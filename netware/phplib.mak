@@ -3,11 +3,11 @@
 PROJECT_ROOT = .
 
 # Module details
-MODULE_NAME = phplib
-MODULE_DESC = "PHP 4.0.8 for NetWare (Beta) - PHP Library"
-VMAJ = 0
-VMIN = 60
-VREV = 1
+MODULE_NAME = PHPLIB
+MODULE_DESC = "PHP 4.3 - Script Interpreter and Library"
+VMAJ = 3
+VMIN = 0
+VREV = 0
 
 #include the common settings
 include $(PROJECT_ROOT)/netware/common.mif
@@ -58,11 +58,14 @@ C_SRC = ext/bcmath/bcmath.c \
         ext/pcre/pcrelib/get.c \
         ext/pcre/pcrelib/maketables.c \
         ext/pcre/pcrelib/pcre.c \
+        ext/pcre/pcrelib/pcreposix.c \
         ext/pcre/pcrelib/study.c \
         ext/session/mod_files.c \
+        ext/session/mod_mm.c \
         ext/session/mod_user.c \
         ext/session/session.c \
         ext/snmp/snmp.c \
+        ext/standard/aggregation.c \
         ext/standard/array.c \
         ext/standard/assert.c \
         ext/standard/base64.c \
@@ -70,6 +73,7 @@ C_SRC = ext/bcmath/bcmath.c \
         ext/standard/browscap.c \
         ext/standard/crc32.c \
         ext/standard/credits.c \
+        ext/standard/css.c \
         ext/standard/cyr_convert.c \
         ext/standard/datetime.c \
         ext/standard/dir.c \
@@ -81,6 +85,7 @@ C_SRC = ext/bcmath/bcmath.c \
         ext/standard/flock_compat.c \
         ext/standard/formatted_print.c \
         ext/standard/fsock.c \
+        ext/standard/ftok.c \
         ext/standard/ftp_fopen_wrapper.c \
         ext/standard/head.c \
         ext/standard/html.c \
@@ -105,6 +110,7 @@ C_SRC = ext/bcmath/bcmath.c \
         ext/standard/rand.c \
         ext/standard/reg.c \
         ext/standard/scanf.c \
+        ext/standard/sha1.c \
         ext/standard/soundex.c \
         ext/standard/string.c \
         ext/standard/strnatcmp.c \
@@ -114,9 +120,12 @@ C_SRC = ext/bcmath/bcmath.c \
         ext/standard/url_scanner.c \
         ext/standard/url_scanner_ex.c \
         ext/standard/var.c \
+        ext/standard/var_unserializer.c \
+        ext/standard/versioning.c \
         main/fopen_wrappers.c \
         main/internal_functions_nw.c \
         main/main.c \
+        main/memory_streams.c \
         main/mergesort.c \
         main/network.c \
         main/output.c \
@@ -124,6 +133,7 @@ C_SRC = ext/bcmath/bcmath.c \
         main/php_ini.c \
         main/php_logos.c \
         main/php_open_temporary_file.c \
+        main/php_sprintf.c \
         main/php_ticks.c \
         main/php_variables.c \
         main/reentrancy.c \
@@ -131,41 +141,34 @@ C_SRC = ext/bcmath/bcmath.c \
         main/safe_mode.c \
         main/SAPI.c \
         main/snprintf.c \
+        main/spprintf.c \
+        main/streams.c \
         main/strlcat.c \
         main/strlcpy.c \
-        netware/env.c \
+        main/user_streams.c \
         netware/geterrnoptr.c \
         netware/mktemp.c \
         netware/pipe.c \
         netware/pwd.c \
-        netware/sendmail.c \
         netware/start.c \
+        netware/time_nw.c \
         netware/wfile.c \
         regex/regcomp.c \
         regex/regerror.c \
         regex/regexec.c \
         regex/regfree.c \
 #        ext/standard/crypt.c \
-#        ext/xml/xml.c \
 #        ext/com/COM.c \
 #        ext/com/conversion.c \
-#        ext/ldap/ldap.c \
 #        ext/odbc/php_odbc.c \
 #        ext/snmp/winsnmp.c \
 #        netware/winutil.c \
-#        ext/mysql/php_mysql.c \
-#        ext/standard/syslog.c \
 #        netware/registry.c \
-#        netware/time_nw.c \
-#        netware/wsyslog.c
-#        ext/xml/expat/xmlparse/hashtable.c \
-#        ext/xml/expat/xmlparse/xmlparse.c \
-#        ext/xml/expat/xmltok/xmlrole.c \
-#        ext/xml/expat/xmltok/xmltok.c \
-#        ext/xml/expat/xmltok/xmltok_impl.c \
-#        ext/xml/expat/xmltok/xmltok_ns.c \
+#        main/alloca.c \
 #        ext/wddx/wddx.c \
 #        netware/readdir.c \
+
+WIN32_C_SRC = sendmail.c \
 
 
 CPP_SRC_NODIR = $(notdir $(CPP_SRC))
@@ -174,14 +177,13 @@ SRC_DIR = $(dir $(CPP_SRC) $(C_SRC))
 
 # Library files
 LIBRARY  = $(PROJECT_ROOT)/Zend/$(BUILD)/Zend.lib $(PROJECT_ROOT)/TSRM/$(BUILD)/TSRM.lib
-LIBRARY += $(PROJECT_ROOT)/win32build/lib/resolv.lib
-#LIBRARY += libmysql.lib
 
 # Destination directories and files
 OBJ_DIR = $(BUILD)
 FINAL_DIR = $(BUILD)
 MAP_FILE = $(FINAL_DIR)\$(MODULE_NAME).map
 OBJECTS  = $(join $(SRC_DIR), $(addprefix $(OBJ_DIR)/,$(CPP_SRC_NODIR:.c=.obj) $(C_SRC_NODIR:.c=.obj)))
+WIN32_OBJECTS  = $(addprefix $(OBJ_DIR)/,$(WIN32_C_SRC:.c=.obj))
 DEPDS  = $(join $(SRC_DIR), $(addprefix $(OBJ_DIR)/,$(CPP_SRC_NODIR:.c=.d) $(C_SRC_NODIR:.c=.d)))
 
 # Binary file
@@ -192,36 +194,35 @@ endif
 # Compile flags
 C_FLAGS += -c -maxerrors 25 -msgstyle gcc
 C_FLAGS += -wchar_t on -bool on
+C_FLAGS += -relax_pointers		# To remove type-casting errors
 C_FLAGS += -processor Pentium
 C_FLAGS += -nostdinc -nosyspath
 C_FLAGS  += -DNETWARE -D__BIT_TYPES_DEFINED__ -DZTS
-#C_FLAGS  += -DZEND_DEBUG
 C_FLAGS  += -DPHP4DLLTS_EXPORTS -DPHP_EXPORTS -DLIBZEND_EXPORTS -DTSRM_EXPORTS -DSAPI_EXPORTS
 C_FLAGS  += -DHAVE_SYS_TIME_H -DHAVE_STRUCT_FLOCK -DVIRTUAL_DIR -DHAVE_TZNAME
 C_FLAGS  += -DHAVE_DLFCN_H -DHAVE_LIBDL
-#C_FLAGS  += -DCOMPILE_DL_LDAP
+C_FLAGS  += -DCLIB_STAT_PATCH		# stat patch
 C_FLAGS  += -DNEW_LIBC -DHAVE_ARPA_INET_H=1 -DHAVE_NETINET_IN_H=1 -DHAVE_INET_ATON=1
-#C_FLAGS  += -DUSE_WINSOCK -DUSE_WINSOCK_DIRECTLY=1
-C_FLAGS  += -I. -Imain -Inetware -Iregex -I./bindlib_w32 -IZend -ITSRM
+
+C_FLAGS  += -DLINK_SIZE=2		# Added for the new definition in ext\pcre\pcrelib\internal.h
+# Below added for the file ext\pcre\pcrelib\pcreposix.c and
+# the default value is what is defined in the changelog file
+C_FLAGS  += -DPOSIX_MALLOC_THRESHOLD=5
+
+C_FLAGS  += -I. -Imain -Inetware -Iregex -IZend -ITSRM
 C_FLAGS  += -Iext/standard -Iext/mcal -Iext/pcre -Iext/pcre/pcrelib
 C_FLAGS  += -Iext/bcmath -Iext/bcmath/libbcmath/src
-#C_FLAGS  += -Iext/ldap
-C_FLAGS  += -Iext/xml -Iext/xml/expat/xmltok -Iext/xml/expat -Iext/xml/expat/xmlparse
 C_FLAGS  += -Iext/odbc -Iext/session -Iext/ftp -Iext/wddx -Iext/calendar -Iext/snmp
-#C_FLAGS  += -Iext/mysql -Iext/mysql/libmysql
-#C_FLAGS  += -I- -Inetware -I$(SDK_DIR)/sdk -I$(MWCIncludes)	# netware added for special SYS/STAT.H : Venkat(6/2/02)
 C_FLAGS  += -I- -Inetware -I$(SDK_DIR)/include -I$(MWCIncludes)	# netware added for special SYS/STAT.H : Venkat(6/2/02)
-
-C_FLAGS  += -I$(SDK_DIR)/include/winsock	# Added for socket calls : Ananth (16 Aug 2002)
-
-#C_FLAGS  += -I$(LDAP_DIR)/inc
+C_FLAGS  += -Iwin32
+C_FLAGS  += -I$(SDK_DIR)/include/winsock	# Added for socket calls
 
 
 # Extra stuff based on debug / release builds
 ifeq '$(BUILD)' 'debug'
 	SYM_FILE = $(FINAL_DIR)\$(MODULE_NAME).sym
 	C_FLAGS  += -inline smart -sym on -sym codeview4 -sym internal -opt off -opt intrinsics 
-	C_FLAGS += -D_DEBUG -DZEND_DEBUG=1  #-r
+	C_FLAGS += -D_DEBUG -DZEND_DEBUG=1
 	LD_FLAGS += -sym codeview4 -sym internal -osym $(SYM_FILE) 
 	export MWLibraryFiles=$(SDK_DIR)/imports/libcpre.o;mwcrtl.lib
 else
@@ -244,7 +245,7 @@ API = NXGetEnvCount \
 
 # Virtual paths
 vpath %.cpp .
-vpath %.c .
+vpath %.c . win32
 vpath %.obj $(OBJ_DIR)
 
 
@@ -255,23 +256,16 @@ all: prebuild project
 prebuild:
 	@if not exist main\$(OBJ_DIR)                     md main\$(OBJ_DIR)
 	@if not exist regex\$(OBJ_DIR)                    md regex\$(OBJ_DIR)
-	@if not exist bindlib_w32\$(OBJ_DIR)              md bindlib_w32\$(OBJ_DIR)
 	@if not exist netware\$(OBJ_DIR)                  md netware\$(OBJ_DIR)
 	@if not exist ext\standard\$(OBJ_DIR)             md ext\standard\$(OBJ_DIR)
 	@if not exist ext\bcmath\$(OBJ_DIR)               md ext\bcmath\$(OBJ_DIR)
 	@if not exist ext\bcmath\libbcmath\src\$(OBJ_DIR) md ext\bcmath\libbcmath\src\$(OBJ_DIR)
 	@if not exist ext\mcal\$(OBJ_DIR)                 md ext\mcal\$(OBJ_DIR)
-	@if not exist ext\mysql\$(OBJ_DIR)                md ext\mysql\$(OBJ_DIR)
-	@if not exist ext\mysql\libmysql\$(OBJ_DIR)       md ext\mysql\libmysql\$(OBJ_DIR)
 	@if not exist ext\pcre\$(OBJ_DIR)                 md ext\pcre\$(OBJ_DIR)
 	@if not exist ext\pcre\pcrelib\$(OBJ_DIR)         md ext\pcre\pcrelib\$(OBJ_DIR)
 	@if not exist ext\odbc\$(OBJ_DIR)                 md ext\odbc\$(OBJ_DIR)
-	@if not exist ext\xml\$(OBJ_DIR)                  md ext\xml\$(OBJ_DIR)
-	@if not exist ext\xml\expat\xmlparse\$(OBJ_DIR)   md ext\xml\expat\xmlparse\$(OBJ_DIR)
-	@if not exist ext\xml\expat\xmltok\$(OBJ_DIR)     md ext\xml\expat\xmltok\$(OBJ_DIR)
 	@if not exist ext\session\$(OBJ_DIR)              md ext\session\$(OBJ_DIR)
 	@if not exist ext\ftp\$(OBJ_DIR)                  md ext\ftp\$(OBJ_DIR)
-#	@if not exist ext\ldap\$(OBJ_DIR)                 md ext\ldap\$(OBJ_DIR)
 	@if not exist ext\wddx\$(OBJ_DIR)                 md ext\wddx\$(OBJ_DIR)
 	@if not exist ext\calendar\$(OBJ_DIR)             md ext\calendar\$(OBJ_DIR)
 	@if not exist ext\snmp\$(OBJ_DIR)                 md ext\snmp\$(OBJ_DIR)
@@ -293,11 +287,9 @@ project: $(BINARY) $(MESSAGE)
 	@echo $(wordlist 61, 80, $(C_FLAGS)) >> $(basename $(OBJ_DIR)\$(notdir $@)).cfg
 	@$(CC) $< @$(basename $(OBJ_DIR)\$(notdir $@)).cfg -o $@ 
 	@del $(basename $(OBJ_DIR)\$(notdir $@)).cfg
-#	@$(CC) $< $(C_FLAGS) -o $@
 
 
-#$(BINARY): $(DEPDS) $(OBJECTS) $(LIBRARY)
-$(BINARY): $(OBJECTS) $(LIBRARY)
+$(BINARY): $(OBJECTS) $(WIN32_OBJECTS) $(LIBRARY)
 	@echo Import $(IMPORT) > $(basename $@).def
 ifdef API
 	@echo Import $(API) >> $(basename $@).def
@@ -311,8 +303,10 @@ ifeq '$(BUILD)' 'debug'
 	@echo Debug >> $(basename $@).def
 endif
 	@echo Flag_On 0x00000008 >> $(basename $@).def
-	@echo Start _NonAppStart >> $(basename $@).def
-	@echo Exit _NonAppStop >> $(basename $@).def
+#	@echo Start _NonAppStart >> $(basename $@).def
+#	@echo Exit _NonAppStop >> $(basename $@).def
+	@echo Start _LibCPrelude >> $(basename $@).def
+	@echo Exit _LibCPostlude >> $(basename $@).def
 
 	$(MPKTOOL) $(XDCFLAGS) $(basename $@).xdc
 	@echo xdcdata $(basename $@).xdc >> $(basename $@).def
@@ -339,61 +333,57 @@ endif
 	@echo $(wordlist 111, 115, $(OBJECTS)) >> $(basename $@).link
 	@echo $(wordlist 116, 120, $(OBJECTS)) >> $(basename $@).link
 	@echo $(wordlist 121, 125, $(OBJECTS)) >> $(basename $@).link
-	@echo $(wordlist 126, 127, $(OBJECTS)) >> $(basename $@).link
-#	@echo $(wordlist 126, 134, $(OBJECTS)) >> $(basename $@).link
+	@echo $(wordlist 126, 130, $(OBJECTS)) >> $(basename $@).link
+	@echo $(wordlist 131, 135, $(OBJECTS)) >> $(basename $@).link
+	@echo $(wordlist 136, 140, $(OBJECTS)) >> $(basename $@).link
+
+	@echo $(wordlist 1, 2, $(WIN32_OBJECTS)) >> $(basename $@).link
 
 	@$(LINK) @$(basename $@).link
 
 
 .PHONY: clean
-clean: cleand cleanobj cleanbin
+clean: cleansrc cleanobj cleanbin
 
 .PHONY: cleand
 cleand:
 	@echo Deleting all dependency files...
 	-@del "main\$(OBJ_DIR)\*.d"
 	-@del "regex\$(OBJ_DIR)\*.d"
-	-@del "..\bindlib_w32\$(OBJ_DIR)\*.d"
 	-@del "netware\$(OBJ_DIR)\*.d"
 	-@del "ext\standard\$(OBJ_DIR)\*.d"
 	-@del "ext\bcmath\$(OBJ_DIR)\*.d"
 	-@del "ext\bcmath\libbcmath\src\$(OBJ_DIR)\*.d"
-#	-@del "ext\ldap\$(OBJ_DIR)\*.d"
 	-@del "ext\mcal\$(OBJ_DIR)\*.d"
-	-@del "ext\mysql\$(OBJ_DIR)\*.d"
-	-@del "ext\mysql\libmysql\$(OBJ_DIR)\*.d"
 	-@del "ext\pcre\$(OBJ_DIR)\*.d"
 	-@del "ext\pcre\pcrelib\$(OBJ_DIR)\*.d"
 	-@del "ext\odbc\$(OBJ_DIR)\*.d"
-	-@del "ext\xml\$(OBJ_DIR)\*.d"
-	-@del "ext\xml\expat\xmlparse\$(OBJ_DIR)\*.d"
-	-@del "ext\xml\expat\xmltok\$(OBJ_DIR)\*.d"
 	-@del "ext\session\$(OBJ_DIR)\*.d"
 	-@del "ext\ftp\$(OBJ_DIR)\*.d"
 	-@del "ext\wddx\$(OBJ_DIR)\*.d"
 	-@del "ext\calendar\$(OBJ_DIR)\*.d"
 	-@del "ext\snmp\$(OBJ_DIR)\*.d"
 
+.PHONY: cleansrc
+cleansrc:
+	@echo Deleting all generated source files...
+	-@del "ext\standard\parsedate.c"
+	-@del "ext\standard\parsedate.h"
+	-@del "ext\standard\parsedate.output"
+
 .PHONY: cleanobj
 cleanobj:
 	@echo Deleting all object files...
 	-@del "main\$(OBJ_DIR)\*.obj"
 	-@del "regex\$(OBJ_DIR)\*.obj"
-	-@del "..\bindlib_w32\$(OBJ_DIR)\*.obj"
 	-@del "netware\$(OBJ_DIR)\*.obj"
 	-@del "ext\standard\$(OBJ_DIR)\*.obj"
 	-@del "ext\bcmath\$(OBJ_DIR)\*.obj"
 	-@del "ext\bcmath\libbcmath\src\$(OBJ_DIR)\*.obj"
-#	-@del "ext\ldap\$(OBJ_DIR)\*.obj"
 	-@del "ext\mcal\$(OBJ_DIR)\*.obj"
-	-@del "ext\mysql\$(OBJ_DIR)\*.obj"
-	-@del "ext\mysql\libmysql\$(OBJ_DIR)\*.obj"
 	-@del "ext\pcre\$(OBJ_DIR)\*.obj"
 	-@del "ext\pcre\pcrelib\$(OBJ_DIR)\*.obj"
 	-@del "ext\odbc\$(OBJ_DIR)\*.obj"
-	-@del "ext\xml\$(OBJ_DIR)\*.obj"
-	-@del "ext\xml\expat\xmlparse\$(OBJ_DIR)\*.obj"
-	-@del "ext\xml\expat\xmltok\$(OBJ_DIR)\*.obj"
 	-@del "ext\session\$(OBJ_DIR)\*.obj"
 	-@del "ext\ftp\$(OBJ_DIR)\*.obj"
 	-@del "ext\wddx\$(OBJ_DIR)\*.obj"

@@ -3,9 +3,9 @@
 PROJECT_ROOT = ../..
 
 # Module details
-MODULE_NAME = mod_php
-MODULE_DESC = "PHP 4.3 - Apache 1.3 Module"
-VMAJ = 3
+MODULE_NAME = php
+MODULE_DESC = "PHP 4.2.3 - Command Line Interface"
+VMAJ = 2
 VMIN = 0
 VREV = 0
 
@@ -17,10 +17,11 @@ include $(PROJECT_ROOT)/netware/common.mif
 .SUFFIXES: .nlm .lib .obj .cpp .c .msg .mlc .mdb .xdc .d
 
 # Source files
-C_SRC = mod_php4.c \
-        php_apache.c \
-        sapi_apache.c \
-        libpre.c
+C_SRC = getopt.c \
+        php_cli.c
+
+# Library files
+LIBRARY =
 
 # Destination directories and files
 OBJ_DIR = $(BUILD)
@@ -31,31 +32,28 @@ DEPDS  = $(addprefix $(OBJ_DIR)/,$(CPP_SRC:.cpp=.d) $(C_SRC:.c=.d))
 
 # Binary file
 ifndef BINARY
-BINARY=$(FINAL_DIR)\$(MODULE_NAME).nlm
+	BINARY=$(FINAL_DIR)\$(MODULE_NAME).nlm
 endif
 
 
 # Compile flags
-C_FLAGS  = -c -maxerrors 25 -msgstyle gcc
+C_FLAGS += -c -maxerrors 25 -msgstyle gcc
 C_FLAGS += -wchar_t on -bool on
 C_FLAGS += -processor Pentium
 C_FLAGS += -w nounusedarg -msext on
 C_FLAGS += -nostdinc
 C_FLAGS += -relax_pointers		# To remove type-casting errors
-C_FLAGS += -DNETWARE
+C_FLAGS += -DNETWARE -DTHREAD_SWITCH
 C_FLAGS += -DZTS
 C_FLAGS += -DNLM_PLATFORM
 C_FLAGS += -DN_PLAT_NLM -DNLM=1 -D__NO_MATH_OPS
 C_FLAGS += -D__C9X_CMATH_INLINES_DEFINED -DAPACHE_OS_H -DNO_USE_SIGACTION -DMULTITHREAD
-C_FLAGS += -DCLIB_STAT_PATCH
 C_FLAGS += -DNEW_LIBC
 C_FLAGS += -I. -I- -I. -I../../netware -I$(SDK_DIR)/include		# ../../netware added for special SYS/STAT.H
 C_FLAGS += -I$(MWCIncludes)
-C_FLAGS += -I$(APACHE_DIR)/include -I$(APACHE_DIR)/os/netware
 C_FLAGS += -I- -I../../main -I../../Zend -I../../TSRM -I../../ext/standard
 C_FLAGS += -I../../ -I../../netware -I$(PROJECT_ROOT)/regex
 C_FLAGS += -I$(WINSOCK_DIR)/include/nlm -I$(WINSOCK_DIR)/include
-
 
 # Extra stuff based on debug / release builds
 ifeq '$(BUILD)' 'debug'
@@ -64,7 +62,6 @@ ifeq '$(BUILD)' 'debug'
 	C_FLAGS += -r -DZEND_DEBUG=1
 	C_FLAGS += -exc cw
 	LD_FLAGS += -sym on -sym codeview4 -sym internal -osym $(SYM_FILE) 
-        LD_FLAGS += -msgstyle std
 	export MWLibraryFiles=$(SDK_DIR)/imports/libcpre.o;mwcrtld.lib
 else
 	C_FLAGS  += -opt speed -inline on -inline smart -inline auto -sym off -DZEND_DEBUG=0
@@ -74,13 +71,14 @@ else
 	export MWLibraryFiles=$(SDK_DIR)/imports/libcpre.o;mwcrtl.lib
 endif
 
+
 # Dependencies
-MODULE = LibC \
+MODULE = LibC   \
          phplib
-IMPORT = @$(SDK_DIR)/imports/libc.imp            \
-         @$(PROJECT_ROOT)/netware/apachecore.imp \
+IMPORT = @$(SDK_DIR)/imports/libc.imp        \
          @$(PROJECT_ROOT)/netware/phplib.imp
-EXPORT = php4_module
+EXPORT = 
+API    =
 
 
 # Virtual paths
@@ -123,8 +121,8 @@ ifeq '$(BUILD)' 'debug'
 	@echo Debug >> $(basename $@).def
 endif
 	@echo Flag_On 0x00000008 >> $(basename $@).def
-	@echo Start _lib_start >> $(basename $@).def
-	@echo Exit _lib_stop >> $(basename $@).def
+	@echo Start _LibCPrelude >> $(basename $@).def
+	@echo Exit _LibCPostlude >> $(basename $@).def
 
 	$(MPKTOOL) $(XDCFLAGS) $(basename $@).xdc
 	@echo xdcdata $(basename $@).xdc >> $(basename $@).def
