@@ -824,7 +824,7 @@ my_send(int s, void *buf, size_t len)
 		if (sent == -1)
 			return -1;
 
-		buf += sent;
+		buf = (char*) buf + sent;
 		size -= sent;
 	}
 
