@@ -3510,6 +3510,10 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 	array_init(result);
 
 
+	if (EX(opline)->extended_value) {
+		SEPARATE_ZVAL_IF_NOT_REF(value);
+		(*value)->is_ref = 1;
+	}
 	(*value)->refcount++;
 	zend_hash_index_update(result->value.ht, 0, value, sizeof(zval *), NULL);
 
