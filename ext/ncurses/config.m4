@@ -42,6 +42,7 @@ if test "$PHP_NCURSES" != "no"; then
 
    AC_CHECK_LIB(ncurses, color_set,   [AC_DEFINE(HAVE_NCURSES_COLOR_SET,  1, [ ])])
    AC_CHECK_LIB(ncurses, slk_color,   [AC_DEFINE(HAVE_NCURSES_SLK_COLOR,  1, [ ])])
+   AC_CHECK_LIB(ncurses, asume_default_colors,   [AC_DEFINE(HAVE_NCURSES_ASSUME_DEFAULT_COLORS,  1, [ ])])
    AC_CHECK_LIB(ncurses, use_extended_names,   [AC_DEFINE(HAVE_NCURSES_USE_EXTENDED_NAMES,  1, [ ])])
 
 
