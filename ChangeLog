@@ -1,3 +1,46 @@
+2001-08-25  Zeev Suraski  <zeev@zend.com>
+
+    * ext/session/config.m4: This option is no longer needed
+
+    * main/config.w32.h
+      ext/session/php_session.h
+      ext/session/session.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/url_scanner.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+    Get rid of TRANS_SID - it's always possible to use it now.
+
+    * ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re
+      main/output.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/basic_functions.c
+      ext/session/php_session.h
+      ext/session/session.c:
+    Move the trans-sid mechanism to use the output buffering mechanism.
+    Advantages:
+    - Would work with the output buffering mechanism in general, and with
+      output compression in particular
+    - Should yield better performance (untested as of yet)
+
+    * ext/session/php_session.h: add struct name
+
+2001-08-25  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/iconv/tests/001.phpt: This test needed a newline after an echo.
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h: Windows-1252 encoding awareness
+
+    * main/streams.c: TSRMLS fix
+
+2001-08-25  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * php.ini-recommended
+      php.ini-dist: Add random number generator-entry to INI-files
+
 2001-08-24  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
 
     * ext/standard/basic_functions.c
