@@ -33,10 +33,13 @@ static zend_class_entry *domxmldtd_class_entry_ptr;
 static zend_class_entry *domxmlnode_class_entry_ptr;
 static zend_class_entry *domxmlattr_class_entry_ptr;
 
-function_entry php_domxml_functions[] = {
+static zend_function_entry php_domxml_functions[] = {
 	PHP_FE(getdom,	NULL)
 	PHP_FE(domxml_root,	NULL)
 	PHP_FE(domxml_attributes,	NULL)
+	PHP_FE(domxml_getattr,	NULL)
+	PHP_FE(domxml_setattr,	NULL)
+	PHP_FE(domxml_children,	NULL)
 	PHP_FALIAS(dom,		getdom,	NULL)
 	{NULL, NULL, NULL}
 };
@@ -45,9 +48,11 @@ function_entry php_domxml_functions[] = {
 static zend_function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(root,	domxml_root,	NULL)
 	PHP_FALIAS(intdtd,	domxml_intdtd,	NULL)
+	{NULL, NULL, NULL}
 };
 
 static zend_function_entry php_domxmldtd_class_functions[] = {
+	{NULL, NULL, NULL}
 };
 
 static zend_function_entry php_domxmlnode_class_functions[] = {
@@ -55,12 +60,14 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(children,	domxml_children,	NULL)
 	PHP_FALIAS(parent,	domxml_parent,		NULL)
 	PHP_FALIAS(getattr,	domxml_getattr,		NULL)
-	PHP_FALIAS(setattr,	domxml_getattr,		NULL)
+	PHP_FALIAS(setattr,	domxml_setattr,		NULL)
 	PHP_FALIAS(attributes,	domxml_attributes,	NULL)
+	{NULL, NULL, NULL}
 };
 
 static zend_function_entry php_domxmlattr_class_functions[] = {
 	PHP_FALIAS(name,	domxml_attrname,	NULL)
+	{NULL, NULL, NULL}
 };
 
 php3_module_entry php3_domxml_module_entry = {
@@ -143,7 +150,7 @@ PHP_FUNCTION(domxml_attrname)
 		id_to_find = id->value.lval;
 	}
 		
-	nodep = (xmlNode *)php3_list_find(id_to_find, &type);
+	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
 	if (!nodep || type != le_domxmlnodep) {
 		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
@@ -154,7 +161,7 @@ PHP_FUNCTION(domxml_attrname)
 		RETURN_FALSE;
 	}
 	while(attr) {
-		ret = php3_list_insert(attr, le_domxmlattrp);
+		ret = zend_list_insert(attr, le_domxmlattrp);
 
 		/* construct an object with some methods */
 		object_init_ex(return_value, domxmlattr_class_entry_ptr);
@@ -192,7 +199,7 @@ PHP_FUNCTION(domxml_lastchild)
 		id_to_find = id->value.lval;
 	}
 		
-	nodep = (xmlNode *)php3_list_find(id_to_find, &type);
+	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
 	if (!nodep || type != le_domxmlnodep) {
 		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
@@ -203,7 +210,7 @@ PHP_FUNCTION(domxml_lastchild)
 		RETURN_FALSE;
 	}
 
-	ret = php3_list_insert(last, le_domxmlnodep);
+	ret = zend_list_insert(last, le_domxmlnodep);
 
 	/* construct an object with some methods */
 	object_init_ex(return_value, domxmlnode_class_entry_ptr);
@@ -243,7 +250,7 @@ PHP_FUNCTION(domxml_parent)
 		id_to_find = id->value.lval;
 	}
 		
-	nodep = (xmlNode *)php3_list_find(id_to_find, &type);
+	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
 	if (!nodep || type != le_domxmlnodep) {
 		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
@@ -254,7 +261,7 @@ PHP_FUNCTION(domxml_parent)
 		RETURN_FALSE;
 	}
 
-	ret = php3_list_insert(last, le_domxmlnodep);
+	ret = zend_list_insert(last, le_domxmlnodep);
 
 	/* construct an object with some methods */
 	object_init_ex(return_value, domxmlnode_class_entry_ptr);
@@ -294,7 +301,7 @@ PHP_FUNCTION(domxml_children)
 		id_to_find = id->value.lval;
 	}
 		
-	nodep = (xmlNode *)php3_list_find(id_to_find, &type);
+	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
 	if (!nodep || type != le_domxmlnodep) {
 		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
@@ -313,7 +320,7 @@ PHP_FUNCTION(domxml_children)
 		zval *child;
 		MAKE_STD_ZVAL(child);
 
-		ret = php3_list_insert(last, le_domxmlnodep);
+		ret = zend_list_insert(last, le_domxmlnodep);
 
 		/* construct a node object */
 		object_init_ex(child, domxmlnode_class_entry_ptr);
@@ -359,7 +366,7 @@ PHP_FUNCTION(domxml_getattr)
 		WRONG_PARAM_COUNT;
 	}
 		
-	nodep = (xmlNode *)php3_list_find(id_to_find, &type);
+	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
 	if (!nodep || type != le_domxmlnodep) {
 		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
@@ -407,7 +414,7 @@ PHP_FUNCTION(domxml_setattr)
 		WRONG_PARAM_COUNT;
 	}
 		
-	nodep = (xmlNode *)php3_list_find(id_to_find, &type);
+	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
 	if (!nodep || type != le_domxmlnodep) {
 		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
@@ -452,7 +459,7 @@ PHP_FUNCTION(domxml_attributes)
 		id_to_find = id->value.lval;
 	}
 		
-	nodep = (xmlNode *)php3_list_find(id_to_find, &type);
+	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
 	if (!nodep || type != le_domxmlnodep) {
 		php_error(E_WARNING, "unable to find node identifier (%d)", id_to_find);
 		RETURN_FALSE;
@@ -474,7 +481,7 @@ PHP_FUNCTION(domxml_attributes)
 }
 /* }}} */
 
-/* {{{ proto string domxml_root([int dir_handle])
+/* {{{ proto string domxml_root([int doc_handle])
    Read directory entry from dir_handle */
 PHP_FUNCTION(domxml_root)
 {
@@ -503,7 +510,7 @@ PHP_FUNCTION(domxml_root)
 		id_to_find = id->value.lval;
 	}
 		
-	docp = (xmlDoc *)php3_list_find(id_to_find, &type);
+	docp = (xmlDoc *)zend_list_find(id_to_find, &type);
 	if (!docp || type != le_domxmldocp) {
 		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
@@ -513,7 +520,7 @@ PHP_FUNCTION(domxml_root)
 	if (!node) {
 		RETURN_FALSE;
 	}
-	ret = php3_list_insert(node, le_domxmlnodep);
+	ret = zend_list_insert(node, le_domxmlnodep);
 
 	/* construct an object with some methods */
 	object_init_ex(return_value, domxmlnode_class_entry_ptr);
@@ -522,6 +529,7 @@ PHP_FUNCTION(domxml_root)
 	add_property_stringl(return_value, "name", (char *) node->name, strlen(node->name), 1);
 	if(node->content)
 		add_property_stringl(return_value, "content", (char *) node->content, strlen(node->content), 1);
+	zend_list_addref(ret);
 }
 /* }}} */
 
@@ -554,7 +562,7 @@ PHP_FUNCTION(domxml_intdtd)
 		id_to_find = id->value.lval;
 	}
 		
-	docp = (xmlDoc *)php3_list_find(id_to_find, &type);
+	docp = (xmlDoc *)zend_list_find(id_to_find, &type);
 	if (!docp || type != le_domxmldocp) {
 		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
@@ -564,14 +572,16 @@ PHP_FUNCTION(domxml_intdtd)
 	if (!dtd) {
 		RETURN_FALSE;
 	}
-	ret = php3_list_insert(dtd, le_domxmldtdp);
+	ret = zend_list_insert(dtd, le_domxmldtdp);
 
 	/* construct an object with some methods */
 	object_init_ex(return_value, domxmldtd_class_entry_ptr);
 	add_property_long(return_value, "dtd", ret);
-	add_property_string(return_value, "extid", (char *) dtd->ExternalID, 1);
+	if(dtd->ExternalID)
+		add_property_string(return_value, "extid", (char *) dtd->ExternalID, 1);
 	add_property_string(return_value, "sysid", (char *) dtd->SystemID, 1);
 	add_property_string(return_value, "name", (char *) dtd->name, 1);
+	zend_list_addref(ret);
 }
 /* }}} */
 
@@ -592,12 +602,13 @@ PHP_FUNCTION(getdom)
 	if (!docp) {
 		RETURN_FALSE;
 	}
-	ret = php3_list_insert(docp, le_domxmldocp);
+	ret = zend_list_insert(docp, le_domxmldocp);
 
 	/* construct an object with some methods */
 	object_init_ex(return_value, domxmldoc_class_entry_ptr);
 	add_property_long(return_value, "doc", ret);
 	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
+	zend_list_addref(ret);
 }
 /* }}} */
 
