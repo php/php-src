@@ -206,7 +206,7 @@ xmlNodePtr to_xml_gmonth(encodeType type, zval *data, int style);
 
 #define get_conversion(e) get_conversion_ex(SOAP_GLOBAL(defEncIndex), e)
 #define get_conversion_from_type(n, t) get_conversion_from_type_ex(SOAP_GLOBAL(defEnc), n, t)
-#define get_conversion_from_href_type(t) get_conversion_from_href_type_ex(SOAP_GLOBAL(defEnc), t)
+#define get_conversion_from_href_type(t) get_conversion_from_href_type_ex(SOAP_GLOBAL(defEnc), t, strlen(t))
 
 void encode_reset_ns();
 smart_str *encode_new_ns();
@@ -215,7 +215,7 @@ void set_ns_and_type(xmlNodePtr node, encodeType type);
 void set_ns_and_type_ex(xmlNodePtr node, char *ns, char *type);
 encodePtr get_conversion_ex(HashTable *encoding, int encode);
 encodePtr get_conversion_from_type_ex(HashTable *encoding, xmlNodePtr node, char *type);
-encodePtr get_conversion_from_href_type_ex(HashTable *encoding, char *type);
+encodePtr get_conversion_from_href_type_ex(HashTable *encoding, char *type, int len);
 
 int is_map(zval *array);
 void get_array_type(zval *array, smart_str *out_type);

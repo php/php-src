@@ -134,12 +134,12 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 				char *ns_type;
 				ns_type = emalloc(strlen(defaultEncoding[i].details.ns) + strlen(defaultEncoding[i].details.type_str) + 2);
 				sprintf(ns_type, "%s:%s", defaultEncoding[i].details.ns, defaultEncoding[i].details.type_str);
-				zend_hash_add(soap_globals->defEnc, ns_type, strlen(ns_type), &enc, sizeof(encodePtr), NULL);
+				zend_hash_add(soap_globals->defEnc, ns_type, strlen(ns_type) + 1, &enc, sizeof(encodePtr), NULL);
 				efree(ns_type);
 			}
 			else
 			{
-				zend_hash_add(soap_globals->defEnc, defaultEncoding[i].details.type_str, strlen(defaultEncoding[i].details.type_str), &enc, sizeof(encodePtr), NULL);
+				zend_hash_add(soap_globals->defEnc, defaultEncoding[i].details.type_str, strlen(defaultEncoding[i].details.type_str) + 1, &enc, sizeof(encodePtr), NULL);
 			}
 		}
 		//Index everything by number
@@ -1807,11 +1807,13 @@ xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *
 		{
 			sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)function->bindingAttributes;
 
-			ns = xmlNewNs(body, fnb->input.ns, gen_ns->c);
 			style = fnb->style;
 			use = fnb->input.use;
 			if(style == SOAP_RPC)
+			{
+				ns = xmlNewNs(body, fnb->input.ns, gen_ns->c);
 				method = xmlNewChild(body, ns, function->requestName , NULL);
+			}
 		}
 	}
 	else
@@ -2264,5 +2266,3 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 	}
 	return FAILURE;
 }
-
-

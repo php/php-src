@@ -52,41 +52,57 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 				resp = body->children;
 				if(fn != NULL)
 				{
-					cur = get_node(resp, fn->responseName);
-					if(cur != NULL)
+					sdlParamPtr *h_param, param = NULL;
+					xmlNodePtr val = NULL;
+					encodePtr enc;
+					char *name, *ns;
+
+					if(fn->bindingType == BINDING_SOAP)
 					{
-						int num_resp = zend_hash_num_elements(fn->responseParameters);
-						if(num_resp <= 1)
+						sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)fn->bindingAttributes;
+
+						zend_hash_internal_pointer_reset(fn->responseParameters);
+						if(zend_hash_get_current_data(fn->responseParameters, (void **)&h_param) != SUCCESS)
+							php_error(E_ERROR, "Can't find response parameter \"%s\"", param->paramName);
+
+						param = (*h_param);
+						if(fnb->style == SOAP_DOCUMENT)
 						{
-							sdlParamPtr *h_param, param;
-							xmlNodePtr val;
-
-							zend_hash_internal_pointer_reset(fn->responseParameters);
-							if(zend_hash_get_current_data(fn->responseParameters, (void **)&h_param) == SUCCESS)
-							{
-								param = (*h_param);
-								val = get_node(cur->children, param->paramName);
-								if(val != NULL)
-								{
-									encodePtr enc;
-									tmp_ret = emalloc(sizeof(zval **));
-									if(param != NULL)
-										enc = param->encode;
-									else
-										enc = get_conversion(UNKNOWN_TYPE);
-
-									tmp_ret[0] = master_to_zval(enc, val);
-									(*ret) = tmp_ret;
-									(*num_params) = 1;
-								}
-								else
-									php_error(E_ERROR, "Can't find response parameter \"%s\"", param->paramName);
-							}
+							name = (*h_param)->encode->details.type_str;
+							ns = (*h_param)->encode->details.ns;
 						}
 						else
 						{
-							php_error(E_ERROR,"Doesn't handle multiple return values");
+							name = fn->responseName;
+							/* ns = ? */
 						}
+
+						cur = get_node_ex(resp, name, ns);
+						/* TODO: produce warning invalid ns */
+						if(!cur)
+							cur = get_node(resp, name);
+						
+						if(!cur)
+							php_error(E_ERROR, "Can't find response data");
+
+
+						if(fnb->style == SOAP_DOCUMENT)
+							val = cur;
+						else
+							val = get_node(cur->children, param->paramName);
+
+						if(!val)
+							php_error(E_ERROR, "Can't find response data");
+
+						tmp_ret = emalloc(sizeof(zval **));
+						if(param != NULL)
+							enc = param->encode;
+						else
+							enc = get_conversion(UNKNOWN_TYPE);
+
+						tmp_ret[0] = master_to_zval(enc, val);
+						(*ret) = tmp_ret;
+						(*num_params) = 1;
 					}
 				}
 				else
