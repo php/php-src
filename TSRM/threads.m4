@@ -89,7 +89,12 @@ dnl Try to find a way to enable POSIX threads
 dnl
 AC_DEFUN(PTHREADS_CHECK,[
 
+save_CFLAGS="$CFLAGS"
+save_LIBS="$LIBS"
+PTHREADS_ASSIGN_VARS
 PTHREADS_CHECK_COMPILE
+LIBS="$save_LIBS"
+CFLAGS="$save_CFLAGS"
 
 AC_CACHE_CHECK(for pthreads_cflags,ac_cv_pthreads_cflags,[
 ac_cv_pthreads_cflags=""
