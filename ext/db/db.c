@@ -166,8 +166,8 @@ dbm_info *php_find_dbm(pval *id TSRMLS_DC)
 	int info_type;
 
 	if (Z_TYPE_P(id) == IS_STRING) {
-		numitems = zend_hash_num_elements(&EG(regular_list));
-		for (i=1; i<=numitems; i++) {
+		numitems = zend_hash_next_free_element(&EG(regular_list));
+		for (i=1; i<numitems; i++) {
 			if (zend_hash_index_find(&EG(regular_list), i, (void **) &le)==FAILURE) {
 				continue;
 			}
@@ -188,6 +188,39 @@ dbm_info *php_find_dbm(pval *id TSRMLS_DC)
 	return info;
 }
 /* }}} */
+
+/* {{{ proto array dblist(void)
+   Return an associative array id->filename */ 
+#if 0_HELLY
+/* New function not needed yet */
+PHP_FUNCTION(db_id_list)
+{
+	ulong numitems, i;
+	zend_rsrc_list_entry *le;
+	dbm_info *info;
+
+	if (ZEND_NUM_ARGS()!=0) {
+		ZEND_WRONG_PARAM_COUNT();
+		RETURN_FALSE;
+	}
+
+	if (array_init(return_value) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
+		RETURN_FALSE;
+	}
+	numitems = zend_hash_next_free_element(&EG(regular_list));
+	for (i=1; i<numitems; i++) {
+		if (zend_hash_index_find(&EG(regular_list), i, (void **) &le)==FAILURE) {
+			continue;
+		}
+		if (Z_TYPE_P(le) == le_db) {
+			info = (dbm_info *)(le->ptr);
+			add_next_index_string(return_value, info->filename, 1);
+		}
+	}
+}
+/* }}} */
+#endif
 
 /* {{{ php_get_info_db
  */
@@ -369,7 +402,7 @@ dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC)
 	if (dbf) {
 		info = (dbm_info *)emalloc(sizeof(dbm_info));
 		if (!info) {
-			php_error_docref1(NULL TSRMLS_CC, filename, E_ERROR, "Oroblem allocating memory!");
+			php_error_docref1(NULL TSRMLS_CC, filename, E_ERROR, "Problem allocating memory!");
 			return NULL;
 		}
 
@@ -1150,6 +1183,9 @@ function_entry dbm_functions[] = {
 	PHP_FE(dbmdelete,								NULL)
 	PHP_FE(dbmfirstkey,								NULL)
 	PHP_FE(dbmnextkey,								NULL)
+#if 0_HELLY
+	PHP_FE(db_id_list,                              NULL)
+#endif
 	{NULL, NULL, NULL}
 };
 /* }}} */
