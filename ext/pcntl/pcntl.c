@@ -155,6 +155,7 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("SIGPWR",   (long) SIGPWR, CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("SIGSYS",   (long) SIGSYS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGBABY",  (long) SIGSYS, CONST_CS | CONST_PERSISTENT);
 }
 
 static void php_pcntl_init_globals(zend_pcntl_globals *pcntl_globals) 
@@ -202,7 +203,7 @@ PHP_MINFO_FUNCTION(pcntl)
 	php_info_print_table_end();
 }
 
-/* {{{ proto long pcntl_fork()
+/* {{{ proto int pcntl_fork()
    Forks the currently running process following the same behavior as the UNIX fork() system call*/
 PHP_FUNCTION(pcntl_fork)
 {
@@ -217,7 +218,7 @@ PHP_FUNCTION(pcntl_fork)
 }
 /* }}} */
 
-/* {{{ proto long pcntl_waitpid(long pid, long status, long options)
+/* {{{ proto int pcntl_waitpid(long pid, long status, long options)
       Waits on or returns the status of a forked child as defined by the waitpid() system call */
 PHP_FUNCTION(pcntl_waitpid)
 {
@@ -302,7 +303,7 @@ PHP_FUNCTION(pcntl_wifsignaled)
 }
 /* }}} */
 
-/* {{{ proto long pcntl_wexitstatus(long status) 
+/* {{{ proto int pcntl_wexitstatus(long status) 
    Returns the status code of a child's exit */
 PHP_FUNCTION(pcntl_wexitstatus)
 {
@@ -325,7 +326,7 @@ PHP_FUNCTION(pcntl_wexitstatus)
 }
 /* }}} */
 
-/* {{{ proto long pcntl_wtermsig(long status) 
+/* {{{ proto int pcntl_wtermsig(long status) 
    Returns the number of the signal that terminated the process who's status code is passed  */
 PHP_FUNCTION(pcntl_wtermsig)
 {
@@ -346,7 +347,7 @@ PHP_FUNCTION(pcntl_wtermsig)
 }
 /* }}} */
 
-/* {{{ proto long pcntl_wstopsig(long status) 
+/* {{{ proto int pcntl_wstopsig(long status) 
    Returns the number of the signal that caused the process to stop who's status code is passed  */
 PHP_FUNCTION(pcntl_wstopsig)
 {

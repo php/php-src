@@ -308,7 +308,7 @@ PHP_FUNCTION(mailparse_rfc822_parse_addresses)
 }
 /* }}} */
 
-/* {{{ proto long mailparse_determine_best_xfer_encoding(resource fp)
+/* {{{ proto int mailparse_determine_best_xfer_encoding(resource fp)
 	figure out the best way of encoding the content read from the file pointer fp, which must be seek-able.
 */
 PHP_FUNCTION(mailparse_determine_best_xfer_encoding)
@@ -556,7 +556,7 @@ PHP_FUNCTION(mailparse_msg_free)
 /* }}} */
 
 
-/* {{{ proto long mailparse_msg_create()
+/* {{{ proto int mailparse_msg_create()
 	Return a handle that can be used to parse a message
 */
 PHP_FUNCTION(mailparse_msg_create)
@@ -885,7 +885,7 @@ PHP_FUNCTION(mailparse_msg_get_part_data)
 }
 /* }}} */
 
-/* {{{ proto long mailparse_msg_get_part(resource rfc2045, string mimesection)
+/* {{{ proto int mailparse_msg_get_part(resource rfc2045, string mimesection)
 	Return a handle on a given section in a mimemessage
 */
 PHP_FUNCTION(mailparse_msg_get_part)
