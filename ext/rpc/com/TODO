@@ -9,3 +9,8 @@
 9) reduce the need for VARIANT()
 10) lets try if we are able to call non IDispatch - only Typelib components
 11) IEnumVariant::Next() without parameter should only return an object, not an array with one element
+
+
+these seem to be done:
+
+2) 6) 11)
