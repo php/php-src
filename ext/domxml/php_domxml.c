@@ -960,8 +960,10 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 			object_init_ex(wrapper, domxmlcomment_class_entry);
 			rsrc_type = le_domxmlcommentp;
 			content = xmlNodeGetContent(nodep);
-			if (content)
+			if (content) {
+				add_property_long(wrapper, "type", Z_TYPE_P(nodep));
 				add_property_stringl(wrapper, "content", (char *) content, strlen(content), 1);
+			}
 			break;
 		}
 
