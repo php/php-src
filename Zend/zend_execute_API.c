@@ -89,7 +89,6 @@ void init_executor(CLS_D ELS_DC)
 	EG(error_zval).refcount = 1;
 	EG(error_zval).is_ref=0;
 	EG(error_zval_ptr)=&EG(error_zval);
-	EG(destroying_function_symbol_table) = 0;
 	zend_ptr_stack_init(&EG(arg_types_stack));
 	zend_stack_init(&EG(overloaded_objects_stack));
 /* destroys stack frame, therefore makes core dumps worthless */
@@ -115,6 +114,7 @@ void init_executor(CLS_D ELS_DC)
 
 	zend_llist_apply(&zend_extensions, (void (*)(void *)) zend_extension_activator);
 	EG(opline_ptr) = NULL;
+	EG(garbage_ptr) = 0;
 }
 
 
@@ -144,6 +144,10 @@ void shutdown_executor(ELS_D)
 #if ZEND_DEBUG
 	signal(SIGSEGV, original_sigsegv_handler);
 #endif
+	while (EG(garbage_ptr)--) {
+		zval_dtor(EG(garbage)[EG(garbage_ptr)]);
+		efree(EG(garbage)[EG(garbage_ptr)]);
+	}
 }
 
 
