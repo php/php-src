@@ -22,14 +22,16 @@ AC_ARG_WITH(java,
     fi
 
     if test -d $withval/lib/kaffe; then
+      AC_ADD_LIBPATH($withval/lib)
       AC_ADD_LIBPATH($withval/lib/kaffe)
 
       JAVA_CFLAGS="-DKAFFE"
       JAVA_INCLUDE=-I$withval/include/kaffe
       JAVA_CLASSPATH=$withval/share/kaffe/Klasses.jar
+      JAVA_LIB=kaffevm
 
-      test -f $withval/lib/libkaffevm.so && AC_ADD_LIBPATH($withval/lib)
-      AC_ADD_LIBRARY(kaffevm)
+      test -f $withval/lib/$JAVA_LIB && JAVA_LIBPATH=$withval/lib
+      test -f $withval/lib/kaffe/$JAVA_LIB && JAVA_LIBPATH=$withval/lib/kaffe
 
       # accomodate old versions of kaffe which don't support jar
       if kaffe -version 2>&1 | grep 1.0b > /dev/null; then
@@ -37,7 +39,9 @@ AC_ARG_WITH(java,
       fi
 
     elif test -f $withval/lib/libjava.so; then
-      AC_ADD_LIBRARY_WITH_PATH(java, $withval/lib)
+      AC_ADD_LIBPATH($withval/lib)
+      JAVA_LIB=java
+      JAVA_LIBPATH=$withval/lib
       JAVA_INCLUDE="-I$withval/include"
       test -f $withval/lib/classes.zip && JAVA_CFLAGS="-DJNI_11"
       test -f $withval/lib/jvm.jar     && JAVA_CFLAGS="-DJNI_12"
@@ -60,6 +64,8 @@ AC_ARG_WITH(java,
 	test -f $i/classes.zip	&& JAVA_CLASSPATH="$i/classes.zip"
 	test -f $i/rt.jar	&& JAVA_CLASSPATH="$i/rt.jar"
 	if test -f $i/libjava.so; then 
+          JAVA_LIB=java
+          JAVA_LIBPATH=$i
 	  AC_ADD_LIBPATH($i)
 	  test -d $i/classic && AC_ADD_LIBPATH($i/classic)
 	  test -d $i/native_threads && AC_ADD_LIBPATH($i/native_threads)
@@ -72,12 +78,17 @@ AC_ARG_WITH(java,
       fi
 
       JAVA_CFLAGS="$JAVA_CFLAGS -D_REENTRANT"
-      AC_ADD_LIBRARY(java)
     fi
 
     AC_DEFINE(HAVE_JAVA,1,[ ])
+    JAVA_CFLAGS="$JAVA_CFLAGS '-DJAVALIB=\"$JAVA_LIBPATH/lib$JAVA_LIB.so\"'"
+
     if test "$PHP_SAPI" != "servlet"; then
       PHP_EXTENSION(java, shared)
+
+      if test "$PHP_SAPI" = "cgi"; then
+        AC_ADD_LIBRARY($JAVA_LIB)
+      fi
     fi
 
     INSTALL_IT="$INSTALL_IT; \$(INSTALL) -m 0755 \$(srcdir)/ext/java/php_java.jar \$(libdir)"
