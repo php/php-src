@@ -834,7 +834,7 @@ ZEND_API int bitwise_not_function(zval *result, zval *op1 TSRMLS_DC)
 		return SUCCESS;
 	}
 	if (op1->type == IS_STRING) {
-		zend_uint i;
+		int i;
 
 		result->type = IS_STRING;
 		result->value.str.val = estrndup(op1->value.str.val, op1->value.str.len);
@@ -856,7 +856,7 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 	if (op1->type == IS_STRING && op2->type == IS_STRING) {
 		zval *longer, *shorter;
 		char *result_str;
-		zend_uint i, result_len;
+		int i, result_len;
 
 		if (op1->value.str.len >= op2->value.str.len) {
 			longer = op1;
@@ -895,7 +895,7 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 	if (op1->type == IS_STRING && op2->type == IS_STRING) {
 		zval *longer, *shorter;
 		char *result_str;
-		zend_uint i, result_len;
+		int i, result_len;
 
 		if (op1->value.str.len >= op2->value.str.len) {
 			longer = op1;
@@ -936,7 +936,7 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 	if (op1->type == IS_STRING && op2->type == IS_STRING) {
 		zval *longer, *shorter;
 		char *result_str;
-		zend_uint i, result_len;
+		int i, result_len;
 
 		if (op1->value.str.len >= op2->value.str.len) {
 			longer = op1;
