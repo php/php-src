@@ -121,6 +121,11 @@ static void zend_register_default_exception(TSRMLS_D)
 	default_exception_ptr = zend_register_internal_class(&default_exception TSRMLS_CC);
 }
 
+ZEND_API zend_class_entry *zend_exception_get_default(void)
+{
+	return default_exception_ptr;
+}
+
 ZEND_API void zend_register_default_classes(TSRMLS_D)
 {
 	zend_register_default_exception(TSRMLS_C);
