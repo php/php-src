@@ -94,6 +94,8 @@ ext/session
       locked individually.
     * write a network-transparent storage back-end with fallover
       facilities
+    * provide a callback facility which is executed upon encountering
+      an unknown classname during deserialization
 
 ext/sockets
 -----------
