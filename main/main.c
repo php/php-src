@@ -165,23 +165,22 @@ static PHP_INI_MH(OnChangeMemoryLimit)
  */
 static void php_disable_functions(TSRMLS_D)
 {
-	char *s = NULL;
-	char *e = INI_STR("disable_functions");
-	char p;
+	char *s = NULL, *e;
 
-	if (!*e) {
+	if (!*(INI_STR("disable_functions"))) {
 		return;
 	}
+
+	/* Intentional one time memory leak on startup */
+	e = strdup(INI_STR("disable_functions"));
 
 	while (*e) {
 		switch (*e) {
 			case ' ':
 			case ',':
 				if (s) {
-					p = *e;
 					*e = '\0';
 					zend_disable_function(s, e-s TSRMLS_CC);
-					*e = p;
 					s = NULL;
 				}
 				break;
@@ -203,23 +202,22 @@ static void php_disable_functions(TSRMLS_D)
  */
 static void php_disable_classes(TSRMLS_D)
 {
-	char *s = NULL;
-	char *e = INI_STR("disable_classes");
-	char p;
+	char *s = NULL, *e;
 
-	if (!*e) {
+	if (!*(INI_STR("disable_classes"))) {
 		return;
 	}
+
+	/* Intentional one time memory leak on startup */
+	e = strdup(INI_STR("disable_classes"));
 
 	while (*e) {
 		switch (*e) {
 			case ' ':
 			case ',':
 				if (s) {
-					p = *e;
 					*e = '\0';
 					zend_disable_class(s, e-s TSRMLS_CC);
-					*e = p;
 					s = NULL;
 				}
 				break;
