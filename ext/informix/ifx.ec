@@ -1419,7 +1419,7 @@ EXEC SQL END DECLARE SECTION;
 				}
 
 				if (ifx_check() < 0)   {
-					char *ifx_err = ifx_error(ifx)
+					char *ifx_err = ifx_error(ifx);
 					IFXG(sv_sqlcode) = SQLCODE;
 					EXEC SQL DEALLOCATE DESCRIPTOR :i_descrpid;
 					EXEC SQL free :statemid;
