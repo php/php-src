@@ -518,7 +518,8 @@ PHP_FUNCTION(gzgetss)
 		RETURN_FALSE;
 	}
 
-	_php3_strip_tags(buf, len, ZLIBG(gzgetss_state), allow->value.str.val);
+	/* strlen() can be used here since we are doing it on the return of an fgets() anyway */
+	_php3_strip_tags(buf, strlen, ZLIBG(gzgetss_state), allow?allow->value.str.val:NULL);
 	RETURN_STRING(buf, 0);
 	
 }
