@@ -241,7 +241,11 @@ static int php_foreach_all (int instatus, char *inkey, int inkeylen, char *inval
 
 	if(call_user_function_ex(CG(function_table), NULL, *((zval **)indata), &retval, 3, args, 0, NULL TSRMLS_CC) != SUCCESS)
 	{
-		zend_error(E_ERROR, "Function call failed");
+		zval_ptr_dtor(&status);
+		zval_ptr_dtor(&key);
+		zval_ptr_dtor(&value);
+
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Function call failed");
 		return 1;
 	}
 
