@@ -115,15 +115,23 @@ static void php_dom_validate_error(void *ctx, const char *msg, ...)
 	efree(buf);
 }
 
+/* {{{ static void php_dom_ctx_error_level(int level, void *ctx, const char *msg, ...) */
+static void php_dom_ctx_error_level(int level, void *ctx, const char *msg)
+{
+	xmlParserCtxtPtr parser;
+
+	parser = (xmlParserCtxtPtr) ctx;
+	php_error(level, "%s in %s, line: %d", msg, parser->input->filename, parser->input->line);
+
+}
+/* }}} end php_dom_ctx_error */
+
 /* {{{ static void php_dom_ctx_error(void *ctx, const char *msg, ...) */
 static void php_dom_ctx_error(void *ctx, const char *msg, ...)
 {
 	va_list ap;
 	char *buf;
 	int len;
-	xmlParserCtxtPtr parser;
-
-	parser = (xmlParserCtxtPtr) ctx;
 
 	va_start(ap, msg);
 	len = vspprintf(&buf, 0, msg, ap);
@@ -134,10 +142,31 @@ static void php_dom_ctx_error(void *ctx, const char *msg, ...)
 		buf[len] = '\0';
 	}
 
-	php_error(E_WARNING, "%s in %s, line: %d", buf, parser->input->filename, parser->input->line);
+	php_dom_ctx_error_level(E_WARNING, ctx, buf);
 	efree(buf);
 }
 /* }}} end php_dom_ctx_error */
+
+static void php_dom_ctx_warning(void *ctx, const char *msg, ...)
+{
+	va_list ap;
+	char *buf;
+	int len;
+
+	va_start(ap, msg);
+	len = vspprintf(&buf, 0, msg, ap);
+	va_end(ap);
+	
+	/* remove any trailing \n */
+	while (len && buf[--len] == '\n') {
+		buf[len] = '\0';
+	}
+
+	php_dom_ctx_error_level(E_NOTICE, ctx, buf);
+	efree(buf);
+}
+/* }}} end php_dom_ctx_error */
+
 
 /* {{{ proto doctype	documenttype	
 readonly=yes 
@@ -1299,10 +1328,11 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 	ctxt->replaceEntities = substitute_ent;
 
 	ctxt->vctxt.error = php_dom_ctx_error;
-	ctxt->vctxt.warning = php_dom_ctx_error;
+	ctxt->vctxt.warning = php_dom_ctx_warning;
 
 	if (ctxt->sax != NULL) {
 		ctxt->sax->error = php_dom_ctx_error;
+		ctxt->sax->warning = php_dom_ctx_warning;
 	}
 
 	xmlParseDocument(ctxt);
@@ -1687,7 +1717,8 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	dom_doc_props *doc_prop;
 	char *source;
 	int source_len, refcount, ret;
-
+	htmlParserCtxtPtr ctxt;
+	
 	id = getThis();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
@@ -1695,11 +1726,21 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	if (mode == DOM_LOAD_FILE) {
-		newdoc = htmlParseFile(source, NULL);
+		ctxt = htmlCreateFileParserCtxt(source, NULL);
 	} else {
-		newdoc = htmlParseDoc(source, NULL);
+		source_len = xmlStrlen(source);
+		ctxt = htmlCreateMemoryParserCtxt(source, source_len);
 	}
-
+	ctxt->vctxt.error = php_dom_ctx_warning;
+	ctxt->vctxt.warning = php_dom_ctx_warning;
+	if (ctxt->sax != NULL) {
+		ctxt->sax->error = php_dom_ctx_error;
+		ctxt->sax->warning = php_dom_ctx_warning;
+	}
+	htmlParseDocument(ctxt);
+	newdoc = ctxt->myDoc;
+	htmlFreeParserCtxt(ctxt);
+	
 	if (!newdoc)
 		RETURN_FALSE;
 
