@@ -3,6 +3,8 @@ PHP 4                                                                      NEWS
 ?? Jan 2004, Version 4.3.5
 - Fixed bug #26937 (Warning in xml.c). (Jani)
 - Fixed Bug #26927 (preg_quote() does not escape \0). (Ilia)
+- Fixed bug #26923 (ext/imap: pam and crypt libraries missing when build as
+  shared extension). (Jani)
 - Fixed bug #26909 (crash in imap_mime_header_decode() when no encoding is 
   used). (Ilia)
 - Fixed bug #26892 (ORA-21301 in ocinewcollection() call). (Antony)
