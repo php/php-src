@@ -1887,8 +1887,8 @@ static const struct mbfl_convert_vtbl vtbl_2022kr_wchar = {
 
 #if defined(HAVE_MBSTR_RU)
 static const struct mbfl_convert_vtbl vtbl_wchar_cp1251 = {
-	mbfl_no_encoding_cp1251,
 	mbfl_no_encoding_wchar,
+	mbfl_no_encoding_cp1251,
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_cp1251,
@@ -1903,8 +1903,8 @@ static const struct mbfl_convert_vtbl vtbl_cp1251_wchar = {
 	mbfl_filt_conv_common_flush };
 
 static const struct mbfl_convert_vtbl vtbl_wchar_cp866 = {
-	mbfl_no_encoding_cp866,
 	mbfl_no_encoding_wchar,
+	mbfl_no_encoding_cp866,
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_cp866,
@@ -1925,7 +1925,6 @@ static const struct mbfl_convert_vtbl vtbl_wchar_koi8r = {
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_koi8r,
 	mbfl_filt_conv_common_flush };
-
 
 static const struct mbfl_convert_vtbl vtbl_koi8r_wchar = {
 	mbfl_no_encoding_koi8r,
