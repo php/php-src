@@ -63,7 +63,7 @@ PHP_NAMED_FUNCTION(php_if_md5)
 }
 /* }}} */
 
-/* {{{ proto string md5sum(string filename)
+/* {{{ proto string md5_file(string filename)
    Calculate the md5 hash of given filename */
 PHP_NAMED_FUNCTION(php_if_md5_file)
 {
