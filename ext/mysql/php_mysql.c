@@ -732,7 +732,6 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		if (connect_timeout != -1)
 				mysql_options(&mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
-		mysql_options(&mysql->conn, MYSQL_OPT_LOCAL_INFILE, (const char *)&connect_timeout);
 
 		if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL) {
 #else
