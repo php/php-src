@@ -1,5 +1,15 @@
 dnl ## -*- sh -*-
 
+AC_DEFUN(PHP_APACHE_CHECK_RDYNAMIC,[
+  if test -n "$GCC"; then
+    dnl we should use a PHP-specific macro here
+    TSRM_CHECK_GCC_ARG(-rdynamic, gcc_rdynamic)
+    if test "$gcc_rdynamic" = "yes"; then
+      PHP_LDFLAGS="$PHP_LDFLAGS -rdynamic"
+    fi
+  fi
+])
+
 AC_MSG_CHECKING(for Apache module support via DSO through APXS)
 AC_ARG_WITH(apxs,
 [  --with-apxs[=FILE]	   Build shared Apache module.	FILE is the optional
@@ -195,6 +205,7 @@ if test -n "$APACHE_MODULE"; then
     APACHE_WANT_HSREGEX=no
   fi
   AC_SUBST(APACHE_WANT_HSREGEX)
+  PHP_APACHE_CHECK_RDYNAMIC
   PHP_EXTENSION(apache)
   PHP_OUTPUT(sapi/apache/libphp4.module)
   PHP_BUILD_STATIC
