@@ -1410,7 +1410,7 @@ ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSR
 }
 
 
-ZEND_API zend_bool instanceof_function(zend_class_entry *instance_ce, zend_class_entry *ce TSRMLS_DC)
+ZEND_API zend_bool instanceof_function_ex(zend_class_entry *instance_ce, zend_class_entry *ce, zend_bool interfaces_only TSRMLS_DC)
 {
 	zend_uint i;
 
@@ -1419,14 +1419,21 @@ ZEND_API zend_bool instanceof_function(zend_class_entry *instance_ce, zend_class
 			return 1;
 		}
 	}
-	while (instance_ce) {
-		if (instance_ce == ce) {
-			return 1;
+	if (!interfaces_only) {
+		while (instance_ce) {
+			if (instance_ce == ce) {
+				return 1;
+			}
+			instance_ce = instance_ce->parent;
 		}
-		instance_ce = instance_ce->parent;
 	}
 
 	return 0;
+}
+
+ZEND_API zend_bool instanceof_function(zend_class_entry *instance_ce, zend_class_entry *ce TSRMLS_DC)
+{
+	return instanceof_function_ex(instance_ce, ce, 0 TSRMLS_CC);
 }
 
 #define LOWER_CASE 1

@@ -26,6 +26,7 @@
 #include "zend_objects.h"
 #include "zend_objects_API.h"
 #include "zend_object_handlers.h"
+#include "zend_interfaces.h"
 
 #define DEBUG_OBJECT_HANDLERS 0
 
@@ -352,44 +353,49 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 
 zval *zend_std_read_dimension(zval *object, zval *offset TSRMLS_DC)
 {
-#if 1
-	zend_error(E_ERROR, "Cannot use object as array");
-#else
-	zend_printf("Fetching from object:  ");
-	zend_print_zval(object, 0);
-
-	zend_printf("\n the offset:  ");
-	zend_print_zval(offset, 0);
-
-	zend_printf("\n");
-#endif
-	return EG(uninitialized_zval_ptr);
+	zend_class_entry *ce = Z_OBJCE_P(object);
+	zval *retval;
+	
+	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
+		zend_call_method_with_1_params(&object, ce, NULL, "offsetget", &retval, offset);
+		if (retval->refcount > 0) { /* Should always  be  the case */
+			retval->refcount--;
+		}
+		return retval;
+	} else {
+		zend_error(E_ERROR, "Cannot use object of type %s as array", ce->name);
+		return 0;
+	}
 }
 
 
 static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC)
 {
-#if 1
-	zend_error(E_ERROR, "Cannot use object as array");
-#else
-	zend_printf("Assigning to object:  ");
-	zend_print_zval(object, 0);
-
-	zend_printf("\n with offset:  ");
-	zend_print_zval(offset, 0);
-
-	zend_printf("\n the value:  ");
-	zend_print_zval(value, 0);
-
-	zend_printf("\n");
-#endif
+	zend_class_entry *ce = Z_OBJCE_P(object);
+	
+	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
+		zend_call_method_with_2_params(&object, ce, NULL, "offsetset", NULL, offset, value);
+	} else {
+		zend_error(E_ERROR, "Cannot use object of type %s as array", ce->name);
+	}
 }
 
 
 static int zend_std_has_dimension(zval *object, zval *offset, int check_empty TSRMLS_DC)
 {
-	zend_error(E_ERROR, "Cannot use object as array");
-	return 0;
+	zend_class_entry *ce = Z_OBJCE_P(object);
+	zval *retval;
+	int result;
+	
+	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
+		zend_call_method_with_1_params(&object, ce, NULL, "offsetexists", &retval, offset);
+		result = i_zend_is_true(retval);
+		zval_ptr_dtor(&retval);
+		return result;
+	} else {
+		zend_error(E_ERROR, "Cannot use object of type %s as array", ce->name);
+		return 0;
+	}
 }
 
 
@@ -463,7 +469,15 @@ static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC)
 
 static void zend_std_unset_dimension(zval *object, zval *offset TSRMLS_DC)
 {
-	zend_error(E_ERROR, "Cannot use object as array");
+	zend_class_entry *ce = Z_OBJCE_P(object);
+	zval *retval;
+	
+	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
+		zend_call_method_with_1_params(&object, ce, NULL, "offsetunset", &retval, offset);
+		zval_ptr_dtor(&retval);
+	} else {
+		zend_error(E_ERROR, "Cannot use object of type %s as array", ce->name);
+	}
 }
 
 
