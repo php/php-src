@@ -24,7 +24,7 @@ AC_ARG_WITH(servlet,
 	SERVLET_CLASSPATH=$withval
       fi
 
-      if test -z "$JAVA_INCLUDE"; then
+      if test -z "$SERVLET_CLASSPATH"; then
 	AC_MSG_RESULT(no)
 	AC_MSG_ERROR(unable to find servlet libraries)
       fi
