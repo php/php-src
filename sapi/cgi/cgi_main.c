@@ -406,6 +406,7 @@ static void php_cgi_usage(char *argv0)
 #endif
 			   "  -C               Do not chdir to the script's directory\n"
 			   "  -c <path>|<file> Look for php.ini file in this directory\n"
+			   "  -n               No php.ini file will be used\n"
 			   "  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
 			   "  -e               Generate extended information for debugger/profiler\n"
 			   "  -f <file>        Parse <file>.  Implies `-q'\n"
@@ -616,6 +617,9 @@ int main(int argc, char *argv[])
 			switch (c) {
 				case 'c':
 					cgi_sapi_module.php_ini_path_override = strdup(ap_php_optarg);
+					break;
+				case 'n':
+					cgi_sapi_module.php_ini_ignore = 1;
 					break;
 			}
 
@@ -884,6 +888,17 @@ consult the installation file that came with this distribution, or visit \n\
 				free(SG(request_info).argv0);
 				SG(request_info).argv0 = NULL;
 			}
+
+			if (cgi_sapi_module.php_ini_path_override && cgi_sapi_module.php_ini_ignore) {
+				no_headers = 1;  
+				php_output_startup();
+				php_output_activate(TSRMLS_C);
+				SG(headers_sent) = 1;
+				php_printf("You cannot use both -n and -c switch. Use -h for help.\n");
+				php_end_ob_buffers(1 TSRMLS_CC);
+				exit(1);
+			}
+		
 			while ((c = ap_php_getopt(argc, argv, OPTSTRING)) != -1) {
 				switch (c) {
 					
@@ -960,7 +975,7 @@ consult the installation file that came with this distribution, or visit \n\
 					break;
 
 #if 0 /* not yet operational, see also below ... */
-  				case 'n': /* generate indented source mode*/ 
+  				case '': /* generate indented source mode*/ 
 						behavior=PHP_MODE_INDENT;
 						break;
 #endif
