@@ -247,18 +247,29 @@ static void ps_mm_destroy(ps_mm *data)
 
 PHP_MINIT_FUNCTION(ps_mm)
 {
-	char *ps_mm_path = calloc(strlen(PS(save_path))+1+strlen(PS_MM_FILE)+1, 1); /* Directory + '/' + File + \0 */
+	int len = strlen(PS(save_path));
+	char *ps_mm_path;
+	int ret;
 
 	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
+   	if (!ps_mm_instance)
+		return FAILURE;
+	
+	ps_mm_path = do_alloca(len + 1 + sizeof(PS_MM_FILE)); /* Directory + '/' + File + \0 */
 
-	strcpy(ps_mm_path, PS(save_path));
+	memcpy(ps_mm_path, PS(save_path), len + 1);
 
-	if((strlen(ps_mm_path) > 0) && (ps_mm_path[strlen(ps_mm_path)-1] != '/'))
-		strcat(ps_mm_path, "/");  /* Fixme Windows */
+	if (len > 0 && ps_mm_path[len - 1] != DEFAULT_DIR_SEPARATOR)
+		strcat(ps_mm_path, DEFAULT_DIR_SEPARATOR);
 
 	strcat(ps_mm_path, PS_MM_FILE);
 
-	if (ps_mm_initialize(ps_mm_instance, ps_mm_path) != SUCCESS) {
+	ret = ps_mm_initialize(ps_mm_instance, ps_mm_path);
+		
+	free_alloca(ps_mm_path);
+   
+	if (ret != SUCCESS) {
+		free(ps_mm_instance);
 		ps_mm_instance = NULL;
 		return FAILURE;
 	}
