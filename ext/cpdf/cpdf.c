@@ -800,10 +800,11 @@ PHP_FUNCTION(cpdf_set_font) {
 		RETURN_FALSE;
 	}
 	
-	if(arg4->value.lval > 6) {
+/*	if(arg4->value.lval > 6) {
 		php_error(E_WARNING,"Font encoding set to 5");
 		arg4->value.lval = 5;
 	}
+*/
 	cpdf_setFont(pdf, arg2->value.str.val, arg4->value.str.val, (float) arg3->value.dval);
 
 	RETURN_TRUE;
