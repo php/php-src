@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:                                                             |
+   | Authors: Uwe Steinmann <steinm@php.net>                              |
    +----------------------------------------------------------------------+
  */
 
@@ -956,7 +956,7 @@ PHP_FUNCTION(domxml_dumpmem)
 /* }}} */
 
 /* {{{ proto class xmldoc(string xmldoc)
-   Creates dom object of xml document */
+   Creates DOM object of XML document */
 PHP_FUNCTION(xmldoc)
 {
 	zval *arg;
@@ -987,7 +987,7 @@ PHP_FUNCTION(xmldoc)
 /* }}} */
 
 /* {{{ proto class xmldocfile(string filename)
-   Creates dom object of xml document in file*/
+   Creates DOM object of XML document in file*/
 PHP_FUNCTION(xmldocfile)
 {
 	zval *arg;
@@ -1237,7 +1237,7 @@ static int node_attributes(zval **attributes, xmlNode *nodep)
 	return count;
 }
 
-/* {{{ proto string domxml_children([int node])
+/* {{{ proto string node_children([int node])
    Returns list of children nodes */
 static int node_children(zval **children, xmlNode *nodep)
 {
@@ -1299,7 +1299,7 @@ static int node_children(zval **children, xmlNode *nodep)
 /* }}} */
 
 /* {{{ proto class xmltree(string xmldoc)
-   Create a tree of php objects from an xml document */
+   Create a tree of PHP objects from an XML document */
 PHP_FUNCTION(xmltree)
 {
 	zval *arg;
