@@ -29,19 +29,6 @@
 #define SQLDA_CURRENT_VERSION SQLDA_VERSION1
 #endif
 
-/* IB < 6 doesn't define these */
-#ifndef SQL_DIALECT_CURRENT
-#define SQL_DIALECT_CURRENT 1 /* == SQL_DIALECT_V5 */
-
-#ifdef PHP_WIN32
-typedef __int64 ISC_INT64;
-typedef unsigned __int64 ISC_UINT64;
-#else
-typedef long long ISC_INT64;
-typedef unsigned long long ISC_UINT64;
-#endif /* PHP_WIN32 */
-#endif /* SQL_DIALECT_CURRENT */
-
 #define RESET_ERRMSG do { IBG(errmsg)[0] = '\0'; IBG(sql_code) = 0; } while (0)
 
 #define IB_STATUS (IBG(status))
@@ -97,40 +84,10 @@ typedef struct tr_list {
 } ibase_tr_list;
 
 typedef struct {
-	ISC_ARRAY_DESC ar_desc;
-	ISC_LONG ar_size; /* size of entire array in bytes */
-	unsigned short el_type, el_size;
-} ibase_array;
-
-typedef struct {
 	isc_blob_handle bl_handle;
 	unsigned short type;
 	ISC_QUAD bl_qd;
 } ibase_blob;
-
-typedef struct {
-	ibase_db_link *link;
-	ibase_trans *trans;
-	isc_stmt_handle stmt;
-	unsigned short type;
-	unsigned char has_more_rows, statement_type;
-	XSQLDA *out_sqlda;
-	ibase_array out_array[1]; /* last member */
-} ibase_result;
-
-typedef struct {
-	ibase_db_link *link;
-	ibase_trans *trans;
-	int result_res_id;
-	isc_stmt_handle stmt;
-	XSQLDA *in_sqlda, *out_sqlda;
-	ibase_array *in_array, *out_array;
-	unsigned short in_array_cnt, out_array_cnt;
-	unsigned short dialect;
-	char statement_type;
-	char *query;
-	long trans_res_id;
-} ibase_query;
 
 typedef struct event {
 	ibase_db_link *link;

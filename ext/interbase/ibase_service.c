@@ -24,7 +24,7 @@
 
 #include "php.h"
 
-#if HAVE_IBASE6_API
+#if HAVE_IBASE
 
 #include "php_interbase.h"
 #include "php_ibase_includes.h"
@@ -617,7 +617,7 @@ PHP_FUNCTION(ibase_server_info)
 
 void php_ibase_register_service_constants(INIT_FUNC_ARGS) { /* nop */ }
 
-#endif /* HAVE_IBASE6_API */
+#endif /* HAVE_IBASE */
 
 /*
  * Local variables:

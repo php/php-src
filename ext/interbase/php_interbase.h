@@ -45,9 +45,9 @@ PHP_FUNCTION(ibase_name_result);
 PHP_FUNCTION(ibase_prepare);
 PHP_FUNCTION(ibase_execute);
 PHP_FUNCTION(ibase_free_query);
-#if HAVE_STRFTIME
+
 PHP_FUNCTION(ibase_timefmt);
-#endif
+
 PHP_FUNCTION(ibase_gen_id);
 PHP_FUNCTION(ibase_num_fields);
 PHP_FUNCTION(ibase_num_params);
@@ -62,6 +62,7 @@ PHP_FUNCTION(ibase_trans);
 PHP_FUNCTION(ibase_commit);
 PHP_FUNCTION(ibase_rollback);
 PHP_FUNCTION(ibase_commit_ret);
+PHP_FUNCTION(ibase_rollback_ret);
 
 PHP_FUNCTION(ibase_blob_create);
 PHP_FUNCTION(ibase_blob_add);
@@ -72,12 +73,10 @@ PHP_FUNCTION(ibase_blob_close);
 PHP_FUNCTION(ibase_blob_echo);
 PHP_FUNCTION(ibase_blob_info);
 PHP_FUNCTION(ibase_blob_import);
-#if HAVE_IBASE6_API
+
 PHP_FUNCTION(ibase_add_user);
 PHP_FUNCTION(ibase_modify_user);
 PHP_FUNCTION(ibase_delete_user);
-
-PHP_FUNCTION(ibase_rollback_ret);
 
 PHP_FUNCTION(ibase_service_attach);
 PHP_FUNCTION(ibase_service_detach);
@@ -86,7 +85,7 @@ PHP_FUNCTION(ibase_restore);
 PHP_FUNCTION(ibase_maintain_db);
 PHP_FUNCTION(ibase_db_info);
 PHP_FUNCTION(ibase_server_info);
-#endif
+
 PHP_FUNCTION(ibase_errmsg);
 PHP_FUNCTION(ibase_errcode);
 

@@ -24,9 +24,7 @@
 #include "config.h"
 #endif
 
-#ifdef __GNUC__
 #define _GNU_SOURCE
-#endif
 
 #include "php.h"
 
@@ -61,9 +59,7 @@ function_entry ibase_functions[] = {
 	PHP_FE(ibase_prepare, NULL)
 	PHP_FE(ibase_execute, NULL)
 	PHP_FE(ibase_free_query, NULL)
-#if HAVE_STRFTIME
 	PHP_FE(ibase_timefmt, NULL)
-#endif
 	PHP_FE(ibase_gen_id, NULL)
 	PHP_FE(ibase_num_fields, NULL)
 	PHP_FE(ibase_num_params, NULL)
@@ -78,6 +74,7 @@ function_entry ibase_functions[] = {
 	PHP_FE(ibase_commit, NULL)
 	PHP_FE(ibase_rollback, NULL)
 	PHP_FE(ibase_commit_ret, NULL)
+	PHP_FE(ibase_rollback_ret, NULL)
 
 	PHP_FE(ibase_blob_info, NULL)
 	PHP_FE(ibase_blob_create, NULL)
@@ -91,12 +88,9 @@ function_entry ibase_functions[] = {
 	PHP_FE(ibase_errmsg, NULL)
 	PHP_FE(ibase_errcode, NULL)
 
-#if HAVE_IBASE6_API
 	PHP_FE(ibase_add_user, NULL)
 	PHP_FE(ibase_modify_user, NULL)
 	PHP_FE(ibase_delete_user, NULL)
-
-	PHP_FE(ibase_rollback_ret, NULL)
 
 	PHP_FE(ibase_service_attach, NULL)
 	PHP_FE(ibase_service_detach, NULL)
@@ -105,7 +99,7 @@ function_entry ibase_functions[] = {
 	PHP_FE(ibase_maintain_db, NULL)
 	PHP_FE(ibase_db_info, NULL)
 	PHP_FE(ibase_server_info, NULL)
-#endif
+
 	PHP_FE(ibase_wait_event, NULL)
 	PHP_FE(ibase_set_event_handler, NULL)
 	PHP_FE(ibase_free_event_handler, NULL)
@@ -272,8 +266,7 @@ static void _php_ibase_commit_link(ibase_db_link *link TSRMLS_DC) /* {{{ */
 					}
 				}
 				efree(p->trans); /* default transaction is not a registered resource: clean up */
-			}
-			else {
+			} else {
 				if (p->trans->handle != NULL) { 
 					/* non-default trans might have been rolled back by other call of this dtor */
 					IBDEBUG("Rolling back other transactions...");
@@ -513,8 +506,6 @@ PHP_MINFO_FUNCTION(ibase)
 	sprintf( (s = tmp), "Firebird API version %d", FB_API_VER);
 #elif (SQLDA_CURRENT_VERSION > 1)
 	s =  "Interbase 7.0 and up";
-#elif (SQL_DIALECT_CURRENT == 1)
-	s =  "Interbase 5.6 or earlier";
 #elif !defined(DSC_null)
 	s = "Interbase 6";
 #else
@@ -538,11 +529,7 @@ PHP_MINFO_FUNCTION(ibase)
 		if (info_func) {
 			info_func(s = tmp);
 		} else {
-#if HAVE_IBASE6_API
 			s = "Firebird 1.0/Interbase 6";
-#else
-			s = "Firebird 1.0/Interbase 6 or earlier";
-#endif
 		}
 		php_info_print_table_row(2, "Run-time Client Library Version", s);
 	} while (0);
@@ -578,10 +565,8 @@ PHP_MINFO_FUNCTION(ibase)
 
 enum connect_args { DB = 0, USER = 1, PASS = 2, CSET = 3, ROLE = 4, BUF = 0, DLECT = 1 };
 	
-static char const dpb_args[] = { 0, isc_dpb_user_name, isc_dpb_password, isc_dpb_lc_ctype
-#ifdef isc_dpb_sql_role_name
-	, isc_dpb_sql_role_name
-#endif
+static char const dpb_args[] = { 
+	0, isc_dpb_user_name, isc_dpb_password, isc_dpb_lc_ctype, isc_dpb_sql_role_name
 };
 	
 int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db TSRMLS_DC)
@@ -956,7 +941,7 @@ PHP_FUNCTION(ibase_trans)
 	}
 
 	/* register the transaction in our own data structures */
-	ib_trans = (ibase_trans *) safe_emalloc((link_cnt-1), sizeof(ibase_db_link *), sizeof(ibase_trans));
+	ib_trans = (ibase_trans *) safe_emalloc(link_cnt-1, sizeof(ibase_db_link *), sizeof(ibase_trans));
 	ib_trans->handle = tr_handle;
 	ib_trans->link_cnt = link_cnt;
 	ib_trans->affected_rows = 0;
@@ -1079,11 +1064,9 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit) /* {{
 		case COMMIT:
 			result = isc_commit_transaction(IB_STATUS, &trans->handle);
 			break;
-#if HAVE_IBASE6_API
 		case (ROLLBACK | RETAIN):
 			result = isc_rollback_retaining(IB_STATUS, &trans->handle);
 			break;
-#endif
 		case (COMMIT | RETAIN):
 			result = isc_commit_retaining(IB_STATUS, &trans->handle);
 			break;
@@ -1128,12 +1111,10 @@ PHP_FUNCTION(ibase_commit_ret)
 
 /* {{{ proto bool ibase_rollback_ret( resource link_identifier )
    Rollback transaction and retain the transaction context */
-#if HAVE_IBASE6_API
 PHP_FUNCTION(ibase_rollback_ret)
 {
 	_php_ibase_trans_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, ROLLBACK | RETAIN);
 }
-#endif
 /* }}} */
 
 /* {{{ proto bool ibase_timefmt(string format [, int type ])
@@ -1186,11 +1167,7 @@ PHP_FUNCTION(ibase_gen_id)
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
 	XSQLDA out_sqlda;
-#ifdef SQL_INT64
 	ISC_INT64 result;
-#else
-	ISC_LONG result;
-#endif
 
 	RESET_ERRMSG;
 
@@ -1208,11 +1185,7 @@ PHP_FUNCTION(ibase_gen_id)
 	out_sqlda.version = SQLDA_CURRENT_VERSION;
 	
 	/* allocate the field for the result */
-#ifdef SQL_INT64
 	out_sqlda.sqlvar[0].sqltype = SQL_INT64;
-#else
-	out_sqlda.sqlvar[0].sqltype = SQL_LONG;
-#endif
 	out_sqlda.sqlvar[0].sqlscale = 0;
 	out_sqlda.sqlvar[0].sqllen = sizeof(result);
 	out_sqlda.sqlvar[0].sqldata = (void*) &result;
@@ -1225,7 +1198,7 @@ PHP_FUNCTION(ibase_gen_id)
 	}
 
 	/* don't return the generator value as a string unless it doesn't fit in a long */
-#if SQL_INT64 && SIZEOF_LONG < 8
+#if SIZEOF_LONG < 8
 	if (result < LONG_MIN || result > LONG_MAX) {
 		char res[24];
 
