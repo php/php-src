@@ -120,6 +120,7 @@ static void php_dom_validate_error(void *ctx, const char *msg, ...)
 static void php_dom_ctx_error_level(int level, void *ctx, const char *msg)
 {
 	xmlParserCtxtPtr parser;
+	TSRMLS_FETCH();
 
 	parser = (xmlParserCtxtPtr) ctx;
 	php_error_docref(NULL TSRMLS_CC, level, "%s in %s, line: %d", msg, parser->input->filename, parser->input->line);
