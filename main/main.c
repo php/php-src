@@ -692,8 +692,6 @@ void php_request_shutdown(void *dummy)
 	SLS_FETCH();
 	PLS_FETCH();
 
-	return;
-
 	zend_try {
 		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1));
 	} zend_end_try();
@@ -955,7 +953,6 @@ void php_module_shutdown()
 	int module_number=0;	/* for UNREGISTER_INI_ENTRIES() */
 	PLS_FETCH();
 
-	return;
 	if (!module_initialized) {
 		return;
 	}
