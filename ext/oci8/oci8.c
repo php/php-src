@@ -2700,6 +2700,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 					session->persistent = 1;
 				}
 				smart_str_free_ex(&hashed_details, 1);
+				mutex_unlock(mx_lock);
 				return session;
 			} else {
 				_oci_close_session(session);
