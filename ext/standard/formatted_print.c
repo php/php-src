@@ -398,9 +398,6 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 
 	numbuf[i] = '\0';
 
-	if (precision > 0) {
-		width += (precision + 1);
-	}
 	php_sprintf_appendstring(buffer, pos, size, numbuf, width, 0, padding,
 							 alignment, i, sign, 0, always_sign);
 }
