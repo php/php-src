@@ -654,8 +654,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		for (i=0; i<nlinks; i++) {
 			zend_hash_get_current_data(Z_ARRVAL_PP(link), (void **)&entry);
 
-			ZEND_FETCH_RESOURCE(ldap, LDAP *, entry, -1, "ldap link", le_link);
-
+			ldap = (LDAP *) zend_fetch_resource(entry TSRMLS_CC, -1, "ldap link", NULL, 1, le_link);
 			if (ldap == NULL) {
 				efree(links);
 				efree(rcs);
@@ -716,7 +715,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	  ldap_base_dn = NULL;
 	}
 
-	ZEND_FETCH_RESOURCE(ldap, LDAP *, link, -1, "ldap link", le_link);
+	ldap = (LDAP *) zend_fetch_resource(link TSRMLS_CC, -1, "ldap link", NULL, 1, le_link);
 	if (ldap == NULL) {
 		if (ldap_attrs != NULL) {
 			efree(ldap_attrs);
@@ -796,13 +795,8 @@ PHP_FUNCTION(ldap_free_result)
 
 	ZEND_FETCH_RESOURCE(ldap_result, LDAPMessage *, result, -1, "ldap result", le_result);
 
-	if (ldap_result == NULL) {
-		RETVAL_FALSE;
-	} else {
-		zend_list_delete(Z_LVAL_PP(result));  /* Delete list entry and call registered destructor function */
-		RETVAL_TRUE;
-	}
-	return;
+	zend_list_delete(Z_LVAL_PP(result));  /* Delete list entry and call registered destructor function */
+	RETVAL_TRUE;
 }
 /* }}} */
 
@@ -1458,10 +1452,6 @@ PHP_FUNCTION(ldap_errno)
 
 	ZEND_FETCH_RESOURCE(ldap, LDAP *, link, -1, "ldap link", le_link);
 
-	if (ldap == NULL) {
-		RETURN_LONG(0);
-	}
-
 	RETURN_LONG( _get_lderrno(ldap) );
 }
 /* }}} */
@@ -1515,8 +1505,6 @@ PHP_FUNCTION(ldap_compare)
 	}
 
 	ZEND_FETCH_RESOURCE(ldap, LDAP *, link, -1, "ldap link", le_link);
-
-	if (ldap == NULL) RETURN_LONG(-1);
 
 	convert_to_string_ex(dn);
 	convert_to_string_ex(attr);
