@@ -65,7 +65,7 @@ typedef enum {
 	php_session_active,
 } php_session_status;
 
-typedef struct {
+typedef struct _php_ps_globals {
 	char *save_path;
 	char *session_name;
 	char *id;
