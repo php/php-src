@@ -1,3 +1,56 @@
+2003-11-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Add method reflection_class::implementsInterface()
+      Allow string & reflection_class in isSubclassOf()
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fix reflection_class::isSubclassOf()
+
+2003-11-08  Sergey Kartashoff  <gluke@mail.ru>
+
+    * (PHP_4_3)
+      ext/mnogosearch/php_mnogo.c:
+      - Mnogosearch extension wsa updated to include mnogosearch-3.2.16 features.
+
+    * ext/mnogosearch/php_mnogo.c:
+      - Mnogosearch Extension was updated to include mnogosearch-3.2.16 features
+
+2003-11-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      ext/exif/exif.c:
+      MFH (#26056: Warnings while compiling exif.c)
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/tests/bug26166.phpt:
+      Handle exceptions in casting more gracefully.
+      This fixes bug #26166
+
+2003-11-08  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      NEWS:
+      touch
+
+    * NEWS:
+      Remove NEWS entry since the fix went to the branch as well.
+
+2003-11-08  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      scripts/Makefile.frag:
+      Fix shared/pecl build for extensions that rely on mbstring...
+
+2003-11-08  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_4_3)
+      ext/ming/ming.c
+      ext/ming/php_ming.h:
+      Reverting. New features are not supposed to go into the 4.3 branch
+
 2003-11-07  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
