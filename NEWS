@@ -1,5 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+xx xxx 2002, Version 4.2.1
+- Fixed the false logic in ext/session which made SID constant not to be
+  defined when cookies are disabled. (Sascha)
+
 22 Apr 2002, Version 4.2.0
 - ATTENTION!! register_globals defaults to 'off' now !!!
 - Note: Apache2 support is EXPERIMENTAL.
