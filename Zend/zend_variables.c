@@ -101,7 +101,7 @@ ZEND_API void zval_add_ref(zval **p)
 }
 
 
-ZEND_API int _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
+ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	switch (zvalue->type) {
 		case IS_RESOURCE: {
@@ -127,7 +127,7 @@ ZEND_API int _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 				TSRMLS_FETCH();
 
 				if (zvalue->value.ht == &EG(symbol_table)) {
-					return SUCCESS; /* do nothing */
+					return; /* do nothing */
 				}
 				ALLOC_HASHTABLE_REL(tmp_ht);
 				zend_hash_init(tmp_ht, 0, NULL, ZVAL_PTR_DTOR, 0);
@@ -142,7 +142,6 @@ ZEND_API int _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 			}
 			break;
 	}
-	return SUCCESS;
 }
 
 
