@@ -161,7 +161,7 @@ PHP_MINIT_FUNCTION(xslt)
 PHP_MINFO_FUNCTION(xslt)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "XSLT support", "enabled");
+	php_info_print_table_row(2, "XSLT support", "enabled");
 	php_info_print_table_end();
 }
 /* }}} */
