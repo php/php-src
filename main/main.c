@@ -579,19 +579,9 @@ static void php_message_handler_for_zend(long message, void *data)
 {
 	switch (message) {
 		case ZMSG_ENABLE_TRACK_VARS: {
-				int old;
-				ELS_FETCH();
 				PLS_FETCH();
-				SLS_FETCH();
 				
-				old = PG(track_vars);
 				PG(track_vars) = 1;
-				
-				if(old == 0) {
-					php_treat_data(PARSE_POST, NULL ELS_CC PLS_CC SLS_CC);
-					php_treat_data(PARSE_COOKIE, NULL ELS_CC PLS_CC SLS_CC);
-					php_treat_data(PARSE_GET, NULL ELS_CC PLS_CC SLS_CC);
-				}
 			}
 			break;
 		case ZMSG_FAILED_INCLUDE_FOPEN: {
@@ -1152,7 +1142,6 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	if (setjmp(EG(bailout))!=0) {
 		return;
 	}
-	zend_hash_environment(PLS_C ELS_CC SLS_CC);
 
 #if WIN32||WINNT
 	UpdateIniFromRegistry(primary_file->filename);
@@ -1174,6 +1163,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	}	
 	EG(main_op_array) = zend_compile_files(0 CLS_CC, 3, prepend_file_p, primary_file, append_file_p);
 	if (EG(main_op_array)) {
+		zend_hash_environment(PLS_C ELS_CC SLS_CC);
 		EG(active_op_array) = EG(main_op_array);
 		zend_execute(EG(main_op_array) ELS_CC);
 	}
