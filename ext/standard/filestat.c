@@ -710,25 +710,25 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown file type (%d)", BG(sb).st_mode&S_IFMT);
 		RETURN_STRING("unknown", 1);
 	case FS_IS_W:
-	#ifndef NETWARE	/* getuid is not available on NetWare */
+#ifndef NETWARE	/* getuid is not available on NetWare */
 		if (getuid()==0) {
 			RETURN_TRUE; /* root */
 		}
-	#endif	/* NETWARE */
+#endif	/* NETWARE */
 		RETURN_BOOL((BG(sb).st_mode & wmask) != 0);
 	case FS_IS_R:
-	#ifndef NETWARE	/* getuid is not available on NetWare */
+#ifndef NETWARE	/* getuid is not available on NetWare */
 		if (getuid()==0) {
 			RETURN_TRUE; /* root */
 		}
-	#endif	/* NETWARE */
+#endif	/* NETWARE */
 		RETURN_BOOL((BG(sb).st_mode&rmask)!=0);
 	case FS_IS_X:
-	#ifndef NETWARE	/* getuid is not available on NetWare */
+#ifndef NETWARE	/* getuid is not available on NetWare */
 		if (getuid()==0) {
 			xmask = S_IXROOT; /* root */
 		}
-	#endif	/* NETWARE */
+#endif	/* NETWARE */
 		RETURN_BOOL((BG(sb).st_mode&xmask)!=0 && !S_ISDIR(BG(sb).st_mode));
 	case FS_IS_FILE:
 		RETURN_BOOL(S_ISREG(BG(sb).st_mode));
