@@ -547,12 +547,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	}
 
 	/* Initialize execute_data */
-	EX(fbc) = NULL;
-	EX(object) = NULL;
-	EX(Ts) = NULL;
-	EX(op_array) = NULL;
-	EX(opline) = NULL;
-	*fci->retval_ptr_ptr = NULL;
+	if (EG(current_execute_data)) {
+		execute_data = *EG(current_execute_data);
+	} else {
+		memset(&execute_data, 0, sizeof(zend_execute_data));
+	}
 
 	if (!fci_cache || !fci_cache->initialized) {
 		if (fci->function_name->type==IS_ARRAY) { /* assume array($obj, $name) couple */
