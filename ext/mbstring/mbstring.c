@@ -1262,71 +1262,73 @@ PHP_FUNCTION(mb_parse_str)
 PHP_FUNCTION(mb_output_handler)
 {
 	pval **arg_string, **arg_status;
-	mbfl_string string, result, *ret;
+	mbfl_string string, result;
 	const char *mimetype, *charset;
-	mbfl_memory_device device;
+	char *p;
+	enum mbfl_no_encoding encoding;
+	int last_feed, len, arg_strlen;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg_string, &arg_status) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &arg_string, &arg_strlen, &arg_status) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string_ex(arg_string);
-	convert_to_long_ex(arg_status);
+	encoding = MBSTRG(current_http_output_encoding);
 
-	if ( SG(sapi_headers).send_default_content_type && ! SG(headers_sent) &&
-	     MBSTRG(current_http_output_encoding) != mbfl_no_encoding_pass &&
-	     (Z_LVAL_PP(arg_status) & PHP_OUTPUT_HANDLER_START) != 0) {
-		mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
-		charset = mbfl_no2preferred_mime_name(MBSTRG(current_http_output_encoding));
-		if ( charset != NULL && (*mimetype == '\0' || strncasecmp(mimetype, "text/", 5) == 0) ) {
-			mbfl_memory_device_init(&device, 0, 0);
-			mbfl_memory_device_strcat(&device, "Content-Type: ");
-			if (*mimetype == '\0') {
-				mbfl_memory_device_strcat(&device, "text/html");
-			} else {
-				mbfl_memory_device_strcat(&device, mimetype);
-			}
-			mbfl_memory_device_strcat(&device, ";charset=");
-			mbfl_memory_device_strcat(&device, charset);
-			ret = mbfl_memory_device_result(&device, &result);
-			if (ret != NULL) {
-				if (sapi_add_header(ret->val, ret->len, 0) != FAILURE) {
-					SG(sapi_headers).send_default_content_type = 0;
-				}
-			}
-		}
-	}
+ 	/* start phase only */
+ 	if ((Z_LVAL_PP(arg_status) & PHP_OUTPUT_HANDLER_START) != 0) {
+ 		/* delete the converter just in case. */
+ 		if (MBSTRG(outconv)) {
+ 			mbfl_buffer_converter_delete(MBSTRG(outconv));
+ 			MBSTRG(outconv) = NULL;
+  		}
+ 		/* if content-type is not yet set, set it and activate the converter */
+ 		if (SG(sapi_headers).send_default_content_type) {
+ 			mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
+ 			charset = mbfl_no2preferred_mime_name(encoding);
+ 			len = (sizeof ("Content-Type:")-1) + strlen(mimetype) + (sizeof (";charset=")-1) + strlen(charset) + 1;
+ 			p = emalloc(len);
+ 			strcpy(p, "Content-Type:");
+ 			strcat(p, mimetype);
+ 			strcat(p, ";charset=");
+ 			strcat(p, charset);
+ 			if (sapi_add_header(p, len, 0) != FAILURE)
+ 				SG(sapi_headers).send_default_content_type = 0;
+ 
+ 			/* activate the converter */
+ 			MBSTRG(outconv) = mbfl_buffer_converter_new(MBSTRG(current_internal_encoding), encoding, 0);
+ 		}
+  	}
 
-	ret = NULL;
-	if (MBSTRG(current_http_output_encoding) != mbfl_no_encoding_pass && MBSTRG(outconv) == NULL) {
-		MBSTRG(outconv) = mbfl_buffer_converter_new(MBSTRG(current_internal_encoding), MBSTRG(current_http_output_encoding), 0);
-	}
-	if (MBSTRG(current_http_output_encoding) != mbfl_no_encoding_pass && MBSTRG(outconv) != NULL) {
-		mbfl_buffer_converter_illegal_mode(MBSTRG(outconv), MBSTRG(current_filter_illegal_mode));
-		mbfl_buffer_converter_illegal_substchar(MBSTRG(outconv), MBSTRG(current_filter_illegal_substchar));
-		mbfl_string_init(&string);
-		string.no_language = MBSTRG(current_language);
-		string.no_encoding = MBSTRG(current_internal_encoding);
-		string.val = Z_STRVAL_PP(arg_string);
-		string.len = Z_STRLEN_PP(arg_string);
-		if ((Z_LVAL_PP(arg_status) & PHP_OUTPUT_HANDLER_END) != 0) {
-			mbfl_buffer_converter_feed(MBSTRG(outconv), &string);
-			mbfl_buffer_converter_flush(MBSTRG(outconv));
-			ret = mbfl_buffer_converter_result(MBSTRG(outconv), &result);
-		} else {
-			mbfl_buffer_converter_feed(MBSTRG(outconv), &string);
-			ret = mbfl_buffer_converter_result(MBSTRG(outconv), &result);
-		}
-	}
-
-	if (ret != NULL) {
-		RETVAL_STRINGL(ret->val, ret->len, 0);		/* the string is already strdup()'ed */
-	} else {
+ 	/* just return if the converter is not activated. */
+ 	if (MBSTRG(outconv) == NULL) {
 		zval_dtor(return_value);
 		*return_value = **arg_string;
 		zval_copy_ctor(return_value);
+		return;
 	}
-	if ((Z_LVAL_PP(arg_status) & PHP_OUTPUT_HANDLER_END) != 0) {
+
+ 	/* flag */
+ 	last_feed = ((Z_LVAL_PP(arg_status) & PHP_OUTPUT_HANDLER_END) != 0);
+ 	/* mode */
+ 	mbfl_buffer_converter_illegal_mode(MBSTRG(outconv), MBSTRG(current_filter_illegal_mode));
+ 	mbfl_buffer_converter_illegal_substchar(MBSTRG(outconv), MBSTRG(current_filter_illegal_substchar));
+ 
+ 	/* feed the string */
+ 	mbfl_string_init(&string);
+ 	string.no_language = MBSTRG(current_language);
+ 	string.no_encoding = MBSTRG(current_internal_encoding);
+ 	string.val = Z_STRVAL_PP(arg_string);
+ 	string.len = arg_strlen;
+ 	mbfl_buffer_converter_feed(MBSTRG(outconv), &string);
+ 	if (last_feed)
+ 		mbfl_buffer_converter_flush(MBSTRG(outconv));
+ 
+ 	/* get the converter output, and return it */
+ 	mbfl_buffer_converter_result(MBSTRG(outconv), &result);
+ 	RETVAL_STRINGL(result.val, result.len, 0);		/* the string is already strdup()'ed */
+ 
+ 	/* delete the converter if it is the last feed. */
+ 	if (last_feed) {
 		mbfl_buffer_converter_delete(MBSTRG(outconv));
 		MBSTRG(outconv) = NULL;
 	}
