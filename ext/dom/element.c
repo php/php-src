@@ -92,9 +92,9 @@ PHP_FUNCTION(dom_element_element)
 	if (intern != NULL) {
 		oldnode = (xmlNodePtr)intern->ptr;
 		if (oldnode != NULL) {
-			node_free_resource(oldnode  TSRMLS_CC);
+			php_libxml_node_free_resource(oldnode  TSRMLS_CC);
 		}
-		php_dom_set_object(intern, nodep TSRMLS_CC);
+		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern TSRMLS_CC);
 	}
 }
 /* }}} end dom_element_element */
@@ -322,7 +322,7 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 	existattrp = xmlHasProp(nodep, attrp->name);
 	if (existattrp != NULL) {
 		if ((oldobj = dom_object_get_data((xmlNodePtr) existattrp)) != NULL && 
-			((node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp)
+			((php_libxml_node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp)
 		{
 			RETURN_NULL();
 		}
@@ -331,7 +331,7 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 
 	if (attrp->doc == NULL && nodep->doc != NULL) {
 		attrobj->document = intern->document;
-		increment_document_reference(attrobj, NULL TSRMLS_CC);
+		php_libxml_increment_doc_ref((php_libxml_node_object *)attrobj, NULL TSRMLS_CC);
 	}
 
 	xmlAddChild(nodep, (xmlNodePtr) attrp);
@@ -673,7 +673,7 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 
 	if (existattrp != NULL) {
 		if ((oldobj = dom_object_get_data((xmlNodePtr) existattrp)) != NULL && 
-			((node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp)
+			((php_libxml_node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp)
 		{
 			RETURN_NULL();
 		}
@@ -682,7 +682,7 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 
 	if (attrp->doc == NULL && nodep->doc != NULL) {
 		attrobj->document = intern->document;
-		increment_document_reference(attrobj, NULL TSRMLS_CC);
+		php_libxml_increment_doc_ref((php_libxml_node_object *)attrobj, NULL TSRMLS_CC);
 	}
 
 	xmlAddChild(nodep, (xmlNodePtr) attrp);

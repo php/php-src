@@ -65,9 +65,9 @@ PHP_FUNCTION(dom_comment_comment)
 	if (intern != NULL) {
 		oldnode = (xmlNodePtr)intern->ptr;
 		if (oldnode != NULL) {
-			node_free_resource(oldnode  TSRMLS_CC);
+			php_libxml_node_free_resource(oldnode  TSRMLS_CC);
 		}
-		php_dom_set_object(intern, nodep TSRMLS_CC);
+		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)nodep, (void *)intern TSRMLS_CC);
 	}
 }
 /* }}} end dom_comment_comment */

@@ -66,12 +66,12 @@ PHP_FUNCTION(dom_xpath_xpath)
 	if (intern != NULL) {
 		oldctx = (xmlXPathContextPtr)intern->ptr;
 		if (oldctx != NULL) {
-			decrement_document_reference(intern TSRMLS_CC);
+			php_libxml_decrement_doc_ref((php_libxml_node_object *)intern TSRMLS_CC);
 			xmlXPathFreeContext(oldctx);
 		}
 		intern->ptr = ctx;
 		intern->document = docobj->document;
-		increment_document_reference(intern, docp TSRMLS_CC);
+		php_libxml_increment_doc_ref((php_libxml_node_object *)intern, docp TSRMLS_CC);
 	}
 }
 /* }}} end dom_xpath_xpath */

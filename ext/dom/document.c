@@ -1164,16 +1164,15 @@ PHP_FUNCTION(dom_document_document)
 	if (intern != NULL) {
 		olddoc = (xmlDocPtr) dom_object_get_node(intern);
 		if (olddoc != NULL) {
-			decrement_node_ptr(intern TSRMLS_CC);
-			refcount = decrement_document_reference(intern TSRMLS_CC);
+			php_libxml_decrement_node_ptr((php_libxml_node_object *) intern TSRMLS_CC);
+			refcount = php_libxml_decrement_doc_ref((php_libxml_node_object *)intern TSRMLS_CC);
 			if (refcount != 0) {
 				olddoc->_private = NULL;
 			}
 		}
 		intern->document = NULL;
-		increment_document_reference(intern, docp TSRMLS_CC);
-
-		php_dom_set_object(intern, (xmlNodePtr) docp TSRMLS_CC);
+		php_libxml_increment_doc_ref((php_libxml_node_object *)intern, docp TSRMLS_CC);
+		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)docp, (void *)intern TSRMLS_CC);
 	}
 }
 /* }}} end dom_document_document */
@@ -1230,7 +1229,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
     xmlParserCtxtPtr ctxt = NULL;
 	dom_doc_props *doc_props;
 	dom_object *intern;
-	dom_ref_obj *document = NULL;
+	php_libxml_ref_obj *document = NULL;
 	int validate, resolve_externals, keep_blanks, substitute_ent;
 	int resolved_path_len;
 	char *directory=NULL, resolved_path[MAXPATHLEN];
@@ -1352,20 +1351,20 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 			docp = (xmlDocPtr) dom_object_get_node(intern);
 			doc_prop = NULL;
 			if (docp != NULL) {
-				decrement_node_ptr(intern TSRMLS_CC);
+				php_libxml_decrement_node_ptr((php_libxml_node_object *) intern TSRMLS_CC);
 				doc_prop = intern->document->doc_props;
 				intern->document->doc_props = NULL;
-				refcount = decrement_document_reference(intern TSRMLS_CC);
+				refcount = php_libxml_decrement_doc_ref((php_libxml_node_object *)intern TSRMLS_CC);
 				if (refcount != 0) {
 					docp->_private = NULL;
 				}
 			}
 			intern->document = NULL;
-			increment_document_reference(intern, newdoc TSRMLS_CC);
+			php_libxml_increment_doc_ref((php_libxml_node_object *)intern, newdoc TSRMLS_CC);
 			intern->document->doc_props = doc_prop;
 		}
 
-		php_dom_set_object(intern, (xmlNodePtr) newdoc TSRMLS_CC);
+		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)newdoc, (void *)intern TSRMLS_CC);
 
 		RETURN_TRUE;
 	} else {
@@ -1710,20 +1709,20 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			docp = (xmlDocPtr) dom_object_get_node(intern);
 			doc_prop = NULL;
 			if (docp != NULL) {
-				decrement_node_ptr(intern TSRMLS_CC);
+				php_libxml_decrement_node_ptr((php_libxml_node_object *) intern TSRMLS_CC);
 				doc_prop = intern->document->doc_props;
 				intern->document->doc_props = NULL;
-				refcount = decrement_document_reference(intern TSRMLS_CC);
+				refcount = php_libxml_decrement_doc_ref((php_libxml_node_object *)intern TSRMLS_CC);
 				if (refcount != 0) {
 					docp->_private = NULL;
 				}
 			}
 			intern->document = NULL;
-			increment_document_reference(intern, newdoc TSRMLS_CC);
+			php_libxml_increment_doc_ref((php_libxml_node_object *)intern, newdoc TSRMLS_CC);
 			intern->document->doc_props = doc_prop;
 		}
 
-		php_dom_set_object(intern, (xmlNodePtr) newdoc TSRMLS_CC);
+		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)newdoc, (void *)intern TSRMLS_CC);
 
 		RETURN_TRUE;
 	} else {

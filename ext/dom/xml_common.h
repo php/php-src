@@ -22,6 +22,8 @@
 #ifndef PHP_XML_COMMON_H
 #define PHP_XML_COMMON_H
 
+#include "ext/libxml/php_libxml.h"
+
 typedef struct _dom_doc_props {
 	int formatoutput;
 	int validateonparse;
@@ -33,28 +35,10 @@ typedef struct _dom_doc_props {
 
 typedef dom_doc_props *dom_doc_propsptr;
 
-typedef struct _dom_ref_obj {
-	void *ptr;
-	int   refcount;
-	dom_doc_props *doc_props;
-} dom_ref_obj;
-
-typedef struct _node_ptr {
-	xmlNodePtr node;
-	int	refcount;
-	void *_private;
-} node_ptr;
-
-typedef struct _node_object {
-	zend_object  std;
-	node_ptr *node;
-	dom_ref_obj *document;
-} node_object;
-
 typedef struct _dom_object {
 	zend_object  std;
 	void *ptr;
-	dom_ref_obj *document;
+	php_libxml_ref_obj *document;
 	HashTable *prop_handler;
 	zend_object_handle handle;
 } dom_object;
@@ -80,15 +64,15 @@ PHP_DOM_EXPORT(void) dom_write_property(zval *object, zval *member, zval *value 
     (const xmlChar *) "http://www.w3.org/2000/xmlns/"
 
 #define NODE_GET_OBJ(__ptr, __id, __prtype, __intern) { \
-	__intern = (node_object *)zend_object_store_get_object(__id TSRMLS_CC); \
-	if (__intern->ptr == NULL || !(__ptr = (__prtype)__intern->ptr->node)) { \
+	__intern = (php_libxml_node_object *)zend_object_store_get_object(__id TSRMLS_CC); \
+	if (__intern->node == NULL || !(__ptr = (__prtype)__intern->node->node)) { \
   		php_error(E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
   		RETURN_NULL();\
   	} \
 }
 
 #define DOC_GET_OBJ(__ptr, __id, __prtype, __intern) { \
-	__intern = (node_object *)zend_object_store_get_object(__id TSRMLS_CC); \
+	__intern = (php_libxml_node_object *)zend_object_store_get_object(__id TSRMLS_CC); \
 	if (__intern->document != NULL) { \
 		if (!(__ptr = (__prtype)__intern->document->ptr)) { \
   			php_error(E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
