@@ -152,6 +152,40 @@ class PEAR_Builder extends PEAR_Common
 
     // {{{ build()
 
+	function _harvest_inst_dir($dest_prefix, $dirname, &$built_files)
+	{
+		$d = opendir($dirname);
+		if (!$d)
+			return false;
+
+		$ret = true;
+		while (($ent = readdir($d)) !== false) {
+			if ($ent{0} == '.')
+				continue;
+
+			$full = $dirname . DIRECTORY_SEPARATOR . $ent;
+			if (is_dir($full)) {
+				if (!$this->_harvest_inst_dir(
+						$dest_prefix . DIRECTORY_SEPARATOR . $ent,
+						$full, $built_files)) {
+					$ret = false;
+					break;
+				}
+			} else {
+				$dest = $dest_prefix . DIRECTORY_SEPARATOR . $ent;
+				$built_files[] = array(
+						'file' => $full,
+						'dest' => $dest,
+						'php_api' => $this->php_api_version,
+						'zend_mod_api' => $this->zend_module_api_no,
+						'zend_ext_api' => $this->zend_extension_api_no,
+						);
+			}
+		}
+		closedir($d);
+		return $ret;
+	}
+
     /**
      * Build an extension from source.  Runs "phpize" in the source
      * directory, but compiles in a temporary directory
@@ -231,6 +265,7 @@ class PEAR_Builder extends PEAR_Common
         }
         $build_basedir = "/var/tmp/pear-build-$user";
         $build_dir = "$build_basedir/$info[package]-$info[version]";
+		  $inst_dir = "$build_basedir/install-$info[package]-$info[version]";
         $this->log(1, "building in $build_dir");
         if (is_dir($build_dir)) {
             System::rm("-rf $build_dir");
@@ -238,7 +273,13 @@ class PEAR_Builder extends PEAR_Common
         if (!System::mkDir("-p $build_dir")) {
             return $this->raiseError("could not create build dir: $build_dir");
         }
+
         $this->addTempFile($build_dir);
+		  if (!System::mkDir("-p $inst_dir")) {
+			  return $this->raiseError("could not create install dir: $inst_dir");
+		  }
+        $this->addTempFile($inst_dir);
+
         if (getenv('MAKE')) {
             $make_command = getenv('MAKE');
         } else {
@@ -247,6 +288,7 @@ class PEAR_Builder extends PEAR_Common
         $to_run = array(
             $configure_command,
             $make_command,
+				"$make_command INSTALL_ROOT=$inst_dir install"
             );
         if (!@chdir($build_dir)) {
             return $this->raiseError("could not chdir to $build_dir");
@@ -267,26 +309,9 @@ class PEAR_Builder extends PEAR_Common
             return $this->raiseError("no `modules' directory found");
         }
         $built_files = array();
-        while ($ent = readdir($dp)) {
-            if ($ent{0} == '.' || substr($ent, -3) == '.la') {
-                continue;
-            }
-            // harvest!
-            if (@copy("modules/$ent", "$dir/$ent")) {
-                $built_files[] = array(
-                    'file' => "$dir/$ent",
-                    'php_api' => $this->php_api_version,
-                    'zend_mod_api' => $this->zend_module_api_no,
-                    'zend_ext_api' => $this->zend_extension_api_no,
-                    );
-
-                $this->log(1, "$ent copied to $dir/$ent");
-            } else {
-                chdir($old_cwd);
-                return $this->raiseError("failed copying $ent to $dir");
-            }
-        }
-        closedir($dp);
+		  $prefix = exec("php-config --prefix");
+		  $this->_harvest_inst_dir($prefix, $inst_dir . DIRECTORY_SEPARATOR . $prefix, $built_files);
+		  print_r($built_files);
         chdir($old_cwd);
         return $built_files;
     }
