@@ -68,7 +68,6 @@ PHP_ORA_API php_ora_globals ora_globals;
 #define ORA_FETCHINTO_NULLS (1<<1)
 
 static oraCursor *ora_get_cursor(HashTable *, pval **);
-static void ora_del_cursor(HashTable *, int);
 static char *ora_error(Cda_Def *);
 static int ora_describe_define(oraCursor *);
 static int _close_oraconn(oraConnection *conn);
@@ -323,8 +322,7 @@ PHP_MINIT_FUNCTION(oracle)
 	REGISTER_LONG_CONSTANT("ORA_FETCHINTO_NULLS",ORA_FETCHINTO_NULLS, CONST_CS | CONST_PERSISTENT);
 
 #ifdef ZTS
-	opinit(OCI_EV_TSF); /* initialize threaded environment - must match the threaded mode 
-						   of the oci8 driver if both are used at the same time!! */
+	opinit(OCI_EV_TSF); 
 #endif
 
 	return SUCCESS;
@@ -407,7 +405,6 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int hashed_details_length;
 	oraConnection *db_conn;
 	ORALS_FETCH();
-	PLS_FETCH();
 
 	if (getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -576,7 +573,6 @@ PHP_FUNCTION(ora_logoff)
 {								/* conn_index */
 	oraConnection *conn;
 	pval **arg;
-	ORALS_FETCH();
 
 	if (getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -585,7 +581,7 @@ PHP_FUNCTION(ora_logoff)
 	conn = (oraConnection *) zend_fetch_resource_ex(arg, -1, "Oracle-Connection", 2, le_conn, le_pconn);
 	ZEND_VERIFY_RESOURCE(conn);
 
-	php3_list_delete((*arg)->value.lval);
+	zend_list_delete((*arg)->value.lval);
 }
 /* }}} */
 
@@ -629,16 +625,20 @@ PHP_FUNCTION(ora_open)
 PHP_FUNCTION(ora_close)
 {								/* conn_index */
 	pval **arg;
+	oraCursor *cursor;
 
 	if (getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long_ex(arg);
+	cursor = (oraCursor *) zend_fetch_resource_ex(arg, -1, "Oracle-Cursor", 1, le_cursor);
+	if (! cursor) {
+		RETURN_FALSE;
+	}
 
-	ora_del_cursor(list, (*arg)->value.lval);
+	zend_list_delete((*arg)->value.lval);
 
-	RETVAL_TRUE;
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1577,20 +1577,6 @@ ora_get_cursor(HashTable *list, pval **ind)
 	}
 
 	return cursor;
-}
-
-void ora_del_cursor(HashTable *list, int ind)
-{
-	oraCursor *cursor;
-	int type;
-	ORALS_FETCH();
-  
-	cursor = (oraCursor *) php3_list_find(ind, &type);
-	if (!cursor || type != le_cursor) {
-		php_error(E_WARNING,"Can't find cursor %d",ind);
-		return;
-	}
-	php3_list_delete(ind);
 }
 
 static char *
