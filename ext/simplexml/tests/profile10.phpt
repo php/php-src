@@ -17,9 +17,6 @@ $spattr = $root->child->attributes('special-ns');
 echo $rsattr['attribute'];
 echo "\n";
 echo $spattr['attribute'];
-foreach ($root->child['attribute'] as $attr) {
-	echo "$attr\n";
-}
 echo "\n---Done---\n";
 ?>
 --EXPECT--
