@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Made the IMAP module work with PHP 4.0 (Zeev)
 - Fixed a problem with include()/require() of URLs (Sascha, Zeev)
 - Fixed a bug in implode() that caused it to corrupt its arguments (Zeev)
 - Added get_class($obj), get_parent_class($obj) and method_exists($obj,"name")
