@@ -208,28 +208,24 @@ INCLUDES="-I\$(top_builddir)/libzend -I\$(top_builddir)/TSRM"
 AC_SUBST(INCLUDES)
 
 AC_CHECK_LIB(nsl, gethostname, [
-  LIBS="-lnsl $LIBS"
-  AC_DEFINE(HAVE_LIBNSL) ], [])
+ AC_ADD_LIBRARY(nsl)
+ AC_DEFINE(HAVE_LIBNSL) ], [])
 
-AC_CHECK_LIB(c, socket, [:], [
- AC_CHECK_LIB(socket, socket, [
-  LIBS="-lsocket $LIBS"
-  AC_DEFINE(HAVE_LIBSOCKET) ], []) ])
+AC_CHECK_LIB(socket, socket, [
+ AC_ADD_LIBRARY(socket)
+ AC_DEFINE(HAVE_LIBSOCKET) ], [])
 
-AC_CHECK_LIB(c, gethostbyaddr, [:], [
- AC_CHECK_LIB(nsl, gethostbyaddr, [
-  LIBS="-lnsl $LIBS"
-  AC_DEFINE(HAVE_LIBNSL) ], []) ])
+AC_CHECK_LIB(nsl, gethostbyaddr, [
+ AC_ADD_LIBRARY(nsl)
+ AC_DEFINE(HAVE_LIBNSL) ], [])
 
-AC_CHECK_LIB(c, crypt, [:], [
- AC_CHECK_LIB(crypt, crypt, [
-  LIBS="-lcrypt $LIBS"
-  AC_DEFINE(HAVE_LIBCRYPT) ], []) ])
+AC_CHECK_LIB(crypt, crypt, [
+ AC_ADD_LIBRARY(crypt)
+ AC_DEFINE(HAVE_LIBCRYPT) ], [])
 
 dnl The sin may be in a library which need not be specifed
 dnl as well as res_search resides in libsocket
-AC_CHECK_LIB(c, sin, [:], [
- AC_CHECK_LIB(m, sin) ])
+AC_CHECK_LIB(m, sin)
 
 dnl The res_search may be in libsocket as well, and if it is
 dnl make sure to check for dn_skipname in libresolv, or if res_search
@@ -345,7 +341,50 @@ AC_CHECK_TYPE( ulong, unsigned long )
 
 dnl Checks for library functions.
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(memcpy memmove strdup strerror strcasecmp strstr flock lockf putenv tempnam usleep setlocale gettimeofday setvbuf srand48 lrand48 srandom random link symlink regcomp getlogin cuserid vsnprintf snprintf gcvt utime crypt rint setitimer unsetenv strftime setsockopt tzset shutdown inet_aton statvfs statfs mmap)
+AC_CHECK_FUNCS(
+crypt \
+cuserid \
+flock \
+gcvt \
+getlogin \
+gethostbyaddr \
+gettimeofday \
+inet_aton \
+link \
+lockf \
+lrand48 \
+memcpy \
+memmove \
+mmap \
+putenv \
+random \
+regcomp \
+rint \
+setitimer \
+setlocale \
+setsockopt \
+setvbuf \
+shutdown \
+sin \
+snprintf \
+srand48 \
+srandom \
+statfs \
+statvfs \
+strcasecmp \
+strdup \
+strerror \
+strftime \
+strstr \
+symlink \
+tempnam \
+tzset \
+unsetenv \
+usleep \
+utime \
+vsnprintf \
+)
+
 AC_REPLACE_FUNCS(strlcat strlcpy)
 AC_FUNC_UTIME_NULL
 AC_FUNC_ALLOCA
