@@ -32,7 +32,7 @@
 
 typedef struct {
 	httpd_conn *hc;
-	int post_off;
+	int read_post_data;	
 	void (*on_close)(int);
 } php_thttpd_globals;
 
@@ -145,7 +145,7 @@ static int sapi_thttpd_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	}
 	
 	count_bytes = MIN(count_bytes, 
-			SG(request_info).content_length - SG(read_post_bytes) - TG(post_off));
+			SG(request_info).content_length - SG(read_post_bytes));
 
 	while (read_bytes < count_bytes) {
 		tmp = recv(TG(hc)->conn_fd, buffer + read_bytes, 
@@ -155,6 +155,16 @@ static int sapi_thttpd_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 		/* A simple "tmp > 0" produced broken code on Solaris/GCC */
 		if (tmp != 0 && tmp != -1)
 			read_bytes += tmp;
+	}
+
+	TG(read_post_data) += read_bytes;
+
+	/* Hack for user-agents which send a LR or CRLF after POST data */
+	if (TG(read_post_data) >= TG(hc)->contentlength) {
+		char tmpbuf[2];
+	
+		/* we are in non-blocking mode */
+		recv(TG(hc)->conn_fd, tmpbuf, 2, 0);
 	}
 	
 	return read_bytes;
@@ -302,16 +312,6 @@ static void thttpd_request_ctor(TSRMLS_D)
 	SG(request_info).content_length = TG(hc)->contentlength;
 	
 	php_handle_auth_data(TG(hc)->authorization TSRMLS_CC);
-
-	TG(post_off) = TG(hc)->read_idx - TG(hc)->checked_idx;
-
-	/* avoid feeding \r\n from POST data to SAPI */
-	offset = TG(post_off) - SG(request_info).content_length;
-
-	if (offset > 0) {
-		TG(post_off) -= offset;
-		TG(hc)->read_idx -= offset;
-	}
 }
 
 static void thttpd_request_dtor(TSRMLS_D)
@@ -504,6 +504,7 @@ static off_t thttpd_real_php_request(httpd_conn *hc TSRMLS_DC)
 	TG(hc) = hc;
 	hc->bytes_sent = 0;
 
+	TG(read_post_data) = 0;
 	if (hc->method == METHOD_POST)
 		hc->should_linger = 1;
 	
