@@ -46,7 +46,7 @@ typedef enum ftptype {
 typedef struct databuf
 {
 	int		listener;		/* listener socket */
-	int		fd;			/* data connection */
+	php_socket_t		fd;			/* data connection */
 	ftptype_t	type;			/* transfer type */
 	char		buf[FTP_BUFSIZE];	/* data buffer */
 #if HAVE_OPENSSL_EXT
@@ -57,7 +57,7 @@ typedef struct databuf
 
 typedef struct ftpbuf
 {
-	int		fd;			/* control connection */
+	php_socket_t		fd;			/* control connection */
 	php_sockaddr_storage	localaddr;	/* local address */
 	int		resp;			/* last response code */
 	char		inbuf[FTP_BUFSIZE];	/* last response text */

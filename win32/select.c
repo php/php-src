@@ -17,6 +17,7 @@
 */
 
 #include "php.h"
+#include "php_network.h"
 
 /* $Id$ */
 
@@ -24,13 +25,14 @@
  * get the OS file handle from regular fd's and sockets and then use WaitForMultipleObjects().
  * This implementation is not as feature-full as posix select, but it works for our purposes
  */
-PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv)
+PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv)
 {
 	HANDLE *handles;
 	DWORD waitret;
 	DWORD ms_total;
-	int i, f, s, fd_count = 0, sock_count = 0;
+	int f, s, fd_count = 0, sock_count = 0;
 	int retval;
+	php_socket_t i;
 	fd_set ard, awr, aex; /* active fd sets */
 
 	for (i = 0; i < max_fd; i++) {

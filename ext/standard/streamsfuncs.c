@@ -28,10 +28,13 @@
 #include "ext/standard/basic_functions.h"
 #include "php_ini.h"
 #include "streamsfuncs.h"
-
+#include "php_network.h"
+#include "php_string.h"
 
 #ifndef PHP_WIN32
 #define php_select(m, r, w, e, t)	select(m, r, w, e, t)
+#else
+#include "win32/select.h"
 #endif
 
 static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC);
@@ -342,11 +345,11 @@ PHP_FUNCTION(stream_get_wrappers)
 /* }}} */
 
 /* {{{ stream_select related functions */
-static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, int *max_fd TSRMLS_DC)
+static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t *max_fd TSRMLS_DC)
 {
 	zval **elem;
 	php_stream *stream;
-	int this_fd;
+	php_socket_t this_fd;
 
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;

@@ -280,7 +280,7 @@ typedef int php_non_blocking_flags_t;
  * enable non-blocking mode on the socket.
  * */
 /* {{{ php_network_connect_socket */
-PHPAPI int php_network_connect_socket(int sockfd,
+PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		const struct sockaddr *addr,
 		socklen_t addrlen,
 		int asynchronous,
@@ -341,7 +341,7 @@ PHPAPI int php_network_connect_socket(int sockfd,
 		   BSD-derived systems set errno correctly
 		   Solaris returns -1 from getsockopt in case of error
 		   */
-		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &error, &len) < 0) {
+		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char*)&error, &len) < 0) {
 			ret = -1;
 		}
 	} else {
@@ -393,11 +393,12 @@ static inline void sub_times(struct timeval a, struct timeval b, struct timeval 
  * Returns the bound socket, or -1 on failure.
  * */
 /* {{{ php_network_bind_socket_to_local_addr */
-int php_network_bind_socket_to_local_addr(const char *host, unsigned port,
+php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned port,
 		int socktype, char **error_string, int *error_code
 		TSRMLS_DC)
 {
-	int num_addrs, sock, n, err = 0;
+	int num_addrs, n, err = 0;
+	php_socket_t sock;
 	struct sockaddr **sal, **psal, *sa;
 	socklen_t socklen;
 
@@ -442,7 +443,7 @@ int php_network_bind_socket_to_local_addr(const char *host, unsigned port,
 #ifdef SO_REUSEADDR
 			{
 				int val = 1;
-				setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
+				setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&val, sizeof(val));
 			}
 #endif
 			
@@ -543,7 +544,7 @@ static void populate_name(
 	}
 }
 
-PHPAPI int php_network_get_peer_name(int sock, 
+PHPAPI int php_network_get_peer_name(php_socket_t sock, 
 		char **textaddr, long *textaddrlen,
 		struct sockaddr **addr,
 		socklen_t *addrlen
@@ -562,7 +563,7 @@ PHPAPI int php_network_get_peer_name(int sock,
 	return -1;
 }
 
-PHPAPI int php_network_get_sock_name(int sock, 
+PHPAPI int php_network_get_sock_name(php_socket_t sock, 
 		char **textaddr, long *textaddrlen,
 		struct sockaddr **addr,
 		socklen_t *addrlen
@@ -592,7 +593,7 @@ PHPAPI int php_network_get_sock_name(int sock,
  * */
 
 /* {{{ php_network_accept_incoming */
-PHPAPI int php_network_accept_incoming(int srvsock,
+PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		char **textaddr, long *textaddrlen,
 		struct sockaddr **addr,
 		socklen_t *addrlen,
@@ -601,7 +602,7 @@ PHPAPI int php_network_accept_incoming(int srvsock,
 		int *error_code
 		TSRMLS_DC)
 {
-	int clisock = -1;
+	php_socket_t clisock = -1;
 	fd_set rset;
 	int error, n;
 	php_sockaddr_storage sa;
@@ -651,12 +652,13 @@ PHPAPI int php_network_accept_incoming(int srvsock,
  * */
 
 /* {{{ php_network_connect_socket_to_host */
-int php_network_connect_socket_to_host(const char *host, unsigned short port,
+php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, char **error_string,
 		int *error_code
 		TSRMLS_DC)
 {
-	int num_addrs, sock, n, fatal = 0;
+	int num_addrs, n, fatal = 0;
+	php_socket_t sock;
 	struct sockaddr **sal, **psal, *sa;
 	struct timeval working_timeout;
 	socklen_t socklen;
@@ -865,7 +867,7 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 /* }}} */
 
 /* deprecated */
-PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, const char *persistent_id STREAMS_DC TSRMLS_DC)
+PHPAPI php_stream *_php_stream_sock_open_from_socket(php_socket_t socket, const char *persistent_id STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream;
 	php_netstream_data_t *sock;

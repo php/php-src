@@ -422,7 +422,8 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 		php_stream_xport_param *xparam TSRMLS_DC)
 {
 	char *host = NULL;
-	int portno, err;
+	int portno;
+	int err;
 	int ret;
 
 #ifdef AF_UNIX
@@ -441,7 +442,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 		parse_unix_address(xparam, &unix_addr TSRMLS_CC);
 
 		ret = php_network_connect_socket(sock->socket,
-				(const struct sockaddr *)&unix_addr, sizeof(unix_addr),
+				(const struct sockaddr *)&unix_addr, (socklen_t)sizeof(unix_addr),
 				xparam->op == STREAM_XPORT_OP_CONNECT_ASYNC, xparam->inputs.timeout,
 				xparam->want_errortext ? &xparam->outputs.error_text : NULL,
 				&err);
@@ -465,7 +466,8 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 	sock->socket = php_network_connect_socket_to_host(host, portno,
 			stream->ops == &php_stream_udp_socket_ops ? SOCK_DGRAM : SOCK_STREAM,
 			xparam->op == STREAM_XPORT_OP_CONNECT_ASYNC,
-			xparam->inputs.timeout, xparam->want_errortext ? &xparam->outputs.error_text : NULL,
+			xparam->inputs.timeout,
+			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
 			&err
 			TSRMLS_CC);
 	

@@ -86,9 +86,9 @@ static int		ftp_putcmd(	ftpbuf_t *ftp,
 					const char *args);
 
 /* wrapper around send/recv to handle timeouts */
-static int		my_send(ftpbuf_t *ftp, int s, void *buf, size_t len);
-static int		my_recv(ftpbuf_t *ftp, int s, void *buf, size_t len);
-static int		my_accept(ftpbuf_t *ftp, int s, struct sockaddr *addr,
+static int		my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len);
+static int		my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len);
+static int		my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr,
 				int *addrlen);
 
 /* reads a line the socket , returns true on success, false on error */
@@ -1173,7 +1173,7 @@ ftp_getresp(ftpbuf_t *ftp)
 /* {{{ my_send
  */
 int
-my_send(ftpbuf_t *ftp, int s, void *buf, size_t len)
+my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 {
 	fd_set		write_set;
 	struct timeval	tv;
@@ -1225,7 +1225,7 @@ my_send(ftpbuf_t *ftp, int s, void *buf, size_t len)
 /* {{{ my_recv
  */
 int
-my_recv(ftpbuf_t *ftp, int s, void *buf, size_t len)
+my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 {
 	fd_set		read_set;
 	struct timeval	tv;
@@ -1265,7 +1265,7 @@ my_recv(ftpbuf_t *ftp, int s, void *buf, size_t len)
 /* {{{ data_available
  */
 int
-data_available(ftpbuf_t *ftp, int s)
+data_available(ftpbuf_t *ftp, php_socket_t s)
 {
 	fd_set		read_set;
 	struct timeval	tv;
@@ -1292,7 +1292,7 @@ data_available(ftpbuf_t *ftp, int s)
 /* {{{ data_writeable
  */
 int
-data_writeable(ftpbuf_t *ftp, int s)
+data_writeable(ftpbuf_t *ftp, php_socket_t s)
 {
 	fd_set		write_set;
 	struct timeval	tv;
@@ -1320,7 +1320,7 @@ data_writeable(ftpbuf_t *ftp, int s)
 /* {{{ my_accept
  */
 int
-my_accept(ftpbuf_t *ftp, int s, struct sockaddr *addr, int *addrlen)
+my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, int *addrlen)
 {
 	fd_set		accept_set;
 	struct timeval	tv;
