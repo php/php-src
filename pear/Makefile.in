@@ -52,8 +52,7 @@ install-data-local: PEAR.php
 			(set -x;$(INSTALL_DATA) $(srcdir)/$$i $(peardir)/$$dir); \
 		done; \
 		for i in PEAR.php; do \
-			dir=`echo $$i|sed 's%[^/][^/]*$$%%'`; \
-			(set -x;$(INSTALL_DATA) $(builddir)/$$i $(peardir)/$$dir); \
+			(set -x;$(INSTALL_DATA) $$i $(peardir)); \
 		done; \
 	else \
 		cat $(srcdir)/install-pear.txt; \
