@@ -482,7 +482,8 @@ Changes in the Zend Engine 2.0
         print foo::$my_static;
         ?>
 
-    * Supporting default values for by-reference function parameters.
+    * Parameters that are passed by reference to a function
+      may now have default values.
 
       Example:
 
