@@ -6,6 +6,8 @@ PHP_ARG_WITH(sablot, for Sablotron XSL support,
 
 if test "$PHP_SABLOT" != "no"; then
 
+  PHP_EXTENSION(sablot, $ext_shared)
+
   PHP_ARG_WITH(expat-dir, libexpat dir for Sablotron 0.50,
   [  --with-expat-dir=DIR    Sablotron: libexpat dir for Sablotron 0.50])
 
@@ -71,5 +73,4 @@ if test "$PHP_SABLOT" != "no"; then
   
   AC_DEFINE(HAVE_SABLOT,1,[ ])
 
-  PHP_EXTENSION(sablot, $ext_shared)
 fi
