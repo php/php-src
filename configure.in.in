@@ -256,7 +256,7 @@ AC_CHECK_TYPE( ulong, unsigned long )
 
 dnl Checks for library functions.
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(memcpy memmove strdup strerror strcasecmp strstr flock lockf putenv tempnam usleep setlocale gettimeofday setvbuf srand48 lrand48 srandom random link symlink regcomp getlogin cuserid vsnprintf snprintf gcvt utime crypt rint unsetenv strftime setsockopt tzset)
+AC_CHECK_FUNCS(memcpy memmove strdup strerror strcasecmp strstr flock lockf putenv tempnam usleep setlocale gettimeofday setvbuf srand48 lrand48 srandom random link symlink regcomp getlogin cuserid vsnprintf snprintf gcvt utime crypt rint unsetenv strftime setsockopt tzset shutdown inet_aton)
 AC_FUNC_UTIME_NULL
 AC_FUNC_ALLOCA
 dnl## OLDLIBS=$LIBS; LIBS=""
