@@ -276,6 +276,10 @@ int php_init_config()
 		return FAILURE;
 	}
 
+	if (sapi_module.ini_defaults) {
+		sapi_module.ini_defaults(&configuration_hash);
+	}
+
 	zend_llist_init(&extension_lists.engine, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
 	zend_llist_init(&extension_lists.functions, sizeof(zval), (llist_dtor_func_t)  ZVAL_DESTRUCTOR, 1);
 	zend_llist_init(&scanned_ini_list, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
