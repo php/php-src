@@ -160,9 +160,9 @@ zend_module_entry sablot_module_entry = {
     "sablot",
     sablot_functions,
     PHP_MINIT(sablot),
-    PHP_MSHUTDOWN(sablot),
+	NULL,
     NULL,
-    NULL,
+    PHP_RSHUTDOWN(sablot),
     PHP_MINFO(sablot),
     STANDARD_MODULE_PROPERTIES
 };
@@ -180,15 +180,15 @@ PHP_MINIT_FUNCTION(sablot)
     return SUCCESS;
 }
 
-PHP_MSHUTDOWN_FUNCTION(sablot)
+PHP_RSHUTDOWN_FUNCTION(sablot)
 {
     SABLOTLS_FETCH();
-    
+
     if (SABLOTG(processor)) {
         SablotUnregHandler(SABLOTG(processor), HLR_MESSAGE, NULL, NULL);
         SablotDestroyProcessor(SABLOTG(processor));
     }
-    
+
     return SUCCESS;
 }
 
@@ -252,7 +252,7 @@ PHP_FUNCTION(xslt_output_endtransform)
     buffer = estrndup(OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length);
 
     /* Nake sure there is data to send */
-    if (strlen(buffer)) {
+    if (OG(active_ob_buffer).text_length) {
         char *args[] = {"/_xmlinput", buffer,
                         "/_output",   NULL};
         
@@ -1344,6 +1344,7 @@ static void _php_sablot_free_processor(zend_rsrc_list_entry *rsrc)
     FUNCH_FREE(handle->endDocHandler);
 
     SABLOT_FREE_ERROR_HANDLE(*handle);
+    efree(handle);
 }
 /* }}} */
 
