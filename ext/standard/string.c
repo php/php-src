@@ -1614,7 +1614,9 @@ PHP_FUNCTION(strrpos)
 		e = haystack + haystack_len - needle_len;
 	} else {
 		p = haystack;
-		if (needle_len > -offset) {
+		if (-offset > haystack_len) {
+			e = haystack - needle_len;
+		} else if (needle_len > -offset) {
 			e = haystack + haystack_len - needle_len;
 		} else {
 			e = haystack + haystack_len + offset;
@@ -1681,7 +1683,11 @@ PHP_FUNCTION(strripos)
 			e = haystack + haystack_len - 1;
 		} else {
 			p = haystack;
-			e = haystack + haystack_len - offset;
+			if (-offset > haystack_len) {
+				e = haystack + haystack_len - 1;
+			} else {
+				e = haystack + haystack_len + offset;
+			}
 		}
 		/* Borrow that ord_needle buffer to avoid repeatedly tolower()ing needle */
 		*ord_needle = tolower(*needle);
@@ -1704,7 +1710,9 @@ PHP_FUNCTION(strripos)
 		e = haystack_dup + haystack_len - needle_len;
 	} else {
 		p = haystack_dup;
-		if (needle_len > -offset) {
+		if (-offset > haystack_len) {
+			e = haystack_dup - needle_len;
+		} else if (needle_len > -offset) {
 			e = haystack_dup + haystack_len - needle_len;
 		} else {
 			e = haystack_dup + haystack_len + offset;
