@@ -357,6 +357,7 @@ class PEAR_Frontend_CLI extends PEAR
         {
             case 'install':
             case 'upgrade':
+            case 'upgrade-all':
                 if (isset($data['release_warnings'])) {
                     $this->_displayLine('');
                     $this->_startTable(array(
