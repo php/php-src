@@ -4,6 +4,9 @@
 #undef PACKAGE
 #undef VERSION
 
+#undef HAVE_STRUCT_FLOCK
+#undef HAVE_TM_GMTOFF
+
 #define CONFIGURATION_FILE_PATH "php3.ini"
 #define USE_CONFIG_FILE 1
 
