@@ -102,7 +102,7 @@ union ipbox {
 /* {{{ ftp_open
  */
 ftpbuf_t*
-ftp_open(const char *host, short port, long timeout_sec)
+ftp_open(const char *host, short port, long timeout_sec TSRMLS_DC)
 {
 	ftpbuf_t		*ftp;
 	int			size;
@@ -119,7 +119,7 @@ ftp_open(const char *host, short port, long timeout_sec)
 	tv.tv_sec = timeout_sec;
 	tv.tv_usec = 0;
 
-	ftp->fd = php_hostconnect(host, (unsigned short) (port ? port : 21), SOCK_STREAM, &tv);
+	ftp->fd = php_hostconnect(host, (unsigned short) (port ? port : 21), SOCK_STREAM, &tv TSRMLS_CC);
 	if (ftp->fd == -1) {
 		goto bail;
 	}

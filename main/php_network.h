@@ -91,7 +91,7 @@ typedef struct {
 #endif
 
 
-int php_hostconnect(const char *host, unsigned short port, int socktype, struct timeval *timeout);
+int php_hostconnect(const char *host, unsigned short port, int socktype, struct timeval *timeout TSRMLS_DC);
 PHPAPI int php_connect_nonb(int sockfd, const struct sockaddr *addr, socklen_t addrlen, struct timeval *timeout);
 
 #ifdef PHP_WIN32

@@ -145,7 +145,7 @@ PHP_FUNCTION(ftp_connect)
 	}
 
 	/* connect */
-	ftp = ftp_open(host, (short)port, timeout_sec);
+	ftp = ftp_open(host, (short)port, timeout_sec TSRMLS_CC);
 	if (ftp == NULL) {
 		RETURN_FALSE;
 	}
