@@ -352,78 +352,6 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 	}
 }
 
-static inline void zend_assign_to_object_op(znode *result, znode *op1, znode *op2, znode *value_op, temp_variable *Ts, int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC) TSRMLS_DC)
-{
-	zval **object_ptr = get_obj_zval_ptr_ptr(op1, Ts, BP_VAR_W TSRMLS_CC);
-	zval *object;
-	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
-	zval *free_value;
-	zval *value = get_zval_ptr(value_op, Ts, &free_value, BP_VAR_R);
-	zval tmp;
-	zval **retval = &T(result->u.var).var.ptr;
-	int have_get_ptr = 0;
-
-	T(result->u.var).var.ptr_ptr = NULL;
-	make_real_object(object_ptr TSRMLS_CC);
-	object = *object_ptr;
-	
-	if (object->type != IS_OBJECT) {
-		zend_error(E_WARNING, "Attempt to assign property of non-object");
-		FREE_OP(Ts, op2, EG(free_op2));
-
-		*retval = EG(uninitialized_zval_ptr);
-
-		SELECTIVE_PZVAL_LOCK(*retval, result);
-		return;
-	}
-	
-	/* here we are sure we are dealing with an object */
-	switch (op2->op_type) {
-		case IS_CONST:
-			/* already a constant string */
-			break;
-		case IS_VAR:
-			tmp = *property;
-			zval_copy_ctor(&tmp);
-			convert_to_string(&tmp);
-			property = &tmp;
-			break;
-		case IS_TMP_VAR:
-			convert_to_string(property);
-			break;
-	}
-
-	/* here property is a string */
-	if (Z_OBJ_HT_P(object)->get_property_zval_ptr) {
-		zval **zptr = Z_OBJ_HT_P(object)->get_property_zval_ptr(object, property TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			SEPARATE_ZVAL_IF_NOT_REF(zptr);
-
-			have_get_ptr = 1;
-			binary_op(*zptr, *zptr, value TSRMLS_CC);
-			*retval = *zptr;
-			SELECTIVE_PZVAL_LOCK(*retval, result);
-		}
-	}
-
-	if (!have_get_ptr) {
-		zval *z = Z_OBJ_HT_P(object)->read_property(object, property TSRMLS_CC);
-		SEPARATE_ZVAL_IF_NOT_REF(&z);
-		binary_op(z, z, value TSRMLS_CC);
-		Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
-		*retval = z;
-		SELECTIVE_PZVAL_LOCK(*retval, result);
-		if (z->refcount <= 1) {
-			zval_dtor(z);
-		}
-	}
-
-	if (property == &tmp) {
-		zval_dtor(property);
-	}
-	
-	FREE_OP(Ts, op2, EG(free_op2));
-}
 
 static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2, zval *value, int type, temp_variable *Ts TSRMLS_DC)
 {
@@ -1518,6 +1446,85 @@ inline int zend_binary_assign_op_helper(void *binary_op_arg, ZEND_OPCODE_HANDLER
 }
 
 
+static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *op_data = EX(opline)+1;
+	zval **object_ptr = get_obj_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_W TSRMLS_CC);
+	zval *object;
+	zval *property = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+	zval *free_value;
+	zval *value = get_zval_ptr(&op_data->op1, EX(Ts), &free_value, BP_VAR_R);
+	zval tmp;
+	znode *result = &EX(opline)->result;
+	zval **retval = &EX_T(result->u.var).var.ptr;
+	int have_get_ptr = 0;
+
+	EX_T(result->u.var).var.ptr_ptr = NULL;
+	make_real_object(object_ptr TSRMLS_CC);
+	object = *object_ptr;
+	
+	if (object->type != IS_OBJECT) {
+		zend_error(E_WARNING, "Attempt to assign property of non-object");
+		FREE_OP(Ts, op2, EG(free_op2));
+
+		*retval = EG(uninitialized_zval_ptr);
+
+		SELECTIVE_PZVAL_LOCK(*retval, result);
+	} else {
+		/* here we are sure we are dealing with an object */
+		switch (EX(opline)->op2.op_type) {
+			case IS_CONST:
+				/* already a constant string */
+				break;
+			case IS_VAR:
+				tmp = *property;
+				zval_copy_ctor(&tmp);
+				convert_to_string(&tmp);
+				property = &tmp;
+				break;
+			case IS_TMP_VAR:
+				convert_to_string(property);
+				break;
+		}
+
+		/* here property is a string */
+		if (Z_OBJ_HT_P(object)->get_property_zval_ptr) {
+			zval **zptr = Z_OBJ_HT_P(object)->get_property_zval_ptr(object, property TSRMLS_CC);
+			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
+				SEPARATE_ZVAL_IF_NOT_REF(zptr);
+
+				have_get_ptr = 1;
+				binary_op(*zptr, *zptr, value TSRMLS_CC);
+				*retval = *zptr;
+				SELECTIVE_PZVAL_LOCK(*retval, result);
+			}
+		}
+
+		if (!have_get_ptr) {
+			zval *z = Z_OBJ_HT_P(object)->read_property(object, property TSRMLS_CC);
+			SEPARATE_ZVAL_IF_NOT_REF(&z);
+			binary_op(z, z, value TSRMLS_CC);
+			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			*retval = z;
+			SELECTIVE_PZVAL_LOCK(*retval, result);
+			if (z->refcount <= 1) {
+				zval_dtor(z);
+			}
+		}
+
+		if (property == &tmp) {
+			zval_dtor(property);
+		}
+		
+		FREE_OP(Ts, op2, EG(free_op2));
+	}
+
+	/* assign_obj has two opcodes! */
+	EX(opline)++;
+	NEXT_OPCODE();
+}
+
+
 int zend_assign_add_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	return zend_binary_assign_op_helper(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -1586,111 +1593,67 @@ int zend_assign_bw_xor_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_assign_add_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *op_data = EX(opline)+1;
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), add_function TSRMLS_CC);
-	/* assign_obj has two opcodes! */
-	EX(opline)++;
-	NEXT_OPCODE();
+	return zend_binary_assign_op_obj_helper(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 
 int zend_assign_sub_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *op_data = EX(opline)+1;
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), sub_function TSRMLS_CC);
-	/* assign_obj has two opcodes! */
-	EX(opline)++;
-	NEXT_OPCODE();
+	return zend_binary_assign_op_obj_helper(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 
 int zend_assign_mul_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *op_data = EX(opline)+1;
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), mul_function TSRMLS_CC);
-	/* assign_obj has two opcodes! */
-	EX(opline)++;
-	NEXT_OPCODE();
+	return zend_binary_assign_op_obj_helper(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 
 int zend_assign_div_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *op_data = EX(opline)+1;
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), div_function TSRMLS_CC);
-	/* assign_obj has two opcodes! */
-	EX(opline)++;
-	NEXT_OPCODE();
+	return zend_binary_assign_op_obj_helper(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 
 int zend_assign_mod_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *op_data = EX(opline)+1;
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), mod_function TSRMLS_CC);
-	/* assign_obj has two opcodes! */
-	EX(opline)++;
-	NEXT_OPCODE();
+	return zend_binary_assign_op_obj_helper(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 
 int zend_assign_sl_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *op_data = EX(opline)+1;
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), shift_left_function TSRMLS_CC);
-	/* assign_obj has two opcodes! */
-	EX(opline)++;
-	NEXT_OPCODE();
+	return zend_binary_assign_op_obj_helper(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 
 int zend_assign_sr_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *op_data = EX(opline)+1;
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), shift_right_function TSRMLS_CC);
-	/* assign_obj has two opcodes! */
-	EX(opline)++;
-	NEXT_OPCODE();
+	return zend_binary_assign_op_obj_helper(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 
 int zend_assign_concat_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *op_data = EX(opline)+1;
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), concat_function TSRMLS_CC);
-	/* assign_obj has two opcodes! */
-	EX(opline)++;
-	NEXT_OPCODE();
+	return zend_binary_assign_op_obj_helper(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 
 int zend_assign_bw_or_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *op_data = EX(opline)+1;
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), bitwise_or_function TSRMLS_CC);
-	/* assign_obj has two opcodes! */
-	EX(opline)++;
-	NEXT_OPCODE();
+	return zend_binary_assign_op_obj_helper(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 
 int zend_assign_bw_and_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *op_data = EX(opline)+1;
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), bitwise_and_function TSRMLS_CC);
-	/* assign_obj has two opcodes! */
-	EX(opline)++;
-	NEXT_OPCODE();
+	return zend_binary_assign_op_obj_helper(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 
 int zend_assign_bw_xor_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *op_data = EX(opline)+1;
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), bitwise_xor_function TSRMLS_CC);
-	/* assign_obj has two opcodes! */
-	EX(opline)++;
-	NEXT_OPCODE();
+	return zend_binary_assign_op_obj_helper(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 
