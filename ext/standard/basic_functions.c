@@ -212,6 +212,8 @@ function_entry basic_functions[] = {
 	PHP_FE(mt_getrandmax,							NULL)
 	PHP_FE(getservbyname, NULL)
 	PHP_FE(getservbyport, NULL)	
+	PHP_FE(getprotobyname, NULL)
+	PHP_FE(getprotobynumber, NULL)
 	PHP_FE(gethostbyaddr,							NULL)
 	PHP_FE(gethostbyname,							NULL)
 	PHP_FE(gethostbynamel,							NULL)
@@ -3157,6 +3159,55 @@ PHP_FUNCTION(getservbyport)
 		RETURN_FALSE;
 
 	RETURN_STRING(serv->s_name,1);
+}
+/* }}} */
+
+
+/* {{{ proto int getprotobyname(string name)
+   Returns protocol number associated with name as per /etc/protocols. */
+PHP_FUNCTION(getprotobyname)
+{
+	pval **name;
+	struct protoent *ent;
+
+	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &name) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(name);
+	
+	ent = getprotobyname((*name)->value.str.val);
+
+	if(ent == NULL) {
+		return_value->value.lval = -1;
+		return_value->type = IS_LONG;
+		return;
+	}
+
+	RETURN_LONG(ent->p_proto);
+}
+/* }}} */
+		
+
+/* {{{ proto string getprotobynumber(int proto)
+   Returns protocol name associated with protocol number proto. */
+PHP_FUNCTION(getprotobynumber)
+{
+	pval **proto;
+	struct protoent *ent;
+
+	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &proto) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(proto);
+
+	ent = getprotobynumber((*proto)->value.lval);
+	
+	if(ent == NULL)
+		RETURN_FALSE;
+
+	RETURN_STRING(ent->p_name,1);
 }
 /* }}} */
 

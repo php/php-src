@@ -137,6 +137,8 @@ PHP_FUNCTION(array_pad);
 
 PHP_FUNCTION(getservbyname);
 PHP_FUNCTION(getservbyport);
+PHP_FUNCTION(getprotobyname);
+PHP_FUNCTION(getprotobynumber);
 
 #if HAVE_PUTENV
 typedef struct {
