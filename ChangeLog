@@ -1,3 +1,77 @@
+2003-02-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/private_001.phpt
+      tests/classes/private_002.phpt
+      tests/classes/private_003.phpt
+      tests/classes/private_003b.phpt
+      tests/classes/private_004.phpt
+      tests/classes/private_004b.phpt
+      tests/classes/private_005.phpt
+      tests/classes/private_005b.phpt
+      tests/classes/private_006.phpt
+      tests/classes/private_006b.phpt
+      tests/classes/private_007.phpt
+      tests/classes/private_007b.phpt
+      tests/classes/protected_001.phpt
+      tests/classes/protected_001b.phpt
+      tests/classes/protected_002.phpt
+      tests/classes/visibility_000a.phpt
+      tests/classes/visibility_000b.phpt
+      tests/classes/visibility_000c.phpt
+      tests/classes/visibility_001a.phpt
+      tests/classes/visibility_001b.phpt
+      tests/classes/visibility_001c.phpt
+      tests/classes/visibility_002a.phpt
+      tests/classes/visibility_002b.phpt
+      tests/classes/visibility_002c.phpt
+      tests/classes/visibility_003a.phpt
+      tests/classes/visibility_003b.phpt
+      tests/classes/visibility_003c.phpt
+      tests/classes/visibility_004a.phpt
+      tests/classes/visibility_004b.phpt
+      tests/classes/visibility_004c.phpt:
+      Add PPP method tests
+
+2003-02-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      New function news.
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h:
+      Added array_walk_recursive() function that can apply array_walk recursively
+      to an array.
+
+2003-02-05  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/iconv/CREDITS:
+      Credits for iconv
+
+    * sapi/activescript/EXPERIMENTAL:
+      Mark activescript sapi as experimental, so that the installer can
+      categorize it appropriately.
+
+    * win32/installer/README
+      win32/installer/gen-nsis.php
+      win32/installer/setini.php:
+      Check in the prototype PHP installer for win32.
+      
+
+2003-02-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache/mod_php4.c
+      sapi/apache_hooks/mod_php4.c:
+      Build Fix.
+
+2003-02-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php.1:
+      
+
+    * sapi/cli/php.1:
+      First step - abrief version.
+
 2003-02-04  Stig Bakken  <ssb@fast.no>
 
     * pear/package-PEAR.xml:

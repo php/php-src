@@ -1,3 +1,32 @@
+2003-02-05  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_objects_API.c:
+      - read_property cleanup
+      - Implement unset/isset/empty for PPP
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_compile.c
+      zend_execute.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_opcode.c:
+      Rework static class properties - now supports access restrictions
+
+    * zend_hash.c
+      zend_hash.h:
+      Add quick_exists()
+
+    * zend_object_handlers.c:
+      Add PPP support for arrays
+
+    * zend_compile.c:
+      Fix buglet in error message
+
 2003-02-04  Zeev Suraski  <zeev@zend.com>
 
     * zend_object_handlers.c:
