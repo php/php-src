@@ -463,11 +463,6 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
 							  apr_pool_cleanup_null, s->process->pool);
 		return OK;
 	}
-	else if (data == (const void *)2) {
-		return OK;
-	}
-	apr_pool_userdata_set((const void *)2, userdata_key,
-						   apr_pool_cleanup_null, s->process->pool);
 
 	/* Set up our overridden path. */
 	if (apache2_php_ini_path_override) {
