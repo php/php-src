@@ -1321,7 +1321,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 
 				if (n >= 0) {
 					l = sprintf(string_data, "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, n % f);
-				} else if (n < -f) {
+				} else if (n <= -f) {
 					l = sprintf(string_data, "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, -n % f);				
 				 } else {
 					l = sprintf(string_data, "-0.%0*" LL_MASK "d", -scale, -n % f);
@@ -1340,7 +1340,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 
 				if (n >= 0) {
 					l = sprintf(string_data, "%ld.%0*ld", n / f, -scale,  n % f);
-				} else if (n < -f) {
+				} else if (n <= -f) {
 					l = sprintf(string_data, "%ld.%0*ld", n / f, -scale,  -n % f);
 				} else {
 					l = sprintf(string_data, "-0.%0*ld", -scale, -n % f);
