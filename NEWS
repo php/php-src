@@ -15,6 +15,8 @@ PHP 4                                                                      NEWS
   and/or HTTP_SESSION_VARS. (Sara)
 - Fixed bug #28508 (Do not make hypot() available if not supported by libc).
   (Ilia)
+- Fixed bug #28506 (Allow negative start angle in imagearc and imagefilledarc.
+  (Pierre)
 - Fixed bug #28386 (wordwrap() wraps lines 1 character too soon). (Ilia)
 - Fixed bug #28374 (Possible unterminated loop inside 
   _php_pgsql_trim_message()). (Ilia)

@@ -1607,9 +1607,14 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 	int lx = 0, ly = 0;
 	int fx = 0, fy = 0;
 
+	while (s<0) {
+		s += 360;
+	}
+
 	while (e < s) {
 		e += 360;
 	}
+
 	for (i = s; i <= e; i++) {
 		int x, y;
 		x = ((long) gdCosT[i % 360] * (long) w / (2 * 1024)) + cx;
