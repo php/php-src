@@ -41,6 +41,9 @@ PHP_FUNCTION(mcrypt_generic_init);
 PHP_FUNCTION(mcrypt_generic);
 PHP_FUNCTION(mdecrypt_generic);
 PHP_FUNCTION(mcrypt_generic_end);
+#if HAVE_MCRYPT_GENERIC_DEINIT
+PHP_FUNCTION(mcrypt_generic_deinit);
+#endif
 PHP_FUNCTION(mcrypt_enc_self_test);
 PHP_FUNCTION(mcrypt_enc_is_block_algorithm_mode);
 PHP_FUNCTION(mcrypt_enc_is_block_algorithm);
