@@ -857,27 +857,10 @@ PHP_FUNCTION(getpeername)
 	int salen = sizeof(php_sockaddr_storage);
 	int ret;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 3:
-		 	if (zend_get_parameters_ex(ZEND_NUM_ARGS(), &fd, &addr, &port) == FAILURE)
-				WRONG_PARAM_COUNT;
-			break;
-		case 2:
-			if (zend_get_parameters_ex(ZEND_NUM_ARGS(), &fd, &addr) == FAILURE)
-				WRONG_PARAM_COUNT;
-			break;
-			MAKE_STD_ZVAL((*port));
-			
-		default:
-			WRONG_PARAM_COUNT;
-	}
-
-/*
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 || 
 	    zend_get_parameters_ex(ZEND_NUM_ARGS(), &fd, &addr, &port) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-*/
 	multi_convert_to_long_ex(ZEND_NUM_ARGS() - 1, fd, port);
 	convert_to_string_ex(addr);
 
@@ -906,7 +889,8 @@ PHP_FUNCTION(getpeername)
 
 			Z_STRVAL_PP(addr) = tmp;
 			Z_STRLEN_PP(addr) = strlen(tmp);
-			Z_LVAL_PP(port)   = htons(sin->sin_port);
+			if (ZEND_NUM_ARGS() > 2)
+				Z_LVAL_PP(port)   = htons(sin->sin_port);
 
 			RETURN_LONG(ret);
 		}
