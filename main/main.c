@@ -609,8 +609,8 @@ static void php_message_handler_for_zend(long message, void *data)
 
 				if (EG(error_reporting)&E_WARNING) {
 #if ZEND_DEBUG
-#	if APACHE  /* log into the errorlog, since at this time we can't send messages to the browser */
 					mem_header *t = (mem_header *) data;
+#	if APACHE  /* log into the errorlog, since at this time we can't send messages to the browser */
 					char memory_leak_buf[512];
 
 					snprintf(memory_leak_buf,512,"Possible PHP3 memory leak detected (harmless):  %d bytes from %s:%d",t->size,t->filename,t->lineno);
