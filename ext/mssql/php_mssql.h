@@ -37,6 +37,9 @@
 #include "sqldb.h"
 
 #if HAVE_FREETDS
+#ifndef SHORT
+typedef short SHORT;
+#endif
 #define SQLTEXT SYBTEXT
 #define SQLCHAR SYBCHAR
 #define SQLVARCHAR SYBVARCHAR
