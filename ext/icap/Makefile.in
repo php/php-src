@@ -3,7 +3,3 @@ LTLIBRARY_NAME    = libicap.la
 LTLIBRARY_SOURCES = php_icap.c
 
 include $(top_srcdir)/build/dynlib.mk
-
-
-
-

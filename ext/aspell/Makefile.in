@@ -3,7 +3,3 @@ LTLIBRARY_NAME    = libaspell.la
 LTLIBRARY_SOURCES = aspell.c
 
 include $(top_srcdir)/build/dynlib.mk
-
-
-
-

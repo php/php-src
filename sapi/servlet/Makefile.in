@@ -29,7 +29,3 @@ phpsrvlt.jar : servlet.java ../../ext/java/reflect.java
 	@rm net/php/servlet.* net/php/reflect.* net/php/formatter.*
 	@rmdir net/php
 	@rmdir net
-
-
-
-

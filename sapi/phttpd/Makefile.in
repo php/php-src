@@ -3,7 +3,3 @@ LTLIBRARY_NAME    = libsapi.la
 LTLIBRARY_SOURCES = phttpd.c
 
 include $(top_srcdir)/build/ltlib.mk
-
-
-
-

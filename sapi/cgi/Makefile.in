@@ -3,7 +3,3 @@ LTLIBRARY_NAME    = libsapi.la
 LTLIBRARY_SOURCES = cgi_main.c getopt.c
 
 include $(top_srcdir)/build/ltlib.mk
-
-
-
-

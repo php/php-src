@@ -12,8 +12,3 @@ ifx.c: $(srcdir)/ifx.ec
 	 else \
 	   touch ifx.c; \
 	 fi)
-
-
-
-
-

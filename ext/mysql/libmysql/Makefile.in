@@ -14,7 +14,3 @@ LTLIBRARY_SOURCES = libmysql.c errmsg.c net.c violite.c password.c \
 	longlong2str.c strtoull.c strtoll.c ctype-latin1.c
 
 include $(top_srcdir)/build/dynlib.mk
-
-
-
-

@@ -8,7 +8,3 @@ LTLIBRARY_SHARED_LIBADD  = $(MYSQL_SHARED_LIBADD)
 SUBDIRS = $(MYSQL_SUBDIRS)
 
 include $(top_srcdir)/build/dynlib.mk
-
-
-
-

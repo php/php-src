@@ -3,8 +3,3 @@ LTLIBRARY_NAME = libpcre.la
 LTLIBRARY_SOURCES = maketables.c get.c study.c pcre.c
 
 include $(top_srcdir)/build/dynlib.mk
-
-
-
-
-
