@@ -1,5 +1,5 @@
 --TEST--
-Assignment bug. (Bug #16227)
+Internal hash position bug on assignment (Bug #16227)
 --POST--
 --GET--
 --FILE--
