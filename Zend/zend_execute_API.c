@@ -309,7 +309,7 @@ ZEND_API int zend_is_true(zval *op)
 ZEND_API int zval_update_constant(zval **pp, void *arg)
 {
 	zval *p = *pp;
-	zend_bool inline_change = (zend_bool) arg;
+	zend_bool inline_change = (zend_bool) (unsigned long) arg;
 
 	if (p->type == IS_CONSTANT) {
 		zval c;
