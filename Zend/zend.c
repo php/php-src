@@ -36,6 +36,10 @@
 #	define GLOBAL_CONSTANTS_TABLE	CG(zend_constants)
 #endif
 
+#if ZEND_WIN32
+BOOL WINAPI IsDebuggerPresent(VOID);
+#endif
+
 /* true multithread-shared globals */
 ZEND_API zend_class_entry zend_standard_class_def;
 ZEND_API int (*zend_printf)(const char *format, ...);
