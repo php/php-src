@@ -1385,7 +1385,7 @@ void do_case_before_statement(znode *case_list, znode *case_token, znode *case_e
 	SET_UNUSED(opline->op2);
 	case_token->u.opline_num = next_op_number;
 
-	if (case_list->u.opline_num==-1) {
+	if (case_list->op_type==IS_UNUSED) {
 		return;
 	}
 	next_op_number = get_next_op_number(CG(active_op_array));

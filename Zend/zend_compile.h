@@ -59,7 +59,7 @@ typedef struct _znode {
 		zval constant;
 
 		zend_uint var;
-		int opline_num; /*  Needs to be signed */
+		zend_uint opline_num; /*  Needs to be signed */
 		zend_uchar fetch_type;
 		zend_op_array *op_array;
 		struct {
@@ -97,7 +97,7 @@ struct _zend_op_array {
 	zend_uint *refcount;
 
 	zend_op *opcodes;
-	int last, size;
+	zend_uint last, size;
 
 	zend_uint T;
 
