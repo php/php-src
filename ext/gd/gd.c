@@ -1137,8 +1137,9 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	FILE * fp = NULL;
 	int argc=ZEND_NUM_ARGS();
 	
-	if ((image_type == PHP_GDIMG_TYPE_GD2PART && argc != 4) || 
-		argc != 1 || zend_get_parameters_ex(argc, &file, &srcx, &srcy, &width, &height) == FAILURE) {
+	if ((image_type == PHP_GDIMG_TYPE_GD2PART && argc != 5) ||
+		(image_type != PHP_GDIMG_TYPE_GD2PART && argc != 1) || 
+		zend_get_parameters_ex(argc, &file, &srcx, &srcy, &width, &height) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	
