@@ -1863,7 +1863,10 @@ PHP_FUNCTION(setsockopt)
 
 	RETURN_LONG(((ret < 0) ? -errno : ret));
 }
+/* }}} */
 
+/* {{{ proto int socketpair(int domain, int type, int protocol, array &fds)
+   Creates a pair of indistinguishable sockets and stores them in fds. */
 PHP_FUNCTION(socketpair)
 {
 	zval **domain, **type, **protocol, **fds, **fd;
@@ -1874,6 +1877,7 @@ PHP_FUNCTION(socketpair)
 	    zend_get_parameters_ex(4, &domain, &type, &protocol, &fds) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+
 	v_convert_to_long_ex(3, domain, type, protocol);
 
 	if (Z_LVAL_PP(domain) != AF_INET && Z_LVAL_PP(domain) != AF_UNIX) {
@@ -1886,32 +1890,30 @@ PHP_FUNCTION(socketpair)
 		Z_LVAL_PP(type) = SOCK_STREAM;
 	}
 	
-	fd_ar = HASH_OF(*fds);
-	zend_hash_internal_pointer_reset(fd_ar);
-	
-	if (zend_hash_get_current_data(fd_ar, (void **)&fd) == FAILURE) {
-		php_error(E_WARNING, "Can't access data from fds array");
+	/* Initialize the array */
+	if (array_init(*fds) == FAILURE) {
+		php_error(E_WARNING, "Can't initialize fds array");
 		RETURN_FALSE;
 	}
-	SEPARATE_ZVAL(fd);
 	
-	convert_to_long_ex(fd);
-	fds_ar[0] = Z_LVAL_PP(fd);
-	
-	zend_hash_move_forward(fd_ar);
-	if (zend_hash_get_current_data(fd_ar, (void **)&fd) == FAILURE) {
-		php_error(E_WARNING, "Can't access data from fds array");
-		RETURN_FALSE;
-	}
-	SEPARATE_ZVAL(fd);
-	
-	convert_to_long_ex(fd);
-	fds_ar[1] = Z_LVAL_PP(fd);	
-	
+	/* Get the sockets */
 	ret = socketpair(Z_LVAL_PP(domain), Z_LVAL_PP(type), Z_LVAL_PP(protocol), fds_ar);
 	
-	RETURN_LONG(((ret < 0) ? -errno : ret));
+	if (ret < 0) {
+		RETURN_LONG(-errno);
+	}
+
+	/* Put them into the array */
+	add_index_long(*fds, 0, fds_ar[0]);
+	add_index_long(*fds, 1, fds_ar[1]);
+
+	/* ... and return */
+	RETURN_LONG(ret);
 }
+/* }}} */
+
+/* {{{ proto int shutdown(int fd, int how)
+   Shuts down a socket for receiving, sending, or both. */
 
 PHP_FUNCTION(shutdown)
 {
@@ -1933,7 +1935,6 @@ PHP_FUNCTION(shutdown)
 	
 	RETURN_LONG(((ret < 0) ? -errno : ret));
 }
-
 /* }}} */
 
 #endif				/* HAVE_SOCKETS */
