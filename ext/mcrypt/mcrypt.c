@@ -253,8 +253,10 @@ PHP_INI_END()
 
 static void php_mcrypt_module_dtor(zend_rsrc_list_entry *rsrc)
 {
+#if HAVE_LIBMCRYPT24
 	MCRYPT td = (MCRYPT) rsrc->ptr;
 	mcrypt_module_close (td);
+#endif
 }
 
     
