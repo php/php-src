@@ -3114,10 +3114,10 @@ PHP_FUNCTION(exif_read_data)
 			/* try to evaluate if thumbnail data is present */
 			exif_scan_thumbnail( &ImageInfo);
 		}
-		if ( ImageInfo.Thumbnail.width && ImageInfo.Thumbnail.height) {
-			exif_iif_add_int( &ImageInfo, SECTION_COMPUTED, "Thumbnail.Height", ImageInfo.Thumbnail.height);
-			exif_iif_add_int( &ImageInfo, SECTION_COMPUTED, "Thumbnail.Width",  ImageInfo.Thumbnail.width);
-		}
+	}
+	if ( ImageInfo.Thumbnail.width && ImageInfo.Thumbnail.height) {
+		exif_iif_add_int( &ImageInfo, SECTION_COMPUTED, "Thumbnail.Height", ImageInfo.Thumbnail.height);
+		exif_iif_add_int( &ImageInfo, SECTION_COMPUTED, "Thumbnail.Width",  ImageInfo.Thumbnail.width);
 	}
    	if ( sections_str) efree(sections_str);
 
