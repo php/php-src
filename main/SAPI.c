@@ -25,14 +25,14 @@
 
 #include "php.h"
 #include "SAPI.h"
+#include "php_ini.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/pageinfo.h"
 #if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 #include "ext/pcre/php_pcre.h"
 #endif
-#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
+#if HAVE_ZLIB
 #include "ext/zlib/php_zlib.h"
-ZEND_EXTERN_MODULE_GLOBALS(zlib)
 #endif
 #ifdef ZTS
 #include "TSRM.h"
@@ -556,9 +556,9 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 				while (*ptr == ' ' && *ptr != '\0') {
 					ptr++;
 				}
-#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
+#if HAVE_ZLIB
 				if(!strncmp(ptr, "image/", sizeof("image/")-1)) {
-					ZLIBG(output_compression) = 0;
+					zend_alter_ini_entry("zlib.output_compression", sizeof("zlib.output_compression"), "0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 				}
 #endif
 				mimetype = estrdup(ptr);
@@ -704,27 +704,32 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 		return SUCCESS;
 	}
 
-#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
+#if HAVE_ZLIB
 	/* Add output compression headers at this late stage in order to make
 	   it possible to switch it off inside the script. */
-	if (ZLIBG(output_compression)) {
-		switch (ZLIBG(ob_gzip_coding)) {
-			case CODING_GZIP:
-				if (sapi_add_header("Content-Encoding: gzip", sizeof("Content-Encoding: gzip") - 1, 1)==FAILURE) {
-					return FAILURE;
-				}
-				if (sapi_add_header("Vary: Accept-Encoding", sizeof("Vary: Accept-Encoding") - 1, 1)==FAILURE) {
-					return FAILURE;			
-				}
-				break;
-			case CODING_DEFLATE:
-				if (sapi_add_header("Content-Encoding: deflate", sizeof("Content-Encoding: deflate") - 1, 1)==FAILURE) {
-					return FAILURE;
-				}
-				if (sapi_add_header("Vary: Accept-Encoding", sizeof("Vary: Accept-Encoding") - 1, 1)==FAILURE) {
-					return FAILURE;			
-				}
-				break;
+
+	if (zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0)) {
+		zval nm_zlib_get_coding_type;
+		zval *uf_result = NULL;
+
+		ZVAL_STRINGL(&nm_zlib_get_coding_type, "zlib_get_coding_type", sizeof("zlib_get_coding_type") - 1, 0);
+
+		if (call_user_function_ex(CG(function_table), NULL, &nm_zlib_get_coding_type, &uf_result, 0, NULL, 1, NULL TSRMLS_CC) != FAILURE && uf_result != NULL && Z_TYPE_P(uf_result) == IS_STRING) {
+			char buf[128];
+			uint len;
+
+			assert(Z_STRVAL_P(uf_result) != NULL);
+
+			len = snprintf(buf, sizeof(buf), "Content-Encoding: %s", Z_STRVAL_P(uf_result));
+			if (sapi_add_header(buf, len, 1)==FAILURE) {
+				return FAILURE;
+			}
+			if (sapi_add_header("Vary: Accept-Encoding", sizeof("Vary: Accept-Encoding") - 1, 1)==FAILURE) {
+				return FAILURE;			
+			}
+		}
+		if (uf_result != NULL) {
+			zval_ptr_dtor(&uf_result);
 		}
 	}
 #endif
