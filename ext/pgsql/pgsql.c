@@ -2131,7 +2131,7 @@ void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 }
 /* }}} */
 
-/* {{{ proto bool pg_async_request_cancel([resource connection])
+/* {{{ proto bool pg_request_cancel([resource connection])
    Cancel request */
 PHP_FUNCTION(pg_request_cancel)
 {
@@ -2139,7 +2139,7 @@ PHP_FUNCTION(pg_request_cancel)
 }
 /* }}} */
 
-/* {{{ proto query bool pg_isbusy([resource connection])
+/* {{{ proto bool pg_is_busy([resource connection])
    Get connection is busy or not */
 PHP_FUNCTION(pg_is_busy)
 {
@@ -2147,7 +2147,7 @@ PHP_FUNCTION(pg_is_busy)
 }
 /* }}} */
 
-/* {{{ proto bool pg_async_exec([resource connection], string qeury)
+/* {{{ proto bool pg_send_query([resource connection], string qeury)
    Send asynchronous query */
 PHP_FUNCTION(pg_send_query)
 {
@@ -2203,7 +2203,7 @@ PHP_FUNCTION(pg_send_query)
 /* }}} */
 
 
-/* {{{ proto query resouce pg_arync_result([resource connection])
+/* {{{ proto query resouce pg_get_result([resource connection])
    Get asynchronous query result */
 PHP_FUNCTION(pg_get_result)
 {
