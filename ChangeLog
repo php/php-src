@@ -1,3 +1,78 @@
+2003-05-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/lang/bug17115.phpt:
+      Added test case for bug #17115
+
+2003-05-23  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS:
+      Jani will learn me about NEWS entries yet.
+
+2003-05-23  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      this fix will be in 4.3.2..
+
+2003-05-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php
+      run-tests.php:
+      Executing tests once is enough
+
+    * run-tests.php:
+      Allow writing a list of failed tests.
+      
+
+2003-05-23  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      NEWS:
+      BFN 23765
+
+    * main/rfc1867.c:
+      MFB(r-1.122.2.10)
+      Bug#23765 File upload handler should not care about case sensitivity of
+      header values.
+
+    * (PHP_4_3)
+      main/rfc1867.c:
+      Bug#23765 File upload handler should not care about case sensitivity of
+      header values.
+
+2003-05-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/time/001.phpt:
+      Make this a warning
+
+    * run-tests.php:
+      Add warning level for tests.
+      
+
+2003-05-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      main/streams.c:
+      Avoid greedy reads on FIFOs
+
+    * (PHP_4_3)
+      main/streams.c:
+      Fix Bug #23770: Odd output from file_get_contents().
+      php_stream_copy_to_mem couldn't handle the case when the read returned
+      less
+      than chunk_size/4 bytes (except when it was the last chunk read).
+
+2003-05-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * CODING_STANDARDS:
+      - Update codinf standards with the posted RFC (results from PEAR Meeting)
+
+2003-05-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #23759 (PHP doesn't preserve subrequest status).
+      (jaboydjr.netwalk@com, Ilia)
+
 2003-05-22  Jani Taskinen  <sniper@iki.fi>
 
     * ext/standard/tests/serialize/004.phpt:

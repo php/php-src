@@ -1,3 +1,17 @@
+2003-05-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.h:
+      Revert to sizeof()
+
+2003-05-23  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_execute.c
+      zend_hash.c
+      zend_operators.c
+      zend_operators.h:
+      move HANDLE_NUMERIC() from the hash table implementation upstream to the
+      places that actually need to use it.
+
 2003-05-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute.c:
