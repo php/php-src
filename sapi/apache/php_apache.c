@@ -187,6 +187,7 @@ PHP_MINFO_FUNCTION(apache)
 
 	serv = ((request_rec *) SG(server_context))->server;
 
+
 	php_info_print_table_start();
 
 #ifdef PHP_WIN32
@@ -235,6 +236,7 @@ PHP_MINFO_FUNCTION(apache)
 
 	php_info_print_table_end();
 
+	DISPLAY_INI_ENTRIES();
 
 	{
 		register int i;
@@ -285,7 +287,6 @@ PHP_MINFO_FUNCTION(apache)
 		}
 		php_info_print_table_end();
 	}
-
 }
 
 /* This function is equivalent to <!--#include virtual...-->
