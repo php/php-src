@@ -154,7 +154,6 @@ $ECHO_N " .cvsignore$ECHO_C"
 cat >.cvsignore <<eof
 .deps
 Makefile
-*.o
 *.lo
 *.la
 .libs
