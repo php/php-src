@@ -3166,7 +3166,7 @@ PHP_FUNCTION(imagepscopyfont)
 	of_ind = zend_list_find(Z_LVAL_PP(fnt), &type);
 
 	if (type != le_ps_font) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Type 1 font index", Z_LVAL_PP(fnt));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a Type 1 font index", Z_LVAL_PP(fnt));
 		RETURN_FALSE;
 	}
 
