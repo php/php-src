@@ -1089,7 +1089,7 @@ static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC)
 	INIT_PZVAL(arr);
 
 	/* Prepare argv */
-	if(*s) {
+	if (s && *s) {
 		ss = s;
 		while (ss) {
 			space = strchr(ss, '+');
