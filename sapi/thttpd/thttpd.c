@@ -449,7 +449,8 @@ static void thttpd_request_ctor(TSRMLS_D)
 	SG(request_info).request_method = httpd_method_str(TG(hc)->method);
 	SG(sapi_headers).http_response_code = 200;
 	SG(request_info).content_type = TG(hc)->contenttype;
-	SG(request_info).content_length = TG(hc)->contentlength;
+	SG(request_info).content_length = TG(hc)->contentlength == -1 ? 0
+		: TG(hc)->contentlength;
 	
 	php_handle_auth_data(TG(hc)->authorization TSRMLS_CC);
 }
