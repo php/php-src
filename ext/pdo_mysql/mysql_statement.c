@@ -67,8 +67,12 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		return 0;
 	}
 	if ((S->result = mysql_use_result(H->server)) == NULL) {
-		pdo_mysql_error_stmt(stmt);
-		return 0;
+		/* could've been INSERT/UPDATE/DELETE query */
+		if (!mysql_affected_rows(H->server)) {
+			pdo_mysql_error_stmt(stmt);
+			return 0;
+		}
+		return 1;
 	}
 	if (!stmt->executed) { 
 		stmt->column_count = (int) mysql_num_fields(S->result);
