@@ -30,12 +30,13 @@ static zval *current_section;
 
 #define DEFAULT_SECTION_NAME "Default Browser Capability Settings"
 
+/* OBJECTS_FIXME: This whole extension needs going through. The use of objects looks pretty broken here */
 
 static void browscap_entry_dtor(zval *pvalue)
 {
 	if (pvalue->type == IS_OBJECT) {
-		zend_hash_destroy(pvalue->value.obj.properties);
-		free(pvalue->value.obj.properties);
+		zend_hash_destroy(Z_OBJPROP_P(pvalue));
+		free(Z_OBJPROP_P(pvalue));
 	}
 }
 
@@ -101,7 +102,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, vo
 				
 				new_key = zend_strndup(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
 				zend_str_tolower(new_key, Z_STRLEN_P(arg1));
-				zend_hash_update(current_section->value.obj.properties, new_key, Z_STRLEN_P(arg1)+1, &new_property, sizeof(zval *), NULL);
+				zend_hash_update(Z_OBJPROP_P(current_section), new_key, Z_STRLEN_P(arg1)+1, &new_property, sizeof(zval *), NULL);
 				free(new_key);
 			}
 			break;
@@ -114,17 +115,18 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, vo
 				processed = (zval *) malloc(sizeof(zval));
 				INIT_PZVAL(processed);
 
-				current_section->value.obj.ce = &zend_standard_class_def;
-				current_section->value.obj.properties = (HashTable *) malloc(sizeof(HashTable));
+				/* OBJECTS_FIXME */
+				Z_OBJCE_P(current_section) = &zend_standard_class_def;
+				Z_OBJPROP_P(current_section) = (HashTable *) malloc(sizeof(HashTable));
 				current_section->type = IS_OBJECT;
-				zend_hash_init(current_section->value.obj.properties, 0, NULL, (dtor_func_t) browscap_entry_dtor, 1);
+				zend_hash_init(Z_OBJPROP_P(current_section), 0, NULL, (dtor_func_t) browscap_entry_dtor, 1);
 				zend_hash_update(&browser_hash, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, (void *) &current_section, sizeof(zval *), NULL);  
 
 				processed->value.str.val = Z_STRVAL_P(arg1);
 				processed->value.str.len = Z_STRLEN_P(arg1);
 				processed->type = IS_STRING;
 				convert_browscap_pattern(processed);
-				zend_hash_update(current_section->value.obj.properties, "browser_name_pattern", sizeof("browser_name_pattern"), (void *) &processed, sizeof(zval *), NULL);
+				zend_hash_update(Z_OBJPROP_P(current_section), "browser_name_pattern", sizeof("browser_name_pattern"), (void *) &processed, sizeof(zval *), NULL);
 			}
 			break;
 	}
@@ -181,7 +183,7 @@ static int browser_reg_compare(zval **browser,int num_args, va_list args, zend_h
 	if (*found_browser_entry) { /* already found */
 		return 0;
 	}
-	if(zend_hash_find((*browser)->value.obj.properties, "browser_name_pattern",sizeof("browser_name_pattern"),(void **) &browser_name) == FAILURE) {
+	if(zend_hash_find(Z_OBJPROP_PP(browser), "browser_name_pattern",sizeof("browser_name_pattern"),(void **) &browser_name) == FAILURE) {
 		return 0;
 	}
 
@@ -244,15 +246,15 @@ PHP_FUNCTION(get_browser)
 	}
 	
 	object_init(return_value);
-	zend_hash_copy(return_value->value.obj.properties,(*agent)->value.obj.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
+	zend_hash_copy(Z_OBJPROP_P(return_value), Z_OBJPROP_PP(agent), (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
 	
-	while (zend_hash_find((*agent)->value.obj.properties, "parent",sizeof("parent"), (void **) &agent_name)==SUCCESS) {
+	while (zend_hash_find(Z_OBJPROP_PP(agent), "parent",sizeof("parent"), (void **) &agent_name)==SUCCESS) {
 
 		if (zend_hash_find(&browser_hash,(*agent_name)->value.str.val, (*agent_name)->value.str.len+1, (void **)&agent)==FAILURE) {
 			break;
 		}
 		
-		zend_hash_merge(return_value->value.obj.properties,(*agent)->value.obj.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *), 0);
+		zend_hash_merge(Z_OBJPROP_P(return_value), Z_OBJPROP_PP(agent), (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *), 0);
 	}
 }
 /* }}} */
