@@ -61,6 +61,11 @@ class PEAR_Command_Install extends PEAR_Command_Common
                     'shortopt' => 'Z',
                     'doc' => 'request uncompressed files when downloading',
                     ),
+                'installroot' => array(
+                    'shortopt' => 'R',
+                    'arg' => 'DIR',
+                    'doc' => 'root directory used when installing files (ala PHP\'s INSTALL_ROOT)',
+                    ),
                 ),
             'doc' => '<package> ...
 Installs one or more PEAR packages.  You can specify a package to
@@ -107,6 +112,11 @@ four ways of specifying packages.
                     'shortopt' => 'Z',
                     'doc' => 'request uncompressed files when downloading',
                     ),
+                'installroot' => array(
+                    'shortopt' => 'R',
+                    'arg' => 'DIR',
+                    'doc' => 'root directory used when installing files (ala PHP\'s INSTALL_ROOT)',
+                    ),
                 ),
             'doc' => '<package> ...
 Upgrades one or more PEAR packages.  See documentation for the
@@ -139,6 +149,11 @@ More than one package may be specified at once.
                     'shortopt' => 'Z',
                     'doc' => 'request uncompressed files when downloading',
                     ),
+                'installroot' => array(
+                    'shortopt' => 'R',
+                    'arg' => 'DIR',
+                    'doc' => 'root directory used when installing files (ala PHP\'s INSTALL_ROOT)',
+                    ),
                 ),
             'doc' => '
 Upgrades all packages that have a newer release available.  Upgrades are
@@ -158,6 +173,11 @@ more stable.
                 'register-only' => array(
                     'shortopt' => 'r',
                     'doc' => 'do not remove files, only register the packages as not installed',
+                    ),
+                'installroot' => array(
+                    'shortopt' => 'R',
+                    'arg' => 'DIR',
+                    'doc' => 'root directory used when installing files (ala PHP\'s INSTALL_ROOT)',
                     ),
                 ),
             'doc' => '<package> ...
