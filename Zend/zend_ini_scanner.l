@@ -53,13 +53,13 @@ static char *ini_filename;
 
 void init_ini_scanner(TSRMLS_D)
 {
-       SCNG(lineno)=1;
+	SCNG(lineno)=1;
 }
 
 
 int zend_ini_scanner_get_lineno(TSRMLS_D)
 {
-       return SCNG(lineno);
+	return SCNG(lineno);
 }
 
 
@@ -119,7 +119,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <INITIAL>[[][^[]+[\]][ ]*{NEWLINE}? {
 	/* SECTION */
 
-	/* eat trailng and spaces ] */
+	/* eat trailing ] and spaces */
 	while (yyleng>0 && (yytext[yyleng-1]=='\n' || yytext[yyleng-1]=='\r' || yytext[yyleng-1]==']' || yytext[yyleng-1]==' ')) {
 		yyleng--;
 		yytext[yyleng]=0;
