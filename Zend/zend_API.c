@@ -1247,8 +1247,11 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		}
 		if (ptr->flags & ZEND_ACC_ABSTRACT) {
 			if (scope) {
+				/* This is a class that must be abstract itself. Here we set the check info. */
 				scope->ce_flags |= ZEND_ACC_ABSTRACT;
 				if (!(scope->ce_flags & ZEND_ACC_INTERFACE)) {
+					/* Since the class is not an interface it needs to be declared as a abstract class. */
+					/* This time we set the flag for the keyword 'abstratc'. */
 					scope->ce_flags |= ZEND_ACC_ABSTRACT_CLASS;
 				}
 			}
