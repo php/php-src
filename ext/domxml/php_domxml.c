@@ -744,9 +744,7 @@ static zval *php_xpathobject_new(xmlXPathObjectPtr obj, int *found TSRMLS_DC)
 {
 	zval *wrapper;
 
-	if (! found) {
 		*found = 0;
-	}
 
 	if (!obj) {
 		MAKE_STD_ZVAL(wrapper);
@@ -851,9 +849,7 @@ static zval *php_xpathcontext_new(xmlXPathContextPtr obj, int *found TSRMLS_DC)
 	zval *wrapper;
 	int rsrc_type;
 
-	if (! found) {
 		*found = 0;
-	}
 
 	if (!obj) {
 		MAKE_STD_ZVAL(wrapper);
@@ -937,9 +933,7 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 	char *content;
 	int rsrc_type;
 
-	if (! found) {
 		*found = 0;
-	}
 
 	if (!obj) {
 		MAKE_STD_ZVAL(wrapper);
@@ -976,6 +970,7 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 			if (content) {
 				add_property_long(wrapper, "type", Z_TYPE_P(nodep));
 				add_property_stringl(wrapper, "content", (char *) content, strlen(content), 1);
+				xmlFree(content);
 			}
 			break;
 		}
@@ -989,6 +984,7 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 			if (content) {
 				add_property_long(wrapper, "type", Z_TYPE_P(nodep));
 				add_property_stringl(wrapper, "content", (char *) content, strlen(content), 1);
+				xmlFree(content);
 			}
 			break;
 		}
@@ -1000,8 +996,10 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 			rsrc_type = le_domxmlpip;
 			content = xmlNodeGetContent(nodep);
 			add_property_stringl(wrapper, "target", (char *) nodep->name, strlen(nodep->name), 1);
-			if (content)
+			if (content) {
 				add_property_stringl(wrapper, "data", (char *) content, strlen(content), 1);
+				xmlFree(content);
+			}
 			break;
 		}
 
@@ -1024,8 +1022,10 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 			add_property_stringl(wrapper, "name", (char *) nodep->name, strlen(nodep->name), 1);
 			if (Z_TYPE_P(obj) == XML_ENTITY_REF_NODE) {
 				content = xmlNodeGetContent(nodep);
-				if (content)
+				if (content) {
 					add_property_stringl(wrapper, "content", (char *) content, strlen(content), 1);
+					xmlFree(content);
+				}
 			}
 			break;
 		}
@@ -1038,8 +1038,10 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 			add_property_stringl(wrapper, "name", (char *) attrp->name, strlen(attrp->name), 1);
 			add_property_long(wrapper, "type", Z_TYPE_P(attrp));
 			content = xmlNodeGetContent((xmlNodePtr) attrp);
-			if (content)
+			if (content) {
 				add_property_stringl(wrapper, "value", (char *) content, strlen(content), 1);
+				xmlFree(content);
+			}
 			break;
 		}
 
@@ -1093,8 +1095,10 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 			rsrc_type = le_domxmlcdatap;
 			content = xmlNodeGetContent(nodep);
 			add_property_long(wrapper, "type", Z_TYPE_P(nodep));
-			if (content)
+			if (content) {
 				add_property_stringl(wrapper, "content", (char *) content, strlen(content), 1);
+				xmlFree(content);
+			}
 			break;
 		}
 
@@ -1749,7 +1753,7 @@ PHP_FUNCTION(domxml_node_has_attributes)
 }
 /* }}} */
 
-/* {{{ proto object domxml_node_prefix(void)
+/* {{{ proto string domxml_node_prefix(void)
    Returns namespace prefix of node */
 PHP_FUNCTION(domxml_node_prefix)
 {
@@ -2103,7 +2107,8 @@ PHP_FUNCTION(domxml_node_get_content)
 		RETURN_FALSE;
 	}
 		
-	RETURN_STRING(mem,1);
+	RETVAL_STRING(mem,1);
+	xmlFree(mem);
 }
 /* }}} */
 
@@ -2201,9 +2206,10 @@ PHP_FUNCTION(domxml_elem_get_attribute)
 
 	value = xmlGetProp(nodep, name);
 	if (!value) {
-		RETURN_EMPTY_STRING();
+		RETURN_FALSE;
 	} else {
-		RETURN_STRING(value, 1);
+		RETVAL_STRING(value, 1);
+		xmlFree(value);
 	}
 }
 /* }}} */
@@ -2242,8 +2248,7 @@ PHP_FUNCTION(domxml_elem_remove_attribute)
     
 	DOMXML_PARAM_TWO(nodep, id, le_domxmlelementp, "s", &name, &name_len);
 	attrp = xmlHasProp(nodep,name);
-	if (attrp == NULL)
-	{
+	if (attrp == NULL) {
 		RETURN_FALSE;
 	}
 	xmlUnlinkNode((xmlNodePtr)attrp);
@@ -2263,8 +2268,7 @@ PHP_FUNCTION(domxml_elem_get_attribute_node)
 
 	DOMXML_PARAM_TWO(nodep, id, le_domxmlelementp, "s", &name, &name_len);
 	attrp = xmlHasProp(nodep,name);
-	if (attrp == NULL)
-	{
+	if (attrp == NULL) {
 		RETURN_FALSE;
 	}
 	DOMXML_RET_OBJ(rv, (xmlNodePtr) attrp, &ret);
@@ -2990,9 +2994,12 @@ PHP_FUNCTION(domxml_html_dump_mem)
 
 	htmlDocDumpMemory(docp, &mem, &size);
 	if (!size) {
+		if (mem)
+			xmlFree(mem);
 		RETURN_FALSE;
 	}
 	RETURN_STRINGL(mem, size, 1);
+	xmlFree(mem);
 }
 /* }}} */
 
@@ -3573,9 +3580,7 @@ static zval *php_xsltstylesheet_new(xsltStylesheetPtr obj, int *found TSRMLS_DC)
 	zval *wrapper;
 	int rsrc_type;
 
-	if (! found) {
 		*found = 0;
-	}
 
 	if (!obj) {
 		MAKE_STD_ZVAL(wrapper);
