@@ -774,11 +774,18 @@ class PEAR_Installer extends PEAR_Common
             $this->installroot = '';
         }
         $this->registry = &new PEAR_Registry($php_dir);
+        $filelist = $this->registry->packageInfo($package, 'filelist');
+        if ($filelist == null) {
+            return $this->raiseError("$package not installed");
+        }
         if (empty($options['nodeps'])) {
             $depchecker = &new PEAR_Dependency($this->registry);
-            $error = $depchecker->checkPackageUninstall($errors, $package);
+            $error = $depchecker->checkPackageUninstall($errors, $warning, $package);
             if ($error) {
                 return $this->raiseError($errors . 'uninstall failed');
+            }
+            if ($warning) {
+                $this->log(0, $warning);
             }
         }
         // Delete the files
