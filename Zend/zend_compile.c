@@ -2420,6 +2420,10 @@ void zend_do_implements_interface(znode *interface_znode TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
+	if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
+		zend_error(E_COMPILE_ERROR, "Interfaces cannot implement other classes/interfaces");
+	}
+
 	opline->opcode = ZEND_ADD_INTERFACE;
 	opline->op1 = CG(implementing_class);
 	opline->op2 = *interface_znode;
