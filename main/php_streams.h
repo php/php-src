@@ -193,6 +193,7 @@ PHPAPI int _php_stream_flush(php_stream *stream TSRMLS_DC);
 PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC);
 #define php_stream_gets(stream, buf, maxlen)	_php_stream_gets((stream), (buf), (maxlen) TSRMLS_CC)
 
+/* CAREFUL! this is equivalent to puts NOT fputs! */
 PHPAPI int _php_stream_puts(php_stream *stream, char *buf TSRMLS_DC);
 #define php_stream_puts(stream, buf)	_php_stream_puts((stream), (buf) TSRMLS_CC)
 
@@ -207,6 +208,10 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen,
 		int persistent STREAMS_DC TSRMLS_DC);
 #define php_stream_copy_to_mem(src, buf, maxlen, persistent) _php_stream_copy_to_mem((src), (buf), (maxlen), (persistent) STREAMS_CC TSRMLS_CC)
+
+/* output all data from a stream */
+PHPAPI size_t _php_stream_passthru(php_stream * src STREAMS_DC TSRMLS_DC);
+#define php_stream_passthru(stream)	_php_stream_passthru((stream) STREAMS_CC TSRMLS_CC)
 
 
 /* maybe implement someday */

@@ -26,7 +26,7 @@
 #include "php_network.h"
 #include "php_open_temporary_file.h"
 #include "ext/standard/file.h"
-
+#include "ext/standard/basic_functions.h" /* for BG(mmap_file) (not strictly required) */
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
@@ -285,6 +285,54 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 	zend_error(E_WARNING, "streams of type %s do not support seeking", stream->ops->label);
 	return -1;
 }
+
+PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
+{
+	size_t bcount = 0;
+	int ready = 0;
+	char buf[8192];
+#ifdef HAVE_MMAP
+	int fd;
+#endif
+
+#ifdef HAVE_MMAP
+	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET)
+			&& php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fd, 0))
+	{
+		struct stat sbuf;
+		off_t off;
+		void *p;
+		size_t len;
+
+		fstat(fd, &sbuf);
+
+		if (sbuf.st_size > sizeof(buf)) {
+			off = php_stream_tell(stream);
+			len = sbuf.st_size - off;
+			p = mmap(0, len, PROT_READ, MAP_SHARED, fd, off);
+			if (p != (void *) MAP_FAILED) {
+				BG(mmap_file) = p;
+				BG(mmap_len) = len;
+				PHPWRITE(p, len);
+				BG(mmap_file) = NULL;
+				munmap(p, len);
+				bcount += len;
+				ready = 1;
+			}
+		}
+	}
+#endif
+	if(!ready) {
+		int b;
+
+		while ((b = php_stream_read(stream, buf, sizeof(buf))) > 0) {
+			PHPWRITE(buf, b);
+			bcount += b;
+		}
+	}
+	return bcount;
+}
+
 
 PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen, int persistent STREAMS_DC TSRMLS_DC)
 {
