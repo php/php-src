@@ -987,7 +987,7 @@ PHP_FUNCTION(mysql_get_server_info)
    Returns a string containing information about the most recent query */
 PHP_FUNCTION(mysql_info)
 {
-	zval **mysql_link;
+	zval *mysql_link;
 	int id = -1;
 	char *str;
 	php_mysql_conn *mysql;
