@@ -330,6 +330,7 @@ static zval *master_to_zval_int(encodePtr encode, xmlNodePtr data)
 
 zval *master_to_zval(encodePtr encode, xmlNodePtr data)
 {
+	TSRMLS_FETCH();
 	data = check_and_resolve_href(data);
 
 	if (encode == NULL) {
@@ -1072,7 +1073,7 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 #ifdef ZEND_ENGINE_2
 					tmpVal->refcount--;
 #endif
-					add_property_zval_ex(ret, (char*)trav->name, key_len, tmpVal);
+					add_property_zval_ex(ret, (char*)trav->name, key_len, tmpVal TSRMLS_CC);
 				} else {
 				  /* Property already exist - make array */
 				  if (Z_TYPE_PP(prop) != IS_ARRAY) {
