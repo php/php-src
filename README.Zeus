@@ -1,157 +1,126 @@
 Using PHP4 with the Zeus Web Server
 -----------------------------------
 
-Zeus fully supports running PHP in combination with our webserver. A
-significant improvement in PHP 4 is that you can now run PHP as an
-ISAPI module, giving great performance benefits over traditional CGI
-code.
+Zeus fully supports running PHP in combination with our
+webserver. There are three different interfaces that can be used to
+enable PHP:
 
-Note that you will need to be running at least version 3.3.8 of the
-webserver. If you are running an earlier version, please see our
-website (http://www.zeus.com) for upgrade instructions.
-Earlier versions of Zeus (3.3.6) can also run PHP, but it is
-suggested that you upgrade for full compatibility.
+* CGI
+* ISAPI
+* FastCGI
 
-You should compile PHP using the gcc compiler. Other compilers may
-cause build errors.
+Of the three, we recommend using FastCGI, which has been tested and
+benchmarked as providing the best performance and reliability.
 
-To build the ISAPI version of PHP, start the configuration with:
+Full details of how to install PHP are available from our
+website, at:
 
-./configure --with-zeus=/usr/local/zeus
+http://support.zeus.com/products/php.html
 
-Obviously, replace /usr/local/zeus with the location of where you have
-installed Zeus on your machine. For PHP to build successfully, you
-need to have 3.3.6 already installed, because the code relies on the
-presence of header files provided with the latest version.
-
-You may have to adjust the environment variable LDFLAGS and EXTRA_LIBS
-in order to link in extra libraries. This depends on the platform on
-which you are building and also on the compiler used (see below). A
-standard GNU/Linux install with GCC should build fine with no changes.
+If you have any problems, please check the support site for more
+up-to-date information and advice.
 
 
-Configuring the webserver
--------------------------
+Quick guide to installing FastCGI with Zeus
+-------------------------------------------
 
-After running 'make' and 'make install', you will have a 'libphp4.so'
-file. Copy this file into a directory reserved for ISAPI
-binaries. Now, perform the following steps for each virtual server
-that you wish to run PHP on:
+Step 1 - obtain and install FastCGI development kit.
 
-1) On the Admin server, go to 'edit server->path mapping'
-2) Add an alias to the directory with libphp4.so in it, mapped to
-   /isapi/ (or a location of your choice). Make sure you set the alias
-   type to ISAPI.
-3) Click 'update'
-4) Add a handler for file extension 'php' to be run by /isapi/libphp4.so
-5) Click 'update', then go back to the previous page.
-6) Click on the 'module configuration' button, ensure that ISAPI
-   support is ticked.
-7) Click on the ISAPI link. At the bottom of the page, click the
-   checkbox for running ISAPI extensions 'out of process'.
-8) Click 'update'. Then restart the virtual server. Done!
+Grab the package from:
+http://www.fastcgi.com/dist/devkit_2.2.0.tar.gz
+
+Extract the package and follow the instructions:
+        ./configure
+        make
+        make export
+(run the last as root)
+
+This will install to /usr/local/lib/libfcgi.a
+                and  /usr/local/include/*fcgi*
 
 
-Troubleshooting
----------------
 
-*) Why does the compile fail at Zend/zend-scanner-cc.cc
-                             or Zend/zend-parser.c ?
+Step 2 - Compile PHP as FastCGI.
 
-These source files are auto-generated from the corresponding .y files.
-The default distribution of PHP contains pre-generated versions of these
-files that have caused problems for some people. The simplest solution is
-to delete the files. They will then be rebuilt correctly. You must have the
-following GNU tools to do this:
+Compile as follows:
+        ./configure --with-fastcgi
+        make
 
-       bison  1.28 or later
-       flex  2.5.4 or later
+Note that PHP has many options to the configure script -
+e.g. --with-mysql. You will probably want to select your usual options
+before compiling; the above is just a bare minimum, for illustration.
 
-*) Why does my PHP library fail to load?
-
-After configuring Zeus, if you get a '502 Bad Gateway' error when
-accessing a PHP page, there are problems loading the PHP
-library. Check the error log ($ZEUSHOME/web/log/errors) for errors.
-
-Failing to load the PHP ISAPI module is likely to be due to unresolved
-symbols in the module. A way to check for this is to visit our support
-page at http://support.zeus.com/faq/entries/isapi_error.html and run
-the program there on your libphp4.so. It will list any unresolved
-symbols.
-
-*) My libphp4.so has unresolved symbols. How do I fix this?
-
-You must ensure that the PHP build process links in the appropriate
-libraries that contain these symbols! The libraries required will
-depend on the platform you are running PHP on.
-
-You may need to set one or two environment variables before running
-the 'configure' program to set up PHP; LDFLAGS and EXTRA_LIBS. Make
-sure that you also export these variables to the build process.
-(Type 'export LDFLAGS EXTRA_LIBS' in the shell to do this.)
-
-If you are using 3rd party tools and libraries which are installed
-in non-standard locations, you may need to set the environment
-variable LD_LIBRARY_PATH to point to the library's location, prior
-to running the Zeus Web Server. For example, if you have compiled
-external MySQL support, and mysql is installed in /usr/local/mysql,
-you should set LD_LIBRARY_PATH to '/usr/local/mysql/lib/mysql'
-and then 'export LD_LIBRARY_PATH'. For convenience, you should add
-this to the 'start-zeus' script provided.
-
-Yet another method of ensuring the linked libraries are found is to
-set the environment variable LD_RUN_PATH before compiling PHP. This
-works in a similar way to LD_LIBRARY_PATH, but at compile-time.
-Libraries produced with this envrionment variable set will have its
-value 'burned' into the resultant binary, specifying a runtime
-search pth to locate other required libraries such as MySQL.
-
-On Linux, you can also tell the dynamic linker where to find the
-libraries, by adding '/usr/local/mysql/lib/mysql' to the file 
-/etc/ld.so.conf - after editting this file, run 'ldconfig' as root,
-to use the changes.
+After compilation finishes, you will be left with an executable
+program called 'php'. Copy this into your document root, under a
+dedicated FastCGI directory (e.g. $DOCROOT/fcgi-bin/php)
 
 
-Specific examples:
+Step 3 - configure Zeus
 
-Solaris + gcc:
-Ensure you run ./configure with the `--enable-libgcc' parameter. You
-may need to set LDFLAGS to '-L/usr/local/egcs/lib' (path depends on
-your gcc installation)
+Four stages:
+        -  enable FastCGI
+        -  configure FastCGI
+        -  setup alias for FastCGI
+        -  setup alias for PHP
 
-FreeBSD 4:
-Some people may find they need to run ./configure with the
-'--enable-libgcc' compile option too.
+1) Using the admin server, go to the 'module configuration' page for
+your virtual server, and ensure that 'fastcgi' is enabled (select the
+tickbox to the left).
+
+2) While we can run FastCGI's locally, there are known problems with
+some OS's (specifically, the communication between web server and
+FastCGI happens over a unix domain socket, and some OS's have trouble
+sustaining high connection rates over these sockets). So instead, we
+are going to set up the PHP FastCGI to run 'remotely' over localhost
+(this uses TCP sockets, which do not suffer this problem). Go to the
+'fastcgi configuration' page, and under 'add remote fastcgi':
+        Add Remote FastCGI
+                Docroot path            /fcgi-bin/php
+                Remote machine          localhost:8002
+The first entry is where you saved PHP, above.
+The second entry is localhost:<any unused port>
+We will start the FastCGI listening on this port shortly.
+Click 'update' to commit these changes.
+
+3) Go to the path mapping module and add an alias for FastCGI:
+        Add Alias
+                Docroot path            /fcgi-bin
+                Filesystem directory    /path/to/docroot/fcgi-bin
+                Alias type              fastcgi
+Click 'update' to commit these changes
+
+4) Also on the path mapping module, add a handler for PHP:
+        Add handler
+                File extension          php
+                Handler                 /fcgi-bin/php
+Click 'update' to commit these changes
+
+Finally restart your virtual server for these changes to take effect.
 
 
-Performance issues
-==================
+Step 4 - start PHP as a FastCGI runner
 
-To make PHP run fast under Zeus, check the following points:
+When you start PHP, it will pre-fork a given number of child processes
+to handle incoming PHP requests. Each process will handle a given
+number of requests before exiting (and being replaced by a newly
+forked process). You can control these two parameters by setting the
+following environment variables BEFORE starting the FastCGI runner:
 
-1) Run PHP as an ISAPI module, not a CGI - compile it with the --with-zeus=...
-   flag!
+PHP_FCGI_CHILDREN - the number of child processes to pre-fork. If not
+set, defaults to 8.
 
-2) Tune the ISAPI runner to your required workload. There are several
-   tuneables that can be given. These are set by adding the appropriate
-   lines to the $ZEUSHOME/web/global.cfg file. Changes to this file will only
-   be picked up after the web server is restarted (run stop-zeus ; start-zeus)
+PHP_FCGI_MAX_REQUESTS - the number of requests each PHP child process
+handles before exiting. If not set, defaults to 500.
 
-   tuning!modules!isapi!external!maxthreads xxx
+To start the FastCGI runner, execute '$ZEUSHOME/web/bin/fcgirunner
+8002 $DOCROOT/fcgi-bin/php'.  Substitute the appropriate values for
+$ZEUSHOME and $DOCROOT; also substitute for 8002 the port you chose,
+above.
 
-   - Sets the maximum number of threads that the ISAPI runner will spawn. If
-     further PHP page requests arrive, they will be queued until a current
-     page is finished. For busy websites, we suggest increasing this value
-     (defaults to 16). Replace the 'xxx' in the above line with the required
-     number of threads. Note that the threads are equally shared between
-     ISAPI extensions and filters, so if you want to handle 100 concurrent
-     PHP page requests, set this tuneable to 200.
-
-   tuning!modules!isapi!external!minthreads xxx
-
-   - Sets the minimum number of threads. Idle threads will be kept in a pool,
-     which avoids costly thread creation/deletion.
-
-
-For more information and help with Zeus, please visit our website:
-http://support.zeus.com
+To stop the runner (e.g. to experiment with the above environment
+variables) you will need to manually stop and running PHP
+processes. (Use 'ps' and 'kill'). As it is PHP which is forking lots
+of children and not the runner, Zeus unfortunately cannot keep track
+of what processes are running, sorry. A typical command line may look
+like 'ps -efl | grep $DOCROOT/fcgi-bin/php | grep -v grep | awk
+'{print $4}' | xargs kill'
