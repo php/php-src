@@ -1,3 +1,41 @@
+2002-01-03  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mssql/php_mssql.c:
+    Making error handling thread safe. Thanks to Paco Ortiz <fjortiz@comunet.es>
+
+2002-01-03  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * acinclude.m4
+      configure.in:
+    make configure more robust if extensions add libraries without
+    checking for their existance first
+
+    old behaviour was to fail on the next library check with misleading
+    messages, now configure will work but make will fail with a
+    'lib not found' message
+
+    * ext/standard/string.c:
+    fix for bug #14832: basename with 2nd parm corrupts source string
+
+2002-01-03  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/ftp/php_ftp.c: - Now use ZE's builtin zend_zval_type_name().
+
+    * ext/domxml/php_domxml.c:
+    - domxml_node_add_child(): Perform deep copy before adding child to prevent
+      double memory freeing.
+
+    * ext/ftp/php_ftp.c: - FTP_BINARY is more common instead of FTP_IMAGE.
+
+2002-01-03  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/dir.c: protos fixes by Wolfgang Drews
+
+2002-01-03  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/ftp/php_ftp.c:
+    Please, no punctuation mark at the end of the description.
+
 2002-01-02  Zak Greant  <zak@jobvillage.com>
 
     * ext/standard/basic_functions.c:
