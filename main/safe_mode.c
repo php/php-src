@@ -73,7 +73,7 @@ PHPAPI int php_checkuid(const char *fn, int mode) {
 	 * used to confuse the function.
 	 */
 	while(s && *(s+1)=='\0' && s>fn) {
-		s='\0';
+		*s='\0';
 		s = strrchr(fn,'/');
 	}
 
