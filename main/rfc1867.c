@@ -102,7 +102,7 @@ void destroy_uploaded_files_hash(TSRMLS_D)
  */
 static void php_mime_split(char *buf, int cnt, char *boundary, int len, zval *array_ptr TSRMLS_DC)
 {
-	char *ptr, *loc, *loc2, *loc3, *s, *name, *filename, *u, *temp_filename;
+	char *ptr, *loc, *loc2, *loc3, *s, *name, *filename, *u, *temp_filename, c;
 	int state = 0, Done = 0, rem, urem;
 	int eolsize;
 	long bytes, max_file_size = 0;
@@ -130,14 +130,14 @@ static void php_mime_split(char *buf, int cnt, char *boundary, int len, zval *ar
 	while ((ptr - buf < cnt) && !Done) {
 		switch (state) {
 			case 0:			/* Looking for mime boundary */
-				loc = memchr(ptr, *boundary, cnt);
+				loc = memchr(ptr, *boundary, rem);  /* fixed */
 				if (loc) {
 					if (!strncmp(loc, boundary, len)) {
 
 						state = 1;
 
 						eolsize = 2;
-						if(*(loc+len)==0x0a) {
+						if(*(loc+len)=='\n') {
 							eolsize = 1;
 						}
 
@@ -163,17 +163,37 @@ static void php_mime_split(char *buf, int cnt, char *boundary, int len, zval *ar
 					}
 					/* some other headerfield found, skip it */
 					loc = (char *) memchr(ptr, '\n', rem)+1;
+					if (!loc) {
+						/* broken */
+						php_error(E_WARNING, "File Upload Mime headers garbled ptr: [%c%c%c%c%c]", *ptr, *(ptr + 1), *(ptr + 2), *(ptr + 3), *(ptr + 4));
+						SAFE_RETURN;
+					}
 					while (*loc == ' ' || *loc == '\t') {
 						/* other field is folded, skip it */
 						loc = (char *) memchr(loc, '\n', rem-(loc-ptr))+1;
+						if (!loc) {
+							/* broken */
+							php_error(E_WARNING, "File Upload Mime headers garbled ptr: [%c%c%c%c%c]", *ptr, *(ptr + 1), *(ptr + 2), *(ptr + 3), *(ptr + 4));
+							SAFE_RETURN;
+						}
 					}
 					rem -= (loc - ptr);
 					ptr = loc;
 				}
 				loc = memchr(ptr, '\n', rem);
+				if (!loc) {
+					/* broken */
+					php_error(E_WARNING, "File Upload Mime headers garbled ptr: [%c%c%c%c%c]", *ptr, *(ptr + 1), *(ptr + 2), *(ptr + 3), *(ptr + 4));
+					SAFE_RETURN;
+				}
 				while (loc[1] == ' ' || loc[1] == '\t') {
 					/* field is folded, look for end */
 					loc = memchr(loc+1, '\n', rem-(loc-ptr)-1);
+					if (!loc) {
+						/* broken */
+						php_error(E_WARNING, "File Upload Mime headers garbled ptr: [%c%c%c%c%c]", *ptr, *(ptr + 1), *(ptr + 2), *(ptr + 3), *(ptr + 4));
+						SAFE_RETURN;
+					}
 				}
 				name = strstr(ptr, " name=");
 				if (name && name < loc) {
@@ -181,13 +201,14 @@ static void php_mime_split(char *buf, int cnt, char *boundary, int len, zval *ar
 					if ( *name == '\"' ) { 
 						name++;
 						s = memchr(name, '\"', loc - name);
-						if(!s) {
-							php_error(E_WARNING, "File Upload Mime headers garbled name: [%c%c%c%c%c]", *name, *(name + 1), *(name + 2), *(name + 3), *(name + 4));
-							SAFE_RETURN;
-						}
 					} else {
 						s = strpbrk(name, " \t()<>@,;:\\\"/[]?=\r\n");
 					}
+					if (!s) {
+						php_error(E_WARNING, "File Upload Mime headers garbled name: [%c%c%c%c%c]", *name, *(name + 1), *(name + 2), *(name + 3), *(name + 4));
+						SAFE_RETURN;
+					}
+					
 					if (namebuf) {
 						efree(namebuf);
 					}
@@ -197,13 +218,15 @@ static void php_mime_split(char *buf, int cnt, char *boundary, int len, zval *ar
 					}
 					lbuf = emalloc(s-name + MAX_SIZE_OF_INDEX + 1);
 					state = 2;
-					loc2 = loc;
-					while (loc2[2] != '\n') {
-						/* empty line as end of header not yet found */
-						loc2 = memchr(loc2 + 1, '\n', rem-(loc2-ptr)-1);
-					}
-					rem -= (loc2 - ptr) + 3;
-					ptr = loc2 + 3;
+					
+					/* the fix at this position was wrong
+					 * the end of headers search was broken
+					 * below. fix moved there and restored
+					 * pre 4.0.6 code here
+					 */
+					loc2 = memchr(loc + 1, '\n', rem);
+					rem -= (loc2 - ptr) + 1;
+					ptr = loc2 + 1;
 					/* is_arr_upload is true when name of file upload field
 					 * ends in [.*]
 					 * start_arr is set to point to 1st [
@@ -211,9 +234,9 @@ static void php_mime_split(char *buf, int cnt, char *boundary, int len, zval *ar
 					 */
 					is_arr_upload = (start_arr = strchr(namebuf,'[')) && 
 									(end_arr = strrchr(namebuf,']')) && 
-									(end_arr = namebuf+strlen(namebuf)-1);
+									(end_arr == namebuf+strlen(namebuf)-1);
 					if(is_arr_upload) {
-						arr_len = strlen(start_arr);
+						arr_len = strlen(start_arr); /* is NOW >=2 */
 						if(arr_index) efree(arr_index);
 						arr_index = estrndup(start_arr+1, arr_len-2);	
 					}
@@ -267,21 +290,26 @@ static void php_mime_split(char *buf, int cnt, char *boundary, int len, zval *ar
 					s = "";
 					if ((loc2 - loc) > 2) {
 						if (!strncasecmp(loc + 1, "Content-Type:", 13)) {
+							c = *(loc2 - 1);
 							*(loc2 - 1) = '\0';
 							s = loc+15;
 						}
-						loc3=memchr(loc2+1, '\n', rem-1);
-						if (loc3==NULL) {
-						    php_error(E_WARNING, "File Upload Mime headers garbled header3: [%c%c%c%c%c]", *loc2, *(loc2 + 1), *(loc2 + 2), *(loc2 + 3), *(loc2 + 4));
-						    SAFE_RETURN;
+						/* end of header fix fixed and moved here
+						 * find the double newline that marks the
+						 * end of the headers
+						 */
+						loc3 = loc2;
+						while (loc3[2] != '\n') {
+							
+							/* empty line as end of headers not yet found */
+							loc3 = memchr(loc3 + 1, '\n', rem-(loc3-ptr)-1);
+							if (loc3==NULL) {
+								php_error(E_WARNING, "File Upload Mime headers garbled header3: [%c%c%c%c%c]", *loc2, *(loc2 + 1), *(loc2 + 2), *(loc2 + 3), *(loc2 + 4));
+								SAFE_RETURN;
+							}
 						}
-						if (loc3 - loc2 > 2) { /* we have a third header */
-						    rem -= (ptr-loc3)+3;
-						    ptr = loc3+3;
-						} else {
-							rem -= (ptr-loc3)+1;
-							ptr = loc3+1;
-						}
+						rem -= (loc3 - ptr) + 3;
+						ptr = loc3 + 3;
 					}
 
 					/* Add $foo_type */
@@ -300,7 +328,11 @@ static void php_mime_split(char *buf, int cnt, char *boundary, int len, zval *ar
 					}
 					register_http_post_files_variable(lbuf, s, http_post_files, 0 TSRMLS_CC);
 					if(*s != '\0') {
-						*(loc2 - 1) = '\n';
+						/* write old char back
+						 * most probably it is '\r'
+						 * and not '\n'
+						 */
+						*(loc2 - 1) = c;  
 					}
 				}
 				break;
