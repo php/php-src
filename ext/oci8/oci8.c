@@ -27,6 +27,7 @@
 /* TODO list:
  *
  * - php.ini flags
+ * - Change return-value for OCIFetch*() (1-row read, 0-Normal end, false-error) 
  * - Error mode (print or shut up?)
  * - OCIPasswordChange()
  * - binding of arrays
