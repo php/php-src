@@ -1530,39 +1530,39 @@ PHP_FUNCTION(error_log)
 }
 /* }}} */
 
-PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers){
+PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers)
+{
 	FILE *logfile;
 	int issock=0, socketd=0;;
 
 	switch(opt_err){
-	case 1: /*send an email*/
-		{
+		case 1: /*send an email*/ {
 #if HAVE_SENDMAIL
-		if (!php_mail(opt,"PHP error_log message",message,headers)){
-			return FAILURE;
-		}
+				if (!php_mail(opt, "PHP error_log message", message, headers, NULL)){
+					return FAILURE;
+				}
 #else
-		php_error(E_WARNING,"Mail option not available!");
-		return FAILURE;
+				php_error(E_WARNING,"Mail option not available!");
+				return FAILURE;
 #endif
-		}
-		break;
-	case 2: /*send to an address */
-		php_error(E_WARNING,"TCP/IP option not available!");
-		return FAILURE;
-		break;
-	case 3: /*save to a file*/
-		logfile=php_fopen_wrapper(opt,"a", (IGNORE_URL|ENFORCE_SAFE_MODE), &issock, &socketd, NULL);
-		if(!logfile) {
-			php_error(E_WARNING,"error_log: Unable to write to %s",opt);
+			}
+			break;
+		case 2: /*send to an address */
+			php_error(E_WARNING,"TCP/IP option not available!");
 			return FAILURE;
-		}
-		fwrite(message,strlen(message),1,logfile);
-		fclose(logfile);
-		break;
-	default:
-		php_log_err(message);
-		break;
+			break;
+		case 3: /*save to a file*/
+			logfile=php_fopen_wrapper(opt,"a", (IGNORE_URL|ENFORCE_SAFE_MODE), &issock, &socketd, NULL);
+			if(!logfile) {
+				php_error(E_WARNING,"error_log: Unable to write to %s",opt);
+				return FAILURE;
+			}
+			fwrite(message,strlen(message),1,logfile);
+			fclose(logfile);
+			break;
+		default:
+			php_log_err(message);
+			break;
 	}
 	return SUCCESS;
 }
