@@ -1,3 +1,75 @@
+2001-03-30  Fredrik Öhrn  <ohrn@chl.chalmers.se>
+
+    * ext/cpdf/cpdf.c
+      ext/cpdf/php_cpdf.h:
+    Implemented cpdf_set_viewer_preferences (previously a stub).
+    Added new functions: cpdf_set_font_directories and cpdf_set_font_map_file.
+
+2001-03-30  Anil Madhavapeddy  <anil@recoil.org>
+
+    * ext/zlib/zlib.c:
+    Send the correct Vary headers, if we negotiate a gzip/deflate session
+    via Accept-Encoding.  This obeys a SHOULD directive in RFC2616
+
+    PR: 10070
+
+2001-03-30  Zeev Suraski  <zeev@zend.com>
+
+    * ext/pgsql/pgsql.c: Fix pgsql_set_Default_link()
+
+    * ext/pgsql/pgsql.c:
+    Revert all PostgreSQL patches that were in the branch...
+
+2001-03-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/genif.sh
+      build/print_include.awk:
+    Replace the incomprehensible newline escaping with @NEWLINE@
+
+    Fixes the build on Darwin 1.2
+
+2001-03-30  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Experimental/XML/sql2xml.php: too much whitespaces after ?>
+
+    * pear/Experimental/XML/fo2pdf.php:
+    printPDF() din't print out the correct header, if no pdf was specified
+
+    * pear/Experimental/XML/sql2xml.php: one api-change ulf forgot:
+
+    getxml() -> getXML()
+
+    * pear/Experimental/XML/sql2xml_ext.php:
+    a lot of new customizable options.... too much to be listed here,
+    documentation will follow.
+
+    * pear/Experimental/XML/sql2xml.php:
+    - new user_tableInfo option for user-contributed xml-structure
+    - Error checking in doSql2Xml
+    - xml_encode function for correctly parsing of &s.
+
+2001-03-30  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/ITX.xml
+      pear/IT[X].xml: - Renamed the file following Thies suggestion
+
+    100% beginners compatible politics of the PHP core guys: I was (again) allowed to make a mistake without beeing kicked - cool, thanks!
+
+2001-03-30  Emiliano Heyns  <emile@iris-advies.com>
+
+    * ext/midgard/preparser.c: Don't restat the connection, trust mod_midgard
+
+2001-03-30  Romolo Manfredini  <romolo@bicnet.it>
+
+    * ext/pgsql/pgsql.c:
+    pg_close was not closing the connection, making impossible to reopen it. Pls insert in 4.0.5
+
+2001-03-30  Adam Daniel  <adaniel2@cinci.rr.com>
+
+    * pear/HTML/Common.php: added a few methods to manipulate attributes
+
+    * pear/HTML/Table.php: minor change to toHtml
+
 2001-03-29  Ulf Wendel  <ulf.wendel@phpdoc.de>
 
     * pear/package.dtd: - uuups, modified the package.dtd, undo
