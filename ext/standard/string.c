@@ -1160,7 +1160,9 @@ PHPAPI char *_php3_addslashes(char *str, int length, int *new_length, int should
 		}
 	}
 	*target = 0;
-	if(new_length) *new_length = target - new_str;
+	if (new_length) {
+		*new_length = target - new_str;
+	}
 	if (should_free) {
 		STR_FREE(str);
 	}

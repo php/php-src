@@ -338,7 +338,7 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
 		module_number = 0;
 	}
 	PUTS("<table border=5 width=\"600\">\n");
-	php_info_print_table_header(3, "Directive", "Master Value", "Local Value");
+	php_info_print_table_header(3, "Directive", "Local Value", "Master Value");
 	zend_hash_apply_with_argument(&known_directives, (int (*)(void *, void *)) php_ini_displayer, (void *) module_number);
 	PUTS("</table>\n");
 }

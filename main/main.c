@@ -599,8 +599,6 @@ static void php_message_handler_for_zend(long message, void *data)
 
 int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 {
-	PG(unclean_shutdown) = 0;
-
 	zend_output_startup();
 
 #if APACHE
@@ -675,7 +673,7 @@ void php_request_shutdown(void *dummy)
 	sapi_deactivate(SLS_C);
 
 	php3_destroy_request_info(NULL);
-	shutdown_memory_manager(PG(unclean_shutdown), 0);
+	shutdown_memory_manager(CG(unclean_shutdown), 0);
 	php3_unset_timeout();
 
 
@@ -1151,7 +1149,6 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	}
 
 	if (setjmp(EG(bailout))!=0) {
-		PG(unclean_shutdown) = 1;
 		return;
 	}
 	_php3_hash_environment(PLS_C ELS_CC);
@@ -1178,8 +1175,6 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	if (EG(main_op_array)) {
 		EG(active_op_array) = EG(main_op_array);
 		zend_execute(EG(main_op_array) ELS_CC);
-	} else {
-		PG(unclean_shutdown) = 1;
 	}
 }
 
@@ -1207,7 +1202,7 @@ PHPAPI int apache_php3_module_main(request_rec *r, int fd, int display_source_mo
 	php3_TreatHeaders();
 	file_handle.type = ZEND_HANDLE_FD;
 	file_handle.handle.fd = fd;
-	file_handle.filename = request_info.filename;
+	file_handle.filename = SG(request_info).path_translated;
 	(void) php_execute_script(&file_handle CLS_CC ELS_CC);
 	
 	php3_header();			/* Make sure headers have been sent */
