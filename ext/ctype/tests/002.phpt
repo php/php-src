@@ -35,8 +35,8 @@ ctype_test_002("ctype_space");
 ctype_test_002("ctype_xdigit");
 
 ?>
---EXPECT--
-LOCALE is 'C'
+--EXPECTF--
+LOCALE is '%s'
 ctype_lower 26 26 0
 ctype_upper 26 26 0
 ctype_alpha 52 52 0
