@@ -188,7 +188,7 @@ static void php_apache_sapi_log_message(char *msg)
 	 * line.  Not sure if this is correct, but it mirrors what happens
 	 * with Apache 1.3 -- rbb
 	 */
-	ap_log_error(NULL, APLOG_ERR | APLOG_NOERRNO | APLOG_STARTUP, 0, ctx->f->r->server, "%s", msg);
+	ap_log_error(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO | APLOG_STARTUP, 0, ctx->f->r->server, "%s", msg);
 }
 
 static sapi_module_struct apache2_sapi_module = {
@@ -402,7 +402,7 @@ php_apache_server_startup(apr_pool_t *pchild, server_rec *s)
 	tsrm_startup(1, 1, 0, NULL);
 	sapi_startup(&apache2_sapi_module);
 	apache2_sapi_module.startup(&apache2_sapi_module);
-	apr_pool_cleanup_register(pchild, NULL, php_apache_server_shutdown, NULL);
+	apr_pool_cleanup_register(pchild, NULL, php_apache_server_shutdown, apr_pool_cleanup_null);
 	php_apache_register_module();
 }
 
