@@ -19,7 +19,7 @@
 		function docbook_xml($base) {
 			return "
     <section id='$base.resources.{$this->name}'>
-     <title><litera>{$this->name}</literal></title>
+     <title><literal>{$this->name}</literal></title>
      <para>
       {$this->description}
      </para>
