@@ -18,12 +18,6 @@
 
 /* $Id$ */
 #define IS_EXT_MODULE
-
-/* boldly assume that if PIC is defined, we are being compiled dynamically */
-#ifdef PIC
-# define COMPILE_DL 1
-#endif
-
 #if COMPILE_DL
 # if PHP_31
 #  include "../phpdl.h"
@@ -98,44 +92,27 @@ DLEXPORT php3_module_entry *get_module() { return &xml_module_entry; };
 #if PHP_API_VERSION >= 19990421
 #define php3tls_pval_destructor(a) zval_dtor(a)
 #endif                                                                                                                                              
-    /* {{{ php3i_long_pval() */
-
-PHPAPI pval *php3i_long_pval(long value)
+static pval *php3i_long_pval(long value)
 {
-	pval *ret = emalloc(sizeof(pval));
-
-	ret->type = IS_LONG;
-	ret->value.lval = value;
-	return ret;
+    pval *ret = emalloc(sizeof(pval));
+ 
+    ret->type = IS_LONG;
+    ret->value.lval = value;
+	INIT_PZVAL(ret);
+    return ret;
 }
 
-/* }}} */
-    /* {{{ php3i_double_pval() */
-
-PHPAPI pval *php3i_double_pval(double value)
+static pval *php3i_string_pval(const char *str)
 {
-	pval *ret = emalloc(sizeof(pval));
-
-	ret->type = IS_DOUBLE;
-	ret->value.dval = value;
-	return ret;
-}
-
-/* }}} */
-    /* {{{ php3i_string_pval() */
-
-PHPAPI pval *php3i_string_pval(const char *str)
-{
-	pval *ret = emalloc(sizeof(pval));
-	int len = strlen(str);
-
-	ret->type = IS_STRING;
-	ret->value.str.len = len;
-	ret->value.str.val = estrndup(str, len);
-	return ret;
-}
-
-/* }}} */
+    pval *ret = emalloc(sizeof(pval));
+    int len = strlen(str);
+ 
+    ret->type = IS_STRING;
+    ret->value.str.len = len;
+	INIT_PZVAL(ret);
+    ret->value.str.val = estrndup(str, len);
+    return ret;
+} 
 
 /* end of UGLY HACK!!! */
 
@@ -641,21 +618,7 @@ static int php3i_xmlcharlen(const XML_Char *s)
 }
 
 /* }}} */
-    /* {{{ php3i_pval_strdup() */
-
-PHPAPI char *php3i_pval_strdup(pval *val)
-{
-	if (val->type == IS_STRING) {
-		char *buf = emalloc(val->value.str.len + 1);
-		memcpy(buf, val->value.str.val, val->value.str.len);
-		buf[val->value.str.len] = '\0';
-		return buf;
-	}
-	return NULL;
-}
-
-/* }}} */
-    /* {{{ php3i_add_to_info */
+/* {{{ php3i_add_to_info */
 static void php3i_add_to_info(xml_parser *parser,char *name)
 {
 	pval **element, *values;
@@ -682,7 +645,7 @@ static void php3i_add_to_info(xml_parser *parser,char *name)
 }
 
 /* }}} */
-    /* {{{ php3i_xml_startElementHandler() */
+/* {{{ php3i_xml_startElementHandler() */
 
 void php3i_xml_startElementHandler(void *userData, const char *name,
 								   const char **attributes)

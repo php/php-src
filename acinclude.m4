@@ -38,8 +38,9 @@ AC_DEFUN(AC_ADD_LIBPATH,[
   AC_EXPAND_PATH($1, ai_p)
   AC_PHP_ONCE(LIBPATH, $ai_p, [
     EXTRA_LIBS="$EXTRA_LIBS -L$ai_p"
-    RAW_RPATHS="$RAW_RPATHS ${raw_runpath_switch}$ai_p"
-    if test -n "$APXS" ; then
+    if test -n "$rpath_raw" ; then
+      RPATHS="$RPATHS ${raw_runpath_switch}$ai_p"
+    elif test -n "$APXS" ; then
       RPATHS="$RPATHS ${apxs_runpath_switch}$ai_p'"
     else
       RPATHS="$RPATHS ${ld_runpath_switch}$ai_p"
@@ -138,22 +139,15 @@ dnl to make dynamic libraries as well.
 dnl
 AC_DEFUN(PHP_EXTENSION,[
   EXT_SUBDIRS="$EXT_SUBDIRS $1"
-  if test "$2" != "shared" -a "$2" != "yes"; then
-    _extlib="libphpext_$1.a"
-    EXT_LIBS="$EXT_LIBS $1/$_extlib"
-    EXTINFO_DEPS="$EXTINFO_DEPS ../ext/$1/extinfo.c.stub"
-    EXT_STATIC="$EXT_STATIC $1"
-  else
-    EXT_SHARED="$EXT_SHARED $1"
-  fi
+  _extlib="libphpext_$1.a"
+  EXT_LIBS="$EXT_LIBS $1/$_extlib"
+  EXTINFO_DEPS="$EXTINFO_DEPS ../ext/$1/extinfo.c.stub"
 dnl   EXT_INCLUDE_CODE="\#include \"ext/$1/php3_$1.h\"\\n$EXT_INCLUDE_CODE"
 dnl   EXT_MODULE_PTRS="phpext_$1_ptr, $EXT_MODULE_PTRS"
 dnl "
 ])
 
 AC_SUBST(EXT_SUBDIRS)
-AC_SUBST(EXT_STATIC)
-AC_SUBST(EXT_SHARED)
 AC_SUBST(EXT_LIBS)
 AC_SUBST(EXTINFO_DEPS)
 dnl AC_SUBST(EXT_INCLUDE_CODE)

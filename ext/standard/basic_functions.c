@@ -284,7 +284,6 @@ function_entry basic_functions[] = {
 	PHP_FE(print_r,					NULL)
 	{"setcookie",		php3_SetCookie,		NULL},
 	{"header",			php3_Header,		NULL},
-	PHP_FE(headers_sent,				NULL)
 	PHP_FE(function_exists,				NULL)
 	PHP_FE(in_array,					NULL)
 	PHP_FE(extract,						NULL)
@@ -1414,7 +1413,7 @@ static int _php3_array_walk(const void *a)
 	pval retval;
 	CLS_FETCH();
 
-	args[0] = *((pval **)a);
+	args[0] = (pval *)a;
 	
 	call_user_function(CG(function_table), NULL, php3_array_walk_func_name, &retval, 1, args);
 	return 0;

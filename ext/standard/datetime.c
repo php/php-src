@@ -60,8 +60,6 @@ static int phpday_tab[2][12] =
 	{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 };
 
-#define isleap(year) (((year%4) == 0 && (year%100)!=0) || (year%400)==0)
-
 PHP_FUNCTION(time)
 {
 	return_value->value.lval = (long) time(NULL);
@@ -144,7 +142,7 @@ _php3_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	pval *format, *timestamp;
 	time_t the_time;
 	struct tm *ta;
-	int i, size = 0, length, h, beat;
+	int i, size = 0, length, h;
 	char tmp_buff[16];
 
 	switch(ARG_COUNT(ht)) {
@@ -183,45 +181,33 @@ _php3_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				break;
 			case 'F':		/* month, textual, full */
 			case 'l':		/* day (of the week), textual */
-			case 'T':		/* timezone name */
 				size += 9;
-				break;
-			case 'Z':		/* timezone offset in seconds */
-				size += 6;
 				break;
 			case 'Y':		/* year, numeric, 4 digits */
 				size += 4;
 				break;
 			case 'M':		/* month, textual, 3 letters */
 			case 'D':		/* day, textual, 3 letters */
-			case 'z':		/* day of the year, 1 to 366 */
+			case 'z':		/* day of the year */
 				size += 3;
 				break;
 			case 'y':		/* year, numeric, 2 digits */
 			case 'm':		/* month, numeric */
-			case 'n':		/* month, numeric, no leading zeroes */
 			case 'd':		/* day of the month, numeric */
 			case 'j':		/* day of the month, numeric, no leading zeros */
 			case 'H':		/* hour, numeric, 24 hour format */
 			case 'h':		/* hour, numeric, 12 hour format */
-			case 'G':		/* hour, numeric, 24 hour format, no leading zeroes */
-			case 'g':		/* hour, numeric, 12 hour format, no leading zeroes */
 			case 'i':		/* minutes, numeric */
 			case 's':		/* seconds, numeric */
 			case 'A':		/* AM/PM */
 			case 'a':		/* am/pm */
 			case 'S':		/* standard english suffix for the day of the month (e.g. 3rd, 2nd, etc) */
-			case 't':		/* days in current month */
 				size += 2;
 				break;
 			case '\\':
 				if(i < format->value.str.len-1) {
 					i++;
 				}
-			case 'L':		/* boolean for leap year */
-			case 'B':		/* Swatch Beat, 3 digits */
-				size += 3;
-				break;
 			case 'w':		/* day of the week, numeric */
 			default:
 				size++;
@@ -275,10 +261,6 @@ _php3_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				sprintf(tmp_buff, "%02d", ta->tm_mon + 1);  /* SAFE */
 				strcat(return_value->value.str.val, tmp_buff);
 				break;
-			case 'n':      /* month, numeric, no leading zeros */
-				sprintf(tmp_buff, "%d", ta->tm_mon + 1);  /* SAFE */
-				strcat(return_value->value.str.val, tmp_buff);
-				break;
 			case 'd':		/* day of the month, numeric */
 				sprintf(tmp_buff, "%02d", ta->tm_mday);  /* SAFE */
 				strcat(return_value->value.str.val, tmp_buff);
@@ -294,15 +276,6 @@ _php3_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 			case 'h':		/* hour, numeric, 12 hour format */
 				h = ta->tm_hour % 12; if (h==0) h = 12;
 				sprintf(tmp_buff, "%02d", h);  /* SAFE */
-				strcat(return_value->value.str.val, tmp_buff);
-				break;
-			case 'G':      /* hour, numeric, 24 hour format, no leading zeros */
-				sprintf(tmp_buff, "%d", ta->tm_hour);  /* SAFE */
-				strcat(return_value->value.str.val, tmp_buff);
-				break;
-			case 'g':      /* hour, numeric, 12 hour format, no leading zeros */
-				h = ta->tm_hour % 12; if (h==0) h = 12;
-				sprintf(tmp_buff, "%d", h);  /* SAFE */
 				strcat(return_value->value.str.val, tmp_buff);
 				break;
 			case 'i':		/* minutes, numeric */
@@ -339,38 +312,8 @@ _php3_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 					}
 				}
 				break;
-			case 't':		/* days in current month */
-				sprintf(tmp_buff, "%2d", phpday_tab[isleap((ta->tm_year+1900))][ta->tm_mon] );
-				strcat(return_value->value.str.val, tmp_buff);
-				break;
 			case 'w':		/* day of the week, numeric EXTENSION */
 				sprintf(tmp_buff, "%01d", ta->tm_wday);  /* SAFE */
-				strcat(return_value->value.str.val, tmp_buff);
-				break;
-			case 'Z':		/* timezone offset in seconds */
-#if HAVE_TM_GMTOFF
-				sprintf(tmp_buff, "%ld", ta->tm_gmtoff );
-#else
-				sprintf(tmp_buff, "%ld", timezone);
-#endif
-				strcat(return_value->value.str.val, tmp_buff);
-				break;
-			case 'L':		/* boolean for leapyear */
-				sprintf(tmp_buff, "%d", (isleap((ta->tm_year+1900)) ? 1 : 0 ) );
-				strcat(return_value->value.str.val, tmp_buff);
-				break;
-			case 'T':		/* timezone name */
-#if HAVE_TM_ZONE
-				strcat(return_value->value.str.val, ta->tm_zone);
-#else
-				strcat(return_value->value.str.val, tzname[0]);
-#endif
-				break;
-			case 'B':	/* Swatch Beat a.k.a. Internet Time */
-				beat =  (((((long)the_time)-(((long)the_time) -
-					((((long)the_time) % 86400) + 3600))) * 10) / 864);
-				if (beat > 999) beat = 0;
-				sprintf(tmp_buff, "%03d", beat); /* SAFE */
 				strcat(return_value->value.str.val, tmp_buff);
 				break;
 			default:

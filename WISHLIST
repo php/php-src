@@ -1,0 +1,17 @@
+- Persistant per-process scripting
+
+  Apache 1.3 has added things that makes this much easier than before.
+  The module structure now contains a child_init hook and a child_exit 
+  hook where you can register functions to be called when an httpd
+  process starts up and when one shuts down (due to MaxRequestsPerChild 
+  or a Kill).  The only real trick now is to come up with some sort of
+  syntax for specifying what to do from the child_init call and the
+  child_exit call.
+
+  One idea is to be able to add a <PHP>...</PHP> block to the Apache
+  httpd.conf file which would somehow define a series of PHP statements
+  to be executed from the child_* calls.  One for startup and another
+  block for shutdown.  These blocks would work with the per-process
+  memory pool, so any variables initialized here would have a lifespan
+  equal to that of the httpd process.  Basically request-spanning
+  global variables.

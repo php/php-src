@@ -1,0 +1,55 @@
+V Do yystype_ptr and hash pointers the right way - use the hash
+  pointer and the bucket pointer, instead of a pointer to the data.
+  Allows for a real unset() among other things.
+V Improve performance of simple variable lookups
+* Improve string performance by using smarter memory allocation methods
+- Improve preprocessor (handle require() efficiently), possibly handle
+  automatic preprocessing for sites based on timestamp
+V Use a reference count mechanism to prevent unnecessary duplication of data.
+* Write and stabilize a complete persistent data API.  Feature wishlist:
+  - memory manager using shared memory
+  - process-global symbol table
+  - make api inter-thread capable for win32 and some far off future where unix
+    version will be multithreaded
+V Handle out of memory (inside emalloc()?)
+* Try to figure out a way to declare *real* global variables
+* Improve the reading of configuration variables into php3_ini (generalize)
+  Make it possible to implement config_get("configuration_variable") and
+  config_set("configuration_variable","value") that'll work with *php3_ini*,
+  not the configuration hash!
+* Bundle some nice classes (like Bjørn's graphing class)
+* Bundle some database abstraction classes
+* Distribute binaries
+* Clean up API and modules to make .so modules portable across CGI and server
+  binaries
+* dbm cleanup (don't arbitrarily pick, and support multiple concurrent formats)
+* start system defines so that we can move away from the standard c lib on
+  windows to the win32 lib.  (file functions primarily)
+* COM implementation so php can be used as an asp language (cant find any docs
+  on how this is done though)
+* Clean up the file structure so the top-level directory isn't such a mess.
+* Bring the module concept to maturity: use libtool and make it
+  possible to decide at compile time whether you want to compile a
+  module statically or dynamically.  Remove the distinction between
+  the stuff currently in dl/ and functions/.
+* a way of letting each module specify its options, so ini file options and
+  Apache directives can be set up from the same specification.
+V Make it possible to declare smarter user functions: (done in 3.0)
+  - Optional parameters
+  - Parameters that are forced/prefered by reference
+* Make object parsing more general, and allow nested arrays/objects with
+  unlimited levels.
+V Make it possible to copy references of variables.
+* data tainting (like perl -T)
+* multi-dimensional array support in GET/POST/COOKIE handling code
+* Persistent functions and classes
+* odbc_fetch_assoc
+* Add env handling to gpc_order
+* Populate track_vars regardless of gpc_order
+* a real exec() function
+* Support passing arguments to functions by name (e.g. foo(arg1 => "bar", arg2 => "foobar"))
+* Add an optional setting to destroy persistent resources if a PHP script terminates
+  abnormally
+V COM automation support for Win32
+? Add a setting for making function names case sensitive
+* stat() files before feeding them to flex - it doesn't handle special files very well

@@ -28,7 +28,7 @@
 #endif
 
 #include "php.h"
-#include "ext/standard/head.h"
+#include "head.h"
 #include <math.h>
 #include "php3_fdf.h"
 

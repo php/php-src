@@ -351,12 +351,14 @@ void php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 int php3_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
 	if (php3_pgsql_module.default_link==-1) { /* no link opened yet, implicitly open one */
-		ht = 0;
+		HashTable tmp;
+		
+		_php3_hash_init(&tmp,0,NULL,NULL,0);
 		php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
+		_php3_hash_destroy(&tmp);
 	}
 	return php3_pgsql_module.default_link;
 }
-
 
 /* {{{ proto int pg_connect([string connection_string] | [string host, string port, [string options, [string tty,]] string database)
    Open a PostgreSQL connection */
@@ -953,7 +955,7 @@ PHP_FUNCTION(pgsql_fetch_row)
 /* }}} */
 
 /* ??  This is a rather odd function - why not just point pg_fetcharray() directly at fetch_hash ? -RL */
-/* {{{ proto array pg_fetch_array(int result, int row [, int result_type])
+/* {{{ proto array pg_fetch_array(int result, int row)
    Fetch a row as an array */
 PHP_FUNCTION(pgsql_fetch_array)
 {
@@ -961,7 +963,7 @@ PHP_FUNCTION(pgsql_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto object pg_fetch_object(int result, int row [, int result_type])
+/* {{{ proto object pg_fetch_object(int result, int row)
    Fetch a row as an object */
 PHP_FUNCTION(pgsql_fetch_object)
 {

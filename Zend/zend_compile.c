@@ -933,6 +933,7 @@ void do_early_binding(CLS_D)
 	opline->opcode = ZEND_NOP;
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
+	//CG(active_op_array)->last--;
 }
 
 

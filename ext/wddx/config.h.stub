@@ -1,2 +1,0 @@
-/* define if you want to use the wddx extension */
-#define HAVE_WDDX 0
