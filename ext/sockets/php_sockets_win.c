@@ -52,7 +52,7 @@ ssize_t readv(SOCKET sock, const struct iovec *iov, int iovcnt) {
 	remain = bytes = (size_t) retval;
 	
 	for(i=0; i<iovcnt; i++) {
-		len = (iov[i].iov_len < remain) ? iov[i].iov_len : remain;
+		len = ((unsigned int)iov[i].iov_len < remain) ? iov[i].iov_len : remain;
 		memcpy(iov[i].iov_base, buffer+pos, len);
 		pos += len;
 		remain -= len;
