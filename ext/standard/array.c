@@ -1435,23 +1435,16 @@ PHP_FUNCTION(range)
 /* }}} */
 
 
-/* {{{ proto bool shuffle(array array_arg)
-   Randomly shuffle the contents of an array */
-PHP_FUNCTION(shuffle)
+static void array_data_shuffle(zval *array TSRMLS_DC)
 {
-	zval *array;
 	Bucket **elems, *temp;
 	HashTable *hash;
 	int j, n_elems, cur_elem = 0, rnd_idx, n_left;
-	TSRMLS_FETCH();
-
-	if (zend_parse_parameters(1 TSRMLS_CC, "a", &array) == FAILURE) {
-		RETURN_FALSE;
-	}
 
 	n_elems = zend_hash_num_elements(Z_ARRVAL_P(array));
+	
 	if (n_elems <= 1) {
-		RETURN_TRUE;
+		return;
 	}
 
 	elems = (Bucket **)emalloc(n_elems * sizeof(Bucket *));
@@ -1496,7 +1489,20 @@ PHP_FUNCTION(shuffle)
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	efree(elems);
-	
+}
+
+/* {{{ proto bool shuffle(array array_arg)
+   Randomly shuffle the contents of an array */
+PHP_FUNCTION(shuffle)
+{
+	zval *array;
+
+	if (zend_parse_parameters(1 TSRMLS_CC, "a", &array) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	array_data_shuffle(array TSRMLS_CC);
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2946,10 +2952,7 @@ PHP_FUNCTION(array_rand)
 	}  
 
 	if (num_req_val == num_avail) {
-		if (zend_hash_sort(Z_ARRVAL_P(return_value), (sort_func_t)php_mergesort, array_data_shuffle, 1 TSRMLS_CC) == FAILURE) {
-			zval_dtor(return_value);
-			RETURN_FALSE;
-		}
+		array_data_shuffle(return_value TSRMLS_CC);
 	}
 }
 /* }}} */
