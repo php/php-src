@@ -1,3 +1,104 @@
+2003-06-06  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/dom/text.c:
+      add splitText()
+      never has such a complex process been endured for such a simple function
+      libxml makes me queasy right now :)
+
+2003-06-06  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      hrm..
+
+2003-06-06  Georg Richter  <phpinfo@t-online.de>
+
+    * (PHP_4_3)
+      NEWS:
+      fixed bug 24060
+
+2003-06-06  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/php_dom.c:
+      fix double free issue
+      fix property access within invalid objects and failed reads
+
+2003-06-06  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/ncurses/ncurses_functions.c:
+      fixed bug #24060
+
+2003-06-06  Jay Smith  <jsmith@tutorbuddy.com>
+
+    * tests/lang/namespace_001.phpt:
+      Namespaces are gone, and so is this test.
+
+2003-06-06  Georg Richter  <phpinfo@t-online.de>
+
+    * (PHP_4_3)
+      ext/ncurses/ncurses_functions.c:
+      fixed #24060
+
+2003-06-06  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR/Frontend/CLI.php:
+      - The argument of displayError() is a PEAR_Error instance.
+      
+
+    * pear/PEAR/Command/Registry.php:
+      - Use raiseError(), like it's done in the rest of class also.
+      
+
+2003-06-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      NEWS:
+      Refine error description
+
+2003-06-06  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * tests/lang/bug24054.phpt:
+      
+      Test for bug #24054
+
+2003-06-06  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_nonapi.c:
+      fixed return value
+
+2003-06-06  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      ws
+
+    * ext/standard/file.c:
+      WS
+
+    * ext/xsl/xsl_fe.h:
+      missing header
+
+    * ext/dom/xml_common.h:
+      Missing header
+
+    * ext/dom/EXPERIMENTAL
+      ext/xsl/CREDITS
+      ext/xsl/EXPERIMENTAL:
+      Some missing files..
+
+    * ext/xsl/.cvsignore
+      ext/xsl/config.m4:
+      Missing entries in .cvsignore and some cutpaste bugs in config.m4
+
+    * ext/mcve/mcve.c
+      ext/mcve/php_mcve.h
+      ext/mcve/tests/001.phpt:
+      Fixed bug #24051: shared build and test
+
 2003-06-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
