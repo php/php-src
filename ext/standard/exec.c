@@ -44,11 +44,12 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 	FILE *fp;
 	char *buf, *tmp=NULL;
 	int buflen = 0;
-	int t, l, ret, output=1;
+	int t, l, output=1;
 	int overflow_limit, lcmd, ldir;
 	int rsrc_id;
 	char *b, *c, *d=NULL;
 	PLS_FETCH();
+	FLS_FETCH();
 
 	buf = (char*) emalloc(EXEC_INPUT_BUF);
     if (!buf) {
@@ -123,7 +124,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 	 * fd gets pclosed
 	 */
 
-	rsrc_id = ZEND_REGISTER_RESOURCE(NULL, fp, php_file_le_fopen());
+	rsrc_id = ZEND_REGISTER_RESOURCE(NULL, fp, php_file_le_popen());
 
 	if (type != 3) {
 		l=0;
@@ -195,16 +196,18 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 
 	/* the zend_list_delete will pclose our popen'ed process */
 	zend_list_delete(rsrc_id); 
-	
+
 #if HAVE_SYS_WAIT_H
-	if (WIFEXITED(ret)) {
-		ret = WEXITSTATUS(ret);
+	if (WIFEXITED(FG(pclose_ret))) {
+		ret = WEXITSTATUS(FG(pclose_ret));
 	}
 #endif
 
-	if (d) efree(d);
+	if (d) {
+		efree(d);
+	}
 	efree(buf);
-	return ret;
+	return FG(pclose_ret);
 }
 
 /* {{{ proto int exec(string command [, array output [, int return_value]])

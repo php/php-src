@@ -357,7 +357,6 @@ PHP_FUNCTION(pfsockopen)
 }
 /* }}} */
 
-#define CHUNK_SIZE 8192
 #define SOCK_DESTROY(sock) \
 		if(sock->readbuf) pefree(sock->readbuf, sock->persistent); \
 		if(sock->prev) sock->prev->next = sock->next; \
@@ -366,7 +365,7 @@ PHP_FUNCTION(pfsockopen)
 			FG(phpsockbuf) = sock->next; \
 		pefree(sock, sock->persistent)
 
-static void php_cleanup_sockbuf(int persistent FLS_DC)
+void php_cleanup_sockbuf(int persistent FLS_DC)
 {
 	php_sockbuf *now, *next;
 
@@ -431,7 +430,7 @@ size_t php_sock_set_def_chunk_size(size_t size)
 
 	old = FG(def_chunk_size);
 
-	if(size <= CHUNK_SIZE || size > 0) 
+	if(size <= PHP_FSOCK_CHUNK_SIZE || size > 0) 
 		FG(def_chunk_size) = size;
 
 	return old;
@@ -516,7 +515,7 @@ static void php_sockwait_for_data(php_sockbuf *sock)
 
 static size_t php_sockread_internal(php_sockbuf *sock)
 {
-	char buf[CHUNK_SIZE];
+	char buf[PHP_FSOCK_CHUNK_SIZE];
 	int nr_bytes;
 	size_t nr_read = 0;
 	
@@ -716,28 +715,9 @@ void php_msock_destroy(int *data)
 }
 /* }}} */
 
-static void fsock_globals_ctor(FLS_D)
-{
-	zend_hash_init(&FG(ht_fsock_keys), 0, NULL, NULL, 1);
-	zend_hash_init(&FG(ht_fsock_socks), 0, NULL, (void (*)(void *))php_msock_destroy, 1);
-	FG(def_chunk_size) = CHUNK_SIZE;
-	FG(phpsockbuf) = NULL;
-}
-
-static void fsock_globals_dtor(FLS_D)
-{
-	zend_hash_destroy(&FG(ht_fsock_socks));
-	zend_hash_destroy(&FG(ht_fsock_keys));
-	php_cleanup_sockbuf(1 FLS_CC);
-}
 
 PHP_MINIT_FUNCTION(fsock)
 {
-#ifdef ZTS
-	fsock_globals_id = ts_allocate_id(sizeof(php_fsock_globals), (ts_allocate_ctor) fsock_globals_ctor, (ts_allocate_dtor) fsock_globals_dtor);
-#else
-	fsock_globals_ctor(FLS_C);
-#endif
 	return SUCCESS;
 }
 

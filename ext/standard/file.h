@@ -72,4 +72,32 @@ PHPAPI int php_file_le_popen(void);
 PHPAPI int php_file_le_socket(void);
 PHPAPI int php_copy_file(char *src, char *dest);
 
+typedef struct {
+	int fgetss_state;
+	int pclose_ret;
+	HashTable ht_fsock_keys;
+	HashTable ht_fsock_socks;
+	struct php_sockbuf *phpsockbuf;
+	size_t def_chunk_size;
+} php_file_globals;
+
+#ifdef ZTS
+#define FLS_D php_file_globals *file_globals
+#define FLS_DC , FLS_D
+#define FLS_C file_globals
+#define FLS_CC , FLS_C
+#define FG(v) (file_globals->v)
+#define FLS_FETCH() php_file_globals *file_globals = ts_resource(file_globals_id)
+extern int file_globals_id;
+#else
+#define FLS_D	void
+#define FLS_DC
+#define FLS_C
+#define FLS_CC
+#define FG(v) (file_globals.v)
+#define FLS_FETCH()
+extern php_file_globals file_globals;
+#endif
+
+
 #endif /* FILE_H */
