@@ -1328,8 +1328,8 @@ PHP_FUNCTION(stristr)
 		WRONG_PARAM_COUNT;
 	}
 
-	SEPERATE_ZVAL(haystack);
-	SEPERATE_ZVAL(needle);
+	SEPARATE_ZVAL(haystack);
+	SEPARATE_ZVAL(needle);
 	
 	convert_to_string_ex(haystack);
 
