@@ -186,10 +186,10 @@ static int mcheck(union VALUETYPE *, struct magic *);
 static void mprint(union VALUETYPE *, struct magic *);
 static int mconvert(union VALUETYPE *, struct magic *);
 static int magic_rsl_get(char **, char **);
-static int magic_process(char * TSRMLS_DC);
+static int magic_process(zval * TSRMLS_DC);
 
 static long from_oct(int, char *);
-static int fsmagic(char *fn TSRMLS_DC);
+static int fsmagic(zval * TSRMLS_DC);
 
 
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
@@ -305,17 +305,34 @@ PHP_MINFO_FUNCTION(mime_magic)
 /* }}} */
 
 
-/* {{{ proto string mime_content_type(string filename)
+/* {{{ proto string mime_content_type(string filename|resource stream)
    Return content-type for file */
 PHP_FUNCTION(mime_content_type)
 {
-	char *filename = NULL;
-	int filename_len;
+	zval *what;
 	magic_server_config_rec *conf = &mime_global;
 	char *content_type=NULL, *content_encoding=NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &what) == FAILURE) {
 		return;
+	}
+
+	switch (Z_TYPE_P(what)) {
+	case IS_STRING:
+		break;
+	case IS_RESOURCE:
+		{
+			php_stream *stream;
+
+			php_stream_from_zval(stream, &what);
+			if (stream) {
+				break;
+			}
+		}
+		/* fallthru if not a stream resource */
+	default:
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "can only process string or stream arguments");
+		break;
 	}
 
 	if (conf->magic == (struct magic *)-1) {
@@ -332,7 +349,7 @@ PHP_FUNCTION(mime_content_type)
 
 	MIME_MAGIC_G(req_dat) = magic_set_config();
 
-	if(MIME_MAGIC_OK != magic_process(filename TSRMLS_CC)) {
+	if(MIME_MAGIC_OK != magic_process(what TSRMLS_CC)) {
 		RETVAL_FALSE;
 	} else if(MIME_MAGIC_OK != magic_rsl_get(&content_type, &content_encoding)) {
 		RETVAL_FALSE;
@@ -999,17 +1016,18 @@ static char *rsl_strdup(int start_frag, int start_pos, int len)
  * (formerly called "process" in file command, prefix added for clarity) Opens
  * the file and reads a fixed-size buffer to begin processing the contents.
  */
-static int magic_process(char *filename TSRMLS_DC)
+static int magic_process(zval *what TSRMLS_DC)
 {
 	php_stream *stream;
     unsigned char buf[HOWMANY + 1];	/* one extra for terminating '\0' */
     int nbytes = 0;		/* number of bytes read from a datafile */
     int result;
+	off_t streampos;
 
     /*
      * first try judging the file based on its filesystem status
      */
-    switch ((result = fsmagic(filename TSRMLS_CC))) {
+    switch ((result = fsmagic(what TSRMLS_CC))) {
     case MIME_MAGIC_DONE:
 		magic_rsl_putchar('\n');
 		return MIME_MAGIC_OK;
@@ -1020,22 +1038,36 @@ static int magic_process(char *filename TSRMLS_DC)
 		return result;
     }
 
-    stream = php_stream_open_wrapper(filename, "rb", IGNORE_PATH | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+	switch (Z_TYPE_P(what)) {
+	case IS_STRING:
+		stream = php_stream_open_wrapper(Z_STRVAL_P(what), "rb", IGNORE_PATH | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+		if (stream == NULL) {
+			/* We can't open it, but we were able to stat it. */
+			if(MIME_MAGIC_G(debug))
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "can't read `%s'", Z_STRVAL_P(what));
+			/* let some other handler decide what the problem is */
+			return MIME_MAGIC_DECLINED;
+		}
+		break;
+	case IS_RESOURCE:
+		php_stream_from_zval_no_verify(stream, &what); /* we tested this before, so it should work here */
+		streampos = php_stream_tell(stream); /* remember stream position for restauration */
+		php_stream_seek(stream, 0, SEEK_SET);
+		break;
+	}
 
-    if (stream == NULL) {
-		/* We can't open it, but we were able to stat it. */
-		if(MIME_MAGIC_G(debug))
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "can't read `%s'", filename);
-		/* let some other handler decide what the problem is */
-		return MIME_MAGIC_DECLINED;
-    }
 
     /*
      * try looking at the first HOWMANY bytes
      */
     if ((nbytes = php_stream_read(stream, (char *) buf, sizeof(buf) - 1)) == -1) {
-		if(MIME_MAGIC_G(debug))
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "read failed: %s", filename);
+		if(MIME_MAGIC_G(debug)) {
+			if (Z_TYPE_P(what) == IS_RESOURCE) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "read failed on stream");
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "read failed: %s", Z_STRVAL_P(what));
+			}
+		}
 		return MIME_MAGIC_ERROR;
     }
 
@@ -1046,7 +1078,11 @@ static int magic_process(char *filename TSRMLS_DC)
 		tryit(buf, nbytes, 1); 
     }
 
-    (void) php_stream_close(stream);
+	if (Z_TYPE_P(what) == IS_RESOURCE) {
+		php_stream_seek(stream, streampos, SEEK_SET);
+	} else {
+		(void) php_stream_close(stream);
+	}
     (void) magic_rsl_putchar('\n');
 
     return MIME_MAGIC_OK;
@@ -1088,12 +1124,26 @@ static void tryit(unsigned char *buf, int nb, int checkzmagic)
  * return MIME_MAGIC_OK to indicate it's a regular file still needing handling
  * other returns indicate a failure of some sort
  */
-static int fsmagic(char *filename TSRMLS_DC)
+static int fsmagic(zval *what TSRMLS_DC)
 {
 	php_stream_statbuf stat_ssb;
 
-	if(!php_stream_stat_path(filename, &stat_ssb)) {
-		return MIME_MAGIC_OK;
+	switch (Z_TYPE_P(what)) {
+	case IS_STRING:
+		if(!php_stream_stat_path(Z_STRVAL_P(what), &stat_ssb)) {
+			return MIME_MAGIC_OK;
+		}
+		break;
+	case IS_RESOURCE:
+		{
+			php_stream *stream;
+
+			php_stream_from_zval_no_verify(stream, &what);
+			if(!php_stream_stat(stream, &stat_ssb)) {
+				return MIME_MAGIC_OK;
+			}
+		}
+		break;
 	}
 
     switch (stat_ssb.sb.st_mode & S_IFMT) {
@@ -1130,8 +1180,10 @@ static int fsmagic(char *filename TSRMLS_DC)
 		/* We used stat(), the only possible reason for this is that the
 		 * symlink is broken.
 		 */
-		if(MIME_MAGIC_G(debug))
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "broken symlink (%s)", filename);
+		if(MIME_MAGIC_G(debug)) {
+			/* no need to check argument type here, this can only happen with strings */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "broken symlink (%s)", Z_STRVAL_P(what));
+		}
 		return MIME_MAGIC_ERROR;
 #endif
 #ifdef    S_IFSOCK
