@@ -627,6 +627,36 @@ PHPAPI void php_stream_sock_set_timeout(php_stream *stream, struct timeval *time
 	sock->timeout_event = 0;
 }
 
+PHPAPI int php_set_sock_blocking(int socketd, int block)
+{
+      int ret = SUCCESS;
+      int flags;
+      int myflag = 0;
+
+#ifdef PHP_WIN32
+      /* with ioctlsocket, a non-zero sets nonblocking, a zero sets blocking */
+	  flags = !block;
+	  if (ioctlsocket(socketd, FIONBIO, &flags)==SOCKET_ERROR){
+		  php_error(E_WARNING, "%s", WSAGetLastError());
+		  ret = FALSE;
+      }
+#else
+      flags = fcntl(socketd, F_GETFL);
+#ifdef O_NONBLOCK
+      myflag = O_NONBLOCK; /* POSIX version */
+#elif defined(O_NDELAY)
+      myflag = O_NDELAY;   /* old non-POSIX version */
+#endif
+      if (!block) {
+              flags |= myflag;
+      } else {
+              flags &= ~myflag;
+      }
+      fcntl(socketd, F_SETFL, flags);
+#endif
+      return ret;
+}
+
 PHPAPI int php_stream_sock_set_blocking(php_stream *stream, int mode TSRMLS_DC)
 {
 	int oldmode;
@@ -636,9 +666,17 @@ PHPAPI int php_stream_sock_set_blocking(php_stream *stream, int mode TSRMLS_DC)
 		return 0;
 	
 	oldmode = sock->is_blocked;
-	sock->is_blocked = mode;
+	
+	/* no need to change anything */
+	if (mode == oldmode)
+		return oldmode;
+	
+	if (SUCCESS == php_set_sock_blocking(sock->socket, mode)) {
+		sock->is_blocked = mode;
+		return oldmode;
+	}
 
-	return oldmode;
+	return -1;
 }
 
 PHPAPI size_t php_stream_sock_set_chunk_size(php_stream *stream, size_t size TSRMLS_DC)
@@ -809,6 +847,8 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 
 	if (buf == NULL && count == 0) {
 		/* check for EOF condition */
+		int save_blocked;
+		
 DUMP_SOCK_STATE("check for EOF", sock);
 		
 		if (sock->eof)
@@ -818,7 +858,7 @@ DUMP_SOCK_STATE("check for EOF", sock);
 			return 0;
 
 		/* no data in the buffer - lets examine the socket */
-#if HAVE_SYS_POLL_H
+#if HAVE_SYS_POLL_H && HAVE_POLL
 		{
 			struct pollfd topoll;
 			
@@ -831,13 +871,16 @@ DUMP_SOCK_STATE("check for EOF", sock);
 			}
 		}
 #endif
-
-		/* in the absence of other methods of checking if the
-		 * socket is still active, try to read a chunk of data */
-		sock->timeout_event = 0;
-		php_sock_stream_read_internal(stream, sock TSRMLS_CC);
 		
-		if (sock->timeout_event || sock->eof)
+		/* in the absence of other methods of checking if the
+		 * socket is still active, try to read a chunk of data,
+		 * but lets not block. */
+		sock->timeout_event = 0;
+		save_blocked = php_stream_sock_set_blocking(stream, 1 TSRMLS_CC);
+		php_sock_stream_read_internal(stream, sock TSRMLS_CC);
+		php_stream_sock_set_blocking(stream, save_blocked TSRMLS_CC);
+		
+		if (sock->eof)
 			return EOF;
 		
 		return 0;

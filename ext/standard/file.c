@@ -956,44 +956,12 @@ PHPAPI PHP_FUNCTION(feof)
 }
 /* }}} */
 
-/* TODO: move to main/network.c */
-PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
-{
-      int ret = SUCCESS;
-      int flags;
-      int myflag = 0;
-
-#ifdef PHP_WIN32
-      /* with ioctlsocket, a non-zero sets nonblocking, a zero sets blocking */
-	  flags = !block;
-	  if (ioctlsocket(socketd, FIONBIO, &flags)==SOCKET_ERROR){
-		  php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), WSAGetLastError());
-		  ret = FALSE;
-      }
-#else
-      flags = fcntl(socketd, F_GETFL);
-#ifdef O_NONBLOCK
-      myflag = O_NONBLOCK; /* POSIX version */
-#elif defined(O_NDELAY)
-      myflag = O_NDELAY;   /* old non-POSIX version */
-#endif
-      if (!block) {
-              flags |= myflag;
-      } else {
-              flags &= ~myflag;
-      }
-      fcntl(socketd, F_SETFL, flags);
-#endif
-      return ret;
-}
-
 /* {{{ proto bool socket_set_blocking(resource socket, int mode)
    Set blocking/non-blocking mode on a socket */
 PHP_FUNCTION(socket_set_blocking)
 {
 	zval **arg1, **arg2;
 	int block, type;
-	int socketd = 0;
 	void *what;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
@@ -1007,15 +975,6 @@ PHP_FUNCTION(socket_set_blocking)
 	block = Z_LVAL_PP(arg2);
 
 	if (php_stream_is((php_stream*)what, PHP_STREAM_IS_SOCKET))	{
-		/* TODO: check if the blocking mode is changed elsewhere, and see if we
-			* can integrate these calls into php_stream_sock_set_blocking */
-		if (FAILURE == php_stream_cast((php_stream *) what, PHP_STREAM_AS_SOCKETD, (void *) &socketd, REPORT_ERRORS)) {
-			RETURN_FALSE;
-		}
-
-		if (php_set_sock_blocking(socketd, block TSRMLS_CC) == FAILURE)
-			RETURN_FALSE;
-
 		php_stream_sock_set_blocking((php_stream*)what, block == 0 ? 0 : 1 TSRMLS_CC);
 		RETURN_TRUE;	
 	}
