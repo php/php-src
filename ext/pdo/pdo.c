@@ -90,7 +90,10 @@ PDO_API int php_pdo_register_driver(pdo_driver_t *driver)
 	if (driver->api_version != PDO_DRIVER_API)
 		return FAILURE;
 
-	printf("registering PDO driver %s\n", driver->driver_name);
+	if (!zend_hash_exists(&module_registry, "pdo", sizeof("pdo"))) {
+		zend_error(E_ERROR, "You MUST load PDO before loading any PDO drivers");
+		return FAILURE;	/* NOTREACHED */
+	}
 
 	return zend_hash_add(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len,
 			(void**)&driver, sizeof(driver), NULL);
@@ -98,6 +101,10 @@ PDO_API int php_pdo_register_driver(pdo_driver_t *driver)
 
 PDO_API void php_pdo_unregister_driver(pdo_driver_t *driver)
 {
+	if (!zend_hash_exists(&module_registry, "pdo", sizeof("pdo"))) {
+		return;
+	}
+
 	zend_hash_del(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len);
 }
 
