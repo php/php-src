@@ -2248,20 +2248,30 @@ PHP_FUNCTION(ibase_affected_rows)
 }
 /* }}} */
 
-/* {{{ proto ibase_num_rows( resource result_identifier )
-   Returns the number of rows in a result */
+/* {{{ ibase_num_rows( resource result_identifier ) */
 PHP_FUNCTION(ibase_num_rows) 
 {
 	/**
-	 * This function relies on the InterBase API function isc_dsql_sql_info()
-	 * which has a couple of limitations (which I hope will be fixed in
-	 * future releases of Firebird):
-	 * - row count is always zero before the first fetch;
-	 * - row count for SELECT ... FOR UPDATE is broken -> never returns a
-	 *   higher number than the number of records fetched so far;
-	 * - row count for other statements is merely a lower bound on the number
-	 *   of records => calling ibase_num_rows() again after a couple of fetches
-	 *   will most likely return a new (higher) figure for large result sets.
+	 * PLEASE READ THIS FIRST before adding this function to the main PHP
+	 * documentation:
+	 * 
+	 * As this function relies on the InterBase API function isc_dsql_sql_info()
+	 * which has a couple of limitations (which I hope will be fixed in future 
+	 * releases of Firebird), this function is fairly useless. I'm leaving it
+	 * in place for people who can live with the limitations, which I only 
+	 * found out about after I had implemented it anyway.
+	 *
+	 * Currently, there's no way to determine how many rows can be fetched from
+	 * a cursor. The only number that _can_ be determined is the number of rows
+	 * that have already been pre-fetched by the client library. 
+	 * This implies the following:
+	 * - num_rows() always returns zero before the first fetch;
+	 * - num_rows() for SELECT ... FOR UPDATE is broken -> never returns a
+	 *   higher number than the number of records fetched so far (no pre-fetch);
+	 * - the result of num_rows() for other statements is merely a lower bound 
+	 * on the number of records => calling ibase_num_rows() again after a couple
+	 * of fetches will most likely return a new (higher) figure for large result 
+	 * sets.
 	 *
 	 * 12-aug-2003 Ard Biesheuvel
 	 */
@@ -4088,7 +4098,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 	zend_list_addref(Z_LVAL_P(return_value));
 }
 
-/* {{{ proto bool ibase_free_vevent_handler(resource event)
+/* {{{ proto bool ibase_free_event_handler(resource event)
    Frees the event handler set by ibase_set_event_handler() */
 PHP_FUNCTION(ibase_free_event_handler)
 {
