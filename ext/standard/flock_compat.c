@@ -41,7 +41,7 @@
 #endif
 
 #ifndef HAVE_FLOCK
-PHPAPI int php_flock(int fd, int operation)
+PHPAPI int flock(int fd, int operation)
 {
 	return php_flock(fd, operation);
 }
