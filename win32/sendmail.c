@@ -856,11 +856,11 @@ int Ack(char **server_response)
 	/* Check for newline */
 	Index += rlen;
 	
-	if ((buf[Received - 4] == ' ' && buf[Received - 3] == '-') ||
-	    (buf[Received - 2] != '\r') || (buf[Received - 1] != '\n'))
-		/* err_msg          fprintf(stderr,"Incomplete server message. Awaiting CRLF\n"); */
-		goto again;				/* Incomplete data. Line must be terminated by CRLF
-		                           And not contain a space followed by a '-' */
+	/* SMPT RFC says \r\n is the only valid line ending, who are we to argue ;)
+	 * The response code must contain at least 5 characters ex. 220\r\n */
+	if (Received < 5 || buf[Received - 1] != '\n' || buf[Received - 2] != '\r') {
+		goto again;
+	}
 
 	if (buf[0] > '3') {
 		/* If we've a valid pointer, return the SMTP server response so the error message contains more information */

@@ -16,6 +16,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #24142 (workaround for a gcc bug affecting round()). (Marcus, Ilia)
 - Fixed bug #24063 (serialize() missing 0 after the . on scientific notation).
   (Marcus, Ilia)
+- Fixed bug #22947 (Ack() inside win32/sendmail.c may stall in certain
+  situations). (Ilia)
 - Fixed bug #21957 (serialize() mangles objects with __sleep). (Ilia)
 
 07 Aug 2003, Version 4.3.3RC3
