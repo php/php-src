@@ -370,6 +370,12 @@ PHP_FUNCTION(xslt_create)
 	int ret;
 	SABLOTLS_FETCH();
 
+	if (SABLOTG(current_processor)) {
+		Z_TYPE_P(return_value) = IS_RESOURCE;
+		Z_LVAL_P(return_value) = SABLOTG(current_processor);
+		return;
+	}
+	
 	ret = SablotCreateProcessor(&p);
 	
 	if (ret) {
@@ -403,6 +409,7 @@ PHP_FUNCTION(xslt_create)
 	
 	ZEND_REGISTER_RESOURCE(return_value, handle, SABLOTG(le_sablot));
 	handle->index = Z_LVAL_P(return_value);
+	SABLOTG(current_processor) = Z_LVAL_P(return_value);
 }
 /* }}} */
 
@@ -1079,6 +1086,8 @@ static void _php_sablot_free_processor(php_sablot *handle)
 		SablotUnregHandler(handle->p, HLR_SAX, NULL, NULL);
 		SablotDestroyProcessor(handle->p);
 	}
+	SABLOTG(current_processor) = 0;
+	
 	FUNCH_FREE(handle->startDocHandler);
 	FUNCH_FREE(handle->startElementHandler);
 	FUNCH_FREE(handle->endElementHandler);

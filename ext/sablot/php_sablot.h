@@ -80,6 +80,7 @@ typedef struct {
 	char *output_transform_file;
 	int le_sablot;
 	int last_errno;
+	int current_processor;
 } php_sablot_globals;
 
 
