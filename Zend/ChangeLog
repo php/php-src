@@ -1,3 +1,17 @@
+2002-06-17  Andi Gutmans  <andi@zend.com>
+
+    * zend_mm.c: - Improve speed of alignment calculation
+
+    * zend_mm.c
+      zend_mm.h
+      zend_alloc.c:
+    - Fix a bug and add code which frees actual allocated segments at the end
+    - of execution (this still doesn't work because some blocks remain
+    - referenced after the memory manager is killed.
+
+    * zend_mm.c
+      zend_mm.h: - Save space per-allocated block.
+
 2002-06-16  Andi Gutmans  <andi@zend.com>
 
     * zend_execute.c
