@@ -2435,7 +2435,7 @@ PHP_FUNCTION(imap_sort)
 	if (myargc >= 4) {
 		convert_to_long_ex(flags);
 		if (Z_LVAL_PP(flags) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Search options parameter has to be greater than or equal to 0cannot be less than 0");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Search options parameter has to be greater than or equal to 0");
 			RETURN_FALSE;
 		}
 	}
