@@ -116,7 +116,7 @@ typedef struct {
 } m_query;
 
 #define MSQL_GET_QUERY(res)																			\
-	ZEND_FETCH_RESOURCE(msql_query, m_query *, res, -1, "mSQL result", msql_globals.le_query);	\
+	ZEND_FETCH_RESOURCE(msql_query, m_query *, &res, -1, "mSQL result", msql_globals.le_query);	\
 	msql_result = msql_query->result
 
 static void _delete_query(void *arg)
@@ -402,7 +402,7 @@ DLEXPORT PHP_FUNCTION(msql_close)
 			break;
 	}
 	
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
+	msql = (int) zend_fetch_resource_ex(&msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 	
 	zend_list_delete(id);
@@ -438,7 +438,7 @@ DLEXPORT PHP_FUNCTION(msql_select_db)
 	}
 	
 
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
+	msql = (int) zend_fetch_resource_ex(&msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 
 	convert_to_string(db);
@@ -478,7 +478,7 @@ DLEXPORT PHP_FUNCTION(msql_create_db)
 			break;
 	}
 	
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
+	msql = (int) zend_fetch_resource_ex(&msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(db);
@@ -517,7 +517,7 @@ DLEXPORT PHP_FUNCTION(msql_drop_db)
 			break;
 	}
 	
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
+	msql = (int) zend_fetch_resource_ex(&msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(db);
@@ -557,7 +557,7 @@ DLEXPORT PHP_FUNCTION(msql_query)
 			break;
 	}
 	
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
+	msql = (int) zend_fetch_resource_ex(&msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(query);
@@ -596,7 +596,7 @@ DLEXPORT PHP_FUNCTION(msql_db_query)
 			break;
 	}
 	
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
+	msql = (int) zend_fetch_resource_ex(&msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(db);
@@ -637,7 +637,7 @@ DLEXPORT PHP_FUNCTION(msql_list_dbs)
 			break;
 	}
 	
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
+	msql = (int) zend_fetch_resource_ex(&msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 
 	if ((msql_result=msqlListDBs(msql))==NULL) {
@@ -676,7 +676,7 @@ DLEXPORT PHP_FUNCTION(msql_list_tables)
 			break;
 	}
 	
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
+	msql = (int) zend_fetch_resource_ex(&msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(db);
@@ -719,7 +719,7 @@ DLEXPORT PHP_FUNCTION(msql_list_fields)
 			break;
 	}
 	
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
+	msql = (int) zend_fetch_resource_ex(&msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(db);
