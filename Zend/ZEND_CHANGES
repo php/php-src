@@ -181,6 +181,9 @@ Changes in the Zend Engine 2.0
       To avoid ambiguities in the '::' resolution there may be no
       global class and namespace with the same name.
 
+      Old code that has no user-defined classes or functions named 
+      'namespace' should run without modifications.
+
     * Unified Constructors.
 
       The Zend Engine allows developers to declare constructor methods
