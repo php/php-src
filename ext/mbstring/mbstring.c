@@ -2485,7 +2485,7 @@ MBSTRING_API char * php_mb_convert_encoding(char *input, size_t length, char *_t
 	if (output_len) {
 		*output_len = 0;
 	}
-	if (!input) {
+	if ( !input || !length) {
 		return NULL;
 	}
 	/* new encoding */

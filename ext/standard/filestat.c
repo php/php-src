@@ -34,10 +34,6 @@
 # include <unistd.h>
 #endif
 
-#if HAVE_SYS_PARAM_H
-# include <sys/param.h>
-#endif
-
 #if HAVE_SYS_VFS_H
 # include <sys/vfs.h>
 #endif

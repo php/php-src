@@ -57,8 +57,7 @@ touch install-sh mkinstalldirs missing
 aclocal || exit 1
 autoconf || exit 1
 autoheader || exit 1
-libtoolize=`$phpdir/shtool path glibtoolize libtoolize`
-$libtoolize -f -c || exit 1
+libtoolize -f -c || exit 1
 
 # dumping API NOs:
 PHP_API_VERSION=`egrep '#define PHP_API_VERSION' $includedir/main/php.h|sed 's/#define PHP_API_VERSION//'`
