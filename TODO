@@ -71,7 +71,7 @@ ext/oci8
 --------
     * all OCIFetch*() functions should return 0 for no more data and false on error.
     * have a flag that trims trailing spaces from CHAR fields on retrieval.
-	* m<empty clipboard>ake allow_call_time_pass_reference=Off working.
+	* make allow_call_time_pass_reference=Off working.
 	* for additional todo information, see oci8.c, in ext/oci8
 
 ext/pcre
