@@ -44,7 +44,7 @@
 #include <io.h>
 #endif
 
-#if !HAVE_FLOCK
+#ifndef HAVE_FLOCK
 int flock(int fd, int operation)
 #if HAVE_STRUCT_FLOCK
 {
@@ -161,7 +161,7 @@ int flock(int fd, int operation)
 	return 0;
 }
 #endif
-#endif /* !HAVE_FLOCK */
+#endif /* !defined(HAVE_FLOCK) */
 
 #if !(HAVE_INET_ATON)
 

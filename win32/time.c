@@ -70,7 +70,7 @@ void usleep(unsigned int useconds)
 }
 
 
-#if HAVE_SETITIMER
+#ifdef HAVE_SETITIMER
 
 
 #ifndef THREAD_SAFE
