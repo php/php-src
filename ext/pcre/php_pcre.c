@@ -713,6 +713,7 @@ char *php_pcre_replace(char *regex,   int regex_len,
 					} else {
 						*walkbuf++ = *walk++;
 					}
+				*walkbuf = '\0';
 				/* increment the result length by how much we've added to the string */
 				*result_len += walkbuf - (result + *result_len);
 			}
