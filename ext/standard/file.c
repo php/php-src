@@ -1629,7 +1629,7 @@ PHP_FUNCTION(fread)
    Get line from file pointer and parse for CSV fields */
  
 PHP_FUNCTION(fgetcsv) {
-	char *temp, *tptr, *bptr;
+	char *temp, *tptr, *bptr, *lineEnd;
 	char delimiter = ',';	/* allow this to be set as parameter */
 
 	/* first section exactly as php_fgetss */
@@ -1688,15 +1688,18 @@ PHP_FUNCTION(fgetcsv) {
 
 	/* Now into new section that parses buf for comma/quote delimited fields */
 
-	/* Strip trailing space from buf */
+	/* Strip trailing space from buf, saving end of line in case required for quoted field */
 
-	bptr = buf;
-	tptr = buf + strlen(buf) -1;
-	while ( isspace((int)*tptr) && (tptr > bptr) ) *tptr--=0;
+	lineEnd = emalloc(sizeof(char) * (len + 1));
+        bptr = buf;
+        tptr = buf + strlen(buf) -1;
+        while ( isspace(*tptr) && (tptr > bptr) ) tptr--;
+        tptr++;
+        strcpy(lineEnd, tptr);
 
 	/* add single space - makes it easier to parse trailing null field */
-	*++tptr = ' ';
-	*++tptr = 0;
+	*tptr++ = ' ';
+	*tptr = 0;
 
 	/* reserve workspace for building each individual field */
 
@@ -1705,6 +1708,7 @@ PHP_FUNCTION(fgetcsv) {
 
 	/* Initialize return array */
 	if (array_init(return_value) == FAILURE) {
+		efree(lineEnd);
 		efree(temp);
 		efree(buf);
 		RETURN_FALSE;
@@ -1736,6 +1740,26 @@ PHP_FUNCTION(fgetcsv) {
 				} else {
 				/* normal character */
 					*tptr++ = *bptr++;
+
+                                        if (*bptr == 0) {       /* embedded line end? */
+                                                *(tptr-1)=0;            /* remove space character added on reading line */
+                                                strcat(temp,lineEnd);   /* add the embedded line end to the field */
+
+                                                        /* read a new line from input, as at start of routine */
+                                                memset(buf,0,len+1);
+						if (FP_FGETS(buf, len, socketd, (FILE*)what, issock) == NULL) {
+                                                        efree(lineEnd); efree(temp); efree(buf);
+                                                        RETURN_FALSE;
+                                                        }
+                                                bptr = buf;
+                                                tptr = buf + strlen(buf) -1;
+                                                while ( isspace(*tptr) && (tptr > bptr) ) tptr--;
+                                                tptr++; strcpy(lineEnd, tptr);
+                                                *tptr++ = ' ';  *tptr = 0;
+
+                                                tptr=temp;      /* reset temp pointer to end of field as read so far */
+                                                while (*tptr) tptr++;
+                                        }
 				}
 			}
 		} else {
@@ -1752,6 +1776,8 @@ PHP_FUNCTION(fgetcsv) {
 		add_next_index_string(return_value, temp, 1);
 		tptr=temp;
 	} while (*bptr);
+	
+	efree(lineEnd);
 	efree(temp);
 	efree(buf);
 }
