@@ -627,7 +627,7 @@ PHP_FUNCTION(mcal_list_alarms)
 	pils *mcal_le_struct; 
 	cal_list_t *my_cal_list;
 	int myargc=ZEND_NUM_ARGS();
-	if (myargc != 1 || myargc !=7 || zend_get_parameters_ex(myargc, &streamind, &year, &month, &day, &hour, &min, &sec) == FAILURE) {
+	if ((myargc != 1 && myargc != 7) || zend_get_parameters_ex(myargc, &streamind, &year, &month, &day, &hour, &min, &sec) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
