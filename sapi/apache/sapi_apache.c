@@ -93,7 +93,7 @@ int apache_php_module_main(request_rec *r, int display_source_mode CLS_DC ELS_DC
 	zend_try {
 		php_end_ob_buffers(1);
 		php_header();			/* Make sure headers have been sent */
-	}
+	} zend_end_try();
 	return (OK);
 }
 /* }}} */
