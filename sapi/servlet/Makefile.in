@@ -7,10 +7,10 @@ VPATH     = @srcdir@
 LTLIBRARY_NAME    = libsapi.la
 LTLIBRARY_SOURCES = servlet.c java.c
 
-include $(topsrcdir)/build/ltlib.mk
+EXTRA_CFLAGS = $(JAVA_CFLAGS)
+EXTRA_INCLUDES = $(JAVE_INCLUDE)
 
-CFLAGS += $(JAVA_CFLAGS)
-INCLUDES += $(JAVA_INCLUDE)
+include $(topsrcdir)/build/ltlib.mk
 
 java.c : ../../ext/java/java.c
 	@cp ../../ext/java/java.c .

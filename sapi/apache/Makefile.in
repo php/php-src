@@ -7,6 +7,6 @@ VPATH     = @srcdir@
 LTLIBRARY_NAME    = libsapi.la
 LTLIBRARY_SOURCES = sapi_apache.c mod_php4.c
 
-include $(topsrcdir)/build/ltlib.mk
+EXTRA_INCLUDES = $(APACHE_INCLUDE)
 
-INCLUDES += $(APACHE_INCLUDE)
+include $(topsrcdir)/build/ltlib.mk
