@@ -37,27 +37,13 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.2</version>
+    <version>1.2.1</version>
     <state>stable</state>
-    <date>2003-08-14</date>
+    <date>2003-08-15</date>
     <notes>
-Changes from 1.1:
-
-* Changed license from PHP 2.02 to 3.0
-* Added support for optional dependencies
-* Made upgrade and uninstall package case insensitive
-* pear makerpm, now works and generates a better system independant spec file
-* pear install|build pecl-package, now exposes the compilation progress
-* Installer now checks dependencies on package uninstall
-* Added proxy support for remote commands using the xmlrcp C ext (Adam Ashley)
-* Added the command "download-all" (Alex Merz)
-* Made package dependency checking back to work
-* Added support for spaces in path names (Greg)
-* Various bugfixes
-* Added new pear "bundle" command, which downloads and uncompress a PECL package.
-The main purpouse of this command is for easily adding extensions to the PHP sources
-before compiling it.
+- Set back the default library path (BC issues)
     </notes>
+
     <provides type="class" name="OS_Guess" />
     <provides type="class" name="System" />
     <provides type="function" name="md5_file" />
@@ -122,6 +108,29 @@ before compiling it.
     </deps>
   </release>
   <changelog>
+    <release>
+      <version>1.2</version>
+      <state>stable</state>
+      <date>2003-08-14</date>
+      <notes>
+Changes from 1.1:
+
+* Changed license from PHP 2.02 to 3.0
+* Added support for optional dependencies
+* Made upgrade and uninstall package case insensitive
+* pear makerpm, now works and generates a better system independant spec file
+* pear install|build pecl-package, now exposes the compilation progress
+* Installer now checks dependencies on package uninstall
+* Added proxy support for remote commands using the xmlrcp C ext (Adam Ashley)
+* Added the command "download-all" (Alex Merz)
+* Made package dependency checking back to work
+* Added support for spaces in path names (Greg)
+* Various bugfixes
+* Added new pear "bundle" command, which downloads and uncompress a PECL package.
+The main purpouse of this command is for easily adding extensions to the PHP sources
+before compiling it.
+      </notes>
+    </release>
     <release>
         <version>1.1</version>
         <state>stable</state>
