@@ -808,6 +808,15 @@ void pdo_dbstmt_free_storage(zend_object *object TSRMLS_DC)
 		}
 		efree(stmt->columns);
 	}
+
+	if (stmt->bound_params) {
+		zend_hash_destroy(stmt->bound_params);
+		FREE_HASHTABLE(stmt->bound_params);
+	}
+	if (stmt->bound_columns) {
+		zend_hash_destroy(stmt->bound_columns);
+		FREE_HASHTABLE(stmt->bound_columns);
+	}
 	
 	zend_objects_store_del_ref(&stmt->database_object_handle TSRMLS_CC);
 #if 0

@@ -97,6 +97,7 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", message);
 
 		if (info) {
+			zval_dtor(info);
 			FREE_ZVAL(info);
 		}
 	} else {
