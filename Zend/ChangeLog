@@ -1,3 +1,9 @@
+2002-03-18  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c
+      zend_language_parser.y:
+    - More fixes to check for member/function call legality.
+
 2002-03-17  Andi Gutmans  <andi@zend.com>
 
     * zend_language_parser.y
