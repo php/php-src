@@ -1347,7 +1347,7 @@ PHP_FUNCTION(socket_recvfrom)
 	int					retval, arg3, arg4;
 	char				*recv_buf, *address;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzllz|z!", &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzllz|z", &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE)
 		return;
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
