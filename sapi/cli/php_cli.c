@@ -627,8 +627,8 @@ int main(int argc, char *argv[])
 				SG(headers_sent) = 1;
 				php_cli_usage(argv[0]);
 				php_end_ob_buffers(1 TSRMLS_CC);
-				exit(1);
-				break;
+				exit_status=1;
+				goto out_err;
 
 			case 'a':	/* interactive mode */
 				printf("Interactive mode enabled\n\n");
@@ -691,8 +691,8 @@ int main(int argc, char *argv[])
 				}
 				php_print_info(0xFFFFFFFF TSRMLS_CC);
 				php_end_ob_buffers(1 TSRMLS_CC);
-				exit(1);
-				break;
+				exit_status=1;
+				goto out;
 
 			case 'l': /* syntax check mode */
 				if (behavior != PHP_MODE_STANDARD) {
@@ -712,8 +712,8 @@ int main(int argc, char *argv[])
 				print_extensions(TSRMLS_C);
 				php_printf("\n");
 				php_end_ob_buffers(1 TSRMLS_CC);
-				exit(1);
-			break;
+				exit_status=1;
+				goto out_err;
 
 #if 0 /* not yet operational, see also below ... */
 			case '': /* generate indented source mode*/
@@ -805,8 +805,8 @@ int main(int argc, char *argv[])
 				}
 				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2003 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 				php_end_ob_buffers(1 TSRMLS_CC);
-				exit(1);
-				break;
+				exit_status=1;
+				goto out;
 
 			case 'w':
 				if (behavior == PHP_MODE_CLI_DIRECT || behavior == PHP_MODE_PROCESS_STDIN) {
@@ -832,7 +832,8 @@ int main(int argc, char *argv[])
 			SG(headers_sent) = 1;
 			SG(request_info).no_headers = 1;
 			PUTS(param_error);
-			exit(1);
+			exit_status=1;
+			goto out_err;
 		}
 
 		CG(interactive) = interactive;
