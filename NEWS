@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Fixed bug #11643 (Session related, fix SID redefinition). (Ilia)
+- Fixed bug #18556 (Scripting Engine, problem with locales like tr_TR). 
+  (Ilia)
 - Changed y2k_compliance to default to 1 now. (Sascha)
 - Added platform independent socket error constants for better error handling.
 - Fixed include(), require() and GD functions to work with remote files under
