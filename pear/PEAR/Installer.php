@@ -886,6 +886,11 @@ class PEAR_Installer extends PEAR_Common
                         continue;
                     }
                     if (!isset($installed[strtolower($info['name'])])) {
+                        // check to see if we can install the specific version required
+                        if ($info['rel'] == 'eq') {
+                            $deppackages[] = $info['name'] . '-' . $info['version'];
+                            continue;
+                        }
                         // skip upgrade check for packages we don't have installed
                         $deppackages[] = $info['name'];
                         continue;
