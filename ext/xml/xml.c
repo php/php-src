@@ -94,9 +94,12 @@ int  _xml_externalEntityRefHandler(XML_Parser, const XML_Char *, const XML_Char 
 /* }}} */
 /* {{{ extension definition structures */
 
+static unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
+static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
+
 function_entry xml_functions[] = {
     PHP_FE(xml_parser_create, NULL)
-    PHP_FE(xml_set_object, NULL)
+    PHP_FE(xml_set_object, second_arg_force_ref)
     PHP_FE(xml_set_element_handler, NULL)
 	PHP_FE(xml_set_character_data_handler, NULL)
 	PHP_FE(xml_set_processing_instruction_handler, NULL)
@@ -105,7 +108,7 @@ function_entry xml_functions[] = {
 	PHP_FE(xml_set_notation_decl_handler, NULL)
 	PHP_FE(xml_set_external_entity_ref_handler, NULL)
     PHP_FE(xml_parse, NULL)
-    PHP_FE(xml_parse_into_struct, NULL)
+    PHP_FE(xml_parse_into_struct, third_and_fourth_args_force_ref)
     PHP_FE(xml_get_error_code, NULL)
     PHP_FE(xml_error_string, NULL)
     PHP_FE(xml_get_current_line_number, NULL)
