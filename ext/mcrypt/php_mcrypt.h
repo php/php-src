@@ -8,6 +8,8 @@ extern zend_module_entry mcrypt_module_entry;
 
 PHP_FUNCTION(mcrypt_ecb);
 PHP_FUNCTION(mcrypt_cbc);
+PHP_FUNCTION(mcrypt_get_block_size);
+PHP_FUNCTION(mcrypt_get_key_size);
 
 #else
 #define mcrypt_module_ptr NULL
