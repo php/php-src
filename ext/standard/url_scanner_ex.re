@@ -352,7 +352,7 @@ char *url_adapt_single_url(const char *url, size_t urllen, const char *name, con
 	return buf.c;
 }
 
-char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen TSRMLS_DC)
+char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen, zend_bool do_flush TSRMLS_DC)
 {
 	char *ret;
 	url_adapt_state_ex_t *ctx;
@@ -364,9 +364,16 @@ char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char
 	mainloop(ctx, src, srclen TSRMLS_CC);
 
 	*newlen = ctx->result.len;
-	if (!ctx->result.c) 
+	if (!ctx->result.c) {
 		smart_str_appendl(&ctx->result, "", 0);
+	}
 	smart_str_0(&ctx->result);
+	if (do_flush) {
+		smart_str_appendl(&ctx->result, ctx->buf.c, ctx->buf.len);
+		*newlen += ctx->buf.len;
+		ctx->buf.c = 0;
+		ctx->buf.len = 0;
+	}
 	ctx->result.len = 0;
 	return ctx->result.c;
 }
