@@ -919,7 +919,7 @@ PHP_FUNCTION(fgetc) {
 
 
 /* Strip any HTML tags while reading */
-/* {{{ proto string fgetss(int fp, int length [, allowable_tags])
+/* {{{ proto string fgetss(int fp, int length [, string allowable_tags])
 Get a line from file pointer and strip HTML tags */
 PHP_FUNCTION(fgetss)
 {
