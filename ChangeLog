@@ -1,3 +1,181 @@
+2000-03-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mysql/libmysql/mysql_com.h:
+    Change default UNIX sock to /tmp/mysql.sock
+
+    * ext/mysql/libmysql/Makefile.in
+      ext/mysql/libmysql/libmysql.c
+      ext/mysql/config.m4: Build fixes - MySQL now actually works
+
+2000-03-06  Stig Bakken  <ssb@fast.no>
+
+    * Makefile.in
+      ext/standard/array.c
+      ext/standard/assert.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/browscap.c
+      ext/standard/crypt.c
+      ext/standard/dir.c
+      ext/standard/dl.c
+      ext/standard/dl.h
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/filestat.c
+      ext/standard/fsock.c
+      ext/standard/fsock.h
+      ext/standard/head.c
+      ext/standard/head.h
+      ext/standard/lcg.c
+      ext/standard/mail.c
+      ext/standard/metaphone.c
+      ext/standard/output.c
+      ext/standard/pack.c
+      ext/standard/pack.h
+      ext/standard/php_array.h
+      ext/standard/php_assert.h
+      ext/standard/php_browscap.h
+      ext/standard/php_crypt.h
+      ext/standard/php_dir.h
+      ext/standard/php_filestat.h
+      ext/standard/php_lcg.h
+      ext/standard/php_mail.h
+      ext/standard/php_metaphone.h
+      ext/standard/php_output.h
+      ext/standard/php_standard.h
+      ext/standard/php_syslog.h
+      ext/standard/reg.c
+      ext/standard/reg.h
+      ext/standard/syslog.c
+      internal_functions.c.in
+      php.h:    Cleaned up extension namespace, and changed ext/standard into one single
+    extension.
+
+2000-03-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mysql/libmysql/.cvsignore: update
+
+    * ext/mysql/config.m4: Finish config.m4 changes
+
+    * ext/mysql/Makefile.in
+      ext/mysql/config.m4: Build always against embedded library
+
+    * ext/mysql/libmysql/.cvsignore
+      ext/mysql/libmysql/Makefile.am
+      ext/mysql/libmysql/Makefile.in
+      ext/mysql/libmysql/acconfig.h
+      ext/mysql/libmysql/acinclude.m4
+      ext/mysql/libmysql/config.guess
+      ext/mysql/libmysql/config.sub
+      ext/mysql/libmysql/configure.in
+      ext/mysql/libmysql/install-sh
+      ext/mysql/libmysql/ltconfig
+      ext/mysql/libmysql/ltmain.sh
+      ext/mysql/libmysql/missing
+      ext/mysql/libmysql/mkinstalldirs
+      ext/mysql/libmysql/my_config.h
+      ext/mysql/libmysql/mysql.m4: Modularize mysql autoconf stuff
+
+2000-03-06  David Hedbor  <david@hedbor.org>
+
+    * sapi/roxen/roxen.c:
+    Use php_module_shutdown_wrapper as the shutdown function
+
+    * sapi/roxen/config.m4: Use
+
+2000-03-06  Stig Bakken  <ssb@fast.no>
+
+    * sapi/apache/php_apache.c
+      ext/sysvshm/sysvshm.c
+      ext/wddx/wddx.c
+      ext/xml/xml.c
+      ext/yp/yp.c
+      ext/standard/basic_functions.c
+      ext/sybase/sybase.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sysvsem/sysvsem.c
+      ext/snmp/snmp.c
+      ext/pgsql/pgsql.c
+      ext/posix/posix.c
+      ext/readline/readline.c
+      ext/session/session.c
+      ext/oracle/oracle.c
+      ext/pcre/php_pcre.c
+      ext/mysql/php_mysql.c
+      ext/oci8/oci8.c
+      ext/odbc/php_odbc.c
+      ext/odbc/velocis.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mcal/php_mcal.c
+      ext/interbase/interbase.c
+      ext/ldap/ldap.c
+      ext/imap/imap.c
+      ext/ftp/php_ftp.c
+      ext/hyperwave/hw.c
+      ext/icap/php_icap.c
+      ext/domxml/domxml.c
+      ext/filepro/filepro.c
+      ext/db/db.c
+      ext/dba/dba.c
+      ext/dbase/dbase.c
+      ext/aspell/aspell.c
+      ext/com/COM.c
+      ext/cybercash/cybercash.c
+      ext/dav/dav.c:
+    Change extension names in all extensions' zend_module_entry to their
+    directory name.
+
+2000-03-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * cvsclean:
+    "User interface" for removing all files which are ignored by cvs
+    (i.e. object files, Makefiles)
+
+2000-03-06  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/exec.c:
+    Hartmut don't touch protos. Only two lines are allowed.
+
+2000-03-06  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/standard/exec.c:
+    off-by-one error (bug id #3741) fixed
+
+2000-03-06  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/session/session.c: Need to pass PLS_DC.
+
+    * ext/session/session.c: (php_get_session_var)
+    The variables are now serialized either from globals or from
+    $HTTP_STATE_VARS[] array, depending on register_globals and track_vars
+    settings.
+
+2000-03-06  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/cookies.php
+      sapi/servlet/reqheaders.php
+      sapi/servlet/reqinfo.php
+      sapi/servlet/reqparams.php
+      sapi/servlet/servlet.dsw
+      sapi/servlet/sessions.php: Cleanup
+
+2000-03-06  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/domxml.c:
+    - root property in Dom Doc class is now reference to array element in
+      children property
+
+2000-03-06  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c
+      ext/oci8/php_oci8.h:
+    - OCINLogon() sessions are now closed again. 
+
+2000-03-06  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * pear/File/Find.php: Fun with tags.
+
 2000-03-05  Sam Ruby  <rubys@us.ibm.com>
 
     * win95nt.h: Eliminate "wrong number of parameters" warning
