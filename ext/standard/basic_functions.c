@@ -803,6 +803,7 @@ function_entry basic_functions[] = {
 	PHP_FALIAS(ftok  , warn_not_available,      NULL)
 #endif	
 
+	PHP_FE(rot13, NULL)
 	{NULL, NULL, NULL}
 };
 

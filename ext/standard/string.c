@@ -398,6 +398,8 @@ PHP_MINIT_FUNCTION(nl_langinfo)
 }
 /* }}} */
 
+/* {{{ proto string nl_langinfo(int item)
+   Query language and locale information */
 PHP_FUNCTION(nl_langinfo)
 {
 	zval **item;
@@ -3860,6 +3862,30 @@ PHP_FUNCTION(sscanf)
 	}
 }
 /* }}} */
+
+/* {{{ proto string rot13(string str)
+   Perform the rot13 transform on a string */
+PHP_FUNCTION(rot13)
+{
+	char *str;
+	int str_len;
+    static char xfrom[] = "abcdefghijklmnopqrstuvwxyz"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    static char xto[] = "nopqrstuvwxyzabcdefghijklm"
+        "NOPQRSTUVWXYZABCDEFGHIJKLM";
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
+							  &str, &str_len) == FAILURE) {
+		return;
+	}
+
+    php_strtr(str, str_len, xfrom, xto, 52);
+	RETURN_STRINGL(str, str_len, 1);
+}
+/* }}} */
+
+
+
 
 /*
  * Local variables:
