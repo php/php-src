@@ -57,7 +57,7 @@ PHPAPI int php_checkuid(const char *fn, int mode) {
 	}
 		
 	if (mode<3) {
-		ret = stat(fn,&sb);
+		ret = V_STAT(fn,&sb);
 		if (ret<0 && mode < 2) {
 			php_error(E_WARNING,"Unable to access %s",fn);
 			return(mode);
@@ -79,7 +79,7 @@ PHPAPI int php_checkuid(const char *fn, int mode) {
 
 	if (s) {
 		*s='\0';
-		ret = stat(fn,&sb);
+		ret = V_STAT(fn,&sb);
 		*s='/';
 		if (ret<0) {
 			php_error(E_WARNING, "Unable to access %s",fn);
@@ -92,7 +92,7 @@ PHPAPI int php_checkuid(const char *fn, int mode) {
 			php_error(E_WARNING, "Unable to access current working directory");
 			return(0);
 		}
-		ret = stat(s,&sb);
+		ret = V_STAT(s,&sb);
 		efree(s);
 		if (ret<0) {
 			php_error(E_WARNING, "Unable to access %s",s);
