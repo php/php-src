@@ -250,10 +250,10 @@ PHPAPI void php_print_info(int flag)
 void php_print_credits(int flag)
 {
 	if (flag & PHP_CREDITS_FULLPAGE) {
-		PUTS("<html><head><title>PHP Credits</title></head><body>\n");
+		PUTS("<html><head><title>PHP Credits</title></head><body><center>\n");
 	}
 
-	PUTS("<h1>Credits</h1>\n");
+	PUTS("<h1>PHP 4.0 Credits</h1>\n");
 
 	if (flag & PHP_CREDITS_GENERAL) {
 		/* Language */
@@ -317,7 +317,7 @@ void php_print_credits(int flag)
 	}
 
 	if (flag & PHP_CREDITS_FULLPAGE) {
-		PUTS("</body></html>\n");
+		PUTS("</center></body></html>\n");
 	}
 }
 
