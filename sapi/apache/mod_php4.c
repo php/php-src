@@ -502,7 +502,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		return OK;
 	}
 
-	zend_try {
+	zend_first_try {
 		/* We don't accept OPTIONS requests, but take everything else */
 		if (r->method_number == M_OPTIONS) {
 			r->allowed |= (1 << METHODS) - 1;

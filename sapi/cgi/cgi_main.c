@@ -486,7 +486,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	tsrm_ls = ts_resource(0);
 #endif
 
-	zend_try {
+	zend_first_try {
 		if (!cgi) {
 			while ((c=ap_php_getopt(argc, argv, OPTSTRING))!=-1) {
 				switch (c) {

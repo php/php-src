@@ -720,7 +720,7 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 #endif
 	TSRMLS_FETCH();
 
-	zend_try {
+	zend_first_try {
 #ifdef PHP_ENABLE_SEH
 		__try {
 #endif

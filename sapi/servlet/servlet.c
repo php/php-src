@@ -320,7 +320,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 #endif
 	TSRMLS_FETCH();
 
-	zend_try {
+	zend_first_try {
 		SG(server_context) = emalloc(sizeof(servlet_request));
 		((servlet_request*)SG(server_context))->jenv=jenv;
 		((servlet_request*)SG(server_context))->servlet=self;

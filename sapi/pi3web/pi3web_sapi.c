@@ -377,7 +377,7 @@ DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB)
 	int iRet = PIAPI_COMPLETED;
 	TSRMLS_FETCH();
 
-	zend_try {
+	zend_first_try {
 		file_handle.filename = lpCB->lpszFileName;
 		file_handle.free_filename = 0;
 		file_handle.type = ZEND_HANDLE_FILENAME;
