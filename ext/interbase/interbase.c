@@ -229,10 +229,10 @@ typedef struct {
 #define GET_BLOB_HANDLE_ARG(blob_arg, blob_ptr) \
 { \
 	int type; \
-	convert_to_long(blob_arg); \
-	blob_ptr = (ibase_blob_handle *) zend_list_find(Z_LVAL_P(blob_arg), &type); \
+	convert_to_long_ex(blob_arg); \
+	blob_ptr = (ibase_blob_handle *) zend_list_find(Z_LVAL_PP(blob_arg), &type); \
 	if (type!=le_blob) { \
-		_php_ibase_module_error("%d is not blob handle", Z_LVAL_P(blob_arg)); \
+		_php_ibase_module_error("%d is not blob handle", Z_LVAL_PP(blob_arg)); \
 		RETURN_FALSE; \
 	} \
 }
@@ -2630,7 +2630,7 @@ PHP_FUNCTION(ibase_blob_add)
 		WRONG_PARAM_COUNT;
 	}
 
-	GET_BLOB_HANDLE_ARG(*blob_arg, ib_blob);
+	GET_BLOB_HANDLE_ARG(blob_arg, ib_blob);
 	
 	convert_to_string_ex(string_arg);
 
@@ -2661,7 +2661,7 @@ PHP_FUNCTION(ibase_blob_get)
 	convert_to_long_ex(len_arg);
 	max_len = (unsigned short) Z_LVAL_PP(len_arg);
 
-	GET_BLOB_HANDLE_ARG(*blob_arg, ib_blob);
+	GET_BLOB_HANDLE_ARG(blob_arg, ib_blob);
 
 	if (ib_blob->bl_qd.gds_quad_high || ib_blob->bl_qd.gds_quad_low) { /*not null ?*/
 		
@@ -2706,7 +2706,7 @@ static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end)
 		WRONG_PARAM_COUNT;
 	}
 
-	GET_BLOB_HANDLE_ARG(*blob_arg, ib_blob);
+	GET_BLOB_HANDLE_ARG(blob_arg, ib_blob);
 
 	if (bl_end == BLOB_CLOSE) { /* return id here */
 		if (ib_blob->bl_qd.gds_quad_high || ib_blob->bl_qd.gds_quad_low) { /*not null ?*/
