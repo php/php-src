@@ -5,21 +5,20 @@ Bug #31651 (ReflectionClass::getDefaultProperties segfaults with arrays.)
 
 class Test
 {
-	var $a = array('a' => 1);
+	public $a = array('a' => 1);
 }
 
-//$obj = new Test;
-//$ref = new ReflectionClass($obj);
 $ref = new ReflectionClass('Test');
 
-print_r($ref->getdefaultProperties());
+print_r($ref->getDefaultProperties());
 
 ?>
 --EXPECT--
 Array
 (
     [a] => Array
-    (
-        [a] => 1
-    )
+        (
+            [a] => 1
+        )
+
 )
