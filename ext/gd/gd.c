@@ -1592,8 +1592,9 @@ PHP_FUNCTION(imagecolorat)
 #if HAVE_LIBGD20
 	if(gdImageTrueColor(im)) {
 		if (im->tpixels && gdImageBoundsSafe(im, Z_LVAL_PP(x), Z_LVAL_PP(y))) {
-			RETURN_LONG(im->tpixels[Z_LVAL_PP(x)][Z_LVAL_PP(y)]);
+			RETURN_LONG(gdImageTrueColorPixel(im, Z_LVAL_PP(x), Z_LVAL_PP(y)));
 		} else {
+			php_error(E_NOTICE, "%ld,%ld is out of bounds",Z_LVAL_PP(x), Z_LVAL_PP(y));
 			RETURN_FALSE;
 		}
 	} else {
@@ -1605,6 +1606,7 @@ PHP_FUNCTION(imagecolorat)
 			RETURN_LONG(im->pixels[Z_LVAL_PP(x)][Z_LVAL_PP(y)]);
 #endif
 		} else {
+			php_error(E_NOTICE, "%ld,%ld is out of bounds",Z_LVAL_PP(x), Z_LVAL_PP(y));
 			RETURN_FALSE;
 		}
 #if HAVE_LIBGD20
