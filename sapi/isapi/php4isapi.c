@@ -504,6 +504,7 @@ static void my_endthread()
 #endif
 }
 
+#ifdef PHP_WIN32
 // ___except can only call a function, so we have to do this
 // to retrieve the pointer.
 BOOL exceptionhandler(LPEXCEPTION_POINTERS *e,LPEXCEPTION_POINTERS ep)
@@ -511,6 +512,7 @@ BOOL exceptionhandler(LPEXCEPTION_POINTERS *e,LPEXCEPTION_POINTERS ep)
 	*e=ep;
 	return TRUE;
 }
+#endif
 
 DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 {
@@ -520,7 +522,9 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 	CLS_FETCH();
 	ELS_FETCH();
 	PLS_FETCH();
+#ifdef PHP_WIN32
 	LPEXCEPTION_POINTERS e;
+#endif
 
 	if (setjmp(EG(bailout))!=0) {
 		php_request_shutdown(NULL);
@@ -540,8 +544,11 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 		if (SG(request_info).cookie_data) {
 			efree(SG(request_info).cookie_data);
 		}
+#ifdef PHP_WIN32
 	} __except(exceptionhandler(&e,GetExceptionInformation())) {
-//	} __except(EXCEPTION_EXECUTE_HANDLER) {
+#else
+	} __except(EXCEPTION_EXECUTE_HANDLER) {
+#endif
 #ifdef PHP_WIN32
 		char buf[1024];
 		if (_exception_code()==EXCEPTION_STACK_OVERFLOW) {
