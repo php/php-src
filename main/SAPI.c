@@ -60,8 +60,7 @@ sapi_globals_struct sapi_globals;
 static void sapi_globals_ctor(sapi_globals_struct *sapi_globals TSRMLS_DC)
 {
 	memset(sapi_globals, 0, sizeof(*sapi_globals));
-	zend_hash_init_ex(&sapi_globals->known_post_content_types, 5,
-			NULL, NULL, 1, 0);
+	zend_hash_init_ex(&sapi_globals->known_post_content_types, 5, NULL, NULL, 1, 0);
 }
 
 static void sapi_globals_dtor(sapi_globals_struct *sapi_globals TSRMLS_DC)
@@ -80,8 +79,7 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 #ifdef ZTS
 	ts_allocate_id(&sapi_globals_id, sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, (ts_allocate_dtor) sapi_globals_dtor);
 #else
-	TSRMLS_FETCH();
-	sapi_globals_ctor(&sapi_globals TSRMLS_CC);
+	sapi_globals_ctor(&sapi_globals);
 #endif
 
 	virtual_cwd_startup(); /* Could use shutdown to free the main cwd but it would just slow it down for CGI */
@@ -98,8 +96,7 @@ SAPI_API void sapi_shutdown(void)
 #ifdef ZTS
 	ts_free_id(&sapi_globals_id);
 #else
-	TSRMLS_FETCH();
-	sapi_globals_dtor(&sapi_globals TSRMLS_CC);
+	sapi_globals_dtor(&sapi_globals);
 #endif
 
 	reentrancy_shutdown();
