@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.15 2002-03-03 23:03:34 zak Exp $ 
+# $Id: buildcheck.sh,v 1.16 2002-03-04 08:28:57 sas Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -37,9 +37,6 @@ echo "           to build PHP from CVS."
 exit 1
 else
 echo "buildconf: autoconf version $ac_version (ok)"
-echo "**Note: Certain versions of autoconf may generate the warning:"
-echo "        'AC_PROG_CPP called before AC_PROG_CC'"
-echo "        This error message is expected and can usually be ignored."
 fi
 
 
