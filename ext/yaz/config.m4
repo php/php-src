@@ -37,6 +37,9 @@ if test "$PHP_YAZ" != "no"; then
       case $c in
        -L*)
          dir=`echo $c|cut -c 3-|sed 's%/\.libs%%g'`
+	 if test "$dir" != "/usr/lib"; then
+           PHP_ADD_LIBPATH($dir,YAZ_SHARED_LIBADD)
+         fi
         ;;
        -lyaz*)
         ;;
@@ -45,9 +48,6 @@ if test "$PHP_YAZ" != "no"; then
         ;;
       esac
     done
-    if test -n "$dir"; then
-      PHP_ADD_LIBPATH($dir,YAZ_SHARED_LIBADD)
-    fi
     PHP_ADD_LIBRARY_DEFER(yaz,1,YAZ_SHARED_LIBADD)
     PHP_EVAL_INCLINE($YAZINC)
     PHP_SUBST(YAZ_SHARED_LIBADD)
