@@ -7,34 +7,50 @@ AC_DEFUN(PHP_PGSQL_CHECK_FUNCTIONS,[
 
 PHP_ARG_WITH(pgsql,for PostgreSQL support,
 [  --with-pgsql[=DIR]      Include PostgreSQL support.  DIR is the PostgreSQL
-                          base install directory, defaults to /usr/local/pgsql.])
+                          base install directory or the path to pg_config.])
 
 if test "$PHP_PGSQL" != "no"; then
   PHP_EXPAND_PATH($PGSQL_INCLUDE, PGSQL_INCLUDE)
 
-  if test "$PHP_PGSQL" = "yes"; then
-    PGSQL_SEARCH_PATHS="/usr /usr/local /usr/local/pgsql"
-  else
-    PGSQL_SEARCH_PATHS=$PHP_PGSQL
-  fi
-  
-  for i in $PGSQL_SEARCH_PATHS; do
-    for j in include include/pgsql include/postgres include/postgresql ""; do
-      if test -r "$i/$j/libpq-fe.h"; then
-        PGSQL_INC_BASE=$i
-        PGSQL_INCLUDE=$i/$j
-        if test -r "$i/$j/pg_config.h"; then
-          AC_DEFINE(HAVE_PG_CONFIG_H,1,[Whether to have pg_config.h])
-        fi
-      fi
-    done
-
-    for j in lib lib/pgsql lib/postgres lib/postgresql ""; do
-      if test -f "$i/$j/libpq.so" || test -f "$i/$j/libpq.a"; then 
-        PGSQL_LIBDIR=$i/$j
-      fi
-    done
+  AC_MSG_CHECKING(for pg_config)
+  for i in $PHP_PGSQL $PHP_PGSQL/bin /usr/local/pgsql/bin /usr/local/bin /usr/bin ""; do
+	if test -x $i/pg_config; then
+      PG_CONFIG="$i/pg_config"
+      break;
+    fi
   done
+
+  if test -n "$PG_CONFIG"; then
+    AC_MSG_RESULT([$PG_CONFIG])
+    PGSQL_INCLUDE=`$PG_CONFIG --includedir`
+    PGSQL_LIBDIR=`$PG_CONFIG --libdir`
+    AC_DEFINE(HAVE_PG_CONFIG_H,1,[Whether to have pg_config.h])
+  else
+    AC_MSG_RESULT(not found)
+    if test "$PHP_PGSQL" = "yes"; then
+      PGSQL_SEARCH_PATHS="/usr /usr/local /usr/local/pgsql"
+    else
+      PGSQL_SEARCH_PATHS=$PHP_PGSQL
+    fi
+  
+    for i in $PGSQL_SEARCH_PATHS; do
+      for j in include include/pgsql include/postgres include/postgresql ""; do
+        if test -r "$i/$j/libpq-fe.h"; then
+          PGSQL_INC_BASE=$i
+          PGSQL_INCLUDE=$i/$j
+          if test -r "$i/$j/pg_config.h"; then
+            AC_DEFINE(HAVE_PG_CONFIG_H,1,[Whether to have pg_config.h])
+          fi
+        fi
+      done
+
+      for j in lib lib/pgsql lib/postgres lib/postgresql ""; do
+        if test -f "$i/$j/libpq.so" || test -f "$i/$j/libpq.a"; then 
+          PGSQL_LIBDIR=$i/$j
+        fi
+      done
+    done
+  fi
 
   if test -z "$PGSQL_INCLUDE"; then
     AC_MSG_ERROR(Cannot find libpq-fe.h. Please specify correct PostgreSQL installation path)
