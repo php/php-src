@@ -82,7 +82,7 @@ int spl_add_classes(zend_class_entry ** ppce, zval *list, int sub, int allow, in
 	PHP_METHOD(spl_ ## class_name, function_name)
 
 #define SPL_MA(class_name, function_name, alias_class, alias_function, arg_info, flags) \
-	ZEND_MALIAS(spl_ ## alias_class, function_name, alias_function, arg_info, flags)
+	PHP_MALIAS(spl_ ## alias_class, function_name, alias_function, arg_info, flags)
 #endif /* PHP_FUNCTIONS_H */
 
 /*
