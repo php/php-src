@@ -1596,8 +1596,8 @@ PHPAPI void php_stripcslashes(char *str, int *len)
 						nlen-=i;
 						source--;
 					} else {
-						*target++='\\';
 						*target++=*source;
+						nlen--;
 					}
 			}
 		} else {
