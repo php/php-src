@@ -295,9 +295,6 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 	int error = 0;
 	socklen_t len;
 	int ret = 0;
-	fd_set rset;
-	fd_set wset;
-	fd_set eset;
 
 	SET_SOCKET_BLOCKING_MODE(sockfd, orig_flags);
 	
@@ -325,18 +322,11 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		goto ok;
 	}
 
-	FD_ZERO(&rset);
-	FD_ZERO(&eset);
-	FD_SET(sockfd, &rset);
-	FD_SET(sockfd, &eset);
-
-	wset = rset;
-
-	if ((n = select(sockfd + 1, &rset, &wset, &eset, timeout)) == 0) {
+	if ((n = php_pollfd_for(sockfd, PHP_POLLREADABLE|POLLOUT, timeout)) == 0) {
 		error = PHP_TIMEOUT_ERROR_VALUE;
 	}
 
-	if(FD_ISSET(sockfd, &rset) || FD_ISSET(sockfd, &wset)) {
+	if (n > 0) {
 		len = sizeof(error);
 		/*
 		   BSD-derived systems set errno correctly
@@ -692,21 +682,17 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		TSRMLS_DC)
 {
 	php_socket_t clisock = -1;
-	fd_set rset;
 	int error = 0, n;
 	php_sockaddr_storage sa;
 	socklen_t sl;
-
-	FD_ZERO(&rset);
-	FD_SET(srvsock, &rset);
 		
-	n = select(srvsock + 1, &rset, NULL, NULL, timeout);
+	n = php_pollfd_for(srvsock, PHP_POLLREADABLE, timeout);
 
 	if (n == 0) {
 		error = PHP_TIMEOUT_ERROR_VALUE;
 	} else if (n == -1) {
 		error = php_socket_errno();
-	} else if (FD_ISSET(srvsock, &rset)) {
+	} else {
 		sl = sizeof(sa);
 
 		clisock = accept(srvsock, (struct sockaddr*)&sa, &sl);
@@ -1025,6 +1011,104 @@ PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
 #endif
       return ret;
 }
+
+PHPAPI void _php_emit_fd_setsize_warning(int max_fd)
+{
+	TSRMLS_FETCH();
+
+#ifdef PHP_WIN32
+	php_error_docref(NULL TSRMLS_CC, E_WARNING,
+		"PHP needs to be recompiled with a larger value of FD_SETSIZE.\n"
+		"If this binary is from an official www.php.net package, file a bug report\n"
+		"at http://bugs.php.net, including the following information:\n"
+		"FD_SETSIZE=%d, but you are using %d.\n"
+		" --enable-fd-setsize=%d is recommended, but you may want to set it\n"
+		"to match to maximum number of sockets each script will work with at\n"
+		"one time, in order to avoid seeing this error again at a later date.",
+		FD_SETSIZE, max_fd, (max_fd + 128) & ~127);
+#else
+	php_error_docref(NULL TSRMLS_CC, E_WARNING,
+		"You MUST recompile PHP with a larger value of FD_SETSIZE.\n"
+		"It is set to %d, but you have descriptors numbered at least as high as %d.\n"
+		" --enable-fd-setsize=%d is recommended, but you may want to set it\n"
+		"to equal the maximum number of open files supported by your system,\n"
+		"in order to avoid seeing this error again at a later date.",
+		FD_SETSIZE, max_fd, (max_fd + 1024) & ~1023);
+#endif
+}
+
+#if defined(PHP_USE_POLL_2_EMULATION)
+
+/* emulate poll(2) using select(2), safely. */
+
+PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
+{
+	fd_set rset, wset, eset;
+	php_socket_t max_fd = SOCK_ERR;
+	unsigned int i, n;
+	struct timeval tv;
+	
+	/* check the highest numbered descriptor */
+	for (i = 0; i < nfds; i++) {
+		if (ufds[i].fd > max_fd)
+			max_fd = ufds[i].fd;
+	}
+
+	PHP_SAFE_MAX_FD(max_fd, nfds + 1);
+
+	FD_ZERO(&rset);
+	FD_ZERO(&wset);
+	FD_ZERO(&eset);
+
+	for (i = 0; i < nfds; i++) {
+		if (ufds[i].fd >= FD_SETSIZE) {
+			/* unsafe to set */
+			ufds[i].revents = POLLNVAL;
+			continue;
+		}
+		if (ufds[i].events & PHP_POLLREADABLE) {
+			FD_SET(ufds[i].fd, &rset);
+		}
+		if (ufds[i].events & POLLOUT) {
+			FD_SET(ufds[i].fd, &wset);
+		}
+		if (ufds[i].events & POLLPRI) {
+			FD_SET(ufds[i].fd, &eset);
+		}
+	}
+
+	if (timeout >= 0) {
+		tv.tv_sec = timeout / 1000;
+		tv.tv_usec = (timeout - (tv.tv_sec * 1000)) * 1000;
+	}
+
+	n = select(max_fd + 1, &rset, &wset, &eset, timeout >= 0 ? &tv : NULL);
+
+	if (n >= 0) {
+		for (i = 0; i < nfds; i++) {
+			if (ufds[i].fd >= FD_SETSIZE) {
+				continue;
+			}
+
+			ufds[i].revents = 0;
+
+			if (FD_ISSET(ufds[i].fd, &rset)) {
+				/* could be POLLERR or POLLHUP but can't tell without probing */
+				ufds[i].revents |= POLLIN;
+			}
+			if (FD_ISSET(ufds[i].fd, &wset)) {
+				ufds[i].revents |= POLLOUT;
+			}
+			if (FD_ISSET(ufds[i].fd, &eset)) {
+				ufds[i].revents |= POLLPRI;
+			}
+		}
+	}
+
+	return n;
+}
+
+#endif
 
 
 /*

@@ -533,7 +533,7 @@ static int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, PHP_SOCKET *m
 		php_sock = (php_socket*) zend_fetch_resource(element TSRMLS_CC, -1, le_socket_name, NULL, 1, le_socket);
 		if (!php_sock) continue; /* If element is not a resource, skip it */
 
-		FD_SET(php_sock->bsd_socket, fds);
+		PHP_SAFE_FD_SET(php_sock->bsd_socket, fds);
 		if (php_sock->bsd_socket > *max_fd) {
 			*max_fd = php_sock->bsd_socket;
 		}
@@ -560,7 +560,7 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC)
 		php_sock = (php_socket*) zend_fetch_resource(element TSRMLS_CC, -1, le_socket_name, NULL, 1, le_socket);
 		if (!php_sock) continue; /* If element is not a resource, skip it */
 
-		if (FD_ISSET(php_sock->bsd_socket, fds)) {
+		if (PHP_SAFE_FD_ISSET(php_sock->bsd_socket, fds)) {
 			/* Add fd to new array */
 			zend_hash_next_index_insert(new_hash, (void *)element, sizeof(zval *), (void **)&dest_element);
 			if (dest_element) zval_add_ref(dest_element);
@@ -604,6 +604,8 @@ PHP_FUNCTION(socket_select)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no resource arrays were passed to select");
 		RETURN_FALSE;
 	}
+
+	PHP_SAFE_MAX_FD(max_fd, 0); /* someone needs to make this look more like stream_socket_select */
 
 	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
 	if (sec != NULL) {
