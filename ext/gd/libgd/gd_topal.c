@@ -1560,6 +1560,7 @@ gdImageTrueColorToPalette (gdImagePtr im, int dither, int colorsWanted)
   prescan_quantize (im, cquantize);
   select_colors (im, cquantize, 256);
   /* TBB HACK REMOVE */
+#if 0
   {
     FILE *out = fopen ("palettemap.png", "wb");
     int i;
@@ -1575,6 +1576,7 @@ gdImageTrueColorToPalette (gdImagePtr im, int dither, int colorsWanted)
     fclose (out);
     gdImageDestroy (im2);
   }
+#endif
   zeroHistogram (cquantize->histogram);
   if (dither)
     {
