@@ -1,3 +1,8 @@
+2002-03-09  Andi Gutmans  <andi@zend.com>
+
+    * tests/zend2.php:
+    - Add the original example script to the CVS so that it's always available.
+
 2002-03-08  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * ZEND_CHANGES: Add 'import const' example.

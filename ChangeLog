@@ -1,3 +1,58 @@
+2002-03-09  Jani Taskinen  <sniper@iki.fi>
+
+    * Makefile.in
+      build/rules.mk: - Fixed bug #15748 (fixed otherwise in 4.3.0-dev)
+
+    * ext/domxml/config.m4: MFH fix for bug #15686 and some exslt fix.
+
+    * ext/domxml/config.m4: - Fixed bug: #15686
+
+    * ext/ming/config.m4: MFH fix for #15190
+
+    * ext/ming/config.m4: - Fixed bug: #15190
+
+2002-03-09  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/IDEAS: more wishes :-)
+
+2002-03-09  Ludovico Magnocavallo  <ludo@sumatrasolutions.com>
+
+    * pear/DB/STATUS: updated status for ibase with working tests
+
+    * pear/DB/tests/ibase/05sequences.phpt: new test, passed
+
+2002-03-09  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/standard/datetime.c:
+    Oops... 1 digit is allowed too! Reverting my fix.
+
+2002-03-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/HTML/Form.php: * added addPlain() by Ted Shieh
+
+2002-03-09  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c: MFH: Recent Bug Fixes
+
+    * ext/sockets/sockets.c: Fix build on win32
+
+    * ext/sockets/sockets.c:
+    Fixed bug where NULL specified in sec was not waiting infinately as it should
+    Fixed bug where socket_select was not producing an error message on error
+    Fixed bug where -1 was getting returned instead of FALSE in socket_recv(),
+    socket_send(), socket_sendto(), and socket_select()
+
+2002-03-09  Jani Taskinen  <sniper@iki.fi>
+
+    * main/main.c: MFH
+
+    * ext/ctype/ctype.c: MFH the MacosX compile fix.
+
+    * ext/session/session.c: whitespace..
+
+    * main/main.c:
+    - Commented out the space escaping. Works now as it did before.
+
 2002-03-08  Joseph Tate  <jtate@mi-corporation.com>
 
     * ext/domxml/php_domxml.c:
