@@ -116,10 +116,6 @@ static void _zend_is_inconsistent(HashTable *ht, char *file, int line)
 	(ht)->nApplyCount--;
 
 
-static uint PrimeNumbers[] =
-	{5, 11, 19, 53, 107, 223, 463, 983, 1979, 3907, 7963, 16229, 32531, 65407, 130987, 262237, 524521, 1048793, 2097397, 4194103, 8388857, 16777447, 33554201, 67108961, 134217487, 268435697, 536870683, 1073741621, 2147483399};
-static uint nNumPrimeNumbers = sizeof(PrimeNumbers) / sizeof(uint);
-
 #define ZEND_HASH_IF_FULL_DO_RESIZE(ht)				\
 	if ((ht)->nNumOfElements > (ht)->nTableSize) {	\
 		zend_hash_do_resize(ht);					\
