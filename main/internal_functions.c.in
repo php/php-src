@@ -31,9 +31,6 @@
 
 @EXT_INCLUDE_CODE@
 
-/* SNMP has to be moved to ext */
-/* #include "dl/snmp/php3_snmp.h" */
-
 zend_module_entry *php_builtin_extensions[] = {
 @EXT_MODULE_PTRS@
 };
