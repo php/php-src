@@ -156,7 +156,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type TSRMLS_
 	SafeArrayGetUBound(sa, proxy->dimensions, &ubound);
 
 	if (Z_LVAL_P(offset) < lbound || Z_LVAL_P(offset) > ubound) {
-		php_com_throw_exception(E_INVALIDARG, "index out of bounds" TSRMLS_CC);
+		php_com_throw_exception(DISP_E_BADINDEX, "index out of bounds" TSRMLS_CC);
 		return return_value;
 	}
 	
@@ -185,15 +185,19 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type TSRMLS_
 		}
 
 		if (vt == VT_VARIANT) {
-			SafeArrayGetElement(sa, indices, &v);
+			res = SafeArrayGetElement(sa, indices, &v);
 		} else {
 			V_VT(&v) = vt;
-			SafeArrayGetElement(sa, indices, &v.lVal);
+			res = SafeArrayGetElement(sa, indices, &v.lVal);
 		}
 
 		free_alloca(indices);
 
-		php_com_wrap_variant(return_value, &v, proxy->obj->code_page TSRMLS_CC);
+		if (SUCCEEDED(res)) {
+			php_com_wrap_variant(return_value, &v, proxy->obj->code_page TSRMLS_CC);
+		} else {
+			php_com_throw_exception(res, NULL TSRMLS_CC);
+		}
 
 		VariantClear(&v);
 		
@@ -209,8 +213,6 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRM
 {
 	php_com_saproxy *proxy = SA_FETCH(object);
 	UINT dims;
-	SAFEARRAY *sa;
-	LONG ubound, lbound;
 	int i;
 	HRESULT res;
 	VARIANT v;
@@ -238,7 +240,44 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRM
 		efree(args);
 		
 	} else if (V_ISARRAY(&proxy->obj->v)) {
-		php_com_throw_exception(E_NOTIMPL, "writing to safearray not yet implemented" TSRMLS_CC);
+		LONG *indices;
+		VARTYPE vt;
+
+		dims = SafeArrayGetDim(V_ARRAY(&proxy->obj->v));
+		indices = do_alloca(dims * sizeof(LONG));
+		/* copy indices from proxy */
+		for (i = 0; i < dims; i++) {
+			convert_to_long(proxy->indices[i]);
+			indices[i] = Z_LVAL_P(proxy->indices[i]);
+		}
+
+		/* add user-supplied index */
+		convert_to_long(offset);
+		indices[dims-1] = Z_LVAL_P(offset);
+
+		if (FAILED(SafeArrayGetVartype(V_ARRAY(&proxy->obj->v), &vt)) || vt == VT_EMPTY) {
+			vt = V_VT(&proxy->obj->v) & ~VT_ARRAY;
+		}
+
+		VariantInit(&v);
+		php_com_variant_from_zval(&v, value, proxy->obj->code_page TSRMLS_CC);
+
+		if (V_VT(&v) != vt) {
+			VariantChangeType(&v, &v, 0, vt);
+		}
+
+		if (vt == VT_VARIANT) {
+			res = SafeArrayPutElement(V_ARRAY(&proxy->obj->v), indices, &v);
+		} else {
+			res = SafeArrayPutElement(V_ARRAY(&proxy->obj->v), indices, &v.lVal);
+		}
+	
+		free_alloca(indices);
+		VariantClear(&v);
+
+		if (FAILED(res)) {
+			php_com_throw_exception(res, NULL TSRMLS_CC);
+		}
 	} else {
 		php_com_throw_exception(E_NOTIMPL, "invalid write to com proxy object" TSRMLS_CC);
 	}
@@ -366,7 +405,6 @@ static void saproxy_clone(void *object, void **clone_ptr TSRMLS_DC)
 {
 	php_com_saproxy *proxy = (php_com_saproxy *)object;
 	php_com_saproxy *cloneproxy;
-	int i;
 
 	cloneproxy = emalloc(sizeof(*cloneproxy));
 	memcpy(cloneproxy, proxy, sizeof(*cloneproxy));

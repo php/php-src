@@ -158,6 +158,7 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 	php_com_dotnet_object *obj;
 	zval *args[2];
 	VARIANT v;
+	HRESULT res;
 
 	obj = CDNO_FETCH(object);
 
@@ -176,8 +177,42 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 				DISPATCH_METHOD|DISPATCH_PROPERTYPUT, &v, 2, args TSRMLS_CC)) {
 			VariantClear(&v);
 		}
+	} else if (V_ISARRAY(&obj->v)) {
+		LONG indices = 0;
+		VARTYPE vt;
+		
+		if (SafeArrayGetDim(V_ARRAY(&obj->v)) == 1) {	
+			if (FAILED(SafeArrayGetVartype(V_ARRAY(&obj->v), &vt)) || vt == VT_EMPTY) {
+				vt = V_VT(&obj->v) & ~VT_ARRAY;
+			}
+
+			convert_to_long(offset);
+			indices = Z_LVAL_P(offset);
+
+			VariantInit(&v);
+			php_com_variant_from_zval(&v, value, obj->code_page TSRMLS_CC);
+
+			if (V_VT(&v) != vt) {
+				VariantChangeType(&v, &v, 0, vt);
+			}
+
+			if (vt == VT_VARIANT) {
+				res = SafeArrayPutElement(V_ARRAY(&obj->v), &indices, &v);
+			} else {
+				res = SafeArrayPutElement(V_ARRAY(&obj->v), &indices, &v.lVal);
+			}
+
+			VariantClear(&v);
+
+			if (FAILED(res)) {
+				php_com_throw_exception(res, NULL TSRMLS_CC);
+			}
+
+		} else {
+			php_com_throw_exception(DISP_E_BADINDEX, "this variant has multiple dimensions; you can't set a new value without specifying *all* dimensions" TSRMLS_CC);
+		}
+
 	} else {
-		/* TODO: check for safearray */
 		php_com_throw_exception(E_INVALIDARG, "this variant is not an array type" TSRMLS_CC);
 	}
 }
