@@ -83,14 +83,14 @@ PHPAPI int php_stream_free(php_stream *stream, int call_dtor) /* {{{ */
 			 */
 			return fclose(stream->stdiocast);
 		}
-		
+
 		php_stream_flush(stream);
 	}
-	
+
 	ret = stream->ops->close(stream, call_dtor);
 	stream->abstract = NULL;
-	
-	if (call_dtor) {	
+
+	if (call_dtor) {
 		/* tidy up any FILE* that might have been fdopened */
 		if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FDOPEN && stream->stdiocast) {
 			fclose(stream->stdiocast);
@@ -209,7 +209,7 @@ PHPAPI off_t php_stream_tell(php_stream *stream)
 
 PHPAPI int php_stream_seek(php_stream *stream, off_t offset, int whence)
 {
-	if (stream->ops->seek) {	
+	if (stream->ops->seek) {
 		return stream->ops->seek(stream, offset, whence);
 	}
 
@@ -227,7 +227,7 @@ PHPAPI int php_stream_seek(php_stream *stream, off_t offset, int whence)
 		}
 		return 0;
 	}
-	
+
 	zend_error(E_WARNING, "streams of type %s do not support seeking", stream->ops->label);
 	return -1;
 }
@@ -245,7 +245,7 @@ PHPAPI size_t php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen,
 
 	if (buf)
 		*buf = NULL;
-	
+
 	if (maxlen == 0)
 		return 0;
 
@@ -258,7 +258,7 @@ PHPAPI size_t php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen,
 	 * buffering layer.
 	 * */
 	if ( php_stream_is(src, PHP_STREAM_IS_STDIO) &&
-			php_stream_tell(src) == 0 && 
+			php_stream_tell(src) == 0 &&
 			SUCCESS == php_stream_cast(src, PHP_STREAM_AS_FD, (void**)&srcfd, 0))
 	{
 		struct stat sbuf;
@@ -268,7 +268,7 @@ PHPAPI size_t php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen,
 
 			if (maxlen > sbuf.st_size || maxlen == 0)
 				maxlen = sbuf.st_size;
-				
+
 			srcfile = mmap(NULL, maxlen, PROT_READ, MAP_SHARED, srcfd, 0);
 			if (srcfile != (void*)MAP_FAILED) {
 
@@ -278,7 +278,7 @@ PHPAPI size_t php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen,
 					memcpy(*buf, srcfile, maxlen);
 					ret = maxlen;
 				}
-				
+
 				munmap(srcfile, maxlen);
 				return ret;
 			}
@@ -286,7 +286,7 @@ PHPAPI size_t php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen,
 		/* fall through - we might be able to copy in smaller chunks */
 	}
 #endif
-	
+
 	ptr = *buf = pemalloc(persistent, step);
 	max_len = step;
 
@@ -322,24 +322,24 @@ PHPAPI size_t php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_
 
 	if (maxlen == PHP_STREAM_COPY_ALL)
 		maxlen = 0;
-	
+
 #if HAVE_MMAP
 	/* try and optimize the case where we are copying from the start of a plain file.
 	 * We could probably make this work in more situations, but I don't trust the stdio
 	 * buffering layer.
 	 * */
 	if ( php_stream_is(src, PHP_STREAM_IS_STDIO) &&
-			php_stream_tell(src) == 0 && 
+			php_stream_tell(src) == 0 &&
 			SUCCESS == php_stream_cast(src, PHP_STREAM_AS_FD, (void**)&srcfd, 0))
 	{
 		struct stat sbuf;
 
 		if (fstat(srcfd, &sbuf) == 0) {
 			void *srcfile;
-		
+
 			if (maxlen > sbuf.st_size || maxlen == 0)
 				maxlen = sbuf.st_size;
-			
+
 			srcfile = mmap(NULL, maxlen, PROT_READ, MAP_SHARED, srcfd, 0);
 			if (srcfile != (void*)MAP_FAILED) {
 				haveread = php_stream_write(dest, srcfile, maxlen);
@@ -350,7 +350,7 @@ PHPAPI size_t php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_
 		/* fall through - we might be able to copy in smaller chunks */
 	}
 #endif
-	
+
 	while(1) {
 		readchunk = sizeof(buf);
 
@@ -366,18 +366,22 @@ PHPAPI size_t php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_
 			towrite = didread;
 			writeptr = buf;
 			haveread += didread;
-			
+
 			while(towrite) {
 				didwrite = php_stream_write(dest, writeptr, towrite);
 
 				if (didwrite == 0)
 					return 0;	/* error */
-				
+
 				towrite -= didwrite;
 				writeptr += didwrite;
 			}
 		} else {
-			return 0; /* error */
+			if ( !maxlen) {
+				return haveread;
+			} else {
+				return 0; /* error */
+			}
 		}
 
 		if (maxlen - haveread == 0) {
@@ -386,7 +390,7 @@ PHPAPI size_t php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_
 	}
 
 	return haveread;
-	
+
 }
 /* }}} */
 
@@ -414,7 +418,7 @@ PHPAPI php_stream *php_stream_fopen_temporary_file(const char *dir, const char *
 		fclose(fp);
 
 		zend_error(E_WARNING, "%s(): unable to allocate stream", get_active_function_name(TSRMLS_C));
-		
+
 		return NULL;
 	}
 	return NULL;
@@ -424,7 +428,7 @@ PHPAPI php_stream *php_stream_fopen_tmpfile(void)
 {
 	FILE *fp;
 	php_stream *stream;
-	
+
 	fp = tmpfile();
 	if (fp == NULL) {
 		zend_error(E_WARNING, "tmpfile(): %s", strerror(errno));
@@ -465,7 +469,7 @@ static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
 	assert(data != NULL);
-	
+
 #if HAVE_FLUSHIO
 	if (data->last_op == 'r') {
 		fseek(data->file, 0, SEEK_CUR);
@@ -481,7 +485,7 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
 	assert(data != NULL);
-	
+
 	if (buf == NULL && count == 0)	{
 		/* check for EOF condition */
 		if (feof(data->file))	{
@@ -495,7 +499,7 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 		fseek(data->file, 0, SEEK_CUR);
 	data->last_op = 'r';
 #endif
-	
+
 	return fread(buf, 1, count, data->file);
 }
 
@@ -517,7 +521,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 	}
 
 	efree(data);
-	
+
 	return ret;
 }
 
@@ -526,7 +530,7 @@ static int php_stdiop_flush(php_stream *stream)
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
 	assert(data != NULL);
-	
+
 	return fflush(data->file);
 }
 
@@ -538,7 +542,7 @@ static int php_stdiop_seek(php_stream *stream, off_t offset, int whence)
 
 	if (offset == 0 && whence == SEEK_CUR)
 		return ftell(data->file);
-	
+
 	return fseek(data->file, offset, whence);
 }
 
@@ -553,14 +557,14 @@ static char *php_stdiop_gets(php_stream *stream, char *buf, size_t size)
 	}
 	data->last_op = 'r';
 #endif
-	
+
 	return fgets(buf, size, data->file);
 }
 static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 {
 	int fd;
 	php_stdio_stream_data *data = (php_stdio_stream_data*) stream->abstract;
- 
+
 	assert(data != NULL);
 
 	switch (castas)	{
@@ -659,7 +663,7 @@ PHPAPI php_stream *php_stream_fopen_with_path(char *filename, char *mode, char *
 				|| exec_fname_length<=0) {
 			/* [no active file] or no path */
 			pathbuf = estrdup(path);
-		} else {		
+		} else {
 			pathbuf = (char *) emalloc(exec_fname_length + path_length +1 +1);
 			memcpy(pathbuf, path, path_length);
 			pathbuf[path_length] = DEFAULT_DIR_SEPARATOR;
@@ -714,7 +718,7 @@ PHPAPI php_stream *php_stream_fopen(const char *filename, const char *mode, char
 	char *realpath = NULL;
 
 	realpath = expand_filepath(filename, NULL TSRMLS_CC);
-	
+
 	fp = fopen(realpath, mode);
 
 	if (fp)	{
@@ -774,7 +778,7 @@ PHPAPI int php_stream_cast(php_stream *stream, int castas, void **ret, int show_
 {
 	int flags = castas & PHP_STREAM_CAST_MASK;
 	castas &= ~PHP_STREAM_CAST_MASK;
-	
+
 	if (castas == PHP_STREAM_AS_STDIO) {
 		if (stream->stdiocast) {
 			if (ret) {
@@ -851,7 +855,7 @@ exit_success:
 			php_stream_free(stream, 0);
 		}
 	}
-	
+
 	return SUCCESS;
 
 } /* }}} */
@@ -928,10 +932,10 @@ static php_stream *php_stream_open_url(char *path, char *mode, int options, char
 PHPAPI php_stream *php_stream_open_wrapper(char *path, char *mode, int options, char **opened_path TSRMLS_DC)
 {
 	php_stream *stream = NULL;
-	
+
 	if (opened_path)
 		*opened_path = NULL;
-	
+
 	if (!path || !*path)
 		return NULL;
 
@@ -939,7 +943,7 @@ PHPAPI php_stream *php_stream_open_wrapper(char *path, char *mode, int options, 
 		stream = php_stream_open_url(path, mode, options, opened_path TSRMLS_CC);
 		goto out;
 	}
-		
+
 	if ((options & USE_PATH) && PG(include_path) != NULL)	{
 		stream = php_stream_fopen_with_path(path, mode, PG(include_path), opened_path TSRMLS_CC);
 		goto out;
@@ -947,7 +951,7 @@ PHPAPI php_stream *php_stream_open_wrapper(char *path, char *mode, int options, 
 
 	if ((options & ENFORCE_SAFE_MODE) && PG(safe_mode) && (!php_checkuid(path, mode, CHECKUID_CHECK_MODE_PARAM)))
 		return NULL;
-	
+
 	stream = php_stream_fopen(path, mode, opened_path TSRMLS_CC);
 out:
 	if (stream == NULL && (options & REPORT_ERRORS))	{
