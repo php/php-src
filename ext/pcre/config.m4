@@ -8,7 +8,7 @@ AC_MSG_CHECKING(whether to include PCRE support)
 AC_ARG_WITH(pcre-regex,
 [  --with-pcre-regex[=DIR] Include Perl Compatible Regular Expressions support],[
   if test "$withval" = "yes"; then
-    EXTRA_LIBS="-Lext/pcre/pcrelib -lpcre $EXTRA_LIBS"
+    EXTRA_LIBS="-L$abs_builddir/ext/pcre/pcrelib -lpcre $EXTRA_LIBS"
     PCRE_SUBDIR="pcrelib"
     AC_DEFINE(HAVE_PCRE, 1)
     AC_MSG_RESULT(yes)
@@ -17,7 +17,7 @@ AC_ARG_WITH(pcre-regex,
     AC_MSG_RESULT(no)
   fi
 ],[
-  EXTRA_LIBS="-Lext/pcre/pcrelib -lpcre $EXTRA_LIBS"
+  EXTRA_LIBS="-L$abs_builddir/ext/pcre/pcrelib -lpcre $EXTRA_LIBS"
   PCRE_SUBDIR="pcrelib"
   AC_DEFINE(HAVE_PCRE, 1)
   AC_MSG_RESULT(yes)

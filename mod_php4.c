@@ -208,7 +208,9 @@ static void init_request_info(SLS_D)
 	SG(request_info).path_translated = r->filename;
 	SG(request_info).request_uri = r->uri;
 	SG(request_info).request_method = (char *)r->method;
+	printf("Obtaining content type...\n");
 	SG(request_info).content_type = (char *) table_get(r->subprocess_env, "CONTENT_TYPE");
+	printf("Obtained content type:  %s\n", SG(request_info).content_type);
 	SG(request_info).content_length = (content_length ? atoi(content_length) : 0);
 
 	if (r->headers_in) {
@@ -238,6 +240,9 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 	int fd, retval;
 	SLS_FETCH();
 
+	if (setjmp(EG(bailout))!=0) {
+		return OK;
+	}
 	/* We don't accept OPTIONS requests, but take everything else */
 	if (r->method_number == M_OPTIONS) {
 		r->allowed |= (1 << METHODS) - 1;
@@ -291,12 +296,13 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 	hard_timeout("send", r);
 
 	SG(server_context) = r;
-	init_request_info(SLS_C);
 	
 	php_save_umask();
 	chdir_file(filename);
 	add_common_vars(r);
 	add_cgi_vars(r);
+
+	init_request_info(SLS_C);
 	apache_php_module_main(r, fd, display_source_mode SLS_CC);
 
 	/* Done, restore umask, turn off timeout, close file and return */
@@ -382,6 +388,7 @@ int php_xbithack_handler(request_rec * r)
 void php_init_handler(server_rec *s, pool *p)
 {
 	register_cleanup(p, NULL, php_module_shutdown, php_module_shutdown_for_exec);
+	sapi_startup(&sapi_module);
 	php_module_startup(&sapi_module);
 #if MODULE_MAGIC_NUMBER >= 19980527
 	ap_add_version_component("PHP/" PHP_VERSION);
