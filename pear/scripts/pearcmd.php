@@ -46,7 +46,8 @@ PEAR_Command::setFrontendType('CLI');
 $all_commands = PEAR_Command::getCommands();
 
 $argv = Console_Getopt::readPHPArgv();
-$progname = basename($argv[0]);
+/* $progname = basename($argv[0]); */
+$progname = 'pear';
 array_shift($argv);
 $options = Console_Getopt::getopt2($argv, "c:C:d:D:Gh?sSqu:vV");
 if (PEAR::isError($options)) {
