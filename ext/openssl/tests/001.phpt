@@ -1,7 +1,8 @@
 --TEST--
 OpenSSL private key functions
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php // vim600:syn=php
+include('skipif.inc'); ?>
 --POST--
 --GET--
 --FILE--
