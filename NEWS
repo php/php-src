@@ -54,7 +54,6 @@ PHP                                                                        NEWS
 - Fixed bug #29061 (soap extension segfaults). (Dmitry)
 - Fixed bug #28985 (__getTypes() returning nothing on complex WSDL). (Dmitry)
 - Fixed bug #28969 (Wrong data encoding of special characters). (Dmitry)
-- Fixed bug #27183 (Userland stream wrapper segfaults on stream_write). (Christian)
 
 13 Jul 2004, PHP 5.0.0
 - Rewritten UNIX and Windows install help files. (Documentation Team)
