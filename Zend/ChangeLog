@@ -1,3 +1,15 @@
+2003-12-05  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c
+      zend_execute.c:
+      - Remove two unneeded convert_to_string() (found by Marcus)
+      - Change illegal use of string offset to E_ERROR
+
+2003-12-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_default_classes.c:
+      Fixed crash demonstrated with ext/dom/tests/dom003.phpt test case.
+
 2003-12-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * zend_execute.c:

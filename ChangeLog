@@ -1,3 +1,233 @@
+2003-12-05  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/config.w32:
+      openssl support for the new build
+
+2003-12-05  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * pear/Console/Getopt.php:
+      MFB
+
+    * (PHP_4_3)
+      pear/Console/Getopt.php:
+      Remove erroneous array_shift(). The args passed to Getopt are supposed
+      to be without leading command name anyway. This has been the rule since
+      the first release.
+
+2003-12-05  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/config.w32:
+      Fix the xsl warnings
+
+2003-12-05  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/dom/config.w32
+      ext/simplexml/config.w32
+      ext/xml/config.w32
+      ext/xsl/config.w32:
+      Tweak xml related build.
+      Still some warnings for ext/xsl, but I'll leave that to someone else for
+      now.
+
+    * ext/standard/streamsfuncs.c:
+      Probable fix for #26534
+
+    * ext/iconv/config.w32
+      ext/xsl/config.w32
+      ext/zlib/config.w32:
+      Use Rob's static libxml+libiconv library; new build no longer
+      requires libxml2.dll or iconv.dll at runtime.
+      Since we have iconv built in, enable iconv extension by
+      default too.
+
+2003-12-05  Frank M. Kromann  <frank@kromann.info>
+
+    * win32/builddef.bat:
+      Move the echo off statement to the top of the file. This removes commens
+      from the final def file
+
+2003-12-05  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      Fix bug #26531: get_elements_by_tag_name() wildcard fails
+
+2003-12-05  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/tests/iconv_stream_filter.phpt:
+      A trivial implement for dos-like platforms
+
+    * ext/iconv/tests/iconv_stream_filter.phpt
+      ext/iconv/tests/iconv_stream_filter.txt:
+      Add regression test for iconv stream filters
+
+2003-12-05  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/sqlite/php_sqlite.def:
+      dos line endings
+
+    * win32/EngineSelect.bat
+      win32/builddef.bat:
+      convert to DOS line endings to solve win98 issues
+
+    * README.WIN32-BUILD-SYSTEM:
+      rewrite
+
+2003-12-05  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c:
+      - Remove two unneeded convert_to_string() (found by Marcus)
+      - Change illegal use of string offset to E_ERROR
+
+2003-12-05  Christian Stocker  <chregu@phant.ch>
+
+    * ext/dom/tests/dom_test.inc:
+      fix test
+
+2003-12-05  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/proc_open.c:
+      fix unix build....
+
+    * run-tests.php
+      ext/standard/proc_open.c:
+      Add optional array argument to proc_open() to specify additional
+      options for the child process.
+      The first option is "suppress_errors" which will disable any
+      dialog boxes that arise from missing DLL's and suppress the
+      GPF dialog.
+      Use this new feature in the test suite, so that crashing tests don't block
+      the test run; useful for un-attended execution.
+
+    * ext/com_dotnet/tests/variants.phpt
+      ext/session/tests/skipif.inc
+      ext/sqlite/tests/blankdb.inc
+      ext/sqlite/tests/blankdb_oo.inc
+      ext/sqlite/tests/sqlite_001.phpt
+      ext/sqlite/tests/sqlite_015.phpt
+      ext/sqlite/tests/sqlite_017.phpt
+      ext/sqlite/tests/sqlite_oo_020.phpt
+      ext/standard/tests/strings/bug24098.phpt
+      ext/standard/tests/strings/nl2br.phpt:
+      Make these tests work under win32
+
+    * ext/standard/tests/network/udgloop.phpt
+      ext/standard/tests/network/udp6loop.phpt
+      ext/standard/tests/network/unixloop.phpt
+      main/streams/streams.c:
+      Be smarter about which systems should register unix transports.
+      Fix skip conditions in these network tests
+
+    * TSRM/tsrm_virtual_cwd.c:
+      fix uninitialized variable
+
+2003-12-05  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * TSRM/tsrm_virtual_cwd.c:
+      Fix for the problem I posted to internals@.
+
+2003-12-05  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/xml/compat.c:
+      xmlCtxtSetOptions() isn't available in the versions up to 2.6.x
+
+    * ext/xml/compat.c
+      main/php_compat.h:
+      Fix libexpat build.
+      Improve replaceEntities patch.
+
+    * ext/iconv/iconv.c:
+      Add a missing marker
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      Revert crap.
+
+2003-12-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/tests/bug25756.phpt:
+      Update test
+
+2003-12-05  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/exif/config.w32:
+      Include exif in the new win32 build system
+
+2003-12-05  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/mysql/config.w32:
+      Support for new Win32 build bliss.
+
+2003-12-05  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/iconv/config.w32
+      ext/iconv/iconv.c:
+      fix zts build
+
+    * ext/com_dotnet/config.w32:
+      check for .net headers
+
+    * sapi/isapi/config.w32
+      sapi/nsapi/config.w32:
+      use /Ox flag for release build (all optimizations on).
+      If no php_build dir is specified, then look for either of the two
+      "standard" things in reasonable locations.
+      Allow CHECK_LIB to search for the "same" library using a ; separated
+      list of alternatives.
+      Tweak nsapi config and remove redundant or unused flags.
+      Add ZTS checks for both isapi and nsapi configs.
+
+2003-12-05  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/sqlite/tests/sqlite_002.phpt
+      ext/sqlite/tests/sqlite_003.phpt
+      ext/sqlite/tests/sqlite_004.phpt
+      ext/sqlite/tests/sqlite_005.phpt
+      ext/sqlite/tests/sqlite_006.phpt
+      ext/sqlite/tests/sqlite_007.phpt
+      ext/sqlite/tests/sqlite_008.phpt
+      ext/sqlite/tests/sqlite_009.phpt
+      ext/sqlite/tests/sqlite_010.phpt
+      ext/sqlite/tests/sqlite_011.phpt
+      ext/sqlite/tests/sqlite_012.phpt
+      ext/sqlite/tests/sqlite_013.phpt
+      ext/sqlite/tests/sqlite_014.phpt
+      ext/sqlite/tests/sqlite_015.phpt
+      ext/sqlite/tests/sqlite_016.phpt
+      ext/sqlite/tests/sqlite_017.phpt
+      ext/sqlite/tests/sqlite_018.phpt
+      ext/sqlite/tests/sqlite_019.phpt
+      ext/sqlite/tests/sqlite_022.phpt
+      ext/sqlite/tests/sqlite_023.phpt
+      ext/sqlite/tests/sqlite_024.phpt:
+      Made test work on windows
+
+2003-12-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_default_classes.c:
+      Fixed crash demonstrated with ext/dom/tests/dom003.phpt test case.
+
+    * NEWS
+      ext/xml/compat.c
+      ext/xml/tests/bug26528.phpt:
+      Fixed bug #26528 (HTML entities are not being decoded by
+      xml_parse()/xml_parse_into_struct()).
+
+2003-12-05  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/pgsql/config.w32
+      ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+      Get rid of PHPAPI usage.
+      Enable shared build in the new php5 build system
+      Check for the correct header.
+
+2003-12-05  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/config.w32:
+      First version... Wez: can you check this...
+
 2003-12-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/iconv/iconv.c:
