@@ -2,6 +2,11 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+<<<<<<< ChangeLog
+<<<<<<< ChangeLog
+- Renamed allow_builtin_links to expose_php (defaults to On).  This directive
+  tells PHP whether it may expose its existence to the outside world, e.g.
+  by adding itself to the Web server header (Zeev)
 - Added support for transparent session id propagation (Sascha)
 - Made WDDX serialize object properties properly (Andrey)
 - Fixed WDDX mem leak when undefined variable is passed in
@@ -22,7 +27,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 - Resourcified Informix driver (Danny)
 - New resource handling for odbc, renamed to php_odbc.[ch]
 - Make set_time_limit() work on Unix (Rasmus)
-- Add connection handling support (Rasmus)
+- Added connection handling support (Rasmus)
 - Improved the Sybase-CT module to make use of resources (Zeev)
 - Improved the mSQL module to make use of resources (Zeev)
 - Changed mysql_query() and mysql_db_query() to return false in case of saving

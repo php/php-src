@@ -207,7 +207,7 @@ static int zend_ub_body_write(const char *str, uint str_length)
 		}
 
 		zend_body_write = zend_ub_body_write_no_header;
-		result = zend_header_write(str, str_length);
+		result = zend_ub_body_write_no_header(str, str_length);
 
 		if (newstr) {
 			free(newstr);
