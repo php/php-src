@@ -1992,10 +1992,14 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 		}
 
 		/* Time zone support */
-#if HAVE_TM_GMTOFF
+#ifdef HAVE_TM_GMTOFF
 		sprintf(tzbuf, "%c%02d%02d", (ta->tm_gmtoff < 0) ? '-' : '+', abs(ta->tm_gmtoff / 3600), abs( (ta->tm_gmtoff % 3600) / 60 ));
 #else
+# ifdef ZEND_WIN32
+		sprintf(tzbuf, "%c%02d%02d", ((ta->tm_isdst ? timezone - 3600:timezone)>0)?'-':'+', abs((ta->tm_isdst ? timezone - 3600 : timezone) / 3600), abs(((ta->tm_isdst ? timezone - 3600 : timezone) % 3600) / 60));
+# else
 		sprintf(tzbuf, "%c%02d%02d", ((ta->tm_isdst ? tzone - 3600:tzone)>0)?'-':'+', abs((ta->tm_isdst ? tzone - 3600 : tzone) / 3600), abs(((ta->tm_isdst ? tzone - 3600 : tzone) % 3600) / 60));
+# endif
 #endif
 		if (strcmp(tzbuf,"+0000") == 0) {
 		  strcpy(tzbuf,"Z");

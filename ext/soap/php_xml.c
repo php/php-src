@@ -162,6 +162,7 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 	return ret;
 }
 
+#ifndef ZEND_ENGINE_2
 int php_stream_xmlIO_match_wrapper(const char *filename)
 {
 	TSRMLS_FETCH();
@@ -185,6 +186,7 @@ int php_stream_xmlIO_close(void *context)
 	TSRMLS_FETCH();
 	return php_stream_close((php_stream*)context);
 }
+#endif
 
 xmlNsPtr attr_find_ns(xmlAttrPtr node)
 {
