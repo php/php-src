@@ -1,3 +1,70 @@
+2000-03-16  Andi Gutmans  <andi@php.net>
+
+    * php_virtual_cwd.c: - Last one for today.
+
+    * php_virtual_cwd.c:
+    - Allow passing of a verify function. This way we can easily create
+      chdir() and expandpath() wrappers.
+
+    * SAPI.c: - Note quite sure why this wasn't done.
+
+2000-03-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * php_virtual_cwd.c: Cleanup
+
+    * php_virtual_cwd.c: Merge in local changes
+
+2000-03-16  Andi Gutmans  <andi@php.net>
+
+    * php_virtual_cwd.c: - php_is_dir_ok() should work on Windows now.
+
+    * php_virtual_cwd.c: - Fix a leak (I think)
+
+    * php_virtual_cwd.c: - Make it compile on Windows.
+
+2000-03-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * php_virtual_cwd.c: Use old_state
+
+    * php_virtual_cwd.c: (php_check_dots) we don't need len
+
+    * php_virtual_cwd.c: virtual_chdir:
+
+    * added error handling
+    * fixed the special case where there were more DIRECTORY_UPs than
+      directory parts (i.e. cwd is d:\foo and path is ../..)
+    * no spaces between # and preprocessor directive - breaks some compilers
+
+2000-03-16  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/standard/var.c:
+    restore compilation on ZTS enabled environments (like Windows)
+
+2000-03-16  Andi Gutmans  <andi@php.net>
+
+    * php_virtual_cwd.c:
+    - Add initial virtual_getcwd() and virtual_chdir() for discussing with the
+      rest of the folks
+
+2000-03-16  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+     Added is_numeric() that returns true if the argument is a number
+     or a numeric string. 
+
+2000-03-16  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: share some thoughts
+
+    * ext/standard/info.c: *** empty log message ***
+
+    * ext/standard/var.c:
+    - serialize()/unserialize() now call _sleep_() and _wakeup_() when
+      working on objects. 
+    - renamed to_string() method to _string_value_() for consistency.
+      (Thies, Zend library)
+
 2000-03-15  Joey Smith  <joey@samaritan.com>
 
     * ext/recode/.cvsignore: Adding .cvsignore to ext/recode
