@@ -237,14 +237,16 @@ ZEND_GET_MODULE(mcrypt)
 #define MCRYPT_ENTRY2_4(a) MCRYPT_ENTRY_NAMED(a, a)
 #endif
 
+#if HAVE_LIBMCRYPT24
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mcrypt.algorithms_dir",	NULL, PHP_INI_ALL, OnUpdateString, algorithms_dir, zend_mcrypt_globals, mcrypt_globals)
 	STD_PHP_INI_ENTRY("mcrypt.modes_dir",	NULL, PHP_INI_ALL, OnUpdateString, modes_dir, zend_mcrypt_globals, mcrypt_globals)
 PHP_INI_END()
+#endif
 
 static PHP_MINIT_FUNCTION(mcrypt)
 {
-#ifdef ZTS
+#if defined(ZTS) && defined(HAVE_LIBMCRYPT24)
     ZEND_INIT_MODULE_GLOBALS(mcrypt, NULL, NULL);
     mcrypt_module_entry.type = type;
 #endif
@@ -329,8 +331,8 @@ static PHP_MINIT_FUNCTION(mcrypt)
 	MCRYPT_ENTRY2_2_4(MODE_NOFB, "nofb");
 	MCRYPT_ENTRY2_2_4(MODE_OFB, "ofb");
 	MCRYPT_ENTRY2_2_4(MODE_STREAM, "stream");
-#endif
 	REGISTER_INI_ENTRIES();
+#endif
 	return SUCCESS;
 }
 
