@@ -129,6 +129,12 @@ void zend_register_standard_constants(ELS_D)
 		c.value.value.lval = 0;
 		c.value.type = IS_BOOL;
 		zend_register_constant(&c ELS_CC);
+
+		c.name = zend_strndup("SQL_NULL",8);
+		c.name_len = 9;
+		c.value.value.lval = 0;
+		c.value.type = IS_LONG;
+		zend_register_constant(&c ELS_CC);
 	}
 }
 
