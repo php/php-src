@@ -5,6 +5,15 @@ For the impatient here is a quick set of steps that will build PHP as
 first a dynamic Apache module (DSO) for Apache 1.3.x with MySQL support 
 and then a static module.  A more verbose explanation follows.  
 
+For installing PHP on other web servers, refer to one of the following
+files:
+
+    sapi/aolserver/README
+    sapi/pi3web/README
+    sapi/servlet/README
+    sapi/thttpd/README
+    README.Zeus
+
 Note!  Only install either the static module or the dynamic one.  Do not
 install both.  
 
