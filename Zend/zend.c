@@ -315,7 +315,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 static void executor_globals_dtor(zend_executor_globals *executor_globals TSRMLS_DC)
 {
 	zend_shutdown_constants(TSRMLS_C);
-	zend_destroy_rsrc_plist(TSRMLS_C);
+	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 	zend_ini_shutdown(TSRMLS_C);
 }
 
@@ -437,7 +437,7 @@ void zend_shutdown(TSRMLS_D)
 	zend_shutdown_timeout_thread();
 #endif
 #ifndef ZTS
-	zend_destroy_rsrc_plist();
+	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 #endif
 	zend_destroy_rsrc_list_dtors();
 	zend_hash_destroy(&module_registry);

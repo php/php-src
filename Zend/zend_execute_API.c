@@ -177,9 +177,10 @@ void shutdown_executor(TSRMLS_D)
 		zend_hash_apply(EG(class_table), (apply_func_t) is_not_internal_class TSRMLS_CC);
 	} zend_end_try();
 
-	zend_destroy_rsrc_list(TSRMLS_C); /* must be destroyed after the main symbol table and
-									* op arrays are destroyed.
-									*/
+	/* The regular list must be destroyed after the main symbol table and
+	 * op arrays are destroyed.
+	 */
+	zend_destroy_rsrc_list(&EG(regular_list) TSRMLS_CC);
 
 	zend_try {
 		clean_non_persistent_constants(TSRMLS_C);

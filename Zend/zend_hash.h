@@ -37,8 +37,6 @@ typedef ulong (*hash_func_t)(char *arKey, uint nKeyLength);
 typedef int  (*compare_func_t)(const void *, const void *);
 typedef void (*sort_func_t)(void *, size_t, register size_t, compare_func_t);
 typedef void (*dtor_func_t)(void *pDest);
-typedef int (*apply_func_t)(void *pDest TSRMLS_DC);
-typedef int (*apply_func_arg_t)(void *pDest, void *argument TSRMLS_DC);
 typedef void (*copy_ctor_func_t)(void *pElement);
 
 struct _hashtable;
@@ -81,8 +79,6 @@ BEGIN_EXTERN_C()
 ZEND_API int zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, int persistent);
 ZEND_API int zend_hash_init_ex(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, int persistent, zend_bool bApplyProtection);
 ZEND_API void zend_hash_destroy(HashTable *ht);
-ZEND_API void zend_hash_reverse_destroy(HashTable *ht);
-
 ZEND_API void zend_hash_clean(HashTable *ht);
 
 /* additions/updates/changes */
@@ -113,6 +109,8 @@ typedef struct _zend_hash_key {
 } zend_hash_key;
 
 
+typedef int (*apply_func_t)(void *pDest TSRMLS_DC);
+typedef int (*apply_func_arg_t)(void *pDest, void *argument TSRMLS_DC);
 typedef int (*apply_func_args_t)(void *pDest, int num_args, va_list args, zend_hash_key *hash_key);
 
 ZEND_API void zend_hash_graceful_destroy(HashTable *ht);
