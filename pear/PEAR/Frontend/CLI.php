@@ -355,6 +355,20 @@ class PEAR_Frontend_CLI extends PEAR
     {
         switch ($command)
         {
+            case 'install':
+            case 'upgrade':
+                if (isset($data['release_warnings'])) {
+                    $this->_displayLine('');
+                    $this->_startTable(array(
+                        'border' => true,
+                        'caption' => 'Release Warnings'
+                        ));
+                    $this->_tableRow(array($data['release_warnings']), null, array(1 => array('wrap' => 55)));
+                    $this->_endTable();
+                    $this->_displayLine('');
+                };
+                $this->_displayLine($data['data']);
+                break;
             case 'search':
                 $this->_startTable($data);
                 if (isset($data['headline']) && is_array($data['headline']))

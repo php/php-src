@@ -246,7 +246,11 @@ specified at once.
             if (is_array($info)) {
                 if ($this->config->get('verbose') > 0) {
                     $label = "$info[package] $info[version]";
-                    $this->ui->outputData("$command ok: $label", $command);
+                    $out = array('data' => "$command ok: $label");
+                    if (isset($info['release_warnings'])) {
+                        $out['release_warnings'] = $info['release_warnings'];
+                    }
+                    $this->ui->outputData($out, $command);
                 }
             } else {
                 return $this->raiseError("$command failed");
