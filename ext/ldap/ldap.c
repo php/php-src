@@ -450,70 +450,76 @@ PHP_FUNCTION(ldap_unbind)
 
 static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 {
-	pval **link, **base_dn, **filter, **attrs, **attr;
+	pval **link, **base_dn, **filter, **attrs, **attr, **attrsonly, **sizelimit, **timelimit, **deref;
 	char *ldap_base_dn, *ldap_filter;
 	LDAP *ldap;
 	char **ldap_attrs = NULL; 
-	int attrsonly;
+	int ldap_attrsonly = 0; /* 0 = types & values , 1 = only attributes types */
+	int ldap_sizelimit = 0; /* LDAP_NO_LIMIT 0        */
+	int ldap_timelimit = 0; /* 0 = no timelimit?      */
+	int ldap_deref = 0;		/* LDAP_DEREF_NEVER 0, LDAP_DEREF_SEARCHING 1, LDAP_DEREF_FINDING 2, LDAP_DEREF_ALWAYS 3 */
 	LDAPMessage *ldap_result;
-	int num_attribs=0, i;
+	int num_attribs = 0;
+	int i, errno;
+	int myargcount = ZEND_NUM_ARGS();
 	LDAPLS_FETCH();
+  
+	if (myargcount < 3 || myargcount > 8 || zend_get_parameters_ex(myargcount, &link, &base_dn, &filter, &attrs, &attrsonly, &sizelimit, &timelimit, &deref) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
 
-	switch(ZEND_NUM_ARGS()) {
-		case 3 :
-			if (zend_get_parameters_ex(3, &link, &base_dn,&filter) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
+	/* Reverse -> fall through */
+	switch(myargcount) {
+		case 8 :
+			convert_to_long_ex(deref);
+			ldap_deref = (*deref)->value.lval;
 
-			convert_to_string_ex(base_dn);
-			convert_to_string_ex(filter);
+		case 7 :
+			convert_to_long_ex(timelimit);
+			ldap_timelimit = (*timelimit)->value.lval;
 
-			ldap_base_dn = (*base_dn)->value.str.val;
-			ldap_filter = (*filter)->value.str.val;
+		case 6 :
+			convert_to_long_ex(sizelimit);
+			ldap_sizelimit = (*sizelimit)->value.lval;
 
-			break;
+		case 5 :
+			convert_to_long_ex(attrsonly);
+			ldap_attrsonly = (*attrsonly)->value.lval;
 
 		case 4 : 
-			if (zend_get_parameters_ex(4, &link, &base_dn,&filter, &attrs) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-
 			if ((*attrs)->type != IS_ARRAY) {
 				php_error(E_WARNING, "LDAP: Expected Array as last element");
 				RETURN_FALSE;
 			}
 
-			convert_to_string_ex(base_dn);
-			convert_to_string_ex(filter);
-
-			ldap_base_dn = (*base_dn)->value.str.val;
-			ldap_filter = (*filter)->value.str.val;
-
 			num_attribs = zend_hash_num_elements((*attrs)->value.ht);
 			if ((ldap_attrs = emalloc((num_attribs+1) * sizeof(char *))) == NULL) {
 				php_error(E_WARNING, "LDAP: Could not allocate memory");
 				RETURN_FALSE;
-				return;
 			}
 
 			for(i=0; i<num_attribs; i++) {
-				if(zend_hash_index_find((*attrs)->value.ht, i, (void **) &attr) == FAILURE)
-{
+				if(zend_hash_index_find((*attrs)->value.ht, i, (void **) &attr) == FAILURE) {
 					php_error(E_WARNING, "LDAP: Array initialization wrong");
 					RETURN_FALSE;
-					return;
 				}
+
 				SEPARATE_ZVAL(attr);
 				convert_to_string_ex(attr);
 				ldap_attrs[i] = (*attr)->value.str.val;
 			}
 			ldap_attrs[num_attribs] = NULL;
-
-			break;
+		
+		case 3 :
+			convert_to_string_ex(base_dn);
+			convert_to_string_ex(filter);
+			ldap_base_dn = (*base_dn)->value.str.val;
+			ldap_filter = (*filter)->value.str.val;
+		break;
 
 		default:
 			WRONG_PARAM_COUNT;
-			break;
+		break;
 	}
 
 	/* fix to make null base_dn's work */
@@ -524,32 +530,47 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_FALSE;
 
-	/* Is it useful to only get the attributes ? */
-	attrsonly = 0;	
+	/* sizelimit */
+	if(ldap_sizelimit > 0) {
+		ldap->ld_sizelimit = ldap_sizelimit; 
+	}
 
-	/* We can possibly add the timeout value also */
+	/* timelimit */
+	if(ldap_timelimit > 0) {
+		ldap->ld_timelimit = ldap_timelimit; 
+	}
 
-	if (ldap_search_s(ldap, ldap_base_dn, scope, ldap_filter, ldap_attrs, attrsonly, &ldap_result) != LDAP_SUCCESS) {
+	/* deref */
+	if(ldap_deref > 0) {
+		ldap->ld_deref = ldap_deref; 
+	}
+
+	/* Run the actual search */	
+	errno = ldap_search_s(ldap, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly, &ldap_result);
+
+	if (ldap_attrs != NULL) {
+		efree(ldap_attrs);
+	}
+
+	if (errno != LDAP_SUCCESS && errno != LDAP_SIZELIMIT_EXCEEDED) {
 #if !HAVE_NSLDAP
 #if LDAP_API_VERSION > 2000
-		php_error(E_WARNING,"LDAP:  Unable to perform the search: %s",ldap_err2string(ldap_get_lderrno(ldap,NULL,NULL)));
+		php_error(E_WARNING,"LDAP: Unable to perform the search: %s",ldap_err2string(ldap_get_lderrno(ldap,NULL,NULL)));
 #else
 		php_error(E_WARNING, "LDAP: Unable to perform the search: %s", ldap_err2string(ldap->ld_errno));
 #endif
 #endif
-		RETVAL_FALSE;
-	} else  {
+		RETVAL_FALSE; 
+	} else {
+		if (errno == LDAP_SIZELIMIT_EXCEEDED)  {
+			php_error(E_WARNING,"LDAP: Partial search results returned: Sizelimit exceeded.");
+		}
 		RETVAL_LONG(zend_list_insert(ldap_result, le_result));
 	}
-
-	if (ldap_attrs != NULL) {
-	  /*	for(i=0; i<num_attribs; i++) efree(ldap_attrs[i]); */
-		efree(ldap_attrs);
-	}
-	return;
 }
 
-/* {{{ proto int ldap_read(int link, string base_dn, string filter [, array attributes])
+
+/* {{{ proto int ldap_read(int link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]] )
    Read an entry */
 PHP_FUNCTION(ldap_read)
 {
@@ -557,7 +578,8 @@ PHP_FUNCTION(ldap_read)
 }
 /* }}} */
 
-/* {{{ proto int ldap_list(int link, string base_dn, string filter [, array attributes])
+
+/* {{{ proto int ldap_list(int link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]] )
    Single-level search */
 PHP_FUNCTION(ldap_list)
 {
@@ -566,13 +588,14 @@ PHP_FUNCTION(ldap_list)
 /* }}} */
 
 
-/* {{{ proto int ldap_search(int link, string base_dn, string filter [, array attributes])
+/* {{{ proto int ldap_search(int link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]] )
    Search LDAP tree under base_dn */
 PHP_FUNCTION(ldap_search)
 {
 	php_ldap_do_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_SCOPE_SUBTREE);
 }
 /* }}} */
+
 
 /* {{{ proto int ldap_free_result(int result)
    Free result memory */
@@ -1292,7 +1315,6 @@ PHP_FUNCTION(ldap_errno) {
 #else
 	RETURN_LONG( ldap_get_lderrno(ldap, NULL, NULL) );
 #endif
-	RETURN_LONG(0);
 }
 /* }}} */
 
