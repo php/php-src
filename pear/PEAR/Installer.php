@@ -110,15 +110,15 @@ class PEAR_Installer extends PEAR_Common
         } elseif (!@is_file($pkgfile)) {
             return $this->raiseError("Could not open the package file: $pkgfile");
         }
+
         // Download package -----------------------------------------------
         if ($need_download) {
             $file = basename($pkgfile);
-            // XXX FIXME use ??? on Windows, use $TMPDIR on unix (use tmpnames?)
-            $downloaddir = '/tmp/pearinstall';
-            if (!$this->mkDirHier($downloaddir)) {
-                return $this->raiseError("Failed to create tmp dir: $downloaddir");
+            if (PEAR::isError($downloaddir = $this->mkTempDir())) {
+                return $downloaddir;
             }
-            $downloadfile = $downloaddir.DIRECTORY_SEPARATOR.$file;
+            $this->log(2, '+ tmp dir created at ' . $downloaddir);
+            $downloadfile = $downloaddir . DIRECTORY_SEPARATOR . $file;
             $this->log(1, "downloading $pkgfile ...");
             if (!$fp = @fopen($pkgfile, 'r')) {
                 return $this->raiseError("$pkgfile: failed to download ($php_errormsg)");
@@ -126,7 +126,6 @@ class PEAR_Installer extends PEAR_Common
             if (!$wp = @fopen($downloadfile, 'w')) {
                 return $this->raiseError("$downloadfile: write failed ($php_errormsg)");
             }
-            $this->addTempFile($downloadfile);
             $bytes = 0;
             while ($data = @fread($fp, 16384)) {
                 $bytes += strlen($data);
@@ -148,18 +147,13 @@ class PEAR_Installer extends PEAR_Common
         }
         $pkgfile = getcwd() . DIRECTORY_SEPARATOR . basename($pkgfile);
 
-        // XXX FIXME Windows
-        $this->tmpdir = tempnam('/tmp', 'pear');
-        unlink($this->tmpdir);
-        if (!mkdir($this->tmpdir, 0755)) {
-            return $this->raiseError("Unable to create temporary directory $this->tmpdir.");
-        } else {
-            $this->log(2, '+ tmp dir created at ' . $this->tmpdir);
+        if (PEAR::isError($tmpdir = $this->mkTempDir())) {
+            return $tmpdir;
         }
-        $this->addTempFile($this->tmpdir);
+        $this->log(2, '+ tmp dir created at ' . $tmpdir);
 
         $tar = new Archive_Tar($pkgfile, true);
-        if (!$tar->extract($this->tmpdir)) {
+        if (!$tar->extract($tmpdir)) {
             return $this->raiseError("Unable to unpack $pkgfile");
         }
         $file = basename($pkgfile);
@@ -168,7 +162,7 @@ class PEAR_Installer extends PEAR_Common
             return $this->raiseError('package doesn\'t follow the package name convention');
         }
         $pkgdir = substr($file, 0, $pos);
-        $descfile = $this->tmpdir . DIRECTORY_SEPARATOR . $pkgdir . DIRECTORY_SEPARATOR . 'package.xml';
+        $descfile = $tmpdir . DIRECTORY_SEPARATOR . $pkgdir . DIRECTORY_SEPARATOR . 'package.xml';
 
         if (!is_file($descfile)) {
             return $this->raiseError("No package.xml file after extracting the archive.");
