@@ -49,7 +49,11 @@ PHP_FUNCTION(abs)
 	if (Z_TYPE_PP(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(fabs(Z_DVAL_PP(value)));
 	} else if (Z_TYPE_PP(value) == IS_LONG) {
-		RETURN_LONG(Z_LVAL_PP(value) < 0 ? -Z_LVAL_PP(value) : Z_LVAL_PP(value));
+		if (Z_LVAL_PP(value) == LONG_MIN) {
+			RETURN_DOUBLE(-(double)LONG_MIN);
+		} else {
+			RETURN_LONG(Z_LVAL_PP(value) < 0 ? -Z_LVAL_PP(value) : Z_LVAL_PP(value));
+		}
 	}
 
 	RETURN_FALSE;
@@ -466,19 +470,10 @@ PHP_FUNCTION(pow)
 			}
 		case 1:
 			RETURN_LONG(1);
-		case LONG_MIN: /* special case since -LONG_MIN == 0 */
-			/* lexp != 0, and only lexp==1 is LONG, DOUBLE otherwise */
-			if (lexp == 1) {
-				RETURN_LONG(LONG_MIN);
-			} else {
-				dval = exp(log(-(double)LONG_MIN) * (double)lexp);
-				RETURN_DOUBLE(lexp&1 ? -dval : dval);
-			}
 		default:
 			/* abs(lbase) > 1 */
-			dval = exp(log((double) (lbase>0?lbase:-lbase)) * 
+			dval = exp(log(lbase>0? (double)lbase : -(double)lbase ) * 
 								  (double) lexp);
-			/* long result = 1; */
 			if (lexp < 0 || dval > (double) LONG_MAX) {
 				/* 1/n ( abs(n) > 1 ) || overflow */
 				RETURN_DOUBLE(((lexp & 1) && lbase<0) ? -dval : dval);
