@@ -59,7 +59,7 @@ typedef struct _sapi_module_struct sapi_module_struct;
 
 extern sapi_module_struct sapi_module;  /* true global */
 
-/* Some values in this structure needs to be field in before
+/* Some values in this structure needs to be filled in before
  * calling sapi_activate(). We WILL change the `char *' entries,
  * so make sure that you allocate a separate buffer for them
  * and that you free them after sapi_deactivate().
