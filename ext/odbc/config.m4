@@ -82,9 +82,9 @@ AC_ARG_WITH(adabas,
     $srcdir/build/shtool mkdir -f -p ext/odbc
     rm -f "$ODBC_LIB"
     cp "$ODBC_OBJS" "$ODBC_LIB"
+	AC_ADD_LIBRARY(sqlptc)
+	AC_ADD_LIBRARY(sqlrte)
     AC_ADD_LIBRARY_WITH_PATH(odbc_adabas, $abs_builddir/ext/odbc)
-    AC_ADD_LIBRARY(sqlrte)
-    AC_ADD_LIBRARY(sqlptc)
     ODBC_TYPE=adabas
     AC_DEFINE(HAVE_ADABAS,1,[ ])
     AC_MSG_RESULT(yes)
