@@ -66,6 +66,17 @@ if test "$PHP_PDO_PGSQL" != "no"; then
   fi
 
   AC_DEFINE(HAVE_PDO_PGSQL,1,[Whether to build PostgreSQL for PDO support or not])
+
+  AC_MSG_CHECKING([for openssl dependencies])
+  if grep -q openssl $PGSQL_INCLUDE/libpq-fe.h ; then
+	 AC_MSG_RESULT([yes])
+	 if pkg-config openssl ; then
+      PDO_PGSQL_CFLAGS="`pkg-config openssl --cflags`"
+    fi
+  else
+	 AC_MSG_RESULT([no])
+  fi
+
   old_LIBS=$LIBS
   old_LDFLAGS=$LDFLAGS
   LDFLAGS="$LDFLAGS -L$PGSQL_LIBDIR"
@@ -77,7 +88,7 @@ if test "$PHP_PDO_PGSQL" != "no"; then
   AC_CHECK_LIB(pq, PQparameterStatus,AC_DEFINE(HAVE_PQPARAMETERSTATUS,1,[PostgreSQL 7.4 or later]))
   AC_CHECK_LIB(pq, PQprotocolVersion,AC_DEFINE(HAVE_PQPROTOCOLVERSION,1,[PostgreSQL 7.4 or later]))
   AC_CHECK_LIB(pq, PQtransactionStatus,AC_DEFINE(HAVE_PGTRANSACTIONSTATUS,1,[PostgreSQL 7.4 or later]))
-  AC_CHECK_LIB(pq, pg_encoding_to_char,AC_DEFINE(HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT,1,[Whether libpq is compiled with --enable-multibye]))
+  AC_CHECK_LIB(pq, pg_encoding_to_char,AC_DEFINE(HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT,1,[Whether libpq is compiled with --enable-multibyte]))
   LIBS=$old_LIBS
   LDFLAGS=$old_LDFLAGS
 
@@ -97,6 +108,6 @@ dnl find PDO sources
 	AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
   fi
 
-  PHP_NEW_EXTENSION(pdo_pgsql, pdo_pgsql.c pgsql_driver.c pgsql_statement.c, $ext_shared,,-I$pdo_inc_path)
+  PHP_NEW_EXTENSION(pdo_pgsql, pdo_pgsql.c pgsql_driver.c pgsql_statement.c, $ext_shared,,-I$pdo_inc_path $PDO_PGSQL_CFLAGS)
   PHP_ADD_EXTENSION_DEP(pdo_pgsql, pdo) 
 fi
