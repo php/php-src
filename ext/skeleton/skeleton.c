@@ -20,39 +20,40 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "php__extname_.h"
+#include "php_extname.h"
 
 /* You should tweak config.m4 so this symbol (or some else suitable)
    gets defined.
 */
-#ifdef HAVE__EXTNAME_
+#ifdef HAVE_EXTNAME
 
 #ifdef ZTS
-int _extname__globals_id;
+int extname_globals_id;
 #else
-php__extname__globals _extname__globals;
+php_extname_globals extname_globals;
 #endif
 
-/* Every user visible function must have an entry in _extname_functions[].
+/* Every user visible function must have an entry in extname_functions[].
 */
-function_entry _extname__functions[] = {
-	PHP_FE(_extname__test,	NULL)
-	{NULL, NULL, NULL}	/* Must be the last line in $extension_functions[] */
+function_entry extname_functions[] = {
+	PHP_FE(confirm_extname_compiled,	NULL)		/* For testing, remove later. */
+__function_entries_here__
+	{NULL, NULL, NULL}	/* Must be the last line in extname_functions[] */
 };
 
-zend_module_entry _extname__module_entry = {
-	"_extname_",
-	_extname__functions,
-	PHP_MINIT(_extname_),
-	PHP_MSHUTDOWN(_extname_),
-	PHP_RINIT(_extname_),		/* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(_extname_),	/* Replace with NULL if there's nothing to do at request end */
-	PHP_MINFO(_extname_),
+zend_module_entry extname_module_entry = {
+	"extname",
+	extname_functions,
+	PHP_MINIT(extname),
+	PHP_MSHUTDOWN(extname),
+	PHP_RINIT(extname),		/* Replace with NULL if there's nothing to do at request start */
+	PHP_RSHUTDOWN(extname),	/* Replace with NULL if there's nothing to do at request end */
+	PHP_MINFO(extname),
 	STANDARD_MODULE_PROPERTIES
 };
 
-#ifdef COMPILE_DL__EXTNAME_
-ZEND_GET_MODULE(_extname_)
+#ifdef COMPILE_DL_EXTNAME
+ZEND_GET_MODULE(extname)
 #endif
 
 /* Remove comments and fill if you need to have entries in php.ini
@@ -60,7 +61,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 */
 
-PHP_MINIT_FUNCTION(_extname_)
+PHP_MINIT_FUNCTION(extname)
 {
 /* Remove comments if you have entries in php.ini
 	REGISTER_INI_ENTRIES();
@@ -68,7 +69,7 @@ PHP_MINIT_FUNCTION(_extname_)
 	return SUCCESS;
 }
 
-PHP_MSHUTDOWN_FUNCTION(_extname_)
+PHP_MSHUTDOWN_FUNCTION(extname)
 {
 /* Remove comments if you have entries in php.ini
 	UNREGISTER_INI_ENTRIES();
@@ -77,21 +78,21 @@ PHP_MSHUTDOWN_FUNCTION(_extname_)
 }
 
 /* Remove if there's nothing to do at request start */
-PHP_RINIT_FUNCTION(_extname_)
+PHP_RINIT_FUNCTION(extname)
 {
 	return SUCCESS;
 }
 
 /* Remove if there's nothing to do at request end */
-PHP_RSHUTDOWN_FUNCTION(_extname_)
+PHP_RSHUTDOWN_FUNCTION(extname)
 {
 	return SUCCESS;
 }
 
-PHP_MINFO_FUNCTION(_extname_)
+PHP_MINFO_FUNCTION(extname)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "_extname_ support", "enabled");
+	php_info_print_table_header(2, "extname support", "enabled");
 	php_info_print_table_end();
 
 	/* Remove comments if you have entries in php.ini
@@ -105,9 +106,9 @@ PHP_MINFO_FUNCTION(_extname_)
 */
 
 /* Every user-visible function in PHP should document itself in the source */
-/* {{{ proto string _extname__test(string arg)
+/* {{{ proto string confirm_extname_compiled(string arg)
    Return a string to confirm that the module is compiled in */
-PHP_FUNCTION(_extname__test)
+PHP_FUNCTION(extname_test)
 {
 	zval **arg;
 	int len;
@@ -119,7 +120,7 @@ PHP_FUNCTION(_extname__test)
 
 	convert_to_string_ex(arg);
 
-	len = sprintf(string, "Congratulations, you have successfully modified ext/_extname_/config.m4, module %s is compiled in PHP", Z_STRVAL_PP(arg));
+	len = sprintf(string, "Congratulations, you have successfully modified ext/extname/config.m4, module %s is compiled in PHP", Z_STRVAL_PP(arg));
 	RETVAL_STRINGL(string, len, 1);
 }
 /* }}} */
@@ -129,7 +130,9 @@ PHP_FUNCTION(_extname__test)
    this convention for the convenience of others editing your code.
 */
 
-#endif	/* HAVE__EXTNAME_ */
+__function_stubs_here__
+
+#endif	/* HAVE_EXTNAME */
 
 /*
  * Local variables:

@@ -1,6 +1,6 @@
 <?
-$module = '_extname_';
-$function = $module . '_test';
+$module = 'extname';
+$function = 'confirm_' . $module . '_compiled';
 if (extension_loaded($module)) {
 	$str = $function($module);
 } else {
