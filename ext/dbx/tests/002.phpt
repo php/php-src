@@ -2,8 +2,6 @@
 DBX_CONSTANTS
 --SKIPIF--
 <?php if (!extension_loaded("dbx")) print("skip"); ?>
---POST--
---GET--
 --FILE--
 <?php 
 if (DBX_MYSQL=="DBX_MYSQL")               print('!DBX_MYSQL');

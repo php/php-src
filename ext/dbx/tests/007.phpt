@@ -2,14 +2,8 @@
 dbx_sort
 --SKIPIF--
 <?php 
-    if (!extension_loaded("dbx")) print("skip"); 
-    else {
-        include_once("dbx_test.p");
-        if ($connection===NULL) print("skip");
-        }
+include_once("skipif.inc");
 ?>
---POST--
---GET--
 --FILE--
 <?php 
 include_once("dbx_test.p");
