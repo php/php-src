@@ -37,7 +37,7 @@ AC_DEFUN([PHP_MBSTRING_EXTENSION], [
   if test "$ext_shared" = "no"; then
     out="php_config.h"
   else
-    if test -e "$ext_builddir/config.h.in"; then
+    if test -f "$ext_builddir/config.h.in"; then
       out="$abs_builddir/config.h"
     else
       out="php_config.h"
