@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include "gd.h"
 
+#include "php.h"
+
 /* Used only when debugging GIF compression code */
 /* #define DEBUGGING_ENVARS */
 
@@ -290,19 +292,24 @@ GetDataBlock_(gdIOCtx *fd, unsigned char *buf)
 static int
 GetDataBlock(gdIOCtx *fd, unsigned char *buf)
 {
- int rv;
- int i;
-
- rv = GetDataBlock_(fd,buf);
- if (VERBOSE)
-  { printf("[GetDataBlock returning %d",rv);
-    if (rv > 0)
-     { printf(":");
-       for (i=0;i<rv;i++) printf(" %02x",buf[i]);
-     }
-    printf("]\n");
-  }
- return(rv);
+	int rv;
+	int i;
+	char *tmp = NULL;
+	
+	rv = GetDataBlock_(fd,buf);
+	if (VERBOSE) {
+		if (rv > 0) {
+			tmp = emalloc((3*sizeof(char)*rv) + 1);
+			for (i=0;i<rv;i++) {
+				sprintf(&tmp[3*sizeof(char)*i], " %02x", buf[i]);
+			}
+		} else {
+			tmp = estrdup("");
+		}
+		php_gd_error_ex(E_NOTICE, "[GetDataBlock returning %d: %s]", rv, tmp);
+		efree(tmp);
+	}
+	return(rv);
 }
 
 static int
@@ -352,7 +359,7 @@ GetCode(gdIOCtx *fd, int code_size, int flag)
  int rv;
 
  rv = GetCode_(fd,code_size,flag);
- if (VERBOSE) printf("[GetCode(,%d,%d) returning %d]\n",code_size,flag,rv);
+ if (VERBOSE) php_gd_error_ex(E_NOTICE, "[GetCode(,%d,%d) returning %d]\n",code_size,flag,rv);
  return(rv);
 }
 
@@ -484,7 +491,7 @@ LWZReadByte(gdIOCtx *fd, int flag, int input_code_size)
  int rv;
 
  rv = LWZReadByte_(fd,flag,input_code_size);
- if (VERBOSE) printf("[LWZReadByte(,%d,%d) returning %d]\n",flag,input_code_size,rv);
+ if (VERBOSE) php_gd_error_ex(E_NOTICE, "[LWZReadByte(,%d,%d) returning %d]\n",flag,input_code_size,rv);
  return(rv);
 }
 

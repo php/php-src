@@ -49,9 +49,8 @@ fatal_jpeg_error (j_common_ptr cinfo)
 {
   jmpbuf_wrapper *jmpbufw;
 
-  fprintf (stderr, "gd-jpeg: JPEG library reports unrecoverable error: ");
+  php_gd_error("gd-jpeg: JPEG library reports unrecoverable error: ");
   (*cinfo->err->output_message) (cinfo);
-  fflush (stderr);
 
   jmpbufw = (jmpbuf_wrapper *) cinfo->client_data;
   jpeg_destroy (cinfo);
@@ -59,16 +58,15 @@ fatal_jpeg_error (j_common_ptr cinfo)
   if (jmpbufw != 0)
     {
       longjmp (jmpbufw->jmpbuf, 1);
-      fprintf (stderr, "gd-jpeg: EXTREMELY fatal error: longjmp"
+      php_gd_error_ex(E_ERROR, "gd-jpeg: EXTREMELY fatal error: longjmp"
 	       " returned control; terminating\n");
     }
   else
     {
-      fprintf (stderr, "gd-jpeg: EXTREMELY fatal error: jmpbuf"
+      php_gd_error_ex(E_ERROR, "gd-jpeg: EXTREMELY fatal error: jmpbuf"
 	       " unrecoverable; terminating\n");
     }
 
-  fflush (stderr);
   exit (99);
 }
 
@@ -170,7 +168,7 @@ gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 			     * sizeof (JSAMPLE));
   if (row == 0)
     {
-      fprintf (stderr, "gd-jpeg: error: unable to allocate JPEG row "
+      php_gd_error("gd-jpeg: error: unable to allocate JPEG row "
 	       "structure: gdCalloc returns NULL\n");
       jpeg_destroy_compress (&cinfo);
       return;
@@ -192,7 +190,7 @@ gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
   if (im->trueColor)
     {
 #if BITS_IN_JSAMPLE == 12
-      fprintf (stderr, "gd-jpeg: error: jpeg library was compiled for 12-bit\n"
+      php_gd_error("gd-jpeg: error: jpeg library was compiled for 12-bit\n"
 	 "precision. This is mostly useless, because JPEGs on the web are\n"
 	 "8-bit and such versions of the jpeg library won't read or write\n"
 	       "them. GD doesn't support these unusual images. Edit your\n"
@@ -212,7 +210,7 @@ gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 
 	  nlines = jpeg_write_scanlines (&cinfo, rowptr, 1);
 	  if (nlines != 1)
-	    fprintf (stderr, "gd_jpeg: warning: jpeg_write_scanlines"
+	    php_gd_error_ex(E_WARNING, "gd_jpeg: warning: jpeg_write_scanlines"
 		     " returns %u -- expected 1\n", nlines);
 	}
     }
@@ -244,7 +242,7 @@ gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 
 	  nlines = jpeg_write_scanlines (&cinfo, rowptr, 1);
 	  if (nlines != 1)
-	    fprintf (stderr, "gd_jpeg: warning: jpeg_write_scanlines"
+	    php_gd_error_ex(E_WARNING, "gd_jpeg: warning: jpeg_write_scanlines"
 		     " returns %u -- expected 1\n", nlines);
 	}
     }
@@ -314,17 +312,17 @@ gdImageCreateFromJpegCtx (gdIOCtx * infile)
 
   retval = jpeg_read_header (&cinfo, TRUE);
   if (retval != JPEG_HEADER_OK)
-    fprintf (stderr, "gd-jpeg: warning: jpeg_read_header returns"
+    php_gd_error_ex(E_WARNING, "gd-jpeg: warning: jpeg_read_header returns"
 	     " %d, expected %d\n", retval, JPEG_HEADER_OK);
 
   if (cinfo.image_height > INT_MAX)
-    fprintf (stderr, "gd-jpeg: warning: JPEG image height (%u) is"
+    php_gd_error_ex(E_WARNING, "gd-jpeg: warning: JPEG image height (%u) is"
 	     " greater than INT_MAX (%d) (and thus greater than"
 	     " gd can handle)", cinfo.image_height,
 	     INT_MAX);
 
   if (cinfo.image_width > INT_MAX)
-    fprintf (stderr, "gd-jpeg: warning: JPEG image width (%u) is"
+    php_gd_error_ex(E_WARNING, "gd-jpeg: warning: JPEG image width (%u) is"
 	     " greater than INT_MAX (%d) (and thus greater than"
 	     " gd can handle)\n", cinfo.image_width, INT_MAX);
 
@@ -332,7 +330,7 @@ gdImageCreateFromJpegCtx (gdIOCtx * infile)
 			       (int) cinfo.image_height);
   if (im == 0)
     {
-      fprintf (stderr, "gd-jpeg error: cannot allocate gdImage"
+      php_gd_error("gd-jpeg error: cannot allocate gdImage"
 	       " struct\n");
       goto error;
     }
@@ -344,7 +342,7 @@ gdImageCreateFromJpegCtx (gdIOCtx * infile)
   cinfo.out_color_space = JCS_RGB;
 
   if (jpeg_start_decompress (&cinfo) != TRUE)
-    fprintf (stderr, "gd-jpeg: warning: jpeg_start_decompress"
+    php_gd_error("gd-jpeg: warning: jpeg_start_decompress"
 	     " reports suspended data source\n");
 
 #ifdef JPEG_DEBUG
@@ -409,14 +407,14 @@ gdImageCreateFromJpegCtx (gdIOCtx * infile)
 #endif
   if (cinfo.output_components != 3)
     {
-      fprintf (stderr, "gd-jpeg: error: JPEG color quantization"
+      php_gd_error_ex(E_WARNING, "gd-jpeg: error: JPEG color quantization"
 	       " request resulted in output_components == %d"
 	       " (expected 3)\n", cinfo.output_components);
       goto error;
     }
 
 #if BITS_IN_JSAMPLE == 12
-  fprintf (stderr, "gd-jpeg: error: jpeg library was compiled for 12-bit\n"
+  php_gd_error("gd-jpeg: error: jpeg library was compiled for 12-bit\n"
 	 "precision. This is mostly useless, because JPEGs on the web are\n"
 	 "8-bit and such versions of the jpeg library won't read or write\n"
 	   "them. GD doesn't support these unusual images. Edit your\n"
@@ -428,7 +426,7 @@ gdImageCreateFromJpegCtx (gdIOCtx * infile)
   row = gdCalloc (cinfo.output_width * 3, sizeof (JSAMPLE));
   if (row == 0)
     {
-      fprintf (stderr, "gd-jpeg: error: unable to allocate row for"
+      php_gd_error("gd-jpeg: error: unable to allocate row for"
 	       " JPEG scanline: gdCalloc returns NULL\n");
       goto error;
     }
@@ -439,7 +437,7 @@ gdImageCreateFromJpegCtx (gdIOCtx * infile)
       nrows = jpeg_read_scanlines (&cinfo, rowptr, 1);
       if (nrows != 1)
 	{
-	  fprintf (stderr, "gd-jpeg: error: jpeg_read_scanlines"
+	  php_gd_error_ex(E_WARNING, "gd-jpeg: error: jpeg_read_scanlines"
 		   " returns %u, expected 1\n", nrows);
 	  goto error;
 	}
@@ -450,7 +448,7 @@ gdImageCreateFromJpegCtx (gdIOCtx * infile)
     }
 
   if (jpeg_finish_decompress (&cinfo) != TRUE)
-    fprintf (stderr, "gd-jpeg: warning: jpeg_finish_decompress"
+    php_gd_error("gd-jpeg: warning: jpeg_finish_decompress"
 	     " reports suspended data source\n");
 
 

@@ -92,6 +92,28 @@ static int gdAlphaBlendColor(int b1, int b2, int a1, int a2);
 static int gdAlphaOverlayColor(int src, int dst, int max);
 static int gdImageGetTrueColorPixel(gdImagePtr im, int x, int y);
 
+void php_gd_error_ex(int type, const char *format, ...) 
+{
+	va_list args;
+	
+	TSRMLS_FETCH();
+	
+	va_start(args, format);
+	php_verror(NULL, "", type, format, args TSRMLS_CC);
+	va_end(args);
+}
+
+void php_gd_error(const char *format, ...)
+{
+	va_list args;
+	
+	TSRMLS_FETCH();
+	
+	va_start(args, format);
+	php_verror(NULL, "", E_WARNING, format, args TSRMLS_CC);
+	va_end(args);
+}
+
 gdImagePtr
 gdImageCreate (int sx, int sy)
 {
@@ -2780,7 +2802,7 @@ gdImageCreateFromXbm (FILE * fd)
 	}
     }
   /* Shouldn't happen */
-  fprintf (stderr, "Error: bug in gdImageCreateFromXbm!\n");
+  php_gd_error("Error: bug in gdImageCreateFromXbm\n");
   return 0;
 fail:
   gdImageDestroy (im);
