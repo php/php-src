@@ -710,7 +710,9 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 			*retval = &EG(uninitialized_zval_ptr);
 			SELECTIVE_PZVAL_LOCK(**retval, result);
 			FREE_OP(op2, free_op2);
-			zend_error(E_WARNING, "Cannot use a NULL value as an array");
+			if (type==BP_VAR_W || type==BP_VAR_RW) {
+				zend_error(E_WARNING, "Cannot use a NULL value as an array");
+			}
 			break;
 		case IS_STRING: {
 				zval *offset;
@@ -752,7 +754,9 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 				}
 				FREE_OP(op2, free_op2);
 				SELECTIVE_PZVAL_LOCK(**retval, result);
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				if (type==BP_VAR_W || type==BP_VAR_RW) {
+					zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				}
 			}
 			break;
 	}
