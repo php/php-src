@@ -102,6 +102,7 @@ PHP_METHOD(domimplementation, getFeature);
 
 /* domdocumentfragment methods */
 PHP_METHOD(domdocumentfragment, __construct);
+PHP_METHOD(domdocumentfragment, appendXML);
 
 /* domdocument methods */
 PHP_FUNCTION(dom_document_create_element);
