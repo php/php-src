@@ -1,5 +1,9 @@
 --TEST--
-Error message handling
+Error message handling (without ZendOptimizer)
+--SKIPIF--
+<?php
+!extension_loaded("Zend Optimizer") or die("skip Zend Optimizer is loaded");
+?>
 --FILE--
 <?php
 // If this test fails ask the developers of run-test.php
