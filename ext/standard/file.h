@@ -46,6 +46,7 @@ PHP_FUNCTION(feof);
 PHP_FUNCTION(fread);
 PHP_FUNCTION(fgetc);
 PHP_FUNCTION(fgets);
+PHP_FUNCTION(fscanf);
 PHP_FUNCTION(fgetss);
 PHP_FUNCTION(fgetcsv);
 PHP_FUNCTION(fwrite);
