@@ -1,3 +1,239 @@
+2003-12-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * sapi/embed/config.w32:
+      Forgot to add embed config.w32, and tweak version resource when CREDITS
+      file is missing.
+
+    * win32/flock.c
+      win32/flock.h:
+      Export flock for win32
+
+    * (php_5_0_0b3RC2)
+      sapi/aolserver/config.w32
+      sapi/apache/config.w32
+      sapi/apache_hooks/config.w32
+      sapi/nsapi/config.w32
+      sapi/pi3web/config.w32:
+      More things for the new build system.
+      Pi3Web and aolserver build untested (no headers and libs for those here)
+
+    * (php_5_0_0b3RC2)
+      sapi/apache2handler/config.w32
+      sapi/apache2handler/php4apache2.dsp
+      sapi/apache2handler/sapi_apache2.c:
+      Make apache2handler build with new build system.
+      Perhaps also make it build with .dsp system too...
+
+    * (php_5_0_0b3RC2)
+      NEWS
+      ext/notes/.cvsignore
+      ext/notes/notes.dsp
+      ext/notes/notes.dsw
+      ext/notes/php_notes.c
+      ext/notes/php_notes.h:
+      Moved ext/notes to PECL.
+      (win32 only, and doesn't build on snaps.php.net)
+
+    * (php_5_0_0b3RC2)
+      ext/pdf/config.w32
+      ext/pspell/config.w32
+      ext/snmp/config.w32
+      ext/snmp/snmp.c
+      ext/sockets/config.w32
+      ext/sybase_ct/config.w32:
+      Make these build with new win32 build system.
+
+    * (php_5_0_0b3RC2)
+      ext/xmlrpc/config.w32:
+      Make xmlrpc build using our expat compat functions.
+      Would be good if someone could verify that it actually
+      works in this configuration.
+
+    * (php_5_0_0b3RC2)
+      ext/yaz/config.w32:
+      add config.w32 for ext/yaz
+      Edin: we need to update the yaz stuff in php-win32-dev
+      so that this extension will build.
+
+    * (php_5_0_0b3RC2)
+      ext/xml/compat.c
+      ext/xml/expat_compat.h:
+      Export expat compat functions.
+      "Implement" XML_GetCurrentByteCount(); probably not 100%
+      correct, but the only usage of it is by xmlrpc extension when
+      reporting an error; it should be safe.
+
+2003-12-19  Derick Rethans  <php@derickrethans.nl>
+
+    * (php_5_0_0b3RC2)
+      ext/mcrypt/TODO:
+      - Test commit
+
+    * (php_5_0_0b3RC2)
+      pear/CODING_STANDARDS:
+      - Test 3
+
+    * pear/CODING_STANDARDS:
+      - test 2
+
+2003-12-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (php_5_0_0b3RC2)
+      ext/standard/tests/array/array_sum.phpt:
+      Using INI section.
+
+    * (php_5_0_0b3RC2)
+      tests/classes/assign_op_property_001.phpt
+      tests/classes/incdec_property_001.phpt
+      tests/classes/incdec_property_002.phpt
+      tests/classes/incdec_property_003.phpt
+      tests/classes/incdec_property_004.phpt:
+      New tests for memory leaks
+
+2003-12-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (php_5_0_0b3RC2)
+      ext/gettext/config.w32
+      ext/interbase/config.w32
+      ext/ldap/config.w32
+      ext/mcrypt/config.w32
+      ext/mcve/config.w32
+      ext/mime_magic/config.w32
+      ext/ming/config.w32
+      ext/msql/config.w32
+      ext/oci8/config.w32
+      ext/oracle/config.w32:
+      make these build with new win32 build system.
+      mcve untested (I don't have those libs/headers)
+
+2003-12-19  Derick Rethans  <php@derickrethans.nl>
+
+    * pear/CODING_STANDARDS:
+      - Test new commit info file
+
+2003-12-19  Andi Gutmans  <andi@zend.com>
+
+    * (php_5_0_0b3RC2)
+      ZendEngine2/zend_language_parser.y:
+      - Nuke another rule (thanks to Jan for noticing this)
+
+2003-12-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (php_5_0_0b3RC2)
+      ZendEngine2/zend.c:
+      Bug #25547 (error_handler and array index with function call) was fixed
+      tests/lang/bug25547.phpt
+
+2003-12-19  Jan Lehnardt  <jan@dasmoped.net>
+
+    * (php_5_0_0b3RC2)
+      scripts/phpize.in:
+       - restructured phpize
+       - added -v and --version to print out API numbers
+       - discussed with Jani and Andi
+
+2003-12-19  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * (php_5_0_0b3RC2)
+      pear/package-PEAR.xml:
+      - date==today()
+
+2003-12-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (php_5_0_0b3RC2)
+      ext/standard/basic_functions.c:
+      Check correction (Thanks Andi).
+
+2003-12-19  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * pear/package-PEAR.xml:
+      - prepare 1.3b5
+
+2003-12-19  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - Update date
+
+    * (php_5_0_0b3RC2)
+      configure.in
+      main/php_version.h:
+      - Prepare for RC2
+
+    * ZendEngine2/zend_language_parser.y:
+      - Nuke unused code
+
+2003-12-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/basic_functions.c:
+      MFH: Fixed bug #26667 (Added safety checks to ip2long()).
+
+    * ext/standard/basic_functions.c:
+      Fixed bug #26667 (Added safety checks to ip2long()).
+
+2003-12-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (php_5_0_0b3RC2)
+      ext/zlib/config.w32:
+      we only use zlib.lib
+
+    * (php_5_0_0b3RC2)
+      ext/imap/config.w32:
+      detect c-client headers correctly using Edin's php-win32-dev layout
+
+    * (php_5_0_0b3RC2)
+      ext/curl/config.w32:
+      copy-n-paste error
+
+    * (php_5_0_0b3RC2)
+      ext/com_dotnet/config.w32:
+      Explicitly depend on oleaut32.lib
+
+    * (php_5_0_0b3RC2)
+      cvsclean.bat:
+      "Real" cvsclean, works as the unix version does
+
+    * (php_5_0_0b3RC2)
+      win32/select.c:
+      this should be an int
+
+    * (php_5_0_0b3RC2)
+      ext/standard/parsedate.y:
+      add prototype
+
+    * (php_5_0_0b3RC2)
+      ext/sqlite/tests/.cvsignore:
+      ignore .tmp files created by tests
+
+    * (php_5_0_0b3RC2)
+      ext/gd/libgd/gdft.c:
+      be slightly nicer when defining R_OK
+
+2003-12-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/tests/array/array_sum.phpt:
+      Memory limit overflow was fixed
+
+    * (php_5_0_0b3RC2)
+      ZendEngine2/zend_execute.c:
+      Error reporting on unset string offset was added (Bug #24773
+      Zend/tests/bug24773.phpt)
+
+    * ZendEngine2/zend_execute.c
+      tests/classes/array_access_006.phpt:
+      Assign_op operators (+=) were fixed for elements of overloaded objects
+
+2003-12-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (php_5_0_0b3RC2)
+      tests/classes/array_access_005.phpt:
+      Fix test
+
+    * (php_5_0_0b3RC2)
+      tests/classes/visibility_005.phpt:
+      Add test for foreach visibility
+
 2003-12-18  Andi Gutmans  <andi@zend.com>
 
     * ZendEngine2/zend_execute.c:
