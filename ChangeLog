@@ -1,3 +1,25 @@
+2004-11-13  Rainer Schaaf  <rjs@pdflib.com>
+
+    * (PHP_4_3)
+      ext/pdf/config.m4:
+      fixed Bug #29297
+      Configure now only allows to work with PDFlib up to PDFlib 4, as newer
+      PDFlib versions need the code from the PDFlib PECL module.
+
+2004-11-13  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ext/xml/compat.c:
+      MFH: Fixed bug #30566 (attribute namespace URIs are inconsistent when
+      parsing).
+
+    * ext/xml/compat.c:
+      Fixed bug #30566 (attribute namespace URIs are inconsistent when parsing).
+
 2004-11-12  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/recode/recode.c:
