@@ -14,7 +14,6 @@ if test "$PHP_NSAPI" != "no"; then
     AC_MSG_ERROR(Please specify the path to the root of your Netscape server using --with-nsapi=DIR)
   fi
   AC_MSG_CHECKING(for NSAPI include files)
-  NSAPI_INCLUDE=""
   if test -d $PHP_NSAPI/include ; then
     NSAPI_INCLUDE=$PHP_NSAPI/include
     AC_MSG_RESULT(Netscape-Enterprise/3.x style)
@@ -32,7 +31,6 @@ if test "$PHP_NSAPI" != "no"; then
   INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED $PHP_NSAPI/bin/"
 fi
 
-INCLUDES="$INCLUDES -I$NSAPI_INCLUDE"
 
 dnl ## Local Variables:
 dnl ## tab-width: 4
