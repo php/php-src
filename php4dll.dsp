@@ -359,10 +359,6 @@ SOURCE=.\ext\bcmath\number.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\odbc\odbc.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\ext\standard\pack.c
 # End Source File
 # Begin Source File
@@ -372,6 +368,10 @@ SOURCE=.\ext\standard\pageinfo.c
 # Begin Source File
 
 SOURCE=.\ext\standard\parsedate.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\odbc\php_odbc.c
 # End Source File
 # Begin Source File
 
