@@ -408,7 +408,7 @@ PHP_FUNCTION(strcoll)
  * it needs to be incrementing.  
  * Returns: FAILURE/SUCCESS wether the input was correct (i.e. no range errors)
  */
-int php_charmask(unsigned char *input, int len, char *mask)
+int php_charmask(unsigned char *input, int len, char *mask TSRMLS_DC)
 {
 	unsigned char *end;
 	unsigned char c;
@@ -470,6 +470,8 @@ PHPAPI void php_trim2(zval *str, zval *what, zval *return_value, int mode)
    what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
 */
 {
+	TSRMLS_FETCH();
+
 	register int i;
 	int len = str->value.str.len;
 	int trimmed = 0;
@@ -477,9 +479,9 @@ PHPAPI void php_trim2(zval *str, zval *what, zval *return_value, int mode)
 	char mask[256];
 
 	if (what) {
-		php_charmask(what->value.str.val, what->value.str.len, mask);
+		php_charmask(what->value.str.val, what->value.str.len, mask TSRMLS_CC);
 	} else {
-		php_charmask(" \n\r\t\v\0", 6, mask);
+		php_charmask(" \n\r\t\v\0", 6, mask TSRMLS_CC);
 	}
 
 	if (mode & 1) {
