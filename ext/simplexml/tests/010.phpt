@@ -9,13 +9,29 @@ class simplexml_inherited extends simplexml_element
 {
 }
 
-$sxe = simplexml_load_file(dirname(__FILE__).'/sxe.xml', 'simplexml_inherited');
+$xml =<<<EOF
+<?xml version='1.0'?>
+<!DOCTYPE sxe SYSTEM "notfound.dtd">
+<sxe id="elem1">
+ <elem1 attr1='first'>
+  <!-- comment -->
+  <elem2>
+   <elem3>
+    <elem4>
+     <?test processing instruction ?>
+    </elem4>
+   </elem3>
+  </elem2>
+ </elem1>
+</sxe>
+EOF;
+
+$sxe = simplexml_load_string($xml, 'simplexml_inherited');
 
 print_r($sxe);
 
-echo "---Done---\n";
-
 ?>
+===DONE===
 --EXPECT--
 simplexml_inherited Object
 (
@@ -44,4 +60,4 @@ simplexml_inherited Object
         )
 
 )
----Done--- 
+===DONE===
