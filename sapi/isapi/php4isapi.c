@@ -102,7 +102,7 @@ static void php_info_isapi(ZEND_MODULE_INFO_FUNC_ARGS)
 
 	lpECB = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
 
-	PUTS("<table border=5 width=\"600\">\n");
+	php_info_print_table_start();
 	php_info_print_table_header(2, "Server Variable", "Value");
 	while (*p) {
 		variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
@@ -121,8 +121,7 @@ static void php_info_isapi(ZEND_MODULE_INFO_FUNC_ARGS)
 		}
 		p++;
 	}
-
-	PUTS("</table>");
+	php_info_print_table_end();
 }
 
 
