@@ -38,7 +38,7 @@ object(test)#2 (3) {
   ["p1"]=>
   int(1)
   ["p2"]=>
-  string(1) "A"
+  int(2)
   ["p3"]=>
   string(1) "C"
 }

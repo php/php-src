@@ -5,26 +5,29 @@ ZE2 object cloning, 3
 --FILE--
 <?php
 class base {
-	private $p1 = 1;
-	protected $p2 = 2;
-	public $p3;
+	protected $p1 = 'base:1';
+	public $p2 = 'base:2';
+	public $p3 = 'base:3';
+	public $p4 = 'base:4';
+	public $p5 = 'base:5';
+	private $p6 = 'base:6';
 	public function __clone() {
 	}
 };
 
-class test {
-	public $p1 = 4;
-	protected $p4 = 5;
-	public $p5;
+class test extends base {
+	public $p1 = 'test:1';
+	public $p3 = 'test:3';
+	public $p4 = 'test:4';
+	public $p5 = 'test:5';
 	public function __clone() {
+		$this->p5 = 'clone:5';
 	}
 }
 
 $obj = new test;
-$obj->p2 = 'A';
-$obj->p3 = 'B';
+$obj->p4 = 'A';
 $copy = $obj->__clone();
-$copy->p3 = 'C';
 echo "Object\n";
 print_r($obj);
 echo "Clown\n";
@@ -35,20 +38,23 @@ echo "Done\n";
 Object
 test Object
 (
-    [p1] => 4
-    [p4:protected] => 5
-    [p5] => 
-    [p2] => A
-    [p3] => B
+    [p1] => test:1
+    [p3] => test:3
+    [p4] => A
+    [p5] => test:5
+    [p1:protected] => base:1
+    [p2] => base:2
+    [p6:private] => base:6
 )
 Clown
 test Object
 (
-    [p1] => 4
-    [p4:protected] => 5
-    [p5] => 
-    [p1:private] => 1
-    [p2] => A
-    [p3] => C
+    [p1] => test:1
+    [p3] => test:3
+    [p4] => test:4
+    [p5] => clone:5
+    [p1:protected] => base:1
+    [p2] => base:2
+    [p6:private] => base:6
 )
 Done
