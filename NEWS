@@ -1,6 +1,17 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Added optional parameter to highlight_string and highlight_file which
+  makes these functions return a highlighted string instead of dumping
+  to standard output. (Derick)
+- Added EXTR_IF_EXISTS and EXTR_PREFIX_IF_EXISTS flags to extract()
+  EXTR_IF_EXISTS only extracts a variable if it already exists
+  EXTR_PREFIX_IF_EXISTS only extracts the variable if it exists and
+  then it prepends the prefix to it.  ie. if $PATH exists then
+  extract($_ENV,EXTR_PREFIX_IF_EXISTS,'e') would result in $e_PATH
+  This lets you do $a = $b = $c = true; extract($_REQUEST,EXTR_IF_EXISTS);
+  and you only get the global request variables you have defined imported
+  into your symbol table.  (Rasmus)
 - Fixed pg_pconnect(). It catches broken connection and reconnects to PostgreSQL 
   server always. When PostgreSQL is rebooted, web server reboot is not needed
   to avoid errors. (Yasuo)
