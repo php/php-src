@@ -1820,7 +1820,7 @@ send_by_ref:
 					FREE_OP(&opline->op2, EG(free_op2));
 					continue;
 				}
-				NEXT_OPCODE();
+				/* Never reaches this point */
 			case ZEND_CASE: {
 					int switch_expr_is_overloaded=0;
 
