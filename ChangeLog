@@ -1,3 +1,16 @@
+2002-01-29  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/DB/mysql.php:
+    Fix errors caused by not checking for variables before using them.
+
+2002-01-29  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php_modules.dsw: Overload is built-in.
+
+2002-01-29  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/oci8.php: typo :)
+
 2002-01-28  Stig Bakken  <ssb@fast.no>
 
     * pear/Net/Socket.php:
