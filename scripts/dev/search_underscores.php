@@ -23,7 +23,10 @@
    underscores. It omits magic names (e.g. anything that starts with two
    underscores but no more).
  */
-$cnt = 0;
+
+$cnt_modules = 0;
+$cnt_classes = 0;
+$cnt_methods = 0;
 $err = 0;
 
 $classes = array_merge(get_declared_classes(), get_declared_interfaces());
@@ -31,14 +34,14 @@ $classes = array_merge(get_declared_classes(), get_declared_interfaces());
 $extensions = array();
 
 foreach(get_loaded_extensions() as $ext) {
-	$cnt++;
+	$cnt_modules++;
 	if (strpos($ext, "_") !== false) {
 		$err++;
 		$extensions[$ext] = array();
 	}
 }
 
-$cnt += count($classes);
+$cnt_classes = count($classes);
 
 foreach($classes as $c) {
 	if (strpos($c, "_") !== false) {
@@ -52,7 +55,7 @@ foreach($classes as $c) {
 		}
 		$extensions[$ext][$c] = array();
 		foreach(get_class_methods($c) as $method) {
-			$cnt++;
+			$cnt_methods++;
 			if (strpos(substr($method, substr($method, 0, 2) != "__"  ? 0 : 2), "_") !== false) {
 				$err++;
 				$extensions[$ext][$c][] = $method;
@@ -61,9 +64,20 @@ foreach($classes as $c) {
 	}
 	else
 	{
-		$cnt += count(get_class_methods($c));
+		$cnt_methods += count(get_class_methods($c));
 	}
 }
+
+$cnt = $cnt_modules + $cnt_classes + $cnt_methods;
+
+printf("\n");
+printf("Modules: %5d\n", $cnt_modules);
+printf("Classes: %5d\n", $cnt_classes);
+printf("Methods: %5d\n", $cnt_methods);
+printf("\n");
+printf("Names:   %5d\n", $cnt);
+printf("Errors:  %5d (%.1f%%)\n", $err, round($err * 100 / $cnt, 1));
+printf("\n");
 
 ksort($extensions);
 foreach($extensions as $ext => &$classes) {
@@ -78,9 +92,6 @@ foreach($extensions as $ext => &$classes) {
 	}
 }
 
-printf("\n");
-printf("Names:  %5d\n", $cnt);
-printf("Errors: %5d (%.1f%%)\n", $err, round($err * 100 / $cnt, 1));
 printf("\n");
 
 ?>
