@@ -769,13 +769,14 @@ PHP_FUNCTION(mysql_close)
 }
 /* }}} */
 
-/* {{{ proto bool mysql_select_db(string database_name [, int link_identifier])
+/* {{{ proto bool mysql_select_db(string database_name [, int link_identifier [, bool return_prev_dbname]])
    Selects a MySQL database */
 PHP_FUNCTION(mysql_select_db)
 {
-	zval **db, **mysql_link;
-	int id;
+	zval **db, **mysql_link, **ret_prevdb;
+	int id, ret_dbname=0;
 	php_mysql_conn *mysql;
+	char *prev_db=NULL;
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
@@ -791,20 +792,38 @@ PHP_FUNCTION(mysql_select_db)
 			}
 			id = -1;
 			break;
+		case 3:
+			if (zend_get_parameters_ex(3, &db, &mysql_link, &ret_prevdb)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = -1;
+			convert_to_long_ex(ret_prevdb);
+			ret_dbname = Z_LVAL_PP(ret_prevdb);
+			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
-	
-	
+
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
+
+	/* Get the previous database name */
+	if (ret_dbname && mysql->conn.db) {
+		prev_db=estrdup(mysql->conn.db);
+	}
 	
 	if (mysql_select_db(&mysql->conn, Z_STRVAL_PP(db))!=0) {
-		RETURN_FALSE;
+		RETVAL_FALSE;
+	} else if (prev_db) {
+		RETVAL_STRING(prev_db, 1);
 	} else {
-		RETURN_TRUE;
+		RETVAL_TRUE;
+	}
+
+	if (prev_db) {
+		efree(prev_db);
 	}
 }
 /* }}} */
