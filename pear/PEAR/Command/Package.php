@@ -2,6 +2,7 @@
 
 require_once 'PEAR/Command/Common.php';
 require_once 'PEAR/Packager.php';
+require_once 'PEAR/Common.php';
 
 class PEAR_Command_Package extends PEAR_Command_Common
 {
@@ -28,7 +29,9 @@ class PEAR_Command_Package extends PEAR_Command_Common
      */
     function getCommands()
     {
-        return array('package', 'package-list', 'package-info');
+        return array('package',
+                     'package-list',
+                     'package-info');
     }
 
     // }}}
@@ -80,7 +83,6 @@ class PEAR_Command_Package extends PEAR_Command_Common
             // {{{ package-list
 
             case 'package-list': {
-                include_once "PEAR/Common.php";
                 $obj = new PEAR_Common();
                 if (PEAR::isError($info = $obj->infoFromTgzFile($params[0]))) {
                     return $info;
@@ -125,7 +127,6 @@ class PEAR_Command_Package extends PEAR_Command_Common
             // {{{ package-info
 
             case 'package-info': {
-                include_once "PEAR/Common.php";
                 $obj = new PEAR_Common();
                 if (PEAR::isError($info = $obj->infoFromTgzFile($params[0]))) {
                     return $info;
