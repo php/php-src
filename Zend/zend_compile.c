@@ -2838,6 +2838,9 @@ void zend_do_list_end(znode *result, znode *expr TSRMLS_DC)
 	zend_llist_element *dimension;
 	zend_op *opline;
 	znode last_container;
+	int opcode_index;
+	int last_op_number;
+	zend_op *last_op;
 
 	le = CG(list_llist).head;
 	while (le) {
@@ -2877,8 +2880,14 @@ void zend_do_list_end(znode *result, znode *expr TSRMLS_DC)
 		((list_llist_element *) le->data)->value = last_container;
 		zend_llist_destroy(&((list_llist_element *) le->data)->dimensions);
 		zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC);
+		opcode_index = - 1;
+		last_op_number = get_next_op_number(CG(active_op_array))-1;
+		last_op = &CG(active_op_array)->opcodes[last_op_number];
+		if (last_op->opcode == ZEND_FETCH_OBJ_W) {
+			opcode_index = - 2;
+		}
 		zend_do_assign(result, &((list_llist_element *) le->data)->var, &((list_llist_element *) le->data)->value TSRMLS_CC);
-		CG(active_op_array)->opcodes[CG(active_op_array)->last-1].result.u.EA.type |= EXT_TYPE_UNUSED;
+		CG(active_op_array)->opcodes[CG(active_op_array)->last + opcode_index].result.u.EA.type |= EXT_TYPE_UNUSED;
 		le = le->next;
 	}
 	zend_llist_destroy(&CG(dimension_llist));
