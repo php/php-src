@@ -409,14 +409,16 @@ void *php_xpath_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2)
 	return obj;
 }  
 
-static void xpath_object_set_data(void *obj, zval *wrapper) {
+static void xpath_object_set_data(void *obj, zval *wrapper)
+{
 /*	char tmp[20];
 	sprintf(tmp, "%08X", obj);
 	fprintf(stderr, "Adding %s to hash\n", tmp); */
 	((xmlXPathObjectPtr) obj)->user = wrapper;
 }
 
-static zval *xpath_object_get_data(void *obj) {
+static zval *xpath_object_get_data(void *obj)
+{
 /*	char tmp[20];
 	sprintf(tmp, "%08X", obj);
 	fprintf(stderr, "Trying getting %s from hash ...", tmp); 
@@ -427,7 +429,8 @@ static zval *xpath_object_get_data(void *obj) {
 	return((zval *) (((xmlXPathObjectPtr) obj)->user));
 }
 
-static void php_xpath_set_object(zval *wrapper, void *obj, int rsrc_type) {
+static void php_xpath_set_object(zval *wrapper, void *obj, int rsrc_type)
+{
 	zval *handle, *addr;
 
 	MAKE_STD_ZVAL(handle);
@@ -442,7 +445,8 @@ static void php_xpath_set_object(zval *wrapper, void *obj, int rsrc_type) {
 	xpath_object_set_data(obj, wrapper);
 }
 
-static zval *php_xpathobject_new(xmlXPathObjectPtr obj, int *found) {
+static zval *php_xpathobject_new(xmlXPathObjectPtr obj, int *found TSRMLS_DC) 
+{
 	zval *wrapper;
 	int rsrc_type;
 
@@ -488,14 +492,16 @@ void *php_xpath_get_context(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS
 	return obj;
 }  
 
-static void xpath_context_set_data(void *obj, zval *wrapper) {
+static void xpath_context_set_data(void *obj, zval *wrapper)
+{
 /*	char tmp[20];
 	sprintf(tmp, "%08X", obj);
 	fprintf(stderr, "Adding %s to hash\n", tmp); */
 	((xmlXPathContextPtr) obj)->user = (void *) wrapper;
 }
 
-static zval *xpath_context_get_data(void *obj) {
+static zval *xpath_context_get_data(void *obj)
+{
 /*	char tmp[20];
 	sprintf(tmp, "%08X", obj);
 	fprintf(stderr, "Trying getting %s from hash ...", tmp); 
@@ -506,7 +512,8 @@ static zval *xpath_context_get_data(void *obj) {
 	return((zval *) (((xmlXPathContextPtr) obj)->user));
 }
 
-static void php_xpath_set_context(zval *wrapper, void *obj, int rsrc_type) {
+static void php_xpath_set_context(zval *wrapper, void *obj, int rsrc_type)
+{
 	zval *handle, *addr;
 
 	MAKE_STD_ZVAL(handle);
@@ -521,7 +528,8 @@ static void php_xpath_set_context(zval *wrapper, void *obj, int rsrc_type) {
 	xpath_context_set_data(obj, wrapper);
 }
 
-static zval *php_xpathcontext_new(xmlXPathContextPtr obj, int *found) {
+static zval *php_xpathcontext_new(xmlXPathContextPtr obj, int *found TSRMLS_DC)
+{
 	zval *wrapper;
 	int rsrc_type;
 
@@ -568,7 +576,8 @@ void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC
 	return obj;
 }  
 
-static void php_dom_set_object(zval *wrapper, void *obj, int rsrc_type) {
+static void php_dom_set_object(zval *wrapper, void *obj, int rsrc_type)
+{
 	zval *handle, *addr;
 
 	MAKE_STD_ZVAL(handle);
@@ -583,7 +592,8 @@ static void php_dom_set_object(zval *wrapper, void *obj, int rsrc_type) {
 	dom_object_set_data(obj, wrapper);
 }
 
-static zval *php_domobject_new(xmlNodePtr obj, int *found) {
+static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
+{
 	zval *wrapper;
 	char *content;
 	int rsrc_type;
@@ -980,7 +990,7 @@ PHP_FUNCTION(domxml_node)
 	if (!node) {
 		RETURN_FALSE;
 	}
-	rv = php_domobject_new(node, &ret);
+	rv = php_domobject_new(node, &ret TSRMLS_CC);
 	if (!rv) {
 		RETURN_FALSE;
 	}
@@ -1096,7 +1106,7 @@ PHP_FUNCTION(domxml_node_first_child)
 		RETURN_FALSE;
 	}
 
-	rv = php_domobject_new(first, &ret);
+	rv = php_domobject_new(first, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1119,7 +1129,7 @@ PHP_FUNCTION(domxml_node_last_child)
 		RETURN_FALSE;
 	}
 
-	rv = php_domobject_new(last, &ret);
+	rv = php_domobject_new(last, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1143,7 +1153,7 @@ PHP_FUNCTION(domxml_node_next_sibling)
 		RETURN_FALSE;
 	}
 
-	rv = php_domobject_new(first, &ret);
+	rv = php_domobject_new(first, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1167,7 +1177,7 @@ PHP_FUNCTION(domxml_node_previous_sibling)
 		RETURN_FALSE;
 	}
 
-	rv = php_domobject_new(first, &ret);
+	rv = php_domobject_new(first, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1192,7 +1202,7 @@ PHP_FUNCTION(domxml_node_owner_document)
 		RETURN_FALSE;
 	}
 
-	rv = php_domobject_new((xmlNodePtr) docp, &ret);
+	rv = php_domobject_new((xmlNodePtr) docp, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1280,7 +1290,7 @@ PHP_FUNCTION(domxml_node_parent)
 	if (!last) {
 		RETURN_FALSE;
 	}
-	rv = php_domobject_new(last, &ret);
+	rv = php_domobject_new(last, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1315,7 +1325,7 @@ PHP_FUNCTION(domxml_node_children)
 
 	while(last) {
 		zval *child;
-		child = php_domobject_new(last, &ret);
+		child = php_domobject_new(last, &ret TSRMLS_CC);
 		add_next_index_zval(return_value, child);
 		last = last->next;
 	}
@@ -1359,7 +1369,7 @@ PHP_FUNCTION(domxml_node_add_child)
 	}
 
 	child = xmlAddChild(nodep, child);
-	rv = php_domobject_new(child, &ret);
+	rv = php_domobject_new(child, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1386,7 +1396,7 @@ PHP_FUNCTION(domxml_node_append_child)
 	}
 
 	child = xmlAddSibling(nodep, child);
-	rv = php_domobject_new(child, &ret);
+	rv = php_domobject_new(child, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1414,7 +1424,7 @@ PHP_FUNCTION(domxml_node_insert_before)
 	}
 
 	child = xmlAddPrevSibling(refp, child);
-	rv = php_domobject_new(child, &ret);
+	rv = php_domobject_new(child, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1456,7 +1466,7 @@ PHP_FUNCTION(domxml_node_attributes)
 	id = getThis();
 	nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
 
-	if(node_attributes(&attrs, nodep) < 0)
+	if(node_attributes(&attrs, nodep TSRMLS_CC) < 0)
 		RETURN_FALSE;
 
 	*return_value = *attrs;
@@ -1504,7 +1514,7 @@ PHP_FUNCTION(domxml_node_new_child)
 	if (!child) {
 		RETURN_FALSE;
 	}
-	rv = php_domobject_new(child, &ret);
+	rv = php_domobject_new(child, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1589,7 +1599,7 @@ PHP_FUNCTION(domxml_element)
 	if (!node) {
 		RETURN_FALSE;
 	}
-	rv = php_domobject_new(node, &ret);
+	rv = php_domobject_new(node, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1660,7 +1670,7 @@ PHP_FUNCTION(domxml_elem_set_attribute)
 		php_error(E_WARNING, "No such attribute '%s'", arg1->value.str.val);
 		RETURN_FALSE;
 	}
-	rv = php_domobject_new((xmlNodePtr) attr, &ret);
+	rv = php_domobject_new((xmlNodePtr) attr, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1789,7 +1799,7 @@ PHP_FUNCTION(domxml_doc_doctype)
 	}
 
 	dtd = xmlGetIntSubset(docp);
-	rv = php_domobject_new((xmlNodePtr) dtd, &ret);
+	rv = php_domobject_new((xmlNodePtr) dtd, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1808,7 +1818,7 @@ PHP_FUNCTION(domxml_doc_implementation)
 		RETURN_FALSE;
 	}
 
-/*	rv = php_domobject_new(node, &ret);
+/*	rv = php_domobject_new(node, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 */
@@ -1842,7 +1852,7 @@ PHP_FUNCTION(domxml_doc_document_element)
 	while(node) {
 		if(node->type == XML_ELEMENT_NODE) {
 			zval *rv;
-			rv = php_domobject_new(node, &ret);
+			rv = php_domobject_new(node, &ret TSRMLS_CC);
 			SEPARATE_ZVAL(&rv);
 			*return_value = *rv;
 			FREE_ZVAL(rv);
@@ -1876,9 +1886,9 @@ PHP_FUNCTION(domxml_doc_create_element)
 	if (!node) {
 		RETURN_FALSE;
 	}
-  node->doc = docp;
+	node->doc = docp;
 
-	rv = php_domobject_new(node, &ret);
+	rv = php_domobject_new(node, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1908,9 +1918,9 @@ PHP_FUNCTION(domxml_doc_create_text_node)
 	if (!node) {
 		RETURN_FALSE;
 	}
-  node->doc = docp;
+	node->doc = docp;
 
-	rv = php_domobject_new(node, &ret);
+	rv = php_domobject_new(node, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1940,9 +1950,9 @@ PHP_FUNCTION(domxml_doc_create_comment)
 	if (!node) {
 		RETURN_FALSE;
 	}
-  node->doc = docp;
+	node->doc = docp;
 
-	rv = php_domobject_new(node, &ret);
+	rv = php_domobject_new(node, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -1973,9 +1983,9 @@ PHP_FUNCTION(domxml_doc_create_attribute)
 	if (!node) {
 		RETURN_FALSE;
 	}
-  node->doc = docp;
+	node->doc = docp;
 
-	rv = php_domobject_new((xmlNodePtr) node, &ret);
+	rv = php_domobject_new((xmlNodePtr) node, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -2006,9 +2016,9 @@ PHP_FUNCTION(domxml_doc_create_processing_instruction)
 	if (!node) {
 		RETURN_FALSE;
 	}
-  node->doc = docp;
+	node->doc = docp;
 
-	rv = php_domobject_new(node, &ret);
+	rv = php_domobject_new(node, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -2042,9 +2052,9 @@ PHP_FUNCTION(domxml_doc_imported_node)
 	if (!node) {
 		RETURN_FALSE;
 	}
-  node->doc = docp; /* Not enough because other nodes in the tree are not set */
+	node->doc = docp; /* Not enough because other nodes in the tree are not set */
 
-	rv = php_domobject_new(node, &ret);
+	rv = php_domobject_new(node, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -2067,7 +2077,7 @@ PHP_FUNCTION(domxml_intdtd)
 	if (!dtd) {
 		RETURN_FALSE;
 	}
-	rv = php_domobject_new((xmlNodePtr) dtd, &ret);
+	rv = php_domobject_new((xmlNodePtr) dtd, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -2123,7 +2133,7 @@ PHP_FUNCTION(xmldoc)
 	}
 	if (!docp)
 		RETURN_FALSE;
-	rv = php_domobject_new((xmlNodePtr) docp, &ret);
+	rv = php_domobject_new((xmlNodePtr) docp, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -2149,7 +2159,7 @@ PHP_FUNCTION(xmldocfile)
 	}
 	ret = zend_list_insert(docp, le_domxmldocp);
 
-	rv = php_domobject_new((xmlNodePtr) docp, &ret);
+	rv = php_domobject_new((xmlNodePtr) docp, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -2215,7 +2225,7 @@ PHP_FUNCTION(domxml_add_root)
 	}
 	
 	xmlDocSetRootElement(docp, nodep); 
-	rv = php_domobject_new(nodep, &ret);
+	rv = php_domobject_new(nodep, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -2239,7 +2249,7 @@ PHP_FUNCTION(domxml_new_xmldoc)
 	if (!docp) {
 		RETURN_FALSE;
 	}
-	rv = php_domobject_new((xmlNodePtr) docp, &ret);
+	rv = php_domobject_new((xmlNodePtr) docp, &ret TSRMLS_CC);
 	if (!rv) {
 		RETURN_FALSE;
 	}
@@ -2252,7 +2262,7 @@ PHP_FUNCTION(domxml_new_xmldoc)
 #ifdef newcode
 /* {{{ proto int node_namespace([int node])
    Returns list of namespaces */
-static int node_namespace(zval **attributes, xmlNode *nodep)
+static int node_namespace(zval **attributes, xmlNode *nodep TSRMLS_DC)
 {
 	xmlNs *ns;
 
@@ -2272,7 +2282,7 @@ static int node_namespace(zval **attributes, xmlNode *nodep)
 		zval *pattr;
 		int ret;
 
-		pattr = php_domobject_new((xmlNodePtr) ns, &ret);
+		pattr = php_domobject_new((xmlNodePtr) ns, &ret TSRMLS_CC);
 		SEPARATE_ZVAL(&pattr);
 /*		if(!ret) { */
 			if(ns->href)
@@ -2290,7 +2300,7 @@ static int node_namespace(zval **attributes, xmlNode *nodep)
 
 /* {{{ proto int node_attributes(zval **attributes, int node)
    Returns list of children nodes */
-static int node_attributes(zval **attributes, xmlNode *nodep)
+static int node_attributes(zval **attributes, xmlNode *nodep TSRMLS_DC)
 {
 	xmlAttr *attr;
 	int count = 0;
@@ -2310,8 +2320,8 @@ static int node_attributes(zval **attributes, xmlNode *nodep)
 		zval *pattr;
 		int ret;
 
-		pattr = php_domobject_new((xmlNodePtr) attr, &ret);
-/*		if(0 <= (n = node_children(&children, attr->children))) {
+		pattr = php_domobject_new((xmlNodePtr) attr, &ret TSRMLS_CC);
+/*		if(0 <= (n = node_children(&children, attr->children TSRMLS_CC))) {
 			zend_hash_update(pattr->value.obj.properties, "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
 		}
 */		add_property_string(pattr, "name", (char *) (attr->name), 1);
@@ -2325,7 +2335,7 @@ static int node_attributes(zval **attributes, xmlNode *nodep)
 
 /* {{{ proto int node_children([int node])
    Returns list of children nodes */
-static int node_children(zval **children, xmlNode *nodep)
+static int node_children(zval **children, xmlNode *nodep TSRMLS_DC)
 {
 	zval *mchildren, *attributes;
 	/* zval *namespace; */
@@ -2346,7 +2356,7 @@ static int node_children(zval **children, xmlNode *nodep)
 		zval *child;
 		int ret;
 	
-		child = php_domobject_new(last, &ret);
+		child = php_domobject_new(last, &ret TSRMLS_CC);
 		zend_hash_next_index_insert((*children)->value.ht, &child, sizeof(zval *), NULL);
 
 		/* Get the namespace of the current node and add it as a property */
@@ -2355,11 +2365,11 @@ static int node_children(zval **children, xmlNode *nodep)
 */
 
 		/* Get the attributes of the current node and add it as a property */
-		if(node_attributes(&attributes, last) >= 0)
+		if(node_attributes(&attributes, last TSRMLS_CC) >= 0)
 			zend_hash_update(child->value.obj.properties, "attributes", sizeof("attributes"), (void *) &attributes, sizeof(zval *), NULL);
 
 		/* Get recursively the children of the current node and add it as a property */
-		if(node_children(&mchildren, last->children) >= 0)
+		if(node_children(&mchildren, last->children TSRMLS_CC) >= 0)
 			zend_hash_update(child->value.obj.properties, "children", sizeof("children"), (void *) &mchildren, sizeof(zval *), NULL);
 		count++;
 		last = last->next;
@@ -2395,7 +2405,7 @@ PHP_FUNCTION(xmltree)
 		RETURN_FALSE;
 	}
 
-	rv = php_domobject_new((xmlNodePtr) docp, &ret);
+	rv = php_domobject_new((xmlNodePtr) docp, &ret TSRMLS_CC);
 	if (!rv) {
 		RETURN_FALSE;
 	}
@@ -2407,7 +2417,7 @@ PHP_FUNCTION(xmltree)
 	   as root, you may have a comment, pi and and element as root.
 	   Thanks to Paul DuBois for pointing me at this.
 	*/
-	if (node_children(&children, root) >= 0) {
+	if (node_children(&children, root TSRMLS_CC) >= 0) {
 		zend_hash_update(return_value->value.obj.properties, "children",
 						 sizeof("children"), (void *) &children, sizeof(zval *), NULL);
 	}
@@ -2444,7 +2454,7 @@ static void php_xpathptr_new_context(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	if (!ctx) {
 		RETURN_FALSE;
 	}
-	rv = php_xpathcontext_new(ctx, &ret);
+	rv = php_xpathcontext_new(ctx, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
@@ -2499,7 +2509,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 		RETURN_FALSE;
 	}
 
-	rv = php_xpathobject_new(xpathobjp, &ret);
+	rv = php_xpathobject_new(xpathobjp, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 
 	add_property_long(rv, "type", xpathobjp->type);
@@ -2527,7 +2537,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 				int retnode;
 
 				/* construct a node object */
-				child = php_domobject_new(node, &retnode);
+				child = php_domobject_new(node, &retnode TSRMLS_CC);
 				zend_hash_next_index_insert(arr->value.ht, &child, sizeof(zval *), NULL);
 			}
 			zend_hash_update(rv->value.obj.properties, "nodeset", sizeof("nodeset"), (void *) &arr, sizeof(zval *), NULL);
