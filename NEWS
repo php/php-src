@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . ext/db (Jani, Derick)
   . ext/mcal (Jani, Derick)
   . ext/qtdom (Jani, Derick)
+  . ext/notes (Wez)
 - Added 'c' modifier to date() which returns the date in the ISO 8601 format.
   (Derick, Manuzhai)
 - Added an optional parameter to microtime() to get the time as float. (Andrey)
