@@ -552,6 +552,8 @@ PHP_FUNCTION(mb_split)
 		break;
 	}
 
+	if (count == 0) count = 1; 
+
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -574,7 +576,7 @@ PHP_FUNCTION(mb_split)
 	pos = 0;
 	err = 0;
 	/* churn through str, generating array entries as we go */
-	while ((count != 0) &&
+	while ((--count != 0) &&
 		   (err = mbre_search(&re, string, string_len, pos, string_len - pos, &regs)) >= 0) {
 		if ( regs.beg[0] == regs.end[0] ) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty regular expression");
@@ -583,7 +585,7 @@ PHP_FUNCTION(mb_split)
 
 		n = regs.beg[0];
 		/* add it to the array */
-		if (n < string_len && n <= pos) {
+		if (n < string_len && n >= pos) {
 			n -= pos;
 			add_next_index_stringl(return_value, &string[pos], n, 1);
 		} else {
@@ -597,10 +599,8 @@ PHP_FUNCTION(mb_split)
 		} else {
 			pos++;
 		}
-		/* if we're only looking for a certain number of points,
-		   stop looking once we hit it */
-		if (count > 0) {
-			count--;
+		if (count < 0) {
+			count = 0;
 		}
 	}
 
