@@ -18,8 +18,8 @@
 
 /* $Id$ */
 
-#ifndef PHP_LIBDBM_H
-#define PHP_LIBDBM_H
+#ifndef PHP_LIB_FLATFILE_H
+#define PHP_LIB_FLATFILE_H
 
 typedef struct {
 	char *dptr;
