@@ -538,7 +538,7 @@ class PEAR_Config extends PEAR
                 if ($valid_set) {
                     reset($valid_set);
                     if ((key($valid_set) === 0 && !in_array($value, $valid_set)) ||
-                        empty($valid_set[$value]))
+                        (key($valid_set) !== 0 && empty($valid_set[$value])))
                     {
                         return false;
                     }
