@@ -6,6 +6,8 @@ PHP 4.0                                                                    NEWS
 - Fixed bug in the mcrypt extension that caused segfaults when using a key
   that is too large for the used algorithm, and a bug that caused
   mcrypt_generic() to segfault PHP (Derick)
+- Fixed getopt so that it accepts command line arguments in the form
+  -<opt><arg> and -<opt> <arg>. (Jmoore)
 - Fixed race in writing session files (Sascha)
 - Fixed a possible crash in the PHP CGI when no input file is
   specified (Zeev)
