@@ -82,7 +82,9 @@ for (i = 0; i < 256; i++) *p++ = tolower(i);
 for (i = 0; i < 256; i++) *p++ = islower(i)? toupper(i) : tolower(i);
 
 /* Then the character class tables. Don't try to be clever and save effort
-on exclusive ones - in some locales things may be different. */
+on exclusive ones - in some locales things may be different. Note that the
+table for "space" includes everything "isspace" gives, including VT in the
+default locale. This makes it work for the POSIX class [:space:]. */
 
 memset(p, 0, cbit_length);
 for (i = 0; i < 256; i++)
@@ -112,12 +114,14 @@ for (i = 0; i < 256; i++)
   }
 p += cbit_length;
 
-/* Finally, the character type table */
+/* Finally, the character type table. In this, we exclude VT from the white
+space chars, because Perl doesn't recognize it as such for \s and for comments
+within regexes. */
 
 for (i = 0; i < 256; i++)
   {
   int x = 0;
-  if (isspace(i)) x += ctype_space;
+  if (i != 0x0b && isspace(i)) x += ctype_space;
   if (isalpha(i)) x += ctype_letter;
   if (isdigit(i)) x += ctype_digit;
   if (isxdigit(i)) x += ctype_xdigit;

@@ -1,4 +1,4 @@
-PCRE version 3.9 02-Jan-2002
+PCRE version 3.92 11-Sep-2002
 
 /the quick brown fox/
     the quick brown fox
@@ -2225,7 +2225,7 @@ No match
  0: abc\x01de
  1: abc
 
-/a.b(?s)/
+/(?s)a.b/
     a\nb
  0: a\x0ab
 
@@ -3015,5 +3015,3208 @@ No match
  0: ABABAB
  1: AB
     
+/(?<!bar)foo/
+    foo
+ 0: foo
+    catfood
+ 0: foo
+    arfootle
+ 0: foo
+    rfoosh
+ 0: foo
+    *** Failers
+No match
+    barfoo
+No match
+    towbarfoo
+No match
+
+/\w{3}(?<!bar)foo/
+    catfood
+ 0: catfoo
+    *** Failers
+No match
+    foo
+No match
+    barfoo
+No match
+    towbarfoo
+No match
+
+/(?<=(foo)a)bar/
+    fooabar
+ 0: bar
+ 1: foo
+    *** Failers
+No match
+    bar
+No match
+    foobbar
+No match
+      
+/\Aabc\z/m
+    abc
+ 0: abc
+    *** Failers
+No match
+    abc\n   
+No match
+    qqq\nabc
+No match
+    abc\nzzz
+No match
+    qqq\nabc\nzzz
+No match
+
+"(?>.*/)foo"
+    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/it/you/see/
+No match
+
+"(?>.*/)foo"
+    /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
+ 0: /this/is/a/very/long/line/in/deed/with/very/many/slashes/in/and/foo
+
+/(?>(\.\d\d[1-9]?))\d+/
+    1.230003938
+ 0: .230003938
+ 1: .23
+    1.875000282
+ 0: .875000282
+ 1: .875
+    *** Failers 
+No match
+    1.235 
+No match
+
+/^((?>\w+)|(?>\s+))*$/
+    now is the time for all good men to come to the aid of the party
+ 0: now is the time for all good men to come to the aid of the party
+ 1: party
+    *** Failers
+No match
+    this is not a line with only words and spaces!
+No match
+    
+/(\d+)(\w)/
+    12345a
+ 0: 12345a
+ 1: 12345
+ 2: a
+    12345+ 
+ 0: 12345
+ 1: 1234
+ 2: 5
+
+/((?>\d+))(\w)/
+    12345a
+ 0: 12345a
+ 1: 12345
+ 2: a
+    *** Failers
+No match
+    12345+ 
+No match
+
+/(?>a+)b/
+    aaab
+ 0: aaab
+
+/((?>a+)b)/
+    aaab
+ 0: aaab
+ 1: aaab
+
+/(?>(a+))b/
+    aaab
+ 0: aaab
+ 1: aaa
+
+/(?>b)+/
+    aaabbbccc
+ 0: bbb
+
+/(?>a+|b+|c+)*c/
+    aaabbbbccccd
+ 0: aaabbbbc
+
+/((?>[^()]+)|\([^()]*\))+/
+    ((abc(ade)ufh()()x
+ 0: abc(ade)ufh()()x
+ 1: x
+    
+/\(((?>[^()]+)|\([^()]+\))+\)/ 
+    (abc)
+ 0: (abc)
+ 1: abc
+    (abc(def)xyz)
+ 0: (abc(def)xyz)
+ 1: xyz
+    *** Failers
+No match
+    ((()aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa   
+No match
+
+/a(?-i)b/i
+    ab
+ 0: ab
+    Ab
+ 0: Ab
+    *** Failers 
+No match
+    aB
+No match
+    AB
+No match
+        
+/(a (?x)b c)d e/
+    a bcd e
+ 0: a bcd e
+ 1: a bc
+    *** Failers
+No match
+    a b cd e
+No match
+    abcd e   
+No match
+    a bcde 
+No match
+ 
+/(a b(?x)c d (?-x)e f)/
+    a bcde f
+ 0: a bcde f
+ 1: a bcde f
+    *** Failers
+No match
+    abcdef  
+No match
+
+/(a(?i)b)c/
+    abc
+ 0: abc
+ 1: ab
+    aBc
+ 0: aBc
+ 1: aB
+    *** Failers
+No match
+    abC
+No match
+    aBC  
+No match
+    Abc
+No match
+    ABc
+No match
+    ABC
+No match
+    AbC
+No match
+    
+/a(?i:b)c/
+    abc
+ 0: abc
+    aBc
+ 0: aBc
+    *** Failers 
+No match
+    ABC
+No match
+    abC
+No match
+    aBC
+No match
+    
+/a(?i:b)*c/
+    aBc
+ 0: aBc
+    aBBc
+ 0: aBBc
+    *** Failers 
+No match
+    aBC
+No match
+    aBBC
+No match
+    
+/a(?=b(?i)c)\w\wd/
+    abcd
+ 0: abcd
+    abCd
+ 0: abCd
+    *** Failers
+No match
+    aBCd
+No match
+    abcD     
+No match
+    
+/(?s-i:more.*than).*million/i
+    more than million
+ 0: more than million
+    more than MILLION
+ 0: more than MILLION
+    more \n than Million 
+ 0: more \x0a than Million
+    *** Failers
+No match
+    MORE THAN MILLION    
+No match
+    more \n than \n million 
+No match
+
+/(?:(?s-i)more.*than).*million/i
+    more than million
+ 0: more than million
+    more than MILLION
+ 0: more than MILLION
+    more \n than Million 
+ 0: more \x0a than Million
+    *** Failers
+No match
+    MORE THAN MILLION    
+No match
+    more \n than \n million 
+No match
+    
+/(?>a(?i)b+)+c/ 
+    abc
+ 0: abc
+    aBbc
+ 0: aBbc
+    aBBc 
+ 0: aBBc
+    *** Failers
+No match
+    Abc
+No match
+    abAb    
+No match
+    abbC 
+No match
+    
+/(?=a(?i)b)\w\wc/
+    abc
+ 0: abc
+    aBc
+ 0: aBc
+    *** Failers
+No match
+    Ab 
+No match
+    abC
+No match
+    aBC     
+No match
+    
+/(?<=a(?i)b)(\w\w)c/
+    abxxc
+ 0: xxc
+ 1: xx
+    aBxxc
+ 0: xxc
+ 1: xx
+    *** Failers
+No match
+    Abxxc
+No match
+    ABxxc
+No match
+    abxxC      
+No match
+
+/(?:(a)|b)(?(1)A|B)/
+    aA
+ 0: aA
+ 1: a
+    bB
+ 0: bB
+    *** Failers
+No match
+    aB
+No match
+    bA    
+No match
+
+/^(a)?(?(1)a|b)+$/
+    aa
+ 0: aa
+ 1: a
+    b
+ 0: b
+    bb  
+ 0: bb
+    *** Failers
+No match
+    ab   
+No match
+
+/^(?(?=abc)\w{3}:|\d\d)$/
+    abc:
+ 0: abc:
+    12
+ 0: 12
+    *** Failers
+No match
+    123
+No match
+    xyz    
+No match
+
+/^(?(?!abc)\d\d|\w{3}:)$/
+    abc:
+ 0: abc:
+    12
+ 0: 12
+    *** Failers
+No match
+    123
+No match
+    xyz    
+No match
+    
+/(?(?<=foo)bar|cat)/
+    foobar
+ 0: bar
+    cat
+ 0: cat
+    fcat
+ 0: cat
+    focat   
+ 0: cat
+    *** Failers
+No match
+    foocat  
+No match
+
+/(?(?<!foo)cat|bar)/
+    foobar
+ 0: bar
+    cat
+ 0: cat
+    fcat
+ 0: cat
+    focat   
+ 0: cat
+    *** Failers
+No match
+    foocat  
+No match
+
+/( \( )? [^()]+ (?(1) \) |) /x
+    abcd
+ 0: abcd
+    (abcd)
+ 0: (abcd)
+ 1: (
+    the quick (abcd) fox
+ 0: the quick 
+    (abcd   
+ 0: abcd
+
+/( \( )? [^()]+ (?(1) \) ) /x
+    abcd
+ 0: abcd
+    (abcd)
+ 0: (abcd)
+ 1: (
+    the quick (abcd) fox
+ 0: the quick 
+    (abcd   
+ 0: abcd
+
+/^(?(2)a|(1)(2))+$/
+    12
+ 0: 12
+ 1: 1
+ 2: 2
+    12a
+ 0: 12a
+ 1: 1
+ 2: 2
+    12aa
+ 0: 12aa
+ 1: 1
+ 2: 2
+    *** Failers
+No match
+    1234    
+No match
+
+/((?i)blah)\s+\1/
+    blah blah
+ 0: blah blah
+ 1: blah
+    BLAH BLAH
+ 0: BLAH BLAH
+ 1: BLAH
+    Blah Blah
+ 0: Blah Blah
+ 1: Blah
+    blaH blaH
+ 0: blaH blaH
+ 1: blaH
+    *** Failers
+No match
+    blah BLAH
+No match
+    Blah blah      
+No match
+    blaH blah 
+No match
+
+/((?i)blah)\s+(?i:\1)/
+    blah blah
+ 0: blah blah
+ 1: blah
+    BLAH BLAH
+ 0: BLAH BLAH
+ 1: BLAH
+    Blah Blah
+ 0: Blah Blah
+ 1: Blah
+    blaH blaH
+ 0: blaH blaH
+ 1: blaH
+    blah BLAH
+ 0: blah BLAH
+ 1: blah
+    Blah blah      
+ 0: Blah blah
+ 1: Blah
+    blaH blah 
+ 0: blaH blah
+ 1: blaH
+
+/(?>a*)*/
+    a
+ 0: a
+    aa
+ 0: aa
+    aaaa
+ 0: aaaa
+    
+/(abc|)+/
+    abc
+ 0: abc
+ 1: 
+    abcabc
+ 0: abcabc
+ 1: 
+    abcabcabc
+ 0: abcabcabc
+ 1: 
+    xyz      
+ 0: 
+ 1: 
+
+/([a]*)*/
+    a
+ 0: a
+ 1: 
+    aaaaa 
+ 0: aaaaa
+ 1: 
+ 
+/([ab]*)*/
+    a
+ 0: a
+ 1: 
+    b
+ 0: b
+ 1: 
+    ababab
+ 0: ababab
+ 1: 
+    aaaabcde
+ 0: aaaab
+ 1: 
+    bbbb    
+ 0: bbbb
+ 1: 
+ 
+/([^a]*)*/
+    b
+ 0: b
+ 1: 
+    bbbb
+ 0: bbbb
+ 1: 
+    aaa   
+ 0: 
+ 1: 
+ 
+/([^ab]*)*/
+    cccc
+ 0: cccc
+ 1: 
+    abab  
+ 0: 
+ 1: 
+ 
+/([a]*?)*/
+    a
+ 0: 
+ 1: 
+    aaaa 
+ 0: 
+ 1: 
+ 
+/([ab]*?)*/
+    a
+ 0: 
+ 1: 
+    b
+ 0: 
+ 1: 
+    abab
+ 0: 
+ 1: 
+    baba   
+ 0: 
+ 1: 
+ 
+/([^a]*?)*/
+    b
+ 0: 
+ 1: 
+    bbbb
+ 0: 
+ 1: 
+    aaa   
+ 0: 
+ 1: 
+ 
+/([^ab]*?)*/
+    c
+ 0: 
+ 1: 
+    cccc
+ 0: 
+ 1: 
+    baba   
+ 0: 
+ 1: 
+ 
+/(?>a*)*/
+    a
+ 0: a
+    aaabcde 
+ 0: aaa
+ 
+/((?>a*))*/
+    aaaaa
+ 0: aaaaa
+ 1: 
+    aabbaa 
+ 0: aa
+ 1: 
+ 
+/((?>a*?))*/
+    aaaaa
+ 0: 
+ 1: 
+    aabbaa 
+ 0: 
+ 1: 
+
+/(?(?=[^a-z]+[a-z])  \d{2}-[a-z]{3}-\d{2}  |  \d{2}-\d{2}-\d{2} ) /x
+    12-sep-98
+ 0: 12-sep-98
+    12-09-98
+ 0: 12-09-98
+    *** Failers
+No match
+    sep-12-98
+No match
+        
+/(?<=(foo))bar\1/
+    foobarfoo
+ 0: barfoo
+ 1: foo
+    foobarfootling 
+ 0: barfoo
+ 1: foo
+    *** Failers
+No match
+    foobar
+No match
+    barfoo   
+No match
+
+/(?i:saturday|sunday)/
+    saturday
+ 0: saturday
+    sunday
+ 0: sunday
+    Saturday
+ 0: Saturday
+    Sunday
+ 0: Sunday
+    SATURDAY
+ 0: SATURDAY
+    SUNDAY
+ 0: SUNDAY
+    SunDay
+ 0: SunDay
+    
+/(a(?i)bc|BB)x/
+    abcx
+ 0: abcx
+ 1: abc
+    aBCx
+ 0: aBCx
+ 1: aBC
+    bbx
+ 0: bbx
+ 1: bb
+    BBx
+ 0: BBx
+ 1: BB
+    *** Failers
+No match
+    abcX
+No match
+    aBCX
+No match
+    bbX
+No match
+    BBX               
+No match
+
+/^([ab](?i)[cd]|[ef])/
+    ac
+ 0: ac
+ 1: ac
+    aC
+ 0: aC
+ 1: aC
+    bD
+ 0: bD
+ 1: bD
+    elephant
+ 0: e
+ 1: e
+    Europe 
+ 0: E
+ 1: E
+    frog
+ 0: f
+ 1: f
+    France
+ 0: F
+ 1: F
+    *** Failers
+No match
+    Africa     
+No match
+
+/^(ab|a(?i)[b-c](?m-i)d|x(?i)y|z)/
+    ab
+ 0: ab
+ 1: ab
+    aBd
+ 0: aBd
+ 1: aBd
+    xy
+ 0: xy
+ 1: xy
+    xY
+ 0: xY
+ 1: xY
+    zebra
+ 0: z
+ 1: z
+    Zambesi
+ 0: Z
+ 1: Z
+    *** Failers
+No match
+    aCD  
+No match
+    XY  
+No match
+
+/(?<=foo\n)^bar/m
+    foo\nbar
+ 0: bar
+    *** Failers
+No match
+    bar
+No match
+    baz\nbar   
+No match
+
+/(?<=(?<!foo)bar)baz/
+    barbaz
+ 0: baz
+    barbarbaz 
+ 0: baz
+    koobarbaz 
+ 0: baz
+    *** Failers
+No match
+    baz
+No match
+    foobarbaz 
+No match
+
+/The case of aaaaaa is missed out below because I think Perl 5.005_02 gets/
+/it wrong; it sets $1 to aaa rather than aa. Compare the following test,/
+No match
+/where it does set $1 to aa when matching aaaaaa./
+No match
+
+/^(a\1?){4}$/
+    a
+No match
+    aa
+No match
+    aaa
+No match
+    aaaa
+ 0: aaaa
+ 1: a
+    aaaaa
+ 0: aaaaa
+ 1: a
+    aaaaaaa
+ 0: aaaaaaa
+ 1: a
+    aaaaaaaa
+No match
+    aaaaaaaaa
+No match
+    aaaaaaaaaa
+ 0: aaaaaaaaaa
+ 1: aaaa
+    aaaaaaaaaaa
+No match
+    aaaaaaaaaaaa
+No match
+    aaaaaaaaaaaaa
+No match
+    aaaaaaaaaaaaaa
+No match
+    aaaaaaaaaaaaaaa
+No match
+    aaaaaaaaaaaaaaaa               
+No match
+
+/^(a\1?)(a\1?)(a\2?)(a\3?)$/
+    a
+No match
+    aa
+No match
+    aaa
+No match
+    aaaa
+ 0: aaaa
+ 1: a
+ 2: a
+ 3: a
+ 4: a
+    aaaaa
+ 0: aaaaa
+ 1: a
+ 2: aa
+ 3: a
+ 4: a
+    aaaaaa
+ 0: aaaaaa
+ 1: a
+ 2: aa
+ 3: a
+ 4: aa
+    aaaaaaa
+ 0: aaaaaaa
+ 1: a
+ 2: aa
+ 3: aaa
+ 4: a
+    aaaaaaaa
+No match
+    aaaaaaaaa
+No match
+    aaaaaaaaaa
+ 0: aaaaaaaaaa
+ 1: a
+ 2: aa
+ 3: aaa
+ 4: aaaa
+    aaaaaaaaaaa
+No match
+    aaaaaaaaaaaa
+No match
+    aaaaaaaaaaaaa
+No match
+    aaaaaaaaaaaaaa
+No match
+    aaaaaaaaaaaaaaa
+No match
+    aaaaaaaaaaaaaaaa               
+No match
+
+/The following tests are taken from the Perl 5.005 test suite; some of them/
+/are compatible with 5.004, but I'd rather not have to sort them out./
+No match
+
+/abc/
+    abc
+ 0: abc
+    xabcy
+ 0: abc
+    ababc
+ 0: abc
+    *** Failers
+No match
+    xbc
+No match
+    axc
+No match
+    abx
+No match
+
+/ab*c/
+    abc
+ 0: abc
+
+/ab*bc/
+    abc
+ 0: abc
+    abbc
+ 0: abbc
+    abbbbc
+ 0: abbbbc
+
+/.{1}/
+    abbbbc
+ 0: a
+
+/.{3,4}/
+    abbbbc
+ 0: abbb
+
+/ab{0,}bc/
+    abbbbc
+ 0: abbbbc
+
+/ab+bc/
+    abbc
+ 0: abbc
+    *** Failers
+No match
+    abc
+No match
+    abq
+No match
+
+/ab{1,}bc/
+
+/ab+bc/
+    abbbbc
+ 0: abbbbc
+
+/ab{1,}bc/
+    abbbbc
+ 0: abbbbc
+
+/ab{1,3}bc/
+    abbbbc
+ 0: abbbbc
+
+/ab{3,4}bc/
+    abbbbc
+ 0: abbbbc
+
+/ab{4,5}bc/
+    *** Failers
+No match
+    abq
+No match
+    abbbbc
+No match
+
+/ab?bc/
+    abbc
+ 0: abbc
+    abc
+ 0: abc
+
+/ab{0,1}bc/
+    abc
+ 0: abc
+
+/ab?bc/
+
+/ab?c/
+    abc
+ 0: abc
+
+/ab{0,1}c/
+    abc
+ 0: abc
+
+/^abc$/
+    abc
+ 0: abc
+    *** Failers
+No match
+    abbbbc
+No match
+    abcc
+No match
+
+/^abc/
+    abcc
+ 0: abc
+
+/^abc$/
+
+/abc$/
+    aabc
+ 0: abc
+    *** Failers
+No match
+    aabc
+ 0: abc
+    aabcd
+No match
+
+/^/
+    abc
+ 0: 
+
+/$/
+    abc
+ 0: 
+
+/a.c/
+    abc
+ 0: abc
+    axc
+ 0: axc
+
+/a.*c/
+    axyzc
+ 0: axyzc
+
+/a[bc]d/
+    abd
+ 0: abd
+    *** Failers
+No match
+    axyzd
+No match
+    abc
+No match
+
+/a[b-d]e/
+    ace
+ 0: ace
+
+/a[b-d]/
+    aac
+ 0: ac
+
+/a[-b]/
+    a-
+ 0: a-
+
+/a[b-]/
+    a-
+ 0: a-
+
+/a]/
+    a]
+ 0: a]
+
+/a[]]b/
+    a]b
+ 0: a]b
+
+/a[^bc]d/
+    aed
+ 0: aed
+    *** Failers
+No match
+    abd
+No match
+    abd
+No match
+
+/a[^-b]c/
+    adc
+ 0: adc
+
+/a[^]b]c/
+    adc
+ 0: adc
+    *** Failers
+No match
+    a-c
+ 0: a-c
+    a]c
+No match
+
+/\ba\b/
+    a-
+ 0: a
+    -a
+ 0: a
+    -a-
+ 0: a
+
+/\by\b/
+    *** Failers
+No match
+    xy
+No match
+    yz
+No match
+    xyz
+No match
+
+/\Ba\B/
+    *** Failers
+ 0: a
+    a-
+No match
+    -a
+No match
+    -a-
+No match
+
+/\By\b/
+    xy
+ 0: y
+
+/\by\B/
+    yz
+ 0: y
+
+/\By\B/
+    xyz
+ 0: y
+
+/\w/
+    a
+ 0: a
+
+/\W/
+    -
+ 0: -
+    *** Failers
+ 0: *
+    -
+ 0: -
+    a
+No match
+
+/a\sb/
+    a b
+ 0: a b
+
+/a\Sb/
+    a-b
+ 0: a-b
+    *** Failers
+No match
+    a-b
+ 0: a-b
+    a b
+No match
+
+/\d/
+    1
+ 0: 1
+
+/\D/
+    -
+ 0: -
+    *** Failers
+ 0: *
+    -
+ 0: -
+    1
+No match
+
+/[\w]/
+    a
+ 0: a
+
+/[\W]/
+    -
+ 0: -
+    *** Failers
+ 0: *
+    -
+ 0: -
+    a
+No match
+
+/a[\s]b/
+    a b
+ 0: a b
+
+/a[\S]b/
+    a-b
+ 0: a-b
+    *** Failers
+No match
+    a-b
+ 0: a-b
+    a b
+No match
+
+/[\d]/
+    1
+ 0: 1
+
+/[\D]/
+    -
+ 0: -
+    *** Failers
+ 0: *
+    -
+ 0: -
+    1
+No match
+
+/ab|cd/
+    abc
+ 0: ab
+    abcd
+ 0: ab
+
+/()ef/
+    def
+ 0: ef
+ 1: 
+
+/$b/
+
+/a\(b/
+    a(b
+ 0: a(b
+
+/a\(*b/
+    ab
+ 0: ab
+    a((b
+ 0: a((b
+
+/a\\b/
+    a\b
+No match
+
+/((a))/
+    abc
+ 0: a
+ 1: a
+ 2: a
+
+/(a)b(c)/
+    abc
+ 0: abc
+ 1: a
+ 2: c
+
+/a+b+c/
+    aabbabc
+ 0: abc
+
+/a{1,}b{1,}c/
+    aabbabc
+ 0: abc
+
+/a.+?c/
+    abcabc
+ 0: abc
+
+/(a+|b)*/
+    ab
+ 0: ab
+ 1: b
+
+/(a+|b){0,}/
+    ab
+ 0: ab
+ 1: b
+
+/(a+|b)+/
+    ab
+ 0: ab
+ 1: b
+
+/(a+|b){1,}/
+    ab
+ 0: ab
+ 1: b
+
+/(a+|b)?/
+    ab
+ 0: a
+ 1: a
+
+/(a+|b){0,1}/
+    ab
+ 0: a
+ 1: a
+
+/[^ab]*/
+    cde
+ 0: cde
+
+/abc/
+    *** Failers
+No match
+    b
+No match
+    
+
+/a*/
+    
+
+/([abc])*d/
+    abbbcd
+ 0: abbbcd
+ 1: c
+
+/([abc])*bcd/
+    abcd
+ 0: abcd
+ 1: a
+
+/a|b|c|d|e/
+    e
+ 0: e
+
+/(a|b|c|d|e)f/
+    ef
+ 0: ef
+ 1: e
+
+/abcd*efg/
+    abcdefg
+ 0: abcdefg
+
+/ab*/
+    xabyabbbz
+ 0: ab
+    xayabbbz
+ 0: a
+
+/(ab|cd)e/
+    abcde
+ 0: cde
+ 1: cd
+
+/[abhgefdc]ij/
+    hij
+ 0: hij
+
+/^(ab|cd)e/
+
+/(abc|)ef/
+    abcdef
+ 0: ef
+ 1: 
+
+/(a|b)c*d/
+    abcd
+ 0: bcd
+ 1: b
+
+/(ab|ab*)bc/
+    abc
+ 0: abc
+ 1: a
+
+/a([bc]*)c*/
+    abc
+ 0: abc
+ 1: bc
+
+/a([bc]*)(c*d)/
+    abcd
+ 0: abcd
+ 1: bc
+ 2: d
+
+/a([bc]+)(c*d)/
+    abcd
+ 0: abcd
+ 1: bc
+ 2: d
+
+/a([bc]*)(c+d)/
+    abcd
+ 0: abcd
+ 1: b
+ 2: cd
+
+/a[bcd]*dcdcde/
+    adcdcde
+ 0: adcdcde
+
+/a[bcd]+dcdcde/
+    *** Failers
+No match
+    abcde
+No match
+    adcdcde
+No match
+
+/(ab|a)b*c/
+    abc
+ 0: abc
+ 1: ab
+
+/((a)(b)c)(d)/
+    abcd
+ 0: abcd
+ 1: abc
+ 2: a
+ 3: b
+ 4: d
+
+/[a-zA-Z_][a-zA-Z0-9_]*/
+    alpha
+ 0: alpha
+
+/^a(bc+|b[eh])g|.h$/
+    abh
+ 0: bh
+
+/(bc+d$|ef*g.|h?i(j|k))/
+    effgz
+ 0: effgz
+ 1: effgz
+    ij
+ 0: ij
+ 1: ij
+ 2: j
+    reffgz
+ 0: effgz
+ 1: effgz
+    *** Failers
+No match
+    effg
+No match
+    bcdd
+No match
+
+/((((((((((a))))))))))/
+    a
+ 0: a
+ 1: a
+ 2: a
+ 3: a
+ 4: a
+ 5: a
+ 6: a
+ 7: a
+ 8: a
+ 9: a
+10: a
+
+/((((((((((a))))))))))\10/
+    aa
+ 0: aa
+ 1: a
+ 2: a
+ 3: a
+ 4: a
+ 5: a
+ 6: a
+ 7: a
+ 8: a
+ 9: a
+10: a
+
+/(((((((((a)))))))))/
+    a
+ 0: a
+ 1: a
+ 2: a
+ 3: a
+ 4: a
+ 5: a
+ 6: a
+ 7: a
+ 8: a
+ 9: a
+
+/multiple words of text/
+    *** Failers
+No match
+    aa
+No match
+    uh-uh
+No match
+
+/multiple words/
+    multiple words, yeah
+ 0: multiple words
+
+/(.*)c(.*)/
+    abcde
+ 0: abcde
+ 1: ab
+ 2: de
+
+/\((.*), (.*)\)/
+    (a, b)
+ 0: (a, b)
+ 1: a
+ 2: b
+
+/[k]/
+
+/abcd/
+    abcd
+ 0: abcd
+
+/a(bc)d/
+    abcd
+ 0: abcd
+ 1: bc
+
+/a[-]?c/
+    ac
+ 0: ac
+
+/(abc)\1/
+    abcabc
+ 0: abcabc
+ 1: abc
+
+/([a-c]*)\1/
+    abcabc
+ 0: abcabc
+ 1: abc
+
+/(a)|\1/
+    a
+ 0: a
+ 1: a
+    *** Failers
+ 0: a
+ 1: a
+    ab
+ 0: a
+ 1: a
+    x
+No match
+
+/(([a-c])b*?\2)*/
+    ababbbcbc
+ 0: ababb
+ 1: bb
+ 2: b
+
+/(([a-c])b*?\2){3}/
+    ababbbcbc
+ 0: ababbbcbc
+ 1: cbc
+ 2: c
+
+/((\3|b)\2(a)x)+/
+    aaaxabaxbaaxbbax
+ 0: bbax
+ 1: bbax
+ 2: b
+ 3: a
+
+/((\3|b)\2(a)){2,}/
+    bbaababbabaaaaabbaaaabba
+ 0: bbaaaabba
+ 1: bba
+ 2: b
+ 3: a
+
+/abc/i
+    ABC
+ 0: ABC
+    XABCY
+ 0: ABC
+    ABABC
+ 0: ABC
+    *** Failers
+No match
+    aaxabxbaxbbx
+No match
+    XBC
+No match
+    AXC
+No match
+    ABX
+No match
+
+/ab*c/i
+    ABC
+ 0: ABC
+
+/ab*bc/i
+    ABC
+ 0: ABC
+    ABBC
+ 0: ABBC
+
+/ab*?bc/i
+    ABBBBC
+ 0: ABBBBC
+
+/ab{0,}?bc/i
+    ABBBBC
+ 0: ABBBBC
+
+/ab+?bc/i
+    ABBC
+ 0: ABBC
+
+/ab+bc/i
+    *** Failers
+No match
+    ABC
+No match
+    ABQ
+No match
+
+/ab{1,}bc/i
+
+/ab+bc/i
+    ABBBBC
+ 0: ABBBBC
+
+/ab{1,}?bc/i
+    ABBBBC
+ 0: ABBBBC
+
+/ab{1,3}?bc/i
+    ABBBBC
+ 0: ABBBBC
+
+/ab{3,4}?bc/i
+    ABBBBC
+ 0: ABBBBC
+
+/ab{4,5}?bc/i
+    *** Failers
+No match
+    ABQ
+No match
+    ABBBBC
+No match
+
+/ab??bc/i
+    ABBC
+ 0: ABBC
+    ABC
+ 0: ABC
+
+/ab{0,1}?bc/i
+    ABC
+ 0: ABC
+
+/ab??bc/i
+
+/ab??c/i
+    ABC
+ 0: ABC
+
+/ab{0,1}?c/i
+    ABC
+ 0: ABC
+
+/^abc$/i
+    ABC
+ 0: ABC
+    *** Failers
+No match
+    ABBBBC
+No match
+    ABCC
+No match
+
+/^abc/i
+    ABCC
+ 0: ABC
+
+/^abc$/i
+
+/abc$/i
+    AABC
+ 0: ABC
+
+/^/i
+    ABC
+ 0: 
+
+/$/i
+    ABC
+ 0: 
+
+/a.c/i
+    ABC
+ 0: ABC
+    AXC
+ 0: AXC
+
+/a.*?c/i
+    AXYZC
+ 0: AXYZC
+
+/a.*c/i
+    *** Failers
+No match
+    AABC
+ 0: AABC
+    AXYZD
+No match
+
+/a[bc]d/i
+    ABD
+ 0: ABD
+
+/a[b-d]e/i
+    ACE
+ 0: ACE
+    *** Failers
+No match
+    ABC
+No match
+    ABD
+No match
+
+/a[b-d]/i
+    AAC
+ 0: AC
+
+/a[-b]/i
+    A-
+ 0: A-
+
+/a[b-]/i
+    A-
+ 0: A-
+
+/a]/i
+    A]
+ 0: A]
+
+/a[]]b/i
+    A]B
+ 0: A]B
+
+/a[^bc]d/i
+    AED
+ 0: AED
+
+/a[^-b]c/i
+    ADC
+ 0: ADC
+    *** Failers
+No match
+    ABD
+No match
+    A-C
+No match
+
+/a[^]b]c/i
+    ADC
+ 0: ADC
+
+/ab|cd/i
+    ABC
+ 0: AB
+    ABCD
+ 0: AB
+
+/()ef/i
+    DEF
+ 0: EF
+ 1: 
+
+/$b/i
+    *** Failers
+No match
+    A]C
+No match
+    B
+No match
+
+/a\(b/i
+    A(B
+ 0: A(B
+
+/a\(*b/i
+    AB
+ 0: AB
+    A((B
+ 0: A((B
+
+/a\\b/i
+    A\B
+No match
+
+/((a))/i
+    ABC
+ 0: A
+ 1: A
+ 2: A
+
+/(a)b(c)/i
+    ABC
+ 0: ABC
+ 1: A
+ 2: C
+
+/a+b+c/i
+    AABBABC
+ 0: ABC
+
+/a{1,}b{1,}c/i
+    AABBABC
+ 0: ABC
+
+/a.+?c/i
+    ABCABC
+ 0: ABC
+
+/a.*?c/i
+    ABCABC
+ 0: ABC
+
+/a.{0,5}?c/i
+    ABCABC
+ 0: ABC
+
+/(a+|b)*/i
+    AB
+ 0: AB
+ 1: B
+
+/(a+|b){0,}/i
+    AB
+ 0: AB
+ 1: B
+
+/(a+|b)+/i
+    AB
+ 0: AB
+ 1: B
+
+/(a+|b){1,}/i
+    AB
+ 0: AB
+ 1: B
+
+/(a+|b)?/i
+    AB
+ 0: A
+ 1: A
+
+/(a+|b){0,1}/i
+    AB
+ 0: A
+ 1: A
+
+/(a+|b){0,1}?/i
+    AB
+ 0: 
+
+/[^ab]*/i
+    CDE
+ 0: CDE
+
+/abc/i
+
+/a*/i
+    
+
+/([abc])*d/i
+    ABBBCD
+ 0: ABBBCD
+ 1: C
+
+/([abc])*bcd/i
+    ABCD
+ 0: ABCD
+ 1: A
+
+/a|b|c|d|e/i
+    E
+ 0: E
+
+/(a|b|c|d|e)f/i
+    EF
+ 0: EF
+ 1: E
+
+/abcd*efg/i
+    ABCDEFG
+ 0: ABCDEFG
+
+/ab*/i
+    XABYABBBZ
+ 0: AB
+    XAYABBBZ
+ 0: A
+
+/(ab|cd)e/i
+    ABCDE
+ 0: CDE
+ 1: CD
+
+/[abhgefdc]ij/i
+    HIJ
+ 0: HIJ
+
+/^(ab|cd)e/i
+    ABCDE
+No match
+
+/(abc|)ef/i
+    ABCDEF
+ 0: EF
+ 1: 
+
+/(a|b)c*d/i
+    ABCD
+ 0: BCD
+ 1: B
+
+/(ab|ab*)bc/i
+    ABC
+ 0: ABC
+ 1: A
+
+/a([bc]*)c*/i
+    ABC
+ 0: ABC
+ 1: BC
+
+/a([bc]*)(c*d)/i
+    ABCD
+ 0: ABCD
+ 1: BC
+ 2: D
+
+/a([bc]+)(c*d)/i
+    ABCD
+ 0: ABCD
+ 1: BC
+ 2: D
+
+/a([bc]*)(c+d)/i
+    ABCD
+ 0: ABCD
+ 1: B
+ 2: CD
+
+/a[bcd]*dcdcde/i
+    ADCDCDE
+ 0: ADCDCDE
+
+/a[bcd]+dcdcde/i
+
+/(ab|a)b*c/i
+    ABC
+ 0: ABC
+ 1: AB
+
+/((a)(b)c)(d)/i
+    ABCD
+ 0: ABCD
+ 1: ABC
+ 2: A
+ 3: B
+ 4: D
+
+/[a-zA-Z_][a-zA-Z0-9_]*/i
+    ALPHA
+ 0: ALPHA
+
+/^a(bc+|b[eh])g|.h$/i
+    ABH
+ 0: BH
+
+/(bc+d$|ef*g.|h?i(j|k))/i
+    EFFGZ
+ 0: EFFGZ
+ 1: EFFGZ
+    IJ
+ 0: IJ
+ 1: IJ
+ 2: J
+    REFFGZ
+ 0: EFFGZ
+ 1: EFFGZ
+    *** Failers
+No match
+    ADCDCDE
+No match
+    EFFG
+No match
+    BCDD
+No match
+
+/((((((((((a))))))))))/i
+    A
+ 0: A
+ 1: A
+ 2: A
+ 3: A
+ 4: A
+ 5: A
+ 6: A
+ 7: A
+ 8: A
+ 9: A
+10: A
+
+/((((((((((a))))))))))\10/i
+    AA
+ 0: AA
+ 1: A
+ 2: A
+ 3: A
+ 4: A
+ 5: A
+ 6: A
+ 7: A
+ 8: A
+ 9: A
+10: A
+
+/(((((((((a)))))))))/i
+    A
+ 0: A
+ 1: A
+ 2: A
+ 3: A
+ 4: A
+ 5: A
+ 6: A
+ 7: A
+ 8: A
+ 9: A
+
+/(?:(?:(?:(?:(?:(?:(?:(?:(?:(a))))))))))/i
+    A
+ 0: A
+ 1: A
+
+/(?:(?:(?:(?:(?:(?:(?:(?:(?:(a|b|c))))))))))/i
+    C
+ 0: C
+ 1: C
+
+/multiple words of text/i
+    *** Failers
+No match
+    AA
+No match
+    UH-UH
+No match
+
+/multiple words/i
+    MULTIPLE WORDS, YEAH
+ 0: MULTIPLE WORDS
+
+/(.*)c(.*)/i
+    ABCDE
+ 0: ABCDE
+ 1: AB
+ 2: DE
+
+/\((.*), (.*)\)/i
+    (A, B)
+ 0: (A, B)
+ 1: A
+ 2: B
+
+/[k]/i
+
+/abcd/i
+    ABCD
+ 0: ABCD
+
+/a(bc)d/i
+    ABCD
+ 0: ABCD
+ 1: BC
+
+/a[-]?c/i
+    AC
+ 0: AC
+
+/(abc)\1/i
+    ABCABC
+ 0: ABCABC
+ 1: ABC
+
+/([a-c]*)\1/i
+    ABCABC
+ 0: ABCABC
+ 1: ABC
+
+/a(?!b)./
+    abad
+ 0: ad
+
+/a(?=d)./
+    abad
+ 0: ad
+
+/a(?=c|d)./
+    abad
+ 0: ad
+
+/a(?:b|c|d)(.)/
+    ace
+ 0: ace
+ 1: e
+
+/a(?:b|c|d)*(.)/
+    ace
+ 0: ace
+ 1: e
+
+/a(?:b|c|d)+?(.)/
+    ace
+ 0: ace
+ 1: e
+    acdbcdbe
+ 0: acd
+ 1: d
+
+/a(?:b|c|d)+(.)/
+    acdbcdbe
+ 0: acdbcdbe
+ 1: e
+
+/a(?:b|c|d){2}(.)/
+    acdbcdbe
+ 0: acdb
+ 1: b
+
+/a(?:b|c|d){4,5}(.)/
+    acdbcdbe
+ 0: acdbcdb
+ 1: b
+
+/a(?:b|c|d){4,5}?(.)/
+    acdbcdbe
+ 0: acdbcd
+ 1: d
+
+/((foo)|(bar))*/
+    foobar
+ 0: foobar
+ 1: bar
+ 2: foo
+ 3: bar
+
+/a(?:b|c|d){6,7}(.)/
+    acdbcdbe
+ 0: acdbcdbe
+ 1: e
+
+/a(?:b|c|d){6,7}?(.)/
+    acdbcdbe
+ 0: acdbcdbe
+ 1: e
+
+/a(?:b|c|d){5,6}(.)/
+    acdbcdbe
+ 0: acdbcdbe
+ 1: e
+
+/a(?:b|c|d){5,6}?(.)/
+    acdbcdbe
+ 0: acdbcdb
+ 1: b
+
+/a(?:b|c|d){5,7}(.)/
+    acdbcdbe
+ 0: acdbcdbe
+ 1: e
+
+/a(?:b|c|d){5,7}?(.)/
+    acdbcdbe
+ 0: acdbcdb
+ 1: b
+
+/a(?:b|(c|e){1,2}?|d)+?(.)/
+    ace
+ 0: ace
+ 1: c
+ 2: e
+
+/^(.+)?B/
+    AB
+ 0: AB
+ 1: A
+
+/^([^a-z])|(\^)$/
+    .
+ 0: .
+ 1: .
+
+/^[<>]&/
+    <&OUT
+ 0: <&
+
+/^(a\1?){4}$/
+    aaaaaaaaaa
+ 0: aaaaaaaaaa
+ 1: aaaa
+    *** Failers
+No match
+    AB
+No match
+    aaaaaaaaa
+No match
+    aaaaaaaaaaa
+No match
+
+/^(a(?(1)\1)){4}$/
+    aaaaaaaaaa
+ 0: aaaaaaaaaa
+ 1: aaaa
+    *** Failers
+No match
+    aaaaaaaaa
+No match
+    aaaaaaaaaaa
+No match
+
+/(?:(f)(o)(o)|(b)(a)(r))*/
+    foobar
+ 0: foobar
+ 1: f
+ 2: o
+ 3: o
+ 4: b
+ 5: a
+ 6: r
+
+/(?<=a)b/
+    ab
+ 0: b
+    *** Failers
+No match
+    cb
+No match
+    b
+No match
+
+/(?<!c)b/
+    ab
+ 0: b
+    b
+ 0: b
+    b
+ 0: b
+
+/(?:..)*a/
+    aba
+ 0: aba
+
+/(?:..)*?a/
+    aba
+ 0: a
+
+/^(?:b|a(?=(.)))*\1/
+    abc
+ 0: ab
+ 1: b
+
+/^(){3,5}/
+    abc
+ 0: 
+ 1: 
+
+/^(a+)*ax/
+    aax
+ 0: aax
+ 1: a
+
+/^((a|b)+)*ax/
+    aax
+ 0: aax
+ 1: a
+ 2: a
+
+/^((a|bc)+)*ax/
+    aax
+ 0: aax
+ 1: a
+ 2: a
+
+/(a|x)*ab/
+    cab
+ 0: ab
+
+/(a)*ab/
+    cab
+ 0: ab
+
+/(?:(?i)a)b/
+    ab
+ 0: ab
+
+/((?i)a)b/
+    ab
+ 0: ab
+ 1: a
+
+/(?:(?i)a)b/
+    Ab
+ 0: Ab
+
+/((?i)a)b/
+    Ab
+ 0: Ab
+ 1: A
+
+/(?:(?i)a)b/
+    *** Failers
+No match
+    cb
+No match
+    aB
+No match
+
+/((?i)a)b/
+
+/(?i:a)b/
+    ab
+ 0: ab
+
+/((?i:a))b/
+    ab
+ 0: ab
+ 1: a
+
+/(?i:a)b/
+    Ab
+ 0: Ab
+
+/((?i:a))b/
+    Ab
+ 0: Ab
+ 1: A
+
+/(?i:a)b/
+    *** Failers
+No match
+    aB
+No match
+    aB
+No match
+
+/((?i:a))b/
+
+/(?:(?-i)a)b/i
+    ab
+ 0: ab
+
+/((?-i)a)b/i
+    ab
+ 0: ab
+ 1: a
+
+/(?:(?-i)a)b/i
+    aB
+ 0: aB
+
+/((?-i)a)b/i
+    aB
+ 0: aB
+ 1: a
+
+/(?:(?-i)a)b/i
+    *** Failers
+No match
+    aB
+ 0: aB
+    Ab
+No match
+
+/((?-i)a)b/i
+
+/(?:(?-i)a)b/i
+    aB
+ 0: aB
+
+/((?-i)a)b/i
+    aB
+ 0: aB
+ 1: a
+
+/(?:(?-i)a)b/i
+    *** Failers
+No match
+    Ab
+No match
+    AB
+No match
+
+/((?-i)a)b/i
+
+/(?-i:a)b/i
+    ab
+ 0: ab
+
+/((?-i:a))b/i
+    ab
+ 0: ab
+ 1: a
+
+/(?-i:a)b/i
+    aB
+ 0: aB
+
+/((?-i:a))b/i
+    aB
+ 0: aB
+ 1: a
+
+/(?-i:a)b/i
+    *** Failers
+No match
+    AB
+No match
+    Ab
+No match
+
+/((?-i:a))b/i
+
+/(?-i:a)b/i
+    aB
+ 0: aB
+
+/((?-i:a))b/i
+    aB
+ 0: aB
+ 1: a
+
+/(?-i:a)b/i
+    *** Failers
+No match
+    Ab
+No match
+    AB
+No match
+
+/((?-i:a))b/i
+
+/((?-i:a.))b/i
+    *** Failers
+No match
+    AB
+No match
+    a\nB
+No match
+
+/((?s-i:a.))b/i
+    a\nB
+ 0: a\x0aB
+ 1: a\x0a
+
+/(?:c|d)(?:)(?:a(?:)(?:b)(?:b(?:))(?:b(?:)(?:b)))/
+    cabbbb
+ 0: cabbbb
+
+/(?:c|d)(?:)(?:aaaaaaaa(?:)(?:bbbbbbbb)(?:bbbbbbbb(?:))(?:bbbbbbbb(?:)(?:bbbbbbbb)))/
+    caaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+ 0: caaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+
+/(ab)\d\1/i
+    Ab4ab
+ 0: Ab4ab
+ 1: Ab
+    ab4Ab
+ 0: ab4Ab
+ 1: ab
+
+/foo\w*\d{4}baz/
+    foobar1234baz
+ 0: foobar1234baz
+
+/x(~~)*(?:(?:F)?)?/
+    x~~
+ 0: x~~
+ 1: ~~
+
+/^a(?#xxx){3}c/
+    aaac
+ 0: aaac
+
+/^a (?#xxx) (?#yyy) {3}c/x
+    aaac
+ 0: aaac
+
+/(?<![cd])b/
+    *** Failers
+No match
+    B\nB
+No match
+    dbcb
+No match
+
+/(?<![cd])[ab]/
+    dbaacb
+ 0: a
+
+/(?<!(c|d))b/
+
+/(?<!(c|d))[ab]/
+    dbaacb
+ 0: a
+
+/(?<!cd)[ab]/
+    cdaccb
+ 0: b
+
+/^(?:a?b?)*$/
+    *** Failers
+No match
+    dbcb
+No match
+    a--
+No match
+
+/((?s)^a(.))((?m)^b$)/
+    a\nb\nc\n
+ 0: a\x0ab
+ 1: a\x0a
+ 2: \x0a
+ 3: b
+
+/((?m)^b$)/
+    a\nb\nc\n
+ 0: b
+ 1: b
+
+/(?m)^b/
+    a\nb\n
+ 0: b
+
+/(?m)^(b)/
+    a\nb\n
+ 0: b
+ 1: b
+
+/((?m)^b)/
+    a\nb\n
+ 0: b
+ 1: b
+
+/\n((?m)^b)/
+    a\nb\n
+ 0: \x0ab
+ 1: b
+
+/((?s).)c(?!.)/
+    a\nb\nc\n
+ 0: \x0ac
+ 1: \x0a
+    a\nb\nc\n
+ 0: \x0ac
+ 1: \x0a
+
+/((?s)b.)c(?!.)/
+    a\nb\nc\n
+ 0: b\x0ac
+ 1: b\x0a
+    a\nb\nc\n
+ 0: b\x0ac
+ 1: b\x0a
+
+/^b/
+
+/()^b/
+    *** Failers
+No match
+    a\nb\nc\n
+No match
+    a\nb\nc\n
+No match
+
+/((?m)^b)/
+    a\nb\nc\n
+ 0: b
+ 1: b
+
+/(?(1)a|b)/
+
+/(?(1)b|a)/
+    a
+ 0: a
+
+/(x)?(?(1)a|b)/
+    *** Failers
+No match
+    a
+No match
+    a
+No match
+
+/(x)?(?(1)b|a)/
+    a
+ 0: a
+
+/()?(?(1)b|a)/
+    a
+ 0: a
+
+/()(?(1)b|a)/
+
+/()?(?(1)a|b)/
+    a
+ 0: a
+ 1: 
+
+/^(\()?blah(?(1)(\)))$/
+    (blah)
+ 0: (blah)
+ 1: (
+ 2: )
+    blah
+ 0: blah
+    *** Failers
+No match
+    a
+No match
+    blah)
+No match
+    (blah
+No match
+
+/^(\(+)?blah(?(1)(\)))$/
+    (blah)
+ 0: (blah)
+ 1: (
+ 2: )
+    blah
+ 0: blah
+    *** Failers
+No match
+    blah)
+No match
+    (blah
+No match
+
+/(?(?!a)a|b)/
+
+/(?(?!a)b|a)/
+    a
+ 0: a
+
+/(?(?=a)b|a)/
+    *** Failers
+No match
+    a
+No match
+    a
+No match
+
+/(?(?=a)a|b)/
+    a
+ 0: a
+
+/(?=(a+?))(\1ab)/
+    aaab
+ 0: aab
+ 1: a
+ 2: aab
+
+/^(?=(a+?))\1ab/
+
+/(\w+:)+/
+    one:
+ 0: one:
+ 1: one:
+
+/$(?<=^(a))/
+    a
+ 0: 
+ 1: a
+
+/(?=(a+?))(\1ab)/
+    aaab
+ 0: aab
+ 1: a
+ 2: aab
+
+/^(?=(a+?))\1ab/
+    *** Failers
+No match
+    aaab
+No match
+    aaab
+No match
+
+/([\w:]+::)?(\w+)$/
+    abcd
+ 0: abcd
+ 1: <unset>
+ 2: abcd
+    xy:z:::abcd
+ 0: xy:z:::abcd
+ 1: xy:z:::
+ 2: abcd
+
+/^[^bcd]*(c+)/
+    aexycd
+ 0: aexyc
+ 1: c
+
+/(a*)b+/
+    caab
+ 0: aab
+ 1: aa
+
+/([\w:]+::)?(\w+)$/
+    abcd
+ 0: abcd
+ 1: <unset>
+ 2: abcd
+    xy:z:::abcd
+ 0: xy:z:::abcd
+ 1: xy:z:::
+ 2: abcd
+    *** Failers
+ 0: Failers
+ 1: <unset>
+ 2: Failers
+    abcd:
+No match
+    abcd:
+No match
+
+/^[^bcd]*(c+)/
+    aexycd
+ 0: aexyc
+ 1: c
+
+/(>a+)ab/
+
+/(?>a+)b/
+    aaab
+ 0: aaab
+
+/([[:]+)/
+    a:[b]:
+ 0: :[
+ 1: :[
+
+/([[=]+)/
+    a=[b]=
+ 0: =[
+ 1: =[
+
+/([[.]+)/
+    a.[b].
+ 0: .[
+ 1: .[
+
+/((?>a+)b)/
+    aaab
+ 0: aaab
+ 1: aaab
+
+/(?>(a+))b/
+    aaab
+ 0: aaab
+ 1: aaa
+
+/((?>[^()]+)|\([^()]*\))+/
+    ((abc(ade)ufh()()x
+ 0: abc(ade)ufh()()x
+ 1: x
+
+/a\Z/
+    *** Failers
+No match
+    aaab
+No match
+    a\nb\n
+No match
+
+/b\Z/
+    a\nb\n
+ 0: b
+
+/b\z/
+
+/b\Z/
+    a\nb
+ 0: b
+
+/b\z/
+    a\nb
+ 0: b
+    *** Failers
+No match
+    
+/^(?>(?(1)\.|())[^\W_](?>[a-z0-9-]*[^\W_])?)+$/
+    a
+ 0: a
+ 1: 
+    abc
+ 0: abc
+ 1: 
+    a-b
+ 0: a-b
+ 1: 
+    0-9 
+ 0: 0-9
+ 1: 
+    a.b
+ 0: a.b
+ 1: 
+    5.6.7  
+ 0: 5.6.7
+ 1: 
+    the.quick.brown.fox
+ 0: the.quick.brown.fox
+ 1: 
+    a100.b200.300c  
+ 0: a100.b200.300c
+ 1: 
+    12-ab.1245 
+ 0: 12-ab.1245
+ 1: 
+    ***Failers
+No match
+    \
+No match
+    .a
+No match
+    -a
+No match
+    a-
+No match
+    a.  
+No match
+    a_b 
+No match
+    a.-
+No match
+    a..  
+No match
+    ab..bc 
+No match
+    the.quick.brown.fox-
+No match
+    the.quick.brown.fox.
+No match
+    the.quick.brown.fox_
+No match
+    the.quick.brown.fox+       
+No match
+
+/(?>.*)(?<=(abcd|wxyz))/
+    alphabetabcd
+ 0: alphabetabcd
+ 1: abcd
+    endingwxyz
+ 0: endingwxyz
+ 1: wxyz
+    *** Failers
+No match
+    a rather long string that doesn't end with one of them
+No match
+
+/word (?>(?:(?!otherword)[a-zA-Z0-9]+ ){0,30})otherword/
+    word cat dog elephant mussel cow horse canary baboon snake shark otherword
+ 0: word cat dog elephant mussel cow horse canary baboon snake shark otherword
+    word cat dog elephant mussel cow horse canary baboon snake shark
+No match
+  
+/word (?>[a-zA-Z0-9]+ ){0,30}otherword/
+    word cat dog elephant mussel cow horse canary baboon snake shark the quick brown fox and the lazy dog and several other words getting close to thirty by now I hope
+No match
+
+/(?<=\d{3}(?!999))foo/
+    999foo
+ 0: foo
+    123999foo 
+ 0: foo
+    *** Failers
+No match
+    123abcfoo
+No match
+    
+/(?<=(?!...999)\d{3})foo/
+    999foo
+ 0: foo
+    123999foo 
+ 0: foo
+    *** Failers
+No match
+    123abcfoo
+No match
+
+/(?<=\d{3}(?!999)...)foo/
+    123abcfoo
+ 0: foo
+    123456foo 
+ 0: foo
+    *** Failers
+No match
+    123999foo  
+No match
+    
+/(?<=\d{3}...)(?<!999)foo/
+    123abcfoo   
+ 0: foo
+    123456foo 
+ 0: foo
+    *** Failers
+No match
+    123999foo  
+No match
+
+/<a[\s]+href[\s]*=[\s]*          # find <a href=
+ ([\"\'])?                       # find single or double quote
+ (?(1) (.*?)\1 | ([^\s]+))       # if quote found, match up to next matching
+                                 # quote, otherwise match up to next space
+/isx
+    <a href=abcd xyz
+ 0: <a href=abcd
+ 1: <unset>
+ 2: <unset>
+ 3: abcd
+    <a href=\"abcd xyz pqr\" cats
+ 0: <a href="abcd xyz pqr"
+ 1: "
+ 2: abcd xyz pqr
+    <a href=\'abcd xyz pqr\' cats
+ 0: <a href='abcd xyz pqr'
+ 1: '
+ 2: abcd xyz pqr
+
+/<a\s+href\s*=\s*                # find <a href=
+ (["'])?                         # find single or double quote
+ (?(1) (.*?)\1 | (\S+))          # if quote found, match up to next matching
+                                 # quote, otherwise match up to next space
+/isx
+    <a href=abcd xyz
+ 0: <a href=abcd
+ 1: <unset>
+ 2: <unset>
+ 3: abcd
+    <a href=\"abcd xyz pqr\" cats
+ 0: <a href="abcd xyz pqr"
+ 1: "
+ 2: abcd xyz pqr
+    <a href       =       \'abcd xyz pqr\' cats
+ 0: <a href       =       'abcd xyz pqr'
+ 1: '
+ 2: abcd xyz pqr
+
+/<a\s+href(?>\s*)=(?>\s*)        # find <a href=
+ (["'])?                         # find single or double quote
+ (?(1) (.*?)\1 | (\S+))          # if quote found, match up to next matching
+                                 # quote, otherwise match up to next space
+/isx
+    <a href=abcd xyz
+ 0: <a href=abcd
+ 1: <unset>
+ 2: <unset>
+ 3: abcd
+    <a href=\"abcd xyz pqr\" cats
+ 0: <a href="abcd xyz pqr"
+ 1: "
+ 2: abcd xyz pqr
+    <a href       =       \'abcd xyz pqr\' cats
+ 0: <a href       =       'abcd xyz pqr'
+ 1: '
+ 2: abcd xyz pqr
+
+/((Z)+|A)*/
+    ZABCDEFG
+ 0: ZA
+ 1: A
+ 2: Z
+
+/(Z()|A)*/
+    ZABCDEFG
+ 0: ZA
+ 1: A
+ 2: 
+
+/(Z(())|A)*/
+    ZABCDEFG
+ 0: ZA
+ 1: A
+ 2: 
+ 3: 
+
+/((?>Z)+|A)*/
+    ZABCDEFG
+ 0: ZA
+ 1: A
+
+/((?>)+|A)*/
+    ZABCDEFG
+ 0: 
+ 1: 
+
+/a*/g
+    abbab
+ 0: a
+ 0: 
+ 0: 
+ 0: a
+ 0: 
+ 0: 
+
+/^[a-\d]/
+    abcde
+ 0: a
+    -things
+ 0: -
+    0digit
+ 0: 0
+    *** Failers
+No match
+    bcdef    
+No match
+
+/^[\d-a]/
+    abcde
+ 0: a
+    -things
+ 0: -
+    0digit
+ 0: 0
+    *** Failers
+No match
+    bcdef    
+No match
+    
+/[[:space:]]+/
+    > \x09\x0a\x0c\x0d\x0b<
+ 0:  \x09\x0a\x0c\x0d\x0b
+     
+/[[:blank:]]+/
+    > \x09\x0a\x0c\x0d\x0b<
+ 0:  \x09
+     
+/[\s]+/
+    > \x09\x0a\x0c\x0d\x0b<
+ 0:  \x09\x0a\x0c\x0d
+     
+/\s+/
+    > \x09\x0a\x0c\x0d\x0b<
+ 0:  \x09\x0a\x0c\x0d
+     
+/ab/x
+    ab
+No match
+
+/(?!\A)x/m
+  a\nxb\n
+ 0: x
+
+/(?!^)x/m
+  a\nxb\n
+No match
+
+/abc\Qabc\Eabc/
+    abcabcabc
+ 0: abcabcabc
+    
+/abc\Q(*+|\Eabc/
+    abc(*+|abc 
+ 0: abc(*+|abc
+
+/   abc\Q abc\Eabc/x
+    abc abcabc
+ 0: abc abcabc
+    *** Failers
+No match
+    abcabcabc  
+No match
+    
+/abc#comment
+    \Q#not comment
+    literal\E/x
+    abc#not comment\n    literal     
+ 0: abc#not comment\x0a    literal
+
+/abc#comment
+    \Q#not comment
+    literal/x
+    abc#not comment\n    literal     
+ 0: abc#not comment\x0a    literal
+
+/abc#comment
+    \Q#not comment
+    literal\E #more comment
+    /x
+    abc#not comment\n    literal     
+ 0: abc#not comment\x0a    literal
+
+/abc#comment
+    \Q#not comment
+    literal\E #more comment/x
+    abc#not comment\n    literal     
+ 0: abc#not comment\x0a    literal
+
+/\Qabc\$xyz\E/
+    abc\\\$xyz
+ 0: abc\$xyz
+
+/\Qabc\E\$\Qxyz\E/
+    abc\$xyz
+ 0: abc$xyz
+
+/\Gabc/
+    abc
+ 0: abc
+    *** Failers
+No match
+    xyzabc  
+No match
+
+/\Gabc./g
+    abc1abc2xyzabc3
+ 0: abc1
+ 0: abc2
+
+/abc./g
+    abc1abc2xyzabc3 
+ 0: abc1
+ 0: abc2
+ 0: abc3
+
+/a(?x: b c )d/
+    XabcdY
+ 0: abcd
+    *** Failers 
+No match
+    Xa b c d Y 
+No match
+
+/((?x)x y z | a b c)/
+    XabcY
+ 0: abc
+ 1: abc
+    AxyzB 
+ 0: xyz
+ 1: xyz
+
+/(?i)AB(?-i)C/
+    XabCY
+ 0: abC
+    *** Failers
+No match
+    XabcY  
+No match
+
+/((?i)AB(?-i)C|D)E/
+    abCE
+ 0: abCE
+ 1: abC
+    DE
+ 0: DE
+ 1: D
+    *** Failers
+No match
+    abcE
+No match
+    abCe  
+No match
+    dE
+No match
+    De    
+No match
+
+/(.*)\d+\1/
+    abc123abc
+ 0: abc123abc
+ 1: abc
+    abc123bc 
+ 0: bc123bc
+ 1: bc
+
+/(.*)\d+\1/s
+    abc123abc
+ 0: abc123abc
+ 1: abc
+    abc123bc 
+ 0: bc123bc
+ 1: bc
+    
+/((.*))\d+\1/
+    abc123abc
+ 0: abc123abc
+ 1: abc
+ 2: abc
+    abc123bc  
+ 0: bc123bc
+ 1: bc
+ 2: bc
+
+/-- This tests for an IPv6 address in the form where it can have up to --/
+/-- eight components, one and only one of which is empty. This must be --/
+No match
+/-- an internal component. --/
+No match
+
+/^(?!:)                       # colon disallowed at start
+  (?:                         # start of item
+    (?: [0-9a-f]{1,4} |       # 1-4 hex digits or
+    (?(1)0 | () ) )           # if null previously matched, fail; else null
+    :                         # followed by colon
+  ){1,7}                      # end item; 1-7 of them required               
+  [0-9a-f]{1,4} $             # final hex number at end of string
+  (?(1)|.)                    # check that there was an empty component
+  /xi
+    a123::a123
+ 0: a123::a123
+ 1: 
+    a123:b342::abcd
+ 0: a123:b342::abcd
+ 1: 
+    a123:b342::324e:abcd
+ 0: a123:b342::324e:abcd
+ 1: 
+    a123:ddde:b342::324e:abcd
+ 0: a123:ddde:b342::324e:abcd
+ 1: 
+    a123:ddde:b342::324e:dcba:abcd
+ 0: a123:ddde:b342::324e:dcba:abcd
+ 1: 
+    a123:ddde:9999:b342::324e:dcba:abcd
+ 0: a123:ddde:9999:b342::324e:dcba:abcd
+ 1: 
+    *** Failers
+No match
+    1:2:3:4:5:6:7:8
+No match
+    a123:bce:ddde:9999:b342::324e:dcba:abcd
+No match
+    a123::9999:b342::324e:dcba:abcd
+No match
+    abcde:2:3:4:5:6:7:8
+No match
+    ::1
+No match
+    abcd:fee0:123::   
+No match
+    :1
+No match
+    1:  
+No match
+
 / End of testinput1 /
 

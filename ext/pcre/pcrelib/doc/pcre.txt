@@ -1273,6 +1273,8 @@ POSIX CHARACTER CLASSES
        word     "word" characters (same as \w)
        xdigit   hexadecimal digits
 
+     >>>>>>>>>>>>Only WORD is perl. BLANK is GNU.
+
      The names "ascii" and "word" are  Perl  extensions.  Another
      Perl  extension is negation, which is indicated by a ^ char-
      acter after the colon. For example,
@@ -1416,7 +1418,6 @@ SUBPATTERNS
      are  numbered  1  and 2. The maximum number of captured sub-
      strings is 99, and the maximum number  of  all  subpatterns,
      both capturing and non-capturing, is 200.
-
      As a  convenient  shorthand,  if  any  option  settings  are
      required  at  the  start  of a non-capturing subpattern, the
      option letters may appear between the "?" and the ":".  Thus
@@ -1468,8 +1469,9 @@ REPETITION
      matches exactly 8 digits.  An  opening  curly  bracket  that
      appears  in a position where a quantifier is not allowed, or
      one that does not match the syntax of a quantifier, is taken
-     as  a literal character. For example, {,6} is not a quantif-
-     ier, but a literal string of four characters.
+     as   a  literal  character.  For  example,  {,6}  is  not  a
+     quantifier, but a literal string of four characters.
+
      The quantifier {0} is permitted, causing the  expression  to
      behave  as  if the previous item and the quantifier were not
      present.
@@ -1519,8 +1521,8 @@ REPETITION
 
      does the right thing with the C comments. The meaning of the
      various  quantifiers is not otherwise changed, just the pre-
-     ferred number of matches.  Do not confuse this use of  ques-
-     tion  mark  with  its  use as a quantifier in its own right.
+     ferred number of  matches.   Do  not  confuse  this  use  of
+     question mark with its use as a quantifier in its own right.
      Because it has two uses, it can sometimes appear doubled, as
      in
 
@@ -1571,17 +1573,10 @@ REPETITION
 
 
 
+
 BACK REFERENCES
      Outside a character class, a backslash followed by  a  digit
      greater  than  0  (and  possibly  further  digits) is a back
-
-
-
-
-SunOS 5.8                 Last change:                         30
-
-
-
      reference to a capturing subpattern  earlier  (i.e.  to  its
      left)  in  the  pattern,  provided there have been that many
      previous capturing left parentheses.
@@ -1630,8 +1625,8 @@ SunOS 5.8                 Last change:                         30
      A back reference that occurs inside the parentheses to which
      it  refers  fails when the subpattern is first used, so, for
      example, (a\1) never matches.  However, such references  can
-     be useful inside repeated subpatterns. For example, the pat-
-     tern
+     be  useful  inside  repeated  subpatterns.  For example, the
+     pattern
 
        (a|b\1)+
 
@@ -2100,12 +2095,11 @@ UTF-8 SUPPORT
      UTF-8  codes. It does not diagnose invalid UTF-8 strings. If
      you pass invalid UTF-8 strings  to  PCRE,  the  results  are
      undefined.
-
      Running with PCRE_UTF8 set causes these changes in  the  way
      PCRE works:
 
-     1. In a pattern, the  escape  sequence  \x{...},  where  the
-     contents of the braces is a string of hexadecimal digits, is
+     1. In a pattern, the escape sequence \x{...}, where the con-
+     tents  of  the  braces is a string of hexadecimal digits, is
      interpreted as a UTF-8 character whose code  number  is  the
      given   hexadecimal  number,  for  example:  \x{1234}.  This
      inserts from one to six  literal  bytes  into  the  pattern,
@@ -2153,7 +2147,6 @@ UTF-8 SUPPORT
      9. The character types  such  as  \d  and  \w  do  not  work
      correctly  with  UTF-8  characters.  They continue to test a
      single byte.
-
      10. Anything not explicitly mentioned here continues to work
      in bytes rather than in characters.
 
@@ -2310,6 +2303,5 @@ AUTHOR
      New Museums Site,
      Cambridge CB2 3QG, England.
      Phone: +44 1223 334714
-
      Last updated: 15 August 2001
      Copyright (c) 1997-2001 University of Cambridge.

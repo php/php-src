@@ -42,11 +42,11 @@ OPTIONS
                wrapper  API  is  used  to  call PCRE. None of the
                other options has any effect when -p is set.
 
-     -t        Run each compile, study,  and  match  20000  times
-               with  a  timer, and output resulting time per com-
-               pile or match (in milliseconds).  Do  not  set  -t
-               with -m, because you will then get the size output
-               20000 times and the timing will be distorted.
+     -t        Run each compile, study, and match many times with
+               a  timer, and output resulting time per compile or
+               match (in milliseconds). Do not set  -t  with  -m,
+               because  you  will  then get the size output 20000
+               times and the timing will be distorted.
 
 
 
@@ -70,10 +70,18 @@ SunOS 5.8                 Last change:                          1
      The program handles any number of sets of input on a  single
      input  file.  Each set starts with a regular expression, and
      continues with any  number  of  data  lines  to  be  matched
-     against  the  pattern.  An empty line signals the end of the
-     data lines, at which point a new regular expression is read.
-     The  regular  expressions  are  given  enclosed  in any non-
-     alphameric delimiters other than backslash, for example
+     against the pattern.
+
+     Each line is matched separately and  independently.  If  you
+     want  to  do  multiple-line  matches, you have to use the \n
+     escape sequence in a single line of input to encode the new-
+     line  characters.  The maximum length of data line is 30,000
+     characters.
+
+     An empty line signals the end of the data  lines,  at  which
+     point  a new regular expression is read. The regular expres-
+     sions are given enclosed in  any  non-alphameric  delimiters
+     other than backslash, for example
 
        /(a|bc)x+yz/
 
@@ -165,6 +173,7 @@ PATTERN MODIFIERS
      pcre_fullinfo()  after  compiling an expression, and output-
      ting the information it gets back. If the  pattern  is  stu-
      died, the results of that are also output.
+
      The /D modifier is a  PCRE  debugging  feature,  which  also
      assumes /I.  It causes the internal form of compiled regular
      expressions to be output after compilation.
@@ -208,7 +217,8 @@ DATA LINES
        \t         tab
        \v         vertical tab
        \nnn       octal character (up to 3 octal digits)
-       \xhh       hexadecimal character (up to 2 hex digits)
+
+              hexadecimal character (up to 2 hex digits)
        \x{hh...}  hexadecimal UTF-8 character
 
        \A         pass the PCRE_ANCHORED option to pcre_exec()
@@ -217,7 +227,6 @@ DATA LINES
                      after a successful match (any decimal number
                      less than 32)
        \Gdd       call pcre_get_substring() for substring dd
-
                      after a successful match (any decimal number
                      less than 32)
        \L         call pcre_get_substringlist() after a
@@ -261,6 +270,7 @@ OUTPUT FROM PCRETEST
 
          re> /^abc(\d+)/
        data> abc123
+
         0: abc123
         1: 123
        data> xyz
@@ -315,5 +325,5 @@ AUTHOR
      Cambridge CB2 3QG, England.
      Phone: +44 1223 334714
 
-     Last updated: 15 August 2001
-     Copyright (c) 1997-2001 University of Cambridge.
+     Last updated: 25 August 2002
+     Copyright (c) 1997-2002 University of Cambridge.

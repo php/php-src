@@ -231,23 +231,23 @@ Conditional subpatterns
 These are like other subpatterns, but they start with the opcode OP_COND. If
 the condition is a back reference, this is stored at the start of the
 subpattern using the opcode OP_CREF followed by two bytes containing the
-reference number. Otherwise, a conditional subpattern will always start with
-one of the assertions.
+reference number. If the condition is "in recursion" (coded as "(?(R)"), the
+same scheme is used, with a "reference number" of 0xffff. Otherwise, a
+conditional subpattern always starts with one of the assertions.
 
 
 Changing options
 ----------------
 
-If any of the /i, /m, or /s options are changed within a parenthesized group,
-an OP_OPT opcode is compiled, followed by one byte containing the new settings
-of these flags. If there are several alternatives in a group, there is an
-occurrence of OP_OPT at the start of all those following the first options
-change, to set appropriate options for the start of the alternative.
-Immediately after the end of the group there is another such item to reset the
-flags to their previous values. Other changes of flag within the pattern can be
-handled entirely at compile time, and so do not cause anything to be put into
-the compiled data.
-
+If any of the /i, /m, or /s options are changed within a pattern, an OP_OPT
+opcode is compiled, followed by one byte containing the new settings of these
+flags. If there are several alternatives, there is an occurrence of OP_OPT at
+the start of all those following the first options change, to set appropriate
+options for the start of the alternative. Immediately after the end of the
+group there is another such item to reset the flags to their previous values. A
+change of flag right at the very start of the pattern can be handled entirely
+at compile time, and so does not cause anything to be put into the compiled
+data.
 
 Philip Hazel
-August 2001
+August 2002

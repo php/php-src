@@ -13,10 +13,15 @@ for perltest as well as for pcretest, and the special upper case modifiers such
 as /A that pcretest recognizes are not used in these files. The output should
 be identical, apart from the initial identifying banner.
 
-For testing UTF-8 features, an alternative form of perltest, called perltest8,
-is supplied. This requires Perl 5.6 or higher. It recognizes the special
-modifier /8 that pcretest uses to invoke UTF-8 functionality. The testinput5
-file can be fed to perltest8.
+The perltest script can also test UTF-8 features. It works as is for Perl 5.8
+or higher. It recognizes the special modifier /8 that pcretest uses to invoke
+UTF-8 functionality. The testinput5 file can be fed to perltest to run UTF-8
+tests.
+
+For Perl 5.6, perltest won't work unmodified for the UTF-8 tests. You need to
+uncomment the "use utf8" lines that it contains. It is best to do this on a
+copy of the script, because for non-UTF-8 tests, these lines should remain
+commented out.
 
 The testinput2 and testinput4 files are not suitable for feeding to perltest,
 since they do make use of the special upper case modifiers and escapes that
@@ -26,4 +31,4 @@ them correctly. Similarly, testinput6 tests UTF-8 features that do not relate
 to Perl.
 
 Philip Hazel <ph10@cam.ac.uk>
-August 2000
+August 2002

@@ -3,7 +3,8 @@
 *************************************************/
 
 /* This is a grep program that uses the PCRE regular expression library to do
-its pattern matching. On a Unix system it can recurse into directories. */
+its pattern matching. On a Unix or Win32 system it can recurse into
+directories. */
 
 #include <ctype.h>
 #include <stdio.h>
@@ -18,7 +19,7 @@ its pattern matching. On a Unix system it can recurse into directories. */
 
 typedef int BOOL;
 
-#define VERSION "2.0 01-Aug-2001"
+#define VERSION "2.2 10-Sep-2002"
 #define MAX_PATTERN_COUNT 100
 
 
@@ -70,8 +71,8 @@ static option_item optionlist[] = {
 *************************************************/
 
 /* These functions are defined so that they can be made system specific,
-although at present the only ones are for Unix, and for "no directory recursion
-support". */
+although at present the only ones are for Unix, Win32, and for "no directory
+recursion support". */
 
 
 /************* Directory scanning in Unix ***********/
@@ -118,12 +119,104 @@ closedir(dir);
 }
 
 
-#else
+/************* Directory scanning in Win32 ***********/
+
+/* I (Philip Hazel) have no means of testing this code. It was contributed by
+Lionel Fourquaux. */
+
+
+#elif HAVE_WIN32API
+
+#ifndef STRICT
+# define STRICT
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+# define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+
+typedef struct directory_type
+{
+HANDLE handle;
+BOOL first;
+WIN32_FIND_DATA data;
+} directory_type;
+
+int
+isdirectory(char *filename)
+{
+DWORD attr = GetFileAttributes(filename);
+if (attr == INVALID_FILE_ATTRIBUTES)
+  return 0;
+return ((attr & FILE_ATTRIBUTE_DIRECTORY) != 0) ? '/' : 0;
+}
+
+directory_type *
+opendirectory(char *filename)
+{
+size_t len;
+char *pattern;
+directory_type *dir;
+DWORD err;
+len = strlen(filename);
+pattern = (char *) malloc(len + 3);
+dir = (directory_type *) malloc(sizeof(*dir));
+if ((pattern == NULL) || (dir == NULL))
+  {
+  fprintf(stderr, "pcregrep: malloc failed\n");
+  exit(2);
+  }
+memcpy(pattern, filename, len);
+memcpy(&(pattern[len]), "\\*", 3);
+dir->handle = FindFirstFile(pattern, &(dir->data));
+if (dir->handle != INVALID_HANDLE_VALUE)
+  {
+  free(pattern);
+  dir->first = TRUE;
+  return dir;
+  }
+err = GetLastError();
+free(pattern);
+free(dir);
+errno = (err == ERROR_ACCESS_DENIED) ? EACCES : ENOENT;
+return NULL;
+}
+
+char *
+readdirectory(directory_type *dir)
+{
+for (;;)
+  {
+  if (!dir->first)
+    {
+    if (!FindNextFile(dir->handle, &(dir->data)))
+      return NULL;
+    }
+  else
+    {
+    dir->first = FALSE;
+    }
+  if (strcmp(dir->data.cFileName, ".") != 0 && strcmp(dir->data.cFileName, "..") != 0)
+    return dir->data.cFileName;
+  }
+#ifndef _MSC_VER
+return NULL;   /* Keep compiler happy; never executed */
+#endif
+}
+
+void
+closedirectory(directory_type *dir)
+{
+FindClose(dir->handle);
+free(dir);
+}
 
 
 /************* Directory scanning when we can't do it ***********/
 
 /* The type is void, and apart from isdirectory(), the functions do nothing. */
+
+#else
 
 typedef void directory_type;
 
@@ -262,8 +355,9 @@ if ((sep = isdirectory(filename)) != 0 && recurse)
   }
 
 /* If the file is not a directory, or we are not recursing, scan it. If this is
-the first and only argument at top level, we don't show the file name.
-Otherwise, control is via the show_filenames variable. */
+the first and only argument at top level, we don't show the file name (unless
+we are only showing the file name). Otherwise, control is via the
+show_filenames variable. */
 
 in = fopen(filename, "r");
 if (in == NULL)
@@ -272,7 +366,8 @@ if (in == NULL)
   return 2;
   }
 
-rc = pcregrep(in, (show_filenames && !only_one_at_top)? filename : NULL);
+rc = pcregrep(in, (filenames_only || (show_filenames && !only_one_at_top))?
+  filename : NULL);
 fclose(in);
 return rc;
 }
@@ -287,7 +382,7 @@ return rc;
 static int
 usage(int rc)
 {
-fprintf(stderr, "Usage: pcregrep [-Vcfhilnrsvx] [long-options] pattern [file] ...\n");
+fprintf(stderr, "Usage: pcregrep [-Vcfhilnrsvx] [long-options] [pattern] [file1 file2 ...]\n");
 fprintf(stderr, "Type `pcregrep --help' for more information.\n");
 return rc;
 }
@@ -304,8 +399,9 @@ help(void)
 {
 option_item *op;
 
-printf("Usage: pcregrep [OPTION]... PATTERN [FILE] ...\n");
+printf("Usage: pcregrep [OPTION]... [PATTERN] [FILE1 FILE2 ...]\n");
 printf("Search for PATTERN in each FILE or standard input.\n");
+printf("PATTERN must be present if -f is not used.\n");
 printf("Example: pcregrep -i 'hello.*world' menu.h main.c\n\n");
 
 printf("Options:\n");
@@ -389,6 +485,10 @@ BOOL only_one_at_top;
 for (i = 1; i < argc; i++)
   {
   if (argv[i][0] != '-') break;
+
+  /* Missing options */
+
+  if (argv[i][1] == 0) exit(usage(2));
 
   /* Long name options */
 
@@ -492,7 +592,7 @@ if (pattern_filename != NULL)
 
 else
   {
-  if (i >= argc) return usage(0);
+  if (i >= argc) return usage(2);
   pattern_list[0] = pcre_compile(argv[i++], options, &error, &errptr, NULL);
   if (pattern_list[0] == NULL)
     {

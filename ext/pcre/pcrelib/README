@@ -30,13 +30,14 @@ Windows systems (I myself do not use Windows). Some are complete in themselves;
 others are pointers to URLs containing relevant files.
 
 
-Building PCRE on a Unix system
-------------------------------
+Building PCRE on a Unix-like system
+-----------------------------------
 
-To build PCRE on a Unix system, first run the "configure" command from the PCRE
-distribution directory, with your current directory set to the directory where
-you want the files to be created. This command is a standard GNU "autoconf"
-configuration script, for which generic instructions are supplied in INSTALL.
+To build PCRE on a Unix-like system, first run the "configure" command from the
+PCRE distribution directory, with your current directory set to the directory
+where you want the files to be created. This command is a standard GNU
+"autoconf" configuration script, for which generic instructions are supplied in
+INSTALL.
 
 Most commonly, people build PCRE within its own distribution directory, and in
 this case, on many systems, just running "./configure" is sufficient, but the
@@ -147,13 +148,11 @@ A file called testtry is used to hold the output from pcretest. To run pcretest
 on just one of the test files, give its number as an argument to RunTest, for
 example:
 
-  RunTest 3
+  RunTest 2
 
-The first and third test files can also be fed directly into the perltest
-script to check that Perl gives the same results. The third file requires the
-additional features of release 5.005, which is why it is kept separate from the
-main test input, which needs only Perl 5.004. In the long run, when 5.005 (or
-higher) is widespread, these two test files may get amalgamated.
+The first file can also be fed directly into the perltest script to check that
+Perl gives the same results. The only difference you should see is in the first
+few lines, where the Perl version is given instead of the PCRE version.
 
 The second set of tests check pcre_fullinfo(), pcre_info(), pcre_study(),
 pcre_copy_substring(), pcre_get_substring(), pcre_get_substring_list(), error
@@ -171,12 +170,12 @@ listed for checking. Where the comparison test output contains [\x00-\x7f] the
 test will contain [\x00-\xff], and similarly in some other cases. This is not a
 bug in PCRE.
 
-The fourth set of tests checks pcre_maketables(), the facility for building a
+The third set of tests checks pcre_maketables(), the facility for building a
 set of character tables for a specific locale and using them instead of the
 default tables. The tests make use of the "fr" (French) locale. Before running
 the test, the script checks for the presence of this locale by running the
 "locale" command. If that command fails, or if it doesn't include "fr" in the
-list of available locales, the fourth test cannot be run, and a comment is
+list of available locales, the third test cannot be run, and a comment is
 output to say why. If running this test produces instances of the error
 
   ** Failed to set locale "fr"
@@ -184,10 +183,14 @@ output to say why. If running this test produces instances of the error
 in the comparison output, it means that locale is not available on your system,
 despite being listed by "locale". This does not mean that PCRE is broken.
 
-The fifth test checks the experimental, incomplete UTF-8 support. It is not run
-automatically unless PCRE is built with UTF-8 support. This file can be fed
-directly to the perltest8 script, which requires Perl 5.6 or higher. The sixth
-file tests internal UTF-8 features of PCRE that are not relevant to Perl.
+The fourth test checks the experimental, incomplete UTF-8 support. It is not
+run automatically unless PCRE is built with UTF-8 support. To do this you must
+set --enable-utf8 when running "configure". This file can be also fed directly
+to the perltest script, provided you are running Perl 5.8 or higher. (For Perl
+5.6, a small patch, commented in the script, can be be used.)
+
+The fifth and final file tests error handling with UTF-8 encoding, and internal
+UTF-8 features of PCRE that are not relevant to Perl.
 
 
 Character tables
@@ -285,23 +288,25 @@ The distribution should contain the following files:
   perltest8             Perl test program for UTF-8 tests
   pcregrep.c            source of a grep utility that uses PCRE
   pcre-config.in        source of script which retains PCRE information
-  testdata/testinput1   test data, compatible with Perl 5.004 and 5.005
+  testdata/testinput1   test data, compatible with Perl
   testdata/testinput2   test data for error messages and non-Perl things
-  testdata/testinput3   test data, compatible with Perl 5.005
-  testdata/testinput4   test data for locale-specific tests
-  testdata/testinput5   test data for UTF-8 tests compatible with Perl 5.6
-  testdata/testinput6   test data for other UTF-8 tests
+  testdata/testinput3   test data for locale-specific tests
+  testdata/testinput4   test data for UTF-8 tests compatible with Perl
+  testdata/testinput5   test data for other UTF-8 tests
   testdata/testoutput1  test results corresponding to testinput1
   testdata/testoutput2  test results corresponding to testinput2
   testdata/testoutput3  test results corresponding to testinput3
   testdata/testoutput4  test results corresponding to testinput4
   testdata/testoutput5  test results corresponding to testinput5
-  testdata/testoutput6  test results corresponding to testinput6
 
 (C) Auxiliary files for Win32 DLL
 
   dll.mk
   pcre.def
 
+(D) Auxiliary file for VPASCAL
+
+  makevp.bat
+
 Philip Hazel <ph10@cam.ac.uk>
-August 2001
+August 2002

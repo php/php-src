@@ -1,7 +1,214 @@
 ChangeLog for PCRE
 ------------------
 
-Version 3.0 02-Jan-02
+Version 4.00 ....
+-----------------
+
+1. If a comment in an extended regex that started immediately after a meta-item
+extended to the end of string, PCRE compiled incorrect data. This could lead to
+all kinds of weird effects. Example: /#/ was bad; /()#/ was bad; /a#/ was not.
+
+2. Moved to autoconf 2.53 and libtool 1.4.2.
+
+3. Perl 5.8 no longer needs "use utf8" for doing UTF-8 things. Consequently,
+the special perltest8 script is no longer needed - all the tests can be run
+from a single perltest script.
+
+4. From 5.004, Perl has not included the VT character (0x0b) in the set defined
+by \s. It has now been removed in PCRE. This means it isn't recognized as
+whitespace in /x regexes too, which is the same as Perl. Note that the POSIX
+class [:space:] *does* include VT, thereby creating a mess.
+
+5. Added the class [:blank:] (a GNU extension from Perl 5.8) to match only
+space and tab.
+
+6. Perl 5.005 was a long time ago. It's time to amalgamate the tests that use
+its new features into the main test script, reducing the number of scripts.
+
+7. Perl 5.8 has changed the meaning of patterns like /a(?i)b/. Earlier
+versions were backward compatible, and made the (?i) apply to the whole
+pattern, as if /i were given. Now it behaves more logically, and applies the
+option setting only to what follows. PCRE has been changed to follow suit.
+However, if it finds options settings right at the start of the pattern, it
+extracts them into the global options, as before. Thus, they show up in the
+info data.
+
+8. Added support for the \Q...\E escape sequence. Characters in between are
+treated as literals. This is slightly different from Perl in that $ and @ are
+also handled as literals inside the quotes. In Perl, they will cause variable
+interpolation. Note the following examples:
+
+    Pattern            PCRE matches      Perl matches
+
+    \Qabc$xyz\E        abc$xyz           abc followed by the contents of $xyz
+    \Qabc\$xyz\E       abc\$xyz          abc\$xyz
+    \Qabc\E\$\Qxyz\E   abc$xyz           abc$xyz
+
+9. Re-organized 3 code statements in pcretest to avoid "overflow in
+floating-point constant arithmetic" warnings from a Microsoft compiler. Added a
+(size_t) cast to one statement in pcretest and one in pcreposix to avoid
+signed/unsigned warnings.
+
+10. SunOS4 doesn't have strtoul(). This was used only for unpicking the -o
+option for pcretest, so I've replaced it by a simple function that does just
+that job.
+
+11. pcregrep was ending with code 0 instead of 2 for the commands "pcregrep" or
+"pcregrep -".
+
+12. Added "possessive quantifiers" ?+, *+, ++, and {,}+ which come from Sun's
+Java package. This provides some syntactic sugar for simple cases of what my
+documentation calls "once-only subpatterns". A pattern such as x*+ is the
+same as (?>x*). In other words, if what is inside (?>...) is just a single
+repeated item, you can use this simplified notation. Note that only makes sense
+with greedy quantifiers. Consequently, the use of the possessive quantifier
+forces greediness, whatever the setting of the PCRE_UNGREEDY option.
+
+13. A change of greediness default within a pattern was not taking effect at
+the current level for patterns like /(b+(?U)a+)/. It did apply to parenthesized
+subpatterns that followed. Patterns like /b+(?U)a+/ worked because the option
+was abstracted outside.
+
+14. PCRE now supports the \G assertion. It is true when the current matching
+position is at the start point of the match. This differs from \A when the
+starting offset is non-zero. Used with the /g option of pcretest (or similar
+code), it works in the same way as it does for Perl's /g option.
+
+15. Some bugs concerning the handling of certain option changes within patterns
+have been fixed. These applied to options other than (?ims). For example,
+"a(?x: b c )d" did not match "XabcdY" but did match "Xa b c dY". It should have
+been the other way round. Some of this was related to change 7 above.
+
+16. PCRE now gives errors for /[.x.]/ and /[=x=]/ as unsupported POSIX
+features, as Perl does. Previously, PCRE gave the warnings only for /[[.x.]]/
+and /[[=x=]]/. PCRE now also gives an error for /[:name:]/ because it supports
+POSIX classes only within a class (e.g. /[[:alpha:]]/).
+
+17. Added support for Perl's \C escape. This matches one byte, even in UTF8
+mode. Unlike ".", it always matches newline, whatever the setting of
+PCRE_DOTALL. However, PCRE does not permit \C to appear in lookbehind
+assertions. (Perl allows it, but it doesn't (in general) work because it can't
+calculate the length of the lookbehind. At least, that's the case for Perl
+5.8.0)
+
+18. Added an error diagnosis for escapes that PCRE does not support: these are
+\L, \l, \N, \P, \p, \U, \u, and \X.
+
+19. Although correctly diagnosing a missing ']' in a character class, PCRE was
+reading past the end of the pattern in cases such as /[abcd/.
+
+20. PCRE was getting more memory than necessary for patterns with classes that
+contained both POSIX named classes and other characters, e.g. /[[:space:]abc/.
+
+21. Added some code, conditional on #ifdef VPCOMPAT, to make life easier for
+compiling PCRE for use with Virtual Pascal.
+
+22. Small fix to the Makefile to make it work properly if the build is done
+outside the source tree.
+
+23. Added a new extension: a condition to go with recursion. If a conditional
+subpattern starts with (?(R) the "true" branch is used if recursion has
+happened, whereas the "false" branch is used only at the top level.
+
+24. When there was a very long string of literal characters (over 255 bytes
+without UTF support, over 250 bytes with UTF support), the computation of how
+much memory was required could be incorrect, leading to segfaults or other
+strange effects.
+
+25. PCRE was incorrectly assuming anchoring (either to start of subject or to
+start of line for a non-DOTALL pattern) when a pattern started with (.*) and
+there was a subsequent back reference to those brackets. This meant that, for
+example, /(.*)\d+\1/ failed to match "abc123bc". Unfortunately, it isn't
+possible to check for precisely this case. All we can do is abandon the
+optimization if .* occurs inside capturing brackets when there are any back
+references whatsoever.
+
+26. The handling of the optimization for finding the first character of a
+non-anchored pattern, and for finding a character that is required later in the
+match were failing in some cases. This didn't break the matching; it just
+failed to optimize when it could. The way this is done has been re-implemented.
+
+27. Fixed typo in error message for invalid (?R item (it said "(?p").
+
+28. Added a new feature that provides some of the functionality that Perl
+provides with (?{...}). The facility is termed a "callout". The way it is done
+in PCRE is for the caller to provide an optional function, by setting
+pcre_callout to its entry point. Like pcre_malloc and pcre_free, this is a
+global variable. By default it is unset, which disables all calling out. To get
+the function called, the regex must include (?C) at appropriate points. This
+is, in fact, equivalent to (?C0), and any number <= 255 may be given with (?C).
+This provides a means of identifying different callout points. When PCRE
+reaches such a point in the regex, if pcre_callout has been set, the external
+function is called. It is provided with data in a structure called
+pcre_callout_block, which is defined in pcre.h. If the function returns 0,
+matching continues; if it returns a non-zero value, the match at the current
+point fails. However, backtracking will occur if possible.
+
+29. pcretest is upgraded to test the callout functionality. It provides a
+callout function that displays information. By default, it shows the start of
+the match and the current position in the text. There are some new data escapes
+to vary what happens:
+
+    \C+         in addition, show current contents of captured substrings
+    \C-         do not supply a callout function
+    \C!n        return 1 when callout number n is reached
+    \C!n!m      return 1 when callout number n is reached for the mth time
+
+30. If pcregrep was called with the -l option and just a single file name, it
+output "<stdin>" if a match was found, instead of the file name.
+
+31. Improve the efficiency of the POSIX API to PCRE. If the number of capturing
+slots is less than POSIX_MALLOC_THRESHOLD, use a block on the stack to pass to
+pcre_exec(). This saves a malloc/free per call. The default value of
+POSIX_MALLOC_THRESHOLD is 5; it can be changed by --with-posix-malloc-threshold
+when configuring.
+
+32. The default maximum size of a compiled pattern is 64K. There have been a
+few cases of people hitting this limit. The code now uses macros to handle the
+storing of links as offsets within the compiled pattern. It defaults to 2-byte
+links, but this can be changed to 3 or 4 bytes by --with-link-size when
+configuring. Tests 2 and 5 work only with 2-byte links because they output
+debugging information about compiled patterns.
+
+33. Internal code re-arrangements:
+
+    (a) Moved the debugging function for printing out a compiled regex into
+        its own source file (printint.c) and used #include to pull it into
+        pcretest.c and, when DEBUG is defined, into pcre.c, instead of having
+        two separate copies.
+
+    (b) Defined the list of op-code names for debugging as a macro in
+        internal.h so that it is next to the definition of the opcodes.
+
+    (c) Defined a table of op-code lengths for simpler skipping along compiled
+        code. This is again a macro in internal.h so that it is next to the
+        definition of the opcodes.
+
+34. Added support for recursive calls to individual subpatterns, along the
+    lines of Robin Houston's patch (but implemented somewhat differently).
+
+35. Further mods to the Makefile to help Win32. Also, added code to pcregrep
+    to allow it to read and process whole directories in Win32. This code was
+    contributed by Lionel Fourquaux; it has not been tested by me.
+
+36. Added support for named subpatterns. The Python syntax (?P<name>...) is
+    used to name a group. Names consist of alphanumerics and underscores, and
+    must be unique. Back references use the syntax (?P=name) and recursive
+    calls use (?P>name) which is a PCRE extension to the Python extension.
+    Groups still have numbers. The function pcre_fullinfo() can be used after
+    compilation to extract a name/number map. There are three relevant calls:
+
+      PCRE_INFO_NAMEENTRYSIZE        yields the size of each entry in the map
+      PCRE_INFO_NAMECOUNT            yields the number of entries
+      PCRE_INFO_NAMETABLE            yields a pointer to the map.
+
+    The map is a vector of fixed-size entries. The size of each entry depends
+    on the length of the longest name used. The first two bytes of each entry
+    are the group number, most significant byte first. There follows the
+    corresponding name, zero terminated. The names are in alphabetical order.
+
+
+Version 3.9 02-Jan-02
 ---------------------
 
 1. A bit of extraneous text had somehow crept into the pcregrep documentation.

@@ -2,6 +2,10 @@
 *             PCRE testing program               *
 *************************************************/
 
+/* This program was hacked up as a tester for PCRE. I really should have
+written it more tidily in the first place. Will I ever learn? It has grown and
+been extended and consequently is now rather untidy in places. */
+
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
@@ -9,7 +13,8 @@
 #include <time.h>
 #include <locale.h>
 
-/* Use the internal info for displaying the results of pcre_study(). */
+/* We need the internal info for displaying the results of pcre_study(). Also
+for getting the opcodes for showing compiled code. */
 
 #include "internal.h"
 
@@ -29,11 +34,17 @@ Makefile. */
 #endif
 #endif
 
-#define LOOPREPEAT 20000
+#define LOOPREPEAT 50000
 
 
 static FILE *outfile;
 static int log_store = 0;
+static int callout_count;
+static int callout_extra;
+static int callout_fail_count;
+static int callout_fail_id;
+static int first_callout;
+static int utf8;
 static size_t gotten_store;
 
 
@@ -46,6 +57,49 @@ static int utf8_table2[] = {
 
 static int utf8_table3[] = {
   0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01};
+
+
+
+/*************************************************
+*         Print compiled regex                   *
+*************************************************/
+
+/* The code for doing this is held in a separate file that is also included in
+pcre.c when it is compiled with the debug switch. It defines a function called
+print_internals(), which uses a table of opcode lengths defined by the macro
+OP_LENGTHS, whose name must be OP_lengths. */
+
+static uschar OP_lengths[] = { OP_LENGTHS };
+
+#include "printint.c"
+
+
+
+/*************************************************
+*          Read number from string               *
+*************************************************/
+
+/* We don't use strtoul() because SunOS4 doesn't have it. Rather than mess
+around with conditional compilation, just do the job by hand. It is only used
+for unpicking the -o argument, so just keep it simple.
+
+Arguments:
+  str           string to be converted
+  endptr        where to put the end pointer
+
+Returns:        the unsigned long
+*/
+
+static int
+get_value(unsigned char *str, unsigned char **endptr)
+{
+int result = 0;
+while(*str != 0 && isspace(*str)) str++;
+while (isdigit(*str)) result = result * 10 + (int)(*str++ - '0');
+*endptr = str;
+return(result);
+}
+
 
 
 /*************************************************
@@ -143,256 +197,137 @@ return i+1;
 
 
 
+/*************************************************
+*             Print character string             *
+*************************************************/
 
+/* Character string printing function. Must handle UTF-8 strings in utf8
+mode. Yields number of characters printed. If handed a NULL file, just counts
+chars without printing. */
 
-
-/* Debugging function to print the internal form of the regex. This is the same
-code as contained in pcre.c under the DEBUG macro. */
-
-static const char *OP_names[] = {
-  "End", "\\A", "\\B", "\\b", "\\D", "\\d",
-  "\\S", "\\s", "\\W", "\\w", "\\Z", "\\z",
-  "Opt", "^", "$", "Any", "chars", "not",
-  "*", "*?", "+", "+?", "?", "??", "{", "{", "{",
-  "*", "*?", "+", "+?", "?", "??", "{", "{", "{",
-  "*", "*?", "+", "+?", "?", "??", "{", "{", "{",
-  "*", "*?", "+", "+?", "?", "??", "{", "{",
-  "class", "Ref", "Recurse",
-  "Alt", "Ket", "KetRmax", "KetRmin", "Assert", "Assert not",
-  "AssertB", "AssertB not", "Reverse", "Once", "Cond", "Cref",
-  "Brazero", "Braminzero", "Branumber", "Bra"
-};
-
-
-static void print_internals(pcre *re)
-{
-unsigned char *code = ((real_pcre *)re)->code;
-
-fprintf(outfile, "------------------------------------------------------------------\n");
-
-for(;;)
-  {
-  int c;
-  int charlength;
-
-  fprintf(outfile, "%3d ", (int)(code - ((real_pcre *)re)->code));
-
-  if (*code >= OP_BRA)
-    {
-    if (*code - OP_BRA > EXTRACT_BASIC_MAX)
-      fprintf(outfile, "%3d Bra extra", (code[1] << 8) + code[2]);
-    else
-      fprintf(outfile, "%3d Bra %d", (code[1] << 8) + code[2], *code - OP_BRA);
-    code += 2;
-    }
-
-  else switch(*code)
-    {
-    case OP_END:
-    fprintf(outfile, "    %s\n", OP_names[*code]);
-    fprintf(outfile, "------------------------------------------------------------------\n");
-    return;
-
-    case OP_OPT:
-    fprintf(outfile, " %.2x %s", code[1], OP_names[*code]);
-    code++;
-    break;
-
-    case OP_CHARS:
-    charlength = *(++code);
-    fprintf(outfile, "%3d ", charlength);
-    while (charlength-- > 0)
-      if (isprint(c = *(++code))) fprintf(outfile, "%c", c);
-        else fprintf(outfile, "\\x%02x", c);
-    break;
-
-    case OP_KETRMAX:
-    case OP_KETRMIN:
-    case OP_ALT:
-    case OP_KET:
-    case OP_ASSERT:
-    case OP_ASSERT_NOT:
-    case OP_ASSERTBACK:
-    case OP_ASSERTBACK_NOT:
-    case OP_ONCE:
-    case OP_COND:
-    case OP_BRANUMBER:
-    case OP_REVERSE:
-    case OP_CREF:
-    fprintf(outfile, "%3d %s", (code[1] << 8) + code[2], OP_names[*code]);
-    code += 2;
-    break;
-
-    case OP_STAR:
-    case OP_MINSTAR:
-    case OP_PLUS:
-    case OP_MINPLUS:
-    case OP_QUERY:
-    case OP_MINQUERY:
-    case OP_TYPESTAR:
-    case OP_TYPEMINSTAR:
-    case OP_TYPEPLUS:
-    case OP_TYPEMINPLUS:
-    case OP_TYPEQUERY:
-    case OP_TYPEMINQUERY:
-    if (*code >= OP_TYPESTAR)
-      fprintf(outfile, "    %s", OP_names[code[1]]);
-    else if (isprint(c = code[1])) fprintf(outfile, "    %c", c);
-      else fprintf(outfile, "    \\x%02x", c);
-    fprintf(outfile, "%s", OP_names[*code++]);
-    break;
-
-    case OP_EXACT:
-    case OP_UPTO:
-    case OP_MINUPTO:
-    if (isprint(c = code[3])) fprintf(outfile, "    %c{", c);
-      else fprintf(outfile, "    \\x%02x{", c);
-    if (*code != OP_EXACT) fprintf(outfile, ",");
-    fprintf(outfile, "%d}", (code[1] << 8) + code[2]);
-    if (*code == OP_MINUPTO) fprintf(outfile, "?");
-    code += 3;
-    break;
-
-    case OP_TYPEEXACT:
-    case OP_TYPEUPTO:
-    case OP_TYPEMINUPTO:
-    fprintf(outfile, "    %s{", OP_names[code[3]]);
-    if (*code != OP_TYPEEXACT) fprintf(outfile, "0,");
-    fprintf(outfile, "%d}", (code[1] << 8) + code[2]);
-    if (*code == OP_TYPEMINUPTO) fprintf(outfile, "?");
-    code += 3;
-    break;
-
-    case OP_NOT:
-    if (isprint(c = *(++code))) fprintf(outfile, "    [^%c]", c);
-      else fprintf(outfile, "    [^\\x%02x]", c);
-    break;
-
-    case OP_NOTSTAR:
-    case OP_NOTMINSTAR:
-    case OP_NOTPLUS:
-    case OP_NOTMINPLUS:
-    case OP_NOTQUERY:
-    case OP_NOTMINQUERY:
-    if (isprint(c = code[1])) fprintf(outfile, "    [^%c]", c);
-      else fprintf(outfile, "    [^\\x%02x]", c);
-    fprintf(outfile, "%s", OP_names[*code++]);
-    break;
-
-    case OP_NOTEXACT:
-    case OP_NOTUPTO:
-    case OP_NOTMINUPTO:
-    if (isprint(c = code[3])) fprintf(outfile, "    [^%c]{", c);
-      else fprintf(outfile, "    [^\\x%02x]{", c);
-    if (*code != OP_NOTEXACT) fprintf(outfile, ",");
-    fprintf(outfile, "%d}", (code[1] << 8) + code[2]);
-    if (*code == OP_NOTMINUPTO) fprintf(outfile, "?");
-    code += 3;
-    break;
-
-    case OP_REF:
-    fprintf(outfile, "    \\%d", (code[1] << 8) | code[2]);
-    code += 3;
-    goto CLASS_REF_REPEAT;
-
-    case OP_CLASS:
-      {
-      int i, min, max;
-      code++;
-      fprintf(outfile, "    [");
-
-      for (i = 0; i < 256; i++)
-        {
-        if ((code[i/8] & (1 << (i&7))) != 0)
-          {
-          int j;
-          for (j = i+1; j < 256; j++)
-            if ((code[j/8] & (1 << (j&7))) == 0) break;
-          if (i == '-' || i == ']') fprintf(outfile, "\\");
-          if (isprint(i)) fprintf(outfile, "%c", i); else fprintf(outfile, "\\x%02x", i);
-          if (--j > i)
-            {
-            fprintf(outfile, "-");
-            if (j == '-' || j == ']') fprintf(outfile, "\\");
-            if (isprint(j)) fprintf(outfile, "%c", j); else fprintf(outfile, "\\x%02x", j);
-            }
-          i = j;
-          }
-        }
-      fprintf(outfile, "]");
-      code += 32;
-
-      CLASS_REF_REPEAT:
-
-      switch(*code)
-        {
-        case OP_CRSTAR:
-        case OP_CRMINSTAR:
-        case OP_CRPLUS:
-        case OP_CRMINPLUS:
-        case OP_CRQUERY:
-        case OP_CRMINQUERY:
-        fprintf(outfile, "%s", OP_names[*code]);
-        break;
-
-        case OP_CRRANGE:
-        case OP_CRMINRANGE:
-        min = (code[1] << 8) + code[2];
-        max = (code[3] << 8) + code[4];
-        if (max == 0) fprintf(outfile, "{%d,}", min);
-        else fprintf(outfile, "{%d,%d}", min, max);
-        if (*code == OP_CRMINRANGE) fprintf(outfile, "?");
-        code += 4;
-        break;
-
-        default:
-        code--;
-        }
-      }
-    break;
-
-    /* Anything else is just a one-node item */
-
-    default:
-    fprintf(outfile, "    %s", OP_names[*code]);
-    break;
-    }
-
-  code++;
-  fprintf(outfile, "\n");
-  }
-}
-
-
-
-/* Character string printing function. A "normal" and a UTF-8 version. */
-
-static void pchars(unsigned char *p, int length, int utf8)
+static int pchars(unsigned char *p, int length, FILE *f)
 {
 int c;
+int yield = 0;
+
 while (length-- > 0)
   {
   if (utf8)
     {
     int rc = utf82ord(p, &c);
-    if (rc > 0)
+
+    if (rc > 0 && rc <= length + 1)   /* Mustn't run over the end */
       {
       length -= rc - 1;
       p += rc;
-      if (c < 256 && isprint(c)) fprintf(outfile, "%c", c);
-        else fprintf(outfile, "\\x{%02x}", c);
+      if (c < 256 && isprint(c))
+        {
+        if (f != NULL) fprintf(f, "%c", c);
+        yield++;
+        }
+      else
+        {
+        int n;
+        if (f != NULL) fprintf(f, "\\x{%02x}%n", c, &n);
+        yield += n;
+        }
       continue;
       }
     }
 
    /* Not UTF-8, or malformed UTF-8  */
 
-  if (isprint(c = *(p++))) fprintf(outfile, "%c", c);
-    else fprintf(outfile, "\\x%02x", c);
+  if (isprint(c = *(p++)))
+    {
+    if (f != NULL) fprintf(f, "%c", c);
+    yield++;
+    }
+  else
+    {
+    if (f != NULL) fprintf(f, "\\x%02x", c);
+    yield += 4;
+    }
   }
+
+return yield;
 }
 
 
+
+/*************************************************
+*              Callout function                  *
+*************************************************/
+
+/* Called from PCRE as a result of the (?C) item. We print out where we are in
+the match. Yield OK unless more callouts than the fail count. . */
+
+static int callout(pcre_callout_block *cb)
+{
+FILE *f = (first_callout | callout_extra)? outfile : NULL;
+int i, pre_start, post_start;
+
+if (callout_extra)
+  {
+  int i;
+  fprintf(f, "Callout %d: last capture = %d\n",
+    cb->callout_number, cb->capture_last);
+
+  for (i = 0; i < cb->capture_top * 2; i += 2)
+    {
+    if (cb->offset_vector[i] < 0)
+      fprintf(f, "%2d: <unset>\n", i/2);
+    else
+      {
+      fprintf(f, "%2d: ", i/2);
+      (void)pchars((unsigned char *)cb->subject + cb->offset_vector[i],
+        cb->offset_vector[i+1] - cb->offset_vector[i], f);
+      fprintf(f, "\n");
+      }
+    }
+  }
+
+/* Re-print the subject in canonical form, the first time or if giving full
+datails. On subsequent calls in the same match, we use pchars just to find the
+printed lengths of the substrings. */
+
+if (f != NULL) fprintf(f, "--->");
+
+pre_start = pchars((unsigned char *)cb->subject, cb->start_match, f);
+post_start = pchars((unsigned char *)(cb->subject + cb->start_match),
+  cb->current_position - cb->start_match, f);
+
+(void)pchars((unsigned char *)(cb->subject + cb->current_position),
+  cb->subject_length - cb->current_position, f);
+
+if (f != NULL) fprintf(f, "\n");
+
+/* Always print appropriate indicators, with callout number if not already
+shown */
+
+if (callout_extra) fprintf(outfile, "    ");
+  else fprintf(outfile, "%3d ", cb->callout_number);
+
+for (i = 0; i < pre_start; i++) fprintf(outfile, " ");
+fprintf(outfile, "^");
+
+if (post_start > 0)
+  {
+  for (i = 0; i < post_start - 1; i++) fprintf(outfile, " ");
+  fprintf(outfile, "^");
+  }
+
+fprintf(outfile, "\n");
+
+first_callout = 0;
+
+return (cb->callout_number != callout_fail_id)? 0 :
+       (++callout_count >= callout_fail_count)? 1 : 0;
+}
+
+
+/*************************************************
+*            Local malloc function               *
+*************************************************/
 
 /* Alternative malloc function, to test functionality and show the size of the
 compiled re. */
@@ -400,14 +335,14 @@ compiled re. */
 static void *new_malloc(size_t size)
 {
 gotten_store = size;
-if (log_store)
-  fprintf(outfile, "Memory allocation (code space): %d\n",
-    (int)((int)size - offsetof(real_pcre, code[0])));
 return malloc(size);
 }
 
 
 
+/*************************************************
+*          Call pcre_fullinfo()                  *
+*************************************************/
 
 /* Get one piece of information from the pcre_fullinfo() function */
 
@@ -420,6 +355,9 @@ if ((rc = pcre_fullinfo(re, study, option, ptr)) < 0)
 
 
 
+/*************************************************
+*                Main Program                    *
+*************************************************/
 
 /* Read lines from named file or stdin and write to named file or stdout; lines
 consist of a regular expression, in delimiters and optionally followed by
@@ -453,7 +391,7 @@ outfile = stdout;
 
 while (argc > 1 && argv[op][0] == '-')
   {
-  char *endptr;
+  unsigned char *endptr;
 
   if (strcmp(argv[op], "-s") == 0 || strcmp(argv[op], "-m") == 0)
     showstore = 1;
@@ -461,7 +399,7 @@ while (argc > 1 && argv[op][0] == '-')
   else if (strcmp(argv[op], "-i") == 0) showinfo = 1;
   else if (strcmp(argv[op], "-d") == 0) showinfo = debug = 1;
   else if (strcmp(argv[op], "-o") == 0 && argc > 2 &&
-      ((size_offsets = (int)strtoul(argv[op+1], &endptr, 10)), *endptr == 0))
+      ((size_offsets = get_value(argv[op+1], &endptr)), *endptr == 0))
     {
     op++;
     argc--;
@@ -549,12 +487,14 @@ while (!done)
   int do_g = 0;
   int do_showinfo = showinfo;
   int do_showrest = 0;
-  int utf8 = 0;
   int erroroffset, len, delimiter;
+
+  utf8 = 0;
 
   if (infile == stdin) printf("  re> ");
   if (fgets((char *)buffer, sizeof(buffer), infile) == NULL) break;
   if (infile != stdin) fprintf(outfile, "%s", (char *)buffer);
+  fflush(outfile);
 
   p = buffer;
   while (isspace(*p)) p++;
@@ -705,8 +645,8 @@ while (!done)
         }
       time_taken = clock() - start_time;
       fprintf(outfile, "Compile time %.3f milliseconds\n",
-        ((double)time_taken * 1000.0) /
-        ((double)LOOPREPEAT * (double)CLOCKS_PER_SEC));
+        (((double)time_taken * 1000.0) / (double)LOOPREPEAT) /
+          (double)CLOCKS_PER_SEC);
       }
 
     re = pcre_compile((char *)p, options, &error, &erroroffset, tables);
@@ -740,14 +680,26 @@ while (!done)
     info-returning functions. The old one has a limited interface and
     returns only limited data. Check that it agrees with the newer one. */
 
+    if (log_store)
+      fprintf(outfile, "Memory allocation (code space): %d\n",
+        (int)(gotten_store -
+              sizeof(real_pcre) -
+              ((real_pcre *)re)->name_count * ((real_pcre *)re)->name_entry_size));
+
     if (do_showinfo)
       {
       unsigned long int get_options;
       int old_first_char, old_options, old_count;
       int count, backrefmax, first_char, need_char;
+      int nameentrysize, namecount;
+      const uschar *nametable;
       size_t size;
 
-      if (do_debug) print_internals(re);
+      if (do_debug)
+        {
+        fprintf(outfile, "------------------------------------------------------------------\n");
+        print_internals(re, outfile);
+        }
 
       new_info(re, NULL, PCRE_INFO_OPTIONS, &get_options);
       new_info(re, NULL, PCRE_INFO_SIZE, &size);
@@ -755,6 +707,9 @@ while (!done)
       new_info(re, NULL, PCRE_INFO_BACKREFMAX, &backrefmax);
       new_info(re, NULL, PCRE_INFO_FIRSTCHAR, &first_char);
       new_info(re, NULL, PCRE_INFO_LASTLITERAL, &need_char);
+      new_info(re, NULL, PCRE_INFO_NAMEENTRYSIZE, &nameentrysize);
+      new_info(re, NULL, PCRE_INFO_NAMECOUNT, &namecount);
+      new_info(re, NULL, PCRE_INFO_NAMETABLE, &nametable);
 
       old_count = pcre_info(re, &old_options, &old_first_char);
       if (count < 0) fprintf(outfile,
@@ -781,6 +736,19 @@ while (!done)
       fprintf(outfile, "Capturing subpattern count = %d\n", count);
       if (backrefmax > 0)
         fprintf(outfile, "Max back reference = %d\n", backrefmax);
+
+      if (namecount > 0)
+        {
+        fprintf(outfile, "Named capturing subpatterns:\n");
+        while (namecount-- > 0)
+          {
+          fprintf(outfile, "  %s %*s%3d\n", nametable + 2,
+            nameentrysize - 3 - (int)strlen((char *)nametable + 2), "",
+            GET2(nametable, 0));
+          nametable += nameentrysize;
+          }
+        }
+
       if (get_options == 0) fprintf(outfile, "No options\n");
         else fprintf(outfile, "Options:%s%s%s%s%s%s%s%s%s\n",
           ((get_options & PCRE_ANCHORED) != 0)? " anchored" : "",
@@ -806,10 +774,13 @@ while (!done)
         }
       else
         {
-        if (isprint(first_char))
-          fprintf(outfile, "First char = \'%c\'\n", first_char);
+        int ch = first_char & 255;
+        char *caseless = ((first_char & REQ_CASELESS) == 0)?
+          "" : " (caseless)";
+        if (isprint(ch))
+          fprintf(outfile, "First char = \'%c\'%s\n", ch, caseless);
         else
-          fprintf(outfile, "First char = %d\n", first_char);
+          fprintf(outfile, "First char = %d%s\n", ch, caseless);
         }
 
       if (need_char < 0)
@@ -818,10 +789,13 @@ while (!done)
         }
       else
         {
+        int ch = need_char & 255;
+        char *caseless = ((need_char & REQ_CASELESS) == 0)?
+          "" : " (caseless)";
         if (isprint(need_char))
-          fprintf(outfile, "Need char = \'%c\'\n", need_char);
+          fprintf(outfile, "Need char = \'%c\'%s\n", ch, caseless);
         else
-          fprintf(outfile, "Need char = %d\n", need_char);
+          fprintf(outfile, "Need char = %d%s\n", ch, caseless);
         }
       }
 
@@ -840,8 +814,8 @@ while (!done)
         time_taken = clock() - start_time;
         if (extra != NULL) free(extra);
         fprintf(outfile, "  Study time %.3f milliseconds\n",
-          ((double)time_taken * 1000.0)/
-          ((double)LOOPREPEAT * (double)CLOCKS_PER_SEC));
+          (((double)time_taken * 1000.0) / (double)LOOPREPEAT) /
+            (double)CLOCKS_PER_SEC);
         }
 
       extra = pcre_study(re, study_options, &error);
@@ -906,6 +880,13 @@ while (!done)
 
     options = 0;
 
+    pcre_callout = callout;
+    first_callout = 1;
+    callout_extra = 0;
+    callout_count = 0;
+    callout_fail_count = 999999;
+    callout_fail_id = -1;
+
     if (infile == stdin) printf("data> ");
     if (fgets((char *)buffer, sizeof(buffer), infile) == NULL)
       {
@@ -927,6 +908,7 @@ while (!done)
       {
       int i = 0;
       int n = 0;
+
       if (c == '\\') switch ((c = *p++))
         {
         case 'a': c =    7; break;
@@ -991,8 +973,35 @@ while (!done)
         continue;
 
         case 'C':
-        while(isdigit(*p)) n = n * 10 + *p++ - '0';
-        copystrings |= 1 << n;
+        if (isdigit(*p))    /* Set copy string */
+          {
+          while(isdigit(*p)) n = n * 10 + *p++ - '0';
+          copystrings |= 1 << n;
+          }
+        else if (*p == '+')
+          {
+          callout_extra = 1;
+          p++;
+          }
+        else if (*p == '-')
+          {
+          pcre_callout = NULL;
+          p++;
+          }
+        else if (*p == '!')
+          {
+          callout_fail_id = 0;
+          p++;
+          while(isdigit(*p))
+            callout_fail_id = callout_fail_id * 10 + *p++ - '0';
+          callout_fail_count = 0;
+          if (*p == '!')
+            {
+            p++;
+            while(isdigit(*p))
+              callout_fail_count = callout_fail_count * 10 + *p++ - '0';
+            }
+          }
         continue;
 
         case 'G':
@@ -1023,7 +1032,7 @@ while (!done)
             }
           }
         use_size_offsets = n;
-        if (n == 0) use_offsets = NULL;
+        if (n == 0) use_offsets = NULL;   /* Ensures it can't write to it */
         continue;
 
         case 'Z':
@@ -1057,18 +1066,19 @@ while (!done)
       else
         {
         size_t i;
-        for (i = 0; i < use_size_offsets; i++)
+        for (i = 0; i < (size_t)use_size_offsets; i++)
           {
           if (pmatch[i].rm_so >= 0)
             {
             fprintf(outfile, "%2d: ", (int)i);
-            pchars(dbuffer + pmatch[i].rm_so,
-              pmatch[i].rm_eo - pmatch[i].rm_so, utf8);
+            (void)pchars(dbuffer + pmatch[i].rm_so,
+              pmatch[i].rm_eo - pmatch[i].rm_so, outfile);
             fprintf(outfile, "\n");
             if (i == 0 && do_showrest)
               {
               fprintf(outfile, " 0+ ");
-              pchars(dbuffer + pmatch[i].rm_eo, len - pmatch[i].rm_eo, utf8);
+              (void)pchars(dbuffer + pmatch[i].rm_eo, len - pmatch[i].rm_eo,
+                outfile);
               fprintf(outfile, "\n");
               }
             }
@@ -1094,8 +1104,8 @@ while (!done)
             start_offset, options | g_notempty, use_offsets, use_size_offsets);
         time_taken = clock() - start_time;
         fprintf(outfile, "Execute time %.3f milliseconds\n",
-          ((double)time_taken * 1000.0)/
-          ((double)LOOPREPEAT * (double)CLOCKS_PER_SEC));
+          (((double)time_taken * 1000.0) / (double)LOOPREPEAT) /
+            (double)CLOCKS_PER_SEC);
         }
 
       count = pcre_exec(re, extra, (char *)bptr, len,
@@ -1119,14 +1129,16 @@ while (!done)
           else
             {
             fprintf(outfile, "%2d: ", i/2);
-            pchars(bptr + use_offsets[i], use_offsets[i+1] - use_offsets[i], utf8);
+            (void)pchars(bptr + use_offsets[i],
+              use_offsets[i+1] - use_offsets[i], outfile);
             fprintf(outfile, "\n");
             if (i == 0)
               {
               if (do_showrest)
                 {
                 fprintf(outfile, " 0+ ");
-                pchars(bptr + use_offsets[i+1], len - use_offsets[i+1], utf8);
+                (void)pchars(bptr + use_offsets[i+1], len - use_offsets[i+1],
+                  outfile);
                 fprintf(outfile, "\n");
                 }
               }
