@@ -77,7 +77,7 @@ HashTable* php_splice(HashTable *, int, int, zval ***, int, HashTable **);
 int multisort_compare(const void *a, const void *b);
 
 typedef struct {
-	int *multisort_flags;
+	int *multisort_flags[2];
 	int (*compare_func)(zval *result, zval *op1, zval *op2);
 } php_array_globals;
 
