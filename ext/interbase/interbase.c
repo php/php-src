@@ -53,6 +53,11 @@ A lot... */
 
 #if HAVE_IBASE
 #include <ibase.h>
+
+#ifndef SQLDA_CURRENT_VERSION
+#define SQLDA_CURRENT_VERSION SQLDA_VERSION1
+#endif
+
 #include <time.h>
 #include "ext/standard/fsock.h"
 #include "ext/standard/info.h"
@@ -1080,9 +1085,9 @@ static int _php_ibase_alloc_query(ibase_query **ib_queryp, isc_db_handle link, i
 		goto _php_ibase_alloc_query_error;
 	}
 
-	IB_QUERY->out_sqlda = (XSQLDA *) emalloc(XSQLDA_LENGTH(0));
-	IB_QUERY->out_sqlda->sqln = 0;
-	IB_QUERY->out_sqlda->version = SQLDA_VERSION1;
+	IB_QUERY->out_sqlda = (XSQLDA *) emalloc(XSQLDA_LENGTH(1));
+	IB_QUERY->out_sqlda->sqln = 1;
+	IB_QUERY->out_sqlda->version = SQLDA_CURRENT_VERSION;
 
 	if (isc_dsql_prepare(IB_STATUS, &IB_QUERY->trans, &IB_QUERY->stmt, 0, query, dialect, IB_QUERY->out_sqlda)) {
 		_php_ibase_error(TSRMLS_C);
@@ -1093,18 +1098,18 @@ static int _php_ibase_alloc_query(ibase_query **ib_queryp, isc_db_handle link, i
 	if (IB_QUERY->out_sqlda->sqld > IB_QUERY->out_sqlda->sqln) {
 		IB_QUERY->out_sqlda = erealloc(IB_QUERY->out_sqlda, XSQLDA_LENGTH(IB_QUERY->out_sqlda->sqld));
 		IB_QUERY->out_sqlda->sqln = IB_QUERY->out_sqlda->sqld;
-		IB_QUERY->out_sqlda->version = SQLDA_VERSION1;
-		if (isc_dsql_describe(IB_STATUS, &IB_QUERY->stmt, SQLDA_VERSION1, IB_QUERY->out_sqlda)) {
+		IB_QUERY->out_sqlda->version = SQLDA_CURRENT_VERSION;
+		if (isc_dsql_describe(IB_STATUS, &IB_QUERY->stmt, SQLDA_CURRENT_VERSION, IB_QUERY->out_sqlda)) {
 			_php_ibase_error(TSRMLS_C);
 			goto _php_ibase_alloc_query_error;
 		}
 	}
 
 	/* maybe have input placeholders? */
-	IB_QUERY->in_sqlda = emalloc(XSQLDA_LENGTH(0));
-	IB_QUERY->in_sqlda->sqln = 0;
-	IB_QUERY->in_sqlda->version = SQLDA_VERSION1;
-	if (isc_dsql_describe_bind(IB_STATUS, &IB_QUERY->stmt, SQLDA_VERSION1, IB_QUERY->in_sqlda)) {
+	IB_QUERY->in_sqlda = emalloc(XSQLDA_LENGTH(1));
+	IB_QUERY->in_sqlda->sqln = 1;
+	IB_QUERY->in_sqlda->version = SQLDA_CURRENT_VERSION;
+	if (isc_dsql_describe_bind(IB_STATUS, &IB_QUERY->stmt, SQLDA_CURRENT_VERSION, IB_QUERY->in_sqlda)) {
 		_php_ibase_error(TSRMLS_C);
 		goto _php_ibase_alloc_query_error;
 	}
@@ -1113,8 +1118,8 @@ static int _php_ibase_alloc_query(ibase_query **ib_queryp, isc_db_handle link, i
 	if (IB_QUERY->in_sqlda->sqln < IB_QUERY->in_sqlda->sqld) {
 		IB_QUERY->in_sqlda = erealloc(IB_QUERY->in_sqlda, XSQLDA_LENGTH(IB_QUERY->in_sqlda->sqld));
 		IB_QUERY->in_sqlda->sqln = IB_QUERY->in_sqlda->sqld;
-		IB_QUERY->in_sqlda->version = SQLDA_VERSION1;
-		if (isc_dsql_describe_bind(IB_STATUS, &IB_QUERY->stmt, SQLDA_VERSION1, IB_QUERY->in_sqlda)) {
+		IB_QUERY->in_sqlda->version = SQLDA_CURRENT_VERSION;
+		if (isc_dsql_describe_bind(IB_STATUS, &IB_QUERY->stmt, SQLDA_CURRENT_VERSION, IB_QUERY->in_sqlda)) {
 			_php_ibase_error(TSRMLS_C);
 			goto _php_ibase_alloc_query_error;
 		}
