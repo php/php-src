@@ -38,6 +38,7 @@
 #include "SAPI.h"
 #include "php_session.h"
 #include "ext/standard/md5.h"
+#include "ext/standard/sha1.h"
 #include "ext/standard/php_var.h"
 #include "ext/standard/datetime.h"
 #include "ext/standard/php_lcg.h"
@@ -151,7 +152,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.cache_limiter",      "nocache",   PHP_INI_ALL, OnUpdateString, cache_limiter,      php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_expire",       "180",       PHP_INI_ALL, OnUpdateInt,    cache_expire,       php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_trans_sid",    "0",         PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   use_trans_sid,      php_ps_globals,    ps_globals)
-
+	STD_PHP_INI_ENTRY("session.hash_function",      "0",         PHP_INI_ALL, OnUpdateInt,    hash_func,          php_ps_globals,    ps_globals)
 	/* Commented out until future discussion */
 	/* PHP_INI_ENTRY("session.encode_sources", "globals,track", PHP_INI_ALL, NULL) */
 PHP_INI_END()
@@ -535,55 +536,129 @@ static void php_session_decode(const char *val, int vallen TSRMLS_DC)
 	}
 }
 
-static char hexconvtab[] = "0123456789abcdef";
+static char hexconvtab[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+enum {
+	PS_HASH_FUNC_MD5,
+	PS_HASH_FUNC_SHA1
+};
 
 char *php_session_create_id(PS_CREATE_SID_ARGS)
 {
-	PHP_MD5_CTX context;
-	unsigned char digest[16];
-	char buf[256];
+	PHP_MD5_CTX md5_context;
+	PHP_SHA1_CTX sha1_context;
+	unsigned char digest[21];
+	int digest_len;
+	char *buf;
 	struct timeval tv;
 	int i;
 	int j = 0;
 	unsigned char c;
+	unsigned int w;
+	zval **array;
+	zval **token;
+	char *remote_addr = NULL;
 
 	gettimeofday(&tv, NULL);
-	PHP_MD5Init(&context);
 	
-	sprintf(buf, "%ld%ld%0.8f", tv.tv_sec, tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
-	PHP_MD5Update(&context, buf, strlen(buf));
+	if (zend_hash_find(&EG(symbol_table), "_SERVER",
+				sizeof("_SERVER"), (void **) &array) == SUCCESS &&
+			Z_TYPE_PP(array) == IS_ARRAY &&
+			zend_hash_find(Z_ARRVAL_PP(array), "REMOTE_ADDR",
+				sizeof("REMOTE_ADDR"), (void **) &token) == SUCCESS) {
+		remote_addr = Z_STRVAL_PP(token);
+	}
+
+	buf = emalloc(100);
+
+	/* maximum 15+19+19+10 bytes */	
+	sprintf(buf, "%.15s%ld%ld%0.8f", remote_addr ? remote_addr : "", 
+			tv.tv_sec, tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
+
+	switch (PS(hash_func)) {
+	case PS_HASH_FUNC_MD5:
+		PHP_MD5Init(&md5_context);
+		PHP_MD5Update(&md5_context, buf, strlen(buf));
+		digest_len = 16;
+		break;
+	case PS_HASH_FUNC_SHA1:
+		PHP_SHA1Init(&sha1_context);
+		PHP_SHA1Update(&sha1_context, buf, strlen(buf));
+		digest_len = 20;
+		break;
+	default:
+		php_error(E_ERROR, "Invalid session hash function");
+		efree(buf);
+		return NULL;
+	}
 
 	if (PS(entropy_length) > 0) {
 		int fd;
 
 		fd = VCWD_OPEN(PS(entropy_file), O_RDONLY);
 		if (fd >= 0) {
-			unsigned char buf[2048];
+			unsigned char rbuf[2048];
 			int n;
 			int to_read = PS(entropy_length);
 			
 			while (to_read > 0) {
-				n = read(fd, buf, MIN(to_read, sizeof(buf)));
+				n = read(fd, rbuf, MIN(to_read, sizeof(rbuf)));
 				if (n <= 0) break;
-				PHP_MD5Update(&context, buf, n);
+				
+				switch (PS(hash_func)) {
+				case PS_HASH_FUNC_MD5:
+					PHP_MD5Update(&md5_context, rbuf, n);
+					break;
+				case PS_HASH_FUNC_SHA1:
+					PHP_SHA1Update(&sha1_context, rbuf, n);
+					break;
+				}
 				to_read -= n;
 			}
 			close(fd);
 		}
 	}
 
-	PHP_MD5Final(digest, &context);
-	
-	for (i = 0; i < 16; i++) {
-		c = digest[i];
-		buf[j++] = hexconvtab[c >> 4];
-		buf[j++] = hexconvtab[c & 15];
+	switch (PS(hash_func)) {
+	case PS_HASH_FUNC_MD5:
+		PHP_MD5Final(digest, &md5_context);
+		break;
+	case PS_HASH_FUNC_SHA1:
+		PHP_SHA1Final(digest, &sha1_context);
+		break;
+	}
+
+	if (digest_len == 16) {
+		for (i = 0; i < digest_len; i++) {
+			c = digest[i];
+
+			buf[j++] = hexconvtab[c >> 4];
+			buf[j++] = hexconvtab[c & 15];
+		}
+	} else {
+		int bit_offset, off2, off3;
+
+		/* take 5 bits from the bit stream per iteration */
+		
+		/* ensure that there is a NUL byte at the end */
+		digest[digest_len] = 0;
+		for (i = 0; i < digest_len * 8 / 5; i++) {
+			bit_offset = i * 5;
+			off2 = bit_offset >> 3;
+			off3 = bit_offset & 7;
+
+			w = digest[off2] + (digest[off2+1] << 8);
+			
+			w = (w >> off3) & 31;
+
+			buf[j++] = hexconvtab[w];
+		}
 	}
 	buf[j] = '\0';
 	
 	if (newlen) 
 		*newlen = j;
-	return estrdup(buf);
+	return buf;
 }
 
 static void php_session_initialize(TSRMLS_D)
