@@ -457,7 +457,7 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 		zend_do_op_data(opline, value TSRMLS_CC);
 		SET_UNUSED(opline->result);
 		*result = last_op->result;
-	} else 	if (last_op->opcode == ZEND_FETCH_DIM_W) {
+	} else if (last_op->opcode == ZEND_FETCH_DIM_W) {
 		last_op->opcode = ZEND_ASSIGN_DIM;
 
 		zend_do_op_data(opline, value TSRMLS_CC);
