@@ -64,11 +64,11 @@ Exceptions:
 Naming Conventions
 ------------------
 
-[1] Function names for user functions should be enclosed with in
+[1] Function names for user-level functions should be enclosed with in
     the PHP_FUNCTION() macro. They should be in lowercase, with words
     underscore delimited, with care taken to minimize the letter count.
-    If they are part of a "parent set" of functions, that parent should
-    be included in the user function name.
+    Abbreviations should not be used when they greatly decrease the
+    readability of the function name itself.
 
     Good:
     'mcrypt_enc_self_test'
@@ -83,17 +83,35 @@ Naming Conventions
     Bad:
     'hw_GetObjectByQueryCollObj'
     'pg_setclientencoding'
+    'jf_n_s_i'
+    
+    
+[2] If they are part of a "parent set" of functions, that parent should
+    be included in the user function name, and should be clearly related
+    to the parent program or function family. This should be in the form
+    of parent_*.
+    
+    A family of 'foo' functions, for example:
+    Good:
+    'foo_select_bar'
+    'foo_insert_baz'
+    'foo_delete_baz'
 
-[2] Function names used by user functions should be prefixed
+    Bad:
+    'fooselect_bar'
+    'fooinsertbaz'
+    'delete_foo_baz'
+
+[3] Function names used by user functions should be prefixed
     with "_php_", and followed by a word or an underscore-delimited list of
     words, in lowercase letters, that describes the function.  If applicable,
     they should be declared 'static'.
     
-[3] Variable names must be meaningful.  One letter variable names must be
+[4] Variable names must be meaningful.  One letter variable names must be
     avoided, except for places where the variable has no real meaning or
     a trivial meaning (e.g. for (i=0; i<100; i++) ...).
 
-[4] Variable names should be in lowercase;  Use underscores to seperate
+[5] Variable names should be in lowercase;  Use underscores to seperate
     between words.
 
 
@@ -167,8 +185,23 @@ messing up the function summary.
 Optional arguments are written like this:
 
 /* {{{ proto object imap_header(int stream_id, int msg_no [, int from_length [, int subject_length [, string default_host]]])
+   Returns a header object with the defined parameters. */
 
-And yes, please keep everything on a single line, even if that line is massive.
+And yes, please keep the prototype on a single line, even if that line
+is massive.
+
+New and Experimental Functions
+-----------------------------------
+To reduce the problems normally associated with the first public
+implementation of a new set of functions, it has been suggested
+that the first implementation include a file labeled 'EXPERIMENTAL'
+in the function directory, and that the functions follow the
+standard prefixing conventions during their initial implementation.
+
+The file labelled 'EXPERIMENTAL' should include the following
+information:
+   Any authoring infomration (known bugs, future directions of the module).
+   Ongoing status notes which may not be appropriate for CVS comments.
 
 Aliases & Legacy Documentation
 -----------------------------------
