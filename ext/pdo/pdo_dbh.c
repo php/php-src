@@ -657,6 +657,17 @@ static void pdo_dbh_free_storage(zend_object *object TSRMLS_DC)
 	}
 
 	dbh->methods->closer(dbh TSRMLS_CC);
+
+	if (dbh->data_source) {
+		efree((char *)dbh->data_source);
+	}
+	if (dbh->username) {
+		efree(dbh->username);
+	}
+	if (dbh->password) {
+		efree(dbh->password);
+	}
+
 	efree(dbh);
 }
 
