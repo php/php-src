@@ -231,13 +231,13 @@ int zend_init_rsrc_plist(ELS_D)
 
 void zend_destroy_rsrc_list(ELS_D)
 {
-	zend_hash_graceful_destroy(&EG(regular_list));
+	zend_hash_reverse_destroy(&EG(regular_list));
 }
 
 
 void zend_destroy_rsrc_plist(ELS_D)
 {
-	zend_hash_graceful_destroy(&EG(persistent_list));
+	zend_hash_reverse_destroy(&EG(persistent_list));
 }
 
 
