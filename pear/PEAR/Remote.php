@@ -47,10 +47,21 @@ class PEAR_Remote extends PEAR
 
     function call($method)
     {
+        $args = func_get_args();
+        array_shift($args);
+        return $this->__call($method, $args);
+    }
+
+    // }}}
+
+    // {{{ __call(method, args)
+
+    function __call($method, $params)
+    {
         if (!extension_loaded("xmlrpc")) {
             return $this->raiseError("xmlrpc support not loaded");
         }
-        $params = array_slice(func_get_args(), 1);
+        $method = str_replace("_", ".", $method);
         $request = xmlrpc_encode_request($method, $params);
         $server_host = $this->config_object->get("master_server");
         if (empty($server_host)) {
@@ -98,5 +109,7 @@ class PEAR_Remote extends PEAR
 
     // }}}
 }
+
+overload("PEAR_Remote");
 
 ?>
