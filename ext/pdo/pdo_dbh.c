@@ -889,7 +889,7 @@ static PHP_METHOD(PDO, quote)
 	int str_len;
 	long paramtype = PDO_PARAM_STR;
 	char *qstr;
-	size_t qlen;
+	int qlen;
 
 	if (FAILURE == zend_parse_parameters(1 TSRMLS_CC, "s|l", &str, &str_len,
 			&paramtype)) {
