@@ -1,3 +1,46 @@
+2002-01-23  Vincent Blavet  <vincent@blavet.net>
+
+    * pear/scripts/pearwin.php: * Add uninstall command
+    * Add list-installed command
+
+2002-01-23  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/System.php:
+    Return false when the directory can not be created in mkDir()
+
+    * pear/DB/tests/driver/.cvsignore: cvsignore
+
+2002-01-23  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Fixing spelling error in FrontBase section
+    Changed som int to unsigned int to remove compiler warnings
+
+    * php.ini-dist
+      php.ini-recommended: Fixing spelling error in FrontBase section
+
+2002-01-23  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4ts.dsw
+      win32/php4ts_cli.dsp: Add workspace to build CLI SAPI Module on Win32.
+
+    * sapi/cli/php_cli.c: Give Edin Kadribasic his due credits.
+
+2002-01-23  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/php_cli.c:
+    No need to dupe this string in cli sapi (Bug #15181).
+
+2002-01-23  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * EXTENSIONS: Added comment for pgsql module.
+
+2002-01-23  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * EXTENSIONS: claiming maintainance ownership of ext/calendar
+
+    * apidoc-zend.txt: added info about FETCH macros
+    (written over a year ago but somehow never commited)
+
 2002-01-22  Jaroslaw Kolakowski  <J.Kolakowski@students.mimuw.edu.pl>
 
     * ext/domxml/php_domxml.c:
