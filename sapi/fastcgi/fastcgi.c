@@ -163,6 +163,15 @@ static void sapi_fastcgi_register_variables(zval *track_vars_array TSRMLS_DC)
 }
 
 
+static void sapi_fastcgi_log_message(char *message)
+{
+#ifdef DEBUG_FASTCGI
+	fprintf( stderr, "Log Message: %s\n", message );
+#endif
+	FCGX_FPrintF(err, "%s\n", message);
+}
+
+
 static sapi_module_struct fastcgi_sapi_module = {
 	"fastcgi",
 	"FastCGI",
@@ -187,7 +196,7 @@ static sapi_module_struct fastcgi_sapi_module = {
 	sapi_fastcgi_read_cookies,
 
 	sapi_fastcgi_register_variables,
-	NULL,									/* Log message */
+	sapi_fastcgi_log_message,
 
 	NULL,									/* Block interruptions */
 	NULL,									/* Unblock interruptions */
