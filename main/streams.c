@@ -389,7 +389,7 @@ typedef struct {
 
 PHPAPI php_stream *php_stream_fopen_temporary_file(const char *dir, const char *pfx, char **opened_path TSRMLS_DC)
 {
-	FILE *fp = php_open_temporary_file(dir, pfx, opened_path);
+	FILE *fp = php_open_temporary_file(dir, pfx, opened_path TSRMLS_CC);
 
 	if (fp)	{
 		php_stream *stream = php_stream_fopen_from_file(fp, "wb");
@@ -671,9 +671,9 @@ PHPAPI php_stream *php_stream_fopen_with_path(char *filename, char *mode, char *
 PHPAPI php_stream *php_stream_fopen(const char *filename, const char *mode, char **opened_path TSRMLS_DC)
 {
 	FILE *fp;
-	char *realpath;
+	char *realpath = NULL;
 
-	realpath = expand_filepath(filename, NULL TSRMLS_C);
+	realpath = expand_filepath(filename, NULL TSRMLS_CC);
 	
 	fp = fopen(realpath, mode);
 
@@ -901,7 +901,7 @@ out:
 	if (stream == NULL && (options & REPORT_ERRORS))	{
 		char *tmp = estrdup(path);
 		php_strip_url_passwd(tmp);
-		zend_error(E_WARNING, "%s(\"%s\") - %s", get_active_function_name(TSRMLS_CC), tmp, strerror(errno));
+		zend_error(E_WARNING, "%s(\"%s\") - %s", get_active_function_name(TSRMLS_CC), tmp, strerror(errno) TSRMLS_CC);
 		efree(tmp);
 	}
 	return stream;
