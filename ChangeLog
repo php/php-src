@@ -1,3 +1,38 @@
+2000-07-13  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/ftp/php_ftp.c: The description for protos need no period.
+
+2000-07-13  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/pspell/Makefile.in
+      ext/pspell/README
+      ext/pspell/config.m4
+      ext/pspell/php_pspell.h
+      ext/pspell/pspell.c: - Making pspell compile as a shared module
+    - fix a couple typos
+     Making pspell compile as a shared module
+
+2000-07-13  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/icap/php_icap.c
+      ext/dba/dba.c: Fixed protos.
+
+    * ext/zlib/zlib.c: Forgotten to change.
+
+    * ext/zlib/zlib.c: Corrected some protos.
+
+2000-07-13  Zeev Suraski  <zeev@php.net>
+
+    * main/main.c: Fix disable_functions feature
+
+    * NEWS: *** empty log message ***
+
+2000-07-13  Stanislav Malyshev  <stas@zend.com>
+
+    * sapi/cgi/cgi_main.c: make -c in stand-alone mode work again.
+    Setting ini_path after php_module_startup doesn't do much good -
+    since php_module_startup reads .ini.
+
 2000-07-12  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
 
     * tests/testcpdfclock: - The pdfclock example using cpdf
