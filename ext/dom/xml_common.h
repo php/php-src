@@ -27,9 +27,15 @@ typedef struct _node_list_pointer {
 	void *next;
 } node_list_pointer;
 
+typedef struct _dom_ref_obj {
+	void *ptr;
+	int   refcount;
+} dom_ref_obj;
+
 typedef struct _dom_object {
 	zend_object  std;
 	void *ptr;
+	dom_ref_obj *document;
 	HashTable *prop_handler;
 	node_list_pointer *node_list;
 } dom_object;
@@ -71,7 +77,6 @@ zend_object_handlers dom_object_handlers;
 INIT_CLASS_ENTRY(ce, name, funcs); \
 ce.create_object = dom_objects_new; \
 entry = zend_register_internal_class_ex(&ce, parent_ce, NULL TSRMLS_CC);
-/* entry = zend_register_internal_ns_class(&ce, parent_ce, ns, NULL TSRMLS_CC); */
 
 #define DOM_GET_OBJ(__ptr, __id, __prtype) { \
 	dom_object *intern = (dom_object *)zend_object_store_get_object(__id TSRMLS_CC); \

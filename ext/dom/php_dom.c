@@ -97,6 +97,9 @@ static void php_dom_clear_object(zval *wrapper TSRMLS_DC)
 
 	object = (dom_object *)zend_objects_get_address(wrapper TSRMLS_CC);
 	object->ptr = NULL;
+	if (object->prop_handler) {
+		object->prop_handler = NULL;
+	}
 }
 /* }}} */
 
@@ -235,27 +238,24 @@ zval *dom_read_property(zval *object, zval *member TSRMLS_DC)
 
 	ret = FAILURE;
 	obj = (dom_object *)zend_objects_get_address(object TSRMLS_CC);
-	if (obj->ptr != NULL) {
-		if (obj->prop_handler != NULL) {
-			ret = zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
-		}
+
+	if (obj->prop_handler != NULL) {
+		ret = zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
+	}
+	if (ret == SUCCESS) {
+		ret = hnd->read_func(obj, &retval TSRMLS_CC);
 		if (ret == SUCCESS) {
-			ret = hnd->read_func(obj, &retval TSRMLS_CC);
-			if (ret == SUCCESS) {
-				/* ensure we're creating a temporary variable */
-				retval->refcount = 1;
-				PZVAL_UNLOCK(retval);
-			} else {
-				retval = EG(uninitialized_zval_ptr);
-			}
+			/* ensure we're creating a temporary variable */
+			retval->refcount = 1;
+			PZVAL_UNLOCK(retval);
 		} else {
-			std_hnd = zend_get_std_object_handlers();
-			retval = std_hnd->read_property(object, member TSRMLS_CC);
+			retval = EG(uninitialized_zval_ptr);
 		}
 	} else {
-		retval = EG(uninitialized_zval_ptr);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing");
+		std_hnd = zend_get_std_object_handlers();
+		retval = std_hnd->read_property(object, member TSRMLS_CC);
 	}
+
 	if (member == &tmp_member) {
 		zval_dtor(member);
 	}
@@ -281,19 +281,17 @@ void dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 
 	ret = FAILURE;
 	obj = (dom_object *)zend_objects_get_address(object TSRMLS_CC);
-	if (obj->ptr != NULL) {
-		if (obj->prop_handler != NULL) {
-			ret = zend_hash_find((HashTable *)obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
-		}
-		if (ret == SUCCESS) {
-			hnd->write_func(obj, value TSRMLS_CC);
-		} else {
-			std_hnd = zend_get_std_object_handlers();
-			std_hnd->write_property(object, member, value TSRMLS_CC);
-		}
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing");
+
+	if (obj->prop_handler != NULL) {
+		ret = zend_hash_find((HashTable *)obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
 	}
+	if (ret == SUCCESS) {
+		hnd->write_func(obj, value TSRMLS_CC);
+	} else {
+		std_hnd = zend_get_std_object_handlers();
+		std_hnd->write_property(object, member, value TSRMLS_CC);
+	}
+
 	if (member == &tmp_member) {
 		zval_dtor(member);
 	}
@@ -670,6 +668,24 @@ void node_list_unlink(xmlNodePtr node TSRMLS_DC)
 }
 /* }}} end node_list_unlink */
 
+
+/* {{{ void dom_node_free(xmlNodePtr node) */
+void dom_node_free(xmlNodePtr node)
+{
+	if(node) {
+		switch (node->type) {
+			case XML_ATTRIBUTE_NODE:
+				xmlFreeProp((xmlAttrPtr) node);
+				break;
+			case XML_ENTITY_DECL:
+				break;
+			default:
+				xmlFreeNode(node);
+		}
+	}
+}
+/* }}} end dom_node_free */
+
 /* {{{ node_free_list */
 void node_free_list(xmlNodePtr node TSRMLS_DC)
 {
@@ -679,23 +695,27 @@ void node_free_list(xmlNodePtr node TSRMLS_DC)
 		curnode = node;
 		while (curnode != NULL) {
 			node = curnode;
-			node_free_list(node->children TSRMLS_CC);
 			switch (node->type) {
 				/* Skip property freeing for the following types */
+				case XML_ENTITY_REF_NODE:
+					node_free_list((xmlNodePtr) node->properties TSRMLS_CC);
+					break;
 				case XML_ATTRIBUTE_DECL:
 				case XML_DTD_NODE:
 				case XML_DOCUMENT_TYPE_NODE:
 				case XML_ENTITY_DECL:
 				case XML_ATTRIBUTE_NODE:
+					node_free_list(node->children TSRMLS_CC);
 					break;
 				default:
+					node_free_list(node->children TSRMLS_CC);
 					node_free_list((xmlNodePtr) node->properties TSRMLS_CC);
 			}
 			
 			dom_unregister_node(node TSRMLS_CC);
 			curnode = node->next;
 			xmlUnlinkNode(node);
-			xmlFreeNode(node);
+			dom_node_free(node);
 		}
 	}
 }
@@ -810,6 +830,7 @@ zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern->ptr = NULL;
 	intern->node_list = NULL;
 	intern->prop_handler = NULL;
+	intern->document = NULL;
 	
 	base_class = class_type;
 	while(base_class->type != ZEND_INTERNAL_CLASS && base_class->parent != NULL) {
