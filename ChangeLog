@@ -1,3 +1,52 @@
+2004-09-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/session/session.c:
+      Fixed compiler warnings.
+
+2004-09-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #30045 (Cannot pass big integers (> 2147483647) in SOAP requests)
+
+2004-09-14  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      NEWS:
+      Stefano did the real work tracking this one down
+
+2004-09-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      4.3.9RC3
+
+2004-09-14  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h
+      main/php_streams.h
+      main/streams/filter.c
+      main/streams/php_stream_filter_api.h
+      main/streams/streams.c:
+      Added stream_filter_remove() to cancel a stream filter.
+      
+      Register filters as resources when
+      instantiated by stream_filter_(ap|pre)pend().
+      
+      Export php_stream_filter_flush() internal function to wind buffered data
+      out of a particular filter until consumed by a later filter or sent to
+      stream->readbuffer or stream->ops->write()
+
 2004-09-13  Sara Golemon  <php@alphaweb.net>
 
     * main/streams/filter.c
