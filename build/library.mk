@@ -1,4 +1,4 @@
-# Copyright (c) 1999 Sascha Schumann. All rights reserved.
+# Copyright (c) 1999, 2000 Sascha Schumann. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
