@@ -385,7 +385,7 @@ PHP_FUNCTION(touch)
 		RETURN_FALSE;
 
 	/* create the file if it doesn't exist already */
-	ret = stat((*filename)->value.str.val, &sb);
+	ret = V_STAT((*filename)->value.str.val, &sb);
 	if (ret == -1) {
 		file = V_FOPEN((*filename)->value.str.val, "w");
 		if (file == NULL) {
@@ -439,7 +439,7 @@ static void php_stat(const char *filename, int type, pval *return_value)
 #if HAVE_SYMLINK
 		BG(lsb).st_mode = 0; /* mark lstat buf invalid */
 #endif
-		if (stat(BG(CurrentStatFile),&BG(sb))==-1) {
+		if (V_STAT(BG(CurrentStatFile),&BG(sb))==-1) {
 			if (type != 15 || errno != ENOENT) { /* fileexists() test must print no error */
 				php_error(E_NOTICE,"stat failed for %s (errno=%d - %s)",BG(CurrentStatFile),errno,strerror(errno));
 			}
@@ -457,7 +457,7 @@ static void php_stat(const char *filename, int type, pval *return_value)
 		/* do lstat if the buffer is empty */
 
 		if (!BG(lsb).st_mode) {
-			if (lstat(BG(CurrentStatFile),&BG(lsb)) == -1) {
+			if (V_LSTAT(BG(CurrentStatFile),&BG(lsb)) == -1) {
 				php_error(E_NOTICE,"lstat failed for %s (errno=%d - %s)",BG(CurrentStatFile),errno,strerror(errno));
 				RETURN_FALSE;
 			}

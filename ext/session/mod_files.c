@@ -175,7 +175,7 @@ static int _ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 				snprintf(buf, MAXPATHLEN, "%s%c%s", dirname, DIR_DELIMITER,
 					entry->d_name) > 0 &&
 				/* stat the directory entry */
-				stat(buf, &sbuf) == 0 &&
+				V_STAT(buf, &sbuf) == 0 &&
 				/* is it expired? */
 				(now - sbuf.st_atime) > maxlifetime) {
 			unlink(buf);

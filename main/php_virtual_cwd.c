@@ -7,8 +7,9 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-
 #include "php_virtual_cwd.h"
+
+#define VIRTUAL_CWD_DEBUG 0
 
 #ifdef ZTS
 #include "TSRM.h"
@@ -148,6 +149,9 @@ CWD_API void virtual_cwd_startup()
 
 CWD_API void virtual_cwd_activate(char *filename)
 {
+#if VIRTUAL_CWD_DEBUG
+	fprintf(stderr, "Changing dir to %s\n", filename);
+#endif
 	if (filename) {
 		virtual_chdir_file(filename);
 	}
@@ -238,7 +242,9 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 
 	old_state = (cwd_state *) malloc(sizeof(cwd_state));
 	CWD_STATE_COPY(old_state, state);
-
+#if VIRTUAL_CWD_DEBUG
+	fprintf(stderr,"cwd = %s path = %s\n", state->cwd, path);
+#endif
 	if (IS_ABSOLUTE_PATH(path_copy, path_length)) {
 		copy_amount = COPY_WHEN_ABSOLUTE;
 		is_absolute = 1;
@@ -310,7 +316,9 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	free(old_state);
 	
 	efree(free_path);
-
+#if VIRTUAL_CWD_DEBUG
+	fprintf (stderr, "virtual_file_ex() = %s\n",state->cwd);
+#endif
 	return (ret);
 }
 
@@ -324,6 +332,8 @@ CWD_API int virtual_chdir(char *path)
 CWD_API int virtual_chdir_file(char *path)
 {
 	int length = strlen(path);
+	char *temp;
+	int retval;
 
 	if (length == 0) {
 		return 1; /* Can't cd to empty string */
@@ -334,8 +344,16 @@ CWD_API int virtual_chdir_file(char *path)
 	if (length == -1) {
 		return virtual_chdir(path);
 	}
-	path[length] = DEFAULT_SLASH;
-	return virtual_chdir(path);
+
+	temp = (char *) malloc(length+1);
+	memcpy(temp, path, length);
+	temp[length] = 0;
+#if VIRTUAL_CWD_DEBUG
+	fprintf (stderr, "Changing directory to %s\n", temp);
+#endif
+	retval = virtual_chdir(temp);
+	free(temp);
+	return retval;
 }
 
 
@@ -378,6 +396,21 @@ CWD_API int virtual_stat(const char *path, struct stat *buf)
 	virtual_file_ex(&new_state, path, NULL);
 
 	retval = stat(new_state.cwd, buf);
+	CWD_STATE_FREE(&new_state);
+	return retval;
+}
+
+CWD_API int virtual_lstat(const char *path, struct stat *buf)
+{
+	cwd_state new_state;
+	int retval;
+	CWDLS_FETCH();
+
+	CWD_STATE_COPY(&new_state, &CWDG(cwd));
+
+	virtual_file_ex(&new_state, path, NULL);
+
+	retval = lstat(new_state.cwd, buf);
 	CWD_STATE_FREE(&new_state);
 	return retval;
 }

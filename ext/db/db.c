@@ -319,7 +319,7 @@ dbm_info *php_dbm_open(char *filename, char *mode) {
 		strcat(lockfn, ".lck");
 
 #if NFS_HACK 
-		while((last_try = stat(lockfn,&sb))==0) {
+		while((last_try = V_STAT(lockfn,&sb))==0) {
 			retries++;
 			php_sleep(1);
 			if (retries>30) break;

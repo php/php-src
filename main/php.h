@@ -295,6 +295,7 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define V_CHDIR_FILE(path) virtual_chdir_file(path)
 #define V_GETWD(buf)
 #define V_STAT(path, buff) virtual_stat(path, buff)
+#define V_LSTAT(path, buff) virtual_lstat(path, buff)
 #else
 #define V_GETCWD(buff, size) getcwd(buff,size)
 #define V_FOPEN(path, mode)  fopen(path, mode)
@@ -302,6 +303,7 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define V_CHDIR_FILE(path) chdir_file(path)
 #define V_GETWD(buf) getwd(buf)
 #define V_STAT(path, buff) stat(path, buff)
+#define V_LSTAT(path, buff) lstat(path, buff)
 #endif
 
 #include "zend_constants.h"
