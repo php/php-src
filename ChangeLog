@@ -1,3 +1,220 @@
+2003-05-30  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      Disable virtual() if zlib.output_compression is turned on. Better detection
+      of ns-httpdXX.dll
+
+2003-05-30  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      TODO:
+      Sync with head (r-1.153)
+
+    * TODO:
+      done.
+
+    * sapi/cgi/cgi_main.c:
+      CGI SAPI should honour this setting
+
+2003-05-30  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      Info about the improved NSAPI module
+
+    * NEWS:
+      Beginning of restructuring NEWS to make it more readable.
+
+    * (PHP_4_3)
+      NEWS:
+      Cleanup, missing entries, BFN
+
+    * php.ini-dist
+      php.ini-recommended:
+      Add the note to php.ini-* about the mail.force_extra_paramaters
+
+    * main/main.c:
+      Follow the "standard" naming.
+
+    * NEWS:
+      - Removed all PHP 4 entries. They're easier to be added all when PHP 5
+        is actually released..
+
+2003-05-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/basic_functions.c:
+      Removed parts committed by mistake
+
+2003-05-30  Georg Richter  <phpinfo@t-online.de>
+
+    * (PHP_4_3)
+      ext/mysql/php_mysql.c:
+      better to test next time with the right version :)
+
+2003-05-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pgsql/pgsql.c:
+      Better fix for default connection handling.
+
+2003-05-30  Jay Smith  <jsmith@tutorbuddy.com>
+
+    * ext/standard/browscap.c:
+      Relying on longer matches seems to work better than
+      matching the whole string with ^...$.
+
+2003-05-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+      Use safe_estrdup() instead.
+
+    * ext/exif/exif.c:
+      Fix handling of ini settings
+
+2003-05-30  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * (PHP_4_3)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      - Added a "DEBUG" qualifier to 'php -v's version output, and made the CGI
+        version statement look the same as the CLI version. (Derick)
+
+2003-05-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/tests/05large_object.phpt:
+      Fix handling of default links
+
+2003-05-30  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      TODO:
+      MFH(r-1.152): refined the bz2 section as per Sascha's suggestion
+
+    * TODO:
+      Refined the bz2 section as per Sascha's suggestion
+
+2003-05-30  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      - MFB: Version output beautification
+
+2003-05-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/tests/09notice.phpt:
+      Fix notice handling
+
+2003-05-30  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      TODO:
+      MFH(r-1.151): fixed a little typo. No germany..
+
+    * TODO:
+      Fixed a little typo. No germany..
+
+2003-05-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h
+      ext/pgsql/tests/09notice.phpt:
+      - Fix ini handling in ZTS mode
+
+2003-05-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      Bug fixing news.
+
+    * ext/odbc/php_odbc.c:
+      Fixed bug #23898 (Proper handling of NULLs in odbc_result, odbc_fetch_into
+      and odbc_result_all)
+
+2003-05-30  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      NEWS:
+      I love dots too
+
+2003-05-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysql/php_mysql.c:
+      Fixed bug #23888 (Missing input validation for flags parameter)
+
+2003-05-30  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/standard/formatted_print.c:
+      MFH(r-1.67): fixed bug #23894 (sprintf() decimal specifiers problem)
+
+    * ext/standard/formatted_print.c:
+      Fixed bug #23894 (sprintf() decimal specifiers problem)
+
+    * (PHP_4_3)
+      ext/standard/tests/strings/bug23894.phpt:
+      MFH(r-1.1): added test case for bug #23894
+
+    * ext/standard/tests/strings/bug23894.phpt:
+      
+      Added test case for bug #23894
+
+2003-05-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mbstring/mbfilter.c:
+      Fixed bug #23897 (Fixed a check for mbfilter_ru.h) aleks@m2media.ru
+
+2003-05-30  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      virtual() now works under windows, too
+
+2003-05-30  Georg Richter  <phpinfo@t-online.de>
+
+    * (PHP_4_3)
+      ext/mysql/php_mysql.c:
+      fixed #23779 (CLIENT_LOCAL_FILES with open_basedir)
+
+2003-05-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      Add php_uname() to output
+
+    * ext/standard/info.c:
+      Fix memleaks (detected by rrichards@php.net)
+
+2003-05-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/ircg/ircg.c:
+      Make tokenizer binary safe
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg_tokenizer.c
+      ext/ircg/php_ircg_tokenizer.h:
+      Format messages can handle NUL bytes now
+
+2003-05-30  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * (PHP_4_3)
+      NEWS
+      ext/yaz/php_yaz.c
+      ext/yaz/php_yaz.c:
+      Prevent yaz from logging unless yaz.log_file is set
+
+2003-05-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c:
+      MFB
+
 2003-05-29  Edin Kadribasic  <edink@proventum.net>
 
     * (PHP_4_3)
