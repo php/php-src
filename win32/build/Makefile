@@ -21,13 +21,15 @@ CC="$(CL)"
 LD="$(LINK)"
 MC="$(MC)"
 
-all: $(BUILD_DIR) $(BUILD_DIRS_SUB) generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
+MCFILE=$(BUILD_DIR)\wsyslog.res
 
-generated_files: Zend\zend_ini_parser.c \
+all: generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
+
+generated_files: $(BUILD_DIR) $(BUILD_DIRS_SUB) Zend\zend_ini_parser.c \
 	Zend\zend_language_parser.c Zend\zend_ini_scanner.c \
 	Zend\zend_language_scanner.c \
 	ext\standard\parsedate.c \
-	$(PHPDEF)
+	$(PHPDEF) $(MCFILE)
 
 $(BUILD_DIR)\$(PHPDLL).def: $(PHP_DLL_DEF_SOURCES)
 	type $(PHP_DLL_DEF_SOURCES) > $(BUILD_DIR)\$(PHPDLL).def
@@ -48,8 +50,6 @@ ext\standard\parsedate.c ext\standard\parsedate.h: ext\standard\parsedate.y
 	$(BISON) --output=ext/standard/parsedate.c -v -d ext/standard/parsedate.y 
 
 PHPDLL_RES=$(BUILD_DIR)\$(PHPDLL).res
-
-MCFILE=$(BUILD_DIR)\wsyslog.res
 
 $(MCFILE): win32\build\wsyslog.mc
 	$(MC) -h win32\ -r $(BUILD_DIR)\ -x $(BUILD_DIR)\ win32\build\wsyslog.mc
@@ -93,7 +93,7 @@ set TEST_PHP_EXECUTABLE=$(BUILD_DIR)\php.exe
 $(BUILD_DIR)\php.exe -d open_basedir= -d safe_mode=0 -d output_buffering=0 run-tests.php $(TESTS)
 <<NOKEEP
 
-build-snap:
+build-snap: generated_files
 	@$(MAKE) "$(BUILD_DIR)\$(PHPDLL)"
 	-for %T in ($(SAPI_TARGETS)) do $(MAKE) /I /nologo "%T"
 	-for %T in ($(EXT_TARGETS)) do $(MAKE) /I /nologo "%T"
