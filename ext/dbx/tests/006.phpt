@@ -13,8 +13,9 @@ dbx_error
 --FILE--
 <?php 
 include_once("dbx_test.p");
-if ($module==DBX_ODBC) {
+if ($module==DBX_ODBC || $module==DBX_OCI8) {
     // ODBC module doesn't have an error-message-function (yet?)
+    // OCI8 module needs the query-handle instead of the db-handle (now what?)
     print('query generated an error: dbx_error works ok'."\n");
     print('query is valid: dbx_error works ok'."\n");
     print('wrong dbx_link_object: dbx_error failure works ok'."\n");

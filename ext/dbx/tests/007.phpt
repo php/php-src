@@ -22,8 +22,9 @@ function invalid_cmp() {
     return "blabla";
     }
 function cmp($a, $b) {
-    $rv = dbx_compare($a, $b, "description");
-    if (!$rv) $rv = dbx_compare($a, $b, "id");
+    $fieldname_case_function = $GLOBALS['fieldname_case_function'];
+    $rv = dbx_compare($a, $b, $fieldname_case_function("description"));
+    if (!$rv) $rv = dbx_compare($a, $b, $fieldname_case_function("id"));
     return $rv;
     }
 if (!$dlo) {
@@ -35,11 +36,11 @@ else {
         print('this won\'t work'."\n");
         }
     for ($i=0; $i<$dro->rows; ++$i) {
-        print($dro->data[$i]['id'].".".$dro->data[$i]['description']."\n");
+        print($dro->data[$i][$fieldname_case_function('id')].".".$dro->data[$i][$fieldname_case_function('description')]."\n");
         }
     if (dbx_sort($dro, $compare_function)) {
         for ($i=0; $i<$dro->rows; ++$i) {
-            print($dro->data[$i]['id'].".".$dro->data[$i]['description']."\n");
+            print($dro->data[$i][$fieldname_case_function('id')].".".$dro->data[$i][$fieldname_case_function('description')]."\n");
             }
         }
     if (!@dbx_sort(0, $compare_function)) {
