@@ -15,18 +15,6 @@
    | Authors: Mark Woodward <markw@mohawksoft.com>                        |
    |    Portions copyright the PHP group.                                 |
    +----------------------------------------------------------------------+
-   | Notes from the author:                                               |
-   | While I appreciate work done in this module by well meaning          |
-   | developers, and this is the nature of Open Source. I would Really    |
-   | appreciate a few considerations BEFORE you start mucking around:     |
-   | DO NOT ever remove backward compatibility!!!!  NEVER!!!!             |
-   | DO NOT rename my variable names                                      |
-   | DO NOT reformat by braces, if you don't like the way I brace my code |
-   | too bad. I take strides to follow the format that other authors use  |
-   | I expect the same consideration. I use vi, not emacs. If you do not  |
-   | have an editor that will not muck up my braces, do not edit this     |
-   | code.                                                                |
-   +----------------------------------------------------------------------+
  */
 #include "php.h"
 #include "php_ini.h"
@@ -40,6 +28,14 @@
 #ifndef FALSE
 #define FALSE 0
 #endif
+
+/*
+ * Please do not remove backward compatibility from this module.
+ * this same souce must also work with 4.0 versions of PHP.
+ *
+ * Also, please to not reformat braces ;-)
+ * -MLW
+ */
 
 // #define ERR_DEBUG
 
