@@ -1,3 +1,45 @@
+2000-03-01  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/domxml.c
+      tests/testdom: - started to implement overload class for xml node
+
+2000-03-01  David Hedbor  <david@hedbor.org>
+
+    * sapi/roxen/roxen.c:
+    Removal of printf-debug, changed sp/fp to Pike_sp / Pike_fp instead of
+    using a define.
+
+2000-03-01  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/math.c: Only two lines are allowed here.
+
+2000-03-01  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/standard/math.c: round(-0.1) will now return 0 instead of -0
+
+2000-03-01  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS: .
+
+    * ext/oci8/oci8.c: - OCINLogon no longer crashes. 
+
+2000-03-01  Evan Klinger  <evan715@sirius.com>
+
+    * ext/cybercash/cyberlib.php:
+    get rid of warning when $url["port"] isn't set
+
+2000-03-01  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/imap/imap.c: Fix compile warnings.
+
+    * ext/imap/imap.c:
+    Add _php_imap_parse_address(), which replaces a lot of duplicated,
+    hard-to-follow code in imap_headerinfo(). This code also happened to be
+    broken, causing the $h->to, $h->from, etc arrays to contain only the first
+    address, not every address. This is fixed now.
+
+    * ext/mcal/php_mcal.c: Show the minor MCAL version if we have it.
+
 2000-02-29  Charles Hagenbuch  <chagenbu@wso.williams.edu>
 
     * ext/imap/imap.c:
