@@ -129,6 +129,14 @@ sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, zend_bool attr
 	xmlNodePtr      node;
 	xmlAttrPtr      attr;
 	int             counter = 0;
+	zval            tmp_zv;
+
+	if (Z_TYPE_P(member) != IS_STRING) {
+		tmp_zv = *member;
+		zval_copy_ctor(&tmp_zv);
+		member = &tmp_zv;
+		convert_to_string(member);
+	}
 
 	MAKE_STD_ZVAL(return_value);
 	ZVAL_NULL(return_value);
@@ -206,6 +214,10 @@ next_iter:
 	return_value->refcount = 0;
 	return_value->is_ref = 0;
 
+	if (member == &tmp_zv) {
+		zval_dtor(&tmp_zv);
+	}
+
 	return return_value;
 }
 /* }}} */
@@ -223,7 +235,6 @@ sxe_property_read(zval *object, zval *member, zend_bool silent TSRMLS_DC)
  */
 static zval *sxe_dimension_read(zval *object, zval *offset TSRMLS_DC)
 {
-	convert_to_string_ex(&offset);
 	return sxe_prop_dim_read(object, offset, 0, 1, 0 TSRMLS_CC);
 }
 /* }}} */
@@ -261,6 +272,14 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 	xmlAttrPtr      attr = NULL;
 	int             counter = 0;
 	int             is_attr = 0;
+	zval            tmp_zv;
+
+	if (Z_TYPE_P(member) != IS_STRING) {
+		tmp_zv = *member;
+		zval_copy_ctor(&tmp_zv);
+		member = &tmp_zv;
+		convert_to_string(member);
+	}
 
 	name = Z_STRVAL_P(member);
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
@@ -310,6 +329,10 @@ next_iter:
 			php_error(E_WARNING, "Cannot create new atrribute\n");
 		}
 	}
+
+	if (member == &tmp_zv) {
+		zval_dtor(&tmp_zv);
+	}
 }
 /* }}} */
 
@@ -325,7 +348,6 @@ static void sxe_property_write(zval *object, zval *member, zval *value TSRMLS_DC
  */
 static void sxe_dimension_write(zval *object, zval *offset, zval *value TSRMLS_DC)
 {
-	convert_to_string_ex(&offset);
 	sxe_prop_dim_write(object, offset, value, 0, 1 TSRMLS_CC);
 }
 /* }}} */
@@ -381,6 +403,14 @@ static void sxe_prop_dim_delete(zval *object, zval *member, zend_bool elements, 
 	xmlNodePtr      nnext;
 	xmlAttrPtr      attr;
 	xmlAttrPtr      anext;
+	zval            tmp_zv;
+
+	if (Z_TYPE_P(member) != IS_STRING) {
+		tmp_zv = *member;
+		zval_copy_ctor(&tmp_zv);
+		member = &tmp_zv;
+		convert_to_string(member);
+	}
 
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
@@ -416,6 +446,10 @@ next_iter:
 			}
 		}
 	}
+
+	if (member == &tmp_zv) {
+		zval_dtor(&tmp_zv);
+	}
 }
 /* }}} */
 
@@ -432,7 +466,6 @@ sxe_property_delete(zval *object, zval *member TSRMLS_DC)
  */
 static void sxe_dimension_delete(zval *object, zval *offset TSRMLS_DC)
 {
-	convert_to_string_ex(&offset);
 	sxe_prop_dim_delete(object, offset, 1, 1 TSRMLS_CC);
 }
 /* }}} */
@@ -654,12 +687,12 @@ static void
 simplexml_ce_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	php_sxe_object         *sxe;
-	zval                   *source;
+	zval                   **source;
 	xmlSchemaParserCtxtPtr  parser;
 	xmlSchemaPtr            sptr;
 	xmlSchemaValidCtxtPtr   vptr;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &source) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", source) == FAILURE) {
 		return;
 	}
 
@@ -667,17 +700,17 @@ simplexml_ce_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 	switch (type) {
 		case SCHEMA_FILE:
-			convert_to_string_ex(&source);
-			parser = xmlSchemaNewParserCtxt(Z_STRVAL_P(source));
+			convert_to_string_ex(source);
+			parser = xmlSchemaNewParserCtxt(Z_STRVAL_PP(source));
 			if (parser == NULL) {
-				php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_P(source), E_WARNING, "Unable to load XML Schema file");
+				php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_PP(source), E_WARNING, "Unable to load XML Schema file");
 				RETURN_FALSE;
 			}
 			sptr = xmlSchemaParse(parser);
 			break;
 		case SCHEMA_BLOB:
-			convert_to_string_ex(&source);
-			parser = xmlSchemaNewMemParserCtxt(Z_STRVAL_P(source), Z_STRLEN_P(source));
+			convert_to_string_ex(source);
+			parser = xmlSchemaNewMemParserCtxt(Z_STRVAL_PP(source), Z_STRLEN_PP(source));
 			sptr = xmlSchemaParse(parser);
 			break;
 		default:
