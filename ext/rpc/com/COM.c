@@ -650,7 +650,6 @@ static int do_COM_propget(VARIANTARG *var_result, IDispatch *i_dispatch, pval *a
 }
 
 
-
 static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_property, pval *value)
 {
 	DISPID dispid;
@@ -709,6 +708,8 @@ static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_
 }
 
 
+/* {{{ proto mixed com_propget(int module, string property_name)
+   Gets properties from a COM module */
 PHP_FUNCTION(com_propget)
 {
 	pval *arg_idispatch, *arg_property;
@@ -734,8 +735,11 @@ PHP_FUNCTION(com_propget)
 	}
 	php_variant_to_pval(&var_result, return_value, 0);
 }
+/* }}} */
 
 
+/* {{{ proto bool com_propput(int module, string property_name, mixed value)
+   Puts the properties for a module */
 PHP_FUNCTION(com_propput)
 {
 	pval *arg_idispatch, *arg_property, *arg_value;
@@ -757,6 +761,7 @@ PHP_FUNCTION(com_propput)
 
 	do_COM_propput(return_value, i_dispatch, arg_property, arg_value);
 }
+/* }}} */
 
 
 VARIANTARG _php_COM_get_property_handler(zend_property_reference *property_reference)
