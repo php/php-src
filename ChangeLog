@@ -1,3 +1,130 @@
+2001-05-01  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+    modified some function name in ext/mbstring based on naming convension and mbstr_http_input() implemented.
+
+2001-05-01  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/odbc/config.m4
+      main/build-defs.h.in: Fix bug #10563
+
+2001-05-01  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Fixing some proto types and return values
+
+2001-05-01  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/saprfc/CREDITS
+      ext/saprfc/EXPERIMENTAL
+      ext/saprfc/Makefile.in
+      ext/saprfc/README
+      ext/saprfc/config.m4
+      ext/saprfc/php_saprfc.c
+      ext/saprfc/php_saprfc.h
+      ext/saprfc/tests/001.phpt:
+    the beginning of the SAP R/3 ABAP4 Remote Function Call extension
+    configure works, it finds headers and lib
+    compile and link against librfc works too
+    but no functionality yet :(
+
+    * ext/ext_skel: looks like i missed something
+
+2001-05-01  John Donagher  <john@webmeta.com>
+
+    * ext/pfpro/TODO: Add TODO
+
+2001-05-01  Andi Gutmans  <andi@zend.com>
+
+    * ext/mssql/php_mssql.c:
+    - Optimizer the previous patch a bit by nuking memset()
+
+2001-05-01  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mssql/php_mssql.c:
+    Adding support for BINARY, VARBINARY and IMAGE column types.
+    Thanks to Brad LaFountain.
+
+2001-05-01  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/wddx/php_wddx_api.h
+      ext/wddx/wddx.c
+      ext/session/php_session.h
+      ext/session/session.c:
+    Patch from Sascha that abstracts session serializers. WDDX extension
+    now implements the encode/decode functions and registers them with
+    the session module.
+
+2001-05-01  Andi Gutmans  <andi@zend.com>
+
+    * main/snprintf.c: - Remove C++ comment
+
+    * main/snprintf.c: - Fix snprintf() to work with nan and inf properly
+
+2001-05-01  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/skeleton/php_skeleton.h
+      ext/skeleton/skeleton.c:
+    hartmfixed and extended the ini parameter and module globals stuff
+
+    once again: someone test this please!
+
+2001-05-01  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+    modified some function name in mbstring based on php's naming convension.
+
+2001-05-01  Andi Gutmans  <andi@zend.com>
+
+    * sapi/cgi/cgi_main.c: - Remove unused variable
+
+2001-05-01  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: - Fix for bug #10518 (Thanks to kettler@gmx.net)
+
+2001-05-01  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+    simplified some function's name in ext/mbstring.
+
+2001-05-01  John Donagher  <john@webmeta.com>
+
+    * ext/pfpro/config.m4
+      ext/pfpro/pfpro.c
+      ext/pfpro/php_pfpro.h: - Remove some stale code
+    - Fix spelling mistakes
+    - Add build-time version detection
+    - Add support for v3 Verisign SDK
+     pfpro extension now supports version 3 of the Verisign SDK (John Donagher)
+
+2001-05-01  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * sapi/cgi/cgi_main.c:
+    fix for bug 6491, http://www.php.net/bugs.php?id=6491, removes a bit of
+    (what I think is) broken logic.
+
+
+    * ext/sablot/config.m4
+      ext/xslt/config.m4: Check for the existance of the iconv library
+
+
+2001-05-01  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * main/php_main.h
+      ext/mbstring/CREDITS
+      ext/mbstring/EXPERIMENTAL
+      ext/mbstring/Makefile.in
+      ext/mbstring/README_PHP3-i18n-ja
+      ext/mbstring/config.m4
+      ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h
+      ext/mbstring/mbfilter_ja.c
+      ext/mbstring/mbfilter_ja.h
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h: renamed jstring to mbstring.
+
 2001-04-30  Andi Gutmans  <andi@zend.com>
 
     * sapi/cgi/cgi_main.c: - Fix for Bug id #10071
