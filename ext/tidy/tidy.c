@@ -136,11 +136,12 @@ void _php_tidy_mem_free(void *mem) {
 
 void _php_tidy_mem_panic(ctmbstr errmsg) {
 	
+	TSRMLS_FETCH();
 	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not allocate memory for Tidy: %s", (char *)errmsg);
 }
 
 
-PHPTidyObj *php_tidy_new(TSRMLS_DC) {
+PHPTidyObj *php_tidy_new() {
 
 	PHPTidyObj *intern;
 
@@ -1177,7 +1178,7 @@ PHP_FUNCTION(tidy_get_body) {
 
 
  zval ** tidy_property_get_ptr(zval *obj, zval *member TSRMLS_DC) {
-	zval **p_ptr;
+	zval **p_ptr = NULL;
 	zval  *p;
 
 	/* How to fix this memleak? */
@@ -1193,7 +1194,7 @@ PHP_FUNCTION(tidy_get_body) {
 
  zval * tidy_property_read(zval *object, zval *member, zend_bool silent TSRMLS_DC) {
 	
-	PHPTidyObj *obj = php_tidy_fetch_object(object);
+	PHPTidyObj *obj = php_tidy_fetch_object(object TSRMLS_CC);
 	zval *return_value, *temp;
 	TidyBuffer buf;
 	TidyNode tempnode;
@@ -1341,7 +1342,7 @@ PHP_FUNCTION(tidy_get_body) {
 
 zend_bool _php_tidy_node_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS) {
 
-	PHPTidyObj *obj = php_tidy_fetch_object(getThis());
+	PHPTidyObj *obj = php_tidy_fetch_object(getThis() TSRMLS_CC);
 	zend_internal_function *func = (zend_internal_function *)EG(function_state_ptr)->function;
 	PHPTidyObj *newobj;
 	TidyNode tempnode;
@@ -1497,7 +1498,7 @@ zend_bool _php_tidy_node_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 		} else if(!strcmp(method, "get_attr_type")) {
 			
 			if(ZEND_NUM_ARGS() != 1) {
-				zend_wrong_param_count(TSRMLS_CC);
+				zend_wrong_param_count(TSRMLS_C);
 				return TRUE;
 			}
 			
@@ -1542,7 +1543,7 @@ zend_bool _php_tidy_node_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 
 zend_bool _php_tidy_attr_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS) {
 	
-	PHPTidyObj *obj = php_tidy_fetch_object(getThis());
+	PHPTidyObj *obj = php_tidy_fetch_object(getThis() TSRMLS_CC);
 	TidyAttr tempattr;
 	
 	if(!strcmp(method, "next")) {
@@ -1568,7 +1569,7 @@ zend_bool _php_tidy_attr_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 
  int tidy_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS) {
 	
-	PHPTidyObj *obj = php_tidy_fetch_object(getThis());
+	PHPTidyObj *obj = php_tidy_fetch_object(getThis() TSRMLS_CC);
 
 	switch(obj->type) {
 		
@@ -1588,7 +1589,7 @@ zend_bool _php_tidy_attr_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 
  int tidy_get_class_name(zval *obj, char **class_name, zend_uint *name_len, int parent TSRMLS_DC) {
 	
-	PHPTidyObj *object = php_tidy_fetch_object(obj);
+	PHPTidyObj *object = php_tidy_fetch_object(obj TSRMLS_CC);
 	
 	switch(object->type) {
 		
@@ -1618,8 +1619,8 @@ zend_bool _php_tidy_attr_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 
 	PHPTidyObj *obj1, *obj2;
 	
-	obj1 = php_tidy_fetch_object(obj_one);
-	obj2 = php_tidy_fetch_object(obj_two);
+	obj1 = php_tidy_fetch_object(obj_one TSRMLS_CC);
+	obj2 = php_tidy_fetch_object(obj_two TSRMLS_CC);
 	
 	if( (obj1->tdoc == obj2->tdoc) &&
 		(obj1->node == obj2->node) &&
