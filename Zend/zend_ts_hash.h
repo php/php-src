@@ -37,10 +37,16 @@ BEGIN_EXTERN_C()
 #define TS_HASH(table) (&(table->hash))
 
 /* startup/shutdown */
-ZEND_API int zend_ts_hash_init(TsHashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent);
-ZEND_API int zend_ts_hash_init_ex(TsHashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection);
+ZEND_API int _zend_ts_hash_init(TsHashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC);
+ZEND_API int _zend_ts_hash_init_ex(TsHashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC);
 ZEND_API void zend_ts_hash_destroy(TsHashTable *ht);
 ZEND_API void zend_ts_hash_clean(TsHashTable *ht);
+
+#define zend_ts_hash_init(ht, nSize, pHashFunction, pDestructor, persistent)	\
+	_zend_ts_hash_init(ht, nSize, pHashFunction, pDestructor, persistent ZEND_FILE_LINE_CC)
+#define zend_ts_hash_init_ex(ht, nSize, pHashFunction, pDestructor, persistent, bApplyProtection)	\
+	_zend_ts_hash_init_ex(ht, nSize, pHashFunction, pDestructor, persistent, bApplyProtection ZEND_FILE_LINE_CC)
+
 
 /* additions/updates/changes */
 ZEND_API int zend_ts_hash_add_or_update(TsHashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag);
