@@ -969,7 +969,7 @@ PHP_METHOD(soapserver, handle)
 	xmlDocPtr doc_request, doc_return;
 	zval function_name, **params, **raw_post, *soap_obj, retval, **server_vars;
 	char *fn_name, cont_len[30];
-	int num_params = 0, size, i, call_status;
+	int num_params = 0, size, i, call_status = 0;
 	xmlChar *buf;
 	HashTable *function_table;
 
@@ -1421,8 +1421,8 @@ static void do_soap_call(zval* thisObj,
 
  	clear_soap_fault(thisObj TSRMLS_CC);
 
-zend_try {
 	old_soap_version = SOAP_GLOBAL(soap_version);
+zend_try {
 	SOAP_GLOBAL(soap_version) = soap_version;
 	old_sdl = SOAP_GLOBAL(sdl);
 	SOAP_GLOBAL(sdl) = sdl;
@@ -1762,7 +1762,7 @@ static void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char
 
 static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval ***parameters, int *version TSRMLS_DC)
 {
-	char* envelope_ns;
+	char* envelope_ns = NULL;
 	xmlNodePtr trav,env,head,body,func;
 	int cur_param = 0,num_of_params = 0;
 	zval tmp_function_name, **tmp_parameters = NULL;
@@ -1926,8 +1926,8 @@ static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *functi
 static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name, char *uri, zval *ret, int version TSRMLS_DC)
 {
 	xmlDoc *doc;
-	xmlNode *envelope,*body,*method = NULL, *param;
-	xmlNs *ns;
+	xmlNode *envelope = NULL, *body,*method = NULL, *param;
+	xmlNs *ns = NULL;
 	sdlParamPtr parameter = NULL;
 	smart_str *gen_ns = NULL;
 	int param_count;
@@ -2073,8 +2073,8 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 static xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count, int version TSRMLS_DC)
 {
 	xmlDoc *doc;
-	xmlNode *envelope, *body, *method;
-	xmlNs *ns;
+	xmlNode *envelope = NULL, *body, *method = NULL;
+	xmlNs *ns = NULL;
 	zval **zstyle, **zuse;
 	int i, style, use;
 	smart_str *gen_ns;
