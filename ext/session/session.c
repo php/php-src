@@ -616,6 +616,10 @@ static const ps_serializer *_php_find_ps_serializer(char *name PSLS_DC)
 	return ret;
 }
 
+#define PPID2SID \
+		convert_to_string((*ppid)); \
+		PS(id) = estrndup((*ppid)->value.str.val, (*ppid)->value.str.len)
+
 static void _php_session_start(PSLS_D)
 {
 	pval **ppid;
@@ -623,7 +627,6 @@ static void _php_session_start(PSLS_D)
 	char *p;
 	int send_cookie = 1;
 	int define_sid = 1;
-	int found_sid = 0;
 	zend_bool gpc_globals;
 	zend_bool track_vars;
 	int module_number = PS(module_number);
@@ -642,48 +645,59 @@ static void _php_session_start(PSLS_D)
 		php_error(E_ERROR, "The sessions module will not work, if you have disabled track_vars and gpc_globals. Enable at least one of them.");
 		return;
 	}
+
+	if (!track_vars && PS(use_cookies)) {
+		php_error(E_NOTICE, "Because track_vars are disabled, the session module will not be able to determine whether the user has sent a cookie. SID will always be defined.");
+	}
 	
-	/* check whether a symbol with the name of the session exists
-	   in the global symbol table. This requires gpc_globals to be enabled */
+	/*
+	 * If our only resource is the global symbol_table, then check it.
+	 * If track_vars are enabled, we prefer these, because they are more
+	 * reliable, and we always know whether the user has accepted the 
+	 * cookie.
+	 */
 	
-	if (gpc_globals &&
+	if (gpc_globals && 
+			!track_vars &&
 			!PS(id) &&
 			zend_hash_find(&EG(symbol_table), PS(session_name),
 				lensess + 1, (void **) &ppid) == SUCCESS) {
-		convert_to_string((*ppid));
-		PS(id) = estrndup((*ppid)->value.str.val, (*ppid)->value.str.len);
+		PPID2SID;
 		send_cookie = 0;
-		found_sid = 1;
 	}
+	
+	/*
+     * Now check the track_vars. Cookies are preferred, because initially
+	 * cookie and get variables will be available. 
+	 */
 
-	/* if we did not find the session id yet, we check track_vars */
-
-	if (!found_sid && track_vars) {
+	if (!PS(id) && track_vars) {
 		if (zend_hash_find(&EG(symbol_table), "HTTP_COOKIE_VARS",
 					sizeof("HTTP_COOKIE_VARS"), (void **) &data) == SUCCESS &&
 				(*data)->type == IS_ARRAY &&
 				zend_hash_find((*data)->value.ht, PS(session_name),
 					lensess + 1, (void **) &ppid) == SUCCESS) {
+			PPID2SID;
 			define_sid = 0;
-			found_sid = 1;
+			send_cookie = 0;
 		}
 
-		if (!found_sid &&
+		if (!PS(id) &&
 				zend_hash_find(&EG(symbol_table), "HTTP_GET_VARS",
 					sizeof("HTTP_GET_VARS"), (void **) &data) == SUCCESS &&
 				(*data)->type == IS_ARRAY &&
 				zend_hash_find((*data)->value.ht, PS(session_name),
 					lensess + 1, (void **) &ppid) == SUCCESS) {
-			found_sid = 1;
+			PPID2SID;
 		}
 
-		if (!found_sid &&
+		if (!PS(id) &&
 				zend_hash_find(&EG(symbol_table), "HTTP_POST_VARS",
 					sizeof("HTTP_POST_VARS"), (void **) &data) == SUCCESS &&
 				(*data)->type == IS_ARRAY &&
 				zend_hash_find((*data)->value.ht, PS(session_name),
 					lensess + 1, (void **) &ppid) == SUCCESS) {
-			found_sid = 1;
+			PPID2SID;
 		}
 	}
 
