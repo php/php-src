@@ -35,7 +35,7 @@ struct pdo_bound_param_data;
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050213
+#define PDO_DRIVER_API	20050214
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -452,6 +452,11 @@ struct pdo_column_data {
 	unsigned long maxlen;
 	enum pdo_param_type param_type;
 	unsigned long precision;
+
+	/* don't touch the following fields unless your name is dbdo */
+	char *native_type_name;
+	int abstract_type;
+	int abstract_flags;
 };
 
 /* describes a bound parameter */
