@@ -234,10 +234,11 @@ static void sapi_cgibin_flush(void *server_context)
 	}
 }
 
+#define SAPI_CGI_MAX_HEADER_LENGTH 1024
 
 static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
-	char buf[1024];
+	char buf[SAPI_CGI_MAX_HEADER_LENGTH];
 	sapi_header_struct *h;
 	zend_llist_position pos;
 	long rfc2616_headers = 0;
@@ -255,7 +256,13 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 		int len;
 		
 		if (rfc2616_headers) {
-			len = sprintf(buf, "%s\r\n", SG(sapi_headers).http_status_line);
+			len = snprintf(buf, SAPI_CGI_MAX_HEADER_LENGTH, 
+						   "%s\r\n", SG(sapi_headers).http_status_line);
+
+			if (len > SAPI_CGI_MAX_HEADER_LENGTH) {
+				len = SAPI_CGI_MAX_HEADER_LENGTH;
+			}
+
 		} else {
 			len = sprintf(buf, "Status: %d\r\n", SG(sapi_headers).http_response_code);
 		}
