@@ -1,6 +1,10 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- added com_release($obj) and com_addref($obj) functions
+  and the related class members $obj->Release() and $obj->AddRef()
+  to gain more control over the used COM components. (phanto)
+- added an additional parameter to dotnet_load to specify the codepage (phanto)
 - Added --enable-memory-usage-info. This creates a new Apache 1.x logging
   directive "{mod_php_memory_usage}n" which will log the peak amount of
   memory used by the script. (Thies)
