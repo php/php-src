@@ -1,3 +1,132 @@
+2005-02-17  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      - Commit fix:
+      - Fixed bug #31960 (msql_fetch_row() and msql_fetch_array() dropping
+      columns
+        with NULL values). (Daniel Convissor)
+
+    * (PHP_4_3)
+      NEWS:
+      - Commit NEWS Entry for:
+      - Fixed bug #31960 (msql_fetch_row() and msql_fetch_array() dropping
+      columns
+        with NULL values). (Daniel Convissor)
+
+2005-02-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c:
+      - A little optimization to prevent problems when trying to reimplement an
+        interface inherited from an interfaces that was just implemented......
+
+    * ZendEngine2/zend_API.c:
+      - No C++ ruleZ here
+
+    * ZendEngine2/zend_API.c:
+      - Actually we must do this in two steps: 1st resize the table and set all
+        interfaces, 2nd implement the interfaces
+
+    * ZendEngine2/zend_API.c:
+      - Incrementation is done elsewhere
+
+    * ZendEngine2/zend_API.c:
+      - Fix windows build (funny MS compiler)
+
+2005-02-17  Andi Gutmans  <andi@zend.com>
+
+    * ext/msql/php_msql.c:
+      - Fix Bug #31960: msql_fetch_row() and msql_fetch_array() dropping columns
+      with NULL values
+
+2005-02-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/ftp/ftp.c
+      ext/ftp/ftp.c:
+      MFH: Fixed bug #27633 (Double \r problem on ftp_get in ASCII mode on
+      Win32).
+
+    * ext/ftp/ftp.c:
+      Fixed bug #27633 (Double \r\r problem on ftp_get in ASCII mode on Win32).
+
+2005-02-17  Joe Orton  <jorton@redhat.com>
+
+    * ext/xml/compat.c:
+      Declare error_mapping array as static and more const.
+
+2005-02-17  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/standard/filestat.c:
+      NetWare LibC has pwd.h
+
+    * ext/standard/file.c:
+      NetWare libc has pwd.h
+
+2005-02-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/openssl/openssl.c:
+      ws/cs
+
+2005-02-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/credits.c:
+      George too
+
+    * ext/standard/credits.c
+      ext/standard/credits_ext.h:
+      ran ./scripts/dev/credits to update credits to reflect recent removals and
+      additions.
+
+2005-02-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      main/main.c:
+      MFH: MFH: Fixed bug #31440 ($GLOBALS can be overwritten via GPC when
+      register_globals is enabled).
+
+    * (PHP_5_0)
+      NEWS
+      main/php_variables.c:
+      MFH: Fixed bug #31440 ($GLOBALS can be overwritten via GPC when
+      register_globals is enabled).
+
+2005-02-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      Zend/Zend.m4
+      Zend/zend_strtod.c
+      ZendEngine2/Zend.m4
+      ZendEngine2/zend_strtod.c:
+      MFH: - Compile fix for systems without int32_t typedef
+
+    * ZendEngine2/Zend.m4
+      ZendEngine2/zend_strtod.c:
+      - Compile fix for systems without int32_t typedef
+
+2005-02-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/php_variables.c:
+      Fixed bug #31440 ($GLOBALS can be overwritten via GPC when register_globals
+      is enabled).
+
+2005-02-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/pspell/config.m4
+      ext/pspell/config.m4:
+      MFH:- Fixed bug #29554 (compile failure when using
+      --with-pspell=/usr/local)
+
+    * ext/pspell/config.m4:
+      - Fixed bug #29554 (compile failure when using --with-pspell=/usr/local)
+
 2005-02-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * ext/exif/exif.c:

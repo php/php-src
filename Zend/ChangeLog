@@ -1,3 +1,33 @@
+2005-02-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c:
+      - A little optimization to prevent problems when trying to reimplement an
+        interface inherited from an interfaces that was just implemented......
+
+    * zend_API.c:
+      - No C++ ruleZ here
+
+    * zend_API.c:
+      - Actually we must do this in two steps: 1st resize the table and set all
+        interfaces, 2nd implement the interfaces
+
+    * zend_API.c:
+      - Incrementation is done elsewhere
+
+    * zend_API.c:
+      - Fix windows build (funny MS compiler)
+
+2005-02-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_5_0)
+      Zend.m4
+      zend_strtod.c:
+      MFH: - Compile fix for systems without int32_t typedef
+
+    * Zend.m4
+      zend_strtod.c:
+      - Compile fix for systems without int32_t typedef
+
 2005-02-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute_API.c
