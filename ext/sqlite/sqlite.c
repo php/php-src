@@ -1305,8 +1305,11 @@ void sqlite_query(zval *object, struct php_sqlite_db *db, char *sql, long sql_le
 	if (ret != SQLITE_OK) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
 		sqlite_freemem(errtext);
-		
-		RETURN_FALSE;
+		if (return_value) {
+			RETURN_FALSE;
+		} else {
+			return;
+		}
 	}
 
 	if (!rres) {
@@ -1320,7 +1323,11 @@ void sqlite_query(zval *object, struct php_sqlite_db *db, char *sql, long sql_le
 	/* now the result set is ready for stepping: get first row */
 	if (php_sqlite_fetch(rres TSRMLS_CC) != SQLITE_OK) {
 		real_result_dtor(rres TSRMLS_CC);
-		RETURN_FALSE;
+		if (return_value) {
+			RETURN_FALSE;
+		} else {
+			return;	
+		}
 	}
 	
 	rres->curr_row = 0;
@@ -1664,6 +1671,10 @@ PHP_FUNCTION(sqlite_array_query)
 	
 	rres = (struct php_sqlite_result *)emalloc(sizeof(*rres));
 	sqlite_query(NULL, db, sql, sql_len, mode, 0, NULL, rres TSRMLS_CC);
+ 	if (db->last_err_code != SQLITE_OK) {
+ 		efree(rres);
+ 		RETURN_FALSE;
+ 	}
 
 	array_init(return_value);
 
