@@ -118,11 +118,6 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 					case IS_DOUBLE:
 					case IS_LONG:
 						break;
-#if 0 && HAVE_BCMATH
-					case FLAG_IS_BC:
-						op->type = IS_DOUBLE; /* may have lost significant digits */
-						break;
-#endif
 					default:
 						op->value.lval = strtol(op->value.str.val, NULL, 10);
 						op->type = IS_LONG;
@@ -160,9 +155,6 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 					switch (((holder).type=is_numeric_string((op)->value.str.val, (op)->value.str.len, &(holder).value.lval, &(holder).value.dval, 1))) {	\
 						case IS_DOUBLE:															\
 						case IS_LONG:															\
-							break;																\
-						case FLAG_IS_BC:														\
-							(holder).type = IS_DOUBLE; /* may have lost significant digits */	\
 							break;																\
 						default:																\
 							(holder).value.lval = strtol((op)->value.str.val, NULL, 10);		\
@@ -1654,10 +1646,6 @@ ZEND_API int increment_function(zval *op1)
 						op1->type = IS_DOUBLE;
 						efree(strval); /* should never be empty_string */
 						break;
-#if 0
-					case FLAG_IS_BC:
-						/* Not implemented */
-#endif
 					default:
 						/* Perl style string increment */
 						increment_string(op1);
@@ -1847,22 +1835,6 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 	
 	if ((ret1=is_numeric_string(s1->value.str.val, s1->value.str.len, &lval1, &dval1, 0)) &&
 		(ret2=is_numeric_string(s2->value.str.val, s2->value.str.len, &lval2, &dval2, 0))) {
-#if 0&&HAVE_BCMATH
-		if ((ret1==FLAG_IS_BC) || (ret2==FLAG_IS_BC)) {
-			bc_num first, second;
-			
-			/* use the BC math library to compare the numbers */
-			init_num(&first);
-			init_num(&second);
-			str2num(&first, s1->value.str.val, 100); /* this scale should do */
-			str2num(&second, s2->value.str.val, 100); /* ditto */
-			result->value.lval = bc_compare(first, second);
-			result->value.lval = ZEND_NORMALIZE_BOOL(result->value.lval);
-			result->type = IS_LONG;
-			free_num(&first);
-			free_num(&second);
-		} else
-#endif
 		if ((ret1==IS_DOUBLE) || (ret2==IS_DOUBLE)) {
 			if (ret1!=IS_DOUBLE) {
 				dval1 = strtod(s1->value.str.val, NULL);

@@ -98,9 +98,9 @@ static inline zend_bool is_numeric_string(char *str, int length, long *lval, dou
 
 	errno=0;
 	local_dval = strtod(str, &end_ptr_double);
-	if (errno!=ERANGE) {
+	if (errno != ERANGE) {
 		if (end_ptr_double == str+length) { /* floating point string */
-			if (! zend_finite(local_dval)) {
+			if (!zend_finite(local_dval)) {
 				/* "inf","nan" and maybe other weird ones */
 				return 0;
 			}
@@ -108,28 +108,7 @@ static inline zend_bool is_numeric_string(char *str, int length, long *lval, dou
 			if (dval) {
 				*dval = local_dval;
 			}
-#if 0&&HAVE_BCMATH
-			if (length>16) {
-				register char *ptr=str, *end=str+length;
-				
-				while (ptr<end) {
-					switch (*ptr++) {
-						case 'e':
-						case 'E':
-							/* scientific notation, not handled by the BC library */
-							return IS_DOUBLE;
-							break;
-						default:
-							break;
-					}
-				}
-				return FLAG_IS_BC;
-			} else {
-				return IS_DOUBLE;
-			}
-#else
 			return IS_DOUBLE;
-#endif
 		}
 	} else {
 		end_ptr_double=NULL;
