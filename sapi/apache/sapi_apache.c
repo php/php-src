@@ -100,6 +100,40 @@ int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ apache_php_module_hook
+ */
+int apache_php_module_hook(request_rec *r, char *filename, zval **ret TSRMLS_DC)
+{
+	zend_file_handle file_handle;
+
+#if PHP_SIGCHILD
+    signal(SIGCHLD, sigchld_handler);
+#endif
+
+	if (php_request_startup_for_hook(TSRMLS_C) == FAILURE) {
+		return FAILURE;
+	}
+
+	/* Add PHP_SELF_HOOK - Absolute path */
+	php_register_variable("PHP_SELF_HOOK", filename, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
+
+	file_handle.type = ZEND_HANDLE_FILENAME;
+	file_handle.handle.fd = 0;
+	file_handle.filename = filename;
+	file_handle.opened_path = NULL;
+	file_handle.free_filename = 0;
+
+	(void) php_execute_simple_script(&file_handle, ret TSRMLS_CC);
+
+	AP(in_request) = 0;
+	
+	zend_try {
+		php_request_shutdown_for_hook(NULL);
+	} zend_end_try();
+	
+	return (OK);
+}
+
 /*
  * Local variables:
  * tab-width: 4
