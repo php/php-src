@@ -104,7 +104,7 @@ class PEAR_Remote extends PEAR
             if (extension_loaded("xmlrpc")) {
                 break;
             }
-            return $this->raiseError("xmlrpc extension not loaded");
+            return $this->raiseError("unable to load xmlrpc extension");
         } while (false);
         $params = func_get_args();
         array_shift($params);
