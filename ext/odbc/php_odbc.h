@@ -41,7 +41,6 @@
  #include <cli0core.h>
  #include <cli0ext1.h>
  /*the following help for SOLID 3.0 */
- #include <cli0cli.h>
  #include <cli0env.h>
 #elif defined(HAVE_SOLID_35)
  #if !defined(PHP_WIN32)
