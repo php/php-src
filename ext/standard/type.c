@@ -116,10 +116,10 @@ PHP_FUNCTION(settype)
 	} else if (!strcasecmp(new_type, "null")) {
 		convert_to_null(*var);
 	} else if (!strcasecmp(new_type, "resource")) {
-		php_error(E_WARNING, "%s(): Cannot convert to resource type", get_active_function_name (TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot convert to resource type");
 		RETURN_FALSE;
 	} else {
-		php_error(E_WARNING, "%s(): Invalid type", get_active_function_name (TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid type");
 		RETURN_FALSE;
 	}
 	RETVAL_TRUE;
@@ -196,7 +196,7 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 	pval **arg;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		php_error(E_WARNING, "%s(): Only one argument expected", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only one argument expected");
 		RETURN_FALSE;
 	}
 

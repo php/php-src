@@ -339,7 +339,7 @@ static void aggregate(INTERNAL_FUNCTION_PARAMETERS, int aggr_what, int aggr_type
 	zend_str_tolower(class_name_lc, class_name_len);
 	if (zend_hash_find(EG(class_table), class_name_lc,
 					   class_name_len+1, (void **)&ce) == FAILURE) {
-		php_error(E_WARNING, "%s(): Expects the second parameter to be a valid class name, '%s' given", get_active_function_name(TSRMLS_C), class_name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expects the second parameter to be a valid class name, '%s' given", class_name);
 		efree(class_name_lc);
 		return;
 	}
@@ -614,7 +614,7 @@ PHP_FUNCTION(deaggregate)
 
 		if (zend_hash_find(EG(class_table), Z_OBJCE_P(obj)->name,
 						   Z_OBJCE_P(obj)->name_length+1, (void **)&orig_ce) == FAILURE) {
-			php_error(E_WARNING, "%s(): Internal deaggregation error", get_active_function_name (TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Internal deaggregation error");
 			return;
 		}
 

@@ -1166,7 +1166,7 @@ PHP_FUNCTION(constant)
 	convert_to_string_ex(const_name);
 
 	if (!zend_get_constant(Z_STRVAL_PP(const_name), Z_STRLEN_PP(const_name), return_value TSRMLS_CC)) {
-		php_error(E_WARNING, "%s(): Couldn't find constant %s", get_active_function_name (TSRMLS_C), Z_STRVAL_PP(const_name));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't find constant %s", Z_STRVAL_PP(const_name));
 		RETURN_NULL();
 	}
 }
@@ -1260,7 +1260,7 @@ PHP_FUNCTION(putenv)
 		if (PG(safe_mode)) {
 			/* Check the protected list */
 			if (zend_hash_exists(&BG(sm_protected_env_vars), pe.key, pe.key_len)) {
-				php_error(E_WARNING, "%s(): Safe Mode warning: Cannot override protected environment variable '%s'", get_active_function_name (TSRMLS_C), pe.key);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Safe Mode warning: Cannot override protected environment variable '%s'", pe.key);
 				efree(pe.putenv_string);
 				efree(pe.key);
 				RETURN_FALSE;
@@ -1281,7 +1281,7 @@ PHP_FUNCTION(putenv)
 				}
 				efree(allowed_env_vars);
 				if (!allowed) {
-					php_error(E_WARNING, "%s(): Safe Mode warning: Cannot set environment variable '%s' - it's not in the allowed list", get_active_function_name (TSRMLS_C), pe.key);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Safe Mode warning: Cannot set environment variable '%s' - it's not in the allowed list", pe.key);
 					efree(pe.putenv_string);
 					efree(pe.key);
 					RETURN_FALSE;
@@ -1446,14 +1446,14 @@ PHP_FUNCTION(error_log)
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &string) == FAILURE) {
-				php_error(E_WARNING, "%s(): Argument 1 invalid", get_active_function_name (TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument 1 invalid");
 				RETURN_FALSE;
 			}
 			break;
 
 		case 2:
 			if (zend_get_parameters_ex(2, &string, &erropt) == FAILURE) {
-				php_error(E_WARNING, "%s(): Invalid arguments", get_active_function_name (TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid arguments");
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(erropt);
@@ -1462,7 +1462,7 @@ PHP_FUNCTION(error_log)
 	
 		case 3:
 			if (zend_get_parameters_ex(3, &string, &erropt, &option) == FAILURE) {
-				php_error(E_WARNING, "%s(): Invalid arguments", get_active_function_name (TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid arguments");
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(erropt);
@@ -1473,7 +1473,7 @@ PHP_FUNCTION(error_log)
 		
 		case 4:
 			if (zend_get_parameters_ex (4, &string, &erropt, &option, &emailhead) == FAILURE) {
-				php_error(E_WARNING, "%s(): Invalid arguments in", get_active_function_name (TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid arguments in");
 				RETURN_FALSE;
 			}
 			break;
@@ -1522,14 +1522,14 @@ PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers T
 					return FAILURE;
 				}
 #else
-				php_error(E_WARNING, "%s(): Mail option not available!", get_active_function_name (TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Mail option not available!");
 				return FAILURE;
 #endif
 			}
 			break;
 
 		case 2:		/*send to an address */
-			php_error(E_WARNING, "%s(): TCP/IP option not available!", get_active_function_name (TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "TCP/IP option not available!");
 			return FAILURE;
 			break;
 
@@ -1574,7 +1574,7 @@ PHP_FUNCTION(call_user_func)
 	}
 
 	if (!zend_is_callable(*params[0], 0, &name)) {
-		php_error(E_WARNING, "%s(): First argumented is expected to be a valid callback, '%s' was given", get_active_function_name(TSRMLS_C), name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argumented is expected to be a valid callback, '%s' was given", name);
 		efree(name);
 		efree(params);
 		RETURN_NULL();
@@ -1583,7 +1583,7 @@ PHP_FUNCTION(call_user_func)
 	if (call_user_function_ex(EG(function_table), NULL, *params[0], &retval_ptr, argc-1, params+1, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
-		php_error(E_WARNING, "%s(): Unable to call %s()", get_active_function_name (TSRMLS_C), name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s()", name);
 	}
 
 	efree(name);
@@ -1615,7 +1615,7 @@ PHP_FUNCTION(call_user_func_array)
 	}
 
 	if (!zend_is_callable(*func, 0, &name)) {
-		php_error(E_WARNING, "%s(): First argumented is expected to be a valid callback, '%s' was given", get_active_function_name(TSRMLS_C), name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argumented is expected to be a valid callback, '%s' was given", name);
 		efree(name);
 		RETURN_NULL();
 	}
@@ -1635,7 +1635,7 @@ PHP_FUNCTION(call_user_func_array)
 	if (call_user_function_ex(EG(function_table), NULL, *func, &retval_ptr, count, func_params, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
-		php_error(E_WARNING, "%s(): Unable to call %s()", get_active_function_name(TSRMLS_C), name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s()", name);
 	}
 
 	efree(name);
@@ -1643,7 +1643,7 @@ PHP_FUNCTION(call_user_func_array)
 }
 /* }}} */
 
-#define _CUM_DEPREC "%s(): This function is deprecated, use the call_user_func variety with the array(&$obj, \"method\") syntax instead"
+#define _CUM_DEPREC "This function is deprecated, use the call_user_func variety with the array(&$obj, \"method\") syntax instead"
 
 /* {{{ proto mixed call_user_method(string method_name, mixed object [, mixed parameter] [, mixed ...])
    Call a user method on a specific object or class */
@@ -1653,7 +1653,7 @@ PHP_FUNCTION(call_user_method)
 	zval *retval_ptr;
 	int arg_count = ZEND_NUM_ARGS();
 
-	php_error(E_NOTICE, _CUM_DEPREC, get_active_function_name(TSRMLS_C));
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, _CUM_DEPREC);
 
 	if (arg_count < 2) {
 		WRONG_PARAM_COUNT;
@@ -1665,7 +1665,7 @@ PHP_FUNCTION(call_user_method)
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_PP(params[1]) != IS_OBJECT && Z_TYPE_PP(params[1]) != IS_STRING) {
-		php_error(E_WARNING, "%s(): Second argument is not an object or class name", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument is not an object or class name");
 		efree(params);
 		RETURN_FALSE;
 	}
@@ -1676,7 +1676,7 @@ PHP_FUNCTION(call_user_method)
 	if (call_user_function_ex(EG(function_table), params[1], *params[0], &retval_ptr, arg_count-2, params+2, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
-		php_error(E_WARNING, "%s(): Unable to call %s()", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(params[0]));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s()", Z_STRVAL_PP(params[0]));
 	}
 	efree(params);
 }
@@ -1690,14 +1690,14 @@ PHP_FUNCTION(call_user_method_array)
 	HashTable *params_ar;
 	int num_elems, element = 0;
 
-	php_error(E_NOTICE, _CUM_DEPREC, get_active_function_name(TSRMLS_C));
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, _CUM_DEPREC);
 
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &method_name, &obj, &params) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	if (Z_TYPE_PP(obj) != IS_OBJECT && Z_TYPE_PP(obj) != IS_STRING) {
-		php_error(E_WARNING, "%s(): Second argument is not an object or class name", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument is not an object or class name");
 		RETURN_FALSE;
 	}
 
@@ -1720,7 +1720,7 @@ PHP_FUNCTION(call_user_method_array)
 	if (call_user_function_ex(EG(function_table), obj, *method_name, &retval_ptr, num_elems, method_args, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
-		php_error(E_WARNING, "%s(): Unable to call %s()", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(method_name));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s()", Z_STRVAL_PP(method_name));
 	}
 
 	efree(method_args);
@@ -1761,7 +1761,7 @@ static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_fun
 		zval_dtor(&retval);
 
 	} else {
-		php_error(E_WARNING, "%s(): Unable to call %s() - function does not exist", get_active_function_name(TSRMLS_C), Z_STRVAL_P(shutdown_function_entry->arguments[0]));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s() - function does not exist", Z_STRVAL_P(shutdown_function_entry->arguments[0]));
 	}
 	return 0;
 }
@@ -1787,15 +1787,15 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe TSRMLS_DC)
 			zval **obj, **method;
 
 			if (Z_TYPE_P(function) == IS_STRING) {
-				php_error(E_WARNING, "%s(): Unable to call %s() - function does not exist", get_active_function_name(TSRMLS_C), Z_STRVAL_P(function));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s() - function does not exist", Z_STRVAL_P(function));
 			} else if (	Z_TYPE_P(function) == IS_ARRAY 
 						&& zend_hash_index_find(Z_ARRVAL_P(function), 0, (void **) &obj) == SUCCESS
 						&& zend_hash_index_find(Z_ARRVAL_P(function), 1, (void **) &method) == SUCCESS
 						&& Z_TYPE_PP(obj) == IS_OBJECT
 						&& Z_TYPE_PP(method) == IS_STRING ) {
-				php_error(E_WARNING, "%s(): Unable to call %s::%s() - function does not exist", get_active_function_name(TSRMLS_C), Z_OBJCE_PP(obj)->name, Z_STRVAL_PP(method));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s::%s() - function does not exist", Z_OBJCE_PP(obj)->name, Z_STRVAL_PP(method));
 			} else {
-				php_error(E_WARNING, "%s(): Unable to call tick function", get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call tick function");
 			}
 		}
 	
@@ -2034,7 +2034,7 @@ PHP_FUNCTION(ini_get_all)
 
 	if(extname) {
 		if (zend_hash_find(&module_registry, extname, extname_len+1, (void **) &module) == FAILURE) {
-			php_error(E_WARNING, "%s(): Unable to find extension '%s'", get_active_function_name(TSRMLS_C), extname);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find extension '%s'", extname);
 			RETURN_FALSE;
 		}
 		extnumber = module->module_number;
@@ -2427,7 +2427,7 @@ PHP_FUNCTION(move_uploaded_file)
 	if (successful) {
 		zend_hash_del(SG(rfc1867_uploaded_files), Z_STRVAL_PP(path), Z_STRLEN_PP(path)+1);
 	} else {
-		php_error(E_WARNING, "%s(): Unable to move '%s' to '%s'", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(path), Z_STRVAL_PP(new_path));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to move '%s' to '%s'", Z_STRVAL_PP(path), Z_STRVAL_PP(new_path));
 	}
 	RETURN_BOOL(successful);
 }
@@ -2552,7 +2552,7 @@ PHP_FUNCTION(parse_ini_file)
 
 	fh.handle.fp = VCWD_FOPEN(Z_STRVAL_PP(filename), "r");
 	if (!fh.handle.fp) {
-		php_error(E_WARNING, "%s(): Cannot open '%s' for reading", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(filename));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open '%s' for reading", Z_STRVAL_PP(filename));
 		return;
 	}
 	Z_TYPE(fh) = ZEND_HANDLE_FP;
@@ -2622,7 +2622,7 @@ PHP_FUNCTION(import_request_variables)
 	}
 
 	if (prefix_len == 0) {
-		zend_error(E_NOTICE, "No prefix specified in %s() - possible security hazard", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "No prefix specified - possible security hazard");
 	}
 
 	convert_to_string_ex(z_types);

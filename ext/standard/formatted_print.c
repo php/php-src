@@ -144,7 +144,7 @@ php_sprintf_appendchar(char **buffer, int *pos, int *size, char add TSRMLS_DC)
 {
 	if ((*pos + 1) >= *size) {
 		*size <<= 1;
-		PRINTF_DEBUG(("%s: ereallocing buffer to %d bytes\n", get_active_function_name(TSRMLS_C), *size));
+		PRINTF_DEBUG(("%s(): ereallocing buffer to %d bytes\n", get_active_function_name(TSRMLS_C), *size));
 		*buffer = erealloc(*buffer, *size);
 	}
 	PRINTF_DEBUG(("sprintf: appending '%c', pos=\n", add, *pos));
@@ -475,7 +475,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 			if (currarg >= argc && format[inpos + 1] != '%') {
 				efree(result);
 				efree(args);
-				php_error(E_WARNING, "%s(): Too few arguments", get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too few arguments");
 				return NULL;
 			}
 			/* starting a new format specifier, reset variables */
@@ -496,7 +496,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 					if (argnum == 0) {
 						efree(result);
 						efree(args);
-						php_error(E_WARNING, "%s(): Zero is not a valid argument number", get_active_function_name(TSRMLS_C));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Zero is not a valid argument number");
 						return NULL;
 					}
 	
@@ -507,7 +507,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 				if (argnum >= argc) {
 					efree(result);
 					efree(args);
-					php_error(E_WARNING, "%s(): Too few arguments", get_active_function_name(TSRMLS_C));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too few arguments");
 					return NULL;
 				}
 

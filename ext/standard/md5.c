@@ -90,7 +90,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	}
 
 	if ((fp = VCWD_FOPEN(Z_STRVAL_PP(arg), "rb")) == NULL) {
-		php_error(E_WARNING, "%s(): Unable to open file", get_active_function_name (TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open file");
 		RETURN_FALSE;
 	}
 

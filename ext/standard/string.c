@@ -466,22 +466,22 @@ static inline int php_charmask(unsigned char *input, int len, char *mask TSRMLS_
 			/* Error, try to be as helpful as possible:
 			   (a range ending/starting with '.' won't be captured here) */
 			if (end-len>=input) { /* there was no 'left' char */
-				php_error(E_WARNING, "Invalid '..'-range passed to %s(), no character to the left of '..'", get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range, no character to the left of '..'");
 				result = FAILURE;
 				continue;
 			}
 			if (input+2>=end) { /* there is no 'right' char */
-				php_error(E_WARNING, "Invalid '..'-range passed to %s(), no character to the right of '..'", get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range, no character to the right of '..'");
 				result = FAILURE;
 				continue;
 			}
 			if (input[-1] > input[2]) { /* wrong order */
-				php_error(E_WARNING, "Invalid '..'-range passed to %s(), '..'-range needs to be incrementing", get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range, '..'-range needs to be incrementing");
 				result = FAILURE;
 				continue;
 			} 
 			/* FIXME: better error (a..b..c is the only left possibility?) */
-			php_error(E_WARNING, "Invalid '..'-range passed to %s()", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range");
 			result = FAILURE;
 			continue;
 		} else {
@@ -607,7 +607,7 @@ PHP_FUNCTION(wordwrap)
 		RETURN_FALSE;
 
 	if (linelength == 0 && docut) {
-		php_error(E_WARNING, "%s() can't force cut when width is zero",get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "can't force cut when width is zero");
 		RETURN_FALSE;
 	}
 
@@ -843,8 +843,7 @@ PHP_FUNCTION(implode)
 		convert_to_string_ex(arg1);
 		delim = *arg1;
 	} else {
-		php_error(E_WARNING, "Bad arguments to %s()",
-			get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad arguments");
 		return;
 	}
 
@@ -3480,8 +3479,7 @@ PHP_FUNCTION(str_repeat)
 	convert_to_long_ex(mult);
 	
 	if (Z_LVAL_PP(mult) < 0) {
-		php_error(E_WARNING, "Second argument to %s() has to be greater than or equal to 0",
-				  get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument has to be greater than or equal to 0");
 		return;
 	}
 
@@ -3798,8 +3796,7 @@ PHP_FUNCTION(str_pad)
 	if (ZEND_NUM_ARGS() > 2) {
 		convert_to_string_ex(pad_string);
 		if (Z_STRLEN_PP(pad_string) == 0) {
-			php_error(E_WARNING, "Padding string cannot be empty in %s()",
-					  get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding string cannot be empty");
 			return;
 		}
 		pad_str_val = Z_STRVAL_PP(pad_string);
@@ -3809,7 +3806,7 @@ PHP_FUNCTION(str_pad)
 			convert_to_long_ex(pad_type);
 			pad_type_val = Z_LVAL_PP(pad_type);
 			if (pad_type_val < STR_PAD_LEFT || pad_type_val > STR_PAD_BOTH) {
-				php_error(E_WARNING, "Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH in %s()", get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH");
 				return;
 			}
 		}

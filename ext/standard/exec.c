@@ -72,7 +72,7 @@ static int php_make_safe_mode_command(char *cmd, char **safecmd TSRMLS_DC)
 	larg0 = strlen(arg0);
 
 	if (strstr(arg0, "..")) {
-		zend_error(E_WARNING, "No '..' components allowed in path");
+		php_error(E_WARNING, "No '..' components allowed in path");
 		efree(arg0);
 		return FAILURE;
 	}
@@ -124,7 +124,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 
 	buf = (char *) emalloc(EXEC_INPUT_BUF);
 	if (!buf) {
-		php_error(E_WARNING, "%s(): Unable to emalloc %d bytes for exec buffer", get_active_function_name(TSRMLS_C), EXEC_INPUT_BUF);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to emalloc %d bytes for exec buffer", EXEC_INPUT_BUF);
 		return -1;
 	}
 	buflen = EXEC_INPUT_BUF;
@@ -137,7 +137,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 		c = strchr(cmd, ' ');
 		if (c) *c = '\0';
 		if (strstr(cmd, "..")) {
-			php_error(E_WARNING, "%s(): No '..' components allowed in path", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No '..' components allowed in path");
 			efree(buf);
 			return -1;
 		}
@@ -169,7 +169,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 		fp = VCWD_POPEN(d, "r");
 #endif
 		if (!fp) {
-			php_error(E_WARNING, "%s(): Unable to fork [%s]", get_active_function_name(TSRMLS_C), d);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to fork [%s]", d);
 			efree(d);
 			efree(buf);
 #if PHP_SIGCHILD
@@ -188,7 +188,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 		fp = VCWD_POPEN(cmd, "r");
 #endif
 		if (!fp) {
-			php_error(E_WARNING, "%s(): Unable to fork [%s]", get_active_function_name(TSRMLS_C), cmd);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to fork [%s]", cmd);
 			efree(buf);
 #if PHP_SIGCHILD
 			signal (SIGCHLD, sig_handler);
@@ -219,7 +219,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 				if ( buflen <= (l+1) ) {
 					buf = erealloc(buf, buflen + EXEC_INPUT_BUF);
 					if ( buf == NULL ) {
-						php_error(E_WARNING, "%s(): Unable to erealloc %d bytes for exec buffer", get_active_function_name(TSRMLS_C), 
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to erealloc %d bytes for exec buffer", 
 								buflen + EXEC_INPUT_BUF);
 #if PHP_SIGCHILD
 						signal (SIGCHLD, sig_handler);
@@ -514,7 +514,7 @@ PHP_FUNCTION(shell_exec)
 	}
 	
 	if (PG(safe_mode)) {
-		php_error(E_WARNING, "%s(): Cannot execute using backquotes in Safe Mode", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot execute using backquotes in Safe Mode");
 		RETURN_FALSE;
 	}
 
@@ -524,7 +524,7 @@ PHP_FUNCTION(shell_exec)
 #else
 	if ((in=VCWD_POPEN(Z_STRVAL_PP(cmd), "r"))==NULL) {
 #endif
-		php_error(E_WARNING, "%s(): Unable to execute '%s'", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(cmd));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to execute '%s'", Z_STRVAL_PP(cmd));
 		RETURN_FALSE;
 	}
 	allocated_space = EXEC_INPUT_BUF;
@@ -706,8 +706,7 @@ PHP_FUNCTION(proc_open)
 		zend_hash_get_current_key_ex(Z_ARRVAL_P(descriptorspec), &str_index, NULL, &nindex, 0, &pos);
 
 		if (str_index) {
-			zend_error(E_WARNING, "%s(): descriptor spec must be an integer indexed array",
-					get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "descriptor spec must be an integer indexed array");
 			goto exit_fail;
 		}
 
@@ -727,31 +726,27 @@ PHP_FUNCTION(proc_open)
 #ifdef PHP_WIN32
 			descriptors[ndesc].childend = dup_fd_as_handle(fd);
 			if (descriptors[ndesc].childend == NULL) {
-				zend_error(E_WARNING, "%s(): unable to dup File-Handle for descriptor %d",
-						get_active_function_name(TSRMLS_C), nindex);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to dup File-Handle for descriptor %d", nindex);
 				goto exit_fail;
 			}
 #else
 			descriptors[ndesc].childend = dup(fd);
 			if (descriptors[ndesc].childend < 0) {
-				zend_error(E_WARNING, "%s(): unable to dup File-Handle for descriptor %d - %s",
-						get_active_function_name(TSRMLS_C), nindex, strerror(errno));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to dup File-Handle for descriptor %d - %s", nindex, strerror(errno));
 				goto exit_fail;
 			}
 #endif
 			descriptors[ndesc].mode = DESC_FILE;
 
 		} else if (Z_TYPE_PP(descitem) != IS_ARRAY) {
-			php_error(E_WARNING, "%s(): Descriptor item must be either an array or a File-Handle",
-					get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Descriptor item must be either an array or a File-Handle");
 			goto exit_fail;
 		} else {
 
 			if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 0, (void **)&ztype) == SUCCESS) {
 				convert_to_string_ex(ztype);
 			} else {
-				php_error (E_WARNING, "%s(): Missing handle qualifier in array",
-					get_active_function_name(TSRMLS_C), Z_STRVAL_PP(ztype));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing handle qualifier in array", Z_STRVAL_PP(ztype));
 				goto exit_fail;
 			}
 
@@ -762,16 +757,14 @@ PHP_FUNCTION(proc_open)
 				if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 1, (void **)&zmode) == SUCCESS) {
 					convert_to_string_ex(zmode);
 				} else {
-					php_error (E_WARNING, "%s(): Missing mode parameter for 'pipe'",
-						get_active_function_name(TSRMLS_C), Z_STRVAL_PP(ztype));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing mode parameter for 'pipe'", Z_STRVAL_PP(ztype));
 					goto exit_fail;
 				}
 
 				descriptors[ndesc].mode = DESC_PIPE;
 
 				if (0 != pipe(newpipe)) {
-					zend_error(E_WARNING, "%s(): unable to create pipe %s",
-							get_active_function_name(TSRMLS_C), strerror(errno));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to create pipe %s", strerror(errno));
 					goto exit_fail;
 				}
 
@@ -806,16 +799,14 @@ PHP_FUNCTION(proc_open)
 				if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 1, (void **)&zfile) == SUCCESS) {
 					convert_to_string_ex(zfile);
 				} else {
-					php_error (E_WARNING, "%s(): Missing file name parameter for 'file'",
-						get_active_function_name(TSRMLS_C), Z_STRVAL_PP(ztype));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing file name parameter for 'file'", Z_STRVAL_PP(ztype));
 					goto exit_fail;
 				}
 
 				if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 2, (void **)&zmode) == SUCCESS) {
 					convert_to_string_ex(zmode);
 				} else {
-					php_error (E_WARNING, "%s(): Missing mode parameter for 'file'",
-						get_active_function_name(TSRMLS_C), Z_STRVAL_PP(ztype));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing mode parameter for 'file'", Z_STRVAL_PP(ztype));
 					goto exit_fail;
 				}
 
@@ -840,8 +831,7 @@ PHP_FUNCTION(proc_open)
 #endif
 
 			} else {
-				zend_error(E_WARNING, "%s(): %s is not a valid descriptor spec/mode",
-						get_active_function_name(TSRMLS_C), Z_STRVAL_PP(ztype));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not a valid descriptor spec/mode", Z_STRVAL_PP(ztype));
 				goto exit_fail;
 			}
 		}
@@ -884,7 +874,7 @@ PHP_FUNCTION(proc_open)
 	efree(command_with_cmd);
 
 	if (FALSE == newprocok) {
-		zend_error(E_WARNING, "%s(): CreateProcess failed", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "CreateProcess failed");
 		goto exit_fail;
 	}
 
@@ -926,10 +916,7 @@ PHP_FUNCTION(proc_open)
 			close(descriptors[i].parentend);
 		}
 
-		zend_error(E_WARNING, "%s(): fork failed - %s",
-				get_active_function_name(TSRMLS_C),
-				strerror(errno)
-				);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "fork failed - %s", strerror(errno));
 
 		goto exit_fail;
 
