@@ -463,7 +463,7 @@ PHP_FUNCTION(dbase_get_record)
 		/* get the value */
 		str_value = (char *)emalloc(cur_f->db_flen + 1);
 
-		if(cursize <= cur_f->db_flen) {
+		if(cursize <= (unsigned)cur_f->db_flen) {
 			cursize = cur_f->db_flen + 1;
 			fnp = erealloc(fnp, cursize);
 		}
