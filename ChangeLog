@@ -1,3 +1,27 @@
+2001-04-11  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c: MFH - never initialize OCI in OCI_THREADED mode
+
+    * ext/oci8/oci8.c:
+    never initialize oci in OCI_THREADED mode. seems to break win32.
+
+2001-04-11  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx.c
+      ext/dbx/dbx_mysql.c
+      ext/dbx/dbx_mysql.h
+      ext/dbx/dbx_odbc.c
+      ext/dbx/dbx_odbc.h
+      ext/dbx/dbx_pgsql.c
+      ext/dbx/dbx_pgsql.h
+      ext/dbx/php_dbx.h:
+    Added a database member to the dbx_link object. Since e.g. mysql reuses
+    connections, two or more dbx_link objects may share the connection
+    identifier. The database name is used in the dbx_query, where it calls
+    mysql_db_query instead of mysql_query.
+    This means the database name has to be passed around to all dbx_xxx_query
+    functions, hence the update on all the files. (Mc)
+
 2001-04-10  Jason Greene  <jason@inetgurus.net>
 
     * ext/sockets/sockets.c: MFH, I have tested this thoroughly.
