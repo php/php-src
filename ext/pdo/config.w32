@@ -1,9 +1,0 @@
-// $Id$
-// vim:ft=javascript
-
-ARG_ENABLE("pdo", "Enable PHP Data Objects support", "no");
-
-if (PHP_PDO != "no") {
-	EXTENSION('pdo', 'pdo.c pdo_dbh.c pdo_stmt.c pdo_sql_parser.c');
-}
-
