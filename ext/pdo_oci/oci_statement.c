@@ -229,7 +229,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 				param->driver_data = P;
 			
 				/* figure out what we're doing */
-				switch (param->param_type) {
+				switch (PDO_PARAM_TYPE(param->param_type)) {
 					case PDO_PARAM_LOB:
 					case PDO_PARAM_STMT:
 						return 0;
