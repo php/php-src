@@ -40,6 +40,7 @@ void spl_register_namespace(zend_namespace ** ppns, char * namespace_name TSRMLS
 	zend_namespace ns;
 
 	INIT_NAMESPACE(ns, namespace_name);
+	ns.name_length = strlen(namespace_name);
 	*ppns = zend_register_internal_namespace(&ns TSRMLS_CC);
 }
 /* }}} */
@@ -50,6 +51,7 @@ void spl_register_interface(zend_class_entry ** ppce, zend_namespace * namespace
 	zend_class_entry ce;
 	
 	INIT_CLASS_ENTRY(ce, class_name, NULL);
+	ce.name_length = strlen(class_name);
 	*ppce = zend_register_internal_ns_class(&ce, NULL, namespace_entry, NULL TSRMLS_CC);
 
 	/* entries changed by initialize */
@@ -64,6 +66,7 @@ void spl_register_std_class(zend_class_entry ** ppce, zend_namespace * namespace
 	memset(&ce, 0, sizeof(zend_class_entry));
 	
 	INIT_CLASS_ENTRY(ce, class_name, NULL);
+	ce.name_length = strlen(class_name);
 	*ppce = zend_register_internal_ns_class(&ce, NULL, namespace_entry, NULL TSRMLS_CC);
 
 	/* entries changed by initialize */
