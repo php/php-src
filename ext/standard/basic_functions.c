@@ -967,7 +967,7 @@ static double php_get_inf()
 {
 #if defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
 	double val;
-	((php_uint32*)&val)[1] = PHP_DOUBLE_QUIET_INF_HIGH;
+	((php_uint32*)&val)[1] = PHP_DOUBLE_INFINITY_HIGH;
 	((php_uint32*)&val)[0] = 0;
 	return val;
 #else
