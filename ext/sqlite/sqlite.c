@@ -1845,7 +1845,11 @@ PHP_FUNCTION(sqlite_fetch_object)
 		return;
 	}
 
-	php_sqlite_fetch_array(res, PHPSQLITE_ASSOC, decode_binary, 1, &dataset TSRMLS_CC);
+	if (res->curr_row < res->nrows) {
+		php_sqlite_fetch_array(res, PHPSQLITE_ASSOC, decode_binary, 1, &dataset TSRMLS_CC);
+	} else {
+		RETURN_FALSE;
+	}
 
 	object_and_properties_init(return_value, ce, NULL);
 	zend_merge_properties(return_value, Z_ARRVAL(dataset), 1 TSRMLS_CC);
