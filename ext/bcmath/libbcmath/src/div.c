@@ -129,13 +129,13 @@ bc_divide (n1, n2, quot, scale)
     extra = scale - scale1;
   else
     extra = 0;
-  num1 = (unsigned char *) malloc (n1->n_len+n1->n_scale+extra+2);
+  num1 = (unsigned char *) emalloc (n1->n_len+n1->n_scale+extra+2);
   if (num1 == NULL) bc_out_of_memory();
   memset (num1, 0, n1->n_len+n1->n_scale+extra+2);
   memcpy (num1+1, n1->n_value, n1->n_len+n1->n_scale);
 
   len2 = n2->n_len + scale2;
-  num2 = (unsigned char *) malloc (len2+1);
+  num2 = (unsigned char *) emalloc (len2+1);
   if (num2 == NULL) bc_out_of_memory();
   memcpy (num2, n2->n_value, len2);
   *(num2+len2) = 0;
@@ -166,7 +166,7 @@ bc_divide (n1, n2, quot, scale)
   memset (qval->n_value, 0, qdigits);
 
   /* Allocate storage for the temporary storage mval. */
-  mval = (unsigned char *) malloc (len2+1);
+  mval = (unsigned char *) emalloc (len2+1);
   if (mval == NULL) bc_out_of_memory ();
 
   /* Now for the full divide algorithm. */
@@ -267,9 +267,9 @@ bc_divide (n1, n2, quot, scale)
   *quot = qval;
 
   /* Clean up temporary storage. */
-  free (mval);
-  free (num1);
-  free (num2);
+  efree (mval);
+  efree (num1);
+  efree (num2);
 
   return 0;	/* Everything is OK. */
 }

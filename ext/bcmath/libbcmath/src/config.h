@@ -1,7 +1,7 @@
 #if PHP_WIN32
 #include "../../../../main/config.w32.h"
 #else
-#include "../../../../main/php_config.h"
+#include "php_config.h"
 #endif
 
 #include <string.h>
