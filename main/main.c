@@ -1178,7 +1178,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	} else {
 		append_file_p = NULL;
 	}	
-	EG(main_op_array) = zend_compile_files(0 CLS_CC, 3, prepend_file_p, primary_file, append_file_p);
+	EG(main_op_array) = zend_compile_files(ZEND_REQUIRE CLS_CC, 3, prepend_file_p, primary_file, append_file_p);
 	if (EG(main_op_array)) {
 		EG(active_op_array) = EG(main_op_array);
 		zend_execute(EG(main_op_array) ELS_CC);
