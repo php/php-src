@@ -39,10 +39,5 @@ struct dirent *readdir(DIR *);
 int readdir_r(DIR *, struct dirent *, struct dirent **);
 int closedir(DIR *);
 int rewinddir(DIR *);
-int scandir(const char *dirname,
-			struct dirent **namelist[],
-			int (*selector) (const struct dirent *entry),
-			int (*compare) (const struct dirent **a, const struct dirent **b));
-int alphasort(const struct dirent **a, const struct dirent **b);
 
 #endif /* READDIR_H */
