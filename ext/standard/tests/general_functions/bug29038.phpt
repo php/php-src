@@ -1,5 +1,5 @@
 --TEST--
-bug #29039 (extract(), EXTR_PREFIX_SAME option prefixes empty strings)
+bug #29038 (extract(), EXTR_PREFIX_SAME option prefixes empty strings)
 --FILE--
 <?php
 function f1() {
