@@ -374,6 +374,8 @@ static void _php_session_start(PSLS_D)
 		buf = emalloc(strlen(PS(session_name)) + strlen(PS(id)) + 5);
 		sprintf(buf, "%s=%s", PS(session_name), PS(id));
 		REGISTER_STRING_CONSTANT("SID", buf, 0);
+	} else {
+		REGISTER_STRING_CONSTANT("SID", empty_string, 0);
 	}
 
 	PS(nr_open_sessions)++;
