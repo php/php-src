@@ -2,6 +2,7 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, Version 4.3.6
 - Synchronized bundled GD library with GD 2.0.22. (Ilia)
+- Fixed bug #27822 (is_resource() returns TRUE for closed resources). (Derick)
 - Fixed bug #25547 (error_handler and array index with function call). 
   (cschneid at cschneid dot com)
 - Fixed bug #27809 (ftp_systype returns null on some ftp servers). (Ilia)
