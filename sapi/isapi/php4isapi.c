@@ -717,7 +717,7 @@ BOOL exceptionhandler(LPEXCEPTION_POINTERS *e, LPEXCEPTION_POINTERS ep)
 
 DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 {
-	zend_file_handle file_handle;
+	zend_file_handle file_handle = {0};
 	zend_bool stack_overflown=0;
 #ifdef PHP_ENABLE_SEH
 	LPEXCEPTION_POINTERS e;

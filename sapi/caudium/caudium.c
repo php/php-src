@@ -564,7 +564,7 @@ static sapi_module_struct caudium_sapi_module = {
 static void php_caudium_module_main(php_caudium_request *ureq)
 {
   int res;
-  zend_file_handle file_handle;
+  zend_file_handle file_handle = {0};
 #ifndef USE_PIKE_LEVEL_THREADS
   struct thread_state *state;
   extern struct program *thread_id_prog;

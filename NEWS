@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2003, Version 4.3.3
+- Improved the engine to use POSIX/socket IO where feasible. (Sascha)
 - Improved NSAPI SAPI module (Uwe Schindler)
   . php4_init (magnus.conf): new parameter to set alternate path to php.ini.
     (php_ini="/path/to/php.ini")
@@ -9,9 +10,6 @@ PHP 4                                                                      NEWS
     (See sapi/nsapi/nsapi-readme.txt for more information)
   . Added support for virtual()
   . Synced $_SERVER variables to be similar to Apache variables
-- Added long options into CLI & CGI (e.g. --version). (Marcus)
-- Added new command line parameters -B, -F, -R and -E which allow to process 
-  stdin line by line (See 'php -h' or 'man php' for more). (Marcus)
 - Added DBA handler 'inifile' to support ini files. (Marcus)
 - Added a "DEBUG" note to 'php -v' output when --enable-debug is used. (Derick)
 - Fixed ext/yaz to not log unless yaz.log_file is set. (Adam Dickmeiss)

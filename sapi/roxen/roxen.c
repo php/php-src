@@ -575,7 +575,7 @@ static int php_roxen_module_main(TSRMLS_D)
 {
   int res, len;
   char *dir;
-  zend_file_handle file_handle;
+  zend_file_handle file_handle = {0};
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif

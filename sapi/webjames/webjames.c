@@ -142,7 +142,7 @@ static void sapi_webjames_register_variables(zval *track_vars_array TSRMLS_DC)
 
 static void webjames_module_main(TSRMLS_D)
 {
-	zend_file_handle file_handle;
+	zend_file_handle file_handle = {0};
 	FILE *fp=NULL;
 	char *path;
 

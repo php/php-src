@@ -296,7 +296,7 @@ static sapi_module_struct tux_sapi_module = {
 
 static void tux_module_main(TSRMLS_D)
 {
-	zend_file_handle file_handle;
+	zend_file_handle file_handle = {0};
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;

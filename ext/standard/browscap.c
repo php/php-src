@@ -150,7 +150,7 @@ PHP_MINIT_FUNCTION(browscap)
 	char *browscap = INI_STR("browscap");
 
 	if (browscap) {
-		zend_file_handle fh;
+		zend_file_handle fh = {0};
 
 		if (zend_hash_init(&browser_hash, 0, NULL, (dtor_func_t) browscap_entry_dtor, 1)==FAILURE) {
 			return FAILURE;
