@@ -1,3 +1,42 @@
+2003-02-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/gettext/gettext.c:
+      Fix segfault in bindtextdomain when first parameter was empty.
+      
+      The Linux man page states: domainname must be a non-empty string.
+      
+      Noticed by: Nils Meyer
+
+2003-02-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php.1:
+      Style corrections
+      See also: Stig's intro
+      Version info
+
+2003-02-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/string.c:
+      style & ws fixes
+
+2003-02-08  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * (PHP_4_3)
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h:
+      MFH:
+      Add gdImageEllipse
+      Replace gdImageFilledEllipse by a new function (backported from
+      the new phpgd)
+      the new gdImageFilledEllipse fix bug bug #22103 (ellipse part)
+
+    * ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h:
+      Add gdImageEllipse
+      Replace gdImageFilledEllipse by a new function (backported from
+      the new phpgd)
+      the new gdImageFilledEllipse fix bug bug #22103 (ellipse part)
+
 2003-02-07  Sara Golemon  <php@alphaweb.net>
 
     * ext/standard/http_fopen_wrapper.c:

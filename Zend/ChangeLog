@@ -1,3 +1,20 @@
+2003-02-08  Georg Richter  <georg.richter@phpev.de>
+
+    * zend_API.c
+      zend_API.h:
+      fixed zend_parse_method_param
+
+2003-02-08  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_builtin_functions.c:
+      zend_config.h (and its Win32 version) is already included by zend.h
+
+2003-02-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_builtin_functions.c:
+      The string.h is already avaliable through zend.h, so the manual inclusion
+      is not necessary.
+
 2003-02-07  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_builtin_functions.c:
