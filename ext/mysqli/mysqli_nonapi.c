@@ -230,7 +230,7 @@ PHP_FUNCTION(mysqli_query)
 
 	if (!mysql_field_count(mysql)) {
 		if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
-			php_mysqli_report_index(query, mysql->server_status);
+			php_mysqli_report_index(query, mysql->server_status TSRMLS_CC);
 		}
 		RETURN_TRUE;
 	}
@@ -242,7 +242,7 @@ PHP_FUNCTION(mysqli_query)
 	}
 
 	if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
-		php_mysqli_report_index(query, mysql->server_status);
+		php_mysqli_report_index(query, mysql->server_status TSRMLS_CC);
 	}
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));

@@ -1381,7 +1381,7 @@ PHP_FUNCTION(mysqli_real_query)
 
 	if (!mysql_field_count(mysql)) {
 		if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
-			php_mysqli_report_index(query, mysql->server_status);
+			php_mysqli_report_index(query, mysql->server_status TSRMLS_CC);
 		}
 	}
 
@@ -1829,7 +1829,7 @@ PHP_FUNCTION(mysqli_store_result)
 		RETURN_FALSE;
 	}
 	if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
-		php_mysqli_report_index("from previous mysql_real_connect", mysql->server_status);
+		php_mysqli_report_index("from previous mysql_real_connect", mysql->server_status TSRMLS_CC);
 	}
 	MYSQLI_DISABLE_MQ;
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
@@ -1884,7 +1884,7 @@ PHP_FUNCTION(mysqli_use_result)
 	}
 
 	if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
-		php_mysqli_report_index("from previous mysql_real_connect", mysql->server_status);
+		php_mysqli_report_index("from previous mysql_real_connect", mysql->server_status TSRMLS_CC);
 	}
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
