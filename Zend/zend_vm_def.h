@@ -2828,6 +2828,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
 	zend_class_entry *ce = NULL;
+	zend_bool is_empty = 0;
 
 	if (opline->extended_value) {
 		array_ptr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_R);
@@ -2889,20 +2890,26 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		if (iter->funcs->rewind) {
 			iter->funcs->rewind(iter TSRMLS_CC);
 		}
+		is_empty = iter->funcs->valid(iter TSRMLS_CC) != SUCCESS;
 	} else if ((fe_ht = HASH_OF(array_ptr)) != NULL) {
-		/* probably redundant */
 		zend_hash_internal_pointer_reset(fe_ht);
+		if (ce) {
+			zend_object *zobj = zend_objects_get_address(array_ptr TSRMLS_CC);
+			while (zend_hash_has_more_elements(fe_ht) == SUCCESS) {
+				char *str_key;
+				uint str_key_len;
+				ulong int_key;
+				if (zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL) == HASH_KEY_IS_STRING 
+				&& zend_check_property_access(zobj, str_key TSRMLS_CC) == SUCCESS) {
+					break;
+				}
+				zend_hash_move_forward(fe_ht);
+			}
+		}
+		is_empty = zend_hash_has_more_elements(fe_ht) != SUCCESS;
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
-
-		opline++;
-		ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
-		if (opline->extended_value) {
-			FREE_OP1_VAR_PTR();
-		} else {
-			FREE_OP1_IF_VAR();
-		}
-		ZEND_VM_CONTINUE_JMP();
+		is_empty = 1;
 	}
 
 	if (opline->extended_value) {
@@ -2910,7 +2917,12 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 	} else {
 		FREE_OP1_IF_VAR();
 	}
-	ZEND_VM_NEXT_OPCODE();
+	if (is_empty) {
+		ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
+		ZEND_VM_CONTINUE_JMP();
+	} else {
+		ZEND_VM_NEXT_OPCODE();
+	}
 }
 
 ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
@@ -2980,7 +2992,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				 * In case that ever happens we need an additional flag. */
 				iter->funcs->move_forward(iter TSRMLS_CC);
 			}
-			if (!iter || iter->funcs->valid(iter TSRMLS_CC) == FAILURE) {
+			if (!iter || (iter->index > 1 && iter->funcs->valid(iter TSRMLS_CC) == FAILURE)) {
 				/* reached end of iteration */
 				ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
 				ZEND_VM_CONTINUE_JMP();
