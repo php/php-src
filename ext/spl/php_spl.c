@@ -32,6 +32,7 @@
 #include "spl_directory.h"
 #include "spl_iterators.h"
 #include "spl_sxe.h"
+#include "spl_exceptions.h"
 
 #ifdef COMPILE_DL_SPL
 ZEND_GET_MODULE(spl)
@@ -93,6 +94,7 @@ PHP_MINIT_FUNCTION(spl)
 	PHP_MINIT(spl_array)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_directory)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_sxe)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(spl_exceptions)(INIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
 }
@@ -168,19 +170,29 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(CachingRecursiveIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(Countable, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(DirectoryIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(DomainException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(EmptyIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(FilterIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(InfiniteIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(InvalidArgumentException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(IteratorIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(LengthException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(LimitIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(LogicException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(NoRewindIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(OuterIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(OutOfRangeException, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(OutOfBoundsException, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(OverflowException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(ParentIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(RangeException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveDirectoryIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveIteratorIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(RuntimeException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SeekableIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SimpleXMLIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(UnderflowException, z_list, sub, allow, ce_flags); \
 
 /* {{{ spl_classes */
 PHP_FUNCTION(spl_classes)
