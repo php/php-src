@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2004, Version 4.3.6
+01 Apr 2004, Version 4.3.6RC1
 - Synchronized bundled GD library with GD 2.0.22. (Ilia)
 - Fixed bug #27822 (is_resource() returns TRUE for closed resources). (Derick)
 - Fixed bug #27819 (problems returning reference to a reference parameter).
