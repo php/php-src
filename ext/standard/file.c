@@ -1953,7 +1953,7 @@ PHP_FUNCTION(fgetcsv)
 		convert_to_string_ex(p_delim);
 		/* Make sure that there is at least one character in string */
 		if (Z_STRLEN_PP(p_delim) < 1) {
-			php_error(E_WARNING, "%s() 3rd paramater must be a character",
+			php_error(E_WARNING, "%s() 3rd parameter must be a character",
 					  get_active_function_name(TSRMLS_C));
 			return;
 		}
@@ -1968,7 +1968,7 @@ PHP_FUNCTION(fgetcsv)
 		convert_to_string_ex(p_delim);
 		/* Make sure that there is at least one character in string */
 		if (Z_STRLEN_PP(p_delim) < 1) {
-			php_error(E_WARNING, "%s() 3rd paramater must be a character",
+			php_error(E_WARNING, "%s() 3rd parameter must be a character",
 					  get_active_function_name(TSRMLS_C));
 			return;
 		}
@@ -1978,7 +1978,7 @@ PHP_FUNCTION(fgetcsv)
 		convert_to_string_ex(p_enclosure);
 		/* Make sure that there is at least one character in string */
 		if (Z_STRLEN_PP(p_enclosure) < 1) {
-			php_error(E_WARNING, "%s() 4th paramater must be a character",
+			php_error(E_WARNING, "%s() 4th parameter must be a character",
 					  get_active_function_name(TSRMLS_C));
 			return;
 		}
