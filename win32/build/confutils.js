@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.42.2.2 2005-02-13 21:40:28 wez Exp $
+// $Id: confutils.js,v 1.42.2.3 2005-02-26 01:10:50 edink Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -916,6 +916,15 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 
 	MFO.WriteBlankLines(1);
 }
+
+function ADD_DIST_FILE(filename)
+{
+	if (configure_module_dirname.match("pecl")) {
+		ADD_FLAG("PECL_EXTRA_DIST_FILES", filename);
+	} else {
+		ADD_FLAG("PHP_EXTRA_DIST_FILES", filename);
+	}
+}	
 
 function file_get_contents(filename)
 {
