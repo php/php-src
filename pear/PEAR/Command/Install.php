@@ -61,15 +61,24 @@ class PEAR_Command_Install extends PEAR_Command_Common
     {
         switch ($command) {
             case 'install':
-                return array('<pear package>',
+                $ret = array('<pear package>',
                              'Installs a PEAR package created by the "package" command');
+                break;
             case 'uninstall':
-                return array('<package>',
+                $ret = array('<package>',
                              'Uninstalls a previously installed PEAR package');
+                break;
             case 'upgrade':
-                return array('<pear package>',
+                $ret = array('<pear package>',
                              'Upgrades a PEAR package installed in the system');
+                break;
         }
+        $ret[0] = "[-n] [-f] {$ret[0]}";
+        $ret[1] = "{$ret[1]}\n" .
+                  "   -f    forces the installation of the package\n".
+                  "         when it is already installed\n".
+                  "   -n    do not take care package dependencies";
+        return $ret;
     }
 
     // }}}
@@ -84,15 +93,17 @@ class PEAR_Command_Install extends PEAR_Command_Common
 
         $failmsg = '';
         $opts = array();
+        if (isset($options['f'])) {
+            $opts['force'] = true;
+        }
+        if (isset($options['n'])) {
+            $opts['nodeps'] = true;
+        }
         switch ($command) {
             case 'upgrade':
                 $opts['upgrade'] = true;
                 // fall through
             case 'install': {
-                if (isset($options['f'])) {
-                    $opts['force'] = true;
-                }
-                // XXX The ['nodeps'] option is still missing
                 if ($installer->install(@$params[0], $opts, $this->config)) {
                     $this->ui->displayLine("install ok");
                 } else {
@@ -122,7 +133,7 @@ class PEAR_Command_Install extends PEAR_Command_Common
 
     function getOptions()
     {
-        return array('f');
+        return array('f', 'n');
     }
 }
 
