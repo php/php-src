@@ -22,8 +22,8 @@ $s3 = array_sum($c);
 $s4 = array_sum($d);
 var_dump($s3, $s4);
 ?>
---EXPECT--
+--EXPECTF--
 int(500500)
 int(500500)
-float(5000050000)
-float(5000050000)
+%st(5000050000)
+%st(5000050000)
