@@ -1,0 +1,11 @@
+/* php_config.h.in.  Generated automatically from configure.in by autoheader.  */
+
+/* Define if your C compiler doesn't accept -c and -o together.  */
+#undef NO_MINUS_C_MINUS_O
+
+/* Whether you have XMLRPC */
+#undef HAVE_XMLRPC
+
+/* Whether to build xmlrpc as dynamic module */
+#undef COMPILE_DL_XMLRPC
+
