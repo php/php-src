@@ -69,6 +69,8 @@
 #define UDM_PARAM_VARDIR		16
 #define UDM_PARAM_LOCAL_CHARSET		17
 #define UDM_PARAM_BROWSER_CHARSET	18
+#define UDM_PARAM_HLBEG			19
+#define UDM_PARAM_HLEND			20
 
 /* udm_add_search_limit constants */
 #define UDM_LIMIT_URL		1
@@ -249,6 +251,9 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_VARDIR",	UDM_PARAM_VARDIR,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_DATADIR",	UDM_PARAM_VARDIR,CONST_CS | CONST_PERSISTENT);	
+	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_HLBEG",	UDM_PARAM_HLBEG,CONST_CS | CONST_PERSISTENT);	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_HLEND",	UDM_PARAM_HLEND,CONST_CS | CONST_PERSISTENT);	
 	
 	/* udm_add_search_limit constants */
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_CAT",		UDM_LIMIT_CAT,CONST_CS | CONST_PERSISTENT);
@@ -602,7 +607,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 #if UDM_VERSION_ID < 30200								
 					Agent->Conf->ispell_mode |= UDM_ISPELL_USE_PREFIXES;
 #else
-					UdmAddIntVar(Env->vars, "IspellUsePrefixes", 1, UDM_VARSRC_GLOBAL);					
+					UdmAddIntVar(Agent->Conf->vars, "IspellUsePrefixes", 1, UDM_VARSRC_GLOBAL);					
 #endif								
 					break;
 					
@@ -610,7 +615,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 #if UDM_VERSION_ID < 30200												
 					Agent->Conf->ispell_mode &= ~UDM_ISPELL_USE_PREFIXES;
 #else
-					UdmAddIntVar(Env->vars, "IspellUsePrefixes", 0, UDM_VARSRC_GLOBAL);						
+					UdmAddIntVar(Agent->Conf->vars, "IspellUsePrefixes", 0, UDM_VARSRC_GLOBAL);						
 #endif																	
 					break;
 
@@ -619,7 +624,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 #if UDM_VERSION_ID < 30200								
 					Agent->Conf->ispell_mode |= UDM_ISPELL_USE_PREFIXES;
 #else
-					UdmAddIntVar(Env->vars, "IspellUsePrefixes", 1, UDM_VARSRC_GLOBAL);					
+					UdmAddIntVar(Agent->Conf->vars, "IspellUsePrefixes", 1, UDM_VARSRC_GLOBAL);					
 #endif												
 					php_error(E_WARNING,"Udm_Set_Agent_Param: Unknown ispell prefixes mode");
 					RETURN_FALSE;
@@ -634,6 +639,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			Agent->Conf->local_charset=UdmGetCharset(val);
 			Agent->charset=Agent->Conf->local_charset;
 #else
+			Agent->Conf->local_charset=strdup(val);
 			UdmReplaceStrVar(Agent->Conf->vars,"LocalCharset",val,UDM_VARSRC_GLOBAL);
 #endif
 
@@ -641,9 +647,21 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			
 #if UDM_VERSION_ID >= 30200
 		case UDM_PARAM_BROWSER_CHARSET:
+			Agent->Conf->browser_charset=strdup(val);
 			UdmReplaceStrVar(Agent->Conf->vars,"BrowserCharset",val,UDM_VARSRC_GLOBAL);
 			
 			break;
+
+		case UDM_PARAM_HLBEG:
+			UdmReplaceStrVar(Agent->Conf->vars,"HlBeg",val,UDM_VARSRC_GLOBAL);
+			
+			break;
+
+		case UDM_PARAM_HLEND:
+			UdmReplaceStrVar(Agent->Conf->vars,"HlBeg",val,UDM_VARSRC_GLOBAL);
+			
+			break;
+			
 #endif
 			
 		case UDM_PARAM_STOPTABLE:
@@ -665,6 +683,23 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			Agent->weight_factor=strdup(val);
 #else
 			UdmReplaceStrVar(Agent->Conf->vars,"wf",val,UDM_VARSRC_GLOBAL);
+			{
+				size_t len;
+	
+		                len=strlen(val);
+				if((len>0)&&(len<256)){
+				    const char *sec;
+				    int sn;
+				
+				    for(sn=0;sn<256;sn++){
+					    Agent->wf[sn]=0;
+				    }
+				
+				    for(sec=val+len-1;sec>=val;sec--){
+					    Agent->wf[len-(sec-val)]=UdmHex2Int(*sec);
+	                	    }
+        			}                                                          			
+			}
 #endif			    
 			break;
 			
@@ -678,8 +713,6 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			    
 			break;
 			
-#if UDM_VERSION_ID > 30110
-
 		case UDM_PARAM_CROSS_WORDS: 
 			switch (atoi(val)){
 				case UDM_CROSS_WORDS_ENABLED:
@@ -697,8 +730,6 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			}
 			
 			break;
-			
-#endif
 
 #if UDM_VERSION_ID > 30112
 
