@@ -47,6 +47,8 @@ struct _zend_extension {
 	void (*activate)();
 	void (*deactivate)();
 
+	void (*message_handler)(int message, void *arg);
+
 	void (*op_array_handler)(zend_op_array *op_array);
 	
 	void (*statement_handler)(zend_op_array *op_array);
@@ -71,6 +73,9 @@ struct _zend_extension {
 
 
 ZEND_API int zend_get_resource_handle(zend_extension *extension);
+ZEND_API void zend_extension_dispatch_message(int message, void *arg);
+
+#define ZEND_EXTMSG_NEW_EXTENSION		1
 
 #ifdef ZTS
 #define ZTS_V 1
