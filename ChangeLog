@@ -1,3 +1,66 @@
+2000-08-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/rules.mk: Change the C++ extension to .cpp
+
+2000-08-15  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/fdf/fdf.c: - Inserted constants for fdf flags
+
+2000-08-15  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/swf/php_swf.h
+      ext/swf/swf.c:  Fix stdout support with the swf extension. 
+
+2000-08-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/main.c:
+    Fix varargs handling. The assignments are not necessary at all and
+    cause problems on various platforms, so we get rid of them.
+
+2000-08-15  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/curl/php_curl.h: Leftovers...
+
+    * ext/curl/curl.c: Add Win32 support for cURL.
+
+
+    * ext/curl/curl.c
+      ext/curl/php_curl.h: This fixes to problems:
+
+    - Apache not having the output go to stdout in some cases.
+    - Output being displayed before the header is displayed.
+
+    And causes the following:
+
+    - *Slightly* slower cURL transfers.
+
+2000-08-15  Zeev Suraski  <zeev@php.net>
+
+    * main/main.c: Sync with Zend
+
+2000-08-15  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: - Clearified which version of libmcrypt is enabled
+
+2000-08-15  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/basic_functions.c:
+    Fix byteorder for il2long and long2ip (#6159)
+
+2000-08-15  David Croft  <david@infotrek.co.uk>
+
+    * php.ini-dist
+      php.ini-optimized:
+    renamed ini section, quoted default host and tabulated.
+
+
+    * ext/pfpro/pfpro.c
+      ext/pfpro/php_pfpro.h:
+    display ini file entries on phpinfo(), unregister them on shutdown
+    numeric ini file entries stored as ints
+    removed unnecessary casts from PFPROG()
+    pval -> zval
+
 2000-08-14  Brendan W. McAdams  <brendan@plexmedia.com>
 
     * ext/ccvs/TODO:
