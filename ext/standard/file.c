@@ -75,7 +75,7 @@
 #endif
 
 #if MISSING_FCLOSE_DECL
-extern int fclose();
+extern int fclose(FILE *);
 #endif
 
 #ifdef HAVE_SYS_MMAN_H
