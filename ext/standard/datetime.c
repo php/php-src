@@ -80,7 +80,7 @@ PHP_FUNCTION(time)
 void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
 	pval **arguments[7];
-	struct tm *ta, tmbuf, *t1, *t2;
+	struct tm *ta, tmbuf;
 	time_t t, seconds;
 	int i, gmadjust, arg_count = ZEND_NUM_ARGS();
 	int is_dst = -1, val, chgsecs = 0;
