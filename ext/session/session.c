@@ -857,13 +857,17 @@ static void php_session_send_cookie(TSRMLS_D)
 	
 	if (PS(cookie_lifetime) > 0) {
 		struct timeval tv;
-		
+		time_t t;
+
 		gettimeofday(&tv, NULL);
-		date_fmt = php_std_date(tv.tv_sec + PS(cookie_lifetime));
+		t = tv.tv_sec + PS(cookie_lifetime);
 		
-		smart_str_appends(&ncookie, COOKIE_EXPIRES);
-		smart_str_appends(&ncookie, date_fmt);
-		efree(date_fmt);
+		if (t > 0) {
+			date_fmt = php_std_date(t);
+			smart_str_appends(&ncookie, COOKIE_EXPIRES);
+			smart_str_appends(&ncookie, date_fmt);
+			efree(date_fmt);
+		}
 	}
 
 	if (PS(cookie_path)[0]) {
