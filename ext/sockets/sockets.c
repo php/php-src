@@ -100,6 +100,9 @@ static int le_socket;
 static unsigned char second_and_third_args_force_ref[] =
 {3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE};
 
+static unsigned char second_arg_of_four_force_ref[] =
+{4, BYREF_NONE, BYREF_FORCE, BYREF_NONE, BYREF_NONE};
+
 static unsigned char second_fifth_and_sixth_args_force_ref[] =
 {6, BYREF_NONE, BYREF_FORCE, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE};
 
@@ -131,7 +134,7 @@ function_entry sockets_functions[] = {
 	PHP_FE(socket_connect, 			NULL)
 	PHP_FE(socket_strerror, 		NULL)
 	PHP_FE(socket_bind,				NULL)
-	PHP_FE(socket_recv,				second_arg_force_ref)
+	PHP_FE(socket_recv,				second_arg_of_four_force_ref)
 	PHP_FE(socket_send,				NULL)
 	PHP_FE(socket_recvfrom,			second_fifth_and_sixth_args_force_ref)
 	PHP_FE(socket_sendto,			NULL)
@@ -432,7 +435,7 @@ PHP_MINFO_FUNCTION(sockets)
 }
 /* }}} */
 
-int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, int *max_fd TSRMLS_DC) {
+int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, SOCKET *max_fd TSRMLS_DC) {
 	zval		**element;
 	php_socket	*php_sock;
 	
@@ -898,8 +901,6 @@ PHP_FUNCTION(socket_connect)
 	php_socket			*php_sock;
 	struct sockaddr_in	sin;
 	struct sockaddr_un	s_un;
-	struct in_addr		addr_buf;
-	struct hostent		*host_struct;
 	char				*addr;
 	int					retval, addr_len, port;
 
@@ -1384,7 +1385,6 @@ PHP_FUNCTION(socket_sendto)
 	php_socket			*php_sock;
 	struct sockaddr_un	s_un;
 	struct sockaddr_in	sin;
-	struct in_addr		addr_buf;
 	int					retval, buf_len, len, flags, addr_len, port = 0;
 	char				*buf, *addr;
 
@@ -1916,7 +1916,6 @@ PHP_FUNCTION(socket_clear_error)
 {
 	zval		*arg1;
 	php_socket	*php_sock;
-	int			error;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE)
 		return;	
