@@ -399,10 +399,15 @@ static void aggregate(INTERNAL_FUNCTION_PARAMETERS, int aggr_what, int aggr_type
 		new_ce->clone = Z_OBJCE_P(obj)->clone;
 #endif
 		new_ce->builtin_functions = Z_OBJCE_P(obj)->builtin_functions;
+#ifndef ZEND_ENGINE_2
 		new_ce->handle_function_call = Z_OBJCE_P(obj)->handle_function_call;
 		new_ce->handle_property_get  = Z_OBJCE_P(obj)->handle_property_get;
 		new_ce->handle_property_set  = Z_OBJCE_P(obj)->handle_property_set;
-
+#else
+		new_ce->__call = Z_OBJCE_P(obj)->__call;
+		new_ce->__get  = Z_OBJCE_P(obj)->__get;
+		new_ce->__set  = Z_OBJCE_P(obj)->__set;
+#endif
 		/*
 		 * Okay, that was kind of exhausting. Let's invoke programmer virtue #1
 		 * and stuff this where it belongs so we don't have to work so hard next
