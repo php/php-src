@@ -173,6 +173,7 @@ static const struct mb_overload_def mb_ovld[] = {
 	{MB_OVERLOAD_STRING, "substr", "mb_substr", "mb_orig_substr"},
 	{MB_OVERLOAD_STRING, "strtolower", "mb_strtolower", "mb_orig_strtolower"},
 	{MB_OVERLOAD_STRING, "strtoupper", "mb_strtoupper", "mb_orig_strtoupper"},
+	{MB_OVERLOAD_STRING, "substr_count", "mb_substr_count", "mb_orig_substr_count"},
 #if HAVE_MBREGEX
 	{MB_OVERLOAD_REGEX, "ereg", "mb_ereg", "mb_orig_ereg"},
 	{MB_OVERLOAD_REGEX, "eregi", "mb_eregi", "mb_orig_eregi"},
@@ -216,6 +217,7 @@ function_entry mbstring_functions[] = {
 	PHP_FE(mb_strlen,					NULL)
 	PHP_FE(mb_strpos,					NULL)
 	PHP_FE(mb_strrpos,				NULL)
+	PHP_FE(mb_substr_count,			NULL)
 	PHP_FE(mb_substr,					NULL)
 	PHP_FE(mb_strcut,					NULL)
 	PHP_FE(mb_strwidth,				NULL)
@@ -2113,6 +2115,61 @@ PHP_FUNCTION(mb_strrpos)
 	needle.val = (unsigned char *)Z_STRVAL_PP(arg2);
 	needle.len = Z_STRLEN_PP(arg2);
 	n = mbfl_strpos(&haystack, &needle, 0, 1 TSRMLS_CC);
+	if (n >= 0) {
+		RETVAL_LONG(n);
+	} else {
+		RETVAL_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto int mb_substr_count(string haystack, string needle [, string encoding])
+   Count the number of substring occurrences */
+PHP_FUNCTION(mb_substr_count)
+{
+	pval **arg1, **arg2, **arg3; 
+	int n;
+	mbfl_string haystack, needle;
+
+	mbfl_string_init(&haystack);
+	mbfl_string_init(&needle);
+	haystack.no_language = MBSTRG(current_language);
+	haystack.no_encoding = MBSTRG(current_internal_encoding);
+	needle.no_language = MBSTRG(current_language);
+	needle.no_encoding = MBSTRG(current_internal_encoding);
+	switch (ZEND_NUM_ARGS()) {
+	case 2:
+		if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		break;
+	case 3:
+		if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		convert_to_string_ex(arg3);
+		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg3));
+		if (haystack.no_encoding == mbfl_no_encoding_invalid) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg3));
+			RETURN_FALSE;
+		}
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(arg1);
+	convert_to_string_ex(arg2);
+
+	if (Z_STRLEN_PP(arg2) <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty needle");
+		RETURN_FALSE;
+	}
+	haystack.val = (unsigned char *)Z_STRVAL_PP(arg1);
+	haystack.len = Z_STRLEN_PP(arg1);
+	needle.val = (unsigned char *)Z_STRVAL_PP(arg2);
+	needle.len = Z_STRLEN_PP(arg2);
+	n = mbfl_substr_count(&haystack, &needle TSRMLS_CC);
 	if (n >= 0) {
 		RETVAL_LONG(n);
 	} else {
