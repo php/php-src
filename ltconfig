@@ -1448,7 +1448,7 @@ else
     hardcode_shlibpath_var=no
     ;;
 
-  sysv4)
+  sysv4 | sysv5)
     archive_cmds='$LD -G -h $soname -o $lib $libobjs $deplibs $linkopts'
     runpath_var='LD_RUN_PATH'
     hardcode_shlibpath_var=no
