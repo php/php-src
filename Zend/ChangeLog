@@ -1,3 +1,11 @@
+2004-08-07  Andi Gutmans  <andi@zend.com>
+
+    * zend_alloc.h:
+      - Commit Derick's patch for allowing Zend to use regular libc memory
+      - allocation functions. Mainly useful in conjunction with tools such as
+      - valgrind which enables us to find bugs we might not find with the
+      - current memory managers boundary protection.
+
 2004-08-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_builtin_functions.c:

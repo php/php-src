@@ -1,3 +1,39 @@
+2004-08-07  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ext/com_dotnet/com_dotnet.c:
+      MFH: Fix for Bug #29490 from Michael Sisolak
+
+    * ext/com_dotnet/com_dotnet.c:
+      Fix for Bug #29490 from Michael Sisolak.
+      Another fine patch; thanks Michael.
+
+2004-08-07  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      Fix inet_pton/ntop() on BSD
+
+    * ext/standard/basic_functions.c:
+      Binary safety fix for inet_pton()
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      New Functions inet_pton() and inet_ntop()
+
+2004-08-07  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_alloc.h:
+      - Commit Derick's patch for allowing Zend to use regular libc memory
+      - allocation functions. Mainly useful in conjunction with tools such as
+      - valgrind which enables us to find bugs we might not find with the
+      - current memory managers boundary protection.
+
 2004-08-06  Sara Golemon  <php@alphaweb.net>
 
     * ext/standard/dns.c:
