@@ -257,12 +257,12 @@ class Cache extends PEAR {
     * @return   boolean
     * @access   public
     */
-    function delete($id, $group = 'default') {
+    function remove($id, $group = 'default') {
         if (!$this->caching)
             return true;
 
-        return $this->container->delete($id, $group);
-    } // end func delete
+        return $this->container->remove($id, $group);
+    } // end func remove
 
     /**
     * Flushes the cache - removes all data from it
