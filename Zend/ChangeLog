@@ -1,3 +1,24 @@
+2002-08-16  Stig Bakken  <ssb@pb1.pair.com>
+
+    * zend.c: * append emacs footer
+
+    * zend.c: * remove builtin exception class
+
+2002-08-16  Andi Gutmans  <andi@pb1.pair.com>
+
+    * zend.c: - Fix whitespace
+
+2002-08-16  Stig Bakken  <ssb@pb1.pair.com>
+
+    * zend_execute_API.c
+      zend_globals.h
+      zend.c
+      zend_builtin_functions.c:
+    - Added set_exception_handler() function for registering a global,
+      catch-all exception handling function 
+    - Added set_exception_handler() function for registering a global,
+      catch-all exception handling function (Stig)
+
 2002-08-15  Zeev Suraski  <zeev@pb1.pair.com>
 
     * flex.skl
