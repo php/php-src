@@ -310,7 +310,6 @@ static void php_apache_log_message(char *message)
 static void php_apache_request_shutdown(void *dummy)
 {
 	TSRMLS_FETCH();
-	TSRMLS_FETCH();
 
 	php_output_set_status(0);
 	SG(server_context) = NULL; /* The server context (request) is invalid by the time run_cleanups() is called */
