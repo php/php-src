@@ -13,6 +13,8 @@ PHP 4                                                                      NEWS
 - Changed uniqid() parameters to be optional and allow any prefix length.
   (Marcus)
 - Added improved JPEG 2000 support for getimagesize(). (Marcus, Adam Wright)
+- Added strpbrk() function, which can search a string for a list of 
+  characters. (Ilia)
 - Added stream_get_line() function. This function will read either 
   the specified number of bytes or until the ending string is found. (Ilia)
 - Added optional parameter to mkdir() which makes directory creation recursive.
