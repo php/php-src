@@ -1,3 +1,14 @@
+2004-05-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_exceptions.c
+      zend_exceptions.h:
+      Revert; obviously I missed the function at the bottom of the file...
+
+    * zend_exceptions.c
+      zend_exceptions.h:
+      Export this, so extensions may throw their own exception objects that
+      they have already instantiated.
+
 2004-05-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c:

@@ -1,3 +1,67 @@
+2004-05-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c:
+      Fixed stream leak on error.
+
+2004-05-20  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/var.c:
+      for now removing ":public". Waiting for a decision? ":public" will require
+      quite a lot of phpt files changes.
+
+    * ext/dom/tests/dom003.phpt
+      ext/standard/tests/array/007.phpt
+      ext/standard/tests/array/array_intersect_1.phpt:
+      fixing the tests so to work with the new var_dump() (dumping private and
+      protected member variables)
+
+2004-05-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.h:
+      Revert; obviously I missed the function at the bottom of the file...
+
+2004-05-20  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/var.c:
+      var_dump() now shows private and protected member variables.
+      Not BC is that since now the public variables are explicitly shown as
+      public
+      Example :
+      
+      class a{ protected $a=1; private $b=2;var $c=3;} $a=new a(); var_dump($a);
+      
+      object(a)#1 (3) {
+        ["a:protected"]=>
+        int(1)
+        ["b:private"]=>
+        int(2)
+        ["c:public"]=>
+        int(3)
+      }
+
+2004-05-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.h:
+      Export this, so extensions may throw their own exception objects that
+      they have already instantiated.
+
+2004-05-20  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/fam/fam.c
+      ext/ncurses/ncurses.c:
+      - Removed unused INI sections.
+
+    * main/main.c:
+      - Allow extra parameters to mail to be forced also from virtual host
+      settings.
+
+2004-05-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pfpro/pfpro.c:
+      Free vars before calling E_ERROR.
+
 2004-05-19  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
 
     * ext/standard/formatted_print.c:
