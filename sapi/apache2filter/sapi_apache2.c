@@ -308,9 +308,6 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 {
 	php_struct *ctx;
 	apr_bucket *b;
-	apr_status_t rv;
-	const char *str;
-	apr_ssize_t n;
 	void *conf = ap_get_module_config(f->r->per_dir_config, &php4_module);
 	SLS_FETCH();
 
@@ -340,9 +337,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	 * we "flatten" the buckets by creating a single string buffer.
 	 */
 	if (ctx->state == 1 && APR_BUCKET_IS_EOS(APR_BRIGADE_LAST(ctx->bb))) {
-		int fd;
 		zend_file_handle zfd;
-		smart_str content = {0};
 		apr_bucket *eos;
 		CLS_FETCH();
 		ELS_FETCH();
@@ -356,53 +351,30 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 		ctx->state = 2;
 
 		/* Handle phpinfo/phpcredits/built-in images */
-		if (php_handle_special_queries(SLS_C PLS_CC)) 
-			goto ok;
-	
-		/* Loop over all buckets and put them into the buffer */	
-		APR_BRIGADE_FOREACH(b, ctx->bb) {
-			rv = apr_bucket_read(b, &str, &n, 1);
-			if (rv == APR_SUCCESS && n > 0)
-				smart_str_appendl(&content, str, n);
+		if (!php_handle_special_queries(SLS_C PLS_CC)) {
+
+			b = APR_BRIGADE_FIRST(ctx->bb);
+			
+			if (APR_BUCKET_IS_FILE(b)) {
+				const char *path;
+
+				apr_file_name_get(&path, ((apr_bucket_file *) b->data)->fd);
+				
+				zfd.type = ZEND_HANDLE_FILENAME;
+				zfd.filename = (char *) path;
+				zfd.free_filename = 0;
+				zfd.opened_path = NULL;
+
+				php_execute_script(&zfd CLS_CC ELS_CC PLS_CC);
+			} else {
+				
+#define NO_DATA "The PHP Filter did not receive suitable input data"
+				
+				eos = apr_bucket_transient_create(NO_DATA, sizeof(NO_DATA)-1);
+				APR_BRIGADE_INSERT_HEAD(bb, eos);
+			}
 		}
 		
-		/* Empty script */
-		if (!content.c) goto skip_execution;
-		
-		smart_str_0(&content);
-
-		/* 
-		 * This hack is used only for testing purposes and will
-		 * go away when the scripting engine will be able to deal
-		 * with something more complex than files/-handles.
-		 */
-		
-#if 1
-#define FFFF "/tmp/really_silly"
-		fd = open(FFFF, O_WRONLY|O_TRUNC|O_CREAT, 0600);
-		
-		write(fd, content.c, content.len);
-
-		close(fd);
-
-		zfd.type = ZEND_HANDLE_FILENAME;
-		zfd.filename = FFFF;
-		zfd.free_filename = 0;
-		zfd.opened_path = NULL;
-		
-		php_execute_script(&zfd CLS_CC ELS_CC PLS_CC);
-#else
-		CG(in_compilation) = 1;
-		zend_eval_string(content, NULL, "foo" CLS_CC ELS_CC);
-#endif
-
-		smart_str_free(&content);
-		goto ok;
-skip_execution:
-#define NO_DATA "php_filter did not get ANY data"
-		eos = apr_bucket_transient_create(NO_DATA, sizeof(NO_DATA)-1);
-		APR_BRIGADE_INSERT_HEAD(bb, eos);
-ok:
 		php_apache_request_dtor(f SLS_CC);
 
 		SG(server_context) = 0;
