@@ -25,6 +25,8 @@
 
 #if HAVE_SHMOP
 
+#include "ext/standard/info.h"
+
 #ifdef ZTS
 int shmop_globals_id;
 #else
