@@ -666,8 +666,8 @@ static char *php_stream_locate_eol(php_stream *stream TSRMLS_DC)
 PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC)
 {
 	size_t avail = 0;
-	int did_copy = 0;
 	size_t current_buf_size = 0;
+	size_t total_copied = 0;
 	int grow_mode = 0;
 	char *bufstart = buf;
 
@@ -718,6 +718,7 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 				 * hard to follow */
 				bufstart = erealloc(bufstart, current_buf_size + cpysz + 1);
 				current_buf_size += cpysz + 1;
+				buf = bufstart + total_copied;
 			} else {
 				if (cpysz >= maxlen - 1) {
 					cpysz = maxlen - 1;
@@ -731,8 +732,8 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 			stream->readpos += cpysz;
 			buf += cpysz;
 			maxlen -= cpysz;
+			total_copied += cpysz;
 
-			did_copy = 1;
 			if (done) {
 				break;
 			}
@@ -758,8 +759,11 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 		}
 	}
 	
-	if (!did_copy)
+	if (total_copied == 0) {
+		if (grow_mode)
+			assert(bufstart != NULL);
 		return NULL;
+	}
 	
 	buf[0] = '\0';
 

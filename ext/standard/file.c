@@ -1247,8 +1247,8 @@ PHP_FUNCTION(stream_set_timeout)
 PHPAPI PHP_FUNCTION(fgets)
 {
 	zval **arg1, **arg2;
-	int len = 1024;
-	char *buf;
+	int len;
+	char *buf = NULL;
 	int argc = ZEND_NUM_ARGS();
 	php_stream *stream;
 
@@ -1258,30 +1258,33 @@ PHPAPI PHP_FUNCTION(fgets)
 
 	php_stream_from_zval(stream, arg1);
 
-	if (argc>1) {
+	if (argc == 1) {
+		/* ask streams to give us a buffer of an appropriate size */
+		buf = php_stream_gets(stream, NULL, 0);
+		if (buf == NULL)
+			goto exit_failed;
+	} else if (argc > 1) {
 		convert_to_long_ex(arg2);
 		len = Z_LVAL_PP(arg2);
+
+		if (len < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
+			RETURN_FALSE;
+		}
+
+		buf = ecalloc(len + 1, sizeof(char));
+		if (php_stream_gets(stream, buf, len) == NULL)
+			goto exit_failed;
 	}
-
-	if (len < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
-		RETURN_FALSE;
-	}
-
-	buf = emalloc(sizeof(char) * (len + 1));
-	/* needed because recv doesnt put a null at the end*/
-	memset(buf, 0, len+1);
-
-	if (php_stream_gets(stream, buf, len) == NULL)
-		goto exit_failed;
-
+	
 	if (PG(magic_quotes_runtime)) {
 		Z_STRVAL_P(return_value) = php_addslashes(buf, 0, &Z_STRLEN_P(return_value), 1 TSRMLS_CC);
 		Z_TYPE_P(return_value) = IS_STRING;
 	} else {
 		ZVAL_STRING(return_value, buf, 0);
-		/* resize buffer if it's much larger than the result */
-		if (Z_STRLEN_P(return_value) < len / 2) {
+		/* resize buffer if it's much larger than the result.
+		 * Only needed if the user requested a buffer size. */
+		if (argc > 1 && Z_STRLEN_P(return_value) < len / 2) {
 			Z_STRVAL_P(return_value) = erealloc(buf, Z_STRLEN_P(return_value) + 1);
 		}
 	}
@@ -1289,7 +1292,8 @@ PHPAPI PHP_FUNCTION(fgets)
 
 exit_failed:
 	RETVAL_FALSE;
-	efree(buf);
+	if (buf)
+		efree(buf);
 }
 /* }}} */
 
