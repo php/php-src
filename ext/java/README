@@ -183,7 +183,7 @@ Guidance for when these instructions don't work.
    next problem - for example, it appears that many JDKs attempt to locate 
    the runtime Java classes (rt.jar) in a directory relative to these system 
    libraries.  So unless you are inclined to copy your entire Java 
-   installation, you are much better ajusting your PATHs.
+   installation, you are much better adjusting your PATHs.
 
    Not documented above, but useful for many JDK's is ability to specify the 
    library path via java.library.path in the php.ini.  On many Unix machines, 
