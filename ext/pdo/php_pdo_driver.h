@@ -95,6 +95,7 @@ enum pdo_error_type {
 	PDO_ERR_MISMATCH,
 	PDO_ERR_TRUNCATED,
 	PDO_ERR_DISCONNECTED,
+	PDO_ERR_NO_PERM,
 };
 
 enum pdo_error_mode {
