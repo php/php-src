@@ -798,15 +798,13 @@ if true; then
   else
       rm -f internal_functions.c.old
   fi
-  
-  if test -n "$APXS" ; then
-    if test "a`$APXS -q LD_SHLIB`" = "a" || test "`$APXS -q LIBEXECDIR`" = "modules"; then
-        echo "+--------------------------------------------------------------------+"
-        echo "| WARNING: Your $APXS script is most likely broken."
-        echo "|                                                                    |"
-        echo "| Please go read http://www.php.net/FAQ.php3#4.11 and make the       |"
-        echo "| changes described there and try again.                             |"
-    fi
+
+  if test -n "$PHP_APXS_BROKEN"; then
+    echo "+--------------------------------------------------------------------+"
+    echo "| WARNING: Your $APXS script is most likely broken."
+    echo "|                                                                    |"
+    echo "| Please go read http://www.php.net/FAQ.php3#4.11 and make the       |"
+    echo "| changes described there and try again.                             |"
   fi
 
   # Warn about CGI version with no extra security options.

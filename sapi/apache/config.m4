@@ -23,6 +23,9 @@ AC_ARG_WITH(apxs,
 	PHP_SAPI=apache
 	APACHE_INSTALL="$APXS -i -a -n php4 $SAPI_SHARED"
 	PHP_BUILD_SHARED
+	if test -z "`$APXS -q LD_SHLIB`" || test "`$APXS -q LIBEXECDIR`" = "modules"; then
+		PHP_APXS_BROKEN=yes
+	fi
 	STRONGHOLD=
 	AC_DEFINE(APACHE)
 	AC_DEFINE(HAVE_AP_CONFIG_H)
