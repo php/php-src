@@ -1,3 +1,16 @@
+2000-05-09  Jouni Ahto  <jah@mork.net>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+    Support (partially) the new datatypes in InterBase 6.
+
+2000-05-09  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h:
+
 2000-05-07  Jim Winstead  <jimw@php.net>
 
     * header: another minor change to test CVS mails again
