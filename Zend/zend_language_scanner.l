@@ -94,20 +94,23 @@
 
 #define YY_FATAL_ERROR zend_fatal_scanner_error
 
-#define HANDLE_NEWLINES(s,l) \
-do { \
-	char *p = (s),*boundary = p+(l); \
-\
-	while (p<boundary) { \
-		if (*p++=='\n') { \
-			CG(zend_lineno)++; \
-		} \
-	} \
+#define HANDLE_NEWLINES(s,l)													\
+do {																			\
+	char *p = (s),*boundary = p+(l);											\
+																				\
+	while (p<boundary) {														\
+		if (*p == '\n') {														\
+			CG(zend_lineno)++;													\
+		} else if ((*p == '\r') && (p+1 < boundary) && (*(p+1) != '\n')) {		\
+			CG(zend_lineno)++;													\
+		}																		\
+		p++;																	\
+	}																			\
 } while (0)
 
 #define HANDLE_NEWLINE(c) \
 { \
-	if (c=='\n') { \
+	if (c == '\n' || c == '\r') { \
 		CG(zend_lineno)++; \
 	} \
 }
@@ -1117,7 +1120,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<INITIAL>"<?php"[ \n\r\t] {
+<INITIAL>"<?php"([ \t]|{NEWLINE}) {
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
