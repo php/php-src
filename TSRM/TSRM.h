@@ -24,7 +24,7 @@
 /* Only compile multi-threading functions if we're in ZTS mode */
 #ifdef ZTS
 
-#if WIN32||WINNT
+#ifdef TSRM_WIN32
 # include <windows.h>
 #elif defined(GNUPTH)
 # include <pth.h>
@@ -34,7 +34,7 @@
 
 typedef int ts_rsrc_id;
 
-#if WIN32||WINNT
+#ifdef TSRM_WIN32
 #	ifdef TSRM_EXPORTS
 #	define TSRM_API __declspec(dllexport)
 #	else
@@ -46,7 +46,7 @@ typedef int ts_rsrc_id;
 
 
 /* Define THREAD_T and MUTEX_T */
-#if defined(WIN32)
+#ifdef TSRM_WIN32
 # define THREAD_T DWORD
 # define MUTEX_T CRITICAL_SECTION *
 #elif defined(GNUPTH)
