@@ -83,12 +83,12 @@ PHPAPI char *php_replace_controlchars(char *str)
 
 /* {{{ php_url_parse
  */
-PHPAPI php_url *php_url_parse(char *str)
+PHPAPI php_url *php_url_parse(char const *str)
 {
 	int length = strlen(str);
 	char port_buf[5];
 	php_url *ret = ecalloc(1, sizeof(php_url));
-	char *s, *e, *p, *pp, *ue;
+	char const *s, *e, *p, *pp, *ue;
 		
 	s = str;
 	ue = s + length;
@@ -371,11 +371,11 @@ static unsigned char hexchars[] = "0123456789ABCDEF";
 
 /* {{{ php_url_encode
  */
-PHPAPI char *php_url_encode(char *s, int len, int *new_length)
+PHPAPI char *php_url_encode(char const *s, int len, int *new_length)
 {
 	register unsigned char c;
-	unsigned char *to, *from, *start;
-	unsigned char *end;
+	unsigned char *to, *start;
+	unsigned char const *from, *end;
 	
 	from = s;
 	end = s + len;
@@ -392,15 +392,15 @@ PHPAPI char *php_url_encode(char *s, int len, int *new_length)
 				   (c > 'Z' && c < 'a' && c != '_') ||
 				   (c > 'z')) {
 			to[0] = '%';
-			to[1] = hexchars[(unsigned char) c >> 4];
-			to[2] = hexchars[(unsigned char) c & 15];
+			to[1] = hexchars[c >> 4];
+			to[2] = hexchars[c & 15];
 			to += 3;
 #else /*CHARSET_EBCDIC*/
 		} else if (!isalnum(c) && strchr("_-.", c) == NULL) {
 			/* Allow only alphanumeric chars and '_', '-', '.'; escape the rest */
 			to[0] = '%';
-			to[1] = hexchars[os_toascii[(unsigned char) c] >> 4];
-			to[2] = hexchars[os_toascii[(unsigned char) c] & 15];
+			to[1] = hexchars[os_toascii[c] >> 4];
+			to[2] = hexchars[os_toascii[c] & 15];
 			to += 3;
 #endif /*CHARSET_EBCDIC*/
 		} else {
@@ -459,9 +459,11 @@ PHPAPI int php_url_decode(char *str, int len)
 	char *data = str;
 
 	while (len--) {
-		if (*data == '+')
+		if (*data == '+') {
 			*dest = ' ';
-		else if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1)) && isxdigit((int) *(data + 2))) {
+		}
+		else if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1)) && isxdigit((int) *(data + 2))) 
+		{
 #ifndef CHARSET_EBCDIC
 			*dest = (char) php_htoi(data + 1);
 #else
@@ -469,8 +471,9 @@ PHPAPI int php_url_decode(char *str, int len)
 #endif
 			data += 2;
 			len -= 2;
-		} else
+		} else {
 			*dest = *data;
+		}
 		data++;
 		dest++;
 	}
@@ -481,7 +484,7 @@ PHPAPI int php_url_decode(char *str, int len)
 
 /* {{{ php_raw_url_encode
  */
-PHPAPI char *php_raw_url_encode(char *s, int len, int *new_length)
+PHPAPI char *php_raw_url_encode(char const *s, int len, int *new_length)
 {
 	register int x, y;
 	unsigned char *str;
@@ -557,7 +560,8 @@ PHPAPI int php_raw_url_decode(char *str, int len)
 	char *data = str;
 
 	while (len--) {
-		if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1)) && isxdigit((int) *(data + 2))) {
+		if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1)) && isxdigit((int) *(data + 2))) 
+		{
 #ifndef CHARSET_EBCDIC
 			*dest = (char) php_htoi(data + 1);
 #else
@@ -565,8 +569,9 @@ PHPAPI int php_raw_url_decode(char *str, int len)
 #endif
 			data += 2;
 			len -= 2;
-		} else
+		} else {
 			*dest = *data;
+		}
 		data++;
 		dest++;
 	}

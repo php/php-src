@@ -125,7 +125,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path
 	char *scratch;
 	char tmp_line[512];
 
-	resource = php_url_parse((char *) path);
+	resource = php_url_parse(path);
 	if (resource == NULL || resource->path == NULL)
 		return NULL;
 
