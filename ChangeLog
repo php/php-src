@@ -1,3 +1,35 @@
+2005-03-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS:
+      - BFN
+
+2005-03-03  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * (PHP_4_3)
+      ext/standard/incomplete_class.c:
+      - Remove <b>-Tag from error message
+
+2005-03-03  Zeev Suraski  <zeev@zend.com>
+
+    * main/logos.h:
+      New egg
+
+2005-03-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/standard/file.c
+      ext/standard/file.c:
+      MFH: Fixed bug #32160 (file truncation in copy() when source & destination
+      are
+      the same).
+
+    * ext/standard/file.c:
+      Fixed bug #32160 (file truncation in copy() when source & destination are
+      the same).
+
 2005-03-02  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * (PHP_4_3)
