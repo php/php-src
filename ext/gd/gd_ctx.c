@@ -52,13 +52,13 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 
 	if ((argc == 2) || (argc == 3 && Z_STRLEN_PP(file))) {
 		if (!fn || fn == empty_string || php_check_open_basedir(fn TSRMLS_CC)) {
-			php_error(E_WARNING, "%s: invalid filename '%s'", get_active_function_name(TSRMLS_C), fn);
+			php_error(E_WARNING, "%s(): Invalid filename '%s'", get_active_function_name(TSRMLS_C), fn);
 			RETURN_FALSE;
 		}
 
 		fp = VCWD_FOPEN(fn, "wb");
 		if (!fp) {
-			php_error(E_WARNING, "%s: unable to open '%s' for writing", get_active_function_name(TSRMLS_C), fn);
+			php_error(E_WARNING, "%s(): Unable to open '%s' for writing", get_active_function_name(TSRMLS_C), fn);
 			RETURN_FALSE;
 		}
 
@@ -79,7 +79,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	switch(image_type) {
 		case PHP_GDIMG_CONVERT_WBM:
 			if(q<0||q>255) {
-				php_error(E_WARNING, "%s: invalid threshold value '%d'. It must be between 0 and 255",get_active_function_name(TSRMLS_C), q);
+				php_error(E_WARNING, "%s(): Invalid threshold value '%d'. It must be between 0 and 255",get_active_function_name(TSRMLS_C), q);
 			}
 		case PHP_GDIMG_TYPE_JPG:
 			(*func_p)(im, ctx, q);
