@@ -59,6 +59,9 @@
 #define SQLIMAGE SYBIMAGE
 #define SQLBINARY SYBBINARY
 #define SQLVARBINARY SYBVARBINARY
+#ifdef SQLUNIQUE /* FreeTSD 0.61+ */
+#define SQLUNIQUE SYBUNIQUE
+#endif
 #define DBERRHANDLE(a, b) dberrhandle(b)
 #define DBMSGHANDLE(a, b) dbmsghandle(b)
 #define DBSETOPT(a, b, c) dbsetopt(a, b, c, -1)
