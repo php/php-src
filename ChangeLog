@@ -1,3 +1,30 @@
+2001-08-23  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/xslt/sablot.c
+      ext/xslt/xslt.c: noet
+
+    * ext/xslt/sablot.c: some cleanup
+
+2001-08-23  Zeev Suraski  <zeev@zend.com>
+
+    * ext/com/conversion.c: whitespace
+
+2001-08-23  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/standard/html.c:
+    - Add support for chinese encodings to htmlentities/htmlspecialchars
+      (patch from Alan Knowles <alan_k@hklc.com>)
+
+2001-08-23  Stanislav Malyshev  <stas@zend.com>
+
+    * TODO: Add TODO for DLSYM_NEEDS_UNDRESCORE
+
+2001-08-23  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/common.php:
+    make quoteString() backwards compatible with the original version (quote()
+    is still the prefered quote method)
+
 2001-08-22  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
 
     * ext/standard/crypt.c: Fixed the right version
