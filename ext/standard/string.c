@@ -4024,7 +4024,7 @@ PHP_FUNCTION(str_shuffle)
 }
 /* }}} */
 
-/* {{{ proto void str_word_count(string str, [int format])
+/* {{{ proto mixed str_word_count(string str, [int format])
    	Counts the number of words inside a string. If format of 1 is specified,
    	then the function will return an array containing all the words
    	found inside the string. If format of 2 is specified, then the function
