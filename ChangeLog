@@ -1,3 +1,9 @@
+2004-10-03  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/dom_fe.h
+      ext/dom/xpath.c:
+      add evaluate() method to support all xpath expressions
+
 2004-10-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_0)
