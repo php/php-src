@@ -217,7 +217,8 @@ static void real_result_dtor(struct php_sqlite_result *res TSRMLS_DC)
 
 	if (res->table) {
 		if (!res->buffered && res->nrows) {
-		res->nrows = 1; /* only one row is stored */
+			res->nrows = 1; /* only one row is stored */
+		}
 		for (i = 0; i < res->nrows; i++) {
 			base = i * res->ncolumns;
 			for (j = 0; j < res->ncolumns; j++) {
