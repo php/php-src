@@ -62,7 +62,7 @@ static void php_pcre_free(void *ptr)
 }
 
 
-static void _php_free_pcre_cache(void *data)
+static void php_free_pcre_cache(void *data)
 {
 	pcre_cache_entry *pce = (pcre_cache_entry *) data;
 	pefree(pce->re, 1);
@@ -73,13 +73,13 @@ static void _php_free_pcre_cache(void *data)
 
 
 #ifdef ZTS
-static void _php_pcre_init_globals(php_pcre_globals *pcre_globals)
+static void php_pcre_init_globals(php_pcre_globals *pcre_globals)
 {
-	zend_hash_init(&PCRE_G(pcre_cache), 0, NULL, _php_free_pcre_cache, 1);
+	zend_hash_init(&PCRE_G(pcre_cache), 0, NULL, php_free_pcre_cache, 1);
 }
 
 
-static void _php_pcre_shutdown_globals(php_pcre_globals *pcre_globals)
+static void php_pcre_shutdown_globals(php_pcre_globals *pcre_globals)
 {
 	zend_hash_destroy(&PCRE_G(pcre_cache));
 }
@@ -103,10 +103,10 @@ static PHP_MINIT_FUNCTION(pcre)
 #ifdef ZTS
 	pcre_globals_id = ts_allocate_id(
 							sizeof(php_pcre_globals),
-							(ts_allocate_ctor) _php_pcre_init_globals,
-							(ts_allocate_dtor) _php_pcre_shutdown_globals);
+							(ts_allocate_ctor) php_pcre_init_globals,
+							(ts_allocate_dtor) php_pcre_shutdown_globals);
 #else
-	zend_hash_init(&PCRE_G(pcre_cache), 0, NULL, _php_free_pcre_cache, 1);
+	zend_hash_init(&PCRE_G(pcre_cache), 0, NULL, php_free_pcre_cache, 1);
 #endif
 	
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
@@ -141,8 +141,7 @@ static PHP_RINIT_FUNCTION(pcre)
 /* }}} */
 
 
-/* {{{ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra) */
-static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_options) {
+static pcre* pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_options) {
 	pcre				*re = NULL;
 	int				 	 coptions = 0;
 	int				 	 soptions = 0;
@@ -294,11 +293,9 @@ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_
 
 	return re;
 }
-/* }}} */
 
 
-/* {{{ void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) */
-static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
+static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 {
 	zval			**regex,			/* Regular expression */
 					**subject,			/* String to match against */
@@ -379,7 +376,7 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	}
 
 	/* Compile regex or get it from cache. */
-	if ((re = _pcre_get_compiled_regex((*regex)->value.str.val, extra, &preg_options)) == NULL) {
+	if ((re = pcre_get_compiled_regex((*regex)->value.str.val, extra, &preg_options)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -497,14 +494,13 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 
 	RETVAL_LONG(matched);
 }
-/* }}} */
 
 
 /* {{{ proto int preg_match(string pattern, string subject [, array subpatterns])
    Perform a Perl-style regular expression match */
 PHP_FUNCTION(preg_match)
 {
-	_pcre_match(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_pcre_match(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -513,13 +509,12 @@ PHP_FUNCTION(preg_match)
    Perform a Perl-style global regular expression match */
 PHP_FUNCTION(preg_match_all)
 {
-	_pcre_match(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_pcre_match(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
 
-/* {{{ int _preg_get_backref(const char *walk, int *backref) */
-static int _preg_get_backref(const char *walk, int *backref)
+static int preg_get_backref(const char *walk, int *backref)
 {
 	if (*walk && *walk >= '0' && *walk <= '9')
 		*backref = *walk - '0';
@@ -531,13 +526,10 @@ static int _preg_get_backref(const char *walk, int *backref)
 	
 	return 1;	
 }
-/* }}} */
 
 
-/* {{{ int _preg_do_eval(char *eval_str, char *subject, int *offsets,
-				  int count, char **result) */
-static int _preg_do_eval(char *eval_str, char *subject, int *offsets,
-				  int count, char **result)
+static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
+						int *offsets, int count, char **result)
 {
 	zval		 retval;			/* Return value from evaluation */
 	char		 backref_buf[4],	/* Buffer for string version of backref */
@@ -554,15 +546,13 @@ static int _preg_do_eval(char *eval_str, char *subject, int *offsets,
 	ELS_FETCH();
 	
 	/* Save string to be evaluated, since we will be modifying it */
-	code = estrdup(eval_str);
+	code = estrndup(eval_str, eval_str_len);
 	walk = code;
-	new_code_len = code_len = strlen(code);
+	new_code_len = code_len = eval_str_len;
 	
 	while (*walk) {
 		/* If found a backreference.. */
-		if ('\\' == *walk &&
-			_preg_get_backref(walk+1, &backref) &&
-			backref < count) {
+		if ('\\' == *walk && preg_get_backref(walk+1, &backref) && backref < count) {
 			/* Find the corresponding string match and substitute it
 			   in instead of the backref */
 			match = subject + offsets[backref<<1];
@@ -601,11 +591,12 @@ static int _preg_do_eval(char *eval_str, char *subject, int *offsets,
 	
 	return result_len;
 }
-/* }}} */
 
 
-/* {{{ char *_php_pcre_replace(char *regex, char *subject, char *replace) */
-char *_php_pcre_replace(char *regex, char *subject, char *replace)
+char *php_pcre_replace(char *regex,   int regex_len,
+					   char *subject, int subject_len,
+					   char *replace, int replace_len,
+					   int  *result_len)
 {
 	pcre			*re = NULL;			/* Compiled regular expression */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
@@ -616,9 +607,7 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 	int			 	 size_offsets;		/* Size of the offsets array */
 	int				 new_len;			/* Length of needed storage */
 	int				 alloc_len;			/* Actual allocated length */
-	int				 subject_len;		/* Length of the subject string */
 	int				 eval_result_len=0;	/* Length of the eval'ed string */
-	int				 result_len;		/* Current length of the result */
 	int				 match_len;			/* Length of the current match */
 	int				 backref;			/* Backreference number */
 	int				 eval;				/* If the replacement string should be eval'ed */
@@ -630,10 +619,11 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 					*walk,				/* Used to walk the replacement string */
 					*match,				/* The current match */
 					*piece,				/* The current piece of subject */
+					*replace_end,		/* End of replacement string */
 					*eval_result;		/* Result of eval */
 
 	/* Compile regex or get it from cache. */
-	if ((re = _pcre_get_compiled_regex(regex, extra, &preg_options)) == NULL) {
+	if ((re = pcre_get_compiled_regex(regex, extra, &preg_options)) == NULL) {
 		return NULL;
 	}
 	
@@ -641,8 +631,6 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 	size_offsets = (pcre_info(re, NULL, NULL) + 1) * 3;
 	offsets = (int *)emalloc(size_offsets * sizeof(int));
 	
-	subject_len = strlen(subject);
-
 	alloc_len = 2 * subject_len + 1;
 	result = emalloc(alloc_len * sizeof(char));
 	if (!result) {
@@ -654,8 +642,9 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 
 	/* Initialize */
 	match = NULL;
-	result[0] = '\0';
+	*result_len = 0;
 	start_offset = 0;
+	replace_end = replace + replace_len;
 	eval = preg_options & PREG_REPLACE_EVAL;
 	
 	while (1) {
@@ -669,25 +658,23 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 			count = size_offsets/3;
 		}
 
-		piece = &subject[start_offset];
+		piece = subject + start_offset;
 
 		if (count > 0) {
 			/* Set the match location in subject */
 			match = subject + offsets[0];
 
-			new_len = strlen(result) + offsets[0] - start_offset; /* part before the match */
+			new_len = *result_len + offsets[0] - start_offset; /* part before the match */
 			
 			/* If evaluating, do it and add the return string's length */
 			if (eval) {
-				eval_result_len = _preg_do_eval(replace, subject, offsets,
-												count, &eval_result);
+				eval_result_len = preg_do_eval(replace, replace_len, subject,
+											   offsets, count, &eval_result);
 				new_len += eval_result_len;
 			} else { /* do regular substitution */
 				walk = replace;
-				while (*walk)
-					if ('\\' == *walk &&
-						_preg_get_backref(walk+1, &backref) &&
-						backref < count) {
+				while (walk < replace_end)
+					if ('\\' == *walk && preg_get_backref(walk+1, &backref) && backref < count) {
 						new_len += offsets[(backref<<1)+1] - offsets[backref<<1];
 						walk += (backref > 9) ? 3 : 2;
 					} else {
@@ -699,38 +686,36 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 			if (new_len + 1 > alloc_len) {
 				alloc_len = 1 + alloc_len + 2 * new_len;
 				new_buf = emalloc(alloc_len);
-				strcpy(new_buf, result);
+				memcpy(new_buf, result, *result_len);
 				efree(result);
 				result = new_buf;
 			}
-			result_len = strlen(result);
 			/* copy the part of the string before the match */
-			strncat(result, piece, match-piece);
+			memcpy(&result[*result_len], piece, match-piece);
+			*result_len += match-piece;
 
 			/* copy replacement and backrefs */
-			walkbuf = &result[result_len + offsets[0] - start_offset];
+			walkbuf = result + *result_len;
 			
 			/* If evaluating, copy result to the buffer and clean up */
 			if (eval) {
 				memcpy(walkbuf, eval_result, eval_result_len);
-				walkbuf += eval_result_len;
+				*result_len += eval_result_len;
 				efree(eval_result);
 			} else { /* do regular backreference copying */
 				walk = replace;
-				while (*walk)
-					if ('\\' == *walk &&
-						_preg_get_backref(walk+1, &backref) &&
-						backref < count) {
+				while (walk < replace_end)
+					if ('\\' == *walk && preg_get_backref(walk+1, &backref) && backref < count) {
 						match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
-						memcpy (walkbuf,
-								subject + offsets[backref<<1],
-								match_len);
+						memcpy(walkbuf, subject + offsets[backref<<1], match_len);
 						walkbuf += match_len;
 						walk += (backref > 9) ? 3 : 2;
-					} else
+					} else {
 						*walkbuf++ = *walk++;
+					}
+				/* increment the result length by how much we've added to the string */
+				*result_len += walkbuf - (result + *result_len);
 			}
-			*walkbuf = '\0';
 		} else { /* Failed to match */
 			/* If we previously set PCRE_NOTEMPTY after a null match,
 			   this is not necessarily the end. We need to advance
@@ -739,19 +724,20 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 			if (g_notempty != 0 && start_offset < subject_len) {
 				offsets[0] = start_offset;
 				offsets[1] = start_offset + 1;
-				strncat(result, piece, 1);
-			}
-			else {
-				new_len = strlen(result) + subject_len - start_offset;
+				memcpy(&result[*result_len], piece, 1);
+				(*result_len)++;
+			} else {
+				new_len = *result_len + subject_len - start_offset;
 				if (new_len + 1 > alloc_len) {
 					alloc_len = new_len + 1; /* now we know exactly how long it is */
 					new_buf = emalloc(alloc_len * sizeof(char));
-					strcpy(new_buf, result);
+					memcpy(new_buf, result, *result_len);
 					efree(result);
 					result = new_buf;
 				}
 				/* stick that last bit of string on our output */
-				strcat(result, piece);
+				memcpy(&result[*result_len], piece, subject_len - start_offset);
+				*result_len += subject_len - start_offset;
 				break;
 			}
 		}
@@ -770,33 +756,38 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 
 	return result;
 }
-/* }}} */
 
 
-static char *_php_replace_in_subject(zval *regex, zval *replace, zval **subject)
+static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject,
+									int *result_len)
 {
 	zval		**regex_entry,
 				**replace_entry = NULL;
 	char		*replace_value = NULL,
 				*subject_value,
 				*result;
+	int			 subject_len,
+				 replace_len;
 
 	/* Make sure we're dealing with strings. */	
 	convert_to_string_ex(subject);
 	
 	/* If regex is an array */
 	if (regex->type == IS_ARRAY) {
-		/* Duplicating subject string for repeated replacement */
+		/* Duplicate subject string for repeated replacement */
 		subject_value = estrndup((*subject)->value.str.val, (*subject)->value.str.len);
+		subject_len = (*subject)->value.str.len;
 		
 		zend_hash_internal_pointer_reset(regex->value.ht);
 
 		if (replace->type == IS_ARRAY) {
 			zend_hash_internal_pointer_reset(replace->value.ht);
 		}
-		else
+		else {
 			/* Set replacement value to the passed one */
 			replace_value = replace->value.str.val;
+			replace_len = replace->value.str.len;
+		}
 
 		/* For each entry in the regex array, get the entry */
 		while (zend_hash_get_current_data(regex->value.ht,
@@ -807,28 +798,34 @@ static char *_php_replace_in_subject(zval *regex, zval *replace, zval **subject)
 			/* If replace is an array */
 			if (replace->type == IS_ARRAY) {
 				/* Get current entry */
-				if (zend_hash_get_current_data(replace->value.ht,
-											   (void **)&replace_entry) == SUCCESS) {
+				if (zend_hash_get_current_data(replace->value.ht, (void **)&replace_entry) == SUCCESS) {
 					/* Make sure we're dealing with strings. */	
 					convert_to_string_ex(replace_entry);
 					
 					/* Set replacement value to the one we got from array */
 					replace_value = (*replace_entry)->value.str.val;
+					replace_len = (*replace_entry)->value.str.len;
 
 					zend_hash_move_forward(replace->value.ht);
-				}
-				else
+				} else {
 					/* We've run out of replacement strings, so use an empty one */
 					replace_value = empty_string;
+					replace_len = 0;
+				}
 			}
 			
 			/* Do the actual replacement and put the result back into subject_value
 			   for further replacements. */
-			if ((result = _php_pcre_replace((*regex_entry)->value.str.val,
-											subject_value,
-											replace_value)) != NULL) {
+			if ((result = php_pcre_replace((*regex_entry)->value.str.val,
+										   (*regex_entry)->value.str.len,
+										   subject_value,
+										   subject_len,
+										   replace_value,
+										   replace_len,
+										   result_len)) != NULL) {
 				efree(subject_value);
 				subject_value = result;
+				subject_len = *result_len;
 			}
 			
 			zend_hash_move_forward(regex->value.ht);
@@ -836,9 +833,13 @@ static char *_php_replace_in_subject(zval *regex, zval *replace, zval **subject)
 
 		return subject_value;
 	} else {
-		result = _php_pcre_replace(regex->value.str.val,
-								   (*subject)->value.str.val,
-								   replace->value.str.val);
+		result = php_pcre_replace(regex->value.str.val,
+								  regex->value.str.len,
+							      (*subject)->value.str.val,
+								  (*subject)->value.str.len,
+							      replace->value.str.val,
+								  replace->value.str.len,
+								  result_len);
 		return result;
 	}
 }
@@ -853,6 +854,7 @@ PHP_FUNCTION(preg_replace)
 				   **subject,
 				   **subject_entry;
 	char			*result;
+	int				 result_len;
 	char			*string_key;
 	ulong			 num_key;
 	
@@ -881,18 +883,17 @@ PHP_FUNCTION(preg_replace)
 		   and add the result to the return_value array. */
 		while (zend_hash_get_current_data((*subject)->value.ht,
 										  (void **)&subject_entry) == SUCCESS) {
-			if ((result = _php_replace_in_subject(*regex, *replace, subject_entry)) != NULL)
-			{
+			if ((result = php_replace_in_subject(*regex, *replace, subject_entry, &result_len)) != NULL) {
 				/* Add to return array */
 				switch(zend_hash_get_current_key((*subject)->value.ht, &string_key, &num_key))
 				{
 					case HASH_KEY_IS_STRING:
-						add_assoc_string(return_value, string_key, result, 0);
+						add_assoc_stringl(return_value, string_key, result, result_len, 0);
 						efree(string_key);
 						break;
 
 					case HASH_KEY_IS_LONG:
-						add_index_string(return_value, num_key, result, 0);
+						add_index_stringl(return_value, num_key, result, result_len, 0);
 						break;
 				}
 			}
@@ -901,9 +902,8 @@ PHP_FUNCTION(preg_replace)
 		}
 	}
 	else {	/* if subject is not an array */
-		if ((result = _php_replace_in_subject(*regex, *replace, subject)) != NULL) {
-			RETVAL_STRING(result, 1);
-			efree(result);
+		if ((result = php_replace_in_subject(*regex, *replace, subject, &result_len)) != NULL) {
+			RETVAL_STRINGL(result, result_len, 0);
 		}
 	}	
 }
@@ -956,7 +956,7 @@ PHP_FUNCTION(preg_split)
 	convert_to_string_ex(subject);
 	
 	/* Compile regex or get it from cache. */
-	if ((re = _pcre_get_compiled_regex((*regex)->value.str.val, extra, &preg_options)) == NULL) {
+	if ((re = pcre_get_compiled_regex((*regex)->value.str.val, extra, &preg_options)) == NULL) {
 		RETURN_FALSE;
 	}
 	
@@ -1149,7 +1149,7 @@ PHP_FUNCTION(preg_grep)
 	convert_to_string_ex(regex);
 	
 	/* Compile regex or get it from cache. */
-	if ((re = _pcre_get_compiled_regex((*regex)->value.str.val, extra, &preg_options)) == NULL) {
+	if ((re = pcre_get_compiled_regex((*regex)->value.str.val, extra, &preg_options)) == NULL) {
 		RETURN_FALSE;
 	}
 
