@@ -1153,15 +1153,17 @@ PHP_FUNCTION(ip2long)
 PHP_FUNCTION(long2ip)
 {
 	zval **num;
+	unsigned long n;
 	struct in_addr myaddr;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+	convert_to_string_ex(num);
+	
+	n = strtoul(Z_STRVAL_PP(num), NULL, 0);
 
-	convert_to_long_ex(num);
-	myaddr.s_addr = htonl((unsigned long) Z_LVAL_PP(num));
-
+	myaddr.s_addr = htonl(n);
 	RETURN_STRING(inet_ntoa(myaddr), 1);
 }
 /* }}} */
@@ -2882,7 +2884,7 @@ PHP_FUNCTION(import_request_variables)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
+ * vim600: fdm=marker
+ * vim: noet sw=4 ts=4
  */
 
