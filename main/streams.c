@@ -1751,7 +1751,16 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 	if (fp)	{
 		/* sanity checks for include/require */
 		if (options & STREAM_OPEN_FOR_INCLUDE && (fstat(fileno(fp), &st) == -1 || !S_ISREG(st.st_mode))) {
-			goto err;
+			int is_unc = 0;
+
+#ifdef PHP_WIN32
+			/* skip the sanity check; fstat doesn't appear to work on
+			 * UNC paths */
+			is_unc = (filename[0] == '\\' && filename[1] == '\\');
+#endif
+			if (!is_unc) {
+				goto err;
+			}
 		} 
 	
 		ret = php_stream_fopen_from_file_rel(fp, mode);
@@ -2317,7 +2326,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 				return stream;
 			case PHP_STREAM_RELEASED:
 #if ZEND_DEBUG
-				newstream->__orig_path = estrdup(copy_of_path);
+				newstream->__orig_path = estrdup(path);
 #endif
 				return newstream;
 			default:
@@ -2339,8 +2348,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	}
 	tidy_wrapper_error_log(wrapper TSRMLS_CC);
 #if ZEND_DEBUG
-	if (stream == NULL && copy_of_path != NULL)
+	if (stream == NULL && copy_of_path != NULL) {
 		efree(copy_of_path);
+	}
 #endif
 	return stream;
 }
