@@ -462,7 +462,7 @@ PHP_FUNCTION(scandir)
 	char *dirn;
 	int dirn_len;
 	long flags = 0;
-	php_stream_dirent **namelist;
+	char **namelist;
 	int n, i;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
