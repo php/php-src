@@ -1,3 +1,26 @@
+2001-10-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * Makefile.in:
+    may fail.
+
+2001-10-01  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/mimeDecode.php: Added body decoding functionality.
+
+2001-10-01  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/dbplus/php_dbplus.c
+      ext/dbplus/php_dbplus.h
+      ext/dbplus/dbplus.c
+      ext/dbplus/nonimp_dbplus.c: MFH
+
+2001-10-01  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/config.m4:
+    Removed PHOENIX_INCLUDE, I don't need it to compile and it seems like
+    it causes a conflict with ext/mhash. (Phoenix has a file called mhash.h
+    and that is being found when mhash is being built.)
+
 2001-09-30  Sascha Schumann  <sascha@schumann.cx>
 
     * sapi/thttpd/thttpd.c:
