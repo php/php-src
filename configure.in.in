@@ -16,7 +16,7 @@ for arg in $@; do
 	esac
 done
 
-if test "$with_shared_apache" != "no" ; then
+if test "$with_shared_apache" != "no" && test -n "$with_shared_apache" ; then
   echo ""
   echo "ERROR: --with-shared-apache is not supported."
   echo "       Please read INSTALL.DSO for instructions on using APXS."
