@@ -122,8 +122,18 @@ void php_dl(pval *file,int type,pval *return_value)
 
 	efree(libpath);
 
-	get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "get_module");
 	
+	get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "get_module");
+
+	/*
+	 * some OS prepend _ to symbol names while their dynamic linker
+	 * does not do that automatically. Thus we check manually for
+	 * _get_module.
+	 */
+
+	if (!get_module)
+		get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "_get_module");
+
 	if (!get_module) {
 		DL_UNLOAD(handle);
 		php_error(E_CORE_WARNING,"Invalid library (maybe not a PHP library) '%s' ",file->value.str.val);
