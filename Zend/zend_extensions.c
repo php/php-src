@@ -42,7 +42,13 @@ int zend_load_extension(char *path)
 	}
 
 	extension_version_info = (zend_extension_version_info *) DL_FETCH_SYMBOL(handle, "extension_version_info");
+	if (!extension_version_info) {
+		extension_version_info = (zend_extension_version_info *) DL_FETCH_SYMBOL(handle, "_extension_version_info");
+	}
 	new_extension = (zend_extension *) DL_FETCH_SYMBOL(handle, "zend_extension_entry");
+	if (!new_extension) {
+		new_extension = (zend_extension *) DL_FETCH_SYMBOL(handle, "_zend_extension_entry");
+	}
 	if (!extension_version_info || !new_extension) {
 		fprintf(stderr, "%s doesn't appear to be a valid Zend extension\n", path);
 		DL_UNLOAD(handle);
