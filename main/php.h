@@ -266,8 +266,6 @@ int cfgparse(void);
 
 /* functions */
 int php_startup_internal_extensions(void);
-int php_global_startup_internal_extensions(void);
-int php_global_shutdown_internal_extensions(void);
 
 int php_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp) (const void *, const void *));
 

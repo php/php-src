@@ -312,6 +312,7 @@ static void php_apache_request_shutdown(void *dummy)
 	SLS_FETCH();
 	APLS_FETCH();
 
+	php_output_set_status(0);
 	SG(server_context) = NULL; /* The server context (request) is invalid by the time run_cleanups() is called */
 	if (AP(in_request)) {
 		AP(in_request) = 0;

@@ -768,43 +768,6 @@ int php_startup_extensions(zend_module_entry **ptr, int count)
 }
 /* }}} */
 
-/* {{{ php_global_startup_extensions
- */
-int php_global_startup_extensions(zend_module_entry **ptr, int count)
-{
-	zend_module_entry **end = ptr+count;
-
-	while (ptr < end) {
-		if (*ptr) {
-			if ((*ptr)->global_startup_func && 
-					(*ptr)->global_startup_func()==FAILURE) {
-				return FAILURE;
-			}
-		}
-		ptr++;
-	}
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ php_global_shutdown_extensions
- */
-int php_global_shutdown_extensions(zend_module_entry **ptr, int count)
-{
-	zend_module_entry **end = ptr+count;
-
-	while (ptr < end) {
-		if (*ptr) {
-			if ((*ptr)->global_shutdown_func && 
-					(*ptr)->global_shutdown_func()==FAILURE) {
-				return FAILURE;
-			}
-		}
-		ptr++;
-	}
-	return SUCCESS;
-}
-/* }}} */
 
 /* {{{ php_module_startup
  */
@@ -1296,6 +1259,7 @@ PHPAPI void php_handle_aborted_connection(void)
 	PLS_FETCH();
 
 	PG(connection_status) = PHP_CONNECTION_ABORTED;
+	php_output_set_status(0);
 
 	if (!PG(ignore_user_abort)) {
 		zend_bailout();
