@@ -1851,11 +1851,13 @@ do_fcall_common:
 				NEXT_OPCODE();
 			case ZEND_NAMESPACE:
 				{
+#if 0
 					if (EX(opline)->op1.op_type == IS_UNUSED) {
 						EG(namespace) = NULL;
 					} else {
 						EG(namespace) = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
 					}
+#endif
 					NEXT_OPCODE();
 				}
 			case ZEND_SEND_VAL: 
