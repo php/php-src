@@ -51,7 +51,15 @@ if test "$PHP_DOM" != "no"; then
     DOM_LIBNAME=xml
   fi
 
-  PHP_ADD_LIBRARY_WITH_PATH($DOM_LIBNAME, $DOMXML_DIR/lib, DOMXML_SHARED_LIBADD)
+  XML2_CONFIG=$DOMXML_DIR/bin/xml2-config
+ 
+  if test -x $XML2_CONFIG; then
+    DOM_LIBS=`$XML2_CONFIG --libs`
+    PHP_EVAL_LIBLINE($DOM_LIBS, DOMXML_SHARED_LIBADD)
+  else 
+    PHP_ADD_LIBRARY_WITH_PATH($DOM_LIBNAME, $DOMXML_DIR/lib, DOMXML_SHARED_LIBADD)
+  fi
+
   PHP_ADD_INCLUDE($DOMXML_DIR/include$DOMXML_DIR_ADD)
 
   if test "$PHP_ZLIB_DIR" = "no"; then
@@ -104,7 +112,7 @@ PHP_ARG_WITH(dom-xslt, for DOM XSLT support,
                           DIR is the libxslt install directory.])
 
 PHP_ARG_WITH(dom-exslt, for DOM EXSLT support,
-[  --with-dom-exslt[=DIR]   Include DOM EXSLT support (requires libxslt >= 1.0.3).
+[  --with-dom-exslt[=DIR]  Include DOM EXSLT support (requires libxslt >= 1.0.3).
                           DIR is the libexslt install directory.])
 
 if test "$PHP_DOM_XSLT" != "no"; then
@@ -132,6 +140,19 @@ if test "$PHP_DOM_XSLT" != "no"; then
     AC_MSG_ERROR(DOMXSLT requires DOMXML. Use --with-dom=<DIR>)
   fi
   
+  if test -f $DOMXML_DIR/lib/libxml2.a -o -f $DOMXML_DIR/lib/libxml2.$SHLIB_SUFFIX_NAME ; then
+    DOM_LIBNAME=xml2
+  else
+    DOM_LIBNAME=xml
+  fi
+
+  PHP_ADD_LIBRARY_WITH_PATH($DOM_LIBNAME, $DOMXML_DIR/lib, DOMXML_SHARED_LIBADD)
+  PHP_ADD_INCLUDE($DOMXML_DIR/include$DOMXML_DIR_ADD)
+
+  if test -f $DOMXML_DIR/lib/libxsltbreakpoint.a -o -f $DOMXML_DIR/lib/libxsltbreakpoint.$SHLIB_SUFFIX_NAME ; then
+    PHP_ADD_LIBRARY_WITH_PATH(xsltbreakpoint, $DOMXML_DIR/lib, DOMXML_SHARED_LIBADD)
+  fi
+
   AC_DEFINE(HAVE_DOMXSLT,1,[ ])
   
   PHP_SUBST(DOMXML_SHARED_LIBADD)
