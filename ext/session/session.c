@@ -183,7 +183,7 @@ static void php_set_session_var(char *name, size_t namelen,
 	state_val_copy->refcount = 0;
 
 	if (PG(register_globals) && PG(track_vars)) {
-		zend_set_hash_symbol(state_val_copy, name, namelen, 1, 2, PS(http_state_vars)->value.ht, &EG(symbol_table));
+		zend_set_hash_symbol(state_val_copy, name, namelen, 0, 2, PS(http_state_vars)->value.ht, &EG(symbol_table));
 	} else {
 		if (PG(register_globals)) {
 			zend_set_hash_symbol(state_val_copy, name, namelen, 0, 1, &EG(symbol_table));
