@@ -1,3 +1,51 @@
+2004-12-15  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/ming/ming.c:
+      Adding missing zend_list_addref() and make SWFShape::drawArc() work
+
+2004-12-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+2004-12-15  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - 5.0.4-dev
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Redo 5.0.3
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Back to -dev
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Roll PHP 5.0.3
+
+2004-12-15  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/iconv/.cvsignore:
+      missing files
+
 2004-12-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/tests/math/bug28228.phpt
