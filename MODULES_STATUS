@@ -5,7 +5,7 @@ COM                 Working
 WDDX                Working
 PCRE                Working
 DBA                 Working
-mcrypt              Working
+mcrypt              Working (with libmcrypt version 2.2.7 but not later)
 mhash               Working
 dbase               Working
 aspell              Working
@@ -25,3 +25,36 @@ mcal                Working
 interbase           Working
 posix               Working
 recode              Working
+pfpro               Working (but under development)
+
+bcmath
+calendar
+cpdf
+curl
+cybercash
+dav
+db
+domxml
+fdf
+filepro
+ftp
+gd
+hyperwave
+icap
+ingres_ii
+java
+msql
+mysql
+pdf
+pgsql
+pspell
+readline
+session
+sockets
+swf
+sybase
+sybase_ct
+sysvsem
+xml
+yaz
+yp
