@@ -1,3 +1,203 @@
+2003-04-01  Jay Smith  <jsmith@tutorbuddy.com>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+      Fix 'timestamp without timezone', too.
+
+2003-04-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pgsql/pgsql.c:
+      Fix 'time with timezone', too
+
+2003-04-01  Jay Smith  <jsmith@tutorbuddy.com>
+
+    * ext/pgsql/pgsql.c:
+      Fixed bug #23009 (pg_select with timestamp)
+
+2003-04-01  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS
+      ext/standard/array.c:
+      Arbitrarily limit array_pad() to only do 1 million elements at a time.
+      Probably still too high, but it solves the segfault for now.
+
+2003-04-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/filters/bug22538.phpt:
+      Fixed bogus test
+
+2003-04-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      main/output.c:
+      s/0/FAILURE/
+
+    * main/output.c:
+      Fix an uninitialized read, default to FAILURE
+
+    * (PHP_4_3)
+      main/output.c:
+      Fix an uninitialised read for ob_start(array())
+
+2003-04-01  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/dbase/dbf_head.c
+      ext/exif/exif.c
+      ext/standard/array.c:
+      MFB
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS
+      ext/dbase/dbf_head.c:
+      Argh!!!  I guess nobody has ever looked at this code.
+
+2003-04-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/filters/bug22538.phpt:
+      Added a test case for bug #22538
+
+    * ext/mbstring/php_mbregex.c:
+      oops
+
+    * ext/mbstring/php_mbregex.c:
+      Reverted the last patch; the problem is elsewhere..
+
+2003-04-01  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS
+      ext/exif/exif.c:
+      Fix exif crashes
+
+2003-04-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/php_mbregex.c:
+      Fixed crash that occurs due to an abused persistent hashtable.
+
+2003-04-01  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      Update (not fixed in HEAD because the API for this function needs to
+      change in PHP5.  It is moronic the way it is now)
+
+    * (PHP_4_3)
+      ext/sockets/sockets.c:
+      Ok, really fix socket_iovec_alloc() this time
+
+2003-04-01  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      crap removal
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      configure.in:
+      MFH: Fixed bug #22987 (missing perror() check in configure)
+
+    * configure.in:
+      Fixed bug #22987 (missing perror() check in configure)
+
+2003-04-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      more insight re. ob_start bug
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      The ob_start issue is reproducible.
+
+2003-04-01  Moshe Doron  <mosdoron@netvision.net.il>
+
+    * ext/standard/tests/strings/bug22904.phpt:
+      oops
+
+    * ext/standard/tests/strings/bug22904.phpt:
+      revert due the last string.c revert
+
+    * ext/standard/string.c:
+      revert last commit for now
+
+2003-04-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      editing
+
+    * TODO_SEGFAULTS
+      TODO_SEGFAULTS:
+      
+      file TODO_SEGFAULTS was initially added on branch PHP_4_3.
+
+2003-04-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c:
+      MFH(r-1.170): fixed crash in mb_convert_encoding() that occurs when a void
+      array is passed as the third parameter.
+
+    * ext/mbstring/mbstring.c:
+      Fixed crash in mb_convert_encoding() that occurs when a void array is
+      passed as the third parameter
+
+2003-04-01  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/info.c
+      ext/standard/info.c:
+      -** empty log message ***
+
+2003-04-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+      Fix segfault, logic and lock issue in ircg_is_conn_alive
+
+    * ext/dba/config.m4
+      ext/dba/config.m4
+      ext/dba/config.m4:
+      fix VPATH builds
+
+    * ext/standard/basic_functions.c:
+      Fix segfault in register_shutdown_function
+
+    * (PHP_4_3)
+      acinclude.m4:
+      No need for shtool
+
+    * acinclude.m4:
+      Don't need shtool
+
+    * ext/ircg/ircg.c:
+      Intermediate commit of relocation map integration
+
+    * (PHP_4_3)
+      ext/standard/file.c
+      ext/standard/file.c:
+      Fix segfault in flock()
+
+2003-04-01  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/mail.c:
+      Bug #22962
+
+2003-04-01  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      Sorry Sterling, but this broke the ZTS build and I'd rather not 'ZTS fix'
+      an April's Fool joke.
+
+2003-04-01  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      Add the landonize() and landonize_url() functions which provide a secure
+      alternative to the sha1() and sha1_file() functions.
+
 2003-03-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/standard/tests/serialize/001.phpt:
