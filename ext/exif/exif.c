@@ -1630,7 +1630,7 @@ static void exif_process_SOFn (uchar *Data, int marker, jpeg_sof_info *result)
 }
 /* }}} */
 
-static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *DirStart, char *OffsetBase, unsigned IFDlength, int sub_section_index);
+static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *DirStart, char *OffsetBase, unsigned IFDlength, int sub_section_index TSRMLS_DC);
 
 /* {{{ exif_get_markername
 	Get name of marker */
@@ -2025,13 +2025,12 @@ static int exif_process_user_comment(char **pszInfoPtr,char **szEncoding,char *s
 
 /* {{{ exif_process_IFD_TAG
  * Process one of the nested IFDs directories. */
-static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, char *offset_base, size_t IFDlength, int section_index, int ReadNextIFD)
+static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, char *offset_base, size_t IFDlength, int section_index, int ReadNextIFD TSRMLS_DC)
 {
 	int l;
 	int tag, format, components;
 	char *value_ptr, tagname[64], cbuf[32], *outside=NULL;
 	size_t byte_count, offset_val, fpos, fgot;
-	TSRMLS_FETCH();
 
 	tag = php_ifd_get16u(dir_entry, ImageInfo->motorola_intel);
 	format = php_ifd_get16u(dir_entry+2, ImageInfo->motorola_intel);
@@ -2266,7 +2265,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 						php_error(E_WARNING, "Illegal IFD Pointer");
 						return FALSE;
 					}
-					exif_process_IFD_in_JPEG(ImageInfo, SubdirStart, offset_base, IFDlength, sub_section_index);
+					exif_process_IFD_in_JPEG(ImageInfo, SubdirStart, offset_base, IFDlength, sub_section_index TSRMLS_CC);
 					#ifdef EXIF_DEBUG
 					php_error(E_NOTICE,"subsection %s done", exif_get_sectionname(sub_section_index));
 					#endif
@@ -2281,7 +2280,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 
 /* {{{ exif_process_IFD_in_JPEG
  * Process one of the nested IFDs directories. */
-static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *DirStart, char *OffsetBase, unsigned IFDlength, int section_index)
+static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *DirStart, char *OffsetBase, unsigned IFDlength, int section_index TSRMLS_DC)
 {
 	int de;
 	int NumDirEntries;
@@ -2301,7 +2300,8 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *DirStart, 
 	}
 
 	for (de=0;de<NumDirEntries;de++) {
-		if ( !exif_process_IFD_TAG(ImageInfo,DirStart+2+12*de,OffsetBase,IFDlength,section_index,1)) {
+		if (!exif_process_IFD_TAG(ImageInfo, DirStart + 2 + 12 * de,
+								  OffsetBase, IFDlength, section_index, 1 TSRMLS_CC)) {
 			return FALSE;
 		}
 	}
@@ -2320,7 +2320,7 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *DirStart, 
 		#ifdef EXIF_DEBUG
 		php_error(E_NOTICE,"expect next IFD to be thumbnail");
 		#endif
-		if (exif_process_IFD_in_JPEG(ImageInfo, OffsetBase + NextDirOffset, OffsetBase, IFDlength, SECTION_THUMBNAIL))
+		if (exif_process_IFD_in_JPEG(ImageInfo, OffsetBase + NextDirOffset, OffsetBase, IFDlength, SECTION_THUMBNAIL TSRMLS_CC))
 		{
 			#ifdef EXIF_DEBUG
 			php_error(E_NOTICE,"thumbnail size: 0x%04X", ImageInfo->Thumbnail.size);
@@ -2344,7 +2344,7 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *DirStart, 
 /* {{{ exif_process_TIFF_in_JPEG
    Process a TIFF header in a JPEG file
 */
-static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf, unsigned int length)
+static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf, unsigned int length TSRMLS_DC)
 {
 	/* set the thumbnail stuff to nothing so we can test to see if they get set up */
 	if (memcmp(CharBuf, "II", 2) == 0) {
@@ -2365,7 +2365,7 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
 
 	ImageInfo->sections_found |= FOUND_IFD0;
 	/* First directory starts at offset 8. Offsets starts at 0. */
-	exif_process_IFD_in_JPEG(ImageInfo, CharBuf+8, CharBuf, length/*-14*/, SECTION_IFD0);
+	exif_process_IFD_in_JPEG(ImageInfo, CharBuf+8, CharBuf, length/*-14*/, SECTION_IFD0 TSRMLS_CC);
 
 	#ifdef EXIF_DEBUG
 	php_error(E_NOTICE,"exif_process_TIFF_in_JPEG, done");
@@ -2382,7 +2382,7 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
    Process an JPEG APP1 block marker
    Describes all the drivel that most digital cameras include...
 */
-static void exif_process_APP1(image_info_type *ImageInfo, char *CharBuf, unsigned int length)
+static void exif_process_APP1(image_info_type *ImageInfo, char *CharBuf, unsigned int length TSRMLS_DC)
 {
 	/* Check the APP1 for Exif Identifier Code */
 	static const uchar ExifHeader[] = {0x45, 0x78, 0x69, 0x66, 0x00, 0x00};
@@ -2390,7 +2390,7 @@ static void exif_process_APP1(image_info_type *ImageInfo, char *CharBuf, unsigne
 		php_error(E_WARNING, "Incorrect APP1 Exif Identifier Code");
 		return;
 	}
-	exif_process_TIFF_in_JPEG(ImageInfo,CharBuf+8,length-8);
+	exif_process_TIFF_in_JPEG(ImageInfo,CharBuf + 8, length - 8 TSRMLS_CC);
 	#ifdef EXIF_DEBUG
 	php_error(E_NOTICE,"process Exif done");
 	#endif
@@ -2419,7 +2419,7 @@ static void exif_process_APP12(image_info_type *ImageInfo, char *buffer, unsigne
 
 /* {{{ exif_scan_JPEG_header
  * Parse the marker stream until SOS or EOI is seen; */
-static int exif_scan_JPEG_header(image_info_type *ImageInfo)
+static int exif_scan_JPEG_header(image_info_type *ImageInfo TSRMLS_DC)
 {
 	int section, sn;
 	int marker = 0, last_marker = M_PSEUDO, comment_correction;
@@ -2427,7 +2427,6 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 	uchar *Data;
 	size_t fpos, size, got, itemlen;
 	jpeg_sof_info  sof_info;
-	TSRMLS_FETCH();
 
 	for(section=0;;section++)
 	{
@@ -2533,7 +2532,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 					/*ImageInfo->sections_found |= FOUND_EXIF;*/
 					/* Seen files from some 'U-lead' software with Vivitar scanner
 					   that uses marker 31 later in the file (no clue what for!) */
-					exif_process_APP1(ImageInfo, (char *)Data, itemlen);
+					exif_process_APP1(ImageInfo, (char *)Data, itemlen TSRMLS_CC);
 				}
 				break;
 
@@ -2573,7 +2572,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 		last_marker = marker;
 	}
 	#ifdef EXIF_DEBUG
-	php_error(E_NOTICE,"exif_scan_JPEG_header, done");
+	php_error(E_NOTICE, "exif_scan_JPEG_header, done");
 	#endif
 	return TRUE;
 }
@@ -2661,13 +2660,12 @@ static int exif_scan_thumbnail(image_info_type *ImageInfo)
 
 /* {{{ exif_process_IFD_in_TIFF
  * Parse the TIFF header; */
-static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offset, int section_index)
+static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offset, int section_index TSRMLS_DC)
 {
 	int i, sn, num_entries, sub_section_index;
 	unsigned char *dir_entry;
 	size_t ifd_size, dir_size, entry_offset, next_offset, entry_length, entry_value, fgot;
 	int entry_tag , entry_type;
-	TSRMLS_FETCH();
 
 	if ( ImageInfo->FileSize >= dir_offset+2) {
 		if ( (sn=exif_file_sections_add(ImageInfo, M_PSEUDO, 2, NULL))==-1) {
@@ -2807,12 +2805,14 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 						#ifdef EXIF_DEBUG
 						php_error(E_NOTICE,"Next IFD %s at x%04X", exif_get_sectionname(sub_section_index), entry_offset);
 						#endif
-						exif_process_IFD_in_TIFF(ImageInfo,entry_offset,sub_section_index);
+						exif_process_IFD_in_TIFF(ImageInfo, entry_offset,sub_section_index TSRMLS_CC);
 						#ifdef EXIF_DEBUG
 						php_error(E_NOTICE,"Next IFD %s done", exif_get_sectionname(sub_section_index));
 						#endif
 					} else {
-						if ( !exif_process_IFD_TAG(ImageInfo,dir_entry,ImageInfo->file.list[sn].data-dir_offset,ifd_size,section_index,0)) {
+						if (!exif_process_IFD_TAG(ImageInfo, dir_entry,
+												  ImageInfo->file.list[sn].data-dir_offset,
+												  ifd_size,section_index, 0 TSRMLS_CC)) {
 							return FALSE;
 						}
 					}
@@ -2823,7 +2823,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 					#ifdef EXIF_DEBUG
 					php_error(E_NOTICE,"Read next IFD (THUMBNAIL) at x%04X", next_offset);
 					#endif
-					exif_process_IFD_in_TIFF(ImageInfo,next_offset,SECTION_THUMBNAIL);
+					exif_process_IFD_in_TIFF(ImageInfo, next_offset,SECTION_THUMBNAIL TSRMLS_CC);
 					#ifdef EXIF_DEBUG
 					php_error(E_NOTICE,"Read THUMBNAIL @0x%04X + 0x%04X", ImageInfo->Thumbnail.offset, ImageInfo->Thumbnail.size);
 					#endif
@@ -2863,11 +2863,10 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 
 /* {{{ exif_scan_FILE_header
  * Parse the marker stream until SOS or EOI is seen; */
-static int exif_scan_FILE_header (image_info_type *ImageInfo)
+static int exif_scan_FILE_header(image_info_type *ImageInfo TSRMLS_DC)
 {
 	unsigned char file_header[8];
 	int ret = FALSE;
-	TSRMLS_FETCH();
 
 	ImageInfo->FileType = IMAGE_FILETYPE_UNKNOWN;
 
@@ -2876,7 +2875,7 @@ static int exif_scan_FILE_header (image_info_type *ImageInfo)
 		php_stream_read(ImageInfo->infile, file_header, 2);
 		if ( (file_header[0]==0xff) && (file_header[1]==M_SOI)) {
 			ImageInfo->FileType = IMAGE_FILETYPE_JPEG;
-			if (exif_scan_JPEG_header(ImageInfo)) {
+			if (exif_scan_JPEG_header(ImageInfo TSRMLS_CC)) {
 				ret = TRUE;
 			} else {
 				php_error(E_WARNING, "Invalid JPEG file: '%s'", ImageInfo->FileName);
@@ -2891,7 +2890,9 @@ static int exif_scan_FILE_header (image_info_type *ImageInfo)
 				php_error(E_NOTICE,"File(%s) has TIFF/II format", ImageInfo->FileName);
 				#endif
 				ImageInfo->sections_found |= FOUND_IFD0;
-				if (exif_process_IFD_in_TIFF(ImageInfo,php_ifd_get32u(file_header+4,ImageInfo->motorola_intel),SECTION_IFD0)) {
+				if (exif_process_IFD_in_TIFF(ImageInfo,
+											 php_ifd_get32u(file_header + 4, ImageInfo->motorola_intel),
+											 SECTION_IFD0 TSRMLS_CC)) {
 					ret = TRUE;
 				} else {
 					php_error(E_WARNING, "Invalid TIFF file: '%s'", ImageInfo->FileName);
@@ -2906,7 +2907,9 @@ static int exif_scan_FILE_header (image_info_type *ImageInfo)
 				php_error(E_NOTICE,"File(%s) has TIFF/MM format", ImageInfo->FileName);
 				#endif
 				ImageInfo->sections_found |= FOUND_IFD0;
-				if (exif_process_IFD_in_TIFF(ImageInfo,php_ifd_get32u(file_header+4,ImageInfo->motorola_intel),SECTION_IFD0)) {
+				if (exif_process_IFD_in_TIFF(ImageInfo,
+											 php_ifd_get32u(file_header + 4, ImageInfo->motorola_intel),
+											 SECTION_IFD0 TSRMLS_CC)) {
 					ret = TRUE;
 				} else {
 					php_error(E_WARNING, "Invalid TIFF file: '%s'", ImageInfo->FileName);
@@ -2985,7 +2988,7 @@ int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnai
 	}
 
 	/* Scan the JPEG headers. */
-	ret = exif_scan_FILE_header(ImageInfo);
+	ret = exif_scan_FILE_header(ImageInfo TSRMLS_CC);
 
 	php_stream_close(ImageInfo->infile);
 	return ret;
