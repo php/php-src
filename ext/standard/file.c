@@ -89,24 +89,14 @@ extern int fclose(FILE *);
 #include "scanf.h"
 #include "zend_API.h"
 
+#ifdef ZTS
+int file_globals_id;
+#else
+php_file_globals file_globals;
+#endif
 
 /* }}} */
 /* {{{ ZTS-stuff / Globals / Prototypes */
-
-typedef struct {
-	int fgetss_state;
-	int pclose_ret;
-} php_file_globals;
-
-#ifdef ZTS
-#define FIL(v) (file_globals->v)
-#define FIL_FETCH() php_file_globals *file_globals = ts_resource(file_globals_id)
-int file_globals_id;
-#else
-#define FIL(v) (file_globals.v)
-#define FIL_FETCH()
-php_file_globals file_globals;
-#endif
 
 /* sharing globals is *evil* */
 static int le_fopen, le_popen, le_socket; 
@@ -118,8 +108,9 @@ static int le_fopen, le_popen, le_socket;
 static void _file_popen_dtor(zend_rsrc_list_entry *rsrc)
 {
 	FILE *pipe = (FILE *)rsrc->ptr;
-	FIL_FETCH();
-	FIL(pclose_ret) = pclose(pipe);
+	FLS_FETCH();
+
+	FG(pclose_ret) = pclose(pipe);
 }
 
 
@@ -159,10 +150,20 @@ PHPAPI int php_file_le_socket(void) /* XXX doe we really want this???? */
 
 
 #ifdef ZTS
-static void php_file_init_globals(php_file_globals *file_globals)
+static void file_globals_ctor(FLS_D)
 {
-	FIL(fgetss_state) = 0;
-	FIL(pclose_ret) = 0;
+	zend_hash_init(&FG(ht_fsock_keys), 0, NULL, NULL, 1);
+	zend_hash_init(&FG(ht_fsock_socks), 0, NULL, (void (*)(void *))php_msock_destroy, 1);
+	FG(def_chunk_size) = PHP_FSOCK_CHUNK_SIZE;
+	FG(phpsockbuf) = NULL;
+	FG(fgetss_state) = 0;
+	FG(pclose_ret) = 0;
+}
+static void file_globals_dtor(FLS_D)
+{
+	zend_hash_destroy(&FG(ht_fsock_socks));
+	zend_hash_destroy(&FG(ht_fsock_keys));
+	php_cleanup_sockbuf(1 FLS_CC);
 }
 #endif
 
@@ -173,10 +174,9 @@ PHP_MINIT_FUNCTION(file)
 	le_socket = zend_register_list_destructors_ex(_file_socket_dtor, NULL, "socket", module_number);
 
 #ifdef ZTS
-	file_globals_id = ts_allocate_id(sizeof(php_file_globals), (ts_allocate_ctor) php_file_init_globals, NULL);
+	file_globals_id = ts_allocate_id(sizeof(php_file_globals), (ts_allocate_ctor) file_globals_ctor, (ts_allocate_dtor) file_globals_dtor);
 #else
-	FIL(fgetss_state) = 0;
-	FIL(pclose_ret) = 0;
+	file_globals_ctor(FLS_C);
 #endif
 
 	REGISTER_LONG_CONSTANT("SEEK_SET", SEEK_SET, CONST_CS | CONST_PERSISTENT);
@@ -526,7 +526,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	int *sock;
 	int use_include_path = 0;
 	int issock=0, socketd=0;
-	FIL_FETCH();
+	FLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 	case 2:
@@ -565,7 +565,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	}
 
 	efree(p);
-	FIL(fgetss_state)=0;
+	FG(fgetss_state)=0;
 
 	if (issock) {
 		sock=emalloc(sizeof(int));
@@ -664,7 +664,7 @@ PHP_FUNCTION(pclose)
 {
 	pval **arg1;
 	void *what;
-	FIL_FETCH();
+	FLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -674,7 +674,7 @@ PHP_FUNCTION(pclose)
 	ZEND_VERIFY_RESOURCE(what);
 	
 	zend_list_delete((*arg1)->value.lval);
-	RETURN_LONG(FIL(pclose_ret));
+	RETURN_LONG(FG(pclose_ret));
 }
 
 /* }}} */
@@ -949,7 +949,7 @@ PHP_FUNCTION(fgetss)
 	void *what;
 	char *allowed_tags=NULL;
 	int allowed_tags_len=0;
-	FIL_FETCH();
+	FLS_FETCH();
 
 	switch(ARG_COUNT(ht)) {
 	case 2:
@@ -995,7 +995,7 @@ PHP_FUNCTION(fgetss)
 	}
 
 	/* strlen() can be used here since we are doing it on the return of an fgets() anyway */
-	php_strip_tags(buf, strlen(buf), FIL(fgetss_state), allowed_tags, allowed_tags_len);
+	php_strip_tags(buf, strlen(buf), FG(fgetss_state), allowed_tags, allowed_tags_len);
 
 	RETURN_STRING(buf, 0);
 }

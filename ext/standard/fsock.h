@@ -24,6 +24,8 @@
 #ifndef FSOCK_H
 #define FSOCK_H
 
+#include "file.h"
+
 #ifdef PHP_WIN32
 # ifndef WINNT
 #  define WINNT 1
@@ -44,6 +46,8 @@
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
+
+#define PHP_FSOCK_CHUNK_SIZE 8192
 
 struct php_sockbuf {
 	int socket;
@@ -78,6 +82,7 @@ int php_sockdestroy(int socket);
 int php_sock_close(int socket);
 size_t php_sock_set_def_chunk_size(size_t size);
 void php_msock_destroy(int *data);
+void php_cleanup_sockbuf(int persistent FLS_DC);
 
 PHPAPI int connect_nonb(int sockfd, struct sockaddr *addr, socklen_t addrlen, struct timeval *timeout);
 PHPAPI struct php_sockbuf *php_get_socket(int socket);
@@ -85,28 +90,5 @@ PHPAPI struct php_sockbuf *php_get_socket(int socket);
 PHP_MINIT_FUNCTION(fsock);
 PHP_MSHUTDOWN_FUNCTION(fsock);
 PHP_RSHUTDOWN_FUNCTION(fsock);
-
-typedef struct {
-	HashTable ht_fsock_keys;
-	HashTable ht_fsock_socks;
-	struct php_sockbuf *phpsockbuf;
-	size_t def_chunk_size;
-} php_fsock_globals;
-
-#ifdef ZTS
-#define FLS_D php_fsock_globals *fsock_globals
-#define FLS_DC , FLS_D
-#define FLS_C fsock_globals
-#define FLS_CC , FLS_C
-#define FG(v) (fsock_globals->v)
-#define FLS_FETCH() php_fsock_globals *fsock_globals = ts_resource(fsock_globals_id)
-#else
-#define FLS_D	void
-#define FLS_DC
-#define FLS_C
-#define FLS_CC
-#define FG(v) (fsock_globals.v)
-#define FLS_FETCH()
-#endif
 
 #endif /* FSOCK_H */
