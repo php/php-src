@@ -1,3 +1,93 @@
+2001-09-10  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/openssl/openssl.c:
+    Added some preliminary x509 cert and csr creation/signing functions.
+    Also, some problems with CGI initialization should be eliminated.
+    Renamed some pkey functions to be more consistent.
+
+2001-09-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/java/config.m4: fix build.
+
+2001-09-10  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/pdf/pdf.c: fix resource destruction
+
+2001-09-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/config.m4
+      build/library.mk:
+    Use $(LINK) for libraries, but $(LINK_CLEAN) for creating programs.
+
+    Also pass only $(CFLAGS_CLEAN) into thttpd's Makefile.
+
+2001-09-10  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/pdf/pdf.c: - Fix for bug #13230
+
+2001-09-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/java/config.m4:
+    Fix a problem when withval pointed to a symlink and automatic
+    detection for the java libraries failed
+
+2001-09-10  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Net/Socket.php:
+    allow for reading from sockets that just terminate lines with \n, instead of
+    \r\n. Contributed by Aaron S. Hawley <Aaron.Hawley@uvm.edu>.
+
+2001-09-10  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/openssl/openssl.c:
+    don't forget TSRMLS_CC when using zend_parse_parameters
+
+    * sapi/apache2filter/php4apache2.dsp
+      sapi/apache2filter/sapi_apache2.c
+      win32/php4ts.dsw: let apache2 filter build under win32
+
+2001-09-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: MFH
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: A round of "d'ohs" for me, please.
+
+    We must not stop scanning after finding a "?", because we
+    need the information regarding the "#".
+
+    * ext/curl/curl.c: Use proper macro to return string with unknown length
+
+2001-09-10  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/variant.h
+      ext/com/VARIANT.c
+      ext/com/conversion.h
+      ext/com/conversion.c
+      ext/com/COM.c
+      ext/com/TODO: MFH
+
+    * ext/com/TODO
+      ext/com/conversion.c:
+    removed ->is_ref check, doesn't make sense and causes bugs
+
+    * ext/com/COM.c:
+    IDispatchs got released if they were passed to another component
+
+2001-09-10  Stig Bakken  <ssb@fast.no>
+
+    * ext/xmlrpc/.cvsignore: .cvsignore
+
+    * ext/xmlrpc/Makefile.in
+      ext/xmlrpc/config.m4: * build fix
+
+2001-09-10  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c: Revert, this is max error size, not strlen(error)
+
+    * ext/curl/curl.c: RETURN_STRING -> RETURN_STRINGL
+
 2001-09-09  Zeev Suraski  <zeev@zend.com>
 
     * ext/standard/credits.c: Do some justice to the doc team
