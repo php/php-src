@@ -298,7 +298,7 @@ PHPAPI FILE *php_fopen_primary_script(void)
 	temp = estrdup(fn);
 	php_dirname(temp, strlen(temp));
 	if (*temp) {
-		chdir(temp);
+		PHP_CHDIR(temp);
 	}
 	efree(temp);
 	SG(request_info).path_translated = fn;
