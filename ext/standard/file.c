@@ -76,8 +76,6 @@
 #if HAVE_PWD_H
 #ifdef PHP_WIN32
 #include "win32/pwd.h"
-#elif defined(NETWARE)
-#include "netware/pwd.h"
 #else
 #include <pwd.h>
 #endif
@@ -1538,7 +1536,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	MAKE_LONG_ZVAL_INCREF(stat_rdev, -1); 
 #endif
 	MAKE_LONG_ZVAL_INCREF(stat_size, stat_ssb.sb.st_size);
-#if defined(NETWARE) && defined(CLIB_STAT_PATCH)
+#ifdef NETWARE
 	MAKE_LONG_ZVAL_INCREF(stat_atime, stat_ssb.sb.st_atime.tv_sec);
 	MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_ssb.sb.st_mtime.tv_sec);
 	MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_ssb.sb.st_ctime.tv_sec);
