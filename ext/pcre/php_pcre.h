@@ -40,11 +40,6 @@ PHP_FUNCTION(preg_split);
 PHP_FUNCTION(preg_quote);
 PHP_FUNCTION(preg_grep);
 
-char *php_pcre_replace(char *regex,   int regex_len,
-					   char *subject, int subject_len,
-					   char *replace, int replace_len,
-					   int  *result_len, int limit);
-
 extern zend_module_entry pcre_module_entry;
 #define pcre_module_ptr &pcre_module_entry
 

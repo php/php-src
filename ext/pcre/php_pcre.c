@@ -561,18 +561,14 @@ static inline int preg_get_backref(const char *walk, int *backref)
 	return 1;	
 }
 
-static int preg_do_repl_func(char *function_name, char *subject, int *offsets, int count, char **result)
+static int preg_do_repl_func(zval *function, char *subject, int *offsets, int count, char **result)
 {
 	zval		*retval_ptr;		/* Function return value */
-	zval		 function;			/* Function to call */
-	zval		*function_ptr = &function;		/* Pointer to function to call */
 	zval	   **args[1];			/* Argument to pass to function */
 	zval		*subpats;			/* Captured subpatterns */ 
 	int			 result_len;		/* Return value length */
 	int			 i;
 	CLS_FETCH();
-
-	ZVAL_STRING(function_ptr, function_name, 0);
 
 	MAKE_STD_ZVAL(subpats);
 	array_init(subpats);
@@ -580,13 +576,13 @@ static int preg_do_repl_func(char *function_name, char *subject, int *offsets, i
 		add_next_index_stringl(subpats, &subject[offsets[i<<1]], offsets[(i<<1)+1] - offsets[i<<1], 1);
 	args[0] = &subpats;
 
-	if (call_user_function_ex(CG(function_table), NULL, function_ptr, &retval_ptr, 1, args, 0, NULL) == SUCCESS && retval_ptr) {
+	if (call_user_function_ex(EG(function_table), NULL, function, &retval_ptr, 1, args, 0, NULL) == SUCCESS && retval_ptr) {
 		convert_to_string_ex(&retval_ptr);
 		*result = estrndup(Z_STRVAL_P(retval_ptr), Z_STRLEN_P(retval_ptr));
 		result_len = Z_STRLEN_P(retval_ptr);
 		zval_ptr_dtor(&retval_ptr);
 	} else {
-		php_error(E_WARNING, "Unable to call custom replacement function %s()", function_name);
+		php_error(E_WARNING, "Unable to call custom replacement function");
 		result_len = offsets[1] - offsets[0];
 		*result = estrndup(&subject[offsets[0]], result_len);
 	}
@@ -693,8 +689,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 
 char *php_pcre_replace(char *regex,   int regex_len,
 					   char *subject, int subject_len,
-					   char *replace, int replace_len,
-					   int  *result_len, int limit)
+					   zval *replace_val, int *result_len, int limit)
 {
 	pcre			*re = NULL;			/* Compiled regular expression */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
@@ -714,7 +709,9 @@ char *php_pcre_replace(char *regex,   int regex_len,
 										   a function to get the replacement string */
 	int				 start_offset;		/* Where the new search starts */
 	int				 g_notempty = 0;	/* If the match should not be empty */
+	int				 replace_len;		/* Length of replacement string */
 	char			*result,			/* Result of replacement */
+					*replace,			/* Replacement string */
 					*new_buf,			/* Temporary buffer for re-allocation */
 					*walkbuf,			/* Location of current replacement in the result */
 					*walk,				/* Used to walk the replacement string */
@@ -728,7 +725,24 @@ char *php_pcre_replace(char *regex,   int regex_len,
 	if ((re = pcre_get_compiled_regex(regex, extra, &preg_options)) == NULL) {
 		return NULL;
 	}
-	
+	eval = preg_options & PREG_REPLACE_EVAL;
+	use_func = preg_options & PREG_REPLACE_FUNC;
+
+	/* Verify and use the replacement value. */
+	if (use_func) {
+		if (!zend_is_callable(replace_val)) {
+			php_error(E_WARNING, "Replacement function is invalid or undefined");
+			result = estrndup(subject, subject_len);
+			*result_len = subject_len;
+			return result;
+		}
+	} else {
+		convert_to_string(replace_val);
+		replace = Z_STRVAL_P(replace_val);
+		replace_len = Z_STRLEN_P(replace_val);
+		replace_end = replace + replace_len;
+	}
+
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	size_offsets = (pcre_info(re, NULL, NULL) + 1) * 3;
 	offsets = (int *)emalloc(size_offsets * sizeof(int));
@@ -740,9 +754,6 @@ char *php_pcre_replace(char *regex,   int regex_len,
 	match = NULL;
 	*result_len = 0;
 	start_offset = 0;
-	replace_end = replace + replace_len;
-	eval = preg_options & PREG_REPLACE_EVAL;
-	use_func = preg_options & PREG_REPLACE_FUNC;
 	
 	while (1) {
 		/* Execute the regular expression. */
@@ -770,7 +781,7 @@ char *php_pcre_replace(char *regex,   int regex_len,
 				new_len += eval_result_len;
 			} else if (use_func) {
 				/* Use custom function to get replacement string and its length. */
-				eval_result_len = preg_do_repl_func(replace, subject, offsets,
+				eval_result_len = preg_do_repl_func(replace_val, subject, offsets,
 													count, &eval_result);
 				new_len += eval_result_len;
 			} else { /* do regular substitution */
@@ -890,18 +901,19 @@ char *php_pcre_replace(char *regex,   int regex_len,
 }
 
 
-static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, int *result_len, int limit)
+static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, int *result_len, int limit, zend_bool is_callable_replace)
 {
 	zval		**regex_entry,
-				**replace_entry = NULL;
-	char		*replace_value = NULL,
-				*subject_value,
+				**replace_entry = NULL,
+				 *replace_value,
+				  empty_replace;
+	char		*subject_value,
 				*result;
-	int			 subject_len,
-				 replace_len = 0;
+	int			 subject_len;
 
 	/* Make sure we're dealing with strings. */	
 	convert_to_string_ex(subject);
+	ZVAL_STRINGL(&empty_replace, empty_string, 0, 0);
 	
 	/* If regex is an array */
 	if (Z_TYPE_P(regex) == IS_ARRAY) {
@@ -912,37 +924,24 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 		
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(regex));
 
-		if (Z_TYPE_P(replace) == IS_ARRAY) {
+		replace_value = replace;
+		if (Z_TYPE_P(replace) == IS_ARRAY && !is_callable_replace)
 			zend_hash_internal_pointer_reset(Z_ARRVAL_P(replace));
-		}
-		else {
-			/* Set replacement value to the passed one */
-			replace_value = Z_STRVAL_P(replace);
-			replace_len = Z_STRLEN_P(replace);
-		}
 
 		/* For each entry in the regex array, get the entry */
-		while (zend_hash_get_current_data(Z_ARRVAL_P(regex),
-										  (void **)&regex_entry) == SUCCESS) {
+		while (zend_hash_get_current_data(Z_ARRVAL_P(regex), (void **)&regex_entry) == SUCCESS) {
 			/* Make sure we're dealing with strings. */	
 			convert_to_string_ex(regex_entry);
 		
-			/* If replace is an array */
-			if (Z_TYPE_P(replace) == IS_ARRAY) {
+			/* If replace is an array and not a callable construct */
+			if (Z_TYPE_P(replace) == IS_ARRAY && !is_callable_replace) {
 				/* Get current entry */
 				if (zend_hash_get_current_data(Z_ARRVAL_P(replace), (void **)&replace_entry) == SUCCESS) {
-					/* Make sure we're dealing with strings. */	
-					convert_to_string_ex(replace_entry);
-					
-					/* Set replacement value to the one we got from array */
-					replace_value = Z_STRVAL_PP(replace_entry);
-					replace_len = Z_STRLEN_PP(replace_entry);
-
+					replace_value = *replace_entry;
 					zend_hash_move_forward(Z_ARRVAL_P(replace));
 				} else {
 					/* We've run out of replacement strings, so use an empty one */
-					replace_value = empty_string;
-					replace_len = 0;
+					replace_value = &empty_replace;
 				}
 			}
 			
@@ -953,7 +952,6 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 										   subject_value,
 										   subject_len,
 										   replace_value,
-										   replace_len,
 										   result_len,
 										   limit)) != NULL) {
 				efree(subject_value);
@@ -970,8 +968,7 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 								  Z_STRLEN_P(regex),
 							      Z_STRVAL_PP(subject),
 								  Z_STRLEN_PP(subject),
-							      Z_STRVAL_P(replace),
-								  Z_STRLEN_P(replace),
+								  replace,
 								  result_len,
 								  limit);
 		return result;
@@ -993,6 +990,7 @@ PHP_FUNCTION(preg_replace)
 	int				 limit_val = -1;
 	char			*string_key;
 	ulong			 num_key;
+	zend_bool		 is_callable_replace = 0;
 	
 	/* Get function parameters and do error-checking. */
 	if (ZEND_NUM_ARGS() < 3 || ZEND_NUM_ARGS() > 4 ||
@@ -1009,12 +1007,13 @@ PHP_FUNCTION(preg_replace)
 		limit_val = Z_LVAL_PP(limit);
 	}
 		
-	/* Make sure we're dealing with strings and do the replacement */
-	if (Z_TYPE_PP(regex) != IS_ARRAY) {
+	if (Z_TYPE_PP(regex) != IS_ARRAY)
 		convert_to_string_ex(regex);
+	
+	if (Z_TYPE_PP(replace) != IS_ARRAY) {
 		convert_to_string_ex(replace);
-	} else if (Z_TYPE_PP(replace) != IS_ARRAY)
-		convert_to_string_ex(replace);
+	} else
+		is_callable_replace = zend_is_callable(*replace);
 	
 	/* if subject is an array */
 	if (Z_TYPE_PP(subject) == IS_ARRAY) {
@@ -1023,9 +1022,8 @@ PHP_FUNCTION(preg_replace)
 
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
-		while (zend_hash_get_current_data(Z_ARRVAL_PP(subject),
-										  (void **)&subject_entry) == SUCCESS) {
-			if ((result = php_replace_in_subject(*regex, *replace, subject_entry, &result_len, limit_val)) != NULL) {
+		while (zend_hash_get_current_data(Z_ARRVAL_PP(subject), (void **)&subject_entry) == SUCCESS) {
+			if ((result = php_replace_in_subject(*regex, *replace, subject_entry, &result_len, limit_val, is_callable_replace)) != NULL) {
 				/* Add to return array */
 				switch(zend_hash_get_current_key(Z_ARRVAL_PP(subject), &string_key, &num_key, 0))
 				{
@@ -1043,7 +1041,7 @@ PHP_FUNCTION(preg_replace)
 		}
 	}
 	else {	/* if subject is not an array */
-		if ((result = php_replace_in_subject(*regex, *replace, subject, &result_len, limit_val)) != NULL) {
+		if ((result = php_replace_in_subject(*regex, *replace, subject, &result_len, limit_val, is_callable_replace)) != NULL) {
 			RETVAL_STRINGL(result, result_len, 0);
 		}
 	}	
