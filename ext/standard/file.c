@@ -1646,7 +1646,7 @@ PHP_FUNCTION(mmapfile)
 	char        *in_addr;
 	struct stat f_stat;
 
-	memset (&f_stat, 0, sizeof (stat));
+	memset (&f_stat, 0, sizeof (f_stat));
    
 	/* check args */
 	switch (ARG_COUNT(ht)) {
