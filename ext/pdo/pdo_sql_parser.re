@@ -43,7 +43,7 @@ static int scan(Scanner *s)
 	std:
 		s->tok = cursor;
 	/*!re2c
-	BINDCHR		= [:][a-zA-Z0-9]+;
+	BINDCHR		= [:][a-zA-Z0-9_]+;
 	SPECIALS	= [:"];
 	ESC     	= [\\]["];
 	EOF			= [\000];
