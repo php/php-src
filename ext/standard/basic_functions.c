@@ -503,8 +503,13 @@ function_entry basic_functions[] = {
 	PHP_FE(diskfreespace,			NULL)
 
 	/* functions from mail.c */
+#ifdef HAVE_SENDMAIL
 	PHP_FE(mail,					NULL)
 	PHP_FE(ezmlm_hash,				NULL)
+#else
+	PHP_FALIAS(mail,	warn_not_available,	NULL)
+	PHP_FALIAS(ezmlm_hash,	warn_not_available,	NULL)
+#endif
 
 	/* functions from syslog.c */
 #ifdef HAVE_SYSLOG_H
