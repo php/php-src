@@ -97,8 +97,22 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 static long odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
+	RETCODE rc;
+	long row_count;
 
-	return 0;
+	rc = SQLExecDirect(H->dbc, (char *)sql, sql_len);
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		/* XXX error reporting needed */
+		return 0;
+	}
+
+	rc = SQLRowCount(H->dbc, &row_count);
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		/* XXX error reporting needed */
+		return 0;
+	}
+
+	return row_count;
 }
 
 static int odbc_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen  TSRMLS_DC)
