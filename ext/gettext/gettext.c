@@ -146,8 +146,7 @@ PHP_FUNCTION(dcgettext)
 PHP_FUNCTION(bindtextdomain)
 {
 	pval **domain_name, **dir;
-	char *retval, *dir_name;
-	char *val;
+	char *retval, dir_name[MAXPATHLEN];
 
 	if (ZEND_NUM_ARGS() != 2
 		|| zend_get_parameters_ex(2, &domain_name, &dir) == FAILURE)
@@ -157,11 +156,10 @@ PHP_FUNCTION(bindtextdomain)
 	convert_to_string_ex(domain_name);
 	convert_to_string_ex(dir);
 
-	val = (*dir)->value.str.val;
-	if (strcmp(val, "") && strcmp(val, "0")) {
-		dir_name = val;
+	if (strcmp((*dir)->value.str.val, "") && strcmp((*dir)->value.str.val, "0")) {
+		V_REALPATH((*dir)->value.str.val, dir_name);
 	} else {
-		dir_name = NULL;
+		V_GETCWD(dir_name, MAXPATHLEN);
 	}
 
 	retval = bindtextdomain((*domain_name)->value.str.val, dir_name);
