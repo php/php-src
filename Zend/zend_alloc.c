@@ -165,6 +165,12 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 			AG(cache_stats)[CACHE_INDEX][0]++;
 		}
 #endif
+#if MEMORY_LIMIT
+		CHECK_MEMORY_LIMIT(size, SIZE);
+		if (AG(allocated_memory) > AG(allocated_memory_peak)) {
+			AG(allocated_memory_peak) = AG(allocated_memory);
+		}
+#endif
 		p  = (zend_mem_header *) ZEND_DO_MALLOC(sizeof(zend_mem_header) + MEM_HEADER_PADDING + SIZE + END_MAGIC_SIZE);
 #if !ZEND_DISABLE_MEMORY_CACHE
 	}
@@ -198,12 +204,6 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	p->thread_id = tsrm_thread_id();
 # endif
 	memcpy((((char *) p) + sizeof(zend_mem_header) + MEM_HEADER_PADDING + size), &mem_block_end_magic, sizeof(long));
-#endif
-#if MEMORY_LIMIT
-	CHECK_MEMORY_LIMIT(size, SIZE);
-	if (AG(allocated_memory) > AG(allocated_memory_peak)) {
-		AG(allocated_memory_peak) = AG(allocated_memory);
-	}
 #endif
 
 	HANDLE_UNBLOCK_INTERRUPTIONS();
@@ -331,6 +331,12 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 	CALCULATE_REAL_SIZE_AND_CACHE_INDEX(size);
 
 	HANDLE_BLOCK_INTERRUPTIONS();
+#if MEMORY_LIMIT
+	CHECK_MEMORY_LIMIT(size - p->size, SIZE - REAL_SIZE(p->size));
+	if (AG(allocated_memory) > AG(allocated_memory_peak)) {
+		AG(allocated_memory_peak) = AG(allocated_memory);
+	}
+#endif
 #if ZEND_DEBUG || !defined(ZEND_MM)
 	REMOVE_POINTER_FROM_LIST(p);
 #endif
@@ -359,12 +365,6 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 	p->magic = MEM_BLOCK_START_MAGIC;
 	memcpy((((char *) p) + sizeof(zend_mem_header) + MEM_HEADER_PADDING + size), &mem_block_end_magic, sizeof(long));
 #endif	
-#if MEMORY_LIMIT
-	CHECK_MEMORY_LIMIT(size - p->size, SIZE - REAL_SIZE(p->size));
-	if (AG(allocated_memory) > AG(allocated_memory_peak)) {
-		AG(allocated_memory_peak) = AG(allocated_memory);
-	}
-#endif
 
 	p->size = size;
 
