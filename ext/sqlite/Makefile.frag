@@ -25,6 +25,8 @@ $(srcdir)/libsqlite/src/opcodes.h: $(srcdir)/libsqlite/src/vdbe.c
 	  sed -e 's/://' | \
 	  awk '{printf "#define %-30s %3d\n", $$2, ++cnt}' >>$@
 
+$(srcdir)/libsqlite/src/sqlite.c: $(srcdir)/libsqlite/src/sqlite.h
+
 $(srcdir)/libsqlite/src/parse.c:	$(srcdir)/libsqlite/src/parse.y
 	$(LEMON) $(srcdir)/libsqlite/src/parse.y
 
