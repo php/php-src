@@ -130,7 +130,7 @@ PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size, zend_bool 
 PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS_DC)
 {
 	char *final_buffer=NULL;
-	int final_buffer_length=0;
+	unsigned int final_buffer_length=0;
 	zval *alternate_buffer=NULL;
 	char *to_be_destroyed_buffer;
 	char *to_be_destroyed_handled_output[2] = { 0, 0 };
