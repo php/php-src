@@ -1,4 +1,5 @@
 #include "php_soap.h"
+#include "ext/standard/base64.h"
 
 static char *get_http_header_value(char *headers, char *type);
 static int get_http_body(php_stream *socketd, char *headers,  char **response, int *out_size TSRMLS_DC);
@@ -112,7 +113,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 	}
 
 	if (stream) {
-		zval **cookies;
+		zval **cookies, **login, **password;
 
 		smart_str_append_const(&soap_headers, "POST ");
 		smart_str_appends(&soap_headers, phpurl->path);
@@ -132,7 +133,24 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 		smart_str_appends(&soap_headers, soapaction);
 		smart_str_append_const(&soap_headers, "\"\r\n");
 
-		/* TODO: Add authentication */
+		/* HTTP Authentication */
+		if(zend_hash_find(Z_OBJPROP_P(this_ptr), "_login", sizeof("_login"), (void **)&login) == SUCCESS) {
+			char* buf;
+			int len;
+
+			smart_str auth = {0};
+			smart_str_appendl(&auth, Z_STRVAL_PP(login), Z_STRLEN_PP(login));
+			smart_str_appendc(&auth, ':');
+			if(zend_hash_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password"), (void **)&password) == SUCCESS) {
+				smart_str_appendl(&auth, Z_STRVAL_PP(password), Z_STRLEN_PP(password));
+			}
+			buf = php_base64_encode(auth.c, auth.len, &len);
+			smart_str_append_const(&soap_headers, "Authorization: Basic ");
+			smart_str_appendl(&soap_headers, buf, len);
+			smart_str_append_const(&soap_headers, "\r\n");
+			efree(buf);
+			smart_str_free(&auth);
+		}
 
 		/* Send cookies along with request */
 		if(zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == SUCCESS) {

@@ -108,7 +108,7 @@ Transport
 + support for https://
 - support for persistent HTTP connections (keep_alive)
 - support for HTTP compression (gzip,x-gzip,defalte)
-- support for HTTP athentication
++ support for HTTP authentication
 - support for HTTP proxies
 - transport abstraction layer
 
