@@ -126,9 +126,6 @@ static sapi_module_struct php_embed_module = {
 	php_embed_register_variables,   /* register server variables */
 	php_embed_log_message,          /* Log message */
   
-	NULL,                          /* Block interruptions */
-	NULL,                          /* Unblock interruptions */
-
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */

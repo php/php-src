@@ -540,7 +540,12 @@ static sapi_module_struct apache_sapi_module = {
 	unblock_alarms,					/* Unblock interruptions */
 #endif
 
-	STANDARD_SAPI_MODULE_PROPERTIES
+	NULL,                           /* default post reader */
+	NULL,                           /* treat data */
+	NULL,                           /* exe location */
+	0,                              /* ini ignore */
+	NULL
+	
 };
 /* }}} */
 

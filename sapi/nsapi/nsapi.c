@@ -380,9 +380,6 @@ static sapi_module_struct nsapi_sapi_module = {
 	sapi_nsapi_register_server_variables,	/* register server variables */
 	nsapi_log_message,			/* Log message */
 
-	NULL,					/* Block interruptions */
-	NULL,					/* Unblock interruptions */
-
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 

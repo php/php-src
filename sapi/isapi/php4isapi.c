@@ -603,9 +603,6 @@ static sapi_module_struct isapi_sapi_module = {
 	sapi_isapi_register_server_variables,	/* register server variables */
 	NULL,									/* Log message */
 
-	NULL,									/* Block interruptions */
-	NULL,									/* Unblock interruptions */
-
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 

@@ -278,9 +278,6 @@ static sapi_module_struct sapi_module = {
 	sapi_webjames_register_variables,       /* register server variables */
 	NULL,									/* Log message */
 
-	NULL,									/* Block interruptions */
-	NULL,									/* Unblock interruptions */
-
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 

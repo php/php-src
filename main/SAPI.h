@@ -215,12 +215,12 @@ struct _sapi_module_struct {
 	void (*register_server_variables)(zval *track_vars_array TSRMLS_DC);
 	void (*log_message)(char *message);
 
+
 	char *php_ini_path_override;
 
 	void (*block_interruptions)(void);
 	void (*unblock_interruptions)(void);
 	
-
 	void (*default_post_reader)(TSRMLS_D);
 	void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC);
 	char *executable_location;
@@ -262,7 +262,7 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader);
 SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data);
 
-#define STANDARD_SAPI_MODULE_PROPERTIES NULL, NULL, 0
+#define STANDARD_SAPI_MODULE_PROPERTIES NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL
 
 #endif /* SAPI_H */
 

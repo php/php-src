@@ -209,9 +209,6 @@ static sapi_module_struct fastcgi_sapi_module = {
 	sapi_fastcgi_register_variables,
 	sapi_fastcgi_log_message,
 
-	NULL,									/* Block interruptions */
-	NULL,									/* Unblock interruptions */
-
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
