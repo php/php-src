@@ -91,6 +91,7 @@ PHP_FUNCTION(ibase_errmsg);
 PHP_FUNCTION(ibase_errcode);
 
 PHP_FUNCTION(ibase_wait_event);
+PHP_FUNCTION(ibase_set_event_handler);
 
 #define IBASE_MSGSIZE 256
 #define MAX_ERRMSG (IBASE_MSGSIZE*2)
@@ -170,6 +171,17 @@ typedef struct {
 	unsigned char has_more_rows;
 	char statement_type;
 } ibase_result;
+
+typedef struct {
+	int link_res_id;
+	ibase_db_link *link;
+	ISC_LONG event_id;
+	unsigned short event_count;
+	char **events;
+	char *event_buffer, *result_buffer;
+	zval *callback;
+	void **thread_ctx;
+} ibase_event;
 
 typedef struct _php_ibase_varchar {
 	short var_len;
