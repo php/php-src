@@ -222,17 +222,53 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 	xmlNodePtr node = NULL;
 	TSRMLS_FETCH();
 
-	if (encode == NULL) {
-		encode = get_conversion(UNKNOWN_TYPE);
-	}
-	if (encode->to_xml_before) {
-		data = encode->to_xml_before(&encode->details, data);
-	}
-	if (encode->to_xml) {
-		node = encode->to_xml(&encode->details, data, style, parent);
-	}
-	if (encode->to_xml_after) {
-		node = encode->to_xml_after(&encode->details, node, style);
+	/* Special handling of class SoapVar */
+	if (data &&
+	    Z_TYPE_P(data) == IS_OBJECT &&
+	    Z_OBJCE_P(data) == soap_var_class_entry) {
+		zval **ztype, **zdata, **zns, **zstype, **zname, **znamens;
+		encodePtr enc;
+
+		if (zend_hash_find(Z_OBJPROP_P(data), "enc_type", sizeof("enc_type"), (void **)&ztype) == FAILURE) {
+			php_error(E_ERROR, "SOAP-ERROR: Encoding: SoapVar hasn't 'enc_type' propery");
+		}
+
+		enc = get_conversion(Z_LVAL_P(*ztype));
+
+		if (zend_hash_find(Z_OBJPROP_P(data), "enc_value", sizeof("enc_value"), (void **)&zdata) == FAILURE) {
+			node = master_to_xml(enc, NULL, style, parent);
+		} else {
+			node = master_to_xml(enc, *zdata, style, parent);
+		}
+
+		if (zend_hash_find(Z_OBJPROP_P(data), "enc_stype", sizeof("enc_stype"), (void **)&zstype) == SUCCESS) {
+			if (zend_hash_find(Z_OBJPROP_P(data), "enc_ns", sizeof("enc_ns"), (void **)&zns) == SUCCESS) {
+				set_ns_and_type_ex(node, Z_STRVAL_PP(zns), Z_STRVAL_PP(zstype));
+			} else {
+				set_ns_and_type_ex(node, NULL, Z_STRVAL_PP(zstype));
+			}
+		}
+
+		if (zend_hash_find(Z_OBJPROP_P(data), "enc_name", sizeof("enc_name"), (void **)&zname) == SUCCESS) {
+			xmlNodeSetName(node, Z_STRVAL_PP(zname));
+		}
+		if (zend_hash_find(Z_OBJPROP_P(data), "enc_namens", sizeof("enc_namens"), (void **)&znamens) == SUCCESS) {
+			xmlNsPtr nsp = encode_add_ns(node, Z_STRVAL_PP(znamens));
+			xmlSetNs(node, nsp);
+		}
+	} else {
+		if (encode == NULL) {
+			encode = get_conversion(UNKNOWN_TYPE);
+		}
+		if (encode->to_xml_before) {
+			data = encode->to_xml_before(&encode->details, data);
+		}
+		if (encode->to_xml) {
+			node = encode->to_xml(&encode->details, data, style, parent);
+		}
+		if (encode->to_xml_after) {
+			node = encode->to_xml_after(&encode->details, node, style);
+		}
 	}
 	return node;
 }
@@ -979,41 +1015,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 	sdlTypePtr sdlType = type->sdl_type;
 	TSRMLS_FETCH();
 
-	/* Special handling of class SoapVar */
-	if (data &&
-	    Z_TYPE_P(data) == IS_OBJECT &&
-	    Z_OBJCE_P(data) == soap_var_class_entry) {
-		zval **ztype, **zdata, **zns, **zstype, **zname, **znamens;
-		encodePtr enc;
-
-		if (zend_hash_find(Z_OBJPROP_P(data), "enc_type", sizeof("enc_type"), (void **)&ztype) == FAILURE) {
-			php_error(E_ERROR, "SOAP-ERROR: Encoding: SoapVar hasn't 'enc_type' propery");
-		}
-
-		enc = get_conversion(Z_LVAL_P(*ztype));
-
-		if (zend_hash_find(Z_OBJPROP_P(data), "enc_value", sizeof("enc_value"), (void **)&zdata) == FAILURE) {
-			xmlParam = master_to_xml(enc, NULL, style, parent);
-		} else {
-			xmlParam = master_to_xml(enc, *zdata, style, parent);
-		}
-
-		if (zend_hash_find(Z_OBJPROP_P(data), "enc_stype", sizeof("enc_stype"), (void **)&zstype) == SUCCESS) {
-			if (zend_hash_find(Z_OBJPROP_P(data), "enc_ns", sizeof("enc_ns"), (void **)&zns) == SUCCESS) {
-				set_ns_and_type_ex(xmlParam, Z_STRVAL_PP(zns), Z_STRVAL_PP(zstype));
-			} else {
-				set_ns_and_type_ex(xmlParam, NULL, Z_STRVAL_PP(zstype));
-			}
-		}
-
-		if (zend_hash_find(Z_OBJPROP_P(data), "enc_name", sizeof("enc_name"), (void **)&zname) == SUCCESS) {
-			xmlNodeSetName(xmlParam, Z_STRVAL_PP(zname));
-		}
-		if (zend_hash_find(Z_OBJPROP_P(data), "enc_namens", sizeof("enc_namens"), (void **)&znamens) == SUCCESS) {
-			xmlNsPtr nsp = encode_add_ns(xmlParam, Z_STRVAL_PP(znamens));
-			xmlSetNs(xmlParam, nsp);
-		}
-	} else if (sdlType) {
+	if (sdlType) {
 		prop = NULL;
 		if (Z_TYPE_P(data) == IS_OBJECT) {
 			prop = Z_OBJPROP_P(data);
@@ -2462,6 +2464,7 @@ static void get_array_type(xmlNodePtr node, zval *array, smart_str *type TSRMLS_
 	HashTable *ht = HASH_OF(array);
 	int i, count, cur_type, prev_type, different;
 	zval **tmp;
+	char *prev_stype, *cur_stype, *prev_ns, *cur_ns;
 
 	if (!array || Z_TYPE_P(array) != IS_ARRAY) {
 		smart_str_appendl(type, "xsd:anyType", 11);
@@ -2482,31 +2485,64 @@ static void get_array_type(xmlNodePtr node, zval *array, smart_str *type TSRMLS_
 			if (zend_hash_find(Z_OBJPROP_PP(tmp), "enc_type", sizeof("enc_type"), (void **)&ztype) == FAILURE) {
 				php_error(E_ERROR, "SOAP-ERROR: Encoding: SoapVar hasn't 'enc_type' property");
 			}
-			cur_type = Z_LVAL_P(*ztype);
+			cur_type = Z_LVAL_PP(ztype);
+
+			if (zend_hash_find(Z_OBJPROP_PP(tmp), "enc_stype", sizeof("enc_stype"), (void **)&ztype) == SUCCESS) {
+			  cur_stype = Z_STRVAL_PP(ztype);
+			} else {
+			  cur_stype = NULL;
+			}
+			
+			if (zend_hash_find(Z_OBJPROP_PP(tmp), "enc_ns", sizeof("enc_ns"), (void **)&ztype) == SUCCESS) {
+			  cur_ns = Z_STRVAL_PP(ztype);
+			} else {
+			  cur_ns = NULL;
+			}
+				
 		} else if (Z_TYPE_PP(tmp) == IS_ARRAY && is_map(*tmp)) {
 			cur_type = APACHE_MAP;
+		  cur_stype = NULL;
+		  cur_ns = NULL;
 		} else {
 			cur_type = Z_TYPE_PP(tmp);
+		  cur_stype = NULL;
+		  cur_ns = NULL;
 		}
 
 		if (i > 0) {
-			if (cur_type != prev_type) {
+			if ((cur_type != prev_type) ||
+          (cur_stype != NULL && prev_stype != NULL && strcmp(cur_stype,prev_stype) != 0) ||
+          (cur_stype == NULL && cur_stype != prev_stype) ||
+          (cur_ns != NULL && prev_ns != NULL && strcmp(cur_ns,prev_ns) != 0) ||
+          (cur_ns == NULL && cur_ns != prev_ns)) {
 				different = TRUE;
 				break;
 			}
 		}
 
 		prev_type = cur_type;
+		prev_stype = cur_stype;
+		prev_ns = cur_ns;
 		zend_hash_move_forward(ht);
 	}
 
 	if (different || count == 0) {
 		smart_str_appendl(type, "xsd:anyType", 11);
 	} else {
-		encodePtr enc;
+		if (cur_stype != NULL) {
+			if (cur_ns) {
+				xmlNsPtr ns = encode_add_ns(node,cur_ns);
+				smart_str_appends(type,ns->prefix);
+				smart_str_appendc(type,':');
+			}
+			smart_str_appends(type,cur_stype);
+			smart_str_0(type);
+		} else {
+			encodePtr enc;
 
-		enc = get_conversion(cur_type);
-		get_type_str(node, enc->details.ns, enc->details.type_str, type);
+			enc = get_conversion(cur_type);
+			get_type_str(node, enc->details.ns, enc->details.type_str, type);
+		}
 	}
 }
 

@@ -142,8 +142,8 @@ function make_2d($x, $y)
     return $a;
 }
 
-function soap_value($name, $value, $type) {
-    return new soapparam(new soapvar($value,$type),$name);
+function soap_value($name, $value, $type, $type_name=NULL, $type_ns=NULL) {
+    return new soapparam(new soapvar($value,$type,$type_name,$type_ns),$name);
 }
 
 class SOAPStruct {
@@ -184,22 +184,22 @@ $soap_tests['base'][] = new SOAP_Test('echoStringArray',
         array('inputStringArray' => array('good','bad')));
 $soap_tests['base'][] = new SOAP_Test('echoStringArray',
         array('inputStringArray' =>
-            soap_value('inputStringArray',array('good','bad'),SOAP_ENC_ARRAY)));
+            soap_value('inputStringArray',array('good','bad'),SOAP_ENC_ARRAY,"ArrayOfstring","http://soapinterop.org/xsd")));
 
 $soap_tests['base'][] = new SOAP_Test('echoStringArray(one)',
         array('inputStringArray' => array('good')));
 $soap_tests['base'][] = new SOAP_Test('echoStringArray(one)',
         array('inputStringArray' =>
-            soap_value('inputStringArray',array('good'),SOAP_ENC_ARRAY)));
+            soap_value('inputStringArray',array('good'),SOAP_ENC_ARRAY,"ArrayOfstring","http://soapinterop.org/xsd")));
 
 // empty array test
 $soap_tests['base'][] = new SOAP_Test('echoStringArray(empty)', array('inputStringArray' => array()));
-$soap_tests['base'][] = new SOAP_Test('echoStringArray(empty)', array('inputStringArray' => soap_value('inputStringArray',array(),SOAP_ENC_ARRAY)));
+$soap_tests['base'][] = new SOAP_Test('echoStringArray(empty)', array('inputStringArray' => soap_value('inputStringArray',array(),SOAP_ENC_ARRAY,"ArrayOfstring","http://soapinterop.org/xsd")));
 
 # XXX NULL Arrays not supported
 // null array test
 $soap_tests['base'][] = new SOAP_Test('echoStringArray(null)', array('inputStringArray' => NULL));
-$soap_tests['base'][] = new SOAP_Test('echoStringArray(null)', array('inputStringArray' => soap_value('inputStringArray',NULL,SOAP_ENC_ARRAY)));
+$soap_tests['base'][] = new SOAP_Test('echoStringArray(null)', array('inputStringArray' => soap_value('inputStringArray',NULL,SOAP_ENC_ARRAY,"ArrayOfstring","http://soapinterop.org/xsd")));
 
 //***********************************************************
 // Base echoInteger
@@ -215,7 +215,7 @@ $soap_tests['base'][] = new SOAP_Test('echoIntegerArray',
         array('inputIntegerArray' =>
             soap_value('inputIntegerArray',
                        array(new soapvar(12345,XSD_INT),new soapvar(654321,XSD_INT)),
-                    SOAP_ENC_ARRAY)));
+                    SOAP_ENC_ARRAY,"ArrayOfint","http://soapinterop.org/xsd")));
 
 //***********************************************************
 // Base echoFloat
@@ -231,13 +231,13 @@ $soap_tests['base'][] = new SOAP_Test('echoFloatArray',
         array('inputFloatArray' =>
             soap_value('inputFloatArray',
                        array(new soapvar(123.45,XSD_FLOAT),new soapvar(654.321,XSD_FLOAT)),
-                    SOAP_ENC_ARRAY)));
+                    SOAP_ENC_ARRAY,"ArrayOffloat","http://soapinterop.org/xsd")));
 //***********************************************************
 // Base echoStruct
 
 $soapstruct = new SOAPStruct('arg',34,325.325);
 # XXX no way to set a namespace!!!
-$soapsoapstruct = soap_value('inputStruct',$soapstruct,SOAP_ENC_OBJECT);
+$soapsoapstruct = soap_value('inputStruct',$soapstruct,SOAP_ENC_OBJECT,"SOAPStruct","http://soapinterop.org/xsd");
 $soap_tests['base'][] = new SOAP_Test('echoStruct', array('inputStruct' =>$soapstruct));
 $soap_tests['base'][] = new SOAP_Test('echoStruct', array('inputStruct' =>$soapsoapstruct));
 
@@ -247,7 +247,11 @@ $soap_tests['base'][] = new SOAP_Test('echoStruct', array('inputStruct' =>$soaps
 $soap_tests['base'][] = new SOAP_Test('echoStructArray', array('inputStructArray' => array(
         $soapstruct,$soapstruct,$soapstruct)));
 $soap_tests['base'][] = new SOAP_Test('echoStructArray', array('inputStructArray' =>
-        soap_value('inputStructArray',array($soapstruct,$soapstruct,$soapstruct),SOAP_ENC_ARRAY)));
+         soap_value('inputStructArray',array(
+           new soapvar($soapstruct,SOAP_ENC_OBJECT,"SOAPStruct","http://soapinterop.org/xsd"),
+           new soapvar($soapstruct,SOAP_ENC_OBJECT,"SOAPStruct","http://soapinterop.org/xsd"),
+           new soapvar($soapstruct,SOAP_ENC_OBJECT,"SOAPStruct","http://soapinterop.org/xsd")),
+         SOAP_ENC_ARRAY,"ArrayOfSOAPStruct","http://soapinterop.org/xsd")));
 
 
 //***********************************************************
@@ -331,7 +335,7 @@ $soap_tests['GroupB'][] = new SOAP_Test('echoStructAsSimpleTypes',
             (object)array('varString' => 'arg',
                 					'varInt'    => 34,
                           'varFloat'  => 325.325
-            ), SOAP_ENC_OBJECT)), $expect);
+            ), SOAP_ENC_OBJECT, "SOAPStruct","http://soapinterop.org/xsd")), $expect);
 
 //***********************************************************
 // GroupB echoSimpleTypesAsStruct
@@ -375,8 +379,7 @@ $soap_tests['GroupB'][] = new SOAP_Test('echo2DStringArray',
 //***********************************************************
 // GroupB echoNestedStruct
 
-$soap_tests['GroupB'][] = new SOAP_Test('echoNestedStruct',
-    array('inputStruct' => (object)array(
+$strstr = (object)array(
         'varString'=>'arg',
         'varInt'=>34,
         'varFloat'=>325.325,
@@ -384,8 +387,9 @@ $soap_tests['GroupB'][] = new SOAP_Test('echoNestedStruct',
             'varString'=>'arg',
             'varInt'=>34,
             'varFloat'=>325.325
-        )
-    )));
+        ));
+$soap_tests['GroupB'][] = new SOAP_Test('echoNestedStruct',
+    array('inputStruct' => $strstr));
 $soap_tests['GroupB'][] = new SOAP_Test('echoNestedStruct',
     array('inputStruct' =>
         soap_value('inputStruct',
@@ -393,33 +397,25 @@ $soap_tests['GroupB'][] = new SOAP_Test('echoNestedStruct',
 				        'varString'=>'arg',
         				'varInt'=>34,
 				        'varFloat'=>325.325,
-        				'varStruct' => (object)array(
+        				'varStruct' => new SoapVar((object)array(
 				            'varString'=>'arg',
         				    'varInt'=>34,
 				            'varFloat'=>325.325
-        				)
-//            array( #push struct elements into one soap value
-//                soap_value('varString','arg', XSD_STRING),
-//                soap_value('varInt',34, XSD_INT),
-//                soap_value('varFloat',325.325,XSD_FLOAT),
-//                soap_value('varStruct',
-//                    (object)array('varString' => 'arg',
-//                                  'varInt'    => 34,
-//                                  'varFloat'  => 325.325
-//                    ), SOAP_ENC_OBJECT
-            ), SOAP_ENC_OBJECT
-        )));
+        				), SOAP_ENC_OBJECT, "SOAPStruct","http://soapinterop.org/xsd")
+            ), SOAP_ENC_OBJECT, "SOAPStructStruct","http://soapinterop.org/xsd"
+        )),$strstr);
 
 //***********************************************************
 // GroupB echoNestedArray
 
-$soap_tests['GroupB'][] = new SOAP_Test('echoNestedArray',
-    array('inputStruct' => (object)array(
+$arrstr = (object)array(
         'varString'=>'arg',
         'varInt'=>34,
         'varFloat'=>325.325,
         'varArray' => array('red','blue','green')
-    )));
+    );
+$soap_tests['GroupB'][] = new SOAP_Test('echoNestedArray',
+    array('inputStruct' => $arrstr));
 $soap_tests['GroupB'][] = new SOAP_Test('echoNestedArray',
     array('inputStruct' =>
         soap_value('inputStruct',
@@ -427,13 +423,9 @@ $soap_tests['GroupB'][] = new SOAP_Test('echoNestedArray',
                           'varInt'    => 34,
                           'varFloat'  => 325.325,
                           'varArray'  =>
-                    array("red", "blue", "green")
-//                        soap_value('item','red', XSD_STRING),
-//                        soap_value('item','blue', XSD_STRING),
-//                        soap_value('item','green', XSD_STRING)
-//                    )
-                ), SOAP_ENC_OBJECT
-        )));
+                    new SoapVar(array("red", "blue", "green"), SOAP_ENC_ARRAY, "ArrayOfstring","http://soapinterop.org/xsd")
+                ), SOAP_ENC_OBJECT, "SOAPArrayStruct","http://soapinterop.org/xsd"
+        )),$arrstr);
 
 
 #//***********************************************************

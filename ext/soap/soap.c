@@ -1347,8 +1347,10 @@ static void do_soap_call(zval* thisObj,
                          int function_len,
                          int arg_count,
                          zval** real_args,
-                         zval* return_value
-						 TSRMLS_DC)
+                         zval* return_value,
+                         char* soap_action,
+                         char* call_uri
+                         TSRMLS_DC)
 {
 	zval **tmp;
 	zval **trace;
@@ -1425,11 +1427,18 @@ zend_try {
 		} else if (zend_hash_find(Z_OBJPROP_P(thisObj), "location", sizeof("location"),(void **) &location) == FAILURE) {
 			add_soap_fault(thisObj, "Client", "Error could not find \"location\" property", NULL, NULL TSRMLS_CC);
 		} else {
-	 		request = seralize_function_call(thisObj, NULL, function, Z_STRVAL_PP(uri), real_args, arg_count, soap_version TSRMLS_CC);
+			if (call_uri == NULL) {
+				call_uri = Z_STRVAL_PP(uri);
+			}
+	 		request = seralize_function_call(thisObj, NULL, function, call_uri, real_args, arg_count, soap_version TSRMLS_CC);
 
-			smart_str_appendl(&action, Z_STRVAL_PP(uri), Z_STRLEN_PP(uri));
-			smart_str_appendc(&action, '#');
-			smart_str_appends(&action, function);
+	 		if (soap_action == NULL) {
+				smart_str_appendl(&action, Z_STRVAL_PP(uri), Z_STRLEN_PP(uri));
+				smart_str_appendc(&action, '#');
+				smart_str_appends(&action, function);
+			} else {
+				smart_str_appends(&action, soap_action);
+			}
 			smart_str_0(&action);
 
 			ret = send_http_soap_request(thisObj, request, Z_STRVAL_PP(location), action.c, soap_version TSRMLS_CC);
@@ -1491,7 +1500,7 @@ PHP_METHOD(soapobject, __login)
 
 PHP_METHOD(soapobject, __call)
 {
-	char *function, *soap_action, *uri;
+	char *function, *soap_action = NULL, *uri = NULL;
 	int function_len, soap_action_len, uri_len, i = 0;
 	zval *args;
 	zval **real_args;
@@ -1514,7 +1523,7 @@ PHP_METHOD(soapobject, __call)
 			/*zval_add_ref(param);*/
 			real_args[i++] = *param;
 	}
-	do_soap_call(this_ptr, function, function_len, arg_count, real_args, return_value TSRMLS_CC);
+	do_soap_call(this_ptr, function, function_len, arg_count, real_args, return_value, soap_action, uri TSRMLS_CC);
 
 	efree(real_args);
 }
@@ -1625,7 +1634,7 @@ static void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_proper
 		zval **arguments = (zval **) emalloc(sizeof(zval *) * arg_count);
 
 		zend_get_parameters_array(ht, arg_count, arguments);
-		do_soap_call(this_ptr, function, Z_STRLEN(function_name->element) + 1, arg_count, arguments, return_value TSRMLS_CC);
+		do_soap_call(this_ptr, function, Z_STRLEN(function_name->element) + 1, arg_count, arguments, return_value, NULL, NULL TSRMLS_CC);
 		efree(arguments);
 	}
 	zval_dtor(&function_name->element);

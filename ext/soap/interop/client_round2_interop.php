@@ -90,7 +90,7 @@ class Interop_Client
         $this->_getEndpoints($test, 1);
 
         // retreive endpoints from the endpoint server
-        $endpointArray = $soapclient->__call("GetEndpointInfo",array("groupName"=>$test),"http://soapinterop.org/info/","http://soapinterop.org/info/");
+        $endpointArray = $soapclient->__call("GetEndpointInfo",array("groupName"=>$test),"http://soapinterop.org/","http://soapinterop.org/");
         if ($soapclient->__isfault() || PEAR::isError($endpointArray)) {
             print "<pre>".$soapclient->wire."\n";
             print_r($endpointArray);
