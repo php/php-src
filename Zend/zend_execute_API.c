@@ -776,18 +776,22 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	current_this = EG(This);
 
 	if (fci->object_pp) {
-		EG(This) = *fci->object_pp;
+        if ((EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)) {
+            EG(This) = NULL;
+        } else {
+			EG(This) = *fci->object_pp;
 
-		if (!PZVAL_IS_REF(EG(This))) {
-			EG(This)->refcount++; /* For $this pointer */
-		} else {
-			zval *this_ptr;
+			if (!PZVAL_IS_REF(EG(This))) {
+				EG(This)->refcount++; /* For $this pointer */
+			} else {
+				zval *this_ptr;
 
-			ALLOC_ZVAL(this_ptr);
-			*this_ptr = *EG(This);
-			INIT_PZVAL(this_ptr);
-			zval_copy_ctor(this_ptr);
-			EG(This) = this_ptr;
+				ALLOC_ZVAL(this_ptr);
+				*this_ptr = *EG(This);
+				INIT_PZVAL(this_ptr);
+				zval_copy_ctor(this_ptr);
+				EG(This) = this_ptr;
+			}
 		}
 	} else {
 		EG(This) = NULL;
