@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 28 Jun 2000, Version 4.0.1
+- Removed 8KB limit on line length of the file() function (Zeev)
 - Disabled dl() when PHP is being used as a module inside a multithreaded web
   server - it didn't work before, and caused weird results (Zeev)
 - Added the ImageColorClosestHWB(), ImageCopyMerge() and ImagePaletteCopy() 

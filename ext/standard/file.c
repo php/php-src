@@ -482,14 +482,18 @@ PHP_FUNCTION(get_meta_tags)
 /* {{{ proto array file(string filename [, int use_include_path])
    Read entire file into an array */
 
+#define PHP_FILE_BUF_SIZE	80
+
 PHP_FUNCTION(file)
 {
 	pval **filename, **arg2;
 	FILE *fp;
-	char *slashed, buf[8192];
+	char *slashed, *target_buf;
 	register int i=0;
 	int use_include_path = 0;
 	int issock=0, socketd=0;
+	int target_len, len;
+	zend_bool reached_eof=0;
 	PLS_FETCH();
 	
 	/* check args */
@@ -528,16 +532,42 @@ PHP_FUNCTION(file)
 	}	
 	
 	/* Now loop through the file and do the magic quotes thing if needed */
-	memset(buf,0,8191);
-	while (FP_FGETS(buf,8191,socketd,fp,issock) != NULL) {
+	target_len = 0;
+	target_buf = NULL;
+	while (1) {
+		if (!target_buf) {
+			target_buf = (char *) emalloc(PHP_FILE_BUF_SIZE+1);
+			target_buf[PHP_FILE_BUF_SIZE] = 0; /* avoid overflows */
+		} else {
+			target_buf = (char *) erealloc(target_buf, target_len+PHP_FILE_BUF_SIZE+1);
+			target_buf[target_len+PHP_FILE_BUF_SIZE] = 0; /* avoid overflows */
+		}
+		if (FP_FGETS(target_buf+target_len, PHP_FILE_BUF_SIZE, socketd, fp, issock)==NULL) {
+			if (target_len==0) {
+				efree(target_buf);
+				break;
+			} else {
+				reached_eof = 1;
+			}
+		}
+		if (!reached_eof) {
+			target_len += strlen(target_buf+target_len);
+			if (target_buf[target_len-1]!='\n') {
+				continue;
+			}
+		}
 		if (PG(magic_quotes_runtime)) {
-			int len;
-			
-			slashed = php_addslashes(buf,0,&len,0); /* 0 = don't free source string */
+			slashed = php_addslashes(target_buf, target_len, &len, 1); /* 1 = free source string */
             add_index_stringl(return_value, i++, slashed, len, 0);
 		} else {
-			add_index_string(return_value, i++, buf, 1);
+			target_buf = erealloc(target_buf, target_len+1); /* do we really want to do that? */
+			add_index_stringl(return_value, i++, target_buf, target_len, 0);
 		}
+		if (reached_eof) {
+			break;
+		}
+		target_buf = NULL;
+		target_len = 0;
 	}
 	if (issock) {
 		SOCK_FCLOSE(socketd);
