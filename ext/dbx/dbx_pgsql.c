@@ -47,7 +47,7 @@ int dbx_pgsql_connect(zval **rv, zval **host, zval **db, zval **username, zval *
 		sprintf(connstring, "host='%s' port='%s' dbname='%s' user='%s' password='%s'",
 				Z_STRVAL_PP(host), port, Z_STRVAL_PP(db),
 				Z_STRVAL_PP(username), Z_STRVAL_PP(password));
-		ZVAL_STRING(conn_zval, connstring, 1);
+		ZVAL_STRING(conn_zval, connstring, 0);
 		args[0] = &conn_zval;
 		nargs = 1;
 	} else {
@@ -62,6 +62,8 @@ int dbx_pgsql_connect(zval **rv, zval **host, zval **db, zval **username, zval *
 		args[4] = db;
 	}
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_connect", &returned_zval, nargs, args);		
+	zval_dtor(conn_zval);
+	FREE_ZVAL(conn_zval);
 
 	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_RESOURCE) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
@@ -92,7 +94,7 @@ int dbx_pgsql_pconnect(zval **rv, zval **host, zval **db, zval **username, zval 
 		sprintf(connstring, "host='%s' port='%s' dbname='%s' user='%s' password='%s'",
 				Z_STRVAL_PP(host), port, Z_STRVAL_PP(db),
 				Z_STRVAL_PP(username), Z_STRVAL_PP(password));
-		ZVAL_STRING(conn_zval, connstring, 1);
+		ZVAL_STRING(conn_zval, connstring, 0);
 		args[0] = &conn_zval;
 		nargs = 1;
 	} else {
@@ -107,6 +109,8 @@ int dbx_pgsql_pconnect(zval **rv, zval **host, zval **db, zval **username, zval 
 		args[4] = db;
 	}
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_pconnect", &returned_zval, nargs, args);
+	zval_dtor(conn_zval);
+	FREE_ZVAL(conn_zval);
 
 	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_RESOURCE) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
