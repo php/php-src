@@ -475,6 +475,10 @@ PHP_FUNCTION(cpdf_open)
 		if(strcmp(Z_STRVAL_P(arg2), "-") == 0)
 			php_error(E_WARNING, "%s(): Writing to stdout as described in the ClibPDF manual is not possible if php is used as an Apache module. Write to a memory stream and use cpdf_output_buffer() instead.", get_active_function_name(TSRMLS_C));
 #endif
+		if (php_check_open_basedir(Z_STRVAL_P(arg2) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_P(arg2), "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+			RETURN_FALSE;
+		}
+
 		cpdf_setOutputFilename(cpdf, Z_STRVAL_P(arg2));
 	}
 	cpdf_init(cpdf);
@@ -925,6 +929,10 @@ PHP_FUNCTION(cpdf_set_font_map_file)
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
+		RETURN_FALSE;
+	}
+
+	if (php_check_open_basedir(Z_STRVAL_P(arg2) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_P(arg2), "rb+", CHECKUID_CHECK_MODE_PARAM))) {
 		RETURN_FALSE;
 	}
 
@@ -2378,6 +2386,10 @@ PHP_FUNCTION(cpdf_save_to_file)
 		php_error(E_WARNING, "%s(): Writing to stdout as described in the ClibPDF manual is not possible if php is used as an Apache module. Use cpdf_output_buffer() instead.", get_active_function_name(TSRMLS_C));
 #endif
 
+	if (php_check_open_basedir(Z_STRVAL_P(arg2) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_P(arg2), "wb+", CHECKUID_CHECK_MODE_PARAM))) {
+		RETURN_FALSE;
+	}
+
 	cpdf_savePDFmemoryStreamToFile(pdf, Z_STRVAL_P(arg2));
 
 	RETURN_TRUE;
@@ -2401,6 +2413,11 @@ PHP_FUNCTION(cpdf_import_jpeg)
 
 	convert_to_long(argv[0]);
 	convert_to_string(argv[1]);
+
+	if (php_check_open_basedir(Z_STRVAL_P(argv[1]) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_P(argv[1]), "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+		RETURN_FALSE;
+	}
+
 	convert_to_double(argv[2]);
 	convert_to_double(argv[3]);
 	convert_to_double(argv[4]);
