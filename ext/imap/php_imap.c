@@ -19,6 +19,7 @@
    |          Antoni Pamies Olive <toni@readysoft.net>                    |
    |          Rasmus Lerdorf      <rasmus@lerdorf.on.ca>                  |
    |          Chuck Hagenbuch     <chuck@horde.org>                       |
+   |          Andrew Skalski      <askalski@chekinc.com>                  |
    | PHP 4.0 updates:  Zeev Suraski <zeev@zend.com>                       |
    +----------------------------------------------------------------------+
  */
@@ -2682,12 +2683,12 @@ PHP_FUNCTION(imap_status)
 		}
 #ifdef SA_QUOTA
 		if(IMAPG(status_flags) & SA_QUOTA) {
-			add_property_long(return_value,"quota",status_quota);
+			add_property_long(return_value,"quota",IMAPG(status_quota));
 		}
 #endif
 #ifdef SA_QUOTA
 		if(IMAPG(status_flags) & SA_QUOTA_ALL) {
-			add_property_long(return_value,"quota_all",status_quota_all);
+			add_property_long(return_value,"quota_all",IMAPG(status_quota_all));
 		}
 #endif
 	} else {
@@ -3866,12 +3867,12 @@ void mm_status(MAILSTREAM *stream,char *mailbox,MAILSTATUS *status)
 
 #ifdef SA_QUOTA
 	if (IMAPG(status_flags) & SA_QUOTA) {
-		status_quota=status->quota;
+		IMAPG(status_quota)=status->quota;
 	}
 #endif
 #ifdef SA_QUOTA_ALL
 	if (IMAPG(status_flags) & SA_QUOTA_ALL) { 
-		status_quota_all=status->quota_all;
+		IMAPG(status_quota_all)=status->quota_all;
 	}
 #endif
 }
