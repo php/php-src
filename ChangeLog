@@ -1,3 +1,41 @@
+2001-11-20  Adam Daniel  <adaniel2@cinci.rr.com>
+
+    * pear/HTML/Table.php:
+    fixed small bug in altRowAttributes which made second attribute be applied before the first
+
+    * pear/HTML/Table.php:
+    Added setAllAttributes and updateAllAttributes also changed all html tags to lowercase
+
+2001-11-20  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php_modules.dsw:
+    MFH (Remove sablot from php_modules.dsw, its no longer in repository)
+
+2001-11-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    ircg_now_time_t might be zero before the ircg writer/buffer thread is started.
+
+2001-11-20  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c
+      ext/curl/php_curl.h:
+    Temporary fix not for the HEAD branch, this is the only way to avoid the
+    segfault and *really* not fuck up the release cycle
+
+    * ext/curl/curl.c: MFH latest cURL fixes, these are tested and important
+
+    * ext/curl/curl.c:
+    Fix a crash bug in CURLOPT_POSTFIELDS by using curl_formadd instead of
+    curl_formparse
+
+    Fix a crash bug when CURLOPT_INFILE is not properly specified.
+
+2001-11-20  James Moore  <James@phpuk.org>
+
+    * win32/php_modules.dsw:
+    Remove sablot from php_modules.dsw, its no longer in repository
+
 2001-11-19  Zeev Suraski  <zeev@zend.com>
 
     * main/php_version.h
