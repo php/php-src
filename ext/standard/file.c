@@ -1314,7 +1314,7 @@ PHP_FUNCTION(rmdir)
 	if (PG(safe_mode) &&(!php_checkuid((*arg1)->value.str.val, NULL, 1))) {
 		RETURN_FALSE;
 	}
-	ret = rmdir((*arg1)->value.str.val);
+	ret = V_RMDIR((*arg1)->value.str.val);
 	if (ret < 0) {
 		php_error(E_WARNING,"RmDir failed (%s)", strerror(errno));
 		RETURN_FALSE;
