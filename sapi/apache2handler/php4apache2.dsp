@@ -123,6 +123,10 @@ SOURCE=.\apache_config.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\mod_php5.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\php_functions.c
 # End Source File
 # Begin Source File
