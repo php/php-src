@@ -12,58 +12,19 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:                                                             |
+   | Authors: Andrew Sitnikov <sitnikov@infonet.ee>                       |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#include "basic_functions.h"
-#include "php_math.h"
-#include "php_string.h"
-#include "base64.h"
-#include "php_dir.h"
-#include "dns.h"
-#include "reg.h"
-#include "php_mail.h"
-#include "md5.h"
-#include "html.h"
-#include "exec.h"
-#include "file.h"
-#include "php_ext_syslog.h"
-#include "php_filestat.h"
-#include "php_browscap.h"
-#include "pack.h"
-#include "datetime.h"
-#include "microtime.h"
-#include "url.h"
-#include "pageinfo.h"
-#include "cyr_convert.h"
-#include "php_link.h"
-#include "fsock.h"
-#include "php_image.h"
-#include "php_iptc.h"
-#include "info.h"
-#include "uniqid.h"
-#include "php_var.h"
-#include "quot_print.h"
-#include "type.h"
-#include "dl.h"
-#include "php_crypt.h"
-#include "head.h"
-#include "php_lcg.h"
-#include "php_metaphone.h"
-#include "php_output.h"
-#include "php_array.h"
-#include "php_assert.h"
-#include "php_versioning.h"
-#include "php_ftok.h"
+#ifndef PHP_FTOK_H
+#define PHP_FTOK_H
 
-#define phpext_standard_ptr basic_functions_module_ptr
+#if HAVE_SYSVSEM || HAVE_SYSVSHM  || HAVE_SHMOP
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */
+PHP_FUNCTION(ftok);
+
+#endif
+
+#endif /* PHP_FTOK_H */

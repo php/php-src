@@ -1,4 +1,4 @@
-/*
+/* 
    +----------------------------------------------------------------------+
    | PHP version 4.0                                                      |
    +----------------------------------------------------------------------+
@@ -12,54 +12,51 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:                                                             |
+   | Authors: Andrew Sitnikov <sitnikov@infonet.ee                        |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#include "basic_functions.h"
-#include "php_math.h"
-#include "php_string.h"
-#include "base64.h"
-#include "php_dir.h"
-#include "dns.h"
-#include "reg.h"
-#include "php_mail.h"
-#include "md5.h"
-#include "html.h"
-#include "exec.h"
-#include "file.h"
-#include "php_ext_syslog.h"
-#include "php_filestat.h"
-#include "php_browscap.h"
-#include "pack.h"
-#include "datetime.h"
-#include "microtime.h"
-#include "url.h"
-#include "pageinfo.h"
-#include "cyr_convert.h"
-#include "php_link.h"
-#include "fsock.h"
-#include "php_image.h"
-#include "php_iptc.h"
-#include "info.h"
-#include "uniqid.h"
-#include "php_var.h"
-#include "quot_print.h"
-#include "type.h"
-#include "dl.h"
-#include "php_crypt.h"
-#include "head.h"
-#include "php_lcg.h"
-#include "php_metaphone.h"
-#include "php_output.h"
-#include "php_array.h"
-#include "php_assert.h"
-#include "php_versioning.h"
-#include "php_ftok.h"
+#include "php.h"
 
-#define phpext_standard_ptr basic_functions_module_ptr
+#if HAVE_SYSVSEM || HAVE_SYSVSHM  || HAVE_SHMOP
+
+#include <sys/types.h>                                                                                                        
+#include <sys/ipc.h>
+
+/* {{{ proto int ftok(string pathname, char proj)
+   convert a pathname and a project identifier to a System V IPC key */
+PHP_FUNCTION(ftok)
+{
+    pval **pathname, **proj;
+
+    key_t k;
+
+    if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &pathname, &proj) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+
+    convert_to_string_ex(pathname);
+    convert_to_string_ex(proj);
+
+    if (Z_STRLEN_PP(pathname)==0){
+        php_error(E_WARNING, "Invalid argument 1 in ftok");
+        RETURN_LONG(-1);
+    }
+
+    if (Z_STRLEN_PP(proj)!=1){
+        php_error(E_WARNING, "Invalid argument 2 in ftok");
+        RETURN_LONG(-1);
+    }
+
+    k = ftok(Z_STRVAL_PP(pathname),Z_STRVAL_PP(proj)[0]);
+
+    RETURN_LONG(k);
+}
+/* }}} */
+
+#endif
 
 /*
  * Local variables:
