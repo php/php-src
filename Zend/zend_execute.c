@@ -310,8 +310,18 @@ static inline void zend_assign_to_object(znode *result, znode *op1, znode *op2, 
 		SEPARATE_ZVAL_IF_NOT_REF(object_ptr);
 		object = *object_ptr;
 	}
+	/* by now, property is a string */
 
-	/* here property is a string */
+
+	/* separate our value if necessary */
+	if (value_op->op_type == IS_TMP_VAR) {
+		zval *orig_value = value;
+
+		ALLOC_ZVAL(value);
+		*value = *orig_value;
+		value->is_ref = 0;
+		value->refcount = 0;
+	}
 	Z_OBJ_HT_P(object)->write_property(object, property, value TSRMLS_CC);
 	if (property == &tmp) {
 		zval_dtor(property);
