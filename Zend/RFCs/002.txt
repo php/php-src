@@ -114,9 +114,7 @@ before any other statements in the file.
 
 # [ssb 2001-09-08]:
 # Should it be possible to "add" symbols to a namespace by including a
-# second file with the same namespace statement?  This would screw up
-# the 1:1 file/namespace mapping, so I don't think it would be a good
-# thing.  3.4 below assumes that it is not possible.
+# second file with the same namespace statement?
 
 
 3.3. Importing Symbols
