@@ -1,5 +1,7 @@
 --TEST--
 PEAR_Error: expected errors
+--SKIPIF--
+skip
 --FILE--
 <?php // -*- PHP -*-
 

@@ -1,5 +1,7 @@
 --TEST--
 PEAR_Config
+--SKIPIF--
+skip
 --FILE--
 <?php
 

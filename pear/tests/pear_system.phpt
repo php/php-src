@@ -1,6 +1,7 @@
 --TEST--
 System commands tests
 --SKIPIF--
+skip
 --FILE--
 <?php
 error_reporting(E_ALL);

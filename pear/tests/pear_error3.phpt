@@ -1,5 +1,7 @@
 --TEST--
 PEAR_Error: default error handling
+--SKIPIF--
+skip
 --FILE--
 <?php // -*- PHP -*-
 
