@@ -3172,6 +3172,7 @@ inline int zend_init_add_array_helper(ZEND_OPCODE_HANDLER_ARGS)
 				zend_hash_index_update(array_ptr->value.ht, (long) offset->value.dval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
+			case IS_BOOL:
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
