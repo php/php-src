@@ -88,6 +88,7 @@ PHP_FUNCTION(sscanf);
 PHP_FUNCTION(str_shuffle);
 PHP_FUNCTION(str_word_count);
 PHP_FUNCTION(str_split);
+PHP_FUNCTION(strpbrk);
 #ifdef HAVE_STRCOLL
 PHP_FUNCTION(strcoll);
 #endif

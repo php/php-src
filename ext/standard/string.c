@@ -4379,6 +4379,30 @@ PHP_FUNCTION(str_split)
 }
 /* }}} */
 
+/* {{{ proto array strpbrk(string haystack, string char_list)
+   Search a string for any of a set of characters */
+PHP_FUNCTION(strpbrk)
+{
+	char *haystack, *char_list;
+	int haystack_len, char_list_len;
+	char *p;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &haystack, &haystack_len, &char_list, &char_list_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (!char_list_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The character list cannot be empty.");
+		RETURN_FALSE;	
+	}
+
+	if ((p = strpbrk(haystack, char_list))) {
+		RETURN_STRINGL(p, (haystack + haystack_len - p), 1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
 
 /*
  * Local variables:
