@@ -9,8 +9,7 @@ What is PHP4 ext/java?
 
      1) new Java() will create an instance of a class if a suitable constructor
         is available.  If no parameters are passed and the default constructor
-        is private, then an instance of the class is returned instead.  This
-        is useful as it provides access to classes like "java.lang.system"
+        is useful as it provides access to classes like "java.lang.System"
         which expose most of their functionallity through static methods.
 
      2) Accessing a member of an instance will first look for bean properties
@@ -24,11 +23,16 @@ What is PHP4 ext/java?
      4) Exceptions raised result in PHP warnings, and null results.
 
      5) Overload resolution is in general a hard problem given the
-        differences in types between the two languages.  This being said,
-        the current support is pretty lame and I intend to improve it.
-        The current algorithm is to pick the first method with the right
-        name (ignoring case!) and number of parameters - I warned you it
-        was lame!
+        differences in types between the two languages.  The PHP Java
+	extension employs a simple, but fairly effective, metric for
+	determining which overload is the best match.  
+
+	Additionally, method names in PHP are not case sensitive, potentially
+	increasing the number of overloads to select from.
+
+	Once a method is selected, the parameters are cooerced if necessary, 
+	possibly with a loss of data (example: double precision floating point
+	numbers will be converted to boolean).
 
 Build and execution instructions:
 
@@ -44,12 +48,16 @@ Build and execution instructions:
    the current design requires shared libraries, this support can not be
    linked statically into Apache.
 
-   Finally, it is worth noting that no JVMs are created until the first
+   With ext/java, no Java Virtual Machines are created until the first
    Java call is made.  This not only eliminates unnecessary overhead if
    the extension is never used, it also provides error messages directly
    back to the user instead of being burried in a log some place.
-   Additionally, on Unix, the loading of the shared library which implements
-   the JVM is also deferred until first use.
+
+   For people interested in robustness, performance, and more complete
+   integration with Java, consider using the sapi/servlet interface which
+   is built upon the Java extension.  Running PHP as a servlet enables PHP 
+   to utilize the existing JVM and threads from the servlet engine, and 
+   provides direct access to the servlet request and response objects.
 
 ========================================================================
 ===   JVM=Kaffe 1.0.4 (as delivered with OS), OS=Redhat Linux 6.1    ===
@@ -89,7 +97,7 @@ php.ini:
 
 build instructions:
 
-   ./configure --with-java=/home/jdk118
+   ./configure --with-java
 
 php.ini:
 
@@ -99,25 +107,29 @@ php.ini:
    extension=libphp_java.so
 
 ========================================================================
-===     JVM=Sun/Blackdown 1.2pre-release-v2, OS=Linux (glibc 2.1)    ===
+===           JVM=Blackdown 1.2.2 RC4, OS=Redhat Linux 6.1           ===
 ========================================================================
 
 build instructions:
 
-   ./configure --with-java=/usr/local/lib/jdk1.2
+   ./configure --with-java
 
 php.ini:
 
    [java]
-   java.library.path=/usr/local/lib/jdk1.2/jre/lib/i386/classic:/usr/local/lib/jdk1.2/jre/lib/i386/native_threads:/usr/local/lib/jdk1.2/jre/lib/i386:/var/tmp/work/php4/modules
-   java.class.path=/usr/local/lib/jdk1.2/jre/lib/rt.jar:/usr/local/lib/jdk1.2/jre/lib/i18n.jar:/var/tmp/work/php4/modules/php_java.jar
-   extension_dir=/var/tmp/work/php4/modules
+   java.class.path=/home/rubys/php4/lib/php_java.jar
+   extension_dir=/home/rubys/php4/modules
    extension=libphp_java.so
 
-You may also have to adapt your LD_LIBRARY_PATH environment variable,
-if you didn't add the jdk library paths to /etc/ld.so.conf :
+========================================================================
+===                    JVM=Sun JDK 1.2.2, OS=Linux                   ===
+========================================================================
 
-LD_LIBRARY_PATH="/usr/local/lib/jdk1.2/jre/lib/i386:/usr/local/lib/jdk1.2/jre/lib/i386/classic:/usr/local/lib/jdk1.2/jre/lib/i386/native_threads:$LD_LIBRARY_PATH"
+This compiler is not supported at this time.  At the moment, only green
+threads are supported, requiring system calls to be wrapped, which is
+incompatible with the JNI Invocation API.  Once native threads are
+supported, It is expected that the configuration will be identical to
+the Blackdown JDK. 
 
 ========================================================================
 ===                JVM=Sun JDK 1.1.8, OS=Windows NT 4                ===
