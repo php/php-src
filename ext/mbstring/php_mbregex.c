@@ -864,7 +864,7 @@ PHP_FUNCTION(mb_split)
 	if (n > 0) {
 		add_next_index_stringl(return_value, pos, n, 1);
 	} else {
-		add_next_index_stringl(return_value, empty_string, 0, 1);
+		add_next_index_stringl(return_value, "", 0, 1);
 	}
 }
 /* }}} */

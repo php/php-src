@@ -385,7 +385,7 @@ END_EXTERN_C()
 
 #define ZVAL_EMPTY_STRING(z) {	        \
 		(z)->value.str.len = 0;  	    \
-		(z)->value.str.val = empty_string; \
+		(z)->value.str.val = STR_EMPTY_ALLOC(); \
 		(z)->type = IS_STRING;		    \
 	}
 

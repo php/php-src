@@ -511,7 +511,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 						 */
 						if (count < num_subpats) {
 							for (; i < num_subpats; i++) {
-								add_next_index_string(match_sets[i], empty_string, 1);
+								add_next_index_string(match_sets[i], "", 1);
 							}
 						}
 					} else {
@@ -734,7 +734,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 						esc_match_len = 0;
 					}
 				} else {
-					esc_match = empty_string;
+					esc_match = "";
 					esc_match_len = 0;
 					match_len = 0;
 				}
@@ -1005,7 +1005,8 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 
 	/* Make sure we're dealing with strings. */	
 	convert_to_string_ex(subject);
-	ZVAL_STRINGL(&empty_replace, empty_string, 0, 0);
+	/* FIXME: This might need to be changed to STR_EMPTY_ALLOC(). Check if this zval could be dtor()'ed somehow */
+	ZVAL_STRINGL(&empty_replace, "", 0, 0);
 	
 	/* If regex is an array */
 	if (Z_TYPE_P(regex) == IS_ARRAY) {
@@ -1389,7 +1390,7 @@ PHP_FUNCTION(preg_quote)
 
 	/* Nothing to do if we got an empty string */
 	if (in_str == in_str_end) {
-		RETVAL_STRINGL(empty_string, 0, 0);
+		RETVAL_STRINGL("", 0, 1);
 	}
 
 	if (ZEND_NUM_ARGS() == 2) {

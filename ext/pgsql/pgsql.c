@@ -1214,7 +1214,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 				PQclear(result);
 			}
 			smart_str_free(&str);
-			return empty_string;
+			return STR_EMPTY_ALLOC();
 		}
 		num_rows = PQntuples(result);
 		oid_offset = PQfnumber(result,"oid");
@@ -1786,7 +1786,7 @@ PHP_FUNCTION(pg_last_oid)
 	if (Z_STRVAL_P(return_value)) {
 		RETURN_STRING(Z_STRVAL_P(return_value), 1);
 	}
-	RETURN_STRING(empty_string, 0);
+	RETURN_STRING("", 1);
 #endif
 }
 /* }}} */

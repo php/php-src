@@ -333,7 +333,7 @@ PHP_RINIT_FUNCTION(mssql)
 	MS_SQL_G(default_link) = -1;
 	MS_SQL_G(num_links) = MS_SQL_G(num_persistent);
 	MS_SQL_G(appname) = estrndup("PHP 5", 5);
-	MS_SQL_G(server_message) = empty_string;
+	MS_SQL_G(server_message) = NULL;
 	MS_SQL_G(min_error_severity) = MS_SQL_G(cfg_min_error_severity);
 	MS_SQL_G(min_message_severity) = MS_SQL_G(cfg_min_message_severity);
 	if (MS_SQL_G(connect_timeout) < 1) MS_SQL_G(connect_timeout) = 1;
@@ -1045,7 +1045,7 @@ static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int r
 			result->fields[i].column_source = estrdup(source);
 		}
 		else {
-			result->fields[i].column_source = empty_string;
+			result->fields[i].column_source = STR_EMPTY_ALLOC();
 		}
 
 		column_types[i] = coltype(i+1);
@@ -1267,7 +1267,7 @@ PHP_FUNCTION(mssql_get_last_message)
 		RETURN_STRING(MS_SQL_G(server_message),1);
 	}
 	else {
-		RETURN_STRING(empty_string,1);
+		RETURN_STRING("",1);
 	}
 }
 

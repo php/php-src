@@ -939,7 +939,7 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 					}
 				} else {
 					MAKE_STD_ZVAL(retval);
-					ZVAL_STRINGL(retval, empty_string, 0, 0);
+					ZVAL_STRINGL(retval, "", 0, 1);
 				}
 				*writeobj = *retval;
 				zval_copy_ctor(writeobj);

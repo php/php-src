@@ -165,7 +165,7 @@ PHP_FUNCTION(apache_request_headers)
 	arr = apr_table_elts(ctx->f->r->headers_in);
 
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
-		if (!val) val = empty_string;
+		if (!val) val = "";
 		add_assoc_string(return_value, key, val, 1);
 	APR_ARRAY_FOREACH_CLOSE()
 }
@@ -185,7 +185,7 @@ PHP_FUNCTION(apache_response_headers)
 	arr = apr_table_elts(ctx->f->r->headers_out);
 
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
-		if (!val) val = empty_string;
+		if (!val) val = "";
 		add_assoc_string(return_value, key, val, 1);
 	APR_ARRAY_FOREACH_CLOSE()
 }

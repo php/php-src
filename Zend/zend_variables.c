@@ -26,12 +26,6 @@
 #include "zend_constants.h"
 #include "zend_list.h"
 
-ZEND_API char *empty_string = "";	/* in order to save emalloc() and efree() time for
-									 * empty strings (usually used to denote empty
-									 * return values in failed functions).
-									 * The macro STR_FREE() will not efree() it.
-									 */
-
 
 ZEND_API void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 {
@@ -86,9 +80,7 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_STRING:
 		case IS_CONSTANT:
 			CHECK_ZVAL_STRING_REL(zvalue);
-			if (zvalue->value.str.val != empty_string) {
-				free(zvalue->value.str.val);
-			}
+			free(zvalue->value.str.val);
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY:
@@ -127,12 +119,6 @@ ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 			break;
 		case IS_CONSTANT:
 		case IS_STRING:
-			if (zvalue->value.str.val) {
-				if (zvalue->value.str.len==0) {
-					zvalue->value.str.val = empty_string;
-					return SUCCESS;
-				}
-			}
 			CHECK_ZVAL_STRING_REL(zvalue);
 			zvalue->value.str.val = (char *) estrndup_rel(zvalue->value.str.val, zvalue->value.str.len);
 			break;

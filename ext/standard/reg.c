@@ -428,7 +428,7 @@ static void php_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		if (Z_STRVAL_PP(arg_pattern) && Z_STRLEN_PP(arg_pattern))
 			pattern = estrndup(Z_STRVAL_PP(arg_pattern), Z_STRLEN_PP(arg_pattern));
 		else
-			pattern = empty_string;
+			pattern = STR_EMPTY_ALLOC();
 	} else {
 		convert_to_long_ex(arg_pattern);
 		pattern = emalloc(2);
@@ -440,7 +440,7 @@ static void php_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		if (Z_STRVAL_PP(arg_replace) && Z_STRLEN_PP(arg_replace))
 			replace = estrndup(Z_STRVAL_PP(arg_replace), Z_STRLEN_PP(arg_replace));
 		else
-			replace = empty_string;
+			replace = STR_EMPTY_ALLOC();
 	} else {
 		convert_to_long_ex(arg_replace);
 		replace = emalloc(2);
@@ -452,7 +452,7 @@ static void php_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	if (Z_STRVAL_PP(arg_string) && Z_STRLEN_PP(arg_string))
 		string = estrndup(Z_STRVAL_PP(arg_string), Z_STRLEN_PP(arg_string));
 	else
-		string = empty_string;
+		string = STR_EMPTY_ALLOC();
 
 	/* do the actual work */
 	ret = php_reg_replace(pattern, replace, string, icase, 1);
@@ -527,7 +527,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	while ((count == -1 || count > 1) && !(err = regexec(&re, strp, 1, subs, 0))) {
 		if (subs[0].rm_so == 0 && subs[0].rm_eo) {
 			/* match is at start of string, return empty string */
-			add_next_index_stringl(return_value, empty_string, 0, 1);
+			add_next_index_stringl(return_value, "", 0, 1);
 			/* skip ahead the length of the regex match */
 			strp += subs[0].rm_eo;
 		} else if (subs[0].rm_so == 0 && subs[0].rm_eo == 0) {

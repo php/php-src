@@ -170,7 +170,7 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
  */
 static void pvalue_config_destructor(zval *pvalue)
 {   
-	if (Z_TYPE_P(pvalue) == IS_STRING && Z_STRVAL_P(pvalue) != empty_string) {
+	if (Z_TYPE_P(pvalue) == IS_STRING) {
 		free(Z_STRVAL_P(pvalue));
 	}
 }

@@ -111,7 +111,7 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zval **should_
 					|| ((int)T->str_offset.offset<0)
 					|| (T->str_offset.str->value.str.len <= T->str_offset.offset)) {
 					zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->str_offset.offset);
-					T->tmp_var.value.str.val = empty_string;
+					T->tmp_var.value.str.val = STR_EMPTY_ALLOC();
 					T->tmp_var.value.str.len = 0;
 				} else {
 					char c = str->value.str.val[T->str_offset.offset];
