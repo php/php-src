@@ -280,7 +280,7 @@ PHP_FUNCTION(assert_options)
 		break;
 
 	default:
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown value %d", Z_LVAL_PP(what));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown value %ld", Z_LVAL_PP(what));
 		break;
 	}
 

@@ -408,7 +408,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
         gotSequential = 1;
         if (gotXpg) {
             mixedXPG:
-              php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot mix \"%\" and \"%n$\" conversion specifiers");
+              php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", "cannot mix \"%\" and \"%n$\" conversion specifiers");
             goto error;
         }
 
@@ -495,7 +495,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
             goto error;
 	    default:
             {
-             php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad scan conversion character \"%c\"", ch);
+             php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad scan conversion character \"%c\"", *ch);
              goto error;
            }
 	}
@@ -545,7 +545,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
     }
     for (i = 0; i < numVars; i++) {
         if (nassign[i] > 1) {
-            php_error_docref(NULL TSRMLS_CC, E_WARNING, "Variable is assigned by multiple \"%n$\" conversion specifiers");
+            php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", "Variable is assigned by multiple \"%n$\" conversion specifiers");
             goto error;
         } else if (!xpgSize && (nassign[i] == 0)) {
             /*
@@ -564,7 +564,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 
     badIndex:
         if (gotXpg) {
-            php_error_docref(NULL TSRMLS_CC, E_WARNING, "\"%n$\" argument index out of range");
+            php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", "\"%n$\" argument index out of range");
         } else {
             php_error_docref(NULL TSRMLS_CC, E_WARNING, "Different numbers of variable names and field specifiers");
         }

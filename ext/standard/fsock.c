@@ -229,7 +229,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		err = php_socket_errno();
 
 		if (stream == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:%d", host, port);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:%ld", host, port);
 		} else if (context) {
 			php_stream_context_set(stream, context);
 		}
