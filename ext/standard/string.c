@@ -34,6 +34,7 @@
 #include "php_globals.h"
 
 int php_tag_find(char *tag, int len, char *set);
+static inline char *php_memnstr(char *haystack, char *needle, int needle_len, char *end);
 
 /* this is read-only, so it's ok */
 static char hexconvtab[] = "0123456789abcdef";
@@ -602,6 +603,8 @@ PHP_FUNCTION(strpos)
 	pval **haystack, **needle, **OFFSET;
 	int offset = 0;
 	char *found = NULL;
+	char *endp;
+	char *startp;
 	
 	switch(ARG_COUNT(ht)) {
 	case 2:
@@ -615,25 +618,41 @@ PHP_FUNCTION(strpos)
 		}
 		convert_to_long_ex(OFFSET);
 		offset = (*OFFSET)->value.lval;
+		if (offset < 0) {
+			php_error(E_WARNING,"offset not contained in string");
+			RETURN_FALSE;
+		}	
 		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
+
 	convert_to_string_ex(haystack);
+
 	if (offset > (*haystack)->value.str.len) {
 		php_error(E_WARNING,"offset not contained in string");
 		RETURN_FALSE;
 	}
+
+	startp = (*haystack)->value.str.val;
+	startp+= offset;
+
+	endp = (*haystack)->value.str.val;
+	endp+= (*haystack)->value.str.len;
 
 	if ((*needle)->type == IS_STRING) {
 		if ((*needle)->value.str.len==0) {
 			php_error(E_WARNING,"Empty delimiter");
 			RETURN_FALSE;
 		}
-		found = strstr((*haystack)->value.str.val+offset, (*needle)->value.str.val);
+		found = php_memnstr(startp, (*needle)->value.str.val, (*needle)->value.str.len, endp);
 	} else {
+		char buf;
+
 		convert_to_long_ex(needle);
-		found = strchr((*haystack)->value.str.val+offset, (char) (*needle)->value.lval);
+		buf = (char) (*needle)->value.lval;
+
+		found = php_memnstr(startp, &buf, 1, endp);
 	}
 
 	if (found) {
