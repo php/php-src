@@ -1311,8 +1311,10 @@ cat<<X
 | avoid using it if possible.                                        |
 +--------------------------------------------------------------------+
 
+X
+PHP_CONFIGURE_PART(Thank you for using PHP.)
+cat<<X
 
-Thank you for using PHP.
 
 X
 
