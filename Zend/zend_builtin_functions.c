@@ -559,17 +559,12 @@ ZEND_FUNCTION(get_parent_class)
 		char *name;
 		zend_uint name_length;
 
-		/* first try asking handler for parent class name */
-		if (Z_OBJ_HT_PP(arg)->get_class_name != NULL &&
-			Z_OBJ_HT_PP(arg)->get_class_name(*arg, &name, &name_length, 1 TSRMLS_CC) == SUCCESS) {
-			name = ce->name;
-			name_length = ce->name_length;
-
+		if (Z_OBJ_HT_PP(arg)->get_class_name
+			&& Z_OBJ_HT_PP(arg)->get_class_name(*arg, &name, &name_length, 1 TSRMLS_CC) == SUCCESS) {
 			RETURN_STRINGL(name, name_length, 1);
-		}
-		/* then try getting the class entry
-		   if successfull, will fall through to standard ce handling */
-		if (!Z_OBJ_HT_PP(arg)->get_class_entry || !(ce = zend_get_class_entry(*arg))) {
+		} else if (Z_OBJ_HT_PP(arg)->get_class_entry && (ce = zend_get_class_entry(*arg))) {
+			RETURN_STRINGL(ce->name, ce->name_length, 1);
+		} else {
 			RETURN_FALSE;
 		}
 	} else if (Z_TYPE_PP(arg) == IS_STRING) {
