@@ -529,7 +529,7 @@ static void _php_ibase_free_blob(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 /* {{{ _php_ibase_free_trans()	*/
 static void _php_ibase_free_trans(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-	ibase_trans *trans = (ibase_trans*)rsrc->ptr;
+	ibase_trans *trans = (ibase_trans *)rsrc->ptr;
 	int i;
 	
 	IBDEBUG("Cleaning up transaction resource...");
@@ -1611,13 +1611,13 @@ PHP_FUNCTION(ibase_trans)
 	argn = ZEND_NUM_ARGS();
 
 	/* (1+argn) is an upper bound for the number of links this trans connects to */
-	ib_link = (ibase_db_link**)do_alloca(sizeof(ibase_db_link*) * (1+argn));
+	ib_link = (ibase_db_link **) do_alloca(sizeof(ibase_db_link *) * (1+argn));
 	
 	if (argn > 0) {
 		long trans_argl = 0;
 		char *tpb;
 		ISC_TEB *teb;
-		zval ***args = (zval ***)do_alloca(sizeof(zval **) * argn);
+		zval ***args = (zval ***) do_alloca(sizeof(zval **) * argn);
 
 		if (zend_get_parameters_array_ex(argn, args) == FAILURE) {
 			free_alloca(args);
@@ -1625,8 +1625,8 @@ PHP_FUNCTION(ibase_trans)
 			RETURN_FALSE;
 		}
 
-		teb = (ISC_TEB*)do_alloca(sizeof(ISC_TEB) * argn);
-		tpb = (char*)do_alloca(TPB_MAX_SIZE * argn);
+		teb = (ISC_TEB *) do_alloca(sizeof(ISC_TEB) * argn);
+		tpb = (char *) do_alloca(TPB_MAX_SIZE * argn);
 
 		/* enumerate all the arguments: assume every non-resource argument 
 		   specifies modifiers for the link ids that follow it */
@@ -1710,7 +1710,7 @@ PHP_FUNCTION(ibase_trans)
 	}
 
 	/* register the transaction in our own data structures */
-	ib_trans = (ibase_trans *) emalloc(sizeof(ibase_trans) + (link_cnt-1)*sizeof(ibase_db_link*));
+	ib_trans = (ibase_trans *) emalloc(sizeof(ibase_trans) + (link_cnt-1)*sizeof(ibase_db_link *));
 	ib_trans->handle = tr_handle;
 	ib_trans->link_cnt = link_cnt;
 	for (i = 0; i < link_cnt; ++i) {
@@ -1719,14 +1719,14 @@ PHP_FUNCTION(ibase_trans)
 		
 		/* the first item in the connection-transaction list is reserved for the default transaction */
 		if (ib_link[i]->trans == NULL) {
-			ib_link[i]->trans = (ibase_tr_list*)emalloc(sizeof(ibase_tr_list));
+			ib_link[i]->trans = (ibase_tr_list *) emalloc(sizeof(ibase_tr_list));
 			ib_link[i]->trans->trans = NULL;
 			ib_link[i]->trans->next = NULL;
 		}
 
 		/* link the transaction into the connection-transaction list */
 		for (l = &ib_link[i]->trans; *l != NULL; l = &(*l)->next);
-		*l = (ibase_tr_list*) emalloc(sizeof(ibase_tr_list));
+		*l = (ibase_tr_list *) emalloc(sizeof(ibase_tr_list));
 		(*l)->trans = ib_trans;
 		(*l)->next = NULL;
 	}
@@ -1746,14 +1746,14 @@ static int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans TSRM
 
 	/* the first item in the connection-transaction list is reserved for the default transaction */
 	if (ib_link->trans == NULL) {
-		ib_link->trans = (ibase_tr_list*)emalloc(sizeof(ibase_tr_list));
+		ib_link->trans = (ibase_tr_list *) emalloc(sizeof(ibase_tr_list));
 		ib_link->trans->trans = NULL;
 		ib_link->trans->next = NULL;
 	}
 
 	if (*trans == NULL) {
 		if (ib_link->trans->trans == NULL) {
-			ibase_trans *tr = (ibase_trans*)emalloc(sizeof(ibase_trans));
+			ibase_trans *tr = (ibase_trans *) emalloc(sizeof(ibase_trans));
 			tr->handle = NULL;
 			if (isc_start_transaction(IB_STATUS, &tr->handle, 1, &ib_link->link, 0, NULL)) {
 				_php_ibase_error(TSRMLS_C);
@@ -1913,7 +1913,7 @@ PHP_FUNCTION(ibase_query)
 
 			/* no link ids were passed: if there's no default link, use exec_immediate() with
 			   a NULL handle; this will enable the use of CREATE DATABASE statements. */
-			if ( IBG(default_link) == -1) {
+			if (IBG(default_link) == -1) {
 				isc_db_handle db = NULL;
 				isc_tr_handle trans = NULL;
 
@@ -1938,7 +1938,7 @@ PHP_FUNCTION(ibase_query)
 							
 						/* register the link as a resource; unfortunately, we cannot register 
 						   it in the hash table, because we don't know the connection params */
-						ib_link = (ibase_db_link*) emalloc(sizeof(ibase_db_link));
+						ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
 						ib_link->link = db;
 						ib_link->dialect = SQL_DIALECT_CURRENT;
 						ib_link->trans = NULL;
@@ -2041,18 +2041,18 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 				long n, f = 1;
 				if ( (type & ~1) == SQL_SHORT) {
 					n = (long) *(short *) (data);
-				}else {	
+				} else {	
 					n = (long) *(long *) (data);
 				}
 				for (j = 0; j < -scale; j++) {
 					f *= 10;
 				}
-				if (n  >= 0){
-					Z_STRLEN_P(val) = sprintf (string_data, "%ld.%0*ld", n / f, -scale,  n % f );
-				}else if ((n/f) != 0 ){
-					Z_STRLEN_P(val) = sprintf (string_data, "%ld.%0*ld", n / f, -scale,  -(n % f) );
-				}else{
-					Z_STRLEN_P(val) = sprintf (string_data, "%s.%0*ld","-0", -scale, -(n % f) );
+				if (n  >= 0) {
+					Z_STRLEN_P(val) = sprintf(string_data, "%ld.%0*ld", n / f, -scale,  n % f );
+				} else if ((n/f) != 0) {
+					Z_STRLEN_P(val) = sprintf(string_data, "%ld.%0*ld", n / f, -scale,  -(n % f) );
+				} else {
+					Z_STRLEN_P(val) = sprintf(string_data, "%s.%0*ld","-0", -scale, -(n % f) );
 				}
 				Z_TYPE_P(val) = IS_STRING;
 				Z_STRVAL_P(val) = estrdup(string_data);
@@ -2060,7 +2060,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 				Z_TYPE_P(val) = IS_LONG;
 				if ( (type & ~1) == SQL_SHORT) {
 					Z_LVAL_P(val) = *(short *) (data);
-				}else{
+				} else {
 					Z_LVAL_P(val) = *(long *) (data);
 				}
 			}
@@ -2082,25 +2082,25 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 #ifdef SQL_INT64
 		case SQL_INT64:
 			Z_TYPE_P(val) = IS_STRING;
-			if (scale < 0 ){
+			if (scale < 0) {
 				short j = 0;
 				ISC_INT64 n, f = 1;
 				n = (ISC_INT64) *(ISC_INT64 *) data;
 				for (j = 0; j < -scale; j++) {
 					f *= 10;
 				}
-				if ( n >= 0){
-				Z_STRLEN_P(val) = sprintf (string_data, "%" ISC_INT64_FORMAT "d.%0*" ISC_INT64_FORMAT "d",
+				if (n >= 0) {
+				Z_STRLEN_P(val) = sprintf(string_data, "%" ISC_INT64_FORMAT "d.%0*" ISC_INT64_FORMAT "d",
 											(ISC_INT64) n / f, -scale, (ISC_INT64) n % f );
-				}else if ((n/f) != 0 ){
-				Z_STRLEN_P(val) = sprintf (string_data, "%" ISC_INT64_FORMAT "d.%0*" ISC_INT64_FORMAT "d",
+				} else if ((n/f) != 0) {
+				Z_STRLEN_P(val) = sprintf(string_data, "%" ISC_INT64_FORMAT "d.%0*" ISC_INT64_FORMAT "d",
 											(ISC_INT64) n / f, -scale, (ISC_INT64) -(n % f) );
-				}else{
-				Z_STRLEN_P(val) = sprintf (string_data, "%s.%0*" ISC_INT64_FORMAT "d",
+				} else {
+				Z_STRLEN_P(val) = sprintf(string_data, "%s.%0*" ISC_INT64_FORMAT "d",
 											"-0", -scale, (ISC_INT64) -(n % f) );
 				}
 			} else {
-				Z_STRLEN_P(val) =sprintf (string_data, "%.0" ISC_INT64_FORMAT "d",
+				Z_STRLEN_P(val) = sprintf(string_data, "%.0" ISC_INT64_FORMAT "d",
 							                                    (ISC_INT64) *(ISC_INT64 *) data);
 			}
 
