@@ -30,9 +30,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#if WITH_BCMATH
-#include "ext/bcmath/php_bcmath.h"
-#endif
 #include "ext/standard/dl.h"
 #include "ext/standard/file.h"
 #include "ext/standard/fsock.h"
@@ -48,8 +45,14 @@
 #include "ext/standard/php_lcg.h"
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_assert.h"
+#if WITH_BCMATH
+#include "ext/bcmath/php_bcmath.h"
+#endif
 #if HAVE_CALENDAR
 #include "ext/calendar/php_calendar.h"
+#endif
+#if HAVE_CTYPE
+#include "ext/ctype/php_ctype.h"
 #endif
 #if HAVE_COM
 #include "ext/com/php_COM.h"
@@ -76,7 +79,7 @@
 #if HAVE_MYSQL
 #include "ext/mysql/php_mysql.h"
 #endif
-#if defined(MBSTR_ENC_TRANS)
+#if HAVE_MBSTRING
 #include "ext/mbstring/mbstring.h"
 #endif
 #if HAVE_OVERLOAD
@@ -97,13 +100,16 @@ zend_module_entry *php_builtin_extensions[] = {
 #if HAVE_CALENDAR
 	,phpext_calendar_ptr
 #endif
+#if HAVE_CTYPE
+	,phpext_ctype_ptr
+#endif
 #if HAVE_COM
 	,phpext_com_ptr
 #endif
 #if HAVE_FTP
 	,phpext_ftp_ptr
 #endif
-#if defined(MBSTR_ENC_TRANS)
+#if HAVE_MBSTRING
 	,phpext_mbstring_ptr
 #endif
 #if HAVE_MYSQL

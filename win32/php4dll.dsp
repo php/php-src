@@ -860,6 +860,30 @@ SOURCE=..\ext\pcre\pcrelib\pcre.h
 # PROP Default_Filter ".c"
 # Begin Source File
 
+SOURCE=..\ext\ctype\ctype.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mbstring\mbfilter.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mbstring\mbfilter_ja.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mbstring\mbregex.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mbstring\mbstring.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mbstring\php_mbregex.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\overload\overload.c
 # End Source File
 # Begin Source File

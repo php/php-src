@@ -33,8 +33,15 @@
 /* Enable / Disable COM extension (default: enabled) */
 #define HAVE_COM 1
 
+/* Enable / Disable CTYPE extension (default: enabled) */
+#define HAVE_CTYPE 1
+
 /* Enable / Disable FTP extension (default: enabled) */
 #define HAVE_FTP 1
+
+/* Enable / Disable MBSTRING extension (default: enabled) */
+#define HAVE_MBSTRING 1
+#define HAVE_MBREGEX 1
 
 /* Enable / Disable MySQL extension (default: enabled) */
 #define HAVE_MYSQL 1
