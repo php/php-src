@@ -3389,9 +3389,9 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 					}
 				} else {
 					if (EX(opline)->op2.u.constant.value.lval==ZEND_INCLUDE_ONCE) {
-						zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle.filename);
+						zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, inc_filename->value.str.val);
 					} else {
-						zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle.filename);
+						zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, inc_filename->value.str.val);
 					}
 				}
 				break;
