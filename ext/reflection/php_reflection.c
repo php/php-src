@@ -66,7 +66,6 @@ ZEND_API zend_object_value reflection_objects_new(zend_class_entry *class_type T
 {
 	zend_object_value retval;
 	reflection_object *intern;
-	zval *tmp;
 
 	intern = emalloc(sizeof(reflection_object));
 	intern->zo.ce = class_type;
@@ -93,7 +92,7 @@ ZEND_FUNCTION(reflection_function)
 	}
 
 	object = getThis();
-	intern = (reflection_object *) zend_object_store_get_object(object);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	if(intern == NULL) {
 			return;
 	}
@@ -144,7 +143,7 @@ ZEND_FUNCTION(reflection_function_isinternal)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	object = getThis();
-	intern = (reflection_object *) zend_object_store_get_object(object);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	if(intern == NULL) {
 			RETURN_FALSE;
 	}
@@ -164,7 +163,7 @@ ZEND_FUNCTION(reflection_function_isuserdefined)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	object = getThis();
-	intern = (reflection_object *) zend_object_store_get_object(object);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	if(intern == NULL) {
 			return;
 	}
@@ -184,7 +183,7 @@ ZEND_FUNCTION(reflection_function_getfilename)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	object = getThis();
-	intern = (reflection_object *) zend_object_store_get_object(object);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	if(intern == NULL) {
 			return;
 	}
@@ -207,7 +206,7 @@ ZEND_FUNCTION(reflection_function_getstartline)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	object = getThis();
-	intern = (reflection_object *) zend_object_store_get_object(object);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	if(intern == NULL) {
 			return;
 	}
@@ -230,7 +229,7 @@ ZEND_FUNCTION(reflection_function_getendline)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	object = getThis();
-	intern = (reflection_object *) zend_object_store_get_object(object);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	if(intern == NULL) {
 			RETURN_FALSE;
 	}
@@ -253,7 +252,7 @@ ZEND_FUNCTION(reflection_function_getdoccomment)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	object = getThis();
-	intern = (reflection_object *) zend_object_store_get_object(object);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	if(intern == NULL) {
 			RETURN_FALSE;
 	}
@@ -276,7 +275,7 @@ ZEND_FUNCTION(reflection_function_getstaticvariables)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	object = getThis();
-	intern = (reflection_object *) zend_object_store_get_object(object);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	if(intern == NULL) {
 		RETURN_FALSE;
 	}
@@ -289,7 +288,7 @@ ZEND_FUNCTION(reflection_function_getstaticvariables)
 
 ZEND_FUNCTION(reflection_function_invoke)
 {
-	zval *object, *tmp_copy, *retval_ptr;
+	zval *object, *retval_ptr;
 	zval ***params;
 	reflection_object *intern;
 	zend_function *fptr;
@@ -302,14 +301,14 @@ ZEND_FUNCTION(reflection_function_invoke)
 		RETURN_FALSE;
 	}
 
-	intern = (reflection_object *) zend_object_store_get_object(object);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	if(intern == NULL || (fptr = intern->ptr) == NULL) {
 		efree(params);
 		RETURN_FALSE;
 	}
 	if(fast_call_user_function(EG(function_table), NULL, NULL,
 							   &retval_ptr, argc, params, 
-							   1, NULL, &fptr) == SUCCESS && retval_ptr) {
+							   1, NULL, &fptr TSRMLS_CC) == SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	}
 	efree(params);
