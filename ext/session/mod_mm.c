@@ -61,33 +61,26 @@ static ps_mm *ps_mm_instance = NULL;
 #define ps_mm_debug
 #endif
 
-#define BITS_IN_int (sizeof(int) * CHAR_BIT)
-#define THREE_QUARTERS ((int) ((BITS_IN_int * 3) / 4))
-#define ONE_EIGTH ((int) (BITS_IN_int / 8))
-#define HIGH_BITS (~((unsigned int)(~0) >> ONE_EIGTH))
+/* For php_uint32 */
+#include "ext/standard/basic_functions.h"
 
-/*
- * Weinberger's generic hash algorithm, adapted by Holub
- * (published in [Holub 1990])
- */
-
-static unsigned int ps_sd_hash(const char *data)
+static php_uint32 ps_sd_hash(const char *data)
 {
-	unsigned int val, i;
+	php_uint32 h;
+	char c;
 	
-	for (val = 0; *data; data++) {
-		val = (val << ONE_EIGTH) + *data;
-		if ((i = val & HIGH_BITS) != 0)
-			val = (val ^ (i >> THREE_QUARTERS)) & ~HIGH_BITS;
+	for (h = 2166136261; (c = *data++); ) {
+		h *= 16777619;
+		h ^= c;
 	}
 	
-	return val;
+	return h;
 }
-
+	
 
 static ps_sd *ps_sd_new(ps_mm *data, const char *key, const void *sdata, size_t sdatalen)
 {
-	unsigned int h;
+	php_uint32 h;
 	ps_sd *sd;
 
 	h = ps_sd_hash(key) % HASH_SIZE;
