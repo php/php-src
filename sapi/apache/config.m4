@@ -70,7 +70,19 @@ AC_ARG_WITH(apxs,
   if test "$?" != "0"; then
     APACHE_INSTALL="$APXS -i -a -n php4 $SAPI_SHARED" # Old apxs does not have -S option
   else 
-    APACHE_INSTALL="\$(mkinstalldirs) \"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" && $APXS -S LIBEXECDIR=\"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" -i -a -n php4 $SAPI_SHARED"
+    APXS_LIBEXECDIR='$(INSTALL_ROOT)'`$APXS -q LIBEXECDIR`
+    if test -z `$APXS -q SYSCONFDIR`; then
+      APACHE_INSTALL="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
+                       $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
+                             -i -n php4 $SAPI_SHARED"
+    else
+      APXS_SYSCONFDIR='$(INSTALL_ROOT)'`$APXS -q SYSCONFDIR`
+      APACHE_INSTALL="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
+                      \$(mkinstalldirs) '$APXS_SYSCONFDIR' && \
+                       $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
+                             -S SYSCONFDIR='$APXS_SYSCONFDIR' \
+                             -i -a -n php4 $SAPI_SHARED"
+    fi
   fi
 
   if test -z "`$APXS -q LD_SHLIB`" || test "`$APXS -q LIBEXECDIR`" = "modules"; then
