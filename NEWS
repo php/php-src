@@ -95,7 +95,7 @@ PHP 4                                                                      NEWS
   true-color image). (Ilia)
 - Fixed a crash when converting between true-color images (png/jpeg) and
   gd1/gd2 image formats, png/jpeg -> gd1/gd2 -> png/jpeg conversion now
-  works correctly. (Ilia, Pierre-Alain Joye).
+  works correctly. (Ilia, Pierre-Alain Joye)
 - Fixed a memory leak in the bundled GD library inside 
   gdImageTrueColorToPalette(). (Ilia)
 - Fixed bug #12776 (array_walk crash). (Moriyoshi)
