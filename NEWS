@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Fixed array_merge_recursive() to avoid problems with merging cyclical
+  arrays (bug #16064). (Andrei)
 - Made function_exists() work properly with disabled functions. (Andrei)
 - Added ability to extract() variables as references via OR'able EXTR_REFS
   flag. (Andrei)
