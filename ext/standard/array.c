@@ -853,6 +853,7 @@ PHP_FUNCTION(min)
 		php_error(E_WARNING, "min: must be passed at least 1 value");
 		RETURN_NULL();
 	}
+	set_compare_func(SORT_REGULAR);
 	if (argc == 1) {
 		pval **arr;
 
@@ -904,6 +905,7 @@ PHP_FUNCTION(max)
 		php_error(E_WARNING, "max: must be passed at least 1 value");
 		RETURN_NULL();
 	}
+	set_compare_func(SORT_REGULAR);
 	if (argc == 1) {
 		pval **arr;
 
