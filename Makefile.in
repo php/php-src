@@ -97,7 +97,7 @@ maintainer-clean-depend-recursive:
 		(cd $$subdir && $(MAKE) $$target) || fail=yes; \
 	done && test -z "$$fail"
 
-include sapi/$(PHP_SAPI)/Makefile.inc
+include $(srcdir)/sapi/$(PHP_SAPI)/Makefile.inc
 
 regex/libregex.a:
 	(cd regex; $(MAKE) lib)
