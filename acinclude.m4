@@ -163,6 +163,7 @@ if test "$REGEX_TYPE" = "php"; then
   REGEX_DIR=regex
   AC_DEFINE(HSREGEX)
   AC_DEFINE(REGEX,1)
+  PHP_OUTPUT(regex/Makefile)
 elif test "$REGEX_TYPE" = "system"; then
   AC_DEFINE(REGEX,0)
 elif test "$REGEX_TYPE" = "apache"; then
