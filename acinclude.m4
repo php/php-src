@@ -27,7 +27,6 @@ AC_DEFUN(AC_EXPAND_PATH,[
   else
     $2="$1"
   fi
-  eval "echo \"made from $1 \$$2\""
 ])
 
 dnl
