@@ -2,6 +2,8 @@ dnl This file becomes configure.in for self-contained extensions.
 
 AC_INIT(config.m4)
 
+AC_CANONICAL_HOST
+
 PHP_INIT_BUILD_SYSTEM
 
 AC_DEFUN(PHP_WITH_PHP_CONFIG,[
