@@ -380,7 +380,7 @@ void php_print_credits(int flag)
 		CREDIT_LINE("CGI", "Rasmus Lerdorf, Stig Bakken");
 		CREDIT_LINE("AOLserver", "Sascha Schumann");
 		CREDIT_LINE("Java Servlet", "Sam Ruby");
-		CREDIT_LINE("Roxen", "David Hedbor");
+		CREDIT_LINE("Caudium / Roxen", "David Hedbor");
 		CREDIT_LINE("thttpd", "Sascha Schumann");
 		php_info_print_table_end();
 	}
