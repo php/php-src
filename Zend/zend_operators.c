@@ -49,6 +49,48 @@
 #include "ext/bcmath/number.h"
 #endif
 
+ZEND_API double zend_string_to_double(const char *number, zend_uint length)
+{
+	zend_uint i=0;
+	double divisor = 10.0;
+	double result = 0.0;
+	double exponent;
+
+	if (!length) {
+		return result;
+	}
+
+	for (i=0; i<length; i++) {
+		if ((number[i] <= '9' && number[i] >= '0')) {
+			result *= 10;
+			result += number[i] - '0';
+		} else if (number[i] == '.') {
+			i++;
+			break;
+		} else if (toupper(number[i]) == 'E') {
+			exponent = (double) atoi(&number[i+1]);
+			result *= pow(10.0, exponent);
+			return result;
+		} else {
+			return result;
+		}
+	}
+
+	for (; i<length; i++) {
+		if ((number[i] <= '9' && number[i] >= '0')) {
+			result += (number[i] - '0') / divisor;
+			divisor *= 10;
+		} else if (toupper(number[i]) == 'E') {
+			exponent = (double) atoi(&number[i+1]);
+			result *= pow(10.0, exponent);
+			return result;
+		} else {
+			return result;
+		}
+	}
+	return result;
+}
+
 
 ZEND_API void convert_scalar_to_number(zval *op)
 {
