@@ -34,6 +34,11 @@
 #include "ext/standard/info.h"
 #define PHP_XPATH 1
 #define PHP_XPTR 2
+/* DOMXML API_VERSION, please bump it up, if you change anything in the API
+    therefore it's easier for the script-programmers to check, what's working how 
+   Can be checked with phpversion("domxml");
+*/
+#define DOMXML_API_VERSION "20020516"
 
 /* General macros used by domxml */
 #define DOMXML_DOMOBJ_NEW(zval, obj, ret)			if (NULL == (zval = php_domobject_new(obj, ret TSRMLS_CC))) { \
@@ -461,7 +466,7 @@ zend_module_entry domxml_module_entry = {
 	PHP_RINIT(domxml),
 	NULL,
 	PHP_MINFO(domxml),
-	"20020516", //Extension versionnumber
+	DOMXML_API_VERSION, //Extension versionnumber
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -1428,6 +1433,7 @@ PHP_MINFO_FUNCTION(domxml)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "DOM/XML", "enabled");
 	php_info_print_table_row(2, "libxml Version", LIBXML_DOTTED_VERSION);
+	php_info_print_table_row(2, "domxml API Version", DOMXML_API_VERSION);	
 #if defined(LIBXML_HTML_ENABLED)
 	php_info_print_table_row(2, "HTML Support", "enabled");
 #endif
@@ -4090,6 +4096,8 @@ PHP_FUNCTION(domxml_version)
 	RETURN_STRING(LIBXML_DOTTED_VERSION, 1);
 }
 /* }}} */
+
+
 
 #if HAVE_DOMXSLT
 static zval *php_xsltstylesheet_new(xsltStylesheetPtr obj, int *found TSRMLS_DC)
