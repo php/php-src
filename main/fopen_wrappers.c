@@ -147,7 +147,7 @@ PHPAPI int php_check_specific_open_basedir(char *basedir, char *path PLS_DC)
 	SLS_FETCH();
 	
 	/* Special case basedir==".": Use script-directory */
-	if ((strcmp(open_basedir, ".") == 0) && 
+	if ((strcmp(basedir, ".") == 0) && 
 		SG(request_info).path_translated &&
 		*SG(request_info).path_translated
 		) {
