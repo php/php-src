@@ -9,7 +9,7 @@ the file Tech.Notes for some information on the internals.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1997-2001 University of Cambridge
+           Copyright (c) 1997-2003 University of Cambridge
 
 -----------------------------------------------------------------------------
 Permission is granted to anyone to use this software for any purpose on any
@@ -41,6 +41,52 @@ for these functions came from Scott Wimer <scottw@cgibuilder.com>. */
 the external pcre header. */
 
 #include "internal.h"
+
+
+/*************************************************
+*           Find number for named string         *
+*************************************************/
+
+/* This function is used by the two extraction functions below, as well
+as being generally available.
+
+Arguments:
+  code        the compiled regex
+  stringname  the name whose number is required
+
+Returns:      the number of the named parentheses, or a negative number
+                (PCRE_ERROR_NOSUBSTRING) if not found
+*/
+
+int
+pcre_get_stringnumber(const pcre *code, const char *stringname)
+{
+int rc;
+int entrysize;
+int top, bot;
+uschar *nametable;
+
+if ((rc = pcre_fullinfo(code, NULL, PCRE_INFO_NAMECOUNT, &top)) != 0)
+  return rc;
+if (top <= 0) return PCRE_ERROR_NOSUBSTRING;
+
+if ((rc = pcre_fullinfo(code, NULL, PCRE_INFO_NAMEENTRYSIZE, &entrysize)) != 0)
+  return rc;
+if ((rc = pcre_fullinfo(code, NULL, PCRE_INFO_NAMETABLE, &nametable)) != 0)
+  return rc;
+
+bot = 0;
+while (top > bot)
+  {
+  int mid = (top + bot) / 2;
+  uschar *entry = nametable + entrysize*mid;
+  int c = strcmp(stringname, (char *)(entry + 2));
+  if (c == 0) return (entry[0] << 8) + entry[1];
+  if (c > 0) bot = mid + 1; else top = mid;
+  }
+
+return PCRE_ERROR_NOSUBSTRING;
+}
 
 
 
@@ -84,6 +130,44 @@ if (size < yield + 1) return PCRE_ERROR_NOMEMORY;
 memcpy(buffer, subject + ovector[stringnumber], yield);
 buffer[yield] = 0;
 return yield;
+}
+
+
+
+/*************************************************
+*   Copy named captured string to given buffer   *
+*************************************************/
+
+/* This function copies a single captured substring into a given buffer,
+identifying it by name.
+
+Arguments:
+  code           the compiled regex
+  subject        the subject string that was matched
+  ovector        pointer to the offsets table
+  stringcount    the number of substrings that were captured
+                   (i.e. the yield of the pcre_exec call, unless
+                   that was zero, in which case it should be 1/3
+                   of the offset table size)
+  stringname     the name of the required substring
+  buffer         where to put the substring
+  size           the size of the buffer
+
+Returns:         if successful:
+                   the length of the copied string, not including the zero
+                   that is put on the end; can be zero
+                 if not successful:
+                   PCRE_ERROR_NOMEMORY (-6) buffer too small
+                   PCRE_ERROR_NOSUBSTRING (-7) no such captured substring
+*/
+
+int
+pcre_copy_named_substring(const pcre *code, const char *subject, int *ovector,
+  int stringcount, const char *stringname, char *buffer, int size)
+{
+int n = pcre_get_stringnumber(code, stringname);
+if (n <= 0) return n;
+return pcre_copy_substring(subject, ovector, stringcount, n, buffer, size);
 }
 
 
@@ -204,6 +288,44 @@ substring[yield] = 0;
 *stringptr = substring;
 return yield;
 }
+
+
+
+/*************************************************
+*   Copy named captured string to new store      *
+*************************************************/
+
+/* This function copies a single captured substring, identified by name, into
+new store.
+
+Arguments:
+  code           the compiled regex
+  subject        the subject string that was matched
+  ovector        pointer to the offsets table
+  stringcount    the number of substrings that were captured
+                   (i.e. the yield of the pcre_exec call, unless
+                   that was zero, in which case it should be 1/3
+                   of the offset table size)
+  stringname     the name of the required substring
+  stringptr      where to put the pointer
+
+Returns:         if successful:
+                   the length of the copied string, not including the zero
+                   that is put on the end; can be zero
+                 if not successful:
+                   PCRE_ERROR_NOMEMORY (-6) couldn't get memory
+                   PCRE_ERROR_NOSUBSTRING (-7) no such captured substring
+*/
+
+int
+pcre_get_named_substring(const pcre *code, const char *subject, int *ovector,
+  int stringcount, const char *stringname, const char **stringptr)
+{
+int n = pcre_get_stringnumber(code, stringname);
+if (n <= 0) return n;
+return pcre_get_substring(subject, ovector, stringcount, n, stringptr);
+}
+
 
 
 
