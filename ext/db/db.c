@@ -252,8 +252,9 @@ PHP_MINFO_FUNCTION(db)
    Describes the dbm-compatible library being used */ 
 PHP_FUNCTION(dblist)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
-		return;
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
 
 	char *str = php_get_info_db();
 	RETURN_STRING(str, 1);

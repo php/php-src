@@ -329,6 +329,10 @@ PHP_FUNCTION(mt_rand)
    Returns the maximum value a random number can have */
 PHP_FUNCTION(getrandmax)
 {
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
 	return_value->type = IS_LONG;
 	return_value->value.lval = PHP_RAND_MAX;
 }
@@ -338,6 +342,10 @@ PHP_FUNCTION(getrandmax)
    Returns the maximum value a random number from Mersenne Twister can have */
 PHP_FUNCTION(mt_getrandmax)
 {
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
 	return_value->type = IS_LONG;
 	/*
 	 * Melo: it could be 2^^32 but we only use 2^^31 to maintain

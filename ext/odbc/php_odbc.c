@@ -711,8 +711,9 @@ PHP_FUNCTION(odbc_close_all)
 	int i;
 	int nument;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
-		return;	
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
 
 	nument = zend_hash_next_free_element(&EG(regular_list));
 	

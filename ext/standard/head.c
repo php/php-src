@@ -180,6 +180,10 @@ PHP_FUNCTION(setcookie)
    Return true if headers have already been sent, false otherwise */
 PHP_FUNCTION(headers_sent)
 {
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
 	if (SG(headers_sent)) {
 		RETURN_TRUE;
 	} else {
