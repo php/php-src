@@ -41,6 +41,7 @@ PHP_RSHUTDOWN_FUNCTION(basic);
 PHP_MINFO_FUNCTION(basic);
 PHP_GINIT_FUNCTION(basic);
 
+PHP_FUNCTION(constant);
 PHP_FUNCTION(intval);
 PHP_FUNCTION(doubleval);
 PHP_FUNCTION(strval);
@@ -78,6 +79,7 @@ PHP_FUNCTION(is_object);
 PHP_FUNCTION(error_log);
 
 PHP_FUNCTION(call_user_func);
+PHP_FUNCTION(call_user_func_array);
 PHP_FUNCTION(call_user_method);
 
 PHP_FUNCTION(register_shutdown_function);

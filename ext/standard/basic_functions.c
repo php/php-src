@@ -89,6 +89,7 @@ int test_class_set_property(zend_property_reference *property_reference, pval *v
 void test_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
 
 function_entry basic_functions[] = {
+    PHP_FE(constant,                                NULL)
 	PHP_FE(intval,									NULL)
 	PHP_FE(doubleval,								NULL)
 	PHP_FE(strval,									NULL)
@@ -323,6 +324,7 @@ function_entry basic_functions[] = {
 
 	PHP_FE(error_log,								NULL)
 	PHP_FE(call_user_func,							NULL)
+	PHP_FE(call_user_func_array,                    NULL)
 	PHP_FE(call_user_method,						NULL)
 
 	PHP_FE(var_dump,								NULL)
@@ -861,6 +863,26 @@ PHP_MINFO_FUNCTION(basic)
 	php_info_print_table_end();
 	PHP_MINFO(assert)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
 }
+
+/* {{{ proto mixed constant(string const_name)
+   Given the name of a constant this function will return the constants associated value */
+PHP_FUNCTION(constant)
+{
+    zval **const_name;
+    
+    if (ZEND_NUM_ARGS() != 1 ||
+        zend_get_parameters_ex(1, &const_name) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+    convert_to_string_ex(const_name);
+    
+    if (!zend_get_constant(Z_STRVAL_PP(const_name), Z_STRLEN_PP(const_name), return_value)) {
+        php_error(E_WARNING, "Couldn't find constant %s", Z_STRVAL_PP(const_name));
+        RETURN_NULL();
+    }
+}
+/* }}} */
+
 
 /* {{{ proto int ip2long(string ip_address)
    Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address */
@@ -1515,6 +1537,45 @@ PHP_FUNCTION(call_user_func)
 		php_error(E_WARNING,"Unable to call %s() - function does not exist", (*params[0])->value.str.val);
 	}
 	efree(params);
+}
+/* }}} */
+
+/* {{{ proto mixed call_user_func_array(string function_name, array parameters)
+   Call a user function which is the first parameter with the arguments contained in array */
+PHP_FUNCTION(call_user_func_array)
+{
+    zval **func_name,
+         **params,
+         ***func_args = NULL,
+         *retval_ptr;
+    HashTable *params_ar;
+    int num_elems,
+        element = 0;
+    
+    if (ZEND_NUM_ARGS() != 2 ||
+        zend_get_parameters_ex(2, &func_name, &params) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+    convert_to_string_ex(func_name);
+    
+    params_ar = HASH_OF(*params);
+    num_elems = zend_hash_num_elements(params_ar);
+    
+    func_args = (zval ***)emalloc(sizeof(zval **) * num_elems);
+    
+    for (zend_hash_internal_pointer_reset(params_ar);
+         zend_hash_get_current_data(params_ar, (void **)&(func_args[element])) == SUCCESS;
+         zend_hash_move_forward(params_ar))
+         element++;
+    
+    if (call_user_function_ex(CG(function_table), NULL, *func_name, &retval_ptr, num_elems, func_args, 1, NULL) == SUCCESS
+        && retval_ptr) {
+        COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
+    } else {
+        php_error(E_WARNING, "Unable to call %s() - function does not exist", Z_STRVAL_PP(func_name));
+    }
+    
+    efree(func_args);
 }
 /* }}} */
 
