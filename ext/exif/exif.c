@@ -1065,7 +1065,7 @@ void add_assoc_image_info( pval *value, int sub_array, image_info_type *image_in
    We want to print out the marker contents as legible text;
    we must guard against random junk and varying newline representations.
 */
-static void exif_process_COM (image_info_type *image_info, uchar *value, int length)
+static void exif_process_COM (image_info_type *image_info, char *value, int length)
 {
     exif_add_image_info( image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_STRING, length-2, value+2);
 }
@@ -1972,7 +1972,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 						php_error(E_NOTICE,"TIFF subsection %s done", exif_get_sectionname(sub_section_index));
 #endif
 					} else {
-						exif_process_IFD_TAG(ImageInfo,dir_entry,ImageInfo->sections[sn].Data-dir_offset,ifd_size,section_index,0);
+						exif_process_IFD_TAG(ImageInfo,(char*)dir_entry,(char*)(ImageInfo->sections[sn].Data-dir_offset),ifd_size,section_index,0);
 					}
 				}
 				if (next_offset && section_index != SECTION_THUMBNAIL) {
