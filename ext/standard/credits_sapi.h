@@ -10,7 +10,6 @@
 
 */
 
-CREDIT_LINE("ActiveScript", "Wez Furlong");
 CREDIT_LINE("AOLserver", "Sascha Schumann");
 CREDIT_LINE("Apache 1.3 (apache_hooks)", "Rasmus Lerdorf, Zeev Suraski, Stig Bakken, David Sklar, George Schlossnagle, Lukas Schroeder");
 CREDIT_LINE("Apache 1.3", "Rasmus Lerdorf, Zeev Suraski, Stig Bakken, David Sklar");
