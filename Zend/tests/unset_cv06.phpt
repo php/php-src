@@ -20,5 +20,5 @@ echo "ok\n";
 1
 2
 
-Notice: Undefined variable:  x in %sunset_cv06.php on line %d
+Notice: Undefined variable: x in %sunset_cv06.php on line %d
 ok

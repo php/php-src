@@ -1312,13 +1312,13 @@ static int zend_fetch_var_address_helper_SPEC_CONST(int type, ZEND_OPCODE_HANDLE
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
-					zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
+					zend_error(E_NOTICE,"Undefined variable: %s", varname->value.str.val);
 					/* break missing intentionally */
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval_ptr);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
+					zend_error(E_NOTICE,"Undefined variable: %s", varname->value.str.val);
 					/* break missing intentionally */
 				case BP_VAR_W: {
 						zval *new_zval = &EG(uninitialized_zval);
@@ -3699,13 +3699,13 @@ static int zend_fetch_var_address_helper_SPEC_TMP(int type, ZEND_OPCODE_HANDLER_
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
-					zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
+					zend_error(E_NOTICE,"Undefined variable: %s", varname->value.str.val);
 					/* break missing intentionally */
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval_ptr);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
+					zend_error(E_NOTICE,"Undefined variable: %s", varname->value.str.val);
 					/* break missing intentionally */
 				case BP_VAR_W: {
 						zval *new_zval = &EG(uninitialized_zval);
@@ -6666,13 +6666,13 @@ static int zend_fetch_var_address_helper_SPEC_VAR(int type, ZEND_OPCODE_HANDLER_
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
-					zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
+					zend_error(E_NOTICE,"Undefined variable: %s", varname->value.str.val);
 					/* break missing intentionally */
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval_ptr);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
+					zend_error(E_NOTICE,"Undefined variable: %s", varname->value.str.val);
 					/* break missing intentionally */
 				case BP_VAR_W: {
 						zval *new_zval = &EG(uninitialized_zval);
@@ -17425,13 +17425,13 @@ static int zend_fetch_var_address_helper_SPEC_CV(int type, ZEND_OPCODE_HANDLER_A
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
-					zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
+					zend_error(E_NOTICE,"Undefined variable: %s", varname->value.str.val);
 					/* break missing intentionally */
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval_ptr);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
+					zend_error(E_NOTICE,"Undefined variable: %s", varname->value.str.val);
 					/* break missing intentionally */
 				case BP_VAR_W: {
 						zval *new_zval = &EG(uninitialized_zval);
@@ -28496,13 +28496,13 @@ static int zend_fetch_var_address_helper(int type, ZEND_OPCODE_HANDLER_ARGS)
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
-					zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
+					zend_error(E_NOTICE,"Undefined variable: %s", varname->value.str.val);
 					/* break missing intentionally */
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval_ptr);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
+					zend_error(E_NOTICE,"Undefined variable: %s", varname->value.str.val);
 					/* break missing intentionally */
 				case BP_VAR_W: {
 						zval *new_zval = &EG(uninitialized_zval);

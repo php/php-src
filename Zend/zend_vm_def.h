@@ -882,13 +882,13 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, ANY, int type
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
-					zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
+					zend_error(E_NOTICE,"Undefined variable: %s", varname->value.str.val);
 					/* break missing intentionally */
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval_ptr);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
+					zend_error(E_NOTICE,"Undefined variable: %s", varname->value.str.val);
 					/* break missing intentionally */
 				case BP_VAR_W: {
 						zval *new_zval = &EG(uninitialized_zval);
