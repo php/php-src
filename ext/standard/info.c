@@ -65,7 +65,7 @@ static int _display_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 	int show_info_func = *((int *) arg);
 
 	if (show_info_func && module->info_func) {
-    	if (PG(html_errors)) {
+		if (PG(html_errors)) {
 			php_printf("<h2 align=\"center\"><a name=\"module_%s\">%s</a></h2>\n", module->name, module->name);
 		} else {
 			php_info_print_table_start();
@@ -191,65 +191,64 @@ PHPAPI char *php_get_uname(char mode)
 	DWORD dwWindowsMajorVersion =  (DWORD)(LOBYTE(LOWORD(dwVersion)));
 	DWORD dwWindowsMinorVersion =  (DWORD)(HIBYTE(LOWORD(dwVersion)));
 
-    if (mode == 's') {
-        if (dwVersion < 0x80000000) {
-            php_uname = "Windows NT";
-        } else {
-            php_uname = "Windows 9x";
-        }
-    } else if (mode == 'r') {
-        snprintf(tmp_uname, sizeof(tmp_uname), "%d.%d",
-                 dwWindowsMajorVersion, dwWindowsMinorVersion);
-        php_uname = tmp_uname;
-    } else if (mode == 'n') {
-        /* XXX HOW TO GET THIS ON WINDOWS? */
-        php_uname = "localhost";
-    } else if (mode == 'v') {
-        dwBuild = (DWORD)(HIWORD(dwVersion));
-        snprintf(tmp_uname, sizeof(tmp_uname), "build %d", dwBuild);
-        php_uname = tmp_uname;
-    } else if (mode == 'm') {
-        /* XXX HOW TO GET THIS ON WINDOWS? */
-        php_uname = "i386";
-    } else { /* assume mode == 'a' */
-        /* Get build numbers for Windows NT or Win95 */
-        if (dwVersion < 0x80000000){
-            dwBuild = (DWORD)(HIWORD(dwVersion));
-            snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d build %d",
-                     "Windows NT", "localhost",
-                     dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild);
-        } else {
-            snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d",
-                     "Windows 9x", "localhost",
-                     dwWindowsMajorVersion, dwWindowsMinorVersion);
-        }
-        php_uname = tmp_uname;
-    }
+	if (mode == 's') {
+		if (dwVersion < 0x80000000) {
+			php_uname = "Windows NT";
+		} else {
+			php_uname = "Windows 9x";
+		}
+	} else if (mode == 'r') {
+		snprintf(tmp_uname, sizeof(tmp_uname), "%d.%d", dwWindowsMajorVersion, dwWindowsMinorVersion);
+		php_uname = tmp_uname;
+	} else if (mode == 'n') {
+		/* XXX HOW TO GET THIS ON WINDOWS? */
+		php_uname = "localhost";
+	} else if (mode == 'v') {
+		dwBuild = (DWORD)(HIWORD(dwVersion));
+		snprintf(tmp_uname, sizeof(tmp_uname), "build %d", dwBuild);
+		php_uname = tmp_uname;
+	} else if (mode == 'm') {
+		/* XXX HOW TO GET THIS ON WINDOWS? */
+		php_uname = "i386";
+	} else { /* assume mode == 'a' */
+		/* Get build numbers for Windows NT or Win95 */
+		if (dwVersion < 0x80000000){
+			dwBuild = (DWORD)(HIWORD(dwVersion));
+			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d build %d",
+					 "Windows NT", "localhost",
+					 dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild);
+		} else {
+			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d",
+					 "Windows 9x", "localhost",
+					 dwWindowsMajorVersion, dwWindowsMinorVersion);
+		}
+		php_uname = tmp_uname;
+	}
 #else
 #ifdef HAVE_SYS_UTSNAME_H
-    struct utsname buf;
-    if (uname((struct utsname *)&buf) == -1) {
-        php_uname = PHP_UNAME;
-    } else {
-        if (mode == 's') {
-            php_uname = buf.sysname;
-        } else if (mode == 'r') {
-            php_uname = buf.release;
-        } else if (mode == 'n') {
-            php_uname = buf.nodename;
-        } else if (mode == 'v') {
-            php_uname = buf.version;
-        } else if (mode == 'm') {
-            php_uname = buf.machine;
-        } else { /* assume mode == 'a' */
-            snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %s %s %s",
-                     buf.sysname, buf.nodename, buf.release, buf.version,
-                     buf.machine);
-            php_uname = tmp_uname;
-        }
-    }
+	struct utsname buf;
+	if (uname((struct utsname *)&buf) == -1) {
+		php_uname = PHP_UNAME;
+	} else {
+		if (mode == 's') {
+			php_uname = buf.sysname;
+		} else if (mode == 'r') {
+			php_uname = buf.release;
+		} else if (mode == 'n') {
+			php_uname = buf.nodename;
+		} else if (mode == 'v') {
+			php_uname = buf.version;
+		} else if (mode == 'm') {
+			php_uname = buf.machine;
+		} else { /* assume mode == 'a' */
+			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %s %s %s",
+					 buf.sysname, buf.nodename, buf.release, buf.version,
+					 buf.machine);
+			php_uname = tmp_uname;
+		}
+	}
 #else
-    php_uname = PHP_UNAME;
+	php_uname = PHP_UNAME;
 #endif
 #endif
 	return estrdup(php_uname);
@@ -300,12 +299,12 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_printf("<title>phpinfo()</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"></head>", charset);
 		PUTS("<body text=\"#000000\" bgcolor=\"#f0f0ff\" link=\"#0000ff\" vlink=\"#ff00ff\" alink=\"#0000ff\">");
 	} else {
-        PUTS("       _           _        __        ____  \n");
-        PUTS(" _ __ | |__  _ __ (_)_ __  / _| ___  / /\\ \\ \n");
-        PUTS("| '_ \\| '_ \\| '_ \\| | '_ \\| |_ / _ \\| |  | |\n");
-        PUTS("| |_) | | | | |_) | | | | |  _| (_) | |  | |\n");
-        PUTS("| .__/|_| |_| .__/|_|_| |_|_|  \\___/| |  | |\n");
-        PUTS("|_|         |_|                      \\_\\/_/ \n\n");
+		PUTS("       _           _        __        ____  \n");
+		PUTS(" _ __ | |__  _ __ (_)_ __  / _| ___  / /\\ \\ \n");
+		PUTS("| '_ \\| '_ \\| '_ \\| | '_ \\| |_ / _ \\| |  | |\n");
+		PUTS("| |_) | | | | |_) | | | | |  _| (_) | |  | |\n");
+		PUTS("| .__/|_| |_| .__/|_|_| |_|_|  \\___/| |  | |\n");
+		PUTS("|_|         |_|                      \\_\\/_/ \n\n");
 	}	
 
 	if (flag & PHP_INFO_GENERAL) {
@@ -550,7 +549,7 @@ PHPAPI void php_info_print_table_start()
 {
 	TSRMLS_FETCH();
 
-    if (PG(html_errors)) {
+	if (PG(html_errors)) {
 		php_printf("<table border=\"0\" cellpadding=\"3\" cellspacing=\"1\" width=\"600\" bgcolor=\"#000000\" align=\"center\">\n");
 	} else {
 		php_printf("\n");
@@ -757,22 +756,22 @@ PHP_FUNCTION(phpinfo)
    Return the current PHP version */
 PHP_FUNCTION(phpversion)
 {
-    zval **arg;
-    int argc = ZEND_NUM_ARGS();
+	zval **arg;
+	int argc = ZEND_NUM_ARGS();
 
 	if (argc == 0) {
-        RETURN_STRING(PHP_VERSION, 1);
+		RETURN_STRING(PHP_VERSION, 1);
 	} else if (argc == 1 && zend_get_parameters_ex(1, &arg) == SUCCESS) {
-        char *version;
-        convert_to_string_ex(arg);
-        version = zend_get_module_version(Z_STRVAL_PP(arg));
-        if (version == NULL) {
-            RETURN_FALSE;
-        }
-        RETURN_STRING(version, 1);
-    } else {
+		char *version;
+		convert_to_string_ex(arg);
+		version = zend_get_module_version(Z_STRVAL_PP(arg));
+		if (version == NULL) {
+			RETURN_FALSE;
+		}
+		RETURN_STRING(version, 1);
+	} else {
 		WRONG_PARAM_COUNT;
-    }
+	}
 }
 /* }}} */
 
@@ -853,8 +852,8 @@ PHP_FUNCTION(php_sapi_name)
    Return information about the system PHP was built on */
 PHP_FUNCTION(php_uname)
 {
-    char *mode = "a";
-    int modelen;
+	char *mode = "a";
+	int modelen;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &mode, &modelen) == FAILURE) {
 		return;
 	}
