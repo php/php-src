@@ -1,3 +1,31 @@
+2002-09-03  Thies C. Arntzen  <thies@thieso.net>
+
+    * zend_builtin_functions.c: nuke warning
+
+    * zend_builtin_functions.c: nuke unneeded stuff
+
+2002-09-03  Zeev Suraski  <zeev@zend.com>
+
+    * zend.c
+      zend.h
+      zend_ini.c: MFZE1
+
+2002-09-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend_ini.c: - Revert
+
+    * zend_ini.c:
+    - MFH for: Apply rest of html errors fix (Patch by Jan Lehnardt <jan@php.net>)
+
+2002-09-03  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend.h:
+    Add html_errors to zend_utility_values. Patch by Jan Lehnardt <jan@php.net>.
+
+2002-09-03  Andi Gutmans  <andi@zend.com>
+
+    * zend_builtin_functions.c: - Fix typo
+
 2002-09-02  Thies C. Arntzen  <thies@thieso.net>
 
     * zend_builtin_functions.c:
