@@ -66,15 +66,6 @@
 
 #include "php_content_types.h"
 
-#if USE_SAPI
-#include "serverapi/sapi.h"
-void *gLock;
-#ifndef THREAD_SAFE
-struct sapi_request_info *sapi_rqst;
-#endif
-#endif
-
-
 #include "SAPI.h"
 
 #if MSVC5 || !defined(HAVE_GETOPT)

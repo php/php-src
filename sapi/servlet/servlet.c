@@ -67,14 +67,6 @@
 #include "zend_highlight.h"
 #include "zend_indent.h"
 
-#if USE_SAPI
-#include "serverapi/sapi.h"
-void *gLock;
-#ifndef THREAD_SAFE
-struct sapi_request_info *sapi_rqst;
-#endif
-#endif
-
 #if WIN32|WINNT || !defined(HAVE_GETOPT)
 #include "php_getopt.h"
 #endif
