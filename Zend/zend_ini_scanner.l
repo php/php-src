@@ -276,3 +276,8 @@ void zend_ini_close_file(zend_file_handle *fh)
 	php_error(E_NOTICE,"Unexpected character on line %d:  '%s' (ASCII %d)\n",yylineno,yytext,yytext[0]);
 #endif
 }
+
+<<EOF>> {
+	yy_delete_buffer(YY_CURRENT_BUFFER);
+	yyterminate();
+}
