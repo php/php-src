@@ -889,7 +889,7 @@ static int php_plain_files_url_stater(php_stream_wrapper *wrapper, char *url, ph
 	return VCWD_STAT(url, &ssb->sb);
 }
 
-static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, php_stream_context *context TSRMLS_DC)
+static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
 {
 	char *p;
 	int ret;
@@ -900,17 +900,21 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, php_st
 		url = p + 3;
 	}
 
-	if (PG(safe_mode) && !php_checkuid(url, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
-		return 0;
-	}
+	if (options & ENFORCE_SAFE_MODE) {
+		if (PG(safe_mode) && !php_checkuid(url, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
+			return 0;
+		}
 
-	if (php_check_open_basedir(url TSRMLS_CC)) {
-		return 0;
+		if (php_check_open_basedir(url TSRMLS_CC)) {
+			return 0;
+		}
 	}
 
 	ret = VCWD_UNLINK(url);
 	if (ret == -1) {
-		php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "%s", strerror(errno));
+		if (options & REPORT_ERRORS) {
+			php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "%s", strerror(errno));
+		}
 		return 0;
 	}
 	/* Clear stat cache */
