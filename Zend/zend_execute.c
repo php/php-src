@@ -2625,7 +2625,7 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (EG(This)) {
-		if (EG(exception) && EX(fbc)->common.fn_flags&ZEND_ACC_CTOR) {
+		if (EG(exception) && EX(fbc) && EX(fbc)->common.fn_flags&ZEND_ACC_CTOR) {
 			EG(This)->refcount--;
 			zval_ptr_dtor(&EG(This));
 		} else if (should_change_scope) {
@@ -3632,7 +3632,8 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 			break;
 
 		case ZEND_ITER_OBJECT:
-			if (iter->funcs->has_more(iter TSRMLS_CC) == FAILURE) {
+			/* !iter happens from exception */
+			if (!iter || iter->funcs->has_more(iter TSRMLS_CC) == FAILURE) {
 				/* reached end of iteration */
 				EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
 				return 0; /* CHECK_ME */
