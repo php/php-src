@@ -30,7 +30,8 @@ class PEAR_Command_Remote extends PEAR_Command_Common
     {
         return array('remote-package-info',
                      'list-upgrades',
-                     'list-remote-packages');
+                     'list-remote-packages',
+                     'download');
     }
 
     // }}}
@@ -59,6 +60,48 @@ class PEAR_Command_Remote extends PEAR_Command_Common
                 break;
             }
             case 'list-remote-packages': {
+                break;
+            }
+            case 'download': {
+                //$params[0] -> The package to download
+                if (count($params) != 1) {
+                    return PEAR::raiseError("download expects one argument: the package to download");
+                }
+                if (!ereg('^http://', $params[0])) {
+                    $pkgfile = "http://" . $this->config->get('master_server') .
+                               "/get/" . $params[0];
+                } else {
+                    $pkgfile = $params[0];
+                }
+                if (!extension_loaded("zlib")) {
+                    $pkgfile .= '?uncompress=yes';
+                }
+                include_once 'HTTP.php';
+                $headers = HTTP::head($pkgfile);
+                if (PEAR::isError($headers)|| !isset($headers['Content-disposition'])) {
+                    return $this->raiseError("Could not retrieve remote file information");
+                }
+                preg_match('|filename="(.*)"$|', $headers['Content-disposition'], $matches);
+                $fname = $matches[1];
+                if (!$wp = @fopen($pkgfile, 'wb')) {
+                    $failmsg = "Could not download $pkgfile"; break;
+                }
+                if (!$fp = @fopen($fname, 'wb')) {
+                    $failmsg = "Could not write the file here"; break;
+                }
+                $bytes = 0;
+                $this->ui->displayLine("Downloading $pkgfile:");
+                while ($data = @fread($wp, 16384)) {
+                    $bytes += strlen($data);
+                    if (!@fwrite($fp, $data)) {
+                        return $this->raiseError("$pkgfile: write failed ($php_errormsg)");
+                    }
+                    $this->ui->display('...');
+                }
+                $this->ui->display(" done!\n");
+                fclose($fp);
+                fclose($wp);
+                $this->ui->displayLine("File $fname downloaded ($bytes bytes)");
                 break;
             }
             case 'list-upgrades': {
