@@ -572,7 +572,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		if (!SOCK_FEOF(*socketd)) {
 			/* get response header */
 			if (SOCK_FGETS(tmp_line, sizeof(tmp_line), *socketd) != NULL) {
-				if (strncmp(tmp_line + 8, " 200 ", 5) == NULL) {
+				if (strncmp(tmp_line + 8, " 200 ", 5) == 0) {
 					reqok = 1;
 				}
 			}
