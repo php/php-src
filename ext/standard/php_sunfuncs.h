@@ -12,36 +12,31 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Author: Moshe Doron <mosdoron@netvision.net.il>                      |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#ifndef DATETIME_H
-#define DATETIME_H
+#ifndef PHP_SUNFUNCS_H
+#define PHP_SUNFUNCS_H
 
-PHP_FUNCTION(time);
-PHP_FUNCTION(mktime);
-PHP_FUNCTION(gmmktime);
-PHP_FUNCTION(date);
-PHP_FUNCTION(idate);
-PHP_FUNCTION(gmdate);
-PHP_FUNCTION(localtime);
-PHP_FUNCTION(getdate);
-PHP_FUNCTION(checkdate);
-#if HAVE_STRFTIME
-PHP_FUNCTION(strftime);
-PHP_FUNCTION(gmstrftime);
-#endif
-PHP_FUNCTION(strtotime);
+/* default ini entries: */
+/* Jerusalem one. */
+#define DATE_DEFAULT_LATITUDE "31.7667"
+#define DATE_DEFAULT_LONGITUDE "35.2333"
 
-int php_idate(char format, int timestamp, int gm);
-extern char *php_std_date(time_t t);
-void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm);
-#if HAVE_STRFTIME
-void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);
-#endif
+/* on 90'50; common jewish sunset declaration (start of sun body appear) */
+#define DATE_SUNSET_ZENITH "90.83"
 
-#endif /* DATETIME_H */
+/* on 90'50; common jewish  sunrise declaration (sun body disappeared) */
+#define DATE_SUNRISE_ZENITH "90.83"
+
+#define SUNFUNCS_RET_TIMESTAMP 0
+#define SUNFUNCS_RET_STRING 1
+#define SUNFUNCS_RET_DOUBLE 2
+
+PHP_FUNCTION(date_sunrise);
+PHP_FUNCTION(date_sunset);
+
+#endif /* PHP_SUNFUNCS_H */
