@@ -67,6 +67,12 @@ if(isset($_ENV['TEST_PHP_EXECUTABLE'])) {
 	error("environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!");
 }
 
+if(isset($_ENV['TEST_PHP_LOG_FORMAT'])) {
+	$log_format = strtoupper($_ENV['TEST_PHP_LOG_FORMAT']);
+} else {
+	$log_format = 'LEOD';
+}
+
 if(!@is_executable($php)) {
 	error("invalid PHP executable specified by TEST_PHP_EXECUTABLE  = " . $php);
 }
@@ -262,6 +268,8 @@ function error_report($testname,$logname,$tested)
 
 function run_test($php,$file)
 {
+	global $log_format;
+
     if (DETAILED) echo "
 =================
 TEST $file
@@ -389,6 +397,12 @@ COMMAND $cmd
     @unlink($tmp_post);
     @unlink($tmp_file);
     
+	// unlink old test results	
+	@unlink(ereg_replace('\.phpt$','.diff',$file));
+	@unlink(ereg_replace('\.phpt$','.log',$file));
+	@unlink(ereg_replace('\.phpt$','.exp',$file));
+	@unlink(ereg_replace('\.phpt$','.out',$file));
+
     // Does the output match what is expected?
     
     $output = trim($out);
@@ -396,7 +410,8 @@ COMMAND $cmd
     
     $output = preg_replace('/\r\n/',"\n",$output);
     $wanted = preg_replace('/\r\n/',"\n",$wanted);
-	
+
+	// compare and leave on success
     $ok = (0 == strcmp($output,$wanted));
     if ($ok) {
         echo "PASS $tested\n";
@@ -404,25 +419,62 @@ COMMAND $cmd
     }
     
     // Test failed so we need to report details.
-
     echo "FAIL $tested\n";
 
-    $logname = ereg_replace('\.phpt$','.log',$file);
-    $log = fopen($logname,'w')
-        or error("Cannot create test log - $logname");
-    
-    fwrite($log,"
+	// write .exp
+	if (strpos($log_format,'E')!==false) {
+	    $logname = ereg_replace('\.phpt$','.exp',$file);
+    	$log = fopen($logname,'w') or error("Cannot create test log - $logname");
+	    fwrite($log,$wanted);
+	    fclose($log);
+	}
+
+	// write .out
+	if (strpos($log_format,'O')!==false) {
+	    $logname = ereg_replace('\.phpt$','.out',$file);
+    	$log = fopen($logname,'w') or error("Cannot create test log - $logname");
+	    fwrite($log,$output);
+	    fclose($log);
+	}
+
+	// write .diff
+	if (strpos($log_format,'D')!==false) {
+	    $logname = ereg_replace('\.phpt$','.diff',$file);
+    	$log = fopen($logname,'w') or error("Cannot create test log - $logname");
+	    fwrite($log,generate_diff($wanted,$output));
+    	fclose($log);
+    }
+
+	// write .log
+	if (strpos($log_format,'L')!==false) {
+	    $logname = ereg_replace('\.phpt$','.log',$file);
+    	$log = fopen($logname,'w') or error("Cannot create test log - $logname");
+	    fwrite($log,"
 ---- EXPECTED OUTPUT
 $wanted
 ---- ACTUAL OUTPUT
 $output
 ---- FAILED
 ");
-    fclose($log);
+	    fclose($log);
+	    error_report($file,$logname,$tested);
+	}
 
-    error_report($file,$logname,$tested);
-    
     return 'FAILED';
+}
+
+function generate_diff($wanted,$output) {
+    $w = explode("\n", $wanted);
+    $o = explode("\n", $output);
+    $w1 = array_diff($w,$o);
+    $o1 = array_diff($o,$w);
+    $w2 = array();
+    $o2 = array();
+    foreach($w1 as $idx => $val) $w2[sprintf("%03d<",$idx)] = sprintf("%03d- $val", $idx+1);
+    foreach($o1 as $idx => $val) $o2[sprintf("%03d>",$idx)] = sprintf("%03d+ $val", $idx+1);
+    $diff = array_merge($w2, $o2);
+    ksort($diff);
+    return implode("\r\n", $diff);
 }
 
 function error($message) {
