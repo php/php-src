@@ -495,12 +495,15 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, long ad
 	if (*addr == '[') {
 		colon = memchr(addr + 1, ']', addrlen-1);
 		if (!colon || colon[1] != ':') {
-			return 0;
+			return FAILURE;
 		}
 		port = atoi(colon + 2);
 		addr++;
 	} else {
 		colon = memchr(addr, ':', addrlen);
+		if (!colon || colon[1] != ':') {
+			return FAILURE;
+		}
 		port = atoi(colon + 1);
 	}
 
