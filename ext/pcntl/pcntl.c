@@ -32,6 +32,7 @@
 
 #include "php.h"
 #include "php_ini.h"
+#include "ext/standard/info.h"
 #include "php_pcntl.h"
 #include "zend_extensions.h"
 
@@ -531,7 +532,7 @@ static void old_pcntl_signal_handler(int signo)
 	
 	zval_dtor(call_name);
 	efree(call_name);
-	efree(param)
+	efree(param);
 	efree(retval);
 
 	return;
