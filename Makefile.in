@@ -106,7 +106,7 @@ libmodphp4-so.a: all-recursive $(OBJS) @REGEX_LIB@
 # Apache 1.3 shared module
 libphp4.so: $(srcdir)/mod_php4.c libmodphp4-so.a @REGEX_LIB@
 	-@test -f mod_php4.c || test -L mod_php4.c || $(LN_S) $(srcdir)/mod_php4.c mod_php4.c
-	$(APXS) $(INCLUDE) -c -o libphp4.so $(APXS_LDFLAGS) mod_php4.c libmodphp4-so.a
+	$(APXS) $(INCLUDE) -c -o libphp4.so mod_php4.c libmodphp4-so.a $(APXS_LDFLAGS)
 
 regex/libregex.a:
 	(cd regex; $(MAKE) lib)
@@ -180,8 +180,8 @@ indent:	clean
 .c.o:
 	@rm -f $@
 	$(CC) $(CFLAGS) -c $< -o $@
-	@bn=`echo $@ | sed -e 's#functions/##'`; test -f $@ || \
-	  (test "$@" != "$$bn" && test -f "$$bn" && mv $$bn $@)
+#	@bn=`echo $@ | sed -e 's#functions/##'`; test -f $@ || \
+#	  (test "$@" != "$$bn" && test -f "$$bn" && mv $$bn $@)
 
 parser-scanner:	configuration-parser.c configuration-scanner.c
 
