@@ -1,7 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 26 Jun 2003, Version 4.3.3RC2
-- dummy (remove when first entry is added)
+- Fixed bug #24284 (Fixed memory leak inside pg_ping()). (Ilia)
 
 19 Jun 2003, Version 4.3.3RC1
 - Synchronized bundled GD library with GD 2.0.15. (Ilia)
