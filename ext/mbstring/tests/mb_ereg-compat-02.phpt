@@ -1,8 +1,10 @@
 --TEST--
 mb_ereg() compat test 2
 --SKIPIF--
+<?php
 extension_loaded('mbstring') or die('skip');
 function_exists('mb_ereg') or die("SKIP mb_ereg() is not available in this build");
+?>
 --FILE--
 <?php
 /* (counterpart: ext/standard/tests/reg/005.phpt) */
