@@ -1,3 +1,91 @@
+2004-12-01  Stefan Esser  <sesser@suspekt.org>
+
+    * (PHP_4_3)
+      TSRM/tsrm_virtual_cwd.c:
+      Fixed missing opening bracket
+
+    * TSRM/tsrm_virtual_cwd.c:
+      Fixed behaviour of TSRM in case of realpath() failure
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      Beware of negative indices
+
+    * main/safe_mode.c:
+      Do not silently truncate
+
+2004-12-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      Zend/zend_strtod.c:
+      MFH: Removed extra space that causes problems for some compilers.
+
+    * ZendEngine2/zend_strtod.c:
+      MFB: Removed extra space that causes problems for some compilers.
+
+    * (PHP_5_0)
+      ZendEngine2/zend_strtod.c:
+      Removed extra space that causes problems for some compilers.
+
+2004-12-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #30329 (Error Fetching http body, No Content-Length, connection
+      closed or chunked data).
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #30359 (SOAP client requests have no port in "Host" field ).
+
+2004-12-01  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_strtod.c:
+      - revert unwanted change
+
+    * (PHP_4_3)
+      Zend/zend_strtod.c:
+      - MFH: Fixed MacOSX compilation  (Patch by Christian)
+
+    * ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.c:
+      - Fixed MacOSX compilation  (Patch by Christian)
+
+    * (PHP_5_0)
+      ZendEngine2/zend.h:
+      - And in Zend/ too.
+
+    * (PHP_5_0)
+      configure.in
+      main/php_version.h:
+      - Roll back to -dev
+
+2004-12-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug29883.phpt
+      ZendEngine2/tests/bug29883.phpt:
+      
+      file bug29883.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug29883.phpt:
+      Fixed bug #29883 (isset gives invalid values on strings).
+
+2004-12-01  Derick Rethans  <php@derickrethans.nl>
+
+    * INSTALL
+      INSTALL:
+      - MF43: Update install instructions
+
+    * (PHP_4_3)
+      INSTALL:
+      - Update INSTALL file (to add static instructions)
+
 2004-11-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/ctype/ctype.c:
