@@ -1,3 +1,56 @@
+2004-06-04  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/standard/http.c:
+      Fixed unregistered bug [crash in http_build_query()]
+
+2004-06-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/mysql/php_mysql.c:
+      MFH: Fixed bug #28632 (Prevent open_basedir bypass in MySQL's LOAD DATA
+      LOCAL).
+
+    * ext/mysql/php_mysql.c:
+      Fixed bug #28632 (Prevent open_basedir bypass in MySQL's LOAD DATA LOCAL).
+
+2004-06-04  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/php_ibase_udf.c:
+      Added support for scaled integers
+
+2004-06-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/mysql/php_mysql.c:
+      MFH: Fixed bug #28627 (When multiple MySQL links are used default link is
+      leaked).
+
+    * ext/mysql/php_mysql.c:
+      Fixed bug #28627 (When multiple MySQL links are used default link is
+      leaked).
+      Patch by: gavin at ipalsoftware dot com
+
+2004-06-04  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/php_ibase_udf.c:
+      Added support for arbitrary input types
+      Added support for NULL input/output values
+
+2004-06-04  Sara Golemon  <php@alphaweb.net>
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h:
+      MFB BugFix# 28626 You can't #ifdef check a typedef.  Just give it another
+      name since it's only used once anyway.
+
+    * (PHP_4_3)
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h:
+      BugFix# 28626 You can't #ifdef check a typedef.  Just give it another name
+      since it's only used once anyway.
+
 2004-06-03  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
 
     * ext/interbase/php_ibase_udf.c:
