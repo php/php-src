@@ -622,7 +622,7 @@ if test "$PHP_PHP_STREAMS" = "yes"; then
 fi
 
 AC_CHECK_LIB(crypt, crypt, [
-  PHP_ADD_LIBRARY(crypt)
+  PHP_ADD_LIBRARY(crypt, 1)
   AC_DEFINE(HAVE_CRYPT,1,[ ]) 
 ])
 
