@@ -381,7 +381,15 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 	zval *retval;
 	
 	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
+		if(offset == NULL) {
+			/* [] construct */
+			zval offset_null;
+			ZVAL_NULL(&offset_null);
+			zend_call_method_with_1_params(&object, ce, NULL, "offsetget", &retval, &offset_null);
+			zval_dtor(&offset_null); /* just in case */
+		} else {
 		zend_call_method_with_1_params(&object, ce, NULL, "offsetget", &retval, offset);
+		}
 		if (!retval) {
 			if (!EG(exception)) {
 				zend_error(E_ERROR, "Undefined offset for object of type %s used as array", ce->name);
