@@ -1,6 +1,27 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.0
+- TIFF support for GetImageSize (Marcus)
+- The Velocis extension is no
+- Added test.php/txt to have a possibility to check ext/exif
+  (Marcus)
+- Added TIFF support
+  Changed parameters after checking bugdatabase and discussion with Rasmus
+  1st=Filename, 2nd=NeededSections
+  If the 2nd parameter is not present or 0 or '' the function will return
+  a result array even if no data was read from file.
+  If the 2nd parameter is a string then that string describes which
+  sections have to be present in the file to generate a result array.
+  If none of the needed section is found the result will be false.
+  Section strings are "ANY_TAG","IFD0","COMMENT","EXIF","GPS","INTEROP"
+  "FPIX","APP12". Each string has to be separated by a colon. So
+  "COMMENT,EXIF" returns an array if either a comment or an Exif
+  section is present. "IFD0" is standard datastructure in a TIFF/JPEG
+  file that contains image information. "EXIF" is the Exif structure
+  of TIFF/JPEG (IFD0 subdirectory). "GPS", "INTEROP", "FPIX", "APP12"
+  are additional IFD0 subdirectories. The APP12 support is an
+  		 experimental Olympus support.
+  (Marcus)
 - Added safe_mode checks for opendir(). (jflemer)
 - Make the 2nd parameter to pgsql_fetch_* support NULL in case 3
   parameters are supplied, but you do not want to provide a row number
