@@ -36,6 +36,7 @@
 
 #include "php.h"
 #include "php_ini.h"
+#include "mbstring.h"
 
 #if HAVE_MBSTRING
 
