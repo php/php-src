@@ -107,6 +107,7 @@ build-dist: $(BUILD_DIR)\deplister.exe
 	-rmdir /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 	-rmdir /s /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)
 	-del /f /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)-Win32.zip
+	-del /f /q $(BUILD_DIR)\php-debug-pack-$(PHP_VERSION_STRING)-Win32.zip
 	-del /f /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)-Win32.zip
 	$(BUILD_DIR)\php.exe -n win32/build/mkdist.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)" "$(PECL_TARGETS)" "$(SNAPSHOT_TEMPLATE)"
 	cd $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
@@ -114,6 +115,9 @@ build-dist: $(BUILD_DIR)\deplister.exe
 	cd ..\..
 	cd $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)
 	-$(ZIP) -9 -r ..\pecl-$(PHP_VERSION_STRING)-Win32.zip .
+	cd ..\..
+	cd $(BUILD_DIR)
+	-$(ZIP) -9 php-debug-pack-$(PHP_VERSION_STRING)-Win32.zip *.pdb
 	cd ..\..
 
 dist: all build-dist
