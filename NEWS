@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Added Berkeley DB3 support in DBA (Sascha)
+- Implemented 2-Arg version of strtr($str,$translation_array). This can be used
+  to revert what htmlspecialchars() did. (Thies)
 - Fixed mem-overwrite in XML_Parse_Into_Struct. (Thies)
 - Added substr_replace() function. (Andrei)
 
