@@ -193,8 +193,8 @@ unticked_statement:
 	|	T_RETURN ';'			{ do_return(NULL, 0 CLS_CC); }
 	|	T_RETURN expr_without_variable ';'		{ do_return(&$2, 0 CLS_CC); }
 	|	T_RETURN cvar ';'		{ do_return(&$2, 1 CLS_CC); }
-	|	T_GLOBAL global_var_list
-	|	T_STATIC static_var_list
+	|	T_GLOBAL global_var_list ';'
+	|	T_STATIC static_var_list ';'
 	|	T_ECHO echo_expr_list ';'
 	|	T_INLINE_HTML			{ do_echo(&$1 CLS_CC); }
 	|	expr ';'			{ do_free(&$1 CLS_CC); }
