@@ -273,6 +273,7 @@ dbm_info *_php3_dbmopen(char *filename, char *mode) {
 	int ret, lock=0;
 	char *lockfn = NULL;
 	int lockfd = 0;
+	PLS_FETCH();
 
 #if NFS_HACK
 	int last_try = 0;
