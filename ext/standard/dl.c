@@ -75,7 +75,7 @@ PHP_FUNCTION(dl)
 	} else if (PG(safe_mode)) {
 		php_error(E_ERROR, "Dynamically loaded extensions aren't allowed when running in SAFE MODE.");
 	} else {
-		php_dl(*file, MODULE_TEMPORARY, return_value);
+		php_dl(*file, MODULE_TEMPORARY, return_value TSRMLS_CC);
 	}
 }
 
@@ -92,7 +92,7 @@ PHP_FUNCTION(dl)
 
 /* {{{ php_dl
  */
-void php_dl(pval *file, int type, pval *return_value)
+void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 {
 	void *handle;
 	char *libpath;
@@ -100,7 +100,6 @@ void php_dl(pval *file, int type, pval *return_value)
 	zend_module_entry *(*get_module)(void);
 	int error_type;
 	char *extension_dir;
-	TSRMLS_FETCH();
 
 	if (type==MODULE_PERSISTENT) {
 		/* Use the configuration hash directly, the INI mechanism is not yet initialized */

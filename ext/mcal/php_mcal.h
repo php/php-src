@@ -10,24 +10,14 @@
 #endif
 
 /* Functions accessable to PHP */
-/* extern zend_module_entry php_mcal_module_entry; */
 extern zend_module_entry php_mcal_module_entry;
 #define php_mcal_module_ptr &php_mcal_module_entry
-#define phpext_mcal_ptr php_mcal_module_ptr
-
-#ifdef ZEND_VERSION
-PHP_MINIT_FUNCTION(mcal);
-PHP_MINFO_FUNCTION(mcal);
-#else
-int PHP_MINIT_FUNCTION(INIT_FUNC_ARGS);
-void PHP_MINFO_FUNCTION(void);
-#endif
-
 
 extern int mcal_init_request(INIT_FUNC_ARGS);
 extern int mcal_end_request(void);
-void make_event_object();
-void php_mcal_event_init();
+
+PHP_MINIT_FUNCTION(mcal);
+PHP_MINFO_FUNCTION(mcal);
 
 PHP_FUNCTION(mcal_open);
 PHP_FUNCTION(mcal_popen);
@@ -69,10 +59,10 @@ PHP_FUNCTION(mcal_event_set_recur_monthly_wday);
 PHP_FUNCTION(mcal_event_set_recur_yearly);
 PHP_FUNCTION(mcal_fetch_current_stream_event);
 
-
 #else
 #define php_mcal_module_ptr NULL
 #endif /* HAVE_MCAL */
 
+#define phpext_mcal_ptr php_mcal_module_ptr
 
 #endif

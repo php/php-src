@@ -45,7 +45,7 @@
 #include "winsock.h"
 #endif
 
-void cal_close_it(zend_rsrc_list_entry *rsrc TSRMLS_DC);
+static void cal_close_it(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 typedef struct _php_mcal_le_struct {
 	CALSTREAM *mcal_stream;
@@ -123,11 +123,12 @@ ZEND_GET_MODULE(php_mcal)
    and nothing will link to this module, we can use the simple 
    thread local_ storage
 */
-int le_mcal;
+static int le_mcal;
 char *mcal_user;
 char *mcal_password;
 
-void cal_close_it (zend_rsrc_list_entry *rsrc TSRMLS_DC)
+
+static void cal_close_it (zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	pils *mcal_le_struct = (pils *)rsrc->ptr;
 
@@ -209,7 +210,7 @@ static int add_assoc_object(zval *arg, char *key, zval *tmp)
 	return zend_hash_update(symtable, key, strlen(key)+1, (void *)&tmp, sizeof(zval *), NULL);
 }
 
-void php_mcal_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
+static void php_mcal_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	zval **calendar, **user, **passwd, **options;
 	CALSTREAM *mcal_stream;
@@ -248,13 +249,13 @@ void php_mcal_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	RETURN_LONG(ind);
 }
 
-void php_mcal_event_init(struct _php_mcal_le_struct *mystruct)
+static void php_mcal_event_init(struct _php_mcal_le_struct *mystruct)
 {
 	calevent_free(mystruct->event);
 	mystruct->event=calevent_new();
 }
 
-void _php_make_event_object(zval *myzvalue, CALEVENT *event)
+static void _php_make_event_object(zval *myzvalue, CALEVENT *event TSRMLS_DC)
 {
 	zval *start, *end, *recurend, *attrlist;
 	CALATTR *attr;
@@ -469,7 +470,7 @@ PHP_FUNCTION(mcal_fetch_event)
 	}
 	calevent_free(mcal_le_struct->event);
 	mcal_le_struct->event = myevent;
-	_php_make_event_object(return_value, mcal_le_struct->event);
+	_php_make_event_object(return_value, mcal_le_struct->event TSRMLS_CC);
 }
 /* }}} */
 
@@ -492,7 +493,7 @@ PHP_FUNCTION(mcal_fetch_current_stream_event)
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
     }
-	_php_make_event_object(return_value, mcal_le_struct->event);
+	_php_make_event_object(return_value, mcal_le_struct->event TSRMLS_CC);
 }
 /* }}} */
 
