@@ -1,8 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- exif functions now support streams using memory streams where necessary (Marcus)
-- added memory streams (Marcus)
 - PHP now has a new stream system that allows it to do some clever stuff with
   fopen() and fsockopen().  As a result:
   . URL wrappers natively supports https:// URLs
@@ -11,6 +9,7 @@ PHP 4                                                                      NEWS
   . zlib wrappers can be used even on systems without fopencookie()
   . Most extensions now support streams when passing files, which means
     that those extensions will support URL wrappers. (Wez)
+- Added memory stream support. (Marcus)
 - Fixed memory allocation problem on systems that have iconv() support in libc.
   (Yasuo)
 - Made var_dump() handle recursive structures better. (Yasuo)
