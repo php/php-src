@@ -131,8 +131,7 @@ static void php_sqlite_function_callback(sqlite_func *func, int argc, const char
 		for (i = 0; i < argc-1; i++) {
 			zargs[i] = emalloc(sizeof(zval *));
 			MAKE_STD_ZVAL(*zargs[i]);
-
-			ZVAL_STRING(*zargs[i], (char*)argv[i+1], 0);
+			ZVAL_STRING(*zargs[i], (char*)argv[i+1], 1);
 		}
 	}
 
@@ -174,11 +173,14 @@ static void php_sqlite_function_callback(sqlite_func *func, int argc, const char
 
 	if (zargs) {
 		for (i = 0; i < argc-1; i++) {
+			zval_ptr_dtor(zargs[i]);
 			efree(zargs[i]);
 		}
 		efree(zargs);
 	}
 }
+
+
 PHP_MINIT_FUNCTION(sqlite)
 {
 	le_sqlite_db = zend_register_list_destructors_ex(php_sqlite_db_dtor, NULL, "sqlite database", module_number);
@@ -273,7 +275,7 @@ PHP_FUNCTION(sqlite_query)
 	long sql_len;
 	struct php_sqlite_result res, *rres;
 	int ret;
-	char *errtext;
+	char *errtext = NULL;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sr", &sql, &sql_len, &zdb)) {
 		return;
