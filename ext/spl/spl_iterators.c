@@ -230,9 +230,11 @@ next_step:
 				ce = object->iterators[object->level].ce;
 				zobject = object->iterators[object->level].zobject;
 				zend_call_method_with_0_params(&zobject, ce, NULL, "getchildren", &child);
-				ce = Z_OBJCE_P(child);
+				ce = child ? Z_OBJCE_P(child) : NULL;
 				if (!ce || !instanceof_function(ce, spl_ce_RecursiveIterator TSRMLS_CC)) {
-					zval_ptr_dtor(&child);
+					if (child) {
+						zval_ptr_dtor(&child);
+					}
 					zend_throw_exception(zend_exception_get_default(), "Objects returned by RecursiveIterator::getChildren() must implement RecursiveIterator", 0 TSRMLS_CC);
 					return;
 				}
@@ -610,7 +612,7 @@ SPL_METHOD(dual_it, getInnerIterator)
 
 static INLINE void spl_dual_it_free(spl_dual_it_object *intern TSRMLS_DC)
 {
-	if (intern->inner.iterator->funcs->invalidate_current) {
+	if (intern->inner.iterator && intern->inner.iterator->funcs->invalidate_current) {
 		intern->inner.iterator->funcs->invalidate_current(intern->inner.iterator TSRMLS_CC);
 	}
 	if (intern->current.data) {
@@ -740,11 +742,13 @@ static INLINE void spl_filter_it_fetch(zval *zthis, spl_dual_it_object *intern T
 
 	while (spl_dual_it_fetch(intern, 1 TSRMLS_CC) == SUCCESS) {
 		zend_call_method_with_0_params(&zthis, intern->std.ce, NULL, "accept", &retval);
-		if (zend_is_true(retval)) {
+		if (retval) {
+			if (zend_is_true(retval)) {
+				zval_ptr_dtor(&retval);
+				return;
+			}
 			zval_ptr_dtor(&retval);
-			return;
 		}
-		zval_ptr_dtor(&retval);
 
 		intern->inner.iterator->funcs->move_forward(intern->inner.iterator TSRMLS_CC);
 	}
