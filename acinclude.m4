@@ -1593,65 +1593,86 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
   unset OPENSSL_INCDIR
   unset OPENSSL_LIBDIR
 
-  if test "$PHP_OPENSSL" = "yes"; then
-    PHP_OPENSSL="/usr/local/ssl /usr/local /usr /usr/local/openssl"
+  dnl First try to find pkg-config
+  if test -z "$PKG_CONFIG"; then
+    AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
   fi
 
-  for i in $PHP_OPENSSL; do
-    if test -r $i/include/openssl/evp.h; then
-      OPENSSL_INCDIR=$i/include
+  dnl If pkg-config is found try using it
+  if test "$PHP_OPENSSL" = "yes" && test -x "$PKG_CONFIG"; then
+    if $PKG_CONFIG --atleast-version=0.9.6 openssl; then
+      found_openssl=yes
+      OPENSSL_LIBS=`$PKG_CONFIG --libs openssl`
+      OPENSSL_INCS=`$PKG_CONFIG --cflags-only-I openssl`
+      OPENSSL_INCDIR=`$PKG_CONFIG --variable=includedir openssl`
+    else
+      AC_MSG_ERROR([OpenSSL version 0.9.6 or greater required.])
     fi
-    if test -r $i/lib/libssl.a -o -r $i/lib/libssl.$SHLIB_SUFFIX_NAME; then
-      OPENSSL_LIBDIR=$i/lib
+
+  else 
+
+    dnl If pkg-config fails for some reason, revert to the old method
+    if test "$PHP_OPENSSL" = "yes"; then
+      PHP_OPENSSL="/usr/local/ssl /usr/local /usr /usr/local/openssl"
     fi
-  done
 
-  if test -z "$OPENSSL_INCDIR"; then
-    AC_MSG_ERROR([Cannot find OpenSSL's <evp.h>])
-  fi
+    for i in $PHP_OPENSSL; do
+      if test -r $i/include/openssl/evp.h; then
+        OPENSSL_INCDIR=$i/include
+      fi
+      if test -r $i/lib/libssl.a -o -r $i/lib/libssl.$SHLIB_SUFFIX_NAME; then
+        OPENSSL_LIBDIR=$i/lib
+      fi
+    done
 
-  if test -z "$OPENSSL_LIBDIR"; then
-    AC_MSG_ERROR([Cannot find OpenSSL's libraries])
-  fi
+    if test -z "$OPENSSL_INCDIR"; then
+      AC_MSG_ERROR([Cannot find OpenSSL's <evp.h>])
+    fi
 
-  old_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS=-I$OPENSSL_INCDIR
-  AC_MSG_CHECKING([for OpenSSL version])
-  AC_EGREP_CPP(yes,[
+    if test -z "$OPENSSL_LIBDIR"; then
+      AC_MSG_ERROR([Cannot find OpenSSL's libraries])
+    fi
+
+    old_CPPFLAGS=$CPPFLAGS
+    CPPFLAGS=-I$OPENSSL_INCDIR
+    AC_MSG_CHECKING([for OpenSSL version])
+    AC_EGREP_CPP(yes,[
 #include <openssl/opensslv.h>
 #if OPENSSL_VERSION_NUMBER >= 0x0090600fL
   yes
 #endif
-  ],[
-    AC_MSG_RESULT([>= 0.9.6])
-  ],[
-    AC_MSG_ERROR([OpenSSL version 0.9.6 or greater required.])
-  ])
-  CPPFLAGS=$old_CPPFLAGS
-
-  PHP_CHECK_LIBRARY(crypto, CRYPTO_free, [
-    PHP_CHECK_LIBRARY(ssl, SSL_CTX_set_ssl_version, [
-      found_openssl=yes
-    ], [
-      AC_MSG_ERROR([libssl not found!])
     ],[
-      -L$OPENSSL_LIBDIR -lcrypto
+      AC_MSG_RESULT([>= 0.9.6])
+    ],[
+      AC_MSG_ERROR([OpenSSL version 0.9.6 or greater required.])
     ])
-  ], [
-    AC_MSG_ERROR([libcrypto not found!])
-  ],[
-    -L$OPENSSL_LIBDIR
-  ])
+    CPPFLAGS=$old_CPPFLAGS
 
+    PHP_CHECK_LIBRARY(crypto, CRYPTO_free, [
+      PHP_CHECK_LIBRARY(ssl, SSL_CTX_set_ssl_version, [
+        found_openssl=yes
+        OPENSSL_LIBS=-L$OPENSSL_LIBDIR -lcrypto -lssl
+        OPENSSL_INCS=-I$OPENSSL_INCDIR
+      ], [
+        AC_MSG_ERROR([libssl not found!])
+      ],[
+        -L$OPENSSL_LIBDIR -lcrypto
+      ])
+    ], [
+      AC_MSG_ERROR([libcrypto not found!])
+    ],[
+      -L$OPENSSL_LIBDIR
+    ])
+  fi
+
+  dnl For apache 1.3.x static build
   OPENSSL_INCDIR_OPT=-I$OPENSSL_INCDIR
   AC_SUBST(OPENSSL_INCDIR_OPT)
 
   if test "$found_openssl" = "yes"; then
-    if test -n "$OPENSSL_INCDIR" && test -n "$OPENSSL_LIBDIR"; then
-      PHP_ADD_INCLUDE($OPENSSL_INCDIR)
-      PHP_ADD_LIBPATH($OPENSSL_LIBDIR, $1)
-      PHP_ADD_LIBRARY(crypto,,$1)
-      PHP_ADD_LIBRARY(ssl,, $1)
+    if test -n "$OPENSSL_LIBS" && test -n "$OPENSSL_INCS"; then
+      PHP_EVAL_LIBLINE($OPENSSL_LIBS, $1)
+      PHP_EVAL_INCLINE($OPENSSL_INCS)
     fi
     $2
 ifelse([$3],[],,[else $3])
