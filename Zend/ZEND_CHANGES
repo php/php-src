@@ -125,7 +125,8 @@ Changes in the Zend Engine 2.0
         $o->test();
         ?>
 
-      Abstract classes cannot be instantiated.
+      Abstract classes cannot be instantiated and must not contain 
+      abstract methods.
 
       Old code that has no user-defined classes or functions named 
       'abstract' should run without modifications.
@@ -205,11 +206,11 @@ Changes in the Zend Engine 2.0
 
       This syntax only applies to objects/classes, not built-in types.
 
-    * final.
+    * Final methods and classes.
 
       The Zend Engine 2.0 introduces the "final" keyword to declare
       final members and methods. Those cannot be overridden by
-      sub-classes.
+      sub-classes. 
 
       Example:
 
@@ -220,6 +221,23 @@ Changes in the Zend Engine 2.0
           }
         }
         ?>
+
+      It is furthermore possible to make a class final. Doing this 
+      prevents a class from being specialized (it cannot be inherited 
+      by another class). There's no need to declare the methods of
+      a final class themselves as final.
+
+      Example:
+
+        <?php
+         final class Foo {
+          // class definition
+        }
+        // the next line is impossible
+        // class Bork extends Foo {}
+        ?>
+
+      Properties cannot be final.
 
       Old code that has no user-defined classes or functions named 
       'final' should run without modifications.
@@ -474,8 +492,7 @@ Changes in the Zend Engine 2.0
         ShapeFactoryMethod('Square')->draw();
         ?>
 
-    * Static member variables of static classes can now be
-      initialized.
+    * Static member variables of classes can now be initialized.
 
       Example:
 
@@ -605,6 +622,86 @@ Changes in the Zend Engine 2.0
             $a = $foo->test(1, '2', 3.4, true);
             var_dump($a);
         ?>
+
+    * Iteration
+
+      Objects may be iterated in an overloaded way when used with
+      foreach. The default behavior is to iterate over all properties.
+
+      Example:
+
+        <?php
+            class Foo {
+                var $x = 1;
+                var $y = 2;
+            }
+
+            $obj = new Foo;
+
+            foreach ($obj as $prp_name => $prop_value) {
+                // using the property
+            }
+        ?>
+
+      TBD: Respect visibility: Show protected only when inside class
+           method and only otherwise public properties only.
+
+    * __METHOD__
+
+      The pseudo constant __METHOD__ shows the current class and method 
+      when used inside a method and the function when used outside of a 
+      class.
+
+      Example:
+
+        <?php
+            class Foo {
+                function Show() {
+                    echo __FILE__ . '(' . __LINE__ . ')' . __METHOD__;
+                }
+            }
+        ?>
+
+    * __toString()
+
+      The magic method __toString() allows to overload the object to 
+      string conversion.
+
+      Example:
+
+        <?php
+            class Foo {
+                function __toString() {
+                    return "What ever";
+            }
+
+            $obj = Foo;
+            
+            $str = (string) $obj; // call __toString()
+        ?>
+
+    * Reflection
+
+      Nearly all aspects of object oriented code can be reflected by
+      using the reflection API which is documented separatley:
+      http://sitten-polizei.de/php/reflection_api/docs/language.reflection.html
+
+      Example:
+
+        <?php
+            class Foo {
+                public $prop;
+                function Func($name) {
+                    echo "Hello $name";
+            }
+
+            reflection_class::export('Foo');
+            reflection_object::export(new Foo);
+            reflection_method::export('Foo', 'func');
+            reflection_property::export('Foo', 'prop');
+            reflection_extension::export('standard');
+        ?>
+
 
 
 Changes in the Zend Engine 1.0
