@@ -1,3 +1,49 @@
+2003-11-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/file.c
+      ext/standard/tests/file/bug26003.phpt
+      ext/standard/tests/file/test3.csv:
+      Fixed bug #26003 (Make fgetcsv() binary safe). (Ilia)
+
+    * NEWS:
+      Bug fixing news.
+
+    * ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c:
+      10-18% optimization of fetch_array(), when both number & string indexes are
+      created.
+      
+
+2003-11-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute_API.c:
+      Make __autoload() faster
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_iterators.h:
+      Update Iterators: Call next at the correct point in time.
+
+    * ZendEngine2/zend_compile.c:
+      Add missing initialization.
+
+    * ZendEngine2/zend_interfaces.h:
+      Make these class entries available for inheriting classes
+
+    * ext/standard/basic_functions.h
+      ext/standard/php_filestat.h:
+      Move typedef to where it is needed now.
+
+    * ext/standard/filestat.c
+      ext/standard/php_filestat.h:
+      Make php_stat() available for extensions.
+
+2003-11-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ming/ming.c:
+      Added mandatory safe_mode & open_basedir checks.
+
 2003-11-06  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
