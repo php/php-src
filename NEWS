@@ -19,6 +19,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #24663 (\n. sequences were not being escaped). (Ilia)
 - Fixed bug #24640 (var_export() and var_dump() can not output large floats).
   (Marcus)
+- Fixed bug #24629 (FreeBSD select() does not like large microseconds values).
+  (Mirco Bauer).
 - Fixed bug #24609 (ext/domxml: segfault when using replace node across 
   different docs). (Rob Richards)
 - Fixed bug #24594 (Rewrite of the imagefill() function). (Pierre-Alain Joye)
