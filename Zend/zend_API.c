@@ -735,13 +735,12 @@ void module_destructor(zend_module_entry *module)
 		clean_module_constants(module->module_number);
 	}
 
-	if (module->request_started && module->request_shutdown_func) {
+	if (module->request_shutdown_func) {
 #if 0
 		zend_printf("%s:  Request shutdown\n",module->name);
 #endif
 		module->request_shutdown_func(module->type, module->module_number);
 	}
-	module->request_started=0;
 	if (module->module_started && module->module_shutdown_func) {
 #if 0
 		zend_printf("%s:  Module shutdown\n",module->name);
@@ -764,13 +763,15 @@ void module_destructor(zend_module_entry *module)
 /* call request startup for all modules */
 int module_registry_request_startup(zend_module_entry *module)
 {
-	if (!module->request_started && module->request_startup_func) {
+	if (module->request_startup_func) {
 #if 0
 		zend_printf("%s:  Request startup\n",module->name);
 #endif
-		module->request_startup_func(module->type, module->module_number);
+		if (module->request_startup_func(module->type, module->module_number)==FAILURE) {
+			zend_error(E_WARNING, "request_startup() for %s module failed", module->name);
+			exit(1);
+		}
 	}
-	module->request_started=1;
 	return 0;
 }
 
@@ -782,13 +783,12 @@ int module_registry_cleanup(zend_module_entry *module)
 {
 	switch(module->type) {
 		case MODULE_PERSISTENT:
-			if (module->request_started && module->request_shutdown_func) {
+			if (module->request_shutdown_func) {
 #if 0
 				zend_printf("%s:  Request shutdown\n",module->name);
 #endif
 				module->request_shutdown_func(module->type, module->module_number);
 			}
-			module->request_started=0;
 			return 0;
 			break;
 		case MODULE_TEMPORARY:
