@@ -477,11 +477,11 @@ PHP_MINFO_FUNCTION(fbsql)
 
 	if (FB_SQL_G(allowPersistent))
 	{
-		sprintf(buf, "%ld", FB_SQL_G(persistentCount));
+		snprintf(buf, sizeof(buf), "%ld", FB_SQL_G(persistentCount));
 		php_info_print_table_row(2, "Active Persistent Links", buf);
 	}
 
-	sprintf(buf, "%ld", FB_SQL_G(linkCount));
+	snprintf(buf, sizeof(buf), "%ld", FB_SQL_G(linkCount));
 	php_info_print_table_row(2, "Active Links", buf);
 
 /*
@@ -525,7 +525,9 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (userName     == NULL) userName     = FB_SQL_G(userName);
 	if (userPassword == NULL) userPassword = FB_SQL_G(userPassword);
 
-	sprintf(name, "fbsql_%s_%s_%s", hostName, userName, userPassword);
+	if (snprintf(name, sizeof(name), "fbsql_%s_%s_%s", hostName, userName, userPassword) < 0) {
+		RETURN_FALSE;
+	}
 
 	if (!FB_SQL_G(allowPersistent)) {
 		persistent=0;
@@ -836,9 +838,21 @@ PHP_FUNCTION(fbsql_set_transaction)
 			WRONG_PARAM_COUNT;
 			break;
 	}
+
+	if (Z_LVAL_PP(Locking) < 0 || Z_LVAL_PP(Locking) > 2) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid locking type.");
+		RETURN_FALSE;
+	}
+	if (Z_LVAL_PP(strIsolation) < 0 || Z_LVAL_PP(Isolation) > 4) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid isolation type.");
+		RETURN_FALSE;
+	}
+
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, -1, "FrontBase-Link", le_link, le_plink);
 
-	sprintf(strSQL, "SET TRANSACTION LOCKING %s, ISOLATION %s;", strLocking[Z_LVAL_PP(Locking)], strIsolation[Z_LVAL_PP(Isolation)]);
+	if (snprintf(strSQL, sizeof(strSQL) , "SET TRANSACTION LOCKING %s, ISOLATION %s;", strLocking[Z_LVAL_PP(Locking)], strIsolation[Z_LVAL_PP(Isolation)]) < 0) {
+		RETURN_FALSE;
+	}
 
 	md = fbcdcExecuteDirectSQL(phpLink->connection, strSQL);
 	fbcmdRelease(md);
@@ -1472,7 +1486,9 @@ PHP_FUNCTION(fbsql_change_user)
 	convert_to_string_ex(password);
 	userPassword = Z_STRVAL_PP(password);
 
-	sprintf(buffer, "SET AUTHORIZATION %s;", userName);
+	if (snprintf(buffer, sizeof(buffer), "SET AUTHORIZATION %s;", userName) < 0) {
+		RETURN_FALSE;
+	}
 
 	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, buffer, phpLink);
 	if (Z_LVAL_P(return_value))
@@ -2139,7 +2155,9 @@ PHP_FUNCTION(fbsql_list_fields)
 		RETURN_FALSE;
 	}
 
-	sprintf(sql, "SELECT * FROM %s WHERE 1=0;", tableName);
+	if (snprintf(sql, sizeof(sql), "SELECT * FROM %s WHERE 1=0;", tableName) < 0) {
+		RETURN_FALSE;
+	}
 
 	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, sql, phpLink);
 }
@@ -2323,7 +2341,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		{ 
 			int v = *((int*)data);
 			char b[128];
-			sprintf(b, "%d", v);
+			snprintf(b, sizeof(b), "%d", v);
 			phpfbestrdup(b, length, value);
 		}
 		break;
@@ -2332,7 +2350,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		{ 
 			short int v = *((FBTinyInteger*)data);
 			char b[128];
-			sprintf(b, "%d", v);
+			snprintf(b, sizeof(b), "%d", v);
 			phpfbestrdup(b, length, value);
 		}
 		break;
@@ -2343,9 +2361,9 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 			FBLongInteger v = *((FBLongInteger*)data);
 			char b[128];
 #ifdef PHP_WIN32
-			sprintf(b, "%I64i", v);
+			snprintf(b, sizeof(b), "%I64i", v);
 #else
-			sprintf(b, "%ll", v);
+			snprintf(b, sizeof(b), "%ll", v);
 #endif
 			phpfbestrdup(b, length, value);
 		}
@@ -2355,7 +2373,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		{
 			short v = *((short*)data);
 			char b[128];
-			sprintf(b, "%d", v);
+			snprintf(b, sizeof(b), "%d", v);
 			phpfbestrdup(b, length, value);
 		}
 		break; 
@@ -2368,7 +2386,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		{
 			double v = *((double*)data);
 			char b[128];
-			sprintf(b, "%f", v);
+			snprintf(b, sizeof(b), "%f", v);
 			phpfbestrdup(b, length, value);
 		}
 		break;
@@ -2423,7 +2441,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 				*length = l*2+3+1;
 				if (value)
 				{
-					char* r = safe_emalloc(l, 2, 1);
+					char* r = safe_emalloc(l, 2, 4);
 					r[0] = 'B';
 					r[1] = '\'';
 					for (i = 0; i < nBits; i++)
@@ -2455,7 +2473,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		{
 			char b[128];
 			int v = *((unsigned int*)data);
-			sprintf(b, "%d", v);
+			snprintf(b, sizeof(b), "%d", v);
 			phpfbestrdup(b, length, value);
 		}
 		break;
@@ -2464,7 +2482,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		{
 			char b[128];
 			double seconds = *((double*)data);
-			sprintf(b, "%f", seconds);
+			snprintf(b, sizeof(b), "%f", seconds);
 			phpfbestrdup(b, length, value);
 		}
 		break;
