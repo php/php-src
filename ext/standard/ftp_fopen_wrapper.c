@@ -15,6 +15,7 @@
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Jim Winstead <jimw@php.net>                                 |
    |          Hartmut Holzgraefe <hholzgra@php.net>                       |
+   |          Sara Golemon <pollita@php.net>                              |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -533,7 +534,9 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	return datastream;
 
  errexit:
-	php_url_free(resource);
+	if (resource) {
+		php_url_free(resource);
+	}
 	if (stream) {
 		php_stream_notify_error(context, PHP_STREAM_NOTIFY_FAILURE, tmp_line, result);
 		php_stream_close(stream);
@@ -620,7 +623,7 @@ static php_stream_ops php_ftp_dirstream_ops = {
 php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream, *reuseid, *datastream = NULL;
-	php_url *resource;
+	php_url *resource = NULL;
 	int result, use_ssl, use_ssl_on_data = 0;
 	char *hoststart = NULL, tmp_line[512];
 	char ip[sizeof("123.123.123.123")];
@@ -694,7 +697,9 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, char *path, cha
 	return php_stream_alloc(&php_ftp_dirstream_ops, datastream, 0, mode);
 
  opendir_errexit:
-	php_url_free(resource);
+	if (resource) {
+		php_url_free(resource);
+	}
 	if (stream) {
 		php_stream_notify_error(context, PHP_STREAM_NOTIFY_FAILURE, tmp_line, result);
 		php_stream_close(stream);
@@ -710,7 +715,7 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, char *path, cha
 static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, char *url, php_stream_statbuf *ssb TSRMLS_DC)
 {
 	php_stream *stream = NULL;
-	php_url *resource;
+	php_url *resource = NULL;
 	int result;
 	char tmp_line[512];
 
@@ -743,10 +748,65 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, char *url, php_s
 	return 0;
 
  stat_errexit:
+	if (resource) {
+		php_url_free(resource);
+	}
 	if (stream) {
 		php_stream_close(stream);
 	}
 	return -1;
+}
+/* }}} */
+
+/* {{{ php_stream_ftp_unlink
+ */
+static int php_stream_ftp_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
+{
+	php_stream *stream = NULL;
+	php_url *resource = NULL;
+	int result;
+	char tmp_line[512];
+
+	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, NULL, NULL, &resource, NULL, NULL TSRMLS_CC);
+	if (!stream) {
+		if (options & REPORT_ERRORS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to connect to %s", url);
+		}
+		goto unlink_errexit;
+	}
+
+	if (resource->path == NULL) {
+		if (options & REPORT_ERRORS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid path provided in %s", url);
+		}
+		goto unlink_errexit;
+	}
+
+	/* Attempt to delete the file */
+	php_stream_write_string(stream, "DELE ");
+	php_stream_write_string(stream, resource->path);
+	php_stream_write_string(stream, "\r\n");
+
+	result = GET_FTP_RESULT(stream);
+	if (result < 200 || result > 299) {
+		if (options & REPORT_ERRORS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error Deleting file: %s", tmp_line);
+		}
+		goto unlink_errexit;
+	}
+
+	php_url_free(resource);
+	php_stream_close(stream);
+	return 1;
+
+ unlink_errexit:
+	if (resource) {
+		php_url_free(resource);
+	}
+	if (stream) {
+		php_stream_close(stream);
+	}
+	return 0;
 }
 /* }}} */
 
@@ -757,7 +817,7 @@ static php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_ftp_url_stat, /* stat_url */
 	php_stream_ftp_opendir, /* opendir */
 	"FTP",
-	NULL /* unlink */
+	php_stream_ftp_unlink /* unlink */
 };
 
 PHPAPI php_stream_wrapper php_stream_ftp_wrapper =	{
