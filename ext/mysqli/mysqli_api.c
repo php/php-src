@@ -1435,6 +1435,12 @@ PHP_FUNCTION(mysqli_real_connect)
 
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, prmysql, PR_MYSQL *, &mysql_link, "mysqli_link");
 
+	/* remove some insecure options */
+	$flags ^= CLIENT_MULTI_QUERIES;   // don't allow multi_queries via connect parameter
+	if (PG(open_basedir) && strlen(PG(open_basedir))) {
+		flags ^= CLIENT_LOCAL_FILES;
+	}
+
 	if (mysql_real_connect(mysql,hostname,username,passwd,dbname,port,socket,flags) == NULL) {
 		/* Save error messages */
 		php_mysqli_set_error(mysql_errno(mysql), (char *)mysql_error(mysql) TSRMLS_CC);
