@@ -18,46 +18,23 @@ function convert(i, j, t)
 
 	for (i = 0; i < t; i++) { tabs = tabs "\t" }
 
-	if (type == "int") {
-		x = tabs "convert_to_long_ex(" name ext ");\n" \
-			(ext? tabs name " = Z_LVAL_PP(" name ext ");\n": "")
-		ints = ints "\tint " name ";\n"
+	if (type == "int" || type == "long") {
+		longs = longs "\tlong " name ";\n"
 	} else if (type == "bool") {
-		x = tabs "convert_to_long_ex(" name ext ");\n" \
-			(ext? tabs name " = Z_LVAL_PP(" name ext ");\n": "")
-		ints = ints "\tint " name ";\n"
-	} else if (type == "double") {
-		x = tabs "convert_to_double_ex(" name ext ");\n" \
-			(ext? tabs name " = Z_DVAL_PP(" name ext ");\n": "")
+		bools = bools "\tzend_bool " name ";\n"
+	} else if (type == "double" || type == "float") {
 		doubles = doubles "\tdouble " name ";\n"
-	} else if (type == "float") {
-		x = tabs "convert_to_double_ex(" name ext ");\n" \
-			(ext? tabs name " = (float) Z_DVAL_PP(" name ext ");\n": "")
-		floats = floats "\tfloat " name ";\n"
 	} else if (type == "string") {
-		x = tabs "convert_to_string_ex(" name ext ");\n" \
-			(ext? tabs name " = Z_STRVAL_PP(" name ext ");\n": "")
-		(ext ? strings = strings "\tchar *" name " = NULL;\n" : 0)
-			if (string_lens) {
-				x = x tabs name "_len = Z_STRLEN_PP(" name ext ");\n"
-				ints = ints "\tint " name "_len;\n"
-			}
-	} else if (type == "array") {
-		x = "convert_to_array_ex(" name ext ");\n"
+		strings = strings "\tchar *" name " = NULL;\n"
+		ints = ints "\tint " name "_len;\n"
+	} else if (type == "array" || type == "object" || type == "mixed") {
+		zvals = zvals "\tzval *" name " = NULL;\n"
 	} else if (type == "resource") {
-		if (opt && i > -1) {
-			resources = resources "\tif (argc < " j+1 ") {\n" \
-				comment("\t\t/* Argument not given, do something before\n\t\t   trying to fetch resource " name ". */\n") \
-				"\t}\n\tZEND_FETCH_RESOURCE(???, ???, " name ext ", " name "_id, \"???\", ???_rsrc_id);\n"
-		} else {
-			resources = resources "\tZEND_FETCH_RESOURCE(???, ???, " name ext ", " name "_id, \"???\", ???_rsrc_id);\n"
-		}
+		zvals = zvals "\tzval *" name " = NULL;\n"
+		resources = resources "\tif (" name ") {\n" \
+			"\t\tZEND_FETCH_RESOURCE(???, ???, " name ", " name "_id, \"???\", ???_rsrc_id);\n\t}\n"
 		ints = ints "\tint " name "_id = -1;\n"
-	} else {
-		x = comment(tabs "/* Write your own code here to handle argument " name ". */\n")
 	}
-
-	if (x) return x
 }
 
 function comment(s)
@@ -71,10 +48,16 @@ function comment(s)
 
 BEGIN {
 	name = "[_A-Za-z][_A-Za-z0-9]*"
-	type = "int|double|float|string|bool|array|object|resource|mixed|void"
+	type = "int|long|double|float|string|bool|array|object|resource|mixed|void"
+	spec = "l|l|d|d|s|b|a|o|r|z|"
 	num_funcs = 0
 
-	if (assign_params) ext = "_arg"
+# create a map from type name to the spec
+	split(type, type_array, "\|")
+	split(spec, spec_array, "\|")
+	for (i in type_array) {
+		spec_map[type_array[i]] = spec_array[i]
+	}
 
 	if (xml && xml != "yes") {
 		xmldoc = xml
@@ -111,8 +94,9 @@ BEGIN {
 }
 
 {
-	args_max = args_min = optional = i = 0
+	args_max = args_min = optional = i = spec_opt = 0
 	line = $0
+	spec_str = "\""
 
 	func_type = gobble(type);
 	func_name = gobble(name);
@@ -130,6 +114,7 @@ BEGIN {
 				argnames[num_funcs,args_max] = arg_name
 
 				args_max++
+				spec_str = spec_str spec_map[arg_type]
 				if (optional) {
 					optionals[num_funcs,i] = optional
 					if (arg_type != "resource") {
@@ -140,12 +125,15 @@ BEGIN {
 				}
 
 				if (x = gobble("\\[")) {
+					if (!spec_opt) {
+						spec_str = spec_str "|"
+						spec_opt = 1
+					}
 					optional++
 				}
 
 				y = gobble(",")
 				if (!x && y && optional) {
-					check_argc_in_switch[num_funcs] = 1
 					grouped_optional_param[num_funcs,i] = 1
 				}
 				i++
@@ -159,10 +147,13 @@ BEGIN {
 		fcomments[num_funcs] = line
 #	}
 
+	spec_str = spec_str "\""
+
 	funcs[num_funcs]   = func_name
 	types[num_funcs]   = func_type
 	maxargs[num_funcs] = args_max
 	minargs[num_funcs] = args_min
+	specs[num_funcs]   = spec_str
 
 	num_funcs++
 }
@@ -172,7 +163,7 @@ END {
 	for (i = 0; i < num_funcs; i++) {
 		compareargc = maxargs[i] - minargs[i]
 		closefetch = fetchargs = zvals = xmlparams = funcvals = resources = handleargs = closeopts = ""
-		ints = doubles = floats = strings = arrays = ""
+		ints = longs = doubles = strings = bools = zvals = ""
 
 		proto = "/* {{{ proto " types[i] " " funcs[i] "("
 
@@ -189,33 +180,18 @@ END {
 			"     <funcprototype>\n" \
 			"      <funcdef>" types[i] " <function>" funcs[i] "</function></funcdef>\n"
 
-		if (maxargs[i]>0) {
-			zvals = "\tzval "
-			if (compareargc) {
-				if (minargs[i]) {
-					fetchargs = "\tint argc = ZEND_NUM_ARGS();\n\tif (argc < " \
-						minargs[i] " || argc > " maxargs[i] \
-						" || zend_get_parameters_ex(argc, "
-				} else {
-					fetchargs = "\tint argc = ZEND_NUM_ARGS();\n\tif (argc > " \
-						maxargs[i] " || (argc && zend_get_parameters_ex(argc, "
-					closefetch = ")"
-				}
-			} else {
-				fetchargs = "\tif (ZEND_NUM_ARGS() != " maxargs[i] \
-					" || zend_get_parameters_ex(" maxargs[i] ", "
-			}
-		}
+		fetchargs = "\tif (zend_parse_parameters(ZEND_NUM_ARGS, " specs[i] ", "
 
 		for (j = 0; j < maxargs[i]; j++) {
 
 			if (j) {
-				zvals = zvals ", "
 				fetchargs = fetchargs ", "
 			}
 
-			zvals = zvals "**" argnames[i,j] ext
-			fetchargs = fetchargs "&" argnames[i,j] ext
+			fetchargs = fetchargs "&" argnames[i,j]
+			if (argtypes[i,j] == "string") {
+				fetchargs = fetchargs ", &" argnames[i,j] "_len"
+			}
 
 			xmlparams = xmlparams "     <paramdef>" argtypes[i,j]
 			if (j > minargs[i]-1) {
@@ -237,56 +213,12 @@ END {
 			if (j > 0) proto = proto ", "
 			proto = proto argtypes[i,j] " " argnames[i,j]
 
-			# Clean up this mess...
-
-			if (useswitch[i]) {
-				if (grouped_optional_param[i,j] && code) {
-					handleargs = convert(i, j, 3) \
-						((grouped_optional_param[i,j-1]) ? "" : comment("\t\t\t/* Fall-through. */\n")) \
-						handleargs
-				} else {
-					if (j > minargs[i]-1) {
-						if (code = convert(i, j, 3)) {
-							handleargs = "\t\tcase " j+1 ":\n" code \
-								((grouped_optional_param[i,j-1]) ? "" : comment("\t\t\t/* Fall-through. */\n")) \
-								handleargs
-						} else {
-							handleargs = "\t\tcase " j+1 ":" \
-							comment("\t/* Fall-through. */") \
-							"\n" handleargs
-						}
-					} else if (j >= minargs[i]-1) {
-						if (code = convert(i, j, 3)) {
-							handleargs = "\t\tcase " j+1 ":\n" code handleargs
-						} else {
-							handleargs = "\t\tcase " j+1 ":\n" handleargs
-						}
-					} else {
-						if (code = convert(i, j, 3)) handleargs = code handleargs
-					}
-				}
-			} else {
-				if (code = convert(i, j, 1)) handleargs = handleargs code
-			}
+			convert(i, j, 1)
 		}
 
 		proto = proto closeopts ")\n   " fcomments[i] " */\nPHP_FUNCTION(" funcs[i] ")\n{"
-		if (maxargs[i]) {
-			zvals = zvals ";"
-			fetchargs = fetchargs ") == FAILURE)" closefetch " {\n\t\tZEND_WRONG_PARAM_COUNT();\n\t}\n"
-		}
-		if (assign_params) funcvals = ints doubles floats strings
-		if (useswitch[i]) {
-			if (check_argc_in_switch[i]) {
-				check_argc = "\t\tdefault:\n\t\t\tZEND_WRONG_PARAM_COUNT();\n"
-			} else {
-				check_argc = ""
-			}
-			handleargs = "\tswitch (argc) {\n" \
-				handleargs \
-				(minargs[i] ? "" : "\t\tcase 0:\n") \
-				"\t\t\tbreak;\n" check_argc "\t}"
-		}
+		fetchargs = fetchargs ") == FAILURE)" closefetch " \n\t\treturn;\n"
+		funcvals = strings ints longs doubles bools zvals
 		xmlstr = xmlstr xmlparams \
 			"     </funcprototype>\n" \
 			"    </funcsynopsis>\n" \
@@ -296,16 +228,14 @@ END {
 			"  </refentry>\n"
 
 		print proto > stubfile
-		if (zvals) print zvals > stubfile
  		if (funcvals) print funcvals > stubfile
 		if (fetchargs) print fetchargs > stubfile
 		if (resources) {
 				print resources > stubfile
 				if (!stubs) print "" > extname "/function_warning"
 		}
-		if (handleargs) print handleargs > stubfile
 		if (!i_know_what_to_do_shut_up_i_dont_need_your_help_mode) {
-			print "\n\tphp_error(E_WARNING, \"" funcs[i] ": not yet implemented\");" > stubfile
+			print "\tphp_error(E_WARNING, \"" funcs[i] ": not yet implemented\");" > stubfile
 		}
 		print "}\n/* }}} */\n" > stubfile
 
