@@ -14,6 +14,7 @@
 #include <httpext.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "getopt.h"
 
 // These are things that go out in the Response Header
 //
@@ -29,8 +30,9 @@
 //
 // The mandatory exports from the ISAPI DLL
 //
-#define NUM_THREADS 10
-#define ITERATIONS 1
+DWORD numThreads = 1;
+DWORD iterations = 1;
+
 HANDLE StartNow;
 // quick and dirty environment
 typedef CMapStringToString TEnvironment;
@@ -53,6 +55,7 @@ typedef struct _TIsapiContext {
 	HANDLE out;
 	DWORD tid;
 	TEnvironment env;
+	HANDLE waitEvent;
 } TIsapiContext;
 
 //
@@ -62,6 +65,7 @@ extern "C" {
 HINSTANCE hDll;
 typedef BOOL (WINAPI *VersionProc)(HSE_VERSION_INFO *) ;
 typedef DWORD (WINAPI *HttpExtProc)(EXTENSION_CONTROL_BLOCK *);
+typedef BOOL (WINAPI *TerminateProc) (DWORD);
 BOOL WINAPI FillExtensionControlBlock(EXTENSION_CONTROL_BLOCK *, TIsapiContext *) ;
 BOOL WINAPI GetServerVariable(HCONN, LPSTR, LPVOID, LPDWORD );
 BOOL WINAPI ReadClient(HCONN, LPVOID, LPDWORD);
@@ -69,6 +73,7 @@ BOOL WINAPI WriteClient(HCONN, LPVOID, LPDWORD, DWORD);
 BOOL WINAPI ServerSupportFunction(HCONN, DWORD, LPVOID, LPDWORD, LPDWORD);
 VersionProc IsapiGetExtensionVersion;
 HttpExtProc IsapiHttpExtensionProc;
+TerminateProc TerminateExtensionProc;
 HSE_VERSION_INFO version_info;
 }
 
@@ -153,8 +158,9 @@ BOOL CompareStringWithFile(const char *filename, const char *str, unsigned int s
 	bool retval;
 	char buf[COMPARE_BUF_SIZE];
 	unsigned int offset=0, readbytes;
-
-	if ((fp=fopen(filename, "r"))==NULL) {
+	fprintf(stderr, "test %s\n",filename);
+	if ((fp=fopen(filename, "rb"))==NULL) {
+		fprintf(stderr, "Error opening %s\n",filename);
 		return FALSE;
 	}
 
@@ -163,13 +169,15 @@ BOOL CompareStringWithFile(const char *filename, const char *str, unsigned int s
 		readbytes = fread(buf, 1, sizeof(buf), fp);
 
 		// check for end of file
-		if (feof(fp)) {
-			break;
-		}
 
 		if (offset+readbytes > str_length
 			|| memcmp(buf, str+offset, readbytes)!=NULL) {
+			fprintf(stderr, "File missmatch %s\n",filename);
 			retval = FALSE;
+			break;
+		}
+		if (feof(fp)) {
+			if (!retval) fprintf(stderr, "File zero length %s\n",filename);
 			break;
 		}
 	}
@@ -250,15 +258,20 @@ void DoThreads() {
 	printf("Starting Threads...\n");
 	// loop creating threads
 	DWORD tid;
-	HANDLE threads[NUM_THREADS];
-	for (DWORD i=0; i< NUM_THREADS; i++) {
+	HANDLE *threads = new HANDLE[numThreads];
+	DWORD i;
+	for (i=0; i< numThreads; i++) {
 		threads[i]=CreateThread(NULL, 0, IsapiThread, NULL, CREATE_SUSPENDED, &tid);
 	}
-	for (i=0; i< NUM_THREADS; i++) {
+	for (i=0; i< numThreads; i++) {
 		if (threads[i]) ResumeThread(threads[i]);
 	}
 	// wait for threads to finish
-	WaitForMultipleObjects(NUM_THREADS, threads, TRUE, INFINITE);
+	WaitForMultipleObjects(numThreads, threads, TRUE, INFINITE);
+	for (i=0; i< numThreads; i++) {
+		CloseHandle(threads[i]);
+	}
+	delete threads;
 }
 
 void DoFileList(const char *filelist, const char *environment)
@@ -292,11 +305,11 @@ BOOL ParseTestFile(const char *path, const char *fn)
 
 	enum state {none, test, skipif, post, get, file, expect} parsestate = none;
 
-	FILE *fp = fopen(filename, "r");
+	FILE *fp = fopen(filename, "rb");
 	char *tn = _tempnam(temppath,"pht.");
 	char *en = _tempnam(temppath,"exp.");
-	FILE *ft = fopen(tn, "w+");
-	FILE *fe = fopen(en, "w+");
+	FILE *ft = fopen(tn, "wb+");
+	FILE *fe = fopen(en, "wb+");
 	if (fp && ft && fe) {
 		while (fgets(line, sizeof(line)-1, fp)) {
 			if (line[0]=='-') {
@@ -353,9 +366,13 @@ BOOL ParseTestFile(const char *path, const char *fn)
 			IsapiGetData.Add(cGet);
 			IsapiPostData.Add(cPost);
 			IsapiMatchData.Add(en);
+			free(tn);
+			free(en);
 			return TRUE;
 		}
 	}
+	free(tn);
+	free(en);
 	return FALSE;
 }
 
@@ -441,23 +458,66 @@ void DoTestFiles(const char *filelist, const char *environment)
 	printf("Done\r\n");
 }
 
+#define OPTSTRING "m:f:d:h:t:i:"
+static void _usage(char *argv0)
+{
+	char *prog;
+
+	prog = strrchr(argv0, '/');
+	if (prog) {
+		prog++;
+	} else {
+		prog = "stresstest";
+	}
+
+	printf("Usage: %s -m <isapi.dll> -d|-l <file> [-t <numthreads>] [-i <numiterations>]\n"
+				"  -m             path to isapi dll\n"
+				"  -d <directory> php directory (to run php test files).\n"
+				"  -f <file>      file containing list of files to run\n"
+				"  -t             number of threads to use (default=1)\n"
+                "  -i             number of iterations per thread (default=1)\n"
+				"  -h             This help\n", prog);
+}
 int main(int argc, char* argv[])
 {
 	LPVOID lpMsgBuf;
-	char *filelist=NULL, *environment=NULL;
-
-	if (argc < 3) {
-		// look for phpt files in tests
-		printf("USAGE: stresstest [L|T] filelist [environment]\r\n");
-		return 0;
-	} else {
-		if (argv[1][0]=='T') bUseTestFiles = TRUE;
-		if (argc > 1) filelist = argv[2];
-		if (argc > 2) environment = argv[3];
+	char *filelist=NULL, *environment=NULL, *module=NULL;
+	int c = NULL;
+	while ((c=ap_getopt(argc, argv, OPTSTRING))!=-1) {
+		switch (c) {
+			case 'd':
+				bUseTestFiles = TRUE;
+				filelist = strdup(ap_optarg);
+				break;
+			case 'f':
+				bUseTestFiles = FALSE;
+				filelist = strdup(ap_optarg);
+				break;
+			case 'e':
+				environment = strdup(ap_optarg);
+				break;
+			case 't':
+				numThreads = atoi(ap_optarg);
+				break;
+			case 'i':
+				iterations = atoi(ap_optarg);
+				break;
+			case 'm':
+				module = strdup(ap_optarg);
+				break;
+			case 'h':
+				_usage(argv[0]);
+				exit(0);
+				break;
+		}
+	}
+	if (!module || !filelist) {
+		_usage(argv[0]);
+		exit(0);
 	}
 
 	GetTempPath(sizeof(temppath), temppath);
-	hDll = LoadLibrary("php4isapi.dll"); // Load our DLL
+	hDll = LoadLibrary(module); // Load our DLL
 
 	if (!hDll) {
 		FormatMessage( 
@@ -470,6 +530,8 @@ int main(int argc, char* argv[])
 		    NULL 
 		);
 		fprintf(stderr,"Error: Dll 'php4isapi.dll' not found -%d\n%s\n", GetLastError(), lpMsgBuf);
+		free (module);
+		free(filelist);
 		LocalFree( lpMsgBuf );
 		return -1;
 	}
@@ -480,19 +542,27 @@ int main(int argc, char* argv[])
 	IsapiGetExtensionVersion = (VersionProc)GetProcAddress(hDll,"GetExtensionVersion");
 	if (!IsapiGetExtensionVersion) {
 		fprintf(stderr,"Can't Get Extension Version %d\n", GetLastError());
+		free (module);
+		free(filelist);
 		return -1;
 	}
 	IsapiHttpExtensionProc = (HttpExtProc)GetProcAddress(hDll,"HttpExtensionProc");
 	if (!IsapiHttpExtensionProc) {
 		fprintf(stderr,"Can't Get Extension proc %d\n", GetLastError());
+		free (module);
+		free(filelist);
 		return -1;
 	}
+	TerminateExtensionProc = (TerminateProc) GetProcAddress(hDll, 
+                                          "TerminateExtension");
 
 	// This should really check if the version information matches what we
 	// expect.
 	//
 	if (!IsapiGetExtensionVersion(&version_info) ) {
 		fprintf(stderr,"Fatal: GetExtensionVersion failed\n");
+		free (module);
+		free(filelist);
 		return -1;
 	}
 
@@ -507,12 +577,14 @@ int main(int argc, char* argv[])
 	}
 
 	// cleanup
-
+	if (TerminateExtensionProc) TerminateExtensionProc(0);
 
 	// We should really free memory (e.g., from GetEnv), but we'll be dead
 	// soon enough
 
 	FreeLibrary(hDll);
+	free (module);
+	free(filelist);
 	return 0;
 }
 
@@ -521,7 +593,7 @@ DWORD CALLBACK IsapiThread(void *p)
 {
 	DWORD filecount = IsapiFileList.GetSize();
 
-	for (DWORD j=0; j<ITERATIONS; j++) {
+	for (DWORD j=0; j<iterations; j++) {
 		for (DWORD i=0; i<filecount; i++) {
 			// execute each file
 			CString testname = TestNames.GetAt(i);
@@ -572,7 +644,7 @@ BOOL stress_main(const char *filename,
 	CString fname;
 	fname.Format("%08X.out", context.tid);
 
-	context.out = CreateFile(fname, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL);
+	context.out = CreateFile(fname, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_FLAG_WRITE_THROUGH, NULL);
 	if (context.out==INVALID_HANDLE_VALUE) {
 		printf("failed to open output file %s\n", fname);
 		return 0;
@@ -600,7 +672,8 @@ BOOL stress_main(const char *filename,
 	context.env["CONTENT_LENGTH"]= "";
 	context.env["QUERY_STRING"]= arg;
 	context.env["METHOD"]="GET";
-
+	context.env["PATH_INFO"] = "";
+	context.waitEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	char buf[MAX_PATH];
 	if (postdata && *postdata !=0) {
 		ECB.cbAvailable = strlen(postdata);
@@ -613,15 +686,25 @@ BOOL stress_main(const char *filename,
 
 		context.env["CONTENT_TYPE"]="application/x-www-form-urlencoded";
 	}
+	ECB.lpszMethod = strdup(context.env["METHOD"]);
     ECB.lpszPathTranslated = strdup(filename);
 	ECB.lpszQueryString = strdup(arg);
+	ECB.lpszPathInfo = strdup(context.env["PATH_INFO"]);
+
 
 	// Call the DLL
 	//
 	rc = IsapiHttpExtensionProc(&ECB);
-
+	if (rc == HSE_STATUS_PENDING) {
+		// We will exit in ServerSupportFunction
+		WaitForSingleObject(context.waitEvent, INFINITE);
+	}
+	CloseHandle(context.waitEvent);
+	//Sleep(75);
 	free(ECB.lpszPathTranslated);
 	free(ECB.lpszQueryString);
+	free(ECB.lpszMethod);
+	free(ECB.lpszPathInfo);
 
 	BOOL ok = TRUE;
 
@@ -629,12 +712,10 @@ BOOL stress_main(const char *filename,
 
 	// compare the output with the EXPECT section
 	if (matchdata && *matchdata != 0) {
-		ok = CompareStringWithFile(fname, matchdata, strlen(matchdata));
+		ok = CompareFiles(fname, matchdata);
 	}
 
 	DeleteFile(fname);
-	//if (rc == HSE_STATUS_PENDING) // We will exit in ServerSupportFunction
-	//	Sleep(INFINITE);
 
 	return ok;
 		
@@ -696,9 +777,8 @@ BOOL WINAPI WriteClient(HCONN hConn, LPVOID lpBuffer, LPDWORD lpdwSize,
 	TIsapiContext *c = (TIsapiContext *)hConn;
 	if (!c) return FALSE;
 
-	if (c->out != INVALID_HANDLE_VALUE) 
+	if (c->out != INVALID_HANDLE_VALUE)
 		return WriteFile(c->out, lpBuffer, *lpdwSize, lpdwSize, NULL);
-
 	return FALSE;
 }
 //
@@ -708,10 +788,11 @@ BOOL WINAPI WriteClient(HCONN hConn, LPVOID lpBuffer, LPDWORD lpdwSize,
 BOOL WINAPI ServerSupportFunction(HCONN hConn, DWORD dwHSERequest,
 				LPVOID lpvBuffer, LPDWORD lpdwSize, LPDWORD lpdwDataType){
 
+	TIsapiContext *c = (TIsapiContext *)hConn;
 	char *lpszRespBuf;
 	char * temp = NULL;
 	DWORD dwBytes;
-	BOOL bRet;
+	BOOL bRet = TRUE;
 
 	switch(dwHSERequest) {
 		case (HSE_REQ_SEND_RESPONSE_HEADER) :
@@ -744,6 +825,7 @@ BOOL WINAPI ServerSupportFunction(HCONN hConn, DWORD dwHSERequest,
 			//
 			// A real server would do cleanup here
 		case (HSE_REQ_DONE_WITH_SESSION):
+			SetEvent(c->waitEvent);
 			//ExitThread(0);
 			break;
 		
