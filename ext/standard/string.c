@@ -1008,12 +1008,13 @@ PHP_FUNCTION(strtr)
 	convert_to_string_ex(from);
 	convert_to_string_ex(to);
 
-	RETVAL_STRING(php_strtr((*str)->value.str.val,
-							(*str)->value.str.len,
-							(*from)->value.str.val,
-							(*to)->value.str.val,
-							MIN((*from)->value.str.len,(*to)->value.str.len)),
-				  1);
+	*return_value=**str;
+	zval_copy_ctor(return_value);                                                                                        
+	php_strtr(return_value->value.str.val,
+			  return_value->value.str.len,
+			  (*from)->value.str.val,
+			  (*to)->value.str.val,
+			  MIN((*from)->value.str.len,(*to)->value.str.len));
 }
 /* }}} */
 
