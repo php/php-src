@@ -4,22 +4,16 @@ htmlentities() test 5 (mbstring / cp1252)
 output_handler=
 --SKIPIF--
 <?php
-/*
-if (!extension_loaded("mbstring") && ini_get("enable_dl")) {
-	$dlext = (substr(PHP_OS, 0, 3) == "WIN" ? ".dll" : ".so");
-	@dl("mbstring$dlext");
-}
-*/
-extension_loaded("mbstring") or die("skip mbstring not available\n");
+	extension_loaded("mbstring") or die("skip mbstring not available\n");
+	mb_internal_encoding('cp1252');
+	$php_errormsg = NULL;
+	@htmlentities("\x82\x86\x99\x9f", ENT_QUOTES, '');
+	if ($php_errormsg) {
+		die("skip cp1252 chracter set is not supported on this platform.\n");
+	}
 ?>
 --FILE--
 <?php
-/*
-	if (!extension_loaded("mbstring") && ini_get("enable_dl")) {
-		$dlext = (substr(PHP_OS, 0, 3) == "WIN" ? ".dll" : ".so");
-		@dl("mbstring$dlext");
-	}
-*/
 	mb_internal_encoding('cp1252');
 	print mb_internal_encoding()."\n";
 	var_dump(htmlentities("\x82\x86\x99\x9f", ENT_QUOTES, ''));
