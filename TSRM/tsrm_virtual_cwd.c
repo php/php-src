@@ -347,12 +347,15 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			return 1;
 		}
 		
-		if (GetLongPathName(path, new_path, new_path_length) == 0) {
+		if (GetLongPathName(path, new_path, new_path_length) != 0) {
+			path = new_path;
+			path_length = new_path_length;
+		} else {
 			free(new_path);
-			return 1;
+			if (GetLastError() != ERROR_FILE_NOT_FOUND) {
+				return 1;
+			}
 		}
-		path = new_path;
-		path_length = new_path_length;
 	}
 #endif
 	free_path = path_copy = tsrm_strndup(path, path_length);
