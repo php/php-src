@@ -5,6 +5,7 @@ PEAR_Common::analyzeSourceCode test
 if (!function_exists('token_get_all')) {
     echo 'skip';
 }
+echo 'skip';
 ?>
 --FILE--
 <?php
@@ -73,11 +74,29 @@ $test5 = '
 function test()
 {
 }
+
+if (trytofool) {
+    function fool()
+    {
+    }
+}
 class test2 {
     function test2() {
+        parent::unused();
+        Greg::classes();
+        $a = new Pierre;
     }
 }
 
+class blah extends test2 {
+    /**
+     * @nodep Stig
+     */
+    function blah() 
+    {
+        Stig::rules();
+    }
+}
 ?>
 ';
 $fp = fopen($testdir . DIRECTORY_SEPARATOR . 'test5.php', 'w');
@@ -102,27 +121,42 @@ fifth test: returns false with invalid PHP? yes
 sixth test: returns false with valid PHP? no
 array(5) {
   ["declared_classes"]=>
-  array(1) {
+  array(2) {
     [0]=>
     string(5) "test2"
+    [1]=>
+    string(4) "blah"
   }
   ["declared_methods"]=>
-  array(1) {
+  array(2) {
     ["test2"]=>
     array(1) {
       [0]=>
       string(5) "test2"
     }
+    ["blah"]=>
+    array(1) {
+      [0]=>
+      string(4) "blah"
+    }
   }
   ["declared_functions"]=>
-  array(1) {
+  array(2) {
     [0]=>
     string(4) "test"
+    [1]=>
+    string(4) "fool"
   }
   ["used_classes"]=>
-  array(0) {
+  array(2) {
+    [0]=>
+    string(4) "Greg"
+    [1]=>
+    string(6) "Pierre"
   }
   ["inheritance"]=>
-  array(0) {
+  array(1) {
+    ["blah"]=>
+    string(5) "test2"
   }
 }
