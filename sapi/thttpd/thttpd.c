@@ -24,6 +24,8 @@
 #include "php_variables.h"
 #include "version.h"
 
+#include <sys/uio.h>
+
 typedef struct {
 	httpd_conn *hc;
 	int post_off;
