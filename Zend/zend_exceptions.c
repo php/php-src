@@ -343,7 +343,7 @@ ZEND_METHOD(exception, getTraceAsString)
 }
 /* }}} */
 
-int zend_spprintf(char **message, int max_len, char *format, ...)
+static int zend_spprintf(char **message, int max_len, char *format, ...)
 {
 	va_list arg;
 	int len;
@@ -471,7 +471,7 @@ ZEND_API void zend_throw_exception_ex(zend_class_entry *exception_ce, long code 
 	MAKE_STD_ZVAL(ex);
 	if (exception_ce) {
 		if (!instanceof_function(exception_ce, default_exception_ce TSRMLS_CC)) {
-			zend_error(E_NOTICE, "Exceptions must be derived from exception");
+			zend_error(E_NOTICE, "Exceptions must be derived from the Exception base class");
 			exception_ce = default_exception_ce;
 		}
 	} else {
@@ -563,7 +563,7 @@ ZEND_API void zend_throw_exception_object(zval *exception TSRMLS_DC)
 	exception_ce = Z_OBJCE_P(exception);
 
 	if (!exception_ce || !instanceof_function(exception_ce, default_exception_ce TSRMLS_CC)) {
-		zend_error(E_ERROR, "Exceptions must be valid objects that are derived from class Exception");
+		zend_error(E_ERROR, "Exceptions must be valid objects derived from the Exception base class");
 	}
 	zend_throw_exception_internal(exception TSRMLS_CC);
 }
