@@ -693,34 +693,29 @@ void yyFlexLexer::switch_streams( istream* new_in, ostream* new_out )
 		yyout = new_out;
 	}
 
-#ifdef YY_INTERACTIVE
-int yyFlexLexer::LexerInput( char* buf, int /* max_size */ )
-#else
 int yyFlexLexer::LexerInput( char* buf, int max_size )
-#endif
 	{
-	if ( yyin->eof() || yyin->fail() )
-		return 0;
+		if ( yyin->eof() || yyin->fail() )
+			return 0;
 
-#ifdef YY_INTERACTIVE
-	yyin->get( buf[0] );
+		if (yy_current_buffer->yy_is_interactive) {
+			yyin->get( buf[0] );
 
-	if ( yyin->eof() )
-		return 0;
+			if ( yyin->eof() )
+				return 0;
 
-	if ( yyin->bad() )
-		return -1;
+			if ( yyin->bad() )
+				return -1;
 
-	return 1;
+			return 1;
+		} else {
+			(void) yyin->read( buf, max_size );
 
-#else
-	(void) yyin->read( buf, max_size );
-
-	if ( yyin->bad() )
-		return -1;
-	else
-		return yyin->gcount();
-#endif
+			if ( yyin->bad() )
+				return -1;
+			else
+				return yyin->gcount();
+		}
 	}
 
 void yyFlexLexer::LexerOutput( const char* buf, int size )
@@ -1213,7 +1208,7 @@ void yyFlexLexer::yy_init_buffer( YY_BUFFER_STATE b, istream* file )
 #endif
 #endif
 %+
-	b->yy_is_interactive = 0;
+	b->yy_is_interactive = (file == (istream *) &cin) ? 1 : 0;
 %*
 	}
 

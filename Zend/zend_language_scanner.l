@@ -78,8 +78,6 @@
 #define YY_DECL int lex_scan(zval *zendlval TSRMLS_DC)
 #endif
 
-#define YY_INTERACTIVE
-
 #define ECHO { ZEND_WRITE( yytext, yyleng ); }
 
 #ifdef ZTS
