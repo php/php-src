@@ -63,7 +63,7 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
 
 AC_MSG_CHECKING(whether to enable truetype string function in gd)
 AC_ARG_ENABLE(gd-native-ttf,
-[  --enable-gd-imgstrttf   Enable TrueType string function in gd],[
+[  --enable-gd-native-ttf   Enable TrueType string function in gd],[
   if test "$enableval" = "yes" ; then
     AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
     AC_MSG_RESULT(yes)
