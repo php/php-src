@@ -52,7 +52,7 @@ function convert(i, j, t)
 		} else {
 			resources = resources "\tZEND_FETCH_RESOURCE(???, ???, " name ext ", " name "_id, \"???\", ???_rsrc_id);\n"
 		}
-		funcvals = funcvals "\tint " name "_id = -1;\n"
+		ints = ints "\tint " name "_id = -1;\n"
 	} else {
 		x = comment(tabs "/* Write your own code here to handle argument " name ". */\n")
 	}
@@ -121,36 +121,43 @@ BEGIN {
 		if (gobble("\\[")) optional = 1
 		while (arg_type = gobble(type)) {
 			arg_name = gobble(name)
-			argtypes[num_funcs,args_max] = arg_type
-			argnames[num_funcs,args_max] = arg_name
-
-			args_max++
-			if (optional) {
-				optionals[num_funcs,i] = optional
-				if (arg_type != "resource") {
-					useswitch[num_funcs] = 1
-				}
+			if(arg_type == "void") {
+				args_max = 0;
+				args_min = 0;
+				break;
 			} else {
-					args_min++
-			}
+				argtypes[num_funcs,args_max] = arg_type
+				argnames[num_funcs,args_max] = arg_name
 
-			if (x = gobble("\\[")) {
-				optional++
-			}
+				args_max++
+				if (optional) {
+					optionals[num_funcs,i] = optional
+					if (arg_type != "resource") {
+						useswitch[num_funcs] = 1
+					}
+				} else {
+						args_min++
+				}
 
-			y = gobble(",")
-			if (!x && y && optional) {
-				check_argc_in_switch[num_funcs] = 1
-				grouped_optional_param[num_funcs,i] = 1
+				if (x = gobble("\\[")) {
+					optional++
+				}
+
+				y = gobble(",")
+				if (!x && y && optional) {
+					check_argc_in_switch[num_funcs] = 1
+					grouped_optional_param[num_funcs,i] = 1
+				}
+				i++
 			}
-			i++
 		}
 	}
 
-	if (x = gobble("\\)")) {
+#	if (x = gobble("\\)")) {
+		gobble("\\]* *)")
 		sub(/^[ \t]+/, "", line)
 		fcomments[num_funcs] = line
-	}
+#	}
 
 	funcs[num_funcs]   = func_name
 	types[num_funcs]   = func_type
@@ -163,37 +170,34 @@ BEGIN {
 END {
 	if (xml) print xmlhead > xmldoc
 	for (i = 0; i < num_funcs; i++) {
-		
 		compareargc = maxargs[i] - minargs[i]
-		closefetch = xmlparams = funcvals = resources = handleargs = closeopts = ""
+		closefetch = fetchargs = zvals = xmlparams = funcvals = resources = handleargs = closeopts = ""
 		ints = doubles = floats = strings = arrays = ""
 
 		proto = "/* {{{ proto " types[i] " " funcs[i] "("
 
+	 	refid = funcs[i]
+	 	gsub(/_/, "-", refid)
+	 	xmlstr = "  <refentry id=\"function." refid "\">\n" \
+			"   <refnamediv>\n" \
+			"    <refname>" funcs[i] "</refname>\n" \
+			"    <refpurpose>" fcomments[i] "</refpurpose>\n" \
+			"   </refnamediv>\n" \
+			"   <refsect1>\n" \
+			"    <title>Description</title>\n" \
+			"    <funcsynopsis>\n" \
+			"     <funcprototype>\n" \
+			"      <funcdef>" types[i] " <function>" funcs[i] "</function></funcdef>\n"
 
-	 refid = funcs[i]
-	 gsub(/_/, "-", refid)
-	 xmlstr = "  <refentry id=\"function." refid "\">\n" \
-		"   <refnamediv>\n" \
-		"    <refname>" funcs[i] "</refname>\n" \
-		"    <refpurpose>" fcomments[i] "</refpurpose>\n" \
-		"   </refnamediv>\n" \
-		"   <refsect1>\n" \
-		"    <title>Description</title>\n" \
-		"    <funcsynopsis>\n" \
-		"     <funcprototype>\n" \
-		"      <funcdef>" types[i] " <function>" funcs[i] "</function></funcdef>\n"
-
-		if (maxargs[i]) {
+		if (maxargs[i]>0) {
 			zvals = "\tzval "
 			if (compareargc) {
-				funcvals = "\tint argc;\n"
 				if (minargs[i]) {
-					fetchargs = "\targc = ZEND_NUM_ARGS();\n\tif (argc < " \
+					fetchargs = "\tint argc = ZEND_NUM_ARGS();\n\tif (argc < " \
 						minargs[i] " || argc > " maxargs[i] \
 						" || zend_get_parameters_ex(argc, "
 				} else {
-					fetchargs = "\targc = ZEND_NUM_ARGS();\n\tif (argc > " \
+					fetchargs = "\tint argc = ZEND_NUM_ARGS();\n\tif (argc > " \
 						maxargs[i] " || (argc && zend_get_parameters_ex(argc, "
 					closefetch = ")"
 				}
@@ -269,7 +273,7 @@ END {
 		proto = proto closeopts ")\n   " fcomments[i] " */\nPHP_FUNCTION(" funcs[i] ")\n{"
 		if (maxargs[i]) {
 			zvals = zvals ";"
-			fetchargs = fetchargs ") == FAILURE)" closefetch "{\n\t\tZEND_WRONG_PARAM_COUNT();\n\t}\n"
+			fetchargs = fetchargs ") == FAILURE)" closefetch " {\n\t\tZEND_WRONG_PARAM_COUNT();\n\t}\n"
 		}
 		if (assign_params) funcvals = ints doubles floats strings
 		if (useswitch[i]) {
