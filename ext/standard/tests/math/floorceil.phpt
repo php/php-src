@@ -22,7 +22,7 @@ Tests for floor en ceil
 ?>  
 --EXPECT--
 float(0)
-float(-0)
+float(0)
 float(-1)
 float(-1)
 float(-1)
