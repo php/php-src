@@ -366,9 +366,6 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define XtOffsetOf(s_type,field) XtOffset(s_type*,field)
 #endif
 
-/* warn about unavailable functions */
-#include "ext/standard/php_noavail.h"
-
 #endif
 
 /*
