@@ -46,7 +46,11 @@
 #define ZEND_INI_PARSER_ARG	(CG(ini_parser_param))->arg
 
 int ini_lex(zval *ini_lval TSRMLS_DC);
+#ifdef ZTS
 int ini_parse(void *arg);
+#else
+int ini_parse(void);
+#endif
 
 zval yylval;
 
