@@ -393,6 +393,8 @@ PHP_FUNCTION(mime_content_type);
 ZEND_BEGIN_MODULE_GLOBALS(mime_magic)
 	char *magicfile;
 	magic_req_rec *req_dat;
+	int    debug;           /* shall magic file parser errors be shown? */
+	char *status;           /* status message for phpinfo() */
 ZEND_END_MODULE_GLOBALS(mime_magic)
 
 /* In every utility function you add that needs to use variables 
