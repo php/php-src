@@ -15,7 +15,7 @@ function ming_check_version()
 	}
 
 	c = file_get_contents(ming_h + "\\ming.h");
-	if (c.match(/MING_VERSION\s+(0.[a-zA-Z0-9]+)/)) {
+	if (typeof(c) == "string" && c.match(/MING_VERSION\s+(0.[a-zA-Z0-9]+)/)) {
 		v = RegExp.$1;
 		if (v > "0.2") {
 			if (CHECK_LIB("libungif.lib", "ming", PHP_MING) &&
