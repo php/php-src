@@ -8,7 +8,7 @@ class IteratorIterator implements OuterIterator
 	/** Construct an IteratorIterator from an Iterator or an IteratorAggregate.
 	 *
 	 * Classes that only implement Traversable can be wrapped only after 
-	 * converting class IteratorItaerator into c code.
+	 * converting class IteratorIterator into c code.
 	 */
 	function __construct(Traversable $iterator)
 	{
@@ -33,7 +33,7 @@ class IteratorIterator implements OuterIterator
 		return $this->iterator;
 	}
 
-	/** \return whetehr the iterator is valid
+	/** \return whether the iterator is valid
 	 */
 	function valid()
 	{
@@ -68,7 +68,7 @@ class IteratorIterator implements OuterIterator
 		return $this->iterator->rewind();
 	}
 
-	/** The inner iterator must be public becaus ewhen this class will be
+	/** The inner iterator must be private because when this class will be
 	 * converted to c code it won't no longer be available.
 	 */
 	private $iterator;
