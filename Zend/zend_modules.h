@@ -29,8 +29,6 @@
 #define SHUTDOWN_FUNC_ARGS_PASSTHRU type, module_number TSRMLS_CC
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module TSRMLS_DC
 #define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module TSRMLS_CC
-#define GINIT_FUNC_ARGS		void
-#define GINIT_FUNC_ARGS_PASSTHRU
 
 ZEND_API extern unsigned char first_arg_force_ref[];
 ZEND_API extern unsigned char second_arg_force_ref[];
