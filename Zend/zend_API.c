@@ -212,7 +212,10 @@ static int zend_check_class(zval *obj, zend_class_entry *expected_ce)
 	}
 	
 	for (ce = Z_OBJCE_P(obj); ce != NULL; ce = ce->parent) {
-		if (!strncmp(ce->name, expected_ce->name, MIN(ce->name_length, expected_ce->name_length))) {
+		/*
+		 * C'est une UGLY HACK.
+		 */
+		if (ce->refcount == expected_ce->refcount) {
 			return 1;
 		}
 	}
