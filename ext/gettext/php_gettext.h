@@ -22,31 +22,28 @@
 #define PHP_GETTEXT_H
 
 #if HAVE_LIBINTL
-#ifndef INIT_FUNC_ARGS
-#include "zend_modules.h"
-#endif
 
 extern zend_module_entry php_gettext_module_entry;
 #define gettext_module_ptr &php_gettext_module_entry
 
-PHP_MINFO_FUNCTION(gettext);
+PHP_MINFO_FUNCTION(php_gettext);
 
-PHP_FUNCTION(textdomain);
-PHP_FUNCTION(gettext);
-PHP_FUNCTION(dgettext);
-PHP_FUNCTION(dcgettext);
-PHP_FUNCTION(bindtextdomain);
+PHP_NAMED_FUNCTION(zif_textdomain);
+PHP_NAMED_FUNCTION(zif_gettext);
+PHP_NAMED_FUNCTION(zif_dgettext);
+PHP_NAMED_FUNCTION(zif_dcgettext);
+PHP_NAMED_FUNCTION(zif_bindtextdomain);
 #if HAVE_NGETTEXT
-PHP_FUNCTION(ngettext);
+PHP_NAMED_FUNCTION(zif_ngettext);
 #endif
 #if HAVE_DNGETTEXT
-PHP_FUNCTION(dngettext);
+PHP_NAMED_FUNCTION(zif_dngettext);
 #endif
 #if HAVE_DCNGETTEXT
-PHP_FUNCTION(dcngettext);
+PHP_NAMED_FUNCTION(zif_dcngettext);
 #endif
 #if HAVE_BIND_TEXTDOMAIN_CODESET
-PHP_FUNCTION(bind_textdomain_codeset);
+PHP_NAMED_FUNCTION(zif_bind_textdomain_codeset);
 #endif
 
 #else
