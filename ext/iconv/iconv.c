@@ -32,7 +32,7 @@
 #include "php_globals.h"
 #include "php_iconv.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_output.h"
+#include "main/php_output.h"
 #include "SAPI.h"
 #include "php_ini.h"
 
