@@ -98,7 +98,7 @@ class istream;
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
 
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE yyrestart( yyin TSRMLS_CC )
+#define YY_NEW_FILE yyrestart( SCNG(yy_in) TSRMLS_CC )
 
 #define YY_END_OF_BUFFER_CHAR 0
 
@@ -276,14 +276,14 @@ static void yy_flex_free YY_PROTO(( void * ));
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! yy_current_buffer ) \
-		yy_current_buffer = yy_create_buffer( SCNG(yyin), YY_BUF_SIZE TSRMLS_CC ); \
+		yy_current_buffer = yy_create_buffer( SCNG(yy_in), YY_BUF_SIZE TSRMLS_CC ); \
 	yy_current_buffer->yy_is_interactive = is_interactive; \
 	}
 
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! yy_current_buffer ) \
-		yy_current_buffer = yy_create_buffer( SCNG(yyin), YY_BUF_SIZE TSRMLS_CC ); \
+		yy_current_buffer = yy_create_buffer( SCNG(yy_in), YY_BUF_SIZE TSRMLS_CC ); \
 	yy_current_buffer->yy_at_bol = at_bol; \
 	}
 
@@ -296,7 +296,10 @@ static void yy_flex_free YY_PROTO(( void * ));
 #define yytext SCNG(yy_text)
 #undef yytext_ptr
 #define yytext_ptr SCNG(yy_text)
-
+#undef yyin
+#define yyin SCNG(yy_in)
+#undef yyout
+#define yyout SCNG(yy_out)
 
 %- Standard (non-C++) definition
 static yy_state_type yy_get_previous_state YY_PROTO(( TSRMLS_D ));
@@ -324,6 +327,8 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 #undef yyleng
 #undef yytext
 #undef yytext_ptr
+#undef yyin
+#undef yyout
 
 %% data tables for the DFA and the user's section 1 definitions go here
 
@@ -410,7 +415,7 @@ YY_MALLOC_DECL
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO (void) fwrite( yytext, yyleng, 1, SCNG(yyout) )
+#define ECHO (void) fwrite( yytext, yyleng, 1, SCNG(yy_out) )
 %+ C++ definition
 #define ECHO LexerOutput( yytext, yyleng )
 %*
@@ -495,23 +500,23 @@ YY_DECL
 		if ( ! yy_start )
 			yy_start = 1;	/* first start state */
 
-		if ( ! SCNG(yyin) )
+		if ( ! SCNG(yy_in) )
 %-
-			SCNG(yyin) = stdin;
+			SCNG(yy_in) = stdin;
 %+
-			SCNG(yyin) = &cin;
+			SCNG(yy_in) = &cin;
 %*
 
-		if ( ! SCNG(yyout) )
+		if ( ! SCNG(yy_out) )
 %-
-			SCNG(yyout) = stdout;
+			SCNG(yy_out) = stdout;
 %+
-			SCNG(yyout) = &cout;
+			SCNG(yy_out) = &cout;
 %*
 
 		if ( ! yy_current_buffer )
 			yy_current_buffer =
-				yy_create_buffer( SCNG(yyin), YY_BUF_SIZE TSRMLS_CC );
+				yy_create_buffer( SCNG(yy_in), YY_BUF_SIZE TSRMLS_CC );
 
 		yy_load_buffer_state(TSRMLS_C);
 		}
@@ -566,7 +571,7 @@ do_action:	/* This label is used only to access EOF actions. */
 			 * back-up) that will match for the new input source.
 			 */
 			yy_n_chars = yy_current_buffer->yy_n_chars;
-			yy_current_buffer->yy_input_file = yyin;
+			yy_current_buffer->yy_input_file = SCNG(yy_in);
 			yy_current_buffer->yy_buffer_status = YY_BUFFER_NORMAL;
 			}
 
@@ -677,8 +682,8 @@ do_action:	/* This label is used only to access EOF actions. */
 %+
 yyFlexLexer::yyFlexLexer( istream* arg_yyin, ostream* arg_yyout )
 	{
-	SCNG(yyin) = arg_yyin;
-	SCNG(yyout) = arg_yyout;
+	SCNG(yy_in) = arg_yyin;
+	SCNG(yy_out) = arg_yyout;
 	yy_c_buf_p = 0;
 	yy_init = 1;
 	yy_start = 0;
@@ -719,37 +724,37 @@ void yyFlexLexer::switch_streams( istream* new_in, ostream* new_out )
 		}
 
 	if ( new_out )
-		SCNG(yyout) = new_out;
+		SCNG(yy_out) = new_out;
 	}
 
 int yyFlexLexer::LexerInput( char* buf, int max_size )
 	{
-		if ( SCNG(yyin)->eof() || SCNG(yyin)->fail() )
+		if ( SCNG(yy_in)->eof() || SCNG(yy_in)->fail() )
 			return 0;
 
 		if (yy_current_buffer->yy_is_interactive) {
-			SCNG(yyin)->get( buf[0] );
+			SCNG(yy_in)->get( buf[0] );
 
-			if ( SCNG(yyin)->eof() )
+			if ( SCNG(yy_in)->eof() )
 				return 0;
 
-			if ( SCNG(yyin)->bad() )
+			if ( SCNG(yy_in)->bad() )
 				return -1;
 
 			return 1;
 		} else {
-			(void) SCNG(yyin)->read( buf, max_size );
+			(void) SCNG(yy_in)->read( buf, max_size );
 
-			if ( SCNG(yyin)->bad() )
+			if ( SCNG(yy_in)->bad() )
 				return -1;
 			else
-				return SCNG(yyin)->gcount();
+				return SCNG(yy_in)->gcount();
 		}
 	}
 
 void yyFlexLexer::LexerOutput( const char* buf, int size )
 	{
-	(void) SCNG(yyout)->write( buf, size );
+	(void) SCNG(yy_out)->write( buf, size );
 	}
 %*
 
@@ -871,7 +876,7 @@ int yyFlexLexer::yy_get_next_buffer(TSRMLS_D)
 		if ( number_to_move == YY_MORE_ADJ )
 			{
 			ret_val = EOB_ACT_END_OF_FILE;
-			yyrestart( SCNG(yyin) TSRMLS_CC );
+			yyrestart( SCNG(yy_in) TSRMLS_CC );
 			}
 
 		else
@@ -1045,7 +1050,7 @@ int yyFlexLexer::yyinput(TSRMLS_D)
 					 */
 
 					/* Reset buffer status. */
-					yyrestart( SCNG(yyin) TSRMLS_CC );
+					yyrestart( SCNG(yy_in) TSRMLS_CC );
 
 					/* fall through */
 
@@ -1092,7 +1097,7 @@ void yyFlexLexer::yyrestart( istream* input_file TSRMLS_DC )
 %*
 	{
 	if ( ! yy_current_buffer )
-		yy_current_buffer = yy_create_buffer( SCNG(yyin), YY_BUF_SIZE TSRMLS_CC );
+		yy_current_buffer = yy_create_buffer( SCNG(yy_in), YY_BUF_SIZE TSRMLS_CC );
 
 	yy_init_buffer( yy_current_buffer, input_file TSRMLS_CC );
 	yy_load_buffer_state(TSRMLS_C);
@@ -1151,7 +1156,7 @@ void yyFlexLexer::yy_load_buffer_state()
 	{
 	yy_n_chars = yy_current_buffer->yy_n_chars;
 	yytext_ptr = yy_c_buf_p = yy_current_buffer->yy_buf_pos;
-	SCNG(yyin) = yy_current_buffer->yy_input_file;
+	SCNG(yy_in) = yy_current_buffer->yy_input_file;
 	yy_hold_char = *yy_c_buf_p;
 	}
 

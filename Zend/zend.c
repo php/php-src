@@ -369,6 +369,8 @@ static void scanner_globals_ctor(zend_scanner_globals *scanner_globals_p TSRMLS_
 	scanner_globals_p->init = 1;
 	scanner_globals_p->start = 0;
 	scanner_globals_p->current_buffer = NULL;
+	scanner_globals_p->yy_in = NULL;
+	scanner_globals_p->yy_out = NULL;
 }
 
 

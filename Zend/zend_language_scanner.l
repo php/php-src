@@ -22,6 +22,8 @@
 #define yyleng SCNG(yy_leng)
 #define yytext SCNG(yy_text)
 #define yytext_ptr SCNG(yy_text)
+#define yyin SCNG(yy_in)
+#define yyout SCNG(yy_out)
 
 %}
 
@@ -135,7 +137,7 @@ END_EXTERN_C()
 static inline void save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 {
 	memcpy(&lex_state->buffer_state, &YY_CURRENT_BUFFER, sizeof(YY_BUFFER_STATE));
-	lex_state->in = yyin;
+	lex_state->in = SCNG(yy_in);
 	lex_state->state = YYSTATE;
 	lex_state->filename = zend_get_compiled_filename(TSRMLS_C);
 	lex_state->lineno = CG(zend_lineno);
@@ -153,7 +155,7 @@ static inline void restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	}
 		
 	yy_delete_buffer(original_buffer_state TSRMLS_CC);
-	yyin = lex_state->in;
+	SCNG(yy_in) = lex_state->in;
 	BEGIN(lex_state->state);
 	CG(zend_lineno) = lex_state->lineno;
 	zend_restore_compiled_filename(lex_state->filename TSRMLS_CC);
@@ -228,8 +230,8 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 		zend_llist_add_element(&CG(open_files), file_handle);
 	}
 	/* Reset the scanner for scanning the new file */
-	yyin = file_handle->handle.fp;
-	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE TSRMLS_CC) TSRMLS_CC);
+	SCNG(yy_in) = file_handle->handle.fp;
+	yy_switch_to_buffer(yy_create_buffer(SCNG(yy_in), YY_BUF_SIZE TSRMLS_CC) TSRMLS_CC);
 	BEGIN(INITIAL);
 
 	if (file_handle->opened_path) {
@@ -343,7 +345,7 @@ static inline int prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 
 	str->value.str.val[str->value.str.len+1]=0;
 
-	yyin=NULL;
+	SCNG(yy_in)=NULL;
 	yy_scan_buffer(str->value.str.val, str->value.str.len+2 TSRMLS_CC);
 
 	zend_set_compiled_filename(filename TSRMLS_CC);
