@@ -27,11 +27,22 @@ typedef struct _node_list_pointer {
 	void *next;
 } node_list_pointer;
 
+typedef struct _doc_ref_obj {
+	void *ptr;
+	int   refcount;
+} doc_ref_obj;
+
 typedef struct _dom_ref_obj {
 	void *ptr;
 	int   refcount;
 	node_list_pointer *node_list;
 } dom_ref_obj;
+
+typedef struct _node_object {
+	zend_object  std;
+	xmlNodePtr node;
+	doc_ref_obj *document;
+} node_object;
 
 typedef struct _dom_object {
 	zend_object  std;
@@ -50,6 +61,9 @@ typedef struct _dom_object {
 #else
 #define PHPAPI __declspec(dllimport)
 #endif /* DOM_EXPORTS */
+#define DOM_IMPORT __declspec(dllimport)
+#else
+#define DOM_IMPORT extern
 #endif /* PHP_WIN32 */
 
 #ifdef ZTS
@@ -85,6 +99,16 @@ entry = zend_register_internal_class_ex(&ce, parent_ce, NULL TSRMLS_CC);
   		php_error(E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
   		RETURN_NULL();\
   	} \
+}
+
+#define DOC_GET_OBJ(__ptr, __id, __prtype, __intern) { \
+	__intern = (node_object *)zend_object_store_get_object(__id TSRMLS_CC); \
+	if (__intern->document != NULL) { \
+		if (!(__ptr = (__prtype)__intern->document->ptr)) { \
+  			php_error(E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
+  			RETURN_NULL();\
+  		} \
+	} \
 }
 
 #define DOM_DOMOBJ_NEW(zval, obj, ret, domobject) \

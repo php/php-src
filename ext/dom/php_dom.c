@@ -37,7 +37,7 @@
 #define PHP_XPATH 1
 #define PHP_XPTR 2
 
-extern int xml_parser_inited;
+DOM_IMPORT int xml_parser_inited;
 
 zend_object_handlers dom_object_handlers;
 
