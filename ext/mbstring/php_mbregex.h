@@ -44,8 +44,8 @@
 #define PHP_MBREGEX_FUNCTION_ENTRIES \
 	PHP_FE(mb_regex_encoding,	NULL) \
 	PHP_FE(mb_regex_set_options,	NULL) \
-	PHP_FE(mb_ereg,			(unsigned char *)third_argument_force_ref) \
-	PHP_FE(mb_eregi,			(unsigned char *)third_argument_force_ref) \
+	PHP_FE(mb_ereg,			third_arg_force_ref) \
+	PHP_FE(mb_eregi,			third_arg_force_ref) \
 	PHP_FE(mb_ereg_replace,			NULL) \
 	PHP_FE(mb_eregi_replace,			NULL) \
 	PHP_FE(mb_split,					NULL) \
