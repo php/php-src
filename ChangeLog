@@ -1,3 +1,150 @@
+2002-06-07  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Registry.php:
+    Experimental dependencies database handling functions
+    (not yet in production)
+
+2002-06-07  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/config.w32.h.in:
+    Unbreak build by setting PHP_PREFIX to c:\php4 for now.
+
+    * main/config.w32.h.in: Fugbix typo.
+
+2002-06-07  Zak Greant  <zak@mysql.com>
+
+    * ext/mysql/libmysql/strmake.c
+      ext/mysql/libmysql/strto.c
+      ext/mysql/libmysql/strtoll.c
+      ext/mysql/libmysql/strtoull.c
+      ext/mysql/libmysql/thr_alarm.h
+      ext/mysql/libmysql/violite.c
+      ext/mysql/libmysql/my_pthread.h
+      ext/mysql/libmysql/my_realloc.c
+      ext/mysql/libmysql/my_static.c
+      ext/mysql/libmysql/my_sys.h
+      ext/mysql/libmysql/my_tempnam.c
+      ext/mysql/libmysql/my_thr_init.c
+      ext/mysql/libmysql/my_wincond.c
+      ext/mysql/libmysql/my_winthread.c
+      ext/mysql/libmysql/my_write.c
+      ext/mysql/libmysql/mysql.h
+      ext/mysql/libmysql/mysql_com.h
+      ext/mysql/libmysql/mysql_version.h
+      ext/mysql/libmysql/mysqld_error.h
+      ext/mysql/libmysql/net.c
+      ext/mysql/libmysql/raid.h
+      ext/mysql/libmysql/config-win.h
+      ext/mysql/libmysql/ctype.c
+      ext/mysql/libmysql/dbug.c
+      ext/mysql/libmysql/dbug.h
+      ext/mysql/libmysql/default.c
+      ext/mysql/libmysql/dll.c
+      ext/mysql/libmysql/errmsg.c
+      ext/mysql/libmysql/errmsg.h
+      ext/mysql/libmysql/get_password.c
+      ext/mysql/libmysql/global.h
+      ext/mysql/libmysql/libmysql.c
+      ext/mysql/libmysql/list.c
+      ext/mysql/libmysql/m_string.h
+      ext/mysql/libmysql/mf_casecnv.c
+      ext/mysql/libmysql/mf_dirname.c
+      ext/mysql/libmysql/mf_format.c
+      ext/mysql/libmysql/mf_path.c
+      ext/mysql/libmysql/my_compress.c
+      ext/mysql/libmysql/my_create.c
+      ext/mysql/libmysql/my_getwd.c
+      ext/mysql/libmysql/my_init.c
+      ext/mysql/libmysql/my_lib.c
+      ext/mysql/libmysql/my_malloc.c
+      ext/mysql/libmysql/my_open.c
+      ext/mysql/libmysql/my_pthread.c
+      ext/mysql/libmysql/charset.c:
+    Updating embedded libmysql to version 3.23.48
+
+2002-06-07  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Remote.php
+      pear/PEAR/Frontend/CLI.php: Beautify remote-info
+
+2002-06-07  Joseph Tate  <jtate@mi-corporation.com>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+    Added aliases to make attr_node access functions more consistent.
+    Old access functions are now deprecated.
+    CVS: ----------------------------------------------------------------------
+    CVS: Enter Log.  Lines beginning with `CVS:' are removed automatically
+    CVS:
+    CVS: Committing in .
+    CVS:
+    CVS: Modified Files:
+    CVS: 	php_domxml.c
+    CVS: ----------------------------------------------------------------------
+
+2002-06-07  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Config.php:
+    - Reapplied the "treat umask as octal in "config-set"
+      command" Stig's patch
+    - Ported the config-help command to new UI API
+
+    * pear/PEAR/Frontend/CLI.php: more wrapping cases
+
+2002-06-07  Stig Bakken  <ssb@fast.no>
+
+    * main/config.w32.h.in: * fix SHLIB_SUFFIX_NAME define for Windows
+
+    * main/build-defs.h.in
+      main/main.c
+      configure.in: New constants: PHP_PREFIX and PHP_SHLIB_SUFFIX 
+
+2002-06-07  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php: Remove debug code
+
+    * pear/PEAR/Command/Registry.php: More info output retouchs
+
+    * pear/PEAR/Common.php: Fix some minor issues with the parsing
+
+2002-06-07  Stig Bakken  <ssb@fast.no>
+
+    * configure.in
+      pear/Makefile.frag: * get rid of pearize
+
+2002-06-07  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Registry.php:
+    Make "info" full human friendly (in deps list and lastmodified)
+
+    * pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Package.php:
+    Make $_deps_rel_trans and $_deps_type_trans globally avaible:
+    moved from Command/Package.php -> Command/Common.php
+
+    * pear/scripts/pear.in: Be nicer with the help
+
+    * pear/scripts/pear.in: ws
+
+2002-06-07  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c:  - Stay always in buffer
+
+2002-06-07  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Package.php
+      pear/PEAR/Command/Registry.php:
+    Put back the "info" command in its full state:
+    "Displays information about a package. The package argument may be a
+    local package file, an URL to a package file, or the name of an
+    installed package."
+    Command "package-info" depreciated (again)
+
+    * pear/Net/SMTP.php:
+    fix EOL handling in AUTH (patch from Scott Carr <scarr@progbits.com>)
+
+    * pear/Net/SMTP.php: ws
+
 2002-06-06  Daniela Mariaschi  <mariaschi@libero.it>
 
     * ext/interbase/interbase.c
