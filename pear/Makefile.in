@@ -22,7 +22,7 @@ install-data-local:
 	$(INSTALL_DATA) $(srcdir)/DB/pgsql.php $(pear_DBdir) && \
 	$(INSTALL_DATA) $(srcdir)/DB/storage.php $(pear_DBdir) && \
 	$(INSTALL_DATA) $(srcdir)/HTTP.php $(peardir) && \
-	$(INSTALL_DATA) $(srcdir)/File/Find.php $(pearFiledir)
+	$(INSTALL_DATA) $(srcdir)/File/Find.php $(pear_Filedir)
 
 phpincludedir = $(includedir)/php
 builddir = $(prefix)/lib/php/build
