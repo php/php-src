@@ -301,6 +301,7 @@ function_entry basic_functions[] = {
 	PHP_FE(bin2hex,															NULL)
 	PHP_FE(sleep,															NULL)
 	PHP_FE(usleep,															NULL)
+	PHP_FE(nanosleep,														NULL)
 	PHP_FE(time,															NULL)
 	PHP_FE(mktime,															NULL)
 	PHP_FE(gmmktime,														NULL)
@@ -1687,6 +1688,34 @@ PHP_FUNCTION(usleep)
 	convert_to_long_ex(num);
 	usleep(Z_LVAL_PP(num));
 #endif
+}
+/* }}} */
+
+/* {{{ proto mixed nanosleep(long seconds, long nanoseconds)
+   Delay for a number of seconds and nano seconds */
+PHP_FUNCTION(nanosleep)
+{
+	long tv_sec, tv_nsec;
+	struct timespec php_req, php_rem;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &tv_sec, &tv_nsec)) {
+		WRONG_PARAM_COUNT;
+	}
+
+	php_req.tv_sec = (time_t) tv_sec;
+	php_req.tv_nsec = tv_nsec;
+	if (!nanosleep(&php_req, &php_rem)) {
+		RETURN_TRUE;
+	} else if (errno == EINTR) {
+		array_init(return_value);
+		add_assoc_long_ex(return_value, "seconds", sizeof("seconds"), php_rem.tv_sec);
+		add_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds"), php_rem.tv_nsec);
+		return;
+	} else if (errno == EINVAL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "nanoseconds was not in the range 0 to 999 999 999 or seconds was negative");
+	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 
