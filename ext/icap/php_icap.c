@@ -197,8 +197,6 @@ void php_icap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 }
 
 
-
-
 /* {{{ proto int icap_close(int stream_id [, int options])
    Close an ICAP stream */
 PHP_FUNCTION(icap_close)
@@ -228,12 +226,6 @@ PHP_FUNCTION(icap_close)
         RETURN_TRUE;
 }
 /* }}} */
-
-
-
-
-
-
 
 
 /* {{{ proto int icap_open(string calendar, string user, string password [, int options])
@@ -319,7 +311,7 @@ PHP_FUNCTION(icap_expunge)
 /* }}} */
 
 /* {{{ proto int icap_fetch_event(int stream_id,int eventid, [int options])
-   Fetch an event*/
+   Fetch an event */
 PHP_FUNCTION(icap_fetch_event)
 {
 	pval *streamind,*eventid,*start,*end,*options=NULL;
@@ -542,7 +534,7 @@ PHP_FUNCTION(icap_rename_calendar)
 
 
 /* {{{ proto int icap_reopen(int stream_id, array date, array time)
-   list alarms for a given time */
+   List alarms for a given time */
 PHP_FUNCTION(icap_list_alarms)
 {
 	pval *streamind, *date,*time;
@@ -654,7 +646,7 @@ PHP_FUNCTION(icap_delete_calendar)
 
 
 /* {{{ proto string icap_delete_event(int stream_id, int uid)
-   Delete event*/
+   Delete event */
 PHP_FUNCTION(icap_delete_event)
 {
 	pval *streamind, *uid;
@@ -698,7 +690,7 @@ PHP_FUNCTION(icap_popen)
 
 
 /* {{{ proto string icap_store_event(int stream_id, object event)
-   Store an  event*/
+   Store an event */
 PHP_FUNCTION(icap_store_event)
 {
 	pval *streamind,*storeobject;
@@ -850,7 +842,7 @@ PHP_FUNCTION(icap_store_event)
 
 
 /* {{{ proto string icap_snooze(int stream_id, int uid)
-   Snooze an alarm*/
+   Snooze an alarm */
 PHP_FUNCTION(icap_snooze)
 {
 	pval *streamind,*uid;
@@ -910,10 +902,6 @@ void cc_searched (unsigned long cal_uid)
       g_cal_list_end->next=NULL;
     }
 }
-
-
-
-
 
 
 void cc_appended(u_int32_t uid)
