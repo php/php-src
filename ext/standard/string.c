@@ -263,6 +263,10 @@ PHP_FUNCTION(wordwrap)
 	}
 
 	convert_to_string_ex(ptext);
+	
+	if (Z_STRVAL_PP(ptext) == 0)
+		RETVAL_FALSE;
+	
 	text = (*ptext)->value.str.val;
 
 	if (ZEND_NUM_ARGS() > 1) {
