@@ -1,3 +1,25 @@
+2000-10-10  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/sablot/sablot.c: Fix compilation, I wonder when these were omitted??
+
+2000-10-10  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/oracle/oracle.c: - Reserved the patch
+
+2000-10-10  Sebastian Bergmann  <sb@phpopentracker.de>
+
+    * pear/PHPDoc/redist/IT.php: Removed a function used for debugging.
+
+2000-10-10  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/pdf.c:
+    - added optional argument pdf_show_boxed() to determine if text is
+      actually shown or not.
+
+2000-10-10  Sebastian Bergmann  <sb@phpopentracker.de>
+
+    * pear/PHPDoc/redist/IT.php: Updated IntegratedTemplate class.
+
 2000-10-08  Chuck Hagenbuch  <chuck@horde.org>
 
     * pear/File/SearchReplace.php
