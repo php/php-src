@@ -24,7 +24,7 @@ require_once "PEAR/Config.php";
 require_once "PEAR/Command.php";
 require_once "Console/Getopt.php";
 
-PEAR_Command::setUIType('CLI');
+PEAR_Command::setFrontendType('CLI');
 $all_commands = PEAR_Command::getCommands();
 $cmd_options  = PEAR_Command::getOptions();
 
