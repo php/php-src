@@ -38,7 +38,6 @@ static request_rec *php_apache_lookup_uri(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval **p1;
 	php_struct *ctx;
-	TSRMLS_FETCH();
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &p1) == FAILURE)
 		return NULL;
@@ -110,7 +109,6 @@ PHP_FUNCTION(get_all_headers)
 	php_struct *ctx;
 	apr_array_header_t *arr;
 	char *key, *val;
-	TSRMLS_FETCH();
 
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
