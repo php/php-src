@@ -10,7 +10,7 @@ CW_PATH = P:/APPS/SCRIPT/SW/CW71-4
 
 # NWSDK directories
 ifndef SDK_DIR
-SDK_DIR = R:/script/common/libc-internal
+SDK_DIR = R:/script/common/libc
 endif
 
 # MPK related directory
