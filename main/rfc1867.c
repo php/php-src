@@ -70,16 +70,68 @@ void php_rfc1867_register_constants(TSRMLS_D)
 	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_NO_FILE",    UPLOAD_ERROR_D,  CONST_CS | CONST_PERSISTENT);
 }
 
+static void normalize_protected_variable(char *varname TSRMLS_DC)
+{
+	char *s=varname, *index=NULL, *indexend=NULL;
+	
+	/* overjump leading space */
+	while (*s == ' ') {
+		s++;
+	}
+	
+	/* and remove it */
+	if (s != varname) {
+		memcpy(varname, s, strlen(s)+1);
+	}
+
+	/* find index */
+	index = strchr(varname, '[');
+	if (index) {
+		index++;
+		s=index;
+	} else {
+		return;
+	}
+
+	/* done? */
+	while (index) {
+		
+		while (*index == ' ' || *index == '\r' || *index == '\n' || *index=='\t') {
+			index++;
+		}
+		indexend = strchr(index, ']');
+		indexend = indexend ? indexend + 1 : index + strlen(index);
+		
+		if (s != index) {
+			memcpy(s, index, strlen(s)+1);
+			s += indexend-index;
+		} else {
+			s = indexend;
+		}
+
+		if (*s == '[') {
+			s++;
+			index = s;
+		} else {
+			index = NULL;
+		}	
+	}
+	*s++='\0';
+}
+
+
 static void add_protected_variable(char *varname TSRMLS_DC)
 {
 	int dummy=1;
 
+	normalize_protected_variable(varname TSRMLS_CC);
 	zend_hash_add(&PG(rfc1867_protected_variables), varname, strlen(varname)+1, &dummy, sizeof(int), NULL);
 }
 
 
 static zend_bool is_protected_variable(char *varname TSRMLS_DC)
 {
+	normalize_protected_variable(varname TSRMLS_CC);
 	return zend_hash_exists(&PG(rfc1867_protected_variables), varname, strlen(varname)+1);
 }
 
