@@ -220,6 +220,10 @@ SOURCE=.\zend_objects.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_objects_API.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_opcode.c
 # End Source File
 # Begin Source File
@@ -373,6 +377,10 @@ SOURCE=.\zend_object_handlers.h
 # Begin Source File
 
 SOURCE=.\zend_objects.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_objects_API.h
 # End Source File
 # Begin Source File
 
