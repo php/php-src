@@ -2202,6 +2202,38 @@ SOURCE=..\ext\xml\expat\xmltok_impl.h
 # Begin Group "Streams"
 
 # PROP Default_Filter ""
+# Begin Group "streams headers"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\main\streams\php_stream_context.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\streams\php_stream_filter_api.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\streams\php_stream_mmap.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\streams\php_stream_plain_wrapper.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\streams\php_stream_transport.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\streams\php_stream_userspace.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\streams\php_streams_int.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\main\streams\cast.c
@@ -2216,6 +2248,10 @@ SOURCE=..\main\streams\memory.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\streams\mmap.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\streams\plain_wrapper.c
 # End Source File
 # Begin Source File
@@ -2224,11 +2260,19 @@ SOURCE=..\main\streams\streams.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\streams\transports.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\user_filters.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\main\streams\userspace.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\streams\xp_socket.c
 # End Source File
 # End Group
 # Begin Source File

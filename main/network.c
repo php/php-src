@@ -93,6 +93,7 @@ int inet_aton(const char *, struct in_addr *);
 #include "ext/standard/file.h"
 
 #ifdef PHP_WIN32
+# include "win32/time.h"
 # define SOCK_ERR INVALID_SOCKET
 # define SOCK_CONN_ERR SOCKET_ERROR
 # define PHP_TIMEOUT_ERROR_VALUE		WSAETIMEDOUT
@@ -336,7 +337,7 @@ PHPAPI int php_network_connect_socket(int sockfd,
 	wset = rset;
 
 	if ((n = select(sockfd + 1, &rset, &wset, &eset, timeout)) == 0) {
-		error = ETIMEDOUT;
+		error = PHP_TIMEOUT_ERROR_VALUE;
 	}
 
 	if(FD_ISSET(sockfd, &rset) || FD_ISSET(sockfd, &wset)) {
