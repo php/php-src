@@ -32,6 +32,7 @@
 #include "php_pdo_driver.h"
 #include "php_pdo_int.h"
 #include "zend_exceptions.h"
+#include "zend_interfaces.h"
 
 #if defined(HAVE_SPL) && ((PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1))
 extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
@@ -306,6 +307,7 @@ PHP_MINIT_FUNCTION(pdo)
 	pdo_dbstmt_ce = zend_register_internal_class(&ce TSRMLS_CC);
 	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
 	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
+	zend_class_implements(pdo_dbstmt_ce TSRMLS_CC, 1, zend_ce_traversable); 
 
 	INIT_CLASS_ENTRY(ce, "PDORow", pdo_row_functions);
 	pdo_row_ce = zend_register_internal_class(&ce TSRMLS_CC);
