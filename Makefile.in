@@ -163,7 +163,7 @@ distdir:
 		fi; \
 	done
 	(cd $(distdir) ; $(MAKE) distclean)
-	find $(distdir) -name CVS -type d | xargs rm -rf
+	find $(distdir) -name CVS -o -name .cvsignore | xargs rm -rf
 	
 
 maintainer-clean-depend: maintainer-clean-depend-recursive
