@@ -481,6 +481,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			if (Z_TYPE_P(le) != php_sybase_module.le_plink) {
 				php_error(E_WARNING,"Sybase:  Hashed persistent link is not a Sybase link!");
 				efree(hashed_details);
+				dbloginfree(sybase.login);
 				RETURN_FALSE;
 			}
 			
@@ -491,11 +492,13 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 					/*php_error(E_WARNING,"Sybase:  Link to server lost, unable to reconnect");*/
 					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
 					efree(hashed_details);
+					dbloginfree(sybase.login);
 					RETURN_FALSE;
 				}
 				if (dbsetopt(sybase_ptr->link,DBBUFFER,"2",-1)==FAIL) {
 					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
 					efree(hashed_details);
+					dbloginfree(sybase.login);
 					RETURN_FALSE;
 				}
 			}
@@ -516,6 +519,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 
 			if (Z_TYPE_P(index_ptr) != le_index_ptr) {
 				efree(hashed_details);
+				dbloginfree(sybase.login);
 				RETURN_FALSE;
 			}
 			link = (int) index_ptr->ptr;
@@ -524,6 +528,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				Z_LVAL_P(return_value) = php_sybase_module.default_link = link;
 				Z_TYPE_P(return_value) = IS_LONG;
 				efree(hashed_details);
+				dbloginfree(sybase.login);
 				return;
 			} else {
 				zend_hash_del(&EG(regular_list),hashed_details,hashed_details_length+1);
@@ -532,12 +537,14 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		if (php_sybase_module.max_links!=-1 && php_sybase_module.num_links>=php_sybase_module.max_links) {
 			php_error(E_WARNING,"Sybase:  Too many open links (%d)",php_sybase_module.num_links);
 			efree(hashed_details);
+			dbloginfree(sybase.login);
 			RETURN_FALSE;
 		}
 		
 		if ((sybase.link=PHP_SYBASE_DBOPEN(sybase.login,host))==NULL) {
 			/*php_error(E_WARNING,"Sybase:  Unable to connect to server:  %s",sybase_error(sybase));*/
 			efree(hashed_details);
+			dbloginfree(sybase.login);
 			RETURN_FALSE;
 		}
 
@@ -559,6 +566,8 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		Z_TYPE(new_index_ptr) = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list),hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry),NULL)==FAILURE) {
 			efree(hashed_details);
+			dbloginfree(sybase.login);
+			dbclose(sybase.link);
 			RETURN_FALSE;
 		}
 		php_sybase_module.num_links++;
