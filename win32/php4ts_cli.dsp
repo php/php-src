@@ -163,5 +163,13 @@ SOURCE=..\sapi\cli\getopt.c
 SOURCE=..\sapi\cli\php_getopt.h
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=.\php4ts_cli.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\php4ts_cli.rc2
+# End Source File
 # End Target
 # End Project

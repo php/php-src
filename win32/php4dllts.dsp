@@ -2087,5 +2087,13 @@ SOURCE=..\ext\xml\expat\xmltok_impl.h
 # End Group
 # End Group
 # End Group
+# Begin Source File
+
+SOURCE=.\php4dllts.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\php4dllts.rc2
+# End Source File
 # End Target
 # End Project
