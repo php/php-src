@@ -152,7 +152,7 @@ php_sprintf_appendchar(char **buffer, int *pos, int *size, char add)
 inline static void
 php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
 						   int min_width, int max_width, char padding,
-						   int alignment, int len)
+						   int alignment, int len, int sign)
 {
 	register int npad = min_width - MIN(len,(max_width?max_width:len));
 
@@ -173,6 +173,7 @@ php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
 		*buffer = erealloc(*buffer, *size);
 	}
 	if (alignment == ALIGN_RIGHT) {
+		if (sign && padding=='0') { (*buffer)[(*pos)++] = '-'; add++; }
 		while (npad-- > 0) {
 			(*buffer)[(*pos)++] = padding;
 		}
@@ -204,6 +205,9 @@ php_sprintf_appendint(char **buffer, int *pos, int *size, int number,
 		magn = (unsigned int) number;
 	}
 
+	/* Can't right-pad 0's on integers */
+	if(alignment==0 && padding=='0') padding=' ';
+
 	numbuf[i] = '\0';
 
 	do {
@@ -219,7 +223,7 @@ php_sprintf_appendint(char **buffer, int *pos, int *size, int number,
 	PRINTF_DEBUG(("sprintf: appending %d as \"%s\", i=%d\n",
 				  number, &numbuf[i], i));
 	php_sprintf_appendstring(buffer, pos, size, &numbuf[i], width, 0,
-							   padding, alignment, (NUM_BUF_SIZE - 1) - i);
+							   padding, alignment, (NUM_BUF_SIZE - 1) - i, neg);
 }
 
 
@@ -280,7 +284,7 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 		width += (precision + 1);
 	}
 	php_sprintf_appendstring(buffer, pos, size, numbuf, width, 0, padding,
-							   alignment, i);
+							   alignment, i, sign);
 }
 
 
@@ -317,7 +321,7 @@ php_sprintf_append2n(char **buffer, int *pos, int *size, int number,
 		numbuf[--i] = '-';
 	}
 	php_sprintf_appendstring(buffer, pos, size, &numbuf[i], width, 0,
-							   padding, alignment, (NUM_BUF_SIZE - 1) - i);
+							   padding, alignment, (NUM_BUF_SIZE - 1) - i, neg);
 }
 
 
@@ -471,7 +475,7 @@ php3_formatted_print(int ht, int *len)
 											   args[currarg]->value.str.val,
 											   width, precision, padding,
 											   alignment,
-											   args[currarg]->value.str.len);
+											   args[currarg]->value.str.len,0);
 					break;
 
 				case 'd':
