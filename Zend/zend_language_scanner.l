@@ -41,6 +41,7 @@
 %x ST_LOOKING_FOR_PROPERTY
 %x ST_LOOKING_FOR_VARNAME
 %x ST_COMMENT
+%x ST_DOC_COMMENT
 %x ST_ONE_LINE_COMMENT
 %option stack
 
@@ -133,6 +134,10 @@ void shutdown_scanner(TSRMLS_D)
 	if (CG(heredoc)) {
 		efree(CG(heredoc));
 		CG(heredoc_len)=0;
+	}
+	if (CG(doc_comment)) {
+		efree(CG(doc_comment));
+		CG(doc_comment_len) = 0;
 	}
 }
 END_EXTERN_C()
@@ -1169,6 +1174,12 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 	}
 }
 
+<ST_IN_SCRIPTING>"/** "{NEWLINE} {
+	CG(comment_start_line) = CG(zend_lineno);
+	BEGIN(ST_DOC_COMMENT);
+	yymore();
+}
+
 <ST_IN_SCRIPTING>"/*" {
 	CG(comment_start_line) = CG(zend_lineno);
 	BEGIN(ST_COMMENT);
@@ -1176,8 +1187,19 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 }
 
 
-<ST_COMMENT>[^*]+ {
+<ST_COMMENT,ST_DOC_COMMENT>[^*]+ {
 	yymore();
+}
+
+<ST_DOC_COMMENT>"*/" {
+	if (CG(doc_comment)) {
+		efree(CG(doc_comment));
+	}
+	CG(doc_comment) = estrndup(yytext, yyleng);
+	CG(doc_comment_len) = yyleng;
+	HANDLE_NEWLINES(yytext, yyleng);
+	BEGIN(ST_IN_SCRIPTING);
+	return T_DOC_COMMENT;
 }
 
 <ST_COMMENT>"*/" {
@@ -1186,7 +1208,7 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 	return T_COMMENT;
 }
 
-<ST_COMMENT>"*" {
+<ST_COMMENT,ST_DOC_COMMENT>"*" {
 	yymore();
 }
 
@@ -1552,7 +1574,7 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 	return 0;
 }
 
-<ST_COMMENT><<EOF>> {
+<ST_COMMENT,ST_DOC_COMMENT><<EOF>> {
 	zend_error(E_COMPILE_WARNING,"Unterminated comment starting line %d", CG(comment_start_line));
 	return 0;
 }

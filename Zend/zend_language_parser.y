@@ -130,7 +130,7 @@
 %token T_LINE
 %token T_FILE
 %token T_COMMENT
-%token T_ML_COMMENT
+%token T_DOC_COMMENT
 %token T_OPEN_TAG
 %token T_OPEN_TAG_WITH_ECHO
 %token T_CLOSE_TAG

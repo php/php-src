@@ -146,6 +146,8 @@ struct _zend_op_array {
 	zend_bool uses_this;
 
 	char *filename;
+	int  line_start;
+	int  line_end;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
