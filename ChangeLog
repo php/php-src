@@ -1,3 +1,36 @@
+2003-03-23  Alex Waugh  <alex@alexwaugh.com>
+
+    * ext/standard/php_fopen_wrappers.h:
+      Fix linkage of symbols.
+
+2003-03-23  Shane Caraveo  <shane@caraveo.com>
+
+    * sapi/cgi/cgi_main.c:
+      For fastcgi env vars, don't magic quote them
+
+    * ext/standard/proc_open.c
+      main/php_variables.c:
+      The environment should *never* be magic quoted.
+
+2003-03-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      ext/curl/config.m4:
+      MFH curl detection when multiple installations exist
+
+    * ext/curl/config.m4:
+      Fix curl detection when multiple installations exist
+
+2003-03-23  Sterling Hughes  <sterling@bumblebury.com>
+
+    * configure.in:
+      add a standard Exception class.
+
+2003-03-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/calendar/jewish.c:
+      Added some compiler check
+
 2003-03-22  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * (PHP_4_3)

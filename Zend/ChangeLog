@@ -1,3 +1,43 @@
+2003-03-23  Andi Gutmans  <andi@zend.com>
+
+    * zend.c:
+      - Fix win32 build
+
+2003-03-23  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.c:
+      resore namespace on shutdown - since some functions use
+      EG() and CG() pointers
+
+2003-03-23  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_default_classes.c:
+      ZTS fix.
+
+2003-03-23  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Another fix for implicit public, perhaps it was not such a good idea :I
+
+2003-03-23  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * Zend.dsp
+      ZendTS.dsp
+      zend_default_classes.c:
+      Add new files to ZendTS.dsp. Sync list of files in Zend.dsp with
+      ZendTS.dsp. ZTS fixes.
+
+2003-03-23  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_default_classes.h:
+      DEFAULT_CLASSES_H not DEFAULT_INTERFACES_H
+
+    * Makefile.am
+      zend.c
+      zend_default_classes.c
+      zend_default_classes.h:
+      add a standard Exception class.
+
 2003-03-22  Shane Caraveo  <shane@caraveo.com>
 
     * zend_compile.h:
