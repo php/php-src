@@ -36,6 +36,7 @@
 #include "ext/standard/datetime.h"
 #include "ext/standard/php_lcg.h"
 #include "ext/standard/url_scanner.h"
+#include "ext/standard/php_output.h"
 #include "ext/standard/php_rand.h"                   /* for RAND_MAX */
 
 #ifdef ZTS
@@ -554,7 +555,15 @@ static void _php_session_cache_limiter(PSLS_D)
 	SLS_FETCH();
 
 	if (SG(headers_sent)) {
-		php_error(E_WARNING, "Cannot send session cache limiter - headers already sent");
+		char *output_start_filename = php_get_output_start_filename();
+		int output_start_lineno = php_get_output_start_lineno();
+
+		if (output_start_filename) {
+			php_error(E_WARNING, "Cannot send session cache limiter - headers already sent by (output started at %s:%d)",
+				output_start_filename, output_start_lineno);
+		} else {
+			php_error(E_WARNING, "Cannot send session cache limiter - headers already sent");
+		}	
 		return;
 	}
 	
@@ -581,7 +590,15 @@ static void _php_session_send_cookie(PSLS_D)
 	SLS_FETCH();
 
 	if (SG(headers_sent)) {
-		php_error(E_WARNING, "Cannot send session cookie - headers already sent");
+		char *output_start_filename = php_get_output_start_filename();
+		int output_start_lineno = php_get_output_start_lineno();
+
+		if (output_start_filename) {
+			php_error(E_WARNING, "Cannot send session cookie - headers already sent by (output started at %s:%d)",
+				output_start_filename, output_start_lineno);
+		} else {
+			php_error(E_WARNING, "Cannot send session cookie - headers already sent");
+		}	
 		return;
 	}
 
