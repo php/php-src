@@ -56,6 +56,7 @@ function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_cdup,			NULL)
 	PHP_FE(ftp_chdir,			NULL)
 	PHP_FE(ftp_exec,			NULL)
+	PHP_FE(ftp_raw,				NULL)
 	PHP_FE(ftp_mkdir,			NULL)
 	PHP_FE(ftp_rmdir,			NULL)
 	PHP_FE(ftp_chmod,			NULL)
@@ -328,6 +329,26 @@ PHP_FUNCTION(ftp_exec)
 	}
 
 	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto array ftp_raw(resource stream, string command)
+   Sends a literal command to the FTP server */
+PHP_FUNCTION(ftp_raw)
+{
+	zval		*z_ftp;
+	ftpbuf_t	*ftp;
+	char		*cmd;
+	int			cmd_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &cmd, &cmd_len) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
+
+	/* execute arbitrary ftp command */
+	ftp_raw(ftp, cmd, return_value);
 }
 /* }}} */
 

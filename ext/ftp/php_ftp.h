@@ -43,6 +43,7 @@ PHP_FUNCTION(ftp_pwd);
 PHP_FUNCTION(ftp_cdup);
 PHP_FUNCTION(ftp_chdir);
 PHP_FUNCTION(ftp_exec);
+PHP_FUNCTION(ftp_raw);
 PHP_FUNCTION(ftp_mkdir);
 PHP_FUNCTION(ftp_rmdir);
 PHP_FUNCTION(ftp_chmod);
