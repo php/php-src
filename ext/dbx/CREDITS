@@ -1,7 +1,8 @@
 dbx (database abstraction)
 
-core routines: Marc Boeren (Guidance Rotterdam bv)
+core routines: Marc Boeren (marc@guidance.nl)
 mysql support: Marc Boeren
 odbc support:  Marc Boeren
-pgsql support: Rui Hirokawa
+pgsql support: Rui Hirokawa (hirokawa@php.net)
 mssql support: Marc Boeren
+fbsql support: Frank M. Kromann (frank@frontbase.com)
