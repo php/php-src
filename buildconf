@@ -1,6 +1,18 @@
 #!/bin/sh
 # $Id$
 
+eval `grep '^EXTRA_VERSION=' configure.in`
+case "$EXTRA_VERSION" in
+	*-dev)
+		dev=1
+		;;
+	*)
+		dev=0
+		;;
+esac
+
+devok=0
+
 while test $# -gt 0; do
     if test "$1" = "--copy"; then
         automake_flags=--copy
@@ -11,8 +23,19 @@ while test $# -gt 0; do
         echo "Using Zend Engine 2 code"
     fi
 
+	if test "$1" = "--force"; then
+		devok=1
+		echo "Forcing buildconf"
+	fi
+
     shift
 done
+
+if test "$dev" = "0" -a "$devok" = "0"; then
+	echo "You should not run buildconf in a release package."
+	echo "use buildconf --force to override this check."
+	exit 1
+fi
 
 if test -z "$ZENDDIR"; then
     ZENDDIR=Zend
