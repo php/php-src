@@ -227,8 +227,6 @@ PS_SERIALIZER_ENCODE_FUNC(wddx)
 	PS_ENCODE_VARS;
 
 	packet = php_wddx_constructor();
-	if (!packet)
-		return FAILURE;
 
 	php_wddx_packet_start(packet, NULL, 0);
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
@@ -1103,9 +1101,6 @@ PHP_FUNCTION(wddx_serialize_value)
 		return;
 	
 	packet = php_wddx_constructor();
-	if (!packet) {
-		RETURN_FALSE;
-	}
 
 	php_wddx_packet_start(packet, comment, comment_len);
 	php_wddx_serialize_var(packet, var, NULL, 0 TSRMLS_CC);
@@ -1138,9 +1133,6 @@ PHP_FUNCTION(wddx_serialize_vars)
 	}
 		
 	packet = php_wddx_constructor();
-	if (!packet) {
-		RETURN_FALSE;
-	}
 
 	php_wddx_packet_start(packet, NULL, 0);
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
@@ -1198,9 +1190,6 @@ PHP_FUNCTION(wddx_packet_start)
 		return;
 
 	packet = php_wddx_constructor();
-	if (!packet) {
-		RETURN_FALSE;
-	}
 	
 	php_wddx_packet_start(packet, comment, comment_len);
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
