@@ -10,6 +10,7 @@ AC_PROG_CC
 AM_PROG_LEX
 AM_PROG_CC_STDC
 ZEND_VERSION=$VERSION
+AC_ZEND_C_BIGENDIAN
 
 dnl We want this one before the checks, so the checks can modify CFLAGS.
 test -z "$CFLAGS" && auto_cflags=1
