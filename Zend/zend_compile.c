@@ -1535,8 +1535,8 @@ static zend_bool do_inherit_method_check(zend_function *child, zend_function *pa
 
 	/* You cannot change from static to non static and vice versa.
 	 */
-	if ((child_flags & FN_IS_STATIC) != (parent_flags & FN_IS_STATIC)) {
-		if (child->common.fn_flags & FN_IS_STATIC) {
+	if ((child_flags & FN_STATIC) != (parent_flags & FN_STATIC)) {
+		if (child->common.fn_flags & FN_STATIC) {
 			zend_error(E_COMPILE_ERROR, "Cannot make non static method %s::%s() static in class %s", FN_SCOPE_NAME(parent), child->common.function_name, FN_SCOPE_NAME(child));
 		} else {
 			zend_error(E_COMPILE_ERROR, "Cannot make static method %s::%s() non static in class %s", FN_SCOPE_NAME(parent), child->common.function_name, FN_SCOPE_NAME(child));

@@ -88,7 +88,7 @@ typedef struct _zend_brk_cont_element {
 } zend_brk_cont_element;
 
 
-#define FN_IS_STATIC 0x01
+#define FN_STATIC 0x01
 
 #define FN_ABSTRACT  0x02
 

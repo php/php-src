@@ -447,7 +447,7 @@ class_statement:
 ;
 
 is_static:
-		T_STATIC	{ $$.u.constant.value.lval = FN_IS_STATIC; }
+		T_STATIC	{ $$.u.constant.value.lval = FN_STATIC; }
 	|	/* empty */ { $$.u.constant.value.lval = 0; }
 ;
 	
