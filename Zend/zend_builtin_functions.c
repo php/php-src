@@ -897,13 +897,14 @@ ZEND_FUNCTION(create_function)
 /* }}} */
 
 
-
+#if ZEND_DEBUG
 ZEND_FUNCTION(zend_test_func)
 {
 	zval *arg1, *arg2;
 
 	zend_get_parameters(ht, 2, &arg1, &arg2);
 }
+#endif
 
 
 ZEND_FUNCTION(get_resource_type)
