@@ -31,6 +31,19 @@
 #include <pwd.h>
 #endif
 #endif
+#if HAVE_GRP_H
+# ifdef PHP_WIN32
+#  include "win32/grp.h"
+# else
+#  include <grp.h>
+# endif
+#endif
+#ifdef PHP_WIN32
+#undef getgid
+#define getgroups(a, b) 0
+#define getgid() 1
+#define getuid() 1
+#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -56,8 +69,7 @@ PHPAPI void php_statpage(TSRMLS_D)
 			BG(page_gid)   = pstat->st_gid;
 			BG(page_inode) = pstat->st_ino;
 			BG(page_mtime) = pstat->st_mtime;
-		} 
-		else { /* handler for situations where there is no source file, ex. php -r */
+		} else { /* handler for situations where there is no source file, ex. php -r */
 			BG(page_uid) = getuid();
 			BG(page_gid) = getgid();
 		}
