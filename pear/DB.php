@@ -154,7 +154,7 @@ class DB {
 	 * <return type="object">a newly created DB object, or a DB error
 	 * code on error</return>
 	 */
-    function factory($type) {
+    function &factory($type) {
 		global $USED_PACKAGES;
 		// "include" should be replaced with "import" once PHP gets it
 		$pkgname = 'DB/' . $type;
@@ -167,7 +167,7 @@ class DB {
 		}
 		$classname = 'DB_' . $type;
 		$obj = new $classname;
-		return $obj; // XXX ADDREF
+		return $obj;
     }
 
     // }}}
@@ -188,12 +188,12 @@ class DB {
 	 * <return type="object">a newly created DB object, or a DB error
 	 * code on error</return>
 	 */
-	function connect($dsn, $persistent = false) {
+	function &connect($dsn, $persistent = false) {
 		global $USED_PACKAGES;
 
 		$dsninfo = DB::parseDSN($dsn);
 		$type = $dsninfo['phptype'];
-		// "include" should be replaced with "use" once PHP gets it
+		// "include" should be replaced with "import" once PHP gets it
 		$pkgname = 'DB/' . $type;
 		if (!is_array($USED_PACKAGES) || !$USED_PACKAGES[$pkgname]) {
 			if (!@include($pkgname . '.php')) {
@@ -208,7 +208,7 @@ class DB {
 		if (DB::isError($err)) {
 			return $err;
 		}
-		return $obj; // XXX ADDREF
+		return $obj;
 	}
 
     // }}}
@@ -354,7 +354,7 @@ class DB {
 			} else {
 				$parsed['phptype'] = $dsn;
 			}
-			return $parsed; // XXX ADDREF
+			return $parsed;
 		}
 
 		if (preg_match('|^(.*)/([^/]+)/?$|', $dsn, &$arr)) {
@@ -385,7 +385,7 @@ class DB {
 			$parsed['dbsyntax'] = $parsed['phptype'];
 		}
 
-		return $parsed; // XXX ADDREF
+		return $parsed;
 	}
 
     // }}}
