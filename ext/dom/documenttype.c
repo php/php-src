@@ -100,6 +100,10 @@ int dom_documenttype_notations_read(dom_object *obj, zval **retval TSRMLS_DC)
 	dom_object *intern;
 
 	doctypep = (xmlDtdPtr) dom_object_get_node(obj);
+
+	MAKE_STD_ZVAL(*retval);
+	php_dom_create_interator(*retval, DOM_NAMEDNODEMAP TSRMLS_CC);
+
 	notationht = (xmlHashTable *) doctypep->notations;
 
 	intern = (dom_object *)zend_objects_get_address(*retval TSRMLS_CC);
