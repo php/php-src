@@ -24,6 +24,8 @@
 #ifndef _PHP_RAND_H
 #define	_PHP_RAND_H
 
+#include <stdlib.h>
+
 #ifndef RAND_MAX
 #define RAND_MAX (1<<15)
 #endif

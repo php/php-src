@@ -92,7 +92,6 @@
 #define loBits(u)     ((u) & 0x7FFFFFFFU)  /* mask     the highest   bit of u */
 #define mixBits(u, v) (hiBit(u)|loBits(v)) /* move hi bit of u to hi bit of v */
 
-/*	Could be 1<<32 but for some reason it has been used as 1<<31 in the past */
 #define MT_RAND_MAX ((unsigned long)((1<<31)-1))
 
 static void seedMT(php_uint32 seed BLS_DC)
