@@ -85,7 +85,7 @@ static zval *xml_call_handler(xml_parser *, zval *, int, zval **);
 static zval *_xml_xmlchar_zval(const XML_Char *, int, const XML_Char *);
 static int _xml_xmlcharlen(const XML_Char *);
 static void _xml_add_to_info(xml_parser *parser,char *name);
-
+inline static char *_xml_decode_tag(xml_parser *parser, const char *tag);
 
 void _xml_startElementHandler(void *, const char *, const char **);
 void _xml_endElementHandler(void *, const char *);
@@ -621,47 +621,55 @@ static void _xml_add_to_info(xml_parser *parser,char *name)
 	
 	parser->curtag++;
 }
+/* }}} */
+/* {{{ _xml_decode_tag() */
+
+static char *_xml_decode_tag(xml_parser *parser, const char *tag)
+{
+	char *newstr;
+	int out_len;
+
+	newstr = xml_utf8_decode(tag, strlen(tag), &out_len, parser->target_encoding);
+
+	if (parser->case_folding) {
+		php_strtoupper(newstr, out_len);
+	}
+
+	return newstr;
+}
 
 /* }}} */
-    /* {{{ _xml_startElementHandler() */
+/* {{{ _xml_startElementHandler() */
 
-void _xml_startElementHandler(void *userData, const char *name,
-								   const char **attributes)
+void _xml_startElementHandler(void *userData, const char *name, const char **attributes)
 {
 	xml_parser *parser = (xml_parser *)userData;
 	const char **attrs = attributes;
+	char *tag_name;
+	char *att, *val;
+	int att_len, val_len;
+	zval *retval, *args[3];
 
 	if (parser) {
-		zval *retval, *args[3];
-
 		parser->level++;
 
-		if (parser->case_folding) {
-			name = php_strtoupper(estrdup(name), strlen(name));
-		}
+		tag_name = _xml_decode_tag(parser, name);
 
 		if (parser->startElementHandler) {
 			args[0] = _xml_resource_zval(parser->index);
-			args[1] = _xml_string_zval(name);
+			args[1] = _xml_string_zval(tag_name);
 			MAKE_STD_ZVAL(args[2]);
 			array_init(args[2]);
+
 			while (attributes && *attributes) {
-				char *key = (char *)attributes[0];
-				char *value = (char *)attributes[1];
-				char *decoded_value;
-				int decoded_len;
-				if (parser->case_folding) {
-					key = php_strtoupper(estrdup(key), strlen(key));
-				}
-				decoded_value = xml_utf8_decode(value, strlen(value),
-												&decoded_len,
-												parser->target_encoding);
-				
-				add_assoc_stringl(args[2], key, decoded_value, decoded_len, 0);
-				if (parser->case_folding) {
-					efree(key);
-				}
+				att = _xml_decode_tag(parser, attributes[0]);
+				val = xml_utf8_decode(attributes[1], strlen(attributes[1]), &val_len, parser->target_encoding);
+
+				add_assoc_stringl(args[2], att, val, val_len, 0);
+
 				attributes += 2;
+
+				efree(att);
 			}
 			
 			if ((retval = xml_call_handler(parser, parser->startElementHandler, 3, args))) {
@@ -680,34 +688,27 @@ void _xml_startElementHandler(void *userData, const char *name,
 			array_init(tag);
 			array_init(atr);
 
-			_xml_add_to_info(parser,((char *) name) + parser->toffset);
+			_xml_add_to_info(parser,((char *) tag_name) + parser->toffset);
 
-			add_assoc_string(tag,"tag",((char *) name) + parser->toffset,1); /* cast to avoid gcc-warning */
+			add_assoc_string(tag,"tag",((char *) tag_name) + parser->toffset,1); /* cast to avoid gcc-warning */
 			add_assoc_string(tag,"type","open",1);
 			add_assoc_long(tag,"level",parser->level);
 
-			parser->ltags[parser->level-1] = estrdup(name);
+			parser->ltags[parser->level-1] = estrdup(tag_name);
 			parser->lastwasopen = 1;
 
 			attributes = attrs;
+
 			while (attributes && *attributes) {
-				char *key = (char *)attributes[0];
-				char *value = (char *)attributes[1];
-				char *decoded_value;
-				int decoded_len;
-				if (parser->case_folding) {
-					key = php_strtoupper(estrdup(key), strlen(key));
-				}
-				decoded_value = xml_utf8_decode(value, strlen(value),
-												&decoded_len,
-												parser->target_encoding);
+				att = _xml_decode_tag(parser, attributes[0]);
+				val = xml_utf8_decode(attributes[1], strlen(attributes[1]), &val_len, parser->target_encoding);
 				
-				add_assoc_stringl(atr,key,decoded_value,decoded_len,0);
+				add_assoc_stringl(atr,att,val,val_len,0);
+
 				atcnt++;
-				if (parser->case_folding) {
-					efree(key);
-				}
 				attributes += 2;
+
+				efree(att);
 			}
 
 			if (atcnt) {
@@ -720,9 +721,7 @@ void _xml_startElementHandler(void *userData, const char *name,
 			zend_hash_next_index_insert(parser->data->value.ht,&tag,sizeof(zval*),(void *) &parser->ctag);
 		}
 
-		if (parser->case_folding) {
-			efree((char *)name);
-		}
+		efree(tag_name);
 	}
 }
 
@@ -732,17 +731,16 @@ void _xml_startElementHandler(void *userData, const char *name,
 void _xml_endElementHandler(void *userData, const char *name)
 {
 	xml_parser *parser = (xml_parser *)userData;
+	char *tag_name;
 
 	if (parser) {
 		zval *retval, *args[2];
 
-		if (parser->case_folding) {
-			name = php_strtoupper(estrdup(name), strlen(name));
-		}
+		tag_name = _xml_decode_tag(parser, name);
 
 		if (parser->endElementHandler) {
 			args[0] = _xml_resource_zval(parser->index);
-			args[1] = _xml_string_zval(name);
+			args[1] = _xml_string_zval(tag_name);
 
 			if ((retval = xml_call_handler(parser, parser->endElementHandler, 2, args))) {
 				zval_dtor(retval);
@@ -760,9 +758,9 @@ void _xml_endElementHandler(void *userData, const char *name)
 
 				array_init(tag);
 				  
-				_xml_add_to_info(parser,((char *) name) + parser->toffset);
+				_xml_add_to_info(parser,((char *) tag_name) + parser->toffset);
 
-				add_assoc_string(tag,"tag",((char *) name) + parser->toffset,1); /* cast to avoid gcc-warning */
+				add_assoc_string(tag,"tag",((char *) tag_name) + parser->toffset,1); /* cast to avoid gcc-warning */
 				add_assoc_string(tag,"type","close",1);
 				add_assoc_long(tag,"level",parser->level);
 				  
@@ -772,12 +770,12 @@ void _xml_endElementHandler(void *userData, const char *name)
 			parser->lastwasopen = 0;
 		}
 
-		if (parser->case_folding) {
-			efree((char *)name);
-		}
+		efree(tag_name);
+
 		if (parser->ltags) {
 			efree(parser->ltags[parser->level-1]);
 		}
+
 		parser->level--;
 	}
 }
