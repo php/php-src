@@ -70,7 +70,6 @@ void spl_register_std_class(zend_class_entry ** ppce, zend_namespace * namespace
 	*ppce = zend_register_internal_ns_class(&ce, NULL, namespace_entry, NULL TSRMLS_CC);
 
 	/* entries changed by initialize */
-	(*ppce)->ce_flags = ZEND_ACC_ABSTRACT | ZEND_ACC_INTERFACE;
 	(*ppce)->create_object = obj_ctor;
 }
 /* }}} */
