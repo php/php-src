@@ -1,4 +1,4 @@
-PHP 4.0                                                                    NEWS
+PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 26 Nov 2001, Version 4.1.0
 - Fixed a bug which caused set_time_limit() to affect all requests to an
