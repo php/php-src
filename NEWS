@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added new switch -x to CLI that enables execution of files without @scripting tags. (Marcus)
 - All special fopen wrappers ('php://', 'bz2://' and 'zlib://') now require the
   '://' separator (instead of simply 'php:', 'bz2:' and 'zlib:') to avoid
   ambiguities when filenames have ':' characters. (Wez)
