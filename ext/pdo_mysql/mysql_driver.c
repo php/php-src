@@ -279,7 +279,11 @@ static struct pdo_dbh_methods mysql_methods = {
 };
 
 #ifndef PDO_MYSQL_UNIX_ADDR
-# define PDO_MYSQL_UNIX_ADDR	"MySQL"
+# ifndef PHP_WIN32
+#  define PDO_MYSQL_UNIX_ADDR	"MySQL"
+# else
+#  define PDO_MYSQL_UNIX_ADDR	"/tmp/mysql.sock"
+# endif
 #endif
 
 static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
@@ -322,14 +326,9 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	
 	mysql_handle_autocommit(dbh TSRMLS_CC);
 
-#ifndef PHP_WIN32
 	if (vars[2].optval && !strcmp("localhost", vars[2].optval)) {
-		host = ".";
 		unix_socket = vars[4].optval;  
-	} else
-#endif
-	{
-		host = vars[2].optval;
+	} else {
 		port = atoi(vars[3].optval); 
 	}
 	dbname = vars[1].optval;
