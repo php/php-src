@@ -442,7 +442,7 @@ PHP_FUNCTION(wordwrap)
 				}
 				if (l == -1) {
 					/* couldn't break it backwards, try looking forwards */
-					l = linelength;
+					l = linelength - 1;
 					while (l <= pgr) {
 						if (docut == 0)
 						{
@@ -456,13 +456,12 @@ PHP_FUNCTION(wordwrap)
 						if (docut == 1)
 						{
 							if (text[i+l] == ' ' || l > i-last) {
-								strncat(newtext, text+last, i+l-last);
+								strncat(newtext, text+last, i+l-last+1);
 								strcat(newtext, breakchar);
-								last = i + l;
+								last = i + l + 1;
 								break;
 							}
 						}
-						l ++;
 					}
 				}
 				i += l+1;
