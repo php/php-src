@@ -25,16 +25,10 @@
 
 #include "ext/session/php_session.h"
 #include <sqlite.h>
-
+#define SQLITE_RETVAL(__r) ((__r) == SQLITE_OK ? SUCCESS : FAILURE)
 #define PS_SQLITE_DATA sqlite *db = (sqlite*)PS_GET_MOD_DATA()
 extern int sqlite_encode_binary(const unsigned char *in, int n, unsigned char *out);
 extern int sqlite_decode_binary(const unsigned char *in, unsigned char *out);
-
-#define CREATE_TBL_QUERY	"CREATE TABLE session_data(sess_id TEXT PRIMARY KEY, value TEXT, updated INTEGER)"
-#define INSERT_QUERY		"REPLACE INTO session_data VALUES('%q', '%q', %d)"
-#define SELECT_QUERY		"SELECT value FROM session_data WHERE sess_id='%q' LIMIT 1"
-#define GC_QUERY			"DELETE FROM session_data WHERE (%d - updated) > %d"
-#define DELETE_QUERY		"DELETE FROM session_data WHERE sess_id='%q'"
 
 PS_FUNCS(sqlite);
 
@@ -88,11 +82,15 @@ PS_OPEN_FUNC(sqlite)
 	/* allow up to 1 minute when busy */
 	sqlite_busy_timeout(db, 60000);
 
-	/* sqlite_exec(db, "PRAGMA default_synchronous = OFF", NULL, NULL, NULL); */
+	sqlite_exec(db, "PRAGMA default_synchronous = OFF", NULL, NULL, NULL);
 	
 	/* This will fail if the table already exists, but that's not a big problem. I'm
 	   unclear as to how to check for a table's existence in SQLite -- that would be better here. */
-	sqlite_exec(db, CREATE_TBL_QUERY, NULL, NULL, NULL);
+	sqlite_exec(db, 
+	    "CREATE TABLE session_data ("
+		"	sess_id TEXT PRIMARY KEY," 
+	    "    value TEXT, updated INTEGER "
+	    ")", NULL, NULL, NULL);
 
 	PS_SET_MOD_DATA(db);
 
@@ -126,7 +124,7 @@ PS_READ_FUNC(sqlite)
 		return FAILURE;
 	}
 
-	query = sqlite_mprintf(SELECT_QUERY, key);
+	query = sqlite_mprintf("SELECT value FROM session_data WHERE sess_id='%q' LIMIT 1", key);
 	if (query == NULL) {
 		/* no memory */
 		return FAILURE;
@@ -168,42 +166,47 @@ PS_WRITE_FUNC(sqlite)
 {
 	PS_SQLITE_DATA;
 	char *error;
-	int result = SUCCESS;
 	time_t t;
 	char *binary;
 	int binlen;
+	int rv;
 	
 	t = time(NULL);
 
 	binary = emalloc((256 * vallen + 1262) / 253);
 	binlen = sqlite_encode_binary((const unsigned char*)val, vallen, binary);
 	
-	if (SQLITE_OK != sqlite_exec_printf(db, INSERT_QUERY, NULL, NULL, &error, key, binary, t)) {
+	rv = sqlite_exec_printf(db, "REPLACE INTO session_data VALUES('%q', '%q', %d)", NULL, NULL, &error, key, binary, t);
+	if (rv != SQLITE_OK) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLite: session write query failed: %s", error);
 		sqlite_freemem(error);
-		result = FAILURE;
 	}
-
 	efree(binary);
 
-	return result;
+	SQLITE_RETVAL(rv);
 }
 
 PS_DESTROY_FUNC(sqlite) 
 {
+	int rv;
 	PS_SQLITE_DATA;
 
-	return SQLITE_OK == sqlite_exec_printf(db, DELETE_QUERY, NULL, NULL, NULL, key) ?
-		SUCCESS : FAILURE;
+	rv = sqlite_exec_printf(db, "DELETE FROM session_data WHERE sess_id='%q'", NULL, NULL, NULL, key);
+	
+	SQLITE_RETVAL(rv);return rv == SQLITE_OK ? SUCCESS : FAILURE;
 }
 
 PS_GC_FUNC(sqlite) 
 {
 	PS_SQLITE_DATA;
+	int rv;
 	time_t t = time(NULL);
 
-	return SQLITE_OK == sqlite_exec_printf(db, GC_QUERY, NULL, NULL, NULL, t, maxlifetime) ?
-		SUCCESS : FAILURE;
+	rv = sqlite_exec_printf(db, 
+			"DELETE FROM session_data WHERE (%d - updated) > %d", 
+			NULL, NULL, NULL, t, maxlifetime);
+	
+	SQLITE_RETVAL(rv);
 }
 
 #endif /* HAVE_PHP_SESSION */
