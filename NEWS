@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Fix memory leak in x-httpd-source mode (Jason Greene)
 - Changed ext/gd not to be enabled by default (Jani)
 - Make increment of empty string ("") behave like in PHP 3 and result in "1"
   (Andi, Zend Engine)
