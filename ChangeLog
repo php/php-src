@@ -1,3 +1,104 @@
+2001-01-14  David Croft  <david@infotrek.co.uk>
+
+    * ext/vpopmail/config.m4:
+    vpopmail's bin dir is unnecessary as the library exports these functions
+
+2001-01-14  Boian Bonev  <boian@bonev.com>
+
+    * ext/vpopmail/README:
+    * ext/vpopmail/php_vpopmail.c
+      ext/vpopmail/php_vpopmail.h: merged my version with David Croft's
+    removed unneccessary php.ini calls and defines
+    removed module_init, shutdown, request_init declarations and references
+    added request_shutdown to close mysql/other db connection
+    	(a must in apache module)
+    added defines for external binaries from vpopmail
+    changed functions to present more consistent api from user's point of view
+    	so that in one call more stuff is done
+    added more comprehensive MINFO function helping users debug their case
+    added static int vpopmail_exec(char *cmd) [will change to php_Exec soon]
+
+    * ext/vpopmail/CREDITS: updated
+
+2001-01-14  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/exec.c: Name this php_Exec instead
+
+2001-01-14  Boian Bonev  <boian@bonev.com>
+
+    * ext/vpopmail/config.m4: rewritten the whole logic of the script
+    added VPOPMAIL_BIN_DIR to point to ~vpopmail/bin directory
+    added checks for ALL files needed by the extension
+    style fixes to the output
+
+2001-01-14  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c
+      main/config.w32.h
+      configure.in:
+
+    Added localeconv() function.  Operates similarly to localeconv() defined in
+    locale.h.  Should work well under non-ZTS as well as ZTS.
+
+2001-01-14  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/exec.c: Export _Exec for extensions to use
+
+2001-01-14  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/file.c: fixed readfile() fd-leak.
+
+    guys, always remember that every function that *generates output* could cause a
+    bailout if ignore_user_abort is set to false (and the user _aborts_ the
+    connection). in this case a longjump will be performed and our function (in
+    this case readfile) will have no chance to clean-up. having said that it's a
+    good idea to register all opened files using REGISTER_RESOURCE - that way the
+    engine will make sure they get closed on request end.
+
+2001-01-14  Zeev Suraski  <zeev@zend.com>
+
+    * ext/mysql/php_mysql.c:
+    Don't fetch numeric indices in mysql_fetch_object()
+
+2001-01-14  David Croft  <david@infotrek.co.uk>
+
+    * ext/vpopmail/php_vpopmail.c:
+     New extension for vpopmail - http://www.inter7.com/vpopmail (David Croft)
+
+    * ext/vpopmail/.cvsignore
+      ext/vpopmail/CREDITS
+      ext/vpopmail/Makefile.in
+      ext/vpopmail/config.m4
+      ext/vpopmail/php_vpopmail.c
+      ext/vpopmail/php_vpopmail.h: vpopmail extension
+
+2001-01-14  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/iconv/iconv.c
+      ext/iconv/php_iconv.h:
+    added iconv_get_encoding and supported initialization from php.ini
+
+2001-01-14  David Croft  <david@infotrek.co.uk>
+
+    * ext/standard/datetime.c: reserve space for quoted characters
+    fixes buffer overrun bug #8694
+
+2001-01-14  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/tests/ibase/.cvsignore
+      pear/DB/tests/ibase/001.phpt
+      pear/DB/tests/ibase/002.phpt
+      pear/DB/tests/ibase/003.phpt
+      pear/DB/tests/ibase/004.phpt
+      pear/DB/tests/ibase/006.phpt
+      pear/DB/tests/ibase/010.phpt
+      pear/DB/tests/ibase/connect.inc
+      pear/DB/tests/ibase/mktable.inc
+      pear/DB/tests/ibase/skipif.inc:
+    * defined some interbase tests, unable to run them yet
+
 2001-01-13  Zeev Suraski  <zeev@zend.com>
 
     * ext/standard/basic_functions.c
