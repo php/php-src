@@ -1313,6 +1313,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuf.ticks_function = php_run_ticks;
 	zuf.on_timeout = php_on_timeout;
 	zuf.stream_open_function = php_stream_open_for_zend;
+	zuf.vspprintf_function = vspprintf;
 	zend_startup(&zuf, NULL, 1);
 
 #ifdef ZTS

@@ -365,6 +365,7 @@ typedef struct _zend_utility_functions {
 	void (*ticks_function)(int ticks);
 	void (*on_timeout)(int seconds TSRMLS_DC);
 	int (*stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
+	int (*vspprintf_function)(char **pbuf, size_t max_len, const char *format, va_list ap);
 } zend_utility_functions;
 
 		
@@ -501,6 +502,7 @@ extern ZEND_API void (*zend_ticks_function)(int ticks);
 extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 extern void (*zend_on_timeout)(int seconds TSRMLS_DC);
 extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
+extern int (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
 
 
 ZEND_API void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
