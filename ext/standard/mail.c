@@ -57,36 +57,36 @@ DLEXPORT php3_module_entry *get_module(void) { return &odbc_module_entry; }
    Send an email message */
 PHP_FUNCTION(mail)
 {
-	pval *argv[4];
+	pval **argv[4];
 	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL;
 	int argc;
 	
 	argc = ARG_COUNT(ht);
-	if (argc < 3 || argc > 4 || getParametersArray(ht, argc, argv) == FAILURE) {
+	if (argc < 3 || argc > 4 || getParametersArrayEx(argc, argv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	/* To: */
-	convert_to_string(argv[0]);
-	if (argv[0]->value.str.val) {
-		to = argv[0]->value.str.val;
+	convert_to_string_ex(argv[0]);
+	if ((*argv[0])->value.str.val) {
+		to = (*argv[0])->value.str.val;
 	} else {
 		php_error(E_WARNING, "No to field in mail command");
 		RETURN_FALSE;
 	}
 
 	/* Subject: */
-	convert_to_string(argv[1]);
-	if (argv[1]->value.str.val) {
-		subject = argv[1]->value.str.val;
+	convert_to_string_ex(argv[1]);
+	if ((*argv[1])->value.str.val) {
+		subject = (*argv[1])->value.str.val;
 	} else {
 		php_error(E_WARNING, "No subject field in mail command");
 		RETURN_FALSE;
 	}
 
 	/* message body */
-	convert_to_string(argv[2]);
-	if (argv[2]->value.str.val) {
-		message = argv[2]->value.str.val;
+	convert_to_string_ex(argv[2]);
+	if ((*argv[2])->value.str.val) {
+		message = (*argv[2])->value.str.val;
 	} else {
 		/* this is not really an error, so it is allowed. */
 		php_error(E_WARNING, "No message string in mail command");
@@ -94,8 +94,8 @@ PHP_FUNCTION(mail)
 	}
 
 	if (argc == 4) {			/* other headers */
-		convert_to_string(argv[3]);
-		headers = argv[3]->value.str.val;
+		convert_to_string_ex(argv[3]);
+		headers = (*argv[3])->value.str.val;
 	}
 	
 	if (_php3_mail(to, subject, message, headers)){

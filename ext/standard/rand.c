@@ -205,19 +205,19 @@ static inline uint32 randomMT(void)
    Seeds random number generator */
 PHP_FUNCTION(srand)
 {
-	pval *arg;
+	pval **arg;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg);
+	convert_to_long_ex(arg);
 #ifdef HAVE_SRAND48
-	srand48((unsigned int) arg->value.lval);
+	srand48((unsigned int) (*arg)->value.lval);
 #else
 #ifdef HAVE_SRANDOM
-	srandom((unsigned int) arg->value.lval);
+	srandom((unsigned int) (*arg)->value.lval);
 #else
-	srand((unsigned int) arg->value.lval);
+	srand((unsigned int) (*arg)->value.lval);
 #endif
 #endif
 }
@@ -227,12 +227,13 @@ PHP_FUNCTION(srand)
    Seeds Mersenne Twister random number generator */
 PHP_FUNCTION(mt_srand)
 {
-	pval *arg;
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	pval **arg;
+
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg);
-	seedMT(arg->value.lval);
+	convert_to_long_ex(arg);
+	seedMT((*arg)->value.lval);
 }
 /* }}} */
 
@@ -240,19 +241,19 @@ PHP_FUNCTION(mt_srand)
    Returns a random number */
 PHP_FUNCTION(rand)
 {
-	pval *p_min=NULL, *p_max=NULL;
+	pval **p_min=NULL, **p_max=NULL;
 	
 	switch (ARG_COUNT(ht)) {
 		case 0:
 			break;
 		case 2:
-			if (getParameters(ht, 2, &p_min, &p_max)==FAILURE) {
+			if (getParametersEx(2, &p_min, &p_max)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(p_min);
-			convert_to_long(p_max);
-			if (p_max->value.lval-p_min->value.lval <= 0) {
-				php_error(E_WARNING,"rand():  Invalid range:  %ld..%ld", p_min->value.lval, p_max->value.lval);
+			convert_to_long_ex(p_min);
+			convert_to_long_ex(p_max);
+			if ((*p_max)->value.lval-(*p_min)->value.lval <= 0) {
+				php_error(E_WARNING,"rand():  Invalid range:  %ld..%ld", (*p_min)->value.lval, (*p_max)->value.lval);
 			}
 			break;
 		default:
@@ -296,8 +297,8 @@ PHP_FUNCTION(rand)
      * -RL
      */
 	if (p_min && p_max) { /* implement range */
-		return_value->value.lval = p_min->value.lval +
-			(int)((double)(p_max->value.lval - p_min->value.lval + 1) * return_value->value.lval/(PHP_RAND_MAX+1.0));     
+		return_value->value.lval = (*p_min)->value.lval +
+			(int)((double)((*p_max)->value.lval - (*p_min)->value.lval + 1) * return_value->value.lval/(PHP_RAND_MAX+1.0));     
 	}
 }
 /* }}} */
@@ -306,19 +307,19 @@ PHP_FUNCTION(rand)
    Returns a random number from Mersenne Twister */
 PHP_FUNCTION(mt_rand)
 {
-	pval *p_min=NULL, *p_max=NULL;
+	pval **p_min=NULL, **p_max=NULL;
 	
 	switch (ARG_COUNT(ht)) {
 		case 0:
 			break;
 		case 2:
-			if (getParameters(ht, 2, &p_min, &p_max)==FAILURE) {
+			if (getParametersEx(2, &p_min, &p_max)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(p_min);
-			convert_to_long(p_max);
-			if (p_max->value.lval-p_min->value.lval <= 0) {
-				php_error(E_WARNING,"mtrand():  Invalid range:  %ld..%ld", p_min->value.lval, p_max->value.lval);
+			convert_to_long_ex(p_min);
+			convert_to_long_ex(p_max);
+			if ((*p_max)->value.lval-(*p_min)->value.lval <= 0) {
+				php_error(E_WARNING,"mtrand():  Invalid range:  %ld..%ld", (*p_min)->value.lval, (*p_max)->value.lval);
 			}
 			break;
 		default:
@@ -338,8 +339,8 @@ PHP_FUNCTION(mt_rand)
 	return_value->value.lval = (long)(randomMT() >> 1);
 
 	if (p_min && p_max) { /* implement range */
-		return_value->value.lval = p_min->value.lval +
-			(int)((double)(p_max->value.lval - p_min->value.lval + 1) * return_value->value.lval/(PHP_RAND_MAX+1.0));
+		return_value->value.lval = (*p_min)->value.lval +
+			(int)((double)((*p_max)->value.lval - (*p_min)->value.lval + 1) * return_value->value.lval/(PHP_RAND_MAX+1.0));
 	}
 }
 /* }}} */

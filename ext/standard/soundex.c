@@ -30,7 +30,7 @@ PHP_FUNCTION(soundex)
 {
 	char	*somestring;
 	int	i, _small, len, code, last;
-	pval	*arg;
+	pval	*arg, **parg;
 	char	soundex[4 + 1];
 
 	static char soundex_table[26] =
@@ -61,10 +61,11 @@ PHP_FUNCTION(soundex)
 	 0,							/* Y */
 	 '2'};						/* Z */
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &parg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg);
+	convert_to_string_ex(parg);
+	arg = *parg;
 	if (arg->value.str.len==0) {
 		RETURN_FALSE;
 	}

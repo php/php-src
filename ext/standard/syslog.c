@@ -204,18 +204,18 @@ PHP_FUNCTION(define_syslog_variables)
  */
 PHP_FUNCTION(openlog)
 {
-	pval *ident, *option, *facility;
-	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &ident, &option, &facility) == FAILURE) {
+	pval **ident, **option, **facility;
+	if (ARG_COUNT(ht) != 3 || getParametersEx(3, &ident, &option, &facility) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(ident);
-	convert_to_long(option);
-	convert_to_long(facility);
+	convert_to_string_ex(ident);
+	convert_to_long_ex(option);
+	convert_to_long_ex(facility);
 	if (syslog_device) {
 		efree(syslog_device);
 	}
-	syslog_device = estrndup(ident->value.str.val,ident->value.str.len);
-	openlog(syslog_device, option->value.lval, facility->value.lval);
+	syslog_device = estrndup((*ident)->value.str.val,(*ident)->value.str.len);
+	openlog(syslog_device, (*option)->value.lval, (*facility)->value.lval);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -237,20 +237,20 @@ PHP_FUNCTION(closelog)
    Generate a system log message */
 PHP_FUNCTION(syslog)
 {
-	pval *priority, *message;
+	pval **priority, **message;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &priority, &message) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &priority, &message) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(priority);
-	convert_to_string(message);
+	convert_to_long_ex(priority);
+	convert_to_string_ex(message);
 
 	/*
 	 * CAVEAT: if the message contains patterns such as "%s",
 	 * this will cause problems.
 	 */
 
-	syslog(priority->value.lval, message->value.str.val);
+	syslog((*priority)->value.lval, (*message)->value.str.val);
 	RETURN_TRUE;
 }
 /* }}} */
