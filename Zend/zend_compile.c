@@ -1355,7 +1355,7 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC)
 	zend_op *opline;
 	
 	if (do_end_vparse) {
-		if (CG(active_op_array)->return_reference) {
+		if (CG(active_op_array)->return_reference && !zend_is_function_or_method_call(expr)) {
 			zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC);
 		} else {
 			zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC);

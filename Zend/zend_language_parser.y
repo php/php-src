@@ -194,7 +194,7 @@ unticked_statement:
 	|	T_CONTINUE expr ';'		{ zend_do_brk_cont(ZEND_CONT, &$2 TSRMLS_CC); }
 	|	T_RETURN ';'						{ zend_do_return(NULL, 0 TSRMLS_CC); }
 	|	T_RETURN expr_without_variable ';'	{ zend_do_return(&$2, 0 TSRMLS_CC); }
-	|	T_RETURN cvar ';'					{ zend_do_return(&$2, 1 TSRMLS_CC); }
+	|	T_RETURN variable ';'				{ zend_do_return(&$2, 1 TSRMLS_CC); }
 	|	T_GLOBAL global_var_list ';'
 	|	T_STATIC static_var_list ';'
 	|	T_ECHO echo_expr_list ';'
@@ -389,10 +389,10 @@ function_call_parameter_list:
 
 non_empty_function_call_parameter_list:
 		expr_without_variable	{ $$.u.constant.value.lval = 1;  zend_do_pass_param(&$1, ZEND_SEND_VAL, $$.u.constant.value.lval TSRMLS_CC); }
-	|	cvar					{ $$.u.constant.value.lval = 1;  zend_do_pass_param(&$1, ZEND_SEND_VAR, $$.u.constant.value.lval TSRMLS_CC); }
+	|	variable				{ $$.u.constant.value.lval = 1;  zend_do_pass_param(&$1, ZEND_SEND_VAR, $$.u.constant.value.lval TSRMLS_CC); }
 	|	'&' w_cvar 				{ $$.u.constant.value.lval = 1;  zend_do_pass_param(&$2, ZEND_SEND_REF, $$.u.constant.value.lval TSRMLS_CC); }
 	|	non_empty_function_call_parameter_list ',' expr_without_variable	{ $$.u.constant.value.lval=$1.u.constant.value.lval+1;  zend_do_pass_param(&$3, ZEND_SEND_VAL, $$.u.constant.value.lval TSRMLS_CC); }
-	|	non_empty_function_call_parameter_list ',' cvar						{ $$.u.constant.value.lval=$1.u.constant.value.lval+1;  zend_do_pass_param(&$3, ZEND_SEND_VAR, $$.u.constant.value.lval TSRMLS_CC); }
+	|	non_empty_function_call_parameter_list ',' variable					{ $$.u.constant.value.lval=$1.u.constant.value.lval+1;  zend_do_pass_param(&$3, ZEND_SEND_VAR, $$.u.constant.value.lval TSRMLS_CC); }
 	|	non_empty_function_call_parameter_list ',' '&' w_cvar				{ $$.u.constant.value.lval=$1.u.constant.value.lval+1;  zend_do_pass_param(&$4, ZEND_SEND_REF, $$.u.constant.value.lval TSRMLS_CC); }
 ;
 
