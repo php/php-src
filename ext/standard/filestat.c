@@ -488,8 +488,8 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		/* do lstat if the buffer is empty */
 
 		if (!BG(lsb).st_mode) {
-			if (V_LSTAT(BG(CurrentStatFile), &BG(lsb)) == -1) {
-				php_error(E_NOTICE, "lstat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
+			if (V_LSTAT(filename, &BG(lsb)) == -1) {
+				php_error(E_NOTICE, "lstat failed for %s (errno=%d - %s)", filename, errno, strerror(errno));
 				RETURN_FALSE;
 			}
 		}
