@@ -123,7 +123,6 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			expr_copy->value.str.val = empty_string;
 			break;
 		case IS_BOOL:
-#if 1
 			if (expr->value.lval) {
 				expr_copy->value.str.len = 1;
 				expr_copy->value.str.val = estrndup("1", 1);
@@ -131,15 +130,6 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 				expr_copy->value.str.len = 0;
 				expr_copy->value.str.val = empty_string;
 			}
-#else
-			if (expr->value.lval) {
-				expr_copy->value.str.len = sizeof("true")-1;
-				expr_copy->value.str.val = estrndup("true", expr_copy->value.str.len);
-			} else {
-				expr_copy->value.str.len = sizeof("false")-1;
-				expr_copy->value.str.val = estrndup("false", expr_copy->value.str.len);
-			}
-#endif
 			break;
 		case IS_RESOURCE:
 			expr_copy->value.str.val = (char *) emalloc(sizeof("Resource id #")-1 + MAX_LENGTH_OF_LONG);
@@ -151,10 +141,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			break;
 		case IS_OBJECT: {
 				zval function_name;
-
-				function_name.value.str.len = sizeof("to_string")-1;
-				function_name.value.str.val = estrndup("to_string", function_name.value.str.len);
-				function_name.type = IS_STRING;
+				ZVAL_STRING(&function_name,"_string_value_",1);
 
 				if (call_user_function(NULL, expr, &function_name, expr_copy, 0, NULL)==FAILURE) {
 					expr_copy->value.str.len = sizeof("Object")-1;
