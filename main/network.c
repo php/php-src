@@ -58,7 +58,7 @@
 /*
  * Converts a host name to an IP address.
  */
-static int my_lookup_hostname(const char *addr, struct in_addr *in)
+static int php_network_lookup_hostname(const char *addr, struct in_addr *in)
 {
         struct hostent *host_info;
 
@@ -77,13 +77,14 @@ static int my_lookup_hostname(const char *addr, struct in_addr *in)
 /*
  * Creates a socket of type socktype and connects to the given host and
  * port, returns the created socket on success, else returns -1.
+ * timeout gives timeout in seconds, 0 means blocking mode.
  */
-int hostconnect(char *host, int port, int socktype)
+int hostconnect(char *host, int port, int socktype, int timeout)
 {	
 	int s;
 	struct sockaddr_in sa;
 
-	if (my_lookup_hostname(host, &sa.sin_addr))
+	if (php_network_lookup_hostname(host, &sa.sin_addr))
 		return -1;
 	s = socket(PF_INET, socktype, 0);
 	if (s == SOCK_ERR)
