@@ -25,9 +25,6 @@
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
    |          Thies C. Arntzen <thies@digicol.de>                         |
-   |                                                                      |
-   | Initial work sponsored by Thies Arntzen <thies@digicol.de> of        |
-   | Digital Collections, http://www.digicol.de/                          |
    +----------------------------------------------------------------------+
  */
 
@@ -64,13 +61,16 @@ typedef struct {
 	int open;
 	char *dbname;
     OCIServer *pServer;
+#if 0
 	OCIFocbkStruct failover;
+#endif
 } oci_server;
 
 typedef struct {
 	int num;
 	int persistent;
 	int open;
+	char *hashed_details;
 	oci_server *server;
 	OCISession *pSession;
 } oci_session;
@@ -148,11 +148,16 @@ typedef struct {
 typedef struct {
 	sword error;
     OCIError *pError;
+		
+	/*
     char *default_username;
     char *default_password;
     char *default_dbname;
+	*/
 
     long debug_mode;
+
+	int shutdown;
 
 	/* XXX NYI
     long allow_persistent;
