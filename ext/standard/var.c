@@ -240,7 +240,7 @@ PHPAPI void php_var_serialize(zval *buf, zval **struc, HashTable *var_hash)
 				MAKE_STD_ZVAL(fname);
 				ZVAL_STRING(fname,"__sleep",1);
 
-				res =  call_user_function_ex(CG(function_table), struc, fname, &retval_ptr, 0, 0, 1, NULL);
+				res =  call_user_function_ex(CG(function_table), struc, fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
 
 				if (res == SUCCESS) {
 					if (retval_ptr && HASH_OF(retval_ptr)) {
@@ -583,7 +583,7 @@ PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, Has
 				MAKE_STD_ZVAL(fname);
 				ZVAL_STRING(fname,"__wakeup",1);
 
-				call_user_function_ex(CG(function_table), rval, fname, &retval_ptr, 0, 0, 1, NULL);
+				call_user_function_ex(CG(function_table), rval, fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
 
 				zval_dtor(fname);
 				FREE_ZVAL(fname);

@@ -403,7 +403,7 @@ DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB)
 				if ( open_file_for_scanning( &file_handle TSRMLS_CC ) == SUCCESS )
 					{
 					php_get_highlight_struct( &syntax_highlighter_ini );
-					zend_highlight( &syntax_highlighter_ini );
+					zend_highlight( &syntax_highlighter_ini TSRMLS_CC );
 					}
 				else
 					{

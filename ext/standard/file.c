@@ -621,7 +621,7 @@ PHP_FUNCTION(fopenstream)
 	stream = php_stream_fopen(Z_STRVAL_PP(zfilename), Z_STRVAL_PP(zmode));
 
 	if (stream == NULL)	{
-		zend_error(E_WARNING, "%s(): unable to open %s: %s", get_active_function_name(), Z_STRVAL_PP(zfilename), strerror(errno));
+		zend_error(E_WARNING, "%s(): unable to open %s: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(zfilename), strerror(errno));
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, stream, le_stream);
@@ -1247,7 +1247,7 @@ PHP_FUNCTION(fscanf)
 
 	convert_to_string_ex( format_string );
 	result = php_sscanf_internal( buf,(*format_string)->value.str.val,
-			argCount,args, 2,&return_value);
+			argCount, args, 2, &return_value TSRMLS_CC);
 	efree(args);
 	efree(buf);
 	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {

@@ -1883,7 +1883,6 @@ PHP_FUNCTION(imap_lsub_full)
 	pils *imap_le_struct;
 	FOBJECTLIST *cur=NIL;
 	char *delim=NIL;
-	TSRMLS_FETCH();
 	
 	delim = emalloc(2 * sizeof(char));
 	

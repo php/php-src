@@ -191,7 +191,7 @@ static void _close_ii_plink(zend_rsrc_list_entry *rsrc)
 */
 static void _clean_ii_plink(zend_rsrc_list_entry *rsrc)
 {
-	II_LINK *link = (II_LINK *)rsrc->ptr;
+  II_LINK *link = (II_LINK *)rsrc->ptr;
   IIAPI_AUTOPARM autoParm;
   TSRMLS_FETCH();
 

@@ -152,7 +152,7 @@ static PHP_INI_MH(OnUpdateTimeout)
 		/* Don't set a timeout on startup, only per-request */
 		return SUCCESS;
 	}
-	zend_unset_timeout();
+	zend_unset_timeout(TSRMLS_C);
 	zend_set_timeout(EG(timeout_seconds));
 	return SUCCESS;
 }
@@ -484,7 +484,7 @@ PHP_FUNCTION(set_time_limit)
 	}
 
 	convert_to_long_ex(new_timeout);
-	zend_unset_timeout();
+	zend_unset_timeout(TSRMLS_C);
 	zend_set_timeout(Z_LVAL_PP(new_timeout));
 }
 /* }}} */
@@ -708,7 +708,7 @@ void php_request_shutdown(void *dummy)
 	} zend_end_try();
 
 	zend_try { 
-		zend_unset_timeout();
+		zend_unset_timeout(TSRMLS_C);
 	} zend_end_try();
 }
 /* }}} */

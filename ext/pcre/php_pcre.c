@@ -566,7 +566,7 @@ static int preg_do_repl_func(zval *function, char *subject, int *offsets, int co
 		add_next_index_stringl(subpats, &subject[offsets[i<<1]], offsets[(i<<1)+1] - offsets[i<<1], 1);
 	args[0] = &subpats;
 
-	if (call_user_function_ex(EG(function_table), NULL, function, &retval_ptr, 1, args, 0, NULL) == SUCCESS && retval_ptr) {
+	if (call_user_function_ex(EG(function_table), NULL, function, &retval_ptr, 1, args, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
 		convert_to_string_ex(&retval_ptr);
 		*result = estrndup(Z_STRVAL_P(retval_ptr), Z_STRLEN_P(retval_ptr));
 		result_len = Z_STRLEN_P(retval_ptr);
@@ -993,7 +993,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 	if (is_callable_replace) {
 		if (!zend_is_callable(*replace, 0, &callback_name)) {
 			php_error(E_WARNING, "%s() requires argument 2, '%s', to be a valid callback",
-					  get_active_function_name(), callback_name);
+					  get_active_function_name(TSRMLS_C), callback_name);
 			efree(callback_name);
 			*return_value = **subject;
 			zval_copy_ctor(return_value);

@@ -564,13 +564,12 @@ void php_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
 }
 
 
-int odbc_bindcols(odbc_result *result)
+int odbc_bindcols(odbc_result *result TSRMLS_DC)
 {
 	RETCODE rc;
     int i;
     SWORD       colnamelen; /* Not used */
 	SDWORD      displaysize;
-	TSRMLS_FETCH();
 
     result->values = (odbc_result_value *)
 		emalloc(sizeof(odbc_result_value)*result->numcols);
@@ -839,7 +838,7 @@ PHP_FUNCTION(odbc_prepare)
     SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-        if (!odbc_bindcols(result)) {
+        if (!odbc_bindcols(result TSRMLS_CC)) {
 			efree(result);
             RETURN_FALSE;
 		}
@@ -1022,7 +1021,7 @@ PHP_FUNCTION(odbc_execute)
 		SQLNumResultCols(result->stmt, &(result->numcols));
 
 		if (result->numcols > 0) {
-			if (!odbc_bindcols(result)) {
+			if (!odbc_bindcols(result TSRMLS_CC)) {
 				efree(result);
 				RETVAL_FALSE;
 			}
@@ -1181,7 +1180,7 @@ PHP_FUNCTION(odbc_exec)
 	
 	/* For insert, update etc. cols == 0 */
 	if (result->numcols > 0) {
-        if (!odbc_bindcols(result)) {
+        if (!odbc_bindcols(result TSRMLS_CC)) {
 			efree(result);
             RETURN_FALSE;
 		}
@@ -2280,7 +2279,7 @@ PHP_FUNCTION(odbc_next_result)
 		SQLNumResultCols(result->stmt, &(result->numcols));
 
 		if (result->numcols > 0) {
-			if (!odbc_bindcols(result)) {
+			if (!odbc_bindcols(result TSRMLS_CC)) {
 				efree(result);
 				RETVAL_FALSE;
 			}
@@ -2681,7 +2680,7 @@ PHP_FUNCTION(odbc_tables)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-        if (!odbc_bindcols(result)) {
+        if (!odbc_bindcols(result TSRMLS_CC)) {
 			efree(result);
             RETURN_FALSE;
 		}
@@ -2761,7 +2760,7 @@ PHP_FUNCTION(odbc_columns)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-        if (!odbc_bindcols(result)) {
+        if (!odbc_bindcols(result TSRMLS_CC)) {
 			efree(result);
             RETURN_FALSE;
 		}
@@ -2840,7 +2839,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-        if (!odbc_bindcols(result)) {
+        if (!odbc_bindcols(result TSRMLS_CC)) {
 			efree(result);
             RETURN_FALSE;
 		}
@@ -2940,7 +2939,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-        if (!odbc_bindcols(result)) {
+        if (!odbc_bindcols(result TSRMLS_CC)) {
 			efree(result);
             RETURN_FALSE;
 		}
@@ -3013,7 +3012,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-        if (!odbc_bindcols(result)) {
+        if (!odbc_bindcols(result TSRMLS_CC)) {
 			efree(result);
             RETURN_FALSE;
 		}
@@ -3088,7 +3087,7 @@ PHP_FUNCTION(odbc_primarykeys)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-        if (!odbc_bindcols(result)) {
+        if (!odbc_bindcols(result TSRMLS_CC)) {
 			efree(result);
             RETURN_FALSE;
 		}
@@ -3171,7 +3170,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-        if (!odbc_bindcols(result)) {
+        if (!odbc_bindcols(result TSRMLS_CC)) {
 			efree(result);
             RETURN_FALSE;
 		}
@@ -3252,7 +3251,7 @@ PHP_FUNCTION(odbc_procedures)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-        if (!odbc_bindcols(result)) {
+        if (!odbc_bindcols(result TSRMLS_CC)) {
 			efree(result);
             RETURN_FALSE;
 		}
@@ -3341,7 +3340,7 @@ PHP_FUNCTION(odbc_specialcolumns)
     SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-        if (!odbc_bindcols(result)) {
+        if (!odbc_bindcols(result TSRMLS_CC)) {
 			efree(result);
             RETURN_FALSE;
 		}
@@ -3425,7 +3424,7 @@ PHP_FUNCTION(odbc_statistics)
     SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-        if (!odbc_bindcols(result)) {
+        if (!odbc_bindcols(result TSRMLS_CC)) {
 			efree(result);
             RETURN_FALSE;
 		}
@@ -3501,7 +3500,7 @@ PHP_FUNCTION(odbc_tableprivileges)
     SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-        if (!odbc_bindcols(result)) {
+        if (!odbc_bindcols(result TSRMLS_CC)) {
 			efree(result);
             RETURN_FALSE;
 		}

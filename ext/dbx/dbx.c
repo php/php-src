@@ -79,16 +79,18 @@ int split_dbx_handle_object(zval ** dbx_object, zval *** pdbx_handle, zval *** p
     }
 
 /* from dbx.h, to be used in support-files (dbx_mysql.c etc...) */
-void dbx_call_any_function(INTERNAL_FUNCTION_PARAMETERS, char * function_name, zval ** returnvalue, int number_of_arguments, zval *** params) {
+void dbx_call_any_function(INTERNAL_FUNCTION_PARAMETERS, char * function_name, zval ** returnvalue, int number_of_arguments, zval ***params)
+{
     zval * zval_function_name;
+
     MAKE_STD_ZVAL(zval_function_name);
     ZVAL_STRING(zval_function_name, function_name, 1);
-    if (call_user_function_ex(EG(function_table), NULL, zval_function_name, returnvalue, number_of_arguments, params, 0, NULL) == FAILURE) {
+    if (call_user_function_ex(EG(function_table), NULL, zval_function_name, returnvalue, number_of_arguments, params, 0, NULL TSRMLS_CC) == FAILURE) {
         zend_error(E_ERROR, "function '%s' not found", zval_function_name->value.str.val);
-        }
+    }
     zval_dtor(zval_function_name); /* to free stringvalue memory */
     FREE_ZVAL(zval_function_name);
-    }
+}
 
 /* switch_dbx functions declarations
  * each must be supported in the dbx_module files as dbx_module_function,

@@ -328,6 +328,7 @@ PHPAPI int ValidateFormat(char *format,int numVars,int *totalSubs)
     int staticAssign[STATIC_LIST_SIZE];
     int *nassign = staticAssign;
     int objIndex, xpgSize, nspace = STATIC_LIST_SIZE;
+	TSRMLS_FETCH();
 
     /*
      * Initialize an array that records the number of times a variable
@@ -408,7 +409,7 @@ PHPAPI int ValidateFormat(char *format,int numVars,int *totalSubs)
         if (gotXpg) {
             mixedXPG:
               php_error(E_WARNING,
-                "cannot mix \"%\" and \"%n$\" conversion specifiers in %s", get_active_function_name() );
+                "cannot mix \"%\" and \"%n$\" conversion specifiers in %s", get_active_function_name(TSRMLS_C) );
             goto error;
         }
 
@@ -593,7 +594,7 @@ PHPAPI int ValidateFormat(char *format,int numVars,int *totalSubs)
 
 PHPAPI int php_sscanf_internal(	char *string,char *format,
 				int argCount,zval ***args,
-				int varStart,pval **return_value)
+				int varStart,pval **return_value TSRMLS_DC)
 {
     int  numVars, nconversions, totalVars = -1;
     int  i, value, result;
@@ -642,7 +643,7 @@ PHPAPI int php_sscanf_internal(	char *string,char *format,
 		for (i = varStart;i < argCount;i++){
 			if ( ! PZVAL_IS_REF( *args[ i ] ) ) {	
 				php_error(E_WARNING,"Parameter %d to %s() must be passed by reference",
-								i, get_active_function_name());			
+								i, get_active_function_name(TSRMLS_C));
 				scan_set_error_return(numVars, return_value);
 				return SCAN_ERROR_VAR_PASSED_BYVAL;
 			}

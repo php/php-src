@@ -156,7 +156,6 @@ static void php_info_isapi(ZEND_MODULE_INFO_FUNC_ARGS)
 	};
 	char ***server_variable_names;
 	LPEXTENSION_CONTROL_BLOCK lpECB;
-	TSRMLS_FETCH();
 
 	lpECB = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
 
@@ -246,7 +245,6 @@ static int sapi_isapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	HSE_SEND_HEADER_EX_INFO header_info;
 	char status_buf[MAX_STATUS_LENGTH];
 	sapi_header_struct default_content_type;
-	TSRMLS_FETCH();
 
 	/* Obtain headers length */
 	if (SG(sapi_headers).send_default_content_type) {
@@ -497,7 +495,7 @@ static void sapi_isapi_register_server_variables2(char **server_variables, LPEXT
 }
 
 
-static void sapi_isapi_register_server_variables(zval *track_vars_array TSRMLS_DC TSRMLS_DC TSRMLS_DC)
+static void sapi_isapi_register_server_variables(zval *track_vars_array TSRMLS_DC)
 {
 	DWORD variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
 	char *variable;
@@ -648,7 +646,7 @@ DWORD WINAPI HttpFilterProc(PHTTP_FILTER_CONTEXT pfc, DWORD notificationType, LP
 }
 
 
-static void init_request_info(sapi_globals_struct *sapi_globals, LPEXTENSION_CONTROL_BLOCK lpECB)
+static void init_request_info(LPEXTENSION_CONTROL_BLOCK lpECB TSRMLS_DC)
 {
 	SG(request_info).request_method = lpECB->lpszMethod;
 	SG(request_info).query_string = lpECB->lpszQueryString;
@@ -718,18 +716,16 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 {
 	zend_file_handle file_handle;
 	zend_bool stack_overflown=0;
-	TSRMLS_FETCH();
-	TSRMLS_FETCH();
-	TSRMLS_FETCH();
 #ifdef PHP_ENABLE_SEH
 	LPEXCEPTION_POINTERS e;
 #endif
+	TSRMLS_FETCH();
 
 	zend_try {
 #ifdef PHP_ENABLE_SEH
 		__try {
 #endif
-			init_request_info(sapi_globals, lpECB);
+			init_request_info(lpECB TSRMLS_CC);
 			SG(server_context) = lpECB;
 
 #ifdef WITH_ZEUS
@@ -750,7 +746,7 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 				}
 			}
 #else
-			file_handle.filename = sapi_globals->request_info.path_translated;
+			file_handle.filename = SG(request_info.path_translated);
 			file_handle.free_filename = 0;
 #endif
 			file_handle.type = ZEND_HANDLE_FILENAME;

@@ -136,11 +136,11 @@ static char *php_convert_to_decimal(double arg, int ndigits, int *decpt, int *si
 
 
 inline static void
-php_sprintf_appendchar(char **buffer, int *pos, int *size, char add)
+php_sprintf_appendchar(char **buffer, int *pos, int *size, char add TSRMLS_DC)
 {
 	if ((*pos + 1) >= *size) {
 		*size <<= 1;
-		PRINTF_DEBUG(("%s: ereallocing buffer to %d bytes\n", get_active_function_name(), *size));
+		PRINTF_DEBUG(("%s: ereallocing buffer to %d bytes\n", get_active_function_name(TSRMLS_C), *size));
 		*buffer = erealloc(*buffer, *size);
 	}
 	PRINTF_DEBUG(("sprintf: appending '%c', pos=\n", add, *pos));
@@ -438,15 +438,15 @@ php_formatted_print(int ht, int *len TSRMLS_DC)
 		PRINTF_DEBUG(("sprintf: format[%d]='%c'\n", inpos, format[inpos]));
 		PRINTF_DEBUG(("sprintf: outpos=%d\n", outpos));
 		if (format[inpos] != '%') {
-			php_sprintf_appendchar(&result, &outpos, &size, format[inpos++]);
+			php_sprintf_appendchar(&result, &outpos, &size, format[inpos++] TSRMLS_CC);
 		} else if (format[inpos + 1] == '%') {
-			php_sprintf_appendchar(&result, &outpos, &size, '%');
+			php_sprintf_appendchar(&result, &outpos, &size, '%' TSRMLS_CC);
 			inpos += 2;
 		} else {
 			if (currarg >= argc && format[inpos + 1] != '%') {
 				efree(result);
 				efree(args);
-				php_error(E_WARNING, "%s(): too few arguments",get_active_function_name());
+				php_error(E_WARNING, "%s(): too few arguments",get_active_function_name(TSRMLS_C));
 				return NULL;
 			}
 			/* starting a new format specifier, reset variables */
@@ -470,7 +470,7 @@ php_formatted_print(int ht, int *len TSRMLS_DC)
 				if (argnum >= argc) {
 					efree(result);
 					efree(args);
-					php_error(E_WARNING, "%s(): too few arguments",get_active_function_name());
+					php_error(E_WARNING, "%s(): too few arguments", get_active_function_name(TSRMLS_C));
 					return NULL;
 				}
 
@@ -570,7 +570,7 @@ php_formatted_print(int ht, int *len TSRMLS_DC)
 				case 'c':
 					convert_to_long_ex(args[argnum]);
 					php_sprintf_appendchar(&result, &outpos, &size,
-										(char) (*args[argnum])->value.lval);
+										(char) (*args[argnum])->value.lval TSRMLS_CC);
 					break;
 
 				case 'o':
@@ -606,7 +606,7 @@ php_formatted_print(int ht, int *len TSRMLS_DC)
 					break;
 
 				case '%':
-					php_sprintf_appendchar(&result, &outpos, &size, '%');
+					php_sprintf_appendchar(&result, &outpos, &size, '%' TSRMLS_CC);
 
 					break;
 				default:

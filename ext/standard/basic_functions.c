@@ -933,7 +933,7 @@ PHP_FUNCTION(constant)
     }
     convert_to_string_ex(const_name);
 
-    if (!zend_get_constant(Z_STRVAL_PP(const_name), Z_STRLEN_PP(const_name), return_value)) {
+    if (!zend_get_constant(Z_STRVAL_PP(const_name), Z_STRLEN_PP(const_name), return_value TSRMLS_CC)) {
         php_error(E_WARNING, "Couldn't find constant %s", Z_STRVAL_PP(const_name));
         RETURN_NULL();
     }
@@ -1624,13 +1624,13 @@ PHP_FUNCTION(call_user_func)
 
 	if (!zend_is_callable(*params[0], 0, &name)) {
 		php_error(E_WARNING, "%s() expects first argument, '%s', to be a valid callback",
-				  get_active_function_name(), name);
+				  get_active_function_name(TSRMLS_C), name);
 		efree(name);
 		efree(params);
 		RETURN_NULL();
 	}
 
-	if (call_user_function_ex(EG(function_table), NULL, *params[0], &retval_ptr, argc - 1, params + 1, 0, NULL)==SUCCESS && retval_ptr) {
+	if (call_user_function_ex(EG(function_table), NULL, *params[0], &retval_ptr, argc - 1, params + 1, 0, NULL TSRMLS_CC)==SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
 		php_error(E_WARNING, "Unable to call %s()", name);
@@ -1668,7 +1668,7 @@ PHP_FUNCTION(call_user_func_array)
 
 	if (!zend_is_callable(*func, 0, &name)) {
 		php_error(E_WARNING, "%s() expects first argument, '%s', to be a valid callback",
-				  get_active_function_name(), name);
+				  get_active_function_name(TSRMLS_C), name);
 		efree(name);
 		RETURN_NULL();
 	}
@@ -1684,7 +1684,7 @@ PHP_FUNCTION(call_user_func_array)
 		current++;
 	}
 
-	if (call_user_function_ex(EG(function_table), NULL, *func, &retval_ptr, count, func_params, 0, NULL) == SUCCESS && retval_ptr) {
+	if (call_user_function_ex(EG(function_table), NULL, *func, &retval_ptr, count, func_params, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
 		php_error(E_WARNING, "Unable to call %s()", name);
@@ -1723,7 +1723,7 @@ PHP_FUNCTION(call_user_method)
 	}
 	SEPARATE_ZVAL(params[0]);
 	convert_to_string(*params[0]);
-	if (call_user_function_ex(EG(function_table), params[1], *params[0], &retval_ptr, arg_count-2, params+2, 0, NULL)==SUCCESS && retval_ptr) {
+	if (call_user_function_ex(EG(function_table), params[1], *params[0], &retval_ptr, arg_count-2, params+2, 0, NULL TSRMLS_CC)==SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
 		php_error(E_WARNING,"Unable to call %s()", Z_STRVAL_PP(params[0]));
@@ -1771,7 +1771,7 @@ PHP_FUNCTION(call_user_method_array)
 	     zend_hash_move_forward(params_ar))
 		element++;
 
-	if (call_user_function_ex(EG(function_table), obj, *method_name, &retval_ptr, num_elems, method_args, 0, NULL) == SUCCESS && retval_ptr) {
+	if (call_user_function_ex(EG(function_table), obj, *method_name, &retval_ptr, num_elems, method_args, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
 		php_error(E_WARNING, "Unable to call %s()", Z_STRVAL_PP(method_name));
@@ -1806,7 +1806,7 @@ static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_fun
 	zval retval;
 	TSRMLS_FETCH();
 
-	if (call_user_function(EG(function_table), NULL, shutdown_function_entry->arguments[0], &retval, shutdown_function_entry->arg_count-1, shutdown_function_entry->arguments+1)==SUCCESS) {
+	if (call_user_function(EG(function_table), NULL, shutdown_function_entry->arguments[0], &retval, shutdown_function_entry->arg_count-1, shutdown_function_entry->arguments+1 TSRMLS_CC)==SUCCESS) {
 		zval_dtor(&retval);
 	} else {
 		php_error(E_WARNING,"Unable to call %s() - function does not exist",
@@ -1822,7 +1822,7 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe)
 	TSRMLS_FETCH();
 
 	if (call_user_function(EG(function_table), NULL, function, &retval,
-						   tick_fe->arg_count - 1, tick_fe->arguments + 1) == SUCCESS) {
+						   tick_fe->arg_count - 1, tick_fe->arguments+1 TSRMLS_CC) == SUCCESS) {
 		zval_dtor(&retval);
 	} else {
 		zval **obj, **method;
@@ -2387,7 +2387,7 @@ PHP_FUNCTION(unregister_tick_function)
 /* This function is not directly accessible to end users */
 PHPAPI PHP_FUNCTION(warn_not_available)
 {
-	php_error(E_WARNING, "%s() is  not supported in this PHP build", get_active_function_name());
+	php_error(E_WARNING, "%s() is  not supported in this PHP build", get_active_function_name(TSRMLS_C));
     RETURN_FALSE;
 }
 

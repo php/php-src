@@ -28,13 +28,14 @@ void rfc2045_cdecode_start(struct rfc2045 *p,
 			void *miscptr)
 {
 	enum mbfl_no_encoding from = mbfl_no_encoding_8bit;
-	
+	TSRMLS_FETCH();
+
 	if (p->content_transfer_encoding)
 	{
 		from = mbfl_name2no_encoding(p->content_transfer_encoding);
 		if (from == mbfl_no_encoding_invalid)	{
 			zend_error(E_WARNING, "%s(): I don't know how to decode %s transfer encoding!",
-					get_active_function_name(),
+					get_active_function_name(TSRMLS_C),
 					p->content_transfer_encoding);
 			from = mbfl_no_encoding_8bit;
 		}

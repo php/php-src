@@ -462,7 +462,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	/* append the calling scripts' current working directory
 	 * as a fall back case
 	 */
-	if (zend_is_executing()) {
+	if (zend_is_executing(TSRMLS_C)) {
 		exec_fname = zend_get_executed_filename(TSRMLS_C);
 		exec_fname_length = strlen(exec_fname);
 		path_length = strlen(path);

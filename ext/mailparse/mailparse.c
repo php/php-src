@@ -133,7 +133,9 @@ PHP_RSHUTDOWN_FUNCTION(mailparse)
 
 static void mailparse_rfc822t_errfunc(const char * msg, int num)
 {
-	php_error(E_WARNING, "%s(): %s %d", get_active_function_name(), msg, num);
+	TSRMLS_FETCH();
+
+	php_error(E_WARNING, "%s(): %s %d", get_active_function_name(TSRMLS_C), msg, num);
 }
 
 /* {{{ proto array mailparse_rfc822_parse_addresses(string addresses)
@@ -313,7 +315,7 @@ PHP_FUNCTION(mailparse_stream_encode)
 	enc = mbfl_name2no_encoding(Z_STRVAL_PP(encod));
 	if (enc == mbfl_no_encoding_invalid)	{
 		zend_error(E_WARNING, "%s(): unknown encoding \"%s\"",
-				get_active_function_name(),
+				get_active_function_name(TSRMLS_C),
 				Z_STRVAL_PP(encod)
 				);
 		RETURN_FALSE;
@@ -387,7 +389,7 @@ PHP_FUNCTION(mailparse_msg_parse_file)
 	/* open file and read it in */
 	fp = VCWD_FOPEN(Z_STRVAL_PP(filename), "r");
 	if (fp == NULL)	{
-		zend_error(E_WARNING, "%s(): unable to open file %s", get_active_function_name(), Z_STRVAL_PP(filename));
+		zend_error(E_WARNING, "%s(): unable to open file %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(filename));
 		RETURN_FALSE;
 	}
 
@@ -446,18 +448,20 @@ PHP_FUNCTION(mailparse_msg_create)
 }
 /* }}} */
 
-static void get_structure_callback(struct rfc2045 *p, struct rfc2045id * id, void * ptr)
+static void get_structure_callback(struct rfc2045 *p, struct rfc2045id *id, void *ptr)
 {
 	zval * return_value = (zval *)ptr;
 	char intbuf[16];
 	char buf[256];
 	int len, i = 0;
+	TSRMLS_FETCH();
+
 	while(id && i < sizeof(buf))	{
 		sprintf(intbuf, "%d", id->idnum);
 		len = strlen(intbuf);
 		if (len > (sizeof(buf)-i))	{
 			/* too many sections: bail */
-			zend_error(E_WARNING, "%s(): too many nested sections in message", get_active_function_name());
+			zend_error(E_WARNING, "%s(): too many nested sections in message", get_active_function_name(TSRMLS_C));
 			return;
 		}
 		sprintf(&buf[i], "%s%c", intbuf, id->next ? '.' : '\0');
@@ -509,8 +513,8 @@ static int extract_callback_user_func(const char *p, size_t n, zval *userfunc)
 
 	/* TODO: use zend_is_callable */
 
-	if (call_user_function(EG(function_table), NULL, userfunc, retval, 1, &arg) == FAILURE)
-		zend_error(E_WARNING, "%s(): unable to call user function", get_active_function_name());
+	if (call_user_function(EG(function_table), NULL, userfunc, retval, 1, &arg TSRMLS_CC) == FAILURE)
+		zend_error(E_WARNING, "%s(): unable to call user function", get_active_function_name(TSRMLS_C));
 
 	zval_dtor(retval);
 	zval_dtor(arg);
@@ -627,12 +631,12 @@ PHP_FUNCTION(mailparse_msg_extract_part_file)
 	/* open file and read it in */
 	fp = VCWD_FOPEN(Z_STRVAL_PP(filename), "rb");
 	if (fp == NULL)	{
-		zend_error(E_WARNING, "%s(): unable to open file %s", get_active_function_name(), Z_STRVAL_PP(filename));
+		zend_error(E_WARNING, "%s(): unable to open file %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(filename));
 		RETURN_FALSE;
 	}
 	if (fseek(fp, body, SEEK_SET) == -1)
 	{
-		zend_error(E_WARNING, "%s(): unable to seek to section start", get_active_function_name());
+		zend_error(E_WARNING, "%s(): unable to seek to section start", get_active_function_name(TSRMLS_C));
 		RETVAL_FALSE;
 		goto cleanup;
 	}
@@ -648,7 +652,7 @@ PHP_FUNCTION(mailparse_msg_extract_part_file)
 		n = fread(filebuf, sizeof(char), n, fp);
 		if (n == 0)
 		{
-			zend_error(E_WARNING, "%s(): error reading from file \"%s\", offset %d", get_active_function_name(), Z_STRVAL_PP(filename), body);
+			zend_error(E_WARNING, "%s(): error reading from file \"%s\", offset %d", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(filename), body);
 			RETVAL_FALSE;
 			goto cleanup;
 		}
@@ -783,7 +787,7 @@ PHP_FUNCTION(mailparse_msg_get_part)
 	newsection = rfc2045_find(rfcbuf, (*mimesection)->value.str.val);
 
 	if (!newsection)	{
-		php_error(E_WARNING, "%s(): cannot find section %s in message", get_active_function_name(), (*mimesection)->value.str.val);
+		php_error(E_WARNING, "%s(): cannot find section %s in message", get_active_function_name(TSRMLS_C), (*mimesection)->value.str.val);
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, newsection, le_rfc2045_nofree);

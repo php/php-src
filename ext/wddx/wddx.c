@@ -446,7 +446,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	 * We try to call __sleep() method on object. It's supposed to return an
 	 * array of property names to be serialized.
 	 */
-	if (call_user_function_ex(CG(function_table), &obj, fname, &retval, 0, 0, 1, NULL) == SUCCESS) {
+	if (call_user_function_ex(CG(function_table), &obj, fname, &retval, 0, 0, 1, NULL TSRMLS_CC) == SUCCESS) {
 		if (retval && HASH_OF(retval)) {
 			PHP_CLASS_ATTRIBUTES;
 			
@@ -813,7 +813,7 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 			MAKE_STD_ZVAL(fname);
 			ZVAL_STRING(fname, "__wakeup", 1);
 
-			call_user_function_ex(NULL, &ent1->data, fname, &retval, 0, 0, 0, NULL);
+			call_user_function_ex(NULL, &ent1->data, fname, &retval, 0, 0, 0, NULL TSRMLS_CC);
 
 			zval_dtor(fname);
 			FREE_ZVAL(fname);
@@ -1027,7 +1027,7 @@ PHP_FUNCTION(wddx_serialize_vars)
 	argc = ZEND_NUM_ARGS();
 	if (argc < 1) {
 		php_error(E_WARNING, "%s() requires at least 1 argument, 0 given",
-				  get_active_function_name());
+				  get_active_function_name(TSRMLS_C));
 		return;
 	}
 
@@ -1144,7 +1144,7 @@ PHP_FUNCTION(wddx_add_vars)
 	argc = ZEND_NUM_ARGS();
 	if (argc < 2) {
 		php_error(E_WARNING, "%s() requires at least 2 arguments, %d given",
-				  get_active_function_name(), ZEND_NUM_ARGS());
+				  get_active_function_name(TSRMLS_C), ZEND_NUM_ARGS());
 		return;	
 	}
 	

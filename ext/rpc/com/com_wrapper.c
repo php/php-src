@@ -1628,7 +1628,7 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode)
 				SysFreeString(bstr_ids);
 				c.name_len = strlen(ids)+1;
 				c.name = ids;
-				if (zend_get_constant(c.name, c.name_len-1, &exists))
+				if (zend_get_constant(c.name, c.name_len-1, &exists TSRMLS_CC))
 				{
 					/* Oops, it already exists. No problem if it is defined as the same value */
 					/* Check to see if they are the same */
