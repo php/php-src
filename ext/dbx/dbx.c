@@ -635,7 +635,6 @@ ZEND_FUNCTION(dbx_sort)
 	zval **arguments[2];
 	zval **zval_data;
 	zval *returned_zval;
-	int result=0;
 	if (ZEND_NUM_ARGS() !=number_of_arguments || zend_get_parameters_array_ex(number_of_arguments, arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
