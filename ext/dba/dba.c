@@ -34,6 +34,7 @@
 #if HAVE_DBA
 
 #include "php_dba.h"
+#include "ext/standard/info.h"
 
 #include "php_gdbm.h"
 #include "php_ndbm.h"
@@ -197,6 +198,8 @@ static PHP_MSHUTDOWN_FUNCTION(dba)
 
 static PHP_MINFO_FUNCTION(dba)
 {
+	/* could be prettier (cmv) */
+	php_info_print_box_start();
 	dba_handler *hptr;
 	
 	PUTS("V1 ($Id$)");
@@ -204,6 +207,7 @@ static PHP_MINFO_FUNCTION(dba)
 		PUTS(" ");
 		PUTS(hptr->name);
 	}
+	php_info_print_box_end();
 }
 
 static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)

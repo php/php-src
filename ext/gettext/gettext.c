@@ -25,6 +25,7 @@
 #if HAVE_LIBINTL
 
 #include <libintl.h>
+#include "ext/standard/info.h"
 
 function_entry php_gettext_functions[] = {
     PHP_FE(textdomain,								NULL)
@@ -42,7 +43,9 @@ zend_module_entry php_gettext_module_entry = {
 
 PHP_MINFO_FUNCTION(gettext)
 {
-	php_printf("GNU gettext support active.");
+	php_info_print_table_start();
+	php_info_print_table_row(2, "GNU GetText Support", "enabled");
+	php_info_print_table_end();
 }
 
 /* {{{ proto string textdomain(string domain)

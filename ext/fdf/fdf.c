@@ -61,6 +61,8 @@
 
 #if HAVE_FDFLIB
 
+#include "ext/standard/info.h"
+
 #ifdef THREAD_SAFE
 DWORD FDFlibTls;
 static int numthreads=0;
@@ -123,7 +125,10 @@ PHP_MINIT_FUNCTION(fdf)
 PHP_MINFO_FUNCTION(fdf)
 {
 	/* need to use a PHPAPI function here because it is external module in windows */
-	php_printf("FdfTk Version %s", FDFGetVersion());
+	php_info_print_table_start();
+	php_info_print_table_row(2, "FDF Support", "enabled");
+	php_info_print_table_row(2, "FdfTk Version", FDFGetVersion() );
+	php_info_print_table_end();
 }
 
 PHP_MSHUTDOWN_FUNCTION(fdf)

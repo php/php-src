@@ -23,6 +23,7 @@
 #include "php_domxml.h"
 
 #if HAVE_DOMXML
+#include "ext/standard/info.h"
 //#define newcode
 
 static int le_domxmldocp;
@@ -313,9 +314,11 @@ PHP_FUNCTION(domxml_test)
 
 PHP_MINFO_FUNCTION(domxml)
 {
-		PUTS("DOM/XML support active (compiled with libxml ");
-//		php_printf("%s", LIBXML_VERSION);
-		PUTS(".)");
+	/* don't know why that line was commented out in the previous version, so i left it (cmv) */
+	php_info_print_table_start();
+	php_info_print_table_row(2, "DOM/XML Support", "enabled");
+//	php_info_print_table_row(2, "libmxl Version", LIBXML_VERSION );
+	php_info_print_table_end();
 }
 
 /* {{{ proto string domxml_attrname([int dir_handle])
