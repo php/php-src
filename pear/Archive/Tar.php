@@ -60,10 +60,13 @@ class Archive_Tar extends PEAR
     * declare a new Archive_Tar object, identifying it by the name of the
     * tar file.
     * If the compress argument is set the tar will be read or created as a
-    * gzip compressed TAR file.
+    * gzip or bz2 compressed TAR file.
     *
     * @param    string  $p_tarname  The name of the tar archive to create
-    * @param    boolean $p_compress if true, the archive will be gezip(ped)
+    * @param    string  $p_compress can be null, 'gz' or 'bz2'. This
+    *                   parameter indicates if gzip or bz2 compression
+    *                   is required.  For compatibility reason the
+    *                   boolean value 'true' means 'gz'.
     * @access public
     */
     function Archive_Tar($p_tarname, $p_compress = null)
@@ -99,7 +102,7 @@ class Archive_Tar extends PEAR
                 }
             }
         } else {
-            if ($p_compress == 'gz') {
+            if (($p_compress == true) || ($p_compress == 'gz')) {
                 $this->_compress = true;
                 $this->_compress_type = 'gz';
             } else if ($p_compress == 'bz2') {
