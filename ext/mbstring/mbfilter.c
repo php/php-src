@@ -974,7 +974,7 @@ static mbfl_encoding mbfl_encoding_cp1251 = {
 	mbfl_no_encoding_cp1251,
 	"Windows-1251",
 	"Windows-1251",
-	&mbfl_encoding_cp1251_aliases,
+	(const char *(*)[])&mbfl_encoding_cp1251_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS
 };
@@ -985,7 +985,7 @@ static mbfl_encoding mbfl_encoding_cp866 = {
 	mbfl_no_encoding_cp866,
 	"CP866",
 	"CP866",
-	&mbfl_encoding_cp866_aliases,
+	(const char *(*)[])&mbfl_encoding_cp866_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS
 };
@@ -996,7 +996,7 @@ static mbfl_encoding mbfl_encoding_koi8r = {
 	mbfl_no_encoding_koi8r,
 	"KOI8-R",
 	"KOI8-R",
-	&mbfl_encoding_koi8r_aliases,
+	(const char *(*)[])&mbfl_encoding_koi8r_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS
 };
@@ -6286,7 +6286,7 @@ mbfl_filt_ident_cp1252(int c, mbfl_identify_filter *filter TSRMLS_DC)
 #if defined(HAVE_MBSTR_RU)
 // all of this is so ugly now!
 static int
-mbfl_filt_ident_cp1251(int c, mbfl_identify_filter *filter)
+mbfl_filt_ident_cp1251(int c, mbfl_identify_filter *filter TSRMLS_DC)
 {
 	if (c >= 0x80 && c < 0xff)
 		filter->flag = 0;
@@ -6296,7 +6296,7 @@ mbfl_filt_ident_cp1251(int c, mbfl_identify_filter *filter)
 }
 
 static int
-mbfl_filt_ident_cp866(int c, mbfl_identify_filter *filter)
+mbfl_filt_ident_cp866(int c, mbfl_identify_filter *filter TSRMLS_DC)
 {
 	if (c >= 0x80 && c < 0xff)
 		filter->flag = 0;
@@ -6306,7 +6306,7 @@ mbfl_filt_ident_cp866(int c, mbfl_identify_filter *filter)
 }
 
 static int
-mbfl_filt_ident_koi8r(int c, mbfl_identify_filter *filter)
+mbfl_filt_ident_koi8r(int c, mbfl_identify_filter *filter TSRMLS_DC)
 {
 	if (c >= 0x80 && c < 0xff)
 		filter->flag = 0;
