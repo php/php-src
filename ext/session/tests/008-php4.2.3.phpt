@@ -9,7 +9,8 @@ session.use_cookies=0
 session.cache_limiter=
 register_globals=0
 session.bug_compat_42=1
-session.bug_compat_warn=0
+session.bug_compat_warn=1
+track_errors=1
 --FILE--
 <?php
 error_reporting(E_ALL & ~E_NOTICE);
@@ -27,6 +28,7 @@ var_dump($c);
 unset($c);
 $c = 3.14;
 session_write_close();
+echo $php_errormsg."\n";
 unset($HTTP_SESSION_VARS);
 unset($c);
 
@@ -49,8 +51,8 @@ var_dump($HTTP_SESSION_VARS);
 session_destroy();
 ?>
 --EXPECTF--
-%s(%d) : Warning - Your script possibly relies on a session side-effect which existed until PHP 4.2.3. Please be advised that the session extension does not consider global variables as a source of data, unless register_globals is enabled. You can disable this functionality and this warning by setting session.bug_compat_42 or session.bug_compat_warn to off, respectively.
 NULL
+Your script possibly relies on a session side-effect which existed until PHP 4.2.3. Please be advised that the session extension does not consider global variables as a source of data, unless register_globals is enabled. You can disable this functionality and this warning by setting session.bug_compat_42 or session.bug_compat_warn to off, respectively.
 array(1) {
   ["c"]=>
   float(3.14)
