@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Modified session_register() to take variable number of arguments (Andrei)
 - Fixed file descriptor leak in thread safe mode (Zeev, Zend library)
 - Added select(), fd_set() and fd_isset() (Evan)
 - cpdf support has been ported from php3, needs ClibPDF 2.x (Uwe)
