@@ -761,7 +761,7 @@ PHP_FUNCTION(proc_open)
 			if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 0, (void **)&ztype) == SUCCESS) {
 				convert_to_string_ex(ztype);
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing handle qualifier in array", Z_STRVAL_PP(ztype));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing handle qualifier in array");
 				goto exit_fail;
 			}
 
