@@ -28,13 +28,6 @@
 #include "zend_extensions.h"
 
 
-static void destroy_garbage(HashTable *ht)
-{
-	zend_hash_destroy(ht);
-	efree(ht);
-}
-
-
 #define SELECTIVE_PZVAL_LOCK(pzv, pzn)		if (!((pzn)->u.EA.type & EXT_TYPE_UNUSED)) { PZVAL_LOCK(pzv); }
 
 #define get_zval_ptr(node, Ts, should_free, type) _get_zval_ptr(node, Ts, should_free ELS_CC)

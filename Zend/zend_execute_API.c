@@ -102,8 +102,6 @@ void init_executor(CLS_D ELS_DC)
 
 	zend_ptr_stack_init(&EG(argument_stack));
 
-	zend_ptr_stack_init(&EG(garbage));
-
 	EG(main_op_array) = NULL;
 	zend_hash_init(&EG(symbol_table), 50, NULL, PVAL_PTR_DTOR, 0);
 	EG(active_symbol_table) = &EG(symbol_table);
@@ -124,7 +122,6 @@ void shutdown_executor(ELS_D)
 		EG(symtable_cache_ptr)--;
 	}
 	zend_llist_apply(&zend_extensions, (void (*)(void *)) zend_extension_deactivator);
-	zend_ptr_stack_destroy(&EG(garbage));
 
 	zend_hash_destroy(&EG(symbol_table));
 
