@@ -50,7 +50,11 @@ static my_bool	mysql_client_init=0;
 uint		mysql_port=0;
 my_string	mysql_unix_port=0;
 
+#ifndef DISALLOW_MYSQL_LOAD_LOCAL
 #define CLIENT_CAPABILITIES	(CLIENT_LONG_PASSWORD | CLIENT_LONG_FLAG | CLIENT_LOCAL_FILES | CLIENT_TRANSACTIONS)
+#else 
+#define CLIENT_CAPABILITIES	(CLIENT_LONG_PASSWORD | CLIENT_LONG_FLAG | CLIENT_TRANSACTIONS) 
+#endif 
 
 #ifdef __WIN__
 #define CONNECT_TIMEOUT 20

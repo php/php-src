@@ -41,6 +41,9 @@ PHP_ARG_WITH(mysql, for MySQL support,
 
 if test "$PHP_MYSQL" != "no"; then
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
+  if test "$PHP_SAFE_MODE" = "yes"; then
+     AC_DEFINE(DISALLOW_MYSQL_LOAD_LOCAL, 1, [Whether to disable load local])
+  fi
   PHP_EXTENSION(mysql,$ext_shared)
 fi
 
