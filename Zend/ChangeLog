@@ -1,3 +1,11 @@
+2002-07-27  Andi Gutmans  <andi@pb1.pair.com>
+
+    * zend_compile.c
+      zend_execute_API.c:
+    - Make sure classes are first looked for in the current scope.
+    - Make sure that during inheritance the global scope is searched if the
+    - current one doesn't work.
+
 2002-07-26  Andi Gutmans  <andi@pb1.pair.com>
 
     * zend_execute.c
