@@ -634,7 +634,7 @@ PHP_FUNCTION(mysqli_errno)
 }
 /* }}} */
 
-/* {{{ proto string mysql_error(resource link)
+/* {{{ proto string mysqli_error(resource link)
    Returns the text of the error message from previous MySQL operation */
 PHP_FUNCTION(mysqli_error) 
 {
@@ -766,7 +766,7 @@ PHP_FUNCTION(mysqli_fetch)
 }
 /* }}} */
 
-/* {{{ proto int mysql_fetch_field (resource result)
+/* {{{ proto int mysqli_fetch_field (resource result)
    Get column information from a result and return as an object */
 PHP_FUNCTION(mysqli_fetch_field) 
 {
@@ -799,7 +799,7 @@ PHP_FUNCTION(mysqli_fetch_field)
 }
 /* }}} */
 
-/* {{{ proto int mysql_fetch_fields (resource result)
+/* {{{ proto int mysqli_fetch_fields (resource result)
 */
 PHP_FUNCTION(mysqli_fetch_fields) 
 {
@@ -845,7 +845,7 @@ PHP_FUNCTION(mysqli_fetch_fields)
 }
 /* }}} */
 
-/* {{{ proto int mysql_fetch_field_direct (resource result, int offset)
+/* {{{ proto int mysqli_fetch_field_direct (resource result, int offset)
 */
 PHP_FUNCTION(mysqli_fetch_field_direct) 
 {
@@ -1098,7 +1098,7 @@ PHP_FUNCTION(mysqli_info)
 }
 /* }}} */
 
-/* {{{ resource mysqli_init(void)
+/* {{{ proto resource mysqli_init(void)
    initialize mysqli */
 PHP_FUNCTION(mysqli_init)
 {
@@ -1775,7 +1775,7 @@ PHP_FUNCTION(mysqli_stmt_error)
 }
 /* }}} */
 
-/* {{{ bool resource mysqli_stmt_store_result(stmt)
+/* {{{ proto resource mysqli_stmt_store_result(stmt)
 */
 PHP_FUNCTION(mysqli_stmt_store_result)
 {
