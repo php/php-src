@@ -156,7 +156,7 @@ if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
        LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
 fi
 
-INCLUDES="-I\$(top_builddir)/Zend -I\$(top_srcdir) -I\$(top_srcdir)/Zend"
+INCLUDES="-I\$(top_builddir)/Zend -I\$(top_srcdir)"
 AC_SUBST(INCLUDES)
 
 AC_CHECK_LIB(nsl, gethostname, [
@@ -697,11 +697,18 @@ if test "$ZEND_EXPERIMENTAL_ZTS" = "yes"; then
   TSRM_LIB='TSRM/libtsrm.la'
   TSRM_DIR=TSRM
   AC_DEFINE(ZTS)
-  INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM -I\$(top_srcdir)/TSRM"
+  INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM"
   PHP_THREAD_SAFETY=yes
   PHP_OUTPUT(TSRM/Makefile)
 else
   PHP_THREAD_SAFETY=no
+fi
+
+if test "$abs_srcdir" != "$abs_builddir"; then
+  INCLUDES="$INCLUDES -I\$(top_srcdir)/Zend"
+  if test "$PHP_THREAD_SAFETY" = "yes"; then
+    INCLUDES="$INCLUDES -I\$(top_srcdir)/TSRM"
+  fi
 fi
 
 AC_SUBST(TSRM_DIR)
