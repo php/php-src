@@ -1411,8 +1411,9 @@ static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int
 	
 _php_ibase_exec_error:		 /* I'm a bad boy... */
 	
-	if (in_sqlda)
-		_php_ibase_free_xsqlda(in_sqlda);
+	if (in_sqlda){
+		efree(in_sqlda);
+	}
 	if (bind_buf)
 		efree(bind_buf);
 
