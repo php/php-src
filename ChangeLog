@@ -1,3 +1,80 @@
+2000-05-25  dickmeiss  <dickmeiss@va>
+
+    * NEWS: Added extension YAZ.
+
+    * ext/yaz/README: Added short README for ext YAZ.
+
+    * MAINTAINERS
+      ext/yaz/Makefile.in
+      ext/yaz/config.m4
+      ext/yaz/php_yaz.c
+      ext/yaz/php_yaz.h
+      ext/yaz/setup.stub: Added extension YAZ (Z39.50 client role).
+
+2000-05-25  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c: Update proto.
+
+    * ext/pcre/php_pcre.c:
+    - Added second argument to preg_quote() which allows quoting of
+      one additional character, usually the regex delimiter. 
+
+2000-05-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: Test commit
+
+2000-05-25  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/zlib/php_zlib.h
+      ext/zlib/zlib.c:
+    added functions gzcompress() and gzuncompress() for direct string
+    compression as requested by BugId #1151
+
+2000-05-25  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/zlib/php_zlib.h: Making ZLIB compile on Win32
+
+    * ext/ldap/ldap.dsp: fixing typo
+
+2000-05-25  Zeev Suraski  <zeev@php.net>
+
+    * NEWS:
+    (about the removed line - we agreed that the NEWS file should only contain stuff
+    that would interest end users, removing warnings isn't such a thing in my opinion)
+
+    * sapi/cgi/cgi_main.c:
+    Only fetch globals if it's necessary (which it usually won't be)
+
+2000-05-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/buildcheck.sh: Accept CVS version of libtool (1.3c)
+
+2000-05-25  Kristian Köhntopp  <kk@shonline.de>
+
+    * MAINTAINERS
+      MODULES_STATUS
+      ext/standard/info.c: - Added credits.
+
+2000-05-25  Jouni Ahto  <jah@mork.net>
+
+    * ext/pgsql/pgsql.c:
+    - Move to high performance api, use Z_* macros.
+    - Added some spaces here and there.
+
+2000-05-25  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c:
+    - Uncommitted outstanding OCI8 transactions are now rolled back
+      before the connection is closed. 
+
+    * sapi/cgi/cgi_main.c:
+    - ignore_user_abort() & friends should now work in CGI mode as well.
+      (Patch by daniel.braun@ercom.fr)
+
+2000-05-25  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/swf/config.m4: Check lib.
+
 2000-05-24  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/array.c
