@@ -553,14 +553,18 @@ static void php_session_initialize(TSRMLS_D)
 	char *val;
 	int vallen;
 	
-	if (PS(mod)->open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
-		php_error(E_ERROR, "Failed to initialize session module");
+	if (PS(mod)->open(&PS(mod_data), PS(save_path), PS(session_name) TSRMLS_CC) == FAILURE) {
+		PS(session_status) = php_session_disabled;
+		php_error(E_WARNING, "Failed to initialize session module");
 		return;
 	}
-	if (PS(mod)->read(&PS(mod_data), PS(id), &val, &vallen) == SUCCESS) {
-		php_session_decode(val, vallen TSRMLS_CC);
-		efree(val);
+	if (PS(mod)->read(&PS(mod_data), PS(id), &val, &vallen TSRMLS_CC) == FAILURE) {
+		PS(session_status) = php_session_disabled;
+		php_error(E_WARNING, "Failed to read session data");
+		return;
 	}
+	php_session_decode(val, vallen TSRMLS_CC);
+	efree(val);
 }
 
 
