@@ -34,7 +34,7 @@
 #include "SAPI.h"
 
 #ifdef PHP_WIN32
-#include <winsock2.h>
+#include <winsock.h>
 #endif
 
 #if HYPERWAVE
