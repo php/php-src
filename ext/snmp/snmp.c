@@ -349,14 +349,14 @@ PHP_FUNCTION(snmpget) {
 /* {{{ proto array snmpwalk(string host, string community, string object_id [, int timeout [, int retries]]) 
    Return all objects under the specified object id */
 PHP_FUNCTION(snmpwalk) {
-	return php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,2);
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,2);
 }
 /* }}} */
 
 /* {{{ proto array snmprealwalk(string host, string community, string object_id [, int timeout [, int retries]])
    Return all objects including their respective object id withing the specified one */
 PHP_FUNCTION(snmprealwalk) {
-	return php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,3);
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,3);
 }
 /* }}} */
 
