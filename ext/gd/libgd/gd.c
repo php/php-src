@@ -26,7 +26,7 @@ extern float floorf(float x);
 #endif
 #if HAVE_FABSF == 0
 /* float fabsf(float x); */
-# define fabsf(x) ((float)(abs(x)))
+# define fabsf(x) ((float)(fabs(x)))
 #endif
 #if HAVE_FLOORF == 0
 /* float floorf(float x);*/
@@ -235,9 +235,13 @@ gdImageColorClosestAlpha (gdImagePtr im, int r, int g, int b, int a)
 #define HWB_UNDEFINED -1
 #define SETUP_RGB(s, r, g, b) {s.R = r/255.0f; s.G = g/255.0f; s.B = b/255.0f;}
 
+#ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
 #define MIN3(a,b,c) ((a)<(b)?(MIN(a,c)):(MIN(b,c)))
+#ifndef MAX
 #define MAX(a,b) ((a)<(b)?(b):(a))
+#endif
 #define MAX3(a,b,c) ((a)<(b)?(MAX(b,c)):(MAX(a,c)))
 
 
