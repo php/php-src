@@ -51,6 +51,7 @@ int dbx_mysql_connect(zval ** rv, zval ** host, zval ** db, zval ** username, zv
         /* also close connection */
         number_of_arguments=1;
         arguments[0]=&returned_zval;
+        zend_list_addref(returned_zval->value.lval);
         dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mysql_close", &select_db_zval, number_of_arguments, arguments);
         if (select_db_zval) zval_ptr_dtor(&select_db_zval);
         zval_ptr_dtor(&returned_zval);
@@ -88,6 +89,7 @@ int dbx_mysql_pconnect(zval ** rv, zval ** host, zval ** db, zval ** username, z
         /* also close connection */
         number_of_arguments=1;
         arguments[0]=&returned_zval;
+        zend_list_addref(returned_zval->value.lval);
         dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mysql_close", &select_db_zval, number_of_arguments, arguments);
         if (select_db_zval) zval_ptr_dtor(&select_db_zval);
         zval_ptr_dtor(&returned_zval);

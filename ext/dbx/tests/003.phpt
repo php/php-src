@@ -79,6 +79,19 @@ else {
     print_r($dlo);
 	dbx_close($dlo);
     }
+$dlo1 = dbx_connect($module, $host, $database, $username, $password);
+$dlo2 = dbx_connect($module, $host, $database, $username, $password);
+if ($dlo1!=0 && $dlo2!=0) {
+	print('multiple connects ok'."\n");
+	dbx_close($dlo1);
+	dbx_close($dlo2);
+	}
+$dlo1 = dbx_connect($module, $host, $database, $username, $password);
+$dlo2 = dbx_connect($module, $host, $nonexisting_database, $username, $password);
+if ($dlo1!=0 && $dlo2==0) {
+	print('multiple connects (2nd fails on database-name) ok'."\n");
+	dbx_close($dlo1);
+	}
 ?>
 --EXPECT--
 connect using string ok
@@ -91,3 +104,5 @@ persistent connect to non-existing database failed, so it's ok
 persistent connect with false username/password combi failed, so it's ok
 too many parameters: connect failure works ok
 too few parameters: connect failure works ok
+multiple connects ok
+multiple connects (2nd fails on database-name) ok
