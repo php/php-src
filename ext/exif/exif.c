@@ -1957,6 +1957,9 @@ static void exif_thumbnail_build(image_info_type *ImageInfo) {
 	if (!ImageInfo->read_thumbnail || !ImageInfo->Thumbnail.offset || !ImageInfo->Thumbnail.size) {
 		return; /* ignore this call */
 	}
+#ifdef EXIF_DEBUG
+			php_error(E_NOTICE, "Thumbnail.filetype = %d", ImageInfo->Thumbnail.filetype);
+#endif
 	switch(ImageInfo->Thumbnail.filetype) {
 		default:
 		case IMAGE_FILETYPE_JPEG:
@@ -3326,6 +3329,7 @@ PHP_FUNCTION(exif_read_data)
 	exif_iif_add_int(&ImageInfo, SECTION_FILE, "FileDateTime",  ImageInfo.FileDateTime);
 	exif_iif_add_int(&ImageInfo, SECTION_FILE, "FileSize",      ImageInfo.FileSize);
 	exif_iif_add_int(&ImageInfo, SECTION_FILE, "FileType",      ImageInfo.FileType);
+	exif_iif_add_str(&ImageInfo, SECTION_FILE, "MimeType",      (char*)php_imagetype2mimetype(ImageInfo.FileType));
 	exif_iif_add_str(&ImageInfo, SECTION_FILE, "SectionsFound", sections_str ? sections_str : "NONE");
 
 #ifdef EXIF_DEBUG
@@ -3390,6 +3394,8 @@ PHP_FUNCTION(exif_read_data)
 			/* try to evaluate if thumbnail data is present */
 			exif_scan_thumbnail(&ImageInfo);
 		}
+		exif_iif_add_int(&ImageInfo, SECTION_COMPUTED, "Thumbnail.FileType", ImageInfo.Thumbnail.filetype);
+		exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "Thumbnail.MimeType", (char*)php_imagetype2mimetype(ImageInfo.Thumbnail.filetype));
 	}
 	if (ImageInfo.Thumbnail.width && ImageInfo.Thumbnail.height) {
 		exif_iif_add_int(&ImageInfo, SECTION_COMPUTED, "Thumbnail.Height", ImageInfo.Thumbnail.height);
@@ -3426,24 +3432,27 @@ PHP_FUNCTION(exif_read_data)
 }
 /* }}} */
 
-/* {{{ proto string|false exif_thumbnail(string filename [, &width, &height])
+/* {{{ proto string|false exif_thumbnail(string filename [, &width, &height [, &imagetype]])
    Reads the embedded thumbnail */
 PHP_FUNCTION(exif_thumbnail)
 {
-	zval **p_name, **p_width, **p_height;
+	zval **p_name, **p_width, **p_height, **p_imagetype;
 	int ret, arg_c = ZEND_NUM_ARGS();
 	image_info_type ImageInfo;
 
 	memset(&ImageInfo, 0, sizeof(ImageInfo));
 
-	if ((arg_c != 1 && arg_c != 3) || zend_get_parameters_ex(arg_c, &p_name, &p_width, &p_height) == FAILURE) {
+	if ((arg_c!=1 && arg_c!=3 && arg_c!=4) || zend_get_parameters_ex(arg_c, &p_name, &p_width, &p_height, &p_imagetype) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_string_ex(p_name);
-	if (arg_c == 3) {
+	if (arg_c >= 3) {
 		zval_dtor(*p_width);
 		zval_dtor(*p_height);
+	}
+	if (arg_c >= 4) {
+		zval_dtor(*p_imagetype);
 	}
 
 	ret = exif_read_file(&ImageInfo, Z_STRVAL_PP(p_name), 1, 0 TSRMLS_CC);
@@ -3452,14 +3461,10 @@ PHP_FUNCTION(exif_thumbnail)
 		RETURN_FALSE;
 	}
 
-	if (!ImageInfo.Thumbnail.data || !ImageInfo.Thumbnail.size) {
 #ifdef EXIF_DEBUG
-		php_error(E_NOTICE, "No thumbnail data %d %d, %d x %d", ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size, ImageInfo.Thumbnail.width, ImageInfo.Thumbnail.height);
+	php_error(E_NOTICE, "Thumbnail data %d %d %d, %d x %d", ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size, ImageInfo.Thumbnail.filetype, ImageInfo.Thumbnail.width, ImageInfo.Thumbnail.height);
 #endif
-		if (arg_c == 3) {
-			ZVAL_LONG(*p_width,  ImageInfo.Thumbnail.width);
-			ZVAL_LONG(*p_height, ImageInfo.Thumbnail.height);
-		}
+	if (!ImageInfo.Thumbnail.data || !ImageInfo.Thumbnail.size) {
 		exif_discard_imageinfo(&ImageInfo);
 		RETURN_FALSE;
 	}
@@ -3469,12 +3474,15 @@ PHP_FUNCTION(exif_thumbnail)
 #endif
 
 	ZVAL_STRINGL(return_value, ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size, 1);
-	if (arg_c == 3) {
+	if (arg_c >= 3) {
 		if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
 			exif_scan_thumbnail(&ImageInfo);
 		}
 		ZVAL_LONG(*p_width,  ImageInfo.Thumbnail.width);
 		ZVAL_LONG(*p_height, ImageInfo.Thumbnail.height);
+	}
+	if (arg_c >= 4)	{
+		ZVAL_LONG(*p_imagetype, ImageInfo.Thumbnail.filetype);
 	}
 
 #ifdef EXIF_DEBUG
