@@ -277,6 +277,28 @@ static int php_cli_startup(sapi_module_struct *sapi_module)
 }
 
 
+/* {{{ sapi_cli_ini_defaults */
+
+#define INI_DEFAULT(name,name_len,value)\
+	ZVAL_STRING(tmp, value, 0);\
+	zend_hash_update(configuration_hash, name, name_len, tmp, sizeof(zval), (void**)&entry);\
+	Z_STRVAL_P(entry) = zend_strndup(Z_STRVAL_P(entry), Z_STRLEN_P(entry))
+
+static void sapi_cli_ini_defaults(HashTable *configuration_hash)
+{
+	zval *tmp, *entry;
+	
+	MAKE_STD_ZVAL(tmp);
+
+	INI_DEFAULT("register_argc_argv", 19, "1");
+	INI_DEFAULT("html_errors", 12, "1");
+	INI_DEFAULT("implicit_flush", 15, "1");
+	INI_DEFAULT("max_execution_time", 19, "0");
+
+	FREE_ZVAL(tmp);
+}
+/* }}} */
+
 /* {{{ sapi_module_struct cli_sapi_module
  */
 static sapi_module_struct cli_sapi_module = {
@@ -526,6 +548,7 @@ int main(int argc, char *argv[])
 	tsrm_startup(1, 1, 0, NULL);
 #endif
 
+	cli_sapi_module.ini_defaults = sapi_cli_ini_defaults;
 	sapi_startup(&cli_sapi_module);
 
 #ifdef PHP_WIN32
@@ -576,10 +599,6 @@ int main(int argc, char *argv[])
 
         /* Set some CLI defaults */
 		SG(options) |= SAPI_OPTION_NO_CHDIR;
-		zend_alter_ini_entry("register_argc_argv", 19, "1", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-		zend_alter_ini_entry("html_errors", 12, "0", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-		zend_alter_ini_entry("implicit_flush", 15, "1", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-		zend_alter_ini_entry("max_execution_time", 19, "0", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 
 		zend_uv.html_errors = 0; /* tell the engine we're in non-html mode */
 
