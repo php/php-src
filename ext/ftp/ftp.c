@@ -78,6 +78,7 @@ ftp_open(const char *host, short port)
 
 	memset(&addr, 0, sizeof(addr));
 	memcpy(&addr.sin_addr, he->h_addr, he->h_length);
+	addr.sin_family = AF_INET;
 	addr.sin_port = port ? port : htons(21);
 
 
@@ -550,6 +551,7 @@ ftp_port(ftpbuf_t *ftp)
 
 	/* bind to a local address */
 	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = INADDR_ANY;
 	addr.sin_port = 0;
 
