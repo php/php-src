@@ -174,7 +174,11 @@ int php_mail(char *to, char *subject, char *message, char *headers, char *extra_
 		}
 		fprintf(sendmail, "\n%s\n", message);
 		ret = pclose(sendmail);
+#if defined(EX_TEMPFAIL)
 		if ((ret != EX_OK)&&(ret != EX_TEMPFAIL)) {
+#else
+		if (ret != EX_OK) {
+#endif
 			return 0;
 		} else {
 			return 1;
