@@ -52,7 +52,7 @@ extern zend_module_entry dba_module_entry;
 #define DBA_CLOSE_FUNC(x) \
 	void dba_close_##x(dba_info *info)
 #define DBA_FETCH_FUNC(x) \
-	char *dba_fetch_##x(dba_info *info, char *key, int keylen, int *newlen)
+	char *dba_fetch_##x(dba_info *info, char *key, int keylen, int skip, int *newlen)
 #define DBA_UPDATE_FUNC(x) \
 	int dba_update_##x(dba_info *info, char *key, int keylen, char *val, int vallen, int mode)
 #define DBA_EXISTS_FUNC(x) \
