@@ -129,16 +129,14 @@ PHP_FUNCTION(recode_string)
 {
 	RECODE_REQUEST request = NULL;
 	char *r = NULL;
-	zval **str;
-	zval **req;
 	bool success;
-	int r_len=0, r_alen =0;
+	int r_len = 0, r_alen = 0;
+	int req_len, str_len;
+	char *req, *str;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &req, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(TSRMLS_CC ZEND_NUM_ARGS(), "ss", &req, &req_len, &str, &str_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(str);
-	convert_to_string_ex(req);
 
 	request = recode_new_request(ReSG(outer));
 
@@ -147,13 +145,13 @@ PHP_FUNCTION(recode_string)
 		RETURN_FALSE;
 	}
 	
-	success = recode_scan_request(request, Z_STRVAL_PP(req));
+	success = recode_scan_request(request, req);
 	if (!success) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal recode request '%s'", Z_STRVAL_PP(req));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal recode request '%s'", req);
 		goto error_exit;
 	}
 	
-	recode_buffer_to_buffer(request, Z_STRVAL_PP(str), Z_STRLEN_PP(str), &r, &r_len, &r_alen);
+	recode_buffer_to_buffer(request, str, str_len, &r, &r_len, &r_alen);
 	if (!r) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Recoding failed.");
 		goto error_exit;
