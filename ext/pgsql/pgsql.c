@@ -1144,7 +1144,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	int i, num_fields, pgsql_row;
 	char *element, *field_name;
 	uint element_len;
-	TSRMLS__FETCH();
+	TSRMLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1812,7 +1812,7 @@ PHP_FUNCTION(pg_loimport)
 	int id = -1;
 	PGconn *pgsql;
 	Oid oid;
-	TSRMLS__FETCH();
+	TSRMLS_FETCH();
 	
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
