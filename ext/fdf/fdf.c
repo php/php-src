@@ -105,7 +105,7 @@ zend_module_entry fdf_module_entry = {
 
 #if COMPILE_DL
 #include "dl/phpdl.h"
-DLEXPORT zend_module_entry *get_module(void) { return &fdf_module_entry; }
+ZEND_GET_MODULE(fdf)
 #endif
 
 static void phpi_FDFClose(FDFDoc fdf) {

@@ -1141,7 +1141,7 @@ zend_module_entry dbm_module_entry = {
 };
 
 #if COMPILE_DL
-DLEXPORT zend_module_entry *get_module(void) { return &dbm_module_entry; }
+ZEND_GET_MODULE(dbm)
 #endif
 
 #endif

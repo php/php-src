@@ -58,7 +58,7 @@ PHP_XML_API php_xml_globals xml_globals;
 
 #ifdef COMPILE_DL_XML
 # include "dl/phpdl.h"
-DLEXPORT zend_module_entry *get_module(void) { return &xml_module_entry; }
+ZEND_GET_MODULE(xml)
 #endif /* COMPILE_DL_XML */
 
 /* }}} */

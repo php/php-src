@@ -160,7 +160,7 @@ zend_module_entry cpdf_module_entry = {
 
 #if COMPILE_DL
 #include "dl/phpdl.h"
-DLEXPORT zend_module_entry *get_module(void) { return &cpdf_module_entry; }
+ZEND_GET_MODULE(cpdf)
 #endif
 
 static void _free_outline(CPDFoutlineEntry *outline)

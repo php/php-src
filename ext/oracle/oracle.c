@@ -182,7 +182,7 @@ static const text *ora_func_tab[] =
 };
 
 #if COMPILE_DL
-DLEXPORT zend_module_entry *get_module() { return &oracle_module_entry; };
+ZEND_GET_MODULE(oracle)
 #endif
 
 static int _close_oraconn(oraConnection *conn)

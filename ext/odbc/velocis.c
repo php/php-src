@@ -67,7 +67,7 @@ zend_module_entry velocis_module_entry = {
 
 
 #if COMPILE_DL
-zend_module_entry *get_module() { return &velocis_module_entry; }
+ZEND_GET_MODULE(velocis)
 #endif
 
 THREAD_LS velocis_module php_velocis_module;

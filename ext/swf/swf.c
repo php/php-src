@@ -107,7 +107,7 @@ zend_module_entry swf_module_entry = {
 };
 
 #ifdef COMPILE_DL_SWF
-ZEND_DLEXPORT zend_module_entry *get_module(void) { return &swf_module_entry; }
+ZEND_GET_MODULE(swf)
 #endif
 
 PHP_MINFO_FUNCTION(swf)

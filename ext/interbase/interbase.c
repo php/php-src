@@ -102,7 +102,7 @@ zend_module_entry ibase_module_entry =
 
 #if COMPILE_DL
 #include "dl/phpdl.h"
-DLEXPORT php_module_entry *get_module() { return &ibase_module_entry; }
+ZEND_GET_MODULE(ibase)
 
 #define DL_MALLOC(size) malloc(size)
 #define DL_STRDUP(str) strdup(str)

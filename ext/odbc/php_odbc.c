@@ -132,7 +132,7 @@ ZEND_API php_odbc_globals odbc_globals;
 #endif
 
 #if COMPILE_DL
-DLEXPORT zend_module_entry *get_module(void) { return &odbc_module_entry; };
+ZEND_GET_MODULE(odbc)
 #endif
 
 static void _free_odbc_result(odbc_result *res)

@@ -80,7 +80,7 @@ zend_module_entry pgsql_module_entry = {
 };
 
 #if COMPILE_DL
-PHP_PGSQL_API zend_module_entry *get_module() { return &pgsql_module_entry; }
+ZEND_GET_MODULE(pgsql)
 #endif
 
 static int le_link,le_plink,le_result,le_lofp,le_string;

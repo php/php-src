@@ -61,7 +61,7 @@ zend_module_entry sysvsem_module_entry = {
 };
 
 #if COMPILE_DL
-zend_module_entry *get_module() { return &sysvsem_module_entry; }
+ZEND_GET_MODULE(sysvsem)
 #endif
 
 

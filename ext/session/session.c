@@ -121,7 +121,7 @@ zend_module_entry session_module_entry = {
 };
 
 #ifdef COMPILE_DL_SESSION
-ZEND_DLEXPORT zend_module_entry *get_module(void) { return &session_module_entry; }
+ZEND_GET_MODULE(session)
 #endif
 
 typedef struct {

@@ -1211,7 +1211,7 @@ zend_module_entry pcre_module_entry = {
 };
 
 #ifdef COMPILE_DL_PCRE
-ZEND_DLEXPORT zend_module_entry *get_module(void) { return &pcre_module_entry; }
+ZEND_GET_MODULE(pcre)
 #endif
 
 /* }}} */

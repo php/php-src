@@ -110,7 +110,7 @@ zend_module_entry php_zlib_module_entry = {
 };
 
 #if defined(COMPILE_DL)
-DLEXPORT zend_module_entry *get_module(void) { return &php_zlib_module_entry; }
+ZEND_GET_MODULE(php_zlib)
 #endif
 
 static void phpi_destructor_gzclose(gzFile *zp) {

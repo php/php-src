@@ -101,7 +101,7 @@ zend_module_entry ldap_module_entry = {
 
 
 #ifdef COMPILE_DL_LDAP
-ZEND_DLEXPORT zend_module_entry *get_module(void ) { return &ldap_module_entry; }
+ZEND_GET_MODULE(ldap)
 #endif
 
 

@@ -69,7 +69,7 @@ phpdav_module php_dav_module;
 /* {{{ dynamically loadable module stuff */
 
 # if COMPILE_DL
-DLEXPORT zend_module_entry *get_module() { return &phpdav_module_entry; };
+ZEND_GET_MODULE(phpdav)
 # endif /* COMPILE_DL */
 
 /* }}} */

@@ -170,7 +170,7 @@ zend_module_entry pdf_module_entry = {
 
 #if COMPILE_DL
 #include "dl/phpdl.h"
-DLEXPORT zend_module_entry *get_module(void) { return &pdf_module_entry; }
+ZEND_GET_MODULE(pdf)
 #endif
 
 static void _free_pdf_image(int image)

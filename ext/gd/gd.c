@@ -172,7 +172,7 @@ static php_gd_globals gd_globals;
 
 #ifdef COMPILE_DL_GD
 # include "dl/phpdl.h"
-DLEXPORT zend_module_entry *get_module(void) { return &gd_module_entry; }
+ZEND_GET_MODULE(gd)
 #endif
 
 
