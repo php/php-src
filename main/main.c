@@ -382,11 +382,12 @@ PHPAPI int php_printf(const char *format, ...)
 
 PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
 {
-	const char *estr;
+	const char *end = str+size;
+	const char *p = str;
 	smart_str s = {0};
 
-	for (estr = str + size; str < estr; str++) {
-		switch (*str) {
+	while (p < end) {
+		switch (*p) {
 			case '\n':
 				smart_str_appendl(&s, "<br />", sizeof("<br />")-1);
 				break;
@@ -399,19 +400,25 @@ PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
 			case '&':
 				smart_str_appendl(&s, "&amp;", sizeof("&amp;")-1);
 				break;
+			case ' ': {
+					const char *nextchar = p+1, *prevchar = p-1;
 
-/* Commented out since this is not necessary */
-/*
-			case ' ':
-				smart_str_appendl(&s, "&nbsp;", sizeof("&nbsp;")-1);
+					/* series of spaces should be converted to &nbsp;'s */
+					if (((nextchar < end) && *nextchar==' ')
+						|| ((prevchar >= str) && *prevchar==' ')) {
+						smart_str_appendl(&s, "&nbsp;", sizeof("&nbsp;")-1);
+					} else {
+						smart_str_appendc(&s, ' ');
+					}
+				}
 				break;
-*/
 			case '\t':
 				smart_str_appendl(&s, "&nbsp;&nbsp;&nbsp;&nbsp;", sizeof("&nbsp;&nbsp;&nbsp;&nbsp;")-1);
 				break;
 			default:
-				smart_str_appendc(&s, *str);
+				smart_str_appendc(&s, *p);
 		}
+		p++;
 	}
 
 	if (s.c) {
