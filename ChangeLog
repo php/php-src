@@ -1,3 +1,27 @@
+1999-11-05  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/mysql/php_mysql.c:
+    We need to use mysql_field_count() instead of mysql_num_fields() if
+    we are using MySQL 3.22.24 or newer when we want to check a mysql struct
+    instead of a result struct.  The reference is here:
+     http://www.mysql.com/Manual_chapter/manual_Clients.html#mysql_num_fields
+
+1999-11-05  Sam Ruby  <rubys@us.ibm.com>
+
+    * main.c: configuration failures trap server
+
+1999-11-05  Rasmus Lerdorf  <rasmus@php.net>
+
+    * LICENSE:
+1999-11-05  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/sybase/sybase.c:
+    (php3_sybase_get_column_content) initialize buffer before call to dbconvert()
+
+1999-11-05  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
 1999-11-04  Andrei Zmievski  <zmievski@ispi.net>
 
     * ext/standard/basic_functions.c:
