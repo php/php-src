@@ -1,3 +1,96 @@
+2002-05-31  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * sapi/apache/php_apache.c: Oops
+
+    * sapi/apache/php_apache.c:    Renamed getallheaders() to apache_request_headers() and kept
+    getallheaders() as an alias to it.  Also added apache_response_headers()
+    which returns the current response headers from Apache.
+
+2002-05-31  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mbstring/config.m4: Fixed typo..
+
+2002-05-31  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Frontend/CLI.php: * added missing fold
+
+2002-05-31  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/System.php: fread already detects EOF
+
+    * pear/System.php:
+    Be able to handle strings as well as arrays in _multipleToStruct()
+
+    * pear/System.php:
+    - Make mkTemp() automatically removed temporary created files
+      or dirs at script shutdown time
+    - Remove unnecesarry PEAR inheritance
+    - Some PHPDoc fixes
+
+2002-05-31  Brad LaFountain  <rodif_bl@yahoo.com>
+
+    * ext/domxml/domxml.dsp
+      ext/domxml/php_domxml.h:
+    Changed PHP_EXPORTS to DOMXML_EXPORTS as Edin Kadribasic suggested
+
+2002-05-31  Harald Radi  <h.radi@nme.at>
+
+    * ext/standard/credits_ext.h: MFH
+
+    * ext/standard/credits_ext.h: added wez to the com extension
+
+    * ext/com/CREDITS
+      ext/com/VARIANT.c
+      ext/com/com.h
+      ext/com/conversion.c
+      ext/com/php_COM.h
+      ext/com/variant.h
+      ext/com/COM.c: MFH
+
+    * ext/com/CREDITS: added wez and ordered names alphabetically
+
+2002-05-31  Venkat Raghavan S  <rvenkat@novell.com>
+
+    * sapi/apache/php_apache.c:
+    Removed ugly code done as part of NetWare change, upon Andi's advice. Now, the typecasting is done for all platforms.
+
+2002-05-31  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/rfc1867.c: - Don't issue a notice when no file was uploaded
+
+2002-05-31  Brad LaFountain  <rodif_bl@yahoo.com>
+
+    * ext/domxml/php_domxml.c:
+    initalize variable in domxml_doc_document_element()
+
+    * ext/domxml/domxml.dsp:
+    defined PHP_EXPORTS for exporting php_domobject_new()
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+    added the ability to use new keywork with domxmls objects "new DomDocument()"
+      instead of xmldoc. This also allows you to create nodes without having
+      a whole document "new DomElement("foo")".
+
+    moved DOMXML_API_VERSION to php_domxml.h
+    exposed php_domobject_new for other extensions to use
+    removed some un-needed code
+
+2002-05-31  Venkat Raghavan S  <rvenkat@novell.com>
+
+    * main/config.nw.h
+      main/php.h
+      main/php_compat.h
+      sapi/apache/php_apache_http.h
+      sapi/apache/php_apache.c
+      sapi/apache/mod_php4.c: NetWare related changes
+
+    * netware/buildsapi.bat
+      netware/common.mif
+      netware/php4apache.mak
+      netware/phplib.imp
+      netware/pwd.h: NetWare related additions / changes to build mod_php
+
 2002-05-30  Harald Radi  <h.radi@nme.at>
 
     * ext/com/COM.c:
