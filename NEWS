@@ -1,7 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.3
-- Lot of other bug fixes. (Various Artists)
+- Fixed ob_gzhandler()'s handling of requests that do have the Accept-Encoding
+  header, but do not allow compression (Zeev)
 - Transparent sid support is now disabled by default. (Yasuo)
 - Fixed accidental pg_lo_import() API change. (Yasuo)
 - Fixed ereg_replace() crash when the backreference number was greater than the 
