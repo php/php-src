@@ -47,15 +47,16 @@ if (PHP_MBSTRING == "yes") {
 	AC_DEFINE('HAVE_MBSTR_RU', 1, 'RU');
 	AC_DEFINE('HAVE_MBSTR_TW', 1, 'TW');
 
-	if (PHP_MBREGEX == "yes") {
+	if (PHP_MBREGEX != "no") {
 		AC_DEFINE('HAVE_STDARG_PROTOTYPES', 1, 'have stdarg.h');
+		AC_DEFINE('HAVE_MBREGEX', 1);
 		ADD_SOURCES("ext/mbstring/oniguruma", "regcomp.c regerror.c \
 			regenc.c regexec.c reggnu.c regparse.c regposerr.c", "mbstring");
 		ADD_SOURCES("ext/mbstring/oniguruma/enc", "ascii.c big5.c \
 			euc_jp.c euc_kr.c euc_tw.c iso8859_1.c iso8859_2.c \
 			iso8859_3.c iso8859_4.c iso8859_5.c iso8859_6.c \
 			iso8859_7.c iso8859_8.c iso8859_9.c iso8859_10.c \
-			iso8859_11.c iso8859_13.c iso8859_15.c iso8859_16.c \
+			iso8859_11.c iso8859_13.c iso8859_14.c iso8859_15.c iso8859_16.c \
 			koi8.c koi8_r.c sjis.c utf8.c", "mbstring");
 		ADD_SOURCES("ext/mbstring", "php_mbregex.c", "mbstring");
 	}
