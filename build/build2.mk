@@ -47,7 +47,7 @@ all: .deps Zend/Makefile.am TSRM/Makefile.am $(targets)
 		list="$$list $$i/.deps"; \
 	done; \
 	touch $$list pear/.deps $@
-	
+
 Zend/Makefile.am:
 	test -d Zend || (test -d ../Zend && ln -s ../Zend Zend)
 
@@ -79,11 +79,11 @@ $(config_h_in): configure acconfig.h
 # correctly otherwise (timestamps are not updated)
 	@echo rebuilding $@
 	@rm -f $@
-	autoheader
+	@autoheader 2>&1 | (grep -v 'warning: AC_TRY_RUN called without default to allow cross compiling'||true)
 
 $(TOUCH_FILES):
 	touch $(TOUCH_FILES)
-	
+
 configure: aclocal.m4 configure.in $(config_m4_files)
 	@echo rebuilding $@
-	autoconf
+	@autoconf 2>&1 | (grep -v 'warning: AC_TRY_RUN called without default to allow cross compiling'||true)
