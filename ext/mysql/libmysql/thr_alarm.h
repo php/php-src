@@ -51,7 +51,7 @@ typedef struct st_thr_alarm_entry
   rf_SetTimer crono;
 } thr_alarm_entry;
 
-#elif defined(__EMX__)
+#elif defined(__EMX__) || defined(OS2)
 
 typedef struct st_thr_alarm_entry
 {

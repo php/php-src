@@ -1,6 +1,13 @@
 /* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
 This file is public domain and comes with NO WARRANTY of any kind */
 
+/*
+  This function is only used by some old ISAM code.
+  When we remove ISAM support from MySQL, we should also delete this file
+
+  One should instead use the functions in mf_tempfile.c
+*/
+
 #include "mysys_priv.h"
 #include <m_string.h>
 #include "my_static.h"
@@ -12,7 +19,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #endif
 
 #ifdef HAVE_TEMPNAM
-#ifndef MSDOS
+#if !defined( MSDOS) && !defined(OS2)
 extern char **environ;
 #endif
 #endif
@@ -77,14 +84,26 @@ my_string my_tempnam(const char *dir, const char *pfx,
     temp[1]= 0;
     dir=temp;
   }
-  old_env=environ;
+#ifdef OS2
+  // changing environ variable doesn't work with VACPP
+  char  buffer[256];
+  sprintf( buffer, "TMP=%s", dir);
+  // remove ending backslash
+  if (buffer[strlen(buffer)-1] == '\\')
+     buffer[strlen(buffer)-1] = '\0';
+  putenv( buffer);
+#else
+  old_env=(char**)environ;
   if (dir)
   {				/* Don't use TMPDIR if dir is given */
-    environ=temp_env;
+    environ=(const char**)temp_env;		/* May give warning */
     temp_env[0]=0;
   }
+#endif
   res=tempnam((char*) dir,(my_string) pfx); /* Use stand. dir with prefix */
-  environ=old_env;
+#ifndef OS2
+  environ=(const char**)old_env;		/* May give warning */
+#endif
   if (!res)
     DBUG_PRINT("error",("Got error: %d from tempnam",errno));
   return res;

@@ -112,6 +112,7 @@ extern uint sf_malloc_prehunc,sf_malloc_endhunc,sf_malloc_quick;
 extern ulonglong safemalloc_mem_limit;
 #else
 #define my_checkmalloc() (0)
+#undef TERMINATE
 #define TERMINATE(A) {}
 #define QUICK_SAFEMALLOC
 #define NORMAL_SAFEMALLOC
@@ -194,7 +195,7 @@ extern long lCurMemory,lMaxMemory;	/* from safemalloc */
 
 extern ulong	my_default_record_cache_size;
 extern my_bool NEAR my_disable_locking,NEAR my_disable_async_io,
-       NEAR my_disable_flush_key_blocks;
+               NEAR my_disable_flush_key_blocks, NEAR my_disable_symlinks;
 extern char	wild_many,wild_one,wild_prefix;
 extern const char *charsets_dir;
 extern char *defaults_extra_file;
@@ -371,6 +372,8 @@ extern int my_realpath(char *to, const char *filename, myf MyFlags);
 extern File my_create_with_symlink(const char *linkname, const char *filename,
 				   int createflags, int access_flags,
 				   myf MyFlags);
+extern int my_delete_with_symlink(const char *name, myf MyFlags);
+extern int my_rename_with_symlink(const char *from,const char *to,myf MyFlags);
 extern int my_symlink(const char *content, const char *linkname, myf MyFlags);
 extern uint my_read(File Filedes,byte *Buffer,uint Count,myf MyFlags);
 extern uint my_pread(File Filedes,byte *Buffer,uint Count,my_off_t offset,

@@ -22,6 +22,9 @@ extern "C" {
   
 #ifndef _global_h				/* If not standard header */
 #include <sys/types.h>
+#ifdef __LCC__
+#include <winsock.h>				/* For windows */
+#endif
 typedef char my_bool;
 #if (defined(_WIN32) || defined(_WIN64)) && !defined(__WIN__)
 #define __WIN__
@@ -126,7 +129,8 @@ struct st_mysql_options {
 enum mysql_option { MYSQL_OPT_CONNECT_TIMEOUT, MYSQL_OPT_COMPRESS,
 		    MYSQL_OPT_NAMED_PIPE, MYSQL_INIT_COMMAND,
 		    MYSQL_READ_DEFAULT_FILE, MYSQL_READ_DEFAULT_GROUP,
-		    MYSQL_SET_CHARSET_DIR, MYSQL_SET_CHARSET_NAME};
+		    MYSQL_SET_CHARSET_DIR, MYSQL_SET_CHARSET_NAME,
+		    MYSQL_OPT_LOCAL_INFILE};
 
 enum mysql_status { MYSQL_STATUS_READY,MYSQL_STATUS_GET_RESULT,
 		    MYSQL_STATUS_USE_RESULT};

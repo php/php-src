@@ -60,7 +60,7 @@ void my_init(void)
   pthread_init();			/* Must be called before DBUG_ENTER */
 #endif
   my_thread_global_init();
-#ifndef __WIN__
+#if !defined( __WIN__) && !defined(OS2)
   sigfillset(&my_signals);		/* signals blocked by mf_brkhant */
 #endif
 #endif /* THREAD */
@@ -112,6 +112,7 @@ void my_end(int infoflag)
       DBUG_PRINT("error",("%s",errbuff[0]));
     }
   }
+  free_charsets();
   if (infoflag & MY_GIVE_INFO || info_file != stderr)
   {
 #ifdef HAVE_GETRUSAGE
@@ -136,7 +137,6 @@ Voluntary context switches %ld, Involuntary context switches %ld\n",
 #if defined(MSDOS) && !defined(__WIN__)
     fprintf(info_file,"\nRun time: %.1f\n",(double) clock()/CLOCKS_PER_SEC);
 #endif
-    free_charsets();
 #if defined(SAFEMALLOC)
     TERMINATE(stderr);		/* Give statistic on screen */
 #elif defined(__WIN__) && defined(_MSC_VER)

@@ -5,6 +5,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include "mysys_err.h"
 #include <errno.h>
 
+
 	/* Write a chunk of bytes to a file */
 
 uint my_write(int Filedes, const byte *Buffer, uint Count, myf MyFlags)

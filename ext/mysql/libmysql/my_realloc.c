@@ -35,7 +35,7 @@ gptr my_realloc(gptr oldpoint, uint Size, myf MyFlags)
     free(oldpoint);
   }
 #else
-  if ((point = realloc(oldpoint,Size)) == NULL)
+  if ((point = (char*)realloc(oldpoint,Size)) == NULL)
   {
     if (MyFlags & MY_FREE_ON_ERROR)
       my_free(oldpoint,MyFLAGS);

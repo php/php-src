@@ -6,7 +6,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include "mysys_err.h"
 #include <my_dir.h>
 #include <errno.h>
-#if defined(MSDOS) || defined(__WIN__) || defined(__EMX__)
+#if defined(MSDOS) || defined(__WIN__) || defined(__EMX__) || defined(OS2)
 #include <share.h>
 #endif
 
@@ -21,7 +21,7 @@ File my_open(const char *FileName, int Flags, myf MyFlags)
   DBUG_ENTER("my_open");
   DBUG_PRINT("my",("Name: '%s'  Flags: %d  MyFlags: %d",
 		   FileName, Flags, MyFlags));
-#if defined(MSDOS) || defined(__WIN__) || defined(__EMX__)
+#if defined(MSDOS) || defined(__WIN__) || defined(__EMX__) || defined(OS2)
   if (Flags & O_SHARE)
     fd = sopen((my_string) FileName, (Flags & ~O_SHARE) | O_BINARY, SH_DENYNO,
 	       MY_S_IREAD | MY_S_IWRITE);
@@ -61,8 +61,8 @@ int my_close(File fd, myf MyFlags)
     pthread_mutex_destroy(&my_file_info[fd].mutex);
 #endif
     my_file_info[fd].type = UNOPEN;
-    my_file_opened--;
   }
+  my_file_opened--;
   pthread_mutex_unlock(&THR_LOCK_open);
   DBUG_RETURN(err);
 } /* my_close */
@@ -82,9 +82,8 @@ File my_register_filename(File fd, const char *FileName, enum file_type
 	my_error(EE_OUT_OF_FILERESOURCES, MYF(ME_BELL+ME_WAITTANG),
 		 FileName, my_errno);
       return(-1);
-#else
-      thread_safe_increment(my_file_opened,&THR_LOCK_open);
 #endif
+      thread_safe_increment(my_file_opened,&THR_LOCK_open);
       return(fd);				/* safeguard */
     }
     pthread_mutex_lock(&THR_LOCK_open);

@@ -19,7 +19,7 @@ const char *my_raid_type(int raid_type);
 }
 #endif
 
-#ifdef USE_RAID
+#if defined(USE_RAID) && !defined(DONT_USE_RAID)
 
 #ifdef __GNUC__
 #pragma interface			/* gcc class implementation */

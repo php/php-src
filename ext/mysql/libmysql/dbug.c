@@ -307,6 +307,7 @@ static char *static_strtok(char *s1,pchar chr);
  *	Macros and defines for testing file accessibility under UNIX and MSDOS.
  */
 
+#undef EXISTS
 #if !defined(HAVE_ACCESS) || defined(MSDOS)
 #define EXISTS(pathname) (FALSE)	/* Assume no existance */
 #define Writable(name) (TRUE)
@@ -489,8 +490,7 @@ static CODE_STATE  static_code_state = { 0,0,"?func","?file",NULL,0,NULL,
  *
  */
 
-void _db_push_ (control)
-const char *control;
+void _db_push_ (const char *control)
 {
   reg1 char *scan;
   reg2 struct link *temp;
@@ -691,15 +691,14 @@ void _db_pop_ ()
  *
  */
 
-void _db_enter_ (_func_, _file_, _line_, _sfunc_, _sfile_, _slevel_,
-		 _sframep_)
-const char *_func_;
-const char *_file_;
-uint _line_;
-const char **_sfunc_;
-const char **_sfile_;
-uint *_slevel_;
-char ***_sframep_ __attribute__((unused));
+void _db_enter_ (
+const char *_func_,
+const char *_file_,
+uint _line_,
+const char **_sfunc_,
+const char **_sfile_,
+uint *_slevel_,
+char ***_sframep_ __attribute__((unused)))
 {
   reg1 CODE_STATE *state;
 
@@ -777,11 +776,11 @@ char ***_sframep_ __attribute__((unused));
  *
  */
 
-void _db_return_ (_line_, _sfunc_, _sfile_, _slevel_)
-uint _line_;
-const char **_sfunc_;
-const char **_sfile_;
-uint *_slevel_;
+void _db_return_ (
+uint _line_,
+const char **_sfunc_,
+const char **_sfile_,
+uint *_slevel_)
 {
   CODE_STATE *state;
 
@@ -851,9 +850,9 @@ uint *_slevel_;
  *
  */
 
-void _db_pargs_ (_line_, keyword)
-uint _line_;
-const char *keyword;
+void _db_pargs_ (
+uint _line_,
+const char *keyword)
 {
   CODE_STATE *state=code_state();
   state->u_line = _line_;
@@ -934,10 +933,11 @@ void _db_doprnt_ (const char *format,...)
  *  Is used to examine corrputed memory or arrays.
  */
 
-void _db_dump_(_line_,keyword,memory,length)
-uint _line_,length;
-const char *keyword;
-const char *memory;
+void _db_dump_(
+uint _line_,
+const char *keyword,
+const char *memory,
+uint length)
 {
   int pos;
   char dbuff[90];
@@ -1004,11 +1004,11 @@ const char *memory;
  *
  */
 
-static struct link *ListParse (ctlp)
-char *ctlp;
+static struct link *ListParse (
+char *ctlp)
 {
   REGISTER char *start;
-  REGISTER struct link *new;
+  REGISTER struct link *new_malloc;
   REGISTER struct link *head;
 
   head = NULL;
@@ -1020,10 +1020,10 @@ char *ctlp;
     if (*ctlp == ',') {
       *ctlp++ = EOS;
     }
-    new = (struct link *) DbugMalloc (sizeof (struct link));
-    new -> str = StrDup (start);
-    new -> next_link = head;
-    head = new;
+    new_malloc = (struct link *) DbugMalloc (sizeof (struct link));
+    new_malloc -> str = StrDup (start);
+    new_malloc -> next_link = head;
+    head = new_malloc;
   }
   return (head);
 }
@@ -1052,9 +1052,9 @@ char *ctlp;
  *
  */
 
-static BOOLEAN InList (linkp, cp)
-struct link *linkp;
-const char *cp;
+static BOOLEAN InList (
+struct link *linkp,
+const char *cp)
 {
   REGISTER struct link *scan;
   REGISTER BOOLEAN result;
@@ -1098,7 +1098,7 @@ const char *cp;
 
 static void PushState ()
 {
-  REGISTER struct state *new;
+  REGISTER struct state *new_malloc;
 
   if (!init_done)
   {
@@ -1106,19 +1106,19 @@ static void PushState ()
     init_done=TRUE;
   }
   (void) code_state();				/* Alloc memory */
-  new = (struct state *) DbugMalloc (sizeof (struct state));
-  new -> flags = 0;
-  new -> delay = 0;
-  new -> maxdepth = MAXDEPTH;
-  new -> sub_level=0;
-  new -> out_file = stderr;
-  new -> prof_file = (FILE*) 0;
-  new -> functions = NULL;
-  new -> p_functions = NULL;
-  new -> keywords = NULL;
-  new -> processes = NULL;
-  new -> next_state = stack;
-  stack=new;
+  new_malloc = (struct state *) DbugMalloc (sizeof (struct state));
+  new_malloc -> flags = 0;
+  new_malloc -> delay = 0;
+  new_malloc -> maxdepth = MAXDEPTH;
+  new_malloc -> sub_level=0;
+  new_malloc -> out_file = stderr;
+  new_malloc -> prof_file = (FILE*) 0;
+  new_malloc -> functions = NULL;
+  new_malloc -> p_functions = NULL;
+  new_malloc -> keywords = NULL;
+  new_malloc -> processes = NULL;
+  new_malloc -> next_state = stack;
+  stack=new_malloc;
 }
 
 
@@ -1216,8 +1216,8 @@ static BOOLEAN DoProfile ()
  *
  */
 
-BOOLEAN _db_keyword_ (keyword)
-const char *keyword;
+BOOLEAN _db_keyword_ (
+const char *keyword)
 {
   REGISTER BOOLEAN result;
   CODE_STATE *state;
@@ -1256,8 +1256,8 @@ const char *keyword;
  *
  */
 
-static void Indent (indent)
-int indent;
+static void Indent (
+int indent)
 {
   REGISTER int count;
 
@@ -1289,8 +1289,8 @@ int indent;
  *
  */
 
-static void FreeList (linkp)
-struct link *linkp;
+static void FreeList (
+struct link *linkp)
 {
   REGISTER struct link *old;
 
@@ -1325,13 +1325,13 @@ struct link *linkp;
  */
 
 
-static char *StrDup (str)
-const char *str;
+static char *StrDup (
+const char *str)
 {
-    reg1 char *new;
-    new = DbugMalloc ((int) strlen (str) + 1);
-    (void) strcpy (new, str);
-    return (new);
+    reg1 char *new_malloc;
+    new_malloc = DbugMalloc ((int) strlen (str) + 1);
+    (void) strcpy (new_malloc, str);
+    return (new_malloc);
 }
 
 
@@ -1354,8 +1354,8 @@ const char *str;
  *
  */
 
-static void DoPrefix (_line_)
-uint _line_;
+static void DoPrefix (
+uint _line_)
 {
   CODE_STATE *state;
   state=code_state();
@@ -1365,7 +1365,7 @@ uint _line_;
 #ifdef THREAD
     (void) fprintf (_db_fp_, "%-7s: ", my_thread_name());
 #else
-    (void) fprintf (_db_fp_, "%5d: ", getpid ());
+    (void) fprintf (_db_fp_, "%5d: ", (int) getpid ());
 #endif
   }
   if (stack -> flags & NUMBER_ON) {
@@ -1419,7 +1419,7 @@ static void DBUGOpenFile (const char *name,int append)
     }
     else
     {
-      if (!Writable(name))
+      if (!Writable((char*)name))
       {
 	(void) fprintf (stderr, ERR_OPEN, _db_process_, name);
 	perror ("");
@@ -1528,8 +1528,8 @@ static FILE *OpenProfile (const char *name)
  *
  */
 
-static void CloseFile (fp)
-FILE *fp;
+static void CloseFile (
+FILE *fp)
 {
   if (fp != stderr && fp != stdout) {
     if (fclose (fp) == EOF) {
@@ -1590,14 +1590,14 @@ static void DbugExit (const char *why)
  *
  */
 
-static char *DbugMalloc (size)
-int size;
+static char *DbugMalloc (
+int size)
 {
-    register char *new;
+    register char *new_malloc;
 
-    if (!(new = malloc ((unsigned int) size)))
+    if (!(new_malloc = (char*) malloc ((unsigned int) size)))
       DbugExit ("out of memory");
-    return (new);
+    return (new_malloc);
 }
 
 
@@ -1606,9 +1606,9 @@ int size;
  *		separator (to allow directory-paths in dos).
  */
 
-static char *static_strtok (s1, separator)
-char *s1;
-pchar separator;
+static char *static_strtok (
+char *s1,
+pchar separator)
 {
   static char *end = NULL;
   reg1 char *rtnval,*cpy;
@@ -1692,8 +1692,8 @@ static char *BaseName (const char *pathname)
 
 #ifndef Writable
 
-static BOOLEAN Writable (pathname)
-char *pathname;
+static BOOLEAN Writable (
+char *pathname)
 {
   REGISTER BOOLEAN granted;
   REGISTER char *lastslash;
@@ -1746,8 +1746,8 @@ char *pathname;
  */
 
 #ifndef ChangeOwner
-static void ChangeOwner (pathname)
-char *pathname;
+static void ChangeOwner (
+char *pathname)
 {
   if (chown (pathname, getuid (), getgid ()) == -1)
   {
@@ -1847,8 +1847,8 @@ EXPORT void _db_longjmp_ ()
 #define HZ (50)			      /* Probably in some header somewhere */
 #endif
 
-static int DelayArg (value)
-int value;
+static int DelayArg (
+int value)
 {
   uint delayarg = 0;
 
@@ -1868,8 +1868,8 @@ int value;
  */
 
 #if ! defined(Delay) && ! defined(AMIGA)
-static int Delay (ticks)
-int ticks;
+static int Delay (
+int ticks)
 {
   return ticks;
 }
@@ -1969,12 +1969,13 @@ void _db_unlock_file()
  * own for whatever system that you have.
  */
 
-#ifdef HAVE_GETRUSAGE
+#ifndef THREAD
+#if defined(HAVE_GETRUSAGE)
 
 #include <sys/param.h>
 #include <sys/resource.h>
 
-/* extern int     getrusage(int, struct rusage *); */
+/* extern int getrusage(int, struct rusage *); */
 
 /*
  * Returns the user time in milliseconds used by this process so
@@ -1989,15 +1990,13 @@ static unsigned long Clock ()
     return ((ru.ru_utime.tv_sec * 1000) + (ru.ru_utime.tv_usec / 1000));
 }
 
-#else
-#if defined(MSDOS) || defined(__WIN__)
+#elif defined(MSDOS) || defined(__WIN__) || defined(OS2)
 
 static ulong Clock()
 {
   return clock()*(1000/CLOCKS_PER_SEC);
 }
-#else
-#ifdef amiga
+#elif defined (amiga)
 
 struct DateStamp {		/* Yes, this is a hack, but doing it right */
 	long ds_Days;		/* is incredibly ugly without splitting this */
@@ -2030,19 +2029,13 @@ static unsigned long Clock ()
     }
     return (millisec);
 }
-
 #else
-
-#ifndef THREAD
 static unsigned long Clock ()
 {
     return (0);
 }
-#endif
-#endif /* amiga */
-#endif /* MSDOS || __WIN__ */
 #endif /* RUSAGE */
-
+#endif /* THREADS */
 
 #ifdef NO_VARARGS
 

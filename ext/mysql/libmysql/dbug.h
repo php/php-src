@@ -52,7 +52,7 @@ extern	void _db_unlock_file();
 #define DEBUGGER_ON  _no_db_=0
 #define DBUG_LOCK_FILE { _db_lock_file(); }
 #define DBUG_UNLOCK_FILE { _db_unlock_file(); }
-#define DBUG_ASSERT(A) A
+#define DBUG_ASSERT(A) assert(A)
 #else						/* No debugger */
 
 #define DBUG_ENTER(a1)

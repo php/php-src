@@ -58,11 +58,11 @@ void list_free(LIST *root, pbool free_data)
 
 LIST *list_cons(void *data, LIST *list)
 {
-  LIST *new=(LIST*) my_malloc(sizeof(LIST),MYF(MY_FAE));
-  if (!new)
+  LIST *new_charset=(LIST*) my_malloc(sizeof(LIST),MYF(MY_FAE));
+  if (!new_charset)
     return 0;
-  new->data=data;
-  return list_add(list,new);
+  new_charset->data=data;
+  return list_add(list,new_charset);
 }
 
 

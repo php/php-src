@@ -51,7 +51,7 @@ my_string fn_format(my_string to, const char *name, const char *dsk,
     pack_dirname(dev,dev);			/* Put in ./.. and ~/.. */
   if (flag & 4)
     (void) unpack_dirname(dev,dev);		/* Replace ~/.. with dir */
-  if ((pos=strchr(name,FN_EXTCHAR)) != NullS)
+  if ((pos=(char*)strchr(name,FN_EXTCHAR)) != NullS)
   {
     if ((flag & 2) == 0)			/* Skall vi byta extension ? */
     {

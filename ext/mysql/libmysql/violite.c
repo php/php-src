@@ -21,25 +21,30 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #ifdef HAVE_POLL
 #include <sys/poll.h>
 #endif
-
-#if defined(__EMX__)
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+
+#if !defined(MSDOS) && !defined(__WIN__) && !defined(HAVE_BROKEN_NETINET_INCLUDES) && !defined(__BEOS__) && !defined(__FreeBSD__)
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#if !defined(alpha_linux_port)
+#include <netinet/tcp.h>
+#endif
+#endif
+
+#if defined(__EMX__) || defined(OS2)
 #define ioctlsocket ioctl
-#endif				/* defined(__EMX__) */
+#endif	/* defined(__EMX__) */
 
 #if defined(MSDOS) || defined(__WIN__)
-#ifdef __WIN__
-#undef errno
-#undef EINTR
-#undef EAGAIN
-#define errno WSAGetLastError()
-#define EINTR  WSAEINTR
-#define EAGAIN WSAEINPROGRESS
-#endif /* __WIN__ */
 #define O_NONBLOCK 1    /* For emulation of fcntl() */
 #endif
 #ifndef EWOULDBLOCK
-#define EWOULDBLOCK EAGAIN
+#define SOCKET_EWOULDBLOCK SOCKET_EAGAIN
 #endif
 
 #ifndef __WIN__
@@ -89,9 +94,12 @@ Vio *vio_new(my_socket sd, enum enum_vio_type type, my_bool localhost)
     sprintf(vio->desc,
 	    (vio->type == VIO_TYPE_SOCKET ? "socket (%d)" : "TCP/IP (%d)"),
 	    vio->sd);
-#if !defined(___WIN__) && !defined(__EMX__)
+#if !defined(___WIN__) && !defined(__EMX__) && !defined(OS2)
 #if !defined(NO_FCNTL_NONBLOCK)
     vio->fcntl_mode = fcntl(sd, F_GETFL);
+#elif defined(HAVE_SYS_IOCTL_H)			/* hpux */
+    /* Non blocking sockets doesn't work good on HPUX 11.0 */
+    (void) ioctl(sd,FIOSNBIO,0);
 #endif
 #else /* !defined(__WIN__) && !defined(__EMX__) */
     {
@@ -135,7 +143,7 @@ void vio_delete(Vio * vio)
 
 int vio_errno(Vio *vio __attribute__((unused)))
 {
-  return errno;			/* On Win32 this mapped to WSAGetLastError() */
+  return socket_errno;		/* On Win32 this mapped to WSAGetLastError() */
 }
 
 
@@ -143,13 +151,18 @@ int vio_read(Vio * vio, gptr buf, int size)
 {
   int r;
   DBUG_ENTER("vio_read");
-  DBUG_PRINT("enter", ("sd=%d, buf=%p, size=%d", vio->sd, buf, size));
-#ifdef __WIN__
+  DBUG_PRINT("enter", ("sd=%d  size=%d", vio->sd, size));
+#if defined( __WIN__) || defined(OS2)
   if (vio->type == VIO_TYPE_NAMEDPIPE)
   {
     DWORD length;
+#ifdef OS2
+    if (!DosRead((HFILE)vio->hPipe, buf, size, &length))
+      DBUG_RETURN(-1);
+#else
     if (!ReadFile(vio->hPipe, buf, size, &length, NULL))
       DBUG_RETURN(-1);
+#endif
     DBUG_RETURN(length);
   }
   r = recv(vio->sd, buf, size,0);
@@ -160,7 +173,7 @@ int vio_read(Vio * vio, gptr buf, int size)
 #ifndef DBUG_OFF
   if (r < 0)
   {
-    DBUG_PRINT("error", ("Got error %d during read",errno));
+    DBUG_PRINT("vio_error", ("Got error %d during read",socket_errno));
   }
 #endif /* DBUG_OFF */
   DBUG_PRINT("exit", ("%d", r));
@@ -172,13 +185,18 @@ int vio_write(Vio * vio, const gptr buf, int size)
 {
   int r;
   DBUG_ENTER("vio_write");
-  DBUG_PRINT("enter", ("sd=%d, buf=%p, size=%d", vio->sd, buf, size));
-#ifdef __WIN__
+  DBUG_PRINT("enter", ("sd=%d  size=%d", vio->sd, size));
+#if defined( __WIN__) || defined(OS2)
   if ( vio->type == VIO_TYPE_NAMEDPIPE)
   {
     DWORD length;
+#ifdef OS2
+    if (!DosWrite((HFILE)vio->hPipe, (char*) buf, size, &length))
+      DBUG_RETURN(-1);
+#else
     if (!WriteFile(vio->hPipe, (char*) buf, size, &length, NULL))
       DBUG_RETURN(-1);
+#endif
     DBUG_RETURN(length);
   }
   r = send(vio->sd, buf, size,0);
@@ -188,7 +206,7 @@ int vio_write(Vio * vio, const gptr buf, int size)
 #ifndef DBUG_OFF
   if (r < 0)
   {
-    DBUG_PRINT("error", ("Got error on write: %d",errno));
+    DBUG_PRINT("vio_error", ("Got error on write: %d",socket_errno));
   }
 #endif /* DBUG_OFF */
   DBUG_PRINT("exit", ("%d", r));
@@ -202,7 +220,7 @@ int vio_blocking(Vio * vio, my_bool set_blocking_mode)
   DBUG_ENTER("vio_blocking");
   DBUG_PRINT("enter", ("set_blocking_mode: %d", (int) set_blocking_mode));
 
-#if !defined(___WIN__) && !defined(__EMX__)
+#if !defined(___WIN__) && !defined(__EMX__) && !defined(OS2)
 #if !defined(NO_FCNTL_NONBLOCK)
 
   if (vio->sd >= 0)
@@ -282,7 +300,7 @@ int vio_keepalive(Vio* vio, my_bool set_keep_alive)
   int r=0;
   uint opt = 0;
   DBUG_ENTER("vio_keepalive");
-  DBUG_PRINT("enter", ("sd=%d, set_keep_alive=%d", vio->sd, (int)
+  DBUG_PRINT("enter", ("sd=%d  set_keep_alive=%d", vio->sd, (int)
 		       set_keep_alive));
   if (vio->type != VIO_TYPE_NAMEDPIPE)
   {
@@ -298,8 +316,8 @@ int vio_keepalive(Vio* vio, my_bool set_keep_alive)
 my_bool
 vio_should_retry(Vio * vio __attribute__((unused)))
 {
-  int en = errno;
-  return en == EAGAIN || en == EINTR || en == EWOULDBLOCK;
+  int en = socket_errno;
+  return en == SOCKET_EAGAIN || en == SOCKET_EINTR || en == SOCKET_EWOULDBLOCK;
 }
 
 
@@ -327,7 +345,7 @@ int vio_close(Vio * vio)
   }
   if (r)
   {
-    DBUG_PRINT("error", ("close() failed, error: %d",errno));
+    DBUG_PRINT("vio_error", ("close() failed, error: %d",socket_errno));
     /* FIXME: error handling (not critical for MySQL) */
   }
   vio->type= VIO_CLOSED;
@@ -366,7 +384,7 @@ my_bool vio_peer_addr(Vio * vio, char *buf)
     if (getpeername(vio->sd, (struct sockaddr *) (& (vio->remote)),
 		    &addrLen) != 0)
     {
-      DBUG_PRINT("exit", ("getpeername, error: %d", errno));
+      DBUG_PRINT("exit", ("getpeername, error: %d", socket_errno));
       DBUG_RETURN(1);
     }
     my_inet_ntoa(vio->remote.sin_addr,buf);

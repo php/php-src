@@ -60,7 +60,7 @@ my_string my_path(my_string to, const char *progname,
 	/* test if file without filename is found in path */
 	/* Returns to if found and to has dirpart if found, else NullS */
 
-#if defined(MSDOS) || defined(__WIN__) || defined(__EMX__)
+#if defined(MSDOS) || defined(__WIN__) || defined(__EMX__) || defined(OS2)
 #define F_OK 0
 #define PATH_SEP ';'
 #define PROGRAM_EXTENSION ".exe"
