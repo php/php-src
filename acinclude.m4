@@ -80,6 +80,10 @@ AC_DEFUN(AC_ADD_LIBRARY_WITH_PATH,[
 ])
 
 
+AC_DEFUN(AM_SET_LIBTOOL_VARIABLE,[
+  LIBTOOL='$(SHELL) $(top_builddir)/libtool $1'
+])
+
 dnl
 dnl Check for cc option
 dnl
