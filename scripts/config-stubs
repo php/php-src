@@ -2,6 +2,7 @@
 #
 # $Id$
 
-for stubfile in ext/*/config.m4; do
+dir=$1; shift
+for stubfile in $dir/*/config.m4; do
     echo "sinclude($stubfile)"
 done

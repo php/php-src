@@ -1,0 +1,190 @@
+dnl ## -*- sh -*-
+
+divert(1)
+
+if test "`uname -sv`" = "AIX 4" -a "$GCC" != "yes"; then
+	APXS_EXP="-bE:sapi/apache/mod_php4.exp"
+fi
+AC_SUBST(APXS_EXP)
+	
+divert(2)
+
+AC_MSG_CHECKING(for Apache module support via DSO through APXS)
+AC_ARG_WITH(apxs,
+[  --with-apxs[=FILE]	   Build shared Apache module.	FILE is the optional
+						  pathname to the Apache apxs tool; defaults to "apxs".
+						  (This option needs Perl installed)],
+[
+	if test "$withval" = "yes"; then
+		withval=apxs
+	fi
+	AC_EXPAND_PATH($withval, APXS)
+	APXS_LDFLAGS="@SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@"
+	APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
+	if test -d "$APXS_INCLUDEDIR/xml" ; then
+		XML_INCLUDE="$APXS_INCLUDEDIR/xml"
+	fi
+	APACHE_INCLUDE="-I$APXS_INCLUDEDIR"
+	PHP_SAPI=apache
+	SAPI_TARGET=libphp4.so
+	APACHE_INSTALL="\$(APXS) -i -a -n php4 $SAPI_TARGET"
+	CFLAGS_SHLIB=`perl -V:cccdlflags | cut -d\' -f2`
+	LDFLAGS_SHLIB=`perl -V:lddlflags | cut -d\' -f2`
+	LDFLAGS_SHLIB_EXPORT=`perl -V:ccdlflags | cut -d\' -f2`
+	PHP_LIBS=
+	STRONGHOLD=
+	INCLUDES="$INCLUDES $APACHE_INCLUDE"
+	AC_DEFINE(APACHE)
+	AC_DEFINE(HAVE_AP_CONFIG_H)
+	AC_DEFINE(HAVE_AP_COMPAT_H)
+	AC_MSG_RESULT(yes)
+],[
+	AC_MSG_RESULT(no)
+])
+
+APACHE_INSTALL_FILES="$srcdir/mod_php4.* libphp4.module"
+
+if test "$SAPI_TARGET" != "libmodphp4-so.a"; then
+if test "$SAPI_TARGET" != "libphp4.so"; then
+AC_MSG_CHECKING(for Apache module support)
+AC_ARG_WITH(apache,
+[  --with-apache[=DIR]	   Build Apache module.	 DIR is the top-level Apache
+						  build directory, defaults to /usr/local/etc/httpd.],
+[
+	if test "$withval" = "yes"; then
+	  # Apache's default directory
+	  withval=/usr/local/apache
+	fi
+	if test "$withval" != "no"; then
+		AC_EXPAND_PATH($withval, withval)
+		# For Apache 1.2.x
+		if test -f $withval/src/httpd.h; then 
+			APACHE_INCLUDE=-I$withval/src
+			APACHE_TARGET=$withval/src
+			PHP_SAPI=apache
+			SAPI_TARGET=libphp4.a
+			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_TARGET $APACHE_INSTALL_FILES $APACHE_TARGET"
+			PHP_LIBS="-L. -lphp3"
+			AC_DEFINE(APACHE)
+			AC_MSG_RESULT(yes - Apache 1.2.x)
+			STRONGHOLD=
+			if test -f $withval/src/ap_config.h; then
+				AC_DEFINE(HAVE_AP_CONFIG_H)
+			fi
+		# For Apache 1.3.x
+		elif test -f $withval/src/main/httpd.h; then
+			APACHE_INCLUDE="-I$withval/src/main -I$withval/src/os/unix -I$withval/src/ap"
+			APACHE_TARGET=$withval/src/modules/php4
+			if test ! -d $APACHE_TARGET; then
+				mkdir $APACHE_TARGET
+			fi
+			PHP_SAPI=apache
+			SAPI_TARGET=libmodphp4.a
+			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_TARGET $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
+			PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
+			AC_DEFINE(APACHE)
+			AC_MSG_RESULT(yes - Apache 1.3.x)
+			STRONGHOLD=
+			if test -f $withval/src/include/ap_config.h; then
+				AC_DEFINE(HAVE_AP_CONFIG_H)
+			fi
+			if test -f $withval/src/include/ap_compat.h; then
+				AC_DEFINE(HAVE_AP_COMPAT_H)
+				if test ! -f $withval/src/include/ap_config_auto.h; then
+					AC_MSG_ERROR(Please run Apache\'s configure or src/Configure program once and try again)
+				fi
+			else
+				if test -f $withval/src/include/compat.h; then
+					AC_DEFINE(HAVE_OLD_COMPAT_H)
+				fi
+			fi
+		# Also for Apache 1.3.x
+		elif test -f $withval/src/include/httpd.h; then
+			APACHE_INCLUDE="-I$withval/src/include -I$withval/src/os/unix"
+			APACHE_TARGET=$withval/src/modules/php4
+			if test -d $withval/src/lib/expat-lite ; then
+				  XML_INCLUDE=$withval/src/lib/expat-lite
+			fi
+			if test ! -d $APACHE_TARGET; then
+				mkdir $APACHE_TARGET
+			fi
+			PHP_SAPI=apache
+			SAPI_TARGET=libmodphp4.a
+			PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
+			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_TARGET $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
+			AC_DEFINE(APACHE)
+			AC_MSG_RESULT(yes - Apache 1.3.x)
+			STRONGHOLD=
+			if test -f $withval/src/include/ap_config.h; then
+				AC_DEFINE(HAVE_AP_CONFIG_H)
+			fi
+			if test -f $withval/src/include/ap_compat.h; then
+				AC_DEFINE(HAVE_AP_COMPAT_H)
+				if test ! -f $withval/src/include/ap_config_auto.h; then
+					AC_MSG_ERROR(Please run Apache\'s configure or src/Configure program once and try again)
+				fi
+			else
+				if test -f $withval/src/include/compat.h; then
+					AC_DEFINE(HAVE_OLD_COMPAT_H)
+				fi
+			fi
+		# For StrongHold 2.2
+		elif test -f $withval/apache/httpd.h; then
+			APACHE_INCLUDE=-"I$withval/apache -I$withval/ssl/include"
+			APACHE_TARGET=$withval/apache
+			PHP_SAPI=apache
+			SAPI_TARGET=libmodphp4.a
+			PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
+			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_TARGET $APACHE_INSTALL_FILES $APACHE_TARGET"
+			STRONGHOLD=-DSTRONGHOLD=1
+			AC_DEFINE(APACHE)
+			AC_MSG_RESULT(yes - StrongHold)
+			if test -f $withval/apache/ap_config.h; then
+				AC_DEFINE(HAVE_AP_CONFIG_H)
+			fi
+			if test -f $withval/src/ap_compat.h; then
+				AC_DEFINE(HAVE_AP_COMPAT_H)
+				if test ! -f $withval/src/include/ap_config_auto.h; then
+					AC_MSG_ERROR(Please run Apache\'s configure or src/Configure program once and try again)
+				fi
+			else
+				if test -f $withval/src/compat.h; then
+					AC_DEFINE(HAVE_OLD_COMPAT_H)
+				fi
+			fi
+		else
+			AC_MSG_RESULT(no)
+			AC_MSG_ERROR(Invalid Apache directory - unable to find httpd.h under $withval)
+		fi
+	else
+		AC_MSG_RESULT(no)
+	fi
+],[
+	AC_MSG_RESULT(no)
+])
+
+INCLUDES="$INCLUDES $APACHE_INCLUDE"
+dnl## AC_SUBST(APACHE_INCLUDE)
+fi
+fi
+
+AC_SUBST(APACHE_INCLUDE)
+AC_SUBST(APACHE_TARGET)
+AC_SUBST(APXS)
+AC_SUBST(APXS_LDFLAGS)
+AC_SUBST(APACHE_INSTALL)
+AC_SUBST(STRONGHOLD)
+
+AC_MSG_CHECKING(for mod_charset compatibility option)
+AC_ARG_WITH(mod_charset,
+[  --with-mod_charset      Enable transfer tables for mod_charset (Rus Apache).],
+[
+	AC_MSG_RESULT(yes)
+    AC_DEFINE(USE_TRANSFER_TABLES)
+],[
+	AC_MSG_RESULT(no)
+])
+
+dnl ## Local Variables:
+dnl ## tab-width: 4
+dnl ## End:
