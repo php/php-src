@@ -67,6 +67,8 @@ class PEAR_Common extends PEAR
 
     function PEAR_Common()
     {
+        $GLOBALS['_PEAR_Common_tempfiles'] = array();
+        $this->_tempfiles =& $GLOBALS['_PEAR_Common_tempfiles'];
         $this->PEAR();
     }
 
@@ -75,8 +77,11 @@ class PEAR_Common extends PEAR
 
     function _PEAR_Common()
     {
-        while (is_array($this->_tempfiles) &&
-               $file = array_shift($this->_tempfiles))
+        // doesn't work due to bug #14744
+        //$tempfiles = $this->_tempfiles;
+        $tempfiles =& $GLOBALS['_PEAR_Common_tempfiles'];
+        while (is_array($tempfiles) &&
+               $file = array_shift($tempfiles))
         {
             if (@is_dir($file)) {
                 System::rm("-rf $file");
@@ -210,6 +215,9 @@ class PEAR_Common extends PEAR
                 break;
             case 'summary':
                 $this->pkginfo['summary'] = $data;
+                break;
+            case 'description':
+                $this->pkginfo['description'] = $data;
                 break;
             case 'user':
                 $this->current_maintainer['handle'] = $data;
@@ -387,33 +395,32 @@ class PEAR_Common extends PEAR
 
     /**
     * Returns info from a tgz pear package
-    * (experimental)
     */
-    function infoFromTgzFile($file, $pedantic = true)
+    function infoFromTgzFile($file)
     {
-        if ($pedantic) {
-            // XXX Fixme: Only allows file in the current dir
-            $file = basename($file);
-        }
         if (!@is_file($file)) {
-            return $this->raiseError('no tar file supplied');
+            return $this->raiseError('tgz :: could not open file');
         }
-        // Assume the decompressed dir name
-        if ($pedantic && ($pos = strrpos($file, '.')) === false) {
-            return $this->raiseError('file doesn\'t follow the package name convention');
-        }
-        $pkgdir = substr($file, 0, $pos);
-        $xml = $pkgdir . DIRECTORY_SEPARATOR . 'package.xml';
-
         $tar = new Archive_Tar($file, true);
-        if (!$tar->extractList($xml)) {
-            return $this->raiseError('could not extract the package.xml file');
+        $content = $tar->listContent();
+        if (!is_array($content)) {
+            return $this->raiseError('tgz :: could not get contents of package');
         }
-        $info = $this->infoFromDescriptionFile($xml);
-        unlink($xml);
-        return $info;
-    }
+        $xml = null;
+        foreach ($content as $file) {
+            $name = $file['filename'];
+            if (ereg('^.*/package.xml$', $name, $match)) {
+                $xml = $match[0];
+            }
+        }
+        $tmpdir = System::mkTemp('-d pear');
+        $this->addTempFile($tmpdir);
+        if (!$xml || !$tar->extractList($xml, $tmpdir)) {
+            return $this->raiseError('tgz :: could not extract the package.xml file');
+        }
+        return $this->infoFromDescriptionFile("$tmpdir/$xml");
 
     // }}}
+    }
 }
 ?>
