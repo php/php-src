@@ -122,7 +122,7 @@ php_memnstr(char *haystack, char *needle, int needle_len, char *end)
 	char *s = NULL;
 
 	for(; p <= end - needle_len && 
-			(s = memchr(p, *needle, end - p - needle_len + 1)); p = s + 1) {
+			(s = (char*)memchr(p, *needle, end - p - needle_len + 1)); p = s + 1) {
 		if(memcmp(s, needle, needle_len) == 0)
 			return s;
 	}
