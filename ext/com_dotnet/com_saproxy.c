@@ -265,7 +265,7 @@ static void saproxy_free_storage(void *object TSRMLS_DC)
 {
 	php_com_saproxy *proxy = (php_com_saproxy *)object;
 
-	ZVAL_DELREF(proxy->zobj);
+	zval_ptr_dtor(&proxy->zobj);
 	efree(proxy->indices);
 	efree(proxy);
 }
@@ -325,7 +325,7 @@ static void saproxy_iter_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)iter->data;
 
-	ZVAL_DELREF(I->proxy_obj);
+	zval_ptr_dtor(&I->proxy_obj);
 
 	efree(I->indices);
 	efree(I);
