@@ -135,19 +135,19 @@ AC_MSG_CHECKING(whether to enable Zend debugging)
 AC_MSG_RESULT($ZEND_DEBUG)
 	
 if test "$ZEND_DEBUG" = "yes"; then
-  AC_DEFINE(ZEND_DEBUG,1)
+  AC_DEFINE(ZEND_DEBUG,1,[ ])
   echo " $CFLAGS" | grep ' -g' >/dev/null || DEBUG_CFLAGS="-g"
   test -n "$GCC" && DEBUG_CFLAGS="$DEBUG_CFLAGS -Wall"
   test -n "$GCC" && test "$USE_MAINTAINER_MODE" = "yes" && \
     DEBUG_CFLAGS="$DEBUG_CFLAGS -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations"
 else
-  AC_DEFINE(ZEND_DEBUG,0)
+  AC_DEFINE(ZEND_DEBUG,0,[ ])
 fi
 
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
 if test "$ZEND_EXPERIMENTAL_ZTS" = "yes"; then
-  AC_DEFINE(ZTS)
+  AC_DEFINE(ZTS,1,[ ])
   ZEND_SCANNER_TYPE=cc
   CPPFLAGS="$CPPFLAGS -I../TSRM"
   LIBZEND_CPLUSPLUS_CHECKS
