@@ -2127,22 +2127,19 @@ send_by_ref:
 					zval *array_ptr;
 					HashTable *fe_ht;
 					
-					if ((opline->op1.op_type == IS_CONST) || (opline->op1.op_type == IS_TMP_VAR)) {
-						array_ptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
-						if (EG(free_op1)) { /* IS_TMP_VAR */
-							zval *tmp;
+					array_ptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 
-							ALLOC_ZVAL(tmp);
-							*tmp = *array_ptr;
-							INIT_PZVAL(tmp);
-							array_ptr = tmp;
-						} else { /* IS_CONST */
-							array_ptr->refcount++;
-						}
-					} else {
-						array_ptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+					if (EG(free_op1)) { /* IS_TMP_VAR */
+						zval *tmp;
+
+						ALLOC_ZVAL(tmp);
+						*tmp = *array_ptr;
+						INIT_PZVAL(tmp);
+						array_ptr = tmp;
+					} else { /* IS_CONST */
 						array_ptr->refcount++;
 					}
+
 					PZVAL_LOCK(array_ptr);
 					Ts[opline->result.u.var].var.ptr = array_ptr;
 					Ts[opline->result.u.var].var.ptr_ptr = &Ts[opline->result.u.var].var.ptr;	
