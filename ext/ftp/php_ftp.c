@@ -108,7 +108,7 @@ PHP_MINFO_FUNCTION(ftp)
 
 #define	XTYPE(xtype, mode)	{ \
 								if (mode != FTPTYPE_ASCII && mode != FTPTYPE_IMAGE) { \
-									php_error(E_WARNING, "%s(): mode must be FTP_ASCII or FTP_IMAGE", get_active_function_name(TSRMLS_C)); \
+									php_error(E_WARNING, "%s(): mode must be FTP_ASCII or FTP_BINARY", get_active_function_name(TSRMLS_C)); \
 									RETURN_FALSE; \
 								} \
 								xtype = mode; \
