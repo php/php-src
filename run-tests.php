@@ -851,7 +851,7 @@ COMMAND $cmd
 	} else {
 		$wanted = trim($section_text['EXPECT']);
 		$wanted = preg_replace('/\r\n/',"\n",$wanted);
-	// compare and leave on success
+		// compare and leave on success
 		$ok = (0 == strcmp($output,$wanted));
 		if ($ok) {
 			@unlink($tmp_file);
@@ -861,6 +861,7 @@ COMMAND $cmd
 			}
 			return 'PASSED';
 		}
+		$wanted_re = NULL;
 	}
 
 	// Test failed so we need to report details.
@@ -898,7 +899,7 @@ COMMAND $cmd
 	if (strpos($log_format,'D') !== FALSE) {
 		$logname = ereg_replace('\.phpt$','.diff',$file);
 		$log = fopen($logname,'w') or error("Cannot create test log - $logname");
-		fwrite($log,generate_diff($wanted,$output));
+		fwrite($log,generate_diff($wanted,$wanted_re,$output));
 		fclose($log);
 	}
 
@@ -924,10 +925,18 @@ $output
 	return $warn ? 'WARNED' : 'FAILED';
 }
 
-function generate_diff($wanted,$output)
+function generate_diff($wanted,$wanted_re,$output)
 {
 	$w = explode("\n", $wanted);
 	$o = explode("\n", $output);
+	if (!is_null($wanted_re)) {
+		$r = explode("\n", $wanted_re);
+		for($idx = 0; $idx < min(count($o),count($r)); $idx++) {
+			if (preg_match('/^'.$r[$idx].'$/s', $o[$idx])) {
+				$w[$idx] = $o[$idx];  
+			}
+		}
+	}
 	$w1 = array_diff_assoc($w,$o);
 	$o1 = array_diff_assoc($o,$w);
 	$w2 = array();
