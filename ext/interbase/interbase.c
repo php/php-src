@@ -1906,12 +1906,12 @@ PHP_FUNCTION(ibase_rollback_ret)
 static void _php_ibase_do_fetch(ibase_result *ib_result TSRMLS_DC)
 {
 	if (ib_result->has_more_rows) {
-		if (isc_dsql_fetch(IB_STATUS, &ib_result->stmt, 1, ib_result->out_sqlda) == 100L) {
+		if (isc_dsql_fetch(IB_STATUS, &ib_result->stmt, 1, ib_result->out_sqlda)) {
+
 			ib_result->has_more_rows = 0;
-		}
-	
-		if (IB_STATUS[0] && IB_STATUS[1]) { /* error in fetch */
-			_php_ibase_error(TSRMLS_C);
+			if (IB_STATUS[0] && IB_STATUS[1]) { /* error in fetch */
+				_php_ibase_error(TSRMLS_C);
+			}
 		}
 	}
 }	
@@ -3528,7 +3528,7 @@ PHP_FUNCTION(ibase_blob_import)
 	unsigned short b;
 	ibase_blob_handle ib_blob;
 	ibase_db_link *ib_link;
-	ibase_trans *trans;
+	ibase_trans *trans = NULL;
 	char bl_data[IBASE_BLOB_SEG]; /* FIXME? blob_seg_size parameter?	 */
 	php_stream *stream;
 
