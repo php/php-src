@@ -44,6 +44,7 @@
 #include "ext/gd/php3_gd.h"
 #include "ext/dbase/dbase.h"
 #include "ext/odbc/php3_odbc.h"
+#include "ext/gettext/php3_gettext.h"
 
 #include "functions/php3_ifx.h"
 #include "functions/php3_ldap.h"
@@ -119,6 +120,7 @@ zend_module_entry *php3_builtin_modules[] =
 	sysvsem_module_ptr,
 	sysvshm_module_ptr,
 	phpdav_module_ptr,
+	php3_gettext_module_ptr,
 };
 
 	

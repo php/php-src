@@ -30,6 +30,7 @@
  */
 
 
+#include <php.h>
 #include <errno.h>
 #include "php_compat.h"
 
