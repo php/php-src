@@ -1,5 +1,6 @@
 <?php
 class Soap12test {
+	var $header;
 
 	function echoOk($x) {
   	return $x;
@@ -95,9 +96,20 @@ class Soap12test {
 
 	function returnVoid() {
 	}
+
+	function emptyBody() {
+	}
+
+	function requiredHeader($x) {
+		$this->header = $x;
+	}
+
+	function echoHeader() {
+	  return $this->header;
+	}
 }
 
-$server = new soapserver("http://http://example.org/ts-tests");
+$server = new soapserver("http://http://example.org/ts-tests","http://example.org/ts-tests/C");
 $server->bind(dirname(__FILE__)."/soap12-test.wsdl");
 $server->setClass("Soap12test");
 
