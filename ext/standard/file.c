@@ -1703,6 +1703,10 @@ PHP_FUNCTION(copy)
 		RETURN_FALSE;
 	}
 	
+	if (PG(safe_mode) &&(!php_checkuid((*target)->value.str.val, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		RETURN_FALSE;
+	}
+	
 	if (php_copy_file(Z_STRVAL_PP(source), Z_STRVAL_PP(target))==SUCCESS) {
 		RETURN_TRUE;
 	} else {
