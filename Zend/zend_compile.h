@@ -364,6 +364,7 @@ void zend_class_add_ref(zend_class_entry *ce);
 #define ZEND_CLASS_DTOR (int (*)(void *)) destroy_zend_class
 
 zend_op *get_next_op(zend_op_array *op_array CLS_DC);
+void init_op(zend_op *op CLS_DC);
 int get_next_op_number(zend_op_array *op_array);
 int print_class(zend_class_entry *class_entry);
 void print_op_array(zend_op_array *op_array, int optimizations);

@@ -198,22 +198,29 @@ void do_fetch_globals(znode *varname CLS_DC)
 
 void fetch_simple_variable_ex(znode *result, znode *varname, int bp, int op CLS_DC)
 {
-	int next_op_number = get_next_op_number(CG(active_op_array));
-	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
+	zend_op opline;
+	zend_op *opline_ptr;
 	zend_llist *fetch_list_ptr;
 
-	opline->opcode = op;
-	opline->result.op_type = IS_VAR;
-	opline->result.u.EA.type = 0;
-	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->op1 = *varname;
-	*result = opline->result;
-	SET_UNUSED(opline->op2);
-	opline->op2.u.fetch_type = ZEND_FETCH_LOCAL;
+	if (bp) {
+		opline_ptr = &opline;
+		init_op(opline_ptr CLS_CC);
+	} else {
+		opline_ptr = get_next_op(CG(active_op_array) CLS_CC);
+	}
+
+	opline_ptr->opcode = op;
+	opline_ptr->result.op_type = IS_VAR;
+	opline_ptr->result.u.EA.type = 0;
+	opline_ptr->result.u.var = get_temporary_variable(CG(active_op_array));
+	opline_ptr->op1 = *varname;
+	*result = opline_ptr->result;
+	SET_UNUSED(opline_ptr->op2);
+	opline_ptr->op2.u.fetch_type = ZEND_FETCH_LOCAL;
 
 	if (bp) {
 		zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
-		zend_llist_add_element(fetch_list_ptr, &next_op_number);
+		zend_llist_add_element(fetch_list_ptr, opline_ptr);
 	}
 }
 
@@ -234,21 +241,21 @@ void fetch_array_begin(znode *result, znode *varname, znode *first_dim CLS_DC)
 
 void fetch_array_dim(znode *result, znode *parent, znode *dim CLS_DC)
 {
-	int next_op_number = get_next_op_number(CG(active_op_array));
-	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
+	zend_op opline;
 	zend_llist *fetch_list_ptr;
 
-	opline->opcode = ZEND_FETCH_DIM_W;	/* the backpatching routine assumes W */
-	opline->result.op_type = IS_VAR;
-	opline->result.u.EA.type = 0;
-	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->op1 = *parent;
-	opline->op2 = *dim;
-	opline->extended_value = ZEND_FETCH_STANDARD;
-	*result = opline->result;
+	init_op(&opline CLS_CC);
+	opline.opcode = ZEND_FETCH_DIM_W;	/* the backpatching routine assumes W */
+	opline.result.op_type = IS_VAR;
+	opline.result.u.EA.type = 0;
+	opline.result.u.var = get_temporary_variable(CG(active_op_array));
+	opline.op1 = *parent;
+	opline.op2 = *dim;
+	opline.extended_value = ZEND_FETCH_STANDARD;
+	*result = opline.result;
 
 	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
-	zend_llist_add_element(fetch_list_ptr, &next_op_number);
+	zend_llist_add_element(fetch_list_ptr, &opline);
 }
 
 
@@ -489,7 +496,9 @@ void do_begin_variable_parse(CLS_D)
 {
 	zend_llist fetch_list;
 
-	zend_llist_init(&fetch_list, sizeof(int), NULL, 0);
+	/* zend_llist_init(&fetch_list, sizeof(int), NULL, 0);
+	zend_stack_push(&CG(bp_stack), (void *) &fetch_list, sizeof(zend_llist));*/
+	zend_llist_init(&fetch_list, sizeof(zend_op), NULL, 0);
 	zend_stack_push(&CG(bp_stack), (void *) &fetch_list, sizeof(zend_llist));
 }
 
@@ -498,14 +507,17 @@ void do_end_variable_parse(int type CLS_DC)
 {
 	zend_llist *fetch_list_ptr;
 	zend_llist_element *le;
-	zend_op *opline;
+	zend_op *opline, *opline_ptr;
+	int last_temp_var=-1;
 
 	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
 
 	le = fetch_list_ptr->head;
 
 	while (le) {
-		opline = &CG(active_op_array)->opcodes[*((int *) le->data)];
+		opline_ptr = (zend_op *)le->data;
+		opline = get_next_op(CG(active_op_array) CLS_CC);
+		memcpy(opline, opline_ptr, sizeof(zend_op));
 		switch (type) {
 			case BP_VAR_R:
 				if (opline->opcode == ZEND_FETCH_DIM_W && opline->op2.op_type == IS_UNUSED) {
@@ -1445,20 +1457,20 @@ void do_declare_property(znode *var_name, znode *value CLS_DC)
 
 void do_fetch_property(znode *result, znode *object, znode *property CLS_DC)
 {
-	int next_op_number = get_next_op_number(CG(active_op_array));
-	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
+	zend_op opline;
 	zend_llist *fetch_list_ptr;
 
-	opline->opcode = ZEND_FETCH_OBJ_W;	/* the backpatching routine assumes W */
-	opline->result.op_type = IS_VAR;
-	opline->result.u.EA.type = 0;
-	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->op1 = *object;
-	opline->op2 = *property;
-	*result = opline->result;
+	init_op(&opline CLS_CC);
+	opline.opcode = ZEND_FETCH_OBJ_W;	/* the backpatching routine assumes W */
+	opline.result.op_type = IS_VAR;
+	opline.result.u.EA.type = 0;
+	opline.result.u.var = get_temporary_variable(CG(active_op_array));
+	opline.op1 = *object;
+	opline.op2 = *property;
+	*result = opline.result;
 
 	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
-	zend_llist_add_element(fetch_list_ptr, &next_op_number);
+	zend_llist_add_element(fetch_list_ptr, &opline);
 }
 
 
