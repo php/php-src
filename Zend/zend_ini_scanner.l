@@ -116,7 +116,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return CFG_FALSE;
 }
 
-<INITIAL>\[[^\]\[]+\][ ]*{NEWLINE}? {
+<INITIAL>[[][^\]\n]+[\]][ ]*{NEWLINE}? {
 	/* SECTION */
 
 	/* eat trailing ] and spaces */
