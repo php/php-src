@@ -83,13 +83,16 @@ typedef struct _php_randgen_entry {
 	char *ini_str;
 } php_randgen_entry;
 
-extern php_randgen_entry (*php_randgen_entries)[];
+/* an ARRAY of POINTERS, not vice versa */
+extern php_randgen_entry *php_randgen_entries[];
 
-#define PHP_HAS_SRAND(which)	(php_randgen_entries[which]->srand)
-#define PHP_SRAND(which,seed)	((*(php_randgen_entries[which]->srand))(seed))
-#define PHP_RAND(which)			((*(php_randgen_entries[which]->rand))())
-#define PHP_RANDMAX(which)		(php_randgen_entries[which]->randmax)
-#define PHP_RAND_INISTR(which)	(php_randgen_entries[which]->ini_str)
+#define PHP_RANDGEN_ENTRY(which, nsrand, nrand, nrandmax, nini_str) { \
+	php_randgen_entries[which] = emalloc(sizeof(php_randgen_entry)); \
+	php_randgen_entries[which]->srand	= nsrand;	\
+	php_randgen_entries[which]->rand	= nrand;	\
+	php_randgen_entries[which]->randmax	= nrandmax;	\
+	php_randgen_entries[which]->ini_str	= nini_str;	\
+}
 
 /* Define random generator constants */
 #define PHP_RAND_SYS		0

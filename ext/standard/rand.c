@@ -32,22 +32,19 @@
 
 /* See php_rand.h for information about layout */
 
-#if 0
-#define RANDGEN_ENTRY(intval, lower, upper, has_seed) \
-	php_randgen_entry[intval] = { \
-		(has_seed) ? php_rand_##lower : NULL, \
-		php_rand_##lower, \
-		PHP_RANDMAX_##upper, \
-		"lower" \
-	};
-#endif
+/* an ARRAY of POINTERS, not vice versa */
+php_randgen_entry *php_randgen_entries[PHP_RAND_NUMRANDS];
 
-php_randgen_entry (*php_randgen_entries)[PHP_RAND_NUMRANDS];
+#define PHP_HAS_SRAND(which)	(php_randgen_entries[which]->srand)
+#define PHP_SRAND(which,seed)	((*(php_randgen_entries[which]->srand))(seed))
+#define PHP_RAND(which)			((*(php_randgen_entries[which]->rand))())
+#define PHP_RANDMAX(which)		(php_randgen_entries[which]->randmax)
+#define PHP_RAND_INISTR(which)	(php_randgen_entries[which]->ini_str)
 
-/* TODO: make sure this will be called */
 PHP_MINIT_FUNCTION(rand)
 {
-	/* call: rand_sys, rand_mt, etc */
+	PHP_MINIT(rand_sys)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(rand_mt)(INIT_FUNC_ARGS_PASSTHRU);
 }
 
 /* TODO: check that this function is called on the start of each script

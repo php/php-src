@@ -40,41 +40,29 @@ static long _php_rand_sys(void)
 
 PHP_MINIT_FUNCTION(rand_sys)
 {
-	php_randgen_entries[PHP_RAND_SYS] = {
+#ifndef RAND_MAX
+#define RAND_MAX (1<<15)
+#endif
+	PHP_RANDGEN_ENTRY(PHP_RAND_SYS,
 		_php_srand_sys,	/* void srand(long seed)	*/
 		_php_rand_sys,	/* long rand(void)			*/
-#ifdef RAND_MAX
-		(long)RANDMAX,	/* long randmax				*/
-#else
-		(long)(1<<15),	/* long randmax				*/
-#endif
+		(long)RAND_MAX,	/* long randmax				*/
 		"system"		/* char *ini_str			*/
-	};
+	);
 
-	/*
-	php_randgen_entries[PHP_RAND_SYS]->srand = _php_srand_sys;
-	php_randgen_entries[PHP_RAND_SYS].rand = _php_rand_sys;
-#ifdef RAND_MAX
-	php_randgen_entries[PHP_RAND_SYS].randmax = (long)RAND_MAX;
-#else
-	php_randgen_entries[PHP_RAND_SYS].randmax = (long)(1<<15);
-#endif
-	php_randgen_entries[PHP_RAND_SYS].ini_str = "system";
-	*/
-
-/* random() is left away, no manual page on my system, no bigger range than
- * rand() 
- *    --jeroen
- */
+	/* random() is left away, no manual page on my system, no bigger range than
+	 * rand() 
+	 *    --jeroen
+	 */
 
 	/* lrand48 (_not_ TS) */
 #if HAVE_LRAND48
-	php_randgen_entries[PHP_RAND_LRAND48] = {
+	PHP_RANDGEN_ENTRY(PHP_RAND_LRAND48,
 		srand48,		/* void srand(long seed)	*/
 		lrand48,		/* long rand(void)			*/
 		2147483647L,	/* long randmax				*/
 		"lrand48"		/* char *ini_str			*/
-	};
+	);
 #else
 	php_randgen_entries[PHP_RAND_LRAND48] = NULL;
 #endif
@@ -87,5 +75,5 @@ PHP_MINIT_FUNCTION(rand_sys)
  * c-basic-offset: 4
  * End:
  * vim600: sw=4 ts=4 tw=78 fdm=marker
- * vim<600: sw=4 ts=4 tw=78
+ * vim: sw=4 ts=4 tw=78
  */

@@ -89,13 +89,16 @@ static        long _php_rand_mt(void);
  * Melo: it could be 2^^32 but we only use 2^^31 to maintain
  * compatibility with the previous php_rand
  */
-#define _PHP_RANDMAX_MT ((long)(0x7FFFFFFF)) /* 2^^31 - 1 */
+#define PHP_RANDMAX_MT ((long)(0x7FFFFFFF)) /* 2^^31 - 1 */
 
-php_randgen_entries[PHP_RAND_MT] = {
-	_php_srand_mt,	/* void srand(long seed)	*/
-	_php_rand_mt,	/* long rand(void)			*/
-	PHP_RANDMAX_MT,	/* long randmax				*/
-	"mt"			/* char *ini_str			*/
+PHP_MINIT_FUNCTION(rand_mt)
+{
+	PHP_RANDGEN_ENTRY(PHP_RAND_MT,
+		_php_srand_mt,	/* void srand(long seed)	*/
+		_php_rand_mt,	/* long rand(void)			*/
+		PHP_RANDMAX_MT,	/* long randmax				*/
+		"mt"			/* char *ini_str			*/
+	);
 }
 
 #define N             MT_N                 /* length of state vector */
