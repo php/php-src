@@ -1,3 +1,149 @@
+2004-01-19  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/simplexml/simplexml.c:
+      Fix compilation of simplexml when spl is build as shared object
+
+2004-01-19  Christian Stocker  <chregu@phant.ch>
+
+    * ext/dom/xpath.c:
+      Fix leaks in dom_xpath_query (create retval only if requiered) by
+      Pierre-Alain
+
+    * ext/dom/document.c:
+      fixes segfault, if file doesn't exist (by Pierre-Alain)
+
+2004-01-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      makerpm:
+      Correct license
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c:
+      Fix a memleak
+
+2004-01-19  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/basic_functions.c:
+      - Fixed bug #26381 (rand() without srand() doesn't work with certain
+      php.ini)
+
+    * ext/standard/basic_functions.c:
+      - Make sure srand() / mt_srand() are really called.
+
+2004-01-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      MFH: Fixed bug #26967 (make various file operations return FALSE on error).
+
+    * ext/standard/file.c:
+      Fixed bug #26967 (make various file operations return FALSE on error).
+
+2004-01-19  Christian Stocker  <chregu@phant.ch>
+
+    * NEWS:
+      added missing dots..
+
+    * NEWS
+      ext/xsl/xsltprocessor.c:
+      Cosmetics and NEWS entry
+
+2004-01-19  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/tests/mb_strlen.phpt:
+      - MFH(r-1.3): Turn off mbstring.func_overload as this test uses plain
+      strlen()
+        for comparison.
+
+    * ext/mbstring/tests/mb_strlen.phpt:
+      - Turn off mbstring.func_overload as this test uses plain strlen() for
+        comparison.
+
+2004-01-19  Christian Stocker  <chregu@phant.ch>
+
+    * ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h
+      ext/xsl/xsl_fe.h
+      ext/xsl/xsltprocessor.c:
+      without that method call, it is not allowed to call php functions from
+      xslt stylesheets for security reasons.
+
+2004-01-19  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR.php:
+      - CS
+
+2004-01-19  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h:
+      - Hopefully fix bug #26696.
+      - Please let me know if hell-breaks loose
+
+2004-01-19  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_4_3)
+      Zend/zend_execute_API.c:
+      Backport fix for bug #21513
+
+2004-01-19  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - SPL lives now in ext/
+
+2004-01-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/file/fgetcsv.phpt:
+      
+      Added fgetcsv() tests.
+
+2004-01-19  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/System.php:
+      fix -m argument to mkDir().  Conversion to octal was not being made,
+      and a string should never be passed into mkdir().
+      
+      Thanks to Alex Hayes
+
+2004-01-19  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/standard/crypt.c
+      ext/standard/rand.c:
+      MFH: Moved php_srand() call into php_rand().
+
+    * ext/standard/crypt.c
+      ext/standard/rand.c:
+      - Moved php_srand() call into php_rand().
+      
+
+    * NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/php_rand.h:
+      MFH: - Fixed bug #26949 (rand(min,max) always returns min when ZTS enabled)
+
+    * ext/standard/php_rand.h:
+      - Fixed bug #26949 (rand(min,max) always returns min when ZTS enabled)
+
+2004-01-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      Add zend_get_module_started() to quickly check whether a module is present
+      and its MINIT function has been called.
+
 2004-01-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_execute.h
