@@ -50,14 +50,12 @@ typedef void (*zend_object_write_dimension_t)(zval *object, zval *offset, zval *
 /* Used to create pointer to the property of the object, for future direct r/w access */
 typedef zval **(*zend_object_get_property_ptr_ptr_t)(zval *object, zval *member TSRMLS_DC);
 
-/* Used to set object value (most probably used in combination with
- * typedef the result of the get_property_ptr)
- */
+/* Used to set object value. Can be used to override assignments and scalar
+   write ops (like ++, +=) on the object */
 typedef void (*zend_object_set_t)(zval **property, zval *value TSRMLS_DC);
 
-/* Used to get object value (most probably used in combination with
- * the result of the get_property_ptr or when converting object value to
- * one of the basic types)
+/* Used to get object value. Can be used when converting object value to
+ * one of the basic types and when using scalar ops (like ++, +=) on the object
  */
 typedef zval* (*zend_object_get_t)(zval *property TSRMLS_DC);
 
