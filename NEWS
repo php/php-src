@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 26 Jun 2003, Version 4.3.3RC2
+- Fixed bug #23664 FastCGI socket listenting (shane)
+- Fixed bug #24009 FastCGI handling of file not found (shane)
+- Fixed FastCGI IIS document root problem (shane)
 - Upgraded the bundled PCRE library to version 4.3. (Andrei)
 - Fixed bug #24312 (base64_decode() does not skip 0xF0-0xFF characters).
   (gereon.steffens[at]onvista.de, Ilia)
