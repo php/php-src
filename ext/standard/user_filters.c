@@ -246,9 +246,36 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	/* determine the classname/class entry */
 	if (FAILURE == zend_hash_find(BG(user_filter_map), (char*)filtername,
 				strlen(filtername), (void**)&fdat)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,
-				"Err, filter \"%s\" is not in the user-filter map, but somehow the user-filter-factory was invoked for it!?", filtername);
-		return NULL;
+		char *period;
+
+		/* Userspace Filters using ambiguous wildcards could cause problems.
+           i.e.: myfilter.foo.bar will always call into myfilter.foo.*
+                 never seeing myfilter.* 
+           TODO: Allow failed userfilter creations to continue
+                 scanning through the list */
+		if ((period = strrchr(filtername, '.'))) {
+			char *wildcard;
+
+			/* Search for wildcard matches instead */
+			wildcard = estrdup(filtername);
+			period = wildcard + (period - filtername);
+			while (period) {
+				*period = '\0';
+				strcat(wildcard, ".*");
+				if (SUCCESS == zend_hash_find(BG(user_filter_map), wildcard, strlen(wildcard), (void**)&fdat)) {
+					period = NULL;
+				} else {
+					*period = '\0';
+					period = strrchr(wildcard, '.');
+				}
+			}
+			efree(wildcard);
+		}
+		if (fdat == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+					"Err, filter \"%s\" is not in the user-filter map, but somehow the user-filter-factory was invoked for it!?", filtername);
+			return NULL;
+		}
 	}
 
 	/* bind the classname to the actual class */
