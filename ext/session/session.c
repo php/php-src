@@ -1330,7 +1330,7 @@ void session_adapt_uris(const char *src, uint srclen, char **new, uint *newlen)
 	PSLS_FETCH();
 
 	if (PS(define_sid) && PS(nr_open_sessions) > 0) {
-		data = url_adapt_ext(src, srclen, PS(session_name), PS(id), &len);
+		data = url_adapt_ext_ex(src, srclen, PS(session_name), PS(id), &len);
 		*new = data;
 		*newlen = len;
 	}
