@@ -1,3 +1,157 @@
+2000-02-26  Zeev Suraski  <zeev@php.net>
+
+    * main.c
+      php_globals.h:
+    - Fixed a (fairly common) situation where error_reporting values would not be
+      properly restored after a call to error_reporting(), in between requests 
+
+    * configuration-parser.y
+      main.c: Verified $HTTP_*[] protection
+
+    * ext/sybase/sybase.c: Fix Sybase DB compilation
+
+2000-02-26  Andrei Zmievski  <andrei@ispi.net>
+
+    * main.c: (php_hash_environment)
+    Fixed a bunch of memory leaks from the recent HTTP_*_VARS[] protection
+    patch.
+
+2000-02-26  Zeev Suraski  <zeev@php.net>
+
+    * main.c
+      php_globals.h
+      rfc1867.c: - Protect $HTTP_POST_FILES[] as well
+
+2000-02-26  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS
+      php_version.h: Added notice about new functions.
+
+2000-02-26  Zeev Suraski  <zeev@php.net>
+
+    * main.c
+      php_globals.h
+      php_variables.c:    This patch is untested!  I'll only have time to test it thoroughly in a couple of hours...
+
+2000-02-26  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: Add a couple of entries.
+
+2000-02-26  Zeev Suraski  <zeev@php.net>
+
+    * sapi/apache/mod_php4.c: Compile fix
+
+2000-02-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/HTTP.php: register package
+
+2000-02-26  Zeev Suraski  <zeev@php.net>
+
+    * configuration-parser.y
+      ext/standard/basic_functions.c
+      main.c
+      php_ini.c
+      php_ini.h
+      sapi/cgi/cgi_main.c
+      win32/registry.c: Allow the INI callbacks to know at what stage PHP is
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+    - Added ini_set() as an alias to ini_alter() 
+
+    * SAPI.c
+      configuration-scanner.l
+      main.c
+      php.ini-dist:
+    - The string None is now recognized as a keyword by the php.ini processor, and
+      can be used to denote an empty string 
+    - Added None keyword support to the INI parser
+    - Removed specialized "none" code
+
+2000-02-26  Thies C. Arntzen  <thies@digicol.de>
+
+    * SAPI.c: (sapi_send_headers) fix leak
+
+2000-02-26  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * NEWS
+      ext/pdf/pdf.c
+      ext/pdf/php_pdf.h: - More function in php module
+
+2000-02-26  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS: correct
+
+2000-02-26  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/imap/imap.c:
+    fixing imap_undelete to accept 2 or 3 arguments, not 3 or 4.
+
+2000-02-26  Zeev Suraski  <zeev@php.net>
+
+    * SAPI.c
+      SAPI.h
+      sapi/apache/mod_php4.c
+      sapi/isapi/php4isapi.c: - From CODING_STANDARDS:
+      [6] NEVER USE strncat().  If you're absolutely sure you know what you're doing,
+          check its man page again, and only then, consider using it, and even then,
+          try avoiding it.
+      strncat() is your enemy!
+    - Fix several SAPI services, get rid of the default_content_type (it's always
+      composed of the mime type and charset now).
+    - Win32 works again
+
+    * NEWS: *** empty log message ***
+
+2000-02-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/HTTP.php:
+    Added simple HTTP utility class, currently with Date() and
+    negotiateLanguage().
+
+2000-02-26  Zeev Suraski  <zeev@php.net>
+
+    * ext/sybase_ct/php_sybase_ct.h
+      ext/sysvshm/sysvshm.c
+      ext/session/session.c
+      ext/standard/config.m4
+      ext/standard/crypt.c
+      ext/standard/head.h
+      ext/standard/info.c
+      ext/standard/md5.c
+      ext/standard/md5.h
+      ext/standard/microtime.c
+      ext/posix/posix.c
+      ext/msql/php_msql.c
+      ext/mysql/php_mysql.c
+      ext/interbase/php_interbase.h
+      ext/ldap/ldap.c
+      ext/gd/gd.c
+      ext/gd/gdttf.h
+      ext/informix/config.m4
+      ext/informix/php_informix.h
+      ext/db/db.c
+      ext/domxml/php_domxml.h
+      ext/cpdf/php_cpdf.h
+      ext/cybercash/cyberlib.php
+      ext/dav/dav.c
+      acconfig.h.in
+      config.w32.h
+      configure.in
+      fopen-wrappers.c: - Convert 'PHP3' to 'PHP'
+    - Avoid declaring crypt() related salt types twice
+
+2000-02-26  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/mcal/php_mcal.c
+      ext/mcal/php_mcal.h:
+    - Removing the code that checks for Zend, since this is distinctly
+    php4-specific now.
+    - bringing it up to date with the mcal functions in php3
+    - cleanups
+
+    Unfortunately, it still segfaults. I'll file a bug report about that...
+
 2000-02-25  Sam Ruby  <rubys@us.ibm.com>
 
     * php4dllts.dsp: Need to include php_ticks.c in the windows build
