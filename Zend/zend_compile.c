@@ -194,6 +194,9 @@ void zend_do_fold_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2
 	}
 
 	do_op(&result->u.constant, &op1->u.constant, &op2->u.constant TSRMLS_CC);
+	/* clean up constants after folding - we won't need them anymore */
+	zval_dtor(&op1->u.constant);
+	zval_dtor(&op2->u.constant);
 }
 
 void zend_do_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
