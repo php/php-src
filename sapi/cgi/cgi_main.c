@@ -1062,7 +1062,7 @@ consult the installation file that came with this distribution, or visit \n\
 
 #if ENABLE_PATHINFO_CHECK
 	if (cfg_get_long("cgi.fix_pathinfo", &fix_pathinfo) == FAILURE) {
-		fix_pathinfo = 1;
+		fix_pathinfo = 0;
 	}
 #endif
 
