@@ -295,7 +295,9 @@ extern void html_putc(char c);
 #define phpin zendin
 
 /* functions */
-extern int module_startup_modules(void);
+int module_startup_modules(void);
+int module_global_startup_modules(void);
+int module_global_shutdown_modules(void);
 
 /* needed for modules only */
 extern PHPAPI int php3i_get_le_fp(void);
