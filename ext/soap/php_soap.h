@@ -244,8 +244,8 @@ extern zend_class_entry soap_var_class_entry;
 PS_SERIALIZER_FUNCS(soap);
 
 void clear_soap_fault(zval *obj);
-void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail);
-void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail);
+void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
+void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
 
 sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int index, int);
 sdlFunctionPtr get_function(sdlBindingPtr sdl, char *function_name);
@@ -265,7 +265,7 @@ zval soap_get_property_handler(zend_property_reference *property_reference);
 int soap_set_property_handler(zend_property_reference *property_reference, zval *value);
 void soap_destructor(void *jobject);
 
-void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval **parameters[]);
+void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval **parameters[] TSRMLS_CC);
 xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name,char *uri,zval *ret);
 xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count);
 xmlNodePtr seralize_parameter(sdlParamPtr param,zval *param_val,int index,char *name, int style);

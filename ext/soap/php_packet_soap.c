@@ -1,11 +1,11 @@
 #include "php_soap.h"
 
-int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctionPtr fn, char *fn_name, zval ***ret, int *num_params)
+int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctionPtr fn, char *fn_name, zval ***ret, int *num_params TSRMLS_DC)
 {
 	xmlDocPtr response;
 	xmlNodePtr trav, trav2, env, body, resp, cur, fault;
 	zval **tmp_ret;
-	TSRMLS_FETCH();
+/*	TSRMLS_FETCH();*/
 
 	response = xmlParseMemory(buffer, buffer_size);
 	xmlCleanupParser();
@@ -49,7 +49,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 					details = enc->to_zval(enc->details, tmp);
 				}
 
-				add_soap_fault(this_ptr, faultcode, faultstring, faultactor, details);
+				add_soap_fault(this_ptr, faultcode, faultstring, faultactor, details TSRMLS_CC);
 			}
 			else
 			{

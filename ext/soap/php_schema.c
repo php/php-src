@@ -848,7 +848,7 @@ int schema_element(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr c
 {
 	xmlNodePtr content;
 	xmlAttrPtr attrs, curattr, name, ns;
-	TSRMLS_FETCH();
+	TSRMLS_FETCH(); /* is this really needed - or the parameter */
 
 	attrs = element->properties;
 	ns = get_attribute(attrs, "targetNamespace");
