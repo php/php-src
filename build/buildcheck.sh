@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.17 2002-06-26 08:39:39 sas Exp $ 
+# $Id: buildcheck.sh,v 1.18 2002-06-26 18:42:50 sniper Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -61,7 +61,7 @@ fi
 
 # libtool 1.4 or newer
 # Prefer glibtool over libtool for Mac OS X compatibility
-libtool=`which glibtool`
+libtool=`which glibtool 2> /dev/null`
 if test ! -f "$libtool"; then libtool=`which libtool`; fi
 lt_pversion=`$libtool --version 2>/dev/null|sed -n -e 's/^[^0-9]*//' -e 1's/[- ].*//p'`
 if test "$lt_pversion" = ""; then
