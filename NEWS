@@ -1,6 +1,11 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 4.4.0
+- Added iconv related functions (Moriyoshi)
+  . iconv_strlen()
+  . iconv_substr()
+  . iconv_mime_decode()
+  . iconv_mime_encode()
 - Removed support for libmcrypt 2.2.x to allow cleaner code. Another reason
   to upgrade libmcrypt to a 2.5.x series as the older ones have too much bugs
   to be safely used with PHP. (Derick)
