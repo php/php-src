@@ -1,3 +1,42 @@
+2005-02-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/exif/exif.c
+      ext/exif/exif.c:
+      MFH: Fixed bug #31986 (Max nesting limit set too low).
+
+    * ext/exif/exif.c:
+      Fixed bug #31986 (Max nesting limit set too low).
+
+2005-02-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/config.m4
+      ext/sqlite/config.w32
+      ext/sqlite/sqlite.c
+      ext/sqlite/tests/sqlite_oo_032.phpt:
+      - SQLite depends on SPL if it is present
+      - Add SQLiteResult::count()
+      - SQLiteResult implements Countable if present
+
+2005-02-15  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * config.guess
+      config.sub
+      ltmain.sh
+      build/libtool.m4:
+      - Applied some patches to fix issues with e.g. ia_64 and s390
+
+    * ext/dom/config.m4:
+      No tabs here
+
+    * ext/xmlrpc/libxmlrpc/.cvsignore:
+      Missing .libs entry
+
+2005-02-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/rfc1867.c:
+      Prune uploaded file names to \ on all OSes, read comments for explanation.
+
 2005-02-14  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * ext/sockets/sockets.c:
