@@ -1,3 +1,11 @@
+2003-08-01  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_API.c:
+      better fix...
+
+    * zend_API.c:
+      Fix "O" format for zend_parse_parameters
+
 2003-07-31  Zeev Suraski  <zeev@zend.com>
 
     * zend_API.c:
