@@ -595,7 +595,9 @@ static int send_parsed_php(request_rec * r)
         TSRMLS_FETCH();
  
         sprintf(mem_usage,"%u", (int) AG(allocated_memory_peak));
+		AG(allocated_memory_peak)=0;
         ap_table_setn(r->notes, "mod_php_memory_usage", ap_pstrdup(r->pool, mem_usage));
+
     }
 #endif
 
