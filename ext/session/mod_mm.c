@@ -33,16 +33,21 @@
 
 #define PS_MM_PATH "/tmp/session_mm"
 
+/* For php_uint32 */
+#include "ext/standard/basic_functions.h"
+
 /*
  * this list holds all data associated with one session 
  */
 
 typedef struct ps_sd {
-	struct ps_sd *next, *prev;
-	time_t ctime;
+	struct ps_sd *next;
+	php_uint32 hv;		/* hash value of key */
+	time_t ctime;		/* time of last change */
 	char *key;
 	void *data;
-	size_t datalen;
+	size_t datalen;		/* amount of valid data */
+	size_t alloclen;	/* amount of allocated memory for data */
 } ps_sd;
 
 typedef struct {
@@ -56,20 +61,17 @@ static ps_mm *ps_mm_instance = NULL;
 #define HASH_SIZE 577
 
 #if 0
-#define ps_mm_debug(a...) fprintf(stderr, a)
+#define ps_mm_debug(a) printf a
 #else
-#define ps_mm_debug
+#define ps_mm_debug(a)
 #endif
 
-/* For php_uint32 */
-#include "ext/standard/basic_functions.h"
-
-static php_uint32 ps_sd_hash(const char *data)
+static inline php_uint32 ps_sd_hash(const char *data)
 {
 	php_uint32 h;
 	char c;
 	
-	for (h = 2166136261; (c = *data++); ) {
+	for (h = 2166136261U; (c = *data++); ) {
 		h *= 16777619;
 		h ^= c;
 	}
@@ -80,15 +82,17 @@ static php_uint32 ps_sd_hash(const char *data)
 
 static ps_sd *ps_sd_new(ps_mm *data, const char *key, const void *sdata, size_t sdatalen)
 {
-	php_uint32 h;
+	php_uint32 hv, slot;
 	ps_sd *sd;
 
-	h = ps_sd_hash(key) % HASH_SIZE;
+	hv = ps_sd_hash(key);
+	slot = hv % HASH_SIZE;
 	
 	sd = mm_malloc(data->mm, sizeof(*sd));
 	if (!sd)
 		return NULL;
 	sd->ctime = 0;
+	sd->hv = hv;
 	
 	sd->data = mm_malloc(data->mm, sdatalen);
 	if (!sd->data) {
@@ -96,7 +100,7 @@ static ps_sd *ps_sd_new(ps_mm *data, const char *key, const void *sdata, size_t 
 		return NULL;
 	}
 
-	sd->datalen = sdatalen;
+	sd->alloclen = sd->datalen = sdatalen;
 	
 	sd->key = mm_strdup(data->mm, key);
 	if (!sd->key) {
@@ -107,30 +111,29 @@ static ps_sd *ps_sd_new(ps_mm *data, const char *key, const void *sdata, size_t 
 	
 	memcpy(sd->data, sdata, sdatalen);
 	
-	if ((sd->next = data->hash[h]))
-		sd->next->prev = sd;
-	sd->prev = NULL;
+	sd->next = data->hash[slot];
+	data->hash[slot] = sd;
 	
-	ps_mm_debug("inserting %s(%p) into %d\n", key, sd, h);
-	
-	data->hash[h] = sd;
+	ps_mm_debug(("inserting %s(%p) into slot %d\n", key, sd, slot));
 
 	return sd;
 }
 
 static void ps_sd_destroy(ps_mm *data, ps_sd *sd)
 {
-	unsigned int h;
+	php_uint32 slot;
 
-	h = ps_sd_hash(sd->key) % HASH_SIZE;
-	
-	if (sd->next)
-		sd->next->prev = sd->prev;
-	if (sd->prev)
-		sd->prev->next = sd->next;
-	
-	if (data->hash[h] == sd)
-		data->hash[h] = sd->next;
+	slot = ps_sd_hash(sd->key) % HASH_SIZE;
+
+	if (data->hash[slot] == sd)
+		data->hash[slot] = sd->next;
+	else {
+		ps_sd *prev;
+
+		/* There must be some entry before the one we want to delete */
+		for (prev = data->hash[slot]; prev->next != sd; prev = prev->next);
+		prev->next = sd->next;
+	}
 		
 	mm_free(data->mm, sd->key);
 	if (sd->data) 
@@ -140,23 +143,24 @@ static void ps_sd_destroy(ps_mm *data, ps_sd *sd)
 
 static ps_sd *ps_sd_lookup(ps_mm *data, const char *key, int rw)
 {
-	unsigned int h;
+	php_uint32 hv, slot;
 	ps_sd *ret;
 
-	h = ps_sd_hash(key) % HASH_SIZE;
-
-	for (ret = data->hash[h]; ret; ret = ret->next)
-		if (!strcmp(ret->key, key)) 
+	hv = ps_sd_hash(key);
+	slot = hv % HASH_SIZE;
+	
+	for (ret = data->hash[slot]; ret; ret = ret->next)
+		if (ret->hv == hv && !strcmp(ret->key, key)) 
 			break;
 
-	if (ret && rw && ret != data->hash[h]) {
-		data->hash[h]->prev = ret;
-		ret->next = data->hash[h];
-		data->hash[h] = ret;
-		ps_mm_debug("optimizing\n");
+	if (ret && rw && ret != data->hash[slot]) {
+		/* Move the entry to the top of the linked list */
+		
+		ret->next = data->hash[slot];
+		data->hash[slot] = ret;
 	}
 
-	ps_mm_debug("lookup(%s): ret=%p,h=%d\n", key, ret, h);
+	ps_mm_debug(("lookup(%s): ret=%p,hv=%u,slot=%d\n", key, ret, hv, slot));
 	
 	return ret;
 }
@@ -221,7 +225,7 @@ PHP_MSHUTDOWN_FUNCTION(ps_mm)
 
 PS_OPEN_FUNC(mm)
 {
-	ps_mm_debug("open: ps_mm_instance=%p\n", ps_mm_instance);
+	ps_mm_debug(("open: ps_mm_instance=%p\n", ps_mm_instance));
 	
 	if (!ps_mm_instance)
 		return FAILURE;
@@ -249,8 +253,9 @@ PS_READ_FUNC(mm)
 	sd = ps_sd_lookup(data, key, 0);
 	if (sd) {
 		*vallen = sd->datalen;
-		*val = emalloc(sd->datalen);
+		*val = emalloc(sd->datalen + 1);
 		memcpy(*val, sd->data, sd->datalen);
+		(*val)[sd->datalen] = '\0';
 		ret = SUCCESS;
 	}
 
@@ -264,24 +269,29 @@ PS_WRITE_FUNC(mm)
 	PS_MM_DATA;
 	ps_sd *sd;
 
-	if (vallen == 0) return SUCCESS;
-	
 	mm_lock(data->mm, MM_LOCK_RW);
 
 	sd = ps_sd_lookup(data, key, 1);
 	if (!sd) {
 		sd = ps_sd_new(data, key, val, vallen);
-		ps_mm_debug("new one for %s\n", key);
+		ps_mm_debug(("new entry for %s\n", key));
 	} else {
-		ps_mm_debug("found existing one for %s\n", key);
-		mm_free(data->mm, sd->data);
-		sd->datalen = vallen;
-		sd->data = mm_malloc(data->mm, vallen);
-		if (!sd->data) {
-			ps_sd_destroy(data, sd);
-			sd = NULL;
-		} else
+		ps_mm_debug(("found existing entry for %s\n", key));
+
+		if (vallen >= sd->alloclen) {
+			mm_free(data->mm, sd->data);
+			sd->alloclen = vallen + 1;
+			sd->data = mm_malloc(data->mm, sd->alloclen);
+
+			if (!sd->data) {
+				ps_sd_destroy(data, sd);
+				sd = NULL;
+			}
+		}
+		if (sd) {
+			sd->datalen = vallen;
 			memcpy(sd->data, val, vallen);
+		}
 	}
 
 	if (sd)
@@ -312,23 +322,25 @@ PS_GC_FUNC(mm)
 {
 	PS_MM_DATA;
 	int h;
-	time_t now;
+	time_t limit;
 	ps_sd *sd, *next;
 	
 	*nrdels = 0;
-	ps_mm_debug("gc\n");
-	
+	ps_mm_debug(("gc\n"));
+		
+	time(&limit);
+
+	limit -= maxlifetime;
+
 	mm_lock(data->mm, MM_LOCK_RW);
-	
-	time(&now);
 
 	for (h = 0; h < HASH_SIZE; h++)
 		for (sd = data->hash[h]; sd; sd = next) {
 			next = sd->next;
-			ps_mm_debug("looking at %s\n", sd->key);
-			if ((now - sd->ctime) > maxlifetime) {
+			if (sd->ctime < limit) {
+				ps_mm_debug(("purging %s\n", sd->key));
 				ps_sd_destroy(data, sd);
-				*nrdels++;
+				(*nrdels)++;
 			}
 		}
 
