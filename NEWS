@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
+- Allow gettimeofday() return a float if optional argument is specified. (Ilia)
 - Added sqlite_fetch_column_types() 3rd argument for arrays. (Ilia)
 - Added optional offset parameter to stream_get_contents() and 
   file_get_contents(). (Ilia)
