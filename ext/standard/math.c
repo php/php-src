@@ -81,7 +81,8 @@ PHP_FUNCTION(ceil)
 /* {{{ proto double floor(double number)
    Returns the next lowest integer value from the number */
 
-PHP_FUNCTION(floor) {
+PHP_FUNCTION(floor)
+{
 	zval **value;
 	
 	if (ZEND_NUM_ARGS()!=1||zend_get_parameters_ex(1,&value)==FAILURE) {

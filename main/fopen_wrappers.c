@@ -163,7 +163,7 @@ PHPAPI int php_check_specific_open_basedir(char *basedir, char *path TSRMLS_DC)
 	}
 
 	/* Resolve the real path into resolved_name */
-	if ((expand_filepath(path, resolved_name) != NULL) && (expand_filepath(local_open_basedir, resolved_basedir) != NULL)) {
+	if ((expand_filepath(path, resolved_name TSRMLS_CC) != NULL) && (expand_filepath(local_open_basedir, resolved_basedir TSRMLS_CC) != NULL)) {
 		/* Check the path */
 #ifdef PHP_WIN32
 		if (strncasecmp(resolved_basedir, resolved_name, strlen(resolved_basedir)) == 0) {
@@ -232,7 +232,7 @@ static FILE *php_fopen_and_set_opened_path(const char *path, char *mode, char **
 	}
 	fp = VCWD_FOPEN(path, mode);
 	if (fp && opened_path) {
-		*opened_path = expand_filepath(path, NULL);
+		*opened_path = expand_filepath(path, NULL TSRMLS_CC);
 	}
 	return fp;
 }
@@ -350,7 +350,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 		return FAILURE;
 	}
 
-	file_handle->opened_path = expand_filepath(filename, NULL);
+	file_handle->opened_path = expand_filepath(filename, NULL TSRMLS_CC);
 
     if (!(SG(options) & SAPI_OPTION_NO_CHDIR)) {
 		VCWD_CHDIR_FILE(filename);
@@ -539,7 +539,7 @@ static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, in
 		}
 	} 
 
-	if (!protocol || !strncasecmp(protocol, "file",n)){
+	if (!protocol || !strncasecmp(protocol, "file", n)){
 		*issock = 0;
 		
 		if(protocol) {
@@ -605,7 +605,7 @@ PHPAPI char *php_strip_url_passwd(char *url)
 
 /* {{{ expand_filepath
  */
-PHPAPI char *expand_filepath(const char *filepath, char *real_path)
+PHPAPI char *expand_filepath(const char *filepath, char *real_path TSRMLS_DC)
 {
 	cwd_state new_state;
 	char cwd[MAXPATHLEN];

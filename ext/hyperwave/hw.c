@@ -971,7 +971,8 @@ PHP_FUNCTION(hw_pconnect)
 
 /* {{{ proto void hw_close(int link)
    Close connection to Hyperwave server */
-PHP_FUNCTION(hw_close) {
+PHP_FUNCTION(hw_close)
+{
 	pval **arg1;
 	int id, type;
 	hw_connection *ptr;
@@ -1366,7 +1367,8 @@ char *php_hw_command(INTERNAL_FUNCTION_PARAMETERS, int comm) {
 
 /* {{{ proto string hw_stat(int link)
    Returns status string */
-PHP_FUNCTION(hw_stat) {
+PHP_FUNCTION(hw_stat)
+{
         char *object;
 
 	object = php_hw_command(INTERNAL_FUNCTION_PARAM_PASSTHRU, STAT_COMMAND);
@@ -1381,7 +1383,8 @@ PHP_FUNCTION(hw_stat) {
 
 /* {{{ proto array hw_who(int link)
    Returns names and info of users loged in */
-PHP_FUNCTION(hw_who) {
+PHP_FUNCTION(hw_who)
+{
 	zval *user_arr;
         char *object, *ptr, *temp, *attrname;
 	int i;
@@ -1497,7 +1500,8 @@ php_printf("%s\n", ptr);
 
 /* {{{ proto string hw_dummy(int link, int id, int msgid)
    Hyperwave dummy function */
-PHP_FUNCTION(hw_dummy) {
+PHP_FUNCTION(hw_dummy)
+{
 	pval **arg1, **arg2, **arg3;
 	int link, id, type, msgid;
 	hw_connection *ptr;
@@ -1533,7 +1537,8 @@ php_printf("%s", object);
 
 /* {{{ proto string hw_getobject(int link, int objid [, string query])
    Returns object record  */
-PHP_FUNCTION(hw_getobject) {
+PHP_FUNCTION(hw_getobject)
+{
 	pval **argv[3];
 	int argc, link, id, type, multi;
 	char *query;
@@ -1621,7 +1626,8 @@ PHP_FUNCTION(hw_getobject) {
 
 /* {{{ proto int hw_insertobject(int link, string objrec, string parms)
    Inserts an object */
-PHP_FUNCTION(hw_insertobject) {
+PHP_FUNCTION(hw_insertobject)
+{
 	pval *arg1, *arg2, *arg3;
 	int link, type;
 	char *objrec, *parms;
@@ -1655,7 +1661,8 @@ PHP_FUNCTION(hw_insertobject) {
 
 /* {{{ proto string hw_getandlock(int link, int objid)
    Returns object record and locks object */
-PHP_FUNCTION(hw_getandlock) {
+PHP_FUNCTION(hw_getandlock)
+{
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
@@ -1686,7 +1693,8 @@ PHP_FUNCTION(hw_getandlock) {
 
 /* {{{ proto void hw_unlock(int link, int objid)
    Unlocks object */
-PHP_FUNCTION(hw_unlock) {
+PHP_FUNCTION(hw_unlock)
+{
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
@@ -1714,7 +1722,8 @@ PHP_FUNCTION(hw_unlock) {
 
 /* {{{ proto void hw_deleteobject(int link, int objid)
    Deletes object */
-PHP_FUNCTION(hw_deleteobject) {
+PHP_FUNCTION(hw_deleteobject)
+{
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
@@ -1742,7 +1751,8 @@ PHP_FUNCTION(hw_deleteobject) {
 /* {{{ proto void hw_changeobject(int link, int objid, array attributes)
    Changes attributes of an object (obsolete) */
 #define BUFFERLEN 200
-PHP_FUNCTION(hw_changeobject) {
+PHP_FUNCTION(hw_changeobject)
+{
 	pval *arg1, *arg2, *arg3;
 	int link, id, type, i;
 	hw_connection *ptr;
@@ -1831,7 +1841,8 @@ PHP_FUNCTION(hw_changeobject) {
 /* {{{ proto void hw_modifyobject(int link, int objid, array remattributes, array addattributes [, int mode])
    Modifies attributes of an object */
 #define BUFFERLEN 200
-PHP_FUNCTION(hw_modifyobject) {
+PHP_FUNCTION(hw_modifyobject)
+{
 	zval **argv[5];
 	int argc;
 	int link, id, type, i, mode;
@@ -2152,21 +2163,24 @@ void php_hw_mvcp(INTERNAL_FUNCTION_PARAMETERS, int mvcp) {
 
 /* {{{ proto void hw_mv(int link, array objrec, int from, int dest)
    Moves object */
-PHP_FUNCTION(hw_mv) {
+PHP_FUNCTION(hw_mv)
+{
 	php_hw_mvcp(INTERNAL_FUNCTION_PARAM_PASSTHRU, MOVE);
 }
 /* }}} */
 
 /* {{{ proto void hw_cp(int link, array objrec, int dest)
    Copies object */
-PHP_FUNCTION(hw_cp) {
+PHP_FUNCTION(hw_cp)
+{
 	php_hw_mvcp(INTERNAL_FUNCTION_PARAM_PASSTHRU, COPY);
 }
 /* }}} */
 
 /* {{{ proto hwdoc hw_gettext(int link, int objid [, int rootid])
    Returns text document. Links are relative to rootid if given */
-PHP_FUNCTION(hw_gettext) {
+PHP_FUNCTION(hw_gettext)
+{
 	pval *argv[3];
 	int argc, link, id, type, mode;
 	int rootid = 0;
@@ -2228,7 +2242,8 @@ PHP_FUNCTION(hw_gettext) {
 
 /* {{{ proto void hw_edittext(int link, hwdoc doc)
    Modifies text document */
-PHP_FUNCTION(hw_edittext) {
+PHP_FUNCTION(hw_edittext)
+{
 	pval *arg1, *arg2;
 	int link, doc, type;
 	hw_connection *ptr;
@@ -2269,7 +2284,8 @@ PHP_FUNCTION(hw_edittext) {
    Returns the output of a CGI script */
 #define BUFFERLEN 1000
 /* FIX ME: The buffer cgi_env_str should be allocated dynamically */
-PHP_FUNCTION(hw_getcgi) {
+PHP_FUNCTION(hw_getcgi)
+{
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_document *doc;
@@ -2331,7 +2347,8 @@ PHP_FUNCTION(hw_getcgi) {
 
 /* {{{ proto int hw_getremote(int link, int objid)
    Returns the content of a remote document */
-PHP_FUNCTION(hw_getremote) {
+PHP_FUNCTION(hw_getremote)
+{
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_document *doc;
@@ -2371,7 +2388,8 @@ PHP_FUNCTION(hw_getremote) {
 
 /* {{{ proto [array|int] hw_getremotechildren(int link, string objrec)
    Returns the remote document or an array of object records */
-PHP_FUNCTION(hw_getremotechildren) {
+PHP_FUNCTION(hw_getremotechildren)
+{
 	pval *arg1, *arg2;
 	int link, type, i;
 	hw_connection *ptr;
@@ -2475,7 +2493,8 @@ php_printf("count = %d, remainder = <HR>%s---<HR>", count, remainder);
 
 /* {{{ proto void hw_setlinkroot(int link, int rootid)
    Set the id to which links are calculated */
-PHP_FUNCTION(hw_setlinkroot) {
+PHP_FUNCTION(hw_setlinkroot)
+{
 	pval *arg1, *arg2;
 	int link, type, rootid;
 	hw_connection *ptr;
@@ -2500,7 +2519,8 @@ PHP_FUNCTION(hw_setlinkroot) {
 
 /* {{{ proto hwdoc hw_pipedocument(int link, int objid [, array urlprefixes])
    Returns document with links inserted. Optionally a array with five urlprefixes may be passed, which will be inserted for the different types of anchors. This should be a named array with the following keys: HW_DEFAULT_LINK, HW_IMAGE_LINK, HW_BACKGROUND_LINK, HW_INTAG_LINK, and HW_APPLET_LINK */
-PHP_FUNCTION(hw_pipedocument) {
+PHP_FUNCTION(hw_pipedocument)
+{
 	pval *arg1, *arg2, *arg3;
 	int i, link, id, type, argc, mode;
 	int rootid = 0;
@@ -2617,7 +2637,8 @@ PHP_FUNCTION(hw_pipedocument) {
 
 /* {{{ proto hwdoc hw_pipedocument(int link, int objid)
    Returns document */
-PHP_FUNCTION(hw_oldpipedocument) {
+PHP_FUNCTION(hw_oldpipedocument)
+{
 	pval *argv[3];
 	int link, id, type, argc, mode;
 	int rootid = 0;
@@ -2687,7 +2708,8 @@ PHP_FUNCTION(hw_oldpipedocument) {
    Returns output of CGI script */
 #define BUFFERLEN 1000
 /* FIX ME: The buffer cgi_env_str should be allocated dynamically */
-PHP_FUNCTION(hw_pipecgi) {
+PHP_FUNCTION(hw_pipecgi)
+{
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
@@ -2751,7 +2773,8 @@ PHP_FUNCTION(hw_pipecgi) {
 
 /* {{{ proto void hw_insertdocument(int link, int parentid, hwdoc doc) 
    Insert new document */
-PHP_FUNCTION(hw_insertdocument) {
+PHP_FUNCTION(hw_insertdocument)
+{
 	pval *arg1, *arg2, *arg3;
 	int link, id, doc, type;
 	hw_connection *ptr;
@@ -2939,7 +2962,8 @@ PHP_FUNCTION(hw_new_document_from_file)
 
 /* {{{ proto void hw_free_document(hwdoc doc)
    Frees memory of document */
-PHP_FUNCTION(hw_free_document) {
+PHP_FUNCTION(hw_free_document)
+{
 	pval *arg1;
 	int id, type;
 	hw_document *ptr;
@@ -2965,7 +2989,8 @@ PHP_FUNCTION(hw_free_document) {
 
 /* {{{ proto void hw_output_document(hwdoc doc)
    Prints document */
-PHP_FUNCTION(hw_output_document) {
+PHP_FUNCTION(hw_output_document)
+{
 	pval *arg1;
 	int id, type;
 	hw_document *ptr;
@@ -2993,7 +3018,8 @@ PHP_FUNCTION(hw_output_document) {
 
 /* {{{ proto string hw_document_bodytag(hwdoc doc [, string prefix])
    Return bodytag prefixed by prefix */
-PHP_FUNCTION(hw_document_bodytag) {
+PHP_FUNCTION(hw_document_bodytag)
+{
 	pval *argv[2];
 	int id, type, argc;
 	hw_document *ptr;
@@ -3038,7 +3064,8 @@ PHP_FUNCTION(hw_document_bodytag) {
 
 /* {{{ proto string hw_document_content(hwdoc doc)
    Returns content of document */
-PHP_FUNCTION(hw_document_content) {
+PHP_FUNCTION(hw_document_content)
+{
 	pval *argv[1];
 	int id, type, argc;
 	hw_document *ptr;
@@ -3064,7 +3091,8 @@ PHP_FUNCTION(hw_document_content) {
 
 /* {{{ proto int hw_document_setcontent(hwdoc doc, string content)
    Sets/replaces content of document */
-PHP_FUNCTION(hw_document_setcontent) {
+PHP_FUNCTION(hw_document_setcontent)
+{
 	pval *argv[2];
 	int id, type, argc;
 	hw_document *ptr;
@@ -3104,7 +3132,8 @@ PHP_FUNCTION(hw_document_setcontent) {
 
 /* {{{ proto int hw_document_size(hwdoc doc)
    Returns size of document */
-PHP_FUNCTION(hw_document_size) {
+PHP_FUNCTION(hw_document_size)
+{
 	pval *arg1;
 	int id, type;
 	hw_document *ptr;
@@ -3130,7 +3159,8 @@ PHP_FUNCTION(hw_document_size) {
 
 /* {{{ proto string hw_document_attributes(hwdoc doc)
    Returns object record of document */
-PHP_FUNCTION(hw_document_attributes) {
+PHP_FUNCTION(hw_document_attributes)
+{
 	pval *arg1;
 	int id, type;
 	hw_document *ptr;
@@ -3153,7 +3183,8 @@ PHP_FUNCTION(hw_document_attributes) {
 
 /* {{{ proto array hw_getparentsobj(int link, int objid)
    Returns array of parent object records */
-PHP_FUNCTION(hw_getparentsobj) {
+PHP_FUNCTION(hw_getparentsobj)
+{
 	pval *arg1, *arg2;
 	int link, id, type;
 	int count;
@@ -3188,7 +3219,8 @@ PHP_FUNCTION(hw_getparentsobj) {
 
 /* {{{ proto array hw_getparents(int link, int objid)
    Returns array of parent object ids */
-PHP_FUNCTION(hw_getparents) {
+PHP_FUNCTION(hw_getparents)
+{
 	pval *arg1, *arg2;
 	int link, id, type;
 	int count;
@@ -3233,7 +3265,8 @@ PHP_FUNCTION(hw_getparents) {
 
 /* {{{ proto array hw_children(int link, int objid)
    Returns array of children object ids */
-PHP_FUNCTION(hw_children) {
+PHP_FUNCTION(hw_children)
+{
 	zval **arg1, **arg2;
 	int link, id, type;
 	int count;
@@ -3278,7 +3311,8 @@ PHP_FUNCTION(hw_children) {
 
 /* {{{ proto array hw_childrenobj(int link, int objid)
    Returns array of children object records */
-PHP_FUNCTION(hw_childrenobj) {
+PHP_FUNCTION(hw_childrenobj)
+{
 	pval **arg1, **arg2;
 	int link, id, type;
 	int count;
@@ -3313,7 +3347,8 @@ PHP_FUNCTION(hw_childrenobj) {
 
 /* {{{ proto array hw_getchildcoll(int link, int objid)
    Returns array of child collection object ids */
-PHP_FUNCTION(hw_getchildcoll) {
+PHP_FUNCTION(hw_getchildcoll)
+{
 	pval **arg1, **arg2;
 	int link, id, type;
 	int count;
@@ -3358,7 +3393,8 @@ PHP_FUNCTION(hw_getchildcoll) {
 
 /* {{{ proto array hw_getchildcollobj(int link, int objid)
    Returns array of child collection object records */
-PHP_FUNCTION(hw_getchildcollobj) {
+PHP_FUNCTION(hw_getchildcollobj)
+{
 	pval **arg1, **arg2;
 	int link, id, type;
 	int count;
@@ -3393,7 +3429,8 @@ PHP_FUNCTION(hw_getchildcollobj) {
 
 /* {{{ proto int hw_docbyanchor(int link, int anchorid)
    Returns objid of document belonging to anchorid */
-PHP_FUNCTION(hw_docbyanchor) {
+PHP_FUNCTION(hw_docbyanchor)
+{
 	pval **arg1, **arg2;
 	int link, id, type;
 	hw_connection *ptr;
@@ -3424,7 +3461,8 @@ PHP_FUNCTION(hw_docbyanchor) {
 
 /* {{{ proto array hw_docbyanchorobj(int link, int anchorid)
    Returns object record of document belonging to anchorid */
-PHP_FUNCTION(hw_docbyanchorobj) {
+PHP_FUNCTION(hw_docbyanchorobj)
+{
 	pval **arg1, **arg2;
 	int link, id, type;
 	hw_connection *ptr;
@@ -3459,7 +3497,8 @@ PHP_FUNCTION(hw_docbyanchorobj) {
 
 /* {{{ proto array hw_getobjectbyquery(int link, string query, int maxhits)
    Search for query and return maxhits objids */
-PHP_FUNCTION(hw_getobjectbyquery) {
+PHP_FUNCTION(hw_getobjectbyquery)
+{
 	pval **arg1, **arg2, **arg3;
 	int link, type, maxhits;
 	char *query;
@@ -3502,7 +3541,8 @@ PHP_FUNCTION(hw_getobjectbyquery) {
 
 /* {{{ proto array hw_getobjectbyqueryobj(int link, string query, int maxhits)
    Search for query and return maxhits object records */
-PHP_FUNCTION(hw_getobjectbyqueryobj) {
+PHP_FUNCTION(hw_getobjectbyqueryobj)
+{
 	pval **arg1, **arg2, **arg3;
 	int link, type, maxhits;
 	char *query;
@@ -3540,7 +3580,8 @@ PHP_FUNCTION(hw_getobjectbyqueryobj) {
 
 /* {{{ proto array hw_getobjectbyquerycoll(int link, int collid, string query, int maxhits)
    Search for query in collection and return maxhits objids */
-PHP_FUNCTION(hw_getobjectbyquerycoll) {
+PHP_FUNCTION(hw_getobjectbyquerycoll)
+{
 	pval **arg1, **arg2, **arg3, **arg4;
 	int link, id, type, maxhits;
 	char *query;
@@ -3585,7 +3626,8 @@ PHP_FUNCTION(hw_getobjectbyquerycoll) {
 
 /* {{{ proto array hw_getobjectbyquerycollobj(int link, int collid, string query, int maxhits)
    Search for query in collection and return maxhits object records */
-PHP_FUNCTION(hw_getobjectbyquerycollobj) {
+PHP_FUNCTION(hw_getobjectbyquerycollobj)
+{
 	pval **arg1, **arg2, **arg3, **arg4;
 	int link, id, type, maxhits;
 	char *query;
@@ -3625,7 +3667,8 @@ PHP_FUNCTION(hw_getobjectbyquerycollobj) {
 
 /* {{{ proto array hw_getobjectbyftquery(int link, string query, int maxhits)
    Search for query as fulltext and return maxhits objids */
-PHP_FUNCTION(hw_getobjectbyftquery) {
+PHP_FUNCTION(hw_getobjectbyftquery)
+{
 	pval **arg1, **arg2, **arg3;
 	int link, type, maxhits;
 	char *query;
@@ -3669,7 +3712,8 @@ PHP_FUNCTION(hw_getobjectbyftquery) {
 
 /* {{{ proto array hw_getobjectbyftqueryobj(int link, string query, int maxhits)
    Search for query as fulltext and return maxhits object records */
-PHP_FUNCTION(hw_getobjectbyftqueryobj) {
+PHP_FUNCTION(hw_getobjectbyftqueryobj)
+{
 	pval **arg1, **arg2, **arg3;
 	int link, type, maxhits;
 	char *query;
@@ -3708,7 +3752,8 @@ PHP_FUNCTION(hw_getobjectbyftqueryobj) {
 
 /* {{{ proto array hw_getobjectbyftquerycoll(int link, int collid, string query, int maxhits)
    Search for fulltext query in collection and return maxhits objids */
-PHP_FUNCTION(hw_getobjectbyftquerycoll) {
+PHP_FUNCTION(hw_getobjectbyftquerycoll)
+{
 	pval **arg1, **arg2, **arg3, **arg4;
 	int link, id, type, maxhits;
 	char *query;
@@ -3754,7 +3799,8 @@ PHP_FUNCTION(hw_getobjectbyftquerycoll) {
 
 /* {{{ proto array hw_getobjectbyftquerycollobj(int link, int collid, string query, int maxhits)
    Search for fulltext query in collection and return maxhits object records */
-PHP_FUNCTION(hw_getobjectbyftquerycollobj) {
+PHP_FUNCTION(hw_getobjectbyftquerycollobj)
+{
 	pval **arg1, **arg2, **arg3, **arg4;
 	int link, id, type, maxhits;
 	char *query;
@@ -3795,7 +3841,8 @@ PHP_FUNCTION(hw_getobjectbyftquerycollobj) {
 
 /* {{{ proto array hw_getchilddoccoll(int link, int objid)
    Returns all children ids which are documents */
-PHP_FUNCTION(hw_getchilddoccoll) {
+PHP_FUNCTION(hw_getchilddoccoll)
+{
 	pval **arg1, **arg2;
 	int link, id, type;
 	int count, i;
@@ -3834,7 +3881,8 @@ PHP_FUNCTION(hw_getchilddoccoll) {
 
 /* {{{ proto array hw_getchilddoccollobj(int link, int objid)
    Returns all children object records which are documents */
-PHP_FUNCTION(hw_getchilddoccollobj) {
+PHP_FUNCTION(hw_getchilddoccollobj)
+{
 	pval **arg1, **arg2;
 	int link, id, type;
 	int count;
@@ -3869,7 +3917,8 @@ PHP_FUNCTION(hw_getchilddoccollobj) {
 
 /* {{{ proto array hw_getanchors(int link, int objid)
    Return all anchors of object */
-PHP_FUNCTION(hw_getanchors) {
+PHP_FUNCTION(hw_getanchors)
+{
 	pval **arg1, **arg2;
 	int link, id, type;
 	int count, i;
@@ -3908,7 +3957,8 @@ PHP_FUNCTION(hw_getanchors) {
 
 /* {{{ proto array hw_getanchorsobj(int link, int objid)
    Return all object records of anchors of object */
-PHP_FUNCTION(hw_getanchorsobj) {
+PHP_FUNCTION(hw_getanchorsobj)
+{
 	pval **arg1, **arg2;
 	int link, id, type;
 	int count;
@@ -3942,7 +3992,8 @@ PHP_FUNCTION(hw_getanchorsobj) {
 
 /* {{{ proto string hw_getusername(int link)
    Returns the current user name */
-PHP_FUNCTION(hw_getusername) {
+PHP_FUNCTION(hw_getusername)
+{
 	pval **arg1;
 	int link, type;
 	hw_connection *ptr;
@@ -3966,7 +4017,8 @@ PHP_FUNCTION(hw_getusername) {
 
 /* {{{ proto void hw_identify(int link, string username, string password)
    Identifies at Hyperwave server */
-PHP_FUNCTION(hw_identify) {
+PHP_FUNCTION(hw_identify)
+{
 	pval **arg1, **arg2, **arg3;
 	int link, type;
 	char *name, *passwd, *userdata;
@@ -4015,7 +4067,8 @@ PHP_FUNCTION(hw_identify) {
 
 /* {{{ proto array hw_objrec2array(string objrec, [array format])
    Returns object array of object record */
-PHP_FUNCTION(hw_objrec2array) {
+PHP_FUNCTION(hw_objrec2array)
+{
 	zval **arg1, **arg2;
 
 	switch(ZEND_NUM_ARGS()) {
@@ -4040,7 +4093,8 @@ PHP_FUNCTION(hw_objrec2array) {
 
 /* {{{ proto string hw_array2objrec(array objarr)
    Returns object record of object array */
-PHP_FUNCTION(hw_array2objrec) {
+PHP_FUNCTION(hw_array2objrec)
+{
 	pval **arg1;
 	char *objrec, *retobj;
 
@@ -4060,7 +4114,8 @@ PHP_FUNCTION(hw_array2objrec) {
 
 /* {{{ proto array hw_incollections(int link, array objids, array collids, int para)
    Returns object ids which are in collections */
-PHP_FUNCTION(hw_incollections) {
+PHP_FUNCTION(hw_incollections)
+{
 	pval **arg1, **arg2, **arg3, **arg4;
 	int type, link, i;
 	hw_connection *ptr;
@@ -4121,7 +4176,8 @@ PHP_FUNCTION(hw_incollections) {
 
 /* {{{ proto void hw_inscoll(int link, int parentid, array objarr)
    Inserts collection */
-PHP_FUNCTION(hw_inscoll) {
+PHP_FUNCTION(hw_inscoll)
+{
 	pval **arg1, **arg2, **arg3;
 	char *objrec;
 	int id, newid, type, link;
@@ -4159,7 +4215,8 @@ PHP_FUNCTION(hw_inscoll) {
 
 /* {{{ proto void hw_insdoc(int link, int parentid, string objrec [, string text])
    Inserts document */
-PHP_FUNCTION(hw_insdoc) {
+PHP_FUNCTION(hw_insdoc)
+{
 	zval **argv[4];
 	char *objrec, *text;
 	int id, newid, type, link, argc;
@@ -4201,7 +4258,8 @@ PHP_FUNCTION(hw_insdoc) {
 
 /* {{{ proto int hw_getsrcbydestobj(int link, int destid)
    Returns object id of source docuent by destination anchor */
-PHP_FUNCTION(hw_getsrcbydestobj) {
+PHP_FUNCTION(hw_getsrcbydestobj)
+{
 	pval **arg1, **arg2;
 	int link, type, id;
 	int count;
@@ -4235,7 +4293,8 @@ PHP_FUNCTION(hw_getsrcbydestobj) {
 
 /* {{{ proto int hw_mapid(int link, int serverid, int destid)
    Returns virtual object id of document on remote Hyperwave server */
-PHP_FUNCTION(hw_mapid) {
+PHP_FUNCTION(hw_mapid)
+{
 	pval **arg1, **arg2, **arg3;
 	int link, type, servid, id, virtid;
 	hw_connection *ptr;
@@ -4266,7 +4325,8 @@ PHP_FUNCTION(hw_mapid) {
 
 /* {{{ proto string hw_getrellink(int link, int rootid, int sourceid, int destid)
    Get link from source to dest relative to rootid */
-PHP_FUNCTION(hw_getrellink) {
+PHP_FUNCTION(hw_getrellink)
+{
 	pval **arg1, **arg2, **arg3, **arg4;
 	int link, type;
 	int rootid, destid, sourceid;
@@ -4302,7 +4362,8 @@ PHP_FUNCTION(hw_getrellink) {
 	
 /* {{{ proto string hw_insertanchors(int hwdoc, array anchorecs, array dest [, array urlprefixes])
    Inserts only anchors into text */
-PHP_FUNCTION(hw_insertanchors) {
+PHP_FUNCTION(hw_insertanchors)
+{
 	pval **arg1, **arg2, **arg3, **arg4;
 	hw_document *hwdoc;
 	int type, docid, error, argc, count;

@@ -727,7 +727,7 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler)
 	ASInt32 nBytes;
 	zval *array_ptr = (zval *) arg;
 	
-	fp=php_open_temporary_file(NULL,"fdfdata.",&filename);
+	fp=php_open_temporary_file(NULL, "fdfdata.", &filename TSRMLS_CC);
 	if(!fp) {
 		if(filename) efree(filename);
 		return;

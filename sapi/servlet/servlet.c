@@ -355,7 +355,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 		 * changed, so save it and change it back as quickly as possible
 		 * in the hopes that Java doesn't notice.
 		 */
-		getcwd(cwd,MAXPATHLEN);
+		getcwd(cwd, MAXPATHLEN);
 		retval = php_fopen_primary_script(&file_handle TSRMLS_CC);
 		chdir(cwd);
 #endif
@@ -363,7 +363,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 		if (retval == FAILURE) {
 			php_request_shutdown((void *) 0);
 			php_module_shutdown();
-			ThrowIOException(jenv,file_handle.filename);
+			ThrowIOException(jenv, file_handle.filename);
 			return;
 		}
 

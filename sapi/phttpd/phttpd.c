@@ -62,7 +62,7 @@ php_phttpd_sapi_ub_write(const char *str, uint str_length)
     int sent_bytes;
 	TSRMLS_FETCH();
 
-	sent_bytes = fd_write(PHG(cip)->fd,str,str_length);
+	sent_bytes = fd_write(PHG(cip)->fd, str, str_length);
 
 	if (sent_bytes == -1) {
 		php_handle_aborted_connection();
@@ -78,7 +78,7 @@ php_phttpd_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
     char *p;
     TSRMLS_FETCH();
  
-	http_sendheaders(PHG(cip)->fd,PHG(cip), SG(sapi_headers).http_response_code, NULL);
+	http_sendheaders(PHG(cip)->fd, PHG(cip), SG(sapi_headers).http_response_code, NULL);
 
     header_name = sapi_header->header;
     header_content = p = strchr(header_name, ':');
@@ -89,7 +89,7 @@ php_phttpd_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
             header_content++;
         } while (*header_content == ' ');
 
-		fd_printf(PHG(cip)->fd,"%s: %s\n",header_name,header_content);
+		fd_printf(PHG(cip)->fd,"%s: %s\n", header_name, header_content);
  
         *p = ':';
     }
@@ -194,7 +194,7 @@ static sapi_module_struct phttpd_sapi_module = {
 static void
 php_phttpd_request_ctor(TSRMLS_D TSRMLS_DC)
 {
-	memset(&SG(request_info),0,sizeof(sapi_globals_struct)); /* pfusch! */
+	memset(&SG(request_info), 0, sizeof(sapi_globals_struct)); /* pfusch! */
 
     SG(request_info).query_string = PHG(cip)->hip->request;
     SG(request_info).request_method = PHG(cip)->hip->method;

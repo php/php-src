@@ -716,7 +716,7 @@ void pike_module_init( void )
   ADD_STORAGE(php_roxen_request);
   set_init_callback(clear_struct);
   pike_add_function("run", f_php_roxen_request_handler,
-		    "function(string,mapping,object,function:int)", 0);
+		    "function(string, mapping, object, function:int)", 0);
   add_program_constant("Interpreter", (php_program = end_program()), 0);
 }
 

@@ -116,7 +116,8 @@ static PHP_MSHUTDOWN_FUNCTION(dbase)
 
 /* {{{ proto int dbase_open(string name, int mode)
    Opens a dBase-format database file */
-PHP_FUNCTION(dbase_open) {
+PHP_FUNCTION(dbase_open)
+{
 	pval *dbf_name, *options;
 	dbhead_t *dbh;
 	int handle;
@@ -149,7 +150,8 @@ PHP_FUNCTION(dbase_open) {
 
 /* {{{ proto bool dbase_close(int identifier)
    Closes an open dBase-format database file */
-PHP_FUNCTION(dbase_close) {
+PHP_FUNCTION(dbase_close)
+{
 	pval *dbh_id;
 	dbhead_t *dbh;
 	int dbh_type;
@@ -172,7 +174,8 @@ PHP_FUNCTION(dbase_close) {
 
 /* {{{ proto int dbase_numrecords(int identifier)
    Returns the number of records in the database */
-PHP_FUNCTION(dbase_numrecords) {
+PHP_FUNCTION(dbase_numrecords)
+{
 	pval *dbh_id;
 	dbhead_t *dbh;
 	int dbh_type;
@@ -194,7 +197,8 @@ PHP_FUNCTION(dbase_numrecords) {
 
 /* {{{ proto int dbase_numfields(int identifier)
    Returns the number of fields (columns) in the database */
-PHP_FUNCTION(dbase_numfields) {
+PHP_FUNCTION(dbase_numfields)
+{
 	pval *dbh_id;
 	dbhead_t *dbh;
 	int dbh_type;
@@ -216,7 +220,8 @@ PHP_FUNCTION(dbase_numfields) {
 
 /* {{{ proto bool dbase_pack(int identifier)
    Packs the database (deletes records marked for deletion) */
-PHP_FUNCTION(dbase_pack) {
+PHP_FUNCTION(dbase_pack)
+{
 	pval *dbh_id;
 	dbhead_t *dbh;
 	int dbh_type;
@@ -240,7 +245,8 @@ PHP_FUNCTION(dbase_pack) {
 
 /* {{{ proto bool dbase_add_record(int identifier, array data)
    Adds a record to the database */
-PHP_FUNCTION(dbase_add_record) {
+PHP_FUNCTION(dbase_add_record)
+{
 	pval *dbh_id, *fields, **field;
 	dbhead_t *dbh;
 	int dbh_type;
@@ -382,7 +388,8 @@ PHP_FUNCTION(dbase_replace_record)
 
 /* {{{ proto bool dbase_delete_record(int identifier, int record)
    Marks a record to be deleted */
-PHP_FUNCTION(dbase_delete_record) {
+PHP_FUNCTION(dbase_delete_record)
+{
 	pval *dbh_id, *record;
 	dbhead_t *dbh;
 	int dbh_type;
@@ -416,7 +423,8 @@ PHP_FUNCTION(dbase_delete_record) {
 
 /* {{{ proto array dbase_get_record(int identifier, int record)
    Returns an array representing a record from the database */
-PHP_FUNCTION(dbase_get_record) {
+PHP_FUNCTION(dbase_get_record)
+{
 	pval *dbh_id, *record;
 	dbhead_t *dbh;
 	int dbh_type;
@@ -500,7 +508,8 @@ PHP_FUNCTION(dbase_get_record) {
 /* From Martin Kuba <makub@aida.inet.cz> */
 /* {{{ proto array dbase_get_record_with_names(int identifier, int record)
    Returns an associative array representing a record from the database */
-PHP_FUNCTION(dbase_get_record_with_names) {
+PHP_FUNCTION(dbase_get_record_with_names)
+{
 	pval *dbh_id, *record;
 	dbhead_t *dbh;
 	int dbh_type;
@@ -575,7 +584,8 @@ PHP_FUNCTION(dbase_get_record_with_names) {
 
 /* {{{ proto bool dbase_create(string filename, array fields)
    Creates a new dBase-format database file */
-PHP_FUNCTION(dbase_create) {
+PHP_FUNCTION(dbase_create)
+{
 	pval *filename, *fields, **field, **value;
 	int fd;
 	dbhead_t *dbh;
@@ -603,7 +613,7 @@ PHP_FUNCTION(dbase_create) {
 		RETURN_FALSE;
 	}
 
-	if ((fd = VCWD_OPEN((Z_STRVAL_P(filename), O_BINARY|O_RDWR|O_CREAT, 0644))) < 0) {
+	if ((fd = VCWD_OPEN_MODE(Z_STRVAL_P(filename), O_BINARY|O_RDWR|O_CREAT, 0644)) < 0) {
 		php_error(E_WARNING, "Unable to create database (%d): %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}

@@ -40,7 +40,7 @@ SAPI_POST_READER_FUNC(php_default_post_reader)
 	char *data;
 
 	if(!SG(request_info).post_data) sapi_read_standard_form_data(TSRMLS_C);
-	data = estrndup(SG(request_info).post_data,SG(request_info).post_data_length);
+	data = estrndup(SG(request_info).post_data, SG(request_info).post_data_length);
 	SET_VAR_STRINGL("HTTP_RAW_POST_DATA", data, SG(request_info).post_data_length);
 }
 /* }}} */

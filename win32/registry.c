@@ -1,7 +1,7 @@
 #include "php.h"
 #include "php_ini.h"
 
-void UpdateIniFromRegistry(char *path)
+void UpdateIniFromRegistry(char *path TSRMLS_DC)
 {
 	char *p, *orig_path;
 	HKEY MainKey;
@@ -10,7 +10,6 @@ void UpdateIniFromRegistry(char *path)
 	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\PHP\\Per Directory Values", 0, KEY_READ, &MainKey)!=ERROR_SUCCESS) {
 		return;
 	}
-
 
 	orig_path = path = estrdup(path);
 

@@ -113,7 +113,7 @@ char *strtok_r(char *s, const char *delim, char **last);
 typedef unsigned int socklen_t;
 #endif
 
-#define CREATE_MUTEX(a,b)
+#define CREATE_MUTEX(a, b)
 #define SET_MUTEX(a)
 #define FREE_MUTEX(a)
 
@@ -303,29 +303,29 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 
 #if defined(CRAY) || (defined(__arm) && !defined(LINUX))
 #ifdef __STDC__
-#define XtOffset(p_type,field) _Offsetof(p_type,field)
+#define XtOffset(p_type, field) _Offsetof(p_type, field)
 #else
 #ifdef CRAY2
-#define XtOffset(p_type,field) \
+#define XtOffset(p_type, field) \
     (sizeof(int)*((unsigned int)&(((p_type)NULL)->field)))
 
 #else /* !CRAY2 */
 
-#define XtOffset(p_type,field) ((unsigned int)&(((p_type)NULL)->field))
+#define XtOffset(p_type, field) ((unsigned int)&(((p_type)NULL)->field))
 
 #endif /* !CRAY2 */
 #endif /* __STDC__ */
 #else /* ! (CRAY || __arm) */
 
-#define XtOffset(p_type,field) \
+#define XtOffset(p_type, field) \
     ((long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
 
 #endif /* !CRAY */
 
 #ifdef offsetof
-#define XtOffsetOf(s_type,field) offsetof(s_type,field)
+#define XtOffsetOf(s_type, field) offsetof(s_type, field)
 #else
-#define XtOffsetOf(s_type,field) XtOffset(s_type*,field)
+#define XtOffsetOf(s_type, field) XtOffset(s_type*, field)
 #endif
 
 PHPAPI PHP_FUNCTION(warn_not_available);

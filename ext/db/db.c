@@ -350,7 +350,7 @@ dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC)
 		}
 #else /* NFS_HACK */
 
-		lockfd = VCWD_OPEN((lockfn,O_RDWR|O_CREAT,0644));
+		lockfd = VCWD_OPEN_MODE(lockfn, O_RDWR|O_CREAT, 0644);
 
 		if (lockfd) {
 			flock(lockfd,LOCK_EX);
@@ -422,7 +422,8 @@ dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC)
 
 /* {{{ proto bool dbmclose(int dbm_identifier)
    Closes a dbm database */
-PHP_FUNCTION(dbmclose) {
+PHP_FUNCTION(dbmclose)
+{
 	pval *id;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht,1,&id)==FAILURE) {
@@ -453,7 +454,7 @@ int php_dbm_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	VCWD_UNLINK(info->lockfn);
 #else
 	if (info->lockfn) {
-		lockfd = VCWD_OPEN((info->lockfn,O_RDWR,0644));
+		lockfd = VCWD_OPEN_MODE(info->lockfn, O_RDWR, 0644);
 		flock(lockfd,LOCK_UN);
 		close(lockfd);
 	}

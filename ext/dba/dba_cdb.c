@@ -60,7 +60,7 @@ DBA_OPEN_FUNC(cdb)
 	cdb = malloc(sizeof *cdb);
 	memset(cdb, 0, sizeof *cdb);
 
-	cdb->fd = VCWD_OPEN((info->path, gmode));
+	cdb->fd = VCWD_OPEN(info->path, gmode);
 	if(cdb->fd < 0) {
 		free(cdb);
 		return FAILURE;

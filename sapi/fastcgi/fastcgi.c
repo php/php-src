@@ -237,7 +237,7 @@ static void init_request_info( TSRMLS_D )
 	   char *ptr;
 	   while( ptr = strrchr(pt,'/') ) {
 	      *ptr = 0;
-	      if ( stat(pt,&st) == 0 && S_ISREG(st.st_mode) ) {
+	      if ( stat(pt, &st) == 0 && S_ISREG(st.st_mode) ) {
 		 /*
 		  * okay, we found the base script!
 		  * work out how many chars we had to strip off;
@@ -350,7 +350,7 @@ int main(int argc, char *argv[])
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
-	signal(SIGPIPE,SIG_IGN); /* ignore SIGPIPE in standalone mode so
+	signal(SIGPIPE, SIG_IGN); /* ignore SIGPIPE in standalone mode so
 				    that sockets created via fsockopen()
 				    don't kill PHP if the remote site
 				    closes it.	in apache|apxs mode apache

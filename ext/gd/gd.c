@@ -2712,7 +2712,7 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int extende
 	l = strlen(str);
 
 #ifdef VIRTUAL_DIR
-	if(virtual_filepath(Z_STRVAL_PP(FONTNAME), &fontname)) {
+	if(virtual_filepath(Z_STRVAL_PP(FONTNAME), &fontname TSRMLS_CC)) {
 		fontname = (unsigned char*)Z_STRVAL_PP(FONTNAME);
 	}
 #else

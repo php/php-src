@@ -19,6 +19,6 @@
 #ifndef PHP_OPEN_TEMPORARY_FILE_H
 #define PHP_OPEN_TEMPORARY_FILE_H
 
-PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **opened_path_p);
+PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **opened_path_p TSRMLS_DC);
 
 #endif /* PHP_OPEN_TEMPORARY_FILE_H */

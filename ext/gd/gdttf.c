@@ -332,11 +332,12 @@ fontFetch ( char **error, void *key )
 	fontkey_t		*b=(fontkey_t *)key;
 	int				i, n, map_found;
 	short			platform, encoding;
+	TSRMLS_FETCH();
 
 	a = (font_t *)malloc(sizeof(font_t));
 #ifdef VIRTUAL_DIR
 	/* a->fontname will be freed in fontRelease() later on */
-	if (virtual_filepath(b->fontname, &a->fontname)) {
+	if (virtual_filepath(b->fontname, &a->fontname TSRMLS_CC)) {
 		*error = "Could not find/open font";
 		return NULL;
 	}

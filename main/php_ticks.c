@@ -53,7 +53,7 @@ PHPAPI void php_remove_tick_function(void (*func)(int))
 	TSRMLS_FETCH();
 
 	zend_llist_del_element(&PG(tick_functions), func,
-						   (int(*)(void*,void*))php_compare_tick_functions);
+						   (int(*)(void*, void*))php_compare_tick_functions);
 }
 
 static void php_tick_iterator(void *data, void *arg TSRMLS_DC)

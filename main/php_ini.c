@@ -228,7 +228,7 @@ int php_init_config(char *php_ini_path_override)
 #ifdef PHP_WIN32
 		default_location = (char *) emalloc(512);
 	
-		if (!GetWindowsDirectory(default_location,255)) {
+		if (!GetWindowsDirectory(default_location, 255)) {
 			default_location[0]=0;
 		}
 		free_default_location=1;
@@ -272,7 +272,7 @@ int php_init_config(char *php_ini_path_override)
 		tmp.value.str.len = strlen(php_ini_opened_path);
 		tmp.value.str.val = zend_strndup(php_ini_opened_path, tmp.value.str.len);
 		tmp.type = IS_STRING;
-		zend_hash_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path"),(void *) &tmp,sizeof(zval), NULL);
+		zend_hash_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path"), (void *) &tmp, sizeof(zval), NULL);
 		efree(php_ini_opened_path);
 		php_ini_opened_path = zend_strndup(tmp.value.str.val, tmp.value.str.len);
 	}
@@ -321,11 +321,11 @@ zval *cfg_get_entry(char *name, uint name_length)
 
 /* {{{ cfg_get_long
  */
-PHPAPI int cfg_get_long(char *varname,long *result)
+PHPAPI int cfg_get_long(char *varname, long *result)
 {
-	zval *tmp,var;
+	zval *tmp, var;
 	
-	if (zend_hash_find(&configuration_hash,varname,strlen(varname)+1,(void **) &tmp)==FAILURE) {
+	if (zend_hash_find(&configuration_hash, varname, strlen(varname)+1, (void **) &tmp)==FAILURE) {
 		*result=(long)NULL;
 		return FAILURE;
 	}
@@ -339,11 +339,11 @@ PHPAPI int cfg_get_long(char *varname,long *result)
 
 /* {{{ cfg_get_double
  */
-PHPAPI int cfg_get_double(char *varname,double *result)
+PHPAPI int cfg_get_double(char *varname, double *result)
 {
-	zval *tmp,var;
+	zval *tmp, var;
 	
-	if (zend_hash_find(&configuration_hash,varname,strlen(varname)+1,(void **) &tmp)==FAILURE) {
+	if (zend_hash_find(&configuration_hash, varname, strlen(varname)+1, (void **) &tmp)==FAILURE) {
 		*result=(double)0;
 		return FAILURE;
 	}
@@ -361,7 +361,7 @@ PHPAPI int cfg_get_string(char *varname, char **result)
 {
 	zval *tmp;
 
-	if (zend_hash_find(&configuration_hash,varname,strlen(varname)+1,(void **) &tmp)==FAILURE) {
+	if (zend_hash_find(&configuration_hash, varname, strlen(varname)+1, (void **) &tmp)==FAILURE) {
 		*result=NULL;
 		return FAILURE;
 	}
