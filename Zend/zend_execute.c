@@ -521,40 +521,35 @@ static void print_refcount(zval *p, char *str)
 	print_refcount(NULL, NULL);
 }
 
-
-static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type TSRMLS_DC)
+static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_variable *Ts, int type TSRMLS_DC)
 {
-	int free_op1;
-	zval *varname = get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
-	zval **retval;
-	zval tmp_varname;
-	HashTable *target_symbol_table=0;
-
 	switch (opline->op2.u.EA.type) {
 		case ZEND_FETCH_LOCAL:
-			target_symbol_table = EG(active_symbol_table);
+			return EG(active_symbol_table);
 			break;
 		case ZEND_FETCH_GLOBAL:
+/* Don't think this is actually needed.
 			if (opline->op1.op_type == IS_VAR) {
 				PZVAL_LOCK(varname);
 			}
-			target_symbol_table = &EG(symbol_table);
+*/
+			return &EG(symbol_table);
 			break;
 		case ZEND_FETCH_STATIC:
 			if (!EG(active_op_array)->static_variables) {
 				ALLOC_HASHTABLE(EG(active_op_array)->static_variables);
 				zend_hash_init(EG(active_op_array)->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0);
 			}
-			target_symbol_table = EG(active_op_array)->static_variables;
+			return EG(active_op_array)->static_variables;
 			break;
 		case ZEND_FETCH_STATIC_MEMBER:
-			target_symbol_table = Ts[opline->op2.u.var].EA.class_entry->static_members;
+			return Ts[opline->op2.u.var].EA.class_entry->static_members;
 			break;
 		case ZEND_FETCH_FROM_THIS:
 			if (!EG(this)) {
 				zend_error(E_ERROR, "Using $this when not in object context");
 			}
-			target_symbol_table = Z_OBJPROP_P(EG(this));
+			return Z_OBJPROP_P(EG(this));
 			break;
 		case ZEND_FETCH_THIS:
 			{
@@ -569,10 +564,25 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 				Ts[opline->result.u.var].var.ptr_ptr = &EG(this);
 				SELECTIVE_PZVAL_LOCK(EG(this), &opline->result);
 				AI_USE_PTR(Ts[opline->result.u.var].var);
-				return;
+				return NULL;
 				break;
 			}
 		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
+
+static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type TSRMLS_DC)
+{
+	int free_op1;
+	zval *varname = get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
+	zval **retval;
+	zval tmp_varname;
+	HashTable *target_symbol_table;
+
+	target_symbol_table = zend_get_target_symbol_table(opline, Ts, type TSRMLS_CC);
+	if (!target_symbol_table) {
+		return;
 	}
 
  	if (varname->type != IS_STRING) {
@@ -581,6 +591,7 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 		convert_to_string(&tmp_varname);
 		varname = &tmp_varname;
 	}
+
 	if (zend_hash_find(target_symbol_table, varname->value.str.val, varname->value.str.len+1, (void **) &retval) == FAILURE) {
 		switch (type) {
 			case BP_VAR_R: 
@@ -2484,7 +2495,8 @@ send_by_ref:
 					EG(return_value_ptr_ptr) = original_return_value;
 				}
 				NEXT_OPCODE();
-			case ZEND_UNSET_VAR: {
+			case ZEND_UNSET_VAR:
+				{
 					zval tmp, *variable = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 					zval **object;
 					zend_bool unset_object;
@@ -2701,54 +2713,133 @@ send_by_ref:
 					}
 				}
 				NEXT_OPCODE();
-			case ZEND_ISSET_ISEMPTY: {
-					zval **var = get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_IS);
-					zval *value;
-					int isset;
+			case ZEND_ISSET_ISEMPTY_VAR:
+				{
+					zval tmp, *variable = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+					zval **value;
+					zend_bool isset = 1;
+					HashTable *target_symbol_table;
 
-					if (!var) {
-						if (EX(Ts)[EX(opline)->op1.u.var].EA.type == IS_STRING_OFFSET) {
-							PZVAL_LOCK(EX(Ts)[EX(opline)->op1.u.var].EA.data.str_offset.str);
-							value = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_IS);
-							if (value->value.str.val == empty_string) {
-								isset = 0;
-							} else {
-								isset = 1;
-							}
-						} else { /* IS_OVERLOADED_OBJECT */
-							value = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_IS);
-							if (value->type == IS_NULL) {
-								isset = 0;
-							} else {
-								isset = 1;
-							}
-						}
-					} else if (*var==EG(uninitialized_zval_ptr) || ((*var)->type == IS_NULL)) {
-						value = *var;
-						isset = 0;
-					} else {
-						value = *var;
-						isset = 1;
+					target_symbol_table = zend_get_target_symbol_table(EX(opline), EX(Ts), BP_VAR_IS TSRMLS_CC);
+
+					if (variable->type != IS_STRING) {
+						tmp = *variable;
+						zval_copy_ctor(&tmp);
+						convert_to_string(&tmp);
+						variable = &tmp;
 					}
 
-					switch (EX(opline)->op2.u.constant.value.lval) {
+					if (zend_hash_find(target_symbol_table, variable->value.str.val, variable->value.str.len+1, (void **) &value) == FAILURE) {
+						isset = 0;
+					}
+
+					EX(Ts)[EX(opline)->result.u.var].tmp_var.type = IS_BOOL;
+
+					switch (EX(opline)->extended_value) {
 						case ZEND_ISSET:
-							EX(Ts)[EX(opline)->result.u.var].tmp_var.value.lval = isset;
+							if (isset && Z_TYPE_PP(value) == IS_NULL) {
+								EX(Ts)[EX(opline)->result.u.var].tmp_var.value.lval = 0;
+							} else {
+								EX(Ts)[EX(opline)->result.u.var].tmp_var.value.lval = isset;
+							}
 							break;
 						case ZEND_ISEMPTY:
-							if (!isset || !zend_is_true(value)) {
+							if (!isset || !zend_is_true(*value)) {
 								EX(Ts)[EX(opline)->result.u.var].tmp_var.value.lval = 1;
 							} else {
 								EX(Ts)[EX(opline)->result.u.var].tmp_var.value.lval = 0;
 							}
 							break;
 					}
-					EX(Ts)[EX(opline)->result.u.var].tmp_var.type = IS_BOOL;
-					if (!var) {
-						FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
+
+					if (variable == &tmp) {
+						zval_dtor(&tmp);
 					}
+					FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
 				}
 				NEXT_OPCODE();
+		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+				{
+					zval **container = get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_R);
+					zval *offset = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+					zval **value;
+					int isset = 1;
+
+					if (container) {
+						HashTable *ht;
+
+						switch ((*container)->type) {
+							case IS_ARRAY:
+								ht = (*container)->value.ht;
+								break;
+							case IS_OBJECT:
+								ht = Z_OBJPROP_PP(container);
+								break;
+							default:
+								ht = NULL;
+								break;
+						}
+						if (ht)	{
+							switch (offset->type) {
+								case IS_DOUBLE:
+								case IS_RESOURCE:
+								case IS_BOOL: 
+								case IS_LONG:
+									{
+										long index;
+
+										if (offset->type == IS_DOUBLE) {
+											index = (long) offset->value.lval;
+										} else {
+											index = offset->value.lval;
+										}
+										if (zend_hash_index_find(ht, index, (void **) &value) == FAILURE) {
+											isset = 0;
+										}
+										break;
+									}
+								case IS_STRING:
+									if (zend_hash_find(ht, offset->value.str.val, offset->value.str.len+1, (void **) &value) == FAILURE) {
+										isset = 0;
+									}
+									break;
+								case IS_NULL:
+									if (zend_hash_find(ht, "", sizeof(""), (void **) &value) == FAILURE) {
+										isset = 0;
+									}
+									break;
+								default: 
+									zend_error(E_WARNING, "Illegal offset type in unset");
+									break;
+							}
+						}
+					} else {
+						/* overloaded element & string offsets */
+					}
+					
+					EX(Ts)[EX(opline)->result.u.var].tmp_var.type = IS_BOOL;
+
+					switch (EX(opline)->extended_value) {
+						case ZEND_ISSET:
+							if (isset && Z_TYPE_PP(value) == IS_NULL) {
+								EX(Ts)[EX(opline)->result.u.var].tmp_var.value.lval = 0;
+							} else {
+								EX(Ts)[EX(opline)->result.u.var].tmp_var.value.lval = isset;
+							}
+							break;
+						case ZEND_ISEMPTY:
+							if (!isset || !zend_is_true(*value)) {
+								EX(Ts)[EX(opline)->result.u.var].tmp_var.value.lval = 1;
+							} else {
+								EX(Ts)[EX(opline)->result.u.var].tmp_var.value.lval = 0;
+							}
+							break;
+					}
+
+					FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
+				}
+				NEXT_OPCODE();
+				break;
 			case ZEND_EXIT:
 				if (EX(opline)->op1.op_type != IS_UNUSED) {
 					zval *ptr;
