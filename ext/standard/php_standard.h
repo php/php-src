@@ -31,7 +31,7 @@
 /* $Id$ */
 
 #include "basic_functions.h"
-#include "phpmath.h"
+#include "php_math.h"
 #include "php_string.h"
 #include "base64.h"
 #include "php_dir.h"

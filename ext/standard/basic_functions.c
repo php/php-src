@@ -23,7 +23,7 @@
 #include "php_ini.h"
 #include "internal_functions_registry.h"
 #include "php_standard.h"
-#include "phpmath.h"
+#include "php_math.h"
 #include "ext/standard/info.h"
 #include "zend_operators.h"
 #include <stdarg.h>
