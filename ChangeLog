@@ -1,3 +1,73 @@
+2003-08-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_default_classes.h
+      ZendEngine2/zend_reflection_api.c:
+      Allow zend_throw_exception() to also set the exception code
+
+    * ZendEngine2/zend_default_classes.c:
+      Exception has 4 protected default properties (message,code,file,line).
+      They are all initialized at c-level constructor correctly.
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h:
+      Internal classes can now have default properties.
+
+    * ZendEngine2/zend_reflection_api.c:
+      Show ctor/dtor information and those don't return anything
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c:
+      - Flag ctor/dtor methods
+      - Use this to prevent memleaks when an exception gets thrown in ctors.
+
+    * ZendEngine2/zend_default_classes.c:
+      Make exception code more robust
+
+2003-08-23  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c:
+      revert previous patch.
+
+    * ext/mbstring/mb_gpc.c
+      ext/mbstring/mbstring.c:
+      changed for ZTS mode.
+
+    * ext/mbstring/README.libmbfl
+      ext/mbstring/config.m4
+      ext/mbstring/cp932_table.h
+      ext/mbstring/html_entities.c
+      ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h
+      ext/mbstring/mbfilter_cn.c
+      ext/mbstring/mbfilter_cn.h
+      ext/mbstring/mbfilter_ja.c
+      ext/mbstring/mbfilter_ja.h
+      ext/mbstring/mbfilter_kr.c
+      ext/mbstring/mbfilter_kr.h
+      ext/mbstring/mbfilter_ru.c
+      ext/mbstring/mbfilter_ru.h
+      ext/mbstring/mbfilter_tw.c
+      ext/mbstring/mbfilter_tw.h
+      ext/mbstring/mbregex.c
+      ext/mbstring/mbregex.h
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/php_mbfl_allocators.c
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/php_mbregex.h
+      ext/mbstring/unicode_table.h
+      ext/mbstring/unicode_table_cn.h
+      ext/mbstring/unicode_table_ja.h
+      ext/mbstring/unicode_table_kr.h
+      ext/mbstring/unicode_table_ru.h
+      ext/mbstring/unicode_table_tw.h:
+      
+
 2003-08-22  Wez Furlong  <wez.php@thebrainroom.net>
 
     * win32/.cvsignore:
