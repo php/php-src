@@ -122,6 +122,7 @@ AC_PROG_LN_S
 AC_PROG_LEX
 if test -n "$LEX"; then
   AC_DECL_YYTEXT
+  :
 fi
 
 dnl ## Make flex scanners use const if they can, even if __STDC__ is not
@@ -934,7 +935,7 @@ pear/scripts/pearize pear/scripts/phptar TSRM/Makefile $PHP_OUTPUT_FILES"
 
 AC_OUTPUT($ALL_OUTPUT_FILES, [], [
 
-if test "\$CONFIG_FILES" = "$ALL_OUTPUT_FILES"; then
+if test "\$CONFIG_FILES" = "$ALL_OUTPUT_FILES" || test -z "\$CONFIG_FILES"; then
   REDO_ALL=yes
 fi
 
@@ -953,9 +954,10 @@ fi
 # Create configuration headers
 #
 
-if test -d TSRM; then
-  echo '#include "../main/php_config.h"' > TSRM/tsrm_config.h
-fi
+test -d TSRM || mkdir TSRM
+echo '#include "../main/php_config.h"' > TSRM/tsrm_config.h
+
+test -d Zend || mkdir Zend
 
 cat >Zend/zend_config.h <<FEO
 #include "../main/php_config.h"

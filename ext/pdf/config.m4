@@ -18,7 +18,7 @@ if test "$PHP_PDFLIB" != "no"; then
       AC_CHECK_LIB(pdf, PDF_show_boxed, [
         AC_DEFINE(HAVE_PDFLIB,1,[ ])
       ],[
-        AC_MSG_ERROR(pdflib extension requires at least pdflib 3.x. You may also need libtiff and libjpeg. If so, use the options --with-tiff-dir=<DIR> and --with-jpeg-dir=<DIR>)
+        AC_MSG_ERROR([pdflib extension requires at least pdflib 3.x. You may also need libtiff and libjpeg. If so, use the options --with-tiff-dir=<DIR> and --with-jpeg-dir=<DIR>])
       ],[
         -ltiff -ljpeg -lpng -lz
       ])
@@ -34,7 +34,7 @@ if test "$PHP_PDFLIB" != "no"; then
       if test -n "$PDFLIB_INCLUDE" ; then
 
         if test "$PHP_ZLIB_DIR" = "no"; then
-          AC_MSG_ERROR(PDF extension requires ZLIB. Use --with-zlib-dir=<DIR>)
+          AC_MSG_ERROR([PDF extension requires ZLIB. Use --with-zlib-dir=<DIR>])
         fi
 
         PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/lib, PDFLIB_SHARED_LIBADD)
@@ -47,7 +47,7 @@ if test "$PHP_PDFLIB" != "no"; then
           [
             PHP_ADD_LIBRARY_WITH_PATH(jpeg, $PHP_JPEG_DIR/lib, PDFLIB_SHARED_LIBADD)
           ],[
-            AC_MSG_ERROR(libjpeg not found!)
+            AC_MSG_ERROR([libjpeg not found!])
           ],[
             -L$PHP_JPEG_DIR/lib
           ])
@@ -69,7 +69,7 @@ if test "$PHP_PDFLIB" != "no"; then
           [
             PHP_ADD_LIBRARY_WITH_PATH(png, $PHP_PNG_DIR/lib, PDFLIB_SHARED_LIBADD)
           ],[
-            AC_MSG_ERROR(libpng not found!)
+            AC_MSG_ERROR([libpng not found!])
           ],[
             -L$PHP_PNG_DIR/lib
           ])
@@ -91,7 +91,7 @@ if test "$PHP_PDFLIB" != "no"; then
           [
             PHP_ADD_LIBRARY_WITH_PATH(tiff, $PHP_TIFF_DIR/lib, PDFLIB_SHARED_LIBADD)
           ],[
-            AC_MSG_ERROR(libtiff not found!)
+            AC_MSG_ERROR([libtiff not found!])
           ],[
             -L$PHP_TIFF_DIR/lib
           ])
@@ -111,7 +111,7 @@ if test "$PHP_PDFLIB" != "no"; then
           PHP_ADD_LIBRARY_WITH_PATH(pdf, $PHP_PDFLIB/lib, PDFLIB_SHARED_LIBADD)
           PHP_ADD_INCLUDE($PDFLIB_INCLUDE)
         ],[
-          AC_MSG_ERROR(pdflib extension requires at least pdflib 3.x.)
+          AC_MSG_ERROR([pdflib extension requires at least pdflib 3.x.])
         ],[
           -L$PHP_PDFLIB/lib
         ])
