@@ -1225,8 +1225,7 @@ void php3_Ora_FetchInto(INTERNAL_FUNCTION_PARAMETERS)
 		} else {
 #if PHP_API_VERSION >= 19990421
 			tmp = emalloc(sizeof(pval));
-			tmp->EA = 0;
-			tmp->refcount = 1;
+			INIT_PZVAL(tmp);
 #endif
 
 			tmp->type = IS_STRING;

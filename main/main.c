@@ -944,8 +944,7 @@ int _php3_hash_environment(PLS_D ELS_DC)
 		tmp->value.str.len = strlen(p + 1);
 		tmp->value.str.val = estrndup(p + 1, tmp->value.str.len);
 		tmp->type = IS_STRING;
-		tmp->refcount=1;
-		tmp->EA=0;
+		INIT_PZVAL(tmp);
 		/* environmental variables never take precedence over get/post/cookie variables */
 		_php3_hash_add(&EG(symbol_table), t, p - *env + 1, &tmp, sizeof(pval *), NULL);
 		efree(t);
@@ -970,8 +969,7 @@ int _php3_hash_environment(PLS_D ELS_DC)
 				tmp->value.str.len = 0;
 				tmp->value.str.val = empty_string;
 			}
-			tmp->refcount=1;
-			tmp->EA=0;
+			INIT_PZVAL(tmp);
 			tmp->type = IS_STRING;
 			_php3_hash_update(&EG(symbol_table), t, strlen(t)+1, &tmp, sizeof(pval *), NULL);
 		}
@@ -983,8 +981,7 @@ int _php3_hash_environment(PLS_D ELS_DC)
 		tmp = (pval *) emalloc(sizeof(pval));
 		tmp->value.str.len = strlen(((request_rec *) SG(server_context))->uri);
 		tmp->value.str.val = estrndup(((request_rec *) SG(server_context))->uri, tmp->value.str.len);
-		tmp->refcount=1;
-		tmp->EA=0;
+		INIT_PZVAL(tmp);
 		tmp->type = IS_STRING;
 		_php3_hash_update(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF"), (void *) &tmp, sizeof(pval *), NULL);
 	}
@@ -998,8 +995,7 @@ int _php3_hash_environment(PLS_D ELS_DC)
 		tmp->value.str.val = emalloc(((pi)?strlen(pi):0) + 1);
 		tmp->value.str.len = _php3_sprintf(tmp->value.str.val, "%s", (pi ? pi : ""));	/* SAFE */
 		tmp->type = IS_STRING;
-		tmp->refcount=1;
-		tmp->EA=0;
+		INIT_PZVAL(tmp);
 #else
 		int l = 0;
 		char *sn;
@@ -1017,8 +1013,7 @@ int _php3_hash_environment(PLS_D ELS_DC)
 		tmp->value.str.val = emalloc(l + 1);
 		tmp->value.str.len = _php3_sprintf(tmp->value.str.val, "%s%s", (sn ? sn : ""), (pi ? pi : ""));	/* SAFE */
 		tmp->type = IS_STRING;
-		tmp->refcount=1;
-		tmp->EA=0;
+		INIT_PZVAL(tmp);
 #endif
 		_php3_hash_update(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF"), (void *) & tmp, sizeof(pval *), NULL);
 	}
@@ -1043,8 +1038,7 @@ void _php3_build_argv(char *s ELS_DC)
 		php3_error(E_WARNING, "Unable to create argv array");
 	} else {
 		arr->type = IS_ARRAY;
-		arr->refcount=1;
-		arr->EA=0;
+		INIT_PZVAL(arr);
 		_php3_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
 	}
 	/* now pick out individual entries */
@@ -1059,8 +1053,7 @@ void _php3_build_argv(char *s ELS_DC)
 		tmp->type = IS_STRING;
 		tmp->value.str.len = strlen(ss);
 		tmp->value.str.val = estrndup(ss, tmp->value.str.len);
-		tmp->refcount=1;
-		tmp->EA=0;
+		INIT_PZVAL(tmp);
 		count++;
 		if (_php3_hash_next_index_insert(arr->value.ht, &tmp, sizeof(pval *), NULL)==FAILURE) {
 			if (tmp->type == IS_STRING) {
@@ -1077,8 +1070,7 @@ void _php3_build_argv(char *s ELS_DC)
 	tmp = (pval *) emalloc(sizeof(pval));
 	tmp->value.lval = count;
 	tmp->type = IS_LONG;
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	_php3_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &tmp, sizeof(pval *), NULL);
 }
 
