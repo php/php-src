@@ -249,7 +249,7 @@ PHP_FUNCTION(mt_srand)
  * -RL
  */    
 #define RAND_RANGE(__n, __min, __max) \
-	(__min) + (int)((double)(__max) - (__min) + 1.0) * ((__n) / (PHP_RAND_MAX + 1.0))
+	(__n) = (__min) + (int)((double)(__max) - (__min) + 1.0) * ((__n) / (PHP_RAND_MAX + 1.0))
 
 /* {{{ proto int rand([int min, int max])
    Returns a random number */
@@ -267,7 +267,7 @@ PHP_FUNCTION(rand)
 
 	number = php_rand();
 	if (argc == 2) {
-		number = RAND_RANGE(number, Z_LVAL_PP(min), Z_LVAL_PP(max));
+		RAND_RANGE(number, Z_LVAL_PP(min), Z_LVAL_PP(max));
 	}
 
 	RETURN_LONG(number);
@@ -298,7 +298,7 @@ PHP_FUNCTION(mt_rand)
 	 */
 	number = (long) (randomMT(TSRMLS_C) >> 1);
 	if (argc == 2) {
-		number = RAND_RANGE(number, Z_LVAL_PP(min), Z_LVAL_PP(max));
+		RAND_RANGE(number, Z_LVAL_PP(min), Z_LVAL_PP(max));
 	}
 
 	RETURN_LONG(number);
