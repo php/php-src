@@ -1,6 +1,9 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
+- add apache_setenv() function for injecting variables into Apache's
+  subprocess_env table.
+- Let settype also accept 'int', 'bool', 'float' and 'null' (Jeroen)
 - Added IPv6 support to gethostbyaddr()
   (Patch by Matthias Wimmer <matthias@charente.de> and venaas)
 - Make the seed options to srand() and mt_srand() optional, if the seed is
