@@ -39,19 +39,26 @@
 
 
 #define MYSQLI_GET_MYSQL() \
-MYSQL *p = (MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql;
+MYSQL *p; \
+ALLOC_ZVAL(*retval);\
+CHECK_OBJECT(); \
+p = (MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql;
 
 #define MYSQLI_GET_RESULT() \
-MYSQL_RES *p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr
+MYSQL_RES *p; \
+ALLOC_ZVAL(*retval);\
+CHECK_OBJECT(); \
+p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr
 
 #define MYSQLI_GET_STMT() \
-MYSQL_STMT *p = (MYSQL_STMT *)((MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->stmt
+MYSQL_STMT *p; \
+ALLOC_ZVAL(*retval);\
+CHECK_OBJECT(); \
+p = (MYSQL_STMT *)((MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->stmt
 
 #define MYSQLI_MAP_PROPERTY_FUNC_LONG( __func, __int_func, __get_type, __ret_type)\
 int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 {\
-	ALLOC_ZVAL(*retval); \
-	CHECK_OBJECT(); \
 	__ret_type l;\
 	__get_type;\
 	if (!p) {\
@@ -73,8 +80,6 @@ int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 int __func(mysqli_object *obj, zval **retval TSRMLS_DC)\
 {\
 	char *c;\
-	ALLOC_ZVAL(*retval); \
-	CHECK_OBJECT(); \
 	__get_type;\
 	if (!p) {\
 		ZVAL_NULL(*retval);\
@@ -145,10 +150,12 @@ MYSQLI_MAP_PROPERTY_FUNC_LONG(link_warning_count_read, mysql_warning_count, MYSQ
 /* {{{ property result_type_read */
 int result_type_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
+	MYSQL_RES *p;
+
 	ALLOC_ZVAL(*retval); 
 	CHECK_OBJECT();
 
-	MYSQL_RES *p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+ 	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
 	if (!p) {
 		ZVAL_NULL(*retval);
@@ -162,12 +169,13 @@ int result_type_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 /* {{{ property result_lengths_read */
 int result_lengths_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
+	MYSQL_RES *p;
+
 	ALLOC_ZVAL(*retval); 
 	CHECK_OBJECT();
 
-	MYSQL_RES *p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
-	ALLOC_ZVAL(*retval);
 	if (!p || !p->field_count) {
 		ZVAL_NULL(*retval);
 	} else {
