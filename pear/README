@@ -29,4 +29,4 @@ CODING RULES AND GUIDELINES
 * All PHP code must use <?php ?>.  This is the only really portable tag.
 
 * Before adding a new top-level directory ("DB" is one), discuss your
-  intentions on php4beta@lists.php.net.
+  intentions on php-pear@lists.php.net.
