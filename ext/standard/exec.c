@@ -523,7 +523,7 @@ PHP_FUNCTION(escapeshellarg)
 /* }}} */
 
 /* {{{ proto string shell_exec(string cmd)
-   Use pclose() for FILE* that has been opened via popen() */
+   Execute command via shell and return complete output as string */
 PHP_FUNCTION(shell_exec)
 {
 	FILE *in;
