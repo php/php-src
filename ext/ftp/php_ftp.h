@@ -58,6 +58,11 @@ PHP_FUNCTION(ftp_site);
 PHP_FUNCTION(ftp_close);
 PHP_FUNCTION(ftp_set_option);
 PHP_FUNCTION(ftp_get_option);
+PHP_FUNCTION(ftp_async_get);
+PHP_FUNCTION(ftp_async_fget);
+PHP_FUNCTION(ftp_async_put);
+PHP_FUNCTION(ftp_async_fput);
+PHP_FUNCTION(ftp_async_continue);
 
 #define phpext_ftp_ptr php_ftp_module_ptr
 
