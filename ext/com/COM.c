@@ -1155,7 +1155,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 	ZVAL_NULL(&return_value);
 
 	/* fetch the IDispatch interface */
-	zend_hash_index_find(object->value.obj.properties, 0, (void **) &comval_handle);
+	zend_hash_index_find(Z_OBJPROP_P(object), 0, (void **) &comval_handle);
 	obj = (comval *) zend_list_find(Z_LVAL_P(*comval_handle), &type);
 	if(!obj || (type != IS_COM))
 	{
@@ -1246,7 +1246,7 @@ PHPAPI int php_COM_set_property_handler(zend_property_reference *property_refere
 
 
 	/* fetch the IDispatch interface */
-	zend_hash_index_find(object->value.obj.properties, 0, (void **) &comval_handle);
+	zend_hash_index_find(Z_OBJPROP_P(object), 0, (void **) &comval_handle);
 	obj = (comval *)zend_list_find(Z_LVAL_P(*comval_handle), &type);
 	if(!obj || (type != IS_COM))
 	{
@@ -1319,7 +1319,7 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		*object_handle = *return_value;
 		pval_copy_constructor(object_handle);
 		INIT_PZVAL(object_handle);
-		zend_hash_index_update(object->value.obj.properties, 0, &object_handle, sizeof(pval *), NULL);
+		zend_hash_index_update(Z_OBJPROP_P(object), 0, &object_handle, sizeof(pval *), NULL);
 		pval_destructor(&function_name->element);
 
 		return;
@@ -1335,8 +1335,8 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		pval_destructor(&function_name->element);
 		return;
 	}
-	zend_hash_index_find(property.value.obj.properties, 0, (void **) &handle);
-	obj = (comval *)zend_list_find((*handle)->value.lval,&type);
+	zend_hash_index_find(Z_OBJPROP(property), 0, (void **) &handle);
+	obj = (comval *)zend_list_find(Z_LVAL_PP(handle), &type);
 
 	if(!obj || (type != IS_COM))
 	{
@@ -1674,8 +1674,8 @@ PHP_FUNCTION(com_isenum)
 	getParameters(ht, 1, &object);
 
 	/* obtain IDispatch interface */
-	zend_hash_index_find(object->value.obj.properties, 0, (void **) &comval_handle);
-	obj = (comval *) zend_list_find((*comval_handle)->value.lval, &type);
+	zend_hash_index_find(Z_OBJPROP_P(object), 0, (void **) &comval_handle);
+	obj = (comval *) zend_list_find(Z_LVAL_PP(comval_handle), &type);
 	if(!obj || (type != IS_COM))
 	{
 		php_error(E_WARNING,"%s is not a COM object handler", "");
