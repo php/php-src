@@ -1,3 +1,65 @@
+2001-03-24  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/Makefile.in: Install the Informix database implementation.
+
+2001-03-24  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Makefile.in: Added missing files.
+
+    * php.ini-dist: Added php_dbx.dll.
+
+2001-03-24  Adam Daniel  <adaniel2@cinci.rr.com>
+
+    * pear/HTML/Common.php: removed extra whitespace
+
+2001-03-24  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Experimental/XML/sql2xml.php
+      pear/Experimental/XML/sql2xml_ext.php:
+    First Commit of the sql2xml classes.
+
+    This class takes a PEAR::DB-Result Object (or more than one) and returns a
+    xml-representation of it.
+
+2001-03-24  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/STATUS
+      pear/DB/ifx.php: Minor fixes
+
+2001-03-24  Romolo Manfredini  <romolo@bicnet.it>
+
+    * ext/pgsql/pgsql.c:
+    Solved bugs #9746 and #9937, pg_close was closing twice the default conn.
+
+2001-03-24  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/STATUS
+      pear/DB/common.php
+      pear/DB/mysql.php
+      pear/DB/tests/mysql/012.phpt
+      pear/DB/tests/tableinfo.inc
+      pear/DB.php: * added Christian Stocker's tableInfo() implementation
+
+2001-03-24  Adam Daniel  <adaniel2@cinci.rr.com>
+
+    * pear/HTML/Page.php:
+    This class handles the details for creating a properly constructed HTML page.
+     Page caching, stylesheets, client side script, and Meta tags can be
+     managed using this class.
+
+    * pear/HTML/Table.php:
+    added comments to the html output including table nest level, added automatic taboffset for
+    cell contents if a subclass of html_common
+
+    * pear/HTML/Select.php:
+    added comments to the HTML output, added loadQuery, added load
+
+    * pear/HTML/Common.php: added setComment
+
+2001-03-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/basic_functions.c: Fix ZTS build
+
 2001-03-23  Jon Parise  <jon@csh.rit.edu>
 
     * pear/DB/MAINTAINERS
