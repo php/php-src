@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
+   | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Stig Sæther Bakken <ssb@fast.no>                            |
    |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
@@ -473,35 +473,50 @@ PHP_FUNCTION(strtolower)
 }
 /* }}} */
 
-/* {{{ proto string basename(string path)
-   Return the filename component of the path */
-PHP_FUNCTION(basename)
+PHPAPI char *php_basename(char *s, size_t len)
 {
-	zval **str;
-	char *ret, *c;
-	
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str)) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(str);
-	ret = estrdup((*str)->value.str.val);
-	c = ret + (*str)->value.str.len -1;	
+	char *ret=NULL, *c, *p=NULL, buf='\0';
+	c = s + len - 1;	
+
+	/* strip trailing slashes */
 	while (*c == '/'
 #ifdef PHP_WIN32
 		   || *c == '\\'
 #endif
 		)
 		c--;
-	*(c + 1) = '\0';	
-	if ((c = strrchr(ret, '/'))
+	if(c < s+len-1) {
+		buf = *(c + 1);  /* Save overwritten char */
+		*(c + 1) = '\0'; /* overwrite char */
+		p = c + 1;       /* Save pointer to overwritten char */
+	}
+
+	if ((c = strrchr(s, '/'))
 #ifdef PHP_WIN32
-		|| (c = strrchr(ret, '\\'))
+		|| (c = strrchr(s, '\\'))
 #endif
 		) {
-		RETVAL_STRING(c + 1,1);
+		ret = estrdup(c + 1);
 	} else {
-		RETVAL_STRING((*str)->value.str.val,1);
+		ret = estrdup(s);
 	}
+	if(buf) *p = buf;
+	return (ret);
+}
+
+/* {{{ proto string basename(string path)
+   Return the filename component of the path */
+PHP_FUNCTION(basename)
+{
+	zval **str;
+	char *ret;
+
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str)) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(str);
+	ret = php_basename((*str)->value.str.val,(*str)->value.str.len);
+	RETVAL_STRING(ret,1)
 	efree(ret);
 }
 /* }}} */
