@@ -32,7 +32,7 @@ CWD_API char *virtual_getcwd(char *buf, size_t size);
 CWD_API int virtual_chdir(char *path);
 CWD_API int virtual_chdir_file(char *path);
 CWD_API int virtual_filepath(char *path, char **filepath);
-CWD_API FILE *virtual_fopen(char *path, const char *mode);
+CWD_API FILE *virtual_fopen(const char *path, const char *mode);
 
 ZEND_BEGIN_MODULE_GLOBALS(cwd)
 	cwd_state cwd;
