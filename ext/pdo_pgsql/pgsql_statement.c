@@ -31,16 +31,17 @@
 #include "php_pdo_pgsql_int.h"
 
 /* from postgresql/src/include/catalog/pg_type.h */
-#define BOOLOID			16
-#define INT8OID			20
-#define INT2OID			21
-#define INT4OID			23
+#define BOOLOID     16
+#define BYTEAOID    17
+#define INT8OID     20
+#define INT2OID     21
+#define INT4OID     23
+#define OIDOID      26
 
 
 static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
-	int i;
 
 	if (S->result) {
 		/* free the resource */
@@ -184,6 +185,7 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 
 		case INT2OID:
 		case INT4OID:
+		case OIDOID:
 			cols[colno].param_type = PDO_PARAM_INT;
 			break;
 
@@ -242,7 +244,6 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, long colno, zval *return
 	PGresult *res;
 	char *q=NULL;
 	ExecStatusType status;
-	int i;
 	
 	if (!S->result) {
 		return FAILURE;
