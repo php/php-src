@@ -18,12 +18,13 @@ Usage
                  c) FRIBIDI_AUTO - autodetect the base direction
             3) The char code being used, which can be one of the following
                constants:
-                 a) FRIBIDI_CHARSET_UTF8
-                 b) FRIBIDI_CHARSET_8859_6
-                 c) FRIBIDI_CHARSET_8859_8
-                 d) FRIBIDI_CHARSET_CP1255
-                 e) FRIBIDI_CHARSET_CP1256
-                 f) FRIBIDI_CHARSET_ISIRI_3342
+                 a) FRIBIDI_CHARSET_UTF8       (Unicode)
+                 b) FRIBIDI_CHARSET_8859_6     (Arabic)
+                 c) FRIBIDI_CHARSET_8859_8     (Hebrew)
+                 d) FRIBIDI_CHARSET_CP1255     (Hebrew/Yiddish)
+                 e) FRIBIDI_CHARSET_CP1256     (Arabic)
+                 f) FRIBIDI_CHARSET_ISIRI_3342 (Persian)
+                 g) FRIBIDI_CHARSET_CAP_RTL - Used for test purposes, will treat CAPS as non-English letetrs
 
 Note: Currently, FriBidi supports the above Character Codes alone. 
 

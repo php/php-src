@@ -64,6 +64,7 @@ PHP_MINIT_FUNCTION(fribidi)
 	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_CP1255", FRIBIDI_CHARSET_CP1255, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_CP1256", FRIBIDI_CHARSET_CP1256, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_ISIRI_3342", FRIBIDI_CHARSET_ISIRI_3342, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_CAP_RTL", FRIBIDI_CHARSET_CAP_RTL, CONST_CS | CONST_PERSISTENT);
 	
 	/* Directions */
 	REGISTER_LONG_CONSTANT("FRIBIDI_AUTO", FRIBIDI_TYPE_ON, CONST_CS | CONST_PERSISTENT);
@@ -102,7 +103,7 @@ PHP_MINFO_FUNCTION(fribidi)
 |             Possible values:                               |
 |             a) FRIBIDI_LTR  - left to right.               |
 |             b) FRIBIDI_RTL  - right to left.               |
-|             c) FRIBIDI_AUTO - autodetected by the BiDi     |
+|             c) FRIBIDI_AUTO - autodetected by the Unicode  |
 |                               BiDi algorithm.              |
 |        3) Character code being used -                      |
 |             Possible values (i.e., charsets supported)     |
@@ -112,31 +113,35 @@ PHP_MINFO_FUNCTION(fribidi)
 |              FRIBIDI_CHARSET_CP1255                        |
 |              FRIBIDI_CHARSET_CP1256                        |
 |              FRIBIDI_CHARSET_ISIRI_3342                    |
+|              FRIBIDI_CHARSET_CAP_RTL                       |
 |                                                            |
 | Output: on success: The visual string.                     |
 |         on failure: FALSE                                  |
 +------------------------------------------------------------+
 */           
 
-/* {{{ proto string fribidi_log2vis(string v_str, long direction, long charset)
+/* {{{ proto string fribidi_log2vis(string logical_str, long direction, long charset)
    Convert a logical string to a visual one */
 PHP_FUNCTION(fribidi_log2vis)
 {
-	zval **direction;
-	long charset;
+	zval **logical_str, **direction, **charset;
 	FriBidiChar *u_logical_str, *u_visual_str;  /* unicode strings .... */
-	char *v_str, *in_string, *out_string;
+	char *in_string, *out_string;
 	int len, alloc_len;
 	FriBidiCharType base_dir;
 	FriBidiStrIndex *position_L_to_V_list;
 	FriBidiStrIndex *position_V_to_L_list;
 	FriBidiLevel    *embedding_level_list;
-				   
-	/* parse parameters from input */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szl", &v_str, &len, &direction, &charset) == FAILURE) {
-		return;
+
+	/* get parameters from input */
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &logical_str, &direction, &charset) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
 
+	/* convert argument types */
+	convert_to_string_ex(logical_str);
+	convert_to_long_ex(charset);
+	
 	if (Z_TYPE_PP(direction) == IS_LONG) {
 		convert_to_long_ex(direction);
 		base_dir = Z_LVAL_PP(direction);
@@ -150,11 +155,11 @@ PHP_FUNCTION(fribidi_log2vis)
 			base_dir = FRIBIDI_TYPE_ON;
 		}
 			
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The use of strings to mark the base direction is deprecated, please use the FRIBIDI_LTR, FRIBIDI_RTL and FRIBIDI_AUTO constants");
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "The use of strings to mark the base direction is deprecated, please use the FRIBIDI_LTR, FRIBIDI_RTL and FRIBIDI_AUTO constants");
 	}
 
 	/* allocate space and prepare all local variables */
-	in_string = estrndup(v_str, len);
+	in_string = estrndup(Z_STRVAL_PP(logical_str), len);
 	alloc_len = len+1;
 
 	u_logical_str = (FriBidiChar*) emalloc(sizeof(FriBidiChar)*alloc_len);
@@ -168,14 +173,15 @@ PHP_FUNCTION(fribidi_log2vis)
 		in_string[len-1] = '\0';
 	}
 
-	switch(charset) {
+	switch(Z_LVAL_PP(charset)) {
 		case FRIBIDI_CHARSET_UTF8:
 		case FRIBIDI_CHARSET_ISO8859_6:
 		case FRIBIDI_CHARSET_ISO8859_8:
 		case FRIBIDI_CHARSET_CP1255:
 		case FRIBIDI_CHARSET_CP1256:
 		case FRIBIDI_CHARSET_ISIRI_3342:
-			len = fribidi_charset_to_unicode(charset, in_string, len, u_logical_str);
+		case FRIBIDI_CHARSET_CAP_RTL:
+			len = fribidi_charset_to_unicode(Z_LVAL_PP(charset), in_string, len, u_logical_str);
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown charset");
@@ -195,14 +201,15 @@ PHP_FUNCTION(fribidi_log2vis)
 	fribidi_log2vis(u_logical_str, len, &base_dir, u_visual_str, position_L_to_V_list, position_V_to_L_list, embedding_level_list);
 	
 	/* convert back to original char set */
-	switch(charset) {
+	switch(Z_LVAL_PP(charset)) {
 		case FRIBIDI_CHARSET_UTF8:
 		case FRIBIDI_CHARSET_ISO8859_6:
 		case FRIBIDI_CHARSET_ISO8859_8:
 		case FRIBIDI_CHARSET_CP1255:
 		case FRIBIDI_CHARSET_CP1256:
 		case FRIBIDI_CHARSET_ISIRI_3342:
-			fribidi_unicode_to_charset(charset, u_visual_str, len, out_string);
+		case FRIBIDI_CHARSET_CAP_RTL:
+			fribidi_unicode_to_charset(Z_LVAL_PP(charset), u_visual_str, len, out_string);
 			break;									
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown charset");
