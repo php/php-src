@@ -1,3 +1,43 @@
+2000-04-24  Andrew Skalski  <askalski@chek.com>
+
+    * ext/imap/php_imap.c: * typecast fs_give parameter to void**
+    * removed wide-character treatment from imap_utf7_encode
+    * suggestion to #include "linkage.c" rather than link in auth/mail drivers
+      manually
+
+2000-04-24  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/rand.c: - Get rid of newly introduced warning
+
+2000-04-24  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c: .
+
+2000-04-24  Zeev Suraski  <zeev@php.net>
+
+    * reentrancy.c:
+    - Fix crash bug in localtime_r. If locatime() returns NULL then also return
+      NULL
+
+2000-04-24  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/dl.c: RINIT was called twice for modules loaded vi php.ini
+
+2000-04-24  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/file.c: Exterminate warnings.
+
+    * NEWS
+      ext/standard/file.c:
+    The third argument to fseek() is now one of the standard SEEK_* constants.
+
+
+2000-04-24  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.dsp: enabel PDB
+
+    * ext/oci8/oci8.c: fix warning
+
 2000-04-23  Sterling Hughes  <sterling@designmultimedia.com>
 
     * pear/DB/msql.php: Add mSQL DB extension.
