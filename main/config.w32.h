@@ -174,6 +174,8 @@
 #define REGEX 1
 #define HSREGEX 1
 
+#define HAVE_PCRE 1
+
 /* Define if you have the gcvt function.  */
 #define HAVE_GCVT 1
 

@@ -347,10 +347,6 @@ SOURCE=.\ext\standard\microtime.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\mime.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\ext\bcmath\number.c
 # End Source File
 # Begin Source File
@@ -364,6 +360,10 @@ SOURCE=.\ext\standard\pack.c
 # Begin Source File
 
 SOURCE=.\ext\standard\pageinfo.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\pcre\php_pcre.c
 # End Source File
 # Begin Source File
 
@@ -511,6 +511,10 @@ SOURCE=.\functions\php3_syslog.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\pcre\php_pcre.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\functions\phpdir.h
 # End Source File
 # Begin Source File
@@ -557,6 +561,46 @@ SOURCE=.\regex\regexec.c
 
 SOURCE=.\regex\regfree.c
 # End Source File
+# End Group
+# Begin Group "PCRE"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 3"
+
+# PROP Default_Filter ".c"
+# Begin Source File
+
+SOURCE=.\ext\pcre\pcrelib\chartables.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\pcre\pcrelib\get.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\pcre\pcrelib\maketables.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\pcre\pcrelib\pcre.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\pcre\pcrelib\study.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 3"
+
+# PROP Default_Filter ".h"
+# Begin Source File
+
+SOURCE=.\ext\pcre\pcrelib\internal.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\pcre\pcrelib\pcre.h
+# End Source File
+# End Group
 # End Group
 # End Group
 # Begin Group "Win32"
