@@ -435,10 +435,16 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 		return ap_pass_brigade(f->next, bb);
 	}
 
-	/* setup standard CGI variables */
-	ap_add_common_vars(f->r);
-	ap_add_cgi_vars(f->r);
-
+	/* Setup the CGI variables if this is the main request.. */
+	if (f->r->main == NULL || 
+		/* .. or if the sub-request envinronment differs from the main-request. */
+		f->r->subprocess_env != f->r->main->subprocess_env
+	) {
+		/* setup standard CGI variables */
+		ap_add_common_vars(f->r);
+		ap_add_cgi_vars(f->r);
+	}
+	
 	ctx = SG(server_context);
 	if (ctx == NULL) {
 		ap_log_rerror(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, f->r,

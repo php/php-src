@@ -470,9 +470,15 @@ static int php_handler(request_rec *r)
 		return DECLINED;
 	}
 
-	/* setup standard CGI variables */
-	ap_add_common_vars(r);
-	ap_add_cgi_vars(r);
+	/* Setup the CGI variables if this is the main request */
+	if (r->main == NULL || 
+		/* .. or if the sub-request envinronment differs from the main-request. */ 
+		r->subprocess_env != r->main->subprocess_env
+	) {
+		/* setup standard CGI variables */
+		ap_add_common_vars(r);
+		ap_add_cgi_vars(r);
+	}
 
 	ctx = SG(server_context);
 	if (ctx == NULL) {
