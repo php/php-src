@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
 
@@ -63,3 +64,4 @@ PHP_FUNCTION(dom_domimplementationsource_get_domimplementations)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_domimplementationsource_get_domimplementations */
+#endif

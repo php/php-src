@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
 
@@ -70,4 +71,4 @@ int dom_typeinfo_type_namespace_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-
+#endif

@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
 
@@ -70,3 +71,4 @@ PHP_FUNCTION(dom_comment_comment)
 	}
 }
 /* }}} end dom_comment_comment */
+#endif

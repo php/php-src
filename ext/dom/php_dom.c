@@ -25,12 +25,11 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "ext/standard/php_rand.h"
 #include "php_dom.h"
 #include "dom_ce.h"
 #include "dom_properties.h"
-
-#if HAVE_DOM
 
 #include "ext/standard/info.h"
 #define PHP_XPATH 1

@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
 
@@ -363,3 +364,4 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 	RETURN_TRUE;
 }
 /* }}} end dom_characterdata_replace_data */
+#endif

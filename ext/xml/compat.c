@@ -17,6 +17,7 @@
  */
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_XML
 #include "expat_compat.h"
 
 #ifdef LIBXML_EXPAT_COMPAT
@@ -555,6 +556,7 @@ XML_ParserFree(XML_Parser parser)
 }
 
 #endif /* LIBXML_EXPAT_COMPAT */
+#endif
 
 /**
  * Local Variables:

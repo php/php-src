@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
 typedef struct _nodeIterator nodeIterator;
@@ -290,4 +291,4 @@ int dom_documenttype_internal_subset_read(dom_object *obj, zval **retval TSRMLS_
 
 /* }}} */
 
-
+#endif

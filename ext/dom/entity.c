@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
 
@@ -179,4 +180,4 @@ int dom_entity_version_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 /* }}} */
 
-
+#endif

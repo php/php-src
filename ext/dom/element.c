@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
 
@@ -834,3 +835,5 @@ PHP_FUNCTION(dom_element_set_id_attribute_node)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_element_set_id_attribute_node */
+
+#endif

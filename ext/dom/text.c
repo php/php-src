@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 #include "dom_ce.h"
 
@@ -188,3 +189,4 @@ PHP_FUNCTION(dom_text_replace_whole_text)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_text_replace_whole_text */
+#endif
