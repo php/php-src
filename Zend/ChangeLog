@@ -1,3 +1,8 @@
+2004-08-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c:
+      - Add missing brackets
+
 2004-08-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_compile.c:
