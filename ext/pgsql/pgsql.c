@@ -875,7 +875,7 @@ PHP_FUNCTION(pg_cmdtuples)
 /* }}} */
 
 /* {{{ proto int pg_last_notice(int connection)
-    Returns the last notice set by the backend */
+   Returns the last notice set by the backend */
 PHP_FUNCTION(pg_last_notice) {
 	if (PGG(last_notice) == NULL) {
 		RETURN_FALSE;
