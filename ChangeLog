@@ -1,3 +1,151 @@
+2001-03-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/zziplib/zziplib.c:
+    Make phpinfo() output prettier + kill some compile warnings.
+
+2001-03-13  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS
+      ext/standard/browscap.c:
+    Make get_browser() read its information from $HTTP_SERVER_VARS[] if available
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h:
+    Implement mysql_unbuffered_query() - uses mysql_use_result() instead of
+    mysql_store_result()
+
+2001-03-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/fbsql/config.m4: cleanup.
+
+2001-03-13  Jason Greene  <jason@inetgurus.net>
+
+    * ext/fbsql/config.m4:
+    fix broken m4, you should have all checking code withing your withval test
+
+    -Jason
+
+2001-03-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/fbsql/config.m4: Extension was enabled by default..
+
+2001-03-13  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/midgard/.cvsignore:
+    cvs _knows_ to ignore the CVS directory; probably a bunch of these others,
+    also...
+
+2001-03-13  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Experimental/HTML/Menu.php:
+    API change: replaced getSitemap() with get("sitemap")
+
+    * pear/Experimental/HTML/Menu.php: - fixed a rows bug
+    - removed all \n
+
+2001-03-13  Zeev Suraski  <zeev@zend.com>
+
+    * ext/mysql/php_mysql.c: Centralize query code
+
+    * ext/mysql/php_mysql.c: Use a container struct instead of MYSQL directly
+
+2001-03-13  Frank M. Kromann  <frank@frontbase.com>
+
+    * win32/php_modules.dsw: Adding FrontBase extension to modules
+
+    * ext/fbsql/.cvsignore
+      ext/fbsql/Makefile.in
+      ext/fbsql/config.m4
+      ext/fbsql/fbsql.dsp
+      ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h: Initial check-in of FrontBase extension
+
+2001-03-13  Stanislav Malyshev  <stas@zend.com>
+
+    * sapi/apache/mod_php4.c:
+    Fix off-by-one on config values set from Apache config
+
+2001-03-13  Andrei Zmievski  <andrei@ispi.net>
+
+    * build/rules_pear.mk: Remove config.h instead of php_config.h
+
+2001-03-13  Colin Viebrock  <colin@easydns.com>
+
+    * pear/Net/Dig.php: add capability to define server in the constructor
+
+2001-03-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c: Replace memcpy and sprintf with smart_strs.
+
+    * ext/session/session.c: buf is gone. Don't reference it.
+
+2001-03-13  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c
+      ext/yaz/php_yaz.h:
+    Added yaz_database. Option bit ExtendedServices set for InitRequest.
+
+2001-03-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: Replace another sprintf
+
+    * ext/session/mod_files.c
+      ext/session/session.c:
+    Nuke calls to sprintf, snprintf, strcat, strcpy and rely on
+    memcpy and smart_strs.
+
+2001-03-13  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/pcre/php_pcre.c: Fixing compiler warning on win32
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h: Changed email
+
+2001-03-13  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: Update NEWS for the branch...
+
+    * main/php_version.h
+      configure.in: Rebranch
+
+2001-03-13  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/printer/printer.c: nuke alot unnecessary globals fetches
+
+2001-03-13  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/preparser-scanner.l:
+    fixed bug http://www.midgard-project.org/bugs/?id=135
+
+2001-03-13  Daniel Beulshausen  <daniel@php4win.de>
+
+    * main/reentrancy.c: fix bug in php_gmtime_r
+
+2001-03-13  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/preparser-scanner.l:
+    Fixed a bug that prevented the preparser to expand any Midgard syntax formatter after a //-style comment anywhere in the page.
+
+2001-03-13  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h:
+    - IMPORTANT: removed /F modifier handling from preg_replace(). Instead
+      one should use new preg_replace_callback() function. 
+
+2001-03-13  Dave Hayden  <dave@opaque.net>
+
+    * ext/ming/ming.c
+      ext/ming/php_ming.h:
+    changed scalar args and returns to doubles, added Ming_setScale function,
+    added SWFTEXTFIELD_HTML flag, fixed SWFTextField_setIndentation glitch
+
+2001-03-13  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Experimental/HTML/Menu.php: - added the PPHP licence text
+    - final structure, seems to be bug free
+    - usage example missing, I'm writing on a german language tutorial, will add the usage example as soon as the tutorial is finished
+
 2001-03-12  Ulf Wendel  <ulf.wendel@phpdoc.de>
 
     * pear/Experimental/HTML/Menu.php:
