@@ -417,7 +417,7 @@ dnl
 AC_DEFUN(PHP_BUILD_THREAD_SAFE,[
   enable_experimental_zts=yes
   if test "$pthreads_working" != "yes"; then
-    AC_MSG_ERROR(ZTS currently requires working POSIX threads. Your system does not support this.)
+    AC_MSG_ERROR(ZTS currently requires working POSIX threads. We were unable to verify that your system supports Pthreads.)
   fi
 ])
 
@@ -535,9 +535,7 @@ AC_DEFUN(AC_ADD_INCLUDE,[
 ])
 
 AC_DEFUN(PHP_X_ADD_LIBRARY,[
-  if test -n "$1"; then 
-    ifelse($2,,$3="-l$1 [$]$3", $3="[$]$3 -l$1")
-  fi
+  ifelse($2,,$3="-l$1 [$]$3", $3="[$]$3 -l$1")
 ])
 
 dnl
