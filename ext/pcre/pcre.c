@@ -34,9 +34,12 @@
 #if HAVE_PCRE
 
 #include "php_pcre.h"
+#include "ext/standard/php3_string.h"
 
 #define PREG_PATTERN_ORDER	0
 #define PREG_SET_ORDER		1
+
+#define PREG_REPLACE_EVAL	(1<<0)
 
 /* {{{ module definition structures */
 
@@ -155,19 +158,19 @@ int php_rinit_pcre(INIT_FUNC_ARGS)
 
 
 /* {{{ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra) */
-static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra) {
-	pcre			*re = NULL;
-	int				 coptions = 0;
-	int				 soptions = 0;
-	const char	 	*error;
-	int			 	 erroffset;
-	char		 	 delimiter;
-	char 			*p, *pp;
-	char			*pattern;
-	int				 regex_len;
-	int				 do_study = 0;
+static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_options) {
+	pcre				*re = NULL;
+	int				 	 coptions = 0;
+	int				 	 soptions = 0;
+	const char	 		*error;
+	int			 	 	 erroffset;
+	char		 	 	 delimiter;
+	char 				*p, *pp;
+	char				*pattern;
+	int				 	 regex_len;
+	int				 	 do_study = 0;
 	pcre_cache_entry	*pce;
-	pcre_cache_entry	new_entry;
+	pcre_cache_entry	 new_entry;
 	PCRE_LS_FETCH();
 
 	/* Try to lookup the cached regex entry, and if successful, just pass
@@ -182,7 +185,7 @@ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra) {
 	
 	/* Parse through the leading whitespace, and display a warning if we
 	   get to the end without encountering a delimiter. */
-	while (isspace(*p)) p++;
+	while (isspace((int)*p)) p++;
 	if (*p == 0) {
 		zend_error(E_WARNING, "Empty regular expression");
 		return NULL;
@@ -191,7 +194,7 @@ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra) {
 	/* Get the delimiter and display a warning if it is alphanumeric
 	   or a backslash. */
 	delimiter = *p++;
-	if (isalnum(delimiter) || delimiter == '\\') {
+	if (isalnum((int)delimiter) || delimiter == '\\') {
 		zend_error(E_WARNING, "Delimiter must not be alphanumeric or backslash");
 		return NULL;
 	}
@@ -216,21 +219,29 @@ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra) {
 	/* Move on to the options */
 	pp++;
 
+	/* Clear out preg options */
+	*preg_options = 0;
+	
 	/* Parse through the options, setting appropriate flags.  Display
 	   a warning if we encounter an unknown option. */	
 	while (*pp != 0) {
 		switch (*pp++) {
+			/* Perl compatible options */
 			case 'i':	coptions |= PCRE_CASELESS;		break;
 			case 'm':	coptions |= PCRE_MULTILINE;		break;
 			case 's':	coptions |= PCRE_DOTALL;		break;
 			case 'x':	coptions |= PCRE_EXTENDED;		break;
 			
+			/* PCRE specific options */
 			case 'A':	coptions |= PCRE_ANCHORED;		break;
 			case 'D':	coptions |= PCRE_DOLLAR_ENDONLY;break;
 			case 'S':	do_study  = 1;					break;
 			case 'U':	coptions |= PCRE_UNGREEDY;		break;
 			case 'X':	coptions |= PCRE_EXTRA;			break;
 
+			/* Custom preg options */
+			case 'e':	*preg_options |= PREG_REPLACE_EVAL; break;
+			
 			case ' ':
 			case '\n':
 				break;
@@ -287,18 +298,19 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 										   array for global match */
 					*result_set,		/* Holds a set of subpatterns after
 										   a global match */
-				   **match_sets;		/* An array of sets of matches for each
+				   **match_sets = NULL;	/* An array of sets of matches for each
 										   subpattern after a global match */
 	pcre			*re = NULL;			/* Compiled regular expression */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
 	int			 	 exoptions = 0;		/* Execution options */
+	int			 	 preg_options = 0;	/* Custom preg options */
 	int			 	 count = 0;			/* Count of matched subpatterns */
 	int			 	*offsets;			/* Array of subpattern offsets */
 	int				 num_subpats;		/* Number of captured subpatterns */
 	int			 	 size_offsets;		/* Size of the offsets array */
 	int			 	 matched;			/* Has anything matched */
 	int				 i;
-	int				 subpats_order_val;	/* Integer value of subpats_order */
+	int				 subpats_order_val = 0;	/* Integer value of subpats_order */
 	const char	   **stringlist;		/* Used to hold list of subpatterns */
 	char			*match,				/* The current match */
 					*piece,				/* The current piece of subject */
@@ -358,7 +370,7 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	}
 
 	/* Compile regex or get it from cache. */
-	if ((re = _pcre_get_compiled_regex(regex->value.str.val, extra)) == NULL) {
+	if ((re = _pcre_get_compiled_regex(regex->value.str.val, extra, &preg_options)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -483,8 +495,8 @@ PHP_FUNCTION(preg_match_all)
 /* }}} */
 
 
-/* {{{ int _pcre_get_backref(const char *walk, int *backref) */
-static int _pcre_get_backref(const char *walk, int *backref)
+/* {{{ int _preg_get_backref(const char *walk, int *backref) */
+static int _preg_get_backref(const char *walk, int *backref)
 {
 	if (*walk && *walk >= '0' && *walk <= '9')
 		*backref = *walk - '0';
@@ -499,33 +511,105 @@ static int _pcre_get_backref(const char *walk, int *backref)
 /* }}} */
 
 
+/* {{{ int _preg_do_eval(char *eval_str, char *subject, int *offsets,
+				  int count, char **result) */
+static int _preg_do_eval(char *eval_str, char *subject, int *offsets,
+				  int count, char **result)
+{
+	zval		 retval;			/* Return value from evaluation */
+	char		 backref_buf[4],	/* Buffer for string version of backref */
+				*code,				/* PHP code string */
+				*new_code,			/* Code as result of substitution */
+				*match,				/* Current match for a backref */
+				*walk;				/* Used to walk the code string */
+	int			 code_len;			/* Length of the code string */
+	int			 new_code_len;		/* Length of the substituted code string */
+	int			 match_len;			/* Length of the match */
+	int			 result_len;		/* Length of the result of the evaluation */
+	int			 backref;			/* Current backref */
+	CLS_FETCH();
+	ELS_FETCH();
+	
+	/* Save string to be evaluated, since we will be modifying it */
+	code = estrdup(eval_str);
+	walk = code;
+	new_code_len = code_len = strlen(code);
+	
+	while (*walk) {
+		/* If found a backreference.. */
+		if ('\\' == *walk &&
+			_preg_get_backref(walk+1, &backref) &&
+			backref < count) {
+			/* Find the corresponding string match and substitute it
+			   in instead of the backref */
+			match = subject + offsets[backref<<1];
+			match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
+			sprintf(backref_buf, "\\%d", backref);
+			new_code = _php3_str_to_str(code, code_len,
+										backref_buf, (backref > 9) ? 3 : 2,
+										match, match_len, &new_code_len);
+			
+			/* Adjust the walk pointer */
+			walk = new_code + (walk - code) + match_len;
+			
+			/* Clean up and reassign */
+			efree(code);
+			code = new_code;
+			code_len = new_code_len;
+		} else {
+			walk++;
+		}
+	}
+	
+	/* Run the code */
+	zend_eval_string(code, &retval CLS_CC ELS_CC);
+	convert_to_string(&retval);
+	
+	/* Save the return value and its length */
+	*result = estrdup(retval.value.str.val);
+	result_len = retval.value.str.len;
+	
+	/* Clean up */
+	zval_dtor(&retval);
+	efree(code);
+	
+	return result_len;
+}
+/* }}} */
+
+
 /* {{{ char *_php_pcre_replace(char *regex, char *subject, char *replace) */
 char *_php_pcre_replace(char *regex, char *subject, char *replace)
 {
 	pcre			*re = NULL;			/* Compiled regular expression */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
 	int			 	 exoptions = 0;		/* Execution options */
+	int			 	 preg_options = 0;	/* Custom preg options */
 	int			 	 count = 0;			/* Count of matched subpatterns */
 	int			 	*offsets;			/* Array of subpattern offsets */
 	int			 	 size_offsets;		/* Size of the offsets array */
 	int				 new_len;			/* Length of needed storage */
 	int				 alloc_len;			/* Actual allocated length */
 	int				 subject_len;		/* Length of the subject string */
+	int				 eval_result_len=0;	/* Length of the eval'ed string */
 	int				 result_len;		/* Current length of the result */
+	int				 match_len;			/* Length of the current match */
 	int				 backref;			/* Backreference number */
+	int				 eval;				/* If the replacement string should be eval'ed */
 	char			*result,			/* Result of replacement */
 					*new_buf,			/* Temporary buffer for re-allocation */
 					*walkbuf,			/* Location of current replacement in the result */
 					*walk,				/* Used to walk the replacement string */
 					*match,				/* The current match */
 					*piece,				/* The current piece of subject */
-					*subject_end;		/* Points to the end of the subject */
+					*subject_end,		/* Points to the end of the subject */
+					*eval_result;		/* Result of eval */
 
 	/* Compile regex or get it from cache. */
-	if ((re = _pcre_get_compiled_regex(regex, extra)) == NULL) {
+	if ((re = _pcre_get_compiled_regex(regex, extra, &preg_options)) == NULL) {
 		return NULL;
 	}
-
+	
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	size_offsets = (pcre_info(re, NULL, NULL) + 1) * 3;
 	offsets = (int *)emalloc(size_offsets * sizeof(int));
@@ -542,10 +626,11 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 	}
 
 	/* Initialize */
+	match = NULL;
 	result[0] = '\0';
 	piece = subject;
 	subject_end = subject + subject_len;
-	match = NULL;
+	eval = preg_options & PREG_REPLACE_EVAL;
 	
 	while (count >= 0) {
 		/* Execute the regular expression. */
@@ -565,17 +650,25 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 			match = piece + offsets[0];
 
 			new_len = strlen(result) + offsets[0]; /* part before the match */
-			walk = replace;
-			while (*walk)
-				if ('\\' == *walk &&
-					_pcre_get_backref(walk+1, &backref) &&
-					backref < count) {
-					new_len += offsets[(backref<<1)+1] - offsets[backref<<1];
-					walk += (backref > 9) ? 3 : 2;
-				} else {
-					new_len++;
-					walk++;
-				}
+			
+			/* If evaluating, do it and add the return string's length */
+			if (eval) {
+				eval_result_len = _preg_do_eval(replace, piece, offsets,
+												count, &eval_result);
+				new_len += eval_result_len;
+			} else { /* do regular substitution */
+				walk = replace;
+				while (*walk)
+					if ('\\' == *walk &&
+						_preg_get_backref(walk+1, &backref) &&
+						backref < count) {
+						new_len += offsets[(backref<<1)+1] - offsets[backref<<1];
+						walk += (backref > 9) ? 3 : 2;
+					} else {
+						new_len++;
+						walk++;
+					}
+			}
 
 			if (new_len + 1 > alloc_len) {
 				alloc_len = 1 + alloc_len + 2 * new_len;
@@ -590,19 +683,27 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 
 			/* copy replacement and backrefs */
 			walkbuf = &result[result_len + offsets[0]];
-			walk = replace;
-			while (*walk)
-				if ('\\' == *walk &&
-					_pcre_get_backref(walk+1, &backref) &&
-					backref < count) {
-					result_len = offsets[(backref<<1)+1] - offsets[backref<<1];
-					memcpy (walkbuf,
-							piece + offsets[backref<<1],
-							result_len);
-					walkbuf += result_len;
-					walk += (backref > 9) ? 3 : 2;
-				} else
-					*walkbuf++ = *walk++;
+			
+			/* If evaluating, copy result to the buffer and clean up */
+			if (eval) {
+				memcpy(walkbuf, eval_result, eval_result_len);
+				walkbuf += eval_result_len;
+				efree(eval_result);
+			} else { /* do regular backreference copying */
+				walk = replace;
+				while (*walk)
+					if ('\\' == *walk &&
+						_preg_get_backref(walk+1, &backref) &&
+						backref < count) {
+						match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
+						memcpy (walkbuf,
+								piece + offsets[backref<<1],
+								match_len);
+						walkbuf += match_len;
+						walk += (backref > 9) ? 3 : 2;
+					} else
+						*walkbuf++ = *walk++;
+			}
 			*walkbuf = '\0';
 
 			/* Advance to the next piece */
@@ -634,7 +735,7 @@ static char *_php_replace_in_subject(zval *regex, zval *replace, zval *subject)
 				*regex_entry,
 				**replace_entry_ptr,
 				*replace_entry;
-	char		*replace_value,
+	char		*replace_value = NULL,
 				*subject_value,
 				*result;
 
@@ -759,6 +860,7 @@ PHP_FUNCTION(preg_split)
 	int			 	*offsets;			/* Array of subpattern offsets */
 	int			 	 size_offsets;		/* Size of the offsets array */
 	int				 exoptions = 0;		/* Execution options */
+	int			 	 preg_options = 0;	/* Custom preg options */
 	int				 argc;				/* Argument count */
 	int				 limit_val;			/* Integer value of limit */
 	int				 count = 0;			/* Count of matched subpatterns */
@@ -784,7 +886,7 @@ PHP_FUNCTION(preg_split)
 	convert_to_string(subject);
 	
 	/* Compile regex or get it from cache. */
-	if ((re = _pcre_get_compiled_regex(regex->value.str.val, extra)) == NULL) {
+	if ((re = _pcre_get_compiled_regex(regex->value.str.val, extra, &preg_options)) == NULL) {
 		RETURN_FALSE;
 	}
 	
@@ -801,7 +903,7 @@ PHP_FUNCTION(preg_split)
 	match = NULL;
 	
 	/* Get next piece if no limit or limit not yet reached and something matched*/
-	while ((limit_val == -1 || limit_val > 0) && count >= 0) {
+	while ((limit_val == -1 || limit_val > 1) && count >= 0) {
 		count = pcre_exec(re, extra, piece,
 						  subject_end-piece, subject->value.str.val,
 						  (piece==subject->value.str.val ? exoptions : exoptions|PCRE_NOTBOL),
@@ -829,15 +931,12 @@ PHP_FUNCTION(preg_split)
 			if (limit_val != -1)
 				limit_val--;
 		}
-		else { /* if no match */
-			/* Add the last piece to the return value, if there is
-			   something left */
-			if (limit_val != 0)
-				add_next_index_stringl(return_value,
-									   piece,
-									   subject_end-piece, 1);
-		}
 	}
+	
+	/* Add the last piece to the return value */
+	add_next_index_stringl(return_value,
+						   piece,
+						   subject_end-piece, 1);
 	
 	/* Clean up */
 	efree(offsets);
@@ -918,6 +1017,7 @@ PHP_FUNCTION(preg_grep)
 			   	   **entry;				/* An entry in the input array */
 	pcre			*re = NULL;			/* Compiled regular expression */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
+	int			 	 preg_options = 0;	/* Custom preg options */
 	int			 	*offsets;			/* Array of subpattern offsets */
 	int			 	 size_offsets;		/* Size of the offsets array */
 	int			 	 count = 0;			/* Count of matched subpatterns */
@@ -939,7 +1039,7 @@ PHP_FUNCTION(preg_grep)
 	convert_to_string(regex);
 	
 	/* Compile regex or get it from cache. */
-	if ((re = _pcre_get_compiled_regex(regex->value.str.val, extra)) == NULL) {
+	if ((re = _pcre_get_compiled_regex(regex->value.str.val, extra, &preg_options)) == NULL) {
 		RETURN_FALSE;
 	}
 
