@@ -118,7 +118,7 @@ PHP_FUNCTION(session_set_save_handler);
 #define PS(v) (ps_globals->v)
 #define PSLS_FETCH() php_ps_globals *ps_globals = ts_resource(ps_globals_id)
 #else
-#define PSLS_D
+#define PSLS_D	void
 #define PSLS_DC
 #define PSLS_C
 #define PSLS_CC
@@ -152,6 +152,8 @@ void session_adapt_uris(const char *, uint, char **, uint *);
 #else
 #define session_adapt_uris(a,b,c,d) do { } while(0)
 #endif
+
+void _php_session_auto_start(void *data);
 
 #if HAVE_WDDX
 #define WDDX_SERIALIZER

@@ -316,7 +316,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 
 #endif
 
-static void php_session_track_init()
+static void php_session_track_init(void)
 {
 	PSLS_FETCH();
 	ELS_FETCH();

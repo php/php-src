@@ -93,7 +93,7 @@ typedef struct {
 #define FG(v) (fsock_globals->v)
 #define FLS_FETCH() php_fsock_globals *fsock_globals = ts_resource(fsock_globals_id)
 #else
-#define FLS_D
+#define FLS_D	void
 #define FLS_DC
 #define FLS_C
 #define FLS_CC
