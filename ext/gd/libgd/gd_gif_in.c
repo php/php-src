@@ -299,7 +299,7 @@ GetDataBlock(gdIOCtx *fd, unsigned char *buf)
 	rv = GetDataBlock_(fd,buf);
 	if (VERBOSE) {
 		if (rv > 0) {
-			tmp = emalloc((3*sizeof(char)*rv) + 1);
+			tmp = safe_emalloc(3 * rv, sizeof(char), 1);
 			for (i=0;i<rv;i++) {
 				sprintf(&tmp[3*sizeof(char)*i], " %02x", buf[i]);
 			}

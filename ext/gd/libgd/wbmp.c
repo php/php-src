@@ -176,7 +176,7 @@ readwbmp (int (*getin) (void *in), void *in, Wbmp ** return_wbmp)
   printf ("W: %d, H: %d\n", wbmp->width, wbmp->height);
 #endif
 
-  if ((wbmp->bitmap = (int *) gdMalloc (sizeof (int) * wbmp->width * wbmp->height)) == NULL)
+  if ((wbmp->bitmap = (int *) safe_emalloc(wbmp->width * wbmp->height, sizeof(int), 0)) == NULL)
     {
       gdFree (wbmp);
       return (-1);
