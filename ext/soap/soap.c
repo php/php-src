@@ -2035,8 +2035,6 @@ static void do_soap_call(zval* this_ptr,
  	sdlPtr old_sdl = NULL;
  	sdlFunctionPtr fn;
 	xmlDocPtr request = NULL;
-	char *buffer;
-	int len;
 	int ret = FALSE;
 	int soap_version;
 	zval response;
@@ -2602,8 +2600,6 @@ static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, c
 	xmlNodePtr trav,env,head,body,func;
 	xmlAttrPtr attr;
 	sdlFunctionPtr function;
-
-	ZVAL_EMPTY_STRING(function_name);
 
 	/* Get <Envelope> element */
 	env = NULL;
