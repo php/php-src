@@ -47,34 +47,19 @@ class PEAR_Remote extends PEAR
 
     function call($method)
     {
-        $args = func_get_args();
-        array_shift($args);
-        $this->__call($method, $args, $retval);
-        return $retval;
-    }
-
-    // }}}
-
-    // {{{ __call(method, args)
-
-    function __call($method, $params, &$retval)
-    {
         if (!extension_loaded("xmlrpc")) {
-            $retval = $this->raiseError("xmlrpc support not loaded");
-            return false;
+            return $this->raiseError("xmlrpc support not loaded");
         }
         $method = str_replace("_", ".", $method);
         $request = xmlrpc_encode_request($method, $params);
         $server_host = $this->config_object->get("master_server");
         if (empty($server_host)) {
-            $retval = $this->raiseError("PEAR_Remote::call: no master_server configured");
-            return false;
+            return $this->raiseError("PEAR_Remote::call: no master_server configured");
         }
         $server_port = 80;
         $fp = @fsockopen($server_host, $server_port);
         if (!$fp) {
-            $retval = $this->raiseError("PEAR_Remote::call: fsockopen(`$server_host', $server_port) failed");
-            return false;
+            return $this->raiseError("PEAR_Remote::call: fsockopen(`$server_host', $server_port) failed");
         }
         $len = strlen($request);
         fwrite($fp, ("POST /xmlrpc.php HTTP/1.0\r\n".
@@ -100,25 +85,19 @@ class PEAR_Remote extends PEAR
                 if ($ret['message']  === '') $ret['message']  = null;
                 if ($ret['userinfo'] === '') $ret['userinfo'] = null;
                 if (strtolower($class) == 'db_error') {
-                    $retval = $this->raiseError(DB::errorMessage($ret['code']),
+                    $ret = $this->raiseError(DB::errorMessage($ret['code']),
                                                 $ret['code'], null, null,
                                                 $ret['userinfo']);
                 } else {
-                    $retval = $this->raiseError($ret['message'], $ret['code'],
+                    $ret = $this->raiseError($ret['message'], $ret['code'],
                                                 null, null, $ret['userinfo']);
                 }
-                return true;
             }
         }
-        $retval = $ret;
-        return true;
+        return $ret;
     }
 
     // }}}
-}
-
-if (function_exists("overload")) {
-    overload("PEAR_Remote");
 }
 
 ?>
