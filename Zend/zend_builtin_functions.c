@@ -1174,20 +1174,21 @@ ZEND_FUNCTION(create_function)
 	efree(eval_name);
 
 	if (retval==SUCCESS) {
-		zend_function *func;
+		zend_function new_function, *func;
 
 		if (zend_hash_find(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME), (void **) &func)==FAILURE) {
 			zend_error(E_ERROR, "Unexpected inconsistency in create_function()");
 			RETURN_FALSE;
 		}
-		function_add_ref(func);
+		new_function = *func;
+		function_add_ref(&new_function);
 
 		function_name = (char *) emalloc(sizeof("0lambda_")+MAX_LENGTH_OF_LONG);
 
 		do {
 			sprintf(function_name, "%clambda_%d", 0, ++EG(lambda_count));
 			function_name_length = strlen(function_name+1)+1;
-		} while (zend_hash_add(EG(function_table), function_name, function_name_length+1, func, sizeof(zend_function), NULL)==FAILURE);
+		} while (zend_hash_add(EG(function_table), function_name, function_name_length+1, &new_function, sizeof(zend_function), NULL)==FAILURE);
 		zend_hash_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME));
 		RETURN_STRINGL(function_name, function_name_length, 0);
 	} else {
