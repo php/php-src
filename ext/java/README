@@ -1,0 +1,132 @@
+What is PHP4 ext/java?
+
+   PHP4 ext/java provides a simple and effective means for creating and
+   invoking methods on Java objects from PHP.  The JVM is created using JNI,
+   and everthing runs in-process.
+
+   Two examples are provided, jver and jawt, to illustrate usage of this
+   extension.  A few things to note:
+
+     1) new Java() will create an instance of a class if a suitable constructor
+        is available.  If no parameters are passed and the default constructor
+        is private, then an instance of the class is returned instead.  This
+        is useful as it provides access to classes like "java.lang.system"
+        which expose most of their functionallity through static methods.
+
+     2) Accessing a member of an instance will first look for bean properties
+        then public fields.  In other words, "print $date.time" will first
+        attempt to be resolved as "$date.getTime()", then as "$date.time";
+
+     3) Both static and instance members can be accessed on an object with
+        the same syntax.  Furthermore, if the java object is of type
+        "java.lang.Class", then static members
+
+     4) Exceptions raised result in PHP warnings, and null results.
+
+     5) Overload resolution is in general a hard problem given the
+        differences in types between the two languages.  This being said,
+        the current support is pretty lame and I intend to improve it.
+        The current algorithm is to pick the first method with the right
+        name (ignoring case!) and number of parameters - I warned you it
+        was lame!
+
+Build and execution instructions:
+
+   Given the number of platforms and providers of JVMs, no single set of
+   instructions will be able to cover all cases.  So in place of hard and
+   fast instructions, below are a working examples for a number of free and
+   commercial implementations and platforms.  Please adjust the paths to
+   suit your installation.  Also, if you happen to get this to work on
+   another JVM/platform combination, please let me know, particularly if
+   a unique build or execution setup was required.
+
+   This function has been tested in both CGI and Apache (apxs) modes.  As
+   the current design requires shared libraries, this support can not be
+   linked statically into Apache.
+
+   Finally, it is worth noting that no JVMs are created until the first
+   Java call is made.  This not only eliminates unnecessary overhead if
+   the extension is never used, it also provides error messages directly
+   back to the user instead of being burried in a log some place.
+   Additionally, on Unix, the loading of the shared library which implements
+   the JVM is also deferred until first use.
+
+========================================================================
+===   JVM=Kaffe 1.0.4 (as delivered with OS), OS=Redhat Linux 6.1    ===
+========================================================================
+
+build instructions:
+
+   ./configure --with-java
+
+php.ini:
+
+   [java]
+   java.library=/usr/lib/kaffe/libkaffevm.so
+   java.library.path=/usr/lib/kaffe:/home/rubys/php4/modules
+   java.class.path=/usr/share/kaffe/Klasses.jar:/home/rubys/php4/modules/php_java.jar
+   extension_dir=/home/rubys/php4/modules
+   extension=libphp_java.so
+
+========================================================================
+===     JVM=Kaffe 1.0.5 (built from source), OS=Redhat Linux 6.1     ===
+========================================================================
+
+build instructions:
+
+   ./configure --with-java
+
+php.ini:
+
+   [java]
+   java.library=/usr/local/lib/libkaffevm.so
+   java.library.path=/usr/local/lib/kaffe:/home/rubys/php4/modules
+   java.class.path=/usr/local/share/kaffe/Klasses.jar:/home/rubys/php4/modules/php_java.jar
+   extension_dir=/home/rubys/php4/modules
+   extension=libphp_java.so
+
+========================================================================
+===                JVM=IBM 1.1.8, OS=Redhat Linux 6.1                ===
+========================================================================
+
+build instructions:
+
+   ./configure --with-java=/home/jdk118
+
+php.ini:
+
+   [java]
+   java.library=/home/jdk118/lib/linux/native_threads/libjava.so
+   java.class.path=/home/jdk118/lib/classes.zip:/home/rubys/php4/modules/php_java.jar
+   extension_dir=/home/rubys/php4/modules
+   extension=libphp_java.so
+
+========================================================================
+===                JVM=Sun JDK 1.1.8, OS=Windows NT 4                ===
+========================================================================
+
+build instructions:
+
+   SET JAVA_HOME=D:\jdk1.1.8
+   msdev ext\java\java.dsp /MAKE "java - Win32 Debug_TS"
+
+php.ini:
+
+   [java]
+   java.class.path="D:\jdk1.1.8\lib\classes.zip;F:\PHP4\Debug_TS\php_java.jar"
+   extension=php_java.dll
+
+========================================================================
+===                JVM=Sun JDK 1.2.2, OS=Windows NT 4                ===
+========================================================================
+
+build instructions:
+
+   SET JAVA_HOME=D:\jdk1.2.2
+   msdev ext\java\java.dsp /MAKE "java - Win32 Debug_TS"
+
+php.ini:
+
+   [java]
+   java.class.path=F:\PHP4\Debug_TS\php_java.jar
+   extension=php_java.dll
