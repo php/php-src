@@ -1336,10 +1336,12 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 	assert(data != NULL);
 
 	if (close_handle) {
-		if (data->is_process_pipe) {
-			ret = pclose(data->file);
-		} else {
-			ret = fclose(data->file);
+		if (data->file) {
+			if (data->is_process_pipe) {
+				ret = pclose(data->file);
+			} else {
+				ret = fclose(data->file);
+			}
 		}
 		if (data->temp_file_name) {
 			unlink(data->temp_file_name);
@@ -1347,6 +1349,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 		}
 	} else {
 		ret = 0;
+		data->file = NULL;
 	}
 
 	/* STDIO streams are never persistent! */
