@@ -33,9 +33,9 @@
 #include <pspell/pspell.h>
 #include "ext/standard/info.h"
 
-#define PS_FAST 1
-#define PS_NORMAL 2
-#define PS_BAD_SPELLERS 3
+#define PSPELL_FAST 1
+#define PSPELL_NORMAL 2
+#define PSPELL_BAD_SPELLERS 3
 
 function_entry pspell_functions[] = {
 	PHP_FE(pspell_new,		NULL)
@@ -61,9 +61,9 @@ static void php_pspell_close(PspellManager *manager){
 
 
 PHP_MINIT_FUNCTION(pspell){
-	REGISTER_MAIN_LONG_CONSTANT("PS_FAST", PS_FAST, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PS_NORMAL", PS_NORMAL, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PS_BAD_SPELLERS", PS_BAD_SPELLERS, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("PSPELL_FAST", PSPELL_FAST, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("PSPELL_NORMAL", PSPELL_NORMAL, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("PSPELL_BAD_SPELLERS", PSPELL_BAD_SPELLERS, CONST_PERSISTENT | CONST_CS);
 	le_pspell = register_list_destructors(php_pspell_close,NULL);
 	return SUCCESS;
 }
@@ -71,7 +71,7 @@ PHP_MINIT_FUNCTION(pspell){
 /* {{{ proto int pspell_new(string language [, string spelling [, string jargon [, string encoding]]])
    Load a dictionary */
 PHP_FUNCTION(pspell_new){
-	pval **language,**spelling,**jargon,**encoding;
+	zval **language,**spelling,**jargon,**encoding;
 	int argc;
 	int ind;
 
@@ -122,7 +122,7 @@ PHP_FUNCTION(pspell_new){
 PHP_FUNCTION(pspell_mode)
 {
 	int type;
-	pval **scin, **pmode;
+	zval **scin, **pmode;
 	int argc;
 	long mode = 0L;
 	PspellManager *manager;
@@ -143,11 +143,11 @@ PHP_FUNCTION(pspell_mode)
 	}
 	config = pspell_manager_config(manager);
 
-	if(mode == PS_FAST){
+	if(mode == PSPELL_FAST){
 		pspell_config_replace(config, "sug-mode", "fast");
-	}else if(mode == PS_NORMAL){
+	}else if(mode == PSPELL_NORMAL){
 		pspell_config_replace(config, "sug-mode", "normal");
-	}else if(mode == PS_BAD_SPELLERS){
+	}else if(mode == PSPELL_BAD_SPELLERS){
 		pspell_config_replace(config, "sug-mode", "bad-spellers");
 	}else{
 		RETURN_FALSE;
@@ -161,7 +161,7 @@ PHP_FUNCTION(pspell_mode)
 PHP_FUNCTION(pspell_runtogether)
 {
 	int type;
-	pval **scin, **pruntogether;
+	zval **scin, **pruntogether;
 	int argc;
 	int runtogether;
 	PspellManager *manager;
@@ -195,7 +195,7 @@ PHP_FUNCTION(pspell_runtogether)
    Return if word is valid */
 PHP_FUNCTION(pspell_check){
 	int type;
-	pval **scin,**word;
+	zval **scin,**word;
 	PspellManager *manager;
 
 	int argc;
@@ -224,7 +224,7 @@ PHP_FUNCTION(pspell_check){
    Return array of Suggestions */
 PHP_FUNCTION(pspell_suggest)
 {
-	pval **scin, **word;
+	zval **scin, **word;
 	int argc;
 	PspellManager *manager;
 	int type;
