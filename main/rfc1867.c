@@ -32,6 +32,9 @@
 #include "php_variables.h"
 #include "rfc1867.h"
 
+#if HAVE_MBSTRING
+#include "ext/mbstring/mbstring.h"
+#endif
 
 #undef DEBUG_FILE_UPLOAD
 
@@ -57,6 +60,8 @@
 #define UPLOAD_ERROR_C  3  /* Only partiallly uploaded */
 #define UPLOAD_ERROR_D  4  /* No file uploaded */
 #define UPLOAD_ERROR_E  5  /* Uploaded file size 0 bytes */
+
+
 
 static void add_protected_variable(char *varname TSRMLS_DC)
 {
@@ -823,7 +828,11 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				sprintf(lbuf, "%s_name", param);
 			}
 
+#if HAVE_MBSTRING
+			s = mbstr_strrchr(filename, '\\');
+#else
 			s = strrchr(filename, '\\');
+#endif
 			if (s && s > filename) {
 				safe_php_register_variable(lbuf, s+1, NULL, 0 TSRMLS_CC);
 			} else {
