@@ -33,6 +33,8 @@
 #include "rfc1867.h"
 
 
+#undef DEBUG_FILE_UPLOAD
+
 #define SAFE_RETURN { \
 	if (lbuf) efree(lbuf); \
 	if (abuf) efree(abuf); \
@@ -752,19 +754,19 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			} 
 			fclose(fp);
 
+#ifdef DEBUG_FILE_UPLOAD
 			if(strlen(filename) > 0 && total_bytes == 0) {
 				sapi_module.sapi_error(E_WARNING, "Uploaded file size 0 - file [%s=%s] not saved", param, filename);
 				cancel_upload = UPLOAD_ERROR_E;
 			}
-			
-			if (cancel_upload || total_bytes == 0) {
+#endif		
 
+			if (cancel_upload) {
 				if (temp_filename) {
 					unlink(temp_filename);
 					efree(temp_filename);
 				}
 				temp_filename="";
-
 			} else {
 				zend_hash_add(SG(rfc1867_uploaded_files), temp_filename, strlen(temp_filename) + 1, &temp_filename, sizeof(char *), NULL);
 			}
