@@ -252,7 +252,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("track_vars",			"0",			PHP_INI_ALL,		OnUpdateBool,				track_vars,		php_core_globals,	core_globals)
 #endif
 
-	STD_PHP_INI_BOOLEAN("gpc_globals",			"1",								PHP_INI_ALL,		OnUpdateBool,				gpc_globals,	php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("gpc_globals",			"1",			PHP_INI_ALL,		OnUpdateBool,				gpc_globals,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("gpc_order",				"GPC",			PHP_INI_ALL,		OnUpdateStringUnempty,	gpc_order,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("arg_separator",			"&",			PHP_INI_ALL,		OnUpdateStringUnempty,	arg_separator,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("ignore_user_abort",	"1",			PHP_INI_ALL,		OnUpdateBool,			ignore_user_abort,		php_core_globals,	core_globals)
