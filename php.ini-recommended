@@ -608,6 +608,9 @@ mysql.default_user =
 ; file will be able to reveal the password as well.
 mysql.default_password =
 
+; Maximum time (in secondes) for connect timeout. -1 means no limimt
+mysql.connect_timeout = -1
+
 [mSQL]
 ; Allow or prevent persistent links.
 msql.allow_persistent = On
