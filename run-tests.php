@@ -197,6 +197,7 @@ if (isset($argc) && $argc > 1) {
 			$test_files[] = $testfile;
 		}
 	}
+	$test_files = array_unique($test_files);
 
 	// Run selected tests.
 	if (count($test_files)) {
@@ -274,6 +275,7 @@ function test_sort($a, $b) {
 	}
 }
 
+$test_files = array_unique($test_files);
 usort($test_files, "test_sort");
 
 $start_time = time();
