@@ -15,7 +15,7 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(cwd);
 
-cwd_state true_global_cwd_state;
+cwd_state main_cwd_state; /* True global */
 
 #ifndef ZEND_WIN32
 #include <unistd.h>
@@ -88,6 +88,15 @@ static int php_check_dots(const char *element, int n)
 #ifndef IS_DIR_OK
 #define IS_DIR_OK(state) (php_is_dir_ok(state) == 0)
 #endif
+
+
+#define CWD_STATE_COPY(d, s)				\
+	(d)->cwd_length = (s)->cwd_length;		\
+	(d)->cwd = (char *) malloc((s)->cwd_length+1);	\
+	memcpy((d)->cwd, (s)->cwd, (s)->cwd_length+1);
+
+#define CWD_STATE_FREE(s)			\
+	free((s)->cwd);
 	
 static int php_is_dir_ok(const cwd_state *state) 
 {
@@ -111,9 +120,7 @@ static int php_is_file_ok(const cwd_state *state)
 
 static void cwd_globals_ctor(zend_cwd_globals *cwd_globals)
 {
-	cwd_globals->cwd.cwd = (char *) malloc(true_global_cwd_state.cwd_length+1);
-	memcpy(cwd_globals->cwd.cwd, true_global_cwd_state.cwd, true_global_cwd_state.cwd_length+1);
-	cwd_globals->cwd.cwd_length = true_global_cwd_state.cwd_length;
+	CWD_STATE_COPY(&cwd_globals->cwd, &main_cwd_state);
 }
 
 void virtual_cwd_startup()
@@ -125,8 +132,8 @@ void virtual_cwd_startup()
 	if (!result) {
 		cwd[0] = '\0';
 	}
-	true_global_cwd_state.cwd = strdup(cwd);
-	true_global_cwd_state.cwd_length = strlen(cwd);
+	main_cwd_state.cwd = strdup(cwd);
+	main_cwd_state.cwd_length = strlen(cwd);
 
 	ZEND_INIT_MODULE_GLOBALS(cwd, cwd_globals_ctor, NULL);
 }
@@ -202,9 +209,8 @@ int virtual_file_ex(cwd_state *state, char *path, verify_path_func verify_path)
 	if (path_length == 0) 
 		return (0);
 
-	old_state = (cwd_state *) malloc(sizeof(*old_state));
-	old_state->cwd = strdup(state->cwd);
-	old_state->cwd_length = state->cwd_length;
+	old_state = (cwd_state *) malloc(sizeof(cwd_state));
+	CWD_STATE_COPY(old_state, state);
 
 	if (IS_ABSOLUTE_PATH(path, path_length)) {
 		copy_amount = COPY_WHEN_ABSOLUTE;
@@ -259,13 +265,13 @@ int virtual_file_ex(cwd_state *state, char *path, verify_path_func verify_path)
 	}
 
 	if (verify_path && verify_path(state)) {
-		free(state->cwd);
+		CWD_STATE_FREE(state);
 
 		*state = *old_state;
 
 		ret = 1;
 	} else {
-		free(old_state->cwd);
+		CWD_STATE_FREE(old_state);
 	}
 	
 	free(old_state);
@@ -286,8 +292,7 @@ int virtual_filepath(char *path, char **filepath)
 	int retval;
 	CWDLS_FETCH();
 
-	new_state = CWDG(cwd);
-	new_state.cwd = strdup(CWDG(cwd).cwd);
+	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 
 	retval = virtual_file_ex(&new_state, path, php_is_file_ok);
 	*filepath = new_state.cwd;
@@ -301,8 +306,7 @@ FILE *virtual_fopen(char *path, const char *mode)
 	int retval;
 	CWDLS_FETCH();
 
-	new_state = CWDG(cwd);
-	new_state.cwd = strdup(CWDG(cwd).cwd);
+	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 
 	retval = virtual_file_ex(&new_state, path, php_is_file_ok);
 
@@ -310,7 +314,7 @@ FILE *virtual_fopen(char *path, const char *mode)
 		return NULL;
 	}
 	f = fopen(new_state.cwd, mode);
-	free(new_state.cwd);
+	CWD_STATE_FREE(&new_state);
 	return f;
 }
 
