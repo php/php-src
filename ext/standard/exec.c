@@ -567,7 +567,7 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	do {
 		wait_pid = waitpid(child, &wstatus, 0);
-	} while (wait_pid == -1 && errno = EINTR);
+	} while (wait_pid == -1 && errno == EINTR);
 	
 	if (wait_pid == -1)
 		FG(pclose_ret) = -1;
