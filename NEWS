@@ -19,6 +19,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #25307 (Crash with WDDX serializer). (Sascha, Jani)
 - Fixed bug #25295 (QNX6: php_ini.c:414: 'alphasort' undeclared). (Jani)
 - Fixed bug #25239 (ftp_fopen_wrapper not RFC compliant). (Sara)
+- Fixed bug #25211 (image.c compile failure with AIX). (Marcus)
 - Fixed bug #25166 (WDDX serializer handler missing in win32). (Jani)
 - Fixed bug #25109 (Possible crash when fetching field names in pgsql). (Ilia)
 - Fixed bug #25218 ("deflate" compressed pages had a gzip header). (Stefan)
