@@ -140,20 +140,22 @@ done:
 #undef YYLIMIT
 #undef YYMARKER
 
-static inline void tag_arg(url_adapt_state_ex_t *ctx, char quote TSRMLS_DC)
+static inline void tag_arg(url_adapt_state_ex_t *ctx, char quotes, char type TSRMLS_DC)
 {
 	char f = 0;
 
 	if (strncasecmp(ctx->arg.c, ctx->lookup_data, ctx->arg.len) == 0)
 		f = 1;
 
-	smart_str_appendc(&ctx->result, quote);
+	if (quotes)
+		smart_str_appendc(&ctx->result, type);
 	if (f) {
 		append_modified_url(&ctx->val, &ctx->result, &ctx->q_name, &ctx->q_value, PG(arg_separator).output);
 	} else {
 		smart_str_append(&ctx->result, &ctx->val);
 	}
-	smart_str_appendc(&ctx->result, quote);
+	if (quotes)
+		smart_str_appendc(&ctx->result, type);
 }
 
 enum {
@@ -221,7 +223,7 @@ static inline void handle_arg(STD_PARA)
 static inline void handle_val(STD_PARA, char quotes, char type) 
 {
 	smart_str_setl(&ctx->val, start + quotes, YYCURSOR - start - quotes * 2);
-	tag_arg(ctx, type TSRMLS_CC);
+	tag_arg(ctx, quotes, type TSRMLS_CC);
 }
 
 #ifdef SCANNER_DEBUG
