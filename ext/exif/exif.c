@@ -2574,9 +2574,9 @@ static int exif_process_string(char **result, char *value, size_t byte_count TSR
 static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoPtr, char **pszEncoding, char *szValuePtr, int ByteCount TSRMLS_DC)
 {
 	int   a;
-	char  *decode;
 
 #ifdef HAVE_MBSTRING
+	char  *decode;
 	size_t len;;
 #endif
 
