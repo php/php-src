@@ -994,7 +994,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 
 		zend_hash_move_forward_ex(target_hash, &pos);
 	}
-	efree(key);
+	zval_ptr_dtor(&key);
 	
 	return 0;
 }
