@@ -4,6 +4,10 @@
  * All Rights Reserved
  */
 
+#ifdef PHP_WIN32
+#include "ext/standard/flock_compat.h"
+#endif
+
 #include <stdio.h>
 #include <fcntl.h>
 
