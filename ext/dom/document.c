@@ -1436,6 +1436,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 	php_libxml_ref_obj *document = NULL;
 	int validate, recover, resolve_externals, keep_blanks, substitute_ent;
 	int resolved_path_len;
+	int old_error_reporting;
 	char *directory=NULL, resolved_path[MAXPATHLEN];
 
 	if (id != NULL) {
@@ -1510,11 +1511,17 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 		ctxt->sax->error = php_libxml_ctx_error;
 		ctxt->sax->warning = php_libxml_ctx_warning;
 	}
-
+	if (recover) {
+		old_error_reporting = EG(error_reporting);
+		EG(error_reporting) = old_error_reporting | E_WARNING;
+	}
 	xmlParseDocument(ctxt);
 
 	if (ctxt->wellFormed || recover) {
 		ret = ctxt->myDoc;
+		if (recover) {
+			EG(error_reporting) = old_error_reporting;
+		}
 		/* If loading from memory, set the base reference uri for the document */
 		if (ret->URL == NULL && ctxt->directory != NULL) {
 			ret->URL = xmlStrdup(ctxt->directory);
