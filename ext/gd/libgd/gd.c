@@ -1739,7 +1739,7 @@ gdImageCopy (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int s
 	  /* Destination is palette based */
 
     if (src->trueColor) {  /* But source is truecolor (Ouch!) */
-		toy = dstY;
+        toy = dstY;
         for (y = srcY; (y < (srcY + h)); y++)
         {
             tox = dstX;
