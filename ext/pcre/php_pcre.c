@@ -24,7 +24,6 @@
 	- Make new modifier, similar to /e, that passes matches to
 	  a user-defined function
 	- add option to preg_grep() to return entries that _don't_ match
-	- add option to preg_grep() to return the matching keys
 */
 
 #include "php.h"
@@ -514,7 +513,7 @@ PHP_FUNCTION(preg_match_all)
 /* }}} */
 
 
-static int preg_get_backref(const char *walk, int *backref)
+static inline int preg_get_backref(const char *walk, int *backref)
 {
 	if (*walk && *walk >= '0' && *walk <= '9')
 		*backref = *walk - '0';
@@ -537,7 +536,8 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 				*new_code,			/* Code as result of substitution */
 				*match,				/* Current match for a backref */
 				*esc_match,			/* Quote-escaped match */
-				*walk;				/* Used to walk the code string */
+				*walk,				/* Used to walk the code string */
+				 walk_last;			/* Last walked character */
 	int			 code_len;			/* Length of the code string */
 	int			 new_code_len;		/* Length of the substituted code string */
 	int			 match_len;			/* Length of the match */
@@ -552,10 +552,12 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 	code = estrndup(eval_str, eval_str_len);
 	walk = code;
 	new_code_len = code_len = eval_str_len;
+	walk_last = 0;
 	
 	while (*walk) {
 		/* If found a backreference.. */
-		if ('\\' == *walk && preg_get_backref(walk+1, &backref)) {
+		if (('\\' == *walk || '$' == *walk ) && walk_last != '\\' &&
+			preg_get_backref(walk+1, &backref)) {
 			if (backref < count) {
 				/* Find the corresponding string match and substitute it
 				   in instead of the backref */
@@ -572,7 +574,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 				esc_match_len = 0;
 				match_len = 0;
 			}
-			sprintf(backref_buf, "\\%d", backref);
+			sprintf(backref_buf, "%c%d", *walk, backref);
 			new_code = php_str_to_str(code, code_len,
 									  backref_buf, (backref > 9) ? 3 : 2,
 									  esc_match, esc_match_len, &new_code_len);
@@ -589,6 +591,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 		} else {
 			walk++;
 		}
+		walk_last = walk[-1];
 	}
 
 	compiled_string_description = zend_make_compiled_string_description("regexp code");
@@ -640,7 +643,8 @@ char *php_pcre_replace(char *regex,   int regex_len,
 					*match,				/* The current match */
 					*piece,				/* The current piece of subject */
 					*replace_end,		/* End of replacement string */
-					*eval_result;		/* Result of eval */
+					*eval_result,		/* Result of eval */
+					 walk_last;			/* Last walked character */
 
 	/* Compile regex or get it from cache. */
 	if ((re = pcre_get_compiled_regex(regex, extra, &preg_options)) == NULL) {
@@ -693,8 +697,10 @@ char *php_pcre_replace(char *regex,   int regex_len,
 				new_len += eval_result_len;
 			} else { /* do regular substitution */
 				walk = replace;
-				while (walk < replace_end)
-					if ('\\' == *walk && preg_get_backref(walk+1, &backref)) {
+				walk_last = 0;
+				while (walk < replace_end) {
+					if (('\\' == *walk || '$' == *walk) && walk_last != '\\' &&
+						preg_get_backref(walk+1, &backref)) {
 						if (backref < count)
 							new_len += offsets[(backref<<1)+1] - offsets[backref<<1];
 						walk += (backref > 9) ? 3 : 2;
@@ -702,6 +708,8 @@ char *php_pcre_replace(char *regex,   int regex_len,
 						new_len++;
 						walk++;
 					}
+					walk_last = walk[-1];
+				}
 			}
 
 			if (new_len + 1 > alloc_len) {
@@ -725,8 +733,10 @@ char *php_pcre_replace(char *regex,   int regex_len,
 				efree(eval_result);
 			} else { /* do regular backreference copying */
 				walk = replace;
-				while (walk < replace_end)
-					if ('\\' == *walk && preg_get_backref(walk+1, &backref)) {
+				walk_last = 0;
+				while (walk < replace_end) {
+					if (('\\' == *walk || '$' == *walk) && walk_last != '\\' &&
+						preg_get_backref(walk+1, &backref)) {
 						if (backref < count) {
 							match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
 							memcpy(walkbuf, subject + offsets[backref<<1], match_len);
@@ -736,6 +746,8 @@ char *php_pcre_replace(char *regex,   int regex_len,
 					} else {
 						*walkbuf++ = *walk++;
 					}
+					walk_last = walk[-1];
+				}
 				*walkbuf = '\0';
 				/* increment the result length by how much we've added to the string */
 				*result_len += walkbuf - (result + *result_len);
@@ -1230,8 +1242,8 @@ PHP_FUNCTION(preg_grep)
 					break;
 
 				case HASH_KEY_IS_LONG:
-					zend_hash_next_index_insert(return_value->value.ht, entry,
-												sizeof(zval *), NULL);
+					zend_hash_index_update(return_value->value.ht, num_key, entry,
+										   sizeof(zval *), NULL);
 					break;
 			}
 		}
