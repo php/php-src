@@ -34,6 +34,7 @@ PHP                                                                        NEWS
   exception). (Marcus)
 - Fixed bug #24608 (__set not triggered when overloading with array).
   (Stanislav)
+- Fixed bug #24243 (enabling browscap causes segfault). (Wez)
 
 21 Dec 2003, PHP 5 Beta 3
 - Bundled new tidy extension (John, Wez)
