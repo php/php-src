@@ -1918,6 +1918,11 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC)
 		return;
 	}
 
+	if (EG(ze1_compatibility_mode) && Z_OBJPROP_P(o1) && Z_OBJPROP_P(o2)) {
+		zend_compare_symbol_tables(result, Z_OBJPROP_P(o1), Z_OBJPROP_P(o2) TSRMLS_CC);
+		return;
+	}
+
 	if (Z_OBJ_HT_P(o1)->compare_objects == NULL) {
 		if (Z_OBJ_HANDLE_P(o1) == Z_OBJ_HANDLE_P(o2)) {
 			result->value.lval = 0;
