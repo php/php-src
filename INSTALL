@@ -8,6 +8,22 @@ and then a static module.  A more verbose explanation follows.
 Note!  Only install either the static module or the dynamic one.  Do not
 install both.  
 
+Note 2!  If you are recompiling PHP to add new extensions or upgrading
+something like GD, remove the config.cache file before you re-run 
+configure.
+
+Note 3!  If you are on Linux and have installed shared libraries, make
+sure the location of these shared libraries are listed in your 
+/etc/ld.so.conf file.  For example, if you have:
+
+  /usr/local/lib/mysql/libmysqlclient.so
+
+Make sure /etc/ld.so.conf contains:
+
+  /usr/local/lib/mysql
+
+Then run ldconfig.
+
 If you want both PHP 3 and 4 modules in the same Apache server, check the
 bottom of this file for instructions.
 
