@@ -212,12 +212,6 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 	APR_ARRAY_FOREACH_CLOSE()
 		
 	php_register_variable("PHP_SELF", ctx->r->uri, track_vars_array TSRMLS_CC);
-
-	/* If PATH_TRANSLATED doesn't exist, copy it from SCRIPT_FILENAME */
-	if (!zend_hash_exists(Z_ARRVAL_P(track_vars_array), "PATH_TRANSLATED", sizeof("PATH_TRANSLATED"))
-		&& zend_hash_find(Z_ARRVAL_P(track_vars_array), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME"), (void **) &path_translated_zv) == SUCCESS) {
-		php_register_variable("PATH_TRANSLATED", Z_STRVAL_PP(path_translated_zv), track_vars_array TSRMLS_CC);
-	}
 }
 
 static void
@@ -394,7 +388,6 @@ static void php_apache_request_ctor(ap_filter_t *f, php_struct *ctx TSRMLS_DC)
 	apr_table_unset(f->r->headers_out, "Expires");
 	apr_table_unset(f->r->headers_out, "ETag");
 	apr_table_unset(f->r->headers_in, "Connection");
-
 	if (!PG(safe_mode) || (PG(safe_mode) && !ap_auth_type(f->r))) {
 		auth = apr_table_get(f->r->headers_in, "Authorization");
 		php_handle_auth_data(auth TSRMLS_CC);
