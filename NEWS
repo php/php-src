@@ -5,7 +5,8 @@ PHP 4.0                                                                    NEWS
 - Moved install-local to install-sapi for clarity. (Joey)
 - Improved extension build framework. Refer to README.SELF-CONTAINED-EXTENSIONS
   for an introduction. (Sascha)
-- ImagePolygon() is no longer limited by a maximum number of polygons (Marc Pohl)
+- ImagePolygon() is no longer limited by a maximum number of polygons.
+  (Marc Pohl)
 - Added configure time checking for bcmath package (Joey, Sascha)
 - Added get_declared_classes(). (Andrei, Zend library)
 - Add initial NSAPI module from Jayakumar Muthukumarasamy. (Rasmus)
@@ -48,8 +49,10 @@ PHP 4.0                                                                    NEWS
 - WDDX now defaults to ISO-8859-1. (Thies)
 - Fixed crash resulting from IMAP's error handling (Stas)
 - Added $HTTP_POST_FILES[filename][tmp_name] - it was previously impossible to
-  retrieve the temporary name of an uploaded file using $HTTP_POST_FILES[] (Zeev)
-- Made the IMAP and LDAP modules compilable under Windows and thread-safe (Zeev)
+  retrieve the temporary name of an uploaded file using $HTTP_POST_FILES[]
+  (Zeev)
+- Made the IMAP and LDAP modules compilable under Windows and thread-safe
+  (Zeev)
 - Fixed a problem when dealing with large POST blocks in CGI mode (Zeev)
 - Added session_get_cookie_params() function. (Sterling)
 - Fixed return of stristr() to no longer always be lowercased. (Andrei)
@@ -61,15 +64,15 @@ PHP 4.0                                                                    NEWS
 - Added support for reading properties that require arguments in the COM
   module - writing to them will only be supported in PHP 4.1 (Zeev)
 - Fixed a very old legacy memory leak in the COM module (Zeev)
-- Fixed problems with object-overloading support - noteably, COM and Java (Zeev,
-  Zend Engine)
+- Fixed problems with object-overloading support - noteably, COM and Java
+  (Zeev, Zend Engine)
 - Fixed an overrun in WDDX. (Thies)
 - Fixed a crash bug with modules loaded through dl() not properly freeing their
   resources (Zeev, Zend Engine)
 - Added localtime() function. (Sterling)
 - Added the 'I' format option for the date function, this option will return
   true or false depending on whether or not daylight savings time is in effect.
-  (Sterling)
+(Sterling)
 - Added gmstrftime() function. (Sterling)
 - snmp_walkoid is now an alias for snmp_realwalk. (Sterling)
 - Fixed a bug that could cause a crash when using 'global' inside large include
@@ -89,10 +92,11 @@ PHP 4.0                                                                    NEWS
   when used as function arguments (Andi, Zend Engine)
 - Added get_class_methods(string classname) function. (Andrei)
 - Added 'I' switch to test whether or not DST is active. (Sterling)
-- Fixed a data corruption bug in mysql_result(), if used in table.fieldname mode (Zeev)
-- Modified the registry INI entry reader (Win32) to work with drive letters.  For
-  example, if you wish to wish to specify INI entries for C:\foo\bar, you should
-  create HKLM\PHP\Per Directory Values\C\foo\bar in the registry, and add
+- Fixed a data corruption bug in mysql_result(), if used in table.fieldname
+  mode (Zeev)
+- Modified the registry INI entry reader (Win32) to work with drive letters.
+  For example, if you wish to wish to specify INI entries for C:\foo\bar, you
+  should create HKLM\PHP\Per Directory Values\C\foo\bar in the registry, and add
   string values for each directive you want to override in this directory (Zeev)
 - Fixed extract() for EXTR_PREFIX_SAME and EXTR_SKIP cases. (Andrei)
 - stristr() no longer modifies it's arguments. (Thies)
@@ -143,7 +147,8 @@ PHP 4.0                                                                    NEWS
   like they were prior to PHP 4.0 Beta 4 (Zeev)
 - Fixed Sybase-DB compilation (Zeev)
 - Fixed a (fairly common) situation where error_reporting values would not be
-  properly restored after a call to error_reporting(), in between requests (Zeev)
+  properly restored after a call to error_reporting(), in between requests
+  (Zeev)
 - The various $HTTP_*_VARS[] are now protected, and cannot be manipulated by
   user input (Zeev)
 - Added ini_set() as an alias to ini_alter() (Zeev)
