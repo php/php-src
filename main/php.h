@@ -148,7 +148,7 @@ char *strtok_r(char *s, const char *delim, char **last);
 
 
 #include "zend_hash.h"
-#include "php_compat.h"
+#include "php3_compat.h"
 #include "zend_alloc.h"
 #include "zend_stack.h"
 
