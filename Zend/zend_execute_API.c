@@ -652,8 +652,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 						zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL_PP(fci->object_pp));
 					}
 					if (EG(This) && 
-					    instanceof_function(Z_OBJCE_P(EG(This)), scope) &&
-					    instanceof_function(scope, *ce)) {
+						instanceof_function(Z_OBJCE_P(EG(This)), scope) &&
+						instanceof_function(scope, *ce)) {
 						fci->object_pp = &EG(This);
 					} else {
 						fci->object_pp = NULL;
@@ -776,9 +776,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	current_this = EG(This);
 
 	if (fci->object_pp) {
-        if ((EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)) {
-            EG(This) = NULL;
-        } else {
+		if ((EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)) {
+			EG(This) = NULL;
+		} else {
 			EG(This) = *fci->object_pp;
 
 			if (!PZVAL_IS_REF(EG(This))) {
@@ -1010,7 +1010,7 @@ ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name,
 
 void execute_new_code(TSRMLS_D)
 {
-    zend_op *opline, *end;
+	zend_op *opline, *end;
 	zend_op *ret_opline;
 	zval *local_retval=NULL;
 
@@ -1034,18 +1034,18 @@ void execute_new_code(TSRMLS_D)
 	opline=CG(active_op_array)->start_op;
 	end=CG(active_op_array)->opcodes+CG(active_op_array)->last;
 
-    while (opline<end) {
-        if (opline->op1.op_type==IS_CONST) {
-            opline->op1.u.constant.is_ref = 1;
-            opline->op1.u.constant.refcount = 2; /* Make sure is_ref won't be reset */
-        }
-        if (opline->op2.op_type==IS_CONST) {
-            opline->op2.u.constant.is_ref = 1;
-            opline->op2.u.constant.refcount = 2;
-        }
+	while (opline<end) {
+		if (opline->op1.op_type==IS_CONST) {
+			opline->op1.u.constant.is_ref = 1;
+			opline->op1.u.constant.refcount = 2; /* Make sure is_ref won't be reset */
+		}
+		if (opline->op2.op_type==IS_CONST) {
+			opline->op2.u.constant.is_ref = 1;
+			opline->op2.u.constant.refcount = 2;
+		}
 		opline->handler = zend_opcode_handlers[opline->opcode];
 		opline++;
-    }
+	}
 
 	EG(return_value_ptr_ptr) = &local_retval;
 	EG(active_op_array) = CG(active_op_array);
