@@ -585,7 +585,10 @@ static int _preg_do_eval(char *eval_str, char *subject, int *offsets,
 	}
 
 	/* Run the code */
-	zend_eval_string(code, &retval CLS_CC ELS_CC);
+	if (zend_eval_string(code, &retval CLS_CC ELS_CC) == FAILURE) {
+		zend_error(E_ERROR, "Failed evaluating code:\n%s\n", code);
+		/* zend_error() does not return in this case */
+	}
 	convert_to_string(&retval);
 	
 	/* Save the return value and its length */
