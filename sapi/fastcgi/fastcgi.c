@@ -43,11 +43,21 @@
 #include "fcgi_config.h"
 #include "fcgiapp.h"
 #include <stdio.h>
+#if HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <sys/wait.h>
 #include <sys/stat.h>
 
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_SIGNAL_H
+#include <signal.h>
+#endif
 
 #define TLS_D
 #define TLS_DC
@@ -59,6 +69,7 @@
 FCGX_Stream *in, *out, *err;
 FCGX_ParamArray envp;
 char *path_info = NULL;
+struct sigaction act, old_term, old_quit, old_int;
 
 /* Our original environment from when the FastCGI first started */
 char **orig_env;
@@ -70,6 +81,21 @@ char **cgi_env;
  * the parameters set by the per-connection environment
  */
 char **merge_env;
+
+/**
+ * Number of child processes that will get created to service requests
+ */
+static int children = 8;
+
+/**
+ * Set to non-zero if we are the parent process
+ */
+static int parent = 1;
+
+/**
+ * Process group
+ */
+static pid_t pgroup;
 
 
 static int sapi_fastcgi_ub_write(const char *str, uint str_length)
@@ -127,12 +153,12 @@ static void sapi_fastcgi_register_variables(zval *track_vars_array ELS_DC SLS_DC
 	char *ptr = strchr( self, '?' );
 
 	/*
-         * note that the environment will already have been set up
-         * via fastcgi_module_main(), below.
-         *
-         * fastcgi_module_main() -> php_request_startup() ->
-         * php_hash_environment() -> php_import_environment_variables()
-         */
+	 * note that the environment will already have been set up
+	 * via fastcgi_module_main(), below.
+	 *
+	 * fastcgi_module_main() -> php_request_startup() ->
+	 * php_hash_environment() -> php_import_environment_variables()
+	 */
 
 	/* strip query string off this */
 	if ( ptr ) *ptr = 0;
@@ -271,6 +297,24 @@ void fastcgi_php_shutdown(void)
 }
 
 
+/**
+ * Clean up child processes upon exit
+ */
+void fastcgi_cleanup(int signal)
+{
+	int i;
+
+#ifdef DEBUG_FASTCGI
+	fprintf( stderr, "FastCGI shutdown, pid %d\n", getpid() );
+#endif
+
+	sigaction( SIGTERM, &old_term, 0 );
+
+	/* Kill all the processes in our process group */
+	kill( -pgroup, SIGTERM );
+}
+
+
 int main(int argc, char *argv[])
 {
 	int exit_status = SUCCESS;
@@ -280,15 +324,20 @@ int main(int argc, char *argv[])
 	char *argv0=NULL;
 	char *script_file=NULL;
 	zend_llist global_vars;
-	int children = 8;
 	int max_requests = 500;
 	int requests = 0;
 	int status;
 	int env_size, cgi_env_size;
 
-#ifdef FASTCGI_DEBUG
-	fprintf( stderr, "Initialising now!\n" );
+#ifdef DEBUG_FASTCGI
+	fprintf( stderr, "Initialising now, pid %d!\n", getpid() );
 #endif
+
+	if( FCGX_IsCGI() ) {
+		fprintf( stderr, "The FastCGI version of PHP cannot be "
+			 "run as a CGI application\n" );
+		exit( 1 );
+	}
 
 	/* Calculate environment size */
 	env_size = 0;
@@ -342,21 +391,46 @@ int main(int argc, char *argv[])
 	}
 
 	if( children ) {
-		int parent = 1;
 		int running = 0;
+		int i;
+		pid_t pid;
+
+		/* Create a process group for ourself & children */
+		setsid();
+		pgroup = getpgrp();
+#ifdef DEBUG_FASTCGI
+		fprintf( stderr, "Process group %d\n", pgroup );
+#endif
+
+		/* Set up handler to kill children upon exit */
+		act.sa_flags = 0;
+		act.sa_handler = fastcgi_cleanup;
+		if( sigaction( SIGTERM, &act, &old_term ) ||
+		    sigaction( SIGINT, &act, &old_int ) ||
+		    sigaction( SIGQUIT, &act, &old_quit )) {
+			perror( "Can't set signals" );
+			exit( 1 );
+		}
+
 		while( parent ) {
 			do {
-#ifdef FASTCGI_DEBUG
+#ifdef DEBUG_FASTCGI
 				fprintf( stderr, "Forking, %d running\n",
 					 running );
 #endif
-				switch( fork() ) {
+				pid = fork();
+				switch( pid ) {
 				case 0:
 					/* One of the children.
 					 * Make sure we don't go round the
 					 * fork loop any more
 					 */
 					parent = 0;
+
+					/* don't catch our signals */
+					sigaction( SIGTERM, &old_term, 0 );
+					sigaction( SIGQUIT, &old_quit, 0 );
+					sigaction( SIGINT, &old_int, 0 );
 					break;
 				case -1:
 					perror( "php (pre-forking)" );
@@ -370,6 +444,10 @@ int main(int argc, char *argv[])
 			} while( parent && ( running < children ));
 
 			if( parent ) {
+#ifdef DEBUG_FASTCGI
+				fprintf( stderr, "Wait for kids, pid %d\n",
+					 getpid() );
+#endif
 				wait( &status );
 				running--;
 			}
@@ -377,27 +455,27 @@ int main(int argc, char *argv[])
 	}
 
 	/* Main FastCGI loop */
-#ifdef FASTCGI_DEBUG
+#ifdef DEBUG_FASTCGI
 	fprintf( stderr, "Going into accept loop\n" );
 #endif
 
 	while( FCGX_Accept( &in, &out, &err, &cgi_env ) >= 0 ) {
 
-#ifdef FASTCGI_DEBUG
+#ifdef DEBUG_FASTCGI
 		fprintf( stderr, "Got accept\n" );
 #endif
 
-                cgi_env_size = 0;
-                while( cgi_env[ cgi_env_size ] ) { cgi_env_size++; }
-                merge_env = malloc( (env_size+cgi_env_size)*sizeof(char*) );
-                if( !merge_env ) {
-                   perror( "Can't malloc environment" );
-                   exit( 1 );
-                }
-                memcpy( merge_env, orig_env, (env_size-1)*sizeof(char *) );
-                memcpy( merge_env + env_size - 1,
-                        cgi_env, (cgi_env_size+1)*sizeof(char *) );
-                environ = merge_env;
+		cgi_env_size = 0;
+		while( cgi_env[ cgi_env_size ] ) { cgi_env_size++; }
+		merge_env = malloc( (env_size+cgi_env_size)*sizeof(char*) );
+		if( !merge_env ) {
+		   perror( "Can't malloc environment" );
+		   exit( 1 );
+		}
+		memcpy( merge_env, orig_env, (env_size-1)*sizeof(char *) );
+		memcpy( merge_env + env_size - 1,
+			cgi_env, (cgi_env_size+1)*sizeof(char *) );
+		environ = merge_env;
 
 		init_request_info( TLS_C SLS_CC );
 		SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
@@ -424,7 +502,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-#ifdef FASTCGI_DEBUG
+#ifdef DEBUG_FASTCGI
 	fprintf( stderr, "Exiting...\n" );
 #endif
 	return 0;
