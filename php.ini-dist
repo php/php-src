@@ -303,6 +303,7 @@ report_memleaks = On
 track_errors = Off
 
 ; Disable the inclusion of HTML tags in error messages.
+; Note: Never use this feature for production boxes.
 ;html_errors = Off
   
 ; If html_errors is set On PHP produces clickable error messages that direct 
@@ -311,6 +312,7 @@ track_errors = Off
 ; and change docref_root to the base URL of your local copy including the
 ; leading '/'. You must also specify the file extension being used including 
 ; the dot.
+; Note: Never use this feature for production boxes.
 ;docref_root = /phpmanual/
 ;docref_ext = .html
   
