@@ -473,6 +473,23 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 
 				case 'g':
 				case 'G':
+					fp_num = va_arg(ap, double);
+
+					if (zend_isnan(fp_num)) {
+						s = "NAN";
+						s_len = 3;
+						break;
+					} else if (zend_isinf(fp_num)) {
+						if (fp_num > 0) {
+							s = "INF";
+							s_len = 3;
+						} else {
+							s = "-INF";
+							s_len = 4;
+						}
+						break;
+					}
+
 					if (adjust_precision == NO)
 						precision = FLOAT_DIGITS;
 					else if (precision == 0)
@@ -480,8 +497,7 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-					s = ap_php_gcvt(va_arg(ap, double), precision, &num_buf[1],
-							alternate_form);
+					s = ap_php_gcvt(fp_num, precision, &num_buf[1], alternate_form);
 					if (*s == '-')
 						prefix_char = *s++;
 					else if (print_sign)
