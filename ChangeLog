@@ -1,3 +1,83 @@
+2002-07-11  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ftp/php_ftp.c: ws fix
+
+2002-07-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/main.c: - Fix for bug #18283
+
+2002-07-11  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/pgsql/pgsql.c
+      ext/mbstring/mbstring.c
+      php.ini-recommended
+      php.ini-dist: added mbstring.language option in ext/mbstring.
+
+2002-07-11  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/package-Net_SMTP.xml: typo
+
+    * pear/package-Net_SMTP.xml: Prepare package.xml for Net_SMTP
+
+2002-07-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/config.m4:
+    Break up the INSTALL_IT line into comprehensible pieces
+    and fix a bug related to [..] quotes.
+
+    * sapi/apache/config.m4:
+    the variable interpolation was already subject to IFS treatment,
+    which resulted in the execution of the foremost directory.
+
+    we capture the output before setting IFS now
+
+2002-07-11  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c
+      ext/yaz/php_yaz.h:
+    yaz.max_links, yaz_log_file setting. User-defined Other Info
+
+    * ext/yaz/config.m4: Include YAZ support libs (if any)
+
+2002-07-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/config.m4
+      sapi/apache2filter/config.m4:
+    Use a simple IFS; set step to interprete the httpd -v output
+
+2002-07-11  Uwe Steinmann  <uwe@steinmann.cx>
+
+    * ext/hwapi/php_hwapi.h: - added missing file
+
+2002-07-11  James Cox  <james@blog.at>
+
+    * ext/gd/libgd/gdft.c:
+    adding patch from http://www.coupin.net/gd-freetype/ which makes images anti aliased (and therefore more readable).
+
+
+2002-07-11  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/iconv/tests/translit.inc
+      ext/iconv/tests/translit.phpt:
+    Added traslit test files. Moriyoshi Koizumi <readjust@deneb.freemail.ne.jp>
+
+    * ext/iconv/config.m4
+      ext/iconv/iconv.c:
+    Fix #16069. Patch by Moriyoshi Koizumi <readjust@deneb.freemail.ne.jp>
+
+2002-07-11  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ftp/ftp.c: Fix bug: #14052
+
+    * ext/standard/http_fopen_wrapper.c: MFH: Fix for #16337
+
+    * ext/standard/http_fopen_wrapper.c:
+    Fixed bug: #16637, username/password needs to be urlencoded.
+
+    * ext/curl/curl.c: Fixed bug: #18250
+
+    * NEWS: news-entry-robot(tm)
+
 2002-07-10  Harald Radi  <harald.radi+coding.php@nme.at>
 
     * ext/rpc/com/com.c
