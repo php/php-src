@@ -32,34 +32,53 @@ extern zend_module_entry sablot_module_entry;
 #define PHP_SABLOT_API
 #endif
 
+/* Module functions */
 PHP_MINIT_FUNCTION(sablot);
+PHP_MSHUTDOWN_FUNCTION(sablot);
 PHP_MINFO_FUNCTION(sablot);
+
+/* Output transformation functions */
 PHP_FUNCTION(xslt_output_begintransform);
 PHP_FUNCTION(xslt_output_endtransform);
+
+/* Basic transformation functions */
 PHP_FUNCTION(xslt_transform);
 PHP_FUNCTION(xslt_process);
+
+/* Advanced API transformation functions */
 PHP_FUNCTION(xslt_create);
 PHP_FUNCTION(xslt_run);
-PHP_FUNCTION(xslt_fetch_result);
-PHP_FUNCTION(xslt_openlog);
-PHP_FUNCTION(xslt_closelog);
 PHP_FUNCTION(xslt_set_sax_handler);
+PHP_FUNCTION(xslt_set_error_handler);
+PHP_FUNCTION(xslt_fetch_result);
 PHP_FUNCTION(xslt_free);
+
+/* Error Handling functions */
 PHP_FUNCTION(xslt_error);
 PHP_FUNCTION(xslt_errno);
+PHP_FUNCTION(xslt_openlog);
+PHP_FUNCTION(xslt_closelog);
 
+/* Sablotron error structure */
 struct _php_sablot_error {
 	char *key;
 	char *value;
 	struct _php_sablot_error *next;
 };
-
 typedef struct _php_sablot_error php_sablot_error;
 
+
+/* Sablotron Handle */
 typedef struct {
-	long index;
+
+    /* Error Handling */
+    zval *errorHandler;
+	php_sablot_error *errors;
+	php_sablot_error errors_start;
 	int last_errno;
-	php_sablot_error *errors, errors_start;
+	
+    /* SAX Handling */
+	long index;
 	zval *startDocHandler;
 	zval *startElementHandler;
 	zval *endElementHandler;
@@ -69,33 +88,39 @@ typedef struct {
 	zval *PIHandler;
 	zval *charactersHandler;
 	zval *endDocHandler;
+	
+	/* Sablotron Related */
 	SablotHandle p;
+
 } php_sablot;
 
+
+/* Sablotron Globals */
 typedef struct {
-	char *output_transform_file;
-	int le_sablot;
-	int last_errno;
-	int processor;
+    zval *errorHandler;
+    SablotHandle processor;
+    php_sablot_error *errors;
+    php_sablot_error errors_start;
+	char *output_transform_file; /* For output transformations */
+	int last_errno;              /* Global last_errno, if no handle is found */
 } php_sablot_globals;
 
 
 #ifdef ZTS
 #define SABLOTG(v) (sablot_globals->v)
 #define SABLOTLS_FETCH() php_sablot_globals *sablot_globals = ts_resource(sablot_globals_id)
+#define SABLOTG_HANDLE (*sablot_globals)
 #else
 #define SABLOTG(v) (sablot_globals.v)
+#define SABLOTG_HANDLE sablot_globals
 #define SABLOTLS_FETCH()
 #endif
 
 #else
-
 #define phpext_sablot_ptr NULL
-
 #endif
 
 #endif
-
 
 /*
  * Local variables:

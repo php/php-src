@@ -31,6 +31,8 @@
 #include "ext/standard/php_output.h"
 #include "php_sablot.h"
 
+static int le_sablot;
+
 /* Functions related to PHP's list handling */
 static void _php_sablot_free_processor(zend_rsrc_list_entry *rsrc);
 
@@ -50,27 +52,59 @@ static SAX_RETURN _php_sablot_sax_endDoc(void *);
 /* Error Handling Functions */
 static MH_ERROR _php_sablot_make_code(void *, SablotHandle, int, unsigned short, unsigned short);
 static MH_ERROR _php_sablot_error(void *, SablotHandle, MH_ERROR, MH_LEVEL, char **);
+static void _php_sablot_standard_error(php_sablot_error *, php_sablot_error, int, int);
 
 /* PHP Utility Functions */
 static void _php_sablot_ht_char(HashTable *, char **);
 static zval *_php_sablot_string_zval(const char *);
 static zval *_php_sablot_resource_zval(long);
 
+/* Macro's */
+
 /* Free macros */
 #define S_FREE(__var) if (__var) efree(__var);
 #define FUNCH_FREE(__var) if (__var) zval_del_ref(&(__var));		
 
-/* ERROR Macro */
-#define SEND_ERROR_INFO(__error, __errlevel) \
-	php_printf("A %s has occurred, sending all relevant information\n", __error); \
-	handle->errors = handle->errors_start.next; \
-	while (handle->errors) { \
-		php_printf("%s: %s\n", handle->errors->key, handle->errors->value); \
-		handle->errors = handle->errors->next; \
-	} \
-	php_error(__errlevel, "");
+/* ERROR Macros */
+
+#define SABLOT_FREE_ERROR_HANDLE(__handle) \
+    if ((__handle).errors) { \
+        (__handle).errors = (__handle).errors_start.next; \
+        while ((__handle).errors) { \
+            S_FREE((__handle).errors->key); \
+            S_FREE((__handle).errors->value); \
+            (__handle).errors = (__handle).errors->next; \
+        } \
+        S_FREE((__handle).errors); \
+    }
 
 
+/* Sablotron Basic Api macro's */
+#define SABLOT_BASIC_CREATE_PROCESSOR() \
+    if (SABLOTG(processor) == NULL) { \
+        int ret = 0; \
+        \
+        ret = SablotCreateProcessor(&SABLOTG(processor)); \
+        if (ret) { \
+            SABLOTG(last_errno) = ret; \
+            return; \
+        } \
+        \
+        ret = SablotRegHandler(SABLOTG(processor), HLR_MESSAGE, (void *)&mh, (void *)NULL); \
+        if (ret) { \
+            SABLOTG(last_errno) = ret; \
+            return; \
+        } \
+    }
+
+#define SABLOT_BASIC_HANDLE SABLOTG(processor)
+
+/**
+ * SAX Handler structure, this defines the different functions to be
+ * called when Sablotron's internal expat parser reaches the 
+ * different callbacks.  These are the same as the functions which are
+ * defined for expat.
+ */
 static SAXHandler sax = {
        _php_sablot_sax_startDoc,
        _php_sablot_sax_startElement,
@@ -83,13 +117,16 @@ static SAXHandler sax = {
        _php_sablot_sax_endDoc
 };
 
+
+/**
+ * Message Handler structure for use when Sablotron
+ * reports that something has gone wrong.
+ */
 static MessageHandler mh = {
 	_php_sablot_make_code,
 	_php_sablot_error,
 	_php_sablot_error
 };
-
-/* {{{ Begin PHP Extension code */
 
 #ifdef ZTS
 int sablot_globals_id;
@@ -112,6 +149,7 @@ function_entry sablot_functions[] = {
 	PHP_FE(xslt_openlog,                  NULL)
 	PHP_FE(xslt_closelog,                 NULL)
 	PHP_FE(xslt_set_sax_handler,          NULL)
+	PHP_FE(xslt_set_error_handler,        NULL)
 	PHP_FE(xslt_free,                     NULL)
 	PHP_FE(xslt_error,                    NULL)
 	PHP_FE(xslt_errno,                    NULL)
@@ -122,7 +160,7 @@ zend_module_entry sablot_module_entry = {
 	"sablot",
 	sablot_functions,
 	PHP_MINIT(sablot),
-	NULL,
+	PHP_MSHUTDOWN(sablot),
 	NULL,
 	NULL,
 	PHP_MINFO(sablot),
@@ -133,37 +171,43 @@ zend_module_entry sablot_module_entry = {
 ZEND_GET_MODULE(sablot)
 #endif
 
-/* }}} */
 
-
-/* {{{ MINIT and MINFO Functions */
+/* MINIT and MINFO Functions */
 PHP_MINIT_FUNCTION(sablot)
 {
-	SABLOTLS_FETCH();
-	SABLOTG(le_sablot) = zend_register_list_destructors_ex(_php_sablot_free_processor, NULL, "sablotron", module_number);
+    le_sablot = zend_register_list_destructors_ex(_php_sablot_free_processor, NULL, "Sablotron XSLT", module_number);
+
 	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(sablot)
+{
+    SABLOTLS_FETCH();
+    
+    if (SABLOTG(processor)) {
+        SablotUnregHandler(SABLOTG(processor), HLR_MESSAGE, NULL, NULL);
+        SablotDestroyProcessor(SABLOTG(processor));
+    }
+    
+    return SUCCESS;
 }
 
 PHP_MINFO_FUNCTION(sablot)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "Sablotron support", "enabled");
+	php_info_print_table_row(2, "Sablotron XSLT support", "enabled");
 	php_info_print_table_end();
 
 }
-/* }}} */
-
-/* }}} */
-
-/* {{{ Begin Extension function */
-
-/* {{{ Begin Output Transformation functions */
 
 /* {{{ proto void xslt_output_begintransform(string file)
    Begin filtering of all data that is being printed out through the XSL file given by the file parameter. */
 PHP_FUNCTION(xslt_output_begintransform)
 {
+    /* The name of the file to pass the output through */
 	zval **file;
+	
+	/* needed for the output transformation file name */
 	SABLOTLS_FETCH();
 	
 	if (ZEND_NUM_ARGS() != 1 ||
@@ -172,9 +216,15 @@ PHP_FUNCTION(xslt_output_begintransform)
 	}
 	convert_to_string_ex(file);
 	
+	/* If the buffer exists, free it */
 	S_FREE(SABLOTG(output_transform_file));
-		
+	
 	SABLOTG(output_transform_file) = estrndup(Z_STRVAL_PP(file), Z_STRLEN_PP(file));
+
+    /**
+     * Start output buffering, NULL signifies that no "user-space" output function
+     * will be used.
+     */
 	php_start_ob_buffer(NULL);
 }
 /* }}} */
@@ -186,44 +236,80 @@ PHP_FUNCTION(xslt_output_endtransform)
 	char *tRes   = NULL,
 	     *buffer = NULL;
 	int ret = 0;
+	
+	/* Fetch both the output globals and the sablotron globals */
 	OLS_FETCH();
 	SABLOTLS_FETCH();
 
+    /** 
+     * Make sure that we don't have more than one output buffer going on
+     * at the same time.
+     */
 	if (OG(nesting_level) == 0) {
 		RETURN_NULL();
 	}
 
 	buffer = estrndup(OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length);
 
+    /* Nake sure there is data to send */
 	if (strlen(buffer)) {
 		char *args[] = {"/_xmlinput", buffer,
 		                "/_output",   NULL};
 		
-		ret = SablotProcess(SABLOTG(output_transform_file), "arg:/_xmlinput", "arg:/_output", NULL, args, &tRes);
-	}
+		SABLOT_BASIC_CREATE_PROCESSOR();
+		
+		ret = SablotRunProcessor(SABLOT_BASIC_HANDLE, SABLOTG(output_transform_file), 
+		                         "arg:/_xmlinput", "arg:/_output", NULL, args);
+		
+		if (ret) {
+		    SABLOTG(last_errno) = ret;
+		    S_FREE(SABLOTG(output_transform_file));
+		    RETURN_NULL();
+		}
+		
+		ret = SablotGetResultArg(SABLOT_BASIC_HANDLE, "arg:/_output", &tRes);
+		
+		if (ret) {
+		    SABLOTG(last_errno) = ret;
+		    S_FREE(SABLOTG(output_transform_file));
+		    RETURN_NULL();
+		}
+    }
 
+    /**
+     * A non-zero return means error, save this error in the global
+     * errno (for xslt_errno() and xslt_error()) free the output
+     * transformation file and null.
+     */ 
 	if (ret) {
 		SABLOTG(last_errno) = ret;
 		S_FREE(SABLOTG(output_transform_file));
-		return;
+		RETURN_NULL();
 	}
-		
-	php_end_ob_buffer(0);
+	
+	/**
+	 * If there is a buffer, end output buffering and clear the
+	 * current output buffer (so we don't send data twice) 
+	 */
+	if (tRes)
+	    php_end_ob_buffer(0);
 	
 	PUTS(tRes);
+	
 	S_FREE(SABLOTG(output_transform_file));
 	S_FREE(buffer);
 
-	if (tRes) {
-		SablotFree(tRes);
-	} else {
-		php_end_ob_buffer(0);
-	}
+    /**
+     * If there exists a result, free that result
+     * otherwise just end output buffering and send the
+     * data.
+     */
+	if (tRes)
+	    SablotFree(tRes);
+	else
+		php_end_ob_buffer(1);
 }
 /* }}} */
-
-/* }}} */
-/* {{{ Begin Simple API */
 
 /* {{{ proto bool xslt_transform(string xslt_uri, string transform_uri, string result_uri[, array xslt_params[, array xslt_args[, string &result]]])
    Transform an XML document, transform_uri, with an XSL stylesheet, xslt_uri with parameters, xslt_params, into the Result buffer, result_uri, xslt_args defines the variables in xslt_uri, transform_uri and result_uri. */
@@ -235,11 +321,14 @@ PHP_FUNCTION(xslt_transform)
 	     **xslt_params, 
 		 **xslt_args, 
 		 **result;
+
 	char **args   = NULL,
 	     **params = NULL,
 	     *tResult = NULL;
+
 	int argc = ZEND_NUM_ARGS(), 
 	    ret  = 0;
+
 	SABLOTLS_FETCH();
 	
 	if (argc < 3 || argc > 6 ||
@@ -248,24 +337,45 @@ PHP_FUNCTION(xslt_transform)
 	}
 	multi_convert_to_string_ex(3, xslt_uri, transform_uri, result_uri);
 	
+	/**
+	 * if there are more than 3 function arguments, inspect the value of 
+	 * the third argument and decide whether or not there are Sablotron
+	 * parameters.
+	 */
 	if (argc > 3) {
-		if (Z_TYPE_PP(xslt_params) != IS_LONG || Z_LVAL_PP(xslt_params) != 0) {
+		if (Z_TYPE_PP(xslt_params) != IS_LONG || Z_LVAL_PP(xslt_params) != 0 ||
+		    Z_TYPE_PP(xslt_params) != IS_NULL) {
 			int numelems, 
 			    size;
 			HashTable *ar = HASH_OF(*xslt_params);
 
+            /**
+             * Allocate 2 times the number of elements in
+             * the array, since with associative arrays in PHP
+             * keys are not counted.
+             */
 			numelems = zend_hash_num_elements(ar);
 			size = (numelems * 2 + 1) * sizeof(char *);
 			
 			params = (char **)emalloc(size+1);
 			memset((char *)params, 0, size);
 			
+			/**
+			 * Translate a PHP array (HashTable *) into a 
+			 * Sablotron array (char **).
+			 */
 			_php_sablot_ht_char(ar, params);
 		}
 	}
 	
+	/**
+	 * If there are more than 4 function arguments, inspect the value
+	 * of the 4 argument and decide whether or not there are Sablotron
+	 * arguments.
+	 */
 	if (argc > 4) {
-		if (Z_TYPE_PP(xslt_args) != IS_LONG || Z_LVAL_PP(xslt_args) != 0) {
+		if (Z_TYPE_PP(xslt_args) != IS_LONG || Z_LVAL_PP(xslt_args) != 0 ||
+		    Z_TYPE_PP(xslt_args) != IS_NULL) {
 			int numelems, 
 			    size;
 			HashTable *ar = HASH_OF(*xslt_args);
@@ -280,21 +390,33 @@ PHP_FUNCTION(xslt_transform)
 		}
 	}
 	
-	ret = SablotProcess(Z_STRVAL_PP(xslt_uri), Z_STRVAL_PP(transform_uri),
-	                    Z_STRVAL_PP(result_uri), params, args, &tResult);
-	
+	SABLOT_BASIC_CREATE_PROCESSOR();
+	ret = SablotRunProcessor(SABLOT_BASIC_HANDLE, Z_STRVAL_PP(xslt_uri), 
+	                         Z_STRVAL_PP(transform_uri), Z_STRVAL_PP(result_uri), 
+	                         params, args);
+
 	if (ret) {
 		SABLOTG(last_errno) = ret;
 		
 		S_FREE(params);
 		S_FREE(args);
-		if (tResult) {
-			SablotFree(tResult);
-		}
 		
 		RETURN_FALSE;
-	} else { RETVAL_TRUE; }
-
+	}
+	
+	ret = SablotGetResultArg(SABLOT_BASIC_HANDLE, Z_STRVAL_PP(result_uri), &tResult);
+	
+	if (ret) {
+	    SABLOTG(last_errno) = ret;
+	    
+	    S_FREE(params);
+	    S_FREE(args);
+	    
+	    if (tResult)
+	        SablotFree(tResult);
+    
+        RETURN_FALSE;
+    } else { RETVAL_TRUE; }
 
 	if (tResult &&
 	    argc == 6) {
@@ -327,22 +449,48 @@ PHP_FUNCTION(xslt_process)
 		WRONG_PARAM_COUNT;
 	}
 	multi_convert_to_string_ex(2, xslt, input);
-
+	
+	SABLOT_BASIC_CREATE_PROCESSOR();
+	
+	/**
+	 * If we have more than three arguments that means we have
+	 * a base!
+	 */
 	if (argc > 3) {
-		convert_to_string_ex(base);
-		ret = SablotProcessStringsWithBase(Z_STRVAL_PP(xslt), Z_STRVAL_PP(input), &tRes, Z_STRVAL_PP(base));
-	} else {
-		ret = SablotProcessStrings(Z_STRVAL_PP(xslt), Z_STRVAL_PP(input), &tRes);
+	    convert_to_string_ex(base);
+	    
+	    SablotSetBase(SABLOT_BASIC_HANDLE, Z_STRVAL_PP(base));
+	}
+	
+	/**
+	 * Need to declare args here (to lazy to actually allocate
+	 * it with emalloc() ;)
+	 */
+	{
+	    char *args[] = {"/_stylesheet", Z_STRVAL_PP(xslt),
+	                    "/_xmlinput", Z_STRVAL_PP(input),
+	                    "/_output", NULL,
+	                    NULL};
+	    
+	    ret = SablotRunProcessor(SABLOT_BASIC_HANDLE, "arg:/_stylesheet", 
+	                             "arg:/_xmlinput", "arg:/_output", 
+	                             NULL, args);
 	}
 	
 	if (ret) {
-		SABLOTG(last_errno) = ret;
-		if (tRes) {
-			SablotFree(tRes);
-		}
-		RETURN_FALSE;
+	    SABLOTG(last_errno) = ret;
+	    RETURN_FALSE;
 	}
-
+	
+	SablotGetResultArg(SABLOT_BASIC_HANDLE, "arg:/_output", &tRes);
+	if (ret) {
+	    SABLOTG(last_errno) = ret;
+	    RETURN_FALSE;
+	    
+	    if (tRes)
+	        SablotFree(tRes);
+	}
+	
 	if (tRes) {
 		ZVAL_STRING(*result, tRes, 1);
 		SablotFree(tRes);
@@ -351,9 +499,6 @@ PHP_FUNCTION(xslt_process)
 }
 /* }}} */
 
-/* }}} */
-
-/* {{{ Begin Advanced Resource API */
 
 /* {{{ proto resource xslt_create(void)
    Create a new XSL processor and return a resource identifier. */
@@ -393,7 +538,7 @@ PHP_FUNCTION(xslt_create)
 		RETURN_FALSE;
 	}
 	
-	ZEND_REGISTER_RESOURCE(return_value, handle, SABLOTG(le_sablot));
+	ZEND_REGISTER_RESOURCE(return_value, handle, le_sablot);
 	handle->index = Z_LVAL_P(return_value);
 }
 /* }}} */
@@ -420,7 +565,7 @@ PHP_FUNCTION(xslt_run)
 	    zend_get_parameters_ex(argc, &xh, &xslt_file, &data_file, &xslt_result, &xslt_params, &xslt_args) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron handle", SABLOTG(le_sablot));
+	ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron handle", le_sablot);
 	multi_convert_to_string_ex(2, xslt_file, data_file);
 	
 	if (argc == 3) {
@@ -500,7 +645,7 @@ PHP_FUNCTION(xslt_openlog)
 	    zend_get_parameters_ex(argc, &xh, &logfile, &opt_loglevel) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron", SABLOTG(le_sablot));
+	ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron", le_sablot);
 	convert_to_string_ex(logfile);
 	
 	if (argc > 2) {
@@ -533,7 +678,7 @@ PHP_FUNCTION(xslt_closelog)
 	    zend_get_parameters_ex(1, &xh) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron", SABLOTG(le_sablot));
+	ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron", le_sablot);
 	
 	ret = SablotSetLog(handle->p, (const char *)NULL, 1);
 	
@@ -561,7 +706,7 @@ PHP_FUNCTION(xslt_fetch_result)
 	    zend_get_parameters_ex(argc, &xh, &result_name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron Handle", SABLOTG(le_sablot));
+	ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron Handle", le_sablot);
 	
 	if (argc > 1) {
 		convert_to_string_ex(result_name);
@@ -603,7 +748,7 @@ PHP_FUNCTION(xslt_free)
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron Handle", SABLOTG(le_sablot));
+	ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron Handle", le_sablot);
 	zend_list_delete(Z_LVAL_PP(xh));
 }
 /* }}} */
@@ -626,7 +771,7 @@ PHP_FUNCTION(xslt_set_sax_handler)
 	    zend_get_parameters_ex(2, &xh, &handlers) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron Handle", SABLOTG(le_sablot));
+	ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron Handle", le_sablot);
 	
 	handlers_list = HASH_OF(*handlers);
 	
@@ -692,7 +837,7 @@ PHP_FUNCTION(xslt_error)
 	}
 	
 	if (argc) {
-		ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron Handle", SABLOTG(le_sablot));
+		ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron Handle", le_sablot);
 
 		if (handle->errors) {
 			if (array_init(return_value) == FAILURE) {
@@ -735,7 +880,7 @@ PHP_FUNCTION(xslt_errno)
 	}
 	
 	if (argc) {
-		ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron Handle", SABLOTG(le_sablot));
+		ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron Handle", le_sablot);
 		RETURN_LONG(handle->last_errno);
 	} else {
 		RETURN_LONG(SABLOTG(last_errno));
@@ -743,13 +888,40 @@ PHP_FUNCTION(xslt_errno)
 }
 /* }}} */
 
+/* {{{ proto void xslt_set_error_handler([int xh, ] string error_handler_name)
+   Set a error handler (either per handle or global) */
+PHP_FUNCTION(xslt_set_error_handler)
+{
+    zval **arg1, **arg2;
+    php_sablot *handle;
+    int argc = ZEND_NUM_ARGS();
+    
+    if (argc > 2 || argc < 1 ||
+        zend_get_parameters_ex(argc, &arg1, &arg2) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+    
+    if (argc > 1) {
+        convert_to_string_ex(arg2);
+        ZEND_FETCH_RESOURCE(handle, php_sablot *, arg1, -1, "PHP-Sablotron Handle", le_sablot);
+        
+        if (!handle->errorHandler)
+            MAKE_STD_ZVAL(handle->errorHandler);
+         
+        *handle->errorHandler = **arg2;
+        zval_copy_ctor(handle->errorHandler);
+    } else {
+        convert_to_string_ex(arg1);
+        
+        if (!SABLOTG(errorHandler))
+            MAKE_STD_ZVAL(SABLOTG(errorHandler));
+        
+        *SABLOTG(errorHandler) = **arg1;
+        zval_copy_ctor(SABLOTG(errorHandler));
+    }
+}
 /* }}} */
 
-/* }}} */
-
-/* {{{ BEGIN HANDLER FUNCTIONS */
-
-/* {{{ Begin SAX Handler functions */
 
 /* {{{ _php_sablot_handler_pair()
    Set the handler functions from a two item array */
@@ -990,67 +1162,159 @@ static MH_ERROR _php_sablot_make_code(void *userData, SablotHandle p, int severi
    Handle Sablotron errors */
 static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code, MH_LEVEL level, char **fields)
 {
-	php_sablot *handle = (php_sablot *)userData;
+    zval **argv = NULL,
+          *errorHandler;
+    
+    php_sablot_error *errors,
+                      errors_start;
+    php_sablot       *handle = NULL;
+    
+    char *sep = NULL;
+    
+    int isAdvanced = 0,
+        argc = 0,
+        idx,
+        len;
+    
+    if (userData == NULL) {
+        SABLOT_FREE_ERROR_HANDLE(SABLOTG_HANDLE);
+        
+        SABLOTG(errors_start).next = NULL;
+        SABLOTG(errors) = &SABLOTG(errors_start);
+        
+        errors        = SABLOTG(errors);
+        errorHandler  = SABLOTG(errorHandler);
+    } else {
+        handle = (php_sablot *)userData;
+        
+        SABLOT_FREE_ERROR_HANDLE(*handle);
+        
+        handle->errors_start.next = NULL;
+        handle->errors = &errors_start;
+        
+        errors        = handle->errors;
+        errorHandler  = handle->errorHandler;
+        
+        isAdvanced   = 1;
+    }
 
-	char *sep;
 
-	int idx, 
-	    len;
+    while (fields && *fields) {
+        errors->next = (php_sablot_error *)emalloc(sizeof(php_sablot_error));
+        errors = errors->next;
+        
+        sep = strchr(fields[0], ':');
+        
+        idx = sep - fields[0];
+        len = strlen(fields[0]);
+        
+        errors->key   = emalloc(idx+1);
+        errors->value = emalloc((len - idx) + 1);
+        
+        memcpy(errors->key, fields[0], idx);
+        memcpy(errors->value, fields[0] + idx + 1, len - idx - 1);
+        errors->value[len - idx - 1] = '\0';
+        
+        errors->next = NULL;
+        fields++;
+    }
+    
+    if (isAdvanced)
+        handle->last_errno = (int)code;
+    else
+        SABLOTG(last_errno) = (int)code;
+    
+    if (errorHandler) {
+        zval *retval;
+        int i;
+        ELS_FETCH();
+        
+        MAKE_STD_ZVAL(retval);
+        
+        argc = isAdvanced ? 4 : 3;
+        argv = emalloc(argc * sizeof(zval *));
+        
+        MAKE_STD_ZVAL(argv[0]);
+        MAKE_STD_ZVAL(argv[1]);
+        MAKE_STD_ZVAL(argv[2]);
+        
+        if (isAdvanced) {
+            MAKE_STD_ZVAL(argv[3]);
 
-	if (!fields) {
-		if (code) {
-			handle->last_errno = (int)code;
-		}
-		return(0);
-	}	
-	
-	if (handle->errors) {
-		handle->errors = handle->errors_start.next;
-		while (handle->errors) {
-			S_FREE(handle->errors->key);
-			S_FREE(handle->errors->value);
-			handle->errors = handle->errors->next;
-		}
-		S_FREE(handle->errors);
-	}
+            ZVAL_RESOURCE(argv[0], handle->index);
+            ZVAL_LONG(argv[1], code);
+            ZVAL_LONG(argv[2], level);
+            
+            array_init(argv[3]);
+            errors = handle->errors_start.next;
+            while (errors->next) {
+                add_assoc_string(argv[3], errors->key, errors->value, 1);
+                errors = errors->next;
+            }
+        } else {
+            ZVAL_LONG(argv[0], code);
+            ZVAL_LONG(argv[1], level);
+            
+            array_init(argv[2]);
+            errors = SABLOTG(errors_start).next;
+            while (errors) {
+                add_assoc_string(argv[2], errors->key, errors->value, 1);
+                errors = errors->next;
+            }
+        }
 
-	handle->errors_start.next = NULL;
-	handle->errors = &(handle->errors_start);
+        if (call_user_function(EG(function_table), NULL, errorHandler, retval, argc, argv) == FAILURE) {
+            php_error(E_WARNING, "Sorry, couldn't call %s error handler", Z_STRVAL_P(errorHandler));
+        }
 
-	while (fields && *fields) {
-		handle->errors->next = (php_sablot_error *)emalloc(sizeof(php_sablot_error));
-		handle->errors = handle->errors->next;
-	
-		sep = strchr(fields[0], ':');
-		
-		idx = sep - fields[0];
-		len = strlen(fields[0]);
-		
-		handle->errors->key   = emalloc(idx+1);
-		handle->errors->value = emalloc((len - idx) + 1);
-		memcpy(handle->errors->key, fields[0], idx);
-		memcpy(handle->errors->value, fields[0] + idx + 1, len - idx - 1);
-		
-		handle->errors->next = NULL;
-		fields++;
-	}
-	handle->last_errno = (int)code;
-	
-	switch (code) {
-		case MH_LEVEL_CRITICAL:
-			SEND_ERROR_INFO("Fatal Error", E_CORE);
-			return (0);
-		case MH_LEVEL_ERROR:
-			SEND_ERROR_INFO("Serious Error", E_ERROR);
-			return (0);
-		case MH_LEVEL_WARN:
-			SEND_ERROR_INFO("Warning", E_WARNING);
-			break;
-	}
+        zval_dtor(retval);
+        efree(retval);
+    } else {
+        _php_sablot_standard_error(errors, isAdvanced ? handle->errors_start : SABLOTG(errors_start), code, level);
+    }
 
 	return(0);
+
 }
 /* }}} */
+
+static void _php_sablot_standard_error(php_sablot_error *errors, php_sablot_error errors_start, int code, int level)
+{
+    int len = 0,
+        pos = 0;
+    char *errstr = NULL;
+    SABLOTLS_FETCH();
+    
+    errors = errors_start.next;
+    
+    while (errors) {
+        len = pos + strlen(errors->key) + sizeof(": ") + strlen(errors->value) + sizeof("\n");
+        
+        /** 
+         * Could be a problem, I just hate looping through strings
+         * more than I have to ;-)
+         */
+        if (pos)
+            errstr = erealloc(errstr, len);
+        else
+            errstr = emalloc(len+1);
+        
+        sprintf(errstr + pos, "%s: %s\n", errors->key, errors->value);
+        
+        pos = len;
+        errors = errors->next;
+    }
+    
+    switch (level) {
+        case MH_LEVEL_CRITICAL:
+        case MH_LEVEL_ERROR:  
+            php_error(E_ERROR, errstr);
+            break;
+        case MH_LEVEL_WARN:
+            php_error(E_WARNING, errstr);
+            break;
+    }
+}
 
 /* }}} */
 
@@ -1077,16 +1341,7 @@ static void _php_sablot_free_processor(zend_rsrc_list_entry *rsrc)
 	FUNCH_FREE(handle->charactersHandler);
 	FUNCH_FREE(handle->endDocHandler);
 
-	if (handle->errors) {
-		handle->errors = handle->errors_start.next;
-		while (handle->errors) {
-			S_FREE(handle->errors->key);
-			S_FREE(handle->errors->value);
-			handle->errors = handle->errors->next;
-		}
-		S_FREE(handle->errors);
-	}
-	S_FREE(handle);
+    SABLOT_FREE_ERROR_HANDLE(*handle);
 }
 /* }}} */
 
