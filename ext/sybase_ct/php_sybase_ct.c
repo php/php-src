@@ -408,7 +408,7 @@ PHP_RSHUTDOWN_FUNCTION(sybase)
 {
 	efree(SybCtG(appname));
 	if (SybCtG(callback_name)) {
-		zval_dtor(SybCtG(callback_name));
+		zval_ptr_dtor(&SybCtG(callback_name));
 		SybCtG(callback_name)= NULL;
 	}
 	STR_FREE(SybCtG(server_message));
@@ -1261,7 +1261,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 	
 	/* Check to see if a previous sybase_unbuffered_query has read all rows */
 	if (sybase_ptr->active_result_index) {
-		zval *tmp;
+		zval *tmp = NULL;
 		
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Sybase:  Called %s() without first fetching all rows from a previous unbuffered query",
 			get_active_function_name(TSRMLS_C));
@@ -1275,10 +1275,20 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 		Z_TYPE_P(tmp)= IS_RESOURCE;
 		INIT_PZVAL(tmp);
 		ZEND_FETCH_RESOURCE(result, sybase_result *, &tmp, -1, "Sybase result", le_result);
+		
+		/* Causes the following segfault:
+		   Program received signal SIGSEGV, Segmentation fault.
+		   0x8144380 in _efree (ptr=0x81fe024, __zend_filename=0x81841a0 "php4/ext/sybase_ct/php_sybase_ct.c", 
+		   __zend_lineno=946, __zend_orig_filename=0x0, __zend_orig_lineno=0) at php4/Zend/zend_alloc.c:229
+		   php4/Zend/zend_alloc.c:229:7284:beg:0x8144380
+		*/
+		#if O_TIMM
 		if (result) {
 			php_sybase_finish_results(result);
 		}
-		zval_dtor(tmp);
+		#endif
+		
+		zval_ptr_dtor(&tmp);
 		zend_list_delete(sybase_ptr->active_result_index);
 		sybase_ptr->active_result_index= 0;
 	}
@@ -1630,8 +1640,8 @@ static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int numerics)
 		}
 		if (numerics) {
 			zend_hash_index_update(Z_ARRVAL_P(return_value), i, (void *) &tmp, sizeof(zval *), NULL);
+			tmp->refcount++;
 		}
-		tmp->refcount++;
 		
 		if (zend_hash_exists(Z_ARRVAL_P(return_value), result->fields[i].name, strlen(result->fields[i].name)+1)) {
 			snprintf(name, 32, "%s%d", result->fields[i].name, j);
@@ -2057,8 +2067,6 @@ PHP_FUNCTION(sybase_set_message_handler)
 		efree(params);
 		RETURN_FALSE;
 	}
-	
-	MAKE_STD_ZVAL(SybCtG(callback_name));
 	
 	ALLOC_ZVAL(SybCtG(callback_name));
 	*SybCtG(callback_name) = **params[0];
