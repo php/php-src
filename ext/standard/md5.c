@@ -28,7 +28,7 @@
 
 #include "md5.h"
 
-static void make_digest(char *md5str, unsigned char *digest)
+PHPAPI void make_digest(char *md5str, unsigned char *digest)
 {
 	int i;
 
@@ -213,7 +213,7 @@ static unsigned char PADDING[64] =
 /* {{{ PHP_MD5Init
  * MD5 initialization. Begins an MD5 operation, writing a new context.
  */
-void PHP_MD5Init(PHP_MD5_CTX * context)
+PHPAPI void PHP_MD5Init(PHP_MD5_CTX * context)
 {
 	context->count[0] = context->count[1] = 0;
 	/* Load magic initialization constants.
@@ -230,7 +230,7 @@ void PHP_MD5Init(PHP_MD5_CTX * context)
    operation, processing another message block, and updating the
    context.
  */
-void PHP_MD5Update(PHP_MD5_CTX * context, const unsigned char *input,
+PHPAPI void PHP_MD5Update(PHP_MD5_CTX * context, const unsigned char *input,
 			   unsigned int inputLen)
 {
 	unsigned int i, index, partLen;
@@ -271,7 +271,7 @@ void PHP_MD5Update(PHP_MD5_CTX * context, const unsigned char *input,
    MD5 finalization. Ends an MD5 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
-void PHP_MD5Final(unsigned char digest[16], PHP_MD5_CTX * context)
+PHPAPI void PHP_MD5Final(unsigned char digest[16], PHP_MD5_CTX * context)
 {
 	unsigned char bits[8];
 	unsigned int index, padLen;

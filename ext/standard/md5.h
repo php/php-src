@@ -54,9 +54,10 @@ typedef struct {
 	unsigned char buffer[64];	/* input buffer */
 } PHP_MD5_CTX;
 
-void PHP_MD5Init(PHP_MD5_CTX *);
-void PHP_MD5Update(PHP_MD5_CTX *, const unsigned char *, unsigned int);
-void PHP_MD5Final(unsigned char[16], PHP_MD5_CTX *);
+PHPAPI void make_digest(char *md5str, unsigned char *digest);
+PHPAPI void PHP_MD5Init(PHP_MD5_CTX *);
+PHPAPI void PHP_MD5Update(PHP_MD5_CTX *, const unsigned char *, unsigned int);
+PHPAPI void PHP_MD5Final(unsigned char[16], PHP_MD5_CTX *);
 
 PHP_NAMED_FUNCTION(php_if_md5);
 PHP_NAMED_FUNCTION(php_if_md5_file);
