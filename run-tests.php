@@ -510,7 +510,6 @@ TEST $file
 			$name = trim(strtolower($setting[0]));
 			$value = trim($setting[1]);
 			$ini_settings[$name] = $value;
-			echo "$name::<$value>\n";
 		}
 	}
 
