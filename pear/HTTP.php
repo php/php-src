@@ -53,27 +53,27 @@ class HTTP {
      * Negotiate language with the user's browser through the
      * Accept-Language HTTP header or the user's host address.
      * Language codes are generally in the form "ll" for a language
-     * spoken in only one country, or "ll_CC" for a language spoken in
-     * a particular country.  For example, U.S. English is "en_US",
-     * while British English is "en_UK".  Portugese as spoken in
-     * Portugal is "pt_PT", while Brazilian Portugese is "pt_BR".
+     * spoken in only one country, or "ll-CC" for a language spoken in
+     * a particular country.  For example, U.S. English is "en-US",
+     * while British English is "en-UK".  Portugese as spoken in
+     * Portugal is "pt-PT", while Brazilian Portugese is "pt-BR".
      * Two-letter country codes can be found in the ISO 3166 standard.
      *
      * Quantities in the Accept-Language: header are supported, for
      * example:
      *
-     *  Accept-Language: en_UK;q=0.7, en_US;q=0.6, no;q=1.0, dk;q=0.8
+     *  Accept-Language: en-UK;q=0.7, en-US;q=0.6, no;q=1.0, dk;q=0.8
      *
      * @param $supported an associative array indexed by language
      * codes (country codes) supported by the application.  Values
      * must evaluate to true.
      *
      * @param $default the default language to use if none is found
-     * during negotiation, defaults to "en_US" for U.S. English
+     * during negotiation, defaults to "en-US" for U.S. English
      *
      * @author Stig Bakken <ssb@fast.no>
      */
-    function negotiateLanguage(&$supported, $default = 'en_US') {
+    function negotiateLanguage(&$supported, $default = 'en-US') {
         global $HTTP_SERVER_VARS;
 
         /* If the client has sent an Accept-Language: header, see if
