@@ -1,3 +1,52 @@
+2002-07-16  sniper  <sniper@pb1.pair.com>
+
+    * NEWS: This is the real world..
+
+    * ext/mysql/php_mysql.c: fix protos
+
+2002-07-16  Sascha Schumann  <sas@pb1.pair.com>
+
+    * sapi/thttpd/README
+      ext/ircg/README.txt: refine
+
+2002-07-16  georg  <georg@pb1.pair.com>
+
+    * NEWS: added mysql changes:
+    - php.ini option mysql.connect_timeout
+    - optional parameter client_flags (mysql_connect, mysql_pconnect)
+    - automatic rollback for non commited transactions
+
+2002-07-16  jason  <jason@pb1.pair.com>
+
+    * ext/standard/basic_functions.c:    Prevent reenterant calls to a user tick function by flagging the function
+    entry during call.
+
+    This prevents code like the following from infinitely recursing until a
+    crash occurs:
+    <?php
+
+    register_tick_function(a);
+
+    declare(ticks=1) {
+    	function a() {
+    		print "blah\n";
+    	}
+    	;
+    	;
+    	;
+    	;
+    }
+    ?>
+
+2002-07-16  georg  <georg@pb1.pair.com>
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h:
+    Added support for php.ini parameter "mysql.connect_timeout"
+
+    * php.ini-dist
+      php.ini-recommended: Added php.ini option "mysql_connection.timeout"
+
 2002-07-15  edink  <edink@pb1.pair.com>
 
     * ext/mbstring/mbstring.c: MFH
