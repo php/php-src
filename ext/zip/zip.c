@@ -142,8 +142,7 @@ PHP_FUNCTION(zip_open)
 
 	archive_p = zzip_opendir(filename);
 	if (archive_p == NULL) {
-		php_error(E_WARNING, "%s() Cannot open zip archive %s", 
-				  get_active_function_name(TSRMLS_C), filename);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open zip archive %s", filename);
 		RETURN_FALSE;
 	}
 

@@ -79,7 +79,7 @@ PHP_FUNCTION(yp_get_default_domain)
 	char *outdomain;
 
 	if((YP(error) = yp_get_default_domain(&outdomain))) {
-		php_error(E_WARNING, yperr_string (YP(error)));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", yperr_string (YP(error)));
 		RETURN_FALSE;
 	}
 	RETVAL_STRING(outdomain,1);
@@ -106,7 +106,7 @@ PHP_FUNCTION(yp_order)
 	convert_to_string_ex(map);
 
 	if((YP(error) = yp_order(Z_STRVAL_PP (domain), Z_STRVAL_PP (map), &outval))) {
-		php_error(E_WARNING, yperr_string (YP(error)));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", yperr_string (YP(error)));
 		RETURN_FALSE;
 	}
 
@@ -129,7 +129,7 @@ PHP_FUNCTION(yp_master)
 	convert_to_string_ex(map);
 
 	if((YP(error) = yp_master(Z_STRVAL_PP (domain), Z_STRVAL_PP (map), &outname))) {
-		php_error(E_WARNING, yperr_string (YP(error)));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", yperr_string (YP(error)));
 		RETURN_FALSE;
 	}
 
@@ -154,7 +154,7 @@ PHP_FUNCTION(yp_match)
 	convert_to_string_ex(key);
 
 	if((YP(error) = yp_match(Z_STRVAL_PP (domain), Z_STRVAL_PP (map), Z_STRVAL_PP (key), Z_STRLEN_PP (key), &outval, &outvallen))) {
-		php_error(E_WARNING, yperr_string (YP(error)));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", yperr_string (YP(error)));
 		RETURN_FALSE;
 	}
 
@@ -178,7 +178,7 @@ PHP_FUNCTION(yp_first)
 	convert_to_string_ex(map);
 
 	if((YP(error) = yp_first(Z_STRVAL_PP (domain), Z_STRVAL_PP (map), &outkey, &outkeylen, &outval, &outvallen))) {
-		php_error(E_WARNING, yperr_string (YP(error)));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", yperr_string (YP(error)));
 		RETURN_FALSE;
 	}
 	array_init(return_value);
@@ -207,7 +207,7 @@ PHP_FUNCTION(yp_next)
 	convert_to_string_ex(key);
 
 	if((YP(error) = yp_next(Z_STRVAL_PP (domain), Z_STRVAL_PP (map), Z_STRVAL_PP (key), Z_STRLEN_PP (key), &outkey, &outkeylen, &outval, &outvallen))) {
-		php_error(E_WARNING, yperr_string (YP(error)));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", yperr_string (YP(error)));
 		RETURN_FALSE;
 	}
 	
@@ -302,7 +302,7 @@ static int php_foreach_cat (int instatus, char *inkey, int inkeylen, char *inval
 		TSRMLS_FETCH();
 
 		YP(error) = err;
-		php_error(E_WARNING, yperr_string (err));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", yperr_string (err));
 	}
 
 	return 0;
