@@ -64,7 +64,7 @@ if test "$PHP_SAPI" = "cgi"; then
 fi
 
 if test "$PHP_SAPI" = "cgi" ; then
-  INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_PROGRAM \$(INSTALL_ROOT)\$(bindir)/$SAPI_CGI"
+  INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_PROGRAM \$(INSTALL_ROOT)\$(bindir)/php-cgi"
 fi
 
 AC_MSG_CHECKING(for fhttpd module support)
