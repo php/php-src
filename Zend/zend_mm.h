@@ -41,9 +41,14 @@ typedef struct _zend_mm_free_block {
 	struct _zend_mm_free_block *next_free_block;
 } zend_mm_free_block;
 
+typedef struct _zend_mm_segment {
+	struct _zend_mm_segment *next_segment;
+} zend_mm_segment;
+
 typedef struct _zend_mm_heap {
 	/* Head of free list */
 	zend_mm_free_block *free_list;
+	zend_mm_segment *segments_list;
 	size_t block_size;
 } zend_mm_heap;
 
