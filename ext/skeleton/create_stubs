@@ -48,9 +48,9 @@ function convert(i, j, t)
 		if (opt && i > -1) {
 			resources = resources "\tif (argc < " j+1 ") {\n" \
 				comment("\t\t/* Argument not given, do something before\n\t\t   trying to fetch resource " name ". */\n") \
-				"\t}\n\tZEND_FETCH_RESOURCE(???, ???, " name ext ", " name "_id, \"???\", ???G());\n"
+				"\t}\n\tZEND_FETCH_RESOURCE(???, ???, " name ext ", " name "_id, \"???\", ???_rsrc_id);\n"
 		} else {
-			resources = resources "\tZEND_FETCH_RESOURCE(???, ???, " name ext ", " name "_id, \"???\", ???G());\n"
+			resources = resources "\tZEND_FETCH_RESOURCE(???, ???, " name ext ", " name "_id, \"???\", ???_rsrc_id);\n"
 		}
 		funcvals = funcvals "\tint " name "_id = -1;\n"
 	} else {
@@ -272,7 +272,6 @@ END {
 			fetchargs = fetchargs ") == FAILURE)" closefetch "{\n\t\tZEND_WRONG_PARAM_COUNT();\n\t}\n"
 		}
 		if (assign_params) funcvals = ints doubles floats strings
-		if (resources) funcvals = funcvals "\tTSRMLS_FETCH();\n"
 		if (useswitch[i]) {
 			if (check_argc_in_switch[i]) {
 				check_argc = "\t\tdefault:\n\t\t\tZEND_WRONG_PARAM_COUNT();\n"
