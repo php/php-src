@@ -106,6 +106,7 @@ function_entry basic_functions[] = {
 	
 	PHP_FE(getimagesize,							NULL)
 	
+	PHP_FE(wordwrap,								NULL)
 	PHP_FE(htmlspecialchars,						NULL)
 	PHP_FE(htmlentities,							NULL)
 	PHP_FE(get_html_translation_table,				NULL)
