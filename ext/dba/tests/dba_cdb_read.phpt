@@ -2,8 +2,8 @@
 DBA CDB handler test (read only)
 --SKIPIF--
 <?php 
-	if (!extension_loaded('dba')) die('skip dba extension not available');
-	if (!in_array('cdb', dba_handlers())) die('skip CDB handler not available');
+	$handler = 'cdb_make';
+	require_once('skipif.inc');
 ?>
 --FILE--
 <?php

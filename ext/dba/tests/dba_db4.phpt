@@ -2,13 +2,13 @@
 DBA DB4 handler test
 --SKIPIF--
 <?php 
+	$handler = 'db4';
 	require_once('skipif.inc');
-	if (!in_array('db4', dba_handlers())) die('skip DB4 handler not available');
 ?>
 --FILE--
 <?php
-	require_once('test.inc');
 	$handler = 'db4';
+	require_once('test.inc');
 	require_once('dba_handler.inc');
 ?>
 --EXPECT--

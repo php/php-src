@@ -2,13 +2,13 @@
 DBA GDBM handler test
 --SKIPIF--
 <?php 
+	$handler = 'gdbm';
 	require_once('skipif.inc');
-	if (!in_array('gdbm', dba_handlers())) die('skip GDBM handler not available');
 ?>
 --FILE--
 <?php
-	require_once('test.inc');
 	$handler = 'gdbm';
+	require_once('test.inc');
 	$lock_flag = ''; // lock in library
 	require_once('dba_handler.inc');
 	
