@@ -831,7 +831,7 @@ void do_end_function_call(znode *function_name, znode *result, znode *argument_l
 
 void do_pass_param(znode *param, int op, int offset CLS_DC)
 {
-	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
+	zend_op *opline;
 	unsigned char *arg_types;
 	int original_op=op;
 	zend_function **function_ptr_ptr, *function_ptr;
@@ -840,10 +840,8 @@ void do_pass_param(znode *param, int op, int offset CLS_DC)
 	function_ptr = *function_ptr_ptr;
 	if (function_ptr) {
 		arg_types = function_ptr->common.arg_types;
-		opline->extended_value = ZEND_DO_FCALL;
 	} else {
 		arg_types = NULL;
-		opline->extended_value = ZEND_DO_FCALL_BY_NAME;
 	}
 
 	if (op == ZEND_SEND_VAL) {
@@ -885,6 +883,12 @@ void do_pass_param(znode *param, int op, int offset CLS_DC)
 		}
 	}
 
+	opline = get_next_op(CG(active_op_array) CLS_CC);
+	if (function_ptr) {
+		opline->extended_value = ZEND_DO_FCALL;
+	} else {
+		opline->extended_value = ZEND_DO_FCALL_BY_NAME;
+	}
 	opline->opcode = op;
 	opline->op1 = *param;
 	opline->op2.u.opline_num = offset;
