@@ -712,7 +712,7 @@ void do_begin_dynamic_function_call(znode *function_name CLS_DC)
 	unsigned char *ptr = NULL;
 	int last_op_number = get_next_op_number(CG(active_op_array))-1;
 
-	if (CG(active_op_array)->opcodes[last_op_number].opcode == ZEND_FETCH_OBJ_R) {
+	if (last_op_number>=0 && CG(active_op_array)->opcodes[last_op_number].opcode == ZEND_FETCH_OBJ_R) {
 		CG(active_op_array)->opcodes[last_op_number].opcode = ZEND_INIT_FCALL_BY_NAME;
 	} else {
 		zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
