@@ -436,8 +436,9 @@ TEST $file
 			if (ereg("^skip", trim($output))){
 				echo "SKIP $tested\n";
 				$reason = (ereg("^skip\s*(.+)$", trim($output))) ? ereg_replace("^skip\s*(.+)$", "\\1", trim($output)) : FALSE;
-				if($reason)
-					print "\treason: $reason\n";
+				if ($reason) {
+					echo "\treason: $reason\n";
+				}
 				return 'SKIPPED';
 			}
 		}
@@ -539,7 +540,7 @@ COMMAND $cmd
 		print(str_repeat('=', 80) . "\n");
 		var_dump($output);
 */
-		if (preg_match("/^$wanted_re$/s", $output)) {
+		if (preg_match("/^$wanted_re\$/s", $output)) {
 			echo "PASS $tested\n";
 			return 'PASSED';
 		}
