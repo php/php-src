@@ -131,11 +131,13 @@ static void _ps_files_open(ps_files *data, const char *key)
 		data->lastkey = estrdup(key);
 		
 #ifdef O_EXCL
-		/* in the common case, the file already exists */
-		data->fd = open(buf, O_EXCL | O_RDWR);
-		if(data->fd == -1) {
-			/* create it, if necessary */
-			data->fd = open(buf, O_EXCL | O_RDWR | O_CREAT, 0600);
+		data->fd = open(buf, O_RDWR);
+		if (data->fd == -1) {
+			if (errno == ENOENT) {
+				data->fd = open(buf, O_EXCL | O_RDWR | O_CREAT, 0600);
+			}
+		} else {
+			flock(data->fd, LOCK_EX);
 		}
 #else
 		data->fd = open(buf, O_CREAT | O_RDWR, 0600);
