@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- OCI8 now returns NULL values in LONG columns correct. (Thies)
 - Added support for a C-like assert() function. (Thies)
 - Added CyberCash support. (Evan)
 - explode() is now binary-safe. (Thies)
