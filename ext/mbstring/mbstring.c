@@ -191,8 +191,12 @@ struct def_mbctype_tbl {
 
 const struct def_mbctype_tbl mbctype_tbl[] = {
 	{mbfl_no_encoding_ascii,MBCTYPE_ASCII},
+	{mbfl_no_encoding_7bit,MBCTYPE_ASCII},
+	{mbfl_no_encoding_8bit,MBCTYPE_ASCII},
 	{mbfl_no_encoding_euc_jp,MBCTYPE_EUC},
+	{mbfl_no_encoding_eucjp_win,MBCTYPE_EUC},
 	{mbfl_no_encoding_sjis,MBCTYPE_SJIS},
+	{mbfl_no_encoding_sjis_win,MBCTYPE_SJIS},
 	{mbfl_no_encoding_utf8,MBCTYPE_UTF8},
 	{mbfl_no_encoding_pass,-1}
 };
