@@ -585,8 +585,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 				php_printf("\n[Zend Modules]\n");			
 				zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) _print_module_info, NULL);
 				php_printf("\n");
-                             	php_end_ob_buffers(1);
-                                exit(1);
+                php_end_ob_buffers(1);
+                exit(1);
 				break;
 
 #if 0 /* not yet operational, see also below ... */
