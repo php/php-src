@@ -25,7 +25,6 @@ define('PEAR_ERROR_PRINT', 2);
 define('PEAR_ERROR_TRIGGER', 4);
 define('PEAR_ERROR_DIE', 8);
 define('PEAR_ERROR_CALLBACK', 16);
-define('DIRECTORY_SEPARATOR', '/');
 
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     define('OS_WINDOWS', true);
