@@ -1,3 +1,35 @@
+2004-03-05  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      - Fix some small problems I introduce in last patch.
+
+    * ZendEngine2/zend_compile.c:
+      - Finally fix the following:
+      $xml_mem =
+      simplexml_load_string('<bookbody><part><chapter><page>1</page></chapter></part></bookbody>');
+      /* The following works fine */
+      foreach ($xml_mem->part as $part) {
+        foreach($part->chapter->page as $page) {
+       print $page;
+        }
+      }
+      /* The following segfaults */
+      foreach ($xml_mem->part as $part) {
+        foreach($part->chapter as $chapter) { // Difference here from previous
+      example
+       print $chapter;
+        }
+      }
+
+2004-03-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/classes/ctor_dtor.phpt
+      tests/classes/inheritance_002.phpt:
+      Test files were fixed acording to new constructor redeclaration semantic
+
+    * tests/classes/bug27468.phpt:
+      Test file was fixed (stack trace is removed)
+
 2004-03-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * sapi/cli/php_cli.c:
