@@ -463,7 +463,7 @@ PHP_FUNCTION(phpinfo)
 	}
 
 	if(!argc) {
-		flag = 0xFFFFFFFF;
+		flag = PHP_INFO_ALL;
 	}
 
 	php_print_info(flag TSRMLS_CC);
@@ -508,7 +508,7 @@ PHP_FUNCTION(phpcredits)
 	}
 
 	if(!argc) {
-		flag = 0xFFFFFFFF;
+		flag = PHP_CREDITS_ALL;
 	} 
 
 	php_print_credits(flag);
