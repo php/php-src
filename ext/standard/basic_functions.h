@@ -105,6 +105,7 @@ PHP_FUNCTION(move_uploaded_file);
 PHP_FUNCTION(parse_ini_file);
 
 PHP_FUNCTION(str_rot13);
+PHP_FUNCTION(stream_get_filters);
 PHP_FUNCTION(stream_register_filter);
 PHP_MINIT_FUNCTION(user_filters);
 
