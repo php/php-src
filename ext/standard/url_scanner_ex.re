@@ -98,7 +98,7 @@ alpha = [a-zA-Z];
 	
 static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *name, smart_str *val, const char *separator)
 {
-	register const char *p, *q, *r;
+	register const char *p, *q;
 	const char *bash = NULL;
 	const char *sep = "?";
 	
@@ -337,7 +337,6 @@ char *url_adapt_single_url(const char *url, size_t urllen, const char *name, con
 
 char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen, zend_bool do_flush TSRMLS_DC)
 {
-	char *ret;
 	url_adapt_state_ex_t *ctx;
 	char *retval;
 
