@@ -217,6 +217,11 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, int 
 		
 		zval_dtor(key);
 		FREE_ZVAL(key);
+
+		if (elements && *(*p-1) != ';' &&  *(*p-1) != '}') {
+			(*p)--;
+			return 0;
+		}
 	}
 
 	return 1;
