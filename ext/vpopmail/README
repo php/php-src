@@ -1,60 +1,170 @@
 Minimum Survial Readme
 
-1) select a uid and gid apache to run under
-   or if this is already fixed take it into account
+VPOPMAIL SPECIFIC ISSUES
+-------------------------------------------------------------------------------
 
-2) install vpopmail with EXACTLY the same uid gid
-   in case you already have installed vpopmail
-   you have two choices - to change apache's 
-   uid/gid but be careful - this may break some 
-   existing scripts or worse your server's security
+assume
+	qmail is installed in /var/qmail
+	vpopmail in ~vpopmail
+	qmail-send runs as qmails
 
-   changing existing vpopmail uid/gid is possible
-   but not easy - take these into account:
 
-   #1 - backup your setup!
+different parts of vpopmail require certain user id (uid) and
+group id (gid) in order to operate normally.
 
-   stop qmail-send before doing any changes
-   else your mail in process may get bounced or 
-   deleted or delivered to a default destination or...
+brief list with requirements:
 
-   stop pop3/imap remote users - while changing uids
-   users cannot check their mail
+adddomain
+deldomain
+addaliasdomain
+	read/write permissions on
+	/var/qmail/users/ assing, assign.lock, cdb
 
-   you may leave smtp - qmail-inject will take care
-   no matter vpopmail setup is broken (if and only
-   if you have stopped qmail-send)
+	read/write permissions on
+	/var/qmail/control/*
 
-   rc.d scrips tcpserver uid/gid may need to be changed
+	singnal qmail-send with SIGHUP (uid==qmails or root)
 
-   remember to
-       ./configure ....opts....
-       make clean all install
-   in vpopmail src tree
+	read/write permissions on
+	~vpopmail/domains
 
-   after these steps change the uid/gid in
-   /var/qmail/users/assign
-   compile the assign file. the dummies way is to
-   vadddomain mydummy.domain aaaa
-   vdeldomain mydummy.domain
+	optionally read/write to cdb vpopmail databases
 
-   suid root vadddomain, vdeldomain and vaddaliasdomain
-       cd ~vpopmail/bin
-       chown 0.0 vadddomain vdeldomain vaddaliasdomain
-       chmod +s vadddomain vdeldomain vaddaliasdomain
-   beware these programs may be exploitable and if
-   neccessary chmod 700 ~vpopmail/bin
+adduser
+deluser
+	read/write permissions on
+	~vpopmail/domains/<givendomain> (or the default domain)
 
-   run qmail-send (/bin/csh -cf '/var/qmail/rc &')
-   run pop3 tcpserver or what you are using
+	optionally read/write to cdb vpopmail databases
 
-   verify your setup
+passwd
+	optionally read/write on
+	~vpopmail/domains/<givendomain>/<givenuser>
+	(only when sqwebmail is configured)
 
-3) check that vpopmail support is compiled into apache
-   throug a simple phpinfo. there some more info helpful
-   for debugging will appear
+setuserquota
+	optionally read/write to cdb vpopmail databases
 
-4) happy vpopmail-ing :-)
+auth_user
+	optionally read from cdb vpopmail databases
+
+POSSIBLE SCENARIOS
+-------------------------------------------------------------------------------
+
+php is in cgi mode
+
+	command line invocation
+
+	web server cgi invocation
+
+php is web server module
+
+
+in command line mode the php interpreter may be run from vpopmail uid to
+administer users, etc. or as root to add/del domains - this is the easiest case
+
+in cgi mode proper uid may be provided eighter by suid php interpreter or
+using cgi exec wrapper. the same restrictions as in command line mode apply
+
+the web server module mode is the most powerful and works much faster that cgi.
+in this mode more restrictions apply because web server's uid at least must
+be able to read/write the directories of the manages domains.
+
+first scenario only allows web scripts to manage certain domains.  security 
+may be compromised if there are user webs under the same web server
+with allowed script execution.
+
+second scenario is to setup web server and vpopmail under the same uid/gid.
+thus allowing only user management in all domains.
+
+third scenario extends second with the ability to manage domains. generally
+from security reasons it is not a good idea to run such a system on a server
+with shell users - vpopmail's domain admin tools must be suid root to work
+properly and most users will be able to add/delete domains.
+
+it is not considered a good idea to run web servers as root. hence the need
+to suid vpopmail domain management tools and exec them insted using native api.
+native api for domains is only suitable for cgi/command line mode, when php is
+run through suid root wrapper or suid itself.
+
+almost all scenarios lack secutiry in different ways - eighter powerful tools
+get suid root or parts of vpopmail setup become useable by any system user
+or web users with cgi/php access may utilize vpopmail api for mail management.
+
+perhapse the most secure solution is to run a separate apache server under
+the vpopmail user and chmod 700 ~vpopmail/bin.
+
+FREQUENTLY USED CONFIGURATION STEPS
+-------------------------------------------------------------------------------
+
+changing existing vpopmail uid/gid is possible but not easy - 
+take these into account:
+
+#1 - backup your setup, mail and configuration!
+
+	stop qmail-send before doing any changes
+	else your mail in process may get bounced or 
+	deleted or delivered to a default destination or...
+
+	stop pop3/imap remote/local users - while changing uids
+	users cannot check their mail
+
+	you may leave smtp - qmail-inject will take care
+	no matter vpopmail setup is broken (if and only
+	if you have stopped qmail-send)
+
+	in rc.d scripts tcpserver uid/gid may need to be changed
+
+	reconfiguring vpopmail:
+		./configure ....your opts plus new uid/gid....
+
+	remember to
+		make clean all install
+	in vpopmail src tree; clean is needed if vpopmail has already been
+	configured with another uid/gid - vpopmail's dependencies are not
+	intact after reconfigure
+
+	after these steps change the uid/gid in
+		/var/qmail/users/assign
+	compile the assign file. the dummies way is to
+		vadddomain mydummy.domain aaaa
+		vdeldomain mydummy.domain
+
+	suid root vadddomain, vdeldomain and vaddaliasdomain
+	(this is only needed for domain management in web server module)
+		cd ~vpopmail/bin
+		chown 0.0 vadddomain vdeldomain vaddaliasdomain
+		chmod +s vadddomain vdeldomain vaddaliasdomain
+
+	optionally secure ~vpopmail/bin
+	(beware these programs may be exploitable or at least used)
+		chmod 700 ~vpopmail/bin
+
+	run qmail-send
+		/bin/csh -cf '/var/qmail/rc &'
+		
+	run pop3 tcpserver or what you are using
+
+	verify your setup
+
+#2 verify php vpopmail module and configuration
+
+	for web server module and cgi setups create a phpinfo page:
+
+	<?php phpinfo() ?>
+
+	for command line mode run
+		php -i
+
+	check for vpopmail section in result
+
+	verify that php euid/egid match vpopmail's
+
+	in setups where only certain domain users will be administrated
+	verify that php euid/egid can access their respective directories
+
+CONTACT INFO
+-------------------------------------------------------------------------------
 
 your comments, fixes and stuff are welcome
 Boian Bonev <boian@bonev.com>
