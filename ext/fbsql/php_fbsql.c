@@ -1704,6 +1704,9 @@ PHP_FUNCTION(fbsql_list_dbs)
 	phpResult->array       = fbcehAvailableDatabases(phpLink->execHandler);
 	phpResult->rowCount    = fbaCount(phpResult->array);
 	phpResult->list        = NULL;
+
+	ZEND_REGISTER_RESOURCE(return_value, phpResult, le_result);
+
 }
 /* }}} */
 
