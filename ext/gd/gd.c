@@ -2862,7 +2862,7 @@ PHP_FUNCTION(imagecopyresized)
 	dstH = Z_LVAL_PP(DH);
 	dstW = Z_LVAL_PP(DW);
 	
-	if (dstW < 0 || dstH < 0 || srcW < 0 || srcH < 0) {
+	if (dstW <= 0 || dstH <= 0 || srcW <= 0 || srcH <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid image dimensions");
 		RETURN_FALSE;
 	}
