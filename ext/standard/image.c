@@ -867,10 +867,11 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, pval *info, int mot
  */
 static struct gfxinfo *php_handle_iff(php_stream * stream TSRMLS_DC)
 {
-	struct gfxinfo *result = NULL;
+	struct gfxinfo * result;
 	unsigned char a[10];
 	int chunkId;
 	int size;
+	short width, height, bits;
 
 	if (php_stream_read(stream, a, 8) != 8) {
 		return NULL;
@@ -893,18 +894,20 @@ static struct gfxinfo *php_handle_iff(php_stream * stream TSRMLS_DC)
 			size++;
 		}
 		if (chunkId == 0x424d4844) { /* BMHD chunk */
-			if (php_stream_read(stream, a, 9) != 9) {
+			if (size < 9 || php_stream_read(stream, a, 9) != 9) {
 				return NULL;
 			}
-			result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
-			result->width    = php_ifd_get16s(a+0, 1);
-			result->height   = php_ifd_get16s(a+2, 1);
-			result->bits     = a[8] & 0xff;
-			result->channels = 0;
-			if (result->width > 0 && result->height > 0 && result->bits > 0 && result->bits < 33) {
+			width  = php_ifd_get16s(a+0, 1);
+			height = php_ifd_get16s(a+2, 1);
+			bits   = a[8] & 0xff;
+			if (width > 0 && height > 0 && bits > 0 && bits < 33) {
+				result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+				result->width    = width;
+				result->height   = height;
+				result->bits     = bits;
+				result->channels = 0;
 				return result;
 			}
-			efree(result);
 		} else {
 			if (php_stream_seek(stream, size, SEEK_CUR)) {
 				return NULL;
