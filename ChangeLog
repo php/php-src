@@ -1,3 +1,21 @@
+2004-12-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/imap/php_imap.c:
+      MFH: Fixed bug #31142 (imap_mail_compose() fails to generate correct
+      output).
+
+    * ext/imap/php_imap.c:
+      Fixed bug #31142 (imap_mail_compose() fails to generate correct output).
+
+2004-12-22  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      makedist.ZendEngine2:
+      Removed unneeded file.
+
 2004-12-21  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
