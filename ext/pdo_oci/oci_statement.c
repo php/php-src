@@ -81,6 +81,11 @@ static int oci_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		stmt->bound_params = NULL;
 	}
 	
+	if (S->einfo.errmsg) {
+		efree(S->einfo.errmsg);
+		S->einfo.errmsg = NULL;
+	}
+	
 	if (S->cols) {
 		for (i = 0; i < stmt->column_count; i++) {
 			if (S->cols[i].data) {
