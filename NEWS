@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+- Fixed bug #27469 (serialize() objects of incomplete class). (Dmitry)
+- Fixed bug #27457 (handling of numeric indexes in strtr()). (Dmitry)
 ?? ????? 2004, PHP 5 Release Candidate 2
 18 March 2004, PHP 5 Release Candidate 1
 - Fixed numerous bugs with the just-in-time auto-global initialization, that
