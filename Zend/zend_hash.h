@@ -287,8 +287,11 @@ END_EXTERN_C()
 #define HANDLE_NUMERIC(key, length, func) {												\
 	register char *tmp=key;																\
 																						\
+	if (*tmp=='-') {																	\
+		tmp++;																			\
+	}																					\
 	if ((*tmp>='0' && *tmp<='9')) do { /* possibly a numeric index */					\
-		char *end=tmp+length-1;															\
+		char *end=key+length-1;															\
 		ulong idx;																		\
 																						\
 		if (*tmp++=='0' && length>2) { /* don't accept numbers with leading zeros */	\
@@ -301,9 +304,16 @@ END_EXTERN_C()
 			tmp++;																		\
 		}																				\
 		if (tmp==end && *tmp=='\0') { /* a numeric index */								\
-			idx = strtol(key, NULL, 10);												\
-			if (idx!=LONG_MAX) {														\
-				return func;															\
+			if (*key=='-') {															\
+				idx = strtol(key, NULL, 10);											\
+				if (idx!=LONG_MIN) {													\
+					return func;														\
+				}																		\
+			} else {																	\
+				idx = strtol(key, NULL, 10);											\
+				if (idx!=LONG_MAX) {													\
+					return func;														\
+				}																		\
 			}																			\
 		}																				\
 	} while (0);																		\
