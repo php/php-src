@@ -1,3 +1,19 @@
+2000-05-13  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/README:
+    Fix typo - thanks to Christian Wenz <christian.wenz@stud.tu-muenchen.de>
+
+2000-05-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/icap/php_icap.c
+      ext/mcal/php_mcal.c: Do not use non-standard type u_int32_t.
+
+    Instead, use UINT4 for now which is platform-independent.
+
+    PR: #4262
+
+    * ext/standard/assert.c: "INT" configuration values must be of type long
+
 2000-05-12  Sterling Hughes  <sterling@designmultimedia.com>
 
     * ext/standard/info.c: Add Meself for LibSWF.
