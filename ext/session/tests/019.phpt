@@ -23,8 +23,8 @@ class TFoo {
 }
 
 session_id("abtest");
-session_register('o1', 'o2' );
 session_start();
+session_register('o1', 'o2' );
 
 $o1 =& new TFoo(42);
 $o2 =& $o1;
@@ -46,7 +46,6 @@ var_dump($_SESSION);
 session_destroy();
 ?>
 --EXPECTF--
-Notice: A session had already been started - ignoring session_start() in %s on line 17
 array(2) {
   ["o1"]=>
   &object(tfoo)#1 (1) {
