@@ -38,7 +38,7 @@ typedef struct {
 
 	/* now the PHP stuff */
 	
-	THREAD_T engine_thread; /* for sanity checking */
+	DWORD engine_thread; /* for sanity checking */
 	zval *object;			/* the object exported */
 	LONG refcount;			/* COM reference count */
 
@@ -74,7 +74,7 @@ static inline void trace(char *fmt, ...)
 	va_list ap;
 	char buf[4096];
 
-	sprintf(buf, "T=%08x ", tsrm_thread_id());
+	sprintf(buf, "T=%08x ", GetCurrentThreadId());
 	OutputDebugString(buf);
 	
 	va_start(ap, fmt);
@@ -86,10 +86,17 @@ static inline void trace(char *fmt, ...)
 }
 /* }}} */
 
+#ifdef ZTS
+# define TSRMLS_FIXED()	TSRMLS_FETCH();
+#else
+# define TSRMLS_FIXED()
+#endif
+
 #define FETCH_DISP(methname)	\
+	TSRMLS_FIXED() \
 	php_dispatchex *disp = (php_dispatchex*)This; \
 	trace(" PHP:%s %s\n", Z_OBJCE_P(disp->object)->name, methname); \
-	if (tsrm_thread_id() != disp->engine_thread) \
+	if (GetCurrentThreadId() != disp->engine_thread) \
 		return RPC_E_WRONG_THREAD;
 
 
@@ -98,8 +105,6 @@ static HRESULT STDMETHODCALLTYPE disp_queryinterface(
 	/* [in] */ REFIID riid,
 	/* [iid_is][out] */ void **ppvObject)
 {
-	TSRMLS_FETCH();
-
 	FETCH_DISP("QueryInterface");
 
 	if (IsEqualGUID(&IID_IUnknown, riid) ||
@@ -117,8 +122,6 @@ static HRESULT STDMETHODCALLTYPE disp_queryinterface(
         
 static ULONG STDMETHODCALLTYPE disp_addref(IDispatchEx *This)
 {
-	TSRMLS_FETCH();
-
 	FETCH_DISP("AddRef");
 
 	return InterlockedIncrement(&disp->refcount);
@@ -127,8 +130,6 @@ static ULONG STDMETHODCALLTYPE disp_addref(IDispatchEx *This)
 static ULONG STDMETHODCALLTYPE disp_release(IDispatchEx *This)
 {
 	ULONG ret;
-	TSRMLS_FETCH();
-
 	FETCH_DISP("Release");
 
 	ret = InterlockedDecrement(&disp->refcount);
@@ -145,8 +146,6 @@ static HRESULT STDMETHODCALLTYPE disp_gettypeinfocount(
 	IDispatchEx *This,
 	/* [out] */ UINT *pctinfo)
 {
-	TSRMLS_FETCH();
-
 	FETCH_DISP("GetTypeInfoCount");
 
 	*pctinfo = 0;
@@ -159,8 +158,6 @@ static HRESULT STDMETHODCALLTYPE disp_gettypeinfo(
 	/* [in] */ LCID lcid,
 	/* [out] */ ITypeInfo **ppTInfo)
 {
-	TSRMLS_FETCH();
-
 	FETCH_DISP("GetTypeInfo");
 	
 	*ppTInfo = NULL;
@@ -177,8 +174,6 @@ static HRESULT STDMETHODCALLTYPE disp_getidsofnames(
 {
 	UINT i;
 	HRESULT ret = S_OK;
-	TSRMLS_FETCH();
-
 	FETCH_DISP("GetIDsOfNames");
 
 	for (i = 0; i < cNames; i++) {
@@ -229,8 +224,6 @@ static HRESULT STDMETHODCALLTYPE disp_getdispid(
 	char *name;
 	unsigned int namelen;
 	zval **tmp;
-	TSRMLS_FETCH();
-
 	FETCH_DISP("GetDispID");
 
 	name = php_com_olestring_to_string(bstrName, &namelen, COMG(code_page) TSRMLS_CC);
@@ -264,8 +257,6 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 	zval *retval = NULL;
 	zval ***params = NULL;
 	HRESULT ret = DISP_E_MEMBERNOTFOUND;
-	TSRMLS_FETCH();
-
 	FETCH_DISP("InvokeEx");
 
 	if (SUCCESS == zend_hash_index_find(disp->dispid_to_name, id, (void**)&name)) {
@@ -351,8 +342,6 @@ static HRESULT STDMETHODCALLTYPE disp_deletememberbyname(
 	/* [in] */ BSTR bstrName,
 	/* [in] */ DWORD grfdex)
 {
-	TSRMLS_FETCH();
-
 	FETCH_DISP("DeleteMemberByName");
 
 	/* TODO: unset */
@@ -364,8 +353,6 @@ static HRESULT STDMETHODCALLTYPE disp_deletememberbydispid(
 	IDispatchEx *This,
 	/* [in] */ DISPID id)
 {
-	TSRMLS_FETCH();
-
 	FETCH_DISP("DeleteMemberByDispID");
 	
 	/* TODO: unset */
@@ -379,8 +366,6 @@ static HRESULT STDMETHODCALLTYPE disp_getmemberproperties(
 	/* [in] */ DWORD grfdexFetch,
 	/* [out] */ DWORD *pgrfdex)
 {
-	TSRMLS_FETCH();
-
 	FETCH_DISP("GetMemberProperties");
 
 	return DISP_E_UNKNOWNNAME;
@@ -392,8 +377,6 @@ static HRESULT STDMETHODCALLTYPE disp_getmembername(
 	/* [out] */ BSTR *pbstrName)
 {
 	zval *name;
-	TSRMLS_FETCH();
-
 	FETCH_DISP("GetMemberName");
 
 	if (SUCCESS == zend_hash_index_find(disp->dispid_to_name, id, (void**)&name)) {
@@ -413,8 +396,6 @@ static HRESULT STDMETHODCALLTYPE disp_getnextdispid(
 	/* [out] */ DISPID *pid)
 {
 	ulong next = id+1;
-	TSRMLS_FETCH();
-
 	FETCH_DISP("GetNextDispID");
 
 	while(!zend_hash_index_exists(disp->dispid_to_name, next))
@@ -431,8 +412,6 @@ static HRESULT STDMETHODCALLTYPE disp_getnamespaceparent(
 	IDispatchEx *This,
 	/* [out] */ IUnknown **ppunk)
 {
-	TSRMLS_FETCH();
-
 	FETCH_DISP("GetNameSpaceParent");
 
 	*ppunk = NULL;
@@ -549,7 +528,7 @@ static php_dispatchex *disp_constructor(zval *object TSRMLS_DC)
 
 	memset(disp, 0, sizeof(php_dispatchex));
 
-	disp->engine_thread = tsrm_thread_id();
+	disp->engine_thread = GetCurrentThreadId();
 	disp->lpVtbl = &php_dispatch_vtbl;
 	disp->refcount = 1;
 
