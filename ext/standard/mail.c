@@ -40,10 +40,6 @@
 #include "win32/sendmail.h"
 #endif
 
-#ifdef COMPILE_DL_STANDARD
-ZEND_GET_MODULE(odbc)
-#endif
-
 /* {{{ proto int ezmlm_hash(string addr)
    Calculate EZMLM list hash value. */
 PHP_FUNCTION(ezmlm_hash)
