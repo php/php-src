@@ -6,8 +6,12 @@
 #include "build-defs.h"
 #endif
 
-#include "mail.h"
-#include "rfc822.h"
+/*
+ #include "mail.h"
+ #include "rfc822.h" 
+*/
+#include "c-client.h"
+#include "imap4r1.h"	/* used for the imap_setquota function */
 #include "modules.h"
 
 extern zend_module_entry imap_module_entry;
@@ -100,6 +104,8 @@ PHP_FUNCTION(imap_renamemailbox);
 PHP_FUNCTION(imap_deletemailbox);
 PHP_FUNCTION(imap_listmailbox);
 PHP_FUNCTION(imap_scanmailbox);
+PHP_FUNCTION(imap_get_quota);
+PHP_FUNCTION(imap_set_quota);
 PHP_FUNCTION(imap_subscribe);
 PHP_FUNCTION(imap_unsubscribe);
 PHP_FUNCTION(imap_append);
@@ -156,12 +162,8 @@ ZEND_BEGIN_MODULE_GLOBALS(imap)
 	unsigned long status_unseen;
 	unsigned long status_uidnext;
 	unsigned long status_uidvalidity;
-#ifdef SA_QUOTA
-	unsigned long status_quota;
-#endif
-#ifdef SA_QUOTA_ALL
-	unsigned long status_quota_all;
-#endif
+	unsigned long quota_usage;
+	unsigned long quota_limit;
 ZEND_END_MODULE_GLOBALS(imap)
 
 

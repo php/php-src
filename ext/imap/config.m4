@@ -41,9 +41,9 @@ PHP_ARG_WITH(imap,for IMAP support,
   if test "$PHP_IMAP" != "no"; then  
     for i in /usr/local /usr $PHP_IMAP; do
       IMAP_INC_CHK()
-      el[]IMAP_INC_CHK(/include)
-      el[]IMAP_INC_CHK(/include/imap)
       el[]IMAP_INC_CHK(/include/c-client)
+      el[]IMAP_INC_CHK(/include/imap)
+      el[]IMAP_INC_CHK(/include)
       el[]IMAP_INC_CHK(/imap)
       el[]IMAP_INC_CHK(/c-client)
       fi
