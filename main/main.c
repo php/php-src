@@ -1146,16 +1146,8 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 
 	if (primary_file->type == ZEND_HANDLE_FILENAME 
 			&& primary_file->filename) {
-		char *filename;
-
-		filename = strrchr(primary_file->filename, PHP_DIR_SEPARATOR);
-		
-		if (filename) {
-			filename++;
-			V_GETCWD(old_cwd, sizeof(old_cwd)-1);
-			V_CHDIR_FILE(primary_file->filename);
-			primary_file->filename = filename;
-		}
+		V_GETCWD(old_cwd, sizeof(old_cwd)-1);
+		V_CHDIR_FILE(primary_file->filename);
 	}
 
 	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {

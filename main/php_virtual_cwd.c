@@ -31,6 +31,7 @@
 
 #ifdef ZEND_WIN32
 #include "win95nt.h"
+#include <sys/utime.h>
 #endif
 
 #include "php_virtual_cwd.h"
@@ -396,7 +397,7 @@ CWD_API int virtual_chdir(const char *path)
 	return virtual_file_ex(&CWDG(cwd), path, php_is_dir_ok)?-1:0;
 }
 
-CWD_API int virtual_chdir_file(const char *path)
+CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path))
 {
 	int length = strlen(path);
 	char *temp;
@@ -421,7 +422,7 @@ CWD_API int virtual_chdir_file(const char *path)
 #if VIRTUAL_CWD_DEBUG
 	fprintf (stderr, "Changing directory to %s\n", temp);
 #endif
-	retval = virtual_chdir(temp);
+	retval = p_chdir(temp);
 	free(temp);
 	return retval;
 }
@@ -732,6 +733,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type)
 
 #endif
 
+#if 0
 /* taken from Apache 1.3 */
 
 CWD_API void virtual_real_chdir_file(const char *file)
@@ -751,6 +753,8 @@ CWD_API void virtual_real_chdir_file(const char *file)
     /* XXX: well, this is a silly function, no method of reporting an
      * error... ah well. */
 }
+
+#endif
 
 #if 0
 
