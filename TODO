@@ -5,10 +5,12 @@ Zend
 ----
     * allow foreach ($array as $k => &$val) syntax. right now we can not 
       traverse an array without copying each element.
+    * look al replacing c-lib call tolower().
     * get_class_methods("classname")
 
 global
 ------
+    * make sure all source files have the "right" copyright.
     * the following modules still use PHP3_TLS_*() macros (and thereby don't 
       work in ZTS mode): ext/dav/dav.c, ext/db/db.c, ext/gd/gd.c, ext/ldap/ldap.c
     * let every module (source-file) have it's own module & function_entry 
@@ -56,6 +58,10 @@ ext/wddx
 
     * implement wddx_packet_as_javascript(). (Andrei)
 
+ext/dav
+--------
+    * rewrite
+
 ext/oci8
 --------
     * all OCIFetch*() functions should return 0 for no more data and false on error.
@@ -66,6 +72,7 @@ ext/snmp
     
 ext/standard
 ------------
+    * add a version number to data serialized via serialize().
     * array_add(), array_rand() (Andrei)
     * implement pathinfo()
     * possibly modify parsing of GPC data to automatically create arrays if
