@@ -489,7 +489,7 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 					unsigned int funcdesclen, cnames = 0;
 					BSTR *names;
 
-					names = (BSTR*)emalloc((func->cParams + 1) * sizeof(BSTR));
+					names = (BSTR*)safe_emalloc((func->cParams + 1), sizeof(BSTR), 0);
 
 					ITypeInfo_GetNames(typeinfo, func->memid, names, func->cParams + 1, &cnames);
 					/* first element is the function name */

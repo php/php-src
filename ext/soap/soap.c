@@ -1002,7 +1002,7 @@ PHP_METHOD(soapserver,setclass)
 	FETCH_THIS_SERVICE(service);
 
 	argc = ZEND_NUM_ARGS();
-	argv = emalloc(argc * sizeof(zval **));
+	argv = safe_emalloc(argc, sizeof(zval **), 0);
 
 	if (argc < 1 || zend_get_parameters_array_ex(argc, argv) == FAILURE) {
 		efree(argv);
@@ -1025,7 +1025,7 @@ PHP_METHOD(soapserver,setclass)
 			service->soap_class.argc = argc - 1;
 			if (service->soap_class.argc > 0) {
 				int i;
-				service->soap_class.argv = emalloc(sizeof(zval) * service->soap_class.argc);
+				service->soap_class.argv = safe_emalloc(sizeof(zval), service->soap_class.argc, 0);
 				for (i = 0;i < service->soap_class.argc;i++) {
 					service->soap_class.argv[i] = *(argv[i + 1]);
 					zval_add_ref(&service->soap_class.argv[i]);
@@ -2069,7 +2069,7 @@ PHP_METHOD(soapclient, __call)
 
 	arg_count = zend_hash_num_elements(Z_ARRVAL_P(args));
 
-	real_args = emalloc(sizeof(zval *) * arg_count);
+	real_args = safe_emalloc(sizeof(zval *), arg_count, 0);
 	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(args), &pos);
 		zend_hash_get_current_data_ex(Z_ARRVAL_P(args), (void **) &param, &pos) == SUCCESS;
 		zend_hash_move_forward_ex(Z_ARRVAL_P(args), &pos)) {
@@ -2170,7 +2170,7 @@ static void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_proper
 		builtin_function->internal_function.handler(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	} else {
 		int arg_count = ZEND_NUM_ARGS();
-		zval **arguments = (zval **) emalloc(sizeof(zval *) * arg_count);
+		zval **arguments = (zval **) safe_emalloc(sizeof(zval *), arg_count, 0);
 
 		zend_get_parameters_array(ht, arg_count, arguments);
 		do_soap_call(this_ptr, function, Z_STRLEN(function_name->element) + 1, arg_count, arguments, return_value, NULL, NULL, NULL, NULL TSRMLS_CC);
@@ -2275,7 +2275,7 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, i
 			zend_hash_move_forward(function->requestParameters);
 		}
 		if (use_names) {
-			tmp_parameters = emalloc(num_of_params * sizeof(zval *));
+			tmp_parameters = safe_emalloc(num_of_params, sizeof(zval *), 0);
 			zend_hash_internal_pointer_reset(function->requestParameters);
 			while (zend_hash_get_current_data(function->requestParameters, (void **)&param) == SUCCESS) {
 				val = get_node(params, (*param)->paramName);
@@ -2307,7 +2307,7 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, i
 			trav = trav->next;
 		}
 		if (num_of_params > 0) {
-			tmp_parameters = emalloc(num_of_params * sizeof(zval *));
+			tmp_parameters = safe_emalloc(num_of_params, sizeof(zval *), 0);
 
 			trav = params;
 			while (trav != 0 && cur_param < num_of_params) {
