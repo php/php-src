@@ -306,9 +306,6 @@ static void php_oci_init_globals(php_oci_globals *oci_globals)
 	OCI(server) = malloc(sizeof(HashTable));
 	zend_hash_init(OCI(server), 13, NULL, NULL, 1); 
 
-	OCI(conns) = malloc(sizeof(HashTable));
-	zend_hash_init(OCI(conns), 13, NULL, NULL, 1);
-
 	OCIEnvInit(&OCI(pEnv), OCI_DEFAULT, 0, NULL);
 	OCIHandleAlloc(OCI(pEnv), 
 				   (dvoid **)&OCI(pError),
@@ -335,9 +332,6 @@ PHP_MINIT_FUNCTION(oci)
 
 	OCI(server) = malloc(sizeof(HashTable));
 	zend_hash_init(OCI(server), 13, NULL, NULL, 1); 
-
-	OCI(conns) = malloc(sizeof(HashTable));
-	zend_hash_init(OCI(conns), 13, NULL, NULL, 1);
 
 	OCIEnvInit(&OCI(pEnv), OCI_DEFAULT, 0, NULL);
 	OCIHandleAlloc(OCI(pEnv), 
@@ -451,11 +445,9 @@ PHP_MSHUTDOWN_FUNCTION(oci)
 
 	zend_hash_destroy(OCI(user));
 	zend_hash_destroy(OCI(server));
-	zend_hash_destroy(OCI(conns));
 
 	free(OCI(user));
 	free(OCI(server));
-	free(OCI(conns));
 
 	OCIHandleFree((dvoid *)OCI(pEnv), OCI_HTYPE_ENV);
 
@@ -547,16 +539,12 @@ static int
 _oci_column_dtor(void *data)
 {	
 	oci_out_column *column = (oci_out_column *) data;
-	oci_connection *db_conn;
-	OCILS_FETCH();
 
 	oci_debug("START _oci_column_dtor: %s",column->name);
 
 	if (column->data) {
 		if (column->is_descr) {
-			if (zend_hash_find(OCI(conns),(void*)&(column->statement->conn),sizeof(void*),(void **)&db_conn) == SUCCESS) {
-				zend_hash_index_del(column->statement->conn->descriptors,(int) column->data);
-			}
+			zend_hash_index_del(column->statement->conn->descriptors,(int) column->data);
 		} else {
 			if (column->data) {
 				efree(column->data);
@@ -575,15 +563,11 @@ _oci_column_dtor(void *data)
 
 /* }}} */
 /* {{{ _oci_statement_dtor() */
-
+ 
 static void
 _oci_statement_dtor(oci_statement *statement)
 {
-	if (! statement) {
-		return;
-	}
-
-	oci_debug("_oci_statement_dtor: id=%d last_query=\"%s\"",statement->id,SAFE_STRING(statement->last_query));
+	oci_debug("START _oci_statement_dtor: id=%d last_query=\"%s\"",statement->id,SAFE_STRING(statement->last_query));
 
  	if (statement->pStmt) {
 		OCIHandleFree(statement->pStmt, OCI_HTYPE_STMT);
@@ -614,6 +598,10 @@ _oci_statement_dtor(oci_statement *statement)
 		efree(statement->defines);
 	}
 
+	zend_list_delete(statement->conn->id); /* delete one ref from the connection */
+
+	oci_debug("END _oci_statement_dtor: id=%d",statement->id);
+
 	efree(statement);
 }
 
@@ -627,11 +615,7 @@ _oci_connection_dtor(oci_connection *connection)
 	   as the connection is "only" a in memory service context we do not disconnect from oracle.
 	*/
 
-	OCILS_FETCH();
-
 	oci_debug("START _oci_connection_dtor: id=%d",connection->id);
-
-	zend_hash_del(OCI(conns),(void*)&connection,sizeof(void*));
 
 	if (connection->descriptors) {
    		zend_hash_destroy(connection->descriptors);
@@ -960,6 +944,8 @@ static oci_statement *oci_parse(oci_connection *connection, char *query, int len
 			   SAFE_STRING(query),
 			   statement->id,
 			   statement->conn->id);
+
+	zend_list_addref(statement->conn->id);
 
 	return statement;
 }
@@ -2153,7 +2139,7 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 	*/
 
 
-	connection->id = php3_list_insert(connection, le_conn);
+	connection->id = zend_list_insert(connection, le_conn);
 
 	connection->descriptors = emalloc(sizeof(HashTable));
 	if (!connection->descriptors ||
@@ -2165,15 +2151,13 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 
 	oci_debug("oci_do_connect: id=%d",connection->id);
 
-	zend_hash_add(OCI(conns),(void*)&connection,sizeof(void*),(void*)&connection,sizeof(void*),NULL);
-
 	RETURN_RESOURCE(connection->id);
 	
  CLEANUP:
 	oci_debug("oci_do_connect: FAILURE -> CLEANUP called");
 
 	if (connection->id) {
-		php3_list_delete(connection->id);
+		zend_list_delete(connection->id);
 	} else {
 		_oci_connection_dtor(connection);
 	}
@@ -3155,7 +3139,7 @@ PHP_FUNCTION(ocifreestatement)
 
 	OCI_GET_STMT(statement,stmt);
 
-	php3_list_delete(statement->id);
+	zend_list_delete(statement->id);
 
 	RETURN_TRUE;
 }
@@ -3182,7 +3166,7 @@ PHP_FUNCTION(ocilogoff)
 
 	zend_hash_apply(list,(int (*)(void *))_stmt_cleanup);
 
-	if (php3_list_delete(connection->id) == SUCCESS) {
+	if (zend_list_delete(connection->id) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
