@@ -65,11 +65,11 @@ class PEAR_Installer extends PEAR_Common
      */
     var $docdir;
 
-    /** directory where the package wants to put files, relative
-     *  to one of the previous dirs
+    /** installation root directory (ala PHP's INSTALL_ROOT or
+     * automake's DESTDIR
      * @var string
      */
-    var $destdir = '';
+    var $installroot = '';
 
     /** debug level
      * @var int
@@ -131,7 +131,7 @@ class PEAR_Installer extends PEAR_Common
             if (empty($props['installed_as'])) {
                 continue;
             }
-            $path = $props['installed_as'];
+            $path = $this->_prependPath($props['installed_as'], $this->installroot);
             if (!@unlink($path)) {
                 $this->log(2, "unable to delete: $path");
             } else {
@@ -200,10 +200,12 @@ class PEAR_Installer extends PEAR_Common
         $orig_file = $tmp_path . DIRECTORY_SEPARATOR . $file;
 
         // Clean up the DIRECTORY_SEPARATOR mess
-        $ds2 = str_repeat(DIRECTORY_SEPARATOR, 2);
-        list($dest_file, $orig_file) = preg_replace(array('!\\\\!', '!/!', "!$ds2+!"),
+        $ds2 = DIRECTORY_SEPARATOR . DIRECTORY_SEPARATOR;
+        list($dest_file, $orig_file) = preg_replace(array('!\\\\+!', '!/!', "!$ds2+!"),
                                                     DIRECTORY_SEPARATOR,
                                                     array($dest_file, $orig_file));
+        $installed_as = $dest_file;
+        $dest_file = $this->_prependPath($dest_file, $this->installroot);
         $dest_dir = dirname($dest_file);
         if (!@is_dir($dest_dir)) {
             if (!$this->mkDirHier($dest_dir)) {
@@ -267,7 +269,7 @@ class PEAR_Installer extends PEAR_Common
         }
 
         // Store the full path where the file was installed for easy unistall
-        $this->pkginfo['filelist'][$file]['installed_as'] = $dest_file;
+        $this->pkginfo['filelist'][$file]['installed_as'] = $installed_as;
 
         $this->log(2, "installed file $dest_file");
         return PEAR_INSTALLER_OK;
@@ -291,6 +293,21 @@ class PEAR_Installer extends PEAR_Common
     }
 
     // }}}
+
+    // {{{ _prependPath($path, $prepend)
+
+    function _prependPath($path, $prepend)
+    {
+        if (OS_WINDOWS && preg_match('/^[a-z]:/i', $path)) {
+            $path = $prepend . substr($path, 2);
+        } else {
+            $path = $prepend . $path;
+        }
+        return $path;
+    }
+
+    // }}}
+
     // {{{ install()
 
     /**
@@ -309,6 +326,18 @@ class PEAR_Installer extends PEAR_Common
         // - upgrade       : upgrade existing install
         // - soft          : fail silently
         //
+        $php_dir = $this->config->get('php_dir');
+        if (isset($options['installroot'])) {
+            if (substr($options['installroot'], -1) == DIRECTORY_SEPARATOR) {
+                $options['installroot'] = substr($options['installroot'], 0, -1);
+            }
+            $php_dir = $this->_prependPath($php_dir, $options['installroot']);
+            $this->registry = &new PEAR_Registry($php_dir);
+            $this->installroot = $options['installroot'];
+        } else {
+            $registry = &$this->registry;
+            $this->installroot = '';
+        }
         $need_download = false;
         //  ==> XXX should be removed later on
         $flag_old_format = false;
@@ -478,7 +507,7 @@ class PEAR_Installer extends PEAR_Common
         $this->source_files = 0;
 
         if (empty($options['register-only'])) {
-            if (!is_dir($this->config->get('php_dir'))) {
+            if (!is_dir($php_dir)) {
                 return $this->raiseError("no script destination directory\n",
                                          null, PEAR_ERROR_DIE);
             }
@@ -516,7 +545,7 @@ class PEAR_Installer extends PEAR_Common
 
             if ($this->source_files > 0 && empty($options['nobuild'])) {
                 $this->log(1, "$this->source_files source files, building");
-                $bob = &new PEAR_Builder($this->ui);
+                $bob = &new PEAR_Builder($this->ui); // Malin loves Bob the Builder
                 $bob->debug = $this->debug;
                 $built = $bob->build($descfile, array(&$this, '_buildCallback'));
                 if (PEAR::isError($built)) {
@@ -525,11 +554,11 @@ class PEAR_Installer extends PEAR_Common
                 foreach ($built as $ext) {
                     $bn = basename($ext['file']);
                     $this->log(2, "installing $bn");
-                    $dest = $this->config->get('ext_dir') .
-                        DIRECTORY_SEPARATOR . $bn;
+                    $dest = $this->config->get('ext_dir') . DIRECTORY_SEPARATOR . $bn;
                     $this->log(3, "+ cp $ext[file] ext_dir");
-                    if (!@copy($ext['file'], $dest)) {
-                        return $this->raiseError("failed to copy $bn to $dest");
+                    $copyto = $dest->_prependPath($dest, $this->installroot);
+                    if (!@copy($ext['file'], $copyto)) {
+                        return $this->raiseError("failed to copy $bn to $copyto");
                     }
                     $pkginfo['filelist'][$bn] = array(
                         'role' => 'ext',
@@ -561,11 +590,19 @@ class PEAR_Installer extends PEAR_Common
     // }}}
     // {{{ uninstall()
 
-    function uninstall($package)
+    function uninstall($package, $options = array())
     {
-        if (empty($this->registry)) {
-            $this->registry = new PEAR_Registry($this->config->get('php_dir'));
+        $php_dir = $this->config->get('php_dir');
+        if (isset($options['installroot'])) {
+            if (substr($options['installroot'], -1) == DIRECTORY_SEPARATOR) {
+                $options['installroot'] = substr($options['installroot'], 0, -1);
+            }
+            $this->installroot = $options['installroot'];
+            $php_dir = $this->_prependPath($php_dir, $this->installroot);
+        } else {
+            $this->installroot = '';
         }
+        $this->registry = &new PEAR_Registry($php_dir);
 
         // Delete the files
         if (PEAR::isError($err = $this->_deletePackageFiles($package))) {
