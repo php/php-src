@@ -2225,7 +2225,7 @@ PHP_FUNCTION(odbc_num_rows)
 }
 /* }}} */
 
-/* {{{ proto bool next_result(int result_id)
+/* {{{ proto bool odbc_next_result(int result_id)
    Checks if multiple results are avaiable */
 PHP_FUNCTION(odbc_next_result)
 {
