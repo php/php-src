@@ -457,11 +457,6 @@ fi
 
 divert(4)
 
-PHP_ARG_WITH(config-file-path,[path to configuration file],
-[  --with-config-file-path=PATH  
-                          Sets the path in which to look for php.ini.
-                          defaults to --sysconfdir, "none" to disable], $sysconfdir)
-
 PHP_ARG_ENABLE(debug, whether to include debugging symbols,
 [  --enable-debug          Compile with debugging symbols.], no)
 
@@ -473,6 +468,41 @@ else
   ZEND_DEBUG=no
 fi
 
+PHP_ARG_WITH(layout,[layout of installed files],
+[ --with-layout=TYPE      Sets how installed files will be laid out.  Type is
+                         one of "PHP" (default) or "GNU"], PHP)
+
+PHP_ARG_WITH(config-file-path,[path to configuration file],
+[  --with-config-file-path=PATH  
+                          Sets the path in which to look for php.ini,
+                          defaults to PREFIX/lib], DEFAULT)
+
+if test "x$PHP_CONFIG_FILE_PATH" = "xDEFAULT"; then
+  case $PHP_LAYOUT in
+    GNU) PHP_CONFIG_FILE_PATH="$sysconfdir";;
+    *)   PHP_CONFIG_FILE_PATH="$libdir";;
+  esac
+fi
+
+# compatibility
+if test "x$with_pear" = "x" -a "x$enable_pear" = "xno"; then
+    with_pear="no"
+fi
+
+PHP_ARG_WITH(pear, [whether to install PEAR, and where],
+[  --with-pear=DIR         Install PEAR in DIR (default PREFIX/lib/php)
+  --without-pear          Do not install PEAR], DEFAULT)
+
+if test "x$PHP_PEAR" != "xno"; then
+  PEAR_DIR=pear
+fi
+
+if test "x$PHP_PEAR" = "xDEFAULT"; then
+  case $PHP_LAYOUT in
+    GNU) PEAR_INSTALLDIR="$datadir/pear";;
+    *)   PEAR_INSTALLDIR="$libdir/php";;
+  esac
+fi
 
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
@@ -506,20 +536,6 @@ AC_ARG_WITH(exec-dir,
 	AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin", [ ])
    	AC_MSG_RESULT(/usr/local/php/bin)
 ])
-
-# compatibility
-if test "x$with_pear" = "x" -a "x$enable_pear" = "xno"; then
-    with_pear="no"
-fi
-
-PHP_ARG_WITH(pear, [whether to install PEAR, and where],
-[  --with-pear=DIR         Install PEAR in DIR (default \$datadir/php/pear)
-  --without-pear          Do not install PEAR], $datadir/php/pear)
-
-if test "$PHP_PEAR" != "no"; then
-  PEAR_DIR=pear
-  PEAR_INSTALLDIR="$PHP_PEAR"
-fi
 
 PHP_ARG_WITH(openssl,for OpenSSL support,
 [  --with-openssl[=DIR]    Include OpenSSL support (requires OpenSSL >= 0.9.5) ])
@@ -692,43 +708,27 @@ EXTRA_LIBS="$EXTRA_LIBS $LIBS"
 LDFLAGS=""
 LIBS=""
 
+test "$prefix" = "NONE" && prefix="/usr/local"
+test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'
+case $libdir in
+  '${exec_prefix}/lib')
+    libdir="$libdir/php"
+	oldstyleextdir=yes
+    ;;
+  *)
+    oldstyleextdir=no
+    ;;
+esac
+case $datadir in
+  '${prefix}/share')
+    datadir="$datadir/php"
+    ;;
+  *) ;;
+esac
 
 phplibdir="`pwd`/modules"
 $php_shtool mkdir -p $phplibdir
 phptempdir="`pwd`/libs"
-
-test "$prefix" = "NONE" && prefix="/usr/local"
-test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'
-case $libdir in
-  '${exec_prefix}/lib') libdir="$libdir/php";;
-  *) ;;
-esac
-case $datadir in
-  '${prefix}/share') datadir="$datadir/php";;
-  *) ;;
-esac
-
-dnl Build extension directory path
-
-ZEND_MODULE_API_NO=`egrep '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|sed 's/#define ZEND_MODULE_API_NO //'`
-
-extbasedir="$ZEND_MODULE_API_NO"
-
-if test "$enable_experimental_zts" = "yes"; then
-  extbasedir="${extbasedir}-zts"
-fi
-
-if test "$PHP_DEBUG" = "1"; then
-  extbasedir="${extbasedir}-debug"
-fi
-
-if test "x$PEAR_INSTALLDIR" = "x"; then
-  PEAR_INSTALLDIR="$datadir/pear"
-fi
-
-if test "x$EXTENSION_DIR" = "x"; then
-  EXTENSION_DIR="$libdir/$extbasedir"
-fi
 
 old_exec_prefix="$exec_prefix"
 old_libdir="$libdir"
@@ -736,6 +736,39 @@ old_datadir="$datadir"
 exec_prefix=`eval echo $exec_prefix`
 libdir=`eval echo $libdir`
 datadir=`eval echo $datadir`
+
+dnl Build extension directory path
+
+ZEND_MODULE_API_NO=`egrep '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|sed 's/#define ZEND_MODULE_API_NO //'`
+
+if test "x$EXTENSION_DIR" = "x"; then
+  extbasedir="$ZEND_MODULE_API_NO"
+  if test "$oldstyleextdir" = "yes"; then
+    if test "$PHP_DEBUG" = "1"; then
+      part1="debug"
+    else
+      part1="no-debug"
+    fi
+    if test "$enable_experimental_zts" = "yes"; then
+      part2="zts"
+    else
+      part2="non-zts"
+    fi
+    extbasedir="$part1-$part2-$extbasedir"
+  	EXTENSION_DIR="$libdir/extensions/$extbasedir"
+  else
+  	if test "$enable_experimental_zts" = "yes"; then
+  	  extbasedir="${extbasedir}-zts"
+  	fi
+  	
+  	if test "$PHP_DEBUG" = "1"; then
+  	  extbasedir="${extbasedir}-debug"
+  	fi
+  	EXTENSION_DIR="$libdir/$extbasedir"
+  fi
+fi
+
+dnl Expand all directory names for use in macros/constants
 EXPANDED_PEAR_INSTALLDIR=`eval echo $PEAR_INSTALLDIR`
 EXPANDED_EXTENSION_DIR=`eval echo $EXTENSION_DIR`
 EXPANDED_LOCALSTATEDIR=`eval echo $localstatedir`
