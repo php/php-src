@@ -21,6 +21,7 @@ interface RecursiveIterator implements Iterator
 	function hasChildren();
 	
 	/** @return the sub iterator for the current element
+	 * @note The returned object must implement RecursiveIterator.
 	 */
 	function getChildren();
 }

@@ -14,6 +14,11 @@
  * @author  Marcus Boerger
  * @version 1.1
  *
+ * A class that starts iteration at a certain offset and only iterates over
+ * a specified amount of elements.
+ *
+ * This class uses SeekableIterator::seek() if available and rewind() plus
+ * a skip loop otehrwise.
  */
 class LimitIterator implements OuterIterator
 {

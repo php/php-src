@@ -17,6 +17,10 @@
  * Instances of this class act as a filter around iterators. In other words 
  * you can put an iterator into the constructor and the instance will only 
  * return selected (accepted) elements.
+ *
+ * The only thing that needs to be done to make this work is implementing 
+ * method accept(). Typically this invloves reading the current element or 
+ * key of the inner Iterator and checking whether it is acceptable.
  */
 abstract class FilterIterator implements OuterIterator
 {
