@@ -450,6 +450,12 @@ void gdImageCopyResized(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int 
 	substituted automatically. */
 void gdImageCopyResampled(gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int dstW, int dstH, int srcW, int srcH);
 
+gdImagePtr gdImageRotate90(gdImagePtr src);
+gdImagePtr gdImageRotate180(gdImagePtr src);
+gdImagePtr gdImageRotate270(gdImagePtr src);
+gdImagePtr gdImageRotate45(gdImagePtr src, double dAngle, int clrBack);
+gdImagePtr gdImageRotate (gdImagePtr src, double dAngle, int clrBack);
+
 void gdImageSetBrush(gdImagePtr im, gdImagePtr brush);
 void gdImageSetTile(gdImagePtr im, gdImagePtr tile);
 void gdImageSetStyle(gdImagePtr im, int *style, int noOfPixels);

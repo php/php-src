@@ -158,6 +158,10 @@ function_entry gd_functions[] = {
 	PHP_FE(imagecopyresampled,						NULL)
 #endif
 
+#ifdef HAVE_GD_BUNDLED
+	PHP_FE(imagerotate,     						NULL)
+#endif
+
 #if HAVE_GD_IMAGESETTILE
 	PHP_FE(imagesettile,							NULL)
 #endif
@@ -912,6 +916,39 @@ PHP_FUNCTION(imagecopyresampled)
 
 	gdImageCopyResampled(im_dst, im_src, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
 	RETURN_TRUE;
+
+}
+/* }}} */
+#endif
+
+#ifdef HAVE_GD_BUNDLED
+/* {{{ proto int imagerotate(int src_im, float angle, int bgdcolor)
+   Rotate an image using a custom angle */
+PHP_FUNCTION(imagerotate)
+{
+	zval **SIM, **ANGLE, **BGDCOLOR;
+	gdImagePtr im_dst, im_src;
+	double degrees;
+	long color;
+
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &SIM, &ANGLE, &BGDCOLOR) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
+
+	convert_to_long_ex(BGDCOLOR);
+	color = Z_LVAL_PP(BGDCOLOR);
+
+	convert_to_double_ex(ANGLE);
+	degrees = Z_DVAL_PP(ANGLE);
+	im_dst = gdImageRotate(im_src, degrees, color);
+
+	if (im_dst != NULL) {
+		ZEND_REGISTER_RESOURCE(return_value, im_dst, le_gd);
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 #endif
