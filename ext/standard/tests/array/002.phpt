@@ -30,11 +30,10 @@ foreach (array ('arsort', 'asort', 'krsort', 'ksort', 'rsort', 'sort') as $test_
 
 ?>
 --EXPECT--
-
- -- Testing arsort() -- 
+-- Testing arsort() -- 
 No second argument:
-array(7) {
-  ["-2147483648"]=>
+array(8) {
+  ["-2147483647"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -45,18 +44,20 @@ array(7) {
   int(27)
   [2147483647]=>
   string(4) "test"
+  [-2147483648]=>
+  string(6) "monkey"
   [5]=>
   string(4) "Test"
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
   [0]=>
   string(3) "PHP"
-  [-2147483648]=>
+  [16777216]=>
   float(-0.33333333333333)
 }
 Using SORT_REGULAR:
-array(7) {
-  ["-2147483648"]=>
+array(8) {
+  ["-2147483647"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -67,20 +68,22 @@ array(7) {
   int(27)
   [2147483647]=>
   string(4) "test"
+  [-2147483648]=>
+  string(6) "monkey"
   [5]=>
   string(4) "Test"
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
   [0]=>
   string(3) "PHP"
-  [-2147483648]=>
+  [16777216]=>
   float(-0.33333333333333)
 }
 Using SORT_NUMERIC:
-array(7) {
+array(8) {
   ["test"]=>
   int(27)
-  ["-2147483648"]=>
+  ["-2147483647"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -91,24 +94,28 @@ array(7) {
   string(3) "PHP"
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
+  [-2147483648]=>
+  string(6) "monkey"
   [5]=>
   string(4) "Test"
   [2147483647]=>
   string(4) "test"
-  [-2147483648]=>
+  [16777216]=>
   float(-0.33333333333333)
 }
 Using SORT_STRING
-array(7) {
+array(8) {
   [2147483647]=>
   string(4) "test"
+  [-2147483648]=>
+  string(6) "monkey"
   [5]=>
   string(4) "Test"
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
   [0]=>
   string(3) "PHP"
-  ["-2147483648"]=>
+  ["-2147483647"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -117,14 +124,14 @@ array(7) {
   }
   ["test"]=>
   int(27)
-  [-2147483648]=>
+  [16777216]=>
   float(-0.33333333333333)
 }
 
  -- Testing asort() -- 
 No second argument:
-array(7) {
-  [-2147483648]=>
+array(8) {
+  [16777216]=>
   float(-0.33333333333333)
   [0]=>
   string(3) "PHP"
@@ -132,11 +139,13 @@ array(7) {
   string(27) "PHP: Hypertext Preprocessor"
   [5]=>
   string(4) "Test"
+  [-2147483648]=>
+  string(6) "monkey"
   [2147483647]=>
   string(4) "test"
   ["test"]=>
   int(27)
-  ["-2147483648"]=>
+  ["-2147483647"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -145,8 +154,8 @@ array(7) {
   }
 }
 Using SORT_REGULAR:
-array(7) {
-  [-2147483648]=>
+array(8) {
+  [16777216]=>
   float(-0.33333333333333)
   [0]=>
   string(3) "PHP"
@@ -154,11 +163,13 @@ array(7) {
   string(27) "PHP: Hypertext Preprocessor"
   [5]=>
   string(4) "Test"
+  [-2147483648]=>
+  string(6) "monkey"
   [2147483647]=>
   string(4) "test"
   ["test"]=>
   int(27)
-  ["-2147483648"]=>
+  ["-2147483647"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -167,9 +178,11 @@ array(7) {
   }
 }
 Using SORT_NUMERIC:
-array(7) {
-  [-2147483648]=>
+array(8) {
+  [16777216]=>
   float(-0.33333333333333)
+  [-2147483648]=>
+  string(6) "monkey"
   [2147483647]=>
   string(4) "test"
   [5]=>
@@ -178,7 +191,7 @@ array(7) {
   string(27) "PHP: Hypertext Preprocessor"
   [0]=>
   string(3) "PHP"
-  ["-2147483648"]=>
+  ["-2147483647"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -189,12 +202,12 @@ array(7) {
   int(27)
 }
 Using SORT_STRING
-array(7) {
-  [-2147483648]=>
+array(8) {
+  [16777216]=>
   float(-0.33333333333333)
   ["test"]=>
   int(27)
-  ["-2147483648"]=>
+  ["-2147483647"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -207,15 +220,19 @@ array(7) {
   string(27) "PHP: Hypertext Preprocessor"
   [5]=>
   string(4) "Test"
+  [-2147483648]=>
+  string(6) "monkey"
   [2147483647]=>
   string(4) "test"
 }
 
  -- Testing krsort() -- 
 No second argument:
-array(7) {
+array(8) {
   [2147483647]=>
   string(4) "test"
+  [16777216]=>
+  float(-0.33333333333333)
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
   [5]=>
@@ -224,29 +241,31 @@ array(7) {
   int(27)
   [0]=>
   string(3) "PHP"
-  [-2147483648]=>
-  float(-0.33333333333333)
-  ["-2147483648"]=>
+  ["-2147483647"]=>
   array(2) {
     [0]=>
     string(6) "banana"
     [1]=>
     string(6) "orange"
   }
+  [-2147483648]=>
+  string(6) "monkey"
 }
 Using SORT_REGULAR:
-array(7) {
+array(8) {
   [2147483647]=>
   string(4) "test"
+  [16777216]=>
+  float(-0.33333333333333)
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
   [5]=>
   string(4) "Test"
-  [0]=>
-  string(3) "PHP"
   ["test"]=>
   int(27)
-  ["-2147483648"]=>
+  [0]=>
+  string(3) "PHP"
+  ["-2147483647"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -254,12 +273,14 @@ array(7) {
     string(6) "orange"
   }
   [-2147483648]=>
-  float(-0.33333333333333)
+  string(6) "monkey"
 }
 Using SORT_NUMERIC:
-array(7) {
+array(8) {
   [2147483647]=>
   string(4) "test"
+  [16777216]=>
+  float(-0.33333333333333)
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
   [5]=>
@@ -268,18 +289,18 @@ array(7) {
   int(27)
   [0]=>
   string(3) "PHP"
-  [-2147483648]=>
-  float(-0.33333333333333)
-  ["-2147483648"]=>
+  ["-2147483647"]=>
   array(2) {
     [0]=>
     string(6) "banana"
     [1]=>
     string(6) "orange"
   }
+  [-2147483648]=>
+  string(6) "monkey"
 }
 Using SORT_STRING
-array(7) {
+array(8) {
   ["test"]=>
   int(27)
   [5]=>
@@ -288,31 +309,33 @@ array(7) {
   string(4) "test"
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
+  [16777216]=>
+  float(-0.33333333333333)
   [0]=>
   string(3) "PHP"
-  ["-2147483648"]=>
+  [-2147483648]=>
+  string(6) "monkey"
+  ["-2147483647"]=>
   array(2) {
     [0]=>
     string(6) "banana"
     [1]=>
     string(6) "orange"
   }
-  [-2147483648]=>
-  float(-0.33333333333333)
 }
 
  -- Testing ksort() -- 
 No second argument:
-array(7) {
-  ["-2147483648"]=>
+array(8) {
+  [-2147483648]=>
+  string(6) "monkey"
+  ["-2147483647"]=>
   array(2) {
     [0]=>
     string(6) "banana"
     [1]=>
     string(6) "orange"
   }
-  [-2147483648]=>
-  float(-0.33333333333333)
   [0]=>
   string(3) "PHP"
   ["test"]=>
@@ -321,14 +344,16 @@ array(7) {
   string(4) "Test"
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
+  [16777216]=>
+  float(-0.33333333333333)
   [2147483647]=>
   string(4) "test"
 }
 Using SORT_REGULAR:
-array(7) {
+array(8) {
   [-2147483648]=>
-  float(-0.33333333333333)
-  ["-2147483648"]=>
+  string(6) "monkey"
+  ["-2147483647"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -343,20 +368,22 @@ array(7) {
   string(4) "Test"
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
+  [16777216]=>
+  float(-0.33333333333333)
   [2147483647]=>
   string(4) "test"
 }
 Using SORT_NUMERIC:
-array(7) {
-  ["-2147483648"]=>
+array(8) {
+  [-2147483648]=>
+  string(6) "monkey"
+  ["-2147483647"]=>
   array(2) {
     [0]=>
     string(6) "banana"
     [1]=>
     string(6) "orange"
   }
-  [-2147483648]=>
-  float(-0.33333333333333)
   [0]=>
   string(3) "PHP"
   ["test"]=>
@@ -365,22 +392,26 @@ array(7) {
   string(4) "Test"
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
+  [16777216]=>
+  float(-0.33333333333333)
   [2147483647]=>
   string(4) "test"
 }
 Using SORT_STRING
-array(7) {
-  [-2147483648]=>
-  float(-0.33333333333333)
-  ["-2147483648"]=>
+array(8) {
+  ["-2147483647"]=>
   array(2) {
     [0]=>
     string(6) "banana"
     [1]=>
     string(6) "orange"
   }
+  [-2147483648]=>
+  string(6) "monkey"
   [0]=>
   string(3) "PHP"
+  [16777216]=>
+  float(-0.33333333333333)
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
   [2147483647]=>
@@ -393,7 +424,7 @@ array(7) {
 
  -- Testing rsort() -- 
 No second argument:
-array(7) {
+array(8) {
   [0]=>
   array(2) {
     [0]=>
@@ -406,16 +437,18 @@ array(7) {
   [2]=>
   string(4) "test"
   [3]=>
-  string(4) "Test"
+  string(6) "monkey"
   [4]=>
-  string(27) "PHP: Hypertext Preprocessor"
+  string(4) "Test"
   [5]=>
-  string(3) "PHP"
+  string(27) "PHP: Hypertext Preprocessor"
   [6]=>
+  string(3) "PHP"
+  [7]=>
   float(-0.33333333333333)
 }
 Using SORT_REGULAR:
-array(7) {
+array(8) {
   [0]=>
   array(2) {
     [0]=>
@@ -428,16 +461,18 @@ array(7) {
   [2]=>
   string(4) "test"
   [3]=>
-  string(4) "Test"
+  string(6) "monkey"
   [4]=>
-  string(27) "PHP: Hypertext Preprocessor"
+  string(4) "Test"
   [5]=>
-  string(3) "PHP"
+  string(27) "PHP: Hypertext Preprocessor"
   [6]=>
+  string(3) "PHP"
+  [7]=>
   float(-0.33333333333333)
 }
 Using SORT_NUMERIC:
-array(7) {
+array(8) {
   [0]=>
   int(27)
   [1]=>
@@ -452,38 +487,42 @@ array(7) {
   [3]=>
   string(27) "PHP: Hypertext Preprocessor"
   [4]=>
-  string(4) "Test"
+  string(6) "monkey"
   [5]=>
-  string(4) "test"
+  string(4) "Test"
   [6]=>
+  string(4) "test"
+  [7]=>
   float(-0.33333333333333)
 }
 Using SORT_STRING
-array(7) {
+array(8) {
   [0]=>
   string(4) "test"
   [1]=>
-  string(4) "Test"
+  string(6) "monkey"
   [2]=>
-  string(27) "PHP: Hypertext Preprocessor"
+  string(4) "Test"
   [3]=>
-  string(3) "PHP"
+  string(27) "PHP: Hypertext Preprocessor"
   [4]=>
+  string(3) "PHP"
+  [5]=>
   array(2) {
     [0]=>
     string(6) "banana"
     [1]=>
     string(6) "orange"
   }
-  [5]=>
-  int(27)
   [6]=>
+  int(27)
+  [7]=>
   float(-0.33333333333333)
 }
 
  -- Testing sort() -- 
 No second argument:
-array(7) {
+array(8) {
   [0]=>
   float(-0.33333333333333)
   [1]=>
@@ -493,10 +532,12 @@ array(7) {
   [3]=>
   string(4) "Test"
   [4]=>
-  string(4) "test"
+  string(6) "monkey"
   [5]=>
-  int(27)
+  string(4) "test"
   [6]=>
+  int(27)
+  [7]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -505,7 +546,7 @@ array(7) {
   }
 }
 Using SORT_REGULAR:
-array(7) {
+array(8) {
   [0]=>
   float(-0.33333333333333)
   [1]=>
@@ -515,10 +556,12 @@ array(7) {
   [3]=>
   string(4) "Test"
   [4]=>
-  string(4) "test"
+  string(6) "monkey"
   [5]=>
-  int(27)
+  string(4) "test"
   [6]=>
+  int(27)
+  [7]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -527,29 +570,31 @@ array(7) {
   }
 }
 Using SORT_NUMERIC:
-array(7) {
+array(8) {
   [0]=>
   float(-0.33333333333333)
   [1]=>
-  string(4) "test"
+  string(6) "monkey"
   [2]=>
-  string(4) "Test"
+  string(4) "test"
   [3]=>
-  string(27) "PHP: Hypertext Preprocessor"
+  string(4) "Test"
   [4]=>
-  string(3) "PHP"
+  string(27) "PHP: Hypertext Preprocessor"
   [5]=>
+  string(3) "PHP"
+  [6]=>
   array(2) {
     [0]=>
     string(6) "banana"
     [1]=>
     string(6) "orange"
   }
-  [6]=>
+  [7]=>
   int(27)
 }
 Using SORT_STRING
-array(7) {
+array(8) {
   [0]=>
   float(-0.33333333333333)
   [1]=>
@@ -568,5 +613,7 @@ array(7) {
   [5]=>
   string(4) "Test"
   [6]=>
+  string(6) "monkey"
+  [7]=>
   string(4) "test"
 }
