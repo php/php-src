@@ -300,6 +300,7 @@ int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr
 		add_assoc_long(spec_arr, "Keyword", HW_ATTR_LANG);
 		add_assoc_long(spec_arr, "Group", HW_ATTR_NONE);
 		add_assoc_long(spec_arr, "HtmlAttr", HW_ATTR_NONE);
+		add_assoc_long(spec_arr, "Parent", HW_ATTR_NONE);
 	}
 
 	if (array_init(*return_value) == FAILURE) {
@@ -1293,6 +1294,7 @@ php_printf("%s", object);
 PHP_FUNCTION(hw_getobject) {
 	pval **argv[3];
 	int argc, link, id, type, multi;
+	char *query;
 	hw_connection *ptr;
 
 	argc = ARG_COUNT(ht);
@@ -1312,7 +1314,9 @@ PHP_FUNCTION(hw_getobject) {
 
 	if(argc == 3) {
 		convert_to_string_ex(argv[2]);
-	}
+		query = (*argv[2])->value.str.val;
+	} else
+		query = NULL;
 
 	link=(*argv[0])->value.lval;
 	ptr = zend_list_find(link,&type);
@@ -1346,7 +1350,7 @@ PHP_FUNCTION(hw_getobject) {
 			zend_hash_move_forward(lht);
 		}
 
-		if (0 != (ptr->lasterror = send_objectbyidquery(ptr->socket, ids, &count, (*argv[2])->value.str.val, &objects))) {
+		if (0 != (ptr->lasterror = send_objectbyidquery(ptr->socket, ids, &count, query, &objects))) {
 			efree(ids);
 			RETURN_FALSE;
 			}
