@@ -536,9 +536,15 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 
 				if (res == SUCCESS) {
 					if (retval_ptr) {
-					   	if (HASH_OF(retval_ptr))
+					   	if (HASH_OF(retval_ptr)) {
 							php_var_serialize_class(buf, struc, retval_ptr, 
 									var_hash TSRMLS_CC);
+						} else {
+							php_error(E_NOTICE, "__sleep should return an array only "
+												"containing the names of instance-variables to "
+												"serialize.");
+						}
+
 						zval_ptr_dtor(&retval_ptr);
 					}
 					return;	
@@ -623,7 +629,12 @@ PHP_FUNCTION(serialize)
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 	php_var_serialize(&buf, struc, &var_hash TSRMLS_CC);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
-	RETVAL_STRINGL(buf.c, buf.len, 0);
+
+	if (buf.c) {
+		RETURN_STRINGL(buf.c, buf.len, 0);
+	} else {
+		RETURN_NULL();
+	}
 }
 
 /* }}} */
