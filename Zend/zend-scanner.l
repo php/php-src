@@ -1036,7 +1036,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	return T_PHP_TRACK_VARS;
 }
 
-<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC>"$"{LABEL} {
+<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL} {
 	zendlval->value.str.val = (char *)estrndup(yytext+1, yyleng-1);
 	zendlval->value.str.len = yyleng-1;
 	zendlval->type = IS_STRING;
