@@ -340,7 +340,7 @@ TSRM_API void tsrm_mutex_free( MUTEX_T mutexp )
 #ifdef WIN32
 		CloseHandle(mutexp);
 #elif defined(PTHREADS)
-		free(mutexp);
+		pthread_mutex_destroy(mutexp);
 #elif defined(NSAPI)
 		crit_terminate(mutexp);
 #elif defined(PI3WEB)
