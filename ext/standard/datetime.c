@@ -79,12 +79,12 @@ PHP_FUNCTION(time)
 
 void _php3_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
-	pval *arguments[6];
+	pval *arguments[7];
 	struct tm ta, *tn;
 	time_t t;
 	int i, gmadjust=0,arg_count = ARG_COUNT(ht);
 
-	if (arg_count > 6 || getParametersArray(ht, arg_count, arguments) == FAILURE) {
+	if (arg_count > 7 || getParametersArray(ht, arg_count, arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	/* convert supplied arguments to longs */
@@ -92,14 +92,15 @@ void _php3_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 		convert_to_long(arguments[i]);
 	}
 	t=time(NULL);
-#if HAVE_TZSET
+#ifdef HAVE_TZSET
 	tzset();
 #endif
 	tn = localtime(&t);
 	memcpy(&ta,tn,sizeof(struct tm));
-	ta.tm_isdst = -1;
+	ta.tm_isdst = arg_count > 6 ? arguments[6]->value.lval : gm ? 0 : -1;
 
 	switch(arg_count) {
+	case 7:
 	case 6:
 		ta.tm_year = arguments[5]->value.lval - ((arguments[5]->value.lval > 1000) ? 1900 : 0);
 		/* fall-through */
@@ -125,15 +126,15 @@ void _php3_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 
 	if (gm) {
 #if HAVE_TM_GMTOFF
-		gmadjust=(tn->tm_gmtoff)/3600;
+		gmadjust=tn->tm_gmtoff;
 #else
-		gmadjust=timezone/3600;
+		gmadjust=timezone;
 #endif
+		ta.tm_hour += gmadjust / 3600;
+		ta.tm_min += gmadjust % 3600;
 	}
 
-	ta.tm_hour+=gmadjust;
-	return_value->value.lval = mktime(&ta);
-	return_value->type = IS_LONG;
+	RETURN_LONG(mktime(&ta));
 }
 
 PHP_FUNCTION(mktime)
