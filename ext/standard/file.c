@@ -241,10 +241,14 @@ function_entry file_functions[] = {
 	PHP_FE(fgetcsv,				NULL)
     PHP_FE(flock,				NULL)
 	PHP_FE(get_meta_tags,		NULL)
+	/* set_socket_blocking() is deprecated,
+	   use socket_set_blocking() instead */
 	PHP_FE(set_socket_blocking,	NULL)
+	PHP_FE(socket_set_blocking,	NULL)
 #if HAVE_SYS_TIME_H
-	PHP_FE(set_socket_timeout,	NULL)
+	PHP_FE(socket_set_timeout,	NULL)
 #endif
+	PHP_FE(socket_get_status,	NULL)
 	PHP_FE(realpath,			NULL)
 #if 0 /* needs to be rethought 991221 thies@digicol.de */
 	PHP_FE(fd_set, NULL)
@@ -818,9 +822,10 @@ PHP_FUNCTION(feof)
 	}
 }
 /* }}} */
-/* {{{ proto int set_socket_blocking(int socket descriptor, int mode)
-   Set blocking/non-blocking mode on a socket */
 
+
+/* {{{ proto int socket_set_blocking(int socket descriptor, int mode)
+   Set blocking/non-blocking mode on a socket */
 PHPAPI int php_set_sock_blocking(int socketd, int block)
 {
       int ret = SUCCESS;
@@ -851,7 +856,7 @@ PHPAPI int php_set_sock_blocking(int socketd, int block)
       return ret;
 }
 
-PHP_FUNCTION(set_socket_blocking)
+PHP_FUNCTION(socket_set_blocking)
 {
 	pval **arg1, **arg2;
 	int block;
@@ -880,11 +885,16 @@ PHP_FUNCTION(set_socket_blocking)
 
 /* }}} */
 
+PHP_FUNCTION(set_socket_blocking)
+{
+	php_error(E_NOTICE, "set_socket_blocking() is deprecated, use socket_set_blocking() instead");
+	PHP_FN(socket_set_blocking)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 
-/* {{{ proto bool set_socket_timeout(int socket descriptor, int seconds, int microseconds)
+/* {{{ proto bool socket_set_timeout(int socket descriptor, int seconds, int microseconds)
    Set timeout on socket read to seconds + microseonds */
 #if HAVE_SYS_TIME_H
-PHP_FUNCTION(set_socket_timeout)
+PHP_FUNCTION(socket_set_timeout)
 {
 	zval **socket, **seconds, **microseconds;
 	int type;
@@ -918,6 +928,38 @@ PHP_FUNCTION(set_socket_timeout)
 #endif /* HAVE_SYS_TIME_H */
 
 /* }}} */
+
+
+/* {{{ proto array socket_get_status(resource socket_descriptor)
+   Return an array describing socket status */
+PHP_FUNCTION(socket_get_status)
+{
+	zval **socket;
+	int type;
+	void *what;
+	int socketd = 0;
+	struct php_sockbuf *sock;
+	FLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &socket) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	what = zend_fetch_resource(socket, -1, "File-Handle", &type, 1, le_socket);
+	ZEND_VERIFY_RESOURCE(what);
+	socketd = *(int *)what;
+	sock = php_get_socket(socketd);
+
+	array_init(return_value);
+
+	add_assoc_bool(return_value, "timed_out", sock->timeout_event);
+	add_assoc_bool(return_value, "blocked", sock->is_blocked);
+	add_assoc_bool(return_value, "eof", sock->eof);
+	add_assoc_long(return_value, "unread_bytes", sock->writepos - sock->readpos);
+}
+/* }}} */
+
+
 /* {{{ proto string fgets(int fp, int length)
    Get a line from file pointer */
 
@@ -1691,13 +1733,13 @@ PHP_FUNCTION(fgetcsv) {
 /* }}} */
 
 /* {{{ proto string realpath(string path)
-   Returns the resolved path */
+   Return the resolved path */
 PHP_FUNCTION(realpath)
 {
 	zval **path;
 	char resolved_path[MAXPATHLEN];
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &path) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &path) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
