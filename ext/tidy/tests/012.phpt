@@ -8,7 +8,7 @@ Accessing children nodes
 --FILE--
 <?php
 
-        function dump_nodes(tidy_node $node) {
+        function dump_nodes(tidyNode $node) {
 
             var_dump($node->hasChildren());
             if($node->hasChildren()) {
@@ -35,7 +35,7 @@ Accessing children nodes
 ?>
 --EXPECT--
 bool(true)
-object(tidy_node)#3 (6) {
+object(tidyNode)#3 (6) {
   ["value"]=>
   string(31) "<head>
 <title></title>
@@ -52,7 +52,7 @@ object(tidy_node)#3 (6) {
   ["child"]=>
   array(1) {
     [0]=>
-    &object(tidy_node)#4 (6) {
+    &object(tidyNode)#4 (6) {
       ["value"]=>
       string(16) "<title></title>
 "
@@ -70,7 +70,7 @@ object(tidy_node)#3 (6) {
   }
 }
 bool(true)
-object(tidy_node)#4 (6) {
+object(tidyNode)#4 (6) {
   ["value"]=>
   string(16) "<title></title>
 "
@@ -85,7 +85,7 @@ object(tidy_node)#4 (6) {
   ["child"]=>
   NULL
 }
-object(tidy_node)#5 (6) {
+object(tidyNode)#5 (6) {
   ["value"]=>
   string(80) "<body bgcolor="#FFFFFF" alink="#000000">
 <b>Hi</b><i>Bye<u>Test</u></i>
@@ -107,7 +107,7 @@ object(tidy_node)#5 (6) {
   ["child"]=>
   array(2) {
     [0]=>
-    &object(tidy_node)#6 (6) {
+    &object(tidyNode)#6 (6) {
       ["value"]=>
       string(9) "<b>Hi</b>"
       ["name"]=>
@@ -121,7 +121,7 @@ object(tidy_node)#5 (6) {
       ["child"]=>
       array(1) {
         [0]=>
-        &object(tidy_node)#7 (5) {
+        &object(tidyNode)#7 (5) {
           ["value"]=>
           string(2) "Hi"
           ["name"]=>
@@ -136,7 +136,7 @@ object(tidy_node)#5 (6) {
       }
     }
     [1]=>
-    &object(tidy_node)#8 (6) {
+    &object(tidyNode)#8 (6) {
       ["value"]=>
       string(21) "<i>Bye<u>Test</u></i>"
       ["name"]=>
@@ -150,7 +150,7 @@ object(tidy_node)#5 (6) {
       ["child"]=>
       array(2) {
         [0]=>
-        &object(tidy_node)#9 (5) {
+        &object(tidyNode)#9 (5) {
           ["value"]=>
           string(3) "Bye"
           ["name"]=>
@@ -163,7 +163,7 @@ object(tidy_node)#5 (6) {
           NULL
         }
         [1]=>
-        &object(tidy_node)#10 (6) {
+        &object(tidyNode)#10 (6) {
           ["value"]=>
           string(11) "<u>Test</u>"
           ["name"]=>
@@ -177,7 +177,7 @@ object(tidy_node)#5 (6) {
           ["child"]=>
           array(1) {
             [0]=>
-            &object(tidy_node)#11 (5) {
+            &object(tidyNode)#11 (5) {
               ["value"]=>
               string(4) "Test"
               ["name"]=>
@@ -196,7 +196,7 @@ object(tidy_node)#5 (6) {
   }
 }
 bool(true)
-object(tidy_node)#6 (6) {
+object(tidyNode)#6 (6) {
   ["value"]=>
   string(9) "<b>Hi</b>"
   ["name"]=>
@@ -210,7 +210,7 @@ object(tidy_node)#6 (6) {
   ["child"]=>
   array(1) {
     [0]=>
-    &object(tidy_node)#7 (5) {
+    &object(tidyNode)#7 (5) {
       ["value"]=>
       string(2) "Hi"
       ["name"]=>
@@ -225,7 +225,7 @@ object(tidy_node)#6 (6) {
   }
 }
 bool(true)
-object(tidy_node)#7 (5) {
+object(tidyNode)#7 (5) {
   ["value"]=>
   string(2) "Hi"
   ["name"]=>
@@ -237,7 +237,7 @@ object(tidy_node)#7 (5) {
   ["child"]=>
   NULL
 }
-object(tidy_node)#8 (6) {
+object(tidyNode)#8 (6) {
   ["value"]=>
   string(21) "<i>Bye<u>Test</u></i>"
   ["name"]=>
@@ -251,7 +251,7 @@ object(tidy_node)#8 (6) {
   ["child"]=>
   array(2) {
     [0]=>
-    &object(tidy_node)#9 (5) {
+    &object(tidyNode)#9 (5) {
       ["value"]=>
       string(3) "Bye"
       ["name"]=>
@@ -264,7 +264,7 @@ object(tidy_node)#8 (6) {
       NULL
     }
     [1]=>
-    &object(tidy_node)#10 (6) {
+    &object(tidyNode)#10 (6) {
       ["value"]=>
       string(11) "<u>Test</u>"
       ["name"]=>
@@ -278,7 +278,7 @@ object(tidy_node)#8 (6) {
       ["child"]=>
       array(1) {
         [0]=>
-        &object(tidy_node)#11 (5) {
+        &object(tidyNode)#11 (5) {
           ["value"]=>
           string(4) "Test"
           ["name"]=>
@@ -295,7 +295,7 @@ object(tidy_node)#8 (6) {
   }
 }
 bool(true)
-object(tidy_node)#9 (5) {
+object(tidyNode)#9 (5) {
   ["value"]=>
   string(3) "Bye"
   ["name"]=>
@@ -307,7 +307,7 @@ object(tidy_node)#9 (5) {
   ["child"]=>
   NULL
 }
-object(tidy_node)#10 (6) {
+object(tidyNode)#10 (6) {
   ["value"]=>
   string(11) "<u>Test</u>"
   ["name"]=>
@@ -321,7 +321,7 @@ object(tidy_node)#10 (6) {
   ["child"]=>
   array(1) {
     [0]=>
-    &object(tidy_node)#11 (5) {
+    &object(tidyNode)#11 (5) {
       ["value"]=>
       string(4) "Test"
       ["name"]=>
@@ -336,7 +336,7 @@ object(tidy_node)#10 (6) {
   }
 }
 bool(true)
-object(tidy_node)#11 (5) {
+object(tidyNode)#11 (5) {
   ["value"]=>
   string(4) "Test"
   ["name"]=>

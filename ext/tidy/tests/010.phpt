@@ -15,7 +15,7 @@ Accessing root, body, html, and head nodes..
  
 ?>
 --EXPECT--
-object(tidy_node)#2 (5) {
+object(tidyNode)#2 (5) {
   ["value"]=>
   string(94) "<html>
 <head>
@@ -33,7 +33,7 @@ object(tidy_node)#2 (5) {
   ["child"]=>
   array(1) {
     [0]=>
-    &object(tidy_node)#3 (6) {
+    &object(tidyNode)#3 (6) {
       ["value"]=>
       string(94) "<html>
 <head>
@@ -53,7 +53,7 @@ object(tidy_node)#2 (5) {
       ["child"]=>
       array(2) {
         [0]=>
-        &object(tidy_node)#4 (6) {
+        &object(tidyNode)#4 (6) {
           ["value"]=>
           string(31) "<head>
 <title></title>
@@ -70,7 +70,7 @@ object(tidy_node)#2 (5) {
           ["child"]=>
           array(1) {
             [0]=>
-            &object(tidy_node)#5 (6) {
+            &object(tidyNode)#5 (6) {
               ["value"]=>
               string(16) "<title></title>
 "
@@ -88,7 +88,7 @@ object(tidy_node)#2 (5) {
           }
         }
         [1]=>
-        &object(tidy_node)#6 (6) {
+        &object(tidyNode)#6 (6) {
           ["value"]=>
           string(49) "<body bgcolor="#FFFFFF" alink="#000000">
 </body>
@@ -113,7 +113,7 @@ object(tidy_node)#2 (5) {
     }
   }
 }
-object(tidy_node)#2 (6) {
+object(tidyNode)#2 (6) {
   ["value"]=>
   string(49) "<body bgcolor="#FFFFFF" alink="#000000">
 </body>
@@ -134,7 +134,7 @@ object(tidy_node)#2 (6) {
   ["child"]=>
   NULL
 }
-object(tidy_node)#2 (6) {
+object(tidyNode)#2 (6) {
   ["value"]=>
   string(94) "<html>
 <head>
@@ -154,7 +154,7 @@ object(tidy_node)#2 (6) {
   ["child"]=>
   array(2) {
     [0]=>
-    &object(tidy_node)#3 (6) {
+    &object(tidyNode)#3 (6) {
       ["value"]=>
       string(31) "<head>
 <title></title>
@@ -171,7 +171,7 @@ object(tidy_node)#2 (6) {
       ["child"]=>
       array(1) {
         [0]=>
-        &object(tidy_node)#6 (6) {
+        &object(tidyNode)#6 (6) {
           ["value"]=>
           string(16) "<title></title>
 "
@@ -189,7 +189,7 @@ object(tidy_node)#2 (6) {
       }
     }
     [1]=>
-    &object(tidy_node)#4 (6) {
+    &object(tidyNode)#4 (6) {
       ["value"]=>
       string(49) "<body bgcolor="#FFFFFF" alink="#000000">
 </body>
@@ -212,7 +212,7 @@ object(tidy_node)#2 (6) {
     }
   }
 }
-object(tidy_node)#2 (6) {
+object(tidyNode)#2 (6) {
   ["value"]=>
   string(31) "<head>
 <title></title>
@@ -229,7 +229,7 @@ object(tidy_node)#2 (6) {
   ["child"]=>
   array(1) {
     [0]=>
-    &object(tidy_node)#4 (6) {
+    &object(tidyNode)#4 (6) {
       ["value"]=>
       string(16) "<title></title>
 "
