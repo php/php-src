@@ -225,7 +225,7 @@ PHP_FUNCTION(ftp_login)
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	/* log in */
-	if (!ftp_login(ftp, user, pass)) {
+	if (!ftp_login(ftp, user, pass TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -396,7 +396,7 @@ PHP_FUNCTION(ftp_nlist)
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	/* get list of files */
-	if (NULL == (nlist = ftp_nlist(ftp, dir))) {
+	if (NULL == (nlist = ftp_nlist(ftp, dir TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
 
@@ -424,7 +424,7 @@ PHP_FUNCTION(ftp_rawlist)
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	/* get raw directory listing */
-	if (NULL == (llist = ftp_list(ftp, dir, recursive))) {
+	if (NULL == (llist = ftp_list(ftp, dir, recursive TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
 
@@ -539,7 +539,7 @@ PHP_FUNCTION(ftp_nb_fget)
 	ftp->direction = 0;   /* recv */
 	ftp->closestream = 0; /* do not close */
 
-	if ((ret = ftp_nb_get(ftp, stream, file, xtype, resumepos)) == PHP_FTP_FAILED) {
+	if ((ret = ftp_nb_get(ftp, stream, file, xtype, resumepos TSRMLS_CC)) == PHP_FTP_FAILED) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_LONG(ret);
 	}
@@ -677,7 +677,7 @@ PHP_FUNCTION(ftp_nb_get)
 	ftp->direction = 0;   /* recv */
 	ftp->closestream = 1; /* do close */
 
-	if ((ret = ftp_nb_get(ftp, outstream, remote, xtype, resumepos)) == PHP_FTP_FAILED) {
+	if ((ret = ftp_nb_get(ftp, outstream, remote, xtype, resumepos TSRMLS_CC)) == PHP_FTP_FAILED) {
 		php_stream_close(outstream);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_LONG(PHP_FTP_FAILED);
@@ -815,7 +815,7 @@ PHP_FUNCTION(ftp_nb_fput)
 	ftp->direction = 1;   /* send */
 	ftp->closestream = 0; /* do not close */
 
-	if (((ret = ftp_nb_put(ftp, remote, stream, xtype, startpos)) == PHP_FTP_FAILED)) {
+	if (((ret = ftp_nb_put(ftp, remote, stream, xtype, startpos TSRMLS_CC)) == PHP_FTP_FAILED)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_LONG(ret);
 	}
@@ -925,7 +925,7 @@ PHP_FUNCTION(ftp_nb_put)
 	ftp->direction = 1;   /* send */
 	ftp->closestream = 1; /* do close */
 
-	ret = ftp_nb_put(ftp, remote, instream, xtype, startpos);
+	ret = ftp_nb_put(ftp, remote, instream, xtype, startpos TSRMLS_CC);
 
 	if (ret != PHP_FTP_MOREDATA) {
 		php_stream_close(instream);
@@ -1136,6 +1136,7 @@ PHP_FUNCTION(ftp_get_option)
 			break;
 		case PHP_FTP_OPT_AUTOSEEK:
 			RETURN_BOOL(ftp->autoseek);
+			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown option '%d'", option);
 			RETURN_FALSE;

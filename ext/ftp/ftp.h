@@ -107,7 +107,7 @@ void		ftp_gc(ftpbuf_t *ftp);
 ftpbuf_t*	ftp_close(ftpbuf_t *ftp);
 
 /* logs into the FTP server, returns true on success, false on error */
-int		ftp_login(ftpbuf_t *ftp, const char *user, const char *pass);
+int		ftp_login(ftpbuf_t *ftp, const char *user, const char *pass TSRMLS_DC);
 
 /* reinitializes the connection, returns true on success, false on error */
 int		ftp_reinit(ftpbuf_t *ftp);
@@ -139,14 +139,14 @@ int		ftp_rmdir(ftpbuf_t *ftp, const char *dir);
  * or NULL on error.  the return array must be freed (but don't
  * free the array elements)
  */
-char**		ftp_nlist(ftpbuf_t *ftp, const char *path);
+char**		ftp_nlist(ftpbuf_t *ftp, const char *path TSRMLS_DC);
 
 /* returns a NULL-terminated array of lines returned by the ftp
  * LIST command for the given path or NULL on error.  the return
  * array must be freed (but don't
  * free the array elements)
  */
-char**		ftp_list(ftpbuf_t *ftp, const char *path, int recursive);
+char**		ftp_list(ftpbuf_t *ftp, const char *path, int recursive TSRMLS_DC);
 
 /* switches passive mode on or off
  * returns true on success, false on error
@@ -182,13 +182,12 @@ int		ftp_site(ftpbuf_t *ftp, const char *cmd);
 /* retrieves part of a file and saves its contents to outfp
  * returns true on success, false on error
  */
-int		ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path,
-			ftptype_t type, int resumepos);
+int		ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, int resumepos TSRMLS_DC);
 
 /* stores the data from a file, socket, or process as a file on the remote server
  * returns true on success, false on error
  */
-int		ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, int startpos);
+int		ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, int startpos TSRMLS_DC);
 
 /* continues a previous nb_(f)get command
  */
