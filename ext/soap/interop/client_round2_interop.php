@@ -370,7 +370,7 @@ class Interop_Client extends Interop_Base
                 if (!array_key_exists('client',$endpoint_info)) {
                     $endpoint_info['client'] = new SoapObject($endpoint_info['wsdlURL']);
                 }
-                $soap = $endpoint_info['client'];
+                $soap =& $endpoint_info['client'];
                 
                 # XXX how do we determine a failure on retreiving/parsing wsdl?
                 if ($soap->wsdl->fault) {
@@ -418,13 +418,22 @@ class Interop_Client extends Interop_Base
         // this lets us set UTF-8, US-ASCII or other
         //$soap->setEncoding($soap_test->encoding);
         
-        $return = $soap->__call($soap_test->method_name,$soap_test->method_params, $soapaction, $namespace);
+        if ($this->useWSDL) {
+            $args = '';
+            foreach ($soap_test->method_params as $pname => $param) {
+                $arg = '$soap_test->method_params["'.$pname.'"]';
+                $args .= $args?','.$arg:$arg;
+            }
+            $return = eval('return $soap->'.$soap_test->method_name.'('.$args.');');
+        } else {
+            $return = $soap->__call($soap_test->method_name,$soap_test->method_params,$soapaction, $namespace);
+        }
         
         // save the wire
         $wire = $soap->__getlastrequest()."\n\n".$soap->__getlastresponse();
         $wire = str_replace('>',">\n",$wire);
         $wire = str_replace('" ',"\" \n",$wire);
-        print $wire;
+        #print $wire;
         
         if(!$soap->__isfault()){
             if (is_array($soap_test->method_params) && count($soap_test->method_params) == 1) {
