@@ -33,7 +33,7 @@ if test "$PHP_FBSQL" != "no"; then
     fi
   fi  
 
-  if test -z "$FBSQL_INSTALLATION_DIR/lib/libFBCAccess.a"; then
+  if test ! -r "$FBSQL_INSTALLATION_DIR/lib/libFBCAccess.a"; then
      AC_MSG_ERROR(Could not find $FBSQL_INSTALLATION_DIR/lib/libFBCAccess.a)
   fi
 
