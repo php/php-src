@@ -66,6 +66,7 @@ function_entry dba_functions[] = {
 	PHP_FE(dba_sync, NULL)
 	PHP_FE(dba_handlers, NULL)
 	PHP_FE(dba_list, NULL)
+	PHP_FE(dba_key_split, NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -907,6 +908,27 @@ PHP_FUNCTION(dba_fetch)
 	} 
 	DBA_ID_DONE;
 	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto array dba_key_split(string key)
+   Splits an inifile key into an array of the form array(0=>group,1=>value_name) */
+PHP_FUNCTION(dba_key_split)
+{
+	char *key, *name;
+	int key_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len) == FAILURE) {
+		return;
+	}
+	array_init(return_value);
+	if (key[0] == '[' && (name = strchr(key, ']')) != NULL) {
+		add_next_index_stringl(return_value, key+1, name - (key + 1), 1);
+		add_next_index_stringl(return_value, name+1, key_len - (name - key + 1), 1);
+	} else {
+		add_next_index_stringl(return_value, "", 0, 1);
+		add_next_index_stringl(return_value, key, key_len, 1);
+	}
 }
 /* }}} */
 
