@@ -1,3 +1,108 @@
+2000-11-23  Stig Venaas  <venaas@uninett.no>
+
+    * ext/openssl/CREDITS
+      ext/openssl/README: Added README on usage, and added myself to CREDITS
+
+2000-11-23  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/output.c
+      ext/standard/php_output.h
+      main/main.c:
+    Very initial work on chunked output buffering.  It's really unoptimized at
+    this time, and it can crash under some circumstances, but that's the
+    concept...
+
+2000-11-23  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c: This submission introduces two features.
+
+    The first one is support for Perl-style matching regexp delimiters, i.e.
+    using <[{( and )}]> to delimit the regular expressions.
+
+    The second one is a new 'F' modifier that allows you to specify a function name
+    in the replacement argument to preg_replace(). This function will be called
+    when the replacement needs to be made. It is passed an array of full matched
+    pattern and captured subpatterns and it is expected to return a string that
+    will be used for replacement. 'e' and 'F' modifiers cannot be used together.
+
+
+
+2000-11-23  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/curl/curl.c: Revert bad commit.
+
+2000-11-23  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/php4dllts.dsp: oops, libcrypt shouln't be in the linker libs
+    by default
+
+2000-11-23  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/curl/curl.c: Fixed some compile warnings.
+
+    * ext/gd/gd.c: Fixed Bug #7939 + some cleaning.
+
+2000-11-23  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c
+      ext/hyperwave/hg_comm.h
+      ext/hyperwave/hw.c:
+    - optional argument for hw_pipedocument() to specify link prefix
+
+2000-11-23  Zeev Suraski  <zeev@zend.com>
+
+    * win32/libbcmath.dsp
+      win32/php4dllts.dsp
+      win32/php4ts.dsw: I forgot to commit the .dsp update...
+
+2000-11-23  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/php_modules.dsw
+      ext/ctype/ctype.dsp: make ctype ext compile under windows
+
+2000-11-23  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dllts.dsp: Fixed typo.
+
+2000-11-23  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/sablot/sablot.c: added missing SABLOTLS_FETCH()
+
+2000-11-23  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/exif/exif.c
+      ext/ccvs/ccvs.c: make genfunclist in phpdoc happy
+
+2000-11-23  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/fdf/config.m4:
+    - The name of the extension has to be fdf and not fdftk
+
+2000-11-23  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/libbcmath.dsp
+      win32/php4dllts.dsp
+      win32/php4ts.dsw: fix libbcmath compile, updated dependencies & add
+    libbcmath to linker options
+
+2000-11-23  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/config.m4: - fixed copy and paste error
+
+2000-11-23  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/credits_ext.h
+      ext/standard/credits_sapi.h
+      scripts/credits: filename wildcards in a c comment were a bad idea
+
+2000-11-23  Frank M. Kromann  <fmk@swwwing.com>
+
+    * win32/libbcmath.dsp: Adding Win32 project for libbcmath
+
+    * ext/standard/credits_ext.h
+      ext/standard/credits_sapi.h:
+    changed comment to allow compilation under win32
+
 2000-11-22  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/standard/credits_ext.h
