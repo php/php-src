@@ -97,7 +97,7 @@ PHP_RINIT_FUNCTION(pfpro)
 {
 	PFPROLS_FETCH();
 
-	PFPROG(initialised) = 0;
+	PFPROG(initialized) = 0;
 
     return SUCCESS;
 }
@@ -106,7 +106,7 @@ PHP_RSHUTDOWN_FUNCTION(pfpro)
 {
 	PFPROLS_FETCH();
 
-	if (PFPROG(initialised) == 1) {
+	if (PFPROG(initialized) == 1) {
 		PNCleanup();
 	}
 
@@ -150,7 +150,7 @@ PHP_FUNCTION(pfpro_init)
 
 	PNInit();
 
-	PFPROG(initialised) = 1;
+	PFPROG(initialized) = 1;
 
 	RETURN_TRUE;
 }
@@ -168,7 +168,7 @@ PHP_FUNCTION(pfpro_cleanup)
 
 	PNCleanup();
 
-	PFPROG(initialised) = 0;
+	PFPROG(initialized) = 0;
 
 	RETURN_TRUE;
 }
@@ -275,9 +275,9 @@ PHP_FUNCTION(pfpro_process_raw)
 
 	/* Initialise the library if needed */
 
-	if (PFPROG(initialised) == 0) {
+	if (PFPROG(initialized) == 0) {
 		PNInit();
-		PFPROG(initialised) = 1;
+		PFPROG(initialized) = 1;
 	}
 
 	/* Perform the transaction */
@@ -520,9 +520,9 @@ PHP_FUNCTION(pfpro_process)
 
 	/* Initialise the library if needed */
 
-	if (PFPROG(initialised) == 0) {
+	if (PFPROG(initialized) == 0) {
 		PNInit();
-		PFPROG(initialised) = 1;
+		PFPROG(initialized) = 1;
 	}
 
 	/* Perform the transaction */

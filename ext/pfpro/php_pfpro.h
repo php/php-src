@@ -46,7 +46,7 @@ PHP_FUNCTION(pfpro_process);            /* Transaction processing     */
 
 typedef struct {
 	int le_pfpro;
-	int initialised;
+	int initialized;
 	char *defaulthost;
 	int defaultport;
 	int defaulttimeout;
