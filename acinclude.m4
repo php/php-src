@@ -15,11 +15,11 @@ AC_DEFUN(PHP_EVAL_LIBLINE,[
     case "$ac_i" in
     -l*)
       ac_ii=`echo $ac_i|cut -c 3-`
-      AC_ADD_LIBRARY($ac_ii,$2)
+      AC_ADD_LIBRARY($ac_ii,,$2)
     ;;
     -L*)
       ac_ii=`echo $ac_i|cut -c 3-`
-      AC_ADD_LIBPATH($ac_ii,,$2)
+      AC_ADD_LIBPATH($ac_ii,$2)
     ;;
     esac
   done
