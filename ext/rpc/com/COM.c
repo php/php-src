@@ -533,6 +533,7 @@ int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_re
 
 	for (current_arg=0; current_arg<arg_count; current_arg++) {
 		current_variant = arg_count - current_arg - 1;
+		zval_dtor(arguments[current_arg]);
 		php_variant_to_pval(&variant_args[current_variant], arguments[current_arg], 0);
 	}
 
