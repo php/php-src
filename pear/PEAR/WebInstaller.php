@@ -17,6 +17,14 @@
 // +---------------------------------------------------------------------+
 
 
+/*
+
+    WARNING: Due to internal changes in PEAR, the webinstaller is
+             currently not supported!
+
+*/
+
+
 /* This class should simplify the task of installing PEAR-packages, if you
  *  don't have a cgi-php binary on your system or you don't have access to
  *  the system-wide pear directory.
