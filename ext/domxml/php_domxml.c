@@ -2871,7 +2871,7 @@ static void php_xpathptr_new_context(INTERNAL_FUNCTION_PARAMETERS, int mode)
 }
 /* }}} */
 
-/* {{{ proto string xpath_new_context([int doc_handle])
+/* {{{ proto object xpath_new_context([int doc_handle])
    Creates new XPath context */
 PHP_FUNCTION(xpath_new_context)
 {
@@ -2879,7 +2879,7 @@ PHP_FUNCTION(xpath_new_context)
 }
 /* }}} */
 
-/* {{{ proto string xptr_new_context([int doc_handle])
+/* {{{ proto object xptr_new_context([int doc_handle])
    Creates new XPath context */
 PHP_FUNCTION(xptr_new_context)
 {
@@ -3017,7 +3017,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 }
 /* }}} */
 
-/* {{{ proto int xpath_eval([int xpathctx_handle,] string str)
+/* {{{ proto object xpath_eval([object xpathctx_handle,] string str)
    Evaluates the XPath Location Path in the given string */
 PHP_FUNCTION(xpath_eval)
 {
@@ -3025,7 +3025,7 @@ PHP_FUNCTION(xpath_eval)
 }
 /* }}} */
 
-/* {{{ proto int xpath_eval_expression([int xpathctx_handle,] string str)
+/* {{{ proto object xpath_eval_expression([object xpathctx_handle,] string str)
    Evaluates the XPath expression in the given string */
 PHP_FUNCTION(xpath_eval_expression)
 {
@@ -3033,7 +3033,7 @@ PHP_FUNCTION(xpath_eval_expression)
 }
 /* }}} */
 
-/* {{{ proto bool xpath_register_ns([int xpathctx_handle,] string namespace_prefix, string namespace_uri)
+/* {{{ proto bool xpath_register_ns([object xpathctx_handle,] string namespace_prefix, string namespace_uri)
 	Registeres the given namespace in the passed XPath context */
 PHP_FUNCTION(xpath_register_ns)
 {
@@ -3042,36 +3042,21 @@ PHP_FUNCTION(xpath_register_ns)
 	- make the namespace registration persistent - now it dissapears each time xpath_eval is called
 	- automagically register all namespaces when creating a new context
 	*/
+
 	int prefix_len, uri_len, result;
 	xmlXPathContextPtr ctxp;
 	char *prefix, *uri;
 	zval *id;
-	
-	if (NULL == (id = getThis())) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oss", &id, &prefix, &prefix_len, &uri, &uri_len) == FAILURE) {
-			return;
-		}
-	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &prefix, &prefix_len, &uri, &uri_len) == FAILURE) {
-			return;
-		}
-	}
 
-	ctxp = php_xpath_get_context(id, le_xpathctxp, 0 TSRMLS_CC);
-    if (!ctxp) {
-		php_error(E_WARNING, "%s(): cannot fetch XPATH context", get_active_function_name(TSRMLS_C));
-        RETURN_FALSE;
-    }
+	DOMXML_PARAM_FOUR(ctxp, id, le_xpathctxp, "ss", &prefix, &prefix_len, &uri, &uri_len);
 
 	/* set the context node to NULL - what is a context node anyway? */
 	ctxp->node = NULL;
-
 	result = xmlXPathRegisterNs(ctxp, prefix, uri);
 
 	if (0 == result) {
 		RETURN_TRUE;
 	}
-
 	RETURN_FALSE;
 }
 /* }}} */
