@@ -101,7 +101,7 @@ class PEAR_Registry extends PEAR
 
         // XXX Compatibility code should be removed in the future
         // rename all registry files if any to lowercase
-        if (!OS_WINDOWS && $handle = opendir($this->statedir)) {
+        if (!OS_WINDOWS && $handle = @opendir($this->statedir)) {
             $dest = $this->statedir . DIRECTORY_SEPARATOR;
             while (false !== ($file = readdir($handle))) {
                 if (preg_match('/^.*[A-Z].*\.reg$/', $file)) {
