@@ -25,4 +25,19 @@ ext/standard
 ------------
     * strpad() (Andrei)
     * advanced sort (Andrei)
-    * make all string functions binary-safe.
+	* NOT binary safe:
+		strcspn()
+		implode()
+		strtok()
+		strtoupper()
+		strtolower()
+		basename()
+		dirname()
+		stristr()
+		strstr()
+		strrpos()
+		strrchr()
+		substr_replace()
+		quotemeta()
+		ucwords()
+		strip_tags()
