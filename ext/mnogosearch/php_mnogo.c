@@ -7,10 +7,10 @@
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2003 The PHP Group                                |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.02 of the PHP license,      |
+   | This source file is subject to version 3.0 of the PHP license,       |
    | that is bundled with this package in the file LICENSE, and is        |
-   | available at through the world-wide-web at                           |
-   | http://www.php.net/license/2_02.txt.                                 |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_0.txt.                                  |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -1883,6 +1883,14 @@ DLEXPORT PHP_FUNCTION(udm_find)
 	int id=-1;
 
 	switch(ZEND_NUM_ARGS()){
+#if UDM_VERSION_ID >= 30213
+		case 1: {
+				if (zend_get_parameters_ex(1, &yyagent)==FAILURE) {
+					RETURN_FALSE;
+				}
+			}
+			break;
+#endif
 		case 2: {
 				if (zend_get_parameters_ex(2, &yyagent,&yyquery)==FAILURE) {
 					RETURN_FALSE;
@@ -1899,7 +1907,11 @@ DLEXPORT PHP_FUNCTION(udm_find)
 #if UDM_VERSION_ID < 30200
 	if ((Res=UdmFind(Agent,UdmTolower(Z_STRVAL_PP(yyquery),Agent->charset)))) {
 #else
+#if UDM_VERSION_ID >= 30213
+	if ((Res=UdmFind(Agent))) {
+#else
 	if ((Res=UdmFind(Agent,Z_STRVAL_PP(yyquery)))) {
+#endif
 #endif	
 	    ZEND_REGISTER_RESOURCE(return_value,Res,le_res);
 	} else {
@@ -2381,7 +2393,6 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 			    add_next_index_stringl(return_value, C.Category[i].name,strlen(C.Category[i].name),1);
 			}
 		    } else {
-			free(buf);
 			RETURN_FALSE;
 		    }
 		}
@@ -2456,7 +2467,6 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 			    add_next_index_stringl(return_value, C.Category[i].name,strlen(C.Category[i].name),1);
 			}
 		    } else {
-			free(buf);
 			RETURN_FALSE;
 		    }
 		}
