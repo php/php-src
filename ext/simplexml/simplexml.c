@@ -215,10 +215,15 @@ sxe_property_write(zval *object, zval *member, zval *value TSRMLS_DC)
 static zval **
 sxe_property_get_ptr(zval *object, zval *member TSRMLS_DC)
 {
-	zval *property = sxe_property_read(object, member TSRMLS_CC);
+	zval **property_ptr;
+	zval  *property;
+	
+	property = sxe_property_read(object, member TSRMLS_CC);
 	zval_add_ref(&property);
 
-	return &property;
+	property_ptr = &property;
+
+	return property_ptr;
 }
 /* }}} */
 
@@ -272,7 +277,7 @@ sxe_property_delete(zval *object, zval *member TSRMLS_DC)
 static HashTable *
 sxe_properties_get(zval *object TSRMLS_DC)
 {
-	zval           *return_value;
+	HashTable      *return_value;
 	zval           *value;
 	php_sxe_object *sxe;
 	char           *name;
