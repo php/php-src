@@ -33,7 +33,8 @@
 #define RAND_MAX (1<<15)
 #endif
 
-#if defined(HAVE_LRAND48) || defined(HAVE_RANDOM)
+/* In ZTS mode we rely on rand_r() so we must use RAND_MAX. */
+#if !defined(ZTS) && (defined(HAVE_LRAND48) || defined(HAVE_RANDOM))
 #define PHP_RAND_MAX 2147483647
 #else
 #define PHP_RAND_MAX RAND_MAX

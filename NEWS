@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2004, Version 4.3.5
+- Fixed bug #26949 (rand(min,max) always returns min when ZTS enabled). (Jani)
 - Fixed bug #26937 (Warning in xml.c). (Jani)
 - Fixed Bug #26927 (preg_quote() does not escape \0). (Ilia)
 - Fixed bug #26923 (ext/imap: pam and crypt libraries missing when build as
