@@ -113,11 +113,11 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 	size_t i, j;
 
 	result = (char *) emalloc(oldlen * 2 * sizeof(char) + 1);
-	if(!result) {
+	if (!result) {
 		return result;
 	}
 	
-	for(i = j = 0; i < oldlen; i++) {
+	for (i = j = 0; i < oldlen; i++) {
 		result[j++] = hexconvtab[old[i] >> 4];
 		result[j++] = hexconvtab[old[i] & 15];
 	}
@@ -491,21 +491,21 @@ static inline int php_charmask(unsigned char *input, int len, char *mask TSRMLS_
 	int result = SUCCESS;
 
 	memset(mask, 0, 256);
-	for (end=input+len; input<end; input++) {
+	for (end = input+len; input < end; input++) {
 		c=*input; 
-		if (input+3<end && input[1] == '.' && input[2] == '.' 
+		if ((input+3 < end) && input[1] == '.' && input[2] == '.' 
 				&& input[3] >= c) {
 			memset(mask+c, 1, input[3] - c + 1);
 			input+=3;
-		} else if (input+1<end && input[0] == '.' && input[1] == '.') {
+		} else if ((input+1 < end) && input[0] == '.' && input[1] == '.') {
 			/* Error, try to be as helpful as possible:
 			   (a range ending/starting with '.' won't be captured here) */
-			if (end-len>=input) { /* there was no 'left' char */
+			if (end-len >= input) { /* there was no 'left' char */
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range, no character to the left of '..'.");
 				result = FAILURE;
 				continue;
 			}
-			if (input+2>=end) { /* there is no 'right' char */
+			if (input+2 >= end) { /* there is no 'right' char */
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid '..'-range, no character to the right of '..'.");
 				result = FAILURE;
 				continue;
@@ -984,7 +984,7 @@ PHPAPI char *php_strtoupper(char *s, size_t len)
 	c = s;
 	e = c+len;
 
-	while (c<e) {
+	while (c < e) {
 		*c = toupper(*c);
 		c++;
 	}
@@ -1018,7 +1018,7 @@ PHPAPI char *php_strtolower(char *s, size_t len)
 	c = s;
 	e = c+len;
 
-	while (c<e) {
+	while (c < e) {
 		*c = tolower(*c);
 		c++;
 	}
@@ -1052,8 +1052,8 @@ PHPAPI char *php_basename(char *s, size_t len, char *suffix, size_t sufflen)
 	c = s + len - 1;	
 
 	/* do suffix removal as the unix command does */
-	if(suffix && (len > sufflen)) {
-		if(!strncmp(suffix, c-sufflen+1, sufflen)) {
+	if (suffix && (len > sufflen)) {
+		if (!strncmp(suffix, c-sufflen+1, sufflen)) {
 			c -= sufflen; 
 			buf2 = *(c + 1); /* Save overwritten char */
 			*(c + 1) = '\0'; /* overwrite char */
@@ -1069,7 +1069,7 @@ PHPAPI char *php_basename(char *s, size_t len, char *suffix, size_t sufflen)
 #endif
 		)
 		c--;
-	if(c < s+len-1) {
+	if (c < s+len-1) {
 		buf = *(c + 1);  /* Save overwritten char */
 		*(c + 1) = '\0'; /* overwrite char */
 		p = c + 1;       /* Save pointer to overwritten char */
@@ -1084,8 +1084,8 @@ PHPAPI char *php_basename(char *s, size_t len, char *suffix, size_t sufflen)
 	} else {
 		ret = estrdup(s);
 	}
-	if(buf) *p = buf;
-	if(buf2) *p2 = buf2;
+	if (buf) *p = buf;
+	if (buf2) *p2 = buf2;
 	return (ret);
 }
 /* }}} */
@@ -1524,7 +1524,7 @@ static char *php_chunk_split(char *src, int srclen, char *end, int endlen,
 
 	dest = emalloc((srclen + (chunks + 1) * endlen + 1) * sizeof(char));
 
-	for(p = src, q = dest; p < (src + srclen - chunklen + 1); ) {
+	for (p = src, q = dest; p < (src + srclen - chunklen + 1); ) {
 		memcpy(q, p, chunklen);
 		q += chunklen;
 		memcpy(q, end, endlen);
@@ -1532,7 +1532,7 @@ static char *php_chunk_split(char *src, int srclen, char *end, int endlen,
 		p += chunklen;
 	}
 
-	if(restlen) {
+	if (restlen) {
 		memcpy(q, p, restlen);
 		q += restlen;
 		memcpy(q, end, endlen);
@@ -1644,7 +1644,7 @@ PHP_FUNCTION(substr)
 		RETURN_FALSE;
 	}
 
-	if((f + l) > Z_STRLEN_PP(str)) {
+	if ((f + l) > Z_STRLEN_PP(str)) {
 		l = Z_STRLEN_PP(str) - f;
 	}
 
@@ -1745,9 +1745,9 @@ PHP_FUNCTION(quotemeta)
 	
 	str = emalloc(2 * Z_STRLEN_PP(arg) + 1);
 	
-	for(p = old, q = str; p != old_end; p++) {
+	for (p = old, q = str; p != old_end; p++) {
 		c = *p;
-		switch(c) {
+		switch (c) {
 			case '.':
 			case '\\':
 			case '+':
@@ -1991,7 +1991,7 @@ PHP_FUNCTION(strtr)
 	convert_to_string_ex(str);
 
 	/* shortcut for empty string */
-	if(Z_STRLEN_PP(str) == 0) {
+	if (Z_STRLEN_PP(str) == 0) {
 		RETURN_EMPTY_STRING();
 	}
 
@@ -2020,7 +2020,7 @@ PHP_FUNCTION(strrev)
 	int i, len;
 	char c;
 	
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &str)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -2136,15 +2136,15 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 
 	if (PG(magic_quotes_sybase)) {
 		while (l > 0) {
-			if(*t=='\'') {
-				if((l>0) && (t[1]=='\'')) {
+			if (*t == '\'') {
+				if ((l > 0) && (t[1] == '\'')) {
 					t++;
 					if (len != NULL)
 						(*len)--;
 					l--;
 				}
 				*s++ = *t++;
-			} else if (*t=='\\' && l>0 && t[1]=='0') {
+			} else if (*t == '\\' && l > 0 && t[1] == '0') {
 					*s++='\0';
 					t += 2;
 					if (len != NULL) 
@@ -2167,7 +2167,7 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 				(*len)--;
 			l--;
 			if (l > 0) {
-				if(*t=='0') {
+				if (*t == '0') {
 					*s++='\0';
 					t++;
 				} else {
@@ -2297,8 +2297,8 @@ PHPAPI void php_stripcslashes(char *str, int *len)
 	int  nlen = *len, i;
 	char numtmp[4];
 
-	for (source=str, end=str+nlen, target=str; source<end; source++) {
-		if (*source == '\\' && source+1<end) {
+	for (source=str, end=str+nlen, target=str; source < end; source++) {
+		if (*source == '\\' && source+1 < end) {
 			source++;
 			switch (*source) {
 				case 'n': *target++='\n'; nlen--; break;
@@ -2309,9 +2309,9 @@ PHPAPI void php_stripcslashes(char *str, int *len)
 				case 'b': *target++='\b'; nlen--; break;
 				case 'f': *target++='\f'; nlen--; break;
 				case '\\': *target++='\\'; nlen--; break;
-				case 'x': if (source+1<end && isxdigit((int)(*(source+1)))) {
+				case 'x': if (source+1 < end && isxdigit((int)(*(source+1)))) {
 						numtmp[0] = *++source;
-						if (source+1<end && isxdigit((int)(*(source+1)))) {
+						if (source+1 < end && isxdigit((int)(*(source+1)))) {
 							numtmp[1] = *++source;
 							numtmp[2] = '\0';
 							nlen-=3;
@@ -2324,7 +2324,7 @@ PHPAPI void php_stripcslashes(char *str, int *len)
 					}
 					/* break is left intentionally */
 				default: i=0; 
-					while (source<end && *source>='0' && *source<='7' && i<3) {
+					while (source < end && *source >= '0' && *source <= '7' && i<3) {
 						numtmp[i++] = *source++;
 					}
 					if (i) {
@@ -2342,7 +2342,7 @@ PHPAPI void php_stripcslashes(char *str, int *len)
 		}
 	}
 
-	if(nlen != 0) {
+	if (nlen != 0) {
 		*target='\0';
 	}
 
@@ -2371,7 +2371,7 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 
 	php_charmask(what, wlength, flags TSRMLS_CC);
 
-	for (source=str, end=source+length, target=new_str; (c=*source) || source<end; source++) {
+	for (source = str, end = source+length, target = new_str; (c=*source) || (source < end); source++) {
 		if (flags[(unsigned char)c]) {
 			if ((unsigned char)c<32 || (unsigned char)c>126) {
 				*target++ = '\\';
@@ -2393,7 +2393,7 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 	}
 	*target = 0;
 	newlen = target-new_str;
-	if (target-new_str<length*4) {
+	if (target-new_str < length*4) {
 		new_str = erealloc(new_str, newlen+1);
 	}
 	if (new_length) {
@@ -2422,9 +2422,9 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 	}
 	new_str = (char *) emalloc((length?length:(length=strlen(str)))*2+1);
 	if (PG(magic_quotes_sybase)) {
-		for (source=str, end=source+length, target=new_str; source<end; source++) {
+		for (source = str, end = source+length, target = new_str; source < end; source++) {
 			c = *source;
-			switch(c) {
+			switch (c) {
 				case '\0':
 					*target++ = '\\';
 					*target++ = '0';
@@ -2440,9 +2440,9 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 		}
 	}
 	else {
-		for (source=str, end=source+length, target=new_str; source<end; source++) {
+		for (source = str, end = source+length, target = new_str; source < end; source++) {
 			c = *source;
-			switch(c) {
+			switch (c) {
 				case '\0':
 					*target++ = '\\';
 					*target++ = '0';
@@ -2483,13 +2483,13 @@ PHPAPI int php_char_to_str(char *str, uint len, char from, char *to, int to_len,
 	int replaced = 0;
 	char *source, *target, *tmp, *source_end=str+len, *tmp_end = NULL;
 	
-	for (source=str; source<source_end; source++) {
-		if (*source==from) {
+	for (source = str; source < source_end; source++) {
+		if (*source == from) {
 			char_count++;
 		}
 	}
 
-	if (char_count==0) {
+	if (char_count == 0) {
 		ZVAL_STRINGL(result, str, len, 1);
 		return 0;
 	}
@@ -2666,7 +2666,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 		while (zend_hash_get_current_data(Z_ARRVAL_P(search), (void **) &search_entry) == SUCCESS) {
 			/* Make sure we're dealing with strings. */	
 			convert_to_string_ex(search_entry);
-			if(Z_STRLEN_PP(search_entry) == 0) {
+			if (Z_STRLEN_PP(search_entry) == 0) {
 				zend_hash_move_forward(Z_ARRVAL_P(search));
 				continue;
 			}
@@ -2690,7 +2690,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 				}
 			}
 			
-			if(Z_STRLEN_PP(search_entry) == 1) {
+			if (Z_STRLEN_PP(search_entry) == 1) {
 				php_char_to_str(Z_STRVAL_P(result),
 								Z_STRLEN_P(result),
 								Z_STRVAL_PP(search_entry)[0],
@@ -2745,7 +2745,7 @@ PHP_FUNCTION(str_replace)
 	ulong num_key;
 	int boyer = 0;
 
-	if(ZEND_NUM_ARGS() < 3 ||
+	if (ZEND_NUM_ARGS() < 3 ||
 	   ZEND_NUM_ARGS() > 4 ||
 	   zend_get_parameters_ex(ZEND_NUM_ARGS(), &search, 
 							  &replace, &subject, &pboyer) == FAILURE) {
@@ -2782,7 +2782,7 @@ PHP_FUNCTION(str_replace)
 			MAKE_STD_ZVAL(result);
 			php_str_replace_in_subject(*search, *replace, subject_entry, result, boyer);
 			/* Add to return array */
-			switch(zend_hash_get_current_key_ex(Z_ARRVAL_PP(subject), &string_key,
+			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(subject), &string_key,
 												&string_key_len, &num_key, 0, NULL)) {
 				case HASH_KEY_IS_STRING:
 					add_assoc_zval_ex(return_value, string_key, string_key_len, result);
@@ -2815,14 +2815,14 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 	int begin, end, char_count, orig_begin;
 
 	
-	switch(ZEND_NUM_ARGS()) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			if (zend_get_parameters_ex(1, &str)==FAILURE) {
+			if (zend_get_parameters_ex(1, &str) == FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
 		case 2:
-			if (zend_get_parameters_ex(2, &str, &max_chars_per_line)==FAILURE) {
+			if (zend_get_parameters_ex(2, &str, &max_chars_per_line) == FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(max_chars_per_line);
@@ -2835,7 +2835,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 	
 	convert_to_string_ex(str);
 	
-	if (Z_STRLEN_PP(str)==0) {
+	if (Z_STRLEN_PP(str) == 0) {
 		RETURN_FALSE;
 	}
 
@@ -2856,13 +2856,13 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 	}
 	
 	do {
-		if (block_type==_HEB_BLOCK_TYPE_HEB) {
-			while((isheb((int)*(tmp+1)) || _isblank((int)*(tmp+1)) || ispunct((int)*(tmp+1)) || (int)*(tmp+1)=='\n' ) && block_end<Z_STRLEN_PP(str)-1) {
+		if (block_type == _HEB_BLOCK_TYPE_HEB) {
+			while ((isheb((int)*(tmp+1)) || _isblank((int)*(tmp+1)) || ispunct((int)*(tmp+1)) || (int)*(tmp+1)=='\n' ) && block_end<Z_STRLEN_PP(str)-1) {
 				tmp++;
 				block_end++;
 				block_length++;
 			}
-			for (i=block_start; i<=block_end; i++) {
+			for (i = block_start; i<= block_end; i++) {
 				*target = Z_STRVAL_PP(str)[i];
 				switch (*target) {
 					case '(':
@@ -2902,23 +2902,23 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 			}
 			block_type = _HEB_BLOCK_TYPE_ENG;
 		} else {
-			while(!isheb(*(tmp+1)) && (int)*(tmp+1)!='\n' && block_end<Z_STRLEN_PP(str)-1) {
+			while (!isheb(*(tmp+1)) && (int)*(tmp+1)!='\n' && block_end < Z_STRLEN_PP(str)-1) {
 				tmp++;
 				block_end++;
 				block_length++;
 			}
-			while ((_isblank((int)*tmp) || ispunct((int)*tmp)) && *tmp!='/' && *tmp!='-' && block_end>block_start) {
+			while ((_isblank((int)*tmp) || ispunct((int)*tmp)) && *tmp!='/' && *tmp!='-' && block_end > block_start) {
 				tmp--;
 				block_end--;
 			}
-			for (i=block_end; i>=block_start; i--) {
+			for (i = block_end; i >= block_start; i--) {
 				*target = Z_STRVAL_PP(str)[i];
 				target--;
 			}
 			block_type = _HEB_BLOCK_TYPE_HEB;
 		}
 		block_start=block_end+1;
-	} while(block_end<Z_STRLEN_PP(str)-1);
+	} while (block_end < Z_STRLEN_PP(str)-1);
 
 
 	broken_str = (char *) emalloc(Z_STRLEN_PP(str)+1);
@@ -2927,28 +2927,28 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 		
 	while (1) {
 		char_count=0;
-		while ((!max_chars || char_count<max_chars) && begin>0) {
+		while ((!max_chars || char_count < max_chars) && begin > 0) {
 			char_count++;
 			begin--;
-			if (begin<=0 || _isnewline(heb_str[begin])) {
-				while(begin>0 && _isnewline(heb_str[begin-1])) {
+			if (begin <= 0 || _isnewline(heb_str[begin])) {
+				while (begin > 0 && _isnewline(heb_str[begin-1])) {
 					begin--;
 					char_count++;
 				}
 				break;
 			}
 		}
-		if (char_count==max_chars) { /* try to avoid breaking words */
+		if (char_count == max_chars) { /* try to avoid breaking words */
 			int new_char_count=char_count, new_begin=begin;
 			
-			while (new_char_count>0) {
+			while (new_char_count > 0) {
 				if (_isblank(heb_str[new_begin]) || _isnewline(heb_str[new_begin])) {
 					break;
 				}
 				new_begin++;
 				new_char_count--;
 			}
-			if (new_char_count>0) {
+			if (new_char_count > 0) {
 				char_count=new_char_count;
 				begin=new_begin;
 			}
@@ -2958,20 +2958,20 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 		if (_isblank(heb_str[begin])) {
 			heb_str[begin]='\n';
 		}
-		while (begin<=end && _isnewline(heb_str[begin])) { /* skip leading newlines */
+		while (begin <= end && _isnewline(heb_str[begin])) { /* skip leading newlines */
 			begin++;
 		}
-		for (i=begin; i<=end; i++) { /* copy content */
+		for (i = begin; i <= end; i++) { /* copy content */
 			*target = heb_str[i];
 			target++;
 		}
-		for (i=orig_begin; i<=end && _isnewline(heb_str[i]); i++) {
+		for (i = orig_begin; i <= end && _isnewline(heb_str[i]); i++) {
 			*target = heb_str[i];
 			target++;
 		}
 		begin=orig_begin;
 
-		if (begin<=0) {
+		if (begin <= 0) {
 			*target = 0;
 			break;
 		}
@@ -3118,14 +3118,14 @@ PHP_FUNCTION(strip_tags)
 	char *allowed_tags=NULL;
 	int allowed_tags_len=0;
 
-	switch(ZEND_NUM_ARGS()) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			if(zend_get_parameters_ex(1, &str)==FAILURE) {
+			if (zend_get_parameters_ex(1, &str) == FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
 		case 2:
-			if(zend_get_parameters_ex(2, &str, &allow)==FAILURE) {
+			if (zend_get_parameters_ex(2, &str, &allow) == FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(allow);
@@ -3152,7 +3152,7 @@ PHP_FUNCTION(setlocale)
 	int i, cat, n_args=ZEND_NUM_ARGS();
 	char *loc, *retval;
 
-	if (zend_get_parameters_array_ex(n_args, args)==FAILURE || n_args<2) {
+	if (zend_get_parameters_array_ex(n_args, args) == FAILURE || n_args < 2) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
@@ -3194,7 +3194,7 @@ PHP_FUNCTION(setlocale)
 	} else {
 		i=1;
 	}
-	while(1) {
+	while (1) {
 		if (Z_TYPE_PP(args[1]) == IS_ARRAY) {
 			zend_hash_get_current_data(Z_ARRVAL_PP(args[1]),(void **)&plocale);
 		} else {
@@ -3225,7 +3225,7 @@ PHP_FUNCTION(setlocale)
 		if (Z_TYPE_PP(args[1]) == IS_ARRAY) {
 			zend_hash_move_forward(Z_ARRVAL_PP(args[1]));
 		} else {
-			if(++i >= n_args) break;
+			if (++i >= n_args) break;
 		}
 	}
 
@@ -3248,7 +3248,7 @@ PHP_FUNCTION(parse_str)
 	int old_rg;
 
 	argCount = ARG_COUNT(ht);
-	if(argCount < 1 || argCount > 2 || zend_get_parameters_ex(argCount, &arg, &arrayArg) == FAILURE) {
+	if (argCount < 1 || argCount > 2 || zend_get_parameters_ex(argCount, &arg, &arrayArg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3259,7 +3259,7 @@ PHP_FUNCTION(parse_str)
 	}
 
 	old_rg = PG(register_globals);
-	if(argCount == 1) {
+	if (argCount == 1) {
 		PG(register_globals) = 1;
 		sapi_module.treat_data(PARSE_STRING, res, NULL TSRMLS_CC);
 	} else 	{
@@ -3301,32 +3301,34 @@ int php_tag_find(char *tag, int len, char *set) {
 	if (!len) {
 		return 0;
 	}
-	while(!done) {
-		switch(c) {
-		case '<':
-			*(n++) = c;
-			break;
-		case '>':
-			done =1;
-			break;
-		default:
-			if(!isspace((int)c)) {
-				if(state==0) {
-					state=1;
-					if(c!='/') *(n++) = c;
+	while (!done) {
+		switch (c) {
+			case '<':
+				*(n++) = c;
+				break;
+			case '>':
+				done =1;
+				break;
+			default:
+				if (!isspace((int)c)) {
+					if (state == 0) {
+						state=1;
+						if (c != '/')
+							*(n++) = c;
+					} else {
+						*(n++) = c;
+					}
 				} else {
-					*(n++) = c;
+					if (state == 1)
+						done=1;
 				}
-			} else {
-				if(state==1) done=1;
-			}
-			break;
+				break;
 		}
 		c = tolower(*(++t));
 	}  
 	*(n++) = '>';
 	*n = '\0'; 
-	if(strstr(set, norm)) {
+	if (strstr(set, norm)) {
 		done=1;
 	} else {
 		done=0;
@@ -3371,7 +3373,7 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 	p = buf;
 	rp = rbuf;
 	br = 0;
-	if(allow) {
+	if (allow) {
 		php_strtolower(allow, allow_len);
 		tbuf = emalloc(PHP_TAG_BUF_SIZE+1);
 		tp = tbuf;
@@ -3379,13 +3381,13 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 		tbuf = tp = NULL;
 	}
 
-	while(i<len) {
+	while (i < len) {
 		switch (c) {
 			case '<':
 				if (state == 0) {
 					lc = '<';
 					state = 1;
-					if(allow) {
+					if (allow) {
 						*(tp++) = '<';
 					}
 				} else if (state == 1) {
@@ -3430,10 +3432,10 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 					case 1: /* HTML/XML */
 						lc = '>';
 						state = 0;
-						if(allow) {
+						if (allow) {
 							*(tp++) = '>';
 							*tp='\0';
-							if(php_tag_find(tbuf, tp-tbuf, allow)) {
+							if (php_tag_find(tbuf, tp-tbuf, allow)) {
 								memcpy(rp, tbuf, tp-tbuf);
 								rp += tp-tbuf;
 							}
@@ -3442,7 +3444,7 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 						break;
 						
 					case 2: /* PHP */
-						if (!br && lc != '\"' && *(p-1)=='?') {
+						if (!br && lc != '\"' && *(p-1) == '?') {
 							state = 0;
 							tp = tbuf;
 						}
@@ -3485,7 +3487,7 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 			
 			case '?':
 
-				if (state==1 && *(p-1)=='<') { 
+				if (state == 1 && *(p-1)=='<') { 
 					br=0;
 					state=2;
 					break;
@@ -3497,7 +3499,7 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 				 * state == 2 (PHP). Switch back to HTML.
 				 */
 
-				if(state == 2 && *(p-1) == 'm' && *(p-2) == 'x') {
+				if (state == 2 && *(p-1) == 'm' && *(p-2) == 'x') {
 					state = 1;
 					break;
 				}
@@ -3506,9 +3508,9 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 			default:
 				if (state == 0) {
 					*(rp++) = c;
-				} else if(allow && state == 1) {
+				} else if (allow && state == 1) {
 					*(tp++) = c;
-					if( (tp-tbuf)>=PHP_TAG_BUF_SIZE ) { /* no buffer overflows */
+					if ( (tp-tbuf) >= PHP_TAG_BUF_SIZE ) { /* no buffer overflows */
 						tp = tbuf;
 					}
 				} 
@@ -3519,7 +3521,8 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 	}	
 	*rp = '\0';
 	efree(buf);
-	if(allow) efree(tbuf);
+	if (allow)
+		efree(tbuf);
 	if (stateptr)
 		*stateptr = state;
 }
@@ -3561,7 +3564,7 @@ PHP_FUNCTION(str_repeat)
 	result = (char *)emalloc(result_len + 1);
 	
 	/* Copy the input string into the result as many times as necessary */
-	for (i=0; i<Z_LVAL_PP(mult); i++) {
+	for (i = 0; i < Z_LVAL_PP(mult); i++) {
 		memcpy(result + Z_STRLEN_PP(input_str) * i,
 			   Z_STRVAL_PP(input_str),
 			   Z_STRLEN_PP(input_str));
@@ -3615,7 +3618,7 @@ PHP_FUNCTION(count_chars)
 		array_init(return_value);
 	}
 
-	for (inx=0; inx < 256; inx++) {
+	for (inx = 0; inx < 256; inx++) {
 		switch (mymode) {
  		case 0:
 			add_index_long(return_value, inx, chars[inx]);
@@ -3708,14 +3711,14 @@ PHP_FUNCTION(localeconv)
 		/* Grab the grouping data out of the array */
 		len = strlen(currlocdata.grouping);
 
-		for (i=0;i<len;i++) {
+		for (i = 0; i < len; i++) {
 			add_index_long(grouping, i, currlocdata.grouping[i]);
 		}
 
 		/* Grab the monetary grouping data out of the array */
 		len = strlen(currlocdata.mon_grouping);
 
-		for (i=0;i<len;i++) {
+		for (i = 0; i < len; i++) {
 			add_index_long(mon_grouping, i, currlocdata.mon_grouping[i]);
 		}
 
@@ -3805,7 +3808,7 @@ PHP_FUNCTION(substr_count)
  		p = Z_STRVAL_PP(haystack);
 		endp = p + Z_STRLEN_PP(haystack);
 		while (p <= endp) {
-			if( (p = php_memnstr(p, Z_STRVAL_PP(needle), Z_STRLEN_PP(needle), endp)) != NULL ) {
+			if ( (p = php_memnstr(p, Z_STRVAL_PP(needle), Z_STRLEN_PP(needle), endp)) != NULL ) {
 				p += Z_STRLEN_PP(needle);
 				count++;
 			} else {
