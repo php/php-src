@@ -1,3 +1,83 @@
+2004-08-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/zlib/zlib_fopen_wrapper.c
+      ext/zlib/zlib_fopen_wrapper.c:
+      MFH: Fixed a nasty resource/memory/disk-space leak when opening zlib files
+      via wrapper stacking ala compress.zlib://http://...
+
+    * ext/zlib/zlib_fopen_wrapper.c:
+      Fixed a nasty resource/memory/disk-space leak when opening zlib files
+      via wrapper stacking ala compress.zlib://http://...
+
+2004-08-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_compile.c:
+      MFH: Enforce semantics: Classes cannot extend Interfaces
+
+    * ZendEngine2/zend_compile.c:
+      Enforce semantics: Classes cannot extend Interfaces
+
+    * ZendEngine2/tests/bug29828.phpt:
+      Fix test: Classes cannot extend Interfaces
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * ZendEngine2/zend_compile.c:
+      Drop doubled check
+
+    * ZendEngine2/zend_compile.c:
+      - Bugfix #29828 Interfaces no longer work
+
+    * ZendEngine2/tests/bug29828.phpt
+      tests/classes/interface_and_extends.phpt:
+      
+      Add new test
+
+2004-08-26  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/EXPERIMENTAL
+      ext/dom/EXPERIMENTAL:
+      not experimental
+
+2004-08-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #29839 (incorrect convert (xml:lang to lang))
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #29795 (SegFault with Soap and Amazon's Web Services)
+      Fixed bug #27994 (segfault with Soapserver when WSDL-Cache is enabled)
+
+2004-08-26  Thies C. Arntzen  <thies@thieso.net>
+
+    * (PHP_4_3)
+      ext/standard/formatted_print.c:
+      
+
+2004-08-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #29844 (SOAP doesn't return the result of a valid SOAP request).
+      Fixed bug #29830 (SoapServer::setClass() should not export non-public
+      methods).
+
+2004-08-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/array.c:
+      MFH: Fixed bug #29808 (array_count_values() breaks with numeric strings).
+
+    * ext/standard/array.c:
+      Fixed bug #29808 (array_count_values() breaks with numeric strings).
+
 2004-08-25  Andrei Zmievski  <andreiz@gmail.com>
 
     * ext/pcre/php_pcre.c
