@@ -94,6 +94,7 @@ struct _zend_op_array {
 	int type;	/* MUST be the first element of this struct! */
 
 	unsigned char *arg_types;		/* MUST be the second element of this struct! */
+	char *function_name;			/* MUST be the third element of this struct! */
 
 	int *refcount;
 
@@ -102,7 +103,6 @@ struct _zend_op_array {
 
 	int T;
 
-	char *function_name;
 
 	zend_brk_cont_element *brk_cont_array;
 	int last_brk_cont;
@@ -126,9 +126,9 @@ typedef struct _zend_internal_function {
 	int type;	/* MUST be the first element of this struct! */
 
 	unsigned char *arg_types;		/* MUST be the second element of this struct */
+	char *function_name;			/* MUST be the third element of this struct */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
-	char *function_name;
 } zend_internal_function;
 
 
@@ -137,6 +137,7 @@ typedef union _zend_function {
 	struct {
 		int type;  /* never used */
 		unsigned char *arg_types;
+		char *function_name;
 	} common;
 	
 	zend_op_array op_array;
