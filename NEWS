@@ -98,6 +98,8 @@ PHP                                                                        NEWS
 - Fixed bug #31055 (apache2filter: per request leak proportional to the full
   path of the request URI). (kameshj at fastmail dot fm)
 - Fixed bug #30901 (can't send cookies with soap envelop). (Dmitry)
+- Fixed bug #30868 (evaluated pointer comparison in mbregex causes compile
+  failure). (Moriyoshi)
 - Fixed bug #30862 (Static array with boolean indexes). (Marcus)
 - Fixed bug #30726 (-.1 like numbers are not being handled correctly). (Ilia)
 - Fixed bug #30725 (PHP segfaults when an exception is thrown in getIterator() 
