@@ -1412,8 +1412,6 @@ PHP_FUNCTION(getopt)
 	 * Get argv from the global symbol table.  We calculate argc ourselves
 	 * in order to be on the safe side, even though it is also available
 	 * from the symbol table.
-	 *
-	 * TODO: Take from trackbars instead.
 	 */
 	if (zend_hash_find(HASH_OF(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"),
 					   (void **) &args) != FAILURE) {
@@ -1469,7 +1467,6 @@ PHP_FUNCTION(getopt)
 		while (zend_hash_get_current_data(Z_ARRVAL_P(p_longopts),
 										  (void **)&arg) == SUCCESS) {
 
-			/* TODO: check for : and ::, strip'em, efrees ... */
 			p->has_arg = 0;
 			name = estrdup(Z_STRVAL_PP(arg));
 			len = strlen(name);
@@ -1513,13 +1510,14 @@ PHP_FUNCTION(getopt)
 #endif
 		/* Skip unknown arguments. */
 		if (o == '?') {
-			// TODO bailout?
 			continue;
 		}
 
 		/* Prepare the option character and the argument string. */
 		if(o == 0) {
+#ifdef HAVE_GETOPT_LONG
 			optname = (char *)longopts[longindex].name;
+#endif
 		} else {		
 			if(o == 1) o = '-';
 			opt[0] = o;
