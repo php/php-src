@@ -25,6 +25,16 @@
 
 #include "php.h"
 
+#ifdef NETWARE
+#ifdef USE_WINSOCK
+#include <novsock2.h>
+#else
+#ifndef NEW_LIBC
+#include <sys/socket.h>
+#endif
+#endif
+#endif
+
 #if HAVE_FTP
 
 #include "ext/standard/info.h"
