@@ -404,9 +404,7 @@ PHP_FUNCTION(nsapi_request_headers)
 	struct pb_entry *entry;
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	for (i=0; i < rc->rq->headers->hsize; i++) {
 		entry=rc->rq->headers->ht[i];
@@ -428,9 +426,7 @@ PHP_FUNCTION(nsapi_response_headers)
 	struct pb_entry *entry;
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	php_header();
 
