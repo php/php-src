@@ -20,41 +20,51 @@
 /* $Id$ */
 
 /* Much of the code in this module was borrowed from the public domain
-   jhead.c package with the author's consent.  The main changes have been
-   to eliminate all the global variables to make it thread safe and to wrap
-   it in the PHP 4 API.
+	jhead.c package with the author's consent.  The main changes have been
+	to eliminate all the global variables to make it thread safe and to wrap
+	it in the PHP 4 API.
 
-   Aug.3 2001 - Added support for multiple M_COM entries - Rasmus
+	Aug.3 2001 - Added support for multiple M_COM entries - Rasmus
 
-   Additional changes and fixes mainly to expand functionality for image
-   galleries.
+	Feb.26 2002 - Marcus
 
-   Feb.26 2002 - Marcus
+		Additional changes and fixes mainly to expand functionality for image
+		galleries.
 
-				Added UNICODE support for Comments
-				Added Description,Artist
-				Added missing memory deallocation
-				Corrected error with multiple comments
-				Corrected handling of ExifVersion, Tag has 4 ASCII
-				    characters *WITHOUT* NUL
-				Corrected handling of Thumbnailsize if current source
-				    detects size < 0
-				Changed all fields to char* that do not have a maximum
-				    length in EXIF standard
-		        Undocumented second Parameter ReadAll frees memory to
-	                early -> moved to third position default changed to
-	                false -> faster
-	            New second Parameter [true|false] to specify whether or
-					not to to read thumbnails -> reading is timeconsumpting
-					suppose default should be false -> done so
+		Added UNICODE support for Comments
+		Added Description,Artist
+		Added missing memory deallocation
+		Corrected error with multiple comments
+		Corrected handling of ExifVersion, Tag has 4 ASCII
+			characters *WITHOUT* NUL
+		Corrected handling of Thumbnailsize if current source
+			detects size < 0
+		Changed all fields to char* that do not have a maximum
+			length in EXIF standard
+		Undocumented second Parameter ReadAll frees memory to
+			early -> moved to third position default changed to
+			false -> faster
+		New second Parameter [true|false] to specify whether or
+			not to to read thumbnails -> reading is timeconsumpting
+			suppose default should be false -> done so
 
-   ToDos - Copyright tag stores "<Photographer> '\0' <Editor> '\0'" but we
-			  stop at first '\0'
-		   JIS encoding for comments
-		   See if example images from http://www.exif.org have illegal
-			  thumbnail sizes or if code is corrupt.
+	Feb.28 2002 - Marcus
 
-   The original header from the jhead.c file was:
+		Support for Photographer/Editor Copyright as associative
+			array as this is a new feature the change (optionally
+			being an array) has to be mentioned in documentation.
+		New function exif_headername can be used to read the internal Tag
+			namelist (was mainly created for debugging purpose but maybe
+			somone writes code to create/update exif headers here).
+		A testpage is supplied test.txt describes how the test works.
+
+	ToDos - JIS encoding for comments
+			See if example images from http://www.exif.org have illegal
+				thumbnail sizes or if code is corrupt.
+			Create/Update exif headers.
+			Create/Remove/Update image thumbnails.
+
+	The original header from the jhead.c file was:
 
   --------------------------------------------------------------------------
    Program to pull the information out of various types of EFIF digital
@@ -69,7 +79,7 @@
 
    Matthias Wandel,  Dec 1999 - April 2000
   --------------------------------------------------------------------------
-  */
+*/
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -93,18 +103,21 @@ typedef unsigned char uchar;
 
 #define EXIF_MAX_COMMENTS 12
 
+/* EXIF standard defines Copyright as "<Photographer> [ '\0' <Editor> ] ['\0']" */
+#define EXIF_MAX_COPYRIGHT 2
+
 /* {{{ structs
    This structure stores Exif header image elements in a simple manner
    Used to store camera data as extracted from the various ways that it can be
    stored in a nexif header
 */
 typedef struct {
-	char  FileName     [120];
+	char  FileName[120];
 	time_t FileDateTime;
 	unsigned FileSize;
 	char  *CameraMake;
 	char  *CameraModel;
-	char  DateTime     [20];
+	char  DateTime[20];
 	int   Height, Width;
 	int   IsColor;
 	int   FlashUsed;
@@ -124,7 +137,10 @@ typedef struct {
 	char GPSinfo[48];
 	int ISOspeed;
 	char ExifVersion[8];
-	char *Copyright; /* maybe two strings see ToDos */
+	char *RawCopyright;
+	int lenRawCopyright;
+	char *Copyright[EXIF_MAX_COPYRIGHT];
+	int numCopyrights;
 	char *Artist;
 	char *Software;
 	char *Thumbnail;
@@ -156,9 +172,13 @@ typedef struct {
  */
 function_entry exif_functions[] = {
 	PHP_FE(read_exif_data, NULL)
+	PHP_FALIAS(exif_read_data,read_exif_data, NULL)
+	PHP_FE(exif_headername, NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
+
+#define EXIF_VERSION "2.0a $Revision$"
 
 PHP_MINFO_FUNCTION(exif);
 
@@ -171,7 +191,7 @@ zend_module_entry exif_module_entry = {
 	NULL, NULL,
 	NULL, NULL,
 	PHP_MINFO(exif),
-	NO_VERSION_YET,
+	EXIF_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -186,6 +206,8 @@ PHP_MINFO_FUNCTION(exif)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "EXIF Support", "enabled" );
+	php_info_print_table_row(2, "EXIF Version", EXIF_VERSION );
+	php_info_print_table_row(2, "Supported EXIF Version", "02100");
 	php_info_print_table_end();
 }
 /* }}} */
@@ -264,7 +286,7 @@ static void process_COM (ImageInfoType *ImageInfo, uchar *Data, int length)
 	a = ImageInfo->numComments;
 
 	(ImageInfo->Comments)[a] = emalloc(nch+1);
-  strcpy(ImageInfo->Comments[a], Comment);
+	strcpy(ImageInfo->Comments[a], Comment);
 	(ImageInfo->numComments)++;
 }
 /* }}} */
@@ -468,8 +490,42 @@ static const struct {
   {	0xA217,	"SensingMethod"},		        /* 0x9217    -  -    */
   {	0xA300,	"FileSource"},
   {	0xA301,	"SceneType"},
-  {      0, NULL}
+  {      0, NULL}                           /* Important for get_exif_headername() */
 } ;
+/* }}} */
+
+/* {{{ get_exif_headername
+    Get headername for tag_num or NULL if not defined */
+char * get_exif_headername(int tag_num)
+{
+	int i,t;
+
+	for (i=0;;i++) {
+		if ( (t=TagTable[i].Tag) == tag_num || !t) return TagTable[i].Desc;
+	}
+	return NULL;
+}
+/* }}} */
+
+/* {{{ proto string|false exif_headername(index)
+    Get headername for index or false if not defined */
+PHP_FUNCTION(exif_headername)
+{
+	pval **p_num;
+	int ac = ZEND_NUM_ARGS();
+	char *szTemp;
+
+	if ((ac < 1 || ac > 1) || zend_get_parameters_ex(ac, &p_num) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(p_num);
+	if ( (szTemp = get_exif_headername(Z_LVAL_PP(p_num))) == NULL) {
+		RETURN_BOOL(FALSE);
+	} else {
+		RETURN_STRING(szTemp, 1)
+	}
+}
 /* }}} */
 
 /* {{{ Get16u
@@ -638,17 +694,38 @@ static int ProcessExifComment(char **pszInfoPtr,char *szValuePtr,int ByteCount)
 }
 /* }}} */
 
+/* {{{ CopyExifStringRaw
+ * Copy a string in Exif header to a character string returns length of allocated buffer if any. */
+static int CopyExifStringRaw(char **pszInfoPtr,char *szValuePtr,int ByteCount) {
+	/* we cannot use strlcpy - here the problem is that we have to copy NUL
+	 * chars up to ByteCount, we also have to add a single NUL character to
+	 * force end of string.
+	 */
+	if (ByteCount) {
+		(*pszInfoPtr) = emalloc(ByteCount+1);
+		memcpy(*pszInfoPtr, szValuePtr, ByteCount);
+		(*pszInfoPtr)[ByteCount] = '\0';
+		return ByteCount+1;
+	}
+	return 0;
+}
+/* }}} */
+
 /* {{{ CopyExifString
- * Copy a string in Exif header to a character string. */
+ * Copy a string in Exif header to a character string returns length of allocated buffer if any. */
 static int CopyExifString(char **pszInfoPtr,char *szValuePtr,int ByteCount) {
 	int l;
 
-	l = strlen(szValuePtr)+1;
-	if (ByteCount<l) l = ByteCount;
-	if (l>1) {
-	  (*pszInfoPtr) = emalloc(l);
-	  strlcpy(*pszInfoPtr, szValuePtr, l);
-	  return 1;
+	/* we cannot use strlcpy - here the problem is that we cannot use strlen to
+	 * determin length of string and we cannot use strlcpy with len=ByteCount+1
+	 * because then we might get into an EXCEPTION if we exceed an aallocate
+	 * memory page...
+	 */
+	if (ByteCount && CopyExifStringRaw(pszInfoPtr,szValuePtr,ByteCount)) {
+		if ( (l = strlen(*pszInfoPtr)) < ByteCount) {
+			(*pszInfoPtr)[l] = '\0';
+		}
+		return l+1;
 	}
 	return 0;
 }
@@ -659,7 +736,7 @@ static int CopyExifString(char **pszInfoPtr,char *szValuePtr,int ByteCount) {
 static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *OffsetBase, unsigned ExifLength, char *LastExifRefd, int ReadThumbnail)
 {
 	int de;
-	int a;
+	int a,l;
 	int NumDirEntries;
 	int NextDirOffset;
 
@@ -723,6 +800,7 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
 		}
 
 		/* Extract useful components of tag */
+		/* php_error(E_NOTICE,"Scan tag: %s", get_exif_headername(Tag)); */
 		switch(Tag) {
 
 			case TAG_MAKE:
@@ -743,7 +821,16 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
 				break;
 
 			case TAG_COPYRIGHT:
-				CopyExifString(&ImageInfo->Copyright,ValuePtr,ByteCount);
+				if (CopyExifStringRaw(&ImageInfo->RawCopyright,ValuePtr,ByteCount)) {
+					l = strlen(ImageInfo->RawCopyright);
+				} else {
+					l = 0;
+				}
+				ImageInfo->lenRawCopyright = ByteCount;
+				if ( ImageInfo->numCopyrights==0 && ByteCount>1 && l<ByteCount-1) {
+					CopyExifString(&((ImageInfo->Copyright)[ImageInfo->numCopyrights++]), ValuePtr, l);
+					CopyExifString(&((ImageInfo->Copyright)[ImageInfo->numCopyrights++]), ValuePtr+l+1, ByteCount-l-1);
+			    }
 				break;
 
 			case TAG_ARTIST:
@@ -1155,7 +1242,7 @@ int ReadJpegFile(ImageInfoType *ImageInfo, Section_t *Sections,
 	}
 /*    CurrentFile = FileName; */
 
-/*    php_error(E_NOTICE,"EXIF: Process %s%s: %s", ReadThumbnail?"thumbs ":"", ReadAll?"All ":"", FileName); */
+/*    php_error(E_WARNING,"EXIF: Process %s%s: %s", ReadThumbnail?"thumbs ":"", ReadAll?"All ":"", FileName); */
 	/* Start with an empty image information structure. */
 	memset(ImageInfo, 0, sizeof(*ImageInfo));
 	memset(Sections, 0, sizeof(*Sections));
@@ -1239,7 +1326,7 @@ int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int ReadThumbna
    Reads the EXIF header data from the JPEG identified by filename and optionally reads the internal thumbnails */
 PHP_FUNCTION(read_exif_data)
 {
-	pval **p_name, **p_readthumbnail, **p_readall, *tmpi;
+	pval **p_name, **p_readthumbnail, **p_readall;
 	int i, ac = ZEND_NUM_ARGS(), ret, readthumbnail=0, readall=0;
 	ImageInfoType ImageInfo;
 	char tmp[64];
@@ -1335,11 +1422,28 @@ PHP_FUNCTION(read_exif_data)
 	if (ImageInfo.ExifVersion[0]) {
 		add_assoc_string(return_value, "ExifVersion", ImageInfo.ExifVersion, 1);
 	}
-	if (ImageInfo.Copyright) {
-		if (ImageInfo.Copyright[0]) {
-			add_assoc_string(return_value, "Copyright", ImageInfo.Copyright, 1);
+	if (ImageInfo.RawCopyright || ImageInfo.numCopyrights) {
+		if (ImageInfo.RawCopyright && !ImageInfo.numCopyrights && ImageInfo.lenRawCopyright) {
+			add_assoc_stringl(return_value, "Copyright", ImageInfo.RawCopyright, ImageInfo.lenRawCopyright, 1);
+		}else{
+			pval *tmpi;
+
+			MAKE_STD_ZVAL(tmpi);
+			array_init(tmpi);
+			/*for(i=0; i<ImageInfo.numCopyrights; i++) {
+			 *	add_index_string(tmpi, i, (ImageInfo.Copyright)[i], 0);
+			 *}
+			 */
+			add_assoc_string(tmpi, "Photographer", ImageInfo.Copyright[0], 1);
+			add_assoc_string(tmpi, "Editor", ImageInfo.Copyright[1], 1);
+			add_assoc_zval(return_value, "Copyright", tmpi);
 		}
-		efree(ImageInfo.Copyright);
+		if (ImageInfo.RawCopyright) {
+			efree(ImageInfo.RawCopyright);
+		}
+		for(i=0; i<ImageInfo.numCopyrights; i++) {
+			efree((ImageInfo.Copyright)[i]);
+		}
 	}
 	if (ImageInfo.Software) {
 		if (ImageInfo.Software[0]) {
@@ -1351,16 +1455,18 @@ PHP_FUNCTION(read_exif_data)
 		if(ImageInfo.numComments==1) {
 			add_assoc_string(return_value, "Comments", (ImageInfo.Comments)[0], 1);
 		} else {
+			pval *tmpi;
+
 			MAKE_STD_ZVAL(tmpi);
 			array_init(tmpi);
 			for(i=0; i<ImageInfo.numComments; i++) {
 				add_index_string(tmpi, i, (ImageInfo.Comments)[i], 0);
 			}
-			zend_hash_update(return_value->value.ht, "Comments", 9, &tmpi, sizeof(zval *), NULL);
+			add_assoc_zval(return_value, "Comments", tmpi);
+			/* zend_hash_add(return_value->value.ht, "Comments", 9, &tmpi, sizeof(zval *), NULL); */
 		}
 		for(i=0; i<ImageInfo.numComments; i++) {
 			efree((ImageInfo.Comments)[i]);
-			(ImageInfo.Comments)[i] = NULL;
 		}
 	}
 	if (ImageInfo.Description) {
