@@ -68,6 +68,8 @@ set_sql('select3', 'SELECT classtypes.name AS name, test.val AS val FROM test LE
 set_sql('select4', 'SELECT COUNT(*) FROM test LEFT JOIN classtypes ON test.classtype=classtypes.id WHERE (classtypes.id IS NULL OR classtypes.id > 0)');
 set_sql('select5', 'SELECT classtypes.name AS name, test.val AS val FROM test LEFT JOIN classtypes ON test.classtype=classtypes.id WHERE (classtypes.id IS NULL OR classtypes.id > 0)');
 
+$DB->setAttribute(PDO_ATTR_ERRMODE, PDO_ERRMODE_EXCEPTION);
+
 echo "===INIT===\n";
 $DB->exec($SQL['create1']);
 var_dump($DB->exec($SQL['insert1']));

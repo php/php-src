@@ -58,7 +58,7 @@ array(4) {
   string(144) "a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";}"
 }
 ===FAILURE===
-Exception:Class stdClass cannot be unserialized
+Exception:SQLSTATE[HY000]: General error: cannot unserialize class
 ===COUNT===
 string(1) "3"
 ===DATABASE===
