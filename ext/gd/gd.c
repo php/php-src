@@ -117,6 +117,7 @@ static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold
 /* {{{ gd_functions[]
  */
 function_entry gd_functions[] = {
+	PHP_FE(gd_info,                                 NULL)
 	PHP_FE(imagearc,								NULL)
 	PHP_FE(imageellipse,							NULL)
 	PHP_FE(imagechar,								NULL)
@@ -415,6 +416,82 @@ PHP_MINFO_FUNCTION(gd)
 	php_info_print_table_row(2, "XBM Support", "enabled");
 #endif
 	php_info_print_table_end();
+}
+/* }}} */
+
+/* {{{ proto array gd_info()
+ */
+PHP_FUNCTION(gd_info)
+{
+	if (ZEND_NUM_ARGS()!=0) {
+		ZEND_WRONG_PARAM_COUNT();
+		RETURN_FALSE;
+	}
+
+	if (array_init(return_value) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
+		RETURN_FALSE;
+	}
+#if HAVE_GD_BUNDLED
+	add_assoc_string(return_value, "GD Version", "bundled (2.0 compatible)", 1);
+#elif HAVE_LIBGD20
+	add_assoc_string(return_value, "GD Version", "2.0 or higher", 1);
+#elif HAVE_GDIMAGECOLORRESOLVE
+	add_assoc_string(return_value, "GD Version", "1.6.2 or higher", 1);
+#elif HAVE_LIBGD13
+	add_assoc_string(return_value, "GD Version", "between 1.3 and 1.6.1", 1);
+#else
+	add_assoc_string(return_value, "GD Version", "1.2", 1);
+#endif
+
+#ifdef ENABLE_GD_TTF
+	add_assoc_bool(return_value, "FreeType Support", 1);
+#if HAVE_LIBFREETYPE
+	add_assoc_string(return_value, "FreeType Linkage", "with freetype", 1);
+#elif HAVE_LIBTTF
+	add_assoc_string(return_value, "FreeType Linkage", "with TTF library", 1);
+#else
+	add_assoc_string(return_value, "FreeType Linkage", "with unknown library", 1);
+#endif
+#else
+	add_assoc_bool(return_value, "FreeType Support", 0);
+#endif
+
+#ifdef HAVE_LIBT1
+	add_assoc_bool(return_value, "T1Lib Support", 1);
+#else
+	add_assoc_bool(return_value, "T1Lib Support", 0);
+#endif
+#ifdef HAVE_GD_GIF_READ
+	add_assoc_bool(return_value, "GIF Read Support", 1);
+#else
+	add_assoc_bool(return_value, "GIF Read Support", 0);
+#endif
+#ifdef HAVE_GD_GIF_CREATE
+	add_assoc_bool(return_value, "GIF Create Support", 1);
+#else
+	add_assoc_bool(return_value, "GIF Create Support", 0);
+#endif
+#ifdef HAVE_GD_JPG
+	add_assoc_bool(return_value, "JPG Support", 1);
+#else
+	add_assoc_bool(return_value, "JPG Support", 0);
+#endif
+#ifdef HAVE_GD_PNG
+	add_assoc_bool(return_value, "PNG Support", 1);
+#else
+	add_assoc_bool(return_value, "PNG Support", 0);
+#endif
+#ifdef HAVE_GD_WBMP
+	add_assoc_bool(return_value, "WBMP Support", 1);
+#else
+	add_assoc_bool(return_value, "WBMP Support", 0);
+#endif
+#ifdef HAVE_GD_XBM
+	add_assoc_bool(return_value, "XBM Support", 1);
+#else
+	add_assoc_bool(return_value, "XBM Support", 0);
+#endif
 }
 /* }}} */
 
