@@ -1031,7 +1031,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					php_mb_gpc_encoding_converter(&filename, &str_len, 1, NULL, NULL TSRMLS_CC);
 				}
 				s = php_mb_strrchr(filename, '\\' TSRMLS_CC);
-				if (tmp = php_mb_strrchr(filename, '/')) {
+				if (tmp = php_mb_strrchr(filename, '/' TSRMLS_CC)) {
 					s = tmp;
 				}
 				num_vars--;
