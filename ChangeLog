@@ -1,3 +1,57 @@
+2000-05-26  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache/mod_php4.c:    Changed the Apache handler's return status to 'Declined' when a requested
+    PHP file could not be found.  Returning 'Not Found' caused problems
+    in the ErrorDocument handler stage in that $REDIRECT_REDIRECT_ERROR_NOTES
+    was not getting set at all.  Moving to 'Declined' shoudl fix this and I
+    can't see any other side effects.
+
+2000-05-26  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/mhash/mhash.c: protos fixed
+
+    * ext/mcal/php_mcal.c: proto fixed
+
+    * ext/mcrypt/mcrypt.c: protos fixed
+
+    * ext/standard/crypt.c
+      ext/standard/datetime.c
+      ext/standard/dl.h
+      ext/standard/dns.c
+      ext/standard/file.c
+      ext/standard/microtime.c
+      ext/standard/php_crypt.h
+      ext/standard/basic_functions.c
+      php.h:
+    if a module provides a function it should also do so if the function
+    is not functional due to configure findings
+    the function should offer a meaningful warning if it is not supported
+    instead of just beeing undefined
+    i had already changed this in 'gd', now this is doing it for 'standard'
+
+2000-05-26  Zeev Suraski  <zeev@php.net>
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+    Save more overhead.  Look for the serializer/save_handler only when they're actually modified.
+
+    * ext/session/php_session.h
+      ext/session/session.c: Use the INI framework in the session module
+
+2000-05-26  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/swf/config.m4
+      ext/swf/swf.h:
+    - swf.h belongs to the libswf distribution and should not be copied
+      in the php distribution.
+    - the configure script now checks for the libswf.a and swf.h in
+      <swf-dir>/lib and <swf-dir>/include. If it doesn't find it the
+      default directories /usr/local and /usr are checked.
+
+2000-05-26  Andi Gutmans  <andi@php.net>
+
+    * NEWS: - Update news file
+
 2000-05-25  dickmeiss  <dickmeiss@va>
 
     * NEWS: Added extension YAZ.
