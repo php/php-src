@@ -1,3 +1,128 @@
+2002-03-08  Joseph Tate  <jtate@mi-corporation.com>
+
+    * ext/domxml/php_domxml.c:
+    - Fixed a coredump involved in the domxml_unlink() function.  Refer to bug #14522
+    for more details.
+
+2002-03-08  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+     implemented domxml_elem_get_attribute_node(attrname) (chregu)
+
+2002-03-08  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: -support for out of section data
+
+2002-03-08  Sander Roobol  <phy@wanadoo.nl>
+
+    * tests/basic/003.phpt
+      tests/basic/004.phpt
+      tests/basic/005.phpt
+      ext/session/tests/001.phpt
+      ext/session/tests/002.phpt
+      ext/session/tests/003.phpt
+      ext/session/tests/004.phpt
+      ext/session/tests/005.phpt
+      ext/session/tests/006.phpt
+      pear/tests/pear_error.phpt
+      tests/basic/002.phpt
+      ext/exif/tests/002.phpt
+      ext/gmp/tests/002.phpt: Fixed many tests, mostly incorrect paths.
+
+2002-03-08  Joseph Tate  <jtate@mi-corporation.com>
+
+    * ext/domxml/config.m4:
+    Added linking files to make build compatible with RH 7.2's updated libxslt
+    packages.  Should not break when compiling with older versions.  This may
+    fix bug #15942 as well.
+    Configure was giving a Warning message without these lines when --with-xslt was
+    specified.
+
+2002-03-08  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/standard/datetime.c:
+    (php_date) Fixed 'r' modifier to always return two digits for the day
+    value (see RFC 822) (#15952).
+
+2002-03-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Add identifier which terminates a connection upon receiving a specific
+    CTCP message.  The message must come from the specified user or will
+    be ignored.  This can be used to disconnect a large number of users
+    when an event adjourns.
+
+    Improve error reporting by notifying the IRC server why a HTTP
+    connection failed.
+
+    Fix a prototype comment
+
+    * ext/ircg/config.m4:
+    Adding an existing fragment is implicitly done by PHP_EXTENSION
+
+2002-03-08  Ludovico Magnocavallo  <ludo@sumatrasolutions.com>
+
+    * pear/DB/TESTERS: added interbase tester (myself) =)
+
+    * pear/DB/STATUS:
+    changed status of ibase error mapping support to implemented, but without tests
+
+    * pear/DB/tests/ibase/02fetch.phpt
+      pear/DB/tests/ibase/03simplequery.phpt
+      pear/DB/tests/ibase/04numcols.phpt
+      pear/DB/tests/ibase/06prepexec.phpt
+      pear/DB/tests/ibase/10errormap.phpt
+      pear/DB/tests/ibase/connect.inc
+      pear/DB/tests/ibase/mktable.inc
+      pear/DB/tests/ibase/skipif.inc:
+    all tests working except tests 6 and 10, still broken
+
+    * pear/DB/ibase.php: beginning of error mapping support for Interbase
+    added ibaseRaiseError() method and errorcode_map hash
+
+2002-03-08  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/ctype/ctype.c:
+    reimplementation using macro instead of function pointer ( Bug #15951 )
+
+2002-03-08  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/test.txt
+      ext/exif/example.php
+      ext/exif/exif.c: -change IsColor from non zero to 1
+    -new test and example for documentation
+
+2002-03-08  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+     domxml_elem_remove_attribute(attibutename) is now implemented (chregu)
+
+2002-03-08  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/php_cli.c: Cleaned up previous commit.
+
+    * sapi/cli/php_cli.c:
+    - Added -r option to the CLI version of PHP which executes a piece of PHP
+      code directly from the commmand line. 
+
+2002-03-08  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+     added formatting option to domxml_dump_mem() (chregu)
+
+2002-03-08  Jani Taskinen  <sniper@iki.fi>
+
+    * main/main.c: - MFH (fix for the phpinfo() output)
+
+2002-03-08  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/tests/001.phpt: -Changes according to exif.c 1.55
+
+    * ext/exif/exif.c: -Support for IFD Arrays
+
+    * ext/exif/exif.c
+      ext/standard/image.c: TIFF support for 'non' digicam files
+
 2002-03-07  Joseph Tate  <jtate@mi-corporation.com>
 
     * ext/domxml/php_domxml.c:
