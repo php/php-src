@@ -243,6 +243,16 @@ static void register_standard_class(void)
 }
 
 
+static void zend_set_default_compile_time_values(CLS_D)
+{
+	/* default compile-time values */
+	CG(asp_tags) = 0;
+	CG(short_tags) = 1;
+	CG(allow_call_time_pass_reference) = 1;
+	CG(extended_info) = 0;
+}
+
+
 #ifdef ZTS
 static void compiler_globals_ctor(zend_compiler_globals *compiler_globals)
 {
@@ -257,12 +267,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals)
 	zend_hash_init(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1);
 	zend_hash_copy(compiler_globals->class_table, global_class_table, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry));
 
-	compiler_globals->extended_info = 0;
-
-	/* default compile-time values */
-	compiler_globals->asp_tags = 0;
-	compiler_globals->short_tags = 1;
-	compiler_globals->allow_call_time_pass_reference = 1;
+	zend_set_default_compile_time_values(CLS_C);
 }
 
 
@@ -374,6 +379,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	GLOBAL_CONSTANTS_TABLE = EG(zend_constants);
 #else
 	zend_startup_constants();
+	zend_set_default_compile_time_values(CLS_C);
 #endif
 	zend_register_standard_constants(ELS_C);
 
