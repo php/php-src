@@ -328,49 +328,6 @@ abs_builddir=`pwd`
 AC_SUBST(abs_srcdir)
 AC_SUBST(abs_builddir)
 
-AC_MSG_CHECKING(whether to use bundled regex library)
-AC_ARG_WITH(system-regex,
-[  --with-system-regex     Do not use the bundled regex library],
-[
-    if test -n "$APXS"; then
-        if test -n "`$APXS -q CFLAGS | grep USE_HSREGEX`"; then
-            HSREGEX=yes
-        else
-            HSREGEX=no
-        fi
-    else
-        if test "$withval" = "no"; then
-            HSREGEX=yes
-        else
-            HSREGEX=no
-        fi
-    fi
-],[
-    if test -n "$APXS"; then
-        if test -n "`$APXS -q CFLAGS | grep USE_HSREGEX`"; then
-            HSREGEX=yes
-        else
-            HSREGEX=no
-        fi
-    else
-        HSREGEX=yes
-    fi
-])
-AC_MSG_RESULT($HSREGEX)
-
-if test "$HSREGEX" = "yes"; then
-  REGEX_LIB=regex/libregex.a
-  EXTRA_LIBS="-L$abs_builddir/regex -lregex $EXTRA_LIBS"
-  AC_DEFINE(HSREGEX)
-  AC_DEFINE(REGEX,1)
-else
-  REGEX_LIB=
-  AC_DEFINE(REGEX,0)
-fi
-
-AC_SUBST(REGEX_LIB)
-AC_SUBST(HSREGEX)
-
 AC_MSG_CHECKING(for Apache module support via DSO through APXS)
 AC_ARG_WITH(apxs,
 [  --with-apxs[=FILE]      Build shared Apache module.  FILE is the optional
@@ -591,6 +548,49 @@ AC_SUBST(STRONGHOLD)
 AC_SUBST(PHP_LIBS)
 fi
 fi
+
+AC_MSG_CHECKING(whether to use bundled regex library)
+AC_ARG_WITH(system-regex,
+[  --with-system-regex     Do not use the bundled regex library],
+[
+    if test -n "$APXS"; then
+        if test -n "`$APXS -q CFLAGS | grep USE_HSREGEX`"; then
+            HSREGEX=yes
+        else
+            HSREGEX=no
+        fi
+    else
+        if test "$withval" = "no"; then
+            HSREGEX=yes
+        else
+            HSREGEX=no
+        fi
+    fi
+],[
+    if test -n "$APXS"; then
+        if test -n "`$APXS -q CFLAGS | grep USE_HSREGEX`"; then
+            HSREGEX=yes
+        else
+            HSREGEX=no
+        fi
+    else
+        HSREGEX=yes
+    fi
+])
+AC_MSG_RESULT($HSREGEX)
+
+if test "$HSREGEX" = "yes"; then
+  REGEX_LIB=regex/libregex.a
+  EXTRA_LIBS="-L$abs_builddir/regex -lregex $EXTRA_LIBS"
+  AC_DEFINE(HSREGEX)
+  AC_DEFINE(REGEX,1)
+else
+  REGEX_LIB=
+  AC_DEFINE(REGEX,0)
+fi
+
+AC_SUBST(REGEX_LIB)
+AC_SUBST(HSREGEX)
 
 AC_MSG_CHECKING(for mod_charset compatibility option)
 AC_ARG_WITH(mod_charset,
