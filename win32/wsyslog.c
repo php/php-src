@@ -57,6 +57,7 @@
 #include <process.h>
 
 #include "php_win32_globals.h"
+#include "wsyslog.h"
 
 void closelog(void)
 {
@@ -78,6 +79,7 @@ void syslog(int priority, const char *message, ...)
 	LPTSTR strs[2];
 	unsigned short etype;
 	char *tmp = NULL;
+	DWORD evid;
 	TSRMLS_FETCH();
 
 	/* default event source */
@@ -87,19 +89,22 @@ void syslog(int priority, const char *message, ...)
 	switch (priority) {			/* translate UNIX type into NT type */
 		case LOG_ALERT:
 			etype = EVENTLOG_ERROR_TYPE;
+			evid = PHP_SYSLOG_ERROR_TYPE;
 			break;
 		case LOG_INFO:
 			etype = EVENTLOG_INFORMATION_TYPE;
+			evid = PHP_SYSLOG_INFO_TYPE;
 			break;
 		default:
 			etype = EVENTLOG_WARNING_TYPE;
+			evid = PHP_SYSLOG_WARNING_TYPE;
 	}
 	va_start(args, message);	/* initialize vararg mechanism */
 	vspprintf(&tmp, 0, message, args);	/* build message */
 	strs[0] = PW32G(log_header);	/* write header */
 	strs[1] = tmp;				/* then the message */
 	/* report the event */
-	ReportEvent(PW32G(log_source), etype, (unsigned short) priority, 2000, NULL, 2, 0, strs, NULL);
+	ReportEvent(PW32G(log_source), etype, (unsigned short) priority, evid, NULL, 2, 0, strs, NULL);
 	va_end(args);
 	efree(tmp);
 }
@@ -121,6 +126,6 @@ void openlog(const char *ident, int logopt, int facility)
 
 	STR_FREE(PW32G(log_header));
 
-	PW32G(log_source) = RegisterEventSource(NULL, ident);
+	PW32G(log_source) = RegisterEventSource(NULL, "PHP-" PHP_VERSION);
 	spprintf(&PW32G(log_header), 0, (logopt & LOG_PID) ? "%s[%d]" : "%s", ident, getpid());
 }
