@@ -1,3 +1,40 @@
+2004-08-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      - Add methods to check parameter count
+
+    * (PHP_5_0)
+      zend_compile.c:
+      MFH Change to use memcmp instead of strcmp
+
+    * zend_compile.c:
+      - Change to use memcmp instead of strcmp
+
+2004-08-02  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - Fix typo
+
+2004-08-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_language_parser.y
+      zend_language_scanner.l:
+      - Remove all for now
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute_API.c:
+      MFB: Enforce protocol on magic methods/functions
+
+2004-08-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      zend_execute.c:
+      MFH: A gentler (performance wise) allocation of buffer for temp variables.
+
+    * zend_execute.c:
+      A gentler (performance wise) allocation of buffer for temp variables.
+
 2004-08-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_0)
