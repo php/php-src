@@ -24,6 +24,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_ncurses.h"
+#include "ext/standard/info.h"
 
 /* If you declare any globals in php_ncurses.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(ncurses)
