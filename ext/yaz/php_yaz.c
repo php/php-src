@@ -372,14 +372,17 @@ static void handle_records (Yaz_Association t, Z_Records *sr,
 			NMEM nmem = odr_extract_mem (t->odr_in);
 			Z_NamePlusRecordList *p =
 				sr->u.databaseOrSurDiagnostics;
-			for (j = 0; j < t->resultSets->recordList->num_records; j++)
+			if (t->resultSets->recordList)
+			{
+				for (j = 0; j < t->resultSets->recordList->num_records; j++)
 				if (!t->resultSets->recordList->records[j])
 					break;
-			for (i = 0; i<p->num_records; i++)
-				t->resultSets->recordList->records[i+j] = p->records[i];
-			/* transfer our response to search_nmem .. we need it later */
-			nmem_transfer (t->resultSets->odr->mem, nmem);
-			nmem_destroy (nmem);
+				for (i = 0; i<p->num_records; i++)
+					t->resultSets->recordList->records[i+j] = p->records[i];
+				/* transfer our response to search_nmem .. we need it later */
+				nmem_transfer (t->resultSets->odr->mem, nmem);
+				nmem_destroy (nmem);
+			}
 			if (present_phase && p->num_records == 0)
 			{
 				/* present response and we didn't get any records! */
