@@ -40,6 +40,8 @@
 
 #define PREG_REPLACE_EVAL			(1<<0)
 
+#define PREG_GREP_INVERT			(1<<0)
+
 
 ZEND_DECLARE_MODULE_GLOBALS(pcre)
 
@@ -98,6 +100,7 @@ static PHP_MINIT_FUNCTION(pcre)
 	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_NO_EMPTY", PREG_SPLIT_NO_EMPTY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_DELIM_CAPTURE", PREG_SPLIT_DELIM_CAPTURE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_GREP_INVERT", PREG_GREP_INVERT, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -1280,6 +1283,7 @@ PHP_FUNCTION(preg_grep)
 {
 	zval		   **regex,				/* Regular expression */
 				   **input,				/* Input array */
+				   **flags,
 			   	   **entry;				/* An entry in the input array */
 	pcre			*re = NULL;			/* Compiled regular expression */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
@@ -1289,10 +1293,13 @@ PHP_FUNCTION(preg_grep)
 	int			 	 count = 0;			/* Count of matched subpatterns */
 	char			*string_key;
 	ulong			 num_key;
+	zend_bool		 invert = 0;		/* Whether to return non-matching
+										   entries */
 	
 	/* Get arguments and do error checking */
 	
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &regex, &input) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &regex, &input, &flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1305,6 +1312,12 @@ PHP_FUNCTION(preg_grep)
 	
 	/* Make sure regex is a string */
 	convert_to_string_ex(regex);
+
+	if (ZEND_NUM_ARGS() > 2) {
+		convert_to_long_ex(flags);
+		invert = Z_LVAL_PP(flags) & PREG_GREP_INVERT;
+	}
+	printf("invert: %d\n", invert);
 	
 	/* Compile regex or get it from cache. */
 	if ((re = pcre_get_compiled_regex(Z_STRVAL_PP(regex), extra, &preg_options)) == NULL) {
@@ -1335,8 +1348,9 @@ PHP_FUNCTION(preg_grep)
 			count = size_offsets/3;
 		}
 
-		/* If something matched */
-		if (count > 0) {
+		/* If the entry fits our requirements */
+		if ((count > 0 && !invert) ||
+			(count < 0 && invert)) {
 			(*entry)->refcount++;
 
 			/* Add to return array */
