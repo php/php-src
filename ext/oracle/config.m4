@@ -146,11 +146,9 @@ AC_ARG_WITH(oracle,
     	else
     	  ORACLE_SHLIBS="$ORACLE_STLIBS"
     	fi
-        AC_DEFINE(HAVE_OCI8,,[ ])
     	;;
       8.1)
 	ORACLE_SHLIBS="-lclntsh $ORA_SYSLIB"
-	AC_DEFINE(HAVE_OCI8,,[ ])
 	;;
       *)
   	ORACLE_SHLIBS=
