@@ -195,6 +195,10 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 	to_be_destroyed_buffer = OG(active_ob_buffer).buffer;
 
 	if (!just_flush) {
+		if (OG(active_ob_buffer).internal_output_handler
+			&& (internal_output_handler_buffer != OG(active_ob_buffer).internal_output_handler_buffer)) {
+			efree(internal_output_handler_buffer);
+		}
 		if (OG(nesting_level)>1) { /* restore previous buffer */
 			php_ob_buffer *ob_buffer_p;
 
@@ -223,10 +227,6 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 		OG(active_ob_buffer).text_length = 0;
 		OG(active_ob_buffer).status |= PHP_OUTPUT_HANDLER_START;
 		OG(php_body_write) = php_b_body_write;
-	}
-	if (OG(active_ob_buffer).internal_output_handler
-		&& (internal_output_handler_buffer != OG(active_ob_buffer).internal_output_handler_buffer)) {
-		efree(internal_output_handler_buffer);
 	}
 }
 
