@@ -930,6 +930,7 @@ next_row:
 		case SQLITE_MISUSE:
 		default:
 			/* fall through to finalize */
+			;
 	}
 
 	ret = sqlite_finalize(rres->vm, &errtext);
