@@ -380,7 +380,7 @@ PHP_FUNCTION(mcal_popen)
 }
 
 /* {{{ proto int mcal_reopen(int stream_id, string calendar [, int options])
-   Reopen MCAL stream to new calendar */
+   Reopen MCAL stream to a new calendar */
 PHP_FUNCTION(mcal_reopen)
 {
 	zval **streamind, **calendar, **options;
@@ -417,9 +417,8 @@ PHP_FUNCTION(mcal_reopen)
 }
 /* }}} */
 
-
 /* {{{ proto int mcal_expunge(int stream_id)
-   Delete all messages marked for deletion */
+   Delete all events marked for deletion */
 PHP_FUNCTION(mcal_expunge)
 {
 	zval **streamind;
@@ -560,10 +559,8 @@ PHP_FUNCTION(mcal_list_events)
 }
 /* }}} */
 
-
 /* {{{ proto string mcal_create_calendar(int stream_id, string calendar)
    Create a new calendar */
-
 PHP_FUNCTION(mcal_create_calendar)
 {
 	zval **streamind, **calendar;
@@ -595,7 +592,6 @@ PHP_FUNCTION(mcal_create_calendar)
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ proto string mcal_rename(int stream_id, string src_calendar, string dest_calendar)
    Rename a calendar */
@@ -715,7 +711,7 @@ PHP_FUNCTION(mcal_delete_calendar)
 /* }}} */
 
 /* {{{ proto string mcal_delete_event(int stream_id, int uid)
-   Delete event */
+   Delete an event */
 PHP_FUNCTION(mcal_delete_event)
 {
 	zval **streamind, **uid;
@@ -836,7 +832,6 @@ PHP_FUNCTION(mcal_snooze)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto string mcal_event_set_category(int stream_id, string category)
    Attach a category to an event */
@@ -1516,7 +1511,7 @@ PHP_FUNCTION(mcal_event_set_recur_monthly_mday)
 /* }}} */
 
 /* {{{ proto string mcal_event_set_recur_monthly_wday(int stream_id, int year, int month, int day, int interval)
-   Create a monthy by week recurrence */
+   Create a monthly by week recurrence */
 PHP_FUNCTION(mcal_event_set_recur_monthly_wday)
 {
 	zval **streamind, **year, **month, **day, **interval;
