@@ -1,3 +1,12 @@
+2003-08-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_objects_API.c:
+      Add missing entry
+
+    * zend_API.c:
+      - Show classes in case of methods
+      - Using sprintf here was a bad idea
+
 2003-08-12  Zeev Suraski  <zeev@zend.com>
 
     * zend_hash.c:
