@@ -44,6 +44,9 @@ typedef zend_object_value (*create_object_func_t)(zend_class_entry *class_type T
 #define REGISTER_SPL_FUNCTIONS(class_name, function_list) \
 	spl_register_functions(spl_ce_ ## class_name, function_list TSRMLS_CC);
 
+#define REGISTER_SPL_PROPERTY(class_name, prop_name) \
+	spl_register_property(spl_ce_ ## class_name, prop_name, prop_val, prop_flags TSRMLS_CC);
+
 void spl_destroy_class(zend_class_entry ** ppce);
 
 void spl_register_std_class(zend_class_entry ** ppce, char * class_name, create_object_func_t ctor, function_entry * function_list TSRMLS_DC);
@@ -54,6 +57,7 @@ void spl_register_interface_function(zend_class_entry * class_entry, char * fn_n
 void spl_register_parent_ce(zend_class_entry * class_entry, zend_class_entry * parent_class TSRMLS_DC);
 void spl_register_implement(zend_class_entry * class_entry, zend_class_entry * interface_entry TSRMLS_DC);
 void spl_register_functions(zend_class_entry * class_entry, function_entry * function_list TSRMLS_DC);
+void spl_register_property( zend_class_entry * class_entry, char *prop_name, zval *prop_val, int prop_flags TSRMLS_DC);
 
 void spl_add_class_name(zval * list, zend_class_entry * pce TSRMLS_DC);
 void spl_add_interfaces(zval * list, zend_class_entry * pce TSRMLS_DC);
