@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 4.3.1
+- Enabled read-only GIF support in the bundled GDLIB (php_gd2.dll)
+  on Windows. (Sebastian, Edin)
 - Improved dba extension (Marcus)
   . Added support for internal error handling of Berkeley db libraries.
   . Disallow Berkeley db versions 4.1.0 to 4.1.24 due to locking problems.
