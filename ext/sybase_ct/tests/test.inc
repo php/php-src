@@ -4,6 +4,8 @@
  * $Id$ 
  */
 
+  error_reporting(E_ALL);
+
   // Change if needed
   define('HOST',     '****');
   define('USER',     '****');
