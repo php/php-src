@@ -91,7 +91,6 @@ typedef struct {
 	int gc_maxlifetime;
 	int module_number;
 	const struct ps_serializer_struct *serializer;
-	char *php_sid;
 } php_ps_globals;
 
 extern zend_module_entry session_module_entry;

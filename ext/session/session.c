@@ -374,9 +374,7 @@ static void _php_session_start(PSLS_D)
 		buf = emalloc(strlen(PS(session_name)) + strlen(PS(id)) + 5);
 		sprintf(buf, "%s=%s", PS(session_name), PS(id));
 		REGISTER_STRING_CONSTANT("SID", buf, 0);
-		PS(php_sid) = buf;
-	} else
-		PS(php_sid) = NULL;
+	}
 
 	PS(nr_open_sessions)++;
 
@@ -644,8 +642,6 @@ static void php_rshutdown_session_globals(PSLS_D)
 {
 	if(PS(mod_data))
 		PS(mod)->close(&PS(mod_data));
-	if(PS(php_sid))
-		efree(PS(php_sid));
 	efree(PS(save_path));
 	efree(PS(session_name));
 	if(PS(id)) efree(PS(id));
