@@ -148,7 +148,7 @@ static void php_apache_sapi_log_message(char *msg)
 
 	ctx = SG(server_context);
 
-	apr_fprintf(ctx->f->r->server->error_log, "%s", msg);
+	apr_puts(msg, ctx->f->r->server->error_log);
 }
 
 static sapi_module_struct sapi_module = {
