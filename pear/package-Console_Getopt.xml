@@ -23,9 +23,9 @@ short and long options.</description>
     </maintainer>
   </maintainers>
   <release>
-    <version>2.0</version>
-    <date>2003-12-06</date>
-    <notes>Revert of erroneous POSIX compatibility fix (BC break)</notes>
+    <version>1.2</version>
+    <date>2003-12-11</date>
+    <notes>Fix to preserve BC with 1.0 and allow correct behaviour for new users</notes>
     <state>stable</state>
     <filelist>
      <dir name="Console">
@@ -35,29 +35,40 @@ short and long options.</description>
   </release>
   <changelog>
     <release>
-      <version>0.11</version>
-      <date>2002-05-26</date>
-      <notes>POSIX getopt compatibility fix: treat first element of args
-        array as command name
-      </notes>
-      <state>beta</state>
+      <version>1.0</version>
+      <date>2002-09-13</date>
+      <notes>Stable release</notes>
+      <state>stable</state>
       <filelist>
         <dir name="Console">
           <file role="php" name="Getopt.php"/>
         </dir>
       </filelist>
     </release>
-    <release>
-      <version>0.10</version>
-      <date>2002-05-12</date>
-      <notes>Packaging fix</notes>
-      <state>beta</state>
-    </release>
-    <release>
-      <version>0.9</version>
-      <date>2002-05-12</date>
-      <notes>Initial release</notes>
-      <state>beta</state>
-    </release>
+   <release>
+     <version>0.11</version>
+     <date>2002-05-26</date>
+     <notes>POSIX getopt compatibility fix: treat first element of args
+       array as command name
+     </notes>
+     <state>beta</state>
+     <filelist>
+       <dir name="Console">
+         <file role="php" name="Getopt.php"/>
+       </dir>
+     </filelist>
+   </release>
+   <release>
+     <version>0.10</version>
+     <date>2002-05-12</date>
+     <notes>Packaging fix</notes>
+     <state>beta</state>
+   </release>
+   <release>
+     <version>0.9</version>
+     <date>2002-05-12</date>
+     <notes>Initial release</notes>
+     <state>beta</state>
+   </release>
   </changelog>
-</package>
+ </package>
