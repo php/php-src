@@ -53,27 +53,13 @@ AC_MSG_RESULT(yes - installed in $PTH_PREFIX)
 
 AC_DEFUN(TSRM_CHECK_PTHREADS,[
 
-old_CFLAGS="$CFLAGS"
-
-if test -n "$GCC"; then
-  TSRM_CHECK_GCC_ARG(-pthread, [
-    CFLAGS="$CFLAGS -pthread"
-    ],[
-    TSRM_CHECK_GCC_ARG(-pthreads, [
-        CFLAGS="$CFLAGS -pthreads"
-        ])])
-fi
-
-AC_CHECK_FUNCS(pthread_kill)
-
-if test "$ac_cv_func_pthread_kill" != "yes"; then
-  CFLAGS="$old_CFLAGS"
-  AC_CHECK_LIB(pthread, pthread_kill)
-  unset ac_cv_func_pthread_kill
-  AC_CHECK_FUNCS(pthread_kill)
-  if test "$ac_cv_func_pthread_kill" != "yes"; then
-    AC_MSG_ERROR(Your system seems to lack POSIX threads.)
-  fi
+sinclude(threads.m4)
+sinclude(TSRM/threads.m4)
+		
+PTHREADS_CHECK
+		
+if test "$pthreads_working" != "yes"; then
+  AC_MSG_ERROR(Your system seems to lack POSIX threads.)
 fi
 		
 AC_DEFINE(PTHREADS, 1, Whether to use Pthreads)
