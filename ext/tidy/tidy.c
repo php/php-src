@@ -690,6 +690,8 @@ static void php_tidy_parse_file(INTERNAL_FUNCTION_PARAMETERS)
 
 PHP_MINIT_FUNCTION(tidy)
 {
+	ZEND_INIT_MODULE_GLOBALS(tidy, tidy_globals_ctor, tidy_globals_dtor);
+
 	REGISTER_INI_ENTRIES();
 	REGISTER_TIDY_CLASS(doc,	NULL);
 	REGISTER_TIDY_CLASS(node,	NULL);
@@ -702,8 +704,6 @@ PHP_MINIT_FUNCTION(tidy)
 
 	tidy_object_handlers_doc.cast_object = tidy_doc_cast_handler;
 	tidy_object_handlers_node.cast_object = tidy_node_cast_handler;
-
-	ZEND_INIT_MODULE_GLOBALS(tidy, tidy_globals_ctor, tidy_globals_dtor);
 
 	_php_tidy_register_tags(INIT_FUNC_ARGS_PASSTHRU);
 	_php_tidy_register_attributes(INIT_FUNC_ARGS_PASSTHRU);
