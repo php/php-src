@@ -34,7 +34,7 @@
 
 /* checking in the same order as in configure.in */
 
-#if defined(HAVE_SOLID) || defined(HAVE_SOLID_35) /* Solid Server */
+#if defined(HAVE_SOLID) || defined(HAVE_SOLID_30) || defined(HAVE_SOLID_35) /* Solid Server */
 
 #define ODBC_TYPE "Solid"
 #if defined(HAVE_SOLID)
