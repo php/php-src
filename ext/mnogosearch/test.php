@@ -37,6 +37,8 @@
 	Udm_Set_Agent_Param($udm,UDM_PARAM_CHARSET,"koi8-r");
 //	Udm_Set_Agent_Param($udm,UDM_PARAM_STOPTABLE,"stopword");
 //	Udm_Set_Agent_Param($udm,UDM_PARAM_STOPFILE,"stop.txt");
+	Udm_Set_Agent_Param($udm,UDM_PARAM_WEIGHT_FACTOR,"F9421");
+	Udm_Set_Agent_Param($udm,UDM_PARAM_WORD_MATCH,UDM_MATCH_SUBSTR);
 
 // Stage 3: add search limits
 //	Udm_Add_Search_Limit($udm,UDM_LIMIT_URL,"http://www.mydomain.com/%");
