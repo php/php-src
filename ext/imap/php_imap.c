@@ -3998,6 +3998,8 @@ PHP_FUNCTION (imap_thread)
 }
 /* }}} */
 
+/* {{{ proto mixed imap_timeout(int timeout_type [, int timeout])
+   Set or fetch imap timeout */
 PHP_FUNCTION (imap_timeout)
 {
 	long ttype, timeout=-1;
@@ -4053,6 +4055,7 @@ PHP_FUNCTION (imap_timeout)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
 /* {{{ Interfaces to C-client 
  */
