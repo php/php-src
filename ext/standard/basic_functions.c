@@ -1670,7 +1670,7 @@ PHP_FUNCTION(method_exists)
 		RETURN_FALSE;
 	}
 	convert_to_string(arg2);
-	if(zend_hash_exists(&arg1->value.obj.ce->function_table, arg2->value.str.val, arg2->value.str.len+1) {
+	if(zend_hash_exists(&arg1->value.obj.ce->function_table, arg2->value.str.val, arg2->value.str.len+1)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;

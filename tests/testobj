@@ -14,7 +14,8 @@ class barbara extends foobar {
 };
 }
 
-$foo = new foobar; // or die("Unable to construct foobar\n");
+$name = "foobar";
+$foo = new $name; // or die("Unable to construct foobar\n");
 //print $foo->initialized;
 
 $boo = new barbara;
