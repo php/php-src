@@ -129,6 +129,7 @@ class PEAR_Downloader extends PEAR_Common
         $this->_options = $options;
         $this->_config = &$config;
         $this->_preferredState = $this->_config->get('preferred_state');
+        $this->ui = &$ui;
         if (!$this->_preferredState) {
             // don't inadvertantly use a non-set preferred_state
             $this->_preferredState = null;
@@ -149,7 +150,7 @@ class PEAR_Downloader extends PEAR_Common
             array_walk($this->_installed, create_function('&$v,$k','$v = strtolower($v);'));
             $this->_installed = array_flip($this->_installed);
         }
-        parent::PEAR_Common($ui);
+        parent::PEAR_Common();
     }
     
     // }}}
@@ -443,6 +444,7 @@ class PEAR_Downloader extends PEAR_Common
                 foreach ($releases as $ver => $inf) {
                     if ($inf['state'] == $state && version_compare("$version", "$ver") < 0) {
                         $version = $ver;
+                        break;
                     }
                 }
                 if ($version == 0) {
@@ -461,18 +463,19 @@ class PEAR_Downloader extends PEAR_Common
             foreach ($releases as $ver => $inf) {
                 if (in_array($inf['state'], $states) && version_compare("$version", "$ver") < 0) {
                     $version = $ver;
+                    break;
                 }
             }
-            if ($version == 0 && !isset($this->_options['force'])) {
+            if ($version === 0 && !isset($this->_options['force'])) {
                 return $this->raiseError('No release with state equal to: \'' . implode(', ', $states) .
                                          "' found for '$pkgfile'");
-            } elseif ($version == 0) {
+            } elseif ($version === 0) {
                 $this->log(0, "Warning: $pkgfile is state '$inf[state]' which is less stable " .
                               "than state '$this->_preferredState'");
             }
         }
         // Check if we haven't already the version
-        if (empty($this->_options['force'])) {
+        if (empty($this->_options['force']) && !is_null($curinfo)) {
             if ($curinfo['version'] == $version) {
                 $this->log(0, "Package '{$curinfo['package']}-{$curinfo['version']}' already installed, skipping");
                 return false;
@@ -579,6 +582,36 @@ class PEAR_Downloader extends PEAR_Common
         return $info['name'];
     }
     
+    // }}}
+    // {{{ _downloadCallback()
+
+    function _downloadCallback($msg, $params = null)
+    {
+        switch ($msg) {
+            case 'saveas':
+                $this->log(1, "downloading $params ...");
+                break;
+            case 'done':
+                $this->log(1, '...done: ' . number_format($params, 0, '', ',') . ' bytes');
+                break;
+            case 'bytesread':
+                static $bytes;
+                if (empty($bytes)) {
+                    $bytes = 0;
+                }
+                if (!($bytes % 10240)) {
+                    $this->log(1, '.', false);
+                }
+                $bytes += $params;
+                break;
+            case 'start':
+                $this->log(1, "Starting to download {$params[0]} (".number_format($params[1], 0, '', ',')." bytes)");
+                break;
+        }
+        if (method_exists($this->ui, '_downloadCallback'))
+            $this->ui->_downloadCallback($msg, $params);
+    }
+
     // }}}
     // {{{ pushError($errmsg, $code)
     
