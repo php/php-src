@@ -258,7 +258,7 @@ AC_ARG_WITH(db3,
     done
     PHP_DBA_DB_CHECK(3, db-3.3 db-3.2 db-3.1 db-3.0 db-3 db3 db, [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
   fi
-      ])
+])
 AC_DBA_STD_RESULT(db3,Berkeley DB3)
 
 AC_ARG_WITH(db2,
