@@ -478,17 +478,17 @@ PHP_FUNCTION(touch)
 	struct utimbuf *newtime = NULL;
 	int ac = ZEND_NUM_ARGS();
 
+	newtime = &newtimebuf;
+
 	if (ac == 1 && zend_get_parameters_ex(1, &filename) != FAILURE) {
 #ifndef HAVE_UTIME_NULL
 		newtime->modtime = newtime->actime = time(NULL);
 #endif
 	} else if (ac == 2 && zend_get_parameters_ex(2, &filename, &filetime) != FAILURE) {
-		newtime = &newtimebuf;
 		convert_to_long_ex(filetime);
 		newtime->actime = time(NULL);
 		newtime->modtime = newtime->actime = Z_LVAL_PP(filetime);
 	} else if (ac == 3 && zend_get_parameters_ex(3, &filename, &filetime, &fileatime) != FAILURE) {
-		newtime = &newtimebuf;
 		convert_to_long_ex(fileatime);
 		convert_to_long_ex(filetime);
 		newtime->actime = Z_LVAL_PP(fileatime);
