@@ -1,6 +1,6 @@
 <?php
 	echo "database handler: $handler\n";
-	if (($db_file=dba_open($db_file, "n", $handler))!==FALSE) {
+	if (($db_file=dba_open($db_filename, "n", $handler))!==FALSE) {
 		dba_insert("key1", "Content String 1", $db_file);
 		dba_insert("key2", "Content String 2", $db_file);
 		dba_insert("key3", "Third Content String", $db_file);
@@ -25,5 +25,37 @@
 		dba_close($db_file);
 	} else {
 		echo "Error creating database\n";
+	}
+	$db_writer=dba_open($db_filename, "w", $handler);
+	if (($dba_reader=dba_open($db_filename, "r", $handler))===false) {
+		echo "Cannot read during write operation\n";
+	} else {
+		echo "Read during write permitted\n";
+	}
+	if ($db_writer!==FALSE) {
+		dba_insert("key number 6", "The 6th value", $db_writer);
+		dba_replace("key2", "Content 2 replaced 2nd time", $db_writer);
+		dba_delete("key4", $db_writer);
+		echo dba_fetch("key2", $db_writer)."\n";
+		echo dba_fetch("key number 6", $db_writer)."\n";
+		dba_close($db_writer); // when the writer is open at least db3 would fail because of buffered io.
+	} else {
+		die("Error reopening database\n");
+	}
+	if (($db_file=dba_open($db_filename, "r", $handler))!==FALSE) {
+		$key = dba_firstkey($db_file);
+		$res = array();
+		while($key) {
+			$res[$key] = dba_fetch($key, $db_file);
+			$key = dba_nextkey($db_file);
+		}
+		ksort($res);
+		var_dump($res);
+		dba_close($db_file);
+	} else {
+		echo "Error reading database\n";
+	}
+	if ($dba_reader) {
+		dba_close($dba_reader);
 	}
 ?>

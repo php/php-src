@@ -1,5 +1,5 @@
 <?php
-	$db_file = dirname(__FILE__).'/test0.dbm'; 
+	$db_filename = $db_file = dirname(__FILE__).'/test0.dbm';
 	$handler = dba_handlers(); 
 	// CDB currently supports only reading 
 	if ($handler[0]=='cdb') {
