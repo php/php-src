@@ -63,6 +63,7 @@ int zend_load_extension(char *path)
 					extension_version_info->required_zend_version,
 					ZEND_VERSION,
 					ZEND_EXTENSION_API_NO);
+		DL_UNLOAD(handle);
 		return FAILURE;
 	} else if (extension_version_info->zend_extension_api_no < ZEND_EXTENSION_API_NO) {
 		/* we may be able to allow for downwards compatability in some harmless cases. */
@@ -73,17 +74,22 @@ int zend_load_extension(char *path)
 					ZEND_EXTENSION_API_NO,
 					new_extension->author,
 					new_extension->URL);
+		DL_UNLOAD(handle);
 		return FAILURE;
 	} else if (ZTS_V!=extension_version_info->thread_safe) {
 		zend_printf("Cannot load %s - it %s thread safe, whereas Zend %s\n",
 					new_extension->name,
 					(extension_version_info->thread_safe?"is":"isn't"),
 					(ZTS_V?"is":"isn't"));
+		DL_UNLOAD(handle);
 		return FAILURE;
 	}
 
 	if (new_extension->startup) {
-		new_extension->startup(new_extension);
+		if (new_extension->startup(new_extension)!=SUCCESS) {
+			DL_UNLOAD(handle);
+			return FAILURE;
+		}
 	}
 	extension = *new_extension;
 	extension.handle = handle;

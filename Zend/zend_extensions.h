@@ -37,7 +37,7 @@ struct _zend_extension {
 	char *URL;
 	char *copyright;
 
-	void (*startup)(zend_extension *extension);
+	int (*startup)(zend_extension *extension);
 	void (*shutdown)(zend_extension *extension);
 	void (*activate)();
 	void (*deactivate)();
