@@ -28,9 +28,11 @@ static int freezeset(register struct parse *p, register cset *cs);
 static int firstch(register struct parse *p, register cset *cs);
 static int nch(register struct parse *p, register cset *cs);
 static void mcadd(register struct parse *p, register cset *cs, register char *cp);
+#if 0
 static void mcsub(register cset *cs, register char *cp);
 static int mcin(register cset *cs, register char *cp);
 static char *mcfind(register cset *cs, register char *cp);
+#endif
 static void mcinvert(register struct parse *p, register cset *cs);
 static void mccase(register struct parse *p, register cset *cs);
 static int isinsets(register struct re_guts *g, int c);
