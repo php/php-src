@@ -138,7 +138,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 	params = stmt->bound_params;
 	
 	/* Do we have placeholders but no bound params */
-	if (bindno && !params) {
+	if (bindno && !params && stmt->supports_placeholders == PDO_PLACEHOLDER_NONE) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "no parameters were bound" TSRMLS_CC);
 		ret = -1;
 		goto clean_up;
