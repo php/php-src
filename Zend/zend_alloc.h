@@ -52,7 +52,7 @@ typedef union _align_test {
 	long lng;
 } align_test;
 
-#define MAX_CACHED_MEMORY   16
+#define MAX_CACHED_MEMORY	16
 #define MAX_CACHED_ENTRIES	24
 #if (defined (__GNUC__) && __GNUC__ >= 2)
 #define PLATFORM_ALIGNMENT (__alignof__ (align_test))
