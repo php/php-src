@@ -475,8 +475,8 @@ PHP_MINFO_FUNCTION(ifx)
     php_info_print_table_row(2, "Persistent links : ", buf);
     sprintf(buf, "%ld", IFXG(num_links)); 
     php_info_print_table_row(2, "Total links : ", buf);
-    sprintf(buf, "%02.2f", (double)(CLIENT_SQLI_VER/100.0)); 
-    php_info_print_table_row(2, "Client API Version: ", buf);
+    sprintf(buf, "%02.2f", (double)(IFX_VERSION/100.0)); 
+    php_info_print_table_row(2, "ESQL/C Version: ", buf);
     php_printf("</table>\n");
 }
 
