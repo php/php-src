@@ -412,7 +412,7 @@ int php3api_var_unserialize(pval **rval, char **p, char *max)
 			(*p) += 2;
 			i = atoi(*p);
 			(*rval)->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
-			_php3_hash_init((*rval)->value.ht, i + 1, NULL, PVAL_PTR_DTOR, 0);
+			_php3_hash_init((*rval)->value.obj.properties, i + 1, NULL, PVAL_PTR_DTOR, 0);
 			while (**p && **p != ':') {
 				(*p)++;
 			}
@@ -436,10 +436,10 @@ int php3api_var_unserialize(pval **rval, char **p, char *max)
 				}
 				switch (key->type) {
 					case IS_LONG:
-						_php3_hash_index_update((*rval)->value.ht, key->value.lval, &data, sizeof(data), NULL);
+						_php3_hash_index_update((*rval)->value.obj.properties, key->value.lval, &data, sizeof(data), NULL);
 						break;
 					case IS_STRING:
-						_php3_hash_add((*rval)->value.ht, key->value.str.val, key->value.str.len + 1, &data, sizeof(data), NULL);
+						_php3_hash_add((*rval)->value.obj.properties, key->value.str.val, key->value.str.len + 1, &data, sizeof(data), NULL);
 						break;
 				}
 				pval_destructor(key);
