@@ -54,12 +54,6 @@
 /* in GET/POST/Cookie data */
 #define MAGIC_QUOTES 1
 
-/* Define if you have an ndbm compatible library (-ldbm).  */
-#define NDBM 0
-
-/* Define if you have the gdbm library (-lgdbm).  */
-#define GDBM 0
-
 /* Define both of these if you want the bundled REGEX library */
 #define REGEX 0
 #define HSREGEX 0
