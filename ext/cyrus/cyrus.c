@@ -111,6 +111,8 @@ extern void fatal(char *s, int exit)
 	php_error(E_ERROR, s);
 }
 
+/* {{{ proto resource cyrus_connect([ string host [, string port [, int flags]]])
+   Connect to a Cyrus IMAP server */
 PHP_FUNCTION(cyrus_connect)
 {
 	zval            **z_host;
@@ -176,6 +178,8 @@ PHP_FUNCTION(cyrus_connect)
 	ZEND_REGISTER_RESOURCE(return_value, conn, le_cyrus);
 	conn->id = Z_LVAL_P(return_value);
 }
+/* }}} */
+
 
 static void cyrus_capable_callback(struct imclient *client, void *rock, 
                                    struct imclient_reply *reply)
@@ -197,6 +201,9 @@ static void cyrus_capable_callback(struct imclient *client, void *rock,
 	}
 }
 
+
+/* {{{ proto bool cyrus_authenticate( resource connection [, string mechlist [, string service [, string user [, int minssf [, int maxssf]]]]])
+   Authenticate agaings a Cyrus IMAP server */
 PHP_FUNCTION(cyrus_authenticate)
 {
 	zval        **z_conn;
@@ -314,6 +321,8 @@ PHP_FUNCTION(cyrus_authenticate)
 	efree(service);
 	efree(user);
 }
+/* }}} */
+
 
 static void cyrus_generic_callback(struct imclient *client, 
                                    void *rock, 
@@ -366,7 +375,8 @@ static void cyrus_generic_callback(struct imclient *client,
 }
 
 	
-
+/* {{{ proto bool cyrus_bind( resource connection, array callbacks) 
+ Bind callbacks to a Cyrus IMAP connection */
 PHP_FUNCTION(cyrus_bind)
 {
 	zval                  **z_conn;
@@ -431,7 +441,10 @@ PHP_FUNCTION(cyrus_bind)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* proto bool cyrus_unbind( resource connection, string trigger_name)
+   Unbind ... */
 PHP_FUNCTION(cyrus_unbind)
 {
 	zval        **z_conn;
@@ -450,7 +463,10 @@ PHP_FUNCTION(cyrus_unbind)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto bool cyrus_qzuery( resource connection, string query) 
+   Send a query to a Cyrus IMAP server */
 PHP_FUNCTION(cyrus_query)
 {
 	zval               **z_conn;
@@ -468,8 +484,10 @@ PHP_FUNCTION(cyrus_query)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
-
+/* {{{ proto bool cyrus_close( resource connection)
+   Close connection to a cyrus server */
 PHP_FUNCTION(cyrus_close)
 {
 	zval      **z_conn;
@@ -485,7 +503,7 @@ PHP_FUNCTION(cyrus_close)
 
 	RETURN_TRUE;
 }
-
+/* }}} */
 #endif
 
 
