@@ -284,7 +284,7 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 
 	opline_ptr->op2.u.EA.type = ZEND_FETCH_LOCAL;
 	if (varname->op_type == IS_CONST && varname->u.constant.type == IS_STRING) {
-		if (zend_is_auto_global(varname->u.constant.value.str.val, varname->u.constant.value.str.len+1 TSRMLS_CC)) {
+		if (zend_is_auto_global(varname->u.constant.value.str.val, varname->u.constant.value.str.len TSRMLS_CC)) {
 			opline_ptr->op2.u.EA.type = ZEND_FETCH_GLOBAL;
 		} else {
 /*			if (CG(active_op_array)->static_variables && zend_hash_exists(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
