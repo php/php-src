@@ -28,12 +28,7 @@
 #include "php_open_temporary_file.h"
 #include "php_swf.h"
 
-#ifdef ZTS
-int swf_globals_id;
-#else
-php_swf_globals swf_globals;
-#endif
-
+ZEND_DECLARE_MODULE_GLOBALS(swf)
 
 function_entry swf_functions[] = {
 	PHP_FE(swf_openfile,		NULL)

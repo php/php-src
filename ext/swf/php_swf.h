@@ -100,15 +100,18 @@ PHP_FUNCTION(swf_translate);
 PHP_FUNCTION(swf_rotate);
 PHP_FUNCTION(swf_posround);
 
-typedef struct {
+
+ZEND_BEGIN_MODULE_GLOBALS(swf)
 	int use_file;
 	char *tmpfile_name;
-} php_swf_globals;
+ZEND_END_MODULE_GLOBALS(swf)
 
 #ifdef ZTS
+#define SWFLS_D zend_swf_globals *swf_globals
 #define SWFG(v) (swf_globals->v)
-#define SWFLS_FETCH() php_swf_globals *swf_globals = ts_resource(gd_swf_id)
+#define SWFLS_FETCH() zend_swf_globals *swf_globals = ts_resource(swf_globals_id)
 #else
+#define SWFLS_D
 #define SWFG(v) (swf_globals.v)
 #define SWFLS_FETCH()
 #endif
