@@ -516,7 +516,7 @@ PHP_FUNCTION(ftp_get)
 		RETURN_FALSE;
 	}
 
-	if (!ftp_get(ftp, outstream, remote, xtype, resumepos) || php_stream_error(tmpstream)) {
+	if (!ftp_get(ftp, outstream, remote, xtype, resumepos) || php_stream_error(outstream)) {
 		php_stream_close(outstream);
 		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
