@@ -5,6 +5,7 @@ PHP 4.0                                                                    NEWS
 
 
 November 16 1999, Version 4.0 Beta 3
+- Fixed mem-overwrite in XML_Parse_Into_Struct. (Thies)
 - Added substr_replace() function. (Andrei)
 - ucfirst()/ucwords() no longer modify arg1. (Thies)
 - Fixed strtr() not to modify arg1. (Thies)
