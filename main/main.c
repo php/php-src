@@ -247,6 +247,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("max_execution_time",		"30",			PHP_INI_ALL,		OnChangeMaxExecutionTime,		NULL)
 	PHP_INI_ENTRY("memory_limit",			"8388608",		PHP_INI_ALL,		OnChangeMemoryLimit,			NULL)
 
+	PHP_INI_ENTRY("track_vars",				"0",			PHP_INI_ALL,		OnUpdateInt,			(void *) XtOffsetOf(php_core_globals, track_vars))
 	PHP_INI_ENTRY("gpc_order",				"GPC",			PHP_INI_ALL,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, gpc_order))
 	PHP_INI_ENTRY("arg_separator",			"&",			PHP_INI_ALL,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, arg_separator))
 PHP_INI_END()
@@ -604,12 +605,12 @@ static void php_message_handler_for_zend(long message, void *data)
 			php3_error(E_WARNING, "Failed opening '%s' for highlighting", php3_strip_url_passwd((char *) data));
 			break;
 		case ZMSG_MEMORY_LEAK_DETECTED: {
-				mem_header *t = (mem_header *) data;
 				ELS_FETCH();
 
 				if (EG(error_reporting)&E_WARNING) {
 #if ZEND_DEBUG
 #	if APACHE  /* log into the errorlog, since at this time we can't send messages to the browser */
+					mem_header *t = (mem_header *) data;
 					char memory_leak_buf[512];
 
 					snprintf(memory_leak_buf,512,"Possible PHP3 memory leak detected (harmless):  %d bytes from %s:%d",t->size,t->filename,t->lineno);

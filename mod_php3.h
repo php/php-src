@@ -42,7 +42,9 @@ typedef struct {
     long last_modified;
 	char *dav_script;
 	long xbithack;
-} php3_ini_structure;
+} php_apache_info_struct;
+
+extern php_apache_info_struct php_apache_info;
 
 #if MSVC5
 #define S_IXUSR _S_IEXEC

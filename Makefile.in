@@ -210,47 +210,42 @@ depend:	parser-scanner
 	$(CC) $(CFLAGS) -MM $(SOURCE) | perl -pe 's|regex/regex.h||;' > Makefile.depend
 	$(CC) $(CFLAGS) -MM $(FUNCTIONS_SOURCE) | perl -pe 's|^(.+\.o)|functions/$$1|; s|regex/regex.h||;' >> Makefile.depend
 
-main.o: main.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h build-defs.h php_ini.h main.h \
- libzend/zend_globals.h libzend/zend_ptr_stack.h \
- libzend/zend_compile.h libzend/zend-parser.h \
+main.o: main.c php.h php_version.h libzend/zend.h libzend/config.h \
+ libzend/config.unix.h libzend/zend_errors.h libzend/zend_alloc.h \
+ libzend/zend_hash.h libzend/zend_llist.h libzend/zend_API.h \
+ libzend/modules.h libzend/zend_list.h config.h request_info.h \
+ php3_compat.h libzend/zend_stack.h  safe_mode.h \
+ fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h build-defs.h \
+ php_ini.h php_globals.h main.h libzend/zend_globals.h \
+ libzend/zend_ptr_stack.h libzend/zend_compile.h libzend/zend-parser.h \
  libzend/zend_execute.h control_structures.h \
- functions/basic_functions.h functions/info.h functions/head.h \
- functions/post.h functions/type.h snprintf.h logos.h
+ functions/basic_functions.h libzend/zend_highlight.h functions/info.h \
+ functions/head.h functions/post.h functions/type.h snprintf.h \
+ libzend/zend_indent.h logos.h
 internal_functions.o: internal_functions.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
+ libzend/zend.h libzend/config.h libzend/config.unix.h \
+ libzend/zend_errors.h libzend/zend_alloc.h libzend/zend_hash.h \
+ libzend/zend_llist.h libzend/zend_API.h libzend/modules.h \
+ libzend/zend_list.h config.h request_info.h php3_compat.h \
+ libzend/zend_stack.h  safe_mode.h fopen-wrappers.h \
+ output.h libzend/zend_operators.h libzend/zend_variables.h \
  libzend/zend_constants.h internal_functions_registry.h \
- libzend/zend_compile.h libzend/zend-parser.h \
- libzend/zend_globals.h libzend/zend_ptr_stack.h \
- libzend/zend_execute.h functions/php3_ifx.h \
+ libzend/zend_compile.h libzend/zend-parser.h libzend/zend_globals.h \
+ libzend/zend_ptr_stack.h libzend/zend_execute.h functions/php3_ifx.h \
  functions/php3_ldap.h functions/php3_mysql.h functions/php3_bcmath.h \
- functions/php3_msql.h functions/basic_functions.h functions/phpmath.h \
- functions/php3_string.h functions/php3_oci8.h functions/oracle.h \
- functions/base64.h functions/php3_dir.h functions/dns.h \
- functions/php3_pgsql.h functions/php3_velocis.h \
- functions/php3_sybase.h functions/php3_sybase-ct.h functions/reg.h \
- functions/php3_mail.h functions/imap.h functions/md5.h \
- functions/global.h functions/php3_gd.h functions/html.h \
- functions/dl.h functions/head.h functions/post.h functions/exec.h \
- functions/php3_solid.h functions/adabasd.h functions/file.h \
- functions/dbase.h functions/hw.h functions/filepro.h functions/db.h \
- functions/php3_syslog.h functions/php3_filestat.h \
- functions/php3_browscap.h functions/pack.h \
+ functions/php3_msql.h functions/basic_functions.h \
+ libzend/zend_highlight.h functions/phpmath.h functions/php3_string.h \
+ functions/php3_oci8.h functions/oracle.h functions/base64.h \
+ functions/php3_dir.h functions/dns.h functions/php3_pgsql.h \
+ functions/php3_velocis.h functions/php3_sybase.h \
+ functions/php3_sybase-ct.h functions/reg.h functions/php3_mail.h \
+ functions/imap.h functions/md5.h functions/global.h \
+ functions/php3_gd.h functions/html.h functions/dl.h functions/head.h \
+ functions/post.h functions/exec.h functions/php3_solid.h \
+ functions/adabasd.h functions/file.h functions/dbase.h functions/hw.h \
+ functions/filepro.h functions/db.h functions/php3_syslog.h \
+ functions/php3_filestat.h functions/php3_browscap.h functions/pack.h \
  functions/php3_unified_odbc.h dl/snmp/php3_snmp.h \
  functions/php3_zlib.h functions/php3_COM.h functions/php3_interbase.h \
  functions/php3_xml.h functions/php3_pdf.h functions/php3_fdf.h \
@@ -259,136 +254,106 @@ internal_functions.o: internal_functions.c php.h php_version.h \
 snprintf.o: snprintf.c config.h
 php3_sprintf.o: php3_sprintf.c config.h
 configuration-parser.o: configuration-parser.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/dl.h functions/file.h \
- functions/php3_browscap.h libzend/zend_extensions.h \
- libzend/zend_compile.h libzend/zend-parser.h \
- libzend/zend_globals.h libzend/zend_ptr_stack.h \
- libzend/zend_execute.h
-configuration-scanner.o: configuration-scanner.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h configuration-parser.h
-request_info.o: request_info.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h
-safe_mode.o: safe_mode.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
+ libzend/zend.h libzend/config.h libzend/config.unix.h \
+ libzend/zend_errors.h libzend/zend_alloc.h libzend/zend_hash.h \
+ libzend/zend_llist.h libzend/zend_API.h libzend/modules.h \
  libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/pageinfo.h
-fopen-wrappers.o: fopen-wrappers.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h php3_realpath.h functions/head.h \
- functions/url.h functions/base64.h functions/fsock.h \
- functions/php3_string.h libzend/zend_compile.h \
- libzend/zend-parser.h libzend/zend_globals.h \
+ libzend/zend_stack.h  safe_mode.h fopen-wrappers.h \
+ output.h libzend/zend_operators.h libzend/zend_variables.h \
+ libzend/zend_constants.h php_globals.h php_ini.h functions/dl.h \
+ functions/file.h functions/php3_browscap.h libzend/zend_extensions.h \
+ libzend/zend_compile.h libzend/zend-parser.h libzend/zend_globals.h \
  libzend/zend_ptr_stack.h libzend/zend_execute.h
-php3_realpath.o: php3_realpath.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h
+configuration-scanner.o: configuration-scanner.c php.h php_version.h \
+ libzend/zend.h libzend/config.h libzend/config.unix.h \
+ libzend/zend_errors.h libzend/zend_alloc.h libzend/zend_hash.h \
+ libzend/zend_llist.h libzend/zend_API.h libzend/modules.h \
+ libzend/zend_list.h config.h request_info.h php3_compat.h \
+ libzend/zend_stack.h  safe_mode.h fopen-wrappers.h \
+ output.h libzend/zend_operators.h libzend/zend_variables.h \
+ libzend/zend_constants.h configuration-parser.h
+request_info.o: request_info.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h
+safe_mode.o: safe_mode.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/pageinfo.h
+fopen-wrappers.o: fopen-wrappers.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h php_globals.h \
+ php3_realpath.h functions/head.h functions/url.h functions/base64.h \
+ functions/fsock.h functions/php3_string.h libzend/zend_compile.h \
+ libzend/zend-parser.h libzend/zend_globals.h libzend/zend_ptr_stack.h \
+ libzend/zend_execute.h
+php3_realpath.o: php3_realpath.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h
 alloca.o: alloca.c
-output.o: output.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/head.h
+output.o: output.c php.h php_version.h libzend/zend.h libzend/config.h \
+ libzend/config.unix.h libzend/zend_errors.h libzend/zend_alloc.h \
+ libzend/zend_hash.h libzend/zend_llist.h libzend/zend_API.h \
+ libzend/modules.h libzend/zend_list.h config.h request_info.h \
+ php3_compat.h libzend/zend_stack.h  safe_mode.h \
+ fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/head.h
 php_ini.o: php_ini.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h php_ini.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h php_ini.h \
+ php_globals.h
 functions/adabasd.o: functions/adabasd.c config.h build-defs.h php.h \
- php_version.h libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
+ php_version.h libzend/zend.h libzend/config.h libzend/config.unix.h \
+ libzend/zend_errors.h libzend/zend_alloc.h libzend/zend_hash.h \
+ libzend/zend_llist.h libzend/zend_API.h libzend/modules.h \
+ libzend/zend_list.h request_info.h php3_compat.h libzend/zend_stack.h \
+  safe_mode.h fopen-wrappers.h output.h \
  libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_string.h \
- functions/head.h functions/adabasd.h
-functions/apache.o: functions/apache.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/head.h
-functions/fhttpd.o: functions/fhttpd.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h
+ libzend/zend_constants.h functions/php3_string.h functions/head.h \
+ functions/adabasd.h
+functions/apache.o: functions/apache.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/head.h \
+ php_globals.h php_ini.h mod_php3.h
+functions/fhttpd.o: functions/fhttpd.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h
 functions/basic_functions.o: functions/basic_functions.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h php_ini.h \
- internal_functions_registry.h functions/basic_functions.h \
+ libzend/zend.h libzend/config.h libzend/config.unix.h \
+ libzend/zend_errors.h libzend/zend_alloc.h libzend/zend_hash.h \
+ libzend/zend_llist.h libzend/zend_API.h libzend/modules.h \
+ libzend/zend_list.h config.h request_info.h php3_compat.h \
+ libzend/zend_stack.h  safe_mode.h fopen-wrappers.h \
+ output.h libzend/zend_operators.h libzend/zend_variables.h \
+ libzend/zend_constants.h php_ini.h internal_functions_registry.h \
+ functions/basic_functions.h libzend/zend_highlight.h \
  functions/phpmath.h functions/php3_string.h functions/dns.h \
  functions/md5.h functions/global.h functions/html.h functions/post.h \
  functions/exec.h functions/info.h functions/url.h \
@@ -396,682 +361,528 @@ functions/basic_functions.o: functions/basic_functions.c php.h php_version.h \
  functions/php3_link.h functions/php3_filestat.h functions/microtime.h \
  functions/pageinfo.h functions/uniqid.h functions/base64.h \
  functions/php3_mail.h functions/php3_var.h functions/php3_iptc.h \
- functions/quot_print.h functions/cyr_convert.h \
- libzend/zend_globals.h libzend/zend_ptr_stack.h \
- libzend/zend_compile.h libzend/zend-parser.h \
- libzend/zend_execute.h
+ functions/quot_print.h functions/cyr_convert.h libzend/zend_globals.h \
+ libzend/zend_ptr_stack.h libzend/zend_compile.h libzend/zend-parser.h \
+ libzend/zend_execute.h php_globals.h
 functions/crypt.o: functions/crypt.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_string.h
-functions/datetime.o: functions/datetime.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/datetime.h snprintf.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/php3_string.h
+functions/datetime.o: functions/datetime.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/datetime.h snprintf.h php_globals.h
 functions/db.o: functions/db.c
 functions/dbase.o: functions/dbase.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h php_globals.h
 functions/dir.o: functions/dir.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_dir.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/php3_dir.h
 functions/dl.o: functions/dl.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/dl.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/dl.h \
+ php_globals.h
 functions/dns.o: functions/dns.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/dns.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/dns.h
 functions/exec.o: functions/exec.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_string.h \
- functions/head.h functions/exec.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/php3_string.h functions/head.h functions/exec.h \
+ php_globals.h
 functions/file.o: functions/file.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/head.h \
- functions/php3_string.h functions/file.h snprintf.h functions/fsock.h
-functions/filepro.o: functions/filepro.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/filepro.h
-functions/filestat.o: functions/filestat.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_filestat.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/head.h \
+ functions/php3_string.h functions/file.h snprintf.h functions/fsock.h \
+ php_globals.h
+functions/filepro.o: functions/filepro.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h php_globals.h \
+ functions/filepro.h
+functions/filestat.o: functions/filestat.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h php_globals.h \
+ functions/php3_filestat.h
 functions/formatted_print.o: functions/formatted_print.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/head.h \
- functions/php3_string.h
-functions/fsock.o: functions/fsock.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
+ libzend/zend.h libzend/config.h libzend/config.unix.h \
+ libzend/zend_errors.h libzend/zend_alloc.h libzend/zend_hash.h \
+ libzend/zend_llist.h libzend/zend_API.h libzend/modules.h \
  libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/fsock.h \
- functions/base64.h functions/file.h functions/post.h functions/url.h \
+ libzend/zend_stack.h  safe_mode.h fopen-wrappers.h \
+ output.h libzend/zend_operators.h libzend/zend_variables.h \
+ libzend/zend_constants.h functions/head.h functions/php3_string.h \
+ libzend/zend_execute.h libzend/zend_compile.h libzend/zend-parser.h \
+ libzend/zend_globals.h libzend/zend_ptr_stack.h
+functions/fsock.o: functions/fsock.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/base64.h \
+ functions/file.h functions/post.h functions/url.h functions/fsock.h \
  build-defs.h
 functions/gd.o: functions/gd.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/head.h \
- functions/php3_gd.h functions/gdttf.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/head.h \
+ functions/php3_gd.h
 functions/head.o: functions/head.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/reg.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/reg.h \
  functions/php3_string.h functions/pageinfo.h main.h \
  libzend/zend_globals.h libzend/zend_ptr_stack.h \
- libzend/zend_compile.h libzend/zend-parser.h \
- libzend/zend_execute.h functions/datetime.h functions/head.h \
- functions/post.h functions/url.h
+ libzend/zend_compile.h libzend/zend-parser.h libzend/zend_execute.h \
+ functions/datetime.h functions/head.h functions/post.h php_globals.h \
+ functions/url.h
 functions/html.o: functions/html.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/reg.h functions/html.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/reg.h \
+ functions/html.h
 functions/image.o: functions/image.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/image.h
-functions/imap.o: functions/imap.c config.h php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/image.h
+functions/imap.o: functions/imap.c config.h php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h
 functions/link.o: functions/link.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_filestat.h \
- functions/php3_link.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/php3_filestat.h php_globals.h functions/php3_link.h
 functions/mail.o: functions/mail.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h build-defs.h functions/php3_mail.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h build-defs.h \
+ functions/php3_mail.h php_ini.h
 functions/math.o: functions/math.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/phpmath.h snprintf.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/phpmath.h \
+ snprintf.h
 functions/iptc.o: functions/iptc.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_iptc.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/php3_iptc.h
 functions/md5.o: functions/md5.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/md5.h functions/global.h
-functions/microtime.o: functions/microtime.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/microtime.h snprintf.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/md5.h \
+ functions/global.h
+functions/microtime.o: functions/microtime.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/microtime.h snprintf.h
 functions/mime.o: functions/mime.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/type.h functions/post.h \
- functions/mime.h libzend/zend_globals.h \
- libzend/zend_ptr_stack.h libzend/zend_compile.h \
- libzend/zend-parser.h libzend/zend_execute.h
-functions/msql.o: functions/msql.c config.h php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_msql.h \
- functions/reg.h functions/php3_string.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/type.h \
+ functions/post.h functions/mime.h libzend/zend_globals.h \
+ libzend/zend_ptr_stack.h libzend/zend_compile.h libzend/zend-parser.h \
+ libzend/zend_execute.h php_globals.h
+functions/msql.o: functions/msql.c config.h php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/php3_msql.h functions/reg.h functions/php3_string.h \
+ php_globals.h
 functions/mysql.o: functions/mysql.c config.h build-defs.h php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
+ libzend/zend.h libzend/config.h libzend/config.unix.h \
+ libzend/zend_errors.h libzend/zend_alloc.h libzend/zend_hash.h \
+ libzend/zend_llist.h libzend/zend_API.h libzend/modules.h \
+ libzend/zend_list.h request_info.h php3_compat.h libzend/zend_stack.h \
+  safe_mode.h fopen-wrappers.h output.h \
  libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_string.h \
- functions/php3_mysql.h
-functions/oracle.o: functions/oracle.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/oracle.h
+ libzend/zend_constants.h php_globals.h functions/php3_string.h \
+ functions/php3_mysql.h php_ini.h
+functions/oracle.o: functions/oracle.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/oracle.h
 functions/oci8.o: functions/oci8.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_oci8.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/php3_oci8.h
 functions/pack.o: functions/pack.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/head.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/head.h \
  functions/php3_string.h functions/pack.h snprintf.h functions/fsock.h
-functions/pageinfo.o: functions/pageinfo.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/pageinfo.h
-functions/pgsql.o: functions/pgsql.c config.h php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_pgsql.h \
- functions/php3_string.h
+functions/pageinfo.o: functions/pageinfo.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/pageinfo.h
+functions/pgsql.o: functions/pgsql.c config.h php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/php3_pgsql.h functions/php3_string.h php_globals.h
 functions/post.o: functions/post.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/mime.h functions/type.h \
- functions/php3_string.h functions/post.h functions/url.h \
- libzend/zend_globals.h libzend/zend_ptr_stack.h \
- libzend/zend_compile.h libzend/zend-parser.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/mime.h \
+ functions/type.h functions/php3_string.h functions/post.h \
+ functions/url.h php_globals.h libzend/zend_globals.h \
+ libzend/zend_ptr_stack.h libzend/zend_compile.h libzend/zend-parser.h \
  libzend/zend_execute.h
 functions/rand.o: functions/rand.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/phpmath.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/phpmath.h
 functions/reg.o: functions/reg.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_string.h \
- functions/reg.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/php3_string.h functions/reg.h
 functions/solid.o: functions/solid.c config.h build-defs.h php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
+ libzend/zend.h libzend/config.h libzend/config.unix.h \
+ libzend/zend_errors.h libzend/zend_alloc.h libzend/zend_hash.h \
+ libzend/zend_llist.h libzend/zend_API.h libzend/modules.h \
+ libzend/zend_list.h request_info.h php3_compat.h libzend/zend_stack.h \
+  safe_mode.h fopen-wrappers.h output.h \
  libzend/zend_operators.h libzend/zend_variables.h \
  libzend/zend_constants.h functions/php3_solid.h
-functions/soundex.o: functions/soundex.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_string.h
-functions/string.o: functions/string.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/reg.h functions/post.h \
+functions/soundex.o: functions/soundex.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
  functions/php3_string.h
-functions/syslog.o: functions/syslog.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h libzend/zend_globals.h \
- libzend/zend_ptr_stack.h libzend/zend_compile.h \
- libzend/zend-parser.h libzend/zend_execute.h \
+functions/string.o: functions/string.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/reg.h \
+ functions/post.h functions/php3_string.h libzend/zend_execute.h \
+ libzend/zend_compile.h libzend/zend-parser.h libzend/zend_globals.h \
+ libzend/zend_ptr_stack.h php_globals.h
+functions/syslog.o: functions/syslog.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h php_ini.h \
+ libzend/zend_globals.h libzend/zend_ptr_stack.h \
+ libzend/zend_compile.h libzend/zend-parser.h libzend/zend_execute.h \
  functions/php3_syslog.h
 functions/type.o: functions/type.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/type.h
-functions/uniqid.o: functions/uniqid.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/uniqid.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/type.h
+functions/uniqid.o: functions/uniqid.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/uniqid.h
 functions/sybase.o: functions/sybase.c config.h php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
+ libzend/zend.h libzend/config.h libzend/config.unix.h \
+ libzend/zend_errors.h libzend/zend_alloc.h libzend/zend_hash.h \
+ libzend/zend_llist.h libzend/zend_API.h libzend/modules.h \
+ libzend/zend_list.h request_info.h php3_compat.h libzend/zend_stack.h \
+  safe_mode.h fopen-wrappers.h output.h \
  libzend/zend_operators.h libzend/zend_variables.h \
  libzend/zend_constants.h functions/php3_sybase.h \
- functions/php3_string.h
+ functions/php3_string.h php_globals.h
 functions/sybase-ct.o: functions/sybase-ct.c config.h php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
+ libzend/zend.h libzend/config.h libzend/config.unix.h \
+ libzend/zend_errors.h libzend/zend_alloc.h libzend/zend_hash.h \
+ libzend/zend_llist.h libzend/zend_API.h libzend/modules.h \
+ libzend/zend_list.h request_info.h php3_compat.h libzend/zend_stack.h \
+  safe_mode.h fopen-wrappers.h output.h \
  libzend/zend_operators.h libzend/zend_variables.h \
  libzend/zend_constants.h functions/php3_sybase-ct.h \
- functions/php3_string.h
+ functions/php3_string.h php_globals.h
 functions/url.o: functions/url.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/url.h
-functions/base64.o: functions/base64.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/base64.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/url.h
+functions/base64.o: functions/base64.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/base64.h
 functions/info.o: functions/info.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/head.h functions/info.h \
- build-defs.h libzend/zend_globals.h \
- libzend/zend_ptr_stack.h libzend/zend_compile.h \
- libzend/zend-parser.h libzend/zend_execute.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h php_ini.h \
+ php_globals.h functions/head.h functions/info.h build-defs.h \
+ libzend/zend_globals.h libzend/zend_ptr_stack.h \
+ libzend/zend_compile.h libzend/zend-parser.h libzend/zend_execute.h
 functions/bcmath.o: functions/bcmath.c config.h build-defs.h php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
+ libzend/zend.h libzend/config.h libzend/config.unix.h \
+ libzend/zend_errors.h libzend/zend_alloc.h libzend/zend_hash.h \
+ libzend/zend_llist.h libzend/zend_API.h libzend/modules.h \
+ libzend/zend_list.h request_info.h php3_compat.h libzend/zend_stack.h \
+  safe_mode.h fopen-wrappers.h output.h \
  libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/number.h \
- functions/php3_bcmath.h
+ libzend/zend_constants.h functions/number.h functions/php3_bcmath.h
 functions/number.o: functions/number.c functions/number.h php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
+ libzend/zend.h libzend/config.h libzend/config.unix.h \
+ libzend/zend_errors.h libzend/zend_alloc.h libzend/zend_hash.h \
+ libzend/zend_llist.h libzend/zend_API.h libzend/modules.h \
+ libzend/zend_list.h config.h request_info.h php3_compat.h \
+ libzend/zend_stack.h  safe_mode.h fopen-wrappers.h \
+ output.h libzend/zend_operators.h libzend/zend_variables.h \
  libzend/zend_constants.h
 functions/xml.o: functions/xml.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_xml.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/php3_xml.h
 functions/unified_odbc.o: functions/unified_odbc.c config.h build-defs.h php.h \
- php_version.h libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
+ php_version.h libzend/zend.h libzend/config.h libzend/config.unix.h \
+ libzend/zend_errors.h libzend/zend_alloc.h libzend/zend_hash.h \
+ libzend/zend_llist.h libzend/zend_API.h libzend/modules.h \
+ libzend/zend_list.h request_info.h php3_compat.h libzend/zend_stack.h \
+  safe_mode.h fopen-wrappers.h output.h \
  libzend/zend_operators.h libzend/zend_variables.h \
  libzend/zend_constants.h dl/phpdl.h functions/php3_string.h \
  functions/php3_unified_odbc.h functions/head.h snprintf.h
-functions/ldap.o: functions/ldap.c config.h php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h
-functions/browscap.o: functions/browscap.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_browscap.h \
- libzend/zend_globals.h libzend/zend_ptr_stack.h \
- libzend/zend_compile.h libzend/zend-parser.h \
+functions/ldap.o: functions/ldap.c config.h php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h
+functions/browscap.o: functions/browscap.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/php3_browscap.h php_ini.h libzend/zend_globals.h \
+ libzend/zend_ptr_stack.h libzend/zend_compile.h libzend/zend-parser.h \
  libzend/zend_execute.h
-functions/velocis.o: functions/velocis.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_velocis.h
-functions/gdttf.o: functions/gdttf.c config.h functions/gdttf.h \
- functions/gdcache.h
-functions/gdcache.o: functions/gdcache.c config.h functions/gdcache.h
+functions/velocis.o: functions/velocis.c php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/php3_velocis.h
+functions/gdttf.o: functions/gdttf.c config.h
+functions/gdcache.o: functions/gdcache.c config.h
 functions/zlib.o: functions/zlib.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/head.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/head.h \
  functions/php3_string.h functions/php3_zlib.h snprintf.h
 functions/COM.o: functions/COM.c
-functions/ifx.o: functions/ifx.c
 functions/pdf.o: functions/pdf.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/head.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/head.h \
  functions/php3_pdf.h
-functions/hw.o: functions/hw.c config.h php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/head.h
+functions/hw.o: functions/hw.c config.h php.h php_version.h libzend/zend.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/head.h
 functions/hg_comm.o: functions/hg_comm.c config.h
 functions/dlist.o: functions/dlist.c config.h
 functions/fdf.o: functions/fdf.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/head.h \
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/head.h \
  functions/php3_fdf.h
 functions/snmp.o: functions/snmp.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_snmp.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/php3_snmp.h
 functions/var.o: functions/var.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/reg.h functions/post.h \
- functions/php3_string.h functions/php3_var.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h functions/reg.h \
+ functions/post.h functions/php3_string.h functions/php3_var.h
 functions/interbase.o: functions/interbase.c config.h php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
+ libzend/zend.h libzend/config.h libzend/config.unix.h \
+ libzend/zend_errors.h libzend/zend_alloc.h libzend/zend_hash.h \
+ libzend/zend_llist.h libzend/zend_API.h libzend/modules.h \
+ libzend/zend_list.h request_info.h php3_compat.h libzend/zend_stack.h \
+  safe_mode.h fopen-wrappers.h output.h \
  libzend/zend_operators.h libzend/zend_variables.h \
  libzend/zend_constants.h functions/php3_interbase.h
 functions/quot_print.o: functions/quot_print.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
+ libzend/zend.h libzend/config.h libzend/config.unix.h \
+ libzend/zend_errors.h libzend/zend_alloc.h libzend/zend_hash.h \
+ libzend/zend_llist.h libzend/zend_API.h libzend/modules.h \
+ libzend/zend_list.h config.h request_info.h php3_compat.h \
+ libzend/zend_stack.h  safe_mode.h fopen-wrappers.h \
+ output.h libzend/zend_operators.h libzend/zend_variables.h \
  libzend/zend_constants.h functions/quot_print.h
 functions/cyr_convert.o: functions/cyr_convert.c php.h php_version.h \
- libzend/zend.h libzend/config.h \
- libzend/config.unix.h libzend/zend_errors.h \
- libzend/zend_alloc.h libzend/zend_hash.h \
- libzend/zend_llist.h libzend/zend_API.h \
- libzend/modules.h libzend/zend_list.h config.h \
- request_info.h php3_compat.h libzend/zend_stack.h \
-  safe_mode.h fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
+ libzend/zend.h libzend/config.h libzend/config.unix.h \
+ libzend/zend_errors.h libzend/zend_alloc.h libzend/zend_hash.h \
+ libzend/zend_llist.h libzend/zend_API.h libzend/modules.h \
+ libzend/zend_list.h config.h request_info.h php3_compat.h \
+ libzend/zend_stack.h  safe_mode.h fopen-wrappers.h \
+ output.h libzend/zend_operators.h libzend/zend_variables.h \
  libzend/zend_constants.h functions/cyr_convert.h
 functions/sysvsem.o: functions/sysvsem.c config.h
 functions/sysvshm.o: functions/sysvshm.c config.h
 functions/dav.o: functions/dav.c php.h php_version.h libzend/zend.h \
- libzend/config.h libzend/config.unix.h \
- libzend/zend_errors.h libzend/zend_alloc.h \
- libzend/zend_hash.h libzend/zend_llist.h \
- libzend/zend_API.h libzend/modules.h \
- libzend/zend_list.h config.h request_info.h php3_compat.h \
- libzend/zend_stack.h  safe_mode.h \
- fopen-wrappers.h mod_php3.h output.h \
- libzend/zend_operators.h libzend/zend_variables.h \
- libzend/zend_constants.h functions/php3_dav.h
+ libzend/config.h libzend/config.unix.h libzend/zend_errors.h \
+ libzend/zend_alloc.h libzend/zend_hash.h libzend/zend_llist.h \
+ libzend/zend_API.h libzend/modules.h libzend/zend_list.h config.h \
+ request_info.h php3_compat.h libzend/zend_stack.h  \
+ safe_mode.h fopen-wrappers.h output.h libzend/zend_operators.h \
+ libzend/zend_variables.h libzend/zend_constants.h \
+ functions/php3_dav.h
 
 # Local Variables:
 # tab-width: 4

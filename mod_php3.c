@@ -25,6 +25,7 @@
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    | (with helpful hints from Dean Gaudet <dgaudet@arctic.org>            |
+   | PHP4 patches by Zeev Suraski <zeev@zend.com>                         |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -103,8 +104,7 @@ int saved_umask;
 # define php3i_popenf(p,n,f,m) popenf((p),(n),(f),(m))
 #endif
 
-extern php3_ini_structure php3_ini;  /* active config */
-extern php3_ini_structure php3_ini_master;  /* master copy of config */
+php_apache_info_struct php_apache_info;		/* active config */
 
 int apache_php3_module_main(request_rec * r, int fd, int display_source_mode);
 extern int php3_module_startup();
@@ -186,7 +186,6 @@ void php3_restore_umask()
 int send_php3(request_rec *r, int display_source_mode, char *filename)
 {
 	int fd, retval;
-	php3_ini_structure *conf;
 
 	/* We don't accept OPTIONS requests, but take everything else */
 	if (r->method_number == M_OPTIONS) {
@@ -199,16 +198,10 @@ int send_php3(request_rec *r, int display_source_mode, char *filename)
 		return NOT_FOUND;
 	}
 
-	/* grab configuration settings */
-	conf = (php3_ini_structure *) get_module_config(r->per_dir_config,
-													&php3_module);
-	/* copy to active configuration */
-	memcpy(&php3_ini,conf,sizeof(php3_ini_structure));
-
 	/* If PHP parser engine has been turned off with a "php3_engine off"
 	 * directive, then decline to handle this request
 	 */
-	if (!conf->engine) {
+	if (!php_apache_info.engine) {
 		r->content_type = "text/html";
 		r->allowed |= (1 << METHODS) - 1;
 		return DECLINED;
@@ -228,7 +221,7 @@ int send_php3(request_rec *r, int display_source_mode, char *filename)
 		return retval;
 #endif
 
-	if (conf->last_modified) {
+	if (php_apache_info.last_modified) {
 #if MODULE_MAGIC_NUMBER < 19970912
 		if ((retval = set_last_modified(r, r->finfo.st_mtime))) {
 			return retval;
@@ -270,39 +263,15 @@ int send_parsed_php3_source(request_rec * r)
 }
 
 /*
- * Create the per-directory config structure with defaults from php3_ini_master
+ * Create the per-directory config structure with defaults
  */
 static void *php3_create_dir(pool * p, char *dummy)
 {
-	php3_ini_structure *new;
+	php_apache_info_struct *new;
 
-	php3_module_startup();  /* php3_ini_master is set up here */
+	new = (php_apache_info_struct *) palloc(p, sizeof(php_apache_info_struct));
+	memcpy(new, &php_apache_info, sizeof(php_apache_info_struct));
 
-	new = (php3_ini_structure *) palloc(p, sizeof(php3_ini_structure));
-	memcpy(new,&php3_ini_master,sizeof(php3_ini_structure));
-
-
-	return new;
-}
-
-/*
- * Merge in per-directory .conf directives
- */
-static void *php3_merge_dir(pool *p, void *basev, void *addv) 
-{
-	php3_ini_structure *new = (php3_ini_structure *) palloc(p, sizeof(php3_ini_structure));
-	php3_ini_structure *base = (php3_ini_structure *) basev;
-	php3_ini_structure *add = (php3_ini_structure *) addv;
-	php3_ini_structure orig = php3_ini_master;
-
-	/* Start with the base config */
-	memcpy(new,base,sizeof(php3_ini_structure));
-
-	/* skip the highlight stuff */
-	if (add->engine != orig.engine) new->engine = add->engine;
-	if (add->last_modified != orig.last_modified) new->last_modified = add->last_modified;
-	if (add->dav_script != orig.dav_script) new->dav_script = add->dav_script;
-	
 	return new;
 }
 
@@ -313,14 +282,14 @@ static void *php3_merge_dir(pool *p, void *basev, void *addv)
 #define CONST_PREFIX
 #endif
 
-CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, php3_ini_structure *conf, char *arg1, char *arg2)
+CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
 {
 	php_alter_ini_entry(arg1, strlen(arg1)+1, arg2, strlen(arg2)+1, PHP_INI_PERDIR);
 	return NULL;
 }
 
 
-CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, php3_ini_structure *conf, char *arg1, char *arg2)
+CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
 {
 	char bool_val[2];
 
@@ -336,31 +305,11 @@ CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, php3_ini_structure *c
 }
 
 
-#if MODULE_MAGIC_NUMBER > 19961007
-const char *php3take1handler(cmd_parms * cmd, php3_ini_structure * conf, char *arg)
-{
-#else
-char *php3take1handler(cmd_parms * cmd, php3_ini_structure * conf, char *arg)
-{
-#endif
-	int c = (int) cmd->info;
-
-	switch (c) {
-		case 0:
-			conf->errors = atoi(arg);
-			break;
-		case 20:
-			conf->dav_script = pstrdup(cmd->pool, arg);
-			break;
-	}
-	return NULL;
-}
-
 int php3_xbithack_handler(request_rec * r)
 {
-	php3_ini_structure *conf;
+	php_apache_info_struct *conf;
 
-	conf = (php3_ini_structure *) get_module_config(r->per_dir_config, &php3_module);
+	conf = (php_apache_info_struct *) get_module_config(r->per_dir_config, &php3_module);
 	if (!(r->finfo.st_mode & S_IXUSR)) {
 		r->allowed |= (1 << METHODS) - 1;
 		return DECLINED;
@@ -375,6 +324,7 @@ int php3_xbithack_handler(request_rec * r)
 void php3_init_handler(server_rec *s, pool *p)
 {
 	register_cleanup(p, NULL, php3_module_shutdown, php3_module_shutdown_for_exec);
+	php3_module_startup();
 #if MODULE_MAGIC_NUMBER >= 19980527
 	ap_add_version_component("PHP/" PHP_VERSION);
 #endif
@@ -389,18 +339,18 @@ extern int phpdav_mkcol_create_handler(request_rec *r);
 /* conf is being read twice (both here and in send_php3()) */
 int send_parsed_php3_dav_script(request_rec *r)
 {
-	php3_ini_structure *conf;
+	php_apache_info_struct *conf;
 
-	conf = (php3_ini_structure *) get_module_config(r->per_dir_config,
+	conf = (php_apache_info_struct *) get_module_config(r->per_dir_config,
 													&php3_module);
 	return send_php3(r, 0, 0, conf->dav_script);
 }
 
 static int php3_type_checker(request_rec *r)
 {
-	php3_ini_structure *conf;
+	php_apache_info_struct *conf;
 
-	conf = (php3_ini_structure *)get_module_config(r->per_dir_config,
+	conf = (php_apache_info_struct *)get_module_config(r->per_dir_config,
 												   &php3_module);
 
     /* If DAV support is enabled, use mod_dav's type checker. */
@@ -433,7 +383,7 @@ handler_rec php3_handlers[] =
 
 command_rec php3_commands[] =
 {
-	{"php4_directive",		php_apache_value_handler, NULL, OR_OPTIONS, TAKE2, "PHP Value Modifier"},
+	{"php4_value",		php_apache_value_handler, NULL, OR_OPTIONS, TAKE2, "PHP Value Modifier"},
 	{"php4_flag",			php_apache_flag_handler, NULL, OR_OPTIONS, TAKE2, "PHP Flag Modifier"},
 	{NULL}
 };
@@ -445,7 +395,7 @@ module MODULE_VAR_EXPORT php3_module =
 	STANDARD_MODULE_STUFF,
 	php3_init_handler,			/* initializer */
 	php3_create_dir,			/* per-directory config creator */
-	php3_merge_dir,				/* dir merger */
+	NULL,						/* dir merger */
 	NULL,						/* per-server config creator */
 	NULL, 						/* merge server config */
 	php3_commands,				/* command table */
