@@ -1137,7 +1137,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 
 	if (op1->type == IS_LONG && op2->type == IS_LONG) {
 		result->type = IS_LONG;
-		result->value.lval = ZEND_NORMALIZE_BOOL(op1->value.lval-op2->value.lval);
+		result->value.lval = op1->value.lval>op2->value.lval?1:(op1->value.lval<op2->value.lval?-1:0);
 		return SUCCESS;
 	}
 	if ((op1->type == IS_DOUBLE || op1->type == IS_LONG)
