@@ -562,12 +562,12 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 			}
 		case IS_ARRAY:
 			myht = HASH_OF(*struc);
-			i = zend_hash_num_elements(myht);
 			if (Z_TYPE_PP(struc) == IS_ARRAY) {
 				smart_str_appendl(buf, "a:", 2);
 			} else {
 				php_var_serialize_class_name(buf, struc TSRMLS_CC);
 			}
+			i = zend_hash_num_elements(myht);
 			smart_str_append_long(buf, i);
 			smart_str_appendl(buf, ":{", 2);
 			if (i > 0) {
