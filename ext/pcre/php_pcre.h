@@ -36,6 +36,7 @@
 PHP_FUNCTION(preg_match);
 PHP_FUNCTION(preg_match_all);
 PHP_FUNCTION(preg_replace);
+PHP_FUNCTION(preg_replace_callback);
 PHP_FUNCTION(preg_split);
 PHP_FUNCTION(preg_quote);
 PHP_FUNCTION(preg_grep);
