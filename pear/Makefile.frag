@@ -98,18 +98,18 @@ peardir=$(PEAR_INSTALLDIR)
 PEARCMD=$(top_builddir)/sapi/cli/php -d include_path=$(top_srcdir)/pear pear/scripts/pear.in
 
 install-pear-installer: $(top_builddir)/sapi/cli/php
-	@if $(PEARCMD) shell-test PEAR; then \
-	    version=`grep '<version>' $(srcdir)/package-PEAR.xml|head -1|cut -d\> -f2|cut -d\< -f1`; \
-	    if ! $(PEARCMD) shell-test PEAR $$version; then \
-		echo "Found an older version of the PEAR Installer, upgrading..."; \
-	        $(PEARCMD) -q upgrade $(srcdir)/package-PEAR.xml; \
+	@for descfile in $(srcdir)/package-*.xml; do \
+	    tmp="$${descfile%.xml}"; \
+	    pkgname="$${tmp#*-}"; \
+	    pkgver=`grep '<version>' $$descfile|head -1|cut -d\> -f2|cut -d\< -f1`; \
+	    if $(PEARCMD) shell-test $$pkgname; then \
+	    	if ! $(PEARCMD) shell-test $$pkgname $$pkgver; then \
+	    	    $(PEARCMD) -q upgrade $$descfile | sed -e "s/^/$$pkgname $$pkgver: /"; \
+	    	fi; \
 	    else \
-		echo "No need to install or upgrade the PEAR Installer..."; \
+		$(PEARCMD) -q install $$descfile | sed -e "s/^/$$pkgname $$pkgver: /"; \
 	    fi; \
-	else \
-	    echo "PEAR Installer not found, installing..."; \
-	    $(PEARCMD) -q install $(srcdir)/package-PEAR.xml; \
-	fi
+	done
 
 install-pear-packages: # requires cli installed
 	@/bin/ls -1 $(srcdir)/packages | while read package; do \
