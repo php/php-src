@@ -6,9 +6,10 @@ AC_ARG_WITH(apxs,
 						  pathname to the Apache apxs tool; defaults to "apxs".],
 [
 	if test "$withval" = "yes"; then
-		withval=apxs
+		APXS=apxs
+	else
+		AC_EXPAND_PATH($withval, APXS)
 	fi
-	AC_EXPAND_PATH($withval, APXS)
 	APXS_LDFLAGS="@SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@"
 	APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
 	if test -d "$APXS_INCLUDEDIR/xml" ; then
