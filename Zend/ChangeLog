@@ -1,3 +1,31 @@
+2003-12-19  Andi Gutmans  <andi@zend.com>
+
+    * (php_5_0_0b3RC2)
+      zend_language_parser.y:
+      - Nuke another rule (thanks to Jan for noticing this)
+
+2003-12-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (php_5_0_0b3RC2)
+      zend.c:
+      Bug #25547 (error_handler and array index with function call) was fixed
+      tests/lang/bug25547.phpt
+
+2003-12-19  Andi Gutmans  <andi@zend.com>
+
+    * zend_language_parser.y:
+      - Nuke unused code
+
+2003-12-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (php_5_0_0b3RC2)
+      zend_execute.c:
+      Error reporting on unset string offset was added (Bug #24773
+      Zend/tests/bug24773.phpt)
+
+    * zend_execute.c:
+      Assign_op operators (+=) were fixed for elements of overloaded objects
+
 2003-12-18  Andi Gutmans  <andi@zend.com>
 
     * zend_execute.c:
