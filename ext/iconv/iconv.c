@@ -320,9 +320,13 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 static void _php_iconv_show_error(php_iconv_err_t err, const char *in_charset, const char *out_charset TSRMLS_DC)
 {
 	switch (err) {
+		case PHP_ICONV_ERR_SUCCESS:
+			break;
+
 		case PHP_ICONV_ERR_CONVERTER:
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Cannot open converter");
 			break;
+
 		case PHP_ICONV_ERR_WRONG_CHARSET:
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Wrong charset, cannot convert from `%s' to `%s'",
 			          in_charset, out_charset);
