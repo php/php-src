@@ -125,11 +125,9 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header,sapi_headers_stru
 	if (!strcasecmp(sapi_header->header, "content-type")) {
 		val = apr_pstrdup(ctx->r->pool, val);
 		ap_set_content_type(ctx->r, val);
-	}
-	else if (sapi_header->replace) {
+	} else if (sapi_header->replace) {
 		apr_table_set(ctx->r->headers_out, sapi_header->header, val);
-	}
-	else {
+	} else {
 		apr_table_add(ctx->r->headers_out, sapi_header->header, val);
 	}
 	
@@ -166,8 +164,7 @@ php_apache_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
 
 	if (rv == APR_SUCCESS) {
 		apr_brigade_flatten(brigade, buf, &len);
-	}
-	else {
+	} else {
 		len = 0;
 	}
 
@@ -285,8 +282,7 @@ static void php_apache_sapi_log_message(char *msg)
 	if (ctx == NULL) { /* we haven't initialized our ctx yet, oh well */
 		ap_log_error(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO | APLOG_STARTUP,
 					 0, NULL, "%s", msg);
-	}
-	else {
+	} else {
 		ap_log_rerror(APLOG_MARK, APLOG_ERR | APLOG_NOERRNO | APLOG_STARTUP,
 					 0, ctx->r, "%s", msg);
 	}
@@ -306,24 +302,24 @@ static sapi_module_struct apache2_sapi_module = {
 	"apache2handler",
 	"Apache 2.0 Handler",
 
-	php_apache2_startup,						/* startup */
+	php_apache2_startup,				/* startup */
 	php_module_shutdown_wrapper,			/* shutdown */
 
-	NULL,									/* activate */
-	NULL,									/* deactivate */
+	NULL,						/* activate */
+	NULL,						/* deactivate */
 
-	php_apache_sapi_ub_write,				/* unbuffered write */
-	php_apache_sapi_flush,					/* flush */
-	php_apache_sapi_get_stat,						/* get uid */
-	php_apache_sapi_getenv,					/* getenv */
+	php_apache_sapi_ub_write,			/* unbuffered write */
+	php_apache_sapi_flush,				/* flush */
+	php_apache_sapi_get_stat,			/* get uid */
+	php_apache_sapi_getenv,				/* getenv */
 
-	php_error,								/* error handler */
+	php_error,					/* error handler */
 
 	php_apache_sapi_header_handler,			/* header handler */
 	php_apache_sapi_send_headers,			/* send headers handler */
-	NULL,									/* send header handler */
+	NULL,						/* send header handler */
 
-	php_apache_sapi_read_post,				/* read POST data */
+	php_apache_sapi_read_post,			/* read POST data */
 	php_apache_sapi_read_cookies,			/* read Cookies */
 
 	php_apache_sapi_register_variables,
@@ -369,8 +365,7 @@ static int php_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 }
 
 static int
-php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
-		                  apr_pool_t *ptemp, server_rec *s)
+php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
 {
 	void *data = NULL;
 	const char *userdata_key = "apache2hook_post_config";
@@ -384,8 +379,7 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
 		 * to a different location when the DSO is reloaded and the
 		 * pointers won't match, causing get() to return NULL when
 		 * we expected it to return non-NULL. */
-		apr_pool_userdata_set((const void *)1, userdata_key,
-							  apr_pool_cleanup_null, s->process->pool);
+		apr_pool_userdata_set((const void *)1, userdata_key, apr_pool_cleanup_null, s->process->pool);
 		return OK;
 	}
 
@@ -404,29 +398,6 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
 	return OK;
 }
 
-static void php_add_filter(request_rec *r, ap_filter_t *f)
-{
-	int output = (f == r->output_filters);
-
-	/* for those who still have Set*Filter PHP configured */
-	while (f) {
-		if (strcmp(f->frec->name, "PHP") == 0) {
-			ap_log_error(APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO,
-					 0, r->server,
-					 "\"Set%sFilter PHP\" already configured for %s",
-					 output ? "Output" : "Input", r->uri);
-			return;
-		}
-		f = f->next;
-	}
-
-	if (output) {
-		ap_add_output_filter("PHP", NULL, r, r->connection);
-	} else {
-		ap_add_input_filter("PHP", NULL, r, r->connection);
-	}
-}
-
 static apr_status_t php_server_context_cleanup(void *data_)
 {
 	void **data = data_;
@@ -440,16 +411,14 @@ static void php_apache_request_ctor(request_rec *r, php_struct *ctx TSRMLS_DC)
 	const char *auth;
 
 	SG(sapi_headers).http_response_code = 200;
-	SG(request_info).content_type = apr_table_get(r->headers_in,
-												  "Content-Type");
+	SG(request_info).content_type = apr_table_get(r->headers_in, "Content-Type");
 	SG(request_info).query_string = apr_pstrdup(r->pool, r->args);
 	SG(request_info).request_method = r->method;
 	SG(request_info).request_uri = apr_pstrdup(r->pool, r->uri);
 	r->no_local_copy = 1;
 
 	content_type = sapi_get_default_content_type(TSRMLS_C);
-	ap_set_content_type(r, apr_pstrdup(r->pool,
-									sapi_get_default_content_type(TSRMLS_C)));
+	ap_set_content_type(r, apr_pstrdup(r->pool, sapi_get_default_content_type(TSRMLS_C)));
 	efree(content_type);
 
 	apr_table_unset(r->headers_out, "Content-Length");
@@ -476,7 +445,6 @@ static int php_handler(request_rec *r)
 {
 	php_struct *ctx;
 	void *conf;
-	char *enabled;
 	apr_bucket_brigade *brigade;
 	apr_bucket *bucket;
 	apr_status_t rv;
@@ -486,25 +454,15 @@ static int php_handler(request_rec *r)
 	conf = ap_get_module_config(r->per_dir_config, &php4_module);
 	apply_config(conf);
 
-	if (strcmp(r->handler, PHP_MAGIC_TYPE) &&
-		strcmp(r->handler, PHP_SOURCE_MAGIC_TYPE) &&
-		strcmp(r->handler, PHP_SCRIPT)) {
-		char *xbithack;
+	if (strcmp(r->handler, PHP_MAGIC_TYPE) && strcmp(r->handler, PHP_SOURCE_MAGIC_TYPE) && strcmp(r->handler, PHP_SCRIPT)) {
 		/* Check for xbithack in this case. */
-		if (strcmp(r->handler, "text/html")) {
-			return DECLINED;
-		}
-		xbithack = get_php_config(conf, "xbithack", sizeof("xbithack"));
-		if (*xbithack == '\0' || *xbithack == '0'
-			|| !(r->finfo.protection & APR_UEXECUTE)) {
+		if (!AP2(xbithack) || strcmp(r->handler, "text/html") || !(r->finfo.protection & APR_UEXECUTE)) {
 			return DECLINED;
 		}
 	}
 
-	enabled = get_php_config(conf, "engine", sizeof("engine"));
-
 	/* handle situations where user turns the engine off */
-	if (*enabled == '0') {
+	if (!AP2(engine)) {
 		return DECLINED;
 	}
 
@@ -514,36 +472,44 @@ static int php_handler(request_rec *r)
 
 	ctx = SG(server_context);
 	if (ctx == NULL) {
-		ctx = SG(server_context) = apr_pcalloc(r->pool, sizeof(*ctx));;
+		ctx = SG(server_context) = apr_pcalloc(r->pool, sizeof(*ctx));
 		/* register a cleanup so we clear out the SG(server_context)
 		 * after each request. Note: We pass in the pointer to the
 		 * server_context in case this is handled by a different thread.
 		 */
-		apr_pool_cleanup_register(r->pool, (void *)&SG(server_context),
-								  php_server_context_cleanup,
-								  apr_pool_cleanup_null);
+		apr_pool_cleanup_register(r->pool, (void *)&SG(server_context), php_server_context_cleanup, apr_pool_cleanup_null);
 
 		ctx->r = r;
 		brigade = apr_brigade_create(r->pool, r->connection->bucket_alloc);
 		ctx->brigade = brigade;
 
 		php_apache_request_ctor(r, ctx TSRMLS_CC);
-	}
-	else {
+	} else {
 		parent_req = ctx->r;
 		ctx->r = r;
 		brigade = ctx->brigade;
 	}
 
+	if (r->finfo.filetype == 0) {
+		php_apache_sapi_log_message("script not found or unable to stat");
+		return HTTP_NOT_FOUND;
+	}
+	if (r->finfo.filetype == APR_DIR) {
+		php_apache_sapi_log_message("attempt to invoke directory as script");
+		return HTTP_FORBIDDEN;
+	}
+
+	if (AP2(last_modified)) {
+		ap_update_mtime(r, r->finfo.mtime);
+		ap_set_last_modified(r);
+	}
+
 	/* Determine if we need to parse the file or show the source */
-	if (strncmp(r->handler, PHP_SOURCE_MAGIC_TYPE,
-				sizeof(PHP_SOURCE_MAGIC_TYPE) - 1) == 0) {
+	if (strncmp(r->handler, PHP_SOURCE_MAGIC_TYPE, sizeof(PHP_SOURCE_MAGIC_TYPE) - 1) == 0) {
 		zend_syntax_highlighter_ini syntax_highlighter_ini;
 		php_get_highlight_struct(&syntax_highlighter_ini);
-		highlight_file((char *)r->filename,
-					   &syntax_highlighter_ini TSRMLS_CC);
-	}
-	else {
+		highlight_file((char *)r->filename, &syntax_highlighter_ini TSRMLS_CC);
+	} else {
 		zend_file_handle zfd;
 
 		zfd.type = ZEND_HANDLE_FILENAME;
@@ -553,16 +519,14 @@ static int php_handler(request_rec *r)
 
 		if (!parent_req) {
 			php_execute_script(&zfd TSRMLS_CC);
-		}
-		else {
+		} else {
 			zend_execute_scripts(ZEND_INCLUDE TSRMLS_CC, NULL, 1, &zfd);
 		}
 #if MEMORY_LIMIT
 		{
 			char *mem_usage;
 
-			mem_usage = apr_psprintf(ctx->r->pool, "%u",
-									 AG(allocated_memory_peak));
+			mem_usage = apr_psprintf(ctx->r->pool, "%u", AG(allocated_memory_peak));
 			AG(allocated_memory_peak) = 0;
 			apr_table_set(r->notes, "mod_php_memory_usage", mem_usage);
 		}
@@ -580,8 +544,7 @@ static int php_handler(request_rec *r)
 			php_handle_aborted_connection();
 		}
 		apr_brigade_cleanup(brigade);
-	}
-	else {
+	} else {
 		ctx->r = parent_req;
 	}
 
@@ -599,8 +562,8 @@ AP_MODULE_DECLARE_DATA module php4_module = {
 	STANDARD20_MODULE_STUFF,
 	create_php_config,		/* create per-directory config structure */
 	merge_php_config,		/* merge per-directory config structures */
-	NULL,					/* create per-server config structure */
-	NULL,					/* merge per-server config structures */
+	NULL,				/* create per-server config structure */
+	NULL,				/* merge per-server config structures */
 	php_dir_cmds,			/* command apr_table_t */
 	php_register_hook		/* register hooks */
 };
