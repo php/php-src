@@ -58,10 +58,10 @@
 #include "ext/standard/php_image.h"
 #include "ext/standard/info.h" 
 
-#if HAVE_MBSTRING
-#if !defined(COMPILE_DL_MBSTRING) 
+#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING) 
 #define EXIF_USE_MBSTRING 1
-#endif
+#else
+#define EXIF_USE_MBSTRING 0
 #endif
 
 #ifdef EXIF_USE_MBSTRING
@@ -181,6 +181,7 @@ PHP_MINIT_FUNCTION(exif)
 {
 	ZEND_INIT_MODULE_GLOBALS(exif, php_exif_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
+	REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", EXIF_USE_MBSTRING, CONST_CS | CONST_PERSISTENT); 
 	return SUCCESS;
 }
 /* }}} */
