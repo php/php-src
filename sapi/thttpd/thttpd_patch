@@ -50,9 +50,32 @@ diff -ur thttpd-2.21b-orig/config.h thttpd-2.21b/config.h
  
  /* CONFIGURE: If this is defined then thttpd will automatically generate
  ** index pages for directories that don't have an explicit index file.
+diff -ur thttpd-2.21b-orig/fdwatch.c thttpd-2.21b/fdwatch.c
+--- thttpd-2.21b-orig/fdwatch.c	Fri Apr 13 07:36:08 2001
++++ thttpd-2.21b/fdwatch.c	Tue Aug 14 00:00:10 2001
+@@ -460,7 +460,7 @@
+ 
+     ridx = 0;
+     for ( i = 0; i < npollfds; ++i )
+-	if ( pollfds[i].revents & ( POLLIN | POLLOUT ) )
++	if ( pollfds[i].revents & ( POLLIN | POLLOUT | POLLERR | POLLHUP | POLLNVAL ) )
+ 	    poll_rfdidx[ridx++] = pollfds[i].fd;
+ 
+     return r;
+@@ -472,8 +472,8 @@
+     {
+     switch ( fd_rw[fd] )
+ 	{
+-	case FDW_READ: return pollfds[poll_fdidx[fd]].revents & POLLIN;
+-	case FDW_WRITE: return pollfds[poll_fdidx[fd]].revents & POLLOUT;
++	case FDW_READ: return pollfds[poll_fdidx[fd]].revents & ( POLLIN | POLLERR | POLLHUP | POLLNVAL );
++	case FDW_WRITE: return pollfds[poll_fdidx[fd]].revents & (  POLLOUT | POLLERR | POLLHUP | POLLNVAL );
+ 	default: return 0;
+ 	}
+     }
 diff -ur thttpd-2.21b-orig/libhttpd.c thttpd-2.21b/libhttpd.c
 --- thttpd-2.21b-orig/libhttpd.c	Tue Apr 24 00:42:40 2001
-+++ thttpd-2.21b/libhttpd.c	Mon Aug 13 23:50:27 2001
++++ thttpd-2.21b/libhttpd.c	Tue Aug 14 00:00:07 2001
 @@ -85,6 +85,8 @@
  #include "match.h"
  #include "tdate_parse.h"
@@ -108,7 +131,21 @@ diff -ur thttpd-2.21b-orig/libhttpd.c thttpd-2.21b/libhttpd.c
  	{
  	mmc_unmap( hc->file_address, &(hc->sb), nowP );
  	hc->file_address = (char*) 0;
-@@ -3560,6 +3571,11 @@
+@@ -3026,11 +3037,9 @@
+ post_post_garbage_hack( httpd_conn* hc )
+     {
+     char buf[2];
+-    int r;
+ 
+-    r = recv( hc->conn_fd, buf, sizeof(buf), MSG_PEEK );
+-    if ( r > 0 )
+-	(void) read( hc->conn_fd, buf, r );
++	fcntl(hc->conn_fd, F_SETFL, O_NONBLOCK);
++	(void) read( hc->conn_fd, buf, 2 );
+     }
+ 
+ 
+@@ -3560,6 +3569,11 @@
  	 ( hc->sb.st_mode & S_IXOTH ) &&
  	 match( hc->hs->cgi_pattern, hc->expnfilename ) )
  	return cgi( hc );
@@ -132,8 +169,6 @@ diff -ur thttpd-2.21b-orig/libhttpd.h thttpd-2.21b/libhttpd.h
      char* charset;
      char* cwd;
      int listen4_fd, listen6_fd;
-Only in thttpd-2.21b: thttpd-cgi-patch
-Only in thttpd-2.21b: thttpd-poll-patch
 diff -ur thttpd-2.21b-orig/thttpd.c thttpd-2.21b/thttpd.c
 --- thttpd-2.21b-orig/thttpd.c	Tue Apr 24 00:41:57 2001
 +++ thttpd-2.21b/thttpd.c	Mon Aug 13 23:50:27 2001
