@@ -1,3 +1,64 @@
+2000-06-29  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/php_dir.h
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/dir.c: Fixed opendir() thoroughly
+
+2000-06-29  Thies C. Arntzen  <thies@digicol.de>
+
+    * configure.in: welcome 4.0.2-dev
+
+2000-06-29  Andi Gutmans  <andi@php.net>
+
+    * ext/pgsql/pgsql.dsp: - Get rid of absolute path
+
+    * ext/pgsql/pgsql.dsp: - Make pgsql compile on Windows.
+
+2000-06-29  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/wddx/wddx.c: Lowercase class name before checking for it
+
+    * ext/standard/var.c: Lowercase class name before looking for it
+
+2000-06-29  Kristian Köhntopp  <kk@shonline.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/mail.c
+      ext/standard/php_mail.h: ezmlm_hash() function also available for php4.
+
+2000-06-29  Andi Gutmans  <andi@php.net>
+
+    * sapi/cgi/cgi_main.c: - Extra newline crept in somehow
+
+2000-06-29  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/file.c:
+    Make fgets not use maximal buffer length always, but shrink buffer
+    if it's too big.
+
+2000-06-29  Andi Gutmans  <andi@php.net>
+
+    * sapi/cgi/cgi_main.c
+      main/config.w32.h:
+    - Fix problem with DICARD_PATH being defined in windows
+
+2000-06-29  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Starting 4.0.2 changes.
+
+2000-06-29  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/session/session.c:
+    Try to fix #5271 - crash when $HTTP_SESSION_VARS is already defined
+    via "global"
+
+2000-06-29  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * pear/DB/mysql.php:
+    check the return value of mysql_select_db() ("James L. Pine"
+    <jpine@valinux.com>)
+
 2000-06-28  Andrei Zmievski  <andrei@ispi.net>
 
     * TODO: Would be a useful thing to have.
