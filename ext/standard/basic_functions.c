@@ -64,6 +64,7 @@ static unsigned char second_and_third_args_force_ref[] = { 3, BYREF_NONE, BYREF_
 static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 static unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
+static unsigned char third_and_rest_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST };
 
 typedef struct _php_shutdown_function_entry {
 	zval **arguments;
@@ -177,8 +178,8 @@ function_entry basic_functions[] = {
 	PHP_FALIAS(strchr,			strstr,				NULL)
 	PHP_NAMED_FE(sprintf,		PHP_FN(user_sprintf),	NULL)
 	PHP_NAMED_FE(printf,		PHP_FN(user_printf),	NULL)
-    PHP_FE(sscanf,                                  NULL)
-    PHP_FE(fscanf,                                  NULL)
+    PHP_FE(sscanf,                                  third_and_rest_force_ref)
+    PHP_FE(fscanf,                                  third_and_rest_force_ref)
 
 	PHP_FE(parse_url,								NULL)
 	PHP_FE(urlencode,								NULL)
