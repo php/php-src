@@ -5,6 +5,11 @@ PHP                                                                        NEWS
 - Fixed bug #29236 (memory error when wsdl-cache is enabled). (Dmitry)
 - Fixed bug #29109 (SoapFault exception: [WSDL] Out of memory). (Dmitry)
 - Fixed bug #29061 (soap extension segfaults). (Dmitry)
+- Added new functions :
+  . array_diff_key() (Andrey)
+  . array_diff_ukey() (Andrey)
+  . array_intersect_key() (Christiano Duarte)
+  . array_intersect_ukey() (Christiano Duarte)
 - Added MDTM support to ftp_url_stat. (Sara)
 - Added zlib stream filter suport. (Sara)
 - Added bz2 stream filter support. (Sara)
