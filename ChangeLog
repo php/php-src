@@ -1,3 +1,146 @@
+2005-01-20  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_0)
+      ext/ldap/config.w32:
+      MFOB: Fixed bug #29492 - missing ldap_parse_reference()
+
+    * (PHP_4_3)
+      ext/ldap/ldap.dsp:
+      Fixed bug #29492 - missing ldap_parse_reference()
+
+2005-01-20  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      fix error message =/
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/oci8/oci8.c
+      ext/oci8/oci8.c:
+      MFH: fix bug #31623 (OCILogin does not support password grace period)
+
+    * ext/oci8/oci8.c:
+      fix bug #31623 (OCILogin does not support password grace period)
+
+    * ext/imap/php_imap.c:
+      fix error message
+
+    * ext/imap/php_imap.c:
+      fix segfault in imap_sort() - it segfaults when options is less than 0.
+      it looks like c-client bug, but we still need a workaround.
+      also, convert_to_string search criteria.
+
+2005-01-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/standard/string.c
+      main/rfc1867.c
+      main/rfc1867.c:
+      MFH: Fixed bug #31398 (When magic_guotes_gpc are enabled filenames with '
+      get cutoff).
+
+    * main/rfc1867.c:
+      Fixed bug #31398 (When magic_guotes_gpc are enabled filenames with '
+      get cutoff).
+
+2005-01-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #30901 (can't send cookies with soap envelop).
+      void SoapClient::__setCookie(string name [, string value])
+
+2005-01-20  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      MFH: fix segfault in imap_headerinfo() when fromlength or subjectlength are
+      less than 0
+      + fix protos
+
+    * ext/imap/php_imap.c:
+      fix segfault in imap_headerinfo() when fromlength or subjectlength are less
+      than 0
+      + fix protos
+
+2005-01-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #31422 (No Error-Logging on SoapServer-Side).
+
+2005-01-20  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      ext/dom/php_dom.c:
+      MFH: Fixed bug #28817 (Var problem when extending domDocument)
+
+    * ext/dom/php_dom.c:
+      Fixed bug #28817 (Var problem when extending domDocument).
+
+2005-01-20  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      ext/sysvsem/sysvsem.c
+      ext/sysvsem/sysvsem.c:
+      MFH: fix typos in error messages & resource name
+
+    * ext/sysvshm/sysvshm.c:
+      fix typos in error messages
+
+    * ext/sysvsem/sysvsem.c:
+      fix typos in error messages & resource name
+
+2005-01-20  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_constants.c
+      ext/ncurses/ncurses_functions.c
+      sapi/cli/php_cli.c:
+      - Revert the weird change of ZEND_STRS() macro and use the correct
+        ZEND_STRL() macro.
+
+    * (PHP_4_3)
+      NEWS
+      build/build2.mk
+      build/buildcheck.sh
+      build/libtool.m4
+      scripts/Makefile.frag
+      scripts/phpize.in:
+      MFH: - Changed phpize not to require automake and libtool. (Jani)
+      MFH: - Fixed build system to always use bundled libtool files. (Jani)
+      MFH: - Rewrote of phpize routines
+
+    * (PHP_5_0)
+      NEWS
+      build/build2.mk
+      build/buildcheck.sh
+      build/libtool.m4
+      scripts/Makefile.frag
+      scripts/phpize.in:
+      MFH: - Changed phpize not to require automake and libtool. (Jani)
+      MFH: - Fixed build system to always use bundled libtool files. (Jani)
+
+    * build/build2.mk
+      build/buildcheck.sh
+      scripts/Makefile.frag
+      scripts/phpize.in:
+      - Changed phpize not to require automake and libtool.
+      - Fixed build system to always use bundled libtool files.
+
+    * scripts/phpize.m4:
+      - Add --with-libdir to phpized builds too
+
+    * configure.in:
+      - Removed obsolete AC_PROG_RANLIB (AC_PROG_LIBTOOL does it)
+      - configure --help output cleanup for --with-libdir
+
 2005-01-19  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * buildconf
