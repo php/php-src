@@ -874,6 +874,21 @@ static void function_add_ref(zend_function *function)
 }
 
 
+static void do_inherit_parent_constructor(zend_class_entry *ce)
+{
+	if (ce->parent
+		&& !zend_hash_exists(&ce->function_table, ce->name, ce->name_length+1)) {
+		zend_function *function;
+
+		if (zend_hash_find(&ce->parent->function_table, ce->parent->name, ce->parent->name_length+1, (void **) &function)==SUCCESS) {
+			/* inherit parent's constructor */
+			zend_hash_update(&ce->function_table, ce->name, ce->name_length+1, function, sizeof(zend_function), NULL);
+			function_add_ref(function);
+		}
+	}
+}
+
+
 ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_table, HashTable *class_table, int allow_failure)
 {
 	switch (opline->extended_value) {
@@ -937,6 +952,8 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 				/* Perform inheritence */
 				zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
 				zend_hash_merge(&ce->function_table, &parent_ce->function_table, (void (*)(void *)) function_add_ref, &tmp_zend_function, sizeof(zend_function), 0);
+				ce->parent = parent_ce;
+				do_inherit_parent_constructor(ce);
 
 				/* Register the derived class */
 				if (zend_hash_add(class_table, class_name, strlen(class_name)+1, ce, sizeof(zend_class_entry), NULL)==FAILURE) {
@@ -1326,6 +1343,7 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 
 void do_end_class_declaration(CLS_D)
 {
+	do_inherit_parent_constructor(CG(active_class_entry));
 	CG(active_class_entry) = NULL;
 }
 
