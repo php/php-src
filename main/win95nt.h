@@ -24,7 +24,7 @@ typedef char * caddr_t;
 #define chdir(path) SetCurrentDirectory(path)
 #define mkdir(a,b)	_mkdir(a)
 #define rmdir(a)	_rmdir(a)
-#define getpid()		_getpid()
+#define getpid		_getpid
 #define php_sleep(t)	Sleep(t*1000)
 #define getcwd(a, b)		_getcwd(a, b)
 #define snprintf	_snprintf
