@@ -458,11 +458,13 @@ PHP_FUNCTION(file)
 	int target_len, len;
 	char eol_marker = '\n';
 	zend_bool use_include_path = 0;
+	zend_bool include_new_line = 1;
+	zend_bool skip_blank_lines = 0;
 	php_stream *stream;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b",
-							  &filename, &filename_len, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bbb",
+					&filename, &filename_len, &use_include_path, &include_new_line, &skip_blank_lines) == FAILURE) {
 		return;
 	}
 
@@ -488,19 +490,39 @@ PHP_FUNCTION(file)
  		if (stream->flags & PHP_STREAM_FLAG_EOL_MAC) {
   			eol_marker = '\r';
  		}	
- 	
- 		do {
- 			p++;
- 			parse_eol:
- 			if (PG(magic_quotes_runtime)) {
- 				/* s is in target_buf which is freed at the end of the function */
- 				slashed = php_addslashes(s, (p-s), &len, 0 TSRMLS_CC);
- 				add_index_stringl(return_value, i++, slashed, len, 0);
- 			} else {
- 				add_index_stringl(return_value, i++, estrndup(s, p-s), p-s, 0);
-  			}
- 			s = p;
- 		} while ((p = memchr(p, eol_marker, (e-p))));
+
+		/* for performance reasons the code is duplicated, so that the if (include_new_line) 
+		 * will not need to be done for every single line in the file.
+		 */
+		if (include_new_line) {	
+	 		do {
+ 				p++;
+ 				parse_eol:
+ 				if (PG(magic_quotes_runtime)) {
+ 					/* s is in target_buf which is freed at the end of the function */
+ 					slashed = php_addslashes(s, (p-s), &len, 0 TSRMLS_CC);
+ 					add_index_stringl(return_value, i++, slashed, len, 0);
+ 				} else {
+ 					add_index_stringl(return_value, i++, estrndup(s, p-s), p-s, 0);
+  				}
+ 				s = p;
+	 		} while ((p = memchr(p, eol_marker, (e-p))));
+	 	} else {
+	 		do {
+ 				if (skip_blank_lines && !(p-s)) {
+ 					s = ++p;
+ 					continue;
+ 				}
+ 				if (PG(magic_quotes_runtime)) {
+ 					/* s is in target_buf which is freed at the end of the function */
+ 					slashed = php_addslashes(s, (p-s), &len, 0 TSRMLS_CC);
+ 					add_index_stringl(return_value, i++, slashed, len, 0);
+ 				} else {
+ 					add_index_stringl(return_value, i++, estrndup(s, p-s), p-s, 0);
+  				}
+ 				s = ++p;
+	 		} while ((p = memchr(p, eol_marker, (e-p))));
+	 	}
  		
  		/* handle any left overs of files without new lines */
  		if (s != e) {
