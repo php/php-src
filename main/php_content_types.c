@@ -37,12 +37,25 @@ static sapi_post_entry php_post_entries[] = {
  */
 SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader)
 {
-	char *data;
+	char *data = NULL;
 
 	if(PG(always_populate_raw_post_data)) {
-		if(!SG(request_info).post_data) sapi_read_standard_form_data(TSRMLS_C);
-		data = estrndup(SG(request_info).post_data, SG(request_info).post_data_length);
-		SET_VAR_STRINGL("HTTP_RAW_POST_DATA", data, SG(request_info).post_data_length);
+		if(NULL == SG(request_info).post_data) { /* no data yet */
+			if(NULL == SG(request_info).post_entry) {
+				/* no post handler registered, so we just swallow the data */
+				sapi_read_standard_form_data(TSRMLS_C);
+				data = SG(request_info).post_data;
+				SG(request_info).post_data = NULL;
+				SG(request_info).post_data_length = 0;
+			}
+		} else {
+			/* copy existing post data */
+			data = estrndup(SG(request_info).post_data, SG(request_info).post_data_length);
+		}
+		
+		if(data) {
+			SET_VAR_STRINGL("HTTP_RAW_POST_DATA", data, SG(request_info).post_data_length);
+		}
 	}
 }
 /* }}} */
