@@ -1,4 +1,0 @@
-TODO
-
-    - Implement fetch_attr(), fetch_node() methods
-    - Fix any memleaks (some may be purely ZE2 related)
