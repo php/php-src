@@ -133,9 +133,8 @@ AC_ARG_WITH(sapdb,
   fi
   if test "$withval" != "no"; then
     PHP_ADD_INCLUDE($withval/incl)
-	PHP_ADD_LIBPATH($withval/lib)
-	PHP_ADD_LIBRARY(sqlod)
-	PHP_ADD_LIBRARY(sqlrte)
+    PHP_ADD_LIBPATH($withval/lib)
+    PHP_ADD_LIBRARY(sqlod)
     ODBC_TYPE=sapdb
     AC_DEFINE(HAVE_SAPDB,1,[ ])
     AC_MSG_RESULT(yes)
