@@ -167,7 +167,7 @@ static long pdo_mysql_last_insert_id(pdo_dbh_t *dbh TSRMLS_DC)
 	return (long) mysql_insert_id(H->server);
 }
 
-static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen  TSRMLS_DC)
+static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype  TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	*quoted = emalloc(2*unquotedlen + 3);
