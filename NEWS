@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Make the special Header("http/...") response be case insensitive like 3.0 (Rasmus)
+- Allow cybercash to compile as a DL module. (Sterling)
 - Fixed the dbase_create function. (Sterling)
 - Fixed a problem under some versions of Windows that could cause PHP to hang
   on startup if errors occured, e.g. in the php.ini file (Zeev)
