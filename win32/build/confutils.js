@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.22 2003-12-19 20:39:02 wez Exp $
+// $Id: confutils.js,v 1.23 2003-12-19 23:19:18 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -541,7 +541,7 @@ function generate_version_info_resource(makefiletarget, creditspath)
 	var res_desc = "PHP " + makefiletarget;
 	var res_prod_name = res_desc;
 	var credits;
-	var thanks = null;
+	var thanks = "";
 	var logo = "";
 
 	if (FSO.FileExists(creditspath + '/CREDITS')) {
