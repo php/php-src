@@ -26,6 +26,10 @@ if test "$PHP_XSLT" != "no"; then
     XSLT_LIBNAME=sablot
   fi
 
+  if test -z "$XSLT_BACKEND_NAME"; then
+    AC_MSG_ERROR(No backend specified for XSLT extension.)
+  fi
+
   condition="$XSLT_CHECK_DIR$XSLT_TEST_FILE"
 
   if test -r $condition; then
