@@ -33,6 +33,9 @@ define('PEAR_INSTALLER_SKIPPED', -1);
  *
  * TODO:
  *   - Check dependencies break on package uninstall (when no force given)
+ *   - add a guessInstallDest() method with the code from _installFile() and
+ *     use that method in Registry::_rebuildFileMap() & Command_Registry::doList(),
+ *     others..
  *
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@fast.no>
@@ -192,10 +195,13 @@ class PEAR_Installer extends PEAR_Common
         } else {
             $dest_file = $dest_dir . DIRECTORY_SEPARATOR . $atts['install-as'];
         }
+        $orig_file = $tmp_path . DIRECTORY_SEPARATOR . $file;
+
+        // Clean up the DIRECTORY_SEPARATOR mess
         $ds2 = str_repeat(DIRECTORY_SEPARATOR, 2);
-        $dest_file = preg_replace(array('!\\\\!', '!/!', "!$ds2+!"),
-                                  DIRECTORY_SEPARATOR,
-                                  $dest_file);
+        list($dest_file, $orig_file) = preg_replace(array('!\\\\!', '!/!', "!$ds2+!"),
+                                                    DIRECTORY_SEPARATOR,
+                                                    array($dest_file, $orig_file));
         $dest_dir = dirname($dest_file);
         if (!@is_dir($dest_dir)) {
             if (!$this->mkDirHier($dest_dir)) {
@@ -204,7 +210,6 @@ class PEAR_Installer extends PEAR_Common
             }
             $this->log(3, "+ mkdir $dest_dir");
         }
-        $orig_file = $tmp_path . DIRECTORY_SEPARATOR . $file;
         if (empty($atts['replacements'])) {
             if (!@copy($orig_file, $dest_file)) {
                 return $this->raiseError("failed to copy $orig_file to $dest_file",
@@ -393,7 +398,7 @@ class PEAR_Installer extends PEAR_Common
         $pkgname = $pkginfo['package'];
 
         // Check dependencies -------------------------------------------
-        if (isset($pkginfo['release_deps']) && !isset($options['nodeps'])) {
+        if (isset($pkginfo['release_deps']) && empty($options['nodeps'])) {
             $error = $this->checkDeps($pkginfo);
             if ($error) {
                 if (empty($options['soft'])) {
@@ -409,7 +414,7 @@ class PEAR_Installer extends PEAR_Common
                 return $this->raiseError("$pkgname already installed");
             }
         } else {
-            // check to do only when upgrading packages
+            // checks to do only when upgrading packages
             if (!$this->registry->packageExists($pkgname)) {
                 return $this->raiseError("$pkgname not installed");
             }
