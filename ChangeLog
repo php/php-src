@@ -1,3 +1,137 @@
+2000-06-26  Zeev Suraski  <zeev@php.net>
+
+    * NEWS
+      ext/standard/file.c:
+    Removed 8KB limit on line length of the file() function
+
+    * NEWS
+      ext/standard/dl.c:
+    - Disabled dl() when PHP is being used as a module inside a multithreaded web
+      server - it didn't work before, and caused weird results (Zeev)
+
+2000-06-26  Andi Gutmans  <andi@php.net>
+
+    * ext/zlib/zlib.c:
+    - Don't depend on USE_PATH being equal to 1. Use #define value
+
+2000-06-26  Zeev Suraski  <zeev@php.net>
+
+    * php.ini-dist
+      php.ini-optimized: Add missing enable_dl
+
+    * main/configuration-parser.y
+      main/configuration-scanner.l:
+    Support boolean NOT in the php.ini processor
+
+2000-06-26  Andrei Zmievski  <andrei@ispi.net>
+
+    * sapi/servlet/servlet.c
+      sapi/thttpd/thttpd.c
+      sapi/roxen/roxen.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/nsapi/nsapi.c
+      sapi/phttpd/phttpd.c
+      sapi/cgi/cgi_main.c
+      sapi/isapi/php4isapi.c
+      sapi/apache/mod_php4.c
+      ext/standard/info.c
+      main/SAPI.h
+      sapi/aolserver/aolserver.c:
+    Separate plain name returned by php_sapi_module() and pretty name
+    used for output.
+
+2000-06-26  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/file.c: Fixed some protos.
+
+2000-06-26  Andi Gutmans  <andi@php.net>
+
+    * sapi/cgi/cgi_main.c: - Pray this is an OK fix for the DISCARD_PATH junk
+
+2000-06-26  Zeev Suraski  <zeev@php.net>
+
+    * ext/zlib/zlib.c:
+    - Please NEVER copy fopen_wrappers.c functions to modules. They are ugly
+    - enough as is and need cleaning up. Duplicating the mess makes things just
+    - worse and prevents bug fixes in the functions from propogating throughout
+    - PHP.
+    - This fix is untested so someone who uses zlib, please test it and report
+    - back.
+
+2000-06-26  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/exec.c: Make exec() fwork on Unix again
+
+2000-06-26  Zeev Suraski  <zeev@php.net>
+
+    * configure.in
+      main/config.w32.h
+      main/main.c: TRACK_VARS is really no longer necessary...
+
+    * php.ini-dist
+      php.ini-optimized: max_execution_time is no longer UNIX only...
+
+2000-06-26  Stanislav Malyshev  <stas@zend.com>
+
+    * sapi/cgi/cgi_main.c: Right name for the function persist_alloc
+
+2000-06-26  Zeev Suraski  <zeev@php.net>
+
+    * main/php_virtual_cwd.c:
+    - Fix bug in virtual dir under Windows when using absolute paths without
+    - drive letter
+
+2000-06-26  Andi Gutmans  <andi@php.net>
+
+    * sapi/cgi/cgi_main.c:
+    - Try two in fixing the problem with memory leaks reporting path_translated
+
+2000-06-26  Zeev Suraski  <zeev@php.net>
+
+    * sapi/cgi/cgi_main.c:
+    - Fix problem with filename being freed before possible memory leaks are
+    - reported by the memory manager
+
+2000-06-26  Jouni Ahto  <jah@mork.net>
+
+    * ext/gd/config.m4
+      ext/gd/gd.c:
+    - Fixed another missing test for existing functions in libgd.
+
+2000-06-26  Kristian Köhntopp  <kk@shonline.de>
+
+    * ext/standard/info.c: Corrected a syntax error: Macro requires braces.
+
+    * ext/standard/info.c
+      ext/standard/info.h
+      ext/standard/basic_functions.c:
+    Added function php_sapi_name() as written by Stefan Livieratos.
+
+2000-06-26  Andrei Zmievski  <andrei@ispi.net>
+
+    * .cvsignore: ignore libs.mk
+
+    * NEWS: Fix up news.
+
+2000-06-26  Stanislav Malyshev  <stas@zend.com>
+
+    * sapi/cgi/cgi_main.c: If we freed it, we might not touch it
+
+2000-06-26  Jouni Ahto  <jah@mork.net>
+
+    * ext/gd/config.m4
+      ext/gd/gd.c:
+    - Test gdImagePaletteCopy and define HAVE_LIBGD15 if found.
+    - s/HAVE_LIBGD13/HAVE_LIBGD15/ in ImagePaletteCopy, ImageCopyMerge.
+
+2000-06-26  Stefan Roehrich  <sr@linux.de>
+
+    * ext/zlib/config.m4: Fix for configure not setting the library path.
+
+2000-06-26  Sterling Hughes  <stirling@bestweb.net>
+
+    * NEWS: two too many.
+
 2000-06-25  Sascha Schumann  <sascha@schumann.cx>
 
     * makedist: Fix Bison version check
