@@ -337,49 +337,46 @@ PHP_FUNCTION(fdf_set_value) {
 
 /* {{{ proto string fdf_next_field_name(int fdfdoc [, string fieldname])
    Gets the name of the next field name or the first field name */
-PHP_FUNCTION(fdf_next_field_name) {
-	pval **argv[2];
-	int id, type, argc;
-	ASInt32 nr;
-	char *buffer, *fieldname;
+PHP_FUNCTION(fdf_next_field_name) 
+{
+	zval **fdfdoc, **field;
+	int id, type, argc=ZEND_NUM_ARGS();
+	ASInt32 length=256, nr;
+	char *buffer=NULL, *fieldname=NULL;
 	FDFDoc fdf;
 	FDFErc err;
 	FDF_TLS_VARS;
 
-	argc = ZEND_NUM_ARGS();
-	if((argc > 2) || (argc < 1))
-		WRONG_PARAM_COUNT;
-
-	if (zend_get_parameters_array_ex(argc, argv) == FAILURE) {
+	if (argc > 2 || argc < 1 || zend_get_parameters_ex(argc, &fdfdoc, &field) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long_ex(argv[0]);
-	if(argc == 2) {
-		convert_to_string_ex(argv[1]);
-		fieldname = (*argv[1])->value.str.val;
-	} else {
-		fieldname = NULL;
-	}
-	id=(*argv[0])->value.lval;
+	convert_to_long_ex(fdfdoc);
+	id=Z_LVAL_PP(fdfdoc);
 	fdf = zend_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	err = FDFNextFieldName(fdf, fieldname, NULL, 0, &nr);
-	if(err != FDFErcOK)
-		printf("Aiii, error\n");
-	if(nr == 0)
-		RETURN_STRING(empty_string, 1);
-		
-	buffer = emalloc(nr);
-	err = FDFNextFieldName(fdf, fieldname, buffer, nr, &nr);
-	if(err != FDFErcOK)
-		printf("Aiii, error\n");
+	if(argc == 2) {
+		convert_to_string_ex(field);
+		fieldname = Z_STRVAL_PP(field);
+	}
 
-	RETURN_STRING(buffer, 0);
+	buffer = emalloc(length);
+	err = FDFNextFieldName(fdf, fieldname, buffer, length-1, &nr);
+	if(err == FDFErcBufTooShort && nr > 0 ) {
+		buffer = erealloc(buffer,nr+1); 
+		err = FDFNextFieldName(fdf, fieldname, buffer, length-1,&nr);
+	} 
+	if(err != FDFErcOK) {
+		efree(buffer);
+		php_error(E_WARNING,"Unable to get next fieldname");
+		RETURN_FALSE;
+	} 
+	RETVAL_STRING(buffer, 1);
+	efree(buffer);
 }
 /* }}} */
 
@@ -768,7 +765,7 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler)
 {
 	FILE *fp;
 	FDFDoc theFDF;
-	char *name=NULL,*value=NULL,*p;
+	char *name=NULL,*value=NULL,*p, *data;
 	int name_len=0,value_len=0;
 	char *lastfieldname =NULL;
 	char *filename = NULL;
@@ -785,6 +782,10 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler)
 	}
 	fwrite(SG(request_info).post_data,SG(request_info).post_data_length,1,fp);
 	fclose(fp);
+
+	/* Set HTTP_FDF_DATA variable */
+	data = estrndup(SG(request_info).post_data,SG(request_info).post_data_length);
+	SET_VAR_STRINGL("HTTP_FDF_DATA", data, SG(request_info).post_data_length);
 
  	err = FDFOpen(filename,0,&theFDF);
 
