@@ -2211,7 +2211,7 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (EX(opline)->op1.op_type == IS_UNUSED) {
 		if (EX(opline)->extended_value == ZEND_FETCH_CLASS_SELF) {
 			if (!EG(scope)) {
-				zend_error(E_ERROR, "Cannot fetch self:: when no class scope is active");
+				zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
 			}
 			EX_T(EX(opline)->result.u.var).EA.class_entry = EG(scope);
 			NEXT_OPCODE();
@@ -2220,10 +2220,10 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 			NEXT_OPCODE();
 		} else if (EX(opline)->extended_value == ZEND_FETCH_CLASS_PARENT) {
 			if (!EG(scope)) {
-				zend_error(E_ERROR, "Cannot fetch parent:: when no class scope is active");
+				zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
 			}
 			if (!EG(scope)->parent) {
-				zend_error(E_ERROR, "Cannot fetch parent:: as current class scope has no parent");
+				zend_error(E_ERROR, "Cannot access parent:: when current class scope has no parent");
 			}
 			EX_T(EX(opline)->result.u.var).EA.class_entry = EG(scope)->parent;
 			NEXT_OPCODE();
