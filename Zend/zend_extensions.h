@@ -35,6 +35,23 @@ typedef struct _zend_extension_version_info {
 
 typedef struct _zend_extension zend_extension;
 
+/* Typedef's for zend_extension function pointers */
+typedef int (*startup_func_t)(zend_extension *extension);
+typedef void (*shutdown_func_t)(zend_extension *extension);
+typedef void (*activate_func_t)();
+typedef void (*deactivate_func_t)();
+
+typedef void (*message_handler_func_t)(int message, void *arg);
+
+typedef void (*op_array_handler_func_t)(zend_op_array *op_array);
+
+typedef void (*statement_handler_func_t)(zend_op_array *op_array);
+typedef void (*fcall_begin_handler_func_t)(zend_op_array *op_array);
+typedef void (*fcall_end_handler_func_t)(zend_op_array *op_array);
+
+typedef void (*op_array_ctor_func_t)(zend_op_array *op_array);
+typedef void (*op_array_dtor_func_t)(zend_op_array *op_array);
+
 struct _zend_extension {
 	char *name;
 	char *version;
@@ -42,23 +59,23 @@ struct _zend_extension {
 	char *URL;
 	char *copyright;
 
-	int (*startup)(zend_extension *extension);
-	void (*shutdown)(zend_extension *extension);
-	void (*activate)();
-	void (*deactivate)();
+	startup_func_t startup;
+	shutdown_func_t shutdown;
+	activate_func_t activate;
+	deactivate_func_t deactivate;
 
-	void (*message_handler)(int message, void *arg);
+	message_handler_func_t message_handler;
 
-	void (*op_array_handler)(zend_op_array *op_array);
-	
-	void (*statement_handler)(zend_op_array *op_array);
-	void (*fcall_begin_handler)(zend_op_array *op_array);
-	void (*fcall_end_handler)(zend_op_array *op_array);
+	op_array_handler_func_t op_array_handler;
 
-	void (*op_array_ctor)(zend_op_array *op_array);
-	void (*op_array_dtor)(zend_op_array *op_array);
+	statement_handler_func_t statement_handler;	
+	fcall_begin_handler_func_t fcall_begin_handler;
+	fcall_end_handler_func_t fcall_end_handler;
 
-	int  (*api_no_check)(int api_no);
+	op_array_ctor_func_t op_array_ctor;
+	op_array_dtor_func_t op_array_dtor;
+
+	int (*api_no_check)(int api_no);
 	void *reserved2;
 	void *reserved3;
 	void *reserved4;
