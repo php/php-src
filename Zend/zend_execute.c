@@ -1747,7 +1747,7 @@ send_by_ref:
 					zval **param;
 
 					if (zend_ptr_stack_get_arg(opline->op1.u.constant.value.lval, (void **) &param ELS_CC)==FAILURE) {
-						zend_error(E_NOTICE, "Missing argument %d for %s()\n", opline->op1.u.constant.value.lval, get_active_function_name());
+						zend_error(E_WARNING, "Missing argument %d for %s()\n", opline->op1.u.constant.value.lval, get_active_function_name());
 						if (opline->result.op_type == IS_VAR) {
 							PZVAL_UNLOCK(*Ts[opline->result.u.var].var.ptr_ptr);
 						}
