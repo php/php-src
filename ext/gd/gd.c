@@ -476,7 +476,11 @@ PHP_MINFO_FUNCTION(gd)
 	php_info_print_table_row(2, "FreeType Linkage", "with freetype");
 	{
 		char tmp[256];
+#ifdef FREETYPE_PATCH
 		snprintf(tmp, sizeof(tmp), "%d.%d.%d", FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH);
+#else
+		snprintf(tmp, sizeof(tmp), "%d.%d", FREETYPE_MAJOR, FREETYPE_MINOR);
+#endif
 		php_info_print_table_row(2, "FreeType Version", tmp);
 	}
 #elif HAVE_LIBTTF
