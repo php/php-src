@@ -36,7 +36,7 @@
  * */
 PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv)
 {
-	DWORD ms_total, limit, slice;
+	DWORD ms_total, limit;
 	HANDLE handles[MAXIMUM_WAIT_OBJECTS];
 	int handle_slot_to_fd[MAXIMUM_WAIT_OBJECTS];
 	int n_handles = 0, i;
