@@ -1,8 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
-- Fixed bug #29354 (Exception constructor marked as both public and protected).
-  (Marcus)
 - Fixed bug #29335 (fetch functions now use MYSQLI_BOTH as default) (Georg)
 - Fixed bug #29311 (calling parent constructor in mysqli). (Georg)
 - Fixed bug #29236 (memory error when wsdl-cache is enabled). (Dmitry)
