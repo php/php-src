@@ -603,7 +603,10 @@ PHP_FUNCTION(mysql_close)
 	}
 	
 	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
-	zend_list_delete(id);
+	zend_list_delete(Z_RESVAL_PP(mysql_link));
+	if (Z_RESVAL_PP(mysql_link)==MySG(default_link)) {
+		zend_list_delete(MySG(default_link));
+	}
 	RETURN_TRUE;
 }
 /* }}} */
