@@ -43,10 +43,6 @@ global
     * on some platforms unimplemented function will just do nothing 
       (e.g. symlink) they should print a warning or not even be defined!
       (DONE ?)
-    * Finish PHP streams abstraction, nuke all that issock stuff, implement SSL
-      socket support. (wez)
-        - ext/ftp/ -> all FILEs to streams
-        - ext/bz2/ -> convert to stream impl.
     * Use arg_separator.input to implode args in the CGI sapi extension
       and arg_separator.input to explode in php_build_argv(). (DONE?)
     * Change the odbc_fetch_into() function to require ALWAYS the first two

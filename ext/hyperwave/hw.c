@@ -2892,7 +2892,7 @@ PHP_FUNCTION(hw_new_document_from_file)
 	if(NULL == doc)
 		RETURN_FALSE;
 
-	doc->size = php_stream_read_all(stream, &doc->data, 1);
+	doc->size = php_stream_copy_to_mem(stream, &doc->data, PHP_STREAM_COPY_ALL, 1);
 
 	php_stream_close(stream);
 	
