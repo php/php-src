@@ -20,7 +20,7 @@
 # Makefile to generate build tools
 #
 
-SUBDIRS = Zend TSRM
+ZENDDIR = $(shell if test -d "ZendEngine2"; then echo ZendEngine2; else echo Zend; fi)
 
 STAMP = buildmk.stamp
 
@@ -30,11 +30,11 @@ all: $(STAMP) $(ALWAYS)
 	@$(MAKE) AMFLAGS=$(AMFLAGS) -s -f build/build2.mk
 
 generated_lists:
-	@echo makefile_am_files = Zend/Makefile.am \
+	@echo makefile_am_files = $(ZENDDIR)/Makefile.am \
 		TSRM/Makefile.am > $@
-	@echo config_h_files = Zend/acconfig.h TSRM/acconfig.h >> $@
-	@echo config_m4_files = Zend/Zend.m4 TSRM/tsrm.m4 TSRM/threads.m4 \
-		Zend/acinclude.m4 ext/*/config*.m4 sapi/*/config.m4 >> $@
+	@echo config_h_files = $(ZENDDIR)/acconfig.h TSRM/acconfig.h >> $@
+	@echo config_m4_files = $(ZENDDIR)/Zend.m4 TSRM/tsrm.m4 TSRM/threads.m4 \
+		$(ZENDDIR)/acinclude.m4 ext/*/config*.m4 sapi/*/config.m4 >> $@
 
 $(STAMP): build/buildcheck.sh
 	@build/buildcheck.sh && touch $(STAMP)
@@ -66,6 +66,5 @@ cvsclean:
 	@for i in `find . -name .cvsignore`; do \
 		(cd `dirname $$i` 2>/dev/null && rm -rf `cat .cvsignore` *.o *.a || true); \
 	done
-	@rm -f $(SUBDIRS) 2>/dev/null || true
 
 .PHONY: $(ALWAYS) snapshot cvsclean
