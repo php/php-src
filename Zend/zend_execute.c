@@ -2274,78 +2274,6 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 	NEXT_OPCODE();
 }
 
-/* Ensures that we're allowed to call a private method.
- * Will update EX(fbc) with the correct handler as necessary.
- */
-inline int zend_check_private(zend_execute_data *execute_data, zend_class_entry *ce, int fn_flags, char *function_name_strval, int function_name_strlen TSRMLS_DC)
-{
-	zend_function *orig_fbc;
-
-	if (!ce) {
-		return 0;
-	}
-
-	/* We may call a private function if:
-	 * 1.  The class of our object is the same as the scope, and the private
-	 *     function (EX(fbc)) has the same scope.
-	 * 2.  One of our parent classes are the same as the scope, and it contains
-	 *     a private function with the same name that has the same scope.
-	 */
-	if (EX(fbc)->common.scope == ce
-		&& EG(scope) == ce) {
-		/* rule #1 checks out ok, allow the function call */
-		return 1;
-	}
-
-
-	/* Check rule #2 */
-	orig_fbc = EX(fbc);
-
-	ce = ce->parent;
-	while (ce) {
-		if (ce == EG(scope)) {
-			if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen+1, (void **) &EX(fbc))==SUCCESS
-				&& EX(fbc)->op_array.fn_flags & ZEND_ACC_PRIVATE
-				&& EX(fbc)->common.scope == EG(scope)) {
-				return 1;
-			}
-			break;
-		}
-		ce = ce->parent;
-	}
-
-	EX(fbc) = orig_fbc;
-	return 0;
-}
-
-/* Ensures that we're allowed to call a protected method.
- */
-inline int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
-{
-	zend_class_entry *fbc_scope = ce;
-
-	/* Is the context that's calling the function, the same as one of
-	 * the function's parents?
-	 */
-	while (fbc_scope) {
-		if (fbc_scope==scope) {
-			return 1;
-		}
-		fbc_scope = fbc_scope->parent;
-	}
-
-	/* Is the function's scope the same as our current object context,
-	 * or any of the parents of our context?
-	 */
-	while (scope) {
-		if (scope==ce) {
-			return 1;
-		}
-		scope = scope->parent;
-	}
-	return 0;
-}
-
 
 int zend_init_ctor_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
@@ -2371,24 +2299,6 @@ int zend_init_ctor_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	EX(fbc) = EX(fbc_constructor);
 	if (EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
-		if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PUBLIC) {
-			/* No further checks necessary */
-		} else if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-			/* Ensure that if we're calling a private function, we're allowed to do so.
-			 */
-			if (EX(object)->value.obj.handlers->get_class_entry(EX(object) TSRMLS_CC) != EG(scope)) {
-				zend_error(E_ERROR, "Call to private constructor from context '%s'", EG(scope) ? EG(scope)->name : "");
-			}
-		} else if ((EX(fbc)->common.fn_flags & ZEND_ACC_PROTECTED)) {
-			/* Ensure that if we're calling a protected function, we're allowed to do so.
-			 */
-			if (!zend_check_protected(EX(fbc)->common.scope, EG(scope))) {
-				zend_error(E_ERROR, "Call to protected constructor from context '%s'", EG(scope) ? EG(scope)->name : "");
-			}
-		}
-
-		/*  The scope should be the scope of the class where the constructor
-			was initially declared in */
 		EX(calling_scope) = EX(fbc)->common.scope;
 	} else {
 		EX(calling_scope) = NULL;
@@ -2419,32 +2329,6 @@ int zend_init_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 		EX(fbc) = Z_OBJ_HT_P(EX(object))->get_method(EX(object), function_name_strval, function_name_strlen TSRMLS_CC);
 		if (!EX(fbc)) {
 			zend_error(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
-		}
-
-		if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PUBLIC) {
-			/* Ensure that we haven't overridden a private function and end up calling
-			 * the overriding public function...
-			 */
-			if (EX(fbc)->op_array.fn_flags & ZEND_ACC_CHANGED) {
-				zend_function *priv_fbc;
-
-				if (zend_hash_find(&EG(scope)->function_table, function_name_strval, function_name_strlen+1, (void **) &priv_fbc)==SUCCESS
-					&& priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE) {
-					EX(fbc) = priv_fbc;
-				}
-			}
-		} else if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-			/* Ensure that if we're calling a private function, we're allowed to do so.
-			 */
-			if (!zend_check_private(execute_data, EX(object)->value.obj.handlers->get_class_entry(EX(object) TSRMLS_CC), EX(fbc)->common.fn_flags, function_name_strval, function_name_strlen TSRMLS_CC)) {
-				zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(EX(fbc)->common.fn_flags), ZEND_FN_SCOPE_NAME(EX(fbc)), function_name_strval, EG(scope) ? EG(scope)->name : "");
-			}
-		} else if ((EX(fbc)->common.fn_flags & ZEND_ACC_PROTECTED)) {
-			/* Ensure that if we're calling a protected function, we're allowed to do so.
-			 */
-			if (!zend_check_protected(EX(fbc)->common.scope, EG(scope))) {
-				zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(EX(fbc)->common.fn_flags), ZEND_FN_SCOPE_NAME(EX(fbc)), function_name_strval, EG(scope) ? EG(scope)->name : "");
-			}
 		}
 	} else {
 		zend_error(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
@@ -2506,13 +2390,10 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
 
-	EX(calling_scope) = ce;
-
-	if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen+1, (void **) &EX(fbc))==FAILURE) {
-		zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
-	}
+	EX(fbc) = zend_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 	EX(calling_scope) = EX(fbc)->common.scope;
 
+#if 0
 	if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PUBLIC) {
 		/* No further checks necessary, most common case */
 	} else if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PRIVATE) {
@@ -2528,7 +2409,7 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 			zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(EX(fbc)->common.fn_flags), ZEND_FN_SCOPE_NAME(EX(fbc)), function_name_strval, EG(scope) ? EG(scope)->name : "");
 		}
 	}
-
+#endif
 	if (!is_const) {
 		zval_dtor(&tmp);
 		FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
