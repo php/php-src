@@ -426,7 +426,7 @@ PHP_FUNCTION(dio_tcsetattr)
 
  
 	if (Z_TYPE_P(arg) != IS_ARRAY) {
-		zend_error(E_WARNING,"tcsetattr, third argument should be an associative array");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"tcsetattr, third argument should be an associative array");
 		return;
 	}
 
@@ -504,7 +504,7 @@ PHP_FUNCTION(dio_tcsetattr)
 			BAUD = B50;
 			break;
 		default:
-			zend_error(E_WARNING, "invalid baud rate %d", Baud_Rate);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid baud rate %d", Baud_Rate);
 			RETURN_FALSE;
 	}
 	switch (Data_Bits) {
@@ -521,7 +521,7 @@ PHP_FUNCTION(dio_tcsetattr)
 			DATABITS = CS5;
 			break;
 		default:
-			zend_error(E_WARNING, "invalid data bits %d", Data_Bits);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid data bits %d", Data_Bits);
 			RETURN_FALSE;
 	}   
 	switch (Stop_Bits) {
@@ -532,7 +532,7 @@ PHP_FUNCTION(dio_tcsetattr)
 			STOPBITS = CSTOPB;
 			break;
 		default:
-			zend_error(E_WARNING, "invalid stop bits %d", Stop_Bits);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid stop bits %d", Stop_Bits);
 			RETURN_FALSE;
 	}   
 
@@ -550,7 +550,7 @@ PHP_FUNCTION(dio_tcsetattr)
 			PARITY = 0;
 			break;
 		default:
-			zend_error(E_WARNING, "invalid parity %d", Parity);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid parity %d", Parity);
 			RETURN_FALSE;
 	}   
         
