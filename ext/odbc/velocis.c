@@ -278,7 +278,7 @@ PHP_FUNCTION(velocis_close)
 }
 /* }}} */
 
-/* {{{ proto int velocis(int index, string exec_str)
+/* {{{ proto int velocis_exec(int index, string exec_str)
  */
 PHP_FUNCTION(velocis_exec)
 {
@@ -537,7 +537,7 @@ PHP_FUNCTION(velocis_freeresult)
 }
 /* }}} */
 
-/* {{{ proto bool velocis_on_autocommit(int index)
+/* {{{ proto bool velocis_autocommit(int index)
  */
 PHP_FUNCTION(velocis_autocommit)
 {
