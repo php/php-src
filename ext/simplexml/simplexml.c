@@ -293,20 +293,13 @@ sxe_properties_get(zval *object TSRMLS_DC)
 
 	GET_NODE(sxe, node);
 
-	node = node->xmlChildrenNode;
-	if (!sxe->node) {
-		sxe->node = node;
-	}
-
-	while (node) {
-		MAKE_STD_ZVAL(value);
-		_node_as_zval(sxe, node, value);
-
-		zend_hash_next_index_insert(rv, &value, sizeof(zval *), NULL);
-
-		node = node->next;
-	}
-
+	/* 
+	 * XXX: TODO
+	 * Recurse from the current node through the XML document
+	 * and build an array return value.  Expensive? sure.  But
+	 * if you ask for it, you get it :)
+	 */
+	
 	return rv;
 }
 /* }}} */
