@@ -231,6 +231,7 @@ static void _free_mysql_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	MYSQL_RES *mysql_result = (MYSQL_RES *)rsrc->ptr;
 
 	mysql_free_result(mysql_result);
+	MySG(result_allocated)--;
 }
 /* }}} */
 
