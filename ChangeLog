@@ -1,3 +1,115 @@
+2002-10-11  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/embed/config.m4:
+    - Removed the unnecessary extra configure option --enable-shared-embed
+    - Changed --enable-embed to accept parameters shared/static and default
+      to static build.
+
+2002-10-11  Tal Peer  <tal@kaktos.co.il>
+
+    * ext/fribidi/tests/001.phpt:
+    Use var_dump instaed of plain echo
+
+2002-10-11  Moriyoshi Koizumi  <readjust@deneb.freemail.ne.jp>
+
+    * ext/iconv/tests/translit-failure.phpt
+      ext/iconv/tests/translit-utf8.phpt:
+    Improved the test cases so that they will be skipped rather than failed, if libiconv is not used.
+
+2002-10-11  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/standard/tests/strings/explode.phpt:
+    - Document were the first test came from.
+
+2002-10-11  Moriyoshi Koizumi  <readjust@deneb.freemail.ne.jp>
+
+    * ext/iconv/config.m4
+      ext/iconv/iconv.c: *** empty log message ***
+
+    * ext/iconv/iconv.c: Fixed possible compile-time failure
+
+2002-10-11  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/tests/bug19266.phpt
+      ext/gd/tests/bug19366.phpt: Renamed and fixed constant
+
+    * ext/iconv/config.m4: ws fix
+
+2002-10-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/strings/explode.phpt:
+    Added test for explode() function.
+
+    * ext/standard/php_string.h: Fixed bug #19865
+
+2002-10-11  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/tests/001.phpt:
+    text and comment nodes do not have children... test was wrong, implementation
+    is right :)
+
+    * ext/domxml/php_domxml.c:
+    node->attributes returns null, if there are no attributes.
+
+2002-10-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/tests/array/var_export.phpt
+      ext/standard/var.c:
+    - Fix problem with var_export when objects with numeric indexes were
+      exported. We now skip those, as there is no way to export valid code for
+      it.
+
+2002-10-11  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/iconv/tests/translit-failure.phpt: fix typo.
+
+2002-10-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/gd/gd.c: - Change constant name
+
+2002-10-11  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/standard/string.c:
+    Fixed problems with the new nl2br() and beautified the code a little.
+    Closes #19858.
+
+2002-10-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/tests/strings/nl2br.phpt: - Add case for bug 19858
+
+    * ext/gd/tests/bug19266.phpt:
+    - Skip if an external lib gd is used (which always has this crash-bug)
+
+    * ext/gd/gd.c: - Add indetified for bundled GD
+
+2002-10-11  Edin Kadribasic  <edink@proventum.net>
+
+    * main/config.w32.h.in:
+    Revert Stig's patch. Windows build should work again.
+
+2002-10-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/iconv/iconv.c: - Style polizei :)
+
+2002-10-11  Moriyoshi Koizumi  <readjust@deneb.freemail.ne.jp>
+
+    * ext/iconv/iconv.c: Reformatted.
+
+    * ext/iconv/config.m4
+      ext/iconv/iconv.c: Added ICONV_IMPL and ICONV_VERSION constants.
+
+    * ext/iconv/tests/translit-failure.phpt:
+    Added set_time_limit(); We should stop it in some time. See the comment in the script for detail.
+
+2002-10-11  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/formatted_print.c: Fix ZTS build.
+
+2002-10-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+    Switched from localeconv to localeconv_r, which is apparently thread-safe.
+
 2002-10-10  Jani Taskinen  <sniper@iki.fi>
 
     * NEWS: SP
