@@ -898,7 +898,7 @@ session.use_trans_sid = 0
 
 ; Select a hash function
 ; 0: MD5   (128 bits, 32 characters, [0-9a-f])
-; 1: SHA-1 (160 bits, 32 characters, [0-9a-z])
+; 1: SHA-1 (160 bits, 32 characters, [0-9a-v])
 session.hash_function = 0
 
 ; The URL rewriter will look for URLs in a defined set of HTML tags.
