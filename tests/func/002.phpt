@@ -1,7 +1,7 @@
 --TEST--
 Static variables in functions
---POST--
---GET--
+--SKIPIF--
+<?php if(version_compare(zend_version(), "2.0.0-dev", '>=')) echo "skip removed in Zend Engine 2\n"; ?>
 --FILE--
 <?php 
 old_function blah (
