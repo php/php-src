@@ -150,10 +150,10 @@ static const struct reg_entry engine_entries[] = {
 	{ HKEY_CLASSES_ROOT,	"CLSID\\[CLSID]\\InprocServer32",	NULL, 				"[MODULENAME]" },
 	{ HKEY_CLASSES_ROOT,	"CLSID\\[CLSID]\\InprocServer32",	"ThreadingModel",	"[THREADING]" },
 	{ HKEY_CLASSES_ROOT,	"CLSID\\[CLSID]\\OLEScript",		NULL,				NULL },
-	{ HKEY_CLASSES_ROOT,	"CLSID\\[CLSID]\\ProgID",			NULL,				"ActivePHP5" },
-	{ HKEY_CLASSES_ROOT,	"ActivePHP5",						NULL,				"ActivePHP5" },
-	{ HKEY_CLASSES_ROOT,	"ActivePHP5\\CLSID",				NULL,				"[CLSID]"},
-	{ HKEY_CLASSES_ROOT,	"ActivePHP5\\OLEScript",			NULL,				NULL},
+	{ HKEY_CLASSES_ROOT,	"CLSID\\[CLSID]\\ProgID",			NULL,				"PHPScript" },
+	{ HKEY_CLASSES_ROOT,	"PHPScript",						NULL,				"PHPScript" },
+	{ HKEY_CLASSES_ROOT,	"PHPScript\\CLSID",				NULL,				"[CLSID]"},
+	{ HKEY_CLASSES_ROOT,	"PHPScript\\OLEScript",			NULL,				NULL},
 	
 	{ 0, NULL, NULL, NULL }
 };

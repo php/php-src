@@ -23,7 +23,7 @@ Build and install it somewhere; then register the engine like this:
 Configuration.
 ==============
 
-ActivePHP will not use the default php.ini file.
+PHPScript will not use the default php.ini file.
 Instead, it will look only in the same directory as the .exe that caused it to
 load.
 
@@ -38,22 +38,22 @@ o. Windows Script Host
   Create a .wsf file like this:
 
   <job id="test">
-    <script language="ActivePHP5">
+    <script language="PHPScript">
 	  $WScript->Echo("Hello");
 	</script>
   </job>
 
 o. ASP and ASP.NET
 
-  <%@language=ActivePHP5 %>
+  <%@language=PHPScript %>
   <% $Response->Write("Hello"); %>
 
 o. Windows Script Components / Behaviours
 
-  Use language="ActivePHP5" on your <script> tags
+  Use language="PHPScript" on your <script> tags
 
 o. MS Scriptlet control
 
-  Set the language property to "ActivePHP5"
+  Set the language property to "PHPScript"
 
 

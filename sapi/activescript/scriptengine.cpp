@@ -419,7 +419,7 @@ int TPHPScriptingEngine::create_id(OLECHAR *name, DISPID *dispid TSRMLS_DC)
 	int i;
 	for (i = 0; i < m_ids; i++) {
 		if (!strcasecmp(m_names[i], aname.ansi_string())) {
-			trace("already had this ID\n");
+			trace("already had ID %d for %s\n", i, m_names[i]);
 			return i;
 		}
 	}
@@ -764,7 +764,7 @@ static int execute_code_fragment(code_frag *frag,
 		pv.value.str.val = frag->code;
 		pv.value.str.len = frag->codelen;
 
-		frag->opcodes = compile_string(&pv, "fragment (JIT)" TSRMLS_CC);
+		frag->opcodes = compile_string(&pv, "fragment" TSRMLS_CC);
 
 		if (!frag->opcodes) {
 			trace("*** JIT compilation of cloned opcodes failed??");
@@ -1223,7 +1223,6 @@ STDMETHODIMP TPHPScriptingEngine::SetScriptSite(IActiveScriptSite *pass)
 
 	if (pass) {
 		m_basethread = tsrm_thread_id();
-		HRESULT ret = GIT_put(pass, IID_IActiveScriptSite, &m_asscookie);
 	}
 	
 	if (m_pass) {
@@ -1245,6 +1244,7 @@ STDMETHODIMP TPHPScriptingEngine::SetScriptSite(IActiveScriptSite *pass)
 		trace("----> %s", php_win_err(ret));
 		
 		if (SUCCEEDED(ret)) {
+			GIT_put(m_pass, IID_IActiveScriptSite, &m_asscookie);
 			SetScriptState(SCRIPTSTATE_INITIALIZED);
 		}
 	}
@@ -1374,7 +1374,7 @@ STDMETHODIMP TPHPScriptingEngine::AddNamedItem(LPCOLESTR pstrName, DWORD dwFlags
 	TWideString name(pstrName);
 	trace("AddNamedItem: %s (%08x) m_pass=%08x\n", name.ansi_string(), dwFlags, m_pass);
 	
-	res = m_pass->GetItemInfo(pstrName, SCRIPTINFO_IUNKNOWN, &punk, &ti);
+	ASS_CALL(res, GetItemInfo, (pstrName, SCRIPTINFO_IUNKNOWN, &punk, &ti));
 
 	if (SUCCEEDED(res)) {
 		IDispatch *disp = NULL;
@@ -1960,11 +1960,35 @@ public:
 	
 	TActiveScriptError(const char *filename, const uint lineno, const char *message)
 	{
+		char *extra_buf, *dest;
+		int msglen = strlen(message);
+
+		extra_buf = (char*)emalloc(2 * msglen + 1);
+
+		/* convert line endings so multi-line output looks reasonable in a GUI */
+		dest = extra_buf;
+		while (*message) {
+			if (*message == '\n') {
+				*dest++ = '\r';
+				*dest++ = '\n';
+				message++;
+			} else if (*message == '\r' && message[1] == '\n') {
+				*dest++ = '\r';
+				*dest++ = '\n';
+				message+=2;
+			} else {
+				*dest++ = *message++;
+			}
+		}
+		*dest = '\0';
+		
 		m_refcount = 0; /* start with zero refcount because this object is passed
 						 * directly to the script site; it will call addref */
 		m_filename = TWideString::bstr_from_ansi((char*)filename);
-		m_message = TWideString::bstr_from_ansi((char*)message);
+		m_message = TWideString::bstr_from_ansi(extra_buf);
 		m_lineno = lineno;
+
+		efree(extra_buf);
 	}
 
 	~TActiveScriptError()
