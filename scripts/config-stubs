@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+# $Id$
+
+for stubfile in ext/*/config.m4; do
+    echo "sinclude($stubfile)"
+done

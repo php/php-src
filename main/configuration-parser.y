@@ -37,8 +37,8 @@
 #include "php_globals.h"
 #include "php_ini.h"
 #include "functions/dl.h"
-#include "functions/file.h"
-#include "functions/php3_browscap.h"
+#include "ext/standard/file.h"
+#include "ext/standard/php3_browscap.h"
 #include "zend_extensions.h"
 
 #if WIN32

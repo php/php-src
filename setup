@@ -219,24 +219,25 @@ define_option with-apache 'Build as an Apache module?' yesnodir \
     The CGI version also enables Apache users to run different PHP3-enabled\n
     pages under different user-ids.'
 
-define_option with-mod_charset 'Enable transfer tables used by mod_charset?' yesno no \
+if test "$option_value_with_apache" != "no"; then
+    define_option with-mod_charset 'Enable transfer tables used by mod_charset?' yesno no \
 '    Whether to respect transfer tables used by mod_charset when PHP compiled\n
     as Apache module. It is required to allow mod_charset (aka Russian Apache)\n
     to work properly.'
+fi
 
-define_option with-fhttpd 'Build as an fhttpd module?' yesnodir \
+if test "$option_value_with_apache" = "no"; then
+    define_option with-fhttpd 'Build as an fhttpd module?' yesnodir \
     'no /usr/local/src/fhttpd fhttpd sources' \
 '    Whether to build PHP as fhttpd module.  If you are running\n
     fhttpd, building PHP as a module will give better performance,\n
     more control and remote execution capability. More info about fhttpd \n
     can be found at http://phobos.illtel.denver.co.us/pub/fhttpd/.'
+fi
 
-define_option with-gd 'GD support?' yesnodir \
-    "yes /usr GD install" \
-'    Whether to include GD support.  If PHP can find the GD libraries\n
-    on your system, it will be included automatically.  You should enter\n
-    something here if you do not want to include GD support or if you\n
-    have installed GD in some unusual directory.'
+for stub in ext/*/setup.stub; do
+    test -f $stub && . $stub
+done
 
 define_option with-oracle 'Oracle support?' yesnodir \
     "no $oradir Oracle home" \
