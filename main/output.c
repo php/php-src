@@ -53,11 +53,13 @@ typedef struct {
 
 #ifdef ZTS
 #define OLS_D php_output_globals *output_globals
+#define OLS_C output_globals
 #define OG(v) (output_globals->v)
 #define OLS_FETCH() php_output_globals *output_globals = ts_resource(output_globals_id)
 int output_globals_id;
 #else
 #define OLS_D
+#define OLS_C
 #define OG(v) (output_globals.v)
 #define OLS_FETCH()
 php_output_globals output_globals;
@@ -86,7 +88,7 @@ PHP_GINIT_FUNCTION(output)
 #ifdef ZTS
 	output_globals_id = ts_allocate_id(sizeof(php_output_globals), NULL, NULL);
 #else 
-	php_output_init_globals();
+	php_output_init_globals(OLS_C);
 #endif
 
 	return SUCCESS;
