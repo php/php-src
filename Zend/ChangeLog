@@ -1,3 +1,53 @@
+2003-08-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_opcode.c:
+      Fix crash
+
+    * zend_compile.c:
+      Fix test and add missing initialization
+
+2003-08-03  Zeev Suraski  <zeev@zend.com>
+
+    * zend_API.c:
+      Ensure functions have a valid access level
+
+    * zend_API.c:
+      Default to public
+
+2003-08-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c:
+      Not needed, will be copied from ptr->flags later
+
+    * zend_builtin_functions.c:
+      Add missing arg info
+
+2003-08-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/bug24635.phpt
+      tests/bug24699.phpt:
+      Style & WS fixes
+
+2003-08-03  Zeev Suraski  <zeev@zend.com>
+
+    * (BEFORE_ARG_INFO)
+      zend_API.c:
+      No need for this initialization - this function initializes all of the
+      elements of zend_internal_function
+
+    * (BEFORE_ARG_INFO)
+      zend_execute.c:
+      Clean up.  extended_value can only contain either ZEND_UNSET_DIM or
+      ZEND_UNSET_OBJ.
+
+    * (BEFORE_ARG_INFO)
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c:
+      Generalize fetch_class
+
 2003-08-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c:
