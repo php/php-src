@@ -10,7 +10,7 @@ if test -w configure.in.new || test -w acconfig.h.new ; then
 	exit 1
 fi
 
-makefileams=`find ext -name Makefile.am -print`
+makefileams=`find ext -name Makefile.am -print | sort`
 makefiles=`echo $makefileams | sed -e 's/\.am//g'`
 echo "dnl $disclaimer" > configure.in.new
 sed -e "s#@@EXT_MAKEFILES@@#$makefiles#" configure.in.in >> configure.in.new
