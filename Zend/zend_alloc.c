@@ -31,6 +31,8 @@
 # include <unistd.h>
 #endif
 
+#include "zend_mm.h"
+
 #ifndef ZTS
 ZEND_API zend_alloc_globals alloc_globals;
 #endif
@@ -38,8 +40,11 @@ ZEND_API zend_alloc_globals alloc_globals;
 
 #define ZEND_DISABLE_MEMORY_CACHE 0
 
-
-#ifdef ZEND_WIN32
+#if ZEND_MM
+#define ZEND_DO_MALLOC(size)		zend_mm_alloc(&AG(mm_heap), size)
+#define ZEND_DO_FREE(ptr)			zend_mm_free(&AG(mm_heap), ptr)
+#define ZEND_DO_REALLOC(ptr, size)	zend_mm_realloc(&AG(mm_heap), ptr, size)
+#elif defined(ZEND_WIN32)
 #define ZEND_DO_MALLOC(size)		(AG(memory_heap) ? HeapAlloc(AG(memory_heap), HEAP_NO_SERIALIZE, size) : malloc(size))
 #define ZEND_DO_FREE(ptr)			(AG(memory_heap) ? HeapFree(AG(memory_heap), HEAP_NO_SERIALIZE, ptr) : free(ptr))
 #define ZEND_DO_REALLOC(ptr, size)	(AG(memory_heap) ? HeapReAlloc(AG(memory_heap), HEAP_NO_SERIALIZE, ptr, size) : realloc(ptr, size))
@@ -415,7 +420,9 @@ ZEND_API void start_memory_manager(TSRMLS_D)
 	memset(AG(fast_cache_list_head), 0, sizeof(AG(fast_cache_list_head)));
 	memset(AG(cache_count), 0, sizeof(AG(cache_count)));
 
-#ifdef ZEND_WIN32
+#if ZEND_MM
+	zend_mm_startup(&AG(mm_heap), 256*1024);
+#elif defined(ZEND_WIN32)
 	AG(memory_heap) = HeapCreate(HEAP_NO_SERIALIZE, 256*1024, 0);
 #endif
 
@@ -454,7 +461,9 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 #endif
 	zend_fast_cache_list_entry *fast_cache_list_entry, *next_fast_cache_list_entry;
 
-#if defined(ZEND_WIN32) && !ZEND_DEBUG
+#if ZEND_MM
+	return;
+#elif defined(ZEND_WIN32) && !ZEND_DEBUG
 	if (clean_cache && AG(memory_heap)) {
 		HeapDestroy(AG(memory_heap));
 		return;

@@ -209,6 +209,7 @@ struct _zend_executor_globals {
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 
+#include "zend_mm.h"
 
 struct _zend_alloc_globals {
 	zend_mem_header *head;		/* standard list */
@@ -231,6 +232,9 @@ struct _zend_alloc_globals {
 	unsigned int allocated_memory;
 	unsigned int allocated_memory_peak;
 	unsigned char memory_exhausted;
+#endif
+#if ZEND_MM
+	zend_mm_heap mm_heap;
 #endif
 };
 
