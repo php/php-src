@@ -280,7 +280,7 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 
 static int _php_stream_free_persistent(list_entry *le, void *pStream TSRMLS_DC)
 {
-	return le->ptr == pStream;
+	return (le->ptr == pStream && !((php_stream *)pStream)->in_free);
 }
 
 PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* {{{ */
