@@ -544,6 +544,9 @@ function_entry basic_functions[] = {
 	PHP_FE(var_export,														NULL)
 	PHP_FE(debug_zval_dump,														NULL)
 	PHP_FE(print_r,															NULL)
+#if MEMORY_LIMIT 
+	PHP_FE(get_memory_usage,												NULL)
+#endif
 
 	PHP_FE(register_shutdown_function,										NULL)
 	PHP_FE(register_tick_function,											NULL)

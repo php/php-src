@@ -677,6 +677,15 @@ PHP_FUNCTION(unserialize)
 
 /* }}} */
 
+#if MEMORY_LIMIT
+/* {{{ proto int get_memory_usage()
+    Returns the allocated by PHP memory */
+PHP_FUNCTION(get_memory_usage) {
+	RETURN_LONG(AG(allocated_memory));
+}
+/* }}} */
+#endif
+
 /*
  * Local variables:
  * tab-width: 4
