@@ -137,7 +137,6 @@ int TSendMail(char *host, int *error, char **error_message,
 		strcpy(MailHost, host);
 	}
 
-	/* use from address as return path (if specified in headers) */
 	if (headers) {
 		char *pos = NULL;
 		size_t i;
@@ -150,39 +149,17 @@ int TSendMail(char *host, int *error, char **error_message,
 		for (i = 0; i < strlen(headers_lc); i++) {
 			headers_lc[i] = tolower(headers_lc[i]);
 		}
-		/* Try to match 'from:' only at start of the string or after following a \r\n */
-		if (strstr(headers_lc, "\r\nfrom:")) {
-			pos = strstr(headers_lc, "\r\nfrom:") + 7; /* Jump over the string "\r\nfrom:", hence the 7 */
-		} else if (!strncmp(headers_lc, "from:", 5)) {
-			pos = headers_lc + 5; /* Jump over the string "from:", hence the 5 */
-		}
-		if (pos) {
-			char *pos_end;
-			/* Let pos point to the real header string */
-			pos = headers + (pos - headers_lc);
-			/* Ignore any whitespaces */
-			while (pos && ((*pos == ' ' || *pos == '\t')))
-				pos++;
-			/* Match until \r\n or end of header string */
-			if (pos_end = strstr(pos, "\r\n")) {
-				RPath = estrndup(pos, pos_end - pos);
-			} else {
-				RPath = estrndup(pos, strlen(pos));
-			}
-		}
 	}
  
 	/* Fall back to sendmail_from php.ini setting */
- 	if (!RPath) {
-		if (INI_STR("sendmail_from")) {
-			RPath = estrdup(INI_STR("sendmail_from"));
-		} else {
-			if (headers_lc) {
-				efree(headers_lc);
-			}
-			*error = W32_SM_SENDMAIL_FROM_NOT_SET;
-			return FAILURE;
+	if (INI_STR("sendmail_from")) {
+		RPath = estrdup(INI_STR("sendmail_from"));
+	} else {
+		if (headers_lc) {
+			efree(headers_lc);
 		}
+		*error = W32_SM_SENDMAIL_FROM_NOT_SET;
+		return FAILURE;
 	}
 
 	/* attempt to connect with mail host */
