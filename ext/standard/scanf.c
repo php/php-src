@@ -469,7 +469,7 @@ PHPAPI int ValidateFormat(char *format,int numVars,int *totalSubs)
             if (*format == '\0') {
                 goto badSet;
             }
-            (char *)ch = format++;
+            ch = format++;
             if (*ch == '^') {
                 if (*format == '\0') {
                     goto badSet;
