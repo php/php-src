@@ -592,15 +592,6 @@ AC_ARG_ENABLE(dmalloc,
 ])
 AC_MSG_RESULT($DMALLOC_RESULT)
 
-AC_MSG_CHECKING(whether to try to stay below resource limits)
-AC_ARG_ENABLE(low-memory,
-[  --enable-low-memory     Try to stay below resource limits],[
-  PHP_LOW_MEMORY=$enableval
-],[
-  PHP_LOW_MEMORY=no
-])
-AC_MSG_RESULT($PHP_LOW_MEMORY)
-
 AC_ARG_ENABLE(pear,
 [  --disable-pear          Do not install PEAR],[
   PHP_PEAR=$enableval
@@ -651,10 +642,6 @@ if test "$PHP_VERSIONING" = "yes"; then
   if test -f "$PHP_SYM_FILE"; then
     EXTRA_LDFLAGS="-export-symbols $PHP_SYM_FILE"
   fi
-fi
-
-if test "$PHP_LOW_MEMORY" = "yes"; then
-  enable_inline=no
 fi
 
 divert(4)
@@ -732,7 +719,9 @@ if test "$PHP_THREAD_SAFETY" = "yes"; then
   TSRM_BASIC_CHECKS
   TSRM_OTHER_CHECKS
   EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
+  EXTRA_LIBS="$EXTRA_LIBS $LIBS"
   LDFLAGS=""
+  LIBS=""
 fi
 
 
