@@ -69,7 +69,7 @@ static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
 		zend_hash_internal_pointer_reset((*data)->value.ht);
 		while (zend_hash_get_current_data((*data)->value.ht, (void **) &tmp) == SUCCESS) {
 			PUTS("<tr valign=\"baseline\" bgcolor=\"" PHP_CONTENTS_COLOR "\">");
-			PUTS("<td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><B>");
+			PUTS("<td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><b>");
 			PUTS(name);
 			PUTS("[\"");
 			switch (zend_hash_get_current_key((*data)->value.ht, &string_key, &num_key, 0)) {
@@ -80,7 +80,7 @@ static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
 					php_printf("%ld",num_key);
 					break;
 			}
-			PUTS("\"]</B></td><td>");
+			PUTS("\"]</b></td><td>");
 			if ((*tmp)->type == IS_ARRAY) {
 				PUTS("<pre>");
 				zend_print_zval_r(*tmp, 0);
@@ -105,14 +105,14 @@ static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
  */
 void php_info_print_style(void)
 {
-	php_printf("<STYLE TYPE=\"text/css\"><!--\n");
-	php_printf("A { text-decoration: none; }\n");
-	php_printf("A:hover { text-decoration: underline; }\n");
-	php_printf("H1 { font-family: arial,helvetica,sans-serif; font-size: 18pt; font-weight: bold;}\n");
-	php_printf("H2 { font-family: arial,helvetica,sans-serif; font-size: 14pt; font-weight: bold;}\n");
-	php_printf("BODY,TD { font-family: arial,helvetica,sans-serif; font-size: 10pt; }\n");
-	php_printf("TH { font-family: arial,helvetica,sans-serif; font-size: 11pt; font-weight: bold; }\n");
-	php_printf("//--></STYLE>\n");
+	php_printf("<style type=\"text/css\"><!--\n");
+	php_printf("a { text-decoration: none; }\n");
+	php_printf("a:hover { text-decoration: underline; }\n");
+	php_printf("h1 { font-family: arial,helvetica,sans-serif; font-size: 18pt; font-weight: bold;}\n");
+	php_printf("h2 { font-family: arial,helvetica,sans-serif; font-size: 14pt; font-weight: bold;}\n");
+	php_printf("body,td { font-family: arial,helvetica,sans-serif; font-size: 10pt; }\n");
+	php_printf("th { font-family: arial,helvetica,sans-serif; font-size: 11pt; font-weight: bold; }\n");
+	php_printf("//--></style>\n");
 }
 /* }}} */
 
@@ -158,7 +158,7 @@ PHPAPI void php_print_info(int flag)
 	the_time = time(NULL);
 	ta = php_localtime_r(&the_time, &tmbuf);
 
-	PUTS("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\n            \"http://www.w3.org/TR/html4/loose.dtd\">\n<html>\n");
+	PUTS("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n");
 
 	if (flag & PHP_INFO_GENERAL) {
 		char *zend_version = get_zend_version();
