@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 ## to enchance the readability of this file. Using @ is discouraged.
 ## (This file will be cleaned up before release.)
 
+- Mnogosearch extension updated. Now can compile with mnogosearch-3.2.11+
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
 
