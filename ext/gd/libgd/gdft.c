@@ -958,7 +958,6 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 
 	while (*next) {
 		ch = *next;
-
 		/* carriage returns */
 		if (ch == '\r') {
 			penf.x = 0;
@@ -985,11 +984,12 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 
 /* EAM DEBUG */
 #if (defined(FREETYPE_MAJOR) && ((FREETYPE_MAJOR == 2 && ((FREETYPE_MINOR == 1 && FREETYPE_PATCH >= 3) || FREETYPE_MINOR > 1) || FREETYPE_MAJOR > 2)))
-		if (font->face->charmap->encoding == FT_ENCODING_MS_SYMBOL) {
+		if (font->face->charmap->encoding == FT_ENCODING_MS_SYMBOL && strcmp(font->face->family_name, "Symbol") == 0) {
 			/* I do not know the significance of the constant 0xf000.
 			 * It was determined by inspection of the character codes
 			 * stored in Microsoft font symbol.
 			 */
+			/* Convert to the Symbol glyph range only for a Symbol family member */ 
 			len = gdTcl_UtfToUniChar (next, &ch);
 			ch |= 0xf000;
 			next += len;
@@ -1060,7 +1060,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 		FT_Set_Transform(face, &matrix, NULL);
 		/* Convert character code to glyph index */
 		glyph_index = FT_Get_Char_Index(face, ch);
-
+		
 		/* retrieve kerning distance and move pen position */
 		if (use_kerning && previous && glyph_index) {
 			FT_Get_Kerning(face, previous, glyph_index, ft_kerning_default, &delta);
