@@ -1,3 +1,94 @@
+2005-03-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      - Add some more news
+
+    * tests/classes/serialize_001.phpt:
+      - Add test
+
+    * ext/standard/var_unserializer.re:
+      - Update signature
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h:
+      - New Interface Serializeable
+      - Change signature of unserialize() callback to ease inheritance and
+        support code reuse of handlers
+
+    * ext/standard/file.c:
+      - Fix proto
+      - Do not try to write zero bytes
+
+    * ext/standard/file.c:
+      - Length needs to be positive
+
+    * ext/standard/file.c:
+      - Make maic qutes runtime work if length is specified too
+
+    * ext/standard/file.c:
+      - Delay memory allocation, speeds up faiure case
+
+2005-03-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/html.c
+      ext/standard/html.h:
+      Added htmlspecialchars_decode() function for fast conversion from
+      htmlspecialchars() generated entities back to characters.
+
+2005-03-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/tests/bug32226.phpt
+      ZendEngine2/tests/bug32226.phpt:
+      
+      - Add updated description
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/bug32226.phpt:
+      - Fix #32226
+
+2005-03-07  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      RBFN
+
+2005-03-07  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_4_3)
+      tests/basic/bug31672.phpt:
+      Remove test case for a Won't Fix bug
+
+    * (PHP_4_3)
+      Zend/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner.l:
+      Revert // </script> patch
+
+2005-03-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/proc_open.c
+      ext/standard/proc_open.c:
+      Fixed bug #32210 (proc_get_status() sets "running" always to true).
+
+2005-03-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/__set__get_005.phpt:
+      - Add new test
+
+    * (PHP_5_0)
+      ext/standard/file.c:
+      - MFH Allow length 0 as default (e.g. skip param)
+
+    * ext/standard/file.c:
+      - Allow length 0 as default (e.g. skip param)
+
 2005-03-06  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * sapi/cgi/config9.m4
