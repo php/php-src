@@ -204,6 +204,7 @@ typedef struct _zend_file_handle {
 
 
 #define EXT_TYPE_UNUSED		(1<<0)
+#define EXT_TYPE_NEW_OP		(1<<1)
 
 #include "zend_globals.h"
 
