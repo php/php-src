@@ -1,3 +1,32 @@
+2001-11-19  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_version.h
+      configure.in: Go with final RC
+
+2001-11-19  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Fix NEWS.
+
+2001-11-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: - Added a bugfix
+
+    * NEWS: - Add bugfix
+
+2001-11-19  Zeev Suraski  <zeev@zend.com>
+
+    * main/main.c: MFH
+
+    * main/main.c:
+    Fix set_time_limit() to affect only the current request (fix bug #13711)
+
+2001-11-19  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache/config.m4: MFH
+
+    * sapi/apache/config.m4:
+    Fixed bugs: #14034, #11647 (can not find any others)
+
 2001-11-18  Jani Taskinen  <sniper@iki.fi>
 
     * config.guess
