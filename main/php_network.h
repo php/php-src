@@ -21,15 +21,15 @@
 #define _PHP_NETWORK_H
 
 #ifdef PHP_WIN32
-# ifndef WINNT
-#  define WINNT 1
-# endif
-# undef FD_SETSIZE
-# include "arpa/inet.h"
-# define socklen_t unsigned int
+#ifndef WINNT
+#define WINNT 1
+#endif
+#undef FD_SETSIZE
+#include "arpa/inet.h"
+#define socklen_t unsigned int
 #else
-# undef closesocket
-# define closesocket close
+#undef closesocket
+#define closesocket close
 #endif
 
 #ifndef HAVE_SHUTDOWN
@@ -55,7 +55,7 @@
 PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize);
 
 #ifdef HAVE_NETINET_IN_H
-# include <netinet/in.h>
+#include <netinet/in.h>
 #endif
 
 #ifdef HAVE_SYS_SOCKET_H
@@ -65,9 +65,9 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize);
 /* These are here, rather than with the win32 counterparts above,
  * since <sys/socket.h> defines them. */
 #ifndef SHUT_RD
-# define SHUT_RD 0
-# define SHUT_WR 1
-# define SHUT_RDWR 2
+#define SHUT_RD 0
+#define SHUT_WR 1
+#define SHUT_RDWR 2
 #endif
 
 #ifdef HAVE_SYS_TIME_H
@@ -83,13 +83,13 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize);
 #endif
 
 #ifdef PHP_WIN32
-# define SOCK_ERR INVALID_SOCKET
-# define SOCK_CONN_ERR SOCKET_ERROR
-# define SOCK_RECV_ERR SOCKET_ERROR
+#define SOCK_ERR INVALID_SOCKET
+#define SOCK_CONN_ERR SOCKET_ERROR
+#define SOCK_RECV_ERR SOCKET_ERROR
 #else
-# define SOCK_ERR -1
-# define SOCK_CONN_ERR -1
-# define SOCK_RECV_ERR -1
+#define SOCK_ERR -1
+#define SOCK_CONN_ERR -1
+#define SOCK_RECV_ERR -1
 #endif
 
 #define PHP_SOCK_CHUNK_SIZE	8192
