@@ -179,7 +179,7 @@ static void OrbitObject_Wakeup(INTERNAL_FUNCTION_PARAMETERS)
 
 	/* find IOR property */
 	if (zend_hash_find(
-				this_ptr->value.obj.properties, 
+				Z_OBJPROP_P(this_ptr), 
 				IOR_PROPERTY_KEY, 
 				sizeof(IOR_PROPERTY_KEY), 
 				(void**)&pp_ior) != SUCCESS)
@@ -242,20 +242,7 @@ zend_bool OrbitObject_Create(CORBA_Object source, zval * pDestination)
 		goto error;
 	}
 
-	/* set zval members */
-	pDestination->type = IS_OBJECT;
-	pDestination->is_ref = 1;
-	pDestination->refcount = 1;
-
-	pDestination->value.obj.ce = &OrbitObject_class_entry;
-	pDestination->value.obj.properties = orbit_new(HashTable);
-
-	zend_hash_init(
-			pDestination->value.obj.properties,	/* hash table */
-			0, 																	/* size */
-			NULL, 															/* hash function */
-			ZVAL_PTR_DTOR, 											/* destructor */
-			0);																	/* persistent */
+	object_init_ex(pDestination, &OrbitObject_class_entry);
 
 	/* save orbit data */
 	OrbitObject_SaveData(pDestination, p_object);
