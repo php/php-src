@@ -563,10 +563,8 @@ void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 }
 
 
-static int php_mssql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
+static int php_mssql_get_default_link(INTERNAL_FUNCTION_PARAMETERS MSSQLLS_DC)
 {
-	MSSQLLS_FETCH();
-
 	if (MS_SQL_G(default_link)==-1) { /* no link opened yet, implicitly open one */
 		ht = 0;
 		php_mssql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
@@ -604,7 +602,7 @@ PHP_FUNCTION(mssql_close)
 	
 	switch (ARG_COUNT(ht)) {
 		case 0:
-			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MSSQLLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -640,7 +638,7 @@ PHP_FUNCTION(mssql_select_db)
 			if (zend_get_parameters_ex(1, &db)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MSSQLLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 2:
@@ -771,7 +769,7 @@ PHP_FUNCTION(mssql_query)
 			if (zend_get_parameters_ex(1, &query)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MSSQLLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 2:
@@ -902,6 +900,10 @@ PHP_FUNCTION(mssql_free_result)
 		WRONG_PARAM_COUNT;
 	}
 	
+	if ((*mssql_result_index)->type==IS_RESOURCE && (*mssql_result_index)->value.lval==0) {
+		RETURN_FALSE;
+	}
+
 	ZEND_FETCH_RESOURCE(result, mssql_result *, mssql_result_index, -1, "MS SQL-result", le_result);	
 	zend_list_delete((*mssql_result_index)->value.lval);
 	RETURN_TRUE;
