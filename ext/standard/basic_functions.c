@@ -19,7 +19,7 @@
 
 
 #include "php.h"
-#include "main.h"
+#include "php_main.h"
 #include "php_ini.h"
 #include "internal_functions_registry.h"
 #include "php_standard.h"

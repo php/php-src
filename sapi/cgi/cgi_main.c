@@ -50,7 +50,7 @@
 #include "zend_extensions.h"
 #include "php_ini.h"
 #include "php_globals.h"
-#include "main.h"
+#include "php_main.h"
 #include "fopen-wrappers.h"
 #include "ext/standard/php_standard.h"
 #ifdef PHP_WIN32

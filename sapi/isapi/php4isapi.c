@@ -32,7 +32,7 @@
 #include <httpfilt.h>
 #include <httpext.h>
 #include "php.h"
-#include "main.h"
+#include "php_main.h"
 #include "SAPI.h"
 #include "php_globals.h"
 #include "ext/standard/info.h"
