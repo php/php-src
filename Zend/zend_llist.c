@@ -140,6 +140,9 @@ ZEND_API void *zend_llist_remove_tail(zend_llist *l)
 		data = old_tail->data;
 
 		l->tail = l->tail->prev;
+		if (l->dtor) {
+			l->dtor(data);
+		}
 		pefree(old_tail, l->persistent);
 
 		--l->count;
