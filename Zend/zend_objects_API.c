@@ -287,7 +287,8 @@ static zend_object_handlers zend_object_proxy_handlers = {
 	NULL,						/* get_constructor */
 	NULL,						/* get_class_entry */
 	NULL,						/* get_class_name */
-	NULL						/* compare_objects */
+	NULL,						/* compare_objects */
+	NULL,						/* cast_object */
 };
 
 
