@@ -4737,7 +4737,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 	xmlXPathContextPtr ctxp;
 	xmlXPathObjectPtr xpathobjp;
 	xmlNode *contextnodep;
-	int ret, str_len, nsNr;
+	int ret, str_len;
 	char *str;
 	contextnode = NULL;
 	contextnodep = NULL;
