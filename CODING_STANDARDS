@@ -64,21 +64,21 @@ Exceptions:
 
     This can be done automatically using php_error_docref(). The first
     parameter, docref, is either NULL or the URL of a page describing the 
-    error in detail. If you pass NULL, the reference is generated from 
-    the name of the function being executed:
+    error in detail. In most cases you will pass NULL, to generate the URL
+    from the name of the function being executed:
 
     php_error_docref(NULL TSRMLS_CC, E_WHATEVER, "Desc.");
 
     If you pass a URL, it can either be a full URL beginning with "http://":
 
-    php_error_docref("http://www.php.net/manual/en/function.fopen#error" 
+    php_error_docref("http://externalsite.tld/page.ext#error" 
                      TSRMLS_CC, E_WHATEVER, "Desc.");
 
     Or the name of a manual page without file extension, but with an optional 
     target anchor. Or simply the anchor within the manual page of the current
     function. When using function names you must replace '_' by '-':
 
-    php_error_docref("function.ext_func#error" TSRMLS_CC, E_WHATEVER, "Desc.");
+    php_error_docref("function.ext-func#error" TSRMLS_CC, E_WHATEVER, "Desc.");
 
     To display one or two important parameters after the function name, use 
     php_error_docref1() or php_error_docref2(). For example, file functions 
