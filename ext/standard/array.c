@@ -3228,6 +3228,7 @@ PHP_FUNCTION(array_reduce)
 	efree(callback_name);
 
 	if (ZEND_NUM_ARGS() > 2) {
+		convert_to_long_ex(initial);
 		result = *initial;
 	} else {
 		MAKE_STD_ZVAL(result);
