@@ -34,7 +34,7 @@ int php_init_request_info(void *conf)
 	if (!request_info.script_filename) {
 		request_info.script_filename = request_info.php_argv0;
 	}
-#if WIN32|WINNT
+#if PHP_WIN32
 	/* FIXME WHEN APACHE NT IS FIXED */
 	/* a hack for apache nt because it does not appear to set argv[1] and sets
 	   script filename to php.exe thus makes us parse php.exe instead of file.php

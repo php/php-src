@@ -28,7 +28,7 @@
 
 #include "rfc1867.h"
 
-#if WIN32||WINNT
+#if PHP_WIN32
 #define STRCASECMP stricmp
 #else
 #define STRCASECMP strcasecmp

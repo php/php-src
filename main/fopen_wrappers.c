@@ -105,7 +105,7 @@ PHPAPI int php_check_specific_open_basedir(char *basedir, char *path PLS_DC)
 
 		/* Strip filename */
 		while ((
-#if WIN32|WINNT
+#if PHP_WIN32
 			(local_open_basedir[local_open_basedir_pos] != '\\') ||
 #endif
 			(local_open_basedir[local_open_basedir_pos] != '/')
@@ -122,7 +122,7 @@ PHPAPI int php_check_specific_open_basedir(char *basedir, char *path PLS_DC)
 	/* Resolve the real path into resolved_name */
 	if ((php_realpath(path, resolved_name) != NULL) && (php_realpath(local_open_basedir, resolved_basedir) != NULL)) {
 		/* Check the path */
-#if WIN32|WINNT
+#if PHP_WIN32
 		if (strncasecmp(resolved_basedir, resolved_name, strlen(resolved_basedir)) == 0) {
 #else
 		if (strncmp(resolved_basedir, resolved_name, strlen(resolved_basedir)) == 0) {
@@ -153,7 +153,7 @@ PHPAPI int php_check_open_basedir(char *path)
 		ptr = pathbuf;
 
 		while (ptr && *ptr) {
-#if WIN32|WINNT
+#if PHP_WIN32
 			end = strchr(ptr, ';');
 #else
 			end = strchr(ptr, ':');
@@ -340,7 +340,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 		return fp;
 	}
 	/* Absolute path open - prepend document_root in safe mode */
-#if WIN32|WINNT
+#if PHP_WIN32
 	if ((*filename == '\\') || (*filename == '/') || (filename[1] == ':')) {
 #else
 	if (*filename == '/') {
@@ -381,7 +381,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	ptr = pathbuf;
 
 	while (ptr && *ptr) {
-#if WIN32|WINNT
+#if PHP_WIN32
 		end = strchr(ptr, ';');
 #else
 		end = strchr(ptr, ':');
