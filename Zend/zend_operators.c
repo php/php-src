@@ -28,6 +28,7 @@
 #include "zend_list.h"
 #include "zend_fast_cache.h"
 #include "zend_API.h"
+#include "zend_multiply.h"
 
 #if 0&&HAVE_BCMATH
 #include "ext/bcmath/number.h"
@@ -803,16 +804,10 @@ ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 	zendi_convert_scalar_to_number(op2, op2_copy, result);
 
 	if (op1->type == IS_LONG && op2->type == IS_LONG) {
-		long lval = op1->value.lval * op2->value.lval;
-		
-		/* check for overflow by applying the reverse calculation */
-		if (op1->value.lval != 0 && lval / op1->value.lval != op2->value.lval) {
-			result->value.dval = (double) op1->value.lval * (double) op2->value.lval;
-			result->type = IS_DOUBLE;
-		} else {
-			result->value.lval = lval;
-			result->type = IS_LONG;
-		}
+		long overflow;
+
+		ZEND_SIGNED_MULTIPLY_LONG(op1->value.lval,op2->value.lval, result->value.lval,result->value.dval,overflow);
+		result->type = overflow ? IS_DOUBLE : IS_LONG;	
 		return SUCCESS;
 	}
 	if ((op1->type == IS_DOUBLE && op2->type == IS_LONG)
