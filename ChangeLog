@@ -1,3 +1,57 @@
+2000-11-29  Frank M. Kromann  <fmk@swwwing.com>
+
+    * php.ini-dist
+      php.ini-optimized:
+    The ODBC extension looks for settings named odbc. and not uodbc.
+
+    * ext/mssql/mssql.dsp
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h:
+    Removed old version 6.5 code. Clinet Libraries for SQL Server 7.0 can be used  with version 6,5.
+    Minor changes to use som Zend macros to define globals.
+
+    * ext/mssql/php_mssql.c:
+    Fixing wring resource handle returned from mssql_query().
+    The error was introduced when adding mssql_fetch_batch().
+
+2000-11-29  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/gmp/.cvsignore: Add .cvsignore
+
+    * ext/gmp/TODO
+      ext/gmp/config.m4
+      ext/gmp/gmp.c
+      ext/gmp/php_gmp.h: Add more GMP functions, fix a couple of bugs
+
+2000-11-29  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+     Added the is_null() function that will return true if a variable is of
+     type null. 
+
+2000-11-29  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/gd/gd.c: made gd working correct under win32
+
+2000-11-29  Stig Bakken  <ssb@fast.no>
+
+    * pear/HTML/Form.php:
+    * bugfix (reported by Francisco Echarte <fechaye@teleline.es>)
+
+2000-11-29  Jason Greene  <jason@inetgurus.net>
+
+    * main/SAPI.c:
+    Added the capability to specify a different HTTP Redirection response code
+    before the Location Header.
+
+    Ex. header("HTTP/1.1 307 Temporary Redirect");
+        header("Location: URL");
+
+2000-11-29  Zeev Suraski  <zeev@zend.com>
+
+    * main/main.c: Output buffering was being enabled all the time - fixed
+
 2000-11-28  Jani Taskinen  <sniper@iki.fi>
 
     * main/.cvsignore: One file missing.
