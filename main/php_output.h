@@ -47,6 +47,7 @@ PHPAPI int php_ob_get_length(zval *p TSRMLS_DC);
 
 PHP_FUNCTION(ob_start);
 PHP_FUNCTION(ob_flush);
+PHP_FUNCTION(ob_flush_all);
 PHP_FUNCTION(ob_clean);
 PHP_FUNCTION(ob_end_flush);
 PHP_FUNCTION(ob_end_clean);
