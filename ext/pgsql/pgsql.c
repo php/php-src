@@ -1487,7 +1487,7 @@ PHP_FUNCTION(pg_loreadall)
 
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
-			if (zend_get_parameters(ht, 1, &pgsql_id)==FAILURE) {
+			if (zend_get_parameters_ex(1, &pgsql_id)==FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
