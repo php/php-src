@@ -27,6 +27,11 @@
 #if HAVE_PWD_H
 #ifdef PHP_WIN32
 #include "win32/pwd.h"
+#elif defined(NETWARE)
+#ifdef ZTS
+extern int basic_globals_id;
+#endif
+#include "netware/pwd.h"
 #else
 #include <pwd.h>
 #endif
@@ -59,7 +64,11 @@
  */
 PHPAPI void php_statpage(TSRMLS_D)
 {
+#if defined(NETWARE) && defined(CLIB_STAT_PATCH)
+	struct stat_libc *pstat;
+#else
 	struct stat *pstat;
+#endif
 
 	pstat = sapi_get_stat(TSRMLS_C);
 
@@ -68,7 +77,11 @@ PHPAPI void php_statpage(TSRMLS_D)
 			BG(page_uid)   = pstat->st_uid;
 			BG(page_gid)   = pstat->st_gid;
 			BG(page_inode) = pstat->st_ino;
+#if defined(NETWARE) && defined(NEW_LIBC)
+            BG(page_mtime) = (pstat->st_mtime).tv_nsec;
+#else
 			BG(page_mtime) = pstat->st_mtime;
+#endif
 		} else { /* handler for situations where there is no source file, ex. php -r */
 			BG(page_uid) = getuid();
 			BG(page_gid) = getgid();
