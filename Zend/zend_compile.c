@@ -1099,7 +1099,7 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 	pass_two(CG(active_op_array) TSRMLS_CC);
 
 	/* we don't care if the function name is longer, in fact lowercasing only 
-	 * the beginning of the name speeds up th echeck process */
+	 * the beginning of the name speeds up the check process */
 	name_len = strlen(CG(active_op_array)->function_name);
 	zend_str_tolower_copy(lcname, CG(active_op_array)->function_name, MIN(name_len, sizeof(lcname)-1));
 	lcname[sizeof(lcname)-1] = '\0'; // zend_str_tolower_copy won't necessarily set the zero byte
