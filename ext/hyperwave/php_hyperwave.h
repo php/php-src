@@ -142,6 +142,7 @@ PHP_FUNCTION(hw_objrec2array);
 PHP_FUNCTION(hw_array2objrec);
 PHP_FUNCTION(hw_connection_info);
 PHP_FUNCTION(hw_getsrcbydestobj);
+PHP_FUNCTION(hw_insertanchors);
 PHP_FUNCTION(hw_getrellink);
 PHP_FUNCTION(hw_dummy);
 PHP_FUNCTION(hw_who);

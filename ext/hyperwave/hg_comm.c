@@ -326,12 +326,17 @@ int fnCmpAnchors(ANCHOR *a1, ANCHOR *a2)
 
 /***********************************************************************
 * Function fnCreateAnchorList()                                        *
+* Uses either docofanchorrec or reldestrec to create a list of anchors *
+* depending on anchormode                                              *
 *                                                                      *
 * Returns a list of Anchors converted from an object record            *
 * Parameter: int objectID: the object for which the list is created    *
 *            char **anchors: object records of anchors                 *
-*            char **dest: object records of destinations               *
+*            char **docofanchorrec: Name of destination absolut        *
+*            char **reldestrec: Name of destination relativ to current *
+*                               object                                 *
 *            int ancount: number of anchors                            *
+*            int anchormode: 0 = use absolut dest, else rel. dest      *
 * Return: List of Anchors, NULL if error                               *
 ***********************************************************************/
 #ifdef newlist
@@ -2112,6 +2117,7 @@ int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **
 			DLIST *pAnchorList;
 #endif
 
+			/* Get dest as relative and absolut path */
 			send_getdestforanchorsobj(sockfd, anchors, &destrec, ancount);
 			send_getreldestforanchorsobj(sockfd, anchors, &reldestrec, ancount, rootid, objectID);
 			pAnchorList = fnCreateAnchorList(objectID, anchors, destrec, reldestrec, ancount, mode);
@@ -3366,11 +3372,17 @@ int send_getdestforanchorsobj(int sockfd, char **anchorrec, char ***destrec, int
 	/* Now get for each anchor the object record of its destination */
 	for(i=0; i<count; i++) {
 		/* if you retrieve the anchors you sometimes get more than actually accessible.
-		   This happens for the object 0x29a9c. */
+		*/
 		if((NULL != anchorrec[i]) && (NULL != (str = fnAttributeValue(anchorrec[i], "Dest")))) {
 			sscanf(str, "0x%x", &objectID);
 			efree(str);
 
+			/* Using send_docbyanchorobj() makes sense because the Destination can
+			   be both, an anchor or a document. If it is a document you get the
+			   objectrecord of that document. If it is an anchor the function
+			   graps the document which belongs to the anchor
+			   and you get also the objectrecord of that document.
+			*/
 			if(0 > send_docbyanchorobj(sockfd, objectID, &objptr)) {
 				efree(destptr);
 				return -1;
@@ -3412,6 +3424,7 @@ int send_getreldestforanchorsobj(int sockfd, char **anchorrec, char ***reldestre
 			sscanf(str, "0x%x", &destobjectID);
 			efree(str);
 
+			/* See note in send_getdestforanchorsobj() at same position in source code */
 			if(0 > send_docbyanchorobj(sockfd, destobjectID, &docofanchorptr)) {
 				efree(reldestptr);
 				return -1;
@@ -4964,8 +4977,8 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 	efree(retmsg);
 
 	/* passively open the data connection. The HG server is probably
-           already waiting for us.
-        */
+	   already waiting for us.
+	*/
 	len = sizeof(serv_addr);
 	if((newfd = accept(fd, (struct sockaddr *) &serv_addr, &len)) < 0) {
 /*		php_printf("client: can't open data connection to server\n"); */
@@ -5016,6 +5029,7 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 			DLIST *pAnchorList = NULL;
 #endif
 
+			/* Get dest as relative and absolut path */
 			send_getdestforanchorsobj(sockfd, anchors, &destrec, ancount);
 			send_getreldestforanchorsobj(sockfd, anchors, &reldestrec, ancount, rootid, objectID);
 			pAnchorList = fnCreateAnchorList(objectID, anchors, destrec, reldestrec, ancount, mode);
