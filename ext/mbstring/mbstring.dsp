@@ -108,6 +108,10 @@ SOURCE=.\mbstring.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=.\cp932_table.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\mbfilter.h
 # End Source File
 # Begin Source File
@@ -117,6 +121,10 @@ SOURCE=.\mbfilter_ja.h
 # Begin Source File
 
 SOURCE=.\mbstring.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\unicode_table.h
 # End Source File
 # End Group
 # End Target
