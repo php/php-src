@@ -611,12 +611,21 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
-	if (Z_TYPE_PP(obj) != IS_OBJECT) {
+	if (only_subclass && Z_TYPE_PP(obj) == IS_STRING) {
+		zend_class_entry **the_ce;
+		if (zend_lookup_class(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj), &the_ce TSRMLS_CC) == FAILURE) {
+			zend_error(E_WARNING, "Unknown class passed as parameter");
+			RETURN_FALSE;
+		}
+		instance_ce = *the_ce;		
+	} else if (Z_TYPE_PP(obj) != IS_OBJECT) {
 		RETURN_FALSE;
+	} else {
+		instance_ce = NULL;
 	}
 	
 	/* TBI!! new object handlers */
-	if (!HAS_CLASS_ENTRY(**obj)) {
+	if (Z_TYPE_PP(obj) == IS_OBJECT && !HAS_CLASS_ENTRY(**obj)) {
 		RETURN_FALSE;
 	}
 
@@ -626,7 +635,11 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 		retval = 0;
 	} else {
 		if (only_subclass) {
-			instance_ce = Z_OBJCE_PP(obj)->parent;
+			if (!instance_ce) {
+				instance_ce = Z_OBJCE_PP(obj)->parent;
+			} else {
+				instance_ce = instance_ce->parent;
+			}
 		} else {
 			instance_ce = Z_OBJCE_PP(obj);
 		}
