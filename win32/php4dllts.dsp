@@ -1698,6 +1698,10 @@ SOURCE=..\ext\standard\strnatcmp.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\sunfuncs.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\syslog.c
 # End Source File
 # Begin Source File
@@ -1893,6 +1897,10 @@ SOURCE=..\ext\standard\scanf.h
 # Begin Source File
 
 SOURCE=..\ext\standard\sha1.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\sunfuncs.h
 # End Source File
 # Begin Source File
 
