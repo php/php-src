@@ -24,12 +24,7 @@
 #include "zend_builtin_functions.h"
 #include "zend_constants.h"
 #include "zend_ini.h"
-
-#if HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
+#include "zend_config.h"
 
 #undef ZEND_TEST_EXCEPTIONS
 
