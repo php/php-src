@@ -35,7 +35,9 @@ static zend_class_entry *domxmlattr_class_entry_ptr;
 
 static zend_function_entry php_domxml_functions[] = {
 	PHP_FE(getdom,	NULL)
+	PHP_FE(getdomfile,	NULL)
 	PHP_FALIAS(dom,		getdom,	NULL)
+	PHP_FALIAS(domfile,		getdomfile,	NULL)
 	PHP_FE(domxml_root,	NULL)
 	PHP_FE(domxml_addroot,	NULL)
 	PHP_FE(domxml_dumpmem,	NULL)
@@ -684,6 +686,33 @@ PHP_FUNCTION(getdom)
 	convert_to_string(arg);
 
 	docp = xmlParseMemory(arg->value.str.val, arg->value.str.len);
+	if (!docp) {
+		RETURN_FALSE;
+	}
+	ret = zend_list_insert(docp, le_domxmldocp);
+
+	/* construct an object with some methods */
+	object_init_ex(return_value, domxmldoc_class_entry_ptr);
+	add_property_long(return_value, "doc", ret);
+	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
+	zend_list_addref(ret);
+}
+/* }}} */
+
+/* {{{ proto class dom(string filename)
+   Creates dom object of xml document in file*/
+PHP_FUNCTION(getdomfile)
+{
+	pval *arg;
+	xmlDoc *docp;
+	int ret;
+	
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(arg);
+
+	docp = xmlParseFile(arg->value.str.val);
 	if (!docp) {
 		RETURN_FALSE;
 	}

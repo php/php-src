@@ -70,4 +70,5 @@ $table->setattr("WIDTH", "100%");
 $table->newchild("TR", " ");
 echo $doc->dumpmem();
 
+echo {$root->children()}[0];
 ?>
