@@ -276,6 +276,7 @@ static void php_cgi_usage(char *argv0)
 static void init_request_info(SLS_D)
 {
 	char *content_length = getenv("CONTENT_LENGTH");
+	const char *auth;
 
 #if 0
 /* SG(request_info).path_translated is always set to NULL at the end of this function
@@ -326,10 +327,14 @@ static void init_request_info(SLS_D)
 	SG(request_info).content_type = getenv("CONTENT_TYPE");
 	SG(request_info).content_length = (content_length?atoi(content_length):0);
 	SG(sapi_headers).http_response_code = 200;
-	/* CGI does not support HTTP authentication */
-	SG(request_info).auth_user = NULL;
-	SG(request_info).auth_password = NULL;
-
+	
+	/* The CGI RFC allows servers to pass on unvalidated Authorization data */
+	if ((auth = getenv("HTTP_AUTHORIZATION"))) {
+		php_handle_auth_data(auth SLS_CC);
+	} else {
+		SG(request_info).auth_user = NULL;
+		SG(request_info).auth_password = NULL;
+	}
 
 }
 
