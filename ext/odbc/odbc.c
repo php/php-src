@@ -964,7 +964,7 @@ PHP_FUNCTION(odbc_fetch_into)
 		RETURN_FALSE;
 	}
 #else
-	pval     *arg1, *arr, tmp;
+	pval     *arg1, *arr, *tmp;
 
 	numArgs = ARG_COUNT(ht);
 
