@@ -619,10 +619,7 @@ PHP_FUNCTION(ora_open)
 	}
 	ZEND_FETCH_RESOURCE2(conn, oraConnection *, arg, -1, "Oracle-Connection", le_conn, le_pconn);
 
-	if ((cursor = (oraCursor *)emalloc(sizeof(oraCursor))) == NULL){
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
+	cursor = (oraCursor *)emalloc(sizeof(oraCursor);
 	memset(cursor, 0, sizeof(oraCursor));
 	if (oopen(&cursor->cda, &conn->lda, (text *) 0, -1, -1, (text *) 0, -1)) {
 		php_error(E_WARNING, "Unable to open new cursor (%s)",
@@ -840,10 +837,7 @@ PHP_FUNCTION(ora_bind)
 			RETURN_FALSE;
 		}
 	}
-	if ((newparam = (oraParam *)emalloc(sizeof(oraParam))) == NULL) {
-		php_error(E_WARNING, "Out of memory for parameter");
-		RETURN_FALSE;
-	}
+	newparam = (oraParam *)emalloc(sizeof(oraParam);
 
 	if ((paramname = estrndup(Z_STRVAL_PP(pvar), Z_STRLEN_PP(pvar))) == NULL) {
 		php_error(E_WARNING, "Out of memory for parametername");
@@ -866,10 +860,7 @@ PHP_FUNCTION(ora_bind)
 	paramptr->progvl = Z_LVAL_PP(plen) + 1;
 	paramptr->inout = inout;
 
-	if ((paramptr->progv = (text *)emalloc(paramptr->progvl)) == NULL) {
-		php_error(E_WARNING, "Out of memory for parameter value");
-		RETURN_FALSE;
-	}
+	paramptr->progv = (text *)emalloc(paramptr->progvl);
 
 /* XXX Maximum for progvl */
 	paramptr->alen = paramptr->progvl;
@@ -997,10 +988,7 @@ PHP_FUNCTION(ora_do)
 
 	convert_to_string_ex(sql);
 
-	if ((cursor = (oraCursor *)emalloc(sizeof(oraCursor))) == NULL){
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
+	cursor = (oraCursor *)emalloc(sizeof(oraCursor);
 
 	memset(cursor, 0, sizeof(oraCursor));
 
@@ -1137,10 +1125,7 @@ PHP_FUNCTION(ora_fetch_into)
 
 	if (Z_TYPE_PP(arr) != IS_ARRAY){
 		pval_destructor(*arr);
-	    if (array_init(*arr) == FAILURE){
-			php_error(E_WARNING, "Can't convert to type Array");
-			RETURN_FALSE;
-		}
+		array_init(*arr);
 	}
 	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(arr));
 
@@ -1667,10 +1652,6 @@ ora_describe_define(oraCursor * cursor)
 
 	if (cursor->ncols > 0){
 		cursor->columns = (oraColumn *) emalloc(sizeof(oraColumn) * cursor->ncols);
-		if (cursor->columns == NULL){
-			php_error(E_WARNING, "Out of memory");
-			return -1;
-		}
 		memset(cursor->columns,0,sizeof(oraColumn) * cursor->ncols);
 	}
 
@@ -1704,10 +1685,8 @@ ora_describe_define(oraCursor * cursor)
 				break;
 		}
 		
-		if ((cursor->columns[col].buf = (ub1 *) emalloc(cursor->columns[col].dsize + 1)) == NULL){
-			php_error(E_WARNING, "Out of memory");
-			return -1;
-		}
+		cursor->columns[col].buf = (ub1 *) emalloc(cursor->columns[col].dsize + 1);
+
 		/* Define an output variable for the column */
 		if (odefin(&cursor->cda, (sword)col + 1, cursor->columns[col].buf, 
 				   cursor->columns[col].dsize + 1, type, -1, &cursor->columns[col].indp,

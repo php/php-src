@@ -533,9 +533,7 @@ PHP_FUNCTION(mcal_list_events)
 	}
 	
 	/* Initialize return array */
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	
 	if (myargc == 7) {
 		convert_to_long_ex(startyear);
@@ -651,9 +649,7 @@ PHP_FUNCTION(mcal_list_alarms)
 		RETURN_FALSE;
 	}
 	
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	
 	if (myargc == 7) {
 	    convert_to_long_ex(year);

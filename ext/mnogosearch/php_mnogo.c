@@ -2265,9 +2265,7 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 #else
 	if((c=UdmCatList(Agent,cat))){
 #endif
-		if (array_init(return_value)==FAILURE) {
-			RETURN_FALSE;
-		}
+		array_init(return_value);
 		
 		if (!(buf=calloc(1,UDMSTRSIZ+1))) {
 			RETURN_FALSE;
@@ -2339,9 +2337,7 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 #else
 	if((c=UdmCatPath(Agent,cat))){
 #endif
-		if (array_init(return_value)==FAILURE) {
-			RETURN_FALSE;
-		}
+		array_init(return_value);
 		
 		if (!(buf=calloc(1,UDMSTRSIZ+1))) {
 			RETURN_FALSE;

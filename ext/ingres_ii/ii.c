@@ -1067,9 +1067,7 @@ static void php_ii_fetch(INTERNAL_FUNCTION_PARAMETERS, II_LINK *ii_link, int res
 	int len, should_copy, correct_length;
 
 	/* array initialization */
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	/* going through all fields */
 	for (i = 1; i <= ii_link->fieldCount;) {
