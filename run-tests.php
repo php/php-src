@@ -478,7 +478,7 @@ if (!getenv('NO_INTERACTION')) {
 			$libtool = shell_exec($_SERVER['PWD'] . '/libtool --version');
 
 			/* Use shtool to find out if there is glibtool present (MacOSX) */
-			$sys_libtool_path = shell_exec("{$_SERVER['PWD']}/build/shtool path glibtool libtool");
+			$sys_libtool_path = shell_exec(dirname(__FILE__) . "/build/shtool path glibtool libtool");
 			$sys_libtool = shell_exec(str_replace("\n", "", $sys_libtool_path) . ' --version');
 
 			/* Try the most common flags for 'version' */
