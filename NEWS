@@ -1,7 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ??? 2000, Version 4.0.1
+25 Jun 2000, Version 4.0.1
 - Fixed problems with POST requests under the NSAPI module (Roberto Biancardi)
 - Added spliti() function. (Thies)
 - Fixed serializer behaviour with regards to serializing objects which class
