@@ -51,8 +51,6 @@
 
 #define STREAM_WRAPPER_PLAIN_FILES	((php_stream_wrapper*)-1)
 
-#undef HAVE_FOPENCOOKIE
-
 /* {{{ some macros to help track leaks */
 #if ZEND_DEBUG
 #define emalloc_rel_orig(size)	\
