@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2004, PHP 5.0.0
 - Changed doc comments to require a single white space after '/**'. (Marcus)
+- Fixed bug #28851 (call_user_func_array has typo in error message). (Marcus)
 - Fixed bug #28789 (ReflectionProperty getValue() fails on public static 
   members). (Marcus)
 - Fixed bug #28771 (Segfault when using xslt and clone). (Rob)
