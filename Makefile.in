@@ -60,4 +60,7 @@ install-pear: install-modules
 
 install-su: install-pear install-tester
 
+clean-modules:
+	rm -f modules/*
+
 .NOEXPORT:
