@@ -493,8 +493,11 @@ void zend_shutdown(TSRMLS_D)
 	zend_destroy_rsrc_list_dtors();
 	zend_hash_destroy(&module_registry);
 
+#ifndef ZTS
+	/* In ZTS mode these are freed by compiler_globals_dtor() */
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
-/*	zend_hash_destroy(GLOBAL_CLASS_TABLE); FIXME */
+	zend_hash_destroy(GLOBAL_CLASS_TABLE);
+#endif
 
 	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
