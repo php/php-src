@@ -55,7 +55,7 @@ install-su: install-pear install-tester
 
 test: sapi/cli/php
 	TOP_BUILDDIR=$(top_builddir) TOP_SRCDIR=$(top_srcdir) \
-			$(top_builddir)/sapi/cli/php -c $(top_srcdir)/php.ini-dist $(top_srcdir)/run-tests.php $(TESTS)
+			$(top_builddir)/sapi/cli/php $(top_srcdir)/run-tests.php $(TESTS)
 
 clean:
 	find . -name \*.lo -o -name \*.o -o -name \*.la -o -name \*.a| xargs rm -f
