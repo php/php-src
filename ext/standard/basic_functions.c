@@ -289,9 +289,11 @@ function_entry basic_functions[] = {
 	PHP_FE(sinh,										NULL)
 	PHP_FE(cosh,										NULL)
 	PHP_FE(tanh,										NULL)
+#ifndef PHP_WIN32
 	PHP_FE(asinh,									NULL)
 	PHP_FE(acosh,									NULL)
 	PHP_FE(atanh,									NULL)
+#endif
 	PHP_FE(pi,										NULL)
 	PHP_FE(pow,										NULL)
 	PHP_FE(exp,										NULL)
@@ -301,10 +303,14 @@ function_entry basic_functions[] = {
 	PHP_FE(exp2,									NULL)
 	PHP_FE(exp10,									NULL)
 	PHP_FE(log2,									NULL)
+#ifndef PHP_WIN32
 	PHP_FE(cbrt,									NULL)
+#endif
 	PHP_FE(hypot,									NULL)
+#ifndef PHP_WIN32
 	PHP_FE(expm1,									NULL)
 	PHP_FE(log1p,									NULL)
+#endif
 	PHP_FE(deg2rad,									NULL)
 	PHP_FE(rad2deg,									NULL)
 	PHP_FE(bindec,									NULL)

@@ -312,6 +312,8 @@ PHP_FUNCTION(tanh)
 }
 
 /* }}} */
+
+#ifndef PHP_WIN32
 /* {{{ proto double asinh(double number)
    Returns the inverse hyperbolic sine of the number,
    i.e. the value whose hyperbolic sine is number */
@@ -363,6 +365,7 @@ PHP_FUNCTION(atanh)
 }
 
 /* }}} */
+#endif
 
 /* {{{ proto double pi(void)
    Returns an approximation of pi */
@@ -442,6 +445,8 @@ PHP_FUNCTION(exp10)
 }
 
 /* }}} */
+
+#ifndef PHP_WIN32
 /* {{{ proto double expm1(double number)
    Returns exp(number) - 1, computed in a way that accurate even when 
    the value of number is close to zero */
@@ -476,6 +481,8 @@ PHP_FUNCTION(log1p)
 }
 
 /* }}} */
+
+#endif
 /* {{{ proto double log(double number)
    Returns the natural logarithm of the number */
 
@@ -542,6 +549,8 @@ PHP_FUNCTION(sqrt)
 }
 
 /* }}} */
+
+#ifndef PHP_WIN32
 /* {{{ proto double cbrt(double number)
    Returns the cubic root of the number */
 
@@ -558,6 +567,8 @@ PHP_FUNCTION(cbrt)
 }
 
 /* }}} */
+#endif
+
 /* {{{ proto double hypot(double num1, double num2)
    Returns sqrt( num1*num1 + num2*num2) */
 
