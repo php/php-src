@@ -58,7 +58,7 @@ typedef unsigned short mode_t;
  */
 #define COPY_WHEN_ABSOLUTE(path) 2
 #define IS_ABSOLUTE_PATH(path, len) \
-	(len >= 2 && isalpha(path[0]) && path[1] == ':')
+	((len >= 2 && isalpha(path[0]) && path[1] == ':') || (len >= 1 && IS_SLASH(path[0])))
 #define IS_UNC_PATH(path, len) \
 	(len >= 2 && IS_SLASH(path[0]) && IS_SLASH(path[1]))
 
