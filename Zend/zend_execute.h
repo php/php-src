@@ -32,21 +32,12 @@ typedef union _temp_variable {
 	struct {
 		zval **ptr_ptr;
 		zval *ptr;
+		struct {
+			zval *str;
+			zend_uint offset;
+		} str_offset;
 	} var;
-	struct {
-		zval tmp_var; /* a dummy */
-
-		union {
-			struct {
-				zval *str;
-				zend_uint offset;
-			} str_offset;
-			zend_property_reference overloaded_element;
-		} data;
-			
-		unsigned char type;
-		zend_class_entry *class_entry;
-	} EA;
+	zend_class_entry *class_entry;
 } temp_variable;
 
 
@@ -164,7 +155,6 @@ void zend_shutdown_timeout_thread();
 
 void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, zval **value_ptr_ptr, temp_variable *Ts TSRMLS_DC);
 
-#define IS_OVERLOADED_OBJECT 1
 #define IS_STRING_OFFSET 2
 
 /* The following tries to resolve the classname of a zval of type object.

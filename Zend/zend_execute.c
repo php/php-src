@@ -98,33 +98,29 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zval **should_
 				*should_free = 0;
 				return T(node->u.var).var.ptr;
 			} else {
+				temp_variable *T = &T(node->u.var);
+				zval *str = T->var.str_offset.str;
+
+				/* string offset */
 				*should_free = &T(node->u.var).tmp_var;
 
-				switch (T(node->u.var).EA.type) {
-					case IS_STRING_OFFSET: {
-							temp_variable *T = &T(node->u.var);
-							zval *str = T->EA.data.str_offset.str;
+				if (T->var.str_offset.str->type != IS_STRING
+					|| ((int)T->var.str_offset.offset<0)
+					|| (T->var.str_offset.str->value.str.len <= T->var.str_offset.offset)) {
+					zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->var.str_offset.offset);
+					T->tmp_var.value.str.val = empty_string;
+					T->tmp_var.value.str.len = 0;
+				} else {
+					char c = str->value.str.val[T->var.str_offset.offset];
 
-							if (T->EA.data.str_offset.str->type != IS_STRING
-								|| ((int)T->EA.data.str_offset.offset<0)
-								|| (T->EA.data.str_offset.str->value.str.len <= T->EA.data.str_offset.offset)) {
-								zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->EA.data.str_offset.offset);
-								T->tmp_var.value.str.val = empty_string;
-								T->tmp_var.value.str.len = 0;
-							} else {
-								char c = str->value.str.val[T->EA.data.str_offset.offset];
-
-								T->tmp_var.value.str.val = estrndup(&c, 1);
-								T->tmp_var.value.str.len = 1;
-							}
-							PZVAL_UNLOCK(str);
-							T->tmp_var.refcount=1;
-							T->tmp_var.is_ref=1;
-							T->tmp_var.type = IS_STRING;
-							return &T->tmp_var;
-						}
-						break;
+					T->tmp_var.value.str.val = estrndup(&c, 1);
+					T->tmp_var.value.str.len = 1;
 				}
+				PZVAL_UNLOCK(str);
+				T->tmp_var.refcount=1;
+				T->tmp_var.is_ref=1;
+				T->tmp_var.type = IS_STRING;
+				return &T->tmp_var;
 			}
 			break;
 		case IS_UNUSED:
@@ -141,8 +137,9 @@ static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts TSRMLS_DC)
 	if (node->op_type==IS_VAR) {
 		if (T(node->u.var).var.ptr_ptr) {
 			PZVAL_UNLOCK(*T(node->u.var).var.ptr_ptr);
-		} else if (T(node->u.var).EA.type==IS_STRING_OFFSET) {
-			PZVAL_UNLOCK(T(node->u.var).EA.data.str_offset.str);
+		} else {
+			/* string offset */
+			PZVAL_UNLOCK(T(node->u.var).var.str_offset.str);
 		}
 		return T(node->u.var).var.ptr_ptr;
 	} else {
@@ -198,7 +195,7 @@ static inline void zend_switch_free(zend_op *opline, temp_variable *Ts TSRMLS_DC
 				/* perform the equivalent of equivalent of a
 				 * quick & silent get_zval_ptr, and FREE_OP
 				 */
-				PZVAL_UNLOCK(T->EA.data.str_offset.str);
+				PZVAL_UNLOCK(T->var.str_offset.str);
 			} else {
 				zval_ptr_dtor(&T(opline->op1.u.var).var.ptr);
 				if (opline->extended_value) { /* foreach() free */
@@ -437,82 +434,77 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 	zval *variable_ptr;
 	
 	if (!variable_ptr_ptr) {
-		switch (T(op1->u.var).EA.type) {
-			case IS_STRING_OFFSET: {
-					temp_variable *T = &T(op1->u.var);
+		temp_variable *T = &T(op1->u.var);
 
-					if (T->EA.data.str_offset.str->type == IS_STRING) do {
-						zval tmp;
-						zval *final_value = value;
+		if (T->var.str_offset.str->type == IS_STRING) do {
+			zval tmp;
+			zval *final_value = value;
 
-						if (((int)T->EA.data.str_offset.offset < 0)) {
-							zend_error(E_WARNING, "Illegal string offset:  %d", T->EA.data.str_offset.offset);
-							break;
-						}
-						if (T->EA.data.str_offset.offset >= T->EA.data.str_offset.str->value.str.len) {
-							zend_uint i;
-
-							if (T->EA.data.str_offset.str->value.str.len==0) {
-								STR_FREE(T->EA.data.str_offset.str->value.str.val);
-								T->EA.data.str_offset.str->value.str.val = (char *) emalloc(T->EA.data.str_offset.offset+1+1);
-							} else {
-								T->EA.data.str_offset.str->value.str.val = (char *) erealloc(T->EA.data.str_offset.str->value.str.val, T->EA.data.str_offset.offset+1+1);
-							}
-							for (i=T->EA.data.str_offset.str->value.str.len; i<T->EA.data.str_offset.offset; i++) {
-								T->EA.data.str_offset.str->value.str.val[i] = ' ';
-							}
-							T->EA.data.str_offset.str->value.str.val[T->EA.data.str_offset.offset+1] = 0;
-							T->EA.data.str_offset.str->value.str.len = T->EA.data.str_offset.offset+1;
-						}
-
-						if (value->type!=IS_STRING) {
-							tmp = *value;
-							if (op2 && op2->op_type == IS_VAR) {
-								zval_copy_ctor(&tmp);
-							}
-							convert_to_string(&tmp);
-							final_value = &tmp;
-						}
-
-						T->EA.data.str_offset.str->value.str.val[T->EA.data.str_offset.offset] = final_value->value.str.val[0];
-						
-						if (op2) {
-							if (op2->op_type == IS_VAR) {
-								if (value == &T(op2->u.var).tmp_var) {
-									if (result->u.EA.type & EXT_TYPE_UNUSED) {
-										/* We are not going to use return value, drop it */
-										STR_FREE(value->value.str.val);
-									} else {
-										/* We are going to use return value, make it real zval */
-										ALLOC_ZVAL(value);
-										*value = T(op2->u.var).tmp_var;
-										value->is_ref = 0;
-										value->refcount = 0; /* LOCK will increase it */
-									}
-								}
-							} else {
-								if (final_value == &T(op2->u.var).tmp_var) {
-									/* we can safely free final_value here
-									 * because separation is done only
-									 * in case op2->op_type == IS_VAR */
-									STR_FREE(final_value->value.str.val);
-								}
-							}
-						}
-						if (final_value == &tmp) {
-							zval_dtor(final_value);
-						}
-						/*
-						 * the value of an assignment to a string offset is undefined
-						T(result->u.var).var = &T->EA.data.str_offset.str;
-						*/
-					} while (0);
-					/* zval_ptr_dtor(&T->EA.data.str_offset.str); Nuke this line if it doesn't cause a leak */
-					T->tmp_var.type = IS_STRING;
-				}
+			if (((int)T->var.str_offset.offset < 0)) {
+				zend_error(E_WARNING, "Illegal string offset:  %d", T->var.str_offset.offset);
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
-		}
+			}
+			if (T->var.str_offset.offset >= T->var.str_offset.str->value.str.len) {
+				zend_uint i;
+
+				if (T->var.str_offset.str->value.str.len==0) {
+					STR_FREE(T->var.str_offset.str->value.str.val);
+					T->var.str_offset.str->value.str.val = (char *) emalloc(T->var.str_offset.offset+1+1);
+				} else {
+					T->var.str_offset.str->value.str.val = (char *) erealloc(T->var.str_offset.str->value.str.val, T->var.str_offset.offset+1+1);
+				}
+				for (i=T->var.str_offset.str->value.str.len; i<T->var.str_offset.offset; i++) {
+					T->var.str_offset.str->value.str.val[i] = ' ';
+				}
+				T->var.str_offset.str->value.str.val[T->var.str_offset.offset+1] = 0;
+				T->var.str_offset.str->value.str.len = T->var.str_offset.offset+1;
+			}
+
+			if (value->type!=IS_STRING) {
+				tmp = *value;
+				if (op2 && op2->op_type == IS_VAR) {
+					zval_copy_ctor(&tmp);
+				}
+				convert_to_string(&tmp);
+				final_value = &tmp;
+			}
+
+			T->var.str_offset.str->value.str.val[T->var.str_offset.offset] = final_value->value.str.val[0];
+			
+			if (op2) {
+				if (op2->op_type == IS_VAR) {
+					if (value == &T(op2->u.var).tmp_var) {
+						if (result->u.EA.type & EXT_TYPE_UNUSED) {
+							/* We are not going to use return value, drop it */
+							STR_FREE(value->value.str.val);
+						} else {
+							/* We are going to use return value, make it real zval */
+							ALLOC_ZVAL(value);
+							*value = T(op2->u.var).tmp_var;
+							value->is_ref = 0;
+							value->refcount = 0; /* LOCK will increase it */
+						}
+					}
+				} else {
+					if (final_value == &T(op2->u.var).tmp_var) {
+						/* we can safely free final_value here
+						 * because separation is done only
+						 * in case op2->op_type == IS_VAR */
+						STR_FREE(final_value->value.str.val);
+					}
+				}
+			}
+			if (final_value == &tmp) {
+				zval_dtor(final_value);
+			}
+			/*
+			 * the value of an assignment to a string offset is undefined
+			T(result->u.var).var = &T->var.str_offset.str;
+			*/
+		} while (0);
+		/* zval_ptr_dtor(&T->var.str_offset.str); Nuke this line if it doesn't cause a leak */
+		T->tmp_var.type = IS_STRING;
+		
 /*		T(result->u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr); */
 		T(result->u.var).var.ptr_ptr = &value;
 		SELECTIVE_PZVAL_LOCK(*T(result->u.var).var.ptr_ptr, result);
@@ -689,7 +681,7 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
 		target_symbol_table = NULL;
-		retval = zend_std_get_static_property(T(opline->op2.u.var).EA.class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 0 TSRMLS_CC);
+		retval = zend_std_get_static_property(T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 0 TSRMLS_CC);
 	} else {
 		if (opline->op2.u.EA.type == ZEND_FETCH_GLOBAL && opline->op1.op_type == IS_VAR) {
 			varname->refcount++;
@@ -830,15 +822,7 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 	zval ***retval = &T(result->u.var).var.ptr_ptr;
 
 	if (!container_ptr) {
-		if (T(op1->u.var).EA.type == IS_STRING_OFFSET) {
-			zend_error(E_ERROR, "Cannot use string offset as an array");
-
-			get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
-			FREE_OP(Ts, op2, EG(free_op2));
-		}
-		*retval = &EG(error_zval_ptr);
-		SELECTIVE_PZVAL_LOCK(**retval, result);
-		return;
+		zend_error(E_ERROR, "Cannot use string offset as an array");
 	}
 	
 	container = *container_ptr;
@@ -914,10 +898,9 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 					SEPARATE_ZVAL_IF_NOT_REF(container_ptr);
 				}
 				container = *container_ptr;
-				T(result->u.var).EA.data.str_offset.str = container;
+				T(result->u.var).var.str_offset.str = container;
 				PZVAL_LOCK(container);
-				T(result->u.var).EA.data.str_offset.offset = offset->value.lval;
-				T(result->u.var).EA.type = IS_STRING_OFFSET;
+				T(result->u.var).var.str_offset.offset = offset->value.lval;
 				FREE_OP(Ts, op2, EG(free_op2));
 				*retval = NULL;
 				return;
@@ -2290,7 +2273,7 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 	
 
 	if (EX(opline)->op2.op_type == IS_UNUSED) {
-		EX_T(EX(opline)->result.u.var).EA.class_entry = zend_fetch_class(NULL, 0, EX(opline)->extended_value TSRMLS_CC);
+		EX_T(EX(opline)->result.u.var).class_entry = zend_fetch_class(NULL, 0, EX(opline)->extended_value TSRMLS_CC);
 		NEXT_OPCODE();
 	}
 
@@ -2298,10 +2281,10 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	switch (class_name->type) {
 		case IS_OBJECT:
-			EX_T(EX(opline)->result.u.var).EA.class_entry = Z_OBJCE_P(class_name);
+			EX_T(EX(opline)->result.u.var).class_entry = Z_OBJCE_P(class_name);
 			break;
 		case IS_STRING:
-			EX_T(EX(opline)->result.u.var).EA.class_entry = zend_fetch_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
+			EX_T(EX(opline)->result.u.var).class_entry = zend_fetch_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
 			break;
 		default:
 			zend_error(E_ERROR, "Class name must be a valid object or a string");
@@ -2412,7 +2395,7 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
 
-	ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
+	ce = EX_T(EX(opline)->op1.u.var).class_entry;
 	if(EX(opline)->op2.op_type != IS_UNUSED) {
 		char *function_name_strval;
 		int function_name_strlen;
@@ -2786,9 +2769,9 @@ int zend_catch_handler(ZEND_OPCODE_HANDLER_ARGS)
 		return 0; /* CHECK_ME */
 	}
 	ce = Z_OBJCE_P(EG(exception));
-	if (ce != EX_T(EX(opline)->op1.u.var).EA.class_entry) {
+	if (ce != EX_T(EX(opline)->op1.u.var).class_entry) {
 		while (ce->parent) {
-			if (ce->parent == EX_T(EX(opline)->op1.u.var).EA.class_entry) {
+			if (ce->parent == EX_T(EX(opline)->op1.u.var).class_entry) {
 				goto exception_should_be_taken;
 			}
 			ce = ce->parent;
@@ -3048,12 +3031,11 @@ int zend_case_handler(ZEND_OPCODE_HANDLER_ARGS)
 	int switch_expr_is_overloaded=0;
 
 	if (EX(opline)->op1.op_type==IS_VAR) {
-		if (EX_T(EX(opline)->op1.u.var).var.ptr_ptr
-			|| (EX_T(EX(opline)->op1.u.var).var.ptr && EX_T(EX(opline)->op1.u.var).EA.type!=IS_STRING_OFFSET)) {
+		if (EX_T(EX(opline)->op1.u.var).var.ptr_ptr) {
 			PZVAL_LOCK(EX_T(EX(opline)->op1.u.var).var.ptr);
 		} else {
 			switch_expr_is_overloaded = 1;
-			EX_T(EX(opline)->op1.u.var).EA.data.str_offset.str->refcount++;
+			EX_T(EX(opline)->op1.u.var).var.str_offset.str->refcount++;
 		}
 	}
 	is_equal_function(&EX_T(EX(opline)->result.u.var).tmp_var, 
@@ -3084,19 +3066,19 @@ int zend_switch_free_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_new_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	if (EX_T(EX(opline)->op1.u.var).EA.class_entry->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_ABSTRACT_CLASS)) {
+	if (EX_T(EX(opline)->op1.u.var).class_entry->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_ABSTRACT_CLASS)) {
 		char *class_type;
 
-		if (EX_T(EX(opline)->op1.u.var).EA.class_entry->ce_flags & ZEND_ACC_INTERFACE) {
+		if (EX_T(EX(opline)->op1.u.var).class_entry->ce_flags & ZEND_ACC_INTERFACE) {
 			class_type = "interface";
 		} else {
 			class_type = "abstract class";
 		}
-		zend_error(E_ERROR, "Cannot instantiate %s %s", class_type,  EX_T(EX(opline)->op1.u.var).EA.class_entry->name);
+		zend_error(E_ERROR, "Cannot instantiate %s %s", class_type,  EX_T(EX(opline)->op1.u.var).class_entry->name);
 	}
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
 	ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
-	object_init_ex(EX_T(EX(opline)->result.u.var).var.ptr, EX_T(EX(opline)->op1.u.var).EA.class_entry);
+	object_init_ex(EX_T(EX(opline)->result.u.var).var.ptr, EX_T(EX(opline)->op1.u.var).class_entry);
 	EX_T(EX(opline)->result.u.var).var.ptr->refcount=1;
 	EX_T(EX(opline)->result.u.var).var.ptr->is_ref=1;
 
@@ -3188,7 +3170,7 @@ int zend_fetch_constant_handler(ZEND_OPCODE_HANDLER_ARGS)
 		NEXT_OPCODE();
 	}
 	
-	ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
+	ce = EX_T(EX(opline)->op1.u.var).class_entry;
 	
 	if (zend_hash_find(&ce->constants_table, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, (void **) &value) == SUCCESS) {
 		zval_update_constant(value, (void *) 1 TSRMLS_CC);
@@ -3451,7 +3433,7 @@ int zend_unset_var_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (EX(opline)->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		zend_std_unset_static_property(EX_T(EX(opline)->op2.u.var).EA.class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname) TSRMLS_CC);
+		zend_std_unset_static_property(EX_T(EX(opline)->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(EX(opline), EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
 		zend_hash_del(target_symbol_table, varname->value.str.val, varname->value.str.len+1);
@@ -3731,7 +3713,7 @@ int zend_isset_isempty_var_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 	
 	if (EX(opline)->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		value = zend_std_get_static_property(EX_T(EX(opline)->op2.u.var).EA.class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 1 TSRMLS_CC);
+		value = zend_std_get_static_property(EX_T(EX(opline)->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 1 TSRMLS_CC);
 		if (!value) {
 			isset = 0;
 		}
@@ -3970,14 +3952,14 @@ int zend_ext_fcall_end_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_declare_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	EX_T(EX(opline)->result.u.var).EA.class_entry = do_bind_class(EX(opline), EG(function_table), EG(class_table) TSRMLS_CC);
+	EX_T(EX(opline)->result.u.var).class_entry = do_bind_class(EX(opline), EG(function_table), EG(class_table) TSRMLS_CC);
 	NEXT_OPCODE();
 }
 
 
 int zend_declare_inherited_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	EX_T(EX(opline)->result.u.var).EA.class_entry = do_bind_inherited_class(EX(opline), EG(function_table), EG(class_table), EX_T(EX(opline)->extended_value).EA.class_entry TSRMLS_CC);
+	EX_T(EX(opline)->result.u.var).class_entry = do_bind_inherited_class(EX(opline), EG(function_table), EG(class_table), EX_T(EX(opline)->extended_value).class_entry TSRMLS_CC);
 	NEXT_OPCODE();
 }
 
@@ -4007,7 +3989,7 @@ int zend_instanceof_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zend_bool result;
 
 	if (Z_TYPE_P(expr) == IS_OBJECT) {
-		result = instanceof_function(Z_OBJCE_P(expr), EX_T(EX(opline)->op2.u.var).EA.class_entry TSRMLS_CC);
+		result = instanceof_function(Z_OBJCE_P(expr), EX_T(EX(opline)->op2.u.var).class_entry TSRMLS_CC);
 	} else {
 		result = 0;
 	}
@@ -4030,8 +4012,8 @@ int zend_nop_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_add_interface_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_class_entry *ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
-	zend_class_entry *iface = EX_T(EX(opline)->op2.u.var).EA.class_entry;
+	zend_class_entry *ce = EX_T(EX(opline)->op1.u.var).class_entry;
+	zend_class_entry *iface = EX_T(EX(opline)->op2.u.var).class_entry;
 
 	if (!(iface->ce_flags & ZEND_ACC_INTERFACE)) {
 		zend_error(E_ERROR, "%s cannot implement %s - it is not an interface", ce->name, iface->name);
@@ -4072,7 +4054,7 @@ int zend_verify_abstract_class_function(zend_function *fn, zend_abstract_info *a
 
 int zend_verify_abstract_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_class_entry *ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
+	zend_class_entry *ce = EX_T(EX(opline)->op1.u.var).class_entry;
 	zend_abstract_info ai;
 
 	if ((ce->ce_flags & ZEND_ACC_ABSTRACT) && !(ce->ce_flags & ZEND_ACC_ABSTRACT_CLASS)) {
