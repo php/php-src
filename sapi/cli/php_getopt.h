@@ -20,6 +20,13 @@
 
 #include "php.h"
 
+#ifdef NETWARE
+/*
+As NetWare LibC has optind and optarg macros defined in unistd.h our local variables were getting mistakenly preprocessed so undeffing optind and optarg
+*/
+#undef optarg
+#undef optind
+#endif
 /* Define structure for one recognized option (both single char and long name).
  * If short_open is '-' this is the last option.
  */
