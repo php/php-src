@@ -216,7 +216,6 @@ PHP_FUNCTION(ltrim)
 PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, int limit) 
 {
 	char *p1, *p2, *endp;
-	int i = 0;
 
 	endp = str->value.str.val + str->value.str.len;
 
@@ -224,18 +223,16 @@ PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, int limit)
 	p2 = php_memnstr(str->value.str.val, delim->value.str.val, delim->value.str.len, endp);
 
 	if (p2 == NULL) {
-		add_index_stringl(return_value, i++, p1, str->value.str.len, 1);
+		add_next_index_stringl(return_value, p1, str->value.str.len, 1);
 	} else {
 		do {
-			add_index_stringl(return_value, i++, p1, p2-p1, 1);
+			add_next_index_stringl(return_value, p1, p2-p1, 1);
 			p1 = p2 + delim->value.str.len;
-			if((limit>=0)&&(i>=limit-1))
-				break;
-		} while ((p2 = php_memnstr(p1, delim->value.str.val, delim->value.str.len, endp)) != NULL);
+		} while ((p2 = php_memnstr(p1, delim->value.str.val, delim->value.str.len, endp)) != NULL &&
+				 (limit == -1 || --limit > 1));
 
-		if ((p1 <= endp)|| ((limit>=0)&&(i>=limit-1))){
-			add_index_stringl(return_value, i++, p1, endp-p1, 1);
-		}
+		if (p1 <= endp)
+			add_next_index_stringl(return_value, p1, endp-p1, 1);
 	}
 }
 
@@ -274,7 +271,7 @@ PHP_FUNCTION(explode)
 		RETURN_FALSE;
 	}
 
-	if((limit==0)||(limit==1)) {
+	if(limit==0 || limit==1) {
 		add_index_stringl(return_value, 0, (*str)->value.str.val, (*str)->value.str.len, 1);
 	} else {
 		php_explode(*delim, *str, return_value, limit);
