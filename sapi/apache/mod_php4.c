@@ -326,7 +326,6 @@ static void php_apache_request_shutdown(void *dummy)
 static int php_apache_sapi_activate(TSRMLS_D)
 {
 	request_rec *r = (request_rec *) SG(server_context); 
-	TSRMLS_FETCH();
 
 	/*
 	 * For the Apache module version, this bit of code registers a cleanup

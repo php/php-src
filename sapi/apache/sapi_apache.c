@@ -60,10 +60,9 @@
 
 /* {{{ apache_php_module_main
  */
-int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC TSRMLS_DC)
+int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 {
 	zend_file_handle file_handle;
-	TSRMLS_FETCH();
 
 	if (php_request_startup(TSRMLS_C) == FAILURE) {
 		return FAILURE;
