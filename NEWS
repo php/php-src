@@ -2,6 +2,11 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Added new object VARIANT() to encapsulate values for use with
+  the COM and DOTNET module. Therefore it is now possible to pass
+  values by reference, convert php values to extended variant types (currency,
+  date, idispatch, iunknown, ...) and define the codepage that should
+  be used for unicode - conversion.
 - Improved overall speed of IRCG, added URL handling to message scanner (Sascha)
 - Fixed some modules to allow using output-buffering. (Thies)
 - Added the chroot() function (Derick)
