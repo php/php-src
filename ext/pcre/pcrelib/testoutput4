@@ -1,4 +1,4 @@
-PCRE version 2.05 21-Apr-1999
+PCRE version 2.08 31-Aug-1999
 
 /^[\w]+/
     *** Failers
@@ -84,6 +84,7 @@ No match
 Identifying subpattern count = 0
 No options
 No first char
+No req char
 Starting character set: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
   Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
 
@@ -91,6 +92,7 @@ Starting character set: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P
 Identifying subpattern count = 0
 No options
 No first char
+No req char
 Starting character set: 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P 
   Q R S T U V W X Y Z _ a b c d e f g h i j k l m n o p q r s t u v w x y z 
   À Á Â Ã Ä Å Æ Ç È É Ê Ë Ì Í Î Ï Ð Ñ Ò Ó Ô Õ Ö Ø Ù Ú Û Ü Ý Þ ß à á â ã ä å 

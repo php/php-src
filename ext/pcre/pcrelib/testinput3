@@ -1638,4 +1638,55 @@
 /word (?>[a-zA-Z0-9]+ ){0,30}otherword/
     word cat dog elephant mussel cow horse canary baboon snake shark the quick brown fox and the lazy dog and several other words getting close to thirty by now I hope
 
+/(?<=\d{3}(?!999))foo/
+    999foo
+    123999foo 
+    *** Failers
+    123abcfoo
+    
+/(?<=(?!...999)\d{3})foo/
+    999foo
+    123999foo 
+    *** Failers
+    123abcfoo
+
+/(?<=\d{3}(?!999)...)foo/
+    123abcfoo
+    123456foo 
+    *** Failers
+    123999foo  
+    
+/(?<=\d{3}...)(?<!999)foo/
+    123abcfoo   
+    123456foo 
+    *** Failers
+    123999foo  
+
+/<a[\s]+href[\s]*=[\s]*          # find <a href=
+ ([\"\'])?                       # find single or double quote
+ (?(1) (.*?)\1 | ([^\s]+))       # if quote found, match up to next matching
+                                 # quote, otherwise match up to next space
+/isx
+    <a href=abcd xyz
+    <a href=\"abcd xyz pqr\" cats
+    <a href=\'abcd xyz pqr\' cats
+
+/<a\s+href\s*=\s*                # find <a href=
+ (["'])?                         # find single or double quote
+ (?(1) (.*?)\1 | (\S+))          # if quote found, match up to next matching
+                                 # quote, otherwise match up to next space
+/isx
+    <a href=abcd xyz
+    <a href=\"abcd xyz pqr\" cats
+    <a href       =       \'abcd xyz pqr\' cats
+
+/<a\s+href(?>\s*)=(?>\s*)        # find <a href=
+ (["'])?                         # find single or double quote
+ (?(1) (.*?)\1 | (\S+))          # if quote found, match up to next matching
+                                 # quote, otherwise match up to next space
+/isx
+    <a href=abcd xyz
+    <a href=\"abcd xyz pqr\" cats
+    <a href       =       \'abcd xyz pqr\' cats
+
 / End of test input /       

@@ -2,6 +2,86 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 2.08 31-Aug-99
+----------------------
+
+1. When startoffset was not zero and the pattern began with ".*", PCRE was not
+trying to match at the startoffset position, but instead was moving forward to
+the next newline as if a previous match had failed.
+
+2. pcretest was not making use of PCRE_NOTEMPTY when repeating for /g and /G,
+and could get into a loop if a null string was matched other than at the start
+of the subject.
+
+3. Added definitions of PCRE_MAJOR and PCRE_MINOR to pcre.h so the version can
+be distinguished at compile time, and for completeness also added PCRE_DATE.
+
+5. Added Paul Sokolovsky's minor changes to make it easy to compile a Win32 DLL
+in GnuWin32 environments.
+
+
+Version 2.07 29-Jul-99
+----------------------
+
+1. The documentation is now supplied in plain text form and HTML as well as in
+the form of man page sources.
+
+2. C++ compilers don't like assigning (void *) values to other pointer types.
+In particular this affects malloc(). Although there is no problem in Standard
+C, I've put in casts to keep C++ compilers happy.
+
+3. Typo on pcretest.c; a cast of (unsigned char *) in the POSIX regexec() call
+should be (const char *).
+
+4. If NOPOSIX is defined, pcretest.c compiles without POSIX support. This may
+be useful for non-Unix systems who don't want to bother with the POSIX stuff.
+However, I haven't made this a standard facility. The documentation doesn't
+mention it, and the Makefile doesn't support it.
+
+5. The Makefile now contains an "install" target, with editable destinations at
+the top of the file. The pcretest program is not installed.
+
+6. pgrep -V now gives the PCRE version number and date.
+
+7. Fixed bug: a zero repetition after a literal string (e.g. /abcde{0}/) was
+causing the entire string to be ignored, instead of just the last character.
+
+8. If a pattern like /"([^\\"]+|\\.)*"/ is applied in the normal way to a
+non-matching string, it can take a very, very long time, even for strings of
+quite modest length, because of the nested recursion. PCRE now does better in
+some of these cases. It does this by remembering the last required literal
+character in the pattern, and pre-searching the subject to ensure it is present
+before running the real match. In other words, it applies a heuristic to detect
+some types of certain failure quickly, and in the above example, if presented
+with a string that has no trailing " it gives "no match" very quickly.
+
+9. A new runtime option PCRE_NOTEMPTY causes null string matches to be ignored;
+other alternatives are tried instead.
+
+
+Version 2.06 09-Jun-99
+----------------------
+
+1. Change pcretest's output for amount of store used to show just the code
+space, because the remainder (the data block) varies in size between 32-bit and
+64-bit systems.
+
+2. Added an extra argument to pcre_exec() to supply an offset in the subject to
+start matching at. This allows lookbehinds to work when searching for multiple
+occurrences in a string.
+
+3. Added additional options to pcretest for testing multiple occurrences:
+
+   /+   outputs the rest of the string that follows a match
+   /g   loops for multiple occurrences, using the new startoffset argument
+   /G   loops for multiple occurrences by passing an incremented pointer
+
+4. PCRE wasn't doing the "first character" optimization for patterns starting
+with \b or \B, though it was doing it for other lookbehind assertions. That is,
+it wasn't noticing that a match for a pattern such as /\bxyz/ has to start with
+the letter 'x'. On long subject strings, this gives a significant speed-up.
+
+
 Version 2.05 21-Apr-99
 ----------------------
 

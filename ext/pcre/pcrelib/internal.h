@@ -3,9 +3,6 @@
 *************************************************/
 
 
-#define PCRE_VERSION       "2.05 21-Apr-1999"
-
-
 /* This is a library of functions to support regular expressions whose syntax
 and semantics are as close as possible to those of the Perl 5 language. See
 the file Tech.Notes for some information on the internals.
@@ -67,13 +64,17 @@ Standard C system should have one. */
 
 #define PCRE_IMS (PCRE_CASELESS|PCRE_MULTILINE|PCRE_DOTALL)
 
-/* Private options flags start at the most significant end of the two bytes.
-The public options defined in pcre.h start at the least significant end. Make
-sure they don't overlap! */
+/* Private options flags start at the most significant end of the four bytes,
+but skip the top bit so we can use ints for convenience without getting tangled
+with negative values. The public options defined in pcre.h start at the least
+significant end. Make sure they don't overlap, though now that we have expanded
+to four bytes there is plenty of space. */
 
-#define PCRE_FIRSTSET           0x8000  /* first_char is set */
-#define PCRE_STARTLINE          0x4000  /* start after \n for multiline */
-#define PCRE_INGROUP            0x2000  /* compiling inside a group */
+#define PCRE_FIRSTSET      0x40000000  /* first_char is set */
+#define PCRE_REQCHSET      0x20000000  /* req_char is set */
+#define PCRE_STARTLINE     0x10000000  /* start after \n for multiline */
+#define PCRE_INGROUP       0x08000000  /* compiling inside a group */
+#define PCRE_ICHANGED      0x04000000  /* i option changes within regex */
 
 /* Options for the "extra" block produced by pcre_study(). */
 
@@ -86,7 +87,8 @@ time, run time or study time, respectively. */
   (PCRE_CASELESS|PCRE_EXTENDED|PCRE_ANCHORED|PCRE_MULTILINE| \
    PCRE_DOTALL|PCRE_DOLLAR_ENDONLY|PCRE_EXTRA|PCRE_UNGREEDY)
 
-#define PUBLIC_EXEC_OPTIONS (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL)
+#define PUBLIC_EXEC_OPTIONS \
+  (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY)
 
 #define PUBLIC_STUDY_OPTIONS 0   /* None defined */
 
@@ -264,18 +266,19 @@ runs on as long as necessary after the end. */
 typedef struct real_pcre {
   unsigned long int magic_number;
   const unsigned char *tables;
-  unsigned short int options;
-  unsigned char top_bracket;
-  unsigned char top_backref;
-  unsigned char first_char;
-  unsigned char code[1];
+  unsigned long int options;
+  uschar top_bracket;
+  uschar top_backref;
+  uschar first_char;
+  uschar req_char;
+  uschar code[1];
 } real_pcre;
 
 /* The real format of the extra block returned by pcre_study(). */
 
 typedef struct real_pcre_extra {
-  unsigned char options;
-  unsigned char start_bits[32];
+  uschar options;
+  uschar start_bits[32];
 } real_pcre_extra;
 
 
@@ -284,7 +287,7 @@ doing the compiling, so that they are thread-safe. */
 
 typedef struct compile_data {
   const uschar *lcc;            /* Points to lower casing table */
-  const uschar *fcc;            /* Points to case-flippint table */
+  const uschar *fcc;            /* Points to case-flipping table */
   const uschar *cbits;          /* Points to character type table */
   const uschar *ctypes;         /* Points to table of type maps */
 } compile_data;
@@ -303,11 +306,12 @@ typedef struct match_data {
   BOOL   notbol;                /* NOTBOL flag */
   BOOL   noteol;                /* NOTEOL flag */
   BOOL   endonly;               /* Dollar not before final \n */
+  BOOL   notempty;              /* Empty string match not wanted */
   const uschar *start_subject;  /* Start of the subject string */
   const uschar *end_subject;    /* End of the subject string */
+  const uschar *start_match;    /* Start of this match attempt */
   const uschar *end_match_ptr;  /* Subject position at end match */
   int     end_offset_top;       /* Highwater mark at end of match */
-  uschar   regprev;		/* Character previous to subject string (Andrey Zmievski) */
 } match_data;
 
 /* Bit definitions for entries in the pcre_ctypes table. */

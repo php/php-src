@@ -1,14 +1,16 @@
-PCRE version 2.05 21-Apr-1999
+PCRE version 2.08 31-Aug-1999
 
 /(a)b|/
 Identifying subpattern count = 1
 No options
 No first char
+No req char
 
 /abc/
 Identifying subpattern count = 0
 No options
 First char = 'a'
+Req char = 'c'
     abc
  0: abc
     defabc
@@ -26,6 +28,7 @@ No match
 Identifying subpattern count = 0
 Options: anchored
 No first char
+Req char = 'c'
     abc
  0: abc
     \Aabc
@@ -41,26 +44,31 @@ No match
 Identifying subpattern count = 0
 No options
 First char = 'a'
+Req char = 'c'
 
 /a*bc/
 Identifying subpattern count = 0
 No options
 No first char
+Req char = 'c'
 
 /a{3}bc/
 Identifying subpattern count = 0
 No options
 First char = 'a'
+Req char = 'c'
 
 /(abc|a+z)/
 Identifying subpattern count = 1
 No options
 First char = 'a'
+No req char
 
 /^abc$/
 Identifying subpattern count = 0
 Options: anchored
 No first char
+Req char = 'c'
     abc
  0: abc
     *** Failers
@@ -108,16 +116,19 @@ Failed: unrecognized character after (? at offset 2
 Identifying subpattern count = 0
 No options
 First char at start or follows \n
+Req char = 'b'
 
 /.*?b/
 Identifying subpattern count = 0
 No options
 First char at start or follows \n
+Req char = 'b'
 
 /cat|dog|elephant/
 Identifying subpattern count = 0
 No options
 No first char
+No req char
     this sentence eventually mentions a cat
  0: cat
     this sentences rambles on and on for a while and then reaches elephant
@@ -127,6 +138,7 @@ No first char
 Identifying subpattern count = 0
 No options
 No first char
+No req char
 Starting character set: c d e 
     this sentence eventually mentions a cat
  0: cat
@@ -137,6 +149,7 @@ Starting character set: c d e
 Identifying subpattern count = 0
 Options: caseless
 No first char
+No req char
 Starting character set: C D E c d e 
     this sentence eventually mentions a CAT cat
  0: CAT
@@ -147,12 +160,14 @@ Starting character set: C D E c d e
 Identifying subpattern count = 0
 No options
 No first char
+No req char
 Starting character set: a b c d 
 
 /(a|[^\dZ])/S
 Identifying subpattern count = 1
 No options
 No first char
+No req char
 Starting character set: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a 
   \x0b \x0c \x0d \x0e \x0f \x10 \x11 \x12 \x13 \x14 \x15 \x16 \x17 \x18 \x19 
   \x1a \x1b \x1c \x1d \x1e \x1f \x20 ! " # $ % & ' ( ) * + , - . / : ; < = > 
@@ -172,6 +187,7 @@ Starting character set: \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a
 Identifying subpattern count = 1
 No options
 No first char
+No req char
 Starting character set: \x09 \x0a \x0b \x0c \x0d \x20 a b 
 
 /(ab\2)/
@@ -184,6 +200,7 @@ Failed: nothing to repeat at offset 4
 Identifying subpattern count = 3
 No options
 First char = 'a'
+Req char = 'c'
     abcb
  0: abcb
  1: a
@@ -213,6 +230,7 @@ Matched, but too many substrings
 Identifying subpattern count = 3
 No options
 First char = 'a'
+No req char
     abc
  0: abc
  1: a
@@ -253,6 +271,7 @@ Matched, but too many substrings
 Identifying subpattern count = 0
 Options: dollar_endonly
 First char = 'a'
+Req char = 'c'
     abc
  0: abc
     *** Failers
@@ -269,6 +288,7 @@ Failed: back reference to non-existent subpattern at offset 17
 Identifying subpattern count = 0
 No options
 First char = 't'
+Req char = 'x'
     the quick brown fox
  0: the quick brown fox
     this is a line with the quick brown fox
@@ -278,6 +298,7 @@ First char = 't'
 Identifying subpattern count = 0
 Options: anchored
 No first char
+Req char = 'x'
     the quick brown fox
  0: the quick brown fox
     *** Failers
@@ -292,6 +313,7 @@ Failed: unrecognized character after (? at offset 4
 Identifying subpattern count = 0
 No options
 No first char
+No req char
     abcdef
  0: abc
     abcdef\B
@@ -301,6 +323,7 @@ No first char
 Identifying subpattern count = 3
 No options
 First char at start or follows \n
+No req char
     defabc
  0: defabc
  1: abc
@@ -376,6 +399,7 @@ Failed: missing terminating ] for character class at offset 4
 Identifying subpattern count = 0
 No options
 No first char
+No req char
     co-processors, and for 
  0: -pr
     
@@ -383,6 +407,7 @@ No first char
 Identifying subpattern count = 0
 No options
 First char = '<'
+Req char = '>'
     abc<def>ghi<klm>nop
  0: <def>ghi<klm>
 
@@ -390,6 +415,7 @@ First char = '<'
 Identifying subpattern count = 0
 No options
 First char = '<'
+Req char = '>'
     abc<def>ghi<klm>nop
  0: <def>
 
@@ -397,6 +423,7 @@ First char = '<'
 Identifying subpattern count = 0
 Options: ungreedy
 First char = '<'
+Req char = '>'
     abc<def>ghi<klm>nop
  0: <def>
     
@@ -404,6 +431,7 @@ First char = '<'
 Identifying subpattern count = 0
 Options: ungreedy
 First char = '<'
+Req char = '>'
     abc<def>ghi<klm>nop
  0: <def>
 
@@ -411,6 +439,7 @@ First char = '<'
 Identifying subpattern count = 0
 Options: ungreedy
 First char = '<'
+Req char = '>'
     abc<def>ghi<klm>nop
  0: <def>ghi<klm>
     
@@ -418,6 +447,7 @@ First char = '<'
 Identifying subpattern count = 0
 Options: ungreedy
 First char = '='
+Req char = '='
     abc========def
  0: ===
     
@@ -425,6 +455,7 @@ First char = '='
 Identifying subpattern count = 0
 Options: ungreedy
 First char = '='
+Req char = '='
     abc========def
  0: ========
     
@@ -432,6 +463,7 @@ First char = '='
 Identifying subpattern count = 0
 No options
 First char = 'f'
+Req char = 'o'
     foo
  0: foo
     catfoo 
@@ -456,54 +488,65 @@ Failed: lookbehind assertion is not fixed length at offset 12
 Identifying subpattern count = 0
 Options: caseless
 First char = 'a'
+Req char = 'c'
 
 /(a|(?m)a)/
 Identifying subpattern count = 1
 No options
 First char = 'a'
+No req char
 
 /(?i)^1234/
 Identifying subpattern count = 0
 Options: anchored caseless
 No first char
+Req char = '4'
 
 /(^b|(?i)^d)/
 Identifying subpattern count = 1
 Options: anchored
+Case state changes
 No first char
+No req char
 
 /(?s).*/
 Identifying subpattern count = 0
 Options: anchored dotall
 No first char
+No req char
 
 /[abcd]/S
 Identifying subpattern count = 0
 No options
 No first char
+No req char
 Starting character set: a b c d 
 
 /(?i)[abcd]/S
 Identifying subpattern count = 0
 Options: caseless
 No first char
+No req char
 Starting character set: A B C D a b c d 
 
 /(?m)[xy]|(b|c)/S
 Identifying subpattern count = 1
 Options: multiline
 No first char
+No req char
 Starting character set: b c x y 
 
 /(^a|^b)/m
 Identifying subpattern count = 1
 Options: multiline
 First char at start or follows \n
+No req char
 
 /(?i)(^a|^b)/m
 Identifying subpattern count = 1
 Options: caseless multiline
 First char at start or follows \n
+No req char
 
 /(a)(?(1)a|b|c)/
 Failed: conditional group contains more than two branches at offset 13
@@ -527,11 +570,14 @@ Failed: unrecognized character after (?< at offset 2
 Identifying subpattern count = 1
 No options
 First char = 'b'
+Req char = 'h'
 
 /((?i)blah)\s+\1/
 Identifying subpattern count = 1
 No options
+Case state changes
 No first char
+Req char = 'h'
 
 /((?i)b)/DS
 ------------------------------------------------------------------
@@ -546,19 +592,24 @@ No first char
 ------------------------------------------------------------------
 Identifying subpattern count = 1
 No options
+Case state changes
 No first char
+Req char = 'b'
 Starting character set: B b 
 
 /(a*b|(?i:c*(?-i)d))/S
 Identifying subpattern count = 1
 No options
+Case state changes
 No first char
+No req char
 Starting character set: C a b c d 
 
 /a$/
 Identifying subpattern count = 0
 No options
 First char = 'a'
+No req char
     a
  0: a
     a\n
@@ -574,6 +625,7 @@ No match
 Identifying subpattern count = 0
 Options: multiline
 First char = 'a'
+No req char
     a
  0: a
     a\n
@@ -589,16 +641,19 @@ No match
 Identifying subpattern count = 0
 Options: anchored multiline
 No first char
+Req char = 'c'
 
 /^abc/m 
 Identifying subpattern count = 0
 Options: multiline
 First char at start or follows \n
+Req char = 'c'
 
 /^((a+)(?U)([ab]+)(?-U)([bc]+)(\w*))/
 Identifying subpattern count = 5
 Options: anchored
 No first char
+Req char = 'a'
   aaaaabbbbbcccccdef
  0: aaaaabbbbbcccccdef
  1: aaaaabbbbbcccccdef
@@ -611,29 +666,34 @@ No first char
 Identifying subpattern count = 0
 No options
 No first char
+No req char
 Starting character set: a b 
 
 /(?<!foo)(alpha|omega)/S
 Identifying subpattern count = 1
 No options
 No first char
+Req char = 'a'
 Starting character set: a o 
 
 /(?!alphabet)[ab]/S
 Identifying subpattern count = 0
 No options
 No first char
+No req char
 Starting character set: a b 
 
 /(?<=foo\n)^bar/m
 Identifying subpattern count = 0
 Options: multiline
 First char at start or follows \n
+Req char = 'r'
 
 /(?>^abc)/m
 Identifying subpattern count = 0
 Options: multiline
 First char at start or follows \n
+Req char = 'c'
     abc
  0: abc
     def\nabc
@@ -656,11 +716,13 @@ Failed: lookbehind assertion is not fixed length at offset 13
 Identifying subpattern count = 0
 No options
 First char = 'T'
+Req char = 's'
 
 /(?<=bullock|donkey)-cart/
 Identifying subpattern count = 0
 No options
 First char = '-'
+Req char = 't'
     the bullock-cart
  0: -cart
     a donkey-cart race
@@ -675,12 +737,15 @@ No match
 /(?<=ab(?i)x|y|z)/
 Identifying subpattern count = 0
 No options
+Case state changes
 No first char
+No req char
 
 /(?>.*)(?<=(abcd)|(xyz))/
 Identifying subpattern count = 2
 No options
 First char at start or follows \n
+No req char
     alphabetabcd
  0: alphabetabcd
  1: abcd
@@ -692,7 +757,9 @@ First char at start or follows \n
 /(?<=ab(?i)x(?-i)y|(?i)z|b)ZZ/
 Identifying subpattern count = 0
 No options
+Case state changes
 First char = 'Z'
+Req char = 'Z'
     abxyZZ
  0: ZZ
     abXyZZ
@@ -720,6 +787,7 @@ No match
 Identifying subpattern count = 1
 No options
 First char = 'b'
+Req char = 'r'
     bar
  0: bar
     foobbar 
@@ -733,11 +801,13 @@ No match
 Identifying subpattern count = 0
 No options
 First char = 'T'
+Req char = 't'
 
 /^(a)?(?(1)a|b)+$/
 Identifying subpattern count = 1
 Options: anchored
 No first char
+No req char
     *** Failers
 No match
     a 
@@ -747,11 +817,13 @@ No match
 Identifying subpattern count = 0
 No options
 First char = 'T'
+Req char = 'g'
 
 /^(a\1?){4}$/
 Identifying subpattern count = 1
 Options: anchored
 No first char
+Req char = 'a'
     aaaaaa
  0: aaaaaa
  1: aa
@@ -760,6 +832,7 @@ No first char
 Identifying subpattern count = 0
 No options
 First char = 'T'
+Req char = '5'
 
 /a[b-a]/
 Failed: range out of order in character class at offset 4
@@ -873,6 +946,7 @@ Failed: \ at end of pattern at offset 4
 Identifying subpattern count = 2
 No options
 First char = 'a'
+Req char = 'd'
     abcd
  0: abcd
  1: a
@@ -892,6 +966,7 @@ copy substring 5 failed -7
 Identifying subpattern count = 1
 No options
 No first char
+No req char
     abcdefghijklmnopqrstuvwxyz
  0: abcdefghijklmnopqrst
  1: abcdefghijklmnopqrst
@@ -908,6 +983,7 @@ copy substring 1 failed -6
 Identifying subpattern count = 1
 No options
 No first char
+No req char
     abcdefghijklmnopqrstuvwxyz
  0: abcdefghijklmno
  1: abcdefghijklmno
@@ -921,6 +997,7 @@ No first char
 Identifying subpattern count = 1
 No options
 No first char
+No req char
     abcdefghijklmnopqrstuvwxyz
  0: abcdefghijklmnop
  1: abcdefghijklmnop
@@ -936,6 +1013,7 @@ copy substring 1 failed -6
 Identifying subpattern count = 3
 Options: anchored
 No first char
+Req char = 'f'
     adef\G1\G2\G3\G4\L 
  0: adef
  1: a
@@ -973,6 +1051,7 @@ get substring 4 failed -7
 Identifying subpattern count = 0
 Options: anchored
 No first char
+Req char = 'f'
     abc\00def\L\C0 
  0: abc\x00def
  0C abc (7)
@@ -981,10 +1060,11 @@ No first char
 /word ((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ 
 )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ )((?:[a-zA-Z0-9]+ 
 )?)?)?)?)?)?)?)?)?otherword/M
-Memory allocation request: 441 (code space 428)
+Memory allocation (code space): 428
 Identifying subpattern count = 8
 No options
 First char = 'w'
+Req char = 'd'
 
 /.*X/D
 ------------------------------------------------------------------
@@ -997,6 +1077,7 @@ First char = 'w'
 Identifying subpattern count = 0
 No options
 First char at start or follows \n
+Req char = 'X'
 
 /.*X/Ds
 ------------------------------------------------------------------
@@ -1009,6 +1090,7 @@ First char at start or follows \n
 Identifying subpattern count = 0
 Options: anchored dotall
 No first char
+Req char = 'X'
 
 /(.*X|^B)/D
 ------------------------------------------------------------------
@@ -1026,6 +1108,7 @@ No first char
 Identifying subpattern count = 1
 No options
 First char at start or follows \n
+No req char
 
 /(.*X|^B)/Ds
 ------------------------------------------------------------------
@@ -1043,6 +1126,7 @@ First char at start or follows \n
 Identifying subpattern count = 1
 Options: anchored dotall
 No first char
+No req char
     
 /(?s)(.*X|^B)/D
 ------------------------------------------------------------------
@@ -1060,6 +1144,7 @@ No first char
 Identifying subpattern count = 1
 Options: anchored dotall
 No first char
+No req char
 
 /(?s:.*X|^B)/D
 ------------------------------------------------------------------
@@ -1080,9 +1165,460 @@ No first char
 Identifying subpattern count = 0
 No options
 First char at start or follows \n
+No req char
+
+/\Biss\B/+
+Identifying subpattern count = 0
+No options
+First char = 'i'
+Req char = 's'
+    Mississippi
+ 0: iss
+ 0+ issippi
+
+/\Biss\B/+P
+    Mississippi
+ 0: iss
+ 0+ issippi
+
+/iss/G+
+Identifying subpattern count = 0
+No options
+First char = 'i'
+Req char = 's'
+    Mississippi
+ 0: iss
+ 0+ issippi
+ 0: iss
+ 0+ ippi
+
+/\Biss\B/G+
+Identifying subpattern count = 0
+No options
+First char = 'i'
+Req char = 's'
+    Mississippi
+ 0: iss
+ 0+ issippi
+
+/\Biss\B/g+
+Identifying subpattern count = 0
+No options
+First char = 'i'
+Req char = 's'
+    Mississippi
+ 0: iss
+ 0+ issippi
+ 0: iss
+ 0+ ippi
+    *** Failers
+No match
+    Mississippi\A
+No match
+
+/(?<=[Ms])iss/g+
+Identifying subpattern count = 0
+No options
+First char = 'i'
+Req char = 's'
+    Mississippi
+ 0: iss
+ 0+ issippi
+ 0: iss
+ 0+ ippi
+
+/(?<=[Ms])iss/G+
+Identifying subpattern count = 0
+No options
+First char = 'i'
+Req char = 's'
+    Mississippi
+ 0: iss
+ 0+ issippi
+
+/^iss/g+
+Identifying subpattern count = 0
+Options: anchored
+No first char
+Req char = 's'
+    ississippi
+ 0: iss
+ 0+ issippi
+    
+/.*iss/g+
+Identifying subpattern count = 0
+No options
+First char at start or follows \n
+Req char = 's'
+    abciss\nxyzisspqr 
+ 0: abciss
+ 0+ \x0axyzisspqr
+ 0: xyziss
+ 0+ pqr
+
+/.i./+g
+Identifying subpattern count = 0
+No options
+No first char
+Req char = 'i'
+    Mississippi
+ 0: Mis
+ 0+ sissippi
+ 0: sis
+ 0+ sippi
+ 0: sip
+ 0+ pi
+    Mississippi\A
+ 0: Mis
+ 0+ sissippi
+ 0: sis
+ 0+ sippi
+ 0: sip
+ 0+ pi
+    Missouri river
+ 0: Mis
+ 0+ souri river
+ 0: ri 
+ 0+ river
+ 0: riv
+ 0+ er
+    Missouri river\A  
+ 0: Mis
+ 0+ souri river
+
+/^.is/+g
+Identifying subpattern count = 0
+Options: anchored
+No first char
+Req char = 's'
+    Mississippi
+ 0: Mis
+ 0+ sissippi
+
+/^ab\n/g+
+Identifying subpattern count = 0
+Options: anchored
+No first char
+Req char = 10
+    ab\nab\ncd
+ 0: ab\x0a
+ 0+ ab\x0acd
+
+/^ab\n/mg+
+Identifying subpattern count = 0
+Options: multiline
+First char at start or follows \n
+Req char = 10
+    ab\nab\ncd
+ 0: ab\x0a
+ 0+ ab\x0acd
+ 0: ab\x0a
+ 0+ cd
+
+/abc/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+Req char = 'c'
+
+/abc|bac/
+Identifying subpattern count = 0
+No options
+No first char
+Req char = 'c'
+
+/(abc|bac)/
+Identifying subpattern count = 1
+No options
+No first char
+Req char = 'c'
+
+/(abc|(c|dc))/
+Identifying subpattern count = 2
+No options
+No first char
+Req char = 'c'
+
+/(abc|(d|de)c)/
+Identifying subpattern count = 2
+No options
+No first char
+Req char = 'c'
+
+/a*/
+Identifying subpattern count = 0
+No options
+No first char
+No req char
+
+/a+/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+No req char
+
+/(baa|a+)/
+Identifying subpattern count = 1
+No options
+No first char
+Req char = 'a'
+
+/a{0,3}/
+Identifying subpattern count = 0
+No options
+No first char
+No req char
+
+/baa{3,}/
+Identifying subpattern count = 0
+No options
+First char = 'b'
+Req char = 'a'
+
+/"([^\\"]+|\\.)*"/
+Identifying subpattern count = 1
+No options
+First char = '"'
+Req char = '"'
+
+/(abc|ab[cd])/
+Identifying subpattern count = 1
+No options
+First char = 'a'
+No req char
+
+/(a|.)/
+Identifying subpattern count = 1
+No options
+No first char
+No req char
+
+/a|ba|\w/
+Identifying subpattern count = 0
+No options
+No first char
+No req char
+
+/abc(?=pqr)/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+Req char = 'r'
+
+/...(?<=abc)/
+Identifying subpattern count = 0
+No options
+No first char
+No req char
+
+/abc(?!pqr)/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+Req char = 'c'
+
+/ab./
+Identifying subpattern count = 0
+No options
+First char = 'a'
+Req char = 'b'
+
+/ab[xyz]/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+Req char = 'b'
+
+/abc*/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+Req char = 'b'
+
+/ab.c*/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+Req char = 'b'
+
+/a.c*/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+No req char
+
+/.c*/
+Identifying subpattern count = 0
+No options
+No first char
+No req char
+
+/ac*/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+No req char
+
+/(a.c*|b.c*)/
+Identifying subpattern count = 1
+No options
+No first char
+No req char
+
+/a.c*|aba/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+No req char
+
+/.+a/
+Identifying subpattern count = 0
+No options
+No first char
+Req char = 'a'
+
+/(?=abcda)a.*/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+No req char
+
+/(?=a)a.*/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+No req char
+
+/a(b)*/
+Identifying subpattern count = 1
+No options
+First char = 'a'
+No req char
+
+/a\d*/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+No req char
+
+/ab\d*/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+Req char = 'b'
+
+/a(\d)*/
+Identifying subpattern count = 1
+No options
+First char = 'a'
+No req char
+
+/abcde{0,0}/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+Req char = 'd'
+
+/ab\d+/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+Req char = 'b'
+
+/a(?(1)b)/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+No req char
+
+/a(?(1)bag|big)/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+Req char = 'g'
+
+/a(?(1)bag|big)*/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+No req char
+
+/a(?(1)bag|big)+/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+Req char = 'g'
+
+/a(?(1)b..|b..)/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+Req char = 'b'
+
+/ab\d{0}e/
+Identifying subpattern count = 0
+No options
+First char = 'a'
+Req char = 'e'
+
+/a?b?/
+Identifying subpattern count = 0
+No options
+No first char
+No req char
+    a
+ 0: a
+    b
+ 0: b
+    ab
+ 0: ab
+    \
+ 0: 
+    *** Failers
+ 0: 
+    \N     
+No match
+    
+/|-/
+Identifying subpattern count = 0
+No options
+No first char
+No req char
+    abcd
+ 0: 
+    -abc
+ 0: 
+    \Nab-c
+ 0: -
+    *** Failers
+ 0: 
+    \Nabc     
+No match
+
+/.*?/g+
+Identifying subpattern count = 0
+No options
+First char at start or follows \n
+No req char
+  abc
+ 0: 
+ 0+ abc
+ 0: a
+ 0+ bc
+ 0: 
+ 0+ bc
+ 0: b
+ 0+ c
+ 0: 
+ 0+ c
+ 0: c
+ 0+ 
+ 0: 
+ 0+ 
 
 / End of test input /
 Identifying subpattern count = 0
 No options
 First char = ' '
+Req char = ' '
 

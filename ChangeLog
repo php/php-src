@@ -2,6 +2,10 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Reworked preg_* functions according to the new PCRE API, which also made
+  them behave much more like Perl ones (Andrey)
+- Made it possible to specify external location of PCRE library (Andrey)
+- Updated bundled PCRE library to version 2.08 (Andrey)
 - count()/is_array/is_object... speedups. (Thies)
 - OCI8 supports appending and positioning when saving LOBs (Thies)
 - Added metaphone support (Thies)

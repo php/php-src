@@ -18,12 +18,18 @@
 
 /* $Id$ */
 
+/*
+	TODO:
+	- Allow user to set PCRE_NOTEMPTY, PCRE_ANCHORED at execution time
+	- Have an option for preg_split() to not return empty strings
+*/
+
 #include "php.h"
 #include "php_globals.h"
-
-#if HAVE_PCRE
-
 #include "php_pcre.h"
+
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+
 #include "ext/standard/php3_string.h"
 
 #define PREG_PATTERN_ORDER	0
@@ -307,13 +313,13 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	int			 	*offsets;			/* Array of subpattern offsets */
 	int				 num_subpats;		/* Number of captured subpatterns */
 	int			 	 size_offsets;		/* Size of the offsets array */
+	int				 start_offset;		/* Where the new search starts */
 	int			 	 matched;			/* Has anything matched */
 	int				 i;
 	int				 subpats_order_val = 0;	/* Integer value of subpats_order */
+	int				 g_notempty = 0;	/* If the match should not be empty */
 	const char	   **stringlist;		/* Used to hold list of subpatterns */
-	char			*match,				/* The current match */
-					*piece,				/* The current piece of subject */
-					*subject_end;		/* Points to the end of the subject */
+	char			*match;				/* The current match */
 	
 	
 	/* Get function parameters and do error-checking. */
@@ -389,17 +395,15 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	}
 
 	/* Start from the beginning of the string */
-	piece = subject->value.str.val;
-	subject_end = piece + subject->value.str.len;
+	start_offset = 0;
 	match = NULL;
 	matched = 0;
 	
 	do {
 		/* Execute the regular expression. */
-		count = pcre_exec(re, extra, piece,
-						  subject_end-piece, subject->value.str.val,
-						  (piece==subject->value.str.val ? exoptions : exoptions|PCRE_NOTBOL),
-						  offsets, size_offsets, (piece == match));
+		count = pcre_exec(re, extra, subject->value.str.val,
+						  subject->value.str.len, start_offset,
+						  exoptions|g_notempty, offsets, size_offsets);
 
 		/* Check for too many substrings condition. */	
 		if (count == 0) {
@@ -410,12 +414,13 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 		/* If something has matched */
 		if (count >= 0) {
 			matched++;
-			match = piece + offsets[0];
+			match = subject->value.str.val + offsets[0];
 
 			/* If subpatters array has been passed, fill it in with values. */
 			if (subpats != NULL) {
 				/* Try to get the list of substrings and display a warning if failed. */
-				if (pcre_get_substring_list(piece, offsets, count, &stringlist) < 0) {
+				if (pcre_get_substring_list(subject->value.str.val,
+											offsets, count, &stringlist) < 0) {
 					efree(offsets);
 					efree(re);
 					zend_error(E_WARNING, "Get subpatterns list failed");
@@ -452,12 +457,29 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 				}
 
 				php_pcre_free((void *) stringlist);
-				
-				/* Advance to the position right after the last full match */
-				piece += offsets[1];
 			}
 		}
-	} while (global && count >= 0);
+		else { /* Failed to match */
+			/* If we previously set PCRE_NOTEMPTY after a null match,
+			   this is not necessarily the end. We need to advance
+			   the start offset, and continue. Fudge the offset values
+			   to achieve this, unless we're already at the end of the string. */
+			if (g_notempty != 0 && start_offset < subject->value.str.len) {
+				offsets[0] = start_offset;
+				offsets[1] = start_offset + 1;
+			} else
+				break;
+		}
+		
+		/* If we have matched an empty string, mimic what Perl's /g options does.
+		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY and try
+		   the match again at the same point. If this fails (picked up above) we
+		   advance to the next character. */
+		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY : 0;
+		
+		/* Advance to the position right after the last full match */
+		start_offset = offsets[1];
+	} while (global);
 
 	/* Add the match sets to the output array and clean up */
 	if (global && subpats_order_val == PREG_PATTERN_ORDER) {
@@ -593,13 +615,14 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 	int				 match_len;			/* Length of the current match */
 	int				 backref;			/* Backreference number */
 	int				 eval;				/* If the replacement string should be eval'ed */
+	int				 start_offset;		/* Where the new search starts */
+	int				 g_notempty = 0;	/* If the match should not be empty */
 	char			*result,			/* Result of replacement */
 					*new_buf,			/* Temporary buffer for re-allocation */
 					*walkbuf,			/* Location of current replacement in the result */
 					*walk,				/* Used to walk the replacement string */
 					*match,				/* The current match */
 					*piece,				/* The current piece of subject */
-					*subject_end,		/* Points to the end of the subject */
 					*eval_result;		/* Result of eval */
 
 	/* Compile regex or get it from cache. */
@@ -625,16 +648,13 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 	/* Initialize */
 	match = NULL;
 	result[0] = '\0';
-	piece = subject;
-	subject_end = subject + subject_len;
+	start_offset = 0;
 	eval = preg_options & PREG_REPLACE_EVAL;
 	
-	while (count >= 0) {
+	while (1) {
 		/* Execute the regular expression. */
-		count = pcre_exec(re, extra, piece,
-							subject_end-piece, subject,
-						  	(piece==subject ? exoptions : exoptions|PCRE_NOTBOL),
-							offsets, size_offsets, (piece == match));
+		count = pcre_exec(re, extra, subject, subject_len, start_offset,
+						  exoptions|g_notempty, offsets, size_offsets);
 		
 		/* Check for too many substrings condition. */
 		if (count == 0) {
@@ -642,11 +662,13 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 			count = size_offsets/3;
 		}
 
-		if (count > 0) {
-			/* Set the match location in piece */
-			match = piece + offsets[0];
+		piece = &subject[start_offset];
 
-			new_len = strlen(result) + offsets[0]; /* part before the match */
+		if (count > 0) {
+			/* Set the match location in subject */
+			match = subject + offsets[0];
+
+			new_len = strlen(result) + offsets[0] - start_offset; /* part before the match */
 			
 			/* If evaluating, do it and add the return string's length */
 			if (eval) {
@@ -679,7 +701,7 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 			strncat(result, piece, match-piece);
 
 			/* copy replacement and backrefs */
-			walkbuf = &result[result_len + offsets[0]];
+			walkbuf = &result[result_len + offsets[0] - start_offset];
 			
 			/* If evaluating, copy result to the buffer and clean up */
 			if (eval) {
@@ -702,21 +724,39 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 						*walkbuf++ = *walk++;
 			}
 			*walkbuf = '\0';
-
-			/* Advance to the next piece */
-			piece += offsets[1];
-		} else {
-			new_len = strlen(result) + subject_end-piece;
-			if (new_len + 1 > alloc_len) {
-				alloc_len = new_len + 1; /* now we know exactly how long it is */
-				new_buf = emalloc(alloc_len * sizeof(char));
-				strcpy(new_buf, result);
-				efree(result);
-				result = new_buf;
+		} else { /* Failed to match */
+			/* If we previously set PCRE_NOTEMPTY after a null match,
+			   this is not necessarily the end. We need to advance
+			   the start offset, and continue. Fudge the offset values
+			   to achieve this, unless we're already at the end of the string. */
+			if (g_notempty != 0 && start_offset < subject_len) {
+				offsets[0] = start_offset;
+				offsets[1] = start_offset + 1;
+				strncat(result, piece, 1);
 			}
-			/* stick that last bit of string on our output */
-			strcat(result, piece);
+			else {
+				new_len = strlen(result) + subject_len - start_offset;
+				if (new_len + 1 > alloc_len) {
+					alloc_len = new_len + 1; /* now we know exactly how long it is */
+					new_buf = emalloc(alloc_len * sizeof(char));
+					strcpy(new_buf, result);
+					efree(result);
+					result = new_buf;
+				}
+				/* stick that last bit of string on our output */
+				strcat(result, piece);
+				break;
+			}
 		}
+			
+		/* If we have matched an empty string, mimic what Perl's /g options does.
+		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY and try
+		   the match again at the same point. If this fails (picked up above) we
+		   advance to the next character. */
+		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY : 0;
+		
+		/* Advance to the next piece */
+		start_offset = offsets[1];
 	}
 	
 	efree(offsets);
@@ -862,9 +902,10 @@ PHP_FUNCTION(preg_split)
 	int				 argc;				/* Argument count */
 	int				 limit_val;			/* Integer value of limit */
 	int				 count = 0;			/* Count of matched subpatterns */
+	int				 start_offset;		/* Where the new search starts */
+	int				 g_notempty = 0;	/* If the match should not be empty */
 	char			*match,				/* The current match */
-					*piece,				/* The current piece of subject */
-					*subject_end;		/* Points to the end of subject string */
+					*last_match;		/* Location of last match */
 
 	/* Get function parameters and do error checking */	
 	argc = ARG_COUNT(ht);
@@ -896,45 +937,60 @@ PHP_FUNCTION(preg_split)
 	offsets = (int *)emalloc(size_offsets * sizeof(int));
 	
 	/* Start at the beginning of the string */
-	piece = subject->value.str.val;
-	subject_end = piece + subject->value.str.len;
+	start_offset = 0;
+	last_match = subject->value.str.val;
 	match = NULL;
 	
 	/* Get next piece if no limit or limit not yet reached and something matched*/
-	while ((limit_val == -1 || limit_val > 1) && count >= 0) {
-		count = pcre_exec(re, extra, piece,
-						  subject_end-piece, subject->value.str.val,
-						  (piece==subject->value.str.val ? exoptions : exoptions|PCRE_NOTBOL),
-						  offsets, size_offsets, (piece==match));
+	while ((limit_val == -1 || limit_val > 1)) {
+		count = pcre_exec(re, extra, subject->value.str.val,
+						  subject->value.str.len, start_offset,
+						  exoptions|g_notempty, offsets, size_offsets);
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
 			zend_error(E_NOTICE, "Matched, but too many substrings\n");
 			count = size_offsets/3;
 		}
-
+				
 		/* If something matched */
 		if (count > 0) {
-			match = piece + offsets[0];
-			
+			match = subject->value.str.val + offsets[0];
+		
 			/* Add the piece to the return value */
-			add_next_index_stringl(return_value,
-								  piece,
-								  offsets[0], 1);
+			add_next_index_stringl(return_value, last_match,
+								   &subject->value.str.val[offsets[0]]-last_match, 1);
 			
-			/* Advance to next position */
-			piece += offsets[1];
+			last_match = &subject->value.str.val[offsets[1]];
 			
 			/* One less left to do */
 			if (limit_val != -1)
 				limit_val--;
+		} else { /* Failed to match */
+			/* If we previously set PCRE_NOTEMPTY after a null match,
+			   this is not necessarily the end. We need to advance
+			   the start offset, and continue. Fudge the offset values
+			   to achieve this, unless we're already at the end of the string. */
+			if (g_notempty != 0 && start_offset < subject->value.str.len) {
+				offsets[0] = start_offset;
+				offsets[1] = start_offset + 1;
+			} else
+				break;
 		}
+
+		/* If we have matched an empty string, mimic what Perl's /g options does.
+		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY and try
+		   the match again at the same point. If this fails (picked up above) we
+		   advance to the next character. */
+		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY : 0;
+		
+		/* Advance to the position right after the last full match */
+		start_offset = offsets[1];
 	}
 	
 	/* Add the last piece to the return value */
-	add_next_index_stringl(return_value,
-						   piece,
-						   subject_end-piece, 1);
+	add_next_index_string(return_value,
+						  &subject->value.str.val[start_offset], 1);
 	
 	/* Clean up */
 	efree(offsets);
@@ -1064,8 +1120,8 @@ PHP_FUNCTION(preg_grep)
 		
 		/* Perform the match */
 		count = pcre_exec(re, extra, entry->value.str.val,
-						  entry->value.str.len, entry->value.str.val,
-						  0, offsets, size_offsets, 0);
+						  entry->value.str.len, 0,
+						  0, offsets, size_offsets);
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
@@ -1119,15 +1175,19 @@ function_entry pcre_functions[] = {
 };
 
 zend_module_entry pcre_module_entry = {
-   "PCRE", pcre_functions, PHP_MINIT(pcre), PHP_MSHUTDOWN(pcre),
-		   PHP_RINIT(pcre), NULL,
-		   PHP_MINFO(pcre), STANDARD_MODULE_PROPERTIES
+   "PCRE", pcre_functions,
+		   PHP_MINIT(pcre),
+		   PHP_MSHUTDOWN(pcre),
+		   PHP_RINIT(pcre),
+		   NULL,
+		   PHP_MINFO(pcre),
+		   STANDARD_MODULE_PROPERTIES
 };
 
 /* }}} */
 
 
-#endif /* HAVE_PCRE */
+#endif /* HAVE_PCRE || HAVE_BUNDLED_PCRE */
 
 /*
  * Local variables:

@@ -442,4 +442,148 @@
 
 /(?s:.*X|^B)/D
 
+/\Biss\B/+
+    Mississippi
+
+/\Biss\B/+P
+    Mississippi
+
+/iss/G+
+    Mississippi
+
+/\Biss\B/G+
+    Mississippi
+
+/\Biss\B/g+
+    Mississippi
+    *** Failers
+    Mississippi\A
+
+/(?<=[Ms])iss/g+
+    Mississippi
+
+/(?<=[Ms])iss/G+
+    Mississippi
+
+/^iss/g+
+    ississippi
+    
+/.*iss/g+
+    abciss\nxyzisspqr 
+
+/.i./+g
+    Mississippi
+    Mississippi\A
+    Missouri river
+    Missouri river\A  
+
+/^.is/+g
+    Mississippi
+
+/^ab\n/g+
+    ab\nab\ncd
+
+/^ab\n/mg+
+    ab\nab\ncd
+
+/abc/
+
+/abc|bac/
+
+/(abc|bac)/
+
+/(abc|(c|dc))/
+
+/(abc|(d|de)c)/
+
+/a*/
+
+/a+/
+
+/(baa|a+)/
+
+/a{0,3}/
+
+/baa{3,}/
+
+/"([^\\"]+|\\.)*"/
+
+/(abc|ab[cd])/
+
+/(a|.)/
+
+/a|ba|\w/
+
+/abc(?=pqr)/
+
+/...(?<=abc)/
+
+/abc(?!pqr)/
+
+/ab./
+
+/ab[xyz]/
+
+/abc*/
+
+/ab.c*/
+
+/a.c*/
+
+/.c*/
+
+/ac*/
+
+/(a.c*|b.c*)/
+
+/a.c*|aba/
+
+/.+a/
+
+/(?=abcda)a.*/
+
+/(?=a)a.*/
+
+/a(b)*/
+
+/a\d*/
+
+/ab\d*/
+
+/a(\d)*/
+
+/abcde{0,0}/
+
+/ab\d+/
+
+/a(?(1)b)/
+
+/a(?(1)bag|big)/
+
+/a(?(1)bag|big)*/
+
+/a(?(1)bag|big)+/
+
+/a(?(1)b..|b..)/
+
+/ab\d{0}e/
+
+/a?b?/
+    a
+    b
+    ab
+    \
+    *** Failers
+    \N     
+    
+/|-/
+    abcd
+    -abc
+    \Nab-c
+    *** Failers
+    \Nabc     
+
+/.*?/g+
+  abc
+
 / End of test input /

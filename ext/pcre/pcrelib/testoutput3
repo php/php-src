@@ -1,4 +1,4 @@
-PCRE version 2.05 21-Apr-1999
+PCRE version 2.08 31-Aug-1999
 
 /(?<!bar)foo/
     foo
@@ -2827,6 +2827,103 @@ No match
 /word (?>[a-zA-Z0-9]+ ){0,30}otherword/
     word cat dog elephant mussel cow horse canary baboon snake shark the quick brown fox and the lazy dog and several other words getting close to thirty by now I hope
 No match
+
+/(?<=\d{3}(?!999))foo/
+    999foo
+ 0: foo
+    123999foo 
+ 0: foo
+    *** Failers
+No match
+    123abcfoo
+No match
+    
+/(?<=(?!...999)\d{3})foo/
+    999foo
+ 0: foo
+    123999foo 
+ 0: foo
+    *** Failers
+No match
+    123abcfoo
+No match
+
+/(?<=\d{3}(?!999)...)foo/
+    123abcfoo
+ 0: foo
+    123456foo 
+ 0: foo
+    *** Failers
+No match
+    123999foo  
+No match
+    
+/(?<=\d{3}...)(?<!999)foo/
+    123abcfoo   
+ 0: foo
+    123456foo 
+ 0: foo
+    *** Failers
+No match
+    123999foo  
+No match
+
+/<a[\s]+href[\s]*=[\s]*          # find <a href=
+ ([\"\'])?                       # find single or double quote
+ (?(1) (.*?)\1 | ([^\s]+))       # if quote found, match up to next matching
+                                 # quote, otherwise match up to next space
+/isx
+    <a href=abcd xyz
+ 0: <a href=abcd
+ 1: <unset>
+ 2: <unset>
+ 3: abcd
+    <a href=\"abcd xyz pqr\" cats
+ 0: <a href="abcd xyz pqr"
+ 1: "
+ 2: abcd xyz pqr
+    <a href=\'abcd xyz pqr\' cats
+ 0: <a href='abcd xyz pqr'
+ 1: '
+ 2: abcd xyz pqr
+
+/<a\s+href\s*=\s*                # find <a href=
+ (["'])?                         # find single or double quote
+ (?(1) (.*?)\1 | (\S+))          # if quote found, match up to next matching
+                                 # quote, otherwise match up to next space
+/isx
+    <a href=abcd xyz
+ 0: <a href=abcd
+ 1: <unset>
+ 2: <unset>
+ 3: abcd
+    <a href=\"abcd xyz pqr\" cats
+ 0: <a href="abcd xyz pqr"
+ 1: "
+ 2: abcd xyz pqr
+    <a href       =       \'abcd xyz pqr\' cats
+ 0: <a href       =       'abcd xyz pqr'
+ 1: '
+ 2: abcd xyz pqr
+
+/<a\s+href(?>\s*)=(?>\s*)        # find <a href=
+ (["'])?                         # find single or double quote
+ (?(1) (.*?)\1 | (\S+))          # if quote found, match up to next matching
+                                 # quote, otherwise match up to next space
+/isx
+    <a href=abcd xyz
+ 0: <a href=abcd
+ 1: <unset>
+ 2: <unset>
+ 3: abcd
+    <a href=\"abcd xyz pqr\" cats
+ 0: <a href="abcd xyz pqr"
+ 1: "
+ 2: abcd xyz pqr
+    <a href       =       \'abcd xyz pqr\' cats
+ 0: <a href       =       'abcd xyz pqr'
+ 1: '
+ 2: abcd xyz pqr
 
 / End of test input /       
 
