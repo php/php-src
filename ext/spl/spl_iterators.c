@@ -302,7 +302,7 @@ zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
 	spl_recursive_it_rewind
 };
 
-/* {{{ proto RecursiveIteratorIterator::__construct(RecursiveIterator it [, int flags = RIT_LEAVES_ONLY])
+/* {{{ proto RecursiveIteratorIterator::__construct(RecursiveIterator|IteratorAggregate it [, int flags = RIT_LEAVES_ONLY]) throws InvalidArgumentException
    Creates a RecursiveIteratorIterator from a RecursiveIterator. */
 SPL_METHOD(RecursiveIteratorIterator, __construct)
 {
@@ -312,10 +312,20 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 	zend_class_entry          *ce_iterator;
 	long                       mode = RIT_LEAVES_ONLY;
 
-	php_set_error_handling(EH_THROW, zend_exception_get_default() TSRMLS_CC);
+	php_set_error_handling(EH_THROW, spl_ce_InvalidArgumentException TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|l", &iterator, spl_ce_RecursiveIterator, &mode) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "o|l", &iterator, &mode) == SUCCESS) {
+		if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate TSRMLS_CC)) {
+			zval *aggregate = iterator;
+			zend_call_method_with_0_params(&aggregate, Z_OBJCE_P(aggregate), &Z_OBJCE_P(aggregate)->iterator_funcs.zf_new_iterator, "getiterator", &iterator);
+		}
+	} else {
+		iterator = NULL;
+	}
+	if (!iterator || !instanceof_function(Z_OBJCE_P(iterator), spl_ce_RecursiveIterator TSRMLS_CC)) {
+fprintf(stderr, "### %s\n", iterator ? Z_OBJCE_P(iterator)->name : "non object");
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+		zend_throw_exception(spl_ce_InvalidArgumentException, "An instance of RecursiveIterator or IteratorAggregate creating it is required", 0 TSRMLS_CC);
 		return;
 	}
 
@@ -509,7 +519,7 @@ static zend_object_value spl_RecursiveIteratorIterator_new(zend_class_entry *cla
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_recursive_it___construct, 0) 
-	ZEND_ARG_OBJ_INFO(0, iterator, RecursiveIterator, 0)
+	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO();
 
