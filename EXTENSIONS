@@ -464,7 +464,7 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xslt
 PRIMARY MAINTAINER:  Hartmut Holzgraefe <hartmut@six.de>
-MAINTENANC:          Odd Fixes
+MAINTENANCE:         Odd Fixes
 STATUS:              Working (mostly)
 -------------------------------------------------------------------------------
 EXTENSION:           yaz
