@@ -1,3 +1,49 @@
+2002-06-21  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/ldap/ldap.c: - Fix ZTS build, see #17915.
+
+2002-06-21  Stefan Esser  <s.esser@e-matters.de>
+
+    * sapi/apache2filter/sapi_apache2.c
+      sapi/nsapi/nsapi.c
+      sapi/apache/mod_php4.c: Fixing the same possible memory leak.
+
+2002-06-21  Edin Kadribasic  <edink@proventum.net>
+
+    * main/config.w32.h.in: Made pgsql compile on win32 again.
+    All defines regarding libpq capabilities are kept in ext/pgsql/pgsql.dsp
+    where HAVE_PQESCAPE is already defined.
+
+2002-06-21  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Remote.php: * typo
+
+2002-06-21  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/com/COM.c:
+    removed CONST_EFREE_PERSISTENT so that andi can commit his patch
+
+
+2002-06-21  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/SAPI.c
+      main/SAPI.h
+      sapi/pi3web/pi3web_sapi.c
+      sapi/tux/php_tux.c
+      ext/standard/head.c:
+    - Added a new parameter to the header() function which overrides the HTTP
+      response code.
+    - Added a new parameter to the header() function which overrides the HTTP
+      response code. 
+
+2002-06-21  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Config.php: * bending over backwards to find sensible defaults
+
+2002-06-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gmp/config.m4: Make this extension compile as shared extension too.
+
 2002-06-20  Sander Roobol  <phy@wanadoo.nl>
 
     * ext/mime_magic/mime_magic.c: ZTS fixes
