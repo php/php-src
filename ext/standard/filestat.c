@@ -474,32 +474,18 @@ PHP_FUNCTION(touch)
 	int ret;
 	struct stat sb;
 	FILE *file;
-	struct utimbuf *newtime = NULL;
+	struct utimbuf newtimebuf;
+	struct utimbuf *newtime = &newtimebuf;
 	int ac = ZEND_NUM_ARGS();
 
 	if (ac == 1 && zend_get_parameters_ex(1, &filename) != FAILURE) {
 #ifndef HAVE_UTIME_NULL
-		newtime = (struct utimbuf *)emalloc(sizeof(struct utimbuf));
-		if (!newtime) {
-			php_error(E_WARNING, "unable to emalloc memory for changing time");
-			return;
-		}
 		newtime->modtime = newtime->actime = time(NULL);
 #endif
 	} else if (ac == 2 && zend_get_parameters_ex(2, &filename, &filetime) != FAILURE) {
-		newtime = (struct utimbuf *)emalloc(sizeof(struct utimbuf));
-		if (!newtime) {
-			php_error(E_WARNING, "unable to emalloc memory for changing time");
-			return;
-		}
 		convert_to_long_ex(filetime);
 		newtime->modtime = newtime->actime = Z_LVAL_PP(filetime);
 	} else if (ac == 3 && zend_get_parameters_ex(3, &filename, &filetime, &fileatime) != FAILURE) {
-		newtime = (struct utimbuf *)emalloc(sizeof(struct utimbuf));
-		if (!newtime) {
-			php_error(E_WARNING, "unable to emalloc memory for changing time");
-			return;
-		}
 		convert_to_long_ex(fileatime);
 		convert_to_long_ex(filetime);
 		newtime->actime = Z_LVAL_PP(fileatime);
@@ -510,15 +496,11 @@ PHP_FUNCTION(touch)
 	convert_to_string_ex(filename);
 
 	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(filename), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		if (newtime) efree(newtime);
 		RETURN_FALSE;
 	}
 
 	/* Check the basedir */
 	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
-		if (newtime) {
-			efree(newtime);
-		}
 		RETURN_FALSE;
 	}
 
@@ -528,14 +510,12 @@ PHP_FUNCTION(touch)
 		file = VCWD_FOPEN(Z_STRVAL_PP(filename), "w");
 		if (file == NULL) {
 			php_error(E_WARNING, "unable to create file %s because %s", Z_STRVAL_PP(filename), strerror(errno));
-			if (newtime) efree(newtime);
 			RETURN_FALSE;
 		}
 		fclose(file);
 	}
 
 	ret = VCWD_UTIME(Z_STRVAL_PP(filename), newtime);
-	if (newtime) efree(newtime);
 	if (ret == -1) {
 		php_error(E_WARNING, "utime failed: %s", strerror(errno));
 		RETURN_FALSE;
