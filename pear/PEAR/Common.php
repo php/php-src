@@ -260,7 +260,7 @@ class PEAR_Common extends PEAR
             case 'SUMMARY':
                 $this->pkginfo['summary'] .= $data;
                 break;
-            case 'INITIALS':
+            case 'USER':
                 $this->current_maintainer['handle'] .= $data;
                 break;
             case 'EMAIL':

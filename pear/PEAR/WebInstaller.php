@@ -455,7 +455,7 @@ class PEAR_WebInstaller extends PEAR
         case "SUMMARY":
             $this->pkginfo["summary"] .= $data;
             break;
-        case "INITIALS":
+        case "USER":
             $this->pkginfo["maintainer_handle"] .= $data;
             break;
         case "EMAIL":
