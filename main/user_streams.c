@@ -477,11 +477,12 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 			&retval,
 			0, NULL, 0, NULL TSRMLS_CC);
 
-	if (!(call_result == SUCCESS && retval != NULL && zval_is_true(retval))) {
-		if (call_result == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_EOF " is not implemented! Assuming EOF",
-					us->wrapper->classname);
-		}
+	if (call_result == SUCCESS && retval != NULL && zval_is_true(retval)) {
+		stream->eof = 1;
+	} else if (call_result == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"%s::" USERSTREAM_EOF " is not implemented! Assuming EOF",
+				us->wrapper->classname);
 
 		stream->eof = 1;
 	}
