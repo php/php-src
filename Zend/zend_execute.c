@@ -1741,11 +1741,12 @@ binary_assign_op_addr: {
 					
 					EX(calling_namespace) = EG(namespace);
 
-					EX(object).ptr = NULL;
-
 					do {
 						if (EG(namespace)) {
 							if (zend_hash_find(&EG(namespace)->function_table, function_name_strval, function_name_strlen+1, (void **) &function) == SUCCESS) {
+								if (EX(object).ptr = EG(this)) {
+									EX(object).ptr->refcount++;
+								}
 								break;
 							}
 						}
@@ -1753,6 +1754,7 @@ binary_assign_op_addr: {
 							zend_error(E_ERROR, "Call to undefined function:  %s()", function_name_strval);
 						}
 						EX(calling_namespace) = NULL;
+						EX(object).ptr = NULL;
 					} while (0);
 					
 					if (!is_const) {
@@ -1768,20 +1770,26 @@ binary_assign_op_addr: {
 			case ZEND_DO_FCALL: {
 					zval *fname = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 					
+					zend_ptr_stack_push(&EG(arg_types_stack), EX(object).ptr);
+
 					do {
 						if (EG(namespace)) {
 							if (zend_hash_find(&EG(namespace)->function_table, fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function) == SUCCESS) {
+								if (EX(object).ptr = EG(this)) {
+									EX(object).ptr->refcount++;
+								}
 								break;
 							}
 						}
 						if (zend_hash_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
 							zend_error(E_ERROR, "Unknown function:  %s()\n", fname->value.str.val);
 						}
+						EX(object).ptr = NULL;
 					} while (0);
+
 					EX(calling_namespace) = EG(namespace);
 					FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
-					zend_ptr_stack_push(&EG(arg_types_stack), EX(object).ptr);
-					EX(object).ptr = NULL;
+					
 					goto do_fcall_common;
 				}
 do_fcall_common:
