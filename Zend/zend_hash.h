@@ -61,6 +61,8 @@ typedef struct hashtable {
 } HashTable;
 
 
+BEGIN_EXTERN_C()
+
 /* startup/shutdown */
 ZEND_API int zend_hash_init(HashTable *ht, uint nSize, ulong(*pHashFunction) (char *arKey, uint nKeyLength), void (*pDestructor) (void *pData), int persistent);
 ZEND_API void zend_hash_destroy(HashTable *ht);
@@ -129,6 +131,7 @@ ZEND_API ulong zend_hash_next_free_element(HashTable *ht);
 ZEND_API void zend_hash_move_forward(HashTable *ht);
 ZEND_API void zend_hash_move_backwards(HashTable *ht);
 ZEND_API int zend_hash_get_current_key(HashTable *ht, char **str_index, ulong *num_index);
+ZEND_API int zend_hash_get_current_key_type(HashTable *ht);
 ZEND_API int zend_hash_get_current_data(HashTable *ht, void **pData);
 ZEND_API void zend_hash_internal_pointer_reset(HashTable *ht);
 ZEND_API void zend_hash_internal_pointer_end(HashTable *ht);
@@ -149,5 +152,7 @@ ZEND_API ulong hashpjw(char *arKey, uint nKeyLength);
 void zend_hash_display_pListTail(HashTable *ht);
 void zend_hash_display(HashTable *ht);
 #endif
+
+END_EXTERN_C()
 
 #endif							/* _HASH_ */
