@@ -662,11 +662,11 @@ static int get_http_body(php_stream *stream, char *headers,  char **response, in
 		while (!done) {
 			int buf_size = 0;
 
-			php_stream_gets(stream, chunk_size, sizeof(chunk_size));		
+			php_stream_gets(stream, chunk_size, sizeof(chunk_size));
 			if (sscanf(chunk_size, "%x", &buf_size) > 0 ) {
 				if (buf_size > 0) {
 					int len_size = 0;
-		
+
 					http_buf = erealloc(http_buf, http_buf_size + buf_size + 1);
 
 					while (len_size < buf_size) {
@@ -677,14 +677,14 @@ static int get_http_body(php_stream *stream, char *headers,  char **response, in
 						  break;
 						}
 						len_size += len_read;
-	 					http_buf_size += len_size;
+	 					http_buf_size += len_read;
  					}
  				}
-				
+
 				/* Eat up '\r' '\n' */
 				php_stream_getc(stream);
 				php_stream_getc(stream);
-			} else {				
+			} else {
 				/* Somthing wrong in chunked encoding */
 				efree(http_buf);
 				return FALSE;
