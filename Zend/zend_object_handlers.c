@@ -631,6 +631,9 @@ zval **zend_get_static_property(zend_class_entry *ce, char *property_name, int p
 	zend_property_info *property_info;
 	zend_property_info std_property_info;
 
+	if(ce->type == ZEND_NAMESPACE) {
+		zend_hash_find(ce->static_members, property_name, property_name_len+1, (void **) &retval);
+	} else {
 	if (zend_hash_find(&ce->properties_info, property_name, property_name_len+1, (void **) &property_info)==FAILURE) {
 		std_property_info.flags = ZEND_ACC_PUBLIC;
 		std_property_info.name = property_name;
@@ -654,6 +657,7 @@ zval **zend_get_static_property(zend_class_entry *ce, char *property_name, int p
 		}
 		tmp_ce = tmp_ce->parent;
 	}
+	}
 
 	if (!retval) {
 		switch (type) {
@@ -669,8 +673,10 @@ zval **zend_get_static_property(zend_class_entry *ce, char *property_name, int p
 			case BP_VAR_W: {					
 					zval *new_zval = &EG(uninitialized_zval);
 
+					if(ce->type != ZEND_NAMESPACE) {
 					new_zval->refcount++;
 					zend_hash_quick_update(ce->static_members, property_info->name, property_info->name_length+1, property_info->h, &new_zval, sizeof(zval *), (void **) &retval);
+				}
 				}
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
