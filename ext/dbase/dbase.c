@@ -473,12 +473,24 @@ PHP_FUNCTION(dbase_get_record)
 		case 'D':
 			add_next_index_string(return_value, str_value, 1);
 			break;
-		case 'N':	/* FALLS THROUGH */
-		case 'L':	/* FALLS THROUGH */
+		case 'N':
 			if (cur_f->db_fdc == 0) {
 				add_next_index_long(return_value, strtol(str_value, NULL, 10));
 			} else {
 				add_next_index_double(return_value, atof(str_value));
+			}
+			break;
+		case 'L':	/* we used to FALL THROUGH, but now we check for T/Y and F/N
+					   and insert 1 or 0, respectively.  db_fdc is the number of
+					   decimals, which we don't care about.      3/14/2001 LEW */
+			if ((*str_value == 'T') || (*str_value == 'Y')) {
+				add_next_index_long(return_value, strtol("1", NULL, 10));
+			} else {
+				if ((*str_value == 'F') || (*str_value == 'N')) {
+					add_next_index_long(return_value, strtol("0", NULL, 10));
+				} else {
+					add_next_index_long(return_value, strtol(" ", NULL, 10));
+				}
 			}
 			break;
 		case 'M':
@@ -552,12 +564,24 @@ PHP_FUNCTION(dbase_get_record_with_names)
 			case 'D':
 				add_assoc_string(return_value, cur_f->db_fname, str_value, 1);
 				break;
-			case 'N':       /* FALLS THROUGH */
-			case 'L':       /* FALLS THROUGH */
+			case 'N':
 				if (cur_f->db_fdc == 0) {
 					add_assoc_long(return_value, cur_f->db_fname, strtol(str_value, NULL, 10));
 				} else {
 					add_assoc_double(return_value, cur_f->db_fname, atof(str_value));
+				}
+				break;
+			case 'L':	/* we used to FALL THROUGH, but now we check for T/Y and F/N
+						   and insert 1 or 0, respectively.  db_fdc is the number of
+						   decimals, which we don't care about.      3/14/2001 LEW */
+				if ((*str_value == 'T') || (*str_value == 'Y')) {
+					add_assoc_long(return_value, cur_f->db_fname,strtol("1", NULL, 10));
+				} else {
+					if ((*str_value == 'F') || (*str_value == 'N')) {
+						add_assoc_long(return_value, cur_f->db_fname,strtol("0", NULL, 10));
+					} else {
+						add_assoc_long(return_value, cur_f->db_fname,strtol(" ", NULL, 10));
+					}
 				}
 				break;
 			case 'M':
