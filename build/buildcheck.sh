@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.8 2001-05-06 18:51:21 sas Exp $ 
+# $Id: buildcheck.sh,v 1.9 2001-05-23 19:10:06 sas Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -81,7 +81,7 @@ exit 1
 fi
 
 am_prefix=`which automake | sed -e 's#/[^/]*/[^/]*$##'`
-lt_prefix=`which $libtool | sed -e 's#/[^/]*/[^/]*$##'`
+lt_prefix=`echo $libtool | sed -e 's#/[^/]*/[^/]*$##'`
 if test "$am_prefix" != "$lt_prefix"; then
     echo "WARNING: automake and libtool are installed in different"
     echo "         directories.  This may cause aclocal to fail."
