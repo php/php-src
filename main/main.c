@@ -882,6 +882,7 @@ int php_module_startup(sapi_module_struct *sf)
 		return FAILURE;
 	}
 	php_disable_functions();
+	zend_startup_extensions();
 	module_initialized = 1;
 	sapi_deactivate(SLS_C);
 	return SUCCESS;
