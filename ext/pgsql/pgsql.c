@@ -2730,7 +2730,8 @@ static unsigned char * php_pgsql_unescape_bytea(unsigned char *strtext, size_t *
 				break;
 		}
 	}
-	buffer = erealloc(buffer, buflen);
+	buffer[buflen] = '\0';
+	buffer = erealloc(buffer, buflen+1);
 	if (buffer == NULL)
 		return NULL;
 
