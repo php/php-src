@@ -114,22 +114,22 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 
 		doc = soap_xmlParseFile(location);
 		if (doc == NULL) {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: can't import schema from '%s'",location);
+			soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s'", location);
 		}
 		schema = get_node(doc->children, "schema");
 		if (schema == NULL) {
 			xmlFreeDoc(doc);
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: can't import schema from '%s'",location);
+			soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s'", location);
 		}
 		new_tns = get_attribute(schema->properties, "targetNamespace");
 		if (import) {
 			if (ns != NULL && (new_tns == NULL || strcmp(ns->children->content,new_tns->children->content) != 0)) {
 				xmlFreeDoc(doc);
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s'",location,new_tns->children->content);
+				soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s'", location, new_tns->children->content);
 			}
 			if (ns == NULL && new_tns != NULL) {
 				xmlFreeDoc(doc);
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s'",location,new_tns->children->content);
+				soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s'", location, new_tns->children->content);
 			}
 		} else {
 			new_tns = get_attribute(schema->properties, "targetNamespace");
@@ -140,7 +140,7 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 				}
 			} else if (tns != NULL && strcmp(tns->children->content,new_tns->children->content) != 0) {
 				xmlFreeDoc(doc);
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: can't include schema from '%s', different 'targetNamespace'",location);
+				soap_error1(E_ERROR, "Parsing Schema: can't include schema from '%s', different 'targetNamespace'", location);
 			}
 		}
 		zend_hash_add(&ctx->docs, location, strlen(location)+1, (void**)&doc, sizeof(xmlDocPtr), NULL);
@@ -199,7 +199,7 @@ int load_schema(sdlCtx *ctx,xmlNodePtr schema)
 
 			location = get_attribute(trav->properties, "schemaLocation");
 			if (location == NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: include has no 'schemaLocation' attribute");
+				soap_error0(E_ERROR, "Parsing Schema: include has no 'schemaLocation' attribute");
 			} else {
 				xmlChar *uri;
 				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
@@ -219,7 +219,7 @@ int load_schema(sdlCtx *ctx,xmlNodePtr schema)
 
 			location = get_attribute(trav->properties, "schemaLocation");
 			if (location == NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: redefine has no 'schemaLocation' attribute");
+				soap_error0(E_ERROR, "Parsing Schema: redefine has no 'schemaLocation' attribute");
 			} else {
 			  xmlChar *uri;
 				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
@@ -243,7 +243,7 @@ int load_schema(sdlCtx *ctx,xmlNodePtr schema)
 			location = get_attribute(trav->properties, "schemaLocation");
 
 			if (ns != NULL && tns != NULL && strcmp(ns->children->content,tns->children->content) == 0) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: can't import schema from '%s', namespace must not match the enclosing schema 'targetNamespace'",location->children->content);
+				soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s', namespace must not match the enclosing schema 'targetNamespace'", location->children->content);
 			}
 			if (location) {
 				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
@@ -290,7 +290,7 @@ int load_schema(sdlCtx *ctx,xmlNodePtr schema)
 		} else if (node_is_equal(trav,"annotation")) {
 			/* TODO: <annotation> support */
 		} else {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in schema",trav->name);
+			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in schema", trav->name);
 		}
 		trav = trav->next;
 	}
@@ -371,7 +371,7 @@ static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr simpleType, 
 
 		create_encoder(sdl, cur_type, ns->children->content, name->children->content);
 	} else {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: simpleType has no 'name' attribute");
+		soap_error0(E_ERROR, "Parsing Schema: simpleType has no 'name' attribute");
 	}
 
 	trav = simpleType->children;
@@ -392,13 +392,13 @@ static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr simpleType, 
 			schema_union(sdl, tns, trav, cur_type);
 			trav = trav->next;
 		} else {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in simpleType",trav->name);
+			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in simpleType", trav->name);
 		}
 	} else {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: expected <restriction>, <list> or <union> in simpleType");
+		soap_error0(E_ERROR, "Parsing Schema: expected <restriction>, <list> or <union> in simpleType");
 	}
 	if (trav != NULL) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in simpleType",trav->name);
+		soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in simpleType", trav->name);
 	}
 
 	return TRUE;
@@ -454,7 +454,7 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 		sdlTypePtr newType, *tmp;
 
 		if (itemType != NULL) {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element has both 'itemType' attribute and subtype");
+			soap_error0(E_ERROR, "Parsing Schema: element has both 'itemType' attribute and subtype");
 		}
 
 		newType = emalloc(sizeof(sdlType));
@@ -473,7 +473,7 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 		trav = trav->next;
 	}
 	if (trav != NULL) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in list",trav->name);
+		soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in list", trav->name);
 	}
 	return TRUE;
 }
@@ -546,7 +546,7 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 			sdlTypePtr newType, *tmp;
 
 			if (memberTypes != NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: union has both 'memberTypes' attribute and subtypes");
+				soap_error0(E_ERROR, "Parsing Schema: union has both 'memberTypes' attribute and subtypes");
 			}
 
 			newType = emalloc(sizeof(sdlType));
@@ -564,12 +564,12 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 			schema_simpleType(sdl, tns, trav, newType);
 
 		} else {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in union",trav->name);
+			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in union", trav->name);
 		}
 		trav = trav->next;
 	}
 	if (trav != NULL) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in union",trav->name);
+		soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in union", trav->name);
 	}
 	return TRUE;
 }
@@ -600,13 +600,13 @@ static int schema_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr simpCompT
 			schema_extension_simpleContent(sdl, tns, trav, cur_type);
 			trav = trav->next;
 		} else {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in simpleContent",trav->name);
+			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in simpleContent", trav->name);
 		}
 	} else {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: expected <restriction> or <extension> in simpleContent");
+		soap_error0(E_ERROR, "Parsing Schema: expected <restriction> or <extension> in simpleContent");
 	}
 	if (trav != NULL) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in simpleContent",trav->name);
+		soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in simpleContent", trav->name);
 	}
 
 	return TRUE;
@@ -644,7 +644,7 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodeP
 		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	} else if (!simpleType) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: restriction has no 'base' attribute");
+		soap_error0(E_ERROR, "Parsing Schema: restriction has no 'base' attribute");
 	}
 
 	if (cur_type->restrictions == NULL) {
@@ -709,13 +709,13 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodeP
 				trav = trav->next;
 				break;
 			} else {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in restriction",trav->name);
+				soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in restriction", trav->name);
 			}
 			trav = trav->next;
 		}
 	}
 	if (trav != NULL) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in restriction",trav->name);
+		soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in restriction", trav->name);
 	}
 
 	return TRUE;
@@ -747,7 +747,7 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNode
 		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	} else {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: restriction has no 'base' attribute");
+		soap_error0(E_ERROR, "Parsing Schema: restriction has no 'base' attribute");
 	}
 
 	trav = restType->children;
@@ -780,12 +780,12 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNode
 			trav = trav->next;
 			break;
 		} else {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in restriction",trav->name);
+			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in restriction", trav->name);
 		}
 		trav = trav->next;
 	}
 	if (trav != NULL) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in restriction",trav->name);
+		soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in restriction", trav->name);
 	}
 
 	return TRUE;
@@ -810,7 +810,7 @@ static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valp
 
 	value = get_attribute(val->properties, "value");
 	if (value == NULL) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: missing restriction value");
+		soap_error0(E_ERROR, "Parsing Schema: missing restriction value");
 	}
 
 	(*valptr)->value = atoi(value->children->content);
@@ -838,7 +838,7 @@ static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *va
 
 	value = get_attribute(val->properties, "value");
 	if (value == NULL) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: missing restriction value");
+		soap_error0(E_ERROR, "Parsing Schema: missing restriction value");
 	}
 
 	(*valptr)->value = estrdup(value->children->content);
@@ -872,7 +872,7 @@ static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr
 		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	} else {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: extension has no 'base' attribute");
+		soap_error0(E_ERROR, "Parsing Schema: extension has no 'base' attribute");
 	}
 
 	trav = extType->children;
@@ -890,12 +890,12 @@ static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr
 			trav = trav->next;
 			break;
 		} else {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in extension",trav->name);
+			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in extension", trav->name);
 		}
 		trav = trav->next;
 	}
 	if (trav != NULL) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in extension",trav->name);
+		soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in extension", trav->name);
 	}
 	return TRUE;
 }
@@ -927,7 +927,7 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePt
 		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	} else {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: extension has no 'base' attribute");
+		soap_error0(E_ERROR, "Parsing Schema: extension has no 'base' attribute");
 	}
 
 	trav = extType->children;
@@ -960,12 +960,12 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePt
 			trav = trav->next;
 			break;
 		} else {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in extension",trav->name);
+			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in extension", trav->name);
 		}
 		trav = trav->next;
 	}
 	if (trav != NULL) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in extension",trav->name);
+		soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in extension", trav->name);
 	}
 	return TRUE;
 }
@@ -1021,7 +1021,7 @@ static int schema_all(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr all, sdlTypePtr cur
 		if (node_is_equal(trav,"element")) {
 			schema_element(sdl, tns, trav, cur_type, newModel);
 		} else {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in all",trav->name);
+			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in all", trav->name);
 		}
 		trav = trav->next;
 	}
@@ -1101,7 +1101,7 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 				zend_hash_init(sdl->groups, 0, NULL, delete_type, 0);
 			}
 			if (zend_hash_add(sdl->groups, key.c, key.len+1, (void**)&newType, sizeof(sdlTypePtr), NULL) != SUCCESS) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: group '%s' already defined",key.c);
+				soap_error1(E_ERROR, "Parsing Schema: group '%s' already defined", key.c);
 			}
 
 			cur_type = newType;
@@ -1114,7 +1114,7 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 			zend_hash_next_index_insert(model->u.content, &newModel, sizeof(sdlContentModelPtr), NULL);
 		}
 	} else {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: group has no 'name' nor 'ref' attributes");
+		soap_error0(E_ERROR, "Parsing Schema: group has no 'name' nor 'ref' attributes");
 	}
 
 	newModel->min_occurs = 1;
@@ -1142,31 +1142,31 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 	if (trav != NULL) {
 		if (node_is_equal(trav,"choice")) {
 			if (ref != NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: group has both 'ref' attribute and subcontent");
+				soap_error0(E_ERROR, "Parsing Schema: group has both 'ref' attribute and subcontent");
 			}
 			newModel->kind = XSD_CONTENT_CHOICE;
 			schema_choice(sdl, tns, trav, cur_type, newModel);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"sequence")) {
 			if (ref != NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: group has both 'ref' attribute and subcontent");
+				soap_error0(E_ERROR, "Parsing Schema: group has both 'ref' attribute and subcontent");
 			}
 			newModel->kind = XSD_CONTENT_SEQUENCE;
 			schema_sequence(sdl, tns, trav, cur_type, newModel);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"all")) {
 			if (ref != NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: group has both 'ref' attribute and subcontent");
+				soap_error0(E_ERROR, "Parsing Schema: group has both 'ref' attribute and subcontent");
 			}
 			newModel->kind = XSD_CONTENT_ALL;
 			schema_all(sdl, tns, trav, cur_type, newModel);
 			trav = trav->next;
 		} else {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in group",trav->name);
+			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in group", trav->name);
 		}
 	}
 	if (trav != NULL) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in group",trav->name);
+		soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in group", trav->name);
 	}
 	return TRUE;
 }
@@ -1229,7 +1229,7 @@ static int schema_choice(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr choiceType, sdlT
 		} else if (node_is_equal(trav,"any")) {
 			schema_any(sdl, tns, trav, cur_type, newModel);
 		} else {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in choice",trav->name);
+			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in choice", trav->name);
 		}
 		trav = trav->next;
 	}
@@ -1295,7 +1295,7 @@ static int schema_sequence(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr seqType, sdlTy
 		} else if (node_is_equal(trav,"any")) {
 			schema_any(sdl, tns, trav, cur_type, newModel);
 		} else {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in sequence",trav->name);
+			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in sequence", trav->name);
 		}
 		trav = trav->next;
 	}
@@ -1335,13 +1335,13 @@ static int schema_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compCont
 			schema_extension_complexContent(sdl, tns, trav, cur_type);
 			trav = trav->next;
 		} else {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in complexContent",trav->name);
+			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in complexContent", trav->name);
 		}
 	} else {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: <restriction> or <extension> expected in complexContent");
+		soap_error0(E_ERROR, "Parsing Schema: <restriction> or <extension> expected in complexContent");
 	}
 	if (trav != NULL) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in complexContent", trav->name);
+		soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in complexContent", trav->name);
 	}
 
 	return TRUE;
@@ -1418,7 +1418,7 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compType, s
 		cur_type = (*ptr);
 		create_encoder(sdl, cur_type, ns->children->content, name->children->content);
 	} else {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: complexType has no 'name' attribute");
+		soap_error0(E_ERROR, "Parsing Schema: complexType has no 'name' attribute");
 		return FALSE;
 	}
 
@@ -1458,14 +1458,14 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compType, s
 					trav = trav->next;
 					break;
 				} else {
-					php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in complexType",trav->name);
+					soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in complexType", trav->name);
 				}
 				trav = trav->next;
 			}
 		}
 	}
 	if (trav != NULL) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in complexType",trav->name);
+		soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in complexType", trav->name);
 	}
 	return TRUE;
 }
@@ -1560,7 +1560,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 		smart_str_0(&key);
 		if (zend_hash_add(addHash, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), NULL) != SUCCESS) {
 			if (cur_type == NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element '%s' already defined",key.c);
+				soap_error1(E_ERROR, "Parsing Schema: element '%s' already defined", key.c);
 			} else {
 				zend_hash_next_index_insert(addHash, &newType, sizeof(sdlTypePtr), NULL);
 			}
@@ -1593,7 +1593,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 		}
 		cur_type = newType;
 	} else {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element has no 'name' nor 'ref' attributes");
+		soap_error0(E_ERROR, "Parsing Schema: element has no 'name' nor 'ref' attributes");
 	}
 
 	/* nillable = boolean : false */
@@ -1601,7 +1601,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 	attr = get_attribute(attrs, "nillable");
 	if (attr) {
 		if (ref != NULL) {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element has both 'ref' and 'nillable' attributes");
+			soap_error0(E_ERROR, "Parsing Schema: element has both 'ref' and 'nillable' attributes");
 		}
 		if (!stricmp(attr->children->content, "true") ||
 			!stricmp(attr->children->content, "1")) {
@@ -1616,7 +1616,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 	attr = get_attribute(attrs, "fixed");
 	if (attr) {
 		if (ref != NULL) {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element has both 'ref' and 'fixed' attributes");
+			soap_error0(E_ERROR, "Parsing Schema: element has both 'ref' and 'fixed' attributes");
 		}
 		cur_type->fixed = estrdup(attr->children->content);
 	}
@@ -1624,9 +1624,9 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 	attr = get_attribute(attrs, "default");
 	if (attr) {
 		if (ref != NULL) {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element has both 'ref' and 'fixed' attributes");
+			soap_error0(E_ERROR, "Parsing Schema: element has both 'ref' and 'fixed' attributes");
 		} else if (ref != NULL) {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element has both 'default' and 'fixed' attributes");
+			soap_error0(E_ERROR, "Parsing Schema: element has both 'default' and 'fixed' attributes");
 		}
 		cur_type->def = estrdup(attr->children->content);
 	}
@@ -1638,7 +1638,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 		xmlNsPtr nsptr;
 
 		if (ref != NULL) {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element has both 'ref' and 'type' attributes");
+			soap_error0(E_ERROR, "Parsing Schema: element has both 'ref' and 'type' attributes");
 		}
 		parse_namespace(type->children->content, &cptype, &str_ns);
 		nsptr = xmlSearchNs(element->doc, element, str_ns);
@@ -1657,17 +1657,17 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 	if (trav != NULL) {
 		if (node_is_equal(trav,"simpleType")) {
 			if (ref != NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element has both 'ref' attribute and subtype");
+				soap_error0(E_ERROR, "Parsing Schema: element has both 'ref' attribute and subtype");
 			} else if (type != NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element has both 'type' attribute and subtype");
+				soap_error0(E_ERROR, "Parsing Schema: element has both 'type' attribute and subtype");
 			}
 			schema_simpleType(sdl, tns, trav, cur_type);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"complexType")) {
 			if (ref != NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element has both 'ref' attribute and subtype");
+				soap_error0(E_ERROR, "Parsing Schema: element has both 'ref' attribute and subtype");
 			} else if (type != NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element has both 'type' attribute and subtype");
+				soap_error0(E_ERROR, "Parsing Schema: element has both 'type' attribute and subtype");
 			}
 			schema_complexType(sdl, tns, trav, cur_type);
 			trav = trav->next;
@@ -1681,7 +1681,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 		} else if (node_is_equal(trav,"keyref")) {
 			/* TODO: <keyref> support */
 		} else {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in element",trav->name);
+			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in element", trav->name);
 		}
 		trav = trav->next;
 	}
@@ -1761,11 +1761,11 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 		}
 
 		if (zend_hash_add(addHash, key.c, key.len + 1, &newAttr, sizeof(sdlAttributePtr), NULL) != SUCCESS) {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attribute '%s' already defined", key.c);
+			soap_error1(E_ERROR, "Parsing Schema: attribute '%s' already defined", key.c);
 		}
 		smart_str_free(&key);
 	} else{
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attribute has no 'name' nor 'ref' attributes");
+		soap_error0(E_ERROR, "Parsing Schema: attribute has no 'name' nor 'ref' attributes");
 	}
 
 	/* type = QName */
@@ -1775,7 +1775,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 		xmlNsPtr nsptr;
 
 		if (ref != NULL) {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attribute has both 'ref' and 'type' attributes");
+			soap_error0(E_ERROR, "Parsing Schema: attribute has both 'ref' and 'type' attributes");
 		}
 		parse_namespace(type->children->content, &cptype, &str_ns);
 		nsptr = xmlSearchNs(attrType->doc, attrType, str_ns);
@@ -1865,9 +1865,9 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 		if (node_is_equal(trav,"simpleType")) {
 			sdlTypePtr dummy_type;
 			if (ref != NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attribute has both 'ref' attribute and subtype");
+				soap_error0(E_ERROR, "Parsing Schema: attribute has both 'ref' attribute and subtype");
 			} else if (type != NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attribute has both 'type' attribute and subtype");
+				soap_error0(E_ERROR, "Parsing Schema: attribute has both 'type' attribute and subtype");
 			}
 			dummy_type = emalloc(sizeof(sdlType));
 			memset(dummy_type, 0, sizeof(sdlType));
@@ -1880,7 +1880,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 		}
 	}
 	if (trav != NULL) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in attribute",trav->name);
+		soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in attribute", trav->name);
 	}
 	return TRUE;
 }
@@ -1916,7 +1916,7 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 			smart_str_0(&key);
 
 			if (zend_hash_add(ctx->attributeGroups, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), NULL) != SUCCESS) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attributeGroup '%s' already defined", key.c);
+				soap_error1(E_ERROR, "Parsing Schema: attributeGroup '%s' already defined", key.c);
 			}
 			cur_type = newType;
 			smart_str_free(&key);
@@ -1950,7 +1950,7 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 			cur_type = NULL;
 		}
 	} else{
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attributeGroup has no 'name' nor 'ref' attributes");
+		soap_error0(E_ERROR, "Parsing Schema: attributeGroup has no 'name' nor 'ref' attributes");
 	}
 
 	trav = attrGroup->children;
@@ -1961,28 +1961,28 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 	while (trav != NULL) {
 		if (node_is_equal(trav,"attribute")) {
 			if (ref != NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attributeGroup has both 'ref' attribute and subattribute");
+				soap_error0(E_ERROR, "Parsing Schema: attributeGroup has both 'ref' attribute and subattribute");
 			}
 			schema_attribute(sdl, tns, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"attributeGroup")) {
 			if (ref != NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attributeGroup has both 'ref' attribute and subattribute");
+				soap_error0(E_ERROR, "Parsing Schema: attributeGroup has both 'ref' attribute and subattribute");
 			}
 			schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"anyAttribute")) {
 			if (ref != NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attributeGroup has both 'ref' attribute and subattribute");
+				soap_error0(E_ERROR, "Parsing Schema: attributeGroup has both 'ref' attribute and subattribute");
 			}
 			/* TODO: <anyAttribute> support */
 			trav = trav->next;
 			break;
 		} else {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in attributeGroup",trav->name);
+			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in attributeGroup", trav->name);
 		}
 		trav = trav->next;
 	}
 	if (trav != NULL) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in attributeGroup",trav->name);
+		soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in attributeGroup", trav->name);
 	}
 	return TRUE;
 }
@@ -2112,7 +2112,7 @@ static void schema_content_model_fixup(sdlCtx *ctx, sdlContentModelPtr model)
 				model->kind = XSD_CONTENT_GROUP;
 				model->u.group = (*tmp);
 			} else {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unresolved group 'ref' attribute");
+				soap_error0(E_ERROR, "Parsing Schema: unresolved group 'ref' attribute");
 			}
 			break;
 		}
@@ -2153,7 +2153,7 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 				  type->def = estrdup((*tmp)->def);
 				}
 			} else {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unresolved element 'ref' attribute");
+				soap_error0(E_ERROR, "Parsing Schema: unresolved element 'ref' attribute");
 			}
 		}
 		efree(type->ref);
