@@ -214,7 +214,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		}
 	}
 
-	if (param->param_type == PDO_PARAM_STR && param->max_value_len <= 0) {
+	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0) {
 		convert_to_string(param->parameter);
 	}
 
@@ -379,7 +379,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno TSRMLS_DC
 
 	stmt->methods->get_col(stmt, colno, &value, &value_len, &caller_frees TSRMLS_CC);
 
-	switch (col->param_type) {
+	switch (PDO_PARAM_TYPE(col->param_type)) {
 		case PDO_PARAM_INT:
 			if (value && value_len == sizeof(long)) {
 				ZVAL_LONG(dest, *(long*)value);
