@@ -246,7 +246,7 @@ PS_CLOSE_FUNC(files)
 
 PS_READ_FUNC(files)
 {
-	ssize_t n;
+	long n;
 	struct stat sbuf;
 	PS_FILES_DATA;
 
@@ -276,7 +276,7 @@ PS_READ_FUNC(files)
 
 PS_WRITE_FUNC(files)
 {
-	ssize_t n;
+	long n;
 	PS_FILES_DATA;
 
 	ps_files_open(data, key);
