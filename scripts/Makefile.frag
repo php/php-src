@@ -24,28 +24,34 @@ install-build:
 
 HEADER_DIRS = \
 	/ \
-	Zend \
-	TSRM \
-	ext/standard \
-	ext/session \
-	ext/xml \
-	ext/xml/expat \
-	main \
-	main/streams \
-	ext/mbstring \
-	ext/pgsql \
-	regex \
-	ext/sqlite/libsqlite/src
+	Zend/ \
+	TSRM/ \
+	main/ \
+	main/streams/ \
+	regex/ \
+	ext/standard/ \
+	ext/session/ \
+	ext/xml/ \
+	ext/xml/expat/ \
+	ext/mbstring/ \
+	ext/sqlite/libsqlite/src/sqlite.h
 
 install-headers:
 	-@for i in $(HEADER_DIRS); do \
+		i=`$(top_srcdir)/build/shtool path -d $$i`; \
 		paths="$$paths $(INSTALL_ROOT)$(phpincludedir)/$$i"; \
 	done; \
 	$(mkinstalldirs) $$paths && \
 	echo "Installing header files:          $(INSTALL_ROOT)$(phpincludedir)/" && \
 	for i in $(HEADER_DIRS); do \
-		(cd $(top_srcdir)/$$i && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/$$i; \
-		cd $(top_builddir)/$$i && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/$$i) 2>/dev/null || true; \
+		if test -f "$(top_srcdir)/$$i"; then \
+			$(INSTALL_DATA) $(top_srcdir)/$$i $(INSTALL_ROOT)$(phpincludedir)/$$i; \
+		elif test -f "$(top_builddir)/$$i"; then \
+			$(INSTALL_DATA) $(top_builddir)/$$i $(INSTALL_ROOT)$(phpincludedir)/$$i; \
+		else \
+			(cd $(top_srcdir)/$$i && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/$$i; \
+			cd $(top_builddir)/$$i && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/$$i) 2>/dev/null || true; \
+		fi \
 	done; \
 	cd $(top_srcdir)/sapi/embed && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/main
 
