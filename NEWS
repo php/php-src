@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
+- Fixed building Apache SAPI module on SCO UnixWare (Sascha)
 - Fixed writing empty session sets to shared memory (tcarroll@chc-chimes.com)
 - Added support for BSD/OS make (Sascha)
 - Added improved URL rewriter (Sascha)
