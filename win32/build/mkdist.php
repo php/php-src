@@ -335,7 +335,7 @@ function copy_dir($source, $dest)
 
 /* change this next line to true to use good-old
  * hand-assembled go-pear-bundle from the snapshot template */
-$use_pear_template = false;
+$use_pear_template = true;
 
 if (!$use_pear_template) {
 	/* Let's do a PEAR-less pear setup */
