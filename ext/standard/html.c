@@ -408,11 +408,10 @@ static enum entity_charset determine_charset(char *charset_hint)
  */
 PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset)
 {
-	int i, maxlen, len, retlen;
+	int retlen;
 	int j, k;
 	char *replaced, *ret;
 	enum entity_charset charset = determine_charset(hint_charset);
-	int matches_map;
 	unsigned char replacement[15];
 	
 	ret = estrdup(old);
@@ -457,7 +456,7 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 		if (basic_entities[j].flags && (quote_style & basic_entities[j].flags) == 0)
 			continue;
 		
-		replacement[0] = basic_entities[j].charcode;
+		replacement[0] = (unsigned char)basic_entities[j].charcode;
 		replacement[1] = '\0';
 		
 		replaced = php_str_to_str(ret, retlen, basic_entities[j].entity, basic_entities[j].entitylen, replacement, 1, &retlen);
@@ -674,7 +673,7 @@ PHP_FUNCTION(get_html_translation_table)
 				if (basic_entities[j].flags && (quote_style & basic_entities[j].flags) == 0)
 					continue;
 				
-				ind[0] = basic_entities[j].charcode;
+				ind[0] = (unsigned char)basic_entities[j].charcode;
 				add_assoc_string(return_value, ind, basic_entities[j].entity, 1);
 			}
 			break;

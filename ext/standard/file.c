@@ -1284,7 +1284,9 @@ static size_t php_passthru_stream(php_stream *stream TSRMLS_DC)
 	size_t bcount = 0;
 	int ready = 0;
 	char buf[8192];
+#ifdef HAVE_MMAP
 	int fd;
+#endif
 
 #ifdef HAVE_MMAP
 	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET)

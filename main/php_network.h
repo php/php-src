@@ -37,6 +37,11 @@
 #define shutdown(s,n)	/* nothing */
 #endif
 
+#ifdef PHP_WIN32
+#define EWOULDBLOCK WSAEWOULDBLOCK
+#	define fsync _commit
+#	define ftruncate(a, b) chsize(a, b)
+#endif /* defined(PHP_WIN32) */
 
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
@@ -52,6 +57,10 @@
 
 #if HAVE_OPENSSL_EXT
 #include <openssl/ssl.h>
+#endif
+
+#ifdef HAVE_STDDEF_H
+#include <stddef.h>
 #endif
 
 #ifdef HAVE_SOCKADDR_STORAGE
