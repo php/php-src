@@ -1,3 +1,528 @@
+2000-02-13  Zeev Suraski  <zeev@php.net>
+
+    * sapi/isapi/php4isapi.c: Fix a few memory leaks
+
+2000-02-13  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/mssql/mssql.dsp
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h: Fixing compile and link with current cvs.
+
+2000-02-13  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/string.c:
+    - Not sure if len can be zero but it's better to check it once then
+      rechecking for it every loop and having an extra variable do nothing.
+
+    * ext/standard/string.c: - Beautify a bit.
+
+2000-02-13  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/string.c: - Hopefully fix strip_tags bug
+    - Fix overrun in strip_tags (Stas, Zend library)
+
+2000-02-13  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/string.c:
+    - Fixed crash in strip_tags() and related functions. 
+
+2000-02-13  Andi Gutmans  <andi@php.net>
+
+    * main.c
+      php_variables.c:
+    - Improve startup speed a bit by using the hash_*_ptr() functions
+
+2000-02-13  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec: - PHP_WIN32
+
+2000-02-13  Zeev Suraski  <zeev@php.net>
+
+    * sapi/isapi/php4isapi.c: Report access violations
+
+    * sapi/isapi/php4isapi.c
+      NEWS:
+    Make all of the ISAPI variables register themselves as Server variables
+
+    * ext/standard/basic_functions.c
+      main.c
+      php_globals.h: Trap bailout of shutdown functions
+
+2000-02-12  Andi Gutmans  <andi@php.net>
+
+    * ext/mysql/php_mysql.c: - Update the C file to use PHP_WIN32
+
+    * ext/mysql/mysql.dsp: - Update the project file with the Win32 defines.
+
+2000-02-12  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: having HTTP_UPLOAD_FILES[] seems logical to me
+
+    * rfc1867.c:    fix #2944
+
+2000-02-12  Andi Gutmans  <andi@php.net>
+
+    * config.w32.h
+      php4dllts.dsp: - Support wddx by default on Windows
+
+2000-02-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: $ext_src_base is the source dir of the extension
+
+    * ext/xml/config.m4: Tell expat the byte order
+
+    * sapi/apache/config.m4
+      sapi/apache/libphp4.module.in: Never use Apache regex stuff
+
+    * ext/pgsql/php_pgsql.h
+      ext/xml/php_xml.h
+      ext/oracle/oracle.c
+      ext/java/java.c
+      ext/mysql/php_mysql.h
+      ext/oci8/php_oci8.h
+      ext/hyperwave/php_hyperwave.h
+      ext/imap/imap.h
+      ext/informix/php_informix.h:
+    * ext/xml/Makefile.in
+      ext/xml/config.m4
+      ext/xml/expat/Makefile
+      ext/xml/expat/Makefile.in
+      ext/xml/expat/xmlparse/Makefile.in
+      ext/xml/expat/xmltok/Makefile.in:
+    Use bundled expat library on UNIX. Note: Need to fix --enable-xml=shared
+
+2000-02-12  Andi Gutmans  <andi@php.net>
+
+    * php4dllts.dsp: - Fix the Release_inline part.
+
+2000-02-11  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/java.dsp
+      sapi/servlet/servlet.dsp:
+    on WIN32, PHP_WIN32 and ZEND_WIN32 need to be defined
+
+2000-02-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      main.c
+      php_globals.h:
+    (request_shutdown) Prevent infinite loop on shutdown if there is an error
+                       in shutdown function.
+    (php_array_walk) Print a warning if the walk function doesn't exist.
+
+    Split shutdown function call into a separate function that's called with
+    zend_hash_apply() instead of as destructor to keep hash consistent.
+
+    This fixes bug #3419.
+
+    * ext/standard/exec.c: Fix prototype.
+
+2000-02-11  Thies C. Arntzen  <thies@digicol.de>
+
+    * config.guess
+      config.sub
+      ltconfig
+      ltmain.sh:
+    backed out some stuff that got committed by accident & broke things:(!
+    uwe: please read twice what you are commiting!
+
+2000-02-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/exec.c:
+    (PHP passthru) Shouldn't return anything.
+    This fixes bugs #3428 and #3430.
+
+    * pear/Makefile.in: request_info.h is gone.
+
+2000-02-11  Zeev Suraski  <zeev@php.net>
+
+    * sapi/isapi/php4isapi.dsp
+      php4.dsp
+      php4dll.dsp
+      php4dllts.dsp
+      php4ts.dsp: Update .dsp's
+
+    * ext/zlib/zlib.c
+      sapi/cgi/cgi_main.c
+      ext/standard/crypt.c
+      ext/standard/dir.c
+      ext/standard/dl.c
+      ext/standard/dns.c
+      ext/standard/dns.h
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/flock_compat.c
+      ext/standard/flock_compat.h
+      ext/standard/fsock.c
+      ext/standard/fsock.h
+      ext/standard/info.c
+      ext/standard/lcg.c
+      ext/standard/link.c
+      ext/standard/mail.c
+      ext/standard/microtime.c
+      ext/standard/pack.c
+      ext/standard/pageinfo.c
+      ext/standard/parsedate.y
+      ext/standard/string.c
+      ext/standard/syslog.c
+      ext/standard/uniqid.c
+      ext/session/mod_files.c
+      ext/session/session.c
+      ext/snmp/snmp.c
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/filepro/filepro.c
+      ext/imap/imap.c
+      SAPI.c
+      SAPI.h
+      configuration-parser.y
+      dl/snmp/snmp.c
+      fopen-wrappers.c
+      fopen-wrappers.h
+      main.c
+      mergesort.c
+      php.h
+      php_realpath.c: Fine tune Andi's patch
+
+2000-02-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/oracle/php_oracle.h: Define phpext_oracle_ptr properly.
+
+2000-02-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_files.c
+      ext/session/mod_mm.c
+      ext/session/mod_user.c
+      ext/session/session.c: More cosmetic things
+
+    * ext/xml/expat/xmlparse/xmlparse.c
+      ext/xml/expat/xmltok/xmltok.c
+      ext/xml/expat/xmltok/xmltok_impl.c: Kill warnings
+
+    * ext/session/session.c: Some style(9) cosmetics
+
+2000-02-11  Andi Gutmans  <andi@php.net>
+
+    * sapi/cgi/cgi_main.c
+      dl/snmp/snmp.c
+      fopen-wrappers.c
+      main.c: - Baby steps with PHP_WIN32 :)
+
+2000-02-10  Andrei Zmievski  <andrei@ispi.net>
+
+    * pear/Makefile.in: Avoid the 'unexpected end of file' error.
+
+2000-02-10  Andi Gutmans  <andi@php.net>
+
+    * ext/filepro/filepro.c
+      ext/imap/imap.c
+      ext/snmp/snmp.c: - A few more
+
+    * ext/zlib/zlib.c: - A bit more PHP_WIN32 work
+
+    * ext/standard/filestat.c
+      ext/standard/flock_compat.c
+      ext/standard/flock_compat.h
+      ext/standard/fsock.c
+      ext/standard/fsock.h
+      ext/standard/info.c
+      ext/standard/lcg.c
+      ext/standard/link.c
+      ext/standard/mail.c
+      ext/standard/microtime.c
+      ext/standard/pack.c
+      ext/standard/pageinfo.c
+      ext/standard/parsedate.y
+      ext/standard/string.c
+      ext/standard/syslog.c
+      ext/standard/uniqid.c
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/crypt.c
+      ext/standard/dir.c
+      ext/standard/dl.c
+      ext/standard/dns.c
+      ext/standard/dns.h
+      ext/standard/exec.c
+      ext/standard/file.c:
+    - Get rid of some more evil MSVC5's and switch standard/ to use PHP_WIN32
+
+2000-02-10  Zeev Suraski  <zeev@php.net>
+
+    * Makefile.in
+      sapi/apache/php_apache.c: Final build fixes - that's enough for now...
+
+    * php4dll.dsp
+      php4dllts.dsp
+      php4ts.dsp: Update .dsp's
+
+    * SAPI.c
+      SAPI.h
+      main.c
+      php.h
+      request_info.c
+      request_info.h
+      safe_mode.c: request_info.c is dead! long live SAPI
+
+    * SAPI.h
+      main.c
+      request_info.c
+      request_info.h
+      sapi/cgi/cgi_main.c: request_info.c is giving up
+
+    * sapi/apache/config.m4
+      sapi/apache/mod_php4.c
+      sapi/apache/php_apache.c
+      sapi/apache/php_apache_http.h
+      sapi/cgi/cgi_main.c
+      ext/mysql/php_mysql.c
+      ext/oci8/oci8.c
+      ext/posix/posix.c
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      ext/standard/dl.c
+      ext/standard/exec.c
+      ext/standard/head.c
+      ext/standard/mail.c
+      ext/standard/php_string.h
+      ext/standard/string.c
+      ext/standard/url.c
+      acconfig.h.in
+      acinclude.m4
+      config.w32.h
+      ext/aspell/aspell.c
+      ext/db/db.c
+      ext/hyperwave/hg_comm.c
+      fopen-wrappers.c
+      internal_functions_registry.h
+      php.h
+      php_regex.h
+      request_info.c
+      request_info.h
+      snprintf.c
+      snprintf.h
+      win95nt.h: SAPIfication, Episode VI:  Return of the SAPI
+    Remove mostly all references to APACHE and CGI_BINARY from the code.
+
+    - Apache include files are no longer included by any PHP code, except for the Apache SAPI module.
+    - No server specific code is in any of the base PHP code.
+
+    Still left to be done:
+    - Eliminate any references to APACHE from the few remaining modules.
+    - Move request_info.c's logic to SAPI
+    - Modify the regex function names, and globals, so that we can always
+      include them, without having to fear any interference with Apache;
+      Always use the bundled regex library
+
+    * SAPI.c
+      sapi/apache/mod_php4.c: The last patch wasn't that good, fix
+
+    * SAPI.c: More protection...
+
+    * sapi/apache/mod_php4.c: Make the CVS compile again
+
+    * SAPI.c: Only activate if we're inside an actual request
+
+    * sapi/isapi/php4isapi.c
+      sapi/phttpd/phttpd.c
+      sapi/roxen/roxen.c
+      sapi/servlet/servlet.c
+      sapi/thttpd/thttpd.c
+      SAPI.h
+      main.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      sapi/cgi/cgi_main.c: Yes, you guessed it... More cleanup
+
+    * sapi/apache/mod_php4.c
+      ext/standard/pageinfo.c
+      SAPI.c
+      SAPI.h
+      safe_mode.c: More cleanup!
+
+2000-02-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4:
+    Set ext_base, a common prefix to the per-extension build directory
+    (ext/<ext-name> for in-tree builds, "" for rest)
+
+    * ext/xml/php_xml.h
+      ext/xml/xml.c:
+    - Fixed ^#[ ]+preprocessor directive$ constructions which break
+      some compilers
+    - Made php_xml.h useable without having xmltok.h/xmlparse.h in the include
+      path
+
+2000-02-10  Zeev Suraski  <zeev@php.net>
+
+    * sapi/phttpd/phttpd.c
+      sapi/roxen/roxen.c
+      sapi/servlet/servlet.c
+      sapi/thttpd/thttpd.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      sapi/cgi/cgi_main.c
+      sapi/isapi/php4isapi.c
+      SAPI.c
+      SAPI.h
+      ext/standard/basic_functions.c: More cleanup - move getenv() to SAPI
+
+    * sapi/thttpd/thttpd.c
+      sapi/phttpd/phttpd.c
+      sapi/roxen/roxen.c
+      sapi/servlet/servlet.c
+      SAPI.c
+      SAPI.h
+      safe_mode.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      sapi/cgi/cgi_main.c
+      sapi/isapi/php4isapi.c: More cleanup...
+
+2000-02-10  Andi Gutmans  <andi@php.net>
+
+    * php.h: - Little fix
+
+    * main.c: - PHP_WIN32
+
+    * SAPI.c
+      SAPI.h
+      configuration-parser.y
+      fopen-wrappers.c
+      fopen-wrappers.h
+      main.c
+      mergesort.c
+      php.h
+      php_realpath.c
+      request_info.c: - Introduce PHP_WIN32
+
+2000-02-10  Zeev Suraski  <zeev@php.net>
+
+    * main.c: More cleanup
+
+2000-02-10  Andrei Zmievski  <andrei@ispi.net>
+
+    * sapi/cgi/cgi_main.c: Should be 'deactivate' rather than the opposite.
+
+2000-02-10  Zeev Suraski  <zeev@php.net>
+
+    * sapi/isapi/php4isapi.c
+      sapi/phttpd/phttpd.c
+      sapi/roxen/roxen.c
+      sapi/servlet/servlet.c
+      sapi/thttpd/thttpd.c
+      SAPI.c
+      SAPI.h
+      main.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/getopt.c
+      sapi/cgi/php_getopt.h: More abstraction
+
+    * sapi/cgi/Makefile.in
+      sapi/cgi/cgi_main.c
+      sapi/cgi/getopt.c
+      sapi/cgi/php_getopt.h
+      sapi/servlet/servlet.c
+      getopt.c
+      main.c
+      php_getopt.h: Always use getopt with CGI, never use it for anything else
+
+    * sapi/phttpd/phttpd.c
+      sapi/roxen/roxen.c
+      sapi/servlet/servlet.c
+      sapi/thttpd/thttpd.c
+      SAPI.h
+      main.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      sapi/cgi/cgi_main.c
+      sapi/isapi/php4isapi.c: Move the logging mechanism to SAPI
+
+2000-02-10  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/basic_functions.c:
+    - Added NULL-support in gettype(). 
+
+2000-02-10  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * NEWS
+      ext/domxml/domxml.c
+      ext/domxml/php_domxml.h
+      tests/testdom:
+    - added funktion xmltree(), renamed dom() to xmldoc() and domfile()
+      to xmldocfile().
+    - testdom covers most of the functionality
+
+    * ext/pdf/pdf.c
+      ext/pdf/php_pdf.h: - added pdf_open_tiff()
+
+2000-02-10  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/base64.c:
+    - base64_decode() will decode POST data correct. 
+      Patch submitted by: Turadg Aleahmad <turadg@wise.berkeley.edu>
+
+2000-02-09  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/domxml.c
+      ext/domxml/php_domxml.h
+      tests/testdom
+      config.guess
+      config.sub
+      ltconfig
+      ltmain.sh: - removed stupid leftover in testdom
+    - added more functions to domxml
+
+2000-02-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/mysql.php: forgot to remove some debug output.  sorry :-)
+
+2000-02-09  Andrei Zmievski  <andrei@ispi.net>
+
+    * pear/DB.php: Return by reference, where necessary.
+
+2000-02-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/common.php:
+    Introduced an extra optional parameter to getOne, getRow and getAssoc
+    that contains a list of parameters to use with (prepare/)execute.
+    Also changed these methods into returning references.
+
+    * pear/DB.php:
+    Added three get modes: DB_GETMODE_ORDERED, DB_GETMODE_ASSOC and
+    DB_GETMODE_FLIPPED.  Docs are within.
+
+    * pear/DB/mysql.php: Fixed a few bugs, especially in prepare/execute.
+    Introduced "get modes", letting you choose how fetched array data is indexed.
+
+2000-02-09  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS: *** empty log message ***
+
+2000-02-09  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/domxml.c
+      ext/domxml/php_domxml.h
+      tests/testdom: - new function to read and parse xml doc from file
+
+    * tests/testdom
+      NEWS
+      ext/domxml/domxml.c:
+    - fixed several bugs an did some testing. Parsing and creating simple
+      XML docs should work. See the script testdom.
+
+2000-02-09  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/xml/expat/xmlparse/.cvsignore
+      ext/xml/expat/xmltok/.cvsignore
+      ext/xml/expat/.cvsignore: shut-up CVS
+
 2000-02-09  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
 
     * ext/domxml/domxml.c
