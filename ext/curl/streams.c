@@ -52,8 +52,8 @@
 
 static size_t on_data_available(char *data, size_t size, size_t nmemb, void *ctx)
 {
-	php_stream *stream = (php_stream*)ctx;
-	php_curl_stream *curlstream = (php_curl_stream*)stream->abstract;
+	php_stream *stream = (php_stream *) ctx;
+	php_curl_stream *curlstream = (php_curl_stream *) stream->abstract;
 	size_t wrote;
 	TSRMLS_FETCH();
 
@@ -83,8 +83,8 @@ static size_t on_header_available(char *data, size_t size, size_t nmemb, void *c
 {
 	size_t length = size * nmemb;
 	zval *header;
-	php_stream *stream = (php_stream*)ctx;
-	php_curl_stream *curlstream = (php_curl_stream*)stream->abstract;
+	php_stream *stream = (php_stream *) ctx;
+	php_curl_stream *curlstream = (php_curl_stream *) stream->abstract;
 	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(header);
@@ -119,6 +119,7 @@ static size_t on_header_available(char *data, size_t size, size_t nmemb, void *c
 static int on_progress_avail(php_stream *stream, double dltotal, double dlnow, double ultotal, double ulnow)
 {
 	TSRMLS_FETCH();
+
 	/* our notification system only works in a single direction; we should detect which
 	 * direction is important and use the correct values in this call */
 	php_stream_notify_progress(stream->context, dlnow, dltotal);
@@ -127,7 +128,7 @@ static int on_progress_avail(php_stream *stream, double dltotal, double dlnow, d
 
 static size_t php_curl_stream_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
-	php_curl_stream *curlstream = (php_curl_stream*)stream->abstract;
+	php_curl_stream *curlstream = (php_curl_stream *) stream->abstract;
 
 	if (curlstream->writebuffer.buf) {
 		return php_stream_write(curlstream->writebuffer.buf, buf, count);
@@ -138,7 +139,7 @@ static size_t php_curl_stream_write(php_stream *stream, const char *buf, size_t 
 
 static size_t php_curl_stream_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
-	php_curl_stream *curlstream = (php_curl_stream*)stream->abstract;
+	php_curl_stream *curlstream = (php_curl_stream *) stream->abstract;
 	size_t didread = 0;
 	
 	if (curlstream->readbuffer.readpos >= curlstream->readbuffer.writepos && curlstream->pending) {
@@ -147,22 +148,19 @@ static size_t php_curl_stream_read(php_stream *stream, char *buf, size_t count T
 
 		/* fire up the connection */
 		if (curlstream->readbuffer.writepos == 0) {
-			while (CURLM_CALL_MULTI_PERFORM == curl_multi_perform(curlstream->multi, &curlstream->pending))
-				;
+			while (CURLM_CALL_MULTI_PERFORM == curl_multi_perform(curlstream->multi, &curlstream->pending));
 		}
 		
 		do {
 			/* get the descriptors from curl */
-			curl_multi_fdset(curlstream->multi, &curlstream->readfds,
-					&curlstream->writefds, &curlstream->excfds, &curlstream->maxfd);
+			curl_multi_fdset(curlstream->multi, &curlstream->readfds, &curlstream->writefds, &curlstream->excfds, &curlstream->maxfd);
 
 			/* if we are in blocking mode, set a timeout */
 			tv.tv_usec = 0;
 			tv.tv_sec = 15; /* TODO: allow this to be configured from the script */
 
 			/* wait for data */
-			switch (select(curlstream->maxfd+1, &curlstream->readfds,
-						&curlstream->writefds, &curlstream->excfds, &tv)) {
+			switch (select(curlstream->maxfd + 1, &curlstream->readfds, &curlstream->writefds, &curlstream->excfds, &tv)) {
 				case -1:
 					/* error */
 					return 0;
@@ -175,7 +173,7 @@ static size_t php_curl_stream_read(php_stream *stream, char *buf, size_t count T
 						curlstream->mcode = curl_multi_perform(curlstream->multi, &curlstream->pending);
 					} while (curlstream->mcode == CURLM_CALL_MULTI_PERFORM);
 			}
-		} while(curlstream->readbuffer.readpos >= curlstream->readbuffer.writepos && curlstream->pending > 0);
+		} while (curlstream->readbuffer.readpos >= curlstream->readbuffer.writepos && curlstream->pending > 0);
 
 	}
 
@@ -184,7 +182,6 @@ static size_t php_curl_stream_read(php_stream *stream, char *buf, size_t count T
 		php_stream_seek(curlstream->readbuffer.buf, curlstream->readbuffer.readpos, SEEK_SET);
 		didread = php_stream_read(curlstream->readbuffer.buf, buf, count);
 		curlstream->readbuffer.readpos = php_stream_tell(curlstream->readbuffer.buf);
-
 	}
 
 	if (didread == 0) {
@@ -196,7 +193,7 @@ static size_t php_curl_stream_read(php_stream *stream, char *buf, size_t count T
 
 static int php_curl_stream_close(php_stream *stream, int close_handle TSRMLS_DC)
 {
-	php_curl_stream *curlstream = (php_curl_stream*)stream->abstract;
+	php_curl_stream *curlstream = (php_curl_stream *) stream->abstract;
 
 	/* TODO: respect the close_handle flag here, so that casting to a FILE* on
 	 * systems without fopencookie will work properly */
@@ -216,7 +213,7 @@ static int php_curl_stream_close(php_stream *stream, int close_handle TSRMLS_DC)
 
 static int php_curl_stream_flush(php_stream *stream TSRMLS_DC)
 {
-	php_curl_stream *curlstream = (php_curl_stream*)stream->abstract;
+	php_curl_stream *curlstream = (php_curl_stream *) stream->abstract;
 	return 0;
 }
 
@@ -230,7 +227,7 @@ static int php_curl_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRM
 
 static int php_curl_stream_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 {
-	php_curl_stream *curlstream = (php_curl_stream*)stream->abstract;
+	php_curl_stream *curlstream = (php_curl_stream *) stream->abstract;
 	/* delegate to the readbuffer stream */
 	return php_stream_cast(curlstream->readbuffer.buf, castas, ret, 0);
 }
@@ -343,9 +340,7 @@ PHPAPI php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *fil
 		 * otherwise the curlstream we return ends up doing nothing useful. */
 		CURLMcode m;
 
-		while (CURLM_CALL_MULTI_PERFORM == 
-				(m = curl_multi_perform(curlstream->multi, &curlstream->pending))
-			  ) {
+		while (CURLM_CALL_MULTI_PERFORM == (m = curl_multi_perform(curlstream->multi, &curlstream->pending))) {
 			; /* spin */
 		}
 
@@ -371,7 +366,6 @@ php_stream_wrapper php_curl_wrapper = {
 	NULL,
 	1 /* is_url */
 };
-
 
 #endif
 
