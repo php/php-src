@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Make convert_cyr_string() binary safe and stop it from corrupting other
+  PHP variables. (Andi)
 - Added functions array_unique, array_intersect and array_diff (Stig Venaas)
 - Fixed problem when using uninitialized values in comparisons with strings.
   They behave as empty strings again just like in PHP 3.
