@@ -98,12 +98,7 @@ static int sapi_cgibin_ub_write(const char *str, uint str_length)
 
 	ret = fwrite(str, 1, str_length, stdout);
 	if (ret != str_length) {
-		PLS_FETCH();
-
-		PG(connection_status) = PHP_CONNECTION_ABORTED;
-		if (!PG(ignore_user_abort)) {
-			zend_bailout();
-		}
+		php_handle_aborted_connection();
 	}
 
 	return ret;
@@ -113,12 +108,7 @@ static int sapi_cgibin_ub_write(const char *str, uint str_length)
 static void sapi_cgibin_flush(void *server_context)
 {
 	if (fflush(stdout)==EOF) {
-		PLS_FETCH();
-
-		PG(connection_status) = PHP_CONNECTION_ABORTED;
-		if (!PG(ignore_user_abort)) {
-			zend_bailout();
-		}
+		php_handle_aborted_connection();
 	}
 }
 
