@@ -1603,18 +1603,46 @@ PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers)
 	return SUCCESS;
 }
 
+static void unable_to_call_user_function(zval **fcall)
+{
+	switch (Z_TYPE_PP(fcall)) {
+	case IS_STRING:
+		php_error(E_WARNING, "Unable to call %s()", Z_STRVAL_PP(fcall));
+		break;
+	case IS_ARRAY: {
+		zval **tmp_obj;
+		zval **tmp_func;
+		char format[] = "Unable to call %s::%s()";
+		
+		zend_hash_index_find(Z_ARRVAL_PP(fcall), 0, (void **) &tmp_obj);
+		zend_hash_index_find(Z_ARRVAL_PP(fcall), 1, (void **) &tmp_func);
+
+		if (Z_TYPE_PP(tmp_obj) == IS_OBJECT) {
+			php_error(E_WARNING, format, Z_OBJCE_PP(tmp_obj)->name, Z_STRVAL_PP(tmp_func));
+		}
+		else {
+			convert_to_string_ex(tmp_obj);
+
+			php_error(E_WARNING, format, Z_STRVAL_PP(tmp_obj), Z_STRVAL_PP(tmp_func));
+		}
+
+		break;
+	}
+	}
+}
+
 /* {{{ proto mixed call_user_func(string function_name [, mixed parmeter] [, mixed ...])
    Call a user function which is the first parameter */
 PHP_FUNCTION(call_user_func)
 {
-	pval ***params;
-	pval *retval_ptr;
+	zval ***params;
+	zval *retval_ptr;
 	int arg_count=ZEND_NUM_ARGS();
 
 	if (arg_count<1) {
 		WRONG_PARAM_COUNT;
 	}
-	params = (pval ***) emalloc(sizeof(pval **)*arg_count);
+	params = (zval ***) emalloc(sizeof(zval **) * arg_count);
 
 	if (zend_get_parameters_array_ex(arg_count, params)==FAILURE) {
 		efree(params);
@@ -1629,8 +1657,9 @@ PHP_FUNCTION(call_user_func)
 	if (call_user_function_ex(EG(function_table), NULL, *params[0], &retval_ptr, arg_count-1, params+1, 0, NULL)==SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
-		php_error(E_WARNING,"Unable to call %s()", Z_TYPE_PP(params[0]) == IS_STRING ? Z_STRVAL_PP(params[0]) : "");
+		unable_to_call_user_function(params[0]);
 	}
+
 	efree(params);
 }
 /* }}} */
@@ -1639,18 +1668,18 @@ PHP_FUNCTION(call_user_func)
    Call a user function which is the first parameter with the arguments contained in array */
 PHP_FUNCTION(call_user_func_array)
 {
-    zval **func_name,
-         **params,
-         ***func_args = NULL,
-         *retval_ptr;
-    HashTable *params_ar;
-    int num_elems,
-        element = 0;
+	zval **func_name,
+	     **params,
+	     ***func_args = NULL,
+	      *retval_ptr;
+	HashTable *params_ar;
+	int num_elems,
+	    element = 0;
 
-    if (ZEND_NUM_ARGS() != 2 ||
-        zend_get_parameters_ex(2, &func_name, &params) == FAILURE) {
-        WRONG_PARAM_COUNT;
-    }
+	if (ZEND_NUM_ARGS() != 2 ||
+	    zend_get_parameters_ex(2, &func_name, &params) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
 	SEPARATE_ZVAL(params);
 	convert_to_array_ex(params);
 
@@ -1659,39 +1688,43 @@ PHP_FUNCTION(call_user_func_array)
 		convert_to_string_ex(func_name);
 	}
 
-    params_ar = HASH_OF(*params);
+	params_ar = HASH_OF(*params);
 
-    num_elems = zend_hash_num_elements(params_ar);
+	num_elems = zend_hash_num_elements(params_ar);
 
-    func_args = (zval ***)emalloc(sizeof(zval **) * num_elems);
+	func_args = (zval ***)emalloc(sizeof(zval **) * num_elems);
 
-    for (zend_hash_internal_pointer_reset(params_ar);
-         zend_hash_get_current_data(params_ar, (void **)&(func_args[element])) == SUCCESS;
-         zend_hash_move_forward(params_ar))
-         element++;
+	for (zend_hash_internal_pointer_reset(params_ar);
+	     zend_hash_get_current_data(params_ar, (void **)&(func_args[element])) == SUCCESS;
+	     zend_hash_move_forward(params_ar))
+		element++;
 
-    if (call_user_function_ex(EG(function_table), NULL, *func_name, &retval_ptr, num_elems, func_args, 0, NULL) == SUCCESS && retval_ptr) {
-        COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
-    } else {
-        php_error(E_WARNING, "Unable to call %s()", Z_TYPE_PP(func_name) == IS_STRING ? Z_STRVAL_PP(func_name) : "");
-    }
+	if (call_user_function_ex(EG(function_table), NULL, *func_name, &retval_ptr, num_elems, func_args, 0, NULL) == SUCCESS && retval_ptr) {
+		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
+	} else {
+		unable_to_call_user_function(func_name);
+	}
 
     efree(func_args);
 }
 /* }}} */
 
+#define _CUM_DEPREC "The %s() function is depreciated, use the call_user_func variety with the array($obj, \"method\") syntax instead"
+
 /* {{{ proto mixed call_user_method(string method_name, mixed object [, mixed parameter] [, mixed ...])
    Call a user method on a specific object or class */
 PHP_FUNCTION(call_user_method)
 {
-	pval ***params;
-	pval *retval_ptr;
+	zval ***params;
+	zval *retval_ptr;
 	int arg_count=ZEND_NUM_ARGS();
 
+	php_error(E_NOTICE, _CUM_DEPREC, "call_user_method");
+	
 	if (arg_count<2) {
 		WRONG_PARAM_COUNT;
 	}
-	params = (pval ***) emalloc(sizeof(pval **)*arg_count);
+	params = (zval ***) emalloc(sizeof(zval **) * arg_count);
 
 	if (zend_get_parameters_array_ex(arg_count, params)==FAILURE) {
 		efree(params);
@@ -1726,10 +1759,12 @@ PHP_FUNCTION(call_user_method_array)
 	int num_elems,
 	    element = 0;
 
-    if (ZEND_NUM_ARGS() != 3 ||
-        zend_get_parameters_ex(3, &method_name, &obj, &params) == FAILURE) {
-        WRONG_PARAM_COUNT;
-    }
+	php_error(E_NOTICE, _CUM_DEPREC, "call_user_method_array");
+
+	if (ZEND_NUM_ARGS() != 3 ||
+	    zend_get_parameters_ex(3, &method_name, &obj, &params) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
 
 	if (Z_TYPE_PP(obj) != IS_OBJECT && Z_TYPE_PP(obj) != IS_STRING) {
 		php_error(E_WARNING,"2nd argument is not an object or class name\n");
@@ -1741,20 +1776,20 @@ PHP_FUNCTION(call_user_method_array)
 	convert_to_string_ex(method_name);
 	convert_to_array_ex(params);
 
-    params_ar = HASH_OF(*params);
-    num_elems = zend_hash_num_elements(params_ar);
-    method_args = (zval ***)emalloc(sizeof(zval **) * num_elems);
+	params_ar = HASH_OF(*params);
+	num_elems = zend_hash_num_elements(params_ar);
+	method_args = (zval ***)emalloc(sizeof(zval **) * num_elems);
 
 	for (zend_hash_internal_pointer_reset(params_ar);
 	     zend_hash_get_current_data(params_ar, (void **)&(method_args[element])) == SUCCESS;
 	     zend_hash_move_forward(params_ar))
 		element++;
 
-    if (call_user_function_ex(EG(function_table), obj, *method_name, &retval_ptr, num_elems, method_args, 0, NULL) == SUCCESS && retval_ptr) {
-        COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
-    } else {
-        php_error(E_WARNING, "Unable to call %s()", Z_STRVAL_PP(method_name));
-    }
+	if (call_user_function_ex(EG(function_table), obj, *method_name, &retval_ptr, num_elems, method_args, 0, NULL) == SUCCESS && retval_ptr) {
+		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
+	} else {
+		php_error(E_WARNING, "Unable to call %s()", Z_STRVAL_PP(method_name));
+	}
 
 	efree(method_args);
 }
