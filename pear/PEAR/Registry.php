@@ -19,7 +19,7 @@
 //
 // $Id$
 
-require_once "Experimental/System.php";
+require_once "System.php";
 
 /**
  * Administration class used to maintain the installed package database.
@@ -97,7 +97,13 @@ class PEAR_Registry
         if ($this->packageExists($package)) {
             return false;
         }
-        return $this->upgradePackage($package, $info);
+        $fp = $this->_openPackageFile($package, "w");
+        if ($fp === null) {
+            return false;
+        }
+        fwrite($fp, serialize($info));
+        $this->_closePackageFile($fp);
+        return true;
     }
 
     // }}}
@@ -110,6 +116,9 @@ class PEAR_Registry
                              $this->listPackages());
         }
         $fp = $this->_openPackageFile($package, "r");
+        if ($fp === null) {
+            return null;
+        }
         $data = fread($fp, filesize($this->_packageFileName($package)));
         $this->_closePackageFile($fp);
         return unserialize($data);
@@ -121,19 +130,23 @@ class PEAR_Registry
     function deletePackage($package)
     {
         $file = $this->_packageFileName($package);
-        unlink($file);
+        return @unlink($file);
     }
 
     // }}}
-    // {{{ upgradePackage()
+    // {{{ updatePackage()
 
-    function upgradePackage($package, $info)
+    function updatePackage($package, $info)
     {
+        $oldinfo = $this->packageInfo($package);
+        if (empty($oldinfo)) {
+            return false;
+        }
         $fp = $this->_openPackageFile($package, "w");
         if ($fp === null) {
             return false;
         }
-        fwrite($fp, serialize($info));
+        fwrite($fp, serialize(array_merge($oldinfo, $info)));
         $this->_closePackageFile($fp);
         return true;
     }
