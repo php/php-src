@@ -1,5 +1,7 @@
 --TEST--
 Custom save handler, multiple session_start()s, complex data structure test.
+--SKIPIF--
+<?php include('./ext/session/tests/skipif.inc'); ?>
 --FILE--
 <?php
 

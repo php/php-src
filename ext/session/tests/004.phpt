@@ -1,5 +1,7 @@
 --TEST--
 session_set_save_handler test
+--SKIPIF--
+<?php include('./ext/session/tests/skipif.inc'); ?>
 --FILE--
 <?php
 error_reporting(~E_NOTICE);

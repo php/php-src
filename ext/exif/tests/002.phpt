@@ -11,12 +11,12 @@ Check for exif_thumbnail
   test2.jpg is the same image but contains Exif/Comment information and a
             copy of test1.jpg as a thumbnail.
 */
-$istat= stat('test1.jpg');
-$fp    = fopen('test1.jpg','r');
+$istat= stat('./ext/exif/tests/test1.jpg');
+$fp    = fopen('./ext/exif/tests/test1.jpg','r');
 $image = fread($fp,$istat[7]);
 echo substr($image,490,5).'_'.$istat[7];
 fclose($fp);
-$thumb = exif_thumbnail('test2.jpg');
+$thumb = exif_thumbnail('./ext/exif/tests/test2.jpg');
 echo strcmp($image,$thumb) ? 'different' : '_identical_';
 echo strlen($thumb);
 echo '_'.substr($thumb,490,5);
