@@ -3193,7 +3193,8 @@ PHP_FUNCTION(domxml_dump_mem)
 	if (!size) {
 		RETURN_FALSE;
 	}
-	RETURN_STRINGL(mem, size, 1);
+	RETVAL_STRINGL(mem, size, 1);
+	xmlFree(mem);
 }
 /* }}} */
 
@@ -3417,7 +3418,7 @@ PHP_FUNCTION(domxml_html_dump_mem)
 			xmlFree(mem);
 		RETURN_FALSE;
 	}
-	RETURN_STRINGL(mem, size, 1);
+	RETVAL_STRINGL(mem, size, 1);
 	xmlFree(mem);
 }
 /* }}} */
