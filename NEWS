@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.1.0
 - Now bundling Dan Libby's xmlrpc-epi extension
+- Introduced extension version numbers (Stig)
 - Added version_compare() function (Stig)
 - Fixed pg_last_notice() (could cause random crashes in PostgreSQL applications,
   even if they didn't use pg_last_notice()) (Zeev)
