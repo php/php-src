@@ -1671,7 +1671,7 @@ PHP_FUNCTION(is_numeric)
 }
 /* }}} */
 
-/* {{{ proto bool is_scalar (mixed value)
+/* {{{ proto bool is_scalar(mixed value)
    Returns true if value is a scalar */
 PHP_FUNCTION(is_scalar)
 {
@@ -2502,7 +2502,7 @@ PHP_FUNCTION(getprotobynumber)
 /* }}} */
 #endif
 
-/* {{{ proto bool register_tick_function(string function_name [, mixed arg [, ... ]])
+/* {{{ proto bool register_tick_function(string function_name [, mixed arg [, mixed ... ]])
    Registers a tick callback function */
 PHP_FUNCTION(register_tick_function)
 {
@@ -2572,7 +2572,7 @@ PHPAPI PHP_FUNCTION(warn_not_available)
 }
 
 /* {{{ proto bool is_uploaded_file(string path)
-   check if file was created by rfc1867 upload  */
+   Check if file was created by rfc1867 upload  */
 PHP_FUNCTION(is_uploaded_file)
 {
 	zval **path;
@@ -2596,7 +2596,7 @@ PHP_FUNCTION(is_uploaded_file)
 /* }}} */
 
 /* {{{ proto bool move_uploaded_file(string path, string new_path)
-   move a file if and only if it was created by an upload */
+   Move a file if and only if it was created by an upload */
 PHP_FUNCTION(move_uploaded_file)
 {
 	zval **path, **new_path;
@@ -2758,7 +2758,7 @@ PHP_FUNCTION(parse_ini_file)
 }
 /* }}} */
 
-/* {{{ proto bool is_callable(mixed var [, bool syntax_only [, string callable_name ]]) */
+/* {{{ proto bool is_callable(mixed var [, bool syntax_only [, string callable_name]]) */
 PHP_FUNCTION(is_callable)
 {
 	zval **var, **syntax_only, **callable_name;
