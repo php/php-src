@@ -215,11 +215,7 @@ PHPAPI int php_check_open_basedir(char *path)
 		ptr = pathbuf;
 
 		while (ptr && *ptr) {
-#ifdef PHP_WIN32
-			end = strchr(ptr, ';');
-#else
-			end = strchr(ptr, ':');
-#endif
+			end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
 			if (end != NULL) {
 				*end = '\0';
 				end++;
@@ -478,11 +474,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 		
 		pathbuf = (char *) emalloc(exec_fname_length + path_length +1 +1);
 		memcpy(pathbuf, path, path_length);
-#ifdef PHP_WIN32
-		pathbuf[path_length] = ';';
-#else
-		pathbuf[path_length] = ':';
-#endif
+		pathbuf[path_length] = DEFAULT_DIR_SEPARATOR;
 		memcpy(pathbuf+path_length+1, exec_fname, exec_fname_length);
 		pathbuf[path_length + exec_fname_length +1] = '\0';
 	} else {
@@ -492,11 +484,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	ptr = pathbuf;
 
 	while (ptr && *ptr) {
-#ifdef PHP_WIN32
-		end = strchr(ptr, ';');
-#else
-		end = strchr(ptr, ':');
-#endif
+		end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
 		if (end != NULL) {
 			*end = '\0';
 			end++;
