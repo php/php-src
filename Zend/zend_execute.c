@@ -970,6 +970,9 @@ void execute(zend_op_array *op_array ELS_DC)
 			case ZEND_CONCAT:
 				EG(binary_op) = concat_function;
 				goto binary_op_addr;
+			case ZEND_IS_IDENTICAL:
+				EG(binary_op) = is_identical_function;
+				goto binary_op_addr;
 			case ZEND_IS_EQUAL:
 				EG(binary_op) = is_equal_function;
 				goto binary_op_addr;
