@@ -55,16 +55,17 @@ pg_lo_unlink($db, (string)$oid) or print("pg_lo_unlink() error 3\n");
 pg_exec ($db, "commit");
 
 echo "import/export LO\n";
+$path = dirname(__FILE__) . '/';
 pg_query($db, 'begin');
-$oid = pg_lo_import($db, 'php.gif');
+$oid = pg_lo_import($db, $path . 'php.gif');
 pg_query($db, 'commit');
 pg_query($db, 'begin');
-@unlink('php.gif.exported');
-pg_lo_export($oid, 'php.gif.exported', $db);
-if (!file_exists('php.gif.exported')) {
+@unlink($path . 'php.gif.exported');
+pg_lo_export($oid, $path . 'php.gif.exported', $db);
+if (!file_exists($path . 'php.gif.exported')) {
 	echo "Export failed\n";
 }
-@unlink('php.gif.exported');
+@unlink($path . 'php.gif.exported');
 pg_query($db, 'commit');
 
 echo "OK";

@@ -17,7 +17,7 @@ var_dump($meta);
 --EXPECT--
 array(3) {
   ["num"]=>
-  array(5) {
+  array(6) {
     ["num"]=>
     int(1)
     ["type"]=>
@@ -28,9 +28,11 @@ array(3) {
     bool(false)
     ["has default"]=>
     bool(false)
+    ["array dims"]=>
+    int(0)
   }
   ["str"]=>
-  array(5) {
+  array(6) {
     ["num"]=>
     int(2)
     ["type"]=>
@@ -41,9 +43,11 @@ array(3) {
     bool(false)
     ["has default"]=>
     bool(false)
+    ["array dims"]=>
+    int(0)
   }
   ["bin"]=>
-  array(5) {
+  array(6) {
     ["num"]=>
     int(3)
     ["type"]=>
@@ -54,5 +58,7 @@ array(3) {
     bool(false)
     ["has default"]=>
     bool(false)
+    ["array dims"]=>
+    int(0)
   }
 }
