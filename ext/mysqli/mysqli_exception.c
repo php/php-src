@@ -69,6 +69,6 @@ void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char 
 	efree(message);
 	zend_update_property_long(mysqli_exception_class_entry, sql_ex, "code", sizeof("code") - 1, errorno TSRMLS_CC);
 
-	zend_throw_exception_object(sql_ex);
+	zend_throw_exception_object(sql_ex TSRMLS_CC);
 }
 
