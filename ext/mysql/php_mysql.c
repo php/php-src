@@ -286,6 +286,8 @@ static void php_mysql_init_globals(zend_mysql_globals *mysql_globals)
 	mysql_globals->default_host = NULL;
 	mysql_globals->default_user = NULL;
 	mysql_globals->default_password = NULL;
+	mysql_globals->connect_errno = 0;
+	mysql_globals->connect_error = NULL;
 }
 
 
@@ -490,7 +492,13 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #else
 			if (mysql_connect(&mysql->conn, host, user, passwd)==NULL) {
 #endif
-				php_error(E_WARNING, "%s", mysql_error(&mysql->conn));
+				/* Populate connect error globals so that the error functions can read them */
+				if (MySG(connect_error)!=NULL) efree(MySG(connect_error));
+				MySG(connect_error)=estrdup(mysql_error(&mysql->conn));
+				php_error(E_WARNING, "%s", MySG(connect_error));
+#if defined(HAVE_MYSQL_ERRNO)
+				MySG(connect_errno)=mysql_errno(&mysql->conn);
+#endif								   
 				free(mysql);
 				efree(hashed_details);
 				MYSQL_DO_CONNECT_RETURN_FALSE();
@@ -576,6 +584,13 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, 0)==NULL) {
 #else
 		if (mysql_connect(&mysql->conn, host, user, passwd)==NULL) {
+#endif
+			/* Populate connect error globals so that the error functions can read them */
+			if (MySG(connect_error)!=NULL) efree(MySG(connect_error));
+			MySG(connect_error)=estrdup(mysql_error(&mysql->conn));
+			php_error(E_WARNING, "%s", MySG(connect_error));
+#if defined(HAVE_MYSQL_ERRNO)
+			MySG(connect_errno)=mysql_errno(&mysql->conn);
 #endif
 			php_error(E_WARNING, "MySQL Connection Failed: %s\n", mysql_error(&mysql->conn));
 			efree(hashed_details);
@@ -1180,7 +1195,11 @@ PHP_FUNCTION(mysql_error)
 		case 0:
 			id = MySG(default_link);
 			if (id==-1) {
-				RETURN_FALSE;
+				if (MySG(connect_error)!=NULL){
+					RETURN_STRING(MySG(connect_error),1);
+				} else {
+					RETURN_FALSE;
+				}
 			}
 			break;
 		case 1:
@@ -1215,7 +1234,11 @@ PHP_FUNCTION(mysql_errno)
 		case 0:
 			id = MySG(default_link);
 			if (id==-1) {
-				RETURN_FALSE;
+			  	if (MySG(connect_errno)!=0){
+					RETURN_LONG(MySG(connect_errno));
+				} else {
+					RETURN_FALSE;
+				}
 			}
 			break;
 		case 1:
