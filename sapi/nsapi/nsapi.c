@@ -134,6 +134,8 @@ static nsapi_equiv nsapi_client[] = {
 };
 static size_t nsapi_client_size = sizeof(nsapi_client)/sizeof(nsapi_client[0]);
 
+static char *nsapi_exclude_from_ini_entries[] = { "fn", "type", "method", "directive", NULL };
+
 static char *nsapi_strdup(char *str)
 {
 	if (str != NULL) {
@@ -229,7 +231,7 @@ nsapi_servact_prototype nsapi_servact_service = NULL;
  * servact_* functions are always in the newest one, older ones are supported by
  * the server only by wrapping the function table nothing else. So choose
  * the newest one found in process space for dynamic linking */
-char *nsapi_dlls[] = { "ns-httpd40.dll", "ns-httpd36.dll", "ns-httpd35.dll", "ns-httpd30.dll", NULL };
+static char *nsapi_dlls[] = { "ns-httpd40.dll", "ns-httpd36.dll", "ns-httpd35.dll", "ns-httpd30.dll", NULL };
 #endif
 
 /* {{{ php_nsapi_init_dynamic_symbols
@@ -696,7 +698,7 @@ static void nsapi_log_message(char *message)
 	TSRMLS_FETCH();
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 
-	log_error(LOG_INFORM, "PHP module", rc->sn, rc->rq, "%s", message);
+	log_error(LOG_INFORM, pblock_findval("fn", rc->pb), rc->sn, rc->rq, "%s", message);
 }
 
 static int php_nsapi_startup(sapi_module_struct *sapi_module)
@@ -744,19 +746,23 @@ static sapi_module_struct nsapi_sapi_module = {
 static void nsapi_php_ini_entries(NSLS_D TSRMLS_DC)
 {
 	struct pb_entry *entry;
-	register int i;
+	register int i,j,ok;
 
 	for (i=0; i < NSG(pb)->hsize; i++) {
 		entry=NSG(pb)->ht[i];
 		while (entry) {
 			/* exclude standard entries given to "Service" which should not go into ini entries */
-			if (strcasecmp(entry->param->name,"fn") && strcasecmp(entry->param->name,"type")
-			 && strcasecmp(entry->param->name,"method")  && strcasecmp(entry->param->name,"directive")) {
+			ok=1;
+			for (j=0; nsapi_exclude_from_ini_entries[j]; j++) {
+				ok&=(!strcasecmp(entry->param->name, nsapi_exclude_from_ini_entries[j]));
+			}
+
+			if (ok) {
 				/* change the ini entry */
 				if (zend_alter_ini_entry(entry->param->name, strlen(entry->param->name)+1,
 				 entry->param->value, strlen(entry->param->value),
 				 PHP_INI_USER, PHP_INI_STAGE_RUNTIME)==FAILURE) {
-					log_error(LOG_WARN, "php4_execute", NSG(sn), NSG(rq), "Cannot change php.ini key \"%s\" to \"%s\"", entry->param->name, entry->param->value);
+					log_error(LOG_WARN, pblock_findval("fn", NSG(pb)), NSG(sn), NSG(rq), "Cannot change php.ini key \"%s\" to \"%s\"", entry->param->name, entry->param->value);
 				}
 			}
 			entry=entry->next;
@@ -807,7 +813,7 @@ int NSAPI_PUBLIC php4_init(pblock *pb, Session *sn, Request *rq)
 
 	daemon_atrestart(&php4_close, NULL);
 
-	log_error(LOG_INFORM, "php4_init", sn, rq, "Initialized PHP Module (%d threads exspected)", threads);
+	log_error(LOG_INFORM, pblock_findval("fn", pb), sn, rq, "Initialized PHP Module (%d threads exspected)", threads);
 	return REQ_PROCEED;
 }
 
@@ -832,7 +838,7 @@ int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 	   by looking for a request context in the current thread */
 	if (SG(server_context)) {
 		/* send 500 internal server error */
-		log_error(LOG_WARN, "php4_execute", sn, rq, "Cannot make nesting PHP requests with nsapi_virtual()");
+		log_error(LOG_WARN, pblock_findval("fn", pb), sn, rq, "Cannot make nesting PHP requests with nsapi_virtual()");
 		protocol_status(sn, rq, 500, NULL);
 		return REQ_ABORTED;
 	}
@@ -866,13 +872,13 @@ int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 			retval=REQ_PROCEED;
 		} else {
 			/* send 500 internal server error */
-			log_error(LOG_WARN, "php4_execute", sn, rq, "Cannot prepare PHP engine!");
+			log_error(LOG_WARN, pblock_findval("fn", pb), sn, rq, "Cannot prepare PHP engine!");
 			protocol_status(sn, rq, 500, NULL);
 			retval=REQ_ABORTED;
 		}
 	} else {
 		/* send 404 because file not found */
-		log_error(LOG_WARN, "php4_execute", sn, rq, "Cannot execute PHP script: %s", SG(request_info).path_translated);
+		log_error(LOG_WARN, pblock_findval("fn", pb), sn, rq, "Cannot execute PHP script: %s", SG(request_info).path_translated);
 		protocol_status(sn, rq, 404, NULL);
 		retval=REQ_ABORTED;
 	}
