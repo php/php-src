@@ -1,3 +1,235 @@
+2001-08-05  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/string.c: Removed some duplicate code out of addclashes
+
+    * ext/standard/tests/math/001.phpt: Fix test
+
+    * ext/standard/math.c: Bugfix in abs(), abs(LONG_MIN) was bogus
+
+2001-08-05  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/php_string.h
+      ext/standard/string.c: Fix ZTS build.
+
+2001-08-05  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/php_string.h: Added proto for php_charmask in the .h
+
+    * ext/standard/string.c:
+    Error-handling for the second parameter of [l|r]trim
+
+    * ext/standard/tests/strings/trim.phpt:
+    Didn't commit the correct trim.phpt, it now passes
+
+    * ext/standard/tests/math/001.phpt
+      ext/standard/tests/math/pow.phpt
+      ext/standard/tests/math/test_eval.inc
+      ext/standard/tests/strings/trim.phpt
+      tests/quicktester.inc: More tests
+
+2001-08-05  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * NEWS: update NEWS as well
+
+    * ext/cyrus/.cvsignore
+      ext/cyrus/CREDITS
+      ext/cyrus/Makefile.in
+      ext/cyrus/config.m4
+      ext/cyrus/cyrus.c
+      ext/cyrus/php_cyrus.h:
+    Add the Cyrus IMAP extension to PHP's CVS (Manual editing of the news file to occur).
+
+2001-08-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/sysvshm/sysvshm.c
+      ext/standard/php_var.h
+      ext/standard/var.c
+      ext/session/session.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re
+      sapi/apache/php_apache.c: more tsrm cleanup
+
+    * ext/hyperwave/hw.c: fix php_write
+
+    * main/php_main.h
+      sapi/cgi/cgi_main.c
+      sapi/servlet/servlet.c
+      main/main.c
+      main/php.h
+      ext/swf/swf.c
+      ext/zlib/zlib.c
+      ext/pgsql/pgsql.c
+      ext/standard/basic_functions.c
+      ext/gd/gd.c
+      ext/gd/gd_ctx.c
+      ext/ming/ming.c
+      ext/pdf/pdf.c
+      ext/cpdf/cpdf.c: some more eliminate-fetches-or-escalate-them-at-least
+
+    * main/output.c
+      main/php.h
+      main/php_ini.c
+      main/php_output.h
+      sapi/apache/php_apache.c
+      ext/standard/credits.c
+      ext/standard/file.c
+      ext/standard/iptc.c
+      ext/standard/php_var.h
+      ext/standard/var.c
+      main/main.c
+      ext/mssql/php_mssql.c
+      ext/odbc/php_odbc.c
+      ext/session/php_session.h:
+    more tsrm cleanup -- output.c is not doing any fetches anymore
+
+    * sapi/thttpd/thttpd.c
+      sapi/tux/php_tux.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/servlet/servlet.c
+      sapi/phttpd/phttpd.c
+      sapi/cgi/cgi_main.c
+      sapi/fastcgi/fastcgi.c
+      sapi/isapi/php4isapi.c
+      sapi/nsapi/nsapi.c
+      sapi/caudium/caudium.c
+      sapi/apache/php_apache.c
+      sapi/apache2filter/sapi_apache2.c
+      main/output.c
+      main/php_output.h
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      ext/zlib/php_zlib.h
+      ext/zlib/zlib.c
+      main/SAPI.c
+      main/SAPI.h
+      main/main.c
+      ext/session/session.c
+      ext/sablot/sablot.c
+      ext/session/php_session.h: more tsrm cleanup
+
+2001-08-05  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/gmp/gmp.c: (gmp_init) Added extra (optional) argument to gmp_init():
+               a base argument which indicates the number base. E.g.:
+               gmp_init('1010101010',2); // feed gmp a binary value.
+    Patch by Troels.
+
+    * ext/standard/math.c:
+    Check that _php_math_basetolong result fits long (by request from Troels Arvin)
+
+2001-08-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/output.c
+      ext/session/session.c
+      ext/session/php_session.h
+      sapi/roxen/roxen.c
+      sapi/tux/php_tux.c
+      sapi/aolserver/aolserver.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/caudium/caudium.c
+      sapi/fastcgi/fastcgi.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/thttpd/thttpd.c: further tsrm cleanup
+
+2001-08-05  Thies C. Arntzen  <thies@thieso.net>
+
+    * sapi/cgi/cgi_main.c:
+    delay module_shutdown even further. zend_try and _catch need the current
+    globals as well.
+    zeev, is this a chicken & egg problem?
+
+    * sapi/cgi/cgi_main.c:
+    module_shutdown() calls ts_free_thread in ZTS mode. so SG() cannot be accessed
+    afterwards.
+
+2001-08-05  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/caudium/caudium.c
+      sapi/thttpd/thttpd.c: Even more TSRM cleanup.
+
+    * sapi/caudium/caudium.c
+      sapi/fastcgi/fastcgi.c: More tsrm-related cleanup.
+
+2001-08-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c: tsrm-related cleanup
+
+2001-08-05  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/tux/php_tux.c:
+    Fixed some TSRMLS_CC instances (at least it looked odd to me the way it was before).
+
+    * sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/thttpd/thttpd.c
+      sapi/caudium/caudium.c
+      sapi/fastcgi/fastcgi.c
+      sapi/nsapi/nsapi.c
+      sapi/phttpd/phttpd.c: Remove more duplicate TSRMLS_FETCH() calls.
+
+2001-08-05  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/servlet/servlet.c
+      win32/php4.dsw
+      win32/php_registry.h
+      win32/registry.c
+      sapi/isapi/stresstest/stresstest.cpp
+      sapi/phttpd/phttpd.c
+      sapi/roxen/roxen.c
+      sapi/fastcgi/fastcgi.c
+      sapi/isapi/php4isapi.c
+      sapi/apache/mod_php4.c
+      sapi/apache/php_apache.c
+      sapi/apache/sapi_apache.c
+      sapi/caudium/caudium.c
+      sapi/cgi/cgi_main.c
+      main/main.c
+      main/output.c
+      main/php.h
+      main/php_content_types.c
+      main/php_ini.c
+      main/php_logos.c
+      main/php_open_temporary_file.c
+      main/php_open_temporary_file.h
+      main/php_ticks.c
+      main/rfc1867.c
+      main/safe_mode.c
+      main/win95nt.h
+      sapi/aolserver/aolserver.c
+      main/fopen_wrappers.c
+      main/fopen_wrappers.h
+      ext/standard/file.h
+      ext/standard/math.c
+      ext/swf/swf.c
+      ext/vpopmail/php_vpopmail.c
+      ext/yp/yp.c
+      ext/standard/base64.c
+      ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/session/mod_files.c
+      ext/session/session.c
+      ext/snmp/snmp.c
+      ext/printer/printer.c
+      ext/pspell/pspell.c
+      ext/oci8/oci8.c
+      ext/pdf/pdf.c
+      ext/notes/php_notes.c
+      ext/ldap/ldap.c
+      ext/mnogosearch/php_mnogo.c
+      ext/gd/gd.c
+      ext/gd/gdttf.c
+      ext/hyperwave/hw.c
+      ext/dba/dba_cdb.c
+      ext/dba/dba_dbm.c
+      ext/dbase/dbase.c
+      ext/dbase/dbf_head.c
+      ext/domxml/php_domxml.c
+      ext/fdf/fdf.c
+      ext/db/db.c: - TSRMLS_FETCH work
+    - whitespace fixes
+
 2001-08-04  Jani Taskinen  <sniper@iki.fi>
 
     * ext/standard/crypt.c: - Fixed bug: #10822
