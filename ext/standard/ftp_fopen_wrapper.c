@@ -382,15 +382,34 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	size_t file_size = 0;
 	zval **tmpzval;
 	int allow_overwrite = 0;
+	int read_write = 0;
 
 	tmp_line[0] = '\0';
 
-	if (strpbrk(mode, "a+")) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "FTP does not support simultaneous read/write connections.");
+	if (strpbrk(mode, "r+")) {
+		read_write = 1; /* Open for reading */
+	}
+	if (strpbrk(mode, "wa+")) {
+		if (read_write) {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "FTP does not support simultaneous read/write connections.");
+			return NULL;
+		}
+		if (strchr(mode, 'a')) {
+			read_write = 3; /* Open for Appending */
+		} else {
+			read_write = 2; /* Open for writting */
+		}
+	}
+	if (!read_write) {
+		/* No mode specified? */
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unknown file open mode.");
 		return NULL;
 	}
 
 	stream = php_ftp_fopen_connect(wrapper, path, mode, options, opened_path, context, &reuseid, &resource, &use_ssl, &use_ssl_on_data STREAMS_CC TSRMLS_CC);
+	if (!stream) {
+		goto errext;
+	}
 
 	/* set the connection to be binary */
 	php_stream_write_string(stream, "TYPE I\r\n");
@@ -405,7 +424,8 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	
 	/* read the response */
 	result = GET_FTP_RESULT(stream);
-	if (mode[0] == 'r') {
+	if (read_write == 1) {
+		/* Read Mode */
 		char *sizestr;
 		
 		/* when reading file, it must exist */
@@ -420,8 +440,8 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 			file_size = atoi(sizestr);
 			php_stream_notify_file_size(context, file_size, tmp_line, result);
 		}	
-	} else {
-		/* when writing file, it must NOT exist, unless a context option exists which allows it */
+	} else if (read_write == 2) {
+		/* when writing file (but not appending), it must NOT exist, unless a context option exists which allows it */
 		if (context && php_stream_context_get_option(context, "ftp", "overwrite", &tmpzval) == SUCCESS) {
 			allow_overwrite = Z_LVAL_PP(tmpzval);
 		}
@@ -451,12 +471,15 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	}
 
 	/* Send RETR/STOR command */
-	if (mode[0] == 'r') {
+	if (read_write == 1) {
 		/* retrieve file */
 		php_stream_write_string(stream, "RETR ");
-	} else {
-		/* store file */
+	} else if (read_write == 2) {
+		/* Write new file */
 		php_stream_write_string(stream, "STOR ");
+	} else {
+		/* Append */
+		php_stream_write_string(stream, "APPE ");
 	} 
 	if (resource->path != NULL) {
 		php_stream_write_string(stream, resource->path);
