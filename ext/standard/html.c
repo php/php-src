@@ -924,7 +924,10 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 		if (p[0] == '&') {
 			if (p + 2 < lim) {
 				if (p[1] == '#') {
+					int invalid_code = 0;
+
 					code = strtol(p + 2, &next, 10);
+
 					if (next != NULL && *next == ';') {
 						switch (charset) {
 							case cs_utf_8:
@@ -934,7 +937,9 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 							case cs_8859_1:
 							case cs_8859_5:
 							case cs_8859_15:
-								if (0xa0 <= code && code <= 0xff) {
+								if ((code >= 0x80 && code < 0xa0) || code > 0xff) {
+									invalid_code = 1;
+								} else {
 									*(q++) = code;
 								}
 								break;
@@ -942,23 +947,41 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 							case cs_cp1252:
 							case cs_cp1251:
 							case cs_cp866:
-								if (0x80 <= code && code <= 0xff) {
+								if (code > 0xff) {
+									invalid_code = 1;
+								} else {
 									*(q++) = code;
 								}
 								break;
 
 							case cs_big5:
-							case cs_gb2312:
 							case cs_big5hkscs:
 							case cs_sjis:
 							case cs_eucjp:
-								if (code <= 0x7f) {
+								if (code >= 0x80) {
+									invalid_code = 1;
+								} else {
+									*(q++) = code;
+								}
+								break;
+
+							case cs_gb2312:
+								if (code >= 0x81) {
+									invalid_code = 1;
+								} else {
 									*(q++) = code;
 								}
 								break;
 
 							default:
+								/* for backwards compatilibity */
+								invalid_code = 1;
 								break;
+						}
+						if (invalid_code) {
+							for (; p <= next; p++) {
+								*(q++) = *p;
+							}
 						}
 						p = next + 1;
 					} else {
