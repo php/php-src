@@ -249,14 +249,17 @@ time	: tUNUMBER tMERIDIAN {
 	    yyMeridian = $6;
 	}
 	| tUNUMBER ':' tUNUMBER ':' tUNUMBER tSNUMBER {
+	    /* ISO 8601 format.  hh:mm:ss[+-][0-9]{2}([0-9]{2})?.  */
 	    yyHour = $1;
 	    yyMinutes = $3;
 	    yySeconds = $5;
 	    yyMeridian = MER24;
 	    yyHaveZone++;
-	    yyTimezone = ($6 < 0
-			  ? -$6 % 100 + (-$6 / 100) * 60
-			  : - ($6 % 100 + ($6 / 100) * 60));
+		if ($6 < -100 || $6 > 100) {
+			yyTimezone =  -$6 % 100 + (-$6 / 100) * 60;
+		} else {
+			yyTimezone =  -$6 * 60;
+		}
 	}
 	;
 
