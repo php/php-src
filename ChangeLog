@@ -1,3 +1,9 @@
+1999-11-07  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
+    * NEWS: NEWS update
+
 1999-11-06  Sascha Schumann  <sascha@schumann.cx>
 
     * build.mk: - limit find to PHP's automake Makefiles
