@@ -765,8 +765,8 @@ static tag_info_array tag_table_GPS = {
   { 0x0000, "GPSVersion"},
   { 0x0001, "GPSLatitudeRef"},
   { 0x0002, "GPSLatitude"},
-  { 0x0003, "GPSLongitude"},
-  { 0x0004, "GPSLongitudeRef"},
+  { 0x0003, "GPSLongitudeRef"},
+  { 0x0004, "GPSLongitude"},
   { 0x0005, "GPSAltitudeRef"},
   { 0x0006, "GPSAltitude"},
   { 0x0007, "GPSTimeStamp"},
@@ -1520,6 +1520,7 @@ static int exif_file_sections_free(image_info_type *ImageInfo)
 static void exif_iif_add_value(image_info_type *image_info, int section_index, char *name, int tag, int format, size_t length, void* value, int motorola_intel TSRMLS_DC)
 {
 	size_t index;
+	void *vptr;
 	image_info_value *info_value;
 	image_info_data  *info_data;
 	image_info_data  *list;
@@ -1614,35 +1615,35 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			} else {
 				info_value = &info_data->value;
 			}
-			for (index=0; index<length; index++) {
+			for (index=0,vptr=value; index<length; index++,vptr+=php_tiff_bytes_per_format[format]) {
 				if (length>1) {
 					info_value = &info_data->value.list[index];
 				}
 				switch (format) {
 					case TAG_FMT_USHORT:
-						info_value->u = php_ifd_get16u(value, motorola_intel);
+						info_value->u = php_ifd_get16u(vptr, motorola_intel);
 						break;
 
 					case TAG_FMT_ULONG:
-						info_value->u = php_ifd_get32u(value, motorola_intel);
+						info_value->u = php_ifd_get32u(vptr, motorola_intel);
 						break;
 
 					case TAG_FMT_URATIONAL:
-						info_value->ur.num = php_ifd_get32u(value, motorola_intel);
-						info_value->ur.den = php_ifd_get32u(4+(char *)value, motorola_intel);
+						info_value->ur.num = php_ifd_get32u(vptr, motorola_intel);
+						info_value->ur.den = php_ifd_get32u(4+(char *)vptr, motorola_intel);
 						break;
 
 					case TAG_FMT_SSHORT:
-						info_value->i = php_ifd_get16s(value, motorola_intel);
+						info_value->i = php_ifd_get16s(vptr, motorola_intel);
 						break;
 
 					case TAG_FMT_SLONG:
-						info_value->i = php_ifd_get32s(value, motorola_intel);
+						info_value->i = php_ifd_get32s(vptr, motorola_intel);
 						break;
 
 					case TAG_FMT_SRATIONAL:
-						info_value->sr.num = php_ifd_get32u(value, motorola_intel);
-						info_value->sr.den = php_ifd_get32u(4+(char *)value, motorola_intel);
+						info_value->sr.num = php_ifd_get32u(vptr, motorola_intel);
+						info_value->sr.den = php_ifd_get32u(4+(char *)vptr, motorola_intel);
 						break;
 
 					case TAG_FMT_SINGLE:
