@@ -82,7 +82,7 @@ php_ps_globals ps_globals;
 
 static ps_module *_php_find_ps_module(char *name TSRMLS_DC);
 static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
-
+static void php_session_end_output_handler(TSRMLS_D);
 
 static int session_adapt_uris(const char *src, size_t srclen, char **new, size_t *newlen, zend_bool do_flush TSRMLS_DC)
 {
@@ -93,7 +93,6 @@ static int session_adapt_uris(const char *src, size_t srclen, char **new, size_t
 		return FAILURE;
 	}
 }
-
 
 
 static void php_session_output_handler(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC)
@@ -115,17 +114,11 @@ static void php_session_start_output_handler(uint chunk_size TSRMLS_DC)
 	php_url_scanner_ex_activate(TSRMLS_C);
 	php_start_ob_buffer(NULL, chunk_size TSRMLS_CC);
 	php_ob_set_internal_handler(php_session_output_handler, chunk_size TSRMLS_CC);
+	PS(output_handler_registered) = 1;
 }
 
 
-static void php_session_activate(TSRMLS_D)
-{
-}
-
-
-
-
-static void php_session_end_output_handler(SHUTDOWN_FUNC_ARGS)
+static void php_session_end_output_handler(TSRMLS_D)
 {
 	php_url_scanner_ex_deactivate(TSRMLS_C);
 	php_url_scanner_deactivate(TSRMLS_C);
@@ -136,7 +129,7 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 {
 	PS(mod) = _php_find_ps_module(new_value TSRMLS_CC);
 	if(!PS(mod)) {
-	  php_error(E_ERROR,"Cannot find save handler %s",new_value);
+		php_error(E_ERROR,"Cannot find save handler %s",new_value);
 	}
 	return SUCCESS;
 }
@@ -916,8 +909,9 @@ static void php_session_start(TSRMLS_D)
 		send_cookie = 0;
 	}
 	
-	if (send_cookie)
+	if (send_cookie) {
 		php_session_send_cookie(TSRMLS_C);
+	}
 
 
 	if (define_sid) {
@@ -928,8 +922,9 @@ static void php_session_start(TSRMLS_D)
 		smart_str_appends(&var, PS(id));
 		smart_str_0(&var);
 		REGISTER_STRING_CONSTANT("SID", var.c, 0);
-	} else
+	} else {
 		REGISTER_STRING_CONSTANT("SID", empty_string, 0);
+	}
 	PS(define_sid) = define_sid;
 
 	PS(session_status) = php_session_active;
@@ -1371,14 +1366,17 @@ static void php_rinit_session_globals(TSRMLS_D)
 	PS(id) = NULL;
 	PS(session_status) = php_session_none;
 	PS(mod_data) = NULL;
+	PS(output_handler_registered) = 0;
 }
 
 static void php_rshutdown_session_globals(TSRMLS_D)
 {
-	if (PS(mod_data))
+	if (PS(mod_data)) {
 		PS(mod)->close(&PS(mod_data));
-	if (PS(id)) 
+	}
+	if (PS(id)) {
 		efree(PS(id));
+	}
 	zend_hash_destroy(&PS(vars));
 }
 
@@ -1424,8 +1422,8 @@ PHP_FUNCTION(session_write_close)
 
 PHP_RSHUTDOWN_FUNCTION(session)
 {
-	if (PS(use_trans_sid)) {
-		php_session_end_output_handler(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+	if (PS(output_handler_registered)) {
+		php_session_end_output_handler(TSRMLS_C);
 	}
 	php_session_flush(TSRMLS_C);
 	php_rshutdown_session_globals(TSRMLS_C);

@@ -314,22 +314,6 @@ stop:
 	ctx->buf.len = rest;
 }
 
-char *url_adapt_flush(size_t *newlen TSRMLS_DC)
-{
-	char *ret = NULL;
-	url_adapt_state_ex_t *ctx;
-	
-	ctx = &BG(url_adapt_state_ex);
-	
-	if (ctx->buf.len) {
-		ret = ctx->buf.c;
-		*newlen = ctx->buf.len;
-		ctx->buf.c = 0;
-		ctx->buf.len = 0;
-	}
-
-	return ret;
-}
 
 char *url_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen TSRMLS_DC)
 {
@@ -354,6 +338,7 @@ char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char
 {
 	char *ret;
 	url_adapt_state_ex_t *ctx;
+	char *retval;
 
 	ctx = &BG(url_adapt_state_ex);
 
@@ -369,11 +354,12 @@ char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char
 	if (do_flush) {
 		smart_str_appendl(&ctx->result, ctx->buf.c, ctx->buf.len);
 		*newlen += ctx->buf.len;
-		ctx->buf.c = 0;
-		ctx->buf.len = 0;
+		smart_str_free(&ctx->buf);
 	}
+	retval = ctx->result.c;
+	ctx->result.c = NULL;
 	ctx->result.len = 0;
-	return ctx->result.c;
+	return retval;
 }
 
 int php_url_scanner_ex_activate(TSRMLS_D)
