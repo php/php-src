@@ -58,6 +58,7 @@ END_EXTERN_C()
 
 typedef struct _zend_declarables {
 	zval ticks;
+	zend_uint beginop;
 } zend_declarables;
 
 
