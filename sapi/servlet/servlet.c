@@ -349,6 +349,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	SETSTRING( SG(request_info).path_translated, pathTranslated );
 	file_handle.handle.fp = php3_fopen_for_parser();
 	file_handle.filename = SG(request_info).path_translated;
+	file_handle.free_filename = 0;
 	file_handle.type = ZEND_HANDLE_FP;
 
 	if (!file_handle.handle.fp) {

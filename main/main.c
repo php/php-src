@@ -939,6 +939,7 @@ int php_module_startup(sapi_module_struct *sf)
 
 	zuv.short_tags = (unsigned char) PG(short_tags);
 	zuv.asp_tags = (unsigned char) PG(asp_tags);
+	zuv.import_use_extension = ".php";
 	zend_set_utility_values(&zuv);
 	php_startup_SAPI_content_types();
 
@@ -1213,6 +1214,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 
 	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
 		prepend_file.filename = PG(auto_prepend_file);
+		prepend_file.free_filename = 0;
 		prepend_file.type = ZEND_HANDLE_FILENAME;
 		prepend_file_p = &prepend_file;
 	} else {
@@ -1220,6 +1222,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	}
 	if (PG(auto_append_file) && PG(auto_append_file)[0]) {
 		append_file.filename = PG(auto_append_file);
+		append_file.free_filename = 0;
 		append_file.type = ZEND_HANDLE_FILENAME;
 		append_file_p = &append_file;
 	} else {
