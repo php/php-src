@@ -205,7 +205,7 @@ PHP_MINIT_FUNCTION(mcal)
     return SUCCESS;
 }
 
-static int add_assoc_object(pval *arg, char *key, pval *tmp)
+static int add_assoc_object(zval *arg, char *key, zval *tmp)
 {
 	HashTable *symtable;
 	
@@ -214,38 +214,34 @@ static int add_assoc_object(pval *arg, char *key, pval *tmp)
 	} else {
 		symtable = arg->value.ht;
 	}
-	return zend_hash_update(symtable, key, strlen(key)+1, (void *)&tmp, sizeof(pval *), NULL);
+	return zend_hash_update(symtable, key, strlen(key)+1, (void *)&tmp, sizeof(zval *), NULL);
 }
 
 void php_mcal_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
-	pval *calendar;
-	pval *user;
-	pval *passwd;
-	pval *options;
+	zval **calendar, **user, **passwd, **options;
 	CALSTREAM *mcal_stream;
 	pils *mcal_le_struct;
 	long flags=0;
 	int ind;
-	int myargc=ARG_COUNT(ht);
-
 	
-	if (myargc <3 || myargc >4 || getParameters(ht, myargc, &calendar,&user,&passwd,&options) == FAILURE) {
+	int myargc = ARG_COUNT(ht);
+	if (myargc < 3 || myargc > 4 || zend_get_parameters_ex(myargc, &calendar, &user, &passwd, &options) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_string(calendar);
-	convert_to_string(user);
-	convert_to_string(passwd);
-	strcpy(mcal_user,user->value.str.val);
-	strcpy(mcal_password,passwd->value.str.val);
+	
+	convert_to_string_ex(calendar);
+	convert_to_string_ex(user);
+	convert_to_string_ex(passwd);
+	strcpy(mcal_user, (*user)->value.str.val);
+	strcpy(mcal_password, (*passwd)->value.str.val);
 	if (myargc == 4) {
-		convert_to_long(options);
-		flags=options->value.lval;
+		convert_to_long_ex(options);
+		flags = (*options)->value.lval;
 	}
-	mcal_stream = cal_open(NULL,calendar->value.str.val,0);
+	mcal_stream = cal_open(NULL, (*calendar)->value.str.val, 0);
 	if (!mcal_stream) {
-		php_error(E_WARNING,"Couldn't open stream %s\n",calendar->value.str.val);
+		php_error(E_WARNING, "Couldn't open stream %s\n", (*calendar)->value.str.val);
 		RETURN_FALSE;
 	}
 	
@@ -263,14 +259,14 @@ void php_mcal_event_init(struct _php_mcal_le_struct *mystruct)
 	mystruct->event=calevent_new();
 }
 
-void make_event_object(pval *mypvalue, CALEVENT *event)
+void make_event_object(zval *myzvalue, CALEVENT *event)
 {
-	pval *start, *end, *recurend, *attrlist;
+	zval *start, *end, *recurend, *attrlist;
 	CALATTR *attr;
 	
-	object_init(mypvalue);
-	add_property_long(mypvalue,"id",event->id);
-	add_property_long(mypvalue,"public",event->public);
+	object_init(myzvalue);
+	add_property_long(myzvalue,"id",event->id);
+	add_property_long(myzvalue,"public",event->public);
 	
 	MAKE_STD_ZVAL(start);
 	object_init(start); 
@@ -284,7 +280,7 @@ void make_event_object(pval *mypvalue, CALEVENT *event)
 		add_property_long(start,"min",event->start.min);
 		add_property_long(start,"sec",event->start.sec);
 	}
-	add_assoc_object(mypvalue, "start", start);
+	add_assoc_object(myzvalue, "start", start);
 	
 	MAKE_STD_ZVAL(end);
 	object_init(end);
@@ -298,17 +294,17 @@ void make_event_object(pval *mypvalue, CALEVENT *event)
 		add_property_long(end,"min",event->end.min);
 		add_property_long(end,"sec",event->end.sec);
 	}
-	add_assoc_object(mypvalue, "end", end);
+	add_assoc_object(myzvalue, "end", end);
 	
 	if (event->category)
-		add_property_string(mypvalue,"category",event->category,1);
+		add_property_string(myzvalue,"category",event->category,1);
 	if (event->title)
-		add_property_string(mypvalue,"title",event->title,1);
+		add_property_string(myzvalue,"title",event->title,1);
 	if (event->description)
-		add_property_string(mypvalue,"description",event->description,1);
-	add_property_long(mypvalue,"alarm",event->alarm);
-	add_property_long(mypvalue,"recur_type",event->recur_type);
-	add_property_long(mypvalue,"recur_interval",event->recur_interval);
+		add_property_string(myzvalue,"description",event->description,1);
+	add_property_long(myzvalue,"alarm",event->alarm);
+	add_property_long(myzvalue,"recur_type",event->recur_type);
+	add_property_long(myzvalue,"recur_interval",event->recur_interval);
 	
 	MAKE_STD_ZVAL(recurend);
 	object_init(recurend);
@@ -322,9 +318,9 @@ void make_event_object(pval *mypvalue, CALEVENT *event)
 		add_property_long(recurend,"min",event->recur_enddate.min);
 		add_property_long(recurend,"sec",event->recur_enddate.sec);
 	}
-	add_assoc_object(mypvalue, "recur_enddate", recurend);
+	add_assoc_object(myzvalue, "recur_enddate", recurend);
 	
-	add_property_long(mypvalue,"recur_data",event->recur_data.weekly_wday);	
+	add_property_long(myzvalue,"recur_data",event->recur_data.weekly_wday);	
 	
 	if (event->attrlist) {
 		MAKE_STD_ZVAL(attrlist);
@@ -333,7 +329,7 @@ void make_event_object(pval *mypvalue, CALEVENT *event)
 		for (attr = event->attrlist; attr; attr = attr->next) {
 			add_assoc_string(attrlist, attr->name, attr->value, 1);
 		}
-		add_assoc_object(mypvalue, "attrlist", attrlist);
+		add_assoc_object(myzvalue, "attrlist", attrlist);
 	}
 }
 
@@ -341,32 +337,32 @@ void make_event_object(pval *mypvalue, CALEVENT *event)
    Close an MCAL stream */
 PHP_FUNCTION(mcal_close)
 {
-	pval *options, *streamind;
+	zval **options, **streamind;
 	int ind, ind_type;
 	pils *mcal_le_struct=NULL; 
 	int myargcount=ARG_COUNT(ht);
 	long flags = 0;
-
-	if (myargcount < 1 || myargcount > 2 || getParameters(ht, myargcount, &streamind, &options) == FAILURE) {
+	
+	if (myargcount < 1 || myargcount > 2 || zend_get_parameters_ex(myargcount, &streamind, &options) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(streamind);
-	ind = streamind->value.lval;
+	
+	convert_to_long_ex(streamind);
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	if(myargcount==2) {
-		convert_to_long(options);
-		flags = options->value.lval;
+	if (myargcount==2) {
+		convert_to_long_ex(options);
+		flags = (*options)->value.lval;
 		mcal_le_struct->flags = flags;
 	}
 	zend_list_delete(ind);
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ proto int mcal_open(string calendar, string user, string password [, int options])
    Open an MCAL stream to a calendar */
@@ -376,36 +372,41 @@ PHP_FUNCTION(mcal_open)
 }
 /* }}} */
 
+/* {{{ proto string mcal_popen(string calendar, string user, string password [, int options])
+   Open a persistant MCAL stream to a calendar */
+PHP_FUNCTION(mcal_popen)
+{
+	php_mcal_do_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+
 /* {{{ proto int mcal_reopen(int stream_id, string calendar [, int options])
    Reopen MCAL stream to new calendar */
 PHP_FUNCTION(mcal_reopen)
 {
-	pval *streamind;
-	pval *calendar;
-	pval *options;
+	zval **streamind, **calendar, **options;
 	CALSTREAM *mcal_stream=NULL;
 	pils *mcal_le_struct; 
 	int ind, ind_type;
 	long flags=0;
 	long cl_flags=0;
 	int myargc=ARG_COUNT(ht);
-
-	if (myargc<2 || myargc>3 || getParameters(ht,myargc,&streamind, &calendar, &options) == FAILURE) {
+	
+	if (myargc < 2 || myargc > 3 || zend_get_parameters_ex(myargc, &streamind, &calendar, &options) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
-
-	convert_to_long(streamind);
-	ind = streamind->value.lval;
+	
+	convert_to_long_ex(streamind);
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-
-	convert_to_string(calendar);
+	
+	convert_to_string_ex(calendar);
 	if (myargc == 3) {
-		convert_to_long(options);
-		flags = options->value.lval;
+		convert_to_long_ex(options);
+		flags = (*options)->value.lval;
 		mcal_le_struct->flags = cl_flags;	
 	}
 	if (mcal_stream == NULL) {
@@ -421,27 +422,25 @@ PHP_FUNCTION(mcal_reopen)
    Delete all messages marked for deletion */
 PHP_FUNCTION(mcal_expunge)
 {
-	pval *streamind;
+	zval **streamind;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
-
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &streamind) == FAILURE) {
+	
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_long(streamind);
-
-	ind = streamind->value.lval;
-
+	
+	convert_to_long_ex(streamind);
+	ind = (*streamind)->value.lval;
+	
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-
-/*	cal_expunge (mcal_le_struct->mcal_stream);
-*/
+	
+	/*	cal_expunge (mcal_le_struct->mcal_stream);
+	 */
 	RETURN_TRUE;
 }
 /* }}} */
@@ -450,33 +449,33 @@ PHP_FUNCTION(mcal_expunge)
    Fetch an event */
 PHP_FUNCTION(mcal_fetch_event)
 {
-	pval *streamind,*eventid,*options=NULL;
+	zval **streamind, **eventid, **options=NULL;
 	int ind, ind_type;
 	pils *mcal_le_struct=NULL; 
 	CALEVENT *myevent;
 	int myargcount=ARG_COUNT(ht);
 	
-	if (myargcount < 1 || myargcount > 3 || getParameters(ht, myargcount, &streamind, &eventid, &options) == FAILURE) {
+	if (myargcount < 1 || myargcount > 3 || zend_get_parameters_ex(myargcount, &streamind, &eventid, &options) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(streamind);
-	convert_to_long(eventid);
-	ind = streamind->value.lval;
+	convert_to_long_ex(streamind);
+	convert_to_long_ex(eventid);
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	if (myargcount==3) {
-		convert_to_long(options);
+	if (myargcount == 3) {
+		convert_to_long_ex(options);
 	}
-	cal_fetch(mcal_le_struct->mcal_stream,eventid->value.lval,&myevent);
+	cal_fetch(mcal_le_struct->mcal_stream, (*eventid)->value.lval, &myevent);
 	if (myevent == NULL) {
 	    RETURN_FALSE;
 	}
 	calevent_free(mcal_le_struct->event);
-	mcal_le_struct->event=myevent;
-	make_event_object(return_value,mcal_le_struct->event);
+	mcal_le_struct->event = myevent;
+	make_event_object(return_value, mcal_le_struct->event);
 }
 /* }}} */
 
@@ -484,22 +483,22 @@ PHP_FUNCTION(mcal_fetch_event)
    Fetch the current event stored in the stream's event structure */
 PHP_FUNCTION(mcal_fetch_current_stream_event)
 {
-	pval *streamind;
+	zval **streamind;
 	int ind, ind_type;
 	pils *mcal_le_struct=NULL; 
 	int myargcount=ARG_COUNT(ht);
 	
-	if (myargcount != 1  || getParameters(ht, myargcount, &streamind) == FAILURE) {
+	if (myargcount != 1 || zend_get_parameters_ex(1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(streamind);
-	ind = streamind->value.lval;
+	convert_to_long_ex(streamind);
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
     }
-	make_event_object(return_value,mcal_le_struct->event);
+	make_event_object(return_value, mcal_le_struct->event);
 }
 /* }}} */
 
@@ -507,58 +506,56 @@ PHP_FUNCTION(mcal_fetch_current_stream_event)
    Returns list of UIDs for that day or range of days */
 PHP_FUNCTION(mcal_list_events)
 {
-	pval *streamind,*startyear,*startmonth,*startday;
-	pval *endyear,*endmonth,*endday;
+	zval **streamind, **startyear, **startmonth, **startday;
+	zval **endyear, **endmonth, **endday;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	cal_list_t *my_cal_list;
 	int myargc;
 	datetime_t startdate=DT_INIT;
 	datetime_t enddate=DT_INIT;
-	myargc=ARG_COUNT(ht);
-	if ((myargc != 1 && myargc != 7)|| getParameters(ht,myargc,&streamind,&startyear,&startmonth,&startday,&endyear,&endmonth,&endday) == FAILURE) {
+	
+	myargc = ARG_COUNT(ht);
+	if ((myargc != 1 && myargc != 7) || zend_get_parameters_ex(myargc, &streamind, &startyear, &startmonth, &startday, &endyear, &endmonth, &endday) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_long(streamind);
-	ind = streamind->value.lval;
-
+	
+	convert_to_long_ex(streamind);
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-
+	
 	/* Initialize return array */
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
- 
 	
 	if (myargc == 7) {
-		convert_to_long(startyear);
-		convert_to_long(startmonth);
-		convert_to_long(startday);
-		convert_to_long(endyear);
-		convert_to_long(endmonth);
-		convert_to_long(endday);
-		dt_setdate(&startdate,startyear->value.lval,startmonth->value.lval,startday->value.lval);
-		dt_setdate(&enddate,endyear->value.lval,endmonth->value.lval,endday->value.lval);
+		convert_to_long_ex(startyear);
+		convert_to_long_ex(startmonth);
+		convert_to_long_ex(startday);
+		convert_to_long_ex(endyear);
+		convert_to_long_ex(endmonth);
+		convert_to_long_ex(endday);
+		dt_setdate(&startdate, (*startyear)->value.lval, (*startmonth)->value.lval, (*startday)->value.lval);
+		dt_setdate(&enddate, (*endyear)->value.lval, (*endmonth)->value.lval, (*endday)->value.lval);
 	}
 	else {
-		startdate=mcal_le_struct->event->start;
-		enddate=mcal_le_struct->event->end;
+		startdate = mcal_le_struct->event->start;
+		enddate = mcal_le_struct->event->end;
 	}
-
-	g_cal_list=NULL;
-	cal_search_range(mcal_le_struct->mcal_stream,&startdate,&enddate);
-	my_cal_list=g_cal_list;
+	
+	g_cal_list = NULL;
+	cal_search_range(mcal_le_struct->mcal_stream, &startdate, &enddate);
+	my_cal_list = g_cal_list;
 	while (my_cal_list != NULL) {
-		add_next_index_long(return_value,my_cal_list->uid);
-		my_cal_list=my_cal_list->next;
+		add_next_index_long(return_value, my_cal_list->uid);
+		my_cal_list = my_cal_list->next;
 		free(g_cal_list);
-		g_cal_list=my_cal_list;
+		g_cal_list = my_cal_list;
 	}
 }
 /* }}} */
@@ -569,33 +566,33 @@ PHP_FUNCTION(mcal_list_events)
 
 PHP_FUNCTION(mcal_create_calendar)
 {
-	pval *streamind, *calendar;
+	zval **streamind, **calendar;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
-	int myargc=ARG_COUNT(ht);
-	if (myargc <1 || myargc > 2 || getParameters(ht,myargc,&streamind,&calendar) == FAILURE) {
+	int myargc = ARG_COUNT(ht);
+	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &calendar) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_long(streamind);
-	convert_to_string(calendar);
-	ind = streamind->value.lval;
-
+	
+	convert_to_long_ex(streamind);
+	convert_to_string_ex(calendar);
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-/*
-	if (mcal_create(mcal_le_struct->mcal_stream,calendar->value.str.val)) 
+	/*
+	  if (mcal_create(mcal_le_struct->mcal_stream,calendar->value.str.val)) 
 	  {
-	    RETURN_TRUE;
+	  RETURN_TRUE;
 	  }
-	else 
+	  else 
 	  {
-	    RETURN_FALSE;
+	  RETURN_FALSE;
 	  }
-*/
+	*/
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -604,21 +601,21 @@ PHP_FUNCTION(mcal_create_calendar)
    Rename a calendar */
 PHP_FUNCTION(mcal_rename_calendar)
 {
-	pval *streamind, *src_calendar,*dest_calendar;
+	zval **streamind, **src_calendar, **dest_calendar;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc=ARG_COUNT(ht);
-	if (myargc <2 || myargc > 3 || getParameters(ht,myargc,&streamind,&src_calendar,&dest_calendar) == FAILURE) {
+	if (myargc != 3 || zend_get_parameters_ex(3, &streamind, &src_calendar, &dest_calendar) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_long(streamind);
-	convert_to_string(src_calendar);
-	convert_to_string(dest_calendar);
-	ind = streamind->value.lval;
-
+	
+	convert_to_long_ex(streamind);
+	convert_to_string_ex(src_calendar);
+	convert_to_string_ex(dest_calendar);
+	
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
@@ -627,6 +624,7 @@ PHP_FUNCTION(mcal_rename_calendar)
 	  if(mcal_rename(mcal_le_struct->mcal_stream,src_calendar->value.str.val,dest_calendar->value.str.val)) {RETURN_TRUE;}
 	  else {RETURN_FALSE; }
 	*/
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -634,21 +632,20 @@ PHP_FUNCTION(mcal_rename_calendar)
    List alarms for a given time */
 PHP_FUNCTION(mcal_list_alarms)
 {
-	pval *streamind, *year,*month,*day,*hour,*min,*sec;
+	zval **streamind, **year, **month, **day, **hour, **min, **sec;
 	datetime_t mydate=DT_INIT;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	cal_list_t *my_cal_list;
 	int myargc=ARG_COUNT(ht);
-	if (myargc != 1 || myargc !=7 || getParameters(ht,myargc,&streamind,&year,&month,&day,&hour,&min,&sec) == FAILURE) {
+	if (myargc != 1 || myargc !=7 || zend_get_parameters_ex(myargc, &streamind, &year, &month, &day, &hour, &min, &sec) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-  
-	convert_to_long(streamind);
-	ind = streamind->value.lval;
-  
+	
+	convert_to_long_ex(streamind);
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
@@ -658,88 +655,88 @@ PHP_FUNCTION(mcal_list_alarms)
 	}
 	
 	if (myargc == 7) {
-	    convert_to_long(year);
-	    convert_to_long(month);
-	    convert_to_long(day);
-	    convert_to_long(hour);
-	    convert_to_long(min);
-	    convert_to_long(sec);
-	    dt_setdate(&mydate,year->value.lval,month->value.lval,day->value.lval);
-	    dt_settime(&mydate,hour->value.lval,min->value.lval,sec->value.lval);
+	    convert_to_long_ex(year);
+	    convert_to_long_ex(month);
+	    convert_to_long_ex(day);
+	    convert_to_long_ex(hour);
+	    convert_to_long_ex(min);
+	    convert_to_long_ex(sec);
+	    dt_setdate(&mydate, (*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
+	    dt_settime(&mydate, (*hour)->value.lval, (*min)->value.lval, (*sec)->value.lval);
 	}
 	else {
-		mydate=mcal_le_struct->event->start;
+		mydate = mcal_le_struct->event->start;
 	}
-	g_cal_list=NULL;
-	cal_search_alarm(mcal_le_struct->mcal_stream,&mydate);
-	my_cal_list=g_cal_list;
+	g_cal_list = NULL;
+	cal_search_alarm(mcal_le_struct->mcal_stream, &mydate);
+	my_cal_list = g_cal_list;
 	while (my_cal_list != NULL) {
-		add_next_index_long(return_value,my_cal_list->uid);
-		my_cal_list=my_cal_list->next;
+		add_next_index_long(return_value, my_cal_list->uid);
+		my_cal_list = my_cal_list->next;
 		free(g_cal_list);
-		g_cal_list=my_cal_list;
+		g_cal_list = my_cal_list;
 	}
 }
 /* }}} */
-
 
 /* {{{ proto string mcal_delete_calendar(int stream_id, string calendar)
    Delete calendar */
 PHP_FUNCTION(mcal_delete_calendar)
 {
-	pval *streamind, *calendar;
+	zval **streamind, **calendar;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc=ARG_COUNT(ht);
-	if (myargc <1 || myargc > 2 || getParameters(ht,myargc,&streamind,&calendar) == FAILURE) {
+	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &calendar) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_long(streamind);
-	convert_to_string(calendar);
-	ind = streamind->value.lval;
-
+	
+	convert_to_long_ex(streamind);
+	convert_to_string_ex(calendar);
+	
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
 	/*	if (mcal_delete_calendar(mcal_le_struct->mcal_stream,calendar->value.str.val)) 
-	  {
+		{
 	    RETURN_TRUE;
-	  }
-	else 
-	  {
+		}
+		else 
+		{
 	    RETURN_FALSE;
-	  }
+		}
 	*/
+	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ proto string mcal_delete_event(int stream_id, int uid)
    Delete event */
 PHP_FUNCTION(mcal_delete_event)
 {
-	pval *streamind, *uid;
+	zval **streamind, **uid;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc=ARG_COUNT(ht);
-	if (myargc <1 || myargc > 2 || getParameters(ht,myargc,&streamind,&uid) == FAILURE) {
+	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &uid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_long(streamind);
-	convert_to_long(uid);
-	ind = streamind->value.lval;
-
+	
+	convert_to_long_ex(streamind);
+	convert_to_long_ex(uid);
+	
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	if (cal_remove(mcal_le_struct->mcal_stream,uid->value.lval)) {
+	
+	if (cal_remove(mcal_le_struct->mcal_stream, (*uid)->value.lval)) {
 	    RETURN_TRUE;
 	}
 	else {
@@ -748,37 +745,32 @@ PHP_FUNCTION(mcal_delete_event)
 }
 /* }}} */
 
-
-PHP_FUNCTION(mcal_popen){
-}
-
 /* {{{ proto string mcal_append_event(int stream_id)
    Append a new event to the calendar stream */
 PHP_FUNCTION(mcal_append_event)
 {
-	pval *streamind;
+	zval **streamind;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
 	unsigned long uid;
 	CALEVENT *myevent=NULL;
 	
-	myargc=ARG_COUNT(ht);
-	if (myargc != 1 || getParameters(ht,myargc,&streamind) == FAILURE) {
+	myargc = ARG_COUNT(ht);
+	if (myargc != 1 || zend_get_parameters_ex(1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(streamind);
-	ind = streamind->value.lval;
-	
+	convert_to_long_ex(streamind);
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	myevent=mcal_le_struct->event;
-	cal_append(mcal_le_struct->mcal_stream,"INBOX",&uid,myevent);
+	myevent = mcal_le_struct->event;
+	cal_append(mcal_le_struct->mcal_stream, "INBOX", &uid, myevent);
 	calevent_free(myevent);
 	RETURN_LONG(uid);
 }
@@ -788,59 +780,55 @@ PHP_FUNCTION(mcal_append_event)
    Store changes to an event */
 PHP_FUNCTION(mcal_store_event)
 {
-	pval *streamind;
+	zval **streamind;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
 	CALEVENT *myevent=NULL;
 	
-	myargc=ARG_COUNT(ht);
-	if (myargc !=1 || getParameters(ht,myargc,&streamind) == FAILURE) {
+	myargc = ARG_COUNT(ht);
+	if (myargc != 1 || zend_get_parameters_ex(1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(streamind);
-	ind = streamind->value.lval;
-	
+	convert_to_long_ex(streamind);
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	myevent=mcal_le_struct->event;
+	myevent = mcal_le_struct->event;
 	cal_store(mcal_le_struct->mcal_stream, myevent);
 	RETURN_LONG(myevent->id);
 }
 /* }}} */
 
-
 /* {{{ proto string mcal_snooze(int stream_id, int uid)
    Snooze an alarm */
 PHP_FUNCTION(mcal_snooze)
 {
-	pval *streamind,*uid;
+	zval **streamind, **uid;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
-	myargc=ARG_COUNT(ht);
-	if (myargc !=2 || getParameters(ht,myargc,&streamind,&uid) == FAILURE) {
+	myargc = ARG_COUNT(ht);
+	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &uid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_long(streamind);
-	convert_to_long(uid);
-
-	ind = streamind->value.lval;
-
+	
+	convert_to_long_ex(streamind);
+	convert_to_long_ex(uid);
+	
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-
-	if (cal_snooze(mcal_le_struct->mcal_stream,uid->value.lval)) {
+	
+	if (cal_snooze(mcal_le_struct->mcal_stream, (*uid)->value.lval)) {
 	    RETURN_TRUE;
 	}
 	else {
@@ -854,27 +842,26 @@ PHP_FUNCTION(mcal_snooze)
    Attach a category to an event */
 PHP_FUNCTION(mcal_event_set_category)
 {
-	pval *streamind,*category;
+	zval **streamind, **category;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
-	myargc=ARG_COUNT(ht);
-	if (myargc !=2 || getParameters(ht,myargc,&streamind,&category) == FAILURE) {
+	
+	myargc = ARG_COUNT(ht);
+	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &category) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_long(streamind);
-	convert_to_string(category);
-
-	ind = streamind->value.lval;
-
+	
+	convert_to_long_ex(streamind);
+	convert_to_string_ex(category);
+	
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	mcal_le_struct->event->category=strdup(category->value.str.val);
+	mcal_le_struct->event->category = strdup((*category)->value.str.val);
 }
 /* }}} */
 
@@ -882,27 +869,26 @@ PHP_FUNCTION(mcal_event_set_category)
    Attach a title to an event */
 PHP_FUNCTION(mcal_event_set_title)
 {
-	pval *streamind,*title;
+	zval **streamind, **title;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
-	myargc=ARG_COUNT(ht);
-	if (myargc !=2 || getParameters(ht,myargc,&streamind,&title) == FAILURE) {
+	
+	myargc = ARG_COUNT(ht);
+	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &title) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(streamind);
-	convert_to_string(title);
+	convert_to_long_ex(streamind);
+	convert_to_string_ex(title);
 	
-	ind = streamind->value.lval;
-	
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
-		RETURN_FALSE;
+	RETURN_FALSE;
 	}
-	mcal_le_struct->event->title=strdup(title->value.str.val);
+	mcal_le_struct->event->title = strdup((*title)->value.str.val);
 }
 /* }}} */
 
@@ -910,27 +896,26 @@ PHP_FUNCTION(mcal_event_set_title)
    Attach a description to an event */
 PHP_FUNCTION(mcal_event_set_description)
 {
-	pval *streamind,*description;
+	zval **streamind, **description;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
-	myargc=ARG_COUNT(ht);
-	if (myargc !=2 || getParameters(ht,myargc,&streamind,&description) == FAILURE) {
+	
+	myargc = ARG_COUNT(ht);
+	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &description) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_long(streamind);
-	convert_to_string(description);
-
-	ind = streamind->value.lval;
-
+	
+	convert_to_long_ex(streamind);
+	convert_to_string_ex(description);
+	
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	mcal_le_struct->event->description=strdup(description->value.str.val);
+	mcal_le_struct->event->description = strdup((*description)->value.str.val);
 }
 /* }}} */
 
@@ -938,39 +923,38 @@ PHP_FUNCTION(mcal_event_set_description)
    Attach a start datetime to an event */
 PHP_FUNCTION(mcal_event_set_start)
 {
-	pval *streamind,*year,*month,*date,*hour,*min,*sec;
+	zval **streamind, **year, **month, **date, **hour, **min, **sec;
 	int ind, ind_type;
-	int myhour=0,mymin=0,mysec=0;
+	int myhour=0, mymin=0, mysec=0;
 	pils *mcal_le_struct; 
 	int myargc;
-	myargc=ARG_COUNT(ht);
-	if (myargc <4 || getParameters(ht,myargc,&streamind,&year,&month,&date,&hour,&min,&sec) == FAILURE) {
+	
+	myargc = ARG_COUNT(ht);
+	if (myargc < 4 || myargc > 7 || zend_get_parameters_ex(myargc, &streamind, &year, &month, &date, &hour, &min, &sec) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_long(streamind);
-	convert_to_long(year);
-	convert_to_long(month);
-	convert_to_long(date);
-	if (myargc > 4) convert_to_long(hour);
-	if (myargc > 5) convert_to_long(min);
-	if (myargc > 6) convert_to_long(sec);
 	
-	ind = streamind->value.lval;
+	convert_to_long_ex(streamind);
+	convert_to_long_ex(year);
+	convert_to_long_ex(month);
+	convert_to_long_ex(date);
+	if (myargc > 4) convert_to_long_ex(hour);
+	if (myargc > 5) convert_to_long_ex(min);
+	if (myargc > 6) convert_to_long_ex(sec);
 	
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-
-	dt_setdate(&(mcal_le_struct->event->start),year->value.lval,month->value.lval,date->value.lval);
-
-	if (myargc > 4) myhour=hour->value.lval;
-	if (myargc > 5) mymin=min->value.lval;
-	if (myargc > 6) mysec=sec->value.lval;
-	if (myargc >4) dt_settime(&(mcal_le_struct->event->start),myhour,mymin,mysec);
+	
+	dt_setdate(&(mcal_le_struct->event->start), (*year)->value.lval, (*month)->value.lval, (*date)->value.lval);
+	
+	if (myargc > 4) myhour = (*hour)->value.lval;
+	if (myargc > 5) mymin  = (*min)->value.lval;
+	if (myargc > 6) mysec  = (*sec)->value.lval;
+	if (myargc > 4) dt_settime(&(mcal_le_struct->event->start), myhour, mymin, mysec);
 }
 /* }}} */
 
@@ -978,42 +962,40 @@ PHP_FUNCTION(mcal_event_set_start)
    Attach an end datetime to an event */
 PHP_FUNCTION(mcal_event_set_end)
 {
-	pval *streamind,*year,*month,*date,*hour,*min,*sec;
+	zval **streamind, **year, **month, **date, **hour, **min, **sec;
 	int ind, ind_type;
 	/* initialize these to zero to make sure we don't use them
 	   uninitialized (and to avoid the gcc warning) */
 	int myhour = 0; int mymin = 0; int mysec = 0;
 	pils *mcal_le_struct; 
 	int myargc;
-	myargc=ARG_COUNT(ht);
-	if (myargc <4 || getParameters(ht,myargc,&streamind,&year,&month,&date,&hour,&min,&sec) == FAILURE) {
+	
+	myargc = ARG_COUNT(ht);
+	if (myargc < 4 || myargc > 7 || zend_get_parameters_ex(myargc, &streamind, &year, &month, &date, &hour, &min, &sec) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(streamind);
-	convert_to_long(year);
-	convert_to_long(month);
-	convert_to_long(date);
-	if (myargc > 4) convert_to_long(hour);
-	if (myargc > 5) convert_to_long(min);
-	if (myargc > 6) convert_to_long(sec);
+	convert_to_long_ex(streamind);
+	convert_to_long_ex(year);
+	convert_to_long_ex(month);
+	convert_to_long_ex(date);
+	if (myargc > 4) convert_to_long_ex(hour);
+	if (myargc > 5) convert_to_long_ex(min);
+	if (myargc > 6) convert_to_long_ex(sec);
 
-	ind = streamind->value.lval;
-
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-
-
-	dt_setdate(&(mcal_le_struct->event->end),year->value.lval,month->value.lval,date->value.lval);
-
-	if (myargc > 4) myhour=hour->value.lval;
-	if (myargc > 5) mymin=min->value.lval;
-	if (myargc > 6) mysec=sec->value.lval;
-	if (myargc >4) dt_settime(&(mcal_le_struct->event->end),myhour,mymin,mysec);
+	
+	dt_setdate(&(mcal_le_struct->event->end), (*year)->value.lval, (*month)->value.lval, (*date)->value.lval);
+	
+	if (myargc > 4) myhour = (*hour)->value.lval;
+	if (myargc > 5) mymin  = (*min)->value.lval;
+	if (myargc > 6) mysec  = (*sec)->value.lval;
+	if (myargc > 4) dt_settime(&(mcal_le_struct->event->end), myhour, mymin, mysec);
 }
 /* }}} */
 
@@ -1021,27 +1003,26 @@ PHP_FUNCTION(mcal_event_set_end)
    Add an alarm to the streams global event */
 PHP_FUNCTION(mcal_event_set_alarm)
 {
-	pval *streamind,*alarm;
+	zval **streamind, **alarm;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
 	myargc=ARG_COUNT(ht);
-	if (myargc !=2 || getParameters(ht,myargc,&streamind,&alarm) == FAILURE) {
+	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &alarm) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_long(streamind);
-	convert_to_long(alarm);
-
-	ind = streamind->value.lval;
-
+	
+	convert_to_long_ex(streamind);
+	convert_to_long_ex(alarm);
+	
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	mcal_le_struct->event->alarm=alarm->value.lval;
+	
+	mcal_le_struct->event->alarm = (*alarm)->value.lval;
 }
 /* }}} */
 
@@ -1049,22 +1030,24 @@ PHP_FUNCTION(mcal_event_set_alarm)
    Initialize a streams global event */
 PHP_FUNCTION(mcal_event_init)
 {
-	pval *streamind;
+	zval **streamind;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
-	myargc=ARG_COUNT(ht);
-	if (myargc !=1 || getParameters(ht,myargc,&streamind) == FAILURE) {
+	
+	myargc = ARG_COUNT(ht);
+	if (myargc != 1 || zend_get_parameters_ex(1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(streamind);
-	ind = streamind->value.lval;
+	convert_to_long_ex(streamind);
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
+	
 	php_mcal_event_init(mcal_le_struct);
 }
 /* }}} */
@@ -1073,27 +1056,27 @@ PHP_FUNCTION(mcal_event_init)
    Add an class to the streams global event */
 PHP_FUNCTION(mcal_event_set_class)
 {
-	pval *streamind,*class;
+	zval **streamind, **class;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
-	myargc=ARG_COUNT(ht);
-	if (myargc !=2 || getParameters(ht,myargc,&streamind,&class) == FAILURE) {
+	
+	myargc = ARG_COUNT(ht);
+	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &class) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_long(streamind);
-	convert_to_long(class);
-
-	ind = streamind->value.lval;
-
+	
+	convert_to_long_ex(streamind);
+	convert_to_long_ex(class);
+	
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	mcal_le_struct->event->public=class->value.lval;
+	
+	mcal_le_struct->event->public = (*class)->value.lval;
 }
 /* }}} */
 
@@ -1101,28 +1084,28 @@ PHP_FUNCTION(mcal_event_set_class)
    Add an attribute and value to an event */
 PHP_FUNCTION(mcal_event_add_attribute)
 {
-	pval *streamind,*attribute,*val;
+	zval **streamind, **attribute, **val;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
 	
-	myargc=ARG_COUNT(ht);
-	if (myargc !=3 || getParameters(ht,myargc,&streamind,&attribute,&val) == FAILURE) {
+	myargc = ARG_COUNT(ht);
+	if (myargc != 3 || zend_get_parameters_ex(3, &streamind, &attribute, &val) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(streamind);
-	convert_to_string(attribute);
-	convert_to_string(val);
+	convert_to_long_ex(streamind);
+	convert_to_string_ex(attribute);
+	convert_to_string_ex(val);
 	
-	ind = streamind->value.lval;
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 #if MCALVER >= 20000121
-	if (calevent_setattr(mcal_le_struct->event, attribute->value.str.val, val->value.str.val)) {
+	if (calevent_setattr(mcal_le_struct->event, (*attribute)->value.str.val, (*val)->value.str.val)) {
 		RETURN_TRUE;
 	}
 	else
@@ -1137,14 +1120,17 @@ PHP_FUNCTION(mcal_event_add_attribute)
    Returns true if year is a leap year, false if not */
 PHP_FUNCTION(mcal_is_leap_year)
 {
-	pval *year;
+	zval **year;
 	int myargc;
-	myargc=ARG_COUNT(ht);
-	if (myargc !=1 || getParameters(ht,myargc,&year) == FAILURE) {
+	
+	myargc = ARG_COUNT(ht);
+	if (myargc != 1 || zend_get_parameters_ex(1, &year) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(year);
-	if (isleapyear(year->value.lval)) {
+	
+	convert_to_long_ex(year);
+	
+	if (isleapyear((*year)->value.lval)) {
 	    RETURN_TRUE;
 	}
 	else {
@@ -1157,16 +1143,19 @@ PHP_FUNCTION(mcal_is_leap_year)
    Returns the number of days in the given month, needs to know if the year is a leap year or not */
 PHP_FUNCTION(mcal_days_in_month)
 {
-	pval *month,*leap;
+	zval **month, **leap;
 	int myargc;
-	myargc=ARG_COUNT(ht);
-	if (myargc !=2 || getParameters(ht,myargc,&month,&leap) == FAILURE) {
+	
+	myargc = ARG_COUNT(ht);
+	if (myargc != 2 || zend_get_parameters_ex(2, &month, &leap) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(month);
-	convert_to_long(leap);
-	convert_to_boolean(leap);
-	RETURN_LONG(daysinmonth(month->value.lval,leap->value.lval));
+	
+	convert_to_long_ex(month);
+	convert_to_long_ex(leap);
+	convert_to_boolean_ex(leap);
+	
+	RETURN_LONG(daysinmonth((*month)->value.lval, (*leap)->value.lval));
 }
 /* }}} */
 
@@ -1174,16 +1163,19 @@ PHP_FUNCTION(mcal_days_in_month)
    Returns true if the date is a valid date */
 PHP_FUNCTION(mcal_date_valid)
 {
-	pval *year,*month,*day;
+	zval **year, **month, **day;
 	int myargc;
-	myargc=ARG_COUNT(ht);
-	if (myargc !=3 || getParameters(ht,myargc,&year,&month,&day) == FAILURE) {
+	
+	myargc = ARG_COUNT(ht);
+	if (myargc != 3 || zend_get_parameters_ex(3, &year, &month, &day) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(year);
-	convert_to_long(month);
-	convert_to_long(day);
-	if (datevalid(year->value.lval,month->value.lval,day->value.lval)) {
+	
+	convert_to_long_ex(year);
+	convert_to_long_ex(month);
+	convert_to_long_ex(day);
+	
+	if (datevalid((*year)->value.lval, (*month)->value.lval, (*day)->value.lval)) {
 	    RETURN_TRUE;
 	}
 	else {
@@ -1196,16 +1188,19 @@ PHP_FUNCTION(mcal_date_valid)
    Returns true if the time is a valid time */
 PHP_FUNCTION(mcal_time_valid)
 {
-	pval *hour,*min,*sec;
+	zval **hour, **min, **sec;
 	int myargc;
-	myargc=ARG_COUNT(ht);
-	if (myargc !=3 || getParameters(ht,myargc,&hour,&min,&sec) == FAILURE) {
+	
+	myargc = ARG_COUNT(ht);
+	if (myargc != 3 || zend_get_parameters_ex(3, &hour, &min, &sec) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(hour);
-	convert_to_long(min);
-	convert_to_long(sec);
-	if (timevalid(hour->value.lval,min->value.lval,sec->value.lval)) {
+	
+	convert_to_long_ex(hour);
+	convert_to_long_ex(min);
+	convert_to_long_ex(sec);
+	
+	if (timevalid((*hour)->value.lval, (*min)->value.lval, (*sec)->value.lval)) {
 	    RETURN_TRUE;
 	}
 	else {
@@ -1218,18 +1213,21 @@ PHP_FUNCTION(mcal_time_valid)
    Returns the day of the week of the given date */
 PHP_FUNCTION(mcal_day_of_week)
 {
-	pval *year,*month,*day;
+	zval **year, **month, **day;
 	int myargc;
 	datetime_t mydate;
-	myargc=ARG_COUNT(ht);
-	if (myargc !=3 || getParameters(ht,myargc,&year,&month,&day) == FAILURE) {
+	
+	myargc = ARG_COUNT(ht);
+	if (myargc != 3 || zend_get_parameters_ex(3, &year, &month, &day) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(year);
-	convert_to_long(month);
-	convert_to_long(day);
+	
+	convert_to_long_ex(year);
+	convert_to_long_ex(month);
+	convert_to_long_ex(day);
+	
 	dt_init(&mydate);
-	dt_setdate(&mydate,year->value.lval,month->value.lval, day->value.lval);
+	dt_setdate(&mydate, (*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
 	
 	RETURN_LONG(dt_dayofweek(&mydate));
 }
@@ -1239,19 +1237,22 @@ PHP_FUNCTION(mcal_day_of_week)
    Returns the day of the year of the given date */
 PHP_FUNCTION(mcal_day_of_year)
 {
-	pval *year,*month,*day;
+	zval **year, **month, **day;
 	int myargc;
 	datetime_t mydate;
-	myargc=ARG_COUNT(ht);
-	if (myargc !=3 || getParameters(ht,myargc,&year,&month,&day) == FAILURE) {
+	
+	myargc = ARG_COUNT(ht);
+	if (myargc != 3 || zend_get_parameters_ex(3, &year, &month, &day) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(year);
-	convert_to_long(month);
-	convert_to_long(day);
+	
+	convert_to_long_ex(year);
+	convert_to_long_ex(month);
+	convert_to_long_ex(day);
+	
 	dt_init(&mydate);
-	dt_setdate(&mydate,year->value.lval,month->value.lval, day->value.lval);
-
+	dt_setdate(&mydate, (*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
+	
 	RETURN_LONG(dt_dayofyear(&mydate));
 }
 /* }}} */
@@ -1260,20 +1261,20 @@ PHP_FUNCTION(mcal_day_of_year)
    Returns the week number of the given date */
 PHP_FUNCTION(mcal_week_of_year)
 {
-	pval *year, *month, *day;
+	zval **year, **month, **day;
 	int myargc;
 	
 	myargc = ARG_COUNT(ht);
-	if (myargc != 3 || getParameters(ht,myargc,&day,&month,&year) == FAILURE) {
+	if (myargc != 3 || zend_get_parameters_ex(3, &day, &month, &year) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
- 	convert_to_long(year);
- 	convert_to_long(month);
- 	convert_to_long(day);
+ 	convert_to_long_ex(year);
+ 	convert_to_long_ex(month);
+ 	convert_to_long_ex(day);
 	
- 	if (datevalid(year->value.lval,month->value.lval,day->value.lval)) { 
-		RETURN_LONG(dt_weekofyear(day->value.lval,month->value.lval,year->value.lval));
+ 	if (datevalid((*year)->value.lval, (*month)->value.lval, (*day)->value.lval)) { 
+		RETURN_LONG(dt_weekofyear((*day)->value.lval, (*month)->value.lval, (*year)->value.lval));
 	}
 	else {
 		RETURN_FALSE;
@@ -1285,25 +1286,27 @@ PHP_FUNCTION(mcal_week_of_year)
    Returns <0, 0, >0 if a<b, a==b, a>b respectively */
 PHP_FUNCTION(mcal_date_compare)
 {
-	pval *ayear, *amonth, *aday;
-	pval *byear, *bmonth, *bday;
+	zval **ayear, **amonth, **aday;
+	zval **byear, **bmonth, **bday;
 	int myargc;
 	datetime_t myadate, mybdate;
 	
-	myargc=ARG_COUNT(ht);
-	if (myargc !=6 || getParameters(ht,myargc,&ayear,&amonth,&aday,&byear,&bmonth,&bday) == FAILURE) {
+	myargc = ARG_COUNT(ht);
+	if (myargc != 6 || zend_get_parameters_ex(6, &ayear, &amonth, &aday, &byear, &bmonth, &bday) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(ayear);
-	convert_to_long(amonth);
-	convert_to_long(aday);
-	convert_to_long(byear);
-	convert_to_long(bmonth);
-	convert_to_long(bday);
+	
+	convert_to_long_ex(ayear);
+	convert_to_long_ex(amonth);
+	convert_to_long_ex(aday);
+	convert_to_long_ex(byear);
+	convert_to_long_ex(bmonth);
+	convert_to_long_ex(bday);
+	
 	dt_init(&myadate);
 	dt_init(&mybdate);
-	dt_setdate(&myadate, ayear->value.lval, amonth->value.lval, aday->value.lval);
-	dt_setdate(&mybdate, byear->value.lval, bmonth->value.lval, bday->value.lval);
+	dt_setdate(&myadate, (*ayear)->value.lval, (*amonth)->value.lval, (*aday)->value.lval);
+	dt_setdate(&mybdate, (*byear)->value.lval, (*bmonth)->value.lval, (*bday)->value.lval);
 	
 	RETURN_LONG(dt_compare(&myadate, &mybdate));
 }
@@ -1313,73 +1316,74 @@ PHP_FUNCTION(mcal_date_compare)
    Returns an object filled with the next date the event occurs, on or after the supplied date.  Returns empty date field if event does not occur or something is invalid. */
 PHP_FUNCTION(mcal_next_recurrence)
 {
-	pval *streamind, *weekstart, *next, **pvalue;
+	zval **streamind, **weekstart, **next, **zvalue;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
 	datetime_t mydate;
 	
 	myargc=ARG_COUNT(ht);
-	if (myargc !=3 || getParameters(ht,myargc,&streamind,&weekstart,&next) == FAILURE) {
+	if (myargc != 3 || zend_get_parameters_ex(3, &streamind, &weekstart, &next) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(streamind);
-	convert_to_long(weekstart);
-	convert_to_array(next);
-	ind = streamind->value.lval;
+	convert_to_long_ex(streamind);
+	convert_to_long_ex(weekstart);
+	convert_to_array_ex(next);
 	
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	if (zend_hash_find(next->value.ht,"year",sizeof("year"),(void **) &pvalue) == SUCCESS) {
-		SEPARATE_ZVAL(pvalue);
-		convert_to_long(*pvalue);
-		mydate.year = (*pvalue)->value.lval;
+	if (zend_hash_find((*next)->value.ht, "year", sizeof("year"), (void **) &zvalue) == SUCCESS) {
+		SEPARATE_ZVAL(zvalue);
+		convert_to_long_ex(zvalue);
+		mydate.year = (*zvalue)->value.lval;
 	}
-	if (zend_hash_find(next->value.ht,"month",sizeof("month"),(void **) &pvalue) == SUCCESS) {
-		SEPARATE_ZVAL(pvalue);
-		convert_to_long(*pvalue);
-		mydate.mon = (*pvalue)->value.lval;
+	if (zend_hash_find((*next)->value.ht, "month", sizeof("month"), (void **) &zvalue) == SUCCESS) {
+		SEPARATE_ZVAL(zvalue);
+		convert_to_long_ex(zvalue);
+		mydate.mon = (*zvalue)->value.lval;
 	}
-	if (zend_hash_find(next->value.ht,"mday",sizeof("mday"),(void **) &pvalue) == SUCCESS) {
-		SEPARATE_ZVAL(pvalue);
-		convert_to_long(*pvalue);
-		mydate.mday = (*pvalue)->value.lval;
+	if (zend_hash_find((*next)->value.ht, "mday", sizeof("mday"), (void **) &zvalue) == SUCCESS) {
+		SEPARATE_ZVAL(zvalue);
+		convert_to_long_ex(zvalue);
+		mydate.mday = (*zvalue)->value.lval;
 	}
-	if (zend_hash_find(next->value.ht,"hour",sizeof("hour"),(void **) &pvalue) == SUCCESS) {
-		SEPARATE_ZVAL(pvalue);
-		convert_to_long(*pvalue);
-		mydate.hour = (*pvalue)->value.lval;
+	if (zend_hash_find((*next)->value.ht, "hour", sizeof("hour"), (void **) &zvalue) == SUCCESS) {
+		SEPARATE_ZVAL(zvalue);
+		convert_to_long_ex(zvalue);
+		mydate.hour = (*zvalue)->value.lval;
 	}
-	if (zend_hash_find(next->value.ht,"min",sizeof("min"),(void **) &pvalue) == SUCCESS) {
-		SEPARATE_ZVAL(pvalue);
-		convert_to_long(*pvalue);
-		mydate.min = (*pvalue)->value.lval;
+	if (zend_hash_find((*next)->value.ht, "min", sizeof("min"), (void **) &zvalue) == SUCCESS) {
+		SEPARATE_ZVAL(zvalue);
+		convert_to_long_ex(zvalue);
+		mydate.min = (*zvalue)->value.lval;
 	}
-	if (zend_hash_find(next->value.ht,"sec",sizeof("sec"),(void **) &pvalue) == SUCCESS) {
-		SEPARATE_ZVAL(pvalue);
-		convert_to_long(*pvalue);
-		mydate.sec = (*pvalue)->value.lval;
+	if (zend_hash_find((*next)->value.ht, "sec", sizeof("sec"), (void **) &zvalue) == SUCCESS) {
+		SEPARATE_ZVAL(zvalue);
+		convert_to_long_ex(zvalue);
+		mydate.sec = (*zvalue)->value.lval;
 	}
 	
-	calevent_next_recurrence(mcal_le_struct->event,&mydate,weekstart->value.lval);
+	calevent_next_recurrence(mcal_le_struct->event, &mydate, (*weekstart)->value.lval);
 	
 	if (object_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
+	
 	if (mydate.has_date) {
-	    add_property_long(return_value,"year",mydate.year);
-	    add_property_long(return_value,"month",mydate.mon);
-	    add_property_long(return_value,"mday",mydate.mday);
+	    add_property_long(return_value, "year", mydate.year);
+	    add_property_long(return_value, "month", mydate.mon);
+	    add_property_long(return_value, "mday", mydate.mday);
 	}
 	if (mydate.has_time) {
-		add_property_long(return_value,"hour",mydate.hour);
-		add_property_long(return_value,"min",mydate.min);
-		add_property_long(return_value,"sec",mydate.sec);
+		add_property_long(return_value, "hour", mydate.hour);
+		add_property_long(return_value, "min", mydate.min);
+		add_property_long(return_value, "sec", mydate.sec);
 	}
 }
 /* }}} */
@@ -1388,21 +1392,21 @@ PHP_FUNCTION(mcal_next_recurrence)
    Create a daily recurrence */
 PHP_FUNCTION(mcal_event_set_recur_none)
 {
-	pval *streamind;
+	zval **streamind;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
 	
 	myargc = ARG_COUNT(ht);
-	if (myargc != 1 || getParameters(ht, myargc, &streamind) == FAILURE) {
+	if (myargc != 1 || zend_get_parameters_ex(1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(streamind);
+	convert_to_long_ex(streamind);
 	
-	ind = streamind->value.lval;
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
@@ -1415,33 +1419,32 @@ PHP_FUNCTION(mcal_event_set_recur_none)
    Create a daily recurrence */
 PHP_FUNCTION(mcal_event_set_recur_daily)
 {
-	pval *streamind,*year,*month,*day,*interval;
+	zval **streamind, **year, **month, **day, **interval;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
-	datetime_t endtime=DT_INIT;
+	datetime_t endtime = DT_INIT;
 	
-	myargc=ARG_COUNT(ht);
-	if (myargc != 5 || getParameters(ht,myargc,&streamind,&year,&month,&day,&interval) == FAILURE) {
+	myargc = ARG_COUNT(ht);
+	if (myargc != 5 || zend_get_parameters_ex(5, &streamind, &year, &month, &day, &interval) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(streamind);
-	convert_to_long(year);
-	convert_to_long(month);
-	convert_to_long(day);
-	convert_to_long(interval);
-	ind = streamind->value.lval;
-
+	convert_to_long_ex(streamind);
+	convert_to_long_ex(year);
+	convert_to_long_ex(month);
+	convert_to_long_ex(day);
+	convert_to_long_ex(interval);
+	
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	dt_setdate(&endtime,year->value.lval,month->value.lval,day->value.lval);
-	calevent_recur_daily(mcal_le_struct->event, &endtime,
-						 interval->value.lval);
+	dt_setdate(&endtime, (*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
+	calevent_recur_daily(mcal_le_struct->event, &endtime, (*interval)->value.lval);
 }
 /* }}} */
 
@@ -1449,34 +1452,33 @@ PHP_FUNCTION(mcal_event_set_recur_daily)
    Create a weekly recurrence */
 PHP_FUNCTION(mcal_event_set_recur_weekly)
 {
-	pval *streamind,*year,*month,*day,*interval,*weekdays;
+	zval **streamind, **year, **month, **day, **interval, **weekdays;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
 	datetime_t endtime=DT_INIT;
 	
-	myargc=ARG_COUNT(ht);
-	if (myargc != 6 || getParameters(ht,myargc,&streamind,&year,&month,&day,&interval,&weekdays) == FAILURE) {
+	myargc = ARG_COUNT(ht);
+	if (myargc != 6 || zend_get_parameters_ex(6, &streamind, &year, &month, &day, &interval, &weekdays) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(streamind);
-	convert_to_long(year);
-	convert_to_long(month);
-	convert_to_long(day);
-	convert_to_long(interval);
-	convert_to_long(weekdays);
-	ind = streamind->value.lval;
+	convert_to_long_ex(streamind);
+	convert_to_long_ex(year);
+	convert_to_long_ex(month);
+	convert_to_long_ex(day);
+	convert_to_long_ex(interval);
+	convert_to_long_ex(weekdays);
 	
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	dt_setdate(&endtime,year->value.lval,month->value.lval,day->value.lval);
-	calevent_recur_weekly(mcal_le_struct->event, &endtime,
-						  interval->value.lval,weekdays->value.lval);
+	dt_setdate(&endtime, (*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
+	calevent_recur_weekly(mcal_le_struct->event, &endtime, (*interval)->value.lval, (*weekdays)->value.lval);
 }
 /* }}} */
 
@@ -1484,33 +1486,32 @@ PHP_FUNCTION(mcal_event_set_recur_weekly)
    Create a monthly by day recurrence */
 PHP_FUNCTION(mcal_event_set_recur_monthly_mday)
 {
-	pval *streamind,*year,*month,*day,*interval;
+	zval **streamind, **year, **month, **day, **interval;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
 	datetime_t endtime=DT_INIT;
 	
-	myargc=ARG_COUNT(ht);
-	if (myargc != 5 || getParameters(ht,myargc,&streamind,&year,&month,&day,&interval) == FAILURE) {
+	myargc = ARG_COUNT(ht);
+	if (myargc != 5 || zend_get_parameters_ex(5, &streamind, &year, &month, &day, &interval) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(streamind);
-	convert_to_long(year);
-	convert_to_long(month);
-	convert_to_long(day);
-	convert_to_long(interval);
+	convert_to_long_ex(streamind);
+	convert_to_long_ex(year);
+	convert_to_long_ex(month);
+	convert_to_long_ex(day);
+	convert_to_long_ex(interval);
 	
-	ind = streamind->value.lval;
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	dt_setdate(&endtime,year->value.lval,month->value.lval,day->value.lval);
-	calevent_recur_monthly_mday(mcal_le_struct->event, &endtime,
-								interval->value.lval);
+	dt_setdate(&endtime, (*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
+	calevent_recur_monthly_mday(mcal_le_struct->event, &endtime, (*interval)->value.lval);
 }
 /* }}} */
 
@@ -1518,33 +1519,32 @@ PHP_FUNCTION(mcal_event_set_recur_monthly_mday)
    Create a monthy by week recurrence */
 PHP_FUNCTION(mcal_event_set_recur_monthly_wday)
 {
-	pval *streamind,*year,*month,*day,*interval;
+	zval **streamind, **year, **month, **day, **interval;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
 	datetime_t endtime=DT_INIT;
 	
-	myargc=ARG_COUNT(ht);
-	if (myargc != 5 || getParameters(ht,myargc,&streamind,&year,&month,&day,&interval) == FAILURE) {
+	myargc = ARG_COUNT(ht);
+	if (myargc != 5 || zend_get_parameters_ex(5, &streamind, &year, &month, &day, &interval) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(streamind);
-	convert_to_long(year);
-	convert_to_long(month);
-	convert_to_long(day);
-	convert_to_long(interval);
+	convert_to_long_ex(streamind);
+	convert_to_long_ex(year);
+	convert_to_long_ex(month);
+	convert_to_long_ex(day);
+	convert_to_long_ex(interval);
 	
-	ind = streamind->value.lval;
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	dt_setdate(&endtime,year->value.lval,month->value.lval,day->value.lval);
-	calevent_recur_monthly_wday(mcal_le_struct->event, &endtime,
-								interval->value.lval);
+	dt_setdate(&endtime, (*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
+	calevent_recur_monthly_wday(mcal_le_struct->event, &endtime, (*interval)->value.lval);
 }
 /* }}} */
 
@@ -1552,33 +1552,32 @@ PHP_FUNCTION(mcal_event_set_recur_monthly_wday)
    Create a yearly recurrence */
 PHP_FUNCTION(mcal_event_set_recur_yearly)
 {
-	pval *streamind,*year,*month,*day,*interval;
+	zval **streamind, **year, **month, **day, **interval;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
 	datetime_t endtime=DT_INIT;
 	
-	myargc=ARG_COUNT(ht);
-	if (myargc != 5 || getParameters(ht,myargc,&streamind,&year,&month,&day,&interval) == FAILURE) {
+	myargc = ARG_COUNT(ht);
+	if (myargc != 5 || zend_get_parameters_ex(5, &streamind, &year, &month, &day, &interval) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(streamind);
-	convert_to_long(year);
-	convert_to_long(month);
-	convert_to_long(day);
-	convert_to_long(interval);
+	convert_to_long_ex(streamind);
+	convert_to_long_ex(year);
+	convert_to_long_ex(month);
+	convert_to_long_ex(day);
+	convert_to_long_ex(interval);
 	
-	ind = streamind->value.lval;
+	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!mcal_le_struct ) {
+	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	dt_setdate(&endtime,year->value.lval,month->value.lval,day->value.lval);
-	calevent_recur_yearly(mcal_le_struct->event, &endtime,
-						  interval->value.lval);
+	dt_setdate(&endtime, (*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
+	calevent_recur_yearly(mcal_le_struct->event, &endtime, (*interval)->value.lval);
 }
 /* }}} */
 
@@ -1586,17 +1585,17 @@ PHP_FUNCTION(mcal_event_set_recur_yearly)
 /* Interfaces to callbacks */
 void cc_searched (unsigned long cal_uid)
 {
-	if (g_cal_list==NULL) {
-		g_cal_list=malloc(sizeof(struct cal_list));
-		g_cal_list->uid=cal_uid;
-		g_cal_list->next=NULL;
-		g_cal_list_end=g_cal_list;
+	if (g_cal_list == NULL) {
+		g_cal_list = malloc(sizeof(struct cal_list));
+		g_cal_list->uid = cal_uid;
+		g_cal_list->next = NULL;
+		g_cal_list_end = g_cal_list;
     }
 	else {
-		g_cal_list_end->next=malloc(sizeof(struct cal_list));
-		g_cal_list_end=g_cal_list_end->next;
-		g_cal_list_end->uid=cal_uid;
-		g_cal_list_end->next=NULL;
+		g_cal_list_end->next = malloc(sizeof(struct cal_list));
+		g_cal_list_end = g_cal_list_end->next;
+		g_cal_list_end->uid = cal_uid;
+		g_cal_list_end->next = NULL;
 	}
 }
 
