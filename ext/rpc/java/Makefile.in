@@ -4,12 +4,14 @@ topsrcdir = @topsrcdir@
 srcdir    = @srcdir@
 VPATH     = @srcdir@
 
-LTLIBRARY_NAME    = libphp_java.la
+LTLIBRARY_SHARED_NAME  = libphp_java.la
 LTLIBRARY_SOURCES = java.c
 LTLIBRARY_DEPENDENCIES = php_java.jar
 
 EXTRA_CFLAGS   = $(JAVA_CFLAGS)
 EXTRA_INCLUDES = $(JAVA_INCLUDE)
+
+make_shared = yes
 
 include $(topsrcdir)/build/ltlib.mk
 
