@@ -1986,7 +1986,7 @@ send_by_ref:
 
 								if (file_handle.handle.fp) {
 									if (!opened_path || zend_hash_add(&EG(included_files), opened_path, strlen(opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
-										new_op_array = zend_compile_file(&file_handle CLS_CC);
+										new_op_array = zend_compile_file(&file_handle, (opline->op2.u.constant.value.lval==ZEND_INCLUDE_ONCE?ZEND_INCLUDE:ZEND_REQUIRE) CLS_CC);
 										zend_destroy_file_handle(&file_handle CLS_CC);
 										opened_path = NULL; /* zend_destroy_file_handle() already frees it */
 									} else {

@@ -212,7 +212,7 @@ BEGIN_EXTERN_C()
 void init_compiler(CLS_D ELS_DC);
 void shutdown_compiler(CLS_D);
 
-extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle CLS_DC);
+extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type CLS_DC);
 
 void zend_activate(CLS_D ELS_DC);
 void zend_deactivate(CLS_D ELS_DC);
@@ -375,7 +375,7 @@ ZEND_API void function_add_ref(zend_function *function);
 
 
 /* helper functions in zend-scanner.l */
-ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle CLS_DC);
+ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type CLS_DC);
 ZEND_API zend_op_array *compile_string(zval *source_string CLS_DC);	
 ZEND_API zend_op_array *compile_filename(int type, zval *filename CLS_DC ELS_DC);
 ZEND_API int zend_execute_scripts(int type CLS_DC ELS_DC, int file_count, ...);
