@@ -65,7 +65,7 @@ PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval **n
 		for (i = 0; i < var_hash->used_slots; i++) {
 			if (var_hash->data[i] == ozval) {
 				var_hash->data[i] = *nzval;
-				return;
+				/* do not break here */
 			}
 		}
 		var_hash = var_hash->next;
@@ -177,7 +177,7 @@ static inline size_t parse_uiv(const unsigned char *p)
 static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, int elements)
 {
 	while (elements-- > 0) {
-		zval *key, *data;
+		zval *key, *data, *old_data;
 
 		ALLOC_INIT_ZVAL(key);
 
@@ -205,9 +205,15 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, int 
 
 		switch (Z_TYPE_P(key)) {
 			case IS_LONG:
+				if (zend_hash_index_find(ht, Z_LVAL_P(key), (void **)&old_data)) {
+					var_replace(var_hash, old_data, rval);
+				}
 				zend_hash_index_update(ht, Z_LVAL_P(key), &data, sizeof(data), NULL);
 				break;
 			case IS_STRING:
+				if (zend_hash_find(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, (void **)&old_data)) {
+					var_replace(var_hash, old_data, rval);
+				}
 				zend_hash_update(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, &data, sizeof(data), NULL);
 				break;
 		}
@@ -947,6 +953,8 @@ yy86:
 	if (id == -1 || var_access(var_hash, id, &rval_ref) != SUCCESS) {
 		return 0;
 	}
+	
+	if (*rval == *rval_ref) return 0;
 
 	if (*rval != NULL) {
 		zval_ptr_dtor(rval);
