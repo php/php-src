@@ -34,31 +34,31 @@
     <filelist>
       <file role="php" name="PEAR.php"/>
       <dir name="PEAR">
-	<file role="php" name="Autoloader.php"/>
-	<file role="php" name="Command.php"/>
-	<dir name="Command">
-	  <file role="php" name="Auth.php"/>
-	  <file role="php" name="Common.php"/>
-	  <file role="php" name="Config.php"/>
-	  <file role="php" name="Install.php"/>
-	  <file role="php" name="Package.php"/>
-	  <file role="php" name="Registry.php"/>
-	  <file role="php" name="Remote.php"/>
-	</dir>
-	<file role="php" name="Common.php"/>
-	<file role="php" name="Config.php"/>
-	<file role="php" name="Dependency.php"/>
-	<dir name="Frontend">
-	  <file role="php" name="CLI.php"/>
-	</dir>
-	<file role="php" name="Installer.php"/>
-	<file role="php" name="Packager.php"/>
-	<file role="php" name="Registry.php"/>
-	<file role="php" name="Remote.php"/>
+        <file role="php" name="Autoloader.php"/>
+        <file role="php" name="Command.php"/>
+        <dir name="Command">
+          <file role="php" name="Auth.php"/>
+          <file role="php" name="Common.php"/>
+          <file role="php" name="Config.php"/>
+          <file role="php" name="Install.php"/>
+          <file role="php" name="Package.php"/>
+          <file role="php" name="Registry.php"/>
+          <file role="php" name="Remote.php"/>
+        </dir>
+        <file role="php" name="Common.php"/>
+        <file role="php" name="Config.php"/>
+        <file role="php" name="Dependency.php"/>
+        <dir name="Frontend">
+          <file role="php" name="CLI.php"/>
+        </dir>
+        <file role="php" name="Installer.php"/>
+        <file role="php" name="Packager.php"/>
+        <file role="php" name="Registry.php"/>
+        <file role="php" name="Remote.php"/>
       </dir>
       <dir name="scripts">
-	<file baseinstalldir="/" role="script" install-as="pear" name="pear.in">
-          <replace from="@bindir@" to="PHP_BINDIR" type="php-const"/>
+        <file baseinstalldir="/" role="script" install-as="pear" name="pear.in">
+              <replace from="@bindir@" to="PHP_BINDIR" type="php-const"/>
         </file>
       </dir>
     </filelist>
