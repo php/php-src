@@ -1939,7 +1939,7 @@ static void pdo_stmt_iter_get_data(zend_object_iterator *iter, zval ***data TSRM
 		return;
 	}
 
-	ptr_ptr = emalloc(sizeof(*ptr_ptr));
+	ptr_ptr = emalloc(sizeof(*ptr_ptr)); /* leaks somewhere */
 	*ptr_ptr = I->fetch_ahead;
 	ZVAL_ADDREF(I->fetch_ahead);
 	
