@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
+- Added new classes in mysqli: mysqli_driver, mysqli_warning, mysqli_exception,
+  and mysqli_sql_exception (Georg)
+- Improved support for embedded server in mysqli (Georg)
 - Changed stream_filter_(ap|pre)pend() to return resource. (Sara)
 - Removed garbage manager in Zend Engine which results in more aggressive
   freeing of data. (Dmitry, Andi)
