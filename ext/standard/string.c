@@ -213,7 +213,7 @@ PHP_FUNCTION(ltrim)
 }
 /* }}} */
 
-PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, int limit) 
+PHPAPI void php_explode(zval *delim, zval *str, zval *return_value) 
 {
 	char *p1, *p2, *endp;
 	int i = 0;
@@ -229,38 +229,23 @@ PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, int limit)
 		do {
 			add_index_stringl(return_value, i++, p1, p2-p1, 1);
 			p1 = p2 + delim->value.str.len;
-			if((limit>=0)&&(i>=limit-1))
-				break;
 		} while ((p2 = php_memnstr(p1, delim->value.str.val, delim->value.str.len, endp)) != NULL);
 
-		if ((p1 <= endp)|| ((limit>=0)&&(i>=limit-1))){
+		if (p1 <= endp) {
 			add_index_stringl(return_value, i++, p1, endp-p1, 1);
 		}
 	}
 }
 
-/* {{{ proto array explode(string separator, string str [, int limit])
+/* {{{ proto array explode(string separator, string str)
    Split a string on string separator and return array of components */
 PHP_FUNCTION(explode)
 {
-	zval **str, **delim, **zlimit = NULL;
-	int limit;
+	zval **str, **delim;
 
-	switch (ARG_COUNT(ht)) {
-	case 2:
-		if (zend_get_parameters_ex(2, &delim, &str) == FAILURE)
-			WRONG_PARAM_COUNT;
-		limit=-1;
-		break;
-	case 3:
-		if (zend_get_parameters_ex(3, &delim, &str, &zlimit) == FAILURE)
-			WRONG_PARAM_COUNT;
-		convert_to_long_ex(zlimit);
-		limit = (*zlimit)->value.lval;
-		break;
-	default:
-		WRONG_PARAM_COUNT;                                         
-	}                                                                  
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &delim, &str) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
 
 	convert_to_string_ex(str);
 	convert_to_string_ex(delim);
@@ -274,11 +259,7 @@ PHP_FUNCTION(explode)
 		RETURN_FALSE;
 	}
 
-	if((limit==0)||(limit==1)) {
-		add_index_stringl(return_value, 0, (*str)->value.str.val, (*str)->value.str.len, 1);
-	} else {
-		php_explode(*delim, *str, return_value, limit);
-	}
+	php_explode(*delim, *str, return_value);
 }
 /* }}} */
 
