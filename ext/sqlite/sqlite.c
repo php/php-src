@@ -730,6 +730,7 @@ static int php_sqlite_authorizer(void *autharg, int access_type, const char *arg
 		sqlite_ce_ ## name = zend_register_internal_class_ex(&ce, parent, NULL TSRMLS_CC); \
 		memcpy(&sqlite_object_handlers_ ## name, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); \
 		sqlite_object_handlers_ ## name.clone_obj = NULL; \
+		sqlite_ce_ ## name->ce_flags |= ZEND_ACC_FINAL_CLASS; \
 	}
 
 zend_class_entry *sqlite_ce_db, *sqlite_ce_exception;
