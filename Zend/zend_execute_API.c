@@ -893,20 +893,20 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 		return SUCCESS;
 	}
 
+	/* The compiler is not-reentrant. Make sure we __autoload() only during run-time
+	 * (doesn't impact fuctionality of __autoload()
+	*/
+	if (zend_is_compiling(TSRMLS_C)) {
+		free_alloca(lc_name);
+		return FAILURE;
+	}
+
 	if (EG(in_autoload) == NULL) {
 		ALLOC_HASHTABLE(EG(in_autoload));
 		zend_hash_init(EG(in_autoload), 0, NULL, NULL, 0);	
 	}
 	
 	if (zend_hash_add(EG(in_autoload), lc_name, name_length+1, (void**)&dummy, sizeof(char), NULL) == FAILURE) {
-		free_alloca(lc_name);
-		return FAILURE;
-	}
-
-	/* The compiler is not-reentrant. Make sure we __autoload() only during run-time
-	 * (doesn't impact fuctionality of __autoload()
-	 */
-	if (zend_is_compiling(TSRMLS_C)) {
 		free_alloca(lc_name);
 		return FAILURE;
 	}
