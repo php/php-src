@@ -443,7 +443,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr T
 }
 
 
-SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
+SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 {
 	char *boundary;
 	uint boundary_len;

@@ -191,7 +191,7 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 }
 
 
-SAPI_POST_HANDLER_FUNC(php_std_post_handler)
+SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 {
 	char *var, *val;
 	char *strtok_buf = NULL;

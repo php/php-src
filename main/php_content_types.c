@@ -35,7 +35,7 @@ static sapi_post_entry php_post_entries[] = {
 
 /* {{{ SAPI_POST_READER_FUNC
  */
-SAPI_POST_READER_FUNC(php_default_post_reader)
+SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader)
 {
 	char *data;
 
