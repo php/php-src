@@ -1,38 +1,41 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.1.0
-- Fixed MySQL extension to work with MySQL 4.0 (Jani)
+- Fixed a crash in str_replace() that would happen if search parameter was an
+  array and one of the replacements resulted in subject string being empty.
+  (Andrei)
+- Fixed MySQL extension to work with MySQL 4.0. (Jani)
 - Fixed a crash bug within Cobalt systems. Patch by tomc@tripac.com. (Jani)
-- Now bundling Dan Libby's xmlrpc-epi extension
-- Introduced extension version numbers (Stig)
-- Added version_compare() function (Stig)
-- Fixed pg_last_notice() (could cause random crashes in PostgreSQL applications,
-  even if they didn't use pg_last_notice()) (Zeev)
-- Fixed DOM-XML's error reporting, so E_WARNING errors are given instead of 
+- Bundled Dan Libby's xmlrpc-epi extension.
+- Introduced extension version numbers. (Stig)
+- Added version_compare() function. (Stig)
+- Fixed pg_last_notice() (could cause random crashes in PostgreSQL
+  applications, even if they didn't use pg_last_notice()). (Zeev)
+- Fixed DOM-XML's error reporting, so E_WARNING errors are given instead of
   E_ERROR error's, this allows you to trap errors thrown by DOMXML functions.
   (Sterling)
 - Fixed a bug in the mcrypt extension, where list destructors were not
   properly being allocated. (Sterling)
-- Better Interbase blob, null and error handling (Patch by Jeremy Bettis)
+- Better Interbase blob, null and error handling. (Patch by Jeremy Bettis)
 - Fixed a crash bug in array_map() if the input arrays had string or
   non-sequential keys. Also modified it so that if a single array is passed,
   its keys are preserved in the resulting array. (Andrei)
-- Fixed a crash in dbase_replace_record (Patch by robin.marlow@dps-int.com)
-- Fixed a crash in msql_result() (Zeev)
+- Fixed a crash in dbase_replace_record. (Patch by robin.marlow@dps-int.com)
+- Fixed a crash in msql_result(). (Zeev)
 - Added support for single dimensional SafeArrays and Enumerations.
   Added an is_enum() function to check if a component implements an
   enumeration. (Alan, Harald)
 - Fixed a bug in dbase_get_record() and dbase_get_record_with_names().
   boolean fields are now returned correctly.
   Patch by Lawrence E. Widman <widman@cardiothink.com> (Jani)
-- Added --version option to php-config (Stig)
+- Added --version option to php-config. (Stig)
 - Improved support for thttpd-2.21b by incorporating patches for all known
-  bugs (Sascha)
+  bugs. (Sascha)
 - Added ircg_get_username, a roomkey argument to ircg_join, error fetching
   infrastructure, a tokenizer to speed up message processing, and fixed
-  a lot of bugs in the IRCG extension (Sascha)
-- Improved speed of the serializer/deserializer (Thies, Sascha)
-- Floating point numbers are better detected when converting from strings
+  a lot of bugs in the IRCG extension. (Sascha)
+- Improved speed of the serializer/deserializer. (Thies, Sascha)
+- Floating point numbers are better detected when converting from strings.
   (Zeev, Zend Engine)
 - Replaced php.ini-optimized with php.ini-recommended.  As the name implies,
   it's warmly recommended to use this file as the basis for your PHP
