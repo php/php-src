@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Added ability to set timeout on socket read operations through
+  set_socket_timeout() function. (Andrei)
 - Added register_argc_argv INI directive, to allow to selectively disable
   the declaration of the $argv and $argc variables for increased
   performance (Zeev)
