@@ -24,7 +24,7 @@
 #include "config.h"
 #endif
 
-#define PHP_SQLITE_MODULE_VERSION	"0.9b"
+#define PHP_SQLITE_MODULE_VERSION	"0.9-c"
 
 #include "php.h"
 #include "php_ini.h"
@@ -39,7 +39,7 @@
 #include <sqlite.h>
 
 #ifndef safe_emalloc
-#define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
+# define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
 #endif
 
 #ifndef ZEND_ENGINE_2
@@ -384,7 +384,12 @@ static void php_sqlite_function_callback(sqlite_func *func, int argc, const char
 		for (i = 0; i < argc; i++) {
 			zargs[i] = emalloc(sizeof(zval *));
 			MAKE_STD_ZVAL(*zargs[i]);
-			ZVAL_STRING(*zargs[i], (char*)argv[i], 1);
+
+			if (argv[i] == NULL) {
+				ZVAL_NULL(*zargs[i]);
+			} else {
+				ZVAL_STRING(*zargs[i], (char*)argv[i], 1);
+			}
 		}
 	}
 
@@ -402,6 +407,7 @@ static void php_sqlite_function_callback(sqlite_func *func, int argc, const char
 		} else {
 			switch (Z_TYPE_P(retval)) {
 				case IS_STRING:
+					/* TODO: for binary results, need to encode the string */
 					sqlite_set_result_string(func, Z_STRVAL_P(retval), Z_STRLEN_P(retval));
 					break;
 				case IS_LONG:
@@ -472,7 +478,11 @@ static void php_sqlite_agg_step_function_callback(sqlite_func *func, int argc, c
 	for (i = 0; i < argc; i++) {
 		zargs[i+1] = emalloc(sizeof(zval *));
 		MAKE_STD_ZVAL(*zargs[i+1]);
-		ZVAL_STRING(*zargs[i+1], (char*)argv[i], 1);
+		if (argv[i] == NULL) {
+			ZVAL_NULL(*zargs[i+1]);
+		} else {
+			ZVAL_STRING(*zargs[i+1], (char*)argv[i], 1);
+		}
 	}
 
 	res = call_user_function_ex(EG(function_table),
@@ -641,6 +651,9 @@ PHP_MINIT_FUNCTION(sqlite)
 	REGISTER_LONG_CONSTANT("SQLITE_MISUSE",			SQLITE_MISUSE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLITE_NOLFS",			SQLITE_NOLFS, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLITE_AUTH",			SQLITE_AUTH, CONST_CS|CONST_PERSISTENT);
+#ifdef SQLITE_FORMAT
+	REGISTER_LONG_CONSTANT("SQLITE_FORMAT",			SQLITE_FORMAT, CONST_CS|CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("SQLITE_ROW",			SQLITE_ROW, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLITE_DONE",			SQLITE_DONE, CONST_CS|CONST_PERSISTENT);
 
@@ -691,9 +704,9 @@ static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *per
 	/* register the PHP functions */
 	sqlite_create_function(sdb, "php", -1, php_sqlite_generic_function_callback, 0);
 
-	/* set default busy handler; keep retrying up until 1/2 second has passed,
+	/* set default busy handler; keep retrying up until 1 minute has passed,
 	 * then fail with a busy status code */
-	sqlite_busy_timeout(sdb, 500);
+	sqlite_busy_timeout(sdb, 60000);
 
 	/* authorizer hook so we can enforce safe mode
 	 * Note: the declaration of php_sqlite_authorizer is correct for 2.8.2 of libsqlite,

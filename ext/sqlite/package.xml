@@ -28,6 +28,9 @@
 	Programs that link with the SQLite library can have SQL database access
 	without running a separate RDBMS process.
 	This extension allows you to access SQLite databases from within PHP.
+
+	Windows binary available from:
+	http://snaps.php.net/win32/PECL_STABLE/php_sqlite.dll
   </description>
   <license>PHP</license>
   <release>
@@ -51,6 +54,8 @@
 
 		Fixed some build issues for thread-safe builds.
 
+		Increase the default busy timeout interval to 60 seconds.
+		
 		API is considered stabilized for 4.3.x; this is a pre-release before
 		announcing stable version 1.0.
 
