@@ -318,6 +318,9 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			}
 			efree(val);
 		} else {
+			int val_len;
+			unsigned int new_val_len;
+
 			php_url_decode(var, strlen(var));
 			val_len = 0;
 			val = estrndup("", val_len);
