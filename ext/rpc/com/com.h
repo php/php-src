@@ -37,6 +37,7 @@ ZEND_FUNCTION(com_reset);
 ZEND_FUNCTION(com_skip);
 ZEND_FUNCTION(com_event_sink);
 ZEND_FUNCTION(com_message_pump);
+ZEND_FUNCTION(com_load_typelib);
 ZEND_FUNCTION(com_print_typeinfo);
 
 #endif

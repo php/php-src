@@ -28,6 +28,7 @@
 #include "variant.h"
 #include "ext/standard/php_smart_str.h"
 #include <oleauto.h>
+#include <ocidl.h>
 
 
 /* protos */
@@ -44,7 +45,7 @@ static int com_has_property(rpc_string, void *);
 static int com_unset_property(rpc_string, void *);
 static int com_get_properties(HashTable **, void *);
 
-static PHP_INI_MH(com_typelib_file_change);
+static ZEND_INI_MH(com_typelib_file_change);
 
 /* globals */
 static IBindCtx *pBindCtx;
@@ -88,6 +89,7 @@ RPC_FUNCTION_ENTRY_BEGIN(com)
 	ZEND_FE(com_skip,			NULL)
 	ZEND_FE(com_event_sink,		arg1and2_force_ref)
 	ZEND_FE(com_message_pump,	NULL)
+	ZEND_FE(com_load_typelib,	NULL)
 	ZEND_FE(com_print_typeinfo,	NULL)
 RPC_FUNCTION_ENTRY_END()
 
@@ -149,28 +151,59 @@ ZEND_GET_MODULE(com);
 
 static int com_hash(rpc_string name, rpc_string *hash, void *data, int num_args, char *arg_types, int type)
 {
-	OLECHAR *olestr = php_char_to_OLECHAR(name.str, name.len, CP_ACP, FALSE);
-
 	switch (type) {
 		case CLASS:
 		{
 			CLSID *clsid = malloc(sizeof(CLSID));
 
-			if (FAILED(CLSIDFromString(olestr, clsid))) {
-				/* Perhaps this is a Moniker? */
-				free(clsid);
+			/* if name is {NULL, 0} then the corresponding hash value has to be figured out
+			 * of the *data struct. this might be not a trivial task.
+			 */
+			if (name.str) {
+				OLECHAR *olestr = php_char_to_OLECHAR(name.str, name.len, CP_ACP, FALSE);
 
-				hash->str = strdup(name.str);
-				hash->len = name.len;
+				if (FAILED(CLSIDFromString(olestr, clsid))) {
+					/* Perhaps this is a Moniker? */
+					free(clsid);
+					efree(olestr);
+
+					hash->str = strdup(name.str);
+					hash->len = name.len;
+
+					return SUCCESS;
+				}
+
+				efree(olestr);
 			} else {
-				hash->str = (char *) clsid;
-				/* str is actually not a string but a CLSID struct, thus set len to 0.
-				 * nevertheless clsid is freed by the rpc_string_dtor
-				 */
-				hash->len = 0;
+				comval *obj = (comval *)data;
+				IProvideClassInfo2 *pci2;
+
+				if (SUCCEEDED(C_DISPATCH_VT(obj)->QueryInterface(C_DISPATCH(obj), &IID_IProvideClassInfo2, (void**)&pci2))) {
+					if (FAILED(pci2->lpVtbl->GetGUID(pci2, GUIDKIND_DEFAULT_SOURCE_DISP_IID, clsid))) {
+						free(clsid);
+
+						return FAILURE;
+					}
+					pci2->lpVtbl->Release(pci2);
+				} else if (C_HASTLIB(obj)) {
+					TYPEATTR *typeattrib;
+
+					if (FAILED(C_TYPEINFO_VT(obj)->GetTypeAttr(C_TYPEINFO(obj), &typeattrib))) {
+						free(clsid);
+
+						return FAILURE;
+					}
+
+					*clsid = (typeattrib->guid);
+					C_TYPEINFO_VT(obj)->ReleaseTypeAttr(C_TYPEINFO(obj), typeattrib);
+				}
 			}
 
-			efree(olestr);
+			hash->str = (char *) clsid;
+			/* str is actually not a string but a CLSID struct, thus set len to 0.
+			* nevertheless clsid is freed by the rpc_string_dtor
+			*/
+			hash->len = 0;
 
 			return SUCCESS;
 		}
@@ -179,7 +212,8 @@ static int com_hash(rpc_string name, rpc_string *hash, void *data, int num_args,
 		case PROPERTY:
 		{
 			DISPID *dispid = malloc(sizeof(DISPID));
-			
+			OLECHAR *olestr = php_char_to_OLECHAR(name.str, name.len, CP_ACP, FALSE);
+
 			if(SUCCEEDED(php_COM_get_ids_of_names((comval *) data, olestr, dispid))) {
 				hash->str = (char *) dispid;
 				/* str is actually not a string but a DISPID struct, thus set len to 0.
@@ -199,8 +233,6 @@ static int com_hash(rpc_string name, rpc_string *hash, void *data, int num_args,
 		}
 	}
 
-	efree(olestr);
-
 	return FAILURE;
 }
 
@@ -216,21 +248,24 @@ static int com_name(rpc_string hash, rpc_string *name, void *data, int type)
 		switch (type) {
 			case CLASS:
 			{
-				if (hash.str != NULL) {
-					OLECHAR *olestr;
+				CLSID clsid;
+				OLECHAR *olestr;
 
-					StringFromCLSID((CLSID *) hash.str, &olestr);
-					name->str = php_OLECHAR_to_char(olestr, &(name->len), CP_ACP, TRUE);
-					CoTaskMemFree(olestr);
+				clsid = *((CLSID *) hash.str);
 
-					return SUCCESS;
-				} else {
-					comval *obj = (comval *) data;
-
-					/* try to figure out classname */
-
+				ProgIDFromCLSID(&clsid, &olestr);
+				if (olestr == NULL) {
+					StringFromCLSID(&clsid, &olestr);
+				}
+				
+				if (olestr == NULL) {
 					return FAILURE;
 				}
+
+				name->str = php_OLECHAR_to_char(olestr, &(name->len), CP_ACP, TRUE);
+				CoTaskMemFree(olestr);
+
+				return SUCCESS;
 			}
 
 			case METHOD:
@@ -575,14 +610,12 @@ static int com_describe(rpc_string method_name, void *data, char **arg_types, un
 	GET_INTERNAL_EX(intern, data);
 	obj = (comval*)data;
 
-	if (C_TYPEINFO(obj)) {
-		typeinfo = C_TYPEINFO(obj);
-		ITypeInfo_AddRef(typeinfo);
-	} else if (FAILED(C_DISPATCH_VT(obj)->GetTypeInfo(C_DISPATCH(obj), 0, LOCALE_SYSTEM_DEFAULT, &typeinfo))) {
+	if (!C_HASTLIB(obj)) {
 		return FAILURE;
 	}
 
 	olename = php_char_to_OLECHAR(method_name.str, method_name.len, CP_ACP, FALSE);
+	typeinfo = C_TYPEINFO(obj);
 
 	if (SUCCEEDED(ITypeInfo_GetIDsOfNames(typeinfo, &olename, 1, &fid)) && SUCCEEDED(ITypeInfo_GetFuncDesc(typeinfo, fid, &funcdesc))) {
 
@@ -623,7 +656,6 @@ static int com_describe(rpc_string method_name, void *data, char **arg_types, un
 	}
 	
 	efree(olename);
-	ITypeInfo_Release(typeinfo);
 
 	return retval;
 }
@@ -831,7 +863,7 @@ ZEND_FUNCTION(com_release)
 }
 /* }}} */
 
-PHP_FUNCTION(com_next)
+ZEND_FUNCTION(com_next)
 {
 	zval *object;
 	rpc_internal *intern;
@@ -915,7 +947,7 @@ PHP_FUNCTION(com_next)
 	RETURN_NULL();
 }
 
-PHP_FUNCTION(com_all)
+ZEND_FUNCTION(com_all)
 {
 #if 0
 		} else if (C_HASENUM(obj) && strstr(Z_STRVAL_P(function_name), "all")) {
@@ -938,7 +970,7 @@ PHP_FUNCTION(com_all)
 #endif
 }
 
-PHP_FUNCTION(com_reset)
+ZEND_FUNCTION(com_reset)
 {
 	zval *object;
 	rpc_internal *intern;
@@ -972,7 +1004,7 @@ PHP_FUNCTION(com_reset)
 	RETURN_FALSE;
 }
 
-PHP_FUNCTION(com_skip)
+ZEND_FUNCTION(com_skip)
 {
 	zval *object;
 	rpc_internal *intern;
@@ -1027,7 +1059,7 @@ ZEND_FUNCTION(com_isenum)
 
 /* {{{ proto bool com_load_typelib(string typelib_name [, int case_insensitive]) 
    Loads a Typelib */
-PHP_FUNCTION(com_load_typelib)
+ZEND_FUNCTION(com_load_typelib)
 {
 	char *typelib;
 	int len, cis = FALSE;
@@ -1052,7 +1084,7 @@ PHP_FUNCTION(com_load_typelib)
 
 /* {{{ proto bool com_print_typeinfo(mixed comobject | string typelib, string dispinterface, bool wantsink)
    Print out a PHP class definition for a dispatchable interface */
-PHP_FUNCTION(com_print_typeinfo)
+ZEND_FUNCTION(com_print_typeinfo)
 {
 	zval *object;
 	char *ifacename = NULL;
@@ -1093,7 +1125,7 @@ PHP_FUNCTION(com_print_typeinfo)
 
 /* {{{ proto bool com_event_sink(mixed comobject, object sinkobject [, mixed sinkinterface])
    Connect events from a COM object to a PHP object */
-PHP_FUNCTION(com_event_sink)
+ZEND_FUNCTION(com_event_sink)
 {
 	zval *object, *sinkobject, *sink=NULL;
 	char *dispname = NULL, *typelibname = NULL;
@@ -1159,7 +1191,7 @@ PHP_FUNCTION(com_event_sink)
 
 /* ini callbacks */
 
-static PHP_INI_MH(com_typelib_file_change)
+static ZEND_INI_MH(com_typelib_file_change)
 {
 	FILE *typelib_file;
 	char *typelib_name_buffer;
