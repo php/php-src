@@ -1,3 +1,192 @@
+2002-10-30  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c: Prevent unnecessary notices on success
+
+2002-10-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c
+      sapi/thttpd/thttpd_patch:
+    first step towards asynchronous content body processing
+
+2002-10-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * run-tests.php: Corrected my email address.
+
+2002-10-30  Shane Caraveo  <shane@caraveo.com>
+
+    * run-tests2.php:
+    initial reorganization of run-tests, commiting so both John and
+    I can work on it.
+
+2002-10-30  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS: Bug fix news
+
+2002-10-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ldap/ldap.c: Fixed a memory leak on ldap_connect() failure.
+
+2002-10-30  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gdxpm.c: fix warnings
+
+    * ext/domxml/config.m4: that was not good :-(
+
+2002-10-30  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/config.m4
+      ext/standard/basic_functions.c:
+    getopt with long options reverted to configure problems
+    (may find the wrong getopt.h so needed structures are not defined :(   )
+
+2002-10-30  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx_sybasect.c
+      ext/dbx/dbx_fbsql.c
+      ext/dbx/dbx_mssql.c
+      ext/dbx/dbx_mysql.c
+      ext/dbx/dbx_oci8.c
+      ext/dbx/dbx_odbc.c
+      ext/dbx/dbx_pgsql.c: Coding style.
+
+2002-10-30  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/domxml/config.m4: added default library path
+
+2002-10-30  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx_oci8.c: Fixed weird membug in oci8 support.
+
+2002-10-30  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/xslt/sablot.c
+      ext/xslt/xslt.c: php_error -> php_error_docref
+
+2002-10-30  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/TODO: Added 2 more items
+
+2002-10-30  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * netware/BisonExtStandard.bat: Bison tool to build phplib for NetWare.
+
+    * netware/BisonExtStandard.bat: New file.
+
+    * netware/BisonFlexZend.bat: Bison/Flex tool to build Zend for NetWare.
+
+    * netware/BisonFlexZend.bat: New file.
+
+2002-10-30  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * README.TESTING
+      run-tests.php: Enough discussion on display_erros it seems
+
+2002-10-30  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx_sybasect.c
+      ext/dbx/dbx_mysql.c
+      ext/dbx/dbx_oci8.c
+      ext/dbx/dbx_odbc.c
+      ext/dbx/dbx_pgsql.c
+      ext/dbx/dbx_fbsql.c
+      ext/dbx/dbx_mssql.c:
+    escape_string functions will now return empty string directly.
+
+2002-10-30  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/strings/bug20169.phpt: Fixed typo
+
+    * ext/standard/tests/strings/bug20169.phpt:
+    Added a test case for bug #20169
+
+    * ext/standard/string.c: Fixed bug #20169
+
+2002-10-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/buildcheck.sh: Remove overzealous bison check
+
+    1. bison is not invoked during buildconf, so why the heck was the check
+    embedded here.
+
+    2. bison 1.35 works fine for ze1. if there is a problem with ze2, the
+    check should be limited to that ze version. don't inconvenience people
+    who are using a perfectly fine combination.
+
+2002-10-30  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+    Get infos from php running tests not from php running run-test.php
+
+2002-10-30  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/php_mbregex.c: Fixed mb_ereg_replace() bug
+
+    * ext/mbstring/tests/bug20087.phpt
+      ext/mbstring/tests/casefold.phpt
+      ext/mbstring/tests/htmlent.phpt
+      ext/mbstring/tests/mb_convert_encoding.phpt
+      ext/mbstring/tests/mb_convert_variables.phpt
+      ext/mbstring/tests/mb_detect_encoding.phpt
+      ext/mbstring/tests/mb_detect_order.phpt
+      ext/mbstring/tests/mb_ereg.phpt
+      ext/mbstring/tests/mb_ereg_replace.phpt
+      ext/mbstring/tests/mb_ereg_search_xxx.phpt
+      ext/mbstring/tests/mb_http_input.phpt
+      ext/mbstring/tests/mb_http_output.phpt
+      ext/mbstring/tests/mb_internal_encoding.phpt
+      ext/mbstring/tests/mb_output_handler_euc_jp.phpt
+      ext/mbstring/tests/mb_preferred_mime_name.phpt
+      ext/mbstring/tests/mb_regex_set_options.phpt
+      ext/mbstring/tests/mb_split.phpt
+      ext/mbstring/tests/mb_strcut.phpt
+      ext/mbstring/tests/mb_strimwidth.phpt
+      ext/mbstring/tests/mb_strlen.phpt
+      ext/mbstring/tests/mb_strpos.phpt
+      ext/mbstring/tests/mb_strwidth.phpt
+      ext/mbstring/tests/mb_substitute_character.phpt
+      ext/mbstring/tests/mb_substr.phpt
+      ext/mbstring/tests/php_gr_jp_10830.phpt
+      ext/mbstring/tests/simpletest.phpt: Clean up.
+
+    * ext/mbstring/tests/skipif.inc: Removed dl() code
+
+    * ext/mbstring/tests/mb_ereg-compat-01.phpt
+      ext/mbstring/tests/mb_ereg-compat-02.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-01.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-02.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-03.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-04.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-05.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-06.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-07.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-08.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-09.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-10.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-11.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-12.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-13.phpt
+      ext/mbstring/tests/mb_split-compat-01.phpt:
+    Shortened comments. I also think they were too long.
+
+2002-10-30  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses_fe.h: And some more ncurses functions.
+
+2002-10-30  Brad House  <brad@mainstreetsoftworks.com>
+
+    * ext/mcve/mcve.c: constant MC_TRAN_CHNGPWD typo
+
+2002-10-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd_ctx.c
+      ext/gd/config.m4
+      ext/gd/gd.c:
+    This patch allows compilation of gd against non-bundled gd library older
+    then 2.0.4.
+
 2002-10-29  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/standard/basic_functions.c
