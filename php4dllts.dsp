@@ -738,10 +738,6 @@ SOURCE=.\regex\regfree.c
 # PROP Default_Filter ".c"
 # Begin Source File
 
-SOURCE=.\dlist.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\ext\wddx\wddx.c
 # ADD CPP /I "ext\xml\expat\xmltok" /I "ext\xml\expat\xmlparse"
 # End Source File
@@ -754,10 +750,6 @@ SOURCE=.\ext\xml\xml.c
 # Begin Group "Header Files No. 4"
 
 # PROP Default_Filter ".h"
-# Begin Source File
-
-SOURCE=.\dlist.h
-# End Source File
 # Begin Source File
 
 SOURCE=.\ext\wddx\php_wddx.h
