@@ -623,7 +623,7 @@ PHP_FUNCTION(sybase_pconnect)
 
 PHP_FUNCTION(sybase_close)
 {
-	pval *sybase_link_index;
+	pval *sybase_link_index = 0;
 	int id;
 	sybase_link *sybase_ptr;
 	
@@ -642,10 +642,13 @@ PHP_FUNCTION(sybase_close)
 			break;
 	}
 	
-	
 	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, &sybase_link_index, id, "Sybase-Link", sybase_globals.le_link, sybase_globals.le_plink);
 	
-	zend_list_delete(id); /* XXX this IS A BUG!!!! */
+	if (sybase_link_index) {
+		zend_list_delete(sybase_link_index->value.lval);
+	} else {
+		zend_list_delete(id);
+	}
 
 	RETURN_TRUE;
 }
@@ -1561,3 +1564,10 @@ PHP_FUNCTION(sybase_min_server_severity)
 
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */
