@@ -389,22 +389,34 @@ class System
     */
     function tmpdir()
     {
-        if (OS_WINDOWS){
-            if (isset($_ENV['TEMP'])) {
-                return $_ENV['TEMP'];
+        if (OS_WINDOWS) {
+            if (System::_myenv('TEMP')) {
+                return System::_myenv('TEMP');
             }
-            if (isset($_ENV['TMP'])) {
-                return $_ENV['TMP'];
+            if (System::_myenv('TMP')) {
+                return System::_myenv('TMP');
             }
-            if (isset($_ENV['windir'])) {
-                return $_ENV['windir'] . '\temp';
+            if (System::_myenv('windir')) {
+                return System::_myenv('windir') . '\temp';
             }
-            return $_ENV['SystemRoot'] . '\temp';
+            return System::_myenv('SystemRoot') . '\temp';
         }
-        if (isset($_ENV['TMPDIR'])) {
-            return $_ENV['TMPDIR'];
+        if (System::_myenv('TMPDIR')) {
+            return System::_myenv('TMPDIR');
         }
         return '/tmp';
+    }
+
+    /**
+    * (cox) I always get $_ENV empty in both Windows and Linux
+    * with all PHP version <= 4.2.1
+    */
+    function _myenv($var)
+    {
+        if (!empty($_ENV)) {
+            return isset($_ENV[$var]) ? $_ENV[$var] : false;
+        }
+        return getenv($var);
     }
 
     /**
