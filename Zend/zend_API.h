@@ -252,15 +252,15 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 																										\
 		if (zend_hash_find(symtable, (name), (name_length), (void **) &orig_var)==SUCCESS				\
 			&& PZVAL_IS_REF(*orig_var)) {																\
-			var->refcount = (*orig_var)->refcount;														\
-			var->is_ref = 1;																			\
+			(var)->refcount = (*orig_var)->refcount;														\
+			(var)->is_ref = 1;																			\
 																										\
 			zval_dtor(*orig_var);																		\
-			**orig_var = *var;																			\
+			**orig_var = *(var);																			\
 			efree(var);																					\
 		} else {																						\
-			INIT_PZVAL(var);																			\
-			zend_hash_update(symtable, (name), (name_length), &var, sizeof(zval *), NULL);				\
+			INIT_PZVAL((var));																			\
+			zend_hash_update(symtable, (name), (name_length), &(var), sizeof(zval *), NULL);				\
 		}																								\
 	}
 
