@@ -433,9 +433,9 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_BEGIN_SILENCE			54
 #define ZEND_END_SILENCE			55
 
-#define ZEND_INIT_FCALL				56
-#define ZEND_INIT_FCALL_BY_NAME		57
-#define ZEND_DO_FCALL				58
+#define ZEND_INIT_FCALL_BY_NAME		56
+#define ZEND_DO_FCALL				57
+#define ZEND_DO_FCALL_BY_NAME		58
 #define ZEND_RETURN					59
 
 #define ZEND_RECV					60

@@ -1247,6 +1247,9 @@ binary_assign_op_addr: {
 					HashTable *active_function_table;
 					zval tmp;
 
+					zend_ptr_stack_push(&EG(arg_types_stack), function_being_called); 
+					zend_ptr_stack_push(&EG(arg_types_stack), object_ptr); 
+
 					if (opline->extended_value & ZEND_CTOR_CALL) {
 						/* constructor call */
 						EG(AiCount)++; /* for op1 */
@@ -1319,28 +1322,25 @@ binary_assign_op_addr: {
 					zval_dtor(&tmp);
 					function_being_called = function;
 overloaded_function_call_cont:
-					zend_ptr_stack_push(&EG(arg_types_stack), function_being_called); 
 					FREE_OP(&opline->op2, free_op2);
 				}
 				break;
-			case ZEND_INIT_FCALL:
-				object_ptr=NULL;
-				function_being_called=NULL;
-				break;
+			case ZEND_DO_FCALL_BY_NAME:
+				function_state.function = function_being_called;
+				goto do_fcall_common;
 			case ZEND_DO_FCALL: {
+					zval *fname = get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
+
+					if (zend_hash_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &function_state.function)==FAILURE) {
+						zend_error(E_ERROR, "Unknown function:  %s()\n", fname->value.str.val);
+					}
+					FREE_OP(&opline->op1, free_op1);
+					goto do_fcall_common;
+				}
+do_fcall_common:
+				{
 					zval *original_return_value;
 
-					if (function_being_called) {
-						function_being_called = zend_ptr_stack_pop(&EG(arg_types_stack));
-						function_state.function = function_being_called;
-					} else {
-						zval *fname = get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
-						
-						if (zend_hash_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &function_state.function)==FAILURE) {
-							zend_error(E_ERROR, "Unknown function:  %s()\n", fname->value.str.val);
-						}
-						FREE_OP(&opline->op1, free_op1);
-					}
 					zend_ptr_stack_push(&EG(argument_stack), (void *) opline->extended_value);
 					if (function_state.function->type==ZEND_INTERNAL_FUNCTION) {
 						var_uninit(&Ts[opline->result.u.var].tmp_var);
@@ -1356,7 +1356,9 @@ overloaded_function_call_cont:
 						}
 						calling_symbol_table = EG(active_symbol_table);
 						EG(active_symbol_table) = function_state.function_symbol_table;
-						if (object_ptr && function_being_called && function_being_called->type!=ZEND_OVERLOADED_FUNCTION) {
+						if (opline->opcode==ZEND_DO_FCALL_BY_NAME
+							&& object_ptr
+							&& function_being_called->type!=ZEND_OVERLOADED_FUNCTION) {
 							zval *dummy = (zval *) emalloc(sizeof(zval)), **this_ptr;
 
 							var_uninit(dummy);
@@ -1386,7 +1388,10 @@ overloaded_function_call_cont:
 						call_overloaded_function(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list) ELS_CC);
 						efree(function_being_called);
 					}
-					function_being_called = NULL;
+					if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+						object_ptr = zend_ptr_stack_pop(&EG(arg_types_stack));
+						function_being_called = zend_ptr_stack_pop(&EG(arg_types_stack));
+					}
 					function_state.function = (zend_function *) op_array;
 					EG(function_state_ptr) = &function_state;
 					zend_ptr_stack_clear_multiple(ELS_C);
@@ -1409,7 +1414,8 @@ overloaded_function_call_cont:
 				}
 				break;
 			case ZEND_SEND_VAL: 
-				if (function_being_called
+				if (opline->extended_value==ZEND_DO_FCALL_BY_NAME
+					&& function_being_called
 					&& function_being_called->common.arg_types
 					&& opline->op2.u.opline_num<=function_being_called->common.arg_types[0]
 					&& function_being_called->common.arg_types[opline->op2.u.opline_num]==BYREF_FORCE) {
@@ -1426,7 +1432,8 @@ overloaded_function_call_cont:
 				}
 				break;
 			case ZEND_SEND_VAR:
-				if (function_being_called
+				if (opline->extended_value==ZEND_DO_FCALL_BY_NAME
+					&& function_being_called
 					&& function_being_called->common.arg_types
 					&& opline->op2.u.opline_num<=function_being_called->common.arg_types[0]
 					&& function_being_called->common.arg_types[opline->op2.u.opline_num]==BYREF_FORCE) {
