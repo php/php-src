@@ -47,7 +47,7 @@
 %pure_parser
 %expect 4
 
-%left T_INCLUDE T_INCLUDE_ONCE T_EVAL
+%left T_INCLUDE T_INCLUDE_ONCE T_EVAL T_REQUIRE T_REQUIRE_ONCE
 %left ','
 %left T_LOGICAL_OR
 %left T_LOGICAL_XOR
@@ -105,8 +105,6 @@
 %token T_FUNCTION
 %token T_CONST
 %token T_RETURN
-%token T_REQUIRE
-%token T_REQUIRE_ONCE
 %token T_USE
 %token T_GLOBAL
 %token T_STATIC
@@ -197,9 +195,7 @@ unticked_statement:
 	|	T_ECHO echo_expr_list ';'
 	|	T_INLINE_HTML			{ do_echo(&$1 CLS_CC); }
 	|	expr ';'				{ do_free(&$1 CLS_CC); }
-	|	T_REQUIRE expr ';'				{ do_require(&$2, 0 CLS_CC); }
-	|	T_REQUIRE_ONCE use_filename ';'	{ do_require(&$2, 1 CLS_CC); }
-	|	T_USE use_filename ';'		{ use_filename($2.u.constant.value.str.val, $2.u.constant.value.str.len CLS_CC); zval_dtor(&$2.u.constant); }
+	|	T_USE use_filename ';'		{ zend_error(E_COMPILE_ERROR,"use: Not yet supported. Please use include_once() or require_once()");  zval_dtor(&$2.u.constant); }
 	|	T_UNSET '(' unset_variables ')' ';'
 	|	T_FOREACH '(' expr T_AS { do_foreach_begin(&$1, &$3, &$2, &$4 CLS_CC); } w_cvar foreach_optional_arg ')' { do_foreach_cont(&$6, &$7, &$4 CLS_CC); } foreach_statement { do_foreach_end(&$1, &$2 CLS_CC); }
 	|	T_DECLARE { do_declare_begin(CLS_C); } '(' declare_list ')' declare_statement { do_declare_end(CLS_C); }
@@ -720,6 +716,8 @@ internal_functions_in_yacc:
 	|	T_INCLUDE expr 			{ do_include_or_eval(ZEND_INCLUDE, &$$, &$2 CLS_CC); }
 	|	T_INCLUDE_ONCE expr 	{ do_include_or_eval(ZEND_INCLUDE_ONCE, &$$, &$2 CLS_CC); }
 	|	T_EVAL '(' expr ')' 	{ do_include_or_eval(ZEND_EVAL, &$$, &$3 CLS_CC); }
+	|	T_REQUIRE expr			{ do_include_or_eval(ZEND_REQUIRE, &$$, &$2 CLS_CC); }
+	|	T_REQUIRE_ONCE use_filename		{ do_include_or_eval(ZEND_REQUIRE_ONCE, &$$, &$2 CLS_CC); }
 ;
 
 

@@ -91,8 +91,6 @@ struct _zend_compiler_globals {
 	HashTable *function_table;	/* function symbol table */
 	HashTable *class_table;		/* class table */
 
-	HashTable used_files;		/* files already included using 'use' */
-
 	zend_llist filenames_list;
 
 	zend_bool in_compilation;
@@ -133,7 +131,6 @@ struct _zend_executor_globals {
 
 	/* for global return() support */
 	zval *global_return_value_ptr;
-	zval global_return_value;
 
 	/* symbol table cache */
 	HashTable *symtable_cache[SYMTABLE_CACHE_SIZE];
@@ -153,7 +150,6 @@ struct _zend_executor_globals {
 	int orig_error_reporting;
 
 	zend_op_array *active_op_array;
-	zend_op_array *main_op_array;
 
 	HashTable *function_table;	/* function symbol table */
 	HashTable *class_table;		/* class table */

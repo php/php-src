@@ -357,7 +357,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_get_ini_entry_p = utility_functions->get_ini_entry;
 	zend_ticks_function = utility_functions->ticks_function;
 
-	zend_v_compile_files = v_compile_files;
+	zend_compile_file = compile_file;
 	zend_execute = execute;
 
 	zend_startup_extensions();
@@ -692,3 +692,35 @@ ZEND_API void zend_output_debug_string(zend_bool trigger_break, char *format, ..
 	va_end(args);
 #endif
 }
+
+
+ZEND_API int zend_execute_scripts(int type CLS_DC ELS_DC, int file_count, ...)
+{
+	va_list files;
+	int i;
+	zend_file_handle *file_handle;
+
+	va_start(files, file_count);
+	for (i=0; i<file_count; i++) {
+		file_handle = va_arg(files, zend_file_handle *);
+		if (!file_handle) {
+			continue;
+		}
+		EG(active_op_array) = zend_compile_file(file_handle CLS_CC);
+		if (EG(active_op_array)) {
+			zend_execute(EG(active_op_array) ELS_CC);
+			zval_ptr_dtor(EG(return_value_ptr_ptr));
+			EG(return_value_ptr_ptr) = &EG(global_return_value_ptr);
+			EG(global_return_value_ptr) = NULL;
+			destroy_op_array(EG(active_op_array));
+			efree(EG(active_op_array));
+		} else if (type==ZEND_REQUIRE) {
+			va_end(files);
+			return FAILURE;
+		}
+	}
+	va_end(files);
+
+	return SUCCESS;
+}
+

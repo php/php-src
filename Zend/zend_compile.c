@@ -26,7 +26,7 @@
 #include "zend_fast_cache.h"
 
 
-ZEND_API zend_op_array *(*zend_v_compile_files)(int type CLS_DC, int file_count, va_list files);
+ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle CLS_DC);
 
 
 #ifndef ZTS
@@ -43,15 +43,15 @@ static void free_filename(void *p)
 }
 
 
-static void build_runtime_defined_function_key(zval *result, zval *name, zend_op *opline)
+static void build_runtime_defined_function_key(zval *result, zval *name, zend_op *opline CLS_DC)
 {
 	char lineno_buf[32];
 	uint lineno_len;
 	char *filename;
 
 	lineno_len = zend_sprintf(lineno_buf, "%d", opline->lineno);
-	if (opline->filename) {
-		filename = opline->filename;
+	if (CG(active_op_array)->filename) {
+		filename = CG(active_op_array)->filename;
 	} else {
 		filename = "-";
 	}
@@ -95,7 +95,6 @@ void init_compiler(CLS_D ELS_DC)
 	zend_init_rsrc_list(ELS_C);
 	CG(unclean_shutdown) = 0;
 	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) zend_open_file_dtor, 0);
-	zend_hash_init(&CG(used_files), 5, NULL, (void (*)(void *)) zend_open_file_dtor_wrapper, 0);
 	init_compiler_declarables(CLS_C ELS_CC);
 }
 
@@ -110,7 +109,6 @@ void shutdown_compiler(CLS_D)
 	zend_stack_destroy(&CG(declare_stack));
 	zend_llist_destroy(&CG(filenames_list));
 	zend_llist_destroy(&CG(open_files));
-	zend_hash_destroy(&CG(used_files));
 }
 
 
@@ -717,7 +715,7 @@ void do_begin_function_declaration(znode *function_token, znode *function_name, 
 	function_token->u.op_array = CG(active_op_array);
 	zend_str_tolower(name, name_len);
 
-	init_op_array(&op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
+	init_op_array(&op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE CLS_CC);
 
 	op_array.function_name = name;
 	op_array.arg_types = NULL;
@@ -730,7 +728,7 @@ void do_begin_function_declaration(znode *function_token, znode *function_name, 
 
 		opline->opcode = ZEND_DECLARE_FUNCTION_OR_CLASS;
 		opline->op1.op_type = IS_CONST;
-		build_runtime_defined_function_key(&opline->op1.u.constant, &function_name->u.constant, opline);
+		build_runtime_defined_function_key(&opline->op1.u.constant, &function_name->u.constant, opline CLS_CC);
 		opline->op2.op_type = IS_CONST;
 		opline->op2.u.constant.type = IS_STRING;
 		opline->op2.u.constant.value.str.val = estrndup(name, name_len);
@@ -1551,7 +1549,7 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 
 	opline->opcode = ZEND_DECLARE_FUNCTION_OR_CLASS;
 	opline->op1.op_type = IS_CONST;
-	build_runtime_defined_function_key(&opline->op1.u.constant, &class_name->u.constant, opline);
+	build_runtime_defined_function_key(&opline->op1.u.constant, &class_name->u.constant, opline CLS_CC);
 	opline->op2.op_type = IS_CONST;
 	opline->op2.u.constant.type = IS_STRING;
 	opline->op2.u.constant.refcount = 1;
@@ -1954,20 +1952,6 @@ void do_include_or_eval(int type, znode *result, znode *op1 CLS_DC)
 	*result = opline->result;
 	if (type==ZEND_REQUIRE) {
 		opline->result.u.EA.type |= EXT_TYPE_UNUSED;
-	}
-}
-
-
-void do_require(znode *filename, zend_bool unique CLS_DC)
-{
-	if (filename->op_type==IS_CONST
-		&& filename->u.constant.type==IS_STRING) {
-		require_filename(filename->u.constant.value.str.val, unique CLS_CC);
-		zval_dtor(&filename->u.constant);
-	} else {
-		znode result;
-
-		do_include_or_eval(ZEND_REQUIRE, &result, filename CLS_CC);
 	}
 }
 

@@ -47,7 +47,6 @@ static ZEND_FUNCTION(leak);
 #ifdef ZEND_TEST_EXCEPTIONS
 static ZEND_FUNCTION(crash);
 #endif
-static ZEND_FUNCTION(get_required_files);
 static ZEND_FUNCTION(get_included_files);
 static ZEND_FUNCTION(is_subclass_of);
 static ZEND_FUNCTION(get_class_vars);
@@ -91,8 +90,8 @@ static zend_function_entry builtin_functions[] = {
 #ifdef ZEND_TEST_EXCEPTIONS
 	ZEND_FE(crash,				NULL)
 #endif
-	ZEND_FE(get_required_files,	NULL)
 	ZEND_FE(get_included_files,	NULL)
+	ZEND_FALIAS(get_required_files,	get_included_files,		NULL)
 	ZEND_FE(is_subclass_of,		NULL)
 	ZEND_FE(get_class_vars,		NULL)
 	ZEND_FE(get_object_vars,	NULL)
@@ -711,22 +710,6 @@ static int copy_import_use_file(zend_file_handle *fh, zval *array)
 	}
 	return 0;
 }
-
-
-/* {{{ proto array get_required_files(void)
-   Returns an array with the file names that were require_once()'d */
-ZEND_FUNCTION(get_required_files)
-{
-	CLS_FETCH();
-
-	if (ZEND_NUM_ARGS() != 0) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
-
-	array_init(return_value);
-	zend_hash_apply_with_argument(&CG(used_files), (apply_func_arg_t) copy_import_use_file, return_value);
-}
-/* }}} */
 
 
 /* {{{ proto array get_included_files(void)
