@@ -46,11 +46,6 @@
 #include <sys/socket.h>
 #endif
 #endif
-
-/* Below stuff to introduce delay so that sockets are freed */
-#define THREAD_SWITCH_DELAY         1000
-#define THREAD_SWITCH_WITH_DELAY    NXThreadDelay(THREAD_SWITCH_DELAY)
-
 #else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -147,11 +142,7 @@ ftp_open(const char *host, short port, long timeout_sec TSRMLS_DC)
 
 	size = sizeof(ftp->localaddr);
 	memset(&ftp->localaddr, 0, size);
-#if defined(NETWARE) && !defined(USE_WINSOCK)
 	if (getsockname(ftp->fd, (struct sockaddr*) &ftp->localaddr, (unsigned int*)&size) == -1) {
-#else
-	if (getsockname(ftp->fd, (struct sockaddr*) &ftp->localaddr, &size) == -1) {
-#endif
 		perror("getsockname");
 		goto bail;
 	}
@@ -235,28 +226,13 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass)
 	if (!ftp_getresp(ftp))
 		return 0;
 
-#if defined(NETWARE) && defined(USE_WINSOCK)    /* Atleast for now, to allow sockets to be freed */
-    /*THREAD_SWITCH_WITH_DELAY;*/
-    printf ("PHP | ftp_login: response = %d\n", ftp->resp);
-#endif
-
 	if (ftp->resp == 230)
 		return 1;
 	if (ftp->resp != 331)
 		return 0;
 
-#if defined(NETWARE) && defined(USE_WINSOCK)    /* Atleast for now, to allow sockets to be freed */
-    /*THREAD_SWITCH_WITH_DELAY;*/
-    printf ("PHP | ftp_login: sending password...\n");
-#endif
-
 	if (!ftp_putcmd(ftp, "PASS", pass))
 		return 0;
-
-#if defined(NETWARE) && defined(USE_WINSOCK)    /* Atleast for now, to allow sockets to be freed */
-    /*THREAD_SWITCH_WITH_DELAY;*/
-    printf ("PHP | ftp_login: getting response...\n");
-#endif
 
 	if (!ftp_getresp(ftp))
 		return 0;
@@ -872,11 +848,6 @@ ftp_putcmd(ftpbuf_t *ftp, const char *cmd, const char *args)
 	int		size;
 	char		*data;
 
-#if defined(NETWARE) && defined(USE_WINSOCK)    /* Atleast for now, to allow sockets to be freed */
-    /*THREAD_SWITCH_WITH_DELAY;*/
-    printf ("PHP | ftp_putcmd: building output buffer...\n");
-#endif
-
 	/* build the output buffer */
 	if (args && args[0]) {
 		/* "cmd args\r\n\0" */
@@ -892,11 +863,6 @@ ftp_putcmd(ftpbuf_t *ftp, const char *cmd, const char *args)
 	}
 
 	data = ftp->outbuf;
-
-#if defined(NETWARE) && defined(USE_WINSOCK)    /* Atleast for now, to allow sockets to be freed */
-    /*THREAD_SWITCH_WITH_DELAY;*/
-    printf ("PHP | ftp_putcmd: sending data...\n");
-#endif
 
 	if (my_send(ftp, ftp->fd, data, size) != size)
 		return 0;
@@ -946,11 +912,6 @@ ftp_readline(ftpbuf_t *ftp)
 			}
 		}
 
-#if defined(NETWARE) && defined(USE_WINSOCK)    /* Atleast for now, to allow sockets to be freed */
-        /*THREAD_SWITCH_WITH_DELAY;*/
-        printf ("PHP | ftp_readline: receiving data...\n");
-#endif
-
 		data = eol;
 		if ((rcvd = my_recv(ftp, ftp->fd, data, size)) < 1) {
 			return 0;
@@ -971,11 +932,6 @@ ftp_getresp(ftpbuf_t *ftp)
 	if (ftp == NULL) return 0;
 	buf = ftp->inbuf;
 	ftp->resp = 0;
-
-#if defined(NETWARE) && defined(USE_WINSOCK)    /* Atleast for now, to allow sockets to be freed */
-    /*THREAD_SWITCH_WITH_DELAY;*/
-    printf ("PHP | ftp_getresp: getting response...\n");
-#endif
 
 	while (1) {
 
@@ -1004,11 +960,6 @@ ftp_getresp(ftpbuf_t *ftp)
 			10 * (ftp->inbuf[1] - '0') +
 			(ftp->inbuf[2] - '0');
 
-#if defined(NETWARE) && defined(USE_WINSOCK)    /* Atleast for now, to allow sockets to be freed */
-    /*THREAD_SWITCH_WITH_DELAY;*/
-    printf ("PHP | ftp_getresp: response = %c%c%c\n", ftp->inbuf[0], ftp->inbuf[1], ftp->inbuf[2]);
-#endif
-
 	memmove(ftp->inbuf, ftp->inbuf + 4, FTP_BUFSIZE - 4);
 
 	if (ftp->extra)
@@ -1035,36 +986,16 @@ my_send(ftpbuf_t *ftp, int s, void *buf, size_t len)
 		FD_ZERO(&write_set);
 		FD_SET(s, &write_set);
 
-#if defined(NETWARE) && defined(USE_WINSOCK)    /* Atleast for now, to allow sockets to be freed */
-        /*THREAD_SWITCH_WITH_DELAY;*/
-        printf ("PHP | my_send: calling select()...\n");
-#endif
-
 		n = select(s + 1, NULL, &write_set, NULL, &tv);
 
-#if defined(NETWARE) && defined(USE_WINSOCK)    /* Atleast for now, to allow sockets to be freed */
-        /*THREAD_SWITCH_WITH_DELAY;*/
-        printf ("PHP | my_send: select() returned %d\n", n);
-#endif
-
 		if (n < 1) {
-#if defined(NETWARE) && defined(USE_WINSOCK)    /* Atleast for now, to allow sockets to be freed */
-        /*THREAD_SWITCH_WITH_DELAY;*/
-        printf ("PHP | my_send: error = %d\n", errno);
-#endif
 
-/*#ifndef PHP_WIN32*/
 #if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
 			if (n == 0)
 				errno = ETIMEDOUT;
 #endif
 			return -1;
 		}
-
-#if defined(NETWARE) && defined(USE_WINSOCK)    /* Atleast for now, to allow sockets to be freed */
-        /*THREAD_SWITCH_WITH_DELAY;*/
-        printf ("PHP | my_send: FTP request **%s**\n", buf);
-#endif
 
 		sent = send(s, buf, size, 0);
 		if (sent == -1)
@@ -1093,14 +1024,8 @@ my_recv(ftpbuf_t *ftp, int s, void *buf, size_t len)
 	FD_ZERO(&read_set);
 	FD_SET(s, &read_set);
 
-#if defined(NETWARE) && defined(USE_WINSOCK)    /* Atleast for now, to allow sockets to be freed */
-    /*THREAD_SWITCH_WITH_DELAY;*/
-    printf ("PHP | my_recv: calling select()...\n");
-#endif
-
 	n = select(s + 1, &read_set, NULL, NULL, &tv);
 	if (n < 1) {
-/*#ifndef PHP_WIN32*/
 #if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0)
 			errno = ETIMEDOUT;
@@ -1128,7 +1053,6 @@ data_available(ftpbuf_t *ftp, int s)
 	FD_SET(s, &read_set);
 	n = select(s + 1, &read_set, NULL, NULL, &tv);
 	if (n < 1) {
-/*#ifndef PHP_WIN32*/
 #if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0)
 			errno = ETIMEDOUT;
@@ -1180,14 +1104,8 @@ my_accept(ftpbuf_t *ftp, int s, struct sockaddr *addr, int *addrlen)
 	FD_ZERO(&accept_set);
 	FD_SET(s, &accept_set);
 
-#if defined(NETWARE) && defined(USE_WINSOCK)    /* Atleast for now, to allow sockets to be freed */
-    /*THREAD_SWITCH_WITH_DELAY;*/
-    printf ("PHP | FTP: calling select()...\n");
-#endif
-
 	n = select(s + 1, &accept_set, NULL, NULL, &tv);
 	if (n < 1) {
-/*#ifndef PHP_WIN32*/
 #if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0)
 			errno = ETIMEDOUT;
@@ -1195,11 +1113,7 @@ my_accept(ftpbuf_t *ftp, int s, struct sockaddr *addr, int *addrlen)
 		return -1;
 	}
 
-#if defined(NETWARE) && !defined(USE_WINSOCK)
 	return accept(s, addr, (unsigned int*)addrlen);
-#else
-	return accept(s, addr, addrlen);
-#endif
 }
 /* }}} */
 
@@ -1271,11 +1185,7 @@ ftp_getdata(ftpbuf_t *ftp)
 		goto bail;
 	}
 
-#if defined(NETWARE) && !defined(USE_WINSOCK)
 	if (getsockname(fd, (struct sockaddr*) &addr, (unsigned int*)&size) == -1) {
-#else
-	if (getsockname(fd, (struct sockaddr*) &addr, &size) == -1) {
-#endif
 		perror("getsockname");
 		goto bail;
 	}
