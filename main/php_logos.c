@@ -74,7 +74,7 @@ int php_info_logos(const char *logo_string)
 	char *content_header;
 	int len;
 
-	if(FAILURE==zend_hash_find(&phpinfo_logo_hash,logo_string,strlen(logo_string),(void **)&logo_image))
+	if(FAILURE==zend_hash_find(&phpinfo_logo_hash,(char *) logo_string,strlen(logo_string),(void **)&logo_image))
 		return 0;
 
 	len=strlen(CONTENT_TYPE_HEADER)+logo_image->mimelen;
