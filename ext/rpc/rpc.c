@@ -369,7 +369,7 @@ static union _zend_function* rpc_get_method(zval *object, char *method, int meth
 	unsigned char *ref_types = NULL;
 	GET_INTERNAL(intern);
 
-	if (zend_ts_hash_find(&(intern->function_table), method, method_len + 1, &function) != SUCCESS) {
+	if (zend_ts_hash_find(&intern->function_table, method, method_len + 1, &function) != SUCCESS) {
 		zend_internal_function *zif;
 
 		/* get reftypes */
@@ -391,7 +391,7 @@ static union _zend_function* rpc_get_method(zval *object, char *method, int meth
 		zif->type = ZEND_INTERNAL_FUNCTION;
 
 		/* add new method to the method table */
-		zend_ts_hash_add(&(intern->function_table), method, method_len + 1, zif, sizeof(zend_function), &function);
+		zend_ts_hash_add(&intern->function_table, method, method_len + 1, zif, sizeof(zend_function), &function);
 		efree(zif);
 	}
 
@@ -518,6 +518,7 @@ ZEND_API ZEND_FUNCTION(rpc_load)
 					overloaded_class_entry.name_length = class_val.len;
 					class_hash->ce = zend_register_internal_class_ex(&overloaded_class_entry, intern->ce, NULL TSRMLS_CC);
 					intern->ce = class_hash->ce;
+					intern->function_table.hash = intern->ce->function_table;
 
 					/* register with non-hashed key
 					 * also track all instaces in a llist for destruction later on, because there might be duplicate entries in
@@ -545,6 +546,7 @@ ZEND_API ZEND_FUNCTION(rpc_load)
 				/* overload class entry */
 				INIT_CLASS_ENTRY(overloaded_class_entry, class_val.str, NULL);
 				intern->ce = zend_register_internal_class_ex(&overloaded_class_entry, intern->ce, NULL TSRMLS_CC);
+				intern->function_table.hash = intern->ce->function_table;
 			}
 		}
 	} else {
@@ -568,6 +570,7 @@ ZEND_API ZEND_FUNCTION(rpc_load)
 			INIT_CLASS_ENTRY(overloaded_class_entry, class_val.str, NULL);
 			class_hash->ce = zend_register_internal_class_ex(&overloaded_class_entry, intern->ce, NULL TSRMLS_CC);
 			intern->ce = class_hash->ce;
+			intern->function_table.hash = intern->ce->function_table;
 
 			/* register int hashcode, we don't know more */
 			zend_ts_hash_index_update(&classes, class_hash->name.len, &class_hash, sizeof(rpc_class_hash *), NULL);
@@ -805,7 +808,7 @@ ZEND_API zend_object_value rpc_objects_new(zend_class_entry *class_type TSRMLS_D
 
 	intern->ce = class_type;
 	intern->data = NULL;
-	intern->function_table.hash = intern->ce->function_table;
+	intern->function_table.hash = intern->ce->function_table;	
 	intern->function_table.reader = 0;
 	intern->function_table.mx_reader = tsrm_mutex_alloc();
 	intern->function_table.mx_writer = tsrm_mutex_alloc();
@@ -914,6 +917,11 @@ ZEND_API zval* _rpc_object_from_data(zval *z, zend_class_entry *ce, void *data, 
 		class_hash->singleton = FALSE;
 		class_hash->poolable = FALSE;
 		class_hash->data = NULL;
+
+		/* Copy the function table hash for this object, so that it is separated
+		 * from the "global" table */
+		zend_ts_hash_init(&intern->function_table, 0, NULL, NULL, TRUE);
+		zend_hash_copy(&intern->function_table.hash, &ce->function_table, NULL, NULL, 0);
 	}
 
 	RPC_CLASS(intern) = class_hash;
