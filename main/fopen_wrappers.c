@@ -465,18 +465,18 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 		exec_fname_length = strlen(exec_fname);
 		path_length = strlen(path);
 
-		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length])) {
+		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length]));
+		if ((exec_fname && exec_fname[0] == '[')
+			|| exec_fname_length<=0) {
+			/* [no active file] or no path */
+			pathbuf = estrdup(path);
+		} else {		
+			pathbuf = (char *) emalloc(exec_fname_length + path_length +1 +1);
+			memcpy(pathbuf, path, path_length);
+			pathbuf[path_length] = DEFAULT_DIR_SEPARATOR;
+			memcpy(pathbuf+path_length+1, exec_fname, exec_fname_length);
+			pathbuf[path_length + exec_fname_length +1] = '\0';
 		}
-		if (exec_fname && exec_fname[0] == '[') {
-			/* [no active file] */
-			exec_fname_length = 0;
-		}
-		
-		pathbuf = (char *) emalloc(exec_fname_length + path_length +1 +1);
-		memcpy(pathbuf, path, path_length);
-		pathbuf[path_length] = DEFAULT_DIR_SEPARATOR;
-		memcpy(pathbuf+path_length+1, exec_fname, exec_fname_length);
-		pathbuf[path_length + exec_fname_length +1] = '\0';
 	} else {
 		pathbuf = estrdup(path);
 	}
