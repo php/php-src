@@ -64,8 +64,10 @@ ZEND_API void convert_scalar_to_number(zval *op)
 	}
 }
 
-#define zendi_convert_scalar_to_number(op, holder) \
-	if ((op)->type == IS_STRING) { \
+#define zendi_convert_scalar_to_number(op, holder, result) \
+	if (op==result) { \
+		convert_scalar_to_number(op); \
+	} else if ((op)->type == IS_STRING) { \
 		switch (((holder).type=is_numeric_string((op)->value.str.val, (op)->value.str.len, &(holder).value.lval, &(holder).value.dval))) { \
 			case IS_DOUBLE: \
 			case IS_LONG: \
@@ -86,8 +88,10 @@ ZEND_API void convert_scalar_to_number(zval *op)
 	}
 
 
-#define zendi_convert_to_long(op, holder) \
-	if ((op)->type != IS_LONG) { \
+#define zendi_convert_to_long(op, holder, result) \
+	if (op==result) { \
+		convert_to_long(op); \
+	} else if ((op)->type != IS_LONG) { \
 		switch ((op)->type) { \
 			case IS_BOOL: \
 			case IS_RESOURCE: \
@@ -114,8 +118,10 @@ ZEND_API void convert_scalar_to_number(zval *op)
 	}
 
 
-#define zendi_convert_to_boolean(op, holder) \
-	if ((op)->type != IS_BOOL) { \
+#define zendi_convert_to_boolean(op, holder, result) \
+	if (op==result) { \
+		convert_to_boolean(op); \
+	} else if ((op)->type != IS_BOOL) { \
 		switch ((op)->type) { \
 			case IS_LONG: \
 			case IS_RESOURCE: \
@@ -404,8 +410,9 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2)
 		zend_hash_merge(result->value.ht, op2->value.ht, (void (*)(void *pData)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
 		return SUCCESS;
 	}
-	zendi_convert_scalar_to_number(op1, op1_copy);
-	zendi_convert_scalar_to_number(op2, op2_copy);
+	zendi_convert_scalar_to_number(op1, op1_copy, result);
+	zendi_convert_scalar_to_number(op2, op2_copy, result);
+
 
 	if (op1->type == IS_LONG && op2->type == IS_LONG) {
 		double dval = (double) op1->value.lval + (double) op2->value.lval;
@@ -441,8 +448,8 @@ ZEND_API int sub_function(zval *result, zval *op1, zval *op2)
 {
 	zval op1_copy, op2_copy;
 	
-	zendi_convert_scalar_to_number(op1, op1_copy);
-	zendi_convert_scalar_to_number(op2, op2_copy);
+	zendi_convert_scalar_to_number(op1, op1_copy, result);
+	zendi_convert_scalar_to_number(op2, op2_copy, result);
 
 	if (op1->type == IS_LONG && op2->type == IS_LONG) {
 		double dval = (double) op1->value.lval - (double) op2->value.lval;
@@ -478,8 +485,8 @@ ZEND_API int mul_function(zval *result, zval *op1, zval *op2)
 {
 	zval op1_copy, op2_copy;
 	
-	zendi_convert_scalar_to_number(op1, op1_copy);
-	zendi_convert_scalar_to_number(op2, op2_copy);
+	zendi_convert_scalar_to_number(op1, op1_copy, result);
+	zendi_convert_scalar_to_number(op2, op2_copy, result);
 
 	if (op1->type == IS_LONG && op2->type == IS_LONG) {
 		double dval = (double) op1->value.lval * (double) op2->value.lval;
@@ -514,8 +521,8 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2)
 {
 	zval op1_copy, op2_copy;
 	
-	zendi_convert_scalar_to_number(op1, op1_copy);
-	zendi_convert_scalar_to_number(op2, op2_copy);
+	zendi_convert_scalar_to_number(op1, op1_copy, result);
+	zendi_convert_scalar_to_number(op2, op2_copy, result);
 
 	if ((op2->type == IS_LONG && op2->value.lval == 0) || (op2->type == IS_DOUBLE && op2->value.dval == 0.0)) {
 		zend_error(E_WARNING, "Division by zero");
@@ -554,8 +561,8 @@ ZEND_API int mod_function(zval *result, zval *op1, zval *op2)
 {
 	zval op1_copy, op2_copy;
 	
-	zendi_convert_to_long(op1, op1_copy);
-	zendi_convert_to_long(op2, op2_copy);
+	zendi_convert_to_long(op1, op1_copy, result);
+	zendi_convert_to_long(op2, op2_copy, result);
 
 	if (op2->value.lval == 0) {
 		var_reset(result);
@@ -574,12 +581,12 @@ ZEND_API int boolean_or_function(zval *result, zval *op1, zval *op2)
 	
 	result->type = IS_BOOL;
 
-	zendi_convert_to_boolean(op1, op1_copy);
+	zendi_convert_to_boolean(op1, op1_copy, result);
 	if (op1->value.lval) {
 		result->value.lval = 1;
 		return SUCCESS;
 	}
-	zendi_convert_to_boolean(op2, op2_copy);
+	zendi_convert_to_boolean(op2, op2_copy, result);
 	if (op2->value.lval) {
 		result->value.lval = 1;
 		return SUCCESS;
@@ -595,12 +602,12 @@ ZEND_API int boolean_and_function(zval *result, zval *op1, zval *op2)
 	
 	result->type = IS_BOOL;
 
-	zendi_convert_to_boolean(op1, op1_copy);
+	zendi_convert_to_boolean(op1, op1_copy, result);
 	if (!op1->value.lval) {
 		result->value.lval = 0;
 		return SUCCESS;
 	}
-	zendi_convert_to_boolean(op2, op2_copy);
+	zendi_convert_to_boolean(op2, op2_copy, result);
 	if (!op2->value.lval) {
 		result->value.lval = 0;
 		return SUCCESS;
@@ -616,8 +623,8 @@ ZEND_API int boolean_xor_function(zval *result, zval *op1, zval *op2)
 	
 	result->type = IS_BOOL;
 
-	zendi_convert_to_boolean(op1, op1_copy);
-	zendi_convert_to_boolean(op2, op2_copy);
+	zendi_convert_to_boolean(op1, op1_copy, result);
+	zendi_convert_to_boolean(op2, op2_copy, result);
 	result->value.lval = op1->value.lval ^ op2->value.lval;
 	return SUCCESS;
 }
@@ -627,7 +634,7 @@ ZEND_API int boolean_not_function(zval *result, zval *op1)
 {
 	zval op1_copy;
 	
-	zendi_convert_to_boolean(op1, op1_copy);
+	zendi_convert_to_boolean(op1, op1_copy, result);
 
 	result->type = IS_BOOL;
 	result->value.lval = !op1->value.lval;
@@ -689,8 +696,8 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2)
 		}
 		return SUCCESS;
 	}
-	zendi_convert_to_long(op1, op1_copy);
-	zendi_convert_to_long(op2, op2_copy);
+	zendi_convert_to_long(op1, op1_copy, result);
+	zendi_convert_to_long(op2, op2_copy, result);
 
 	result->type = IS_LONG;
 	result->value.lval = op1->value.lval | op2->value.lval;
@@ -723,8 +730,8 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2)
 	}
 	
 
-	zendi_convert_to_long(op1, op1_copy);
-	zendi_convert_to_long(op2, op2_copy);
+	zendi_convert_to_long(op1, op1_copy, result);
+	zendi_convert_to_long(op2, op2_copy, result);
 
 	result->type = IS_LONG;
 	result->value.lval = op1->value.lval & op2->value.lval;
@@ -756,8 +763,8 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2)
 		return SUCCESS;
 	}
 
-	zendi_convert_to_long(op1, op1_copy);
-	zendi_convert_to_long(op2, op2_copy);	
+	zendi_convert_to_long(op1, op1_copy, result);
+	zendi_convert_to_long(op2, op2_copy, result);	
 
 	result->type = IS_LONG;
 	result->value.lval = op1->value.lval ^ op2->value.lval;
@@ -769,8 +776,8 @@ ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2)
 {
 	zval op1_copy, op2_copy;
 	
-	zendi_convert_to_long(op1, op1_copy);
-	zendi_convert_to_long(op2, op2_copy);
+	zendi_convert_to_long(op1, op1_copy, result);
+	zendi_convert_to_long(op2, op2_copy, result);
 	result->value.lval = op1->value.lval << op2->value.lval;
 	result->type = IS_LONG;
 	return SUCCESS;
@@ -781,8 +788,8 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2)
 {
 	zval op1_copy, op2_copy;
 	
-	zendi_convert_to_long(op1, op1_copy);
-	zendi_convert_to_long(op2, op2_copy);
+	zendi_convert_to_long(op1, op1_copy, result);
+	zendi_convert_to_long(op2, op2_copy, result);
 	result->value.lval = op1->value.lval >> op2->value.lval;
 	result->type = IS_LONG;
 	return SUCCESS;
@@ -865,19 +872,19 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 	zval op1_copy, op2_copy;
 
 	if (op1->type == IS_STRING && op2->type == IS_STRING) {
-		zendi_smart_strcmp(result,op1,op2);
+		zendi_smart_strcmp(result, op1, op2);
 		return SUCCESS;
 	}
 	
 	if (op1->type == IS_BOOL || op2->type == IS_BOOL) {
-		zendi_convert_to_boolean(op1, op1_copy);
-		zendi_convert_to_boolean(op2, op2_copy);
+		zendi_convert_to_boolean(op1, op1_copy, result);
+		zendi_convert_to_boolean(op2, op2_copy, result);
 		result->type = IS_LONG;
 		result->value.lval = op1->value.lval - op2->value.lval;
 		return SUCCESS;
 	}
-	zendi_convert_scalar_to_number(op1, op1_copy);
-	zendi_convert_scalar_to_number(op2, op2_copy);
+	zendi_convert_scalar_to_number(op1, op1_copy, result);
+	zendi_convert_scalar_to_number(op2, op2_copy, result);
 
 	if (op1->type == IS_LONG && op2->type == IS_LONG) {
 		result->type = IS_LONG;
