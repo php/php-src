@@ -47,10 +47,10 @@
  #if !defined(PHP_WIN32)
   #include <sqlunix.h>
  #endif
- #include <sql.h>
  #include <sqltypes.h>
  #include <sqlucode.h>
  #include <sqlext.h>
+ #include <sql.h>
 #endif
 #undef HAVE_SQL_EXTENDED_FETCH
 PHP_FUNCTION(solid_fetch_prev);
@@ -220,6 +220,9 @@ typedef struct odbc_connection {
 #if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC )
 	SQLHANDLE henv;
 	SQLHANDLE hdbc;
+#elif defined( HAVE_SOLID_35 )
+	SQLHENV	henv;
+	SQLHDBC hdbc;
 #else
 	HENV henv;
 	HDBC hdbc;
@@ -238,6 +241,8 @@ typedef struct odbc_result_value {
 typedef struct odbc_result {
 #if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC )
 	SQLHANDLE stmt;
+#elif defined( HAVE_SOLID_35 )
+	SQLHSTMT stmt;
 #else
 	HSTMT stmt;
 #endif
@@ -281,6 +286,8 @@ int odbc_bindcols(odbc_result *result);
 
 #if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC )
 #define ODBC_SQL_ERROR_PARAMS SQLHANDLE henv, SQLHANDLE conn, SQLHANDLE stmt, char *func
+#elif defined( HAVE_SOLID_35 )
+#define ODBC_SQL_ERROR_PARAMS SQLHENV henv, SQLHDBC conn, SQLHSTMT stmt, char *func
 #else
 #define ODBC_SQL_ERROR_PARAMS HENV henv, HDBC conn, HSTMT stmt, char *func
 #endif

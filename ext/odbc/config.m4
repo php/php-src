@@ -10,15 +10,19 @@ AC_DEFUN(AC_FIND_SOLID_LIBS,[
     HP-UX) ac_solid_os=h9x;; # h1x for hpux11, h0x for hpux10
     IRIX) ac_solid_os=irx;;
     Linux) if ldd -v /bin/sh | grep GLIBC > /dev/null; then
+		AC_DEFINE(SS_LINUX,1,[Needed in sqlunix.h ])
 		ac_solid_os=l2x
 	else
+		AC_DEFINE(SS_LINUX,1,[Needed in sqlunix.h ])
 		ac_solid_os=lux
 	fi;; 
     SunOS) ac_solid_os=ssx;; # should we deal with SunOS 4?
-    FreeBSD) if [$ac_solid_uname_r < "3."]; then
-        ac_solid_os=fbx
+    FreeBSD) if test "$ac_solid_uname_r" \> "3"; then
+        AC_DEFINE(SS_FBX,1,[Needed in sqlunix.h for wchar defs ])
+	ac_solid_os=fex
       else
-        ac_solid_os=fex
+        AC_DEFINE(SS_FBX,1,[Needed in sqlunix.h for wchar defs ])
+	ac_solid_os=fbx
       fi;;
     # "uname -s" on SCO makes no sense.
   esac
@@ -34,37 +38,21 @@ AC_DEFUN(AC_FIND_SOLID_LIBS,[
     ac_solid_prefix=soc
   fi
 
-  ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}*.so | cut -d' ' -f1`
+  ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so | cut -d' ' -f1`
   if test ! -f $ODBC_LIBS; then
     ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a | cut -d' ' -f1`
   fi
   if test ! -f $ODBC_LIBS; then
-    if test $ac_solid_version == 35; then
-      ODBC_LIBS=`echo $1/libsolodbc.so | cut -d' ' -f1`
-    else
       ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so| cut -d' ' -f1`
-    fi
   fi
   if test ! -f $ODBC_LIBS; then
-    if test $ac_solid_version == 35; then
-      ODBC_LIBS=`echo $1/libsolodbc.a | cut -d' ' -f1`
-    else
       ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a | cut -d' ' -f1`
-    fi
   fi
   if test ! -f $ODBC_LIBS; then
-    if test $ac_solid_version == 35; then
-      ODBC_LIBS=`echo $1/bcl${ac_solid_prefix}*.so | cut -d' ' -f1`
-    else
       ODBC_LIBS=`echo $1/bcl${ac_solid_os}*.so | cut -d' ' -f1`
-    fi
   fi
   if test ! -f $ODBC_LIBS; then
-    if $ac_solid_version == 35; then
-      ODBC_LIBS=`echo $1/bcl${ac_solid_prefix}*.a | cut -d' ' -f1`
-    else
       ODBC_LIBS=`echo $1/bcl${ac_solid_os}*.a | cut -d' ' -f1`
-    fi
   fi
   AC_MSG_RESULT(`echo $ODBC_LIBS | sed -e 's!.*/!!'`)
 ])
