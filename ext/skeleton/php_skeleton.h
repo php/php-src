@@ -32,7 +32,7 @@
 #if HAVE__EXTNAME_
 
 extern zend_module_entry _extname__module_entry;
-#define _extname__module_ptr &_extname__module_entry
+#define phpext__extname__ptr &_extname__module_entry
 
 #ifdef PHP_WIN32
 #define PHP__EXTNAME__API __declspec(dllexport)
@@ -52,6 +52,12 @@ typedef struct {
 	/* Fill in this structure and use entries in it
 	   for thread safety instead of using true globals.
 	*/
+	/* You can use the next one as type if your module registers any
+	   resources. Oh, you can of course rename it to something more
+	   suitable, add list entry types or remove it if it not needed.
+	   It's just an example.
+	*/
+	int le__extname_;
 } php__extname__globals;
 
 /* In every function that needs to use variables in php__extname__globals,
@@ -71,11 +77,9 @@ typedef struct {
 
 #else
 
-#define _extname__module_ptr NULL
+#define php__extname__ptr NULL
 
 #endif
-
-#define phpext__extname__ptr _extname__module_ptr
 
 #endif	/* _PHP__EXTNAME__H */
 
