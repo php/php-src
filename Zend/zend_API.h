@@ -23,10 +23,10 @@
 
 int zend_next_free_module(void);
 
-int getParameters(HashTable *ht, int param_count,...);
-int getParametersArray(HashTable *ht, int param_count, zval **argument_array);
+int getParameters(int ht, int param_count,...);
+int getParametersArray(int ht, int param_count, zval **argument_array);
 int getThis(zval **this);
-int ParameterPassedByReference(HashTable *ht, uint n);
+int ParameterPassedByReference(int ht, uint n);
 int register_functions(function_entry *functions);
 void unregister_functions(function_entry *functions, int count);
 int register_module(zend_module_entry *module_entry);
@@ -36,7 +36,7 @@ ZEND_API void wrong_param_count(void);
 
 #define WRONG_PARAM_COUNT { wrong_param_count(); return; }
 #define WRONG_PARAM_COUNT_WITH_RETVAL(ret) { wrong_param_count(); return ret; }
-#define ARG_COUNT(ht) (ht->nNextFreeElement)
+#define ARG_COUNT(ht) (ht)
 
 #define BYREF_NONE 0
 #define BYREF_FORCE 1

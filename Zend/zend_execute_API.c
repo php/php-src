@@ -86,6 +86,8 @@ void init_executor(CLS_D ELS_DC)
 	EG(function_table) = CG(function_table);
 	EG(class_table) = CG(class_table);
 
+	zend_ptr_stack_init(&EG(argument_stack));
+
 	EG(AiCount) = 0;
 	zend_ptr_stack_init(&EG(garbage));
 
@@ -124,6 +126,7 @@ void shutdown_executor(ELS_D)
 
 	zend_hash_destroy(&EG(symbol_table));
 
+	zend_ptr_stack_destroy(&EG(argument_stack));
 	if (EG(main_op_array)) {
 		destroy_op_array(EG(main_op_array));
 		efree(EG(main_op_array));
@@ -287,7 +290,8 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 		param->refcount=1;
 		param->is_ref=0;
 		zval_copy_ctor(param);
-		zend_hash_next_index_insert_ptr(function_state.function_symbol_table, param, sizeof(zval *), NULL);
+		//zend_hash_next_index_insert_ptr(function_state.function_symbol_table, param, sizeof(zval *), NULL);
+		zend_ptr_stack_push(&EG(argument_stack), param);
 	}
 
 	if (object) {
@@ -314,7 +318,7 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 		EG(return_value)=original_return_value;
 		EG(opline_ptr) = original_opline_ptr;
 	} else {
-		((zend_internal_function *) function_state.function)->handler(EG(active_symbol_table), retval, &EG(regular_list), &EG(persistent_list));
+		((zend_internal_function *) function_state.function)->handler(param_count, retval, &EG(regular_list), &EG(persistent_list));
 	}
 	zend_hash_destroy(EG(active_symbol_table));
 	efree(EG(active_symbol_table));
@@ -443,3 +447,34 @@ void execute_new_code(CLS_D)
 	CG(active_op_array)->start_op_number = CG(active_op_array)->last_executed_op_number;
 }
 #endif
+
+
+/* these are a dedicated, optimized, function, and shouldn't be used for any purpose
+ * other than by Zend's executor
+ */
+ZEND_API inline void zend_ptr_stack_clear_multiple(ELS_D)
+{
+	void **p = EG(argument_stack).top_element-1;
+	int delete_count = (ulong) *p;
+
+	EG(argument_stack).top -= (delete_count+1);
+	while (--delete_count>=0) {
+		zval_ptr_dtor((zval **) --p);
+	}
+	EG(argument_stack).top_element = p;
+}
+
+
+
+ZEND_API int zend_ptr_stack_get_arg(int requested_arg, void **data)
+{
+	void **p = EG(argument_stack).elements+EG(argument_stack).top-1;
+	int arg_count = (ulong) *p;
+
+	if (requested_arg>arg_count) {
+		return FAILURE;
+	}
+	*data = (p-arg_count+requested_arg-1);
+	return SUCCESS;
+}
+

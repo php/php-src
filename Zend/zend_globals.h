@@ -186,6 +186,8 @@ struct _zend_executor_globals {
 	HashTable regular_list;
 	HashTable persistent_list;
 
+	zend_ptr_stack argument_stack;
+
 #if SUPPORT_INTERACTIVE
 	int interactive;
 #endif

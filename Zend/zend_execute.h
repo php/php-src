@@ -45,6 +45,10 @@ ZEND_API inline int i_zend_is_true(zval *op);
 ZEND_API void zval_update_constant(zval *p);
 ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, zval **value_ptr_ptr, temp_variable *Ts ELS_DC);
 
+/* dedicated Zend executor functions - do not use! */
+ZEND_API inline void zend_ptr_stack_clear_multiple(ELS_D);
+ZEND_API inline int zend_ptr_stack_get_arg(int requested_arg, void **data);
+
 #if SUPPORT_INTERACTIVE
 void execute_new_code(CLS_D);
 #endif

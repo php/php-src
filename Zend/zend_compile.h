@@ -62,6 +62,7 @@ typedef struct _zend_op {
 	znode result;
 	znode op1;
 	znode op2;
+	ulong extended_value;
 	char *filename;
 	uint lineno;
 } zend_op;
@@ -238,7 +239,7 @@ void do_receive_arg(int op, znode *var, znode *offset, znode *initialization, un
 void do_begin_function_call(znode *function_name CLS_DC);
 void do_begin_dynamic_function_call(znode *function_name CLS_DC);
 void do_begin_class_member_function_call(znode *class_name, znode *function_name CLS_DC);
-void do_end_function_call(znode *function_name, znode *result, int is_method CLS_DC);
+void do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method CLS_DC);
 void do_return(znode *expr CLS_DC);
 
 void do_pass_param(znode *param, int op, int offset CLS_DC);
@@ -269,7 +270,7 @@ void do_pop_object(znode *object CLS_DC);
 
 
 void do_begin_new_object(znode *result, znode *variable, znode *new_token, znode *class_name CLS_DC);
-void do_end_new_object(znode *class_name, znode *new_token CLS_DC);
+void do_end_new_object(znode *class_name, znode *new_token, znode *argument_list CLS_DC);
 
 void do_fetch_constant(znode *result, znode *constant_name, int mode CLS_DC);
 

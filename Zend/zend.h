@@ -46,7 +46,7 @@
 #include "zend_llist.h"
 
 
-#define INTERNAL_FUNCTION_PARAMETERS HashTable *ht, zval *return_value, HashTable *list, HashTable *plist
+#define INTERNAL_FUNCTION_PARAMETERS int ht, zval *return_value, HashTable *list, HashTable *plist
 #define INTERNAL_FUNCTION_PARAM_PASSTHRU ht, return_value, list, plist
 
 /*
