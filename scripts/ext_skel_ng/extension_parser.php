@@ -588,6 +588,40 @@ ZEND_GET_MODULE('.$this->name.')
 
 			fputs($fp, "#ifndef PHP_HAVE_{$upname}\n\n");
 
+			if(isset($this->headers)) {
+				foreach($this->headers as $header) {
+					if (@$header["prepend"] === "yes") {
+						fputs($fp, "#include <$header[name]>\n");
+					}
+				}
+			}
+
+			fputs($fp, '
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <php.h>
+#include <php_ini.h>
+#include <SAPI.h>
+#include <ext/standard/info.h>
+
+');
+
+			if(isset($this->headers)) {
+				foreach($this->headers as $header) {
+					if (@$header["prepend"] !== "yes") {
+						fputs($fp, "#include <$header[name]>\n");
+					}
+				}
+			}
+
+			if(isset($this->code["header"])) {
+				foreach($this->code["header"] as $code) {
+					fputs($fp, $code);
+				}
+			}
+
 			fputs($fp, "
 extern zend_module_entry {$this->name}_module_entry;
 #define phpext_{$this->name}_ptr &{$this->name}_module_entry
@@ -825,7 +859,7 @@ $code .= "
 		$code = "";
 
     foreach($this->functions as $function) {
-      $code .= $function->c_code();
+      $code .= $function->c_code(&$this);
     }
 		
 		return $code;
@@ -846,17 +880,6 @@ $code .= "
 			
 			fputs($fp, $this->get_license());
 
-			fputs($fp, '
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <php.h>
-#include <php_ini.h>
-#include <SAPI.h>
-#include <ext/standard/info.h>
-
-');
 			fputs($fp, "#include \"php_{$this->name}.h\"\n\n");
 						
       if (isset($this->logo)) {
@@ -866,6 +889,8 @@ $code .= "
 			if (!empty($this->globals)) {
 				fputs($fp, "ZEND_DECLARE_MODULE_GLOBALS({$this->name})\n\n");
 			}
+
+			fputs($fp, $this->private_functions_c());
 
 			if (!empty($this->resources)) {
 				foreach ($this->resources as $resource) {
@@ -888,8 +913,6 @@ $code .= "
 			fputs($fp, "/* }}} */\n\n");
 
 			fputs($fp, $this->internal_functions_c());
-
-			fputs($fp, $this->private_functions_c());
 
 			fputs($fp, $this->public_functions_c());
 
