@@ -2,6 +2,11 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2 
+- Added ability for each xml_set_*_handler() function to take the
+  array($obj, 'method') syntax for the handler argument as well
+  as the normal function name. (Andrei)
+- Updated array_walk() to be able to accept array($obj, 'method')
+- syntax for the walk function. (Andrei)
 - Fixed segfault with fgets(), fgetcsv(), fgetss(), and fread() when
   called with negative length argument. (Torben)
 - Fix by-reference parameters passing for xml_ functions and for scanf functions (Stas)
