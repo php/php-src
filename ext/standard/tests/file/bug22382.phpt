@@ -1,5 +1,5 @@
 --TEST--
-Bug #22382: fgetcvs does not handle escaped quotes correctly
+Bug #22382 (fgetcsv() does not handle escaped quotes correctly)
 --POST--
 --GET--
 --FILE--
