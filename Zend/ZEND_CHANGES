@@ -321,30 +321,31 @@ Changes in the Zend Engine 2.0
 
         <?php
         class MyException {
-          function MyException($_error) {
-            $this->error = $_error;	
+          function __construct($exception) {
+            $this->exception = $exception;
           }
 
-          function getException() {
-            return $this->error;	
+          function Display() {
+            print "MyException: $this->exception\n";
           }
         }
 
-        function ThrowException() {
-          throw new MyException("'This is an exception!'");	
+        class MyExceptionFoo extends MyException {
+          function __construct($exception) {
+            $this->exception = $exception;
+          }
+
+          function Display() {
+            print "MyException: $this->exception\n";
+          }
         }
 
         try {
-        } catch ($exception) {
-          print "There was an exception: " . $exception->getException();
-          print "\n";
+          throw  new MyExceptionFoo("Hello");
         }
 
-        try {
-          ThrowException();	
-        } catch ($exception) {
-          print "There was an exception: " . $exception->getException();
-          print "\n";
+        catch (MyException $exception) {
+          $exception->Display();
         }
         ?>
 
