@@ -154,7 +154,7 @@ void do_binary_assign_op(int op, znode *result, znode *op1, znode *op2 CLS_DC)
 
 
 
-void do_fetch_globals(znode *varname)
+void do_fetch_globals(znode *varname CLS_DC)
 {
 	if (!CG(active_op_array)->initialized_globals
 		&& varname->op_type == IS_CONST
@@ -496,7 +496,7 @@ void do_end_variable_parse(int type CLS_DC)
 }
 
 
-void do_init_string(znode *result)
+void do_init_string(znode *result CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 
@@ -625,7 +625,7 @@ void do_begin_function_declaration(znode *function_token, znode *function_name, 
 	}
 
 	if (CG(extended_info)) {
-		zend_op *opline = get_next_op(CG(active_op_array));
+		zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 
 		opline->opcode = ZEND_EXT_NOP;
 		opline->lineno = function_begin_line;

@@ -53,6 +53,8 @@ static int clean_module_constant(zend_constant *c, int *module_number)
 
 void clean_module_constants(int module_number)
 {
+	ELS_FETCH();
+
 	zend_hash_apply_with_argument(EG(zend_constants), (int (*)(void *,void *)) clean_module_constant, (void *) &module_number);
 }
 
@@ -65,6 +67,7 @@ int zend_startup_constants(void)
 	DWORD dwWindowsMajorVersion =  (DWORD)(LOBYTE(LOWORD(dwVersion)));
 	DWORD dwWindowsMinorVersion =  (DWORD)(HIBYTE(LOWORD(dwVersion)));
 #endif
+	ELS_FETCH();
 
 
 /* ZEND_FIX:  Move to PHP */
@@ -126,6 +129,8 @@ int zend_startup_constants(void)
 
 int zend_shutdown_constants(void)
 {
+	ELS_FETCH();
+
 	zend_hash_destroy(EG(zend_constants));
 	free(EG(zend_constants));
 	return SUCCESS;
@@ -134,6 +139,8 @@ int zend_shutdown_constants(void)
 
 void clean_non_persistent_constants(void)
 {
+	ELS_FETCH();
+
 	zend_hash_apply(EG(zend_constants), (int (*)(void *)) clean_non_persistent_constant);
 }
 
@@ -192,6 +199,7 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result)
 	zend_constant *c;
 	char *lookup_name = estrndup(name,name_len);
 	int retval;
+	ELS_FETCH();
 
 	zend_str_tolower(lookup_name, name_len);
 
@@ -215,6 +223,7 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result)
 ZEND_API void zend_register_constant(zend_constant *c)
 {
 	char *lowercase_name = zend_strndup(c->name, c->name_len);
+	ELS_FETCH();
 
 #if 0
 	printf("Registering constant for module %d\n",c->module_number);

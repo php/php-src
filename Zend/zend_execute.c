@@ -1373,7 +1373,7 @@ overloaded_function_call_cont:
 						}
 						EG(active_symbol_table) = calling_symbol_table;
 					} else { /* ZEND_OVERLOADED_FUNCTION */
-						call_overloaded_function(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list));
+						call_overloaded_function(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list) ELS_CC);
 						efree(function_being_called);
 					}
 					function_state.function = (zend_function *) op_array;
@@ -1470,7 +1470,7 @@ send_by_ref:
 					zval **param;
 
 					//if (zend_hash_index_find(EG(active_symbol_table), opline->op1.u.constant.value.lval, (void **) &param)==FAILURE) {
-					if (zend_ptr_stack_get_arg(opline->op1.u.constant.value.lval, (void **) &param)==FAILURE) {
+					if (zend_ptr_stack_get_arg(opline->op1.u.constant.value.lval, (void **) &param ELS_CC)==FAILURE) {
 						zend_error(E_NOTICE, "Missing argument %d for %s()\n", opline->op1.u.constant.value.lval, get_active_function_name());
 						DEC_AI_COUNT();
 					} else if ((*param)->is_ref) {
@@ -1484,7 +1484,7 @@ send_by_ref:
 					zval **param, *assignment_value;
 
 					//if (zend_hash_index_find(EG(active_symbol_table), opline->op1.u.constant.value.lval, (void **) &param)==FAILURE) {
-					if (zend_ptr_stack_get_arg(opline->op1.u.constant.value.lval, (void **) &param)==FAILURE) {
+					if (zend_ptr_stack_get_arg(opline->op1.u.constant.value.lval, (void **) &param ELS_CC)==FAILURE) {
 						if (opline->op2.op_type == IS_UNUSED) {
 							DEC_AI_COUNT();
 							break;

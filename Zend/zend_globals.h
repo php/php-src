@@ -24,13 +24,16 @@
 #include "zend_hash.h"
 #include "zend_llist.h"
 
+
+/* Define ZTS if you want a thread-safe Zend */
 #undef ZTS
 
 #ifdef ZTS
-#include "SAPI.h"
+#include "../TSRM/TSRM.h"
 
 extern int compiler_globals_id;
 extern int executor_globals_id;
+extern int alloc_globals_id;
 #endif
 
 typedef struct _zend_compiler_globals zend_compiler_globals;
