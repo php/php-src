@@ -48,10 +48,11 @@ ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
 ZEND_API void (*zend_block_interruptions)(void);
 ZEND_API void (*zend_unblock_interruptions)(void);
 ZEND_API void (*zend_ticks_function)(int ticks);
+ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+
 static void (*zend_message_dispatcher_p)(long message, void *data);
 static int (*zend_get_ini_entry_p)(char *name, uint name_length, zval *contents);
 
-static void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
