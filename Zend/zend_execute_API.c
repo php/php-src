@@ -576,9 +576,9 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 				return FAILURE;
 			}
 
-			function_table = &Z_OBJCE_PP(object_pp)->function_table;
-			EX(object) = *object_pp;
 			calling_scope = Z_OBJCE_PP(object_pp);
+			function_table = &calling_scope->function_table;
+			EX(object) =  *object_pp;
 		} else if (Z_TYPE_PP(object_pp) == IS_STRING) {
 			zend_class_entry **ce;
 			char *lc_class;
