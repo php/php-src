@@ -43,6 +43,8 @@ class reflect {
   private static native void setResultFromDouble(long result, double value);
   private static native void setResultFromBoolean(long result, boolean value);
   private static native void setResultFromObject(long result, Object value);
+  private static native void setResultFromArray(long result);
+  private static native long nextElement(long array);
   private static native void setException(long result, String value);
   public  static native void setEnv();
 
@@ -70,6 +72,14 @@ class reflect {
     } else if (value instanceof java.lang.Boolean) {
 
       setResultFromBoolean(result, ((Boolean)value).booleanValue());
+
+    } else if (value.getClass().isArray()) {
+
+      long length = Array.getLength(value);
+      setResultFromArray(result);
+      for (int i=0; i<length; i++) {
+        setResult(nextElement(result), Array.get(value, i));
+      }
 
     } else {
 
@@ -198,27 +208,24 @@ class reflect {
     (Object object, String method, Object args[], long result)
   {
 
-    // Apparently, if a class is not declared "public" it is illegal to
-    // access a method of this class via Invoke.  We can't work around
-    // all such cases, but enumeration does appear to be a common case.
-    if (object instanceof Enumeration && args.length == 0) {
-
-      if (method.equalsIgnoreCase("hasMoreElements")) {
-        setResultFromBoolean(result, ((Enumeration)object).hasMoreElements());
-        return;
-      }
-
-      if (method.equalsIgnoreCase("nextElement")) {
-        setResultFromObject(result, ((Enumeration)object).nextElement());
-        return;
-      }
-    }
-
     try {
       Vector matches = new Vector();
 
       // gather
       for (Class jclass = object.getClass();;jclass=(Class)object) {
+        while (!Modifier.isPublic(jclass.getModifiers())) {
+          // OK, some joker gave us an instance of a non-public class
+          // This often occurs in the case of enumerators
+          // Substitute the first public interface in its place,
+          // and barring that, try the superclass
+          Class interfaces[] = jclass.getInterfaces();
+          jclass=jclass.getSuperclass();
+          for (int i=interfaces.length; i-->0;) {
+            if (Modifier.isPublic(interfaces[i].getModifiers())) {
+              jclass=interfaces[i];
+            }
+          }
+        }
         Method methods[] = jclass.getMethods();
         for (int i=0; i<methods.length; i++) {
           if (methods[i].getName().equalsIgnoreCase(method) &&
