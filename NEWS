@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Fixed bug #26083 (Non-working write support in ext/dom). (Ilia)
 - Fixed bug #24394 (Serializing cross-referenced objects causes segfault).
   (Moriyoshi)
+- Fixed bug #26156 (REPLACE_ZVAL_VALUE works on uninit stack-based zvals).
+  (Moriyoshi)
 
 30 Oct 2003, PHP 5 Beta 2
 - Lots and lots of changes in the Zend Engine 2 since beta 1:
