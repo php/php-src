@@ -1566,7 +1566,9 @@ PHP_FUNCTION(imap_headerinfo)
 	
 	if (!msgno->value.lval || msgno->value.lval < 1 || (unsigned) msgno->value.lval > imap_le_struct->imap_stream->nmsgs) {
 		php_error(E_WARNING, "Bad message number");
+		RETURN_FALSE;
 	}
+	
 	if (mail_fetchstructure(imap_le_struct->imap_stream, msgno->value.lval, NIL)) {
 		cache = mail_elt(imap_le_struct->imap_stream, msgno->value.lval);
 	} else {
