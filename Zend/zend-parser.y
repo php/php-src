@@ -562,7 +562,7 @@ cvar_without_objects:
 
 
 reference_variable:
-		dim_list ']' { $$ = $1; }
+		dim_list { $$ = $1; }
 	|	compound_variable		{ do_fetch_globals(&$1 CLS_CC); do_begin_variable_parse(CLS_C); fetch_simple_variable(&$$, &$1, 1 CLS_CC); }
 ;
 	
@@ -574,8 +574,8 @@ compound_variable:
 
 
 dim_list:
-		dim_list ']' '[' dim_offset	{ fetch_array_dim(&$$, &$1, &$4 CLS_CC); }
-	|	compound_variable  { do_fetch_globals(&$1 CLS_CC); do_begin_variable_parse(CLS_C); } '[' dim_offset		{ fetch_array_begin(&$$, &$1, &$4 CLS_CC); }
+		dim_list '[' dim_offset ']'	{ fetch_array_dim(&$$, &$1, &$3 CLS_CC); }
+	|	compound_variable  { do_fetch_globals(&$1 CLS_CC); do_begin_variable_parse(CLS_C); } '[' dim_offset	']'	{ fetch_array_begin(&$$, &$1, &$4 CLS_CC); }
 ;
 
 
@@ -592,7 +592,7 @@ ref_list:
 
 object_property:
 		scalar_object_property		{ znode tmp_znode;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&$$, &tmp_znode, &$1 CLS_CC); }
-	|	object_dim_list ']' { $$ = $1; }
+	|	object_dim_list { $$ = $1; }
 ;
 
 scalar_object_property:
@@ -603,8 +603,8 @@ scalar_object_property:
 
 
 object_dim_list:
-		object_dim_list ']' '[' dim_offset { fetch_array_dim(&$$, &$1, &$4 CLS_CC); }
-	|	T_STRING { znode tmp_znode, res;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&res, &tmp_znode, &$1 CLS_CC);  $1 = res; } '[' dim_offset { fetch_array_dim(&$$, &$1, &$4 CLS_CC); }
+		object_dim_list '[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$3 CLS_CC); }
+	|	T_STRING { znode tmp_znode, res;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&res, &tmp_znode, &$1 CLS_CC);  $1 = res; } '[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$4 CLS_CC); }
 ;
 
 
