@@ -6,34 +6,35 @@ ARG_ENABLE('apache', 'Build Apache 1.3.x version of PHP', 'yes');
 ARG_WITH('apache-includes', 'Where to find Apache 1.3 headers', null);
 ARG_WITH('apache-libs', 'Where to find Apache 1.3 libraries', null);
 
-if (PHP_APACHE_INCLUDES == null) {
-	if (FSO.FileExists('C:\\Program Files\\Apache Group\\Apache\\include\\httpd.h')) {
-		PHP_APACHE_INCLUDES = "C:\\Program Files\\Apache Group\\Apache\\include";
-	} else if (FSO.FileExists(PHP_PHP_BUILD + "\\apache\\src\\include\\httpd.h")) {
-		PHP_APACHE_INCLUDES = PHP_PHP_BUILD + "\\apache\\src\\include";
-	}
-}
-
-if (!FSO.FileExists(PHP_APACHE_INCLUDES + "\\httpd.h")) {
-	ERROR("Could not find apache headers");
-}
-
-if (PHP_APACHE_LIBS == null) {
-	if (FSO.FileExists('C:\\Program Files\\Apache Group\\Apache\\libexec\\ApacheCore.lib')) {
-		PHP_APACHE_LIBS = "C:\\Program Files\\Apache Group\\Apache\\libexec";
-	} else if (FSO.FileExists(PHP_PHP_BUILD + "\\apache\\src\\corer\\ApacheCore.lib")) {
-		PHP_APACHE_LIBS = PHP_PHP_BUILD + "\\apache\\src\\corer";
-	}
-}
-
-if (!FSO.FileExists(PHP_APACHE_LIBS + "\\ApacheCore.lib")) {
-	ERROR("Could not find apache libraries");
-}
-
-
 if (PHP_APACHE == "yes") {
+
+	if (PHP_APACHE_INCLUDES == null) {
+		if (FSO.FileExists('C:\\Program Files\\Apache Group\\Apache\\include\\httpd.h')) {
+			PHP_APACHE_INCLUDES = "C:\\Program Files\\Apache Group\\Apache\\include";
+		} else if (FSO.FileExists(PHP_PHP_BUILD + "\\apache\\src\\include\\httpd.h")) {
+			PHP_APACHE_INCLUDES = PHP_PHP_BUILD + "\\apache\\src\\include";
+		}
+	}
+
+	if (!FSO.FileExists(PHP_APACHE_INCLUDES + "\\httpd.h")) {
+		ERROR("Could not find apache headers");
+	}
+
+	if (PHP_APACHE_LIBS == null) {
+		if (FSO.FileExists('C:\\Program Files\\Apache Group\\Apache\\libexec\\ApacheCore.lib')) {
+			PHP_APACHE_LIBS = "C:\\Program Files\\Apache Group\\Apache\\libexec";
+		} else if (FSO.FileExists(PHP_PHP_BUILD + "\\apache\\src\\corer\\ApacheCore.lib")) {
+			PHP_APACHE_LIBS = PHP_PHP_BUILD + "\\apache\\src\\corer";
+		}
+	}
+
+	if (!FSO.FileExists(PHP_APACHE_LIBS + "\\ApacheCore.lib")) {
+		ERROR("Could not find apache libraries");
+	}
+
+
 	SAPI('apache', 'mod_php5.c sapi_apache.c php_apache.c',
-	   	'php' + PHP_VERSION + 'apache.dll',
-	   	'/D APACHEPHP4_EXPORTS /D APACHE_READDIR_H /I "' + PHP_APACHE_INCLUDES + '"');
+			'php' + PHP_VERSION + 'apache.dll',
+			'/D APACHEPHP4_EXPORTS /D APACHE_READDIR_H /I "' + PHP_APACHE_INCLUDES + '"');
 	ADD_FLAG('LIBS_APACHE', '/libpath:"' + PHP_APACHE_LIBS + '" ApacheCore.lib');
 }
