@@ -1,10 +1,11 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2003, Version 4.3.3RC4
+- Fixed bug #24989 (external libexpat conflicts with bundled libexpat). (Jani)
 - Fixed bug #24977 (Revert mysql_select_db optimization). (Ilia)
+- Fixed bug #24909 (Bad random numbers with ZTS builds on Solaris). (Ilia)
 - Fixed bug #24792 (--enable-zend-multibyte causes random segfaults with ZTS).
   (fujimoto)
-- Fixed bug #24909 (Bad random numbers with ZTS builds on Solaris). (Ilia)
 - Fixed bug #24063 (serialize() missing 0 after the . on scientific notation).
   (Marcus, Ilia)
 
