@@ -632,6 +632,7 @@ PHP_FUNCTION(dns_get_record)
 /* }}} */
 #endif /* HAVE_DNS_FUNCS */
 
+#if HAVE_DN_SKIPNAME && HAVE_DN_EXPAND
 /* {{{ proto bool dns_get_mx(string hostname, array mxhosts [, array weight])
    Get MX records corresponding to a given Internet host name */
 PHP_FUNCTION(dns_get_mx)
@@ -712,6 +713,7 @@ PHP_FUNCTION(dns_get_mx)
 	RETURN_TRUE;
 }
 /* }}} */
+#endif /* HAVE_DN_SKIPNAME && HAVE_DN_EXPAND */
 
 #endif /* HAVE_RES_SEARCH && !(defined(__BEOS__)||defined(PHP_WIN32) || defined(NETWARE)) */
 
