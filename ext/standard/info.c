@@ -28,6 +28,7 @@
 #include "build-defs.h"
 #endif
 #include "zend_globals.h"		/* needs ELS */
+#include "zend_highlight.h"
 
 
 #define PHP_CONF_LONG(directive,value1,value2) \
@@ -139,6 +140,8 @@ PHPAPI void php_print_info(int flag)
 	ta = php_localtime_r(&the_time, &tmbuf);
 	
 	if (flag & PHP_INFO_GENERAL) {
+		char *zend_version = get_zend_version();
+
 #ifdef PHP_WIN32
 		// Get build numbers for Windows NT or Win95
 		if (dwVersion < 0x80000000){
@@ -208,7 +211,9 @@ PHPAPI void php_print_info(int flag)
 			}
 			PUTS("?=PHPE9568F35-D428-11d2-A769-00AA001ACF42\" border=\"0\" align=\"right\"></a>\n");
 		}
-		php_printf("This program makes use of the Zend scripting language engine:<pre>%s</pre>\n", get_zend_version());
+		php_printf("This program makes use of the Zend scripting language engine:<BR>");
+		zend_html_puts(zend_version, strlen(zend_version));
+		php_printf("</BR>\n");
 		php_info_print_box_end();
 	}
 
