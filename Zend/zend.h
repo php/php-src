@@ -453,7 +453,7 @@ void zend_activate(TSRMLS_D);
 void zend_deactivate(TSRMLS_D);
 void zend_activate_modules(TSRMLS_D);
 void zend_deactivate_modules(TSRMLS_D);
-void zend_exec_finished(TSRMLS_D);
+void zend_post_deactivate_modules(TSRMLS_D);
 
 #if ZEND_DEBUG
 #define Z_DBG(expr)		(expr)
