@@ -16,6 +16,11 @@ AC_ARG_WITH(apxs,
 		XML_INCLUDE="$APXS_INCLUDEDIR/xml"
 	fi
 	AC_ADD_INCLUDE($APXS_INCLUDEDIR)
+	if test -n "`$APXS -q CFLAGS | grep USE_HSREGEX`"; then
+		HSREGEX=yes
+	else
+		HSREGEX=no
+	fi
     PHP_EXTENSION(apache)
 	PHP_SAPI=apache
     APACHE_INSTALL="$APXS -i -a -n php4 $SAPI_SHARED"
@@ -173,6 +178,7 @@ AC_ARG_WITH(mod_charset,
 ])
 
 if test -n "$APACHE_MODULE"; then
+  HSREGEX=no
   PHP_EXTENSION(apache)
   PHP_OUTPUT(sapi/apache/libphp4.module)
   PHP_BUILD_STATIC
