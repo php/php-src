@@ -1,3 +1,30 @@
+2002-07-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/ftp/php_ftp.c: - Initialize var properly
+
+2002-07-09  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c: Hopefully fixes build with IBM's LDAP library
+
+2002-07-09  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/rpc/com/com.h: add file again that andrei deleted by
+    accident (i don't want to blame anyone here)
+
+    * win32/php4dllts.dsp
+      main/config.w32.h.in
+      main/internal_functions_win32.c: MFH
+
+2002-07-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/packages/HTTP-1.2.tar: * add HTTP package (signed)
+
+    * pear/Console/Getopt.php: * tolerate $args being empty
+
+    * pear/PEAR/Remote.php: * tiniest optimization
+
+    * pear/PEAR/Registry.php: * typo
+
 2002-07-08  Sterling Hughes  <sterling@bumblebury.com>
 
     * ext/xslt/sablot.c: eek
