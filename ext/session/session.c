@@ -1369,7 +1369,7 @@ PHP_FUNCTION(session_register)
 	if (argc <= 0)
 		RETURN_FALSE
 	else
-		args = (zval ***)emalloc(argc * sizeof(zval **));
+		args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
 	
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
