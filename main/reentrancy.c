@@ -99,20 +99,22 @@ PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry,
 		struct dirent **result)
 {
 #if defined(HAVE_OLD_READDIR_R)
-	int ret;
+	int ret = 0;
 	
-	errno = 0;
-
-	ret = readdir_r(dirp, entry);
-
-	if (!ret || errno != 0) {
+	/* We cannot rely on the return value of readdir_r
+	   as it differs between various platforms
+	   (HPUX returns 0 on success whereas Solaris returns non-zero)
+	 */
+	entry->d_name[0] = '\0';
+	readdir_r(dirp, entry);
+	
+	if (entry->d_name[0] == '\0') {
 		*result = NULL;
+		ret = errno;
 	} else {
 		*result = entry;
 	}
-
-	return errno;
-
+	return ret;
 #else
 	struct dirent *ptr;
 	int ret = 0;
