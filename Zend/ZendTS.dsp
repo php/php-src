@@ -163,6 +163,14 @@ SOURCE=.\zend_ini.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_ini_parser.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_ini_scanner.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=".\zend_language_parser.c"
 # End Source File
 # Begin Source File
@@ -291,6 +299,14 @@ SOURCE=.\zend_ini.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_ini_parser.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_ini_scanner.h
+# End Source File
+# Begin Source File
+
 SOURCE=".\zend_language_parser.h"
 # End Source File
 # Begin Source File
@@ -336,8 +352,8 @@ InputDir=.
 InputPath=.\zend_ini_parser.y
 
 BuildCmds= \
-	if not "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p zend_ini zend_ini_parser.y \
-	if "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p zend_ini zend_ini_parser.y \
+	if not "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p ini_ zend_ini_parser.y \
+	if "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p ini_ zend_ini_parser.y \
 	
 
 "$(InputDir)\zend_ini_parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -354,8 +370,8 @@ InputDir=.
 InputPath=.\zend_ini_parser.y
 
 BuildCmds= \
-	if not "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p zend_ini zend_ini_parser.y \
-	if "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p zend_ini zend_ini_parser.y \
+	if not "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p ini_ zend_ini_parser.y \
+	if "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p ini_ zend_ini_parser.y \
 	
 
 "$(InputDir)\zend_ini_parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -372,8 +388,8 @@ InputDir=.
 InputPath=.\zend_ini_parser.y
 
 BuildCmds= \
-	if not "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p zend_ini zend_ini_parser.y \
-	if "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p zend_ini zend_ini_parser.y \
+	if not "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p ini_ zend_ini_parser.y \
+	if "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p ini_ zend_ini_parser.y \
 	
 
 "$(InputDir)\zend_ini_parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -461,7 +477,7 @@ SOURCE=.\zend_ini_scanner.l
 InputPath=.\zend_ini_scanner.l
 
 "zend_ini_scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -+ -B -i -Sflex.skl -Pzend_ini -ozend_ini_scanner.cpp zend_ini_scanner.l
+	flex -+ -B -i -Sflex.skl -Pini_ -ozend_ini_scanner.cpp zend_ini_scanner.l
 
 # End Custom Build
 
@@ -471,7 +487,7 @@ InputPath=.\zend_ini_scanner.l
 InputPath=.\zend_ini_scanner.l
 
 "zend_ini_scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -+ -B -i -Sflex.skl -Pzend_ini -ozend_ini_scanner.cpp zend_ini_scanner.l
+	flex -+ -B -i -Sflex.skl -Pini_ -ozend_ini_scanner.cpp zend_ini_scanner.l
 
 # End Custom Build
 
@@ -481,7 +497,7 @@ InputPath=.\zend_ini_scanner.l
 InputPath=.\zend_ini_scanner.l
 
 "zend_ini_scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -+ -B -i -Sflex.skl -Pzend_ini -ozend_ini_scanner.cpp zend_ini_scanner.l
+	flex -+ -B -i -Sflex.skl -Pini_ -ozend_ini_scanner.cpp zend_ini_scanner.l
 
 # End Custom Build
 

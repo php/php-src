@@ -40,6 +40,7 @@
 
 #ifdef __cplusplus
 class ZendFlexLexer;
+class ZendIniFlexLexer;
 #endif
 
 BEGIN_EXTERN_C()
@@ -107,12 +108,12 @@ struct _zend_compiler_globals {
 	zend_bool unclean_shutdown;
 
 	zend_llist open_files;
-#ifdef ZTS
-#ifdef __cplusplus
+#if defined(ZTS) && defined(__cplusplus)
 	ZendFlexLexer *ZFL;
+	ZendIniFlexLexer *ini_scanner;
 #else
 	void *ZFL;
-#endif
+	void *ini_parser;
 #endif
 };
 
