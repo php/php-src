@@ -1131,12 +1131,8 @@ PHP_FUNCTION(imap_get_quotaroot)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		php_error(E_WARNING, "%s(): Unable to allocate array memory", get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
-	}
-
-	add_next_index_zval(return_value, IMAPG(quotaroot_return));
+	*return_value = *IMAPG(quotaroot_return);
+	FREE_ZVAL(IMAPG(quotaroot_return));
 }
 /* }}} */
 
