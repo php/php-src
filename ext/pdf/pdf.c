@@ -81,6 +81,8 @@ function_entry pdf_functions[] = {
 	PHP_FE(pdf_close, NULL)
 	PHP_FE(pdf_begin_page, NULL)
 	PHP_FE(pdf_end_page, NULL)
+	PHP_FE(pdf_get_majorversion, NULL)
+	PHP_FE(pdf_get_minorversion, NULL)
 	PHP_FE(pdf_get_value, NULL)
 	PHP_FE(pdf_set_value, NULL)
 	PHP_FE(pdf_get_parameter, NULL)
@@ -2245,6 +2247,29 @@ PHP_FUNCTION(pdf_new)
 
 /* }}} */
 
+/* {{{ proto int pdf_get_majorversion()
+   Returns the major version number of the PDFlib */
+PHP_FUNCTION(pdf_get_majorversion)
+{
+        if (ZEND_NUM_ARGS() != 0) {  
+                WRONG_PARAM_COUNT;
+        }
+
+        RETURN_LONG(PDF_get_majorversion());
+}
+
+/* {{{ proto int pdf_get_minorversion()
+   Returns the minor version number of the PDFlib */
+PHP_FUNCTION(pdf_get_minorversion)
+{
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	RETURN_LONG(PDF_get_minorversion());
+}
+
+/* }}} */
 /* {{{ proto void pdf_delete(int pdfdoc)
    Deletes the PDF object */
 PHP_FUNCTION(pdf_delete)
