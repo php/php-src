@@ -39,7 +39,7 @@ void php_var_dump(pval **struc, int level)
 {
 	ulong index;
 	char *key;
-	int i, c = 0;
+	int i;
 	pval **data;
 	char buf[512];
 	HashTable *myht;
@@ -91,11 +91,7 @@ void php_var_dump(pval **struc, int level)
 			for (;; zend_hash_move_forward(myht)) {
 				if ((i = zend_hash_get_current_key(myht, &key, &index)) == HASH_KEY_NON_EXISTANT)
 					break;
-				if (c > 0) {
-					strcpy(buf, "\n");
-					PHPWRITE(buf, strlen(buf));
-				}
-				c++;
+
 				if (zend_hash_get_current_data(myht, (void **) (&data)) != SUCCESS || !data || (data == struc)) {
 					if (i == HASH_KEY_IS_STRING)
 						efree(key);
@@ -110,6 +106,7 @@ void php_var_dump(pval **struc, int level)
 					case HASH_KEY_IS_STRING:
 						sprintf(buf, "%*c[\"%s\"]=>\n", level + 1, ' ', key);
 						PHPWRITE(buf, strlen(buf));
+						efree(key);
 						break;
 				}
 				php_var_dump(data, level + 2);
