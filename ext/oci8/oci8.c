@@ -3617,6 +3617,10 @@ PHP_FUNCTION(ocinewdescriptor)
 
 	descr = oci_new_desc(dtype,connection);
 
+	if (! descr) {
+		RETURN_NULL();
+	}
+
 	object_init_ex(return_value, oci_lob_class_entry_ptr);
 	add_property_resource(return_value, "descriptor", descr->id);
 }
