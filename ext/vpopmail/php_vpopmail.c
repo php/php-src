@@ -252,7 +252,6 @@ PHP_FUNCTION(vpopmail_add_alias_domain)
 	char TmpBuf1[300];
 	char TmpBuf2[300];
 	int uid, gid;
-	TSRMLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &domain, &aliasdomain) == FAILURE)
 		WRONG_PARAM_COUNT;
