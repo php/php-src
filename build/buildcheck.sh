@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.4 2001-04-03 19:07:32 wsanchez Exp $ 
+# $Id: buildcheck.sh,v 1.5 2001-04-04 04:41:01 jason Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -58,7 +58,8 @@ echo "buildconf: automake version $am_version (ok)"
 fi
 
 # libtool 1.3.3 or newer
-if ! libtool=`which glibtool`; then libtool=`which libtool`; fi
+libtool=`which libtool`
+if test ! -f "$libtool"; then libtool=`which glibtool`; fi
 lt_pversion=`$libtool --version 2>/dev/null|sed -e 's/^[^0-9]*//' -e 's/[- ].*//'`
 if test "$lt_pversion" = ""; then
 echo "buildconf: libtool not found."
@@ -79,7 +80,7 @@ exit 1
 fi
 
 am_prefix=`which automake | sed -e 's#/[^/]*/[^/]*$##'`
-lt_prefix=`which libtool | sed -e 's#/[^/]*/[^/]*$##'`
+lt_prefix=`which $libtool | sed -e 's#/[^/]*/[^/]*$##'`
 if test "$am_prefix" != "$lt_prefix"; then
     echo "WARNING: automake and libtool are installed in different"
     echo "         directories.  This may cause aclocal to fail."
