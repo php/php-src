@@ -38,6 +38,26 @@ class PEAR_Command_Package extends PEAR_Command_Common
 
     // }}}
 
+    // {{{ _displayValidationResults()
+
+    function _displayValidationResults($err, $warn, $strict = false)
+    {
+        foreach ($err as $e) {
+            $this->ui->displayLine("Error: $e");
+        }
+        foreach ($warn as $w) {
+            $this->ui->displayLine("Warning: $w");
+        }
+        $this->ui->displayLine(sprintf('Validation: %d error(s), %d warning(s)',
+                                       sizeof($err), sizeof($warn)));
+        if ($strict && sizeof($err) > 0) {
+            $this->ui->displayLine("Fix these errors and try again.");
+            return false;
+        }
+        return true;
+    }
+
+    // }}}
     // {{{ getCommands()
 
     /**
@@ -50,11 +70,19 @@ class PEAR_Command_Package extends PEAR_Command_Common
         return array('package',
                      'package-info',
                      'package-list',
-                     'package-validate');
+                     'package-validate',
+                     'cvstag');
     }
 
     // }}}
+    // {{{ getOptions()
 
+    function getOptions()
+    {
+        return array('Z', 'n' /*, 'f', 'd', 'q', 'Q'*/);
+    }
+
+    // }}}
     // {{{ getHelp()
 
     function getHelp($command)
@@ -73,11 +101,13 @@ class PEAR_Command_Package extends PEAR_Command_Common
             case 'package-validate':
                 return array('<package.(tgz|tar|xml)>',
                              'Verifies a package or description file');
+            case 'cvstag':
+                return array('<package.xml>',
+                             'Runs "cvs tag" on files contained in a release');
         }
     }
 
     // }}}
-
     // {{{ run()
 
     /**
@@ -109,19 +139,11 @@ class PEAR_Command_Package extends PEAR_Command_Common
                 $packager->debug = $this->config->get('verbose');
                 $err = $warn = array();
                 $packager->validatePackageInfo($pkginfofile, $err, $warn);
-                foreach ($err as $e) {
-                    $this->ui->displayLine("Error: $e");
-                }
-                foreach ($warn as $w) {
-                    $this->ui->displayLine("Warning: $w");
-                }
-                $this->ui->displayLine(sprintf('%d error(s), %d warning(s)',
-                                               sizeof($err), sizeof($warn)));
-                if (sizeof($err) > 0) {
-                    $this->ui->displayLine("Fix these errors and try again.");
+                if (!$this->_displayValidationResults($err, $warn, true)) {
                     break;
                 }
-                $result = $packager->Package($pkginfofile);
+                $compress = empty($options['Z']) ? true : false;
+                $result = $packager->Package($pkginfofile, $compress);
                 $output = ob_get_contents();
                 ob_end_clean();
                 $lines = explode("\n", $output);
@@ -129,9 +151,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
                     $this->ui->displayLine($line);
                 }
                 if (PEAR::isError($result)) {
-                    $this->ui->displayLine("Package failed!");
-                } else {
-                    $this->ui->displayLine("Package ok.");
+                    $this->ui->displayLine("Package failed: ".$result->getMessage());
                 }
                 break;
             }
@@ -271,7 +291,6 @@ class PEAR_Command_Package extends PEAR_Command_Common
                 }
                 $obj = new PEAR_Common;
                 $info = null;
-                $validate_result = $obj->validatePackageInfo($info, $err, $warn);
                 if (file_exists($params[0])) {
                     $fp = fopen($params[0], "r");
                     $test = fread($fp, 5);
@@ -286,14 +305,63 @@ class PEAR_Command_Package extends PEAR_Command_Common
                 if (PEAR::isError($info)) {
                     return $this->raiseError($info);
                 }
-                foreach ($err as $e) {
-                    $this->ui->displayLine("Error: $e");
+                $obj->validatePackageInfo($info, $err, $warn);
+                $this->_displayValidationResults($err, $warn);
+                break;
+            }
+
+            // }}}
+            // {{{ cvstag
+
+            case 'cvstag': {
+                if (sizeof($params) < 1) {
+                    $help = $this->getHelp($command);
+                    return $this->raiseError("$command: missing parameter: $help[0]");
                 }
-                foreach ($warn as $w) {
-                    $this->ui->displayLine("Warning: $w");
+                $obj = new PEAR_Common;
+                $info = $obj->infoFromDescriptionFile($params[0]);
+                if (PEAR::isError($info)) {
+                    return $this->raiseError($info);
                 }
-                $this->ui->displayLine(sprintf('%d error(s), %d warning(s)',
-                                               sizeof($err), sizeof($warn)));
+                $err = $warn = array();
+                $obj->validatePackageInfo($info, $err, $warn);
+                if (!$this->_displayValidationResults($err, $warn, true)) {
+                    break;
+                }
+                $version = $info['version'];
+                $cvsversion = preg_replace('/[^a-z0-9]/i', '_', $version);
+                $cvstag = "RELEASE_$cvsversion";
+                $files = array_keys($info['filelist']);
+                $command = "cvs";
+                /* until the getopt bug is fixed, these won't work:
+                if (isset($options['q'])) {
+                    $command .= ' -q';
+                }
+                if (isset($options['Q'])) {
+                    $command .= ' -Q';
+                }
+                */
+                $command .= ' tag';
+                if (isset($options['f'])) {
+                    $command .= ' -f';
+                }
+                /* neither will this one:
+                if (isset($options['d'])) {
+                    $command .= ' -d';
+                }
+                */
+                $command .= ' ' . $cvstag . ' ' . escapeshellarg($params[0]);
+                foreach ($files as $file) {
+                    $command .= ' ' . escapeshellarg($file);
+                }
+                $this->ui->displayLine("+ $command");
+                if (empty($options['n'])) {
+                    $fp = popen($command, "r");
+                    while ($line = fgets($fp, 1024)) {
+                        $this->ui->displayLine(rtrim($line));
+                    }
+                    pclose($fp);
+                }
                 break;
             }
 

@@ -31,6 +31,7 @@ class PEAR_Frontend_CLI extends PEAR
      * @access public
      */
     var $type = 'CLI';
+    var $lp = ''; // line prefix
 
     var $omode = 'plain';
     var $params = array();
@@ -63,16 +64,11 @@ class PEAR_Frontend_CLI extends PEAR
 
     // }}}
 
-    // For now, all the display functions print a "| " at the
-    // beginning of the line.  This is just a temporary thing, it
-    // is for discovering commands that use print instead of
-    // the UI layer.
-
     // {{{ displayLine(text)
 
     function displayLine($text)
     {
-        print "| $text\n";
+        print "$this->lp$text\n";
     }
 
     // }}}
@@ -97,8 +93,8 @@ class PEAR_Frontend_CLI extends PEAR
 
     function displayHeading($title)
     {
-        print "| ".$this->bold($title)."\n";
-        print "| ".str_repeat("=", strlen($title))."\n";
+        print $this->lp.$this->bold($title)."\n";
+        print $this->lp.str_repeat("=", strlen($title))."\n";
     }
 
     // }}}
@@ -109,7 +105,7 @@ class PEAR_Frontend_CLI extends PEAR
         if ($type == 'password') {
             system('stty -echo');
         }
-        print "| $prompt ";
+        print "$this->lp$prompt ";
         if ($default) {
             print "[$default] ";
         }
@@ -134,7 +130,7 @@ class PEAR_Frontend_CLI extends PEAR
     {
         static $positives = array('y', 'yes', 'on', '1');
         static $negatives = array('n', 'no', 'off', '0');
-        print "| $prompt [$default] : ";
+        print "$this->lp$prompt [$default] : ";
         $fp = fopen("php://stdin", "r");
         $line = fgets($fp, 2048);
         fclose($fp);
