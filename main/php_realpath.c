@@ -257,9 +257,10 @@ char *php_realpath(char *path, char resolved_path []) {
 		if (S_ISDIR(filestat.st_mode)) {
 			/* It's a directory, append a / if needed */
 			if (*(writepos-1) != '/') {
-				/* C	heck for overflow */
-				if ((strlen(workpos) + 2) >= MAXPATHLEN) return NULL;
-				
+				/* Check for overflow */
+				if ((strlen(workpos) + 2) >= MAXPATHLEN) {
+					 return NULL;
+				}
 				*writepos++ = '/';
 				*writepos = 0;
 			}
