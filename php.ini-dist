@@ -808,8 +808,14 @@ session.cache_limiter = nocache
 session.cache_expire = 180
 
 ; trans sid support is disabled by default.
-; Use of trans sid may risk your users security. It may not be
-; feasible to use this option for some sites. Use this option with caution.
+; Use of trans sid may risk your users security. 
+; Use this option with caution.
+; - User may send URL contains active session ID
+;   to other person via. email/irc/etc.
+; - URL that contains active session ID may be stored
+;   in publically accessible computer.
+; - User may access your site with the same session ID
+;   always using URL stored in browser's history or bookmarks.
 session.use_trans_sid = 0
 
 url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
