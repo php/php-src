@@ -382,7 +382,8 @@ static void php_wddx_serialize_unset(wddx_packet *packet)
 
 static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 {
-	zval **ent, *retval, *fname, **varname;
+	zval **ent, *fname, **varname;
+	zval *retval = NULL;
 	char *key;
 	ulong idx;
 	char tmp_buf[WDDX_BUF_LEN];
@@ -715,7 +716,7 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 				if (ent1->varname) {
 					if (!strcmp(ent1->varname, PHP_CLASS_NAME_VAR) &&
 						ent1->data->type == IS_STRING && ent1->data->value.str.len) {
-						zval *fname, *retval;
+						zval *fname, *retval = NULL;
 
 						if (zend_hash_find(EG(class_table), ent1->data->value.str.val,
 										   ent1->data->value.str.len+1, (void **) &ce)==FAILURE) {
