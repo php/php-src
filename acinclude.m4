@@ -1110,9 +1110,7 @@ AC_DEFUN(PHP_SELECT_SAPI,[
   program) PHP_BUILD_PROGRAM;;
   esac
     
-  ifelse($,,ac_extra=,[ac_extra=$4])
-  
-  ifelse($3,,,[PHP_ADD_SOURCES(sapi/$1, $3, $ac_extra, sapi)])
+  ifelse($3,,,[PHP_ADD_SOURCES([sapi/$1],[$3],[$4],[sapi])])
 ])
 
 dnl deprecated
