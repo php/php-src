@@ -1435,7 +1435,7 @@ error options:
 	3 = save to file in 3rd parameter
 */
 
-/* {{{ proto bool error_log(string message, int message_type [, string destination] [, string extra_headers])
+/* {{{ proto bool error_log(string message [, int message_type [, string destination [, string extra_headers]]])
    Send an error message somewhere */
 PHP_FUNCTION(error_log)
 {
@@ -1473,7 +1473,7 @@ PHP_FUNCTION(error_log)
 		
 		case 4:
 			if (zend_get_parameters_ex (4, &string, &erropt, &option, &emailhead) == FAILURE) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid arguments in");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid arguments");
 				RETURN_FALSE;
 			}
 			break;
