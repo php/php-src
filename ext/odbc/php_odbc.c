@@ -1725,7 +1725,7 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		RETURN_FALSE;
 	}
 
-	hashed_len = php_sprintf(hashed_details, "%s_%s_%s_%s_%d", ODBC_TYPE, db, uid, pwd, cur_opt);
+	hashed_len = sprintf(hashed_details, "%s_%s_%s_%s_%d", ODBC_TYPE, db, uid, pwd, cur_opt);
 
 	/* FIXME the idea of checking to see if our connection is already persistent
 		is good, but it adds a lot of overhead to non-persistent connections.  We

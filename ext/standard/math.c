@@ -613,7 +613,7 @@ char *_php_math_number_format(double d,int dec,char dec_point,char thousand_sep)
 	dec = MAX(0,dec);
 	tmpbuf = (char *) emalloc(32+dec);
 	
-	tmplen=php_sprintf(tmpbuf,"%.*f",dec,d);
+	tmplen=sprintf(tmpbuf,"%.*f",dec,d);
 
 	if (!isdigit((int)tmpbuf[0])) {
 		return tmpbuf;
