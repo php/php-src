@@ -1304,10 +1304,12 @@ binary_assign_op_addr: {
 					HashTable *active_function_table;
 					zval tmp;
 
+					zend_ptr_stack_n_push(&EG(arg_types_stack), 3, function_being_called, object.ptr, object.ptr_ptr);
+					/*
 					zend_ptr_stack_push(&EG(arg_types_stack), function_being_called); 
 					zend_ptr_stack_push(&EG(arg_types_stack), object.ptr); 
 					zend_ptr_stack_push(&EG(arg_types_stack), object.ptr_ptr); 
-
+					*/
 					if (opline->extended_value & ZEND_CTOR_CALL) {
 						/* constructor call */
 
@@ -1465,9 +1467,12 @@ do_fcall_common:
 						efree(function_being_called);
 					}
 					if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+						zend_ptr_stack_n_pop(&EG(arg_types_stack), 3, &object.ptr_ptr, &object.ptr, &function_being_called);
+					/*
 						object.ptr_ptr = zend_ptr_stack_pop(&EG(arg_types_stack));
 						object.ptr = zend_ptr_stack_pop(&EG(arg_types_stack));
 						function_being_called = zend_ptr_stack_pop(&EG(arg_types_stack));
+					*/
 					}
 					function_state.function = (zend_function *) op_array;
 					EG(function_state_ptr) = &function_state;
