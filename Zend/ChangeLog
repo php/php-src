@@ -1,3 +1,11 @@
+2004-08-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      zend_compile.c
+      zend_compile.h
+      zend_execute_API.c:
+      - Enforce protocol on magic methods/functions
+
 2004-07-30  Andi Gutmans  <andi@zend.com>
 
     * zend_execute.c
