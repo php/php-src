@@ -1326,8 +1326,7 @@ binary_assign_op_addr: {
 						EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr = &EG(uninitialized_zval_ptr);
 						SELECTIVE_PZVAL_LOCK(*EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr, &EX(opline)->result);
 						AI_USE_PTR(EX(Ts)[EX(opline)->result.u.var].var);
-						EX(opline)++;
-						continue;
+						NEXT_OPCODE();
 					}
 					
 					SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
@@ -1406,8 +1405,7 @@ binary_assign_op_addr_obj:
 						EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr = &EG(uninitialized_zval_ptr);
 						SELECTIVE_PZVAL_LOCK(*EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr, &EX(opline)->result);
 						AI_USE_PTR(EX(Ts)[EX(opline)->result.u.var].var);
-						EX(opline)++;
-						continue;
+						NEXT_OPCODE();
 					}
 
 					get_incdec_op(incdec_op, EX(opline)->opcode);
