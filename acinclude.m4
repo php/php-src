@@ -59,7 +59,7 @@ main() {
 	dir = opendir("/");
 	if (!dir) 
 		exit(1);
-	if (readdir_r(dir, &entry, &pentry) == 0)
+	if (readdir_r(dir, (struct dirent *) entry, &pentry) == 0)
 		exit(0);
 	exit(1);
 }
