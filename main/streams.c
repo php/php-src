@@ -1460,8 +1460,7 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	if (data->fd >= 0) {
 		ret = read(data->fd, buf, count);
 		
-		if (ret == 0 || (ret == -1 && errno != EWOULDBLOCK))
-			stream->eof = 1;
+		stream->eof = (ret == 0 || (ret == -1 && errno != EWOULDBLOCK));
 				
 	} else {
 #if HAVE_FLUSHIO
@@ -1472,8 +1471,7 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 
 		ret = fread(buf, 1, count, data->file);
 
-		if (feof(data->file))
-			stream->eof = 1;
+		stream->eof = feof(data->file);
 	}
 	return ret < 0 ? 0 : ret;
 }
