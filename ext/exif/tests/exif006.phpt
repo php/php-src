@@ -1,11 +1,14 @@
 --TEST--
 Check for exif_read_data, magic_quotes_runtime
 --SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+<?php 
+	if (!extension_loaded('exif')) die('skip exif extension not available');
+	if (version_compare(PHP_VERSION, "4.4.0-dev", "<")) die('skip PHP 4.4 required');
+?>
 --INI--
 output_handler=
 zlib.output_compression=0
-magic_quotes_runtime=1
+magic_quotes_runtime=On
 --FILE--
 <?php
 /*
@@ -14,6 +17,7 @@ magic_quotes_runtime=1
             copy of test1.jpg as a thumbnail.
   test6.jpg is the same as test2.jpg but with a UNICODE UserComment: &Auml;&Ouml;&&Uuml;&szlig;&auml;&ouml;&uuml;
 */
+print_r(ini_get("magic_quotes_runtime"));
 var_dump(exif_read_data(dirname(__FILE__).'/test6.jpg','',true,false));
 ?>
 --EXPECTF--
