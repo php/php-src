@@ -1,3 +1,76 @@
+2001-05-08  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Use RETURN_ macros to define function returns.
+    Fix fetch functions to return values from array data structure
+
+2001-05-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/sablot/config.m4
+      ext/xslt/config.m4: No need to show these if they are not used.
+
+    * configure.in
+      main/main.c: Fixed: http://www.php.net/bugs.php?id=10733&edit=1
+
+2001-05-08  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+    this is a fix for bug 10250.  it basically provides the unixODBC driver with
+    access to the SQLDriver functions.  patch originally submitted by
+    dzoll@nyscul.org, and is going to be tested by some of the unixODBC people.
+
+2001-05-08  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mssql/php_mssql.c:
+    Fixing the use of compatibility mode. When the flag is off the system should return correct PHP types (default) when the flag is on strings will be returned for all data types.
+
+    * ext/mssql/php_mssql.c:
+    Fixing the use of compatibility_mode setting in php.ini.
+    Nuking trailing spaces when returning a string.
+
+2001-05-08  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/Experimental/XML/Xml2obj.php:
+    This is a complete rewrite of the class. Now the object tree returned
+    by the class is very similiar to a DOM Doc. Also implemented some
+    node methods.
+
+2001-05-08  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Remove wrong line.
+
+    * NEWS: Reformatting.
+
+2001-05-08  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: Update NEWS
+
+2001-05-08  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h
+      ext/mbstring/mbstring.c: added mb_language to ext/mbstring.
+
+2001-05-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mysql/config.m4: Fix the build.
+
+2001-05-08  Dan Kalowsky  <dank@deadmime.org>
+
+    * TODO-4.1.txt: reminder to remove the --with-openlink configure option
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+2001-05-08  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/cgi/cgi_main.c: $argc was off by one in -f (fix bug #9289)
+
+2001-05-08  James Moore  <James@phpuk.org>
+
+    * ext/pdf/pdf.c:
+    Give correct warnings if certain libaries/verisons are not avalible
+
 2001-05-07  Zeev Suraski  <zeev@zend.com>
 
     * sapi/apache/mod_php4.c: whitespace
