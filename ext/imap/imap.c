@@ -89,6 +89,11 @@ typedef struct php_imap_le_struct {
 	long flags;
 } pils;
 
+typedef struct php3_imap_message_struct {
+	unsigned long msgid;
+	struct php3_imap_message_struct *next;
+} MESSAGELIST;
+ 
 MAILSTREAM *mail_close_it (pils *imap_le_struct);
 
 function_entry imap_functions[] = {
@@ -142,8 +147,15 @@ function_entry imap_functions[] = {
 	{"imap_bodystruct", php3_imap_bodystruct, NULL},
 	{"imap_fetch_overview", php3_imap_fetch_overview, NULL},
 	{"imap_mail_compose", php3_imap_mail_compose, NULL},
+	{"imap_search", php3_imap_search, NULL},
 	{NULL, NULL, NULL}
 };
+
+#ifdef OP_RELOGIN
+#define IS_STREAM(ind_type)     ((ind_type)==le_imap || (ind_type)==le_pimap)
+#else
+#define IS_STREAM(ind_type)     ((ind_type)==le_imap)
+#endif
 
 
 zend_module_entry imap_module_entry = {
@@ -156,7 +168,7 @@ DLEXPORT zend_module_entry *get_module(void) { return &imap_module_entry; }
 #endif
 
 /* 
-   I beleive since this global is used ONLY within this module,
+   I believe since this global is used ONLY within this module,
    and nothing will link to this module, we can use the simple 
    thread local storage
 */
@@ -165,6 +177,7 @@ char imap_user[80]="";
 char imap_password[80]="";
 STRINGLIST *imap_folders=NIL;
 STRINGLIST *imap_sfolders=NIL;
+MESSAGELIST *imap_messages=NIL;
 long status_flags;
 unsigned long status_messages;
 unsigned long status_recent;
@@ -203,6 +216,29 @@ inline int add_next_index_object(pval *arg, pval *tmp)
 	}
 
 	return zend_hash_next_index_insert(symtable, (void *) &tmp, sizeof(pval *), NULL); 
+}
+
+
+/* Mail instantiate MESSAGELIST
+ * Returns: new MESSAGELIST list
+ * Author: CJH
+ */
+MESSAGELIST *mail_newmessagelist (void)
+{
+	return (MESSAGELIST *) memset(fs_get(sizeof(MESSAGELIST)),0,
+								  sizeof(MESSAGELIST));
+}
+
+/* Mail garbage collect MESSAGELIST
+ * Accepts: pointer to MESSAGELIST pointer
+ * Author: CJH
+ */
+void mail_free_messagelist (MESSAGELIST **msglist)
+{
+	if (*msglist) {		/* only free if exists */
+		mail_free_messagelist (&(*msglist)->next);
+		fs_give ((void **) msglist);	/* return string to free storage */
+	}
 }
 
 
@@ -503,6 +539,7 @@ PHP_FUNCTION(imap_reopen)
 /* }}} */
 
 /* {{{ proto int imap_append(int stream_id, string folder, string message [, string flags])
+
    Append a string message to a specified mailbox */
 PHP_FUNCTION(imap_append)
 {
@@ -535,6 +572,7 @@ PHP_FUNCTION(imap_append)
 		RETURN_FALSE;
 	}
 }
+
 /* }}} */
 
 /* {{{ proto imap_num_msg(int stream_id)
@@ -674,6 +712,7 @@ PHP_FUNCTION(imap_close)
 /* }}} */
 
 /* {{{ proto array imap_headers(int stream_id)
+
    Returns headers for all messages in a mailbox */
 PHP_FUNCTION(imap_headers)
 {
@@ -732,6 +771,7 @@ PHP_FUNCTION(imap_headers)
 		add_next_index_string(return_value,tmp,1);
 	}
 }
+
 /* }}} */
 
 /* {{{ proto imap_body(int stream_id, int msg_no [, int options])
@@ -943,6 +983,7 @@ PHP_FUNCTION(imap_deletemailbox)
 /* }}} */
 
 /* {{{ proto array imap_list(int stream_id, string ref, string pattern)
+
    Read the list of mailboxes */
 PHP_FUNCTION(imap_list)
 {
@@ -980,9 +1021,11 @@ PHP_FUNCTION(imap_list)
     }
 	mail_free_stringlist (&imap_folders);
 }
+
 /* }}} */
 
 /* {{{ proto imap_scan(int stream_id, string ref, string pattern, string content)
+
    Read list of mailboxes containing a certain string */
 PHP_FUNCTION(imap_listscan)
 {
@@ -1020,9 +1063,11 @@ PHP_FUNCTION(imap_listscan)
 	}
 	mail_free_stringlist (&imap_folders);
 }
+
 /* }}} */
 
 /* {{{ proto object imap_check(int stream_id)
+
    Get mailbox properties */
 PHP_FUNCTION(imap_check)
 {
@@ -1060,6 +1105,7 @@ PHP_FUNCTION(imap_check)
 		RETURN_FALSE;
 	}
 }
+
 /* }}} */
 
 /* {{{ proto int imap_delete(int stream_id, int msg_no)
@@ -1119,6 +1165,7 @@ PHP_FUNCTION(imap_undelete)
 /* }}} */
 
 /* {{{ proto object imap_header(int stream_id, int msg_no [, int from_length [, int subject_length [, string default_host]]])
+
    Read the header of the message */
 PHP_FUNCTION(imap_headerinfo)
 {
@@ -1451,6 +1498,7 @@ PHP_FUNCTION(imap_headerinfo)
 		add_property_string(return_value,"fetchsubject",fulladdress,1);
 	}
 }
+
 /* }}} */
 
 
@@ -1581,7 +1629,7 @@ void imap_add_body( pval *arg, BODY *body )
 	} else {
 		add_property_long( arg, "ifid", 0 );
 	}
-
+	
 	if(body->size.lines) add_property_long( arg, "lines", body->size.lines );
 	if(body->size.bytes) add_property_long( arg, "bytes", body->size.bytes );
 #ifdef IMAP41
@@ -1697,6 +1745,7 @@ PHP_FUNCTION(imap_fetchstructure)
 /* }}} */
 
 /* {{{ proto string imap_fetchbody(int stream_id, int msg_no, int section [, int options])
+
    Get a specific body section */
 PHP_FUNCTION(imap_fetchbody)
 {
@@ -1731,6 +1780,7 @@ PHP_FUNCTION(imap_fetchbody)
 	}
 	RETVAL_STRINGL( body ,len,1);
 }
+
 /* }}} */
 
 /* {{{ proto string imap_base64(string text)
@@ -2153,6 +2203,7 @@ PHP_FUNCTION(imap_status)
 /* }}} */
  
 /* {{{ proto object imap_bodystruct(int stream_id, int msg_no, int section)
+
    Read the structure of a specified body section of a specific message */
 PHP_FUNCTION(imap_bodystruct)
 {
@@ -2207,6 +2258,7 @@ PHP_FUNCTION(imap_bodystruct)
 	} else {
 		add_property_long( return_value, "ifid", 0 );
 	}
+
 	
 	if(body->size.lines) add_property_long( return_value, "lines", body->size.lines );
 	if(body->size.bytes) add_property_long( return_value, "bytes", body->size.bytes );
@@ -2256,6 +2308,7 @@ PHP_FUNCTION(imap_bodystruct)
 	}
 	add_assoc_object( return_value, "parameters", parametres );
 }
+
 /* }}} */
 
 /* {{{ proto array imap_fetch_overview(int stream_id, int msg_no)
@@ -2557,6 +2610,53 @@ PHP_FUNCTION(imap_mail_compose)
 }
 /* }}} */
 
+/* {{{ proto array imap_search(int stream_id, string criteria [, long flags])
+   Return a list of messages matching the criteria. */
+PHP_FUNCTION(imap_search)
+{
+	pval *streamind, *criteria, *search_flags;
+	int ind, ind_type, args;
+	pils *imap_le_struct;
+	long flags;
+	MESSAGELIST *cur;
+    
+	args = ARG_COUNT(ht);
+	if (args < 2 || args > 3 || getParameters(ht, args, &streamind, &criteria, &search_flags) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	convert_to_long(streamind);
+	convert_to_string(criteria);
+	
+	if (args == 2) {
+		flags = SE_FREE;
+	} else {
+		convert_to_long(search_flags);
+		flags = search_flags->value.lval;
+	}
+	
+	ind = streamind->value.lval;
+	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
+		php3_error(E_WARNING, "Unable to find stream pointer");
+		RETURN_FALSE;
+	}
+	
+	imap_messages = NIL;
+	mail_search_full(imap_le_struct->imap_stream, NIL, mail_criteria(criteria->value.str.val), flags);
+	if (imap_messages == NIL) {
+		RETURN_FALSE;
+	}
+	
+	array_init(return_value);
+	cur = imap_messages;
+	while (cur != NIL) {
+		add_next_index_long(return_value, cur->msgid);
+		cur = cur->next;
+	}
+	mail_free_messagelist(&imap_messages);
+}
+/* }}} */
 
 
 /* Interfaces to C-client */
@@ -2564,6 +2664,22 @@ PHP_FUNCTION(imap_mail_compose)
 
 void mm_searched (MAILSTREAM *stream,unsigned long number)
 {
+  MESSAGELIST *cur = NIL;
+  
+  if (imap_messages == NIL) {
+    imap_messages = mail_newmessagelist();
+    imap_messages->msgid = number;
+    imap_messages->next = NIL;
+  } else {
+    cur = imap_messages;
+    while (cur->next != NIL) {
+      cur = cur->next;
+    }
+    cur->next = mail_newmessagelist();
+    cur = cur->next;
+    cur->msgid = number;
+    cur->next = NIL;
+  }
 }
 
 
