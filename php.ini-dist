@@ -561,7 +561,6 @@ default_socket_timeout = 60
 ;extension=php_filepro.dll
 ;extension=php_gd2.dll
 ;extension=php_gettext.dll
-;extension=php_iconv.dll
 ;extension=php_ifx.dll
 ;extension=php_iisfunc.dll
 ;extension=php_imap.dll
