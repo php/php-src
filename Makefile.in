@@ -91,7 +91,7 @@ maintainer-clean-depend-recursive:
 
 # CGI binary or fhttpd module
 php: all-recursive $(OBJS) @REGEX_LIB@ @FHTTPD_LIB@ @TSRM_LIB@
-	$(CC) $(CFLAGS) -o $(BINNAME) $(LDFLAGS) $(OBJS) $(LIBS)
+	$(CC) $(CFLAGS) -o $(BINNAME) $(LDFLAGS) $(OBJS) $(LIBS) @TSRM_LIB@
 
 # Apache modules
 libphp4.a libmodphp4.a: all-recursive $(OBJS) @REGEX_LIB@
