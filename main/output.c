@@ -238,6 +238,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 		params[0] = &orig_buffer;
 		params[1] = &z_status;
 		OG(ob_lock) = 1;
+
 		if (call_user_function_ex(CG(function_table), NULL, OG(active_ob_buffer).output_handler, &alternate_buffer, 2, params, 1, NULL TSRMLS_CC)==SUCCESS) {
 			if (!(Z_TYPE_P(alternate_buffer)==IS_BOOL && Z_BVAL_P(alternate_buffer)==0)) {
 				convert_to_string_ex(&alternate_buffer);
@@ -407,6 +408,9 @@ PHPAPI int php_ob_init_conflict(char *handler_new, char *handler_set TSRMLS_DC)
  */
 static int php_ob_init_named(uint initial_size, uint block_size, char *handler_name, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
 {
+	if (!zend_is_callable(output_handler, 0, NULL)) {
+		return FAILURE;
+	}
 	if (OG(ob_nesting_level)>0) {
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 		if (!strncmp(handler_name, "ob_gzhandler", sizeof("ob_gzhandler")) && php_ob_gzhandler_check(TSRMLS_C)) {
@@ -461,6 +465,8 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 
 	if (output_handler && output_handler->type == IS_STRING) {
 		handler_name = Z_STRVAL_P(output_handler);
+
+		result = SUCCESS;
 		while ((next_handler_name=strchr(handler_name, ',')) != NULL) {
 			len = next_handler_name-handler_name;
 			next_handler_name = estrndup(handler_name, len);
@@ -473,15 +479,17 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 			handler_name += len+1;
 			efree(next_handler_name);
 		}
-		handler_zval = php_ob_handler_from_string(handler_name TSRMLS_CC);
-		result = php_ob_init_named(initial_size, block_size, handler_name, handler_zval, chunk_size, erase TSRMLS_CC);
-		if (result != SUCCESS) {
-			zval_dtor(handler_zval);
-			FREE_ZVAL(handler_zval);
+		if (result == SUCCESS) {
+			handler_zval = php_ob_handler_from_string(handler_name TSRMLS_CC);
+			result = php_ob_init_named(initial_size, block_size, handler_name, handler_zval, chunk_size, erase TSRMLS_CC);
+			if (result != SUCCESS) {
+				zval_dtor(handler_zval);
+				FREE_ZVAL(handler_zval);
+			}
 		}
 	} else if (output_handler && output_handler->type == IS_ARRAY) {
 		/* do we have array(object,method) */
-		if (zend_is_callable(output_handler, 1, &handler_name)) {
+		if (zend_is_callable(output_handler, 0, &handler_name)) {
 			SEPARATE_ZVAL(&output_handler);
 			output_handler->refcount++;
 			result = php_ob_init_named(initial_size, block_size, handler_name, output_handler, chunk_size, erase TSRMLS_CC);
@@ -492,6 +500,9 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(output_handler), &pos);
 			while (zend_hash_get_current_data_ex(Z_ARRVAL_P(output_handler), (void **)&tmp, &pos) == SUCCESS) {
 				result = php_ob_init(initial_size, block_size, *tmp, chunk_size, erase TSRMLS_CC);
+				if (result == FAILURE) {
+					break;
+				}
 				zend_hash_move_forward_ex(Z_ARRVAL_P(output_handler), &pos);
 			}
 		}
