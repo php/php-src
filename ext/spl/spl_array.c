@@ -196,6 +196,11 @@ static void spl_array_write_dimension(zval *object, zval *offset, zval *value TS
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	long index;
 
+	if (!offset) {
+		value->refcount++;
+		add_next_index_zval(intern->array, value);
+		return;
+	}
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
 		value->refcount++;
