@@ -1,7 +1,7 @@
 <?php
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 4                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2004 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -47,7 +47,9 @@ class PEAR_Frontend_CLI extends PEAR
     {
         parent::PEAR();
         $term = getenv('TERM'); //(cox) $_ENV is empty for me in 4.1.1
-        if ($term) {
+        if (function_exists('posix_isatty') && !posix_isatty(1)) {
+            // output is being redirected to a file or through a pipe
+        } elseif ($term) {
             // XXX can use ncurses extension here, if available
             if (preg_match('/^(xterm|vt220|linux)/', $term)) {
                 $this->term['bold'] = sprintf("%c%c%c%c", 27, 91, 49, 109);
@@ -219,7 +221,7 @@ class PEAR_Frontend_CLI extends PEAR
         for ($i = 0; $i < sizeof($columns); $i++) {
             $col = &$columns[$i];
             if (isset($colparams[$i]) && !empty($colparams[$i]['wrap'])) {
-                $col = wordwrap($col, $colparams[$i]['wrap'], "\n", 1);
+                $col = wordwrap($col, $colparams[$i]['wrap'], "\n", 0);
             }
             if (strpos($col, "\n") !== false) {
                 $multiline = explode("\n", $col);
@@ -348,6 +350,9 @@ class PEAR_Frontend_CLI extends PEAR
                     }
 
                     $rowtext .= $cellstart . $cell . $cellend;
+                }
+                if (!$border) {
+                    $rowtext = rtrim($rowtext);
                 }
                 $rowtext .= $rowend;
                 $this->_displayLine($rowtext);

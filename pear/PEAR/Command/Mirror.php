@@ -1,7 +1,7 @@
 <?php
 //
 // +----------------------------------------------------------------------+
-// | PHP Version 4                                                        |
+// | PHP Version 5                                                        |
 // +----------------------------------------------------------------------+
 // | Copyright (c) 1997-2004 The PHP Group                                |
 // +----------------------------------------------------------------------+
@@ -34,13 +34,13 @@ class PEAR_Command_Mirror extends PEAR_Command_Common
 
     var $commands = array(
         'download-all' => array(
-            'summary' => 'Downloads each avaible Package from master_server',
+            'summary' => 'Downloads each available package from master_server',
             'function' => 'doDownloadAll',
             'shortcut' => 'da',
             'options' => array(),
             'doc' => '
-	    Request a list of avaible Packages from the Package-Server
-	    (master_server) and downloads them to current working dir'
+	    Requests a list of available packages from the package server
+	    (master_server) and downloads them to current working directory'
             ),
         );
 
@@ -76,21 +76,23 @@ class PEAR_Command_Mirror extends PEAR_Command_Common
     */
     function doDownloadAll($command, $options, $params)
     {
-	$this->config->set("php_dir", "."); 
-	$remote = &new PEAR_Remote($this->config);
-	$remoteInfo = $remote->call("package.listAll");
-	if(PEAR::isError($remoteInfo)) {
-		return $remoteInfo;
-	}
-	$cmd = &PEAR_Command::factory("download", $this->config);
-	if(PEAR::isError($cmd)) {
-		return $cmd;
-	}	
-	foreach($remoteInfo as $pkgn=>$pkg) {   
-		// error handling not neccesary, because
-		// already done by the download command
-		$cmd->run("download", array(), array($pkgn));       
-  	} 
+        $this->config->set("php_dir", "."); 
+        $remote = &new PEAR_Remote($this->config);
+        $remoteInfo = $remote->call("package.listAll");
+        if (PEAR::isError($remoteInfo)) {
+            return $remoteInfo;
+        }
+        $cmd = &PEAR_Command::factory("download", $this->config);
+        if (PEAR::isError($cmd)) {
+            return $cmd;
+        }
+        foreach ($remoteInfo as $pkgn => $pkg) {
+            /**
+             * Error handling not neccesary, because already done by 
+             * the download command
+             */
+            $cmd->run("download", array(), array($pkgn));
+        }
 
         return true;
     }
