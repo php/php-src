@@ -14,4 +14,4 @@ class derived_a implements if_a {
 
 ?>
 --EXPECTF--
-Fatal error: Class derived_a contains abstract methods and must be declared abstract in %s on line %d
+Fatal error: Class derived_a contains 1 abstract methods and must therefore be declared abstract (if_a::f_a) in %s on line %d
