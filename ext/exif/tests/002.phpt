@@ -4,7 +4,7 @@ Check for exif_thumbnail
 <?php if (!extension_loaded("exif")) print "skip";?>
 --INI--
 magic_quotes_runtime=0
-output_handler= 
+output_handler=
 zlib.output_compression=0 
 --FILE--
 <?php
@@ -13,16 +13,12 @@ zlib.output_compression=0
   test2.jpg is the same image but contains Exif/Comment information and a
             copy of test1.jpg as a thumbnail.
 */
-$infile= './ext/exif/tests/test1.jpg';
-$fp    = fopen($infile,'rb');
-$image = fread($fp,filesize($infile));
-//$image = stripslashes($image);
-echo md5($image).'_'.filesize($infile);
-fclose($fp);
+$infile = './ext/exif/tests/test1.jpg';
+echo md5_file($infile).'_'.filesize($infile);
 $thumb = exif_thumbnail('./ext/exif/tests/test2.jpg');
-echo strcmp($image,$thumb) ? '_different_' : '_identical_';
-echo strlen($thumb).'_'.md5($thumb);
+echo " == ";
+echo md5($thumb).'_'.strlen($thumb);
 echo "\n";
 ?>
 --EXPECT--
-27bbfd9fc10e1e663d749f5225447905_523_identical_523_27bbfd9fc10e1e663d749f5225447905
+27bbfd9fc10e1e663d749f5225447905_523 == 27bbfd9fc10e1e663d749f5225447905_523
