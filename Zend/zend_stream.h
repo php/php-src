@@ -49,10 +49,10 @@ typedef struct _zend_file_handle {
 
 BEGIN_EXTERN_C()
 ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle TSRMLS_DC);
-int zend_stream_ferror(zend_file_handle *file_handle TSRMLS_DC);
-int zend_stream_getc(zend_file_handle *file_handle TSRMLS_DC);
-size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC);
-int zend_stream_fixup(zend_file_handle *file_handle TSRMLS_DC);
+ZEND_API int zend_stream_ferror(zend_file_handle *file_handle TSRMLS_DC);
+ZEND_API int zend_stream_getc(zend_file_handle *file_handle TSRMLS_DC);
+ZEND_API size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC);
+ZEND_API int zend_stream_fixup(zend_file_handle *file_handle TSRMLS_DC);
 END_EXTERN_C()
 
 #define zend_stream_close(handle)	zend_file_handle_dtor((handle))
