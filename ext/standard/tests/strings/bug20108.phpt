@@ -1,5 +1,5 @@
 --TEST--
-Segfault on printf statement bug #20108
+Bug #20108 (Segfault on printf statement)
 --SKIPIF--
 --FILE--
 <?php
