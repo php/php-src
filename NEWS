@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- implemented domxml_elem_get_elements_by_tagname
+  new function domxml_doc_get_elements_by_tagname
+  new function domxml_doc_get_element_by_id (chregu)
 - Fixed seg fault in domxml_unlink() (jtate)
 - implemented domxml_elem_get_attribute_node(attrname) (chregu)
 - domxml_elem_remove_attribute(attibutename) is now implemented (chregu)
