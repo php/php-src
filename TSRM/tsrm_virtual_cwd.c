@@ -70,10 +70,7 @@ cwd_state main_cwd_state; /* True global */
 
 #ifdef TSRM_WIN32
 #define tsrm_strtok_r(a,b,c) strtok((a),(b))
-#define DEFAULT_SLASH '\\'
 #define TOKENIZER_STRING "/\\"
-
-#define COPY_WHEN_ABSOLUTE 2
 	
 static int php_check_dots(const char *element, int n) 
 {
@@ -90,7 +87,6 @@ static int php_check_dots(const char *element, int n)
 
 
 #else
-#define DEFAULT_SLASH '/'
 #define TOKENIZER_STRING "/"
 #endif
 
@@ -105,10 +101,6 @@ static int php_check_dots(const char *element, int n)
 #ifndef IS_DIRECTORY_CURRENT
 #define IS_DIRECTORY_CURRENT(element, len) \
 	(len == 1 && ptr[0] == '.')
-#endif
-
-#ifndef COPY_WHEN_ABSOLUTE
-#define COPY_WHEN_ABSOLUTE 0
 #endif
 
 /* define this to check semantics */
