@@ -146,7 +146,8 @@ PHP_FUNCTION(mysqli_fetch_object)
 
 /* {{{ proto resource mysqli_query(object link, string query [,int resultmode])
    Send a MySQL query */
-PHP_FUNCTION(mysqli_query) {
+PHP_FUNCTION(mysqli_query)
+{
 	MYSQL				*mysql;
 	zval				*mysql_link;
 	MYSQLI_RESOURCE		*mysqli_resource;

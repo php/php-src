@@ -120,7 +120,7 @@ PHP_FUNCTION(mysqli_bind_param)
 	if (zend_hash_num_elements(Z_ARRVAL_P(types)) != argc - start) {
 		/* number of bind variables doesn't match number of elements in array */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of elements in type array doesn't match number of bind variables");
-    }
+	}
 
 	/* prevent leak if variables are already bound */
 	if (stmt->param.var_cnt) {
@@ -1677,23 +1677,22 @@ PHP_FUNCTION(mysqli_stmt_close)
 /* }}} */
 
 /* {{{ proto void mysqli_stmt_data_seek(object stmt, int offset)
-Move internal result pointer */
+   Move internal result pointer */
 PHP_FUNCTION(mysqli_stmt_data_seek)
 {
-STMT 		*stmt;
-zval  		*mysql_stmt;
-PR_STMT  	*prstmt;  
-long  		offset;
+	STMT 		*stmt;
+	zval  		*mysql_stmt;
+	PR_STMT  	*prstmt;  
+	long  		offset;
 
-if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &mysql_stmt, mysqli_stmt_class_entry, &offset) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &mysql_stmt, mysqli_stmt_class_entry, &offset) == FAILURE) {
+		return;
+	}
+
+	MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, &mysql_stmt, "mysqli_stmt");
+
+	mysql_stmt_data_seek(stmt->stmt, offset);
 	return;
-}
-
-MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, &mysql_stmt, "mysqli_stmt");
-
-
-mysql_stmt_data_seek(stmt->stmt, offset);
-return;
 }
 /* }}} */
 
@@ -1709,6 +1708,7 @@ PHP_FUNCTION(mysqli_stmt_num_rows)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
 		return;
 	}
+
 	MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, &mysql_stmt, "mysqli_stmt");
 
 	rc = mysql_stmt_num_rows(stmt->stmt);
