@@ -645,25 +645,18 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 					fci->object_pp = EG(This)?&EG(This):NULL;
 				} else {
 					zend_class_entry *scope;
-					int in_autoload = EG(in_autoload);
-					EG(in_autoload) = 0;
 					scope = EG(active_op_array)->scope; 
 
 					found = zend_lookup_class(Z_STRVAL_PP(fci->object_pp), Z_STRLEN_PP(fci->object_pp), &ce TSRMLS_CC);
 					if (found == FAILURE) {
-						EG(in_autoload) = in_autoload;
 						zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL_PP(fci->object_pp));
 					}
-					EG(in_autoload) = in_autoload;
-					fci->object_pp = NULL;
-					if (EG(This)) {
-						while (scope != NULL) {
-						  if (scope == *ce) {
-								fci->object_pp = &EG(This);
-								break;
-						  }
-						  scope = scope->parent;
-						}
+					if (EG(This) && 
+					    instanceof_function(Z_OBJCE_P(EG(This)), scope) &&
+					    instanceof_function(scope, *ce)) {
+						fci->object_pp = &EG(This);
+					} else {
+						fci->object_pp = NULL;
 					}
 				}
 				if (found == FAILURE)
@@ -683,6 +676,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		}
 
 		if (fci->object_pp) {
+			if (Z_OBJ_HT_PP(fci->object_pp)->get_method == NULL) {
+				zend_error(E_ERROR, "Object does not support method calls");
+			}
 			EX(function_state).function = 
 			  Z_OBJ_HT_PP(fci->object_pp)->get_method(*fci->object_pp, Z_STRVAL_P(fci->function_name), Z_STRLEN_P(fci->function_name) TSRMLS_CC);
 		} else if (calling_scope) {
