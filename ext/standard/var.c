@@ -123,7 +123,7 @@ head_done:
 		break;
 	}
 	default:
-		php_printf("%sUNKNOWN(%d):0\n", COMMON, Z_TYPE_PP(struc));
+		php_printf("%sUNKNOWN:0\n", COMMON);
 		break;
 	}
 }
@@ -221,7 +221,7 @@ head_done:
 		break;
 	}
 	default:
-		php_printf("%sUNKNOWN(%d):0\n", COMMON, Z_TYPE_PP(struc));
+		php_printf("%sUNKNOWN:0\n", COMMON);
 		break;
 	}
 }
