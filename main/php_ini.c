@@ -132,6 +132,7 @@ void php_unregister_ini_entries(int module_number)
 int php_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type)
 {
 	php_ini_entry *ini_entry;
+	char *duplicate;
 
 	if (_php3_hash_find(&known_directives, name, name_length, (void **) &ini_entry)==FAILURE) {
 		return FAILURE;
@@ -141,17 +142,21 @@ int php_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_
 		return FAILURE;
 	}
 
+	duplicate = estrndup(new_value, new_value_length);
+	
 	if (!ini_entry->on_modify
-		|| ini_entry->on_modify(ini_entry, new_value, new_value_length, ini_entry->mh_arg)==SUCCESS) {
+		|| ini_entry->on_modify(ini_entry, duplicate, new_value_length, ini_entry->mh_arg)==SUCCESS) {
 		if (!ini_entry->orig_value) {
 			ini_entry->orig_value = ini_entry->value;
 			ini_entry->orig_value_length = ini_entry->value_length;
 		} else { /* we already changed the value, free the changed value */
 			efree(ini_entry->value);
 		}
-		ini_entry->value = estrndup(new_value, new_value_length);
+		ini_entry->value = duplicate;
 		ini_entry->value_length = new_value_length;
 		ini_entry->modified = 1;
+	} else {
+		efree(duplicate);
 	}
 
 	return SUCCESS;
