@@ -20,6 +20,8 @@ PHP 4                                                                      NEWS
 - Added improved JPEG 2000 support for getimagesize(). (Marcus, Adam Wright)
 - Added XBM and WBMP support for getimagesize(). (Marcus)
 - Fixed several errors in hwapi extension. Objects weren't handled properly. (Uwe)
+- Fixed bug #22207 (e notation in *printf would be missing a 0 when there is
+  no exponent). (Ilia)
 - Fixed bug #22191 (frontbase build broken with old version of frontbase). (Ilia)
 - Fixed bug #22187 (spprintf function did not handle floats correctly). (Ilia)
 - Fixed bug #22149 (incorrect insertion of session id when tabs are used to
