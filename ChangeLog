@@ -1,3 +1,33 @@
+2000-11-07  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: Forgot to commit it...
+
+2000-11-07  Daniel Beulshausen  <daniel@php4win.de>
+
+    * main/SAPI.h
+      main/php_open_temporary_file.c
+      ext/fdf/fdf.c
+      ext/fdf/fdf.dsp: win32 sapi symbol export fixes
+
+2000-11-07  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_variables.c
+      main/php_variables.h
+      sapi/cgi/cgi_main.c
+      main/main.c:
+    - In CGI mode, $HTTP_SERVER_VARS now includes all of the environment variables
+      as well 
+
+    * main/SAPI.h: cookie_data may also be modified...
+
+2000-11-07  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/mysql/php_mysql.c:
+    Enable to use mysql_use_result in query functions.
+    You may need this if you use real big queries.
+
+    * ext/standard/var.c: Andi says it should be zval_ptr_dtor
+
 2000-11-06  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/sockets/sockets.c: Use socklen_t for getsockopt
