@@ -67,8 +67,15 @@ PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mod
 module MODULE_VAR_EXPORT php4_module;
 
 int saved_umask;
-static int php_initialized;
+static unsigned char apache_php_initialized=0;
 
+typedef struct _php_per_dir_entry {
+	char *key;
+	char *value;
+	uint key_length;
+	uint value_length;
+	int type;
+} php_per_dir_entry;
 
 #if WIN32|WINNT
 /* popenf isn't working on Windows, use open instead*/
@@ -234,14 +241,24 @@ static void init_request_info(SLS_D)
 }
 
 
+static int php_apache_alter_ini_entries(php_per_dir_entry *per_dir_entry)
+{
+	php_alter_ini_entry(per_dir_entry->key, per_dir_entry->key_length+1, per_dir_entry->value, per_dir_entry->value_length+1, per_dir_entry->type);
+}
+
+
 int send_php(request_rec *r, int display_source_mode, char *filename)
 {
 	int fd, retval;
+	HashTable *per_dir_conf;
 	SLS_FETCH();
 
 	if (setjmp(EG(bailout))!=0) {
 		return OK;
 	}
+	per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php4_module);
+	zend_hash_apply((HashTable *) per_dir_conf, (int (*)(void *)) php_apache_alter_ini_entries);
+
 	/* We don't accept OPTIONS requests, but take everything else */
 	if (r->method_number == M_OPTIONS) {
 		r->allowed |= (1 << METHODS) - 1;
@@ -324,17 +341,46 @@ int send_parsed_php_source(request_rec * r)
 }
 
 
+static void destroy_per_dir_entry(php_per_dir_entry *per_dir_entry)
+{
+	free(per_dir_entry->key);
+	free(per_dir_entry->value);
+}
+
+static void copy_per_dir_entry(php_per_dir_entry *per_dir_entry)
+{
+	php_per_dir_entry tmp = *per_dir_entry;
+
+	per_dir_entry->key = (char *) malloc(tmp.key_length+1);
+	memcpy(per_dir_entry->key, tmp.key, tmp.key_length);
+	per_dir_entry->key[per_dir_entry->key_length] = 0;
+
+	per_dir_entry->value = (char *) malloc(tmp.value_length+1);
+	memcpy(per_dir_entry->value, tmp.value, tmp.value_length);
+	per_dir_entry->value[per_dir_entry->value_length] = 0;
+}
+
 /*
  * Create the per-directory config structure with defaults
  */
-static void *php_create_dir(pool * p, char *dummy)
+static void *php_create_dir(pool *p, char *dummy)
 {
-	php_apache_info_struct *new;
+	HashTable *per_dir_info;
 
-	new = (php_apache_info_struct *) palloc(p, sizeof(php_apache_info_struct));
-	memcpy(new, &php_apache_info, sizeof(php_apache_info_struct));
+	per_dir_info = (HashTable *) malloc(sizeof(HashTable));
+	zend_hash_init(per_dir_info, 5, NULL, (void (*)(void *)) destroy_per_dir_entry, 1);
+	register_cleanup(p, (void *) per_dir_info, (void (*)(void *)) zend_hash_destroy, (void (*)(void *)) zend_hash_destroy);
 
-	return new;
+	return per_dir_info;
+}
+
+
+static void *php_merge_dir(pool *p, void *basev, void *addv)
+{
+	php_per_dir_entry tmp;
+
+	zend_hash_merge((HashTable *) basev, (HashTable *) addv, (void (*)(void *)) copy_per_dir_entry, &tmp, sizeof(php_per_dir_entry), 1);
+	return basev;
 }
 
 
@@ -344,28 +390,36 @@ static void *php_create_dir(pool * p, char *dummy)
 #define CONST_PREFIX
 #endif
 
-CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
+CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2)
 {
-	if (!php_initialized) {
+	php_per_dir_entry per_dir_entry;
+
+	if (!apache_php_initialized) {
 		sapi_startup(&sapi_module);
 		php_module_startup(&sapi_module);
-		php_initialized = 1;
+		apache_php_initialized = 1;
 	}
-	printf("Altering '%s' -> '%s'\n", arg1, arg2);
-	php_alter_ini_entry(arg1, strlen(arg1)+1, arg2, strlen(arg2)+1, PHP_INI_PERDIR);
+	per_dir_entry.type = PHP_INI_PERDIR;
+
+	per_dir_entry.key_length = strlen(arg1);
+	per_dir_entry.value_length = strlen(arg2);
+
+	per_dir_entry.key = (char *) malloc(per_dir_entry.key_length+1);
+	memcpy(per_dir_entry.key, arg1, per_dir_entry.key_length);
+	per_dir_entry.key[per_dir_entry.key_length] = 0;
+
+	per_dir_entry.value = (char *) malloc(per_dir_entry.value_length+1);
+	memcpy(per_dir_entry.value, arg2, per_dir_entry.value_length);
+	per_dir_entry.value[per_dir_entry.value_length] = 0;
+
+	zend_hash_update((HashTable *) conf, per_dir_entry.key, per_dir_entry.key_length, &per_dir_entry, sizeof(php_per_dir_entry), NULL);
 	return NULL;
 }
 
 
-CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
+CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2)
 {
 	char bool_val[2];
-
-	if (!php_initialized) {
-		sapi_startup(&sapi_module);
-		php_module_startup(&sapi_module);
-		php_initialized = 1;
-	}
 
 	if (!strcmp(arg2, "On")) {
 		bool_val[0] = '1';
@@ -374,8 +428,7 @@ CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, php_apache_info_struc
 	}
 	bool_val[1] = 0;
 	
-	php_alter_ini_entry(arg1, strlen(arg1)+1, bool_val, 2, PHP_INI_PERDIR);
-	return NULL;
+	return php_apache_value_handler(cmd, conf, arg1, bool_val);
 }
 
 
@@ -397,7 +450,7 @@ int php_xbithack_handler(request_rec * r)
 
 static void apache_php_module_shutdown_wrapper()
 {
-	php_initialized = 0;
+	apache_php_initialized = 0;
 	sapi_module.shutdown(&sapi_module);
 }
 
@@ -405,10 +458,10 @@ static void apache_php_module_shutdown_wrapper()
 void php_init_handler(server_rec *s, pool *p)
 {
 	register_cleanup(p, NULL, apache_php_module_shutdown_wrapper, php_module_shutdown_for_exec);
-	if (!php_initialized) {
+	if (!apache_php_initialized) {
 		sapi_startup(&sapi_module);
 		php_module_startup(&sapi_module);
-		php_initialized = 1;
+		apache_php_initialized = 1;
 	}
 #if MODULE_MAGIC_NUMBER >= 19980527
 	ap_add_version_component("PHP/" PHP_VERSION);
@@ -480,7 +533,7 @@ module MODULE_VAR_EXPORT php4_module =
 	STANDARD_MODULE_STUFF,
 	php_init_handler,			/* initializer */
 	php_create_dir,				/* per-directory config creator */
-	NULL,						/* dir merger */
+	php_merge_dir,				/* dir merger */
 	NULL,						/* per-server config creator */
 	NULL, 						/* merge server config */
 	php_commands,				/* command table */
