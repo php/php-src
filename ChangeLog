@@ -1,3 +1,91 @@
+2001-08-26  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/Makefile.in
+      ext/standard/basic_functions.h
+      ext/standard/php_rand.h
+      ext/standard/rand.c
+      ext/standard/rand_mt.c
+      ext/standard/rand_sys.c:
+    - Different approach to handling multiple random number generators,
+      now it is way more general, adding a new generator is way more
+      easier. Also elimination the need for a lot of switches.
+    - Made rand() Thread Safe
+    - Made sure this doesn't compile anymore ;-)
+    - PHPAPI functions now behave (almost) as intended, this is not yet
+      the case for PHP_FUNCTION functions.
+
+    * ext/standard/rand_sys.c: New file.
+
+2001-08-26  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/dbplus/dbplus.c
+      ext/dbplus/php_dbplus.c
+      ext/dbplus/php_dbplus.h: whitespace
+
+    * ext/dbplus/php_dbplus.h: removed dbplus_change function
+    moved db++ specific includes to .c files
+
+    * ext/dbplus/php_dbplus.c: implementation of missing functionality
+    implementation and build improvements
+
+    * ext/dbplus/nonimp_dbplus.c:
+    removed as all functions from the perl interface have now been implemented
+
+2001-08-26  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTML/Page.php: * _Always_ use <?php ?> to delimit PHP code in PEAR.
+
+2001-08-26  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/dbplus/dbplus.c: added symbolic constatns for error codes
+    removed dbplus_change function
+    some build improvements
+
+    * ext/dbplus/config.m4: added -lm to LIBS, whitespae
+
+    * ext/dbplus/Makefile.in: whitespace
+
+2001-08-26  Joey Smith  <joey@joeysmith.com>
+
+    * ext/domxml/php_domxml.c:
+    MFH: Fix 1st case reported in #9893. 2nd case was fixed in previous commit.
+
+2001-08-26  Zeev Suraski  <zeev@zend.com>
+
+    * ext/session/session.c
+      ext/standard/url_scanner.c
+      ext/standard/url_scanner.h
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re: Fix my session updates.
+    trans_sid handling will no longer slow down performance unless a session
+    is actually in use.
+
+2001-08-26  Joey Smith  <joey@joeysmith.com>
+
+    * ext/domxml/php_domxml.c:
+    Fix 1st case of #9893. 2nd case was already fixed in previous commit.
+
+2001-08-26  Zeev Suraski  <zeev@zend.com>
+
+    * ext/session/php_session.h
+      ext/session/session.c: Fix trans-sid.
+    Still need to figure out how to turn trans-sid only when sessions
+    are actually used.
+
+2001-08-26  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/gd.c: MFH
+
+    * ext/gd/gd.c: Test your changes please Jani
+
+2001-08-26  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/session/php_session.h
+      ext/session/session.c: Make the session module more independent
+
 2001-08-25  Zeev Suraski  <zeev@zend.com>
 
     * ext/session/config.m4: This option is no longer needed
