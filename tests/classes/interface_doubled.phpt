@@ -6,23 +6,23 @@ ZE2 An interface extends base interfaces
 <?php
 
 interface if_a {
-	abstract function f_a();
+	function f_a();
 }
 	
 interface if_b {
-	abstract function f_b();
+	function f_b();
 }
 
 interface if_c extends if_a, if_b {
-	abstract function f_c();
+	function f_c();
 }
 
 interface if_d extends if_a, if_b {
-	abstract function f_d();
+	function f_d();
 }
 
 interface if_e {
-	abstract function f_d();
+	function f_d();
 }
 
 interface if_f extends /*if_e,*/ if_a, if_b, if_c, if_d /*, if_e*/ {
