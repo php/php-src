@@ -1,5 +1,5 @@
 <!--
-     $Id: package.dtd,v 1.11 2001-12-11 15:31:09 sebastian Exp $
+     $Id: package.dtd,v 1.12 2001-12-28 02:09:27 ssb Exp $
 
      This is the PEAR package description, version 1.1b1.
      It should be used with the informal public identifier:
@@ -28,7 +28,7 @@
 			   threadsafe	(on|off) 'off'">
 <!ENTITY % format.atts "format		CDATA	#IMPLIED">
 <!--=============== ELEMENT: package =======================================-->
-<!ELEMENT package (name, summary, maintainer, release)>
+<!ELEMENT package (name, summary, description, maintainer, release)>
 <!ATTLIST package
 	%global.atts; 
 	type (source | binary | empty) "empty"
@@ -41,6 +41,11 @@
 <!--=============== ELEMENT: summary =======================================-->
 <!ELEMENT summary (#PCDATA)>
 <!ATTLIST summary
+	%global.atts; 
+>
+<!--=============== ELEMENT: description ===================================-->
+<!ELEMENT description (#PCDATA)>
+<!ATTLIST description
 	%global.atts; 
 >
 <!--=============== ELEMENT: maintainer ====================================-->
