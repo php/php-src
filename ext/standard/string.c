@@ -3113,7 +3113,6 @@ PHP_FUNCTION(setlocale)
 {
 	pval ***args = (pval ***) emalloc(sizeof(pval **)*ZEND_NUM_ARGS());
 	zval **pcategory, **plocale;
-	zval *locale;
 	int i, cat, n_args=ZEND_NUM_ARGS();
 	char *loc, *retval;
 
