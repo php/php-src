@@ -7,21 +7,21 @@
 CFG=java - Win32 Debug_TS
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
-!MESSAGE
+!MESSAGE 
 !MESSAGE NMAKE /f "java.mak".
-!MESSAGE
+!MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
-!MESSAGE
+!MESSAGE 
 !MESSAGE NMAKE /f "java.mak" CFG="java - Win32 Debug_TS"
-!MESSAGE
+!MESSAGE 
 !MESSAGE Possible choices for configuration are:
-!MESSAGE
+!MESSAGE 
 !MESSAGE "java - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "java - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "java - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "java - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE
+!MESSAGE 
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
@@ -45,7 +45,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "PHP_WIN32" /D "ZEND_WIN32" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "$(JAVA_HOME)\include\win32" /I "$(JAVA_HOME)\include" /I "..\..\..\bindlib_w32" /D "NDEBUG" /D ZEND_DEBUG=0 /D "PHP_WIN32" /D "ZEND_WIN32" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_JAVA" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "$(JAVA_HOME)\include\win32" /I "$(JAVA_HOME)\include" /I "..\..\..\bindlib_w32" /D "NDEBUG" /D ZEND_DEBUG=0 /D "PHP_WIN32" /D "ZEND_WIN32" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_JAVA" /D HAVE_JAVA=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -71,7 +71,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "PHP_WIN32" /D "ZEND_WIN32" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "$(JAVA_HOME)\include\win32" /I "$(JAVA_HOME)\include" /I "..\..\..\bindlib_w32" /D "_DEBUG" /D ZEND_DEBUG=1 /D "PHP_WIN32" /D "ZEND_WIN32" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_JAVA" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "$(JAVA_HOME)\include\win32" /I "$(JAVA_HOME)\include" /I "..\..\..\bindlib_w32" /D "_DEBUG" /D ZEND_DEBUG=1 /D "PHP_WIN32" /D "ZEND_WIN32" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_JAVA" /D HAVE_JAVA=1 /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "_DEBUG"
@@ -97,7 +97,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\..\Zend" /I "$(JAVA_HOME)\include\win32" /I "$(JAVA_HOME)\include" /I "..\..\..\bindlib_w32" /D "_DEBUG" /D "PHP_WIN32" /D "ZEND_WIN32" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_JAVA" /FR /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "$(JAVA_HOME)\include\win32" /I "$(JAVA_HOME)\include" /I "..\..\..\bindlib_w32" /D "_DEBUG" /D ZEND_DEBUG=1 /D "PHP_WIN32" /D "ZEND_WIN32" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_JAVA" /D "ZTS" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "$(JAVA_HOME)\include\win32" /I "$(JAVA_HOME)\include" /I "..\..\..\bindlib_w32" /D "_DEBUG" /D ZEND_DEBUG=1 /D "ZTS" /D "PHP_WIN32" /D "ZEND_WIN32" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_JAVA" /D HAVE_JAVA=1 /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "_DEBUG"
@@ -123,7 +123,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\..\Zend" /I "$(JAVA_HOME)\include\win32" /I "$(JAVA_HOME)\include" /I "..\..\..\bindlib_w32" /D "NDEBUG" /D "PHP_WIN32" /D "ZEND_WIN32" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_JAVA" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "$(JAVA_HOME)\include\win32" /I "$(JAVA_HOME)\include" /I "..\..\..\bindlib_w32" /D "NDEBUG" /D ZEND_DEBUG=0 /D "PHP_WIN32" /D "ZEND_WIN32" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_JAVA" /D "ZTS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "$(JAVA_HOME)\include\win32" /I "$(JAVA_HOME)\include" /I "..\..\..\bindlib_w32" /D "NDEBUG" /D ZEND_DEBUG=0 /D "ZTS" /D "PHP_WIN32" /D "ZEND_WIN32" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_JAVA" /D HAVE_JAVA=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -135,7 +135,7 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_java.dll" /libpath:"$(JAVA_HOME)\lib" /libpath:"..\..\Release_TS"
 
-!ENDIF
+!ENDIF 
 
 # Begin Target
 
@@ -170,83 +170,79 @@ SOURCE=.\reflect.java
 
 # Begin Custom Build
 OutDir=.\..\..\Release
-TargetName=php_java
 InputPath=.\reflect.java
 
 "$(OutDir)\php_java.jar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-        if not exist net mkdir net
-        if not exist net\php mkdir net\php
-        copy $(InputPath) net\php > nul
-	echo library=php_java>net\php\reflect.properties
-        $(JAVA_HOME)\bin\javac net\php\reflect.java
-        $(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class net\php\*.properties
-        erase net\php\reflect.*
-        rmdir net\php
-        rmdir net
-
+	if not exist net mkdir net 
+	if not exist net\php mkdir net\php 
+	copy $(InputPath) net\php > nul 
+	echo library=php_java>net\php\reflect.properties 
+	$(JAVA_HOME)\bin\javac net\php\reflect.java 
+	$(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class net\php\*.properties 
+	erase net\php\reflect.* 
+	rmdir net\php 
+	rmdir net 
+	
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "java - Win32 Debug"
 
 # Begin Custom Build
 OutDir=.\..\..\Debug
-TargetName=php_java
 InputPath=.\reflect.java
 
 "$(OutDir)\php_java.jar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-        if not exist net mkdir net
-        if not exist net\php mkdir net\php
-        copy $(InputPath) net\php > nul
-	echo library=php_java>net\php\reflect.properties
-        $(JAVA_HOME)\bin\javac -g net\php\reflect.java
-        $(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class net\php\*.properties
-        erase net\php\reflect.*
-        rmdir net\php
-        rmdir net
-
+	if not exist net mkdir net 
+	if not exist net\php mkdir net\php 
+	copy $(InputPath) net\php > nul 
+	echo library=php_java>net\php\reflect.properties 
+	$(JAVA_HOME)\bin\javac -g net\php\reflect.java 
+	$(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class net\php\*.properties 
+	erase net\php\reflect.* 
+	rmdir net\php 
+	rmdir net 
+	
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "java - Win32 Debug_TS"
 
 # Begin Custom Build
 OutDir=.\..\..\Debug_TS
-TargetName=php_java
 InputPath=.\reflect.java
 
 "$(OutDir)\php_java.jar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-        if not exist net mkdir net
-        if not exist net\php mkdir net\php
-        copy $(InputPath) net\php > nul
-	echo library=php_java>net\php\reflect.properties
-        $(JAVA_HOME)\bin\javac -g net\php\reflect.java
-        $(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class net\php\*.properties
-        erase net\php\reflect.*
-        rmdir net\php
-        rmdir net
-
+	if not exist net mkdir net 
+	if not exist net\php mkdir net\php 
+	copy $(InputPath) net\php > nul 
+	echo library=php_java>net\php\reflect.properties 
+	$(JAVA_HOME)\bin\javac -g net\php\reflect.java 
+	$(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class net\php\*.properties 
+	erase net\php\reflect.* 
+	rmdir net\php 
+	rmdir net 
+	
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "java - Win32 Release_TS"
 
 # Begin Custom Build
 OutDir=.\..\..\Release_TS
-TargetName=php_java
 InputPath=.\reflect.java
 
 "$(OutDir)\php_java.jar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-        if not exist net mkdir net
-        if not exist net\php mkdir net\php
-        copy $(InputPath) net\php > nul
-	echo library=php_java>net\php\reflect.properties
-        $(JAVA_HOME)\bin\javac net\php\reflect.java
-        $(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class net\php\*.properties
-        erase net\php\reflect.*
-        rmdir net\php
-        rmdir net
-
+	if not exist net mkdir net 
+	if not exist net\php mkdir net\php 
+	copy $(InputPath) net\php > nul 
+	echo library=php_java>net\php\reflect.properties 
+	$(JAVA_HOME)\bin\javac net\php\reflect.java 
+	$(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class net\php\*.properties 
+	erase net\php\reflect.* 
+	rmdir net\php 
+	rmdir net 
+	
 # End Custom Build
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # End Group
