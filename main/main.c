@@ -86,7 +86,7 @@ struct sapi_request_info *sapi_rqst;
 #include "SAPI.h"
 
 #if MSVC5 || !defined(HAVE_GETOPT)
-#include "getopt.h"
+#include "php_getopt.h"
 #endif
 
 
