@@ -622,7 +622,7 @@ int php_request_startup(TSRMLS_D)
 	zend_try {
 		PG(during_request_startup) = 1;
 		
-		php_output_activate();
+		php_output_activate(TSRMLS_C);
 
 		/* initialize global variables */
 		PG(modules_activated) = 0;
@@ -645,11 +645,11 @@ int php_request_startup(TSRMLS_D)
 			Z_STRLEN_P(output_handler) = strlen(PG(output_handler));	/* this can be optimized */
 			Z_STRVAL_P(output_handler) = estrndup(PG(output_handler), Z_STRLEN_P(output_handler));
 			Z_TYPE_P(output_handler) = IS_STRING;
-			php_start_ob_buffer(output_handler, 0);
+			php_start_ob_buffer(output_handler, 0 TSRMLS_CC);
 		} else if (PG(output_buffering)) {
-			php_start_ob_buffer(NULL, 0);
+			php_start_ob_buffer(NULL, 0 TSRMLS_CC);
 		} else if (PG(implicit_flush)) {
-			php_start_implicit_flush();
+			php_start_implicit_flush(TSRMLS_C);
 		}
 
 		/* We turn this off in php_execute_script() */
@@ -683,7 +683,7 @@ void php_request_shutdown(void *dummy)
 	TSRMLS_FETCH();
 
 	zend_try {
-		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1));
+		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1) TSRMLS_CC);
 	} zend_end_try();
 
 	zend_try {
@@ -800,7 +800,7 @@ int php_module_startup(sapi_module_struct *sf)
 	sapi_module = *sf;
 
 	php_output_startup();
-	php_output_activate();
+	php_output_activate(TSRMLS_C);
 
 	zuf.error_function = php_error_cb;
 	zuf.printf_function = php_printf;
@@ -883,7 +883,7 @@ int php_module_startup(sapi_module_struct *sf)
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_SYSCONFDIR", PHP_SYSCONFDIR, sizeof(PHP_SYSCONFDIR)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_LOCALSTATEDIR", PHP_LOCALSTATEDIR, sizeof(PHP_LOCALSTATEDIR)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_CONFIG_FILE_PATH", PHP_CONFIG_FILE_PATH, sizeof(PHP_CONFIG_FILE_PATH)-1, CONST_PERSISTENT | CONST_CS);
-	php_output_register_constants();
+	php_output_register_constants(TSRMLS_C);
 
 	if (php_startup_ticks(TSRMLS_C) == FAILURE) {
 		php_printf("Unable to start PHP ticks\n");
@@ -1249,7 +1249,7 @@ PHPAPI void php_handle_aborted_connection(void)
 	TSRMLS_FETCH();
 
 	PG(connection_status) = PHP_CONNECTION_ABORTED;
-	php_output_set_status(0);
+	php_output_set_status(0 TSRMLS_CC);
 
 	if (!PG(ignore_user_abort)) {
 		zend_bailout();

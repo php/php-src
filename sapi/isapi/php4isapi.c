@@ -199,11 +199,10 @@ static zend_module_entry php_isapi_module = {
 };
 
 
-static int sapi_isapi_ub_write(const char *str, uint str_length)
+static int sapi_isapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	DWORD num_bytes = str_length;
 	LPEXTENSION_CONTROL_BLOCK ecb;
-	TSRMLS_FETCH();
 	
 	ecb = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
 	if (ecb->WriteClient(ecb->ConnID, (char *) str, &num_bytes, HSE_IO_SYNC ) == FALSE) {

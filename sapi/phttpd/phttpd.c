@@ -57,10 +57,9 @@ php_phttpd_startup(sapi_module_struct *sapi_module)
 }
 
 static int
-php_phttpd_sapi_ub_write(const char *str, uint str_length)
+php_phttpd_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
     int sent_bytes;
-	TSRMLS_FETCH();
 
 	sent_bytes = fd_write(PHG(cip)->fd, str, str_length);
 

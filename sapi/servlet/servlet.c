@@ -114,9 +114,8 @@ void ThrowServletException (JNIEnv *jenv, char *msg) {
  * sapi callbacks
  */
 
-static int sapi_servlet_ub_write(const char *str, uint str_length)
+static int sapi_servlet_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
-	TSRMLS_FETCH();
 	if (!SG(server_context)) {
 		fprintf(stderr, str);
 		return 0;

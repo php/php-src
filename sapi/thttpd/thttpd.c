@@ -43,11 +43,10 @@ static php_thttpd_globals thttpd_globals;
 #define TG(v) (thttpd_globals.v)
 #endif
 
-static int sapi_thttpd_ub_write(const char *str, uint str_length)
+static int sapi_thttpd_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	int n;
 	uint sent = 0;	
-	TSRMLS_FETCH();
 	
 	while (str_length > 0) {
 		n = send(TG(hc)->conn_fd, str, str_length, 0);

@@ -124,10 +124,9 @@ void php_save_umask(void)
 
 /* {{{ sapi_apache_ub_write
  */
-static int sapi_apache_ub_write(const char *str, uint str_length)
+static int sapi_apache_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	int ret=0;
-	TSRMLS_FETCH();
 		
 	if (SG(server_context)) {
 		ret = rwrite(str, str_length, (request_rec *) SG(server_context));
@@ -311,7 +310,7 @@ static void php_apache_request_shutdown(void *dummy)
 {
 	TSRMLS_FETCH();
 
-	php_output_set_status(0);
+	php_output_set_status(0 TSRMLS_CC);
 	SG(server_context) = NULL; /* The server context (request) is invalid by the time run_cleanups() is called */
 	if (AP(in_request)) {
 		AP(in_request) = 0;

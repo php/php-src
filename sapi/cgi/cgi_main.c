@@ -108,7 +108,7 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length)
 #endif
 }
 
-static int sapi_cgibin_ub_write(const char *str, uint str_length)
+static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	const char *ptr = str;
 	uint remaining = str_length;
@@ -493,10 +493,10 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					case '?':
 						no_headers = 1;
 						php_output_startup();
-						php_output_activate();
+						php_output_activate(TSRMLS_C);
 						SG(headers_sent) = 1;
 						php_cgi_usage(argv[0]);
-						php_end_ob_buffers(1);
+						php_end_ob_buffers(1 TSRMLS_CC);
 						exit(1);
 						break;
 				}
@@ -554,10 +554,10 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					case '?':
 						no_headers = 1;  
 						php_output_startup();
-						php_output_activate();
+						php_output_activate(TSRMLS_C);
 						SG(headers_sent) = 1;
 						php_cgi_usage(argv[0]);
-						php_end_ob_buffers(1);
+						php_end_ob_buffers(1 TSRMLS_CC);
 						exit(1);
 						break;
 
@@ -581,7 +581,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 				case 'm': /* list compiled in modules */
 					php_output_startup();
-					php_output_activate();
+					php_output_activate(TSRMLS_C);
 					SG(headers_sent) = 1;
 					php_printf("Running PHP %s\n%s\n", PHP_VERSION , get_zend_version());
 					php_printf("[PHP Modules]\n");
@@ -590,7 +590,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					/* zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) _print_module_info, NULL TSRMLS_CC); */
 					php_printf("Not Implemented\n");
 					php_printf("\n");
-					php_end_ob_buffers(1);
+					php_end_ob_buffers(1 TSRMLS_CC);
 					exit(1);
 					break;
 
@@ -619,7 +619,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 							SG(request_info).no_headers = 1;
 						}
 						php_printf("%s\n", PHP_VERSION);
-						php_end_ob_buffers(1);
+						php_end_ob_buffers(1 TSRMLS_CC);
 						exit(1);
 						break;
 

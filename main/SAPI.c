@@ -373,8 +373,8 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 	char *colon_offset;
 
 	if (SG(headers_sent) && !SG(request_info).no_headers) {
-		char *output_start_filename = php_get_output_start_filename();
-		int output_start_lineno = php_get_output_start_lineno();
+		char *output_start_filename = php_get_output_start_filename(TSRMLS_C);
+		int output_start_lineno = php_get_output_start_lineno(TSRMLS_C);
 
 		if (output_start_filename) {
 			sapi_module.sapi_error(E_WARNING, "Cannot add header information - headers already sent by (output started at %s:%d)",

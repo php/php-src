@@ -91,7 +91,7 @@ static int parent = 1;
 static pid_t pgroup;
 
 
-static int sapi_fastcgi_ub_write(const char *str, uint str_length)
+static int sapi_fastcgi_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	uint sent = FCGX_PutStr( str, str_length, out );
 	return sent;
