@@ -510,6 +510,18 @@ PHP_FUNCTION(phpcredits)
 
 /* }}} */
 
+
+PHP_FUNCTION(php_logo_guid)
+{
+	RETURN_STRINGL(PHP_LOGO_GUID, sizeof(PHP_LOGO_GUID)-1, 1);
+}
+
+
+PHP_FUNCTION(zend_logo_guid)
+{
+	RETURN_STRINGL(ZEND_LOGO_GUID, sizeof(ZEND_LOGO_GUID)-1, 1);
+}
+
 /*
  * Local variables:
  * tab-width: 4

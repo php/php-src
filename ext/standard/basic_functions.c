@@ -113,6 +113,8 @@ function_entry basic_functions[] = {
 	PHP_FE(phpinfo,									NULL)
 	PHP_FE(phpversion,								NULL)
 	PHP_FE(phpcredits,								NULL)
+	PHP_FE(php_logo_guid,							NULL)
+	PHP_FE(zend_logo_guid,							NULL)
 	
 	PHP_FE(strspn,									NULL)
 	PHP_FE(strcspn,									NULL)

@@ -465,7 +465,7 @@ void ODBC_SQL_ERROR(HENV henv, HDBC conn, HSTMT stmt, char *func)
 	ODBCLS_FETCH();
 
     do {
-	    SQLError(henv, conn, stmt, state,
+	    ret = SQLError(henv, conn, stmt, state,
 			    &error, errormsg, sizeof(errormsg)-1, &errormsgsize);
 	    if (func) {
 		    php_error(E_WARNING, "SQL error: %s, SQL state %s in %s",
