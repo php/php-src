@@ -203,10 +203,81 @@ static void release_wddx_packet_rsrc(zend_rsrc_list_entry *rsrc)
 	efree(str);
 }
 
+#include "ext/session/php_session.h"
+
+PS_SERIALIZER_ENCODE_FUNC(wddx)
+{
+	wddx_packet *packet;
+	PS_ENCODE_VARS;
+
+	packet = php_wddx_constructor();
+	if (!packet)
+		return FAILURE;
+
+	php_wddx_packet_start(packet, NULL, 0);
+	php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
+	
+	PS_ENCODE_LOOP(
+		php_wddx_serialize_var(packet, *struc, key, key_length);
+	);
+	
+	php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
+	php_wddx_packet_end(packet);
+	*newstr = php_wddx_gather(packet);
+	php_wddx_destructor(packet);
+	
+	if (newlen)
+		*newlen = strlen(*newstr);
+
+	return SUCCESS;
+}
+
+PS_SERIALIZER_DECODE_FUNC(wddx)
+{
+	zval *retval;
+	zval **ent;
+	char *key;
+	ulong key_length;
+	char tmp[128];
+	ulong idx;
+	int hash_type;
+	int ret;
+
+	if (vallen == 0) 
+		return SUCCESS;
+	
+	MAKE_STD_ZVAL(retval);
+
+	if ((ret = php_wddx_deserialize_ex((char *)val, vallen, retval)) == SUCCESS) {
+
+		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(retval));
+			 zend_hash_get_current_data(Z_ARRVAL_P(retval), (void **) &ent) == SUCCESS;
+			 zend_hash_move_forward(Z_ARRVAL_P(retval))) {
+			hash_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(retval), &key, &key_length, &idx, 0, NULL);
+
+			switch (hash_type) {
+				case HASH_KEY_IS_LONG:
+					sprintf(tmp, "%ld", idx);
+					key = tmp;
+					/* fallthru */
+				case HASH_KEY_IS_STRING:
+					php_set_session_var(key, key_length-1, *ent PSLS_CC);
+					PS_ADD_VAR(key);
+			}
+		}
+	}
+
+	zval_ptr_dtor(&retval);
+
+	return ret;
+}
 
 PHP_MINIT_FUNCTION(wddx)
 {
 	le_wddx = zend_register_list_destructors_ex(release_wddx_packet_rsrc, NULL, "wddx", module_number);
+	php_session_register_serializer("wddx",
+									PS_SERIALIZER_ENCODE_NAME(wddx),
+									PS_SERIALIZER_DECODE_NAME(wddx));
 	
 	return SUCCESS;
 }
@@ -954,6 +1025,12 @@ wddx_packet *php_wddx_constructor(void)
 	packet->c = NULL;
 
 	return packet;
+}
+
+void php_wddx_destructor(wddx_packet *packet)
+{
+	smart_str_free(packet);
+	efree(packet);
 }
 
 /* {{{ proto int wddx_packet_start([string comment])

@@ -143,17 +143,20 @@ typedef struct ps_serializer_struct {
 	int (*decode)(PS_SERIALIZER_DECODE_ARGS);
 } ps_serializer;
 
+#define PS_SERIALIZER_ENCODE_NAME(x) ps_srlzr_encode_##x
+#define PS_SERIALIZER_DECODE_NAME(x) ps_srlzr_decode_##x
+
 #define PS_SERIALIZER_ENCODE_FUNC(x) \
-	int ps_srlzr_encode_##x(PS_SERIALIZER_ENCODE_ARGS)
+	int PS_SERIALIZER_ENCODE_NAME(x)(PS_SERIALIZER_ENCODE_ARGS)
 #define PS_SERIALIZER_DECODE_FUNC(x) \
-	int ps_srlzr_decode_##x(PS_SERIALIZER_DECODE_ARGS)
+	int PS_SERIALIZER_DECODE_NAME(x)(PS_SERIALIZER_DECODE_ARGS)
 
 #define PS_SERIALIZER_FUNCS(x) \
 	PS_SERIALIZER_ENCODE_FUNC(x); \
 	PS_SERIALIZER_DECODE_FUNC(x)
 
 #define PS_SERIALIZER_ENTRY(x) \
-	{ #x,ps_srlzr_encode_##x, ps_srlzr_decode_##x }
+	{ #x, PS_SERIALIZER_ENCODE_NAME(x), PS_SERIALIZER_DECODE_NAME(x) }
 
 #ifdef TRANS_SID
 void session_adapt_uris(const char *, size_t, char **, size_t *);
@@ -163,12 +166,49 @@ void session_adapt_url(const char *, size_t, char **, size_t *);
 #define session_adapt_url(a,b,c,d)
 #endif
 
+void php_set_session_var(char *name, size_t namelen, zval *state_val PSLS_DC);
+int php_get_session_var(char *name, size_t namelen, zval ***state_var PLS_DC PSLS_DC ELS_DC);
+
+int php_session_register_serializer(const char *name,
+	        int (*encode)(PS_SERIALIZER_ENCODE_ARGS),
+	        int (*decode)(PS_SERIALIZER_DECODE_ARGS));
+
+#define PS_ADD_VARL(name,namelen) \
+	zend_hash_update(&PS(vars), name, namelen + 1, 0, 0, NULL)
+
+#define PS_ADD_VAR(name) PS_ADD_VARL(name, strlen(name))
+
+#define PS_DEL_VARL(name,namelen) \
+	zend_hash_del(&PS(vars), name, namelen + 1);
+
+#define PS_DEL_VAR(name) PS_DEL_VARL(name, strlen(name))
+
+#define PS_ENCODE_VARS 											\
+	char *key;													\
+	ulong key_length;											\
+	ulong num_key;												\
+	zval **struc;												\
+	ELS_FETCH();												\
+	PLS_FETCH()
+
+#define PS_ENCODE_LOOP(code)										\
+	for (zend_hash_internal_pointer_reset(&PS(vars));			\
+			zend_hash_get_current_key_ex(&PS(vars), &key, &key_length, &num_key, 0, NULL) == HASH_KEY_IS_STRING; \
+			zend_hash_move_forward(&PS(vars))) {				\
+			key_length--;										\
+		if (php_get_session_var(key, key_length, &struc PLS_CC PSLS_CC ELS_CC) == SUCCESS) { \
+			code;		 										\
+		} 														\
+	}
+
+#ifdef ZTS
+extern int ps_globals_id;
+#else
+extern php_ps_globals ps_globals;
+#endif
+
+
 void php_session_auto_start(void *data);
 void php_session_shutdown(void *data);
-
-#if HAVE_WDDX
-#define WDDX_SERIALIZER
-#include "ext/wddx/php_wddx_api.h"
-#endif
 
 #endif
