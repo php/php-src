@@ -52,6 +52,7 @@ PHP_FUNCTION(ibase_fetch_row);
 PHP_FUNCTION(ibase_fetch_assoc);
 PHP_FUNCTION(ibase_fetch_object);
 PHP_FUNCTION(ibase_free_result);
+PHP_FUNCTION(ibase_name_result);
 PHP_FUNCTION(ibase_prepare);
 PHP_FUNCTION(ibase_execute);
 PHP_FUNCTION(ibase_free_query);
@@ -65,6 +66,8 @@ PHP_FUNCTION(ibase_field_info);
 PHP_FUNCTION(ibase_trans);
 PHP_FUNCTION(ibase_commit);
 PHP_FUNCTION(ibase_rollback);
+PHP_FUNCTION(ibase_commit_ret);
+PHP_FUNCTION(ibase_rollback_ret);
 
 PHP_FUNCTION(ibase_blob_create);
 PHP_FUNCTION(ibase_blob_add);
