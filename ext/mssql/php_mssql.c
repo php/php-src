@@ -1034,7 +1034,7 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 	result->cur_row++;
 }
 
-/* {{{ object mssql_fetch_object(int result_id)
+/* {{{ proto object mssql_fetch_object(int result_id)
    Returns a psuedo-object of the current row in the result set specified by result_id */
 PHP_FUNCTION(mssql_fetch_object)
 {
@@ -1046,7 +1046,7 @@ PHP_FUNCTION(mssql_fetch_object)
 
 /* }}} */
 
-/* {{{ array mssql_fetch_array(int result_id)
+/* {{{ proto array mssql_fetch_array(int result_id)
    Returns an associative array of the current row in the result set specified by result_id */
 PHP_FUNCTION(mssql_fetch_array)
 {
