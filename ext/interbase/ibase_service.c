@@ -24,11 +24,10 @@
 
 #include "php.h"
 
-#if HAVE_IBASE
+#if HAVE_IBASE6_API
 
 #include "php_interbase.h"
-
-#ifdef SQL_DIALECT_V6 /* == if InterBase version >= 6 */
+#include "interbase.h"
 
 static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, int operation) /* {{{ */
 {
@@ -324,8 +323,6 @@ PHP_FUNCTION(ibase_restore)
 	_php_ibase_backup_restore(INTERNAL_FUNCTION_PARAM_PASSTHRU, isc_action_svc_restore);
 }
 /* }}} */
-#endif /* defined(SQL_DIALECT_V6) */
-
 #endif /* HAVE_IBASE */
 
 /*

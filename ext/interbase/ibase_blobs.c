@@ -27,6 +27,7 @@
 #if HAVE_IBASE
 
 #include "php_interbase.h"
+#include "interbase.h"
 
 #define BLOB_CLOSE		1
 #define BLOB_CANCEL		2
