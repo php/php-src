@@ -490,7 +490,9 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 			retval = op_array;
 		}
 	}
+#ifdef ZTS
 	delete input_stream;
+#endif
 	zval_dtor(&tmp);
 	CG(in_compilation) = original_in_compilation;
 	return retval;
@@ -539,7 +541,9 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 	}
 	zend_highlight(syntax_highlighter_ini);
 	restore_lexical_state(&original_lex_state CLS_CC);
+#ifdef ZTS
 	delete input_stream;
+#endif
 	zval_dtor(str);
 	return SUCCESS;
 }
