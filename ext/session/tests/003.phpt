@@ -6,6 +6,7 @@ session object deserialization
 session.use_cookies=0
 session.cache_limiter=
 register_globals=1
+session.serialize_handler=php
 --FILE--
 <?php
 error_reporting(E_ALL);

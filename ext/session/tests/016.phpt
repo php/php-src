@@ -6,6 +6,7 @@ invalid session.save_path should not cause a segfault
 session.save_path="123;:/really\\completely:::/invalid;;,23123;213"
 session.use_cookies=0
 session.cache_limiter=
+session.serialize_handler=php
 --FILE--
 <?php
 error_reporting(E_ALL);
