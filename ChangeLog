@@ -1,3 +1,43 @@
+2003-06-01  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/config.m4:
+      Messages for newer servers.
+
+    * (PHP_4_3)
+      sapi/nsapi/nsapi-readme.txt
+      sapi/nsapi/nsapi.c:
+      MFH: Update of README for newer servers; apache-similar functions
+      nsapi_request_headers and nsapi_response_headers with apache_* aliases;
+      hide authorization-header in save mode.
+
+    * sapi/nsapi/nsapi-readme.txt
+      sapi/nsapi/nsapi.c:
+      Update of README for newer servers; apache-similar functions
+      nsapi_request_headers and nsapi_response_headers with apache_* aliases;
+      hide authorization-header in save mode.
+
+2003-06-01  Holger Zimmermann  <zimpel@t-online.de>
+
+    * sapi/pi3web/pi3web_sapi.c:
+      Removed increment of read_post_bytes because this is done within SAPI
+      (SAPI.c).
+
+2003-06-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      Allow optional directories
+
+2003-06-01  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * tests/run-test/test009.phpt:
+      Per request by Derick and Marcus.
+
+2003-06-01  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/mysql/php_mysql.c:
+      don't do this on startup, lazy initialize it.  This takes up > 17% of load
+      time in CGI mode
+
 2003-05-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/mysqli/mysqli_api.c:
