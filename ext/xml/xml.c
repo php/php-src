@@ -1020,52 +1020,66 @@ void _xml_endNamespaceDeclHandler(void *userData, const XML_Char *prefix)
 
 /************************* EXTENSION FUNCTIONS *************************/
 
-/* {{{ proto resource xml_parser_create([string encoding]) 
-   Create an XML parser */
-PHP_FUNCTION(xml_parser_create)
+static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_support)
 {
 	xml_parser *parser;
-	int argc;
-	zval **encodingArg;
+	int auto_detect = 0;
+
+	char *encoding_param = NULL;
+	int encoding_param_len = 0;
+
+	char *ns_param = NULL;
+	int ns_param_len = 0;
+	
 	XML_Char *encoding;
 	
-	argc = ZEND_NUM_ARGS();
-
-	if (argc > 1 || zend_get_parameters_ex(argc, &encodingArg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, (ns_support ? "|ss": "|s"), &encoding_param, &encoding_param_len, &ns_param, &ns_param_len) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	if (argc == 1) {
-		convert_to_string_ex(encodingArg);
+	if (encoding_param != NULL) {
 		/* The supported encoding types are hardcoded here because
 		 * we are limited to the encodings supported by expat/xmltok.
 		 */
-		if (strncasecmp(Z_STRVAL_PP(encodingArg), "ISO-8859-1",
-						Z_STRLEN_PP(encodingArg)) == 0) {
+		if (encoding_param_len == 0) {
+			encoding = XML(default_encoding);
+			auto_detect = 1;
+		} else if (strcasecmp(encoding_param, "ISO-8859-1") == 0) {
 			encoding = "ISO-8859-1";
-		} else if (strncasecmp(Z_STRVAL_PP(encodingArg), "UTF-8",
-						Z_STRLEN_PP(encodingArg)) == 0) {
+		} else if (strcasecmp(encoding_param, "UTF-8") == 0) {
 			encoding = "UTF-8";
-		} else if (strncasecmp(Z_STRVAL_PP(encodingArg), "US-ASCII",
-						Z_STRLEN_PP(encodingArg)) == 0) {
+		} else if (strcasecmp(encoding_param, "US-ASCII") == 0) {
 			encoding = "US-ASCII";
-		} else { /* UTF-16 not supported */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unsupported source encoding \"%s\"", Z_STRVAL_PP(encodingArg));
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unsupported source encoding \"%s\"", encoding_param);
 			RETURN_FALSE;
 		}
 	} else {
 		encoding = XML(default_encoding);
 	}
 
+	if (ns_support && ns_param == NULL){
+		ns_param = ":";
+	}
+
 	parser = ecalloc(sizeof(xml_parser), 1);
-	parser->parser = XML_ParserCreate_MM(encoding, &php_xml_mem_hdlrs, NULL);
+	parser->parser = XML_ParserCreate_MM((auto_detect ? NULL : encoding),
+                                         &php_xml_mem_hdlrs, ns_param);
+
 	parser->target_encoding = encoding;
 	parser->case_folding = 1;
 	parser->object = NULL;
 	XML_SetUserData(parser->parser, parser);
 
-	ZEND_REGISTER_RESOURCE(return_value,parser,le_xml_parser);
+	ZEND_REGISTER_RESOURCE(return_value, parser,le_xml_parser);
 	parser->index = Z_LVAL_P(return_value);
+}
+
+/* {{{ proto resource xml_parser_create([string encoding]) 
+   Create an XML parser */
+PHP_FUNCTION(xml_parser_create)
+{
+	php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);	
 }
 /* }}} */
 
@@ -1073,55 +1087,7 @@ PHP_FUNCTION(xml_parser_create)
    Create an XML parser */
 PHP_FUNCTION(xml_parser_create_ns)
 {
-	xml_parser *parser;
-	int argc;
-	zval **encodingArg, **sepArg;
-	XML_Char *encoding, *sep;
-	
-	argc = ZEND_NUM_ARGS();
-
-	if (argc > 2 || zend_get_parameters_ex(argc, &encodingArg, &sepArg) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if (argc >= 1) {
-		convert_to_string_ex(encodingArg);
-		/* The supported encoding types are hardcoded here because
-		 * we are limited to the encodings supported by expat/xmltok.
-		 */
-		if (strncasecmp(Z_STRVAL_PP(encodingArg), "ISO-8859-1",
-						Z_STRLEN_PP(encodingArg)) == 0) {
-			encoding = "ISO-8859-1";
-		} else if (strncasecmp(Z_STRVAL_PP(encodingArg), "UTF-8",
-						Z_STRLEN_PP(encodingArg)) == 0) {
-			encoding = "UTF-8";
-		} else if (strncasecmp(Z_STRVAL_PP(encodingArg), "US-ASCII",
-						Z_STRLEN_PP(encodingArg)) == 0) {
-			encoding = "US-ASCII";
-		} else { /* UTF-16 not supported */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unsupported source encoding \"%s\"", Z_STRVAL_PP(encodingArg));
-			RETURN_FALSE;
-		}
-	} else {
-		encoding = XML(default_encoding);
-	}
-
-	if (argc == 2){
-		convert_to_string_ex(sepArg);
-		sep = Z_STRVAL_PP(sepArg);
-	} else {
-		sep = ":";
-	}
-
-	parser = ecalloc(sizeof(xml_parser), 1);
-	parser->parser = XML_ParserCreate_MM(encoding, &php_xml_mem_hdlrs, sep);
-	parser->target_encoding = encoding;
-	parser->case_folding = 1;
-	parser->object = NULL;
-	XML_SetUserData(parser->parser, parser);
-
-	ZEND_REGISTER_RESOURCE(return_value,parser,le_xml_parser);
-	parser->index = Z_LVAL_P(return_value);
+	php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
