@@ -71,7 +71,7 @@ regmatch_t pmatch[];
 int eflags;
 {
 	register char *endp;
-	register int i;
+	register size_t i;
 	struct match mv;
 	register struct match *m = &mv;
 	register char *dp;
