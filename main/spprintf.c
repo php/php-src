@@ -486,7 +486,8 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-					s = ap_php_gcvt(va_arg(ap, double), precision, &num_buf[1]);
+					s = ap_php_gcvt(va_arg(ap, double), precision, &num_buf[1],
+							alternate_form);
 					if (*s == '-')
 						prefix_char = *s++;
 					else if (print_sign)
