@@ -1362,8 +1362,8 @@ ZEND_API inline int is_numeric_string(char *str, int length, long *lval, double 
 	errno=0;
 	local_dval = strtod(str, &end_ptr);
 	if (errno!=ERANGE && end_ptr == str+length) { /* floating point string */
-		if (local_dval==HUGE_VAL || local_dval==-HUGE_VAL) {
-			/* "inf" */
+		if (! finite(local_dval)) {
+			/* "inf","nan" and maybe other weird ones */
 			return 0;
 		}
 
