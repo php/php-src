@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Improved overall speed of IRCG, added URL handling to message scanner (Sascha)
 - Fixed some modules to allow using output-buffering. (Thies)
 - Added the chroot() function (Derick)
 - PostgreSQL now does a rollback at the end of a request on every
@@ -144,6 +145,7 @@ PHP 4.0                                                                    NEWS
   at run-time to provide the replacement string. It is passed an array of
   matched pattern and subpatterns. (Andrei)
 - Put an end to BUG#4615 (kalowsky & Eric Veldhuyzen)
+- Added the IRCG extension (Sascha)
 - Fixed realpath() in Virtual Directory mode (Daniel)
 - Integrated the Phil Nelson's bc math library routines into PHP, now that
   the license allows it (Phil Nelson <phil@cs.wwu.edu>)
