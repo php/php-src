@@ -937,7 +937,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	op_array.fn_flags = fn_flags;
 
 	op_array.scope = CG(active_class_entry);
-	op_array.namespace = CG(active_namespace);
+	op_array.ns = CG(active_namespace);
 
 	if (is_method) {
 		char *short_class_name = CG(active_class_entry)->name;
@@ -3222,7 +3222,7 @@ void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC)
 
 	ns->constructor = emalloc(sizeof(zend_op_array));
 	init_op_array((zend_op_array *)ns->constructor, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
-	ns->constructor->op_array.namespace = CG(active_namespace);
+	ns->constructor->op_array.ns = CG(active_namespace);
 
 	ns_token->u.op_array = CG(active_op_array);	
 	
@@ -3236,7 +3236,7 @@ void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC)
 
 void zend_do_end_namespace(znode *ns_token TSRMLS_DC)
 {
-	zend_namespace *ns = CG(active_op_array)->namespace;
+	zend_namespace *ns = CG(active_op_array)->ns;
 	int handle = CG(handle_op_arrays);
 
 	
@@ -3245,7 +3245,7 @@ void zend_do_end_namespace(znode *ns_token TSRMLS_DC)
 	pass_two(CG(active_op_array) TSRMLS_CC);
 	CG(handle_op_arrays) = handle;
 	
-	CG(active_op_array)->namespace = CG(active_namespace);
+	CG(active_op_array)->ns = CG(active_namespace);
 
 	CG(active_namespace) = ns;
 	CG(active_op_array) = ns_token->u.op_array;
@@ -3321,7 +3321,7 @@ void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers
 		ce->create_object = NULL;
 	}
 
-	ce->namespace = CG(active_namespace);
+	ce->ns = CG(active_namespace);
 }
 
 /*

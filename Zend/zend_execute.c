@@ -1216,8 +1216,8 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 	 */
 	EX(function_state).function_symbol_table = NULL;
 #endif
-	if(EG(active_namespace) != op_array->namespace) {
-		zend_switch_namespace(op_array->namespace TSRMLS_CC);
+	if(EG(active_namespace) != op_array->ns) {
+		zend_switch_namespace(op_array->ns TSRMLS_CC);
 	}
 	
 	while (1) {
