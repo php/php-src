@@ -24,8 +24,7 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors:                                                             |
-   |          Andrew Skalski      <askalski@chek.com>                     |
+   | Authors: Andrew Skalski      <askalski@chek.com>                     |
    +----------------------------------------------------------------------+
  */
 
@@ -130,7 +129,7 @@ PHP_MINIT_FUNCTION(ftp)
 	}
 
 /* {{{ proto int ftp_connect(string host [, int port])
-   Open a FTP stream */
+   Opens a FTP stream */
 PHP_FUNCTION(ftp_connect)
 {
 	pval		*arg1, *arg2;
