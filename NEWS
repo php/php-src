@@ -5,6 +5,7 @@ PHP 4                                                                      NEWS
   POSIX compatible mode. (K.Kosako <kosako at sofnec.co.jp>, Moriyoshi)
 - Fixed bug #25770 (Segfault with PHP and bison 1.875). (eggert@gnu.org, Marcus)
 - Fixed bug #25764 (ldap_get_option() crashes with unbound ldap link). (Jani)
+- Fixed bug #25758 (var_export does not escape ' & \ inside array keys). (Ilia)
 - Fixed bug #25752 (ext/ncurses: ncurses.h instead of curses.h with BSD). (Jani)
 - Fixed bug #25745 (ctype functions fail with non-ascii characters). (Moriyoshi)
 - Fixed bug #25744 (make ZTS build of ext/sybase compile). (Ilia)

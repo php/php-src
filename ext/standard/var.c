@@ -256,7 +256,11 @@ static int php_array_element_export(zval **zv, int num_args, va_list args, zend_
 	if (hash_key->nKeyLength==0) { /* numeric key */
 		php_printf("%*c%ld => ", level + 1, ' ', hash_key->h);
 	} else { /* string key */
-		php_printf("%*c'%s' => ", level + 1, ' ', hash_key->arKey);
+		char *key;
+		int key_len;
+		key = php_addcslashes(hash_key->arKey, strlen(hash_key->arKey), &key_len, 0, "'\\", 2 TSRMLS_CC);
+		php_printf("%*c'%s' => ", level + 1, ' ', key);
+		efree(key);
 	}
 	php_var_export(zv, level + 2 TSRMLS_CC);
 	PUTS (",\n");
