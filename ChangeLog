@@ -1,3 +1,251 @@
+2003-02-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      Fixed memory leaks on conversion failure.
+
+    * ext/standard/filters.c:
+      Revived convert filter codes
+
+2003-02-18  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/rpc/skeleton/skeleton.c:
+      Remove a stray COM reference.
+
+2003-02-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/libflatfile/flatfile.c:
+      - wrong use of sizeof(char)
+      - use define for block size
+      - a bit faster
+
+    * ext/dba/libflatfile/flatfile.c:
+      coding style
+
+    * ext/dba/libflatfile/flatfile.h:
+      avoiding problems
+
+2003-02-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS
+      NEWS
+      NEWS:
+      BFN
+
+2003-02-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/md5.c
+      ext/standard/sha1.c
+      ext/standard/tests/strings/md5.phpt
+      ext/standard/tests/strings/md5raw.phpt
+      ext/standard/tests/strings/sha1.phpt
+      ext/standard/tests/strings/sha1raw.phpt:
+      - Added new parameter to sha1() and md5() which return the digest as
+        binary data. (Original patch by Michael Bretterklieber
+      <mbretter@jawa.at>)
+      - Added test cases for sha1() and md5() based on the testvectors in RFC
+      1321
+        and RFC 3174.
+
+2003-02-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c:
+      Added description for the hand-made finite state machine.
+
+2003-02-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * run-tests.php:
+      - Add check for proc_open() being available
+
+2003-02-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+      Refactor new-session-id code
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+      Remember whether to send a cookie, so that we send out the correct
+      session id.  Also improve check for active session
+
+2003-02-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/rpc/com/com.c
+      main/streams/streams.c:
+      Fix incorrect TSRMLS_CC usage.
+      Fix com_create_guid()
+
+2003-02-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+      add session_regenerate_id()
+
+2003-02-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c:
+      Fixed mb_send_mail() so that Content-Type and Content-Transfer-Encoding
+      headers are overridable by additional header parameters.
+      This patch fixes bug #21985 and bug #22064.
+
+    * ext/standard/string.c:
+      Fixed bug #21708 (ucfirst() trouble again)
+      
+
+    * ext/standard/file.c:
+      Fixed bug #21689 (fgetcsv suppresses some characters before a separator)
+      The fix is suggested by Masahiro Nakayama <masa@sfc.wide.ad.jp>
+      
+
+2003-02-18  Zeev Suraski  <zeev@zend.com>
+
+    * win32/pwd.c
+      win32/time.h:
+      Commit missing stuff
+
+2003-02-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/rpc/com/com.c
+      ext/rpc/com/variant.h:
+      Implement com_create_guid().
+      Add a special case for RETVAL_VARIANT when a variant is of type
+      VT_DISPATCH but has a NULL dispatch pointer.
+      This kind of variant is returned by the WindowsInstaller automation
+      interface.
+
+    * configure.in
+      ext/standard/basic_functions.c
+      main/main.c
+      main/php_ini.c:
+      Implement simple stream support in the ZE scanners.
+
+2003-02-18  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/php_mysqli.h:
+      added new function mysqli_stmt_store_result
+
+    * ext/mysqli/tests/057.phpt:
+      test for mysqli_stmt_store_result
+
+2003-02-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/rpc/com/com.c:
+      Implement com_indexed_prop_set() which allows setting of array-like indexed
+      properties on COM objects.
+      It is expected that this function will be transient, waiting for
+      engine-level and then rpc-level support to be implemented so that this can
+      be integrated more completely.
+      I'm committing this now so that others can help develop the msi installer
+      scripts that require this feature.
+
+2003-02-18  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/php_fopen_wrapper.c:
+      Introduce //filter target to php: wrapper to allow inline application of
+      filters during fopen() style opperations
+
+2003-02-18  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      style polizei
+
+    * ext/pcntl/config.m4:
+      getpriority() and setpriority() are in libc..
+
+    * ext/standard/config.m4:
+      nice() is part of libc, use AC_CHECK_FUNCS instead
+
+2003-02-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/mysqli_api.c:
+      Fixed compiler warning.
+
+2003-02-18  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/file.c
+      main/streams/php_stream_filter_api.h:
+      Fix stream_filter_(ap|pre)pend to allow attaching on the read and/or write
+      chains.  Automagically decide what to do if noone tells us.
+
+2003-02-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      New function news.
+
+    * ext/pcntl/config.m4
+      ext/pcntl/pcntl.c
+      ext/pcntl/php_pcntl.h:
+      Added pcntl_setpriority & pcntl_getpriority(). These functions can be used
+      to fetch and alter the priority of a process.
+
+2003-02-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/filter.c
+      main/streams/streams.c:
+      TSRMLS!
+
+    * ext/standard/tests/filters/basic.phpt:
+      Add basic test of read filters and read filter chain.
+
+2003-02-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/basic_functions.c
+      ext/standard/exec.c
+      ext/standard/exec.h:
+      By popular demand nice() is renamed to proc_nice().
+      A better error message for proc_nice() failure.
+
+2003-02-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/file.c
+      ext/standard/filters.c
+      ext/standard/user_filters.c
+      main/php_streams.h
+      main/streams/cast.c
+      main/streams/context.h
+      main/streams/filter.c
+      main/streams/filter_api.h
+      main/streams/php_stream_context.h
+      main/streams/php_stream_filter_api.h
+      main/streams/php_stream_plain_wrapper.h
+      main/streams/php_stream_userspace.h
+      main/streams/plain_wrapper.h
+      main/streams/streams.c
+      main/streams/userspace.h:
+      Implement new filter API, stage 1.
+      This breaks user-space filters (for the time being), and those
+      weird convert.* filters in ext/standard/filters.c
+      
+      The filters stack has been separated into one chain for read and one chain
+      for write.
+      
+      The user-space stream_filter_append() type functions currently only
+      operate
+      on the read chain. They need extending to work with the write chain too.
+
+2003-02-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/basic_functions.c
+      ext/standard/config.m4
+      ext/standard/exec.c
+      ext/standard/exec.h:
+      Added nice() function, which allows changing of priority for the current
+      process.
+
+2003-02-18  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/tests/056.phpt:
+      new test (class which extends mysqli. currently this test fails :( )
+
+    * ext/mysqli/mysqli.c:
+      removed duplicate code
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c:
+      fixed some leaks when mysql_close will be called before all stmts are
+      freed.
+
 2003-02-17  Georg Richter  <georg.richter@phpev.de>
 
     * ext/mysqli/tests/050.phpt
