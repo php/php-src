@@ -62,11 +62,7 @@
 #include <gdfontl.h>  /* 4 Large font */
 #include <gdfontg.h>  /* 5 Giant font */
 #if HAVE_LIBTTF
-# if PHP_31
-#  include "gdttf.h"
-# else
-#  include "functions/gdttf.h"
-# endif
+# include "gdttf.h"
 #endif
 
 #ifndef M_PI
