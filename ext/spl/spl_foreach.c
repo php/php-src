@@ -40,7 +40,7 @@ typedef struct {
 	zval             *obj;
 	zend_class_entry *obj_ce;
 	zend_uint        index;
-	zend_uint        is_ce_assoc;
+	spl_is_a         is_a;
 	zend_function    *f_next;
 	zend_function    *f_rewind;
 	zend_function    *f_more;
@@ -53,17 +53,26 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 {
 	zval **obj, *retval;
 	spl_foreach_proxy proxy;
+	zend_class_entry *instance_ce;
+	spl_is_a is_a = 0;
 
 	obj = spl_get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
-	if (spl_implements(obj, spl_ce_iterator TSRMLS_CC)) {
+
+	if (obj && (instance_ce = spl_get_class_entry(*obj TSRMLS_CC)) != NULL) {
+		is_a = spl_implements(instance_ce);
+	}
+
+	if (is_a & SPL_IS_A_ITERATOR) {
 		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
 		spl_begin_method_call_ex(obj, NULL, NULL, "new_iterator", sizeof("new_iterator")-1, &retval TSRMLS_CC);
-		if (!spl_implements(&retval, spl_ce_forward TSRMLS_CC)) {
+		instance_ce = spl_get_class_entry(retval TSRMLS_CC);
+		is_a = spl_implements(instance_ce);
+		if (!(is_a & SPL_IS_A_FORWARD)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Objects created by new_iterator() must implement spl::forward");
 			ZEND_EXECUTE_HOOK_ORIGINAL(ZEND_FE_RESET);
 		}
 		PZVAL_LOCK(retval);
-	} else if (spl_implements(obj, spl_ce_forward TSRMLS_CC)) {
+	} else if (is_a & SPL_IS_A_FORWARD) {
 		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
 		(*obj)->refcount += 2; /* lock two times */
 		retval = *obj;
@@ -74,8 +83,8 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 	/* create the proxy */
 	memset(&proxy, 0, sizeof(spl_foreach_proxy));
 	proxy.obj = retval;
-	proxy.obj_ce = spl_get_class_entry(retval TSRMLS_CC);
-	proxy.is_ce_assoc = spl_implements(&retval, spl_ce_assoc TSRMLS_CC);
+	proxy.obj_ce = instance_ce;
+	proxy.is_a = is_a;
 	/* And pack it into a zval. Since it is nowhere accessible using a 
 	 * zval of type STRING is the fastest approach of storing the proxy.
 	 */
@@ -130,7 +139,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 		if (proxy->index++) {
 			spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->f_next, "next", sizeof("next")-1, &tmp TSRMLS_CC);
 		} else {
-			if (spl_implements(obj, spl_ce_sequence TSRMLS_CC)) {
+			if (proxy->is_a & SPL_IS_A_SEQUENCE) {
 				spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->f_rewind, "rewind", sizeof("rewind")-1, &tmp TSRMLS_CC);
 			}
 			op_array->opcodes[EX(opline)->op2.u.opline_num].op2 = *op1;
@@ -142,7 +151,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 
 			spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->f_current, "current", sizeof("current")-1, &value TSRMLS_CC);
 
-			if (proxy->is_ce_assoc) {
+			if (proxy->is_a & SPL_IS_A_ASSOC) {
 				spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->f_key, "key", sizeof("key")-1, &key TSRMLS_CC);
 			} else {
 				MAKE_STD_ZVAL(key);
