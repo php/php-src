@@ -3129,6 +3129,8 @@ int zend_new_handler(ZEND_OPCODE_HANDLER_ARGS)
 int zend_clone_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *obj = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+	zend_class_entry *ce;
+	zend_function *clone;
 
 	if (Z_TYPE_P(obj) != IS_OBJECT) {
 		zend_error(E_WARNING, "__clone method called on non-object");
@@ -3136,6 +3138,24 @@ int zend_clone_handler(ZEND_OPCODE_HANDLER_ARGS)
 		EX_T(EX(opline)->result.u.var).var.ptr->refcount++;
 		NEXT_OPCODE();
 	} 
+
+	ce = Z_OBJCE_P(obj);
+	clone = ce->clone;
+
+	if (clone->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+		/* Ensure that if we're calling a private function, we're allowed to do so.
+		 */
+		if (ce != EG(scope)) {
+			zend_error(E_ERROR, "Call to private __clone from context '%s'", EG(scope) ? EG(scope)->name : "");
+		}
+	} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
+		/* Ensure that if we're calling a protected function, we're allowed to do so.
+		 */
+		if (!zend_check_protected(clone->common.scope, EG(scope))) {
+			zend_error(E_ERROR, "Call to protected __clone from context '%s'", EG(scope) ? EG(scope)->name : "");
+		}
+	}
+
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
 	ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
 	EX_T(EX(opline)->result.u.var).var.ptr->value.obj = Z_OBJ_HT_P(obj)->clone_obj(obj TSRMLS_CC);
