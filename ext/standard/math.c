@@ -321,6 +321,7 @@ PHP_FUNCTION(tanh)
 
 PHP_FUNCTION(asinh)
 {
+#ifdef HAVE_ASINH
 	zval **num;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
@@ -329,6 +330,7 @@ PHP_FUNCTION(asinh)
 	convert_to_double_ex(num);
 	Z_DVAL_P(return_value) = asinh(Z_DVAL_PP(num));
 	Z_TYPE_P(return_value) = IS_DOUBLE;
+#endif
 }
 
 /* }}} */
@@ -337,6 +339,7 @@ PHP_FUNCTION(asinh)
 
 PHP_FUNCTION(acosh)
 {
+#ifdef HAVE_ACOSH
 	zval **num;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
@@ -345,6 +348,7 @@ PHP_FUNCTION(acosh)
 	convert_to_double_ex(num);
 	Z_DVAL_P(return_value) = acosh(Z_DVAL_PP(num));
 	Z_TYPE_P(return_value) = IS_DOUBLE;
+#endif
 }
 
 /* }}} */
@@ -353,6 +357,7 @@ PHP_FUNCTION(acosh)
 
 PHP_FUNCTION(atanh)
 {
+#ifdef HAVE_ATANH
 	zval **num;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
@@ -361,6 +366,7 @@ PHP_FUNCTION(atanh)
 	convert_to_double_ex(num);
 	Z_DVAL_P(return_value) = atanh(Z_DVAL_PP(num));
 	Z_TYPE_P(return_value) = IS_DOUBLE;
+#endif
 }
 
 /* }}} */
@@ -504,6 +510,7 @@ PHP_FUNCTION(expm1)
 
 PHP_FUNCTION(log1p)
 {
+#ifdef HAVE_LOG1P
 	zval **num;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
@@ -512,6 +519,7 @@ PHP_FUNCTION(log1p)
 	convert_to_double_ex(num);
 	Z_DVAL_P(return_value) = log1p(Z_DVAL_PP(num));
 	Z_TYPE_P(return_value) = IS_DOUBLE;
+#endif
 }
 
 /* }}} */
@@ -577,6 +585,7 @@ PHP_FUNCTION(sqrt)
 
 PHP_FUNCTION(hypot)
 {
+#ifdef HAVE_HYPOT
 	zval **num1, **num2;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &num1, &num2) == FAILURE) {
@@ -586,6 +595,7 @@ PHP_FUNCTION(hypot)
 	convert_to_double_ex(num2);
 	Z_DVAL_P(return_value) = hypot(Z_DVAL_PP(num1), Z_DVAL_PP(num2));
 	Z_TYPE_P(return_value) = IS_DOUBLE;
+#endif
 }
 
 /* }}} */

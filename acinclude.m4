@@ -1681,6 +1681,13 @@ AC_DEFUN([PHP_CHECK_FUNC_LIB],[
   ])
 
   if test "$found" = "yes"; then
+    ac_libs=$LIBS
+    LIBS="$LIBS -l$2"
+    AC_TRY_RUN([main() { return (0); }],[found=yes],[found=no],[found=no])
+    LIBS=$ac_libs
+  fi
+
+  if test "$found" = "yes"; then
     PHP_ADD_LIBRARY($2)
     PHP_DEF_HAVE($1)
     PHP_DEF_HAVE(lib$2)
