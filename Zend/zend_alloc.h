@@ -92,6 +92,8 @@ ZEND_API void _persist_alloc(void *ptr);
 #define safe_estrdup(ptr)  ((ptr)?(estrdup(ptr)):(empty_string))
 #define safe_estrndup(ptr,len) ((ptr)?(estrndup((ptr),(len))):(empty_string))
 
+ZEND_API int set_memory_limit(unsigned int memory_limit);
+
 ZEND_API void start_memory_manager(void);
 ZEND_API void shutdown_memory_manager(int silent, int clean_cache);
 

@@ -199,7 +199,8 @@ struct _zend_alloc_globals {
 	void *cache[MAX_CACHED_MEMORY][MAX_CACHED_ENTRIES];
 	unsigned char cache_count[MAX_CACHED_MEMORY];
 
-# if MEMORY_LIMIT
+#if MEMORY_LIMIT
+	unsigned int memory_limit;
 	unsigned int allocated_memory;
 	unsigned char memory_exhausted;
 #endif
