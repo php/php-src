@@ -23,21 +23,33 @@ if (PHP_PDO_MSSQL != "no") {
 	/* if they pointed us to a freetds dir, pick that up,
 	 * otherwise we'll poke around and look for MSSQL libs */
 
+	pdo_mssql_locations = new Array(
+		PHP_PDO_MSSQL,
+		"\\Program Files\\Microsoft SQL Server\\80",
+		"\\MSSQL8",
+		"\\MSSQL7",
+		PHP_PHP_BUILD + "\\MSSQL80"
+	);
+	PDO_DBLIB_FLAVOUR = 0;
+
 	if (CHECK_LIB("sybdb.lib", "pdo_mssql", PHP_PDO_MSSQL) &&
 			CHECK_HEADER_ADD_INCLUDE("sybfront.h", "CFLAGS_PDO_MSSQL",
 			PHP_PDO_MSSQL, null, null, true)) {
 		/* smells like FreeTDS (or maybe native sybase dblib) */
 		PDO_DBLIB_FLAVOUR = "freetds";
-	} else if (CHECK_LIB("ntwdblib.lib", "pdo_mssql", "\\MSSQL8\\DevTools\\Lib") &&
-			CHECK_HEADER_ADD_INCLUDE("sqlfront.h", "CFLAGS_PDO_MSSQL",
-			null, null, null, true)) {
-		PDO_DBLIB_FLAVOUR = 8;
-	} else if (CHECK_LIB("ntwdblib.lib", "pdo_mssql", "\\MSSQL7\\DevTools\\Lib") &&
-			CHECK_HEADER_ADD_INCLUDE("sqlfront.h", "CFLAGS_PDO_MSSQL",
-			null, null, null, true)) {
-		PDO_DBLIB_FLAVOUR = 7;
 	} else {
-		PDO_DBLIB_FLAVOUR = 0;
+		
+		for (i = 0; i < pdo_mssql_locations.length; i++) {
+			if (CHECK_LIB("ntwdblib.lib", "pdo_mssql",
+					pdo_mssql_locations[i] + "\\DevTools\\Lib") &&
+					CHECK_HEADER_ADD_INCLUDE("sqlfront.h", "CFLAGS_PDO_MSSQL",
+					pdo_mssql_locations[i] + "\\DevTools\\Include",
+					null, null, true)) {
+				pdo_mssql_locations[i].match(new RegExp("(\d)"));
+				PDO_DBLIB_FLAVOUR = RegExp.$1 + 0;
+				break;
+			}
+		}
 	}
 
 	if (PDO_DBLIB_FLAVOUR != 0) {
