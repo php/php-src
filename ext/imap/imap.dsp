@@ -107,7 +107,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts_debug.lib wsock32.lib winmm.lib cclient.lib /nologo /dll /debug /machine:I386 /out:"Debug_TS/php_imap.dll" /pdbtype:sept /libpath:"..\..\..\\" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\php_build\IMAP\C-Client"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts_debug.lib wsock32.lib winmm.lib cclient.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS/php_imap.dll" /pdbtype:sept /libpath:"..\..\..\\" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\php_build\IMAP\C-Client"
 
 !ELSEIF  "$(CFG)" == "imap - Win32 Release_TS"
 
@@ -133,7 +133,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib wsock32.lib winmm.lib cclient.lib /nologo /dll /machine:I386 /out:"Release_TS/php_imap.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\..\php_build\IMAP\C-Client"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib wsock32.lib winmm.lib cclient.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_imap.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\..\php_build\IMAP\C-Client"
 
 !ENDIF 
 
