@@ -69,6 +69,7 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 		if(esc_html) {
 			zend_html_puts(display_string, display_string_length);
 		} else {
+			TSRMLS_FETCH();
 			PHPWRITE(display_string, display_string_length);
 		}
 	}

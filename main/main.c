@@ -306,6 +306,7 @@ PHPAPI void php_log_err(char *log_message)
    wrapper for modules to use PHPWRITE */
 PHPAPI int php_write(void *buf, uint size)
 {
+	TSRMLS_FETCH();
 	return PHPWRITE(buf, size);
 }
 /* }}} */
@@ -318,6 +319,7 @@ PHPAPI int php_printf(const char *format, ...)
 	int ret;
 	char buffer[PRINTF_BUFFER_SIZE];
 	int size;
+	TSRMLS_FETCH();
 
 	va_start(args, format);
 	size = vsnprintf(buffer, sizeof(buffer), format, args);
@@ -719,7 +721,8 @@ void php_request_shutdown(void *dummy)
  */
 static int php_body_write_wrapper(const char *str, uint str_length)
 {
-	return php_body_write(str, str_length);
+	TSRMLS_FETCH();
+	return php_body_write(str, str_length TSRMLS_CC);
 }
 /* }}} */
 

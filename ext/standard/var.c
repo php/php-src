@@ -42,6 +42,7 @@
 static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int level;
+	TSRMLS_FETCH();
 
 	level = va_arg(args, int);
 
@@ -50,11 +51,11 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 	} else { /* string key */
 		php_printf("%*c[\"%s\"]=>\n", level + 1, ' ', hash_key->arKey);
 	}
-	php_var_dump(zv, level + 2);
+	php_var_dump(zv, level + 2 TSRMLS_CC);
 	return 0;
 }
 
-void php_var_dump(zval **struc, int level)
+void php_var_dump(zval **struc, int level TSRMLS_DC)
 {
 	HashTable *myht;
 
@@ -131,7 +132,7 @@ PHP_FUNCTION(var_dump)
 	}
 	
 	for (i=0; i<argc; i++)
-		php_var_dump(args[i], 1);
+		php_var_dump(args[i], 1 TSRMLS_CC);
 	
 	efree(args);
 }
@@ -366,7 +367,7 @@ PHPAPI void php_var_serialize(smart_str *buf, zval **struc, HashTable *var_hash)
 }
 	
 /* }}} */
-/* {{{ php_var_dump */
+/* {{{ php_var_unserialize */
 
 PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, HashTable *var_hash)
 {
