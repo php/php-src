@@ -16,6 +16,7 @@
    |          Zeev Suraski <zeev@zend.com>                                |
    |          Rasmus Lerdorf <rasmus@php.net>                             |
    |          Andrei Zmievski <andrei@ispi.net>                           |
+   |          Stig Venaas <venaas@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -343,6 +344,53 @@ static int array_natural_compare(const void *a, const void *b)
 static int array_natural_case_compare(const void *a, const void *b)
 {
 	return array_natural_general_compare(a, b, 1);
+}
+
+/* Compare types first, and compare data only if same type */
+static int array_type_data_compare(const void *a, const void *b)
+{
+	Bucket *f;
+	Bucket *s;
+	pval result;
+	pval *first;
+	pval *second;
+	int diff;
+	ARRAYLS_FETCH();
+ 
+	f = *((Bucket **) a);
+	s = *((Bucket **) b);
+ 
+	first = *((pval **) f->pData);
+	second = *((pval **) s->pData);
+
+	diff = first->type - second->type;
+	if (diff)
+		return diff;
+
+
+    if (ARRAYG(compare_func)(&result, first, second) == FAILURE) {
+        return 0;
+    } 
+
+    if (result.type == IS_DOUBLE) {
+        if (result.value.dval < 0) {
+			return -1;
+        } else if (result.value.dval > 0) {
+			return 1;
+        } else {
+			return 0;
+		}
+    }
+
+	convert_to_long(&result);
+
+	if (result.value.lval < 0) {
+		return -1;
+	} else if (result.value.lval > 0) {
+		return 1;
+	} 
+
+	return 0;
 }
 
 static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
@@ -2221,7 +2269,7 @@ PHP_FUNCTION(array_unique)
    Returns the entries of arr1 that have values which are present in all the other arguments */
 PHP_FUNCTION(array_intersect)
 {
-        zval ***args = NULL;
+	zval ***args = NULL;
 	HashTable *hash;
 	int argc, i, c = 0;
 	Bucket ***lists, **list, ***ptrs, *p;
@@ -2252,57 +2300,67 @@ PHP_FUNCTION(array_intersect)
 		hash = HASH_OF(*args[i]);
 		list = (Bucket **) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket *), hash->persistent);
 		if (!list)
-		        RETURN_FALSE;
+			RETURN_FALSE;
 		lists[i] = list;
 		ptrs[i] = list;
 		for (p = hash->pListHead; p; p = p->pListNext)
-		        *list++ = p;
+			*list++ = p;
 		*list = NULL;
-		qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare);
+		qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_type_data_compare);
 	}
+
+	/* copy the argument array */
+	*return_value = **args[0];
+	zval_copy_ctor(return_value);
+
 	/* go through the lists and look for common values */
 	while (*ptrs[0]) {
 		for (i=1; i<argc; i++) {
-		        while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i]))))
-			        ptrs[i]++;
-			if (!*ptrs[i])
-			        goto out;
+			while (*ptrs[i] && (0 < (c = array_type_data_compare(ptrs[0], ptrs[i]))))
+				ptrs[i]++;
+			if (!*ptrs[i]) {
+				/* delete any values corresponding to remains of ptrs[0] */
+				/* and exit */
+				for (;;) {
+					p = *ptrs[0]++;
+					if (!p)
+						goto out;
+					if (p->nKeyLength)
+						zend_hash_del(return_value->value.ht, p->arKey, p->nKeyLength);  
+					else
+						zend_hash_index_del(return_value->value.ht, p->h);  
+				}
+			}
 			if (c)
-			        break;
+				break;
 			ptrs[i]++;
 		}
 		if (c) {
-		  /* ptrs[0] not in all arguments, next candidate is ptrs[i] */
-		        for (;;) {
-		                if (!*++ptrs[0])
-			                goto out;
-				if (0 <= array_data_compare(ptrs[0], ptrs[i]))
-			                break;
+			/* Value of ptrs[0] not in all arguments, delete all entries */
+            /* with value < value of ptrs[i] */
+			for (;;) {
+				p = *ptrs[0];
+				if (p->nKeyLength)
+					zend_hash_del(return_value->value.ht, p->arKey, p->nKeyLength);  
+				else
+					zend_hash_index_del(return_value->value.ht, p->h);  
+				if (!*++ptrs[0])
+					goto out;
+				if (0 <= array_type_data_compare(ptrs[0], ptrs[i]))
+					break;
 			}
 		} else {
-		        /* ptrs[0] is present in all the arguments */
-		        /* Go through all entries with same value as ptrs[0] */
-		        for (;;) {
-			        p = *ptrs[0];
-				entry = *((zval **)p->pData);
-				entry->refcount++;
-				if (p->nKeyLength)
-				        zend_hash_update(return_value->value.ht,
-						 p->arKey, p->nKeyLength,
-						 &entry, sizeof(zval *),
-						 NULL);  
-				else
-				        zend_hash_index_update(return_value->value.ht,
-						       p->h, &entry,
-						       sizeof(zval *),
-						       NULL);
+			/* ptrs[0] is present in all the arguments */
+			/* Skip all entries with same value as ptrs[0] */
+			for (;;) {
 				if (!*++ptrs[0])
-				        goto out;
-				if (array_data_compare(ptrs[0]-1, ptrs[0]))
-				        break;
+					goto out;
+				if (array_type_data_compare(ptrs[0]-1, ptrs[0]))
+					break;
 			}
 		}
 	}
+
 out:
 	for (i=0; i<argc; i++) {
 	        hash = HASH_OF(*args[i]);
@@ -2355,14 +2413,19 @@ PHP_FUNCTION(array_diff)
 		for (p = hash->pListHead; p; p = p->pListNext)
 		        *list++ = p;
 		*list = NULL;
-		qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare);
+		qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_type_data_compare);
 	}
+
+	/* copy the argument array */
+	*return_value = **args[0];
+	zval_copy_ctor(return_value);
+
 	/* go through the lists and look for values of ptr[0]
            that are not in the others */
 	while (*ptrs[0]) {
 	        c = 1;
 		for (i=1; i<argc; i++) {
-		        while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i]))))
+		        while (*ptrs[i] && (0 < (c = array_type_data_compare(ptrs[0], ptrs[i]))))
 			        ptrs[i]++;
 			if (!c) {
 			        if (*ptrs[i])
@@ -2371,34 +2434,27 @@ PHP_FUNCTION(array_diff)
 			}
 		}
 		if (!c) {
-		  /* ptrs[0] in one of the other arguments */
-		  /* skip all entries with value as ptrs[0] */
-		        for (;;) {
-		                if (!*++ptrs[0])
-			                goto out;
-				if (array_data_compare(ptrs[0]-1, ptrs[0]))
-			                break;
+			/* ptrs[0] in one of the other arguments */
+			/* delete all entries with value as ptrs[0] */
+			for (;;) {
+				p = *ptrs[0];
+				if (p->nKeyLength)
+					zend_hash_del(return_value->value.ht, p->arKey, p->nKeyLength);  
+				else
+					zend_hash_index_del(return_value->value.ht, p->h);  
+				if (!*++ptrs[0])
+					goto out;
+				if (array_type_data_compare(ptrs[0]-1, ptrs[0]))
+					break;
 			}
 		} else {
-		        /* ptrs[0] is in none of the other arguments */
-		        for (;;) {
-			        p = *ptrs[0];
-				entry = *((zval **)p->pData);
-				entry->refcount++;
-				if (p->nKeyLength)
-				        zend_hash_update(return_value->value.ht,
-						 p->arKey, p->nKeyLength,
-						 &entry, sizeof(zval *),
-						 NULL);  
-				else
-				        zend_hash_index_update(return_value->value.ht,
-						       p->h, &entry,
-						       sizeof(zval *),
-						       NULL);
+			/* ptrs[0] in none of the other arguments */
+			/* skip all entries with value as ptrs[0] */
+			for (;;) {
 				if (!*++ptrs[0])
-				        goto out;
-				if (array_data_compare(ptrs[0]-1, ptrs[0]))
-				        break;
+					goto out;
+				if (array_type_data_compare(ptrs[0]-1, ptrs[0]))
+					break;
 			}
 		}
 	}
