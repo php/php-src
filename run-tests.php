@@ -409,18 +409,18 @@ COMMAND $cmd
 
 	if (isset($section_text['EXPECTF'])) {
 		$wanted = trim($section_text['EXPECTF']);
-		$wanted = preg_replace('/\r\n/',"\n",$wanted);
-		$wanted = preg_quote($wanted, '/');
+		$wanted_re = preg_replace('/\r\n/',"\n",$wanted);
+		$wanted_re = preg_quote($wanted_re, '/');
 		// Stick to basics
-		$wanted = str_replace("%s", ".*?", $wanted); //not greedy
-		$wanted = str_replace("%i", "[0-9]+", $wanted);
-		$wanted = str_replace("%f", "[0-9\.+\-]+", $wanted);
+		$wanted_re = str_replace("%s", ".*?", $wanted_re); //not greedy
+		$wanted_re = str_replace("%i", "[0-9]+", $wanted_re);
+		$wanted_re = str_replace("%f", "[0-9\.+\-]+", $wanted_re);
 /* DEBUG YOUR REGEX HERE
 		var_dump($wanted);
 		print(str_repeat('=', 80) . "\n");
 		var_dump($output);
 */
-		if (preg_match("/$wanted/s", $output)) {
+		if (preg_match("/$wanted_re/s", $output)) {
 			echo "PASS $tested\n";
 			return 'PASSED';
 		}
