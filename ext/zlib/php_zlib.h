@@ -59,6 +59,8 @@ PHP_FUNCTION(gzseek);
 PHP_FUNCTION(gzpassthru);
 PHP_FUNCTION(readgzfile);
 PHP_FUNCTION(gzfile);
+PHP_FUNCTION(gzcompress);
+PHP_FUNCTION(gzuncompress);
 
 #ifdef ZTS
 #define ZLIBLS_D php_zlib_globals *zlib_globals
