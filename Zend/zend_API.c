@@ -401,7 +401,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec TSRMLS_DC)
 					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
 						*p = NULL;
 					} else {
-						return ce->name;
+						return ce ? ce->name : "object";
 					}
 				}
 			}
