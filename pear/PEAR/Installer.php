@@ -81,10 +81,6 @@ class PEAR_Installer extends PEAR_Common
     function _PEAR_Installer()
     {
         chdir($this->pwd);
-        if ($this->tmpdir && is_dir($this->tmpdir)) {
-            System::rm("-rf $this->tmpdir");
-        }
-        $this->tmpdir = null;
         $this->_PEAR_Common();
     }
 
