@@ -4,9 +4,9 @@ User-space streams
 <?php
 # vim600:syn=php:
 
-/* This is a fairly aggressive test that looks at
- * user streams and also gives the seek/gets/buffer
- * layer of streams a thorough testing */
+// This is a fairly aggressive test that looks at
+// user streams and also gives the seek/gets/buffer
+// layer of streams a thorough testing
 
 $lyrics = <<<EOD
 ...and the road becomes my bride
@@ -53,9 +53,11 @@ Wherever I May Roam
 
 EOD;
 
-/* repeat the data a few times so that it grows larger than
- * the default cache chunk size and that we have something
- * to seek around... */
+var_dump(strlen($lyrics));
+
+// repeat the data a few times so that it grows larger than
+// the default cache chunk size and that we have something
+// to seek around... 
 $DATA = "";
 for ($i = 0; $i < 30; $i++) {
 	if ($i % 2 == 0)
@@ -64,8 +66,8 @@ for ($i = 0; $i < 30; $i++) {
 		$DATA .= $lyrics;
 }
 
-/* store the data in a regular file so that we can compare
- * the results */
+// store the data in a regular file so that we can compare
+// the results
 $tf = tmpfile();
 fwrite($tf, $DATA);
 $n = ftell($tf);
@@ -76,10 +78,12 @@ $DATALEN = strlen($DATA);
 if ($n != $DATALEN)
 	die("tmpfile stored $n bytes; should be $DATALEN!");
 
-class uselessstream {
+class uselessstream 
+{
 }
 
-class mystream {
+class mystream 
+{
 	var $path;
 	var $mode;
 	var $options;
@@ -151,33 +155,40 @@ class mystream {
 
 }
 
-if (@stream_register_wrapper("bogus", "class_not_exist"))
+if (@stream_register_wrapper("bogus", "class_not_exist")) {
 	die("Registered a non-existant class!!!???");
+}
+echo "Not Registered\n";
 
-if (!stream_register_wrapper("test", "mystream"))
+if (!stream_register_wrapper("test", "mystream")) {
 	die("test wrapper registration failed");
-if (!stream_register_wrapper("bogon", "uselessstream"))
-	die("bogon wrapper registration failed");
+}
+echo "Registered\n";
 
+if (!stream_register_wrapper("bogon", "uselessstream")) {
+	die("bogon wrapper registration failed");
+}
 echo "Registered\n";
 
 $b = @fopen("bogon://url", "rb");
-if (is_resource($b))
+if (is_resource($b)) {
 	die("Opened a bogon??");
+}
 
 $fp = fopen("test://DATA", "rb");
-if (!is_resource($fp))
+if (!$fp || !is_resource($fp)) {
 	die("Failed to open resource");
+}
 
-/* some default seeks that will cause buffer/cache misses */
+// some default seeks that will cause buffer/cache misses
 $seeks = array(
 	array(SEEK_SET, 0, 0),
 	array(SEEK_CUR, 8450, 8450),
 	array(SEEK_CUR, -7904, 546),
 	array(SEEK_CUR, 12456, 13002),
 
-	/* end up at BOF so that randomly generated seek offsets
-	 * below will know where they are supposed to be */
+	// end up at BOF so that randomly generated seek offsets
+	// below will know where they are supposed to be
 	array(SEEK_SET, 0, 0)
 );
 
@@ -192,7 +203,7 @@ $whence_names = array(
 	SEEK_END => "SEEK_END"
 	);
 
-/* generate some random seek offsets */
+// generate some random seek offsets
 $position = 0;
 for ($i = 0; $i < 256; $i++) {
 	$whence = $whence_map[array_rand($whence_map, 1)];
@@ -215,14 +226,14 @@ for ($i = 0; $i < 256; $i++) {
 	$seeks[] = array($whence, $offset, $position);
 }
 
-/* we compare the results of fgets using differing line lengths to 
- * test the fgets layer also */
+// we compare the results of fgets using differing line lengths to 
+// test the fgets layer also
 $line_lengths = array(1024, 256, 64, 16);
 $fail_count = 0;
 
 ob_start();
 foreach($line_lengths as $line_length) {
-	/* now compare the real stream with the user stream */
+	// now compare the real stream with the user stream
 	$j = 0;
 	rewind($tf);
 	rewind($fp);
@@ -289,12 +300,15 @@ while(!feof($fp)) {
 	}
 }
 
-if ($fail_count == 0)
+if ($fail_count == 0) {
 	echo "FGETS: OK\n";
-
-
+}
+/**/
 ?>
 --EXPECT--
+int(1085)
+Not Registered
+Registered
 Registered
 SEEK: OK
 FGETS: OK
