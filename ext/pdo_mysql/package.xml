@@ -10,6 +10,12 @@
    <email>george@omniti.com</email>
    <role>lead</role>
   </maintainer>
+  <maintainer>
+    <user>iliaa</user>
+    <name>Ilia Alshanetsky</name>
+    <email>iliaa@php.net</email>
+    <role>lead</role>
+  </maintainer>
  </maintainers>
  <description>
   This extension provides a Mysql 3.x/4.0 driver for PDO.
