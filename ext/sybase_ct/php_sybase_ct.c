@@ -1260,9 +1260,10 @@ static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 		tmp = (pval *) emalloc(sizeof(pval));
 		*tmp = result->data[result->cur_row][i];
 		INIT_PZVAL(tmp);
-		pval_copy_constructor(tmp);
 		if (PG(magic_quotes_runtime) && tmp->type == IS_STRING) {
-			tmp->value.str.val = php_addslashes(tmp->value.str.val,tmp->value.str.len,&tmp->value.str.len,1);
+			tmp->value.str.val = php_addslashes(tmp->value.str.val,tmp->value.str.len,&tmp->value.str.len,0);
+		} else {
+			pval_copy_constructor(tmp);
 		}
 		zend_hash_index_update(return_value->value.ht, i, (void *) &tmp, sizeof(pval *), NULL);
 		tmp->refcount++;
