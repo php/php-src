@@ -82,8 +82,8 @@ ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element)
 			}\
 			if ((l)->dtor) {\
 				(l)->dtor((current)->data);\
-				pefree((current), (l)->persistent);\
 			}\
+			pefree((current), (l)->persistent);\
 			--l->count;
 
 
