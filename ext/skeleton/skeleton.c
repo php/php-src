@@ -30,7 +30,9 @@ function_entry extname_functions[] = {
 /* {{{ extname_module_entry
  */
 zend_module_entry extname_module_entry = {
+#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
+#endif
 	"extname",
 	extname_functions,
 	PHP_MINIT(extname),
@@ -38,7 +40,9 @@ zend_module_entry extname_module_entry = {
 	PHP_RINIT(extname),		/* Replace with NULL if there's nothing to do at request start */
 	PHP_RSHUTDOWN(extname),	/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(extname),
-    "0.1", /* Replace with version number for your extension */
+#if ZEND_MODULE_API_NO >= 20010901
+    FOO_VERSION,          /* extension version number (string) */
+#endif
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
