@@ -96,6 +96,16 @@ unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_
 	/* run through the whole string, converting as we go */
 	while ((ch = *current++) != '\0') {
 		if (ch == base64_pad) break;
+
+	    /* When Base64 gets POSTed, all pluses are interpreted as spaces.
+		   This line changes them back.  It's not exactly the Base64 spec,
+		   but it is completely compatible with it (the spec says that
+		   spaces are invalid).  This will also save many people considerable
+		   headache.  - Turadg Aleahmad <turadg@wise.berkeley.edu>
+	    */
+
+		if (ch == ' ') ch = '+'; 
+
 		ch = reverse_table[ch];
 		if (ch < 0) continue;
 
