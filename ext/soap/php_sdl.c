@@ -72,7 +72,7 @@ static sdlTypePtr get_element(sdlPtr sdl, xmlNodePtr node, const char *type)
 			}
 		}
 
-		if (cptype) {efree(cptype);}
+		efree(cptype);
 		if (ns) {efree(ns);}
 	}
 	return ret;
@@ -303,12 +303,16 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 		if (!tmp) {
 			php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing message attribute for <header>");
 		}
-		parse_namespace(tmp->children->content, &ctype, &ns);
+
+		ctype = strrchr(tmp->children->content,':');
+		if (ctype == NULL) {
+			ctype = tmp->children->content;
+		} else {
+		  ++ctype;
+		}
 		if (zend_hash_find(&ctx->messages, ctype, strlen(ctype)+1, (void**)&message) != SUCCESS) {
 			php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing <message> with name '%s'", tmp->children->content);
 		}
-		if (ctype) {efree(ctype);}
-		if (ns) {efree(ns);}
 
 		tmp = get_attribute(header->properties, "part");
 		if (!tmp) {
@@ -387,13 +391,16 @@ static HashTable* wsdl_message(sdlCtx *ctx, char* message_name)
 	HashTable* parameters = NULL;
 	char *ns, *ctype;
 
-	parse_namespace(message_name, &ctype, &ns);
+	ctype = strrchr(message_name,':');
+	if (ctype == NULL) {
+		ctype = message_name;
+	} else {
+	  ++ctype;
+	}
 	if (zend_hash_find(&ctx->messages, ctype, strlen(ctype)+1, (void**)&tmp) != SUCCESS) {
 		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing <message> with name '%s'", message->children->content);
 	}
 	message = *tmp;
-	if (ctype) {efree(ctype);}
-	if (ns) {efree(ns);}
 
 	parameters = sdl_malloc(sizeof(HashTable));
 	zend_hash_init(parameters, 0, NULL, delete_paramater, SDL_PERSISTENT);
@@ -514,14 +521,16 @@ static sdlPtr load_wsdl(char *struri)
 					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unknown binding type");
 				}
 
-				parse_namespace(bindingAttr->children->content, &ctype, &ns);
+				ctype = strrchr(bindingAttr->children->content,':');
+				if (ctype == NULL) {
+					ctype = bindingAttr->children->content;
+				} else {
+				  ++ctype;
+				}
 				if (zend_hash_find(&ctx.bindings, ctype, strlen(ctype)+1, (void*)&tmp) != SUCCESS) {
 					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No <binding> element with name '%s'", ctype);
 				}
 				binding = *tmp;
-
-				if (ns) {efree(ns);}
-				if (ctype) {efree(ctype);}
 
 				if (tmpbinding->bindingType == BINDING_SOAP) {
 					sdlSoapBindingPtr soapBinding;
@@ -560,15 +569,17 @@ static sdlPtr load_wsdl(char *struri)
 				if (type == NULL) {
 					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing 'type' attribute for <binding>");
 				}
-				parse_namespace(type->children->content, &ctype, &ns);
 
+				ctype = strrchr(type->children->content,':');
+				if (ctype == NULL) {
+					ctype = type->children->content;
+				} else {
+				  ++ctype;
+				}
 				if (zend_hash_find(&ctx.portTypes, ctype, strlen(ctype)+1, (void**)&tmp) != SUCCESS) {
 					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing <portType> with name '%s'", name->children->content);
 				}
 				portType = *tmp;
-
-				if (ctype) {efree(ctype);}
-				if (ns) {efree(ns);}
 
 				trav2 = binding->children;
 				FOREACHNODE(trav2, "operation", operation) {
@@ -669,8 +680,10 @@ static sdlPtr load_wsdl(char *struri)
 						} else if (input == NULL) {
 							function->responseName = sdl_strdup(function->functionName);
 						} else {
-							function->responseName = sdl_malloc(strlen(function->functionName) + sizeof("Response"));
-							sprintf(function->responseName, "%sResponse", function->functionName);
+							int len = strlen(function->functionName);
+							function->responseName = sdl_malloc(len + sizeof("Response"));
+							memcpy(function->responseName, function->functionName, len);
+							memcpy(function->responseName+len, "Response", sizeof("Response"));
 						}
 
 						if (tmpbinding->bindingType == BINDING_SOAP) {

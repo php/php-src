@@ -46,7 +46,6 @@ static void cleanup_xml_node(xmlNodePtr node)
 	trav = node->children;
 	while (trav != NULL) {
 		if (del != NULL) {
-fprintf(stderr,"***garbage\n");
 			xmlUnlinkNode(del);
 			xmlFreeNode(del);
 			del = NULL;
