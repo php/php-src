@@ -697,14 +697,6 @@ static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_
 	hr = i_dispatch->lpVtbl->Invoke(i_dispatch, dispid, &IID_NULL,
 									LOCALE_SYSTEM_DEFAULT, DISPATCH_PROPERTYPUT,
 									&dispparams, NULL, NULL, 0);
-
-	dispparams.cArgs = 0;
-	dispparams.cNamedArgs = 0;
-
-	hr = i_dispatch->lpVtbl->Invoke(i_dispatch, dispid, &IID_NULL,
-									LOCALE_SYSTEM_DEFAULT, DISPATCH_PROPERTYGET,
-									&dispparams, &var_result, NULL, 0);
-
 	if (FAILED(hr)) {
 		error_message = php_COM_error_message(hr);
 		php_error(E_WARNING,"PropPut() failed:  %s\n", error_message);
@@ -713,7 +705,20 @@ static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_
 		RETURN_FALSE;
 	}
 
-	php_variant_to_pval(&var_result, return_value, 0);
+	dispparams.cArgs = 0;
+	dispparams.cNamedArgs = 0;
+
+	hr = i_dispatch->lpVtbl->Invoke(i_dispatch, dispid, &IID_NULL,
+									LOCALE_SYSTEM_DEFAULT, DISPATCH_PROPERTYGET,
+									&dispparams, &var_result, NULL, 0);
+
+
+	if (SUCCEEDED(hr)) {
+		php_variant_to_pval(&var_result, return_value, 0);
+	} else {
+		*return_value = *value;
+		zval_copy_ctor(return_value);
+	}
 
 	efree(propname);
 }
