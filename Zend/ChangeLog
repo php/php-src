@@ -1,3 +1,7 @@
+2002-04-24  Harald Radi  <h.radi@nme.at>
+
+    * zend_API.c: MFZE1 saschas 'Avoid exceeding buffer limits' patch
+
 2002-04-23  Harald Radi  <h.radi@nme.at>
 
     * zend_hash.c

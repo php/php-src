@@ -1,3 +1,120 @@
+2002-04-24  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: Remove result_type from pg_fetch_object() proto.
+    It still accepts 3rd argument, but passing 3rd argument
+    does not make sense for pg_fetch_object().
+
+    * ext/pgsql/pgsql.c:
+    It does not make any sense to have a PGSQL_BOTH as a default for pg_fetch_object()
+    Noticed by c@cornelia-boenigk.de
+
+2002-04-24  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+    clearing up some code to remove any possible confusion in variable counts
+
+2002-04-24  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mysql/config.m4: MFH
+
+    * ext/mysql/config.m4: - Fixed a typo..
+
+2002-04-24  Stanislav Malyshev  <stas@zend.com>
+
+    * main/output.c: MFH
+
+    * main/output.c:
+    Init output_start_* to avoid "output started at ZZZZZ" messages
+    (which may result when output started while zend is neither compiling nor
+    executing - e.g., when file upload fails).
+
+2002-04-24  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: *** empty log message ***
+
+2002-04-24  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/php_imap.c: MFH
+
+    * ext/imap/php_imap.c:
+    - Do the ssl_onceonlyinit() as last. This is how c-client creates
+      the linkage.c (used by Pine).
+
+2002-04-24  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c: MFH.
+
+2002-04-24  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/.cvsignore: - Missing .libs line..
+
+2002-04-24  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c: Fix Bug #14795.
+
+    * ext/standard/array.c:
+    Fix unwanted type conversion in array_merge_recursive (Bug #14990).
+
+2002-04-24  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/recode/config.m4
+      ext/recode/php_recode.h
+      ext/recode/recode.c: One big mess is a bit less mess now.
+
+2002-04-24  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/mbstring/mbstring.c:
+    Fixed typo. Compiler compiled with this typo somehow.
+
+2002-04-24  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * NEWS: - Put news item about changes of domxml in
+
+2002-04-24  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: Merge fixes
+
+    * NEWS: - Layout and release date
+
+2002-04-24  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * NEWS: Added NEWS for recent multibyte related fixes.
+
+2002-04-24  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/php_domxml.c: Fix ZTS build.
+
+    * NEWS: Added the 4.2.1 entries here too.
+
+    * NEWS: Forgot this one..
+
+    * NEWS: Added entry for the SID fix.
+
+    * sapi/apache/mod_php4.c: This was not supposed to be committed..
+
+    * php.ini-recommended
+      sapi/apache/mod_php4.c: MFH
+
+    * php.ini-recommended: fixed the comment..
+
+2002-04-24  Aaron Bannert  <aaron@apache.org>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Apache does a full load, unload, load cycle for each DSO module.
+    This patch makes sure that any startup actions that are performed
+    for PHP don't happen until the second load (the second call to
+    the post_config hook), and it also prevents subsequent calls
+    to the initialization routines.
+
+    Suggested By:   Cliff Woolley
+
+    PR: 16475, 16754
+
+2002-04-24  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Registry.php:
+    * add "_lastmodified" timestamp to registry files (don't trust filemtime)
+
 2002-04-23  Jani Taskinen  <sniper@iki.fi>
 
     * ext/java/Makefile.in: Make sure the extension will be named java.so
