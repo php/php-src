@@ -350,16 +350,13 @@ AC_CACHE_CHECK(whether HUGE_VAL + -HUGEVAL == NAN, ac_cv_huge_val_nan,[
 #define zend_isnan(a) 0
 #endif
 
-double hv(int i)
-{
-	/* avoid inlining */
-	if (i) return hv(i-1);
-	else return HUGE_VAL;
-}
-
 int main(int argc, char** argv)
 {
-	return zend_isinf(hv(3)) && zend_isnan(HUGE_VAL + -HUGE_VAL) ? 0 : 1;
+#if (__GNUC__ == 2)&&(__GNUC_MINOR <= 95)&&(__GLIBC == 2)&&(__GLIBC_MINOR <= 2)&&defined(__sparc64)
+	return 1;
+#else
+	return zend_isinf(HUGE_VAL) && zend_isnan(HUGE_VAL + -HUGE_VAL) ? 0 : 1;
+#endif
 }
   ],[
       ac_cv_huge_val_nan=yes
