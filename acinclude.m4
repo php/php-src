@@ -380,6 +380,7 @@ AC_DEFUN(PHP_DOES_PWRITE_WORK,[
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 $1
     main() {
     int fd = open("conftest_in", O_WRONLY|O_CREAT, 0600);
@@ -387,7 +388,7 @@ $1
     if (fd < 0) exit(1);
     if (pwrite(fd, "text", 4, 0) != 4) exit(1);
     /* Linux glibc breakage until 2.2.5 */
-    if (pwrite(fd, "text", 4, -1) != -1) exit(1);
+    if (pwrite(fd, "text", 4, -1) != -1 || errno != EINVAL) exit(1);
     exit(0);
     }
 
@@ -407,6 +408,7 @@ AC_DEFUN(PHP_DOES_PREAD_WORK,[
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 $1
     main() {
     char buf[3]; 
@@ -414,7 +416,7 @@ $1
     if (fd < 0) exit(1);
     if (pread(fd, buf, 2, 0) != 2) exit(1);
     /* Linux glibc breakage until 2.2.5 */
-    if (pread(fd, buf, 2, -1) != -1) exit(1);
+    if (pread(fd, buf, 2, -1) != -1 || errno != EINVAL) exit(1);
     exit(0);
     }
   ],[
