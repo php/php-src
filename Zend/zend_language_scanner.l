@@ -502,11 +502,10 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 
 
 BEGIN_EXTERN_C()
-int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini)
+int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini TSRMLS_DC)
 {
 	zend_lex_state original_lex_state;
 	zend_file_handle file_handle;
-	TSRMLS_FETCH();
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = filename;
@@ -523,14 +522,13 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 	return SUCCESS;
 }
 
-int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_ini, char *str_name)
+int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_ini, char *str_name TSRMLS_DC)
 {
 	zend_lex_state original_lex_state;
 	zval tmp = *str;
 #ifdef ZTS
 	istrstream *input_stream;
 #endif
-	TSRMLS_FETCH();
 
 	str = &tmp;
 	zval_copy_ctor(str);

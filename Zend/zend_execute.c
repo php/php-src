@@ -1080,7 +1080,7 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 binary_op_addr:
 				EG(binary_op)(&Ts[opline->result.u.var].tmp_var, 
 					get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R),
-					get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R) );
+					get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R) TSRMLS_CC);
 				FREE_OP(&opline->op1, EG(free_op1));
 				FREE_OP(&opline->op2, EG(free_op2));
 				NEXT_OPCODE();
@@ -1140,7 +1140,7 @@ binary_assign_op_addr: {
 					
 					SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
 
-					EG(binary_op)(*var_ptr, *var_ptr, get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R));
+					EG(binary_op)(*var_ptr, *var_ptr, get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R) TSRMLS_CC);
 					Ts[opline->result.u.var].var.ptr_ptr = var_ptr;
 					SELECTIVE_PZVAL_LOCK(*var_ptr, &opline->result);
 					FREE_OP(&opline->op2, EG(free_op2));
@@ -1880,7 +1880,7 @@ send_by_ref:
 					}
 					is_equal_function(&Ts[opline->result.u.var].tmp_var, 
 								 get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R),
-								 get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R));
+								 get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R) TSRMLS_CC);
 
 					FREE_OP(&opline->op2, EG(free_op2));
 					if (switch_expr_is_overloaded) {

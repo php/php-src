@@ -57,9 +57,12 @@ ZEND_API void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 			zend_hash_destroy(zvalue->value.obj.properties);
 			FREE_HASHTABLE(zvalue->value.obj.properties);
 			break;
-		case IS_RESOURCE:
-			/* destroy resource */
-			zend_list_delete(zvalue->value.lval);
+		case IS_RESOURCE:	{
+				TSRMLS_FETCH();
+
+				/* destroy resource */
+				zend_list_delete(zvalue->value.lval);
+			}
 			break;
 		case IS_LONG:
 		case IS_DOUBLE:
@@ -81,8 +84,11 @@ ZEND_API void zval_add_ref(zval **p)
 ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	switch (zvalue->type) {
-		case IS_RESOURCE:
-			zend_list_addref(zvalue->value.lval);
+		case IS_RESOURCE: {
+				TSRMLS_FETCH();
+
+				zend_list_addref(zvalue->value.lval);
+			}
 			break;
 		case IS_BOOL:
 		case IS_LONG:

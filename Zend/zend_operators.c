@@ -106,7 +106,7 @@ ZEND_API double zend_string_to_double(const char *number, zend_uint length)
 }
 
 
-ZEND_API void convert_scalar_to_number(zval *op)
+ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 {
 	switch (op->type) {
 		case IS_STRING:
@@ -147,7 +147,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 
 #define zendi_convert_scalar_to_number(op, holder, result)			\
 	if (op==result) {												\
-		convert_scalar_to_number(op);								\
+		convert_scalar_to_number(op TSRMLS_CC);						\
 	} else {														\
 		switch ((op)->type) {										\
 			case IS_STRING:											\
@@ -271,8 +271,11 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 		case IS_NULL:
 			op->value.lval = 0;
 			break;
-		case IS_RESOURCE:
-			zend_list_delete(op->value.lval);
+		case IS_RESOURCE: {
+				TSRMLS_FETCH();
+
+				zend_list_delete(op->value.lval);
+			}
 			/* break missing intentionally */
 		case IS_BOOL:
 		case IS_LONG:
@@ -315,8 +318,11 @@ ZEND_API void convert_to_double(zval *op)
 		case IS_NULL:
 			op->value.dval = 0.0;
 			break;
-		case IS_RESOURCE:
-			zend_list_delete(op->value.lval);
+		case IS_RESOURCE: {
+				TSRMLS_FETCH();
+
+				zend_list_delete(op->value.lval);
+			}
 			/* break missing intentionally */
 		case IS_BOOL:
 		case IS_LONG:
@@ -368,8 +374,11 @@ ZEND_API void convert_to_boolean(zval *op)
 		case IS_NULL:
 			op->value.lval = 0;
 			break;
-		case IS_RESOURCE:
-			zend_list_delete(op->value.lval);
+		case IS_RESOURCE: {
+				TSRMLS_FETCH();
+
+				zend_list_delete(op->value.lval);
+			}
 			/* break missing intentionally */
 		case IS_LONG:
 			op->value.lval = (op->value.lval ? 1 : 0);
@@ -591,7 +600,7 @@ ZEND_API void multi_convert_to_string_ex(int argc, ...)
 	va_end(ap);
 }
 
-ZEND_API int add_function(zval *result, zval *op1, zval *op2)
+ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 
@@ -643,7 +652,7 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int sub_function(zval *result, zval *op1, zval *op2)
+ZEND_API int sub_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 	
@@ -680,7 +689,7 @@ ZEND_API int sub_function(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int mul_function(zval *result, zval *op1, zval *op2)
+ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 	
@@ -716,7 +725,7 @@ ZEND_API int mul_function(zval *result, zval *op1, zval *op2)
 	return FAILURE;				/* unknown datatype */
 }
 
-ZEND_API int div_function(zval *result, zval *op1, zval *op2)
+ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 	
@@ -756,7 +765,7 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int mod_function(zval *result, zval *op1, zval *op2)
+ZEND_API int mod_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 	
@@ -775,7 +784,7 @@ ZEND_API int mod_function(zval *result, zval *op1, zval *op2)
 
 
 
-ZEND_API int boolean_xor_function(zval *result, zval *op1, zval *op2)
+ZEND_API int boolean_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 	
@@ -788,7 +797,7 @@ ZEND_API int boolean_xor_function(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int boolean_not_function(zval *result, zval *op1)
+ZEND_API int boolean_not_function(zval *result, zval *op1 TSRMLS_DC)
 {
 	zval op1_copy;
 	
@@ -800,7 +809,7 @@ ZEND_API int boolean_not_function(zval *result, zval *op1)
 }
 
 
-ZEND_API int bitwise_not_function(zval *result, zval *op1)
+ZEND_API int bitwise_not_function(zval *result, zval *op1 TSRMLS_DC)
 {
 	zval op1_copy = *op1;
 	
@@ -831,7 +840,7 @@ ZEND_API int bitwise_not_function(zval *result, zval *op1)
 }
 
 
-ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2)
+ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 	
@@ -870,7 +879,7 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2)
+ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 	
@@ -911,7 +920,7 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2)
+ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 	
@@ -951,7 +960,7 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2)
+ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 	
@@ -963,7 +972,7 @@ ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2)
+ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 	
@@ -1001,7 +1010,7 @@ ZEND_API int add_string_to_string(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int concat_function(zval *result, zval *op1, zval *op2)
+ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 	int use_copy1, use_copy2;
@@ -1046,7 +1055,7 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2)
+ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 	int use_copy1, use_copy2;
@@ -1073,7 +1082,7 @@ ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2)
 	return SUCCESS;
 }
 
-ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2)
+ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 
@@ -1093,7 +1102,7 @@ ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
+ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 
@@ -1140,12 +1149,12 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 		return SUCCESS;
 	}
 	if (op1->type==IS_ARRAY && op2->type==IS_ARRAY) {
-		zend_compare_arrays(result, op1, op2);
+		zend_compare_arrays(result, op1, op2 TSRMLS_CC);
 		return SUCCESS;
 	}
 
 	if (op1->type==IS_OBJECT && op2->type==IS_OBJECT) {
-		zend_compare_objects(result, op1, op2);
+		zend_compare_objects(result, op1, op2 TSRMLS_CC);
 		return SUCCESS;
 	}
 
@@ -1178,20 +1187,21 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 static int hash_zval_identical_function(const zval **z1, const zval **z2)
 {
 	zval result;
+	TSRMLS_FETCH();
 
 	/* is_identical_function() returns 1 in case of identity and 0 in case
 	 * of a difference;
 	 * whereas this comparison function is expected to return 0 on identity,
 	 * and non zero otherwise.
 	 */
-	if (is_identical_function(&result, (zval *) *z1, (zval *) *z2)==FAILURE) {
+	if (is_identical_function(&result, (zval *) *z1, (zval *) *z2 TSRMLS_CC)==FAILURE) {
 		return 1;
 	}
 	return !result.value.lval;
 }
 
 
-ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
+ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	result->type = IS_BOOL;
 	if (op1->type != op2->type) {
@@ -1219,7 +1229,7 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 			}
 			break;
 		case IS_ARRAY:
-			if (zend_hash_compare(op1->value.ht, op2->value.ht, (compare_func_t) hash_zval_identical_function, 1)==0) {
+			if (zend_hash_compare(op1->value.ht, op2->value.ht, (compare_func_t) hash_zval_identical_function, 1 TSRMLS_CC)==0) {
 				result->value.lval = 1;
 			} else {
 				result->value.lval = 0;
@@ -1230,7 +1240,7 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 			if (Z_OBJCE_P(op1) != Z_OBJCE_P(op2)) {
 				result->value.lval = 0;
 			} else {
-				if (zend_hash_compare(Z_OBJPROP_P(op1), Z_OBJPROP_P(op2), (compare_func_t) hash_zval_identical_function, 1)==0) {
+				if (zend_hash_compare(Z_OBJPROP_P(op1), Z_OBJPROP_P(op2), (compare_func_t) hash_zval_identical_function, 1 TSRMLS_CC)==0) {
 					result->value.lval = 1;
 				} else {
 					result->value.lval = 0;
@@ -1245,10 +1255,10 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int is_not_identical_function(zval *result, zval *op1, zval *op2)
+ZEND_API int is_not_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
    result->type = IS_BOOL;
-   if (is_identical_function( result, op1, op2 ) == FAILURE) {
+   if (is_identical_function(result, op1, op2 TSRMLS_CC) == FAILURE) {
 	  return FAILURE;
    }
    result->value.lval = !result->value.lval;
@@ -1256,9 +1266,9 @@ ZEND_API int is_not_identical_function(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int is_equal_function(zval *result, zval *op1, zval *op2)
+ZEND_API int is_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
-	if (compare_function(result, op1, op2) == FAILURE) {
+	if (compare_function(result, op1, op2 TSRMLS_CC) == FAILURE) {
 		return FAILURE;
 	}
 	convert_to_boolean(result);
@@ -1271,9 +1281,9 @@ ZEND_API int is_equal_function(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int is_not_equal_function(zval *result, zval *op1, zval *op2)
+ZEND_API int is_not_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
-	if (compare_function(result, op1, op2) == FAILURE) {
+	if (compare_function(result, op1, op2 TSRMLS_CC) == FAILURE) {
 		return FAILURE;
 	}
 	convert_to_boolean(result);
@@ -1286,9 +1296,9 @@ ZEND_API int is_not_equal_function(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int is_smaller_function(zval *result, zval *op1, zval *op2)
+ZEND_API int is_smaller_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
-	if (compare_function(result, op1, op2) == FAILURE) {
+	if (compare_function(result, op1, op2 TSRMLS_CC) == FAILURE) {
 		return FAILURE;
 	}
 	if (result->type == IS_LONG) {
@@ -1314,9 +1324,9 @@ ZEND_API int is_smaller_function(zval *result, zval *op1, zval *op2)
 }
 
 
-ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2)
+ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
-	if (compare_function(result, op1, op2) == FAILURE) {
+	if (compare_function(result, op1, op2 TSRMLS_CC) == FAILURE) {
 		return FAILURE;
 	}
 	if (result->type == IS_LONG) {
@@ -1654,11 +1664,11 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 }
 
 
-static int hash_zval_compare_function(const zval **z1, const zval **z2)
+static int hash_zval_compare_function(const zval **z1, const zval **z2 TSRMLS_DC)
 {
 	zval result;
 
-	if (compare_function(&result, (zval *) *z1, (zval *) *z2)==FAILURE) {
+	if (compare_function(&result, (zval *) *z1, (zval *) *z2 TSRMLS_CC)==FAILURE) {
 		return 1;
 	}
 	return result.value.lval;
@@ -1666,20 +1676,20 @@ static int hash_zval_compare_function(const zval **z1, const zval **z2)
 
 
 
-ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2)
+ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2 TSRMLS_DC)
 {
 	result->type = IS_LONG;
-	result->value.lval = zend_hash_compare(ht1, ht2, (compare_func_t) hash_zval_compare_function, 0);
+	result->value.lval = zend_hash_compare(ht1, ht2, (compare_func_t) hash_zval_compare_function, 0 TSRMLS_CC);
 }
 
 
-ZEND_API void zend_compare_arrays(zval *result, zval *a1, zval *a2)
+ZEND_API void zend_compare_arrays(zval *result, zval *a1, zval *a2 TSRMLS_DC)
 {
-	zend_compare_symbol_tables(result, a1->value.ht, a2->value.ht);
+	zend_compare_symbol_tables(result, a1->value.ht, a2->value.ht TSRMLS_CC);
 }
 
 
-ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2)
+ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC)
 {
 /* OBJECTS_FIXME */
 	if (Z_OBJCE_P(o1) != Z_OBJCE_P(o2)) {
@@ -1687,7 +1697,7 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2)
 		result->type = IS_LONG;
 		return;
 	}
-	zend_compare_symbol_tables(result, Z_OBJPROP_P(o1), Z_OBJPROP_P(o2));
+	zend_compare_symbol_tables(result, Z_OBJPROP_P(o1), Z_OBJPROP_P(o2) TSRMLS_CC);
 }
 
 

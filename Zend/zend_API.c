@@ -466,7 +466,7 @@ static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int
 	return SUCCESS;
 }
 
-static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int flags)
+static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int flags TSRMLS_DC)
 {
 	char *spec_walk;
 	char buf[1024];
@@ -477,7 +477,6 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 	void **p;
 	int arg_count;
 	int quiet = flags & ZEND_PARSE_PARAMS_QUIET;
-	TSRMLS_FETCH();
 
 	for (spec_walk = type_spec; *spec_walk; spec_walk++) {
 		c = *spec_walk;
@@ -548,25 +547,25 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 	return SUCCESS;
 }
 
-ZEND_API int zend_parse_parameters_ex(int flags, int num_args, char *type_spec, ...)
+ZEND_API int zend_parse_parameters_ex(int flags TSRMLS_DC, int num_args, char *type_spec, ...)
 {
 	va_list va;
 	int retval;
 	
 	va_start(va, type_spec);
-	retval = zend_parse_va_args(num_args, type_spec, &va, flags);
+	retval = zend_parse_va_args(num_args, type_spec, &va, flags TSRMLS_CC);
 	va_end(va);
 
 	return retval;
 }
 
-ZEND_API int zend_parse_parameters(int num_args, char *type_spec, ...)
+ZEND_API int zend_parse_parameters(int num_args TSRMLS_DC, char *type_spec, ...)
 {
 	va_list va;
 	int retval;
 	
 	va_start(va, type_spec);
-	retval = zend_parse_va_args(num_args, type_spec, &va, 0);
+	retval = zend_parse_va_args(num_args, type_spec, &va, 0 TSRMLS_CC);
 	va_end(va);
 
 	return retval;

@@ -46,10 +46,9 @@ ZEND_API int zend_list_insert(void *ptr, int type)
 	return index;
 }
 
-ZEND_API int zend_list_delete(int id)
+ZEND_API int _zend_list_delete(int id TSRMLS_DC)
 {
 	zend_rsrc_list_entry *le;
-	TSRMLS_FETCH();
 	
 	if (zend_hash_index_find(&EG(regular_list), id, (void **) &le)==SUCCESS) {
 /*		printf("del(%d): %d->%d\n", id, le->refcount, le->refcount-1); */
@@ -64,10 +63,9 @@ ZEND_API int zend_list_delete(int id)
 }
 
 
-ZEND_API void *zend_list_find(int id, int *type)
+ZEND_API void *_zend_list_find(int id, int *type TSRMLS_DC)
 {
 	zend_rsrc_list_entry *le;
-	TSRMLS_FETCH();
 
 	if (zend_hash_index_find(&EG(regular_list), id, (void **) &le)==SUCCESS) {
 		*type = le->type;
@@ -79,10 +77,9 @@ ZEND_API void *zend_list_find(int id, int *type)
 }
 
 
-ZEND_API int zend_list_addref(int id)
+ZEND_API int _zend_list_addref(int id TSRMLS_DC)
 {
 	zend_rsrc_list_entry *le;
-	TSRMLS_FETCH();
 	
 	if (zend_hash_index_find(&EG(regular_list), id, (void **) &le)==SUCCESS) {
 /*		printf("add(%d): %d->%d\n", id, le->refcount, le->refcount+1); */
@@ -109,7 +106,7 @@ ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int r
 }
 
 
-ZEND_API void *zend_fetch_resource(zval **passed_id, int default_id, char *resource_type_name, int *found_resource_type, int num_resource_types, ...)
+ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, char *resource_type_name, int *found_resource_type, int num_resource_types, ...)
 {
 	int id;
 	int actual_resource_type;
@@ -378,7 +375,7 @@ void zend_destroy_rsrc_list_dtors(void)
 }
 
 
-char *zend_rsrc_list_get_rsrc_type(int resource)
+char *zend_rsrc_list_get_rsrc_type(int resource TSRMLS_DC)
 {
 	zend_rsrc_list_dtors_entry *lde;
 	int rsrc_type;

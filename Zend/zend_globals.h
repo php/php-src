@@ -36,8 +36,6 @@
 /*#undef ZTS*/
 
 #ifdef ZTS
-#include "../TSRM/TSRM.h"
-
 #ifdef __cplusplus
 class ZendFlexLexer;
 class ZendIniFlexLexer;
@@ -184,7 +182,7 @@ struct _zend_executor_globals {
 	zend_ptr_stack argument_stack;
 	int free_op1, free_op2;
 	int (*unary_op)(zval *result, zval *op1);
-	int (*binary_op)(zval *result, zval *op1, zval *op2);
+	int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 
 	zval *garbage[2];
 	int garbage_ptr;

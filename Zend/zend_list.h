@@ -74,14 +74,18 @@ int zend_init_rsrc_list_dtors(void);
 void zend_destroy_rsrc_list_dtors(void);
 
 ZEND_API int zend_list_insert(void *ptr, int type);
-ZEND_API int zend_list_addref(int id);
-ZEND_API int zend_list_delete(int id);
-ZEND_API void *zend_list_find(int id, int *type);
+ZEND_API int _zend_list_addref(int id TSRMLS_DC);
+ZEND_API int _zend_list_delete(int id TSRMLS_DC);
+ZEND_API void *_zend_list_find(int id, int *type TSRMLS_DC);
+
+#define zend_list_addref(id)		_zend_list_addref(id TSRMLS_CC)
+#define zend_list_delete(id)		_zend_list_delete(id TSRMLS_CC)
+#define zend_list_find(id, type)	_zend_list_find(id, type TSRMLS_CC)
 
 ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type);
-ZEND_API void *zend_fetch_resource(zval **passed_id, int default_id, char *resource_type_name, int *found_resource_type, int num_resource_types, ...);
+ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, char *resource_type_name, int *found_resource_type, int num_resource_types, ...);
 
-ZEND_API char *zend_rsrc_list_get_rsrc_type(int resource);
+ZEND_API char *zend_rsrc_list_get_rsrc_type(int resource TSRMLS_DC);
 ZEND_API int zend_fetch_list_dtor_id(char *type_name);
 
 extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
@@ -92,11 +96,11 @@ extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
 	}
 
 #define ZEND_FETCH_RESOURCE(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type)	\
-	rsrc = (rsrc_type) zend_fetch_resource(passed_id, default_id, resource_type_name, NULL, 1, resource_type);	\
+	rsrc = (rsrc_type) zend_fetch_resource(passed_id TSRMLS_CC, default_id, resource_type_name, NULL, 1, resource_type);	\
 	ZEND_VERIFY_RESOURCE(rsrc);
 
 #define ZEND_FETCH_RESOURCE2(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type1,resource_type2)	\
-	rsrc = (rsrc_type) zend_fetch_resource(passed_id, default_id, resource_type_name, NULL, 2, resource_type1, resource_type2);	\
+	rsrc = (rsrc_type) zend_fetch_resource(passed_id TSRMLS_CC, default_id, resource_type_name, NULL, 2, resource_type1, resource_type2);	\
 	ZEND_VERIFY_RESOURCE(rsrc);
 
 #define ZEND_REGISTER_RESOURCE(rsrc_result, rsrc_pointer, rsrc_type)  \
