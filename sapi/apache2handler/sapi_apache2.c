@@ -422,7 +422,7 @@ static void php_apache_request_ctor(request_rec *r, php_struct *ctx TSRMLS_DC)
 	apr_table_unset(r->headers_out, "Expires");
 	apr_table_unset(r->headers_out, "ETag");
 	apr_table_unset(r->headers_in, "Connection");
-	if (!PG(safe_mode)) {
+	if (!PG(safe_mode) || (PG(safe_mode) && !ap_auth_type(r))) {
 		auth = apr_table_get(r->headers_in, "Authorization");
 		php_handle_auth_data(auth TSRMLS_CC);
 		ctx->r->user = apr_pstrdup(ctx->r->pool, SG(request_info).auth_user);
