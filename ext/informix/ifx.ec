@@ -809,7 +809,7 @@ EXEC SQL END DECLARE SECTION;
             id = IFXG(default_link);
             break;
         case 1:
-            if (getParametersEx(1, &ifx_link)==FAILURE) {
+            if (zend_get_parameters_ex(1, &ifx_link)==FAILURE) {
                 RETURN_FALSE;
             }
             break;
@@ -904,15 +904,15 @@ EXEC SQL END DECLARE SECTION;
       php4 insists on the correct number of arguments */
     switch(ARG_COUNT(ht)) {
       case 2:
-        if (getParametersEx(2, &query, &ifx_link)==FAILURE)  
+        if (zend_get_parameters_ex(2, &query, &ifx_link)==FAILURE)  
 	  RETURN_FALSE;
         break;
       case 3:
-        if (getParametersEx(3, &query, &ifx_link, &dummy)==FAILURE)  
+        if (zend_get_parameters_ex(3, &query, &ifx_link, &dummy)==FAILURE)  
 	  RETURN_FALSE;
         break;
       case 4:
-        if (getParametersEx(4, &query, &ifx_link, &dummy, &dummy)==FAILURE)  
+        if (zend_get_parameters_ex(4, &query, &ifx_link, &dummy, &dummy)==FAILURE)  
 	  RETURN_FALSE;
         break;
     }
@@ -1016,7 +1016,7 @@ EXEC SQL END DECLARE SECTION;
       }
 
       if(ARG_COUNT(ht)==3) {
-          if (getParametersEx(3, &dummy, &dummy, &pblobidarr) == FAILURE) {
+          if (zend_get_parameters_ex(3, &dummy, &dummy, &pblobidarr) == FAILURE) {
               php_error(E_WARNING,"Can't get blob array param");
               EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
               EXEC SQL free :statemid;
@@ -1105,7 +1105,7 @@ EXEC SQL END DECLARE SECTION;
        case 2:
          break;
        case 3:
-         if (getParametersEx(3, 
+         if (zend_get_parameters_ex(3, 
                               &dummy, 
                               &dummy,
                               &cursortype)==FAILURE) {
@@ -1292,15 +1292,15 @@ EXEC SQL END DECLARE SECTION;
       php4 insists on the correct number of arguments */
     switch(ARG_COUNT(ht)) {
       case 2:
-        if (getParametersEx(2, &query, &ifx_link)==FAILURE)  
+        if (zend_get_parameters_ex(2, &query, &ifx_link)==FAILURE)  
 	  RETURN_FALSE;
         break;
       case 3:
-        if (getParametersEx(3, &query, &ifx_link, &dummy)==FAILURE)  
+        if (zend_get_parameters_ex(3, &query, &ifx_link, &dummy)==FAILURE)  
 	  RETURN_FALSE;
         break;
       case 4:
-        if (getParametersEx(4, &query, &ifx_link, &dummy, &dummy)==FAILURE)  
+        if (zend_get_parameters_ex(4, &query, &ifx_link, &dummy, &dummy)==FAILURE)  
 	  RETURN_FALSE;
         break;
     }
@@ -1405,7 +1405,7 @@ EXEC SQL END DECLARE SECTION;
       }
       if(ARG_COUNT(ht)==3) {
           Ifx_Result->paramquery=1;
-          if (getParametersEx(3, &dummy, &dummy,&pblobidarr) == FAILURE) {
+          if (zend_get_parameters_ex(3, &dummy, &dummy,&pblobidarr) == FAILURE) {
               php_error(E_WARNING,"Can't get blob array param");
               EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
               EXEC SQL free :statemid;
@@ -1477,7 +1477,7 @@ EXEC SQL END DECLARE SECTION;
        case 2:
          break;
        case 3:
-         if (getParametersEx(3, &dummy, &dummy, &cursortype)==FAILURE) {
+         if (zend_get_parameters_ex(3, &dummy, &dummy, &cursortype)==FAILURE) {
                 RETURN_FALSE;
          }
          convert_to_long_ex(cursortype);
@@ -1566,7 +1566,7 @@ EXEC SQL END DECLARE SECTION;
             WRONG_PARAM_COUNT;
             break;
         case 1:
-            if (getParametersEx(1, &result)==FAILURE) {
+            if (zend_get_parameters_ex(1, &result)==FAILURE) {
                 RETURN_FALSE;
             }
             break;
@@ -1715,7 +1715,7 @@ PHP_FUNCTION(ifx_error)
             id = IFXG(default_link);
             break;
         case 1:
-            if (getParametersEx(1, &ifx_link)==FAILURE) {
+            if (zend_get_parameters_ex(1, &ifx_link)==FAILURE) {
                 RETURN_FALSE;
             }
             break;
@@ -1759,7 +1759,7 @@ PHP_FUNCTION(ifx_errormsg)
                 ifx_errorcode = IFXG(sv_sqlcode);
             break;
         case 1:
-            if (getParametersEx(1, &errcode)==FAILURE) {
+            if (zend_get_parameters_ex(1, &errcode)==FAILURE) {
                 RETURN_FALSE;
             }
             convert_to_long_ex(errcode);
@@ -1816,7 +1816,7 @@ PHP_FUNCTION(ifx_affected_rows)
             WRONG_PARAM_COUNT;
             break;
         case 1:
-            if (getParametersEx(1, &result)==FAILURE) {
+            if (zend_get_parameters_ex(1, &result)==FAILURE) {
                 RETURN_FALSE;
             }
             break;
@@ -1909,14 +1909,14 @@ EXEC SQL END DECLARE SECTION;
             WRONG_PARAM_COUNT;
             break;
         case 1:
-            if (getParametersEx(1, &result)==FAILURE) {
+            if (zend_get_parameters_ex(1, &result)==FAILURE) {
                 RETURN_FALSE;
             }
             fetch_pos = NULL;
             fetch_row = 0;
             break;
         case 2:
-            if (getParametersEx(2, &result, &position)==FAILURE) {
+            if (zend_get_parameters_ex(2, &result, &position)==FAILURE) {
                 RETURN_FALSE;
             }
             if ((*position)->type != IS_STRING) {
@@ -2288,13 +2288,13 @@ EXEC SQL END DECLARE SECTION;
 
     switch (ARG_COUNT(ht)) {
         case 1:
-            if (getParametersEx(1, &result)==FAILURE) {
+            if (zend_get_parameters_ex(1, &result)==FAILURE) {
                 RETURN_FALSE;
             }
             table_options = NULL;
             break;
         case 2:
-            if (getParametersEx(2, &result, &arg2)==FAILURE) {
+            if (zend_get_parameters_ex(2, &result, &arg2)==FAILURE) {
                 RETURN_FALSE;
             }
             table_options = (*arg2)->value.str.val;
@@ -2613,7 +2613,7 @@ EXEC SQL END DECLARE SECTION;
 
     switch (ARG_COUNT(ht)) {
         case 1:
-            if (getParametersEx(1, &result)==FAILURE) {
+            if (zend_get_parameters_ex(1, &result)==FAILURE) {
                 RETURN_FALSE;
             }
             break;
@@ -2792,7 +2792,7 @@ EXEC SQL END DECLARE SECTION;
 
     switch (ARG_COUNT(ht)) {
         case 1:
-            if (getParametersEx(1, &result)==FAILURE) {
+            if (zend_get_parameters_ex(1, &result)==FAILURE) {
                 RETURN_FALSE;
             }
             break;
@@ -2954,7 +2954,7 @@ PHP_FUNCTION(ifx_num_rows)
 
     IFXLS_FETCH();
 
-    if (ARG_COUNT(ht)!=1 || getParametersEx(1, &result)==FAILURE) {
+    if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
     
@@ -2989,7 +2989,7 @@ PHP_FUNCTION(ifx_getsqlca)
    
     IFXLS_FETCH();
 
-    if (ARG_COUNT(ht)!=1 || getParametersEx(1, &result)==FAILURE) {
+    if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
     
@@ -3030,7 +3030,7 @@ PHP_FUNCTION(ifx_num_fields)
 
     IFXLS_FETCH();
 
-    if (ARG_COUNT(ht)!=1 || getParametersEx(1, &result)==FAILURE) {
+    if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
     
@@ -3073,7 +3073,7 @@ EXEC SQL END DECLARE SECTION;
 
     IFXLS_FETCH();
 
-    if (ARG_COUNT(ht)!=1 || getParametersEx(1, &result)==FAILURE) {
+    if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
     
