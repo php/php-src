@@ -1,3 +1,175 @@
+2003-02-20  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * README.input_filter
+      ext/mbstring/mb_gpc.c
+      main/SAPI.c
+      main/SAPI.h
+      main/php_variables.c
+      main/rfc1867.c:
+      An input filter might not simply strip stuff, it might also turn things
+      into entities or use some other mechanism which causes the filtered data
+      to be longer than the original data.  Ergo, pass in the address of the
+      buffer instead so the filter is free to reallocate it.
+
+2003-02-20  Justin Erenkrantz  <justin@erenkrantz.com>
+
+    * ext/pgsql/pgsql.c:
+      Remove C++-style comment.  (Breaks Sun Forte compiler.)
+
+2003-02-20  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/php_fopen_wrapper.c:
+      Reduce unnecessary filter applications when stream is (read|write) only
+
+2003-02-20  Justin Erenkrantz  <justin@erenkrantz.com>
+
+    * sapi/apache2handler/php_apache.h
+      sapi/apache2handler/php_functions.c
+      sapi/apache2handler/sapi_apache2.c:
+      Clean up apache2handler SAPI.
+      
+      Key improvements:
+      - Be streamy
+      - Re-enable virtual() support
+      - Set content_type correctly
+      - Remove unnecessary code and reintroduce some missing code
+      - Change signature from PhP to PHP
+
+2003-02-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c:
+      MFH(r1.165): Fixed bug #22330 (overloaded strrpos() weirdness)
+
+    * ext/mbstring/mbstring.c:
+      Fixed bug #22330 (overloaded strrpos() gives wrong results)
+      Patch by david at santinoli dot com. Thanks!
+
+2003-02-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/tests/strings/sha1.phpt
+      ext/standard/tests/strings/sha1raw.phpt:
+      - Fixed testcase... you can never trust on RFCs it seems
+
+2003-02-20  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * scripts/ext_skel_ng/extension_parser.php:
+      put constants into C output
+      do not limit int constants to numbers, C #defines are ok as strings
+      foobar(void) needs special treatment in code generation
+
+2003-02-20  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      style
+
+2003-02-20  Corne' Cornelius  <cornec@reach.co.za>
+
+    * (PHP_4_3)
+      ext/informix/php_informix_includes.h:
+      
+         from 16 to 32 to prevents possible overflow
+
+2003-02-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/md5.c:
+      - Fixed copy and paste bug
+
+    * NEWS
+      ext/standard/md5.c
+      ext/standard/sha1.c:
+      - Also add the optional raw output parameter to md5_file and sha1_file.
+
+2003-02-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/session/session.c:
+      merge minor differences from head
+
+2003-02-20  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      style fix
+
+    * NEWS:
+      This is added in 4.3.2
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/pgsql/pgsql.c:
+      MFH: Fixed bug: #22306 (pg_lo_seek($h, 0, PGSQL_SEEK_SET) succeeds but
+      returns false)
+
+    * ext/pgsql/pgsql.c:
+      Fixed bug: #22306 (pg_lo_seek($h, 0, PGSQL_SEEK_SET) succeeds but returns
+      false)
+
+2003-02-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS
+      NEWS
+      NEWS:
+      update
+
+2003-02-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/md5.c
+      ext/standard/sha1.c:
+      - No need to add the \0 ourselves, the estrndup in STRINGL takes care of
+        that for us.
+
+2003-02-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/session/php_session.h
+      ext/session/session.c:
+      MFH general urlencoding
+      MFH session_regenerate_id, a change which is as important as the former
+      one
+
+    * ext/session/session.c:
+      generally urlencode parameters
+
+2003-02-20  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      ext/standard/dns.c:
+      MFH: - Fixed bug #22299 (gethostbyname() crash with non-existing domain on
+      MacOSX)
+
+    * ext/standard/dns.c:
+      - Fixed bug #22299 (gethostbyname() crash with non-existing domain on
+      MacOSX)
+
+2003-02-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * ext/standard/http_fopen_wrapper.c:
+      Revert accidental commit.
+
+    * ext/standard/exec.c
+      ext/standard/http_fopen_wrapper.c:
+      Fixed bug #22308 (optimized passthru, code is now ~40 times faster).
+
+2003-02-20  Jani Taskinen  <sniper@iki.fi>
+
+    * footer
+      header:
+      consistent with the used style
+
 2003-02-19  Jon Parise  <jon@csh.rit.edu>
 
     * ext/rpc/skeleton/php_skeleton.h
