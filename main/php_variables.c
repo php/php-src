@@ -37,7 +37,7 @@ PHPAPI void php_register_variable(char *var, char *strval, zval *track_vars_arra
 	if (PG(magic_quotes_gpc)) {
 		new_entry.value.str.val = php_addslashes(strval, new_entry.value.str.len, &new_entry.value.str.len, 0);
 	} else {
-		strval = estrndup(strval, new_entry.value.str.len);
+		new_entry.value.str.val = estrndup(strval, new_entry.value.str.len);
 	}
 	new_entry.type = IS_STRING;
 
