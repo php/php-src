@@ -1,3 +1,35 @@
+2001-11-03  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/index.php:
+    - mnoGoSearch module example updates for 3.2.x compatibility
+    - mnoGoSearch module example updates for 3.2.x compatibility
+
+    * ext/mnogosearch/php_mnogo.c:    - Some mnogosearch-3.2.x compilation bugs fixes.
+    Make crosswords and weight sections work with mnogosearch-3.2.x
+    UDM_PARAM_HLBEG, UDM_PARAM_HLEND mnoGoSearch Agent parameters
+    has been added (gluke)
+
+2001-11-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mysql/config.m4: - MFH (Bug #13918)
+
+    * ext/mysql/config.m4: - Fix for bug #13918
+
+2001-11-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/bz2/tests/with_strings.phpt:
+    Skip the test if extension is not available.
+
+2001-11-03  James Moore  <James@phpuk.org>
+
+    * ext/standard/datetime.c:     - relying on timezone and tzname isnt OK for gmdate etc, the only behaviour
+       that might not be right is the handling of T formatter under gmdate
+       should it return the machines timezone or GMT Standard Time??
+
+2001-11-03  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/mime.php: Altered mime.php to use mimePart class
+
 2001-11-02  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
 
     * ext/session/session.c:
