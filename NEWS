@@ -1,9 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5 Beta 4
-- Added checks for invalid characters in a cookie name or cookie data 
-  from setrawcookie. (Brian)
-- Added new pspell functions to set the dict-dir and data-dir options. (Brian)
+- Added checks for invalid characters in a cookie name and cookie data 
+  into set[raw]cookie(). (Brian)
+- Added new pspell functions: (Brian)
+  . pspell_config_dict_dir()
+  . pspell_config_data_dir()
 - Added support for ++ and += (and similar) to SimpleXML. (Andi, Zeev)
 - Added infrastructure for ++ and += (and similar) to object overloading
   modules. (Andi, Zeev)
@@ -13,15 +15,12 @@ PHP                                                                        NEWS
 - Added error message when trying to re-assign to $this variable. (Zeev, Andi)
 - Improved destructor implementation to always call destructors on clean
   shutdown. An order of destruction is not guaranteed. (Zeev, Andi)
-- Fixed problem with parse error in include() file not stopping PHP's
-  execution. (Ilia)
 - Redesigned exception support. This fixes many bugs in the previous design
   such as nested try's and problems with overloaded extensions. (Zeev, Andi)
 - Redesigned clone by adding a clone keyword (clone $obj) and copying all
   properties before __clone() is called. Also allows calling parent __clone
   function by using parent::__clone(). (Zeev, Andi)
 - Added support for an interface to extend another interface (Zeev)
-- Respect property visibility in foreach. (Marcus)
 - Completely overhauled SimpleXML extension. (Marcus, Rob, Sterling)
 - Added new Interbase functions: (Ard)
   . ibase_service_attach() and ibase_service_detach().
@@ -34,6 +33,9 @@ PHP                                                                        NEWS
 - Added xsltprocessor->registerPHPFunctions(). (Christian)
 - Bundled new SPL extension. (Marcus, Derick)
 - Upgraded SQLite library to version 2.8.11. (Ilia, Wez)
+- Fixed foreach() to respect property visibility. (Marcus)
+- Fixed problem with parse error in include() file not stopping PHP's
+  execution. (Ilia)
 - Fixed var_export() to show public, protected and private modifiers properly.
   (Derick)
 - Fixed problems with longlong values in mysqli. (Georg)
