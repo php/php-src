@@ -13,6 +13,7 @@ PHP 4                                                                      NEWS
   with different types). (Ilia)
 - Fixed bug #26896 (ext/ftp does not work as shared extension). (Jani)
 - Fixed bug #26772 (fgets returns NULL instead of FALSE). (Wez)
+- Fixed bug #21513 (shutdown functions not executed if timed out). (Zeev)
 
 12 Jan 2004, Version 4.3.5RC1
 - Synchronized bundled GD library with GD 2.0.17
