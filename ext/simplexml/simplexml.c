@@ -42,16 +42,41 @@ php_sxe_fetch_object(zval *object TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ _node_as_zval()
+ */
+static void
+_node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value)
+{
+	char *contents;
+
+	contents = xmlNodeListGetString(sxe->document, node->xmlChildrenNode, 1);
+	if (contents) {
+		ZVAL_STRING(value, contents, 1);
+		xmlFree(contents);
+	} else {
+		php_sxe_object *subnode;
+
+		subnode = php_sxe_object_new(TSRMLS_C);
+		subnode->document = sxe->document;
+		subnode->node = node;
+
+		value->type = IS_OBJECT;
+		value->value.obj = php_sxe_register_object(subnode TSRMLS_CC);
+	}
+}
+/* }}} */
+
 /* {{{ sxe_property_read()
  */
 static zval *
 sxe_property_read(zval *object, zval *member TSRMLS_DC)
 {
 	zval           *return_value;
+	zval           *value;
 	php_sxe_object *sxe;
 	char           *name;
-	char           *content;
 	xmlNodePtr      node;
+	int             counter = 0;
 
 	MAKE_STD_ZVAL(return_value);
 	ZVAL_NULL(return_value);
@@ -59,7 +84,7 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 	name = Z_STRVAL_P(member);
 
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
-	
+
 	if (sxe->node == NULL) {
 		sxe->node = node = xmlDocGetRootElement(sxe->document)->xmlChildrenNode;
 	} else {
@@ -68,34 +93,27 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 
 	while (node) {
 		if (!xmlStrcmp(node->name, name)) {
-			break;
+			if (counter == 1) {
+				array_init(return_value);
+				add_next_index_zval(return_value, value);
+			}
+
+			MAKE_STD_ZVAL(value);
+			_node_as_zval(sxe, node, value);
+			
+			if (++counter > 1) {
+				add_next_index_zval(return_value, value);
+			}
 		}
 
 		node = node->next;
 	}
 
-	if (node) {
-		if ((content = xmlNodeListGetString(sxe->document, node->xmlChildrenNode, 1)) == NULL) {
-			php_sxe_object *subnode;
-
-			subnode = php_sxe_object_new(TSRMLS_C);
-			subnode->document = sxe->document;
-			subnode->node = node;
-
-			return_value->type = IS_OBJECT;
-			return_value->value.obj = php_sxe_register_object(subnode TSRMLS_CC);
-		} else {
-			RETVAL_STRING(content, 1);
-			xmlFree(content);
-		}
-	} else {
-		content = xmlGetProp(sxe->node, (const xmlChar *) name);
-		if (content != NULL) {
-			RETVAL_STRING(content, 1);
-			xmlFree(content);
-		}
+	if (counter == 1) {
+		return_value = value;
 	}
-		
+
+			
 	return return_value;
 }
 /* }}} */
