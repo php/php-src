@@ -1,7 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
-- Added session.hash_function and session.hash_bits_per_character. (Sascha)
 - Input Filter support added. See  README.input_filter. (Rasmus)
 - Updated IFX_VERSION entry to work with new Version output of ESQL/C (Corne')
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
@@ -17,12 +16,12 @@ PHP 4                                                                      NEWS
 - Changed array_search() to accept also objects as a needle. (Moriyoshi)
 - Changed ext/mcrypt to require libmcrypt version 2.5.6 or greater. (Derick)
 - Changed uniqid() parameters to be optional and allow any prefix length. (Marcus)
+- Added session.hash_function and session.hash_bits_per_character. (Sascha)
 - Added lightweight streaming input abstraction to the Zend Engine scanners
   that provides uniform support for include()'ing data from PHP streams across
   all platforms (Wez, Zend Engine).
 - Added optional parameter to sha1(), sha1_file(), md5() and md5_file() which
-  makes them return the digest as binary data. (Michael Bretterklieber
-  <mbretter@jawa.at>, Derick)
+  makes them return the digest as binary data. (Michael Bretterklieber, Derick)
 - Added proc_nice() function. Changes priority of the current process. (Ilia)
 - Added pcntl_getpriority() and pcntl_setpriority() functions. (Ilia)
 - Added idate(), date_sunrise() and date_sunset() functions. (Moshe Doron)
