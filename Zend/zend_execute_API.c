@@ -514,13 +514,18 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 
 int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, zend_uint param_count, zval *params[] TSRMLS_DC)
 {
-	zval ***params_array = (zval ***) emalloc(sizeof(zval **)*param_count);
+	zval ***params_array;
 	zend_uint i;
 	int ex_retval;
 	zval *local_retval_ptr;
 
-	for (i=0; i<param_count; i++) {
-		params_array[i] = &params[i];
+	if (param_count) {
+		params_array = (zval ***) emalloc(sizeof(zval **)*param_count);
+		for (i=0; i<param_count; i++) {
+			params_array[i] = &params[i];
+		}
+	} else {
+		params_array = NULL;
 	}
 	ex_retval = call_user_function_ex(function_table, object_pp, function_name, &local_retval_ptr, param_count, params_array, 1, NULL TSRMLS_CC);
 	if (local_retval_ptr) {
@@ -528,7 +533,9 @@ int call_user_function(HashTable *function_table, zval **object_pp, zval *functi
 	} else {
 		INIT_ZVAL(*retval_ptr);
 	}
-	efree(params_array);
+	if (params_array) {
+		efree(params_array);
+	}
 	return ex_retval;
 }
 
