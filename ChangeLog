@@ -1,3 +1,73 @@
+2000-07-29  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/url.c
+      ext/standard/url.h
+      main/fopen-wrappers.c:
+    This url symbol was a bit too generic.  Change it to php_url instead.
+    It was clashing with a similar typedef in the UdmSearch integration I am
+    working on.
+
+2000-07-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/php_imap.c:
+    - Fixed bug in imap_compose_mail() which caused crashes. 
+
+2000-07-29  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/image.c:
+    - Fix reading of IPTC via GetImageInfo() for certain JPEG files. 
+
+2000-07-29  Rasmus Lerdorf  <rasmus@php.net>
+
+    * INSTALL:
+    Add a couple of notes to the INSTALL file to hopefully cut down on a
+    couple of frequently asked questions.
+
+2000-07-29  Zeev Suraski  <zeev@php.net>
+
+    * sapi/cgi/cgi_main.c
+      NEWS
+      ext/standard/output.c
+      ext/standard/php_output.h
+      main/main.c
+      sapi/apache/php_apache.c
+      sapi/apache/sapi_apache.c:
+    Made ob_start() and friends reentrant.  It's now possible to implement this
+    long-requested functionality, now that output buffering is re-entrant:
+
+    function eval_ret($code)
+    {
+    	ob_start();
+    	eval($code);
+    	$retval = ob_get_contents();
+    	ob_end_clean();
+    	return $retval;
+    }
+
+    * main/fopen-wrappers.c
+      main/main.c
+      main/php_main.h
+      main/php_virtual_cwd.c
+      win32/php4dll.dsp: - Update .dsp's
+    - Make non ZTS Win32 build again
+
+2000-07-29  Jouni Ahto  <jah@mork.net>
+
+    * ext/pgsql/pgsql.c:
+    Fix #5817 and really, really check what gets passed further...
+
+    * ext/pgsql/Makefile.in:
+    Removed an extra tab, it caused problems for Digital Unix' poor native make...
+
+    * ext/pgsql/config.m4
+      ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+    This should fix #5826.
+
+2000-07-29  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Just cleaning up.
+
 2000-07-28  Jani Taskinen  <sniper@iki.fi>
 
     * ext/ldap/ldap.c:
