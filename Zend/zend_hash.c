@@ -683,7 +683,7 @@ ZEND_API void zend_hash_graceful_destroy(HashTable *ht)
  */
 
 
-ZEND_API void zend_hash_apply(HashTable *ht, int (*destruct)(void *))
+ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func)
 {
 	Bucket *p;
 
@@ -691,7 +691,7 @@ ZEND_API void zend_hash_apply(HashTable *ht, int (*destruct)(void *))
 
 	p = ht->pListHead;
 	while (p != NULL) {
-		if (destruct(p->pData)) {
+		if (apply_func(p->pData)) {
 			p = zend_hash_apply_deleter(ht, p);
 		} else {
 			p = p->pListNext;
@@ -700,7 +700,7 @@ ZEND_API void zend_hash_apply(HashTable *ht, int (*destruct)(void *))
 }
 
 
-ZEND_API void zend_hash_apply_with_argument(HashTable *ht, int (*destruct)(void *, void *), void *argument)
+ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void *argument)
 {
 	Bucket *p;
 
@@ -708,7 +708,7 @@ ZEND_API void zend_hash_apply_with_argument(HashTable *ht, int (*destruct)(void 
 
 	p = ht->pListHead;
 	while (p != NULL) {
-		if (destruct(p->pData, argument)) {
+		if (apply_func(p->pData, argument)) {
 			p = zend_hash_apply_deleter(ht, p);
 		} else {
 			p = p->pListNext;
