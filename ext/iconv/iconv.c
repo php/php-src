@@ -228,7 +228,7 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 	out_p = out_buf;
 
 	while(in_left > 0) {
-		result = icv(cd, (char **)&in_p, &in_left, (char **) &out_p, &out_left);
+		result = icv(cd, (const char **)&in_p, &in_left, (char **) &out_p, &out_left);
 		out_size = bsz - out_left;
 		if( result == (size_t)(-1) ) {
 			if( errno == E2BIG && in_left > 0 ) {
