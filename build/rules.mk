@@ -55,9 +55,9 @@ distclean: distclean-recursive clean-x
 
 test: $(top_builddir)/sapi/cli/php
 	@if test "$(TESTS)" = ""; then \
-		TOP_BUILDDIR=$(top_builddir) TOP_SRCDIR=$(top_srcdir) $(top_builddir)/sapi/cli/php $(top_srcdir)/run-tests.php $(srcdir); \
+		TOP_BUILDDIR=$(top_builddir) TOP_SRCDIR=$(top_srcdir) $(top_builddir)/sapi/cli/php -c $(top_srcdir)/php.ini-dist $(top_srcdir)/run-tests.php $(srcdir); \
 	else \
-		TOP_BUILDDIR=$(top_builddir) TOP_SRCDIR=$(top_srcdir) $(top_builddir)/sapi/cli/php $(top_srcdir)/run-tests.php $(TESTS); \
+		TOP_BUILDDIR=$(top_builddir) TOP_SRCDIR=$(top_srcdir) $(top_builddir)/sapi/cli/php -c $(top_srcdir)/php.ini-dist $(top_srcdir)/run-tests.php $(TESTS); \
 	fi
 
 include $(builddir)/.deps
