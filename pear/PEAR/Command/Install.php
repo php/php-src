@@ -77,7 +77,7 @@ class PEAR_Command_Install extends PEAR_Command_Common
                 if (isset($options['f'])) {
                     $opts['force'] = true;
                 }
-                // The ['force'] and ['nodeps'] options are still missing
+                // XXX The ['nodeps'] option is still missing
                 if ($installer->install(@$params[0], $opts, $this->config)) {
                     $this->ui->displayLine("install ok");
                 } else {

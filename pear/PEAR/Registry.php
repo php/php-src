@@ -198,6 +198,10 @@ class PEAR_Registry extends PEAR
             // XXX does not check type of lock (LOCK_SH/LOCK_EX)
             return true;
         }
+        $php_dir = dirname($this->lockfile);
+        if (!@is_dir($php_dir) && !System::mkDir("-p $php_dir")) {
+            return false;
+        }
         $this->lock_fp = @fopen($this->lockfile, "w");
         if (!is_resource($this->lock_fp)) {
             return null;
