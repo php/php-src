@@ -2,6 +2,11 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fixed leak when using string offsets in the array() construct.
+  (Andi, Zend Engine)
+- Fixed corruption problem when changing deeply nested values in objects.
+  (Andi & Zeev, Zend Engine)
+- Fixed closing
 - Improved array_multisort() to be able to specify sort type as well sort
   order. Incidentally, it can be used to sort multi-dimensional arrays
   as well. (Andrei)
