@@ -1,3 +1,348 @@
+2002-03-12  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/pgsql.php:
+    Updated the regex of simpleQuery to support "(" and new lines
+
+2002-03-12  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/aggregation.c: - Compile fixes for Engine 2
+
+    * ext/sybase_ct/php_sybase_ct.c
+      ext/sybase/php_sybase_db.c
+      ext/standard/var_unserializer.re
+      ext/standard/browscap.c
+      ext/standard/var_unserializer.c
+      ext/pgsql/pgsql.c
+      ext/odbc/php_odbc.c
+      ext/mysql/php_mysql.c
+      ext/mssql/php_mssql.c
+      ext/msql/php_msql.c
+      ext/fbsql/php_fbsql.c:
+    - Allow duality between Engine 1 & 2 using ZEND_STANDARD_CLASS_DEF_PTR
+
+2002-03-12  Frank M. Kromann  <frank@frontbase.com>
+
+    * main/config.w32.h:
+    Changed to PHP_CONFIG_FILE_PATH use the environment variable SystemRoot
+
+2002-03-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/zlib/config0.m4: missed zlib.c
+
+    * ext/mysql/libmysql/Makefile.in
+      ext/mysql/Makefile.in: nuke old makefiles
+
+    * ext/aspell/Makefile.in
+      ext/aspell/config.m4
+      ext/cpdf/config.m4
+      ext/cpdf/Makefile.in: php_new_extension
+
+    * ext/xmlrpc/Makefile.in
+      ext/xmlrpc/libxmlrpc/Makefile.in: old makefiles
+
+    * ext/readline/Makefile.in
+      ext/readline/config.m4: php_new_extension
+
+    * ext/pcre/Makefile.in
+      ext/pcre/pcrelib/Makefile.in: remove old makefiles
+
+    * ext/odbc/Makefile.in
+      ext/odbc/config.m4
+      ext/pcntl/config.m4
+      ext/pcntl/Makefile.in
+      ext/ncurses/Makefile.in
+      ext/ncurses/config.m4
+      ext/hyperwave/config.m4
+      ext/hyperwave/Makefile.in: php_new_extension
+
+    * ext/db/config.m4: forgot to add _NEW_
+
+    * ext/db/config.m4
+      ext/db/Makefile.in
+      ext/cybercash/config.m4
+      ext/cybercash/Makefile.in: php_new_extension
+
+    * ext/xml/expat/Makefile.in
+      ext/xml/Makefile.in: Remove old Makefile templates
+
+    * ext/ctype/Makefile.in
+      ext/ctype/config.m4:
+    extension converted automatically to PHP_NEW_EXTENSION. Manually confirmed
+
+2002-03-12  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c
+      ext/exif/test.txt
+      ext/exif/tests/001.phpt: -usability
+    -tests
+
+2002-03-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/zlib/config0.m4
+      ext/zlib/Makefile.in: php_new_extension
+
+    * ext/zip/Makefile.in
+      ext/zip/config.m4
+      ext/yp/Makefile.in
+      ext/yp/config.m4
+      ext/yaz/Makefile.in
+      ext/yaz/config.m4
+      ext/xslt/Makefile.in
+      ext/xslt/config.m4
+      ext/wddx/Makefile.in
+      ext/wddx/config.m4
+      ext/vpopmail/Makefile.in
+      ext/vpopmail/config.m4
+      ext/tokenizer/Makefile.in
+      ext/tokenizer/config.m4
+      ext/sysvshm/Makefile.in
+      ext/sysvshm/config.m4
+      ext/sysvsem/Makefile.in
+      ext/sysvsem/config.m4
+      ext/sybase_ct/Makefile.in
+      ext/sybase_ct/config.m4
+      ext/sybase/Makefile.in
+      ext/sybase/config.m4
+      ext/swf/Makefile.in
+      ext/swf/config.m4
+      ext/sockets/Makefile.in
+      ext/sockets/config.m4
+      ext/snmp/Makefile.in
+      ext/snmp/config.m4
+      ext/shmop/Makefile.in
+      ext/shmop/config.m4
+      ext/recode/Makefile.in
+      ext/recode/config.m4
+      ext/qtdom/Makefile.in
+      ext/qtdom/config.m4
+      ext/pspell/Makefile.in
+      ext/pspell/config.m4
+      ext/posix/Makefile.in
+      ext/posix/config.m4
+      ext/pgsql/Makefile.in
+      ext/pgsql/config.m4
+      ext/pfpro/Makefile.in
+      ext/pfpro/config.m4
+      ext/pdf/Makefile.in
+      ext/pdf/config.m4
+      ext/ovrimos/Makefile.in
+      ext/ovrimos/config.m4
+      ext/overload/Makefile.in
+      ext/overload/config.m4
+      ext/oracle/Makefile.in
+      ext/oracle/config.m4
+      ext/openssl/Makefile.in
+      ext/openssl/config.m4
+      ext/oci8/Makefile.in
+      ext/oci8/config.m4
+      ext/muscat/Makefile.in
+      ext/muscat/config.m4
+      ext/msql/Makefile.in
+      ext/msql/config.m4
+      ext/msession/Makefile.in
+      ext/msession/config.m4
+      ext/mnogosearch/Makefile.in
+      ext/mnogosearch/config.m4
+      ext/ming/Makefile.in
+      ext/ming/config.m4
+      ext/mhash/Makefile.in
+      ext/mhash/config.m4
+      ext/mcve/Makefile.in
+      ext/mcve/config.m4
+      ext/mcrypt/Makefile.in
+      ext/mcrypt/config.m4
+      ext/mcal/Makefile.in
+      ext/mcal/config.m4
+      ext/mbstring/Makefile.in
+      ext/mbstring/config.m4
+      ext/mailparse/Makefile.in
+      ext/mailparse/config.m4:
+    extension converted automatically to PHP_NEW_EXTENSION. Manually confirmed
+
+    * ext/ircg/config.m4: add makefile fragment manually
+
+    * ext/ldap/Makefile.in
+      ext/ldap/config.m4
+      ext/ircg/Makefile.in
+      ext/ircg/config.m4
+      ext/interbase/Makefile.in
+      ext/interbase/config.m4:
+    extension converted automatically to PHP_NEW_EXTENSION. Manually confirmed
+
+    * ext/informix/config.m4: add makefile fragment manually
+
+    * ext/ingres_ii/Makefile.in
+      ext/ingres_ii/config.m4
+      ext/informix/Makefile.in
+      ext/informix/config.m4
+      ext/imap/Makefile.in
+      ext/imap/config.m4
+      ext/icap/Makefile.in
+      ext/icap/config.m4
+      ext/gmp/Makefile.in
+      ext/gmp/config.m4
+      ext/gettext/Makefile.in
+      ext/gettext/config.m4
+      ext/gd/Makefile.in
+      ext/gd/config.m4
+      ext/ftp/Makefile.in
+      ext/ftp/config.m4
+      ext/fribidi/Makefile.in
+      ext/fribidi/config.m4
+      ext/filepro/Makefile.in
+      ext/filepro/config.m4
+      ext/fdf/Makefile.in
+      ext/fdf/config.m4
+      ext/fbsql/Makefile.in
+      ext/fbsql/config.m4
+      ext/domxml/Makefile.in
+      ext/domxml/config.m4
+      ext/dio/Makefile.in
+      ext/dio/config.m4
+      ext/dbx/Makefile.in
+      ext/dbx/config.m4
+      ext/dbplus/Makefile.in
+      ext/dbplus/config.m4
+      ext/dbase/Makefile.in
+      ext/dbase/config.m4
+      ext/dba/Makefile.in
+      ext/dba/config.m4
+      ext/cyrus/Makefile.in
+      ext/cyrus/config.m4
+      ext/cybermut/Makefile.in
+      ext/cybermut/config.m4
+      ext/curl/Makefile.in
+      ext/curl/config.m4
+      ext/crack/Makefile.in
+      ext/crack/config.m4
+      ext/ccvs/Makefile.in
+      ext/ccvs/config.m4
+      ext/calendar/Makefile.in
+      ext/calendar/config.m4
+      ext/bz2/Makefile.in
+      ext/bz2/config.m4
+      ext/exif/Makefile.in
+      ext/exif/config.m4:
+    extension converted automatically to PHP_NEW_EXTENSION. Manually confirmed
+
+    * ext/Makefile.in: unused file
+
+2002-03-12  Stig Bakken  <ssb@fast.no>
+
+    * ext/iconv/config.m4:
+    * MFH: fix compile problem on platforms without iconv in libc
+
+    * ext/iconv/config.m4:
+    * fix compile problem on platforms without iconv in libc
+
+2002-03-12  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: -return size of thumbnail even if it not read
+
+2002-03-12  Stefan Roehrich  <sr@linux.de>
+
+    * ext/zlib/tests/003.phpt
+      ext/zlib/zlib.c:
+    (PHP gzencode) Reimplementation of gzencode(). Now works as documented
+                   (gzencode(string data [, int level [, int encoding_mode]])),
+                   should fix #15930.
+
+    * ext/zlib/tests/001.phpt
+      ext/zlib/zlib.c:
+    (PHP gzinflate) Workaround for bug #14939 (buffer error in gzinflate()).
+                    Fixed prototype and added test for #14939.
+
+
+2002-03-12  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/tests/001.phpt: -reflect changes
+    -find image from run-tests.php
+
+2002-03-12  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c: forgot SEPARATE_ZVAL, produced segfaults.
+     segfaulted only in 4_2_0 (not in HEAD and 4_0_7, strange...)
+
+2002-03-12  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * ext/odbc/config.m4:
+    Removed sqlrte from SAP DB liblist as it is not needed.
+
+2002-03-12  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * README.TESTING: Catch up with recent test scripts changes
+
+2002-03-12  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/domxml/php_domxml.c: - Remove *FETCH() statements.
+    - Clean up WS and parenthesis indentation.
+
+2002-03-12  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+    nicer (optional) formated output in dump_mem and dump_mem_file
+
+2002-03-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/array.c: Fix TSRMLS_CC.
+
+2002-03-12  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/standard/string.c: Change php_addslashes() a little.
+    Since most users do not use magic_quote_sybase, be nicer to
+    users not using magic_quote_sybase.
+
+    * ext/standard/array.c: Make use of TSRMLS_C/D
+
+    * tests/bin-info.inc
+      run-tests.php:
+    Fix PHP version and sapi printed so that it does not print bogus
+    version and sapi name.
+
+2002-03-12  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * EXTENSIONS: -reflect new state of ext/exif
+
+    * ext/exif/php_exif.h
+      ext/exif/exif.c
+      ext/exif/test.txt: -support for array tags
+    -better memory handling
+    -support for thumbnails in TIFF format
+    -new functions exif_imagetype
+
+    * ext/standard/image.c
+      ext/standard/php_image.h: -fixed bug 15174
+    -support for some broken jpegs: bug 13213
+    -better memory handling
+    -initial jpeg2000 support (only jpc not jp2,jb2,jpx)
+
+2002-03-12  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * pear/DB/tests/driver/setup.inc:
+    Make pear tests find scripts needed at least.
+
+2002-03-12  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/image.c: -merged a wrong line
+    -one compiling issue
+
+2002-03-12  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/session/tests/skipif.inc: Add missing skipif.inc
+
+    * run-tests.php:
+    Do not search php binary in search path, since we are not testing older builds.
+    Print SAPI used.
+
+    * run-tests.php: Use CGI binary when CGI SAPI is there.
+    Make "php run-tests.php" work with cli SAPI.
+
+2002-03-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/odbc/php_odbc.h: MFH
+
+    * ext/odbc/php_odbc.h: - Fix more possible bugs (bug #16008 related)
+
 2002-03-11  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ext/imap/php_imap.h: - MFH for bug #16008

@@ -1,3 +1,37 @@
+2002-03-12  Andi Gutmans  <andi@zend.com>
+
+    * zend.h: - Forgot to close comment.
+
+    * zend.h: - Macro for duality between Engine 1 and 2
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_compile.c
+      zend_opcode.c
+      zend_operators.c: - Another couple of indirection fixes.
+    - Make class_entry->refcount be part of the structure and not allocated.
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_opcode.c: - Fix bug introduced with latest class hash table change.
+
+2002-03-12  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_API.c: Fix standard object creation
+
+    * zend_API.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute_API.c
+      zend_opcode.c
+      zend.c
+      zend.h: - make class tables contain class_entry *, not class_entry
+    - fix isset($this)
+
 2002-03-10  Andi Gutmans  <andi@zend.com>
 
     * zend_execute.c: - Fix build in ZTS mode.
