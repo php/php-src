@@ -54,7 +54,7 @@ function_entry spl_functions_none[] = {
  */
 static void spl_init_globals(zend_spl_globals *spl_globals)
 {
-	spl_globals->autoload_extensions = ".inc,.inc.php";
+	spl_globals->autoload_extensions = NULL;
 	spl_globals->autoload_functions  = NULL;
 }
 /* }}} */
@@ -507,7 +507,7 @@ PHP_MINIT_FUNCTION(spl)
 
 PHP_RINIT_FUNCTION(spl) /* {{{ */
 {
-	SPL_G(autoload_extensions) = estrdup(SPL_G(autoload_extensions));
+	SPL_G(autoload_extensions) = estrdup(".inc,.inc.php");
 	return SUCCESS;
 } /* }}} */
 
@@ -515,6 +515,7 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 {
 	if (SPL_G(autoload_extensions)) {
 		efree(SPL_G(autoload_extensions));
+		SPL_G(autoload_extensions) = NULL;
 	}
 	if (SPL_G(autoload_functions)) {
 		zend_hash_destroy(SPL_G(autoload_functions));
