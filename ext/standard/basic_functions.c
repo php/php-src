@@ -1443,7 +1443,11 @@ PHP_FUNCTION(settype)
 
 	if (!strcasecmp(new_type, "integer")) {
 		convert_to_long(*var);
-	} else if (!strcasecmp(new_type, "double")) {
+	} else if (!strcasecmp(new_type, "int")) {
+		convert_to_long(*var);
+	} else if (!strcasecmp(new_type, "float")) {
+		convert_to_double(*var);
+	} else if (!strcasecmp(new_type, "double")) { /* deprecated */
 		convert_to_double(*var);
 	} else if (!strcasecmp(new_type, "string")) {
 		convert_to_string(*var);
@@ -1451,8 +1455,12 @@ PHP_FUNCTION(settype)
 		convert_to_array(*var);
 	} else if (!strcasecmp(new_type, "object")) {
 		convert_to_object(*var);
+	} else if (!strcasecmp(new_type, "bool")) {
+		convert_to_boolean(*var);
 	} else if (!strcasecmp(new_type, "boolean")) {
 		convert_to_boolean(*var);
+	} else if (!strcasecmp(new_type, "null")) {
+		convert_to_null(*var);
 	} else if (!strcasecmp(new_type, "resource")) {
 		php_error(E_WARNING, "settype: cannot convert to resource type");
 		RETURN_FALSE;
