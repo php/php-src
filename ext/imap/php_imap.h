@@ -190,6 +190,7 @@ ZEND_BEGIN_MODULE_GLOBALS(imap)
 	STRINGLIST *imap_alertstack;
 	ERRORLIST *imap_errorstack;
 	MESSAGELIST *imap_messages;
+	MESSAGELIST *imap_messages_tail;
 	FOBJECTLIST *imap_folder_objects;
 	FOBJECTLIST *imap_sfolder_objects;
 	folderlist_style_t folderlist_style;
