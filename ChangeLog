@@ -1,3 +1,62 @@
+2004-06-08  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * NEWS:
+      Interbase news
+
+2004-06-08  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_4_3)
+      pear/PEAR/Command/Package.php:
+      MFH partial fix, bug #1163: rpm build doesn't build properly
+
+    * pear/PEAR/Command/Package.php:
+      partial fix, bug #1163: rpm build doesn't build properly
+
+    * (PHP_4_3)
+      pear/PEAR/Builder.php:
+      MFH fix bug #1550: Builder does not set path to match bin_dir
+
+    * pear/PEAR/Builder.php:
+      fix bug #1550: Builder does not set path to match bin_dir
+
+    * (PHP_4_3)
+      pear/PEAR/Remote.php:
+      MFH fix bug #1378: user/pass must be urldecoded from parse_url in
+      Remote.php
+
+    * pear/PEAR/Remote.php:
+      fix bug #1378: user/pass must be urldecoded from parse_url in Remote.php
+
+    * pear/scripts/pear.bat:
+      fix bug #1153: PEAR command doesn't work after upgrading
+      
+      reverting earlier fix - people must have register_argc_argv=on set in
+      php.ini for PEAR to work.
+
+    * pear/scripts/pearcmd.php:
+      fix bug #1581: unhelpful error message if "pear blatch" is typed
+
+2004-06-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      main/SAPI.c:
+      MFH: Fixed bug #28692 (\0 in Authenticate header passed via safe_mode).
+
+    * main/SAPI.c:
+      Fixed bug #28692 (\0 in Authenticate header passed via safe_mode).
+
+2004-06-08  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/interbase.dsp
+      ext/interbase/interbase.rc:
+      ... back from the dead
+
+2004-06-08  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli_api.c:
+      fixed crash (changed MYSQL TO MY_MYSQL in mysql_stmt_init)
+
 2004-06-07  Andi Gutmans  <andi@zend.com>
 
     * NEWS
