@@ -310,10 +310,12 @@ static HashTable *spl_array_get_properties(zval *object TSRMLS_DC)
 /* {{{ PHP_MINIT_FUNCTION(spl_array) */
 PHP_MINIT_FUNCTION(spl_array)
 {
+#if MBO_0
 	REGISTER_SPL_INTERFACE(ArrayRead);
 
 	REGISTER_SPL_INTERFACE(ArrayAccess);
 	zend_class_implements(spl_ce_ArrayAccess TSRMLS_CC, 1, spl_ce_ArrayRead);
+#endif
 
 	REGISTER_SPL_STD_CLASS_EX(ArrayObject, spl_array_object_new, spl_funcs_ArrayObject);
 	zend_class_implements(spl_ce_ArrayObject TSRMLS_CC, 1, zend_ce_aggregate);
