@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Added is_callable() function that can be used to find out whether
+  its argument is a valid callable construct. (Andrei)
 - Fixed a rare possible crash when generating extended information. (Dmitri
   Dmitrienko, Zend Engine)
 - Improved virtual() to support PHP-enabled URIs. (Zeev)
