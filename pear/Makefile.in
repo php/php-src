@@ -19,7 +19,7 @@ PEAR_FILES = \
 	DB/storage.php \
 	HTTP.php \
 	File/Find.php \
-	PEAR_ERROR.php
+	PEAR_Error.php
 
 install-data-local:
 	@if $(mkinstalldirs) $(peardir); then \
