@@ -1470,11 +1470,14 @@ class PEAR_Common extends PEAR
         } else {
             $config = &PEAR_Config::singleton();
         }
-        $proxy_host = $proxy_port = null;
-        if ($proxy = $config->get('http_proxy')) {
-            $proxy = str_replace('http://', '', $proxy);
-            list($proxy_host, $proxy_port) = explode(':', $proxy);
-            if (empty($proxy_port)) {
+        $proxy_host = $proxy_port = $proxy_user = $proxy_pass = '';
+        if ($proxy = parse_url($config->get('http_proxy'))) {
+            $proxy_host = @$proxy['host'];
+            $proxy_port = @$proxy['port'];
+            $proxy_user = @$proxy['user'];
+            $proxy_pass = @$proxy['pass'];
+
+            if ($proxy_port == '') {
                 $proxy_port = 8080;
             }
             if ($callback) {
@@ -1484,7 +1487,7 @@ class PEAR_Common extends PEAR
         if (empty($port)) {
             $port = 80;
         }
-        if ($proxy_host) {
+        if ($proxy_host != '') {
             $fp = @fsockopen($proxy_host, $proxy_port, $errno, $errstr);
             if (!$fp) {
                 if ($callback) {
@@ -1506,8 +1509,12 @@ class PEAR_Common extends PEAR
             $request = "GET $path HTTP/1.0\r\n";
         }
         $request .= "Host: $host:$port\r\n".
-            "User-Agent: PHP/".PHP_VERSION."\r\n".
-            "\r\n";
+            "User-Agent: PHP/".PHP_VERSION."\r\n";
+        if ($proxy_host != '' && $proxy_user != '') {
+            $request .= 'Proxy-Authorization: Basic ' .
+                base64_encode($proxy_user . ':' . $proxy_pass) . "\r\n";
+        }
+        $request .= "\r\n";
         fwrite($fp, $request);
         $headers = array();
         while (trim($line = fgets($fp, 1024))) {
