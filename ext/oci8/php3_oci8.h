@@ -133,7 +133,7 @@ typedef struct {
 	sb2 indicator;
 	ub2 retcode;
 	ub2 retlen;
-	ub4 cb_retlen;
+	ub4 retlen4;
 	ub2 is_descr;
 	ub2 is_cursor;
     int descr;
@@ -142,12 +142,8 @@ typedef struct {
 	int stmtid;
 	void *data;
 	oci_define *define;
-
-	/* for piecewise read */
 	int piecewise;
-	int cursize;
-	int curoffs;
-    ub4 piecesize;
+	ub4 cb_retlen;
 } oci_out_column;
 
 typedef struct {

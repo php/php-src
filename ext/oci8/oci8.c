@@ -143,9 +143,6 @@ static void _oci_close_user(oci_session *session);
 static sb4 oci_bind_in_callback(dvoid *, OCIBind *, ub4, ub4, dvoid **, ub4 *, ub1 *, dvoid **);
 static sb4 oci_bind_out_callback(dvoid *, OCIBind *, ub4, ub4, dvoid **, ub4 **, ub1 *, dvoid **, ub2 **);
 
-/* define callback function */
-static sb4 oci_define_callback(dvoid *, OCIDefine *, ub4, dvoid **, ub4 **, ub1 *, dvoid **, ub2 **);
-
 #if 0
 /* failover callback function */
 static sb4 oci_failover_callback(dvoid *svchp,dvoid* envhp,dvoid *fo_ctx,ub4 fo_type, ub4 fo_event);
@@ -773,7 +770,6 @@ oci_get_col(oci_statement *statement, int col, pval *pval, char *func)
 		   	}
        	} else {
 			convert_to_long(pval);
-	
 			return oci_get_col(statement,pval->value.lval,0,func);
 		}
 	} else if (col != -1) {
@@ -800,8 +796,8 @@ oci_make_pval(pval *value,oci_statement *statement,oci_out_column *column, char 
 
 	if (column->indicator || column->retcode)
 		if ((column->indicator != -1) && (column->retcode != 1405))
-			oci_debug("oci_make_pval: %16s,retlen = %4d,cb_retlen = %d,storage_size4 = %4d,indicator %4d, retcode = %4d",
-					   column->name,column->retlen,column->cb_retlen,column->storage_size4,column->indicator,column->retcode);
+			oci_debug("oci_make_pval: %16s,retlen = %4d,retlen4 = %d,storage_size4 = %4d,indicator %4d, retcode = %4d",
+					   column->name,column->retlen,column->retlen4,column->storage_size4,column->indicator,column->retcode);
 
 	if (column->indicator == -1) { /* column is NULL */
 		var_reset(value); /* XXX we NEED to make sure that there's no data attached to this yet!!! */
@@ -841,7 +837,7 @@ oci_make_pval(pval *value,oci_statement *statement,oci_out_column *column, char 
 				   oci_debugcol(column,"OK");
 				*/
 				if (column->piecewise) {
-					size = (column->cursize - column->piecesize) + column->cb_retlen;
+					size = column->retlen4;
 				} else {
 					size = column->retlen;
 				}
@@ -1133,19 +1129,9 @@ oci_execute(oci_statement *statement, char *func,ub4 mode, HashTable *list)
 					define_type = outcol->data_type;
 					outcol->is_cursor = 1;
 					outcol->storage_size4 = -1;
-					dynamic = OCI_DYNAMIC_FETCH;
-
-#if 0 /* doesn't work!! */
-					outcol->stmtid = oci_parse(statement->conn,0,0,list);
-					outcol->pstmt = oci_get_stmt(outcol->stmtid, "OCIExecute",list);
-
-					define_type = outcol->data_type;
-					outcol->is_cursor = 1;
-					outcol->storage_size4 = -1;
 					outcol->retlen = -1;
 					dynamic = OCI_DEFAULT;
-					buf = outcol->pstmt->pStmt;
-#endif
+					buf = &(outcol->pstmt->pStmt);
 					break;
 
 			 	case SQLT_RDD:	 /* ROWID */
@@ -1182,15 +1168,6 @@ oci_execute(oci_statement *statement, char *func,ub4 mode, HashTable *list)
 					oci_debug("OCIExecute: new descriptor for %s",outcol->name);
 					break;
 
-#if 0 /* RAW (can be up to 2K) is now handled as STRING! */
-				case SQLT_BIN:
-					define_type = SQLT_BIN;
-					outcol->storage_size4++;
-					buf = outcol->data = (text *) emalloc(outcol->storage_size4);
-					dynamic = OCI_DEFAULT;
-					break;
-#endif
-
 				case SQLT_LNG:
 			    case SQLT_LBI:
 					if (outcol->data_type == SQLT_LBI) {
@@ -1200,7 +1177,6 @@ oci_execute(oci_statement *statement, char *func,ub4 mode, HashTable *list)
 					}
 					outcol->storage_size4 = OCI_MAX_DATA_SIZE;
 					outcol->piecewise = 1;
-					outcol->piecesize = OCI_PIECE_SIZE;
 					dynamic = OCI_DYNAMIC_FETCH;
 					break;
 
@@ -1228,13 +1204,13 @@ oci_execute(oci_statement *statement, char *func,ub4 mode, HashTable *list)
 											  (OCIDefine **)&outcol->pDefine,/* IN/OUT pointer to a pointer to a define handle */
 											  statement->pError, 			/* IN/OUT An error handle  */
 											  counter,						/* IN     position in the select list */
-											  (dvoid *)buf,					/* IN/OUT pointer to a buffer */
+											  (dvoid *)NULL,				/* IN/OUT pointer to a buffer */
 											  outcol->storage_size4, 	    /* IN	  The size of each valuep buffer in bytes */
 											  define_type,			 		/* IN	  The data type */
 											  (dvoid *)&outcol->indicator, 	/* IN	  pointer to an indicator variable or arr */
 											  (ub2 *)NULL, 		            /* IN/OUT Pointer to array of length of data fetched */
 											  (ub2 *)NULL,		            /* OUT	  Pointer to array of column-level return codes */
-											  dynamic));			        /* IN	  mode (OCI_DEFAULT, OCI_DYNAMIC_FETCH) */
+											  OCI_DYNAMIC_FETCH));	        /* IN	  mode (OCI_DEFAULT, OCI_DYNAMIC_FETCH) */
 			} else {
 				statement->error = 
 					oci_error(statement->pError,
@@ -1249,24 +1225,10 @@ oci_execute(oci_statement *statement, char *func,ub4 mode, HashTable *list)
 											  (dvoid *)&outcol->indicator, 	/* IN	  pointer to an indicator variable or arr */
 											  (ub2 *)&outcol->retlen, 		/* IN/OUT Pointer to array of length of data fetched */
 											  (ub2 *)&outcol->retcode,		/* OUT	  Pointer to array of column-level return codes */
-											  dynamic));			        /* IN	  mode (OCI_DEFAULT, OCI_DYNAMIC_FETCH) */
+											  OCI_DEFAULT));		        /* IN	  mode (OCI_DEFAULT, OCI_DYNAMIC_FETCH) */
 			}
 			if (statement->error) {
 				return 0; /* XXX we loose memory!!! */
-			}
-
-			if (dynamic == OCI_DYNAMIC_FETCH) {
-				statement->error = 
-					oci_error(statement->pError,
-							   "OCIDefineDynamic",
-							   OCIDefineDynamic(outcol->pDefine,
-												statement->pError,
-												(dvoid *) outcol,
-												(OCICallbackDefine)oci_define_callback));
-
-				if (statement->error) {
-					return 0; /* XXX we loose memory!!! */
-				}
 			}
 		}
 	}
@@ -1291,13 +1253,10 @@ oci_fetch(oci_statement *statement, ub4 nrows, char *func)
 		}
 			
 		if (column->piecewise) {
-			if (column->curoffs) {
-				column->cursize = column->piecesize; 
-				column->curoffs = 0;
-			}
+			column->retlen4 = 0;
 		}
 	}
-			
+
 	statement->error =
 		OCIStmtFetch(statement->pStmt,
 					 statement->pError, nrows,
@@ -1316,6 +1275,43 @@ oci_fetch(oci_statement *statement, ub4 nrows, char *func)
 		statement->error = 0; /* OCI_NO_DATA is NO error for us!!! */
 
 		return 0;
+	}
+
+	while (statement->error == OCI_NEED_DATA) {
+		for (i = 0; i < statement->ncolumns; i++) {
+			column = oci_get_col(statement, i + 1, 0, "OCIFetch");
+			if (column->piecewise)	{
+				if (! column->data) {
+					column->data = (text *) emalloc(OCI_PIECE_SIZE);
+				} else {
+					column->data = erealloc(column->data,column->retlen4 + OCI_PIECE_SIZE);
+				}
+
+				column->cb_retlen = OCI_PIECE_SIZE;
+
+				OCIStmtSetPieceInfo((void *) column->pDefine,
+									OCI_HTYPE_DEFINE,
+									statement->pError,
+									((char*)column->data) + column->retlen4,
+									&(column->cb_retlen),
+									OCI_NEXT_PIECE,
+									NULL,
+									NULL);
+			}
+		}	
+
+		statement->error =
+			OCIStmtFetch(statement->pStmt,
+					 	 statement->pError, nrows,
+					 	 OCI_FETCH_NEXT,
+					 	 OCI_DEFAULT);
+
+		for (i = 0; i < statement->ncolumns; i++) {
+			column = oci_get_col(statement, i + 1, 0, "OCIFetch");
+			if (column->piecewise)	{
+				column->retlen4 += column->cb_retlen;
+			}
+		}
 	}
 
 	if (statement->error == OCI_SUCCESS_WITH_INFO || statement->error == OCI_SUCCESS) {
@@ -1494,67 +1490,6 @@ oci_failover_callback(dvoid *svchp,
 	return 0;  
 }
 #endif
-/* }}} */
-/* {{{ oci_define_callback() */
-
-static sb4
-oci_define_callback(dvoid *octxp,
-					 OCIDefine *defnp,
-					 ub4 iter, /* 0-based execute iteration value */
-					 dvoid **bufpp, /* pointer to data */
-					 ub4 **alenp, /* size after value/piece has been read */
-					 ub1 *piecep, /* which piece */
-					 dvoid **indpp, /* indicator value */
-					 ub2 **rcodep) 
-{
-	oci_out_column *outcol;
-
-	outcol = (oci_out_column *)octxp;
-
-	if (outcol->is_cursor) { /* REFCURSOR */
-		outcol->cb_retlen = -1;
-		*bufpp  = outcol->pstmt->pStmt;
-	} else { /* "normal variable" */
-		if (! outcol->data) {
-			if (outcol->piecewise) {
-				outcol->data = (text *) emalloc(outcol->piecesize);
-				outcol->cursize = outcol->piecesize;
-				outcol->curoffs = 0;
-			}
-		}
-
-		if (! outcol->data) {
-			php_error(E_WARNING, "OCIFetch: cannot allocate %d bytes!",outcol->storage_size4);
-			return OCI_ERROR;
-		}
-
-       if (outcol->piecewise) {
-			if ((outcol->curoffs + outcol->piecesize) > outcol->cursize) {
-				outcol->cursize += outcol->piecesize;
-				outcol->data = erealloc(outcol->data,outcol->cursize);
-			}
-			outcol->cb_retlen = outcol->piecesize;
-			*bufpp  = ((char*)outcol->data) + outcol->curoffs;
-			outcol->curoffs += outcol->piecesize;
-		} 
-	}
-
-	outcol->indicator = 0;
-	outcol->retcode = 0;
-
-	*alenp  = &outcol->cb_retlen;
- 	*indpp  = &outcol->indicator;
-	*rcodep	= &outcol->retcode;
-	*piecep = OCI_ONE_PIECE;
-
-	/*
-	oci_debug("oci_define_callback: %s,*bufpp = %x,**alenp = %d,**indpp = %d, **rcodep= %d, *piecep = %d",
-		   outcol->name,*bufpp,**alenp,**(ub2**)indpp,**rcodep,*piecep);
-	*/
-		   
-	return OCI_CONTINUE;
-}
-
 /* }}} */
 /* {{{ oci_bind_in_callback() */
 
@@ -3446,7 +3381,7 @@ PHP_FUNCTION(ocisetprefetch)
 		RETURN_FALSE;
 	}
 
-	oci_setprefetch(statement,size->value.lval);
+	oci_setprefetch(statement,size->value.lval); 
 
 	RETURN_TRUE;
 }
@@ -3653,3 +3588,4 @@ PHP_FUNCTION(ocirowcount)
  * c-basic-offset: 4
  * End:
  */
+
