@@ -1035,6 +1035,7 @@ PHP_FUNCTION(preg_quote)
 {
 	zval    **in_str_arg;	/* Input string argument */
 	char 	*in_str,		/* Input string */
+	        *in_str_end,    /* End of the input string */
 			*out_str,		/* Output string with quoted characters */
 		 	*p,				/* Iterator for input string */
 			*q,				/* Iterator for output string */
@@ -1048,10 +1049,11 @@ PHP_FUNCTION(preg_quote)
 	/* Make sure we're working with strings */
 	convert_to_string_ex(in_str_arg);
 	in_str = (*in_str_arg)->value.str.val;
+	in_str_end = (*in_str_arg)->value.str.val + (*in_str_arg)->value.str.len;
 
 	/* Nothing to do if we got an empty string */
-	if (!*in_str) {
-		RETVAL_STRING(empty_string, 0);
+	if (in_str == in_str_end) {
+		RETVAL_STRINGL(empty_string, 0, 0);
 	}
 	
 	/* Allocate enough memory so that even if each character
@@ -1059,7 +1061,8 @@ PHP_FUNCTION(preg_quote)
 	out_str = emalloc(2 * (*in_str_arg)->value.str.len + 1);
 	
 	/* Go through the string and quote necessary characters */
-	for(p = in_str, q = out_str; (c = *p); p++) {
+	for(p = in_str, q = out_str; p != in_str_end; p++) {
+		c = *p;
 		switch(c) {
 			case '.':
 			case '\\':
@@ -1089,7 +1092,7 @@ PHP_FUNCTION(preg_quote)
 	*q = '\0';
 	
 	/* Reallocate string and return it */
-	RETVAL_STRING(erealloc(out_str, q - out_str + 1), 0);
+	RETVAL_STRINGL(erealloc(out_str, q - out_str + 1), q - out_str, 0);
 }
 /* }}} */
 
