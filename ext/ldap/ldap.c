@@ -316,7 +316,7 @@ PHP_MINFO_FUNCTION(ldap)
 }
 /* }}} */
 
-/* {{{ proto int ldap_connect([string host [, int port]])
+/* {{{ proto resource ldap_connect([string host [, int port]])
    Connect to an LDAP server */
 PHP_FUNCTION(ldap_connect)
 {
@@ -453,7 +453,7 @@ static int _get_lderrno(LDAP *ldap)
 }
 /* }}} */
 
-/* {{{ proto int ldap_bind(int link [, string dn, string password])
+/* {{{ proto bool ldap_bind(resource link [, string dn, string password])
    Bind to LDAP directory */
 PHP_FUNCTION(ldap_bind)
 {
@@ -501,7 +501,7 @@ PHP_FUNCTION(ldap_bind)
 }
 /* }}} */
 
-/* {{{ proto int ldap_unbind(int link)
+/* {{{ proto bool ldap_unbind(resource link)
    Unbind from LDAP directory */
 PHP_FUNCTION(ldap_unbind)
 {
@@ -792,7 +792,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 }
 /* }}} */
 
-/* {{{ proto int ldap_read(int link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]])
+/* {{{ proto resource ldap_read(resource link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]])
    Read an entry */
 PHP_FUNCTION(ldap_read)
 {
@@ -800,7 +800,7 @@ PHP_FUNCTION(ldap_read)
 }
 /* }}} */
 
-/* {{{ proto int ldap_list(int link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]])
+/* {{{ proto resource ldap_list(resource link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]])
    Single-level search */
 PHP_FUNCTION(ldap_list)
 {
@@ -808,7 +808,7 @@ PHP_FUNCTION(ldap_list)
 }
 /* }}} */
 
-/* {{{ proto int ldap_search(int link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]])
+/* {{{ proto resource ldap_search(resource link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]])
    Search LDAP tree under base_dn */
 PHP_FUNCTION(ldap_search)
 {
@@ -816,7 +816,7 @@ PHP_FUNCTION(ldap_search)
 }
 /* }}} */
 
-/* {{{ proto int ldap_free_result(int result)
+/* {{{ proto bool ldap_free_result(resource result)
    Free result memory */
 PHP_FUNCTION(ldap_free_result)
 {
@@ -834,7 +834,7 @@ PHP_FUNCTION(ldap_free_result)
 }
 /* }}} */
 
-/* {{{ proto int ldap_count_entries(int link, int result)
+/* {{{ proto int ldap_count_entries(resource link, resource result)
    Count the number of entries in a search result */
 PHP_FUNCTION(ldap_count_entries)
 {
@@ -853,7 +853,7 @@ PHP_FUNCTION(ldap_count_entries)
 }
 /* }}} */
 
-/* {{{ proto int ldap_first_entry(int link, int result)
+/* {{{ proto resource ldap_first_entry(resource link, resource result)
    Return first result id */
 PHP_FUNCTION(ldap_first_entry)
 {
@@ -876,7 +876,7 @@ PHP_FUNCTION(ldap_first_entry)
 }
 /* }}} */
 
-/* {{{ proto int ldap_next_entry(int link, int entry)
+/* {{{ proto resource ldap_next_entry(resource link, resource entry)
    Get next result entry */
 PHP_FUNCTION(ldap_next_entry)
 {
@@ -899,7 +899,7 @@ PHP_FUNCTION(ldap_next_entry)
 }
 /* }}} */
 
-/* {{{ proto array ldap_get_entries(int link, int result)
+/* {{{ proto array ldap_get_entries(resource link, resource result)
    Get all result entries */
 PHP_FUNCTION(ldap_get_entries)
 {
@@ -989,7 +989,7 @@ PHP_FUNCTION(ldap_get_entries)
 }
 /* }}} */
 
-/* {{{ proto string ldap_first_attribute(int link, int result, int ber)
+/* {{{ proto string ldap_first_attribute(resource link, resource result, int ber)
    Return first attribute */
 PHP_FUNCTION(ldap_first_attribute)
 {
@@ -1019,7 +1019,7 @@ PHP_FUNCTION(ldap_first_attribute)
 }
 /* }}} */
 
-/* {{{ proto string ldap_next_attribute(int link, int result, int ber)
+/* {{{ proto string ldap_next_attribute(resource link, resource result, resource ber)
    Get the next attribute in result */
 PHP_FUNCTION(ldap_next_attribute)
 {
@@ -1050,7 +1050,7 @@ PHP_FUNCTION(ldap_next_attribute)
 }
 /* }}} */
 
-/* {{{ proto array ldap_get_attributes(int link, int result)
+/* {{{ proto array ldap_get_attributes(resource link, resource result)
    Get attributes from a search result entry */
 PHP_FUNCTION(ldap_get_attributes)
 {
@@ -1104,7 +1104,7 @@ PHP_FUNCTION(ldap_get_attributes)
 }
 /* }}} */
 
-/* {{{ proto array ldap_get_values(int link, int result, string attribute)
+/* {{{ proto array ldap_get_values(resource link, resource result, string attribute)
    Get all values from a result entry */
 PHP_FUNCTION(ldap_get_values)
 {
@@ -1146,7 +1146,7 @@ PHP_FUNCTION(ldap_get_values)
 }
 /* }}} */
 
-/* {{{ proto array ldap_get_values_len(int link, int result, string attribute)
+/* {{{ proto array ldap_get_values_len(resource link, resource result, string attribute)
    Get all values with lengths from a result entry */
 PHP_FUNCTION(ldap_get_values_len)
 {
@@ -1188,7 +1188,7 @@ PHP_FUNCTION(ldap_get_values_len)
 }
 /* }}} */
 
-/* {{{ proto string ldap_get_dn(int link, int result)
+/* {{{ proto string ldap_get_dn(resource link, resource result)
    Get the DN of a result entry */
 PHP_FUNCTION(ldap_get_dn) 
 {
@@ -1405,7 +1405,7 @@ errexit:
 }
 /* }}} */
 
-/* {{{ proto int ldap_add(int link, string dn, array entry)
+/* {{{ proto bool ldap_add(resource link, string dn, array entry)
    Add entries to LDAP directory */
 PHP_FUNCTION(ldap_add)
 {
@@ -1416,7 +1416,7 @@ PHP_FUNCTION(ldap_add)
 
 /* three functions for attribute base modifications, gerrit Thomson */
 
-/* {{{ proto int ldap_mod_replace(int link, string dn, array entry)
+/* {{{ proto bool ldap_mod_replace(resource link, string dn, array entry)
    Replace attribute values with new ones */
 PHP_FUNCTION(ldap_mod_replace)
 {
@@ -1424,7 +1424,7 @@ PHP_FUNCTION(ldap_mod_replace)
 }
 /* }}} */
 
-/* {{{ proto int ldap_mod_add(int link, string dn, array entry)
+/* {{{ proto bool ldap_mod_add(resource link, string dn, array entry)
    Add attribute values to current */
 PHP_FUNCTION(ldap_mod_add)
 {
@@ -1432,7 +1432,7 @@ PHP_FUNCTION(ldap_mod_add)
 }
 /* }}} */
 
-/* {{{ proto int ldap_mod_del(int link, string dn, array entry)
+/* {{{ proto bool ldap_mod_del(resource link, string dn, array entry)
    Delete attribute values */
 PHP_FUNCTION(ldap_mod_del)
 {
@@ -1440,7 +1440,7 @@ PHP_FUNCTION(ldap_mod_del)
 }
 /* }}} */
 
-/* {{{ proto int ldap_delete(int link, string dn)
+/* {{{ proto bool ldap_delete(resource link, string dn)
    Delete an entry from a directory */
 PHP_FUNCTION(ldap_delete)
 {
@@ -1466,7 +1466,7 @@ PHP_FUNCTION(ldap_delete)
 }
 /* }}} */
 
-/* {{{ proto int ldap_errno(int link)
+/* {{{ proto int ldap_errno(resource link)
    Get the current ldap error number */
 PHP_FUNCTION(ldap_errno)
 {
@@ -1498,7 +1498,7 @@ PHP_FUNCTION(ldap_err2str)
 }
 /* }}} */
 
-/* {{{ proto string ldap_error(int link)
+/* {{{ proto string ldap_error(resource link)
    Get the current ldap error string */
 PHP_FUNCTION(ldap_error) 
 {
@@ -1518,7 +1518,7 @@ PHP_FUNCTION(ldap_error)
 }
 /* }}} */
 
-/* {{{ proto int ldap_compare(int link, string dn, string attr, string value)
+/* {{{ proto bool ldap_compare(resource link, string dn, string attr, string value)
    Determine if an entry has a specific value for one of its attributes */
 PHP_FUNCTION(ldap_compare) 
 {
@@ -1559,7 +1559,7 @@ PHP_FUNCTION(ldap_compare)
 }
 /* }}} */
 
-/* {{{ proto int ldap_sort(int link, int result, string sortfilter)
+/* {{{ proto bool ldap_sort(resource link, resource result, string sortfilter)
    Sort LDAP result entries */
 PHP_FUNCTION(ldap_sort)
 {
@@ -1591,7 +1591,7 @@ PHP_FUNCTION(ldap_sort)
 
 
 #if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP
-/* {{{ proto boolean ldap_get_option(int link, int option, mixed retval)
+/* {{{ proto bool ldap_get_option(resource link, int option, mixed retval)
    Get the current value of various session-wide parameters */
 PHP_FUNCTION(ldap_get_option) 
 {
@@ -1654,7 +1654,7 @@ PHP_FUNCTION(ldap_get_option)
 }
 /* }}} */
 
-/* {{{ proto boolean ldap_set_option(int link, int option, mixed newval)
+/* {{{ proto bool ldap_set_option(resource link, int option, mixed newval)
    Set the value of various session-wide parameters */
 PHP_FUNCTION(ldap_set_option) 
 {
@@ -1792,7 +1792,7 @@ PHP_FUNCTION(ldap_set_option)
 }
 /* }}} */
 
-/* {{{ proto boolean ldap_parse_result(int link, int result, int errcode, string matcheddn, string errmsg, array referrals)
+/* {{{ proto bool ldap_parse_result(resource link, resource result, int errcode, string matcheddn, string errmsg, array referrals)
    Extract information from result */
 PHP_FUNCTION(ldap_parse_result) 
 {
@@ -1864,7 +1864,7 @@ PHP_FUNCTION(ldap_parse_result)
 }
 /* }}} */
 
-/* {{{ proto int ldap_first_reference(int link, int result)
+/* {{{ proto resource ldap_first_reference(resource link, resource result)
    Return first reference */
 PHP_FUNCTION(ldap_first_reference)
 {
@@ -1888,7 +1888,7 @@ PHP_FUNCTION(ldap_first_reference)
 }
 /* }}} */
 
-/* {{{ proto int ldap_next_reference(int link, int entry)
+/* {{{ proto resource ldap_next_reference(resource link, resource entry)
    Get next reference */
 PHP_FUNCTION(ldap_next_reference)
 {
@@ -1911,7 +1911,7 @@ PHP_FUNCTION(ldap_next_reference)
 }
 /* }}} */
 
-/* {{{ proto boolean ldap_parse_reference(int link, int entry, array referrals)
+/* {{{ proto bool ldap_parse_reference(resource link, resource entry, array referrals)
    Extract information from reference entry */
 PHP_FUNCTION(ldap_parse_reference)
 {
@@ -1954,7 +1954,7 @@ PHP_FUNCTION(ldap_parse_reference)
 }
 /* }}} */
 
-/* {{{ proto boolean ldap_rename(int link, string dn, string newrdn, string newparent, boolean deleteoldrdn);
+/* {{{ proto bool ldap_rename(resource link, string dn, string newrdn, string newparent, boolean deleteoldrdn);
    Modify the name of an entry */
 PHP_FUNCTION(ldap_rename)
 {
@@ -1993,7 +1993,7 @@ PHP_FUNCTION(ldap_rename)
 #endif
 
 #if LDAP_API_VERSION > 2000
-/* {{{ proto int ldap_start_tls(int link)
+/* {{{ proto bool ldap_start_tls(resource link)
    Start TLS */
 PHP_FUNCTION(ldap_start_tls)
 {
@@ -2054,7 +2054,7 @@ int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgi
 }
 
 
-/* {{{ proto int ldap_set_rebind_proc(int link, string callback)
+/* {{{ proto bool ldap_set_rebind_proc(resource link, string callback)
    Set a callback function to do re-binds on referral chasing. */
 PHP_FUNCTION(ldap_set_rebind_proc)
 {
