@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   (Dmitry)
 - Fixed handling of return values from storred procedures in mssql_execute()
   with multiple result sets returned. (Frank)
+- Fixed bug #28096 (stream_socket_accept() doesn't work with ssl). (Wez)
 - Fixed bug #28007 (compile mssql extension with old versions of FreeTDS
   fails). (Frank)
 - Fixed bug #27997 (SPL: Crash with getInnerIterator()). (Marcus)
