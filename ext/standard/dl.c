@@ -22,6 +22,7 @@
 #include "dl.h"
 #include "php_globals.h"
 #include "ext/standard/info.h"
+#include "SAPI.h"
 
 #ifdef HAVE_LIBDL
 #include <stdlib.h>
@@ -50,6 +51,12 @@ PHP_FUNCTION(dl)
 {
 	pval **file;
 	PLS_FETCH();
+
+#ifdef ZTS
+	if (strcmp(sapi_module.name, "cgi")!=0) {
+		php_error(E_ERROR, "dl() is not supported in multithreaded Web servers - use extension statements in your php.ini");
+	}
+#endif
 
 	/* obtain arguments */
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
