@@ -377,13 +377,13 @@ php_xml_compat_handlers = {
 	1
 };
 
-XML_Parser 
+PHPAPI XML_Parser 
 XML_ParserCreate(const XML_Char *encoding)
 {
 	return XML_ParserCreate_MM(encoding, NULL, NULL);
 }
 
-XML_Parser
+PHPAPI XML_Parser
 XML_ParserCreateNS(const XML_Char *encoding, const XML_Char sep)
 {
 	XML_Char tmp[2];
@@ -392,7 +392,7 @@ XML_ParserCreateNS(const XML_Char *encoding, const XML_Char sep)
 	return XML_ParserCreate_MM(encoding, NULL, tmp);
 }
 
-XML_Parser
+PHPAPI XML_Parser
 XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *memsuite, const XML_Char *sep)
 {
 	XML_Parser parser;
@@ -422,86 +422,86 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	return parser;
 }
 
-void
+PHPAPI void
 XML_SetUserData(XML_Parser parser, void *user)
 {
 	parser->user = user;
 }
 
-void *
+PHPAPI void *
 XML_GetUserData(XML_Parser parser)
 {
 	return parser->user;
 }
 
-void
+PHPAPI void
 XML_SetElementHandler(XML_Parser parser, XML_StartElementHandler start, XML_EndElementHandler end)
 {
 	parser->h_start_element = start;
 	parser->h_end_element = end;
 }
 
-void
+PHPAPI void
 XML_SetCharacterDataHandler(XML_Parser parser, XML_CharacterDataHandler cdata)
 {
 	parser->h_cdata = cdata;
 }
 
-void
+PHPAPI void
 XML_SetProcessingInstructionHandler(XML_Parser parser, XML_ProcessingInstructionHandler pi)
 {
 	parser->h_pi = pi;
 }
 
-void
+PHPAPI void
 XML_SetCommentHandler(XML_Parser parser, XML_CommentHandler comment)
 {
 	parser->h_comment = comment;
 }
 
-void 
+PHPAPI void 
 XML_SetDefaultHandler(XML_Parser parser, XML_DefaultHandler d)
 {
 	parser->h_default = d;
 }
 
-void
+PHPAPI void
 XML_SetUnparsedEntityDeclHandler(XML_Parser parser, XML_UnparsedEntityDeclHandler unparsed_decl)
 {
 	parser->h_unparsed_entity_decl = unparsed_decl;
 }
 
-void
+PHPAPI void
 XML_SetNotationDeclHandler(XML_Parser parser, XML_NotationDeclHandler notation_decl)
 {
 	parser->h_notation_decl = notation_decl;
 }
 
-void
+PHPAPI void
 XML_SetExternalEntityRefHandler(XML_Parser parser, XML_ExternalEntityRefHandler ext_entity)
 {
 	parser->h_external_entity_ref = ext_entity;
 }
 
-void
+PHPAPI void
 XML_SetStartNamespaceDeclHandler(XML_Parser parser, XML_StartNamespaceDeclHandler start_ns)
 {
 	parser->h_start_ns = start_ns;
 }
 
-void
+PHPAPI void
 XML_SetEndNamespaceDeclHandler(XML_Parser parser, XML_EndNamespaceDeclHandler end_ns)
 {
 	parser->h_end_ns = end_ns;
 }
 
-int
+PHPAPI int
 XML_Parse(XML_Parser parser, const XML_Char *data, int data_len, int is_final)
 {
 	return !xmlParseChunk(parser->parser, data, data_len, is_final);
 }
 
-int
+PHPAPI int
 XML_GetErrorCode(XML_Parser parser)
 {
 	return parser->parser->errNo;
@@ -606,7 +606,7 @@ const XML_Char *error_mapping[] = {
     "XML_ERR_NO_DTD"
 };
 
-const XML_Char *
+PHPAPI const XML_Char *
 XML_ErrorString(int code)
 {
 	if (code < 0 || code >= (int)sizeof(error_mapping)) {
@@ -615,26 +615,35 @@ XML_ErrorString(int code)
 	return error_mapping[code];
 }
 
-int
+PHPAPI int
 XML_GetCurrentLineNumber(XML_Parser parser)
 {
 	return parser->parser->input->line;
 }
 
-int
+PHPAPI int
 XML_GetCurrentColumnNumber(XML_Parser parser)
 {
 	return parser->parser->input->col;
 }
 
-int
+PHPAPI int
 XML_GetCurrentByteIndex(XML_Parser parser)
 {
 	return parser->parser->input->consumed +
 			(parser->parser->input->cur - parser->parser->input->base);
 }
 
-const XML_Char *XML_ExpatVersion(void)
+PHPAPI int
+XML_GetCurrentByteCount(XML_Parser parser)
+{
+	/* WARNING: this is identical to ByteIndex; it should probably
+	 * be different */
+	return parser->parser->input->consumed +
+			(parser->parser->input->cur - parser->parser->input->base);
+}
+
+PHPAPI const XML_Char *XML_ExpatVersion(void)
 {
 	return "1.0";
 }
@@ -662,7 +671,7 @@ _free_ns_pointer(void *ptr, xmlChar *name)
 	efree(ptr);
 }
 
-void
+PHPAPI void
 XML_ParserFree(XML_Parser parser)
 {
 	if (parser->use_namespace) {
