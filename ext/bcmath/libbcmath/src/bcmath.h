@@ -52,9 +52,8 @@ typedef struct bc_struct
 			   in the case of leading zeros generated. */
     } bc_struct;
 
-#include <php.h>
-#include <ext/bcmath/php_bcmath.h>
-
+#include "php.h"
+#include "../../php_bcmath.h"
 
 /* The base used in storing the numbers in n_value above.
    Currently this MUST be 10. */
