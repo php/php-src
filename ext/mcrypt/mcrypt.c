@@ -168,8 +168,11 @@ ZEND_GET_MODULE(mcrypt)
 	if (argc < (a) || argc > (b)) {								\
 		WRONG_PARAM_COUNT;										\
 	}
-#warning Invalidate resource if the param count is wrong, or other problems
-#warning occurred during functions.
+/*
+ * #warning is not ANSI C
+ * #warning Invalidate resource if the param count is wrong, or other problems
+ * #warning occurred during functions.
+ */
 
 #define MCRYPT_GET_CRYPT_ARGS									\
 	switch (argc) {												\
