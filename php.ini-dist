@@ -970,8 +970,13 @@ sockets.use_system_read = On
 
 ; overload(replace) single byte functions by mbstring functions.
 ; mail(), ereg(), etc are overloaded by mb_send_mail(), mb_ereg(),
-; etc. 
-;mbstring.func_overload = No
+; etc. Possible values are 0,1,2,4 or combination of them.
+; For example, 7 for overload everything.
+; 0: No overload
+; 1: Overload mail() function
+; 2: Overload str*() functions
+; 4: Overload ereg*() functions
+;mbstring.func_overload = 0
 
 [FrontBase]
 ;fbsql.allow_persistent = On
