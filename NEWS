@@ -1,23 +1,23 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
-- is_executable now works on windows
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
-- Added get_headers() function, it can be used to retrieve headers sent
-  by the browser for the specified URL.
-- Added str_split() function, this function can break down a string into an
-  array of elements based on length.
-- Added man page for CLI version of PHP. (marcus)
-- Added array_walk_recursive() function that can apply user function 
-  recursively to an array. (Ilia)
-- Fixed bug #20155 (xmlrpc compile problem with ZE2). (Derick, Jan Schneider)
 - Fixed bug #20442 (upgraded bundled expat to 1.95.5). (Ilia)
+- Fixed bug #20155 (xmlrpc compile problem with ZE2). (Derick, Jan Schneider)
 - Changed ext/mcrypt to require libmcrypt version 2.5.6 or greater. (Derick)
 - Changed uniqid() parameters to be optional and allow any prefix length.
   (Marcus)
+- Improved is_executable() to be available on Windows. (Shane)
 - Improved JPEG 2000 support for getimagesize(). (Marcus, Adam Wright)
 - Improved array_search() to accept objects as a needle under ZE2. (Moriyoshi)
+- Added get_headers() function, it can be used to retrieve headers sent
+  by the browser for the specified URL. (Ilia)
+- Added str_split() function, this function can break down a string into an
+  array of elements based on length. (Ilia)
+- Added man page for CLI version of PHP. (marcus)
+- Added array_walk_recursive() function that can apply user function 
+  recursively to an array. (Ilia)
 - Added command line parameters -B, -F, -R and -E which allow to process
   stdin line by line (See php -h for more). (Marcus)
 - Added string.base64 stream filter. (Moriyoshi)
