@@ -88,6 +88,9 @@ function_entry ldap_functions[] = {
 	PHP_FE(ldap_connect,								NULL)
 	PHP_FALIAS(ldap_close,		ldap_unbind,			NULL)
 	PHP_FE(ldap_bind,									NULL)
+#ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
+	PHP_FE(ldap_sasl_bind,								NULL)
+#endif
 	PHP_FE(ldap_unbind,									NULL)
 	PHP_FE(ldap_read,									NULL)
 	PHP_FE(ldap_list,									NULL)
@@ -462,6 +465,47 @@ PHP_FUNCTION(ldap_bind)
 	}
 }
 /* }}} */
+
+#ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
+/* {{{ _php_sasl_interact
+   Interact function for SASL */
+static int _php_sasl_interact(LDAP *ld, unsigned flags, void *defaults, void *in)
+{
+	sasl_interact_t *interact = in;
+
+	while (interact->id != SASL_CB_LIST_END) {
+		const char *dflt = interact->defresult;
+
+		interact->result = strdup((dflt && *dflt) ? dflt : "");
+		interact->len = interact->result ? strlen(interact->result) : 0;
+		interact++;
+	};
+	return LDAP_SUCCESS;
+}
+
+/* {{{ proto bool ldap_sasl_bind(resource link)
+   Bind to LDAP directory using SASL */
+PHP_FUNCTION(ldap_sasl_bind)
+{
+	zval *link;
+	ldap_linkdata *ld;
+	int rc;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &link) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, &link, -1, "ldap link", le_link);
+
+	if ((rc = ldap_sasl_interactive_bind_s(ld->link, NULL, NULL, NULL, NULL, LDAP_SASL_QUIET, _php_sasl_interact, NULL)) != LDAP_SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to bind to server: %s", ldap_err2string(rc));
+		RETURN_FALSE;
+	} else {
+		RETURN_TRUE;
+	}
+}
+/* }}} */
+#endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
 
 /* {{{ proto bool ldap_unbind(resource link)
    Unbind from LDAP directory */
