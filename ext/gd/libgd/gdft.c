@@ -513,7 +513,7 @@ tweenColorFetch (char **error, void *key)
 					     gdTrueColorGetRed (fg),
 					     gdTrueColorGetGreen (fg),
 					     gdTrueColorGetBlue (fg),
-					     gdAlphaMax - ((gdAlphaMax - gdTrueColorGetAlpha (fg)) * pixel / NUMCOLORS))				       );
+					     gdAlphaMax - ((gdAlphaMax - gdTrueColorGetAlpha (fg)) * pixel / NUMCOLORS)				       );
 	}
       else
 	{
