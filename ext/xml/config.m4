@@ -13,11 +13,11 @@ else
   order=12
 fi
 
-PHP_ARG_ENABLE(xml,whether to enable XML support,
-[  --disable-xml           Disable XML support using bundled expat lib], yes)
-
 PHP_ARG_WITH(expat-dir, external libexpat install dir,
 [  --with-expat-dir=DIR    XML: external libexpat install dir])
+
+PHP_ARG_ENABLE(xml,whether to enable XML support,
+[  --disable-xml           Disable XML support using bundled expat lib], yes)
 
 if test "$PHP_XML" = "yes"; then
   AC_DEFINE(HAVE_LIBEXPAT,  1, [ ])
