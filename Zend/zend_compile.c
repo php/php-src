@@ -2202,6 +2202,7 @@ void zend_do_declare_property(znode *var_name, znode *value TSRMLS_DC)
 	if (CG(access_type) & ZEND_ACC_STATIC) {
 		/* FIXME:  Currently, ignores access type for static variables */
 		zend_hash_update(CG(active_class_entry)->static_members, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+		FREE_PNODE(var_name);
 		return;
 	}
 
