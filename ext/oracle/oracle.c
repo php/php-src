@@ -1621,6 +1621,7 @@ ora_describe_define(oraCursor * cursor)
 	int i;
 	sb2 type;
 	sb4 dbsize;
+	TSRMLS_FETCH();
 
 	if (cursor == NULL) {
 		return -1;
