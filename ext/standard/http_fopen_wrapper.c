@@ -85,6 +85,8 @@
 #define HTTP_HEADER_HOST			2
 #define HTTP_HEADER_AUTH			4
 #define HTTP_HEADER_FROM			8
+#define HTTP_HEADER_CONTENT_LENGTH		16
+#define HTTP_HEADER_TYPE			32
 
 php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context, int redirect_max, int header_init STREAMS_DC TSRMLS_DC)
 {
@@ -249,6 +251,12 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			if (strstr(tmp, "authorization:")) {
 				 have_header |= HTTP_HEADER_AUTH;
 			}
+			if (strstr(tmp, "content-length:")) {
+				 have_header |= HTTP_HEADER_CONTENT_LENGTH;
+			}
+			if (strstr(tmp, "content-type:")) {
+				 have_header |= HTTP_HEADER_TYPE;
+			}
 		}
 		efree(tmp);
 	}
@@ -323,14 +331,24 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		}	
 	}
 
-	php_stream_write(stream, "\r\n", sizeof("\r\n")-1);
-
 	/* Request content, such as for POST requests */
 	if (context &&
 		php_stream_context_get_option(context, "http", "content", &tmpzval) == SUCCESS &&
 		Z_STRLEN_PP(tmpzval) > 0) {
+		if (!(have_header & HTTP_HEADER_CONTENT_LENGTH)) {
+			scratch_len = snprintf(scratch, scratch_len, "Content-Length: %d\r\n", Z_STRLEN_PP(tmpzval));
+			php_stream_write(stream, scratch, scratch_len);
+		}
+		if (!(have_header & HTTP_HEADER_TYPE)) {
+			php_stream_write(stream, "Content-Type: application/x-www-form-urlencoded\r\n",
+				sizeof("Content-Type: application/x-www-form-urlencoded\r\n") - 1);
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Content-type not specified assuming application/x-www-form-urlencoded");
+		}
+		php_stream_write(stream, "\r\n", sizeof("\r\n")-1);
 		php_stream_write(stream, Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval));
 		php_stream_write(stream, "\r\n\r\n", sizeof("\r\n\r\n")-1);
+	} else {
+		php_stream_write(stream, "\r\n", sizeof("\r\n")-1);
 	}
 
 	location[0] = '\0';
