@@ -63,9 +63,9 @@
 
 typedef struct {
   struct mapping *request_data;
-  struct object *my_fd;
+  struct object *my_fd_obj;
+  int my_fd;
   char *filename;
-  PIKE_MUTEX_T roxen_php_execution_lock;
 } php_roxen_request;
 
 
@@ -82,16 +82,28 @@ static int roxen_globals_id;
 
 # define GET_THIS() php_roxen_request *_request = ts_resource(roxen_globals_id);
 # define THIS _request
-# define MY_FD ((struct object *)(THIS->my_fd))
-# define REQUEST_DATA ((struct mapping *)(THIS->request_data))
 #else
 static php_roxen_request *current_request = NULL;
 
 # define GET_THIS() current_request = ((php_roxen_request *)fp->current_storage)
 # define THIS current_request
-# define MY_FD ((struct object *)(THIS->my_fd))
-# define REQUEST_DATA ((struct mapping *)(THIS->request_data))
 #endif
+
+/* File descriptor integer. Used to write directly to the FD without 
+ * passing Pike
+ */
+#define MY_FD    (THIS->my_fd)
+
+/* FD object. Really a PHPScript object from Pike which implements a couple
+ * of functions to handle headers, writing and buffering.
+ */
+#define MY_FD_OBJ        ((struct object *)(THIS->my_fd_obj))
+
+/* Mapping with data supplied from the calling Roxen module. Contains
+ * a mapping with headers, an FD object etc.
+ */
+#define REQUEST_DATA ((struct mapping *)(THIS->request_data))
+
 
 #if defined(_REENTRANT) && !defined(ROXEN_USE_ZTS)
 /* Lock used to serialize the PHP execution. If ROXEN_USE_ZTS is defined, we
@@ -226,9 +238,14 @@ php_roxen_low_ub_write(const char *str, uint str_length) {
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif
+  if(!MY_FD_OBJ->prog) {
+    PG(connection_status) = PHP_CONNECTION_ABORTED;
+    zend_bailout();
+    return -1;
+  }
   to_write = make_shared_binary_string(str, str_length);
   push_string(to_write);
-  safe_apply(MY_FD, "write", 1);
+  safe_apply(MY_FD_OBJ, "write", 1);
   if(sp[-1].type == PIKE_T_INT)
     sent_bytes = sp[-1].u.integer;
   pop_stack();
@@ -249,8 +266,35 @@ php_roxen_low_ub_write(const char *str, uint str_length) {
 static int
 php_roxen_sapi_ub_write(const char *str, uint str_length)
 {
-  int sent_bytes = 0;
-  THREAD_SAFE_RUN(sent_bytes = php_roxen_low_ub_write(str, str_length), "write");
+  int sent_bytes = 0, fd = MY_FD;
+  if(fd)
+  {
+    for(sent_bytes=0;sent_bytes < str_length;)
+    {
+      int written;
+      written = fd_write(fd, str + sent_bytes, str_length - sent_bytes);
+      if(written < 0)
+      {
+	switch(errno)
+	{
+	 default:
+	  /* This means the connection is closed. Dead. Gone. *sniff*  */
+	  PG(connection_status) = PHP_CONNECTION_ABORTED;
+	  zend_bailout();
+	  return sent_bytes;
+	 case EINTR: 
+	 case EWOULDBLOCK:
+	  continue;
+	}
+
+      } else {
+	sent_bytes += written;
+      }
+    }
+  } else {
+    THREAD_SAFE_RUN(sent_bytes = php_roxen_low_ub_write(str, str_length),
+		    "write");
+  }
   fprintf(stderr, "write done.\n");
   return sent_bytes;
 }
@@ -328,36 +372,33 @@ php_roxen_low_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif
+  if(!MY_FD_OBJ->prog) {
+    PG(connection_status) = PHP_CONNECTION_ABORTED;
+    zend_bailout();
+    return SAPI_HEADER_SEND_FAILED;
+  }
   ind = make_shared_string(" _headers");  
   s_headermap = low_mapping_string_lookup(REQUEST_DATA, ind);
   free_string(ind);
   fprintf(stderr, "Send Headers (%d)...\n", SG(sapi_headers).http_response_code);
-
+  
   push_int(SG(sapi_headers).http_response_code);
   if(s_headermap && s_headermap->type == PIKE_T_MAPPING)
     ref_push_mapping(s_headermap->u.mapping);
   else
     push_int(0);
-  fprintf(stderr, "Send Headers 1 (%d)...\n", SG(sapi_headers).http_response_code);
-  safe_apply(MY_FD, "send_headers", 2);
-  fprintf(stderr, "Send Headers 1 (%d)...\n", SG(sapi_headers).http_response_code);
+  safe_apply(MY_FD_OBJ, "send_headers", 2);
   pop_stack();
-  fprintf(stderr, "Send Headers 2 (%d)...\n", SG(sapi_headers).http_response_code);
   
-	/*  
-      if(SG(sapi_headers).send_default_content_type) {
-      Ns_ConnSetRequiredHeaders(NSG(conn), "text/html", 0);
-      }
-      Ns_ConnFlushHeaders(NSG(conn), SG(sapi_headers).http_response_code);
-  */
   return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
 static int
 php_roxen_sapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 {
-  THREAD_SAFE_RUN(php_roxen_low_send_headers(sapi_headers SLS_CC), "send headers");
-  return SAPI_HEADER_SENT_SUCCESSFULLY;
+  int res = 0;
+  THREAD_SAFE_RUN(res = php_roxen_low_send_headers(sapi_headers SLS_CC), "send headers");
+  return res;
 }
 
 /*
@@ -373,8 +414,14 @@ INLINE static int php_roxen_low_read_post(char *buf, uint count_bytes)
 #endif
   fprintf(stderr, "read post (%d bytes max)\n", count_bytes);
 
+  if(!MY_FD_OBJ->prog) {
+    PG(connection_status) = PHP_CONNECTION_ABORTED;
+    zend_bailout();
+    return -1;
+  }
+
   push_int(count_bytes);
-  safe_apply(MY_FD, "read_post", 1);
+  safe_apply(MY_FD_OBJ, "read_post", 1);
   if(sp[-1].type == T_STRING) {
     MEMCPY(buf, sp[-1].u.string->str, total_read = sp[-1].u.string->len);
     buf[total_read] = '\0';
@@ -581,25 +628,30 @@ static int php_roxen_module_main(SLS_D)
 
 void f_php_roxen_request_handler(INT32 args)
 {
-  struct object *my_fd;
+  struct object *my_fd_obj;
   struct mapping *request_data;
-  struct svalue *done_callback;
-  struct pike_string *script;
+  struct svalue *done_callback, *raw_fd;
+  struct pike_string *script, *ind;
   int status = 1;
   SLS_FETCH();
+#ifdef ROXEN_USE_ZTS
   GET_THIS();
+#endif
 
   if(current_thread == th_self())
     error("PHP4.Interpetor->run: Tried to run a PHP-script from a PHP "
 	  "callback!");
   get_all_args("PHP4.Interpretor->run", args, "%S%m%O%*", &script,
-	       &request_data, &my_fd, &done_callback);
+	       &request_data, &my_fd_obj, &done_callback);
   if(done_callback->type != PIKE_T_FUNCTION) 
     error("PHP4.Interpretor->run: Bad argument 4, expected function.\n");
   PHP_LOCK(THIS); /* Need to lock here or reusing the same object might cause
 		       * problems in changing stuff in that object */
+#ifndef ROXEN_USE_ZTS
+  GET_THIS();
+#endif
   THIS->request_data = request_data;
-  THIS->my_fd = my_fd;
+  THIS->my_fd_obj = my_fd_obj;
   THIS->filename = script->str;
   current_thread = th_self();
   SG(request_info).query_string = lookup_string_header("QUERY_STRING", 0);;
@@ -615,6 +667,18 @@ void f_php_roxen_request_handler(INT32 args)
   SG(request_info).content_type = "text/html";
   SG(request_info).auth_user = NULL; 
   SG(request_info).auth_password = NULL;
+  
+  ind = make_shared_binary_string("my_fd", 5);
+  raw_fd = low_mapping_string_lookup(THIS->request_data, ind);
+  if(raw_fd && raw_fd->type == PIKE_T_OBJECT)
+  {
+    int fd = fd_from_object(raw_fd->u.object);
+    if(fd == -1)
+      error("PHP4.Interpretor->run: my_fd object not open or not an FD.\n");
+    THIS->my_fd = fd;
+  } else
+    THIS->my_fd = 0;
+  
   status = php_roxen_module_main(SLS_C);
   current_thread = -1;
   PHP_UNLOCK(THIS);
@@ -650,7 +714,7 @@ void pike_module_init()
 #endif	 
 #endif
     sapi_startup(&sapi_module);
-    sapi_module.startup(&sapi_module);
+    php_roxen_startup(&sapi_module);
     roxen_php_initialized = 1;
     PHP_INIT_LOCK();
   }

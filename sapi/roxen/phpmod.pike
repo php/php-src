@@ -158,6 +158,12 @@ class PHPScript
     mapping options = ([
       "env":environment,
     ]);
+#if 0
+    if(!QUERY(rxml)) {
+      mid->my_fd->set_blocking();
+      options->my_fd = mid->my_fd;
+    }
+#endif
     mid->my_fd->set_close_callback(done);
     interpretor->run(command, options, this_object(), done);
     return this_object();
