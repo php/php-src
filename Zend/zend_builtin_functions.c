@@ -557,7 +557,12 @@ ZEND_FUNCTION(get_parent_class)
 	}
 
 	if (Z_TYPE_PP(arg) == IS_OBJECT) {
-		ce = zend_get_class_entry(*arg TSRMLS_CC);
+		if (Z_OBJ_HT_PP(arg)->get_class_name
+			&& Z_OBJ_HT_PP(arg)->get_class_name(*arg, &name, &name_length, 1 TSRMLS_CC) == SUCCESS) {
+			RETURN_STRINGL(name, name_length, 0);
+		} else {
+			ce = zend_get_class_entry(*arg TSRMLS_CC);
+		}
 	} else if (Z_TYPE_PP(arg) == IS_STRING) {
 		zend_class_entry **pce;
 		
@@ -615,7 +620,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 		if (!instance_ce) {
 			efree(lcname);
 			RETURN_FALSE;
-		}
+ 		}
 
 		if (instanceof_function(instance_ce, *ce TSRMLS_CC)) {
 			retval = 1;
