@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Mar 2003, Version 4.3.2
+?? Apr 2003, Version 4.3.2
 - Replaced the old Apache2 module (sapi/apache2filter) with new and improved 
   version (sapi/apache2handler). (Ian Holsman, Justin Erenkrantz)
 - Syncronized bundled GD library with GD 2.0.11. (Ilia)
