@@ -21,7 +21,8 @@ Sybase-CT select and types
     '.(LONG_MIN - 1).' as "integer_min_exceed",
     '.(LONG_MAX).' as "integer_max",
     '.(LONG_MAX + 1).' as "integer_max_exceed",
-    1.0  as "float", 
+    1.0  as "float",
+    12345678901234567890123456789012.123456 as "large_float",
     $22.36 as "money",
     "Binford" as "string",
     convert(datetime, "2004-01-23") as "date",
@@ -40,7 +41,8 @@ Sybase-CT select and types
     -%s as "integer_min_exceed",
     %s as "integer_max",
     %s as "integer_max_exceed",
-    1.0  as "float", 
+    1.0  as "float",
+    12345678901234567890123456789012.123456 as "large_float",
     $22.36 as "money",
     "Binford" as "string",
     convert(datetime, "2004-01-23") as "date",
@@ -65,6 +67,8 @@ array(1) {
     float(%s)
     ["float"]=>
     float(1)
+    ["large_float"]=>
+    string(39) "12345678901234567890123456789012.123456"
     ["money"]=>
     float(22.36)
     ["string"]=>
