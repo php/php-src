@@ -1859,8 +1859,11 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 					zval **new_prop;
 					if (zend_hash_find(ce->static_members, child_info->name, child_info->name_length+1, (void**)&new_prop) == SUCCESS) {
 						if (Z_TYPE_PP(new_prop) != IS_NULL && Z_TYPE_PP(prop) != IS_NULL) {
+							char *prop_name, *tmp;
+							zend_unmangle_property_name(child_info->name, &tmp, &prop_name);
+						
 							zend_error(E_COMPILE_ERROR, "Cannot change initial value of property static protected %s::$%s in class %s", 
-								parent_ce->name, child_info->name, ce->name);
+								parent_ce->name, prop_name, ce->name);
 						}
 					}
 					(*prop)->refcount++;
@@ -1872,8 +1875,11 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 			}
 			pefree(prot_name, ce->type & ZEND_INTERNAL_CLASS);
 		} else if (!(child_info->flags & ZEND_ACC_PRIVATE) && (child_info->flags & ZEND_ACC_STATIC)) {
+			char *prop_name, *tmp;
+
+			zend_unmangle_property_name(child_info->name, &tmp, &prop_name);
 			zend_error(E_COMPILE_ERROR, "Cannot redeclare property static %s %s::$%s in class %s", 
-				zend_visibility_string(child_info->flags), parent_ce->name, child_info->name, ce->name);
+				zend_visibility_string(child_info->flags), parent_ce->name, prop_name, ce->name);
 		}
 		return 0;	/* Don't copy from parent */
 	} else {
