@@ -918,6 +918,9 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 
 	switch (Z_TYPE_P(callable)) {
 		case IS_STRING:
+			if (callable_name)
+				*callable_name = estrndup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
+
 			if (syntax_only)
 				return 1;
 
@@ -926,65 +929,69 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 			if (zend_hash_exists(EG(function_table), lcname, Z_STRLEN_P(callable)+1)) 
 				retval = 1;
 			efree(lcname);
-			if (!retval && callable_name)
-				*callable_name = estrndup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
 			break;
 
 		case IS_ARRAY:
 			{
 				zval **method;
 				zval **obj;
-				zend_class_entry *ce;
+				zend_class_entry *ce = NULL;
 				char callable_name_len;
 				
-				if (zend_hash_index_find(Z_ARRVAL_P(callable), 0, (void **) &obj) == SUCCESS &&
+				if (zend_hash_num_elements(Z_ARRVAL_P(callable)) == 2 &&
+					zend_hash_index_find(Z_ARRVAL_P(callable), 0, (void **) &obj) == SUCCESS &&
 					zend_hash_index_find(Z_ARRVAL_P(callable), 1, (void **) &method) == SUCCESS &&
 					(Z_TYPE_PP(obj) == IS_OBJECT || Z_TYPE_PP(obj) == IS_STRING) &&
 					Z_TYPE_PP(method) == IS_STRING) {
 
-					if (syntax_only)
-						return 1;
-
 					if (Z_TYPE_PP(obj) == IS_STRING) {
 						int found;
 
+						if (callable_name) {
+							char *ptr;
+
+							callable_name_len = Z_STRLEN_PP(obj) + Z_STRLEN_PP(method) + sizeof("::");
+							ptr = *callable_name = emalloc(callable_name_len);
+							memcpy(ptr, Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
+							ptr += Z_STRLEN_PP(obj);
+							memcpy(ptr, "::", sizeof("::") - 1);
+							ptr += sizeof("::") - 1;
+							memcpy(ptr, Z_STRVAL_PP(method), Z_STRLEN_PP(method) + 1);
+						}
+
+						if (syntax_only)
+							return 1;
+
 						lcname = estrndup(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
 						zend_str_tolower(lcname, Z_STRLEN_PP(obj));
-						found = zend_hash_find(EG(class_table), lcname, Z_STRLEN_PP(obj) + 1, (void**)&ce);
+						zend_hash_find(EG(class_table), lcname, Z_STRLEN_PP(obj) + 1, (void**)&ce);
 						efree(lcname);
-						if (found == FAILURE) {
-							if (callable_name) {
-								char *ptr;
-
-								callable_name_len = Z_STRLEN_PP(obj) + Z_STRLEN_PP(method) + sizeof("::");
-								ptr = *callable_name = emalloc(callable_name_len);
-								memcpy(ptr, Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
-								ptr += Z_STRLEN_PP(obj);
-								memcpy(ptr, "::", sizeof("::") - 1);
-								ptr += sizeof("::") - 1;
-								memcpy(ptr, Z_STRVAL_PP(method), Z_STRLEN_PP(method) + 1);
-							}
-							break;
-						}
 					} else {
 						ce = Z_OBJCE_PP(obj);
-					}
-					lcname = estrndup(Z_STRVAL_PP(method), Z_STRLEN_PP(method));
-					zend_str_tolower(lcname, Z_STRLEN_PP(method));
-					if (zend_hash_exists(&ce->function_table, lcname, Z_STRLEN_PP(method)+1))
-						retval = 1;
-					if (!retval && callable_name) {
-						char *ptr;
 
-						callable_name_len = ce->name_length + Z_STRLEN_PP(method) + sizeof("::");
-						ptr = *callable_name = emalloc(callable_name_len);
-						memcpy(ptr, ce->name, ce->name_length);
-						ptr += ce->name_length;
-						memcpy(ptr, "::", sizeof("::") - 1);
-						ptr += sizeof("::") - 1;
-						memcpy(ptr, Z_STRVAL_PP(method), Z_STRLEN_PP(method) + 1);
+						if (callable_name) {
+							char *ptr;
+
+							callable_name_len = ce->name_length + Z_STRLEN_PP(method) + sizeof("::");
+							ptr = *callable_name = emalloc(callable_name_len);
+							memcpy(ptr, ce->name, ce->name_length);
+							ptr += ce->name_length;
+							memcpy(ptr, "::", sizeof("::") - 1);
+							ptr += sizeof("::") - 1;
+							memcpy(ptr, Z_STRVAL_PP(method), Z_STRLEN_PP(method) + 1);
+						}
+
+						if (syntax_only)
+							return 1;
 					}
-					efree(lcname);
+
+					if (ce) {
+						lcname = estrndup(Z_STRVAL_PP(method), Z_STRLEN_PP(method));
+						zend_str_tolower(lcname, Z_STRLEN_PP(method));
+						if (zend_hash_exists(&ce->function_table, lcname, Z_STRLEN_PP(method)+1))
+							retval = 1;
+						efree(lcname);
+					}
 				} else if (callable_name)
 					*callable_name = estrndup("Array", sizeof("Array")-1);
 			}
