@@ -32,7 +32,7 @@ if test "$PHP_MSSQL" != "no"; then
     fi
   fi  
 
-  if test ! -r "$FREETDS_INSTALLATION_DIR/lib/libtds.a" || test ! -r "$FREETDS_INSTALLATION_DIR/lib/libtds.so"; then
+  if test ! -r "$FREETDS_INSTALLATION_DIR/lib/libtds.a" && test ! -r "$FREETDS_INSTALLATION_DIR/lib/libtds.so"; then
      AC_MSG_ERROR(Could not find $FREETDS_INSTALLATION_DIR/lib/libtds.[a|so])
   fi
 
