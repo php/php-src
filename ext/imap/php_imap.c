@@ -583,8 +583,6 @@ PHP_MINIT_FUNCTION(imap)
 	return SUCCESS;
 }
 
-/* {{{ proto int imap_open(string mailbox, string user, string password [, int options])
-   Open an IMAP stream to a mailbox */
 void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	pval *mailbox;
@@ -792,7 +790,7 @@ PHP_FUNCTION(imap_open)
 /* }}} */
 
 /* {{{ proto int imap_popen(string mailbox, string user, string password [, int options])
-   Open an IMAP stream to a mailbox */
+   Open a persistant IMAP stream to a mailbox */
 PHP_FUNCTION(imap_popen)
 {
 #ifdef OP_RELOGIN
@@ -805,7 +803,7 @@ PHP_FUNCTION(imap_popen)
 /* }}} */
 
 /* {{{ proto int imap_reopen(int stream_id, string mailbox [, int options])
-   Reopen IMAP stream to new mailbox */
+   Reopen an IMAP stream to a new mailbox */
 PHP_FUNCTION(imap_reopen)
 {
 	pval *streamind;
@@ -851,7 +849,7 @@ PHP_FUNCTION(imap_reopen)
 /* }}} */
 
 /* {{{ proto int imap_append(int stream_id, string folder, string message [, string flags])
-   Append a string message to a specified mailbox */
+   Append a new message to a specified mailbox */
 PHP_FUNCTION(imap_append)
 {
 	pval *streamind,*folder, *message,*flags;
@@ -883,7 +881,6 @@ PHP_FUNCTION(imap_append)
 		RETURN_FALSE;
 	}
 }
-
 /* }}} */
 
 /* {{{ proto int imap_num_msg(int stream_id)
@@ -959,7 +956,7 @@ PHP_FUNCTION(imap_num_recent)
 /* }}} */
 
 /* {{{ proto int imap_expunge(int stream_id)
-   Delete all messages marked for deletion */
+   Permanently delete all messages marked for deletion */
 PHP_FUNCTION(imap_expunge)
 {
 	pval *streamind;
@@ -1108,9 +1105,8 @@ PHP_FUNCTION(imap_body)
 }
 /* }}} */
 
-
 /* {{{ proto string imap_fetchtext_full(int stream_id, int msg_no [, int options])
-   Read the body of a message */
+   Read the full text of a message */
 PHP_FUNCTION(imap_fetchtext_full)
 {
 	pval *streamind, * msgno, *flags;
@@ -1394,7 +1390,6 @@ PHP_FUNCTION(imap_list_full)
 	efree(delim);
 	IMAPG(folderlist_style) = FLIST_ARRAY;		/* reset to default */
 }
-
 /* }}} */
 
 /* {{{ proto array imap_scan(int stream_id, string ref, string pattern, string content)
@@ -1477,7 +1472,6 @@ PHP_FUNCTION(imap_check)
 		RETURN_FALSE;
 	}
 }
-
 /* }}} */
 
 /* {{{ proto int imap_delete(int stream_id, int msg_no [, int flags])
@@ -1539,7 +1533,7 @@ PHP_FUNCTION(imap_undelete)
 /* }}} */
 
 /* {{{ proto object imap_header(int stream_id, int msg_no [, int from_length [, int subject_length [, string default_host]]])
-   Read the header of the message */
+   Read the headers of the message */
 PHP_FUNCTION(imap_headerinfo)
 {
 	pval *streamind, *msgno, *fromlength, *subjectlength, *defaulthost;
@@ -1696,7 +1690,7 @@ PHP_FUNCTION(imap_lsub)
 /* }}} */
 
 /* {{{ proto array imap_getsubscribed(int stream_id, string ref, string pattern)
-   Return a list of subscribed mailboxes */
+   Return a list of subscribed mailboxes, in the same format as imap_getmailboxes() */
 /* Author: CJH */
 PHP_FUNCTION(imap_lsub_full)
 {
@@ -2078,8 +2072,6 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
 }
 /* }}} */
 
-
-
 /* {{{ proto string imap_utf8(string string)
    Convert a string to UTF-8 */
 PHP_FUNCTION(imap_utf8)
@@ -2424,8 +2416,6 @@ PHP_FUNCTION(imap_utf7_encode)
 #undef B64CHAR
 #undef B64
 #undef UNB64
-
-
 
 /* {{{ proto int imap_setflag_full(int stream_id, string sequence, string flag [, int options])
    Sets flags on messages */
@@ -2802,7 +2792,7 @@ PHP_FUNCTION(imap_bodystruct)
 /* }}} */
 
 /* {{{ proto array imap_fetch_overview(int stream_id, int msg_no)
-   Read an overview of the information in the headers of the given message */ 
+   Read an overview of the information in the headers of the given message sequence */ 
 PHP_FUNCTION(imap_fetch_overview)
 {
  	pval *streamind, *sequence, *pflags;
@@ -2886,7 +2876,6 @@ PHP_FUNCTION(imap_fetch_overview)
 		}
 	}
 }
-
 /* }}} */
 
 /* {{{ proto string imap_mail_compose(array envelope, array body)
@@ -3248,7 +3237,7 @@ PHP_FUNCTION(imap_mail)
 #endif
 
 /* {{{ proto array imap_search(int stream_id, string criteria [, long flags])
-   Return a list of messages matching the criteria */
+   Return a list of messages matching the given criteria */
 PHP_FUNCTION(imap_search)
 {
 	pval *streamind, *criteria, *search_flags;
@@ -3294,15 +3283,10 @@ PHP_FUNCTION(imap_search)
 	}
 	mail_free_messagelist(&IMAPG(imap_messages));
 }
-
 /* }}} */
 
 /* {{{ proto array imap_alerts(void)
-   Returns an array of all IMAP alerts that have been generated */
-/* Returns an array of all IMAP alerts that have been generated either
-   since the last page load, or since the last imap_alerts() call,
-   whichever came last. The alert stack is cleared after imap_alerts()
-   is called. */
+   Returns an array of all IMAP alerts that have been generated since the last page load or since the last imap_alerts() call, whichever came last. The alert stack is cleared after imap_alerts() is called. */
 /* Author: CJH */
 PHP_FUNCTION(imap_alerts)
 {
@@ -3312,7 +3296,7 @@ PHP_FUNCTION(imap_alerts)
     
 	if (arg_count > 0) {
 		WRONG_PARAM_COUNT;
-	}
+	} 
   
 	if (IMAPG(imap_alertstack) == NIL) {
 		RETURN_FALSE;
@@ -3330,10 +3314,7 @@ PHP_FUNCTION(imap_alerts)
 /* }}} */
 
 /* {{{ proto array imap_errors(void)
-   Returns an array of all IMAP errors generated */
-/* Returns an array of all IMAP errors generated either since the last
-   page load, or since the last imap_errors() call, whichever came
-   last. The error stack is cleared after imap_errors() is called. */
+   Returns an array of all IMAP errors generated since the last  page load, or since the last imap_errors() call, whichever came last. The error stack is cleared after imap_errors() is called. */
 /* Author: CJH */
 PHP_FUNCTION(imap_errors)
 {
@@ -3383,6 +3364,95 @@ PHP_FUNCTION(imap_last_error)
 			RETURN_STRING(cur->LTEXT, 1);
 		}
 		cur = cur->next;
+	}
+}
+/* }}} */
+
+/* {{{ proto array imap_mime_header_decode(string str)
+   Decode mime header element in accordance with RFC 2047 and return array of objects containing 'charset' encoding and decoded 'text' */
+PHP_FUNCTION(imap_mime_header_decode)
+{
+	zval **str,*myobject;
+	char *string,*charset,encoding,*text,*decode;
+	long charset_token,encoding_token,end_token,end,offset=0,i;
+	unsigned long newlength;
+
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(str);
+
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	string=(*str)->value.str.val;
+	end=(*str)->value.str.len;
+			
+	if((charset=((char *)emalloc((end+1)*2)))) {
+		text=&charset[end+1];
+		while(offset<end) {													// Reached end of the string?
+			if((charset_token=php_memnstr(&string[offset],"=?",2,string+end))) {		// Is there anything encoded in the string?
+				charset_token-=(unsigned long)string;
+				if(offset!=charset_token) {										// Is there anything before the encoded data?
+					// Retrieve unencoded data that is found at the beginning
+					memcpy(text,&string[offset],charset_token-offset);
+					text[charset_token-offset]=0x00;
+					MAKE_STD_ZVAL(myobject);
+					object_init(myobject);
+					add_property_string(myobject,"charset","default",1);
+					add_property_string(myobject,"text",text,1);
+					zend_hash_next_index_insert(return_value->value.ht,(void *)&myobject,sizeof(zval *),NULL);
+				}
+				if((encoding_token=php_memnstr(&string[charset_token+2],"?",1,string+end))) {			// Find token for encoding
+					encoding_token-=(unsigned long)string;
+					if((end_token=php_memnstr(&string[encoding_token+1],"?=",2,string+end))) {		// Find token for end of encoded data
+						end_token-=(unsigned long)string;
+						memcpy(charset,&string[charset_token+2],encoding_token-(charset_token+2));	// Extract charset encoding
+						charset[encoding_token-(charset_token+2)]=0x00;
+						encoding=string[encoding_token+1];										// Extract encoding from string
+						memcpy(text,&string[encoding_token+3],end_token-(encoding_token+3));		// Extract text
+						text[end_token-(encoding_token+3)]=0x00;
+						decode=text;
+						if(encoding=='q' || encoding=='Q') {										// Decode 'q' encoded data
+							for(i=0;text[i]!=0x00;i++) if(text[i]=='_') text[i]=' ';							// Replace all *_' with space.
+							decode = (char *) rfc822_qprint((unsigned char *) text, strlen(text),&newlength);
+						}
+						if(encoding=='b' || encoding=='B') decode = (char *) rfc822_base64((unsigned char *) text, strlen(text),&newlength); // Decode 'B' encoded data
+						MAKE_STD_ZVAL(myobject);
+						object_init(myobject);
+						add_property_string(myobject,"charset",charset,1);
+						add_property_string(myobject,"text",decode,1);
+						zend_hash_next_index_insert(return_value->value.ht,(void *)&myobject,sizeof(zval *),NULL);
+						
+						offset+=end_token+2;
+						if(string[offset]==' ' && string[offset+1]=='=' && string[offset+2]=='?') offset++;	// Remove required space between encoded segments
+						continue;								// Iterate the loop again please.
+					}
+				}
+			} else {
+				// Just some tweaking to optimize the code, and get the end statements work in a general manner.
+				// If we end up here we didn't find a position for "charset_token",
+				// so we need to set it to the start of the yet unextracted data.
+				charset_token=offset;
+			}
+			// Return the rest of the data as unencoded, as it was either unencoded or was missing separators
+			// which rendered the the remainder of the string impossible for us to decode.
+			memcpy(text,&string[charset_token],end-charset_token);		// Extract unencoded text from string
+			text[end-charset_token]=0x00;
+			MAKE_STD_ZVAL(myobject);
+			object_init(myobject);
+			add_property_string(myobject,"charset","default",1);
+			add_property_string(myobject,"text",text,1);
+			zend_hash_next_index_insert(return_value->value.ht,(void *)&myobject,sizeof(zval *),NULL);
+			
+			offset=end;	// We have reached the end of the string.
+		}
+		efree(charset);
+	} else {
+		php_error(E_WARNING, "Unable to allocate temporary memory buffer for imap_mime_header_decode");
+		RETURN_FALSE;
 	}
 }
 /* }}} */
@@ -3866,92 +3936,4 @@ long mm_diskerror(MAILSTREAM *stream,long errcode,long serious)
 
 void mm_fatal(char *str)
 {
-}
-
-/* {{{ proto array imap_mime_header_decode(string str)
-   Decode mime header element in accordance with RFC 2047 and return array of objects containing 'charset' encoding and decoded 'text' */
-PHP_FUNCTION(imap_mime_header_decode)
-{
-	zval **str,*myobject;
-	char *string,*charset,encoding,*text,*decode;
-	long charset_token,encoding_token,end_token,end,offset=0,i;
-	unsigned long newlength;
-
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_string_ex(str);
-
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	string=(*str)->value.str.val;
-	end=(*str)->value.str.len;
-			
-	if((charset=((char *)emalloc((end+1)*2)))) {
-		text=&charset[end+1];
-		while(offset<end) {													// Reached end of the string?
-			if((charset_token=php_memnstr(&string[offset],"=?",2,string+end))) {		// Is there anything encoded in the string?
-				charset_token-=(unsigned long)string;
-				if(offset!=charset_token) {										// Is there anything before the encoded data?
-					// Retrieve unencoded data that is found at the beginning
-					memcpy(text,&string[offset],charset_token-offset);
-					text[charset_token-offset]=0x00;
-					MAKE_STD_ZVAL(myobject);
-					object_init(myobject);
-					add_property_string(myobject,"charset","default",1);
-					add_property_string(myobject,"text",text,1);
-					zend_hash_next_index_insert(return_value->value.ht,(void *)&myobject,sizeof(zval *),NULL);
-				}
-				if((encoding_token=php_memnstr(&string[charset_token+2],"?",1,string+end))) {			// Find token for encoding
-					encoding_token-=(unsigned long)string;
-					if((end_token=php_memnstr(&string[encoding_token+1],"?=",2,string+end))) {		// Find token for end of encoded data
-						end_token-=(unsigned long)string;
-						memcpy(charset,&string[charset_token+2],encoding_token-(charset_token+2));	// Extract charset encoding
-						charset[encoding_token-(charset_token+2)]=0x00;
-						encoding=string[encoding_token+1];										// Extract encoding from string
-						memcpy(text,&string[encoding_token+3],end_token-(encoding_token+3));		// Extract text
-						text[end_token-(encoding_token+3)]=0x00;
-						decode=text;
-						if(encoding=='q' || encoding=='Q') {										// Decode 'q' encoded data
-							for(i=0;text[i]!=0x00;i++) if(text[i]=='_') text[i]=' ';							// Replace all *_' with space.
-							decode = (char *) rfc822_qprint((unsigned char *) text, strlen(text),&newlength);
-						}
-						if(encoding=='b' || encoding=='B') decode = (char *) rfc822_base64((unsigned char *) text, strlen(text),&newlength); // Decode 'B' encoded data
-						MAKE_STD_ZVAL(myobject);
-						object_init(myobject);
-						add_property_string(myobject,"charset",charset,1);
-						add_property_string(myobject,"text",decode,1);
-						zend_hash_next_index_insert(return_value->value.ht,(void *)&myobject,sizeof(zval *),NULL);
-						
-						offset+=end_token+2;
-						if(string[offset]==' ' && string[offset+1]=='=' && string[offset+2]=='?') offset++;	// Remove required space between encoded segments
-						continue;								// Iterate the loop again please.
-					}
-				}
-			} else {
-				// Just some tweaking to optimize the code, and get the end statements work in a general manner.
-				// If we end up here we didn't find a position for "charset_token",
-				// so we need to set it to the start of the yet unextracted data.
-				charset_token=offset;
-			}
-			// Return the rest of the data as unencoded, as it was either unencoded or was missing separators
-			// which rendered the the remainder of the string impossible for us to decode.
-			memcpy(text,&string[charset_token],end-charset_token);		// Extract unencoded text from string
-			text[end-charset_token]=0x00;
-			MAKE_STD_ZVAL(myobject);
-			object_init(myobject);
-			add_property_string(myobject,"charset","default",1);
-			add_property_string(myobject,"text",text,1);
-			zend_hash_next_index_insert(return_value->value.ht,(void *)&myobject,sizeof(zval *),NULL);
-			
-			offset=end;	// We have reached the end of the string.
-		}
-		efree(charset);
-	} else {
-		php_error(E_WARNING, "Unable to allocate temporary memory buffer for imap_mime_header_decode");
-		RETURN_FALSE;
-	}
 }
