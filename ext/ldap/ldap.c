@@ -978,11 +978,12 @@ PHP_FUNCTION(ldap_get_values_len)
 		WRONG_PARAM_COUNT;
 	}
 	
-	if ((ldap = _get_ldap_link(link)) == NULL) {
-		RETURN_FALSE;
-	}
-	
+	ldap = _get_ldap_link(link);
+	if (ldap == NULL) RETURN_FALSE;
+
 	ldap_result_entry = _get_ldap_result_entry(result_entry);
+	if (ldap_result_entry == NULL) RETURN_FALSE;
+
 	convert_to_string_ex(attr);
 	attribute = (*attr)->value.str.val;
 	
