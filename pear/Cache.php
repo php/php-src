@@ -86,7 +86,7 @@ class Cache {
         $storage_class = 'Cache_Container_' . $storage_driver;
         $storage_classfile = 'Cache/Container/' . $storage_driver . '.php';
 
-        include_once $storage_classfile
+        include_once $storage_classfile;
         $this->container = new $storage_class($storage_options);
         $this->garbageCollection();
         
