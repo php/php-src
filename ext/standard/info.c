@@ -396,6 +396,7 @@ void php_print_credits(int flag)
 		CREDIT_LINE("DBA", "Sascha Schumann");
 		CREDIT_LINE("DBM", "Rasmus Lerdorf, Jim Winstead");
 		CREDIT_LINE("dBase", "Jim Winstead");
+		CREDIT_LINE("dotnet", "Sam Ruby");
 		CREDIT_LINE("FDF", "Uwe Steinmann");
 		CREDIT_LINE("FilePro", "Chad Robinson");
 		CREDIT_LINE("FTP", "Andrew Skalski");
