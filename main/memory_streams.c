@@ -124,7 +124,8 @@ static int php_stream_memory_close(php_stream *stream, int close_handle TSRMLS_D
 
 
 /* {{{ */
-static int php_stream_memory_flush(php_stream *stream TSRMLS_DC) {
+static int php_stream_memory_flush(php_stream *stream TSRMLS_DC)
+{
 	/* nothing to do here */
 	return 0;
 }
@@ -229,7 +230,8 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC TSRMLS_DC)
 
 /* {{{ */
 PHPAPI php_stream *_php_stream_memory_open(int mode, char *buf, size_t length STREAMS_DC TSRMLS_DC)
-{	php_stream *stream;
+{
+	php_stream *stream;
 	php_stream_memory_data *ms;
 
 	if ((stream = php_stream_memory_create_rel(mode)) != NULL) {
