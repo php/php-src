@@ -261,7 +261,7 @@ zend_module_entry sqlite_module_entry = {
 	"SQLite",
 	sqlite_functions,
 	PHP_MINIT(sqlite),
-	NULL,
+	PHP_MSHUTDOWN(sqlite),
 	PHP_RINIT(sqlite),
 	PHP_RSHUTDOWN(sqlite),
 	PHP_MINFO(sqlite),
@@ -1051,6 +1051,12 @@ PHP_MINIT_FUNCTION(sqlite)
 	REGISTER_LONG_CONSTANT("SQLITE_ROW",			SQLITE_ROW, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLITE_DONE",			SQLITE_DONE, CONST_CS|CONST_PERSISTENT);
 
+	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(sqlite)
+{
+	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 

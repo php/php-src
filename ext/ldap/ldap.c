@@ -286,6 +286,7 @@ PHP_MINIT_FUNCTION(ldap)
  */
 PHP_MSHUTDOWN_FUNCTION(ldap)
 {
+	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 /* }}} */
