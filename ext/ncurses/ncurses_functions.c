@@ -2113,7 +2113,7 @@ PHP_FUNCTION(ncurses_wgetch)
 }
 /* }}} */
 
-/* {{{ proto int wattroff(resource window, int attrs)
+/* {{{ proto int ncurses_wattroff(resource window, int attrs)
    Turns off attributes for a window */
 PHP_FUNCTION(ncurses_wattroff)
 {
@@ -2131,7 +2131,7 @@ PHP_FUNCTION(ncurses_wattroff)
 }
 /* }}} */
 
-/* {{{ proto int wattron(resource window, int attrs)
+/* {{{ proto int ncurses_wattron(resource window, int attrs)
    Turns on attributes for a window */
 PHP_FUNCTION(ncurses_wattron)
 {
@@ -2149,7 +2149,7 @@ PHP_FUNCTION(ncurses_wattron)
 }
 /* }}} */
 
-/* {{{ proto int wattrset(resource window, int attrs)
+/* {{{ proto int ncurses_wattrset(resource window, int attrs)
    Set the attributes for a window */
 PHP_FUNCTION(ncurses_wattrset)
 {
@@ -2167,7 +2167,7 @@ PHP_FUNCTION(ncurses_wattrset)
 }
 /* }}} */
 
-/* {{{ proto int wstandend(resource window)
+/* {{{ proto int ncurses_wstandend(resource window)
    End standout mode for a window */
 PHP_FUNCTION(ncurses_wstandend)
 {
@@ -2184,7 +2184,7 @@ PHP_FUNCTION(ncurses_wstandend)
 }
 /* }}} */
 
-/* {{{ proto int wstandout(resource window)
+/* {{{ proto int ncurses_wstandout(resource window)
    Enter standout mode for a window */
 PHP_FUNCTION(ncurses_wstandout)
 {
