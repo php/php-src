@@ -134,7 +134,7 @@ PHP_FUNCTION(recode_string)
 	int req_len, str_len;
 	char *req, *str;
 
-	if (zend_parse_parameters(TSRMLS_CC ZEND_NUM_ARGS(), "ss", &req, &req_len, &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &req, &req_len, &str, &str_len) == FAILURE) {
 		return;
 	}
 
