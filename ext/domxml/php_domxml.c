@@ -34,14 +34,12 @@
 #include "ext/standard/info.h"
 #define PHP_XPATH 1
 #define PHP_XPTR 2
-/* DOMXML API_VERSION, please bump it up, if you change anything in the API
-    therefore it's easier for the script-programmers to check, what's working how 
-   Can be checked with phpversion("domxml");
-*/
-#define DOMXML_API_VERSION "20020516"
 
 /* General macros used by domxml */
-#define DOMXML_DOMOBJ_NEW(zval, obj, ret)			if (NULL == (zval = php_domobject_new(obj, ret TSRMLS_CC))) { \
+
+#define DOMXML_IS_TYPE(zval, ce)					(zval && Z_TYPE_P(zval) == IS_OBJECT && Z_OBJCE_P(zval)->refcount == ce->refcount)
+
+#define DOMXML_DOMOBJ_NEW(zval, obj, ret)			if (NULL == (zval = php_domobject_new(obj, ret, zval TSRMLS_CC))) { \
 														php_error(E_WARNING, "%s(): cannot create required DOM object", \
 																  get_active_function_name(TSRMLS_C)); \
 														RETURN_FALSE; \
@@ -203,9 +201,9 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(html_doc,													NULL)
 	PHP_FE(html_doc_file,												NULL)
 #endif
-	PHP_FE(domxml_xmltree,												NULL)
-	PHP_FALIAS(xmltree,								domxml_xmltree,		NULL)
-	PHP_FE(domxml_substitute_entities_default,							NULL)
+	PHP_FE(domxml_xmltree,														NULL)
+	PHP_FALIAS(xmltree,				domxml_xmltree,	NULL)
+	PHP_FE(domxml_substitute_entities_default,														NULL)
 	PHP_FE(domxml_doc_document_element,									NULL)
 	PHP_FE(domxml_doc_add_root,											NULL)
 	PHP_FE(domxml_doc_set_root,											NULL)
@@ -226,7 +224,7 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_node_set_content,										NULL)
 	PHP_FE(domxml_node_get_content,										NULL)
 	PHP_FE(domxml_new_xmldoc,											NULL)
-	PHP_FALIAS(domxml_new_doc,						domxml_new_xmldoc,	NULL)
+	PHP_FALIAS(domxml_new_doc,				domxml_new_xmldoc,	NULL)
 	PHP_FE(domxml_parser,												NULL)
 	PHP_FE(domxml_parser_add_chunk,										NULL)
 	PHP_FE(domxml_parser_end,											NULL)
@@ -270,6 +268,7 @@ static zend_function_entry domxml_functions[] = {
 
 
 static function_entry php_domxmldoc_class_functions[] = {
+	PHP_FALIAS(domdocument,				xmldoc,							NULL)
 	PHP_FALIAS(doctype, 				domxml_doc_doctype, 			NULL)
 	PHP_FALIAS(implementation,			domxml_doc_implementation,		NULL)
 	PHP_FALIAS(document_element,		domxml_doc_document_element,	NULL)
@@ -295,7 +294,7 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(dumpmem,					domxml_dump_mem,				NULL)
 	PHP_FALIAS(dump_mem,				domxml_dump_mem,				NULL)
 	PHP_FALIAS(dump_mem_file,			domxml_dump_mem_file,			NULL)
-	PHP_FALIAS(dump_file,				domxml_dump_mem_file,			NULL)
+	PHP_FALIAS(dump_file,			domxml_dump_mem_file,			NULL)
 #if defined(LIBXML_HTML_ENABLED)
 	PHP_FALIAS(html_dump_mem,			domxml_html_dump_mem,			NULL)
 #endif
@@ -371,7 +370,7 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 };
 
 static zend_function_entry php_domxmlelement_class_functions[] = {
-	PHP_FALIAS(domelement,				domxml_element,					NULL)
+	PHP_FALIAS(domelement,				domxml_doc_create_element,		NULL)
 	PHP_FALIAS(name,					domxml_elem_tagname,			NULL)
 	PHP_FALIAS(tagname,					domxml_elem_tagname,			NULL)
 	PHP_FALIAS(get_attribute,			domxml_elem_get_attribute,		NULL)
@@ -385,15 +384,18 @@ static zend_function_entry php_domxmlelement_class_functions[] = {
 };
 
 static zend_function_entry php_domxmlcdata_class_functions[] = {
+	PHP_FALIAS(domcdata,				domxml_doc_create_cdata_section,NULL)
 	PHP_FALIAS(length,					domxml_cdata_length,			NULL)
 	{NULL, NULL, NULL}
 };
 
 static zend_function_entry php_domxmltext_class_functions[] = {
+	PHP_FALIAS(domtext,					domxml_doc_create_text_node,	NULL)
 	{NULL, NULL, NULL}
 };
 
 static zend_function_entry php_domxmlcomment_class_functions[] = {
+	PHP_FALIAS(domcomment,				domxml_doc_create_comment,		NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -404,6 +406,7 @@ static zend_function_entry php_domxmlnotation_class_functions[] = {
 };
 
 static zend_function_entry php_domxmlentityref_class_functions[] = {
+	PHP_FALIAS(domentityreference,		domxml_doc_create_entity_reference,	NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -417,6 +420,7 @@ static zend_function_entry php_domxmlentity_class_functions[] = {
 };
 
 static zend_function_entry php_domxmlpi_class_functions[] = {
+	PHP_FALIAS(domprocessinginstruction, domxml_doc_create_processing_instruction, NULL)
 	PHP_FALIAS(target,					domxml_pi_target,				NULL)
 	PHP_FALIAS(data,					domxml_pi_data,					NULL)
 	{NULL, NULL, NULL}
@@ -436,6 +440,7 @@ static zend_function_entry php_xpathobject_class_functions[] = {
 #endif
 
 static zend_function_entry php_domxmlattr_class_functions[] = {
+	PHP_FALIAS(domattribute,			domxml_doc_create_attribute,	NULL)
 	PHP_FALIAS(name,					domxml_attr_name,				NULL)
 	PHP_FALIAS(value,					domxml_attr_value,				NULL)
 	PHP_FALIAS(specified,				domxml_attr_specified,			NULL)
@@ -588,12 +593,12 @@ static void php_free_xml_node(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	xmlNodePtr node = (xmlNodePtr) rsrc->ptr;
 
-	/* if node has no parent, it will not be freed by php_free_xml_doc, so do it here 
+	/* if node has no parent, it will not be freed by php_free_xml_doc, so do it here
 	and for all children as well. */
 	if (node->parent == NULL) {
 		attr_list_wrapper_dtor(node->properties);
 		node_list_wrapper_dtor(node->children);
-		node_wrapper_dtor(node);        
+		node_wrapper_dtor(node);
 		xmlFreeNode(node);
 	} else {
 		node_wrapper_dtor(node);
@@ -635,7 +640,7 @@ static void php_free_xml_parser(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	if (parser) {
 		zval *wrapper = dom_object_get_data(parser);
-		zval_ptr_dtor(&wrapper);        
+		zval_ptr_dtor(&wrapper);
 		xmlFreeParserCtxt(parser);
 	}
 }
@@ -1036,7 +1041,7 @@ static void php_dom_set_object(zval *wrapper, void *obj, int rsrc_type)
 }
 
 
-static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
+PHPAPI zval *php_domobject_new(xmlNodePtr obj, int *found, zval *wrapper_in  TSRMLS_DC)
 {
 	zval *wrapper;
 	char *content;
@@ -1045,7 +1050,12 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 		*found = 0;
 
 	if (!obj) {
-		MAKE_STD_ZVAL(wrapper);
+		if(!wrapper_in)
+		{
+			MAKE_STD_ZVAL(wrapper);
+		}
+		else
+			wrapper = wrapper_in;
 		ZVAL_NULL(wrapper);
 		return wrapper;
 	}
@@ -1056,14 +1066,20 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 		return wrapper;
 	}
 
-	MAKE_STD_ZVAL(wrapper);
+	if(!wrapper_in)
+	{
+		MAKE_STD_ZVAL(wrapper);
+	}
+	else
+		wrapper = wrapper_in;
 
 	switch (Z_TYPE_P(obj)) {
 
 		case XML_ELEMENT_NODE:
 		{
 			xmlNodePtr nodep = obj;
-			object_init_ex(wrapper, domxmlelement_class_entry);
+			if(!wrapper_in)
+				object_init_ex(wrapper, domxmlelement_class_entry);
 			rsrc_type = le_domxmlelementp;
 			add_property_long(wrapper, "type", Z_TYPE_P(nodep));
 			add_property_stringl(wrapper, "tagname", (char *) nodep->name, strlen(nodep->name), 1);
@@ -1073,7 +1089,8 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 		case XML_TEXT_NODE:
 		{
 			xmlNodePtr nodep = obj;
-			object_init_ex(wrapper, domxmltext_class_entry);
+			if(!wrapper_in)
+				object_init_ex(wrapper, domxmltext_class_entry);
 			rsrc_type = le_domxmltextp;
 			content = xmlNodeGetContent(nodep);
 			add_property_long(wrapper, "type", Z_TYPE_P(nodep));
@@ -1087,7 +1104,8 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 		case XML_COMMENT_NODE:
 		{
 			xmlNodePtr nodep = obj;
-			object_init_ex(wrapper, domxmlcomment_class_entry);
+			if(!wrapper_in)
+				object_init_ex(wrapper, domxmlcomment_class_entry);
 			rsrc_type = le_domxmlcommentp;
 			content = xmlNodeGetContent(nodep);
 			if (content) {
@@ -1102,7 +1120,8 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 		case XML_PI_NODE:
 		{
 			xmlNodePtr nodep = obj;
-			object_init_ex(wrapper, domxmlpi_class_entry);
+			if(!wrapper_in)
+				object_init_ex(wrapper, domxmlpi_class_entry);
 			rsrc_type = le_domxmlpip;
 			content = xmlNodeGetContent(nodep);
 			add_property_stringl(wrapper, "name", (char *) nodep->name, strlen(nodep->name), 1);
@@ -1116,7 +1135,8 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 		case XML_ENTITY_REF_NODE:
 		{
 			xmlNodePtr nodep = obj;
-			object_init_ex(wrapper, domxmlentityref_class_entry);
+			if(!wrapper_in)
+				object_init_ex(wrapper, domxmlentityref_class_entry);
 			rsrc_type = le_domxmlentityrefp;
 			add_property_stringl(wrapper, "name", (char *) nodep->name, strlen(nodep->name), 1);
 			break;
@@ -1126,7 +1146,8 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 		case XML_ELEMENT_DECL:
 		{
 			xmlNodePtr nodep = obj;
-			object_init_ex(wrapper, domxmlnode_class_entry);
+			if(!wrapper_in)
+				object_init_ex(wrapper, domxmlnode_class_entry);
 			rsrc_type = le_domxmlnodep;
 			add_property_long(wrapper, "type", Z_TYPE_P(nodep));
 			add_property_stringl(wrapper, "name", (char *) nodep->name, strlen(nodep->name), 1);
@@ -1143,7 +1164,8 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 		case XML_ATTRIBUTE_NODE:
 		{
 			xmlAttrPtr attrp = (xmlAttrPtr) obj;
-			object_init_ex(wrapper, domxmlattr_class_entry);
+			if(!wrapper_in)
+				object_init_ex(wrapper, domxmlattr_class_entry);
 			rsrc_type = le_domxmlattrp;
 			add_property_long(wrapper, "type", Z_TYPE_P(attrp));
 			add_property_stringl(wrapper, "name", (char *) attrp->name, strlen(attrp->name), 1);
@@ -1160,7 +1182,8 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 		{
 			xmlDocPtr docp = (xmlDocPtr) obj;
 
-			object_init_ex(wrapper, domxmldoc_class_entry);
+			if(!wrapper_in)
+				object_init_ex(wrapper, domxmldoc_class_entry);
 			rsrc_type = le_domxmldocp;
 			if (docp->name)
 				add_property_stringl(wrapper, "name", (char *) docp->name, strlen(docp->name), 1);
@@ -1199,7 +1222,8 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 		case XML_DOCUMENT_TYPE_NODE:
 		{
 			xmlDtdPtr dtd = (xmlDtdPtr) obj;
-			object_init_ex(wrapper, domxmldoctype_class_entry);
+			if(!wrapper_in)
+				object_init_ex(wrapper, domxmldoctype_class_entry);
 /*			rsrc_type = le_domxmldtdp; */
 			rsrc_type = le_domxmldoctypep;
 /*			add_property_long(wrapper, "type", Z_TYPE_P(dtd)); */
@@ -1220,7 +1244,8 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 		case XML_CDATA_SECTION_NODE:
 		{
 			xmlNodePtr nodep = obj;
-			object_init_ex(wrapper, domxmlcdata_class_entry);
+			if(!wrapper_in)
+				object_init_ex(wrapper, domxmlcdata_class_entry);
 			rsrc_type = le_domxmlcdatap;
 			content = xmlNodeGetContent(nodep);
 			add_property_long(wrapper, "type", Z_TYPE_P(nodep));
@@ -1292,49 +1317,49 @@ PHP_MINIT_FUNCTION(domxml)
 	le_domxsltstylesheetp =	zend_register_list_destructors_ex(php_free_xslt_stylesheet, NULL, "xsltstylesheet", module_number);
 #endif
 
-	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomNode", php_domxmlnode_class_functions, NULL, NULL, NULL);
+	INIT_OVERLOADED_CLASS_ENTRY(ce, "domnode", php_domxmlnode_class_functions, NULL, NULL, NULL);
 	domxmlnode_class_entry = zend_register_internal_class_ex(&ce, NULL, NULL TSRMLS_CC);
 
-	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomDocument", php_domxmldoc_class_functions, NULL, NULL, NULL);
+	INIT_OVERLOADED_CLASS_ENTRY(ce, "domdocument", php_domxmldoc_class_functions, NULL, NULL, NULL);
 	domxmldoc_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL TSRMLS_CC);
 
-   	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomParser", php_domxmlparser_class_functions, NULL, NULL, NULL);
+   	INIT_OVERLOADED_CLASS_ENTRY(ce, "domparser", php_domxmlparser_class_functions, NULL, NULL, NULL);
 	domxmlparser_class_entry = zend_register_internal_class_ex(&ce, NULL, NULL TSRMLS_CC);
 
-	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomDocumentType", php_domxmldoctype_class_functions, NULL,	NULL, NULL);
+	INIT_OVERLOADED_CLASS_ENTRY(ce, "domdocumenttype", php_domxmldoctype_class_functions, NULL,	NULL, NULL);
 	domxmldoctype_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL TSRMLS_CC);
 
-	INIT_OVERLOADED_CLASS_ENTRY(ce, "Dtd", php_domxmldtd_class_functions, NULL, NULL, NULL);
+	INIT_OVERLOADED_CLASS_ENTRY(ce, "dtd", php_domxmldtd_class_functions, NULL, NULL, NULL);
 	domxmldtd_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL TSRMLS_CC);
 
-	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomElement", php_domxmlelement_class_functions, NULL, NULL, NULL);
+	INIT_OVERLOADED_CLASS_ENTRY(ce, "domelement", php_domxmlelement_class_functions, NULL, NULL, NULL);
 	domxmlelement_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL TSRMLS_CC);
 
-	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomAttribute", php_domxmlattr_class_functions, NULL, NULL, NULL);
+	INIT_OVERLOADED_CLASS_ENTRY(ce, "domattribute", php_domxmlattr_class_functions, NULL, NULL, NULL);
 	domxmlattr_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL TSRMLS_CC);
 
-	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomCData", php_domxmlcdata_class_functions, NULL, NULL, NULL);
+	INIT_OVERLOADED_CLASS_ENTRY(ce, "domcdata", php_domxmlcdata_class_functions, NULL, NULL, NULL);
 	domxmlcdata_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL TSRMLS_CC);
 
-	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomText", php_domxmltext_class_functions, NULL, NULL, NULL);
+	INIT_OVERLOADED_CLASS_ENTRY(ce, "domtext", php_domxmltext_class_functions, NULL, NULL, NULL);
 	domxmltext_class_entry = zend_register_internal_class_ex(&ce, domxmlcdata_class_entry, NULL TSRMLS_CC);
 
-	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomComment", php_domxmlcomment_class_functions, NULL, NULL, NULL);
+	INIT_OVERLOADED_CLASS_ENTRY(ce, "domcomment", php_domxmlcomment_class_functions, NULL, NULL, NULL);
 	domxmlcomment_class_entry = zend_register_internal_class_ex(&ce, domxmlcdata_class_entry, NULL TSRMLS_CC);
 
-	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomProcessingInstruction", php_domxmlpi_class_functions, NULL, NULL, NULL);
+	INIT_OVERLOADED_CLASS_ENTRY(ce, "domprocessinginstruction", php_domxmlpi_class_functions, NULL, NULL, NULL);
 	domxmlpi_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL TSRMLS_CC);
 
-	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomNotation", php_domxmlnotation_class_functions, NULL, NULL, NULL);
+	INIT_OVERLOADED_CLASS_ENTRY(ce, "domnotation", php_domxmlnotation_class_functions, NULL, NULL, NULL);
 	domxmlnotation_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL TSRMLS_CC);
 
-	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomEntity", php_domxmlentity_class_functions, NULL, NULL, NULL);
+	INIT_OVERLOADED_CLASS_ENTRY(ce, "domentity", php_domxmlentity_class_functions, NULL, NULL, NULL);
 	domxmlentity_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL TSRMLS_CC);
 
-	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomEntityReference", php_domxmlentityref_class_functions, NULL, NULL, NULL);
+	INIT_OVERLOADED_CLASS_ENTRY(ce, "domentityreference", php_domxmlentityref_class_functions, NULL, NULL, NULL);
 	domxmlentityref_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL TSRMLS_CC);
 
-	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomNamespace", php_domxmlns_class_functions, NULL, NULL, NULL);
+	INIT_OVERLOADED_CLASS_ENTRY(ce, "domnamespace", php_domxmlns_class_functions, NULL, NULL, NULL);
 	domxmlns_class_entry = zend_register_internal_class_ex(&ce, NULL, NULL TSRMLS_CC);
 
 #if defined(LIBXML_XPATH_ENABLED)
@@ -1433,7 +1458,7 @@ PHP_MINFO_FUNCTION(domxml)
 	/* don't know why that line was commented out in the previous version, so i left it (cmv) */
 	php_info_print_table_start();
 	php_info_print_table_row(2, "DOM/XML", "enabled");
-	php_info_print_table_row(2, "DOM/XML API Version", DOMXML_API_VERSION);	
+	php_info_print_table_row(2, "DOM/XML API Version", DOMXML_API_VERSION);
 	php_info_print_table_row(2, "libxml Version", LIBXML_DOTTED_VERSION);
 #if defined(LIBXML_HTML_ENABLED)
 	php_info_print_table_row(2, "HTML Support", "enabled");
@@ -1459,8 +1484,8 @@ PHP_MINFO_FUNCTION(domxml)
 /* {{{ Methods of Class DomAttribute */
 
 /* {{{ proto array domxml_attr_name(void)
-   Returns list of attribute names 
-   Notice: domxml_node_name() does exactly the same for attribute-nodes, 
+   Returns list of attribute names
+   Notice: domxml_node_name() does exactly the same for attribute-nodes,
            is this function here still needed, or would an alias be enough?
    */
 PHP_FUNCTION(domxml_attr_name)
@@ -1572,7 +1597,7 @@ PHP_FUNCTION(domxml_cdata_length)
    Creates node */
 PHP_FUNCTION(domxml_node)
 {
-	zval *rv;
+	zval *rv = NULL;
 	xmlNode *node;
 	int ret, name_len;
 	char *name;
@@ -1586,7 +1611,11 @@ PHP_FUNCTION(domxml_node)
 		RETURN_FALSE;
 	}
 
-	DOMXML_RET_OBJ(rv, node, &ret);
+	if(DOMXML_IS_TYPE(getThis(), domxmlnode_class_entry)) {
+		DOMXML_DOMOBJ_NEW(getThis(), node, &ret);
+	} else {
+		DOMXML_RET_OBJ(rv, node, &ret);
+	}
 }
 /* }}} */
 
@@ -1725,7 +1754,7 @@ PHP_FUNCTION(domxml_node_type)
    Clones a node */
 PHP_FUNCTION(domxml_clone_node)
 {
-	zval *rv;
+	zval *rv = NULL;
 	zval *id;
 	xmlNode *n, *node;
 	int ret, recursive = 0;;
@@ -1749,7 +1778,7 @@ PHP_FUNCTION(domxml_clone_node)
    Returns first child from list of children */
 PHP_FUNCTION(domxml_node_first_child)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlNode *nodep, *first;
 	int ret;
 
@@ -1770,7 +1799,7 @@ PHP_FUNCTION(domxml_node_first_child)
    Returns last child from list of children */
 PHP_FUNCTION(domxml_node_last_child)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlNode *nodep, *last;
 	int ret;
 
@@ -1791,7 +1820,7 @@ PHP_FUNCTION(domxml_node_last_child)
    Returns next child from list of children */
 PHP_FUNCTION(domxml_node_next_sibling)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlNode *nodep, *first;
 	int ret;
 
@@ -1812,7 +1841,7 @@ PHP_FUNCTION(domxml_node_next_sibling)
    Returns previous child from list of children */
 PHP_FUNCTION(domxml_node_previous_sibling)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlNode *nodep, *first;
 	int ret;
 
@@ -1833,7 +1862,7 @@ PHP_FUNCTION(domxml_node_previous_sibling)
    Returns document this node belongs to */
 PHP_FUNCTION(domxml_node_owner_document)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlNode *nodep;
 	xmlDocPtr docp;
 	int ret;
@@ -1921,7 +1950,7 @@ PHP_FUNCTION(domxml_node_prefix)
    Returns parent of node */
 PHP_FUNCTION(domxml_node_parent)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlNode *nodep, *last;
 	int ret;
 
@@ -1965,7 +1994,7 @@ PHP_FUNCTION(domxml_node_children)
 
 	while (last) {
 		zval *child;
-		child = php_domobject_new(last, &ret TSRMLS_CC);
+		child = php_domobject_new(last, &ret, NULL TSRMLS_CC);
 		add_next_index_zval(return_value, child);
 		last = last->next;
 	}
@@ -1982,7 +2011,7 @@ PHP_FUNCTION(domxml_node_unlink_node)
 	DOMXML_PARAM_NONE(nodep, id, le_domxmlnodep);
 
 	xmlUnlinkNode(nodep);
-	/*	This causes a Segmentation Fault for some reason.  Removing 
+	/*	This causes a Segmentation Fault for some reason.  Removing
 		it allows the user to re-add the node at some other time, in
 		addition to fixing the segfault.  Node will be freed at
 		shutdown. */
@@ -1991,12 +2020,11 @@ PHP_FUNCTION(domxml_node_unlink_node)
 }
 /* }}} */
 
-
 /* {{{ proto object domxml_node_replace_node(object domnode)
    Replaces one node with another node */
 PHP_FUNCTION(domxml_node_replace_node)
 {
-	zval *id, *rv, *node;
+	zval *id, *rv = NULL, *node;
 	xmlNodePtr repnode, nodep, new_repnode;
 	int ret;
 
@@ -2032,7 +2060,7 @@ PHP_FUNCTION(domxml_node_replace_node)
    Adds node to list of children */
 PHP_FUNCTION(domxml_node_append_child)
 {
-	zval *id, *rv, *node;
+	zval *id, *rv = NULL, *node;
 	xmlNodePtr child, nodep, new_child;
 	int ret;
 
@@ -2074,7 +2102,7 @@ PHP_FUNCTION(domxml_node_append_child)
    Adds node to list of siblings */
 PHP_FUNCTION(domxml_node_append_sibling)
 {
-	zval *id, *rv, *node;
+	zval *id, *rv = NULL, *node;
 	xmlNodePtr child, nodep, new_child;
 	int ret;
 
@@ -2112,7 +2140,7 @@ PHP_FUNCTION(domxml_node_append_sibling)
    Adds node in list of nodes before given node */
 PHP_FUNCTION(domxml_node_insert_before)
 {
-	zval *id, *rv, *node, *ref;
+	zval *id, *rv = NULL, *node, *ref;
 	xmlNodePtr child, new_child, nodep, refp;
 	int ret;
 
@@ -2164,7 +2192,7 @@ PHP_FUNCTION(domxml_node_remove_child)
 
 	while (children) {
 		if (children == child) {
-			zval *rv;
+			zval *rv = NULL;
 			xmlUnlinkNode(child);
 			DOMXML_RET_OBJ(rv, child, &ret);
 			return;
@@ -2212,7 +2240,7 @@ PHP_FUNCTION(domxml_node_replace_child)
 	 * a child, then do the replacement
 	 */
 	if(foundoldchild && !foundnewchild) {
-		zval *rv;
+		zval *rv = NULL;
 		xmlNodePtr node;
 		node = xmlReplaceNode(oldchild, newchild);
 		DOMXML_RET_OBJ(rv, oldchild, &ret);
@@ -2223,7 +2251,7 @@ PHP_FUNCTION(domxml_node_replace_child)
 	 * the new node are identical.
 	 */
 	if(foundnewchild) {
-		zval *rv;
+		zval *rv = NULL;
 		DOMXML_RET_OBJ(rv, newchild, &ret);
 		return;
 	} else {
@@ -2293,7 +2321,7 @@ PHP_FUNCTION(domxml_node_attributes)
    Adds child node to parent node */
 PHP_FUNCTION(domxml_node_new_child)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlNodePtr child, nodep;
 	int ret, name_len, content_len;
 	char *name, *content = NULL;
@@ -2334,14 +2362,14 @@ PHP_FUNCTION(domxml_node_set_content)
 	/* FIXME: Actually the property 'content' of the node has to be updated
 	   as well. Since 'content' should disappear sooner or later and being
 	   replaces by a function 'content()' I skip this for now
-	 */	   
+	 */
 	RETURN_TRUE;
 }
 /* }}} */
 
 /* {{{ proto string domxml_node_get_content()
    Gets content of a node.
-   
+
    "Read the value of a node, this can be either the text carried directly by
 this node if it's a TEXT node or the aggregate string of the values carried by
 this node child's (TEXT and ENTITY_REF). Entity references are substituted."
@@ -2357,7 +2385,7 @@ PHP_FUNCTION(domxml_node_get_content)
 	if (!mem) {
 		RETURN_FALSE;
 	}
-		
+
 	RETVAL_STRING(mem,1);
 	xmlFree(mem);
 }
@@ -2416,7 +2444,7 @@ PHP_FUNCTION(domxml_notation_system_id)
    Constructor of DomElement */
 PHP_FUNCTION(domxml_element)
 {
-	zval *rv;
+	zval *rv = NULL;
 	xmlNode *node;
 	int ret, name_len;
 	char *name;
@@ -2477,7 +2505,7 @@ PHP_FUNCTION(domxml_elem_get_attribute)
    Sets value of given attribute */
 PHP_FUNCTION(domxml_elem_set_attribute)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlNode *nodep;
 	xmlAttr *attr;
 	int ret, name_len, value_len;
@@ -2504,7 +2532,7 @@ PHP_FUNCTION(domxml_elem_remove_attribute)
 	xmlAttr *attrp;
 	int name_len;
 	char *name;
-    
+
 	DOMXML_PARAM_TWO(nodep, id, le_domxmlelementp, "s", &name, &name_len);
 	attrp = xmlHasProp(nodep,name);
 	if (attrp == NULL) {
@@ -2519,7 +2547,7 @@ PHP_FUNCTION(domxml_elem_remove_attribute)
    Returns value of given attribute */
 PHP_FUNCTION(domxml_elem_get_attribute_node)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlNode *nodep;
 	xmlAttr  *attrp;
 	int name_len, ret;
@@ -2538,7 +2566,7 @@ PHP_FUNCTION(domxml_elem_get_attribute_node)
    Sets value of given attribute */
 PHP_FUNCTION(domxml_elem_set_attribute_node)
 {
-	zval *id, *arg1, *rv;
+	zval *id, *arg1, *rv = NULL;
 	xmlNode *nodep;
 	xmlAttr *attrp, *newattrp;
 	int ret;
@@ -2601,7 +2629,7 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 	contextnodep = NULL;
 
 	DOMXML_PARAM_FOUR(docp, id, le_domxmldocp, "s|oo", &name, &name_len,&ctxpin,&contextnodep);
-	
+
 	/* if no xpath_context was submitted, create a new one */
 	if (ctxpin == NULL) {
 		ctxp = xmlXPathNewContext(docp);
@@ -2651,7 +2679,7 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 				int retnode;
 
 				/* construct a node object */
-				child = php_domobject_new(node, &retnode TSRMLS_CC);
+				child = php_domobject_new(node, &retnode, NULL TSRMLS_CC);
 				zend_hash_next_index_insert(Z_ARRVAL_P(rv), &child, sizeof(zval *), NULL);
 			}
 
@@ -2694,10 +2722,10 @@ PHP_FUNCTION(domxml_doc_get_element_by_id)
 
 	ids = (xmlHashTable *) docp->ids;
 	if(ids) {
-		iter.elementId = (xmlChar *) 
+		iter.elementId = (xmlChar *)
 		iter.element = NULL;
-		xmlHashScan(ids, idsHashScanner, &iter);
-		rv = php_domobject_new(iter.element, &retnode TSRMLS_CC);
+		xmlHashScan(ids, (void *)idsHashScanner, &iter);
+		rv = php_domobject_new(iter.element, &retnode, NULL TSRMLS_CC);
 		SEPARATE_ZVAL(&rv);
 		*return_value = *rv;
 		FREE_ZVAL(rv);
@@ -2721,7 +2749,7 @@ PHP_FUNCTION(domxml_elem_get_elements_by_tagname)
 	DOMXML_PARAM_TWO(nodep, id, le_domxmlelementp, "s", &name, &name_len);
 
 	MAKE_STD_ZVAL(rv);
-	
+
 	if(array_init(rv) != SUCCESS) {
 		php_error(E_WARNING, "%s(): cannot create required array", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
@@ -2735,7 +2763,7 @@ PHP_FUNCTION(domxml_elem_get_elements_by_tagname)
 			zval *child;
 			int retnode;
 
-			child = php_domobject_new(node, &retnode TSRMLS_CC);
+			child = php_domobject_new(node, &retnode, NULL TSRMLS_CC);
 			zend_hash_next_index_insert(Z_ARRVAL_P(rv), &child, sizeof(zval *), NULL);
 		}
 	}
@@ -2827,7 +2855,7 @@ PHP_FUNCTION(domxml_doctype_entities)
 
 	while (last) {
 		zval *child;
-		child = php_domobject_new(last, &ret TSRMLS_CC);
+		child = php_domobject_new(last, &ret, NULL TSRMLS_CC);
 		add_next_index_zval(return_value, child);
 		last = last->next;
 	}
@@ -2858,7 +2886,7 @@ PHP_FUNCTION(domxml_doctype_notations)
 
 	while (last) {
 		zval *child;
-		child = php_domobject_new(last, &ret TSRMLS_CC);
+		child = php_domobject_new(last, &ret, NULL TSRMLS_CC);
 		add_next_index_zval(return_value, child);
 		last = last->next;
 	}
@@ -2874,7 +2902,7 @@ PHP_FUNCTION(domxml_doctype_notations)
    Returns DomDocumentType */
 PHP_FUNCTION(domxml_doc_doctype)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlDtdPtr dtd;
 	xmlDocPtr docp;
 	int ret;
@@ -2935,13 +2963,15 @@ PHP_FUNCTION(domxml_doc_document_element)
    Creates new element node */
 PHP_FUNCTION(domxml_doc_create_element)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlNode *node;
-	xmlDocPtr docp;
+	xmlDocPtr docp = NULL;
 	int ret, name_len;
 	char *name;
 
-	DOMXML_GET_THIS_OBJ(docp, id, le_domxmldocp);
+	if(!DOMXML_IS_TYPE(getThis(), domxmlelement_class_entry)) {
+		DOMXML_GET_THIS_OBJ(docp, id, le_domxmldocp);
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
 		return;
@@ -2953,7 +2983,11 @@ PHP_FUNCTION(domxml_doc_create_element)
 	}
 	node->doc = docp;
 
-	DOMXML_RET_OBJ(rv, node, &ret);
+	if(DOMXML_IS_TYPE(getThis(), domxmlelement_class_entry)) {
+		DOMXML_DOMOBJ_NEW(getThis(), node, &ret);
+	} else {
+		DOMXML_RET_OBJ(rv, node, &ret);
+	}
 }
 /* }}} */
 
@@ -2961,13 +2995,15 @@ PHP_FUNCTION(domxml_doc_create_element)
    Creates new text node */
 PHP_FUNCTION(domxml_doc_create_text_node)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlNode *node;
-	xmlDocPtr docp;
+	xmlDocPtr docp = NULL;
 	int ret, content_len;
 	char *content;
 
-	DOMXML_GET_THIS_OBJ(docp, id, le_domxmldocp);
+	if(!DOMXML_IS_TYPE(getThis(), domxmltext_class_entry)) {
+		DOMXML_GET_THIS_OBJ(docp, id, le_domxmldocp);
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &content, &content_len) == FAILURE) {
 		return;
@@ -2979,7 +3015,11 @@ PHP_FUNCTION(domxml_doc_create_text_node)
 	}
 	node->doc = docp;
 
-	DOMXML_RET_OBJ(rv, node, &ret);
+	if(DOMXML_IS_TYPE(getThis(), domxmltext_class_entry)) {
+		DOMXML_DOMOBJ_NEW(getThis(), node, &ret);
+	} else {
+		DOMXML_RET_OBJ(rv, node, &ret);
+	}
 }
 /* }}} */
 
@@ -2987,13 +3027,15 @@ PHP_FUNCTION(domxml_doc_create_text_node)
    Creates new comment node */
 PHP_FUNCTION(domxml_doc_create_comment)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlNode *node;
-	xmlDocPtr docp;
+	xmlDocPtr docp = NULL;
 	int ret, content_len;
 	char *content;
 
-	DOMXML_GET_THIS_OBJ(docp, id, le_domxmldocp);
+	if(!DOMXML_IS_TYPE(getThis(), domxmlcomment_class_entry)) {
+		DOMXML_GET_THIS_OBJ(docp, id, le_domxmldocp);
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &content, &content_len) == FAILURE) {
 		return;
@@ -3005,7 +3047,11 @@ PHP_FUNCTION(domxml_doc_create_comment)
 	}
 	node->doc = docp;
 
-	DOMXML_RET_OBJ(rv, node, &ret);
+	if(DOMXML_IS_TYPE(getThis(), domxmlcomment_class_entry)) {
+		DOMXML_DOMOBJ_NEW(getThis(), node, &ret);
+	} else {
+		DOMXML_RET_OBJ(rv, node, &ret);
+	}
 }
 /* }}} */
 
@@ -3013,13 +3059,15 @@ PHP_FUNCTION(domxml_doc_create_comment)
    Creates new attribute node */
 PHP_FUNCTION(domxml_doc_create_attribute)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlAttrPtr node;
-	xmlDocPtr docp;
+	xmlDocPtr docp = NULL;
 	int ret, name_len, value_len;
 	char *name, *value;
 
-	DOMXML_GET_THIS_OBJ(docp, id, le_domxmldocp);
+	if(!DOMXML_IS_TYPE(getThis(), domxmlattr_class_entry)) {
+		DOMXML_GET_THIS_OBJ(docp, id, le_domxmldocp);
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
@@ -3031,7 +3079,11 @@ PHP_FUNCTION(domxml_doc_create_attribute)
 	}
 	node->doc = docp;
 
-	DOMXML_RET_OBJ(rv, (xmlNodePtr) node, &ret);
+	if(DOMXML_IS_TYPE(getThis(), domxmlattr_class_entry)) {
+		DOMXML_DOMOBJ_NEW(getThis(), (xmlNodePtr) node, &ret);
+	} else {
+		DOMXML_RET_OBJ(rv, (xmlNodePtr) node, &ret);
+	}
 }
 /* }}} */
 
@@ -3039,13 +3091,15 @@ PHP_FUNCTION(domxml_doc_create_attribute)
    Creates new cdata node */
 PHP_FUNCTION(domxml_doc_create_cdata_section)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlNode *node;
-	xmlDocPtr docp;
+	xmlDocPtr docp = NULL;
 	int ret, content_len;
 	char *content;
 
-	DOMXML_GET_THIS_OBJ(docp, id, le_domxmldocp);
+	if(!DOMXML_IS_TYPE(getThis(), domxmlcdata_class_entry)) {
+		DOMXML_GET_THIS_OBJ(docp, id, le_domxmldocp);
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &content, &content_len) == FAILURE) {
 		return;
@@ -3057,7 +3111,11 @@ PHP_FUNCTION(domxml_doc_create_cdata_section)
 	}
 	node->doc = docp;
 
-	DOMXML_RET_OBJ(rv, node, &ret);
+	if(DOMXML_IS_TYPE(getThis(), domxmlcdata_class_entry)) {
+		DOMXML_DOMOBJ_NEW(getThis(), node, &ret);
+	} else {
+		DOMXML_RET_OBJ(rv, node, &ret);
+	}
 }
 /* }}} */
 
@@ -3065,13 +3123,15 @@ PHP_FUNCTION(domxml_doc_create_cdata_section)
    Creates new cdata node */
 PHP_FUNCTION(domxml_doc_create_entity_reference)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlNode *node;
-	xmlDocPtr docp;
+	xmlDocPtr docp = NULL;
 	int ret, name_len;
 	char *name;
 
-	DOMXML_GET_THIS_OBJ(docp, id, le_domxmldocp);
+	if(!DOMXML_IS_TYPE(getThis(), domxmlentityref_class_entry)) {
+		DOMXML_GET_THIS_OBJ(docp, id, le_domxmldocp);
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
 		return;
@@ -3082,7 +3142,11 @@ PHP_FUNCTION(domxml_doc_create_entity_reference)
 	}
 	node->doc = docp;
 
-	DOMXML_RET_OBJ(rv, node, &ret);
+	if(DOMXML_IS_TYPE(getThis(), domxmlentityref_class_entry)) {
+		DOMXML_DOMOBJ_NEW(getThis(), node, &ret);
+	} else {
+		DOMXML_RET_OBJ(rv, node, &ret);
+	}
 }
 /* }}} */
 
@@ -3090,13 +3154,15 @@ PHP_FUNCTION(domxml_doc_create_entity_reference)
    Creates new processing_instruction node */
 PHP_FUNCTION(domxml_doc_create_processing_instruction)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlNode *node;
-	xmlDocPtr docp;
+	xmlDocPtr docp = NULL;
 	int ret, name_len, content_len;
 	char *name, *content;
 
-	DOMXML_GET_THIS_OBJ(docp, id, le_domxmldocp);
+	if(!DOMXML_IS_TYPE(getThis(), domxmlpi_class_entry)) {
+		DOMXML_GET_THIS_OBJ(docp, id, le_domxmldocp);
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &name, &name_len, &content, &content_len) == FAILURE) {
 		return;
@@ -3108,7 +3174,11 @@ PHP_FUNCTION(domxml_doc_create_processing_instruction)
 	}
 	node->doc = docp;
 
-	DOMXML_RET_OBJ(rv, node, &ret);
+	if(DOMXML_IS_TYPE(getThis(), domxmlpi_class_entry)) {
+		DOMXML_DOMOBJ_NEW(getThis(), node, &ret);
+	} else {
+		DOMXML_RET_OBJ(rv, node, &ret);
+	}
 }
 /* }}} */
 
@@ -3116,7 +3186,7 @@ PHP_FUNCTION(domxml_doc_create_processing_instruction)
    Creates new element node */
 PHP_FUNCTION(domxml_doc_imported_node)
 {
-	zval *arg1, *id, *rv;
+	zval *arg1, *id, *rv = NULL;
 	xmlNodePtr node, srcnode;
 	xmlDocPtr docp;
 	int ret, recursive = 0;
@@ -3144,7 +3214,7 @@ PHP_FUNCTION(domxml_doc_imported_node)
    Returns DTD of document */
 PHP_FUNCTION(domxml_intdtd)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlDoc *docp;
 	xmlDtd *dtd;
 	int ret;
@@ -3171,7 +3241,7 @@ PHP_FUNCTION(domxml_dump_mem)
 	int size;
 	int encoding_len = 0;
 	char *encoding;
-	
+
 
 	DOMXML_PARAM_THREE(docp, id, le_domxmldocp, "|ls", &format, &encoding, &encoding_len);
 	if (format) {
@@ -3180,7 +3250,7 @@ PHP_FUNCTION(domxml_dump_mem)
 			xmlDocDumpFormatMemoryEnc(docp, &mem, &size, encoding, format);
 		} else {
 			xmlDocDumpFormatMemory(docp, &mem, &size, format);
-		}			
+		}
 	} else {
 		if (encoding_len) {
 			xmlDocDumpMemoryEnc(docp, &mem, &size, encoding);
@@ -3237,22 +3307,22 @@ PHP_FUNCTION(domxml_dump_node)
 	xmlBufferPtr buf;
 	int level = 0;
 	int format = 0;
-	
+
 	DOMXML_PARAM_THREE(docp, id, le_domxmldocp, "o|ll", &nodep, &format, &level);
-	
+
 	DOMXML_GET_OBJ(elementp, nodep, le_domxmlnodep);
 
 	if (Z_TYPE_P(elementp) == XML_DOCUMENT_NODE || Z_TYPE_P(elementp) == XML_HTML_DOCUMENT_NODE ) {
 		php_error(E_WARNING, "%s(): cannot dump element with a document node", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
-	
+
 	buf = xmlBufferCreate();
 	if (!buf) {
 		php_error(E_WARNING, "%s(): could fetch buffer", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
-	
+
 	xmlNodeDump(buf, docp, elementp, level, format);
 
 	mem = (xmlChar*) xmlBufferContent(buf);
@@ -3262,6 +3332,7 @@ PHP_FUNCTION(domxml_dump_node)
 		RETURN_FALSE;
 	}
 	RETVAL_STRING(mem,  1);
+
 	xmlBufferFree(buf);
 
 }
@@ -3275,9 +3346,9 @@ static void idsHashScanner2(void *payload, void *data, xmlChar *name)
 	xmlNode *nodep;
 
 	TSRMLS_FETCH();
-    
+
 	nodep = ((xmlNode *)((xmlID *)payload)->attr)->parent;
-	child = php_domobject_new(nodep, &ret TSRMLS_CC);
+	child = php_domobject_new(nodep, &ret, NULL TSRMLS_CC);
 	add_next_index_zval(return_value, child);
 }
 
@@ -3298,7 +3369,7 @@ PHP_FUNCTION(domxml_doc_ids)
 			RETURN_FALSE;
 		}
 
-		xmlHashScan(ids, idsHashScanner2, return_value);
+		xmlHashScan(ids, (void *)idsHashScanner2, return_value);
 	} else {
 		RETURN_FALSE;
 	}
@@ -3309,7 +3380,7 @@ PHP_FUNCTION(domxml_doc_ids)
    Creates DOM object of XML document */
 PHP_FUNCTION(xmldoc)
 {
-	zval *rv;
+	zval *rv = NULL;
 	xmlDoc *docp;
 	int ret;
 	char *buffer;
@@ -3358,7 +3429,12 @@ PHP_FUNCTION(xmldoc)
 		xmlParseDTD(dtd->ExternalID, dtd->SystemID);
 	}
 */
-	DOMXML_RET_OBJ(rv, (xmlNodePtr) docp, &ret);
+
+	if(DOMXML_IS_TYPE(getThis(), domxmldoc_class_entry)) {
+		DOMXML_DOMOBJ_NEW(getThis(), (xmlNodePtr) docp, &ret);
+	} else {
+		DOMXML_RET_OBJ(rv, (xmlNodePtr) docp, &ret);
+	}
 }
 /* }}} */
 
@@ -3366,7 +3442,7 @@ PHP_FUNCTION(xmldoc)
    Creates DOM object of XML document in file */
 PHP_FUNCTION(xmldocfile)
 {
-	zval *rv;
+	zval *rv = NULL;
 	xmlDoc *docp;
 	int ret, file_len;
 	char *file;
@@ -3382,7 +3458,7 @@ PHP_FUNCTION(xmldocfile)
 
 	DOMXML_RET_OBJ(rv, (xmlNodePtr) docp, &ret);
 
-	add_property_resource(return_value, "doc", ret);
+/*	add_property_resource(return_value, "doc", ret);
 	if (docp->name)
 		add_property_stringl(return_value, "name", (char *) docp->name, strlen(docp->name), 1);
 	if (docp->URL)
@@ -3394,7 +3470,7 @@ PHP_FUNCTION(xmldocfile)
 	add_property_long(return_value, "type", Z_TYPE_P(docp));
 	add_property_long(return_value, "compression", docp->compression);
 	add_property_long(return_value, "charset", docp->charset);
-	zend_list_addref(ret);
+	zend_list_addref(ret);*/
 }
 /* }}} */
 
@@ -3425,7 +3501,7 @@ PHP_FUNCTION(domxml_html_dump_mem)
    Creates DOM object of HTML document */
 PHP_FUNCTION(html_doc)
 {
-	zval *rv;
+	zval *rv = NULL;
 	xmlDoc *docp;
 	int ret;
 	char *buffer;
@@ -3452,7 +3528,7 @@ PHP_FUNCTION(html_doc)
    Creates DOM object of HTML document in file */
 PHP_FUNCTION(html_doc_file)
 {
-	zval *rv;
+	zval *rv = NULL;
 	xmlDoc *docp;
 	int ret, file_len;
 	char *file;
@@ -3523,11 +3599,11 @@ PHP_FUNCTION(domxml_node_text_concat)
 }
 /* }}} */
 
-/* {{{ proto object domxml_doc_add_root(string name)
+/* {{{ proto object domxml_add_root(string name)
    Adds root node to document */
 PHP_FUNCTION(domxml_doc_add_root)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlDoc *docp;
 	xmlNode *nodep;
 	int ret, name_len;
@@ -3571,7 +3647,7 @@ PHP_FUNCTION(domxml_doc_set_root)
    Creates new xmldoc */
 PHP_FUNCTION(domxml_new_xmldoc)
 {
-	zval *rv;
+	zval *rv = NULL;
 	xmlDoc *docp;
 	int ret, buf_len;
 	char *buf;
@@ -3610,7 +3686,7 @@ PHP_FUNCTION(domxml_parser)
 	}
 /*	parserp->loadsubset = XML_DETECT_IDS; */
 
-	rv = php_xmlparser_new(parserp, &ret TSRMLS_CC);    
+	rv = php_xmlparser_new(parserp, &ret TSRMLS_CC);
 	DOMXML_RET_ZVAL(rv);
 }
 /* }}} */
@@ -3638,7 +3714,7 @@ PHP_FUNCTION(domxml_parser_add_chunk)
    Ends parsing and returns DomDocument*/
 PHP_FUNCTION(domxml_parser_end)
 {
-	zval *id,*rv;
+	zval *id,*rv = NULL;
 	xmlParserCtxtPtr parserp;
 	char *chunk = NULL;
 	int chunk_len = 0, error;
@@ -3648,7 +3724,7 @@ PHP_FUNCTION(domxml_parser_end)
 	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"|s", &chunk, &chunk_len);
 	error = xmlParseChunk(parserp, chunk, chunk_len, 1);
 	if (error != 0) {
-		php_error(E_ERROR,"error: %d",error);		
+		php_error(E_ERROR,"error: %d",error);
 		RETURN_FALSE;
 	}
 	if (parserp->myDoc != NULL) {
@@ -3698,7 +3774,7 @@ static int node_namespace(zval **attributes, xmlNode *nodep TSRMLS_DC)
 		zval *pattr;
 		int ret;
 
-		pattr = php_domobject_new((xmlNodePtr) ns, &ret TSRMLS_CC);
+		pattr = php_domobject_new((xmlNodePtr) ns, &ret, NULL TSRMLS_CC);
 		SEPARATE_ZVAL(&pattr);
 
 /*		if(!ret) { */
@@ -3741,7 +3817,7 @@ static int node_attributes(zval **attributes, xmlNode *nodep TSRMLS_DC)
 		zval *pattr;
 		int ret;
 
-		pattr = php_domobject_new((xmlNodePtr) attr, &ret TSRMLS_CC);
+		pattr = php_domobject_new((xmlNodePtr) attr, &ret, NULL TSRMLS_CC);
 		/** XXX FIXME XXX */
 /*		if(0 <= (n = node_children(&children, attr->children TSRMLS_CC))) {
 			zend_hash_update(Z_OBJPROP_P(value), "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
@@ -3779,7 +3855,7 @@ static int node_children(zval **children, xmlNode *nodep TSRMLS_DC)
 		zval *child;
 		int ret;
 
-		if (NULL != (child = php_domobject_new(last, &ret TSRMLS_CC))) {
+		if (NULL != (child = php_domobject_new(last, &ret, NULL TSRMLS_CC))) {
 			zend_hash_next_index_insert(Z_ARRVAL_PP(children), &child, sizeof(zval *), NULL);
 
 			/* Get the namespace of the current node and add it as a property */
@@ -3809,7 +3885,7 @@ static int node_children(zval **children, xmlNode *nodep TSRMLS_DC)
    Creates a tree of PHP objects from an XML document */
 PHP_FUNCTION(domxml_xmltree)
 {
-	zval *children, *rv;
+	zval *children, *rv = NULL;
 	xmlDoc *docp;
 	xmlNode *root;
 	int ret, buf_len;
@@ -3991,7 +4067,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 				int retnode;
 
 				/* construct a node object */
-				child = php_domobject_new(node, &retnode TSRMLS_CC);
+				child = php_domobject_new(node, &retnode, NULL TSRMLS_CC);
 				zend_hash_next_index_insert(Z_ARRVAL_P(arr), &child, sizeof(zval *), NULL);
 			}
 			zend_hash_update(Z_OBJPROP_P(rv), "nodeset", sizeof("nodeset"), (void *) &arr, sizeof(zval *), NULL);
@@ -4098,8 +4174,6 @@ PHP_FUNCTION(domxml_version)
 	RETURN_STRING(LIBXML_DOTTED_VERSION, 1);
 }
 /* }}} */
-
-
 
 #if HAVE_DOMXSLT
 static zval *php_xsltstylesheet_new(xsltStylesheetPtr obj, int *found TSRMLS_DC)
