@@ -384,10 +384,25 @@ static char *php_mime_get_hdr_value(zend_llist header, char *key)
 
 static char *php_ap_getword(char **line, char stop)
 {
-	char *pos = strchr(*line, stop);
+	char *pos = *line, quote;
 	char *res;
 
-	if (!pos) {
+	while (*pos && *pos != stop) {
+		
+		if ((quote = *pos) == '"' || quote == '\'') {
+			++pos;
+			while (*pos && *pos != quote) {
+				if (*pos == '\\' && pos[1] && pos[1] == quote) {
+					pos += 2;
+				} else {
+					++pos;
+				}
+			}
+			++pos;
+		} else ++pos;
+		
+	}
+	if (*pos == '\0') {
 		res = estrdup(*line);
 		*line += strlen(*line);
 		return res;
@@ -433,7 +448,7 @@ static char *php_ap_getword_conf(char **line)
 
 	if (!*str) {
 		*line = str;
-		return "";
+		return estrdup("");
 	}
 
 	if ((quote = *str) == '"' || quote == '\'') {
@@ -647,7 +662,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 			while (*cd && (pair = php_ap_getword(&cd, ';')))
 			{
-				char *key=NULL;
+				char *key=NULL, *word = pair;
 
 				while (isspace(*cd)) {
 					++cd;
@@ -657,14 +672,15 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					key = php_ap_getword(&pair, '=');
 					
 					if (!strcmp(key, "name")) {
+						if (param) efree(param);
 						param = php_ap_getword_conf(&pair);
 					} else if (!strcmp(key, "filename")) {
+						if (filename) efree(filename);
 						filename = php_ap_getword_conf(&pair);
 					}
 				}
-				if (key) {
-					efree(key);
-				}
+				if (key) efree(key);
+				efree(word);
 			}
 
 			/* Normal form variable, safe to read all data into memory */
@@ -672,9 +688,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 				char *value = multipart_buffer_read_body(mbuff TSRMLS_CC);
 
-				if (!value) {
-					value = "";
-				}
+				if (!value) value = estrdup("");
 
 				safe_php_register_variable(param, value, array_ptr, 0 TSRMLS_CC);
 				if (!strcmp(param, "MAX_FILE_SIZE")) {
@@ -682,9 +696,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				}
 
 				efree(param);
-				if (value != "") {
-					efree(value);
-				}
+				efree(value);
 				continue;
 			}
 
@@ -771,14 +783,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				sprintf(lbuf, "%s_name", param);
 			}
 
-			/* Initialize variables */
-			add_protected_variable(param TSRMLS_CC);
-
-			magic_quotes_gpc = PG(magic_quotes_gpc);
-			PG(magic_quotes_gpc) = 0;
-			/* if param is of form xxx[.*] this will cut it to xxx */
-			safe_php_register_variable(param, temp_filename, NULL, 1 TSRMLS_CC);
-
 			s = strrchr(filename, '\\');
 			if (s && s > filename) {
 				safe_php_register_variable(lbuf, s+1, NULL, 0 TSRMLS_CC);
@@ -821,6 +825,13 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			}
 			register_http_post_files_variable(lbuf, cd, http_post_files, 0 TSRMLS_CC);
 
+			/* Initialize variables */
+			add_protected_variable(param TSRMLS_CC);
+
+			magic_quotes_gpc = PG(magic_quotes_gpc);
+			PG(magic_quotes_gpc) = 0;
+			/* if param is of form xxx[.*] this will cut it to xxx */
+			safe_php_register_variable(param, temp_filename, NULL, 1 TSRMLS_CC);
 	
 			/* Add $foo[tmp_name] */
 			if (is_arr_upload) {
