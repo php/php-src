@@ -253,9 +253,10 @@ AC_CHECK_LIB(m, sin)
 AC_CHECK_LIB(bind, inet_aton, [
   AC_ADD_LIBRARY(bind)
   AC_DEFINE(HAVE_LIBBIND,1,[Whether you have bind]) ], [
-    AC_CHECK_LIB(resolv, inet_aton)
+    AC_CHECK_LIB(bind, __inet_aton, [], [
+      AC_CHECK_LIB(resolv, inet_aton)
+    ])
   ])
-AC_CHECK_LIB(bind, __inet_aton)
 
 
 dnl The res_search may be in libsocket as well, and if it is
