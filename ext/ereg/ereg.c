@@ -177,9 +177,9 @@ static void _php3_reg_eprint(int err, regex_t *re) {
 
 static void _php3_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
-	pval *regex,			/* Regular expression */
-		*findin,		/* String to apply expression to */
-		*array = NULL;		/* Optional register array */
+	pval **regex,			/* Regular expression */
+		**findin,		/* String to apply expression to */
+		**array = NULL;		/* Optional register array */
 	regex_t re;
 	regmatch_t subs[NS];
 	int err, i, match_len, string_len;
@@ -193,7 +193,7 @@ static void _php3_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	switch(ARG_COUNT(ht)) {
 	case 2:
-		if (getParameters(ht, 2, &regex, &findin) == FAILURE) {
+		if (getParametersEx(2, &regex, &findin) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		/* don't bother doing substring matching if we're not going
@@ -201,7 +201,7 @@ static void _php3_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		copts |= REG_NOSUB;
 		break;
 	case 3:
-		if (getParameters(ht, 3, &regex, &findin, &array) == FAILURE) {
+		if (getParametersEx(3, &regex, &findin, &array) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		if (!ParameterPassedByReference(ht, 3)) {
@@ -215,15 +215,15 @@ static void _php3_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 
 	/* compile the regular expression from the supplied regex */
-	if (regex->type == IS_STRING) {
-		err = regcomp(&re, regex->value.str.val, REG_EXTENDED | copts);
+	if ((*regex)->type == IS_STRING) {
+		err = regcomp(&re, (*regex)->value.str.val, REG_EXTENDED | copts);
 	} else {
 		/* we convert numbers to integers and treat them as a string */
-		if (regex->type == IS_DOUBLE)
-			convert_to_long(regex);	/* get rid of decimal places */
-		convert_to_string(regex);
+		if ((*regex)->type == IS_DOUBLE)
+			convert_to_long_ex(regex);	/* get rid of decimal places */
+		convert_to_string_ex(regex);
 		/* don't bother doing an extended regex with just a number */
-		err = regcomp(&re, regex->value.str.val, copts);
+		err = regcomp(&re, (*regex)->value.str.val, copts);
 	}
 
 	if (err) {
@@ -232,8 +232,8 @@ static void _php3_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	/* make a copy of the string we're looking in */
-	convert_to_string(findin);
-	string = estrndup(findin->value.str.val, findin->value.str.len);
+	convert_to_string_ex(findin);
+	string = estrndup((*findin)->value.str.val, (*findin)->value.str.len);
 
 	/* actually execute the regular expression */
 	err = regexec(&re, string, (size_t) NS, subs, 0);
@@ -254,16 +254,16 @@ static void _php3_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			RETURN_FALSE;
 		}
 
-		pval_destructor(array);	/* start with clean array */
-		array_init(array);
+		pval_destructor(*array);	/* start with clean array */
+		array_init(*array);
 
 		for (i = 0; i < NS; i++) {
 			start = subs[i].rm_so;
 			end = subs[i].rm_eo;
 			if (start != -1 && end > 0 && start < string_len && end < string_len && start < end) {
-				add_index_stringl(array, i, string+start, end-start, 1);
+				add_index_stringl(*array, i, string+start, end-start, 1);
 			} else {
-				add_index_bool(array, i, 0);
+				add_index_bool(*array, i, 0);
 			}
 		}
 		efree(buf);
@@ -437,45 +437,45 @@ char *_php3_regreplace(const char *pattern, const char *replace, const char *str
 
 static void _php3_eregreplace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
-	pval *arg_pattern,
-		*arg_replace,
-		*arg_string;
+	pval **arg_pattern,
+		**arg_replace,
+		**arg_string;
 	char *pattern;
 	char *string;
 	char *replace;
 	char *ret;
 	
-	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg_pattern, &arg_replace, &arg_string) == FAILURE) {
+	if (ARG_COUNT(ht) != 3 || getParametersEx(3, &arg_pattern, &arg_replace, &arg_string) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	if (arg_pattern->type == IS_STRING) {
-		if (arg_pattern->value.str.val && arg_pattern->value.str.len)
-			pattern = estrndup(arg_pattern->value.str.val,arg_pattern->value.str.len);
+	if ((*arg_pattern)->type == IS_STRING) {
+		if ((*arg_pattern)->value.str.val && (*arg_pattern)->value.str.len)
+			pattern = estrndup((*arg_pattern)->value.str.val,(*arg_pattern)->value.str.len);
 		else
 			pattern = empty_string;
 	} else {
-		convert_to_long(arg_pattern);
+		convert_to_long_ex(arg_pattern);
 		pattern = emalloc(2);
-		pattern[0] = (char) arg_pattern->value.lval;
+		pattern[0] = (char) (*arg_pattern)->value.lval;
 		pattern[1] = '\0';
 	}
 
-	if (arg_replace->type == IS_STRING) {
-		if (arg_replace->value.str.val && arg_replace->value.str.len)
-			replace = estrndup(arg_replace->value.str.val, arg_replace->value.str.len);
+	if ((*arg_replace)->type == IS_STRING) {
+		if ((*arg_replace)->value.str.val && (*arg_replace)->value.str.len)
+			replace = estrndup((*arg_replace)->value.str.val, (*arg_replace)->value.str.len);
 		else
 			replace = empty_string;
 	} else {
-		convert_to_long(arg_replace);
+		convert_to_long_ex(arg_replace);
 		replace = emalloc(2);
-		replace[0] = (char) arg_replace->value.lval;
+		replace[0] = (char) (*arg_replace)->value.lval;
 		replace[1] = '\0';
 	}
 
-	convert_to_string(arg_string);
-	if (arg_string->value.str.val && arg_string->value.str.len)
-		string = estrndup(arg_string->value.str.val, arg_string->value.str.len);
+	convert_to_string_ex(arg_string);
+	if ((*arg_string)->value.str.val && (*arg_string)->value.str.len)
+		string = estrndup((*arg_string)->value.str.val, (*arg_string)->value.str.len);
 	else
 		string = empty_string;
 
@@ -514,7 +514,7 @@ PHP_FUNCTION(eregi_replace)
    split string into array by regular expression */
 PHP_FUNCTION(split)
 {
-	pval *spliton, *str, *arg_count = NULL;
+	pval **spliton, **str, **arg_count = NULL;
 	regex_t re;
 	regmatch_t subs[1];
 	char *strp, *endp;
@@ -522,27 +522,27 @@ PHP_FUNCTION(split)
 	
 	switch (ARG_COUNT(ht)) {
 	case 2:
-		if (getParameters(ht, 2, &spliton, &str) == FAILURE)
+		if (getParametersEx(2, &spliton, &str) == FAILURE)
 			WRONG_PARAM_COUNT;
 		count = -1;
 		break;
 	case 3:
-		if (getParameters(ht, 3, &spliton, &str, &arg_count) == FAILURE)
+		if (getParametersEx(3, &spliton, &str, &arg_count) == FAILURE)
 			WRONG_PARAM_COUNT;
-		convert_to_long(arg_count);
-		count = arg_count->value.lval;
+		convert_to_long_ex(arg_count);
+		count = (*arg_count)->value.lval;
 		break;
 	default:
 		WRONG_PARAM_COUNT;                                         
 	}                                                                  
 
-	convert_to_string(spliton);                                        
-	convert_to_string(str);                                            
+	convert_to_string_ex(spliton);                                        
+	convert_to_string_ex(str);                                            
 
-	strp = str->value.str.val;
-	endp = str->value.str.val + strlen(str->value.str.val);
+	strp = (*str)->value.str.val;
+	endp = (*str)->value.str.val + strlen((*str)->value.str.val);
 
-	err = regcomp(&re, spliton->value.str.val, REG_EXTENDED);
+	err = regcomp(&re, (*spliton)->value.str.val, REG_EXTENDED);
 	if (err) {
 		php_error(E_WARNING, "unexpected regex error (%d)", err);
 		RETURN_FALSE;
@@ -611,21 +611,21 @@ PHP_FUNCTION(split)
    Make regular expression for case insensitive match */
 PHPAPI PHP_FUNCTION(sql_regcase)
 {
-	pval *string;
+	pval **string;
 	char *tmp;
 	unsigned char c;
 	register int i, j;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &string)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &string)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_string(string);
+	convert_to_string_ex(string);
 	
-	tmp = (char *) emalloc(string->value.str.len*4+1);
+	tmp = (char *) emalloc((*string)->value.str.len*4+1);
 	
-	for (i=j=0; i<string->value.str.len; i++) {
-		c = (unsigned char) string->value.str.val[i];
+	for (i=j=0; i<(*string)->value.str.len; i++) {
+		c = (unsigned char) (*string)->value.str.val[i];
 		if(isalpha(c)) {
 			tmp[j++] = '[';
 			tmp[j++] = toupper(c);
