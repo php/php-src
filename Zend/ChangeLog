@@ -1,3 +1,9 @@
+2004-10-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_builtin_functions.c:
+      - Allow to omit object/classname in get_parent_class() which makes it
+        compatible with the signature and behavior of get_class()
+
 2004-10-13  Andi Gutmans  <andi@zend.com>
 
     * zend_compile.c:
