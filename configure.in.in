@@ -18,9 +18,9 @@ done
 
 if test "$recurse" = "yes"; then
 	cwd=`pwd`
-	(set -x; cd $srcdir/libzend; ./configure --cache-file=$cwd/config.cache $@)
+	(set -x; mkdir -p libzend ; cd libzend; $cwd/$srcdir/libzend/configure --cache-file=$cwd/config.cache $@)
 	if test "$threadsafe" = "yes"; then
-		(set -x; cd $srcdir/TSRM; ./configure --cache-file=$cwd/config.cache $@)
+		(set -x; mkdir -p TSRM; cd TSRM; $cwd/$srcdir/TSRM/configure --cache-file=$cwd/config.cache $@)
 	fi
 fi
 
@@ -83,6 +83,7 @@ dnl## LIBS=$OLDLIBS
 
 AC_PROG_RANLIB
 AC_PROG_CC_C_O
+AC_PROG_LN_S
 AC_PATH_PROG(PERL_PATH, perl)
 
 dnl Ugly hack to get around a problem with gcc on AIX.
@@ -155,7 +156,7 @@ if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
        LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
 fi
 
-INCLUDES=""
+INCLUDES="-I\$(top_builddir)/libzend -I\$(top_builddir)/TSRM"
 AC_SUBST(INCLUDES)
 
 AC_CHECK_LIB(nsl, gethostname, [
@@ -874,7 +875,7 @@ PHP_OS=`uname`
 AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS")
 
 AC_OUTPUT(Makefile libphp4.module
-          scripts/mkextlib regex/Makefile ext/Makefile
+          scripts/mkextlib regex/Makefile
           @@EXT_MAKEFILES@@ build-defs.h, [
 ], [
 
