@@ -267,7 +267,7 @@
 #define HALAKIM_PER_LUNAR_CYCLE ((29 * HALAKIM_PER_DAY) + 13753)
 #define HALAKIM_PER_METONIC_CYCLE (HALAKIM_PER_LUNAR_CYCLE * (12 * 19 + 7))
 
-#define SDN_OFFSET 347997
+#define JEWISH_SDN_OFFSET 347997
 #define NEW_MOON_OF_CREATION 31524
 
 #define SUNDAY    0
@@ -497,13 +497,13 @@ void SdnToJewish(
 	int tishri1After;
 	int yearLength;
 
-	if (sdn <= SDN_OFFSET) {
+	if (sdn <= JEWISH_SDN_OFFSET) {
 		*pYear = 0;
 		*pMonth = 0;
 		*pDay = 0;
 		return;
 	}
-	inputDay = sdn - SDN_OFFSET;
+	inputDay = sdn - JEWISH_SDN_OFFSET;
 
 	FindTishriMolad(inputDay, &metonicCycle, &metonicYear, &day, &halakim);
 	tishri1 = Tishri1(metonicYear, day, halakim);
@@ -728,7 +728,7 @@ long int JewishToSdn(
 					return (0);
 			}
 	}
-	return (sdn + SDN_OFFSET);
+	return (sdn + JEWISH_SDN_OFFSET);
 }
 
 /*

@@ -128,7 +128,7 @@
 
 #include "sdncal.h"
 
-#define SDN_OFFSET         32045
+#define GREGOR_SDN_OFFSET         32045
 #define DAYS_PER_5_MONTHS  153
 #define DAYS_PER_4_YEARS   1461
 #define DAYS_PER_400_YEARS 146097
@@ -152,7 +152,7 @@ void SdnToGregorian(
 		*pDay = 0;
 		return;
 	}
-	temp = (sdn + SDN_OFFSET) * 4 - 1;
+	temp = (sdn + GREGOR_SDN_OFFSET) * 4 - 1;
 
 	/* Calculate the century (year/100). */
 	century = temp / DAYS_PER_400_YEARS;
@@ -227,7 +227,7 @@ long int GregorianToSdn(
 			+ ((year % 100) * DAYS_PER_4_YEARS) / 4
 			+ (month * DAYS_PER_5_MONTHS + 2) / 5
 			+ inputDay
-			- SDN_OFFSET);
+			- GREGOR_SDN_OFFSET);
 }
 
 char *MonthNameShort[13] =
