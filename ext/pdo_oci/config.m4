@@ -26,7 +26,7 @@ AC_DEFUN(AC_PDO_OCI_VERSION,[
 ])                                                                                                                                                                
 
 PHP_ARG_WITH(pdo-oci, Oracle OCI support for PDO,
-[  --with-pdo-oci[=DIR]       Include Oracle-oci support. Default DIR is ORACLE_HOME.])
+[  --with-pdo-oci[=DIR]         Include Oracle-oci support. Default DIR is ORACLE_HOME.])
 
 if test "$PDO_OCI" != "no"; then
   AC_MSG_CHECKING([Oracle Install-Dir])

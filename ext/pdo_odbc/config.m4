@@ -2,8 +2,8 @@ dnl $Id$
 dnl config.m4 for extension pdo_odbc
 
 PHP_ARG_WITH(pdo-odbc,  PDBC driver for PDO,
-[[  --with-pdo-odbc=flavour,dir     Add support for "flavour" ODBC drivers,
-                                  looking for include and lib dirs under "dir"
+[[ --with-pdo-odbc=flavour,dir  Add support for "flavour" ODBC drivers,
+                               looking for include and lib dirs under "dir"
          
         flavour can be one of:
            ibm-db2, unixODBC
