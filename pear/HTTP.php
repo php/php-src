@@ -22,7 +22,7 @@
 // HTTP utility functions.
 //
 
-if ($GLOBALS['USED_PACKAGES']['HTTP']) return;
+if (!empty($GLOBALS['USED_PACKAGES']['HTTP'])) return;
 $GLOBALS['USED_PACKAGES']['HTTP'] = true;
 
 class HTTP {
