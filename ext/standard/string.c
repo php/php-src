@@ -1617,7 +1617,10 @@ PHPAPI void php_stripcslashes(char *str, int *len)
 			*target++=*source;
 		}
 	}
-	*target='\0';
+
+	if(nlen != 0) {
+		*target='\0';
+	}
 
 	*len = nlen;
 }
