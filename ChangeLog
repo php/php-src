@@ -1,3 +1,74 @@
+2000-03-09  Leo Baschy  <nirvana@got.net>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    _close_odbc_conn calls _free_odbc_result if possible
+
+2000-03-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4:
+    VPATH builds were broken, if the user specified the path to configure
+    using an absolute path. With this change, absolute and relative paths
+    are accepted and processed correctly.
+
+2000-03-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/storage.php
+      pear/Makefile.in: PEAR now uses "use" instead of "include".
+
+2000-03-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Fix build problem on systems where ulong is not defined.
+    There ulong was defined to `unsigned long long' resulting
+    in compile-time problems in libmysql. The client library
+    uses `ulong' an `unsigned long' interchangeable.
+
+    The removed tests are performed by the Zend library, thus
+    this change has no negative impact.
+
+    Reported by: Dan Larsson <dl@tyfon.net>
+
+2000-03-09  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/cpdf/cpdf.c: - fixed cpdf_set_font() error
+
+    * ext/pdf/pdf.c: - ups, fixed stupid compile errors
+
+    * NEWS
+      ext/pdf/config.m4
+      ext/pdf/pdf.c: - dropped support for version of pdflib < 3.0
+    - better detection of libs required for pdflib
+
+2000-03-09  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/cookies.php
+      sapi/servlet/servlet.c
+      sapi/servlet/servlet.java
+      sapi/servlet/sessions.php:
+    Both PHP and Java can't read Post data - let java do it and reconstruct for
+    PHP.
+
+2000-03-09  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c
+      tests/testhyperwave:
+    - bug fix, insertion of links back into HTML document
+    - smarter test script
+
+2000-03-09  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/sessions.php: remove duplicate line
+
+2000-03-09  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c:
+    (OCILogon) fixed crash in OCILogon if username was not valid (newly introduced - no need for a NEWS entry)
+
 2000-03-08  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
 
     * ext/domxml/domxml.c
