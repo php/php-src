@@ -1358,25 +1358,15 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_c
 	char *lowercase_name = zend_strndup(orig_class_entry->name, orig_class_entry->name_length);
 	*class_entry = *orig_class_entry;
 
-	zend_str_tolower(lowercase_name, class_entry->name_length);
-
 	class_entry->type = ZEND_INTERNAL_CLASS;
 	class_entry->parent = NULL;
-	class_entry->refcount = 1;
-	class_entry->constants_updated = 0;
-	class_entry->ce_flags = 0;
-	zend_hash_init(&class_entry->default_properties, 0, NULL, ZVAL_PTR_DTOR, 1);
-	zend_hash_init(&class_entry->properties_info, 0, NULL, (dtor_func_t) zend_destroy_property_info, 1);
-	class_entry->static_members = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init(class_entry->static_members, 0, NULL, ZVAL_PTR_DTOR, 1);
-	zend_hash_init(&class_entry->constants_table, 0, NULL, ZVAL_PTR_DTOR, 1);
-	zend_hash_init(&class_entry->function_table, 0, NULL, ZEND_FUNCTION_DTOR, 1);
-	zend_hash_init(&class_entry->class_table, 10, NULL, ZEND_CLASS_DTOR, 1);
+	zend_initialize_class_data(class_entry, 0);
 
 	if (class_entry->builtin_functions) {
 		zend_register_functions(class_entry, class_entry->builtin_functions, &class_entry->function_table, MODULE_PERSISTENT TSRMLS_CC);
 	}
 
+	zend_str_tolower(lowercase_name, class_entry->name_length);
 	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, &class_entry, sizeof(zend_class_entry *), NULL);
 	free(lowercase_name);
 	return class_entry;

@@ -444,6 +444,7 @@ ZEND_API extern char *empty_string;
 
 ZEND_API void free_estring(char **str_p);
 
+
 #define STR_FREE(ptr) if (ptr && ptr!=empty_string) { efree(ptr); }
 #define STR_FREE_REL(ptr) if (ptr && ptr!=empty_string) { efree_rel(ptr); }
 

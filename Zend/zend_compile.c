@@ -1650,33 +1650,14 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 
 	new_class_entry = emalloc(sizeof(zend_class_entry));
 	*ce = new_class_entry;
+
 	new_class_entry->type = ZEND_USER_CLASS;
 	new_class_entry->name = estrndup(name, name_length);
 	new_class_entry->name_length = name_length;
-	new_class_entry->refcount = 1;
-	new_class_entry->constants_updated = 0;
-	new_class_entry->ce_flags = 0;
+	new_class_entry->parent = NULL;
+	zend_initialize_class_data(new_class_entry, 1);
 
 	zend_str_tolower(new_class_entry->name, new_class_entry->name_length);
-
-	zend_hash_init(&new_class_entry->function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
-	zend_hash_init(&new_class_entry->class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
-	zend_hash_init(&new_class_entry->default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_init(&new_class_entry->properties_info, 10, NULL, (dtor_func_t) zend_destroy_property_info, 0);
-	ALLOC_HASHTABLE(new_class_entry->static_members);
-	zend_hash_init(new_class_entry->static_members, 10, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_init(&new_class_entry->constants_table, 10, NULL, ZVAL_PTR_DTOR, 0);
-
-	new_class_entry->constructor = NULL;
-	new_class_entry->destructor = NULL;
-	new_class_entry->clone = NULL;
-	new_class_entry->__get = NULL;
-	new_class_entry->__set = NULL;
-	new_class_entry->__call = NULL;
-
-	new_class_entry->create_object = NULL;
-	new_class_entry->parent = NULL;
-
 	if (zend_hash_update(class_table, new_class_entry->name, name_length+1, &new_class_entry, sizeof(zend_class_entry *), NULL) == FAILURE) {
 		zend_error(E_COMPILE_ERROR, "Can't create class. Fatal error, please report!");
 	}
@@ -2117,11 +2098,11 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	zend_class_entry *new_class_entry = emalloc(sizeof(zend_class_entry));
 
 	class_token->u.previously_active_class_entry = CG(active_class_entry);
-	new_class_entry->type = ZEND_USER_CLASS;
 	if (!(strcmp(class_name->u.constant.value.str.val, "main") && strcmp(class_name->u.constant.value.str.val, "self") &&
 			strcmp(class_name->u.constant.value.str.val, "parent"))) {
 		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved", class_name->u.constant.value.str.val);
 	}
+
 	if (CG(active_class_entry)) {
 		new_class_entry->name_length = sizeof("::")-1 + class_name->u.constant.value.str.len + CG(active_class_entry)->name_length;
 		new_class_entry->name = emalloc(new_class_entry->name_length+1);
@@ -2133,36 +2114,17 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 		new_class_entry->name = class_name->u.constant.value.str.val;
 		new_class_entry->name_length = class_name->u.constant.value.str.len;
 	}
-	new_class_entry->refcount = 1;
-	new_class_entry->constants_updated = 0;
-	new_class_entry->ce_flags = 0;
-	
-	zend_str_tolower(new_class_entry->name, new_class_entry->name_length);
 
-	zend_hash_init(&new_class_entry->function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
-	zend_hash_init(&new_class_entry->class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
-	zend_hash_init(&new_class_entry->default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_init(&new_class_entry->properties_info, 10, NULL, (dtor_func_t) zend_destroy_property_info, 0);
-	ALLOC_HASHTABLE(new_class_entry->static_members);
-	zend_hash_init(new_class_entry->static_members, 10, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_init(&new_class_entry->constants_table, 10, NULL, ZVAL_PTR_DTOR, 0);
-
-	new_class_entry->constructor = NULL;
-	new_class_entry->destructor = NULL;
-	new_class_entry->clone = NULL;
-	new_class_entry->__get = NULL;
-	new_class_entry->__set = NULL;
-	new_class_entry->__call = NULL;
-
-	new_class_entry->create_object = NULL;
+	new_class_entry->type = ZEND_USER_CLASS;
 	new_class_entry->parent = NULL;
+	zend_initialize_class_data(new_class_entry, 1);
 
 	if (parent_class_name->op_type != IS_UNUSED) {
 		doing_inheritance = 1;
 	}
 
+	zend_str_tolower(new_class_entry->name, new_class_entry->name_length);
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
 	opline->op1.op_type = IS_CONST;
 	build_runtime_defined_function_key(&opline->op1.u.constant, new_class_entry->name, new_class_entry->name_length, opline TSRMLS_CC);
 	
@@ -2336,6 +2298,7 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 			*result = opline_ptr->result;
 			if (CG(active_class_entry)
 				&& !zend_hash_exists(&CG(active_class_entry)->properties_info, property->u.constant.value.str.val, property->u.constant.value.str.len+1)) {
+				property->u.constant.value.str.val = estrndup(property->u.constant.value.str.val, property->u.constant.value.str.len);
 				zend_do_declare_property(property, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_IMPLICIT_PUBLIC TSRMLS_CC);
 			}
 			return;
@@ -3195,6 +3158,31 @@ void zend_destroy_property_info(zend_property_info *property_info)
 	efree(property_info->name);
 }
 
+
+void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers)
+{
+	ce->refcount = 1;
+	ce->constants_updated = 0;
+	ce->ce_flags = 0;
+
+	zend_hash_init_ex(&ce->default_properties, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
+	zend_hash_init_ex(&ce->properties_info, 0, NULL, (dtor_func_t) zend_destroy_property_info, 1, 0);
+	ce->static_members = (HashTable *) malloc(sizeof(HashTable));
+	zend_hash_init_ex(ce->static_members, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
+	zend_hash_init_ex(&ce->constants_table, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
+	zend_hash_init_ex(&ce->function_table, 0, NULL, ZEND_FUNCTION_DTOR, 1, 0);
+	zend_hash_init_ex(&ce->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
+
+	if (nullify_handlers) {
+		ce->constructor = NULL;
+		ce->destructor = NULL;
+		ce->clone = NULL;
+		ce->__get = NULL;
+		ce->__set = NULL;
+		ce->__call = NULL;
+		ce->create_object = NULL;
+	}
+}
 
 /*
  * Local variables:
