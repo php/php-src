@@ -95,6 +95,16 @@ static void _php3_htmlentities(INTERNAL_FUNCTION_PARAMETERS, int all)
     efree(new);
 }
 
+#define HTML_SPECIALCHARS 	0
+#define HTML_ENTITIES	 	1
+
+void register_html_constants(INIT_FUNC_ARGS)
+{
+	ELS_FETCH();
+	REGISTER_LONG_CONSTANT("HTML_SPECIALCHARS", HTML_SPECIALCHARS, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("HTML_ENTITIES", HTML_ENTITIES, CONST_PERSISTENT|CONST_CS);
+}
+
 /* {{{ proto string htmlspecialchars(string string)
    Convert special characters to HTML entities */
 PHP_FUNCTION(htmlspecialchars)
@@ -108,6 +118,49 @@ PHP_FUNCTION(htmlspecialchars)
 PHP_FUNCTION(htmlentities)
 {
 	_php3_htmlentities(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
+}
+/* }}} */
+
+/* {{{ proto array get_html_translation_table([int whichone])
+	returns the internal translation-table used by htmlspecialchars and htmlentities */
+PHP_FUNCTION(get_html_translation_table)
+{
+	zval **whichone;
+	int which = 0;
+	int ac = ARG_COUNT(ht);
+	int inx;
+	char ind[ 2 ];
+
+	if (ac < 0 || ac > 1 || getParametersEx(ac, &whichone) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+
+	if (ac == 1) {
+		convert_to_long_ex(whichone);
+		which = (*whichone)->value.lval;
+	}
+
+	array_init(return_value);
+
+	ind[1] = 0;
+
+	switch (which) {
+		case HTML_ENTITIES:
+			for (inx = 160; inx <= 255; inx++) {
+				char buffer[16];
+				ind[0] = inx;
+				sprintf(buffer,"&%s;",EntTable[inx-160]);
+				add_assoc_string(return_value,ind,buffer,1);
+			}
+			/* break thru */
+
+		case HTML_SPECIALCHARS:
+			ind[0]=38; add_assoc_string(return_value,ind,"&amp;",1);
+			ind[0]=34; add_assoc_string(return_value,ind,"&quot;",1);
+			ind[0]=60; add_assoc_string(return_value,ind,"&lt;",1);
+			ind[0]=62; add_assoc_string(return_value,ind,"&gt;",1);
+			break;
+	}
 }
 /* }}} */
 
