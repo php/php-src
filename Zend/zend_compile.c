@@ -937,6 +937,25 @@ void do_fetch_class(znode *result, znode *class_entry, znode *class_name TSRMLS_
 	*result = opline->result;
 }
 
+
+void do_fetch_class_name(znode *result, znode *class_name_entry, znode *class_name TSRMLS_DC)
+{
+	zend_uint length;
+
+	if (!result) {
+		result = class_name_entry;
+	} else {
+		*result = *class_name_entry;
+	}
+
+	length = 1 + result->u.constant.value.str.len + class_name->u.constant.value.str.len;
+	result->u.constant.value.str.val = erealloc(result->u.constant.value.str.val, length+1);
+	memcpy(&result->u.constant.value.str.val[result->u.constant.value.str.len], ":", sizeof(":")-1);
+	memcpy(&result->u.constant.value.str.val[result->u.constant.value.str.len+1], class_name->u.constant.value.str.val, class_name->u.constant.value.str.len+1);
+	STR_FREE(class_name->u.constant.value.str.val);
+	result->u.constant.value.str.len = length;
+}
+
 void zend_do_begin_class_member_function_call(znode *class_name, znode *function_name TSRMLS_DC)
 {
 	unsigned char *ptr = NULL;
@@ -1265,6 +1284,7 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 	zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
 	/* STATIC_MEMBERS_FIXME */
 	zend_hash_merge(&ce->static_members, &parent_ce->static_members, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
+	zend_hash_merge(&ce->constants, &parent_ce->constants, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
 	zend_hash_merge(&ce->function_table, &parent_ce->function_table, (void (*)(void *)) function_add_ref, &tmp_zend_function, sizeof(zend_function), 0);
 	ce->parent = parent_ce;
 	if (!ce->handle_property_get)
@@ -1372,6 +1392,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 					zend_hash_destroy(&ce->function_table);
 					zend_hash_destroy(&ce->default_properties);
 					zend_hash_destroy(&ce->static_members);
+					zend_hash_destroy(&ce->constants);
 					return FAILURE;
 				}
 				return SUCCESS;
@@ -1704,6 +1725,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	zend_hash_init(&new_class_entry.class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
 	zend_hash_init(&new_class_entry.default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_init(&new_class_entry.static_members, 10, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&new_class_entry.constants, 10, NULL, ZVAL_PTR_DTOR, 0);
 
 	new_class_entry.constructor = NULL;
 
@@ -1730,6 +1752,9 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 
 			/* copy static members */
 			zend_hash_copy(&new_class_entry.static_members, &parent_class->static_members, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+			/* copy constants */
+			zend_hash_copy(&new_class_entry.constants, &parent_class->constants, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 			new_class_entry.constructor = parent_class->constructor;
 
@@ -1808,10 +1833,16 @@ void zend_do_declare_property(znode *var_name, znode *value, int declaration_typ
 		ALLOC_ZVAL(property);
 
 		*property = value->u.constant;
-		if (declaration_type == T_VAR) {
-			zend_hash_update(&CG(active_class_entry)->default_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
-		} else {
-			zend_hash_update(&CG(active_class_entry)->static_members, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+		switch (declaration_type) {
+			case T_VAR:
+				zend_hash_update(&CG(active_class_entry)->default_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+				break;
+			case T_STATIC:
+				zend_hash_update(&CG(active_class_entry)->static_members, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+				break;
+			case T_CONST:
+				zend_hash_update(&CG(active_class_entry)->constants, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+				break;
 		}
 	}
 	FREE_PNODE(var_name);
@@ -1892,22 +1923,32 @@ void zend_do_end_new_object(znode *result, znode *new_token, znode *argument_lis
 }
 
 
-void zend_do_fetch_constant(znode *result, znode *constant_name, int mode TSRMLS_DC)
+void zend_do_fetch_constant(znode *result, znode *constant_container, znode *constant_name, int mode TSRMLS_DC)
 {
 	switch (mode) {
 		case ZEND_CT:
-			*result = *constant_name;
+			if (constant_container) {
+				do_fetch_class_name(NULL, constant_container, constant_name TSRMLS_CC);
+				*result = *constant_container;
+			} else {
+				*result = *constant_name;
+			}
 			result->u.constant.type = IS_CONSTANT;
 			break;
-		case ZEND_RT: {
+		case ZEND_RT:
+			{
 				zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	
 				opline->opcode = ZEND_FETCH_CONSTANT;
 				opline->result.op_type = IS_TMP_VAR;
 				opline->result.u.var = get_temporary_variable(CG(active_op_array));
-				opline->op1 = *constant_name;
+				if (constant_container) {
+					opline->op1 = *constant_container;
+				} else {
+					SET_UNUSED(opline->op1);
+				}
+				opline->op2 = *constant_name;
 				*result = opline->result;
-				SET_UNUSED(opline->op2);
 			}
 			break;
 	}
