@@ -31,9 +31,11 @@
 #include "zend_list.h"
 #include "zend_fast_cache.h"
 
+
 #if WITH_BCMATH
-#include "functions/number.h"
+#include "ext/bcmath/number.h"
 #endif
+
 
 ZEND_API void convert_scalar_to_number(zval *op)
 {
