@@ -25,6 +25,7 @@ if test "$PHP_PCRE_REGEX" != "no"; then
   else
     test -f $PHP_PCRE_REGEX/pcre.h && PCRE_INCDIR=$PHP_PCRE_REGEX
     test -f $PHP_PCRE_REGEX/include/pcre.h && PCRE_INCDIR=$PHP_PCRE_REGEX/include
+    test -f $PHP_PCRE_REGEX/include/pcre/pcre.h && PCRE_INCDIR=$PHP_PCRE_REGEX/include/pcre
     
     if test -z "$PCRE_INCDIR"; then
       AC_MSG_RESULT(Could not find pcre.h in $PHP_PCRE_REGEX)
