@@ -1231,7 +1231,7 @@ PHP_FUNCTION(mb_preferred_mime_name)
 static void
 php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 {
-	char *var, *val;
+	char *var, *val, *s1, *s2;
 	char *strtok_buf = NULL, **val_list;
 	zval *array_ptr = (zval *) arg;
 	int n, num, val_len, *len_list, *elist, elistsz;
@@ -1248,17 +1248,18 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 		return;
 	}
 	
-	/* count the variables contained in the query */
+	/* count the variables(separators) contained in the "res".
+	 * separator may contain multiple separator chars.
+	 * separaror chars are set in php.ini (arg_separator.input)
+	 */
 	num = 1;
-	var = res;
-	n = strlen(separator);
-
-	while (var=strstr(var, separator)) {
-		num++;
-		var+=n;
-	}
-
-	num *= 2;
+	for (s1=res; *s1 != '\0'; s1++)
+		for (s2=separator; *s2 != '\0'; s2++)
+			if (*s1 == *s2)
+				num++;
+				
+	num *= 2; /* need space for variable name and value */
+	
 	val_list = (char **)ecalloc(num, sizeof(char *));
 	len_list = (int *)ecalloc(num, sizeof(int));
 
@@ -1266,28 +1267,24 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 	n = 0;
 	strtok_buf = NULL;
 	var = php_strtok_r(res, separator, &strtok_buf);
-	
-	while (var && n < num) {
+	while (var)  {
 		val = strchr(var, '=');
+		val_list[n] = var;
+		len_list[n] = php_url_decode(var, strlen(var));
+		n++;
 		if (val) { /* have a value */
 			*val++ = '\0';
-			val_list[n] = var;
-			len_list[n] = php_url_decode(var, strlen(var));
-			n++;
 			val_list[n] = val;
 			len_list[n] = php_url_decode(val, strlen(val));
 		} else {
-			val_list[n] = var;
-			len_list[n] = php_url_decode(var, strlen(var));
-			n++;
 			val_list[n] = NULL;
 			len_list[n] = 0;
 		}
 		n++;
 		var = php_strtok_r(NULL, separator, &strtok_buf);
-	}
-	num = n;
-
+	} 
+	num = n; /* make sure to process initilized vars only */
+	
 	/* initialize converter */
 	to_encoding = MBSTRG(current_internal_encoding);
 	elist = MBSTRG(http_input_list);
