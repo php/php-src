@@ -4902,7 +4902,7 @@ PHP_FUNCTION(xptr_eval)
    Get XML library version */
 PHP_FUNCTION(domxml_version)
 {
-	RETURN_STRING(LIBXML_DOTTED_VERSION, 1);
+	RETURN_STRING(xmlParserVersion,1);
 }
 /* }}} */
 
@@ -5179,7 +5179,7 @@ PHP_FUNCTION(domxml_xslt_process)
    Get XSLT library version */
 PHP_FUNCTION(domxml_xslt_version)
 {
-	RETURN_STRING(LIBXSLT_DOTTED_VERSION, 1);
+	RETURN_LONG(xsltLibxsltVersion);
 }
 /* }}} */
 #endif /* HAVE_DOMXSLT */
