@@ -247,8 +247,8 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	}
 	for (i = 0; i < (*format)->value.str.len; i++) {
 		switch ((*format)->value.str.val[i]) {
-			case 'O':		/* GMT offset in [+-]HHMM format */
-				size += 5;
+			case 'r':		/* rfc822 format */
+				size += 29;
 				break;
 			case 'U':		/* seconds since the epoch */
 				size += 10;
@@ -261,12 +261,16 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 			case 'Z':		/* timezone offset in seconds */
 				size += 6;
 				break;
+			case 'O':		/* GMT offset in [+-]HHMM format */
+				size += 5;
+				break;
 			case 'Y':		/* year, numeric, 4 digits */
 				size += 4;
 				break;
 			case 'M':		/* month, textual, 3 letters */
 			case 'D':		/* day, textual, 3 letters */
 			case 'z':		/* day of the year, 1 to 366 */
+			case 'B':		/* Swatch Beat, 3 digits */
 				size += 3;
 				break;
 			case 'y':		/* year, numeric, 2 digits */
@@ -290,10 +294,8 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				if(i < (*format)->value.str.len-1) {
 					i++;
 				}
-			case 'L':		/* boolean for leap year */
-			case 'B':		/* Swatch Beat, 3 digits */
-				size += 3;
 				break;
+			case 'L':		/* boolean for leap year */
 			case 'w':		/* day of the week, numeric */
 			case 'I':		/* DST? */
 			default:
@@ -458,6 +460,37 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				sprintf(tmp_buff, "%d", ta->tm_isdst);
 				strcat(return_value->value.str.val, tmp_buff);
 				break;
+			case 'r':
+#if HAVE_TM_GMTOFF				
+				sprintf(tmp_buff, "%3s, %2d %3s %02d %02d:%02d:%02d %c%02d%02d", 
+					day_short_names[ta->tm_wday],
+					ta->tm_mday,
+					mon_short_names[ta->tm_mon],
+					((ta->tm_year)%100),
+					ta->tm_hour,
+					ta->tm_min,
+					ta->tm_sec,
+					(ta->tm_gmtoff < 0) ? '-' : '+',
+					abs(ta->tm_gmtoff / 3600),
+					abs( ta->tm_gmtoff % 3600)
+				);
+#else
+				sprintf(tmp_buff, "%3s, %2d %3s %02d %02d:%02d:%02d %c%02d%02d", 
+					day_short_names[ta->tm_wday],
+					ta->tm_mday,
+					mon_short_names[ta->tm_mon],
+					((ta->tm_year)%100),
+					ta->tm_hour,
+					ta->tm_min,
+					ta->tm_sec,
+					((ta->tm_isdst ? timezone - 3600 : timezone) < 0) ? '-' : '+',
+					abs((ta->tm_isdst ? timezone - 3600 : timezone) / 3600),
+					abs((ta->tm_isdst ? timezone - 3600 : timezone) % 3600)
+				);
+#endif
+				strcat(return_value->value.str.val, tmp_buff);
+				break;
+
 			default:
 				length = strlen(return_value->value.str.val);
 				return_value->value.str.val[length] = (*format)->value.str.val[i];
