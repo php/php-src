@@ -1329,12 +1329,10 @@ void session_adapt_uris(const char *src, uint srclen, char **new, uint *newlen)
 {
 	char *data;
 	size_t len;
-	char buf[512];
 	PSLS_FETCH();
 
 	if (PS(define_sid) && PS(nr_open_sessions) > 0) {
-		snprintf(buf, sizeof(buf), "%s=%s", PS(session_name), PS(id));
-		data = url_adapt(src, srclen, buf, &len);
+		data = url_adapt_ext(src, srclen, PS(session_name), PS(id), &len);
 		*new = data;
 		*newlen = len;
 	}
