@@ -1699,7 +1699,7 @@ PHP_MINIT_FUNCTION(domxml)
 	exsltRegisterAll();
 #endif
 #endif
-
+	xmlInitParser();
 	return SUCCESS;
 }
 /* }}} */
