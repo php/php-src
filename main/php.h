@@ -66,7 +66,7 @@ extern unsigned char second_arg_allow_ref[];
 */
 
 
-#if MSVC5
+#if WIN32
 #include "config.w32.h"
 #include "win95nt.h"
 # if defined(COMPILE_DL)

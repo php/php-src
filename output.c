@@ -16,6 +16,7 @@
 
 #include "php.h"
 #include "ext/standard/head.h"
+#include "SAPI.h"
 
 /* output functions */
 int (*zend_body_write)(const char *str, uint str_length);		/* string output */
@@ -37,13 +38,6 @@ static inline void zend_ob_send();
 /* HEAD support  */
 static int header_request;
 
-/* wrappers */
-#if APACHE
-static int zend_apache_ub_write(const char *str, uint str_length);
-#elif CGI_BINARY
-static int zend_cgibin_ub_write(const char *str, uint str_length);
-#endif
-
 
 /*
  * Main
@@ -54,11 +48,7 @@ void zend_output_startup()
 	ob_buffer = NULL;
 	zend_body_write = zend_ub_body_write;
 	header_request=0;
-#if APACHE
-	zend_header_write = zend_apache_ub_write;
-#elif CGI_BINARY
-	zend_header_write = zend_cgibin_ub_write;
-#endif
+	zend_header_write = sapi_functions.ub_write;
 }
 
 
@@ -191,29 +181,6 @@ static int zend_ub_body_write(const char *str, uint str_length)
 		return 0;
 	}
 }
-
-
-#if APACHE
-
-static int zend_apache_ub_write(const char *str, uint str_length)
-{
-	if (php3_rqst) {
-		return rwrite(str, str_length, php3_rqst);
-	} else {
-		return fwrite(str, 1, str_length, stdout);
-	}
-}
-
-#elif CGI_BINARY
-
-static int zend_cgibin_ub_write(const char *str, uint str_length)
-{
-	return fwrite(str, 1, str_length, stdout);
-}
-
-
-
-#endif
 
 
 /*
