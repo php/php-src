@@ -296,6 +296,7 @@ function_entry basic_functions[] = {
 	PHP_FE(function_exists,				NULL)
 	PHP_FE(in_array,					NULL)
 	PHP_FE(extract,						NULL)
+	PHP_FE(compact,						NULL)
 
 	{NULL, NULL, NULL}
 };
@@ -2215,8 +2216,6 @@ PHP_FUNCTION(in_array)
 	zend_hash_internal_pointer_reset(target_hash);
 	while(zend_hash_get_current_data(target_hash, (void **)&entry_ptr) == SUCCESS) {
 		entry = *entry_ptr;
-		if (entry->type == IS_STRING && entry->value.str.val == undefined_variable_string)
-			continue;
      	is_equal_function(&res, value, entry);
 		if (zval_is_true(&res)) {
 			RETURN_TRUE;
@@ -2260,9 +2259,9 @@ static int _valid_var_name(char *varname)
    Imports variables into symbol table from an array */
 PHP_FUNCTION(extract)
 {
-	pval *var_array, *etype, *prefix;
-	pval **entry_ptr, *entry, *exist;
-	pval *data;
+	zval *var_array, *etype, *prefix;
+	zval **entry_ptr, *entry, *exist;
+	zval *data;
 	char *varname, *finalname;
 	ulong lkey;
 	int res, extype;
@@ -2304,7 +2303,7 @@ PHP_FUNCTION(extract)
 		return;
 	}
 	
-	if (!(var_array->type & IS_ARRAY)) {
+	if (var_array->type != IS_ARRAY) {
 		zend_error(E_WARNING, "Wrong datatype in call to extract()");
 		return;
 	}
@@ -2313,60 +2312,117 @@ PHP_FUNCTION(extract)
 	while(zend_hash_get_current_data(var_array->value.ht, (void **)&entry_ptr) == SUCCESS) {
 		entry = *entry_ptr;
 
-		if (!(entry->type == IS_STRING &&
-			entry->value.str.val == undefined_variable_string)) {
+		if (zend_hash_get_current_key(var_array->value.ht, &varname, &lkey) ==
+				HASH_KEY_IS_STRING) {
 
-			if (zend_hash_get_current_key(var_array->value.ht, &varname, &lkey) ==
-					HASH_KEY_IS_STRING) {
+			if (_valid_var_name(varname)) {
+				finalname = NULL;
 
-				if (_valid_var_name(varname)) {
-					finalname = NULL;
-					
-					res = zend_hash_find(EG(active_symbol_table),
-										  varname, strlen(varname)+1, (void**)&exist);
-					switch (extype) {
-						case EXTR_OVERWRITE:
+				res = zend_hash_find(EG(active_symbol_table),
+									  varname, strlen(varname)+1, (void**)&exist);
+				switch (extype) {
+					case EXTR_OVERWRITE:
+						finalname = estrdup(varname);
+						break;
+
+					case EXTR_PREFIX_SAME:
+						if (res != SUCCESS)
 							finalname = estrdup(varname);
-							break;
+						/* break omitted intentionally */
 
-						case EXTR_PREFIX_SAME:
-							if (res != SUCCESS)
-								finalname = estrdup(varname);
-							/* break omitted intentionally */
+					case EXTR_PREFIX_ALL:
+						if (!finalname) {
+							finalname = emalloc(strlen(varname) + prefix->value.str.len + 2);
+							strcpy(finalname, prefix->value.str.val);
+							strcat(finalname, "_");
+							strcat(finalname, varname);
+						}
+						break;
 
-						case EXTR_PREFIX_ALL:
-							if (!finalname) {
-								finalname = emalloc(strlen(varname) + prefix->value.str.len + 2);
-								strcpy(finalname, prefix->value.str.val);
-								strcat(finalname, "_");
-								strcat(finalname, varname);
-							}
-							break;
-							
-						default:
-							if (res != SUCCESS)
-								finalname = estrdup(varname);
-							break;
-					}
-					
-					if (finalname) {
-						data = (pval *)emalloc(sizeof(pval));
-						*data = *entry;
-						pval_copy_constructor(data);
-						data->is_ref = 0;
-						data->refcount = 1;
-
-						zend_hash_update(EG(active_symbol_table), finalname,
-										  strlen(finalname)+1, &data, sizeof(pval *), NULL);
-						efree(finalname);
-					}
+					default:
+						if (res != SUCCESS)
+							finalname = estrdup(varname);
+						break;
 				}
 
-				efree(varname);
+				if (finalname) {
+					data = (zval *)emalloc(sizeof(zval));
+					*data = *entry;
+					zval_copy_ctor(data);
+					data->is_ref = 0;
+					data->refcount = 1;
+
+					zend_hash_update(EG(active_symbol_table), finalname,
+									  strlen(finalname)+1, &data, sizeof(zval *), NULL);
+					efree(finalname);
+				}
 			}
+
+			efree(varname);
 		}
+
 		zend_hash_move_forward(var_array->value.ht);
 	}
+}
+/* }}} */
+
+
+/* {{{ void _compact_var(HashTable *eg_active_symbol_table, zval *return_value, zval *entry) */
+static void _compact_var(HashTable *eg_active_symbol_table, zval *return_value, zval *entry)
+{
+	zval **value_ptr, *value, *data;
+	
+	if (entry->type == IS_STRING) {
+		if (zend_hash_find(eg_active_symbol_table, entry->value.str.val,
+						   entry->value.str.len+1, (void **)&value_ptr) != FAILURE) {
+			value = *value_ptr;
+			data = (zval *)emalloc(sizeof(zval));
+			*data = *value;
+			zval_copy_ctor(data);
+			data->is_ref = 0;
+			data->refcount = 1;
+			
+			zend_hash_update(return_value->value.ht, entry->value.str.val,
+							 entry->value.str.len+1, &data, sizeof(zval *), NULL);
+		}
+	}
+	else if (entry->type == IS_ARRAY) {
+		zend_hash_internal_pointer_reset(entry->value.ht);
+
+		while(zend_hash_get_current_data(entry->value.ht, (void**)&value_ptr) == SUCCESS) {
+			value = *value_ptr;
+
+			_compact_var(eg_active_symbol_table, return_value, value);
+			zend_hash_move_forward(entry->value.ht);
+		}
+	}
+}
+/* }}} */
+
+
+/* {{{ proto void compact(string var_name | array var_names [, ... ])
+   Creates a hash containing variables and their values */
+PHP_FUNCTION(compact)
+{
+	zval **args;			/* function arguments array */
+	int i;
+	ELS_FETCH();
+	
+	args = (zval **)emalloc(ARG_COUNT(ht) * sizeof(zval *));
+	
+	if (getParametersArray(ht, ARG_COUNT(ht), args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}
+
+	array_init(return_value);
+	
+	for (i=0; i<ARG_COUNT(ht); i++)
+	{
+		_compact_var(EG(active_symbol_table), return_value, args[i]);
+	}
+	
+	efree(args);
 }
 /* }}} */
 
