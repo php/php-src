@@ -232,36 +232,39 @@ typedef struct {
 
 #define MAX_STR 512
 
-void php_set_session_var(char *name, size_t namelen, zval *state_val PSLS_DC)
+void php_set_session_var(char *name, size_t namelen, zval *state_val,HashTable *var_hash PSLS_DC)
 {
-	zval *state_val_copy;
 	PLS_FETCH();
 	ELS_FETCH();
 
-	ALLOC_ZVAL(state_val_copy);
-	*state_val_copy = *state_val;
-	zval_copy_ctor(state_val_copy);
-	state_val_copy->refcount = 0;
-
 	if (PG(register_globals)) {
 		zval **old_symbol;
-		if(zend_hash_find(&EG(symbol_table),name,namelen+1,(void *)&old_symbol) == SUCCESS) { 
+		if (zend_hash_find(&EG(symbol_table),name,namelen+1,(void *)&old_symbol) == SUCCESS) { 
 			/* 
 			   There where old one, we need to replace it accurately.
 			   hash_update in zend_set_hash_symbol is not good, because
 			   it will leave referenced variables (such as local instances
 			   of a global variable) dangling.
+
+			   BTW: if you use register_globals references between
+			   session-vars won't work because of this very reason!
 			 */
+
 			
-			REPLACE_ZVAL_VALUE(old_symbol,state_val_copy,0);
-			FREE_ZVAL(state_val_copy);
+			REPLACE_ZVAL_VALUE(old_symbol,state_val,1);
+
+			/* the following line will muck with the reference-table used for
+			 * unserialisation 
+			 */
+
+			PHP_VAR_UNSERIALIZE_ZVAL_CHANGED(var_hash,state_val,*old_symbol);
 
 			zend_set_hash_symbol(*old_symbol, name, namelen, 1, 1, Z_ARRVAL_P(PS(http_session_vars)));
 		} else {
-			zend_set_hash_symbol(state_val_copy, name, namelen, 1, 2, Z_ARRVAL_P(PS(http_session_vars)), &EG(symbol_table));
+			zend_set_hash_symbol(state_val, name, namelen, 1, 2, Z_ARRVAL_P(PS(http_session_vars)), &EG(symbol_table));
 		}
 	} else {
-		zend_set_hash_symbol(state_val_copy, name, namelen, 0, 1, Z_ARRVAL_P(PS(http_session_vars)));
+		zend_set_hash_symbol(state_val, name, namelen, 0, 1, Z_ARRVAL_P(PS(http_session_vars)));
 	}
 }
 
@@ -329,7 +332,6 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
-	MAKE_STD_ZVAL(current);
 	for (p = val; p < endptr; ) {
 		namelen = *p & (~PS_BIN_UNDEF);
 		has_value = *p & PS_BIN_UNDEF ? 0 : 1;
@@ -339,15 +341,16 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 		p += namelen + 1;
 		
 		if (has_value) {
+			MAKE_STD_ZVAL(current);
 			if (php_var_unserialize(&current, &p, endptr, &var_hash)) {
-				php_set_session_var(name, namelen, current PSLS_CC);
-				zval_dtor(current);
+				php_set_session_var(name, namelen, current, &var_hash  PSLS_CC);
 			}
+			zval_ptr_dtor(&current);
 		}
 		PS_ADD_VARL(name, namelen);
 		efree(name);
 	}
-	FREE_ZVAL(current);
+
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 
 	return SUCCESS;
@@ -405,7 +408,6 @@ PS_SERIALIZER_DECODE_FUNC(php)
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
-	MAKE_STD_ZVAL(current);
 	for (p = q = val; (p < endptr) && (q = memchr(p, PS_DELIMITER, endptr - p)); p = q) {
 		if (p[0] == PS_UNDEF_MARKER) {
 			p++;
@@ -419,17 +421,18 @@ PS_SERIALIZER_DECODE_FUNC(php)
 		q++;
 		
 		if (has_value) {
+			MAKE_STD_ZVAL(current);
 			if (php_var_unserialize(&current, &q, endptr, &var_hash)) {
-				php_set_session_var(name, namelen, current PSLS_CC);
-				zval_dtor(current);
+				php_set_session_var(name, namelen, current, &var_hash PSLS_CC);
 			}
+			zval_ptr_dtor(&current);
 		}
 		PS_ADD_VARL(name, namelen);
 		efree(name);
 	}
-	FREE_ZVAL(current);
 
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+
 	return SUCCESS;
 }
 
@@ -543,18 +546,20 @@ static void php_session_save_current_state(PSLS_D)
 	int vallen;
 	int ret = FAILURE;
 	char *variable;
+	ulong variable_len;
 	ulong num_key;
+	HashPosition pos;
 	PLS_FETCH();
 	
 	if (!PG(register_globals)) {
 		if (!PS(http_session_vars)) {
 			return;
 		}
-
-		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(PS(http_session_vars)));
-				zend_hash_get_current_key(Z_ARRVAL_P(PS(http_session_vars)), &variable, &num_key, 1) == HASH_KEY_IS_STRING;
-				zend_hash_move_forward(Z_ARRVAL_P(PS(http_session_vars)))) {
-			PS_ADD_VAR(variable);
+		
+		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(PS(http_session_vars)), &pos);
+				zend_hash_get_current_key_ex(Z_ARRVAL_P(PS(http_session_vars)), &variable, &variable_len, &num_key, 0, &pos) == HASH_KEY_IS_STRING;
+				zend_hash_move_forward_ex(Z_ARRVAL_P(PS(http_session_vars)),&pos)) {
+			PS_ADD_VARL(variable,variable_len-1);
 		}
 	}
 

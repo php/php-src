@@ -155,7 +155,7 @@ void session_adapt_url(const char *, size_t, char **, size_t *);
 #define session_adapt_url(a,b,c,d)
 #endif
 
-void php_set_session_var(char *name, size_t namelen, zval *state_val PSLS_DC);
+void php_set_session_var(char *name, size_t namelen, zval *state_val,HashTable *var_hash PSLS_DC);
 int php_get_session_var(char *name, size_t namelen, zval ***state_var PLS_DC PSLS_DC ELS_DC);
 
 int php_session_register_module(ps_module *);
