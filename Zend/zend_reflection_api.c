@@ -31,6 +31,7 @@ zend_class_entry *reflector_ptr;
 zend_class_entry *reflection_exception_ptr;
 zend_class_entry *reflection_ptr;
 zend_class_entry *reflection_function_ptr;
+zend_class_entry *reflection_parameter_ptr;
 zend_class_entry *reflection_class_ptr;
 zend_class_entry *reflection_method_ptr;
 zend_class_entry *reflection_property_ptr;
@@ -61,7 +62,6 @@ zend_class_entry *reflection_extension_ptr;
 	return;                                                                                                 \
 
 /* Smart string macros */
-
 typedef struct _string {
 	char *string;
 	int len;
@@ -87,7 +87,7 @@ string *string_printf(string *str, const char *format, ...)
 	if (n) {
 		str->alloced += n;
 		str->string = erealloc(str->string, str->alloced);
-		memcpy(str->string + str->len - 1, s_tmp, n);
+		memcpy(str->string + str->len - 1, s_tmp, n + 1);
 		str->len += n;
 	}
 	efree(s_tmp);
@@ -114,6 +114,12 @@ typedef struct _property_reference {
 	zend_class_entry *ce;
 	zend_property_info *prop;
 } property_reference;
+
+/* Struct for parameters */
+typedef struct _parameter_reference {
+	int offset;
+	struct _zend_arg_info *arg_info;
+} parameter_reference;
 
 /* Struct for reflection objects */
 typedef struct {
@@ -240,7 +246,7 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 	/* The information where a class is declared is only available for user classes */
 	if (ce->type == ZEND_USER_CLASS) {
 		string_printf(str, "%s  @@ %s %d-%d\n", indent, ce->filename,
-				      ce->line_start, ce->line_end);
+					  ce->line_start, ce->line_end);
 	}
 
 	/* Constants */
@@ -315,30 +321,40 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 	string_printf(str, "%s}\n", indent);
 }
 
+static void _parameter_string(string *str, struct _zend_arg_info *arg_info, int offset, char* indent TSRMLS_DC)
+{
+	string_printf(str, "Parameter #%d [ ", offset);
+	if (arg_info->class_name) {
+		string_printf(str, "%s ", arg_info->class_name);
+		if (arg_info->allow_null) {
+			string_printf(str, "or NULL ");
+		}
+	}
+	if (arg_info->pass_by_reference) {
+		string_write(str, "&", sizeof("&")-1);
+	}
+	if (arg_info->name) {
+		string_printf(str, "$%s", arg_info->name);
+	} else {
+		string_printf(str, "$param%d", offset);
+	}
+	string_write(str, " ]", sizeof(" ]")-1);
+}
+
 static void _function_parameter_string(string *str, zend_function *fptr, char* indent TSRMLS_DC)
 {
 	zend_uint i;
 	struct _zend_arg_info *arg_info = fptr->common.arg_info;
 
-	if (!arg_info) return;
+	if (!arg_info) {
+		return;
+	}
 
 	string_printf(str, "%sParameters [%d] {\n", indent, fptr->common.num_args);
 	for (i = 0; i < fptr->common.num_args; i++) {
 		string_printf(str, "%s  - ", indent);
-		if (arg_info->class_name) {
-			string_printf(str, "%s ", arg_info->class_name);
-			if (arg_info->allow_null) {
-				string_printf(str, "or NULL ");
-			}
-		}
-		if (arg_info->pass_by_reference) {
-			string_printf(str, "& ");
-		}
-		if (arg_info->name) {
-			string_printf(str, "$%s\n", arg_info->name);
-		} else {
-			string_printf(str, "$param%d\n", i+1);
-		}
+		_parameter_string(str, arg_info, i, indent TSRMLS_CC);
+		string_write(str, "\n", sizeof("\n")-1);
 		arg_info++;
 	}
 	string_printf(str, "%s}\n", indent);
@@ -479,6 +495,106 @@ static void _function_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 	METHOD_NOTSTATIC_NUMPARAMS(0);
 	GET_REFLECTION_OBJECT_PTR(mptr);
 	RETURN_BOOL(mptr->common.fn_flags & mask);
+}
+
+void reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC)
+{
+	reflection_object *intern;
+	zval *name;
+
+	MAKE_STD_ZVAL(name);
+	ZVAL_STRINGL(name, ce->name, ce->name_length, 1);
+	reflection_instanciate(reflection_class_ptr, object TSRMLS_CC);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	intern->ptr = ce;
+	intern->free_ptr = 0;
+	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
+}
+
+void reflection_parameter_factory(struct _zend_arg_info *arg_info, int offset, zval *object TSRMLS_DC)
+{
+	reflection_object *intern;
+	parameter_reference *reference;
+	zval *name;
+
+	MAKE_STD_ZVAL(name);
+	if (arg_info->name) {
+		ZVAL_STRINGL(name, arg_info->name, arg_info->name_len, 1);
+	} else {
+		ZVAL_NULL(name);
+	}
+	reflection_instanciate(reflection_parameter_ptr, object TSRMLS_CC);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	reference = (parameter_reference*) emalloc(sizeof(parameter_reference));
+	reference->arg_info = arg_info;
+	reference->offset = offset;
+	intern->ptr = reference;
+	intern->free_ptr = 1;
+	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
+}
+
+void reflection_function_factory(zend_function *function, zval *object TSRMLS_DC)
+{
+	reflection_object *intern;
+	zval *name;
+
+	MAKE_STD_ZVAL(name);
+	ZVAL_STRING(name, function->common.function_name, 1);
+
+	reflection_instanciate(reflection_function_ptr, object TSRMLS_CC);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	intern->ptr = function;
+	intern->free_ptr = 0;
+	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
+}
+
+void reflection_method_factory(zend_class_entry *ce, zend_function *method, zval *object TSRMLS_DC)
+{
+	reflection_object *intern;
+	zval *name;
+	zval *classname;
+
+	MAKE_STD_ZVAL(name);
+	ZVAL_STRING(name, method->common.function_name, 1);
+	MAKE_STD_ZVAL(classname);
+	ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
+	reflection_instanciate(reflection_method_ptr, object TSRMLS_CC);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	intern->ptr = method;
+	intern->free_ptr = 0;
+	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
+	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
+}
+
+void reflection_property_factory(zend_class_entry *ce, zend_property_info *prop, zval *object TSRMLS_DC)
+{
+	reflection_object *intern;
+	zval *name;
+	zval *classname;
+	property_reference *reference;
+
+	MAKE_STD_ZVAL(name);
+
+	/* Unmangle the property name if necessary */
+	if (prop->name[0] != 0) {
+		ZVAL_STRINGL(name, prop->name, prop->name_length, 1);
+	} else {
+		char* tmp;
+
+		tmp= prop->name + 1;
+		ZVAL_STRING(name, tmp + strlen(tmp) + 1, 1);
+	}
+	MAKE_STD_ZVAL(classname);
+	ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
+	reflection_instanciate(reflection_property_ptr, object TSRMLS_CC);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	reference = (property_reference*) emalloc(sizeof(property_reference));
+	reference->ce = ce;
+	reference->prop = prop;
+	intern->ptr = reference;
+	intern->free_ptr = 1;
+	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
+	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 }
 
 /* {{{ proto public static mixed Reflection::export(Reflector r [, bool return])
@@ -787,84 +903,234 @@ ZEND_METHOD(reflection_function, returnsreference)
 
 	RETURN_BOOL(fptr->op_array.return_reference);
 }
+/* }}} */
 
-void reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC)
+/* {{{ proto public Reflection_Parameter[] Reflection_Function::getParameters()
+   Returns an array of parameter objects for this function */
+ZEND_METHOD(reflection_function, getparameters)
 {
 	reflection_object *intern;
-	zval *name;
+	zend_function *fptr;
+	int i;
+	struct _zend_arg_info *arg_info;
 
-	MAKE_STD_ZVAL(name);
-	ZVAL_STRINGL(name, ce->name, ce->name_length, 1);
-	reflection_instanciate(reflection_class_ptr, object TSRMLS_CC);
-	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
-	intern->ptr = ce;
-	intern->free_ptr = 0;
-	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
-}
+	METHOD_NOTSTATIC;
+	GET_REFLECTION_OBJECT_PTR(fptr);
 
-void reflection_function_factory(zend_function *function, zval *object TSRMLS_DC)
-{
-	reflection_object *intern;
-	zval *name;
+	arg_info= fptr->common.arg_info;
 
-	MAKE_STD_ZVAL(name);
-	ZVAL_STRING(name, function->common.function_name, 1);
+	array_init(return_value);
+	for (i = 0; i < fptr->common.num_args; i++) {
+		 zval *parameter;   
 
-	reflection_instanciate(reflection_function_ptr, object TSRMLS_CC);
-	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
-	intern->ptr = function;
-	intern->free_ptr = 0;
-	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
-}
-
-void reflection_method_factory(zend_class_entry *ce, zend_function *method, zval *object TSRMLS_DC)
-{
-	reflection_object *intern;
-	zval *name;
-	zval *classname;
-
-	MAKE_STD_ZVAL(name);
-	ZVAL_STRING(name, method->common.function_name, 1);
-	MAKE_STD_ZVAL(classname);
-	ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
-	reflection_instanciate(reflection_method_ptr, object TSRMLS_CC);
-	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
-	intern->ptr = method;
-	intern->free_ptr = 0;
-	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
-	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
-}
-
-void reflection_property_factory(zend_class_entry *ce, zend_property_info *prop, zval *object TSRMLS_DC)
-{
-	reflection_object *intern;
-	zval *name;
-	zval *classname;
-	property_reference *reference;
-
-	MAKE_STD_ZVAL(name);
-
-	/* Unmangle the property name if necessary */
-	if (prop->name[0] != 0) {
-		ZVAL_STRINGL(name, prop->name, prop->name_length, 1);
-	} else {
-		char* tmp;
-
-		tmp= prop->name + 1;
-		ZVAL_STRING(name, tmp + strlen(tmp) + 1, 1);
+		 ALLOC_ZVAL(parameter);
+		 reflection_parameter_factory(arg_info, i, parameter TSRMLS_CC);
+		 add_next_index_zval(return_value, parameter);
+		 
+		 arg_info++;
 	}
-	MAKE_STD_ZVAL(classname);
-	ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
-	reflection_instanciate(reflection_property_ptr, object TSRMLS_CC);
-	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
-	reference = (property_reference*) emalloc(sizeof(property_reference));
-	reference->ce = ce;
-	reference->prop = prop;
-	intern->ptr = reference;
-	intern->free_ptr = 1;
-	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
-	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 }
+/* }}} */
+
+/* {{{ proto public Reflection_Method::__construct(mixed function, mixed parameter)
+   Constructor. Throws an Exception in case the given method does not exist */
+ZEND_METHOD(reflection_parameter, __construct)
+{
+	parameter_reference *ref;
+	zval *reference, *parameter;
+	zval *object;
+	zval *name;
+	reflection_object *intern;
+	zend_function *fptr;
+	struct _zend_arg_info *arg_info;
+	int position;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &reference, &parameter) == FAILURE) {
+		return;
+	}
+
+	object = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	if (intern == NULL) {
+		return;
+	}
+	
+	/* First, find the function */
+	switch (Z_TYPE_P(reference)) {
+		case IS_STRING: {
+		  		char *lcname;
+
+				convert_to_string_ex(&reference);
+				lcname = zend_str_tolower_dup((const char *)Z_STRVAL_P(reference), (int) Z_STRLEN_P(reference));
+				if (zend_hash_find(EG(function_table), lcname, (int) Z_STRLEN_P(reference) + 1, (void**) &fptr) == FAILURE) {
+					efree(lcname);
+					_DO_THROW("Function does not exist");
+					/* returns out of this function */
+				}
+				efree(lcname);
+			}
+			break;
+
+		case IS_ARRAY: {
+				zval **classref;
+				zval **method;
+				zend_class_entry *ce;
+				zend_class_entry **pce;
+	  			char *lcname;
+				
+				if ((zend_hash_index_find(Z_ARRVAL_P(reference), 0, (void **) &classref) == FAILURE)
+					|| (zend_hash_index_find(Z_ARRVAL_P(reference), 1, (void **) &method) == FAILURE)) {
+					_DO_THROW("Expected array($object, $method) or array($classname, $method)");
+					/* returns out of this function */
+				}
+
+				if (Z_TYPE_PP(classref) == IS_OBJECT) {
+					ce = Z_OBJCE_PP(classref);
+				} else {
+					convert_to_string_ex(classref);
+					lcname = zend_str_tolower_dup((const char *)Z_STRVAL_PP(classref), (int) Z_STRLEN_PP(classref));
+					if (zend_hash_find(EG(class_table), lcname, (int) Z_STRLEN_PP(classref) + 1, (void **) &pce) == FAILURE) {
+						_DO_THROW("Class does not exist");
+						/* returns out of this function */
+					}
+					
+					ce = *pce;
+					efree(lcname);
+				}
+				
+				convert_to_string_ex(method);
+				lcname = zend_str_tolower_dup((const char *)Z_STRVAL_PP(method), (int) Z_STRLEN_PP(method));
+				if (zend_hash_find(&ce->function_table, lcname, (int)(Z_STRLEN_PP(method) + 1), (void **) &fptr) == FAILURE) {
+					efree(lcname);
+					_DO_THROW("Method does not exist");
+					/* returns out of this function */
+				}
+				efree(lcname);
+			}
+			break;
+			
+		default:
+			_DO_THROW("The parameter class is expected to be either a string or an array(class, method)");
+			/* returns out of this function */
+	}
+	
+	/* Now, search for the parameter */
+	arg_info = fptr->common.arg_info;
+	if (Z_TYPE_P(parameter) == IS_LONG) {
+		position= Z_LVAL_P(parameter);
+		if (position < 0 || position >= fptr->common.num_args) {
+			_DO_THROW("The parameter specified by its offset could not be found");
+			/* returns out of this function */
+		}
+	} else {
+		int i;
+
+		position= -1;
+		convert_to_string_ex(&parameter);
+		for (i = 0; i < fptr->common.num_args; i++) {
+			if (arg_info[i].name && strcmp(arg_info[i].name, Z_STRVAL_P(parameter)) == 0) {
+				position= i;
+				break;
+			}
+		}
+		if (position == -1) {
+			_DO_THROW("The parameter specified by its name could not be found");
+			/* returns out of this function */
+		}
+	}
+	
+	MAKE_STD_ZVAL(name);
+	if (arg_info[position].name) {
+		ZVAL_STRINGL(name, arg_info[position].name, arg_info[position].name_len, 1);
+	} else {
+		ZVAL_NULL(name);
+	}
+	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
+
+	ref = (parameter_reference*) emalloc(sizeof(parameter_reference));
+	ref->arg_info = &arg_info[position];
+	ref->offset = position;
+	intern->ptr = ref;
+	intern->free_ptr = 1;
+}
+/* }}} */
+
+/* {{{ proto public string Reflection_Parameter::toString()
+   Returns a string representation */
+ZEND_METHOD(reflection_parameter, tostring)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+	string str;
+
+	METHOD_NOTSTATIC_NUMPARAMS(0);
+	GET_REFLECTION_OBJECT_PTR(param);
+	string_init(&str);
+	_parameter_string(&str, param->arg_info, param->offset, "" TSRMLS_CC);
+	RETURN_STRINGL(str.string, str.len - 1, 0);
+}
+/* }}} */
+
+/* {{{ proto public string Reflection_Parameter::getName()
+   Returns this parameters's name */
+ZEND_METHOD(reflection_parameter, getname)
+{
+	METHOD_NOTSTATIC_NUMPARAMS(0);
+	_default_get_entry(getThis(), "name", sizeof("name"), return_value TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto public Reflection_Class Reflection_Parameter::getClass()
+   Returns this parameters's class hint or NULL if there is none */
+ZEND_METHOD(reflection_parameter, getclass)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	METHOD_NOTSTATIC_NUMPARAMS(0);
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	if (!param->arg_info->class_name) {
+		RETURN_NULL();
+	} else {
+		zend_class_entry **pce;
+		
+		if (zend_hash_find(EG(class_table), param->arg_info->class_name, param->arg_info->class_name_len + 1, (void **) &pce) == FAILURE) {
+			_DO_THROW("Class does not exist");
+			/* returns out of this function */
+		}
+		reflection_class_factory(*pce, return_value TSRMLS_CC);
+	}
+}
+/* }}} */
+
+/* {{{ proto public bool Reflection_Parameter::allowsNull()
+   Returns whether NULL is allowed as this parameters's value */
+ZEND_METHOD(reflection_parameter, allowsnull)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	METHOD_NOTSTATIC_NUMPARAMS(0);
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->allow_null);
+}
+/* }}} */
+
+/* {{{ proto public bool Reflection_Parameter::isPassedByReference()
+   Returns whether this parameters is passed to by reference */
+ZEND_METHOD(reflection_parameter, ispassedbyreference)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	METHOD_NOTSTATIC_NUMPARAMS(0);
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->pass_by_reference);
+}
+/* }}} */
 
 /* {{{ proto public Reflection_Method::__construct(mixed class, string name)
    Constructor. Throws an Exception in case the given method does not exist */
@@ -2158,6 +2424,7 @@ static zend_function_entry reflection_function_functions[] = {
 	ZEND_ME(reflection_function, getstaticvariables, NULL, 0)
 	ZEND_ME(reflection_function, invoke, NULL, 0)
 	ZEND_ME(reflection_function, returnsreference, NULL, 0)
+	ZEND_ME(reflection_function, getparameters, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
@@ -2224,6 +2491,16 @@ static zend_function_entry reflection_property_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static zend_function_entry reflection_parameter_functions[] = {
+	ZEND_ME(reflection_parameter, __construct, NULL, 0)
+	ZEND_ME(reflection_parameter, tostring, NULL, 0)
+	ZEND_ME(reflection_parameter, getname, NULL, 0)
+	ZEND_ME(reflection_parameter, ispassedbyreference, NULL, 0)
+	ZEND_ME(reflection_parameter, getclass, NULL, 0)
+	ZEND_ME(reflection_parameter, allowsnull, NULL, 0)
+	{NULL, NULL, NULL}
+};
+
 static zend_function_entry reflection_extension_functions[] = {
 	ZEND_ME(reflection_extension, __construct, NULL, 0)
 	ZEND_ME(reflection_extension, tostring, NULL, 0)
@@ -2254,6 +2531,11 @@ ZEND_API void zend_register_reflection_api(TSRMLS_D) {
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_function_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 	reflection_register_implement(reflection_function_ptr, reflector_ptr TSRMLS_CC);
+
+	INIT_CLASS_ENTRY(_reflection_entry, "reflection_parameter", reflection_parameter_functions);
+	_reflection_entry.create_object = reflection_objects_new;
+	reflection_parameter_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
+	reflection_register_implement(reflection_parameter_ptr, reflector_ptr TSRMLS_CC);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "reflection_method", reflection_method_functions);
 	_reflection_entry.create_object = reflection_objects_new;
