@@ -97,6 +97,7 @@ PHPAPI void php_zval_to_variant(zval *zval_arg, VARIANT *var_arg, int codepage)
 PHPAPI void php_zval_to_variant_ex(zval *zval_arg, VARIANT *var_arg, int type, int codepage)
 {
 	OLECHAR *unicode_str = NULL;
+	TSRMLS_FETCH();
 
 	VariantInit(var_arg);
 	V_VT(var_arg) = type;
@@ -445,6 +446,7 @@ PHPAPI int php_variant_to_zval(VARIANT *var_arg, zval *zval_arg, int codepage)
 	/* Existing calls will be unaffected by the change - so it */
 	/* seemed like the smallest impact on unfamiliar code */
 	int ret = SUCCESS; 
+	TSRMLS_FETCH();
 
 	INIT_PZVAL(zval_arg);
 
@@ -765,6 +767,7 @@ PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage, int 
 {
 	BOOL error = FALSE;
 	OLECHAR *unicode_str;
+	TSRMLS_FETCH();
 
 	if (strlen == -1) {
 		/* request needed buffersize */
@@ -818,6 +821,7 @@ PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int cod
 		/* convert string */
 		length = WideCharToMultiByte(codepage, codepage == CP_UTF8 ? 0 : WC_COMPOSITECHECK, unicode_str, -1, C_str, reqSize, NULL, NULL) - 1;
 	} else {
+		TSRMLS_FETCH();
 		C_str = (char *) pemalloc(sizeof(char), persist);
 		*C_str = 0;
 
