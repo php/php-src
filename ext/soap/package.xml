@@ -2,52 +2,59 @@
 <!-- do not use the "Type" attribute here, that one is only for
      generated package.xml files -->
 <package>
-  <name>php_soap</name>
+  <name>soap</name>
   <summary>Provides SOAP Services</summary>
+  <description>
+    Description of package....
+  </description>
   <status>beta</status>
-  <maintainer>
-    <user>rodif_bl</user>
-    <name>Brad Lafountain</name>
-    <email>rodif_bl@yahoo.com</email>
-    <role>lead</role>
-  </maintainer>
-  <maintainer>
-    <user>shane</user>
-    <name>Shane Caraveo</name>
-    <email>shane@caraveo.com</email>
-    <role>lead</role>
-  </maintainer>
+  <maintainers>
+    <maintainer>
+      <user>rodif_bl</user>
+      <name>Brad Lafountain</name>
+      <email>rodif_bl@yahoo.com</email>
+      <role>lead</role>
+    </maintainer>
+    <maintainer>
+      <user>shane</user>
+      <name>Shane Caraveo</name>
+      <email>shane@caraveo.com</email>
+      <role>lead</role>
+    </maintainer>
+  </maintainers>
+  <license>PHP</license>
   <release>
     <version>0.1</version>
     <date>2002-07-07</date>
+    <state>alpha</state>
     <notes>
 	- First offical PEAR/PECL release
     </notes>
   </release>
   <filelist>
-    <dir role="source" name="/" baseinstalldir="iisfunc">
-        <file>EXPERIMENTAL</file>
-        <file>TODO</file>
-        <file>config.m4</file>
-        <file>Makefile</file>
-        <file>Makefile.in</file>
-        <file>libs.mk</file>
-        <file>php_encoding.c</file>
-        <file>php_encoding.h</file>
-        <file>php_http.c</file>
-        <file>php_http.h</file>
-        <file>php_packet_soap.c</file>
-        <file>php_packet_soap.h</file>
-        <file>php_schema.c</file>
-        <file>php_schema.h</file>
-        <file>php_sdl.c</file>
-        <file>php_sdl.h</file>
-        <file>php_soap.h</file>
-        <file>php_soap.h</file>
-        <file>php_xml.c</file>
-        <file>php_xml.h</file>
-        <file>soap.c</file>
-        <file>soap.dsp</file>
+    <dir name="/">
+      <file role="doc">EXPERIMENTAL</file>
+      <file role="doc">TODO</file>
+      <file role="src">config.m4</file>
+      <file role="src">Makefile</file>
+      <file role="src">Makefile.in</file>
+      <file role="src">libs.mk</file>
+      <file role="src">php_encoding.c</file>
+      <file role="src">php_encoding.h</file>
+      <file role="src">php_http.c</file>
+      <file role="src">php_http.h</file>
+      <file role="src">php_packet_soap.c</file>
+      <file role="src">php_packet_soap.h</file>
+      <file role="src">php_schema.c</file>
+      <file role="src">php_schema.h</file>
+      <file role="src">php_sdl.c</file>
+      <file role="src">php_sdl.h</file>
+      <file role="src">php_soap.h</file>
+      <file role="src">php_soap.h</file>
+      <file role="src">php_xml.c</file>
+      <file role="src">php_xml.h</file>
+      <file role="src">soap.c</file>
+      <file role="src">soap.dsp</file>
     </dir>
   </filelist>
 </package>
