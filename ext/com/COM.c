@@ -1239,7 +1239,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 		{
 			efree(obj_prop);
 			obj_prop = NULL;
-			php_variant_to_pval(var_result, &return_value, TRUE, codepage);
+			php_variant_to_pval(var_result, &return_value, FALSE, codepage);
 		}
 
 		pval_destructor(&overloaded_property->element);
@@ -1633,6 +1633,7 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode)
 				BSTR bstr_ids;
 				char *ids;
 				zend_constant c;
+				zval exists, results;
 
 				TypeInfo->lpVtbl->GetNames(TypeInfo, pVarDesc->memid, &bstr_ids, 1, &NameCount);
 				if(NameCount!=1)
@@ -1640,15 +1641,30 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode)
 					j++;
 					continue;
 				}
-				LocalFree(bstr_ids);
 				ids = php_OLECHAR_to_char(bstr_ids, NULL, 1, codepage);
+				SysFreeString(bstr_ids);
 				c.name_len = strlen(ids)+1;
 				c.name = ids;
-				php_variant_to_pval(pVarDesc->lpvarValue, &c.value, 1, codepage);
+				if (zend_get_constant(c.name, c.name_len-1, &exists))
+				{
+					/* Oops, it already exists. No problem if it is defined as the same value */
+					/* Check to see if they are the same */
+					if (!compare_function(&results, &c.value, &exists))
+					{
+						php_error(E_WARNING,"Type library value %s is already defined and has a different value", c.name);
+					}
+					free(ids);
+					j++;
+					continue;
+				}
+
+				php_variant_to_pval(pVarDesc->lpvarValue, &c.value, FALSE, codepage);
 				c.flags = mode;
 
-				zend_register_constant(&c ELS_CC);
-				/*printf("%s -> %ld\n", ids, pVarDesc->lpvarValue->lVal);*/
+				/* Before registering the contsnt, let's see if we can find it */
+				{
+					zend_register_constant(&c ELS_CC);
+				}
 				j++;
 			}
 			TypeInfo->lpVtbl->Release(TypeInfo);
