@@ -90,7 +90,7 @@ PEAR_COMMAND_LIBS = \
 	pearcmd-show-config.php \
 	pearcmd-uninstall.php
 
-install-data-local:
+install-pear:
 	@if $(mkinstalldirs) $(INSTALL_ROOT)$(peardir); then \
 		for i in $(PEAR_SUBDIRS); do \
 			$(mkinstalldirs) $(INSTALL_ROOT)$(peardir)/$$i; \
