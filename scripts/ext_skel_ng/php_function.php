@@ -309,7 +309,7 @@
 		function docbook_xml() {
 			$xml = 
 '<?xml version="1.0" encoding="iso-8859-1"?>
-<!-- '.'$'.Revision: 1.0 $ -->
+<!-- '.'$'.'Revision: 1.0 $ -->
   <refentry id="function.'.strtolower(str_replace("_","-",$this->name)).'">
    <refnamediv>
     <refname>'.$this->name.'</refname>
