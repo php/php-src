@@ -1,3 +1,164 @@
+2003-06-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/serialize/005.phpt:
+      No more namespaces
+
+    * ext/standard/file.c
+      main/streams/streams.c:
+      Fix ZTS mode (hopefully all is working fine now again)
+
+    * (PHP_4_3)
+      ext/dba/dba.c:
+      Remove that old thing
+
+2003-06-14  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      ext/dba/dba.c:
+      Fixed win32 build
+
+2003-06-14  Sergey Kartashoff  <gluke@mail.ru>
+
+    * (PHP_4_3)
+      ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h:
+      - Mnogosearch extension updated. Now can compile with mnogosearch-3.2.11+
+
+2003-06-14  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/php_dom.c
+      ext/dom/xml_common.h:
+      use xmlInitParser instead of xmlInitThreads
+      reentrant safe as well no need for xml_parser_inited
+
+    * ext/xml/xml.c:
+      use xmlInitParser instead of xmlInitThreads
+      reentrant safe as well
+
+2003-06-14  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * (PHP_4_3)
+      ext/interbase/interbase.c
+      ext/interbase/php_interbase.h
+      ext/interbase/tests/005.phpt
+      ext/interbase/tests/interbase.inc:
+      MFH: Added IBASE_REC_VERSION/IBASE_REC_NO_VERSION transaction constants
+
+2003-06-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/db/db.c:
+      Correct license again
+
+    * ext/standard/file.c:
+      Fix  ZTS mode
+
+2003-06-14  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Package.php:
+      Fix some typos in makerpm and removed unused debug code
+
+2003-06-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/db/CREDITS
+      ext/db/db.c
+      ext/db/package.xml
+      ext/db/php_db.h:
+      Update before moving to PECL
+
+2003-06-14  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * ext/interbase/tests/005.phpt
+      ext/interbase/tests/interbase.inc:
+      Added test for IBASE_REC_VERSION/IBASE_REC_NO_VERSION trans constants
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Added IBASE_REC_VERSION/IBASE_REC_NO_VERSION transaction constants
+      required from bugs #8797 #23887
+      (added IBASE_WRITE, IBASE_WAIT, IBASE_CONCURRENCY just for clarity)
+
+2003-06-14  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/xsltprocessor.c:
+      interoperability support
+
+    * ext/dom/php_dom.c
+      ext/dom/xml_common.h:
+      fix xml_parser_inited on win32
+      add common structs for better interoprability
+
+2003-06-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news
+
+2003-06-14  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xml/xml.c:
+      fix common libxml init and deinit routines
+
+2003-06-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      main/main.c
+      main/php_variables.c:
+      MFH: Fixed bug #24007 (Problem with register_globals & arrays)
+
+    * main/main.c
+      main/php_variables.c:
+      Fixed bug #24007 (Problem with register_globals & arrays)
+
+2003-06-14  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/dba/config.m4:
+      - Fixed some /usr/lib leaks into LIBS/LDFLAGS which later on made other
+        configure checks fail (old libs in /usr/lib, new ones in /opt/lib :)
+
+2003-06-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dom/config.m4
+      ext/domxml/config.m4:
+      Improve/fix preventing both enabled
+
+2003-06-14  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ncurses/ncurses_functions.c:
+      Fix compile failure.
+
+    * ext/cpdf/config.m4:
+      - Fixed some build problems (/usr/lib leaked in to LDFLAGS/LIBS)
+      - Made this extension to be possible to be build as shared.
+
+2003-06-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dom/config.m4
+      ext/domxml/config.m4:
+      Don't allow both and mark the old one as deprecated
+
+2003-06-14  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xml/xml.c:
+      export xml_parser_inited under win32
+
+2003-06-14  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/dbx/dbx_fbsql.c
+      ext/dbx/dbx_fbsql.c
+      ext/dbx/dbx_fbsql.h
+      ext/dbx/dbx_fbsql.h
+      ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h
+      ext/fbsql/php_fbsql.h
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h
+      ext/mssql/php_mssql.h
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.c:
+      Updating email address
+
 2003-06-13  Sara Golemon  <php@alphaweb.net>
 
     * ext/standard/user_filters.c:
