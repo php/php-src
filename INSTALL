@@ -167,7 +167,7 @@ USING PHP3 AND PHP4 AS CONCURRENT APACHE MODULES
    
    This feature is known to work on the following platforms:
 
-   - Linux with recent binutils (2.9.1.x tested)
+   - Linux with recent binutils (binutils 2.9.1.0.25 tested)
    - Solaris 2.5 or better
    - FreeBSD (4.0-current tested)
    
