@@ -94,6 +94,8 @@
 %token T_ENDFOR
 %token T_FOREACH
 %token T_ENDFOREACH
+%token T_DECLARE
+%token T_ENDDECLARE
 %token T_AS
 %token T_SWITCH
 %token T_ENDSWITCH
@@ -160,6 +162,11 @@ inner_statement:
 
 
 statement:
+		unticked_statement { do_ticks(CLS_C); }
+;
+
+
+unticked_statement:
 		'{' inner_statement_list '}'
 	|	T_IF '(' expr ')' { do_if_cond(&$3, &$4 CLS_CC); } statement { do_if_after_statement(&$4, 1 CLS_CC); } elseif_list else_single { do_if_end(CLS_C); }
 	|	T_IF '(' expr ')' ':' { do_if_cond(&$3, &$4 CLS_CC); } inner_statement_list { do_if_after_statement(&$4, 1 CLS_CC); } new_elseif_list new_else_single T_ENDIF ';' { do_if_end(CLS_C); }
@@ -191,6 +198,7 @@ statement:
 	|	T_USE use_filename ';'		{ use_filename($2.u.constant.value.str.val, $2.u.constant.value.str.len CLS_CC); zval_dtor(&$2.u.constant); }
 	|	T_UNSET '(' r_cvar ')' ';' { do_unset(&$3 CLS_CC); }
 	|	T_FOREACH '(' expr T_AS { do_foreach_begin(&$1, &$3, &$2, &$4 CLS_CC); } w_cvar foreach_optional_arg ')' { do_foreach_cont(&$6, &$7, &$4 CLS_CC); } foreach_statement { do_foreach_end(&$1, &$2 CLS_CC); }
+	|	T_DECLARE { do_declare_begin(CLS_C); } '(' declare_list ')' declare_statement { do_declare_end(CLS_C); }
 	|	';'		/* empty statement */
 ;
 
@@ -202,6 +210,11 @@ use_filename:
 
 
 declaration_statement:
+		unticked_declaration_statement	{ do_ticks(CLS_C); }
+;
+
+
+unticked_declaration_statement:
 		T_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING { do_begin_function_declaration(&$1, &$4, 0, $3.op_type CLS_CC); }
 			'(' parameter_list ')' '{' inner_statement_list '}' { do_end_function_declaration(&$1 CLS_CC); }
 	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING  { do_begin_function_declaration(&$1, &$4, 0, $3.op_type CLS_CC); }
@@ -226,6 +239,18 @@ for_statement:
 foreach_statement:
 		statement
 	|	':' inner_statement_list T_ENDFOREACH ';'
+;
+
+
+declare_statement:
+		statement
+	|	':' inner_statement_list T_ENDDECLARE ';'
+;
+
+
+declare_list:
+		T_STRING '=' static_scalar						{ do_declare_stmt(&$1, &$3 CLS_CC); }
+	|	declare_list ',' T_STRING '=' static_scalar		{ do_declare_stmt(&$3, &$5 CLS_CC); }
 ;
 
 

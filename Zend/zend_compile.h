@@ -328,6 +328,10 @@ void do_foreach_begin(znode *foreach_token, znode *array, znode *open_brackets_t
 void do_foreach_cont(znode *value, znode *key, znode *as_token CLS_DC);
 void do_foreach_end(znode *foreach_token, znode *open_brackets_token CLS_DC);
 
+void do_declare_begin(CLS_D);
+void do_declare_stmt(znode *var, znode *val CLS_DC);
+void do_declare_end(CLS_D);
+
 void do_end_heredoc(CLS_D);
 
 void do_exit(znode *result, znode *message CLS_DC);
@@ -342,6 +346,8 @@ void do_qm_false(znode *result, znode *false_value, znode *qm_token, znode *colo
 void do_extended_info(CLS_D);
 void do_extended_fcall_begin(CLS_D);
 void do_extended_fcall_end(CLS_D);
+
+void do_ticks(CLS_D);
 
 #define INITIAL_OP_ARRAY_SIZE 64
 
@@ -510,6 +516,8 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_EXT_FCALL_BEGIN		98
 #define ZEND_EXT_FCALL_END			99
 #define ZEND_EXT_NOP				100
+
+#define ZEND_TICKS					101
 
 /* end of block */
 

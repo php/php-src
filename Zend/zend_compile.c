@@ -85,6 +85,13 @@ static void zend_open_file_dtor_wrapper(zend_file_handle *fh)
 }
 
 
+static void init_compiler_declarables(CLS_D ELS_DC)
+{
+	CG(declarables).ticks.type = IS_LONG;
+	CG(declarables).ticks.value.lval = 0;
+}
+
+
 void init_compiler(CLS_D ELS_DC)
 {
 	zend_stack_init(&CG(bp_stack));
@@ -92,6 +99,7 @@ void init_compiler(CLS_D ELS_DC)
 	zend_stack_init(&CG(switch_cond_stack));
 	zend_stack_init(&CG(foreach_copy_stack));
 	zend_stack_init(&CG(object_stack));
+	zend_stack_init(&CG(declare_stack));
 	CG(active_class_entry) = NULL;
 	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
 	zend_llist_init(&CG(dimension_llist), sizeof(int), NULL, 0);
@@ -104,6 +112,7 @@ void init_compiler(CLS_D ELS_DC)
 	CG(unclean_shutdown) = 0;
 	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) zend_open_file_dtor, 0);
 	zend_hash_init(&CG(used_files), 5, NULL, (void (*)(void *)) zend_open_file_dtor_wrapper, 0);
+	init_compiler_declarables(CLS_C ELS_CC);
 }
 
 
@@ -114,6 +123,7 @@ void shutdown_compiler(CLS_D)
 	zend_stack_destroy(&CG(switch_cond_stack));
 	zend_stack_destroy(&CG(foreach_copy_stack));
 	zend_stack_destroy(&CG(object_stack));
+	zend_stack_destroy(&CG(declare_stack));
 	zend_llist_destroy(&CG(filenames_list));
 	zend_hash_apply(CG(function_table), (int (*)(void *)) is_not_internal_function);
 	zend_hash_apply(CG(class_table), (int (*)(void *)) is_not_internal_class);
@@ -2034,6 +2044,33 @@ void do_foreach_end(znode *foreach_token, znode *open_brackets_token CLS_DC)
 }
 
 
+void do_declare_begin(CLS_D)
+{
+	zend_stack_push(&CG(declare_stack), &CG(declarables), sizeof(zend_declarables));
+}
+
+
+void do_declare_stmt(znode *var, znode *val CLS_DC)
+{
+	convert_to_string(&var->u.constant);
+
+	if (!zend_binary_strcasecmp(var->u.constant.value.str.val, var->u.constant.value.str.len, "ticks", sizeof("ticks")-1)) {
+		convert_to_long(&val->u.constant);
+		CG(declarables).ticks = val->u.constant;
+	}
+	zval_dtor(&var->u.constant);
+}
+
+
+void do_declare_end(CLS_D)
+{
+	zend_declarables *declarables;
+
+	zend_stack_top(&CG(declare_stack), (void **) &declarables);
+	CG(declarables) = *declarables;
+}
+
+
 void do_end_heredoc(CLS_D)
 {
 	int opline_num = get_next_op_number(CG(active_op_array))-1;
@@ -2144,6 +2181,7 @@ void do_qm_false(znode *result, znode *false_value, znode *qm_token, znode *colo
 	DEC_BPC(CG(active_op_array));
 }
 
+
 void do_extended_info(CLS_D)
 {
 	zend_op *opline;
@@ -2158,6 +2196,7 @@ void do_extended_info(CLS_D)
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 }
+
 
 void do_extended_fcall_begin(CLS_D)
 {
@@ -2188,6 +2227,18 @@ void do_extended_fcall_end(CLS_D)
 	opline->opcode = ZEND_EXT_FCALL_END;
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
+}
+
+void do_ticks(CLS_D)
+{
+	if (CG(declarables).ticks.value.lval) {
+		zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
+
+		opline->opcode = ZEND_TICKS;
+		opline->op1.u.constant = CG(declarables).ticks;
+		opline->op1.op_type = IS_CONST;
+		SET_UNUSED(opline->op2);
+	}
 }
 
 

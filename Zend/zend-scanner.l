@@ -780,6 +780,14 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	return T_ENDFOREACH;
 }
 
+<ST_IN_SCRIPTING>"declare" {
+	return T_DECLARE;
+}
+
+<ST_IN_SCRIPTING>"enddeclare" {
+	return T_ENDDECLARE;
+}
+
 <ST_IN_SCRIPTING>"as" {
 	return T_AS;
 }

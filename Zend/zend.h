@@ -204,6 +204,7 @@ typedef struct _zend_utility_functions {
 	void (*block_interruptions)(void);
 	void (*unblock_interruptions)(void);
 	int (*get_ini_entry)(char *name, uint name_length, zval *contents);
+	void (*ticks_function)(int ticks);
 } zend_utility_functions;
 
 		
@@ -283,6 +284,7 @@ extern ZEND_API void (*zend_block_interruptions)(void);
 extern ZEND_API void (*zend_unblock_interruptions)(void);
 extern ZEND_API void (*zend_message_dispatcher)(long message, void *data);
 extern ZEND_API int (*zend_get_ini_entry)(char *name, uint name_length, zval *contents);
+extern void (*zend_ticks_function)(int ticks);
  
 void zenderror(char *error);
 
