@@ -65,7 +65,7 @@ PHPAPI const char php_sig_png[8] = {(char) 0x89, (char) 0x50, (char) 0x4e, (char
 PHPAPI const char php_sig_tif_ii[4] = {'I','I', (char)0x2A, (char)0x00};
 PHPAPI const char php_sig_tif_mm[4] = {'M','M', (char)0x00, (char)0x2A};
 PHPAPI const char php_sig_jpc[3] = {(char)0xFF, (char)0x4F, (char)0xff};
-
+/* REMEMBER TO ADD MIME-TYPE TO FUNCTION php_imagetype2mimetype */
 
 /* return info as a struct, to make expansion easier */
 
@@ -668,6 +668,50 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, pval *info, int mot
 }
 /* }}} */
 
+/* {{{ php_imagetype2mimetype
+ * Convert internal image_type to mime type */
+PHPAPI const char * php_imagetype2mimetype(int image_type)
+{
+	switch( image_type) {
+		case IMAGE_FILETYPE_GIF:
+			return "image/gif";
+		case IMAGE_FILETYPE_JPEG:
+		case IMAGE_FILETYPE_JPC:
+			return "image/jpeg";
+		case IMAGE_FILETYPE_PNG:
+			return "image/png";
+		case IMAGE_FILETYPE_SWF:
+		case IMAGE_FILETYPE_SWC:
+			return "application/x-shockwave-flash";
+		case IMAGE_FILETYPE_PSD:
+			return "image/psd";
+		case IMAGE_FILETYPE_BMP:
+			return "image/bmp";
+		case IMAGE_FILETYPE_TIFF_II:
+		case IMAGE_FILETYPE_TIFF_MM:
+			return "image/tiff";
+		default:
+		case IMAGE_FILETYPE_UNKNOWN:
+			return "application/octet-stream"; /* suppose binary format */
+	}
+}
+/* }}} */
+
+/* {{{ proto array imagetype2mimetype(int imagetype)
+   Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
+PHP_FUNCTION(imagetype2mimetype)
+{
+	zval **p_image_type;
+	int arg_c = ZEND_NUM_ARGS();
+
+	if ((arg_c!=1) || zend_get_parameters_ex(arg_c, &p_image_type) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	zval_dtor(*p_image_type);
+	ZVAL_STRING(return_value, (char*)php_imagetype2mimetype(Z_LVAL_PP(p_image_type)), 1);
+}
+/* }}} */
+
 /* {{{ php_imagetype
    detect filetype from first bytes */
 PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
@@ -824,6 +868,7 @@ PHP_FUNCTION(getimagesize)
 		if (result->channels != 0) {
 			add_assoc_long(return_value, "channels", result->channels);
 		}
+		add_assoc_string(return_value, "mime", (char*)php_imagetype2mimetype(itype), 1);
 		efree(result);
 	} else {
 		RETURN_FALSE;

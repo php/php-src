@@ -281,6 +281,7 @@ function_entry basic_functions[] = {
 	PHP_FE(iptcparse,														NULL)															
 	PHP_FE(iptcembed,														NULL)
 	PHP_FE(getimagesize,			second_args_force_ref)
+	PHP_FE(imagetype2mimetype,												NULL)
 
 	PHP_FE(phpinfo,															NULL)
 	PHP_FE(phpversion,														NULL)
