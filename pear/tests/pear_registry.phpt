@@ -10,7 +10,7 @@ if (!getenv('PHP_PEAR_RUNTESTS')) {
 <?php
 
 error_reporting(E_ALL);
-include dirname(__FILE__)."/../PEAR/Registry.php";
+include_once "PEAR/Registry.php";
 PEAR::setErrorHandling(PEAR_ERROR_DIE, "%s\n");
 cleanall();
 
