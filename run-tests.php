@@ -25,7 +25,6 @@
  * - do not test PEAR components if base class and/or component class cannot be instanciated
  */
 
-set_time_limit(0);
 ob_implicit_flush();
 
 define('TEST_PASSED', 0);
