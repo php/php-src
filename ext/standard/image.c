@@ -56,6 +56,8 @@ const char php_sig_png[8] =
 {(char) 0x89, (char) 0x50, (char) 0x4e,
  (char) 0x47, (char) 0x0d, (char) 0x0a,
  (char) 0x1a, (char) 0x0a};
+const char php_sig_swf[3] =
+{'F', 'W', 'S'};
 
 /* return info as a struct, to make expansion easier */
 
@@ -90,6 +92,36 @@ static unsigned long php_read4(FILE *fp)
 
 	return (((unsigned long) a[ 0 ]) << 24) + (((unsigned long) a[ 1 ]) << 16) + (((unsigned long) a[ 2 ]) << 8) + ((unsigned long) a[ 3 ]);
 
+}
+
+static unsigned long int php_swf_get_bits (unsigned char* buffer, int pos, int count)
+{
+	unsigned int loop;
+	unsigned long int result = 0;
+	
+	for (loop = pos; loop < pos + count; loop++)
+	{
+		result = result + 
+			((((buffer[loop / 8]) >> (7 - (loop % 8))) & 0x01) << (count - (loop - pos) - 1));
+	}
+	return result;
+}
+
+static struct gfxinfo *php_handle_swf (FILE* fp)
+{
+	struct gfxinfo *result = NULL;
+	unsigned char bits;
+	unsigned char a[32];
+	
+	result = (struct gfxinfo *) ecalloc (1, sizeof (struct gfxinfo));
+	fseek(fp, 8, SEEK_SET);
+	fread(a,sizeof(a),1,fp);
+	bits = php_swf_get_bits (a, 0, 5);
+	result->width = (php_swf_get_bits (a, 5 + bits, bits) -
+		php_swf_get_bits (a, 5, bits)) / 20;
+	result->height = (php_swf_get_bits (a, 5 + (3 * bits), bits) -
+		php_swf_get_bits (a, 5 + (2 * bits), bits)) / 20;
+	return result;
 }
 
 /* routine to handle PNG files. - even easier */
@@ -365,6 +397,9 @@ PHP_FUNCTION(getimagesize)
 		} else {
 			php_error(E_WARNING, "PNG file corrupted by ASCII conversion");
 		}
+	} else if (!memcmp(filetype, php_sig_swf, 3)) {
+		result = php_handle_swf(fp);
+		itype = 4;
 	}
 	fclose(fp);
 	if (result) {
