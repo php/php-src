@@ -86,6 +86,7 @@ static zend_function_entry php_dir_functions[] = {
 	PHP_FE(opendir,				NULL)
 	PHP_FE(closedir,			NULL)
 	PHP_FE(chdir,				NULL)
+	PHP_FE(getcwd,				NULL)
 	PHP_FE(rewinddir,			NULL)
 	PHP_FE(readdir,				NULL)
 	PHP_FALIAS(dir,		getdir,	NULL)
@@ -210,9 +211,10 @@ PHP_FUNCTION(closedir)
 
 	php3_list_delete(dirp->id);
 }
+
 /* }}} */
 /* {{{ proto int chdir(string directory)
-Change the current directory */
+   Change the current directory */
 
 PHP_FUNCTION(chdir)
 {
@@ -233,6 +235,35 @@ PHP_FUNCTION(chdir)
 
 	RETURN_TRUE;
 }
+
+/* }}} */
+/* {{{ proto string getcwd()
+   Gets the current directory */
+
+PHP_FUNCTION(getcwd)
+{
+	char path[MAXPATHLEN];
+	char *ret;
+	
+	if (ARG_COUNT(ht) != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+#if HAVE_GETCWD
+	ret = getcwd(path,MAXPATHLEN-1);
+#elif HAVE_GETWD
+	ret = getwd(path);
+#elif
+#warning no proper getcwd support for your site
+#endif
+
+	if (ret) {
+		RETURN_STRING(path,1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+
 /* }}} */
 /* {{{ proto void rewinddir([int dir_handle])
 Rewind dir_handle back to the start */
