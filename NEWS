@@ -2,8 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ???, Version 4.0 Beta 5
-- fixed possible crash in unserialize if the serailized data was
-  damaged. (Thies)
+- fixed possible crash in unserialize() if serialized data was
+  corrupted. (Thies)
 - Changed $HTTP_STATE_VARS to $HTTP_SESSION_VARS. Use only the latter
   version now! (Andrei)
 - Add GD-JPEG Support (Rasmus)
