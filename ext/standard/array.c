@@ -351,7 +351,7 @@ static int array_natural_general_compare(const void *a, const void *b, int fold_
 		convert_to_string(&first);
 	}
 	if (Z_TYPE_P(sval) != IS_STRING) {
-		zval_copy_ctor(&first);
+		zval_copy_ctor(&second);
 		convert_to_string(&second);
 	}
 
