@@ -539,7 +539,6 @@ ZEND_API char *get_zend_version()
 
 void zend_activate(TSRMLS_D)
 {
-	EG(bailout_set) = 0;
 	init_compiler(TSRMLS_C);
 	init_executor(TSRMLS_C);
 	startup_scanner(TSRMLS_C);
