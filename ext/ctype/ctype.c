@@ -118,7 +118,7 @@ static int ctype(int (*iswhat)(int), zval **c)
 /* }}} */
 
 /* {{{ proto bool isalnum(mixed c)
-    Check for alphanumeric character(s) */
+   Checks for alphanumeric character(s) */
 PHP_FUNCTION(ctype_alnum)
 {
 	PHP_EXPERIMENTAL("4.0.4dev", NULL)
@@ -136,7 +136,7 @@ PHP_FUNCTION(ctype_alnum)
 /* }}} */
 
 /* {{{ proto bool isalpha(mixed c)
-    Check for alphabetic character(s) */
+   Checks for alphabetic character(s) */
 PHP_FUNCTION(ctype_alpha)
 {
 	PHP_EXPERIMENTAL("4.0.4dev", NULL)
@@ -154,7 +154,7 @@ PHP_FUNCTION(ctype_alpha)
 /* }}} */
 
 /* {{{ proto bool iscntrl(mixed c)
-    Check for control character(s) */
+   Checks for control character(s) */
 PHP_FUNCTION(ctype_cntrl)
 {
 	PHP_EXPERIMENTAL("4.0.4dev", NULL)
@@ -172,7 +172,7 @@ PHP_FUNCTION(ctype_cntrl)
 /* }}} */
 
 /* {{{ proto bool isdigit(mixed c)
-   Check for numeric character(s) */
+   Checks for numeric character(s) */
 PHP_FUNCTION(ctype_digit)
 {
 	PHP_EXPERIMENTAL("4.0.4dev", NULL)
@@ -190,7 +190,7 @@ PHP_FUNCTION(ctype_digit)
 /* }}} */
 
 /* {{{ proto bool islower(mixed c)
-   Check for lowercase character(s)  */
+   Checks for lowercase character(s)  */
 PHP_FUNCTION(ctype_lower)
 {
 	PHP_EXPERIMENTAL("4.0.4dev", NULL)
@@ -208,7 +208,7 @@ PHP_FUNCTION(ctype_lower)
 /* }}} */
 
 /* {{{ proto bool isgraph(mixed c)
-    Check for any printable character(s) except space */
+   Checks for any printable character(s) except space */
 PHP_FUNCTION(ctype_graph)
 {
 	PHP_EXPERIMENTAL("4.0.4dev", NULL)
@@ -226,7 +226,7 @@ PHP_FUNCTION(ctype_graph)
 /* }}} */
 
 /* {{{ proto bool isprint(mixed c)
-    Check for printable character(s) */
+   Checks for printable character(s) */
 PHP_FUNCTION(ctype_print)
 {
 	PHP_EXPERIMENTAL("4.0.4dev", NULL)
@@ -244,7 +244,7 @@ PHP_FUNCTION(ctype_print)
 /* }}} */
 
 /* {{{ proto bool ispunct(mixed c)
-    Check for any printable character which is not whitespace or an alphanumeric character */
+   Checks for any printable character which is not whitespace or an alphanumeric character */
 PHP_FUNCTION(ctype_punct)
 {
 	PHP_EXPERIMENTAL("4.0.4dev", NULL)
@@ -262,7 +262,7 @@ PHP_FUNCTION(ctype_punct)
 /* }}} */
 
 /* {{{ proto bool isspace(mixed c)
-    Check for whitespace character(s)*/
+   Checks for whitespace character(s)*/
 PHP_FUNCTION(ctype_space)
 {
 	PHP_EXPERIMENTAL("4.0.4dev", NULL)
@@ -280,7 +280,7 @@ PHP_FUNCTION(ctype_space)
 /* }}} */
 
 /* {{{ proto bool isupper(mixed c)
-    Check for uppercase character(s) */
+   Checks for uppercase character(s) */
 PHP_FUNCTION(ctype_upper)
 {
 	PHP_EXPERIMENTAL("4.0.4dev", NULL)
@@ -298,7 +298,7 @@ PHP_FUNCTION(ctype_upper)
 /* }}} */
 
 /* {{{ proto bool isxdigit(mixed c)
-    Check for character(s) representing a hexadecimal digit */
+   Checks for character(s) representing a hexadecimal digit */
 PHP_FUNCTION(ctype_xdigit)
 {
 	PHP_EXPERIMENTAL("4.0.4dev", NULL)

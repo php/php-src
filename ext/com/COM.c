@@ -437,7 +437,7 @@ PHP_INI_ENTRY("com.typelib_file", "", PHP_INI_SYSTEM, OnTypelibFileChange)
 PHP_INI_END()
 
 
-/* {{{ proto int com_load(string module_name [, string remote_host [, int codepage[, string typelib]]])
+/* {{{ proto int com_load(string module_name [, string remote_host [, int codepage [, string typelib]]])
    Loads a COM module */
 PHP_FUNCTION(com_load)
 {
@@ -1082,7 +1082,8 @@ PHP_FUNCTION(com_propput)
 /* }}} */
 
 
-/* {{{ proto bool com_load_typelib(string typelib_name[, int case_insensitiv]) */
+/* {{{ proto bool com_load_typelib(string typelib_name [, int case_insensitiv]) 
+   Loads a Typelib */
 PHP_FUNCTION(com_load_typelib)
 {
 	pval *arg_typelib, *arg_cis;
