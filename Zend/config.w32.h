@@ -17,8 +17,6 @@ typedef unsigned int uint;
 #undef inline
 #endif
 
-#define ZEND_DEBUG 1
-
 #define zend_sprintf sprintf
 
 /* Visual C++ doesn't really work with inline for C */
@@ -36,6 +34,5 @@ typedef unsigned int uint;
 #else
 #	define ZEND_API __declspec(dllimport)
 #endif
-
 
 #endif /* _ZEND_CONFIG_W32_H */
