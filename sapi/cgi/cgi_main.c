@@ -1062,13 +1062,24 @@ consult the installation file that came with this distribution, or visit \n\
 #endif
 		}
 
-		if (SG(request_info).path_translated) {
-			persist_alloc(SG(request_info).path_translated);
+		{
+			char *path_translated;
+		
+			/*	Go through this trouble so that the memory manager doesn't warn
+			 *	about SG(request_info).path_translated leaking
+			 */
+			if (SG(request_info).path_translated) {
+				path_translated = strdup(SG(request_info).path_translated);
+				STR_FREE(SG(request_info).path_translated);
+				SG(request_info).path_translated = path_translated;
+			}
+			
+			php_request_shutdown((void *) 0);
+
+			if (SG(request_info).path_translated) {
+				free(SG(request_info).path_translated);
+			}
 		}
-
-		php_request_shutdown((void *) 0);
-
-		STR_FREE(SG(request_info).path_translated);
 
 #ifdef PHP_FASTCGI
 			if (!fastcgi) break;
@@ -1092,11 +1103,14 @@ consult the installation file that came with this distribution, or visit \n\
 		if (cgi_sapi_module.php_ini_path_override) {
 			free(cgi_sapi_module.php_ini_path_override);
 		}
+
 	} zend_catch {
 		exit_status = 255;
 	} zend_end_try();
 
+
 	php_module_shutdown(TSRMLS_C);
+		return SUCCESS;
 
 #ifdef ZTS
 	tsrm_shutdown();
