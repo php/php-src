@@ -36,7 +36,7 @@ if test "$PHP_SABLOT" != "no"; then
   for i in $PHP_EXPAT_DIR $SABLOT_DIR; do
     if test -f $i/lib/libexpat.a -o -f $i/lib/libexpat.s?; then
       AC_DEFINE(HAVE_LIBEXPAT2,1,[ ])
-      PHP_ADD_LIBRARY_WITH_PATH(expat, $i/lib)
+      PHP_ADD_LIBRARY_WITH_PATH(expat, $i/lib, SABLOT_SHARED_LIBADD)
       PHP_ADD_INCLUDE($i/include)
       AC_CHECK_LIB(sablot, SablotSetEncoding, AC_DEFINE(HAVE_SABLOT_SET_ENCODING,1,[ ]))
       testval=yes

@@ -58,7 +58,7 @@ if test "$PHP_XSLT" != "no"; then
       if test -f $i/lib/libexpat.a -o -f $i/lib/libexpat.so; then
         AC_DEFINE(HAVE_LIBEXPAT2, 1, [ ])
         PHP_ADD_INCLUDE($i/include)
-        PHP_ADD_LIBRARY_WITH_PATH(expat, $i/lib)
+        PHP_ADD_LIBRARY_WITH_PATH(expat, $i/lib, XSLT_SHARED_LIBADD)
         found_expat=yes
       fi
     done
