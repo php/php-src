@@ -1,8 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2003, Version 4.3.4RC4
-- Fixed bug #26025 (Segfault on glob() without GLOB_NOCHECK or GLOB_NOMAGIC).
-  (Moriyoshi)
+- Fixed bug #26025 (Segfault on glob() without GLOB_NOCHECK or GLOB_NOMAGIC
+  under *BSD platforms). (Moriyoshi)
 
 29 Oct 2003, Version 4.3.4RC3
 - Fixed bug #25955 (Compile failure on MacOSX 10.3 Panther). (Marko, Dan)
