@@ -50,12 +50,6 @@
 #include "ext/spl/spl_array.h"
 #endif
 
-#ifdef ZTS
-int array_globals_id;
-#else
-php_array_globals array_globals;
-#endif
-
 #define EXTR_OVERWRITE			0
 #define EXTR_SKIP				1
 #define EXTR_PREFIX_SAME		2
