@@ -90,11 +90,11 @@ AC_ARG_WITH(apxs2filter,
     dnl the linker does not recursively look at the bundle loader and
     dnl pull in its dependencies.  Therefore, we must pull in the APR
     dnl and APR-util libraries.
-    if test -x "$APR_BINDIR/apr-config"; then
-        MH_BUNDLE_FLAGS="`$APR_BINDIR/apr-config --ldflags --link-ld --libs`"
+    if test -x "$APR_CONFIG"; then
+        MH_BUNDLE_FLAGS="`$APR_CONFIG --ldflags --link-ld --libs`"
     fi
-    if test -x "$APU_BINDIR/apu-config"; then
-        MH_BUNDLE_FLAGS="`$APU_BINDIR/apu-config --ldflags --link-ld --libs` $MH_BUNDLE_FLAGS"
+    if test -x "$APU_CONFIG"; then
+        MH_BUNDLE_FLAGS="`$APU_CONFIG --ldflags --link-ld --libs` $MH_BUNDLE_FLAGS"
     fi
     MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD $MH_BUNDLE_FLAGS"
     PHP_SUBST(MH_BUNDLE_FLAGS)
