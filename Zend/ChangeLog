@@ -1,3 +1,58 @@
+2003-07-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_objects.c:
+      Temporairy solution to overcome shutdown propbelms with objects that have
+      hidden destructors.
+
+    * zend_objects.c:
+      Reorganize this a bit to ensure the object memory is destructed before
+      showing the error.
+
+    * zend_builtin_functions.c:
+      Bug #24399: is_subclass_of(): fix memleak, too
+
+2003-07-02  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c:
+      Throughly fix scoping change.  Fixes, among other things, bug #24403
+
+2003-07-02  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c
+      zend_globals.h:
+      - Nuke CG(in_clone_method)
+
+2003-07-02  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c:
+      Fix for bug #22367.
+      Heads up - this will break syntactical compatiblity, return($foo) will
+      not work with functions that return references - return $foo should be
+      used
+      instead.  It never worked well before, and caused all sorts of odd bugs.
+      It *might* be possible to support this specifically, albeit unlikely
+
+2003-07-02  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_execute_API.c:
+      optimize the case where the object is really a class name, as we don't need
+      to set EX(object) here.
+
+    * zend_execute_API.c:
+      Timm Friebe points out that object detection should be done regardless of
+      the function pointer
+
+2003-07-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_objects.c:
+      Finally fix property cloning and fix the tests accordingly.
+      
+
+2003-07-02  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_builtin_functions.c:
+      Fix bug #24445
+
 2003-07-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_objects.c:
