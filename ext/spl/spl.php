@@ -340,7 +340,7 @@ interface SeekableIterator extends Iterator
  * This class uses SeekableIterator::seek() if available and rewind() plus
  * a skip loop otehrwise.
  */
-class LimitIetrator implements Iterator
+class LimitIterator implements Iterator
 {
 	/** Construct an instance form a Iterator.
 	 *
