@@ -1,3 +1,50 @@
+1999-10-20  Andi Gutmans  <andi@php.net>
+
+    * ext/com/COM.c
+      internal_functions_win32.c
+      php4dllts.dsp: - Make COM compile again
+
+    * ext/com/php3_COM.h
+      ext/com/php_COM.h
+      ext/standard/dir.c
+      config.w32.h
+      php4ts.dsp: - Make CVS compile on Win32.
+    - Rename php3_COM.h -> php_COM.h
+
+1999-10-20  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/config.h.stub
+      ext/standard/config.m4
+      ext/standard/dir.c
+      ext/standard/php3_dir.h: (PHP getcwd()) added, needs to porting to Win32
+
+1999-10-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/info.c (_display_module_info): Add anchor for module names
+
+1999-10-20  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/xml/xml.c:
+    (PHP xml_parse_into_struct) sometimes the value was truncated
+
+    * ext/standard/var.c: (PHP var_dump, serialize) fixed mem_leak.
+
+1999-10-20  Andrei Zmievski  <zmievski@ispi.net>
+
+    * .cvsignore: Ignore shared modules directory.
+
+    * .cvsignore: Ignore generated libs.
+
+1999-10-20  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/xml/xml.c (PHP xml_parse_into_struct): fixed mem-leak when encountering invalid XML.
+
+1999-10-20  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
+    * NEWS: NEWS update
+
 1999-10-19  Andrei Zmievski  <zmievski@ispi.net>
 
     * main.c: Revert my patches to error functions.
