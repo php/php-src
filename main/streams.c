@@ -908,7 +908,8 @@ PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t coun
 		} else {
 			justwrote = stream->ops->write(stream, buf, towrite TSRMLS_CC);
 		}
-		if (justwrote > 0) {
+		/* convert justwrote to an integer, since normally it is unsigned */
+		if ((int)justwrote > 0) {
 			buf += justwrote;
 			count -= justwrote;
 			didwrite += justwrote;

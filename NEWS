@@ -18,6 +18,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #25348 ("make install" fails with --enable-short-tags). (Jani)
 - Fixed bug #25343 (is_dir() gives warning on FreeBSD). (Jani)
 - Fixed bug #25333 (Possible body corruption & crash in win32 mail()). (Ilia)
+- Fixed bug #25316 (Possible infinite loop inside _php_stream_write()). (Ilia)
 - Fixed bug #25314 (FTP_ASCII mode behaving like binary from Win->Unix). (Sara)
 - Fixed bug #25308 (php -m crashes when zend extensions are loaded). (Stas)
 - Fixed bug #25307 (Crash with WDDX serializer). (Sascha, Jani)
