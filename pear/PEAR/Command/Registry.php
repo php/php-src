@@ -102,45 +102,47 @@ Tests if a package is installed in the system. Will exit(1) if it is not.
                 return $this->raiseError("`$params[0]' not installed");
             }
             $list = $info['filelist'];
-            $caption = 'Contents of ' . basename($params[0]);
+            if ($installed) {
+                $caption = 'Installed Files For ' . $params[0];
+            } else {
+                $caption = 'Contents of ' . basename($params[0]);
+            }
             $this->ui->startTable(array('caption' => $caption,
                                         'border' => true));
             $this->ui->tableRow($headings, array('bold' => true));
             foreach ($list as $file => $att) {
-                if (isset($att['baseinstalldir'])) {
-                    $dest = $att['baseinstalldir'] . DIRECTORY_SEPARATOR .
-                        $file;
-                } else {
-                    $dest = $file;
-                }
-                switch ($att['role']) {
-                    case 'test':
-                    case 'data':
-                        if ($installed) {
-                            break 2;
-                        }
-                        $dest = '-- will not be installed --';
-                        break;
-                    case 'doc':
-                        $dest = $this->config->get('doc_dir') . DIRECTORY_SEPARATOR .
-                            $dest;
-                        break;
-                    case 'php':
-                    default:
-                        $dest = $this->config->get('php_dir') . DIRECTORY_SEPARATOR .
-                            $dest;
-                }
-                $dest = preg_replace('!/+!', '/', $dest);
-                $file = preg_replace('!/+!', '/', $file);
-/*
-                $opts = array(0 => array('wrap' => 23),
-                              1 => array('wrap' => 45)
-                    );
-*/
                 if ($installed) {
-                    $this->ui->tableRow(array($att['role'], $dest), null, $opts);
+                    if (empty($att['installed_as'])) {
+                        continue;
+                    }
+                    $this->ui->tableRow(array($att['role'], $att['installed_as']));
                 } else {
-                    $this->ui->tableRow(array($file, $dest), null, $opts);
+                    if (isset($att['baseinstalldir'])) {
+                        $dest = $att['baseinstalldir'] . DIRECTORY_SEPARATOR .
+                            $file;
+                    } else {
+                        $dest = $file;
+                    }
+                    switch ($att['role']) {
+                        case 'test':
+                        case 'data':
+                            if ($installed) {
+                                break 2;
+                            }
+                            $dest = '-- will not be installed --';
+                            break;
+                        case 'doc':
+                            $dest = $this->config->get('doc_dir') . DIRECTORY_SEPARATOR .
+                                $dest;
+                            break;
+                        case 'php':
+                        default:
+                            $dest = $this->config->get('php_dir') . DIRECTORY_SEPARATOR .
+                                $dest;
+                    }
+                    $dest = preg_replace('!/+!', '/', $dest);
+                    $file = preg_replace('!/+!', '/', $file);
+                    $this->ui->tableRow(array($file, $dest));
                 }
             }
             $this->ui->endTable();
