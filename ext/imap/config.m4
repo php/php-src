@@ -13,7 +13,7 @@ AC_ARG_WITH(imap,
 			withval=/usr
 		fi
 	fi
-	if test "$withval" != "no"; then
+	if test "$withval" != "no" && test "$withval" != "yes"; then
 		IMAP_DIR=$withval
 		if test -f $IMAP_DIR/include/imap/mail.h; then
 			IMAP_INC_DIR=$IMAP_DIR/include/imap
