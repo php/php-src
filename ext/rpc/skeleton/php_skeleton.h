@@ -16,20 +16,10 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef SKELETON_H
-#define SKELETON_H
+#ifndef PHP_SKELETON_H
+#define PHP_SKELETON_H
 
-#include "../handler.h"
-#include "../php_rpc.h"
+extern zend_module_entry skeleton_module_entry;
+#define phpext_skeleton_ptr &skeleton_module_entry
 
-RPC_DECLARE_HANDLER(skeleton);
-
-ZEND_MINIT_FUNCTION(skeleton);
-ZEND_MSHUTDOWN_FUNCTION(skeleton);
-ZEND_MINFO_FUNCTION(skeleton);
-
-/* TODO: define your functions here */
-ZEND_FUNCTION(skeleton_function);
-/**/
-
-#endif /* SKELETON_H */
+#endif	/* PHP_SKELETON_H */
