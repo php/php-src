@@ -58,6 +58,13 @@ static void build_runtime_defined_function_key(zval *result, char *name, int nam
 }
 
 
+int zend_auto_global_arm(zend_auto_global *auto_global TSRMLS_DC)
+{
+	auto_global->armed = (auto_global->auto_global_callback ? 1 : 0);
+	return 0;
+}
+
+
 static void init_compiler_declarables(TSRMLS_D)
 {
 	CG(declarables).ticks.type = IS_LONG;
@@ -84,8 +91,8 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	CG(start_lineno) = 0;
 	init_compiler_declarables(TSRMLS_C);
 	CG(throw_list) = NULL;
- 	zend_register_auto_global("GLOBALS", sizeof("GLOBALS")-1 TSRMLS_CC);
 	CG(in_clone_method) = 0;
+	zend_hash_apply(CG(auto_globals), (apply_func_t) zend_auto_global_arm TSRMLS_CC);
 }
 
 
@@ -277,8 +284,13 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 
 	opline_ptr->op2.u.EA.type = ZEND_FETCH_LOCAL;
 	if (varname->op_type == IS_CONST && varname->u.constant.type == IS_STRING) {
-		if (zend_hash_exists(CG(auto_globals), varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
+		zend_auto_global *auto_global;
+
+		if (zend_hash_find(CG(auto_globals), varname->u.constant.value.str.val, varname->u.constant.value.str.len+1, (void **) &auto_global)==SUCCESS) {
 			opline_ptr->op2.u.EA.type = ZEND_FETCH_GLOBAL;
+			if (auto_global->armed) {
+				auto_global->armed = auto_global->auto_global_callback(auto_global->name, auto_global->name_len TSRMLS_CC);
+			}
 		} else {
 /*			if (CG(active_op_array)->static_variables && zend_hash_exists(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
 				opline_ptr->op2.u.EA.type = ZEND_FETCH_STATIC;
@@ -3152,9 +3164,20 @@ void zend_do_ticks(TSRMLS_D)
 }
 
 
-int zend_register_auto_global(char *name, uint name_len TSRMLS_DC)
+void zend_auto_global_dtor(zend_auto_global *auto_global)
 {
-	return zend_hash_add_empty_element(CG(auto_globals), name, name_len+1);
+	free(auto_global->name);
+}
+
+int zend_register_auto_global(char *name, uint name_len, zend_auto_global_callback auto_global_callback TSRMLS_DC)
+{
+	zend_auto_global auto_global;
+
+	auto_global.name = zend_strndup(name, name_len);
+	auto_global.name_len = name_len;
+	auto_global.auto_global_callback = auto_global_callback;
+
+	return zend_hash_add(CG(auto_globals), name, name_len+1, &auto_global, sizeof(zend_auto_global), NULL);
 }
 
 
