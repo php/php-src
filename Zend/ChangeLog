@@ -1,3 +1,9 @@
+2002-04-27  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_alloc.c
+      zend_alloc.h:
+    MFZE1: If the size-operands of memset are constants, the compiler can turn them into fast inline code. So, instead of using ecalloc, we use emalloc + memset in macro form now. emalloc will not return NULL, so the chosen macro form is safe. This is not true for malloc(3). An inline function accomodates our needs here. Suggested by: http://www.mail-archive.com/dev%40httpd.apache.org/msg02492.html (Sascha)
+
 2002-04-25  Harald Radi  <h.radi@nme.at>
 
     * zend_config.w32.h: unbreak the win32 build

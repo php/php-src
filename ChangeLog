@@ -1,3 +1,51 @@
+2002-04-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/zlib/zlib.c: s/len/xln/ was necessary here
+
+    Noticed by: Charles O Parks III
+
+    * ext/zlib/zlib.c: Use a single macro to set cl header
+
+2002-04-27  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/zlib/zlib.c:
+     - If possible set Content-Length header in zlib.output_compression mode. (thies)
+
+2002-04-27  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/TODO: updated TODO list
+
+2002-04-27  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/url_scanner_ex.c: part 2 of last commit
+
+    * ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re
+      ext/session/php_session.h
+      ext/session/session.c:
+     - added session_set_userdata() which enables you to specify one variable
+       that will be kept in the browser in addition to the session-id. This
+       only works when using trans-sid sessions (no cookie). (thies)
+
+2002-04-27  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * NEWS
+      php.ini-dist
+      php.ini-recommended:
+2002-04-27  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c
+      ext/com/com.h: MFH
+
+    * ext/com/COM.c:
+    don't set CLSCTX_REMOTE_SERVER if NULL is passed as servername
+
+2002-04-27  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mysql/config.m4: MFH: fix for bug #16743
+
+    * ext/mysql/config.m4: Fix bug: #16743
+
 2002-04-26  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
 
     * ext/standard/filestat.c
