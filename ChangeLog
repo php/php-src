@@ -1,3 +1,66 @@
+2000-02-28  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/imap/imap.c:
+    fixing segfaults in imap_getmailboxes and imap_getsubscribed.
+
+2000-02-28  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/wddx/php_wddx_api.h
+      ext/wddx/wddx.c: WDDX header comments now conform to the latest DTD.
+
+2000-02-28  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/jver.php
+      ext/java/reflect.java
+      sapi/servlet/README
+      sapi/servlet/cookies.php
+      sapi/servlet/date.php
+      sapi/servlet/jinfo.php
+      sapi/servlet/jver.php
+      sapi/servlet/reqheaders.php
+      sapi/servlet/reqinfo.php
+      sapi/servlet/reqparams.php
+      sapi/servlet/sessions.php:
+    Improved handing of instances of private classes.  Added servlet examples.
+
+2000-02-28  Jouni Ahto  <jah@mork.net>
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h:
+    - Use *_ex-API and *_RESOURCE-macros (partial).
+
+2000-02-28  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/session/session.c: (php_set_session_var)
+    $foo and $HTTP_SESSION_VARS["foo"] are no longer references to the same
+    value.
+
+2000-02-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * TODO: .
+
+2000-02-28  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: WDDX additions.
+
+2000-02-28  Zeev Suraski  <zeev@php.net>
+
+    * php_variables.c:
+    - Switched back to the old $HTTP_*_VARS[] behavior - $HTTP_GET_VARS["foo"]
+      and $foo are no longer references to each other, but separate variables
+      like they were prior to PHP 4.0 Beta 4 
+
+2000-02-28  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/mcal/php_mcal.c:
+    fixing number of arguments to be consistent with php3 code.
+
+    * ext/mcal/php_mcal.c:
+    mcal_next_recurrence() actually works again now (in addition to not
+    crashing).
+
+    Also, cleaned up the formatting.
+
 2000-02-27  Andi Gutmans  <andi@php.net>
 
     * ext/standard/browscap.c: - Hopefully fix browscap problem
