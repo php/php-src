@@ -661,7 +661,7 @@ PHP_FUNCTION(curl_init)
 	}
 
 	alloc_curl_handle(&ch);
-	ch->thread_ctx = TSRMLS_C;
+	TSRMLS_SET_CTX(ch->thread_ctx);
 	
 	ch->cp = curl_easy_init();
 	if (!ch->cp) {
