@@ -507,16 +507,19 @@ static double ConvertAnyFormat(void *ValuePtr, int Format, int MotorolaOrder)
 static void ExtractThumbnail(ImageInfoType *ImageInfo, char *OffsetBase, unsigned ExifLength) {
 	/* according to exif2.1, the thumbnail is not supposed to be greater than 64K */
 	if (ImageInfo->ThumbnailSize > 65536) {
-		php_error(E_ERROR,"Illegal thumbnail size");
+		php_error(E_WARNING,"Illegal thumbnail size");
+		return;
 	}
 
 	ImageInfo->Thumbnail = emalloc(ImageInfo->ThumbnailSize);
 	if (!ImageInfo->Thumbnail) {
-		php_error(E_ERROR,"Could not allocate memory for thumbnail");
+		php_error(E_WARNING,"Could not allocate memory for thumbnail");
+		return;
 	} else {
 		/* Check to make sure we are not going to go past the ExifLength */
 		if (ImageInfo->ThumbnailOffset + ImageInfo->ThumbnailSize > ExifLength) {
-			php_error(E_ERROR,"Thumbnail goes beyond exif header boundary");
+			php_error(E_WARNING,"Thumbnail goes beyond exif header boundary");
+			return;
 		} else {
 			memcpy(ImageInfo->Thumbnail, OffsetBase + ImageInfo->ThumbnailOffset, ImageInfo->ThumbnailSize);
 		}
@@ -537,7 +540,8 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
     NumDirEntries = Get16u(DirStart, ImageInfo->MotorolaOrder);
 
     if ((DirStart+2+NumDirEntries*12) > (OffsetBase+ExifLength)) {
-        php_error(E_ERROR,"Illegally sized directory");
+        php_error(E_WARNING,"Illegally sized directory");
+		return;
     }
 
 
@@ -560,7 +564,8 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
 
         if ((Format-1) >= NUM_FORMATS) {
             /* (-1) catches illegal zero case as unsigned underflows to positive large. */
-            php_error(E_ERROR,"Illegal format code in EXIF dir");
+            php_error(E_WARNING,"Illegal format code in EXIF dir");
+			return;
         }
 
         ByteCount = Components * ExifBytesPerFormat[Format];
@@ -573,7 +578,8 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
                 /* Bogus pointer offset and / or bytecount value */
 /*                printf("Offset %d bytes %d ExifLen %d\n",OffsetVal, ByteCount, ExifLength); */
 
-                php_error(E_ERROR,"Illegal pointer offset value in EXIF");
+                php_error(E_WARNING,"Illegal pointer offset value in EXIF");
+				return;
             }
             ValuePtr = OffsetBase+OffsetVal;
         } else {
@@ -778,7 +784,8 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
             char *SubdirStart;
             SubdirStart = OffsetBase + Get32u(ValuePtr, ImageInfo->MotorolaOrder);
             if (SubdirStart < OffsetBase || SubdirStart > OffsetBase+ExifLength) {
-                php_error(E_ERROR,"Illegal subdirectory link");
+                php_error(E_WARNING,"Illegal subdirectory link");
+				return;
             }
             ProcessExifDir(ImageInfo, SubdirStart, OffsetBase, ExifLength, LastExifRefd);
             continue;
@@ -791,7 +798,8 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
     NextDirOffset = Get32u(DirStart+2+12*de, ImageInfo->MotorolaOrder);
     if (NextDirOffset) {
             if (OffsetBase + NextDirOffset < OffsetBase || OffsetBase + NextDirOffset > OffsetBase+ExifLength) {
-                php_error(E_ERROR,"Illegal directory offset");
+                php_error(E_WARNING,"Illegal directory offset");
+				return;
             }
 	    ProcessExifDir(ImageInfo, OffsetBase + NextDirOffset, OffsetBase, ExifLength, LastExifRefd);
     }
@@ -818,7 +826,8 @@ static void process_EXIF (ImageInfoType *ImageInfo, char *CharBuf, unsigned int 
     {   /* Check the EXIF header component */
         static const uchar ExifHeader[] = {0x45, 0x78, 0x69, 0x66, 0x00, 0x00};
         if (memcmp(CharBuf+2, ExifHeader,6)) {
-            php_error(E_ERROR,"Incorrect Exif header");
+            php_error(E_WARNING,"Incorrect Exif header");
+			return;
         }
     }
 
@@ -830,14 +839,16 @@ static void process_EXIF (ImageInfoType *ImageInfo, char *CharBuf, unsigned int 
 /*            if (ShowTags) printf("Exif section in Motorola order\n"); */
             ImageInfo->MotorolaOrder = 1;
         } else {
-            php_error(E_ERROR,"Invalid Exif alignment marker.");
+            php_error(E_WARNING,"Invalid Exif alignment marker.");
+			return;
         }
     }
 
     /* Check the next two values for correctness. */
     if (Get16u(CharBuf+10,ImageInfo->MotorolaOrder) != 0x2a
       || Get32u(CharBuf+12,ImageInfo->MotorolaOrder) != 0x08) {
-        php_error(E_ERROR,"Invalid Exif start (1)");
+        php_error(E_WARNING,"Invalid Exif start (1)");
+		return;
     }
 
     /* First directory starts 16 bytes in.  Offsets start at 8 bytes in. */
@@ -877,7 +888,8 @@ static int scan_JPEG_header (ImageInfoType *ImageInfo, FILE *infile, Section_t *
         }
         if (marker == 0xff) {
             /* 0xff is legal padding, but if we get that many, something's wrong. */
-            php_error(E_ERROR,"too many padding bytes!");
+            php_error(E_WARNING,"too many padding bytes!");
+			return FALSE;
         }
 
         Sections[*SectionsRead].Type = marker;
@@ -889,7 +901,8 @@ static int scan_JPEG_header (ImageInfoType *ImageInfo, FILE *infile, Section_t *
         itemlen = (lh << 8) | ll;
 
         if (itemlen < 2) {
-            php_error(E_ERROR,"invalid marker");
+            php_error(E_WARNING,"invalid marker");
+			return FALSE;
         }
 
         Sections[*SectionsRead].Size = itemlen;
@@ -903,7 +916,8 @@ static int scan_JPEG_header (ImageInfoType *ImageInfo, FILE *infile, Section_t *
 
         got = fread(Data+2, 1, itemlen-2, infile); /* Read the whole section. */
         if (got != itemlen-2) {
-            php_error(E_ERROR,"reading from file");
+            php_error(E_WARNING,"reading from file");
+			return FALSE;
         }
         *SectionsRead += 1;
 
@@ -922,12 +936,14 @@ static int scan_JPEG_header (ImageInfoType *ImageInfo, FILE *infile, Section_t *
                     size = ep-cp;
                     Data = (uchar *)malloc(size);
                     if (Data == NULL) {
-                        php_error(E_ERROR,"could not allocate data for entire image");
+                        php_error(E_WARNING,"could not allocate data for entire image");
+						return FALSE;
                     }
 
                     got = fread(Data, 1, size, infile);
                     if (got != size) {
-                        php_error(E_ERROR,"could not read the rest of the image");
+                        php_error(E_WARNING,"could not read the rest of the image");
+						return FALSE;
                     }
 
                     Sections[*SectionsRead].Data = Data;
@@ -941,7 +957,7 @@ static int scan_JPEG_header (ImageInfoType *ImageInfo, FILE *infile, Section_t *
                 return TRUE;
 
             case M_EOI:   /* in case it's a tables-only JPEG stream */
-                php_error(E_ERROR,"No image in jpeg!");
+                php_error(E_WARNING,"No image in jpeg!");
                 return FALSE;
 
             case M_COM: /* Comment section */
@@ -1014,7 +1030,7 @@ int ReadJpegFile(ImageInfoType *ImageInfo, Section_t *Sections,
     infile = VCWD_FOPEN(FileName, "rb"); /* Unix ignores 'b', windows needs it. */
 
     if (infile == NULL) {
-        php_error(E_ERROR, "Unable to open '%s'", FileName);
+        php_error(E_WARNING, "Unable to open '%s'", FileName);
         return FALSE;
     }
 /*    CurrentFile = FileName; */
@@ -1044,14 +1060,16 @@ int ReadJpegFile(ImageInfoType *ImageInfo, Section_t *Sections,
             ImageInfo->FileDateTime = st.st_mtime;
             ImageInfo->FileSize = st.st_size;
         } else {
-            php_error(E_ERROR,"Can't get file statitics");
+            php_error(E_WARNING,"Can't get file statitics");
+			return FALSE;
         }
     }
 
     /* Scan the JPEG headers. */
     ret = scan_JPEG_header(ImageInfo, infile, Sections, SectionsRead, ReadAll, LastExifRefd);
     if (!ret) {
-        php_error(E_ERROR,"Invalid Jpeg file: '%s'\n",FileName);
+        php_error(E_WARNING,"Invalid Jpeg file: '%s'\n",FileName);
+		return FALSE;
     }
 
     fclose(infile);
