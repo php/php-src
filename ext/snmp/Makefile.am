@@ -1,7 +1,7 @@
 # $Id$
 
 SRC=snmp.c
-INCLUDES=@INCLUDES@ @SNMP_INCLUDE@ -I@top_srcdir@ -I@top_srcdir@/libzend
+INCLUDES=@INCLUDES@ @SNMP_INCLUDE@ -I@top_srcdir@ -I@top_srcdir@/Zend
 noinst_LTLIBRARIES=@SNMP_STATIC@
 EXTRA_LTLIBRARIES=libphpext_snmp.la snmp.la
 libphpext_snmp_la_SOURCES=$(SRC)

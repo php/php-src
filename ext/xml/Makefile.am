@@ -1,7 +1,7 @@
 # $Id$
 
 SRC=xml.c
-INCLUDES=@INCLUDES@ @XML_INCLUDE@ -I@top_srcdir@ -I@top_srcdir@/libzend
+INCLUDES=@INCLUDES@ @XML_INCLUDE@ -I@top_srcdir@ -I@top_srcdir@/Zend
 noinst_LTLIBRARIES=@XML_STATIC@
 EXTRA_LTLIBRARIES=libphpext_xml.la xml.la
 libphpext_xml_la_SOURCES=$(SRC)

@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "libzendts"=.\libzend\libzendts.dsp - Package Owner=<4>
+Project: "ZendTS"=.\Zend\ZendTS.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

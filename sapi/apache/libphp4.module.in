@@ -3,5 +3,5 @@ ConfigStart
 	RULE_WANTHSREGEX=@APACHE_WANT_HSREGEX@
 	LIBS="@NATIVE_RPATHS@ @PHP_LDFLAGS@ @PHP_LIBS@ @EXTRA_LIBS@ $LIBS"
 	RULE_HIDE=yes
-	CFLAGS="$CFLAGS -I@abs_srcdir@ -I@abs_srcdir@/libzend -I@abs_builddir@/libzend -I@abs_builddir@"
+	CFLAGS="$CFLAGS -I@abs_srcdir@ -I@abs_srcdir@/Zend -I@abs_builddir@/Zend -I@abs_builddir@"
 ConfigEnd

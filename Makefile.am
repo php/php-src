@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = foreign
 
-ZEND_DIR = $(srcdir)/libzend
-SUBDIRS = libzend ext sapi $(TSRM_DIR) $(REGEX_DIR) . $(PEAR_DIR)
+ZEND_DIR = $(srcdir)/Zend
+SUBDIRS = Zend ext sapi $(TSRM_DIR) $(REGEX_DIR) . $(PEAR_DIR)
 
 BUILDLDFLAGS = $(EXTRA_LDFLAGS) $(LDFLAGS)
 
@@ -14,7 +14,7 @@ libphp4_la_SOURCES = \
        strlcat.c mergesort.c reentrancy.c
 
 libphp4_la_DEPENDENCIES = \
-		libzend/libzend.la \
+		Zend/libZend.la \
 		sapi/$(PHP_SAPI)/libphpsapi_$(PHP_SAPI).la \
 		$(REGEX_LIB) \
 		$(EXT_LTLIBS) \

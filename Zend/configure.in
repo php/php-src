@@ -14,7 +14,7 @@ ZEND_VERSION=$VERSION
 dnl We want this one before the checks, so the checks can modify CFLAGS.
 test -z "$CFLAGS" && auto_cflags=1
 
-sinclude(libzend.m4)
+sinclude(Zend.m4)
 
 LIBZEND_BASIC_CHECKS
 

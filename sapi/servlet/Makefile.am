@@ -3,7 +3,7 @@
 SRC=servlet.c java.c
 
 CFLAGS=@CFLAGS@ @JAVA_CFLAGS@
-INCLUDES=@INCLUDES@ @JAVA_INCLUDE@ -I@top_srcdir@ -I@top_srcdir@/libzend
+INCLUDES=@INCLUDES@ @JAVA_INCLUDE@ -I@top_srcdir@ -I@top_srcdir@/Zend
 noinst_LTLIBRARIES=libphpsapi_servlet.la
 libphpsapi_servlet_la_SOURCES=$(SRC)
 

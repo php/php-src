@@ -3,7 +3,7 @@
 SRC=java.c
 
 CFLAGS=@CFLAGS@ @JAVA_CFLAGS@
-INCLUDES=@INCLUDES@ @JAVA_INCLUDE@ -I@top_srcdir@ -I@top_srcdir@/libzend
+INCLUDES=@INCLUDES@ @JAVA_INCLUDE@ -I@top_srcdir@ -I@top_srcdir@/Zend
 EXTRA_LTLIBRARIES=libphp_java.la
 phplib_LTLIBRARIES=@JAVA_SHARED@
 libphp_java_la_SOURCES=$(SRC)
