@@ -2865,7 +2865,8 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 		/* For each entry in the search array, get the entry */
 		while (zend_hash_get_current_data(Z_ARRVAL_P(search), (void **) &search_entry) == SUCCESS) {
 			/* Make sure we're dealing with strings. */	
-			convert_to_string_ex(search_entry);
+			SEPARATE_ZVAL(search_entry);
+			convert_to_string(*search_entry);
 			if (Z_STRLEN_PP(search_entry) == 0) {
 				zend_hash_move_forward(Z_ARRVAL_P(search));
 				continue;
