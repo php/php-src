@@ -59,6 +59,7 @@ PHP_FUNCTION(phpversion);
 PHP_FUNCTION(phpinfo);
 PHP_FUNCTION(phpcredits);
 PHP_FUNCTION(php_logo_guid);
+PHP_FUNCTION(php_real_logo_guid);
 PHP_FUNCTION(zend_logo_guid);
 PHP_FUNCTION(php_egg_logo_guid);
 PHP_FUNCTION(php_sapi_name);
@@ -77,6 +78,7 @@ PHPAPI void php_info_print_table_end(void);
 PHPAPI void php_info_print_box_start(int bg);
 PHPAPI void php_info_print_box_end(void);
 PHPAPI void php_info_print_hr(void);
+PHPAPI char *php_logo_guid(void);
 
 void register_phpinfo_constants(INIT_FUNC_ARGS);
 

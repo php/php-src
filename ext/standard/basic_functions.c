@@ -312,6 +312,8 @@ function_entry basic_functions[] = {
 	PHP_FE(phpversion,														NULL)
 	PHP_FE(phpcredits,														NULL)
 	PHP_FE(php_logo_guid,													NULL)
+	PHP_FE(php_real_logo_guid,												NULL)
+	PHP_FE(php_egg_logo_guid,												NULL)
 	PHP_FE(zend_logo_guid,													NULL)
 	PHP_FE(php_sapi_name,													NULL)
 	PHP_FE(php_uname,														NULL)
