@@ -487,7 +487,6 @@ static char *php_session_encode(int *newlen TSRMLS_DC)
 
 static void php_session_decode(const char *val, int vallen TSRMLS_DC)
 {
-	php_session_track_init(TSRMLS_C);
 	if (PS(serializer)->decode(val, vallen TSRMLS_CC) == FAILURE) {
 		php_session_destroy(TSRMLS_C);
 		php_error(E_WARNING, "Failed to decode session object. Session has been destroyed.");
@@ -554,6 +553,7 @@ static void php_session_initialize(TSRMLS_D)
 		php_error(E_ERROR, "Failed to initialize session module");
 		return;
 	}
+	php_session_track_init(TSRMLS_C);
 	if (PS(mod)->read(&PS(mod_data), PS(id), &val, &vallen) == SUCCESS) {
 		php_session_decode(val, vallen TSRMLS_CC);
 		efree(val);
