@@ -2046,6 +2046,8 @@ send_by_ref:
 									if (opened_path) {
 										free(opened_path);
 									}
+								} else {
+									zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle.filename);
 								}
 								break;
 							}
