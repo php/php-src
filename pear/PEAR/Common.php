@@ -1320,7 +1320,7 @@ class PEAR_Common extends PEAR
     }
 
     // }}}
-    // {{{ getReplacementTypes()
+    // {{{ getProvideTypes()
 
     /**
      * Get the implemented file replacement types in
@@ -1334,7 +1334,7 @@ class PEAR_Common extends PEAR
     }
 
     // }}}
-    // {{{ getReplacementTypes()
+    // {{{ getScriptPhases()
 
     /**
      * Get the implemented file replacement types in
