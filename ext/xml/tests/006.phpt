@@ -1,7 +1,7 @@
 --TEST--
 UTF-8<->ISO Latin 1 encoding/decoding test
 --SKIPIF--
-<?php include("skipif.php"); ?>
+<?php include("skipif.inc"); ?>
 --FILE--
 <?php
 printf("%s -> %s\n", urlencode("æ"), urlencode(utf8_encode("æ")));
