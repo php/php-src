@@ -85,7 +85,7 @@ static mcrypt_global_struct mcryptg;
 
 #define MCRYPT_CHECK_TD_CPY \
 	if(td == -1) { \
-		php3_error(E_WARNING, MCRYPT_FAILED); \
+		php_error(E_WARNING, MCRYPT_FAILED); \
 		RETURN_FALSE; \
 	} \
 	ndata = ecalloc(nr, bsize); \
@@ -94,7 +94,7 @@ static mcrypt_global_struct mcryptg;
 #define MCRYPT_CHECK_IV \
 	convert_to_string(iv); \
 	if(iv->value.str.len != bsize) { \
-		php3_error(E_WARNING, MCRYPT_IV_WRONG_SIZE); \
+		php_error(E_WARNING, MCRYPT_IV_WRONG_SIZE); \
 		RETURN_FALSE; \
 	}
 
@@ -180,7 +180,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 
 	i = size->value.lval;
 	if(i <= 0) {
-		php3_error(E_WARNING, "illegal size input parameter");
+		php_error(E_WARNING, "illegal size input parameter");
 		RETURN_FALSE;
 	}
 	
@@ -193,7 +193,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 				O_RDONLY);
 		if(fd < 0) {
 			efree(iv);
-			php3_error(E_WARNING, "cannot open source device");
+			php_error(E_WARNING, "cannot open source device");
 			RETURN_FALSE;
 		}
 		read(fd, iv, i);

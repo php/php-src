@@ -189,7 +189,7 @@ inline int add_assoc_object(pval *arg, char *key, pval *tmp)
 	} else {
 		symtable = arg->value.ht;
 	}
-	return _php3_hash_update(symtable, key, strlen(key)+1, (void *) &tmp, sizeof(pval *), NULL);
+	return zend_hash_update(symtable, key, strlen(key)+1, (void *) &tmp, sizeof(pval *), NULL);
 }
 
 inline int add_next_index_object(pval *arg, pval *tmp)
@@ -202,21 +202,21 @@ inline int add_next_index_object(pval *arg, pval *tmp)
 		symtable = arg->value.ht;
 	}
 
-	return _php3_hash_next_index_insert(symtable, (void *) &tmp, sizeof(pval *), NULL); 
+	return zend_hash_next_index_insert(symtable, (void *) &tmp, sizeof(pval *), NULL); 
 }
 
 
 PHP_MINFO_FUNCTION(imap)
 {
-	php3_printf("Imap Support enabled<br>");
-	php3_printf("<table>");
-	php3_printf("<tr><td>Imap c-client Version:</td>");
+	php_printf("Imap Support enabled<br>");
+	php_printf("<table>");
+	php_printf("<tr><td>Imap c-client Version:</td>");
 #ifdef IMAP41
-	php3_printf("<td>Imap 4.1</td>");
+	php_printf("<td>Imap 4.1</td>");
 #else
-	php3_printf("<td>Imap 4.0</td>");
+	php_printf("<td>Imap 4.0</td>");
 #endif
-	php3_printf("</tr></table>");
+	php_printf("</tr></table>");
 }
 
 PHP_MINIT_FUNCTION(imap)
@@ -441,7 +441,7 @@ PHP_FUNCTION(imap_open)
 		imap_stream = mail_open(imap_stream,mailbox->value.str.val,flags);
 
 		if (imap_stream == NIL){
-			php3_error(E_WARNING,"Couldn't open stream %s\n",mailbox->value.str.val);
+			php_error(E_WARNING,"Couldn't open stream %s\n",mailbox->value.str.val);
 			RETURN_FALSE;
 		}
 		/* Note that if we ever come up with a persistent imap stream, the persistent version of this
@@ -479,7 +479,7 @@ PHP_FUNCTION(imap_reopen)
 	ind = streamind->value.lval;
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
@@ -495,7 +495,7 @@ PHP_FUNCTION(imap_reopen)
 	}
 	imap_stream = mail_open(imap_le_struct->imap_stream, mailbox->value.str.val, flags);
 	if (imap_stream == NIL) {
-		php3_error(E_WARNING,"Couldn't re-open stream\n");
+		php_error(E_WARNING,"Couldn't re-open stream\n");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -525,7 +525,7 @@ PHP_FUNCTION(imap_append)
 	imap_le_struct = (pils *)php3_list_find( ind, &ind_type );
 
 	if ( !imap_le_struct || ind_type != le_imap ) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	INIT (&st,mail_string,(void *) message->value.str.val,message->value.str.len);
@@ -556,7 +556,7 @@ PHP_FUNCTION(imap_num_msg)
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
@@ -581,7 +581,7 @@ PHP_FUNCTION(imap_ping)
 
 	imap_le_struct = (pils *)php3_list_find( ind, &ind_type );
 	if ( !imap_le_struct || ind_type != le_imap ) {
-		php3_error( E_WARNING, "Unable to find stream pointer" );
+		php_error( E_WARNING, "Unable to find stream pointer" );
 		RETURN_FALSE;
 	}
 	RETURN_LONG( mail_ping( imap_le_struct->imap_stream ) );
@@ -602,7 +602,7 @@ PHP_FUNCTION(imap_num_recent)
 	ind = streamind->value.lval;
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	RETURN_LONG(imap_le_struct->imap_stream->recent);
@@ -628,7 +628,7 @@ PHP_FUNCTION(imap_expunge)
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
@@ -655,7 +655,7 @@ PHP_FUNCTION(imap_close)
 	ind = streamind->value.lval;
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
     }
 	if(myargcount==2) {
@@ -696,7 +696,7 @@ PHP_FUNCTION(imap_headers)
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
@@ -753,7 +753,7 @@ PHP_FUNCTION(imap_body)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	RETVAL_STRING(mail_fetchtext_full (imap_le_struct->imap_stream,msgno->value.lval,NIL,myargc == 3 ? flags->value.lval : NIL),1);
@@ -780,7 +780,7 @@ PHP_FUNCTION(imap_fetchtext_full)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	RETVAL_STRING(mail_fetchtext_full (imap_le_struct->imap_stream,msgno->value.lval,NIL,myargcount==3?flags->value.lval:NIL),1);
@@ -808,7 +808,7 @@ PHP_FUNCTION(imap_mail_copy)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	if ( mail_copy_full(imap_le_struct->imap_stream,seq->value.str.val,folder->value.str.val,myargcount == 4 ? options->value.lval : NIL)==T ) {
@@ -840,7 +840,7 @@ PHP_FUNCTION(imap_mail_move)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	if ( mail_move(imap_le_struct->imap_stream,seq->value.str.val,folder->value.str.val)==T ) {
@@ -870,7 +870,7 @@ PHP_FUNCTION(imap_createmailbox)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	if ( mail_create(imap_le_struct->imap_stream,folder->value.str.val)==T ) {
@@ -901,7 +901,7 @@ PHP_FUNCTION(imap_renamemailbox)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	if ( mail_rename(imap_le_struct->imap_stream,old->value.str.val,new->value.str.val)==T ) {
@@ -931,7 +931,7 @@ PHP_FUNCTION(imap_deletemailbox)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	if ( mail_delete(imap_le_struct->imap_stream,folder->value.str.val)==T ) {
@@ -964,7 +964,7 @@ PHP_FUNCTION(imap_list)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
     imap_folders = NIL;
@@ -1004,7 +1004,7 @@ PHP_FUNCTION(imap_listscan)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	imap_folders = NIL;
@@ -1041,7 +1041,7 @@ PHP_FUNCTION(imap_check)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
@@ -1081,7 +1081,7 @@ PHP_FUNCTION(imap_delete)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
@@ -1109,7 +1109,7 @@ PHP_FUNCTION(imap_undelete)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
@@ -1152,7 +1152,7 @@ PHP_FUNCTION(imap_headerinfo)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
@@ -1476,7 +1476,7 @@ PHP_FUNCTION(imap_lsub)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	imap_sfolders = NIL;
@@ -1513,7 +1513,7 @@ PHP_FUNCTION(imap_subscribe)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	if ( mail_subscribe(imap_le_struct->imap_stream,folder->value.str.val)==T ) {
@@ -1542,7 +1542,7 @@ PHP_FUNCTION(imap_unsubscribe)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	if ( mail_unsubscribe(imap_le_struct->imap_stream,folder->value.str.val)==T ) {
@@ -1681,14 +1681,14 @@ PHP_FUNCTION(imap_fetchstructure)
 	imap_le_struct = (pils *)php3_list_find( ind, &ind_type );
 
 	if ( !imap_le_struct || ind_type != le_imap ) {
-		php3_error( E_WARNING, "Unable to find stream pointer" );
+		php_error( E_WARNING, "Unable to find stream pointer" );
 		RETURN_FALSE;
 	}
 
 	mail_fetchstructure_full( imap_le_struct->imap_stream, msgno->value.lval, &body ,myargc == 3 ? flags->value.lval : NIL);
 
 	if ( !body ) {
-		php3_error( E_WARNING, "No body information available" );
+		php_error( E_WARNING, "No body information available" );
 		RETURN_FALSE;
 	}
 
@@ -1719,14 +1719,14 @@ PHP_FUNCTION(imap_fetchbody)
 	imap_le_struct = (pils *)php3_list_find( ind, &ind_type );
 
 	if ( !imap_le_struct || ind_type != le_imap ) {
-		php3_error( E_WARNING, "Unable to find stream pointer" );
+		php_error( E_WARNING, "Unable to find stream pointer" );
 		RETURN_FALSE;
 	}
  
 	body = mail_fetchbody_full( imap_le_struct->imap_stream, msgno->value.lval, sec->value.str.val, &len,myargc == 4 ? flags->value.lval : NIL );
 
 	if ( !body ) {
-		php3_error( E_WARNING, "No body information available" );
+		php_error( E_WARNING, "No body information available" );
 		RETURN_FALSE;
 	}
 	RETVAL_STRINGL( body ,len,1);
@@ -1826,7 +1826,7 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 
 	if(!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
@@ -1940,7 +1940,7 @@ PHP_FUNCTION(imap_setflag_full)
 	ind = streamind->value.lval;
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if(!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	mail_setflag_full(imap_le_struct->imap_stream,sequence->value.str.val,flag->value.str.val,myargc == 4 ? flags->value.lval : NIL);
@@ -1969,7 +1969,7 @@ PHP_FUNCTION(imap_clearflag_full)
 	ind = streamind->value.lval;
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if(!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	mail_clearflag_full(imap_le_struct->imap_stream,sequence->value.str.val,flag->value.str.val,myargc == 4 ? flags->value.lval : NIL);
@@ -1997,7 +1997,7 @@ PHP_FUNCTION(imap_sort)
 	convert_to_long(rev);
 	convert_to_long(pgm);
 	if(pgm->value.lval>SORTSIZE) {
-		php3_error(E_WARNING, "Unrecognized sort criteria");
+		php_error(E_WARNING, "Unrecognized sort criteria");
 		RETURN_FALSE;
 	}
 	if(myargc==4) convert_to_long(flags);
@@ -2005,7 +2005,7 @@ PHP_FUNCTION(imap_sort)
 	ind = streamind->value.lval;
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if(!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	spg = mail_newsearchpgm();
@@ -2045,7 +2045,7 @@ PHP_FUNCTION(imap_fetchheader)
 
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	RETVAL_STRING(mail_fetchheader_full (imap_le_struct->imap_stream,msgno->value.lval,NIL,NIL,myargc == 3 ? flags->value.lval : NIL),1);
@@ -2073,7 +2073,7 @@ PHP_FUNCTION(imap_uid)
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
  
 	if (!imap_le_struct || ind_type != le_imap) {
-	php3_error(E_WARNING, "Unable to find stream pointer");
+	php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
  
@@ -2101,7 +2101,7 @@ PHP_FUNCTION(imap_msgno)
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
  
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
  
@@ -2129,7 +2129,7 @@ PHP_FUNCTION(imap_status)
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
  
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
  
@@ -2176,7 +2176,7 @@ PHP_FUNCTION(imap_bodystruct)
 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -2280,7 +2280,7 @@ PHP_FUNCTION(imap_fetch_overview)
  	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
 	
 	if (!imap_le_struct || ind_type != le_imap) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	array_init(return_value);
@@ -2339,105 +2339,105 @@ PHP_FUNCTION(imap_mail_compose)
 	convert_to_array(envelope);
 	convert_to_array(body);
 	env=mail_newenvelope();
-	if(_php3_hash_find(envelope->value.ht,"remail",sizeof("remail"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(envelope->value.ht,"remail",sizeof("remail"),(void **) &pvalue)== SUCCESS){
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		env->remail=cpystr((*pvalue)->value.str.val);
 	}
 
-	if(_php3_hash_find(envelope->value.ht,"return_path",sizeof("return_path"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(envelope->value.ht,"return_path",sizeof("return_path"),(void **) &pvalue)== SUCCESS){
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		rfc822_parse_adrlist (&env->return_path,(*pvalue)->value.str.val,"NO HOST");
 	}
-	if(_php3_hash_find(envelope->value.ht,"date",sizeof("date"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(envelope->value.ht,"date",sizeof("date"),(void **) &pvalue)== SUCCESS){
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		env->date=cpystr((*pvalue)->value.str.val);
 	}
-	if(_php3_hash_find(envelope->value.ht,"from",sizeof("from"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(envelope->value.ht,"from",sizeof("from"),(void **) &pvalue)== SUCCESS){
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		rfc822_parse_adrlist (&env->from,(*pvalue)->value.str.val,"NO HOST");
 	}
-	if(_php3_hash_find(envelope->value.ht,"reply_to",sizeof("reply_to"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(envelope->value.ht,"reply_to",sizeof("reply_to"),(void **) &pvalue)== SUCCESS){
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(pvalue);
 		rfc822_parse_adrlist (&env->reply_to,(*pvalue)->value.str.val,"NO HOST");
 	}
-	if(_php3_hash_find(envelope->value.ht,"to",sizeof("to"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(envelope->value.ht,"to",sizeof("to"),(void **) &pvalue)== SUCCESS){
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		rfc822_parse_adrlist (&env->to,(*pvalue)->value.str.val,"NO HOST");
 	}
-	if(_php3_hash_find(envelope->value.ht,"cc",sizeof("cc"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(envelope->value.ht,"cc",sizeof("cc"),(void **) &pvalue)== SUCCESS){
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		rfc822_parse_adrlist (&env->cc,(*pvalue)->value.str.val,"NO HOST");
 	}
-	if(_php3_hash_find(envelope->value.ht,"bcc",sizeof("bcc"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(envelope->value.ht,"bcc",sizeof("bcc"),(void **) &pvalue)== SUCCESS){
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		rfc822_parse_adrlist (&env->bcc,(*pvalue)->value.str.val,"NO HOST");
 	}
-	if(_php3_hash_find(envelope->value.ht,"message_id",sizeof("message_id"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(envelope->value.ht,"message_id",sizeof("message_id"),(void **) &pvalue)== SUCCESS){
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		env->message_id=cpystr((*pvalue)->value.str.val);
 	}
  
-	_php3_hash_internal_pointer_reset(body->value.ht);
-	_php3_hash_get_current_key(body->value.ht, &key, &ind);
-	_php3_hash_get_current_data(body->value.ht, (void **) &data);
+	zend_hash_internal_pointer_reset(body->value.ht);
+	zend_hash_get_current_key(body->value.ht, &key, &ind);
+	zend_hash_get_current_data(body->value.ht, (void **) &data);
 	if(data->type == IS_ARRAY) {
 		bod=mail_newbody();
 		topbod=bod;
-		if(_php3_hash_find(data->value.ht,"type",sizeof("type"),(void **) &pvalue)== SUCCESS) {
+		if(zend_hash_find(data->value.ht,"type",sizeof("type"),(void **) &pvalue)== SUCCESS) {
 			SEPARATE_ZVAL(pvalue);
 			convert_to_long(*pvalue);
 			bod->type = (*pvalue)->value.lval;
 		}
-		if(_php3_hash_find(data->value.ht,"encoding",sizeof("encoding"),(void **) &pvalue)== SUCCESS){
+		if(zend_hash_find(data->value.ht,"encoding",sizeof("encoding"),(void **) &pvalue)== SUCCESS){
 			SEPARATE_ZVAL(pvalue);
 			convert_to_long(*pvalue);
 			bod->encoding = (*pvalue)->value.lval;
 		}
-		if(_php3_hash_find(data->value.ht,"subtype",sizeof("subtype"),(void **) &pvalue)== SUCCESS){
+		if(zend_hash_find(data->value.ht,"subtype",sizeof("subtype"),(void **) &pvalue)== SUCCESS){
 			SEPARATE_ZVAL(pvalue);
 			convert_to_string(*pvalue);
 			bod->subtype = cpystr((*pvalue)->value.str.val);
 		}
-		if(_php3_hash_find(data->value.ht,"id",sizeof("id"),(void **) &pvalue)== SUCCESS){
+		if(zend_hash_find(data->value.ht,"id",sizeof("id"),(void **) &pvalue)== SUCCESS){
 			SEPARATE_ZVAL(pvalue);
 			convert_to_string(*pvalue);
 			bod->id = cpystr((*pvalue)->value.str.val);
 		}
-		if(_php3_hash_find(data->value.ht,"contents.data",sizeof("contents.data"),(void **) &pvalue)== SUCCESS){
+		if(zend_hash_find(data->value.ht,"contents.data",sizeof("contents.data"),(void **) &pvalue)== SUCCESS){
 			SEPARATE_ZVAL(pvalue);
 			convert_to_string(*pvalue);     
 			bod->contents.text.data=(char *)fs_get((*pvalue)->value.str.len);
 			memcpy(bod->contents.text.data,(*pvalue)->value.str.val,(*pvalue)->value.str.len+1);
 			bod->contents.text.size = (*pvalue)->value.str.len;
 		}
-		if(_php3_hash_find(data->value.ht,"lines",sizeof("lines"),(void **) &pvalue)== SUCCESS){
+		if(zend_hash_find(data->value.ht,"lines",sizeof("lines"),(void **) &pvalue)== SUCCESS){
 			SEPARATE_ZVAL(pvalue);
 			convert_to_long(*pvalue);
 			bod->size.lines = (*pvalue)->value.lval;
 		}
-		if(_php3_hash_find(data->value.ht,"bytes",sizeof("bytes"),(void **) &pvalue)== SUCCESS){
+		if(zend_hash_find(data->value.ht,"bytes",sizeof("bytes"),(void **) &pvalue)== SUCCESS){
 			SEPARATE_ZVAL(pvalue);
 			convert_to_long(*pvalue);
 			bod->size.bytes = (*pvalue)->value.lval;
 		}
-		if(_php3_hash_find(data->value.ht,"md5",sizeof("md5"),(void **) &pvalue)== SUCCESS){
+		if(zend_hash_find(data->value.ht,"md5",sizeof("md5"),(void **) &pvalue)== SUCCESS){
 			SEPARATE_ZVAL(pvalue);
 			convert_to_string(*pvalue);
 			bod->md5 = cpystr((*pvalue)->value.str.val);
 		}
 	}
-	_php3_hash_move_forward(body->value.ht);
-	while(_php3_hash_get_current_data(body->value.ht, (void **) &data)==SUCCESS) {
-		_php3_hash_get_current_key(body->value.ht, &key, &ind);
+	zend_hash_move_forward(body->value.ht);
+	while(zend_hash_get_current_data(body->value.ht, (void **) &data)==SUCCESS) {
+		zend_hash_get_current_key(body->value.ht, &key, &ind);
 		if(data->type == IS_ARRAY) {
 			if(!toppart) {
 				bod->nested.part=mail_newbody_part();
@@ -2449,49 +2449,49 @@ PHP_FUNCTION(imap_mail_compose)
 				 mypart=mypart->next;
 				 bod=&mypart->body;
 			}
-			if(_php3_hash_find(data->value.ht,"type",sizeof("type"),(void **) &pvalue)== SUCCESS) {
+			if(zend_hash_find(data->value.ht,"type",sizeof("type"),(void **) &pvalue)== SUCCESS) {
 				SEPARATE_ZVAL(pvalue);
 				convert_to_long(pvalue);
 				bod->type = (*pvalue)->value.lval;
 			}
-			if(_php3_hash_find(data->value.ht,"encoding",sizeof("encoding"),(void **) &pvalue)== SUCCESS){
+			if(zend_hash_find(data->value.ht,"encoding",sizeof("encoding"),(void **) &pvalue)== SUCCESS){
 				SEPARATE_ZVAL(pvalue);
 				convert_to_long(*pvalue);
 				bod->encoding = (*pvalue)->value.lval;
 			}
-			if(_php3_hash_find(data->value.ht,"subtype",sizeof("subtype"),(void **) &pvalue)== SUCCESS){
+			if(zend_hash_find(data->value.ht,"subtype",sizeof("subtype"),(void **) &pvalue)== SUCCESS){
 				SEPARATE_ZVAL(pvalue);
 				convert_to_string(*pvalue);
 				bod->subtype=cpystr((*pvalue)->value.str.val);
 			}
-			if(_php3_hash_find(data->value.ht,"id",sizeof("id"),(void **) &pvalue)== SUCCESS){
+			if(zend_hash_find(data->value.ht,"id",sizeof("id"),(void **) &pvalue)== SUCCESS){
 				SEPARATE_ZVAL(pvalue);
 				convert_to_string(*pvalue);
 				bod->id=cpystr((*pvalue)->value.str.val);
 			}
-			if(_php3_hash_find(data->value.ht,"contents.data",sizeof("contents.data"),(void **) &pvalue)== SUCCESS){
+			if(zend_hash_find(data->value.ht,"contents.data",sizeof("contents.data"),(void **) &pvalue)== SUCCESS){
 				SEPARATE_ZVAL(pvalue);
 				convert_to_string(*pvalue);     
 				bod->contents.text.data=(char *)fs_get((*pvalue)->value.str.len);
 				memcpy(bod->contents.text.data,(*pvalue)->value.str.val,(*pvalue)->value.str.len+1);
 				bod->contents.text.size=(*pvalue)->value.str.len;
 			}
-			if(_php3_hash_find(data->value.ht,"lines",sizeof("lines"),(void **) &pvalue)== SUCCESS){
+			if(zend_hash_find(data->value.ht,"lines",sizeof("lines"),(void **) &pvalue)== SUCCESS){
 				SEPARATE_ZVAL(pvalue);
 				convert_to_long(*pvalue);
 				bod->size.lines=(*pvalue)->value.lval;
 			}
-			if(_php3_hash_find(data->value.ht,"bytes",sizeof("bytes"),(void **) &pvalue)== SUCCESS){
+			if(zend_hash_find(data->value.ht,"bytes",sizeof("bytes"),(void **) &pvalue)== SUCCESS){
 				SEPARATE_ZVAL(pvalue);
 				convert_to_long(*pvalue);
 				bod->size.bytes=(*pvalue)->value.lval;
 			}
-			if(_php3_hash_find(data->value.ht,"md5",sizeof("md5"),(void **) &pvalue)== SUCCESS){
+			if(zend_hash_find(data->value.ht,"md5",sizeof("md5"),(void **) &pvalue)== SUCCESS){
 				SEPARATE_ZVAL(pvalue);
 				convert_to_string(*pvalue);
 				bod->md5=cpystr((*pvalue)->value.str.val);
 			}
-			_php3_hash_move_forward(body->value.ht);
+			zend_hash_move_forward(body->value.ht);
 		}
 	}
 
@@ -2641,21 +2641,21 @@ void mm_log (char *string,long errflg)
 {
 	switch ((short) errflg) {
 	case NIL:
-		/* php3_error(E_NOTICE,string); messages */
+		/* php_error(E_NOTICE,string); messages */
 		break;
 	case PARSE:
 	case WARN:
-		php3_error(E_WARNING,string); /* warnings */
+		php_error(E_WARNING,string); /* warnings */
 		break;
 	case ERROR:
-		php3_error(E_NOTICE,string);   /* errors */
+		php_error(E_NOTICE,string);   /* errors */
 		break;
 	}
 }
 
 void mm_dlog (char *string)
 {
-	php3_error(E_NOTICE,string);
+	php_error(E_NOTICE,string);
 }
 
 void mm_login (NETMBX *mb,char *user,char *pwd,long trial)

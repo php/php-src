@@ -172,7 +172,7 @@ PHPAPI int _php3_check_open_basedir(char *path)
 
 			ptr = end;
 		}
-		php3_error(E_WARNING, "open_basedir restriction in effect. File is in wrong directory.");
+		php_error(E_WARNING, "open_basedir restriction in effect. File is in wrong directory.");
 		efree(pathbuf);
 		return -1;
 	}
@@ -289,7 +289,7 @@ PHPAPI FILE *php3_fopen_for_parser(void)
 		fp = NULL;
 	}
 	if (!fp) {
-		php3_error(E_CORE_ERROR, "Unable to open %s", fn);
+		php_error(E_CORE_ERROR, "Unable to open %s", fn);
 		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
 		return NULL;
 	}
@@ -449,7 +449,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 	if (!strncasecmp(path, "http://", 7)) {
 		resource = url_parse((char *) path);
 		if (resource == NULL) {
-			php3_error(E_WARNING, "Invalid URL specified, %s", path);
+			php_error(E_WARNING, "Invalid URL specified, %s", path);
 			*issock = BAD_URL;
 			return NULL;
 		}
@@ -616,11 +616,11 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 	} else if (!strncasecmp(path, "ftp://", 6)) {
 		resource = url_parse((char *) path);
 		if (resource == NULL) {
-			php3_error(E_WARNING, "Invalid URL specified, %s", path);
+			php_error(E_WARNING, "Invalid URL specified, %s", path);
 			*issock = BAD_URL;
 			return NULL;
 		} else if (resource->path == NULL) {
-			php3_error(E_WARNING, "No file-path specified");
+			php_error(E_WARNING, "No file-path specified");
 			free_url(resource);
 			*issock = BAD_URL;
 			return NULL;
@@ -739,7 +739,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		if (mode[0] == 'r') {
 			/* when reading file, it must exist */
 			if (result > 299 || result < 200) {
-				php3_error(E_WARNING, "File not found");
+				php_error(E_WARNING, "File not found");
 				free_url(resource);
 				SOCK_FCLOSE(*socketd);
 				*socketd = 0;
@@ -749,7 +749,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		} else {
 			/* when writing file, it must NOT exist */
 			if (result <= 299 && result >= 200) {
-				php3_error(E_WARNING, "File already exists");
+				php_error(E_WARNING, "File already exists");
 				free_url(resource);
 				SOCK_FCLOSE(*socketd);
 				*socketd = 0;

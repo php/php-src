@@ -115,7 +115,7 @@ PHP_FUNCTION(chgrp)
 	if (group->type == IS_STRING) {
 		gr = getgrnam(group->value.str.val);
 		if (!gr) {
-			php3_error(E_WARNING, "unable to find gid for %s",
+			php_error(E_WARNING, "unable to find gid for %s",
 					   group->value.str.val);
 			RETURN_FALSE;
 		}
@@ -134,7 +134,7 @@ PHP_FUNCTION(chgrp)
 
 	ret = chown(filename->value.str.val, -1, gid);
 	if (ret == -1) {
-		php3_error(E_WARNING, "chgrp failed: %s", strerror(errno));
+		php_error(E_WARNING, "chgrp failed: %s", strerror(errno));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -159,7 +159,7 @@ PHP_FUNCTION(chown)
 	if (user->type == IS_STRING) {
 		pw = getpwnam(user->value.str.val);
 		if (!pw) {
-			php3_error(E_WARNING, "unable to find uid for %s",
+			php_error(E_WARNING, "unable to find uid for %s",
 					   user->value.str.val);
 			RETURN_FALSE;
 		}
@@ -178,7 +178,7 @@ PHP_FUNCTION(chown)
 
 	ret = chown(filename->value.str.val, uid, -1);
 	if (ret == -1) {
-		php3_error(E_WARNING, "chown failed: %s", strerror(errno));
+		php_error(E_WARNING, "chown failed: %s", strerror(errno));
 		RETURN_FALSE;
 	}
 #endif
@@ -207,7 +207,7 @@ PHP_FUNCTION(chmod)
 
 	ret = chmod(filename->value.str.val, mode->value.lval);
 	if (ret == -1) {
-		php3_error(E_WARNING, "chmod failed: %s", strerror(errno));
+		php_error(E_WARNING, "chmod failed: %s", strerror(errno));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -229,7 +229,7 @@ PHP_FUNCTION(touch)
 #ifndef HAVE_UTIME_NULL
 		newtime = (struct utimbuf *)emalloc(sizeof(struct utimbuf));
 		if (!newtime) {
-			php3_error(E_WARNING, "unable to emalloc memory for changing time");
+			php_error(E_WARNING, "unable to emalloc memory for changing time");
 			return;
 		}
 		newtime->actime = time(NULL);
@@ -238,7 +238,7 @@ PHP_FUNCTION(touch)
 	} else if (ac == 2 && getParameters(ht,2,&filename,&filetime) != FAILURE) {
 		newtime = (struct utimbuf *)emalloc(sizeof(struct utimbuf));
 		if (!newtime) {
-			php3_error(E_WARNING, "unable to emalloc memory for changing time");
+			php_error(E_WARNING, "unable to emalloc memory for changing time");
 			return;
 		}
 		convert_to_long(filetime);
@@ -262,7 +262,7 @@ PHP_FUNCTION(touch)
 	if (ret == -1) {
 		file = fopen(filename->value.str.val, "w");
 		if (file == NULL) {
-			php3_error(E_WARNING, "unable to create file %s because %s", filename->value.str.val, strerror(errno));
+			php_error(E_WARNING, "unable to create file %s because %s", filename->value.str.val, strerror(errno));
 			if (newtime) efree(newtime);
 			RETURN_FALSE;
 		}
@@ -272,7 +272,7 @@ PHP_FUNCTION(touch)
 	ret = utime(filename->value.str.val, newtime);
 	if (newtime) efree(newtime);
 	if (ret == -1) {
-		php3_error(E_WARNING, "utime failed: %s", strerror(errno));
+		php_error(E_WARNING, "utime failed: %s", strerror(errno));
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -308,7 +308,7 @@ static void _php3_stat(const char *filename, int type, pval *return_value)
 #endif
 		if (stat(CurrentStatFile,&sb)==-1) {
 			if (type != 15 || errno != ENOENT) { /* fileexists() test must print no error */
-				php3_error(E_NOTICE,"stat failed for %s (errno=%d - %s)",CurrentStatFile,errno,strerror(errno));
+				php_error(E_NOTICE,"stat failed for %s (errno=%d - %s)",CurrentStatFile,errno,strerror(errno));
 			}
 			efree(CurrentStatFile);
 			CurrentStatFile=NULL;
@@ -325,7 +325,7 @@ static void _php3_stat(const char *filename, int type, pval *return_value)
 
 		if (!lsb.st_mode) {
 			if (lstat(CurrentStatFile,&lsb) == -1) {
-				php3_error(E_NOTICE,"lstat failed for %s (errno=%d - %s)",CurrentStatFile,errno,strerror(errno));
+				php_error(E_NOTICE,"lstat failed for %s (errno=%d - %s)",CurrentStatFile,errno,strerror(errno));
 				RETURN_FALSE;
 			}
 		}
@@ -362,7 +362,7 @@ static void _php3_stat(const char *filename, int type, pval *return_value)
 		case S_IFBLK: RETURN_STRING("block",1);
 		case S_IFREG: RETURN_STRING("file",1);
 		}
-		php3_error(E_WARNING,"Unknown file type (%d)",sb.st_mode&S_IFMT);
+		php_error(E_WARNING,"Unknown file type (%d)",sb.st_mode&S_IFMT);
 		RETURN_STRING("unknown",1);
 	case 9: /*is writable*/
 		RETURN_LONG((sb.st_mode&S_IWRITE)!=0);
@@ -418,7 +418,7 @@ static void _php3_stat(const char *filename, int type, pval *return_value)
 #endif
 		return;
 	}
-	php3_error(E_WARNING, "didn't understand stat call");
+	php_error(E_WARNING, "didn't understand stat call");
 	RETURN_FALSE;
 }
 

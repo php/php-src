@@ -96,7 +96,7 @@ PHP_FUNCTION(opendir)
 	
 	dirp = opendir(arg->value.str.val);
 	if (!dirp) {
-		php3_error(E_WARNING, "OpenDir: %s (errno %d)", strerror(errno),errno);
+		php_error(E_WARNING, "OpenDir: %s (errno %d)", strerror(errno),errno);
 		RETURN_FALSE;
 	}
 	ret = php3_list_insert(dirp, le_dirp);
@@ -117,8 +117,8 @@ PHP_FUNCTION(closedir)
 	if (ARG_COUNT(ht) == 0) {
 		id = getThis();
 		if (id) {
-			if (_php3_hash_find(id->value.obj.properties, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) {
-				php3_error(E_WARNING, "unable to find my handle property");
+			if (zend_hash_find(id->value.obj.properties, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) {
+				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
 			id_to_find = (*tmp)->value.lval;
@@ -134,7 +134,7 @@ PHP_FUNCTION(closedir)
 		
 	dirp = (DIR *)php3_list_find(id_to_find, &dirp_type);
 	if (!dirp || dirp_type != le_dirp) {
-		php3_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
+		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
 	}
 	php3_list_delete(id_to_find);
@@ -155,7 +155,7 @@ PHP_FUNCTION(chdir)
 	ret = chdir(arg->value.str.val);
 
 	if (ret < 0) {
-		php3_error(E_WARNING, "ChDir: %s (errno %d)", strerror(errno), errno);
+		php_error(E_WARNING, "ChDir: %s (errno %d)", strerror(errno), errno);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -174,8 +174,8 @@ PHP_FUNCTION(rewinddir)
 	if (ARG_COUNT(ht) == 0) {
 		id = getThis();
 		if (id) {
-			if (_php3_hash_find(id->value.obj.properties, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) {
-				php3_error(E_WARNING, "unable to find my handle property");
+			if (zend_hash_find(id->value.obj.properties, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) {
+				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
 			id_to_find = (*tmp)->value.lval;
@@ -191,7 +191,7 @@ PHP_FUNCTION(rewinddir)
 		
 	dirp = (DIR *)php3_list_find(id_to_find, &dirp_type);
 	if (!dirp || dirp_type != le_dirp) {
-		php3_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
+		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
 	}
 	rewinddir(dirp);
@@ -211,8 +211,8 @@ PHP_FUNCTION(readdir)
 	if (ARG_COUNT(ht) == 0) {
 		id = getThis();
 		if (id) {
-			if (_php3_hash_find(id->value.obj.properties, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) {
-				php3_error(E_WARNING, "unable to find my handle property");
+			if (zend_hash_find(id->value.obj.properties, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) {
+				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
 			id_to_find = (*tmp)->value.lval;
@@ -228,7 +228,7 @@ PHP_FUNCTION(readdir)
 		
 	dirp = (DIR *)php3_list_find(id_to_find, &dirp_type);
 	if (!dirp || dirp_type != le_dirp) {
-		php3_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
+		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
 	}
 	direntp = readdir(dirp);
@@ -257,7 +257,7 @@ PHP_FUNCTION(getdir)
 	
 	dirp = opendir(arg->value.str.val);
 	if (!dirp) {
-		php3_error(E_WARNING, "OpenDir: %s (errno %d)", strerror(errno), errno);
+		php_error(E_WARNING, "OpenDir: %s (errno %d)", strerror(errno), errno);
 		RETURN_FALSE;
 	}
 	ret = php3_list_insert(dirp, le_dirp);

@@ -161,7 +161,7 @@ static void _close_ldap_link(LDAP *ld)
 {
 	LDAP_TLS_VARS;
   	ldap_unbind_s(ld);
-	/* php3_printf("Freeing ldap connection");*/
+	/* php_printf("Freeing ldap connection");*/
 	LDAP_GLOBAL(num_links)--;
 }
 
@@ -275,7 +275,7 @@ PHP_MINFO_FUNCTION(ldap)
 		maxl[15] = 0;
 	}
 
-	php3_printf("<table>"
+	php_printf("<table>"
 				"<tr><td>Total links:</td><td>%d/%s</td></tr>\n"
 		        "<tr><td>RCS Version:</td><td>$Id$</td></tr>\n"
 #if HAVE_NSLDAP
@@ -290,12 +290,12 @@ PHP_MINFO_FUNCTION(ldap)
 				);
 #if HAVE_NSLDAP
 	if ( ver.security_level != LDAP_SECURITY_NONE ) {
-	   php3_printf( "<tr><td>Level of encryption:</td><td>%d bits</td></tr>\n", ver.security_level );
+	   php_printf( "<tr><td>Level of encryption:</td><td>%d bits</td></tr>\n", ver.security_level );
 	} else {
-	   php3_printf( "<tr><td>SSL not enabled.</td><td></td></tr>\n" );
+	   php_printf( "<tr><td>SSL not enabled.</td><td></td></tr>\n" );
 	}
 #endif
-	php3_printf("</table>\n");
+	php_printf("</table>\n");
 
 }
 
@@ -360,7 +360,7 @@ PHP_FUNCTION(ldap_connect)
 	}
 
 	if (LDAP_GLOBAL(max_links)!=-1 && LDAP_GLOBAL(num_links)>=LDAP_GLOBAL(max_links)) {
-	  php3_error(E_WARNING, "LDAP: Too many open links (%d)", LDAP_GLOBAL(num_links));
+	  php_error(E_WARNING, "LDAP: Too many open links (%d)", LDAP_GLOBAL(num_links));
 	  RETURN_FALSE;
 	}
 
@@ -385,7 +385,7 @@ static LDAP * _get_ldap_link(pval *link, HashTable *list)
 	ldap = (LDAP *) php3_list_find(link->value.lval, &type);
 	
 	if (!ldap || !(type == LDAP_GLOBAL(le_link))) {
-	  php3_error(E_WARNING, "%d is not a LDAP link index", link->value.lval);
+	  php_error(E_WARNING, "%d is not a LDAP link index", link->value.lval);
 	  return NULL;
 	}
 	return ldap;
@@ -402,7 +402,7 @@ static LDAPMessage * _get_ldap_result(pval *result, HashTable *list)
 	ldap_result = (LDAPMessage *) php3_list_find(result->value.lval, &type);
 
 	if (!ldap_result || type != LDAP_GLOBAL(le_result)) {
-		php3_error(E_WARNING, "%d is not a LDAP result index", result->value.lval);
+		php_error(E_WARNING, "%d is not a LDAP result index", result->value.lval);
 		return NULL;
 	}
 
@@ -420,7 +420,7 @@ static LDAPMessage * _get_ldap_result_entry(pval *result, HashTable *list)
 	ldap_result_entry = (LDAPMessage *) php3_list_find(result->value.lval, &type);
 
 	if (!ldap_result_entry || type != LDAP_GLOBAL(le_result_entry)) {
-		php3_error(E_WARNING, "%d is not a LDAP result entry index", result->value.lval);
+		php_error(E_WARNING, "%d is not a LDAP result entry index", result->value.lval);
 		return NULL;
 	}
 
@@ -438,7 +438,7 @@ static BerElement * _get_ber_entry(pval *berp, HashTable *list)
 	ber = (BerElement *) php3_list_find(berp->value.lval, &type);
 
 	if ( type != LDAP_GLOBAL(le_ber_entry)) {
-		php3_error(E_WARNING, "%d is not a BerElement index", berp->value.lval);
+		php_error(E_WARNING, "%d is not a BerElement index", berp->value.lval);
 		return NULL;
 	}
 
@@ -501,9 +501,9 @@ PHP_FUNCTION(ldap_bind)
 #if !HAVE_NSLDAP
 #if LDAP_API_VERSION > 2000
 		/* New versions of OpenLDAP do it this way */
-		php3_error(E_WARNING,"LDAP:  Unable to bind to server: %s",ldap_err2string(ldap_get_lderrno(ldap,NULL,NULL)));
+		php_error(E_WARNING,"LDAP:  Unable to bind to server: %s",ldap_err2string(ldap_get_lderrno(ldap,NULL,NULL)));
 #else
-		php3_error(E_WARNING,"LDAP:  Unable to bind to server: %s",ldap_err2string(ldap->ld_errno));
+		php_error(E_WARNING,"LDAP:  Unable to bind to server: %s",ldap_err2string(ldap->ld_errno));
 #endif
 #endif
 		RETURN_FALSE;
@@ -566,7 +566,7 @@ static void php3_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			}
 
 			if (attrs->type != IS_ARRAY) {
-				php3_error(E_WARNING, "LDAP: Expected Array as last element");
+				php_error(E_WARNING, "LDAP: Expected Array as last element");
 				RETURN_FALSE;
 			}
 
@@ -576,16 +576,16 @@ static void php3_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			ldap_base_dn = base_dn->value.str.val;
 			ldap_filter = filter->value.str.val;
 
-			num_attribs = _php3_hash_num_elements(attrs->value.ht);
+			num_attribs = zend_hash_num_elements(attrs->value.ht);
 			if ((ldap_attrs = emalloc((num_attribs+1) * sizeof(char *))) == NULL) {
-				php3_error(E_WARNING, "LDAP: Could not allocate memory");
+				php_error(E_WARNING, "LDAP: Could not allocate memory");
 				RETURN_FALSE;
 				return;
 			}
 
 			for(i=0; i<num_attribs; i++) {
-				if (_php3_hash_index_find(attrs->value.ht, i, (void **) &attr) == FAILURE) {
-					php3_error(E_WARNING, "LDAP: Array initialization wrong");
+				if (zend_hash_index_find(attrs->value.ht, i, (void **) &attr) == FAILURE) {
+					php_error(E_WARNING, "LDAP: Array initialization wrong");
 					RETURN_FALSE;
 					return;
 				}
@@ -617,9 +617,9 @@ static void php3_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	if (ldap_search_s(ldap, ldap_base_dn, scope, ldap_filter, ldap_attrs, attrsonly, &ldap_result) != LDAP_SUCCESS) {
 #if !HAVE_NSLDAP
 #if LDAP_API_VERSION > 2000
-		php3_error(E_WARNING,"LDAP:  Unable to perform the search: %s",ldap_err2string(ldap_get_lderrno(ldap,NULL,NULL)));
+		php_error(E_WARNING,"LDAP:  Unable to perform the search: %s",ldap_err2string(ldap_get_lderrno(ldap,NULL,NULL)));
 #else
-		php3_error(E_WARNING, "LDAP: Unable to perform the search: %s", ldap_err2string(ldap->ld_errno));
+		php_error(E_WARNING, "LDAP: Unable to perform the search: %s", ldap_err2string(ldap->ld_errno));
 #endif
 #endif
 		RETVAL_FALSE;
@@ -822,7 +822,7 @@ PHP_FUNCTION(ldap_get_entries)
 			}	
 			ldap_value_free(ldap_value);
 
-			_php3_hash_update(tmp1->value.ht, _php3_strtolower(attribute), strlen(attribute)+1, (void *) &tmp2, sizeof(pval *), NULL);
+			zend_hash_update(tmp1->value.ht, _php3_strtolower(attribute), strlen(attribute)+1, (void *) &tmp2, sizeof(pval *), NULL);
 			add_index_string(tmp1, attr_count, attribute, 1);
 
 			attr_count++;
@@ -833,7 +833,7 @@ PHP_FUNCTION(ldap_get_entries)
 		dn = ldap_get_dn(ldap, ldap_result_entry);
 		add_assoc_string(tmp1, "dn", dn, 1);
 
-		_php3_hash_index_update(return_value->value.ht, entry_count, (void *) &tmp1, sizeof(pval *), NULL);
+		zend_hash_index_update(return_value->value.ht, entry_count, (void *) &tmp1, sizeof(pval *), NULL);
 		
 		entry_count++;
 		ldap_result_entry = ldap_next_entry(ldap, ldap_result_entry);
@@ -959,7 +959,7 @@ PHP_FUNCTION(ldap_get_attributes)
 		}
 		ldap_value_free(ldap_value);
 
-		_php3_hash_update(return_value->value.ht, attribute, strlen(attribute)+1, (void *) &tmp, sizeof(pval *), NULL);
+		zend_hash_update(return_value->value.ht, attribute, strlen(attribute)+1, (void *) &tmp, sizeof(pval *), NULL);
 		add_index_string(return_value, count, attribute, 1);
 
 		count++;
@@ -997,9 +997,9 @@ PHP_FUNCTION(ldap_get_values)
 	if ((ldap_value = ldap_get_values(ldap, ldap_result_entry, attribute)) == NULL) {
 #if !HAVE_NSLDAP
 #if LDAP_API_VERSION > 2000
-		php3_error(E_WARNING, "LDAP: Cannot get the value(s) of attribute %s", ldap_err2string(ldap_get_lderrno(ldap,NULL,NULL)));
+		php_error(E_WARNING, "LDAP: Cannot get the value(s) of attribute %s", ldap_err2string(ldap_get_lderrno(ldap,NULL,NULL)));
 #else
-		php3_error(E_WARNING, "LDAP: Cannot get the value(s) of attribute %s", ldap_err2string(ldap->ld_errno));
+		php_error(E_WARNING, "LDAP: Cannot get the value(s) of attribute %s", ldap_err2string(ldap->ld_errno));
 #endif
 #endif
 		RETURN_FALSE;
@@ -1132,7 +1132,7 @@ static void php3_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	}	
 
 	if (entry->type != IS_ARRAY) {
-		php3_error(E_WARNING, "LDAP: Expected Array as the last element");
+		php_error(E_WARNING, "LDAP: Expected Array as the last element");
 		RETURN_FALSE;
 	}
 
@@ -1142,11 +1142,11 @@ static void php3_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	convert_to_string(dn);
 	ldap_dn = dn->value.str.val;
 
-	num_attribs = _php3_hash_num_elements(entry->value.ht);
+	num_attribs = zend_hash_num_elements(entry->value.ht);
 
 	ldap_mods = emalloc((num_attribs+1) * sizeof(LDAPMod *));
 
-	_php3_hash_internal_pointer_reset(entry->value.ht);
+	zend_hash_internal_pointer_reset(entry->value.ht);
         /* added by gerrit thomson to fix ldap_add using ldap_mod_add */
         if ( oper == PHP_LD_FULL_ADD )
         {
@@ -1160,19 +1160,19 @@ static void php3_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 
 		ldap_mods[i]->mod_op = oper;
 
-		if (_php3_hash_get_current_key(entry->value.ht, &attribute, &index) == HASH_KEY_IS_STRING) {
+		if (zend_hash_get_current_key(entry->value.ht, &attribute, &index) == HASH_KEY_IS_STRING) {
 			ldap_mods[i]->mod_type = estrdup(attribute);
 			efree(attribute);
 		} else {
-			php3_error(E_WARNING, "LDAP: Unknown Attribute in the data");
+			php_error(E_WARNING, "LDAP: Unknown Attribute in the data");
 		}
 
-		_php3_hash_get_current_data(entry->value.ht, (void **) &value);
+		zend_hash_get_current_data(entry->value.ht, (void **) &value);
 
 		if (value->type != IS_ARRAY) {
 			num_values = 1;
 		} else {
-			num_values = _php3_hash_num_elements(value->value.ht);
+			num_values = zend_hash_num_elements(value->value.ht);
 		}
 
 		ldap_mods[i]->mod_values = emalloc((num_values+1) * sizeof(char *));
@@ -1184,14 +1184,14 @@ static void php3_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 			ldap_mods[i]->mod_values[0] = value->value.str.val;
 		} else {	
 			for(j=0; j<num_values; j++) {
-				_php3_hash_index_find(value->value.ht, j, (void **) &ivalue);
+				zend_hash_index_find(value->value.ht, j, (void **) &ivalue);
 				convert_to_string(ivalue);
 				ldap_mods[i]->mod_values[j] = ivalue->value.str.val;
 			}
 		}
 		ldap_mods[i]->mod_values[num_values] = NULL;
 
-		_php3_hash_move_forward(entry->value.ht);
+		zend_hash_move_forward(entry->value.ht);
 	}
 	ldap_mods[num_attribs] = NULL;
 
@@ -1200,12 +1200,12 @@ static void php3_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
         if (is_full_add == 1) {
 		if (ldap_add_s(ldap, ldap_dn, ldap_mods) != LDAP_SUCCESS) {
 			ldap_perror(ldap, "LDAP");
-			php3_error(E_WARNING, "LDAP: add operation could not be completed.");
+			php_error(E_WARNING, "LDAP: add operation could not be completed.");
 			RETVAL_FALSE;
 		} else RETVAL_TRUE;
 	} else {
 		if (ldap_modify_s(ldap, ldap_dn, ldap_mods) != LDAP_SUCCESS) {
-			php3_error(E_WARNING, "LDAP: modify operation could not be completed.");
+			php_error(E_WARNING, "LDAP: modify operation could not be completed.");
 			RETVAL_FALSE;
 		} else RETVAL_TRUE;	
 	}

@@ -571,12 +571,12 @@ PHP_FUNCTION(base_convert)
 	convert_to_long(frombase);
 	convert_to_long(tobase);
 	if (frombase->value.lval < 2 || frombase->value.lval > 36) {
-		php3_error(E_WARNING, "base_convert: invalid `from base' (%d)",
+		php_error(E_WARNING, "base_convert: invalid `from base' (%d)",
 				   frombase->value.lval);
 		RETURN_FALSE;
 	}
 	if (tobase->value.lval < 2 || tobase->value.lval > 36) {
-		php3_error(E_WARNING, "base_convert: invalid `to base' (%d)",
+		php_error(E_WARNING, "base_convert: invalid `to base' (%d)",
 				   tobase->value.lval);
 		RETURN_FALSE;
 	}
@@ -602,7 +602,7 @@ char *_php3_number_format(double d,int dec,char dec_point,char thousand_sep)
 	dec = MAX(0,dec);
 	tmpbuf = (char *) emalloc(32+dec);
 	
-	tmplen=_php3_sprintf(tmpbuf,"%.*f",dec,d);
+	tmplen=php_sprintf(tmpbuf,"%.*f",dec,d);
 
 	if (!isdigit(tmpbuf[0])) {
 		return tmpbuf;

@@ -101,8 +101,8 @@ static void _php_pcre_shutdown_globals(php_pcre_globals *pcre_globals)
 /* {{{ void php_info_pcre(ZEND_MODULE_INFO_FUNC_ARGS) */
 void php_info_pcre(ZEND_MODULE_INFO_FUNC_ARGS)
 {
-	php3_printf("Perl Compatible Regular Expressions");
-	php3_printf("<table cellpadding=5>"
+	php_printf("Perl Compatible Regular Expressions");
+	php_printf("<table cellpadding=5>"
 				"<tr><td>PCRE library version:</td>"
 				"<td>%s</td></tr>"
 				"</table>", pcre_version());

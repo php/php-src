@@ -152,7 +152,7 @@ int php3_minit_pdf(INIT_FUNC_ARGS)
 
 void php3_info_pdf(ZEND_MODULE_INFO_FUNC_ARGS) {
 	/* need to use a PHPAPI function here because it is external module in windows */
-	php3_printf("%s. AFM files in %s", PDFLIB_VERSION, PDF_DEFAULT_FONT_PATH);
+	php_printf("%s. AFM files in %s", PDFLIB_VERSION, PDF_DEFAULT_FONT_PATH);
 }
 
 int php3_mend_pdf(void){
@@ -169,7 +169,7 @@ PHP_FUNCTION(pdf_get_info) {
 	pdf_info = PDF_get_info();
 
 	if(!pdf_info) {
-		php3_error(E_WARNING, "Could not get PDF info");
+		php_error(E_WARNING, "Could not get PDF info");
 		RETURN_FALSE;
 	}
 
@@ -196,7 +196,7 @@ PHP_FUNCTION(pdf_set_info_creator) {
 	id=arg1->value.lval;
 	pdf_info = php3_list_find(id,&type);
 	if (!pdf_info || type!=PDF_GLOBAL(le_pdf_info)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
+		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
@@ -224,7 +224,7 @@ PHP_FUNCTION(pdf_set_info_title) {
 	id=arg1->value.lval;
 	pdf_info = php3_list_find(id,&type);
 	if (!pdf_info || type!=PDF_GLOBAL(le_pdf_info)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
+		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
@@ -252,7 +252,7 @@ PHP_FUNCTION(pdf_set_info_subject) {
 	id=arg1->value.lval;
 	pdf_info = php3_list_find(id,&type);
 	if (!pdf_info || type!=PDF_GLOBAL(le_pdf_info)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
+		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
@@ -280,7 +280,7 @@ PHP_FUNCTION(pdf_set_info_author) {
 	id=arg1->value.lval;
 	pdf_info = php3_list_find(id,&type);
 	if (!pdf_info || type!=PDF_GLOBAL(le_pdf_info)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
+		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
@@ -308,7 +308,7 @@ PHP_FUNCTION(pdf_set_info_keywords) {
 	id=arg1->value.lval;
 	pdf_info = php3_list_find(id,&type);
 	if (!pdf_info || type!=PDF_GLOBAL(le_pdf_info)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
+		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
@@ -339,14 +339,14 @@ PHP_FUNCTION(pdf_open) {
 	id=file->value.lval;
 	fp = php3_list_find(id,&type);
 	if (!fp || type!=php3i_get_le_fp()) {
-		php3_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
+		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
 	id=info->value.lval;
 	pdf_info = php3_list_find(id,&type);
 	if (!pdf_info || type!=PDF_GLOBAL(le_pdf_info)) {
-		php3_error(E_WARNING,"Unable to find pdf info identifier %d (%d!=%d)",id, type, PDF_GLOBAL(le_pdf_info));
+		php_error(E_WARNING,"Unable to find pdf info identifier %d (%d!=%d)",id, type, PDF_GLOBAL(le_pdf_info));
 		RETURN_FALSE;
 	}
 
@@ -375,7 +375,7 @@ PHP_FUNCTION(pdf_close) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -406,7 +406,7 @@ PHP_FUNCTION(pdf_begin_page) {
 	width = arg3->value.dval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -432,7 +432,7 @@ PHP_FUNCTION(pdf_end_page) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -459,7 +459,7 @@ PHP_FUNCTION(pdf_show) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -488,7 +488,7 @@ PHP_FUNCTION(pdf_show_xy) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -517,7 +517,7 @@ PHP_FUNCTION(pdf_set_font) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	
@@ -544,7 +544,7 @@ PHP_FUNCTION(pdf_set_leading) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	
@@ -571,7 +571,7 @@ PHP_FUNCTION(pdf_set_text_rendering) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	
@@ -598,7 +598,7 @@ PHP_FUNCTION(pdf_set_horiz_scaling) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	
@@ -625,7 +625,7 @@ PHP_FUNCTION(pdf_set_text_rise) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	
@@ -656,26 +656,26 @@ PHP_FUNCTION(pdf_set_text_matrix) {
 	matrix=arg2->value.ht;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	
-	if(_php3_hash_num_elements(matrix) != 6) {
-		 php3_error(E_WARNING,"Text matrix must have 6 elements");
+	if(zend_hash_num_elements(matrix) != 6) {
+		 php_error(E_WARNING,"Text matrix must have 6 elements");
 		RETURN_FALSE;
 	}
 
 	pdfmatrixptr = (float *) &pdfmatrix;
-	_php3_hash_internal_pointer_reset(matrix);
-	for(i=0; i<_php3_hash_num_elements(matrix); i++) {
-		_php3_hash_get_current_data(matrix, (void *) &data);
+	zend_hash_internal_pointer_reset(matrix);
+	for(i=0; i<zend_hash_num_elements(matrix); i++) {
+		zend_hash_get_current_data(matrix, (void *) &data);
 		switch(data->type) {
 			case IS_DOUBLE:
 				*pdfmatrixptr++ = (float) data->value.dval;
 			default:
 				*pdfmatrixptr++ = 0.0;
 		}
-		_php3_hash_move_forward(matrix);
+		zend_hash_move_forward(matrix);
 	}
 
 	PDF_set_text_matrix(pdf, pdfmatrix);
@@ -702,7 +702,7 @@ PHP_FUNCTION(pdf_set_text_pos) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -729,7 +729,7 @@ PHP_FUNCTION(pdf_set_char_spacing) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -756,7 +756,7 @@ PHP_FUNCTION(pdf_set_word_spacing) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -783,7 +783,7 @@ PHP_FUNCTION(pdf_continue_text) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -811,7 +811,7 @@ PHP_FUNCTION(pdf_stringwidth) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -837,7 +837,7 @@ PHP_FUNCTION(pdf_save) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -863,7 +863,7 @@ PHP_FUNCTION(pdf_restore) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -891,7 +891,7 @@ PHP_FUNCTION(pdf_translate) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -919,7 +919,7 @@ PHP_FUNCTION(pdf_scale) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -946,7 +946,7 @@ PHP_FUNCTION(pdf_rotate) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -973,12 +973,12 @@ PHP_FUNCTION(pdf_setflat) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
 	if((arg2->value.lval > 100) && (arg2->value.lval < 0)) {
-		php3_error(E_WARNING,"Parameter of pdf_setflat() has to between 0 and 100");
+		php_error(E_WARNING,"Parameter of pdf_setflat() has to between 0 and 100");
 		RETURN_FALSE;
 	}
 
@@ -1005,12 +1005,12 @@ PHP_FUNCTION(pdf_setlinejoin) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
 	if((arg2->value.lval > 2) && (arg2->value.lval < 0)) {
-		php3_error(E_WARNING,"Parameter of pdf_setlinejoin() has to between 0 and 2");
+		php_error(E_WARNING,"Parameter of pdf_setlinejoin() has to between 0 and 2");
 		RETURN_FALSE;
 	}
 
@@ -1037,12 +1037,12 @@ PHP_FUNCTION(pdf_setlinecap) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
 	if((arg2->value.lval > 2) && (arg2->value.lval < 0)) {
-		php3_error(E_WARNING,"Parameter of pdf_setlinecap() has to be > 0 and =< 2");
+		php_error(E_WARNING,"Parameter of pdf_setlinecap() has to be > 0 and =< 2");
 		RETURN_FALSE;
 	}
 
@@ -1069,12 +1069,12 @@ PHP_FUNCTION(pdf_setmiterlimit) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
 	if(arg2->value.dval < 1) {
-		php3_error(E_WARNING,"Parameter of pdf_setmiterlimit() has to be >= 1");
+		php_error(E_WARNING,"Parameter of pdf_setmiterlimit() has to be >= 1");
 		RETURN_FALSE;
 	}
 
@@ -1101,7 +1101,7 @@ PHP_FUNCTION(pdf_setlinewidth) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1129,7 +1129,7 @@ PHP_FUNCTION(pdf_setdash) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1157,7 +1157,7 @@ PHP_FUNCTION(pdf_moveto) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1189,7 +1189,7 @@ PHP_FUNCTION(pdf_curveto) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1222,7 +1222,7 @@ PHP_FUNCTION(pdf_lineto) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1251,7 +1251,7 @@ PHP_FUNCTION(pdf_circle) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1282,7 +1282,7 @@ PHP_FUNCTION(pdf_arc) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1312,7 +1312,7 @@ PHP_FUNCTION(pdf_rect) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1341,7 +1341,7 @@ PHP_FUNCTION(pdf_closepath) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1367,7 +1367,7 @@ PHP_FUNCTION(pdf_closepath_stroke) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1393,7 +1393,7 @@ PHP_FUNCTION(pdf_stroke) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1419,7 +1419,7 @@ PHP_FUNCTION(pdf_fill) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1445,7 +1445,7 @@ PHP_FUNCTION(pdf_fill_stroke) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1471,7 +1471,7 @@ PHP_FUNCTION(pdf_closepath_fill_stroke) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1497,7 +1497,7 @@ PHP_FUNCTION(pdf_endpath) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1523,7 +1523,7 @@ PHP_FUNCTION(pdf_clip) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1550,7 +1550,7 @@ PHP_FUNCTION(pdf_setgray_fill) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1577,7 +1577,7 @@ PHP_FUNCTION(pdf_setgray_stroke) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1604,7 +1604,7 @@ PHP_FUNCTION(pdf_setgray) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1631,7 +1631,7 @@ PHP_FUNCTION(pdf_setrgbcolor_fill) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1658,7 +1658,7 @@ PHP_FUNCTION(pdf_setrgbcolor_stroke) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1685,7 +1685,7 @@ PHP_FUNCTION(pdf_setrgbcolor) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1712,7 +1712,7 @@ PHP_FUNCTION(pdf_add_outline) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1739,7 +1739,7 @@ PHP_FUNCTION(pdf_set_transition) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1766,7 +1766,7 @@ PHP_FUNCTION(pdf_set_duration) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 

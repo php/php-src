@@ -109,7 +109,7 @@ typedef struct dba_handler {
 #define DBA_ID_GET \
 	convert_to_long(id); \
 	DBA_IF_NOT_CORRECT_TYPE(id->value.lval) { \
-		php3_error(E_WARNING, "Unable to find DBA identifier %d", id->value.lval); \
+		php_error(E_WARNING, "Unable to find DBA identifier %d", id->value.lval); \
 		RETURN_FALSE; \
 	}
 	
@@ -128,7 +128,7 @@ typedef struct dba_handler {
 /* check whether the user has write access */
 #define DBA_WRITE_CHECK \
 	if(info->mode != DBA_WRITER && info->mode != DBA_TRUNC && info->mode != DBA_CREAT) { \
-		php3_error(E_WARNING, "you cannot perform a modification to a database without proper access"); \
+		php_error(E_WARNING, "you cannot perform a modification to a database without proper access"); \
 		RETURN_FALSE; \
 	}
 
@@ -176,7 +176,7 @@ static void dba_close(dba_info *info)
 
 static PHP_MINIT_FUNCTION(dba)
 {
-	_php3_hash_init(&ht_keys, 0, NULL, NULL, 1);
+	zend_hash_init(&ht_keys, 0, NULL, NULL, 1);
 	GLOBAL(le_db) = register_list_destructors(dba_close, NULL);
 	GLOBAL(le_pdb) = register_list_destructors(NULL, dba_close);
 	return SUCCESS;
@@ -186,7 +186,7 @@ static PHP_MINIT_FUNCTION(dba)
 
 static PHP_MSHUTDOWN_FUNCTION(dba)
 {
-	_php3_hash_destroy(&ht_keys);
+	zend_hash_destroy(&ht_keys);
 	return SUCCESS;
 }
 /* }}} */
@@ -267,7 +267,7 @@ static void _php3_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			keylen += args[i]->value.str.len;
 		}
 		
-		if(_php3_hash_find(&ht_keys, key, keylen, (void **) &info) == SUCCESS) {
+		if(zend_hash_find(&ht_keys, key, keylen, (void **) &info) == SUCCESS) {
 			FREENOW;
 			RETURN_LONG(php3_list_insert(info, GLOBAL(le_pdb)));
 		}
@@ -278,7 +278,7 @@ static void _php3_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			strcasecmp(hptr->name, args[2]->value.str.val); hptr++);
 
 	if(!hptr->name) {
-		php3_error(E_WARNING, "no such handler: %s", args[2]->value.str.val);
+		php_error(E_WARNING, "no such handler: %s", args[2]->value.str.val);
 		FREENOW;
 		RETURN_FALSE;
 	}
@@ -297,7 +297,7 @@ static void _php3_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			modenr = DBA_TRUNC;
 			break;
 		default:
-			php3_error(E_WARNING,"illegal DBA mode: %s",args[1]->value.str.val);
+			php_error(E_WARNING,"illegal DBA mode: %s",args[1]->value.str.val);
 			FREENOW;
 			RETURN_FALSE;
 	}
@@ -312,7 +312,7 @@ static void _php3_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if(hptr->open(info) != SUCCESS) {
 		dba_close(info);
-		php3_error(E_WARNING, "driver initialization failed");
+		php_error(E_WARNING, "driver initialization failed");
 		FREENOW;
 		RETURN_FALSE;
 	}
@@ -322,7 +322,7 @@ static void _php3_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	listid = php3_list_insert(info, persistent?GLOBAL(le_pdb):GLOBAL(le_db));
 	if(persistent) {
-		_php3_hash_update(&ht_keys, key, keylen, info, sizeof(*info), NULL);
+		zend_hash_update(&ht_keys, key, keylen, info, sizeof(*info), NULL);
 	}
 	
 	FREENOW;

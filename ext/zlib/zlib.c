@@ -70,7 +70,7 @@
 #include "dl/phpdl.h"
 #endif
 #ifndef PUTS
-#define PUTS(a) php3_printf("%s",a)
+#define PUTS(a) php_printf("%s",a)
 #endif
 #ifndef PUTC
 #define PUTC(a) PUTS(a)
@@ -333,7 +333,7 @@ PHP_FUNCTION(gzfile) {
 
 	zp = php3_gzopen_wrapper(filename->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE);
 	if (!zp) {
-		php3_error(E_WARNING,"gzFile(\"%s\") - %s",filename->value.str.val,strerror(errno));
+		php_error(E_WARNING,"gzFile(\"%s\") - %s",filename->value.str.val,strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -394,7 +394,7 @@ PHP_FUNCTION(gzopen) {
 	 */
 	zp = php3_gzopen_wrapper(arg1->value.str.val, p, use_include_path|ENFORCE_SAFE_MODE);
 	if (!zp) {
-		php3_error(E_WARNING,"gzopen(\"%s\",\"%s\") - %s",
+		php_error(E_WARNING,"gzopen(\"%s\",\"%s\") - %s",
 					arg1->value.str.val, p, strerror(errno));
 		efree(p);
 		RETURN_FALSE;
@@ -421,7 +421,7 @@ PHP_FUNCTION(gzclose) {
 	id=arg1->value.lval;
 	zp = php3_list_find(id,&type);
 	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php3_error(E_WARNING,"Unable to find gz-file identifier %d",id);
+		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
 		RETURN_FALSE;
 	}
 	php3_list_delete(id);
@@ -444,7 +444,7 @@ PHP_FUNCTION(gzeof) {
 	id = arg1->value.lval;
 	zp = php3_list_find(id,&type);
 	if ((!zp || (type!=ZLIB_GLOBAL(le_zp)))) {
-		php3_error(E_WARNING,"Unable to find gz-file identifier %d",id);
+		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
 		/* we're at the eof if the file doesn't exist */
 		RETURN_TRUE;
 	}
@@ -475,7 +475,7 @@ PHP_FUNCTION(gzgets) {
 
 	zp = php3_list_find(id,&type);
 	if (!zp || (type!=ZLIB_GLOBAL(le_zp)))  {
-		php3_error(E_WARNING,"Unable to find gz-file identifier %d",id);
+		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
 		RETURN_FALSE;
 	}
 	buf = emalloc(sizeof(char) * (len + 1));
@@ -514,7 +514,7 @@ PHP_FUNCTION(gzgetc) {
 
 	zp = php3_list_find(id,&type);
 	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php3_error(E_WARNING,"Unable to find gz-file identifier %d",id);
+		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
 		RETURN_FALSE;
 	}
 	buf = emalloc(sizeof(char) * 2);
@@ -555,7 +555,7 @@ PHP_FUNCTION(gzgetss)
 
 	zp = php3_list_find(id,&type);
 	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php3_error(E_WARNING, "Unable to find gz-file identifier %d", id);
+		php_error(E_WARNING, "Unable to find gz-file identifier %d", id);
 		RETURN_FALSE;
 	}
 
@@ -685,7 +685,7 @@ PHP_FUNCTION(gzwrite) {
 
 	zp = php3_list_find(id,&type);
 	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php3_error(E_WARNING,"Unable to find gz-file identifier %d",id);
+		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -714,7 +714,7 @@ PHP_FUNCTION(gzrewind) {
 	id = arg1->value.lval;	
 	zp = php3_list_find(id,&type);
 	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php3_error(E_WARNING,"Unable to find gz-file identifier %d",id);
+		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
 		RETURN_FALSE;
 	}
 	gzrewind(zp);
@@ -738,7 +738,7 @@ PHP_FUNCTION(gztell) {
 	id = arg1->value.lval;	
 	zp = php3_list_find(id,&type);
 	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php3_error(E_WARNING,"Unable to find gz-file identifier %d",id);
+		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
 		RETURN_FALSE;
 	}
 	pos = gztell(zp);
@@ -764,7 +764,7 @@ PHP_FUNCTION(gzseek) {
 	id = arg1->value.lval;
 	zp = php3_list_find(id,&type);
 	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php3_error(E_WARNING,"Unable to find gz-file identifier %d",id);
+		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
 		RETURN_FALSE;
 	}
  	ret = gzseek(zp,pos,SEEK_SET);
@@ -810,7 +810,7 @@ PHP_FUNCTION(readgzfile) {
 	 */
 	zp = php3_gzopen_wrapper(arg1->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE);
 	if (!zp){
-		php3_error(E_WARNING,"ReadGzFile(\"%s\") - %s",arg1->value.str.val,strerror(errno));
+		php_error(E_WARNING,"ReadGzFile(\"%s\") - %s",arg1->value.str.val,strerror(errno));
 		RETURN_FALSE;
 	}
 	size= 0;
@@ -842,7 +842,7 @@ PHP_FUNCTION(gzpassthru) {
 	id = arg1->value.lval;
 	zp = php3_list_find(id,&type);
 	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php3_error(E_WARNING,"Unable to find gz-file identifier %d",id);
+		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
 		RETURN_FALSE;
 	}
 	size = 0;
@@ -875,7 +875,7 @@ PHP_FUNCTION(gzread)
 
 	zp = php3_list_find(id,&type);
 	if (!zp || (type!=ZLIB_GLOBAL(le_zp))) {
-		php3_error(E_WARNING,"Unable to find gz-file identifier %d",id);
+		php_error(E_WARNING,"Unable to find gz-file identifier %d",id);
 		RETURN_FALSE;
 	}
 	return_value->value.str.val = emalloc(sizeof(char) * (len + 1));

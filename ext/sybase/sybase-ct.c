@@ -81,7 +81,7 @@ THREAD_LS sybct_module php3_sybct_module;
 THREAD_LS static CS_CONTEXT *context;
 THREAD_LS static HashTable *resource_list,*resource_plist;
 
-#define CHECK_LINK(link) { if (link==-1) { php3_error(E_WARNING,"Sybase:  A link to the server could not be established"); RETURN_FALSE; } }
+#define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING,"Sybase:  A link to the server could not be established"); RETURN_FALSE; } }
 
 
 static int _clean_invalid_results(list_entry *le)
@@ -128,7 +128,7 @@ static void _close_sybct_link(sybct_link *sybct_ptr)
 	CS_INT con_status;
 
 	sybct_ptr->valid = 0;
-	_php3_hash_apply(resource_list,(int (*)(void *))_clean_invalid_results);
+	zend_hash_apply(resource_list,(int (*)(void *))_clean_invalid_results);
 
 	/* Non-persistent connections will always be connected or we wouldn't
 	 * get here, but since we want to check the death status anyway
@@ -136,7 +136,7 @@ static void _close_sybct_link(sybct_link *sybct_ptr)
 	 */
 	if (ct_con_props(sybct_ptr->connection, CS_GET, CS_CON_STATUS,
 					 &con_status, CS_UNUSED, NULL)!=CS_SUCCEED) {
-		php3_error(E_WARNING,"Sybase:  Unable to get connection status on close");
+		php_error(E_WARNING,"Sybase:  Unable to get connection status on close");
 		/* Assume the worst. */
 		con_status = CS_CONSTAT_CONNECTED | CS_CONSTAT_DEAD;
 	}
@@ -161,7 +161,7 @@ static void _close_sybct_plink(sybct_link *sybct_ptr)
 	 */
 	if (ct_con_props(sybct_ptr->connection, CS_GET, CS_CON_STATUS,
 					 &con_status, CS_UNUSED, NULL)!=CS_SUCCEED) {
-		php3_error(E_WARNING,"Sybase:  Unable to get connection status on close");
+		php_error(E_WARNING,"Sybase:  Unable to get connection status on close");
 		/* Assume the worst. */
 		con_status = CS_CONSTAT_CONNECTED | CS_CONSTAT_DEAD;
 	}
@@ -181,7 +181,7 @@ static void _close_sybct_plink(sybct_link *sybct_ptr)
 static CS_RETCODE _client_message_handler(CS_CONTEXT *context, CS_CONNECTION *connection, CS_CLIENTMSG *errmsg)
 {
 	if (CS_SEVERITY(errmsg->msgnumber) >= php3_sybct_module.min_client_severity) {
-		php3_error(E_WARNING,"Sybase:  Client message:  %s (severity %d)",errmsg->msgstring, CS_SEVERITY(errmsg->msgnumber));
+		php_error(E_WARNING,"Sybase:  Client message:  %s (severity %d)",errmsg->msgstring, CS_SEVERITY(errmsg->msgnumber));
 	}
 
 	/* If this is a timeout message, return CS_FAIL to cancel the
@@ -202,7 +202,7 @@ static CS_RETCODE _client_message_handler(CS_CONTEXT *context, CS_CONNECTION *co
 static CS_RETCODE _server_message_handler(CS_CONTEXT *context, CS_CONNECTION *connection, CS_SERVERMSG *srvmsg)
 {
 	if (srvmsg->severity >= php3_sybct_module.min_server_severity) {
-		php3_error(E_WARNING,"Sybase:  Server message:  %s (severity %d, procedure %s)",
+		php_error(E_WARNING,"Sybase:  Server message:  %s (severity %d, procedure %s)",
 					srvmsg->text, srvmsg->severity, ((srvmsg->proclen>0) ? srvmsg->proc : "N/A"));
 	}
 
@@ -235,10 +235,10 @@ int php3_minit_sybct(INIT_FUNC_ARGS)
 	/* Initialize message handlers */
 	
 	if (ct_callback(context, NULL, CS_SET, CS_SERVERMSG_CB, (CS_VOID *)_server_message_handler)!=CS_SUCCEED) {
-		php3_error(E_WARNING,"Sybase:  Unable to set server message handler");
+		php_error(E_WARNING,"Sybase:  Unable to set server message handler");
 	}
 	if (ct_callback(context, NULL, CS_SET, CS_CLIENTMSG_CB, (CS_VOID *)_client_message_handler)!=CS_SUCCEED) {
-		php3_error(E_WARNING,"Sybase:  Unable to set client message handler");
+		php_error(E_WARNING,"Sybase:  Unable to set client message handler");
 	}
 	
 	/* Set datetime conversion format to "Nov  3 1998  8:06PM".
@@ -250,7 +250,7 @@ int php3_minit_sybct(INIT_FUNC_ARGS)
 	{
 		CS_INT dt_convfmt = CS_DATES_SHORT;
 		if (cs_dt_info(context, CS_SET, NULL, CS_DT_CONVFMT, CS_UNUSED, &dt_convfmt, sizeof(dt_convfmt), NULL)!=CS_SUCCEED) {
-			php3_error(E_WARNING,"Sybase:  Unable to set datetime conversion format");
+			php_error(E_WARNING,"Sybase:  Unable to set datetime conversion format");
 		}
 	}
 
@@ -266,13 +266,13 @@ int php3_minit_sybct(INIT_FUNC_ARGS)
 	if (cfg_get_long("sybct.login_timeout",&timeout)==SUCCESS) {
 		CS_INT cs_login_timeout = timeout;
 		if (ct_config(context, CS_SET, CS_LOGIN_TIMEOUT, &cs_login_timeout, CS_UNUSED, NULL)!=CS_SUCCEED) {
-			php3_error(E_WARNING,"Sybase:  Unable to set login timeoutt");
+			php_error(E_WARNING,"Sybase:  Unable to set login timeoutt");
 		}
 	}
 	if (cfg_get_long("sybct.timeout",&timeout)==SUCCESS) {
 		CS_INT cs_timeout = timeout;
 		if (ct_config(context, CS_SET, CS_TIMEOUT, &cs_timeout, CS_UNUSED, NULL)!=CS_SUCCEED) {
-			php3_error(E_WARNING,"Sybase:  Unable to set timeout");
+			php_error(E_WARNING,"Sybase:  Unable to set timeout");
 		}
 	}
 
@@ -338,13 +338,13 @@ static int _php3_sybct_really_connect(sybct_link *sybct, char *host, char *user,
 {
 	/* set a CS_CONNECTION record */
 	if (ct_con_alloc(context, &sybct->connection)!=CS_SUCCEED) {
-		php3_error(E_WARNING,"Sybase:  Unable to allocate connection record");
+		php_error(E_WARNING,"Sybase:  Unable to allocate connection record");
 		return 0;
 	}
 	
 	/* Note - this saves a copy of sybct, not a pointer to it. */
 	if (ct_con_props(sybct->connection, CS_SET, CS_USERDATA, &sybct, CS_SIZEOF(sybct), NULL)!=CS_SUCCEED) {
-		php3_error(E_WARNING,"Sybase:  Unable to set userdata");
+		php_error(E_WARNING,"Sybase:  Unable to set userdata");
 		ct_con_drop(sybct->connection);
 		return 0;
 	}
@@ -366,13 +366,13 @@ static int _php3_sybct_really_connect(sybct_link *sybct, char *host, char *user,
 
 	/* create the link */
 	if (ct_connect(sybct->connection, host, CS_NULLTERM)!=CS_SUCCEED) {
-		php3_error(E_WARNING,"Sybase:  Unable to connect");
+		php_error(E_WARNING,"Sybase:  Unable to connect");
 		ct_con_drop(sybct->connection);
 		return 0;
 	}
 
 	if (ct_cmd_alloc(sybct->connection,&sybct->cmd)!=CS_SUCCEED) {
-		php3_error(E_WARNING,"Sybase:  Unable to allocate command record");
+		php_error(E_WARNING,"Sybase:  Unable to allocate command record");
 		ct_close(sybct->connection,CS_UNUSED);
 		ct_con_drop(sybct->connection);
 		return 0;
@@ -459,16 +459,16 @@ static void php3_sybct_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		list_entry *le;
 
 		/* try to find if we already have this link in our persistent list */
-		if (_php3_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
+		if (zend_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
 			list_entry new_le;
 
 			if (php3_sybct_module.max_links!=-1 && php3_sybct_module.num_links>=php3_sybct_module.max_links) {
-				php3_error(E_WARNING,"Sybase:  Too many open links (%d)",php3_sybct_module.num_links);
+				php_error(E_WARNING,"Sybase:  Too many open links (%d)",php3_sybct_module.num_links);
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
 			if (php3_sybct_module.max_persistent!=-1 && php3_sybct_module.num_persistent>=php3_sybct_module.max_persistent) {
-				php3_error(E_WARNING,"Sybase:  Too many open persistent links (%d)",php3_sybct_module.num_persistent);
+				php_error(E_WARNING,"Sybase:  Too many open persistent links (%d)",php3_sybct_module.num_persistent);
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -483,7 +483,7 @@ static void php3_sybct_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			/* hash it up */
 			new_le.type = php3_sybct_module.le_plink;
 			new_le.ptr = sybct_ptr;
-			if (_php3_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry),NULL)==FAILURE) {
+			if (zend_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry),NULL)==FAILURE) {
 				ct_close(sybct_ptr->connection, CS_UNUSED);
 				ct_con_drop(sybct_ptr->connection);
 				free(sybct_ptr);
@@ -506,7 +506,7 @@ static void php3_sybct_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 
 			if (ct_con_props(sybct_ptr->connection, CS_GET, CS_CON_STATUS,
 							 &con_status, CS_UNUSED, NULL)!=CS_SUCCEED) {
-				php3_error(E_WARNING,"Sybase:  Unable to get connection status");
+				php_error(E_WARNING,"Sybase:  Unable to get connection status");
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -546,7 +546,7 @@ static void php3_sybct_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		 * if it doesn't, open a new sybct link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (_php3_hash_find(list,hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
+		if (zend_hash_find(list,hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
 			int type,link;
 			void *ptr;
 
@@ -562,11 +562,11 @@ static void php3_sybct_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				efree(hashed_details);
 				return;
 			} else {
-				_php3_hash_del(list,hashed_details,hashed_details_length+1);
+				zend_hash_del(list,hashed_details,hashed_details_length+1);
 			}
 		}
 		if (php3_sybct_module.max_links!=-1 && php3_sybct_module.num_links>=php3_sybct_module.max_links) {
-			php3_error(E_WARNING,"Sybase:  Too many open links (%d)",php3_sybct_module.num_links);
+			php_error(E_WARNING,"Sybase:  Too many open links (%d)",php3_sybct_module.num_links);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -585,7 +585,7 @@ static void php3_sybct_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
-		if (_php3_hash_update(list,hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry),NULL)==FAILURE) {
+		if (zend_hash_update(list,hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry),NULL)==FAILURE) {
 			ct_close(sybct_ptr->connection, CS_UNUSED);
 			ct_con_drop(sybct_ptr->connection);
 			efree(sybct_ptr);
@@ -643,7 +643,7 @@ PHP_FUNCTION(sybct_close)
 	
 	php3_list_find(id,&type);
 	if (type!=php3_sybct_module.le_link && type!=php3_sybct_module.le_plink) {
-		php3_error(E_WARNING,"%d is not a Sybase link index",id);
+		php_error(E_WARNING,"%d is not a Sybase link index",id);
 		RETURN_FALSE;
 	}
 	
@@ -757,7 +757,7 @@ PHP_FUNCTION(sybct_select_db)
 	
 	sybct_ptr = (sybct_link *) php3_list_find(id,&type);
 	if (type!=php3_sybct_module.le_link && type!=php3_sybct_module.le_plink) {
-		php3_error(E_WARNING,"%d is not a Sybase link index",id);
+		php_error(E_WARNING,"%d is not a Sybase link index",id);
 		RETURN_FALSE;
 	}
 	
@@ -878,7 +878,7 @@ static sybct_result * _php3_sybct_fetch_result_set (sybct_link *sybct_ptr)
 			|| retcode==CS_ROW_FAIL) {
 		/*
 		if (retcode==CS_ROW_FAIL) {
-			php3_error(E_WARNING,"Sybase:  Error reading row %d",result->num_rows);
+			php_error(E_WARNING,"Sybase:  Error reading row %d",result->num_rows);
 		}
 		*/
 		i = result->num_rows++;
@@ -973,7 +973,7 @@ PHP_FUNCTION(sybct_query)
 	
 	sybct_ptr = (sybct_link *) php3_list_find(id,&type);
 	if (type!=php3_sybct_module.le_link && type!=php3_sybct_module.le_plink) {
-		php3_error(E_WARNING,"%d is not a Sybase link index",id);
+		php_error(E_WARNING,"%d is not a Sybase link index",id);
 		RETURN_FALSE;
 	}
 	
@@ -1169,7 +1169,7 @@ PHP_FUNCTION(sybct_free_result)
 	result = (sybct_result *) php3_list_find(sybct_result_index->value.lval,&type);
 	
 	if (type!=php3_sybct_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",sybct_result_index->value.lval);
+		php_error(E_WARNING,"%d is not a Sybase result index",sybct_result_index->value.lval);
 		RETURN_FALSE;
 	}
 	php3_list_delete(sybct_result_index->value.lval);
@@ -1202,7 +1202,7 @@ PHP_FUNCTION(sybct_num_rows)
 	
 	result = (sybct_result *) php3_list_find(id,&type);
 	if (type!=php3_sybct_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",id);
+		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
 	}	
 	
@@ -1226,7 +1226,7 @@ PHP_FUNCTION(sybct_num_fields)
 	
 	result = (sybct_result *) php3_list_find(id,&type);
 	if (type!=php3_sybct_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",id);
+		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
 	}	
 	
@@ -1251,7 +1251,7 @@ PHP_FUNCTION(sybct_fetch_row)
 	
 	result = (sybct_result *) php3_list_find(id,&type);
 	if (type!=php3_sybct_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",id);
+		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
 	}
 	
@@ -1265,7 +1265,7 @@ PHP_FUNCTION(sybct_fetch_row)
 		*field_content = result->data[result->cur_row][i];
 		INIT_PZVAL(field_content);
 		pval_copy_constructor(field_content);
-		_php3_hash_index_update(return_value->value.ht, i, (void *) &field_content, sizeof(pval* ), NULL);
+		zend_hash_index_update(return_value->value.ht, i, (void *) &field_content, sizeof(pval* ), NULL);
 	}
 	result->cur_row++;
 }
@@ -1288,7 +1288,7 @@ static PHP_FUNCTION(sybct_fetch_hash)
 	result = (sybct_result *) php3_list_find(sybct_result_index->value.lval,&type);
 	
 	if (type!=php3_sybct_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",sybct_result_index->value.lval);
+		php_error(E_WARNING,"%d is not a Sybase result index",sybct_result_index->value.lval);
 		RETURN_FALSE;
 	}
 	
@@ -1308,8 +1308,8 @@ static PHP_FUNCTION(sybct_fetch_hash)
 		if (PG(magic_quotes_runtime) && tmp->type == IS_STRING) {
 			tmp->value.str.val = _php3_addslashes(tmp->value.str.val,tmp->value.str.len,&tmp->value.str.len,1);
 		}
-		_php3_hash_index_update(return_value->value.ht, i, (void *) &tmp, sizeof(pval *), NULL);
-		_php3_hash_update(return_value->value.ht, result->fields[i].name, strlen(result->fields[i].name)+1, (void *) &tmp, sizeof(pval *), NULL);
+		zend_hash_index_update(return_value->value.ht, i, (void *) &tmp, sizeof(pval *), NULL);
+		zend_hash_update(return_value->value.ht, result->fields[i].name, strlen(result->fields[i].name)+1, (void *) &tmp, sizeof(pval *), NULL);
 	}
 	result->cur_row++;
 }
@@ -1346,13 +1346,13 @@ PHP_FUNCTION(sybct_data_seek)
 	
 	result = (sybct_result *) php3_list_find(id,&type);
 	if (type!=php3_sybct_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",id);
+		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
 	}
 
 	convert_to_long(offset);
 	if (offset->value.lval<0 || offset->value.lval>=result->num_rows) {
-		php3_error(E_WARNING,"Sybase:  Bad row offset");
+		php_error(E_WARNING,"Sybase:  Bad row offset");
 		RETURN_FALSE;
 	}
 	
@@ -1435,7 +1435,7 @@ PHP_FUNCTION(sybct_fetch_field)
 	
 	result = (sybct_result *) php3_list_find(id,&type);
 	if (type!=php3_sybct_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",id);
+		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
 	}
 	
@@ -1446,7 +1446,7 @@ PHP_FUNCTION(sybct_fetch_field)
 	
 	if (field_offset<0 || field_offset >= result->num_fields) {
 		if (ARG_COUNT(ht)==2) { /* field specified explicitly */
-			php3_error(E_WARNING,"Sybase:  Bad column offset");
+			php_error(E_WARNING,"Sybase:  Bad column offset");
 		}
 		RETURN_FALSE;
 	}
@@ -1477,7 +1477,7 @@ PHP_FUNCTION(sybct_field_seek)
 	
 	result = (sybct_result *) php3_list_find(id,&type);
 	if (type!=php3_sybct_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",id);
+		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
 	}
 	
@@ -1485,7 +1485,7 @@ PHP_FUNCTION(sybct_field_seek)
 	field_offset = offset->value.lval;
 	
 	if (field_offset<0 || field_offset >= result->num_fields) {
-		php3_error(E_WARNING,"Sybase:  Bad column offset");
+		php_error(E_WARNING,"Sybase:  Bad column offset");
 		RETURN_FALSE;
 	}
 
@@ -1510,13 +1510,13 @@ PHP_FUNCTION(sybct_result)
 	
 	result = (sybct_result *) php3_list_find(id,&type);
 	if (type!=php3_sybct_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",id);
+		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
 	}
 	
 	convert_to_long(row);
 	if (row->value.lval<0 || row->value.lval>=result->num_rows) {
-		php3_error(E_WARNING,"Sybase:  Bad row offset (%d)",row->value.lval);
+		php_error(E_WARNING,"Sybase:  Bad row offset (%d)",row->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -1531,7 +1531,7 @@ PHP_FUNCTION(sybct_result)
 				}
 			}
 			if (i>=result->num_fields) { /* no match found */
-				php3_error(E_WARNING,"Sybase:  %s field not found in result",field->value.str.val);
+				php_error(E_WARNING,"Sybase:  %s field not found in result",field->value.str.val);
 				RETURN_FALSE;
 			}
 			break;
@@ -1540,7 +1540,7 @@ PHP_FUNCTION(sybct_result)
 			convert_to_long(field);
 			field_offset = field->value.lval;
 			if (field_offset<0 || field_offset>=result->num_fields) {
-				php3_error(E_WARNING,"Sybase:  Bad column offset specified");
+				php_error(E_WARNING,"Sybase:  Bad column offset specified");
 				RETURN_FALSE;
 			}
 			break;
@@ -1576,7 +1576,7 @@ PHP_FUNCTION(sybct_affected_rows)
 	
 	sybct_ptr = (sybct_link *) php3_list_find(id,&type);
 	if (type!=php3_sybct_module.le_link && type!=php3_sybct_module.le_plink) {
-		php3_error(E_WARNING,"%d is not a Sybase link index",id);
+		php_error(E_WARNING,"%d is not a Sybase link index",id);
 		RETURN_FALSE;
 	}
 
@@ -1601,7 +1601,7 @@ void php3_info_sybct(ZEND_MODULE_INFO_FUNC_ARGS)
 		snprintf(maxl,15,"%ld",php3_sybct_module.max_links);
 		maxl[15]=0;
 	}
-	php3_printf("<table cellpadding=5>"
+	php_printf("<table cellpadding=5>"
 				"<tr><td>Allow persistent links:</td><td>%s</td></tr>\n"
 				"<tr><td>Persistent links:</td><td>%d/%s</td></tr>\n"
 				"<tr><td>Total links:</td><td>%d/%s</td></tr>\n"

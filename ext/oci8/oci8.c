@@ -377,10 +377,10 @@ PHP_MINIT_FUNCTION(oci8)
 	OCI8_GLOBAL(php3_oci8_module).le_stmt = register_list_destructors(_oci8_free_stmt, NULL);
 
 	OCI8_GLOBAL(php3_oci8_module).user = malloc(sizeof(HashTable));
-	_php3_hash_init(OCI8_GLOBAL(php3_oci8_module).user, 13, NULL, NULL, 1);
+	zend_hash_init(OCI8_GLOBAL(php3_oci8_module).user, 13, NULL, NULL, 1);
 
 	OCI8_GLOBAL(php3_oci8_module).server = malloc(sizeof(HashTable));
-	_php3_hash_init(OCI8_GLOBAL(php3_oci8_module).server, 13, NULL, NULL, 1); 
+	zend_hash_init(OCI8_GLOBAL(php3_oci8_module).server, 13, NULL, NULL, 1); 
 
 	if (cfg_get_long("oci8.debug_mode",
 					 &OCI8_GLOBAL(php3_oci8_module).debug_mode) == FAILURE) {
@@ -477,11 +477,11 @@ PHP_MSHUTDOWN_FUNCTION(oci8)
 {
     oci8_debug("php3_mshutdown_oci8");
 
-	_php3_hash_apply(OCI8_GLOBAL(php3_oci8_module).user,(int (*)(void *))_user_pcleanup);
-	_php3_hash_apply(OCI8_GLOBAL(php3_oci8_module).server,(int (*)(void *))_server_pcleanup);
+	zend_hash_apply(OCI8_GLOBAL(php3_oci8_module).user,(int (*)(void *))_user_pcleanup);
+	zend_hash_apply(OCI8_GLOBAL(php3_oci8_module).server,(int (*)(void *))_server_pcleanup);
 
-	_php3_hash_destroy(OCI8_GLOBAL(php3_oci8_module).user);
-	_php3_hash_destroy(OCI8_GLOBAL(php3_oci8_module).server);
+	zend_hash_destroy(OCI8_GLOBAL(php3_oci8_module).user);
+	zend_hash_destroy(OCI8_GLOBAL(php3_oci8_module).server);
 
 	free(OCI8_GLOBAL(php3_oci8_module).user);
 	free(OCI8_GLOBAL(php3_oci8_module).server);
@@ -552,8 +552,8 @@ PHP_RSHUTDOWN_FUNCTION(oci8)
 
     oci8_debug("php3_rshutdown_oci8");
 
-	_php3_hash_apply(OCI8_GLOBAL(php3_oci8_module).user,(int (*)(void *))_user_cleanup);
-	_php3_hash_apply(OCI8_GLOBAL(php3_oci8_module).server,(int (*)(void *))_server_cleanup);
+	zend_hash_apply(OCI8_GLOBAL(php3_oci8_module).user,(int (*)(void *))_user_cleanup);
+	zend_hash_apply(OCI8_GLOBAL(php3_oci8_module).server,(int (*)(void *))_server_cleanup);
 
 	/* XXX free all statements, rollback all outstanding transactions */
 
@@ -564,7 +564,7 @@ PHP_RSHUTDOWN_FUNCTION(oci8)
 PHP_MINFO_FUNCTION(oci8)
 {
 #if !(WIN32|WINNT)
-	php3_printf("Oracle version: %s<br>\n"
+	php_printf("Oracle version: %s<br>\n"
 			    "Compile-time ORACLE_HOME: %s<br>\n"
 			    "Libraries used: %s",
 			    PHP_ORACLE_VERSION, PHP_ORACLE_HOME, PHP_ORACLE_LIBS);
@@ -602,7 +602,7 @@ _oci8_free_column(oci8_out_column *column)
 
 	if (column->data) {
 		if (column->is_descr) {
-			_php3_hash_index_del(column->statement->conn->descriptors,(int) column->data);
+			zend_hash_index_del(column->statement->conn->descriptors,(int) column->data);
 		} else {
 			if (column->data) {
 				efree(column->data);
@@ -646,17 +646,17 @@ _oci8_free_stmt(oci8_statement *statement)
 	}
 
 	if (statement->columns) {
-		_php3_hash_destroy(statement->columns);
+		zend_hash_destroy(statement->columns);
 		efree(statement->columns);
 	}
 
 	if (statement->binds) {
-		_php3_hash_destroy(statement->binds);
+		zend_hash_destroy(statement->binds);
 		efree(statement->binds);
 	}
 
 	if (statement->defines) {
-		_php3_hash_destroy(statement->defines);
+		zend_hash_destroy(statement->defines);
 		efree(statement->defines);
 	}
 
@@ -682,7 +682,7 @@ _oci8_close_conn(oci8_connection *connection)
 	oci8_debug("_oci8_close_conn: id=%d",connection->id);
 
 	if (connection->descriptors) {
-		_php3_hash_destroy(connection->descriptors);
+		zend_hash_destroy(connection->descriptors);
 		efree(connection->descriptors);
 	}
 
@@ -710,27 +710,27 @@ oci8_error(OCIError *err_p, char *what, sword status)
 		case OCI_SUCCESS:
 			break;
 		case OCI_SUCCESS_WITH_INFO:
-			php3_error(E_WARNING, "%s: OCI_SUCCESS_WITH_INFO", what);
+			php_error(E_WARNING, "%s: OCI_SUCCESS_WITH_INFO", what);
 			break;
 		case OCI_NEED_DATA:
-			php3_error(E_WARNING, "%s: OCI_NEED_DATA", what);
+			php_error(E_WARNING, "%s: OCI_NEED_DATA", what);
 			break;
 		case OCI_NO_DATA:
-			php3_error(E_WARNING, "%s: OCI_NO_DATA", what);
+			php_error(E_WARNING, "%s: OCI_NO_DATA", what);
 			break;
 		case OCI_ERROR:
 			OCIErrorGet(err_p, (ub4)1, NULL, &errcode, errbuf,
 						(ub4)sizeof(errbuf), (ub4)OCI_HTYPE_ERROR);
-			php3_error(E_WARNING, "%s: %s", what, errbuf);
+			php_error(E_WARNING, "%s: %s", what, errbuf);
 			break;
 		case OCI_INVALID_HANDLE:
-			php3_error(E_WARNING, "%s: OCI_INVALID_HANDLE", what);
+			php_error(E_WARNING, "%s: OCI_INVALID_HANDLE", what);
 			break;
 		case OCI_STILL_EXECUTING:
-			php3_error(E_WARNING, "%s: OCI_STILL_EXECUTING", what);
+			php_error(E_WARNING, "%s: OCI_STILL_EXECUTING", what);
 			break;
 		case OCI_CONTINUE:
-			php3_error(E_WARNING, "%s: OCI_CONTINUE", what);
+			php_error(E_WARNING, "%s: OCI_CONTINUE", what);
 			break;
 		default:
 			break;
@@ -769,7 +769,7 @@ static void oci8_debug(const char *format,...)
 		va_end(args);
 		buffer[sizeof(buffer)-1] = '\0';
 		if (php3_header()) {
-			php3_printf("OCIDebug: %s<br>\n", buffer);
+			php_printf("OCIDebug: %s<br>\n", buffer);
 		}
 	}
 }
@@ -786,7 +786,7 @@ oci8_get_conn(int conn_ind, const char *func, HashTable *list)
 
 	connection = (oci8_connection *)php3_list_find(conn_ind, &type);
 	if (!connection || !OCI8_CONN_TYPE(type)) {
-		php3_error(E_WARNING, "%s: invalid connection %d", func, conn_ind);
+		php_error(E_WARNING, "%s: invalid connection %d", func, conn_ind);
 		return (oci8_connection *)NULL;
 	}
 
@@ -810,7 +810,7 @@ oci8_get_stmt(int stmt_ind, const char *func, HashTable *list)
 
 	statement = (oci8_statement *)php3_list_find(stmt_ind, &type);
 	if (!statement || !OCI8_STMT_TYPE(type)) {
-		php3_error(E_WARNING, "%s: invalid statement %d", func, stmt_ind);
+		php_error(E_WARNING, "%s: invalid statement %d", func, stmt_ind);
 		return (oci8_statement *)NULL;
 	}
 
@@ -853,8 +853,8 @@ oci8_get_col(oci8_statement *statement, int col, pval *pval, char *func)
 			return oci8_get_col(statement,pval->value.lval,0,func);
 		}
 	} else if (col != -1) {
-		if (_php3_hash_index_find(statement->columns, col, (void **)&outcol) == FAILURE) {
-			php3_error(E_WARNING, "%s: invalid column %d", func, col);
+		if (zend_hash_index_find(statement->columns, col, (void **)&outcol) == FAILURE) {
+			php_error(E_WARNING, "%s: invalid column %d", func, col);
 			return NULL;
 		}
 		return outcol;
@@ -895,8 +895,8 @@ oci8_make_pval(pval *value,oci8_statement *statement,oci8_out_column *column, ch
 		if ((column->data_type != SQLT_RDD) && (mode & OCI_RETURN_LOBS)) {
 			/* OCI_RETURN_LOBS means that we want the content of the LOB back instead of the locator */
 
-	        if (_php3_hash_index_find(statement->conn->descriptors,(int)  column->data, (void **)&descr) == FAILURE) {
-   	        	php3_error(E_WARNING, "unable to find my descriptor %d",column->data);
+	        if (zend_hash_index_find(statement->conn->descriptors,(int)  column->data, (void **)&descr) == FAILURE) {
+   	        	php_error(E_WARNING, "unable to find my descriptor %d",column->data);
             	return -1;
         	}
 
@@ -1105,7 +1105,7 @@ oci8_execute(oci8_statement *statement, char *func,ub4 mode, HashTable *list)
 
 		statement->columns = emalloc(sizeof(HashTable));
 		if (!statement->columns ||
-			_php3_hash_init(statement->columns, 13, NULL,HASH_DTOR _oci8_free_column, 0) == FAILURE) {
+			zend_hash_init(statement->columns, 13, NULL,HASH_DTOR _oci8_free_column, 0) == FAILURE) {
 			/* out of memory */
 			return 0;
 		}
@@ -1138,7 +1138,7 @@ oci8_execute(oci8_statement *statement, char *func,ub4 mode, HashTable *list)
 		for (counter = 1; counter <= colcount; counter++) {
 			memset(&column,0,sizeof(oci8_out_column));
 
-			if (_php3_hash_index_update(statement->columns, counter, &column,
+			if (zend_hash_index_update(statement->columns, counter, &column,
 										sizeof(oci8_out_column), (void**) &outcol) == FAILURE) {
 				efree(statement->columns);
 				/* out of memory */
@@ -1207,7 +1207,7 @@ oci8_execute(oci8_statement *statement, char *func,ub4 mode, HashTable *list)
 
 			/* find a user-setted define */
 			if (statement->defines) {
-				_php3_hash_find(statement->defines,outcol->name,outcol->name_len,(void **) &outcol->define);
+				zend_hash_find(statement->defines,outcol->name,outcol->name_len,(void **) &outcol->define);
 			}
 
 			buf = 0;
@@ -1257,7 +1257,7 @@ oci8_execute(oci8_statement *statement, char *func,ub4 mode, HashTable *list)
 									   (size_t) 0,
 									   (dvoid **) 0);
 					
-					_php3_hash_index_update(statement->conn->descriptors, 
+					zend_hash_index_update(statement->conn->descriptors, 
 											statement->conn->descriptors_count,
 											&descr,
 											sizeof(oci8_descriptor),
@@ -1394,7 +1394,7 @@ oci8_fetch(oci8_statement *statement, ub4 nrows, char *func)
 	if ((statement->error == OCI_NO_DATA) || (nrows == 0)) {
 		/* XXX this is needed for REFCURSORS! */
 		if (statement->columns) {
-			_php3_hash_destroy(statement->columns);
+			zend_hash_destroy(statement->columns);
 			efree(statement->columns);
 			statement->columns = 0;
 		}
@@ -1613,7 +1613,7 @@ oci8_define_callback(dvoid *octxp,
 		}
 
 		if (! outcol->data) {
-			php3_error(E_WARNING, "OCIFetch: cannot allocate %d bytes!",outcol->storage_size4);
+			php_error(E_WARNING, "OCIFetch: cannot allocate %d bytes!",outcol->storage_size4);
 			return OCI_ERROR;
 		}
 
@@ -1664,7 +1664,7 @@ oci8_bind_in_callback(dvoid *ictxp, /* context pointer */
 	phpbind = (oci8_bind *)ictxp;
 
 	if (!phpbind || !(val = phpbind->value)) {
-		php3_error(E_WARNING, "!phpbind || !phpbind->val");
+		php_error(E_WARNING, "!phpbind || !phpbind->val");
 		return OCI_ERROR;
 	}
 
@@ -1776,7 +1776,7 @@ static oci8_session *oci8_open_user(oci8_server* server,char *username,char *pas
 			SAFE_STRING(server->dbname));
 
 	if (! exclusive) {
-		_php3_hash_find(OCI8_GLOBAL(php3_oci8_module).user, hashed_details, hashed_details_length+1, (void **) &session);
+		zend_hash_find(OCI8_GLOBAL(php3_oci8_module).user, hashed_details, hashed_details_length+1, (void **) &session);
 
 		if (session) {
 			if (session->open) {
@@ -1885,10 +1885,10 @@ static oci8_session *oci8_open_user(oci8_server* server,char *username,char *pas
 	oci8_debug("oci8_open_user new sess=%d user=%s",session->num,username);
 
 	if (exclusive) {
-		_php3_hash_next_index_pointer_insert(OCI8_GLOBAL(php3_oci8_module).user,
+		zend_hash_next_index_pointer_insert(OCI8_GLOBAL(php3_oci8_module).user,
 											 (void *) session);
 	} else {
-		_php3_hash_pointer_update(OCI8_GLOBAL(php3_oci8_module).user,
+		zend_hash_pointer_update(OCI8_GLOBAL(php3_oci8_module).user,
 								  hashed_details,
 								  hashed_details_length+1, 
 								  (void *) session);
@@ -2021,7 +2021,7 @@ static oci8_server *oci8_open_server(char *dbname,int persistent)
 	hashed_details = (char *) emalloc(hashed_details_length+1);
 	sprintf(hashed_details,"%s",SAFE_STRING((char *)dbname));
 
-	_php3_hash_find(OCI8_GLOBAL(php3_oci8_module).server, hashed_details, hashed_details_length+1, (void **) &server);
+	zend_hash_find(OCI8_GLOBAL(php3_oci8_module).server, hashed_details, hashed_details_length+1, (void **) &server);
 
 	if (server) {
 		if (server->open) {
@@ -2090,7 +2090,7 @@ static oci8_server *oci8_open_server(char *dbname,int persistent)
 
 	oci8_debug("oci8_open_server new conn=%d dname=%s",server->num,server->dbname);
 
-	_php3_hash_pointer_update(OCI8_GLOBAL(php3_oci8_module).server,
+	zend_hash_pointer_update(OCI8_GLOBAL(php3_oci8_module).server,
 							  hashed_details,
 							  hashed_details_length+1, 
 							  (void *) server);
@@ -2280,7 +2280,7 @@ static void oci8_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int excl
 
 	connection->descriptors = emalloc(sizeof(HashTable));
 	if (!connection->descriptors ||
-		_php3_hash_init(connection->descriptors, 13, NULL,HASH_DTOR _oci8_free_descr, 0) == FAILURE) {
+		zend_hash_init(connection->descriptors, 13, NULL,HASH_DTOR _oci8_free_descr, 0) == FAILURE) {
         goto CLEANUP;
     }
 
@@ -2343,12 +2343,12 @@ PHP_FUNCTION(oci8_definebyname)
 	if (statement->defines == NULL) {
 		statement->defines = emalloc(sizeof(HashTable));
 		if (statement->defines == NULL ||
-			_php3_hash_init(statement->defines, 13, NULL,HASH_DTOR oci8_free_define, 0) == FAILURE) {
+			zend_hash_init(statement->defines, 13, NULL,HASH_DTOR oci8_free_define, 0) == FAILURE) {
 			/* out of memory */
 			RETURN_FALSE;
 		}
 	}
-	if (_php3_hash_add(statement->defines,
+	if (zend_hash_add(statement->defines,
 					   name->value.str.val,
 					   name->value.str.len,
 					   define,
@@ -2407,13 +2407,13 @@ PHP_FUNCTION(oci8_bindbyname)
 
 	switch (var->type) {
 		case IS_OBJECT :
-	        if (_php3_hash_find(var->value.ht, "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
-   		         php3_error(E_WARNING, "unable to find my descriptor property");
+	        if (zend_hash_find(var->value.ht, "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
+   		         php_error(E_WARNING, "unable to find my descriptor property");
    		         RETURN_FALSE;
         	}
 
-			if (_php3_hash_index_find(statement->conn->descriptors, tmp->value.lval, (void **)&descr) == FAILURE) {
-   		         php3_error(E_WARNING, "unable to find my descriptor");
+			if (zend_hash_index_find(statement->conn->descriptors, tmp->value.lval, (void **)&descr) == FAILURE) {
+   		         php_error(E_WARNING, "unable to find my descriptor");
    		         RETURN_FALSE;
 			}
 
@@ -2438,7 +2438,7 @@ PHP_FUNCTION(oci8_bindbyname)
 				convert_to_string(var);
 				if (ocimaxlen == -1) {
 					if (var->value.str.len == 0) {
-						php3_error(E_WARNING, "OCIBindByName bindlength is 0");
+						php_error(E_WARNING, "OCIBindByName bindlength is 0");
 					}
 
 					if (ocitype == SQLT_BIN) {
@@ -2462,12 +2462,12 @@ PHP_FUNCTION(oci8_bindbyname)
 	if (statement->binds == NULL) {
 		statement->binds = emalloc(sizeof(HashTable));
 		if (statement->binds == NULL ||
-			_php3_hash_init(statement->binds, 13, NULL, NULL, 0) == FAILURE) {
+			zend_hash_init(statement->binds, 13, NULL, NULL, 0) == FAILURE) {
 			/* out of memory */
 			RETURN_FALSE;
 		}
 	}
-	if (_php3_hash_next_index_insert(statement->binds, bind,
+	if (zend_hash_next_index_insert(statement->binds, bind,
 									 sizeof(oci8_bind),
 									 (void **)&tmp_bind) == SUCCESS) {
 		efree(bind);
@@ -2529,8 +2529,8 @@ PHP_FUNCTION(oci8_freedesc)
 #else
 	if ((id = getThis()) != 0) {
 #endif
-        if (_php3_hash_find(id->value.ht, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
-            php3_error(E_WARNING, "unable to find my statement property");
+        if (zend_hash_find(id->value.ht, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
+            php_error(E_WARNING, "unable to find my statement property");
             RETURN_FALSE;
         }
 
@@ -2539,14 +2539,14 @@ PHP_FUNCTION(oci8_freedesc)
             RETURN_FALSE;
         }
 
-   		if (_php3_hash_find(id->value.ht, "descriptor", sizeof("descriptor"), (void **)&desc) == FAILURE) {
-			php3_error(E_WARNING, "unable to find my locator property");
+   		if (zend_hash_find(id->value.ht, "descriptor", sizeof("descriptor"), (void **)&desc) == FAILURE) {
+			php_error(E_WARNING, "unable to find my locator property");
 			RETURN_FALSE;
 		}
 
 		oci8_debug("OCOfreedesc: descr=%d",desc->value.lval);
 
-		_php3_hash_index_del(connection->descriptors,desc->value.lval);
+		zend_hash_index_del(connection->descriptors,desc->value.lval);
 
 	 	RETURN_TRUE;
 	}
@@ -2572,8 +2572,8 @@ PHP_FUNCTION(oci8_savedesc)
 #else
 	if ((id = getThis()) != 0) {
 #endif
-   		if (_php3_hash_find(id->value.ht, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
-			php3_error(E_WARNING, "unable to find my statement property");
+   		if (zend_hash_find(id->value.ht, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
+			php_error(E_WARNING, "unable to find my statement property");
 			RETURN_FALSE;
 		}
 
@@ -2582,13 +2582,13 @@ PHP_FUNCTION(oci8_savedesc)
 			RETURN_FALSE;
 		}
 
-   		if (_php3_hash_find(id->value.ht, "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
-			php3_error(E_WARNING, "unable to find my locator property");
+   		if (zend_hash_find(id->value.ht, "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my locator property");
 			RETURN_FALSE;
 		}
 
-        if (_php3_hash_index_find(connection->descriptors, tmp->value.lval, (void **)&descr) == FAILURE) {
-        	php3_error(E_WARNING, "unable to find my descriptor %d",tmp->value.lval);
+        if (zend_hash_index_find(connection->descriptors, tmp->value.lval, (void **)&descr) == FAILURE) {
+        	php_error(E_WARNING, "unable to find my descriptor %d",tmp->value.lval);
             RETURN_FALSE;
         }
 
@@ -2605,7 +2605,7 @@ PHP_FUNCTION(oci8_savedesc)
 		loblen = arg->value.str.len;
 	
 		if (loblen < 1) {
-			php3_error(E_WARNING, "Cannot save a lob wich size is less than 1 byte");
+			php_error(E_WARNING, "Cannot save a lob wich size is less than 1 byte");
 			RETURN_FALSE;
 		}
 
@@ -2656,8 +2656,8 @@ PHP_FUNCTION(oci8_loaddesc)
 #else
 	if ((id = getThis()) != 0) {
 #endif
-   		if (_php3_hash_find(id->value.ht, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
-			php3_error(E_WARNING, "unable to find my statement property");
+   		if (zend_hash_find(id->value.ht, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
+			php_error(E_WARNING, "unable to find my statement property");
 			RETURN_FALSE;
 		}
 
@@ -2666,13 +2666,13 @@ PHP_FUNCTION(oci8_loaddesc)
 			RETURN_FALSE;
 		}
 
-   		if (_php3_hash_find(id->value.ht, "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
-			php3_error(E_WARNING, "unable to find my locator property");
+   		if (zend_hash_find(id->value.ht, "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my locator property");
 			RETURN_FALSE;
 		}
 
-        if (_php3_hash_index_find(connection->descriptors, tmp->value.lval, (void **)&descr) == FAILURE) {
-        	php3_error(E_WARNING, "unable to find my descriptor %d",tmp->value.lval);
+        if (zend_hash_index_find(connection->descriptors, tmp->value.lval, (void **)&descr) == FAILURE) {
+        	php_error(E_WARNING, "unable to find my descriptor %d",tmp->value.lval);
             RETURN_FALSE;
         }
 
@@ -2714,7 +2714,7 @@ PHP_FUNCTION(oci8_newdescriptor)
 			break;
 		   
 	    default:
-			php3_error(E_WARNING, "Unknown descriptor type %d.",descr.type);
+			php_error(E_WARNING, "Unknown descriptor type %d.",descr.type);
 			RETURN_FALSE;
 	}
 
@@ -2737,7 +2737,7 @@ PHP_FUNCTION(oci8_newdescriptor)
 		RETURN_FALSE;
 	}
 
-	_php3_hash_index_update(connection->descriptors, connection->descriptors_count,&descr,sizeof(oci8_descriptor),NULL);
+	zend_hash_index_update(connection->descriptors, connection->descriptors_count,&descr,sizeof(oci8_descriptor),NULL);
 
 	mylob = connection->descriptors_count++;
 
@@ -3131,7 +3131,7 @@ PHP_FUNCTION(oci8_fetchinto)
 	if (! (mode & OCI_RETURN_NULLS)) { 
 		if (array->type == IS_ARRAY) { 
 			/* XXX is that right?? */
-			_php3_hash_destroy(array->value.ht);
+			zend_hash_destroy(array->value.ht);
 			efree(array->value.ht);
 			var_reset(array);
 		}
@@ -3139,7 +3139,7 @@ PHP_FUNCTION(oci8_fetchinto)
 
 	if (array->type != IS_ARRAY) {
 		if (array_init(array) == FAILURE) {
-			php3_error(E_WARNING, "OCIFetchInto: unable to convert arg 2 to array");
+			php_error(E_WARNING, "OCIFetchInto: unable to convert arg 2 to array");
 			RETURN_FALSE;
 		}
 	}
@@ -3165,9 +3165,9 @@ PHP_FUNCTION(oci8_fetchinto)
 			oci8_make_pval(element,statement,column, "OCIFetchInto",mode);
 
 #if PHP_API_VERSION >= 19990421
-			_php3_hash_index_update(array->value.ht, i, (void *)&element, sizeof(pval*), NULL);
+			zend_hash_index_update(array->value.ht, i, (void *)&element, sizeof(pval*), NULL);
 #else
-			_php3_hash_index_update(array->value.ht, i, (void *)element, sizeof(pval), NULL);
+			zend_hash_index_update(array->value.ht, i, (void *)element, sizeof(pval), NULL);
 #endif
 		}
 
@@ -3178,9 +3178,9 @@ PHP_FUNCTION(oci8_fetchinto)
 			oci8_make_pval(element,statement,column, "OCIFetchInto",mode);
 
 #if PHP_API_VERSION >= 19990421
-		  	_php3_hash_update(array->value.ht, column->name, column->name_len+1, (void *)&element, sizeof(pval*), NULL);
+		  	zend_hash_update(array->value.ht, column->name, column->name_len+1, (void *)&element, sizeof(pval*), NULL);
 #else
-		  	_php3_hash_update(array->value.ht, column->name, column->name_len+1, (void *)element, sizeof(pval), NULL);
+		  	zend_hash_update(array->value.ht, column->name, column->name_len+1, (void *)element, sizeof(pval), NULL);
 #endif
 		}
 	}
@@ -3229,7 +3229,7 @@ PHP_FUNCTION(oci8_fetchstatement)
 
 	if (array->type != IS_ARRAY) {
 		if (array_init(array) == FAILURE) {
-			php3_error(E_WARNING, "OCIFetchStatement: unable to convert arg 2 to array");
+			php_error(E_WARNING, "OCIFetchStatement: unable to convert arg 2 to array");
 			RETURN_FALSE;
 		}
 	}
@@ -3258,9 +3258,9 @@ PHP_FUNCTION(oci8_fetchstatement)
 		namebuf[ columns[ i ]->name_len ] = 0;
 				
 #if PHP_API_VERSION < 19990421
-		_php3_hash_update(array->value.ht, namebuf, columns[ i ]->name_len+1, (void *) tmp, sizeof(pval), (void **) &(outarrs[ i ]));
+		zend_hash_update(array->value.ht, namebuf, columns[ i ]->name_len+1, (void *) tmp, sizeof(pval), (void **) &(outarrs[ i ]));
 #else
-		_php3_hash_update(array->value.ht, namebuf, columns[ i ]->name_len+1, (void *) &tmp, sizeof(pval*), (void **) &(outarrs[ i ]));
+		zend_hash_update(array->value.ht, namebuf, columns[ i ]->name_len+1, (void *) &tmp, sizeof(pval*), (void **) &(outarrs[ i ]));
 #endif
 	}
 
@@ -3280,9 +3280,9 @@ PHP_FUNCTION(oci8_fetchstatement)
 			oci8_make_pval(element,statement,columns[ i ], "OCIFetchStatement",OCI_RETURN_LOBS);
 
 #if PHP_API_VERSION < 19990421
-			_php3_hash_index_update(outarrs[ i ]->value.ht, rows, (void *)element, sizeof(pval), NULL);
+			zend_hash_index_update(outarrs[ i ]->value.ht, rows, (void *)element, sizeof(pval), NULL);
 #else
-			_php3_hash_index_update((*(outarrs[ i ]))->value.ht, rows, (void *)&element, sizeof(pval*), NULL);
+			zend_hash_index_update((*(outarrs[ i ]))->value.ht, rows, (void *)&element, sizeof(pval*), NULL);
 #endif
 		}
 		rows++;
@@ -3356,7 +3356,7 @@ PHP_FUNCTION(oci8_logout)
 
 	connection->open = 0;
 
-	_php3_hash_apply(list,(int (*)(void *))_stmt_cleanup);
+	zend_hash_apply(list,(int (*)(void *))_stmt_cleanup);
 
 	if (php3_list_delete(index) == SUCCESS) {
 		RETURN_TRUE;
@@ -3449,7 +3449,7 @@ PHP_FUNCTION(oci8_error)
 	}
 
 	if (! errh) {
-		php3_error(E_WARNING, "OCIError: unable to find Error handle");
+		php_error(E_WARNING, "OCIError: unable to find Error handle");
 		RETURN_FALSE;
 	}
 

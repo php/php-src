@@ -67,9 +67,9 @@ void dl(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_string(file);
 
 	if (!PG(enable_dl)) {
-		php3_error(E_ERROR, "Dynamically loaded extentions aren't enabled.");
+		php_error(E_ERROR, "Dynamically loaded extentions aren't enabled.");
 	} else if (PG(safe_mode)) {
-		php3_error(E_ERROR, "Dynamically loaded extensions aren't allowed when running in SAFE MODE.");
+		php_error(E_ERROR, "Dynamically loaded extensions aren't allowed when running in SAFE MODE.");
 	} else {
 		php3_dl(file,MODULE_TEMPORARY,return_value);
 	}
@@ -103,10 +103,10 @@ void php3_dl(pval *file,int type,pval *return_value)
 	handle = dlopen(libpath, RTLD_LAZY);
 	if (!handle) {
 #if MSVC5
-		php3_error(E_ERROR,"Unable to load dynamic library '%s'<br>\n%s",libpath,php3_win_err());
+		php_error(E_ERROR,"Unable to load dynamic library '%s'<br>\n%s",libpath,php3_win_err());
 #else
 		printf("dlerror = %s\n", dlerror());
-		php3_error(E_ERROR,"Unable to load dynamic library '%s' - %s",libpath,dlerror());
+		php_error(E_ERROR,"Unable to load dynamic library '%s' - %s",libpath,dlerror());
 #endif
 		RETURN_FALSE;
 	}
@@ -114,7 +114,7 @@ void php3_dl(pval *file,int type,pval *return_value)
 	
 	if (!get_module) {
 		dlclose(handle);
-		php3_error(E_CORE_WARNING,"Invalid library (maybe not a PHP3 library) '%s' ",file->value.str.val);
+		php_error(E_CORE_WARNING,"Invalid library (maybe not a PHP3 library) '%s' ",file->value.str.val);
 		RETURN_FALSE;
 	}
 	module_entry = get_module();
@@ -122,7 +122,7 @@ void php3_dl(pval *file,int type,pval *return_value)
 	module_entry->module_number = zend_next_free_module();
 	if (module_entry->module_startup_func) {
 		if (module_entry->module_startup_func(type, module_entry->module_number)==FAILURE) {
-			php3_error(E_CORE_WARNING,"%s:  Unable to initialize module",module_entry->name);
+			php_error(E_CORE_WARNING,"%s:  Unable to initialize module",module_entry->name);
 			dlclose(handle);
 			RETURN_FALSE;
 		}
@@ -132,15 +132,15 @@ void php3_dl(pval *file,int type,pval *return_value)
 
 	if (module_entry->request_startup_func) {
 		if (module_entry->request_startup_func(type, module_entry->module_number)) {
-			php3_error(E_CORE_WARNING,"%s:  Unable to initialize module",module_entry->name);
+			php_error(E_CORE_WARNING,"%s:  Unable to initialize module",module_entry->name);
 			dlclose(handle);
 			RETURN_FALSE;
 		}
 	}
 	
 	/* update the .request_started property... */
-	if (_php3_hash_find(&module_registry,module_entry->name,strlen(module_entry->name)+1,(void **) &tmp)==FAILURE) {
-		php3_error(E_ERROR,"%s:  Loaded module got lost",module_entry->name);
+	if (zend_hash_find(&module_registry,module_entry->name,strlen(module_entry->name)+1,(void **) &tmp)==FAILURE) {
+		php_error(E_ERROR,"%s:  Loaded module got lost",module_entry->name);
 		RETURN_FALSE;
 	}
 	tmp->request_started=1;
@@ -159,7 +159,7 @@ PHP_MINFO_FUNCTION(dl)
 
 void php3_dl(pval *file,int type,pval *return_value)
 {
-	php3_error(E_WARNING,"Cannot dynamically load %s - dynamic modules are not supported",file->value.str.val);
+	php_error(E_WARNING,"Cannot dynamically load %s - dynamic modules are not supported",file->value.str.val);
 	RETURN_FALSE;
 }
 

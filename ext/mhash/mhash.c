@@ -127,7 +127,7 @@ PHP_FUNCTION(mhash)
 	bsize = mhash_get_block_size(hash->value.lval);
 	td = mhash_init(hash->value.lval);
 	if(td == MHASH_FAILED) {
-		php3_error(E_WARNING, MHASH_FAILED_MSG);
+		php_error(E_WARNING, MHASH_FAILED_MSG);
 		RETURN_FALSE;
 	}
 

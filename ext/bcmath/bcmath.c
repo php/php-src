@@ -231,7 +231,7 @@ PHP_FUNCTION(bcdiv)
 			return_value->type = IS_STRING;
 			break;
 		case -1: /* division by zero */
-			php3_error(E_WARNING,"Division by zero");
+			php_error(E_WARNING,"Division by zero");
 			break;
 	}
 	free_num(&first);
@@ -272,7 +272,7 @@ PHP_FUNCTION(bcmod)
 			return_value->type = IS_STRING;
 			break;
 		case -1:
-			php3_error(E_WARNING,"Division by zero");
+			php_error(E_WARNING,"Division by zero");
 			break;
 	}
 	free_num(&first);
@@ -358,7 +358,7 @@ PHP_FUNCTION(bcsqrt)
 		return_value->value.str.len = strlen(return_value->value.str.val);
 		return_value->type = IS_STRING;
 	} else {
-		php3_error(E_WARNING,"Square root of negative number");
+		php_error(E_WARNING,"Square root of negative number");
 	}
 	free_num(&result);
 	return;

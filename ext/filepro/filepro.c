@@ -209,20 +209,20 @@ PHP_FUNCTION(filepro)
 	}
 
 	if (!(fp = fopen(workbuf, "r"))) {
-		php3_error(E_WARNING, "filePro: cannot open map: [%d] %s",
+		php_error(E_WARNING, "filePro: cannot open map: [%d] %s",
 					errno, strerror(errno));
 		RETURN_FALSE;
 	}
 	if (!fgets(readbuf, 250, fp)) {
 		fclose(fp);
-		php3_error(E_WARNING, "filePro: cannot read map: [%d] %s",
+		php_error(E_WARNING, "filePro: cannot read map: [%d] %s",
 					errno, strerror(errno));
 		RETURN_FALSE;
 	}
 	
 	/* Get the field count, assume the file is readable! */
 	if (strcmp(strtok(readbuf, ":"), "map")) {
-		php3_error(E_WARNING, "filePro: map file corrupt or encrypted");
+		php_error(E_WARNING, "filePro: map file corrupt or encrypted");
 		RETURN_FALSE;
 	}
 	FP_GLOBAL(fp_keysize) = atoi(strtok(NULL, ":"));
@@ -233,7 +233,7 @@ PHP_FUNCTION(filepro)
 	for (i = 0; i < FP_GLOBAL(fp_fcount); i++) {
 		if (!fgets(readbuf, 250, fp)) {
 			fclose(fp);
-			php3_error(E_WARNING, "filePro: cannot read map: [%d] %s",
+			php_error(E_WARNING, "filePro: cannot read map: [%d] %s",
 						errno, strerror(errno));
 			RETURN_FALSE;
 		}
@@ -285,7 +285,7 @@ PHP_FUNCTION(filepro_rowcount)
 	}
 
 	if (!FP_GLOBAL(fp_database)) {
-		php3_error(E_WARNING,
+		php_error(E_WARNING,
 					"filePro: must set database directory first!\n");
 		RETURN_FALSE;
 	}
@@ -304,7 +304,7 @@ PHP_FUNCTION(filepro_rowcount)
 	}
 
 	if (!(fp = fopen(workbuf, "r"))) {
-		php3_error(E_WARNING, "filePro: cannot open key: [%d] %s",
+		php_error(E_WARNING, "filePro: cannot open key: [%d] %s",
 					errno, strerror(errno));
 		RETURN_FALSE;
 	}
@@ -340,7 +340,7 @@ PHP_FUNCTION(filepro_fieldname)
 	convert_to_long(fno);
 
 	if (!FP_GLOBAL(fp_database)) {
-		php3_error(E_WARNING,
+		php_error(E_WARNING,
 					"filePro: must set database directory first!\n");
 		RETURN_FALSE;
 	}
@@ -351,7 +351,7 @@ PHP_FUNCTION(filepro_fieldname)
 		}
 	}
 
-	php3_error(E_WARNING,
+	php_error(E_WARNING,
 				"filePro: unable to locate field number %d.\n",
 				fno->value.lval);
 
@@ -378,7 +378,7 @@ PHP_FUNCTION(filepro_fieldtype)
 	convert_to_long(fno);
 
 	if (!FP_GLOBAL(fp_database)) {
-		php3_error(E_WARNING,
+		php_error(E_WARNING,
 					"filePro: must set database directory first!\n");
 		RETURN_FALSE;
 	}
@@ -388,7 +388,7 @@ PHP_FUNCTION(filepro_fieldtype)
 			RETURN_STRING(lp->format,1);
 		}
 	}
-	php3_error(E_WARNING,
+	php_error(E_WARNING,
 				"filePro: unable to locate field number %d.\n",
 				fno->value.lval);
 	RETVAL_FALSE;
@@ -414,7 +414,7 @@ PHP_FUNCTION(filepro_fieldwidth)
 	convert_to_long(fno);
 
 	if (!FP_GLOBAL(fp_database)) {
-		php3_error(E_WARNING,
+		php_error(E_WARNING,
 					"filePro: must set database directory first!\n");
 		RETURN_FALSE;
 	}
@@ -424,7 +424,7 @@ PHP_FUNCTION(filepro_fieldwidth)
 			RETURN_LONG(lp->width);
 		}
 	}
-	php3_error(E_WARNING,
+	php_error(E_WARNING,
 				"filePro: unable to locate field number %d.\n",
 				fno->value.lval);
 	RETVAL_FALSE;
@@ -445,7 +445,7 @@ PHP_FUNCTION(filepro_fieldcount)
 	}
 
 	if (!FP_GLOBAL(fp_database)) {
-		php3_error(E_WARNING,
+		php_error(E_WARNING,
 					"filePro: must set database directory first!\n");
 		RETURN_FALSE;
 	}
@@ -476,7 +476,7 @@ PHP_FUNCTION(filepro_retrieve)
 	}
 
 	if (!FP_GLOBAL(fp_database)) {
-		php3_error(E_WARNING,
+		php_error(E_WARNING,
 					"filePro: must set database directory first!\n");
 		RETURN_FALSE;
 	}
@@ -488,7 +488,7 @@ PHP_FUNCTION(filepro_retrieve)
 	rnum = rno->value.lval;
     
     if (rnum < 0 || fnum < 0 || fnum >= FP_GLOBAL(fp_fcount)) {
-        php3_error(E_WARNING, "filepro: parameters out of range");
+        php_error(E_WARNING, "filepro: parameters out of range");
 		RETURN_FALSE;
     }
     
@@ -497,7 +497,7 @@ PHP_FUNCTION(filepro_retrieve)
         offset += lp->width;
     }
     if (!lp) {
-        php3_error(E_WARNING, "filePro: cannot locate field");
+        php_error(E_WARNING, "filePro: cannot locate field");
 		RETURN_FALSE;
     }
     
@@ -513,14 +513,14 @@ PHP_FUNCTION(filepro_retrieve)
 	}
 
 	if (!(fp = fopen(workbuf, "r"))) {
-		php3_error(E_WARNING, "filePro: cannot open key: [%d] %s",
+		php_error(E_WARNING, "filePro: cannot open key: [%d] %s",
 					errno, strerror(errno));
 	    fclose(fp);
 		RETURN_FALSE;
 	}
     fseek(fp, offset, SEEK_SET);
 	if (fread(readbuf, lp->width, 1, fp) != 1) {
-        php3_error(E_WARNING, "filePro: cannot read data: [%d] %s",
+        php_error(E_WARNING, "filePro: cannot read data: [%d] %s",
 					errno, strerror(errno));
 	    fclose(fp);
 		RETURN_FALSE;

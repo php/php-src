@@ -70,7 +70,7 @@ PHP_FUNCTION(mail)
 	if (argv[0]->value.str.val) {
 		to = argv[0]->value.str.val;
 	} else {
-		php3_error(E_WARNING, "No to field in mail command");
+		php_error(E_WARNING, "No to field in mail command");
 		RETURN_FALSE;
 	}
 
@@ -79,7 +79,7 @@ PHP_FUNCTION(mail)
 	if (argv[1]->value.str.val) {
 		subject = argv[1]->value.str.val;
 	} else {
-		php3_error(E_WARNING, "No subject field in mail command");
+		php_error(E_WARNING, "No subject field in mail command");
 		RETURN_FALSE;
 	}
 
@@ -89,7 +89,7 @@ PHP_FUNCTION(mail)
 		message = argv[2]->value.str.val;
 	} else {
 		/* this is not really an error, so it is allowed. */
-		php3_error(E_WARNING, "No message string in mail command");
+		php_error(E_WARNING, "No message string in mail command");
 		message = NULL;
 	}
 
@@ -118,7 +118,7 @@ int _php3_mail(char *to, char *subject, char *message, char *headers)
 
 #if MSVC5
 	if (TSendMail(INI_STR("SMTP"), &tsm_err, headers, subject, to, message) != SUCCESS){
-		php3_error(E_WARNING, GetSMErrorText(tsm_err));
+		php_error(E_WARNING, GetSMErrorText(tsm_err));
 		return 0;
 	}
 #else
@@ -141,7 +141,7 @@ int _php3_mail(char *to, char *subject, char *message, char *headers)
 			return 1;
 		}
 	} else {
-		php3_error(E_WARNING, "Could not execute mail delivery program");
+		php_error(E_WARNING, "Could not execute mail delivery program");
 		return 0;
 	}
 #endif
@@ -153,7 +153,7 @@ PHP_MINFO_FUNCTION(mail)
 #if MSVC5
 	PUTS("Internal Sendmail support for Windows 4");
 #else
-	php3_printf("Path to sendmail: <tt>%s</tt>", INI_STR("sendmail_path"));
+	php_printf("Path to sendmail: <tt>%s</tt>", INI_STR("sendmail_path"));
 #endif
 }
 

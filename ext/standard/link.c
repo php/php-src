@@ -64,7 +64,7 @@ PHP_FUNCTION(readlink)
 
 	ret = readlink(filename->value.str.val, buff, 255);
 	if (ret == -1) {
-		php3_error(E_WARNING, "readlink failed (%s)", strerror(errno));
+		php_error(E_WARNING, "readlink failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
 	/* Append NULL to the end of the string */
@@ -90,7 +90,7 @@ PHP_FUNCTION(linkinfo)
 
 	ret = lstat(filename->value.str.val, &sb);
 	if (ret == -1) {
-		php3_error(E_WARNING, "LinkInfo failed (%s)", strerror(errno));
+		php_error(E_WARNING, "LinkInfo failed (%s)", strerror(errno));
 		RETURN_LONG(-1L);
 	}
 	RETURN_LONG((long) sb.st_dev);
@@ -118,7 +118,7 @@ PHP_FUNCTION(symlink)
 
 	ret = symlink(topath->value.str.val, frompath->value.str.val);
 	if (ret == -1) {
-		php3_error(E_WARNING, "SymLink failed (%s)", strerror(errno));
+		php_error(E_WARNING, "SymLink failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -146,7 +146,7 @@ PHP_FUNCTION(link)
 
 	ret = link(topath->value.str.val, frompath->value.str.val);
 	if (ret == -1) {
-		php3_error(E_WARNING, "Link failed (%s)", strerror(errno));
+		php_error(E_WARNING, "Link failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -173,7 +173,7 @@ PHP_FUNCTION(unlink)
 
 	ret = unlink(filename->value.str.val);
 	if (ret == -1) {
-		php3_error(E_WARNING, "Unlink failed (%s)", strerror(errno));
+		php_error(E_WARNING, "Unlink failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
 	/* Clear stat cache */

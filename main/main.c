@@ -318,7 +318,7 @@ PHPAPI int php3_write(void *buf, int size)
 	return PHPWRITE(buf, size);
 }
 
-PHPAPI int php3_printf(const char *format,...)
+PHPAPI int php_printf(const char *format,...)
 {
 	va_list args;
 	int ret;
@@ -335,7 +335,7 @@ PHPAPI int php3_printf(const char *format,...)
 
 
 /* extended error handling function */
-PHPAPI void php3_error(int type, const char *format,...)
+PHPAPI void php_error(int type, const char *format,...)
 {
 	va_list args;
 	char *error_filename = NULL;
@@ -425,7 +425,7 @@ PHPAPI void php3_error(int type, const char *format,...)
 				if (prepend_string) {
 					PUTS(prepend_string);
 				}		
-				php3_printf("<br>\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br>\n", error_type_str, buffer, error_filename, error_lineno);
+				php_printf("<br>\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br>\n", error_type_str, buffer, error_filename, error_lineno);
 				if (append_string) {
 					PUTS(append_string);
 				}		
@@ -446,7 +446,7 @@ PHPAPI void php3_error(int type, const char *format,...)
 		tmp->value.str.len = size;
 		tmp->type = IS_STRING;
 
-		_php3_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(pval *), NULL);
+		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(pval *), NULL);
 	}
 
 	switch (type) {
@@ -467,7 +467,7 @@ static void php3_timeout(int dummy)
 {
 	PLS_FETCH();
 
-	php3_error(E_ERROR, "Maximum execution time of %s seconds exceeded", INI_STR("max_execution_time"));
+	php_error(E_ERROR, "Maximum execution time of %s seconds exceeded", INI_STR("max_execution_time"));
 }
 #endif
 
@@ -514,7 +514,7 @@ PHP_FUNCTION(set_time_limit)
 	PLS_FETCH();
 
 	if (PG(safe_mode)) {
-		php3_error(E_WARNING, "Cannot set time limit in safe mode");
+		php_error(E_WARNING, "Cannot set time limit in safe mode");
 		RETURN_FALSE;
 	}
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &new_timeout) == FAILURE) {
@@ -578,17 +578,17 @@ static void php_message_handler_for_zend(long message, void *data)
 		case ZMSG_FAILED_INCLUDE_FOPEN: {
 				PLS_FETCH();
 
-				php3_error(E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php3_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
+				php_error(E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php3_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
 			}
 			break;
 		case ZMSG_FAILED_REQUIRE_FOPEN: {
 				PLS_FETCH();
 
-				php3_error(E_COMPILE_ERROR, "Failed opening required '%s' (include_path='%s')", php3_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
+				php_error(E_COMPILE_ERROR, "Failed opening required '%s' (include_path='%s')", php3_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
 			}
 			break;
 		case ZMSG_FAILED_HIGHLIGHT_FOPEN:
-			php3_error(E_WARNING, "Failed opening '%s' for highlighting", php3_strip_url_passwd((char *) data));
+			php_error(E_WARNING, "Failed opening '%s' for highlighting", php3_strip_url_passwd((char *) data));
 			break;
 		case ZMSG_MEMORY_LEAK_DETECTED:
 		case ZMSG_MEMORY_LEAK_REPEATED: {
@@ -662,7 +662,7 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	}
 
 	if (php3_init_request_info(NULL)) {
-		php3_printf("Unable to initialize request info.\n");
+		php_printf("Unable to initialize request info.\n");
 		return FAILURE;
 	}
 	
@@ -742,7 +742,7 @@ void php_request_shutdown(void *dummy)
 static int php3_config_ini_startup()
 {
 	if (php3_init_config() == FAILURE) {
-		php3_printf("PHP:  Unable to parse configuration file.\n");
+		php_printf("PHP:  Unable to parse configuration file.\n");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -799,8 +799,8 @@ int php_module_startup(sapi_module_struct *sf)
 
 	zend_output_startup();
 
-	zuf.error_function = php3_error;
-	zuf.printf_function = php3_printf;
+	zuf.error_function = php_error;
+	zuf.printf_function = php_printf;
 	zuf.write_function = zend_body_write_wrapper;
 	zuf.fopen_function = php_fopen_wrapper_for_zend;
 	zuf.message_handler = php_message_handler_for_zend;
@@ -825,7 +825,7 @@ int php_module_startup(sapi_module_struct *sf)
 #if (WIN32|WINNT) && !(USE_SAPI)
 	/* start up winsock services */
 	if (WSAStartup(wVersionRequested, &wsaData) != 0) {
-		php3_printf("\nwinsock.dll unusable. %d\n", WSAGetLastError());
+		php_printf("\nwinsock.dll unusable. %d\n", WSAGetLastError());
 		return FAILURE;
 	}
 #endif
@@ -846,7 +846,7 @@ int php_module_startup(sapi_module_struct *sf)
 	zend_set_utility_values(&zuv);
 
 	if (module_startup_modules() == FAILURE) {
-		php3_printf("Unable to start modules\n");
+		php_printf("Unable to start modules\n");
 		return FAILURE;
 	}
 	module_initialized = 1;
@@ -904,7 +904,7 @@ void php_module_shutdown()
 
 
 /* in 3.1 some of this should move into sapi */
-int _php3_hash_environment(PLS_D ELS_DC)
+int zend_hash_environment(PLS_D ELS_DC)
 {
 	char **env, *p, *t;
 	unsigned char _gpc_flags[3] = {0,0,0};
@@ -951,7 +951,7 @@ int _php3_hash_environment(PLS_D ELS_DC)
 		tmp->type = IS_STRING;
 		INIT_PZVAL(tmp);
 		/* environmental variables never take precedence over get/post/cookie variables */
-		_php3_hash_add(&EG(symbol_table), t, p - *env + 1, &tmp, sizeof(pval *), NULL);
+		zend_hash_add(&EG(symbol_table), t, p - *env + 1, &tmp, sizeof(pval *), NULL);
 		efree(t);
 	}
 
@@ -976,19 +976,19 @@ int _php3_hash_environment(PLS_D ELS_DC)
 			}
 			INIT_PZVAL(tmp);
 			tmp->type = IS_STRING;
-			_php3_hash_update(&EG(symbol_table), t, strlen(t)+1, &tmp, sizeof(pval *), NULL);
+			zend_hash_update(&EG(symbol_table), t, strlen(t)+1, &tmp, sizeof(pval *), NULL);
 		}
 		/* insert special variables */
-		if (_php3_hash_find(&EG(symbol_table), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME"), (void **) &tmp_ptr) == SUCCESS) {
+		if (zend_hash_find(&EG(symbol_table), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME"), (void **) &tmp_ptr) == SUCCESS) {
 			(*tmp_ptr)->refcount++;
-			_php3_hash_update(&EG(symbol_table), "PATH_TRANSLATED", sizeof("PATH_TRANSLATED"), tmp_ptr, sizeof(pval *), NULL);
+			zend_hash_update(&EG(symbol_table), "PATH_TRANSLATED", sizeof("PATH_TRANSLATED"), tmp_ptr, sizeof(pval *), NULL);
 		}
 		tmp = (pval *) emalloc(sizeof(pval));
 		tmp->value.str.len = strlen(((request_rec *) SG(server_context))->uri);
 		tmp->value.str.val = estrndup(((request_rec *) SG(server_context))->uri, tmp->value.str.len);
 		INIT_PZVAL(tmp);
 		tmp->type = IS_STRING;
-		_php3_hash_update(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF"), (void *) &tmp, sizeof(pval *), NULL);
+		zend_hash_update(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF"), (void *) &tmp, sizeof(pval *), NULL);
 	}
 #else
 	{
@@ -998,7 +998,7 @@ int _php3_hash_environment(PLS_D ELS_DC)
 		pi = SG(request_info).request_uri;
 		tmp = (pval *) emalloc(sizeof(pval));
 		tmp->value.str.val = emalloc(((pi)?strlen(pi):0) + 1);
-		tmp->value.str.len = _php3_sprintf(tmp->value.str.val, "%s", (pi ? pi : ""));	/* SAFE */
+		tmp->value.str.len = php_sprintf(tmp->value.str.val, "%s", (pi ? pi : ""));	/* SAFE */
 		tmp->type = IS_STRING;
 		INIT_PZVAL(tmp);
 #else
@@ -1016,11 +1016,11 @@ int _php3_hash_environment(PLS_D ELS_DC)
 		}
 		tmp = (pval *) emalloc(sizeof(pval));
 		tmp->value.str.val = emalloc(l + 1);
-		tmp->value.str.len = _php3_sprintf(tmp->value.str.val, "%s%s", (sn ? sn : ""), (pi ? pi : ""));	/* SAFE */
+		tmp->value.str.len = php_sprintf(tmp->value.str.val, "%s%s", (sn ? sn : ""), (pi ? pi : ""));	/* SAFE */
 		tmp->type = IS_STRING;
 		INIT_PZVAL(tmp);
 #endif
-		_php3_hash_update(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF"), (void *) & tmp, sizeof(pval *), NULL);
+		zend_hash_update(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF"), (void *) & tmp, sizeof(pval *), NULL);
 	}
 #endif
 
@@ -1039,12 +1039,12 @@ void _php3_build_argv(char *s ELS_DC)
 
 	arr = (pval *) emalloc(sizeof(pval));
 	arr->value.ht = (HashTable *) emalloc(sizeof(HashTable));
-	if (_php3_hash_init(arr->value.ht, 0, NULL, PVAL_PTR_DTOR, 0) == FAILURE) {
-		php3_error(E_WARNING, "Unable to create argv array");
+	if (zend_hash_init(arr->value.ht, 0, NULL, PVAL_PTR_DTOR, 0) == FAILURE) {
+		php_error(E_WARNING, "Unable to create argv array");
 	} else {
 		arr->type = IS_ARRAY;
 		INIT_PZVAL(arr);
-		_php3_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
+		zend_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
 	}
 	/* now pick out individual entries */
 	ss = s;
@@ -1060,7 +1060,7 @@ void _php3_build_argv(char *s ELS_DC)
 		tmp->value.str.val = estrndup(ss, tmp->value.str.len);
 		INIT_PZVAL(tmp);
 		count++;
-		if (_php3_hash_next_index_insert(arr->value.ht, &tmp, sizeof(pval *), NULL)==FAILURE) {
+		if (zend_hash_next_index_insert(arr->value.ht, &tmp, sizeof(pval *), NULL)==FAILURE) {
 			if (tmp->type == IS_STRING) {
 				efree(tmp->value.str.val);
 			}
@@ -1076,7 +1076,7 @@ void _php3_build_argv(char *s ELS_DC)
 	tmp->value.lval = count;
 	tmp->type = IS_LONG;
 	INIT_PZVAL(tmp);
-	_php3_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &tmp, sizeof(pval *), NULL);
+	zend_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &tmp, sizeof(pval *), NULL);
 }
 
 
@@ -1110,7 +1110,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	if (setjmp(EG(bailout))!=0) {
 		return;
 	}
-	_php3_hash_environment(PLS_C ELS_CC);
+	zend_hash_environment(PLS_C ELS_CC);
 
 #if WIN32||WINNT
 	UpdateIniFromRegistry(primary_file->filename);

@@ -184,7 +184,7 @@ extern php3_module_entry oci8_module_entry;
 # define OCI8_STMT_TYPE(x) ((x)==OCI8_GLOBAL(php3_oci8_module).le_stmt)
 
 # define RETURN_OUT_OF_MEMORY \
-	php3_error(E_WARNING, "Out of memory");\
+	php_error(E_WARNING, "Out of memory");\
 	RETURN_FALSE
 # define OCI8_FAIL(c,f,r) \
 	php3i_oci8_error((c)->pError,(f),(r));\

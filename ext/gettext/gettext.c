@@ -42,7 +42,7 @@ php3_module_entry php3_gettext_module_entry = {
 
 PHP_MINFO_FUNCTION(gettext)
 {
-	php3_printf("GNU gettext support active.");
+	php_printf("GNU gettext support active.");
 }
 
 PHP_FUNCTION(textdomain)

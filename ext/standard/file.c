@@ -252,7 +252,7 @@ PHP_FUNCTION(flock)
     }
 
     if ((!fp || (type!=le_fp && type!=le_pp)) && (!fd || type!=wsa_fp)) {
-        php3_error(E_WARNING,"Unable to find file identifier %d",arg1->value.lval);
+        php_error(E_WARNING,"Unable to find file identifier %d",arg1->value.lval);
         RETURN_FALSE;
     }
 
@@ -262,7 +262,7 @@ PHP_FUNCTION(flock)
 
     act = arg2->value.lval & 3;
     if(act < 1 || act > 3) {
-            php3_error(E_WARNING, "illegal value for second argument");
+            php_error(E_WARNING, "illegal value for second argument");
             RETURN_FALSE;
     }
     /* flock_values contains all possible actions
@@ -313,7 +313,7 @@ PHP_FUNCTION(get_meta_tags)
 	if (!fp && !socketd) {
 		if (issock != BAD_URL) {
 			php3_strip_url_passwd(filename->value.str.val);
-			php3_error(E_WARNING,"File(\"%s\") - %s",filename->value.str.val,strerror(errno));
+			php_error(E_WARNING,"File(\"%s\") - %s",filename->value.str.val,strerror(errno));
 		}
 		RETURN_FALSE;
 	}
@@ -435,7 +435,7 @@ PHP_FUNCTION(file)
 	if (!fp && !socketd) {
 		if (issock != BAD_URL) {
 			php3_strip_url_passwd(filename->value.str.val);
-			php3_error(E_WARNING,"File(\"%s\") - %s",filename->value.str.val,strerror(errno));
+			php_error(E_WARNING,"File(\"%s\") - %s",filename->value.str.val,strerror(errno));
 		}
 		RETURN_FALSE;
 	}
@@ -572,7 +572,7 @@ PHP_FUNCTION(fopen)
 	if (!fp && !socketd) {
 		if (issock != BAD_URL) {
 			php3_strip_url_passwd(arg1->value.str.val);
-			php3_error(E_WARNING,"fopen(\"%s\",\"%s\") - %s",
+			php_error(E_WARNING,"fopen(\"%s\",\"%s\") - %s",
 						arg1->value.str.val, p, strerror(errno));
 		}
 		efree(p);
@@ -607,7 +607,7 @@ PHP_FUNCTION(fclose)
 	id=arg1->value.lval;
 	fp = php3_list_find(id,&type);
 	if (!fp || (type!=le_fp && type!=wsa_fp)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	php3_list_delete(id);
@@ -654,13 +654,13 @@ PHP_FUNCTION(popen)
 		}
 		fp = popen(buf,p);
 		if (!fp) {
-			php3_error(E_WARNING,"popen(\"%s\",\"%s\") - %s",buf,p,strerror(errno));
+			php_error(E_WARNING,"popen(\"%s\",\"%s\") - %s",buf,p,strerror(errno));
 			RETURN_FALSE;
 		}
 	} else {
 		fp = popen(arg1->value.str.val,p);
 		if (!fp) {
-			php3_error(E_WARNING,"popen(\"%s\",\"%s\") - %s",arg1->value.str.val,p,strerror(errno));
+			php_error(E_WARNING,"popen(\"%s\",\"%s\") - %s",arg1->value.str.val,p,strerror(errno));
 			efree(p);
 			RETURN_FALSE;
 		}
@@ -688,7 +688,7 @@ PHP_FUNCTION(pclose)
 
 	fp = php3_list_find(id,&type);
 	if (!fp || type!=le_pp) {
-		php3_error(E_WARNING,"Unable to find pipe identifier %d",id);
+		php_error(E_WARNING,"Unable to find pipe identifier %d",id);
 		RETURN_FALSE;
 	}
 	php3_list_delete(id);
@@ -719,7 +719,7 @@ PHP_FUNCTION(feof)
 		socketd=*sock;
 	}
 	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		/* we're at the eof if the file doesn't exist */
 		RETURN_TRUE;
 	}
@@ -742,7 +742,7 @@ PHPAPI int _php3_set_sock_blocking(int socketd, int block)
       /* with ioctlsocket, a non-zero sets nonblocking, a zero sets blocking */
 	  flags = block;
 	  if (ioctlsocket(socketd,FIONBIO,&flags)==SOCKET_ERROR){
-		  php3_error(E_WARNING,"%s",WSAGetLastError());
+		  php_error(E_WARNING,"%s",WSAGetLastError());
 		  ret = FALSE;
       }
 #else
@@ -780,7 +780,7 @@ PHP_FUNCTION(set_socket_blocking)
 	
 	sock = php3_list_find(id,&type);
 	if (type != wsa_fp) {
-		php3_error(E_WARNING,"%d is not a socket id",id);
+		php_error(E_WARNING,"%d is not a socket id",id);
 		RETURN_FALSE;
 	}
 	socketd = *sock;
@@ -808,7 +808,7 @@ PHP_FUNCTION(set_socket_timeout)
 	
 	sock = php3_list_find(socket->value.lval, &type);
 	if (type!=wsa_fp) {
-		php3_error(E_WARNING,"%d is not a socket id",socket->value.lval);
+		php_error(E_WARNING,"%d is not a socket id",socket->value.lval);
 		RETURN_FALSE;
 	}
 	t.tv_sec = timeout->value.lval;
@@ -847,7 +847,7 @@ PHP_FUNCTION(fgets)
 		socketd=*sock;
 	}
 	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	buf = emalloc(sizeof(char) * (len + 1));
@@ -893,7 +893,7 @@ PHP_FUNCTION(fgetc) {
 		socketd = *sock;
 	}
 	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	buf = emalloc(sizeof(char) * 2);
@@ -939,7 +939,7 @@ PHP_FUNCTION(fgetss)
 		socketd=*sock;
 	}
 	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
-		php3_error(E_WARNING, "Unable to find file identifier %d", id);
+		php_error(E_WARNING, "Unable to find file identifier %d", id);
 		RETURN_FALSE;
 	}
 
@@ -1003,7 +1003,7 @@ PHP_FUNCTION(fwrite)
 		socketd=*sock;
 	}
 	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1060,7 +1060,7 @@ PHP_FUNCTION(set_file_buffer)
 	}
 	if ((!fp || (type != le_fp && type != le_pp)) &&
 		(!socketd || type != wsa_fp)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1090,7 +1090,7 @@ PHP_FUNCTION(rewind)
 	id = arg1->value.lval;	
 	fp = php3_list_find(id,&type);
 	if (!fp || (type!=le_fp && type!=le_pp)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	rewind(fp);
@@ -1115,7 +1115,7 @@ PHP_FUNCTION(ftell)
 	id = arg1->value.lval;	
 	fp = php3_list_find(id,&type);
 	if (!fp || (type!=le_fp && type!=le_pp)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	pos = ftell(fp);
@@ -1142,7 +1142,7 @@ PHP_FUNCTION(fseek)
 	id = arg1->value.lval;
 	fp = php3_list_find(id,&type);
 	if (!fp || (type!=le_fp && type!=le_pp)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 /*fseek is flaky on windows, use setfilepointer, but we have to live with
@@ -1150,7 +1150,7 @@ PHP_FUNCTION(fseek)
 #if 0
 	ret = SetFilePointer (fp, pos, NULL, FILE_BEGIN);
 	if (ret == 0xFFFFFFFF){
-		php3_error(E_WARNING,"Unable to move file postition: %s",php3_win_err());
+		php_error(E_WARNING,"Unable to move file postition: %s",php3_win_err());
 		RETURN_FALSE;
 	}
 #else
@@ -1180,7 +1180,7 @@ PHP_FUNCTION(mkdir)
 	}
 	ret = mkdir(arg1->value.str.val,mode);
 	if (ret < 0) {
-		php3_error(E_WARNING,"MkDir failed (%s)", strerror(errno));
+		php_error(E_WARNING,"MkDir failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1205,7 +1205,7 @@ PHP_FUNCTION(rmdir)
 	}
 	ret = rmdir(arg1->value.str.val);
 	if (ret < 0) {
-		php3_error(E_WARNING,"RmDir failed (%s)", strerror(errno));
+		php_error(E_WARNING,"RmDir failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1251,7 +1251,7 @@ PHP_FUNCTION(readfile)
 	if (!fp && !socketd){
 		if (issock != BAD_URL) {
 			php3_strip_url_passwd(arg1->value.str.val);
-			php3_error(E_WARNING,"ReadFile(\"%s\") - %s",arg1->value.str.val,strerror(errno));
+			php_error(E_WARNING,"ReadFile(\"%s\") - %s",arg1->value.str.val,strerror(errno));
 		}
 		RETURN_FALSE;
 	}
@@ -1321,7 +1321,7 @@ PHP_FUNCTION(fpassthru)
 		socketd=*sock;
 	}
 	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	size = 0;
@@ -1362,7 +1362,7 @@ PHP_FUNCTION(rename)
 	ret = rename(old_name, new_name);
 
 	if (ret == -1) {
-		php3_error(E_WARNING,
+		php_error(E_WARNING,
 					"Rename failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
@@ -1397,7 +1397,7 @@ PHP_FUNCTION(copy)
 #else
 	if ((fd_s=open(source->value.str.val,O_RDONLY))==-1) {
 #endif
-		php3_error(E_WARNING,"Unable to open '%s' for reading:  %s",source->value.str.val,strerror(errno));
+		php_error(E_WARNING,"Unable to open '%s' for reading:  %s",source->value.str.val,strerror(errno));
 		RETURN_FALSE;
 	}
 #if WIN32|WINNT
@@ -1405,14 +1405,14 @@ PHP_FUNCTION(copy)
 #else
 	if ((fd_t=creat(target->value.str.val,0777))==-1) {
 #endif
-		php3_error(E_WARNING,"Unable to create '%s':  %s", target->value.str.val,strerror(errno));
+		php_error(E_WARNING,"Unable to create '%s':  %s", target->value.str.val,strerror(errno));
 		close(fd_s);
 		RETURN_FALSE;
 	}
 
 	while ((read_bytes=read(fd_s,buffer,8192))!=-1 && read_bytes!=0) {
 		if (write(fd_t,buffer,read_bytes)==-1) {
-			php3_error(E_WARNING,"Unable to write to '%s':  %s",target->value.str.val,strerror(errno));
+			php_error(E_WARNING,"Unable to write to '%s':  %s",target->value.str.val,strerror(errno));
 			close(fd_s);
 			close(fd_t);
 			RETURN_FALSE;
@@ -1453,7 +1453,7 @@ PHP_FUNCTION(fread)
 		socketd=*sock;
 	}
 	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	return_value->value.str.val = emalloc(sizeof(char) * (len + 1));
@@ -1535,7 +1535,7 @@ PHP_FUNCTION(fgetcsv) {
 	}
 	if ((!fp || (type != le_fp && type != le_pp)) &&
 		(!socketd || type != wsa_fp)) {
-		php3_error(E_WARNING, "Unable to find file identifier %d", id);
+		php_error(E_WARNING, "Unable to find file identifier %d", id);
 		RETURN_FALSE;
 	}
 

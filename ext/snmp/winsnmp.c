@@ -87,7 +87,7 @@ void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
    for the session are also required.
 */
 	if ((session = SnmpMgrOpen(agent, community, timeout, retries)) == NULL){
-		php3_error(E_WARNING,"error on SnmpMgrOpen %d\n", GetLastError());
+		php_error(E_WARNING,"error on SnmpMgrOpen %d\n", GetLastError());
 	}
 
     /* Determine and perform the requested operation.*/
@@ -106,12 +106,12 @@ void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 		if (!SnmpMgrRequest(session, requestType, &variableBindings,
                             &errorStatus, &errorIndex)){
             /* The API is indicating an error. */
-            php3_error(E_WARNING,"error on SnmpMgrRequest %d\n", GetLastError());
+            php_error(E_WARNING,"error on SnmpMgrRequest %d\n", GetLastError());
         } else {
             /* The API succeeded, errors may be indicated from the remote
                agent. */
             if (errorStatus > 0){
-                php3_error(E_WARNING,"Error: errorStatus=%d, errorIndex=%d\n",
+                php_error(E_WARNING,"Error: errorStatus=%d, errorIndex=%d\n",
                        errorStatus, errorIndex);
             } else {
                 /* Display the resulting variable bindings.*/
@@ -121,13 +121,13 @@ void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
                 for(i=0; i < variableBindings.len; i++)
                     {
                     SnmpMgrOidToStr(&variableBindings.list[i].name, &string);
-                    php3_printf("Variable = %s\n", string);
+                    php_printf("Variable = %s\n", string);
                     if (string) SNMP_free(string);
 
-                    php3_printf("Value    = ");
+                    php_printf("Value    = ");
                     SnmpUtilPrintAsnAny(&variableBindings.list[i].value);
 
-                    php3_printf("\n");
+                    php_printf("\n");
                     } /* end for() */
                 }
             }
@@ -152,7 +152,7 @@ void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
             if (!SnmpMgrRequest(session, requestType, &variableBindings,
                                 &errorStatus, &errorIndex)){
                 /* The API is indicating an error.*/
-                php3_error(E_WARNING,"error on SnmpMgrRequest %d\n", GetLastError());
+                php_error(E_WARNING,"error on SnmpMgrRequest %d\n", GetLastError());
                 break;
                 }
             else
@@ -170,7 +170,7 @@ void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 
                 /* Test for general error conditions or sucesss. */
                 if (errorStatus > 0){
-                    php3_error(E_ERROR,"Error: errorStatus=%d, errorIndex=%d \n",
+                    php_error(E_ERROR,"Error: errorStatus=%d, errorIndex=%d \n",
                            errorStatus, errorIndex);
                     break;
                     }
@@ -180,13 +180,13 @@ void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
                     char *string = NULL;
 
                     SnmpMgrOidToStr(&variableBindings.list[0].name, &string);
-                    php3_printf("Variable = %s\n", string);
+                    php_printf("Variable = %s\n", string);
                     if (string) SNMP_free(string);
 
-                    php3_printf("Value    = ");
+                    php_printf("Value    = ");
                     SnmpUtilPrintAsnAny(&variableBindings.list[0].value);
 
-                    php3_printf("\n");
+                    php_printf("\n");
                     }
                 } /* end if () */
             /* Prepare for the next iteration.  Make sure returned oid is
@@ -206,7 +206,7 @@ void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 
 	/* Close SNMP session with the remote agent.*/
 	if (!SnmpMgrClose(session)){
-		php3_error(E_WARNING,"error on SnmpMgrClose %d\n", GetLastError());
+		php_error(E_WARNING,"error on SnmpMgrClose %d\n", GetLastError());
 	}
 }
 

@@ -72,7 +72,7 @@ static void _php3_statpage(void)
 		path = SG(request_info).path_translated;
 		if (path != NULL) {
 			if (stat(path, &sb) == -1) {
-				php3_error(E_WARNING, "Unable to find file:  '%s'", path);
+				php_error(E_WARNING, "Unable to find file:  '%s'", path);
 				return;
 			}
 			page_uid   = sb.st_uid;

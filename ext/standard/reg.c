@@ -69,7 +69,7 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 	reg_cache *rc = NULL;
 	REGLS_FETCH();
 	
-	if(_php3_hash_find(&REG(ht_rc), (char *) pattern, patlen+1, (void **) &rc) == FAILURE ||
+	if(zend_hash_find(&REG(ht_rc), (char *) pattern, patlen+1, (void **) &rc) == FAILURE ||
 			rc->cflags != cflags) {
 		r = regcomp(preg, pattern, cflags);
 		if(!r) {
@@ -77,7 +77,7 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 
 			rcp.cflags = cflags;
 			memcpy(&rcp.preg, preg, sizeof(*preg));
-			_php3_hash_update(&REG(ht_rc), (char *) pattern, patlen+1,
+			zend_hash_update(&REG(ht_rc), (char *) pattern, patlen+1,
 					(void *) &rcp, sizeof(rcp), NULL);
 		}
 	} else {
@@ -98,7 +98,7 @@ static int _free_reg_cache(reg_cache *rc)
 	
 static void php_reg_init_globals(php_reg_globals *reg_globals) 
 {
-	_php3_hash_init(&reg_globals->ht_rc, 0, NULL, (int (*)(void *)) _free_reg_cache, 1);
+	zend_hash_init(&reg_globals->ht_rc, 0, NULL, (int (*)(void *)) _free_reg_cache, 1);
 }
 
 static PHP_MINIT_FUNCTION(regex)
@@ -116,7 +116,7 @@ static PHP_MSHUTDOWN_FUNCTION(regex)
 {
 	REGLS_FETCH();
 
-	_php3_hash_destroy(&REG(ht_rc));
+	zend_hash_destroy(&REG(ht_rc));
 	return SUCCESS;
 }
 
@@ -167,7 +167,7 @@ static void _php3_reg_eprint(int err, regex_t *re) {
 		/* drop the message into place */
 		regerror(err, re, message + buf_len, len);
 
-		php3_error(E_WARNING, "%s", message);
+		php_error(E_WARNING, "%s", message);
 	}
 
 	STR_FREE(buf);
@@ -204,7 +204,7 @@ static void _php3_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			WRONG_PARAM_COUNT;
 		}
 		if (!ParameterPassedByReference(ht, 3)) {
-			php3_error(E_WARNING, "Array to be filled with values must be passed by reference.");
+			php_error(E_WARNING, "Array to be filled with values must be passed by reference.");
 			RETURN_FALSE;
 		}
 		break;
@@ -249,7 +249,7 @@ static void _php3_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 		buf = emalloc(string_len);
 		if (!buf) {
-			php3_error(E_WARNING, "Unable to allocate memory in _php3_ereg");
+			php_error(E_WARNING, "Unable to allocate memory in _php3_ereg");
 			RETURN_FALSE;
 		}
 
@@ -324,7 +324,7 @@ char *_php3_regreplace(const char *pattern, const char *replace, const char *str
 	buf_len = 2 * string_len + 1;
 	buf = emalloc(buf_len * sizeof(char));
 	if (!buf) {
-		php3_error(E_WARNING, "Unable to allocate memory in _php3_regreplace");
+		php_error(E_WARNING, "Unable to allocate memory in _php3_regreplace");
 		regfree(&re);
 		return ((char *) -1);
 	}
@@ -541,7 +541,7 @@ PHP_FUNCTION(split)
 
 	err = regcomp(&re, spliton->value.str.val, REG_EXTENDED);
 	if (err) {
-		php3_error(E_WARNING, "unexpected regex error (%d)", err);
+		php_error(E_WARNING, "unexpected regex error (%d)", err);
 		RETURN_FALSE;
 	}
 
@@ -560,8 +560,8 @@ PHP_FUNCTION(split)
 		} else if (subs[0].rm_so==0 && subs[0].rm_eo==0) {
 			/* No more matches */
 			regfree(&re);
-			php3_error(E_WARNING, "bad regular expression for split()");
-			_php3_hash_destroy(return_value->value.ht);
+			php_error(E_WARNING, "bad regular expression for split()");
+			zend_hash_destroy(return_value->value.ht);
 			efree(return_value->value.ht);
 			RETURN_FALSE;
 		} else {
@@ -586,9 +586,9 @@ PHP_FUNCTION(split)
 
 	/* see if we encountered an error */
 	if (err && err != REG_NOMATCH) {
-		php3_error(E_WARNING, "unexpected regex error (%d)", err);
+		php_error(E_WARNING, "unexpected regex error (%d)", err);
 		regfree(&re);
-		_php3_hash_destroy(return_value->value.ht);
+		zend_hash_destroy(return_value->value.ht);
 		efree(return_value->value.ht);
 		RETURN_FALSE;
 	}

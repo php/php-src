@@ -316,7 +316,7 @@ PHP_FUNCTION(getimagesize)
 			WRONG_PARAM_COUNT;
 		}
 		if (!ParameterPassedByReference(ht, 2)) {
-            php3_error(E_WARNING, "Array to be filled with values must be passed by reference.");
+            php_error(E_WARNING, "Array to be filled with values must be passed by reference.");
             RETURN_FALSE;
         }
 
@@ -337,7 +337,7 @@ PHP_FUNCTION(getimagesize)
 	if (_php3_check_open_basedir(arg1->value.str.val)) return;
 	
 	if ((fp = fopen(arg1->value.str.val,"rb")) == 0) {
-		php3_error(E_WARNING, "Unable to open %s", arg1->value.str.val);
+		php_error(E_WARNING, "Unable to open %s", arg1->value.str.val);
 		return;
 	}
 	fread(filetype,sizeof(filetype),1,fp);
@@ -354,13 +354,13 @@ PHP_FUNCTION(getimagesize)
 			result = php3_handle_png(fp);
 			itype = 3;
 		} else {
-			php3_error(E_WARNING, "PNG file corrupted by ASCII conversion");
+			php_error(E_WARNING, "PNG file corrupted by ASCII conversion");
 		}
 	}
 	fclose(fp);
 	if (result) {
 		if (array_init(return_value) == FAILURE) {
-			php3_error(E_ERROR, "Unable to initialize array");
+			php_error(E_ERROR, "Unable to initialize array");
 			if (result) efree(result);
 			return;
 		}

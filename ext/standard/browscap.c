@@ -48,7 +48,7 @@ static int browser_reg_compare(pval *browser)
 	if (found_browser_entry) { /* already found */
 		return 0;
 	}
-	_php3_hash_find(browser->value.ht,"browser_name_pattern",sizeof("browser_name_pattern"),(void **) &browser_name);
+	zend_hash_find(browser->value.ht,"browser_name_pattern",sizeof("browser_name_pattern"),(void **) &browser_name);
 	if (!strchr(browser_name->value.str.val,'*')) {
 		return 0;
 	}
@@ -73,7 +73,7 @@ PHP_FUNCTION(get_browser)
 	
 	switch(ARG_COUNT(ht)) {
 		case 0:
-			if (_php3_hash_find(&EG(symbol_table), "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT"), (void **) &agent_name)==FAILURE) {
+			if (zend_hash_find(&EG(symbol_table), "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT"), (void **) &agent_name)==FAILURE) {
 				agent_name = &tmp;
 				var_reset(agent_name);
 			}
@@ -90,14 +90,14 @@ PHP_FUNCTION(get_browser)
 	
 	convert_to_string(agent_name);
 
-	if (_php3_hash_find(&browser_hash, agent_name->value.str.val, agent_name->value.str.len+1, (void **) &agent)==FAILURE) {
+	if (zend_hash_find(&browser_hash, agent_name->value.str.val, agent_name->value.str.len+1, (void **) &agent)==FAILURE) {
 		lookup_browser_name = agent_name->value.str.val;
 		found_browser_entry = NULL;
-		_php3_hash_apply(&browser_hash,(int (*)(void *)) browser_reg_compare);
+		zend_hash_apply(&browser_hash,(int (*)(void *)) browser_reg_compare);
 		
 		if (found_browser_entry) {
 			agent = found_browser_entry;
-		} else if (_php3_hash_find(&browser_hash, "Default Browser", sizeof("Default Browser"), (void **) &agent)==FAILURE) {
+		} else if (zend_hash_find(&browser_hash, "Default Browser", sizeof("Default Browser"), (void **) &agent)==FAILURE) {
 			RETURN_FALSE;
 		}
 	}
@@ -107,11 +107,11 @@ PHP_FUNCTION(get_browser)
 	pval_copy_constructor(return_value);
 	return_value->value.ht->pDestructor = PVAL_DESTRUCTOR;
 
-	while (_php3_hash_find(agent->value.ht, "parent", sizeof("parent"), (void **) &agent_name)==SUCCESS) {
-		if (_php3_hash_find(&browser_hash, agent_name->value.str.val, agent_name->value.str.len+1, (void **) &agent)==FAILURE) {
+	while (zend_hash_find(agent->value.ht, "parent", sizeof("parent"), (void **) &agent_name)==SUCCESS) {
+		if (zend_hash_find(&browser_hash, agent_name->value.str.val, agent_name->value.str.len+1, (void **) &agent)==FAILURE) {
 			break;
 		}
-		_php3_hash_merge(return_value->value.ht,agent->value.ht,(void (*)(void *pData)) pval_copy_constructor, (void *) &tmp, sizeof(pval), 0);
+		zend_hash_merge(return_value->value.ht,agent->value.ht,(void (*)(void *pData)) pval_copy_constructor, (void *) &tmp, sizeof(pval), 0);
 	}
 }
 

@@ -282,13 +282,13 @@ PHP_FUNCTION(virtual)
 	convert_to_string(filename);
 	
 	if (!(rr = sub_req_lookup_uri (filename->value.str.val, ((request_rec *) SG(server_context))))) {
-		php3_error(E_WARNING, "Unable to include '%s' - URI lookup failed", filename->value.str.val);
+		php_error(E_WARNING, "Unable to include '%s' - URI lookup failed", filename->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
 
 	if (rr->status != 200) {
-		php3_error(E_WARNING, "Unable to include '%s' - error finding URI", filename->value.str.val);
+		php_error(E_WARNING, "Unable to include '%s' - error finding URI", filename->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
@@ -296,14 +296,14 @@ PHP_FUNCTION(virtual)
 	/* Cannot include another PHP file because of global conflicts */
 	if (rr->content_type &&
 		!strcmp(rr->content_type, PHP3_MIME_TYPE)) {
-		php3_error(E_WARNING, "Cannot include a PHP file "
+		php_error(E_WARNING, "Cannot include a PHP file "
 			  "(use <code>&lt;?include \"%s\"&gt;</code> instead)", filename->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
 
 	if (run_sub_req(rr)) {
-		php3_error(E_WARNING, "Unable to include '%s' - request execution failed", filename->value.str.val);
+		php_error(E_WARNING, "Unable to include '%s' - request execution failed", filename->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
 	} else {
@@ -354,7 +354,7 @@ PHP_FUNCTION(apache_lookup_uri)
 	convert_to_string(filename);
 
 	if(!(rr = sub_req_lookup_uri(filename->value.str.val, ((request_rec *) SG(server_context))))) {
-		php3_error(E_WARNING, "URI lookup failed", filename->value.str.val);
+		php_error(E_WARNING, "URI lookup failed", filename->value.str.val);
 		RETURN_FALSE;
 	}
 	object_init(return_value);
@@ -428,7 +428,7 @@ PHP_FUNCTION(apache_exec_uri)
 	convert_to_string(filename);
 
 	if(!(rr = ap_sub_req_lookup_uri(filename->value.str.val, ((request_rec *) SG(server_context))))) {
-		php3_error(E_WARNING, "URI lookup failed", filename->value.str.val);
+		php_error(E_WARNING, "URI lookup failed", filename->value.str.val);
 		RETURN_FALSE;
 	}
 	RETVAL_LONG(ap_run_sub_req(rr));

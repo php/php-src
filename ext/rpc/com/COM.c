@@ -248,7 +248,7 @@ PHP_FUNCTION(COM_load)
 			break;
 		case 2:
 			if (!INI_INT("allow_dcom")) {
-				php3_error(E_WARNING, "DCOM is disabled");
+				php_error(E_WARNING, "DCOM is disabled");
 				RETURN_FALSE;
 			}
 			getParameters(ht, 2, &module_name, &server_name);
@@ -267,7 +267,7 @@ PHP_FUNCTION(COM_load)
 	// obtain CLSID
 	if (FAILED(hr)) {
 		error_message = _php3_COM_error_message(hr);	
-		php3_error(E_WARNING,"Invalid ProgID:  %s\n", error_message);
+		php_error(E_WARNING,"Invalid ProgID:  %s\n", error_message);
 		LocalFree(error_message);
 		RETURN_FALSE;
 	}
@@ -297,7 +297,7 @@ PHP_FUNCTION(COM_load)
 	if (FAILED(hr)) {
 		error_message = _php3_COM_error_message(hr);
 		clsid_str = _php3_string_from_clsid(&clsid);
-		php3_error(E_WARNING,"Unable to obtain IDispatch interface for CLSID %s:  %s",clsid_str,error_message);
+		php_error(E_WARNING,"Unable to obtain IDispatch interface for CLSID %s:  %s",clsid_str,error_message);
 		LocalFree(error_message);
 		efree(clsid_str);
 		RETURN_FALSE;
@@ -355,7 +355,7 @@ static void php_variant_to_pval(VARIANTARG *var_arg, pval *pval_arg, int persist
 			var_reset(pval_arg);
 			break;
 		default:
-			php3_error(E_WARNING,"Unsupported variant type");
+			php_error(E_WARNING,"Unsupported variant type");
 			var_reset(pval_arg);
 			break;
 	}
@@ -408,7 +408,7 @@ int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_re
 
 	if (FAILED(hr)) {
 		error_message = _php3_COM_error_message(hr);
-		php3_error(E_WARNING,"Unable to lookup %s:  %s\n", function_name->value.str.val, error_message);
+		php_error(E_WARNING,"Unable to lookup %s:  %s\n", function_name->value.str.val, error_message);
 		LocalFree(error_message);
 		efree(funcname);
 		return FAILURE;
@@ -433,7 +433,7 @@ int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_re
 
 	if (FAILED(hr)) {
 		error_message = _php3_COM_error_message(hr);
-		php3_error(E_WARNING,"Invoke() failed:  %s\n", error_message);
+		php_error(E_WARNING,"Invoke() failed:  %s\n", error_message);
 		LocalFree(error_message);
 		efree(funcname);
 		efree(variant_args);
@@ -470,7 +470,7 @@ PHP_FUNCTION(COM_invoke)
 	convert_to_long(object);
 	i_dispatch = php3_list_find(object->value.lval, &type);
 	if (!i_dispatch || (type!=le_idispatch)) {
-		php3_error(E_WARNING,"%d is not a COM object handler", function_name->value.str.val);
+		php_error(E_WARNING,"%d is not a COM object handler", function_name->value.str.val);
 		RETURN_FALSE;
 	}
 
@@ -526,7 +526,7 @@ static int do_COM_propget(VARIANTARG *var_result, IDispatch *i_dispatch, pval *a
 
 	if (FAILED(hr)) {
 		error_message = _php3_COM_error_message(hr);
-		php3_error(E_WARNING,"Unable to lookup %s:  %s\n", arg_property->value.str.val, error_message);
+		php_error(E_WARNING,"Unable to lookup %s:  %s\n", arg_property->value.str.val, error_message);
 		LocalFree(error_message);
 		efree(propname);
 		if (cleanup) {
@@ -544,7 +544,7 @@ static int do_COM_propget(VARIANTARG *var_result, IDispatch *i_dispatch, pval *a
 
 	if (FAILED(hr)) {
 		error_message = _php3_COM_error_message(hr);
-		php3_error(E_WARNING,"PropGet() failed:  %s\n", error_message);
+		php_error(E_WARNING,"PropGet() failed:  %s\n", error_message);
 		LocalFree(error_message);
 		efree(propname);
 		if (cleanup) {
@@ -582,7 +582,7 @@ static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_
 
 	if (FAILED(hr)) {
 		error_message = _php3_COM_error_message(hr);
-		php3_error(E_WARNING,"Unable to lookup %s:  %s\n", arg_property->value.str.val, error_message);
+		php_error(E_WARNING,"Unable to lookup %s:  %s\n", arg_property->value.str.val, error_message);
 		LocalFree(error_message);
 		efree(propname);
 		RETURN_FALSE;
@@ -608,7 +608,7 @@ static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_
 
 	if (FAILED(hr)) {
 		error_message = _php3_COM_error_message(hr);
-		php3_error(E_WARNING,"PropPut() failed:  %s\n", error_message);
+		php_error(E_WARNING,"PropPut() failed:  %s\n", error_message);
 		LocalFree(error_message);
 		efree(propname);
 		RETURN_FALSE;
@@ -636,7 +636,7 @@ PHP_FUNCTION(com_propget)
 	/* obtain i_dispatch interface */
 	i_dispatch = php3_list_find(arg_idispatch->value.lval,&type);
 	if (!i_dispatch || (type!=le_idispatch)) {
-		php3_error(E_WARNING,"%d is not a COM object handler", arg_idispatch->value.lval);
+		php_error(E_WARNING,"%d is not a COM object handler", arg_idispatch->value.lval);
 	}	
 	convert_to_string(arg_property);
 
@@ -662,7 +662,7 @@ PHP_FUNCTION(com_propput)
 	/* obtain i_dispatch interface */
 	i_dispatch = php3_list_find(arg_idispatch->value.lval,&type);
 	if (!i_dispatch || (type!=le_idispatch)) {
-		php3_error(E_WARNING,"%d is not a COM object handler", arg_idispatch->value.lval);
+		php_error(E_WARNING,"%d is not a COM object handler", arg_idispatch->value.lval);
 	}	
 	convert_to_string(arg_property);
 
