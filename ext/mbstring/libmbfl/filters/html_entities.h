@@ -30,9 +30,12 @@
 #ifndef MBFL_HTML_ENTITIES_H
 #define MBFL_HTML_ENTITIES_H
 
-#include "mbfilter.h"
+typedef struct _mbfl_html_entity_entry {
+	char *  name;
+	int     code;
+} mbfl_html_entity_entry;
 
-extern mbfl_html_entity mbfl_html_entity_list[];
+extern const mbfl_html_entity_entry mbfl_html_entity_list[];
 
 #endif /* MBFL_HTML_ENTITIES_H */
 

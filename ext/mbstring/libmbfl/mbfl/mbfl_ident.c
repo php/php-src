@@ -139,16 +139,6 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 /*
  * identify filter
  */
-
-void mbfl_identify_filter_set_vtbl(mbfl_identify_filter *filter, const struct mbfl_identify_vtbl *vtbl)
-{
-	if (filter && vtbl) {
-		filter->filter_ctor = vtbl->filter_ctor;
-		filter->filter_dtor = vtbl->filter_dtor;
-		filter->filter_function = vtbl->filter_function;
-	}
-}
-
 const struct mbfl_identify_vtbl * mbfl_identify_filter_get_vtbl(enum mbfl_no_encoding encoding)
 {
 	const struct mbfl_identify_vtbl * vtbl;
@@ -164,26 +154,27 @@ const struct mbfl_identify_vtbl * mbfl_identify_filter_get_vtbl(enum mbfl_no_enc
 	return vtbl;
 }
 
-void mbfl_identify_filter_select_vtbl(mbfl_identify_filter *filter)
-{
-	const struct mbfl_identify_vtbl *vtbl;
-
-	vtbl = mbfl_identify_filter_get_vtbl(filter->encoding->no_encoding);
-	if (vtbl == NULL) {
-		vtbl = &vtbl_identify_false;
-	}
-	mbfl_identify_filter_set_vtbl(filter, vtbl);
-}
-
 mbfl_identify_filter *mbfl_identify_filter_new(enum mbfl_no_encoding encoding)
 {
-	mbfl_identify_filter * filter;
+	mbfl_identify_filter *filter;
 
 	/* allocate */
 	filter = (mbfl_identify_filter *)mbfl_malloc(sizeof(mbfl_identify_filter));
 	if (filter == NULL) {
 		return NULL;
 	}
+
+	if (mbfl_identify_filter_init(filter, encoding)) {
+		mbfl_free(filter);
+		return NULL;
+	}
+
+	return filter;
+}
+
+int mbfl_identify_filter_init(mbfl_identify_filter *filter, enum mbfl_no_encoding encoding)
+{
+	const struct mbfl_identify_vtbl *vtbl;
 
 	/* encoding structure */
 	filter->encoding = mbfl_no2encoding(encoding);
@@ -196,20 +187,33 @@ mbfl_identify_filter *mbfl_identify_filter_new(enum mbfl_no_encoding encoding)
 	filter->score = 0;
 
 	/* setup the function table */
-	mbfl_identify_filter_select_vtbl(filter);
+	vtbl = mbfl_identify_filter_get_vtbl(filter->encoding->no_encoding);
+	if (vtbl == NULL) {
+		vtbl = &vtbl_identify_false;
+	}
+	filter->filter_ctor = vtbl->filter_ctor;
+	filter->filter_dtor = vtbl->filter_dtor;
+	filter->filter_function = vtbl->filter_function;
 
 	/* constructor */
 	(*filter->filter_ctor)(filter);
 
-	return filter;
+	return 0;
 }
 
 void mbfl_identify_filter_delete(mbfl_identify_filter *filter)
 {
-	if (filter) {
-		(*filter->filter_dtor)(filter);
-		mbfl_free((void*)filter);
+	if (filter == NULL) {
+		return;
 	}
+
+	mbfl_identify_filter_cleanup(filter);
+	mbfl_free((void*)filter);
+}
+
+void mbfl_identify_filter_cleanup(mbfl_identify_filter *filter)
+{
+	(*filter->filter_dtor)(filter);
 }
 
 void mbfl_filt_ident_common_ctor(mbfl_identify_filter *filter)
