@@ -8,6 +8,9 @@ Zend
     * look at replacing c-lib call tolower().
     * make hash API functions work with HASH_OF() to save time.
     * native large number support (probably with GNU GMP)
+    * Const'ify APIs. Right now, many functions leave parameters untouched,
+      but don't declare those as const. This makes interaction with other
+      interfaces difficult which pass const parameters to us. 
 
 global
 ------
