@@ -178,7 +178,7 @@ void php_tidy_panic(ctmbstr msg)
 	zend_error(E_ERROR, "Could not allocate memory for tidy! (Reason: %s)", (char *)msg);
 }
 
-static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value)
+static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS_DC)
 {
 	TidyOption opt;
 	
@@ -524,6 +524,10 @@ static void tidy_globals_ctor(zend_tidy_globals *g TSRMLS_DC)
 {
 }
 
+static void tidy_globals_dtor(zend_tidy_globals *g TSRMLS_DC)
+{
+}
+
 static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRMLS_DC)
 {
 
@@ -682,7 +686,7 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 	tidy_add_default_properties(newobj, is_node TSRMLS_CC);
 }
 
-static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options)
+static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRMLS_DC)
 {
 	char *opt_name;
 	zval **opt_val;
@@ -696,7 +700,7 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not retrieve key from array");
 		}
 		
-		_php_tidy_set_tidy_opt(doc, opt_name, *opt_val);
+		_php_tidy_set_tidy_opt(doc, opt_name, *opt_val TSRMLS_CC);
 					
 	}
 	
@@ -738,7 +742,7 @@ static void php_tidy_parse_file(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if(options) {
-		_php_tidy_apply_config_array(obj->ptdoc->doc, HASH_OF(options));		
+		_php_tidy_apply_config_array(obj->ptdoc->doc, HASH_OF(options) TSRMLS_CC);		
 	}
 	
 	if (tidyParseString(obj->ptdoc->doc, contents) < 0) {
@@ -896,7 +900,7 @@ PHP_FUNCTION(tidy_parse_string)
 	}
 
 	if(options) {
-		_php_tidy_apply_config_array(obj->ptdoc->doc, HASH_OF(options));
+		_php_tidy_apply_config_array(obj->ptdoc->doc, HASH_OF(options) TSRMLS_CC);
 	}
 	
 	if (tidyParseString(obj->ptdoc->doc, input) < 0) {
@@ -1323,7 +1327,7 @@ PHP_FUNCTION(tidy_setopt)
 
 	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
 
-	if(_php_tidy_set_tidy_opt(obj->ptdoc->doc, optname, value) == SUCCESS) {
+	if(_php_tidy_set_tidy_opt(obj->ptdoc->doc, optname, value TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
 	}
 	
