@@ -246,18 +246,18 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 
 			MAKE_STD_ZVAL(http_response);
 			response_code = atoi(tmp_line + 9);
-			if (response_code == 200) {
-				reqok = 1;
-			} else {
-				switch(response_code) {
-					case 403:
-						php_stream_notify_error(context, PHP_STREAM_NOTIFY_AUTH_RESULT,
-								tmp_line, response_code);
-						break;
-					default:
-						php_stream_notify_error(context, PHP_STREAM_NOTIFY_FAILURE,
-								tmp_line, response_code);
-				}
+			switch(response_code) {
+				case 200:
+				case 302:
+					reqok = 1;
+					break;
+				case 403:
+					php_stream_notify_error(context, PHP_STREAM_NOTIFY_AUTH_RESULT,
+							tmp_line, response_code);
+					break;
+				default:
+					php_stream_notify_error(context, PHP_STREAM_NOTIFY_FAILURE,
+							tmp_line, response_code);
 			}
 			
 			Z_STRLEN_P(http_response) = strlen(tmp_line);
@@ -283,7 +283,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 		while (!body && !php_stream_eof(stream))	{
 		
 			if (php_stream_gets(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE-1) != NULL)	{
-				char *p;
+				char *p, *ws;
 				int found_eol = 0;
 				int http_header_line_length;
 			
@@ -309,7 +309,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 					file_size = atoi(http_header_line + 16);
 					php_stream_notify_file_size(context, file_size, http_header_line, 0);
 				}
-	
+
 				if (http_header_line[0] == '\0')
 					body = 1;
 				else	{
@@ -327,14 +327,12 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 		}
 	} 
 	
-	if (!reqok)	{		
+	if (!reqok || location[0] != '\0')	{		
 		if (location[0] != '\0')
 			php_stream_notify_info(context, PHP_STREAM_NOTIFY_REDIRECTED, location, 0);
 
 		php_stream_close(stream);
 		stream = NULL;
-		zval_dtor(response_header);
-		FREE_ZVAL(response_header);
 
 		if (location[0] != '\0')	{
 
@@ -373,6 +371,10 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 				FREE_ZVAL(stream->wrapperdata);
 			}
 		} else {
+
+			zval_dtor(response_header);
+			FREE_ZVAL(response_header);
+
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "HTTP request failed! %s", tmp_line);
 		}
 	}
@@ -420,7 +422,8 @@ static php_stream_wrapper_ops http_stream_wops = {
 	NULL, /* stream_close */
 	php_stream_http_stream_stat,
 	NULL, /* stat_url */
-	NULL  /* opendir */
+	NULL, /* opendir */
+	"HTTP"
 };
 
 php_stream_wrapper php_stream_http_wrapper =	{

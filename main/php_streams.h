@@ -168,7 +168,8 @@ typedef struct _php_stream_wrapper_ops {
 	/* open a "directory" stream */
 	php_stream *(*dir_opener)(php_stream_wrapper *wrapper, char *filename, char *mode,
 			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-
+	
+	const char *label;
 } php_stream_wrapper_ops;
 
 struct _php_stream_wrapper	{

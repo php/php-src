@@ -581,24 +581,59 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 }
 /* }}} */
 
-/* {{{ proto resource file_get_wrapper_data(resource fp)
-    Retrieves header/meta data from "wrapped" file pointers */
-PHP_FUNCTION(file_get_wrapper_data)
+/* {{{ proto resource file_get_meta_data(resource fp)
+    Retrieves header/meta data from streams/file pointers */
+PHP_FUNCTION(file_get_meta_data)
 {
 	zval **arg1;
 	php_stream *stream;
+	zval *newval;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	php_stream_from_zval(stream, arg1);
 
-	if (stream->wrapperdata)	{
-		*return_value = *(stream->wrapperdata);
-		zval_copy_ctor(return_value);
+	array_init(return_value);
+	
+	if (stream->wrapperdata) {
+		MAKE_STD_ZVAL(newval);
+		*newval = *(stream->wrapperdata);
+		zval_copy_ctor(newval);
+
+		add_assoc_zval(return_value, "wrapper_data", newval);
 	}
-	else
-		RETURN_FALSE;
+	if (stream->wrapper) {
+		add_assoc_string(return_value, "wrapper_type", (char *)stream->wrapper->wops->label, 1);
+	}
+	add_assoc_string(return_value, "stream_type", (char *)stream->ops->label, 1);
+
+	if (stream->filterhead) {
+		php_stream_filter *filter;
+		
+		MAKE_STD_ZVAL(newval);
+		array_init(newval);
+		
+		for (filter = stream->filterhead; filter != NULL; filter = filter->next) {
+			add_next_index_string(newval, (char *)filter->fops->label, 1);
+		}
+
+		add_assoc_zval(return_value, "filters", newval);
+	}
+	
+	add_assoc_long(return_value, "unread_bytes", stream->writepos - stream->readpos);
+	
+	if (php_stream_is(stream, PHP_STREAM_IS_SOCKET))	{
+		php_netstream_data_t *sock = PHP_NETSTREAM_DATA_FROM_STREAM(stream);
+
+		add_assoc_bool(return_value, "timed_out", sock->timeout_event);
+		add_assoc_bool(return_value, "blocked", sock->is_blocked);
+		add_assoc_bool(return_value, "eof", sock->eof);
+	} else {
+		add_assoc_bool(return_value, "timed_out", 0);
+		add_assoc_bool(return_value, "blocked", 1);
+		add_assoc_bool(return_value, "eof", php_stream_eof(stream));
+	}
 
 }
 /* }}} */
