@@ -629,7 +629,7 @@ PHP_FUNCTION(mcal_rename_calendar)
 }
 /* }}} */
 
-/* {{{ proto mcal_list_alarms(int stream_id, int year, int month, int day, int hour, int min, int sec)
+/* {{{ proto bool mcal_list_alarms(int stream_id, int year, int month, int day, int hour, int min, int sec)
    List alarms for a given time */
 PHP_FUNCTION(mcal_list_alarms)
 {
