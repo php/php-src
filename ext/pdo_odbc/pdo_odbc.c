@@ -30,15 +30,6 @@
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
 
-#ifdef PHP_WIN32
-# define PDO_ODBC_TYPE	"Win32"
-#endif
-
-#ifndef PDO_ODBC_TYPE
-# warning Please fix configure to give your ODBC libraries a name
-# define PDO_ODBC_TYPE	"Unknown"
-#endif
-
 /* {{{ pdo_odbc_functions[] */
 function_entry pdo_odbc_functions[] = {
 	{NULL, NULL, NULL}

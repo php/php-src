@@ -18,6 +18,15 @@
 
 /* $Id$ */
 
+#ifdef PHP_WIN32
+# define PDO_ODBC_TYPE	"Win32"
+#endif
+
+#ifndef PDO_ODBC_TYPE
+# warning Please fix configure to give your ODBC libraries a name
+# define PDO_ODBC_TYPE	"Unknown"
+#endif
+
 /* {{{ Roll a dice, pick a header at random... */
 #if HAVE_SQLCLI1_H
 # include <sqlcli1.h>
