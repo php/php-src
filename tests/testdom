@@ -7,9 +7,11 @@ function output_node($node, $level=0) {
         echo "  ";
       echo "<".$node->name;
       $attributes = $node->attributes();
-      if(is_array($attributes))
-        for(reset($attributes); $attrname = key($attributes); next($attributes))
-          echo " ".$attrname."=".$node->getattr($attrname);
+      if(is_array($attributes)) {
+//var_dump($attributes);
+        foreach($attributes as $attribute)
+          echo " ".$attribute->name."=".$node->getattr($attribute->name);
+      }
       echo ">\n";
       $children = $node->children();
       for($i=0; $i < count($children); $i++)
