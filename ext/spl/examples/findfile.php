@@ -24,18 +24,5 @@ EOF;
 	exit(1);
 }
 
-class FindFile extends FilterIterator
-{
-	protected $file;
-
-	function __construct($path, $file) {
-		$this->file = $file;
-		parent::__construct(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path)));
-	}
-	function accept() {
-		return !strcmp($this->current(), $this->file);
-	}
-}
-
-foreach(new FindFile($argv[1], $argv[2]) as $pathname => $file) echo $file->getPathname()."\n";
+foreach(new FindFile($argv[1], $argv[2]) as $file) echo $file->getPathname()."\n";
 ?>
