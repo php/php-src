@@ -9,5 +9,5 @@ $arr = array('foo' => 'bar');
 echo "$arr['foo']";
 
 ?>
---EXPECTREGEX--
-Parse error: parse error,.*expecting `?T_STRING'? or `?T_VARIABLE'? or `?T_NUM_STRING'? in .* on line .*
+--EXPECTF--
+Parse error: syntax error, unexpected T_ENCAPSED_AND_WHITESPACE, expecting T_STRING or T_VARIABLE or T_NUM_STRING in %sbug21820.php on line %d
