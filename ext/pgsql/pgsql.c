@@ -1072,6 +1072,7 @@ PHP_FUNCTION(pg_query)
 		case PGRES_FATAL_ERROR:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Query failed: %s", PQErrorMessageTrim(pgsql, &msgbuf));
 			efree(msgbuf);
+			PQclear(pgsql_result);
 			RETURN_FALSE;
 			break;
 		case PGRES_COMMAND_OK: /* successful command that did not return rows */
@@ -1083,6 +1084,7 @@ PHP_FUNCTION(pg_query)
 				pg_result->row = 0;
 				ZEND_REGISTER_RESOURCE(return_value, pg_result, le_result);
 			} else {
+				PQclear(pgsql_result);
 				RETURN_FALSE;
 			}
 			break;
@@ -1229,6 +1231,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 				ret = estrdup(tmp_name);
 			}
 		}
+		PQclear(result);
 	}
 
 	smart_str_free(&str);
@@ -3299,6 +3302,7 @@ PHPAPI int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *me
 		name = PQgetvalue(pg_result,i,0);
 		add_assoc_zval(meta, name, elem);
 	}
+	PQclear(pg_result);
 	
 	return SUCCESS;
 }
@@ -4129,6 +4133,7 @@ static int do_exec(smart_str *querystr, int expect, PGconn *pg_link, ulong opt T
 
 		pg_result = PQexec(pg_link, querystr->c);
 		if (PQresultStatus(pg_result) == expect) {
+			PQclear(pg_result);
 			return 0;
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failed to execute '%s'", querystr->c);
@@ -4598,9 +4603,9 @@ PHPAPI int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array,
 		ret = php_pgsql_result2array(pg_result, ret_array TSRMLS_CC);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failed to execute '%s'", querystr.c);
-		PQclear(pg_result);
 	}
-	
+	PQclear(pg_result);
+
 cleanup:
 	if (!(opt & PGSQL_DML_NO_CONV)) {
 		zval_dtor(ids_converted);			
