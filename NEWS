@@ -7,7 +7,6 @@ PHP 4                                                                      NEWS
 - Changed phpize not to require libtool. (Jani)
 - Updated bundled libmbfl library (used for multibyte functions). (Moriyoshi)
   Fixed bugs:
-  . Bug #32311 (mb_encode_mimeheader() does not properly escape characters)
   . Bug #32063 (mb_convert_encoding ignores named entity 'alpha')
   . Bug #31911 (mb_decode_mimeheader() is case-sensitive to hex escapes)
   . Bug #30573 (compiler warnings in libmbfl due to invalid type cast)
