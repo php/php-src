@@ -510,6 +510,8 @@ TEST $file
 
 	// Default ini settings
 	$settings = array (
+		"output_handler=",
+		"zlib.output_compression=0",
 		"open_basedir=",
 		"disable_functions=",
 		"error_reporting=2047",
