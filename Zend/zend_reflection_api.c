@@ -1356,7 +1356,7 @@ ZEND_METHOD(reflection_function, returnsReference)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionParameter[] Reflection_Function::getParameters()
+/* {{{ proto public ReflectionParameter[] ReflectionFunction::getParameters()
    Returns an array of parameter objects for this function */
 ZEND_METHOD(reflection_function, getParameters)
 {
@@ -2565,7 +2565,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 			/* no break */
 		default:
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-					"Parameter one must either be a string or a Reflection_Class object");
+					"Parameter one must either be a string or a ReflectionClass object");
 			return;
 	}
 
@@ -2611,7 +2611,7 @@ ZEND_METHOD(reflection_class, implementsInterface)
 			/* no break */
 		default:
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-					"Parameter one must either be a string or a Reflection_Class object");
+					"Parameter one must either be a string or a ReflectionClass object");
 			return;
 	}
 
@@ -2638,7 +2638,7 @@ ZEND_METHOD(reflection_class, isIterateable)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionExtension|NULL Reflection_Class::getExtension()
+/* {{{ proto public ReflectionExtension|NULL ReflectionClass::getExtension()
    Returns NULL or the extension the class belongs to */
 ZEND_METHOD(reflection_class, getExtension)
 {
@@ -3179,7 +3179,7 @@ static int add_extension_class(zend_class_entry **pce, int num_args, va_list arg
 /* }}} */
 
 /* {{{ proto public ReflectionClass[] ReflectionExtension::getClasses()
-   Returns an array containing Reflection_Class objects for all classes of this extension */
+   Returns an array containing ReflectionClass objects for all classes of this extension */
 ZEND_METHOD(reflection_extension, getClasses)
 {
 	reflection_object *intern;
