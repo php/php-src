@@ -1079,8 +1079,8 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 	} else {
 		cur_arg_info->class_name = NULL;
 		cur_arg_info->class_name_len = 0;
-		opline->result.u.EA.type |= EXT_TYPE_UNUSED;
 	}
+	opline->result.u.EA.type |= EXT_TYPE_UNUSED;
 }
 
 
