@@ -239,13 +239,11 @@ static void php_cli_usage(char *argv0)
 		prog = "php";
 	}
 
-	php_printf("Usage: %s [-q] [-h] [-s [-v] [-i] [-f <file>] |  {<file> [args...]}\n"
-				"  -q             Quiet-mode.  Suppress HTTP Header output.\n"
+	php_printf("Usage: %s [-h] [-s] [-v] [-i] [-f <file>] |  {<file> [args...]}\n"
 				"  -s             Display colour syntax highlighted source.\n"
 				"  -w             Display source with stripped comments and whitespace.\n"
-				"  -f <file>      Parse <file>.  Implies `-q'\n"
+				"  -f <file>      Parse <file>.\n"
 				"  -v             Version number\n"
-                "  -C             Do not chdir to the script's directory\n"
 				"  -c <path>      Look for php.ini file in this directory\n"
 				"  -a             Run interactively\n"
 				"  -d foo[=bar]   Define INI entry foo with value 'bar'\n"
@@ -254,7 +252,7 @@ static void php_cli_usage(char *argv0)
 				"  -l             Syntax check only (lint)\n"
 				"  -m             Show compiled in modules\n"
 				"  -i             PHP information\n"
-				"  -h             This help\n", prog);
+				"  -h             This help\n", prog); 
 }
 /* }}} */
 
@@ -386,6 +384,7 @@ int main(int argc, char *argv[])
         /* Set some CLI defaults */
 		SG(options) |= SAPI_OPTION_NO_CHDIR;
         zend_alter_ini_entry("html_errors", 12, "0", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+		zend_alter_ini_entry("implicit_flush", 15, "1", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 
 		while ((c = ap_php_getopt(argc, argv, OPTSTRING)) != -1) {
 			switch (c) {
