@@ -382,25 +382,25 @@ statement:
 			php3_dl(&$3,MODULE_PERSISTENT,&dummy);
 		}
 	|	T_ZEND_EXTENSION '=' string {
-#if !defined(ZTS) && !defined(ZEND_DEBUG)
+#if !defined(ZTS) && !ZEND_DEBUG
 			zend_load_extension($3.value.str.val);
 #endif
 			free($3.value.str.val);
 		}
 	|	T_ZEND_EXTENSION_TS '=' string { 
-#if defined(ZTS) && !defined(ZEND_DEBUG)
+#if defined(ZTS) && !ZEND_DEBUG
 			zend_load_extension($3.value.str.val);
 #endif
 			free($3.value.str.val);
 		}
 	|	T_ZEND_EXTENSION_DEBUG '=' string { 
-#if !defined(ZTS) && defined(ZEND_DEBUG)
+#if !defined(ZTS) && ZEND_DEBUG
 			zend_load_extension($3.value.str.val);
 #endif
 			free($3.value.str.val);
 		}
 	|	T_ZEND_EXTENSION_DEBUG_TS '=' string { 
-#if defined(ZTS) && defined(ZEND_DEBUG)
+#if defined(ZTS) && ZEND_DEBUG
 			zend_load_extension($3.value.str.val);
 #endif
 			free($3.value.str.val);
