@@ -68,7 +68,7 @@ class System
         if (!is_array($argv) && $argv !== null) {
             $argv = preg_split('/\s+/', $argv);
         }
-        return Console_Getopt::getopt($argv, $short_options);
+        return Console_Getopt::getopt2($argv, $short_options);
     }
 
     /**
