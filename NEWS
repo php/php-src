@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fixed warning when shutting down OCINLogon() connections. (Thies)
+- Fixed \n in session variables bug on Win32 (Stas)
+- OCIError() would sometimes not report failed connections. (Thies)
 - Fix HEAD request bug on an Apache ErrorDocument redirect and preserve
   the status code across the redirect as well.  (Rasmus)
 - Add Olympus-specific tags to read_exif_data() (Rasmus)
