@@ -44,14 +44,14 @@ class PEAR_Autoloader extends PEAR
     /**
      * Add one or more autoload entries.
      *
-     * @param $method     string  which method to autoload
+     * @param string $method     which method to autoload
      *
-     * @param $classname  string  (optional) which class to find the method in.
-     *                            If the $method parameter is an array, this
-     *                            parameter may be omitted (and will be ignored
-     *                            if not), and the $method parameter will be
-     *                            treated as an associative array with method
-     *                            names as keys and class names as values.
+     * @param string $classname  (optional) which class to find the method in.
+     *                           If the $method parameter is an array, this
+     *                           parameter may be omitted (and will be ignored
+     *                           if not), and the $method parameter will be
+     *                           treated as an associative array with method
+     *                           names as keys and class names as values.
      *
      * @return void
      *
@@ -59,17 +59,17 @@ class PEAR_Autoloader extends PEAR
      */
     function addAutoload($method, $classname = null)
     {
-	if (is_array($method)) {
-	    $this->_autoload_map = array_merge($this->_autoload_map, $method);
-	} else {
-	    $this->_autoload_map[$method] = $classname;
-	}
+        if (is_array($method)) {
+            $this->_autoload_map = array_merge($this->_autoload_map, $method);
+        } else {
+            $this->_autoload_map[$method] = $classname;
+        }
     }
 
     /**
      * Remove an autoload entry.
      *
-     * @param $method  string  which method to remove the autoload entry for
+     * @param string $method  which method to remove the autoload entry for
      *
      * @return bool TRUE if an entry was removed, FALSE if not
      *
@@ -77,9 +77,9 @@ class PEAR_Autoloader extends PEAR
      */       
     function removeAutoload($method)
     {
-	$ok = isset($this->_autoload_map[$method]);
-	unset($this->_autoload_map[$method]);
-	return $ok;
+        $ok = isset($this->_autoload_map[$method]);
+        unset($this->_autoload_map[$method]);
+        return $ok;
     }
 
     /**
@@ -89,7 +89,7 @@ class PEAR_Autoloader extends PEAR
      * aggregated, except private ones (name starting with an
      * underscore) and constructors.
      *
-     * @param $classname  string  what class to instantiate for the object.
+     * @param string $classname  what class to instantiate for the object.
      *
      * @return void
      *
@@ -97,25 +97,25 @@ class PEAR_Autoloader extends PEAR
      */
     function addAggregateObject($classname)
     {
-	$classname = strtolower($classname);
-	if (!class_exists($classname)) {
-	    $include_file = preg_replace('/[^a-z0-9]/i', '_', $classname);
-	    include_once $include_file;
-	}
-	$obj =& new $classname;
-	$methods = get_class_methods($classname);
-	foreach ($methods as $method) {
-	    // don't import priviate methods and constructors
-	    if ($method{0} != '_' && $method != $classname) {
-		$this->_method_map[$method] = $obj;
-	    }
-	}
+        $classname = strtolower($classname);
+        if (!class_exists($classname)) {
+            $include_file = preg_replace('/[^a-z0-9]/i', '_', $classname);
+            include_once $include_file;
+        }
+        $obj =& new $classname;
+        $methods = get_class_methods($classname);
+        foreach ($methods as $method) {
+            // don't import priviate methods and constructors
+            if ($method{0} != '_' && $method != $classname) {
+                $this->_method_map[$method] = $obj;
+            }
+        }
     }
 
     /**
      * Remove an aggregate object.
      *
-     * @param $classname  string  the class of the object to remove
+     * @param string $classname  the class of the object to remove
      *
      * @return bool  TRUE if an object was removed, FALSE if not
      *
@@ -123,16 +123,16 @@ class PEAR_Autoloader extends PEAR
      */
     function removeAggregateObject($classname)
     {
-	$ok = false;
-	$classname = strtolower($classname);
-	reset($this->_method_map);
-	while (list($method, $obj) = each($this->_method_map)) {
-	    if (get_class($obj) == $classname) {
-		unset($this->_method_map[$method]);
-		$ok = true;
-	    }
-	}
-	return $ok;
+        $ok = false;
+        $classname = strtolower($classname);
+        reset($this->_method_map);
+        while (list($method, $obj) = each($this->_method_map)) {
+            if (get_class($obj) == $classname) {
+                unset($this->_method_map[$method]);
+                $ok = true;
+            }
+        }
+        return $ok;
     }
 
     /**
@@ -141,23 +141,23 @@ class PEAR_Autoloader extends PEAR
      * the call in the right aggregate object and passes on the return
      * value.
      *
-     * @param $method  string  which method that was called
+     * @param string $method  which method that was called
      *
-     * @param $args  array  An array of the parameters passed in the
-     *                      original call
+     * @param string $args    An array of the parameters passed in the
+     *                        original call
      *
      * @return mixed  The return value from the aggregated method, or a PEAR
      *                error if the called method was unknown.
      */
     function __call($method, $args)
     {
-	if (empty($this->_method_map[$method]) && isset($this->_autoload_map[$method])) {
-	    $this->addAggregateObject($this->_autoload_map[$method]);
-	}
-	if (isset($this->_method_map[$method])) {
-	    return call_user_func_array(array($this->_method_map[$method], $method), $args);
-	}
-	return $this->raiseError("undefined method: $method");
+        if (empty($this->_method_map[$method]) && isset($this->_autoload_map[$method])) {
+            $this->addAggregateObject($this->_autoload_map[$method]);
+        }
+        if (isset($this->_method_map[$method])) {
+            return call_user_func_array(array($this->_method_map[$method], $method), $args);
+        }
+        return $this->raiseError("undefined method: $method");
     }
 }
 
