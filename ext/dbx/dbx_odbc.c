@@ -67,13 +67,24 @@ int dbx_odbc_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS)
     int number_of_arguments=1;
     zval ** arguments[1];
     zval * returned_zval=NULL;
+	int exit_status=EG(exit_status);
+
+	int actual_resource_type;
+	void *resource;
+   	resource = zend_list_find((*dbx_handle)->value.lval, &actual_resource_type);
+    if (!resource) {
+        return 0;
+        }
 
     arguments[0]=dbx_handle;
     dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "odbc_close", &returned_zval, number_of_arguments, arguments);
-    if (!returned_zval || returned_zval->type!=IS_BOOL) {
+
+    if (!returned_zval || returned_zval->type!=IS_NULL) {
         if (returned_zval) zval_ptr_dtor(&returned_zval);
         return 0;
         }
+    convert_to_long_ex(&returned_zval);
+    returned_zval->value.lval=1;
     MOVE_RETURNED_TO_RV(rv, returned_zval);
     return 1;
     }

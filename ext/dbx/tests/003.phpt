@@ -7,7 +7,6 @@ dbx_connect
 --FILE--
 <?php 
 include_once("ext/dbx/tests/dbx_test.p");
-$module_name="mysql";
 $nonexisting_database="nonexisting_database";
 $nonexisting_username="nonexisting_username";
 $nonexisting_password="nonexisting_password";
@@ -87,9 +86,9 @@ if ($dlo1!=0 && $dlo2!=0) {
 	dbx_close($dlo2);
 	}
 $dlo1 = dbx_connect($module, $host, $database, $username, $password);
-$dlo2 = dbx_connect($module, $host, $nonexisting_database, $username, $password);
+$dlo2 = @dbx_connect($module, $host, $nonexisting_database, $username, $password);
 if ($dlo1!=0 && $dlo2==0) {
-	print('multiple connects (2nd fails on database-name) ok'."\n");
+    print('multiple connects (2nd fails on database-name) ok'."\n");
 	dbx_close($dlo1);
 	}
 ?>
