@@ -1759,7 +1759,7 @@ PHP_FUNCTION(dom_document_xinclude)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-#if LIBXML_VERSION >= 20600
+#if LIBXML_VERSION >= 20607
 	err = xmlXIncludeProcessFlags(docp, flags);
 #else
 	err = xmlXIncludeProcess (docp);
