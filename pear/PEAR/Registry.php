@@ -55,7 +55,6 @@ class PEAR_Registry
 
     function _packageFileName($package)
     {
-        $package = strtolower($package);
         return "{$this->statedir}/{$package}.inf";
     }
 
@@ -104,8 +103,12 @@ class PEAR_Registry
     // }}}
     // {{{ packageInfo()
 
-    function packageInfo($package)
+    function packageInfo($package = null)
     {
+        if ($package === null) {
+            return array_map(array($this, "packageInfo"),
+                             $this->listPackages());
+        }
         $fp = $this->_openPackageFile($package, "r");
         $data = fread($fp, filesize($this->_packageFileName($package)));
         $this->_closePackageFile($fp);
@@ -136,7 +139,22 @@ class PEAR_Registry
     }
 
     // }}}
+    // {{{ listPackages()
 
+    function listPackages()
+    {
+        $dp = opendir($this->statedir);
+        $pkglist = array();
+        while ($ent = readdir($dp)) {
+            if ($ent{0} == "." || substr($ent, -4) != ".inf") {
+                continue;
+            }
+            $pkglist[] = substr($entry, 0, -4);
+        }
+        return $pkglist;
+    }
+
+    // }}}
 }
 
 ?>
