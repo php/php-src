@@ -1,7 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
-- Improved performance of switch statement. (Dmitry)
+- Improved performance of:
+  . switch statement. (Dmitry)
+  . several array functions. (Marcus)
+  . general execution/compilation. (Andi, Dmitry, Marcus)
 - Removed garbage manager in Zend Engine which results in more aggressive
   freeing of data. (Dmitry, Andi)
 - Implemented access to INI variables from within .ini file. (Andrei)
