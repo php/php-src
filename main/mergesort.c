@@ -64,8 +64,8 @@ static char sccsid[] = "@(#)merge.c	8.2 (Berkeley) 2/14/94";
 #include <winsock.h> /* Includes definition for u_char */
 #endif
 
-static void setup(u_char *list1, u_char *list2, size_t n, size_t size, int (*cmp)(const void *, const void *));
-static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const void *, const void *));
+static void setup(u_char *list1, u_char *list2, size_t n, size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC);
+static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC);
 
 #define ISIZE sizeof(int)
 #define PSIZE sizeof(u_char *)
@@ -100,7 +100,7 @@ static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const voi
 /* {{{ php_mergesort
  * Arguments are as for qsort.
  */
-int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void *))
+int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC)
 {
 	register unsigned int i;
 	register int sense;
@@ -128,7 +128,7 @@ int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *
 		return (-1);
 
 	list1 = base;
-	setup(list1, list2, nmemb, size, cmp);
+	setup(list1, list2, nmemb, size, cmp TSRMLS_CC);
 	last = list2 + nmemb * size;
 	i = big = 0;
 	while (*EVAL(list2) != last) {
@@ -142,7 +142,7 @@ int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *
 	    		p2 = *EVAL(p2);
 	    	l2 = list1 + (p2 - list2);
 	    	while (f1 < l1 && f2 < l2) {
-	    		if ((*cmp)(f1, f2) <= 0) {
+	    		if ((*cmp)(f1, f2 TSRMLS_CC) <= 0) {
 	    			q = f2;
 	    			b = f1, t = l1;
 	    			sense = -1;
@@ -152,7 +152,7 @@ int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *
 	    			sense = 0;
 	    		}
 	    		if (!big) {	/* here i = 0 */
-				while ((b += size) < t && cmp(q, b) >sense)
+				while ((b += size) < t && cmp(q, b TSRMLS_CC) >sense)
 	    				if (++i == 6) {
 	    					big = 1;
 	    					goto EXPONENTIAL;
@@ -161,12 +161,12 @@ int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *
 EXPONENTIAL:	    		for (i = size; ; i <<= 1)
 	    				if ((p = (b + i)) >= t) {
 	    					if ((p = t - size) > b &&
-						    (*cmp)(q, p) <= sense)
+						    (*cmp)(q, p TSRMLS_CC) <= sense)
 	    						t = p;
 	    					else
 	    						b = p;
 	    					break;
-	    				} else if ((*cmp)(q, p) <= sense) {
+	    				} else if ((*cmp)(q, p TSRMLS_CC) <= sense) {
 	    					t = p;
 	    					if (i == size)
 	    						big = 0;
@@ -175,7 +175,7 @@ EXPONENTIAL:	    		for (i = size; ; i <<= 1)
 	    					b = p;
 				while (t > b+size) {
 	    				i = (((t - b) / size) >> 1) * size;
-	    				if ((*cmp)(q, p = b + i) <= sense)
+	    				if ((*cmp)(q, p = b + i TSRMLS_CC) <= sense)
 	    					t = p;
 	    				else
 	    					b = p;
@@ -183,7 +183,7 @@ EXPONENTIAL:	    		for (i = size; ; i <<= 1)
 	    			goto COPY;
 FASTCASE:	    		while (i > size)
 	    				if ((*cmp)(q,
-	    					p = b + (i >>= 1)) <= sense)
+	    					p = b + (i >>= 1) TSRMLS_CC) <= sense)
 	    					t = p;
 	    				else
 	    					b = p;
@@ -260,14 +260,14 @@ COPY:	    			b = t;
  * when THRESHOLD/2 pairs compare with same sense.  (Only used when NATURAL
  * is defined.  Otherwise simple pairwise merging is used.)
  */
-static void setup(u_char *list1, u_char *list2, size_t n, size_t size, int (*cmp)(const void *, const void *))
+static void setup(u_char *list1, u_char *list2, size_t n, size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC)
 {
 	int i, length, size2, tmp, sense;
 	u_char *f1, *f2, *s, *l2, *last, *p2;
 
 	size2 = size*2;
 	if (n <= 5) {
-		insertionsort(list1, n, size, cmp);
+		insertionsort(list1, n, size, cmp TSRMLS_CC);
 		*EVAL(list2) = (u_char*) list2 + n*size;
 		return;
 	}
@@ -276,19 +276,19 @@ static void setup(u_char *list1, u_char *list2, size_t n, size_t size, int (*cmp
 	 * for simplicity.
 	 */
 	i = 4 + (n & 1);
-	insertionsort(list1 + (n - i) * size, i, size, cmp);
+	insertionsort(list1 + (n - i) * size, i, size, cmp TSRMLS_CC);
 	last = list1 + size * (n - i);
 	*EVAL(list2 + (last - list1)) = list2 + n * size;
 
 #ifdef NATURAL
 	p2 = list2;
 	f1 = list1;
-	sense = (cmp(f1, f1 + size) > 0);
+	sense = (cmp(f1, f1 + size TSRMLS_CC) > 0);
 	for (; f1 < last; sense = !sense) {
 		length = 2;
 					/* Find pairs with same sense. */
 		for (f2 = f1 + size2; f2 < last; f2 += size2) {
-			if ((cmp(f2, f2+ size) > 0) != sense)
+			if ((cmp(f2, f2+ size TSRMLS_CC) > 0) != sense)
 				break;
 			length += 2;
 		}
@@ -301,7 +301,7 @@ static void setup(u_char *list1, u_char *list2, size_t n, size_t size, int (*cmp
 		} else {				/* Natural merge */
 			l2 = f2;
 			for (f2 = f1 + size2; f2 < l2; f2 += size2) {
-				if ((cmp(f2-size, f2) > 0) != sense) {
+				if ((cmp(f2-size, f2 TSRMLS_CC) > 0) != sense) {
 					p2 = *EVAL(p2) = f2 - list1 + list2;
 					if (sense > 0)
 						reverse(f1, f2-size);
@@ -311,7 +311,7 @@ static void setup(u_char *list1, u_char *list2, size_t n, size_t size, int (*cmp
 			if (sense > 0)
 				reverse (f1, f2-size);
 			f1 = f2;
-			if (f2 < last || cmp(f2 - size, f2) > 0)
+			if (f2 < last || cmp(f2 - size, f2 TSRMLS_CC) > 0)
 				p2 = *EVAL(p2) = f2 - list1 + list2;
 			else
 				p2 = *EVAL(p2) = list2 + n*size;
@@ -320,7 +320,7 @@ static void setup(u_char *list1, u_char *list2, size_t n, size_t size, int (*cmp
 #else		/* pairwise merge only. */
 	for (f1 = list1, p2 = list2; f1 < last; f1 += size2) {
 		p2 = *EVAL(p2) = p2 + size2;
-		if (cmp (f1, f1 + size) > 0)
+		if (cmp (f1, f1 + size TSRMLS_CC) > 0)
 			swap(f1, f1 + size);
 	}
 #endif /* NATURAL */
@@ -331,7 +331,7 @@ static void setup(u_char *list1, u_char *list2, size_t n, size_t size, int (*cmp
  * This is to avoid out-of-bounds addresses in sorting the
  * last 4 elements.
  */
-static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const void *, const void *))
+static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC)
 {
 	u_char *ai, *s, *t, *u, tmp;
 	int i;
@@ -339,7 +339,7 @@ static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const voi
 	for (ai = a+size; --n >= 1; ai += size)
 		for (t = ai; t > a; t -= size) {
 			u = t - size;
-			if (cmp(u, t) <= 0)
+			if (cmp(u, t TSRMLS_CC) <= 0)
 				break;
 			swap(u, t);
 		}
@@ -351,6 +351,6 @@ static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const voi
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
+ * vim600: fdm=marker
+ * vim: noet sw=4 ts=4
  */

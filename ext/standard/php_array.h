@@ -81,7 +81,7 @@ PHP_FUNCTION(key_exists);
 
 HashTable* php_splice(HashTable *, int, int, zval ***, int, HashTable **);
 PHPAPI void php_array_merge(HashTable *dest, HashTable *src, int recursive);
-int multisort_compare(const void *a, const void *b);
+int multisort_compare(const void *a, const void *b TSRMLS_DC);
 
 typedef struct {
 	int *multisort_flags[2];

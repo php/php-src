@@ -154,14 +154,14 @@ void fnDeleteAnchor(void *ptr1);
 void fnListAnchor(zend_llist *pAnchorList);
 zend_llist *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorrec, char **reldestrec, int ancount, int anchormode);
 char *fnInsAnchorsIntoText(char *text, zend_llist *pAnchorList, char **bodytag, char **urlprefix);
-int fnCmpAnchors(const void *e1, const void *e2);
+int fnCmpAnchors(const void *e1, const void *e2 TSRMLS_DC);
 ANCHOR *fnAddAnchor(zend_llist *pAnchorList, int objectID, int start, int end);
 #else
 void fnDeleteAnchor(ANCHOR *ptr);
 void fnListAnchor(DLIST *pAnchorList);
 DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorrec, char **reldestrec, int ancount, int anchormode);
 char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char **urlprefix);
-int fnCmpAnchors(ANCHOR *a1, ANCHOR *a2);
+int fnCmpAnchors(ANCHOR *a1, ANCHOR *a2 TSRMLS_DC);
 ANCHOR *fnAddAnchor(DLIST *pAnchorList, int objectID, int start, int end);
 #endif
 extern void set_swap(int do_swap);
