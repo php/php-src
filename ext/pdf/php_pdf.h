@@ -21,12 +21,8 @@
 #ifndef PHP_PDF_H
 #define PHP_PDF_H
 
-#if HAVE_PDFLIB || HAVE_PDFLIB3
+#if HAVE_PDFLIB
 
-/* with version 2.20 of pdflib PDF_open_mem isn't available unless
-   the following define isn't there.
-*/
-#define PDF_OPEN_MEM_SUPPORTED
 #include <pdflib.h>
 
 extern zend_module_entry pdf_module_entry;
