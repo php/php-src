@@ -295,8 +295,8 @@ PHP_MINFO_FUNCTION(ldap)
    Connect to an LDAP server */
 PHP_FUNCTION(ldap_connect)
 {
-	char *host;
-	int port;
+	char *host = NULL;
+	int port = 389; /* Default port */
 #ifdef HAVE_ORALDAP
 	char *wallet, *walletpasswd;
 	int authmode;
@@ -306,8 +306,6 @@ PHP_FUNCTION(ldap_connect)
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0: 
-			host = NULL;
-			port = 0;
 			break;
 
 		case 1: {
@@ -319,7 +317,6 @@ PHP_FUNCTION(ldap_connect)
 
 				convert_to_string_ex(yyhost);
 				host = Z_STRVAL_PP(yyhost);
-				port = 389; /* Default port */
 			}
 			break;
 
@@ -339,7 +336,7 @@ PHP_FUNCTION(ldap_connect)
 #ifdef HAVE_ORALDAP
 
 		case 5: {
-			pval **yyhost, **yyport, **yywallet, **yywalletpasswd, **yyauthmode;
+				pval **yyhost, **yyport, **yywallet, **yywalletpasswd, **yyauthmode;
 
 				if (zend_get_parameters_ex(5, &yyhost, &yyport, &yywallet, &yywalletpasswd, &yyauthmode) == FAILURE) {
 					RETURN_FALSE;
@@ -371,7 +368,7 @@ PHP_FUNCTION(ldap_connect)
 	}
 
 #ifdef LDAP_API_FEATURE_X_OPENLDAP
-	if (strchr(host, '/')) {
+	if (host != NULL && strchr(host, '/')) {
 		int rc;
 		
 		rc = ldap_initialize(&ldap, host);
@@ -379,11 +376,12 @@ PHP_FUNCTION(ldap_connect)
 			php_error(E_WARNING, "Could not create LDAP session handle (%d): %s\n", rc, ldap_err2string(rc));
 			RETURN_FALSE;
 		}
-	} else
-#endif
-	{
-		ldap = ldap_open(host, port);
+	} else {
+		ldap = ldap_init(host, port);
 	}
+#else
+	ldap = ldap_open(host, port);
+#endif
 	
 	if ( ldap == NULL ) {
 		RETURN_FALSE;
