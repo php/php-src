@@ -1,3 +1,156 @@
+2003-02-03  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * main/output.c:
+      proto-fix
+
+2003-02-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/datetime.c:
+      Fixed bug #22017 (non descriptive error to appear when timestamp passed to
+      date() has value < 0. Win32 does not support timestamps prior to midnight
+      (00:00:00), January 1, 1970).
+
+    * ext/standard/basic_functions.c:
+      Make putenv() return a proper error rather then NULL when invalid argument
+      is passed.
+
+    * ext/imap/php_imap.c:
+      Fixed bug #22022 (Crash in imap_mail_compose() if the body is an empty
+      array).
+
+    * ext/curl/interface.c:
+      Fixed bug #22031 (Made curl_write() & curl_write_header() binary safe).
+
+2003-02-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/mb_http_output.phpt
+      ext/mbstring/tests/mb_internal_encoding.phpt
+      ext/mbstring/tests/mb_strpos.phpt:
+      Trivial test adjustment
+
+    * ext/mbstring/mbstring.c:
+      zend_get_parameters_* => zend_parse_parameters
+
+2003-02-03  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      sapi/apache2filter/config.m4:
+      MFH: Fix bug: #22035 (EXTRA_LDFLAGS for AIX not quite right)
+
+    * sapi/apache2filter/config.m4:
+      Fix bug: #22035 (EXTRA_LDFLAGS for AIX not correct)
+
+    * (PHP_4_3)
+      NEWS:
+      fugbix news
+
+    * (PHP_4_3)
+      ext/standard/array.c:
+      MFH: Fixed bug: #21998 (array_pop() did not reset the current array
+      position)
+
+    * ext/standard/array.c:
+      - Fixed bug: #21998 (array_pop() did not reset the current array position)
+
+    * ext/standard/tests/array/bug21998.phpt:
+      Correct description of the problem
+
+2003-02-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c:
+      Really fixed proto.
+      
+
+    * ext/mbstring/mbstring.c:
+      Oops! wrong commit. Reverting...
+
+    * ext/mbstring/mbstring.c:
+      Fixed proto
+
+    * tests/lang/bug21961.phpt:
+      Modified the test so it will be skipped under ZE1.
+      Thanks Kai
+
+    * tests/lang/bug20175.phpt:
+      Added missing "?>"
+
+    * ext/mbstring/tests/mb_strpos.phpt:
+      Fixed test case for mb_strpos().
+
+2003-02-03  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache_hooks/config.m4:
+      Make these configure messages differ from the regular apache configure
+
+2003-02-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/lang/bug21961.phpt:
+      Added test case for bug #21961
+
+2003-02-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/php_image.h:
+      This cause some warning/error in AIX
+
+    * (PHP_4_3)
+      main/php_ini.c:
+      MFH: Fixed bug: #22011 (-n must ignore all ini files)
+
+    * main/php_ini.c:
+      Fixed bug: #22011 (-n must ignore all ini files)
+
+2003-02-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * run-tests.php:
+      - Make VIM highlighting happy
+
+2003-02-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/interbase/config.m4:
+      Test that libgds actually exists.
+
+    * ext/calendar/calendar.c:
+      ws
+
+2003-02-03  Giuseppe Tanzilli  <g.tanzilli@gruppocsf.com>
+
+    * (PHP_4_3)
+      sapi/servlet/Makefile.frag
+      sapi/servlet/config.m4
+      sapi/servlet/servlet.c
+      sapi/servlet/servlet.java:
+      Fix sapi/servlet build on Unix
+
+2003-02-03  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/cli/php_cli.c:
+      Fix ZTS build.
+
+2003-02-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/tests/array/bug21998.phpt:
+      
+      Added test for bug #21998
+
+2003-02-03  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-PEAR.xml:
+      - 1.1 release notes update
+      * added some <provides> elements
+
+    * pear/PEAR/Common.php:
+      - start using the source tokenizer
+
+    * pear/package-PEAR.xml:
+      - substitute @php_dir@ in pear.in
+
+2003-02-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c:
+      - Added -B, -F, -R, -E for line by line std in processing.
+      - Added some error messages.
+      - Added more -h info.
+
 2003-02-02  Ilia Alshanetsky  <ilia@prohost.org>
 
     * main/php_scandir.h:

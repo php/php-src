@@ -1,3 +1,8 @@
+2003-02-03  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_API.h:
+      Build fix.
+
 2003-02-02  Harald Radi  <harald.radi+coding.php@nme.at>
 
     * zend_API.c
