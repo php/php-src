@@ -6,18 +6,20 @@ dnl
 dnl Check for broken sprintf()
 dnl
 AC_DEFUN(AC_ZEND_BROKEN_SPRINTF,[
-  AC_MSG_CHECKING([for broken sprintf])
-  AC_TRY_RUN([main() { char buf[20]; exit (sprintf(buf,"testing 123")!=11); }],[
-    broken=0
-    AC_MSG_RESULT(ok)
-  ],[
-    broken=1
-    AC_MSG_RESULT(broken)
-  ],[
-    broken=0
-    AC_MSG_RESULT(cannot check, guessing ok)
+  AC_CACHE_CHECK(whether sprintf is broken, ac_cv_broken_sprintf,[
+    AC_TRY_RUN([main() {char buf[20];exit(sprintf(buf,"testing 123")!=11); }],[
+      ac_cv_broken_sprintf=no
+    ],[
+      ac_cv_broken_sprintf=yes
+    ],[
+      ac_cv_broken_sprintf=no
+    ])
   ])
-  AC_DEFINE_UNQUOTED(ZEND_BROKEN_SPRINTF, $broken, [Whether sprintf is broken])
+  if test "$ac_cv_broken_sprintf" = "yes"; then
+    AC_DEFINE(ZEND_BROKEN_SPRINTF, 1, [Whether sprintf is broken])
+  else
+    AC_DEFINE(ZEND_BROKEN_SPRINTF, 0, [Whether sprintf is broken])
+  fi
 ])
 
 AC_DEFUN(AM_SET_LIBTOOL_VARIABLE,[
