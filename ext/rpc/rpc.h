@@ -5,12 +5,14 @@
 #define HANDLER handler_entries[__handler_counter]
 #define HANDLER_COUNT (sizeof(handler_entries) / sizeof(rpc_handler_entry))
 
-#define GET_INTERNAL(intern)	rpc_internal **intern;								\
+#define RPC_HT(intern) (*(intern->handlers))
+
+#define GET_INTERNAL(intern)	rpc_internal *intern;								\
 								if (GET_INTERNAL_EX(intern, object) != SUCCESS) {	\
 									/* TODO: exception */							\
 								}
 
-#define GET_INTERNAL_EX(intern, object)	zend_ts_hash_index_find(instance, object->value.obj.handle, (void **) &intern)
+#define GET_INTERNAL_EX(intern, object)	(((intern = zend_object_store_get_object(object TSRMLS_CC)) == NULL) ? FAILURE : SUCCESS)
 
 #define GET_CLASS(ce)	char *key;																				\
 						int key_len;																			\
@@ -48,16 +50,13 @@
 							/* TODO: exception */											\
 						}
 
-#define GET_CTOR_SIGNATURE(intern, hash_val, num_args, arg_types)													\
-			GET_SIGNATURE(intern, (*intern)->class_name, (*intern)->class_name_len, hash_val, num_args, arg_types)
-
 #define GET_METHOD_SIGNATURE(intern, method, hash_val, num_args, arg_types)											\
 			GET_SIGNATURE(intern, method->str, method->len, hash_val, num_args, arg_types)
 
 #define GET_SIGNATURE(intern, name, name_len, hash_val, num_args, arg_types)										\
 						hash_val.len = name_len;																	\
 																													\
-						if ((*(*intern)->handlers)->hash_type & HASH_WITH_SIGNATURE) {								\
+						if ((*intern->handlers)->hash_type & HASH_WITH_SIGNATURE) {								\
 							zend_uint _signature_counter;															\
 																													\
 							arg_types = (char *) emalloc(sizeof(char) * (num_args + 1));							\
@@ -108,16 +107,6 @@
 #define FREE_SIGNATURE(hash_val, arg_types)																			\
 						efree(arg_types);																			\
 						efree(hash_val.str);
-
-
-
-#define RPC_REFCOUNT(intern) ((*intern)->refcount)
-#define RPC_ADDREF(intern) (++RPC_REFCOUNT(intern))
-#define RPC_DELREF(intern) (--RPC_REFCOUNT(intern))
-
-#define RPC_CLONECOUNT(intern) ((*intern)->clonecount)
-#define RPC_ADDCLONE(intern) (++RPC_CLONECOUNT(intern))
-#define RPC_DELCLONE(intern) (--RPC_CLONECOUNT(intern))
 
 static int __handler_counter;
 

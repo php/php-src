@@ -18,15 +18,19 @@ extern zend_module_entry rpc_module_entry;
 
 ZEND_MINIT_FUNCTION(rpc);
 ZEND_MSHUTDOWN_FUNCTION(rpc);
+ZEND_RINIT_FUNCTION(rpc);
+ZEND_RSHUTDOWN_FUNCTION(rpc);
 ZEND_MINFO_FUNCTION(rpc);
 
 ZEND_FUNCTION(rpc_load);
 ZEND_FUNCTION(rpc_call);
 ZEND_FUNCTION(rpc_set);
 ZEND_FUNCTION(rpc_get);
+ZEND_FUNCTION(rpc_singleton);
+ZEND_FUNCTION(rpc_poolable);
 
 ZEND_BEGIN_MODULE_GLOBALS(rpc)
-	int dummy;
+	TsHashTable *proxy;
 ZEND_END_MODULE_GLOBALS(rpc)
 
 #ifdef ZTS
