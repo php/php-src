@@ -38,6 +38,8 @@ top_builddir = .
 ZEND_DIR = $(srcdir)/libzend
 SUBDIRS=libzend ext @TSRM_DIR@
 
+PACKAGE = @PACKAGE@
+VERSION = @VERSION@
 LN_S = @LN_S@
 CC = @CC@
 AR = ar rc
@@ -137,6 +139,32 @@ distclean: clean distclean-recursive
 	-rm -f doc/checkdoc doc/funcparse doc/version.ent
 	-rm -f do-conf test/test.log
 	-rm -f doc/Makefile regex/Makefile
+
+distdir = $(PACKAGE)-$(VERSION)
+top_distdir = $(distdir)
+
+dist: distdir
+	-chmod -R a+r $(distdir)
+	tar chozf $(distdir).tar.gz $(distdir)
+	-rm -rf $(distdir)
+
+distdir:
+	-rm -rf $(distdir)
+	files=`echo *` ;\
+	mkdir $(distdir) ;\
+	for file in $$files ; do \
+		d=$(srcdir); \
+		if test -d $$d/$$file ; then \
+			cp -pr $$d/$$file $(distdir)/$$file; \
+		else \
+			test -f $(distdir)/$$file \
+			|| ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+			|| cp -p $$d/$$file $(distdir)/$$file || :; \
+		fi; \
+	done
+	(cd $(distdir) ; $(MAKE) distclean)
+	find $(distdir) -name CVS -type d | xargs rm -rf
+	
 
 maintainer-clean-depend: maintainer-clean-depend-recursive
 
