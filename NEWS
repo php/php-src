@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ???, Version 4.0 Beta 5
+- Implemented default_charset and default_mimetype config directives (Stig)
+- Ported T1lib support from PHP3. (Jouni)
 - Fixed -DEAPI inheritance from APXS. (Sascha)
 - Fixed possible crash in request-shutdown. (Thies)
 - Fixed safe_mode_protected_env_vars INI directive (Zeev)
