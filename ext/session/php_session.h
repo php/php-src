@@ -21,7 +21,7 @@
 
 #include "ext/standard/php_var.h"
 
-#define PHP_SESSION_API 20020306
+#define PHP_SESSION_API 20020330
 
 #define PS_OPEN_ARGS void **mod_data, const char *save_path, const char *session_name TSRMLS_DC
 #define PS_CLOSE_ARGS void **mod_data TSRMLS_DC
@@ -29,12 +29,10 @@
 #define PS_WRITE_ARGS void **mod_data, const char *key, const char *val, const int vallen TSRMLS_DC
 #define PS_DESTROY_ARGS void **mod_data, const char *key TSRMLS_DC
 #define PS_GC_ARGS void **mod_data, int maxlifetime, int *nrdels TSRMLS_DC
-
-#define HAVE_PHP_SESSION_CREATESID
-#define PS_CREATESID_ARGS void **mod_data, int *newlen
+#define PS_CREATE_SID_ARGS void **mod_data, int *newlen TSRMLS_DC
 
 /* default create id function */
-char *php_session_create_id(PS_CREATESID_ARGS);
+char *php_session_create_id(PS_CREATE_SID_ARGS);
 
 typedef struct ps_module_struct {
 	const char *name;
@@ -44,7 +42,7 @@ typedef struct ps_module_struct {
 	int (*write)(PS_WRITE_ARGS);
 	int (*destroy)(PS_DESTROY_ARGS);
 	int (*gc)(PS_GC_ARGS);
-	char *(*createsid)(PS_CREATESID_ARGS);
+	char *(*create_sid)(PS_CREATE_SID_ARGS);
 } ps_module;
 
 #define PS_GET_MOD_DATA() *mod_data
@@ -56,7 +54,7 @@ typedef struct ps_module_struct {
 #define PS_WRITE_FUNC(x) 	int ps_write_##x(PS_WRITE_ARGS)
 #define PS_DESTROY_FUNC(x) 	int ps_delete_##x(PS_DESTROY_ARGS)
 #define PS_GC_FUNC(x) 		int ps_gc_##x(PS_GC_ARGS)
-#define PS_CREATESID_FUNC(x)	char *ps_createsid_##x(PS_CREATESID_ARGS)
+#define PS_CREATE_SID_FUNC(x)	char *ps_create_sid_##x(PS_CREATE_SID_ARGS)
 
 #define PS_FUNCS(x) \
 	PS_OPEN_FUNC(x); \
@@ -65,7 +63,7 @@ typedef struct ps_module_struct {
 	PS_WRITE_FUNC(x); \
 	PS_DESTROY_FUNC(x); \
 	PS_GC_FUNC(x);	\
-	PS_CREATESID_FUNC(x)
+	PS_CREATE_SID_FUNC(x)
 
 #define PS_MOD(x) \
 	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
@@ -79,11 +77,11 @@ typedef struct ps_module_struct {
 	PS_WRITE_FUNC(x); \
 	PS_DESTROY_FUNC(x); \
 	PS_GC_FUNC(x); \
-	PS_CREATESID_FUNC(x)
+	PS_CREATE_SID_FUNC(x)
 
 #define PS_MOD_SID(x) \
 	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
-	 ps_delete_##x, ps_gc_##x, ps_createsid_##x
+	 ps_delete_##x, ps_gc_##x, ps_create_sid_##x
 
 typedef enum {
 	php_session_disabled,
