@@ -344,7 +344,7 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(prefix,					domxml_node_prefix,				NULL)
 	PHP_FALIAS(clone_node,				domxml_clone_node,				NULL)
 /* Non DOM functions start here */
-	PHP_FALIAS(add_child,				domxml_node_add_child,			NULL)
+	PHP_FALIAS(add_child,				domxml_node_append_child,		NULL)
 	PHP_FALIAS(append_sibling,			domxml_node_append_sibling,		NULL)
 	PHP_FALIAS(node,					domxml_node,					NULL)
 	PHP_FALIAS(unlink,					domxml_node_unlink_node,		NULL)
@@ -1965,43 +1965,6 @@ PHP_FUNCTION(domxml_node_unlink_node)
 		shutdown. */
 	/*xmlFreeNode(nodep);
 	zval_dtor(id);*/			/* This is not enough because the children won't be deleted */
-}
-/* }}} */
-
-/* {{{ proto object domxml_node_add_child(object domnode)
-   Adds existing node to parent node */
-PHP_FUNCTION(domxml_node_add_child)
-{
-	zval *id, *rv, *node;
-	xmlNodePtr child, nodep, new_child;
-	int ret;
-
-	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlnodep);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &node) == FAILURE) {
-		return;
-	}
-
-	DOMXML_GET_OBJ(child, node, le_domxmlnodep);
-
-	if (child->type == XML_ATTRIBUTE_NODE) {
-		php_error(E_WARNING, "%s(): can't add attribute node", get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
-	}
-
-	if (NULL == (new_child = xmlCopyNode(child, 1))) {
-		php_error(E_WARNING, "%s(): unable to clone node", get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
-	}
-
-	child = xmlAddChild(nodep, new_child);
-
-	if (NULL == child) {
-		php_error(E_WARNING, "%s(): couldn't add child", get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
-	}
-
-	DOMXML_RET_OBJ(rv, child, &ret);
 }
 /* }}} */
 
