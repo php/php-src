@@ -1,3 +1,20 @@
+2003-07-31  Zeev Suraski  <zeev@zend.com>
+
+    * zend_API.c:
+      Use instanceof_function()
+
+    * zend_compile.c
+      zend_execute.c:
+      Finish the array overloading patch
+
+    * zend_execute.c:
+      Cleanup
+
+2003-07-31  Andi Gutmans  <andi@zend.com>
+
+    * zend_hash.c:
+      - Fix logic. It was the wrong way around.
+
 2003-07-30  Andi Gutmans  <andi@zend.com>
 
     * zend_execute.c
