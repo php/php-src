@@ -262,7 +262,6 @@ PHP_FUNCTION(vpopmail_add_alias_domain)
 	php_strtolower(Z_STRVAL_PP(domain), Z_STRLEN_PP(domain));
 	php_strtolower(Z_STRVAL_PP(aliasdomain), Z_STRLEN_PP(aliasdomain));
 
-	TSRMLS_FETCH();
 	VPOPMAILG(vpopmail_open) = 1;
 
 	tmpstr = vget_assign(Z_STRVAL_PP(domain), Dir, 156, &uid, &gid);
