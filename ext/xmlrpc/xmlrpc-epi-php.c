@@ -921,7 +921,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data)
             else {
                /* could not create description */
                if(err.xml_elem_error.parser_code) {
-                  php_error_docref(NULL TSRMLS_CC, E_WARNING, "xml parse error: [line %i, column %i, message: %s] Unable to add introspection data returned from %s()", 
+                  php_error_docref(NULL TSRMLS_CC, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to add introspection data returned from %s()", 
                              err.xml_elem_error.column, err.xml_elem_error.line, err.xml_elem_error.parser_error, Z_STRVAL_PP(php_function));
                }
                else {
@@ -1189,7 +1189,7 @@ PHP_FUNCTION(xmlrpc_parse_method_descriptions)
 		} else {
 			/* could not create description */
 			if(err.xml_elem_error.parser_code) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "xml parse error: [line %i, column %i, message: %s] Unable to create introspection data", 
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to create introspection data", 
 				err.xml_elem_error.column, err.xml_elem_error.line, err.xml_elem_error.parser_error);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid xml structure. Unable to create introspection data");
