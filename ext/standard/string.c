@@ -133,7 +133,7 @@ PHPAPI void php_trim(zval *str, zval * return_value, int mode)
 	if (mode & 1) {
 		for (i = 0; i < len; i++) {
 			if (c[i] == ' ' || c[i] == '\n' || c[i] == '\r' ||
-				c[i] == '\t' || c[i] == '\v') {
+				c[i] == '\t' || c[i] == '\v' || c[i] == '\0') {
 				trimmed++;
 			} else {
 				break;
@@ -145,7 +145,7 @@ PHPAPI void php_trim(zval *str, zval * return_value, int mode)
 	if (mode & 2) {
 		for (i = len - 1; i >= 0; i--) {
 			if (c[i] == ' ' || c[i] == '\n' || c[i] == '\r' ||
-				c[i] == '\t' || c[i] == '\v') {
+				c[i] == '\t' || c[i] == '\v' || c[i] == '\0') {
 				len--;
 			} else {
 				break;
