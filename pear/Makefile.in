@@ -107,6 +107,7 @@ PEAR_FILES = \
 	PEAR/Uploader.php \
 	Payment/Verisign.php \
 	Schedule/At.php \
+	System.php \
 	XML/Parser.php 
 
 install-data-local:
