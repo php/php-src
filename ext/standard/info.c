@@ -122,6 +122,7 @@ PHPAPI void php_print_info(int flag)
 	char **env,*tmp1,*tmp2;
 	char *php_uname;
 	int expose_php = INI_INT("expose_php");
+	int tmp_zend_debug;
 
 #ifdef PHP_WIN32
 	char php_windows_uname[256];
@@ -168,9 +169,10 @@ PHPAPI void php_print_info(int flag)
 		php_info_print_table_row(2, "Configure Command", CONFIGURE_COMMAND );
 #endif
 		php_info_print_table_row(2, "php.ini Path", CONFIGURATION_FILE_PATH );
-/* why does this cause seg faults?
-		php_info_print_table_row(2, "ZEND_DEBUG", ZEND_DEBUG );
-*/
+
+		sprintf(tmp_zend_debug, "%d", ZEND_DEBUG);
+		php_info_print_table_row(2, "ZEND_DEBUG", tmp_zend_debug );
+
 		if (sapi_module.name)
 			php_info_print_table_row(2, "SAPI", sapi_module.name );
 #ifdef ZTS
