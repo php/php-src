@@ -939,16 +939,17 @@ PHP_FUNCTION(yaz_record)
 		if (r) {
 			if (!strcmp(type, "array")) {
 				Z_External *ext = (Z_External *) ZOOM_record_get(r, "ext", 0);
-				oident *ent = oid_getentbyoid(ext->direct_reference);
-
-				if (ext->which == Z_External_grs1 && ent->value == VAL_GRS1) {
-					retval_grs1(return_value, ext->u.grs1);
-				} else if (ext->which == Z_External_octet) {
-					char *buf = (char *) (ext->u.octet_aligned->buf);
-					ODR odr = odr_createmem(ODR_DECODE);
-					Z_GenericRecord *rec = 0;
-
-					switch (ent->value) {
+				if (ext) {
+					oident *ent = oid_getentbyoid(ext->direct_reference);
+					
+					if (ext->which == Z_External_grs1 && ent->value == VAL_GRS1) {
+						retval_grs1(return_value, ext->u.grs1);
+					} else if (ext->which == Z_External_octet) {
+						char *buf = (char *) (ext->u.octet_aligned->buf);
+						ODR odr = odr_createmem(ODR_DECODE);
+						Z_GenericRecord *rec = 0;
+						
+						switch (ent->value) {
 						case VAL_SOIF:
 						case VAL_HTML:
 							break;
@@ -958,11 +959,12 @@ PHP_FUNCTION(yaz_record)
 							break;
 						default:
 							rec = marc_to_grs1(buf, odr);
+						}
+						if (rec) {
+							retval_grs1(return_value, rec);
+						}
+						odr_destroy(odr);
 					}
-					if (rec) {
-						retval_grs1(return_value, rec);
-					}
-					odr_destroy(odr);
 				}
 			} else {
 				int rlen;
