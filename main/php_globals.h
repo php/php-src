@@ -32,13 +32,34 @@ struct _php_core_globals {
 	long safe_mode;
 	long sql_safe_mode;
 	char *safe_mode_exec_dir;
+	long enable_dl;
+
+    long max_execution_time;
+    long memory_limit;
 
     long track_errors;
     long display_errors;
     long log_errors;
+    char *error_log;
+
+    char *doc_root;
+    char *user_dir;
+    char *include_path;
+	char *open_basedir;
+    char *extension_dir;
+
+    char *upload_tmp_dir;
+	long upload_max_filesize;
 
     char *auto_prepend_file;
     char *auto_append_file;
+
+    char *arg_separator;
+    char *gpc_order;
+
+    long track_vars;
+
+    long y2k_compliance;
 };
 
 

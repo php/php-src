@@ -70,5 +70,6 @@ pval *cfg_get_entry(char *name, uint name_length);
 PHP_INI_MH(OnUpdateInt);
 PHP_INI_MH(OnUpdateReal);
 PHP_INI_MH(OnUpdateString);
+PHP_INI_MH(OnUpdateStringUnempty);
 
 #endif /* _PHP_INI_H */

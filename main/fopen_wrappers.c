@@ -111,10 +111,10 @@ PHPAPI int _php3_check_open_basedir(char *path)
 	int local_open_basedir_pos;
 	
 	/* Only check when open_basedir is available */
-	if (php3_ini.open_basedir && *php3_ini.open_basedir) {
+	if (PG(open_basedir) && *PG(open_basedir)) {
 	
 		/* Special case basedir==".": Use script-directory */
-		if ((strcmp(php3_ini.open_basedir, ".") == 0) && 
+		if ((strcmp(PG(open_basedir), ".") == 0) && 
 			GLOBAL(request_info).filename &&
 			*GLOBAL(request_info).filename
 		) {
@@ -149,7 +149,7 @@ PHPAPI int _php3_check_open_basedir(char *path)
 			
 		} else {
 			/* Else use the unmodified path */
-			strcpy(local_open_basedir, php3_ini.open_basedir);
+			strcpy(local_open_basedir, PG(open_basedir));
 		}
 	
 		/* Resolve the real path into resolved_name */
@@ -186,8 +186,8 @@ PHPAPI FILE *php3_fopen_wrapper(char *path, char *mode, int options, int *issock
 	}
 #endif
 
-	if (options & USE_PATH && php3_ini.include_path != NULL) {
-		return php3_fopen_with_path(path, mode, php3_ini.include_path, NULL);
+	if (options & USE_PATH && PG(include_path) != NULL) {
+		return php3_fopen_with_path(path, mode, PG(include_path), NULL);
 	} else {
 		if(!strcmp(mode,"r") || !strcmp(mode,"r+")) cm=0;
 		if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!_php3_checkuid(path, cm))) {
@@ -212,7 +212,7 @@ FILE *php3_fopen_for_parser(void)
 	fn = GLOBAL(request_info).filename;
 	path_info = GLOBAL(request_info).path_info;
 #if HAVE_PWD_H
-	if (php3_ini.user_dir && *php3_ini.user_dir
+	if (PG(user_dir) && *PG(user_dir)
 		&& path_info && '/' == path_info[0] && '~' == path_info[1]) {
 
 		char user[32];
@@ -230,11 +230,11 @@ FILE *php3_fopen_for_parser(void)
 
 			pw = getpwnam(user);
 			if (pw && pw->pw_dir) {
-				fn = emalloc(strlen(php3_ini.user_dir) + strlen(path_info) + strlen(pw->pw_dir) + 4);
+				fn = emalloc(strlen(PG(user_dir)) + strlen(path_info) + strlen(pw->pw_dir) + 4);
 				if (fn) {
 					strcpy(fn, pw->pw_dir);		/* safe */
 					strcat(fn, "/");	/* safe */
-					strcat(fn, php3_ini.user_dir);	/* safe */
+					strcat(fn, PG(user_dir));	/* safe */
 					strcat(fn, "/");	/* safe */
 					strcat(fn, s + 1);	/* safe (shorter than path_info) */
 					STR_FREE(GLOBAL(request_info).filename);
@@ -245,16 +245,16 @@ FILE *php3_fopen_for_parser(void)
 	} else
 #endif
 #if WIN32
-	if (php3_ini.doc_root && path_info && ('/' == *php3_ini.doc_root ||
-		'\\' == *php3_ini.doc_root || strstr(php3_ini.doc_root,":\\") ||
-		strstr(php3_ini.doc_root,":/"))) {
+	if (PG(doc_root) && path_info && ('/' == *PG(doc_root) ||
+		'\\' == *PG(doc_root) || strstr(PG(doc_root),":\\") ||
+		strstr(PG(doc_root),":/"))) {
 #else
-	if (php3_ini.doc_root && '/' == *php3_ini.doc_root && path_info) {
+	if (PG(doc_root) && '/' == *PG(doc_root) && path_info) {
 #endif
-		l = strlen(php3_ini.doc_root);
+		l = strlen(PG(doc_root));
 		fn = emalloc(l + strlen(path_info) + 2);
 		if (fn) {
-			memcpy(fn, php3_ini.doc_root, l);
+			memcpy(fn, PG(doc_root), l);
 			if ('/' != fn[l - 1] || '\\' != fn[l - 1])	/* l is never 0 */
 				fn[l++] = '/';
 			if ('/' == path_info[0])
@@ -334,8 +334,8 @@ PHPAPI FILE *php3_fopen_with_path(char *filename, char *mode, char *path, char *
 	if (*filename == '/') {
 #endif
 		if (PG(safe_mode)) {
-			if(php3_ini.doc_root) {
-				snprintf(trypath, MAXPATHLEN, "%s%s", php3_ini.doc_root, filename);
+			if(PG(doc_root)) {
+				snprintf(trypath, MAXPATHLEN, "%s%s", PG(doc_root), filename);
 			} else {
 				strncpy(trypath,filename,MAXPATHLEN);
 			}
@@ -883,7 +883,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 
 	} else {
 		if (options & USE_PATH) {
-			fp = php3_fopen_with_path((char *) path, mode, php3_ini.include_path, NULL);
+			fp = php3_fopen_with_path((char *) path, mode, PG(include_path), NULL);
 		} else {
 			int cm=2;
 			if(!strcmp(mode,"r") || !strcmp(mode,"r+")) cm=0;

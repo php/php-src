@@ -90,10 +90,6 @@
 #include "functions/php3_sysvshm.h"
 #include "functions/php3_dav.h"
 
-
-extern php3_ini_structure php3_ini;
-extern php3_ini_structure php3_ini_master;
-
 unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
 unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };
 unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };

@@ -289,3 +289,26 @@ PHP_INI_MH(OnUpdateString)
 	*p = new_value;
 	return SUCCESS;
 }
+
+
+PHP_INI_MH(OnUpdateStringUnempty)
+{
+	char **p;
+#ifndef ZTS
+	char *base = (char *) &core_globals;
+#else
+	char *base;
+	PLS_FETCH();
+
+	base = (char *) core_globals;
+#endif
+
+	if (new_value && !new_value[0]) {
+		return FAILURE;
+	}
+
+	p = (char **) (base+(size_t) mh_arg);
+
+	*p = new_value;
+	return SUCCESS;
+}

@@ -38,34 +38,10 @@
 #endif
 
 typedef struct {
-    long errors;
-    char *doc_root;
-    char *user_dir;
-    long track_vars;
-    char *cgi_ext;
-    char *isapi_ext;
-    char *nsapi_ext;
-    char *include_path;
-    char *upload_tmp_dir;
-	long upload_max_filesize;
-    char *extension_dir;
-    char *error_log;
-    long sql_safe_mode;
-    long xbithack;
     long engine;
     long last_modified;
-    long max_execution_time;
-    long memory_limit;
-    char *browscap;
-    char *arg_separator;
-    char *gpc_order;
-    long y2k_compliance;
-    long define_syslog_variables;
-	char *error_prepend_string;
-	char *error_append_string;
-	char *open_basedir;
-	long enable_dl;
 	char *dav_script;
+	long xbithack;
 } php3_ini_structure;
 
 #if MSVC5

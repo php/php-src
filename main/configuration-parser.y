@@ -35,6 +35,7 @@
 #define DEBUG_CFG_PARSER 1
 #include "php.h"
 #include "php_globals.h"
+#include "php_ini.h"
 #include "functions/dl.h"
 #include "functions/file.h"
 #include "functions/php3_browscap.h"
@@ -248,22 +249,22 @@ int php3_init_config(void)
 
 int php3_minit_browscap(INIT_FUNC_ARGS)
 {
-	TLS_VARS;
+	char *browscap = INI_STR("browscap");
 
-	if (php3_ini.browscap) {
+	if (browscap) {
 		if (_php3_hash_init(&GLOBAL(browser_hash), 0, NULL, (void (*)(void *))pvalue_browscap_destructor, 1)==FAILURE) {
 			return FAILURE;
 		}
 
-		cfgin = fopen(php3_ini.browscap,"r");
+		cfgin = fopen(browscap, "r");
 		if (!cfgin) {
-			php3_error(E_WARNING,"Cannot open '%s' for reading",php3_ini.browscap);
+			php3_error(E_WARNING,"Cannot open '%s' for reading", browscap);
 			return FAILURE;
 		}
 		init_cfg_scanner();
 		active__php3_hash_table = &GLOBAL(browser_hash);
 		parsing_mode = PARSING_MODE_BROWSCAP;
-		currently_parsed_filename = php3_ini.browscap;
+		currently_parsed_filename = browscap;
 		yyparse();
 		fclose(cfgin);
 	}
@@ -281,9 +282,7 @@ int php3_shutdown_config(void)
 
 int php3_mshutdown_browscap(SHUTDOWN_FUNC_ARGS)
 {
-	TLS_VARS;
-
-	if (php3_ini.browscap) {
+	if (INI_STR("browscap")) {
 		_php3_hash_destroy(&GLOBAL(browser_hash));
 	}
 	return SUCCESS;

@@ -298,67 +298,12 @@ static void *php3_merge_dir(pool *p, void *basev, void *addv)
 	/* Start with the base config */
 	memcpy(new,base,sizeof(php3_ini_structure));
 
-	/* Now, add any fields that have changed in *add compared to the master config */
-	if (add->smtp != orig.smtp) new->smtp = add->smtp;
-	if (add->sendmail_path != orig.sendmail_path) new->sendmail_path = add->sendmail_path;
-	if (add->sendmail_from != orig.sendmail_from) new->sendmail_from = add->sendmail_from;
-	if (add->errors != orig.errors) new->errors = add->errors;
-	if (add->doc_root != orig.doc_root) new->doc_root = add->doc_root;
-	if (add->user_dir != orig.user_dir) new->user_dir = add->user_dir;
-	if (add->track_vars != orig.track_vars) new->track_vars = add->track_vars;
-	if (add->cgi_ext != orig.cgi_ext) new->cgi_ext = add->cgi_ext;
-	if (add->isapi_ext != orig.isapi_ext) new->isapi_ext = add->isapi_ext;
-	if (add->nsapi_ext != orig.nsapi_ext) new->nsapi_ext = add->nsapi_ext;
-	if (add->include_path != orig.include_path) new->include_path = add->include_path;
-	if (add->upload_tmp_dir != orig.upload_tmp_dir) new->upload_tmp_dir = add->upload_tmp_dir;
-	if (add->upload_max_filesize != orig.upload_max_filesize) new->upload_max_filesize = add->upload_max_filesize;
-	if (add->extension_dir != orig.extension_dir) new->extension_dir = add->extension_dir;
-	if (add->error_log != orig.error_log) new->error_log = add->error_log;
 	/* skip the highlight stuff */
-	if (add->xbithack != orig.xbithack) new->xbithack = add->xbithack;
 	if (add->engine != orig.engine) new->engine = add->engine;
 	if (add->last_modified != orig.last_modified) new->last_modified = add->last_modified;
-	if (add->max_execution_time != orig.max_execution_time) new->max_execution_time = add->max_execution_time;
-	if (add->memory_limit != orig.memory_limit) new->memory_limit = add->memory_limit;
-	if (add->browscap != orig.browscap) new->browscap = add->browscap;
-	if (add->arg_separator != orig.arg_separator) new->arg_separator = add->arg_separator;
-	if (add->gpc_order != orig.gpc_order) new->gpc_order = add->gpc_order;
-	if (add->error_prepend_string != orig.error_prepend_string) new->error_prepend_string = add->error_prepend_string;
-	if (add->error_append_string != orig.error_append_string) new->error_append_string = add->error_append_string;
-	if (add->open_basedir != orig.open_basedir) new->open_basedir = add->open_basedir;
-	if (add->enable_dl != orig.enable_dl) new->enable_dl = add->enable_dl;
 	if (add->dav_script != orig.dav_script) new->dav_script = add->dav_script;
 	
 	return new;
-}
-
-#if MODULE_MAGIC_NUMBER > 19961007
-const char *php3flaghandler(cmd_parms * cmd, php3_ini_structure * conf, int val)
-{
-#else
-char *php3flaghandler(cmd_parms * cmd, php3_ini_structure * conf, int val)
-{
-#endif
-	int c = (int) cmd->info;
-
-	switch (c) {
-		case 5:
-			conf->track_vars = val;
-			break;
-		case 7:
-			conf->engine = val;
-			break;
-		case 8:
-			conf->xbithack = val;
-			break;
-		case 9:
-			conf->last_modified = val;
-			break;
-		case 13:
-			conf->enable_dl = val;
-			break;
-	}
-	return NULL;
 }
 
 
@@ -403,54 +348,6 @@ char *php3take1handler(cmd_parms * cmd, php3_ini_structure * conf, char *arg)
 	switch (c) {
 		case 0:
 			conf->errors = atoi(arg);
-			break;
-		case 1:
-			conf->doc_root = pstrdup(cmd->pool, arg);
-			break;
-		case 2:
-			conf->user_dir = pstrdup(cmd->pool, arg);
-			break;
-		case 4:
-			conf->include_path = pstrdup(cmd->pool, arg);
-			break;
-		case 7:
-			conf->upload_tmp_dir = pstrdup(cmd->pool, arg);
-			break;
-		case 8:
-			conf->extension_dir = pstrdup(cmd->pool, arg);
-			break;
-		case 9:
-			conf->error_log = pstrdup(cmd->pool, arg);
-			break;
-		case 10:
-			conf->arg_separator = pstrdup(cmd->pool, arg);
-			break;
-		case 11:
-			conf->max_execution_time = atoi(arg);
-			break;
-		case 12:
-			conf->memory_limit = atoi(arg);
-			break;
-		case 13:
-			conf->sendmail_path = pstrdup(cmd->pool, arg);
-			break;
-		case 14:
-			conf->browscap = pstrdup(cmd->pool, arg);
-			break;
-		case 15:
-			conf->gpc_order = pstrdup(cmd->pool, arg);
-			break;
-		case 16:
-			conf->error_prepend_string = pstrdup(cmd->pool, arg);
-			break;
-		case 17:
-			conf->error_append_string = pstrdup(cmd->pool, arg);
-			break;
-		case 18:
-			conf->open_basedir = pstrdup(cmd->pool, arg);
-			break;
-		case 19:
-			conf->upload_max_filesize = atol(arg);
 			break;
 		case 20:
 			conf->dav_script = pstrdup(cmd->pool, arg);
@@ -538,34 +435,6 @@ command_rec php3_commands[] =
 {
 	{"php4_directive",		php_apache_value_handler, NULL, OR_OPTIONS, TAKE2, "PHP Value Modifier"},
 	{"php4_flag",			php_apache_flag_handler, NULL, OR_OPTIONS, TAKE2, "PHP Flag Modifier"},
-	{"php3_error_reporting", php3take1handler, (void *)0, OR_OPTIONS, TAKE1, "error reporting level"},
-	{"php3_doc_root", php3take1handler, (void *)1, ACCESS_CONF|RSRC_CONF, TAKE1, "directory"}, /* not used yet */
-	{"php3_user_dir", php3take1handler, (void *)2, ACCESS_CONF|RSRC_CONF, TAKE1, "user directory"}, /* not used yet */
-	{"php3_include_path", php3take1handler, (void *)4, OR_OPTIONS, TAKE1, "colon-separated path"},
-	{"php3_auto_prepend_file", php3take1handler, (void *)5, OR_OPTIONS, TAKE1, "file name"},
-	{"php3_auto_append_file", php3take1handler, (void *)6, OR_OPTIONS, TAKE1, "file name"},
-	{"php3_upload_tmp_dir", php3take1handler, (void *)7,  ACCESS_CONF|RSRC_CONF, TAKE1, "directory"},
-	{"php3_extension_dir", php3take1handler, (void *)8,  ACCESS_CONF|RSRC_CONF, TAKE1, "directory"},
-	{"php3_error_log", php3take1handler, (void *)9, OR_OPTIONS, TAKE1, "error log file"},
-	{"php3_arg_separator", php3take1handler, (void *)10, OR_OPTIONS, TAKE1, "GET method arg separator"},
-	{"php3_max_execution_time", php3take1handler, (void *)11, OR_OPTIONS, TAKE1, "Max script run time in seconds"},
-	{"php3_memory_limit", php3take1handler, (void *)12, OR_OPTIONS, TAKE1, "Max memory in bytes a script may use"},
-	{"php3_sendmail_path", php3take1handler, (void *)13, OR_OPTIONS, TAKE1, "Full path to sendmail binary"},
-	{"php3_browscap", php3take1handler, (void *)14, OR_OPTIONS, TAKE1, "Full path to browscap file"},
-	{"php3_gpc_order", php3take1handler, (void *)15, OR_OPTIONS, TAKE1, "Set GET-COOKIE-POST order [default is GPC]"},
-	{"php3_error_prepend_string", php3take1handler, (void *)16, OR_OPTIONS, TAKE1, "String to add before an error message from PHP"},
-	{"php3_error_append_string", php3take1handler, (void *)17, OR_OPTIONS, TAKE1, "String to add after an error message from PHP"},
-	{"php3_open_basedir", php3take1handler, (void *)18, OR_OPTIONS|RSRC_CONF, TAKE1, "Limit opening of files to this directory"},
-	{"php3_upload_max_filesize", php3take1handler, (void *)19, OR_OPTIONS|RSRC_CONF, TAKE1, "Limit uploaded files to this many bytes"},
-#if HAVE_MOD_DAV
-	{"php3_dav_script", php3take1handler, (void *)20, OR_OPTIONS|RSRC_CONF, TAKE1,
-	 "Lets PHP handle DAV requests by parsing this script."},
-#endif
-	{"php3_track_vars", php3flaghandler, (void *)5, OR_OPTIONS, FLAG, "on|off"},
-	{"php3_engine", php3flaghandler, (void *)7, RSRC_CONF|ACCESS_CONF, FLAG, "on|off"},
-	{"php3_xbithack", php3flaghandler, (void *)8, OR_OPTIONS, FLAG, "on|off"},
-	{"php3_last_modified", php3flaghandler, (void *)9, OR_OPTIONS, FLAG, "on|off"},
-	{"php3_enable_dl", php3flaghandler, (void *)13, RSRC_CONF|ACCESS_CONF, FLAG, "on|off"},
 	{NULL}
 };
 

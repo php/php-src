@@ -200,8 +200,6 @@ extern char *strerror(int);
 
 #include "fopen-wrappers.h"
 
-#include "mod_php3.h"  /* the php3_ini structure comes from here */
-
 #if APACHE /* apache httpd */
 # if HAVE_AP_CONFIG_H
 #include "ap_config.h"
@@ -377,8 +375,6 @@ extern PHPAPI int _php3_error_log(int opt_err,char *message,char *opt,char *head
 PHPAPI int cfg_get_long(char *varname, long *result);
 PHPAPI int cfg_get_double(char *varname, double *result);
 PHPAPI int cfg_get_string(char *varname, char **result);
-
-extern PHPAPI php3_ini_structure php3_ini;
 
 
 /* Output support */
