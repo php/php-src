@@ -1922,12 +1922,6 @@ dnl Create the necessary directories if building using VPATH
 if test ! -d functions; then
 	mkdir functions
 fi
-if test ! -d extra; then
-	mkdir extra
-fi
-if test ! -d extra/gd; then
-	mkdir extra/gd
-fi
 
 PHP_BUILD_DATE=`date '+%Y-%m-%d'`
 AC_SUBST(PHP_BUILD_DATE)
@@ -1940,7 +1934,7 @@ AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS")
 AC_OUTPUT(Makefile build-defs.h stamp-h libphp3.module
 dnl doc/Makefile doc/version.ent doc/checkdoc extra/gd/bdf2gdfont
 	  regex/Makefile dbase/Makefile, [
-  chmod +x doc/checkdoc extra/gd/bdf2gdfont
+dnl  chmod +x doc/checkdoc extra/gd/bdf2gdfont
 ], [
 
 dnl Warn about CGI version with no extra security options.
