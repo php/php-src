@@ -3,15 +3,9 @@ $Id$
 
 mnoGoSearch extension module for PHP4.
 
-For details please refer to http://search.mnogo.ru
+For details please refer to http://www.mnogosearch.org/
 
 If used with mysql you should not use bundled mysql library 
 in the php distribution. You should use native mysql 
 library. To do this you should compile php with specefying mysql-dir
 (for example --with-mysql=/usr, not --with-mysql).
-
-  TODO
-  ----
-
-Implement indexing functions of the library.
-For example retrieving, parsing, checking of the URL and so on...
