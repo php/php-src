@@ -181,7 +181,7 @@ PHP_FUNCTION(unlink)
 		RETURN_FALSE;
 	}
 
-	ret = unlink((*filename)->value.str.val);
+	ret = V_UNLINK((*filename)->value.str.val);
 	if (ret == -1) {
 		php_error(E_WARNING, "Unlink failed (%s)", strerror(errno));
 		RETURN_FALSE;

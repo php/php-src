@@ -231,7 +231,7 @@ static void _file_socket_dtor(int *sock)
 
 static void _file_upload_dtor(char *file)
 {
-	unlink(file);
+	V_UNLINK(file);
 }
 
 

@@ -48,6 +48,8 @@ CWD_API int virtual_stat(const char *path, struct stat *buf);
 #ifndef ZEND_WIN32
 CWD_API int virtual_lstat(const char *path, struct stat *buf);
 #endif
+CWD_API int virtual_unlink(const char *path);
+
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path);
 
 ZEND_BEGIN_MODULE_GLOBALS(cwd)
