@@ -246,12 +246,9 @@ static int php_count_recursive(zval *array, long mode TSRMLS_DC)
 {
 	long cnt = 0;
 	zval **element;
-	HashTable *target_hash;
-
-	target_hash = HASH_OF(array);
 
 	if (Z_TYPE_P(array) == IS_ARRAY) {
-		cnt += zend_hash_num_elements(target_hash);
+		cnt = zend_hash_num_elements(Z_ARRVAL_P(array));
 		if (mode == COUNT_RECURSIVE) {
 			HashPosition pos;
 
