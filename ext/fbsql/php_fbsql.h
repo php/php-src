@@ -105,9 +105,9 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type);
 static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent);
 
 ZEND_BEGIN_MODULE_GLOBALS(fbsql)
-   long allowPersistent;
-   long generateWarnings;
-   long autoCommit;
+   zend_bool allowPersistent;
+   zend_bool generateWarnings;
+   zend_bool autoCommit;
    long maxPersistent;
    long maxLinks;
    long maxConnections;
