@@ -1,3 +1,48 @@
+2004-06-18  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      MFH: typo in converting array index doubles to long.
+
+    * ZendEngine2/zend_execute.c:
+      Another typo in converting array index doubles to long.
+
+2004-06-18  George Schlossnagle  <george@omniti.com>
+
+    * tests/lang/bug28213.phpt:
+      tests for the crash in bug 28213
+
+    * ZendEngine2/zend_builtin_functions.c:
+      fix for 28213.
+      
+      class_name and call_type should be reinitialized on every loop iter.
+
+2004-06-18  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR/Downloader.php
+      pear/tests/pear_downloader_invalid.phpt:
+      - Replaced the nonexistent word "postfix" with "suffix".
+
+2004-06-18  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/url.c:
+      String lengths should never be char pointers.
+
+2004-06-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/odbc/php_odbc.c:
+      Fixed possible memory leak.
+
+    * (PHP_4_3)
+      NEWS
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: Fixed bug #28818 (Apache 2 sapis do not export st_dev).
+
+    * sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #28818 (Apache 2 sapis do not export st_dev).
+
 2004-06-17  Sara Golemon  <php@alphaweb.net>
 
     * ZendEngine2/zend_builtin_functions.c:

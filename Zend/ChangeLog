@@ -1,3 +1,15 @@
+2004-06-18  Sara Golemon  <php@alphaweb.net>
+
+    * zend_execute.c:
+      Another typo in converting array index doubles to long.
+
+2004-06-18  George Schlossnagle  <george@omniti.com>
+
+    * zend_builtin_functions.c:
+      fix for 28213.
+      
+      class_name and call_type should be reinitialized on every loop iter.
+
 2004-06-17  Sara Golemon  <php@alphaweb.net>
 
     * zend_builtin_functions.c:
