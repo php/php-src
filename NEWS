@@ -54,6 +54,7 @@ PHP                                                                        NEWS
 - Fixed bug #29418 (double free when openssl_csr_new fails).
   (Kamesh Jayachandran).
 - Fixed bug #29211 (SoapClient doesn't request wsdl through proxy). (Rob)
+- Fixed bug #28599 (strtotime fails with zero base time). (Derick)
 - Fixed bug #28220 (mb_strwidth() returns wrong width values for some hangul
   characters). (Moriyoshi)
 - Fixed bug #27798 (private / protected variables not exposed by 
