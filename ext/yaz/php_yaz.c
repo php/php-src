@@ -799,7 +799,7 @@ static int send_sort_present (Yaz_Association t)
 {
 	if (!send_sort(t))
 		return send_present (t);
-    return 1;
+	return 1;
 }
 
 static int send_present (Yaz_Association t)
