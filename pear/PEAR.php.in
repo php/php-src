@@ -260,10 +260,11 @@ class PEAR
      */
 
     function &raiseError($message = null, $code = null, $mode = null,
-                         $options = null, $userinfo = null)
+                         $options = null, $userinfo = null,
+                         $error_class = null)
     {
         if ($mode === null) {
-            if (isset($this->_default_error_mode)) {
+            if (isset($this) && isset($this->_default_error_mode)) {
                 $mode = $this->_default_error_mode;
             } else {
                 $mode = $GLOBALS['_PEAR_default_error_mode'];
@@ -271,7 +272,7 @@ class PEAR
         }
 
         if ($mode == PEAR_ERROR_TRIGGER && $options === null) {
-            if (isset($this->_default_error_options)) {
+            if (isset($this) && isset($this->_default_error_options)) {
                 $options = $this->_default_error_options;
             } else {
                 $options = $GLOBALS['_PEAR_default_error_options'];
@@ -282,7 +283,7 @@ class PEAR
             if (!is_string($options) &&
                 !(is_array($options) && sizeof($options) == 2 &&
                   is_object($options[0]) && is_string($options[1]))) {
-                if (isset($this->_default_error_callback)) {
+                if (isset($this) && isset($this->_default_error_callback)) {
                     $options = $this->_default_error_callback;
                 } else {
                     $options = $GLOBALS['_PEAR_default_error_callback'];
@@ -290,14 +291,20 @@ class PEAR
             }
         } else {
             if ($options === null) {
-                if (isset($this->_default_error_options)) {
+                if (isset($this) && isset($this->_default_error_options)) {
                     $options = $this->_default_error_options;
                 } else {
                     $options = $GLOBALS['_PEAR_default_error_options'];
                 }
             }
         }
-        $ec = $this->_error_class;
+        if ($error_class !== null) {
+            $ec = $error_class;
+        } elseif (isset($this)) {
+            $ec = $this->_error_class;
+        } else {
+            $ec = 'PEAR_Error';
+        }
         return new $ec($message, $code, $mode, $options, $userinfo);
     }
 
