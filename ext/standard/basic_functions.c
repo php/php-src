@@ -26,6 +26,7 @@
 #include "internal_functions_registry.h"
 #include "php_standard.h"
 #include "php_math.h"
+#include "php_incomplete_class.h"
 #include "ext/standard/info.h"
 #include "zend_operators.h"
 #include <stdarg.h>
@@ -722,6 +723,8 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC)
 #ifdef PHP_WIN32
 	CoInitialize(NULL);
 #endif
+
+	BG(incomplete_class) = php_create_incomplete_class(TSRMLS_C);
 }
 
 static void basic_globals_dtor(php_basic_globals *basic_globals_p TSRMLS_DC)
@@ -797,6 +800,7 @@ PHP_MINIT_FUNCTION(basic)
 	PHP_MINIT(url_scanner_ex)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+
 	if(PG(allow_url_fopen)) {
 		if (FAILURE==php_register_url_wrapper("http", php_fopen_url_wrap_http TSRMLS_CC)) {
 			return FAILURE;
@@ -853,7 +857,6 @@ PHP_RINIT_FUNCTION(basic)
 	BG(locale_string) = NULL;
 	BG(user_compare_func_name) = NULL;
 	BG(array_walk_func_name) = NULL;
-	BG(incomplete_class) = NULL;
 #ifdef HAVE_MMAP
 	BG(mmap_file) = NULL;
 #endif

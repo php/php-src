@@ -525,7 +525,7 @@ PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, Has
 					
 					if (zend_hash_find(EG(class_table), class_name, i+1, (void **) &ce)==FAILURE) {
 						incomplete_class = 1;
-						ce = PHP_IC_ENTRY_READ;
+						ce = PHP_IC_ENTRY;
 					}
 				} else { /* old php 3.0 data 'o' */
 					ce = &zend_standard_class_def;
