@@ -917,7 +917,6 @@ PHPAPI void php_session_start(TSRMLS_D)
 	int module_number = PS(module_number);
 	int nrand;
 	int lensess;
-	zend_constant *c;
 
 	PS(apply_trans_sid) = PS(use_trans_sid);
 
