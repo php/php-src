@@ -421,6 +421,21 @@ ZEND_API int zend_get_ini_entry(char *name, uint name_length, zval *contents);
 	}										\
 	INIT_PZVAL(&(zv));
 
+#define REPLACE_ZVAL_VALUE(ppzv_dest,pzv_src,copy) {	\
+	int is_ref,refcount;						\
+												\
+	SEPARATE_ZVAL_IF_NOT_REF(ppzv_dest);		\
+	is_ref = (*ppzv_dest)->is_ref;				\
+	refcount = (*ppzv_dest)->refcount;			\
+	zval_dtor(*ppzv_dest);						\
+	**ppzv_dest = *pzv_src;						\
+	if(copy) {                                  \
+		zval_copy_ctor(*ppzv_dest);				\
+    }		                                    \
+	(*ppzv_dest)->is_ref = is_ref;				\
+	(*ppzv_dest)->refcount = refcount;			\
+}
+
 #define ZEND_MAX_RESERVED_RESOURCES	2
 
 #ifdef ZEND_WIN32
