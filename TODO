@@ -51,6 +51,7 @@ ext/wddx
         recordset
 
         http://www.wddx.org/WDDX_SDK_10a/7__References/WDDX_DTD.htm
+		(Andrei)
 
     * implement wddx_packet_as_javascript(). (Andrei)
 
@@ -70,12 +71,12 @@ ext/standard
 ------------
     * add a version number to data serialized via serialize().
     * array_add(), array_rand() (Andrei)
-    * implement pathinfo()
+    * implement pathinfo() (what the heck is it?)
     * possibly modify parsing of GPC data to automatically create arrays if
       variable name is seen more than once.
     * implement regex-cache for url-functions.
     * strpad() (Andrei)
-    * stri_replace() (Andrei)
+    * strcase_replace() (Andrei)
     * comparing arrays semantically (like Python) (Andrei)
     * move socket related functions to fsock.c
     * NOT binary safe:
