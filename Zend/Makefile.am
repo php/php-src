@@ -35,5 +35,7 @@ zend-parser.h: zend-parser.c
 zend-parser.c: zend-parser.y
 	$(YACC) -p zend -v -d $(srcdir)/zend-parser.y -o zend-parser.c
 
+depend:
+	
 zend_execute.lo: $(srcdir)/zend_execute.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(INLINE_CFLAGS) -c $(srcdir)/zend_execute.c
