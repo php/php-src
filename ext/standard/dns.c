@@ -44,7 +44,7 @@
 #include "resolv.h"
 #endif
 #endif /* HAVE_LIBBIND */
-#include <winsock.h>
+#include <winsock2.h>
 #else	/* This holds good for NetWare too, both for Winsock and Berkeley sockets */
 #include <netinet/in.h>
 #if HAVE_ARPA_INET_H

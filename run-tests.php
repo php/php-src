@@ -520,26 +520,32 @@ function system_with_timeout($commandline)
 {
 	$data = "";
 	
-	$proc = proc_open($commandline, array(1 => array('pipe', 'w')), $pipes);
+	$proc = proc_open($commandline, array(
+		0 => array('pipe', 'r'),
+		1 => array('pipe', 'w'),
+		2 => array('pipe', 'w')
+		), $pipes);
 
 	if (!$proc)
 		return false;
+
+	fclose($pipes[0]);
 
 	while (true) {
 		/* hide errors from interrupted syscalls */
 		$r = $pipes;
 		$w = null;
 		$e = null;
-		$n = stream_select($r, $w, $e, 60);
+		$n = @stream_select($r, $w, $e, 60);
 
 		if ($n == 0) {
 			/* timed out */
 			$data .= "\n ** ERROR: process timed out **\n";
 			proc_terminate($proc);
 			return $data;
-		} else if ($n) {
-			$line = fgets($pipes[1]);
-			if ($line === false) {
+		} else if ($n > 0) {
+			$line = fread($pipes[1], 8192);
+			if (strlen($line) == 0) {
 				/* EOF */
 				break;
 			}

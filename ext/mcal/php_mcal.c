@@ -42,7 +42,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/basic_functions.h"
 #ifdef PHP_WIN32
-#include "winsock.h"
+#include "winsock2.h"
 #endif
 
 static void cal_close_it(zend_rsrc_list_entry *rsrc TSRMLS_DC);

@@ -56,12 +56,12 @@
 
 #define _WIN32_DCOM
 
+#include "php.h"
+#include "php_ini.h"
+
 #include <iostream.h>
 #include <math.h>
 #include <ocidl.h>
-
-#include "php.h"
-#include "php_ini.h"
 
 #include "../rpc.h"
 #include "../php_rpc.h"

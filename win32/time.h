@@ -13,7 +13,7 @@
 #define TIME_H
 
 /* Include stuff ************************************************************ */
-#include <winsock.h>
+#include <winsock2.h>
 #include <time.h>
 #include <php.h>
 

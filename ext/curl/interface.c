@@ -30,7 +30,7 @@
 #include <string.h>
 
 #ifdef PHP_WIN32
-#include <winsock.h>
+#include <winsock2.h>
 #include <sys/types.h>
 #endif
 

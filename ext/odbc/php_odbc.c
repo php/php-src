@@ -44,7 +44,7 @@
 #include "php_ini.h"
 
 #ifdef PHP_WIN32
-#include <winsock.h>
+#include <winsock2.h>
 
 #define ODBC_TYPE "Win32"
 #define PHP_ODBC_TYPE ODBC_TYPE

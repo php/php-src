@@ -31,7 +31,7 @@
 #include <string.h> 
 #include <sys/types.h>
 #ifdef PHP_WIN32
-# include <winsock.h>
+# include <winsock2.h>
 # define EWOULDBLOCK WSAEWOULDBLOCK
 # define ETIMEDOUT WSAETIMEDOUT
 # define bcopy memcpy
