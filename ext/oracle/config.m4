@@ -143,7 +143,8 @@ if test "$PHP_ORACLE" != "no"; then
 	  ;;
 
 	8.1)
-  	  AC_ADD_LIBRARY_WITH_PATH(clntsh, $ORACLE_DIR/lib, ORACLE_SHARED_LIBADD)
+  	  AC_ADD_LIBRARY(clntsh, 1, ORACLE_SHARED_LIBADD)
+  	  AC_ADD_LIBPATH($ORACLE_DIR/lib, ORACLE_SHARED_LIBADD)
 	  ;;
 	*)
       AC_MSG_ERROR(Unsupported Oracle version!)
