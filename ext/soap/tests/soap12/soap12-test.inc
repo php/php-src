@@ -1,0 +1,106 @@
+<?php
+class Soap12test {
+
+	function echoOk($x) {
+  	return $x;
+	}
+
+	function echoString($inputString) {
+		return $inputString;
+	}
+
+	function echoStringArray($inputStringArray) {
+		return $inputStringArray;
+	}
+
+	function echoInteger($inputInteger) {
+		return $inputInteger;
+	}
+
+	function echoIntegerArray($inputIntegerArray) {
+		return $inputIntegerArray;
+	}
+
+	function echoFloat($inputFloat) {
+		return $inputFloat;
+	}
+
+	function echoFloatArray($inputFloatArray) {
+		return $inputFloatArray;
+  }
+
+	function echoStruct($x) {
+  	return $x;
+	}
+
+	function echoStructArray($x) {
+  	return $x;
+	}
+
+	function echoVoid() {
+		return NULL;
+	}
+
+	function echoBase64($b_encoded) {
+		return $b_encoded;
+  }
+
+	function echoDate($timeInstant) {
+		return $timeInstant;
+	}
+
+	function echoHexBinary($hb) {
+		return $hb;
+	}
+
+	function echoDecimal($dec) {
+		return $dec;
+	}
+
+	function echoBoolean($boolean) {
+		return $boolean;
+	}
+
+	function echoStructAsSimpleTypes ($struct) {
+		 return array('outputString'  => $struct->varString,
+		              'outputInteger' => $struct->varInt,
+		              'outputFloat'   => $struct->varFloat);
+	}
+
+	function echoSimpleTypesAsStruct($string, $int, $float) {
+		return (object)array("varString" => $string,
+		 										 "varInt"    => $int,
+	  										 "varFloat"  => $float);
+	}
+
+	function echoNestedStruct($struct) {
+		return $struct;
+	}
+
+	function echo2DStringArray($ary) {
+		return $ary;
+	}
+
+	function echoNestedArray($ary) {
+		return $ary;
+	}
+
+	function countItems($input) {
+		return count($input);
+	}
+
+	function isNil($input) {
+		return is_null($input);
+	}
+
+	function returnVoid() {
+	}
+}
+
+$server = new soapserver("http://http://example.org/ts-tests");
+$server->bind(dirname(__FILE__)."/soap12-test.wsdl");
+$server->setClass("Soap12test");
+
+$server->handle();
+echo "ok\n";
+?>
