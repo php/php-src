@@ -82,6 +82,7 @@ extern ZEND_API zend_executor_globals executor_globals;
 # define ALS_CC
 # define AG(v) (alloc_globals.v)
 # define ALS_FETCH()
+extern ZEND_API zend_alloc_globals alloc_globals;
 #endif
 
 #endif /* _ZEND_GLOBALS_MACROS_H */

@@ -51,9 +51,6 @@ typedef struct _zend_fast_cache_list_entry {
 # define RECORD_ZVAL_CACHE_MISS(fc_type)
 #endif
 
-#ifndef ZTS
-extern zend_alloc_globals alloc_globals;
-#endif
 
 #define ZEND_FAST_ALLOC(p, type, fc_type)								\
 	{																\

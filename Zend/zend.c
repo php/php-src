@@ -52,7 +52,7 @@ ZEND_API int (*zend_get_ini_entry)(char *name, uint name_length, zval *contents)
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
-int alloc_globals_id;
+ZEND_API int alloc_globals_id;
 HashTable *global_function_table;
 HashTable *global_class_table;
 HashTable *global_constants_table;
