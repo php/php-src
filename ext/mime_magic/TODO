@@ -1,2 +1,3 @@
 - general cleanup
 - support for content-encoding / compressed files
+- nuke all TSRMLS_FETCH() calls where possible
