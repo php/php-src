@@ -19,12 +19,12 @@
 #ifndef SNPRINTF_H
 #define SNPRINTF_H
 
-#ifndef HAVE_SNPRINTF
+#if !defined(HAVE_SNPRINTF) || defined(BROKEN_SNPRINTF)
 extern int ap_php_snprintf(char *, size_t, const char *, ...);
 #define snprintf ap_php_snprintf
 #endif
 
-#ifndef HAVE_VSNPRINTF
+#if !defined(HAVE_VSNPRINTF) || defined(BROKEN_VSNPRINTF)
 extern int ap_php_vsnprintf(char *, size_t, const char *, va_list ap);
 #define vsnprintf ap_php_vsnprintf
 #endif
