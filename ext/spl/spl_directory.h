@@ -31,6 +31,8 @@ typedef struct _spl_ce_dir_object {
 	php_stream        *dirp;
 	php_stream_dirent entry;
 	char              *path;
+	char              *path_name;
+	int               path_name_len;
 	int               index;
 } spl_ce_dir_object;
 
