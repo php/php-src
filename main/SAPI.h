@@ -133,9 +133,37 @@ SAPI_API void sapi_activate(TSRMLS_D);
 SAPI_API void sapi_deactivate(TSRMLS_D);
 SAPI_API void sapi_initialize_empty_request(TSRMLS_D);
 
-SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace, int http_response_code TSRMLS_DC);
-#define sapi_add_header(header_line, header_line_len, duplicate) \
-	sapi_add_header_ex((header_line), (header_line_len), (duplicate), 1, 0 TSRMLS_CC)
+/*
+ * This is the preferred and maintained API for 
+ * operating on HTTP headers.
+ */
+
+/*
+ * Always specify a sapi_header_line this way:
+ *
+ *     sapi_header_line ctr = {0};
+ */
+ 
+typedef struct {
+	char *line; /* If you allocated this, you need to free it yourself */
+	uint line_len;
+	long response_code; /* long due to zend_parse_parameters compatibility */
+} sapi_header_line;
+
+typedef enum {					/* Parameter: 			*/
+	SAPI_HEADER_REPLACE,		/* sapi_header_line* 	*/
+	SAPI_HEADER_ADD,			/* sapi_header_line* 	*/
+	SAPI_HEADER_SET_STATUS		/* int 					*/
+} sapi_header_op_enum;
+
+SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC);
+
+
+/* Deprecated functions. Use sapi_header_op instead. */
+SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC);
+#define sapi_add_header(a, b, c) sapi_add_header_ex((a),(b),(c),1 TSRMLS_CC)
+
+
 SAPI_API int sapi_send_headers(TSRMLS_D);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg TSRMLS_DC);

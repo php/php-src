@@ -385,40 +385,82 @@ static int sapi_extract_response_code(const char *header_line)
 	return code;
 }
 
+
+static void sapi_update_response_code(int ncode TSRMLS_CC)
+{
+	if (SG(sapi_headers).http_status_line) {
+		efree(SG(sapi_headers).http_status_line);
+		SG(sapi_headers).http_status_line = NULL;
+	}
+	SG(sapi_headers).http_response_code = ncode;
+}
+
 static int sapi_find_matching_header(void *element1, void *element2)
 {
 	return strncasecmp(((sapi_header_struct*)element1)->header, (char*)element2, strlen((char*)element2)) == 0;
 }
 
-/* This function expects a *duplicated* string, that was previously emalloc()'d.
- * Pointers sent to this functions will be automatically freed by the framework.
- */
-SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace, int http_response_code TSRMLS_DC)
+SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC)
+{
+	sapi_header_line ctr = {0};
+	int r;
+	
+	ctr.line = header_line;
+	ctr.line_len = header_line_len;
+
+	r = sapi_header_op(replace ? SAPI_HEADER_REPLACE : SAPI_HEADER_ADD,
+			&ctr TSRMLS_CC);
+
+	if (!duplicate)
+		efree(header_line);
+
+	return r;
+}
+
+SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 {
 	int retval;
 	sapi_header_struct sapi_header;
 	char *colon_offset;
 	long myuid = 0L;
-
+	char *header_line;
+	uint header_line_len;
+	zend_bool replace;
+	int http_response_code;
+	
 	if (SG(headers_sent) && !SG(request_info).no_headers) {
 		char *output_start_filename = php_get_output_start_filename(TSRMLS_C);
 		int output_start_lineno = php_get_output_start_lineno(TSRMLS_C);
 
 		if (output_start_filename) {
-			sapi_module.sapi_error(E_WARNING, "Cannot add header information - headers already sent by (output started at %s:%d)",
+			sapi_module.sapi_error(E_WARNING, "Cannot modify header information - headers already sent by (output started at %s:%d)",
 				output_start_filename, output_start_lineno);
 		} else {
-			sapi_module.sapi_error(E_WARNING, "Cannot add header information - headers already sent");
-		}
-		if (!duplicate) {
-			efree(header_line);
+			sapi_module.sapi_error(E_WARNING, "Cannot modify header information - headers already sent");
 		}
 		return FAILURE;
 	}
 
-	if (duplicate) {
-		header_line = estrndup(header_line, header_line_len);
+	switch (op) {
+	case SAPI_HEADER_SET_STATUS:
+		sapi_update_response_code((int) arg TSRMLS_CC);
+		return SUCCESS;
+
+	case SAPI_HEADER_REPLACE:
+	case SAPI_HEADER_ADD: {
+		sapi_header_line *p = arg;
+		header_line = p->line;
+		header_line_len = p->line_len;
+		http_response_code = p->response_code;
+		replace = (op == SAPI_HEADER_REPLACE);
+		break;
+		}
+	
+	default:
+		return FAILURE;
 	}
+
+	header_line = estrndup(header_line, header_line_len);
 
 	/* cut of trailing spaces, linefeeds and carriage-returns */
 	while(isspace(header_line[header_line_len-1])) 
@@ -433,7 +475,7 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 	if (header_line_len>=5 
 		&& !strncasecmp(header_line, "HTTP/", 5)) {
 		/* filter out the response code */
-		SG(sapi_headers).http_response_code = sapi_extract_response_code(header_line);
+		sapi_update_response_code(sapi_extract_response_code(header_line) TSRMLS_CC);
 		SG(sapi_headers).http_status_line = header_line;
 		return SUCCESS;
 	} else {
@@ -465,7 +507,7 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 				if (SG(sapi_headers).http_response_code < 300 ||
 					SG(sapi_headers).http_response_code > 307) {
 					/* Return a Found Redirect if one is not already specified */
-					SG(sapi_headers).http_response_code = 302;
+					sapi_update_response_code(302 TSRMLS_CC);
 				}
 			} else if (!STRCASECMP(header_line, "WWW-Authenticate")) { /* HTTP Authentication */
 				int newlen;
@@ -476,7 +518,7 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 				int ptr_len=0, result_len = 0;
 #endif
 
-				SG(sapi_headers).http_response_code = 401; /* authentication-required */
+				sapi_update_response_code(401 TSRMLS_CC); /* authentication-required */
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 				if(PG(safe_mode)) {
 					myuid = php_getuid();
@@ -546,9 +588,8 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 			}
 		}
 	}
-
 	if (http_response_code) {
-		SG(sapi_headers).http_response_code = http_response_code;
+		sapi_update_response_code(http_response_code TSRMLS_CC);
 	}
 	if (sapi_module.header_handler) {
 		retval = sapi_module.header_handler(&sapi_header, &SG(sapi_headers) TSRMLS_CC);
@@ -602,12 +643,17 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 		case SAPI_HEADER_SENT_SUCCESSFULLY:
 			ret = SUCCESS;
 			break;
-		case SAPI_HEADER_DO_SEND:
-			if (SG(sapi_headers).http_status_line) {
+		case SAPI_HEADER_DO_SEND: {
 				sapi_header_struct http_status_line;
+				char buf[255];
 
-				http_status_line.header = SG(sapi_headers).http_status_line;
-				http_status_line.header_len = strlen(SG(sapi_headers).http_status_line);
+				if (SG(sapi_headers).http_status_line) {
+					http_status_line.header = SG(sapi_headers).http_status_line;
+					http_status_line.header_len = strlen(SG(sapi_headers).http_status_line);
+				} else {
+					http_status_line.header = buf;
+					http_status_line.header_len = sprintf(buf, "HTTP/1.0 %d X", SG(sapi_headers).http_response_code);
+				}
 				sapi_module.send_header(&http_status_line, SG(server_context) TSRMLS_CC);
 			}
 			zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t) sapi_module.send_header, SG(server_context) TSRMLS_CC);
