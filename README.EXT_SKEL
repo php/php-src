@@ -7,9 +7,9 @@ WHAT IT IS
 
 HOW TO USE IT
 
-  Very simple. First, cd do directory ext/ in PHP 4 sources. If you just need
-  the basic framework and will be writing all the code in your functions
-  yourself, you can now do
+  Very simple. First, change to the ext/ directory of the PHP 4 sources. If
+  you just need the basic framework and will be writing all the code in your
+  functions yourself, you can now do
 
    ./ext_skel --extname=module_name
 
@@ -22,7 +22,7 @@ HOW TO USE IT
   If you don't need to test the existence of any external header files, 
   libraries or functions in them, the module is already almost ready to be 
   compiled in PHP.  Just remove 3 comments in your_module_name/config.m4, 
-  cd back up to PHP sources top directory, and do
+  change back up to PHP sources top directory, and do
 
     ./buildconf; ./configure --enable-module_name; make
 
@@ -38,7 +38,7 @@ HOW TO USE IT
 FORMAT OF FUNCTION DEFINITIONS FILE
 
   All the definitions must be on one line. In it's simplest form, it's just
-  the function name, ie.
+  the function name, e.g.
 
     my_function
 
