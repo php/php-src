@@ -746,7 +746,7 @@ CWD_API int virtual_stat(const char *path, struct stat_libc *buf TSRMLS_DC)
 }
 #endif
 
-#if !defined(TSRM_WIN32) && !defined(NETWARE)
+#ifndef TSRM_WIN32
 CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC)
 {
 	cwd_state new_state;
