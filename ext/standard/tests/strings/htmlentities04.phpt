@@ -3,6 +3,7 @@ htmlentities() test 4 (setlocale / ja_JP.EUC-JP)
 --SKIPIF--
 <?php setlocale(LC_CTYPE, "ja_JP.EUC-JP", "ja_JP.eucJP") or die("skip setlocale() failed\n"); ?>
 --INI--
+output_handler=
 mbstring.internal_encoding=pass
 --FILE--
 <?php

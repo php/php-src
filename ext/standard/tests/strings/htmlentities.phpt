@@ -1,7 +1,7 @@
 --TEST--
 HTML entities
---POST--
---GET--
+--INI--
+output_handler=
 --FILE--
 <?php 
 setlocale (LC_CTYPE, "C");

@@ -2,6 +2,8 @@
 Simple multi-byte print test (EUC-JP)
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--INI--
+output_handler=
 --FILE--
 <?php
 /*

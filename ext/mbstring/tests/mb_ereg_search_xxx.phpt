@@ -5,6 +5,8 @@ mb_ereg_search() stuff
 extension_loaded('mbstring') or die('skip mbstring not available');
 function_exists('mb_ereg_search') or die("SKIP");
 ?>
+--INI--
+output_handler=
 --FILE--
 <?php
 	mb_regex_set_options( '' );
