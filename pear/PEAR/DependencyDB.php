@@ -152,11 +152,12 @@ class PEAR_DependencyDB extends PEAR
     function &_getDepDB()
     {
         if (!$fp = fopen($this->depdb_file, 'r')) {
-            return $this->raiseError("Could not open dependencies file `".$this->depdb_file."'");
+            $err = $this->raiseError("Could not open dependencies file `".$this->depdb_file."'");
+            return $err;
         }
-        $data = fread($fp, filesize($this->depdb_file));
+        $data = unserialize(fread($fp, filesize($this->depdb_file)));
         fclose($fp);
-        return unserialize($data);
+        return $data;
     }
 
     // }}}
