@@ -3344,9 +3344,10 @@ PHP_FUNCTION(mb_send_mail)
 		orig_str.no_language = MBSTRG(current_language);
 		orig_str.val = (unsigned char *)Z_STRVAL_PP(argv[1]);
 		orig_str.len = Z_STRLEN_PP(argv[1]);
-		orig_str.no_encoding = mbfl_identify_encoding_no(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size) TSRMLS_CC);
-		if (orig_str.no_encoding == mbfl_no_encoding_invalid) {
-			orig_str.no_encoding = MBSTRG(current_internal_encoding);
+		orig_str.no_encoding = MBSTRG(current_internal_encoding);
+		if (orig_str.no_encoding == mbfl_no_encoding_invalid
+		    || orig_str.no_encoding == mbfl_no_encoding_pass) {
+			orig_str.no_encoding = mbfl_identify_encoding_no(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size) TSRMLS_CC);
 		}
 		pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, "\n", sizeof("Subject: [PHP-jp nnnnnnnn]") TSRMLS_CC);
 		if (pstr != NULL) {
@@ -3365,9 +3366,11 @@ PHP_FUNCTION(mb_send_mail)
 		orig_str.no_language = MBSTRG(current_language);
 		orig_str.val = Z_STRVAL_PP(argv[2]);
 		orig_str.len = Z_STRLEN_PP(argv[2]);
-		orig_str.no_encoding = mbfl_identify_encoding_no(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size) TSRMLS_CC);
-		if (orig_str.no_encoding == mbfl_no_encoding_invalid) {
-			orig_str.no_encoding = MBSTRG(current_internal_encoding);
+		orig_str.no_encoding = MBSTRG(current_internal_encoding);
+
+		if (orig_str.no_encoding == mbfl_no_encoding_invalid
+		    || orig_str.no_encoding == mbfl_no_encoding_pass) {
+			orig_str.no_encoding = mbfl_identify_encoding_no(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size) TSRMLS_CC);
 		}
 		pstr = mbfl_convert_encoding(&orig_str, &conv_str, tran_cs TSRMLS_CC);
 		if (pstr != NULL) {
