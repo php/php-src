@@ -129,10 +129,11 @@ Windows Manual installation from zip binary distribution
    On PWS and IIS, you can set the browscap.ini
    to point to: 'c:\windows\system\inetsrv\browscap.ini' on
    Windows 9x/Me and 'c:\winnt\system32\inetsrv\browscap.ini'
-   on NT/2000 Server. Additional information on using the
-   browscap functionality in PHP can be found at
-   http://php.netvision.net.il/browser-id.php3
-   select the "source" button to see it in action.
+   on NT/2000 Server. 
+
+   More information on the capabilities of browscap can be found here:
+
+   http://www.php.net/manual/en/function.get-browser.php
 
    Note that the mibs directory supplied with the Windows distribution
    contains support files for SNMP. This directory should be moved to
@@ -210,47 +211,47 @@ Web server configuration
   newcomer. Please consult the Apache Docs for further
   configuration directives.
 
-  Now that version 4.1 introduces a safer sapi module, we recommend^M
-  that you configure PHP as a module in Apache.^M
-^M
+  Now that version 4.1 introduces a safer sapi module, we recommend
+  that you configure PHP as a module in Apache.
+
   To do this, you should move php4ts.dll to the windows/system (for Windows 9x/Me)
   or winnt/system32 (for Windows NT/2000) directory, overwriting any
   older file. Then you should add the following three lines to your Apache
   conf file: (swap c:/php/ for your PHP install path)
 
-   LoadModule php4_module c:/php/sapi/php4apache.dll^M
+   LoadModule php4_module c:/php/sapi/php4apache.dll
    AddModule mod_php4.c
    AddType application/x-httpd-php .php
 
-  If you wish to install PHP as a CGI binary, read this first:^M
-^M
-    http://www.cert.org/advisories/CA-1996-11.html^M
-^M
-  and then if you are really sure, insert these lines to your conf file: ^M
-^M
-   ScriptAlias /php/ "c:/php/"^M
-   AddType application/x-httpd-php .php^M
-   Action application/x-httpd-php "/php/php.exe"^M
-^M
-  Note, we consider installing PHP like this suicidal.^M
-^M
-  As a further precaution, we recommend you change the "/php/"^M
-  ScriptAlias to something more random, to prevent the binary being^M
-  called directly, which is a security risk.^M
-^M
+  If you wish to install PHP as a CGI binary, read this first:
+
+    http://www.cert.org/advisories/CA-1996-11.html
+
+  and then if you are really sure, insert these lines to your conf file: 
+
+   ScriptAlias /php/ "c:/php/"
+   AddType application/x-httpd-php .php
+   Action application/x-httpd-php "/php/php.exe"
+
+  Note, we consider installing PHP like this suicidal.
+
+  As a further precaution, we recommend you change the "/php/"
+  ScriptAlias to something more random, to prevent the binary being
+  called directly, which is a security risk.
+
   Remember when you have finished to restart the server, for example,
    NET STOP APACHE
   followed by
    NET START APACHE
 
   To use the source code highlighting feature, add the following
-  line to your apache httpd.conf file:^M
-^M
-    AddType application/x-httpd-php-source .phps^M
-^M
-  Note, this will only work when you install php as a sapi module.^M
-  If you wish to use this feature with the cgi binary, create a new^M
-  file, and use the show_source("path/to/original_file.php"); function.^M
+  line to your apache httpd.conf file:
+
+    AddType application/x-httpd-php-source .phps
+
+  Note, this will only work when you install php as a sapi module.
+  If you wish to use this feature with the cgi binary, create a new
+  file, and use the show_source("path/to/original_file.php"); function.
 
   On Win-Apache all backslashes in a path statement such
   as: "c:\directory\file.ext", must be converted to
@@ -614,4 +615,3 @@ Bug reports
  Read the Bugs-Dos-And-Donts at
  http://bugs.php.net/bugs-dos-and-donts.php
  _BEFORE_ submitting any bug reports!
-
