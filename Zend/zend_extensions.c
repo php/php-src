@@ -68,7 +68,7 @@ int zend_load_extension(char *path)
 		fprintf(stderr, "%s requires Zend Engine API version %d\n"
 					"The installed Zend Engine API version is %d\n",
 					new_extension->name,
-					extension_version_info->required_api_no,
+					extension_version_info->zend_extension_api_no,
 					ZEND_EXTENSION_API_NO);
 		DL_UNLOAD(handle);
 		return FAILURE;
