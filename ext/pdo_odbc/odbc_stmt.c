@@ -214,13 +214,42 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned l
 	}
 }
 
+static int odbc_stmt_set_param(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
+{
+	SQLRETURN rc;
+	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
+
+	switch (attr) {
+		case PDO_ATTR_CURSOR_NAME:
+			convert_to_string(val);
+			rc = SQLSetCursorName(S->stmt, Z_STRVAL_P(val), Z_STRLEN_P(val));
+
+			if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
+				return 1;
+			}
+			pdo_odbc_stmt_error("SQLFetch");
+			return 0;
+
+		default:
+			strcpy(S->einfo.last_err_msg, "Unknown Attribute");
+			S->einfo.what = "setAttribute";
+			stmt->error_code = PDO_ERR_NOT_IMPLEMENTED;
+			S->einfo.last_state[0] = '\0';
+			return -1;
+	}
+
+
+}
+
 struct pdo_stmt_methods odbc_stmt_methods = {
 	odbc_stmt_dtor,
 	odbc_stmt_execute,
 	odbc_stmt_fetch,
 	odbc_stmt_describe,
 	odbc_stmt_get_col,
-	odbc_stmt_param_hook
+	odbc_stmt_param_hook,
+	odbc_stmt_set_param,
+	NULL
 };
 
 /*
