@@ -43,7 +43,7 @@ PEAR_FILES = \
 	File/SearchReplace.php \
 	HTML/Form.php \
 	HTTP.php \
-	Log.php
+	Log.php \
 	Log/composite.php \
 	Log/file.php \
 	Log/mcal.php \
