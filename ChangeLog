@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Small fix in Ora_Close (Thies)
 - Ported range() and shuffle() from PHP3 to PHP4 (Andrei)
 - Fixed header("HTTP/..."); behaviour (Sascha)
 - Improved UNIX build system. Now utilizes libtool (Sascha)
