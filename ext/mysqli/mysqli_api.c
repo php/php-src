@@ -1725,7 +1725,7 @@ PHP_FUNCTION(mysqli_stat)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
 
-	if (stat = (char *)mysql_stat(mysql)) {
+	if ((stat = (char *)mysql_stat(mysql))) {
 		RETURN_STRING(stat, 1);
 	}
 	RETURN_FALSE;
