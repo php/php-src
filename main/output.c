@@ -26,6 +26,8 @@
 #include "ext/standard/url_scanner_ex.h"
 #include "SAPI.h"
 
+#define OB_DEFAULT_HANDLER_NAME "default output handler"
+
 /* output functions */
 static int php_ub_body_write(const char *str, uint str_length TSRMLS_DC);
 static int php_ub_body_write_no_header(const char *str, uint str_length TSRMLS_DC);
@@ -325,8 +327,8 @@ PHPAPI void php_end_implicit_flush(TSRMLS_D)
  */
 PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size, char *handler_name, zend_bool erase TSRMLS_DC)
 {
-	if (OG(ob_nesting_level)==0) {
-		return;
+	if (OG(ob_nesting_level)==0 || OG(active_ob_buffer).internal_output_handler || strcmp(OG(active_ob_buffer).handler_name, OB_DEFAULT_HANDLER_NAME)) {
+		php_start_ob_buffer(NULL, buffer_size, erase TSRMLS_CC);
 	}
 
 	OG(active_ob_buffer).internal_output_handler = internal_output_handler;
@@ -409,7 +411,7 @@ static int php_ob_init_named(uint initial_size, uint block_size, char *handler_n
 	OG(active_ob_buffer).chunk_size = chunk_size;
 	OG(active_ob_buffer).status = 0;
 	OG(active_ob_buffer).internal_output_handler = NULL;
-	OG(active_ob_buffer).handler_name = estrdup(handler_name&&handler_name[0]?handler_name:"default output handler");
+	OG(active_ob_buffer).handler_name = estrdup(handler_name&&handler_name[0]?handler_name:OB_DEFAULT_HANDLER_NAME);
 	OG(active_ob_buffer).erase = erase;	
 	OG(php_body_write) = php_b_body_write;
 	return SUCCESS;
@@ -480,7 +482,7 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 			SEPARATE_ZVAL(&output_handler);
 			output_handler->refcount++;
 		}
-		result = php_ob_init_named(initial_size, block_size, "default output handler", output_handler, chunk_size, erase TSRMLS_CC);
+		result = php_ob_init_named(initial_size, block_size, OB_DEFAULT_HANDLER_NAME, output_handler, chunk_size, erase TSRMLS_CC);
 	}
 	return result;
 }
@@ -495,19 +497,19 @@ static int php_ob_list_each(php_ob_buffer *ob_buffer, zval *ob_handler_array)
 }
 /* }}} */
 
-/* {{{ proto array ob_list_handlers()
+/* {{{ proto false|array ob_list_handlers()
  *  List all output_buffers in an array 
  */
 PHP_FUNCTION(ob_list_handlers)
 {
 	if (ZEND_NUM_ARGS()!=0) {
 		WRONG_PARAM_COUNT;
-		return;
+		RETURN_FALSE;
 	}
 
 	if (array_init(return_value) == FAILURE) {
 		php_error(E_ERROR, "%s(): Unable to initialize array", get_active_function_name(TSRMLS_C));
-		return;
+		RETURN_FALSE;
 	}
 	if (OG(ob_nesting_level)) {
 		if (OG(ob_nesting_level)>1) {
