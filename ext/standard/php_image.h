@@ -46,6 +46,7 @@ typedef enum
   IMAGE_FILETYPE_JB2,
   IMAGE_FILETYPE_SWC,
   IMAGE_FILETYPE_IFF,
+  IMAGE_FILETYPE_WBMP,
 /* WHEN EXTENDING: PLEASE ALSO REGISTER IN image.c:PHP_MINIT_FUNCTION(imagetypes) */
 } image_filetype;
 /* }}} */
