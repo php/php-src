@@ -300,10 +300,10 @@ static void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval ***args;
 	zend_internal_function *func = (zend_internal_function *)EG(function_state_ptr)->function;
-	zval method_name, method_args, method_result, __call_name;
-	zval *method_name_ptr, *method_args_ptr, *method_result_ptr;
-	zval **call_args[3];
-	zval *retval = NULL;
+	zval method_name, method_args, __call_name;
+	zval *method_name_ptr, *method_args_ptr;
+	zval **call_args[2];
+	zval *method_result_ptr = NULL;
 	int i, call_result;
 	
 	args = (zval ***)emalloc(ZEND_NUM_ARGS() * sizeof(zval **));
@@ -322,6 +322,11 @@ static void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
 	INIT_PZVAL(method_args_ptr);
 	array_init(method_args_ptr);
 
+//	method_result_ptr = &method_result;
+//	method_result.is_ref = 0;
+//	method_result.refcount = 1;
+//	ZVAL_NULL(method_result_ptr);
+	
 	for(i=0; i<ZEND_NUM_ARGS(); i++) {
 		zval_add_ref(args[i]);
 		add_next_index_zval(method_args_ptr, *args[i]);
@@ -329,52 +334,38 @@ static void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
 
 	efree(args);
 	
-	method_result_ptr = &method_result;
-	method_result.is_ref = 1;
-	method_result.refcount = 1;
-	ZVAL_NULL(method_result_ptr);
-
 	INIT_PZVAL(&__call_name);
 	ZVAL_STRINGL(&__call_name, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1, 0);
 	
-	/* __call handler is called with three arguments:
+	/* __call handler is called with two arguments:
 	   method name
 	   array of method parameters
-	   return value for the method (by reference)
 
-	   it should return whether the call was successfull or not
 	*/
 	call_args[0] = &method_name_ptr;
 	call_args[1] = &method_args_ptr;
-	call_args[2] = &method_result_ptr;
 
 	/* go call the __call handler */
 	call_result = call_user_function_ex(NULL,
 										&this_ptr,
 										&__call_name,
-										&retval,
-										3, call_args,
+										&method_result_ptr,
+										2, call_args,
 										0, NULL TSRMLS_CC);
 
-	/* A lot of return values here. Let's sort them out:
-	   call_result is if call_user_function gone OK.
-	   retval shows if __call method went OK.
-	   method_result is the true result of the called method
+	/* call_result is if call_user_function gone OK.
+	   method_result_ptr is the true result of the called method
 	*/
 	
-
+	if(method_result_ptr) {
+		*return_value = *method_result_ptr;
+		zval_copy_ctor(return_value);
+		zval_ptr_dtor(&method_result_ptr);
+	}
+	
 	if(call_result == FAILURE) {
 		zend_error(E_ERROR, "Could not call __call handler for class %s", Z_OBJCE_P(this_ptr)->name);
 	}
-
-	if (retval && zval_is_true(retval)) {
-		*return_value = method_result;
-		INIT_PZVAL(return_value);
-	} else {
-		zval_dtor(method_result_ptr);
-		zend_error(E_ERROR, "Call to undefined method %s::%s()", Z_OBJCE_P(this_ptr)->name, Z_STRVAL(method_name));
-	}
-	zval_ptr_dtor(&retval);
 
 	/* now destruct all auxiliaries */
 	zval_dtor(method_args_ptr);
