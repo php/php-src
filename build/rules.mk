@@ -88,7 +88,10 @@ distclean-recursive depend-recursive clean-recursive all-recursive install-recur
 		done; \
 		if test "$$otarget" = "all" && test -z '$(targets)'; then ok=yes; fi; \
 		if test "$$ok" != "yes"; then $(MAKE) "$$otarget-p" || exit 1; fi; \
-	fi; 
+	fi; \
+	if test -n '$(make_shared)'; then \
+		$(MAKE) shared || exit 1; \
+	fi;
 
 all-p: $(targets)
 install-p: $(targets) $(install_targets)
