@@ -1,3 +1,74 @@
+2004-09-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_variables.h:
+      - Fix build
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/tests/file/fputcsv.phpt:
+      - Add fputcsv() (David Sklar)
+
+    * ext/standard/tests/filters/.cvsignore:
+      
+      - Add missing .cvsignore
+
+    * ext/standard/var_unserializer.c:
+      - Earlier detection of failure (.c now)
+
+    * ext/standard/var_unserializer.re:
+      - Earlier detection of failure
+
+2004-09-26  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_variables.c
+      ZendEngine2/zend_variables.h:
+      - Apply Thies and Sterling's patch which doesn't call ctor/dtor functions
+      - for types which don't require it (BOOL/NULL/LONG/DOUBLE)
+      - Breaks serialization!!!
+
+2004-09-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/filters/basic.phpt:
+      fixed test output.
+
+2004-09-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/serialize/002.phpt
+      ext/standard/tests/serialize/autoload_implements.p5c
+      ext/standard/tests/serialize/autoload_interface.p5c
+      ext/standard/tests/serialize/bug30234.phpt:
+      - Add more tests
+
+    * tests/classes/autoload_006.phpt
+      tests/classes/autoload_implements.p5c
+      tests/classes/autoload_interface.p5c:
+      
+      - Add new test (related to #30234)
+
+2004-09-26  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/readline/readline.c:
+      compile fix from Timm
+
+    * (PHP_5_0)
+      NEWS
+      ext/sqlite/sqlite.c:
+      MFH: Fix bug #30147 OO sqlite_fetch_object did not reset error handler
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      configure.in:
+      MFH: configure check for getaddrinfo (Bug #30057)
+
+    * configure.in:
+      Finalize fix for #30057
+
 2004-09-25  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/sqlite/sqlite.c:
