@@ -73,7 +73,7 @@ define('DB_WARNING_READ_ONLY', -1001);
  *
  * The prepare/execute model in DB is mostly borrowed from the ODBC
  * extension, in a query the "?" character means a scalar parameter.
- * There is one extension though, a "*" character means an opaque
+ * There is one extension though, a "&" character means an opaque
  * parameter.  An opaque parameter is simply a file name, the real
  * data are in that file (useful for stuff like putting uploaded files
  * into your database).
