@@ -1104,7 +1104,7 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC)
 }
 
 
-void zend_do_try(znode *try_token CLS_DC)
+void zend_do_try(znode *try_token TSRMLS_DC)
 {
 	try_token->throw_list = (void *) CG(throw_list);
 	CG(throw_list) = (zend_llist *) emalloc(sizeof(zend_llist));
@@ -1115,7 +1115,7 @@ void zend_do_try(znode *try_token CLS_DC)
 static void throw_list_applier(long *opline_num, long *catch_opline)
 {
 	zend_op *opline;
-	CLS_FETCH(); /* Pass this by argument */
+	TSRMLS_FETCH(); /* Pass this by argument */
 
 	opline = &CG(active_op_array)->opcodes[*opline_num];
 
@@ -1132,17 +1132,17 @@ static void throw_list_applier(long *opline_num, long *catch_opline)
 	}
 }
 
-void zend_do_begin_catch(znode *try_token, znode *catch_var CLS_DC)
+void zend_do_begin_catch(znode *try_token, znode *catch_var TSRMLS_DC)
 {
 	long catch_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline;
 	
-	opline = get_next_op(CG(active_op_array) CLS_CC);
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_CATCH;
 	opline->op1 = *catch_var;
 	SET_UNUSED(opline->op2);
 
-	zend_llist_apply_with_argument(CG(throw_list), (llist_apply_with_arg_func_t) throw_list_applier, &catch_op_number);
+	zend_llist_apply_with_argument(CG(throw_list), (llist_apply_with_arg_func_t) throw_list_applier, &catch_op_number TSRMLS_CC);
 	zend_llist_destroy(CG(throw_list));
 	efree(CG(throw_list));
 	CG(throw_list) = (void *) try_token->throw_list;
@@ -1150,17 +1150,17 @@ void zend_do_begin_catch(znode *try_token, znode *catch_var CLS_DC)
 	try_token->u.opline_num = catch_op_number;
 }
 
-void zend_do_end_catch(znode *try_token CLS_DC)
+void zend_do_end_catch(znode *try_token TSRMLS_DC)
 {
 	CG(active_op_array)->opcodes[try_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
 }
 
-void zend_do_throw(znode *expr CLS_DC)
+void zend_do_throw(znode *expr TSRMLS_DC)
 {
 	zend_op *opline;
 	long throw_op_number = get_next_op_number(CG(active_op_array));
 	
-	opline = get_next_op(CG(active_op_array) CLS_CC);
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_THROW;
 	opline->op1 = *expr;
 	SET_UNUSED(opline->op2);
