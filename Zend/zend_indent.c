@@ -80,7 +80,7 @@ ZEND_API void zend_indent()
 			default:
 				if (token.type==0) {
 					/* keyword */
-					switch(token_type) {
+					switch (token_type) {
 						case ',':
 							ZEND_PUTS(", ");
 							goto dflt_printout;

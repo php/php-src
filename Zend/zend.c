@@ -225,7 +225,7 @@ ZEND_API void zend_print_zval_r(zval *expr, int indent)
 
 ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent) 
 {
-	switch(expr->type) {
+	switch (expr->type) {
 		case IS_ARRAY:
 			ZEND_PUTS("Array\n");
 			if (++expr->value.ht->nApplyCount>1) {

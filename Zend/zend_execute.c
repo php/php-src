@@ -52,7 +52,7 @@ static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_
 
 static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zval **should_free TSRMLS_DC)
 {
-	switch(node->op_type) {
+	switch (node->op_type) {
 		case IS_CONST:
 			*should_free = 0;
 			return &node->u.constant;
@@ -243,8 +243,8 @@ static inline void make_real_object(zval **object_ptr TSRMLS_DC)
 
 static inline zval **get_obj_zval_ptr_ptr(znode *op, temp_variable *Ts, int type TSRMLS_DC)
 {
-	if(op->op_type == IS_UNUSED) {
-		if(EG(This)) {
+	if (op->op_type == IS_UNUSED) {
+		if (EG(This)) {
 			/* this should actually never be modified, _ptr_ptr is modified only when
 			   the object is empty */
 			return &EG(This);
@@ -257,8 +257,8 @@ static inline zval **get_obj_zval_ptr_ptr(znode *op, temp_variable *Ts, int type
 
 static inline zval *get_obj_zval_ptr(znode *op, temp_variable *Ts, zval **freeop, int type TSRMLS_DC)
 {
-	if(op->op_type == IS_UNUSED) {
-		if(EG(This)) {
+	if (op->op_type == IS_UNUSED) {
+		if (EG(This)) {
 			return EG(This);
 		} else {
 			zend_error(E_ERROR, "Using $this when not in object context");
@@ -624,7 +624,7 @@ static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_vari
 			return EG(active_op_array)->static_variables;
 			break;
 		case ZEND_FETCH_STATIC_MEMBER:
-			if(T(opline->op2.u.var).EA.class_entry->parent) {
+			if (T(opline->op2.u.var).EA.class_entry->parent) {
 				/* if inherited, try to look up */
 				return zend_find_inherited_static(T(opline->op2.u.var).EA.class_entry, variable);
 			} else {
@@ -784,7 +784,7 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 	zval ***retval = &T(result->u.var).var.ptr_ptr;
 
 	if (!container_ptr) {
-		if(T(op1->u.var).EA.type == IS_STRING_OFFSET) {
+		if (T(op1->u.var).EA.type == IS_STRING_OFFSET) {
 			zval *offset;
 			zend_error(E_WARNING, "Cannot use string offset as an array");
 
@@ -1828,7 +1828,7 @@ int zend_make_var_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zval *value, *value2;
 
 	value = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-	switch(EX(opline)->op1.op_type) {
+	switch (EX(opline)->op1.op_type) {
 		case IS_TMP_VAR:
 			value2 = value;
 			ALLOC_ZVAL(value);
@@ -3030,7 +3030,7 @@ inline int zend_init_add_array_helper(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	}
 	if (offset) {
-		switch(offset->type) {
+		switch (offset->type) {
 			case IS_DOUBLE:
 				zend_hash_index_update(array_ptr->value.ht, (long) offset->value.dval, &expr_ptr, sizeof(zval *), NULL);
 				break;

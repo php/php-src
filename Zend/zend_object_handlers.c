@@ -207,7 +207,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	}
 
 	if (zend_hash_find(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &variable_ptr) == SUCCESS) {
-		if(*variable_ptr == value) {
+		if (*variable_ptr == value) {
 			/* if we already have this value there, we don't actually need to do anything */
 			setter_done = 1;
 		} else {

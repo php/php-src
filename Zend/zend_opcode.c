@@ -339,7 +339,7 @@ int print_class(zend_class_entry *class_entry TSRMLS_DC)
 
 ZEND_API unary_op_type get_unary_op(int opcode)
 {
-	switch(opcode) {
+	switch (opcode) {
 		case ZEND_BW_NOT:
 			return (unary_op_type) bitwise_not_function;
 			break;

@@ -260,7 +260,7 @@ ZEND_API char *get_active_function_name(TSRMLS_D)
 	if (!zend_is_executing(TSRMLS_C)) {
 		return NULL;
 	}
-	switch(EG(function_state_ptr)->function->type) {
+	switch (EG(function_state_ptr)->function->type) {
 		case ZEND_USER_FUNCTION: {
 				char *function_name = ((zend_op_array *) EG(function_state_ptr)->function)->function_name;
 			
