@@ -99,7 +99,7 @@ PHP_METHOD(domimplementation, createDocument);
 PHP_METHOD(domimplementation, getFeature);
 
 /* domdocumentfragment methods */
-PHP_FUNCTION(dom_documentfragment_documentfragment);
+PHP_METHOD(domdocumentfragment, __construct);
 
 /* domdocument methods */
 PHP_FUNCTION(dom_document_create_element);
@@ -119,7 +119,7 @@ PHP_FUNCTION(dom_document_get_element_by_id);
 PHP_FUNCTION(dom_document_adopt_node);
 PHP_FUNCTION(dom_document_normalize_document);
 PHP_FUNCTION(dom_document_rename_node);
-PHP_FUNCTION(dom_document_document);
+PHP_METHOD(domdocument, __construct);
 	/* convienience methods */
 PHP_METHOD(domdocument, load);
 PHP_FUNCTION(dom_document_save);
@@ -183,7 +183,7 @@ PHP_FUNCTION(dom_characterdata_replace_data);
 
 /* domattr methods */
 PHP_FUNCTION(dom_attr_is_id);
-PHP_FUNCTION(dom_attr_attr);
+PHP_METHOD(domattr, __construct);
 
 /* domelement methods */
 PHP_FUNCTION(dom_element_get_attribute);
@@ -204,16 +204,16 @@ PHP_FUNCTION(dom_element_has_attribute_ns);
 PHP_FUNCTION(dom_element_set_id_attribute);
 PHP_FUNCTION(dom_element_set_id_attribute_ns);
 PHP_FUNCTION(dom_element_set_id_attribute_node);
-PHP_FUNCTION(dom_element_element);
+PHP_METHOD(domelement, __construct);
 
 /* domtext methods */
 PHP_FUNCTION(dom_text_split_text);
 PHP_FUNCTION(dom_text_is_whitespace_in_element_content);
 PHP_FUNCTION(dom_text_replace_whole_text);
-PHP_FUNCTION(dom_text_text);
+PHP_METHOD(domtext, __construct);
 
 /* domcomment methods */
-PHP_FUNCTION(dom_comment_comment);
+PHP_METHOD(domcomment, __construct);
 
 /* domtypeinfo methods */
 
@@ -233,7 +233,7 @@ PHP_FUNCTION(dom_domconfiguration_get_parameter);
 PHP_FUNCTION(dom_domconfiguration_can_set_parameter);
 
 /* domcdatasection methods */
-PHP_FUNCTION(dom_cdatasection_cdatasection);
+PHP_METHOD(domcdatasection, __construct);
 
 /* domdocumenttype methods */
 
@@ -242,10 +242,10 @@ PHP_FUNCTION(dom_cdatasection_cdatasection);
 /* domentity methods */
 
 /* domentityreference methods */
-PHP_FUNCTION(dom_entityreference_entityreference);
+PHP_METHOD(domentityreference, __construct);
 
 /* domprocessinginstruction methods */
-PHP_FUNCTION(dom_processinginstruction_processinginstruction);
+PHP_METHOD(domprocessinginstruction, __construct);
 
 /* string_extend methods */
 PHP_FUNCTION(dom_string_extend_find_offset16);
@@ -253,7 +253,7 @@ PHP_FUNCTION(dom_string_extend_find_offset32);
 
 #if defined(LIBXML_XPATH_ENABLED)
 /* xpath methods */
-PHP_FUNCTION(dom_xpath_xpath);
+PHP_METHOD(domxpath, __construct);
 PHP_FUNCTION(dom_xpath_register_ns);
 PHP_FUNCTION(dom_xpath_query);
 #endif

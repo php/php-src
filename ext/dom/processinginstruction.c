@@ -36,12 +36,12 @@
 */
 
 zend_function_entry php_dom_processinginstruction_class_functions[] = {
-	PHP_FALIAS("domprocessinginstruction", dom_processinginstruction_processinginstruction, NULL)
+	PHP_ME(domprocessinginstruction, __construct, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto domnode dom_processinginstruction_processinginstruction(string name, [string value]); */
-PHP_FUNCTION(dom_processinginstruction_processinginstruction)
+/* {{{ proto void DomProcessingInstruction::__construct(string name, [string value]); */
+PHP_METHOD(domprocessinginstruction, __construct)
 {
 
 	zval *id;
@@ -73,7 +73,7 @@ PHP_FUNCTION(dom_processinginstruction_processinginstruction)
 		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern TSRMLS_CC);
 	}
 }
-/* }}} end dom_processinginstruction_processinginstruction */
+/* }}} end DomProcessingInstruction::__construct */
 
 /* {{{ proto target	string	
 readonly=yes 

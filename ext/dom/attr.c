@@ -39,12 +39,12 @@
 
 zend_function_entry php_dom_attr_class_functions[] = {
 	PHP_FALIAS(isId, dom_attr_is_id, NULL)
-	PHP_FALIAS(domattr, dom_attr_attr, NULL)
+	PHP_ME(domattr, __construct, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto domnode dom_attr_attr(string name, [string value]); */
-PHP_FUNCTION(dom_attr_attr)
+/* {{{ proto void DomAttr::__construct(string name, [string value]); */
+PHP_METHOD(domattr, __construct)
 {
 
 	zval *id;
@@ -79,7 +79,7 @@ PHP_FUNCTION(dom_attr_attr)
 	}
 }
 
-/* }}} end dom_attr_attr */
+/* }}} end DomAttr::__construct */
 
 
 /* {{{ proto name	string	

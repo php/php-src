@@ -36,12 +36,12 @@
 */
 
 zend_function_entry php_dom_entityreference_class_functions[] = {
-	PHP_FALIAS(domentityreference, dom_entityreference_entityreference, NULL)
+	PHP_ME(domentityreference, __construct, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto domnode dom_entityreference_entityreference(string name); */
-PHP_FUNCTION(dom_entityreference_entityreference)
+/* {{{ proto void DomEntityReference::__construct(string name); */
+PHP_METHOD(domentityreference, __construct)
 {
 	zval *id;
 	xmlNode *node;
@@ -74,5 +74,5 @@ PHP_FUNCTION(dom_entityreference_entityreference)
 	}
 }
 
-/* }}} end dom_entityreference_entityreference */
+/* }}} end DomEntityReference::__construct */
 #endif

@@ -36,12 +36,12 @@
 */
 
 zend_function_entry php_dom_documentfragment_class_functions[] = {
-	PHP_FALIAS(domdocumentfragment, dom_documentfragment_documentfragment, NULL)
+	PHP_ME(domdocumentfragment, __construct, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto dom_documentfragment_documentfragment(); */
-PHP_FUNCTION(dom_documentfragment_documentfragment)
+/* {{{ proto void DomDocumentFragment::__construct(); */
+PHP_METHOD(domdocumentfragment, __construct)
 {
 
 	zval *id;
@@ -67,5 +67,5 @@ PHP_FUNCTION(dom_documentfragment_documentfragment)
 		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern TSRMLS_CC);
 	}
 }
-/* }}} end dom_documentfragment_documentfragment */
+/* }}} end DomDocumentFragment::__construct */
 #endif

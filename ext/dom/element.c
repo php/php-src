@@ -54,12 +54,12 @@ zend_function_entry php_dom_element_class_functions[] = {
 	PHP_FALIAS(setIdAttribute, dom_element_set_id_attribute, NULL)
 	PHP_FALIAS(setIdAttributeNS, dom_element_set_id_attribute_ns, NULL)
 	PHP_FALIAS(setIdAttributeNode, dom_element_set_id_attribute_node, NULL)
-	PHP_FALIAS(domelement, dom_element_element, NULL)
+	PHP_ME(domelement, __construct, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto domnode dom_element_element(string name, [string value]); */
-PHP_FUNCTION(dom_element_element)
+/* {{{ proto void DomElement::__construct(string name, [string value]); */
+PHP_METHOD(domelement, __construct)
 {
 
 	zval *id;
@@ -121,7 +121,7 @@ PHP_FUNCTION(dom_element_element)
 		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern TSRMLS_CC);
 	}
 }
-/* }}} end dom_element_element */
+/* }}} end DomElement::__construct */
 
 /* {{{ proto tagName	string	
 readonly=yes 
