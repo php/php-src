@@ -258,6 +258,11 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals)
 	zend_hash_copy(compiler_globals->class_table, global_class_table, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry));
 
 	compiler_globals->extended_info = 0;
+
+	/* default compile-time values */
+	compiler_globals->asp_tags = 0;
+	compiler_globals->short_tags = 1;
+	compiler_globals->allow_call_time_pass_reference = 1;
 }
 
 
