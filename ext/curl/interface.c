@@ -1096,18 +1096,22 @@ PHP_FUNCTION(curl_setopt)
 					zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
 				
 					postval = Z_STRVAL_PP(current);
+
+					/* The arguments after _NAMELENGTH and _CONTENTSLENGTH
+					 * must be explicitly cast to long in curl_formadd
+					 * use since curl needs a long not an int. */
 					if (*postval == '@') {
 						error = curl_formadd(&first, &last, 
 											 CURLFORM_COPYNAME, string_key,
-											 CURLFORM_NAMELENGTH, string_key_len - 1,
+											 CURLFORM_NAMELENGTH, (long)string_key_len - 1,
 											 CURLFORM_FILE, ++postval, 
 											 CURLFORM_END);
 					} else {
 						error = curl_formadd(&first, &last, 
 											 CURLFORM_COPYNAME, string_key,
-											 CURLFORM_NAMELENGTH, string_key_len - 1,
+											 CURLFORM_NAMELENGTH, (long)string_key_len - 1,
 											 CURLFORM_COPYCONTENTS, postval, 
-											 CURLFORM_CONTENTSLENGTH, Z_STRLEN_PP(current),
+											 CURLFORM_CONTENTSLENGTH, (long)Z_STRLEN_PP(current),
 											 CURLFORM_END);
 					}
 				}
