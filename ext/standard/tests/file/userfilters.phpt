@@ -45,7 +45,7 @@ rewind($fp);
 
 var_dump(stream_filter_prepend($fp, "string.uppercase"));
 var_dump(fgets($fp));
-
+fclose($fp);
 ?>
 --EXPECT--
 bool(true)
