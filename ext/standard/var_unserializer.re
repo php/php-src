@@ -151,6 +151,7 @@ iv = [+-]? [0-9]+;
 nv = [+-]? ([0-9]* "." [0-9]+|[0-9]+ "." [0-9]*);
 nvexp = (iv | nv) [eE] [+-]? iv;
 any = [\000-\277];
+object = [OC];
 */
 
 
@@ -278,6 +279,33 @@ static inline int finish_nested_data(UNSERIALIZE_PARAMETER)
 	zval_ptr_dtor(rval);
 #endif
 	return 0;
+}
+
+static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
+{
+	int datalen;
+
+	if(ce->unserialize == NULL) {
+		zend_error(E_WARNING, "Class %s has no unserializer", ce->name);
+		return 0;
+	}
+
+	datalen = parse_iv2((*p) + 2, p);
+
+	(*p) += 2;
+
+	if((*p) + datalen >= max) {
+		zend_error(E_WARNING, "Unsifficient data for unserializing - %d required, %d present", datalen, max - (*p));
+		return 0;
+	}
+	
+	if(ce->unserialize(rval, *p, datalen, (zend_unserialize_data *)var_hash TSRMLS_CC) != SUCCESS) {
+		return 0;
+	}
+
+	(*p) += datalen;
+
+	return finish_nested_data(UNSERIALIZE_PASSTHRU);
 }
 
 static inline int object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
@@ -472,18 +500,24 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 			object_common1(UNSERIALIZE_PASSTHRU, ZEND_STANDARD_CLASS_DEF_PTR));
 }
 
-"O:" uiv ":" ["]	{
+object ":" uiv ":" ["]	{
 	size_t len, len2, len3, maxlen;
 	int elements;
 	char *class_name;
 	zend_class_entry *ce;
 	zend_class_entry **pce;
 	int incomplete_class = 0;
-	
+
+	int custom_object = 0;
+
 	zval *user_func;
 	zval *retval_ptr;
 	zval **args[1];
 	zval *arg_func_name;
+
+	if(*start == 'C') {
+		custom_object = 1;
+	}
 	
 	INIT_PZVAL(*rval);
 	len2 = len = parse_uiv(start + 2);
@@ -560,8 +594,14 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 		zval_ptr_dtor(&arg_func_name);
 		break;
 	} while (1);
-	
+
 	*p = YYCURSOR;
+
+	if(custom_object) {
+		efree(class_name);
+		return object_custom(UNSERIALIZE_PASSTHRU, ce);
+	}
+	
 	elements = object_common1(UNSERIALIZE_PASSTHRU, ce);
 
 	if (incomplete_class) {

@@ -671,6 +671,31 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 				zval fname;
 				int res;
 
+				if(Z_OBJCE_PP(struc)->serialize != NULL) {
+					/* has custom handler */
+					unsigned char *serialized_data = NULL;
+					zend_uint serialized_length;
+
+					if(Z_OBJCE_PP(struc)->serialize(*struc, &serialized_data, &serialized_length, (zend_serialize_data *)var_hash TSRMLS_CC) == SUCCESS) {
+						smart_str_appendl(buf, "C:", 2);
+						smart_str_append_long(buf, Z_OBJCE_PP(struc)->name_length);
+						smart_str_appendl(buf, ":\"", 2);
+						smart_str_appendl(buf, Z_OBJCE_PP(struc)->name, Z_OBJCE_PP(struc)->name_length);
+						smart_str_appendl(buf, "\":", 2);
+					
+						smart_str_append_long(buf, serialized_length);
+						smart_str_appendl(buf, ":{", 2);
+						smart_str_appendl(buf, serialized_data, serialized_length);
+						smart_str_appendc(buf, '}'); 
+					} else {
+						smart_str_appendl(buf, "N;", 2);
+					}
+					if(serialized_data) {
+						efree(serialized_data);
+					}
+					return;
+				}
+				
 				if(Z_OBJCE_PP(struc) != PHP_IC_ENTRY) {
 					INIT_PZVAL(&fname);
 					ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1, 0);
