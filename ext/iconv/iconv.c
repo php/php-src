@@ -19,7 +19,6 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "php_config.h"
 
 #if HAVE_ICONV
 
@@ -178,6 +177,7 @@ PHP_FUNCTION(ob_iconv_handler)
 	int coding;
 	char *out_buffer;
 	zval **zv_string;
+	SLS_FETCH();
 	ICONVLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &zv_string)==FAILURE) {
