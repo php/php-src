@@ -84,8 +84,6 @@
 
 #ifdef ZTS
 static int fsock_globals_id;
-#else
-extern int le_fp;
 #endif
 
 #ifdef PHP_WIN32
