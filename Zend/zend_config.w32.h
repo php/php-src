@@ -64,6 +64,7 @@ typedef unsigned int uint;
 #endif
 
 #define zend_finite(A) _finite(A)
+#define zend_isnan(A) _isnan(A)
 
 #ifdef LIBZEND_EXPORTS
 #	define ZEND_API __declspec(dllexport)
