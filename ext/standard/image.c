@@ -1288,11 +1288,14 @@ PHP_FUNCTION(getimagesize)
 		case IMAGE_FILETYPE_SWF:
 			result = php_handle_swf(stream TSRMLS_CC);
 			break;
-#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 		case IMAGE_FILETYPE_SWC:
+#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 			result = php_handle_swc(stream TSRMLS_CC);
-			break;
+#else
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "The image is a compressed SWF file, but you do not have a static version of the zlib extension enabled.");
+
 #endif
+			break;
 		case IMAGE_FILETYPE_PSD:
 			result = php_handle_psd(stream TSRMLS_CC);
 			break;
