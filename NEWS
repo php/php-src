@@ -26,6 +26,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #31797 (exif_read_data() uses too low nesting limit). (Ilia)
 - Fixed bug #31796 (readline completion handler does not handle empty return
   values). (Ilia)
+- Fixed bug #31792 (getrusage() does not provide ru_nswap value). (Ilia)
 - Fixed bug #31754 (dbase_open() fails for mode = 1). (Mehdi, Derick)
 - Fixed bug #31705 (parse_url() does not recognize http://foo.com#bar). (Ilia)
 - Fixed bug #31684 (dio_tcsetattr(): misconfigured termios settings).
