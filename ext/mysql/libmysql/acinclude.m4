@@ -9,7 +9,7 @@ AC_CHECK_FUNCS(alarm bmove \
  getrusage getpwuid getcwd getrlimit getwd index locking longjmp \
  perror pread realpath rename \
  socket strnlen madvise \
- strtoul strtoull snprintf tempnam thr_setconcurrency \
+ strtoll strtoul strtoull snprintf tempnam thr_setconcurrency \
  gethostbyaddr_r gethostbyname_r getpwnam \
  bfill bzero bcmp strstr strpbrk strerror\
  tell atod memcpy memmove \
