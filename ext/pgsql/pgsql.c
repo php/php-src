@@ -1045,7 +1045,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 	char *ret=NULL;
 
 	/* try to lookup the type in the resource list */
-	snprintf(hashed_oid_key,31,"pgsql_oid_%ld", oid);
+	snprintf(hashed_oid_key,31,"pgsql_oid_%u", oid);
 	hashed_oid_key[31]=0;
 
 	if (zend_hash_find(list,hashed_oid_key,strlen(hashed_oid_key)+1,(void **) &field_type)==SUCCESS) {
@@ -1495,7 +1495,7 @@ PHP_FUNCTION(pg_last_oid)
 		RETURN_FALSE;
 	} else if (oid > LONG_MAX) {
 		oid_str = (char *)emalloc(PGSQL_MAX_LENGTH_OF_LONG+1);
-		sprintf(oid_str, "%ld", oid);
+		sprintf(oid_str, "%u", oid);
 		RETURN_STRING(oid_str, 0);
 	}
 	RETURN_LONG((long)oid);
@@ -1638,7 +1638,7 @@ PHP_FUNCTION(pg_lo_create)
 	}
 	if (pgsql_oid > LONG_MAX) {
 		oid_str = (char *)emalloc(PGSQL_MAX_LENGTH_OF_LONG+1);
-		sprintf(oid_str, "%ld", pgsql_oid);
+		sprintf(oid_str, "%u", pgsql_oid);
 		RETURN_STRING(oid_str, 0);
 	}
 	RETURN_LONG((long)pgsql_oid);
@@ -1654,6 +1654,7 @@ PHP_FUNCTION(pg_lo_unlink)
 	Oid pgsql_oid;
 	int id = -1;
 
+	/* FIXME: Does not work when  OID is larger than LONG_MAX */
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &oid)==FAILURE) {
@@ -1679,8 +1680,8 @@ PHP_FUNCTION(pg_lo_unlink)
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 	
 	if (lo_unlink(pgsql, pgsql_oid) == -1) {
-		php_error(E_WARNING, "%s() unable to delete PostgreSQL large object %d",
-				  get_active_function_name(TSRMLS_C), (int) pgsql_oid);
+		php_error(E_WARNING, "%s() unable to delete PostgreSQL large object %u",
+				  get_active_function_name(TSRMLS_C), pgsql_oid);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1699,6 +1700,7 @@ PHP_FUNCTION(pg_lo_open)
 	char *mode_string=NULL;
 	pgLofp *pgsql_lofp;
 
+	/* FIXME: Does not work when  OID is larger than LONG_MAX */
 	switch(ZEND_NUM_ARGS()) {
 		case 2:
 			if (zend_get_parameters_ex(2, &oid, &mode)==FAILURE) {
@@ -1964,7 +1966,7 @@ PHP_FUNCTION(pg_lo_import)
 	} 
 	if (oid > LONG_MAX) {
 		oid_str = (char *)emalloc(PGSQL_MAX_LENGTH_OF_LONG+1);
-		sprintf(oid_str, "%ld", oid);
+		sprintf(oid_str, "%u", oid);
 		RETURN_STRING(oid_str, 0);
 	}
 	RETURN_LONG((long)oid);
@@ -1981,7 +1983,8 @@ PHP_FUNCTION(pg_lo_export)
 	int argc = ZEND_NUM_ARGS();
 	Oid oid;
 	PGconn *pgsql;
-	
+
+	/* FIXME: Does not work when OID is larger than LONG_MAX */
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
 								 "rls", &pgsql_link, &oid_id, &file_out, &name_len) == SUCCESS) {
 		;
