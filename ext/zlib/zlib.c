@@ -274,7 +274,7 @@ static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, cha
 	return NULL;
 }
 
-/* {{{ proto array gzfile(string filename)
+/* {{{ proto array gzfile(string filename [, int use_include_path])
 Read und uncompress entire .gz-file into an array */
 PHP_FUNCTION(gzfile) {
 	pval *filename, *arg2;
