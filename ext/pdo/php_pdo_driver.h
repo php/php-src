@@ -58,6 +58,7 @@ enum pdo_attribute_type {
 	PDO_ATTR_AUTOCOMMIT,	/* use to turn on or off auto-commit mode */
 	PDO_ATTR_SCROLL,		/* ask for a scrollable cursor (when you prepare()) */
 	PDO_ATTR_PREFETCH,		/* configure the prefetch size for drivers that support it */
+	PDO_ATTR_TIMEOUT,		/* connection timeout in seconds */
 };
 
 /* generic error code values.
