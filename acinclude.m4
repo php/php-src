@@ -78,6 +78,7 @@ AC_DEFUN(AC_ADD_LIBPATH,[
   if test "$1" != "/usr/lib"; then
     AC_EXPAND_PATH($1, ai_p)
     AC_PHP_ONCE(LIBPATH, $ai_p, [
+      test -n "$ld_runpath_switch" && LDFLAGS="$LDFLAGS $ld_runpath_switch$ai_p"
       LDFLAGS="$LDFLAGS -L$ai_p"
       PHP_RPATHS="$PHP_RPATHS $ai_p"
     ])
