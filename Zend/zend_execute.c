@@ -683,7 +683,7 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 		retval = zend_std_get_static_property(T(opline->op2.u.var).EA.class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 0 TSRMLS_CC);
 	} else {
 		if (opline->op2.u.EA.type == ZEND_FETCH_GLOBAL && opline->op1.op_type == IS_VAR) {
-			PZVAL_LOCK(varname);
+			varname->refcount++;
 		}
 		target_symbol_table = zend_get_target_symbol_table(opline, Ts, type, varname TSRMLS_CC);
 		if (!target_symbol_table) {
