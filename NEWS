@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   (Marcus)
 - Fixed bug #26690 (make xsltProcessor->transformToUri use streams wrappers).
   (Ilia)
+- Fixed bug #26680 (Added version check in mysqli_report_index) (Georg)
 - Fixed bug #26675 (Segfault on ArrayAccess use). (Marcus)
 
 21 Dec 2003, PHP 5 Beta 3
