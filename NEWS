@@ -1,7 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.4
-- Fixed GET/POST/COOKIE value handlingc. (Yoshimori, Yasuo)
+- Fixed GET/POST/COOKIE value handlings. (Yoshimori, Yasuo)
 
 06 Sep 2002, Version 4.2.3
 - Enable UTF8 modifier support for PCRE on win32. (Wez, Edin)
