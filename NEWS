@@ -8,7 +8,7 @@ PHP                                                                        NEWS
 - Extended the functionality of is_subclass_of() to accept either a class name
   or an object as first parameter. (Andrey) 
 - Fixed potential problems with unserializing invalid serialize data. (Marcus)
-- Fixed bug #29801 (Set limit on the size of mmapable data). (Ilia)
+- Fixed bug #30832 ("!" stripped off comments in xml parser). (Rob)
 - Fixed bug #30799 (SoapServer doesn't handle private or protected properties).
   (Dmitry)
 - Fixed bug #30783 (Apache crash when using ReflectionFunction::
@@ -55,6 +55,7 @@ PHP                                                                        NEWS
 - Fixed bug #30042 (strtotime does not use second param). (Derick)
 - Fixed bug #30027 (Possible crash inside ftp_get()).
   (cfield at affinitysolutions dot com)
+- Fixed bug #29801 (Set limit on the size of mmapable data). (Ilia)
 - Fixed bug #29557 (strtotime error). (Derick)
 - Fixed bug #29418 (double free when openssl_csr_new fails).
   (Kamesh Jayachandran).
