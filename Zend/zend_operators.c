@@ -737,6 +737,7 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2)
 			shorter = op1;
 		}
 
+		result->type = IS_STRING;
 		result->value.str.len = longer->value.str.len;
 		result->value.str.val = estrndup(longer->value.str.val, longer->value.str.len);
 		for (i = 0; i < shorter->value.str.len; i++) {
@@ -769,6 +770,7 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2)
 			shorter = op1;
 		}
 
+		result->type = IS_STRING;
 		result->value.str.len = shorter->value.str.len;
 		result->value.str.val = estrndup(shorter->value.str.val, shorter->value.str.len);
 		for (i = 0; i < shorter->value.str.len; i++) {
@@ -803,6 +805,7 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2)
 			shorter = op1;
 		}
 
+		result->type = IS_STRING;
 		result->value.str.len = shorter->value.str.len;
 		result->value.str.val = estrndup(shorter->value.str.val, shorter->value.str.len);
 		for (i = 0; i < shorter->value.str.len; i++) {
