@@ -421,9 +421,9 @@ PHP_FUNCTION(dbase_delete_record)
 }
 /* }}} */
 
-/* {{{ proto array dbase_get_record(int identifier, int record)
-   Returns an array representing a record from the database */
-PHP_FUNCTION(dbase_get_record)
+/* {{{ php_dbase_get_record
+ */  
+static void php_dbase_get_record(INTERNAL_FUNCTION_PARAMETERS, int assoc)
 {
 	pval *dbh_id, *record;
 	dbhead_t *dbh;
@@ -458,8 +458,8 @@ PHP_FUNCTION(dbase_get_record)
 		RETURN_FALSE;
 	}
 
-        fnp = NULL;
-        for (cur_f = dbf; cur_f < &dbf[dbh->db_nfields]; cur_f++) {
+	fnp = NULL;
+	for (cur_f = dbf; cur_f < &dbf[dbh->db_nfields]; cur_f++) {
 		/* get the value */
 		str_value = (char *)emalloc(cur_f->db_flen + 1);
 
@@ -467,116 +467,17 @@ PHP_FUNCTION(dbase_get_record)
 			cursize = cur_f->db_flen + 1;
 			fnp = erealloc(fnp, cursize);
 		}
-                snprintf(str_value, cursize, cur_f->db_format, get_field_val(data, cur_f, fnp));
-
-		/* now convert it to the right php internal type */
-	        switch (cur_f->db_type) {
-		case 'C':
-		case 'D':
-			add_next_index_string(return_value, str_value, 1);
-			break;
-		case 'I':	/* FALLS THROUGH */
-		case 'N':
-			if (cur_f->db_fdc == 0) {
-				/* Large integers in dbase can be larger than long */
-				errno_save = errno;
-				overflow_test = strtol(str_value, NULL, 10);
-				if (errno == ERANGE) {
-				    /* If the integer is too large, keep it as string */
-				    add_next_index_string(return_value, str_value, 1);
-				} else {
-				    add_next_index_long(return_value, overflow_test);
-				}
-				errno = errno_save;
-			} else {
-				add_next_index_double(return_value, atof(str_value));
-			}
-			break;
-		case 'L':	/* we used to FALL THROUGH, but now we check for T/Y and F/N
-					   and insert 1 or 0, respectively.  db_fdc is the number of
-					   decimals, which we don't care about.      3/14/2001 LEW */
-			if ((*str_value == 'T') || (*str_value == 'Y')) {
-				add_next_index_long(return_value, strtol("1", NULL, 10));
-			} else {
-				if ((*str_value == 'F') || (*str_value == 'N')) {
-					add_next_index_long(return_value, strtol("0", NULL, 10));
-				} else {
-					add_next_index_long(return_value, strtol(" ", NULL, 10));
-				}
-			}
-			break;
-		case 'M':
-			/* this is a memo field. don't know how to deal with
-			   this yet */
-			break;
-		default:
-			/* should deal with this in some way */
-			break;
-		}
-		efree(str_value);
-        }
-        efree(fnp);
-
-	/* mark whether this record was deleted */
-	if (data[0] == '*') {
-		add_assoc_long(return_value, "deleted", 1);
-	}
-	else {
-		add_assoc_long(return_value, "deleted", 0);
-	}
-
-	free(data);
-}
-/* }}} */
-
-/* From Martin Kuba <makub@aida.inet.cz> */
-/* {{{ proto array dbase_get_record_with_names(int identifier, int record)
-   Returns an associative array representing a record from the database */
-PHP_FUNCTION(dbase_get_record_with_names)
-{
-	pval *dbh_id, *record;
-	dbhead_t *dbh;
-	int dbh_type;
-	dbfield_t *dbf, *cur_f;
-	char *data, *fnp, *str_value;
-	long overflow_test;
-	int errno_save;
-	DBase_TLS_VARS;
-
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &dbh_id, &record)==FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_long(dbh_id);
-	convert_to_long(record);
-
-	dbh = zend_list_find(Z_LVAL_P(dbh_id), &dbh_type);
-	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php_error(E_WARNING, "Unable to find database for identifier %d", Z_LVAL_P(dbh_id));
-		RETURN_FALSE;
-	}
-
-	if ((data = get_dbf_record(dbh, Z_LVAL_P(record))) == NULL) {
-		php_error(E_WARNING, "Tried to read bad record %d", Z_LVAL_P(record));
-		RETURN_FALSE;
-	}
-
-	dbf = dbh->db_fields;
-
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	fnp = (char *)emalloc(dbh->db_rlen);
-	for (cur_f = dbf; cur_f < &dbf[dbh->db_nfields]; cur_f++) {
-		/* get the value */
-		str_value = (char *)emalloc(cur_f->db_flen + 1);
-		sprintf(str_value, cur_f->db_format, get_field_val(data, cur_f, fnp));
+		snprintf(str_value, cursize, cur_f->db_format, get_field_val(data, cur_f, fnp));
 
 		/* now convert it to the right php internal type */
 		switch (cur_f->db_type) {
 			case 'C':
 			case 'D':
-				add_assoc_string(return_value, cur_f->db_fname, str_value, 1);
+				if (!assoc) {
+					add_next_index_string(return_value, str_value, 1);
+				} else {
+					add_assoc_string(return_value, cur_f->db_fname, str_value, 1);
+				}
 				break;
 			case 'I':	/* FALLS THROUGH */
 			case 'N':
@@ -586,25 +487,49 @@ PHP_FUNCTION(dbase_get_record_with_names)
 					overflow_test = strtol(str_value, NULL, 10);
 					if (errno == ERANGE) {
 					    /* If the integer is too large, keep it as string */
-					    add_assoc_string(return_value, cur_f->db_fname, str_value, 1);
+						if (!assoc) {
+						    add_next_index_string(return_value, str_value, 1);
+						} else {
+						    add_assoc_string(return_value, cur_f->db_fname, str_value, 1);
+						}
 					} else {
-					    add_assoc_long(return_value, cur_f->db_fname, overflow_test);
+						if (!assoc) {
+						    add_next_index_long(return_value, overflow_test);
+						} else {
+						    add_assoc_long(return_value, cur_f->db_fname, overflow_test);
+						}
 					}
 					errno = errno_save;
 				} else {
-					add_assoc_double(return_value, cur_f->db_fname, atof(str_value));
+					if (!assoc) {
+						add_next_index_double(return_value, atof(str_value));
+					} else {
+						add_assoc_double(return_value, cur_f->db_fname, atof(str_value));
+					}
 				}
 				break;
 			case 'L':	/* we used to FALL THROUGH, but now we check for T/Y and F/N
 						   and insert 1 or 0, respectively.  db_fdc is the number of
 						   decimals, which we don't care about.      3/14/2001 LEW */
 				if ((*str_value == 'T') || (*str_value == 'Y')) {
-					add_assoc_long(return_value, cur_f->db_fname,strtol("1", NULL, 10));
+					if (!assoc) {
+						add_next_index_long(return_value, strtol("1", NULL, 10));
+					} else {
+						add_assoc_long(return_value, cur_f->db_fname,strtol("1", NULL, 10));
+					}
 				} else {
 					if ((*str_value == 'F') || (*str_value == 'N')) {
-						add_assoc_long(return_value, cur_f->db_fname,strtol("0", NULL, 10));
+						if (!assoc) {
+							add_next_index_long(return_value, strtol("0", NULL, 10));
+						} else {
+							add_assoc_long(return_value, cur_f->db_fname,strtol("0", NULL, 10));
+						}
 					} else {
-						add_assoc_long(return_value, cur_f->db_fname,strtol(" ", NULL, 10));
+						if (!assoc) {
+							add_next_index_long(return_value, strtol(" ", NULL, 10));
+						} else {
+							add_assoc_long(return_value, cur_f->db_fname,strtol(" ", NULL, 10));
+						}
 					}
 				}
 				break;
@@ -617,6 +542,7 @@ PHP_FUNCTION(dbase_get_record_with_names)
 		}
 		efree(str_value);
 	}
+
 	efree(fnp);
 
 	/* mark whether this record was deleted */
@@ -627,6 +553,23 @@ PHP_FUNCTION(dbase_get_record_with_names)
 	}
 
 	free(data);
+}
+/* }}} */
+ 
+/* {{{ proto array dbase_get_record(int identifier, int record)
+   Returns an array representing a record from the database */
+PHP_FUNCTION(dbase_get_record)
+{
+	php_dbase_get_record(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* From Martin Kuba <makub@aida.inet.cz> */
+/* {{{ proto array dbase_get_record_with_names(int identifier, int record)
+   Returns an associative array representing a record from the database */
+PHP_FUNCTION(dbase_get_record_with_names)
+{
+	php_dbase_get_record(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
@@ -783,7 +726,7 @@ PHP_FUNCTION(dbase_create)
 	}
 
 	dbh->db_rlen = rlen;
-        put_dbf_info(dbh);
+	put_dbf_info(dbh);
 
 	handle = zend_list_insert(dbh, DBase_GLOBAL(le_dbhead));
 	RETURN_LONG(handle);
