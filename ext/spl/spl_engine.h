@@ -106,7 +106,15 @@ void spl_unlock_zval_ptr_ptr(znode *node, temp_variable *Ts TSRMLS_DC);
 zval * spl_get_zval_ptr(znode *node, temp_variable *Ts, zval **should_free TSRMLS_DC);
 
 int spl_is_instance_of(zval **obj, zend_class_entry *ce TSRMLS_DC);
-int spl_implements(zval **obj, zend_class_entry *ce TSRMLS_DC);
+
+typedef enum {
+	SPL_IS_A_ITERATOR = 1,
+	SPL_IS_A_FORWARD  = 2,
+	SPL_IS_A_ASSOC    = 4,
+	SPL_IS_A_SEQUENCE = 8
+} spl_is_a;
+
+spl_is_a spl_implements(zend_class_entry *ce);
 
 #endif /* SPL_ENGINE_H */
 

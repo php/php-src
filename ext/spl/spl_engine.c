@@ -144,34 +144,27 @@ int spl_is_instance_of(zval **obj, zend_class_entry *ce TSRMLS_DC)
 	zend_class_entry *instance_ce;
 
 	if (obj && (instance_ce = spl_get_class_entry(*obj TSRMLS_CC)) != NULL) {
-		if (instanceof_function(instance_ce, ce TSRMLS_CC)) {
-			return 1;
-		}
+		return instanceof_function(instance_ce, ce TSRMLS_CC);
 	}
 	return 0;
 }
 /* }}} */
 
 /* {{{ spl_implements */
-int spl_implements(zval **obj, zend_class_entry *ce TSRMLS_DC)
+spl_is_a spl_implements(zend_class_entry *ce)
 {
-	/* Ensure everything needed is available before checking for the type.
-	 */
-	zend_class_entry *instance_ce;
+	register spl_is_a is_a = 0;
+	register int i = ce->num_interfaces;
+	register zend_class_entry **pce = ce->interfaces;
 
-	if (obj && (instance_ce = spl_get_class_entry(*obj TSRMLS_CC)) != NULL) {
-		int i;
-
-		while (instance_ce) {
-			for (i = 0; i < instance_ce->num_interfaces; i++) {
-				if (instance_ce->interfaces[i] == ce) {
-					return 1;
-				}
-			}
-			instance_ce = instance_ce->parent;
-		}
+	while (i--) {
+		if (*pce == spl_ce_iterator)      is_a |= SPL_IS_A_ITERATOR;
+		else if (*pce == spl_ce_forward)  is_a |= SPL_IS_A_FORWARD;
+		else if (*pce == spl_ce_assoc)    is_a |= SPL_IS_A_ASSOC;
+		else if (*pce == spl_ce_sequence) is_a |= SPL_IS_A_SEQUENCE;
+		pce++;
 	}
-	return spl_is_instance_of(obj, ce TSRMLS_CC);
+	return is_a;
 }
 /* }}} */
 
