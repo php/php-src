@@ -105,7 +105,14 @@ if (zend_parse_parameters(3 TSRMLS_CC, "zbr!",
 /* Get either a set of 3 longs or a string. */
 long l1, l2, l3;
 char *s;
-long length;
+/* 
+ * The function expects a pointer to a integer in this case, not a long
+ * or any other type.  If you specify a type which is larger
+ * than a 'int', the upper bits might not be initialized
+ * properly, leading to random crashes on platforms like
+ * Tru64 or Linux/Alpha.
+ */
+int length;
 
 if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
 							 "lll", &l1, &l2, &l3) == SUCCESS) {
