@@ -356,10 +356,15 @@ static void _php_ibase_free_result(ibase_result *ib_result)
 				_php_ibase_error();
 			}
 		} else {
+			/* Shouldn't be here unless query was select and had parameter
+			   placeholders, in which case ibase_execute handles this???
+			*/
 			IBDEBUG("Closing statement handle...");
+			/*
 			if (isc_dsql_free_statement(IB_STATUS, &ib_result->stmt, DSQL_close)) {
 				_php_ibase_error();
 			}
+			*/
 		}
 		if (ib_result->out_array) {
 			efree(ib_result->out_array);
@@ -531,17 +536,17 @@ PHP_MINFO_FUNCTION(ibase)
 	php_info_print_table_row(2, "Allow Persistent Links", (IBG(allow_persistent)?"Yes":"No") );
 
 	if (IBG(max_persistent) == -1) {
-		snprintf(tmp, 31, "%d/unlimited", IBG(num_persistent));
+		snprintf(tmp, 31, "%ld/unlimited", IBG(num_persistent));
 	} else {
-		snprintf(tmp, 31, "%d/%ld", IBG(num_persistent), IBG(max_persistent));
+		snprintf(tmp, 31, "%ld/%ld", IBG(num_persistent), IBG(max_persistent));
 	}
 	tmp[31]=0;
 	php_info_print_table_row(2, "Persistent Links", tmp );
 
 	if (IBG(max_links) == -1) {
-		snprintf(tmp, 31, "%d/unlimited", IBG(num_links));
+		snprintf(tmp, 31, "%ld/unlimited", IBG(num_links));
 	} else {
-		snprintf(tmp, 31, "%d/%ld", IBG(num_links), IBG(max_links));
+		snprintf(tmp, 31, "%ld/%ld", IBG(num_links), IBG(max_links));
 	}
 	tmp[31]=0;
 	php_info_print_table_row(2, "Total Links", tmp );
@@ -2128,6 +2133,7 @@ PHP_FUNCTION(ibase_prepare)
 	if (_php_ibase_alloc_query(&ib_query, ib_link->link, ib_link->trans[trans_n],  query, ib_link->dialect) == FAILURE) {
 		RETURN_FALSE;
 	}
+	ib_query->cursor_open = 0;
 
 	zend_list_addref(link_id);
 
@@ -2165,16 +2171,27 @@ PHP_FUNCTION(ibase_execute)
 		bind_args = args[1];
 	}
 	
+	/* Have we used this cursor before and it's still open? */
+	if (ib_query->cursor_open) {
+		IBDEBUG("Implicitly closing a cursor");
+		if (isc_dsql_free_statement(IB_STATUS, &ib_query->stmt, DSQL_close)){
+			efree(args);
+			_php_ibase_error();
+		}
+	}
+
 	if ( _php_ibase_exec(&ib_result, ib_query, ZEND_NUM_ARGS()-1, bind_args) == FAILURE) {
 		efree(args);
 		RETURN_FALSE;
 	}
 	
 	efree(args);
-	
+
 	if (ib_result) { /* select statement */
+		ib_query->cursor_open = 1;
 		ZEND_REGISTER_RESOURCE(return_value, ib_result, IBG(le_result));
 	} else {
+		ib_query->cursor_open = 0;
 		RETURN_TRUE;
 	}
 }
@@ -2268,7 +2285,6 @@ PHP_FUNCTION(ibase_timefmt)
 PHP_FUNCTION(ibase_num_fields)
 {
 	pval **result;
-	int type;
 	ibase_result *ib_result;
 	
 

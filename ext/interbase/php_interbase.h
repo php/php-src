@@ -122,6 +122,7 @@ typedef struct {
 	ibase_array *in_array, *out_array;
 	int in_array_cnt, out_array_cnt;
 	int dialect;
+	int cursor_open;
 } ibase_query;
 
 typedef struct {
