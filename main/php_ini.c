@@ -273,7 +273,8 @@ int php_init_config(char *php_ini_path_override)
 		tmp.value.str.val = zend_strndup(php_ini_opened_path, tmp.value.str.len);
 		tmp.type = IS_STRING;
 		zend_hash_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path"),(void *) &tmp,sizeof(zval), NULL);
-		persist_alloc(php_ini_opened_path);
+		efree(php_ini_opened_path);
+		php_ini_opened_path = zend_strndup(tmp.value.str.val, tmp.value.str.len);
 	}
 	
 	return SUCCESS;
@@ -286,7 +287,7 @@ int php_shutdown_config(void)
 {
 	zend_hash_destroy(&configuration_hash);
 	if (php_ini_opened_path) {
-		efree(php_ini_opened_path);
+		free(php_ini_opened_path);
 	}
 	return SUCCESS;
 }
