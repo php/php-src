@@ -43,6 +43,10 @@ zend_module_entry mhash_module_entry = {
 	STANDARD_MODULE_PROPERTIES,
 };
 
+#ifdef COMPILE_DL_MHASH
+ZEND_GET_MODULE(mhash)
+#endif
+
 #define MHASH_FAILED_MSG "mhash initialization failed"
 
 static PHP_MINIT_FUNCTION(mhash)
