@@ -167,11 +167,6 @@ zend_module_entry php_apache_module = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-int php_apache_register_module(void)
-{
-	return zend_startup_module(&php_apache_module);
-}
-
 /*
  * Local variables:
  * tab-width: 4
