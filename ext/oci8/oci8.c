@@ -129,7 +129,7 @@ static int _oci_make_zval(zval *, oci_statement *, oci_out_column *, char *, int
 static oci_statement *oci_parse(oci_connection *, char *, int);
 static int oci_execute(oci_statement *, char *, ub4 mode);
 static int oci_fetch(oci_statement *, ub4, char *);
-static ub4 oci_loadlob(oci_connection *, oci_descriptor *, char **);
+static int oci_loadlob(oci_connection *, oci_descriptor *, char **, ub4 *length);
 static int oci_setprefetch(oci_statement *statement, int size);
 
 static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclusive);
@@ -487,6 +487,7 @@ PHP_MINFO_FUNCTION(oci)
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "OCI8 Support", "enabled");
+	php_info_print_table_row(2, "Revision", "$Revision$");
 #ifndef PHP_WIN32
 	php_info_print_table_row(2, "Oracle Version", PHP_OCI8_VERSION );
 	php_info_print_table_row(2, "Compile-time ORACLE_HOME", PHP_OCI8_DIR );
@@ -992,12 +993,12 @@ _oci_make_zval(zval *value,oci_statement *statement,oci_out_column *column, char
             	return -1;
         	}
 			
-			loblen = oci_loadlob(statement->conn,descr,&buffer);
+			oci_loadlob(statement->conn,descr,&buffer,&loblen);
 			
 			if (loblen >= 0)	{
 				ZVAL_STRINGL(value,buffer,loblen,0);
 			} else {
-				/*ÜXXX is this an error? */
+				/* XXX is this an error? */
 				ZVAL_BOOL(value,0); 
 			}
 		} else { 
@@ -1544,33 +1545,18 @@ oci_fetch(oci_statement *statement, ub4 nrows, char *func)
 
 /* }}} */
 /* {{{ oci_loadlob() */
-static ub4
-oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer)
+
+#define LOBREADSIZE 1048576l /* 1MB */
+
+static int
+oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer,ub4 *loblen)
 {
-	ub4 loblen;
+	ub4 siz = 0;
+	ub4 readlen;
+	char *buf;
 
-	connection->error = 
-		OCILobGetLength(connection->pServiceContext,
-						connection->pError,
-						mydescr->ocidescr,
-						&loblen);
-
-	if (connection->error) {
-		oci_error(connection->pError, "OCILobGetLength", connection->error);
-		return -1;
-	}
-		
-	*buffer = emalloc(loblen + 1);
-
-	if (! buffer) {
-		return -1;
-	}
-
-	if (loblen == 0) {
-		(*buffer)[ 0 ] = 0;
-		return 0;
-	}
-
+	*loblen = 0;
+	
 	if (mydescr->type == OCI_DTYPE_FILE) {
 		connection->error = 
 			OCILobFileOpen(connection->pServiceContext,
@@ -1579,27 +1565,52 @@ oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer)
 						   OCI_FILE_READONLY);
 		if (connection->error) {
 			oci_error(connection->pError, "OCILobFileOpen",connection->error);
-			efree(buffer);
 			return -1;
 		}
 	}
-		
-	connection->error = 
-		OCILobRead(connection->pServiceContext, 
-				   connection->pError,
-				   mydescr->ocidescr,
-				   &loblen,				/* IN/OUT bytes toread/read */
-				   1,					/* offset (starts with 1) */ 
-				   (dvoid *) *buffer,	
-				   loblen, 				/* size of buffer */
-				   (dvoid *)0,
-				   (OCICallbackLobRead) 0, /* callback... */
-				   (ub2) 0, 			/* The character set ID of the buffer data. */
-				   (ub1) SQLCS_IMPLICIT); /* The character set form of the buffer data. */
-	
+
+
+	connection->error =
+		OCILobGetLength(connection->pServiceContext,
+						connection->pError,
+						mydescr->ocidescr,
+						&readlen);
+
+	if (connection->error) {
+		oci_error(connection->pError, "OCILobFileOpen",connection->error);
+		return -1;
+	}
+
+	buf = emalloc(readlen + 1);
+
+	do {
+		connection->error = 
+			OCILobRead(connection->pServiceContext, 
+					   connection->pError,
+					   mydescr->ocidescr,
+					   &readlen,				/* IN/OUT bytes toread/read */
+					   siz + 1,					/* offset (starts with 1) */ 
+					   (dvoid *) buf + siz,	
+					   readlen,		 			/* size of buffer */
+					   (dvoid *)0,
+					   (OCICallbackLobRead) 0, 	/* callback... */
+					   (ub2) 0, 				/* The character set ID of the buffer data. */
+					   (ub1) SQLCS_IMPLICIT); 	/* The character set form of the buffer data. */
+
+		siz += readlen;
+		readlen = LOBREADSIZE;
+
+		if (connection->error == OCI_NEED_DATA) {
+			buf = erealloc(buf,siz + LOBREADSIZE + 1);	
+			continue;
+		} else {
+			break;
+		}
+	} while (1);
+
 	if (connection->error) {
 		oci_error(connection->pError, "OCILobRead", connection->error);
-		efree(buffer);
+		efree(buf);
 		return -1;
 	}
 
@@ -1610,18 +1621,21 @@ oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer)
 							mydescr->ocidescr);
 		if (connection->error) {
 			oci_error(connection->pError, "OCILobFileClose", connection->error);
-			efree(buffer);
+			efree(buf);
 			return -1;
 		}
 	}
-		
-	(*buffer)[ loblen ] = 0;
 
-	oci_debug("OCIloadlob: size=%d",loblen);
+	buf = erealloc(buf,siz+1);
+	buf[ siz ] = 0;
 
-	return loblen;
+	*buffer = buf;
+	*loblen = siz;
+
+	oci_debug("OCIloadlob: size=%d",siz);
+
+	return 0;
 }
-
 /* }}} */
 /* {{{ oci_failover_callback() */
 #if 0 /* not needed yet ! */
@@ -2743,7 +2757,7 @@ PHP_FUNCTION(ociloadlob)
 
 		connection = descr->conn;
 
-		loblen = oci_loadlob(connection,descr,&buffer);
+		oci_loadlob(connection,descr,&buffer,&loblen);
 
 		if (loblen >= 0) {
 	 		RETURN_STRINGL(buffer,loblen,0);
