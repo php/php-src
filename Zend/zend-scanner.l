@@ -526,7 +526,9 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 {
 	zend_lex_state original_lex_state;
 	zval tmp = *str;
+#ifdef ZTS
 	istrstream *input_stream;
+#endif
 	CLS_FETCH();
 
 	str = &tmp;
