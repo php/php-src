@@ -1,3 +1,56 @@
+2000-10-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/shmop/shmop.c: - Removed the shm_* aliases
+    - Removed the shm_* aliases, only the smhop_* function wiil be
+      supported 
+
+    * ext/shmop/php_shmop.h
+      ext/shmop/shmop.c:
+    - Renamed the shm_ to shmop_ and created aliases for the old shm_
+      functions
+    - Renamed the shm_* functions to shmop_* and added aliases for the
+      old functions 
+
+2000-10-19  Thomas Weinert  <subjective@subjective.de>
+
+    * pear/DB/tests/mysql/003.phpt:
+    I need some time to understand haw I can make a "select"
+
+2000-10-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: Hack for #7262, not fixed yet
+
+2000-10-19  Joey Smith  <joey@joeysmith.com>
+
+    * ext/sybase_ct/php_sybase_ct.c: Use sybct for INI values.
+
+    * ext/sybase/php_sybase_db.c: Fix compiler warnings.
+
+    * ext/sybase/php_sybase_db.c: Fix #7338.
+
+    * apidoc-zend.txt
+      main/fopen-wrappers.c: Close bug #7325. Patches by djm@web.us.uu.net.
+
+2000-10-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/domxml/config.m4: Remove left over ext_skel comment
+
+2000-10-19  Stig Venaas  <venaas@uninett.no>
+
+    * configure.in
+      main/network.c: Check that AF_INET6 is defined before using IPv6
+
+2000-10-19  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/domxml/config.m4: fixed a mistake.  should be .
+
+2000-10-19  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/imap/php_imap.c:
+    add an optional parameter to imap_sort to specify a search program that
+    messages must match to be included in the sorted list.
+
 2000-10-18  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
 
     * ext/domxml/Makefile.in
