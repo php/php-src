@@ -1201,7 +1201,7 @@ static int _php_ibase_blob_add(zval **string_arg, ibase_blob_handle *ib_blob TSR
 
 /* {{{ _php_ibase_bind()
    Bind parameter placeholders in a previously prepared query */
-static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_query *ib_query TSRMLS_DC)
+static int _php_ibase_bind(XSQLDA *sqlda, zval ***b_vars, BIND_BUF *buf, ibase_query *ib_query TSRMLS_DC)
 {
 
 	int i , rv = SUCCESS;
@@ -1209,7 +1209,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 
 	for (i = 0; i < sqlda->sqld; ++var, ++i) { /* bound vars */
 		
-		zval *b_var = b_vars[i];
+		zval *b_var = *b_vars[i];
 
 		var->sqlind = &buf[i].sqlind;
 		
@@ -1425,17 +1425,17 @@ static void _php_ibase_alloc_xsqlda(XSQLDA *sqlda)
 /* }}} */
 
 /* {{{ _php_ibase_exec() */
-static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int argc, zval **args TSRMLS_DC)
+static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int argc, zval ***args TSRMLS_DC)
 {
 #define IB_RESULT (*ib_resultp)
 	XSQLDA *in_sqlda = NULL, *out_sqlda = NULL;
 	BIND_BUF *bind_buf = NULL;
-	int rv = FAILURE;
+	int i, rv = FAILURE;
 
 	IB_RESULT = NULL;
 
-	if (argc > 0 && args != NULL) {
-		SEPARATE_ZVAL(args);
+	for (i = 0; i < argc; ++i) {
+		SEPARATE_ZVAL(args[i]);
 	}
 
 	/* allocate sqlda and output buffers */
@@ -1699,7 +1699,7 @@ PHP_FUNCTION(ibase_rollback)
    Execute a query */
 PHP_FUNCTION(ibase_query)
 {
-	zval ***args, **bind_args = NULL, **dummy = NULL;
+	zval ***args, ***bind_args = NULL, **dummy = NULL;
 	int i, link_id = 0, trans_n = 0, bind_n = 0, trans_id = 0;
 	char *query;
 	ibase_db_link *ib_link;
@@ -1742,7 +1742,7 @@ PHP_FUNCTION(ibase_query)
 		   absolutely no sense if not using a prepared SQL statement.
 		*/
 		bind_n = ZEND_NUM_ARGS() - i;
-		bind_args = args[i];
+		bind_args = &args[i];
 	}
 	
 	/* open default transaction */
@@ -2323,7 +2323,7 @@ PHP_FUNCTION(ibase_prepare)
    Execute a previously prepared query */
 PHP_FUNCTION(ibase_execute)
 {
-	zval ***args, **bind_args = NULL;
+	zval ***args, ***bind_args = NULL;
 	ibase_query *ib_query;
 	ibase_result *ib_result;
 
@@ -2342,7 +2342,7 @@ PHP_FUNCTION(ibase_execute)
 	ZEND_FETCH_RESOURCE(ib_query, ibase_query *, args[0], -1, "InterBase query", le_query);
 
 	if (ZEND_NUM_ARGS() > 1) { /* have variables to bind */
-		bind_args = args[1];
+		bind_args = &args[1];
 	}
 	
 	/* Have we used this cursor before and it's still open? */
