@@ -19,11 +19,13 @@ if test "$PHP_NSAPI" != "no"; then
   if test -d $PHP_NSAPI/include ; then
     NSAPI_INCLUDE=$PHP_NSAPI/include
     AC_MSG_RESULT(Netscape-Enterprise/3.x style)
+    AC_CHECK_HEADERS([$NSAPI_INCLUDE/nsapi.h])
   elif test -d $PHP_NSAPI/plugins/include ; then
     NSAPI_INCLUDE=$PHP_NSAPI/plugins/include
     AC_MSG_RESULT(iPlanet/4.x style)
+    AC_CHECK_HEADERS([$NSAPI_INCLUDE/nsapi.h])
   else
-    AC_MSG_ERROR(Please check you have nsapi.h in either DIR/include or DIR/plugins/include)
+    AC_MSG_ERROR(Please check you have nsapi.h in either $PHP_NSAPI/include or $PHP_NSAPI/plugins/include)
   fi
   PHP_ADD_INCLUDE($NSAPI_INCLUDE)
   PHP_BUILD_THREAD_SAFE
