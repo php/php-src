@@ -2352,7 +2352,7 @@ PHP_FUNCTION(str_repeat)
 	}
 	result[result_len] = '\0';
 	
-	RETURN_STRINGL(result, result_len + 1, 0);
+	RETURN_STRINGL(result, result_len, 0);
 }
 /* }}} */
 
