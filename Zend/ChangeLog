@@ -1,3 +1,26 @@
+2003-03-05  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Fix auto globals
+
+    * zend_compile.c
+      zend_execute.c
+      zend_language_parser.y:
+      Implement $obj::static_func()
+
+    * zend.h
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_globals.h
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_opcode.c
+      zend_operators.c
+      zend_operators.h:
+      Add support for interfaces
+
 2003-03-04  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c
