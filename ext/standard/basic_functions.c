@@ -301,7 +301,9 @@ function_entry basic_functions[] = {
 	PHP_FE(bin2hex,															NULL)
 	PHP_FE(sleep,															NULL)
 	PHP_FE(usleep,															NULL)
+#if HAVE_NANOSLEEP
 	PHP_FE(nanosleep,														NULL)
+#endif
 	PHP_FE(time,															NULL)
 	PHP_FE(mktime,															NULL)
 	PHP_FE(gmmktime,														NULL)
@@ -1691,6 +1693,7 @@ PHP_FUNCTION(usleep)
 }
 /* }}} */
 
+#if HAVE_NANOSLEEP
 /* {{{ proto mixed nanosleep(long seconds, long nanoseconds)
    Delay for a number of seconds and nano seconds */
 PHP_FUNCTION(nanosleep)
@@ -1718,6 +1721,7 @@ PHP_FUNCTION(nanosleep)
 	RETURN_FALSE;
 }
 /* }}} */
+#endif
 
 /* {{{ proto string get_current_user(void)
    Get the name of the owner of the current PHP script */

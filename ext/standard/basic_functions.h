@@ -48,7 +48,9 @@ PHP_FUNCTION(constant);
 PHP_FUNCTION(toggle_short_open_tag);
 PHP_FUNCTION(sleep);
 PHP_FUNCTION(usleep);
+#if HAVE_NANOSLEEP
 PHP_FUNCTION(nanosleep);
+#endif
 PHP_FUNCTION(flush);
 PHP_FUNCTION(ip2long);
 PHP_FUNCTION(long2ip);

@@ -526,6 +526,7 @@ tempnam \
 tzset \
 unsetenv \
 usleep \
+nanosleep \
 utime \
 vsnprintf \
 )
