@@ -272,8 +272,7 @@ define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
 /* We got failed Tests, offer the user to send and e-mail to QA team, unless NO_INTERACTION is set */
 if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 	$fp = fopen("php://stdin", "r+");
-	fwrite($fp, "Some tests have failed, would you like to send the\nreport to PHP's QA team? [Yn]: ");
-	fflush($fp);
+	echo "Some tests have failed, would you like to send the\nreport to PHP's QA team? [Yn]: ";
 	$user_input = fgets($fp, 10);
 	
 	if (strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
@@ -509,17 +508,17 @@ TEST $file
 	if (array_key_exists('INI', $section_text)) {
 		foreach(preg_split( "/[\n\r]+/", $section_text['INI']) as $setting) {
 			if (strpos($setting, '=')!==false) {
-				$setting = explode("=", $setting);
+				$setting = explode("=", $setting,2);
 				$name = trim(strtolower($setting[0]));
 				$value = trim($setting[1]);
-				$ini_settings[$name] = $value;
+				$ini_settings[$name] = addslashes($value);
 			}
 		}
 	}
 	if (count($ini_settings)) {
 		$settings = '';
 		foreach($ini_settings as $name => $value) {
-			$settings .= " -d '$name=$value'";
+			$settings .= " -d \"$name=$value\"";
 		}
 		$ini_settings = $settings;
 	} else {
