@@ -483,18 +483,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "sablot"=..\ext\sablot\sablot.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "shmop"=..\ext\shmop\shmop.dsp - Package Owner=<4>
 
 Package=<5>
