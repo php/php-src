@@ -584,7 +584,7 @@ char *php_std_date(time_t t)
 	tm1 = php_gmtime_r(&t, &tmbuf);
 	str = emalloc(81);
 	if (PG(y2k_compliance)) {
-		snprintf(str, 80, "%s, %02d %s %04d %02d:%02d:%02d GMT",
+		snprintf(str, 80, "%s, %02d-%s-%04d %02d:%02d:%02d GMT",
 				day_short_names[tm1->tm_wday],
 				tm1->tm_mday,
 				mon_short_names[tm1->tm_mon],
@@ -592,7 +592,7 @@ char *php_std_date(time_t t)
 				tm1->tm_hour, tm1->tm_min, tm1->tm_sec);
 	} else {
 		snprintf(str, 80, "%s, %02d-%s-%02d %02d:%02d:%02d GMT",
-				day_full_names[tm1->tm_wday],
+				day_short_names[tm1->tm_wday],
 				tm1->tm_mday,
 				mon_short_names[tm1->tm_mon],
 				((tm1->tm_year)%100),
