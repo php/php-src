@@ -50,6 +50,12 @@
 #  endif
 # endif /* osf alpha */
 
+#if WIN32||WINNT
+#define PHP_OCI_API __declspec(dllexport)
+#else
+#define PHP_OCI_API
+#endif                                   
+
 #include <oci.h>
 
 typedef struct {
@@ -59,42 +65,42 @@ typedef struct {
 	char *dbname;
     OCIServer *pServer;
 	OCIFocbkStruct failover;
-} oci8_server;
+} oci_server;
 
 typedef struct {
 	int num;
 	int persistent;
 	int open;
-	oci8_server *server;
+	oci_server *server;
 	OCISession *pSession;
-} oci8_session;
+} oci_session;
 
 typedef struct {
 	int id;
 	int open;
-	oci8_session *session;
+	oci_session *session;
     OCISvcCtx *pServiceContext;
 	sword error;
     OCIError *pError;
 	HashTable *descriptors;
 	int descriptors_count;
-} oci8_connection;
+} oci_connection;
 
 typedef struct {
 	dvoid *ocidescr;
 	ub4 type;
-} oci8_descriptor;
+} oci_descriptor;
 
 typedef struct {
     pval *pval;
     text *name;
     ub4 name_len;
 	ub4 type;
-} oci8_define;
+} oci_define;
 
 typedef struct {
 	int id;
-	oci8_connection *conn;
+	oci_connection *conn;
 	sword error;
     OCIError *pError;
     OCIStmt *pStmt;
@@ -104,7 +110,7 @@ typedef struct {
 	HashTable *binds;
 	HashTable *defines;
 	int executed;
-} oci8_statement;
+} oci_statement;
 
 typedef struct {
 	OCIBind *pBind;
@@ -114,10 +120,10 @@ typedef struct {
 	ub4 maxsize;
 	sb2 indicator;
 	ub2 retcode;
-} oci8_bind;
+} oci_bind;
 
 typedef struct {
-	oci8_statement *statement;
+	oci_statement *statement;
 	OCIDefine *pDefine;
     char *name;
     ub4 name_len;
@@ -131,18 +137,18 @@ typedef struct {
 	ub2 is_descr;
 	ub2 is_cursor;
     int descr;
-    oci8_descriptor *pdescr;
-    oci8_statement *pstmt;
+    oci_descriptor *pdescr;
+    oci_statement *pstmt;
 	int stmtid;
 	void *data;
-	oci8_define *define;
+	oci_define *define;
 
 	/* for piecewise read */
 	int piecewise;
 	int cursize;
 	int curoffs;
     ub4 piecesize;
-} oci8_out_column;
+} oci_out_column;
 
 typedef struct {
 	sword error;
@@ -161,34 +167,38 @@ typedef struct {
     long num_links;
 	*/
 
-    int le_conn; /* active connections */
-    int le_stmt; /* active statements */
-    int le_trans; /* active transactions */
-
 	int server_num;
     HashTable *server;
 	int user_num;
 	HashTable *user;
 
     OCIEnv *pEnv;
-} oci8_module;
+} php_oci_globals;
 
 extern php3_module_entry oci8_module_entry;
-#define oci8_module_ptr &oci8_module_entry
 #define phpext_oci8_ptr &oci8_module_entry
 
-#define OCI8_MAX_NAME_LEN 64
-#define OCI8_MAX_DATA_SIZE INT_MAX
-#define OCI8_PIECE_SIZE (64*1024)-1
-# define OCI8_CONN_TYPE(x) ((x)==OCI8_GLOBAL(php3_oci8_module).le_conn)
-# define OCI8_STMT_TYPE(x) ((x)==OCI8_GLOBAL(php3_oci8_module).le_stmt)
+#define OCI_MAX_NAME_LEN  64
+#define OCI_MAX_DATA_SIZE INT_MAX
+#define OCI_PIECE_SIZE    (64*1024)-1
+#define OCI_CONN_TYPE(x)  ((x)==le_conn)
+#define OCI_STMT_TYPE(x)  ((x)==le_stmt)
 
-# define RETURN_OUT_OF_MEMORY \
-	php_error(E_WARNING, "Out of memory");\
-	RETURN_FALSE
-# define OCI8_FAIL(c,f,r) \
-	php3i_oci8_error((c)->pError,(f),(r));\
-	RETURN_FALSE
+#ifdef ZTS
+#define OCILS_D php_oci_globals *oci_globals
+#define OCILS_DC , PSLS_D
+#define OCILS_C oci_globals
+#define OCILS_CC , OCILS_C
+#define OCI(v) (oci_globals->v)
+#define OCILS_FETCH() php_oci_globals *oci_globals = ts_resource(oci_globals_id)
+#else
+#define OCILS_D
+#define OCILS_DC
+#define OCILS_C
+#define OCILS_CC
+#define OCI(v) (oci_globals.v)
+#define OCILS_FETCH()
+#endif
 
 #else /* !HAVE_OCI8 */
 
