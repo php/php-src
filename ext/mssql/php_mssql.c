@@ -81,7 +81,7 @@ PHP_MSSQL_API php_mssql_globals mssql_globals;
 #endif
 
 #ifdef COMPILE_DL
-DLEXPORT zend_module_entry *get_module(void) { return &mssql_module_entry; };
+ZEND_GET_MODULE(mssql)
 #endif
 
 #define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING,"MS SQL:  A link to the server could not be established"); RETURN_FALSE; } }

@@ -493,7 +493,7 @@ zend_module_entry java_module_entry = {
   STANDARD_MODULE_PROPERTIES
 };
 
-DLEXPORT zend_module_entry *get_module(void) { return &java_module_entry; }
+ZEND_GET_MODULE(java)
 
 /***************************************************************************/
 

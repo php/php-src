@@ -158,7 +158,7 @@ zend_module_entry imap_module_entry = {
 
 
 #ifdef COMPILE_DL_IMAP
-ZEND_DLEXPORT zend_module_entry *get_module(void) { return &imap_module_entry; }
+ZEND_GET_MODULE(imap)
 #endif
 
 

@@ -127,7 +127,7 @@ zend_module_entry php_mcal_module_entry = {
 };
 
 #if COMPILE_DL
-DLEXPORT zend_module_entry *get_module(void) { return &php_mcal_module_entry; }
+ZEND_GET_MODULE(php_mcal)
 #endif
 
 /* 

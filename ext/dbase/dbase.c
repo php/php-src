@@ -731,7 +731,7 @@ zend_module_entry dbase_module_entry = {
 
 
 #if defined(COMPILE_DL)
-DLEXPORT zend_module_entry *get_module(void) { return &dbase_module_entry; }
+ZEND_GET_MODULE(dbase)
 
 #if (WIN32|WINNT) && defined(THREAD_SAFE)
 

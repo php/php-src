@@ -51,7 +51,7 @@ zend_module_entry sysvshm_module_entry = {
 
 
 #if COMPILE_DL
-zend_module_entry *get_module() { return &sysvshm_module_entry; }
+ZEND_GET_MODULE(sysvshm)
 #endif
 
 #undef shm_ptr					/* undefine AIX-specific macro */

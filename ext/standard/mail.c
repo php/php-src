@@ -35,7 +35,7 @@
 #endif
 
 #if COMPILE_DL
-DLEXPORT zend_module_entry *get_module(void) { return &odbc_module_entry; }
+ZEND_GET_MODULE(odbc)
 #endif
 
 /* {{{ proto int mail(string to, string subject, string message [, string additional_headers])

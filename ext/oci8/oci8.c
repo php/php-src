@@ -94,7 +94,7 @@ PHP_OCI_API php_oci_globals oci_globals;
 /* {{{ dynamically loadable module stuff */
 
 #ifdef COMPILE_DL_OCI8
-DLEXPORT zend_module_entry *get_module() { return &oci8_module_entry; };
+ZEND_GET_MODULE(oci8)
 #endif /* COMPILE_DL */
 
 /* }}} */

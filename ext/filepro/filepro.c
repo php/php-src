@@ -138,7 +138,7 @@ zend_module_entry filepro_module_entry = {
 
 #if COMPILE_DL
 #include "dl/phpdl.h"
-DLEXPORT zend_module_entry *get_module(void) { return &filepro_module_entry; }
+ZEND_GET_MODULE(filepro)
 #if (WIN32|WINNT) && defined(THREAD_SAFE)
 
 /*NOTE: You should have an odbc.def file where you

@@ -93,7 +93,7 @@ zend_module_entry snmp_module_entry = {
 };
 
 #if COMPILE_DL
-DLEXPORT zend_module_entry *get_module() { return &snmp_module_entry; };
+ZEND_GET_MODULE(snmp)
 #endif
 
 /* THREAD_LS snmp_module php_snmp_module; - may need one of these at some point */
