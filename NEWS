@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added support to getimagesize() for compressed Flash MX files. (Derick)
 - Added ability to capture string offsets in preg_split() results. (David Brown, Andrei)
 - Fixed a crash bug in token_get_all(). (Andrei)
 - Implemented glob() for Unix/Win32. (Hartmut, Edin, Markus)
