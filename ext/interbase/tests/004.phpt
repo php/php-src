@@ -32,6 +32,7 @@ InterBase: BLOB test
 
     $bl_s = ibase_blob_import($link,$ftmp);
     ibase_query($link, "INSERT INTO test4 (v_integer, v_blob) VALUES (1, ?)", $bl_s);
+    fclose($ftmp);
 
     echo "test blob 1\n";
     $q = ibase_query("SELECT v_blob FROM test4 WHERE v_integer = 1");
