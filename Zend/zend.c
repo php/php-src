@@ -223,7 +223,7 @@ static FILE *zend_fopen_wrapper(const char *filename, char **opened_path)
 	if (opened_path) {
 		*opened_path = strdup(filename);
 	}
-	return fopen(filename, "r");
+	return fopen(filename, "rb");
 }
 
 
