@@ -211,7 +211,7 @@ XML_ParserCreateNS(const XML_Char *encoding, const XML_Char sep)
 
 static void *(*_expat_cpt_malloc_fcn)(size_t sz);
 
-static char *_expat_cpt_intn_strdup(const chat *str)
+static char *_expat_cpt_intn_strdup(const char *str)
 {
 	size_t len;
 	char *retval;
@@ -237,7 +237,7 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 
 	_expat_cpt_malloc_fcn = memsuite->malloc_fcn; /* FIXME: not reentrant ! */
 
-	xmlMemSetup(memsuite->free_fcn, memsuite->malloc_fcn, memsuite->realloc_fcn, _expat_compat_intn_strdup); /* WHOCANFIXME: not reentrant ! */
+	xmlMemSetup(memsuite->free_fcn, memsuite->malloc_fcn, memsuite->realloc_fcn, _expat_cpt_intn_strdup); /* WHOCANFIXME: not reentrant ! */
 
 	parser = (XML_Parser) memsuite->malloc_fcn(sizeof(struct _XML_Parser));
 	parser->namespace = 0;
