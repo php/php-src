@@ -279,7 +279,7 @@ static void spl_array_unset_dimension(zval *object, zval *offset TSRMLS_DC)
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
 		if (HASH_OF(intern->array) == &EG(symbol_table)) {
-			if (delete_global_variable(Z_STRVAL_P(offset), Z_STRLEN_P(offset) TSRMLS_CC)) {
+			if (zend_delete_global_variable(Z_STRVAL_P(offset), Z_STRLEN_P(offset) TSRMLS_CC)) {
 				zend_error(E_NOTICE,"Undefined index:  %s", Z_STRVAL_P(offset));
 			}
 		} else {

@@ -1915,7 +1915,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	/* Delete the first or last value */
 	zend_hash_get_current_key_ex(Z_ARRVAL_PP(stack), &key, &key_len, &index, 0, NULL);
 	if (key && Z_ARRVAL_PP(stack) == &EG(symbol_table)) {
-		delete_global_variable(key, key_len-1 TSRMLS_CC);
+		zend_delete_global_variable(key, key_len-1 TSRMLS_CC);
 	} else {
 		zend_hash_del_key_or_index(Z_ARRVAL_PP(stack), key, key_len, index, (key) ? HASH_DEL_KEY : HASH_DEL_INDEX);
 	}
@@ -2766,7 +2766,7 @@ PHP_FUNCTION(array_unique)
 			}
 			if (p->nKeyLength) {
 				if (Z_ARRVAL_P(return_value) == &EG(symbol_table)) {
-					delete_global_variable(p->arKey, p->nKeyLength-1 TSRMLS_CC);
+					zend_delete_global_variable(p->arKey, p->nKeyLength-1 TSRMLS_CC);
 				} else {
 					zend_hash_del(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength);
 				}
