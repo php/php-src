@@ -34,6 +34,7 @@
 #ifndef _PHP3_GD_H
 #define _PHP3_GD_H
 
+#define HAVE_GDIMAGECREATEFROMPNG 1
 
 #if HAVE_LIBTTF|HAVE_LIBFREETYPE
 #define ENABLE_GD_TTF
@@ -92,6 +93,8 @@ PHP_FUNCTION(imagestring);
 PHP_FUNCTION(imagestringup);
 PHP_FUNCTION(imagesx);
 PHP_FUNCTION(imagesy);
+PHP_FUNCTION(imagecreatefrompng);
+PHP_FUNCTION(imagepng);
 void php3_free_gd_font(gdFontPtr);
 void _php3_gdimagecharup(gdImagePtr, gdFontPtr, int, int, int, int);
 PHP_FUNCTION(imagedashedline);

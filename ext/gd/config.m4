@@ -56,7 +56,20 @@ dnl A whole whack of possible places where this might be
           AC_MSG_RESULT(yes (static))
           AC_ADD_LIBRARY_WITH_PATH(gd, $GD_LIB)
         fi
+        old_LDFLAGS=$LDFLAGS
+        LDFLAGS="$LDFLAGS -L$GD_LIB"
+		old_LIBS=$LIBS
         AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13) ])
+		LIBS="$LIBS -lpng -lz"
+        AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1)])
+        AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1)])
+        
+        LIBS=$old_LIBS
+        LDFLAGS=$old_LDFLAGS
+        if test "$ac_cv_lib_gd_gdImageCreateFromPng" = "yes"; then
+          AC_ADD_LIBRARY(png)
+          AC_ADD_LIBRARY(z)
+        fi
         ac_cv_lib_gd_gdImageLine=yes
       else
         AC_MSG_ERROR([Unable to find libgd.(a|so) anywhere under $withval])
@@ -92,11 +105,10 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
       if test "$shared" = "yes"; then
         GD_LIBS="$GD_LIBS -lfreetype"
         GD_LFLAGS="$GD_LFLAGS -L$FREETYPE_DIR/lib"
-        GD_INCLUDES="$GD_INCLUDES -I$FREETYPE_DIR/include"
       else 
         AC_ADD_LIBRARY_WITH_PATH(freetype, $FREETYPE_DIR/lib)
-        AC_ADD_INCLUDE($FREETYPE_DIR/include)
       fi
+      AC_ADD_INCLUDE($FREETYPE_DIR/include)
       AC_MSG_RESULT(yes)
     else
       if test -n "$TTF_DIR" ; then
@@ -104,11 +116,10 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
         if test "$shared" = "yes"; then
           GD_LIBS="$GD_LIBS -lttf"
           GD_LFLAGS="$GD_LFLAGS -L$TTF_DIR/lib"
-          GD_INCLUDES="$GD_INCLUDES -I$TTF_DIR/include"
         else
           AC_ADD_LIBRARY_WITH_PATH(ttf, $TTF_DIR/lib)
-          AC_ADD_INCLUDE($TTF_DIR/include)
         fi
+        AC_ADD_INCLUDE($TTF_DIR/include)
         AC_MSG_RESULT(yes)
       else
         AC_MSG_RESULT(no)
@@ -136,21 +147,17 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
     AC_MSG_RESULT(no)
   ])
   
+  AC_EXPAND_PATH($GD_INCLUDE, GD_INCLUDE)
+  AC_ADD_INCLUDE($GD_INCLUDE)
   PHP_EXTENSION(gd, $shared)
   if test "$shared" != "yes"; then
-    AC_ADD_INCLUDE($GD_INCLUDE)
     GD_STATIC="libphpext_gd.la"
   else 
-    AC_EXPAND_PATH($GD_INCLUDE, GD_INCLUDE)
-    if test -n "$GD_INCLUDE"; then
-      GD_INCLUDES="$GD_INCLUDES -I$GD_INCLUDE"
-    fi
     GD_SHARED="gd.la"
   fi
 fi
 
 AC_SUBST(GD_LFLAGS)
 AC_SUBST(GD_LIBS)
-AC_SUBST(GD_INCLUDES)
 AC_SUBST(GD_STATIC)
 AC_SUBST(GD_SHARED)
