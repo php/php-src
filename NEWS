@@ -34,6 +34,8 @@ PHP 4                                                                      NEWS
   (Wez, Ilia)
 - Fixed bug #26381 (rand() without srand() doesn't work with certain php.ini).
   (Jani)
+- Fixed bug #25753 (php.ini settings "leak" from vhosts/.htaccess files).
+  (Patch by: rover at tob dot ru)
 - Fixed bug #22403 (PHP crashes when executing a sql procedure without
   parameters). (Timm)
 - Fixed bug #21513 (shutdown functions not executed if timed out). (Zeev)
