@@ -1,3 +1,50 @@
+2003-09-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/streams/streams.c:
+      Show the whole message when in debug mode
+
+2003-09-13  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * tests/lang/bug24054.phpt:
+      WS
+
+    * main/streams/plain_wrapper.c:
+      Pointer size fix
+
+2003-09-13  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      NEWS
+      ext/ldap/ldap.c:
+      MFH(r-1.147): Fix Bug #25525 ldap_explode_dn() crashes when passed invalid
+      params
+
+    * ext/ldap/ldap.c:
+      Fix Bug #25525 ldap_explode_dn crashes when passed invalid params.
+
+2003-09-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_alloc.c:
+      Fix warnings
+
+    * main/snprintf.c
+      main/spprintf.c:
+      - Fix %p to prepend '0x' as suggested by C99.
+      - Add 'z' prefix.
+
+2003-09-13  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * main/SAPI.c
+      main/streams/streams.c
+      main/streams/userspace.c
+      tests/lang/bug24054.phpt:
+      Fixed for 64bit archs
+
+2003-09-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/sqlite.c:
+      Make use of dedicated macro
+
 2003-09-12  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
 
     * ext/interbase/interbase.c:
