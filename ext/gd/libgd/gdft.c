@@ -16,7 +16,9 @@
 #include <unistd.h>
 #else
 #include <io.h>
-#define R_OK 04			/* Needed in Windows */
+#ifndef R_OK
+# define R_OK 04			/* Needed in Windows */
+#endif
 #endif
 
 #ifdef WIN32
