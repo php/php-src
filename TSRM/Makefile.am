@@ -2,3 +2,5 @@
 AUTOMAKE_OPTIONS=foreign
 noinst_LTLIBRARIES=libtsrm.la
 libtsrm_la_SOURCES = TSRM.c
+
+depend:
