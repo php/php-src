@@ -1,3 +1,61 @@
+2001-11-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/zlib/zlib.c: MFH
+
+2001-11-12  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * sapi/cgi/cgi_main.c: fixed output problem with output buffering handler.
+
+    * ext/mbstring/mbstring.c:
+    fixed a bug in http input processing patched by Yasuo Ohgaki.
+
+2001-11-12  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/CODING_STANDARDS: * shame on me ...
+
+2001-11-12  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/php_sockets_win.c
+      ext/sockets/php_sockets_win.h
+      ext/sockets/sockets.c
+      ext/sockets/sockets.dsp: MFH latest changes
+
+2001-11-12  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/CODING_STANDARDS: * typo
+
+2001-11-12  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/xmail.xsl:
+    Addition of XSLT stylesheet to transform the output of Mail_mimeDecode::getXML()
+    back to an email.
+
+    * pear/Mail/xmail.dtd:
+    Addition of xmail.dtd. This is the DTD for the Mail_mimeDecode::getXML()
+    output.
+
+    * pear/Mail/mimeDecode.php: Updated email addy
+
+    * pear/Mail/mimeDecode.php: Updated TODO list
+
+    * pear/Mail/mimeDecode.php: Tabs --> spaces
+
+    * pear/Mail/mimeDecode.php:
+    Added functionality to convert the output to an XML representation.
+
+2001-11-12  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/CODING_STANDARDS: Provide the full URL to pear.php.net.
+
+2001-11-12  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/sockets/sockets.c: Unified error/warning messages.
+
+    * ext/sockets/sockets.c: WS
+
+    * ext/sockets/sockets.c: Fix #14020 and some minor leaks.
+
 2001-11-11  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
 
     * sapi/cgi/cgi_main.c: fixed output problem with output buffering handler.
