@@ -327,6 +327,9 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 			SELECTIVE_PZVAL_LOCK(*Ts[result->u.var].var.ptr_ptr, result);
 			AI_USE_PTR(Ts[result->u.var].var);
 		}
+		if (type==IS_TMP_VAR) {
+			zval_dtor(value);
+		}
 		return;
 	}
 	
@@ -343,7 +346,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 			variable_ptr->is_ref = 1;
 			if (type!=IS_TMP_VAR) {
 				zendi_zval_copy_ctor(*variable_ptr);
-				zval_ptr_dtor(&value);
+				
 			}
 		}
 	} else {
@@ -570,13 +573,14 @@ fetch_string_dim:
 			break;
 		case IS_DOUBLE:
 		case IS_RESOURCE:
+		case IS_BOOL: 
 		case IS_LONG: {
 				long index;
 
-				if (dim->type == IS_LONG || dim->type == IS_RESOURCE) {
-					index = dim->value.lval;
-				} else {
+				if (dim->type == IS_DOUBLE) {
 					index = (long)dim->value.dval;
+				} else {
+					index = dim->value.lval;
 				}
 				if (zend_hash_index_find(ht, index, (void **) &retval) == FAILURE) {
 					switch (type) {
