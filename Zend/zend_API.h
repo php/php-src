@@ -153,6 +153,7 @@ ZEND_API int add_assoc_resource(zval *arg, char *key, int r);
 ZEND_API int add_assoc_double(zval *arg, char *key, double d);
 ZEND_API int add_assoc_string(zval *arg, char *key, char *str, int duplicate);
 ZEND_API int add_assoc_stringl(zval *arg, char *key, char *str, uint length, int duplicate);
+ZEND_API int add_assoc_zval(zval *arg, char *key, uint key_length, zval *value);
 
 ZEND_API int add_index_long(zval *arg, uint idx, long n);
 ZEND_API int add_index_unset(zval *arg, uint idx);
