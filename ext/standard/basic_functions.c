@@ -898,7 +898,6 @@ function_entry basic_functions[] = {
 	PHP_FE(stream_bucket_prepend,				NULL)
 	PHP_FE(stream_bucket_append,				NULL)
 	PHP_FE(stream_bucket_new,					NULL)
-	PHP_FE(stream_bucket,						NULL)
 
 	/* functions from aggregate.c */
 	PHP_FE(aggregate,						first_arg_force_ref)

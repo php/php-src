@@ -167,7 +167,7 @@ php_stream_filter_status_t userfilter_filter(
 	zval *zclosing, *zconsumed, *zin, *zout, *zstream;
 	int call_result;
 
-	if (FAILURE == zend_hash_find(Z_OBJPROP_P(obj), "stream", 6, (void**)&zstream)) {
+	if (FAILURE == zend_hash_find(Z_OBJPROP_P(obj), "stream", 7, (void**)&zstream)) {
 		/* Give the userfilter class a hook back to the stream */
 		ALLOC_ZVAL(zstream);
 		ZEND_REGISTER_RESOURCE(zstream, stream, le_stream);
@@ -322,11 +322,11 @@ static void filter_item_dtor(struct php_user_filter_data *fdat)
 {
 }
 
-/* {{{ proto resource stream_bucket_make_writeable(resource brigade)
-   Return a bucket from the brigade for operating on */
+/* {{{ proto object stream_bucket_make_writeable(resource brigade)
+   Return a bucket object from the brigade for operating on */
 PHP_FUNCTION(stream_bucket_make_writeable)
 {
-	zval *zbrigade;
+	zval *zbrigade, *zbucket;
 	php_stream_bucket_brigade *brigade;
 	php_stream_bucket *bucket;
 
@@ -339,7 +339,12 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 	ZVAL_NULL(return_value);
 
 	if (brigade->head && (bucket = php_stream_bucket_make_writeable(brigade->head TSRMLS_CC))) {
-		ZEND_REGISTER_RESOURCE(return_value, bucket, le_bucket);
+		ALLOC_INIT_ZVAL(zbucket);
+		ZEND_REGISTER_RESOURCE(zbucket, bucket, le_bucket);
+		object_init(return_value);
+		add_property_zval(return_value, "bucket", zbucket);
+		add_property_stringl(return_value, "data", bucket->buf, bucket->buflen, 1);
+		add_property_long(return_value, "datalen", bucket->buflen);
 	}
 }
 /* }}} */
@@ -347,16 +352,33 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 /* {{{ php_stream_bucket_attach */
 static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval *zbrigade, *zbucket;
+	zval *zbrigade, *zobject;
+	zval **pzbucket, **pzdata;
 	php_stream_bucket_brigade *brigade;
 	php_stream_bucket *bucket;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &zbrigade, &zbucket) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zo", &zbrigade, &zobject) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (FAILURE == zend_hash_find(Z_OBJPROP_P(zobject), "bucket", 7, (void**)&pzbucket)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Object has no bucket property");
 		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE(brigade, php_stream_bucket_brigade *, &zbrigade, -1, PHP_STREAM_BRIGADE_RES_NAME, le_bucket_brigade);
-	ZEND_FETCH_RESOURCE(bucket, php_stream_bucket *, &zbucket, -1, PHP_STREAM_BUCKET_RES_NAME, le_bucket);
+	ZEND_FETCH_RESOURCE(bucket, php_stream_bucket *, pzbucket, -1, PHP_STREAM_BUCKET_RES_NAME, le_bucket);
+
+	if (SUCCESS == zend_hash_find(Z_OBJPROP_P(zobject), "data", 5, (void**)&pzdata) && (*pzdata)->type == IS_STRING) {
+		if (!bucket->own_buf) {
+			bucket = php_stream_bucket_make_writeable(bucket TSRMLS_CC);
+		}
+		if (bucket->buflen != Z_STRLEN_PP(pzdata)) {
+			bucket->buf = perealloc(bucket->buf, Z_STRLEN_PP(pzdata), bucket->is_persistent);
+			bucket->buflen = Z_STRLEN_PP(pzdata);
+		}
+		memcpy(bucket->buf, Z_STRVAL_PP(pzdata), bucket->buflen);
+	}
 
 	if (append) {
 		php_stream_bucket_append(brigade, bucket TSRMLS_CC);
@@ -386,7 +408,7 @@ PHP_FUNCTION(stream_bucket_append)
    Create a new bucket for use on the current stream */
 PHP_FUNCTION(stream_bucket_new)
 {
-	zval *zstream;
+	zval *zstream, *zbucket;
 	php_stream *stream;
 	char *buffer;
 	char *pbuffer;
@@ -407,35 +429,12 @@ PHP_FUNCTION(stream_bucket_new)
 
 	bucket = php_stream_bucket_new(stream, pbuffer, buffer_len, 1, php_stream_is_persistent(stream) TSRMLS_CC);
 
-	ZEND_REGISTER_RESOURCE(return_value, bucket, le_bucket);
-}
-/* }}} */
-
-/* {{{ proto string stream_bucket(resource bucket[, string buffer])
-   Get/Set Bucket Contents */
-PHP_FUNCTION(stream_bucket)
-{
-	char *buffer = NULL;
-	int buffer_len = 0;
-	zval *zbucket;
-	php_stream_bucket *bucket;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|s", &zbucket, &buffer, &buffer_len) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	ZEND_FETCH_RESOURCE(bucket, php_stream_bucket *, &zbucket, -1, PHP_STREAM_BUCKET_RES_NAME, le_bucket);
-
-	if (buffer) {
-		if (bucket->buf && bucket->own_buf) {
-			pefree(bucket->buf, bucket->is_persistent);
-		}
-		bucket->buf = pemalloc(buffer_len, bucket->is_persistent);
-		memcpy(bucket->buf, buffer, buffer_len);
-		bucket->buflen = buffer_len;
-		bucket->own_buf = 1;
-	}
-	RETURN_STRINGL(bucket->buf, bucket->buflen, 1);
+	ALLOC_INIT_ZVAL(zbucket);
+	ZEND_REGISTER_RESOURCE(zbucket, bucket, le_bucket);
+	object_init(return_value);
+	add_property_zval(return_value, "bucket", zbucket);
+	add_property_stringl(return_value, "data", bucket->buf, bucket->buflen, 1);
+	add_property_long(return_value, "datalen", bucket->buflen);
 }
 /* }}} */
 
