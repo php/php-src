@@ -140,6 +140,7 @@ ZEND_GET_MODULE(mnogosearch)
 
 static void _free_udm_agent(zend_rsrc_list_entry *rsrc){
 	UDM_AGENT * Agent = (UDM_AGENT *)rsrc->ptr;
+	UdmFreeEnv(Agent->Conf);
 	UdmFreeAgent(Agent);
 }
 
@@ -325,7 +326,7 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 				Env=UdmAllocEnv();				
 				UdmEnvSetDBAddr(Env,dbaddr);
 				UdmEnvSetDBMode(Env,dbmode);				
-				Agent=UdmAllocAgent(Env,0,UDM_OPEN_MODE_READ);				
+				Agent=UdmAllocAgent(Env,0,UDM_OPEN_MODE_READ);
 				
 				ZEND_REGISTER_RESOURCE(return_value,Agent,le_link);
 			}
