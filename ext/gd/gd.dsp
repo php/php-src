@@ -168,10 +168,6 @@ SOURCE=.\gdcache.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\gdt1.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\gdttf.c
 # End Source File
 # End Group
@@ -181,10 +177,6 @@ SOURCE=.\gdttf.c
 # Begin Source File
 
 SOURCE=.\gdcache.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\gdt1.h
 # End Source File
 # Begin Source File
 
