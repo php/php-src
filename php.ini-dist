@@ -192,6 +192,8 @@ warn_plus_overloading	=	Off		; warn if the + operator is used with strings
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
 ; Note - track_vars is ALWAYS enabled as of PHP 4.0.3
+;arg_separator		=	"&amp;" ; The separator used in PHP generated URLs to separate arguments.
+								; Default is "&". 
 variables_order		=	"EGPCS"	; This directive describes the order in which PHP registers
 								; GET, POST, Cookie, Environment and Built-in variables (G, P,
 								; C, E & S respectively, often referred to as EGPCS or GPC).
