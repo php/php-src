@@ -439,7 +439,7 @@ static char* MyRemoveHiLightDup(const char *s){
 	return res;
 }
 
-/* {{{ proto int udm_alloc_agent(string dbaddr [, string dbmode])
+/* {{{ proto resource udm_alloc_agent(string dbaddr [, string dbmode])
    Allocate mnoGoSearch session */
 DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 {
@@ -561,7 +561,7 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 }
 /* }}} */
 
-/* {{{ proto int udm_set_agent_param(int agent, int var, string val)
+/* {{{ proto bool udm_set_agent_param(resource agent, int var, string val)
    Set mnoGoSearch agent session parameters */
 DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 {
@@ -1092,7 +1092,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 }
 /* }}} */
 
-/* {{{ proto int udm_load_ispell_data(int agent, int var, string val1, [string charset], string val2, int flag)
+/* {{{ proto bool udm_load_ispell_data(resource agent, int var, string val1 [, string charset], string val2, int flag)
    Load ispell data */
 DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 {
@@ -1235,7 +1235,7 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 }
 /* }}} */
 
-/* {{{ proto int udm_free_ispell_data(int agent)
+/* {{{ proto bool udm_free_ispell_data(resource agent)
    Free memory allocated for ispell data */
 DLEXPORT PHP_FUNCTION(udm_free_ispell_data)
 {
@@ -1265,7 +1265,7 @@ DLEXPORT PHP_FUNCTION(udm_free_ispell_data)
 }
 /* }}} */
 
-/* {{{ proto int udm_add_search_limit(int agent, int var, string val)
+/* {{{ proto bool udm_add_search_limit(resource agent, int var, string val)
    Add mnoGoSearch search restrictions */
 DLEXPORT PHP_FUNCTION(udm_add_search_limit)
 {
@@ -1364,7 +1364,7 @@ DLEXPORT PHP_FUNCTION(udm_add_search_limit)
 }
 /* }}} */
 
-/* {{{ proto int udm_clear_search_limits(int agent)
+/* {{{ proto bool udm_clear_search_limits(resource agent)
    Clear all mnoGoSearch search restrictions */
 DLEXPORT PHP_FUNCTION(udm_clear_search_limits)
 {
@@ -1403,7 +1403,7 @@ DLEXPORT PHP_FUNCTION(udm_clear_search_limits)
 /* }}} */
 
 #if UDM_VERSION_ID >= 30200
-/* {{{ proto int udm_check_charset(int agent, string charset)
+/* {{{ proto bool udm_check_charset(resource agent, string charset)
    Check if the given charset is known to mnogosearch */
 DLEXPORT PHP_FUNCTION(udm_check_charset)
 {
@@ -1436,7 +1436,7 @@ DLEXPORT PHP_FUNCTION(udm_check_charset)
 #endif
 
 #if UDM_VERSION_ID >= 30203
-/* {{{ proto int udm_crc32(int agent, string str)
+/* {{{ proto string udm_crc32(resource agent, string str)
    Return CRC32 checksum of gived string */
 DLEXPORT PHP_FUNCTION(udm_crc32)
 {
@@ -1482,7 +1482,7 @@ static ssize_t UdmRecvAll(int s, void *buf, size_t len, int flags) {
 }
 
 
-/* {{{ proto int udm_open_stored(int agent, string storedaddr)
+/* {{{ proto int udm_open_stored(resource agent, string storedaddr)
    Open connection to stored  */
 DLEXPORT PHP_FUNCTION(udm_open_stored)
 {
@@ -1523,7 +1523,7 @@ DLEXPORT PHP_FUNCTION(udm_open_stored)
 }
 /* }}} */
 
-/* {{{ proto int udm_close_stored(int agent, int link)
+/* {{{ proto bool udm_close_stored(resource agent, int link)
    Open connection to stored  */
 DLEXPORT PHP_FUNCTION(udm_close_stored)
 {
@@ -1559,7 +1559,7 @@ DLEXPORT PHP_FUNCTION(udm_close_stored)
 }
 /* }}} */
 
-/* {{{ proto int udm_check_stored(int agent, int link, string doc_id)
+/* {{{ proto int udm_check_stored(resource agent, int link, string doc_id)
    Open connection to stored  */
 DLEXPORT PHP_FUNCTION(udm_check_stored)
 {
@@ -1601,7 +1601,7 @@ DLEXPORT PHP_FUNCTION(udm_check_stored)
 #endif
 
 #if UDM_VERSION_ID >= 30204
-/* {{{ proto int udm_parse_query_string(int agent, string str)
+/* {{{ proto bool udm_parse_query_string(resource agent, string str)
    Parses query string, initialises variables and search limits taken from it */
 DLEXPORT PHP_FUNCTION(udm_parse_query_string)
 {
@@ -1630,7 +1630,7 @@ DLEXPORT PHP_FUNCTION(udm_parse_query_string)
 }
 /* }}} */
 
-/* {{{ proto int udm_make_excerpt(int agent, int res, int row)
+/* {{{ proto bool udm_make_excerpt(resource agent, resource res, int row)
    Perform search */
 DLEXPORT PHP_FUNCTION(udm_make_excerpt)
 {
@@ -1686,7 +1686,7 @@ DLEXPORT PHP_FUNCTION(udm_make_excerpt)
 }
 /* }}} */
 
-/* {{{ proto int udm_set_agent_param_ex(int agent, string var, string val)
+/* {{{ proto bool udm_set_agent_param_ex(resource agent, string var, string val)
    Set mnoGoSearch agent session parameters extended */
 DLEXPORT PHP_FUNCTION(udm_set_agent_param_ex)
 {
@@ -1744,7 +1744,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param_ex)
 	RETURN_TRUE;
 }
 
-/* {{{ proto string udm_get_res_field_ex(int res, int row, string field)
+/* {{{ proto string udm_get_res_field_ex(resource res, int row, string field)
    Fetch mnoGoSearch result field */
 DLEXPORT PHP_FUNCTION(udm_get_res_field_ex)
 {
@@ -1788,7 +1788,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field_ex)
 #endif
 
 #if UDM_VERSION_ID >= 30211
-/* {{{ proto int udm_alloc_agent_array(array dbaddr)
+/* {{{ proto resource udm_alloc_agent_array(array dbaddr)
    Allocate mnoGoSearch session */
 DLEXPORT PHP_FUNCTION(udm_alloc_agent_array)
 {
@@ -1839,7 +1839,7 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent_array)
 }
 /* }}} */
 
-/* {{{ proto int udm_hash32(int agent, string str)
+/* {{{ proto string udm_hash32(resource agent, string str)
    Return Hash32 checksum of gived string */
 DLEXPORT PHP_FUNCTION(udm_hash32)
 {
@@ -1873,7 +1873,7 @@ DLEXPORT PHP_FUNCTION(udm_hash32)
 /* }}} */
 #endif
 
-/* {{{ proto int udm_find(int agent, string query)
+/* {{{ proto resource udm_find(resource agent, string query)
    Perform search */
 DLEXPORT PHP_FUNCTION(udm_find)
 {
@@ -1908,7 +1908,7 @@ DLEXPORT PHP_FUNCTION(udm_find)
 }
 /* }}} */
 
-/* {{{ proto string udm_get_res_field(int res, int row, int field)
+/* {{{ proto string udm_get_res_field(resource res, int row, int field)
    Fetch mnoGoSearch result field */
 DLEXPORT PHP_FUNCTION(udm_get_res_field)
 {
@@ -2093,7 +2093,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 }
 /* }}} */
 
-/* {{{ proto string udm_get_res_param(int res, int param)
+/* {{{ proto mixed udm_get_res_param(resource res, int param)
    Get mnoGoSearch result parameters */
 DLEXPORT PHP_FUNCTION(udm_get_res_param)
 {
@@ -2210,7 +2210,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 }
 /* }}} */
 
-/* {{{ proto int udm_free_res(int res)
+/* {{{ proto bool udm_free_res(resource res)
    mnoGoSearch free result */
 DLEXPORT PHP_FUNCTION(udm_free_res)
 {
@@ -2234,7 +2234,7 @@ DLEXPORT PHP_FUNCTION(udm_free_res)
 }
 /* }}} */
 
-/* {{{ proto int udm_free_agent(int agent)
+/* {{{ proto bool udm_free_agent(resource agent)
    Free mnoGoSearch session */
 DLEXPORT PHP_FUNCTION(udm_free_agent)
 {
@@ -2258,7 +2258,7 @@ DLEXPORT PHP_FUNCTION(udm_free_agent)
 }
 /* }}} */
 
-/* {{{ proto int udm_errno(int agent)
+/* {{{ proto int udm_errno(resource agent)
    Get mnoGoSearch error number */
 DLEXPORT PHP_FUNCTION(udm_errno)
 {
@@ -2290,7 +2290,7 @@ DLEXPORT PHP_FUNCTION(udm_errno)
 }
 /* }}} */
 
-/* {{{ proto string udm_error(int agent)
+/* {{{ proto string udm_error(resource agent)
    Get mnoGoSearch error message */
 DLEXPORT PHP_FUNCTION(udm_error)
 {
@@ -2325,7 +2325,7 @@ DLEXPORT PHP_FUNCTION(udm_api_version)
 }
 /* }}} */
 
-/* {{{ proto array udm_cat_list(int agent, string category)
+/* {{{ proto array udm_cat_list(resource agent, string category)
    Get mnoGoSearch categories list with the same root */
 DLEXPORT PHP_FUNCTION(udm_cat_list)
 {
@@ -2381,6 +2381,7 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 			    add_next_index_stringl(return_value, C.Category[i].name,strlen(C.Category[i].name),1);
 			}
 		    } else {
+		    	/* Possible leak ? 'buf' not free()-d */
 			RETURN_FALSE;
 		    }
 		}
@@ -2399,7 +2400,7 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 }
 /* }}} */
 
-/* {{{ proto array udm_cat_path(int agent, string category)
+/* {{{ proto array udm_cat_path(resource agent, string category)
    Get mnoGoSearch categories path from the root to the given catgory */
 DLEXPORT PHP_FUNCTION(udm_cat_path)
 {
@@ -2455,6 +2456,7 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 			    add_next_index_stringl(return_value, C.Category[i].name,strlen(C.Category[i].name),1);
 			}
 		    } else {
+		    	/* Possible leak ? 'buf' not free()-d */
 			RETURN_FALSE;
 		    }
 		}
@@ -2474,7 +2476,7 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 /* }}} */
 
 #if UDM_VERSION_ID > 30110
-/* {{{ proto int udm_get_doc_count(int agent)
+/* {{{ proto int udm_get_doc_count(resource agent)
    Get total number of documents in database */
 DLEXPORT PHP_FUNCTION(udm_get_doc_count)
 {
