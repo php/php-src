@@ -2482,10 +2482,10 @@ PHP_FUNCTION(ocibindbyname)
 	if ((ocitype == SQLT_CHR) && (value_sz == -1)) {
 		convert_to_string_ex(var);
 		value_sz = (*var)->value.str.len;
-		if (value_sz == 0) {
-			php_error(E_WARNING, "bindlength == 0"); /* XXX shitty message */
-			RETURN_FALSE;
-		}
+	}
+
+	if (value_sz == 0) { 
+		value_sz = 1;
 	}
 
 	convert_to_string_ex(name);
