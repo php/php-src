@@ -215,8 +215,9 @@ ZEND_API void *zend_fetch_resource(zval **passed_id, int default_id, char *resou
 
 	resource = zend_list_find(id, &actual_resource_type);
 	if (!resource) {
-		if (resource_type_name)
+		if (resource_type_name) {
 			zend_error(E_WARNING, "%d is not a valid %s resource", id, resource_type_name);
+		}
 		return NULL;
 	}
 
@@ -232,8 +233,9 @@ ZEND_API void *zend_fetch_resource(zval **passed_id, int default_id, char *resou
 	}
 	va_end(resource_types);
 
-	if (resource_type_name)
+	if (resource_type_name) {
 		zend_error(E_WARNING, "Supplied resource is not a valid %s resource", resource_type_name);
+	}
 
 	return NULL;
 }
