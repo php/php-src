@@ -452,6 +452,10 @@ PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream
 	php_stream_notification_notify((context), (code), PHP_STREAM_NOTIFY_SEVERITY_ERR, \
 			(xmsg), (xcode), 0, 0, NULL TSRMLS_CC); } } while(0)
 	
+
+/* Give other modules access to the url_stream_wrappers_hash */
+PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash();
+
 #endif
 
 /*

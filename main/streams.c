@@ -1481,6 +1481,10 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 	return zend_hash_update(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)&optionvalue, sizeof(zval *), NULL);
 }
 
+PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash()
+{
+	return &url_stream_wrappers_hash;
+}
 
 /*
  * Local variables:
