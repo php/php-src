@@ -44,10 +44,14 @@ PHP_FUNCTION(getdate);
 PHP_FUNCTION(checkdate);
 #if HAVE_STRFTIME
 PHP_FUNCTION(strftime);
+PHP_FUNCTION(gmstrftime);
 #endif
 PHP_FUNCTION(strtotime);
 
 extern char *php_std_date(time_t t);
 void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm);
+#if HAVE_STRFTIME
+void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);
+#endif
 
 #endif /* _DATETIME_H */

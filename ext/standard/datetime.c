@@ -66,11 +66,13 @@ static int phpday_tab[2][12] =
 
 extern PHPAPI time_t parsedate(char *p, struct timeval *now);
 
-
+/* {{{ proto int time(void)
+   Return current UNIX timestamp */
 PHP_FUNCTION(time)
 {
 	RETURN_LONG((long)time(NULL));
 }
+/* }}} */
 
 void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
@@ -174,15 +176,21 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	RETURN_LONG(seconds);
 }
 
+/* {{{ proto int mktime(int hour, int min, int sec, int mon, int mday, int year)
+   Get UNIX timestamp for a date */
 PHP_FUNCTION(mktime)
 {
 	php_mktime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
+/* }}} */
 
+/* {{{ proto int gmmktime(int hour, int min, int sec, int mon, int mday, int year)
+   Get UNIX timestamp for a GMT date */
 PHP_FUNCTION(gmmktime)
 {
 	php_mktime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
+/* }}} */
 
 static void
 php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
@@ -435,16 +443,26 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	return_value->type = IS_STRING;
 }
 
+/* {{{ proto string date(string format [, int timestamp])
+   Format a local time/date */
 PHP_FUNCTION(date)
 {
 	php_date(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
+/* }}} */
 
+/* {{{ proto string gmdate(string format [, int timestamp])
+   Format a GMT/CUT date/time */
 PHP_FUNCTION(gmdate)
 {
 	php_date(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
+/* }}} */
 
+/* {{{ proto array localtime([int timestamp[, bool associative_array]])
+   Returns the results of the C system call localtime as an associative array
+   if the associative_array argument is set to 1 other wise it is a regular
+   array. */
 PHP_FUNCTION(localtime)
 {
 	zval **timestamp_arg, **assoc_array_arg;
@@ -501,7 +519,10 @@ PHP_FUNCTION(localtime)
 		add_next_index_long(return_value, ta->tm_isdst);
 	}
 }
+/* }}} */
 
+/* {{{ proto array getdate([int timestamp])
+   Get date/time information */
 PHP_FUNCTION(getdate)
 {
 	pval **timestamp_arg;
@@ -538,6 +559,7 @@ PHP_FUNCTION(getdate)
 	add_assoc_string(return_value, "month", mon_full_names[ta->tm_mon], 1);
 	add_index_long(return_value, 0, timestamp);
 }
+/* }}} */
 
 /* Return date string in standard format for http headers */
 char *php_std_date(time_t t)
@@ -568,11 +590,9 @@ char *php_std_date(time_t t)
 	return (str);
 }
 
-/* 
- * CheckDate(month, day, year);
- *  returns True(1) if it is valid date
- *
- */
+
+/* {{{ proto bool checkdate(int month, int day, int year)
+   Returns true(1) if it is a valid date */
 PHP_FUNCTION(checkdate)
 {
 	pval **month, **day, **year;
@@ -603,11 +623,10 @@ PHP_FUNCTION(checkdate)
 	}
 	RETURN_TRUE;				/* True : This month,day,year arguments are valid */
 }
-
+/* }}} */
 
 #if HAVE_STRFTIME
-
-PHP_FUNCTION(strftime)
+void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
 	pval **format_arg, **timestamp_arg;
 	char *format,*buf;
@@ -640,7 +659,11 @@ PHP_FUNCTION(strftime)
 		RETURN_FALSE;
 	}
 	format = (*format_arg)->value.str.val;
-	ta = localtime_r(&timestamp, &tmbuf);
+	if (gm) {
+		ta = gmtime_r(&timestamp, &tmbuf);
+	} else {
+		ta = localtime_r(&timestamp, &tmbuf);
+	}
 
 	buf = (char *) emalloc(buf_len);
 	while ((real_len=strftime(buf,buf_len,format,ta))==buf_len || real_len==0) {
@@ -656,6 +679,22 @@ PHP_FUNCTION(strftime)
 	efree(buf);
 	RETURN_FALSE;
 }
+/* {{{ proto string strftime(string format [, int timestamp])
+   Format a local time/date according to locale settings */
+PHP_FUNCTION(strftime)
+{
+	_php_strftime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto string gmstrftime(string format [, int timestamp])
+   Format a GMT/CUT time/date according to locale settings */
+PHP_FUNCTION(gmstrftime)
+{
+	_php_strftime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
 #endif
 
 /* {{{ proto int strtotime(string time, int now)
