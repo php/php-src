@@ -1580,14 +1580,14 @@ char *zend_visibility_string(zend_uint fn_flags)
 }
 
 
-static void do_inherit_method(zend_function *function)
+static void do_inherit_method(zend_function *function, zend_class_entry *ce)
 {
 	/* The class entry of the derived function intentionally remains the same
 	 * as that of the parent class.  That allows us to know in which context
 	 * we're running, and handle private method calls properly.
 	 */
 	if (function->common.fn_flags & ZEND_ACC_ABSTRACT) {
-		function->op_array.scope->ce_flags |= ZEND_ACC_ABSTRACT;
+		ce->ce_flags |= ZEND_ACC_ABSTRACT;
 	}
 	function_add_ref(function);
 }
@@ -1669,7 +1669,7 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 	/* STATIC_MEMBERS_FIXME */
 /*	zend_hash_merge(ce->static_members, parent_ce->static_members, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0); */
 	zend_hash_merge(&ce->constants_table, &parent_ce->constants_table, (void (*)(void *)) zval_add_ref, NULL, sizeof(zval *), 0);
-	zend_hash_merge_ex(&ce->function_table, &parent_ce->function_table, (copy_ctor_func_t) do_inherit_method, sizeof(zend_function), (merge_checker_func_t) do_inherit_method_check, NULL);
+	zend_hash_merge_ex(&ce->function_table, &parent_ce->function_table, (copy_ctor_func_t) do_inherit_method, sizeof(zend_function), (merge_checker_func_t) do_inherit_method_check, ce);
 	do_inherit_parent_constructor(ce);
 }
 
