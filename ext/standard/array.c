@@ -2288,7 +2288,6 @@ PHP_FUNCTION(array_intersect)
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
-	array_init(return_value);
 	/* for each argument, create and sort list with pointers to the hash buckets */
 	lists = (Bucket ***)emalloc(argc * sizeof(Bucket **));
 	ptrs = (Bucket ***)emalloc(argc * sizeof(Bucket **));
@@ -2394,7 +2393,6 @@ PHP_FUNCTION(array_diff)
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
-	array_init(return_value);
 	/* for each argument, create and sort list with pointers to the hash buckets */
 	lists = (Bucket ***)emalloc(argc * sizeof(Bucket **));
 	ptrs = (Bucket ***)emalloc(argc * sizeof(Bucket **));
