@@ -16,7 +16,7 @@ if test "$PHP_PSPELL" != "no"; then
 			PSPELL_INCDIR=$i/include/pspell
 		elif test -f $i/include/pspell.h; then
 			PSPELL_DIR=$i
-			PSPELL_INCDIR=$i
+			PSPELL_INCDIR=$i/include
 		fi
 	done
 
