@@ -1063,8 +1063,6 @@ PHPAPI char *php_strip_url_passwd(char *url)
 }
 
 
-#if 1
-
 PHPAPI char *expand_filepath(const char *filepath, char *real_path)
 {
 	cwd_state new_state;
@@ -1094,49 +1092,6 @@ PHPAPI char *expand_filepath(const char *filepath, char *real_path)
 	return real_path;
 }
 
-#else
-
-PHPAPI char *expand_filepath(char *filepath)
-{
-	char *retval = NULL;
-
-	if (filepath[0] == '.') {
-		char *cwd = malloc(MAXPATHLEN + 1);
-
-		if (V_GETCWD(cwd, MAXPATHLEN)) {
-			char *cwd_end = cwd + strlen(cwd);
-
-			if (filepath[1] == '.') {	/* parent directory - .. */
-				/* erase the last directory name from the path */
-#ifdef PHP_WIN32
-				while (*cwd_end != '/' || *cwd_end != '\\') {
-#else
-				while (*cwd_end != '/') {
-#endif
-					*cwd_end-- = 0;
-				}
-				filepath++;		/* make filepath appear as a current directory path */
-			}
-#ifdef PHP_WIN32
-			if (cwd_end > cwd && (*cwd_end == '/' || *cwd_end == '\\')) { /* remove trailing slashes */
-#else
-			if (cwd_end > cwd && *cwd_end == '/') {		/* remove trailing slashes */
-#endif
-				*cwd_end-- = 0;
-			}
-			retval = (char *) malloc(strlen(cwd) + strlen(filepath) - 1 + 1);
-			strcpy(retval, cwd);
-			strcat(retval, filepath + 1);
-			free(cwd);
-		}
-	}
-	if (!retval) {
-		retval = strdup(filepath);
-	}
-	return retval;
-}
-
-#endif
 
 /*
  * Local variables:
