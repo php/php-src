@@ -1,7 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev 
-- Added option for returning XMLRPC fault packets (Matt Allen, Sascha Schumann).
+- Added option for returning XMLRPC fault packets. (Matt Allen, Sascha
+  Schumann)
 - Improved range() function to support range('a','z') and range(9,0) types of
   ranges. (Rasmus)
 - Added getmygid() and safe_mode_gid ini directive to allow safe mode to do
