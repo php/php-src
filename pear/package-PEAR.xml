@@ -58,6 +58,8 @@ PEAR Installer:
 * Bug #248 --force command does not work as expected
 * Bug #293 [Patch] PEAR_Error not calling static method callbacks for error-handler
 * Bug #324 pear -G gives Fatal Error (PHP-GTK not installed, but error is at engine level)
+* Moved download code into its own class
+* Fully unit tested the installer and downloader, plus PEAR_Common
 
     </notes>
     <provides type="class" name="OS_Guess" />
@@ -85,6 +87,7 @@ PEAR Installer:
         <file role="php" name="Common.php"/>
         <file role="php" name="Config.php"/>
         <file role="php" name="Dependency.php"/>
+        <file role="php" name="Downloader.php"/>
         <dir name="Frontend">
           <file role="php" name="CLI.php"/>
         </dir>
