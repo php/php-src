@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2003, Version 4.3.4
+?? Oct 2003, Version 4.3.4RC2
+
+29 Sep 2003, Version 4.3.4RC1
 - Made MCVE extension available on win32. (Jani)
 - Added apache_get_version() function. (Ilia)
 - Fixed disk_total_space() and disk_free_space() under FreeBSD. (Jon Parise)
