@@ -4,7 +4,7 @@ AC_DEFUN(AC_ORACLE_VERSION,[
   AC_MSG_CHECKING([Oracle version])
   if test -f "$ORACLEINST_TOP/orainst/unix.rgs"
   then
-	ORACLE_VERSION=`grep '"ocommon"' $ORACLEINST_TOP/orainst/unix.rgs | sed 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
+	ORACLE_VERSION=`grep '"ocommon"' $ORACLEINST_TOP/orainst/unix.rgs | sed 's/[[ ]][[ ]]*/:/g' | cut -d: -f 6 | cut -c 2-4`
     test -z "$ORACLE_VERSION" && ORACLE_VERSION=7.3
   else
     if test -f "$ORACLEINST_TOP/lib/libclntsh.so.8.0"
