@@ -38,9 +38,6 @@ diff -ur thttpd-2.19/Makefile.in thttpd-2.19-t/Makefile.in
  
  tar:
  	@name=`sed -n -e '/SERVER_SOFTWARE/!d' -e 's,.*thttpd/,thttpd-,' -e 's, .*,,p' version.h` ; \
-Only in thttpd-2.19-t/cgi-src: Makefile
-Only in thttpd-2.19-t/: config.log
-Only in thttpd-2.19-t/extras: Makefile
 diff -ur thttpd-2.19/libhttpd.c thttpd-2.19-t/libhttpd.c
 --- thttpd-2.19/libhttpd.c	Fri Jun 23 05:43:40 2000
 +++ thttpd-2.19-t/libhttpd.c	Mon Aug  7 15:27:25 2000
