@@ -209,7 +209,7 @@ int php_init_config(char *php_ini_path_override)
 		return FAILURE;
 	}
 
-	zend_llist_init(&extension_lists.engine, sizeof(zval), (llist_dtor_func_t) free_estring, 1);
+	zend_llist_init(&extension_lists.engine, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
 	zend_llist_init(&extension_lists.functions, sizeof(zval), (llist_dtor_func_t)  ZVAL_DESTRUCTOR, 1);
 	
 	safe_mode_state = PG(safe_mode);
