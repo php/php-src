@@ -1093,33 +1093,42 @@ static int php_COM_load_typelib(char *typelib_name, int mode)
 	if(!FAILED(CLSIDFromString(p, &clsid)))
 	{
 		HRESULT hr;
+		WORD major_i = 1;
+		WORD minor_i = 0;
 
 		if(major && minor)
 		{
-			hr = LoadRegTypeLib((REFGUID) &clsid, 1, 0, LANG_NEUTRAL, &TypeLib);
+			major_i = (WORD) atoi(major);
+			minor_i = (WORD) atoi(minor);
 		}
 
-		if(!major || !minor || FAILED(hr))
+		hr = LoadRegTypeLib((REFGUID) &clsid, major_i, minor_i, LANG_NEUTRAL, &TypeLib);
+
+		if(FAILED(hr) && (!major || !minor))
 		{
-			IDispatch *i_dispatch;
+			IDispatch *Dispatch;
 			ITypeInfo *TypeInfo;
 			int idx;
 
-			if(FAILED(CoCreateInstance(&clsid, NULL, CLSCTX_SERVER, &IID_IDispatch, (LPVOID *) &i_dispatch)))
+			if(FAILED(CoCreateInstance(&clsid, NULL, CLSCTX_SERVER, &IID_IDispatch, (LPVOID *) &Dispatch)))
 			{
 				efree(p);
 				return FAILURE;
 			}
-			if(FAILED(i_dispatch->lpVtbl->GetTypeInfo(i_dispatch, 0, LANG_NEUTRAL, &TypeInfo)))
+			if(FAILED(Dispatch->lpVtbl->GetTypeInfo(Dispatch, 0, LANG_NEUTRAL, &TypeInfo)))
 			{
+				Dispatch->lpVtbl->Release(Dispatch);
 				efree(p);
 				return FAILURE;
 			}
+			Dispatch->lpVtbl->Release(Dispatch);
 			if(FAILED(TypeInfo->lpVtbl->GetContainingTypeLib(TypeInfo, &TypeLib, &idx)))
 			{
+				TypeInfo->lpVtbl->Release(TypeInfo);
 				efree(p);
 				return FAILURE;
 			}
+			TypeInfo->lpVtbl->Release(TypeInfo);
 		}
 	}
 	else
