@@ -627,6 +627,17 @@ class DB_result
     var $dbh;
     var $result;
     var $row_counter = null;
+    /**
+    * for limit queries, the row to start fetching
+    * @var integer
+    */
+    var $limit_from  = null;
+
+    /**
+    * for limit queries, the number of rows to fetch
+    * @var integer
+    */
+    var $limit_count = null;
 
     /**
      * DB_result constructor.
@@ -658,19 +669,19 @@ class DB_result
             $fetchmode = DB_FETCHMODE_ASSOC;
             $object_class = $this->dbh->fetchmode_object_class;
         }
-        if ($this->dbh->limit_from !== null) {
+        if ($this->limit_from !== null) {
             if ($this->row_counter === null) {
-                $this->row_counter = $this->dbh->limit_from;
+                $this->row_counter = $this->limit_from;
                 // For Interbase
                 if ($this->dbh->features['limit'] == false) {
                     $i = 0;
-                    while ($i++ < $this->dbh->limit_from) {
+                    while ($i++ < $this->limit_from) {
                         $this->dbh->fetchInto($this->result, $arr, $fetchmode);
                     }
                 }
             }
             if ($this->row_counter >= (
-                    $this->dbh->limit_from + $this->dbh->limit_count))
+                    $this->limit_from + $this->limit_count))
             {
                 return null;
             }
@@ -717,19 +728,19 @@ class DB_result
             $fetchmode = DB_FETCHMODE_ASSOC;
             $object_class = $this->dbh->fetchmode_object_class;
         }
-        if ($this->dbh->limit_from !== null) {
+        if ($this->limit_from !== null) {
             if ($this->row_counter === null) {
-                $this->row_counter = $this->dbh->limit_from;
+                $this->row_counter = $this->limit_from;
                 // For Interbase
                 if ($this->dbh->features['limit'] == false) {
                     $i = 0;
-                    while ($i++ < $this->dbh->limit_from) {
+                    while ($i++ < $this->limit_from) {
                         $this->dbh->fetchInto($this->result, $arr, $fetchmode);
                     }
                 }
             }
             if ($this->row_counter >= (
-                    $this->dbh->limit_from + $this->dbh->limit_count))
+                    $this->limit_from + $this->limit_count))
             {
                 return null;
             }
