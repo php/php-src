@@ -81,6 +81,9 @@
 #ifdef PHP_FASTCGI
 #include "fcgi_config.h"
 #include "fcgiapp.h"
+/* don't want to include fcgios.h, causes conflicts */
+extern int OS_SetImpersonate(void);
+
 FCGX_Stream *in, *out, *err;
 FCGX_ParamArray envp;
 
@@ -475,6 +478,9 @@ int main(int argc, char *argv[])
 	int max_requests = 500;
 	int requests = 0;
 	int fastcgi = !FCGX_IsCGI();
+#ifdef PHP_WIN32
+	int impersonate = 0;
+#endif
 
 	if (fastcgi) { 
 		/* Calculate environment size */
@@ -729,6 +735,18 @@ If you are running IIS, you may safely set cgi.force_redirect=0 in php.ini.\n\
 
 #ifdef PHP_FASTCGI
 		/* start of FAST CGI loop */
+
+#ifdef PHP_WIN32
+		/* attempt to set security impersonation for fastcgi
+		   will only happen on NT based OS, others will ignore it. */
+		if (fastcgi) {
+			if (cfg_get_long("fastcgi.impersonate", &impersonate) == FAILURE) {
+				impersonate = 0;
+			}
+			if (impersonate) OS_SetImpersonate();
+		}
+#endif
+
 		while (!fastcgi
 			|| FCGX_Accept( &in, &out, &err, &cgi_env ) >= 0) {
 

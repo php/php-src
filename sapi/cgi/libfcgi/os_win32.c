@@ -55,6 +55,7 @@ static HANDLE acceptMutex = INVALID_HANDLE_VALUE;
 static BOOLEAN shutdownPending = FALSE;
 static BOOLEAN shutdownNow = FALSE;
 
+static BOOLEAN bImpersonate = FALSE;
 /*
  * An enumeration of the file types
  * supported by the FD_TABLE structure.
@@ -290,6 +291,17 @@ static DWORD WINAPI ShutdownRequestThread(LPVOID arg)
     }
 }
 
+int OS_SetImpersonate(void)
+{
+	char *os_name = NULL;
+	os_name = getenv("OS");
+	if (stricmp(os_name, "Windows_NT") == 0) {
+		bImpersonate = TRUE;
+		return 1;
+	}
+	return 0;
+}
+
 /*
  *--------------------------------------------------------------
  *
@@ -319,7 +331,7 @@ int OS_LibInit(int stdioFds[3])
         return 0;
 
     InitializeCriticalSection(&fdTableCritical);   
-        
+    
     /*
      * Initialize windows sockets library.
      */
@@ -589,6 +601,7 @@ void OS_LibShutdown()
     if (stdioHandles[0] != INVALID_HANDLE_VALUE) {
 		DisconnectNamedPipe(hListen);
 		CancelIo(hListen);
+		if (bImpersonate) RevertToSelf();
 	}
 
 	DeleteCriticalSection(&fdTableCritical);
@@ -672,6 +685,83 @@ static short getPort(const char * bindPath)
  
     return port;
 }
+
+/**
+This function builds a Dacl which grants the creator of the objects
+FILE_ALL_ACCESS and Everyone FILE_GENERIC_READ and FILE_GENERIC_WRITE
+access to the object.
+
+This Dacl allows for higher security than a NULL Dacl, which is common for
+named-pipes, as this only grants the creator/owner write access to the
+security descriptor, and grants Everyone the ability to "use" the named-pipe.
+This scenario prevents a malevolent user from disrupting service by preventing
+arbitrary access manipulation.
+**/
+BOOL
+BuildNamedPipeAcl(
+    PACL pAcl,
+    PDWORD cbAclSize
+    )
+{
+    DWORD dwAclSize;
+
+    SID_IDENTIFIER_AUTHORITY siaWorld = SECURITY_WORLD_SID_AUTHORITY;
+    SID_IDENTIFIER_AUTHORITY siaCreator = SECURITY_CREATOR_SID_AUTHORITY;
+
+    BYTE BufEveryoneSid[32];
+    BYTE BufOwnerSid[32];
+
+    PSID pEveryoneSid = (PSID)BufEveryoneSid;
+    PSID pOwnerSid = (PSID)BufOwnerSid;
+
+    //
+    // compute size of acl
+    //
+    dwAclSize = sizeof(ACL) +
+        2 * ( sizeof(ACCESS_ALLOWED_ACE) - sizeof(DWORD) ) +
+        GetSidLengthRequired( 1 ) + // well-known Everyone Sid
+        GetSidLengthRequired( 1 ) ; // well-known Creator Owner Sid
+
+    if(*cbAclSize < dwAclSize) {
+        *cbAclSize = dwAclSize;
+        return FALSE;
+    }
+
+    *cbAclSize = dwAclSize;
+
+    //
+    // intialize well known sids
+    //
+
+    if(!InitializeSid(pEveryoneSid, &siaWorld, 1)) return FALSE;
+    *GetSidSubAuthority(pEveryoneSid, 0) = SECURITY_WORLD_RID;
+
+    if(!InitializeSid(pOwnerSid, &siaCreator, 1)) return FALSE;
+    *GetSidSubAuthority(pOwnerSid, 0) = SECURITY_CREATOR_OWNER_RID;
+
+    if(!InitializeAcl(pAcl, dwAclSize, ACL_REVISION))
+        return FALSE;
+
+    //
+    //
+    if(!AddAccessAllowedAce(
+        pAcl,
+        ACL_REVISION,
+        FILE_GENERIC_READ | FILE_GENERIC_WRITE,
+        pEveryoneSid
+        ))
+        return FALSE;
+
+    //
+    //
+    return AddAccessAllowedAce(
+        pAcl,
+        ACL_REVISION,
+        FILE_ALL_ACCESS,
+        pOwnerSid
+        );
+}
+
 
 /*
  * OS_CreateLocalIpcFd --
@@ -774,7 +864,13 @@ int OS_CreateLocalIpcFd(const char *bindPath, int backlog, int bCreateMutex)
     }
     else
     {
-        HANDLE hListenPipe = INVALID_HANDLE_VALUE;
+		SECURITY_ATTRIBUTES sa;
+		SECURITY_DESCRIPTOR sd;
+		BYTE AclBuf[ 64 ];
+		DWORD cbAclSize = 64;
+		PACL pAcl = (PACL)AclBuf;
+
+		HANDLE hListenPipe = INVALID_HANDLE_VALUE;
         char *pipePath = malloc(strlen(bindPathPrefix) + strlen(bindPath) + 1);
         
         if (! pipePath) 
@@ -786,11 +882,42 @@ int OS_CreateLocalIpcFd(const char *bindPath, int backlog, int bCreateMutex)
         strcpy(pipePath, bindPathPrefix);
         strcat(pipePath, bindPath);
 
+		if (bImpersonate) {
+			// get the security attributes for Everybody to connect
+			// we do this so that multithreaded servers that run
+			// threads under secured users can access pipes created
+			// by a system level thread (for instance, IIS)
+			//
+			// suppress errors regarding startup directory, etc
+			//
+			SetErrorMode(SEM_FAILCRITICALERRORS);
+
+			if(!BuildNamedPipeAcl(pAcl, &cbAclSize)) {
+				fprintf(stderr, "BuildNamedPipeAcl");
+				return -100;
+			}
+
+			if(!InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION)) {
+				fprintf(stderr, "InitializeSecurityDescriptor");
+				return -100;
+			}
+
+			if(!SetSecurityDescriptorDacl(&sd, TRUE, pAcl, FALSE)) {
+				fprintf(stderr, "SetSecurityDescriptorDacl");
+				return -100;
+			}
+
+		    sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+			sa.lpSecurityDescriptor = &sd; // default Dacl of caller
+			sa.bInheritHandle = TRUE;
+
+		}
+
         hListenPipe = CreateNamedPipe(pipePath,
 		        PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
 		        PIPE_TYPE_BYTE | PIPE_WAIT | PIPE_READMODE_BYTE,
 		        PIPE_UNLIMITED_INSTANCES,
-		        4096, 4096, 0, NULL);
+				4096, 4096, 0, bImpersonate?&sa:NULL);
         
         free(pipePath);
 
@@ -841,7 +968,7 @@ int OS_FcgiConnect(char *bindPath)
 {
     short port = getPort(bindPath);
     int pseudoFd = -1;
-    
+    unsigned int flags = FILE_FLAG_OVERLAPPED;
     if (port) 
     {
 	    struct hostent *hp;
@@ -916,12 +1043,16 @@ int OS_FcgiConnect(char *bindPath)
         strcpy(pipePath, bindPathPrefix);
         strcat(pipePath, bindPath);
 
+		if (bImpersonate) {
+			flags |= SECURITY_SQOS_PRESENT | SECURITY_IMPERSONATION;
+		}
+
         hPipe = CreateFile(pipePath,
 			    GENERIC_WRITE | GENERIC_READ,
 			    FILE_SHARE_READ | FILE_SHARE_WRITE,
 			    NULL,
 			    OPEN_EXISTING,
-			    FILE_FLAG_OVERLAPPED,
+			    flags,
 			    NULL);
 
         free(pipePath);
@@ -1659,11 +1790,19 @@ static int acceptNamedPipe()
         }
     }
 
-    ipcFd = Win32NewDescriptor(FD_PIPE_SYNC, (int) hListen, -1);
-	if (ipcFd == -1) 
-    {
+    //
+    // impersonate the client
+    //
+    if(bImpersonate && !ImpersonateNamedPipeClient(hListen)) {
         DisconnectNamedPipe(hListen);
-    }
+    } else {
+		ipcFd = Win32NewDescriptor(FD_PIPE_SYNC, (int) hListen, -1);
+		if (ipcFd == -1) 
+		{
+			DisconnectNamedPipe(hListen);
+			if (bImpersonate) RevertToSelf();
+		}
+	}
 
     return ipcFd;
 }
@@ -1856,6 +1995,7 @@ int OS_IpcClose(int ipcFd)
 	    return -1;
 	if(DisconnectNamedPipe(fdTable[ipcFd].fid.fileHandle)) {
 	    OS_Close(ipcFd);
+		if (bImpersonate) RevertToSelf();
 	    return 0;
 	} else {
 	    return -1;
