@@ -66,6 +66,10 @@ ZEND_API void convert_scalar_to_number(zval *op)
 			case IS_BC: \
 				(holder).type = IS_DOUBLE; /* may have lost significant digits */ \
 				break; \
+			case IS_RESOURCE: \
+			case IS_BOOL: \
+				(holder).type = IS_LONG; \
+				break; \
 			default: \
 				(holder).value.lval = strtol((op)->value.str.val, NULL, 10); \
 				(holder).type = IS_LONG; \
