@@ -150,9 +150,11 @@ static int sapi_thttpd_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	while (read_bytes < count_bytes) {
 		tmp = recv(TG(hc)->conn_fd, buffer + read_bytes, 
 				count_bytes - read_bytes, 0);
-		if (tmp <= 0) 
+		if (tmp == 0 || (tmp == -1 && errno != EAGAIN))
 			break;
-		read_bytes += tmp;
+		/* A simple "tmp > 0" produced broken code on Solaris/GCC */
+		if (tmp != 0 && tmp != -1)
+			read_bytes += tmp;
 	}
 	
 	return read_bytes;
@@ -501,6 +503,9 @@ static off_t thttpd_real_php_request(httpd_conn *hc TSRMLS_DC)
 {
 	TG(hc) = hc;
 	hc->bytes_sent = 0;
+
+	if (hc->method == METHOD_POST)
+		hc->should_linger = 1;
 	
 	thttpd_request_ctor(TSRMLS_C);
 
