@@ -1,3 +1,49 @@
+2003-09-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c:
+      Partly revert and reintroduce hash table entries for the ctor.
+
+    * zend_compile.c:
+      Nuke unused variable, too
+
+    * zend_compile.c:
+      - Inheritance applies to __clone() too.
+      - No need to add additional functions for the constructor.
+        The handler uses the pointer as intended and doesn't look the the name.
+
+    * zend_compile.c:
+      Cannot turn a static property into a non static one and vice versa
+
+    * zend_API.c
+      zend_API.h
+      zend_compile.c
+      zend_default_classes.c:
+      Fix handling of static properties initialized to arrays
+
+    * zend_compile.c:
+      Add missing error messages when violating static property inheritance
+      rules.
+
+    * zend_API.c
+      zend_compile.c
+      zend_execute.c
+      zend_object_handlers.c:
+      Fix static properties.
+
+    * zend_compile.c:
+      Allow redeclareing a protected property as public.
+
+2003-09-03  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Revert bogus patch
+      One must *never* use E_CORE_* error levels!
+
+2003-09-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      Clearly distinguish between Const, Static and Other members.
+
 2003-09-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_compile.c:

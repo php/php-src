@@ -1,3 +1,167 @@
+2003-09-03  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * acinclude.m4:
+      Cleanup after ourselves.
+
+2003-09-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c:
+      Partly revert and reintroduce hash table entries for the ctor.
+
+    * tests/classes/clone_003.phpt:
+      Fix test
+
+    * ZendEngine2/zend_compile.c:
+      Nuke unused variable, too
+
+    * ZendEngine2/zend_compile.c:
+      - Inheritance applies to __clone() too.
+      - No need to add additional functions for the constructor.
+        The handler uses the pointer as intended and doesn't look the the name.
+
+    * ZendEngine2/zend_compile.c:
+      Cannot turn a static property into a non static one and vice versa
+
+2003-09-03  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/dom/php_dom.c:
+      ZTS fix.
+
+2003-09-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_default_classes.c:
+      Fix handling of static properties initialized to arrays
+
+2003-09-03  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/tests/006.phpt:
+      WS
+
+2003-09-03  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/tests/serialize/bug25378.phpt:
+      
+      test for bug #25378
+
+2003-09-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c:
+      Add missing error messages when violating static property inheritance
+      rules.
+
+2003-09-03  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/var_unserializer.re:
+      MFH: - Fixed bug #25378 (Invalid data passed to unserialize() causes
+      segfault)
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c:
+      sync
+
+    * ext/standard/var_unserializer.re:
+      - Fixed bug #25378 (Invalid data passed to unserialize() causes segfault)
+
+2003-09-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c:
+      Fix static properties.
+
+2003-09-03  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * (PHP_4_3)
+      ext/interbase/tests/006.phpt:
+      MFH Test correct binding of 16-bit NUMERIC parameters
+
+    * ext/interbase/tests/006.phpt:
+      Test correct binding of 16-bit NUMERIC parameters
+
+    * (PHP_4_3)
+      ext/interbase/interbase.c:
+      MFH Fix binding of 16-bit NUMERIC parameters
+
+    * ext/interbase/interbase.c:
+      Fix binding of 16-bit NUMERIC parameters
+
+2003-09-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      NEWS:
+      Fixed FastCGI being unable to bind to a specific IP
+
+2003-09-03  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/scanf.c:
+      MFH: - Fixed bug #25372 (sscanf() does not work with %X)
+
+    * ext/standard/scanf.c:
+      - Fixed bug #25372 (sscanf() does not work with %X)
+
+2003-09-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c:
+      Allow redeclareing a protected property as public.
+
+2003-09-03  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c
+      ext/dom/domexception.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h:
+      changes to php_dom.h for last commit
+      replaced removed closing tags - doh
+
+    * ext/dom/document.c
+      ext/dom/dom_fe.h
+      ext/dom/domexception.c
+      ext/dom/php_dom.c:
+      add document HTML load/save methods
+      add document standalone validate method
+      cleanup some prototype declarations
+      domexception inherits from default exception
+
+2003-09-03  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      Revert bogus patch
+      One must *never* use E_CORE_* error levels!
+
+2003-09-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/cgi/README.FastCGI
+      sapi/cgi/README.FastCGI:
+      Update documentation, -b ip:port works
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      fix heuristic: if someone passed "-b IP:port", this check would
+      falsely recognize the parameter as defining only a port.
+
+    * scripts/phpize.m4
+      scripts/phpize.m4:
+      centralize cflags
+
+2003-09-03  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/gd/gd.dsp:
+      - Added JISX0208=1 and USE_GD_JISX0208 defines
+
+2003-09-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Clearly distinguish between Const, Static and Other members.
+
 2003-09-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_compile.c:
