@@ -292,7 +292,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("display_startup_errors",	"0",	PHP_INI_ALL,		OnUpdateBool,			display_startup_errors,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("enable_dl",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			enable_dl,				php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("expose_php",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			expose_php,				php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("docref_root", "http://www.php.net/", PHP_INI_ALL,		OnUpdateString,			docref_root,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("docref_root", 			"", 		PHP_INI_ALL,		OnUpdateString,			docref_root,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("docref_ext",				"",			PHP_INI_ALL,		OnUpdateString,			docref_ext,				php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("html_errors",			"1",		PHP_INI_ALL,		OnUpdateBool,			html_errors,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("xmlrpc_errors",		"0",		PHP_INI_SYSTEM,		OnUpdateBool,			xmlrpc_errors,			php_core_globals,	core_globals)
@@ -508,7 +508,10 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 					}
 				}
 			}
-			if (PG(html_errors)) {
+			if (!PG(html_errors) || !strlen(PG(docref_root))) {
+				/* no docref and no html errors -> do not point to any documentation (e.g. production boxes) */
+				php_error(type, "%s(%s): %s", get_active_function_name(TSRMLS_C), params, buffer);
+			} else if (PG(html_errors)) {
 				php_error(type, "%s(%s) [<a href='%s%s%s'>%s</a>]: %s", get_active_function_name(TSRMLS_C), params, docref_root, docref, docref_target, docref, buffer);
 			} else {
 				php_error(type, "%s(%s) [%s%s%s]: %s", get_active_function_name(TSRMLS_C), params, docref_root, docref, docref_target, buffer);
