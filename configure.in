@@ -713,6 +713,12 @@ EOF
   chmod +x meta_ccld
 fi
 
+dnl This will go away, if we have a facility to run per-extension code
+dnl after the thread_safety decision was done
+if test "$PHP_THREAD_SAFETY" = "yes" && test "$PHP_MYSQL" = "yes"; then
+  CPPFLAGS="$CPPFLAGS -DTHREAD=1"
+fi
+
 AM_PROG_LIBTOOL
 if test "$enable_debug" != "yes"; then
   AM_SET_LIBTOOL_VARIABLE([--silent])
