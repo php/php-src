@@ -65,4 +65,4 @@ object(simplexml_element)#%d (1) {
     }
   }
 }
-bool(true)
+bool(false)
