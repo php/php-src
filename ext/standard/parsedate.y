@@ -154,8 +154,6 @@ typedef union _date_ll {
 %expect 21
 %pure_parser
 
-%debug
-
 %token	tAGO tDAY tDAY_UNIT tDAYZONE tDST tHOUR_UNIT tID tTZONE tZZONE 
 %token	tMERIDIAN tMINUTE_UNIT tMONTH tMONTH_UNIT
 %token	tSEC_UNIT tSNUMBER tUNUMBER tYEAR_UNIT tZONE
