@@ -412,7 +412,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 #ifdef PHP_WIN32
 	if (IS_SLASH(*filename) || (filename[1] == ':')) {
 #else
-	if (IS_SLASH(*filename) {
+	if (IS_SLASH(*filename)) {
 #endif
 		if (PG(safe_mode)) {
 			if(PG(doc_root)) {
