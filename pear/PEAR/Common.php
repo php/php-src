@@ -26,6 +26,10 @@ require_once 'PEAR/Config.php';
 
 // {{{ constants and globals
 
+/**
+ * PEAR_Common error when an invalid PHP file is passed to PEAR_Common::analyzeSourceCode()
+ */
+define('PEAR_COMMON_ERROR_INVALIDPHP', 1);
 define('_PEAR_COMMON_PACKAGE_NAME_PREG', '[A-Za-z][a-zA-Z0-9_]+');
 define('PEAR_COMMON_PACKAGE_NAME_PREG', '/^' . _PEAR_COMMON_PACKAGE_NAME_PREG . '$/');
 
@@ -1319,6 +1323,11 @@ class PEAR_Common extends PEAR
                 case '(': $paren_level++;   continue 2;
                 case ')': $paren_level--;   continue 2;
                 case T_CLASS:
+                    if (($current_class_level != -1) || ($current_function_level != -1)) {
+                        PEAR::raiseError("Parser error: Invalid PHP file $file",
+                            PEAR_COMMON_ERROR_INVALIDPHP);
+                        return false;
+                    }
                 case T_FUNCTION:
                 case T_NEW:
                 case T_EXTENDS:
@@ -1358,6 +1367,11 @@ class PEAR_Common extends PEAR
                     }
                     continue 2;
                 case T_DOUBLE_COLON:
+                    if ($tokens[$i - 1][0] != T_STRING) {
+                        PEAR::raiseError("Parser error: Invalid PHP file $file",
+                            PEAR_COMMON_ERROR_INVALIDPHP);
+                        return false;
+                    }
                     $class = $tokens[$i - 1][1];
                     if (strtolower($class) != 'parent') {
                         $used_classes[$class] = true;
