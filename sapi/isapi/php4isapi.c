@@ -322,8 +322,6 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array ELS_DC S
 		if (lpECB->GetServerVariable(lpECB->ConnID, *p, static_variable_buf, &variable_len)
 			&& static_variable_buf[0]) {
 			php_register_variable(*p, static_variable_buf, track_vars_array ELS_CC PLS_CC);
-			if (strcmp(*p, "SCRIPT_NAME") == 0)
-				php_register_variable("PHP_SELF", static_variable_buf, track_vars_array ELS_CC PLS_CC);
 		} else if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
 			variable_buf = (char *) emalloc(variable_len);
 			if (lpECB->GetServerVariable(lpECB->ConnID, *p, variable_buf, &variable_len)
@@ -333,6 +331,12 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array ELS_DC S
 			efree(variable_buf);
 		}
 		p++;
+	}
+
+	/* PHP_SELF support */
+	if (lpECB->GetServerVariable(lpECB->ConnID, "SCRIPT_NAME", static_variable_buf, &variable_len)
+		&& static_variable_buf[0]) {
+		php_register_variable("PHP_SELF", static_variable_buf, track_vars_array ELS_CC PLS_CC);
 	}
 
 	/* Register the internal bits of ALL_HTTP */
