@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2004, Version 4.3.10
+- Fixed bug #30962 (mssql returns space for NULL columns). (Ilia)
 
 23 Nov 2004, Version 4.3.10RC1
 - Added the %F modifier to *printf to render a non-locale-aware representation
