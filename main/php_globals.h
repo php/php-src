@@ -48,6 +48,7 @@ typedef struct _php_http_globals {
 	zval *cookie;
 	zval *server;
 	zval *environment;
+	zval *post_files;
 } php_http_globals;
 
 struct _php_tick_function_entry;
