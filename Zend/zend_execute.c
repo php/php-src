@@ -2562,10 +2562,7 @@ int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	is_const = (EX(opline)->op2.op_type == IS_CONST);
 
-	if (EX_T(EX(opline)->result.u.var).tmp_var.type == IS_LONG) {
-		function = (zend_function *) EX_T(EX(opline)->result.u.var).tmp_var.value.lval;
-		goto looked_up_fcall;
-	} else if (is_const) {
+	if (is_const) {
 		function_name_strval = EX(opline)->op2.u.constant.value.str.val;
 		function_name_strlen = EX(opline)->op2.u.constant.value.str.len;
 	} else {
@@ -2585,12 +2582,8 @@ int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (!is_const) {
 		efree(function_name_strval);
 		FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
-	} else {
-		EX_T(EX(opline)->result.u.var).tmp_var.type = IS_LONG;
-		EX_T(EX(opline)->result.u.var).tmp_var.value.lval = (long) function;
-	}
+	} 
 
-looked_up_fcall:
 	EX(calling_scope) = function->common.scope;
 	EX(object) = NULL;
 	
