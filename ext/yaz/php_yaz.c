@@ -109,7 +109,9 @@ struct Yaz_AssociationInfo {
 	ODR odr_in;
 	ODR odr_out;
 	ODR odr_scan;
+	ODR odr_es;
 	Z_ScanResponse *scan_response;
+	Z_ExtendedServicesResponse *es_response;
 	char *buf_out;
 	int len_out;
 	char *buf_in;
@@ -150,7 +152,9 @@ static Yaz_Association yaz_association_mk ()
 	p->odr_in = odr_createmem (ODR_DECODE);
 	p->odr_out = odr_createmem (ODR_ENCODE);
 	p->odr_scan = odr_createmem (ODR_ENCODE);
+	p->odr_es = odr_createmem (ODR_ENCODE);
 	p->scan_response = 0;
+	p->es_response = 0;
 	p->buf_out = 0;
 	p->len_out = 0;
 	p->buf_in = 0;
@@ -191,6 +195,7 @@ static void yaz_association_destroy (Yaz_Association p)
 	odr_destroy (p->odr_in);
 	odr_destroy (p->odr_out);
 	odr_destroy (p->odr_scan);
+	odr_destroy (p->odr_es);
 	/* buf_out */
 	/* buf_in */
 	/* action */
@@ -256,6 +261,7 @@ function_entry yaz_functions [] = {
 	PHP_FE(yaz_itemorder, NULL)
 	PHP_FE(yaz_scan, NULL)
 	PHP_FE(yaz_scan_result, second_argument_force_ref)
+	PHP_FE(yaz_es_result, NULL)
 	PHP_FE(yaz_present, NULL)
 	PHP_FE(yaz_ccl_conf, NULL)
 	PHP_FE(yaz_ccl_parse, third_argument_force_ref)
@@ -515,8 +521,12 @@ static void sort_response (Yaz_Association t, Z_SortResponse *res)
 static void es_response (Yaz_Association t,
 						 Z_ExtendedServicesResponse *res)
 {
-    if (res->diagnostics && res->num_diagnostics > 0)
+	NMEM nmem = odr_extract_mem (t->odr_in);
+	if (res->diagnostics && res->num_diagnostics > 0)
 		response_diag(t, res->diagnostics[0]);
+	t->es_response = res;
+	nmem_transfer (t->odr_es->mem, nmem);
+	nmem_destroy (nmem);
 }
 
 static void handle_apdu (Yaz_Association t, Z_APDU *apdu)
@@ -2238,6 +2248,10 @@ PHP_FUNCTION(yaz_itemorder)
 	{
 		Z_APDU *apdu;
 		p->action = 0;
+		
+		odr_reset (p->odr_es);
+		p->es_response = 0;
+		
 		apdu = encode_es_itemorder (p, Z_ARRVAL_PP(pval_package));
 		if (apdu)
 		{
@@ -2358,6 +2372,49 @@ PHP_FUNCTION(yaz_scan)
 	}
 	release_assoc (p);
 }
+/* }}} */
+
+/* {{{ proto int yaz_es_result(int id)
+   Inspects Extended Services Result */
+PHP_FUNCTION(yaz_es_result)
+{
+	pval **pval_id;
+	Yaz_Association p;
+	if (ZEND_NUM_ARGS() == 1)
+	{
+		if (zend_get_parameters_ex(1, &pval_id) == FAILURE)
+		{
+			WRONG_PARAM_COUNT;
+		}
+	}
+	else
+	{
+		WRONG_PARAM_COUNT;
+	}
+	if (array_init(return_value) == FAILURE)
+	{
+		RETURN_FALSE;
+	}
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+	if (p && p->es_response)
+	{
+		int i;
+		Z_ExtendedServicesResponse *res = p->es_response;
+
+		if (res->taskPackage && 
+			res->taskPackage->which == Z_External_extendedService)
+		{
+			Z_TaskPackage *taskPackage = res->taskPackage->u.extendedService;
+			Odr_oct *id = taskPackage->targetReference;
+			
+			if (id)
+				add_assoc_stringl (return_value, "targetReference",
+								   id->buf, id->len, 1);
+		}
+	}
+	release_assoc (p);
+}
+
 /* }}} */
 
 /* {{{ proto int yaz_scan_result(int id, array options)
