@@ -5211,7 +5211,8 @@ PHP_FUNCTION(domxml_xslt_dump_mem)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRINGL(doc_txt_ptr, doc_txt_len, 1);
+	RETVAL_STRINGL(doc_txt_ptr, doc_txt_len, 1);
+	xmlFree(doc_txt_ptr);
 }
 /* }}} */
 
