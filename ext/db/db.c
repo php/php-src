@@ -158,14 +158,10 @@ int flatfile_findkey(FILE *dbf, datum key);
 int flatfile_delete(FILE *dbf, datum key);
 datum flatfile_firstkey(FILE *dbf);
 datum flatfile_nextkey(FILE *dbf);
-#ifdef PHP_31
-#include "php3_db.h"
-#include "ext/standard/php3_string.h"
-#else
-#endif
 
 #endif
-#include "db.h"
+
+#include "php3_db.h"
 #include "ext/standard/php3_string.h"
 
 #if THREAD_SAFE

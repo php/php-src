@@ -41,7 +41,7 @@
 
 
 extern php3_module_entry dbm_module_entry;
-#define dbm_module_ptr &dbm_module_entry
+#define phpext_db_ptr &dbm_module_entry
 
 
 
@@ -58,8 +58,8 @@ typedef struct dbm_info {
   do not want flatfile compiled staticly
 */
 #if defined(MSVC5) && !defined(COMPILE_DL)
-#undef dbm_module_ptr
-#define dbm_module_ptr NULL
+#undef phpext_db_ptr
+#define phpext_db_ptr NULL
 #endif
 
 dbm_info *_php3_finddbm(pval *id,HashTable *list);
@@ -88,7 +88,7 @@ extern void php3_dbmdelete(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_dbmfirstkey(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_dbmnextkey(INTERNAL_FUNCTION_PARAMETERS);
 
-#undef dbm_module_ptr
-#define dbm_module_ptr	NULL
+#undef phpext_db_ptr
+#define phpext_db_ptr	NULL
 
 #endif /* _PHP3_DB_H */

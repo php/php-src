@@ -38,10 +38,10 @@ extern int php3_init_mime(INIT_FUNC_ARGS);
 
 #if APACHE
 extern php3_module_entry apache_module_entry;
-#define apache_module_ptr &apache_module_entry
+#define phpext_apache_ptr &apache_module_entry
 extern void php3_virtual(INTERNAL_FUNCTION_PARAMETERS);
 #else
-#define apache_module_ptr NULL
+#define phpext_apache_ptr NULL
 #endif
 
 /* environment functions */

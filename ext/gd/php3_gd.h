@@ -44,7 +44,7 @@
 #include <gd.h>
 
 extern php3_module_entry gd_module_entry;
-#define gd_module_ptr &gd_module_entry
+#define phpext_gd_ptr &gd_module_entry
 
 /* gd.c functions */
 extern void php3_info_gd(void);
@@ -95,7 +95,7 @@ extern void php3_imagettftext(INTERNAL_FUNCTION_PARAMETERS);
 #endif
 #else
 
-#define gd_module_ptr NULL
+#define phpext_gd_ptr NULL
 
 #endif
 

@@ -11,12 +11,17 @@ for arg in $@; do
 		## This is to prevent "./config.status --recheck" from
 		## running configure in libzend again.
 		--no-recursion) recurse=no;;
+		--enable-thread-safety) threadsafe=yes;;
 		*) ;;
 	esac
 done
 
 if test "$recurse" = "yes"; then
-	(cwd=`pwd`; set -x; cd $srcdir/libzend; ./configure --cache-file=$cwd/config.cache $@)
+	cwd=`pwd`
+	(set -x; cd $srcdir/libzend; ./configure --cache-file=$cwd/config.cache $@)
+	if test "$threadsafe" = "yes"; then
+		(set -x; cd $srcdir/TSRM; ./configure --cache-file=$cwd/config.cache $@)
+	fi
 fi
 
 dnl ## Diversion 1 is the initial checking of OS features, programs,
@@ -699,6 +704,18 @@ AC_ARG_ENABLE(magic-quotes,
 ]) 
 
 
+AC_MSG_CHECKING(whether to build PHP thread-safe)
+AC_ARG_ENABLE(thread-safety,
+[  --enable-thread-safety  Whether to build PHP thread-safe.],[
+  TSRM_LIB='TSRM/libtsrm.a'
+  TSRM_DIR=TSRM
+  AC_DEFINE(ZTS)
+],[
+  TSRM_DIR=""
+])
+AC_SUBST(TSRM_DIR)
+AC_SUBST(TSRM_LIB)
+
 dnl AC_MSG_CHECKING(whether to enable PHP RPC support)
 dnl AC_ARG_ENABLE(php-rpc,
 dnl [  --enable-php-rpc        Compile with PHP RPC support.],
@@ -853,6 +870,20 @@ AC_OUTPUT(Makefile build-defs.h libphp3.module
           @@EXT_MAKEFILES@@, [
 chmod +x scripts/mkextlib
 ], [
+
+# Hacking while airborne considered harmful.
+#
+echo "creating internal_functions.c"
+extensions=\`grep '^s.@EXT_SUBDIRS@' \$0|sed -e 's/^.*@% *//' -e 's/%.*$//'\`
+mv -f internal_functions.c internal_functions.c.old 2>/dev/null
+perl genif.pl internal_functions.c.in \$extensions > internal_functions.c
+if cmp internal_functions.c.old internal_functions.c > /dev/null 2>&1; then
+    echo "internal_functions.c is unchanged"
+    mv internal_functions.c.old internal_functions.c
+else
+    rm -f internal_functions.c.old
+fi
+
 
 dnl Warn about CGI version with no extra security options.
 if test "$BINNAME" = "php"; then
