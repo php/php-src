@@ -30,9 +30,9 @@ else {
     // select query
     if ($dro=dbx_query($dlo, $sql_statement)) {
         for ($i=0; $i<$dro->rows; ++$i) {
-            print($dro->data[$i][$fieldname_case_function('id')].".".$dro->data[$i][$fieldname_case_function('description')].".".$dro->data[$i][$fieldname_case_function('field1')].".".strlen($dro->data[$i][$fieldname_case_function('field2')])."\n");
+            print($dro->data[$i]['id'].".".$dro->data[$i]['description'].".".$dro->data[$i]['field1'].".".strlen($dro->data[$i]['field2'])."\n");
             }
-        $dro->data[0][$fieldname_case_function('id')]='changed_value';
+        $dro->data[0]['id']='changed_value';
         print($dro->data[0][0]."\n");
         }
     // insert query
@@ -40,7 +40,7 @@ else {
         print('insert-query: dbx_query works ok'."\n");
         if ($dro=dbx_query($dlo, $sql_select_statement)) {
             for ($i=0; $i<$dro->rows; ++$i) {
-                print($dro->data[$i][$fieldname_case_function('id')].".".$dro->data[$i][$fieldname_case_function('description')].".".strlen($dro->data[$i][$fieldname_case_function('field2')])."\n");
+                print($dro->data[$i]['id'].".".$dro->data[$i]['description'].".".strlen($dro->data[$i]['field2'])."\n");
                 }
             }
         }
@@ -49,7 +49,7 @@ else {
         print('update-query: dbx_query works ok'."\n");
         if ($dro=dbx_query($dlo, $sql_select_statement)) {
             for ($i=0; $i<$dro->rows; ++$i) {
-                print($dro->data[$i][$fieldname_case_function('id')].".".$dro->data[$i][$fieldname_case_function('description')].".".strlen($dro->data[$i][$fieldname_case_function('field2')])."\n");
+                print($dro->data[$i]['id'].".".$dro->data[$i]['description'].".".strlen($dro->data[$i]['field2'])."\n");
                 }
             }
         }
@@ -58,7 +58,7 @@ else {
         print('delete-query: dbx_query works ok'."\n");
         if ($dro=dbx_query($dlo, $sql_select_statement)) {
             for ($i=0; $i<$dro->rows; ++$i) {
-                print($dro->data[$i][$fieldname_case_function('id')].".".$dro->data[$i][$fieldname_case_function('description')].".".strlen($dro->data[$i][$fieldname_case_function('field2')])."\n");
+                print($dro->data[$i]['id'].".".$dro->data[$i]['description'].".".strlen($dro->data[$i]['field2'])."\n");
                 }
             }
         }
