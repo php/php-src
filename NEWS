@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Fixed problem with dbase not returning very large (larger than long)
+- integers properly. (Vlad)
 - Added concepts to IRCG: bailout-on-trivial issue, write output to
   files, fetch a ressource upon connection end. (Sascha)
 - Fixed POST-related bugs in thttpd, added QUERY_STRING, HTTP_HOST,
