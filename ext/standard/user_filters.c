@@ -184,6 +184,9 @@ static size_t userfilter_write(php_stream *stream, php_stream_filter *thisfilter
 
 	if (retval)
 		zval_ptr_dtor(&retval);
+
+	if (zbuf)
+		zval_ptr_dtor(&zbuf);
 	
 	return wrote;
 }
