@@ -687,7 +687,7 @@ PHP_FUNCTION(user_printf)
 }
 /* }}} */
 
-/* {{{ proto int printf(string format, array args)
+/* {{{ proto int vprintf(string format, array args)
    Output a formatted string */
 PHP_FUNCTION(vprintf)
 {
