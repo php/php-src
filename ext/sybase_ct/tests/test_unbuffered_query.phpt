@@ -26,7 +26,7 @@ Sybase-CT unbuffered query
   var_dump($q);
   
   // Test #2: after sybase_free_result, this should be an invalid resource
-  var_dump(sybase_num_rows($q));
+  var_dump(FALSE == sybase_num_rows($q));
   
   // Test #3: Seeking
   $q= sybase_unbuffered_query('select name from master..systypes', $db);
@@ -50,7 +50,7 @@ resource(%d) of type (sybase-ct result)
 resource(%d) of type (Unknown)
 
 Warning: sybase_num_rows(): %d is not a valid Sybase result resource in %s/test_unbuffered_query.php on line %d
-bool(false)
+bool(true)
 resource(%d) of type (sybase-ct result)
 int(%d)
 int(%d)
