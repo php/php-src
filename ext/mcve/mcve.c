@@ -70,6 +70,7 @@ function_entry php_mcve_functions[] = {
 	PHP_FE(mcve_transactiontext,		NULL)
 	PHP_FE(mcve_transactionavs,		NULL)
 	PHP_FE(mcve_transactioncv,		NULL)
+	PHP_FE(mcve_getuserparam,		NULL)
 	PHP_FE(mcve_monitor,			NULL)
 	PHP_FE(mcve_transinqueue,		NULL)
 	PHP_FE(mcve_checkstatus,		NULL)
@@ -244,6 +245,7 @@ PHP_MINIT_FUNCTION(mcve)
 	REGISTER_LONG_CONSTANT("MC_ADMIN_CTH", MC_ADMIN_CTH, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MC_ADMIN_CFH", MC_ADMIN_CFH, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MC_ADMIN_FORCESETTLE", MC_ADMIN_FORCESETTLE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_ADMIN_SETBATCHNUM", MC_ADMIN_SETBATCHNUM, MCVE_CONST);
 
 	/* set up the mcve defines */
 	REGISTER_LONG_CONSTANT("MCVE_UNUSED", MCVE_UNUSED, MCVE_CONST);
@@ -805,6 +807,34 @@ PHP_FUNCTION(mcve_responseparam)
 	convert_to_string_ex(arg3);
 
 	retval = MCVE_ResponseParam(conn, Z_LVAL_PP(arg2), Z_STRVAL_PP(arg3));
+
+	if (retval == NULL) {
+	  RETVAL_STRING("",1);
+	} else {
+	  RETVAL_STRING(retval, 1);
+	}
+}
+/* }}} */
+
+/* {{{ proto string mcve_getuserparam(resource conn, long identifier, int key)
+   Get a user response parameter */
+PHP_FUNCTION(mcve_getuserparam)
+{
+	MCVE_CONN *conn;
+	char *retval;
+	zval **arg1, **arg2, **arg3;
+
+	if (ZEND_NUM_ARGS() != 3 ||
+		zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
+	    le_conn);
+
+	convert_to_long_ex(arg2);
+	convert_to_long_ex(arg3);
+
+	retval = MCVE_GetUserParam(conn, Z_LVAL_PP(arg2), Z_LVAL_PP(arg3));
 
 	if (retval == NULL) {
 	  RETVAL_STRING("",1);

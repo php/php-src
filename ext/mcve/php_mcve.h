@@ -54,6 +54,7 @@ PHP_FUNCTION(mcve_transactionauth);
 PHP_FUNCTION(mcve_transactionavs);
 PHP_FUNCTION(mcve_transactioncv);
 PHP_FUNCTION(mcve_transactiontext);
+PHP_FUNCTION(mcve_getuserparam);
 PHP_FUNCTION(mcve_monitor);
 PHP_FUNCTION(mcve_transinqueue);
 PHP_FUNCTION(mcve_checkstatus);
