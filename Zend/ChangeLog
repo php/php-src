@@ -1,3 +1,9 @@
+2004-11-30  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      zend.h:
+      - Go with 5.0.3RC1
+
 2004-11-29  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_0)
