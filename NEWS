@@ -34,7 +34,7 @@ PHP                                                                        NEWS
 - Fixed bug #32134 (Overloading offsetGet/offsetSet). (Marcus)
 - Fixed bug #32130 (ArrayIterator::seek() does not throw an Exception on 
   invalid index). (Marcus)
-- Fixed bug #32115 (dateTime encoding of timezone incorrect). (Dmitry)
+- Fixed bug #32115 (dateTime SOAP encoding of timezone incorrect). (Dmitry)
 - Fixed bug #32081 (in mysqli default socket value is not being used). (Ilia)
 - Fixed bug #32021 (Crash caused by range('', 'z')). (Derick)
 - Fixed bug #32011 (Fragments which replaced Nodes are not globaly useable).
