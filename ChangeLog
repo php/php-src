@@ -1,3 +1,178 @@
+2004-07-19  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/ming/ming.c:
+      Fix compilation with older versions of libMing. Thanks Markus
+
+    * ext/ming/ming.c:
+      Sync. with the API of libMing 0.3b1
+
+2004-07-19  Sergey Kartashoff  <gluke@mail.ru>
+
+    * (PHP_5_0)
+      ext/mnogosearch/php_mnogo.c:
+      - A Bug #29147 was fixed. Thanks to Antony Dovgal <tony2001 at phpclub.net>
+      for his patch.
+
+2004-07-19  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fix prototypes: Reflection_* -> Reflection*.
+
+    * ZendEngine2/zend_reflection_api.c:
+      Make ReflectionClass::getMethod() and ReflectionClass::getProperty() raise
+      an ReflectionException instead of returning NULL on failure.
+
+    * ZendEngine2/zend_reflection_api.c:
+      Do not use contracted forms.
+
+2004-07-19  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_0)
+      ext/standard/tests/strings/bug29119.phpt:
+      - MFH (bug29119.phpt: 1.2): Fix test name
+
+    * ext/standard/tests/strings/bug29119.phpt:
+      - Fix test name
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/html.c
+      ext/standard/tests/strings/bug29119.phpt:
+      - MFH (html.c: 1.98, bug29199.phpt: 1.1): Fix bug #29199
+      (html_entity_decode()
+        misbehaves with UTF-8)
+
+    * ext/standard/tests/strings/bug29199.phpt:
+      - Oops, actual PR # is 29119, not 29199...
+
+    * ext/standard/tests/strings/bug29119.phpt:
+      
+      - Oops, actual PR # is 29119, not 29199...
+
+    * ext/standard/html.c
+      ext/standard/tests/strings/bug29199.phpt:
+      - Fix bug #29199 (html_entity_decode() misbehaves with UTF-8)
+
+2004-07-19  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_ini.h
+      ZendEngine2/zend_ini_parser.y:
+      export INI parser
+
+2004-07-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS:
+      Fixed bug #28985 (__getTypes() returning nothing on complex WSDL).
+
+2004-07-19  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_object_handlers.c:
+      __set and __get will be called not only when variable doesn't exist but
+      also when it's
+      invisible
+
+2004-07-19  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_modules.h:
+      - Bump API number due to empty_string change
+
+2004-07-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS:
+      Fixed bugs #29109 and #29236. (WSDL cache failure)
+
+2004-07-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_variant.c:
+      Possible fix for #29258 (unverified)
+      win32 people, please test (I have no working win32 build env right now)
+
+2004-07-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS:
+      Fixed bug #29061 (soap extension segfaults).
+
+2004-07-19  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_0)
+      ext/iconv/iconv.c:
+      - MFH (iconv.c: 1.118): Fix a bug in iconv stream filter that prevents
+        pending buckets from being processed.
+
+    * ext/iconv/iconv.c:
+      - Fix a bug in iconv stream filter that prevents pending buckets from being
+        processed on flush operation (same issue pollita fixed several days
+      ago).
+
+2004-07-19  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c:
+      fix build
+
+2004-07-19  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_variables.c
+      ext/gd/gd.c
+      ext/gd/gd_ctx.c
+      ext/ircg/ircg.c
+      ext/mbstring/php_mbregex.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli_api.c
+      ext/oci8/oci8.c
+      ext/odbc/php_odbc.c
+      ext/pcre/php_pcre.c
+      ext/pgsql/pgsql.c
+      ext/session/session.c
+      ext/standard/file.c
+      ext/standard/math.c
+      ext/standard/reg.c
+      ext/standard/string.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/wddx/wddx.c
+      main/php_ini.c
+      main/safe_mode.c
+      sapi/apache/mod_php5.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache_hooks/mod_php5.c:
+      - Nuke empty_string. It is a reminanent from the time where RETURN_FALSE()
+        used to return "" and not bool(false). It's not worth keeping it because
+        STR_FREE() and zval_dtor() always have to check for it and it slows down
+        the general case. In addition, it seems that empty_string has been
+      abused
+        quite a lot, and was used not only for setting zval's but generally in
+        PHP code instead of "", which wasn't the intention. Last but not least,
+        nuking empty_string should improve stability as I doubt every place
+        correctly checked if they are not mistakenly erealloc()'ing it or
+        calling efree() on it.
+        NOTE: Some code is probably broken. Each extension maintainer should
+        check and see that my changes are OK. Also, I haven't had time to touch
+        PECL yet. Will try and do it tomorrow.
+
+2004-07-19  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_0)
+      ext/mbstring/config.m4:
+      - MFH (config.m4: 1.52): Fix VPATH build. (patch by Joe Orton)
+
+    * ext/mbstring/config.m4:
+      - Fix VPATH build. (patch by Joe Orton)
+
 2004-07-18  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)

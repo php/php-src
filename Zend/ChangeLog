@@ -1,3 +1,54 @@
+2004-07-19  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_reflection_api.c:
+      Fix prototypes: Reflection_* -> Reflection*.
+
+    * zend_reflection_api.c:
+      Make ReflectionClass::getMethod() and ReflectionClass::getProperty() raise
+      an ReflectionException instead of returning NULL on failure.
+
+    * zend_reflection_api.c:
+      Do not use contracted forms.
+
+2004-07-19  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_ini.h
+      zend_ini_parser.y:
+      export INI parser
+
+    * zend_object_handlers.c:
+      __set and __get will be called not only when variable doesn't exist but
+      also when it's
+      invisible
+
+2004-07-19  Andi Gutmans  <andi@zend.com>
+
+    * zend_extensions.h
+      zend_modules.h:
+      - Bump API number due to empty_string change
+
+    * zend.c
+      zend.h
+      zend_API.h
+      zend_alloc.h
+      zend_execute.c
+      zend_object_handlers.c
+      zend_operators.c
+      zend_variables.c:
+      - Nuke empty_string. It is a reminanent from the time where RETURN_FALSE()
+        used to return "" and not bool(false). It's not worth keeping it because
+        STR_FREE() and zval_dtor() always have to check for it and it slows down
+        the general case. In addition, it seems that empty_string has been
+      abused
+        quite a lot, and was used not only for setting zval's but generally in
+        PHP code instead of "", which wasn't the intention. Last but not least,
+        nuking empty_string should improve stability as I doubt every place
+        correctly checked if they are not mistakenly erealloc()'ing it or
+        calling efree() on it.
+        NOTE: Some code is probably broken. Each extension maintainer should
+        check and see that my changes are OK. Also, I haven't had time to touch
+        PECL yet. Will try and do it tomorrow.
+
 2004-07-18  Wez Furlong  <wez.php@thebrainroom.net>
 
     * zend_execute_API.c:
