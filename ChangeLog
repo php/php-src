@@ -1,3 +1,20 @@
+2002-06-30  Sander Roobol  <phy@wanadoo.nl>
+
+    * main/main.c:
+    Main script should not be parsed when (include|require)_once()'ed, #17720
+
+2002-06-30  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/ldap/ldap.c: - More error messages cleanup
+
+2002-06-30  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xmlrpc/libxmlrpc/encodings.c: MFH: Fix for bug #16252
+
+    * ext/xmlrpc/libxmlrpc/encodings.c: Fix bug: #16252
+
+    * Makefile.global: This does not work with AIX find..
+
 2002-06-29  Jani Taskinen  <sniper@iki.fi>
 
     * config.guess

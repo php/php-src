@@ -1,3 +1,11 @@
+2002-06-30  Andi Gutmans  <andi@zend.com>
+
+    * ZEND_CHANGES: - Remember to document autoload when I have time.
+
+2002-06-30  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend_modules.h: - MFZE1
+
 2002-06-29  Andi Gutmans  <andi@zend.com>
 
     * zend.h: - Get ready for alpha2
