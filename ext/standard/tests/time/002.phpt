@@ -33,12 +33,12 @@ if (!@putenv("TZ=EST") || getenv("TZ") != 'EST') {
 	    echo date ("Y-m-d H:i:s\n", strtotime ($date));
 	}
 
-	if (PHP_OS === "OSF1") {
+	putenv("TZ=US/Eastern");
+	if( date("T") == "GMT" ) {
 		// POSIX style
 		putenv ("TZ=EST5EDT4,M4.1.0,M10.5.0");
-	} else {
-		putenv ("TZ=US/Eastern");
 	}
+
 	foreach ($dates as $date) {
 	    echo date ("Y-m-d H:i:s\n", strtotime ($date));
 	}
