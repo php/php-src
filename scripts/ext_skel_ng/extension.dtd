@@ -1,6 +1,3 @@
-<!--
-  -->
-
 <!ELEMENT extension (name|summary|description|license|maintainers|logo|release|changelog|functions|constants|globals|deps|resources|code)*>
 
 <!ELEMENT name (#PCDATA)>
@@ -73,6 +70,9 @@
 >
 
 <!ELEMENT deps (with|lib|header|file|program)*>
+<!ATTLIST deps
+  language (c|cpp) "c"
+>
 <!ELEMENT with (#PCDATA)>
 <!ATTLIST with
   defaults CDATA #REQUIRED
