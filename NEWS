@@ -114,6 +114,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #22022 (Crash in imap_mail_compose() if the body is an empty array).
   (Ilia)
 - Fixed bug #22017 (date() does not support negative timestamps on win32). (Ilia)
+- Fixed bug #22004 (Overload extension and _call() breaks classes). (Shane)
 - Fixed bug #21998 (array_pop() did not reset the current array position). (Jani)
 - Fixed bug #21978, #21036 (win32 mail(), bcc: gets interpreted as cc:). (Sara)
 - Fixed bug #21885 (move_uploaded_file() does not ignore open_basedir). (Wez)
