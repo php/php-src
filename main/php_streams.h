@@ -554,9 +554,6 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char * path, char * mode, int opt
 #define php_stream_open_wrapper_as_file(path, mode, options, opened_path) _php_stream_open_wrapper_as_file((path), (mode), (options), (opened_path) STREAMS_CC TSRMLS_CC)
 
 
-PHPAPI zend_bool _php_stream_open_wrapper_as_file_handle(char * path, char * mode, int options, zend_file_handle * STREAMS_DC TSRMLS_DC);
-#define php_stream_open_wrapper_as_file_handle(path, mode, options, fh) _php_stream_open_wrapper_as_file_handle((path), (mode), (options), (fh) STREAMS_CC TSRMLS_CC)
-
 /* for user-space streams */
 PHPAPI extern php_stream_ops php_stream_userspace_ops;
 PHPAPI extern php_stream_ops php_stream_userspace_dir_ops;
