@@ -2285,6 +2285,8 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 	char string_data[255];
 	
 	switch (type & ~1) {
+		unsigned short j;
+
 		case SQL_VARYING:
 			len = ((PARAMVARY *) data)->vary_length;
 			data = ((PARAMVARY *) data)->vary_string;
@@ -2299,75 +2301,59 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 			break;
 		case SQL_LONG:
 		case SQL_SHORT:
-			if (scale) {
-				short j;
+			if (scale < 0) {
 				long n, f = 1;
+
 				if ( (type & ~1) == SQL_SHORT) {
-					n = (long) *(short *) (data);
+					n = *(short *) (data);
 				} else {	
-					n = (long) *(long *) (data);
+					n = *(long *) (data);
 				}
 				for (j = 0; j < -scale; j++) {
 					f *= 10;
 				}
-				if (n  >= 0) {
-					Z_STRLEN_P(val) = sprintf(string_data, "%ld.%0*ld", n / f, -scale,  n % f );
-				} else if ((n/f) != 0) {
-					Z_STRLEN_P(val) = sprintf(string_data, "%ld.%0*ld", n / f, -scale,  -(n % f) );
+				if (n  >= 0 || n < -f) {
+					j = sprintf(string_data, "%ld.%0*ld", n / f, -scale,  labs(n % f) );
 				} else {
-					Z_STRLEN_P(val) = sprintf(string_data, "%s.%0*ld","-0", -scale, -(n % f) );
+					j = sprintf(string_data, "%s.%0*ld","-0", -scale, -n % f);
 				}
-				Z_TYPE_P(val) = IS_STRING;
-				Z_STRVAL_P(val) = estrdup(string_data);
+				ZVAL_STRINGL(val,string_data,j,1);
+			} else if ( (type & ~1) == SQL_SHORT) {
+				ZVAL_LONG(val, *(short *) data);
 			} else {
-				Z_TYPE_P(val) = IS_LONG;
-				if ( (type & ~1) == SQL_SHORT) {
-					Z_LVAL_P(val) = *(short *) (data);
-				} else {
-					Z_LVAL_P(val) = *(long *) (data);
-				}
+				ZVAL_LONG(val, *(long *) data);
 			}
 			break;
 		case SQL_FLOAT:
-			Z_TYPE_P(val) = IS_DOUBLE;
-			Z_DVAL_P(val) = *(float *) (data);
+			ZVAL_DOUBLE(val, *(float *) data);
 			break;
 		case SQL_DOUBLE:
-			if (scale) {
-				Z_TYPE_P(val) = IS_STRING;
-				Z_STRLEN_P(val) = sprintf(string_data, "%.*f", -scale, *(double *) data);
-				Z_STRVAL_P(val) = estrdup(string_data);
+			if (scale < 0) {
+				j = sprintf(string_data, "%.*f", -scale, *(double *) data);
+				ZVAL_STRINGL(val, string_data, j, 1);
 			} else {
-				Z_TYPE_P(val) = IS_DOUBLE;
-				Z_DVAL_P(val) = *(double *) data;
+				ZVAL_DOUBLE(val, *(double *) data);
 			}
 			break;
 #ifdef SQL_INT64
 		case SQL_INT64:
-			Z_TYPE_P(val) = IS_STRING;
 			if (scale < 0) {
-				short j = 0;
-				ISC_INT64 n, f = 1;
-				n = (ISC_INT64) *(ISC_INT64 *) data;
+				ISC_INT64 n = *(ISC_INT64 *) data, f = 1;
+
 				for (j = 0; j < -scale; j++) {
 					f *= 10;
 				}
 				if (n >= 0) {
-				Z_STRLEN_P(val) = sprintf(string_data, "%" LL_MASK "d.%0*" LL_MASK "d",
-											(ISC_INT64) n / f, -scale, (ISC_INT64) n % f );
-				} else if ((n/f) != 0) {
-				Z_STRLEN_P(val) = sprintf(string_data, "%" LL_MASK "d.%0*" LL_MASK "d",
-											(ISC_INT64) n / f, -scale, (ISC_INT64) -(n % f) );
-				} else {
-				Z_STRLEN_P(val) = sprintf(string_data, "%s.%0*" LL_MASK "d",
-											"-0", -scale, (ISC_INT64) -(n % f) );
+					j = sprintf(string_data, "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, n % f);
+				} else if (n < -f) {
+					j = sprintf(string_data, "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, -n % f);				
+ 				} else {
+					j = sprintf(string_data, "-0.%0*" LL_MASK "d", -scale, -n % f);
 				}
 			} else {
-				Z_STRLEN_P(val) = sprintf(string_data, "%.0" LL_MASK "d",
-							                                    *(ISC_INT64 *) data);
+				j = sprintf(string_data, "%.0" LL_MASK "d", *(ISC_INT64 *) data);
 			}
-
-			Z_STRVAL_P(val) = estrdup(string_data);
+			ZVAL_STRINGL(val,string_data,j,1);
 			break;
 #endif
 #ifndef SQL_TIMESTAMP
@@ -2411,21 +2397,19 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 			t.tm_zone = tzname[0];
 #endif
 			if (flag & PHP_IBASE_UNIXTIME) {
-				Z_TYPE_P(val) = IS_LONG;
-				Z_LVAL_P(val) = timestamp;
+				ZVAL_LONG(val, timestamp);
 			} else {
-				Z_TYPE_P(val) = IS_STRING;
 #if HAVE_STRFTIME
-				Z_STRLEN_P(val) = strftime(string_data, sizeof(string_data), format, &t);
+				j = strftime(string_data, sizeof(string_data), format, &t);
 #else
 				/* FIXME */
 				if (!t.tm_hour && !t.tm_min && !t.tm_sec) {
-					Z_STRLEN_P(val) = sprintf(string_data, "%02d/%02d/%4d", t.tm_mon + 1, t.tm_mday, t.tm_year + 1900);
+					j = sprintf(string_data, "%02d/%02d/%4d", t.tm_mon + 1, t.tm_mday, t.tm_year + 1900);
 				} else {
-					Z_STRLEN_P(val) = sprintf(string_data, "%02d/%02d/%4d %02d:%02d:%02d", t.tm_mon+1, t.tm_mday, t.tm_year + 1900, t.tm_hour, t.tm_min, t.tm_sec);
+					j = sprintf(string_data, "%02d/%02d/%4d %02d:%02d:%02d", t.tm_mon+1, t.tm_mday, t.tm_year + 1900, t.tm_hour, t.tm_min, t.tm_sec);
 				}
 #endif
-				Z_STRVAL_P(val) = estrdup(string_data);
+				ZVAL_STRINGL(val,string_data,j,1);
 				break;
 			}
 		}
@@ -2836,7 +2820,7 @@ PHP_FUNCTION(ibase_prepare)
 		RETURN_FALSE;
 	}
 	
-	ib_query = emalloc(sizeof(ibase_query));
+	ib_query = (ibase_query *) emalloc(sizeof(ibase_query));
 
 	if (_php_ibase_alloc_query(ib_query, ib_link, trans, query, ib_link->dialect, trans_res_id TSRMLS_CC) == FAILURE) {
 		efree(ib_query);
