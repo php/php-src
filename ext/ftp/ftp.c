@@ -1443,7 +1443,7 @@ ftp_async_continue_read(ftpbuf_t *ftp)
 	type = ftp->type;
 
 	lastch = ftp->lastch;
-	if (rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE)) {
+	if ((rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE))) {
 		if (rcvd == -1) {
 			goto bail;
 		}
