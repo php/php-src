@@ -79,11 +79,6 @@ ZEND_API void wrong_param_count(void);
 #define ARG_COUNT(dummy)	(ht)
 #define ZEND_NUM_ARGS()		(ht)
 
-#define BYREF_NONE 0
-#define BYREF_FORCE 1
-#define BYREF_ALLOW 2
-#define BYREF_FORCE_REST 3
-
 #ifndef ZEND_WIN32
 #define DLEXPORT
 #endif

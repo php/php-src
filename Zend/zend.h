@@ -255,6 +255,13 @@ typedef struct _zend_utility_values {
 #define OE_IS_OBJECT	(1<<1)
 #define OE_IS_METHOD	(1<<2)
 
+
+/* Argument passing types */
+#define BYREF_NONE 0
+#define BYREF_FORCE 1
+#define BYREF_ALLOW 2
+#define BYREF_FORCE_REST 3
+
 int zend_startup(zend_utility_functions *utility_functions, char **extensions);
 void zend_shutdown(void);
 
