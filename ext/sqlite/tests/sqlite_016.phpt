@@ -22,12 +22,12 @@ foreach ($data as $str) {
 
 echo "====BUFFERED====\n";
 $r = sqlite_query("SELECT a, b from strings", $db);
-while (sqlite_has_more($r)) {
+while (sqlite_valid($r)) {
 	var_dump(sqlite_fetch_single($r));
 }
 echo "====UNBUFFERED====\n";
 $r = sqlite_unbuffered_query("SELECT a, b from strings", $db);
-while (sqlite_has_more($r)) {
+while (sqlite_valid($r)) {
 	var_dump(sqlite_fetch_single($r));
 }
 

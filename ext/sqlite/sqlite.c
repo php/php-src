@@ -171,7 +171,8 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_rewind, NULL)
 	PHP_FE(sqlite_next, NULL)
 	PHP_FE(sqlite_prev, NULL)
-	PHP_FE(sqlite_has_more, NULL)
+	PHP_FE(sqlite_valid, NULL)
+	PHP_FALIAS(sqlite_has_more, sqlite_valid, NULL)
 	PHP_FE(sqlite_has_prev, NULL)
 	PHP_FE(sqlite_escape_string, NULL)
 	PHP_FE(sqlite_busy_timeout, NULL)
@@ -217,7 +218,7 @@ function_entry sqlite_funcs_query[] = {
 	/* spl_forward */
 	PHP_ME_MAPPING(current, sqlite_current, NULL)
 	PHP_ME_MAPPING(next, sqlite_next, NULL)
-	PHP_ME_MAPPING(valid, sqlite_has_more, NULL)
+	PHP_ME_MAPPING(valid, sqlite_valid, NULL)
 	/* spl_sequence */
 	PHP_ME_MAPPING(rewind, sqlite_rewind, NULL)
 	/* additional */
@@ -239,7 +240,7 @@ function_entry sqlite_funcs_ub_query[] = {
 	/* spl_forward */
 	PHP_ME_MAPPING(current, sqlite_current, NULL)
 	PHP_ME_MAPPING(next, sqlite_next, NULL)
-	PHP_ME_MAPPING(valid, sqlite_has_more, NULL)
+	PHP_ME_MAPPING(valid, sqlite_valid, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -888,7 +889,7 @@ void sqlite_iterator_rewind(zend_object_iterator *iter TSRMLS_DC)
 	}
 }
 
-int sqlite_iterator_has_more(zend_object_iterator *iter TSRMLS_DC)
+int sqlite_iterator_valid(zend_object_iterator *iter TSRMLS_DC)
 {
 	struct php_sqlite_result *res = ((sqlite_object_iterator*)iter)->res;
 
@@ -944,7 +945,7 @@ void sqlite_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
 
 zend_object_iterator_funcs sqlite_ub_query_iterator_funcs = {
 	sqlite_iterator_dtor,
-	sqlite_iterator_has_more,
+	sqlite_iterator_valid,
 	sqlite_iterator_get_current_data,
 	sqlite_iterator_get_current_key,
 	sqlite_iterator_move_forward,
@@ -953,7 +954,7 @@ zend_object_iterator_funcs sqlite_ub_query_iterator_funcs = {
 
 zend_object_iterator_funcs sqlite_query_iterator_funcs = {
 	sqlite_iterator_dtor,
-	sqlite_iterator_has_more,
+	sqlite_iterator_valid,
 	sqlite_iterator_get_current_data,
 	sqlite_iterator_get_current_key,
 	sqlite_iterator_move_forward,
@@ -2346,9 +2347,9 @@ PHP_FUNCTION(sqlite_num_rows)
 }
 /* }}} */
 
-/* {{{ proto bool sqlite_has_more(resource result)
+/* {{{ proto bool sqlite_valid(resource result)
    Returns whether more rows are available. */
-PHP_FUNCTION(sqlite_has_more)
+PHP_FUNCTION(sqlite_valid)
 {
 	zval *zres;
 	struct php_sqlite_result *res;

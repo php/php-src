@@ -48,7 +48,7 @@ enum {
 	CIT_CATCH_GET_CHILD = 2,
 	CIT_PUBLIC          = CIT_CALL_TOSTRING|CIT_CATCH_GET_CHILD,
 	/* private */
-	CIT_HAS_MORE        = 4,
+	CIT_VALID           = 4,
 	CIT_HAS_CHILDREN    = 8
 };
 
@@ -75,7 +75,7 @@ typedef struct _spl_dual_it_object {
 			long             count;
 		} limit;
 		struct {
-			int              flags; /* CIT_HAS_MORE, CIT_CALL_TOSTRING, CIT_CATCH_GET_CHILD */
+			int              flags; /* CIT_VALID, CIT_CALL_TOSTRING, CIT_CATCH_GET_CHILD */
 			zval             *zstr;
 			zval             *zchildren;
 		} caching;

@@ -22,7 +22,7 @@ foreach ($data as $str) {
 
 echo "====BUFFERED====\n";
 $r = sqlite_query("SELECT a, b from strings", $db);
-while (sqlite_has_more($r)) {
+while (sqlite_valid($r)) {
 	var_dump(sqlite_current($r, SQLITE_NUM));
 	var_dump(sqlite_column($r, 0));
 	var_dump(sqlite_column($r, 1));
@@ -32,7 +32,7 @@ while (sqlite_has_more($r)) {
 }
 echo "====UNBUFFERED====\n";
 $r = sqlite_unbuffered_query("SELECT a, b from strings", $db);
-while (sqlite_has_more($r)) {
+while (sqlite_valid($r)) {
 	var_dump(sqlite_column($r, 0));
 	var_dump(sqlite_column($r, 'b'));
 	var_dump(sqlite_column($r, 1));

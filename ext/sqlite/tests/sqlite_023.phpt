@@ -24,7 +24,7 @@ foreach ($data as $str) {
 $r = sqlite_query("SELECT a FROM strings", $db, SQLITE_NUM);
 
 echo "====TRAVERSE====\n";
-for(sqlite_rewind($r); sqlite_has_more($r); sqlite_next($r)) {
+for(sqlite_rewind($r); sqlite_valid($r); sqlite_next($r)) {
   var_dump(sqlite_current($r));
 
 }
@@ -39,7 +39,7 @@ echo "====UNBUFFERED====\n";
 $r = sqlite_unbuffered_query("SELECT a FROM strings", $db, SQLITE_NUM);
 
 echo "====TRAVERSE====\n";
-for(sqlite_rewind($r); sqlite_has_more($r); sqlite_next($r)) {
+for(sqlite_rewind($r); sqlite_valid($r); sqlite_next($r)) {
   var_dump(sqlite_current($r));
 
 }

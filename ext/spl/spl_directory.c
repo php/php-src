@@ -506,7 +506,7 @@ typedef struct {
 
 /* forward declarations to the iterator handlers */
 static void spl_ce_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC);
-static int spl_ce_dir_it_has_more(zend_object_iterator *iter TSRMLS_DC);
+static int spl_ce_dir_it_valid(zend_object_iterator *iter TSRMLS_DC);
 static void spl_ce_dir_it_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC);
 static int spl_ce_dir_it_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
 static void spl_ce_dir_it_move_forward(zend_object_iterator *iter TSRMLS_DC);
@@ -516,7 +516,7 @@ static void spl_ce_dir_it_rewind(zend_object_iterator *iter TSRMLS_DC);
 /* iterator handler table */
 zend_object_iterator_funcs spl_ce_dir_it_funcs = {
 	spl_ce_dir_it_dtor,
-	spl_ce_dir_it_has_more,
+	spl_ce_dir_it_valid,
 	spl_ce_dir_it_current_data,
 	spl_ce_dir_it_current_key,
 	spl_ce_dir_it_move_forward,
@@ -555,8 +555,8 @@ static void spl_ce_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 /* }}} */
 	
 
-/* {{{ spl_ce_dir_it_has_more */
-static int spl_ce_dir_it_has_more(zend_object_iterator *iter TSRMLS_DC)
+/* {{{ spl_ce_dir_it_valid */
+static int spl_ce_dir_it_valid(zend_object_iterator *iter TSRMLS_DC)
 {
 	spl_ce_dir_it       *iterator = (spl_ce_dir_it *)iter;
 	spl_ce_dir_object   *object   = iterator->object;
@@ -677,7 +677,7 @@ static void spl_ce_dir_tree_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 /* iterator handler table */
 zend_object_iterator_funcs spl_ce_dir_tree_it_funcs = {
 	spl_ce_dir_it_dtor,
-	spl_ce_dir_it_has_more,
+	spl_ce_dir_it_valid,
 	spl_ce_dir_it_current_data,
 	spl_ce_dir_tree_it_current_key,
 	spl_ce_dir_tree_it_move_forward,
