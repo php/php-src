@@ -533,13 +533,13 @@ int GetTimeInfo(TIMEINFO *Now)
 {
     static time_t	NextHour;
     static long		LastTzone;
-    struct tm		*tm;
+    struct tm		*tm, tmbuf;
     int			secondsUntilNextHour;
 #if	defined(HAVE_GETTIMEOFDAY)
     struct timeval	tv;
 #endif	/* defined(HAVE_GETTIMEOFDAY) */
 #if	!defined(HAVE_TM_GMTOFF)
-    struct tm		local;
+    struct tm		local, tmbuf;
     struct tm		gmt;
 #endif	/* !defined(HAVE_TM_GMTOFF) */
 
@@ -557,13 +557,13 @@ int GetTimeInfo(TIMEINFO *Now)
 
     /* Now get the timezone if the last time < HH:00:00 <= now for some HH.  */
     if (NextHour <= Now->time) {
-	if ((tm = localtime(&Now->time)) == NULL)
+	if ((tm = localtime_r(&Now->time, &tmbuf)) == NULL)
 	    return -1;
 	secondsUntilNextHour = 60 * (60 - tm->tm_min) - tm->tm_sec;
 #if	!defined(HAVE_TM_GMTOFF)
 	/* To get the timezone, compare localtime with GMT. */
 	local = *tm;
-	if ((tm = gmtime(&Now->time)) == NULL)
+	if ((tm = gmtime_r(&Now->time, &tmbuf)) == NULL)
 	    return -1;
 	gmt = *tm;
 
@@ -698,11 +698,11 @@ RelativeMonth(Start, RelMonth)
     time_t	Start;
     time_t	RelMonth;
 {
-    struct tm	*tm;
+    struct tm	*tm, tmbuf;
     time_t	Month;
     time_t	Year;
 
-    tm = localtime(&Start);
+    tm = localtime_r(&Start, &tmbuf);
     Month = 12 * tm->tm_year + tm->tm_mon + RelMonth;
     Year = Month / 12;
     Year += 1900;
@@ -868,7 +868,7 @@ static int date_lex(void)
 time_t parsedate(char *p, TIMEINFO *now)
 {
     extern int		date_parse();
-    struct tm		*tm;
+    struct tm		*tm, tmbuf;
     TIMEINFO		ti;
     time_t		Start;
 
@@ -878,7 +878,7 @@ time_t parsedate(char *p, TIMEINFO *now)
 		(void)GetTimeInfo(&ti);
     }
 
-    tm = localtime(&now->time);
+    tm = localtime_r(&now->time, &tmbuf);
     yyYear = tm->tm_year + 1900;
     yyMonth = tm->tm_mon + 1;
     yyDay = tm->tm_mday;

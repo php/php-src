@@ -151,11 +151,11 @@ int db_date_day(char *cp)
 
 char *db_cur_date(char *cp)
 {
-	struct tm *ctm;
+	struct tm *ctm, tmbuf;
 	time_t	  c_time;
 
 	c_time = time((time_t *)NULL);
-	ctm = localtime(&c_time);
+	ctm = localtime_r(&c_time, &tmbuf);
 	if (cp == NULL)
 		cp = (char *)malloc(9);
 
