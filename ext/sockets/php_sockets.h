@@ -102,7 +102,7 @@ typedef struct {
 /* Prototypes */
 int open_listen_sock(php_socket **php_sock, int port, int backlog TSRMLS_DC);
 int accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la TSRMLS_DC);
-int php_read(int bsd_socket, void *buf, int maxlen);
+int php_read(int bsd_socket, void *buf, size_t maxlen, int flags);
 
 ZEND_BEGIN_MODULE_GLOBALS(sockets)
 	int last_error;
