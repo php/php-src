@@ -42,11 +42,14 @@ char g_msession[]="Msession";
 
 #if HAVE_MSESSION
 
+#ifdef HAVE_PHP_SESSION
 PS_FUNCS(msession);
 
 ps_module ps_mod_msession = {
 	PS_MOD(msession)
 };
+#endif
+
 
 // #define ERR_DEBUG
 
@@ -123,7 +126,9 @@ PHP_MINIT_FUNCTION(msession)
 	g_conn = NULL;
 	g_host = g_defhost;
 	
+#ifdef HAVE_PHP_SESSION
 	php_session_register_module(&ps_mod_msession);
+#endif
 
 	return SUCCESS;
 }
@@ -983,6 +988,8 @@ PHP_FUNCTION(msession_plugin)
 	}
 }
 
+#ifdef HAVE_PHP_SESSION
+
 PS_OPEN_FUNC(msession)
 {
 	ELOG( "ps_open_msession");
@@ -1031,4 +1038,5 @@ PS_GC_FUNC(msession)
 	ELOG( "ps_gc_msession");
 	return SUCCESS;
 }
+#endif /* HAVE_PHP_SESSION */
 #endif	/* HAVE_MSESSION */
