@@ -49,6 +49,8 @@ DLEXPORT PHP_RINIT_FUNCTION(mnogosearch);
 DLEXPORT PHP_MSHUTDOWN_FUNCTION(mnogosearch);
 DLEXPORT PHP_MINFO_FUNCTION(mnogosearch);
 
+DLEXPORT PHP_FUNCTION(udm_api_version);
+
 DLEXPORT PHP_FUNCTION(udm_alloc_agent);
 DLEXPORT PHP_FUNCTION(udm_set_agent_param);
 

@@ -6,6 +6,9 @@
 <html>
 <body>
 
+mnoGoSearch API version: <? echo Udm_Api_Version(); ?>
+<br>
+
 <form method=post>
 <input type=text size=30 name=q value="<? echo htmlspecialchars(stripslashes($q)); ?>">
 <input type=submit value=" Search ! ">

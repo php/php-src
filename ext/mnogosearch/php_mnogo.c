@@ -99,6 +99,8 @@ static int le_link,le_res;
 #include <udmsearch.h>
 
 function_entry mnogosearch_functions[] = {
+	PHP_FE(udm_api_version,		NULL)
+
 	PHP_FE(udm_alloc_agent,		NULL)
 	PHP_FE(udm_set_agent_param,	NULL)
 	
@@ -1040,6 +1042,15 @@ DLEXPORT PHP_FUNCTION(udm_error)
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-Agent", le_link);
 	RETURN_STRING(UdmDBErrorMsg(Agent->db),1);
+}
+/* }}} */
+
+
+/* {{{ proto int udm_api_version()
+   Get mnoGoSearch API version */
+DLEXPORT PHP_FUNCTION(udm_api_version)
+{
+	RETURN_LONG(UDM_VERSION_ID);
 }
 /* }}} */
 
