@@ -1123,6 +1123,42 @@ dnl  else
 dnl      rm -f main/internal_functions.c.old
 dnl  fi
 
+
+  # experimental things
+  if test $PHP_SAPI = "apache2filter" ; then
+    echo "+--------------------------------------------------------------------+"
+    echo "|                        *** WARNING ***                             |"
+    echo "|                                                                    |"
+    echo "| Apache 2 Support is EXPERIMENTAL and should NOT be used in         |"
+    echo "| production environment. Before submitting bug reports, try the     |"
+    echo "| latest CVS snapshot from http://snaps.php.net                      |"
+  fi
+
+  if test "$PHP_OVERLOAD" != "no"; then
+    echo "+--------------------------------------------------------------------+"
+    echo "|                        *** WARNING ***                             |"
+    echo "|                                                                    |"
+    echo "| The overload extension is highly EXPERIMENTAL and will most        |"
+    echo "| certainly change in newer versions. You have been warned!          |"
+  fi
+
+  if test "$PHP_AGGREGATE" != "no"; then
+    echo "+--------------------------------------------------------------------+"
+    echo "|                        *** WARNING ***                             |"
+    echo "|                                                                    |"
+    echo "| The aggregate functions are highly EXPERIMENTAL and will most      |"
+    echo "| certainly change in newer versions. You have been warned!          |"
+  fi
+
+  if test $UNAME = "FreeBSD" && test $PHP_SAPI = "apache2filter" && test $TSRM_PTH != "pth-config" ; then
+    echo "+--------------------------------------------------------------------+"
+    echo "|                        *** WARNING ***                             |"
+    echo "|                                                                    |"
+    echo "| In order to build PHP as a Apache2 module on FreeBSD, you have to  |"
+    echo "| add  --with-tsrm-pth to your ./configure line. Therefore you need  |"
+    echo "| to install gnu-pth from /usr/ports/devel/pth.                      |"
+  fi
+
   if test -n "$PHP_APXS_BROKEN"; then
     echo "+--------------------------------------------------------------------+"
     echo "| WARNING: Your $APXS script is most likely broken."

@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(overload,whether to enable user-space object overloading support,
-[  --disable-overload      Disable user-space object overloading support.], yes)
+[  --enable-overload       EXPERIMENTAL: Enable user-space object overloading support.], no)
 
 if test "$PHP_OVERLOAD" != "no"; then
 	AC_DEFINE(HAVE_OVERLOAD, 1, [ ])

@@ -181,7 +181,9 @@ typedef struct {
 	size_t mmap_len;
 #endif
 
+#ifdef HAVE_AGGREGATE
 	HashTable *aggregation_table;
+#endif
 } php_basic_globals;
 
 #ifdef ZTS

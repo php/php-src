@@ -816,6 +816,7 @@ function_entry basic_functions[] = {
 	PHP_FE(str_rot13, NULL)
 
 	/* functions from aggregate.c */
+#if HAVE_AGGREGATE
 	PHP_FE(aggregate,						first_arg_force_ref)
 	PHP_FE(aggregate_methods,				first_arg_force_ref)
 	PHP_FE(aggregate_methods_by_list,		first_arg_force_ref)
@@ -825,6 +826,7 @@ function_entry basic_functions[] = {
 	PHP_FE(aggregate_properties_by_regexp,	first_arg_force_ref)
 	PHP_FE(deaggregate,						first_arg_force_ref)
 	PHP_FE(aggregation_info,				first_arg_force_ref)
+#endif
 	{NULL, NULL, NULL}
 };
 
@@ -908,7 +910,9 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC)
 	BG(next) = NULL;
 	BG(left) = -1;
 	BG(user_tick_functions) = NULL;
+#ifdef HAVE_AGGREGATION
 	BG(aggregation_table) = NULL;
+#endif
 	zend_hash_init(&BG(sm_protected_env_vars), 5, NULL, NULL, 1);
 	BG(sm_allowed_env_vars) = NULL;
 
@@ -1115,11 +1119,13 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 		BG(user_tick_functions) = NULL;
 	}
 
+#ifdef HAVE_AGRGEGATION
 	if (BG(aggregation_table)) {
 		zend_hash_destroy(BG(aggregation_table));
 		efree(BG(aggregation_table));
 		BG(aggregation_table) = NULL;
 	}
+#endif
 
 #ifdef HAVE_MMAP
 	if (BG(mmap_file)) {

@@ -229,6 +229,14 @@ AC_ARG_WITH(system-regex,
   fi
 ])
 
+
+PHP_ARG_ENABLE(aggregate, whether to enable aggregation support,
+[  --enable-aggregate      EXPERIMENTAL: Enable user-space aggregation support.], no)
+
+if test "$PHP_AGGREGATE" != "no"; then
+  AC_DEFINE(HAVE_AGGREGATE, 1, [ ])
+fi
+
 if test "$PHP_SAPI" = "cgi"; then
   AC_DEFINE(ENABLE_CHROOT_FUNC, 1, [Whether to enable chroot() function])
 fi

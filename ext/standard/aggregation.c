@@ -21,6 +21,9 @@
 #include "php.h"
 #include "basic_functions.h"
 #include "aggregation.h"
+
+#ifdef HAVE_AGGREGATE
+
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 #include "ext/pcre/php_pcre.h"
 #endif
@@ -597,6 +600,8 @@ PHP_FUNCTION(deaggregate)
 	}
 }
 /* }}} */
+
+#endif /* HAVE_AGGREGATE */
 
 /*
  * Local variables:

@@ -18,6 +18,8 @@
 
 /* $Id$ */
 
+#ifdef HAVE_AGGREGATE
+
 #ifndef AGGREGATION_H
 #define AGGREGATION_H
 
@@ -49,3 +51,5 @@ PHP_FUNCTION(deaggregate);
 PHP_FUNCTION(aggregation_info);
 
 #endif /* AGGREGATION_H */
+
+#endif /* HAVE_AGGREGATE */
