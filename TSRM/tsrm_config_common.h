@@ -14,10 +14,6 @@
 # include <sys/param.h>
 #endif
 
-#ifdef TSRM_WIN32
-#include <malloc.h>
-#endif
-
 /* AIX requires this to be the first thing in the file.  */
 #ifndef __GNUC__
 # if HAVE_ALLOCA_H

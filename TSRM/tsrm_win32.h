@@ -22,8 +22,6 @@
 #define TSRM_WIN32_H
 
 #include "TSRM.h"
-
-#ifdef TSRM_WIN32
 #include <windows.h>
 
 struct ipc_perm {
@@ -71,8 +69,6 @@ typedef struct {
 # define TWG(v) TSRMG(win32_globals_id, tsrm_win32_globals *, v)
 #else
 # define TWG(v) (win32_globals.v)
-#endif
-
 #endif
 
 #define IPC_PRIVATE	0

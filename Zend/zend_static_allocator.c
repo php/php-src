@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <stdlib.h>
+//#include <stdlib.h>
 
 #include "zend_static_allocator.h"
 

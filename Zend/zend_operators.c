@@ -17,13 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-
-#include <stdio.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <math.h>
-
 #include "zend.h"
 #include "zend_operators.h"
 #include "zend_variables.h"
