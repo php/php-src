@@ -4,6 +4,8 @@ Check for exif_thumbnail
 <?php if (!extension_loaded("exif")) print "skip";?>
 --INI--
 magic_quotes_runtime=0
+output_handler = 
+zlib.output_compression = Off 
 --FILE--
 <?php
 /*
@@ -11,7 +13,6 @@ magic_quotes_runtime=0
   test2.jpg is the same image but contains Exif/Comment information and a
             copy of test1.jpg as a thumbnail.
 */
-if (function_exists("ob_end_clean")) ob_end_clean();
 $infile= './ext/exif/tests/test1.jpg';
 $fp    = fopen($infile,'rb');
 $image = fread($fp,filesize($infile));
