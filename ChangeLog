@@ -1,3 +1,78 @@
+2001-05-17  James Moore  <James@phpuk.org>
+
+    * sapi/cgi/getopt.c:
+    Merge the more sensible way of doing this back in to HEAD
+
+    * sapi/cgi/getopt.c:
+    * sapi/cgi/getopt.c: MFH
+
+2001-05-17  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: MFH (bug 8901)
+
+2001-05-17  James Moore  <James@phpuk.org>
+
+    * sapi/cgi/getopt.c:
+     - Fixed getopt so it accepts arguments in the form -<option><value> not
+       just -<option> <value> (jmoore)
+
+2001-05-17  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: - Fix for bug #9801 (and maybe others)
+
+2001-05-17  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/xslt/sablot.c:
+    Some fixes.  Actually assign a value scheme_handlers before processing it.
+    Add some checks for key type.  Remove some debugging data.
+
+2001-05-17  Daniel Beulshausen  <daniel@php4win.de>
+
+    * NEWS: update news
+
+    * ext/curl/curl.c
+      ext/curl/php_curl.h:
+    winsock is already initialized in an higher version by php
+
+    * win32/php_modules.dsw: add notes & sockets ext
+
+    * ext/sockets/CREDITS
+      ext/sockets/php_sockets.h
+      ext/sockets/php_sockets_win.c
+      ext/sockets/php_sockets_win.h
+      ext/sockets/sockets.c
+      ext/sockets/sockets.dsp: update sockets to work with winsock as well
+
+2001-05-17  Martin Kraemer  <Martin.Kraemer@fujitsu-siemens.com>
+
+    * ext/dba/config.m4:
+    Allow for DB3 to reside in /usr/local/include/db3/ and -ldb3
+
+2001-05-17  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/php_apache.c: Add missing info
+
+2001-05-17  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/win95nt.h: MS VisualStudio .NET 7.0 has M_PI_4 in math.h
+
+2001-05-17  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/storage.php (PEAR DB_storage::_makeWhere): fixed multiple key column bug, thanks
+    to Wolfram Kriesing
+
+2001-05-17  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/pspell/config.m4:
+    ...and this fixes the typo I made long ago. It prevented people that have
+    certain weird installations of pspell from compiling properly (couldn't
+    find pspell header files). No-one noticed...
+
+    * ext/pspell/config.m4: Fix for bug 10912.
+    Also, if you explicily specify path in --with-pspell, the directories
+    /usr, /usr/local will no longer be searched even if the library is not
+    found at the specified location (this seems to make more sense)
+
 2001-05-16  Sterling Hughes  <sterling@designmultimedia.com>
 
     * ext/curl/config.m4
