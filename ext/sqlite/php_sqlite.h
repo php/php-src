@@ -58,6 +58,8 @@ PHP_FUNCTION(sqlite_last_insert_rowid);
 
 PHP_FUNCTION(sqlite_escape_string);
 
+PHP_FUNCTION(sqlite_busy_timeout);
+
 #ifdef ZTS
 #define SQLITE_G(v) TSRMG(sqlite_globals_id, zend_sqlite_globals *, v)
 #else
