@@ -255,9 +255,9 @@ static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, 
 
 /* {{{ sxe_property_read()
  */
-static zval * sxe_property_read(zval *object, zval *member, zend_bool silent TSRMLS_DC)
+static zval * sxe_property_read(zval *object, zval *member, int type TSRMLS_DC)
 {
-	return sxe_prop_dim_read(object, member, 1, 0, silent TSRMLS_CC);
+	return sxe_prop_dim_read(object, member, 1, 0, type == BP_VAR_IS TSRMLS_CC);
 }
 /* }}} */
 

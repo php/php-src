@@ -160,7 +160,7 @@ static int mysqli_write_na(mysqli_object *obj, zval *newval TSRMLS_DC)
 /* }}} */
 
 /* {{{ mysqli_read_property */
-zval *mysqli_read_property(zval *object, zval *member, zend_bool silent TSRMLS_DC)
+zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 {
 	zval tmp_member;
 	zval *retval;
@@ -197,7 +197,7 @@ zval *mysqli_read_property(zval *object, zval *member, zend_bool silent TSRMLS_D
 		}
 	} else {
 		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, silent TSRMLS_CC);
+		retval = std_hnd->read_property(object, member, type TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
