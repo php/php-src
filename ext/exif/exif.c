@@ -859,6 +859,7 @@ void exif_free_image_info( image_info_type *image_info, int section_index)
 void add_assoc_image_info( pval *value, int sub_array, image_info_type *image_info, int section_index)
 {
 	char	buffer[64];
+	int		idx=0;
 	image_info_value	*info_value;
 
 	if ( image_info->info_list[section_index].count)
@@ -892,7 +893,11 @@ void add_assoc_image_info( pval *value, int sub_array, image_info_type *image_in
 					break;
 
 				case TAG_FMT_STRING:
-					add_assoc_string(tmpi, info_value->name, info_value->value.s, 1);
+					if (section_index==SECTION_COMMENT) {
+						add_index_string(tmpi, idx++, info_value->value.s, 1);
+					} else {
+						add_assoc_string(tmpi, info_value->name, info_value->value.s, 1);
+					}
 					break;
 
 				case TAG_FMT_BYTE:
@@ -1670,7 +1675,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo, FILE *infile)
 				return (ImageInfo->sections_found&(~FOUND_COMPUTED)) ? TRUE : FALSE;
 
 			case M_COM: /* Comment section */
-				exif_process_COM(ImageInfo, Data, itemlen);
+				exif_process_COM(ImageInfo, (char *)Data+2, itemlen);
 				break;
 
 			case M_EXIF:
