@@ -1374,8 +1374,8 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 	for (source=str,end=source+length,target=new_str; (c = *source) || source<end; source++) {
 		switch(c) {
 			case '\0':
-				*target++ = '\\'; // what if somebody escapes "foo\0"."12bar"?
-				*target++ = '0';  // we have to add \000 instead of just \0.
+				*target++ = '\\'; /* what if somebody escapes "foo\0"."12bar"? */
+				*target++ = '0';  /* we have to add \000 instead of just \0. */
 				*target++ = '0';
 				*target++ = '0';
 				break;
