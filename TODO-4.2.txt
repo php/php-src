@@ -3,8 +3,6 @@
 
 * Remove --with-openlink configure option (--with-iodbc replaces it).
 
-* Always build CGI (--disable-cgi option to disable).
-
 * Move most extensions and PEAR packages out of the PHP CVS tree,
   include them again during release packaging.
 
