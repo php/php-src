@@ -107,10 +107,10 @@ case $host_alias in
 *bsdi*)
     BSD_MAKEFILE=yes;;
 *beos*)
-	beos_threads=1
-	LIBS="$LIBS -lbe -lroot";;
+    beos_threads=1
+    LIBS="$LIBS -lbe -lroot";;
 *mips*)
-	CPPFLAGS="$CPPFLAGS -D_XPG_IV";;
+    CPPFLAGS="$CPPFLAGS -D_XPG_IV";;
 esac
 
 AM_PROG_CC_STDC
