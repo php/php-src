@@ -2418,9 +2418,13 @@ PHP_FUNCTION(array_unique)
 {
 	zval **array;
 	HashTable *target_hash;
-	Bucket **arTmp, **cmpdata, **lastkept;
 	Bucket *p;
-	int i;
+	struct bucketindex {
+		Bucket *b;
+		unsigned int i;
+	};
+	struct bucketindex *arTmp, *cmpdata, *lastkept;
+	unsigned int i;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2439,22 +2443,29 @@ PHP_FUNCTION(array_unique)
 			return;
 
 	/* create and sort array with pointers to the target_hash buckets */
-	arTmp = (Bucket **) pemalloc((target_hash->nNumOfElements + 1) * sizeof(Bucket *), target_hash->persistent);
+	arTmp = (struct bucketindex *) pemalloc((target_hash->nNumOfElements + 1) * sizeof(struct bucketindex), target_hash->persistent);
 	if (!arTmp)
 		RETURN_FALSE;
-	for (i = 0, p = target_hash->pListHead; p; i++, p = p->pListNext)
-		arTmp[i] = p;
-	arTmp[i] = NULL;
+	for (i = 0, p = target_hash->pListHead; p; i++, p = p->pListNext) {
+		arTmp[i].b = p;
+		arTmp[i].i = i;
+	}
+	arTmp[i].b = NULL;
 	set_compare_func(SORT_STRING TSRMLS_CC);
-	zend_qsort((void *) arTmp, i, sizeof(Bucket *), array_data_compare TSRMLS_CC);
+	zend_qsort((void *) arTmp, i, sizeof(struct bucketindex), array_data_compare TSRMLS_CC);
 
 	/* go through the sorted array and delete duplicates from the copy */
 	lastkept = arTmp;
-	for (cmpdata = arTmp + 1; *cmpdata; cmpdata++) {
+	for (cmpdata = arTmp + 1; cmpdata->b; cmpdata++) {
 		if (array_data_compare(lastkept, cmpdata TSRMLS_CC)) {
 				lastkept = cmpdata;
 		} else {
-			p = *cmpdata;
+			if (lastkept->i > cmpdata->i) {
+				p = lastkept->b;
+				lastkept = cmpdata;
+			} else {
+				p = cmpdata->b;
+			}
 			if (p->nKeyLength)
 					zend_hash_del(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength);  
 			else
