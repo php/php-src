@@ -33,7 +33,7 @@
 #ifndef _PHP_POSIX_H
 #define _PHP_POSIX_H
 
-
+#if HAVE_POSIX
 #ifndef DLEXPORT
 #define DLEXPORT
 #endif
