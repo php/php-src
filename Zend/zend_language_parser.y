@@ -419,6 +419,7 @@ expr_without_variable:
 	|	cvar '=' expr		{ zend_do_end_variable_parse(BP_VAR_W, 0 CLS_CC); zend_do_assign(&$$, &$1, &$3 CLS_CC); }
 	|	cvar '=' '&' w_cvar	{ zend_do_end_variable_parse(BP_VAR_W, 0 CLS_CC); zend_do_assign_ref(&$$, &$1, &$4 CLS_CC); }
 	|	cvar '=' '&' function_call { zend_do_end_variable_parse(BP_VAR_W, 0 CLS_CC); zend_do_assign_ref(&$$, &$1, &$4 CLS_CC); }
+	|	cvar '=' '&' T_NEW class_name { zend_do_extended_fcall_begin(CLS_C); zend_do_begin_new_object(&$4, &$5 CLS_CC); } ctor_arguments { zend_do_end_new_object(&$3, &$5, &$4, &$7 CLS_CC); zend_do_extended_fcall_end(CLS_C); zend_do_end_variable_parse(BP_VAR_W, 0 CLS_CC); zend_do_assign_ref(&$$, &$1, &$3 CLS_CC); }
 	|	T_NEW class_name { zend_do_extended_fcall_begin(CLS_C); zend_do_begin_new_object(&$1, &$2 CLS_CC); } ctor_arguments { zend_do_end_new_object(&$$, &$2, &$1, &$4 CLS_CC); zend_do_extended_fcall_end(CLS_C);}
 	|	cvar T_PLUS_EQUAL expr 	{ zend_do_end_variable_parse(BP_VAR_RW, 0 CLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_ADD, &$$, &$1, &$3 CLS_CC); }
 	|	cvar T_MINUS_EQUAL expr	{ zend_do_end_variable_parse(BP_VAR_RW, 0 CLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_SUB, &$$, &$1, &$3 CLS_CC); }
