@@ -116,3 +116,41 @@ ZEND_API int zend_stack_count(zend_stack *stack)
 {
 	return stack->top;
 }
+
+
+ZEND_API void zend_stack_apply(zend_stack *stack, void (*apply_function)(void *element), int type)
+{
+	int i;
+
+	switch (type) {
+		case ZEND_STACK_APPLY_TOPDOWN:
+			for (i=stack->top-1; i>=0; i--) {
+				apply_function(stack->elements[i]);
+			}
+			break;
+		case ZEND_STACK_APPLY_BOTTOMUP:
+			for (i=0; i<stack->top; i++) {
+				apply_function(stack->elements[i]);
+			}
+			break;
+	}
+}
+
+
+ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, void (*apply_function)(void *element, void *arg), int type, void *arg)
+{
+	int i;
+
+	switch (type) {
+		case ZEND_STACK_APPLY_TOPDOWN:
+			for (i=stack->top-1; i>=0; i--) {
+				apply_function(stack->elements[i], arg);
+			}
+			break;
+		case ZEND_STACK_APPLY_BOTTOMUP:
+			for (i=0; i<stack->top; i++) {
+				apply_function(stack->elements[i], arg);
+			}
+			break;
+	}
+}
