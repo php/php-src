@@ -603,6 +603,7 @@ TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
 ENCAPSED_TOKENS [\[\]{}$]
 ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 ANY_CHAR (.|[\n])
+NEWLINE ("\r"|"\n"|"\r\n")
 
 %option noyylineno
 %option noyywrap
@@ -1122,7 +1123,7 @@ ANY_CHAR (.|[\n])
 }
 
 
-<INITIAL>"<?php_track_vars?>"("\n"|"\r\n")? {
+<INITIAL>"<?php_track_vars?>"{NEWLINE}? {
 	zend_error(E_WARNING, "&lt;?php_track_vars?&gt; is no longer supported - please use the track_vars INI directive instead");
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
@@ -1177,7 +1178,7 @@ ANY_CHAR (.|[\n])
 	yymore();
 }
 
-<ST_ONE_LINE_COMMENT>"\n"|"\r\n" {
+<ST_ONE_LINE_COMMENT>{NEWLINE} {
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
@@ -1220,7 +1221,7 @@ ANY_CHAR (.|[\n])
 	yymore();
 }
 
-<ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">")("\n"|"\r\n")? {
+<ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">"){NEWLINE}? {
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
@@ -1230,7 +1231,7 @@ ANY_CHAR (.|[\n])
 }
 
 
-<ST_IN_SCRIPTING>"%>"("\n"|"\r\n")? {
+<ST_IN_SCRIPTING>"%>"{NEWLINE}? {
 	if (CG(asp_tags)) {
 		BEGIN(INITIAL);
 		zendlval->value.str.len = yyleng;
@@ -1373,7 +1374,7 @@ ANY_CHAR (.|[\n])
 }
 
 
-<ST_IN_SCRIPTING>"<<<"{TABS_AND_SPACES}{LABEL}("\r")?"\n" {
+<ST_IN_SCRIPTING>"<<<"{TABS_AND_SPACES}{LABEL}{NEWLINE} {
 	char *s;
 	CG(zend_lineno)++;
 	CG(heredoc_len) = yyleng-3-1-(yytext[yyleng-2]=='\r'?1:0);
@@ -1400,7 +1401,7 @@ ANY_CHAR (.|[\n])
 }
 
 
-<ST_HEREDOC>^{LABEL}(";")?("\r")?"\n" {
+<ST_HEREDOC>^{LABEL}(";")?{NEWLINE} {
 	int label_len;
 	unsigned char unput_semicolon;
 
