@@ -25,11 +25,6 @@ $per_module_deps = array();
 
 function get_depends($module)
 {
-	// skip this for now; working on a more portable solution
-	// since VC6 ships with an old version of depends.exe that
-	// doesn't have the command line options
-	return;
-
 	static $no_dist = array(
 		/* windows system dlls that should not be bundled */
 		'advapi32.dll', 'comdlg32.dll', 'gdi32.dll', 'kernel32.dll', 'ntdll.dll',
@@ -40,6 +35,12 @@ function get_depends($module)
 
 		/* apache */
 		'apachecore.dll',
+
+		/* apache 2 */
+		'libhttpd.dll', 'libapr.dll', 'libaprutil.dll',
+
+		/* pi3web */
+		'piapi.dll', 'pi3api.dll',
 
 		/* nsapi */
 		'ns-httpd30.dll', 'ns-httpd35.dll', 'ns-httpd36.dll', 'ns-httpd40.dll',
@@ -60,24 +61,22 @@ function get_depends($module)
 	
 	$bd = strtolower(realpath($build_dir));
 
-	$csvname = tempnam($GLOBALS['build_dir'], '_dep');
-	system("depends.exe /c /f:1 /oc:\"$csvname\" \"$module\"", $retcode);
-	$fp = fopen($csvname, "r");
-	$headers = fgetcsv($fp);
-	$n = 0;
-	while (($line = fgetcsv($fp))) {
-		$n++;
-		if ($line[0] == 'D')
-			continue;
+	$cmd = "$GLOBALS[build_dir]\\deplister.exe \"$module\" \"$GLOBALS[build_dir]\"";
+	$proc = proc_open($cmd, 
+			array(1 => array("pipe", "w")),
+			$pipes);
 
-		$dep = strtolower($line[1]);
+	$n = 0;
+	while (($line = fgetcsv($pipes[1]))) {
+		$n++;
+
+		$dep = strtolower($line[0]);
 		$depbase = basename($dep);
 		/* ignore stuff in our build dir, but only if it is
-	     * on of our targets */
-		if (0 == strncmp($dep, $bd, strlen($bd)) &&
-				(in_array($depbase, $sapi_targets) ||
+	     * one of our targets */
+		if (((in_array($depbase, $sapi_targets) ||
 			   	in_array($depbase, $ext_targets)) ||
-				$depbase == $phpdll) {
+				$depbase == $phpdll) && file_exists($GLOBALS['build_dir'] . "/$depbase")) {
 			continue;
 		}
 		/* ignore some well-known system dlls */
@@ -91,8 +90,8 @@ function get_depends($module)
 
 		$per_module_deps[basename($module)][] = $dep;
 	}
-	fclose($fp);
-	unlink($csvname);
+	fclose($pipes[1]);
+	proc_close($proc);
 //echo "Module $module [$n lines]\n";
 }
 
