@@ -2349,8 +2349,6 @@ void zend_do_end_heredoc(TSRMLS_D)
 
 void do_namespace(znode *namespace TSRMLS_DC)
 {
-	HashTable *new_function_table;
-	HashTable *new_class_table;
 	Namespace *namespace_ptr;
 
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);

@@ -67,6 +67,7 @@ HashTable *global_function_table;
 HashTable *global_class_table;
 HashTable *global_constants_table;
 HashTable *global_auto_globals_table;
+HashTable *global_namespaces_table;
 #endif
 
 zend_utility_values zend_uv;
