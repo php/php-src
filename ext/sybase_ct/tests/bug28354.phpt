@@ -21,9 +21,7 @@ Sybase-CT bug #28354 (sybase_free_result crash)
   if (!sybase_select_single($db, 'select object_id("'.$sp_name.'")')) {
     echo "Stored procedure {$sp_name} not found, creating\n";
     var_dump(sybase_query('
-      create proc '.$sp_name.'
-      as
-      begin
+      create proc '.$sp_name.' as begin
         select @@version
       end
     '));
@@ -44,6 +42,5 @@ Sybase-CT bug #28354 (sybase_free_result crash)
 bool(true)
 Stored procedure %s
 bool(true)
->>> Query: exec %s
 int(0)
-string(%s)
+string(%d) "%s"
