@@ -5012,7 +5012,7 @@ PHP_FUNCTION(oci_lob_write_temporary)
 	oci_descriptor *descr;
 	ub4 offset = 1;
 	ub4 loblen;
-	int lob_type = OCI_TEMP_CLOB;
+	long lob_type = OCI_TEMP_CLOB;
 
 	oci_debug ("oci_write_temporary_lob");
 

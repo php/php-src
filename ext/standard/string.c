@@ -1649,7 +1649,8 @@ PHP_FUNCTION(strripos)
 {
 	zval *zneedle;
 	char *needle, *haystack;
-	int needle_len, haystack_len, offset = 0;
+	int needle_len, haystack_len;
+	long offset = 0;
 	char *p, *e, ord_needle[2];
 	char *needle_dup, *haystack_dup;
 

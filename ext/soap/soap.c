@@ -967,7 +967,7 @@ PHP_FUNCTION(SoapServer,map)
 PHP_METHOD(soapserver,setpersistence)
 {
 	soapServicePtr service;
-	int value;
+	long value;
 
 	SOAP_SERVER_BEGIN_CODE();
 

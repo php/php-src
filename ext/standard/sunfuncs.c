@@ -156,7 +156,8 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 {
 	zval *date;
 	double latitude, longitude, zenith, gmt_offset, ret;
-	int time, N, retformat;
+	int time, N;
+	long retformat;
 	char retstr[6];
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ldddd", &date, &retformat, &latitude, &longitude, &zenith, &gmt_offset) == FAILURE) {

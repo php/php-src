@@ -31,7 +31,7 @@
    sets report level */
 PHP_FUNCTION(mysqli_report)
 {
-	int		flags;
+	long		flags;
 
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &flags) == FAILURE) {
