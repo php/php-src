@@ -1,3 +1,8 @@
+2002-09-10  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute_API.c
+      zend_variables.c: MFZE1
+
 2002-09-09  Stanislav Malyshev  <stas@zend.com>
 
     * zend_object_handlers.c: remove comment
