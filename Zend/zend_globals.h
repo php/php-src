@@ -73,7 +73,7 @@ END_EXTERN_C()
 # define CLS_CC
 # define CG(v) (compiler_globals.v)
 # define CLS_FETCH()
-extern ZEND_API zend_compiler_globals compiler_globals;
+extern ZEND_API struct _zend_compiler_globals compiler_globals;
 int zendparse();
 #endif
 
