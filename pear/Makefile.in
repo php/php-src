@@ -83,6 +83,7 @@ PEAR_FILES = \
 	Math/Fraction.php \
 	Math/Util.php \
 	Net/Curl.php \
+	Net/Dig.php \
 	Net/SMTP.php \
 	Net/Socket.php \
 	Numbers/Roman.php \
