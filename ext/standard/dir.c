@@ -444,74 +444,45 @@ PHP_FUNCTION(glob)
 /* }}} */
 #endif 
 
-/* {{{ php_alphasortr
-*/
-static int php_alphasortr(const struct dirent **a, const struct dirent **b)
-{
-	return strcoll((*b)->d_name, (*a)->d_name);
-}
-/* }}} */
-
-/* {{{ proto array scandir(string dir [, int sorting_order])
+/* {{{ proto array scandir(string dir [, int sorting_order [, resource context]])
    List files & directories inside the specified path */
 PHP_FUNCTION(scandir)
 {
 	char *dirn;
 	int dirn_len;
 	int flags = 0;
-	char *path;
-	struct dirent **namelist;
+	php_stream_dirent **namelist;
 	int n, i;
+	zval *zcontext = NULL;
+	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &dirn, &dirn_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr", &dirn, &dirn_len, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 
-#ifdef ZTS
-	if (!IS_ABSOLUTE_PATH(dirn, dirn_len)) {
-		path = expand_filepath(dirn, NULL TSRMLS_CC);
-	} else 
-#endif
-		path = dirn;
-
-	if (PG(safe_mode) && (!php_checkuid(path, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETVAL_FALSE;
-		goto err;
-	}
-	if (php_check_open_basedir(path TSRMLS_CC)) {
-		RETVAL_FALSE;
-		goto err;
+	if (zcontext) {
+		context = php_stream_context_from_zval(zcontext, 0);
 	}
 
 	if (!flags) {
-		n = php_scandir(path, &namelist, 0, php_alphasort);
+		n = php_stream_scandir(dirn, &namelist, context, (void *) php_stream_dirent_alphasort);
 	} else {
-		n = php_scandir(path, &namelist, 0, (void *) php_alphasortr);
+		n = php_stream_scandir(dirn, &namelist, context, (void *) php_stream_dirent_alphasortr);
 	}
-
 	if (n < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(errno %d): %s", errno, strerror(errno));
-		RETVAL_FALSE;
-		goto err;
+		RETURN_FALSE;
 	}
 	
 	array_init(return_value);
 
 	for (i = 0; i < n; i++) {
-		add_next_index_string(return_value, namelist[i]->d_name, 1);
-		free(namelist[i]);
+		add_next_index_string(return_value, namelist[i]->d_name, 0);
 	}
 
 	if (n) {
-		free(namelist);
+		efree(namelist);
 	}
-
-err:
-	if (path && path != dirn) {
-		efree(path);
-	}
-
-	return;
 }
 /* }}} */
 
