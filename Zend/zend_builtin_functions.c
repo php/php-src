@@ -805,7 +805,7 @@ ZEND_FUNCTION(class_exists)
 {
 	char *class_name, *lc_name;
 	zend_class_entry **ce;
-	long class_name_len;
+	int class_name_len;
 	zend_bool autoload = 1;
 	int found;
 
