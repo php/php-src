@@ -38,6 +38,10 @@ extern zend_module_entry xsl_module_entry;
 #include <libxslt/xsltInternals.h>
 #include <libxslt/xsltutils.h>
 #include <libxslt/transform.h>
+#if HAVE_XSL_EXSLT
+#include <libexslt/exslt.h>
+#include <libexslt/exsltconfig.h>
+#endif
 
 #include "../dom/xml_common.h"
 #include "xsl_fe.h"
