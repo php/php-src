@@ -3,14 +3,14 @@
 require_once('pdo.inc');
 	
 set_sql('create1', 'CREATE TABLE classtypes(id int PRIMARY KEY, name VARCHAR(10) UNIQUE)');
-set_sql('insert1', 'INSERT INTO classtypes VALUES(0, "stdClass")'); 
-set_sql('insert2', 'INSERT INTO classtypes VALUES(1, "Test1")'); 
-set_sql('insert3', 'INSERT INTO classtypes VALUES(2, "Test2")'); 
+set_sql('insert1', 'INSERT INTO classtypes VALUES(0, \'stdClass\')'); 
+set_sql('insert2', 'INSERT INTO classtypes VALUES(1, \'Test1\')'); 
+set_sql('insert3', 'INSERT INTO classtypes VALUES(2, \'Test2\')'); 
 set_sql('create2', 'CREATE TABLE test(id int PRIMARY KEY, classtype int, val VARCHAR(10))');
-set_sql('insert4', 'INSERT INTO test VALUES(1, 0, "A")'); 
-set_sql('insert5', 'INSERT INTO test VALUES(2, 1, "B")'); 
-set_sql('insert6', 'INSERT INTO test VALUES(3, 2, "C")'); 
-set_sql('insert7', 'INSERT INTO test VALUES(4, 3, "D")'); 
+set_sql('insert4', 'INSERT INTO test VALUES(1, 0, \'A\')'); 
+set_sql('insert5', 'INSERT INTO test VALUES(2, 1, \'B\')'); 
+set_sql('insert6', 'INSERT INTO test VALUES(3, 2, \'C\')'); 
+set_sql('insert7', 'INSERT INTO test VALUES(4, 3, \'D\')'); 
 set_sql('select',  'SELECT classtypes.name, test.id AS id, test.val AS val FROM test LEFT JOIN classtypes ON test.classtype=classtypes.id');
 
 $DB->exec($SQL['create1']);

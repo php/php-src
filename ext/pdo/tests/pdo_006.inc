@@ -3,9 +3,9 @@
 require_once('pdo.inc');
 
 set_sql('create',  'CREATE TABLE test(id int PRIMARY KEY, val VARCHAR(10))');
-set_sql('insert1', 'INSERT INTO test VALUES(1, "A")'); 
-set_sql('insert2', 'INSERT INTO test VALUES(2, "A")'); 
-set_sql('insert3', 'INSERT INTO test VALUES(3, "C")'); 
+set_sql('insert1', 'INSERT INTO test VALUES(1, \'A\')'); 
+set_sql('insert2', 'INSERT INTO test VALUES(2, \'A\')'); 
+set_sql('insert3', 'INSERT INTO test VALUES(3, \'C\')'); 
 set_sql('select',  'SELECT val, id FROM test');
 
 
