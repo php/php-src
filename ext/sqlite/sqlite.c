@@ -1663,8 +1663,9 @@ PHP_FUNCTION(sqlite_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto object sqlite_fetch_object(resource result [, string class_name [, bool decode_binary]])
+/* {{{ proto object sqlite_fetch_object(resource result [, string class_name [, array ctor_params [, bool decode_binary]]])
    Fetches the next row from a result set as an object. */
+   /* note that you can do array(&$val) for param ctor_params */
 PHP_FUNCTION(sqlite_fetch_object)
 {
 	zval *zres;
@@ -1677,11 +1678,12 @@ PHP_FUNCTION(sqlite_fetch_object)
 	zval dataset;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
-	zval *retval_ptr;
+	zval *retval_ptr; 
+	zval *ctor_params = NULL;
 
 	php_set_error_handling(object ? EH_THROW : EH_NORMAL, sqlite_ce_exception TSRMLS_CC);
 	if (object) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sb", &class_name, &class_name_len, &decode_binary)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|szb", &class_name, &class_name_len, &ctor_params, &decode_binary)) {
 			php_std_error_handling();
 			return;
 		}
@@ -1692,7 +1694,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 			ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 		}
 	} else {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|sb", &zres, &class_name, &class_name_len, &decode_binary)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|szb", &zres, &class_name, &class_name_len, &ctor_params, &decode_binary)) {
 			php_std_error_handling();
 			return;
 		}
@@ -1723,8 +1725,32 @@ PHP_FUNCTION(sqlite_fetch_object)
 		fci.symbol_table = NULL;
 		fci.object_pp = &return_value;
 		fci.retval_ptr_ptr = &retval_ptr;
-		fci.param_count = 0;
-		fci.params = NULL;
+		if (ctor_params) {
+			if (Z_TYPE_P(ctor_params) == IS_ARRAY) {
+				HashTable *ht = Z_ARRVAL_P(ctor_params);
+				Bucket *p;
+
+				fci.param_count = 0;
+				fci.params = emalloc(sizeof(zval*) * ht->nNumOfElements);
+				p = ht->pListHead;
+				while (p != NULL) {
+					fci.params[fci.param_count++] = (zval**)p->pData;
+					p = p->pListNext;
+				}
+			} else {
+				/* Two problems why we throw exceptions here: PHP is typeless
+				 * and hence passing one argument that's not an array could be
+				 * by mistake and the other way round is possible, too. The 
+				 * single value is an array. Also we'd have to make that one
+				 * argument passed by reference.
+				 */
+				zend_throw_exception(sqlite_ce_exception, "Parameter ctor_params must be an array", 0 TSRMLS_CC);
+				return;
+			}
+		} else {
+			fci.param_count = 0;
+			fci.params = NULL;
+		}
 		fci.no_separation = 1;
 	
 		fcc.initialized = 1;
@@ -1738,6 +1764,9 @@ PHP_FUNCTION(sqlite_fetch_object)
 			if (retval_ptr) {
 				zval_ptr_dtor(&retval_ptr);
 			}
+		}
+		if (fci.params) {
+			efree(fci.params);
 		}
 	}
 }
