@@ -46,8 +46,9 @@
 /* mode_t isn't defined on Windows */
 typedef int mode_t;
 
+#define DEFAULT_SLASH '\\'
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
-
+#define COPY_WHEN_ABSOLUTE 2
 #define IS_ABSOLUTE_PATH(path, len) \
 	(len >= 2 && isalpha(path[0]) && path[1] == ':')
 
@@ -56,8 +57,14 @@ typedef int mode_t;
 #include <dirent.h>
 #endif
 
+#define DEFAULT_SLASH '/'
 #define IS_SLASH(c)	((c) == '/')
 
+#endif
+
+
+#ifndef COPY_WHEN_ABSOLUTE
+#define COPY_WHEN_ABSOLUTE 0
 #endif
 
 #ifndef IS_ABSOLUTE_PATH	
