@@ -267,10 +267,6 @@ void dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 	}
 	if (ret == SUCCESS) {
 		hnd->write_func(obj, value TSRMLS_CC);
-		if (! PZVAL_IS_REF(value) && value->refcount == 0) {
-			value->refcount++;
-			zval_ptr_dtor(&value);
-		}
 	} else {
 		std_hnd = zend_get_std_object_handlers();
 		std_hnd->write_property(object, member, value TSRMLS_CC);
