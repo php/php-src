@@ -139,7 +139,6 @@ echo "
 
 // Determine the tests to be run.
 
-$test_to_run = array();
 $test_files = array();
 $test_results = array();
 $GLOBALS['__PHP_FAILED_TESTS__'] = array();
@@ -148,18 +147,18 @@ $GLOBALS['__PHP_FAILED_TESTS__'] = array();
 if (isset($argc) && $argc > 1) {
 	for ($i=1; $i<$argc; $i++) {
 		$testfile = realpath($argv[$i]);
-		$test_to_run[$testfile] = 1;
+		if (is_dir($testfile)) {
+			find_files($testfile);
+		} else if(preg_match("/\.phpt$/", $name)) {
+			$test_files[] = $testfile;
+		}
 	}
 
 	// Run selected tests.
-	if (count($test_to_run)) {
+	if (count($test_files)) {
 		echo "Running selected tests.\n";
-		foreach($test_to_run AS $name=>$runnable) {
-			if(!preg_match("/\.phpt$/", $name))
-				continue;
-			if ($runnable) {
-				$test_results[$name] = run_test($php,$name);
-			}
+		foreach($test_files AS $name) {
+			$test_results[$name] = run_test($php,$name);
 		}
 		if(getenv('REPORT_EXIT_STATUS') == 1 and ereg('FAILED( |$)', implode(' ', $test_results))) {
 			exit(1);
@@ -182,7 +181,7 @@ foreach ($test_dirs as $dir) {
 }
 
 foreach ($user_tests as $dir) {
-	find_files("{$dir}", ($dir == 'ext'));
+	find_files($dir, ($dir == 'ext'));
 }
 
 function find_files($dir,$is_ext_dir=FALSE,$ignore=FALSE)
