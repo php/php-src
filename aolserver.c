@@ -47,17 +47,21 @@ typedef struct {
 	sapi_module_struct *sapi_module;
 	Ns_DString content_type;
 	Ns_Conn *conn;
-} php_aol_context;
+	char *ns_server;
+	char *ns_module;
+} php_ns_context;
+
+static void php_ns_config(php_ns_context *ctx);
 
 static int
-sapi_ub_write(const char *str, uint str_length)
+php_ns_sapi_ub_write(const char *str, uint str_length)
 {
 	Ns_DString dstr;
-	php_aol_context *ctx;
+	php_ns_context *ctx;
 	SLS_FETCH();
 
 	HERE;
-	ctx = (php_aol_context *) SG(server_context);
+	ctx = (php_ns_context *) SG(server_context);
 
 	Ns_DStringInit(&dstr);
 	Ns_DStringNAppend(&dstr, (char *) str, str_length);
@@ -68,11 +72,11 @@ sapi_ub_write(const char *str, uint str_length)
 }
 
 static int
-sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers SLS_DC)
+php_ns_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers SLS_DC)
 {
 	char *header_name, *header_content;
 	char *p;
-	php_aol_context *ctx = (php_aol_context *) SG(server_context);
+	php_ns_context *ctx = (php_ns_context *) SG(server_context);
 
 	header_name = sapi_header->header;
 	header_content = p = strchr(header_name, ':');
@@ -98,20 +102,20 @@ sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_h
 }
 
 static int
-sapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
+php_ns_sapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 {
-	php_aol_context *ctx;
+	php_ns_context *ctx;
 	
-	ctx = (php_aol_context *) SG(server_context);
+	ctx = (php_ns_context *) SG(server_context);
 	Ns_ConnFlushHeaders(ctx->conn, SG(sapi_headers).http_response_code);
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
 static int
-sapi_read_post(char *buf, uint count_bytes SLS_DC)
+php_ns_sapi_read_post(char *buf, uint count_bytes SLS_DC)
 {
 	uint total_read = 0;
-	php_aol_context *ctx = (php_aol_context *) SG(server_context);
+	php_ns_context *ctx = (php_ns_context *) SG(server_context);
 
 	total_read = Ns_ConnRead(ctx->conn, buf, count_bytes);
 	
@@ -123,7 +127,7 @@ sapi_read_post(char *buf, uint count_bytes SLS_DC)
 }
 	
 static char *
-sapi_read_cookies(SLS_D)
+php_ns_sapi_read_cookies(SLS_D)
 {
 	HERE;
 	return NULL;
@@ -132,36 +136,25 @@ sapi_read_cookies(SLS_D)
 static sapi_module_struct sapi_module = {
 	"PHP Language",
 
-	php_module_startup,				/* startup */
+	php_module_startup,						/* startup */
 	php_module_shutdown_wrapper,			/* shutdown */
 
-	sapi_ub_write,					/* unbuffered write */
+	php_ns_sapi_ub_write,					/* unbuffered write */
 
-	php_error,						/* error handler */
+	php_error,								/* error handler */
 
-	sapi_header_handler,			/* header handler */
-	sapi_send_headers,				/* send headers handler */
-	NULL,							/* send header handler */
+	php_ns_sapi_header_handler,				/* header handler */
+	php_ns_sapi_send_headers,				/* send headers handler */
+	NULL,									/* send header handler */
 
-	sapi_read_post,					/* read POST data */
-	sapi_read_cookies,				/* read Cookies */
+	php_ns_sapi_read_post,					/* read POST data */
+	php_ns_sapi_read_cookies,				/* read Cookies */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
-static void
-php_server_shutdown(void *context)
-{
-	php_aol_context *ctx = (php_aol_context *) context;
-	
-	HERE;
-	ctx->sapi_module->shutdown(ctx->sapi_module);
-
-	free(ctx);
-}
-
 static int
-module_main(php_aol_context *ctx SLS_DC)
+php_ns_module_main(php_ns_context *ctx SLS_DC)
 {
 	zend_file_handle file_handle;
 	CLS_FETCH();
@@ -181,7 +174,7 @@ module_main(php_aol_context *ctx SLS_DC)
 }
 
 static void 
-request_ctor(php_aol_context *ctx SLS_DC)
+php_ns_request_ctor(php_ns_context *ctx SLS_DC)
 {
 	char *server;
 	Ns_DString ds;
@@ -209,7 +202,7 @@ request_ctor(php_aol_context *ctx SLS_DC)
 }
 
 static void
-request_dtor(php_aol_context *ctx SLS_DC)
+php_ns_request_dtor(php_ns_context *ctx SLS_DC)
 {
 	HERE;
 	
@@ -218,33 +211,34 @@ request_dtor(php_aol_context *ctx SLS_DC)
 }
 
 static int
-request_handler(void *context, Ns_Conn *conn)
+php_ns_request_handler(void *context, Ns_Conn *conn)
 {
-	php_aol_context *ctx = (php_aol_context *) context;
+	php_ns_context *ctx = (php_ns_context *) context;
 	int status = NS_OK;
 	SLS_FETCH();
 	
 	HERE;
 	ctx->conn = conn;
 	
-	request_ctor(ctx SLS_CC);
+	php_ns_request_ctor(ctx SLS_CC);
 	
-	status = module_main(ctx SLS_CC);
+	status = php_ns_module_main(ctx SLS_CC);
 	
-	request_dtor(ctx SLS_CC);
+	php_ns_request_dtor(ctx SLS_CC);
 	
 	ctx->conn = NULL;
 
 	return status;
 }
 
-static void config(char *server, char *module, php_aol_context *ctx)
+static void 
+php_ns_config(php_ns_context *ctx)
 {
 	int i;
 	char *path;
 	Ns_Set *set;
 
-	path = Ns_ConfigPath(server, module, NULL);
+	path = Ns_ConfigPath(ctx->ns_server, ctx->ns_module, NULL);
 	set = Ns_ConfigGetSection(path);
 
 	for(i = 0; set && i < Ns_SetSize(set); i++) {
@@ -253,44 +247,65 @@ static void config(char *server, char *module, php_aol_context *ctx)
 
 		if(!strcasecmp(key, "map")) {
 			Ns_Log(Notice, "Registering PHP for \"%s\"", value);
-			Ns_RegisterRequest(server, "GET", value, request_handler, NULL, ctx, 0);
-			Ns_RegisterRequest(server, "POST", value, request_handler, NULL, ctx, 0);
-			Ns_RegisterRequest(server, "HEAD", value, request_handler, NULL, ctx, 0);
+			Ns_RegisterRequest(ctx->ns_server, "GET", value, php_ns_request_handler, NULL, ctx, 0);
+			Ns_RegisterRequest(ctx->ns_server, "POST", value, php_ns_request_handler, NULL, ctx, 0);
+			Ns_RegisterRequest(ctx->ns_server, "HEAD", value, php_ns_request_handler, NULL, ctx, 0);
 		} else if(!strcasecmp(key, "php_value")) {
 			char *val;
 
 			val = strchr(value, ' ');
 			if(val) {
-				char *key_end;
+				char *new_key;
 				
-				key_end = val;
+				new_key = estrndup(value, val - value);
 				
 				do { 
 					val++; 
 				} while(*val == ' ');
 
-				php_alter_ini_entry(key, key_end - key, val, strlen(val), PHP_INI_SYSTEM);
+				Ns_Log(Debug, "PHP configuration option '%s=%s'", new_key, val);
+				php_alter_ini_entry(new_key, strlen(new_key) + 1, val, 
+						strlen(val) + 1, PHP_INI_SYSTEM);
+				
+				efree(new_key);
 			}
 		}
 		
 	}
 }
 	
+static void
+php_ns_server_shutdown(void *context)
+{
+	php_ns_context *ctx = (php_ns_context *) context;
+	
+	HERE;
+	ctx->sapi_module->shutdown(ctx->sapi_module);
+	sapi_shutdown();
+	tsrm_shutdown();
+
+	free(ctx->ns_module);
+	free(ctx->ns_server);
+	free(ctx);
+}
+
 
 int Ns_ModuleInit(char *server, char *module)
 {
-	php_aol_context *ctx;
+	php_ns_context *ctx;
 	
-	tsrm_startup(10, 10, 0);
+	tsrm_startup(1, 1, 0);
 	sapi_startup(&sapi_module);
 	sapi_module.startup(&sapi_module);
 	
 	ctx = malloc(sizeof *ctx);
 	ctx->sapi_module = &sapi_module;
+	ctx->ns_server = strdup(server);
+	ctx->ns_module = strdup(module);
+	
+	php_ns_config(ctx);
 
-	config(server, module, ctx);
-
-	Ns_RegisterServerShutdown(server, php_server_shutdown, ctx);
+	Ns_RegisterServerShutdown(server, php_ns_server_shutdown, ctx);
 
 	return NS_OK;
 }
