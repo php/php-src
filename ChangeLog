@@ -1,3 +1,107 @@
+2001-01-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Improved handling for empty format strings
+
+    Also kill a warning
+
+    * ext/ircg/ircg.c:
+    Fix a bug of the D'oh! class (RETVAL instead of RETURN), let the first
+    irconn_id be 1 and allow empty strings as format strings.
+
+    * ext/ircg/ircg.c:
+    Check the return value irc_connect().  There are some cases where
+    that function would fail and we were leaking memory.
+
+2001-01-10  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * main/php_compat.h: *** empty log message ***
+
+    * ext/sablot/config.m4
+      ext/xml/config.m4:
+    disable directory search for libexpat and disable some macros for libxml-1.95.
+
+2001-01-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c:
+    Especially on FreeBSD it seems to be common that send(2) does not
+    do a decent job.  We handle that better now.
+
+    * ext/ircg/ircg.c:
+    Remove unused channel element from the php_irconn structure.
+
+    Remove unnecessary check when freeing custom format messages.
+
+    Improve handling, if send(2) fails.
+
+2001-01-10  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/exec.c:
+    exec'd processes now get cleaned up even if the browser connections was
+    aborted.
+    fixes: #8143
+
+2001-01-10  David Croft  <david@infotrek.co.uk>
+
+    * ext/standard/datetime.c: fixed swatch internet time (bugs#8242,7106)
+
+    * ext/standard/datetime.c:
+    Allocate buffer in date() for the actual length of the timezone (bug#8292)
+
+2001-01-10  Stig Bakken  <ssb@fast.no>
+
+    * configure.in: * renamed PEAR scripts
+    * set localstatedir
+
+    * pear/scripts/.cvsignore: added .cvsignore file
+
+    * pear/scripts/pear.in
+      pear/scripts/php-config.in
+      pear/scripts/phpextdist
+      pear/scripts/phpize.in
+      pear/Payment/Verisign.php
+      pear/XML/Parser.php
+      pear/Numbers/Roman.php
+      pear/PEAR/Installer.php
+      pear/Math/Fraction.php
+      pear/Math/Util.php
+      pear/Net/Curl.php
+      pear/Net/SMTP.php
+      pear/Net/Socket.php
+      pear/File/Passwd.php
+      pear/HTML/Form.php
+      pear/Image/Remote.php
+      pear/Mail/rfc822.php
+      pear/Mail/sendmail.php
+      pear/Mail/smtp.php
+      pear/Date/Human.php
+      pear/File/Find.php
+      pear/Benchmark/Iterate.php
+      pear/Benchmark/Timer.php
+      pear/Cache/Function_Cache.php
+      pear/Crypt/HCEMD5.php
+      pear/DB/common.php
+      pear/DB/ibase.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/storage.php
+      pear/DB/sybase.php
+      pear/DB.php
+      pear/HTTP.php
+      pear/Mail.php
+      pear/Makefile.in
+      pear/PEAR.php.in
+      pear/package.dtd
+      pear/pear.in
+      pear/php-config.in
+      pear/phpextdist
+      pear/phpize.in
+      pear/run-tests.in: * updated copyrights (thanks Colin)
+    * moved scripts to own directory (bug #7635)
+
 2001-01-09  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
 
     * ext/sablot/config.m4:
