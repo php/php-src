@@ -1109,7 +1109,7 @@ static int _valid_var_name(char *varname)
 /* }}} */
 
 
-/* {{{ proto void extract(array var_array, int extract_type [, string prefix])
+/* {{{ proto int extract(array var_array, int extract_type [, string prefix])
    Imports variables into symbol table from an array */
 PHP_FUNCTION(extract)
 {
@@ -1117,7 +1117,7 @@ PHP_FUNCTION(extract)
 	zval **entry, *data;
 	char *varname, *finalname;
 	ulong lkey;
-	int res, extype;
+	int res, extype, count = 0;
 
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
@@ -1203,12 +1203,16 @@ PHP_FUNCTION(extract)
 
 					ZEND_SET_SYMBOL(EG(active_symbol_table), finalname, data);
 					efree(finalname);
+
+					count++;
 				}
 			}
 		}
 
 		zend_hash_move_forward(Z_ARRVAL_PP(var_array));
 	}
+
+	RETURN_LONG(count);
 }
 /* }}} */
 
