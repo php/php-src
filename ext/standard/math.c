@@ -451,6 +451,7 @@ PHP_FUNCTION(pow)
 
 	lbase = Z_LVAL_PP(zbase);
 
+	/* lexp != 0 */
 	switch (lbase) {
 		case -1:
 			RETURN_LONG( lexp & 1 ? -1 : 1 ); /* if lexp=odd ... */
@@ -464,6 +465,13 @@ PHP_FUNCTION(pow)
 			}
 		case 1:
 			RETURN_LONG(1);
+		case LONG_MIN: /* special case since -LONG_MIN == 0 */
+			/* lexp != 0, and only lexp==1 is LONG, DOUBLE otherwise */
+			if (lexp == 1) {
+				RETURN_LONG(LONG_MIN);
+			} else {
+				RETURN_DOUBLE(exp(log(-(double)LONG_MIN) * (double)lexp));
+			}
 		default:
 			/* abs(lbase) > 1 */
 			dval = exp(log((double) (lbase>0?lbase:-lbase)) * 
