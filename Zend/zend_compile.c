@@ -545,18 +545,16 @@ void zend_check_writable_variable(znode *variable)
 	if (type & ZEND_PARSED_METHOD_CALL) {
 		zend_error(E_ERROR, "Can't use method return value in write context");
 	}
-	if ((type & ZEND_PARSED_FUNCTION_CALL) &&
-		!(type & (ZEND_PARSED_METHOD_CALL|ZEND_PARSED_MEMBER))) {
+	if (type == ZEND_PARSED_FUNCTION_CALL) {
 		zend_error(E_ERROR, "Can't use function return value in write context");
 	}
 }
 
-zend_bool zend_variable_buffer_empty(TSRMLS_D)
+zend_bool zend_is_function_or_method_call(znode *variable)
 {
-	zend_llist *fetch_list_ptr;
+	zend_uint type = variable->u.EA.type;
 
-	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
-	return !fetch_list_ptr->head;
+	return  ((type & ZEND_PARSED_METHOD_CALL) || (type == ZEND_PARSED_FUNCTION_CALL));
 }
 
 
@@ -1069,7 +1067,7 @@ void zend_do_pass_param(znode *param, int op, int offset TSRMLS_DC)
 	send_by_reference = ARG_SHOULD_BE_SENT_BY_REF(offset, 1, arg_types)?ZEND_ARG_SEND_BY_REF:0;
 
 
-	if (op == ZEND_SEND_VAR && zend_variable_buffer_empty(TSRMLS_C)) {
+	if (op == ZEND_SEND_VAR && zend_is_function_or_method_call(param)) {
 		/* Method call */
 		op = ZEND_SEND_VAR_NO_REF;
 	} else if (op == ZEND_SEND_VAL && param->op_type == IS_VAR) {
@@ -2372,6 +2370,8 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 	zend_op *opline;
 
 	zend_do_end_variable_parse(BP_VAR_IS, 0 TSRMLS_CC);
+	zend_check_writable_variable(variable);
+
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	opline->opcode = ZEND_ISSET_ISEMPTY;
@@ -2390,7 +2390,7 @@ void zend_do_foreach_begin(znode *foreach_token, znode *array, znode *open_brack
 	zend_bool is_variable;
 
 	if (variable) {
-		if (zend_variable_buffer_empty(TSRMLS_C)) {
+		if (zend_is_function_or_method_call(array)) {
 			is_variable = 0;
 		} else {
 			is_variable = 1;
