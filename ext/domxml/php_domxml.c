@@ -1798,7 +1798,7 @@ PHP_FUNCTION(domxml_attr_value)
 	DOMXML_NO_ARGS();
 
 	/* RETURN_STRING((char *) xmlNodeGetContent((xmlNodePtr) attrp), 1); */
-	if (content = xmlNodeGetContent((xmlNodePtr) attrp)) {
+	if ((content = xmlNodeGetContent((xmlNodePtr) attrp)) != NULL) {
 		RETVAL_STRING(content,1);
 	} else {
 		RETURN_EMPTY_STRING();
@@ -1879,7 +1879,7 @@ PHP_FUNCTION(domxml_pi_data)
 	DOMXML_NO_ARGS();
 
 	/* RETURN_STRING(xmlNodeGetContent(nodep), 1); */
-	if (content = xmlNodeGetContent(nodep)) {
+	if ((content = xmlNodeGetContent(nodep)) != NULL) {
 		RETVAL_STRING(content,1);
 	} else {
 		RETURN_EMPTY_STRING();
