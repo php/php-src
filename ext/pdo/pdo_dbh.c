@@ -242,6 +242,9 @@ static PHP_METHOD(PDO, prepare)
 		stmt->database_object_handle = *getThis();
 		zend_objects_store_add_ref(getThis() TSRMLS_CC);
 		stmt->dbh = dbh;
+
+		/* we haven't created a lazy object yet */
+		ZVAL_NULL(&stmt->lazy_object_ref);
 		return;
 	}
 	efree(stmt);
