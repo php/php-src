@@ -2,8 +2,18 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Added the ability to prevent the user from overriding certain environment
+  variables in Safe Mode (Zeev)
+- Fixed a crash bug in strtr() working on large input strings (Zeev)
+- Ora_GetColumn()/Ora_FetchInto() now return NULL for NULL-Columns. (Thies)
+- OCI8 now supports binding of NULL-values. Module cleanups. (Thies)
 - Added ability to set timeout on socket read operations through
   set_socket_timeout() function. (Andrei)
+- Added implicit_flush INI directive (Zeev)
+- Added implicit_flush() to control whether flush() should be called
+  implicitly after any output (Zeev)
+- Fixed a crash in pfsockopen() (Zeev)
+- Fixed a possible crash in phpinfo() (Zeev)
 - Added register_argc_argv INI directive, to allow to selectively disable
   the declaration of the $argv and $argc variables for increased
   performance (Zeev)
