@@ -1,3 +1,137 @@
+2001-05-02  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/ext_skel
+      ext/skeleton/CREDITS
+      ext/skeleton/EXPERIMENTAL:
+    added generation of CREDITS and EXPERIMENTAL to ext_skel
+
+2001-05-02  Andi Gutmans  <andi@zend.com>
+
+    * ext/odbc/php_odbc.c:
+    - More strncpy() -> strlcpy() changes. Am I getting bored yet? :)
+
+    * ext/imap/php_imap.c:
+    - More strncpy() -> strlcpy() changes. mm_login() doesn't seem to be used
+      though.
+
+    * sapi/thttpd/thttpd.c: - Another strncpy() -> strlcpy() change
+
+    * ext/exif/exif.c: - Change strncpy()'s to strlcpy()'s
+
+    * ext/interbase/interbase.c: - Whitespace fix
+
+    * ext/interbase/interbase.c: - Commit interbase fixes
+
+    * ext/curl/curl.c:
+    - Fix possible buffer overflow. Always better to use strlcpy() instead
+      of strncpy()
+
+2001-05-02  Harald Radi  <h.radi@nme.at>
+
+    * ext/dotnet/dotnet.cpp: adapted because of the changes in the com module
+
+2001-05-02  Andi Gutmans  <andi@zend.com>
+
+    * NEWS: *** empty log message ***
+
+2001-05-02  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c
+      ext/com/com.h
+      ext/com/conversion.c
+      ext/com/php_COM.h:
+    removed itypeinfo calls because they didn't work on every machine
+
+2001-05-02  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Changing paramters on database_password
+
+    * ext/fbsql/php_fbsql.c: Fixing segfault in database_password
+
+2001-05-02  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * NEWS: .
+
+
+    * NEWS: set the date 4.0.5 was released.
+
+    add an entry about the cgi, $PHP_SELF change that I made.
+
+
+2001-05-02  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache/Container.php
+      pear/Cache/Container/db.php
+      pear/Cache/Container/dbx.php
+      pear/Cache/Container/file.php
+      pear/Cache/Container/phplib.php:
+    - added a high- and lowwater mark for the file container
+      ... need some help with the other containers
+
+    - added default options
+
+2001-05-02  Andi Gutmans  <andi@zend.com>
+
+    * ext/sybase/config.m4
+      ext/sybase/php_sybase_db.c:
+    - Apply Vlad's sybase patch to work with two different kinds of builds of
+      the sybase libraries
+
+2001-05-02  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/imap/php_imap.c: fix whitespace pollution
+
+    * ext/imap/php_imap.c:
+    Fixes and improvements to imap_mail_compose (Johan Ekenberg
+    <johan@ekenberg.se>)
+
+    * ext/imap/php_imap.c:
+    Add support for cram-md5 authentication in imap_open().
+
+2001-05-02  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache/OutputCompression.php
+      pear/Experimental/Image/color_helper.php:
+    - I did not get any comments on the Cache/OutputCompression API,
+      so it's now final...
+
+    - some whitespaces in color_helper.php
+
+2001-05-02  Ben Mansell  <ben@zeus.com>
+
+    * sapi/fastcgi/fastcgi.c:
+    Patch from Stephen Landamore: speed up the environment merging by
+    using memcpy instead of putenv.
+
+2001-05-02  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/testsuite.dsp
+      run-tests.php
+      win32/php4ts.dsw: make run-tests work under win32 too
+
+2001-05-02  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/mbstring/mbstring.c:
+    clear http input encoding detection result in RSHUTDOWN.
+
+2001-05-02  Jani Taskinen  <sniper@iki.fi>
+
+    * main/rfc1867.c:
+    Now the file uploads 'work' also on Lynx. This patch was submitted
+    by Andreas Pistoor <andreas@erestor.f2s.com> and I have tested it a
+    quite long time now and didn't notive any problems. Bug: #9930
+
+2001-05-02  John Donagher  <john@webmeta.com>
+
+    * ext/pfpro/pfpro.c: - Remove C-style comments
+    - Remove some stale debugging code
+
+2001-05-02  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mysql/config.m4
+      ext/mysql/php_mysql.c:
+    Possible Fix for #10570, #10585, #10539 and maybe others.
+
 2001-05-01  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
 
     * ext/mbstring/mbstring.c
