@@ -856,22 +856,24 @@ ZEND_FUNCTION(method_exists)
 {
 	zval **klass, **method_name;
 	char *lcname;
+	zend_class_entry * ce, **pce;
 	
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &klass, &method_name)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
-	if ((*klass)->type != IS_OBJECT) {
-		RETURN_FALSE;
-	}
-
-	/* TBI!! new object handlers */
-	if (!HAS_CLASS_ENTRY(**klass)) {
+	if (Z_TYPE_PP(klass) == IS_OBJECT) {
+		ce = Z_OBJCE_PP(klass);
+	} else if (Z_TYPE_PP(klass) == IS_STRING) {
+		if (zend_lookup_class(Z_STRVAL_PP(klass), Z_STRLEN_PP(klass), &pce TSRMLS_CC) == FAILURE) {
+			RETURN_FALSE;
+		}
+	} else {
 		RETURN_FALSE;
 	}
 
 	convert_to_string_ex(method_name);
-	lcname = zend_str_tolower_dup((*method_name)->value.str.val, (*method_name)->value.str.len);
-	if (zend_hash_exists(&Z_OBJCE_PP(klass)->function_table, lcname, (*method_name)->value.str.len+1)) {
+	lcname = zend_str_tolower_dup(Z_STRVAL_PP(method_name), Z_STRLEN_PP(method_name));
+	if (zend_hash_exists(&ce->function_table, lcname, Z_STRLEN_PP(method_name)+1)) {
 		efree(lcname);
 		RETURN_TRUE;
 	} else {
