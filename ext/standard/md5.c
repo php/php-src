@@ -38,7 +38,7 @@
 
 /* {{{ proto string md5(string str)
    Calculate the md5 hash of a string */
-void php3_md5(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(md5)
 {
 	pval *arg;
 	char md5str[33];

@@ -53,8 +53,8 @@ extern php3_module_entry php3_header_module_entry;
 #define php3_header_module_ptr &php3_header_module_entry
 
 extern int php3_init_head(INIT_FUNC_ARGS);
-extern void php3_Header(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_SetCookie(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(Header);
+PHP_FUNCTION(SetCookie);
 
 void php4i_add_header_information(char *header_information, uint header_length);
 

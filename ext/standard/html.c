@@ -108,7 +108,7 @@ static void _php3_htmlentities(INTERNAL_FUNCTION_PARAMETERS, int all)
 
 /* {{{ proto string htmlspecialchars(string string)
    Convert special characters to HTML entities */
-void php3_htmlspecialchars(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(htmlspecialchars)
 {
 	_php3_htmlentities(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
@@ -116,7 +116,7 @@ void php3_htmlspecialchars(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string htmlentities(string string)
    Convert all applicable characters to HTML entities */
-void php3_htmlentities(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(htmlentities)
 {
 	_php3_htmlentities(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }

@@ -32,6 +32,6 @@
 #ifndef _MICROTIME_H
 #define _MICROTIME_H
 
-extern void php3_microtime(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(microtime);
 
 #endif /* _MICROTIME_H */

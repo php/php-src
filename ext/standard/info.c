@@ -365,7 +365,7 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 
 /* {{{ proto void phpinfo(void)
    Output a page of useful information about PHP and the current request */
-void php3_info(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(info)
 {
 	_php3_info();
 	RETURN_TRUE;
@@ -374,7 +374,7 @@ void php3_info(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string phpversion(void)
    Return the current PHP version */
-void php3_version(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(version)
 {
     RETURN_STRING(PHP_VERSION,1);
 }

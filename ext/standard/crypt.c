@@ -128,7 +128,7 @@ static void php3i_to64(char *s, long v, int n)	{
 	} 
 } 
 
-void php3_crypt(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(crypt)
 {
 	char salt[PHP3_MAX_SALT_LEN];
 	pval *arg1, *arg2;

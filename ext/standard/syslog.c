@@ -199,7 +199,7 @@ static void start_syslog(void)
 
 /* {{{ proto void define_syslog_variables(void)
    Initializes all syslog-related variables */
-void php3_define_syslog_variables(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(define_syslog_variables)
 {
 	if (!syslog_started) {
 		start_syslog();
@@ -213,7 +213,7 @@ void php3_define_syslog_variables(INTERNAL_FUNCTION_PARAMETERS)
    ** Syslog($LOG_EMERG, "help me!")
    ** CloseLog();
  */
-void php3_openlog(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(openlog)
 {
 	pval *ident, *option, *facility;
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &ident, &option, &facility) == FAILURE) {
@@ -233,7 +233,7 @@ void php3_openlog(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int closelog(void)
    Close connection to system logger */
-void php3_closelog(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(closelog)
 {
 	closelog();
 	if (syslog_device) {
@@ -246,7 +246,7 @@ void php3_closelog(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int syslog(int priority, string message)
    Generate a system log message */
-void php3_syslog(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(syslog)
 {
 	pval *priority, *message;
 

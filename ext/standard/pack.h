@@ -36,8 +36,8 @@ extern php3_module_entry pack_module_entry;
 #define pack_module_ptr &pack_module_entry
 
 extern int php3_minit_pack(INIT_FUNC_ARGS);
-extern void php3_pack(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_unpack(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(pack);
+PHP_FUNCTION(unpack);
 
 #define phpext_pack_ptr pack_module_ptr
 

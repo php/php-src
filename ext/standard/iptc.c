@@ -44,7 +44,7 @@
 #include "php.h"
 #include "php3_iptc.h"
 
-void php3_iptcparse(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(iptcparse)
 {
 	unsigned int length, inx, len, inheader, tagsfound;
 	unsigned char *buffer;

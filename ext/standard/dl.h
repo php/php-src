@@ -35,7 +35,7 @@
 #ifndef _DL_H
 #define _DL_H
 
-extern void php3_dl(pval *file,int type,pval *return_value);
+void php3_dl(pval *file,int type,pval *return_value);
 
 
 #if HAVE_LIBDL
@@ -44,11 +44,11 @@ extern php3_module_entry dl_module_entry;
 #define dl_module_ptr &dl_module_entry
 
 /* dynamic loading functions */
-extern void dl(INTERNAL_FUNCTION_PARAMETERS);
+void dl(INTERNAL_FUNCTION_PARAMETERS);
 extern int php3_minit_dl(INIT_FUNC_ARGS);
 extern int php3_mshutdown_dl(SHUTDOWN_FUNC_ARGS);
 extern int php3_rshutdown_dl(SHUTDOWN_FUNC_ARGS);
-extern void php3_info_dl(ZEND_MODULE_INFO_FUNC_ARGS);
+void php3_info_dl(ZEND_MODULE_INFO_FUNC_ARGS);
 
 #else
 

@@ -90,7 +90,7 @@ PHP_FUNCTION(bin2hex)
 
 /* {{{ proto int strlen(string str)
    Get string length */
-void php3_strlen(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(strlen)
 {
 	pval *str;
 	
@@ -104,7 +104,7 @@ void php3_strlen(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int strcmp(string str1, string str2)
    Binary safe string comparison */
-void php3_strcmp(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(strcmp)
 {
 	pval *s1,*s2;
 	
@@ -119,7 +119,7 @@ void php3_strcmp(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int strcasecmp(string str1, string str2)
    Binary safe case-insensitive string comparison */
-void php3_strcasecmp(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(strcasecmp)
 {
 	pval *s1,*s2;
 	
@@ -134,7 +134,7 @@ void php3_strcasecmp(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int strspn(string str, string mask)
    Find length of initial segment consisting entirely of characters found in mask */
-void php3_strspn(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(strspn)
 {
 	pval *s1,*s2;
 	
@@ -149,7 +149,7 @@ void php3_strspn(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int strcspn(string str, string mask)
    Find length of initial segment consisting entirely of characters not found in mask */
-void php3_strcspn(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(strcspn)
 {
 	pval *s1,*s2;
 	
@@ -164,7 +164,7 @@ void php3_strcspn(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string chop(string str)
    Remove trailing whitespace */
-void php3_chop(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(chop)
 {
 	pval *str;
 	register int i;
@@ -194,7 +194,7 @@ void php3_chop(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string trim(string str)
    Strip whitespace from the beginning and end of a string */
-void php3_trim(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(trim)
 {
 	pval *str;
 	register int i;
@@ -235,7 +235,7 @@ void php3_trim(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string ltrim(string str)
    Strip whitespace from the beginning of a string */
-void php3_ltrim(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ltrim)
 {
 	pval *str;
 	register int i;
@@ -266,7 +266,7 @@ void php3_ltrim(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array(string separator, string str)
    Split a string on string separator and return array of components */
-void php3_explode(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(explode)
 {
 	pval *str, *delim;
 	char *work_str, *p1, *p2;
@@ -304,7 +304,7 @@ void php3_explode(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string implode(array src, string glue)
    Join array elements placing glue string between items and return one string */
-void php3_implode(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(implode)
 {
 	pval *arg1, *arg2, *delim, *tmp, *arr;
 	int len = 0, count = 0;
@@ -366,7 +366,7 @@ char *strtok_string;
 
 /* {{{ proto string strtok([string str,] string token)
    Tokenize a string */
-void php3_strtok(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(strtok)
 {
 	pval *str, *tok;
 #ifndef THREAD_SAFE
@@ -440,7 +440,7 @@ PHPAPI char *_php3_strtoupper(char *s)
 
 /* {{{ proto string strtoupper(string str)
    Make a string uppercase */
-void php3_strtoupper(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(strtoupper)
 {
 	pval *arg;
 	char *ret;
@@ -471,7 +471,7 @@ PHPAPI char *_php3_strtolower(char *s)
 
 /* {{{ proto string strtolower(string str)
    Make a string lowercase */
-void php3_strtolower(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(strtolower)
 {
 	pval *str;
 	char *ret;
@@ -488,7 +488,7 @@ void php3_strtolower(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string basename(string path)
    Return the filename component of the path */
-void php3_basename(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(basename)
 {
 	pval *str;
 	char *ret, *c;
@@ -540,7 +540,7 @@ PHPAPI void _php3_dirname(char *str, int len) {
 
 /* {{{ proto string dirname(string path)
    Return the directory name component of the path */
-void php3_dirname(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(dirname)
 {
 	pval *str;
 	char *ret;
@@ -574,7 +574,7 @@ PHPAPI char *php3i_stristr(unsigned char *s, unsigned char *t)
 
 /* {{{ proto string strstr(string haystack, string needle)
    Find first occurrence of a string within another, case insensitive */
-void php3_stristr(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(stristr)
 {
 	pval *haystack, *needle;
 	char *found = NULL;
@@ -602,7 +602,7 @@ void php3_stristr(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string strstr(string haystack, string needle)
    Find first occurrence of a string within another */
-void php3_strstr(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(strstr)
 {
 	pval *haystack, *needle;
 	char *found = NULL;
@@ -635,7 +635,7 @@ void php3_strstr(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int strpos(string haystack, string needle)
    Find position of first occurrence of a string within another */
-void php3_strpos(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(strpos)
 {
 	pval *haystack, *needle, *OFFSET;
 	int offset = 0;
@@ -684,7 +684,7 @@ void php3_strpos(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int strrpos(string haystack, string needle)
    Find the last occurrence of a character in a string within another */
-void php3_strrpos(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(strrpos)
 {
 	pval *haystack, *needle;
 	char *found = NULL;
@@ -711,7 +711,7 @@ void php3_strrpos(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string strrchr(string haystack, string needle)
    Find the last occurrence of a character in a string within another */
-void php3_strrchr(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(strrchr)
 {
 	pval *haystack, *needle;
 	char *found = NULL;
@@ -774,7 +774,7 @@ _php3_chunk_split(char *src, int srclen, char *end, int endlen, int chunklen)
 
 /* {{{ proto string chunk_split(string str [, int chunklen [, string ending]])
    Return split line */
-void php3_chunk_split(INTERNAL_FUNCTION_PARAMETERS) 
+PHP_FUNCTION(chunk_split) 
 {
 	pval *p_str, *p_chunklen, *p_ending;
 	int argc;
@@ -822,7 +822,7 @@ void php3_chunk_split(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string substr(string str, int start [, int length])
    Return part of a string */
-void php3_substr(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(substr)
 {
 	pval *string, *from, *len;
 	int argc, l;
@@ -880,7 +880,7 @@ void php3_substr(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string quotemeta(string str)
    Quote meta characters */
-void php3_quotemeta(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(quotemeta)
 {
 	pval *arg;
 	char *str, *old;
@@ -926,7 +926,7 @@ void php3_quotemeta(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ord(string character)
    Return ASCII value of character */
-void php3_ord(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ord)
 {
 	pval *str;
 	
@@ -940,7 +940,7 @@ void php3_ord(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string chr(int ascii)
    Convert ASCII code to a character */
-void php3_chr(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(chr)
 {
 	pval *num;
 	char temp[2];
@@ -957,7 +957,7 @@ void php3_chr(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string(string str)
    Make a string's first character uppercase */
-void php3_ucfirst(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ucfirst)
 {
 	pval *arg;
 	
@@ -976,7 +976,7 @@ void php3_ucfirst(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string ucwords(string str)
    Uppercase the first character of every word in a string */
-void php3_ucwords(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ucwords)
 {
 	pval *arg;
 	char *r;
@@ -1003,7 +1003,7 @@ void php3_ucwords(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string strtr(string str, string from, string to)
    Translate characters in str using given translation tables */
-void php3_strtr(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(strtr)
 {								/* strtr(STRING,FROM,TO) */
 	pval *str, *from, *to;
 	unsigned char xlat[256];
@@ -1046,7 +1046,7 @@ void php3_strtr(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string strrev(string str)
    Reverse a string */
-void php3_strrev(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(strrev)
 {
 	pval *str;
 	int i,len;
@@ -1123,7 +1123,7 @@ PHPAPI void _php3_stripslashes(char *string, int *len)
 
 /* {{{ proto string addslashes(string str)
    Escape single quote, double quotes and backslash characters in a string with backslashes */
-void php3_addslashes(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(addslashes)
 {
 	pval *str;
 
@@ -1138,7 +1138,7 @@ void php3_addslashes(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string stripslashes(string str)
    Strip backslashes from a string */
-void php3_stripslashes(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(stripslashes)
 {
 	pval *str;
 	
@@ -1328,7 +1328,7 @@ finish:
 
 /* {{{ proto string str_replace(string needle, string str, string haystack)
    Replace all occurrences of needle in haystack with str */
-void php3_str_replace(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(str_replace)
 {
 	pval *haystack, *needle, *str;
 	char *new;
@@ -1527,7 +1527,7 @@ static void _php3_hebrev(INTERNAL_FUNCTION_PARAMETERS,int convert_newlines)
 
 /* {{{ proto string hebrev(string str [, int max_chars_per_line])
    Convert logical Hebrew text to visual text */
-void php3_hebrev(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(hebrev)
 {
 	_php3_hebrev(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
@@ -1535,7 +1535,7 @@ void php3_hebrev(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string hebrev(string str [, int max_chars_per_line])
    Convert logical Hebrew text to visual text with newline conversion */
-void php3_hebrev_with_conversion(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(hebrev_with_conversion)
 {
 	_php3_hebrev(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
@@ -1543,7 +1543,7 @@ void php3_hebrev_with_conversion(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string nl2br(string str)
    Converts newlines to HTML line breaks */
-void php3_newline_to_br(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(newline_to_br)
 {
 	pval *str;
 	
@@ -1559,7 +1559,7 @@ void php3_newline_to_br(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string setlocale(string category, string locale)
    Set locale information */
-void php3_setlocale(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(setlocale)
 {
 	pval *category, *locale;
 	int cat;
@@ -1602,7 +1602,7 @@ void php3_setlocale(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto void parsestr(string encoded_string)
    Parses GET/POST/COOKIE data and sets global variables. */
-void php3_parsestr(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(parsestr)
 {
 	pval *arg;
 	char *res = NULL;

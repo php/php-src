@@ -100,7 +100,7 @@ long _php3_getuid(void)
 
 /* {{{ proto int getmyuid(void)
    Get PHP script owner's UID */
-void php3_getmyuid(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(getmyuid)
 {
 	long uid;
 	
@@ -115,7 +115,7 @@ void php3_getmyuid(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int getmypid(void)
    Get current process ID */
-void php3_getmypid(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(getmypid)
 {
 	int pid;
 	
@@ -130,7 +130,7 @@ void php3_getmypid(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int getmyinode(void)
    Get the inode of the current script being parsed */
-void php3_getmyinode(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(getmyinode)
 {
 	_php3_statpage();
 	if (page_inode < 0) {
@@ -143,7 +143,7 @@ void php3_getmyinode(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int getlastmod(void)
    Get time of last page modification */
-void php3_getlastmod(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(getlastmod)
 {
 	_php3_statpage();
 	if (page_mtime < 0) {

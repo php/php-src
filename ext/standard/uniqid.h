@@ -32,6 +32,6 @@
 #ifndef _UNIQID_H
 #define _UNIQID_H
 
-extern void php3_uniqid(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(uniqid);
 
 #endif /* _UNIQID_H */

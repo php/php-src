@@ -36,8 +36,8 @@
 #define PHP_CONTENTS_COLOR "#DDDDDD"
 #define PHP_HEADER_COLOR "#00DDDD"
 
-void php3_version(INTERNAL_FUNCTION_PARAMETERS);
-void php3_info(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(version);
+PHP_FUNCTION(info);
 PHPAPI void _php3_info(void);
 
 PHPAPI void php_info_print_table_header(int num_cols, ...);

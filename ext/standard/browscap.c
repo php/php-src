@@ -72,7 +72,7 @@ static int browser_reg_compare(pval *browser)
 	return 0;
 }
 
-void php3_get_browser(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(get_browser)
 {
 	pval *agent_name,*agent,tmp;
 	ELS_FETCH();

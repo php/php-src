@@ -39,18 +39,18 @@ typedef struct url {
 	char *fragment;
 } url;
 
-extern void free_url(url *);
+void free_url(url *);
 extern url *url_parse(char *);
 extern int _php3_urldecode(char *, int); /* return value: length of decoded string */
 extern char *_php3_urlencode(char *, int);
 extern int _php3_rawurldecode(char *, int); /* return value: length of decoded string */
 extern char *_php3_rawurlencode(char *, int);
 
-extern void php3_parse_url(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_urlencode(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_urldecode(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_rawurlencode(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_rawurldecode(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(parse_url);
+PHP_FUNCTION(urlencode);
+PHP_FUNCTION(urldecode);
+PHP_FUNCTION(rawurlencode);
+PHP_FUNCTION(rawurldecode);
 
 /*
  * Local variables:

@@ -280,7 +280,7 @@ static char * _php3_convert_cyr_string(unsigned char *str, char from, char to)
 
 /* {{{ proto string convert_cyr_string(string str, string from, string to)
    Convert from one Cyrillic character set to another */
-void php3_convert_cyr_string(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(convert_cyr_string)
 {
     pval *str_arg, *fr_cs, *to_cs;
 	unsigned char *str;

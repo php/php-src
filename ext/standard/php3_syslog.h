@@ -38,10 +38,10 @@ extern php3_module_entry syslog_module_entry;
 extern int php3_minit_syslog(INIT_FUNC_ARGS);
 extern int php3_rinit_syslog(INIT_FUNC_ARGS);
 extern int php3_rshutdown_syslog(SHUTDOWN_FUNC_ARGS);
-extern void php3_openlog(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_syslog(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_closelog(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_define_syslog_variables(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(openlog);
+PHP_FUNCTION(syslog);
+PHP_FUNCTION(closelog);
+PHP_FUNCTION(define_syslog_variables);
 
 #else
 #define syslog_module_ptr NULL

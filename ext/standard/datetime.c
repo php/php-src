@@ -71,7 +71,7 @@ static int phpday_tab[2][12] =
 	{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 };
 
-void php3_time(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(time)
 {
 	return_value->value.lval = (long) time(NULL);
 	return_value->type = IS_LONG;
@@ -131,12 +131,12 @@ void _php3_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	return_value->type = IS_LONG;
 }
 
-void php3_mktime(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mktime)
 {
 	_php3_mktime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 
-void php3_gmmktime(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(gmmktime)
 {
 	_php3_mktime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
@@ -332,17 +332,17 @@ _php3_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	return_value->type = IS_STRING;
 }
 
-void php3_date(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(date)
 {
 	_php3_date(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 
-void php3_gmdate(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(gmdate)
 {
 	_php3_date(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 
-void php3_getdate(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(getdate)
 {
 	pval *timestamp_arg;
 	struct tm *ta;
@@ -414,7 +414,7 @@ char *php3_std_date(time_t t)
  *
  */
 #define isleap(year) (((year%4) == 0 && (year%100)!=0) || (year%400)==0)
-void php3_checkdate(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(checkdate)
 {
 	pval *month, *day, *year;
 	int m, d, y;
@@ -448,7 +448,7 @@ void php3_checkdate(INTERNAL_FUNCTION_PARAMETERS)
 
 #if HAVE_STRFTIME
 
-void php3_strftime(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(strftime)
 {
 	pval *format_arg, *timestamp_arg;
 	char *format,*buf;

@@ -212,7 +212,7 @@ static inline uint32 randomMT(void)
 #define PHP_RAND_MAX RAND_MAX
 #endif
 
-void php3_srand(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(srand)
 {
 	pval *arg;
 
@@ -231,7 +231,7 @@ void php3_srand(INTERNAL_FUNCTION_PARAMETERS)
 #endif
 }
 
-void php3_mt_srand(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mt_srand)
 {
 	pval *arg;
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
@@ -241,7 +241,7 @@ void php3_mt_srand(INTERNAL_FUNCTION_PARAMETERS)
 	seedMT(arg->value.lval);
 }
 
-void php3_rand(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(rand)
 {
 	pval *p_min=NULL, *p_max=NULL;
 	
@@ -280,7 +280,7 @@ void php3_rand(INTERNAL_FUNCTION_PARAMETERS)
 	}
 }
 
-void php3_mt_rand(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mt_rand)
 {
 	pval *p_min=NULL, *p_max=NULL;
 	
@@ -319,13 +319,13 @@ void php3_mt_rand(INTERNAL_FUNCTION_PARAMETERS)
 	}
 }
 
-void php3_getrandmax(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(getrandmax)
 {
 	return_value->type = IS_LONG;
 	return_value->value.lval = PHP_RAND_MAX;
 }
 
-void php3_mt_getrandmax(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mt_getrandmax)
 {
 	return_value->type = IS_LONG;
 	/*

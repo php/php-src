@@ -79,7 +79,7 @@ int php3_minit_dir(INIT_FUNC_ARGS)
 
 /* {{{ proto int opendir(string path)
    Open a directory and return a dir_handle */
-void php3_opendir(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(opendir)
 {
 	pval *arg;
 	DIR *dirp;
@@ -106,7 +106,7 @@ void php3_opendir(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto void closedir([int dir_handle])
 Close directory connection identified by the dir_handle */
-void php3_closedir(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(closedir)
 {
 	pval *id, *tmp;
 	int id_to_find;
@@ -141,7 +141,7 @@ void php3_closedir(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int chdir(string directory)
 Change the current directory */
-void php3_chdir(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(chdir)
 {
 	pval *arg;
 	int ret;
@@ -162,7 +162,7 @@ void php3_chdir(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto void rewinddir([int dir_handle])
 Rewind dir_handle back to the start */
-void php3_rewinddir(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(rewinddir)
 {
 	pval *id, *tmp;
 	int id_to_find;
@@ -197,7 +197,7 @@ void php3_rewinddir(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string readdir([int dir_handle])
 Read directory entry from dir_handle */
-void php3_readdir(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(readdir)
 {
 	pval *id, *tmp;
 	int id_to_find;
@@ -237,7 +237,7 @@ void php3_readdir(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto class dir(string directory)
 Directory class with properties, handle and class and methods read, rewind and close */
-void php3_getdir(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(getdir) {
 	pval *arg;
 	DIR *dirp;
 	int ret;

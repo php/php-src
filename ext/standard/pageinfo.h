@@ -1,10 +1,10 @@
 #ifndef _PROCESS_H
 #define _PROCESS_H
 
-extern void php3_getmyuid(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_getmypid(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_getmyinode(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_getlastmod(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(getmyuid);
+PHP_FUNCTION(getmypid);
+PHP_FUNCTION(getmyinode);
+PHP_FUNCTION(getlastmod);
 
 extern long _php3_getuid(void);
 
