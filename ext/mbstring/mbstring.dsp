@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MBSTRING_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\TSRM" /D ZEND_DEBUG=0 /D "_MBCS" /D "_USRDLL" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_MBSTRING" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D MBSTRING_EXPORTS=1 /D HAVE_MBSTRING=1 /D HAVE_MBREGEX=1 /D HAVE_MBSTR_CN=1 /D HAVE_MBSTR_JA=1 /D HAVE_MBSTR_KR=1 /D HAVE_MBSTR_RU=1 /D HAVE_MBSTR_TW=1 /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\TSRM" /I "libmbfl" /I "libmbfl\mbfl" /D ZEND_DEBUG=0 /D "_MBCS" /D "_USRDLL" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_MBSTRING" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D MBSTRING_EXPORTS=1 /D HAVE_MBSTRING=1 /D HAVE_MBREGEX=1 /D HAVE_MBSTR_CN=1 /D HAVE_MBSTR_JA=1 /D HAVE_MBSTR_KR=1 /D HAVE_MBSTR_RU=1 /D HAVE_MBSTR_TW=1 /D MBFL_DLL_EXPORT=1 /D "LIBMBFL_EXPORTS" /D "HAVE_STRICMP" /D "HAVE_CONFIG_H" /D "HAVE_STDLIB_H"  /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MBSTRING_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\TSRM" /D ZEND_DEBUG=1 /D "MBSTRING_EXPORTS" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_MBSTRING" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D MBSTRING_EXPORTS=1 /D HAVE_MBSTRING=1 /D HAVE_MBREGEX=1 /D HAVE_MBSTR_CN=1 /D HAVE_MBSTR_JA=1 /D HAVE_MBSTR_KR=1 /D HAVE_MBSTR_RU=1 /D HAVE_MBSTR_TW=1 /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\TSRM"  /I "libmbfl" /I "libmbfl\mbfl" /D ZEND_DEBUG=1 /D "MBSTRING_EXPORTS" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_MBSTRING" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D MBSTRING_EXPORTS=1 /D HAVE_MBSTRING=1 /D HAVE_MBREGEX=1 /D HAVE_MBSTR_CN=1 /D HAVE_MBSTR_JA=1 /D HAVE_MBSTR_KR=1 /D HAVE_MBSTR_RU=1 /D HAVE_MBSTR_TW=1 /D MBFL_DLL_EXPORT=1 /D "LIBMBFL_EXPORTS" /D "HAVE_STRICMP" /D "HAVE_CONFIG_H" /D "HAVE_STDLIB_H"  /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
@@ -92,35 +92,272 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\html_entities.c
+
+SOURCE=.\libmbfl\filters\html_entities.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\mbfilter.c
+SOURCE=.\libmbfl\mbfl\mbfilter.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\mbfilter_cn.c
+SOURCE=.\libmbfl\filters\mbfilter_7bit.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\mbfilter_ja.c
+SOURCE=.\libmbfl\mbfl\mbfilter_8bit.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\mbfilter_kr.c
+SOURCE=.\libmbfl\filters\mbfilter_ascii.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\mbfilter_ru.c
+SOURCE=.\libmbfl\filters\mbfilter_base64.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\mbfilter_tw.c
+SOURCE=.\libmbfl\filters\mbfilter_big5.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\mbregex.c
+SOURCE=.\libmbfl\filters\mbfilter_byte2.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_byte4.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_cp1251.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_cp1252.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_cp866.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_cp932.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_cp936.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_euc_cn.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_euc_jp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_euc_jp_win.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_euc_kr.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_euc_tw.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_htmlent.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_hz.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso2022_kr.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_1.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_10.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_13.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_14.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_15.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_2.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_3.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_4.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_5.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_6.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_7.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_8.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_9.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_jis.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_koi8r.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfilter_pass.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_qprint.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_sjis.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_ucs2.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_ucs4.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_uhc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_utf16.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_utf32.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_utf7.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_utf7imap.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_utf8.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_uuencode.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfilter_wchar.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_allocators.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_convert.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_encoding.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_filter_output.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_ident.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_language.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_memory_device.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_string.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_de.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_en.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_ja.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_kr.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_neutral.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_ru.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_uni.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_zh.c
+# End Source File
+# End Group
+
+SOURCE=.\mbregx\mbregex.c
 # End Source File
 # Begin Source File
 
@@ -137,34 +374,399 @@ SOURCE=.\php_unicode.c
 # End Group
 # Begin Group "Header Files"
 
-# PROP Default_Filter "h;hpp;hxx;hm;inl"
+# PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\cp932_table.h
+SOURCE=.\libmbfl\config.h.vc6
+
+!IF  "$(CFG)" == "mbstring - Win32 Release_TS MBSTRING"
+
+# Begin Custom Build
+InputDir=.\libmbfl
+InputPath=.\libmbfl\config.h.vc6
+
+"$(InputDir)\config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputDir)\config.h.vc6 "$(InputDir)\config.h"
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "mbstring - Win32 Debug_TS MBSTRING"
+
+# Begin Custom Build
+InputDir=.\libmbfl
+InputPath=.\libmbfl\config.h.vc6
+
+"$(InputDir)\config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputDir)\config.h.vc6 "$(InputDir)\config.h"
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
-SOURCE=.\mbfilter.h
+SOURCE=.\libmbfl\filters\cp932_table.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\mbfilter_cn.h
+SOURCE=.\libmbfl\filters\html_entities.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\mbfilter_ja.h
+SOURCE=.\libmbfl\mbfl\mbfilter.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\mbfilter_kr.h
+SOURCE=.\libmbfl\filters\mbfilter_7bit.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\mbfilter_ru.h
+SOURCE=.\libmbfl\mbfl\mbfilter_8bit.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\mbfilter_tw.h
+SOURCE=.\libmbfl\filters\mbfilter_ascii.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_base64.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_big5.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_byte2.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_byte4.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_cp1251.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_cp1252.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_cp866.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_cp932.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_cp936.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_euc_cn.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_euc_jp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_euc_jp_win.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_euc_kr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_euc_tw.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_htmlent.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_hz.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso2022_kr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_1.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_10.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_13.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_14.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_15.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_2.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_3.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_4.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_5.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_6.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_7.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_8.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_iso8859_9.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_jis.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_koi8r.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfilter_pass.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_qprint.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_sjis.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_ucs2.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_ucs4.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_uhc.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_utf16.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_utf32.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_utf7.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_utf7imap.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_utf8.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\mbfilter_uuencode.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfilter_wchar.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_allocators.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_consts.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_convert.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_defs.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_encoding.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_filter_output.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_ident.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_language.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_memory_device.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\mbfl\mbfl_string.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_de.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_en.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_ja.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_kr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_neutral.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_ru.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_uni.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_zh.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_prop.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_big5.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_cns11643.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_cp1251.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_cp1252.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_cp866.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_cp932_ext.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_cp936.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_iso8859_10.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_iso8859_13.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_iso8859_14.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_iso8859_15.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_iso8859_2.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_iso8859_3.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_iso8859_4.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_iso8859_5.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_iso8859_6.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_iso8859_7.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_iso8859_8.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_iso8859_9.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_jis.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_koi8r.h
 # End Source File
 # Begin Source File
 
@@ -181,22 +783,6 @@ SOURCE=.\php_unicode.h
 # Begin Source File
 
 SOURCE=.\unicode_data.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\unicode_table.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\unicode_table_cn.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\unicode_table_kr.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\unicode_table_tw.h
 # End Source File
 # End Group
 # End Target
