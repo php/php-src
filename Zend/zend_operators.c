@@ -144,7 +144,9 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 
 #define zendi_convert_scalar_to_number(op, holder, result)			\
 	if (op==result) {												\
-		convert_scalar_to_number(op TSRMLS_CC);						\
+		if (op->type != IS_LONG) {									\
+			convert_scalar_to_number(op TSRMLS_CC);					\
+		}															\
 	} else {														\
 		switch ((op)->type) {										\
 			case IS_STRING:											\
