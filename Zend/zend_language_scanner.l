@@ -243,23 +243,18 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 	switch (file_handle->type) {
 		case ZEND_HANDLE_FILENAME:
 			file_handle->handle.fp = zend_fopen(file_handle->filename, &file_handle->opened_path);
-		    file_path = file_handle->opened_path; 
 			break;
 		case ZEND_HANDLE_FD:
-		  /* file_handle->opened_path = NULL; */
 			file_handle->handle.fp = fdopen(file_handle->handle.fd, "r");
 			break;
 		case ZEND_HANDLE_FP:
-		  /* file_handle->opened_path = NULL; */
 			file_handle->handle.fp = file_handle->handle.fp;
 			break;
 	}
 	if (!file_handle->handle.fp) {
 		return FAILURE;
 	}
-	if (!file_path) {
-		file_path = file_handle->filename;
-	}
+
 	file_handle->type = ZEND_HANDLE_FP;	
 	if (file_handle->handle.fp != stdin) {
 		zend_llist_add_element(&CG(open_files), file_handle);
@@ -271,7 +266,6 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 #else
 	switch (file_handle->type) {
 		case ZEND_HANDLE_FD:
-		  /* file_handle->opened_path = NULL; */
 			file_handle->handle.is = new ifstream(file_handle->handle.fd);
 			file_handle->type = ZEND_HANDLE_FSTREAM;
 			break;
@@ -286,7 +280,6 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 				break;
 			}
 		case ZEND_HANDLE_FP:
-		  /* file_handle->opened_path = NULL; */
 			if (file_handle->handle.fp==stdin) {
 				file_handle->handle.is = &cin;
 			} else {
@@ -299,8 +292,6 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 			break;
 	}
 
-	file_path = file_handle->filename;
-
 	if (file_handle->handle.is->fail()) {
 		delete file_handle->handle.is;
 		return FAILURE;
@@ -312,6 +303,13 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 	CG(ZFL) = new ZendFlexLexer;
 	CG(ZFL)->switch_streams(file_handle->handle.is, &cout);
 #endif
+
+	if(file_handle->opened_path) {
+	    file_path = file_handle->opened_path; 
+	} else {
+		file_path = file_handle->filename;
+	}
+
 	zend_set_compiled_filename(file_path);
 	CG(zend_lineno) = 1;
 	return SUCCESS;
