@@ -49,7 +49,9 @@ PR_COMMON *php_mysqli_profiler_new_object(PR_COMMON *parent, unsigned int type, 
 		break; 
 		case MYSQLI_PR_RESULT:
 			prnew = (PR_COMMON *)ecalloc(1, sizeof(PR_RESULT));
-		break; 
+		break;
+		default:
+			return NULL; 
 	}
 	prnew->header.type = type;
 	prnew->header.filename = estrdup(zend_get_executed_filename(TSRMLS_C));
