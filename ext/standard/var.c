@@ -372,7 +372,8 @@ int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 				(*p) += i;
 
 				if (zend_hash_find(EG(class_table), class_name, i+1, (void **) &ce)==FAILURE) {
-					php_error(E_WARNING, "Cannot instanciate non-existant class:  %s", class_name);
+					php_error(E_NOTICE, "Unserializing non-existant class: %s! No methods will be available!", class_name);
+					ce = &zend_standard_class_def;
 				}
 
 				efree(class_name);
