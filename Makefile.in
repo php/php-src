@@ -72,7 +72,7 @@ FUNCTIONS_SOURCE = functions/fhttpd.c \
        functions/crypt.c functions/db.c functions/dl.c \
        functions/head.c functions/imap.c functions/mime.c \
        functions/pgsql.c functions/post.c functions/sybase.c \
-       functions/sybase-ct.c @BCMATH_SRC@ functions/xml.c \
+       functions/sybase-ct.c functions/xml.c \
        functions/ldap.c functions/zlib.c functions/ifx.c \
        functions/pdf.c \
        functions/fdf.c functions/snmp.c functions/interbase.c \
@@ -80,7 +80,7 @@ FUNCTIONS_SOURCE = functions/fhttpd.c \
 
 FUNCTIONS = $(FUNCTIONS_SOURCE:.c=.o)
 PHPLIBS = -L@top_srcdir@/libzend -lzend -L@top_srcdir@/ext -lphpext
-LIBS = $(PHPLIBS) $(EXTRA_LIBS) @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @FHTTPD_LIB@ @REGEX_LIB@ @DBM_LIB@ @SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @MYSQL_LFLAGS@ @MYSQL_LIBS@ @PGSQL_LFLAGS@ @PGSQL_LIBS@ @LDAP_LFLAGS@ @LDAP_LIBS@ @IMAP_LIBS@ @ZLIB_LIBS@ @PDFLIB_LIBS@ @FDFLIB_LIBS@ @IFX_LFLAGS@ @IFX_LIBS@ @SNMP_LFLAGS@ @SNMP_LIBS@ @IBASE_LFLAGS@ @IBASE_LIBS@ @XML_LIBS@ @LIBS@
+LIBS = $(PHPLIBS) $(EXTRA_LIBS) @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @FHTTPD_LIB@ @REGEX_LIB@ @DBM_LIB@ @SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @PGSQL_LFLAGS@ @PGSQL_LIBS@ @LDAP_LFLAGS@ @LDAP_LIBS@ @IMAP_LIBS@ @ZLIB_LIBS@ @PDFLIB_LIBS@ @FDFLIB_LIBS@ @IFX_LFLAGS@ @IFX_LIBS@ @SNMP_LFLAGS@ @SNMP_LIBS@ @IBASE_LFLAGS@ @IBASE_LIBS@ @XML_LIBS@ @LIBS@
 
 all: $(BINNAME)
 

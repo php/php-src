@@ -1,0 +1,2 @@
+/* Define if you want to enable bc style precision math support */
+#define WITH_BCMATH 0

@@ -37,7 +37,7 @@
 
 #include "alloc.h"
 #include "functions/head.h"
-#include "functions/number.h"
+#include "ext/bcmath/number.h"
 #include "constants.h"
 #include <sys/stat.h>
 #if USE_SAPI
