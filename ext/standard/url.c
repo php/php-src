@@ -132,8 +132,9 @@ PHPAPI php_url *php_url_parse(char *str)
 				php_replace_controlchars(ret->user);
 			}	
 		
-			if (p-pp > 1) { 
-				ret->pass = estrndup(++pp, (p-pp-1));
+			if (p-pp > 1) {
+				p++;
+				ret->pass = estrndup(pp, (p-pp));
 				php_replace_controlchars(ret->pass);
 			}	
 		}
