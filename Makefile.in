@@ -21,13 +21,13 @@ LTLIBRARY_DEPENDENCIES = \
 LTLIBRARY_LDFLAGS = -rpath $(phptempdir) $(EXTRA_LDFLAGS) $(LDFLAGS) $(PHP_RPATHS)
 LTLIBRARY_LIBADD = $(LTLIBRARY_DEPENDENCIES) $(EXTRA_LIBS)
 
-PROGRAM_NAME         = $(PHP_PROGRAM)
+PROGRAM_NAME         = php
 PROGRAM_SOURCES      = stub.c
 PROGRAM_LDADD        = libphp4.la
 PROGRAM_LDFLAGS      = -export-dynamic	
 PROGRAM_DEPENDENCIES = $(PROGRAM_LDADD)
 
-targets = $(LTLIBRARY_NAME) $(PROGRAM_NAME)
+targets = $(LTLIBRARY_NAME) $(PHP_PROGRAM)
 
 install_targets = install-sapi install-modules
 
