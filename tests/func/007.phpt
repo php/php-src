@@ -1,7 +1,5 @@
 --TEST--
 INI functions test
---POST--
---GET--
 --FILE--
 <?php
 

@@ -1,7 +1,5 @@
 --TEST--
 Test for buffering in core functions with implicit flush off
---POST--
---GET--
 --INI--
 implicit_flush=0
 --FILE--
