@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Changed class type hints for function parameters to not allow the passing of
   NULL values. (Andi)
 - Changed tidy_node to tidyNode and removed tidy_exception. (John)
+- Fixed ip2long() to return FALSE if an IP address passed to this function
+  is not valid. (Derick)
 - Fixed memory leak in memory manager. (Andi)
 - Fixed problem with exceptions returning from include(). (Dmitry)
 - Fixed bug #28311 (Transparency detection code is off by 1).
