@@ -43,7 +43,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 #include "zend.h"
 #include "zend_language_scanner.h"
-#include "zend_language_parser.h"
+#include <zend_language_parser.h>
 
 #include <stdarg.h>
 #include <stdlib.h>
