@@ -1,3 +1,31 @@
+2002-12-25  George Schlossnagle  <george@omniti.com>
+
+    * sapi/cgi/cgi_main.c:
+      fixed ws
+
+    * sapi/cgi/cgi_main.c:
+      mfh (bug #21177)
+
+    * sapi/cgi/cgi_main.c:
+      fix for 21177
+
+2002-12-25  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/tests/array/bug21182.phpt:
+      
+      - Add test for bug #21182
+
+2002-12-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/array.c:
+      Make range operate on the copies of the parameters rather then modify the
+      actual parameters.
+
+2002-12-25  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/array.c:
+      Fixed bug #21182
+
 2002-12-24  Stefan Esser  <s.esser@e-matters.de>
 
     * sapi/cgi/cgi_main.c:
