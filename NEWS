@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5 Release Candidate 3
+- Changed class type hints for function parameters to not allow the passing of
+  NULL values.
+- Fixed memory leak in memory manager. (Andi)
 - Moved the PDFLib extension to PECL. (Wez)
 - Added support for dumping private/protected properties to var_dump().
   (Andrey)
