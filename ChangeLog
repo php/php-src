@@ -1,3 +1,42 @@
+2005-03-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/tests/bug31102.phpt:
+      - Added missing description (thanks jani)
+
+    * ZendEngine2/tests/bug31102.phpt:
+      - Add new test
+
+2005-03-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      run-tests.php:
+      MFH: Detect shtool properly when build-dir != php source dir.
+
+    * run-tests.php:
+      Detect shtool properly when build-dir != php source dir.
+
+2005-03-20  Zeev Suraski  <zeev@zend.com>
+
+    * TSRM/TSRM.c:
+      Merge
+
+    * (PHP_5_0)
+      TSRM/TSRM.c:
+      Fix the lock (the other patch would probably also work, but it's more error
+      prone and it's better to be on the safe side)
+
+2005-03-20  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/pgsql/pgsql.c:
+      - Fixed a warning (might also be an error with some exotic compiler)
+
+2005-03-20  Christopher Kings-Lynne  <chriskl@users.sourceforge.net>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/tests/03sync_query.phpt:
+      Two of the diagnostic definitions were added in 8.0.  Add appropriate
+      #ifdefs.
+
 2005-03-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_object_handlers.c:
