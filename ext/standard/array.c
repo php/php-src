@@ -1034,6 +1034,7 @@ PHP_FUNCTION(in_array)
 		 **entry,				/* pointer to array entry */
 		  res;					/* comparison result */
 	HashTable *target_hash;		/* array hashtable */
+	HashPosition pos;			/* hash iterator */
 	int (*compare_func)(zval *, zval *, zval *) = is_equal_function;
 
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
@@ -1058,14 +1059,14 @@ PHP_FUNCTION(in_array)
 	}
 
 	target_hash = HASH_OF(*array);
-	zend_hash_internal_pointer_reset(target_hash);
+	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 	while(zend_hash_get_current_data(target_hash, (void **)&entry) == SUCCESS) {
      	compare_func(&res, *value, *entry);
 		if (Z_LVAL(res) == 1) {
 			RETURN_TRUE;
 		}
 		
-		zend_hash_move_forward(target_hash);
+		zend_hash_move_forward_ex(target_hash, &pos);
 	}
 	
 	RETURN_FALSE;
