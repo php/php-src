@@ -902,6 +902,7 @@ int php_module_startup(sapi_module_struct *sf)
 	zuf.block_interruptions = BLOCK_INTERRUPTIONS;
 	zuf.unblock_interruptions = UNBLOCK_INTERRUPTIONS;
 	zuf.get_ini_entry = php_get_ini_entry_for_zend;
+	zuf.ticks_function = NULL;
 	zend_startup(&zuf, NULL);
 
 #ifdef ZTS
