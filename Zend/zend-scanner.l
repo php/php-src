@@ -490,7 +490,7 @@ int use_filename(char *filename, zend_bool unique CLS_DC)
 	filenamelen = strlen(filename);
 	newfile = emalloc(filenamelen + 5);
 	strcpy(newfile, filename);
-	strcpy(newfile+strnamelen, ".php");
+	strcpy(newfile+filenamelen, ".php");
 	newfile[filenamelen+4] = '\0';
 
 	file_handle.type = ZEND_HANDLE_FILENAME;

@@ -347,6 +347,7 @@ void do_extended_fcall_end(CLS_D);
 BEGIN_EXTERN_C()
 ZEND_API int require_file(zend_file_handle *file_handle, zend_bool unique CLS_DC);	
 ZEND_API int require_filename(char *filename, zend_bool unique CLS_DC);
+ZEND_API int use_filename(char *filename, zend_bool unique CLS_DC);
 ZEND_API zend_op_array *compile_files(int mark_as_ref CLS_DC, int file_count, ...);
 ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, va_list files);
 ZEND_API zend_op_array *compile_string(zval *source_string CLS_DC);	
