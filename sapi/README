@@ -15,6 +15,3 @@ PHP_BUILD_STATIC    -- build static target      libs/libphp4.a
 PHP_BUILD_PROGRAM   -- build executable         php
 
 (paths relative to top build dir)
-
-Makefile.am: just what you think.  Make sure your target is called
-"libphpsapi_NNN.la", where NNN is the value of PHP_SAPI.
