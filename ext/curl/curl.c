@@ -961,7 +961,7 @@ PHP_FUNCTION(curl_error)
 	ZEND_FETCH_RESOURCE(ch, php_curl *, zid, -1, le_curl_name, le_curl);
 
 	ch->err.str[CURL_ERROR_SIZE] = 0;
-	RETURN_STRINGL(ch->err.str, 1);
+	RETURN_STRING(ch->err.str, 1);
 }
 /* }}} */
 
