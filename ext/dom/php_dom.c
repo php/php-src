@@ -457,8 +457,8 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_domerror_prop_handlers, "location", dom_domerror_location_read, NULL TSRMLS_CC);
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_domerror_prop_handlers, sizeof(dom_domerror_prop_handlers), NULL);
 
-	REGISTER_DOM_CLASS(ce, "domdomerrorhandler", NULL, php_dom_domerrorhandler_class_functions, dom_domerrorhandler_class_entry);
-	REGISTER_DOM_CLASS(ce, "domdomlocator", NULL, php_dom_domlocator_class_functions, dom_domlocator_class_entry);
+	REGISTER_DOM_CLASS(ce, "domerrorhandler", NULL, php_dom_domerrorhandler_class_functions, dom_domerrorhandler_class_entry);
+	REGISTER_DOM_CLASS(ce, "domlocator", NULL, php_dom_domlocator_class_functions, dom_domlocator_class_entry);
 	
 	zend_hash_init(&dom_domlocator_prop_handlers, 0, NULL, NULL, 1);
 	dom_register_prop_handler(&dom_domlocator_prop_handlers, "lineNumber", dom_domlocator_line_number_read, NULL TSRMLS_CC);
@@ -468,7 +468,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_domlocator_prop_handlers, "uri", dom_domlocator_uri_read, NULL TSRMLS_CC);
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_domlocator_prop_handlers, sizeof(dom_domlocator_prop_handlers), NULL);
 
-	REGISTER_DOM_CLASS(ce, "domdomconfiguration", NULL, php_dom_domconfiguration_class_functions, dom_domconfiguration_class_entry);
+	REGISTER_DOM_CLASS(ce, "domconfiguration", NULL, php_dom_domconfiguration_class_functions, dom_domconfiguration_class_entry);
 	REGISTER_DOM_CLASS(ce, "domcdatasection", dom_text_class_entry, php_dom_cdatasection_class_functions, dom_cdatasection_class_entry);
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_text_prop_handlers, sizeof(dom_documenttype_prop_handlers), NULL);
 
