@@ -34,7 +34,7 @@ typedef unsigned int uint;
 
 #undef HAVE_KILL
 #define HAVE_GETPID 1
-#define HAVE_ALLOCA_H 1
+/* #define HAVE_ALLOCA_H 1 */
 #define HAVE_MEMCPY 1
 #define HAVE_STRDUP 1
 #define HAVE_SYS_TYPES_H 1
