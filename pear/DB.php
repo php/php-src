@@ -330,6 +330,9 @@ class DB {
 	 * @return bool FALSE is returned on error
 	 */
 	function parseDSN($dsn) {
+		if (is_array($dsn))
+			return $dsn;
+		
 		$parsed = array(
 			'phptype'  => false,
 			'dbsyntax' => false,
