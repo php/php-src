@@ -62,7 +62,8 @@ function_entry session_functions[] = {
 	PHP_FE(session_destroy, NULL)
 	PHP_FE(session_unset, NULL)
 	PHP_FE(session_set_save_handler, NULL)
-    PHP_FE(session_set_cookie_params, NULL)
+	PHP_FE(session_cache_limiter, NULL)
+	PHP_FE(session_set_cookie_params, NULL)
 	PHP_FE(session_get_cookie_params, NULL)
 	{0}
 };
@@ -677,7 +678,7 @@ CACHE_LIMITER_FUNC(nocache)
 {
 	ADD_COOKIE("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
 	/* For HTTP/1.1 conforming clients and the rest (MSIE 5) */
-	ADD_COOKIE("Cache-Control: no-cache, post-check=0, pre-check=0");
+	ADD_COOKIE("Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
 	/* For HTTP/1.0 conforming clients */
 	ADD_COOKIE("Pragma: no-cache");
 }
@@ -689,7 +690,7 @@ static php_session_cache_limiter php_session_cache_limiters[] = {
 	{0}
 };
 
-static void _php_session_cache_limiter(PSLS_D)
+static int _php_session_cache_limiter(PSLS_D)
 {
 	php_session_cache_limiter *lim;
 	SLS_FETCH();
@@ -704,15 +705,17 @@ static void _php_session_cache_limiter(PSLS_D)
 		} else {
 			php_error(E_WARNING, "Cannot send session cache limiter - headers already sent");
 		}	
-		return;
+		return (-2);
 	}
 	
 	for (lim = php_session_cache_limiters; lim->name; lim++) {
 		if (!strcasecmp(lim->name, PS(cache_limiter))) {
 			lim->func(PSLS_C);
-			break;
+			return (0);
 		}
 	}
+
+	return (-1);
 }
 
 #define COOKIE_FMT 		"Set-Cookie: %s=%s"
@@ -1173,6 +1176,30 @@ PHP_FUNCTION(session_id)
 		convert_to_string_ex(p_name);
 		if (PS(id)) efree(PS(id));
 		PS(id) = estrndup((*p_name)->value.str.val, (*p_name)->value.str.len);
+	}
+	
+	RETVAL_STRING(old, 0);
+}
+/* }}} */
+
+/* {{{ proto string session_cache_limiter([string new_cache_limiter])
+   Return the current cache limiter. If new_cache_limited is given, the current cache_limiter is replaced with new_cache_limiter */
+PHP_FUNCTION(session_cache_limiter)
+{
+	pval **p_cache_limiter;
+	int ac = ZEND_NUM_ARGS();
+	char *old;
+	PSLS_FETCH();
+
+	old = estrdup(PS(cache_limiter));
+
+	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_cache_limiter) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	if (ac == 1) {
+		convert_to_string_ex(p_cache_limiter);
+		efree(PS(cache_limiter));
+		PS(cache_limiter) = estrndup((*p_cache_limiter)->value.str.val, (*p_cache_limiter)->value.str.len);
 	}
 	
 	RETVAL_STRING(old, 0);
