@@ -19,6 +19,7 @@
 #define pcre_maketables			php_pcre_maketables
 #define pcre_study				php_pcre_study
 #define pcre_version			php_pcre_version
+#define pcre_fullinfo			php_pcre_fullinfo
 #endif
 
 #define lookup				php_lookup
