@@ -1,3 +1,56 @@
+2004-09-13  Sara Golemon  <php@alphaweb.net>
+
+    * main/streams/filter.c
+      main/streams/streams.c:
+      Allocating hash tables should be done via macro, not directly
+
+2004-09-13  Magnus M‰‰tt‰  <novell@kiruna.se>
+
+    * ext/openssl/openssl.c
+      ext/openssl/openssl.c:
+      Add missing stream unregister for sslv2 and 3.
+
+2004-09-13  Rainer Schaaf  <rjs@pdflib.com>
+
+    * (PHP_4_3)
+      ext/pdf/CREDITS
+      ext/pdf/config.m4
+      ext/pdf/pdf.c
+      ext/pdf/pdf.dsp
+      ext/pdf/php_pdf.h:
+      undo of removal of these files.
+      
+      The removal was done because of Bug #29297, but it was the wrong time to
+      do this now.
+
+2004-09-13  Stefan Esser  <sesser@suspekt.org>
+
+    * main/rfc1867.c:
+      only allow valid arrays at this point
+
+2004-09-13  Rainer Schaaf  <rjs@pdflib.com>
+
+    * (PHP_4_3)
+      ext/pdf/CREDITS
+      ext/pdf/config.m4
+      ext/pdf/pdf.c
+      ext/pdf/pdf.dsp
+      ext/pdf/php_pdf.h:
+      removed PDFlib extension from PHP_4_3 branch too (is available in PECL
+      now).
+
+2004-09-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Change soap's ctors to __construct(),
+      rename SoapClient->__call() to SoapClinet->__soapCall().
+
+2004-09-13  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      Antony Dovgal's error message improvement - #27290
+
 2004-09-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/standard/var_unserializer.c:
