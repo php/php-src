@@ -29,7 +29,7 @@
 #include <errno.h>
 
 #include "php3_sysvshm.h"
-
+#include "../standard/php3_var.h"
 
 function_entry sysvshm_functions[] = {
 	{"shm_attach",			php3_sysvshm_attach,		NULL},
@@ -53,13 +53,11 @@ php3_module_entry *get_module() { return &sysvshm_module_entry; }
 
 THREAD_LS sysvshm_module php3_sysvshm_module;
 
-
-
-static void php3i_release_sysvshm(sysvshm_shm *shm_ptr) {
-
+static void php3i_release_sysvshm(sysvshm_shm *shm_ptr) 
+{
 	shmdt((void*)shm_ptr->ptr);
+	efree(shm_ptr);
 }
-
 
 
 int php3_minit_sysvshm(INIT_FUNC_ARGS)
@@ -171,9 +169,6 @@ PHP_FUNCTION(sysvshm_detach)
 {
 	pval *arg_id;
 	long id;
-	sysvshm_shm *shm_list_ptr;
-	int type;
-
 
 	switch (ARG_COUNT(ht)) {
 		case 1:
@@ -188,23 +183,9 @@ PHP_FUNCTION(sysvshm_detach)
 			break;
 	}
 
-	shm_list_ptr = (sysvshm_shm *) php3_list_find(id, &type);
-	if (type!=php3_sysvshm_module.le_shm) {
-		php_error(E_WARNING, "%d is not a SysV shared memory index", id);
-		RETURN_FALSE;
-	}
-
-	if(shmdt((void*)shm_list_ptr->ptr)<0) {
-		php_error(E_WARNING, "shm_detach() failed for id 0x%x: %s", id, strerror(errno));
-		RETURN_FALSE;
-	}
+	php3_list_delete(id);
 }
 /* }}} */
-
-
-
-
-
 /* {{{ proto int shm_remove(int key)
    removes the shared memory with the given key. */
 PHP_FUNCTION(sysvshm_remove)
@@ -227,7 +208,6 @@ PHP_FUNCTION(sysvshm_remove)
 			break;
 	}
 
-
 	if((id=shmget(key,0,0))<0) {
 		php_error(E_WARNING, "%d is not a existing SysV shared memory key", key);
 		RETURN_FALSE;
@@ -236,6 +216,7 @@ PHP_FUNCTION(sysvshm_remove)
 		php_error(E_WARNING, "shm_remove() failed for key 0x%x: %s", key, strerror(errno));
 		RETURN_FALSE;
 	} 
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -275,11 +256,11 @@ PHP_FUNCTION(sysvshm_put_var)
 	}
 
 	/* setup string-variable and serialize */
+
 	shm_var.type=IS_STRING;
 	shm_var.value.str.len=0;
-	shm_var.value.str.val=emalloc(1);
-	shm_var.value.str.val[0]=0;
-	php3api_var_serialize(&shm_var,arg_var);
+	shm_var.value.str.val=0;
+	php3api_var_serialize(&shm_var,&arg_var);
 	/* insert serialized variable into shared memory */
 	ret=php3int_put_shmdata(shm_list_ptr->ptr,key,shm_var.value.str.val,shm_var.value.str.len);
 
@@ -341,7 +322,7 @@ PHP_FUNCTION(sysvshm_get_var)
 	shm_var=(sysvshm_chunk*)((char*)shm_list_ptr->ptr+shm_varpos);
 	shm_data=&shm_var->mem;
 	
-	if(php3api_var_unserialize(return_value, &shm_data, shm_data+shm_var->length)!=1) {
+	if(php3api_var_unserialize(&return_value, (const char **) &shm_data, shm_data+shm_var->length)!=1) {
 		php_error(E_WARNING, "variable data in shared memory is corruped");
 		RETURN_FALSE;
 	}
