@@ -1,3 +1,15 @@
+2003-04-04  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.h:
+      Introduce ZEND_ME() and ZEND_METHOD() macros. Use these for declaring
+      class methods to avoid name collisions.
+
+2003-04-04  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_API.c
+      zend_API.h:
+      Fix namespace issues
+
 2003-04-03  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c:

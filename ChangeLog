@@ -1,3 +1,166 @@
+2003-04-04  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/streamsfuncs.c:
+      Warning fix
+
+2003-04-04  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/streamsfuncs.c:
+      User shouldn't have to initialize this pass-by-ref parameter
+
+2003-04-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/sockets/config.m4
+      ext/sockets/sockets.c:
+      MFH: added check for struct cmsghdr. now sockets extension can be built
+      under cygwin
+
+2003-04-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/rpc/java/config.m4:
+      - Fixed bug #22944 (--with-java "make install" fails)
+
+2003-04-04  Sterling Hughes  <sterling@bumblebury.com>
+
+    * CODING_STANDARDS:
+      both these entries are bad, and were never agreed upon.
+      assert() usage is a controversial concept at best.
+      docref() is something quite a few of us strong disagree with.  suspending
+      this until further discussion.
+
+2003-04-04  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      ext/curl/curl.c:
+      Fix bug #23048, CURLOPT_ENCODING is not always available
+
+2003-04-04  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/curl/multi.c:
+      forgot to commit this.
+
+2003-04-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4:
+      Check that t1lib has T1_StrError
+
+    * configure.in
+      ext/sockets/config.m4:
+      - Checks specific to some extension belong in the extension's config.m4
+
+2003-04-04  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * main/php.h:
+      Introduce ZEND_ME() and ZEND_METHOD() macros. Use these for declaring
+      class methods to avoid name collisions.
+
+2003-04-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/sockets/sockets.c:
+      MFH(r-1.135): fixed memleak in socket_select()
+
+    * ext/sockets/sockets.c:
+      Fixed memleak in socket_select
+
+    * configure.in
+      ext/sockets/sockets.c:
+      Added cmsghdr check. Now sockets extension can be built under cygwin.
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      Sorry, forgot these ones
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      renumbering
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      segfault busting news
+      replacing one tab to 4 spaces
+
+    * (PHP_4_3)
+      ext/mbstring/mbfilter.c:
+      MFH(r-1.55): added missing sanity check, which was causing segfault.
+
+    * ext/mbstring/mbfilter.c:
+      Added missing sanity check, which was causing segfault.
+
+2003-04-04  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/streamsfuncs.c:
+      Simplify and enhance readability.
+
+2003-04-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/output.c:
+      Backout Jani's commit to resync branches
+
+2003-04-04  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h:
+      Added stream_get_transports()
+
+    * main/streams/streams.c:
+      Prevent php_stream_get_record from grabbing more than maxlen characters
+
+2003-04-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c:
+      Might as well disallow 0x0 images.
+      
+      Thanks Marcus.
+
+2003-04-04  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * pear/package-PEAR.xml:
+      - Add some releases notes
+      - Add myself in the maintainer list (stig)
+
+2003-04-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      Notes about various possible integer overflows in bundled gd library.
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      More gd stuff.
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      Fixed segv as well as info about new segvs in gd.
+
+2003-04-04  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-PEAR.xml:
+      - whip script files where they belong
+
+2003-04-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c:
+      Fix segfault in imagecopyresized().
+
+2003-04-04  Stig Bakken  <ssb@fast.no>
+
+    * pear/scripts/pear.sh:
+      - look for pearcmd.php in the right directory when run from a cvs checkout
+
+    * pear/package-PEAR.xml
+      pear/scripts/pear.sh
+      pear/scripts/pear_unices:
+      - rename pear_unices to pear.sh and make it a pure shell script
+
+2003-04-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c:
+      - Better errors for T1lib.
+      - Sanity check into imagepsextendfont().
+
 2003-04-03  Stig Bakken  <ssb@fast.no>
 
     * pear/package-PEAR.xml:
