@@ -33,13 +33,8 @@
 #include "ext/bcmath/number.h"
 #endif
 
-<<<<<<< zend_operators.c
-#define LONG_SIGN_MASK (1L << (8*SIZEOF_LONG-1))
-
-=======
 #define LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
 
->>>>>>> 1.162
 ZEND_API int zend_atoi(const char *str, int str_len)
 {
 	int retval;
