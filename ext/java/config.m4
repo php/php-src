@@ -16,9 +16,17 @@ AC_DEFUN(JAVA_FIND_JAR, [
     if test -z "$JAVA_JAR"; then
       JAVA_JAR='zip -q0'
     fi
-
-    PHP_SUBST(JAVA_JAR)
+  else
+  dnl
+  dnl we have a custom path defined so use it
+  dnl
+    if test -d $PHP_JAVA/bin; then
+      JAVA_JAR=$PHP_JAVA/bin/javac
+    else
+      AC_MSG_ERROR([Unable to locate $PHP_JAVA/bin])
+    fi
   fi
+  PHP_SUBST(JAVA_JAR)
   AC_MSG_RESULT(`echo $JAVA_JAR`)
 ])
 
