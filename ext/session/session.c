@@ -467,8 +467,9 @@ static void php_session_track_init(TSRMLS_D)
 		}
 		MAKE_STD_ZVAL(PS(http_session_vars));
 		array_init(PS(http_session_vars));
-		ZEND_SET_GLOBAL_VAR_WITH_LENGTH("HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"), PS(http_session_vars), 1, 0);
-		ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 1, 0);
+		PS(http_session_vars)->refcount = 2;
+		zend_hash_update(&EG(symbol_table), "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"), &PS(http_session_vars), sizeof(zval *), NULL);
+		zend_hash_update(&EG(symbol_table), "_SESSION", sizeof("_SESSION"), &PS(http_session_vars), sizeof(zval *), NULL);
 	}
 }
 
