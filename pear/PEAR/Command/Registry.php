@@ -340,6 +340,7 @@ installed package.'
             $key = ucwords(trim(str_replace('_', ' ', $key)));
             $data['data'][] = array($key, $value);
         }
+        $data['raw'] = $info;
 
         $this->ui->outputData($data, 'package-info');
     }
