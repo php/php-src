@@ -468,6 +468,7 @@ ZEND_API void zend_bailout()
 	ELS_FETCH();
 
 	CG(unclean_shutdown) = 1;
+	CG(in_compilation) = EG(in_execution) = 0;
 	longjmp(EG(bailout), FAILURE);
 }
 END_EXTERN_C()
