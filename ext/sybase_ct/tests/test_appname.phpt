@@ -19,7 +19,7 @@ Sybase-CT application name
   }
   // }}}
 
-  $program_name= basename(__FILE__, '.php');
+  $program_name= 'phpt_test';
   $hostname= 'php.net';
   ini_set('sybct.hostname', $hostname);
   
@@ -50,7 +50,7 @@ Sybase-CT application name
     from 
       master..sysprocesses
     where
-      program_name = "test_appname"
+      program_name = "phpt_test"
 <<< Return: resource
 array(1) {
   [0]=>
@@ -58,7 +58,7 @@ array(1) {
     ["hostname"]=>
     string(10) "php.net%s"
     ["program_name"]=>
-    string(16) "test_appname%s"
+    string(16) "phpt_test%s"
   }
 }
 bool(true)
