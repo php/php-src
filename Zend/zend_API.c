@@ -1629,15 +1629,17 @@ ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_le
 	} else {
 		target_symbol_table = &ce->default_properties;
 	}
-	switch(Z_TYPE_P(property)) {
-		case IS_ARRAY:
-		case IS_CONSTANT_ARRAY:
-		case IS_OBJECT:
-		case IS_RESOURCE:
-			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
-			break;
-		default:
-			break;
+	if (ce->type & ZEND_INTERNAL_CLASS) {
+		switch(Z_TYPE_P(property)) {
+			case IS_ARRAY:
+			case IS_CONSTANT_ARRAY:
+			case IS_OBJECT:
+			case IS_RESOURCE:
+				zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
+				break;
+			default:
+				break;
+		}
 	}
 	switch (access_type & ZEND_ACC_PPP_MASK) {
 		case ZEND_ACC_PRIVATE: {
