@@ -58,6 +58,8 @@ function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_delete,			NULL)
 	PHP_FE(ftp_site,			NULL)
 	PHP_FE(ftp_close,			NULL)
+	PHP_FE(ftp_set_option,		NULL)
+	PHP_FE(ftp_get_option,		NULL)
 	PHP_FALIAS(ftp_quit, ftp_close, NULL)
 	{NULL, NULL, NULL}
 };
@@ -88,15 +90,12 @@ static void ftp_destructor_ftpbuf(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 PHP_MINIT_FUNCTION(ftp)
 {
-	le_ftpbuf = zend_register_list_destructors_ex(ftp_destructor_ftpbuf, NULL, "ftp", module_number);
-	REGISTER_LONG_CONSTANT("FTP_ASCII", FTPTYPE_ASCII,
-		CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("FTP_BINARY", FTPTYPE_IMAGE,
-		CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("FTP_IMAGE", FTPTYPE_IMAGE,
-		CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("FTP_TEXT", FTPTYPE_ASCII,
-		CONST_PERSISTENT | CONST_CS);
+	le_ftpbuf = zend_register_list_destructors_ex(ftp_destructor_ftpbuf, NULL, le_ftpbuf_name, module_number);
+	REGISTER_LONG_CONSTANT("FTP_ASCII",	 FTPTYPE_ASCII, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("FTP_TEXT",   FTPTYPE_ASCII, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("FTP_BINARY", FTPTYPE_IMAGE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("FTP_IMAGE",  FTPTYPE_IMAGE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("FTP_TIMEOUT_SEC", PHP_FTP_OPT_TIMEOUT_SEC, CONST_PERSISTENT | CONST_CS);
 	return SUCCESS;
 }
 
@@ -123,14 +122,21 @@ PHP_FUNCTION(ftp_connect)
 {
 	ftpbuf_t	*ftp;
 	char		*host;
-	int			host_len, port = 21;
+	int			host_len, port = 0;
+	long		timeout_sec = FTP_DEFAULT_TIMEOUT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &host, &host_len, &port) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &host, &host_len, &port, &timeout_sec) == FAILURE) {
 		return;
 	}
 
+	if (timeout_sec <= 0) {
+		php_error(E_WARNING, "%s(): timeout has to be greater than 0",
+				  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
 	/* connect */
-	ftp = ftp_open(host, htons((short)port));
+	ftp = ftp_open(host, htons((short)port), timeout_sec);
 	if (ftp == NULL) {
 		RETURN_FALSE;
 	}
@@ -699,6 +705,103 @@ PHP_FUNCTION(ftp_close)
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
 	zend_list_delete(Z_LVAL_P(z_ftp));
+}
+/* }}} */
+	
+/* Temporarely copied over from zend_API.c until it gets exposed */
+static char *ze_zval_type_name(zval *arg)
+{
+	switch (Z_TYPE_P(arg)) {
+		case IS_NULL:
+			return "null";
+
+		case IS_LONG:
+			return "integer";
+
+		case IS_DOUBLE:
+			return "double";
+
+		case IS_STRING:
+			return "string";
+
+		case IS_ARRAY:
+			return "array";
+
+		case IS_OBJECT:
+			return "object";
+
+		case IS_BOOL:
+			return "boolean";
+
+		case IS_RESOURCE:
+			return "resource";
+
+		default:
+			return "unknown";
+	}
+}
+
+
+/* {{{ proto bool ftp_set_option(resource stream, int option, mixed value)
+   Sets an FTP option. */
+PHP_FUNCTION(ftp_set_option)
+{
+	zval	*z_ftp, *z_value;
+	long	option;
+	ftpbuf_t	*ftp;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz", &z_ftp, &option, &z_value) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
+
+	switch (option) {
+		case PHP_FTP_OPT_TIMEOUT_SEC:
+			if (Z_TYPE_P(z_value) != IS_LONG) {
+				php_error(E_WARNING, "%s(): option TIMEOUT_SEC expects value of type long, %s given",
+						  get_active_function_name(TSRMLS_C), ze_zval_type_name(z_value));
+				RETURN_FALSE;
+			}
+			if (Z_LVAL_P(z_value) <= 0) {
+				php_error(E_WARNING, "%s(): timeout has to be greater than 0",
+						  get_active_function_name(TSRMLS_C));
+				RETURN_FALSE;
+			}
+			ftp->timeout_sec = Z_LVAL_P(z_value);
+			RETURN_TRUE;
+			break;
+		default:
+			php_error(E_WARNING, "%s(): unknown option '%d'", get_active_function_name(TSRMLS_C), option);
+			RETURN_FALSE;
+			break;
+	}
+}
+/* }}} */
+
+/* {{{ proto mixed ftp_get_option(resource stream, int option)
+   Gets an FTP option. */
+PHP_FUNCTION(ftp_get_option)
+{
+	zval	*z_ftp;
+	long	option;
+	ftpbuf_t	*ftp;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &z_ftp, &option) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
+
+	switch (option) {
+		case PHP_FTP_OPT_TIMEOUT_SEC:
+			RETURN_LONG(ftp->timeout_sec);
+			break;
+		default:
+			php_error(E_WARNING, "%s(): unknown option '%d'", get_active_function_name(TSRMLS_C), option);
+			RETURN_FALSE;
+			break;
+	}
 }
 /* }}} */
 

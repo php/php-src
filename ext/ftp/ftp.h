@@ -27,9 +27,10 @@
 #include <netinet/in.h>
 #endif
 
-/* XXX these should be configurable at runtime XXX */
+#define	FTP_DEFAULT_TIMEOUT	90
+
+/* XXX this should be configurable at runtime XXX */
 #define	FTP_BUFSIZE	4096
-#define	FTP_TIMEOUT	90
 
 typedef enum ftptype {
 	FTPTYPE_ASCII,
@@ -50,6 +51,7 @@ typedef struct ftpbuf
 	ftptype_t	type;			/* current transfer type */
 	int		pasv;			/* 0=off; 1=pasv; 2=ready */
 	struct sockaddr_in	pasvaddr;	/* passive mode address */
+	long	timeout_sec;	/* User configureable timeout (seconds) */
 } ftpbuf_t;
 
 typedef struct databuf
@@ -64,7 +66,7 @@ typedef struct databuf
 /* open a FTP connection, returns ftpbuf (NULL on error)
  * port is the ftp port in network byte order, or 0 for the default
  */
-ftpbuf_t*	ftp_open(const char *host, short port);
+ftpbuf_t*	ftp_open(const char *host, short port, long timeout_sec);
 
 /* quits from the ftp session (it still needs to be closed)
  * return true on success, false on error
