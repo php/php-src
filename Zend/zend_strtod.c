@@ -96,7 +96,7 @@ static char *rcsid = "$OpenBSD: strtod.c,v 1.19 2004/02/03 16:52:11 drahn Exp $"
 #endif /* LIBC_SCCS and not lint */
 
 #if defined(__m68k__) || defined(__sparc__) || defined(__i386__) || \
-    defined(__mips__) || defined(__ns32k__) || defined(__alpha__) || \
+    defined(__mips__) || defined(__ns32k__) || defined(__alpha__) || defined(__alpha) || \
     defined(__powerpc__) || defined(__ppc__) || defined(__m88k__) || \
     defined(__hppa__) || defined(__x86_64__) || (defined(__arm__) && \
     defined(__VFP_FP__))
@@ -128,7 +128,9 @@ static char *rcsid = "$OpenBSD: strtod.c,v 1.19 2004/02/03 16:52:11 drahn Exp $"
 #endif
 
 #if defined(__sparc__) || defined(__ppc__)
+#ifndef __linux__
 #define u_int32_t uint32_t
+#endif
 #endif
 
 #ifdef HAVE_SYS_BITYPES_H
