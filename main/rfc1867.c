@@ -71,18 +71,23 @@ void php_mb_flush_gpc_variables(int num_vars, char **val_list, int *len_list, zv
 	}
 }
 
+void php_mb_gpc_realloc_buffer(char ***pval_list, int **plen_list, int *num_vars_max, int inc  TSRMLS_DC)
+{
+	(*num_vars_max) += inc;
+	*pval_list = (char **)erealloc(*pval_list, (*num_vars_max+2)*sizeof(char *));
+	*plen_list = (int *)erealloc(*plen_list, (*num_vars_max+2)*sizeof(int));
+}
+
 void php_mb_gpc_stack_variable(char *param, char *value, char ***pval_list, int **plen_list, int *num_vars, int *num_vars_max TSRMLS_DC)
 {
 	char **val_list=*pval_list;
 	int *len_list=*plen_list;
 
-	if (*num_vars>=*num_vars_max){
-		(*num_vars_max) += 16;
-		*pval_list = (char **)erealloc(val_list, (*num_vars_max+2)*sizeof(char *));
-		*plen_list = (int *)erealloc(len_list, (*num_vars_max+2)*sizeof(int));
-		val_list=*pval_list;
-		len_list=*plen_list;
+	if (*num_vars>=*num_vars_max){	
+		php_mb_gpc_realloc_buffer(pval_list, plen_list, num_vars_max, 
+								  16 TSRMLS_CC);
 	}
+
 	val_list[*num_vars] = (char *)estrdup(param);
 	len_list[*num_vars] = strlen(param);
 	(*num_vars)++;
@@ -1012,6 +1017,10 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 			if (php_mb_encoding_translation(TSRMLS_C)) {
+				if (num_vars>=num_vars_max){	
+					php_mb_gpc_realloc_buffer(&val_list, &len_list, &num_vars_max, 
+											  1 TSRMLS_CC);
+				}
 				val_list[num_vars] = filename;
 				len_list[num_vars] = strlen(filename);
 				num_vars++;
