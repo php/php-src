@@ -2364,6 +2364,10 @@ SOURCE=..\ext\com_dotnet\com_olechar.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\com_dotnet\com_persist.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\com_dotnet\com_typeinfo.c
 # End Source File
 # Begin Source File
