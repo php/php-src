@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - Fixed bug #30995 (snmp extension does not build with net-snmp 5.2). (Ilia)
 - Fixed bug #30990 (allow popen() on *NIX to accept 'b' flag). (Ilia)
 - Fixed bug #30967 (properties in extended mysqli classes don't work). (Georg)
+- Fixed bug #30928 (When Using WSDL, SoapServer doesn't handle private or
+  protected properties). (Dmitry)
 - Fixed bug #30922 (reflective functions crash PHP when interfaces extend
   themselves). (Tony, Dmitry)
 - Fixed bug #30904 (segfault when recording soapclient into session). (Tony,
