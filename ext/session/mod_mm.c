@@ -211,6 +211,7 @@ PHP_GINIT_FUNCTION(ps_mm)
 		ps_mm_instance = NULL;
 		return FAILURE;
 	}
+	php_session_register_module(&ps_mod_mm);
 	return SUCCESS;
 }
 
