@@ -66,7 +66,9 @@ PHP_FUNCTION(rad2deg);
    WARNING: these functions are expermental: they could change their names or 
    disappear in the next version of PHP!
    */
+#ifdef HAVE_HYPOT
 PHP_FUNCTION(hypot);
+#endif
 PHP_FUNCTION(expm1);
 PHP_FUNCTION(log1p);
 
