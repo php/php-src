@@ -162,6 +162,11 @@ function_entry basic_functions[] = {
 	PHP_FE(strstr,									NULL)
 	PHP_FE(stristr,									NULL)
 	PHP_FE(strrchr,									NULL)
+#ifdef HAVE_STRCOLL
+	PHP_FE(strcoll,									NULL)
+#else
+	PHP_FALIAS(strcoll, warn_not_available,			NULL)
+#endif
 	PHP_FE(substr,									NULL)
 	PHP_FE(substr_replace,							NULL)
 	PHP_FE(quotemeta,								NULL)

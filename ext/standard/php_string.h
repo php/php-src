@@ -79,9 +79,12 @@ PHP_FUNCTION(strnatcasecmp);
 PHP_FUNCTION(substr_count);
 PHP_FUNCTION(str_pad);
 PHP_FUNCTION(sscanf);
+#ifdef HAVE_STRCOLL
+PHP_FUNCTION(strcoll);
+#endif
 
 
-#if defined(HAVE_LOCALECONV) && defined(ZTS)
+#ifdef ZTS
 PHP_MINIT_FUNCTION(localeconv);
 PHP_MSHUTDOWN_FUNCTION(localeconv);
 #endif
