@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.3
+- Fixed a potential crash bug in import_request_variables() (Zeev)
 - Fixed several problems with directory functions on Windows. (Steph)
 - Fixed xbithack bug in Apache module. (Rasmus)
 - Fixed a bug that prevented touch() from working on various platforms. (Steph)

@@ -36,7 +36,7 @@ for arg in $0 "$@"; do
 done
 
 AC_CANONICAL_HOST
-AM_INIT_AUTOMAKE(php, 4.2.3-dev, nodefine)
+AM_INIT_AUTOMAKE(php, 4.2.3RC1, nodefine)
 AM_CONFIG_HEADER(main/php_config.h)
 AM_MAINTAINER_MODE
 
