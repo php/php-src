@@ -401,15 +401,8 @@ static void register_standard_class(TSRMLS_D)
 	zend_standard_class_def->name = zend_strndup("stdClass", zend_standard_class_def->name_length);
 	zend_initialize_class_data(zend_standard_class_def, 1 TSRMLS_CC);
 
-	zend_hash_add(GLOBAL_CLASS_TABLE, "stdclass", sizeof("stdclass")-1, &zend_standard_class_def, sizeof(zend_class_entry *), NULL);
+	zend_hash_add(CG(class_table), "stdclass", sizeof("stdclass"), &zend_standard_class_def, sizeof(zend_class_entry *), NULL);
 }
-
-#ifdef ZTS
-static void unregister_standard_class()
-{
-	destroy_zend_class(&zend_standard_class_def);
-}
-#endif
 
 static void zend_set_default_compile_time_values(TSRMLS_D)
 {
@@ -697,7 +690,6 @@ void zend_shutdown(TSRMLS_D)
 	zend_shutdown_constants(TSRMLS_C);
 #ifdef ZTS
 	zend_hash_destroy(GLOBAL_CONSTANTS_TABLE);
-	unregister_standard_class();
 #endif
 }
 
