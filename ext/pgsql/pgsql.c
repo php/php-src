@@ -75,8 +75,6 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_loreadall,	NULL)
 	PHP_FE(pg_loimport,		NULL)
 	PHP_FE(pg_loexport,		NULL)
-	PHP_FE(pg_lolseek,		NULL)
-	PHP_FE(pg_lotell,		NULL)
 	PHP_FE(pg_put_line,		NULL)
 	PHP_FE(pg_end_copy,		NULL)
 #if HAVE_PQCLIENTENCODING
@@ -1735,59 +1733,6 @@ PHP_FUNCTION(pg_loexport)
 	} else {
 		RETURN_FALSE;
 	}
-}
-/* }}} */
-
-/* {{{ proto int pg_lolseek(int objoid, int offset, int whence)
-   Seek into a postgres large object*/
-PHP_FUNCTION(pg_lolseek) {
-	val **pgsql_lofp, **seek_offset, **seek_whence;
-	gLofp *pgsql;
-
-	switch(ZEND_NUM_ARGS()) {
-		case 3:
-			if (zend_get_parameters_ex(3, &pgsql_lofp, &seek_offset, &seek_whence)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(seek_offset);
-			convert_to_long_ex(seek_whence);
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
-	}
-
-	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, pgsql_lofp, -1, "PostgreSQL large object", le_lofp);
-	if (lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, Z_STRVAL_PP(seek_offset), Z_STRVAL_PP(seek_whence))) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
-}
-/* }}} */
-
-/* {{{ proto int pg_tell(int objoid)
-	 return current offset into large object */
-PHP_FUNCTION(pg_lotell) {
-	long int offset;
-	zval **pgsql_lofp;
-	pgLofp *pgsql;
-
-	switch(ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &pgsql_lofp)==FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
-		default:
-		   	WRONG_PARAM_COUNT;
-			break;
-	}
-
-	END_FETCH_RESOURCE(pgsql, pgLofp *, pgsql_lofp, -1, "PostgreSQL large object", le_lofp);
- 
-	ffset = lo_tell((PGconn *)pgsql->conn, pgsql->lofd);
-	ETURN_LONG (offset);
 }
 /* }}} */
 
