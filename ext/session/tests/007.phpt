@@ -17,6 +17,7 @@ session_start();
 session_destroy();
 
 ### Phase 2 $HTTP_SESSION_VARS["c"] does not contain any value
+session_id("abtest");
 session_register("c");
 unset($c);
 $c = 3.14;
