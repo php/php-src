@@ -126,6 +126,10 @@ SOURCE=.\mbstring.c
 
 SOURCE=.\php_mbregex.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\html_entities.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -184,6 +188,5 @@ SOURCE=.\unicode_table_tw.h
 # End Source File
 # End Group
 
-SOURCE=.\html_entities.c
 # End Target
 # End Project
