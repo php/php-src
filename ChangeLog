@@ -1,3 +1,236 @@
+2000-08-27  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/curl/curl.c
+      ext/curl/php_curl.h: Fix up the implementation.
+
+
+2000-08-27  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/info.c:
+    Some minor cleanup to make W3C's tidy validator happy
+
+2000-08-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c: Compute absolute path to script
+
+    * main/main.c:
+    sizeof(old_cwd) evaluated to sizeof(char *) after last commit, so old_cwd
+    was not set correctly.
+
+2000-08-27  Andi Gutmans  <andi@php.net>
+
+    * main/main.c:
+    - Use do_alloca()/free_alloca() for old_cwd. This will ensure speed in
+    - non-ISAPI environments but in ISAPI will use emalloc()/efree() to save
+    - stack space. MS only gives us 10KB those bastards.
+
+    * main/main.c:
+    - Reverting Sascha's patch although I don't like doing these kind of things
+    - but as it is Sascha who has reverted a zillion patches I don't feel that
+    - bad about it :)
+    - The patch is morally incorrect and it actually also has a crash bug which
+    - I won't point out because it shouldn't be there.
+    - SG(path_translated) should be set by the SAPI module correctly and if it
+    - isn't the SAPI module should be fixed and not add code to PHP. There is
+    - enough special case code in PHP and I would like to clean it up and not
+    - add more.
+    - Last but not least, old_cwd takes 4KB of stack space. We should probably
+    - malloc() it because in ISAPI we only have 10KB of stack space.
+
+2000-08-27  Stig Bakken  <ssb@fast.no>
+
+    * pear/Makefile.in: undid the undoing of Sascha's last commit
+
+    * tests/strings/001.phpt
+      tests/strings/002.phpt
+      tests/strings/003.phpt
+      tests/lang/001.phpt
+      tests/lang/002.phpt
+      tests/lang/003.phpt
+      tests/lang/004.phpt
+      tests/lang/005.phpt
+      tests/lang/006.phpt
+      tests/lang/007.phpt
+      tests/lang/008.phpt
+      tests/lang/009.phpt
+      tests/lang/010.phpt
+      tests/lang/011.phpt
+      tests/lang/012.phpt
+      tests/lang/013.phpt
+      tests/lang/014.phpt
+      tests/lang/015.inc
+      tests/lang/015.phpt
+      tests/lang/016.inc
+      tests/lang/016.phpt
+      tests/lang/017.phpt
+      tests/lang/018.phpt
+      tests/lang/019.phpt
+      tests/lang/020.phpt
+      tests/lang/021.phpt
+      tests/lang/022.phpt
+      tests/lang/023-1.inc
+      tests/lang/023-2.inc
+      tests/lang/023.phpt
+      tests/lang/024.phpt
+      tests/lang/025.phpt
+      tests/lang/026.phpt
+      tests/lang/027.phpt
+      tests/lang/028.phpt
+      tests/README
+      tests/basic/001.phpt
+      tests/basic/002.phpt
+      tests/basic/003.phpt
+      tests/basic/004.phpt
+      tests/basic/005.phpt
+      tests/basic/006.phpt
+      tests/basic/007.phpt
+      tests/basic/008.phpt
+      tests/basic/009.phpt
+      tests/basic/010.phpt
+      tests/basic/011.phpt
+      tests/classes/class_example.phpt
+      tests/classes/inheritance.phpt
+      tests/func/001.phpt
+      tests/func/002.phpt
+      tests/func/003.phpt
+      tests/func/004.phpt
+      tests/func/005.phpt
+      sapi/cgi/cgi_main.c
+      pear/XML/tests/parsererror.r
+      pear/XML/tests/parsererror.t
+      pear/tests/DB::factory.phpt
+      pear/tests/DB::parseDSN.phpt
+      pear/tests/DB_Error.phpt
+      pear/DB/mysql.php
+      pear/HTML/Form.php
+      pear/XML/Parser.php
+      ext/standard/tests/reg/001.phpt
+      ext/standard/tests/reg/002.phpt
+      ext/standard/tests/reg/003.phpt
+      ext/standard/tests/reg/004.phpt
+      ext/standard/tests/reg/005.phpt
+      ext/standard/tests/reg/006.phpt
+      ext/standard/tests/reg/007.phpt
+      ext/standard/tests/reg/008.phpt
+      ext/standard/tests/reg/009.phpt
+      ext/standard/tests/reg/010.phpt
+      ext/standard/tests/reg/011.phpt
+      ext/standard/tests/reg/012.phpt
+      ext/standard/tests/reg/013.phpt
+      ext/standard/tests/reg/014.phpt
+      ext/standard/tests/reg/015.phpt
+      ext/standard/tests/reg/016.phpt
+      pear/DB.php
+      pear/DB/common.php
+      pear/Makefile.in
+      pear/run-tests.in
+      ext/standard/tests/math/001.phpt
+      ext/db/tests/001.phpt
+      ext/db/tests/002.phpt
+      ext/db/tests/003.phpt
+      ext/db/tests/004.phpt
+      ext/db/tests/005.phpt
+      ext/db/tests/006.phpt
+      ext/interbase/tests/001.phpt
+      ext/interbase/tests/002.phpt
+      ext/interbase/tests/003.phpt
+      ext/interbase/tests/004.phpt
+      ext/interbase/tests/005.phpt
+      ext/interbase/tests/006.phpt
+      ext/interbase/tests/extension
+      ext/interbase/tests/interbase.inc
+      ext/standard/tests/file/001.phpt
+      ext/standard/tests/general_functions/001.phpt
+      run-tests.php:    Took the old PHP 3 regression testing framework and rewrote it in PHP.
+    Should work on both Windows and UNIX, however I have not tested it on
+    Windows.  See tests/README for how to write tests.  Added the PHP 3
+    tests and converted most of them.
+
+    * ext/standard/basic_functions.c
+      ext/standard/info.c
+      ext/standard/info.h:    Added php_uname() function.
+
+2000-08-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/main.c: Initializing new_path once is enough
+
+    * main/main.c:
+    If a SAPI module does not pass an absolute path as primary_file to
+    php_execute_script(), we will now change the filename to point to
+    the absolute path.
+
+    * main/php_virtual_cwd.c
+      main/php_virtual_cwd.h: Export IS_ABSOLUTE_PATH to the outside world.
+
+    * main/Makefile.in: Real fix for this rule.
+
+2000-08-27  Andi Gutmans  <andi@php.net>
+
+    * main/php_virtual_cwd.c: - This should be more efficient.
+    - Post 4.0.2 it's time to move the whole opened_path and virtual stuff
+    - to emalloc() and friends including some alloca() improvements where
+    - possible but I don't want to break anything before
+
+2000-08-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/Makefile.in:
+    Fix internal_functions.c rule. This should also work better with BSD make's
+    VPATH support.
+
+2000-08-27  Andi Gutmans  <andi@php.net>
+
+    * main/php.h: - Remove some unused stuff.
+
+    * main/php.h:
+    - Test commit msg. This is Andi and it seems to come from Zeev.
+
+2000-08-27  Zeev Suraski  <zeev@php.net>
+
+    * main/php.h: - Forgot to fix non-ZTS CHDIR_FILE macro
+
+2000-08-27  Andi Gutmans  <andi@php.net>
+
+    * main/main.c
+      main/php.h
+      main/php_realpath.c
+      main/php_virtual_cwd.c
+      main/php_virtual_cwd.h: - Try and fix problem with opening wrong file.
+
+2000-08-27  Chuck Hagenbuch  <chuck@horde.org>
+
+    * EXTENSIONS:
+    Taking responsibility for the IMAP and MCAL extensions, so there's at least
+    a point of contact.
+
+    * ext/mcal/php_mcal.c:
+    fixing the license header and updating some prototypes/variable names in the
+    mcal extension.
+
+2000-08-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * pear/Makefile.in:
+    Fix install-local-data target in VPATH mode. PEAR.php is generated and
+    stored in builddir.
+
+    * sapi/README: Remove obsolete note about Makefile.am
+
+    * main/SAPI.c: Fix strlcpy use at this place.
+
+    * main/php.h: Refine PHP_STRLCPY comment
+
+    * main/SAPI.c:
+    newtype has a length of newlen+1, 'len' refers to the length of *mimetype
+    here.
+
+    * main/php.h:
+    Add PHP_STRLCPY macro. This macro should be used in new code instead of
+    strlcpy/strlcat which are intended for fixing broken code.
+
+2000-08-27  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/fsock.c: - Fix possible overflow in fsockopen().
+
 2000-08-26  Daniel Beulshausen  <daniel@php4win.de>
 
     * php_modules.dsw: updated with cybercash and dotnet
