@@ -100,7 +100,7 @@ dnl
    dnl
    for i in `find $PHP_JAVA/include -type d`; do
      test -f $i/jni.h      && JAVA_INCLUDE=-I$i
-     test -f $i/jni_md.h   && JAVE_INCLUDE="$JAVA_INCLUDE -I$i"
+     test -f $i/jni_md.h   && JAVA_INCLUDE="$JAVA_INCLUDE -I$i"
    done
 
    for i in `find $PHP_JAVA/. -type d`; do
