@@ -19,6 +19,10 @@
 	$Id$
 */
 
+#ifndef ZEND_ENGINE_2
+#error HEAD does not work with ZendEngine1 anymore
+#endif
+
 /* {{{ includes
  */
 #include "php.h"
