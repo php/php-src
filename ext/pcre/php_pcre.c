@@ -587,7 +587,7 @@ static int _preg_do_eval(char *eval_str, char *subject, int *offsets,
 	convert_to_string(&retval);
 	
 	/* Save the return value and its length */
-	*result = estrdup(retval.value.str.val);
+	*result = estrndup(retval.value.str.val, retval.value.str.len);
 	result_len = retval.value.str.len;
 	
 	/* Clean up */
@@ -782,7 +782,7 @@ static char *_php_replace_in_subject(zval *regex, zval *replace, zval **subject)
 	/* If regex is an array */
 	if (regex->type == IS_ARRAY) {
 		/* Duplicating subject string for repeated replacement */
-		subject_value = estrdup((*subject)->value.str.val);
+		subject_value = estrndup((*subject)->value.str.val, (*subject)->value.str.len);
 		
 		zend_hash_internal_pointer_reset(regex->value.ht);
 
