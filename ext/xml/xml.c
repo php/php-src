@@ -192,7 +192,9 @@ static void *php_xml_realloc_wrapper(void *ptr, size_t sz)
 
 static void php_xml_free_wrapper(void *ptr)
 {
-	efree(ptr);
+	if (ptr != NULL) {
+		efree(ptr);
+	}
 }
 
 PHP_MINIT_FUNCTION(xml)
