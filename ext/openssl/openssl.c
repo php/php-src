@@ -227,8 +227,7 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 		if (shortname) {
 			sn = (char*)OBJ_nid2sn(nid);
 			add_assoc_stringl(subitem, sn, str->data, str->length, 1);
-		}
-		else	{
+		} else {
 			ln = (char*)OBJ_nid2ln(nid);
 			add_assoc_stringl(subitem, ln, str->data, str->length, 1);
 		}
