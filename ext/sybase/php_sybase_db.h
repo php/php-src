@@ -63,21 +63,6 @@ PHP_FUNCTION(sybase_field_type);
 PHP_FUNCTION(sybase_field_flags);
 
 
-
-#include <sybfront.h>
-#include <sybdb.h>
-#include <syberror.h>
-
-#define coltype(j) dbcoltype(sybase_ptr->link,j)
-#define intcol(i) ((int) *(DBINT *) dbdata(sybase_ptr->link,i))
-#define smallintcol(i) ((int) *(DBSMALLINT *) dbdata(sybase_ptr->link,i))
-#define tinyintcol(i) ((int) *(DBTINYINT *) dbdata(sybase_ptr->link,i))
-#define anyintcol(j) (coltype(j)==SYBINT4?intcol(j):(coltype(j)==SYBINT2?smallintcol(j):tinyintcol(j)))
-#define charcol(i) ((DBCHAR *) dbdata(sybase_ptr->link,i))
-#define floatcol(i) ((float) *(DBFLT8 *) dbdata(sybase_ptr->link,i))
-
-typedef struct sybase_link_struct sybase_link;
-
 typedef struct {
 	long default_link;
 	long num_links,num_persistent;
@@ -90,29 +75,6 @@ typedef struct {
 	long cfg_min_error_severity,cfg_min_message_severity;
 	long compatability_mode;
 } sybase_module;
-
-struct sybase_link_struct {
-	LOGINREC *login;
-	DBPROCESS *link;
-	int valid;
-};
-
-#define SYBASE_ROWS_BLOCK 128
-
-typedef struct {
-	char *name,*column_source;
-	int max_length, numeric;
-	int type;
-} sybase_field;
-
-typedef struct {
-	pval ***data;
-	sybase_field *fields;
-	sybase_link *sybase_ptr;
-	int cur_row,cur_field;
-	int num_rows,num_fields;
-} sybase_result;
-
 
 extern sybase_module php_sybase_module;
 
