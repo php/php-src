@@ -87,6 +87,7 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_free_result,							NULL)
 	PHP_FE(mysqli_get_client_info,						NULL)
 	PHP_FE(mysqli_get_host_info,						NULL)
+	PHP_FE(mysqli_get_metadata,							NULL)
 	PHP_FE(mysqli_get_proto_info,						NULL)
 	PHP_FE(mysqli_get_server_info,						NULL)
 	PHP_FE(mysqli_get_server_version,					NULL)
@@ -95,13 +96,14 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_insert_id,							NULL)
 	PHP_FE(mysqli_kill,									NULL)
 	PHP_FE(mysqli_master_query,							NULL)
+	PHP_FE(mysqli_more_results,							NULL)
+	PHP_FE(mysqli_next_result,							NULL)
 	PHP_FE(mysqli_num_fields,							NULL)
 	PHP_FE(mysqli_num_rows,								NULL)
 	PHP_FE(mysqli_options, 								NULL)
 	PHP_FE(mysqli_param_count,							NULL)
 	PHP_FE(mysqli_ping,									NULL)
 	PHP_FE(mysqli_prepare,								NULL)
-	PHP_FE(mysqli_get_metadata,							NULL)
 	PHP_FE(mysqli_profiler,								NULL)
 	PHP_FE(mysqli_query,								NULL)
 	PHP_FE(mysqli_read_query_result,					NULL)
@@ -153,7 +155,6 @@ function_entry mysqli_functions[] = {
  * Every user visible function must have an entry in mysqli_functions[].
  */
 function_entry mysqli_link_methods[] = {
-	PHP_FALIAS(affected_rows,mysqli_affected_rows,NULL)
 	PHP_FALIAS(autocommit,mysqli_autocommit,NULL)
 	PHP_FALIAS(change_user,mysqli_change_user,NULL)
 	PHP_FALIAS(character_set_name,mysqli_character_set_name,NULL)
@@ -167,18 +168,18 @@ function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(dump_debug_info,mysqli_dump_debug_info,NULL)
 	PHP_FALIAS(enable_reads_from_master,mysqli_enable_reads_from_master,NULL)
 	PHP_FALIAS(enable_rpl_parse,mysqli_enable_rpl_parse,NULL)
-	PHP_FALIAS(errno,mysqli_errno,NULL)
-	PHP_FALIAS(error,mysqli_error,NULL)
 	PHP_FALIAS(get_client_info,mysqli_get_client_info,NULL)
 	PHP_FALIAS(get_host_info,mysqli_get_host_info,NULL)
-	PHP_FALIAS(get_proto_info,mysqli_get_proto_info,NULL)
 	PHP_FALIAS(get_server_info,mysqli_get_server_info,NULL)
-	PHP_FALIAS(get_server_version,mysqli_get_server_version,NULL)
 	PHP_FALIAS(init,mysqli_init,NULL)
 	PHP_FALIAS(info,mysqli_info,NULL)
 	PHP_FALIAS(insert_id,mysqli_insert_id,NULL)
 	PHP_FALIAS(kill,mysqli_kill,NULL)
 	PHP_FALIAS(master_query,mysqli_master_query,NULL)
+	PHP_FALIAS(mysqli, mysqli_connect, NULL)
+	PHP_FALIAS(multi_query,mysqli_multi_query,NULL)
+	PHP_FALIAS(more_results,mysqli_more_results, NULL)
+	PHP_FALIAS(next_result, mysqli_next_result, NULL)
 	PHP_FALIAS(options,mysqli_options,NULL)
 	PHP_FALIAS(ping,mysqli_ping,NULL)
 	PHP_FALIAS(prepare,mysqli_prepare,NULL)
@@ -196,16 +197,11 @@ function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(select_db,mysqli_select_db,NULL)
 	PHP_FALIAS(set_opt, mysqli_options,NULL)
 	PHP_FALIAS(slave_query,mysqli_slave_query,NULL)
-#if MYSQL_VERSION_ID >= 40101
-	PHP_FALIAS(sqlstate, mysqli_sqlstate,NULL)
-#endif
 	PHP_FALIAS(ssl_set,mysqli_ssl_set,NULL)
 	PHP_FALIAS(stat,mysqli_stat,NULL)
 	PHP_FALIAS(store_result,mysqli_store_result,NULL)
-	PHP_FALIAS(thread_id, mysqli_thread_id,NULL)
 	PHP_FALIAS(thread_safe,mysqli_thread_safe,NULL)
 	PHP_FALIAS(use_result,mysqli_use_result,NULL)
-	PHP_FALIAS(warning_count,mysqli_warning_count,NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -221,7 +217,6 @@ function_entry mysqli_result_methods[] = {
 	PHP_FALIAS(fetch_field,mysqli_fetch_field,NULL)
 	PHP_FALIAS(fetch_fields,mysqli_fetch_fields,NULL)
 	PHP_FALIAS(fetvh_field_direct,mysqli_fetch_field_direct,NULL)
-	PHP_FALIAS(fetch_lengths,mysqli_fetch_lengths,NULL)
 	PHP_FALIAS(fetch_array,mysqli_fetch_array,NULL)
 	PHP_FALIAS(fetch_assoc,mysqli_fetch_assoc,NULL) 
 	PHP_FALIAS(fetch_object,mysqli_fetch_object,NULL) 
@@ -230,8 +225,6 @@ function_entry mysqli_result_methods[] = {
 	PHP_FALIAS(field_seek,mysqli_field_seek,NULL)
 	PHP_FALIAS(field_tell,mysqli_field_tell,NULL)
 	PHP_FALIAS(free_result,mysqli_free_result,NULL)
-	PHP_FALIAS(num_fields,mysqli_num_fields,NULL)
-	PHP_FALIAS(num_rows,mysqli_num_rows,NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -246,18 +239,12 @@ function_entry mysqli_stmt_methods[] = {
 	PHP_FALIAS(bind_result,mysqli_bind_result, all_args_by_ref)
 	PHP_FALIAS(close,mysqli_stmt_close,NULL)
 	PHP_FALIAS(data_seek,mysqli_stmt_data_seek,NULL)
-	PHP_FALIAS(errno,mysqli_stmt_errno,NULL)
-	PHP_FALIAS(error,mysqli_stmt_error,NULL)
 	PHP_FALIAS(execute,mysqli_execute,NULL)
 	PHP_FALIAS(fetch,mysqli_fetch,NULL)
 	PHP_FALIAS(get_metadata, mysqli_get_metadata,NULL)
 	PHP_FALIAS(num_rows, mysqli_stmt_num_rows,NULL)
-	PHP_FALIAS(param_count,mysqli_param_count,NULL)
 	PHP_FALIAS(send_long_data,mysqli_send_long_data,NULL)
 	PHP_FALIAS(store_result,mysqli_stmt_store_result,NULL)
-#if MYSQL_VERSION_ID >= 40101
-	PHP_FALIAS(sqlstate, mysqli_stmt_sqlstate,NULL)
-#endif
 	{NULL, NULL, NULL}
 };
 /* }}} */
