@@ -59,7 +59,6 @@ extern HashTable browser_hash;
 ZEND_API extern char *php_ini_path;
 static HashTable *active_hash_table;
 static zval *current_section;
-static char *currently_parsed_filename;
 
 static int parsing_mode;
 
@@ -135,24 +134,32 @@ static void ini_error(char *str)
 {
 	char *error_buf;
 	int error_buf_len;
+	char *currently_parsed_filename = zend_ini_scanner_get_filename();
+	CLS_FETCH();
 
 	error_buf_len = 128+strlen(currently_parsed_filename); /* should be more than enough */
 	error_buf = (char *) emalloc(error_buf_len);
 
 	sprintf(error_buf, "Error parsing %s on line %d\n", currently_parsed_filename, zend_ini_scanner_get_lineno());
+
+	if (CG(ini_parser_unbuffered_errors)) {
 #ifdef PHP_WIN32
-	MessageBox(NULL, error_buf, "PHP Error", MB_OK|MB_TOPMOST|0x00200000L);
+		MessageBox(NULL, error_buf, "PHP Error", MB_OK|MB_TOPMOST|0x00200000L);
 #else
-	fprintf(stderr, "PHP:  %s", error_buf);
+		fprintf(stderr, "PHP:  %s", error_buf);
 #endif
+	} else {
+		zend_error(E_CORE_WARNING, error_buf);
+	}
 	efree(error_buf);
 }
 
 
-int zend_parse_ini_file(zend_file_handle *fh, zend_ini_parser_cb_t ini_parser_cb, void *arg)
+int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, zend_ini_parser_cb_t ini_parser_cb, void *arg)
 {
 	zend_ini_parser_param ini_parser_param;
 	int retval;
+	CLS_FETCH();
 
 	ini_parser_param.ini_parser_cb = ini_parser_cb;
 	ini_parser_param.arg = arg;
@@ -161,6 +168,7 @@ int zend_parse_ini_file(zend_file_handle *fh, zend_ini_parser_cb_t ini_parser_cb
 		return FAILURE;
 	}
 
+	CG(ini_parser_unbuffered_errors) = unbuffered_errors;
 	retval = ini_parse(&ini_parser_param);
 
 	zend_ini_close_file(fh);

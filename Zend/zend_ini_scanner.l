@@ -46,6 +46,8 @@
 #endif
 
 #ifndef ZTS
+static char *ini_filename;
+
 void init_ini_scanner()
 {
 	ini_lineno=1;
@@ -57,6 +59,12 @@ int zend_ini_scanner_get_lineno()
 	return ini_lineno;
 }
 
+
+char *zend_ini_scanner_get_filename()
+{
+	return ini_filename;
+}
+
 #else /* ZTS */
 
 int zend_ini_scanner_get_lineno()
@@ -64,6 +72,13 @@ int zend_ini_scanner_get_lineno()
 	CLS_FETCH();
 
 	return CG(ini_scanner)->lineno();
+}
+
+char *zend_ini_scanner_get_filename()
+{
+	CLS_FETCH();
+
+	return CG(ini_scanner)->filename;
 }
 
 int ini_lex(zval *ini_lval)
@@ -115,10 +130,12 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh)
 
 	CG(ini_scanner) = new ZendIniFlexLexer;
 	CG(ini_scanner)->switch_streams(fh->handle.is, &cout);
+	CG(ini_scanner)->filename = fh->filename;
 #else
 	init_ini_scanner();
 	yyin = fp;
 	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
+	ini_filename = fh->filename;
 #endif
 	return SUCCESS;
 }
@@ -130,13 +147,13 @@ void zend_ini_close_file(zend_file_handle *fh)
 		case ZEND_HANDLE_FP:
 			fclose(fh->handle.fp);
 			break;
+#ifdef ZTS
 		case ZEND_HANDLE_STDIOSTREAM: {
 				CLS_FETCH();
-#ifdef ZTS
 				delete CG(ini_scanner);
-#endif
 			}
 			break;
+#endif
 	}
 }
 
