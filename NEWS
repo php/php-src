@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   support is used. (Derick)
 - Added iconv stream filter (convert.iconv.*). (Moriyoshi)
 - Added EXSLT support in ext/xsl. (Christian)
+- Added qdbm handler for dba extension. (mg at iceni dot pl, Marcus)
 - Added new functions:
   . dba_key_split() to split inifile keys in an array. (Marcus)
   . time_nanosleep() signal safe sleep (Magnus, Ilia)

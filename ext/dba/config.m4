@@ -65,10 +65,45 @@ AC_DEFUN(AC_DBA_STD_RESULT,[
 PHP_ARG_ENABLE(dba,whether to enable DBA,
 [  --enable-dba            Build DBA with builtin modules])
 
+AC_ARG_WITH(qdbm,
+[  --with-qdbm[=DIR]         DBA: Include QDBM support],[
+  if test "$withval" != "no"; then
+    PHP_DBA_STD_BEGIN
+    for i in $withval /usr/local /usr; do
+      if test -f "$i/include/depot.h"; then
+        THIS_PREFIX=$i
+        THIS_INCLUDE=$i/include/depot.h
+        break
+      fi
+    done
+
+    if test -n "$THIS_INCLUDE"; then
+      for LIB in qdbm; do
+        PHP_CHECK_LIBRARY($LIB, dpopen, [
+          AC_DEFINE_UNQUOTED(QDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+          AC_DEFINE(DBA_QDBM, 1, [ ])
+          THIS_LIBS=$LIB
+        ], [], [-L$THIS_PREFIX/lib])
+        if test -n "$THIS_LIBS"; then
+          break
+        fi
+      done
+    fi
+
+    PHP_DBA_STD_ASSIGN
+    PHP_DBA_STD_CHECK
+    PHP_DBA_STD_ATTACH
+  fi
+])
+AC_DBA_STD_RESULT(qdbm)
+
 AC_ARG_WITH(gdbm,
 [  --with-gdbm[=DIR]         DBA: Include GDBM support],[
   if test "$withval" != "no"; then
     PHP_DBA_STD_BEGIN
+    if test "$HAVE_QDBM" = "1"; then
+      AC_DBA_STD_RESULT(gdbm,gdbm,You cannot combine --with-gdbm with --with-qdbm)
+    fi
     for i in $withval /usr/local /usr; do
       if test -f "$i/include/gdbm.h"; then
         THIS_PREFIX=$i
@@ -300,6 +335,9 @@ AC_ARG_WITH(dbm,
 [  --with-dbm[=DIR]          DBA: Include DBM support],[
   if test "$withval" != "no"; then
     PHP_DBA_STD_BEGIN
+    if test "$HAVE_QDBM" = "1"; then
+      AC_DBA_STD_RESULT(dbm,dbm,You cannot combine --with-dbm with --with-qdbm)
+    fi
     for i in $withval /usr/local /usr; do
       if test -f "$i/include/dbm.h"; then
         THIS_PREFIX=$i
@@ -429,7 +467,7 @@ AC_MSG_CHECKING(whether to enable DBA interface)
 if test "$HAVE_DBA" = "1"; then
   AC_MSG_RESULT(yes)
   AC_DEFINE(HAVE_DBA, 1, [ ])
-  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_db2.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db3.c dba_db4.c dba_flatfile.c dba_inifile.c $cdb_sources $flat_sources $ini_sources, $ext_shared)
+  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_db2.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db3.c dba_db4.c dba_flatfile.c dba_inifile.c dba_qdbm.c $cdb_sources $flat_sources $ini_sources, $ext_shared)
   PHP_ADD_BUILD_DIR($ext_builddir/libinifile)
   PHP_ADD_BUILD_DIR($ext_builddir/libcdb)
   PHP_ADD_BUILD_DIR($ext_builddir/libflatfile)
