@@ -226,10 +226,17 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 			*val++ = '\0';
 			php_url_decode(var, strlen(var));
 			val_len = php_url_decode(val, strlen(val));
+			val_len = sapi_module.input_filter(PARSE_POST, var, val, val_len TSRMLS_CC);
 			php_register_variable_safe(var, val, val_len, array_ptr TSRMLS_CC);
 		}
 		var = php_strtok_r(NULL, "&", &strtok_buf);
 	}
+}
+
+SAPI_API SAPI_INPUT_FILTER_FUNC(php_default_input_filter)
+{
+	/* TODO: check .ini setting here and apply user-defined input filter */
+	return val_len;
 }
 
 SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
@@ -314,6 +321,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			*val++ = '\0';
 			php_url_decode(var, strlen(var));
 			val_len = php_url_decode(val, strlen(val));
+			val_len = sapi_module.input_filter(arg, var, val, val_len TSRMLS_CC);
 			php_register_variable_safe(var, val, val_len, array_ptr TSRMLS_CC);
 		} else {
 			php_url_decode(var, strlen(var));
