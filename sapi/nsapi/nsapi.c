@@ -234,6 +234,10 @@ nsapi_servact_prototype nsapi_servact_service = NULL;
  * the server only by wrapping the function table nothing else. So choose
  * the newest one found in process space for dynamic linking */
 static char *nsapi_dlls[] = { "ns-httpd40.dll", "ns-httpd36.dll", "ns-httpd35.dll", "ns-httpd30.dll", NULL };
+/* if user specifies an other dll name by server_lib parameter 
+ * it is placed in the following variable and only this DLL is
+ * checked for the servact_* functions */
+char *nsapi_dll = NULL;
 #endif
 
 /* {{{ php_nsapi_init_dynamic_symbols
@@ -251,10 +255,18 @@ static void php_nsapi_init_dynamic_symbols(void)
 #ifdef PHP_WIN32
 	register int i;
 	DL_HANDLE module = NULL;
-	/* find a LOADED dll module from nsapi_dlls */
-	for (i=0; nsapi_dlls[i]; i++) {
-		if (module = GetModuleHandle(nsapi_dlls[i])) {
-			break;
+	if (nsapi_dll) {
+		/* try user specified server_lib */
+		module = GetModuleHandle(nsapi_dll);
+		if (!module) {
+			log_error(LOG_WARN, "php4_init", NULL, NULL, "Cannot find DLL specified by server_lib parameter: %s", nsapi_dll);
+		}
+	} else {
+		/* find a LOADED dll module from nsapi_dlls */
+		for (i=0; nsapi_dlls[i]; i++) {
+			if (module = GetModuleHandle(nsapi_dlls[i])) {
+				break;
+			}
 		}
 	}
 	if (!module) return;
@@ -786,6 +798,13 @@ void NSAPI_PUBLIC php4_close(void *vparam)
 	if (nsapi_sapi_module.php_ini_path_override) {
 		free(nsapi_sapi_module.php_ini_path_override);
 	}
+	
+#ifdef PHP_WIN32
+	if (nsapi_dll) {
+		free(nsapi_dll);
+		nsapi_dll = NULL;
+	}
+#endif	
 
 	tsrm_shutdown();
 
@@ -795,14 +814,18 @@ void NSAPI_PUBLIC php4_close(void *vparam)
 /*********************************************************
 / init SAF
 /
-/ Init fn="php4_init" [php_ini="/path/to/php.ini"]
+/ Init fn="php4_init" [php_ini="/path/to/php.ini"] [server_lib="ns-httpdXX.dll"]
 /   Initialize the NSAPI module in magnus.conf
+/
+/ php_ini: gives path to php.ini file
+/ server_lib: (only Win32) gives name of DLL (without path) to look for
+/  servact_* functions
 /
 /*********************************************************/
 int NSAPI_PUBLIC php4_init(pblock *pb, Session *sn, Request *rq)
 {
 	php_core_globals *core_globals;
-	char *ini_path;
+	char *strval;
 	int threads=128; /* default for server */
 
 	/* fetch max threads from NSAPI and initialize TSRM with it */
@@ -817,9 +840,17 @@ int NSAPI_PUBLIC php4_init(pblock *pb, Session *sn, Request *rq)
 	core_globals = ts_resource(core_globals_id);
 
 	/* look if php_ini parameter is given to php4_init */
-	if (ini_path = pblock_findval("php_ini", pb)) {
-		nsapi_sapi_module.php_ini_path_override = strdup(ini_path);
+	if (strval = pblock_findval("php_ini", pb)) {
+		nsapi_sapi_module.php_ini_path_override = strdup(strval);
 	}
+	
+#ifdef PHP_WIN32
+	/* look if server_lib parameter is given to php4_init
+	 * (this disables the automatic search for the newest ns-httpdXX.dll) */
+	if (strval = pblock_findval("server_lib", pb)) {
+		nsapi_dll = strdup(strval);
+	}
+#endif	
 
 	/* start SAPI */
 	sapi_startup(&nsapi_sapi_module);

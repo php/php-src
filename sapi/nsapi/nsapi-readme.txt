@@ -118,4 +118,33 @@ For both error and directory listing pages the original URI and
 translated URI are in the variables $_SERVER['PATH_INFO'] and
 $_SERVER['PATH_TRANSLATED'].
 
+
+Note about nsapi_virtual() and subrequests
+------------------------------------------
+
+The NSAPI module now supports the nsapi_virtual() function (alias: virtual())
+to make subrequests on the webserver and insert the result in the webpage.
+The problem is, that this function uses some undocumented features from
+the NSAPI library.
+
+Under Unix this is not a problem, because the module automatically looks
+for the needed functions and uses them if available. If not, nsapi_virtual()
+is disabled.
+
+Under Windows limitations in the DLL handling need the use of a automatic
+detection of the most recent ns-httpdXX.dll file. This is tested for servers
+till version 6.0. If a newer version of the SunONE server is used, the detection
+fails and nsapi_virtual() is disabled.
+
+If this is the case, try the following:
+Add the following parameter to php4_init in magnus.conf:
+
+    Init fn=php4_init ... server_lib="ns-httpdXX.dll"
+    
+where XX is the correct DLL version number. To get it, look in the server-root
+for the correct DLL name. The DLL with the biggest filesize is the right one.
+
+But be warned: SUPPORT FOR nsapi_virtual() IS EXPERIMENTAL !!!
+
+
 $Id$
