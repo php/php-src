@@ -35,6 +35,8 @@
 #error AOLserver module only useable in thread-safe mode
 #endif
 
+#define NS_BUF_SIZE 511
+
 #include "php_ini.h"
 #include "php_globals.h"
 #include "SAPI.h"
@@ -211,9 +213,16 @@ static void php_info_aolserver(ZEND_MODULE_INFO_FUNC_ARGS)
 	PUTS("</table>");
 }
 
+PHP_FUNCTION(getallheaders);
+
+static function_entry aolserver_functions[] = {
+	PHP_FE(getallheaders, NULL)
+	{0}
+};
+
 static zend_module_entry php_aolserver_module = {
 	"AOLserver",
-	NULL,
+	aolserver_functions,
 	NULL,
 	NULL,
 	NULL,
@@ -221,6 +230,23 @@ static zend_module_entry php_aolserver_module = {
 	php_info_aolserver,
 	STANDARD_MODULE_PROPERTIES
 };
+
+PHP_FUNCTION(getallheaders)
+{
+	int i;
+	NSLS_FETCH();
+
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	for (i = 0; i < Ns_SetSize(NSG(conn->headers)); i++) {
+		char *key = Ns_SetKey(NSG(conn->headers), i);
+		char *value = Ns_SetValue(NSG(conn->headers), i);
+		
+		add_assoc_string(return_value, key, value, 1);
+	}
+}
 
 static int
 php_ns_startup(sapi_module_struct *sapi_module)
@@ -272,7 +298,7 @@ static void
 php_ns_hash_environment(NSLS_D CLS_DC ELS_DC PLS_DC SLS_DC)
 {
 	int i;
-	char buf[512];
+	char buf[NS_BUF_SIZE + 1];
 	zval *pval;
 
 	for(i = 0; i < Ns_SetSize(NSG(conn->headers)); i++) {
@@ -282,7 +308,7 @@ php_ns_hash_environment(NSLS_D CLS_DC ELS_DC PLS_DC SLS_DC)
 		char c;
 		int buf_len;
 
-		buf_len = snprintf(buf, 511, "HTTP_%s", key);
+		buf_len = snprintf(buf, NS_BUF_SIZE, "HTTP_%s", key);
 		for(p = buf; (c = *p); p++) {
 			c = toupper(c);
 			if(c < 'A' || c > 'Z') {
@@ -299,29 +325,41 @@ php_ns_hash_environment(NSLS_D CLS_DC ELS_DC PLS_DC SLS_DC)
 		zend_hash_update(&EG(symbol_table), buf, buf_len + 1, &pval, sizeof(zval *), NULL);
 	}
 	
-	snprintf(buf, 511, "%s/%s", Ns_InfoServerName(), Ns_InfoServerVersion());
+	snprintf(buf, NS_BUF_SIZE, "%s/%s", Ns_InfoServerName(), Ns_InfoServerVersion());
 	ADD_STRING("SERVER_SOFTWARE");
-	snprintf(buf, 511, "HTTP/%1.1f", NSG(conn)->request->version);
+	snprintf(buf, NS_BUF_SIZE, "HTTP/%1.1f", NSG(conn)->request->version);
 	ADD_STRING("SERVER_PROTOCOL");
 
-	strncpy(buf, NSG(conn)->request->method, 511);
+	strncpy(buf, NSG(conn)->request->method, NS_BUF_SIZE);
 	ADD_STRING("REQUEST_METHOD");
 
 	if(NSG(conn)->request->query) {
-		strncpy(buf, NSG(conn)->request->query, 511);
+		strncpy(buf, NSG(conn)->request->query, NS_BUF_SIZE);
 	} else {
 		buf[0] = '\0';
 	}
 	ADD_STRING("QUERY_STRING");
 	
-	strncpy(buf, Ns_InfoBuildDate(), 511);
+	strncpy(buf, Ns_InfoBuildDate(), NS_BUF_SIZE);
 	ADD_STRING("SERVER_BUILDDATE");
 
-	strncpy(buf, Ns_ConnPeer(NSG(conn)), 511);
+	strncpy(buf, Ns_ConnPeer(NSG(conn)), NS_BUF_SIZE);
 	ADD_STRING("REMOTE_ADDR");
 
-	strncpy(buf, SG(request_info).path_translated, 511);
+	snprintf(buf, NS_BUF_SIZE, "%d", Ns_ConnPeerPort(NSG(conn)));
+	ADD_STRING("REMOTE_PORT");
+
+	snprintf(buf, NS_BUF_SIZE, "%d", Ns_ConnPort(NSG(conn)));
+	ADD_STRING("SERVER_PORT");
+
+	strncpy(buf, Ns_ConnHost(NSG(conn)), NS_BUF_SIZE);
+	ADD_STRING("SERVER_NAME");
+
+	strncpy(buf, SG(request_info).path_translated, NS_BUF_SIZE);
 	ADD_STRING("PATH_TRANSLATED");
+
+	strncpy(buf, "CGI/1.1", NS_BUF_SIZE);
+	ADD_STRING("GATEWAY_INTERFACE");
 
 	MAKE_STD_ZVAL(pval);
 	pval->type = IS_LONG;
