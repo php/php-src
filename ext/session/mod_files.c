@@ -70,9 +70,9 @@ static int _ps_files_valid_key(const char *key)
 
 	for(p = key; (c = *p); p++) {
 		/* valid characters are a..z,A..Z,0..9 */
-		if(!(c >= 'a' && c <= 'z') ||
+		if(!((c >= 'a' && c <= 'z') ||
 				(c >= 'A' && c <= 'Z') ||
-				(c >= '0' && c <= '9')) {
+				(c >= '0' && c <= '9'))) {
 			ret = 0;
 			break;
 		}
