@@ -250,6 +250,7 @@ ZEND_API int zend_register_constant(zend_constant *c ELS_DC)
 
 	zend_str_tolower(lowercase_name, c->name_len);
 	if (zend_hash_add(EG(zend_constants), lowercase_name, c->name_len, (void *) c, sizeof(zend_constant), NULL)==FAILURE) {
+		free(c->name);
 		zval_dtor(&c->value);
 		zend_error(E_NOTICE,"Constant %s already defined",lowercase_name);
 		ret = FAILURE;
