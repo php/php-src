@@ -1,3 +1,89 @@
+2003-08-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/mail.c:
+      Prevent abrupt script execution when sendmail_path contains invalid
+      executable.
+      Add more detail to the warnings regarding execution of sendmail binary.
+
+2003-08-27  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Do not reuse data structure for ibase_execute() results.
+      Invalidate the results whose statement handle has been invalidated.
+      Fixed some add_{index|assoc}_*() bogosity
+
+2003-08-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Nuke unused variable
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fix reflection_class::newInstance()
+
+2003-08-27  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Common.php:
+      adding betterStates() for usage in automatic dependency resolution
+
+2003-08-27  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc_includes.h:
+      Committing a patch for IBM DB2 BLOB support submitted by Clara Liu
+      (clara@zealworks.com).
+
+2003-08-27  Jani Taskinen  <sniper@iki.fi>
+
+    * scripts/phpize.in:
+      - Use the shtool in $builddir/build instead
+
+    * (PHP_4_3)
+      acinclude.m4
+      configure.in
+      scan_makefile_in.awk
+      build/scan_makefile_in.awk
+      ext/openssl/config.m4
+      ext/openssl/config0.m4
+      ext/snmp/config.m4
+      ext/standard/config.m4
+      scripts/Makefile.frag
+      scripts/phpize.in
+      scripts/phpize.m4:
+      - Backported several improvements/cleanups for the build/configure stuff.
+        . PEAR dependancies checked during configure
+        . OpenSSL config moved from configure.in to ext/openssl/config0.m4
+          (and also improved the PHP_OPENSSL_SETUP macro a bit)
+        + Some other minor issues
+
+2003-08-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * scripts/Makefile.frag
+      scripts/Makefile.frag:
+      Use INSTALL to install build files
+
+2003-08-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      main/streams.c:
+      MFH: Prevent a crash when expand_filepath() fails.
+
+    * main/streams/plain_wrapper.c:
+      Prevent a crash when expand_filepath() fails.
+
+2003-08-27  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/string.c:
+      Squelch warning "Variable may be used uninitialized."
+      This would never occur anyway because of the logic of the function,
+      but gcc isn't quite smart enough to realize this.
+
+2003-08-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pgsql/pgsql.c:
+      Fixed bug #22243 (make pg_meta_data fetch array dimentions)
+      m-lesser[at]better-com.de
+
 2003-08-26  Jani Taskinen  <sniper@iki.fi>
 
     * (PHP_4_3)
