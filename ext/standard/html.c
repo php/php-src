@@ -45,9 +45,9 @@ static char EntTable[][7] =
 	"uuml","yacute","thorn","yuml"
 };
 
-#define ENT_COMPAT			1
-#define ENT_QUOTES			2
-#define ENT_NOQUOTES		4
+#define ENT_COMPAT    1
+#define ENT_QUOTES    2
+#define ENT_NOQUOTES  4
 
 PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style)
 {
@@ -89,7 +89,7 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 		}
 		old++;
 	}
-    new [len] = '\0';
+	new [len] = '\0';
 	*newlen = len;
 
 	return new;
@@ -97,23 +97,23 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 
 static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
-    zval **arg, **quotes;
-    int len, quote_style = ENT_COMPAT;
+	zval **arg, **quotes;
+	int len, quote_style = ENT_COMPAT;
 	int ac = ZEND_NUM_ARGS();
 	char *new;
 
 	if (ac < 1 || ac > 2 || zend_get_parameters_ex(ac, &arg, &quotes) == FAILURE) {
-        WRONG_PARAM_COUNT;
-    }
+		WRONG_PARAM_COUNT;
+	}
 
-    convert_to_string_ex(arg);
+	convert_to_string_ex(arg);
 	if(ac==2) {
 		convert_to_long_ex(quotes);
 		quote_style = (*quotes)->value.lval;
 	}
 
 	new = php_escape_html_entities((*arg)->value.str.val, (*arg)->value.str.len, &len, all, quote_style);
-    RETVAL_STRINGL(new,len,0);
+	RETVAL_STRINGL(new,len,0);
 }
 
 #define HTML_SPECIALCHARS 	0
@@ -155,8 +155,8 @@ PHP_FUNCTION(get_html_translation_table)
 	char ind[ 2 ];
 
 	if (ac < 0 || ac > 2 || zend_get_parameters_ex(ac, &whichone, &quotes) == FAILURE) {
-        WRONG_PARAM_COUNT;
-    }
+		WRONG_PARAM_COUNT;
+	}
 
 	if (ac > 0) {
 		convert_to_long_ex(whichone);
@@ -184,9 +184,11 @@ PHP_FUNCTION(get_html_translation_table)
 		case HTML_SPECIALCHARS:
 			ind[0]=38; add_assoc_string(return_value,ind,"&amp;",1);
 			if(quote_style&ENT_QUOTES) {
-				ind[0]=39; add_assoc_string(return_value,ind,"&#039;",1); }
+				ind[0]=39; add_assoc_string(return_value,ind,"&#039;",1);
+			}
 			if(!(quote_style&ENT_NOQUOTES)) {
-				ind[0]=34; add_assoc_string(return_value,ind,"&quot;",1); }
+				ind[0]=34; add_assoc_string(return_value,ind,"&quot;",1); 
+			}
 			ind[0]=60; add_assoc_string(return_value,ind,"&lt;",1);
 			ind[0]=62; add_assoc_string(return_value,ind,"&gt;",1);
 			break;
