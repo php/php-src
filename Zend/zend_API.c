@@ -126,7 +126,7 @@ int ParameterPassedByReference(int ht, uint n)
 	if (n>arg_count) {
 		return FAILURE;
 	}
-	arg = (zval *) *(p-arg_count+n);
+	arg = (zval *) *(p-arg_count+n-1);
 	return arg->is_ref;
 }
 
