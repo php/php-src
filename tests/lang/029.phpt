@@ -1,5 +1,7 @@
 --TEST--
 OO Bug Test (Bug #7515)
+--SKIPIF--
+<?php if(version_compare(zend_version(), "2.0.0-dev", '<')) echo "skip\n"; ?>
 --POST--
 --GET--
 --FILE--
