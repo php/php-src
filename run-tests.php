@@ -454,13 +454,14 @@ if (!getenv('NO_INTERACTION')) {
 		
 		$failed_tests_data .= "\n" . $sep . 'BUILD ENVIRONMENT' . $sep;
 		$failed_tests_data .= "OS:\n" . PHP_OS . " - " . php_uname() . "\n\n";
-		$ldd = $automake = $autoconf = $libtool = $compiler = 'N/A';
+		$ldd = $automake = $autoconf = $sys_libtool = $libtool = $compiler = 'N/A';
 
 		if (substr(PHP_OS, 0, 3) != "WIN") {
 			$automake = shell_exec('automake --version');
 			$autoconf = shell_exec('autoconf --version');
 			/* Always use the generated libtool - Mac OSX uses 'glibtool' */
-			$libtool = shell_exec('./libtool --version');
+			$libtool = shell_exec($_SERVER['PWD'] . '/libtool --version');
+			$sys_libtool = shell_exec('libtool --version');
 			/* Try the most common flags for 'version' */
 			$flags = array('-v', '-V', '--version');
 			$cc_status=0;
@@ -475,7 +476,8 @@ if (!getenv('NO_INTERACTION')) {
 		}
 		$failed_tests_data .= "Automake:\n$automake\n";
 		$failed_tests_data .= "Autoconf:\n$autoconf\n";
-		$failed_tests_data .= "Libtool:\n$libtool\n";
+		$failed_tests_data .= "Bundled Libtool:\n$libtool\n";
+		$failed_tests_data .= "System Libtool:\n$sys_libtool\n";
 		$failed_tests_data .= "Compiler:\n$compiler\n";
 		$failed_tests_data .= "Bison:\n". @shell_exec('bison --version'). "\n";
 		$failed_tests_data .= "Libraries:\n$ldd\n";
