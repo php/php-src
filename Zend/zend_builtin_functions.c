@@ -399,7 +399,7 @@ ZEND_FUNCTION(get_class)
 	zval **arg;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &arg)==FAILURE) {
-		RETURN_FALSE;
+		WRONG_PARAM_COUNT;
 	}
 	if ((*arg)->type != IS_OBJECT) {
 		RETURN_FALSE;
@@ -415,7 +415,7 @@ ZEND_FUNCTION(get_parent_class)
 	zval **arg;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &arg)==FAILURE) {
-		RETURN_FALSE;
+		WRONG_PARAM_COUNT;
 	}
 	if (((*arg)->type != IS_OBJECT) || !(*arg)->value.obj.ce->parent) {
 		RETURN_FALSE;
@@ -433,7 +433,7 @@ ZEND_FUNCTION(is_subclass_of)
 	zend_class_entry *parent_ce = NULL;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &obj, &class_name)==FAILURE) {
-		RETURN_FALSE;
+		WRONG_PARAM_COUNT;
 	}
 
 	if ((*obj)->type != IS_OBJECT) {
@@ -466,7 +466,7 @@ ZEND_FUNCTION(get_class_vars)
 	CLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class_name)==FAILURE) {
-		RETURN_FALSE;
+		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_string_ex(class_name);
@@ -492,7 +492,7 @@ ZEND_FUNCTION(get_object_vars)
 	zval *tmp;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &obj) == FAILURE) {
-		RETURN_FALSE;
+		WRONG_PARAM_COUNT;
 	}
 
 	if ((*obj)->type != IS_OBJECT) {
@@ -519,7 +519,7 @@ ZEND_FUNCTION(get_class_methods)
 	CLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class_name)==FAILURE) {
-		RETURN_FALSE;
+		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_string_ex(class_name);
@@ -553,7 +553,7 @@ ZEND_FUNCTION(method_exists)
 	char *lcname;
 	
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &klass, &method_name)==FAILURE) {
-		RETURN_FALSE;
+		WRONG_PARAM_COUNT;
 	}
 	if ((*klass)->type != IS_OBJECT) {
 		RETURN_FALSE;
@@ -580,7 +580,7 @@ ZEND_FUNCTION(class_exists)
 	CLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class_name)==FAILURE) {
-		RETURN_FALSE;
+		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(class_name);
 	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
