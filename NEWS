@@ -3,19 +3,17 @@ PHP 4                                                                      NEWS
 ?? ??? 2002, Version 4.3.0
 - Added optional 3rd parameter 'recursive' to ftp_rawlist() which will
   do 'LIST -R' instead of 'LIST'. (Jani)
-- Disabled the fifth parameter to the mail function in safemode. (Derick)
-- GetImageSize now allways set fields unknown to 0 and new Imagetype
-  iff. (Marcus)
-- Add runtime Apache2 thread check to ensure we don't run a non-threaded
+- Disabled the fifth parameter in mail() when safe-mode is turned on. (Derick)
+- Changed getimagesize() to always set unknown fields to 0 and added support
+  iff imagetype. (Marcus)
+- Added runtime Apache2 thread check to ensure we don't run a non-threaded
   PHP inside a threaded Apache2 MPM.  (Rasmus)
-- Turn off ZTS if Apache2 is using the prefork MPM. (Rasmus)
 - Made getimagesize() and exif_read_data() to return also the mime-type and 
   exif_thumbnail() to return also the image-type. (Marcus)
 - Added image_type_to_mime_type() which converts image-types to mime-types.
   (Marcus)
-- Made GD functions only exist if they are available. This means that for
-  example your GD build has no JPG support, none of the JPG functions would
-  actually exist, so you can safely test that with function_exists(). (Derick)
+- Made GD functions to only exist if they are available in libgd. Now the 
+  availability can be tested with function_exists(). (Derick)
 - Added an optional parameter to the header() function which overrides the HTTP
   response code. (Derick)
 - Changed the order of which modules are unloaded to the reverse order of
