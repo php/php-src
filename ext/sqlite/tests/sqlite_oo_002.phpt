@@ -14,7 +14,7 @@ var_dump($db->query("CREATE TABLE foo(c1 date, c2 time, c3 varchar(64))"));
 var_dump($db->query("INSERT INTO foo VALUES ('2002-01-02', '12:49:00', NULL)"));
 $r = $db->query("SELECT * from foo");
 var_dump($r);
-var_dump($r->fetch());
+var_dump($r->fetch_array());
 ?>
 --EXPECTF--
 object(sqlite_db)#%d (0) {

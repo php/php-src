@@ -30,13 +30,13 @@ foreach ($data as $str) {
 echo "====class24====\n";
 $res = $db->query("SELECT a FROM strings", SQLITE_ASSOC);
 while ($res->valid()) {
-	var_dump($res->fetchObject('class24'));
+	var_dump($res->fetch_object('class24'));
 }
 
 echo "====stdclass====\n";
 $res = $db->query("SELECT a FROM strings", SQLITE_ASSOC);
 while ($res->valid()) {
-	var_dump($res->fetchObject());
+	var_dump($res->fetch_object());
 }
 
 echo "====DONE!====\n";
