@@ -2734,11 +2734,9 @@ PHP_FUNCTION(pg_unescape_bytea)
 
 	to = (char *)php_pgsql_unescape_bytea((unsigned char*)from, from_len);
 	if (!to) {
-		RETVAL_FALSE;
+		RETURN_FALSE;
 	}
-	else {
-		RETVAL_STRINGL(to, to_len-1, 1); /* to_len includes addtional '\0' */
-	}
+	RETVAL_STRINGL(to, to_len-1, 1); /* to_len includes addtional '\0' */
 	free(to);
 }
 /* }}} */
