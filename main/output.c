@@ -457,17 +457,11 @@ static int php_b_body_write(const char *str, uint str_length TSRMLS_DC)
  */
 static int php_ub_body_write_no_header(const char *str, uint str_length TSRMLS_DC)
 {
-	char *newstr = NULL;
-	size_t new_length=0;
 	int result;
 
 	if (OG(disable_output)) {
 		return 0;
 	}		
-	if (newstr) {
-		str = newstr;
-		str_length = new_length;
-	}
 
 	result = OG(php_header_write)(str, str_length TSRMLS_CC);
 
