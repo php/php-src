@@ -178,9 +178,11 @@ PHP_MINIT_FUNCTION(ldap)
 	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_RESTART", LDAP_OPT_RESTART, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_HOST_NAME", LDAP_OPT_HOST_NAME, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_ERROR_STRING", LDAP_OPT_ERROR_STRING, CONST_PERSISTENT | CONST_CS);
-#ifndef HAVE_NSLDAP
+#ifdef LDAP_OPT_MATCHED_DN
 	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_MATCHED_DN", LDAP_OPT_MATCHED_DN, CONST_PERSISTENT | CONST_CS);
 #endif
+	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_SERVER_CONTROLS", LDAP_OPT_SERVER_CONTROLS, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_CLIENT_CONTROLS", LDAP_OPT_CLIENT_CONTROLS, CONST_PERSISTENT | CONST_CS);
 #endif
 
 #ifdef ORALDAP
@@ -1570,7 +1572,7 @@ PHP_FUNCTION(ldap_get_option) {
 		/* options with string value */
 	case LDAP_OPT_HOST_NAME:
 	case LDAP_OPT_ERROR_STRING:
-#ifndef HAVE_NSLDAP
+#ifdef LDAP_OPT_MATCHED_DN
 	case LDAP_OPT_MATCHED_DN:
 #endif
 	        {
@@ -1656,10 +1658,77 @@ PHP_FUNCTION(ldap_set_option) {
 				RETURN_FALSE;
 			}
 		} break;
-		/* options not implemented
+		/* options with control list value */
 	case LDAP_OPT_SERVER_CONTROLS:
 	case LDAP_OPT_CLIENT_CONTROLS:
-		*/
+		{
+			LDAPControl *ctrl, **ctrls, **ctrlp;
+			zval **ctrlval, **val;
+			int ncontrols;
+			char error=0;
+
+			if ((Z_TYPE_PP(newval) != IS_ARRAY) || !(ncontrols = zend_hash_num_elements(Z_ARRVAL_PP(newval)))) {
+				php_error(E_WARNING, "Expected non-empty array value for this option");
+                                RETURN_FALSE;
+                        }
+			ctrls = emalloc((1 + ncontrols) * sizeof(*ctrls));
+			if (ctrls == NULL) {
+				RETURN_FALSE;
+			}
+			*ctrls = NULL;
+			ctrlp = ctrls;
+			zend_hash_internal_pointer_reset(Z_ARRVAL_PP(newval));
+			while (zend_hash_get_current_data(Z_ARRVAL_PP(newval), (void**)&ctrlval) == SUCCESS) {
+				if (Z_TYPE_PP(ctrlval) != IS_ARRAY) {
+					php_error(E_WARNING, "The array value must contain only arrays, where each array is a control");
+					error = 1;
+					break;
+					RETURN_FALSE;
+				}
+				if (zend_hash_find(Z_ARRVAL_PP(ctrlval), "oid", sizeof("oid"), (void **) &val) == FAILURE) {
+					php_error(E_WARNING, "Control must have an oid key");
+					error = 1;
+					break;
+				}
+				ctrl = *ctrlp = emalloc(sizeof(**ctrlp));
+				if (ctrl == NULL) {
+					error = 1;
+					break;
+				}
+				convert_to_string_ex(val);
+				ctrl->ldctl_oid = Z_STRVAL_PP(val);
+				if (zend_hash_find(Z_ARRVAL_PP(ctrlval), "value", sizeof("value"), (void **) &val) == SUCCESS) {
+					convert_to_string_ex(val);
+					ctrl->ldctl_value.bv_val = Z_STRVAL_PP(val);
+					ctrl->ldctl_value.bv_len = Z_STRLEN_PP(val);
+				} else {
+					ctrl->ldctl_value.bv_val = NULL;
+					ctrl->ldctl_value.bv_len = 0;
+				}
+				if (zend_hash_find(Z_ARRVAL_PP(ctrlval), "iscritical", sizeof("iscritical"), (void **) &val) == SUCCESS) {
+					convert_to_boolean_ex(val);
+					ctrl->ldctl_iscritical = Z_BVAL_PP(val);
+				} else {
+					ctrl->ldctl_iscritical = 0;
+				}
+				
+				++ctrlp;
+				*ctrlp = NULL;
+				zend_hash_move_forward(Z_ARRVAL_PP(newval));
+			}
+			if (!error) {
+				error = ldap_set_option(ldap, opt, ctrls);
+			}
+			ctrlp = ctrls;
+			while ( *ctrlp ) {
+				efree(*ctrlp);
+				ctrlp++;
+			}
+			efree(ctrls);
+			if (error) {
+				RETURN_FALSE;
+			}
+		} break;
 	default:
 		RETURN_FALSE;
 	}
