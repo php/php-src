@@ -3241,7 +3241,7 @@ PHP_FUNCTION(imap_mail_compose)
 
 /* {{{ _php_imap_mail
  */
-int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *cc, char *bcc, char* rpath)
+int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *cc, char *bcc, char* rpath TSRMLS_DC)
 {
 #ifdef PHP_WIN32
 	int tsm_err;
@@ -3349,7 +3349,7 @@ PHP_FUNCTION(imap_mail)
 		rpath = Z_STRVAL_PP(argv[6]);
 	}
 
-	if (_php_imap_mail(to, subject, message, headers, cc, bcc, rpath)) {
+	if (_php_imap_mail(to, subject, message, headers, cc, bcc, rpath TSRMLS_CC)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
