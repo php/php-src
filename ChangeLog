@@ -1,3 +1,38 @@
+2004-04-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Prepare for 4.3.6RC2
+
+    * (PHP_4_3)
+      ext/wddx/tests/001.phpt
+      ext/wddx/tests/wddx.xml:
+      Restore wddx tests, without the troublesome date conversions.
+
+2004-04-05  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/config.m4
+      ext/interbase/config.w32
+      ext/interbase/ibase_blobs.c
+      ext/interbase/ibase_events.c
+      ext/interbase/ibase_query.c
+      ext/interbase/ibase_service.c
+      ext/interbase/interbase.c
+      ext/interbase/php_ibase_includes.h:
+      More divide & conquer
+
+2004-04-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/lang/bug22367.phpt:
+      Fix (using patterns)
+
 2004-04-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/mbstring/config.m4:
