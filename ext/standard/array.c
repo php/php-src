@@ -60,18 +60,18 @@ php_array_globals array_globals;
 #define	EXTR_PREFIX_IF_EXISTS	5
 #define	EXTR_IF_EXISTS			6
 
-#define SORT_REGULAR		0
-#define SORT_NUMERIC		1
-#define	SORT_STRING			2
+#define SORT_REGULAR			0
+#define SORT_NUMERIC			1
+#define	SORT_STRING				2
 
-#define SORT_DESC		   	3
-#define SORT_ASC		    4
+#define SORT_DESC				3
+#define SORT_ASC				4
 
-#define CASE_LOWER          0
-#define CASE_UPPER          1
+#define CASE_LOWER				0
+#define CASE_UPPER				1
 
-#define COUNT_NORMAL		0
-#define COUNT_RECURSIVE		1
+#define COUNT_NORMAL			0
+#define COUNT_RECURSIVE			1
 
 PHP_MINIT_FUNCTION(array)
 {
@@ -105,10 +105,10 @@ PHP_MINIT_FUNCTION(array)
 PHP_MSHUTDOWN_FUNCTION(array)
 {
 #ifdef ZTS
-    ts_free_id(array_globals_id);
+	ts_free_id(array_globals_id);
 #endif
 
-    return SUCCESS;
+	return SUCCESS;
 }
 
 static void set_compare_func(int sort_type TSRMLS_DC)
@@ -158,19 +158,19 @@ static int array_key_compare(const void *a, const void *b TSRMLS_DC)
 		Z_STRLEN(second) = s->nKeyLength-1;
 	}
  
-    if (ARRAYG(compare_func)(&result, &first, &second TSRMLS_CC) == FAILURE) {
-        return 0;
-    } 
+	if (ARRAYG(compare_func)(&result, &first, &second TSRMLS_CC) == FAILURE) {
+		return 0;
+	} 
 
-    if (Z_TYPE(result) == IS_DOUBLE) {
-        if (Z_DVAL(result) < 0) {
+	if (Z_TYPE(result) == IS_DOUBLE) {
+		if (Z_DVAL(result) < 0) {
 			return -1;
-        } else if (Z_DVAL(result) > 0) {
+		} else if (Z_DVAL(result) > 0) {
 			return 1;
-        } else {
+		} else {
 			return 0;
 		}
-    }
+	}
 
 	convert_to_long(&result);
 
@@ -302,19 +302,19 @@ static int array_data_compare(const void *a, const void *b TSRMLS_DC)
 	first = *((pval **) f->pData);
 	second = *((pval **) s->pData);
 
-    if (ARRAYG(compare_func)(&result, first, second TSRMLS_CC) == FAILURE) {
-        return 0;
-    } 
+	if (ARRAYG(compare_func)(&result, first, second TSRMLS_CC) == FAILURE) {
+		return 0;
+	} 
 
-    if (Z_TYPE(result) == IS_DOUBLE) {
-        if (Z_DVAL(result) < 0) {
+	if (Z_TYPE(result) == IS_DOUBLE) {
+		if (Z_DVAL(result) < 0) {
 			return -1;
-        } else if (Z_DVAL(result) > 0) {
+		} else if (Z_DVAL(result) > 0) {
 			return 1;
-        } else {
+		} else {
 			return 0;
 		}
-    }
+	}
 
 	convert_to_long(&result);
 
@@ -979,7 +979,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 					  (*BG(array_walk_func_name))->value.str.val);
 
 		zend_hash_move_forward_ex(target_hash, &pos);
-    }
+	}
 	efree(key);
 	
 	return 0;
@@ -989,7 +989,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
    Apply a user function to every member of an array */
 PHP_FUNCTION(array_walk)
 {
-	int    argc;
+	int	argc;
 	zval **array,
 		 **userdata = NULL,
 		 **old_walk_func_name;
@@ -1023,8 +1023,8 @@ PHP_FUNCTION(array_walk)
 /* }}} */
 
 /* void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
- *      0 = return boolean
- *      1 = return key
+ *	  0 = return boolean
+ *	  1 = return key
  */
 static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 {
@@ -1039,7 +1039,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	uint str_key_len;
    	char *string_key;
 	int (*is_equal_func)(zval *, zval *, zval * TSRMLS_DC) = is_equal_function;
-      	
+	  	
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
 		zend_get_parameters_ex(ZEND_NUM_ARGS(), &value, &array, &strict) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1059,15 +1059,15 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 		convert_to_boolean_ex(strict);
 		if (Z_LVAL_PP(strict)) {
 			is_equal_func = is_identical_function;
-	    }
+		}
 	}
 
 	target_hash = HASH_OF(*array);
 	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 	while(zend_hash_get_current_data_ex(target_hash, (void **)&entry, &pos) == SUCCESS) {
-     	is_equal_func(&res, *value, *entry TSRMLS_CC);
+	 	is_equal_func(&res, *value, *entry TSRMLS_CC);
 		if (Z_LVAL(res)) {
-			if (behavior==0) {	     
+			if (behavior==0) {		 
 				RETURN_TRUE;
 			} else {
 				/* Return current key */
@@ -1344,10 +1344,10 @@ PHP_FUNCTION(array_fill)
 		WRONG_PARAM_COUNT;
 	}
 
-    /* allocate an array for return */
-    if (array_init(return_value) == FAILURE) {
+	/* allocate an array for return */
+	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
-    }
+	}
 
 	switch(Z_TYPE_PP(start_key)) {
 		case IS_STRING:
@@ -1395,10 +1395,10 @@ PHP_FUNCTION(range)
 		WRONG_PARAM_COUNT;
 	}
 
-    /* allocate an array for return */
-    if (array_init(return_value) == FAILURE) {
+	/* allocate an array for return */
+	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
-    }
+	}
 
 	if(Z_TYPE_PP(zlow)==IS_STRING && Z_TYPE_PP(zhigh)==IS_STRING) {
 		char *low, *high;
@@ -1613,8 +1613,8 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 PHP_FUNCTION(array_push)
 {
 	zval	  ***args,		/* Function arguments array */
-			    *stack,		/* Input array */
-			    *new_var;	/* Variable to be pushed */
+				*stack,		/* Input array */
+				*new_var;	/* Variable to be pushed */
 	int			 i,			/* Loop counter */
 				 argc;		/* Number of function arguments */
 
@@ -2056,7 +2056,7 @@ PHP_FUNCTION(array_keys)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &pos);
 	while(zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &pos) == SUCCESS) {
 		if (search_value != NULL) {
-     		is_equal_function(&res, *search_value, *entry TSRMLS_CC);
+	 		is_equal_function(&res, *search_value, *entry TSRMLS_CC);
 			add_key = zval_is_true(&res);
 		}
 	
@@ -2128,7 +2128,7 @@ PHP_FUNCTION(array_count_values)
 {
 	zval	   **input,		/* Input array */
 			   **entry;		/* An entry in the input array */
-	zval       **tmp;
+	zval	   **tmp;
 	HashTable   *myht;
 	HashPosition pos;
 	
@@ -2393,10 +2393,10 @@ PHP_FUNCTION(array_change_key_case)
 		(*entry)->refcount++; 
 
 		switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(array), &string_key, &str_key_len, &num_key, 0, &pos)) {
-		    case HASH_KEY_IS_LONG:
+			case HASH_KEY_IS_LONG:
 				zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry, sizeof(entry), NULL);
 				break;
-		    case HASH_KEY_IS_STRING:
+			case HASH_KEY_IS_STRING:
 				new_key=estrndup(string_key,str_key_len);
 				if (change_to_upper)
 					php_strtoupper(new_key, str_key_len - 1);
@@ -2436,7 +2436,7 @@ PHP_FUNCTION(array_unique)
 	zval_copy_ctor(return_value);
 
 	if (target_hash->nNumOfElements <= 1) /* nothing to do */
-	        return;
+			return;
 
 	/* create and sort array with pointers to the target_hash buckets */
 	arTmp = (Bucket **) pemalloc((target_hash->nNumOfElements + 1) * sizeof(Bucket *), target_hash->persistent);
@@ -2445,20 +2445,20 @@ PHP_FUNCTION(array_unique)
 	for (i = 0, p = target_hash->pListHead; p; i++, p = p->pListNext)
 		arTmp[i] = p;
 	arTmp[i] = NULL;
-    set_compare_func(SORT_STRING TSRMLS_CC);
+	set_compare_func(SORT_STRING TSRMLS_CC);
 	zend_qsort((void *) arTmp, i, sizeof(Bucket *), array_data_compare TSRMLS_CC);
 
 	/* go through the sorted array and delete duplicates from the copy */
 	lastkept = arTmp;
 	for (cmpdata = arTmp + 1; *cmpdata; cmpdata++) {
 		if (array_data_compare(lastkept, cmpdata TSRMLS_CC)) {
-		        lastkept = cmpdata;
+				lastkept = cmpdata;
 		} else {
 			p = *cmpdata;
 			if (p->nKeyLength)
-			        zend_hash_del(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength);  
+					zend_hash_del(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength);  
 			else
-			        zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
+					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
 		}
 	}
 	pefree(arTmp, target_hash->persistent);
@@ -2488,7 +2488,7 @@ PHP_FUNCTION(array_intersect)
 	/* for each argument, create and sort list with pointers to the hash buckets */
 	lists = (Bucket ***)emalloc(argc * sizeof(Bucket **));
 	ptrs = (Bucket ***)emalloc(argc * sizeof(Bucket **));
-    set_compare_func(SORT_STRING TSRMLS_CC);
+	set_compare_func(SORT_STRING TSRMLS_CC);
 	for (i=0; i<argc; i++) {
 		if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
 			php_error(E_WARNING, "Argument #%d to array_intersect() is not an array", i+1);
@@ -2535,7 +2535,7 @@ PHP_FUNCTION(array_intersect)
 		}
 		if (c) {
 			/* Value of ptrs[0] not in all arguments, delete all entries */
-            /* with value < value of ptrs[i] */
+			/* with value < value of ptrs[i] */
 			for (;;) {
 				p = *ptrs[0];
 				if (p->nKeyLength)
@@ -2603,11 +2603,11 @@ PHP_FUNCTION(array_diff)
 		hash = HASH_OF(*args[i]);
 		list = (Bucket **) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket *), hash->persistent);
 		if (!list)
-		        RETURN_FALSE;
+				RETURN_FALSE;
 		lists[i] = list;
 		ptrs[i] = list;
 		for (p = hash->pListHead; p; p = p->pListNext)
-		        *list++ = p;
+				*list++ = p;
 		*list = NULL;
 		zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare TSRMLS_CC);
 	}
@@ -2617,7 +2617,7 @@ PHP_FUNCTION(array_diff)
 	zval_copy_ctor(return_value);
 
 	/* go through the lists and look for values of ptr[0]
-           that are not in the others */
+		   that are not in the others */
 	while (*ptrs[0]) {
 		c = 1;
 		for (i=1; i<argc; i++) {
@@ -2656,7 +2656,7 @@ PHP_FUNCTION(array_diff)
 	}
 out:
 	for (i=0; i<argc; i++) {
-	        hash = HASH_OF(*args[i]);
+			hash = HASH_OF(*args[i]);
 		pefree(lists[i], hash->persistent);
 	}
 	efree(ptrs);
@@ -2710,7 +2710,7 @@ PHP_FUNCTION(array_multisort)
 	int				array_size;
 	int				num_arrays = 0;
 	int				parse_state[MULTISORT_LAST];   /* 0 - flag not allowed
-                                             	      1 - flag allowed     */
+											 		  1 - flag allowed	 */
 	int				sort_order = SORT_ASC;
 	int				sort_type  = SORT_REGULAR;
 	int				i, k;
