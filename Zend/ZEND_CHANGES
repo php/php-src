@@ -26,11 +26,11 @@ Changes in the Zend Engine 2.0
       occurs, in order to allow developers to gradually migrate to the
       version 2.0-style behavior (without automatic clones).
 
-    * delete statement.
+    * delete function.
 
       The Zend Engine 1.0 had no means to force deletion of an object
-      if there are still references to it. The newly introduces delete
-      statement calls the object’s destructor and frees it even if the
+      if there are still references to it. The newly introduced delete
+      function calls the object’s destructor and frees it even if the
       object is referenced by some other places in the engine. Other
       references to the deleted object become stale and trying to
       access them results in a fatal error.
