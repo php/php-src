@@ -1,8 +1,6 @@
 dnl     $Id$
 
 AC_DEFUN(FCGI_COMMON_CHECKS, [
-    AC_CHECK_TYPE([ssize_t], [int]) 
-
     AC_MSG_CHECKING([for sun_len in sys/un.h])
     AC_EGREP_HEADER([sun_len], [sys/un.h],
 	[AC_MSG_RESULT([yes])
