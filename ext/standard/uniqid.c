@@ -38,34 +38,49 @@
 #include "../lcg/php_lcg.h"
 #include "uniqid.h"
 
-/* {{{ proto string uniqid(string prefix)
+/* {{{ proto string uniqid(string prefix, [bool more_entropy])
    Generate a unique id */
 PHP_FUNCTION(uniqid)
 {
 #ifdef HAVE_GETTIMEOFDAY
-	pval *prefix;
+	pval *prefix, *flags;
 	char uniqid[138];
-	int sec, usec;
+	int sec, usec, argc;
 	struct timeval tv;
-	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht,1,&prefix)==FAILURE) {
+
+	argc = ARG_COUNT(ht);
+	if (argc < 1 || argc > 2 || getParameters(ht, argc, &prefix, &flags)) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(prefix);
+	if (argc == 2) {
+		convert_to_boolean(flags);
+	}
+
+	printf("flags->value.lval = %d\n", flags->value.lval);
 
 	/* Do some bounds checking since we are using a char array. */
-	if (strlen(prefix->value.str.val) > 114) {
+	if (prefix->value.str.len > 114) {
 		php_error(E_WARNING, "The prefix to uniqid should not be more than 114 characters.");
 		return;
 	}
+#if HAVE_USLEEP && !(WIN32|WINNT)
+	if (!flags->value.lval) {
+		usleep(1);
+	}
+#endif
 	gettimeofday((struct timeval *) &tv, (struct timezone *) NULL);
 	sec = (int) tv.tv_sec;
 	usec = (int) (tv.tv_usec % 1000000);
 
 	/* The max value usec can have is 0xF423F, so we use only five hex
-	 * digits for usecs:
+	 * digits for usecs.
 	 */
-	sprintf(uniqid, "%s%08x%05x%.8f", prefix->value.str.val, sec, usec, php_combined_lcg() * 10);
+	if (argc == 2 && flags->value.lval) {
+		sprintf(uniqid, "%s%08x%05x%.8f", prefix->value.str.val, sec, usec, php_combined_lcg() * 10);
+	} else {
+		sprintf(uniqid, "%s%08x%05x", prefix->value.str.val, sec, usec);
+	}
 
 	RETURN_STRING(uniqid,1);
 #endif
@@ -73,7 +88,7 @@ PHP_FUNCTION(uniqid)
 /* }}} */
 
 function_entry uniqid_functions[] = {
-	{"uniqid",		php3_uniqid,		NULL},
+	PHP_FE(uniqid, NULL)
 	{NULL, NULL, NULL}
 };
 
