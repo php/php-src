@@ -6,6 +6,7 @@ PHP 4                                                                      NEWS
 - Fixed several egregious leaks in ext/browscap and sapi/embed. (Andrei)
 - Fixed build system to always use bundled libtool files. (Jani)  
 - Fixed MacOSX shared extensions crashing on Apache startup. (Rasmus)
+- Fixed bug #31705 (parse_url() does not recognize http://foo.com#bar). (Ilia)
 - Fixed bug #31684 (dio_tcsetattr(): misconfigured termios settings).
   (elod at itfais dot com)
 - Fixed bug #31699 (unserialize() float problem on non-English locales). (Ilia)
