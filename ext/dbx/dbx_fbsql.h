@@ -17,7 +17,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author : Marc Boeren         <marc@guidance.nl>                      |
-   |          Frank M. Kromann    <frank@frontbase.com>                   |
+   |          Frank M. Kromann    <frank@kromann.info>                    |
    +----------------------------------------------------------------------+
 */
 

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
-   |          Frank M. Kromann <frank@frontbase.com> Support for DB/2 CLI |
+   |          Frank M. Kromann <frank@kromann.info>  Support for DB/2 CLI |
    |          Kevin N. Shallow <kshallow@tampabay.rr.com> Birdstep Support|
    |          Daniel R. Kalowsky <kalowsky@php.net>                       |
    +----------------------------------------------------------------------+
