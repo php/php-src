@@ -9,7 +9,7 @@
 /* #include "ext/standard/php3_standard.h" */
 #include "ext/standard/info.h"
 
-#include <ovrimos.h>
+#include <sqlcli.h>
 
 #if !defined(WIN32)
 # define stricmp strcasecmp
