@@ -440,7 +440,8 @@ PHP_FUNCTION(dbmclose) {
 
 /* {{{ php_dbm_close
  */
-int php_dbm_close(zend_rsrc_list_entry *rsrc) {
+int php_dbm_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
 	int ret = 0;
 	dbm_info *info = (dbm_info *)rsrc->ptr;
 	DBM_TYPE dbf;

@@ -23,8 +23,8 @@
 
 #include <t1lib.h>
 
-extern void php_free_ps_font(zend_rsrc_list_entry *rsrc);
-extern void php_free_ps_enc(zend_rsrc_list_entry *rsrc);
+extern void php_free_ps_font(zend_rsrc_list_entry *rsrc TSRMLS_DC);
+extern void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 #endif
 

@@ -78,15 +78,17 @@ zend_module_entry pspell_module_entry = {
 ZEND_GET_MODULE(pspell)
 #endif
 
-static void php_pspell_close(zend_rsrc_list_entry *rsrc)
+static void php_pspell_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	PspellManager *manager = (PspellManager *)rsrc->ptr;
+
 	delete_pspell_manager(manager);
 }
 
-static void php_pspell_close_config(zend_rsrc_list_entry *rsrc)
+static void php_pspell_close_config(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	PspellConfig *config = (PspellConfig *)rsrc->ptr;
+
 	delete_pspell_config(config);
 }
 

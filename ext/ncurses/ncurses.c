@@ -34,7 +34,8 @@ ZEND_DECLARE_MODULE_GLOBALS(ncurses)
 int le_ncurses;
 
 
-static void ncurses_destruct(zend_rsrc_list_entry *rsrc) {
+static void ncurses_destruct(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
 	WINDOW **pwin = (WINDOW **)rsrc->ptr;
 
 	delwin(*pwin);

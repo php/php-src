@@ -138,7 +138,7 @@ static int _clean_invalid_results(list_entry *le TSRMLS_DC)
 }
 
 
-static void _free_sybase_result(zend_rsrc_list_entry *rsrc)
+static void _free_sybase_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	sybase_result *result = (sybase_result *)rsrc->ptr;
 	int i,j;
@@ -164,10 +164,9 @@ static void _free_sybase_result(zend_rsrc_list_entry *rsrc)
 }
 
 
-static void _close_sybase_link(zend_rsrc_list_entry *rsrc)
+static void _close_sybase_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	sybase_link *sybase_ptr = (sybase_link *)rsrc->ptr;
-	TSRMLS_FETCH();
 
 	sybase_ptr->valid = 0;
 
@@ -185,9 +184,10 @@ static void _close_sybase_link(zend_rsrc_list_entry *rsrc)
 }
 
 
-static void _close_sybase_plink(zend_rsrc_list_entry *rsrc)
+static void _close_sybase_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	sybase_link *sybase_ptr = (sybase_link *)rsrc->ptr;
+
 	dbclose(sybase_ptr->link);
 	dbloginfree(sybase_ptr->login);
 	free(sybase_ptr);

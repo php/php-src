@@ -121,7 +121,7 @@ typedef struct {
 	ZEND_FETCH_RESOURCE(msql_query, m_query *, &res, -1, "mSQL result", msql_globals.le_query);	\
 	msql_result = msql_query->result
 
-static void _delete_query(zend_rsrc_list_entry *rsrc)
+static void _delete_query(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	m_query *query = (m_query *)rsrc->ptr;
 
@@ -139,17 +139,19 @@ static m_query *php_msql_query_wrapper(m_result *res, int af_rows)
 	return query;
 }
 
-static void _close_msql_link(zend_rsrc_list_entry *rsrc)
+static void _close_msql_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	int link = (int)rsrc->ptr;
+
 	msqlClose(link);
 	msql_globals.num_links--;
 }
 
 
-static void _close_msql_plink(zend_rsrc_list_entry *rsrc)
+static void _close_msql_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	int link = (int)rsrc->ptr;
+
 	msqlClose(link);
 	msql_globals.num_persistent--;
 	msql_globals.num_links--;

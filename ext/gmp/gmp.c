@@ -101,7 +101,7 @@ zend_module_entry gmp_module_entry = {
 ZEND_GET_MODULE(gmp)
 #endif
 
-static void _php_gmpnum_free(zend_rsrc_list_entry *rsrc);
+static void _php_gmpnum_free(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 #define GMP_RESOURCE_NAME "GMP integer"
 
@@ -1195,9 +1195,10 @@ ZEND_FUNCTION(gmp_scan1)
 
 /* {{{ _php_gmpnum_free
  */
-static void _php_gmpnum_free(zend_rsrc_list_entry *rsrc)
+static void _php_gmpnum_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	mpz_t *gmpnum = (mpz_t *)rsrc->ptr;
+
 	FREE_GMP_NUM(gmpnum);
 }
 /* }}} */

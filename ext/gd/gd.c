@@ -211,7 +211,7 @@ ZEND_GET_MODULE(gd)
 
 /* {{{ php_free_gd_image
  */
-static void php_free_gd_image(zend_rsrc_list_entry *rsrc)
+static void php_free_gd_image(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	gdImageDestroy((gdImagePtr)rsrc->ptr);
 }
@@ -219,9 +219,10 @@ static void php_free_gd_image(zend_rsrc_list_entry *rsrc)
 
 /* {{{ php_free_gd_font
  */
-static void php_free_gd_font(zend_rsrc_list_entry *rsrc)
+static void php_free_gd_font(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	gdFontPtr fp = (gdFontPtr)rsrc->ptr;
+
 	if (fp->data) {
 		efree(fp->data);
 	}
@@ -2756,9 +2757,10 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int extende
 
 /* {{{ php_free_ps_font
  */
-void php_free_ps_font(zend_rsrc_list_entry *rsrc)
+void php_free_ps_font(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	int *font = (int *)rsrc->ptr;
+
 	T1_DeleteFont(*font);
 	efree(font);
 }
@@ -2766,9 +2768,10 @@ void php_free_ps_font(zend_rsrc_list_entry *rsrc)
 
 /* {{{ php_free_ps_enc
  */
-void php_free_ps_enc(zend_rsrc_list_entry *rsrc)
+void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	char **enc = (char **)rsrc->ptr;
+
 	T1_DeleteEncoding(enc);
 }
 /* }}} */

@@ -101,9 +101,10 @@ static void php_set_default_dir(int id TSRMLS_DC)
 }
 
 
-static void _dir_dtor(zend_rsrc_list_entry *rsrc)
+static void _dir_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_dir *dirp = (php_dir *)rsrc->ptr;
+
 	closedir(dirp->dir);
 	efree(dirp);
 }

@@ -60,9 +60,10 @@ ZEND_GET_MODULE(aspell)
 
 /* {{{ php_aspell_close
  */
-static void php_aspell_close(zend_rsrc_list_entry *rsrc)
+static void php_aspell_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	aspell *sc = (aspell *)rsrc->ptr;
+
 	aspell_free(sc);
 }
 /* }}} */

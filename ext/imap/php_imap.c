@@ -75,11 +75,11 @@ void *fs_get(size_t size);
 int imap_mail(char *to, char *subject, char *message, char *headers, char *cc, char *bcc, char *rpath);
 
 
-void mail_close_it (zend_rsrc_list_entry *rsrc);
+void mail_close_it(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #ifdef OP_RELOGIN
 /* AJS: close persistent connection */
-void mail_userlogout_it(zend_rsrc_list_entry *rsrc);
-void mail_nuke_chain(zend_rsrc_list_entry *rsrc);
+void mail_userlogout_it(zend_rsrc_list_entry *rsrc TSRMLS_DC);
+void mail_nuke_chain(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #endif
 
 /* {{{ imap_functions[]
@@ -186,10 +186,9 @@ static int le_pimapchain;
 #endif
 
 
-void mail_close_it(zend_rsrc_list_entry *rsrc)
+void mail_close_it(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	pils *imap_le_struct = (pils *)rsrc->ptr;
-	TSRMLS_FETCH();
 
 	mail_close_full(imap_le_struct->imap_stream, imap_le_struct->flags);
 
@@ -207,9 +206,10 @@ void mail_close_it(zend_rsrc_list_entry *rsrc)
 
 #ifdef OP_RELOGIN
 /* AJS: stream close functions for persistent connections */
-void mail_userlogout_it(zend_rsrc_list_entry *rsrc)
+void mail_userlogout_it(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	pils *imap_le_struct = (pils *)rsrc->ptr;
+
 	/* Close this user's session, putting the stream back
 	 * into AUTHENTICATE state.  (Note that IMAP does not
 	 * support this behavior... yet)
@@ -218,7 +218,7 @@ void mail_userlogout_it(zend_rsrc_list_entry *rsrc)
 	mail_close_full(imap_le_struct->imap_stream, imap_le_struct->flags | CL_HALF);
 }
 
-void mail_nuke_chain(zend_rsrc_list_entry *rsrc)
+void mail_nuke_chain(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	pils **headp = (pils **)rsrc->ptr;
 	pils		*node, *next;

@@ -41,7 +41,7 @@
 static void register_sax_handler_pair(zval *, zval *, zval **);
 
 /* Free processor */
-static void free_processor(zend_rsrc_list_entry *);
+static void free_processor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 /* Scheme handler functions */
 static int  scheme_getall(void *, SablotHandle, const char *, const char *, char **, int *);
@@ -602,7 +602,7 @@ PHP_FUNCTION(xslt_free)
 
 /* {{{ free_processor()
    Free an XSLT processor */
-static void free_processor(zend_rsrc_list_entry *rsrc)
+static void free_processor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_xslt *handle = (php_xslt *) rsrc->ptr;     /* A PHP-XSLT processor */
 	

@@ -74,7 +74,7 @@ PHP_MSHUTDOWN_FUNCTION(xml);
 PHP_RSHUTDOWN_FUNCTION(xml);
 PHP_MINFO_FUNCTION(xml);
 
-static void xml_parser_dtor(zend_rsrc_list_entry *rsrc);
+static void xml_parser_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void xml_set_handler(zval **, zval **);
 inline static unsigned short xml_encode_iso_8859_1(unsigned char);
 inline static char xml_decode_iso_8859_1(unsigned short);
@@ -288,7 +288,7 @@ static zval *_xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encod
 /* {{{ xml_parser_dtor() */
 
 static void
-xml_parser_dtor(zend_rsrc_list_entry *rsrc)
+xml_parser_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	xml_parser *parser = (xml_parser *)rsrc->ptr;
 

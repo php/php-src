@@ -158,7 +158,7 @@ ZEND_GET_MODULE(odbc)
 
 /* {{{ _free_odbc_result
  */
-static void _free_odbc_result(zend_rsrc_list_entry *rsrc)
+static void _free_odbc_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	odbc_result *res = (odbc_result *)rsrc->ptr;
 	int i;
@@ -206,11 +206,9 @@ static void safe_odbc_disconnect( void *handle )
 
 /* {{{ _close_odbc_conn
  */
-static void _close_odbc_conn(zend_rsrc_list_entry *rsrc)
+static void _close_odbc_conn(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	odbc_connection *conn = (odbc_connection *)rsrc->ptr;
-
-	TSRMLS_FETCH();
 
    	safe_odbc_disconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
@@ -220,10 +218,9 @@ static void _close_odbc_conn(zend_rsrc_list_entry *rsrc)
 }
 /* }}} */
 
-static void _close_odbc_pconn(zend_rsrc_list_entry *rsrc)
+static void _close_odbc_pconn(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	odbc_connection *conn = (odbc_connection *)rsrc->ptr;
-	TSRMLS_FETCH();
 	
 	safe_odbc_disconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);

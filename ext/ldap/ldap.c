@@ -136,17 +136,16 @@ ZEND_GET_MODULE(ldap)
 #endif
 
 
-static void _close_ldap_link(zend_rsrc_list_entry *rsrc)
+static void _close_ldap_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	LDAP *ld = (LDAP *)rsrc->ptr;
-	TSRMLS_FETCH();
 
 	ldap_unbind_s(ld);
 	LDAPG(num_links)--;
 }
 
 
-static void _free_ldap_result(zend_rsrc_list_entry *rsrc)
+static void _free_ldap_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	LDAPMessage *result = (LDAPMessage *)rsrc->ptr;
 	ldap_msgfree(result);

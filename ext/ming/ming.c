@@ -305,7 +305,7 @@ PHP_FUNCTION(swfbitmap_init)
   add_property_resource(getThis(), "bitmap", ret);
   zend_list_addref(ret);
 }
-static void destroy_SWFBitmap_resource(zend_rsrc_list_entry *resource)
+static void destroy_SWFBitmap_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
   destroySWFBitmap((SWFBitmap)resource->ptr);
 }
@@ -377,7 +377,7 @@ PHP_FUNCTION(swfbutton_init)
   add_property_resource(getThis(), "button", ret);
   zend_list_addref(ret);
 }
-static void destroy_SWFButton_resource(zend_rsrc_list_entry *resource)
+static void destroy_SWFButton_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
   destroySWFButton((SWFButton)resource->ptr);
 }
@@ -943,7 +943,7 @@ PHP_FUNCTION(swffill_init)
 {
   php_error(E_ERROR, "Instantiating SWFFill won't do any good- use SWFShape::addFill() instead!");
 }
-static void destroy_SWFFill_resource(zend_rsrc_list_entry *resource)
+static void destroy_SWFFill_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
   /* this only destroys the shallow wrapper for SWFFillStyle,
      which SWFShape destroys.  So everything's okay.  I hope. */
@@ -1126,7 +1126,7 @@ PHP_FUNCTION(swffont_init)
   add_property_resource(getThis(), "font", ret);
   zend_list_addref(ret);
 }
-static void destroy_SWFFont_resource(zend_rsrc_list_entry *resource)
+static void destroy_SWFFont_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
   destroySWFBlock((SWFBlock)resource->ptr);
 }
@@ -1209,7 +1209,9 @@ PHP_FUNCTION(swfgradient_init)
   add_property_resource(getThis(), "gradient", ret);
   zend_list_addref(ret);
 }
-static void destroy_SWFGradient_resource(zend_rsrc_list_entry *resource)
+
+
+static void destroy_SWFGradient_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
   destroySWFGradient((SWFGradient)resource->ptr);
 }
@@ -1288,7 +1290,9 @@ PHP_FUNCTION(swfmorph_init)
   add_property_resource(getThis(), "morph", ret);
   zend_list_addref(ret);
 }
-static void destroy_SWFMorph_resource(zend_rsrc_list_entry *resource)
+
+
+static void destroy_SWFMorph_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
   destroySWFMorph((SWFMorph)resource->ptr);
 }
@@ -1385,7 +1389,9 @@ PHP_FUNCTION(swfmovie_init)
   add_property_resource(getThis(), "movie", ret);
   zend_list_addref(ret);
 }
-static void destroy_SWFMovie_resource(zend_rsrc_list_entry *resource)
+
+
+static void destroy_SWFMovie_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
   destroySWFMovie((SWFMovie)resource->ptr);
 }
@@ -1691,7 +1697,9 @@ PHP_FUNCTION(swfshape_init)
   add_property_resource(getThis(), "shape", ret);
   zend_list_addref(ret);
 }
-static void destroy_SWFShape_resource(zend_rsrc_list_entry *resource)
+
+
+static void destroy_SWFShape_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
   destroySWFShape((SWFShape)resource->ptr);
 }
@@ -2268,7 +2276,9 @@ PHP_FUNCTION(swfsprite_init)
   add_property_resource(getThis(), "sprite", ret);
   zend_list_addref(ret);
 }
-static void destroy_SWFSprite_resource(zend_rsrc_list_entry *resource)
+
+
+static void destroy_SWFSprite_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
   destroySWFMovieClip((SWFMovieClip)resource->ptr);
 }
@@ -2412,7 +2422,9 @@ PHP_FUNCTION(swftext_init)
   add_property_resource(getThis(), "text", ret);
   zend_list_addref(ret);
 }
-static void destroy_SWFText_resource(zend_rsrc_list_entry *resource)
+
+
+static void destroy_SWFText_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
   destroySWFText((SWFText)resource->ptr);
 }
@@ -2658,7 +2670,9 @@ PHP_FUNCTION(swftextfield_init)
     SWFTextField_setFlags(field, Z_LVAL_PP(flags));
   }
 }
-static void destroy_SWFTextField_resource(zend_rsrc_list_entry *resource)
+
+
+static void destroy_SWFTextField_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
   destroySWFTextField((SWFTextField)resource->ptr);
 }

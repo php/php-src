@@ -62,7 +62,6 @@ static void php_tick_iterator(void *data, void *arg TSRMLS_DC)
 
 	memcpy(&func, data, sizeof(void(*)(int)));
 	func(*((int *)arg));
-	return SUCCESS;
 }
 
 void php_run_ticks(int count)

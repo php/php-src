@@ -76,9 +76,10 @@ zend_module_entry php_ftp_module_entry = {
 ZEND_GET_MODULE(php_ftp)
 #endif
 
-static void ftp_destructor_ftpbuf(zend_rsrc_list_entry *rsrc)
+static void ftp_destructor_ftpbuf(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	ftpbuf_t *ftp = (ftpbuf_t *)rsrc->ptr;
+
 	ftp_close(ftp);
 }
 

@@ -335,9 +335,10 @@ static char *php_string_from_clsid(const CLSID *clsid)
 	return clsid_str;
 }
 
-static void php_comval_destructor(zend_rsrc_list_entry *rsrc)
+static void php_comval_destructor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	comval *obj = (comval *)rsrc->ptr;
+
 	if(C_ISREFD(obj)) 
 	{
 		C_REFCOUNT(obj) = 1;

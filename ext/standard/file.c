@@ -112,18 +112,18 @@ static int le_stream = FAILURE;
 /* }}} */
 /* {{{ Module-Stuff */
 
-static void _file_popen_dtor(zend_rsrc_list_entry *rsrc)
+static void _file_popen_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	FILE *pipe = (FILE *)rsrc->ptr;
-	TSRMLS_FETCH();
 
 	FG(pclose_ret) = pclose(pipe);
 }
 
 
-static void _file_socket_dtor(zend_rsrc_list_entry *rsrc)
+static void _file_socket_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	int *sock = (int *)rsrc->ptr;
+
 	SOCK_FCLOSE(*sock);
 #if HAVE_SHUTDOWN
 	shutdown(*sock, 0);
@@ -132,9 +132,10 @@ static void _file_socket_dtor(zend_rsrc_list_entry *rsrc)
 }
 
 #if HAVE_PHP_STREAM
-static void _file_stream_dtor(zend_rsrc_list_entry * rsrc)
+static void _file_stream_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-	php_stream * stream = (php_stream*)rsrc->ptr;
+	php_stream *stream = (php_stream*)rsrc->ptr;
+
 	php_stream_close(stream);
 }
 #endif
@@ -144,9 +145,10 @@ PHPAPI int php_file_le_stream(void)
 	return le_stream;
 }
 
-static void _file_fopen_dtor(zend_rsrc_list_entry *rsrc)
+static void _file_fopen_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	FILE *fp = (FILE *)rsrc->ptr;
+
 	fclose(fp);
 }
 
