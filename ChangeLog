@@ -1,3 +1,71 @@
+2002-01-09  jim winstead  <jimw@apache.org>
+
+    * ext/standard/tests/math/pow.phpt
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/math.c
+      ext/standard/php_math.h:
+    Rename finite/isinf/isnan to more standard is_*() names.
+
+    * ext/standard/type.h
+      ext/standard/php_type.h
+      ext/standard/type.c
+      ext/standard/basic_functions.h
+      ext/standard/php_standard.h
+      ext/standard/basic_functions.c
+      main/rfc1867.c:
+    Move type-handling functions into ext/standard/type.c (which had
+    a few otherwise unused functions in it).
+
+2002-01-09  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/XML/Parser.php: * Whitespace.
+
+2002-01-09  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/sockets/sockets.c: - Correct some protos.
+
+2002-01-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/tests/array/count_recursive.phpt
+      ext/standard/array.c: - Fix bug introduced in earlier patch
+
+2002-01-09  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/shmop/README
+      ext/shmop/php_shmop.h
+      ext/shmop/shmop.c: MFH.
+    Bugs 10530,10656,14784
+
+2002-01-09  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pgsql/pgsql.c: - fixed typo in deprecated functionname
+
+2002-01-09  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/shmop/README
+      ext/shmop/config.m4
+      ext/shmop/php_shmop.h
+      ext/shmop/shmop.c:
+    - shmop_open has a new flag for read/write access, 'w'
+    - eliminated a segfault when trying to write to a SHM_RDONLY segment
+    - eliminated a segfault when an invalid flag which starts with 'a' or 'c' is passed
+    - updated creators' email addresses
+    - changed error messages to say shmop_* instead of shm* to correspond with new shmop_* function names
+    Patch by Ilia Alshanetsky (ilia@prohost.org)
+
+2002-01-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/php_domxml.h: - Fixed compile with older libxml.
+
+    * configure.in: - Fixed the creation of pear-get script.
+
+    * acinclude.m4
+      configure.in:
+    Reverted Hartmut's patch as it caused more trouble than it solved.
+
+    * ext/readline/config.m4: whitespace
+
 2002-01-08  Jan Lehnardt  <jan@lehnardt.de>
 
     * pear/HTML/Form.php
