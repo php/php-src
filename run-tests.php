@@ -366,7 +366,7 @@ if (!getenv('NO_INTERACTION')) {
 		
 		/* Ask the user to provide an email address, so that QA team can contact the user */
 		if (!strncasecmp($user_input, 'y', 1) || strlen(trim($user_input)) == 0) {
-			echo "\nPlease enter your email address.\n(You address will be mangled so that it will not go out on any\nmailinglist in plain text): ";
+			echo "\nPlease enter your email address.\n(Your address will be mangled so that it will not go out on any\nmailinglist in plain text): ";
 			flush();
 			$fp = fopen("php://stdin", "r+");
 			$user_email = trim(fgets($fp, 1024));
