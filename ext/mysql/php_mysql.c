@@ -188,6 +188,7 @@ function_entry mysql_functions[] = {
 	PHP_FALIAS(mysql_db_name,		mysql_result,		NULL)
 	PHP_FALIAS(mysql_dbname,		mysql_result,		NULL)
 	PHP_FALIAS(mysql_tablename,		mysql_result,		NULL)
+	PHP_FALIAS(mysql_table_name,	mysql_result,		NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -2246,13 +2247,11 @@ PHP_FUNCTION(mysql_ping)
 	int             id         = -1;
 	php_mysql_conn *mysql;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &mysql_link)==FAILURE) {
-		return;
-	}
-	
-	if (! ZEND_NUM_ARGS()) {
+	if (0 == ZEND_NUM_ARGS()) {
 		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		CHECK_LINK(id);
+	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &mysql_link)==FAILURE) {
+		return;
 	}
 	
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
