@@ -127,9 +127,11 @@ PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers);
 #if SIZEOF_INT == 4
 /* Most 32-bit and 64-bit systems have 32-bit ints */
 typedef unsigned int php_uint32;
+typedef signed int php_int32;
 #elif SIZEOF_LONG == 4
 /* 16-bit systems? */
 typedef unsigned long php_uint32;
+typedef signed int php_int32;
 #else
 #error Need type which holds 32 bits
 #endif
