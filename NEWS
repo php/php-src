@@ -4,8 +4,8 @@ PHP 4                                                                      NEWS
 - ATTENTION!! "make install" will *always* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you did enable the CGI binary to be build, it is
   installed as {PREFIX}/bin/php-cgi.
-- Added pg_fetch_assoc() returns associative array from result resource.
-  (Yasuo)
+- Added pg_fetch_assoc(), pg_fetch_all(), pg_metadate(), pg_convert(), 
+  pg_insert(), pg_select(), pg_update() and pg_delete(). (Yasuo)
 - Fixed bug #17281 (Sanity checks for encoding sessions). (Ilia)
 - Fixed bug #16995 and #19392 (Prevent crash if $HTTP_SESSION_VARS != ARRAY).
   (Ilia)
@@ -166,7 +166,6 @@ PHP 4                                                                      NEWS
   representation instead of echoing it. (Derick)
 - Added mysql_ping(), mysql_real_escape_string(), mysql_character_set_name(), 
   mysql_thread_id(), mysql_stat() and mysql_list_processes(). (Zak, Georg)
-- Added pg_fetch_all() which fetches all rows in a result. (Yasuo)
 - Added safe_mode & open_basedir checks for pg_lo_export(). (Yasuo)
 - Added open_basedir check for pg_lo_import(). (Yasuo)
 - Fixed infinite recursion crash bug in ticks. (Jason)
@@ -273,8 +272,6 @@ PHP 4                                                                      NEWS
 - Added version information to the .dll and .exe files created under Windows.
   (jtate)
 - Added __FUNCTION__ and __CLASS__ constants. (Jani, Zend Engine)
-- Added pg_metadate(), pg_convert(), pg_insert(), pg_select(), pg_update()
-  and pg_delete(). (Yasuo)
 - Added optional 2nd parameter for pg_result_status() to specify return type. 
   (Yasuo)
 - Added "log_errors_max_len" php.ini option which controls maximum length for 
