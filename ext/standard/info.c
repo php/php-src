@@ -220,14 +220,14 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	snprintf (ext_api_no, 9, "%d", ZEND_EXTENSION_API_NO);
 
 	PUTS("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n");
+	PUTS("<head>");
+	php_info_print_style();
+	PUTS("<title>phpinfo()</title></head><body>");
 
 	if (flag & PHP_INFO_GENERAL) {
 		char *zend_version = get_zend_version();
 
 		php_uname = php_get_uname('a');
-		PUTS("<head>");
-		php_info_print_style();
-		PUTS("<title>phpinfo()</title></head><body>");
 
 		php_info_print_box_start(1);
 		if (expose_php) {
