@@ -45,7 +45,7 @@ PHP_NAMED_FUNCTION(php_if_md5)
 
 	md5str[0] = '\0';
 	PHP_MD5Init(&context);
-	PHP_MD5Update(&context, (*arg)->value.str.val, (*arg)->value.str.len);
+	PHP_MD5Update(&context, Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));
 	PHP_MD5Final(digest, &context);
 	for (i = 0, r = md5str; i < 16; i++, r += 2) {
 		sprintf(r, "%02x", digest[i]);

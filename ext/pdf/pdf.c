@@ -2453,10 +2453,10 @@ PHP_FUNCTION(pdf_setpolydash)
 
 	    zend_hash_get_current_data(array, (void **) &keydataptr);
 	    keydata = *keydataptr;
-	    if (keydata->type == IS_DOUBLE) {
-		darray[i] = (float) keydata->value.dval;
-	    } else if (keydata->type == IS_LONG) {
-		darray[i] = (float) keydata->value.lval;
+	    if (Z_TYPE_P(keydata) == IS_DOUBLE) {
+		darray[i] = (float) Z_DVAL_P(keydata);
+	    } else if (Z_TYPE_P(keydata) == IS_LONG) {
+		darray[i] = (float) Z_LVAL_P(keydata);
 	    } else {
 		php_error(E_WARNING,"PDFlib set_polydash: illegal darray value");
 	    }

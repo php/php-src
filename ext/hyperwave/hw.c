@@ -215,7 +215,7 @@ PHP_MINIT_FUNCTION(hw)
 	le_socketp = zend_register_list_destructors_ex(_close_hw_link, NULL, "hyperwave link", module_number);
 	le_psocketp = zend_register_list_destructors_ex(NULL, _close_hw_plink, "hyperwave link persistent", module_number);
 	le_document = zend_register_list_destructors_ex(_free_hw_document, NULL, "hyperwave document", module_number);
-	hw_module_entry.type = type;
+	Z_TYPE(hw_module_entry) = type;
 
 	REGISTER_LONG_CONSTANT("HW_ATTR_LANG", HW_ATTR_LANG, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("HW_ATTR_NR", HW_ATTR_NR, CONST_CS | CONST_PERSISTENT);
@@ -286,7 +286,7 @@ int make_return_objrec(pval **return_value, char **objrecs, int count)
 	add_assoc_long(stat_arr, "FullCollectionHeadNr", fullcollheadnr);
 
 	/* Add the stat array */
-	zend_hash_next_index_insert((*return_value)->value.ht, &stat_arr, sizeof(zval), NULL);
+	zend_hash_next_index_insert(Z_ARRVAL_PP(return_value), &stat_arr, sizeof(zval), NULL);
 
 	return 0;
 }
@@ -318,9 +318,9 @@ int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr
 	}
 
 	if (array_init(*return_value) == FAILURE) {
-		(*return_value)->type = IS_STRING;
-		(*return_value)->value.str.val = empty_string;
-		(*return_value)->value.str.len = 0;
+		Z_TYPE_PP(return_value) = IS_STRING;
+		Z_STRVAL_PP(return_value) = empty_string;
+		Z_STRLEN_PP(return_value) = 0;
 		return -1;
 	}
 
@@ -344,17 +344,17 @@ int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr
 			str++;
 		*str = '\0';
 		str++;
-		if(zend_hash_find(spec_arr->value.ht, attrname, strlen(attrname)+1, (void **) &dataptr) == FAILURE) {
+		if(zend_hash_find(Z_ARRVAL_P(spec_arr), attrname, strlen(attrname)+1, (void **) &dataptr) == FAILURE) {
 			add_assoc_string(*return_value, attrname, str, 1);
 		} else {
 			zval *newarr;
 			data = *dataptr;
-			spec = data->value.lval;
+			spec = Z_LVAL_P(data);
 
-			if(zend_hash_find((*return_value)->value.ht, attrname, strlen(attrname)+1, (void **) &dataptr) == FAILURE) {
+			if(zend_hash_find(Z_ARRVAL_PP(return_value), attrname, strlen(attrname)+1, (void **) &dataptr) == FAILURE) {
 				MAKE_STD_ZVAL(newarr);
 				array_init(newarr);
-				zend_hash_add((*return_value)->value.ht, attrname, strlen(attrname)+1, &newarr, sizeof(zval *), NULL);
+				zend_hash_add(Z_ARRVAL_PP(return_value), attrname, strlen(attrname)+1, &newarr, sizeof(zval *), NULL);
 			} else {
 				newarr = *dataptr;
 			}
@@ -391,8 +391,8 @@ int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr
 	if(NULL == sarr){
 /*
 		spec_arr->refcount--;
-		zend_hash_destroy(spec_arr->value.ht);
-		efree(spec_arr->value.ht);
+		zend_hash_destroy(Z_ARRVAL_P(spec_arr));
+		efree(Z_ARRVAL_P(spec_arr));
 */
 		zval_dtor(spec_arr);
 		efree(spec_arr);
@@ -424,9 +424,9 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 	MAKE_STD_ZVAL(group_arr);
 
 	if (array_init(*return_value) == FAILURE) {
-		(*return_value)->type = IS_STRING;
-		(*return_value)->value.str.val = empty_string;
-		(*return_value)->value.str.len = 0;
+		Z_TYPE_PP(return_value) = IS_STRING;
+		Z_STRVAL_PP(return_value) = empty_string;
+		Z_STRLEN_PP(return_value) = 0;
 		return -1;
 	}
 
@@ -493,7 +493,7 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 
 	/* Add the title array, if we have one */
 	if(hasTitle) {
-		zend_hash_update((*return_value)->value.ht, "Title", 6, &title_arr, sizeof(zval *), NULL);
+		zend_hash_update(Z_ARRVAL_PP(return_value), "Title", 6, &title_arr, sizeof(zval *), NULL);
 
 	} else {
 		efree(title_arr);
@@ -502,7 +502,7 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 
 	if(hasDescription) {
 	/* Add the description array, if we have one */
-		zend_hash_update((*return_value)->value.ht, "Description", 12, &desc_arr, sizeof(zval *), NULL);
+		zend_hash_update(Z_ARRVAL_PP(return_value), "Description", 12, &desc_arr, sizeof(zval *), NULL);
 
 	} else {
 		efree(desc_arr);
@@ -510,7 +510,7 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 
 	if(hasKeyword) {
 	/* Add the keyword array, if we have one */
-		zend_hash_update((*return_value)->value.ht, "Keyword", 8, &keyword_arr, sizeof(zval *), NULL);
+		zend_hash_update(Z_ARRVAL_PP(return_value), "Keyword", 8, &keyword_arr, sizeof(zval *), NULL);
 
 	} else {
 		efree(keyword_arr);
@@ -518,7 +518,7 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 
 	if(hasGroup) {
 	/* Add the Group array, if we have one */
-		zend_hash_update((*return_value)->value.ht, "Group", 6, &group_arr, sizeof(zval *), NULL);
+		zend_hash_update(Z_ARRVAL_PP(return_value), "Group", 6, &group_arr, sizeof(zval *), NULL);
 
 	} else {
 		efree(group_arr);
@@ -571,25 +571,25 @@ static char * make_objrec_from_array(HashTable *lht) {
 /*		if(HASH_KEY_IS_STRING == keytype) { */
 			zend_hash_get_current_data(lht, (void **) &keydataptr);
 			keydata = *keydataptr;
-			switch(keydata->type) {
+			switch(Z_TYPE_P(keydata)) {
 				case IS_STRING:
 					if(HASH_KEY_IS_STRING == keytype)
-						snprintf(str, BUFFERLEN, "%s=%s\n", key, keydata->value.str.val);
+						snprintf(str, BUFFERLEN, "%s=%s\n", key, Z_STRVAL_P(keydata));
 					else
-						snprintf(str, BUFFERLEN, "%s\n", keydata->value.str.val);
+						snprintf(str, BUFFERLEN, "%s\n", Z_STRVAL_P(keydata));
 					break;
 				case IS_LONG:
 					if(HASH_KEY_IS_STRING == keytype)
-						snprintf(str, BUFFERLEN, "%s=0x%lX\n", key, keydata->value.lval);
+						snprintf(str, BUFFERLEN, "%s=0x%lX\n", key, Z_LVAL_P(keydata));
 					else
-						snprintf(str, BUFFERLEN, "0x%lX\n", keydata->value.lval);
+						snprintf(str, BUFFERLEN, "0x%lX\n", Z_LVAL_P(keydata));
 					break;
 				case IS_ARRAY: {
 					int i, len, keylen, count;
 					char *strarr, *ptr, *ptr1;
-					count = zend_hash_num_elements(keydata->value.ht);
+					count = zend_hash_num_elements(Z_ARRVAL_P(keydata));
 					if(count > 0) {
-						strarr = make_objrec_from_array(keydata->value.ht);
+						strarr = make_objrec_from_array(Z_ARRVAL_P(keydata));
 						len = strlen(strarr) - 1;
 						keylen = strlen(key);
 						if(NULL == (ptr = malloc(len + 1 + count*(keylen+1)))) {
@@ -645,9 +645,9 @@ static int * make_ints_from_array(HashTable *lht) {
 		return NULL;
 	for(i=0; i<count; i++) {
 		zend_hash_get_current_data(lht, (void **) &keydata);
-		switch((*keydata)->type) {
+		switch(Z_TYPE_PP(keydata)) {
 			case IS_LONG:
-				objids[i] = (*keydata)->value.lval;
+				objids[i] = Z_LVAL_PP(keydata);
 				break;
 			default:
 				objids[i] = 0;
@@ -673,9 +673,9 @@ static char **make_strs_from_array(HashTable *arrht) {
 	/* Iterate through hash */
 	while(zend_hash_get_current_data(arrht, (void **) &dataptr) == SUCCESS) {
 		data = *dataptr;
-		switch(data->type) {
+		switch(Z_TYPE_P(data)) {
 			case IS_STRING:
-				*ptr = estrdup(data->value.str.val);
+				*ptr = estrdup(Z_STRVAL_P(data));
 /*fprintf(stderr, "carr[] = %s\n", *ptr); */
 				break;
 			default:
@@ -818,7 +818,7 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			ptr->username = strdup("anonymous");
 	
 			new_le.ptr = (void *) ptr;
-			new_le.type = le_psocketp;
+			Z_TYPE(new_le) = le_psocketp;
 
 			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				php_error(E_ERROR, "Could not hash table with connection details");
@@ -834,14 +834,14 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			HwSG(num_persistent)++;
 		} else {
 			/*php_printf("Found already open connection\n"); */
-			if (le->type != le_psocketp) {
+			if (Z_TYPE_P(le) != le_psocketp) {
 				RETURN_FALSE;
 			}
 			ptr = le->ptr;
 		}
 
-		return_value->value.lval = zend_list_insert(ptr, le_psocketp);
-		return_value->type = IS_RESOURCE;
+		Z_LVAL_P(return_value) = zend_list_insert(ptr, le_psocketp);
+		Z_TYPE_P(return_value) = IS_RESOURCE;
 	
 	} else {
 		list_entry *index_ptr, new_index_ptr;
@@ -855,14 +855,14 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			int type, link;
 			void *ptr;
 	
-			if (index_ptr->type != le_index_ptr) {
+			if (Z_TYPE_P(index_ptr) != le_index_ptr) {
 				RETURN_FALSE;
 			}
 			link = (int) index_ptr->ptr;
 			ptr = (hw_connection *) zend_list_find(link, &type);   /* check if the link is still there */
 			if(!ptr || (type!=le_socketp && type!=le_psocketp)) {
-				return_value->value.lval = HwSG(default_link) = link;
-				return_value->type = IS_LONG;
+				Z_LVAL_P(return_value) = HwSG(default_link) = link;
+				Z_TYPE_P(return_value) = IS_LONG;
 				efree(hashed_details);
 				if(username) efree(username);
 				if(password) efree(password);
@@ -912,11 +912,11 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		ptr->hostname = strdup(host);
 		ptr->username = strdup("anonymous");
 	
-		return_value->value.lval = zend_list_insert(ptr, le_socketp);
-		return_value->type = IS_RESOURCE;
+		Z_LVAL_P(return_value) = zend_list_insert(ptr, le_socketp);
+		Z_TYPE_P(return_value) = IS_RESOURCE;
 	
-		new_index_ptr.ptr = (void *) return_value->value.lval;
-		new_index_ptr.type = le_index_ptr;
+		new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
+		Z_TYPE(new_index_ptr) = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_details_length+1, (void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
 			php_error(E_ERROR, "Could not update connection details in hash table");
 			if(host) efree(host);
@@ -928,7 +928,7 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	efree(hashed_details);
 	if(host) efree(host);
-	HwSG(default_link)=return_value->value.lval;
+	HwSG(default_link)=Z_LVAL_P(return_value);
 
 	/* At this point we have a working connection. If userdata was given
 	   we are also indentified.
@@ -1016,9 +1016,9 @@ PHP_FUNCTION(hw_info)
 		php_printf("%s\n", str);
 		efree(str);
 		*/
-		return_value->value.str.len = strlen(str);
-		return_value->value.str.val = str;
-		return_value->type = IS_STRING;
+		Z_STRLEN_P(return_value) = strlen(str);
+		Z_STRVAL_P(return_value) = str;
+		Z_TYPE_P(return_value) = IS_STRING;
 		return;
 		}
 	RETURN_FALSE;
@@ -1335,8 +1335,8 @@ PHP_FUNCTION(hw_root)
 		WRONG_PARAM_COUNT;
 	}
 
-	return_value->value.lval = 0;
-	return_value->type = IS_LONG;
+	Z_LVAL_P(return_value) = 0;
+	Z_TYPE_P(return_value) = IS_LONG;
 }
 /* }}} */
 
@@ -1379,9 +1379,9 @@ PHP_FUNCTION(hw_stat)
 	if(object == NULL)
 		RETURN_FALSE;
 
-	return_value->value.str.val = object;
-	return_value->value.str.len = strlen(object);
-	return_value->type = IS_STRING;
+	Z_STRVAL_P(return_value) = object;
+	Z_STRLEN_P(return_value) = strlen(object);
+	Z_TYPE_P(return_value) = IS_STRING;
 }
 /* }}} */
 
@@ -1492,7 +1492,7 @@ php_printf("%s\n", ptr);
 		add_assoc_string(user_arr, "TotalTime", name, 1);
 
 		/* Add the user array */
-		zend_hash_index_update(return_value->value.ht, i++, &user_arr, sizeof(pval), NULL);
+		zend_hash_index_update(Z_ARRVAL_P(return_value), i++, &user_arr, sizeof(pval), NULL);
 
 		attrname = php_strtok_r(NULL, "\n", &strtok_buf);
 	}
@@ -1532,9 +1532,9 @@ PHP_FUNCTION(hw_dummy)
 		RETURN_FALSE;
 
 php_printf("%s", object);
-	return_value->value.str.val = object;
-	return_value->value.str.len = strlen(object);
-	return_value->type = IS_STRING;
+	Z_STRVAL_P(return_value) = object;
+	Z_STRLEN_P(return_value) = strlen(object);
+	Z_TYPE_P(return_value) = IS_STRING;
 	}
 }
 /* }}} */
@@ -1592,12 +1592,12 @@ PHP_FUNCTION(hw_getobject)
 		zend_hash_internal_pointer_reset(lht);
 		for(i=0; i<count; i++) {
 			zend_hash_get_current_data(lht, (void **) &keydata);
-			switch((*keydata)->type) {
+			switch(Z_TYPE_PP(keydata)) {
 				case IS_LONG:
-					ids[i] = (*keydata)->value.lval;
+					ids[i] = Z_LVAL_PP(keydata);
 					break;
 				default:
-					ids[i] = (*keydata)->value.lval;
+					ids[i] = Z_LVAL_PP(keydata);
 			}
 			zend_hash_move_forward(lht);
 		}
@@ -1793,12 +1793,12 @@ PHP_FUNCTION(hw_changeobject)
 		zend_hash_get_current_key(newobjarr, &key, &ind, 0);
 		zend_hash_get_current_data(newobjarr, (void *) &dataptr);
 		data = *dataptr;
-		switch(data->type) {
+		switch(Z_TYPE_P(data)) {
 			case IS_STRING:
-				if(strlen(data->value.str.val) == 0)
+				if(strlen(Z_STRVAL_P(data)) == 0)
 					snprintf(newattribute, BUFFERLEN, "rem %s", key);
 				else
-					snprintf(newattribute, BUFFERLEN, "add %s=%s", key, data->value.str.val);
+					snprintf(newattribute, BUFFERLEN, "add %s=%s", key, Z_STRVAL_P(data));
 				noinsert = 0;
 				break;
 			default:
@@ -1893,10 +1893,10 @@ PHP_FUNCTION(hw_modifyobject)
 			zend_hash_get_current_key(addobjarr, &key, &ind, 0);
 			zend_hash_get_current_data(addobjarr, (void *) &dataptr);
 			data = *dataptr;
-			switch(data->type) {
+			switch(Z_TYPE_P(data)) {
 				case IS_STRING:
-					if(strlen(data->value.str.val) > 0) {
-						snprintf(addattribute, BUFFERLEN, "add %s=%s", key, data->value.str.val);
+					if(strlen(Z_STRVAL_P(data)) > 0) {
+						snprintf(addattribute, BUFFERLEN, "add %s=%s", key, Z_STRVAL_P(data));
 /* fprintf(stderr, "add: %s\n", addattribute); */
 						noinsert = 0;
 					}
@@ -1904,9 +1904,9 @@ PHP_FUNCTION(hw_modifyobject)
 				case IS_ARRAY: {
 					int i, len, keylen, count;
 					char *strarr, *ptr, *ptr1;
-					count = zend_hash_num_elements(data->value.ht);
+					count = zend_hash_num_elements(Z_ARRVAL_P(data));
 					if(count > 0) {
-						strarr = make_objrec_from_array(data->value.ht);
+						strarr = make_objrec_from_array(Z_ARRVAL_P(data));
 						len = strlen(strarr) - 1;
 						keylen = strlen(key);
 						if(NULL == (ptr = malloc(len + 1 + count*(keylen+1+4)))) {
@@ -1961,10 +1961,10 @@ PHP_FUNCTION(hw_modifyobject)
 			zend_hash_get_current_key(remobjarr, &key, &ind, 0);
 			zend_hash_get_current_data(remobjarr, (void *) &dataptr);
 			data = *dataptr;
-			switch(data->type) {
+			switch(Z_TYPE_P(data)) {
 				case IS_STRING:
-					if(strlen(data->value.str.val) > 0) {
-						snprintf(remattribute, BUFFERLEN, "rem %s=%s", key, data->value.str.val);
+					if(strlen(Z_STRVAL_P(data)) > 0) {
+						snprintf(remattribute, BUFFERLEN, "rem %s=%s", key, Z_STRVAL_P(data));
 						noinsert = 0;
 					} else {
 						snprintf(remattribute, BUFFERLEN, "rem %s", key);
@@ -1974,9 +1974,9 @@ PHP_FUNCTION(hw_modifyobject)
 				case IS_ARRAY: {
 					int i, len, keylen, count;
 					char *strarr, *ptr, *ptr1;
-					count = zend_hash_num_elements(data->value.ht);
+					count = zend_hash_num_elements(Z_ARRVAL_P(data));
 					if(count > 0) {
-						strarr = make_objrec_from_array(data->value.ht);
+						strarr = make_objrec_from_array(Z_ARRVAL_P(data));
 						len = strlen(strarr) - 1;
 						keylen = strlen(key);
 						if(NULL == (ptr = malloc(len + 1 + count*(keylen+1+4)))) {
@@ -2131,16 +2131,16 @@ void php_hw_mvcp(INTERNAL_FUNCTION_PARAMETERS, int mvcp) {
 		zval *keydata, **keydataptr;
 		zend_hash_get_current_data(src_arr, (void **) &keydataptr);
 		keydata = *keydataptr;
-		if(keydata->type == IS_LONG) {
-			if(0 != (ptr->lasterror = send_getobject(ptr->socket, keydata->value.lval, &objrec))) {
+		if(Z_TYPE_P(keydata) == IS_LONG) {
+			if(0 != (ptr->lasterror = send_getobject(ptr->socket, Z_LVAL_P(keydata), &objrec))) {
 				efree(collIDs);
 				efree(docIDs);
 				RETURN_FALSE;
 			}
 			if(0 == fnAttributeCompare(objrec, "DocumentType", "collection"))
-				collIDs[collIDcount++] = keydata->value.lval;
+				collIDs[collIDcount++] = Z_LVAL_P(keydata);
 			else
-				docIDs[docIDcount++] = keydata->value.lval;
+				docIDs[docIDcount++] = Z_LVAL_P(keydata);
 			efree(objrec);
 		}
 		zend_hash_move_forward(src_arr);
@@ -2238,8 +2238,8 @@ PHP_FUNCTION(hw_gettext)
 	doc->attributes = attributes;
 	doc->bodytag = bodytag;
 	doc->size = count;
-	return_value->value.lval = zend_list_insert(doc, le_document);
-	return_value->type = IS_LONG;
+	Z_LVAL_P(return_value) = zend_list_insert(doc, le_document);
+	Z_TYPE_P(return_value) = IS_LONG;
 	}
 }
 /* }}} */
@@ -2342,8 +2342,8 @@ PHP_FUNCTION(hw_getcgi)
 	doc->attributes = attributes;
 	doc->bodytag = NULL;
 	doc->size = count;
-	return_value->value.lval = zend_list_insert(doc, le_document);
-	return_value->type = IS_LONG;
+	Z_LVAL_P(return_value) = zend_list_insert(doc, le_document);
+	Z_TYPE_P(return_value) = IS_LONG;
 	}
 }
 #undef BUFFERLEN
@@ -2384,8 +2384,8 @@ PHP_FUNCTION(hw_getremote)
 	doc->attributes = attributes;
 	doc->bodytag = NULL;
 	doc->size = count;
-	return_value->value.lval = zend_list_insert(doc, le_document);
-	return_value->type = IS_LONG;
+	Z_LVAL_P(return_value) = zend_list_insert(doc, le_document);
+	Z_TYPE_P(return_value) = IS_LONG;
 	}
 }
 /* }}} */
@@ -2473,8 +2473,8 @@ php_printf("count = %d, remainder = <HR>%s---<HR>", count, remainder);
 		doc->attributes = strdup(objrec);
 		doc->bodytag = NULL;
 		doc->size = strlen(doc->data);
-		return_value->value.lval = zend_list_insert(doc, le_document);
-		return_value->type = IS_LONG;
+		Z_LVAL_P(return_value) = zend_list_insert(doc, le_document);
+		Z_TYPE_P(return_value) = IS_LONG;
 	} else {
 		if (array_init(return_value) == FAILURE) {
 			efree(offsets);
@@ -2581,19 +2581,19 @@ PHP_FUNCTION(hw_pipedocument)
 			zend_hash_get_current_key(prefixarray, &key, &ind, 0);
 			zend_hash_get_current_data(prefixarray, (void *) &dataptr);
 			data = *dataptr;
-			if (data->type != IS_STRING) {
+			if (Z_TYPE_P(data) != IS_STRING) {
 				php_error(E_WARNING, "%s must be a String", key);
 				RETURN_FALSE;
 			} else if ( strcmp(key, "HW_DEFAULT_LINK") == 0 ) {
-				urlprefix[HW_DEFAULT_LINK] = data->value.str.val;
+				urlprefix[HW_DEFAULT_LINK] = Z_STRVAL_P(data);
 			} else if ( strcmp(key, "HW_IMAGE_LINK") == 0 ) {
-				urlprefix[HW_IMAGE_LINK] = data->value.str.val;
+				urlprefix[HW_IMAGE_LINK] = Z_STRVAL_P(data);
 			} else if ( strcmp(key, "HW_BACKGROUND_LINK") == 0 ) {
-				urlprefix[HW_BACKGROUND_LINK] = data->value.str.val;
+				urlprefix[HW_BACKGROUND_LINK] = Z_STRVAL_P(data);
 			} else if ( strcmp(key, "HW_INTAG_LINK") == 0 ) {
-				urlprefix[HW_INTAG_LINK] = data->value.str.val;
+				urlprefix[HW_INTAG_LINK] = Z_STRVAL_P(data);
 			} else if ( strcmp(key, "HW_APPLET_LINK") == 0 ) {
-				urlprefix[HW_APPLET_LINK] = data->value.str.val;
+				urlprefix[HW_APPLET_LINK] = Z_STRVAL_P(data);
 			} else {
 				php_error(E_WARNING, "%s is not a valid urlprefix", key);
 				RETURN_FALSE;
@@ -2633,8 +2633,8 @@ PHP_FUNCTION(hw_pipedocument)
 	doc->bodytag = bodytag;
 	doc->size = count;
 /* fprintf(stderr, "size = %d\n", count); */
-	return_value->value.lval = zend_list_insert(doc, le_document);
-	return_value->type = IS_LONG;
+	Z_LVAL_P(return_value) = zend_list_insert(doc, le_document);
+	Z_TYPE_P(return_value) = IS_LONG;
 	}
 }
 /* }}} */
@@ -2702,8 +2702,8 @@ PHP_FUNCTION(hw_oldpipedocument)
 	doc->bodytag = bodytag;
 	doc->size = count;
 /* fprintf(stderr, "size = %d\n", count); */
-	return_value->value.lval = zend_list_insert(doc, le_document);
-	return_value->type = IS_LONG;
+	Z_LVAL_P(return_value) = zend_list_insert(doc, le_document);
+	Z_TYPE_P(return_value) = IS_LONG;
 	}
 }
 /* }}} */
@@ -2768,8 +2768,8 @@ PHP_FUNCTION(hw_pipecgi)
 	doc->attributes = attributes;
 	doc->bodytag = NULL;
 	doc->size = count;
-	return_value->value.lval = zend_list_insert(doc, le_document);
-	return_value->type = IS_LONG;
+	Z_LVAL_P(return_value) = zend_list_insert(doc, le_document);
+	Z_TYPE_P(return_value) = IS_LONG;
 	}
 }
 #undef BUFFERLEN
@@ -2855,8 +2855,8 @@ PHP_FUNCTION(hw_new_document)
 	doc->attributes = strdup(arg1->value.str.val);
 	doc->bodytag = NULL;
 	doc->size = arg3->value.lval;
-	return_value->value.lval = zend_list_insert(doc, le_document);
-	return_value->type = IS_LONG;
+	Z_LVAL_P(return_value) = zend_list_insert(doc, le_document);
+	Z_TYPE_P(return_value) = IS_LONG;
 }
 /* }}} */
 
@@ -2958,8 +2958,8 @@ PHP_FUNCTION(hw_new_document_from_file)
 	doc->attributes = strdup((*arg1)->value.str.val);
 	doc->bodytag = NULL;
 	doc->size = bcount;
-	return_value->value.lval = zend_list_insert(doc, le_document);
-	return_value->type = IS_LONG;
+	Z_LVAL_P(return_value) = zend_list_insert(doc, le_document);
+	Z_TYPE_P(return_value) = IS_LONG;
 }
 /* }}} */
 #undef BUFSIZE
@@ -4013,9 +4013,9 @@ PHP_FUNCTION(hw_getusername)
 		RETURN_FALSE;
 	}
 
-	return_value->value.str.val = estrdup(ptr->username);
-	return_value->value.str.len = strlen(ptr->username);
-	return_value->type = IS_STRING;
+	Z_STRVAL_P(return_value) = estrdup(ptr->username);
+	Z_STRLEN_P(return_value) = strlen(ptr->username);
+	Z_TYPE_P(return_value) = IS_STRING;
 }
 /* }}} */
 
@@ -4054,9 +4054,9 @@ PHP_FUNCTION(hw_identify)
 		RETURN_FALSE;
 	}
 
-	return_value->value.str.val = userdata;
-	return_value->value.str.len = strlen(userdata);
-	return_value->type = IS_STRING;
+	Z_STRVAL_P(return_value) = userdata;
+	Z_STRLEN_P(return_value) = strlen(userdata);
+	Z_TYPE_P(return_value) = IS_STRING;
 	if(ptr->username) free(ptr->username);
 	str = userdata;
 	while((*str != 0) && (*str != ' '))
@@ -4424,19 +4424,19 @@ PHP_FUNCTION(hw_insertanchors)
 			zend_hash_get_current_key(prefixarray, &key, &ind, 0);
 			zend_hash_get_current_data(prefixarray, (void *) &dataptr);
 			data = *dataptr;
-			if (data->type != IS_STRING) {
+			if (Z_TYPE_P(data) != IS_STRING) {
 				php_error(E_WARNING, "%s must be a String", key);
 				RETURN_FALSE;
 			} else if ( strcmp(key, "HW_DEFAULT_LINK") == 0 ) {
-				urlprefix[HW_DEFAULT_LINK] = data->value.str.val;
+				urlprefix[HW_DEFAULT_LINK] = Z_STRVAL_P(data);
 			} else if ( strcmp(key, "HW_IMAGE_LINK") == 0 ) {
-				urlprefix[HW_IMAGE_LINK] = data->value.str.val;
+				urlprefix[HW_IMAGE_LINK] = Z_STRVAL_P(data);
 			} else if ( strcmp(key, "HW_BACKGROUND_LINK") == 0 ) {
-				urlprefix[HW_BACKGROUND_LINK] = data->value.str.val;
+				urlprefix[HW_BACKGROUND_LINK] = Z_STRVAL_P(data);
 			} else if ( strcmp(key, "HW_INTAG_LINK") == 0 ) {
-				urlprefix[HW_INTAG_LINK] = data->value.str.val;
+				urlprefix[HW_INTAG_LINK] = Z_STRVAL_P(data);
 			} else if ( strcmp(key, "HW_APPLET_LINK") == 0 ) {
-				urlprefix[HW_APPLET_LINK] = data->value.str.val;
+				urlprefix[HW_APPLET_LINK] = Z_STRVAL_P(data);
 			} else {
 				php_error(E_WARNING, "%s is not a valid urlprefix", key);
 				RETURN_FALSE;

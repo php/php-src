@@ -483,9 +483,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 
 		ALLOC_ZVAL(tmp);
 		INIT_PZVAL(tmp);
-		tmp->value.str.val = (char *) estrndup(buffer, buffer_len);
-		tmp->value.str.len = buffer_len;
-		tmp->type = IS_STRING;
+		Z_STRVAL_P(tmp) = (char *) estrndup(buffer, buffer_len);
+		Z_STRLEN_P(tmp) = buffer_len;
+		Z_TYPE_P(tmp) = IS_STRING;
 		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(pval *), NULL);
 	}
 }
@@ -1206,14 +1206,14 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 			}
 			/* auto-type */
 			ALLOC_ZVAL(tmp);
-			tmp->type = IS_STRING;
-			tmp->value.str.len = strlen(ss);
-			tmp->value.str.val = estrndup(ss, tmp->value.str.len);
+			Z_TYPE_P(tmp) = IS_STRING;
+			Z_STRLEN_P(tmp) = strlen(ss);
+			Z_STRVAL_P(tmp) = estrndup(ss, Z_STRLEN_P(tmp));
 			INIT_PZVAL(tmp);
 			count++;
-			if (zend_hash_next_index_insert(arr->value.ht, &tmp, sizeof(pval *), NULL)==FAILURE) {
-				if (tmp->type == IS_STRING) {
-					efree(tmp->value.str.val);
+			if (zend_hash_next_index_insert(Z_ARRVAL_P(arr), &tmp, sizeof(pval *), NULL)==FAILURE) {
+				if (Z_TYPE_P(tmp) == IS_STRING) {
+					efree(Z_STRVAL_P(tmp));
 				}
 			}
 			if (space) {
@@ -1227,8 +1227,8 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 
 	/* prepare argc */
 	ALLOC_ZVAL(argc);
-	argc->value.lval = count;
-	argc->type = IS_LONG;
+	Z_LVAL_P(argc) = count;
+	Z_TYPE_P(argc) = IS_LONG;
 	INIT_PZVAL(argc);
 
 	if (PG(register_globals)) {
@@ -1238,8 +1238,8 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 		zend_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
 	}
 
-	zend_hash_update(track_vars_array->value.ht, "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
-	zend_hash_update(track_vars_array->value.ht, "argc", sizeof("argc"), &argc, sizeof(pval *), NULL);
+	zend_hash_update(Z_ARRVAL_P(track_vars_array), "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
+	zend_hash_update(Z_ARRVAL_P(track_vars_array), "argc", sizeof("argc"), &argc, sizeof(pval *), NULL);
 }
 /* }}} */
 
@@ -1283,7 +1283,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 
 		PG(during_request_startup) = 0;
 
-		if (primary_file->type == ZEND_HANDLE_FILENAME 
+		if (Z_TYPE_P(primary_file) == ZEND_HANDLE_FILENAME 
 				&& primary_file->filename) {
 			VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1);
 			VCWD_CHDIR_FILE(primary_file->filename);
@@ -1293,7 +1293,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 			prepend_file.filename = PG(auto_prepend_file);
 			prepend_file.opened_path = NULL;
 			prepend_file.free_filename = 0;
-			prepend_file.type = ZEND_HANDLE_FILENAME;
+			Z_TYPE(prepend_file) = ZEND_HANDLE_FILENAME;
 			prepend_file_p = &prepend_file;
 		} else {
 			prepend_file_p = NULL;
@@ -1302,7 +1302,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 			append_file.filename = PG(auto_append_file);
 			append_file.opened_path = NULL;
 			append_file.free_filename = 0;
-			append_file.type = ZEND_HANDLE_FILENAME;
+			Z_TYPE(append_file) = ZEND_HANDLE_FILENAME;
 			append_file_p = &append_file;
 		} else {
 			append_file_p = NULL;

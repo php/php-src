@@ -194,7 +194,7 @@ PHP_FUNCTION(iptcembed)
         convert_to_string_ex(iptcdata);
         convert_to_string_ex(jpeg_file);
         convert_to_long_ex(spool_flag);
-		spool = (*spool_flag)->value.lval;
+		spool = Z_LVAL_PP(spool_flag);
         break;
 
     case 2:
@@ -210,16 +210,16 @@ PHP_FUNCTION(iptcembed)
         break;
     }
 
-    if (php_check_open_basedir((*jpeg_file)->value.str.val TSRMLS_CC)) {
+    if (php_check_open_basedir(Z_STRVAL_PP(jpeg_file) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-    if ((fp = VCWD_FOPEN((*jpeg_file)->value.str.val, "rb")) == 0) {
-        php_error(E_WARNING, "Unable to open %s", (*jpeg_file)->value.str.val);
+    if ((fp = VCWD_FOPEN(Z_STRVAL_PP(jpeg_file), "rb")) == 0) {
+        php_error(E_WARNING, "Unable to open %s", Z_STRVAL_PP(jpeg_file));
         RETURN_FALSE;
     }
 
-	len = (*iptcdata)->value.str.len;
+	len = Z_STRLEN_PP(iptcdata);
 
 	if (spool < 2) {
 		fstat(fileno(fp), &sb);
@@ -275,7 +275,7 @@ PHP_FUNCTION(iptcembed)
 				php_iptc_put1(fp, spool, (unsigned char)(len&0xff), poi?&poi:0 TSRMLS_CC);
 					
 				for (inx = 0; inx < len; inx++)
-					php_iptc_put1(fp, spool, (*iptcdata)->value.str.val[inx], poi?&poi:0 TSRMLS_CC);
+					php_iptc_put1(fp, spool, Z_STRVAL_PP(iptcdata)[inx], poi?&poi:0 TSRMLS_CC);
 				break;
 
 			case M_SOS:								
@@ -316,8 +316,8 @@ PHP_FUNCTION(iptcparse)
 	convert_to_string_ex(str);
 
 	inx = 0;
-	length = (*str)->value.str.len;
-	buffer = (*str)->value.str.val;
+	length = Z_STRLEN_PP(str);
+	buffer = Z_STRVAL_PP(str);
 
 	inheader = 0; /* have we already found the IPTC-Header??? */
 	tagsfound = 0; /* number of tags already found */
@@ -362,7 +362,7 @@ PHP_FUNCTION(iptcparse)
 	  		}
 		}
 
-		if (zend_hash_find(return_value->value.ht, key, strlen(key) + 1, (void **) &element) == FAILURE) {
+		if (zend_hash_find(Z_ARRVAL_P(return_value), key, strlen(key) + 1, (void **) &element) == FAILURE) {
 			ALLOC_ZVAL(values);
 			INIT_PZVAL(values);
 			if (array_init(values) == FAILURE) {
@@ -370,7 +370,7 @@ PHP_FUNCTION(iptcparse)
 				RETURN_FALSE;
 			}
 			
-			zend_hash_update(return_value->value.ht, key, strlen(key)+1, (void *) &values, sizeof(pval*), (void **) &element);
+			zend_hash_update(Z_ARRVAL_P(return_value), key, strlen(key)+1, (void *) &values, sizeof(pval*), (void **) &element);
 		} 
 			
 		add_next_index_stringl(*element, buffer+inx, len, 1);

@@ -95,16 +95,16 @@ PHP_MINFO_FUNCTION(ctype)
  */
 static int ctype(int (*iswhat)(int), zval **c) 
 {
-	switch ((*c)->type) {
+	switch (Z_TYPE_PP(c)) {
 	case IS_LONG:
-		return iswhat((*c)->value.lval);
+		return iswhat(Z_LVAL_PP(c));
 	case IS_STRING:
 		{
 			char *p;
 			int n, len;
 			convert_to_string_ex(c);
-			p=(*c)->value.str.val;
-			len = (*c)->value.str.len;
+			p=Z_STRVAL_PP(c);
+			len = Z_STRLEN_PP(c);
 			for(n=0;n<len;n++) {
 				if(!iswhat(*p++)) return 0;
 			}

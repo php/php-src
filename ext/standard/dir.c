@@ -148,13 +148,13 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 	}
 	convert_to_string_ex(arg);
 
-	if (php_check_open_basedir((*arg)->value.str.val TSRMLS_CC)) {
+	if (php_check_open_basedir(Z_STRVAL_PP(arg) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	
 	dirp = emalloc(sizeof(php_dir));
 
-	dirp->dir = VCWD_OPENDIR((*arg)->value.str.val);
+	dirp->dir = VCWD_OPENDIR(Z_STRVAL_PP(arg));
 
 #ifdef PHP_WIN32
 	if (!dirp->dir || dirp->dir->finished) {
@@ -175,7 +175,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 
 	if (createobject) {
 		object_init_ex(return_value, dir_class_entry_ptr);
-		add_property_stringl(return_value, "path", (*arg)->value.str.val, (*arg)->value.str.len, 1);
+		add_property_stringl(return_value, "path", Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), 1);
 		add_property_resource(return_value, "handle", dirp->id);
 		zend_list_addref(dirp->id);
 	} else {
@@ -235,7 +235,7 @@ PHP_FUNCTION(chroot)
 	}
 	convert_to_string_ex(arg);
 
-	ret = chroot((*arg)->value.str.val);
+	ret = chroot(Z_STRVAL_PP(arg));
 	
 	if (ret != 0) {
 		php_error(E_WARNING, "chroot: %s (errno %d)", strerror(errno), errno);
@@ -268,10 +268,10 @@ PHP_FUNCTION(chdir)
 	}
 	convert_to_string_ex(arg);
 
-	if (PG(safe_mode) && !php_checkuid((*arg)->value.str.val, NULL, CHECKUID_ALLOW_ONLY_FILE)) {
+	if (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(arg), NULL, CHECKUID_ALLOW_ONLY_FILE)) {
 		RETURN_FALSE;
 	}
-	ret = VCWD_CHDIR((*arg)->value.str.val);
+	ret = VCWD_CHDIR(Z_STRVAL_PP(arg));
 	
 	if (ret != 0) {
 		php_error(E_WARNING, "ChDir: %s (errno %d)", strerror(errno), errno);

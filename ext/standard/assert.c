@@ -143,7 +143,7 @@ PHP_FUNCTION(assert)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((*assertion)->type == IS_STRING) {
+	if (Z_TYPE_PP(assertion) == IS_STRING) {
 		zval retval;
 		int old_error_reporting = 0; /* shut up gcc! */
 
@@ -233,7 +233,7 @@ PHP_FUNCTION(assert_options)
 
 	convert_to_long_ex(what);
 
-	switch ((*what)->value.lval) {
+	switch (Z_LVAL_PP(what)) {
 	case ASSERT_ACTIVE:
 		oldint = ASSERTG(active);
 		if (ac == 2) {

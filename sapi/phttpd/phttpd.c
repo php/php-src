@@ -259,7 +259,7 @@ int php_doit(TSRMLS_D TSRMLS_DC)
         return -1;
     }
 
-    file_handle.type = ZEND_HANDLE_FILENAME;
+    Z_TYPE(file_handle) = ZEND_HANDLE_FILENAME;
     file_handle.filename = SG(request_info).path_translated;
     file_handle.free_filename = 0;
 

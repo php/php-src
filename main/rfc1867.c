@@ -446,8 +446,8 @@ static void php_mime_split(char *buf, int cnt, char *boundary, int len, zval *ar
 				{
 					zval file_size;
 
-					file_size.value.lval = bytes;
-					file_size.type = IS_LONG;
+					Z_LVAL(file_size) = bytes;
+					Z_TYPE(file_size) = IS_LONG;
 
 					/* Add $foo_size */
 					if(is_arr_upload) {

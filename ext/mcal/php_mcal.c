@@ -202,10 +202,10 @@ static int add_assoc_object(zval *arg, char *key, zval *tmp)
 {
 	HashTable *symtable;
 	
-	if (arg->type == IS_OBJECT) {
+	if (Z_TYPE_P(arg) == IS_OBJECT) {
 		symtable = Z_OBJPROP_P(arg);
 	} else {
-		symtable = arg->value.ht;
+		symtable = Z_ARRVAL_P(arg);
 	}
 	return zend_hash_update(symtable, key, strlen(key)+1, (void *)&tmp, sizeof(zval *), NULL);
 }
@@ -230,14 +230,14 @@ static void php_mcal_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	mcal_password = estrndup(Z_STRVAL_PP(passwd), Z_STRLEN_PP(passwd));
 	if (myargc == 4) {
 		convert_to_long_ex(options);
-		flags = (*options)->value.lval;
+		flags = Z_LVAL_PP(options);
 	}
-	mcal_stream = cal_open(NULL, (*calendar)->value.str.val, 0);
+	mcal_stream = cal_open(NULL, Z_STRVAL_PP(calendar), 0);
 	efree(mcal_user);
 	efree(mcal_password);
 	
 	if (!mcal_stream) {
-		php_error(E_WARNING, "Couldn't open stream %s\n", (*calendar)->value.str.val);
+		php_error(E_WARNING, "Couldn't open stream %s\n", Z_STRVAL_PP(calendar));
 		RETURN_FALSE;
 	}
 	
@@ -344,7 +344,7 @@ PHP_FUNCTION(mcal_close)
 	}
 	
 	convert_to_long_ex(streamind);
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -352,7 +352,7 @@ PHP_FUNCTION(mcal_close)
 	}
 	if (myargcount==2) {
 		convert_to_long_ex(options);
-		flags = (*options)->value.lval;
+		flags = Z_LVAL_PP(options);
 		mcal_le_struct->flags = flags;
 	}
 	zend_list_delete(ind);
@@ -392,7 +392,7 @@ PHP_FUNCTION(mcal_reopen)
     }
 	
 	convert_to_long_ex(streamind);
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -402,7 +402,7 @@ PHP_FUNCTION(mcal_reopen)
 	convert_to_string_ex(calendar);
 	if (myargc == 3) {
 		convert_to_long_ex(options);
-		flags = (*options)->value.lval;
+		flags = Z_LVAL_PP(options);
 		mcal_le_struct->flags = cl_flags;	
 	}
 	if (mcal_stream == NULL) {
@@ -426,7 +426,7 @@ PHP_FUNCTION(mcal_expunge)
 	}
 	
 	convert_to_long_ex(streamind);
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
@@ -455,7 +455,7 @@ PHP_FUNCTION(mcal_fetch_event)
 	}
 	convert_to_long_ex(streamind);
 	convert_to_long_ex(eventid);
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -464,7 +464,7 @@ PHP_FUNCTION(mcal_fetch_event)
 	if (myargcount == 3) {
 		convert_to_long_ex(options);
 	}
-	cal_fetch(mcal_le_struct->mcal_stream, (*eventid)->value.lval, &myevent);
+	cal_fetch(mcal_le_struct->mcal_stream, Z_LVAL_PP(eventid), &myevent);
 	if (myevent == NULL) {
 	    RETURN_FALSE;
 	}
@@ -487,7 +487,7 @@ PHP_FUNCTION(mcal_fetch_current_stream_event)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(streamind);
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -516,7 +516,7 @@ PHP_FUNCTION(mcal_list_events)
 	}
 	
 	convert_to_long_ex(streamind);
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -535,8 +535,8 @@ PHP_FUNCTION(mcal_list_events)
 		convert_to_long_ex(endyear);
 		convert_to_long_ex(endmonth);
 		convert_to_long_ex(endday);
-		dt_setdate(&startdate, (*startyear)->value.lval, (*startmonth)->value.lval, (*startday)->value.lval);
-		dt_setdate(&enddate, (*endyear)->value.lval, (*endmonth)->value.lval, (*endday)->value.lval);
+		dt_setdate(&startdate, Z_LVAL_PP(startyear), Z_LVAL_PP(startmonth), Z_LVAL_PP(startday));
+		dt_setdate(&enddate, Z_LVAL_PP(endyear), Z_LVAL_PP(endmonth), Z_LVAL_PP(endday));
 	}
 	else {
 		startdate = mcal_le_struct->event->start;
@@ -569,14 +569,14 @@ PHP_FUNCTION(mcal_create_calendar)
 	
 	convert_to_long_ex(streamind);
 	convert_to_string_ex(calendar);
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	/*
-	  if (mcal_create(mcal_le_struct->mcal_stream,calendar->value.str.val)) 
+	  if (mcal_create(mcal_le_struct->mcal_stream,Z_STRVAL_P(calendar))) 
 	  {
 	  RETURN_TRUE;
 	  }
@@ -605,7 +605,7 @@ PHP_FUNCTION(mcal_rename_calendar)
 	convert_to_string_ex(src_calendar);
 	convert_to_string_ex(dest_calendar);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -613,7 +613,7 @@ PHP_FUNCTION(mcal_rename_calendar)
 	}
 	
 	/*
-	  if(mcal_rename(mcal_le_struct->mcal_stream,src_calendar->value.str.val,dest_calendar->value.str.val)) {RETURN_TRUE;}
+	  if(mcal_rename(mcal_le_struct->mcal_stream,Z_STRVAL_P(src_calendar),Z_STRVAL_P(dest_calendar))) {RETURN_TRUE;}
 	  else {RETURN_FALSE; }
 	*/
 	RETURN_TRUE;
@@ -635,7 +635,7 @@ PHP_FUNCTION(mcal_list_alarms)
 	}
 	
 	convert_to_long_ex(streamind);
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -653,8 +653,8 @@ PHP_FUNCTION(mcal_list_alarms)
 	    convert_to_long_ex(hour);
 	    convert_to_long_ex(min);
 	    convert_to_long_ex(sec);
-	    dt_setdate(&mydate, (*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
-	    dt_settime(&mydate, (*hour)->value.lval, (*min)->value.lval, (*sec)->value.lval);
+	    dt_setdate(&mydate, Z_LVAL_PP(year), Z_LVAL_PP(month), Z_LVAL_PP(day));
+	    dt_settime(&mydate, Z_LVAL_PP(hour), Z_LVAL_PP(min), Z_LVAL_PP(sec));
 	}
 	else {
 		mydate = mcal_le_struct->event->start;
@@ -686,14 +686,14 @@ PHP_FUNCTION(mcal_delete_calendar)
 	convert_to_long_ex(streamind);
 	convert_to_string_ex(calendar);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	/*	if (mcal_delete_calendar(mcal_le_struct->mcal_stream,calendar->value.str.val)) 
+	/*	if (mcal_delete_calendar(mcal_le_struct->mcal_stream,Z_STRVAL_P(calendar))) 
 		{
 	    RETURN_TRUE;
 		}
@@ -721,14 +721,14 @@ PHP_FUNCTION(mcal_delete_event)
 	convert_to_long_ex(streamind);
 	convert_to_long_ex(event_id);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	if (cal_remove(mcal_le_struct->mcal_stream, (*event_id)->value.lval)) {
+	if (cal_remove(mcal_le_struct->mcal_stream, Z_LVAL_PP(event_id))) {
 	    RETURN_TRUE;
 	}
 	else {
@@ -754,7 +754,7 @@ PHP_FUNCTION(mcal_append_event)
 	}
 	
 	convert_to_long_ex(streamind);
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -784,7 +784,7 @@ PHP_FUNCTION(mcal_store_event)
 	}
 	
 	convert_to_long_ex(streamind);
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -813,14 +813,14 @@ PHP_FUNCTION(mcal_snooze)
 	convert_to_long_ex(streamind);
 	convert_to_long_ex(uid);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	if (cal_snooze(mcal_le_struct->mcal_stream, (*uid)->value.lval)) {
+	if (cal_snooze(mcal_le_struct->mcal_stream, Z_LVAL_PP(uid))) {
 	    RETURN_TRUE;
 	}
 	else {
@@ -846,13 +846,13 @@ PHP_FUNCTION(mcal_event_set_category)
 	convert_to_long_ex(streamind);
 	convert_to_string_ex(category);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	mcal_le_struct->event->category = strdup((*category)->value.str.val);
+	mcal_le_struct->event->category = strdup(Z_STRVAL_PP(category));
 }
 /* }}} */
 
@@ -873,13 +873,13 @@ PHP_FUNCTION(mcal_event_set_title)
 	convert_to_long_ex(streamind);
 	convert_to_string_ex(title);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 	RETURN_FALSE;
 	}
-	mcal_le_struct->event->title = strdup((*title)->value.str.val);
+	mcal_le_struct->event->title = strdup(Z_STRVAL_PP(title));
 }
 /* }}} */
 
@@ -900,13 +900,13 @@ PHP_FUNCTION(mcal_event_set_description)
 	convert_to_long_ex(streamind);
 	convert_to_string_ex(description);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	mcal_le_struct->event->description = strdup((*description)->value.str.val);
+	mcal_le_struct->event->description = strdup(Z_STRVAL_PP(description));
 }
 /* }}} */
 
@@ -933,18 +933,18 @@ PHP_FUNCTION(mcal_event_set_start)
 	if (myargc > 5) convert_to_long_ex(min);
 	if (myargc > 6) convert_to_long_ex(sec);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	dt_setdate(&(mcal_le_struct->event->start), (*year)->value.lval, (*month)->value.lval, (*date)->value.lval);
+	dt_setdate(&(mcal_le_struct->event->start), Z_LVAL_PP(year), Z_LVAL_PP(month), Z_LVAL_PP(date));
 	
-	if (myargc > 4) myhour = (*hour)->value.lval;
-	if (myargc > 5) mymin  = (*min)->value.lval;
-	if (myargc > 6) mysec  = (*sec)->value.lval;
+	if (myargc > 4) myhour = Z_LVAL_PP(hour);
+	if (myargc > 5) mymin  = Z_LVAL_PP(min);
+	if (myargc > 6) mysec  = Z_LVAL_PP(sec);
 	if (myargc > 4) dt_settime(&(mcal_le_struct->event->start), myhour, mymin, mysec);
 }
 /* }}} */
@@ -974,18 +974,18 @@ PHP_FUNCTION(mcal_event_set_end)
 	if (myargc > 5) convert_to_long_ex(min);
 	if (myargc > 6) convert_to_long_ex(sec);
 
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	dt_setdate(&(mcal_le_struct->event->end), (*year)->value.lval, (*month)->value.lval, (*date)->value.lval);
+	dt_setdate(&(mcal_le_struct->event->end), Z_LVAL_PP(year), Z_LVAL_PP(month), Z_LVAL_PP(date));
 	
-	if (myargc > 4) myhour = (*hour)->value.lval;
-	if (myargc > 5) mymin  = (*min)->value.lval;
-	if (myargc > 6) mysec  = (*sec)->value.lval;
+	if (myargc > 4) myhour = Z_LVAL_PP(hour);
+	if (myargc > 5) mymin  = Z_LVAL_PP(min);
+	if (myargc > 6) mysec  = Z_LVAL_PP(sec);
 	if (myargc > 4) dt_settime(&(mcal_le_struct->event->end), myhour, mymin, mysec);
 }
 /* }}} */
@@ -1006,14 +1006,14 @@ PHP_FUNCTION(mcal_event_set_alarm)
 	convert_to_long_ex(streamind);
 	convert_to_long_ex(alarm);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	mcal_le_struct->event->alarm = (*alarm)->value.lval;
+	mcal_le_struct->event->alarm = Z_LVAL_PP(alarm);
 }
 /* }}} */
 
@@ -1032,7 +1032,7 @@ PHP_FUNCTION(mcal_event_init)
 	}
 	
 	convert_to_long_ex(streamind);
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -1060,14 +1060,14 @@ PHP_FUNCTION(mcal_event_set_class)
 	convert_to_long_ex(streamind);
 	convert_to_long_ex(class);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	mcal_le_struct->event->public = (*class)->value.lval;
+	mcal_le_struct->event->public = Z_LVAL_PP(class);
 }
 /* }}} */
 
@@ -1089,14 +1089,14 @@ PHP_FUNCTION(mcal_event_add_attribute)
 	convert_to_string_ex(attribute);
 	convert_to_string_ex(val);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 #if MCALVER >= 20000121
-	if (calevent_setattr(mcal_le_struct->event, (*attribute)->value.str.val, (*val)->value.str.val)) {
+	if (calevent_setattr(mcal_le_struct->event, Z_STRVAL_PP(attribute), Z_STRVAL_PP(val))) {
 		RETURN_TRUE;
 	}
 	else
@@ -1121,7 +1121,7 @@ PHP_FUNCTION(mcal_is_leap_year)
 	
 	convert_to_long_ex(year);
 	
-	if (isleapyear((*year)->value.lval)) {
+	if (isleapyear(Z_LVAL_PP(year))) {
 	    RETURN_TRUE;
 	}
 	else {
@@ -1146,7 +1146,7 @@ PHP_FUNCTION(mcal_days_in_month)
 	convert_to_long_ex(leap);
 	convert_to_boolean_ex(leap);
 	
-	RETURN_LONG(daysinmonth((*month)->value.lval, (*leap)->value.lval));
+	RETURN_LONG(daysinmonth(Z_LVAL_PP(month), Z_LVAL_PP(leap)));
 }
 /* }}} */
 
@@ -1166,7 +1166,7 @@ PHP_FUNCTION(mcal_date_valid)
 	convert_to_long_ex(month);
 	convert_to_long_ex(day);
 	
-	if (datevalid((*year)->value.lval, (*month)->value.lval, (*day)->value.lval)) {
+	if (datevalid(Z_LVAL_PP(year), Z_LVAL_PP(month), Z_LVAL_PP(day))) {
 	    RETURN_TRUE;
 	}
 	else {
@@ -1191,7 +1191,7 @@ PHP_FUNCTION(mcal_time_valid)
 	convert_to_long_ex(min);
 	convert_to_long_ex(sec);
 	
-	if (timevalid((*hour)->value.lval, (*min)->value.lval, (*sec)->value.lval)) {
+	if (timevalid(Z_LVAL_PP(hour), Z_LVAL_PP(min), Z_LVAL_PP(sec))) {
 	    RETURN_TRUE;
 	}
 	else {
@@ -1218,7 +1218,7 @@ PHP_FUNCTION(mcal_day_of_week)
 	convert_to_long_ex(day);
 	
 	dt_init(&mydate);
-	dt_setdate(&mydate, (*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
+	dt_setdate(&mydate, Z_LVAL_PP(year), Z_LVAL_PP(month), Z_LVAL_PP(day));
 	
 	RETURN_LONG(dt_dayofweek(&mydate));
 }
@@ -1242,7 +1242,7 @@ PHP_FUNCTION(mcal_day_of_year)
 	convert_to_long_ex(day);
 	
 	dt_init(&mydate);
-	dt_setdate(&mydate, (*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
+	dt_setdate(&mydate, Z_LVAL_PP(year), Z_LVAL_PP(month), Z_LVAL_PP(day));
 	
 	RETURN_LONG(dt_dayofyear(&mydate));
 }
@@ -1264,8 +1264,8 @@ PHP_FUNCTION(mcal_week_of_year)
  	convert_to_long_ex(month);
  	convert_to_long_ex(day);
 	
- 	if (datevalid((*year)->value.lval, (*month)->value.lval, (*day)->value.lval)) { 
-		RETURN_LONG(dt_weekofyear((*day)->value.lval, (*month)->value.lval, (*year)->value.lval));
+ 	if (datevalid(Z_LVAL_PP(year), Z_LVAL_PP(month), Z_LVAL_PP(day))) { 
+		RETURN_LONG(dt_weekofyear(Z_LVAL_PP(day), Z_LVAL_PP(month), Z_LVAL_PP(year)));
 	}
 	else {
 		RETURN_FALSE;
@@ -1296,8 +1296,8 @@ PHP_FUNCTION(mcal_date_compare)
 	
 	dt_init(&myadate);
 	dt_init(&mybdate);
-	dt_setdate(&myadate, (*ayear)->value.lval, (*amonth)->value.lval, (*aday)->value.lval);
-	dt_setdate(&mybdate, (*byear)->value.lval, (*bmonth)->value.lval, (*bday)->value.lval);
+	dt_setdate(&myadate, Z_LVAL_PP(ayear), Z_LVAL_PP(amonth), Z_LVAL_PP(aday));
+	dt_setdate(&mybdate, Z_LVAL_PP(byear), Z_LVAL_PP(bmonth), Z_LVAL_PP(bday));
 	
 	RETURN_LONG(dt_compare(&myadate, &mybdate));
 }
@@ -1322,45 +1322,45 @@ PHP_FUNCTION(mcal_next_recurrence)
 	convert_to_long_ex(weekstart);
 	convert_to_array_ex(next);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	if (zend_hash_find((*next)->value.ht, "year", sizeof("year"), (void **) &zvalue) == SUCCESS) {
+	if (zend_hash_find(Z_ARRVAL_PP(next), "year", sizeof("year"), (void **) &zvalue) == SUCCESS) {
 		SEPARATE_ZVAL(zvalue);
 		convert_to_long_ex(zvalue);
-		mydate.year = (*zvalue)->value.lval;
+		mydate.year = Z_LVAL_PP(zvalue);
 	}
-	if (zend_hash_find((*next)->value.ht, "month", sizeof("month"), (void **) &zvalue) == SUCCESS) {
+	if (zend_hash_find(Z_ARRVAL_PP(next), "month", sizeof("month"), (void **) &zvalue) == SUCCESS) {
 		SEPARATE_ZVAL(zvalue);
 		convert_to_long_ex(zvalue);
-		mydate.mon = (*zvalue)->value.lval;
+		mydate.mon = Z_LVAL_PP(zvalue);
 	}
-	if (zend_hash_find((*next)->value.ht, "mday", sizeof("mday"), (void **) &zvalue) == SUCCESS) {
+	if (zend_hash_find(Z_ARRVAL_PP(next), "mday", sizeof("mday"), (void **) &zvalue) == SUCCESS) {
 		SEPARATE_ZVAL(zvalue);
 		convert_to_long_ex(zvalue);
-		mydate.mday = (*zvalue)->value.lval;
+		mydate.mday = Z_LVAL_PP(zvalue);
 	}
-	if (zend_hash_find((*next)->value.ht, "hour", sizeof("hour"), (void **) &zvalue) == SUCCESS) {
+	if (zend_hash_find(Z_ARRVAL_PP(next), "hour", sizeof("hour"), (void **) &zvalue) == SUCCESS) {
 		SEPARATE_ZVAL(zvalue);
 		convert_to_long_ex(zvalue);
-		mydate.hour = (*zvalue)->value.lval;
+		mydate.hour = Z_LVAL_PP(zvalue);
 	}
-	if (zend_hash_find((*next)->value.ht, "min", sizeof("min"), (void **) &zvalue) == SUCCESS) {
+	if (zend_hash_find(Z_ARRVAL_PP(next), "min", sizeof("min"), (void **) &zvalue) == SUCCESS) {
 		SEPARATE_ZVAL(zvalue);
 		convert_to_long_ex(zvalue);
-		mydate.min = (*zvalue)->value.lval;
+		mydate.min = Z_LVAL_PP(zvalue);
 	}
-	if (zend_hash_find((*next)->value.ht, "sec", sizeof("sec"), (void **) &zvalue) == SUCCESS) {
+	if (zend_hash_find(Z_ARRVAL_PP(next), "sec", sizeof("sec"), (void **) &zvalue) == SUCCESS) {
 		SEPARATE_ZVAL(zvalue);
 		convert_to_long_ex(zvalue);
-		mydate.sec = (*zvalue)->value.lval;
+		mydate.sec = Z_LVAL_PP(zvalue);
 	}
 	
-	calevent_next_recurrence(mcal_le_struct->event, &mydate, (*weekstart)->value.lval);
+	calevent_next_recurrence(mcal_le_struct->event, &mydate, Z_LVAL_PP(weekstart));
 	
 	if (object_init(return_value) == FAILURE) {
 		RETURN_FALSE;
@@ -1395,7 +1395,7 @@ PHP_FUNCTION(mcal_event_set_recur_none)
 	
 	convert_to_long_ex(streamind);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -1427,15 +1427,15 @@ PHP_FUNCTION(mcal_event_set_recur_daily)
 	convert_to_long_ex(day);
 	convert_to_long_ex(interval);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	dt_setdate(&endtime, (*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
-	calevent_recur_daily(mcal_le_struct->event, &endtime, (*interval)->value.lval);
+	dt_setdate(&endtime, Z_LVAL_PP(year), Z_LVAL_PP(month), Z_LVAL_PP(day));
+	calevent_recur_daily(mcal_le_struct->event, &endtime, Z_LVAL_PP(interval));
 }
 /* }}} */
 
@@ -1461,15 +1461,15 @@ PHP_FUNCTION(mcal_event_set_recur_weekly)
 	convert_to_long_ex(interval);
 	convert_to_long_ex(weekdays);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	dt_setdate(&endtime, (*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
-	calevent_recur_weekly(mcal_le_struct->event, &endtime, (*interval)->value.lval, (*weekdays)->value.lval);
+	dt_setdate(&endtime, Z_LVAL_PP(year), Z_LVAL_PP(month), Z_LVAL_PP(day));
+	calevent_recur_weekly(mcal_le_struct->event, &endtime, Z_LVAL_PP(interval), Z_LVAL_PP(weekdays));
 }
 /* }}} */
 
@@ -1494,15 +1494,15 @@ PHP_FUNCTION(mcal_event_set_recur_monthly_mday)
 	convert_to_long_ex(day);
 	convert_to_long_ex(interval);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	dt_setdate(&endtime, (*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
-	calevent_recur_monthly_mday(mcal_le_struct->event, &endtime, (*interval)->value.lval);
+	dt_setdate(&endtime, Z_LVAL_PP(year), Z_LVAL_PP(month), Z_LVAL_PP(day));
+	calevent_recur_monthly_mday(mcal_le_struct->event, &endtime, Z_LVAL_PP(interval));
 }
 /* }}} */
 
@@ -1527,15 +1527,15 @@ PHP_FUNCTION(mcal_event_set_recur_monthly_wday)
 	convert_to_long_ex(day);
 	convert_to_long_ex(interval);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	dt_setdate(&endtime, (*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
-	calevent_recur_monthly_wday(mcal_le_struct->event, &endtime, (*interval)->value.lval);
+	dt_setdate(&endtime, Z_LVAL_PP(year), Z_LVAL_PP(month), Z_LVAL_PP(day));
+	calevent_recur_monthly_wday(mcal_le_struct->event, &endtime, Z_LVAL_PP(interval));
 }
 /* }}} */
 
@@ -1560,15 +1560,15 @@ PHP_FUNCTION(mcal_event_set_recur_yearly)
 	convert_to_long_ex(day);
 	convert_to_long_ex(interval);
 	
-	ind = (*streamind)->value.lval;
+	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	dt_setdate(&endtime, (*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
-	calevent_recur_yearly(mcal_le_struct->event, &endtime, (*interval)->value.lval);
+	dt_setdate(&endtime, Z_LVAL_PP(year), Z_LVAL_PP(month), Z_LVAL_PP(day));
+	calevent_recur_yearly(mcal_le_struct->event, &endtime, Z_LVAL_PP(interval));
 }
 /* }}} */
 

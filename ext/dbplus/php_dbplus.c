@@ -35,9 +35,9 @@ relf * aql_exec(char *, char *);
 tuple *rnext(relf *);
 
 
-#define _STRING(x) ((*x)->value.str.val)
-#define _INT(x)    ((*x)->value.lval)
-#define _HASH(x)   ((*x)->value.ht)
+#define _STRING(x) (Z_STRVAL_PP(x))
+#define _INT(x)    (Z_LVAL_PP(x))
+#define _HASH(x)   (Z_ARRVAL_PP(x))
 
 #define DBPLUS_FETCH_RESOURCE(r, z)   ZEND_FETCH_RESOURCE(r, relf *, z, -1, "dbplus_relation", le_dbplus_relation); \
                                     if(!r) RETURN_LONG(ERR_UNKNOWN);
@@ -50,7 +50,7 @@ var2tuple(relf *r, zval **zv, tuple *t)
   unsigned deg ;
   zval **element;
   
-  if ((*zv)->type!=IS_ARRAY)
+  if (Z_TYPE_PP(zv)!=IS_ARRAY)
     return 1;
   
   rtupinit(r, t);
@@ -58,7 +58,7 @@ var2tuple(relf *r, zval **zv, tuple *t)
   ap = r->r_atts;
   deg = r->r_rel.rel_deg;
   do {
-    if(SUCCESS!=zend_hash_find((*zv)->value.ht, ap->att_name, strlen(ap->att_name)+1, (void **)&element)) {
+    if(SUCCESS!=zend_hash_find(Z_ARRVAL_PP(zv), ap->att_name, strlen(ap->att_name)+1, (void **)&element)) {
       continue;
     }
 
@@ -71,13 +71,13 @@ var2tuple(relf *r, zval **zv, tuple *t)
     case FT_SHORT:   
       /* short integer */
       convert_to_long_ex(element);
-      AFFIX(ap, t)->f_short    = (short) (*element)->value.lval; 
+      AFFIX(ap, t)->f_short    = (short) Z_LVAL_PP(element); 
       break;
     
     case FT_UNSIGNED:    
       /* unsigned short integer */
       convert_to_long_ex(element);
-      AFFIX(ap, t)->f_unsigned = (unsigned) (*element)->value.lval; 
+      AFFIX(ap, t)->f_unsigned = (unsigned) Z_LVAL_PP(element); 
       break;
 
     case FT_LONG:         
@@ -85,31 +85,31 @@ var2tuple(relf *r, zval **zv, tuple *t)
     case FT_SEQUENCE:
       /* unique sequence number -> just a long to outsiders */
       convert_to_long_ex(element);
-      AFFIX(ap, t)->f_long     = (long4) (*element)->value.lval; 
+      AFFIX(ap, t)->f_long     = (long4) Z_LVAL_PP(element); 
       break;
 
     case FT_DATE:         
       /* date -> long containing YYYYMMDD */
       convert_to_long_ex(element);
-      AFFIX(ap, t)->f_date     = (long4) (*element)->value.lval; 
+      AFFIX(ap, t)->f_date     = (long4) Z_LVAL_PP(element); 
       break;
 
     case FT_TIME:         
       /* time as unix timestamp */
       convert_to_long_ex(element);
-      AFFIX(ap, t)->f_time     = (long4) (*element)->value.lval; 
+      AFFIX(ap, t)->f_time     = (long4) Z_LVAL_PP(element); 
       break;
 
     case FT_FLOAT:        
       /* single prec. floating point */
       convert_to_double_ex(element);
-      AFFIX(ap, t)->f_float    = (float) (*element)->value.dval; 
+      AFFIX(ap, t)->f_float    = (float) Z_DVAL_PP(element); 
       break;
       
     case FT_DOUBLE:       
       /* double prec. floating point */
       convert_to_double_ex(element);
-      AFFIX(ap, t)->f_double   = (double) (*element)->value.dval; 
+      AFFIX(ap, t)->f_double   = (double) Z_DVAL_PP(element); 
       break;
 
     case FT_STRING: 
@@ -120,7 +120,7 @@ var2tuple(relf *r, zval **zv, tuple *t)
     case FT_ISOL:
       /* different variants of Strings */
       convert_to_string_ex(element);
-      afput(ap, t, (field *)0, (*element)->value.str.val); 
+      afput(ap, t, (field *)0, Z_STRVAL_PP(element)); 
       break;
 
     default:
@@ -148,7 +148,7 @@ tuple2var(relf * r, tuple * t, zval **zv)
     ap = r->r_atts;
     deg = r->r_rel.rel_deg;
     do {
-      MAKE_STD_ZVAL(element); element->type=IS_NULL;
+      MAKE_STD_ZVAL(element); Z_TYPE_P(element)=IS_NULL;
 
       switch(ap->att_type) {
       case  FT_SHORT: 
@@ -187,8 +187,8 @@ tuple2var(relf * r, tuple * t, zval **zv)
       break;
       }
 
-      if(element->type!=IS_NULL)
-        zend_hash_update((*zv)->value.ht,
+      if(Z_TYPE_P(element)!=IS_NULL)
+        zend_hash_update(Z_ARRVAL_PP(zv),
                  ap->att_name,
                  strlen(ap->att_name)+1,
                  (void *)&element,
@@ -214,7 +214,7 @@ ary2constr(relf * r, zval** constr)
   /* init first */
   db_coninit(r, &c);
 
-  if ((*constr)->type != IS_ARRAY) {
+  if (Z_TYPE_PP(constr) != IS_ARRAY) {
     php_error(E_WARNING, "Constraint is not an array");
     return NULL;
   }
@@ -225,7 +225,7 @@ ary2constr(relf * r, zval** constr)
     return NULL;
   }
   
-  switch((*zdata)->type) {
+  switch(Z_TYPE_PP(zdata)) {
   case IS_STRING: /* constraints in plain string array */
     if (_HASH(constr)->nNumOfElements%3) {
       php_error(E_WARNING, "Constraint array has to have triples of strings");
@@ -266,7 +266,7 @@ ary2constr(relf * r, zval** constr)
       for(zend_hash_internal_pointer_reset(_HASH(constr));
           SUCCESS==zend_hash_get_current_data(_HASH(constr), (void **)&zdata);
           zend_hash_move_forward(_HASH(constr))) {
-        if(!((*zdata)->type==IS_ARRAY)) {
+        if(!(Z_TYPE_PP(zdata)==IS_ARRAY)) {
           php_error(E_WARNING, "Constraint array element not an array");
           return NULL;
         }
@@ -428,7 +428,7 @@ PHP_FUNCTION(dbplus_close)
 
   DBPLUS_FETCH_RESOURCE(r, relation);
 
-  zend_list_delete((*relation)->value.lval);  
+  zend_list_delete(Z_LVAL_PP(relation));  
 
   RETURN_TRUE;
 }
@@ -507,7 +507,7 @@ PHP_FUNCTION(dbplus_find)
 
   DBPLUS_FETCH_RESOURCE(r, relation); 
 
-  if ((*constr)->type != IS_ARRAY) {
+  if (Z_TYPE_PP(constr) != IS_ARRAY) {
     php_error(E_WARNING, "Constraint is not an array");
     RETURN_LONG(ERR_UNKNOWN);
   }
@@ -694,13 +694,13 @@ PHP_FUNCTION(dbplus_info)
   if (array_init(*result) == FAILURE)
     RETURN_LONG(ERR_USER);  
 
-  if(!strcmp("atts", (*key)->value.str.val)) {
+  if(!strcmp("atts", Z_STRVAL_PP(key))) {
     do {
       MAKE_STD_ZVAL(element); 
 
       ZVAL_STRING(element, ap->att_name, 1);
 
-      zend_hash_update((*result)->value.ht,
+      zend_hash_update(Z_ARRVAL_PP(result),
                        ap->att_name,
                        strlen(ap->att_name)+1,
                        (void *)&element,
@@ -797,7 +797,7 @@ PHP_FUNCTION(dbplus_open)
 
   convert_to_string_ex(tname);
 
-  r = cdb_open((*tname)->value.str.val, 1, 1);
+  r = cdb_open(Z_STRVAL_PP(tname), 1, 1);
   if(r == NULL) {
     /* TODO error handling */
     RETURN_FALSE;
@@ -882,7 +882,7 @@ PHP_FUNCTION(dbplus_rcreate)
 
   convert_to_string_ex(name);
 
-  switch ( (*domlist)->type ) {
+  switch ( Z_TYPE_PP(domlist) ) {
   case IS_STRING:
     convert_to_string_ex(domlist);
     break;
@@ -1018,17 +1018,17 @@ PHP_FUNCTION(dbplus_resolve)
   }
 
 
-  MAKE_STD_ZVAL(element); element->type=IS_NULL;
+  MAKE_STD_ZVAL(element); Z_TYPE_P(element)=IS_NULL;
   ZVAL_LONG(element,sid);
   zend_hash_update(Z_ARRVAL_P(return_value), "sid", 4,
             &element, sizeof(zval *), NULL);
 
-  MAKE_STD_ZVAL(element); element->type=IS_NULL;
+  MAKE_STD_ZVAL(element); Z_TYPE_P(element)=IS_NULL;
   ZVAL_STRING(element,host,1);
   zend_hash_update(Z_ARRVAL_P(return_value), "host", 5,
             &element, sizeof(zval *), NULL);
 
-  MAKE_STD_ZVAL(element); element->type=IS_NULL;
+  MAKE_STD_ZVAL(element); Z_TYPE_P(element)=IS_NULL;
   ZVAL_STRING(element,host_path,1);
   zend_hash_update(Z_ARRVAL_P(return_value), "host_path", 10,
             &element, sizeof(zval *), NULL);
@@ -1074,13 +1074,13 @@ PHP_FUNCTION(dbplus_rkeys)
 
   DBPLUS_FETCH_RESOURCE(r, relation);
 
-  switch((*domlist)->type) {
+  switch(Z_TYPE_PP(domlist)) {
   case IS_ARRAY:
     convert_to_array_ex(domlist);
     for(zend_hash_internal_pointer_reset(_HASH(domlist));
         SUCCESS==zend_hash_get_current_data(_HASH(domlist), (void **)&zdata);
         zend_hash_move_forward(_HASH(domlist))) {
-      if((*zdata)->type==IS_STRING)
+      if(Z_TYPE_PP(zdata)==IS_STRING)
         keys[nkeys++] = _STRING(zdata);
       else {
         php_error(E_WARNING, "dbplus_rkeys: domlist array contains non-string value(s)");
@@ -1108,7 +1108,7 @@ PHP_FUNCTION(dbplus_rkeys)
   if(rnew) {
     /* TODO realy delete old relation resource ? */
 #if 0
-    zend_list_delete((*relation)->value.lval);  
+    zend_list_delete(Z_LVAL_PP(relation));  
 #endif     
     ZEND_REGISTER_RESOURCE(return_value, rnew, le_dbplus_relation);
   } else {
@@ -1130,7 +1130,7 @@ PHP_FUNCTION(dbplus_ropen)
 
   convert_to_string_ex(tname);
 
-  r = ropen((*tname)->value.str.val, 0, 0);
+  r = ropen(Z_STRVAL_PP(tname), 0, 0);
   if(r == NULL) {
     /* TODO error handling */
     RETURN_FALSE;
@@ -1201,13 +1201,13 @@ PHP_FUNCTION(dbplus_rsecindex)
 
   DBPLUS_FETCH_RESOURCE(r, relation);
 
-  switch ( (*domlist)->type ) {
+  switch ( Z_TYPE_PP(domlist) ) {
   case IS_ARRAY:
     convert_to_array_ex(domlist);
     for(zend_hash_internal_pointer_reset(_HASH(domlist));
         SUCCESS==zend_hash_get_current_data(_HASH(domlist), (void **)&zdata);
         zend_hash_move_forward(_HASH(domlist))) {
-      if((*zdata)->type==IS_STRING)
+      if(Z_TYPE_PP(zdata)==IS_STRING)
         keys[nkeys++] = _STRING(zdata);
       else {
         php_error(E_WARNING, "dbplus_rsecindex: domlist array contains non-string value(s)");
@@ -1236,7 +1236,7 @@ PHP_FUNCTION(dbplus_rsecindex)
 
   if(rnew) {
     /* TODO realy delete old relation resource ? */
-    zend_list_delete((*relation)->value.lval);  
+    zend_list_delete(Z_LVAL_PP(relation));  
     
     ZEND_REGISTER_RESOURCE(return_value, rnew, le_dbplus_relation);
   } else {
@@ -1328,7 +1328,7 @@ PHP_FUNCTION(dbplus_setindexbynumber)
 
   convert_to_long_ex(idx_number);
   
-  RETURN_LONG(cdb_setindexbynumber(r, (*idx_number)->value.lval));
+  RETURN_LONG(cdb_setindexbynumber(r, Z_LVAL_PP(idx_number)));
 }
 /* }}} */
 

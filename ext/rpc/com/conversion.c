@@ -199,7 +199,7 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 					SYSTEMTIME wintime;
 					struct tm *phptime;
 
-					phptime = gmtime(&(pval_arg->value.lval));
+					phptime = gmtime(&(Z_LVAL_P(pval_arg)));
 					memset(&wintime, 0, sizeof(wintime));
 
 					wintime.wYear = phptime->tm_year + 1900;
@@ -288,14 +288,14 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 
 			case VT_CY|VT_BYREF:
 				convert_to_double_ex(&pval_arg);
-				VarCyFromR8(pval_arg->value.dval, var_arg->pcyVal);
+				VarCyFromR8(Z_DVAL_P(pval_arg), var_arg->pcyVal);
 				break;
 
 			case VT_DATE|VT_BYREF: {
 					SYSTEMTIME wintime;
 					struct tm *phptime;
 
-					phptime = gmtime(&(pval_arg->value.lval));
+					phptime = gmtime(&(Z_LVAL_P(pval_arg)));
 					memset(&wintime, 0, sizeof(wintime));
 
 					wintime.wYear   = phptime->tm_year + 1900;

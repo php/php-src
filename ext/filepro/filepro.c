@@ -212,7 +212,7 @@ PHP_FUNCTION(filepro)
 	FP_GLOBAL(fp_fcount) = -1;
     FP_GLOBAL(fp_keysize) = -1;
 	
-	sprintf(workbuf, "%s/map", dir->value.str.val);
+	sprintf(workbuf, "%s/map", Z_STRVAL_P(dir));
 
 	if (PG(safe_mode) && (!php_checkuid(workbuf, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
@@ -271,7 +271,7 @@ PHP_FUNCTION(filepro)
 	}
 	fclose(fp);
 		
-	FP_GLOBAL(fp_database) = estrndup(dir->value.str.val, dir->value.str.len);
+	FP_GLOBAL(fp_database) = estrndup(Z_STRVAL_P(dir), Z_STRLEN_P(dir));
 
 	RETVAL_TRUE;
 }
@@ -366,14 +366,14 @@ PHP_FUNCTION(filepro_fieldname)
 	}
 	
 	for (i = 0, lp = FP_GLOBAL(fp_fieldlist); lp; lp = lp->next, i++) {
-		if (i == fno->value.lval) {
+		if (i == Z_LVAL_P(fno)) {
 			RETURN_STRING(lp->name, 1);
 		}
 	}
 
 	php_error(E_WARNING,
 				"filePro: unable to locate field number %d.\n",
-				fno->value.lval);
+				Z_LVAL_P(fno));
 
 	RETVAL_FALSE;
 }
@@ -407,13 +407,13 @@ PHP_FUNCTION(filepro_fieldtype)
 	}
 	
 	for (i = 0, lp = FP_GLOBAL(fp_fieldlist); lp; lp = lp->next, i++) {
-		if (i == fno->value.lval) {
+		if (i == Z_LVAL_P(fno)) {
 			RETURN_STRING(lp->format, 1);
 		}
 	}
 	php_error(E_WARNING,
 				"filePro: unable to locate field number %d.\n",
-				fno->value.lval);
+				Z_LVAL_P(fno));
 	RETVAL_FALSE;
 }
 /* }}} */
@@ -446,13 +446,13 @@ PHP_FUNCTION(filepro_fieldwidth)
 	}
 	
 	for (i = 0, lp = FP_GLOBAL(fp_fieldlist); lp; lp = lp->next, i++) {
-		if (i == fno->value.lval) {
+		if (i == Z_LVAL_P(fno)) {
 			RETURN_LONG(lp->width);
 		}
 	}
 	php_error(E_WARNING,
 				"filePro: unable to locate field number %d.\n",
-				fno->value.lval);
+				Z_LVAL_P(fno));
 	RETVAL_FALSE;
 }
 /* }}} */
@@ -516,8 +516,8 @@ PHP_FUNCTION(filepro_retrieve)
 	convert_to_long(rno);
 	convert_to_long(fno);
 
-	fnum = fno->value.lval;
-	rnum = rno->value.lval;
+	fnum = Z_LVAL_P(fno);
+	rnum = Z_LVAL_P(rno);
     
     if (rnum < 0 || fnum < 0 || fnum >= FP_GLOBAL(fp_fcount)) {
         php_error(E_WARNING, "filepro: parameters out of range");

@@ -125,9 +125,9 @@ PHP_FUNCTION(recode_string)
 		RETURN_FALSE;
 	}
 	
-	success = recode_scan_request(request, (*req)->value.str.val);
+	success = recode_scan_request(request, Z_STRVAL_PP(req));
 	if (!success) {
-		php_error(E_WARNING, "Illegal recode request '%s'", (*req)->value.str.val);
+		php_error(E_WARNING, "Illegal recode request '%s'", Z_STRVAL_PP(req));
 		goto error_exit;
 	}
 	
@@ -190,9 +190,9 @@ PHP_FUNCTION(recode_file)
 		RETURN_FALSE;
 	}
 
-	success = recode_scan_request(request, (*req)->value.str.val);
+	success = recode_scan_request(request, Z_STRVAL_PP(req));
 	if (!success) {
-		php_error(E_WARNING, "Illegal recode request '%s'", (*req)->value.str.val);
+		php_error(E_WARNING, "Illegal recode request '%s'", Z_STRVAL_PP(req));
 		goto error_exit;
 	}
 	

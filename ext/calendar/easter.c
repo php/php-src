@@ -45,7 +45,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long(year_arg);
-		year = year_arg->value.lval;
+		year = Z_LVAL_P(year_arg);
 		break;
 	default:
 		WRONG_PARAM_COUNT;
@@ -109,12 +109,12 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
 			te.tm_mday = easter-10;
 		}
 
-	        return_value->value.lval = mktime(&te);
+	        Z_LVAL_P(return_value) = mktime(&te);
 	} else {							/* return the days after March 21 */	
-	        return_value->value.lval = easter;
+	        Z_LVAL_P(return_value) = easter;
 	}
 
-        return_value->type = IS_LONG;
+        Z_TYPE_P(return_value) = IS_LONG;
 
 }
 

@@ -140,10 +140,10 @@ static int add_assoc_object(pval *arg, char *key, pval *tmp)
 {
         HashTable *symtable;
         
-        if (arg->type == IS_OBJECT) {
+        if (Z_TYPE_P(arg) == IS_OBJECT) {
                 symtable = Z_OBJPROP_P(arg);
         } else {
-                symtable = arg->value.ht;
+                symtable = Z_ARRVAL_P(arg);
         }
         return zend_hash_update(symtable, key, strlen(key)+1, (void *) &tmp, sizeof(pval *), NULL);
 }
@@ -170,15 +170,15 @@ void php_icap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	convert_to_string(calendar);
 	convert_to_string(user);
 	convert_to_string(passwd);
-	strcpy(icap_user, user->value.str.val);
-	strcpy(icap_password, passwd->value.str.val);
+	strcpy(icap_user, Z_STRVAL_P(user));
+	strcpy(icap_password, Z_STRVAL_P(passwd));
 	if(myargc ==4) {
 		convert_to_long(options);
-		flags=options->value.lval;
+		flags=Z_LVAL_P(options);
 	}
-		icap_stream = cal_open(NULL, calendar->value.str.val, 0);
+		icap_stream = cal_open(NULL, Z_STRVAL_P(calendar), 0);
 	if (!icap_stream) {
-		php_error(E_WARNING, "Couldn't open stream %s\n", calendar->value.str.val);
+		php_error(E_WARNING, "Couldn't open stream %s\n", Z_STRVAL_P(calendar));
 		RETURN_FALSE;
 	}
 
@@ -204,7 +204,7 @@ PHP_FUNCTION(icap_close)
                 WRONG_PARAM_COUNT;
         }
         convert_to_long(streamind);
-        ind = streamind->value.lval;
+        ind = Z_LVAL_P(streamind);
         icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
         if (!icap_le_struct ) {
 	  php_error(E_WARNING, "Unable to find stream pointer");
@@ -212,7 +212,7 @@ PHP_FUNCTION(icap_close)
 	}
         if(myargcount==2) {
                 convert_to_long(options);
-                flags = options->value.lval;
+                flags = Z_LVAL_P(options);
                 icap_le_struct->flags = flags;
         }
         zend_list_delete(ind);
@@ -249,7 +249,7 @@ PHP_FUNCTION(icap_reopen)
     }
 
 	convert_to_long(streamind);
-	ind = streamind->value.lval;
+	ind = Z_LVAL_P(streamind);
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -259,12 +259,12 @@ PHP_FUNCTION(icap_reopen)
 	convert_to_string(calendar);
 	if(myargc == 3) {
 		convert_to_long(options);
-		flags = options->value.lval;
+		flags = Z_LVAL_P(options);
 		icap_le_struct->flags = cl_flags;	
 	}
 	/*
-		icap_stream = cal_connect(calendar->value.str.val);
-		cal_login(icap_stream, calendar->value.str.val);
+		icap_stream = cal_connect(Z_STRVAL_P(calendar));
+		cal_login(icap_stream, Z_STRVAL_P(calendar));
 	*/
 	if (icap_stream == NULL) {
 		php_error(E_WARNING, "Couldn't re-open stream\n");
@@ -290,7 +290,7 @@ PHP_FUNCTION(icap_expunge)
 
 	convert_to_long(streamind);
 
-	ind = streamind->value.lval;
+	ind = Z_LVAL_P(streamind);
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
@@ -320,7 +320,7 @@ PHP_FUNCTION(icap_fetch_event)
 	}
 	convert_to_long(streamind);
 	convert_to_long(eventid);
-	ind = streamind->value.lval;
+	ind = Z_LVAL_P(streamind);
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -329,7 +329,7 @@ PHP_FUNCTION(icap_fetch_event)
 	if(myargcount==3) {
 		convert_to_long(options);
 	}
-	cal_fetch(icap_le_struct->icap_stream, eventid->value.lval, &myevent);
+	cal_fetch(icap_le_struct->icap_stream, Z_LVAL_P(eventid), &myevent);
 
 	object_init(return_value);
 	add_property_long(return_value, "id", myevent->id);
@@ -396,7 +396,7 @@ PHP_FUNCTION(icap_list_events)
 	convert_to_long(streamind);
 	convert_to_array(begindate);
 	if(myargc == 3) convert_to_array(enddate);
-	ind = streamind->value.lval;
+	ind = Z_LVAL_P(streamind);
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
@@ -411,37 +411,37 @@ PHP_FUNCTION(icap_list_events)
 	}
 	begincal.has_time=0;
 	endcal.has_time=0;
-	if(zend_hash_find(begindate->value.ht, "year", sizeof("year"), (void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(Z_ARRVAL_P(begindate), "year", sizeof("year"), (void **) &pvalue)== SUCCESS){
 	 SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
-          begincal.year=(*pvalue)->value.lval;
+          begincal.year=Z_LVAL_PP(pvalue);
        }
-       if(zend_hash_find(begindate->value.ht, "month", sizeof("month"), (void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(Z_ARRVAL_P(begindate), "month", sizeof("month"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
-          begincal.mon=(*pvalue)->value.lval;
+          begincal.mon=Z_LVAL_PP(pvalue);
        }
-       if(zend_hash_find(begindate->value.ht, "day", sizeof("day"), (void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(Z_ARRVAL_P(begindate), "day", sizeof("day"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
-          begincal.mday=(*pvalue)->value.lval;
+          begincal.mday=Z_LVAL_PP(pvalue);
        }
 if(myargc == 3)
   {
-    if(zend_hash_find(enddate->value.ht, "year", sizeof("year"), (void **) &pvalue)== SUCCESS){
+    if(zend_hash_find(Z_ARRVAL_P(enddate), "year", sizeof("year"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
       convert_to_long(*pvalue);
-      endcal.year=(*pvalue)->value.lval;
+      endcal.year=Z_LVAL_PP(pvalue);
     }
-    if(zend_hash_find(enddate->value.ht, "month", sizeof("month"), (void **) &pvalue)== SUCCESS){
+    if(zend_hash_find(Z_ARRVAL_P(enddate), "month", sizeof("month"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
       convert_to_long(*pvalue);
-      endcal.mon=(*pvalue)->value.lval;
+      endcal.mon=Z_LVAL_PP(pvalue);
     }
-    if(zend_hash_find(enddate->value.ht, "day", sizeof("day"), (void **) &pvalue)== SUCCESS){
+    if(zend_hash_find(Z_ARRVAL_P(enddate), "day", sizeof("day"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
       convert_to_long(*pvalue);
-      endcal.mday=(*pvalue)->value.lval;
+      endcal.mday=Z_LVAL_PP(pvalue);
     }
   }
  
@@ -475,7 +475,7 @@ PHP_FUNCTION(icap_create_calendar)
 
 	convert_to_long(streamind);
 	convert_to_string(calendar);
-	ind = streamind->value.lval;
+	ind = Z_LVAL_P(streamind);
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
@@ -483,7 +483,7 @@ PHP_FUNCTION(icap_create_calendar)
 		RETURN_FALSE;
 	}
 /*
-	if (icap_create(icap_le_struct->icap_stream, calendar->value.str.val)) 
+	if (icap_create(icap_le_struct->icap_stream, Z_STRVAL_P(calendar))) 
 	  {
 	    RETURN_TRUE;
 	  }
@@ -511,7 +511,7 @@ PHP_FUNCTION(icap_rename_calendar)
 	convert_to_long(streamind);
 	convert_to_string(src_calendar);
 	convert_to_string(dest_calendar);
-	ind = streamind->value.lval;
+	ind = Z_LVAL_P(streamind);
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
@@ -519,7 +519,7 @@ PHP_FUNCTION(icap_rename_calendar)
 		RETURN_FALSE;
 	}
 /*
-	if(icap_rename(icap_le_struct->icap_stream, src_calendar->value.str.val, dest_calendar->value.str.val)) {RETURN_TRUE;}
+	if(icap_rename(icap_le_struct->icap_stream, Z_STRVAL_P(src_calendar), Z_STRVAL_P(dest_calendar))) {RETURN_TRUE;}
 	else {RETURN_FALSE; }
 */
 }
@@ -549,7 +549,7 @@ PHP_FUNCTION(icap_list_alarms)
 	convert_to_long(streamind);
 	convert_to_array(date);
 	convert_to_array(time);
-	ind = streamind->value.lval;
+	ind = Z_LVAL_P(streamind);
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
@@ -562,31 +562,31 @@ PHP_FUNCTION(icap_list_alarms)
         }
 	mydate.has_date=1;
 	mydate.has_time=1;
-       if(zend_hash_find(date->value.ht, "year", sizeof("year"), (void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(Z_ARRVAL_P(date), "year", sizeof("year"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
-          mydate.year=(*pvalue)->value.lval;
+          mydate.year=Z_LVAL_PP(pvalue);
        }
-       if(zend_hash_find(date->value.ht, "month", sizeof("month"), (void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(Z_ARRVAL_P(date), "month", sizeof("month"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
-          mydate.mon=(*pvalue)->value.lval;
+          mydate.mon=Z_LVAL_PP(pvalue);
        }
-       if(zend_hash_find(date->value.ht, "day", sizeof("day"), (void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(Z_ARRVAL_P(date), "day", sizeof("day"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
-          mydate.mday=(*pvalue)->value.lval;
+          mydate.mday=Z_LVAL_PP(pvalue);
        }
 
-       if(zend_hash_find(time->value.ht, "hour", sizeof("hour"), (void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(Z_ARRVAL_P(time), "hour", sizeof("hour"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
-          mydate.hour=(*pvalue)->value.lval;
+          mydate.hour=Z_LVAL_PP(pvalue);
        }
-       if(zend_hash_find(time->value.ht, "minute", sizeof("minute"), (void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(Z_ARRVAL_P(time), "minute", sizeof("minute"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
-          mydate.min=(*pvalue)->value.lval;
+          mydate.min=Z_LVAL_PP(pvalue);
        }
        mydate.sec=0;
        g_cal_list=NULL;
@@ -619,7 +619,7 @@ PHP_FUNCTION(icap_delete_calendar)
 
 	convert_to_long(streamind);
 	convert_to_string(calendar);
-	ind = streamind->value.lval;
+	ind = Z_LVAL_P(streamind);
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
@@ -627,7 +627,7 @@ PHP_FUNCTION(icap_delete_calendar)
 		RETURN_FALSE;
 	}
 	
-	if (icap_delete_calendar(icap_le_struct->icap_stream, calendar->value.str.val)) 
+	if (icap_delete_calendar(icap_le_struct->icap_stream, Z_STRVAL_P(calendar))) 
 	  {
 	    RETURN_TRUE;
 	  }
@@ -654,14 +654,14 @@ PHP_FUNCTION(icap_delete_event)
 
 	convert_to_long(streamind);
 	convert_to_long(uid);
-	ind = streamind->value.lval;
+	ind = Z_LVAL_P(streamind);
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	if (cal_remove(icap_le_struct->icap_stream, uid->value.lval)) 
+	if (cal_remove(icap_le_struct->icap_stream, Z_LVAL_P(uid))) 
 	  {
 	    RETURN_TRUE;
 	  }
@@ -707,7 +707,7 @@ PHP_FUNCTION(icap_store_event)
 	convert_to_long(streamind);
 	convert_to_array(storeobject);
 
-	ind = streamind->value.lval;
+	ind = Z_LVAL_P(streamind);
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
@@ -721,109 +721,109 @@ PHP_FUNCTION(icap_store_event)
 		RETURN_FALSE;
 	}
 	myevent=calevent_new();
-	if(zend_hash_find(storeobject->value.ht, "uid", sizeof("uid"), (void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(Z_ARRVAL_P(storeobject), "uid", sizeof("uid"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_long(*pvalue);
-	  myevent->id=(*pvalue)->value.lval;
+	  myevent->id=Z_LVAL_PP(pvalue);
 	}
-	if(zend_hash_find(storeobject->value.ht, "public", sizeof("public"), (void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(Z_ARRVAL_P(storeobject), "public", sizeof("public"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_long(*pvalue);
-	  myevent->public=(*pvalue)->value.lval;
+	  myevent->public=Z_LVAL_PP(pvalue);
 	}
-	if(zend_hash_find(storeobject->value.ht, "category", sizeof("category"), (void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(Z_ARRVAL_P(storeobject), "category", sizeof("category"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_string(*pvalue);
-	  myevent->category=strdup((*pvalue)->value.str.val);
+	  myevent->category=strdup(Z_STRVAL_PP(pvalue));
 	}
-	if(zend_hash_find(storeobject->value.ht, "title", sizeof("title"), (void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(Z_ARRVAL_P(storeobject), "title", sizeof("title"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_string(*pvalue);
-	  myevent->title=strdup((*pvalue)->value.str.val);
+	  myevent->title=strdup(Z_STRVAL_PP(pvalue));
 	}
-	if(zend_hash_find(storeobject->value.ht, "description", sizeof("description"), (void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(Z_ARRVAL_P(storeobject), "description", sizeof("description"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_string(*pvalue);
-	  myevent->description=strdup((*pvalue)->value.str.val);
+	  myevent->description=strdup(Z_STRVAL_PP(pvalue));
 	}
 
-	if(zend_hash_find(storeobject->value.ht, "alarm", sizeof("alarm"), (void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(Z_ARRVAL_P(storeobject), "alarm", sizeof("alarm"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_long(*pvalue);
-	  myevent->alarm=(*pvalue)->value.lval;
+	  myevent->alarm=Z_LVAL_PP(pvalue);
 	}
 
 
-       	if(zend_hash_find(storeobject->value.ht, "start", sizeof("start"), (void **) &temppvalue)== SUCCESS){
+       	if(zend_hash_find(Z_ARRVAL_P(storeobject), "start", sizeof("start"), (void **) &temppvalue)== SUCCESS){
           SEPARATE_ZVAL(temppvalue);
 	  convert_to_array(*temppvalue);
 	  
-	  if(zend_hash_find((*temppvalue)->value.ht, "year", sizeof("year"), (void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find(Z_ARRVAL_PP(temppvalue), "year", sizeof("year"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
-	    myevent->start.year=(*pvalue)->value.lval;
+	    myevent->start.year=Z_LVAL_PP(pvalue);
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht, "month", sizeof("month"), (void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find(Z_ARRVAL_PP(temppvalue), "month", sizeof("month"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
-	    myevent->start.mon=(*pvalue)->value.lval;
+	    myevent->start.mon=Z_LVAL_PP(pvalue);
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht, "mday", sizeof("mday"), (void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find(Z_ARRVAL_PP(temppvalue), "mday", sizeof("mday"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
-	    myevent->start.mday=(*pvalue)->value.lval;
+	    myevent->start.mday=Z_LVAL_PP(pvalue);
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht, "hour", sizeof("hour"), (void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find(Z_ARRVAL_PP(temppvalue), "hour", sizeof("hour"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
-	    myevent->start.hour=(*pvalue)->value.lval;
+	    myevent->start.hour=Z_LVAL_PP(pvalue);
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht, "min", sizeof("min"), (void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find(Z_ARRVAL_PP(temppvalue), "min", sizeof("min"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
-	    myevent->start.min=(*pvalue)->value.lval;
+	    myevent->start.min=Z_LVAL_PP(pvalue);
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht, "sec", sizeof("sec"), (void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find(Z_ARRVAL_PP(temppvalue), "sec", sizeof("sec"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
-	    myevent->start.sec=(*pvalue)->value.lval;
+	    myevent->start.sec=Z_LVAL_PP(pvalue);
 	  }
 	  myevent->start.has_date=true;
 	}
 
-       	if(zend_hash_find(storeobject->value.ht, "end", sizeof("end"), (void **) &temppvalue)== SUCCESS){
+       	if(zend_hash_find(Z_ARRVAL_P(storeobject), "end", sizeof("end"), (void **) &temppvalue)== SUCCESS){
           SEPARATE_ZVAL(temppvalue);
 	  convert_to_array(*temppvalue);
 	  
-	  if(zend_hash_find((*temppvalue)->value.ht, "year", sizeof("year"), (void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find(Z_ARRVAL_PP(temppvalue), "year", sizeof("year"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
-	    myevent->end.year=(*pvalue)->value.lval;
+	    myevent->end.year=Z_LVAL_PP(pvalue);
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht, "month", sizeof("month"), (void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find(Z_ARRVAL_PP(temppvalue), "month", sizeof("month"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
-	    myevent->end.mon=(*pvalue)->value.lval;
+	    myevent->end.mon=Z_LVAL_PP(pvalue);
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht, "mday", sizeof("mday"), (void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find(Z_ARRVAL_PP(temppvalue), "mday", sizeof("mday"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
-	    myevent->end.mday=(*pvalue)->value.lval;
+	    myevent->end.mday=Z_LVAL_PP(pvalue);
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht, "hour", sizeof("hour"), (void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find(Z_ARRVAL_PP(temppvalue), "hour", sizeof("hour"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
-	    myevent->end.hour=(*pvalue)->value.lval;
+	    myevent->end.hour=Z_LVAL_PP(pvalue);
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht, "min", sizeof("min"), (void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find(Z_ARRVAL_PP(temppvalue), "min", sizeof("min"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
-	    myevent->end.min=(*pvalue)->value.lval;
+	    myevent->end.min=Z_LVAL_PP(pvalue);
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht, "sec", sizeof("sec"), (void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find(Z_ARRVAL_PP(temppvalue), "sec", sizeof("sec"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
-	    myevent->end.sec=(*pvalue)->value.lval;
+	    myevent->end.sec=Z_LVAL_PP(pvalue);
 	  }
 	  myevent->end.has_date=true;
 	}
@@ -852,7 +852,7 @@ PHP_FUNCTION(icap_snooze)
 	convert_to_long(streamind);
 	convert_to_long(uid);
 
-	ind = streamind->value.lval;
+	ind = Z_LVAL_P(streamind);
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
@@ -861,7 +861,7 @@ PHP_FUNCTION(icap_snooze)
 		RETURN_FALSE;
 	}
 
-	if(cal_snooze(icap_le_struct->icap_stream, uid->value.lval))
+	if(cal_snooze(icap_le_struct->icap_stream, Z_LVAL_P(uid)))
 	  {
 	    RETURN_TRUE;
 	  }

@@ -151,11 +151,11 @@ PHP_FUNCTION(posix_kill)
 	convert_to_long(pid);                        
 	convert_to_long(sig);
   
-	result = kill(pid->value.lval, sig->value.lval);
+	result = kill(Z_LVAL_P(pid), Z_LVAL_P(sig));
 	if (result< 0) {
 		php_error(E_WARNING, "posix_kill(%d, %d) failed with '%s'",
-    		pid->value.lval,
-			sig->value.lval,
+    		Z_LVAL_P(pid),
+			Z_LVAL_P(sig),
 			strerror(errno));
 		RETURN_FALSE;
   	}
@@ -243,10 +243,10 @@ PHP_FUNCTION(posix_setuid)
 
 	convert_to_long(uid);
   
-	result = setuid(uid->value.lval);
+	result = setuid(Z_LVAL_P(uid));
 	if (result < 0) {
 		php_error(E_WARNING, "posix_setuid(%d) failed with '%s'. Must be root",
-	    	uid->value.lval,
+	    	Z_LVAL_P(uid),
 			strerror(errno));
 			RETURN_FALSE;
 	}
@@ -268,10 +268,10 @@ PHP_FUNCTION(posix_setgid)
 
 	convert_to_long(gid);
   
-	result = setgid(gid->value.lval);
+	result = setgid(Z_LVAL_P(gid));
 	if (result < 0) {
 		php_error(E_WARNING, "posix_setgid(%d) failed with '%s'. Must be root",
-	    	gid->value.lval,
+	    	Z_LVAL_P(gid),
 			strerror(errno));
 			RETURN_FALSE;
 	}
@@ -294,10 +294,10 @@ PHP_FUNCTION(posix_seteuid)
 
 	convert_to_long(uid);
   
-	result = seteuid(uid->value.lval);
+	result = seteuid(Z_LVAL_P(uid));
 	if (result < 0) {
 		php_error(E_WARNING, "posix_setuid(%d) failed with '%s'.",
-			uid->value.lval,
+			Z_LVAL_P(uid),
 			strerror(errno));
 			RETURN_FALSE;
 	}
@@ -323,10 +323,10 @@ PHP_FUNCTION(posix_setegid)
 
 	convert_to_long(gid);
   
-	result = setegid(gid->value.lval);
+	result = setegid(Z_LVAL_P(gid));
 	if (result < 0) {
 		php_error(E_WARNING, "posix_setgid(%d) failed with '%s'.",
-	    	gid->value.lval,
+	    	Z_LVAL_P(gid),
 			strerror(errno));
 			RETURN_FALSE;
 	}
@@ -420,11 +420,11 @@ PHP_FUNCTION(posix_setpgid)
 	convert_to_long(pid);
 	convert_to_long(pgid);
   
-	result = setpgid(pid->value.lval, pgid->value.lval);
+	result = setpgid(Z_LVAL_P(pid), Z_LVAL_P(pgid));
 	if (result< 0) {
 		php_error(E_WARNING, "posix_setpgid(%d, %d) failed with '%s'",
-    		pid->value.lval,
-			pgid->value.lval,
+    		Z_LVAL_P(pid),
+			Z_LVAL_P(pgid),
 			strerror(errno));
 		RETURN_FALSE;
   	}
@@ -446,16 +446,16 @@ PHP_FUNCTION(posix_getpgid)
 	}
 
 	convert_to_long(pid);
-	pgid = getpgid(pid->value.lval);
+	pgid = getpgid(Z_LVAL_P(pid));
 	if (pgid < 0) {
 		php_error(E_WARNING, "posix_getpgid(%d) failed with '%s'", 
-			pid->value.lval,
+			Z_LVAL_P(pid),
 			strerror(errno));
 		RETURN_FALSE;
 	}
 
-	return_value->type= IS_LONG;
-	return_value->value.lval = pgid;
+	Z_TYPE_P(return_value)= IS_LONG;
+	Z_LVAL_P(return_value) = pgid;
 #else
 	RETURN_FALSE;
 #endif
@@ -475,16 +475,16 @@ PHP_FUNCTION(posix_getsid)
 	}
 
 	convert_to_long(pid);
-	sid = getsid(pid->value.lval);
+	sid = getsid(Z_LVAL_P(pid));
 	if (sid < 0) {
 		php_error(E_WARNING, "posix_getsid(%d) failed with '%s'", 
-			pid->value.lval,
+			Z_LVAL_P(pid),
 			strerror(errno));
 		RETURN_FALSE;
 	}
 
-	return_value->type= IS_LONG;
-	return_value->value.lval = sid;
+	Z_TYPE_P(return_value)= IS_LONG;
+	Z_LVAL_P(return_value) = sid;
 #else
 	RETURN_FALSE;
 #endif
@@ -576,10 +576,10 @@ PHP_FUNCTION(posix_ttyname)
 	}
 	convert_to_long(fd);
 
-	p = ttyname(fd->value.lval);
+	p = ttyname(Z_LVAL_P(fd));
 	if (p == NULL) {
 		php_error(E_WARNING, "posix_ttyname(%d) failed with '%s'",
-			fd->value.lval,
+			Z_LVAL_P(fd),
 			strerror(errno));
 		RETURN_FALSE;
 	}
@@ -600,7 +600,7 @@ PHP_FUNCTION(posix_isatty)
 	}
 	convert_to_long(fd);
 
-	result = isatty(fd->value.lval);
+	result = isatty(Z_LVAL_P(fd));
 	if (!result)
 		RETURN_FALSE;
 
@@ -656,13 +656,13 @@ PHP_FUNCTION(posix_mkfifo)
 	convert_to_string(path);
 	convert_to_long(mode);
 
-	if (PG(safe_mode) && (!php_checkuid(path->value.str.val, NULL, CHECKUID_ALLOW_ONLY_DIR))) {
+	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_P(path), NULL, CHECKUID_ALLOW_ONLY_DIR))) {
 		RETURN_FALSE;
 	}
-	result = mkfifo(path->value.str.val, mode->value.lval);
+	result = mkfifo(Z_STRVAL_P(path), Z_LVAL_P(mode));
 	if (result < 0) {
 		php_error(E_WARNING, "posix_mkfifo(%s) failed with '%s'",
-			path->value.str.val,
+			Z_STRVAL_P(path),
 			strerror(errno));
 		RETURN_FALSE;
 	}
@@ -703,10 +703,10 @@ PHP_FUNCTION(posix_getgrnam)
 	}
 	convert_to_string(name);
 
-	g = getgrnam(name->value.str.val);
+	g = getgrnam(Z_STRVAL_P(name));
 	if (!g) {
 		php_error(E_WARNING, "posix_getgrnam(%s) failed with '%s'",
-			name->value.str.val,
+			Z_STRVAL_P(name),
 			strerror(errno));
 		RETURN_FALSE;
 	}
@@ -738,10 +738,10 @@ PHP_FUNCTION(posix_getgrgid)
 	}
 	convert_to_long(gid);
 
-	g = getgrgid(gid->value.lval);
+	g = getgrgid(Z_LVAL_P(gid));
 	if (!g) {
 		php_error(E_WARNING, "posix_getgrgid(%d) failed with '%s'",
-			gid->value.lval,
+			Z_LVAL_P(gid),
 			strerror(errno));
 		RETURN_FALSE;
 	}
@@ -770,10 +770,10 @@ PHP_FUNCTION(posix_getpwnam)
 	}
 	convert_to_string(name);
 
-	pw = getpwnam(name->value.str.val);
+	pw = getpwnam(Z_STRVAL_P(name));
 	if (!pw) {
 		php_error(E_WARNING, "posix_getpwnam(%s) failed with '%s'",
-			name->value.str.val,
+			Z_STRVAL_P(name),
 			strerror(errno));
 		RETURN_FALSE;
 	}
@@ -802,10 +802,10 @@ PHP_FUNCTION(posix_getpwuid)
 	}
 	convert_to_long(uid);
 
-	pw = getpwuid(uid->value.lval);
+	pw = getpwuid(Z_LVAL_P(uid));
 	if (!pw) {
 		php_error(E_WARNING, "posix_getpwuid(%d) failed with '%s'",
-			uid->value.lval,
+			Z_LVAL_P(uid),
 			strerror(errno));
 		RETURN_FALSE;
 	}

@@ -103,7 +103,7 @@ PHP_FUNCTION(getrusage)
 	if(ac == 1 &&
 		zend_get_parameters_ex(ac, &pwho) != FAILURE) {
 		convert_to_long_ex(pwho);
-		if((*pwho)->value.lval == 1)
+		if(Z_LVAL_PP(pwho) == 1)
 			who = RUSAGE_CHILDREN;
 	}
 

@@ -491,9 +491,9 @@ PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, Has
 			INIT_PZVAL(*rval);
 
 			if (cur == 'a') {
-				(*rval)->type = IS_ARRAY;
-				ALLOC_HASHTABLE((*rval)->value.ht);
-				myht = (*rval)->value.ht;
+				Z_TYPE_PP(rval) = IS_ARRAY;
+				ALLOC_HASHTABLE(Z_ARRVAL_PP(rval));
+				myht = Z_ARRVAL_PP(rval);
 			} else {
 				zend_class_entry *ce;
 
@@ -573,7 +573,7 @@ PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, Has
 					FREE_ZVAL(data);
 					return 0;
 				}
-				switch (key->type) {
+				switch (Z_TYPE_P(key)) {
 					case IS_LONG:
 						zend_hash_index_update(myht, Z_LVAL_P(key), &data, sizeof(data), NULL);
 						break;
@@ -585,7 +585,7 @@ PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, Has
 				FREE_ZVAL(key);
 			}
 
-			if ((*rval)->type == IS_OBJECT) {
+			if (Z_TYPE_PP(rval) == IS_OBJECT) {
 				zval *retval_ptr = NULL;
 				zval fname;
 
@@ -617,9 +617,9 @@ PHP_FUNCTION(serialize)
 		WRONG_PARAM_COUNT;
 	}
 
-	return_value->type = IS_STRING;
-	return_value->value.str.val = NULL;
-	return_value->value.str.len = 0;
+	Z_TYPE_P(return_value) = IS_STRING;
+	Z_STRVAL_P(return_value) = NULL;
+	Z_STRLEN_P(return_value) = 0;
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 	php_var_serialize(&buf, struc, &var_hash TSRMLS_CC);
@@ -641,8 +641,8 @@ PHP_FUNCTION(unserialize)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((*buf)->type == IS_STRING) {
-		const char *p = (*buf)->value.str.val;
+	if (Z_TYPE_PP(buf) == IS_STRING) {
+		const char *p = Z_STRVAL_PP(buf);
 
 		if (Z_STRLEN_PP(buf) == 0) {
 			RETURN_FALSE;

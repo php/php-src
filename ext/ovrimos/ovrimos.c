@@ -340,7 +340,7 @@ PHP_FUNCTION(ovrimos_execute)
 				RETURN_FALSE;
 			}
 			convert_to_string(*tmp);
-			if ((*tmp)->type != IS_STRING) {
+			if (Z_TYPE_PP(tmp) != IS_STRING) {
 				php_error(E_WARNING,
 					  "Error converting parameter %d to string in call to ovrimos_execute()",
 					  icol);
@@ -348,11 +348,11 @@ PHP_FUNCTION(ovrimos_execute)
 			}
 
 			/* PHP data to param type */
-			from_type.type = T_VARCHAR;
-			from_type.u.length = (*tmp)->value.str.len;
+			Z_TYPE(from_type) = T_VARCHAR;
+			from_type.u.length = Z_STRLEN_PP(tmp);
 
 			*buffer = 0;
-			memcpy(buffer + 1, (*tmp)->value.str.val,
+			memcpy(buffer + 1, Z_STRVAL_PP(tmp),
 			       from_type.u.length);
 			buffer[from_type.u.length + 1] = 0;
 
@@ -654,17 +654,17 @@ PHP_FUNCTION(ovrimos_fetch_into)
 	}
 
 	convert_to_long(arg_id);
-	pstmt = (PSTATEMENT) arg_id->value.lval;
+	pstmt = (PSTATEMENT) Z_LVAL_P(arg_id);
 
 	stmt = pstmt->statement;
 
 	if (arg_how != 0) {
-		if (arg_how->type != IS_STRING) {
+		if (Z_TYPE_P(arg_how) != IS_STRING) {
 			php_error(E_WARNING,
 				  "Third argument not string in ovrimos_fetch_into()");
 			RETURN_FALSE;
 		}
-		s_how = arg_how->value.str.val;
+		s_how = Z_STRVAL_P(arg_how);
 		if (stricmp(s_how, "next") == 0) {
 			how = h_next;
 		} else if (stricmp(s_how, "prev") == 0) {
@@ -687,7 +687,7 @@ PHP_FUNCTION(ovrimos_fetch_into)
 		}
 		if (arg_row != 0) {
 			convert_to_long(arg_row);
-			rownum = arg_row->value.lval;
+			rownum = Z_LVAL_P(arg_row);
 			switch (how) {
 			case h_next:
 			case h_prev:
@@ -699,7 +699,7 @@ PHP_FUNCTION(ovrimos_fetch_into)
 		}
 	}
 
-	if (arr->type != IS_ARRAY) {
+	if (Z_TYPE_P(arr) != IS_ARRAY) {
 		if (array_init(arr) == FAILURE) {
 			php_error(E_WARNING,
 				  "Can't convert to type Array");
@@ -731,16 +731,16 @@ PHP_FUNCTION(ovrimos_fetch_into)
 		char buffer[10240];
 		tmp = (pval *) emalloc(sizeof(pval));
 		tmp->refcount = 1;
-		tmp->type = IS_STRING;
-		tmp->value.str.len = 0;
+		Z_TYPE_P(tmp) = IS_STRING;
+		Z_STRLEN_P(tmp) = 0;
 
 		/* Produce column value in 'tmp' ... */
 
 		column_to_string(stmt, icol, buffer, &len, pstmt);
-		tmp->value.str.len = len;
-		tmp->value.str.val = estrndup(buffer, len);
+		Z_STRLEN_P(tmp) = len;
+		Z_STRVAL_P(tmp) = estrndup(buffer, len);
 
-		zend_hash_index_update(arr->value.ht, icol, &tmp,
+		zend_hash_index_update(Z_ARRVAL_P(arr), icol, &tmp,
 				       sizeof(pval *), NULL);
 	}
 
@@ -785,16 +785,16 @@ PHP_FUNCTION(ovrimos_fetch_row)
 
 	convert_to_long(arg_id);
 
-	pstmt = (PSTATEMENT) arg_id->value.lval;
+	pstmt = (PSTATEMENT) Z_LVAL_P(arg_id);
 	stmt = (SQLS) pstmt->statement;
 
 	if (arg_how != 0) {
-		if (arg_how->type != IS_STRING) {
+		if (Z_TYPE_P(arg_how) != IS_STRING) {
 			php_error(E_WARNING,
 				  "Second argument not string in ovrimos_fetch_row()");
 			RETURN_FALSE;
 		}
-		s_how = arg_how->value.str.val;
+		s_how = Z_STRVAL_P(arg_how);
 		if (stricmp(s_how, "next") == 0) {
 			how = h_next;
 		} else if (stricmp(s_how, "prev") == 0) {
@@ -817,7 +817,7 @@ PHP_FUNCTION(ovrimos_fetch_row)
 		}
 		if (arg_row != 0) {
 			convert_to_long(arg_row);
-			rownum = arg_row->value.lval;
+			rownum = Z_LVAL_P(arg_row);
 			switch (how) {
 			case h_next:
 			case h_prev:
@@ -869,23 +869,23 @@ PHP_FUNCTION(ovrimos_result)
 			     &arg_field) == FAILURE) WRONG_PARAM_COUNT;
 
 	convert_to_long(arg_id);
-	pstmt = (PSTATEMENT) arg_id->value.lval;
+	pstmt = (PSTATEMENT) Z_LVAL_P(arg_id);
 	stmt = (SQLS) pstmt->statement;
 
 	colnb = sqlGetOutputColNb(stmt);
 
-	if (arg_field->type == IS_STRING) {
+	if (Z_TYPE_P(arg_field) == IS_STRING) {
 		int i;
 		for (i = 0; i < colnb; i++) {
 			if (!stricmp
-			    (arg_field->value.str.val,
+			    (Z_STRVAL_P(arg_field),
 			     sqlGetOutputColName(stmt, i))) {
 				icol = i;
 				break;
 			}
 		}
-	} else if (arg_field->type == IS_LONG) {
-		icol = arg_field->value.lval - 1;
+	} else if (Z_TYPE_P(arg_field) == IS_LONG) {
+		icol = Z_LVAL_P(arg_field) - 1;
 	} else {
 		php_error(E_WARNING,
 			  "Second argument neither number nor string in ovrimos_result()");

@@ -63,7 +63,7 @@ int dbx_pgsql_connect(zval **rv, zval **host, zval **db, zval **username, zval *
 	}
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_connect", &returned_zval, nargs, args);		
 
-	if (!returned_zval || returned_zval->type!=IS_RESOURCE) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_RESOURCE) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}
@@ -108,7 +108,7 @@ int dbx_pgsql_pconnect(zval **rv, zval **host, zval **db, zval **username, zval 
 	}
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_pconnect", &returned_zval, nargs, args);
 
-	if (!returned_zval || returned_zval->type!=IS_RESOURCE) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_RESOURCE) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}
@@ -125,7 +125,7 @@ int dbx_pgsql_close(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS)
 
 	arguments[0]=dbx_handle;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_close", &returned_zval, number_of_arguments, arguments);
-	if (!returned_zval || returned_zval->type!=IS_BOOL) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_BOOL) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}
@@ -147,7 +147,7 @@ int dbx_pgsql_query(zval **rv, zval **dbx_handle, zval **db_name, zval **sql_sta
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_exec", &returned_zval, nargs, args);
 	/* pg_query returns a bool for success or failure, 
 	   or a result_identifier for select statements */
-	if (!returned_zval || (returned_zval->type!=IS_BOOL && returned_zval->type!=IS_RESOURCE)) {
+	if (!returned_zval || (Z_TYPE_P(returned_zval)!=IS_BOOL && Z_TYPE_P(returned_zval)!=IS_RESOURCE)) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}
@@ -164,7 +164,7 @@ int dbx_pgsql_getcolumncount(zval **rv, zval **result_handle, INTERNAL_FUNCTION_
 
 	arguments[0]=result_handle;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_numfields", &returned_zval, number_of_arguments, arguments);
-	if (!returned_zval || returned_zval->type!=IS_LONG) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_LONG) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}
@@ -186,7 +186,7 @@ int dbx_pgsql_getcolumnname(zval **rv, zval **result_handle, long column_index, 
 	arguments[1]=&zval_column_index;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_fieldname", &returned_zval, number_of_arguments, arguments);
 	/* pg_fieldname returns a string */
-	if (!returned_zval || returned_zval->type!=IS_STRING) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_STRING) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		FREE_ZVAL(zval_column_index);
 		return 0;
@@ -210,7 +210,7 @@ int dbx_pgsql_getcolumntype(zval **rv, zval **result_handle, long column_index, 
 	arguments[1]=&zval_column_index;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_fieldtype", &returned_zval, number_of_arguments, arguments);
 	/* pg_fieldtype returns a string */
-	if (!returned_zval || returned_zval->type!=IS_STRING) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_STRING) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		FREE_ZVAL(zval_column_index);
 		return 0;
@@ -243,7 +243,7 @@ int dbx_pgsql_getrow(zval **rv, zval **result_handle, long row_number, INTERNAL_
 	if (save_error_reporting) {
 		EG(error_reporting) = save_error_reporting;
 	}
-	if (!returned_zval || returned_zval->type!=IS_ARRAY) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_ARRAY) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		FREE_ZVAL(zval_row);
 		return 0;
@@ -263,7 +263,7 @@ int dbx_pgsql_error(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS)
 	arguments[0]=dbx_handle;
 	if (!dbx_handle) number_of_arguments=0;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_errormessage", &returned_zval, number_of_arguments, arguments);
-	if (!returned_zval || returned_zval->type!=IS_STRING) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_STRING) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}

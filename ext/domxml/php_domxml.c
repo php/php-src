@@ -312,7 +312,7 @@ static inline void node_wrapper_dtor(xmlNodePtr node)
 {
 	zval *wrapper;
 
-	if (!node || node->type == XML_DTD_NODE)
+	if (!node || Z_TYPE_P(node) == XML_DTD_NODE)
 		return;
 
 	wrapper = dom_object_get_data(node);
@@ -661,14 +661,14 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 
 	MAKE_STD_ZVAL(wrapper);
 
-	switch (obj->type) {
+	switch (Z_TYPE_P(obj)) {
 
 		case XML_ELEMENT_NODE:
 		{
 			xmlNodePtr nodep = obj;
 			object_init_ex(wrapper, domxmlelement_class_entry);
 			rsrc_type = le_domxmlelementp;
-			add_property_long(wrapper, "type", nodep->type);
+			add_property_long(wrapper, "type", Z_TYPE_P(nodep));
 			add_property_stringl(wrapper, "tagname", (char *) nodep->name, strlen(nodep->name), 1);
 			break;
 		}
@@ -680,7 +680,7 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 			rsrc_type = le_domxmltextp;
 			content = xmlNodeGetContent(nodep);
 			if (content) {
-				add_property_long(wrapper, "type", nodep->type);
+				add_property_long(wrapper, "type", Z_TYPE_P(nodep));
 				add_property_stringl(wrapper, "content", (char *) content, strlen(content), 1);
 			}
 			break;
@@ -727,9 +727,9 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 			xmlNodePtr nodep = obj;
 			object_init_ex(wrapper, domxmlnode_class_entry);
 			rsrc_type = le_domxmlnodep;
-			add_property_long(wrapper, "type", nodep->type);
+			add_property_long(wrapper, "type", Z_TYPE_P(nodep));
 			add_property_stringl(wrapper, "name", (char *) nodep->name, strlen(nodep->name), 1);
-			if (obj->type == XML_ENTITY_REF_NODE) {
+			if (Z_TYPE_P(obj) == XML_ENTITY_REF_NODE) {
 				content = xmlNodeGetContent(nodep);
 				if (content)
 					add_property_stringl(wrapper, "content", (char *) content, strlen(content), 1);
@@ -766,7 +766,7 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 			if (docp->encoding)
 				add_property_stringl(wrapper, "encoding", (char *) docp->encoding, strlen(docp->encoding), 1);
 			add_property_long(wrapper, "standalone", docp->standalone);
-			add_property_long(wrapper, "type", docp->type);
+			add_property_long(wrapper, "type", Z_TYPE_P(docp));
 			add_property_long(wrapper, "compression", docp->compression);
 			add_property_long(wrapper, "charset", docp->charset);
 			break;
@@ -787,7 +787,7 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 		}
 
 		default: 
-			php_error(E_WARNING, "Unsupported Node type: %d\n", obj->type);
+			php_error(E_WARNING, "Unsupported Node type: %d\n", Z_TYPE_P(obj));
 			return NULL;
 	}
 
@@ -1095,7 +1095,7 @@ PHP_FUNCTION(domxml_node_name)
 	id = getThis();
 	n = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
 
-	switch (n->type) {
+	switch (Z_TYPE_P(n)) {
 		case XML_ELEMENT_NODE:
 			str = n->name;
 			break;
@@ -1151,7 +1151,7 @@ PHP_FUNCTION(domxml_node_value)
 	if (!n) {
 		RETURN_FALSE;
 	}
-	switch (n->type) {
+	switch (Z_TYPE_P(n)) {
 		case XML_TEXT_NODE:
 		case XML_COMMENT_NODE:
 		case XML_CDATA_SECTION_NODE:
@@ -1179,7 +1179,7 @@ PHP_FUNCTION(domxml_node_type)
 	if (!n) {
 		RETURN_FALSE;
 	}
-	RETURN_LONG(n->type);
+	RETURN_LONG(Z_TYPE_P(n));
 }
 /* }}} */
 
@@ -1327,7 +1327,7 @@ PHP_FUNCTION(domxml_node_has_attributes)
 	id = getThis();
 	if (NULL ==	(nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC))) RETURN_FALSE;
 
-	if (nodep->type != XML_ELEMENT_NODE)
+	if (Z_TYPE_P(nodep) != XML_ELEMENT_NODE)
 		RETURN_FALSE;
 
 	if (nodep->properties) {
@@ -1399,7 +1399,7 @@ PHP_FUNCTION(domxml_node_children)
 	/* Even if the nodep is a XML_DOCUMENT_NODE the type is at the
 	   same position.
 	 */
-	if (nodep->type == XML_DOCUMENT_NODE)
+	if (Z_TYPE_P(nodep) == XML_DOCUMENT_NODE)
 		last = ((xmlDoc *) nodep)->children;
 	else
 		last = nodep->children;
@@ -1957,7 +1957,7 @@ PHP_FUNCTION(domxml_doc_document_element)
 	}
 
 	while (node) {
-		if (node->type == XML_ELEMENT_NODE) {
+		if (Z_TYPE_P(node) == XML_ELEMENT_NODE) {
 			zval *rv;
 			rv = php_domobject_new(node, &ret TSRMLS_CC);
 			SEPARATE_ZVAL(&rv);
@@ -2285,7 +2285,7 @@ PHP_FUNCTION(xmldocfile)
 	if (docp->encoding)
 		add_property_stringl(return_value, "encoding", (char *) docp->encoding, strlen(docp->encoding), 1);
 	add_property_long(return_value, "standalone", docp->standalone);
-	add_property_long(return_value, "type", docp->type);
+	add_property_long(return_value, "type", Z_TYPE_P(docp));
 	add_property_long(return_value, "compression", docp->compression);
 	add_property_long(return_value, "charset", docp->charset);
 	zend_list_addref(ret);
@@ -2405,7 +2405,7 @@ static int node_namespace(zval **attributes, xmlNode *nodep TSRMLS_DC)
 			add_property_stringl(pattr, "href", (char *) ns->href, strlen(ns->href), 1);
 		if (ns->prefix)
 			add_property_stringl(pattr, "prefix", (char *) ns->prefix, strlen(ns->prefix), 1);
-		add_property_long(pattr, "type", ns->type);
+		add_property_long(pattr, "type", Z_TYPE_P(ns));
 /*		} */
 
 		zend_hash_next_index_insert(Z_ARRVAL_PP(attributes), &pattr, sizeof(zval *), NULL);
@@ -2424,7 +2424,7 @@ static int node_attributes(zval **attributes, xmlNode *nodep TSRMLS_DC)
 	int count = 0;
 
 	/* Get the children of the current node */
-	if (nodep->type != XML_ELEMENT_NODE)
+	if (Z_TYPE_P(nodep) != XML_ELEMENT_NODE)
 		return -1;
 	attr = nodep->properties;
 	if (!attr)
@@ -2679,9 +2679,9 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 	rv = php_xpathobject_new(xpathobjp, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
 
-	add_property_long(rv, "type", xpathobjp->type);
+	add_property_long(rv, "type", Z_TYPE_P(xpathobjp));
 
-	switch (xpathobjp->type) {
+	switch (Z_TYPE_P(xpathobjp)) {
 
 		case XPATH_UNDEFINED:
 			break;

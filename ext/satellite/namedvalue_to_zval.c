@@ -113,13 +113,13 @@ static zend_bool satellite_any_to_zval_sequence(
 
 	/* set zval members */
 #if 0
-	pDestination->type = IS_ARRAY;
+	pDZ_TYPE_P(estination) = IS_ARRAY;
 	pDestination->refcount = 1;
 
-	pDestination->value.ht = orbit_new(HashTable);
+	pDZ_ARRVAL_P(estination) = orbit_new(HashTable);
 
 	zend_hash_init(
-			pDestination->value.ht,		/* hash table */
+			pDZ_ARRVAL_P(estination),		/* hash table */
 			0, 												/* size */
 			NULL, 										/* hash function */
 			ZVAL_PTR_DTOR, 						/* destructor */
@@ -153,7 +153,7 @@ static zend_bool satellite_any_to_zval_sequence(
 		/* add to hashtable */
 		INIT_PZVAL(p_destination_item);	/* testing! */
 		zend_hash_next_index_insert(
-			pDestination->value.ht,
+			pDZ_ARRVAL_P(estination),
 			&p_destination_item,
 			sizeof(zval *),
 			NULL);

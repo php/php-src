@@ -81,7 +81,7 @@ int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 			return NOT_FOUND;
 		}
 	} else {
-		file_handle.type = ZEND_HANDLE_FILENAME;
+		Z_TYPE(file_handle) = ZEND_HANDLE_FILENAME;
 		file_handle.handle.fd = 0;
 		file_handle.filename = SG(request_info).path_translated;
 		file_handle.opened_path = NULL;

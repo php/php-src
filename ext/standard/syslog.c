@@ -217,8 +217,8 @@ PHP_FUNCTION(openlog)
 	if (BG(syslog_device)) {
 		efree(BG(syslog_device));
 	}
-	BG(syslog_device) = estrndup((*ident)->value.str.val, (*ident)->value.str.len);
-	openlog(BG(syslog_device), (*option)->value.lval, (*facility)->value.lval);
+	BG(syslog_device) = estrndup(Z_STRVAL_PP(ident), Z_STRLEN_PP(ident));
+	openlog(BG(syslog_device), Z_LVAL_PP(option), Z_LVAL_PP(facility));
 	RETURN_TRUE;
 }
 /* }}} */
@@ -253,7 +253,7 @@ PHP_FUNCTION(syslog)
 	 * this will cause problems.
 	 */
 
-	php_syslog((*priority)->value.lval, "%.500s", (*message)->value.str.val);
+	php_syslog(Z_LVAL_PP(priority), "%.500s", Z_STRVAL_PP(message));
 	RETURN_TRUE;
 }
 /* }}} */

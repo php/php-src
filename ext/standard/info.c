@@ -65,14 +65,14 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 	ulong num_key;
 
 	if (zend_hash_find(&EG(symbol_table), name, name_length+1, (void **) &data)!=FAILURE
-		&& ((*data)->type==IS_ARRAY)) {
-		zend_hash_internal_pointer_reset((*data)->value.ht);
-		while (zend_hash_get_current_data((*data)->value.ht, (void **) &tmp) == SUCCESS) {
+		&& (Z_TYPE_PP(data)==IS_ARRAY)) {
+		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(data));
+		while (zend_hash_get_current_data(Z_ARRVAL_PP(data), (void **) &tmp) == SUCCESS) {
 			PUTS("<tr valign=\"baseline\" bgcolor=\"" PHP_CONTENTS_COLOR "\">");
 			PUTS("<td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><b>");
 			PUTS(name);
 			PUTS("[\"");
-			switch (zend_hash_get_current_key((*data)->value.ht, &string_key, &num_key, 0)) {
+			switch (zend_hash_get_current_key(Z_ARRVAL_PP(data), &string_key, &num_key, 0)) {
 				case HASH_KEY_IS_STRING:
 					zend_html_puts(string_key, strlen(string_key));
 					break;
@@ -81,21 +81,21 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 					break;
 			}
 			PUTS("\"]</b></td><td>");
-			if ((*tmp)->type == IS_ARRAY) {
+			if (Z_TYPE_PP(tmp) == IS_ARRAY) {
 				PUTS("<pre>");
 				zend_print_zval_r(*tmp, 0);
 				PUTS("</pre>");
-			} else if ((*tmp)->type != IS_STRING) {
+			} else if (Z_TYPE_PP(tmp) != IS_STRING) {
 				tmp2 = **tmp;
 				zval_copy_ctor(&tmp2);
 				convert_to_string(&tmp2);
 				zend_html_puts(tmp2.value.str.val, tmp2.value.str.len);
 				zval_dtor(&tmp2);
 			} else {
-				zend_html_puts((*tmp)->value.str.val, (*tmp)->value.str.len);
+				zend_html_puts(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 			}
 			PUTS("&nbsp;</td></tr>\n");
-			zend_hash_move_forward((*data)->value.ht);
+			zend_hash_move_forward(Z_ARRVAL_PP(data));
 		}
 	}
 }
@@ -290,16 +290,16 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_info_print_table_start();
 		php_info_print_table_header(2, "Variable", "Value");
 		if (zend_hash_find(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF"), (void **) &data) != FAILURE) {
-			php_info_print_table_row(2, "PHP_SELF", (*data)->value.str.val);
+			php_info_print_table_row(2, "PHP_SELF", Z_STRVAL_PP(data));
 		}
 		if (zend_hash_find(&EG(symbol_table), "PHP_AUTH_TYPE", sizeof("PHP_AUTH_TYPE"), (void **) &data) != FAILURE) {
-			php_info_print_table_row(2, "PHP_AUTH_TYPE", (*data)->value.str.val);
+			php_info_print_table_row(2, "PHP_AUTH_TYPE", Z_STRVAL_PP(data));
 		}
 		if (zend_hash_find(&EG(symbol_table), "PHP_AUTH_USER", sizeof("PHP_AUTH_USER"), (void **) &data) != FAILURE) {
-			php_info_print_table_row(2, "PHP_AUTH_USER", (*data)->value.str.val);
+			php_info_print_table_row(2, "PHP_AUTH_USER", Z_STRVAL_PP(data));
 		}
 		if (zend_hash_find(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW"), (void **) &data) != FAILURE) {
-			php_info_print_table_row(2, "PHP_AUTH_PW", (*data)->value.str.val);
+			php_info_print_table_row(2, "PHP_AUTH_PW", Z_STRVAL_PP(data));
 		}
 		php_print_gpcse_array("_FORM", sizeof("_FORM")-1 TSRMLS_CC);
 		php_print_gpcse_array("_GET", sizeof("_GET")-1 TSRMLS_CC);

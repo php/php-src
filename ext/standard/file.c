@@ -2041,7 +2041,7 @@ PHP_FUNCTION(fgetcsv)
 		}
 		convert_to_string_ex(p_delim);
 		/* Make sure that there is at least one character in string */
-		if ((*p_delim)->value.str.len < 1) {
+		if (Z_STRLEN_PP(p_delim) < 1) {
 			WRONG_PARAM_COUNT;
 		}
 			/* use first character from string */

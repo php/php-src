@@ -210,7 +210,7 @@ PHP_FUNCTION(muscat_setup_net)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((*socket_arg)->type!=IS_RESOURCE) {
+	if (Z_TYPE_PP(socket_arg)!=IS_RESOURCE) {
 	  zend_error(E_ERROR,"First parameter must be a socket handle");
 	  RETURN_FALSE;
 	}
@@ -324,7 +324,7 @@ PHP_FUNCTION(muscat_close)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &muscat_handle_arg) == FAILURE){
 		WRONG_PARAM_COUNT;
 	}
-	if ((*muscat_handle_arg)->type!=IS_RESOURCE) {
+	if (Z_TYPE_PP(muscat_handle_arg)!=IS_RESOURCE) {
 	  zend_error(E_ERROR,"First parameter must be a muscat handle");
 	  RETURN_FALSE;
 	}
@@ -334,7 +334,7 @@ PHP_FUNCTION(muscat_close)
 
 	_muscat_close(handle);
 	// Let destructor take care of efree!
-	zend_list_delete((*muscat_handle_arg)->value.lval);
+	zend_list_delete(Z_LVAL_PP(muscat_handle_arg));
 }
 /* }}} */
 

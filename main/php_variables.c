@@ -40,13 +40,13 @@ PHPAPI void php_register_variable_safe(char *var, char *strval, int str_len, zva
 	zval new_entry;
 
 	/* Prepare value */
-	new_entry.value.str.len = str_len;
+	Z_STRLEN(new_entry) = str_len;
 	if (PG(magic_quotes_gpc)) {
-		new_entry.value.str.val = php_addslashes(strval, new_entry.value.str.len, &new_entry.value.str.len, 0 TSRMLS_CC);
+		Z_STRVAL(new_entry) = php_addslashes(strval, Z_STRLEN(new_entry), &Z_STRLEN(new_entry), 0 TSRMLS_CC);
 	} else {
-		new_entry.value.str.val = estrndup(strval, new_entry.value.str.len);
+		Z_STRVAL(new_entry) = estrndup(strval, Z_STRLEN(new_entry));
 	}
-	new_entry.type = IS_STRING;
+	Z_TYPE(new_entry) = IS_STRING;
 
 	php_register_variable_ex(var, &new_entry, track_vars_array TSRMLS_CC);
 }
@@ -69,9 +69,9 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 	}
 	if (track_vars_array) {
 		if (symtable1) {
-			symtable2 = track_vars_array->value.ht;
+			symtable2 = Z_ARRVAL_P(track_vars_array);
 		} else {
-			symtable1 = track_vars_array->value.ht;
+			symtable1 = Z_ARRVAL_P(track_vars_array);
 		}
 	}
 	if (!symtable1) {
@@ -129,7 +129,7 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 					escaped_index = index;
 				}
 				if (zend_hash_find(symtable1, escaped_index, index_len+1, (void **) &gpc_element_p)==FAILURE
-					|| (*gpc_element_p)->type != IS_ARRAY) {
+					|| Z_TYPE_PP(gpc_element_p) != IS_ARRAY) {
 					MAKE_STD_ZVAL(gpc_element);
 					array_init(gpc_element);
 					zend_hash_update(symtable1, escaped_index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
@@ -141,7 +141,7 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 			if (!top_gpc_p) {
 				top_gpc_p = gpc_element_p;
 			}
-			symtable1 = (*gpc_element_p)->value.ht;
+			symtable1 = Z_ARRVAL_PP(gpc_element_p);
 			/* ip pointed to the '[' character, now obtain the key */
 			index = ++ip;
 			index_len = 0;
@@ -169,7 +169,7 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 		} else {
 			MAKE_STD_ZVAL(gpc_element);
 			gpc_element->value = val->value;
-			gpc_element->type = val->type;
+			Z_TYPE_P(gpc_element) = Z_TYPE_P(val);
 			if (!index) {
 				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			} else {

@@ -174,8 +174,8 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 		OG(ob_lock) = 1;
 		if (call_user_function_ex(CG(function_table), NULL, OG(active_ob_buffer).output_handler, &alternate_buffer, 2, params, 1, NULL TSRMLS_CC)==SUCCESS) {
 			convert_to_string_ex(&alternate_buffer);
-			final_buffer = alternate_buffer->value.str.val;
-			final_buffer_length = alternate_buffer->value.str.len;
+			final_buffer = Z_STRVAL_P(alternate_buffer);
+			final_buffer_length = Z_STRLEN_P(alternate_buffer);
 		}
 		OG(ob_lock) = 0;
 		zval_ptr_dtor(&OG(active_ob_buffer).output_handler);
@@ -585,7 +585,7 @@ PHP_FUNCTION(ob_implicit_flush)
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(zv_flag);
-			flag = (*zv_flag)->value.lval;
+			flag = Z_LVAL_PP(zv_flag);
 			break;
 		default:
 			WRONG_PARAM_COUNT;

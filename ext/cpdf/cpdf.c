@@ -1065,9 +1065,9 @@ PHP_FUNCTION(cpdf_set_text_matrix)
 	zend_hash_internal_pointer_reset(matrix);
 	for(i=0; i<zend_hash_num_elements(matrix); i++) {
 		zend_hash_get_current_data(matrix, (void *) &data);
-		switch(data->type) {
+		switch(Z_TYPE_P(data)) {
 			case IS_DOUBLE:
-				*pdfmatrixptr++ = (float) data->value.dval;
+				*pdfmatrixptr++ = (float) Z_DVAL_P(data);
 				break;
 			default:
 				*pdfmatrixptr++ = 0.0;

@@ -139,7 +139,7 @@ static void *SWFgetProperty(zval *id, char *name, int namelen, int proptype TSRM
       php_error(E_WARNING, "unable to find property %s", name);
       return NULL;
     }
-    id_to_find = (*tmp)->value.lval;
+    id_to_find = Z_LVAL_PP(tmp);
   }
   else
     return NULL;
@@ -163,21 +163,21 @@ static void *SWFgetProperty(zval *id, char *name, int namelen, int proptype TSRM
 
 SWFCharacter getCharacter(zval *id TSRMLS_DC)
 {
-  if(id->value.obj.ce == &shape_class_entry)
+  if(Z_OBJCE_P(id) == &shape_class_entry)
     return (SWFCharacter)getShape(id TSRMLS_CC);
-  else if(id->value.obj.ce == &font_class_entry)
+  else if(Z_OBJCE_P(id) == &font_class_entry)
     return (SWFCharacter)getFont(id TSRMLS_CC);
-  else if(id->value.obj.ce == &text_class_entry)
+  else if(Z_OBJCE_P(id) == &text_class_entry)
     return (SWFCharacter)getText(id TSRMLS_CC);
-  else if(id->value.obj.ce == &textfield_class_entry)
+  else if(Z_OBJCE_P(id) == &textfield_class_entry)
     return (SWFCharacter)getTextField(id TSRMLS_CC);
-  else if(id->value.obj.ce == &button_class_entry)
+  else if(Z_OBJCE_P(id) == &button_class_entry)
     return (SWFCharacter)getButton(id TSRMLS_CC);
-  else if(id->value.obj.ce == &morph_class_entry)
+  else if(Z_OBJCE_P(id) == &morph_class_entry)
     return (SWFCharacter)getMorph(id TSRMLS_CC);
-  else if(id->value.obj.ce == &sprite_class_entry)
+  else if(Z_OBJCE_P(id) == &sprite_class_entry)
     return (SWFCharacter)getSprite(id TSRMLS_CC);
-  else if(id->value.obj.ce == &bitmap_class_entry)
+  else if(Z_OBJCE_P(id) == &bitmap_class_entry)
     return (SWFCharacter)getBitmap(id TSRMLS_CC);
   else
     php_error(E_ERROR, "called object is not an SWFCharacter");
@@ -235,7 +235,7 @@ static SWFInput getInput(zval **zfile)
   else
   {
     input = newSWFInput_file(file);
-    zend_list_addref((*zfile)->value.lval);
+    zend_list_addref(Z_LVAL_PP(zfile));
   }
 
   zend_list_addref(zend_list_insert(input, le_swfinputp));
@@ -328,7 +328,7 @@ PHP_FUNCTION(swfbitmap_init)
   else
     WRONG_PARAM_COUNT;
 
-  if((*zfile)->type != IS_RESOURCE)
+  if(Z_TYPE_PP(zfile) != IS_RESOURCE)
   {
     convert_to_string_ex(zfile);
     input = newSWFInput_buffer(Z_STRVAL_PP(zfile), Z_STRLEN_PP(zfile));
@@ -339,7 +339,7 @@ PHP_FUNCTION(swfbitmap_init)
 
   if(zmask != NULL)
   {
-    if((*zmask)->type != IS_RESOURCE)
+    if(Z_TYPE_PP(zmask) != IS_RESOURCE)
     {
       convert_to_string_ex(zmask);
       maskinput = newSWFInput_buffer(Z_STRVAL_PP(zmask), Z_STRLEN_PP(zmask));
@@ -1526,7 +1526,7 @@ PHP_FUNCTION(swfmovie_add)
   convert_to_object_ex(zchar);
 
   /* XXX - SWFMovie_add deals w/ all block types.  Probably will need to add that.. */
-  if((*zchar)->value.obj.ce == &action_class_entry)
+  if(Z_OBJCE_PP(zchar) == &action_class_entry)
     block = (SWFBlock)getAction(*zchar TSRMLS_CC);
   else
     block = (SWFBlock)getCharacter(*zchar TSRMLS_CC);
@@ -1613,7 +1613,7 @@ PHP_FUNCTION(swfmovie_save)
   if((ZEND_NUM_ARGS() != 1) || zend_get_parameters_ex(1, &x) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  if((*x)->type == IS_RESOURCE)
+  if(Z_TYPE_PP(x) == IS_RESOURCE)
   {
     ZEND_FETCH_RESOURCE(file, FILE *, x, -1,"File-Handle",php_file_le_fopen());
 
@@ -1717,7 +1717,7 @@ PHP_FUNCTION(swfmovie_streamMp3)
   if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zfile) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  if((*zfile)->type != IS_RESOURCE)
+  if(Z_TYPE_PP(zfile) != IS_RESOURCE)
   {
     convert_to_string_ex(zfile);
     input = newSWFInput_buffer(Z_STRVAL_PP(zfile), Z_STRLEN_PP(zfile));
@@ -2396,7 +2396,7 @@ PHP_FUNCTION(swfsprite_add)
 
   convert_to_object_ex(zchar);
 
-  if((*zchar)->value.obj.ce == &action_class_entry)
+  if(Z_OBJCE_PP(zchar) == &action_class_entry)
     block = (SWFBlock)getAction(*zchar TSRMLS_CC);
   else
     block = (SWFBlock)getCharacter(*zchar TSRMLS_CC);

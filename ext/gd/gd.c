@@ -3224,15 +3224,15 @@ PHP_FUNCTION(imagepsbbox)
 		space += T1_GetCharWidth(*f_ind, ' ');
 		cur_x = cur_y = 0;
 
-		for (i = 0; i < (*str)->value.str.len; i++) {
-			if ((*str)->value.str.val[i] == ' ') {
+		for (i = 0; i < Z_STRLEN_PP(str); i++) {
+			if (Z_STRVAL_PP(str)[i] == ' ') {
 				char_bbox.llx = char_bbox.lly = char_bbox.ury = 0;
 				char_bbox.urx = char_width = space;
 			} else {
-				char_bbox = T1_GetCharBBox(*f_ind, (*str)->value.str.val[i]);
-				char_width = T1_GetCharWidth(*f_ind, (*str)->value.str.val[i]);
+				char_bbox = T1_GetCharBBox(*f_ind, Z_STRVAL_PP(str)[i]);
+				char_width = T1_GetCharWidth(*f_ind, Z_STRVAL_PP(str)[i]);
 			}
-			amount_kern = i ? T1_GetKerning(*f_ind, (*str)->value.str.val[i-1], (*str)->value.str.val[i]) : 0;
+			amount_kern = i ? T1_GetKerning(*f_ind, Z_STRVAL_PP(str)[i-1], Z_STRVAL_PP(str)[i]) : 0;
 
 			/* Transfer character bounding box to right place */
 			x1 = new_x(char_bbox.llx, char_bbox.lly) + cur_x;
@@ -3261,7 +3261,7 @@ PHP_FUNCTION(imagepsbbox)
 		}
 
 	} else {
-		str_bbox = T1_GetStringBBox(*f_ind, (*str)->value.str.val, (*str)->value.str.len, space, T1_KERNING);
+		str_bbox = T1_GetStringBBox(*f_ind, Z_STRVAL_PP(str), Z_STRLEN_PP(str), space, T1_KERNING);
 	}
 	if (T1_errno) RETURN_FALSE;
 	
@@ -3271,10 +3271,10 @@ PHP_FUNCTION(imagepsbbox)
 	/*
 	printf("%d %d %d %d\n", str_bbox.llx, str_bbox.lly, str_bbox.urx, str_bbox.ury);
 	*/
-	add_next_index_long(return_value, (int) ceil(((double) str_bbox.llx)*(*sz)->value.lval/1000));
-	add_next_index_long(return_value, (int) ceil(((double) str_bbox.lly)*(*sz)->value.lval/1000));
-	add_next_index_long(return_value, (int) ceil(((double) str_bbox.urx)*(*sz)->value.lval/1000));
-	add_next_index_long(return_value, (int) ceil(((double) str_bbox.ury)*(*sz)->value.lval/1000));
+	add_next_index_long(return_value, (int) ceil(((double) str_bbox.llx)*Z_LVAL_PP(sz)/1000));
+	add_next_index_long(return_value, (int) ceil(((double) str_bbox.lly)*Z_LVAL_PP(sz)/1000));
+	add_next_index_long(return_value, (int) ceil(((double) str_bbox.urx)*Z_LVAL_PP(sz)/1000));
+	add_next_index_long(return_value, (int) ceil(((double) str_bbox.ury)*Z_LVAL_PP(sz)/1000));
 #else 
 	php_error(E_WARNING, "ImagePsBBox: No T1lib support in this PHP build");
 	RETURN_FALSE;

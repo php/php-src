@@ -135,8 +135,8 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
  */
 static void pvalue_config_destructor(zval *pvalue)
 {   
-    if (pvalue->type == IS_STRING && pvalue->value.str.val != empty_string) {
-        free(pvalue->value.str.val);
+    if (Z_TYPE_P(pvalue) == IS_STRING && Z_STRVAL_P(pvalue) != empty_string) {
+        free(Z_STRVAL_P(pvalue));
     }
 }
 /* }}} */
@@ -262,7 +262,7 @@ int php_init_config(char *php_ini_path_override)
 	if (!fh.handle.fp) {
 		return SUCCESS;  /* having no configuration file is ok */
 	}
-	fh.type = ZEND_HANDLE_FP;
+	Z_TYPE(fh) = ZEND_HANDLE_FP;
 	fh.filename = php_ini_opened_path;
 
 	zend_parse_ini_file(&fh, 1, php_config_ini_parser_cb, &extension_lists);
@@ -270,12 +270,12 @@ int php_init_config(char *php_ini_path_override)
 	if (php_ini_opened_path) {
 		zval tmp;
 		
-		tmp.value.str.len = strlen(php_ini_opened_path);
-		tmp.value.str.val = zend_strndup(php_ini_opened_path, tmp.value.str.len);
-		tmp.type = IS_STRING;
+		Z_STRLEN(tmp) = strlen(php_ini_opened_path);
+		Z_STRVAL(tmp) = zend_strndup(php_ini_opened_path, Z_STRLEN(tmp));
+		Z_TYPE(tmp) = IS_STRING;
 		zend_hash_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path"), (void *) &tmp, sizeof(zval), NULL);
 		efree(php_ini_opened_path);
-		php_ini_opened_path = zend_strndup(tmp.value.str.val, tmp.value.str.len);
+		php_ini_opened_path = zend_strndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
 	}
 	
 	return SUCCESS;
@@ -333,7 +333,7 @@ PHPAPI int cfg_get_long(char *varname, long *result)
 	var = *tmp;
 	zval_copy_ctor(&var);
 	convert_to_long(&var);
-	*result = var.value.lval;
+	*result = Z_LVAL(var);
 	return SUCCESS;
 }
 /* }}} */
@@ -351,7 +351,7 @@ PHPAPI int cfg_get_double(char *varname, double *result)
 	var = *tmp;
 	zval_copy_ctor(&var);
 	convert_to_double(&var);
-	*result = var.value.dval;
+	*result = Z_DVAL(var);
 	return SUCCESS;
 }
 /* }}} */
@@ -366,7 +366,7 @@ PHPAPI int cfg_get_string(char *varname, char **result)
 		*result=NULL;
 		return FAILURE;
 	}
-	*result = tmp->value.str.val;
+	*result = Z_STRVAL_P(tmp);
 	return SUCCESS;
 }
 /* }}} */

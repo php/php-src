@@ -222,7 +222,7 @@ static php_socket *open_listen_sock(int port, int backlog)
 	la.sin_port = htons((unsigned short) port);
 
 	php_sock->bsd_socket = socket(PF_INET, SOCK_STREAM, 0);
-	php_sock->type = PF_INET;
+	Z_TYPE_P(php_sock) = PF_INET;
 	if (IS_INVALID_SOCKET(php_sock)) {
 		php_error(E_WARNING, "Couldn't allocate a new socket from open_listen_sock()");
 		efree(php_sock);
@@ -948,7 +948,7 @@ PHP_FUNCTION(socket_create)
 	}
 	
 	php_sock->bsd_socket = socket(Z_LVAL_PP(arg1), Z_LVAL_PP(arg2), Z_LVAL_PP(arg3));
-	php_sock->type = Z_LVAL_PP(arg1);
+	Z_TYPE_P(php_sock) = Z_LVAL_PP(arg1);
 	if (IS_INVALID_SOCKET(php_sock)) {
 		RETURN_FALSE;
 	}
@@ -982,7 +982,7 @@ PHP_FUNCTION(socket_connect)
 	}
 
 
-	switch(php_sock->type) {
+	switch(Z_TYPE_P(php_sock)) {
 	case AF_INET:
 		if (argc != 3) {
 			WRONG_PARAM_COUNT;
@@ -1093,13 +1093,13 @@ PHP_FUNCTION(socket_bind)
 	}
 	
 
-	if (php_sock->type == AF_UNIX) {
+	if (Z_TYPE_P(php_sock) == AF_UNIX) {
 		struct sockaddr_un *sa = (struct sockaddr_un *) sock_type;
 		memset(sa, 0, sizeof(sa_storage));
 		sa->sun_family = AF_UNIX;
 		snprintf(sa->sun_path, 108, "%s", Z_STRVAL_PP(arg2));
 		retval = bind(php_sock->bsd_socket, (struct sockaddr *) sa, SUN_LEN(sa));
-	} else if (php_sock->type == AF_INET) {
+	} else if (Z_TYPE_P(php_sock) == AF_INET) {
 		struct sockaddr_in sa;
 		struct hostent *hp;
 
@@ -1441,7 +1441,7 @@ PHP_FUNCTION(socket_recvfrom)
 	recv_buf = emalloc(Z_LVAL_PP(arg3) + 2);
 	memset(recv_buf, 0, Z_LVAL_PP(arg3) + 2);
 	
-	switch (php_sock->type) {
+	switch (Z_TYPE_P(php_sock)) {
 	case AF_UNIX:
 		slen = sizeof(s_un);
 		s_un.sun_family = AF_UNIX;

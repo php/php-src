@@ -224,9 +224,9 @@ PHP_FUNCTION(velocis_connect)
 	convert_to_string(serv);
 	convert_to_string(user);
 	convert_to_string(pass);
-	Serv = serv->value.str.val;
-	User = user->value.str.val;
-	Pass = pass->value.str.val;
+	Serv = Z_STRVAL_P(serv);
+	User = Z_STRVAL_P(user);
+	Pass = Z_STRVAL_P(pass);
 	stat = SQLAllocConnect(henv,&hdbc);
 	if ( stat != SQL_SUCCESS ) {
 		php_error(E_WARNING,"Velocis: Could not allocate connection handle");
@@ -258,14 +258,14 @@ PHP_FUNCTION(velocis_close)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
-	conn = velocis_find_conn(list,id->value.lval);
+	conn = velocis_find_conn(list,Z_LVAL_P(id));
 	if ( !conn ) {
-		php_error(E_WARNING,"Velocis: Not connection index (%d)",id->value.lval);
+		php_error(E_WARNING,"Velocis: Not connection index (%d)",Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	SQLDisconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
-	velocis_del_conn(list,id->value.lval);
+	velocis_del_conn(list,Z_LVAL_P(id));
 	php_velocis_module.num_links--;
 	RETURN_TRUE;
 }
@@ -285,13 +285,13 @@ PHP_FUNCTION(velocis_exec)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
-	conn = velocis_find_conn(list,ind->value.lval);
+	conn = velocis_find_conn(list,Z_LVAL_P(ind));
 	if ( !conn ) {
-		php_error(E_WARNING,"Velocis: Not connection index (%d)",ind->value.lval);
+		php_error(E_WARNING,"Velocis: Not connection index (%d)",Z_LVAL_P(ind));
 		RETURN_FALSE;
 	}
 	convert_to_string(exec_str);
-	query = exec_str->value.str.val;
+	query = Z_STRVAL_P(exec_str);
 
 	res = (Vresult *)emalloc(sizeof(Vresult));
 	if ( res == NULL ) {
@@ -380,21 +380,21 @@ PHP_FUNCTION(velocis_fetch)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
-	res = velocis_find_result(list,ind->value.lval);
+	res = velocis_find_result(list,Z_LVAL_P(ind));
 	if ( !res ) {
-		php_error(E_WARNING,"Velocis: Not result index (%d)",ind->value.lval);
+		php_error(E_WARNING,"Velocis: Not result index (%d)",Z_LVAL_P(ind));
 		RETURN_FALSE;
 	}
 	stat = SQLExtendedFetch(res->hstmt,SQL_FETCH_NEXT,1,&row,RowStat);
 	if ( stat == SQL_NO_DATA_FOUND ) {
 		SQLFreeStmt(res->hstmt,SQL_DROP);
-		velocis_del_result(list,ind->value.lval);
+		velocis_del_result(list,Z_LVAL_P(ind));
 		RETURN_FALSE;
 	}
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
 		php_error(E_WARNING,"Velocis: SQLFetch return error");
 		SQLFreeStmt(res->hstmt,SQL_DROP);
-		velocis_del_result(list,ind->value.lval);
+		velocis_del_result(list,Z_LVAL_P(ind));
 		RETURN_FALSE;
 	}
 	res->fetched = 1;
@@ -416,16 +416,16 @@ PHP_FUNCTION(velocis_result)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
-	res = velocis_find_result(list,ind->value.lval);
+	res = velocis_find_result(list,Z_LVAL_P(ind));
 	if ( !res ) {
-		php_error(E_WARNING,"Velocis: Not result index (%d),ind->value.lval");
+		php_error(E_WARNING,"Velocis: Not result index (%d),Z_LVAL_P(ind)");
 		RETURN_FALSE;
 	}
-	if ( col->type == IS_STRING ) {
-		field = col->value.str.val;
+	if ( Z_TYPE_P(col) == IS_STRING ) {
+		field = Z_STRVAL_P(col);
 	} else {
 		convert_to_long(col);
-		indx = col->value.lval;
+		indx = Z_LVAL_P(col);
 	}
 	if ( field ) {
 		for ( i = 0; i < res->numcols; i++ ) {
@@ -448,13 +448,13 @@ PHP_FUNCTION(velocis_result)
 		stat = SQLExtendedFetch(res->hstmt,SQL_FETCH_NEXT,1,&row,RowStat);
 		if ( stat == SQL_NO_DATA_FOUND ) {
 			SQLFreeStmt(res->hstmt,SQL_DROP);
-			velocis_del_result(list,ind->value.lval);
+			velocis_del_result(list,Z_LVAL_P(ind));
 			RETURN_FALSE;
 		}
 		if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
 			php_error(E_WARNING,"Velocis: SQLFetch return error");
 			SQLFreeStmt(res->hstmt,SQL_DROP);
-			velocis_del_result(list,ind->value.lval);
+			velocis_del_result(list,Z_LVAL_P(ind));
 			RETURN_FALSE;
 		}
 		res->fetched = 1;
@@ -477,13 +477,13 @@ l1:
 				res->values[indx].value,4095,&res->values[indx].vallen);
 			if ( stat == SQL_NO_DATA_FOUND ) {
 				SQLFreeStmt(res->hstmt,SQL_DROP);
-				velocis_del_result(list,ind->value.lval);
+				velocis_del_result(list,Z_LVAL_P(ind));
 				RETURN_FALSE;
 			}
 			if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
 				php_error(E_WARNING,"Velocis: SQLGetData return error");
 				SQLFreeStmt(res->hstmt,SQL_DROP);
-				velocis_del_result(list,ind->value.lval);
+				velocis_del_result(list,Z_LVAL_P(ind));
 				RETURN_FALSE;
 			}
 			if ( res->values[indx].valtype == SQL_LONGVARCHAR ) {
@@ -507,13 +507,13 @@ PHP_FUNCTION(velocis_freeresult)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
-	res = velocis_find_result(list,ind->value.lval);
+	res = velocis_find_result(list,Z_LVAL_P(ind));
 	if ( !res ) {
-		php_error(E_WARNING,"Velocis: Not result index (%d)",ind->value.lval);
+		php_error(E_WARNING,"Velocis: Not result index (%d)",Z_LVAL_P(ind));
 		RETURN_FALSE;
 	}
 	SQLFreeStmt(res->hstmt,SQL_DROP);
-	velocis_del_result(list,ind->value.lval);
+	velocis_del_result(list,Z_LVAL_P(ind));
 	RETURN_TRUE;
 }
 
@@ -527,9 +527,9 @@ PHP_FUNCTION(velocis_autocommit)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
-	conn = velocis_find_conn(list,id->value.lval);
+	conn = velocis_find_conn(list,Z_LVAL_P(id));
 	if ( !conn ) {
-		php_error(E_WARNING,"Velocis: Not connection index (%d)",id->value.lval);
+		php_error(E_WARNING,"Velocis: Not connection index (%d)",Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	stat = SQLSetConnectOption(conn->hdbc,SQL_AUTOCOMMIT,SQL_AUTOCOMMIT_ON);
@@ -550,9 +550,9 @@ PHP_FUNCTION(velocis_off_autocommit)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
-	conn = velocis_find_conn(list,id->value.lval);
+	conn = velocis_find_conn(list,Z_LVAL_P(id));
 	if ( !conn ) {
-		php_error(E_WARNING,"Velocis: Not connection index (%d)",id->value.lval);
+		php_error(E_WARNING,"Velocis: Not connection index (%d)",Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	stat = SQLSetConnectOption(conn->hdbc,SQL_AUTOCOMMIT,SQL_AUTOCOMMIT_OFF);
@@ -573,9 +573,9 @@ PHP_FUNCTION(velocis_commit)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
-	conn = velocis_find_conn(list,id->value.lval);
+	conn = velocis_find_conn(list,Z_LVAL_P(id));
 	if ( !conn ) {
-		php_error(E_WARNING,"Velocis: Not connection index (%d)",id->value.lval);
+		php_error(E_WARNING,"Velocis: Not connection index (%d)",Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	stat = SQLTransact(NULL,conn->hdbc,SQL_COMMIT);
@@ -596,9 +596,9 @@ PHP_FUNCTION(velocis_rollback)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
-	conn = velocis_find_conn(list,id->value.lval);
+	conn = velocis_find_conn(list,Z_LVAL_P(id));
 	if ( !conn ) {
-		php_error(E_WARNING,"Velocis: Not connection index (%d)",id->value.lval);
+		php_error(E_WARNING,"Velocis: Not connection index (%d)",Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	stat = SQLTransact(NULL,conn->hdbc,SQL_ROLLBACK);
@@ -619,13 +619,13 @@ PHP_FUNCTION(velocis_fieldname)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
-	res = velocis_find_result(list,ind->value.lval);
+	res = velocis_find_result(list,Z_LVAL_P(ind));
 	if ( !res ) {
-		php_error(E_WARNING,"Velocis: Not result index (%d),ind->value.lval");
+		php_error(E_WARNING,"Velocis: Not result index (%d),Z_LVAL_P(ind)");
 		RETURN_FALSE;
 	}
 	convert_to_long(col);
-	indx = col->value.lval;
+	indx = Z_LVAL_P(col);
 	if ( indx < 0 || indx >= res->numcols ) {
 		php_error(E_WARNING,"Velocis: Field index not in range");
 		RETURN_FALSE;
@@ -642,9 +642,9 @@ PHP_FUNCTION(velocis_fieldnum)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
-	res = velocis_find_result(list,ind->value.lval);
+	res = velocis_find_result(list,Z_LVAL_P(ind));
 	if ( !res ) {
-		php_error(E_WARNING,"Velocis: Not result index (%d),ind->value.lval");
+		php_error(E_WARNING,"Velocis: Not result index (%d),Z_LVAL_P(ind)");
 		RETURN_FALSE;
 	}
 	RETURN_LONG(res->numcols);

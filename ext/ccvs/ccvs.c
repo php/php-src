@@ -126,7 +126,7 @@ PHP_FUNCTION(ccvs_init) /* cv_init() */
 
   convert_to_string_ex(name);
 
-  vsess = cv_init((*name)->value.str.val);
+  vsess = cv_init(Z_STRVAL_PP(name));
 
   /*
   *		-- In the case that we don't run error checking on the return value... --
@@ -173,7 +173,7 @@ PHP_FUNCTION(ccvs_done) /* cv_done() */
   convert_to_string_ex(sess);
 
   /* Convert from the string representation back to a (void*) */
-  vsess = hks_ptr_stringtoptr((*sess)->value.str.val);
+  vsess = hks_ptr_stringtoptr(Z_STRVAL_PP(sess));
   cv_done(vsess);
 
   RETURN_STRING("OK", 1);
@@ -201,10 +201,10 @@ PHP_FUNCTION(ccvs_new) /* cv_new() */
     RETURN_FALSE;
   }
 
-  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  sess = hks_ptr_stringtoptr(Z_STRVAL_PP(psess));
 
   convert_to_string_ex(pinvoice);
-  invoice = (*pinvoice)->value.str.val;
+  invoice = Z_STRVAL_PP(pinvoice);
 
   r = cv_new(sess, invoice);
 
@@ -236,10 +236,10 @@ PHP_FUNCTION(ccvs_add) /* cv_add() */
   convert_to_string_ex(pinvoice);
   convert_to_string_ex(pargtype);
   convert_to_string_ex(pargval);
-  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
-  invoice = (*pinvoice)->value.str.val;
-  argtype = cv_str2arg((*pargtype)->value.str.val);
-  argval = (*pargval)->value.str.val;
+  sess = hks_ptr_stringtoptr(Z_STRVAL_PP(psess));
+  invoice = Z_STRVAL_PP(pinvoice);
+  argtype = cv_str2arg(Z_STRVAL_PP(pargtype));
+  argval = Z_STRVAL_PP(pargval);
 
   r = cv_add(sess, invoice, argtype, argval);
 
@@ -274,8 +274,8 @@ PHP_FUNCTION(ccvs_delete) /* cv_delete() */
 
   convert_to_string_ex(psess);
   convert_to_string_ex(pinvoice);
-  invoice = (*pinvoice)->value.str.val;
-  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  invoice = Z_STRVAL_PP(pinvoice);
+  sess = hks_ptr_stringtoptr(Z_STRVAL_PP(psess));
 
   r = cv_delete(sess, invoice);
 
@@ -300,8 +300,8 @@ PHP_FUNCTION(ccvs_auth) /* cv_auth() */
 
   convert_to_string_ex(psess);
   convert_to_string_ex(pinvoice);
-  invoice = (*pinvoice)->value.str.val;
-  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  invoice = Z_STRVAL_PP(pinvoice);
+  sess = hks_ptr_stringtoptr(Z_STRVAL_PP(psess));
 
   r = cv_auth(sess, invoice);
 
@@ -326,8 +326,8 @@ PHP_FUNCTION(ccvs_return) /* cv_return() */
 
   convert_to_string_ex(psess);
   convert_to_string_ex(pinvoice);
-  invoice = (*pinvoice)->value.str.val;
-  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  invoice = Z_STRVAL_PP(pinvoice);
+  sess = hks_ptr_stringtoptr(Z_STRVAL_PP(psess));
 
   r = cv_return(sess, invoice);
 
@@ -352,8 +352,8 @@ PHP_FUNCTION(ccvs_reverse) /* cv_reverse() */
 
   convert_to_string_ex(psess);
   convert_to_string_ex(pinvoice);
-  invoice = (*pinvoice)->value.str.val;
-  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  invoice = Z_STRVAL_PP(pinvoice);
+  sess = hks_ptr_stringtoptr(Z_STRVAL_PP(psess));
 
   r = cv_reverse(sess, invoice);
 
@@ -378,8 +378,8 @@ PHP_FUNCTION(ccvs_sale) /* cv_sale() */
 
   convert_to_string_ex(psess);
   convert_to_string_ex(pinvoice);
-  invoice = (*pinvoice)->value.str.val;
-  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  invoice = Z_STRVAL_PP(pinvoice);
+  sess = hks_ptr_stringtoptr(Z_STRVAL_PP(psess));
 
   r = cv_sale(sess, invoice);
 
@@ -404,8 +404,8 @@ PHP_FUNCTION(ccvs_void) /* cv_void() */
 
   convert_to_string_ex(psess);
   convert_to_string_ex(pinvoice);
-  invoice = (*pinvoice)->value.str.val;
-  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  invoice = Z_STRVAL_PP(pinvoice);
+  sess = hks_ptr_stringtoptr(Z_STRVAL_PP(psess));
 
   r = cv_void(sess, invoice);
 
@@ -430,8 +430,8 @@ PHP_FUNCTION(ccvs_status) /* cv_status() */
 
   convert_to_string_ex(psess);
   convert_to_string_ex(pinvoice);
-  invoice = (*pinvoice)->value.str.val;
-  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  invoice = Z_STRVAL_PP(pinvoice);
+  sess = hks_ptr_stringtoptr(Z_STRVAL_PP(psess));
 
   r = cv_status(sess, invoice);
 
@@ -456,8 +456,8 @@ PHP_FUNCTION(ccvs_count) /* cv_count() */
 
   convert_to_string_ex(psess);
   convert_to_string_ex(ptype);
-  type = cv_str2stat((*ptype)->value.str.val);
-  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  type = cv_str2stat(Z_STRVAL_PP(ptype));
+  sess = hks_ptr_stringtoptr(Z_STRVAL_PP(psess));
 
   r = cv_count(sess, type);
 
@@ -483,11 +483,11 @@ PHP_FUNCTION(ccvs_lookup) /* cv_lookup() */
   }
 
   convert_to_string_ex(psess);
-  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  sess = hks_ptr_stringtoptr(Z_STRVAL_PP(psess));
   convert_to_string_ex(ptype);
-  type = cv_str2stat((*ptype)->value.str.val);
+  type = cv_str2stat(Z_STRVAL_PP(ptype));
   convert_to_long_ex(pinum);
-  inum = (*pinum)->value.lval;
+  inum = Z_LVAL_PP(pinum);
 
   r = cv_lookup(sess, type, inum);
 
@@ -512,9 +512,9 @@ PHP_FUNCTION(ccvs_report) /* cv_report() */
   }
 
   convert_to_string_ex(psess);
-  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  sess = hks_ptr_stringtoptr(Z_STRVAL_PP(psess));
   convert_to_string_ex(ptype);
-  type = cv_str2rep((*ptype)->value.str.val);
+  type = cv_str2rep(Z_STRVAL_PP(ptype));
 
   r = cv_report(sess, type);
 
@@ -540,11 +540,11 @@ PHP_FUNCTION(ccvs_command) /* cv_command() */
   }
 
   convert_to_string_ex(psess);
-  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  sess = hks_ptr_stringtoptr(Z_STRVAL_PP(psess));
   convert_to_string_ex(ptype);
-  type = cv_str2cmd((*ptype)->value.str.val);
+  type = cv_str2cmd(Z_STRVAL_PP(ptype));
   convert_to_string_ex(pargval);
-  argval = (*pargval)->value.str.val;
+  argval = Z_STRVAL_PP(pargval);
 
   r = cv_command(sess, type, argval);
 
@@ -565,7 +565,7 @@ PHP_FUNCTION(ccvs_textvalue) /* cv_textvalue() */
   }
 
   convert_to_string_ex(psess);
-  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  sess = hks_ptr_stringtoptr(Z_STRVAL_PP(psess));
 
   RETURN_STRING(cv_textvalue(sess), 1);
 }

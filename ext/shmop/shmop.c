@@ -137,16 +137,16 @@ PHP_FUNCTION(shmop_open)
 	shmop = emalloc(sizeof(struct php_shmop));
 	memset(shmop, 0, sizeof(struct php_shmop));
 
-	shmop->key = (*key)->value.lval;
-	shmop->shmflg |= (*mode)->value.lval;
+	shmop->key = Z_LVAL_PP(key);
+	shmop->shmflg |= Z_LVAL_PP(mode);
 
-	if (memchr((*flags)->value.str.val, 'a', (*flags)->value.str.len)) {
+	if (memchr(Z_STRVAL_PP(flags), 'a', Z_STRLEN_PP(flags))) {
 		shmflg = SHM_RDONLY;
 		shmop->shmflg |= IPC_EXCL;
 	} 
-	else if (memchr((*flags)->value.str.val, 'c', (*flags)->value.str.len)) {
+	else if (memchr(Z_STRVAL_PP(flags), 'c', Z_STRLEN_PP(flags))) {
 		shmop->shmflg |= IPC_CREAT;
-		shmop->size = (*size)->value.lval;
+		shmop->size = Z_LVAL_PP(size);
 	}
 	else {
 		php_error(E_WARNING, "shmopen: access mode invalid");
@@ -200,30 +200,30 @@ PHP_FUNCTION(shmop_read)
 	convert_to_long_ex(start);
 	convert_to_long_ex(count);
 
-	shmop = zend_list_find((*shmid)->value.lval, &type);	
+	shmop = zend_list_find(Z_LVAL_PP(shmid), &type);	
 
 	if (!shmop) {
 		php_error(E_WARNING, "shmread: can't find this segment");
 		RETURN_FALSE;
 	}
 
-	if ((*start)->value.lval < 0 || (*start)->value.lval > shmop->size) {
+	if (Z_LVAL_PP(start) < 0 || Z_LVAL_PP(start) > shmop->size) {
 		php_error(E_WARNING, "shmread: start is out of range");
 		RETURN_FALSE;
 	}
 
-	if (((*start)->value.lval+(*count)->value.lval) > shmop->size) {
+	if ((Z_LVAL_PP(start)+Z_LVAL_PP(count)) > shmop->size) {
 		php_error(E_WARNING, "shmread: count is out of range");
 		RETURN_FALSE;
 	}
 
-	if ((*count)->value.lval < 0 ){
+	if (Z_LVAL_PP(count) < 0 ){
 		php_error(E_WARNING, "shmread: count is out of range");
 		RETURN_FALSE;
 	}
 
-	startaddr = shmop->addr + (*start)->value.lval;
-	bytes = (*count)->value.lval ? (*count)->value.lval : shmop->size-(*start)->value.lval;
+	startaddr = shmop->addr + Z_LVAL_PP(start);
+	bytes = Z_LVAL_PP(count) ? Z_LVAL_PP(count) : shmop->size-Z_LVAL_PP(start);
 
 	return_string = emalloc(bytes);
 	memcpy(return_string, startaddr, bytes);
@@ -244,13 +244,13 @@ PHP_FUNCTION(shmop_close)
 		WRONG_PARAM_COUNT;
 	}
 
-	shmop = zend_list_find((*shmid)->value.lval, &type);
+	shmop = zend_list_find(Z_LVAL_PP(shmid), &type);
 
 	if (!shmop) {
 		php_error(E_WARNING, "shmclose: no such shmid");
 		RETURN_FALSE;
 	}
-	zend_list_delete((*shmid)->value.lval);
+	zend_list_delete(Z_LVAL_PP(shmid));
 }
 /* }}} */
 
@@ -268,7 +268,7 @@ PHP_FUNCTION(shmop_size)
 
 	convert_to_long_ex(shmid);
 
-	shmop = zend_list_find((*shmid)->value.lval, &type);
+	shmop = zend_list_find(Z_LVAL_PP(shmid), &type);
 
 	if (!shmop) {
 		php_error(E_WARNING, "shmsize: no such segment");
@@ -296,20 +296,20 @@ PHP_FUNCTION(shmop_write)
 	convert_to_string_ex(data);
 	convert_to_long_ex(offset);
 
-	shmop = zend_list_find((*shmid)->value.lval, &type);
+	shmop = zend_list_find(Z_LVAL_PP(shmid), &type);
 
 	if (!shmop) {
 		php_error(E_WARNING, "shmwrite: error no such segment");
 		RETURN_FALSE;
 	}
 
-	if ( (*offset)->value.lval > shmop->size ) {
+	if ( Z_LVAL_PP(offset) > shmop->size ) {
 		php_error(E_WARNING, "shmwrite: offset out of range");
 		RETURN_FALSE;
 	}
 
-	writesize = ((*data)->value.str.len<shmop->size-(*offset)->value.lval) ? (*data)->value.str.len : shmop->size-(*offset)->value.lval;	
-	memcpy(shmop->addr+(*offset)->value.lval, (*data)->value.str.val, writesize);
+	writesize = (Z_STRLEN_PP(data)<shmop->size-Z_LVAL_PP(offset)) ? Z_STRLEN_PP(data) : shmop->size-Z_LVAL_PP(offset);	
+	memcpy(shmop->addr+Z_LVAL_PP(offset), Z_STRVAL_PP(data), writesize);
 
 	RETURN_LONG(writesize);
 }
@@ -329,7 +329,7 @@ PHP_FUNCTION(shmop_delete)
 
 	convert_to_long_ex(shmid);
 
-	shmop = zend_list_find((*shmid)->value.lval, &type);
+	shmop = zend_list_find(Z_LVAL_PP(shmid), &type);
 
 	if (!shmop) {
 		php_error(E_WARNING, "shmdelete: error no such segment");

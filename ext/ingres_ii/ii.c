@@ -420,17 +420,17 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			case 3:
 				convert_to_string_ex(password);
-				pass = (*password)->value.str.val;
+				pass = Z_STRVAL_PP(password);
 				/* Fall-through. */
 		
 			case 2:
 				convert_to_string_ex(username);
-				user = (*username)->value.str.val;
+				user = Z_STRVAL_PP(username);
 				/* Fall-through. */
 		
 			case 1:
 				convert_to_string_ex(database);
-				db = (*database)->value.str.val;
+				db = Z_STRVAL_PP(database);
 				/* Fall-through. */
 
 			case 0:
@@ -498,7 +498,7 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			link->autocommit = 0;
 
 			/* hash it up */
-			new_le.type = le_ii_plink;
+			Z_TYPE(new_le) = le_ii_plink;
 			new_le.ptr = link;
 			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length + 1, (void *) &new_le, sizeof(list_entry), NULL) == FAILURE) {
 				php_error(E_WARNING, "Ingres II:  Unable to hash (%s)", hashed_details);
@@ -511,7 +511,7 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		} else { /* already open persistent connection */
 
-			if (le->type != le_ii_plink) {
+			if (Z_TYPE_P(le) != le_ii_plink) {
 				RETURN_FALSE;
 			}
 			/* here we should ensure that the link did not die */
@@ -533,18 +533,18 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			int type;
 			void *ptr;
 
-			if (index_ptr->type != le_index_ptr) {
+			if (Z_TYPE_P(index_ptr) != le_index_ptr) {
 				RETURN_FALSE;
 			}
 			link = (II_LINK *) index_ptr->ptr;
 			ptr = zend_list_find((int) link, &type);	/* check if the link is still there */
 			if (ptr && (type == le_ii_link || type == le_ii_plink)) {
 				zend_list_addref((int) link);
-				return_value->value.lval = (int) link;
+				Z_LVAL_P(return_value) = (int) link;
 
 				php_ii_set_default_link((int) link TSRMLS_CC);
 
-				return_value->type = IS_RESOURCE;
+				Z_TYPE_P(return_value) = IS_RESOURCE;
 				efree(hashed_details);
 				return;
 			} else {
@@ -587,8 +587,8 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		ZEND_REGISTER_RESOURCE(return_value, link, le_ii_link);
 
 		/* add it to the hash */
-		new_index_ptr.ptr = (void *) return_value->value.lval;
-		new_index_ptr.type = le_index_ptr;
+		new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
+		Z_TYPE(new_index_ptr) = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_details_length + 1, (void *) &new_index_ptr, sizeof(list_entry), NULL) == FAILURE) {
 			php_error(E_WARNING, "Ingres II:  Unable to hash (%s)", hashed_details);
 			free(link);
@@ -599,7 +599,7 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	efree(hashed_details);
-	php_ii_set_default_link(return_value->value.lval TSRMLS_CC);
+	php_ii_set_default_link(Z_LVAL_P(return_value) TSRMLS_CC);
 }
 
 /* {{{ proto resource ingres_connect([string database [, string username [, string password]]])

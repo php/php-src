@@ -341,7 +341,7 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 					RETURN_FALSE;
 				}
 				convert_to_string_ex(yydbaddr);
-				dbaddr = (*yydbaddr)->value.str.val;
+				dbaddr = Z_STRVAL_PP(yydbaddr);
 				
 				Env=UdmAllocEnv();
 				UdmEnvSetDBAddr(Env,dbaddr);
@@ -364,8 +364,8 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 				}
 				convert_to_string_ex(yydbaddr);
 				convert_to_string_ex(yydbmode);
-				dbaddr = (*yydbaddr)->value.str.val;
-				dbmode = (*yydbmode)->value.str.val;
+				dbaddr = Z_STRVAL_PP(yydbaddr);
+				dbmode = Z_STRVAL_PP(yydbmode);
 				
 				Env=UdmAllocEnv();				
 				UdmEnvSetDBAddr(Env,dbaddr);
@@ -401,8 +401,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			convert_to_long_ex(yyvar);
 			convert_to_string_ex(yyval);
 			ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-agent", le_link);
-			var = (*yyvar)->value.lval;
-			val = (*yyval)->value.str.val;
+			var = Z_LVAL_PP(yyvar);
+			val = Z_STRVAL_PP(yyval);
 			
 			break;
 			
@@ -644,8 +644,8 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 			convert_to_string_ex(yyval1);
 			convert_to_string_ex(yyval2);
 			ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-agent", le_link);
-			var  = (*yyvar)->value.lval;
-			flag = (*yyflag)->value.lval;
+			var  = Z_LVAL_PP(yyvar);
+			flag = Z_LVAL_PP(yyflag);
 			val1 = (*yyval1)->value.str.val;
 			val2 = (*yyval2)->value.str.val;
 			
@@ -769,8 +769,8 @@ DLEXPORT PHP_FUNCTION(udm_add_search_limit)
 			convert_to_long_ex(yyvar);
 			convert_to_string_ex(yyval);
 			ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-agent", le_link);
-			var = (*yyvar)->value.lval;
-			val = (*yyval)->value.str.val;
+			var = Z_LVAL_PP(yyvar);
+			val = Z_STRVAL_PP(yyval);
 			
 			break;
 			
@@ -804,9 +804,9 @@ DLEXPORT PHP_FUNCTION(udm_add_search_limit)
 			struct udm_stl_info_t stl_info = { 0, 0, 0 };
 			
 			if (val[0] == '>') {
-				stl_info.type=1;
+				Z_TYPE(stl_info)=1;
 			} else if (val[0] == '<') {
-				stl_info.type=-1;
+				Z_TYPE(stl_info)=-1;
 			} else {
 				php_error(E_WARNING,"Udm_Add_Search_Limit: Incorrect date limit format");
 				RETURN_FALSE;
@@ -874,7 +874,7 @@ DLEXPORT PHP_FUNCTION(udm_find)
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
 	convert_to_string_ex(yyquery);
 	
-	if ((Res=UdmFind(Agent,UdmTolower((*yyquery)->value.str.val,Agent->charset)))) {
+	if ((Res=UdmFind(Agent,UdmTolower(Z_STRVAL_PP(yyquery),Agent->charset)))) {
 	    ZEND_REGISTER_RESOURCE(return_value,Res,le_res);
 	} else {
 	    RETURN_FALSE;
@@ -898,8 +898,8 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 				}
 				convert_to_string_ex(yyrow_num);
 				convert_to_string_ex(yyfield_name);
-				field=atoi((*yyfield_name)->value.str.val);
-				row=atoi((*yyrow_num)->value.str.val);
+				field=atoi(Z_STRVAL_PP(yyfield_name));
+				row=atoi(Z_STRVAL_PP(yyrow_num));
 			}
 			break;
 		default:
@@ -986,7 +986,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 					RETURN_FALSE;
 				}
 				convert_to_long_ex(yyparam);
-				param=((*yyparam)->value.lval);
+				param=(Z_LVAL_PP(yyparam));
 			}
 			break;
 		default:
@@ -1045,7 +1045,7 @@ DLEXPORT PHP_FUNCTION(udm_free_res)
 			break;
 	}
 	ZEND_FETCH_RESOURCE(Res, UDM_RESULT *, yyres, -1, "mnoGoSearch-Result", le_res);
-	zend_list_delete((*yyres)->value.lval);
+	zend_list_delete(Z_LVAL_PP(yyres));
 	
 	RETURN_TRUE;
 }
@@ -1069,7 +1069,7 @@ DLEXPORT PHP_FUNCTION(udm_free_agent)
 			break;
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_RESULT *, yyagent, -1, "mnoGoSearch-agent", le_link);
-	zend_list_delete((*yyagent)->value.lval);
+	zend_list_delete(Z_LVAL_PP(yyagent));
 	
 	RETURN_TRUE;
 }
@@ -1152,7 +1152,7 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
 	convert_to_string_ex(yycat);
-	cat = (*yycat)->value.str.val;
+	cat = Z_STRVAL_PP(yycat);
 
 	if((c=UdmCatList(Agent,cat))){
 		if (array_init(return_value)==FAILURE) {
@@ -1201,7 +1201,7 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
 	convert_to_string_ex(yycat);
-	cat = (*yycat)->value.str.val;
+	cat = Z_STRVAL_PP(yycat);
 
 	if((c=UdmCatPath(Agent,cat))){
 		if (array_init(return_value)==FAILURE) {

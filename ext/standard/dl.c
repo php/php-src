@@ -119,15 +119,15 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 	if (extension_dir && extension_dir[0]){
 		int extension_dir_len = strlen(extension_dir);
 
-		libpath = emalloc(extension_dir_len+file->value.str.len+2);
+		libpath = emalloc(extension_dir_len+Z_STRLEN_P(file)+2);
 
 		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
-			sprintf(libpath, "%s%s", extension_dir, file->value.str.val); /* SAFE */
+			sprintf(libpath, "%s%s", extension_dir, Z_STRVAL_P(file)); /* SAFE */
 		} else {
-			sprintf(libpath, "%s/%s", extension_dir, file->value.str.val); /* SAFE */
+			sprintf(libpath, "%s/%s", extension_dir, Z_STRVAL_P(file)); /* SAFE */
 		}
 	} else {
-		libpath = estrndup(file->value.str.val, file->value.str.len);
+		libpath = estrndup(Z_STRVAL_P(file), Z_STRLEN_P(file));
 	}
 
 	/* load dynamic symbol */
@@ -154,7 +154,7 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 
 	if (!get_module) {
 		DL_UNLOAD(handle);
-		php_error(error_type, "Invalid library (maybe not a PHP library) '%s' ", file->value.str.val);
+		php_error(error_type, "Invalid library (maybe not a PHP library) '%s' ", Z_STRVAL_P(file));
 		RETURN_FALSE;
 	}
 	module_entry = get_module();
@@ -170,7 +170,7 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 		DL_UNLOAD(handle);
 		RETURN_FALSE;
 	}
-	module_entry->type = type;
+	Z_TYPE_P(module_entry) = type;
 	module_entry->module_number = zend_next_free_module();
 	if (module_entry->module_startup_func) {
 		if (module_entry->module_startup_func(type, module_entry->module_number TSRMLS_CC)==FAILURE) {
@@ -209,7 +209,7 @@ PHP_MINFO_FUNCTION(dl)
 
 void php_dl(pval *file, int type, pval *return_value)
 {
-	php_error(E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", file->value.str.val);
+	php_error(E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", Z_STRVAL_P(file));
 	RETURN_FALSE;
 }
 
