@@ -240,8 +240,8 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	token = strtok(tempMailTo, ",");
 	while(token != NULL)
 	{
-		sprintf(GLOBAL(Buffer), "RCPT TO:<%s>\r\n", token);
-		if ((res = Post(GLOBAL(Buffer))) != SUCCESS)
+		sprintf(Buffer, "RCPT TO:<%s>\r\n", token);
+		if ((res = Post(Buffer)) != SUCCESS)
 			return (res);
 		if ((res = Ack()) != SUCCESS)
 			return (res);
