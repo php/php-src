@@ -27,7 +27,6 @@ PEAR_FILES = \
 	HTTP.php \
 	File/Find.php \
 	Net/Socket.php \
-	PEAR.php \
 	PEAR/Installer.php
 
 install-data-local: PEAR.php
@@ -38,6 +37,10 @@ install-data-local: PEAR.php
 		for i in $(PEAR_FILES); do \
 			dir=`echo $$i|sed 's%[^/][^/]*$$%%'`; \
 			$(INSTALL_DATA) $(srcdir)/$$i $(peardir)/$$dir; \
+		done; \
+		for i in PEAR.php; do \
+			dir=`echo $$i|sed 's%[^/][^/]*$$%%'`; \
+			$(INSTALL_DATA) $(builddir)/$$i $(peardir)/$$dir; \
 		done; \
 	else \
 		cat $(srcdir)/install-pear.txt; \
