@@ -212,7 +212,7 @@ PCON_STATE state = statement->con_state;
 		return 1;
 	}
 	
-	new_statements = emalloc( (state->nstatements-1) * sizeof(STATEMENT));
+	new_statements = safe_emalloc( (state->nstatements-1), sizeof(STATEMENT), 0);
 	
 	for (i=j=0;i<state->nstatements;i++) {
 		if (state->statements->statement != stmt) {

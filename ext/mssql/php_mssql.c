@@ -989,7 +989,7 @@ static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int r
 	int *column_types;
 	char computed_buf[16];
 
-	column_types = (int *) emalloc(sizeof(int) * result->num_fields);
+	column_types = (int *) safe_emalloc(sizeof(int), result->num_fields, 0);
 	for (i=0; i<result->num_fields; i++) {
 		char *fname = (char *)dbcolname(mssql_ptr->link,i+1);
 
@@ -1036,14 +1036,14 @@ static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int r
 
 	i=0;
 	if (!result->data) {
-		result->data = (zval **) emalloc(sizeof(zval *)*MSSQL_ROWS_BLOCK*(++result->blocks_initialized));
+		result->data = (zval **) safe_emalloc(sizeof(zval *), MSSQL_ROWS_BLOCK*(++result->blocks_initialized), 0);
 	}
 	while (retvalue!=FAIL && retvalue!=NO_MORE_ROWS) {
 		result->num_rows++;
 		if (result->num_rows > result->blocks_initialized*MSSQL_ROWS_BLOCK) {
 			result->data = (zval **) erealloc(result->data,sizeof(zval *)*MSSQL_ROWS_BLOCK*(++result->blocks_initialized));
 		}
-		result->data[i] = (zval *) emalloc(sizeof(zval)*result->num_fields);
+		result->data[i] = (zval *) safe_emalloc(sizeof(zval), result->num_fields, 0);
 		for (j=0; j<result->num_fields; j++) {
 			INIT_ZVAL(result->data[i][j]);
 			MS_SQL_G(get_column_content(mssql_ptr, j+1, &result->data[i][j], column_types[j] TSRMLS_CC));
@@ -1163,7 +1163,7 @@ PHP_FUNCTION(mssql_query)
 	result->cur_field=result->cur_row=result->num_rows=0;
 
 	if (num_fields > 0) {
-		result->fields = (mssql_field *) emalloc(sizeof(mssql_field)*result->num_fields);
+		result->fields = (mssql_field *) safe_emalloc(sizeof(mssql_field), result->num_fields, 0);
 		result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
 	}
 	else
@@ -1794,7 +1794,7 @@ PHP_FUNCTION(mssql_next_result)
 		retvalue = dbnextrow(mssql_ptr->link);
 
 		result->num_fields = dbnumcols(mssql_ptr->link);
-		result->fields = (mssql_field *) emalloc(sizeof(mssql_field)*result->num_fields);
+		result->fields = (mssql_field *) safe_emalloc(sizeof(mssql_field), result->num_fields, 0);
 		result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
 		RETURN_TRUE;
 	}
@@ -2101,12 +2101,12 @@ PHP_FUNCTION(mssql_execute)
 				result = (mssql_result *) emalloc(sizeof(mssql_result));
 				result->batchsize = batchsize;
 				result->blocks_initialized = 1;
-				result->data = (zval **) emalloc(sizeof(zval *)*MSSQL_ROWS_BLOCK);
+				result->data = (zval **) safe_emalloc(sizeof(zval *), MSSQL_ROWS_BLOCK);
 				result->mssql_ptr = mssql_ptr;
 				result->cur_field=result->cur_row=result->num_rows=0;
 				result->num_fields = num_fields;
 
-				result->fields = (mssql_field *) emalloc(sizeof(mssql_field)*num_fields);
+				result->fields = (mssql_field *) safe_emalloc(sizeof(mssql_field), num_fields);
 				result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
 				result->statement = statement;
 			}

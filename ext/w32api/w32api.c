@@ -894,7 +894,7 @@ static unsigned char *php_w32api_do_arg_types(arguments **argument_list)
 		if( j == 0 )
 			return NULL;
 
-		retval = (unsigned char *)emalloc(sizeof(unsigned char) * j + 1);
+		retval = (unsigned char *)safe_emalloc(sizeof(unsigned char), j, 1);
 		retval[0] = (unsigned char)j;
 
 		curr_arg = *argument_list;
@@ -1022,7 +1022,7 @@ static void php_w32api_init_type(w32api_type_handle *th, zval *obj TSRMLS_DC)
 	object_init_ex(obj, WG(type_ce));
 
 	ti->type = th;
-	ti->values = emalloc(sizeof(zval *) * th->member_count);
+	ti->values = safe_emalloc(sizeof(zval *), th->member_count, 0);
 	memset(ti->values, '\0', sizeof(zval *) * th->member_count);
 
 	MAKE_STD_ZVAL(rsrc_handle);
@@ -1666,7 +1666,7 @@ W32API_CLASS_FUNCTION(win32, invokefunction)
 			WRONG_PARAM_COUNT
 		}
 
-		params = (w32api_dynamic_param *)emalloc(sizeof(w32api_dynamic_param) * argc);
+		params = (w32api_dynamic_param *)safe_emalloc(sizeof(w32api_dynamic_param), argc, 0);
 
 		curr_arg = (*fh)->argument_list;
 		current_dynamic_param = params;

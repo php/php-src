@@ -4139,7 +4139,7 @@ PHP_FUNCTION(ocifetchstatement)
 	}
 
 	if (flags & OCI_FETCHSTATEMENT_BY_ROW) {
-		columns = emalloc(statement->ncolumns * sizeof(oci_out_column *));
+		columns = safe_emalloc(statement->ncolumns, sizeof(oci_out_column *), 0);
 
 		for (i = 0; i < statement->ncolumns; i++) {
 			columns[ i ] = oci_get_col(statement, i + 1, 0);
@@ -4177,8 +4177,8 @@ PHP_FUNCTION(ocifetchstatement)
 
 		efree(columns);
 	} else { /* default to BY_COLUMN */
-		columns = emalloc(statement->ncolumns * sizeof(oci_out_column *));
-		outarrs = emalloc(statement->ncolumns * sizeof(zval*));
+		columns = safe_emalloc(statement->ncolumns, sizeof(oci_out_column *), 0);
+		outarrs = safe_emalloc(statement->ncolumns, sizeof(zval*), 0);
 		
 		if (flags & OCI_NUM) {
 			for (i = 0; i < statement->ncolumns; i++) {

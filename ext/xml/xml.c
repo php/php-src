@@ -408,7 +408,7 @@ static zval *xml_call_handler(xml_parser *parser, zval *handler, zend_function *
 		int result;
 		zend_fcall_info fci;
 
-		args = emalloc(sizeof(zval **) * argc);
+		args = safe_emalloc(sizeof(zval **), argc, 0);
 		for (i = 0; i < argc; i++) {
 			args[i] = &argv[i];
 		}
@@ -525,7 +525,7 @@ static XML_Char *xml_utf8_encode(const char *s, int len, int *newlen, const XML_
 	}
 	/* This is the theoretical max (will never get beyond len * 2 as long
 	 * as we are converting from single-byte characters, though) */
-	newbuf = emalloc(len * 4 + 1);
+	newbuf = safe_emalloc(len, 4, 1);
 	while (pos > 0) {
 		c = encoder ? encoder((unsigned char)(*s)) : (unsigned short)(*s);
 		if (c < 0x80) {
@@ -1368,7 +1368,7 @@ PHP_FUNCTION(xml_parse_into_struct)
 	if (info)
 	  parser->info = *info;
 	parser->level = 0;
-	parser->ltags = emalloc(XML_MAXLEVEL * sizeof(char *));
+	parser->ltags = safe_emalloc(XML_MAXLEVEL, sizeof(char *), 0);
 
 	XML_SetDefaultHandler(parser->parser, _xml_defaultHandler);
 	XML_SetElementHandler(parser->parser, _xml_startElementHandler, _xml_endElementHandler);

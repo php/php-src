@@ -140,7 +140,7 @@ zend_module_entry wddx_module_entry = {
 static int wddx_stack_init(wddx_stack *stack)
 {
 	stack->top = 0;
-	stack->elements = (void **) emalloc(sizeof(void **) * STACK_BLOCK_SIZE);
+	stack->elements = (void **) safe_emalloc(sizeof(void **), STACK_BLOCK_SIZE, 0);
 	stack->max = STACK_BLOCK_SIZE;
 	stack->varname = NULL;
 	stack->done = 0;
@@ -1158,7 +1158,7 @@ PHP_FUNCTION(wddx_serialize_vars)
 	}
 
 	/* Allocate arguments array and get the arguments, checking for errors. */
-	args = (zval ***)emalloc(argc * sizeof(zval **));
+	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
@@ -1267,7 +1267,7 @@ PHP_FUNCTION(wddx_add_vars)
 	}
 	
 	/* Allocate arguments array and get the arguments, checking for errors. */
-	args = (zval ***)emalloc(argc * sizeof(zval **));
+	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;

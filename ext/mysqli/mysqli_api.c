@@ -127,7 +127,7 @@ PHP_FUNCTION(mysqli_bind_param)
 		php_free_stmt_bind_buffer(stmt->param, FETCH_SIMPLE);
 	}
 
-	args = (zval ***)emalloc(argc * sizeof(zval **));
+	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
 
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
@@ -194,7 +194,7 @@ PHP_FUNCTION(mysqli_bind_param)
 	}
 
 	stmt->param.var_cnt = num_vars;
-	stmt->param.vars = (zval **)emalloc(num_vars * sizeof(zval));
+	stmt->param.vars = (zval **)safe_emalloc(num_vars, sizeof(zval), 0);
 	for (i = 0; i < num_vars; i++) {
 		if (bind[i].buffer_type  != MYSQLI_BIND_SEND_DATA) {
 			ZVAL_ADDREF(*args[i+start]);
@@ -237,7 +237,7 @@ PHP_FUNCTION(mysqli_bind_result)
 		WRONG_PARAM_COUNT;
 	}
 
-	args = (zval ***)emalloc(argc * sizeof(zval **));
+	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
 
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
@@ -338,7 +338,7 @@ PHP_FUNCTION(mysqli_bind_result)
 	}
 
 	stmt->result.var_cnt = var_cnt;
-	stmt->result.vars = (zval **)emalloc((var_cnt) * sizeof(zval));
+	stmt->result.vars = (zval **)safe_emalloc((var_cnt), sizeof(zval), 0);
 	for (i = start; i < var_cnt+start; i++) {
 		ofs = i-start;
 		ZVAL_ADDREF(*args[i]);
@@ -1464,7 +1464,7 @@ PHP_FUNCTION(mysqli_real_escape_string) {
 	}	
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, prmysql, PR_MYSQL *, &mysql_link, "mysqli_link");
 
-	newstr = emalloc(2 * escapestr_len + 1);
+	newstr = safe_emalloc(2, escapestr_len, 1);
 	newstr_len = mysql_real_escape_string(mysql, newstr, escapestr, escapestr_len);
 	newstr = erealloc(newstr, newstr_len + 1);
 		

@@ -1345,7 +1345,7 @@ PHP_FUNCTION(imap_list_full)
 	}
 	
 	array_init(return_value);
-	delim = emalloc(2 * sizeof(char));
+	delim = safe_emalloc(2, sizeof(char), 0);
 	cur=IMAPG(imap_folder_objects);
 	while (cur != NIL) {
 		MAKE_STD_ZVAL(mboxob);
@@ -1654,7 +1654,7 @@ PHP_FUNCTION(imap_lsub_full)
 	convert_to_string_ex(ref);
 	convert_to_string_ex(pat);
 	
-	delim = emalloc(2 * sizeof(char));
+	delim = safe_emalloc(2, sizeof(char), 0);
 	
 	/* set flag for new, improved array of objects list */
 	IMAPG(folderlist_style) = FLIST_OBJECT;
@@ -3551,7 +3551,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 	string = Z_STRVAL_PP(str);
 	end = Z_STRLEN_PP(str);
 			
-	charset = (char *) emalloc((end + 1) * 2);
+	charset = (char *) safe_emalloc((end + 1), 2, 0);
 	text = &charset[end + 1];
 	while (offset < end) {	/* Reached end of the string? */
 		if ((charset_token = (long)php_memnstr(&string[offset], "=?", 2, string + end))) {	/* Is there anything encoded in the string? */

@@ -637,7 +637,7 @@ char *php_dbm_fetch(dbm_info *info, char *key TSRMLS_DC)
 	value_datum = DBM_FETCH(dbf, key_datum);
 
 	if (value_datum.dptr) {
-		ret = (char *)emalloc(sizeof(char) * value_datum.dsize + 1);
+		ret = (char *)safe_emalloc(sizeof(char), value_datum.dsize, 1);
 		strncpy(ret, value_datum.dptr, value_datum.dsize);
 		ret[value_datum.dsize] = '\0';
 
@@ -806,7 +806,7 @@ char *php_dbm_first_key(dbm_info *info TSRMLS_DC) {
 	if (!ret_datum.dptr)
 		return NULL;
 
-	ret = (char *)emalloc((ret_datum.dsize + 1) * sizeof(char));
+	ret = (char *)safe_emalloc((ret_datum.dsize + 1), sizeof(char), 0);
 	strncpy(ret, ret_datum.dptr, ret_datum.dsize);	
 	ret[ret_datum.dsize] = '\0';
 
@@ -873,7 +873,7 @@ char *php_dbm_nextkey(dbm_info *info, char *key TSRMLS_DC)
 	ret_datum = DBM_NEXTKEY(dbf, key_datum);
 
 	if (ret_datum.dptr) {
-		ret = (char *)emalloc(sizeof(char) * ret_datum.dsize + 1);
+		ret = (char *)safe_emalloc(sizeof(char), ret_datum.dsize, 1);
 		strncpy(ret, ret_datum.dptr, ret_datum.dsize);
 		ret[ret_datum.dsize] = '\0';
 #if GDBM
@@ -935,7 +935,7 @@ datum flatfile_fetch(FILE *dbf, datum key_datum) {
 	char *buf;	
 
 	if (flatfile_findkey(dbf, key_datum)) {
-		buf = emalloc((buf_size+1) * sizeof(char));
+		buf = safe_emalloc((buf_size+1), sizeof(char), 0);
 		if (fgets(buf, 15, dbf)) {
 			num = atoi(buf);
 			if (num > buf_size) {
@@ -963,7 +963,7 @@ int flatfile_delete(FILE *dbf, datum key_datum) {
 
 	rewind(dbf);
 
-	buf = emalloc((buf_size + 1)*sizeof(char));
+	buf = safe_emalloc((buf_size + 1), sizeof(char), 0);
 	while(!feof(dbf)) {
 		/* read in the length of the key name */
 		if (!fgets(buf, 15, dbf))
@@ -996,7 +996,7 @@ int flatfile_delete(FILE *dbf, datum key_datum) {
 		if (num > buf_size) {
 			buf_size+=num;
 			if (buf) efree(buf);
-			buf = emalloc((buf_size+1)*sizeof(char));
+			buf = safe_emalloc((buf_size+1), sizeof(char), 0);
 		}
 		/* read in the value */
 		num = fread(buf, sizeof(char), num, dbf);
@@ -1019,14 +1019,14 @@ int flatfile_findkey(FILE *dbf, datum key_datum) {
 	int size = key_datum.dsize;
 
 	rewind(dbf);
-	buf = emalloc((buf_size+1)*sizeof(char));
+	buf = safe_emalloc((buf_size+1), sizeof(char), 0);
 	while (!feof(dbf)) {
 		if (!fgets(buf, 15, dbf)) break;
 		num = atoi(buf);
 		if (num > buf_size) {
 			if (buf) efree(buf);
 			buf_size+=num;
-			buf = emalloc((buf_size+1)*sizeof(char));
+			buf = safe_emalloc((buf_size+1), sizeof(char), 0);
 		}
 		num = fread(buf, sizeof(char), num, dbf);
 		if (num<0) break;
@@ -1043,7 +1043,7 @@ int flatfile_findkey(FILE *dbf, datum key_datum) {
 		if (num > buf_size) {
 			if (buf) efree(buf);
 			buf_size+=num;
-			buf = emalloc((buf_size+1)*sizeof(char));
+			buf = safe_emalloc((buf_size+1), sizeof(char), 0);
 		}
 		num = fread(buf, sizeof(char), num, dbf);
 		if (num<0) break;
@@ -1062,14 +1062,14 @@ datum flatfile_firstkey(FILE *dbf) {
 	int buf_size=1024;
 
 	rewind(dbf);
-	buf.dptr = emalloc((buf_size+1)*sizeof(char));
+	buf.dptr = safe_emalloc((buf_size+1), sizeof(char), 0);
 	while(!feof(dbf)) {
 		if (!fgets(buf.dptr, 15, dbf)) break;
 		num = atoi(buf.dptr);
 		if (num > buf_size) {
 			buf_size+=num;
 			if (buf.dptr) efree(buf.dptr);
-			buf.dptr = emalloc((buf_size+1)*sizeof(char));
+			buf.dptr = safe_emalloc((buf_size+1), sizeof(char), 0);
 		}
 		num = fread(buf.dptr, sizeof(char), num, dbf);
 		if (num<0) break;
@@ -1083,7 +1083,7 @@ datum flatfile_firstkey(FILE *dbf) {
 		if (num > buf_size) {
 			buf_size+=num;
 			if (buf.dptr) efree(buf.dptr);
-			buf.dptr = emalloc((buf_size+1)*sizeof(char));
+			buf.dptr = safe_emalloc((buf_size+1), sizeof(char), 0);
 		}
 		num = fread(buf.dptr, sizeof(char), num, dbf);
 		if (num<0) break;
@@ -1102,14 +1102,14 @@ datum flatfile_nextkey(FILE *dbf) {
 	int buf_size=1024;
 
 	fseek(dbf, CurrentFlatFilePos, SEEK_SET);
-	buf.dptr = emalloc((buf_size+1)*sizeof(char));
+	buf.dptr = safe_emalloc((buf_size+1), sizeof(char), 0);
 	while(!feof(dbf)) {
 		if (!fgets(buf.dptr, 15, dbf)) break;
 		num = atoi(buf.dptr);
 		if (num > buf_size) {
 			buf_size+=num;
 			if (buf.dptr) efree(buf.dptr);
-			buf.dptr = emalloc((buf_size+1)*sizeof(char));
+			buf.dptr = safe_emalloc((buf_size+1), sizeof(char), 0);
 		}
 		num = fread(buf.dptr, sizeof(char), num, dbf);
 		if (num<0) break;
@@ -1118,7 +1118,7 @@ datum flatfile_nextkey(FILE *dbf) {
 		if (num > buf_size) {
 			buf_size+=num;
 			if (buf.dptr) efree(buf.dptr);
-			buf.dptr = emalloc((buf_size+1)*sizeof(char));
+			buf.dptr = safe_emalloc((buf_size+1), sizeof(char), 0);
 		}
 		num = fread(buf.dptr, sizeof(char), num, dbf);
 		if (num<0) break;
