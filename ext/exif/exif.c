@@ -1282,7 +1282,7 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, ch
 		/* If its bigger than 4 bytes, the dir entry contains an offset. */
 		if (offset_val+byte_count > IFDlength) {
 			/* Bogus pointer offset and / or byte_count value */
-			php_error(E_WARNING, "Illegal pointer offset(x%04X + x%04X > x%04X) in IFD for Tag(x%04X=%s): ", offset_val, byte_count, IFDlength, tag, exif_get_tagname(tag,NULL));
+			php_error(E_WARNING, "Illegal pointer offset(x%04X + x%04X = x%04X > x%04X) in IFD for Tag(x%04X=%s): ", offset_val, byte_count, offset_val+byte_count, IFDlength, tag, exif_get_tagname(tag,tagname));
 			return;
 		}
 		value_ptr = offset_base+offset_val;
@@ -1293,7 +1293,7 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, ch
 
 	ImageInfo->sections_found |= FOUND_ANY_TAG;
 	#ifdef EXIF_DEBUG
-	php_error(E_NOTICE,"process tag(x%04x=%s,@x%04X+%i): %s", tag, exif_get_tagname(tag,NULL), value_ptr-offset_base, byte_count, format==TAG_FMT_STRING?(value_ptr?value_ptr:"<no data>"):exif_get_tagformat(format));
+	php_error(E_NOTICE,"process tag(x%04x=%s,@x%04X+x%04X(=%d)): %s", tag, exif_get_tagname(tag,tagname), value_ptr-offset_base, byte_count, byte_count, format==TAG_FMT_STRING?(value_ptr?value_ptr:"<no data>"):exif_get_tagformat(format));
 	#endif
 	if (section_index==SECTION_THUMBNAIL) {
 		switch(tag) {
@@ -1457,7 +1457,7 @@ static void exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *DirStart,
 	int NextDirOffset;
 
 	#ifdef EXIF_DEBUG
-	php_error(E_NOTICE,"exif_process_IFD_in_JPEG(%d=x%04X)", IFDlength, IFDlength);
+	php_error(E_NOTICE,"exif_process_IFD_in_JPEG(x%04X(=%d))", IFDlength, IFDlength);
 	#endif
 
 	ImageInfo->sections_found |= FOUND_IFD0;
@@ -1515,7 +1515,7 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
 	}
 
 	/* First directory starts at offset 8. Offsets starts at 0. */
-	exif_process_IFD_in_JPEG(ImageInfo, CharBuf+8, CharBuf, length-14, SECTION_IFD0);
+	exif_process_IFD_in_JPEG(ImageInfo, CharBuf+8, CharBuf, length/*-14*/, SECTION_IFD0);
 
 	#ifdef EXIF_DEBUG
 	php_error(E_NOTICE,"exif_process_TIFF_in_JPEG, done");
@@ -1581,8 +1581,8 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo, FILE *infile)
 		#endif
 
 		#ifdef EXIF_DEBUG
-		fpos = ftell(infile)-1;
-		php_error(E_NOTICE,"process section at 0x%04X, len=%d", fpos, ImageInfo->sections_count);
+		fpos = ftell(infile);
+		php_error(E_NOTICE,"search section %d at 0x%04X", ImageInfo->sections_count, fpos);
 		#endif
 
 		for (a=0;a<7;a++) {
@@ -1590,7 +1590,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo, FILE *infile)
 			if (marker != 0xff) break;
 		}
 		#ifdef EXIF_DEBUG
-		fpos = ftell(infile)-1;
+		fpos = ftell(infile);
 		#endif
 		if (marker == 0xff) {
 			/* 0xff is legal padding, but if we get that many, something's wrong. */
@@ -1622,13 +1622,13 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo, FILE *infile)
 
 		got = fread(Data+2, 1, itemlen-2, infile); /* Read the whole section. */
 		if (got != itemlen-2) {
-			php_error(E_WARNING, "error reading from file: got=%d=x%04X != itemlen-2=%d=x%04X",got, got, itemlen-2, itemlen-2);
+			php_error(E_WARNING, "error reading from file: got=x%04X(=%d) != itemlen-2=x%04X(=%d)",got, got, itemlen-2, itemlen-2);
 			return FALSE;
 		}
 		ImageInfo->sections_count += 1;
 
 		#ifdef EXIF_DEBUG
-		php_error(E_NOTICE,"process marker(x%02X=%s) at x%04X size %d", marker, exif_get_markername(marker), fpos, itemlen);
+		php_error(E_NOTICE,"process section(x%02X=%s) @ x%04X + x%04X(=%d)", marker, exif_get_markername(marker), fpos, itemlen, itemlen);
 		#endif
 		switch(marker) {
 			case M_SOS:   /* stop before hitting compressed data  */
@@ -1728,6 +1728,9 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 	unsigned char *dir_entry;
 	size_t ifd_size, dir_size, entry_offset, next_offset, entry_length, entry_value;
 	int entry_tag , entry_type;
+	#ifdef EXIF_DEBUG
+	char tagname[64];
+	#endif
 
 	sn = ImageInfo->sections_count++;
 	if ( ImageInfo->FileSize >= dir_offset+2) {
@@ -1853,7 +1856,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 						}
 						entry_offset = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
 						#ifdef EXIF_DEBUG
-						php_error(E_NOTICE,"Found other IFD: %s at x%04X", exif_get_tagname(entry_tag,NULL), entry_offset);
+						php_error(E_NOTICE,"Found other IFD: %s at x%04X", exif_get_tagname(entry_tag,tagname), entry_offset);
 						#endif
 						exif_process_IFD_in_TIFF(ImageInfo,infile,entry_offset,sub_section_index);
 						#ifdef EXIF_DEBUG
@@ -2064,6 +2067,8 @@ PHP_FUNCTION(exif_read_data)
 				sections_needed |= 1<<i;
 			}
 		}
+    	efree(sections_str);
+    	/* now see what we need */
     	#ifdef EXIF_DEBUG
     	sections_str = exif_get_sectionlist(sections_needed);
     	php_error(E_NOTICE,"Sections needed: %s", sections_str[0] ? sections_str : "None");
@@ -2116,8 +2121,7 @@ PHP_FUNCTION(exif_read_data)
 	exif_add_image_info( &ImageInfo, SECTION_FILE, "FileDateTime",  TAG_NONE, TAG_FMT_SLONG,  1, &ImageInfo.FileDateTime);
 	exif_add_image_info( &ImageInfo, SECTION_FILE, "FileSize",      TAG_NONE, TAG_FMT_SLONG,  1, &ImageInfo.FileSize);
 	exif_add_image_info( &ImageInfo, SECTION_FILE, "SectionsFound", TAG_NONE, TAG_FMT_STRING, strlen(sections_str), sections_str);
-   	efree(sections_str);
-	/* ifd0/comment/exif/gps/interop information */
+
 	if (ImageInfo.Width>0 &&  ImageInfo.Height>0) {
 		sprintf(tmp, "width=\"%d\" height=\"%d\"", ImageInfo.Width, ImageInfo.Height);
 		exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "html",   TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
@@ -2167,6 +2171,7 @@ PHP_FUNCTION(exif_read_data)
 	if ( read_thumbnail && ImageInfo.ThumbnailSize) {
 		exif_add_image_info( &ImageInfo, SECTION_THUMBNAIL, "THUMBNAIL", TAG_NONE, TAG_FMT_UNDEFINED, ImageInfo.ThumbnailSize, ImageInfo.Thumbnail);
 	}
+   	efree(sections_str);
 
 	#ifdef EXIF_DEBUG
 	php_error(E_NOTICE,"adding image infos");
