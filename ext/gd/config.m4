@@ -242,7 +242,6 @@ if test "$with_gd" != "no" && test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
         fi
       fi
       
-      told_LIBS="$LIBS"
       if test "$T1_DIR" != "no"; then
         AC_ADD_INCLUDE("$T1_DIR/include")
         if test "$shared" = "yes"; then
@@ -256,7 +255,6 @@ if test "$with_gd" != "no" && test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
 
       AC_MSG_RESULT(yes)
       AC_CHECK_LIB(t1, T1_GetExtend, [AC_DEFINE(HAVE_LIBT1,1,[ ])])
-      LIBS="$told_LIBS"
     else
       AC_MSG_RESULT(no)
     fi
