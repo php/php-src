@@ -2,63 +2,25 @@
 
 /* dba dump utility
  *
- * Usage php dba_dump <file> <handler>
+ * Usage: php dba_dump <file> <handler> [<regex>]
+ *
+ * Show all groups in the ini file specified by <file>.
+ * The regular expression <regex> is used to filter the by setting name.
  *
  * Note: configure with --enable-dba 
  *
  * (c) Marcus Boerger
  */
 
-class dba_reader implements spl_sequence_assoc
-{
-
-	private $db = NULL;
-	private $key = false;
-	private $val = false;
-
-	function __construct($file, $handler) {
-		$this->db = dba_open($file, 'r', $handler);
-	}
-	
-	function __destruct() {
-		if ($this->db) {
-			dba_close($this->db);
-		}
-	}
-
-	function rewind() {
-		if ($this->db) {
-			$this->key = dba_firstkey($this->db);
-		}
-	}
-
-	function current() {
-		return $this->val;
-	}
-
-	function next() {
-		if ($this->db) {
-			$this->key = dba_nextkey($this->db);
-			if ($this->key !== false) {
-				$this->val = dba_fetch($this->key, $this->db);
-			}
-		}
-	}
-
-	function has_more() {
-		if ($this->db && $this->key !== false) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	function key() {
-		return $this->key;
-	}
-}
+require_once("dba_reader.inc");
+require_once("key_filter.inc");
 
 $db = new dba_reader($argv[1], $argv[2]);
+
+if ($argc>3) {
+	$db = new key_filter($db, $argv[3]);
+}
+
 foreach($db as $key => $val) {
 	echo "'$key' => '$val'\n";
 }

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * @brief Subdirectory aware directory iterator.
- * @author Marcus Boerger
+ * @brief   Subdirectory aware directory iterator.
+ * @author  Marcus Boerger
  * @version 1.0
  *
  * This directory iterator recursively returns all files and directories
