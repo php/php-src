@@ -45,6 +45,6 @@ typedef enum
 } image_filetype;
 /* }}} */
 
-extern int php_getimagetype(php_stream * stream, char *filetype);
+extern int php_getimagetype(php_stream *stream, char *filetype);
 
 #endif /* PHP_IMAGE_H */

@@ -90,7 +90,7 @@ typedef enum _php_meta_tags_token {
 } php_meta_tags_token;
 
 typedef struct _php_meta_tags_data {
-  php_stream * stream;
+  php_stream *stream;
   int ulc;
   int lc;
   char *input_buffer;

@@ -379,7 +379,7 @@ PHP_FUNCTION(file)
 	int target_len, len;
 	zend_bool use_include_path = 0;
 	zend_bool reached_eof = 0;
-	php_stream * stream;
+	php_stream *stream;
 
     /* Parse arguments */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b",
@@ -471,7 +471,7 @@ PHP_FUNCTION(tempnam)
    Create a temporary file that will be deleted automatically after use */
 PHP_NAMED_FUNCTION(php_if_tmpfile)
 {
-	php_stream * stream;
+	php_stream *stream;
 	
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
@@ -493,7 +493,7 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 PHP_FUNCTION(fgetwrapperdata)
 {
 	zval **arg1;
-	php_stream * stream;
+	php_stream *stream;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -517,7 +517,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 {
 	zval **arg1, **arg2, **arg3;
 	int use_include_path = 0;
-	php_stream * stream;
+	php_stream *stream;
 	
 	switch(ZEND_NUM_ARGS()) {
 	case 2:
@@ -579,7 +579,7 @@ PHP_FUNCTION(popen)
 	FILE *fp;
 	char *p, *tmp = NULL;
 	char *b, buf[1024];
-	php_stream * stream;
+	php_stream *stream;
 	
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -815,7 +815,7 @@ PHP_FUNCTION(socket_get_status)
 
 	if (php_stream_is((php_stream*)what, PHP_STREAM_IS_SOCKET))	{
 
-		php_netstream_data_t * sock = PHP_NETSTREAM_DATA_FROM_STREAM((php_stream*)what);
+		php_netstream_data_t *sock = PHP_NETSTREAM_DATA_FROM_STREAM((php_stream*)what);
 
 		add_assoc_bool(return_value, "timed_out", sock->timeout_event);
 		add_assoc_bool(return_value, "blocked", sock->is_blocked);
@@ -1109,7 +1109,7 @@ PHP_FUNCTION(set_file_buffer)
 {
 	zval **arg1, **arg2;
 	int ret, type, buff;
-	php_stream * stream;
+	php_stream *stream;
 	FILE * fp;
 
 	switch (ZEND_NUM_ARGS()) {
@@ -1279,7 +1279,7 @@ PHP_FUNCTION(rmdir)
 /* }}} */
 
 /* {{{ php_passthru_stream */
-static size_t php_passthru_stream(php_stream * stream TSRMLS_DC)
+static size_t php_passthru_stream(php_stream *stream TSRMLS_DC)
 {
 	size_t bcount = 0;
 	int ready = 0;
@@ -1332,7 +1332,7 @@ PHP_FUNCTION(readfile)
 	zval **arg1, **arg2;
 	int size=0;
 	int use_include_path=0;
-	php_stream * stream;
+	php_stream *stream;
 	
 	/* check args */
 	switch (ZEND_NUM_ARGS()) {
@@ -1644,7 +1644,7 @@ PHP_FUNCTION(copy)
  */
 PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 {
-	php_stream * srcstream = NULL, * deststream = NULL;
+	php_stream *srcstream = NULL, *deststream = NULL;
 	int ret = FAILURE;
 
 	srcstream = php_stream_open_wrapper(src, "rb", 
@@ -1673,7 +1673,7 @@ PHP_FUNCTION(fread)
 {
 	zval **arg1, **arg2;
 	int len, type;
-	php_stream * stream;
+	php_stream *stream;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1715,7 +1715,7 @@ PHP_FUNCTION(fgetcsv)
 	zval **fd, **bytes, **p_delim;
 	int len, type;
 	char *buf;
-	php_stream * stream;
+	php_stream *stream;
 
 	switch(ZEND_NUM_ARGS()) {
 	case 2:

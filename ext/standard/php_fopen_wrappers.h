@@ -23,8 +23,8 @@
 #ifndef PHP_FOPEN_WRAPPERS_H
 #define PHP_FOPEN_WRAPPERS_H
 
-php_stream * php_stream_url_wrap_http(char * path, char * mode, int options, char ** opened_path TSRMLS_DC);
-php_stream * php_stream_url_wrap_ftp(char * path, char * mode, int options, char ** opened_path TSRMLS_DC);
+php_stream *php_stream_url_wrap_http(char *path, char *mode, int options, char **opened_path TSRMLS_DC);
+php_stream *php_stream_url_wrap_ftp(char *path, char *mode, int options, char **opened_path TSRMLS_DC);
 php_stream_wrapper php_stream_http_wrapper;
 php_stream_wrapper php_stream_ftp_wrapper;
 php_stream_wrapper php_stream_php_wrapper;
