@@ -45,4 +45,5 @@ if test "$PHP_TOKENIZER" != "no"; then
   dnl PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $TOKENIZER_DIR/lib, TOKENIZER_SHARED_LIBADD)
 
   PHP_NEW_EXTENSION(tokenizer, tokenizer.c, $ext_shared)
+  PHP_ADD_MAKEFILE_FRAGMENT
 fi
