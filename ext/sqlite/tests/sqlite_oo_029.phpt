@@ -12,7 +12,6 @@ class sqlite_help
 	function sqlite_help($db){
 		$this->db = $db;
 		$this->db->create_function('link_keywords', array(&$this, 'linkers'), 1);
-		return $this->db;
 	}
 
 	function get_single($key)
