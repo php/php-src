@@ -460,22 +460,19 @@ void zend_post_deactivate_modules(TSRMLS_D);
 #define	Z_DBG(expr)
 #endif
 
-ZEND_API extern char *empty_string;
-
 BEGIN_EXTERN_C()
 ZEND_API void free_estring(char **str_p);
 END_EXTERN_C()
 
-#define STR_FREE(ptr) if (ptr && ptr!=empty_string) { efree(ptr); }
-#define STR_FREE_REL(ptr) if (ptr && ptr!=empty_string) { efree_rel(ptr); }
+/* FIXME: Check if we can save if (ptr) too */
 
-#define STR_REALLOC(ptr, size)										\
-	if (ptr!=empty_string) {										\
-		ptr = (char *) erealloc(ptr, size);							\
-	} else {														\
-		ptr = (char *) emalloc(size);								\
-		memset(ptr, 0, size);										\
-	}
+#define STR_FREE(ptr) if (ptr) { efree(ptr); }
+#define STR_FREE_REL(ptr) if (ptr) { efree_rel(ptr); }
+
+#define STR_EMPTY_ALLOC() estrndup("", sizeof("")-1)
+
+#define STR_REALLOC(ptr, size) \
+			ptr = (char *) erealloc(ptr, size);
 
 /* output support */
 #define ZEND_WRITE(str, str_len)		zend_write((str), (str_len))

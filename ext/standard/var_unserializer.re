@@ -350,11 +350,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 
 	len = parse_iv(start + 2);
 
-	if (len == 0) {
-		str = empty_string;
-	} else {
-		str = estrndup(YYCURSOR, len);
-	}
+	str = estrndup(YYCURSOR, len);
 
 	YYCURSOR += len + 2;
 	*p = YYCURSOR;

@@ -3206,7 +3206,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 	convert_to_string_ex(subject);
 	Z_TYPE_P(result) = IS_STRING;
 	if (Z_STRLEN_PP(subject) == 0) {
-		ZVAL_STRINGL(result, empty_string, 0, 1);
+		ZVAL_STRINGL(result, "", 0, 1);
 		return;
 	}
 	
@@ -3254,7 +3254,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 					zend_hash_move_forward(Z_ARRVAL_P(replace));
 				} else {
 					/* We've run out of replacement strings, so use an empty one. */
-					replace_value = empty_string;
+					replace_value = "";
 					replace_len = 0;
 				}
 			}
@@ -4186,11 +4186,11 @@ PHP_FUNCTION(str_repeat)
 
 	/* Don't waste our time if it's empty */
 	if (Z_STRLEN_PP(input_str) == 0)
-		RETURN_STRINGL(empty_string, 0, 1);
+		RETURN_STRINGL("", 0, 1);
 	
 	/* ... or if the multiplier is zero */
 	if (Z_LVAL_PP(mult) == 0)
-		RETURN_STRINGL(empty_string, 0, 1);
+		RETURN_STRINGL("", 0, 1);
 	
 	/* Initialize the result string */	
 	result_len = Z_STRLEN_PP(input_str) * Z_LVAL_PP(mult);

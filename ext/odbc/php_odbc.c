@@ -1421,13 +1421,13 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			case SQL_VARBINARY:
 			case SQL_LONGVARBINARY:
 				if (result->binmode <= 0) {
-					Z_STRVAL_P(tmp) = empty_string;
+					Z_STRVAL_P(tmp) = STR_EMPTY_ALLOC();
 					break;
 				}
 				if (result->binmode == 1) sql_c_type = SQL_C_BINARY;
 			case SQL_LONGVARCHAR:
 				if (IS_SQL_LONG(result->values[i].coltype) && result->longreadlen <= 0) {
-					Z_STRVAL_P(tmp) = empty_string;
+					Z_STRVAL_P(tmp) = STR_EMPTY_ALLOC();
 					break;
 				}
 				if (buf == NULL) buf = emalloc(result->longreadlen + 1);
@@ -1580,13 +1580,13 @@ PHP_FUNCTION(odbc_fetch_into)
 			case SQL_VARBINARY:
 			case SQL_LONGVARBINARY:
 				if (result->binmode <= 0) {
-					Z_STRVAL_P(tmp) = empty_string;
+					Z_STRVAL_P(tmp) = STR_EMPTY_ALLOC();
 					break;
 				}
 				if (result->binmode == 1) sql_c_type = SQL_C_BINARY; 
 			case SQL_LONGVARCHAR:
 				if (IS_SQL_LONG(result->values[i].coltype) && result->longreadlen <= 0) {
-					Z_STRVAL_P(tmp) = empty_string;
+					Z_STRVAL_P(tmp) = STR_EMPTY_ALLOC();
 					break;
 				}
 

@@ -194,7 +194,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 	switch (expr->type) {
 		case IS_NULL:
 			expr_copy->value.str.len = 0;
-			expr_copy->value.str.val = empty_string;
+			expr_copy->value.str.val = STR_EMPTY_ALLOC();
 			break;
 		case IS_BOOL:
 			if (expr->value.lval) {
@@ -202,7 +202,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 				expr_copy->value.str.val = estrndup("1", 1);
 			} else {
 				expr_copy->value.str.len = 0;
-				expr_copy->value.str.val = empty_string;
+				expr_copy->value.str.val = STR_EMPTY_ALLOC();
 			}
 			break;
 		case IS_RESOURCE:
@@ -242,7 +242,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 				if (EG(exception)) {
 					zval_dtor(expr_copy);
 					expr_copy->value.str.len = 0;
-					expr_copy->value.str.val = empty_string;
+					expr_copy->value.str.val = STR_EMPTY_ALLOC();
 					break;
 				}
 			}

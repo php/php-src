@@ -959,7 +959,7 @@ static void php_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			}
 		} else {
 			/*
-			add_get_index_stringl(return_value, i, empty_string, 0, (void **) &pval_ptr, 1);
+			add_get_index_stringl(return_value, i, "", 0, (void **) &pval_ptr, 1);
 			*/
 		}
 	}
@@ -1097,8 +1097,8 @@ PHP_FUNCTION(msql_fetch_field)
 	}
 	object_init(return_value);
 
-	add_property_string(return_value, "name",(msql_field->name?msql_field->name:empty_string), 1);
-	add_property_string(return_value, "table",(msql_field->table?msql_field->table:empty_string), 1);
+	add_property_string(return_value, "name",(msql_field->name?msql_field->name:""), 1);
+	add_property_string(return_value, "table",(msql_field->table?msql_field->table:""), 1);
 	add_property_long(return_value, "not_null",IS_NOT_NULL(msql_field->flags));
 #if MSQL1
 	add_property_long(return_value, "primary_key",(msql_field->flags&PRI_KEY_FLAG?1:0));

@@ -906,7 +906,7 @@ PHP_FUNCTION(mysqli_get_host_info)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
 
-	RETURN_STRING((mysql->mysql->host_info) ? mysql->mysql->host_info : empty_string, 1);
+	RETURN_STRING((mysql->mysql->host_info) ? mysql->mysql->host_info : "", 1);
 }
 /* }}} */
 
@@ -971,7 +971,7 @@ PHP_FUNCTION(mysqli_info)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
 
-	RETURN_STRING((mysql->mysql->info) ? mysql->mysql->info : empty_string, 1);
+	RETURN_STRING((mysql->mysql->info) ? mysql->mysql->info : "", 1);
 }
 /* }}} */
 

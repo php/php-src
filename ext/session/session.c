@@ -1060,7 +1060,7 @@ static void php_session_reset_id(TSRMLS_D)
 		smart_str_0(&var);
 		REGISTER_STRINGL_CONSTANT("SID", var.c, var.len, 0);
 	} else {
-		REGISTER_STRINGL_CONSTANT("SID", empty_string, 0, 0);
+		REGISTER_STRINGL_CONSTANT("SID", "", 0, 1);
 	}
 
 	if (PS(apply_trans_sid)) {
@@ -1370,13 +1370,16 @@ PHP_FUNCTION(session_id)
 {
 	zval **p_name;
 	int ac = ZEND_NUM_ARGS();
-	char *old = empty_string;
+	char *old;
 
 	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	if (PS(id))
+	if (PS(id)) {
 		old = estrdup(PS(id));
+	} else {
+		old = STR_EMPTY_ALLOC();
+	}
 
 	if (ac == 1) {
 		convert_to_string_ex(p_name);

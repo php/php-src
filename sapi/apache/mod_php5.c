@@ -235,7 +235,7 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 		if (elts[i].val) {
 			val = elts[i].val;
 		} else {
-			val = empty_string;
+			val = "";
 		}
 		php_register_variable(elts[i].key, val, track_vars_array  TSRMLS_CC);
 	}

@@ -510,7 +510,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 
 	switch (op->type) {
 		case IS_NULL:
-			op->value.str.val = empty_string;
+			op->value.str.val = STR_EMPTY_ALLOC();
 			op->value.str.len = 0;
 			break;
 		case IS_STRING:
@@ -520,7 +520,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 				op->value.str.val = estrndup_rel("1", 1);
 				op->value.str.len = 1;
 			} else {
-				op->value.str.val = empty_string;
+				op->value.str.val = STR_EMPTY_ALLOC();
 				op->value.str.len = 0;
 			}
 			break;
@@ -1130,11 +1130,8 @@ ZEND_API int add_char_to_string(zval *result, zval *op1, zval *op2)
 ZEND_API int add_string_to_string(zval *result, zval *op1, zval *op2)
 {
 	int length = op1->value.str.len + op2->value.str.len;
-	if (op1->value.str.val == empty_string) {
-		result->value.str.val = (char *) emalloc(length+1);
-	} else {
-		result->value.str.val = (char *) erealloc(op1->value.str.val, length+1);
-	}
+
+	result->value.str.val = (char *) erealloc(op1->value.str.val, length+1);
     memcpy(result->value.str.val+op1->value.str.len, op2->value.str.val, op2->value.str.len);
     result->value.str.val[length] = 0;
 	result->value.str.len = length;
@@ -1167,12 +1164,8 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 	if (result==op1) {	/* special case, perform operations on result */
 		uint res_len = op1->value.str.len + op2->value.str.len;
 		
-		if (result->value.str.len == 0) { /* handle empty_string */
-			STR_FREE(result->value.str.val);
-			result->value.str.val = emalloc(res_len+1);
-		} else {
-			result->value.str.val = erealloc(result->value.str.val, res_len+1);
-		}
+		result->value.str.val = erealloc(result->value.str.val, res_len+1);
+
 		memcpy(result->value.str.val+result->value.str.len, op2->value.str.val, op2->value.str.len);
 		result->value.str.val[res_len]=0;
 		result->value.str.len = res_len;
