@@ -34,9 +34,6 @@
 #include "zend_highlight.h"
 
 
-#define PHP_CONF_LONG(directive,value1,value2) \
-	php_printf("<TR VALIGN=\"baseline\" BGCOLOR=\"" PHP_CONTENTS_COLOR "\"><TD BGCOLOR=\"" PHP_ENTRY_NAME_COLOR "\">%s<BR></TD><TD>%ld<BR></TD><TD>%ld<BR></TD></TR>\n",directive,value1,value2);
-
 #define SECTION(name)  PUTS("<H2 align=\"center\">" name "</H2>\n")
 
 PHPAPI extern char *php_ini_opened_path;
@@ -74,7 +71,7 @@ static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
 			PUTS("[\"");
 			switch (zend_hash_get_current_key((*data)->value.ht, &string_key, &num_key, 0)) {
 				case HASH_KEY_IS_STRING:
-					PUTS(string_key);
+					zend_html_puts(string_key, strlen(string_key));
 					break;
 				case HASH_KEY_IS_LONG:
 					php_printf("%ld",num_key);
@@ -89,12 +86,12 @@ static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
 				tmp2 = **tmp;
 				zval_copy_ctor(&tmp2);
 				convert_to_string(&tmp2);
-				PUTS(tmp2.value.str.val);
+				zend_html_puts(tmp2.value.str.val, tmp2.value.str.len);
 				zval_dtor(&tmp2);
 			} else {
-				PUTS((*tmp)->value.str.val);
+				zend_html_puts((*tmp)->value.str.val, (*tmp)->value.str.len);
 			}
-			PUTS("</TD></TR>\n");
+			PUTS("&nbsp;</TD></TR>\n");
 			zend_hash_move_forward((*data)->value.ht);
 		}
 	}
@@ -398,15 +395,18 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 
 	php_printf("<TR VALIGN=\"baseline\" BGCOLOR=\"" PHP_CONTENTS_COLOR "\">");
 	for (i=0; i<num_cols; i++) {
+		php_printf("<TD %s>%s",
+			(i==0?"BGCOLOR=\"" PHP_ENTRY_NAME_COLOR "\" ":"ALIGN=\"left\""),
+			(i==0?"<B>":""));
+
 		row_element = va_arg(row_elements, char *);
 		if (!row_element || !*row_element) {
-			row_element = "&nbsp;";
+			php_printf("&nbsp;");
+		} else {
+			zend_html_puts(row_element, strlen(row_element));
 		}
-		php_printf("<TD %s>%s%s%s</td>", 
-			(i==0?"BGCOLOR=\"" PHP_ENTRY_NAME_COLOR "\" ":"ALIGN=\"left\""),
-			(i==0?"<B>":""), 
-			row_element,
-			(i==0?"</B>":""));
+
+		php_printf("%s</td>", (i==0?"</B>":""));
 	}
 	php_printf("</TR>\n");
 
