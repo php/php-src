@@ -163,7 +163,6 @@ More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 save_text($info_file, $php_info);
 $ini_overwrites = array(
 		'output_handler=',
-		'zlib.output_compression=Off',
 		'open_basedir=',
 		'safe_mode=0',
 		'disable_functions=',
@@ -182,9 +181,19 @@ $ini_overwrites = array(
 		'auto_prepend_file=',
 		'auto_append_file=',
 		'magic_quotes_runtime=0',
-		'xdebug.default_enable=0',
-		'session.auto_start=0'
 	);
+
+/* Only add overwrites if the extension is loaded */ 
+if (extension_loaded('xdebug')) {
+	$ini_overwrites[] = 'xdebug.default_enable=0';
+}
+if (extension_loaded('zlib')) {
+	$ini_overwrites[] =	'zlib.output_compression=Off':
+}
+if (extension_loaded('session')) {
+	$ini_overwrites[] = 'session.auto_start=0'
+}
+
 $info_params = array();
 settings2array($ini_overwrites,$info_params);
 settings2params($info_params);
