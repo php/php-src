@@ -202,7 +202,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 				(holder).value.lval = (zend_hash_num_elements((op)->value.ht)?1:0);				\
 				break;												\
 			case IS_OBJECT:											\
-				(holder).value.lval = (zend_hash_num_elements((op)->value.obj.properties)?1:0);	\
+				(holder).value.lval = (zend_hash_num_elements(Z_OBJPROP_P(op))?1:0);	\
 				break;												\
 			case IS_BOOL:											\
 			case IS_RESOURCE:										\
@@ -245,7 +245,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 				(holder).value.lval = (zend_hash_num_elements((op)->value.ht)?1:0);	\
 				break;												\
 			case IS_OBJECT:											\
-				(holder).value.lval = (zend_hash_num_elements((op)->value.obj.properties)?1:0);	\
+				(holder).value.lval = (zend_hash_num_elements(Z_OBJPROP_P(op))?1:0);	\
 				break;												\
 			default:												\
 				(holder).value.lval = 0;							\
@@ -291,7 +291,7 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 			op->value.lval = tmp;
 			break;
 		case IS_OBJECT:
-			tmp = (zend_hash_num_elements(op->value.obj.properties)?1:0);
+			tmp = (zend_hash_num_elements(Z_OBJPROP_P(op))?1:0);
 			zval_dtor(op);
 			op->value.lval = tmp;
 			break;
@@ -336,7 +336,7 @@ ZEND_API void convert_to_double(zval *op)
 			op->value.dval = tmp;
 			break;
 		case IS_OBJECT:
-			tmp = (zend_hash_num_elements(op->value.obj.properties)?1:0);
+			tmp = (zend_hash_num_elements(Z_OBJPROP_P(op))?1:0);
 			zval_dtor(op);
 			op->value.dval = tmp;
 			break;			
@@ -394,7 +394,7 @@ ZEND_API void convert_to_boolean(zval *op)
 			op->value.lval = tmp;
 			break;
 		case IS_OBJECT:
-			tmp = (zend_hash_num_elements(op->value.obj.properties)?1:0);
+			tmp = (zend_hash_num_elements(Z_OBJPROP_P(op))?1:0);
 			zval_dtor(op);
 			op->value.lval = tmp;
 			break;
@@ -486,12 +486,13 @@ static void convert_scalar_to_array(zval *op, int type)
 			zend_hash_index_update(op->value.ht, 0, (void *) &entry, sizeof(zval *), NULL);
 			op->type = IS_ARRAY;
 			break;
+/* OBJECTS_FIXME */
 		case IS_OBJECT:
-			ALLOC_HASHTABLE(op->value.obj.properties);
-			zend_hash_init(op->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-			zend_hash_update(op->value.obj.properties, "scalar", sizeof("scalar"), (void *) &entry, sizeof(zval *), NULL);
-			op->value.obj.ce = &zend_standard_class_def;
-			op->type = IS_OBJECT;
+			ALLOC_HASHTABLE(Z_OBJPROP_P(op));
+			zend_hash_init(Z_OBJPROP_P(op), 0, NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_update(Z_OBJPROP_P(op), "scalar", sizeof("scalar"), (void *) &entry, sizeof(zval *), NULL);
+			Z_OBJCE_P(op) = &zend_standard_class_def;
+			Z_TYPE_P(op) = IS_OBJECT;
 			break;
 	}
 }
@@ -503,9 +504,10 @@ ZEND_API void convert_to_array(zval *op)
 		case IS_ARRAY:
 			return;
 			break;
+/* OBJECTS_FIXME */
 		case IS_OBJECT:
 			op->type = IS_ARRAY;
-			op->value.ht = op->value.obj.properties;
+			op->value.ht = Z_OBJPROP_P(op);
 			return;
 		case IS_NULL:
 			ALLOC_HASHTABLE(op->value.ht);
@@ -522,19 +524,21 @@ ZEND_API void convert_to_array(zval *op)
 ZEND_API void convert_to_object(zval *op)
 {
 	switch(op->type) {
+/* OBJECTS_FIXME */
 		case IS_ARRAY:
-			op->type = IS_OBJECT;
-			op->value.obj.properties = op->value.ht;
-			op->value.obj.ce = &zend_standard_class_def;
+			Z_TYPE_P(op) = IS_OBJECT;
+			Z_OBJPROP_P(op) = op->value.ht;
+			Z_OBJCE_P(op) = &zend_standard_class_def;
 			return;
 			break;
 		case IS_OBJECT:
 			return;
+/* OBJECTS_FIXME */
 		case IS_NULL:
-			ALLOC_HASHTABLE(op->value.obj.properties);
-			zend_hash_init(op->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-			op->value.obj.ce = &zend_standard_class_def;
-			op->type = IS_OBJECT;
+			ALLOC_HASHTABLE(Z_OBJPROP_P(op));
+			zend_hash_init(Z_OBJPROP_P(op), 0, NULL, ZVAL_PTR_DTOR, 0);
+			Z_OBJCE_P(op) = &zend_standard_class_def;
+			Z_TYPE_P(op) = IS_OBJECT;
 			break;
 		default:
 			convert_scalar_to_array(op, IS_OBJECT);
@@ -1222,10 +1226,11 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 			}
 			break;
 		case IS_OBJECT:
-			if (op1->value.obj.ce != op2->value.obj.ce) {
+/* OBJECTS_FIXME */
+			if (Z_OBJCE_P(op1) != Z_OBJCE_P(op2)) {
 				result->value.lval = 0;
 			} else {
-				if (zend_hash_compare(op1->value.obj.properties, op2->value.obj.properties, (compare_func_t) hash_zval_identical_function, 1)==0) {
+				if (zend_hash_compare(Z_OBJPROP_P(op1), Z_OBJPROP_P(op2), (compare_func_t) hash_zval_identical_function, 1)==0) {
 					result->value.lval = 1;
 				} else {
 					result->value.lval = 0;
@@ -1676,12 +1681,14 @@ ZEND_API void zend_compare_arrays(zval *result, zval *a1, zval *a2)
 
 ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2)
 {
-	if (o1->value.obj.ce != o2->value.obj.ce) {
+/* OBJECTS_FIXME */
+	if (Z_OBJCE_P(o1) != Z_OBJCE_P(o2)) {
 		result->value.lval = 1;	/* Comparing objects of different types is pretty much meaningless */
 		result->type = IS_LONG;
 		return;
 	}
-	zend_compare_symbol_tables(result, o1->value.obj.properties, o2->value.obj.properties);
+	zend_compare_symbol_tables(result, Z_OBJPROP_P(o1), Z_OBJPROP_P(o2));
+#endif
 }
 
 
