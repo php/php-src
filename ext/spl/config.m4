@@ -39,5 +39,5 @@ fi
 
 if test "$PHP_SPL" != "no"; then
     AC_DEFINE(HAVE_SPL, 1, [Whether you want SPL (Standard Php Library) support]) 
-    PHP_NEW_EXTENSION(spl, php_spl.c spl_functions.c spl_engine.c spl_foreach.c spl_array.c, $ext_shared)
+    PHP_NEW_EXTENSION(spl, php_spl.c spl_functions.c spl_engine.c spl_foreach.c spl_array.c spl_directory.c, $ext_shared)
 fi

@@ -49,11 +49,11 @@ void spl_register_interface(zend_class_entry ** ppce, char * class_name TSRMLS_D
 /* }}} */
 
 /* {{{ spl_register_std_class */
-void spl_register_std_class(zend_class_entry ** ppce, char * class_name, void * obj_ctor TSRMLS_DC)
+void spl_register_std_class(zend_class_entry ** ppce, char * class_name, void * obj_ctor, function_entry * function_list TSRMLS_DC)
 {
 	zend_class_entry ce;
 	
-	INIT_CLASS_ENTRY(ce, class_name, NULL);
+	INIT_CLASS_ENTRY(ce, class_name, function_list);
 	ce.name_length = strlen(class_name);
 	*ppce = zend_register_internal_class(&ce TSRMLS_CC);
 
