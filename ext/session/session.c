@@ -801,7 +801,7 @@ static void _php_session_destroy(PSLS_D)
 }
 
 
-/* {{{ proto void session_set_cookie_params(int lifetime [, string path [, string domain ]])
+/* {{{ proto void session_set_cookie_params(int lifetime [, string path [, string domain]])
    Set session cookie parameters */
 PHP_FUNCTION(session_set_cookie_params)
 {
@@ -836,7 +836,7 @@ PHP_FUNCTION(session_set_cookie_params)
 
 
 /* {{{ proto string session_name([string newname])
-   return the current session name. if newname is given, the session name is replaced with newname */
+   Return the current session name. if newname is given, the session name is replaced with newname */
 PHP_FUNCTION(session_name)
 {
 	pval **p_name;
@@ -860,7 +860,7 @@ PHP_FUNCTION(session_name)
 /* }}} */
 
 /* {{{ proto string session_module_name([string newname])
-   return the current module name used for accessing session data. if newname is given, the module name is replaced with newname */
+   Return the current module name used for accessing session data. if newname is given, the module name is replaced with newname */
 PHP_FUNCTION(session_module_name)
 {
 	pval **p_name;
@@ -895,7 +895,7 @@ PHP_FUNCTION(session_module_name)
 /* }}} */
 
 /* {{{ proto void session_set_save_handler(string open, string close, string read, string write, string destroy, string gc)
-   sets user-level functions */
+   Sets user-level functions */
 PHP_FUNCTION(session_set_save_handler)
 {
 	zval **args[6];
@@ -925,7 +925,7 @@ PHP_FUNCTION(session_set_save_handler)
 /* }}} */
 
 /* {{{ proto string session_save_path([string newname])
-   return the current save path passed to module_name. if newname is given, the save path is replaced with newname */
+   Return the current save path passed to module_name. if newname is given, the save path is replaced with newname */
 PHP_FUNCTION(session_save_path)
 {
 	pval **p_name;
@@ -949,7 +949,7 @@ PHP_FUNCTION(session_save_path)
 /* }}} */
 
 /* {{{ proto string session_id([string newid])
-   return the current session id. if newid is given, the session id is replaced with newid */
+   Return the current session id. if newid is given, the session id is replaced with newid */
 PHP_FUNCTION(session_id)
 {
 	pval **p_name;
@@ -996,8 +996,8 @@ static void php_register_var(zval** entry PSLS_DC PLS_DC)
 /* }}} */
 
 
-/* {{{ proto bool session_register(string var_name | array var_names [, ... ])
-   adds varname(s) to the list of variables which are freezed at the session end */
+/* {{{ proto bool session_register(mixed var_names [, ...])
+   Adds varname(s) to the list of variables which are freezed at the session end */
 PHP_FUNCTION(session_register)
 {
 	zval  ***args;
@@ -1032,7 +1032,7 @@ PHP_FUNCTION(session_register)
 /* }}} */
 
 /* {{{ proto bool session_unregister(string varname)
-   removes varname from the list of variables which are freezed at the session end */
+   Removes varname from the list of variables which are freezed at the session end */
 PHP_FUNCTION(session_unregister)
 {
 	pval **p_name;
@@ -1052,7 +1052,7 @@ PHP_FUNCTION(session_unregister)
 
 
 /* {{{ proto bool session_is_registered(string varname)
-   checks if a variable is registered in session */
+   Checks if a variable is registered in session */
 PHP_FUNCTION(session_is_registered)
 {
 	pval **p_name;
@@ -1074,8 +1074,8 @@ PHP_FUNCTION(session_is_registered)
 /* }}} */
 
 
-/* {{{ proto string session_encode()
-   serializes the current setup and returns the serialized representation */
+/* {{{ proto string session_encode(void)
+   Serializes the current setup and returns the serialized representation */
 PHP_FUNCTION(session_encode)
 {
 	int len;
@@ -1088,7 +1088,7 @@ PHP_FUNCTION(session_encode)
 /* }}} */
 
 /* {{{ proto session_decode(string data)
-   deserializes data and reinitializes the variables */
+   Deserializes data and reinitializes the variables */
 PHP_FUNCTION(session_decode)
 {
 	pval **str;
@@ -1103,7 +1103,7 @@ PHP_FUNCTION(session_decode)
 }
 /* }}} */
 
-/* {{{ proto session_start()
+/* {{{ proto session_start(void)
    Begin session - reinitializes freezed variables, registers browsers etc */
 PHP_FUNCTION(session_start)
 {
@@ -1115,7 +1115,7 @@ PHP_FUNCTION(session_start)
 }
 /* }}} */
 
-/* {{{ proto session_destroy()
+/* {{{ proto session_destroy(void)
    Destroy the current session and all data associated with it */
 PHP_FUNCTION(session_destroy)
 {
@@ -1142,7 +1142,7 @@ void session_adapt_uris(const char *src, uint srclen, char **new, uint *newlen)
 }
 #endif
 
-/* {{{ proto session_unset()
+/* {{{ proto session_unset(void)
    Unset all registered variables */
 PHP_FUNCTION(session_unset)
 {
