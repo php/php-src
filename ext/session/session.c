@@ -935,7 +935,7 @@ static void php_session_start(PSLS_D)
 		smart_str_appendc(&var, '=');
 		smart_str_appends(&var, PS(id));
 		smart_str_0(&var);
-		REGISTER_STRING_CONSTANT("SID", buf, 0);
+		REGISTER_STRING_CONSTANT("SID", var.c, 0);
 	} else
 		REGISTER_STRING_CONSTANT("SID", empty_string, 0);
 	PS(define_sid) = define_sid;
