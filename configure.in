@@ -607,7 +607,7 @@ PHP_ARG_WITH(pear, [whether to install PEAR, and where],
 [  --with-pear=DIR         Install PEAR in DIR (default PREFIX/lib/php)
   --without-pear          Do not install PEAR], DEFAULT, no)
 
-if test "$PHP_PEAR" != "no" && test "$disable_cli" != "1"; then
+if test "$PHP_PEAR" != "no" && test "$PHP_SAPI_CLI" != "no"; then
   install_pear="install-pear install-build install-headers install-programs"
   PEAR_INSTALLDIR=$PHP_PEAR
 fi
@@ -957,7 +957,7 @@ AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
 PHP_OS=`uname | xargs`
 AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
 
-if test "$disable_cli" != "1"; then
+if test "$PHP_SAPI_CLI" != "no"; then
   PHP_CLI_TARGET=sapi/cli/php
   PHP_INSTALL_CLI_TARGET="install-cli"
   PHP_ADD_SOURCES(sapi/cli, php_cli.c getopt.c,, cli)
