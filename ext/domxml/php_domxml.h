@@ -142,6 +142,7 @@ PHP_FUNCTION(domxml_elem_remove_attribute);
 PHP_FUNCTION(domxml_elem_get_attribute_node);
 PHP_FUNCTION(domxml_elem_set_attribute_node);
 PHP_FUNCTION(domxml_elem_get_elements_by_tagname);
+PHP_FUNCTION(domxml_elem_has_attribute);
 /* Class CData methods */
 PHP_FUNCTION(domxml_cdata_length);
 
