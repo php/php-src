@@ -48,7 +48,7 @@ getlogin()
 	STR_FREE(PW32G(login_name));	
 	GetUserName(name, &max_len);
 	name[max_len] = '\0';
-	PW32G(login_name) = strdup(name);
+	PW32G(login_name) = estrdup(name);
 	return PW32G(login_name);
 }
 
