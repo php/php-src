@@ -49,8 +49,8 @@ extern zend_module_entry pcre_module_entry;
 #define pcre_module_ptr &pcre_module_entry
 
 typedef struct {
-        pcre *re;
-        pcre_extra *extra;
+	pcre *re;
+	pcre_extra *extra;
 	int preg_options;
 #if HAVE_SETLOCALE
 	char *locale;
