@@ -23,7 +23,8 @@ Fixed:
     flock (Sascha)
     register_shutdown_function (Sascha)
     mb_strcut('', [number greater than the length of first arg]) (Moriyoshi)
-    ext/exif, ext/dba (7) (Marcus)
+    ext/exif, ext/dba (Marcus)
+    php_base64_encode (Moriyoshi)
 	
 Open:
 
@@ -32,8 +33,7 @@ Open:
     socket_select               (3)
     php_imagepolygon            (4)
     imagesetstyle               (5)
-    php_base64_encode		(6)
-    pack			(7)
+    pack                        (6)
 	
 (1) heap corruption, mostly visible in malloc-related calls.  Whether you see 
     this or not might depend on your libc/compiler.  Hard to track down,
@@ -83,11 +83,9 @@ Methodology
     gdImageSetStyle function called by this php wrapper can die for the
     same reason.  
 
-(6) integer overflow if the specified string is longer then ~1.1 billion bytes.
+(6) multiple integer overflows, ex. pack("d4294967297", 2);
 
-(7) multiple integer overflows, ex. pack("d4294967297", 2);
-
-Ammendment 1.
+Amendment 1.
 
 CFLAGS='-O0 -g' \
 '../src/php4/configure' \
