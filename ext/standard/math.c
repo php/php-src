@@ -32,8 +32,8 @@
 #endif
 
 /* {{{ proto int abs(int number)
-
    Return the absolute value of the number */
+
 PHP_FUNCTION(abs) 
 {
 	zval **value;
@@ -107,7 +107,7 @@ PHP_FUNCTION(floor)
 
 
 /* {{{ proto float round(float number [, int precision])
-   Returns the number rounded to specified precision. */
+   Returns the number rounded to specified precision */
 PHP_FUNCTION(round)
 {
 	zval **value, **precision;
@@ -268,8 +268,7 @@ PHP_FUNCTION(atan2)
 
 /* }}} */
 /* {{{ proto float sinh(float number)
-   Returns the hyperbolic sine of the number,
-   defined as (exp(number) - exp(-number))/2 */
+   Returns the hyperbolic sine of the number, defined as (exp(number) - exp(-number))/2 */
 
 PHP_FUNCTION(sinh)
 {
@@ -285,8 +284,7 @@ PHP_FUNCTION(sinh)
 
 /* }}} */
 /* {{{ proto float cosh(float number)
-   Returns the hyperbolic cosine of the number,
-   defined as (exp(number) + exp(-number))/2 */
+   Returns the hyperbolic cosine of the number, defined as (exp(number) + exp(-number))/2 */
 
 PHP_FUNCTION(cosh)
 {
@@ -301,8 +299,7 @@ PHP_FUNCTION(cosh)
 }
 /* }}} */
 /* {{{ proto float tanh(float number)
-   Returns the hyperbolic tangent of the number,
-   defined as sinh(number)/cosh(number) */
+   Returns the hyperbolic tangent of the number, defined as sinh(number)/cosh(number) */
 PHP_FUNCTION(tanh)
 {
 	zval **num;
@@ -319,8 +316,7 @@ PHP_FUNCTION(tanh)
 
 #ifndef PHP_WIN32
 /* {{{ proto float asinh(float number)
-   Returns the inverse hyperbolic sine of the number,
-   i.e. the value whose hyperbolic sine is number */
+   Returns the inverse hyperbolic sine of the number, i.e. the value whose hyperbolic sine is number */
 
 PHP_FUNCTION(asinh)
 {
@@ -336,8 +332,7 @@ PHP_FUNCTION(asinh)
 
 /* }}} */
 /* {{{ proto float acosh(float number)
-   Returns the inverse hyperbolic cosine of the number,
-   i.e. the value whose hyperbolic cosine is number */
+   Returns the inverse hyperbolic cosine of the number, i.e. the value whose hyperbolic cosine is number */
 
 PHP_FUNCTION(acosh)
 {
@@ -353,8 +348,7 @@ PHP_FUNCTION(acosh)
 
 /* }}} */
 /* {{{ proto float atanh(float number)
-   Returns the inverse hyperbolic tangent of the number,
-   i.e. the value whose hyperbolic tangent is number */
+   Returns the inverse hyperbolic tangent of the number, i.e. the value whose hyperbolic tangent is number */
 
 PHP_FUNCTION(atanh)
 {
@@ -384,7 +378,7 @@ PHP_FUNCTION(pi)
 
 
 /* {{{ proto bool finite(double val)
-   Returns whether double is finite. */
+   Returns whether double is finite */
 PHP_FUNCTION(finite)
 {
 	double dval;
@@ -398,7 +392,7 @@ PHP_FUNCTION(finite)
 /* }}} */
 
 /* {{{ proto bool isinf(double val)
-   Returns whether double is infinite. */
+   Returns whether double is infinite */
 PHP_FUNCTION(isinf)
 {
 	double dval;
@@ -411,7 +405,7 @@ PHP_FUNCTION(isinf)
 /* }}} */
 
 /* {{{ proto bool isnan(double val)
-   Returns whether double is not a number. */
+   Returns whether double is not a number */
 PHP_FUNCTION(isnan)
 {
 	double dval;
@@ -424,8 +418,7 @@ PHP_FUNCTION(isnan)
 /* }}} */
 
 /* {{{ proto number pow(number base, number exponent)
-   Returns base raised to the power of exponent. Returns
-   integer result when possible. */
+   Returns base raised to the power of exponent. Returns integer result when possible */
 PHP_FUNCTION(pow)
 {
 	zval *zbase, *zexp;
@@ -483,11 +476,12 @@ PHP_FUNCTION(exp)
 
 #ifndef PHP_WIN32
 /* {{{ proto float expm1(float number)
-   Returns exp(number) - 1, computed in a way that accurate even when 
-   the value of number is close to zero 
+   Returns exp(number) - 1, computed in a way that accurate even when the value of number is close to zero */
+
+/*
    WARNING: this function is expermental: it could change its name or 
    disappear in the next version of PHP!
-   */
+*/
 
 PHP_FUNCTION(expm1)
 {
@@ -503,11 +497,12 @@ PHP_FUNCTION(expm1)
 
 /* }}} */
 /* {{{ proto float log1p(float number)
-   Returns log(1 + number), computed in a way that accurate even when 
-   the value of number is close to zero 
+   Returns log(1 + number), computed in a way that accurate even when the value of number is close to zero */ 
+
+/*
    WARNING: this function is expermental: it could change its name or 
    disappear in the next version of PHP!
-   */
+*/
 
 PHP_FUNCTION(log1p)
 {
@@ -575,10 +570,12 @@ PHP_FUNCTION(sqrt)
 
 
 /* {{{ proto float hypot(float num1, float num2)
-   Returns sqrt( num1*num1 + num2*num2) 
+   Returns sqrt(num1*num1 + num2*num2) */ 
+
+/*
    WARNING: this function is expermental: it could change its name or 
    disappear in the next version of PHP!
-   */
+*/
 
 PHP_FUNCTION(hypot)
 {
@@ -911,9 +908,7 @@ PHP_FUNCTION(dechex)
 
 /* }}} */
 /* {{{ proto string base_convert(string number, int frombase, int tobase)
-
-   Converts a number in a string from any base <= 36 to any base <= 36.
-*/
+   Converts a number in a string from any base <= 36 to any base <= 36 */
 
 PHP_FUNCTION(base_convert)
 {

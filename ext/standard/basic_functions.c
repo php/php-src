@@ -2402,7 +2402,7 @@ PHP_FUNCTION(ignore_user_abort)
 
 #if HAVE_GETSERVBYNAME
 /* {{{ proto int getservbyname(string service, string protocol)
-   Returns port associated with service. Protocol must be "tcp" or "udp". */
+   Returns port associated with service. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyname)
 {
 	pval **name, **proto;
@@ -2427,7 +2427,7 @@ PHP_FUNCTION(getservbyname)
 
 #if HAVE_GETSERVBYPORT
 /* {{{ proto string getservbyport(int port, string protocol)
-   Returns service name associated with port. Protocol must be "tcp" or "udp". */
+   Returns service name associated with port. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyport)
 {
 	pval **port, **proto;
@@ -2759,7 +2759,8 @@ PHP_FUNCTION(parse_ini_file)
 }
 /* }}} */
 
-/* {{{ proto bool is_callable(mixed var [, bool syntax_only [, string callable_name]]) */
+/* {{{ proto bool is_callable(mixed var [, bool syntax_only [, string callable_name]]) 
+   ??? */
 PHP_FUNCTION(is_callable)
 {
 	zval **var, **syntax_only, **callable_name;
