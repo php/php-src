@@ -29,6 +29,13 @@
 #include "php_ini.h"
 #include "php_globals.h"
 
+#ifdef PHP_WIN32
+  #include "win32/winutil.h"
+  #define DL_ERROR php_win_err()
+#else
+  #define DL_ERROR dlerror()
+#endif
+
 #include <jni.h>
 
 #include <stdio.h>
@@ -185,7 +192,8 @@ static int jvm_create() {
     dl_handle = DL_LOAD(javalib);
 
     if (!dl_handle) {
-      php_error(E_ERROR, "Unable to load Java Library %s", javalib);
+      php_error(E_ERROR, "Unable to load Java Library %s, error: %s", 
+        javalib, DL_ERROR);
       return -1;
     }
   }
