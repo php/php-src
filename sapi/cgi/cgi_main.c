@@ -651,8 +651,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	}
 
 	file_handle.free_filename = 0;
-	/* Duplicate the filename with strdup() so that the memory manager doesn't nuke it too early */
-	file_handle.filename = strdup(file_handle.filename);
 	switch (behavior) {
 		case PHP_MODE_STANDARD:
 			php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
@@ -682,12 +680,16 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 	php_header();			/* Make sure headers have been sent */
 	
-	STR_FREE(SG(request_info).path_translated);
+
+	if (SG(request_info).path_translated) {
+		zend_persist(SG(request_info).path_translated);
+	}
 
 	php_request_shutdown((void *) 0);
 	php_module_shutdown();
 
-	free(file_handle.filename);
+	STR_FREE(SG(request_info).path_translated);
+
 #ifdef ZTS
 	tsrm_shutdown();
 #endif
