@@ -1,5 +1,15 @@
 [PHP]
-; $Id$
+
+;;;;;;;;;;;
+; WARNING ;
+;;;;;;;;;;;
+; This is the default settings file for new PHP installations.
+; By default, PHP installs itself with a configuration suitable for
+; development purposes, and *NOT* for production purposes.
+; For several security-oriented considerations that should be taken
+; before going online with your site, please consult php.ini-recommended
+; and http://php.net/manual/en/security.php.
+
 
 ;;;;;;;;;;;;;;;;;;;
 ; About this file ;

@@ -1,8 +1,11 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Replaced php.ini-optimized with php.ini-recommended.  As the name implies,
+  it's warmly recommended to use this file as the basis for your PHP
+  configuration, rather than php.ini-dist.  (Zeev)
 - Restore xpath_eval() and php_xpathptr_eval() for 4.0.7. There
-  are still some known leaks.
+  are still some known leaks. (Joey)
 - Added import_request_variables(), to allow users to safely import form
   variables to the global scope (Zeev)
 - Introduced a new $_REQUEST array, which includes any GET, POST or COOKIE
