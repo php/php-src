@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Modified in_array() to not touch array pointer. (Andrei)
 - Added restore_error_handler(). (Zeev, Zend engine)
 - Fixed erroneous file names and line numbers in error situations under the
   multithreaded version of PHP - most noticeably Win32 (Zeev, Zend Engine)
