@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Nov 2004, Version 4.3.10
+07 Dec 2004, Version 4.3.10RC2
 - Fixed bug #30995 (snmp extension does not build with net-snmp 5.2). (Ilia)
 - Fixed bug #30990 (allow popen() on *NIX to accept 'b' flag). (Ilia)
 
