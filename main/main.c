@@ -504,7 +504,7 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path
 }
 
 
-static int php_get_ini_entry_for_zend(char *name, uint name_length, zval *contents)
+static int php_get_configuration_directive_for_zend(char *name, uint name_length, zval *contents)
 {
 	zval *retval = cfg_get_entry(name, name_length);
 
@@ -816,7 +816,7 @@ int php_module_startup(sapi_module_struct *sf)
 	zuf.message_handler = php_message_handler_for_zend;
 	zuf.block_interruptions = sapi_module.block_interruptions;
 	zuf.unblock_interruptions = sapi_module.unblock_interruptions;
-	zuf.get_ini_entry = php_get_ini_entry_for_zend;
+	zuf.get_configuration_directive = php_get_configuration_directive_for_zend;
 	zuf.ticks_function = php_run_ticks;
 	zend_startup(&zuf, NULL, 1);
 
