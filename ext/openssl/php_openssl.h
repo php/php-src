@@ -34,11 +34,9 @@
 # define PHP_OPENSSL_API /* nothing special */
 #endif
 
-
-
-
 /* HAVE_OPENSSL would include SSL MySQL stuff */
-#ifdef HAVE_OPENSSL_EXT
+#if defined(HAVE_OPENSSL_EXT) || defined(HAVE_OPENSSL_SHARED_EXT)
+
 extern zend_module_entry openssl_module_entry;
 #define phpext_openssl_ptr &openssl_module_entry
 

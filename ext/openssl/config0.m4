@@ -10,7 +10,13 @@ if test "$PHP_OPENSSL" != "no"; then
   [
     PHP_NEW_EXTENSION(openssl, openssl.c, $ext_shared)
     PHP_SUBST(OPENSSL_SHARED_LIBADD)
-    AC_DEFINE(HAVE_OPENSSL_EXT,1,[ ])
+
+    if test "$ext_shared" = "yes"; then
+      AC_DEFINE(HAVE_OPENSSL_SHARED_EXT,1,[ ])
+    else
+      AC_DEFINE(HAVE_OPENSSL_EXT,1,[ ])
+    fi
+
   ], [
     AC_MSG_ERROR([OpenSSL check failed. Please check config.log for more information.])
   ])
