@@ -171,7 +171,11 @@ PHP_FUNCTION(mysqli_connect_errno)
    Returns the text of the error message from previous MySQL operation */
 PHP_FUNCTION(mysqli_connect_error) 
 {
-	RETURN_STRING(MyG(error_msg),1);
+	if (MyG(error_msg)) {
+		RETURN_STRING(MyG(error_msg),1);
+	} else {
+		RETURN_NULL();
+	}
 }
 /* }}} */
 
@@ -199,8 +203,31 @@ PHP_FUNCTION(mysqli_fetch_object)
 }
 /* }}} */
 
-/* {{{ proto resource mysqli_query(object link, string query [,int resultmode])
-   Send a MySQL query */
+/* {{{ proto bool mysqli_multi_query(object link, string query)
+   Binary-safe version of mysql_query() */
+PHP_FUNCTION(mysqli_multi_query)
+{
+	MYSQL			*mysql;
+	zval			*mysql_link;
+	char			*query = NULL;
+	unsigned int 	query_len;
+	PR_MYSQL		*prmysql;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &query, &query_len) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, prmysql, PR_MYSQL *, &mysql_link, "mysqli_link");
+
+	MYSQLI_ENABLE_MQ;	
+	if (mysql_real_query(mysql, query, query_len)) {
+		MYSQLI_DISABLE_MQ;
+		RETURN_FALSE;
+	}	
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto resource mysqli_query(object link, string query [,int resultmode]) */
 PHP_FUNCTION(mysqli_query)
 {
 	MYSQL				*mysql;
@@ -230,6 +257,8 @@ PHP_FUNCTION(mysqli_query)
 			}
 		}
 	}
+
+	MYSQLI_DISABLE_MQ;
 
 	if (mysql_real_query(mysql, query, query_len)) {
 		RETURN_FALSE;

@@ -57,9 +57,16 @@ typedef struct {
 } MYSQLI_RESOURCE;
 
 typedef struct _mysqli_object {
-	zend_object zo;
-	void *ptr;
+	zend_object 	zo;
+	void 			*ptr;
+	HashTable 		*prop_handler;
 } mysqli_object; /* extends zend_object */
+
+typedef struct _mysqli_property_entry {
+	char *pname;
+	int (*r_func)(mysqli_object *obj, zval **retval TSRMLS_DC);
+	int (*w_func)(mysqli_object *obj, zval **retval TSRMLS_DC);
+} mysqli_property_entry;
 
 #define MYSQLI_PR_MAIN		0
 #define MYSQLI_PR_MYSQL		1
@@ -90,6 +97,10 @@ extern function_entry mysqli_functions[];
 extern function_entry mysqli_link_methods[];
 extern function_entry mysqli_stmt_methods[];
 extern function_entry mysqli_result_methods[];
+extern mysqli_property_entry mysqli_link_property_entries[];
+extern mysqli_property_entry mysqli_result_property_entries[];
+extern mysqli_property_entry mysqli_stmt_property_entries[];
+
 extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flag, int into_object);
 extern void php_clear_stmt_bind(STMT *stmt);
 extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
@@ -103,6 +114,16 @@ zend_class_entry _mysqli_stmt_class_entry;
 zend_class_entry _mysqli_result_class_entry;
 
 PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRMLS_DC);
+
+#define MYSQLI_DISABLE_MQ if (MyG(multi_query)) { \
+	mysql_set_server_option(mysql, MYSQL_OPTION_MULTI_STATEMENTS_OFF); \
+	MyG(multi_query) = 0; \
+} 
+
+#define MYSQLI_ENABLE_MQ if (!MyG(multi_query)) { \
+	mysql_set_server_option(mysql, MYSQL_OPTION_MULTI_STATEMENTS_ON); \
+	MyG(multi_query) = 1; \
+} 
 
 #define REGISTER_MYSQLI_CLASS_ENTRY(name, mysqli_entry, class_functions) { \
 	INIT_CLASS_ENTRY(_##mysqli_entry,name,class_functions); \
@@ -165,11 +186,20 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	}					\
 }
 
-#define MYSQLI_STORE_RESULT 	0
+#define MYSQLI_ADD_PROPERTIES(a,b) \
+{ \
+	int i = 0; \
+	while (b[i].pname != NULL) { \
+		mysqli_add_property(a, b[i].pname, (mysqli_read_t)b[i].r_func, NULL TSRMLS_CC); \
+		i++; \
+	}\
+}
+
+#define MYSQLI_STORE_RESULT 0
 #define MYSQLI_USE_RESULT 	1
 
 /* for mysqli_fetch_assoc */
-#define MYSQLI_ASSOC		1
+#define MYSQLI_ASSOC	1
 #define MYSQLI_NUM		2
 #define MYSQLI_BOTH		3
 
@@ -194,6 +224,7 @@ PHP_RINIT_FUNCTION(mysqli);
 PHP_RSHUTDOWN_FUNCTION(mysqli);
 PHP_MINFO_FUNCTION(mysqli);
 
+PHP_FUNCTION(mysqli);
 PHP_FUNCTION(mysqli_affected_rows);
 PHP_FUNCTION(mysqli_autocommit);
 PHP_FUNCTION(mysqli_bind_param);
@@ -241,6 +272,9 @@ PHP_FUNCTION(mysqli_insert_id);
 PHP_FUNCTION(mysqli_init);
 PHP_FUNCTION(mysqli_kill);
 PHP_FUNCTION(mysqli_master_query);
+PHP_FUNCTION(mysqli_more_results);
+PHP_FUNCTION(mysqli_multi_query);
+PHP_FUNCTION(mysqli_next_result);
 PHP_FUNCTION(mysqli_num_fields);
 PHP_FUNCTION(mysqli_num_rows);
 PHP_FUNCTION(mysqli_options);
@@ -301,10 +335,16 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	long			error_no;
 	char			*error_msg;
 	unsigned int	profiler;
+	unsigned int	multi_query;
 #ifdef HAVE_EMBEDDED_MYSQLI
 	unsigned int	embedded;
 #endif
 ZEND_END_MODULE_GLOBALS(mysqli)
+
+
+#define MYSQLI_PROPERTY(a) extern int a(mysqli_object *obj, zval **retval TSRMLS_DC)
+
+MYSQLI_PROPERTY(my_prop_link_host);
 
 #ifdef ZTS
 #define MyG(v) TSRMG(mysqli_globals_id, zend_mysqli_globals *, v)

@@ -372,6 +372,7 @@ PHP_FUNCTION(mysqli_change_user)
 	MYSQLI_PROFILER_COMMAND_START(prcommand, prmysql);
 	rc = mysql_change_user(mysql, user, password, dbname);
 	MYSQLI_PROFILER_COMMAND_RETURNLONG(prcommand, rc);
+
 	if (rc) {
 		RETURN_FALSE;
 	}
@@ -1014,7 +1015,7 @@ PHP_FUNCTION(mysqli_get_host_info)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_get_proto_info(object link) 
+/* {{{ proto int mysqli_get_proto_info(object link)
    Get MySQL protocol information */
 PHP_FUNCTION(mysqli_get_proto_info)
 {
@@ -1154,6 +1155,44 @@ PHP_FUNCTION(mysqli_master_query) {
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, prmysql, PR_MYSQL *, &mysql_link, "mysqli_link");
 
 	if (mysql_master_query(mysql, query, query_len)) {
+		RETURN_FALSE;
+	}	
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool mysqli_more_results(object link)
+   check if there any more query results from a multi query */
+PHP_FUNCTION(mysqli_more_results) {
+	MYSQL			*mysql;
+	zval			*mysql_link;
+	PR_MYSQL		*prmysql;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, prmysql, PR_MYSQL *, &mysql_link, "mysqli_link");
+
+	if (!mysql_more_results(mysql)) {
+		RETURN_FALSE;
+	}	
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool mysqli_next_result(object link)
+   read next result from multi_query */
+PHP_FUNCTION(mysqli_next_result) {
+	MYSQL			*mysql;
+	zval			*mysql_link;
+	PR_MYSQL		*prmysql;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, prmysql, PR_MYSQL *, &mysql_link, "mysqli_link");
+
+	if (mysql_next_result(mysql)) {
 		RETURN_FALSE;
 	}	
 	RETURN_TRUE;
@@ -1413,7 +1452,7 @@ PHP_FUNCTION(mysqli_real_connect)
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, prmysql, PR_MYSQL *, &mysql_link, "mysqli_link");
 
 	/* remove some insecure options */
-	flags ^= CLIENT_MULTI_QUERIES;   /* don't allow multi_queries via connect parameter */
+	flags ^= CLIENT_MULTI_STATEMENTS;   /* don't allow multi_queries via connect parameter */
 	if (PG(open_basedir) && strlen(PG(open_basedir))) {
 		flags ^= CLIENT_LOCAL_FILES;
 	}
@@ -1446,6 +1485,7 @@ PHP_FUNCTION(mysqli_real_query)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, prmysql, PR_MYSQL *, &mysql_link, "mysqli_link");
 
+	MYSQLI_DISABLE_MQ;
 	if (mysql_real_query(mysql, query, query_len)) {
 		RETURN_FALSE;
 	}	
@@ -1925,8 +1965,10 @@ PHP_FUNCTION(mysqli_store_result)
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, prmysql, PR_MYSQL *, &mysql_link, "mysqli_link");
 
 	if (!(result = mysql_store_result(mysql))) {
+		MYSQLI_DISABLE_MQ;
 		RETURN_FALSE;
 	}
+//	MYSQLI_DISABLE_MQ;
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)result;
 	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);	
