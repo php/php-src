@@ -1397,9 +1397,16 @@ static void php_rinit_session_globals(PSLS_D)
 	PS(id) = NULL;
 	PS(nr_open_sessions) = 0;
 	PS(mod_data) = NULL;
+	PS(entropy_file) = estrdup(INI_STR("entropy_file"));
+	PS(extern_referer_chk) = estrdup(INI_STR("extern_referer_chk"));
+	PS(save_path) = estrdup(INI_STR("save_path"));
+	PS(session_name) = estrdup(INI_STR("session_name"));
+	PS(cache_limiter) = estrdup(INI_STR("cache_limiter"));
+	PS(cookie_path) = estrdup(INI_STR("cookie_path"));
+	PS(cookie_domain) = estrdup(INI_STR("cookie_domain"));
 }
 
-#define FREE_NULL(x) efree(x); (x) = NULL;
+#define FREE_NULL(x) STR_FREE(x); (x) = NULL;
 
 static void php_rshutdown_session_globals(PSLS_D)
 {
