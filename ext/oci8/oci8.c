@@ -3146,12 +3146,16 @@ PHP_FUNCTION(oci8_fetchinto)
 			php3_error(E_WARNING, "OCIFetchInto: unable to convert arg 2 to array");
 			RETURN_FALSE;
 		}
+
+/*
+		array->is_ref = 0;
+		array->refcount = 1;
+*/
 	}
 
 #if PHP_API_VERSION < 19990421
 	element = emalloc(sizeof(pval));
 #endif
-
 
 	for (i = 0; i < statement->ncolumns; i++) {
 		column = oci8_get_col(statement, i + 1, 0, "OCIFetchInto");
@@ -3165,6 +3169,8 @@ PHP_FUNCTION(oci8_fetchinto)
 
 #if PHP_API_VERSION >= 19990421
 		element = emalloc(sizeof(pval));
+		element->is_ref = 0;
+		element->refcount = 1;
 #endif
 
 		if ((mode & OCI_NUM) || (! (mode & OCI_ASSOC))) { /* OCI_NUM is default */
