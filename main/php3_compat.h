@@ -9,7 +9,6 @@
 #define _php3_hash_add_or_update zend_hash_add_or_update
 #define _php3_hash_add zend_hash_add
 #define _php3_hash_update zend_hash_update
-#define _php3_hash_update_ptr zend_hash_update_ptr
 
 #define _php3_hash_quick_add_or_update zend_hash_quick_add_or_update
 #define _php3_hash_quick_add zend_hash_quick_add

@@ -166,7 +166,7 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 			if (!index) {
 				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			} else {
-				zend_hash_update_ptr(symtable1, index, index_len+1, gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+				zend_hash_update(symtable1, index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			}
 			if (!top_gpc_p) {
 				top_gpc_p = gpc_element_p;
@@ -177,7 +177,7 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 
 	if (top_gpc_p) {
 		if (symtable2) {
-			zend_hash_update_ptr(symtable2, var, var_len+1, *top_gpc_p, sizeof(zval *), NULL);
+			zend_hash_update(symtable2, var, var_len+1, top_gpc_p, sizeof(zval *), NULL);
 			(*top_gpc_p)->refcount++;
 		}	
 	}
