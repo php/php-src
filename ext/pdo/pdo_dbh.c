@@ -214,28 +214,107 @@ static PHP_FUNCTION(dbh_constructor)
 	
 	dbh = (pdo_dbh_t *) zend_object_store_get_object(object TSRMLS_CC);
 
-	if (dbh == NULL) {
-		/* need this check for persistent allocations */
-		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_NONE TSRMLS_CC, "out of memory!?");
+	/* is this supposed to be a persistent connection ? */
+	if (driver_options) {
+		zval **v;
+		int plen;
+		char *hashkey = NULL;
+		list_entry *le;
+		pdo_dbh_t *pdbh = NULL;
+
+		if (SUCCESS == zend_hash_index_find(Z_ARRVAL_P(driver_options), PDO_ATTR_PERSISTENT, (void**)&v)) {
+			if (Z_TYPE_PP(v) == IS_STRING) {
+				/* user specified key */
+				plen = spprintf(&hashkey, 0, "PDO:DBH:DSN=%s:%s:%s:%s", data_source,
+						username ? username : "",
+						password ? password : "",
+						Z_STRVAL_PP(v));
+				is_persistent = 1;
+			} else {
+				convert_to_long_ex(v);
+				is_persistent = Z_LVAL_PP(v) ? 1 : 0;
+				plen = spprintf(&hashkey, 0, "PDO:DBH:DSN=%s:%s:%s", data_source,
+						username ? username : "",
+						password ? password : "");
+			}
+		}
+
+		/* let's see if we have one cached.... */
+		if (is_persistent && SUCCESS == zend_hash_find(&EG(persistent_list), hashkey, plen+1, (void*)&le)) {
+			if (Z_TYPE_P(le) == php_pdo_list_entry()) {
+				pdbh = (pdo_dbh_t*)le->ptr;
+
+				/* is the connection still alive ? */
+				if (pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh TSRMLS_CC)) {
+					/* nope... need to kill it */
+					pdbh = NULL;
+				}
+
+			}
+		}
+
+		if (is_persistent && !pdbh) {
+			/* need a brand new pdbh */
+			pdbh = pecalloc(1, sizeof(*pdbh), 1);
+
+			if (!pdbh) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory while allocating PDO handle");
+				/* NOTREACHED */
+			}
+			
+			pdbh->is_persistent = 1;
+			pdbh->persistent_id = pemalloc(plen + 1, 1);
+			memcpy((char *)pdbh->persistent_id, hashkey, plen+1);
+			pdbh->persistent_id_len = plen+1;
+			pdbh->refcount = 1;
+		}
+
+		if (pdbh) {
+			/* let's copy the emalloc bits over from the other handle */
+			pdbh->ce = dbh->ce;
+			pdbh->properties = dbh->properties;
+			/* kill the non-persistent thingamy */
+			efree(dbh);
+			/* switch over to the persistent one */
+			dbh = pdbh;
+			zend_object_store_set_object(object, dbh TSRMLS_CC);
+			dbh->refcount++;
+		}
+
+		if (hashkey) {
+			efree(hashkey);
+		}
 	}
-	dbh->is_persistent = is_persistent;
+	
 	dbh->data_source_len = strlen(colon + 1);
-	/* when persistent stuff is done, we should check the return values here
-	 * too */
 	dbh->data_source = (const char*)pestrdup(colon + 1, is_persistent);
 	dbh->username = username ? pestrdup(username, is_persistent) : NULL;
 	dbh->password = password ? pestrdup(password, is_persistent) : NULL;
 
 	dbh->auto_commit = pdo_attr_lval(driver_options, PDO_ATTR_AUTOCOMMIT, 1 TSRMLS_CC);
+
+	if (!dbh->data_source || !dbh->username || !dbh->password) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory");
+	}
 	
 	if (driver->db_handle_factory(dbh, driver_options TSRMLS_CC)) {
 		/* all set */
 
 		if (is_persistent) {
+			list_entry le;
+
 			/* register in the persistent list etc. */
 			/* we should also need to replace the object store entry,
 			   since it was created with emalloc */
-			;
+
+			le.type = php_pdo_list_entry();
+			le.ptr = dbh;
+
+			if (FAILURE == zend_hash_update(&EG(persistent_list),
+					(char*)dbh->persistent_id, dbh->persistent_id_len, (void*)&le,
+					sizeof(le), NULL)) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Failed to register persistent entry");
+			}
 		}
 		return;	
 	}
@@ -465,9 +544,9 @@ static PHP_METHOD(PDO, getAttribute)
 }
 /* }}} */
 
-/* {{{ proto long PDO::exec(string query)
+/* {{{ proto long PDO::query(string query)
    Execute a query that does not return a row set, returning the number of affected rows */
-static PHP_METHOD(PDO, exec)
+static PHP_METHOD(PDO, query)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 	char *statement;
@@ -553,7 +632,7 @@ function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, commit,			NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, rollBack,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, setAttribute,	NULL,					ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, exec,			NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, query,			NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, lastInsertId,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, errorCode,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, errorInfo,		NULL,					ZEND_ACC_PUBLIC)
@@ -697,26 +776,11 @@ static zend_object_handlers pdo_dbh_object_handlers = {
 	NULL
 };
 
-
-static void pdo_dbh_free_storage(zend_object *object TSRMLS_DC)
+static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 {
-	pdo_dbh_t *dbh = (pdo_dbh_t*)object;
-
-	if (!dbh) {
+	if (--dbh->refcount)
 		return;
-	}
 
-	if (dbh->is_persistent) {
-		/* XXX: don't really free it, just delete the rsrc id */
-		return;
-	}
-	if(dbh->properties) {
-		zend_hash_destroy(dbh->properties);
-		/* XXX: this should be probably changed to pefree() when persistent
-		 * connections will be properly implemented
-		 * */
-		efree(dbh->properties); 
-	}
 	if (dbh->methods) {
 		dbh->methods->closer(dbh TSRMLS_CC);
 	}
@@ -734,14 +798,32 @@ static void pdo_dbh_free_storage(zend_object *object TSRMLS_DC)
 	pefree(dbh, dbh->is_persistent);
 }
 
+static void pdo_dbh_free_storage(zend_object *object TSRMLS_DC)
+{
+	pdo_dbh_t *dbh = (pdo_dbh_t*)object;
+	if (!dbh) {
+		return;
+	}
+
+	if (dbh->properties) {
+		zend_hash_destroy(dbh->properties);
+		efree(dbh->properties);
+		dbh->properties = NULL;
+	}
+
+	if (!dbh->is_persistent) {
+		dbh_free(dbh TSRMLS_CC);
+	}
+}
+
 zend_object_value pdo_dbh_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
 	pdo_dbh_t *dbh;
-
 	dbh = emalloc(sizeof(*dbh));
 	memset(dbh, 0, sizeof(*dbh));
 	dbh->ce = ce;
+	dbh->refcount = 1;
 	ALLOC_HASHTABLE(dbh->properties);
 	zend_hash_init(dbh->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	
@@ -756,6 +838,15 @@ zend_object_value pdo_dbh_new(zend_class_entry *ce TSRMLS_DC)
 }
 
 /* }}} */
+
+ZEND_RSRC_DTOR_FUNC(php_pdo_pdbh_dtor)
+{
+	if (rsrc->ptr) {
+		pdo_dbh_t *dbh = (pdo_dbh_t*)rsrc->ptr;
+		dbh_free(dbh TSRMLS_CC);
+		rsrc->ptr = NULL;
+	}
+}
 
 /*
  * Local variables:
