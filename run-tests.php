@@ -373,7 +373,7 @@ if (!getenv('NO_INTERACTION')) {
 		
 		$failed_tests_data .= "\n" . $sep . 'BUILD ENVIRONMENT' . $sep;
 		$failed_tests_data .= "OS:\n". PHP_OS. "\n\n";
-		$automake = $autoconf = $libtool = $compiler = 'N/A';
+		$ldd = $automake = $autoconf = $libtool = $compiler = 'N/A';
 
 		if (substr(PHP_OS, 0, 3) != "WIN") {
 			$automake = shell_exec('automake --version');
@@ -390,12 +390,14 @@ if (!getenv('NO_INTERACTION')) {
 					break;
 				}
 			}
+			$ldd = shell_exec("ldd $php");
 		}
 		$failed_tests_data .= "Automake:\n$automake\n";
 		$failed_tests_data .= "Autoconf:\n$autoconf\n";
 		$failed_tests_data .= "Libtool:\n$libtool\n";
 		$failed_tests_data .= "Compiler:\n$compiler\n";
 		$failed_tests_data .= "Bison:\n". @shell_exec('bison --version'). "\n";
+		$failed_tests_data .= "Libraries:\n$ldd\n";
 		$failed_tests_data .= "\n";
 		
 		if (isset($user_email)) {
