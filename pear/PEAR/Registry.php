@@ -233,7 +233,7 @@ class PEAR_Registry extends PEAR
         if (!$tmp && $fsize > 7) {
             return $this->raiseError('PEAR_Registry: invalid filemap data', PEAR_REGISTRY_ERROR_FORMAT, null, null, $data);
         }
-        $this->filemap = $tmp;
+        $this->filemap_cache = $tmp;
         return true;
     }
 
