@@ -42,6 +42,10 @@
 #define sprintf php_sprintf
 #endif
 
+/* PHP's DEBUG value must match Zend's ZEND_DEBUG value */
+#undef PHP_DEBUG
+#define PHP_DEBUG ZEND_DEBUG
+
 #ifdef PHP_WIN32
 #include "tsrm_win32.h"
 #include "win95nt.h"
@@ -59,9 +63,6 @@
 
 #include "php_regex.h"
 
-/* PHP's DEBUG value must match Zend's ZEND_DEBUG value */
-#undef PHP_DEBUG
-#define PHP_DEBUG ZEND_DEBUG
 
 
 #define APACHE 0
