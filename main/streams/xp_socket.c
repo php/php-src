@@ -410,7 +410,7 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 
 		parse_unix_address(xparam, &unix_addr TSRMLS_CC);
 
-		return bind(sock->socket, &unix_addr, sizeof(unix_addr));
+		return bind(sock->socket, (struct sockaddr *)&unix_addr, sizeof(unix_addr));
 	}
 #endif
 
