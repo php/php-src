@@ -195,3 +195,15 @@ AC_DEFINE('HAVE_GETADDRINFO', main_network_has_ipv6);
 AC_DEFINE('HAVE_GAI_STRERROR', main_network_has_ipv6);
 AC_DEFINE('HAVE_IPV6', main_network_has_ipv6);
 
+/* For snapshot builders, where can we find the additional
+ * files that make up the snapshot template? */
+ARG_WITH("snapshot-template", "Path to snapshot builder template dir", "no");
+
+if (PHP_SNAPSHOT_TEMPLATE == "no") {
+	/* default is as a sibling of the php_build dir */
+	if (FSO.FolderExists(PHP_PHP_BUILD + "\\..\\template")) {
+		PHP_SNAPSHOT_TEMPLATE = FSO.GetAbsolutePathName(PHP_PHP_BUILD + "\\..\\template");
+	}
+}
+
+DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
