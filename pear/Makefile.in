@@ -36,6 +36,7 @@ PEAR_FILES = \
 	Benchmark/Timer.php \
 	Cache.php \
 	Cache/Container.php \
+	Cache/Function.php \
 	Cache/Graphics.php \
 	Cache/Output.php \
 	Cache/Container/db.php \
