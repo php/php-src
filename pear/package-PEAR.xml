@@ -35,7 +35,16 @@
     <state>beta</state>
     <date>2002-06-15</date>
     <notes>
+New Features:
+* Added PEAR::loadExtension($ext) - OS independant PHP extension load
+* Added PEAR::delExpect() API method. It allows to unset one or more expected error codes
+* System::mkTemp() automatically remove created tmp files/dirs at script shutdown
+* New command "pear search"
+
+Fixed Bugs:
 * fix for XML-RPC bug that made some remote commands fail
+* fix problems under Windows with the DIRECTORY_SEPARATOR
+* lot of other minor fixes
 </notes>
     <filelist>
       <file role="data" name="package.dtd"/>
