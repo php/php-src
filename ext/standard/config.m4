@@ -115,45 +115,33 @@ main() {
   AC_DEFINE_UNQUOTED(PHP_BLOWFISH_CRYPT, $ac_result, [Whether the system supports BlowFish salt])
 ])
 
-AC_CHECK_LIB(c, dlopen, [
- # fake it
- AC_DEFINE(HAVE_LIBDL,1,[ ]) ], [
- AC_CHECK_LIB(dl, dlopen, [
-  LIBS="-ldl $LIBS"
-  AC_DEFINE(HAVE_LIBDL,1,[ ]) ], []) ])
+AC_CHECK_FUNC(dlopen, [AC_DEFINE(HAVE_LIBDL,1,[ ])])
 
 AC_CHECK_LIB(pam, pam_start, [
   EXTRA_LIBS="$EXTRA_LIBS -lpam"
   AC_DEFINE(HAVE_LIBPAM,1,[ ]) ], []) 
 
-AC_CHECK_LIB(crypt, crypt, [
- AC_ADD_LIBRARY(crypt)
- AC_DEFINE(HAVE_LIBCRYPT,1,[ ]) ], [])
+AC_CHECK_FUNCS(getcwd getwd)
 
-AC_CHECK_FUNCS(getcwd)
-AC_CHECK_FUNCS(getwd)
+AC_CRYPT_CAP
 
 divert(5)dnl
 
 AC_ARG_WITH(regex,
-[  --with-regex=TYPE       regex library type: system, apache, php],
-[
+[  --with-regex=TYPE       regex library type: system, apache, php],[
   REGEX_TYPE=$withval
 ],[
   REGEX_TYPE=php
 ])
 	
 AC_ARG_WITH(system-regex,
-[  --with-system-regex     (deprecated) Use system regex library],
-[
+[  --with-system-regex     (deprecated) Use system regex library],[
   if test "$withval" = "yes"; then
     REGEX_TYPE=system
   else
     REGEX_TYPE=php
   fi
 ])
-
-AC_CRYPT_CAP
 
 PHP_EXTENSION(standard)
 
