@@ -535,7 +535,7 @@ class DB_result
      */
     function free() {
 	$err = $this->dbh->freeResult($this->result);
-	if( DB::isError($err)) {
+	if(DB::isError($err)) {
 	    return $err;
 	}
 	$this->result = false;
