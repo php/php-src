@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.0
+- Added safe_mode checks for opendir(). (jflemer)
 - Make the 2nd parameter to pgsql_fetch_* support NULL in case 3
   parameters are supplied, but you do not want to provide a row number
   yourself. (Derick)
