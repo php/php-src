@@ -597,7 +597,12 @@ zend_function *zend_std_get_static_method(zend_class_entry *ce, char *function_n
 	zend_function *fbc;
 
 	if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen+1, (void **) &fbc)==FAILURE) {
-		zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
+		char *class_name = ce->name;
+
+		if (!class_name) {
+			class_name = "";
+		}
+		zend_error(E_ERROR, "Call to undefined method %s::%s()", class_name, function_name_strval);
 	}
 	if (fbc->op_array.fn_flags & ZEND_ACC_PUBLIC) {
 		/* No further checks necessary, most common case */

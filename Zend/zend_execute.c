@@ -2521,7 +2521,11 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 		function_name_strlen = tmp.value.str.len;
 	}
 
-	ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
+	if (EX(opline)->op1.op_type == IS_UNUSED) {
+		ce = EG(global_namespace_ptr);
+	} else {
+		ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
+	}
 
 	EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 	EX(calling_scope) = EX(fbc)->common.scope;
