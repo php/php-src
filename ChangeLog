@@ -1,3 +1,83 @@
+2004-01-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c:
+      Improove debug capabilities
+
+    * ext/simplexml/php_simplexml_exports.h
+      ext/simplexml/simplexml.c
+      ext/simplexml/simplexml.h:
+      Rename header to prevent name clashes with external files
+
+    * ext/simplexml/simplexml.c:
+      Necessary as long as SPL is shared/dll
+
+    * ext/sqlite/tests/sqlite_oo_031.phpt:
+      Update, id_l is unique
+
+    * ext/sqlite/tests/sqlite_oo_031.phpt:
+      Add spl interaction test.
+
+2004-01-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/file.c:
+      Fix fgetcsv() to reflect the change on 4.3.5 behaviour.
+
+2004-01-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/tests/bug26911.phpt
+      ext/sqlite/tests/sqlite_oo_029.phpt:
+      Update
+
+2004-01-18  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/mcrypt/config.w32:
+      - This define is not used anymore
+
+2004-01-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/file.c
+      ext/standard/tests/file/bug26634.phpt:
+      Corrections for various fgetcsv() issues.
+
+2004-01-18  Timm Friebe  <thekid@thekid.de>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      - Fixed compiler warnings (int format, long int arg)
+
+2004-01-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c:
+      Fix Warning
+
+    * ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c
+      ext/simplexml/simplexml.h:
+      Enable inherited classes inside SPL and respect order of module init.
+
+    * ext/simplexml/tests/002.phpt
+      ext/simplexml/tests/003.phpt
+      ext/simplexml/tests/003.xml
+      ext/simplexml/tests/007.phpt
+      ext/simplexml/tests/008.phpt
+      ext/simplexml/tests/010.phpt:
+      Use external files only in 001.phpt & tests for bugs
+
+    * ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c:
+      Export access to class_entry by function.
+
+2004-01-18  Christian Stocker  <chregu@phant.ch>
+
+    * ext/dom/document.c:
+      - fix for bug #26947 Crash by using DomDocument::getElementById()
+
+2004-01-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fix some casing issues
+
 2004-01-17  Sterling Hughes  <winnie@edwardbear.org>
 
     * ext/simplexml/tests/profile08.phpt
