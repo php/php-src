@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
+- Added a more configurable error reporting interface to DB.
 - Added is_uploaded_file() and move_uploaded_file() (Zeev)
 - Added several directives to php.ini - post_max_size, file_uploads,
   display_startup_errors - see php.ini-dist for further information (Zeev)
