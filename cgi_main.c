@@ -57,7 +57,7 @@ struct sapi_request_info *sapi_rqst;
 #endif
 
 #if MSVC5 || !defined(HAVE_GETOPT)
-#include "getopt.h"
+#include "php_getopt.h"
 #endif
 
 PHPAPI extern char *php3_ini_path;
