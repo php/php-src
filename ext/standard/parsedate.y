@@ -604,6 +604,7 @@ static TABLE const TimezoneTable[] = {
     { "nt",	tZONE,     HOUR (11) },	/* Nome */
     { "idlw",	tZONE,     HOUR (12) },	/* International Date Line West */
     { "cet",	tZONE,     -HOUR (1) },	/* Central European */
+    { "cest",	tDAYZONE,  -HOUR (1) },	/* Central European Summer */
     { "met",	tZONE,     -HOUR (1) },	/* Middle European */
     { "mewt",	tZONE,     -HOUR (1) },	/* Middle European Winter */
     { "mest",	tDAYZONE,  -HOUR (1) },	/* Middle European Summer */
