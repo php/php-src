@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | msession 1.0                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2002 The PHP Group                                |
+   | Copyright (c) 1997-2001 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,19 @@
    +----------------------------------------------------------------------+
  */
 
+/*
+--------------------------------------------------------------------------
+	These are definitions are pulled from Phoenix.
+ 	It would probably be easier to maintain one file, 
+	but some phoenix header files conflict with other
+	project header files common to PHP. Besides, this
+	allows this header to be PHP license and Phoenix to
+	be LGPL with no conflicts.
+
+	MAKE NO CHANGES TO THIS FILE IT. MUST REMAIN CONSTANT
+	WITH PHOENIX OR IT WILL NOT WORK.
+--------------------------------------------------------------------------
+*/
 enum REQ_TYPES
 {
 	REQ_ERR,
@@ -41,9 +54,29 @@ enum REQ_TYPES
 	REQ_UNIQ,
 	REQ_RANDSTR,
 	REQ_PLUGIN,
+	REQ_CALL,
 	REQ_LAST,
 	REQ_POPEN=1024,
 	REQ_PCLOSE
+};
+enum REQ_ERRORS
+{
+	REQE_NOERROR=0,
+	REQE_NOSESSION,
+	REQE_DUPSESSION,
+	REQE_NOWLOCK,
+	REQE_NOVALUE,
+	REQE_LOCKED,
+	REQE_NOSEND,
+	REQE_NOCONNECT,
+	REQE_BADCONN,
+	REQE_BADHDR,
+	REQE_BADVER,
+	REQE_BADLEN,
+	REQE_BUFFER,
+	REQE_DENIED,
+	REQE_NOFN,
+	REQE_UNKNOWN
 };
 
 typedef struct _requestPacket
@@ -86,6 +119,7 @@ REQB *StaticRequestBuffer(char *buffer, unsigned int cb);
 
 int FormatRequest(REQB **buffer, int stat, const char *session, const char *name, const char *value, int param);
 int FormatRequestMulti(REQB **buffer, int stat, char *session, int n, char **pairs, int param);
+int FormatRequestStrings(REQB **ppreq, int stat, char *session, int n, char **strings);
 int DoSingleRequest(char *hostname, int port, REQB **preq);
 void *OpenReqConn(char *hostname, int port);
 void CloseReqConn(void *conn);
