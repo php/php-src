@@ -2815,6 +2815,66 @@ PHP_FUNCTION(array_sum)
 
 /* }}} */
 
+/* {{{ proto mixed array_reduce(array input, mixed callback [, int initial])
+   Reduce the array by calling the callback */
+PHP_FUNCTION(array_reduce)
+{
+	zval **input, **callback, **initial;
+	zval **args[2];
+	zval **operand;
+	zval *result = NULL;
+	zval *retval;
+	char *callback_name;
+
+	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &callback, &initial) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (Z_TYPE_PP(input) != IS_ARRAY) {
+		php_error(E_WARNING, "%s() expects argument 1 to be an array",
+				  get_active_function_name());
+		return;
+	}
+
+	if (!zend_is_callable(*callback, 0, &callback_name)) {
+		php_error(E_WARNING, "%s() expects argument 2, '%s', to be a valid callback",
+				  get_active_function_name(), callback_name);
+		efree(callback_name);
+		return;
+	}
+
+	if (ZEND_NUM_ARGS() > 2)
+		result = *initial;
+
+	if (zend_hash_num_elements(Z_ARRVAL_PP(input)) == 0) {
+		if (result) {
+			*return_value = *result;
+			zval_copy_ctor(return_value);
+		}
+		return;
+	}
+
+	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(input));
+	while (zend_hash_get_current_data(Z_ARRVAL_PP(input), (void **)&operand) == SUCCESS) {
+		if (result) {
+			args[0] = &result;
+			args[1] = operand;
+			if (call_user_function_ex(EG(function_table), NULL, *callback, &retval, 2, args, 0, NULL) == SUCCESS && retval) {
+				result = retval;
+			} else {
+				php_error(E_WARNING, "%s() had an error invoking the reduction callback", get_active_function_name());
+				return;
+			}
+		} else
+			result = *operand;
+
+		zend_hash_move_forward(Z_ARRVAL_PP(input));
+	}
+	
+	*return_value = *result;
+}
+
 /*
  * Local variables:
  * tab-width: 4
