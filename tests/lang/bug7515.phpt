@@ -1,5 +1,5 @@
 --TEST--
-Bug #7515 (weired & invisible referencing of objects)
+Bug #7515 (weird & invisible referencing of objects)
 --SKIPIF--
 <?php if(version_compare(zend_version(), "2.0.0-dev", '<')) echo "skip Zend Engine 2 needed\n"; ?>
 --INI--
