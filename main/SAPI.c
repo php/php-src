@@ -289,7 +289,7 @@ SAPI_API int sapi_send_headers()
 	switch (retval) {
 		case SAPI_HEADER_SENT_SUCCESSFULLY:
 			SG(headers_sent) = 1;
-			ret = FAILURE;
+			ret = SUCCESS;
 			break;
 		case SAPI_HEADER_DO_SEND:
 			if (SG(sapi_headers).http_status_line) {
