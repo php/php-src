@@ -111,6 +111,7 @@ PHP_NAMED_FUNCTION(php_if_crc32);
 PHP_FUNCTION(get_loaded_extensions);
 PHP_FUNCTION(extension_loaded);
 PHP_FUNCTION(get_extension_funcs);
+PHP_FUNCTION(get_defined_constants);
 
 PHP_FUNCTION(register_tick_function);
 PHP_FUNCTION(unregister_tick_function);

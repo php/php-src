@@ -382,6 +382,7 @@ function_entry basic_functions[] = {
 	PHP_FE(get_loaded_extensions,		NULL)
 	PHP_FE(extension_loaded,			NULL)
 	PHP_FE(get_extension_funcs,			NULL)
+	PHP_FE(get_defined_constants,			NULL)
 
 	PHP_FE(parse_ini_file,				NULL)
 
@@ -2365,6 +2366,13 @@ static int php_add_extension_info(zend_module_entry *module, void *arg)
 	return 0;
 }
 
+static int php_add_constant_info(zend_constant *constant, void *arg)
+{
+	zval *name_array = (zval *)arg;
+	add_assoc_zval(name_array, constant->name, &(constant->value));
+	return 0;
+}
+
 /* {{{ proto array get_loaded_extensions(void)
    Return an array containing names of loaded extensions */
 PHP_FUNCTION(get_loaded_extensions)
@@ -2378,6 +2386,19 @@ PHP_FUNCTION(get_loaded_extensions)
 }
 /* }}} */
 
+/* {{{ proto array get_defined_constants(void)
+   Return an array containing the names and values of all defined constants */
+PHP_FUNCTION(get_defined_constants)
+{
+	ELS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	array_init(return_value);
+	zend_hash_apply_with_argument(EG(zend_constants), (int (*)(void *, void*)) php_add_constant_info, return_value);
+}
 
 /* {{{ proto bool extension_loaded(string extension_name)
    Returns true if the named extension is loaded */
