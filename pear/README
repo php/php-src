@@ -26,9 +26,12 @@ This section will describe the tools provided to PEAR users.
 
 CODING RULES AND GUIDELINES
 
-* All PHP code must use <?php ?>.  This is the only really portable tag.
-
 * Before adding a new top-level directory ("DB" is one), discuss your
   intentions on pear-dev@lists.php.net.
 
-* Please see the CODING_STANDARDS file for full rules and guidelines.
+* Please see http://pear.php.net/manual/standards.php for full rules and guidelines.
+
+
+DOCUMENTATION
+
+Documentation for PEAR can be found at http://pear.php.net/manual/.
