@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ???, Version 4.0 Beta 5
+- Added ip2long() and long2ip() courtesy of Faisal Nasim <faisal@nasim.org>
+- Added ftruncate() and fstat(), courtesy of Faisal Nasim <faisal@nasim.org>
+- Added parse_ini_file().  Currently implemented in non thread safe version
+  of PHP, and currently lacks section support (Zeev)
 - "none" is now equivalent with "" in Apache config directives (Stig)
 - OCINLogon no longer crashes. (Thies)
 - Fix comparisons of (string) "nan" with (string) "nan". (Thies, Zend library)
