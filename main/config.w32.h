@@ -60,7 +60,7 @@
    ---------------------------------------------------------------*/
 
 /* Define if you have the link function.  */
-#define HAVE_LINK 0
+#undef HAVE_LINK
 
 /* Define if you have the lockf function.  */
 /* #undef HAVE_LOCKF */
@@ -72,10 +72,10 @@
 /* #undef HAVE_SRAND48 */
 
 /* Define if you have the symlink function.  */
-#define HAVE_SYMLINK 0
+#undef HAVE_SYMLINK
 
 /* Define if you have the usleep function.  */
-#define HAVE_USLEEP 1
+#undef HAVE_USLEEP
 
 #define NEED_ISBLANK 1
 /* ----------------------------------------------------------------
@@ -96,7 +96,7 @@
    ---------------------------------------------------------------*/
 
 #define DISCARD_PATH 1
-#define HAVE_SETITIMER 0
+#undef HAVE_SETITIMER
 #define HAVE_IODBC 0 /*getting rid of old odbc*/
 #define HAVE_UODBC 0
 #define HAVE_LIBDL 1
@@ -107,7 +107,7 @@
 
 #define HAVE_TZSET 1
 /* Define if you have the flock function.  */
-#define HAVE_FLOCK 0
+#undef HAVE_FLOCK
 
 /* Define if using alloca.c.  */
 /* #undef C_ALLOCA */
@@ -126,7 +126,7 @@
 /* #undef HAVE_ALLOCA_H */
 
 /* Define if you have <sys/time.h> */
-#define HAVE_SYS_TIME_H 0
+#undef HAVE_SYS_TIME_H
 
 /* Define if you have <signal.h> */
 #define HAVE_SIGNAL_H 1
@@ -135,10 +135,10 @@
 /* #undef HAVE_DOPRNT */
 
 /* Define if your struct stat has st_blksize.  */
-#define HAVE_ST_BLKSIZE 0
+#undef HAVE_ST_BLKSIZE
 
 /* Define if your struct stat has st_blocks.  */
-#define HAVE_ST_BLOCKS 0
+#undef HAVE_ST_BLOCKS
 
 /* Define if your struct stat has st_rdev.  */
 #define HAVE_ST_RDEV 1
@@ -228,7 +228,7 @@
 /* #undef HAVE_CRYPT_H */
 
 /* Define if you have the <dirent.h> header file.  */
-#define HAVE_DIRENT_H 0
+#undef HAVE_DIRENT_H
 
 /* Define if you have the <fcntl.h> header file.  */
 #define HAVE_FCNTL_H 1

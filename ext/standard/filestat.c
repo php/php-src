@@ -417,12 +417,12 @@ static void _php3_stat(const char *filename, int type, pval *return_value)
 		add_next_index_long(return_value, stat_sb->st_atime);
 		add_next_index_long(return_value, stat_sb->st_mtime);
 		add_next_index_long(return_value, stat_sb->st_ctime);
-#if HAVE_ST_BLKSIZE
+#ifdef HAVE_ST_BLKSIZE
 		add_next_index_long(return_value, stat_sb->st_blksize);
 #else
 		add_next_index_long(return_value, -1);
 #endif
-#if HAVE_ST_BLOCKS
+#ifdef HAVE_ST_BLOCKS
 		add_next_index_long(return_value, stat_sb->st_blocks);
 #else
 		add_next_index_long(return_value, -1);

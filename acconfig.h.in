@@ -26,10 +26,10 @@
 
 /* Define if you have dirent.h but opendir() resides in libc rather than in libdir */
 /* This will cause HAVE_DIRENT_H defined twice sometimes, but it should be problem */
-#define HAVE_DIRENT_H 0
+#undef HAVE_DIRENT_H
 
 /* Define if you have the resolv library (-lresolv). */
-#define HAVE_LIBRESOLV 0
+#undef HAVE_LIBRESOLV
 
 /* Define if you have the pam library (-lpam). */
 #define HAVE_LIBPAM 0
@@ -62,10 +62,10 @@
 #define HSREGEX 0
 
 /* Define if you have and want to use libnsl */
-#define HAVE_LIBNSL 0
+#undef HAVE_LIBNSL
 
 /* Define if you have and want to use libsocket */
-#define HAVE_LIBSOCKET 0
+#undef HAVE_LIBSOCKET
 
 /* Define if you have the sendmail program available */
 #define HAVE_SENDMAIL 0
@@ -91,12 +91,6 @@
 #ifndef DEBUG /* should be set to ZEND_DEBUG */
 #define DEBUG 0
 #endif
-
-/* Define if your system has the gettimeofday() call */
-#define HAVE_GETTIMEOFDAY 0
-
-/* Define if your system has the putenv() library call */
-#define HAVE_PUTENV 0
 
 /* Define if you want to enable PHP RPC (experimental) */
 #define PHP_RPC 0

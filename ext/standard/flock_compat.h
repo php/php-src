@@ -1,7 +1,7 @@
 #ifndef _FLOCK_COMPAT_H
 #define _FLOCK_COMPAT_H
 
-#if !HAVE_FLOCK
+#ifndef HAVE_FLOCK
 #	define LOCK_SH 1
 #	define LOCK_EX 2
 #	define LOCK_NB 4

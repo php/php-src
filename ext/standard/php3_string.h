@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
    | This program is free software; you can redistribute it and/or modify |
    | it under the terms of one of the following licenses:                 |
@@ -30,6 +30,8 @@
 
 
 /* $Id$ */
+
+/* Synced with php3 revision 1.43 1999-06-16 [ssb] */
 
 #ifndef _PHPSTRING_H
 #define _PHPSTRING_H
@@ -67,26 +69,34 @@ PHP_FUNCTION(ucwords);
 PHP_FUNCTION(strtr);
 PHP_FUNCTION(strrev);
 PHP_FUNCTION(hebrev);
-PHP_FUNCTION(hebrev_with_conversion);
+PHP_FUNCTION(hebrevc);
 PHP_FUNCTION(user_sprintf);
 PHP_FUNCTION(user_printf);
 PHP_FUNCTION(addslashes);
 PHP_FUNCTION(stripslashes);
 PHP_FUNCTION(chr);
 PHP_FUNCTION(ord);
-PHP_FUNCTION(newline_to_br);
+PHP_FUNCTION(nl2br);
 PHP_FUNCTION(setlocale);
 PHP_FUNCTION(stristr);
 PHP_FUNCTION(chunk_split);
 PHP_FUNCTION(parsestr);
 PHP_FUNCTION(bin2hex);
+PHP_FUNCTION(similar_text);
 
 extern PHPAPI char *_php3_strtoupper(char *s);
 extern PHPAPI char *_php3_strtolower(char *s);
-extern char *_StrTr(char *string, char *str_from, char *str_to);
+extern PHPAPI char *_php3_strtr(char *string, int len, char *str_from, char *str_to, int trlen);
 extern PHPAPI char *_php3_addslashes(char *string, int length, int *new_length, int freeit);
 extern PHPAPI void _php3_stripslashes(char *string, int *len);
 extern PHPAPI void _php3_dirname(char *str, int len);
 extern PHPAPI char *php3i_stristr(unsigned char *s, unsigned char *t);
+extern PHPAPI void _php3_trim(pval *str, pval *return_value, int mode);
+extern PHPAPI void _php3_strip_tags(char *rbuf, int state);
+
+extern PHPAPI void _php3_char_to_str(char *str, uint len, char from, char *to, int to_len, pval *result);
+
+extern PHPAPI void _php3_implode(pval *delim, pval *arr, pval *return_value);
+extern PHPAPI void _php3_explode(pval *delim, pval *str, pval *return_value);
 
 #endif /* _PHPSTRING_H */

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
    | This program is free software; you can redistribute it and/or modify |
    | it under the terms of one of the following licenses:                 |
@@ -28,6 +28,8 @@
  */
 
 /* $Id$ */
+
+/* Synced with php3 revision 1.30 1999-06-16 [ssb] */
 
 #ifndef _FILE_H
 #define _FILE_H
@@ -55,14 +57,17 @@ PHP_FUNCTION(mkdir);
 PHP_FUNCTION(rmdir);
 PHP_FUNCTION(fpassthru);
 PHP_FUNCTION(readfile);
-PHP_FUNCTION(fileumask);
+PHP_FUNCTION(umask);
 PHP_FUNCTION(rename);
-PHP_FUNCTION(file_copy);
+PHP_FUNCTION(copy);
 PHP_FUNCTION(file);
 PHP_FUNCTION(set_socket_blocking);
 PHP_FUNCTION(set_socket_timeout);
+PHP_FUNCTION(set_file_buffer);
 PHP_FUNCTION(get_meta_tags);
 PHP_FUNCTION(flock);
+
+PHPAPI int _php3_set_sock_blocking(int socketd, int block);
 
 #define phpext_file_ptr php3_file_module_ptr
 #endif /* _FILE_H */

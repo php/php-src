@@ -41,7 +41,7 @@
 #include "snprintf.h"
 
 #include <stdio.h>
-#if HAVE_GETTIMEOFDAY
+#ifdef HAVE_GETTIMEOFDAY
 #if MSVC5
 #include "win32/time.h"
 #else
@@ -56,7 +56,7 @@
    Returns a string containing the current time in seconds and microseconds */
 PHP_FUNCTION(microtime)
 {
-#if HAVE_GETTIMEOFDAY
+#ifdef HAVE_GETTIMEOFDAY
 	struct timeval tp;
 	long sec = 0L;
 	double msec = 0.0;
@@ -77,7 +77,7 @@ PHP_FUNCTION(microtime)
    returns the current time as array */
 PHP_FUNCTION(gettimeofday)
 {
-#if HAVE_GETTIMEOFDAY
+#ifdef HAVE_GETTIMEOFDAY
 	struct timeval tp;
 	struct timezone tz;
 	

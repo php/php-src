@@ -34,8 +34,8 @@
 
 #include "php3_dir.h"
 
-#if HAVE_DIRENT_H
-#include <dirent.h>
+#ifdef HAVE_DIRENT_H
+# include <dirent.h>
 #endif
 
 #if HAVE_UNISTD_H

@@ -147,8 +147,8 @@ function_entry basic_functions[] = {
 	{"strrpos",		php3_strrpos,				NULL},
 	{"strrev",		php3_strrev,				NULL},
 	{"hebrev",		php3_hebrev,				NULL},
-	{"hebrevc",		php3_hebrev_with_conversion,NULL},
-	{"nl2br",		php3_newline_to_br,			NULL},
+	PHP_FE(hebrevc,								NULL)
+	PHP_FE(nl2br,								NULL)
 	{"basename",	php3_basename,				NULL},
 	{"dirname", 	php3_dirname,				NULL},
 	{"stripslashes",	php3_stripslashes,		NULL},
@@ -236,7 +236,7 @@ function_entry basic_functions[] = {
 	{"base_convert",php3_base_convert,			NULL},
 	{"number_format",	php3_number_format,		NULL},
 
-#if HAVE_PUTENV
+#ifdef HAVE_PUTENV
 	{"putenv",		php3_putenv,				NULL},
 #endif
 	{"microtime",	php3_microtime,				NULL},
@@ -328,7 +328,7 @@ php3_module_entry basic_functions_module = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-#if HAVE_PUTENV
+#ifdef HAVE_PUTENV
 static HashTable putenv_ht;
 
 static void _php3_putenv_destructor(putenv_entry *pe)
@@ -378,6 +378,7 @@ int php3_minit_basic(INIT_FUNC_ARGS)
 	
 	test_class_startup();
 	REGISTER_INI_ENTRIES();
+
 	return SUCCESS;
 }
 
@@ -392,7 +393,7 @@ int php3_mshutdown_basic(SHUTDOWN_FUNC_ARGS)
 int php3_rinit_basic(INIT_FUNC_ARGS)
 {
 	strtok_string = NULL;
-#if HAVE_PUTENV
+#ifdef HAVE_PUTENV
 	if (_php3_hash_init(&putenv_ht, 1, NULL, (void (*)(void *)) _php3_putenv_destructor, 0) == FAILURE) {
 		return FAILURE;
 	}
@@ -406,9 +407,10 @@ int php3_rinit_basic(INIT_FUNC_ARGS)
 int php3_rshutdown_basic(SHUTDOWN_FUNC_ARGS)
 {
 	STR_FREE(strtok_string);
-#if HAVE_PUTENV
+#ifdef HAVE_PUTENV
 	_php3_hash_destroy(&putenv_ht);
 #endif
+
 	return SUCCESS;
 }
 
@@ -468,7 +470,7 @@ PHP_FUNCTION(getenv)
 }
 
 
-#if HAVE_PUTENV
+#ifdef HAVE_PUTENV
 PHP_FUNCTION(putenv)
 {
 
