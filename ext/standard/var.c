@@ -59,7 +59,7 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 
 void php_var_dump(zval **struc, int level TSRMLS_DC)
 {
-	HashTable *myht;
+	HashTable *myht = NULL;
 	zend_object *object = NULL;
 
 	if (level > 1) {
@@ -103,7 +103,6 @@ void php_var_dump(zval **struc, int level TSRMLS_DC)
 		myht = Z_OBJPROP_PP(struc);
 		php_printf("%sobject(%s)(%d) {\n", COMMON, Z_OBJCE_PP(struc)->name, zend_hash_num_elements(myht));
 head_done:
-		myht = Z_ARRVAL_PP(struc);
 		zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_array_element_dump, 1, level);
 		if (Z_TYPE_PP(struc) == IS_ARRAY) {
 			(*struc)->value.ht->nApplyCount--;
@@ -176,7 +175,7 @@ static int zval_array_element_dump(zval **zv, int num_args, va_list args, zend_h
 
 void php_debug_zval_dump(zval **struc, int level TSRMLS_DC)
 {
-	HashTable *myht;
+	HashTable *myht = NULL;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
