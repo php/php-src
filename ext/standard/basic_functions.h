@@ -147,6 +147,8 @@ typedef struct {
 	zval **array_walk_func_name;
 	zval **user_compare_func_name;
 	zend_llist *user_tick_functions;
+
+	zval *active_ini_file_section;
 	
 	HashTable sm_protected_env_vars;
 	char *sm_allowed_env_vars;
