@@ -2,12 +2,25 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
 
-## Note the changed grouping. Try add your entries to appropriate places
-## to enhance the readability of this file. Using @ is discouraged.
-## (This file will be cleaned up before release.)
+? ? ??? 2003, PHP 5 Beta 1
 
-- Moved extensions to PECL (http://pear.php.net/): (James, Tal)
-  . ext/fribidi
+- The SQLite (http://www.hwaci.com/sw/sqlite/) extension is now bundled and 
+  enabled by default. (Wez, Marcus, Tal)
+
+- Improved the speed of internal functions that use callbacks by 40% due to a 
+  new internal fast_call_user_function() function. (Sterling)
+
+- Completely Overhauled XML support 
+  . Brand new simplexml extension (Sterling)
+  . New DOM extension (Rob, Chregu, Marcus)
+  . New XSL extension (Chregu, Rob)
+  . Moved the old DOM-XML and XSLT extensions to PECL (James, Sterling)
+  . ext/xml can now use both libxml2 and expat to parse XML (Sterling)
+  . Removed bundled expat (Jani)
+
+- Due to a license change, we are longer bundling the MySQL client library.  
+  If you previously relied on this library in your own product, make sure to 
+  check with MySQL AB for the new licensing terms. (Sterling)
 
 - New php.ini options:
   . "session.hash_function" and "session.hash_bits_per_character". (Sascha)
@@ -86,7 +99,6 @@ PHP                                                                        NEWS
   (Ilia)
 - Added optional parameter to file() which makes the result array not contain
   the line endings and to skip empty lines. (Ilia)
-
 - Added new range() functionality: (Ilia)
   . Support for float modifier.
   . Detection of numeric values inside strings passed as high & low.
@@ -100,7 +112,6 @@ PHP                                                                        NEWS
 - Added context options 'method', 'header' and 'content' for "http://" fopen 
   wrapper. (Sara)
 - Added input filter support. See README.input_filter for more info. (Rasmus)
-
 - Fixed is_executable() to be available also on Windows. (Shane)
 - Fixed dirname() and strip_tags() to be binary-safe. (Moriyoshi)
 - Fixed bug #24098 (crash in pathinfo()). (Ilia)
