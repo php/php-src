@@ -292,6 +292,14 @@ SOURCE=..\main\SAPI.h
 SOURCE=..\main\win95nt.h
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=..\main\php_open_temporary_file.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\php_open_temporary_file.h
+# End Source File
 # End Group
 # Begin Group "Function Modules"
 
