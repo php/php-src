@@ -2202,7 +2202,7 @@ re_compile_pattern(pattern, size, bufp)
 	 `upper_bound' is 1, though.)  */
       { /* If the upper bound is > 1, we need to insert
 	   more at the end of the loop.  */
-	unsigned nbytes = upper_bound == 1 ? 10 : 20;
+	unsigned int nbytes = (unsigned int)upper_bound == 1 ? 10 : 20;
 
 	GET_BUFFER_SPACE(nbytes);
 	/* Initialize lower bound of the `succeed_n', even
@@ -3616,12 +3616,12 @@ init_regs(regs, num_regs)
     regs->end = TMALLOC(num_regs, int);
     regs->allocated = num_regs;
   }
-  else if (regs->allocated < num_regs) {
+  else if (regs->allocated < (int)num_regs) {
     TREALLOC(regs->beg, num_regs, int);
     TREALLOC(regs->end, num_regs, int);
     regs->allocated = num_regs;
   }
-  for (i=0; i<num_regs; i++) {
+  for (i=0; i<(int)num_regs; i++) {
     regs->beg[i] = regs->end[i] = -1;
   }
 }
@@ -3737,7 +3737,7 @@ re_match(bufp, string_arg, size, pos, regs)
      ( or ( and ) or ) has been seen for. Also set all registers to
      inactive and mark them as not having matched anything or ever
      failed. */
-  for (mcnt = 0; mcnt < num_regs; mcnt++) {
+  for (mcnt = 0; mcnt < (int)num_regs; mcnt++) {
     regstart[mcnt] = regend[mcnt]
       = old_regstart[mcnt] = old_regend[mcnt]
       = best_regstart[mcnt] = best_regend[mcnt] = REG_UNSET_VALUE;
@@ -3791,7 +3791,7 @@ re_match(bufp, string_arg, size, pos, regs)
 	    best_regs_set = 1;
 	    best_regend[0] = d;	/* Never use regstart[0].  */
 
-	    for (mcnt = 1; mcnt < num_regs; mcnt++) {
+	    for (mcnt = 1; mcnt < (int)num_regs; mcnt++) {
 	      best_regstart[mcnt] = regstart[mcnt];
 	      best_regend[mcnt] = regend[mcnt];
 	    }
@@ -3804,7 +3804,7 @@ re_match(bufp, string_arg, size, pos, regs)
 	  /* Restore best match.  */
 	  d = best_regend[0];
 
-	  for (mcnt = 0; mcnt < num_regs; mcnt++) {
+	  for (mcnt = 0; mcnt < (int)num_regs; mcnt++) {
 	    regstart[mcnt] = best_regstart[mcnt];
 	    regend[mcnt] = best_regend[mcnt];
 	  }
@@ -3816,7 +3816,7 @@ re_match(bufp, string_arg, size, pos, regs)
       if (regs) {
 	regs->beg[0] = pos;
 	regs->end[0] = d - string;
-	for (mcnt = 1; mcnt < num_regs; mcnt++) {
+	for (mcnt = 1; mcnt < (int)num_regs; mcnt++) {
 	  if (REG_UNSET(regend[mcnt])) {
 	    regs->beg[mcnt] = -1;
 	    regs->end[mcnt] = -1;
@@ -4416,7 +4416,7 @@ re_match(bufp, string_arg, size, pos, regs)
   fail:
     if (stackp != stackb) {
       /* A restart point is known.  Restart there and pop it. */
-      short last_used_reg, this_reg;
+      long last_used_reg, this_reg;
 
       /* If this failure point is from a dummy_failure_point, just
 	 skip it.  */

@@ -7017,7 +7017,7 @@ collector_strpos(int c, void* data TSRMLS_DC)
 	struct collector_strpos_data *pc = (struct collector_strpos_data*)data;
 
 	if (pc->output >= pc->start) {
-		if (c == pc->needle.buffer[pc->needle_pos]) {
+		if (c == (int)pc->needle.buffer[pc->needle_pos]) {
 			if (pc->needle_pos == 0) {
 				pc->found_pos = pc->output;			/* found position */
 			}
@@ -7386,7 +7386,7 @@ mbfl_strcut(
 				}
 				/* search end position */
 				k = start + length;
-				if (k >= string->len) {
+				if (k >= (int)string->len) {
 					end = string->len;
 				} else {
 					end = start;
