@@ -1454,6 +1454,8 @@ overloaded_function_call_cont:
 						zend_error(E_ERROR, "Unknown function:  %s()\n", fname->value.str.val);
 					}
 					FREE_OP(&opline->op1, EG(free_op1));
+					zend_ptr_stack_push(&EG(arg_types_stack), object.ptr);
+					object.ptr = NULL;
 					goto do_fcall_common;
 				}
 do_fcall_common:
@@ -1514,6 +1516,8 @@ do_fcall_common:
 					}
 					if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 						zend_ptr_stack_n_pop(&EG(arg_types_stack), 2, &object.ptr, &function_being_called);
+					} else if (opline->opcode == ZEND_DO_FCALL) {
+						object.ptr = zend_ptr_stack_pop(&EG(arg_types_stack));
 					}
 					function_state.function = (zend_function *) op_array;
 					EG(function_state_ptr) = &function_state;
