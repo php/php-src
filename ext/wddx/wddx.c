@@ -108,6 +108,12 @@ function_entry wddx_functions[] = {
 PHP_MINIT_FUNCTION(wddx);
 PHP_MINFO_FUNCTION(wddx);
 
+/* {{{ dynamically loadable module stuff */
+#ifdef COMPILE_DL_WDDX
+ZEND_GET_MODULE(wddx)
+#endif /* COMPILE_DL_WDDX */
+/* }}} */
+
 /* {{{ wddx_module_entry
  */
 zend_module_entry wddx_module_entry = {
