@@ -714,7 +714,7 @@ int main(int argc, char *argv[])
 			switch (c) {
 
 			case 'a':	/* interactive mode */
-				if (interactive) {
+				if (!interactive) {
 					printf("Interactive mode enabled\n\n");
 					fflush(stdout);
 					interactive=1;
