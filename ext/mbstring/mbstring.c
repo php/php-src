@@ -1755,7 +1755,8 @@ PHP_FUNCTION(mb_parse_str)
 {
 	pval **arg_str, **arg_array, *track_vars_array;
 	char *var, *val, *encstr, *strtok_buf, **str_list, *separator;
-	int n, num, val_len, *len_list, *elist, elistsz, old_rg, argc;
+	int n, num, val_len, *len_list, elistsz, old_rg, argc;
+	enum mbfl_no_encoding *elist;
 	enum mbfl_no_encoding from_encoding, to_encoding;
 	mbfl_string string, resvar, resval;
 	mbfl_encoding_detector *identd;
@@ -2573,7 +2574,8 @@ MBSTRING_API char * php_mb_convert_encoding(char *input, size_t length, char *_t
 	mbfl_string string, result, *ret = NULL;
 	enum mbfl_no_encoding from_encoding, to_encoding;
 	mbfl_buffer_converter *convd;
-	int size, *list;
+	int size;
+	enum mbfl_no_encoding *list;
 	char *output=NULL;
 
 	if (output_len) {
@@ -2804,7 +2806,8 @@ PHP_FUNCTION(mb_detect_encoding)
 	mbfl_string string;
 	const char *ret;
 	enum mbfl_no_encoding *elist;
-	int size, *list, strict = 0;
+	int size, strict = 0;
+	enum mbfl_no_encoding *list;
 
 	if (ZEND_NUM_ARGS() == 1) {
 		if (zend_get_parameters_ex(1, &arg_str) == FAILURE) {
@@ -3093,7 +3096,8 @@ PHP_FUNCTION(mb_convert_variables)
 	enum mbfl_no_encoding from_encoding, to_encoding;
 	mbfl_encoding_detector *identd;
 	mbfl_buffer_converter *convd;
-	int n, argc, stack_level, stack_max, *elist, elistsz;
+	int n, argc, stack_level, stack_max, elistsz;
+	enum mbfl_no_encoding *elist;
 	char *name;
 	void *ptmp;
 
