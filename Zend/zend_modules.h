@@ -21,6 +21,8 @@
 #ifndef MODULES_H
 #define MODULES_H
 
+#include "zend.h"
+
 #define INIT_FUNC_ARGS		int type, int module_number ELS_DC
 #define INIT_FUNC_ARGS_PASSTHRU	type, module_number ELS_CC
 #define SHUTDOWN_FUNC_ARGS	int type, int module_number
@@ -34,8 +36,6 @@ ZEND_API extern unsigned char first_arg_force_ref[];
 ZEND_API extern unsigned char first_arg_allow_ref[];
 ZEND_API extern unsigned char second_arg_force_ref[];
 ZEND_API extern unsigned char second_arg_allow_ref[];
-
-#include "zend.h"
 
 #define ZEND_MODULE_API_NO 20001222
 #ifdef ZTS
