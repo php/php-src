@@ -88,7 +88,7 @@ static char *url_attr_addon(const char *tag,const char *attr,const char *val,con
 
 /* {{{ url_adapt_ext
  */
-char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *val, size_t *newlen)
+char *url_adapt_ext(const char *src, uint srclen, const char *name, const char *val, size_t *newlen)
 {
 	char buf[1024];
 
