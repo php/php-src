@@ -31,10 +31,11 @@
 #include "php_config.h"
 #endif
 
-#ifdef HAVE_SCANDIR
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
+
+#ifdef HAVE_SCANDIR
 #define php_scandir		scandir
 #else
 int php_scandir(const char *dirname, struct dirent **namelist[], int (*selector) (const struct dirent *entry), int (*compare) (const struct dirent **a, const struct dirent **b));
