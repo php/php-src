@@ -1018,7 +1018,39 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
 
+# Begin Custom Build
+InputPath="..\main\configuration-parser.y"
+
+BuildCmds= \
+	cd ..\main \
+	if not "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p cfg configuration-parser.y \
+	if "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y \
+	
+
+"..\main\configuration-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"..\main\configuration-parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# Begin Custom Build
+InputPath="..\main\configuration-parser.y"
+
+BuildCmds= \
+	cd ..\main \
+	if not "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p cfg configuration-parser.y \
+	if "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y \
+	
+
+"..\main\configuration-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"..\main\configuration-parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
 
 !ENDIF 
 
@@ -1087,7 +1119,25 @@ InputPath="..\main\configuration-scanner.l"
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
 
+# Begin Custom Build
+InputPath="..\main\configuration-scanner.l"
+
+"..\main\configuration-scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd ..\main 
+	flex -i -Pcfg -oconfiguration-scanner.c configuration-scanner.l 
+	
+# End Custom Build
+
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# Begin Custom Build
+InputPath="..\main\configuration-scanner.l"
+
+"..\main\configuration-scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd ..\main 
+	flex -i -Pcfg -oconfiguration-scanner.c configuration-scanner.l 
+	
+# End Custom Build
 
 !ENDIF 
 
