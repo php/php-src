@@ -299,10 +299,10 @@ EXEC SQL END DECLARE SECTION;
 	IFXG(num_links)--;
 }
 
-static void ifx_free_result(a_result_id)
-char *a_result_id;
+static void ifx_free_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-	return;
+	IFX_RES *Ifx_Result = (IFX_RES *)rsrc->ptr;
+	efree(Ifx_Result);
 }
 
 PHP_INI_BEGIN()
@@ -2768,7 +2768,6 @@ EXEC SQL END DECLARE SECTION;
 	}
 	
 	EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
-	efree(Ifx_Result);	/* this can be safely done now */
 
 	zend_list_delete(Z_RESVAL_PP(result));
 	RETURN_TRUE;
