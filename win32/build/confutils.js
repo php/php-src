@@ -17,13 +17,21 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.4 2003-12-03 02:47:45 wez Exp $
+// $Id: confutils.js,v 1.5 2003-12-03 14:29:45 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
 var WshShell = WScript.CreateObject("WScript.Shell");
 var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var MFO = null;
+var SYSTEM_DRIVE = WshShell.Environment("Process").Item("SystemDrive");
+var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
+
+if (PROGRAM_FILES == null) {
+	PROGRAM_FILES = "C:\\Program Files\\";
+}
+
+STDOUT.WriteLine("program files " + PROGRAM_FILES);
 
 var PHP_VERSION = 5;
 
@@ -338,6 +346,12 @@ function PATH_PROG(progname, def, additional_paths)
 
 function CHECK_LIB(libname, target, path_to_check)
 {
+	if (path_to_check == null) {
+		path_to_check = php_usual_lib_suspects;
+	} else {
+		path_to_check += ";" + php_usual_lib_suspects;
+	}
+	
 	var p = search_paths(libname, path_to_check, "LIBS");
 	var have = 0;
 
@@ -358,6 +372,13 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	if (use_env == null) {
 		use_env = true;
 	}
+
+	if (path_to_check == null) {
+		path_to_check = php_usual_include_suspects;
+	} else {
+		path_to_check += ";" + php_usual_include_suspects;
+	}
+	
 	var p = search_paths(header_name, path_to_check, use_env ? "INCLUDE" : null);
 	var have = 0;
 	var sym;
@@ -681,7 +702,13 @@ function ADD_FLAG(name, flags, target)
 		name = target.toUpperCase() + "_" + name;
 	}
 	if (configure_subst.Exists(name)) {
-		flags = configure_subst.Item(name) + " " + flags;
+		var curr_flags = configure_subst.Item(name);
+
+		if (curr_flags.match(flags)) {
+			return;
+		}
+		
+		flags = curr_flags + " " + flags;
 		configure_subst.Remove(name);
 	}
 	configure_subst.Add(name, flags);
@@ -708,7 +735,7 @@ function AC_DEFINE(name, value, comment, quote)
 		quote = true;
 	}
 	if (quote && typeof(value) == "string") {
-		value = '"' + value.replace(new RegExp('"', "g"), '\\"') + '"';
+		value = '"' + value.replace(new RegExp('(["\\\\])', "g"), '\\$1') + '"';
 	} else if (value.length == 0) {
 		value = '""';
 	}
@@ -725,5 +752,6 @@ function ERROR(msg)
 function WARNING(msg)
 {
 	STDERR.WriteLine("WARNING: " + msg);
+	STDERR.WriteBlankLines(1);
 }
 

@@ -7,9 +7,10 @@ if (PHP_LIBXML == "yes") {
 	EXTENSION("libxml", "libxml.c", false /* never shared */);
 	AC_DEFINE("HAVE_LIBXML", 1, "LibXML support");
 
-	CHECK_LIB("iconv.lib", "libxml", php_usual_lib_suspects);
-	CHECK_LIB("libxml2.lib", "libxml", php_usual_lib_suspects);
-	CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS", php_usual_include_suspects);
+	CHECK_LIB("iconv.lib", "libxml");
+	CHECK_LIB("libxml2.lib", "libxml");
+	CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS");
+	ADD_FLAG("CFLAGS", "/D LIBXML_THREAD_ENABLED");
 }
 
 
