@@ -169,3 +169,6 @@
 
 /* Win32 supports strcoll */
 #define HAVE_STRCOLL 1
+
+/* Win32 support proc_open */
+#define PHP_CAN_SUPPORT_PROC_OPEN 1
