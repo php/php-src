@@ -708,17 +708,17 @@ PHP_FUNCTION(dbase_create) {
 /* }}} */
 
 function_entry dbase_functions[] = {
-	PHP_FUNCTION(dbase_open,								NULL)
-	PHP_FUNCTION(dbase_create,								NULL)
-	PHP_FUNCTION(dbase_close,								NULL)
-	PHP_FUNCTION(dbase_numrecords,							NULL)
-	PHP_FUNCTION(dbase_numfields,							NULL)
-	PHP_FUNCTION(dbase_add_record,							NULL)
-	PHP_FUNCTION(dbase_replace_record,						NULL)
-	PHP_FUNCTION(dbase_get_record,							NULL)
-	PHP_FUNCTION(dbase_get_record_with_names,				NULL)
-	PHP_FUNCTION(dbase_delete_record,						NULL)
-	PHP_FUNCTION(dbase_pack,								NULL)
+	PHP_FE(dbase_open,								NULL)
+	PHP_FE(dbase_create,							NULL)
+	PHP_FE(dbase_close,								NULL)
+	PHP_FE(dbase_numrecords,						NULL)
+	PHP_FE(dbase_numfields,							NULL)
+	PHP_FE(dbase_add_record,						NULL)
+	PHP_FE(dbase_replace_record,					NULL)
+	PHP_FE(dbase_get_record,						NULL)
+	PHP_FE(dbase_get_record_with_names,				NULL)
+	PHP_FE(dbase_delete_record,						NULL)
+	PHP_FE(dbase_pack,								NULL)
 	{NULL, NULL, NULL}
 };
 
