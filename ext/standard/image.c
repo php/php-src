@@ -601,7 +601,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
 	unsigned short dummy_short;
-	int dummy_int, highest_bit_depth, bit_depth;
+	int highest_bit_depth, bit_depth;
 	unsigned char first_marker_id;
 	unsigned int i;
 

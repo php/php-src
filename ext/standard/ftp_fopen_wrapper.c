@@ -648,7 +648,7 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, char *path, cha
 {
 	php_stream *stream, *reuseid, *datastream = NULL;
 	php_url *resource = NULL;
-	int result, use_ssl, use_ssl_on_data = 0;
+	int result = 0, use_ssl, use_ssl_on_data = 0;
 	char *hoststart = NULL, tmp_line[512];
 	char ip[sizeof("123.123.123.123")];
 	unsigned short portno;
