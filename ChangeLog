@@ -1,3 +1,141 @@
+2001-05-06  Stig Bakken  <ssb@fast.no>
+
+    * pear/CODING_STANDARDS: updated the .emacs example
+
+    * configure.in:
+    use $PHP_LAYOUT, not $libdir, to determine the extension install layout
+
+    * configure.in:    Changed the default php.ini path back to /usr/local/lib.  Use
+    "--with-layout=GNU" for now to get the new behaviour.
+
+2001-05-06  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/mbstring/mbstring.c: Fixed some protos.
+
+2001-05-06  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c: fix crash bug
+
+2001-05-06  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbstring.c:
+    fixed divided by zero exception and lack of multidimentional array support in mbstring.
+
+2001-05-06  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/iconv/php_iconv.h: fix compile bug.
+
+2001-05-06  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/config.m4:
+    Attempt to fix the build when a c-client lib with kerberos, pam and ssl
+    is used.
+
+2001-05-06  James Moore  <James@phpuk.org>
+
+    * ext/standard/basic_functions.c: Fix win32 build
+
+2001-05-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/parsedate.y: - Nuke warning
+
+2001-05-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/buildcheck.sh: Up prerequisites to libtool 1.4
+
+    * config.sub
+      ltconfig
+      ltmain.sh
+      config.guess: Upgrade to libtool 1.4.
+
+2001-05-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/parsedate.y
+      ext/standard/tests/time/002.phpt:
+    - Partial fix for bug #9050, support for "Jan 19  2000" date format
+
+2001-05-06  Anil Madhavapeddy  <anil@recoil.org>
+
+    * ltconfig: sync with OpenBSD libtool patches
+
+2001-05-06  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/basic_functions.c
+      ext/standard/lcg.c
+      ext/standard/php_lcg.h:
+    Moved ts_alloca_id() into MINIT like Andi requested.
+
+2001-05-06  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Net/Socket.php: whitespace
+
+2001-05-06  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/basic_functions.c
+      ext/standard/crypt.c
+      ext/standard/lcg.c
+      ext/standard/php_crypt.h
+      ext/standard/php_lcg.h:
+    Fix bug: #8834. Now there should be more random salts..
+
+    * main/main.c:
+    Fixed bug: #7227. Now the correct strings (if set) are shown.
+
+    * ext/standard/info.c
+      main/php_ini.c: Fix bug: #10323. Every value outputted is now escaped.
+
+2001-05-06  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: Update NEWS
+
+2001-05-06  Harald Radi  <h.radi@nme.at>
+
+    * NEWS: corrected COM news entry
+
+2001-05-06  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Cache/Container/dbx.php:
+    MFH (added low/highwater cache size detection)
+
+2001-05-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/imap/php_imap.c: Fix broken build
+
+2001-05-06  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Cache/Container/dbx.php: added low/highwater cache size detection
+
+2001-05-06  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/standard/fsock.h: Fixed win32 build problem.
+
+    * ext/standard/fsock.h: Fixed build problem for win32
+
+2001-05-06  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/pgsql/pgsql.c: Corrected one proto.
+
+2001-05-06  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/config.m4
+      ext/imap/php_imap.c: Beutify phpinfo() output.
+
+    * ext/imap/config.m4: Added a check that libc-client support SSL.
+
+    * ext/imap/php_imap.c: Removed usused variables.
+
+2001-05-06  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/mbstring/mbstring.c:
+    fixed a compilation problem without --enable-mbstr-enc-trans.
+
+2001-05-06  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h
+      NEWS: Add pg_last_notice() function
+
 2001-05-05  Wez Furlong  <wez.php@thebrainroom.com>
 
     * main/php_network.h: Added missing sys/time.h include
