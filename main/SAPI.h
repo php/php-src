@@ -13,19 +13,32 @@
 #endif
 
 
-typedef struct {
-	int (*ub_write)(const char *str, unsigned int str_length);
-} sapi_functions_struct;
+typedef struct _sapi_module_struct {
+	char *name;
 
-extern sapi_functions_struct sapi_functions;  /* true global */
+	int (*startup)(struct _sapi_module_struct *sapi_module);
+	int (*shutdown)(struct _sapi_module_struct *sapi_module);
+
+	int (*ub_write)(const char *str, unsigned int str_length);
+} sapi_module_struct;
+
+
+extern sapi_module_struct sapi_module;  /* true global */
+
+
+typedef struct {
+	char *path_translated;
+	char *query_string;
+} sapi_request_info;
 
 
 typedef struct {
 	void *server_context;
+	sapi_request_info request_info;
 } sapi_globals_struct;
 
 
-void sapi_startup(sapi_functions_struct *sf);
+SAPI_API void sapi_startup(sapi_module_struct *sf);
 
 #ifdef ZTS
 # define SLS_D	sapi_globals_struct *sapi_globals

@@ -317,6 +317,7 @@ void php3_treat_data(int arg, char *str)
 	pval *array_ptr;
 	ELS_FETCH();
 	PLS_FETCH();
+	SLS_FETCH();
 	
 	switch (arg) {
 		case PARSE_POST:
@@ -350,7 +351,7 @@ void php3_treat_data(int arg, char *str)
 	if (arg == PARSE_POST) {
 		res = php3_getpost(array_ptr PLS_CC);
 	} else if (arg == PARSE_GET) {		/* Get data */
-		var = request_info.query_string;
+		var = SG(request_info).query_string;
 		if (var && *var) {
 			res = (char *) estrdup(var);
 		}

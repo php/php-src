@@ -1533,7 +1533,7 @@ void php3_hw_getcgi(INTERNAL_FUNCTION_PARAMETERS) {
 	sprintf(cgi_env_str, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
 	                     request_info.request_method,
 	                     request_info.path_info,
-	                     request_info.query_string);
+	                     SG(request_info).query_string);
 #endif
 	/* !!!! memory for object and attributes is allocated with malloc !!!! */
 	if (0 != (ptr->lasterror = send_getcgi(ptr->socket, id, cgi_env_str, &attributes, &object, &count)))
@@ -1785,7 +1785,7 @@ void php3_hw_pipecgi(INTERNAL_FUNCTION_PARAMETERS) {
 	sprintf(cgi_env_str, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
 	                     request_info.request_method,
 	                     request_info.path_info,
-	                     request_info.query_string);
+	                     SG(request_info).query_string);
 #endif
 	/* !!!! memory for object, bodytag and attributes is allocated with malloc !!!! */
 	if (0 != (ptr->lasterror =  send_pipecgi(ptr->socket,

@@ -76,8 +76,13 @@ static int zend_cgibin_ub_write(const char *str, uint str_length)
 }
 
 
-static sapi_functions_struct sapi_functions = {
-	zend_cgibin_ub_write
+static sapi_module_struct sapi_module = {
+	"PHP Language",					/* name */
+									
+	php_module_startup,				/* startup */
+	php_module_shutdown_wrapper,	/* shutdown */
+
+	zend_cgibin_ub_write,			/* unbuffered write */
 };
 
 
@@ -127,6 +132,7 @@ int main(int argc, char *argv[])
 	zend_compiler_globals *compiler_globals;
 	zend_executor_globals *executor_globals;
 	php_core_globals *core_globals;
+	sapi_globals_struct *sapi_globals;
 #endif
 
 
@@ -135,7 +141,10 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 #endif
-		
+
+	tsrm_startup(1,1,0);
+	sapi_startup(&sapi_module);
+
 #if WIN32|WINNT
 	_fmode = _O_BINARY;			/*sets default for file streams to binary */
 	setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */
@@ -178,13 +187,14 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 #endif							/* FORCE_CGI_REDIRECT */
 	}
 
-	if (php_module_startup(&sapi_functions)==FAILURE) {
+	if (php_module_startup(&sapi_module)==FAILURE) {
 		return FAILURE;
 	}
 #ifdef ZTS
 	compiler_globals = ts_resource(compiler_globals_id);
 	executor_globals = ts_resource(executor_globals_id);
 	core_globals = ts_resource(core_globals_id);
+	sapi_globals = ts_resource(sapi_globals_id);
 #endif
 
 	CG(extended_info) = 0;
@@ -280,8 +290,10 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 	php3_TreatHeaders();
 
+	SG(request_info).query_string = getenv("QUERY_STRING");
+
 	if (!cgi) {
-		if (!request_info.query_string) {
+		if (!SG(request_info).query_string) {
 			for (i = optind, len = 0; i < argc; i++)
 				len += strlen(argv[i]) + 1;
 
@@ -292,7 +304,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 				if (i < (argc - 1))
 					strcat(s, "+");
 			}
-			request_info.query_string = s;
+			SG(request_info).query_string = s;
 		}
 		if (!request_info.filename && argc > optind)
 			request_info.filename = argv[optind];
