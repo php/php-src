@@ -1,3 +1,14 @@
+2003-02-14  Thies C. Arntzen  <thies@thieso.net>
+
+    * zend_execute_API.c:
+      init current_execute_data befor we start executing
+
+    * Makefile.am:
+      ups
+
+    * Makefile.am:
+      add really nice dump_bt function for debugging in gdb
+
 2003-02-13  Zeev Suraski  <zeev@zend.com>
 
     * zend_object_handlers.c:
