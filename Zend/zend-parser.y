@@ -602,17 +602,20 @@ assignment_list_element:
 
 
 array_pair_list:
-		/* empty */ 				{ do_init_array(&$$, NULL, NULL CLS_CC); }
+		/* empty */ 				{ do_init_array(&$$, NULL, NULL, 0 CLS_CC); }
 	|	non_empty_array_pair_list	{ $$ = $1; }
 ;
 
 non_empty_array_pair_list:
-		non_empty_array_pair_list ',' expr T_DOUBLE_ARROW expr	{ do_add_array_element(&$$, &$5, &$3 CLS_CC); }
-	|	non_empty_array_pair_list ',' expr		{ do_add_array_element(&$$, &$3, NULL CLS_CC); }
-	|	expr T_DOUBLE_ARROW expr	{ do_init_array(&$$, &$3, &$1 CLS_CC); }
-	|	expr 						{ do_init_array(&$$, &$1, NULL CLS_CC); }
+		non_empty_array_pair_list ',' expr T_DOUBLE_ARROW expr	{ do_add_array_element(&$$, &$5, &$3, 0 CLS_CC); }
+	|	non_empty_array_pair_list ',' expr		{ do_add_array_element(&$$, &$3, NULL, 0 CLS_CC); }
+	|	expr T_DOUBLE_ARROW expr	{ do_init_array(&$$, &$3, &$1, 0 CLS_CC); }
+	|	expr 						{ do_init_array(&$$, &$1, NULL, 0 CLS_CC); }
+	|	non_empty_array_pair_list ',' expr T_DOUBLE_ARROW '&' w_cvar { do_add_array_element(&$$, &$6, &$3, 1 CLS_CC); }
+	|	non_empty_array_pair_list ',' '&' w_cvar { do_add_array_element(&$$, &$4, NULL, 1 CLS_CC); }
+	|	expr T_DOUBLE_ARROW '&' w_cvar	{ do_init_array(&$$, &$4, &$1, 1 CLS_CC); }
+	|	'&' w_cvar 						{ do_init_array(&$$, &$2, NULL, 1 CLS_CC); }
 ;
-
 
 encaps_list:
 		encaps_list encaps_var { do_end_variable_parse(BP_VAR_R, 0 CLS_CC);  do_add_variable(&$$, &$1, &$2 CLS_CC); }

@@ -1804,43 +1804,57 @@ send_by_ref:
 			case ZEND_INIT_ARRAY:
 			case ZEND_ADD_ARRAY_ELEMENT: {
 					zval *array_ptr = &Ts[opline->result.u.var].tmp_var;
-					zval *expr=get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+					zval *expr_ptr, **expr_ptr_ptr;
 					zval *offset=get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R);
 
+					if (opline->extended_value) {
+						expr_ptr_ptr=get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_R);
+						expr_ptr = *expr_ptr_ptr;
+					} else {
+						expr_ptr=get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+					}
+					
 					if (opline->opcode==ZEND_INIT_ARRAY) {
 						array_init(array_ptr);
-						if (!expr) {
+						if (!expr_ptr) {
 							break;
 						}
 					}
-					if (EG(free_op1)) { /* temporary variable */
+					if (opline->op1.op_type == IS_TMP_VAR) { /* temporary variable */
 						zval *new_expr = (zval *) emalloc(sizeof(zval));
 
-						*new_expr = *expr;
-						expr = new_expr;
-						INIT_PZVAL(expr);
+						*new_expr = *expr_ptr;
+						expr_ptr = new_expr;
+						INIT_PZVAL(expr_ptr);
 					} else {
-						if (PZVAL_IS_REF(expr)) {
+						if (opline->extended_value) {
+							if (!PZVAL_IS_REF(expr_ptr)) {
+								SEPARATE_ZVAL(expr_ptr_ptr);
+								expr_ptr = *expr_ptr_ptr;
+								expr_ptr->EA.is_ref = 1;
+							}
+							expr_ptr->refcount++;
+						} else if (PZVAL_IS_REF(expr_ptr)) {
 							zval *new_expr = (zval *) emalloc(sizeof(zval));
 
-							*new_expr = *expr;
-							expr = new_expr;
-							zendi_zval_copy_ctor(*expr);
-							INIT_PZVAL(expr);
+							*new_expr = *expr_ptr;
+							expr_ptr = new_expr;
+							zendi_zval_copy_ctor(*expr_ptr);
+							INIT_PZVAL(expr_ptr);
 						} else {
-							expr->refcount++;
+							expr_ptr->refcount++;
 						}
 					}
 					if (offset) {
 						switch(offset->type) {
 							case IS_DOUBLE:
-								zend_hash_index_update(array_ptr->value.ht, (long) offset->value.lval, &expr, sizeof(zval *), NULL);
+								zend_hash_index_update(array_ptr->value.ht, (long) offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 								break;
 							case IS_LONG:
-								zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr, sizeof(zval *), NULL);
+								zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 								break;
 							case IS_STRING:
-								zend_hash_update(array_ptr->value.ht, offset->value.str.val, offset->value.str.len+1, &expr, sizeof(zval *), NULL);
+								zend_hash_update(array_ptr->value.ht, offset->value.str.val, offset->value.str.len+1, &expr_ptr, sizeof(zval *), NULL);
 								break;
 							default:
 								/* do nothing */
@@ -1848,7 +1862,7 @@ send_by_ref:
 						}
 						FREE_OP(&opline->op2, EG(free_op2));
 					} else {
-						zend_hash_next_index_insert(array_ptr->value.ht, &expr, sizeof(zval *), NULL);
+						zend_hash_next_index_insert(array_ptr->value.ht, &expr_ptr, sizeof(zval *), NULL);
 					}
 				}
 				break;

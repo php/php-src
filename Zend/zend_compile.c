@@ -1602,7 +1602,7 @@ void do_shell_exec(znode *result, znode *cmd CLS_DC)
 
 
 
-void do_init_array(znode *result, znode *expr, znode *offset CLS_DC)
+void do_init_array(znode *result, znode *expr, znode *offset, int is_ref CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 
@@ -1621,10 +1621,11 @@ void do_init_array(znode *result, znode *expr, znode *offset CLS_DC)
 		SET_UNUSED(opline->op1);
 		SET_UNUSED(opline->op2);
 	}
+	opline->extended_value = is_ref;
 }
 
 
-void do_add_array_element(znode *result, znode *expr, znode *offset CLS_DC)
+void do_add_array_element(znode *result, znode *expr, znode *offset, int is_ref CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 
@@ -1636,6 +1637,7 @@ void do_add_array_element(znode *result, znode *expr, znode *offset CLS_DC)
 	} else {
 		SET_UNUSED(opline->op2);
 	}
+	opline->extended_value = is_ref;
 }
 
 
