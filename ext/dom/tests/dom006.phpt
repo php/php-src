@@ -6,12 +6,6 @@ Test 6: Extends Test
 <?php
 
 Class books extends domDocument {
-    function __construct() {
-        /* We must first call the constructor for the parent to create the document
-	otherwise this class will not work */
-        parent::__construct();
-    }
-    
     function addBook($title, $author) {
         $titleElement = $this->createElement("title");
         $titleElement->appendChild($this->createTextNode($title));

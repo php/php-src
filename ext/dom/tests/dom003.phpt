@@ -21,13 +21,13 @@ $rootNode->appendChild($rootNode);
 ?>
 --EXPECTF--
 --- Catch exception with try/catch
-object(domexception)#%d (6) {
+object(DOMException)#%d (6) {
   ["code"]=>
   int(3)
 }
 --- Don't catch exception with try/catch
 
-Fatal error: Uncaught exception 'domexception' with message 'Hierarchy Request Error' in %sdom003.php:%d
+Fatal error: Uncaught exception 'DOMException' with message 'Hierarchy Request Error' in %sdom003.php:%d
 Stack trace:
 #0 {main}
   thrown in %sdom003.php on line %d
