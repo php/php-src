@@ -21,6 +21,10 @@
 #include <stdio.h>
 #include <signal.h>
 
+#if (HAVE_ALLOCA && HAVE_ALLOCA_H)
+#include <alloca.h>
+#endif
+
 #include "zend.h"
 #include "zend_compile.h"
 #include "zend_execute.h"
