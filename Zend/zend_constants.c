@@ -27,8 +27,7 @@
 
 void free_zend_constant(zend_constant *c)
 {
-	if (!(c->flags & CONST_PERSISTENT)
-		|| (c->flags & CONST_EFREE_PERSISTENT)) {
+	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_dtor(&c->value);
 	}
 	free(c->name);
@@ -40,9 +39,6 @@ void copy_zend_constant(zend_constant *c)
 	c->name = zend_strndup(c->name, c->name_len);
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_copy_ctor(&c->value);
-		if (c->flags & CONST_EFREE_PERSISTENT) { /* persist_alloc()'d data */
-			persist_alloc(&c->value);
-		}
 	}
 }
 
@@ -265,8 +261,7 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 
 	if (zend_hash_add(EG(zend_constants), lowercase_name, c->name_len, (void *) c, sizeof(zend_constant), NULL)==FAILURE) {
 		free(c->name);
-		if (!(c->flags & CONST_PERSISTENT)
-			|| (c->flags & CONST_EFREE_PERSISTENT)) {
+		if (!(c->flags & CONST_PERSISTENT)) {
 			zval_dtor(&c->value);
 		}
 		zend_error(E_NOTICE,"Constant %s already defined", lowercase_name);

@@ -43,7 +43,7 @@ static inline void zend_objects_destroy_object(zend_object *object, zend_object_
 	zend_objects_call_destructor(object, handle TSRMLS_CC);
 	/* Nuke the object */
 	zend_hash_destroy(object->properties);
-	efree(object->properties);
+	FREE_HASHTABLE(object->properties);
 	efree(object);
 }
 
