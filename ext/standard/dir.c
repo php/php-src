@@ -50,7 +50,7 @@ typedef struct {
 #define DIRLS_FETCH() php_dir_globals *dir_globals = ts_resource(dir_globals_id)
 int dir_globals_id;
 #else
-#define DIR(v) (xml_globals.v)
+#define DIR(v) (dir_globals.v)
 #define DIRLS_FETCH()
 php_dir_globals dir_globals;
 #endif
