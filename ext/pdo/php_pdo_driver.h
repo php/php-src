@@ -297,6 +297,9 @@ struct _pdo_dbh_t {
 	enum pdo_error_mode error_mode;
 
 	enum pdo_case_conversion native_case, desired_case;
+
+	/* needed for inheritance to work */
+	zend_class_entry *ce; 
 #if 0
 	/* persistent hash key associated with this handle */
 	const char *persistent_id;
