@@ -182,10 +182,8 @@ PHP_PGSQL_API php_pgsql_globals pgsql_globals;
 
 /* {{{ php_pgsql_set_default_link
  */
-static void php_pgsql_set_default_link(int id)
+static void php_pgsql_set_default_link(int id TSRMLS_DC)
 {   
-	TSRMLS_FETCH();
-
 	zend_list_addref(id);
 
 	if (PGG(default_link) != -1) {
@@ -400,14 +398,13 @@ PHP_MINFO_FUNCTION(pgsql)
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
-
 }
 /* }}} */
 
 
 /* {{{ php_pgsql_do_connect
  */
-void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
+static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *host=NULL,*port=NULL,*options=NULL,*tty=NULL,*dbname=NULL,*connstring=NULL;
 	char *hashed_details;
@@ -590,7 +587,7 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			if (ptr && (type==le_link || type==le_plink)) {
 				Z_LVAL_P(return_value) = link;
 				zend_list_addref(link);
-				php_pgsql_set_default_link(link);
+				php_pgsql_set_default_link(link TSRMLS_CC);
 				Z_TYPE_P(return_value) = IS_RESOURCE;
 				efree(hashed_details);
 				return;
@@ -629,13 +626,14 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		PGG(num_links)++;
 	}
 	efree(hashed_details);
-	php_pgsql_set_default_link(Z_LVAL_P(return_value));
+	php_pgsql_set_default_link(Z_LVAL_P(return_value) TSRMLS_CC);
 }
 /* }}} */
 
+#if 0
 /* {{{ php_pgsql_get_default_link
  */
-int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
+static int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
 	if (PGG(default_link)==-1) { /* no link opened yet, implicitly open one */
 		ht = 0;
@@ -644,6 +642,7 @@ int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 	return PGG(default_link);
 }
 /* }}} */
+#endif
 
 /* {{{ proto resource pg_connect([string connection_string] | [string host, string port [, string options [, string tty,]] string database)
    Open a PostgreSQL connection */
@@ -711,7 +710,7 @@ PHP_FUNCTION(pg_close)
 
 /* {{{ php_pgsql_get_link_info
  */
-void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
+static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	zval **pgsql_link = NULL;
 	int id = -1;
@@ -890,7 +889,7 @@ PHP_FUNCTION(pg_query)
 
 /* {{{ php_pgsql_get_result_info
  */
-void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
+static void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	zval **result;
 	PGresult *pgsql_result;
@@ -965,7 +964,7 @@ PHP_FUNCTION(pg_last_notice)
 
 /* {{{ get_field_name
  */
-char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
+static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 {
 	PGresult *result;
 	char hashed_oid_key[32];
@@ -1017,7 +1016,7 @@ char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 
 /* {{{ php_pgsql_get_field_info
  */
-void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
+static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	zval **result, **field;
 	PGresult *pgsql_result;
@@ -1049,7 +1048,7 @@ void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			Z_TYPE_P(return_value) = IS_LONG;
 			break;
 		case PHP_PG_FIELD_TYPE:
-			Z_STRVAL_P(return_value) = get_field_name(pg_result->conn, PQftype(pgsql_result, Z_LVAL_PP(field)), &EG(regular_list));
+			Z_STRVAL_P(return_value) = get_field_name(pg_result->conn, PQftype(pgsql_result, Z_LVAL_PP(field)), &EG(regular_list) TSRMLS_CC);
 			Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
 			Z_TYPE_P(return_value) = IS_STRING;
 			break;
@@ -1294,7 +1293,7 @@ PHP_FUNCTION(pg_fetch_object)
 
 /* {{{ php_pgsql_data_info
  */
-void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
+static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	zval **result, **row, **field;
 	PGresult *pgsql_result;
@@ -2444,7 +2443,7 @@ PHP_FUNCTION(pg_connection_reset)
 
 /* {{{ php_pgsql_do_async
  */
-void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type) 
+static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type) 
 {
 	zval *pgsql_link;
 	int id = -1;
