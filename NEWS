@@ -3,6 +3,8 @@ PHP 4.0                                                                    NEWS
 
 
 ?? ??? 2000, Version 4.0.4
+- URL-opened files now store the HTTP response header in $http_response_header
+  (Zeev)
 - Fixed array_rand() to shuffle results when the number of requested
   elements is the same as the number of elements in the array. (Andrei)
 - Added replace parameter to header() (Sascha)

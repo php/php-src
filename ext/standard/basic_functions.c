@@ -724,14 +724,14 @@ PHP_MINIT_FUNCTION(basic)
 #endif
 
 	if(PG(allow_url_fopen)) {
-		if(FAILURE==php_register_url_wrapper("http",php_fopen_url_wrap_http)) {
+		if (FAILURE==php_register_url_wrapper("http", php_fopen_url_wrap_http)) {
 			return FAILURE;
 		} 
-		if(FAILURE==php_register_url_wrapper("ftp",php_fopen_url_wrap_ftp)) {
-			return  FAILURE;
+		if (FAILURE==php_register_url_wrapper("ftp", php_fopen_url_wrap_ftp)) {
+			return FAILURE;
 		}  
-		if(FAILURE==php_register_url_wrapper("php",php_fopen_url_wrap_php)) {
-			return  FAILURE;
+		if (FAILURE==php_register_url_wrapper("php", php_fopen_url_wrap_php)) {
+			return FAILURE;
 		}  
 	}
 	

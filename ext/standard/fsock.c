@@ -649,8 +649,9 @@ char *php_sock_fgets(char *buf, size_t maxlen, int socket)
 	
 	/* signal error only, if we don't return data from this call and 
 	   if there is no data to read and if the eof flag is set */
-	if(amount || TOREAD(sock) || !sock->eof)
+	if(amount || TOREAD(sock) || !sock->eof) {
 		ret = buf;
+	}
 
 	return ret;
 }
