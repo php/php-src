@@ -433,7 +433,7 @@ PHP_FUNCTION(pow)
 		} else if (Z_DVAL_PP(zbase) == 0.0) {
 			if (lexp < 0) {
 				php_error(E_WARNING,
-					"Division by zero: pow(0.0,<negative integer>)");
+					"Division by zero: pow(0.0,[negative integer])");
 				RETURN_FALSE;
 			} else {
 				RETURN_DOUBLE(0.0);
@@ -458,7 +458,7 @@ PHP_FUNCTION(pow)
 		case 0:
 			if (lexp < 0) {
 				php_error(E_WARNING,
-					"Division by zero: pow(0,<negative integer>)");
+					"Division by zero: pow(0,[negative integer])");
 				RETURN_FALSE;
 			} else {
 				RETURN_LONG(0);
