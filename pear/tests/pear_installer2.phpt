@@ -113,6 +113,57 @@ echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR
     '.tmpinstaller2.phpt.testfile.php') ? "yes\n" : "no\n");
 
 $installer->rollbackFileTransaction();
+
+define('PEARINSTALLERTEST2_FAKE_FOO_CONST', 'good');
+echo "\ntest replacements:\n";
+$fp = fopen($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installer2.phpt.testfile.php', 'w');
+fwrite($fp, '@TEST@ stuff');
+fclose($fp);
+var_dump($installer->_installFile('installer2.phpt.testfile.php', array('role' => 'script',
+    'replacements' => array(array('type' => 'php-const', 'from' => '@TEST@', 'to' => 'PEARINSTALLERTEST2_FAKE_FOO_CONST'))),
+    $temp_path . DIRECTORY_SEPARATOR . 'tmp', array()));
+echo "==>test php-const replacement: equals 'good stuff'? => ";
+if (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    '.tmpinstaller2.phpt.testfile.php'))
+{
+    $a = implode(file($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    '.tmpinstaller2.phpt.testfile.php'), '');
+    echo "$a\n";
+} else {
+    echo "no! file installation failed\n";
+}
+$installer->rollbackFileTransaction();
+
+var_dump($installer->_installFile('installer2.phpt.testfile.php', array('role' => 'script',
+    'replacements' => array(array('type' => 'pear-config', 'from' => '@TEST@', 'to' => 'master_server'))),
+    $temp_path . DIRECTORY_SEPARATOR . 'tmp', array()));
+echo "==>test pear-config replacement: equals 'pear.php.net stuff'? => ";
+if (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    '.tmpinstaller2.phpt.testfile.php'))
+{
+    $a = implode(file($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    '.tmpinstaller2.phpt.testfile.php'), '');
+    echo "$a\n";
+} else {
+    echo "no! file installation failed\n";
+}
+$installer->rollbackFileTransaction();
+
+var_dump($installer->_installFile('installer2.phpt.testfile.php', array('role' => 'script',
+    'replacements' => array(array('type' => 'package-info', 'from' => '@TEST@', 'to' => 'package'))),
+    $temp_path . DIRECTORY_SEPARATOR . 'tmp', array()));
+echo "==>test package-info replacement: equals 'Foo stuff'? => ";
+if (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    '.tmpinstaller2.phpt.testfile.php'))
+{
+    $a = implode(file($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    '.tmpinstaller2.phpt.testfile.php'), '');
+    echo "$a\n";
+} else {
+    echo "no! file installation failed\n";
+}
+$installer->rollbackFileTransaction();
+
 unlink($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installer2.phpt.testfile.php');
 
 //cleanup
@@ -154,3 +205,11 @@ file test/.tmpinstaller2.phpt.testfile.php exists? => yes
 install as role="script":
 int(1)
 file bin/.tmpinstaller2.phpt.testfile.php exists? => yes
+
+test replacements:
+int(1)
+==>test php-const replacement: equals 'good stuff'? => good stuff
+int(1)
+==>test pear-config replacement: equals 'pear.php.net stuff'? => pear.php.net stuff
+int(1)
+==>test package-info replacement: equals 'Foo stuff'? => Foo stuff
