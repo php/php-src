@@ -48,13 +48,19 @@ Object access - write
 ---------------------
 
 write_property is used to directly write object's property by
-name. This handler is not oftenly used by the engine itself, but may
-be used by some internal functions.
+name.  This handler is used to assign property variables or to change them 
+in operations like += or ++ (unless get_property_zval_ptr is also set).
+
+get_property_zval_ptr is used to obtain pointer to modifyable zval for 
+operations like += or ++. This should be used only if your object model 
+stores properties as real zval's that can be modified from outside. 
+Otherwise this handler should be NULL and the engine will use 
+read_property and write_property instead.
 
 get_property_ptr is used to obtain zval ** for future writing to
 it. If your object properties are stored as zval*, return real place
 where the property is stored. If the aren't, the best way is to create 
-proxy object and handle it via get and set methods (see below).
+proxy object and handle it via get and set methods (see below). 
 
 get and set handlers are used when engine needs to access the object
 as a value. E.g., in the following situation:
@@ -117,6 +123,7 @@ typedef struct _zend_object_handlers {
 	zend_object_read_property_t              read_property;
 	zend_object_write_property_t             write_property;
 	zend_object_get_property_ptr_t           get_property_ptr;
+	zend_object_get_property_zval_ptr_t      get_property_zval_ptr;
 	zend_object_get_t                        get;
 	zend_object_set_t                        set;
 	zend_object_has_property_t               has_property;
@@ -148,6 +155,9 @@ property. Is used when value of the property should be retrieved for
 reading.
 
 write_property - assigns value to certain property of the object. 
+
+get_property_zval_ptr - retrieves zval** for being directly modified by 
+the engine. If your properties are not zval's, don't define it.
 
 get_property_ptr - retrieves zval** for the property of the value, to
 be used for read and write. If object properties are not zval's
