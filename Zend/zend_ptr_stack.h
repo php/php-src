@@ -31,13 +31,28 @@ typedef struct _zend_ptr_stack {
 #define PTR_STACK_BLOCK_SIZE 64
 
 ZEND_API void zend_ptr_stack_init(zend_ptr_stack *stack);
-ZEND_API void zend_ptr_stack_push(zend_ptr_stack *stack, void *ptr);
 ZEND_API void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count, ...);
-ZEND_API void *zend_ptr_stack_pop(zend_ptr_stack *stack);
 ZEND_API void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count, ...);
 ZEND_API void zend_ptr_stack_destroy(zend_ptr_stack *stack);
 ZEND_API void zend_ptr_stack_apply(zend_ptr_stack *stack, void (*func)(void *));
 ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), zend_bool free_elements);
 ZEND_API int zend_ptr_stack_num_elements(zend_ptr_stack *stack);
+
+static inline void zend_ptr_stack_push(zend_ptr_stack *stack, void *ptr)
+{
+	if (stack->top >= stack->max) {		/* we need to allocate more memory */
+		stack->elements = (void **) erealloc(stack->elements, (sizeof(void *) * (stack->max *= 2 )));
+		stack->top_element = stack->elements+stack->top;
+	}
+	stack->top++;
+	*(stack->top_element++) = ptr;
+}
+
+static inline void *zend_ptr_stack_pop(zend_ptr_stack *stack)
+{
+	stack->top--;
+	return *(--stack->top_element);
+}
+
 
 #endif /* ZEND_PTR_STACK_H */

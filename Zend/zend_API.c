@@ -577,14 +577,11 @@ ZEND_API int zend_parse_parameters(int num_args, char *type_spec, ...)
 /* Argument parsing API -- andrei */
 
 
-ZEND_API inline int _array_init(zval *arg ZEND_FILE_LINE_DC)
+ZEND_API int _array_init(zval *arg ZEND_FILE_LINE_DC)
 {
 	ALLOC_HASHTABLE_REL(arg->value.ht);
 
-	if (!arg->value.ht || zend_hash_init(arg->value.ht, 0, NULL, ZVAL_PTR_DTOR, 0)) {
-		zend_error(E_ERROR, "Cannot allocate memory for array");
-		return FAILURE;
-	}
+	zend_hash_init(arg->value.ht, 0, NULL, ZVAL_PTR_DTOR, 0);
 	arg->type = IS_ARRAY;
 	return SUCCESS;
 }
