@@ -2113,7 +2113,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
  * #ifdef HAVE_EMPRESS */
 	{
 		int     direct = 0;
-		char    dsnbuf[300];
+		char    dsnbuf[1024];
 		short   dsnbuflen;
 		char    *ldb = 0;
 		int		ldb_len = 0;
@@ -2131,7 +2131,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 		}
 
 		if (direct)
-			rc = SQLDriverConnect((*conn)->hdbc, NULL, ldb, strlen(ldb), dsnbuf, 300,
+			rc = SQLDriverConnect((*conn)->hdbc, NULL, ldb, strlen(ldb), dsnbuf, sizeof(dsnbuf),
 									&dsnbuflen, SQL_DRIVER_NOPROMPT);
 		else
 			rc = SQLConnect((*conn)->hdbc, db, SQL_NTS, uid, SQL_NTS, pwd, SQL_NTS);
