@@ -785,7 +785,9 @@ PHP_FUNCTION(socket_set_blocking)
 	if (php_stream_is((php_stream*)what, PHP_STREAM_IS_SOCKET))	{
 		/* TODO: check if the blocking mode is changed elsewhere, and see if we
 			* can integrate these calls into php_stream_sock_set_blocking */
-		php_stream_cast((php_stream *) what, PHP_STREAM_AS_SOCKETD, (void *) &socketd, REPORT_ERRORS);
+		if (FAILURE == php_stream_cast((php_stream *) what, PHP_STREAM_AS_SOCKETD, (void *) &socketd, REPORT_ERRORS)) {
+			RETURN_FALSE;
+		}
 
 		if (php_set_sock_blocking(socketd, block) == FAILURE)
 			RETURN_FALSE;
@@ -1178,7 +1180,7 @@ PHP_FUNCTION(set_file_buffer)
 
 	stream = (php_stream*)zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
 	ZEND_VERIFY_RESOURCE(stream);
-	if (!php_stream_is(stream, PHP_STREAM_IS_STDIO) || !php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void**)&fp, REPORT_ERRORS))	{
+	if (!php_stream_is(stream, PHP_STREAM_IS_STDIO) || FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void**)&fp, REPORT_ERRORS))	{
 		RETURN_FALSE;
 	}
 	
@@ -1511,7 +1513,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 		php_error(E_WARNING, "can't truncate sockets!");
 		RETURN_FALSE;
 	}
-	if (php_stream_cast((php_stream*)what, PHP_STREAM_AS_FD, (void*)&fd, 1))	{
+	if (SUCCESS == php_stream_cast((php_stream*)what, PHP_STREAM_AS_FD, (void*)&fd, 1))	{
 		ret = ftruncate(fd, Z_LVAL_PP(size));
 		RETURN_LONG(ret + 1);
 	}
@@ -1541,7 +1543,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	what = zend_fetch_resource(fp TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
 	ZEND_VERIFY_RESOURCE(what);
 
-	if (!php_stream_cast((php_stream*)what, PHP_STREAM_AS_FD, (void*)&fd, 1))	{
+	if (FAILURE == php_stream_cast((php_stream*)what, PHP_STREAM_AS_FD, (void*)&fd, 1))	{
 		RETURN_FALSE;
 	}
 	
