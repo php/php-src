@@ -632,6 +632,8 @@ PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap
 			xbuf.buf[xbuf.size-1] = '\0';
 		if (pbuf)
 			*pbuf = xbuf.buf;
+		else
+			efree(pbuf);
 		return cc;
 	}
 }
