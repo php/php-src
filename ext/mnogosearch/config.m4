@@ -47,7 +47,7 @@ PHP_ARG_WITH(mnogosearch,for mnoGoSearch support,
     
     AC_DEFINE(HAVE_MNOGOSEARCH,1,[ ])
     
-    PHP_SUBST(MNOGOSEARCH_SHARED_LIBADD)
     PHP_NEW_EXTENSION(mnogosearch, php_mnogo.c, $ext_shared)
+    PHP_SUBST(MNOGOSEARCH_SHARED_LIBADD)
     
   fi
