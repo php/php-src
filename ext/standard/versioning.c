@@ -51,16 +51,28 @@ php_canonicalize_version(const char *version)
  *  s/([^\d\.])([^\D\.])/$1.$2/g;
  *  s/([^\D\.])([^\d\.])/$1.$2/g;
  */
-#define isdigdot(x) (isdigit(x)||(x)=='.')
+#define isdig(x) (isdigit(x)&&(x)!='.')
+#define isndig(x) (!isdigit(x)&&(x)!='.')
 #define isspecialver(x) ((x)=='-'||(x)=='_'||(x)=='+')
 
         lq = *(q - 1);
-        if ((isdigdot(*p) != isdigdot(lp) || isspecialver(*p)) &&
-            (lq != '.' && *p != '.')) {
-            lq = *q;
-            *q++ = '.';
-        }
-        *q++ = lp = *p++;
+		if (isspecialver(*p)) {
+			if (lq != '.') {
+				lq = *q++ = '.';
+			}
+		} else if ((isndig(lp) && isdig(*p)) || (isdig(lp) && isndig(*p))) {
+			if (lq != '.') {
+				*q++ = '.';
+			}
+			lq = *q++ = *p;
+		} else if (!isalnum(*p)) {
+			if (lq != '.') {
+				lq = *q++ = '.';
+			}
+		} else {
+			lq = *q++ = *p;
+		}
+		lp = *p++;
     }
     *q++ = '\0';
     return buf;
@@ -69,30 +81,37 @@ php_canonicalize_version(const char *version)
 /* }}} */
 /* {{{ compare_special_version_forms() */
 
+typedef struct {
+	const char *name;
+	int order;
+} special_forms_t;
+
 static int
-compare_special_version_forms(const char *form1, const char *form2)
+compare_special_version_forms(char *form1, char *form2)
 {
 	int i, found1 = -1, found2 = -1;
-	char **pp;
-	static char *special_forms[] = {
-		"dev",
-		"a",
-		"b",
-		"RC",
-		"#N#",
-		"pl",
-		NULL
+	special_forms_t special_forms[9] = {
+		{"dev", 0},
+		{"alpha", 1},
+		{"a", 1},
+		{"beta", 2},
+		{"b", 2},
+		{"RC", 3},
+		{"#", 4},
+		{"pl", 5},
+		NULL,
 	};
+	special_forms_t *pp;
 
-	for (pp = special_forms, i = 0; *pp != NULL; pp++, i++) {
-		if (strncmp(form1, *pp, strlen(*pp)) == 0) {
-			found1 = i;
+	for (pp = special_forms; pp; pp++) {
+		if (strncmp(form1, pp->name, strlen(pp->name)) == 0) {
+			found1 = pp->order;
 			break;
 		}
 	}
-	for (pp = special_forms, i = 0; *pp != NULL; pp++, i++) {
-		if (strncmp(form2, *pp, strlen(*pp)) == 0) {
-			found2 = i;
+	for (pp = special_forms; pp; pp++) {
+		if (strncmp(form2, pp->name, strlen(pp->name)) == 0) {
+			found2 = pp->order;
 			break;
 		}
 	}
@@ -118,8 +137,16 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 			return *orig_ver1 ? 1 : -1;
 		}
 	}
-	ver1 = php_canonicalize_version(orig_ver1);
-	ver2 = php_canonicalize_version(orig_ver2);
+	if (orig_ver1[0] == '#') {
+		ver1 = estrdup(orig_ver1);
+	} else {
+		ver1 = php_canonicalize_version(orig_ver1);
+	}
+	if (orig_ver2[0] == '#') {
+		ver2 = estrdup(orig_ver2);
+	} else {
+		ver2 = php_canonicalize_version(orig_ver2);
+	}
 	p1 = n1 = ver1;
 	p2 = n2 = ver2;
 	while (*p1 && *p2 && n1 && n2) {
