@@ -22,12 +22,12 @@ foreach ($data as $str) {
 }
 
 echo "unbuffered twice\n";
-$r = $db->queryUnbuffered("SELECT a from strings", SQLITE_NUM);
+$r = $db->unbufferedQuery("SELECT a from strings", SQLITE_NUM);
 var_dump($r->fetchAll());
 var_dump($r->fetchAll());
 
 echo "unbuffered with fetch_array\n";
-$r = $db->queryUnbuffered("SELECT a from strings", SQLITE_NUM);
+$r = $db->unbufferedQuery("SELECT a from strings", SQLITE_NUM);
 var_dump($r->fetch());
 var_dump($r->fetchAll());
 

@@ -192,9 +192,9 @@ function_entry sqlite_funcs_db[] = {
 	PHP_ME_MAPPING(__construct, sqlite_open, NULL)
 /*	PHP_ME_MAPPING(close, sqlite_close, NULL)*/
 	PHP_ME_MAPPING(query, sqlite_query, NULL)
-	PHP_ME_MAPPING(queryAll, sqlite_array_query, NULL)
-	PHP_ME_MAPPING(querySingle, sqlite_single_query, NULL)
-	PHP_ME_MAPPING(queryUnbuffered, sqlite_unbuffered_query, NULL)
+	PHP_ME_MAPPING(arrayQuery, sqlite_array_query, NULL)
+	PHP_ME_MAPPING(singleQuery, sqlite_single_query, NULL)
+	PHP_ME_MAPPING(unbufferedQuery, sqlite_unbuffered_query, NULL)
 	PHP_ME_MAPPING(lastInsertRowid, sqlite_last_insert_rowid, NULL)
 	PHP_ME_MAPPING(changes, sqlite_changes, NULL)
 	PHP_ME_MAPPING(createAggregate, sqlite_create_aggregate, NULL)
