@@ -81,8 +81,10 @@ function_entry posix_functions[] = {
 	/* Non-Posix functions which are common */
 #ifdef HAVE_GETPGID
 	PHP_FE(posix_getpgid,	NULL)
-#endif
+#endif /* HAVE_GETPGID */
+#ifdef HAVE_GETSID
 	PHP_FE(posix_getsid,	NULL)
+#endif /* HAVE_GETSID */
 
 	/* POSIX.1, 4.4 */
 	PHP_FE(posix_uname,		NULL)
