@@ -1,3 +1,35 @@
+2001-04-27  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/install.txt: add notes about support directories
+
+    * win32/install.txt: add instructions for Netscape/iPlanet servers
+
+    * main/SAPI.c
+      main/php.h
+      main/win95nt.h
+      NEWS: get rid of MS's _popen/_pclose
+
+2001-04-27  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * TODO-4.1.txt: - Added note about error messages
+
+2001-04-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/reentrancy.c:
+    Make old readdir_r code compatible with HPUX and Solaris.
+
+2001-04-27  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/xslt/README.XSLT-BACKENDS
+      ext/xslt/php_xslt.h
+      ext/xslt/sablot.c
+      ext/xslt/xslt.c:
+    Add the xslt_make_array and xslt_free_array api functions (C level).
+    Change the naming to be a bit more standard for a few of the existing
+    api functions.
+
+    Make the sablotron backend compile with these changes.
+
 2001-04-26  Andi Gutmans  <andi@zend.com>
 
     * tests/classes/class_example.phpt
