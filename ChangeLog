@@ -1,3 +1,119 @@
+2002-09-07  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS: Mention php://output wrapper.
+
+2002-09-07  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/standard/info.c:  - cosmetics
+
+2002-09-07  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * NEWS: Fixed typo...
+
+    * ext/mbstring/mbstring.c: This should fix var handling problems finally.
+
+2002-09-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/http_fopen_wrapper.c:
+    Added a check to ensure user_agent header is not sent if user_agent value
+    if blank.
+
+2002-09-07  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * NEWS: Fixed name
+
+    * ext/iconv/iconv.c:
+    Fixed errno hanlding. Patch by Moriyoshi Koizumi <readjust@deneb.freemail.ne.jp>
+
+    * NEWS: Update entry
+
+    * main/php_variables.c: MFB
+
+    * main/php_variables.c: Fixed POST/GET/COOKIE var handling
+
+2002-09-07  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/file.c
+      ext/standard/http_fopen_wrapper.c
+      main/php_streams.h
+      main/streams.c: Fix a couple of bad pointer indirections (oops).
+    Lets stick to a single category of "http" for the "user_agent"
+    context override.
+
+    * ext/standard/php_fopen_wrapper.c: fix warning
+
+2002-09-07  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4: This was not a good idea.
+
+2002-09-07  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/php_fopen_wrapper.c:
+    Implement php://output wrapper, which can be used to write to the output
+    buffer via PHPWRITE.
+
+    * main/user_streams.c:
+    Tag user streams as being URLs, so that safe mode restrictions
+    will come into play.
+
+2002-09-07  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * main/SAPI.c: WebDAV MKCOL can have post data body, see rfc2518 8.3.1
+
+2002-09-07  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/http_fopen_wrapper.c: commit the correct/up-to-date version
+
+    * ext/standard/basic_functions.h
+      ext/standard/file.c
+      ext/standard/http_fopen_wrapper.c:
+    The stream context is untested, but it should/could work :)  Either way it
+    doesn't make the rest of the code bad. Wez -- please take a looksie for me
+    :)
+
+    * php.ini-dist
+      php.ini-recommended: add the user_agent ini option.
+
+2002-09-07  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * NEWS: Update entry
+
+2002-09-07  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c:
+    - New mnogosearch extension features has been added to group results
+      by site.
+    - Mnogosearch module fixes and cleanups.
+
+2002-09-07  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/mbstring/mbstring.c: MFH
+
+    * ext/mbstring/mbstring.c:
+    Fixed array var handling. Patch by Moriyoshi Koizumi <readjust@deneb.freemail.ne.jp>
+
+2002-09-07  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/gd/config.m4: Fix build with bundled gd when builddir!=srcdir
+
+2002-09-07  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * NEWS: Just in case we have 4.2.4
+
+    * ext/mbstring/mbstring.c: MFH
+
+    * ext/mbstring/mbstring.c: Fixed trancated value bug when array is used
+
+2002-09-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/http_fopen_wrapper.c:
+    Fixed a massive memory leak that occurs when an opened webpage returns
+    a non 200 return code.
+
+2002-09-07  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - This should have been in the release (but unfortunately wasn't)
+
 2002-09-06  Jani Taskinen  <sniper@iki.fi>
 
     * configure.in: Fix the errors reported by Melvyn
