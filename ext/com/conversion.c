@@ -452,7 +452,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 			ZVAL_NULL(pval_arg);
 			return FAILURE;
 		}
-        SafeArrayLock( array);
+        SafeArrayLock(array);
 
 		/* This call has failed for everything I have tried */
 		/* But best leave it to be on the safe side */
