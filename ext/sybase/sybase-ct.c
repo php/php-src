@@ -20,9 +20,6 @@
 /* $Id$ */
 
 
-#ifndef MSVC5
-#include "php_config.h"
-#endif
 #include "php.h"
 #include "php3_sybase-ct.h"
 #include "ext/standard/php3_standard.h"
@@ -605,11 +602,7 @@ static void php3_sybct_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 static int php3_sybct_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
 	if (php3_sybct_module.default_link==-1) { /* no link opened yet, implicitly open one */
-		HashTable dummy;
-
-		_php3_hash_init(&dummy,0,NULL,NULL,0);
-		php3_sybct_do_connect(&dummy,return_value,list,plist,0);
-		_php3_hash_destroy(&dummy);
+		php3_sybct_do_connect(0,return_value,list,plist,0);
 	}
 	return php3_sybct_module.default_link;
 }
@@ -1315,7 +1308,7 @@ static PHP_FUNCTION(sybct_fetch_hash)
 			tmp->value.str.val = _php3_addslashes(tmp->value.str.val,tmp->value.str.len,&tmp->value.str.len,1);
 		}
 		_php3_hash_index_update(return_value->value.ht, i, (void *) &tmp, sizeof(pval *), NULL);
-		_php3_hash_update(return_value->value.ht, result->fields[i].name, strlen(result->fields[i].name)+1, (void *) &tmp, sizeof(pval *) NULL);
+		_php3_hash_update(return_value->value.ht, result->fields[i].name, strlen(result->fields[i].name)+1, (void *) &tmp, sizeof(pval *), NULL);
 	}
 	result->cur_row++;
 }
