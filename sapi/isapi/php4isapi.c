@@ -518,8 +518,10 @@ static void my_endthread()
 }
 
 #ifdef PHP_WIN32
-// ___except can only call a function, so we have to do this
-// to retrieve the pointer.
+/*
+ ___except can only call a function, so we have to do this
+ to retrieve the pointer.
+ */
 BOOL exceptionhandler(LPEXCEPTION_POINTERS *e,LPEXCEPTION_POINTERS ep)
 {
 	*e=ep;

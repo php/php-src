@@ -272,8 +272,10 @@ PHP_FUNCTION(icap_reopen)
 		flags = options->value.lval;
 		icap_le_struct->flags = cl_flags;	
 	}
-	//	icap_stream = cal_connect(calendar->value.str.val);
-	//	cal_login(icap_stream, calendar->value.str.val);
+	/*
+		icap_stream = cal_connect(calendar->value.str.val);
+		cal_login(icap_stream, calendar->value.str.val);
+	*/
 	if (icap_stream == NULL) {
 		php_error(E_WARNING,"Couldn't re-open stream\n");
 		RETURN_FALSE;

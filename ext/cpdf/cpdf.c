@@ -360,7 +360,7 @@ PHP_FUNCTION(cpdf_set_viewer_preferences) {
 		RETURN_FALSE;
 	}
 
-//	cpdf_setViewerPreferences(pdf, pagemode, 0, 0, 0, 0, 0, 0, pagemode);
+/*	cpdf_setViewerPreferences(pdf, pagemode, 0, 0, 0, 0, 0, 0, pagemode); */
 
 	RETURN_TRUE;
 }

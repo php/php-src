@@ -12,7 +12,7 @@ char *php_win_err(void)
 					 FORMAT_MESSAGE_FROM_SYSTEM,
 					 NULL,
 					 GetLastError(),
-					 MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),		// Default language
+					 MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),	/* Default language */
 					  (LPTSTR) Win_Error_msg,
 					 256,
 					 NULL);

@@ -1296,7 +1296,7 @@ static void retval_grs1 (zval *return_value, Z_GenericRecord *p)
 				eno[level]++;
 			continue;
 		}
-		// eno[level]++;
+		/* eno[level]++; */
 
 		*tag = '\0';
 		for (i = 0; i<=level; i++)

@@ -206,7 +206,7 @@ inline double ulonglong2double(ulonglong value)
 #define HAVE_ALLOCA
 #define HAVE_STRPBRK
 #define HAVE_STRSTR
-//#define HAVE_COMPRESS
+/*#define HAVE_COMPRESS*/
 
 #ifdef _MSC_VER
 #define HAVE_LDIV		/* The optimizer breaks in zortech for ldiv */

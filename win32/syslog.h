@@ -65,8 +65,8 @@
 
 extern void closelog(void);
 extern void openlog(const char *, int, int);
-// setlogmask not implemented
-//extern int    setlogmask (int);
+/* setlogmask not implemented */
+/* extern int    setlogmask (int); */
 extern void syslog(int, const char *, ...);
 
 

@@ -145,7 +145,7 @@ PHPAPI void php_print_info(int flag)
 		char *zend_version = get_zend_version();
 
 #ifdef PHP_WIN32
-		// Get build numbers for Windows NT or Win95
+		/* Get build numbers for Windows NT or Win95 */
 		if (dwVersion < 0x80000000){
 			dwBuild = (DWORD)(HIWORD(dwVersion));
 			snprintf(php_windows_uname,255,"%s %d.%d build %d","Windows NT",dwWindowsMajorVersion,dwWindowsMinorVersion,dwBuild);
@@ -554,7 +554,7 @@ void register_phpinfo_constants(INIT_FUNC_ARGS)
 }
 
 
-/* {{{ proto void phpinfo(void)
+/* {{{ proto void phpinfo([int what])
    Output a page of useful information about PHP and the current request */
 PHP_FUNCTION(phpinfo)
 {
