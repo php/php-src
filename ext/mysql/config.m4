@@ -3,13 +3,28 @@ dnl $Id$
 AC_MSG_CHECKING(for MySQL support)
 AC_ARG_WITH(mysql,
 [  --with-mysql[=DIR]      Include MySQL support.  DIR is the MySQL base
-                          install directory, defaults to /usr/local.],
+                          install directory, defaults to searching through
+                          a number of common places for the MySQL files.],
 [
   if test "$withval" != "no"; then
     if test "$withval" = "yes"; then
-      MYSQL_INCDIR=/usr/local/include/mysql
-      MYSQL_LIBDIR=/usr/local/lib/mysql
-    else
+		if test -f /usr/include/mysql/mysql.h; then
+			MYSQL_INCDIR=/usr/include/mysql
+			MYSQL_LIBDIR=/usr/lib/mysql
+		elif test -f /usr/include/mysql.h; then
+			MYSQL_INCDIR=/usr/include
+			MYSQL_LIBDIR=/usr/lib
+		elif test -f /usr/local/include/mysql/mysql.h; then
+			MYSQL_INCDIR=/usr/local/include/mysql
+			MYSQL_LIBDIR=/usr/local/lib/mysql
+		elif test -f /usr/local/include/mysql.h; then
+			MYSQL_INCDIR=/usr/local/include
+			MYSQL_LIBDIR=/usr/local/lib  
+		else
+			AC_MSG_RESULT(no)
+			AC_MSG_ERROR(Invalid MySQL directory - unable to find mysql.h)
+		fi   
+	else
       if test -f $withval/include/mysql/mysql.h; then
         MYSQL_INCDIR=$withval/include/mysql
         MYSQL_LIBDIR=$withval/lib/mysql
