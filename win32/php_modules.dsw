@@ -207,6 +207,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "ingres"=..\ext\ingres_ii\ingres.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "interbase"=..\ext\interbase\interbase.dsp - Package Owner=<4>
 
 Package=<5>

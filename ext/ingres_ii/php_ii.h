@@ -78,12 +78,12 @@ ZEND_END_MODULE_GLOBALS(ii)
 #define II_BOTH  (II_ASSOC|II_NUM)
 
 #ifdef ZTS
-#define IILS_D php_ii_globals *ii_globals
+#define IILS_D zend_ii_globals *ii_globals
 #define IILS_DC , IILS_D
 #define IILS_C ii_globals
 #define IILS_CC , IILS_C
 #define IIG(v) (ii_globals->v)
-#define IILS_FETCH() php_ii_globals *ii_globals = ts_resource(ii_globals_id)
+#define IILS_FETCH() zend_ii_globals *ii_globals = ts_resource(ii_globals_id)
 #else
 #define IILS_D
 #define IILS_DC
