@@ -1,3 +1,122 @@
+2002-11-01  Colin Viebrock  <colin@easydns.com>
+
+    * main/logos.h: ahem
+
+2002-11-01  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/config.m4:
+    - Added searching for Kerberos libs in default locations if no path is
+      given for --with-kerberos.
+
+
+2002-11-01  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR/Command/Common.php: * Fix bug #20207.
+
+2002-11-01  Lenar Lõhmus  <lenar@city.ee>
+
+    * ext/xslt/sablot.c:
+    Fix scheme_getall() function so that data returned by user is always
+    converted to string except when script returns FALSE or NULL. In this case
+    signal sablotron that we are not able to handle requested scheme.
+
+2002-11-01  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTML/Form.php:
+    * Fix warning with allow_call_time_pass_reference = Off.
+
+2002-11-01  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/tests/dba_cdb.phpt
+      ext/dba/tests/dba_db2.phpt
+      ext/dba/tests/dba_db3.phpt
+      ext/dba/tests/dba_gdbm.phpt
+      ext/dba/tests/dba_handler.inc
+      ext/dba/tests/dba_ndbm.phpt: Add testcase for every single handler
+
+    * ext/dba/tests/dba002.phpt
+      ext/dba/tests/dba003.phpt
+      ext/dba/tests/dba004.phpt
+      ext/dba/tests/dba005.phpt
+      ext/dba/tests/dba006.phpt
+      ext/dba/tests/dba007.phpt
+      ext/dba/tests/dba001.phpt: Always show handler used
+
+    * ext/dba/tests/.cvsignore
+      ext/dba/tests/test.inc: test.dbm* -> test0.dbm*
+
+    * ext/dba/dba.c: php_error -> php_error_docref
+
+2002-11-01  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/tests/xslt_set_scheme_handlers-003.phpt: Fix test output
+
+2002-11-01  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+    -move -d stuff into function and update settings for info call
+
+    * ext/standard/tests/time/001.phpt: update test
+
+2002-11-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd_patch: Simplify handler dispatching mechanism
+
+    * sapi/thttpd/thttpd_patch: Add missing return statement.
+
+    * sapi/thttpd/README: update
+
+    * sapi/thttpd/thttpd_patch:
+    improve host header checking, only affects systems which have virtual
+    hosting enabled
+
+2002-11-01  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+    fix for bug #20209 (appending text nodes leads to segfaults sometimes)
+
+2002-11-01  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c: Probable fix for #20180.
+
+2002-11-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/config.w32.h.in: Reverting previous OpenSSL patch.
+
+2002-11-01  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/tests/xslt_set_scheme_handlers-003.phpt:
+    Segfault test, currently unsolved
+
+    * ext/xslt/tests/xslt_set_scheme_handlers-002.phpt:
+    Testcase for new Sablotron option
+
+    * ext/xslt/sablot.c: - Fix registration of XSLT_SABOPT_FILES_TO_HANDLER
+
+2002-11-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd_bundled.dsp: Fixed win32 build (hopefuly).
+
+    * main/config.w32.h.in: Possible fix for #20014. Suggested by wez@php.net
+
+    * ext/standard/string.c:
+    Fixed bug #18710. dirname() now returns consistent output when dealing with
+    \ directory separators on Windows.
+
+2002-11-01  John Coggeshall  <john@coggeshall.org>
+
+    * ext/session/tests/021.phpt
+      run-tests2.php:
+    Modified the experimental new test class to make it easier to port to the
+    web. Pushed all echo statements through a function that can be
+    overwritten, changed the way pass/skip/fail is handled (separate function)
+    that of course can also be overwritten. To begin testing of a web-based
+    test script also created a webHarness class which will output HTML. To
+    use, just $a = new webHarness(); instead of $a = new testHarness(); A few
+    modifications still must be made to remove the CLI reliance completely.
+
+    Also modified a test script description.
+
 2002-10-31  Melvyn Sopacua  <msopacua@idg.nl>
 
     * ext/xslt/tests/xslt_getopt.phpt: copy/waste error
