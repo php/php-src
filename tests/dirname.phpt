@@ -1,4 +1,7 @@
-<?
+--TEST--
+dirname test
+--FILE--
+<?php
 
 	function check_dirname($path)
 	{
@@ -14,3 +17,14 @@
 	check_dirname("./foo");
 	check_dirname("foobar///");
 	check_dirname("c:\foo");
+?>
+--EXPECT--
+dirname(/foo/) == 
+dirname(/foo) == 
+dirname(/foo/bar) == /foo
+dirname(d:\foo\bar.inc) == 
+dirname(/) == 
+dirname(.../foo) == ...
+dirname(./foo) == .
+dirname(foobar///) == 
+dirname(c:\foo) == 
