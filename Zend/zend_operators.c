@@ -86,6 +86,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 		(holder).type = IS_LONG;									\
 		(op) = &(holder);											\
 	} else if ((op)->type==IS_UNSET) {								\
+		(holder).value.lval = 0;									\
 		(holder).type = IS_LONG;									\
 		(op) = &(holder);											\
 	}
