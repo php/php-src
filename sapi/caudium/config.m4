@@ -5,7 +5,7 @@ dnl
 RESULT=no
 AC_MSG_CHECKING(for Caudium support)
 AC_ARG_WITH(caudium, 
-[  --with-caudium=DIR      Build PHP as a Pike module for use with Caudium
+[  --with-caudium[=DIR]    Build PHP as a Pike module for use with Caudium
                           DIR is the Caudium server dir, with the default value
                           /usr/local/caudium/server.],
 [

@@ -4,7 +4,7 @@ dnl
 
 AC_MSG_CHECKING(for Milter support)
 AC_ARG_WITH(milter,
-[  --with-milter=DIR       Build PHP as Milter application],[
+[  --with-milter[=DIR]     Build PHP as Milter application],[
   if test "$withval" = "yes"; then
     if test -f /usr/lib/libmilter.a ; then
       MILTERPATH=/usr/lib

@@ -98,7 +98,7 @@ ZEND_FP_EXCEPT
 AC_DEFUN(LIBZEND_ENABLE_DEBUG,[
 
 AC_ARG_ENABLE(debug,
-[  --enable-debug         Compile with debugging symbols],[
+[  --enable-debug          Compile with debugging symbols],[
   ZEND_DEBUG=$enableval
 ],[
   ZEND_DEBUG=no
@@ -109,15 +109,15 @@ AC_ARG_ENABLE(debug,
 AC_DEFUN(LIBZEND_OTHER_CHECKS,[
 
 AC_ARG_ENABLE(maintainer-zts,
-[  --enable-maintainer-zts   Enable thread safety - for code maintainers only],[
+[  --enable-maintainer-zts Enable thread safety - for code maintainers only],[
   ZEND_MAINTAINER_ZTS=$enableval
 ],[
   ZEND_MAINTAINER_ZTS=no
 ])  
 
 AC_ARG_ENABLE(inline-optimization,
-[  --disable-inline-optimization If building zend_execute.lo fails, try
-                                this switch.],[
+[  --disable-inline-optimization 
+                          If building zend_execute.lo fails, try this switch.],[
   ZEND_INLINE_OPTIMIZATION=$enableval
 ],[
   ZEND_INLINE_OPTIMIZATION=yes
@@ -131,7 +131,7 @@ AC_ARG_ENABLE(memory-limit,
 ])
 
 AC_ARG_ENABLE(zend-multibyte,
-[  --enable-zend-multibyte   Compile with zend multibyte support. ], [
+[  --enable-zend-multibyte Compile with zend multibyte support. ], [
   ZEND_MULTIBYTE=$enableval
 ],[
   ZEND_MULTIBYTE=no

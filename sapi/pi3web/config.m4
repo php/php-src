@@ -6,7 +6,7 @@ RESULT=no
 AC_MSG_CHECKING(for Pi3Web support)
 
 AC_ARG_WITH(pi3web,
-[  --with-pi3web=DIR       Build PHP as Pi3Web module],
+[  --with-pi3web[=DIR]     Build PHP as Pi3Web module],
 [
 if test "$withval" != "no"; then
 	if test "$withval" = "yes"; then
