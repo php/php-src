@@ -2837,6 +2837,30 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 					case ')':
 						*target = '(';
 						break;
+					case '[':
+						*target = ']';
+						break;
+					case ']':
+						*target = '[';
+						break;
+					case '{':
+						*target = '}';
+						break;
+					case '}':
+						*target = '{';
+						break;
+					case '<':
+						*target = '>';
+						break;
+					case '>':
+						*target = '<';
+						break;
+					case '\\':
+						*target = '/';
+						break;
+					case '/':
+						*target = '\\';
+						break;
 					default:
 						break;
 				}
