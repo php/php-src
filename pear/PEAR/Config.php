@@ -341,7 +341,10 @@ when installing packages without a version or state specified',
         }
         $data = $this->configuration[$layer];
         $this->_encodeOutput($data);
-        if (@file_exists($file) && !@is_writeable($file)) {
+        if (!@System::mkDir("-p " . dirname($file))) {
+            return $this->raiseError("could not create directory: " . dirname($file));
+        }
+        if (@is_file($file) && !@is_writeable($file)) {
             return $this->raiseError("no write access to $file!");
         }
         $fp = @fopen($file, "w");
