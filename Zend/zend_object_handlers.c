@@ -66,7 +66,12 @@ static zval *zend_std_call_getter(zval *object, zval *member TSRMLS_DC)
 
 	   it should return whether the call was successfull or not
 	*/
+	
+	SEPARATE_ARG_IF_REF(member);
+
 	zend_call_method_with_1_params(&object, ce, &ce->__get, ZEND_GET_FUNC_NAME, &retval, member);
+
+	zval_ptr_dtor(&member);
 
 	if (retval) {
 		retval->refcount--;
@@ -80,7 +85,8 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 	zval *retval = NULL;
 	int ret;
 	zend_class_entry *ce = Z_OBJCE_P(object);
-	
+
+	SEPARATE_ARG_IF_REF(member);
 	value->refcount++;
 
 	/* __set handler is called with two arguments:
@@ -91,6 +97,7 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 	*/
 	zend_call_method_with_2_params(&object, ce, &ce->__set, ZEND_SET_FUNC_NAME, &retval, member, value);
 
+	zval_ptr_dtor(&member);
 	zval_ptr_dtor(&value);
 
 	if (retval && zend_is_true(retval)) {
@@ -334,11 +341,13 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
 		if(offset == NULL) {
 			/* [] construct */
-			zval offset_null;
-			INIT_ZVAL(offset_null);
-			offset = &offset_null;
+			ALLOC_INIT_ZVAL(offset);
+		} else {
+			SEPARATE_ARG_IF_REF(offset);
 		}
 		zend_call_method_with_1_params(&object, ce, NULL, "offsetget", &retval, offset);
+
+		zval_ptr_dtor(&offset);
 
 		if (!retval) {
 			if (!EG(exception)) {
@@ -361,14 +370,15 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC)
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
-	zval tmp;
-	
+
 	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
 		if (!offset) {
-			INIT_ZVAL(tmp);
-			offset = &tmp;
+			ALLOC_INIT_ZVAL(offset);
+		} else {
+			SEPARATE_ARG_IF_REF(offset);
 		}
 		zend_call_method_with_2_params(&object, ce, NULL, "offsetset", NULL, offset, value);
+		zval_ptr_dtor(&offset);
 	} else {
 		zend_error(E_ERROR, "Cannot use object of type %s as array", ce->name);
 	}
@@ -382,7 +392,9 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty TS
 	int result;
 	
 	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
+		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(&object, ce, NULL, "offsetexists", &retval, offset);
+		zval_ptr_dtor(&offset);
 		result = i_zend_is_true(retval);
 		zval_ptr_dtor(&retval);
 		return result;
@@ -467,7 +479,9 @@ static void zend_std_unset_dimension(zval *object, zval *offset TSRMLS_DC)
 	zval *retval;
 	
 	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
+		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(&object, ce, NULL, "offsetunset", &retval, offset);
+		zval_ptr_dtor(&offset);
 		zval_ptr_dtor(&retval);
 	} else {
 		zend_error(E_ERROR, "Cannot use object of type %s as array", ce->name);
