@@ -532,7 +532,10 @@ PHP_FUNCTION(phpinfo)
 		flag = PHP_INFO_ALL;
 	}
 
+	/* Andale!  Andale!  Yee-Hah! */
+	php_start_ob_buffer(NULL, 4096, 0 TSRMLS_CC);
 	php_print_info(flag TSRMLS_CC);
+	php_end_ob_buffer(1, 0 TSRMLS_CC);
 
 	RETURN_TRUE;
 }

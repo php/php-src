@@ -378,46 +378,9 @@ PHPAPI int php_printf(const char *format, ...)
 /* }}} */
 
 /* {{{ php_html_puts */
-#include "ext/standard/php_smart_str.h"
-
 PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
 {
-	const char *end = str+size;
-	const char *p = str;
-	smart_str s = {0};
-
-	while (p < end) {
-		switch (*p) {
-			case '\n':
-				smart_str_appendl(&s, "<br />", sizeof("<br />")-1);
-				break;
-			case '<':
-				smart_str_appendl(&s, "&lt;", sizeof("&lt;")-1);
-				break;
-			case '>':
-				smart_str_appendl(&s, "&gt;", sizeof("&gt;")-1);
-				break;
-			case '&':
-				smart_str_appendl(&s, "&amp;", sizeof("&amp;")-1);
-				break;
-			case ' ':
-				while (++p < end && *p == ' ');
-
-				smart_str_appends(&s, "&nbsp;");
-				continue;
-			case '\t':
-				smart_str_appendl(&s, "&nbsp;&nbsp;&nbsp;&nbsp;", sizeof("&nbsp;&nbsp;&nbsp;&nbsp;")-1);
-				break;
-			default:
-				smart_str_appendc(&s, *p);
-		}
-		p++;
-	}
-
-	if (s.c) {
-		PHPWRITE(s.c, s.len);
-		smart_str_free(&s);
-	}
+	zend_html_puts(str, size);
 }
 /* }}} */
 
