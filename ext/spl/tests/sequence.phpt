@@ -67,7 +67,7 @@ foreach($i as $v => $w) {
 print "Done\n";
 ?>
 --EXPECT--
-c::newiterator
+c::newIterator
 Array
 (
     [c] => Array
@@ -102,37 +102,37 @@ Array
 
 )
 c_iter::rewind
-c_iter::hasmore
+c_iter::hasMore
 c_iter::current
 c_iter::key
 object:0
 c_iter::next
-c_iter::hasmore
+c_iter::hasMore
 c_iter::current
 c_iter::key
 object:1
 c_iter::next
-c_iter::hasmore
+c_iter::hasMore
 c_iter::current
 c_iter::key
 object:2
 c_iter::next
-c_iter::hasmore
+c_iter::hasMore
 c_iter::rewind
-c_iter::hasmore
+c_iter::hasMore
 c_iter::current
 c_iter::key
 object:1st=>0
 c_iter::next
-c_iter::hasmore
+c_iter::hasMore
 c_iter::current
 c_iter::key
 object:2nd=>1
 c_iter::next
-c_iter::hasmore
+c_iter::hasMore
 c_iter::current
 c_iter::key
 object:3rd=>2
 c_iter::next
-c_iter::hasmore
+c_iter::hasMore
 Done

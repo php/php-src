@@ -58,33 +58,33 @@ foreach($t as $v) {
 print "Done\n";
 ?>
 --EXPECT--
-c::newiterator
-c_iter::hasmore = true
+c::newIterator
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c::newiterator
-c_iter::hasmore = true
+c::newIterator
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 double:0:0
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c::newiterator
-c_iter::hasmore = true
+c::newIterator
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 double:1:0
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c::newiterator
-c_iter::hasmore = true
+c::newIterator
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 double:2:0
 c_iter::next
-c_iter::hasmore = false
+c_iter::hasMore = false
 Done

@@ -76,127 +76,127 @@ foreach($t as $i => $v) {
 print "Done\n";
 ?>
 --EXPECT--
-c::newiterator
+c::newIterator
 c_iter::__construct
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 0
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 1
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 2
 c_iter::next
-c_iter::hasmore = false
+c_iter::hasMore = false
 array:0
 array:1
 array:2
-c::newiterator
+c::newIterator
 c_iter::__construct
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 object:0
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 object:1
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 object:2
 c_iter::next
-c_iter::hasmore = false
-c::newiterator
+c_iter::hasMore = false
+c::newIterator
 c_iter::__construct
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c::newiterator
+c::newIterator
 c_iter::__construct
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 double:0:0
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 double:0:1
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 double:0:2
 c_iter::next
-c_iter::hasmore = false
+c_iter::hasMore = false
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c::newiterator
+c::newIterator
 c_iter::__construct
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 double:1:0
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 double:1:1
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 double:1:2
 c_iter::next
-c_iter::hasmore = false
+c_iter::hasMore = false
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c::newiterator
+c::newIterator
 c_iter::__construct
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 double:2:0
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 double:2:1
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 double:2:2
 c_iter::next
-c_iter::hasmore = false
+c_iter::hasMore = false
 c_iter::next
-c_iter::hasmore = false
-c::newiterator
+c_iter::hasMore = false
+c::newIterator
 c_iter::__construct
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 object:1st=>0
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 object:2nd=>1
 c_iter::next
-c_iter::hasmore = true
+c_iter::hasMore = true
 c_iter::current
 c_iter::key
 object:3rd=>2
 c_iter::next
-c_iter::hasmore = false
+c_iter::hasMore = false
 Done
