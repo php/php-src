@@ -108,6 +108,8 @@ static sapi_module_struct sapi_module = {
 	php_module_shutdown_wrapper,
 	
 	sapi_thttpd_ub_write,
+	NULL,
+
 	php_error,
 	
 	NULL,

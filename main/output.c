@@ -37,12 +37,6 @@ static void php_ob_prepend(const char *text, uint text_length);
 #endif
 static inline void php_ob_send(void);
 
-void php_start_ob_buffering(void);
-void php_end_ob_buffering(int send_buffer);
-int php_ob_get_buffer(pval *p);
-
-/* HEAD support */
-void set_header_request(int value);
 
 typedef struct {
 	int (*php_body_write)(const char *str, uint str_length);		/* string output */
@@ -51,6 +45,7 @@ typedef struct {
 	uint ob_size;
 	uint ob_block_size;
 	uint ob_text_length;
+	unsigned char implicit_flush;
 } php_output_globals;
 
 #ifdef ZTS
@@ -82,13 +77,14 @@ static void php_output_init_globals(OLS_D)
 	OG(ob_size) = 0;
 	OG(ob_block_size) = 0;
 	OG(ob_text_length) = 0;
+	OG(implicit_flush) = 0;
 }
 
 
 PHP_GINIT_FUNCTION(output)
 {
 #ifdef ZTS
-	output_globals_id = ts_allocate_id(sizeof(php_output_globals), NULL, NULL);
+	output_globals_id = ts_allocate_id(sizeof(php_output_globals), (ts_allocate_ctor) php_output_init_globals, NULL);
 #else 
 	php_output_init_globals(OLS_C);
 #endif
@@ -183,6 +179,18 @@ PHPAPI void php_end_ob_buffering(int send_buffer)
 		php_ob_send();
 	}
 	php_ob_destroy();
+}
+
+
+PHPAPI void php_start_implicit_flush()
+{
+	php_end_ob_buffering(1);		/* Switch out of output buffering if we're in it */
+
+}
+
+
+PHPAPI void php_end_implicit_flush()
+{
 }
 
 
@@ -321,6 +329,7 @@ static int php_ub_body_write_no_header(const char *str, uint str_length)
 		free(newstr);
 	}
 
+
 	return result;
 }
 
@@ -347,10 +356,6 @@ static int php_ub_body_write(const char *str, uint str_length)
  * HEAD support
  */
 
-void set_header_request(int value)
-{
-	/* deprecated */
-}
 
 PHP_FUNCTION(ob_start)
 {
@@ -376,6 +381,27 @@ PHP_FUNCTION(ob_get_contents)
 		RETURN_FALSE;
 	}
 }
+
+
+PHP_FUNCTION(ob_implicit_flush)
+{
+	zval **zv_flag;
+	int flag;
+
+	switch(ZEND_NUM_ARGS()) {
+		case 0:
+			flag = 1;
+			break;
+		case 1:
+			if (zend_get_parameters_ex(1, &zv_flag)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_long_ex(zv_flag);
+			flag = (*zv_flag)->value.lval;
+			break;
+	}
+}
+
 
 
 /*

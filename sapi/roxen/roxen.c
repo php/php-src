@@ -519,15 +519,16 @@ static sapi_module_struct sapi_module = {
   "Roxen",
 
   php_module_startup,						/* startup */
-  pike_module_exit,			/* shutdown */
+  pike_module_exit,							/* shutdown */
 
   php_roxen_sapi_ub_write,					/* unbuffered write */
+  NULL,										/* flush */
 
   php_error,								/* error handler */
 
-  php_roxen_sapi_header_handler,				/* header handler */
+  php_roxen_sapi_header_handler,			/* header handler */
   php_roxen_sapi_send_headers,				/* send headers handler */
-  NULL,									/* send header handler */
+  NULL,										/* send header handler */
 
   php_roxen_sapi_read_post,					/* read POST data */
   php_roxen_sapi_read_cookies,				/* read Cookies */

@@ -27,6 +27,10 @@ PHPAPI int  php_body_write(const char *str, uint str_length);
 PHPAPI int  php_header_write(const char *str, uint str_length);
 PHPAPI void php_start_ob_buffering(void);
 PHPAPI void php_end_ob_buffering(int send_buffer);
+PHPAPI int php_ob_get_buffer(pval *p);
+PHPAPI void php_start_implicit_flush();
+PHPAPI void php_end_implicit_flush();
+
 
 extern zend_module_entry output_module_entry;
 #define phpext_output_ptr &output_module_entry
