@@ -61,52 +61,7 @@ int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 
 /* {{{ apache_php_module_hook
  */
-int apache_php_module_hook(request_rec *r, char *filename, zval **ret TSRMLS_DC)
-{
-	zend_file_handle file_handle;
-	zval *req;
-
-#if PHP_SIGCHILD
-	signal(SIGCHLD, sigchld_handler);
-#endif
-    if(AP(current_hook) == AP_RESPONSE) {
-        fprintf(stderr, "in Response\n");
-        if (php_request_startup_for_hook(TSRMLS_C) == FAILURE)
-            return FAILURE;
-    }
-    else {
-        if (php_request_startup_for_hook(TSRMLS_C) == FAILURE)
-            return FAILURE;
-    }
-
-	/* Add PHP_SELF_HOOK - Absolute path */
-	php_register_variable("PHP_SELF_HOOK", filename, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
-
-	req = php_apache_request_new(r);
-    if(PG(register_globals)) {
-        php_register_variable_ex("request", req, NULL TSRMLS_CC);
-    }
-    else {
-        php_register_variable_ex("request", req, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
-    }
-	memset(&file_handle, 0, sizeof(file_handle));
-	file_handle.type = ZEND_HANDLE_FILENAME;
-	file_handle.filename = filename;
-
-	(void) php_execute_simple_script(&file_handle, ret TSRMLS_CC);
-
-	zval_dtor(&req);
-	AP(in_request) = 0;
-
-	return OK;
-}
-
-/* }}} */
-
-
-/* {{{ apache_php_module_hook_code
- */
-int apache_php_module_hook_code(request_rec *r, char *filename, zval **ret TSRMLS_DC)
+int apache_php_module_hook(request_rec *r, php_handler *handler, zval **ret TSRMLS_DC)
 {
 	zend_file_handle file_handle;
 	zval *req;
@@ -125,9 +80,6 @@ int apache_php_module_hook_code(request_rec *r, char *filename, zval **ret TSRML
             return FAILURE;
     }
 
-	/* Add PHP_SELF_HOOK - Absolute path */
-	php_register_variable("PHP_SELF_HOOK", filename, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
-
 	req = php_apache_request_new(r);
     if(PG(register_globals)) {
         php_register_variable_ex("request", req, NULL TSRMLS_CC);
@@ -135,22 +87,38 @@ int apache_php_module_hook_code(request_rec *r, char *filename, zval **ret TSRML
     else {
         php_register_variable_ex("request", req, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
     }
-    if( (tmp = strstr(filename, "::")) != NULL &&  *(tmp+2) != '\0' ) {
-        zval *class;
-        zval *method;
-        *tmp = '\0';
-        ALLOC_ZVAL(class);
-        ZVAL_STRING(class, filename, 1);
-        ALLOC_ZVAL(method);
-        ZVAL_STRING(method, tmp +2, 1);
-        fprintf(stderr, "calling coderef %s::%s\n", filename, tmp +2);
-        *tmp = ':';
-        call_user_function_ex(EG(function_table), &class, method, ret, 0, NULL, 0, NULL TSRMLS_CC);
-        zval_dtor(&class);
-        zval_dtor(&method);
-    }
-    else {
-        /* not a class::method */
+    switch(handler->type) {
+        case AP_HANDLER_TYPE_FILE:
+            php_register_variable("PHP_SELF_HOOK", handler->name, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
+	        memset(&file_handle, 0, sizeof(file_handle));
+	        file_handle.type = ZEND_HANDLE_FILENAME;
+	        file_handle.filename = handler->name;
+	        (void) php_execute_simple_script(&file_handle, ret TSRMLS_CC);
+            break;
+        case AP_HANDLER_TYPE_METHOD:
+            if( (tmp = strstr(handler->name, "::")) != NULL &&  *(tmp+2) != '\0' ) {
+                zval *class;
+                zval *method;
+                *tmp = '\0';
+                ALLOC_ZVAL(class);
+                ZVAL_STRING(class, handler->name, 1);
+                ALLOC_ZVAL(method);
+                ZVAL_STRING(method, tmp +2, 1);
+                fprintf(stderr, "calling coderef %s::%s\n", handler->name, tmp +2);
+                *tmp = ':';
+                call_user_function_ex(EG(function_table), &class, method, ret, 0, NULL, 0, NULL TSRMLS_CC);
+                zval_dtor(&class);
+                zval_dtor(&method);
+            }
+            else {
+                php_error(E_ERROR, "Unable to call %s - not a Class::Method\n", handler->name);
+                /* not a class::method */
+            }
+            break;
+        default:
+            /* not a valid type */
+            assert(0);
+            break;
     }
 	zval_dtor(&req);
 	AP(in_request) = 0;
@@ -159,6 +127,7 @@ int apache_php_module_hook_code(request_rec *r, char *filename, zval **ret TSRML
 }
 
 /* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

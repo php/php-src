@@ -38,6 +38,15 @@ typedef struct {
         zend_bool headers_sent;
 } php_apache_info_struct;
 
+typedef struct _php_handler {
+    long type;
+    long stage;
+    char *name;
+} php_handler;
+
+#define AP_HANDLER_TYPE_FILE 0
+#define AP_HANDLER_TYPE_METHOD 1
+
 extern zend_module_entry apache_module_entry;
 
 #ifdef ZTS
