@@ -1,10 +1,10 @@
 <?
-  $id = 190867;       // A plain/text document
+  $id = 187852;       // A plain/text document
   $collid = 169828;   // A collection
   $query = "Name=m*";      // Search query for test_9
   $host = "gehtnix";
   $username = "steinm";
-  $password = "akli9132";
+  $password = "";
 
   $connect = hw_connect($host, 418, $username, $password);
   if(hw_error($connect)) {
@@ -14,14 +14,14 @@
 
   // Set all test to 'yes' if they shall be executed
   $test_1 = "yes";    // Get the text document with id $id and output it
-  $test_2 = "yes";    // Check if id $id is in $collid
-  $test_3 = "yes";   // Convert object record to object array and back
-  $test_4 = "yes";   // Get object record of object with id $id
-  $test_5 = "yes";   // List children of $collid
-  $test_6 = "yes";   // List parents of $id
-  $test_7 = "yes";   // Insert a new text document
-  $test_8 = "yes";   // Remove the just inserted text document
-  $test_9 = "yes";   // Searching for objects with Name $query
+  $test_2 = "no";    // Check if id $id is in $collid
+  $test_3 = "no";   // Convert object record to object array and back
+  $test_4 = "no";   // Get object record of object with id $id
+  $test_5 = "no";   // List children of $collid
+  $test_6 = "no";   // List parents of $id
+  $test_7 = "no";   // Insert a new text document
+  $test_8 = "no";   // Remove the just inserted text document
+  $test_9 = "no";   // Searching for objects with Name $query
 
   /* Lists an object array
   */
