@@ -592,7 +592,7 @@ static union _zend_function *zend_std_get_method(zval *object, char *method_name
 
 
 /* This is not (yet?) in the API, but it belongs in the built-in objects callbacks */
-zend_function *zend_get_static_method(zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC)
+zend_function *zend_std_get_static_method(zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC)
 {
 	zend_function *fbc;
 
@@ -623,7 +623,7 @@ zend_function *zend_get_static_method(zend_class_entry *ce, char *function_name_
 }
 
 
-zval **zend_get_static_property(zend_class_entry *ce, char *property_name, int property_name_len, int type TSRMLS_DC)
+zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, int property_name_len, zend_bool silent TSRMLS_DC)
 {
 	HashTable *statics_table;
 	zval **retval = NULL;
@@ -631,61 +631,51 @@ zval **zend_get_static_property(zend_class_entry *ce, char *property_name, int p
 	zend_property_info *property_info;
 	zend_property_info std_property_info;
 
-	if(ce->type == ZEND_NAMESPACE) {
+	if (ce->type == ZEND_NAMESPACE) {
 		zend_hash_find(ce->static_members, property_name, property_name_len+1, (void **) &retval);
 	} else {
-	if (zend_hash_find(&ce->properties_info, property_name, property_name_len+1, (void **) &property_info)==FAILURE) {
-		std_property_info.flags = ZEND_ACC_PUBLIC;
-		std_property_info.name = property_name;
-		std_property_info.name_length = property_name_len;
-		std_property_info.h = zend_get_hash_value(std_property_info.name, std_property_info.name_length+1);
-		property_info = &std_property_info;
-	}
+		if (zend_hash_find(&ce->properties_info, property_name, property_name_len+1, (void **) &property_info)==FAILURE) {
+			std_property_info.flags = ZEND_ACC_PUBLIC;
+			std_property_info.name = property_name;
+			std_property_info.name_length = property_name_len;
+			std_property_info.h = zend_get_hash_value(std_property_info.name, std_property_info.name_length+1);
+			property_info = &std_property_info;
+		}
 
 #if 1&&DEBUG_OBJECT_HANDLERS
-	zend_printf("Access type for %s::%s is %s\n", ce->name, property_name, zend_visibility_string(property_info->flags));
+		zend_printf("Access type for %s::%s is %s\n", ce->name, property_name, zend_visibility_string(property_info->flags));
 #endif
 
-	if (!zend_verify_property_access(property_info, ce TSRMLS_CC)) {
-		zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name, property_name);
-	}
-
-	while (tmp_ce) {
-		if (zend_hash_quick_find(tmp_ce->static_members, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval)==SUCCESS) {
-			statics_table = tmp_ce->static_members;
-			break;
+		if (!zend_verify_property_access(property_info, ce TSRMLS_CC)) {
+			zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name, property_name);
 		}
-		tmp_ce = tmp_ce->parent;
-	}
+
+		while (tmp_ce) {
+			if (zend_hash_quick_find(tmp_ce->static_members, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval)==SUCCESS) {
+				statics_table = tmp_ce->static_members;
+				break;
+			}
+			tmp_ce = tmp_ce->parent;
+		}
 	}
 
 	if (!retval) {
-		switch (type) {
-			case BP_VAR_R: 
-				zend_error(E_NOTICE,"Undefined variable:  %s::$%s", ce->name, property_name);
-				/* break missing intentionally */
-			case BP_VAR_IS:
-				retval = &EG(uninitialized_zval_ptr);
-				break;
-			case BP_VAR_RW:
-				zend_error(E_NOTICE,"Undefined variable:  %s::$%s", ce->name, property_name);
-				/* break missing intentionally */
-			case BP_VAR_W: {					
-					zval *new_zval = &EG(uninitialized_zval);
-
-					if(ce->type != ZEND_NAMESPACE) {
-					new_zval->refcount++;
-					zend_hash_quick_update(ce->static_members, property_info->name, property_info->name_length+1, property_info->h, &new_zval, sizeof(zval *), (void **) &retval);
-				}
-				}
-				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+		if (silent) {
+			return NULL;
+		} else {
+			zend_error(E_ERROR, "Access to undeclared static property:  %s::$%s", ce->name, property_name);
 		}
-	} else {
-		zval_update_constant(retval, (void *) 1 TSRMLS_CC);
 	}
-
+	
+	zval_update_constant(retval, (void *) 1 TSRMLS_CC);
 	return retval;
+}
+
+
+zend_bool zend_std_unset_static_property(zend_class_entry *ce, char *property_name, int property_name_len TSRMLS_DC)
+{
+	zend_error(E_ERROR, "Attempt to unset static property %s::$%s", ce->name, property_name);
+	return 0;
 }
 
 

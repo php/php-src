@@ -93,8 +93,9 @@ typedef struct _zend_object_handlers {
 } zend_object_handlers;
 
 extern zend_object_handlers std_object_handlers;
-union _zend_function *zend_get_static_method(zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC);
-zval **zend_get_static_property(zend_class_entry *ce, char *property_name, int property_name_len, int type TSRMLS_DC);
+union _zend_function *zend_std_get_static_method(zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC);
+zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, int property_name_len, zend_bool silent TSRMLS_DC);
+zend_bool zend_std_unset_static_property(zend_class_entry *ce, char *property_name, int property_name_len TSRMLS_DC);
 
 
 #define IS_ZEND_STD_OBJECT(z)  ((z).type == IS_OBJECT && (Z_OBJ_HT((z))->get_class_entry != NULL))
