@@ -436,7 +436,7 @@ static void _php_ibase_free_query(ibase_query *ib_query)
 
 static void php_ibase_free_query_rsrc(zend_rsrc_list_entry *rsrc)
 {
-	ibase_query *query = (ibase_auery *)rsrc->ptr;
+	ibase_query *query = (ibase_query *)rsrc->ptr;
 	_php_ibase_free_query(query);
 }
 
