@@ -132,6 +132,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 
 	if (itemnode) {
 		DOM_RET_OBJ(rv, itemnode, &ret, objmap->baseobj);
+		return;
 	} else {
 		RETVAL_NULL();
 	}
@@ -179,7 +180,6 @@ PHP_FUNCTION(dom_namednodemap_item)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &id, dom_namednodemap_class_entry, &index) == FAILURE) {
 		return;
 	}
-
 	if (index >= 0) {
 		intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 
@@ -208,6 +208,7 @@ PHP_FUNCTION(dom_namednodemap_item)
 
 		if (itemnode) {
 			DOM_RET_OBJ(rv, itemnode, &ret, objmap->baseobj);
+			return;
 		}
 	}
 
@@ -258,6 +259,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 
 	if (itemnode) {
 		DOM_RET_OBJ(rv, itemnode, &ret, objmap->baseobj);
+		return;
 	} else {
 		RETVAL_NULL();
 	}
