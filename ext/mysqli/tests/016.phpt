@@ -12,7 +12,7 @@ mysqli fetch user variable
 	mysqli_query($link, "SET @dummy='foobar'");
 
 	$stmt = mysqli_prepare($link, "SELECT @dummy");
-	mysqli_bind_result($stmt, &$dummy);
+	mysqli_bind_result($stmt, $dummy);
 	mysqli_execute($stmt);
 	mysqli_fetch($stmt);
 

@@ -24,7 +24,7 @@ precision=12
                                                               '206','6.7')");
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_result");
-	mysqli_bind_result($stmt, &$c1, &$c2, &$c3, &$c4, &$c5, &$c6, &$c7, &$c8);
+	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8);
 	mysqli_execute($stmt);
 	mysqli_fetch($stmt);
 

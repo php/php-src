@@ -20,10 +20,8 @@ mysqli fetch tinyint values
 
 	mysqli_query($link, "INSERT INTO test_bind_fetch VALUES (-23,300,0,-100,-127,+30,0)");
 
-	$c1 = $c2 = $c3 = $c4 = $c5 = $c6 = $c7 = NULL;
-
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch");
-	mysqli_bind_result($stmt, &$c1, &$c2, &$c3, &$c4, &$c5, &$c6, &$c7);
+	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7);
 	mysqli_execute($stmt);
 	mysqli_fetch($stmt);
 

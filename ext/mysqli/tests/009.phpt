@@ -21,7 +21,7 @@ mysqli fetch bigint values
 	mysqli_query($link, "INSERT INTO test_bind_fetch (c2,c3,c4,c5,c6,c7) VALUES (-23,4.0,33333333333333,0,-333333333333,99.9)");
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch");
-	mysqli_bind_result($stmt, &$c1, &$c2, &$c3, &$c4, &$c5, &$c6, &$c7);
+	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7);
 	mysqli_execute($stmt);
 	mysqli_fetch($stmt);
 

@@ -19,7 +19,7 @@ mysqli fetch (bind_param + bind_result)
                                                        col11 char(20))");
   
 	$stmt=  mysqli_prepare($link,"INSERT INTO insert_read(col1,col10, col11) VALUES(?,?,?)");
-	mysqli_bind_param($stmt, &$c1, MYSQLI_BIND_INT, &$c2, MYSQLI_BIND_STRING, &$c3, MYSQLI_BIND_STRING);
+	mysqli_bind_param($stmt, array(MYSQLI_BIND_INT, MYSQLI_BIND_STRING, MYSQLI_BIND_STRING), $c1, $c2, $c3);
 
 	$c1 = 1;
 	$c2 = "foo";
@@ -29,7 +29,7 @@ mysqli fetch (bind_param + bind_result)
 	mysqli_stmt_close($stmt);
 
 	$stmt = mysqli_prepare($link, "SELECT col1, col2, col3, col4, col5, col6, col7, col8, col9, col10, col11 from insert_read");
-	mysqli_bind_result($stmt, &$c1, &$c2, &$c3, &$c4, &$c5, &$c6, &$c7, &$c8, &$c9, &$c10, &$c11); 
+	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8, $c9, $c10, $c11); 
 	mysqli_execute($stmt);
 
 	mysqli_fetch($stmt);

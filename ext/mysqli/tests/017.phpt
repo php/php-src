@@ -10,7 +10,7 @@ mysqli fetch functions
 	mysqli_select_db($link, "test");
 
 	$stmt = mysqli_prepare($link, "SELECT current_user(), database()");
-	mysqli_bind_result($stmt, &$c0, &$c1); 
+	mysqli_bind_result($stmt, $c0, $c1); 
 	mysqli_execute($stmt);
 
 	mysqli_fetch($stmt);

@@ -16,7 +16,7 @@ mysqli_bind_param (UPDATE)
 	mysqli_query($link, "INSERT INTO test_update VALUES ('foo', 2)");
 
 	$stmt = mysqli_prepare($link, "UPDATE test_update SET a=?,b=? WHERE b=?");
-	mysqli_bind_param($stmt, &$c1,MYSQLI_BIND_STRING,&$c2,MYSQLI_BIND_INT, &$c3, MYSQLI_BIND_INT);
+	mysqli_bind_param($stmt, array(MYSQLI_BIND_STRING,MYSQLI_BIND_INT, MYSQLI_BIND_INT), $c1, $c2, $c3);
 
 	$c1 = "Rasmus";
 	$c2 = 1;

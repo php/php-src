@@ -12,7 +12,7 @@ mysqli fetch system variables
 	mysqli_query($link, "SET AUTOCOMMIT=0");
 
 	$stmt = mysqli_prepare($link, "SELECT @@autocommit");
-	mysqli_bind_result($stmt, &$c0); 
+	mysqli_bind_result($stmt, $c0); 
 	mysqli_execute($stmt);
 
 	mysqli_fetch($stmt);

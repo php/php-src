@@ -23,7 +23,7 @@ mysqli fetch mixed / mysql_query
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_result");
 
 	$c = array(0,0,0,0,0,0,0,0);
-	mysqli_bind_result($stmt, &$c[0], &$c[1], &$c[2], &$c[3], &$c[4], &$c[5], &$c[6], &$c[7]);
+	mysqli_bind_result($stmt, $c[0], $c[1], $c[2], $c[3], $c[4], $c[5], $c[6], $c[7]);
 	mysqli_execute($stmt);
 	mysqli_fetch($stmt); 
 	mysqli_fetch($stmt);  

@@ -15,7 +15,7 @@ mysqli_stmt_affected_rows (delete)
 	mysqli_query($link, "INSERT INTO test_affected VALUES (1),(2),(3),(4),(5)");
 
 	$stmt = mysqli_prepare($link, "DELETE FROM test_affected WHERE foo=?");
-	mysqli_bind_param($stmt, &$c1, MYSQLI_BIND_INT);
+	mysqli_bind_param($stmt, array(MYSQLI_BIND_INT), $c1);
 
 	$c1 = 2;
 
