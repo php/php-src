@@ -192,7 +192,7 @@ END_EXTERN_C()
 /* INI parsing engine */
 typedef void (*zend_ini_parser_cb_t)(zval *arg1, zval *arg2, int callback_type, void *arg);
 BEGIN_EXTERN_C()
-int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, zend_ini_parser_cb_t ini_parser_cb, void *arg);
+ZEND_API int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, zend_ini_parser_cb_t ini_parser_cb, void *arg);
 END_EXTERN_C()
 
 #define ZEND_INI_PARSER_ENTRY	1
