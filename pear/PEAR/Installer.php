@@ -114,8 +114,10 @@ class PEAR_Installer extends PEAR_Common
             if (!@unlink($path)) {
                 $this->log(2, "unable to delete: $path");
             } else {
-                @rmdir(dirname($path)); // Delete package directory if it's empty
-                $this->log(2, "+ deleted file: $path");
+                // Delete package directory if it's empty
+                if (@rmdir(dirname($path))) {
+                    $this->log(2, "+ rmdir $path");
+                }
             }
         }
     }
@@ -128,7 +130,7 @@ class PEAR_Installer extends PEAR_Common
         switch ($atts['role']) {
             case 'test': case 'data': case 'ext':
                 // don't install test files for now
-                $this->log(2, "+ $file: $atts[role] file not installed yet");
+                $this->log(2, "$file: $atts[role] file not installed yet");
                 return true;
             case 'doc':
                 $dest_dir = $this->config->get('doc_dir') .
@@ -136,7 +138,7 @@ class PEAR_Installer extends PEAR_Common
                 break;
             case 'extsrc':
                 // don't install test files for now
-                $this->log(2, "+ $file: no support for building extensions yet");
+                $this->log(2, "$file: no support for building extensions yet");
                 return true;
             case 'php':
                 $dest_dir = $this->config->get('php_dir');
@@ -148,10 +150,15 @@ class PEAR_Installer extends PEAR_Common
             default:
                 break;
         }
-        if (isset($atts['baseinstalldir']) && $atts['role'] != 'doc') {
+        if (!isset($atts['baseinstalldir']) ||
+            $atts['baseinstalldir'] == '/' ||
+            $atts['baseinstalldir'] == DIRECTORY_SEPARATOR) {
+            $atts['baseinstalldir'] = '';
+        }
+        if (!empty($atts['baseinstalldir']) && $atts['role'] != 'doc') {
             $dest_dir .= DIRECTORY_SEPARATOR . $atts['baseinstalldir'];
         }
-        if (dirname($file) != '.') {
+        if (dirname($file) != '.' && empty($atts['install-as'])) {
             $dest_dir .= DIRECTORY_SEPARATOR . dirname($file);
         }
         if (empty($atts['install-as'])) {
@@ -165,7 +172,7 @@ class PEAR_Installer extends PEAR_Common
                 $this->log(0, "failed to mkdir $dest_dir");
                 return false;
             }
-            $this->log(2, "+ created dir $dest_dir");
+            $this->log(2, "+ mkdir $dest_dir");
         }
         $orig_file = $tmp_path . DIRECTORY_SEPARATOR . $file;
         if (empty($atts['replacements'])) {
@@ -173,7 +180,7 @@ class PEAR_Installer extends PEAR_Common
                 $this->log(0, "failed to copy $orig_file to $dest_file");
                 return false;
             }
-            $this->log(2, "+ copy $orig_file to $dest_file");
+            $this->log(2, "+ cp $orig_file $dest_file");
         } else {
             $fp = fopen($orig_file, "r");
             $contents = fread($fp, filesize($orig_file));
@@ -196,6 +203,7 @@ class PEAR_Installer extends PEAR_Common
                     $subst_to = $to;
                 }
             }
+            $this->log(1, "doing ".sizeof($subst_from)." substitution(s) for $dest_file");
             if (sizeof($subst_from)) {
                 $contents = str_replace($subst_from, $subst_to, $contents);
             }
@@ -210,6 +218,7 @@ class PEAR_Installer extends PEAR_Common
         if (!OS_WINDOWS) {
             if ($atts['role'] == 'script') {
                 $mode = 0755;
+                $this->log(2, "+ chmod +x $dest_file");
             } else {
                 $mode = 0644;
             }
