@@ -356,7 +356,7 @@ function_entry basic_functions[] = {
 
 	PHP_FE(parse_ini_file,				NULL)
 
-	PHP_FE(is_upload_file,				NULL)
+	PHP_FE(is_uploaded_file,			NULL)
 
 	/* functions from reg.c */
 	PHP_FE(ereg,									third_argument_force_ref)
@@ -2207,7 +2207,7 @@ PHPAPI PHP_FUNCTION(warn_not_available)
 }
 
 
-PHP_FUNCTION(is_upload_file)
+PHP_FUNCTION(is_uploaded_file)
 {
 	zval **path;
 	SLS_FETCH();
