@@ -33,21 +33,18 @@ LINK = $(LIBTOOL) --mode=link $(CCLD) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@
 mkinstalldirs = $(top_srcdir)/build/shtool mkdir -f -p
 INSTALL = $(top_srcdir)/build/shtool install -c
 INSTALL_DATA = $(INSTALL) -m 644
-
+SHARED_COMPILE = $(SHARED_LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -c $< && touch $@
 DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I$(top_builddir)
 
-moduledir    = $(libdir)/php/modules
+moduledir    = $(EXTENSION_DIR)
 
 .SUFFIXES:
-.SUFFIXES: .S .c .lo .o .s .y .l
+.SUFFIXES: .slo .c .lo .o .s .y .l
 
 .c.o:
 	$(COMPILE) -c $<
 
 .s.o:
-	$(COMPILE) -c $<
-
-.S.o:
 	$(COMPILE) -c $<
 
 .c.lo:
@@ -56,8 +53,8 @@ moduledir    = $(libdir)/php/modules
 .s.lo:
 	$(PHP_COMPILE)
 
-.S.lo:
-	$(PHP_COMPILE)
+.c.slo:
+	$(SHARED_COMPILE)
 
 .y.c:
 	$(YACC) $(YFLAGS) $< && mv y.tab.c $*.c
@@ -68,44 +65,37 @@ moduledir    = $(libdir)/php/modules
 .l.c:
 	$(LEX) $(LFLAGS) $< && mv $(LEX_OUTPUT_ROOT).c $@
 
-#################################
-# Simplified Makefile
+install_targets = install-modules
 
-all: shared
-install: shared install-modules
-
-#################################
-
-#all: all-recursive
+all: all-recursive
 install: install-recursive
 
 distclean-recursive depend-recursive clean-recursive all-recursive install-recursive:
 	@otarget=`echo $@|sed s/-recursive//`; \
-	if test '$(NO_RECURSION)' != "$$otarget"; then \
-		list='$(SUBDIRS)'; for i in $$list; do \
-			target="$$otarget"; \
-			echo "Making $$target in $$i"; \
-			if test "$$i" = "."; then \
-				ok=yes; \
-				target="$$target-p"; \
-			fi; \
-			(cd $$i && $(MAKE) $$target) || exit 1; \
-		done; \
-		test "$otarget" = "all" && test -z '$(targets)' && ok=yes; \
-		test "$ok" = "yes" || $(MAKE) "$$otarget-p" || exit 1; \
-	fi; 
+	list='$(SUBDIRS)'; for i in $$list; do \
+		target="$$otarget"; \
+		echo "Making $$target in $$i"; \
+		if test "$$i" = "."; then \
+			ok=yes; \
+			target="$$target-p"; \
+		fi; \
+		if test ! -f $$i/.deps; then touch $$i/.deps; fi; \
+		(cd $$i && $(MAKE) $$target) || exit 1; \
+	done; \
+	if test "$$otarget" = "all" && test -z '$(targets)'; then ok=yes; fi; \
+	if test "$$ok" != "yes"; then $(MAKE) "$$otarget-p" || exit 1; fi
 
 all-p: $(targets)
 install-p: $(targets) $(install_targets)
 distclean-p depend-p clean-p:
 
 depend: depend-recursive
-	test "`echo *.c`" = '*.c' || perl $(top_srcdir)/build/mkdep.perl $(CPP) $(INCLUDES) $(EXTRA_INCLUDES) *.c > .deps
+	test "`echo *.c`" = '*.c' || perl $(top_srcdir)/build/mkdep.perl $(CPP) $(INCLUDES) $(EXTRA_INCLUDES) *.c > $(builddir)/.deps
 
 clean: clean-recursive clean-x
 
 clean-x:
-	rm -f $(targets) *.lo *.la *.o $(CLEANFILES)
+	rm -f $(targets) *.lo *.slo *.la *.o $(CLEANFILES)
 	rm -rf .libs
 
 distclean: distclean-recursive clean-x
@@ -119,7 +109,7 @@ install-modules:
 	rm -f modules/*.la && \
 	cp modules/* $(moduledir) || true
 
-include $(srcdir)/.deps
+include $(builddir)/.deps
 
 .PHONY: all-recursive clean-recursive install-recursive \
 $(install_targets) install all clean depend depend-recursive shared \

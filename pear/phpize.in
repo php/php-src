@@ -1,24 +1,29 @@
 #! /bin/sh
 
 prefix='@PREFIX@'
-
 phpdir="$prefix/lib/php/build"
+builddir="`pwd`"
+FILES_BUILD="dynlib.mk fastgen.sh library.mk ltlib.mk program.mk rules.mk rules_pear.mk shtool"
+FILES="acinclude.m4 dynlib.m4"
+
+if test ! -r config.m4; then
+  echo "Cannot find config.m4. "
+  echo "Make sure that you run $0 in the top level source directory of the module"
+  exit 1
+fi
 
 test -d build || mkdir build
 
-for i in fastgen.sh library.mk ltlib.mk program.mk rules.mk rules_pear.mk shtool; do
-	cp $phpdir/$i build
-done
+(cd $phpdir && cp $FILES_BUILD $builddir/build)
+(cd $phpdir && cp $FILES $builddir)
 
 mv build/rules_pear.mk build/rules.mk
-
-cp $phpdir/acinclude.m4 .
 
 sed \
 -e "s#@prefix@#$prefix#" \
 < $phpdir/pear.m4 > configure.in
 
-touch .deps install-sh mkinstalldirs missing
+touch install-sh mkinstalldirs missing
 
 aclocal
 autoconf

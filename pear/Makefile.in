@@ -32,6 +32,7 @@ BUILD_FILES = \
 	build/rules_pear.mk \
 	build/dynlib.mk \
 	build/shtool \
+	dynlib.m4 \
 	acinclude.m4
 
 install-build:
@@ -52,27 +53,8 @@ install-build:
 	mv $(bindir)/php-config.tmp $(bindir)/php-config && \
 	cp $(srcdir)/phpextdist $(bindir)/phpextdist
 
-SRC_HEADERS = \
-	php.h \
-	php_regex.h \
-	php3_compat.h \
-	safe_mode.h \
-	fopen-wrappers.h \
-	php_version.h \
-	php_globals.h \
-	php_reentrancy.h \
-	php_ini.h \
-	SAPI.h
-
-BUILD_HEADERS = \
-	php_config.h \
-	Zend/zend_config.h \
-	build-defs.h
-
-STANDARD_HEADERS = \
-	php_output.h
-
 HEADER_DIRS = \
+	/ \
 	Zend \
 	TSRM \
 	ext/standard \
@@ -84,9 +66,7 @@ install-headers:
 	done; \
 	$(mkinstalldirs) $$paths && \
 	echo "creating header file hierarchy" && \
-	(cd $(top_srcdir) && cp $(SRC_HEADERS) $(phpincludedir)) && \
-	(cd $(top_srcdir)/ext/standard && cp *.h $(phpincludedir)/ext/standard) && \
-	(cd $(top_srcdir) && cp regex/regex.h regex/regex_extra.h $(phpincludedir)/regex) && \
-	(cd $(top_srcdir) && cp TSRM/TSRM.h $(phpincludedir)/TSRM) && \
-	(cd $(top_srcdir)/Zend && cp *.h $(phpincludedir)/Zend) && \
-	(cd $(top_builddir) && cp $(BUILD_HEADERS) $(phpincludedir))
+	for i in $(HEADER_DIRS); do \
+		cd $(top_srcdir)/$$i && cp -p *.h $(phpincludedir)/$$i; \
+		cd $(top_builddir)/$$i && cp -p *.h $(phpincludedir)/$$i; \
+	done
