@@ -1002,7 +1002,7 @@ function usage() {
 	     "\n  --with-vm-kind=CALL|SWITCH|GOTO - select threading model (default is CALL)".
 	     "\n  --without-specializer           - disable executor specialization".
 	     "\n  --without-old-executor          - disable old executor".
-	     "\n  --without-lines                 - disable #line directives".
+	     "\n  --with-lines                    - enable #line directives".
 	     "\n\n");
 }
 
@@ -1031,9 +1031,9 @@ for ($i = 1;  $i < $argc; $i++) {
 	} else if ($argv[$i] == "--without-old-executor") {
 	  // Disabling code for old-style executor
 		define("ZEND_VM_OLD_EXECUTOR", 0);
-	} else if ($argv[$i] == "--without-lines") {
-		// Disabling debuging using original zend_vm_def.h
-		define("ZEND_VM_LINES", 0);
+	} else if ($argv[$i] == "--with-lines") {
+		// Enabling debuging using original zend_vm_def.h
+		define("ZEND_VM_LINES", 1);
 	} else if ($argv[$i] == "--help") {
 		usage();
 		exit();
@@ -1058,8 +1058,8 @@ if (!defined("ZEND_VM_OLD_EXECUTOR")) {
 	define("ZEND_VM_OLD_EXECUTOR", 1);
 }
 if (!defined("ZEND_VM_LINES")) {
-  // Using #line directives to debug with original zend_vm_def.h by default
-	define("ZEND_VM_LINES", 1);
+  // Disabling #line directives
+	define("ZEND_VM_LINES", 0);
 }
 
 gen_vm("zend_vm_def.h", "zend_vm_execute.skl");
