@@ -20,6 +20,7 @@
 #define _PHP_XSLT_H
 
 #include "php.h"
+#include "ext/standard/php_filestat.h"
 
 #ifdef HAVE_XSLT
 
