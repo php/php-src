@@ -67,6 +67,12 @@ http://snaps.php.net/win32/PECL_5_0/
 - PDO_FETCH_CLASS now passes args through to the class constructor
 - Now builds directly via "pear install PDO" (upgrade to PEAR 1.3.5 first)
 
+** Note **
+
+You should uninstall and re-install your individual database drivers whenever
+you upgrade the base PDO package, otherwise you will see an error about PDO API
+numbers when you run your PHP scripts.
+
   </notes>
 
   <filelist>
