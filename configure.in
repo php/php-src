@@ -139,6 +139,7 @@ dnl paths to the targets are relative to the build directory
 SAPI_PROGRAM=php
 SAPI_SHARED=libs/libphp4.$SHLIB_SUFFIX_NAME
 SAPI_STATIC=libs/libphp4.a
+SAPI_LIBTOOL=libphp4.la
 
 PHP_CONFIGURE_PART(Configuring SAPI modules)
 
