@@ -183,7 +183,7 @@ PHP_MINFO_FUNCTION(fam)
 
 
 /* {{{ proto resource fam_open([string appname])
-    */
+   Open FAM connection */
 PHP_FUNCTION(fam_open)
 {
 	char *appname = NULL;
@@ -208,7 +208,7 @@ PHP_FUNCTION(fam_open)
 /* }}} */
 
 /* {{{ proto void fam_close(resource id)
-    */
+   Close FAM connection */
 PHP_FUNCTION(fam_close)
 {
 	int argc = ZEND_NUM_ARGS();
@@ -222,7 +222,7 @@ PHP_FUNCTION(fam_close)
 /* }}} */
 
 /* {{{ proto resource fam_monitor_directory(resource id, string dirname)
-    */
+   Monitor a directory for changes */
 PHP_FUNCTION(fam_monitor_directory)
 {
 	char *dirname = NULL;
@@ -250,7 +250,7 @@ PHP_FUNCTION(fam_monitor_directory)
 /* }}} */
 
 /* {{{ proto resource fam_monitor_file(resource id, string filename)
-    */
+    Monitor a regular file for changes */
 PHP_FUNCTION(fam_monitor_file)
 {
 	char *filename = NULL;
@@ -278,7 +278,7 @@ PHP_FUNCTION(fam_monitor_file)
 /* }}} */
 
 /* {{{ proto resource fam_monitor_collection(resource id, string dirname, int depth, string mask)
-    */
+    Monitor a collection of files in a directory for changes */
 PHP_FUNCTION(fam_monitor_collection)
 {
 	char *dirname = NULL;
@@ -310,7 +310,7 @@ PHP_FUNCTION(fam_monitor_collection)
 /* }}} */
 
 /* {{{ proto bool fam_suspend_monitor(resource id, resource monitor_id)
-    */
+   Temporary suspend monitoring */
 PHP_FUNCTION(fam_suspend_monitor)
 {
 	int argc = ZEND_NUM_ARGS();
@@ -334,7 +334,7 @@ PHP_FUNCTION(fam_suspend_monitor)
 /* }}} */
 
 /* {{{ proto bool fam_resume_monitor(resource id, resource monitor_id)
-    */
+   Resume suspended monitoring */
 PHP_FUNCTION(fam_resume_monitor)
 {
 	int argc = ZEND_NUM_ARGS();
@@ -359,7 +359,7 @@ PHP_FUNCTION(fam_resume_monitor)
 /* }}} */
 
 /* {{{ proto bool fam_cancel_monitor(resource id, resource monitor_id)
-    */
+    Terminate monitoring */
 PHP_FUNCTION(fam_cancel_monitor)
 {
 	int argc = ZEND_NUM_ARGS();
@@ -388,7 +388,7 @@ PHP_FUNCTION(fam_cancel_monitor)
 /* }}} */
 
 /* {{{ proto int fam_pending(resource id)
-    */
+    Check for pending FAM events */
 PHP_FUNCTION(fam_pending)
 {
 	int argc = ZEND_NUM_ARGS();
@@ -406,7 +406,7 @@ PHP_FUNCTION(fam_pending)
 /* }}} */
 
 /* {{{ proto array fam_next_event(resource id)
-    */
+    Get next pending FAM event */
 PHP_FUNCTION(fam_next_event)
 {
 	int argc = ZEND_NUM_ARGS();
