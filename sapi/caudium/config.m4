@@ -24,7 +24,7 @@ AC_ARG_WITH(caudium,
 	fi
     if $PIKE -e 'float v; int rel;sscanf(version(), "Pike v%f release %d", v, rel);v += rel/10000.0; if(v < 7.0268) exit(1); exit(0);'; then
 		PIKE_MODULE_DIR="`$PIKE --show-paths 2>&1| grep '^Module' | sed -e 's/.*: //'`"
-	    PIKE_INCLUDE_DIR="`echo $PIKE_MODULE_DIR | sed -e 's,lib/pike/modules,include/pike,' -e 's,lib/modules,include/pike,'`"
+	    PIKE_INCLUDE_DIR="`echo $PIKE_MODULE_DIR | sed -e 's,lib/pike/modules,include/pike,' -e 's,lib/modules,include/pike,' `"
 		if test -z "$PIKE_INCLUDE_DIR" -o -z "$PIKE_MODULE_DIR"; then
 			AC_MSG_ERROR(Failed to figure out Pike module and include directories)
 		fi
@@ -67,6 +67,7 @@ AC_ARG_WITH(caudium,
 		      
 		      if test "$PIKE_TEST_VER" = "${PIKE_CMAJOR_VERSION}.${PIKE_CMINOR_VERSION}.${PIKE_CBUILD_VERSION}"; then
 		         AC_ADD_INCLUDE($PIKE_C_INCLUDE)
+				 PIKE_INCLUDE_DIR="$PIKE_INCLUDE_DIR, $PIKE_C_INCLUDE"
 		         AC_MSG_RESULT(found)
 		      else
 		         AC_MSG_RESULT(version mismatch)
@@ -82,11 +83,9 @@ AC_ARG_WITH(caudium,
 	PHP_SAPI=caudium
 	PHP_BUILD_SHARED
 	INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED $withval/lib/$PIKE_VERSION/PHP4.so"
-	RESULT="	*** Pike binary used:      $PIKE
-	*** Pike include dir:      $PIKE_INCLUDE_DIR
-	*** Pike version:          $PIKE_VERSION"
-    PIKE_INCLUDE_DIR=" -I$PIKE_INCLUDE_DIR "
-	
+	RESULT="	*** Pike binary used:         $PIKE
+	*** Pike include dir(s) used: $PIKE_INCLUDE_DIR
+	*** Pike version:             $PIKE_VERSION"
     dnl Always use threads since thread-free support really blows.
     PHP_BUILD_THREAD_SAFE
 
