@@ -146,6 +146,25 @@ int php_libxml_streams_IO_close(void *context)
 	return php_stream_close((php_stream*)context);
 }
 
+static void php_libxml_error_handler(void *ctx, const char *msg, ...)
+{
+	va_list ap;
+	char *buf;
+	int len;
+
+	va_start(ap, msg);
+	len = vspprintf(&buf, 0, msg, ap);
+	va_end(ap);
+	
+	/* remove any trailing \n */
+	while (len && buf[--len] == '\n') {
+		buf[len] = '\0';
+	}
+
+	php_error(E_WARNING, "%s", buf);
+	efree(buf);
+}
+
 PHP_LIBXML_API void php_libxml_initialize() {
 	if (!_php_libxml_initialized) {
 		/* we should be the only one's to ever init!! */
@@ -167,12 +186,17 @@ PHP_LIBXML_API void php_libxml_initialize() {
 			php_libxml_streams_IO_write, 
 			php_libxml_streams_IO_close);
 
+		/* report errors via handler rather than stderr */
+		xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
+
 		_php_libxml_initialized = 1;
 	}
 }
 
 PHP_LIBXML_API void php_libxml_shutdown() {
 	if (_php_libxml_initialized) {
+		/* reset libxml generic error handling */
+		xmlSetGenericErrorFunc(NULL, NULL);
 		xmlCleanupParser();
 		_php_libxml_initialized = 0;
 	}
