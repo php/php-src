@@ -33,6 +33,8 @@
 #include "ext/bcmath/number.h"
 #endif
 
+#define LONG_SIGN_MASK (1L << (8*SIZEOF_LONG-1))
+
 ZEND_API int zend_atoi(const char *str, int str_len)
 {
 	int retval;
@@ -664,13 +666,16 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 
 
 	if (op1->type == IS_LONG && op2->type == IS_LONG) {
-		double dval = (double) op1->value.lval + (double) op2->value.lval;
+		long lval = op1->value.lval + op2->value.lval;
+		
+		/* check for overflow by comparing sign bits */
+		if ( (op1->value.lval & LONG_SIGN_MASK) == (op2->value.lval & LONG_SIGN_MASK) 
+			&& (op1->value.lval & LONG_SIGN_MASK) != (lval & LONG_SIGN_MASK)) {
 
-		if ((dval > (double) LONG_MAX) || (dval < (double) LONG_MIN)) {
-			result->value.dval = dval;
+			result->value.dval = (double) op1->value.lval + (double) op2->value.lval;
 			result->type = IS_DOUBLE;
 		} else {
-			result->value.lval = op1->value.lval + op2->value.lval;
+			result->value.lval = lval;
 			result->type = IS_LONG;
 		}
 		return SUCCESS;
@@ -701,13 +706,16 @@ ZEND_API int sub_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 	zendi_convert_scalar_to_number(op2, op2_copy, result);
 
 	if (op1->type == IS_LONG && op2->type == IS_LONG) {
-		double dval = (double) op1->value.lval - (double) op2->value.lval;
+		long lval = op1->value.lval - op2->value.lval;
+		
+		/* check for overflow by comparing sign bits */
+		if ( (op1->value.lval & LONG_SIGN_MASK) != (op2->value.lval & LONG_SIGN_MASK) 
+			&& (op1->value.lval & LONG_SIGN_MASK) != (lval & LONG_SIGN_MASK)) {
 
-		if ((dval < (double) LONG_MIN) || (dval > (double) LONG_MAX)) {
-			result->value.dval = dval;
+			result->value.dval = (double) op1->value.lval - (double) op2->value.lval;
 			result->type = IS_DOUBLE;
 		} else {
-			result->value.lval = op1->value.lval - op2->value.lval;
+			result->value.lval = lval;
 			result->type = IS_LONG;
 		}
 		return SUCCESS;
@@ -738,13 +746,14 @@ ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 	zendi_convert_scalar_to_number(op2, op2_copy, result);
 
 	if (op1->type == IS_LONG && op2->type == IS_LONG) {
-		double dval = (double) op1->value.lval * (double) op2->value.lval;
-
-		if ((dval > (double) LONG_MAX) || (dval < (double) LONG_MIN)) {
-			result->value.dval = dval;
+		long lval = op1->value.lval * op2->value.lval;
+		
+		/* check for overflow by applying the reverse calculation */
+		if (op1->value.lval != 0 && lval / op1->value.lval != op2->value.lval) {
+			result->value.dval = (double) op1->value.lval * (double) op2->value.lval;
 			result->type = IS_DOUBLE;
 		} else {
-			result->value.lval = op1->value.lval * op2->value.lval;
+			result->value.lval = lval;
 			result->type = IS_LONG;
 		}
 		return SUCCESS;
