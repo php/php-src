@@ -1205,7 +1205,7 @@ void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC)
 }
 
 
-void zend_do_fetch_class(znode *result, znode *namespace_name, znode *class_name TSRMLS_DC)
+void zend_do_fetch_class(znode *result, znode *namespace_name, znode *class_name, zend_bool global_namespace TSRMLS_DC)
 {
 	long fetch_class_op_number;
 	zend_op *opline;
@@ -1219,7 +1219,7 @@ void zend_do_fetch_class(znode *result, znode *namespace_name, znode *class_name
 		opline->op1 = *namespace_name;
 	} else {
 		SET_UNUSED(opline->op1);
-		if (!IN_NAMESPACE()) {
+		if (global_namespace) {
 			opline->extended_value = ZEND_FETCH_CLASS_GLOBAL;
 		}
 	}
