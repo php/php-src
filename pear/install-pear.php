@@ -80,7 +80,7 @@ foreach ($install_files as $package => $instfile) {
             }
         }
     } else {
-        $err = $installer->install($instfile);
+        $err = $installer->install($instfile, array('nodeps' => true));
         if (PEAR::isError($err)) {
             $ui->outputData(sprintf("[PEAR] %s: %s", $package, $err->getMessage()));
             continue;
