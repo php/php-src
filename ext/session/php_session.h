@@ -76,6 +76,7 @@ typedef struct {
 	char *id;
 	char *extern_referer_chk;
 	char *entropy_file;
+	char *cache_limiter;
 	int entropy_length;
 	int cookie_lifetime;
 	char *cookie_path;
@@ -89,6 +90,7 @@ typedef struct {
 	int gc_probability;
 	int gc_maxlifetime;
 	int module_number;
+	int cache_expire;
 	const struct ps_serializer_struct *serializer;
 	zval *http_state_vars;
 } php_ps_globals;

@@ -23,6 +23,7 @@
 #include "win32/time.h"
 #endif
 
+#include <sys/stat.h>
 #include <fcntl.h>
 
 #include "php.h"
@@ -73,9 +74,11 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("session.cookie_path", "/", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session.cookie_domain", "", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session.use_cookies", "1", PHP_INI_ALL, NULL)
-	PHP_INI_ENTRY("session.extern_referer_check", "", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.referer_check", "", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session.entropy_file", "", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session.entropy_length", "0", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.cache_limiter", "nocache", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.cache_expire", "180", PHP_INI_ALL, NULL)
 	/* Commented out until future discussion */
 	/* PHP_INI_ENTRY("session.encode_sources", "globals,track", PHP_INI_ALL, NULL) */
 PHP_INI_END()
@@ -111,6 +114,16 @@ zend_module_entry session_module_entry = {
 	PHP_MINFO(session),
 	STANDARD_MODULE_PROPERTIES,
 };
+
+typedef struct {
+	char *name;
+	void (*func)(PSLS_D);
+} php_session_cache_limiter;
+
+#define CACHE_LIMITER_FUNC(name) void _php_cache_limiter_##name(PSLS_D)
+#define CACHE_LIMITER(name) { #name, _php_cache_limiter_##name },
+
+#define ADD_COOKIE(a) sapi_add_header(estrdup(a), strlen(a));
 
 #define STR_CAT(P,S,I) {\
 	pval *__p = (P);\
@@ -422,6 +435,103 @@ static void _php_session_save_current_state(PSLS_D)
 	PS(mod)->close(&PS(mod_data));
 }
 
+static char *month_names[] = {
+	"Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+};
+
+static char *week_days[] = { 
+	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
+};
+
+static void strcat_gmt(char *ubuf, time_t *when)
+{
+	char buf[MAX_STR];
+	struct tm tm;
+	
+	gmtime_r(when, &tm);
+	
+	/* we know all components, thus it is safe to use sprintf */
+	sprintf(buf, "%s, %d %s %d %02d:%02d:%02d GMT", week_days[tm.tm_wday], tm.tm_mday, month_names[tm.tm_mon], tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	strcat(ubuf, buf);
+}
+
+static void last_modified(void)
+{
+	char *path;
+	struct stat sb;
+	char buf[MAX_STR + 1];
+	SLS_FETCH();
+
+	path = SG(request_info).path_translated;
+	if (path) {
+		if (stat(path, &sb) == -1) {
+			return;
+		}
+
+		strcpy(buf, "Last-Modified: ");
+		strcat_gmt(buf, &sb.st_mtime);
+		ADD_COOKIE(buf);
+	}
+}
+
+CACHE_LIMITER_FUNC(public)
+{
+	char buf[MAX_STR + 1];
+	time_t now;
+	
+	time(&now);
+	now += PS(cache_expire) * 60;
+	strcpy(buf, "Expires: ");
+	strcat_gmt(buf, &now);
+	ADD_COOKIE(buf);
+	
+	sprintf(buf, "Cache-Control: public, max-age=%d", PS(cache_expire) * 60);
+	ADD_COOKIE(buf);
+	
+	last_modified();
+}
+	
+CACHE_LIMITER_FUNC(private)
+{
+	char buf[MAX_STR + 1];
+	
+	ADD_COOKIE("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
+	sprintf(buf, "Cache-Control: private, max-age=%d", PS(cache_expire) * 60);
+	ADD_COOKIE(buf);
+
+	last_modified();
+}
+
+CACHE_LIMITER_FUNC(nocache)
+{
+	ADD_COOKIE("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
+	/* For HTTP/1.1 conforming clients */
+	ADD_COOKIE("Cache-Control: no-cache");
+	/* For HTTP/1.0 conforming clients */
+	ADD_COOKIE("Pragma: no-cache");
+}
+
+static php_session_cache_limiter php_session_cache_limiters[] = {
+	CACHE_LIMITER(public)
+	CACHE_LIMITER(private)
+	CACHE_LIMITER(nocache)
+	{0}
+};
+	
+
+static void _php_session_cache_limiter(PSLS_D)
+{
+	php_session_cache_limiter *lim;
+
+	for (lim = php_session_cache_limiters; lim->name; lim++) {
+		if (!strcasecmp(lim->name, PS(cache_limiter))) {
+			lim->func(PSLS_C);
+			break;
+		}
+	}
+}
+
 #define COOKIE_FMT 		"Set-Cookie: %s=%s"
 #define COOKIE_EXPIRES	"; expires="
 #define COOKIE_PATH		"; path="
@@ -604,6 +714,7 @@ static void _php_session_start(PSLS_D)
 
 	PS(nr_open_sessions)++;
 
+	_php_session_cache_limiter(PSLS_C);
 	_php_session_initialize(PSLS_C);
 
 	if(PS(mod_data) && PS(gc_probability) > 0) {
@@ -981,11 +1092,13 @@ static void php_rinit_session_globals(PSLS_D)
 	PS(entropy_length) = INI_INT("session.entropy_length");
 	PS(gc_probability) = INI_INT("session.gc_probability");
 	PS(gc_maxlifetime) = INI_INT("session.gc_maxlifetime");
-	PS(extern_referer_chk) = estrdup(INI_STR("session.extern_referer_check"));
+	PS(extern_referer_chk) = estrdup(INI_STR("session.referer_check"));
 	PS(id) = NULL;
 	PS(cookie_lifetime) = INI_INT("session.cookie_lifetime");
 	PS(cookie_path) = estrdup(INI_STR("session.cookie_path"));
 	PS(cookie_domain) = estrdup(INI_STR("session.cookie_domain"));
+	PS(cache_limiter) = estrdup(INI_STR("session.cache_limiter"));
+	PS(cache_expire) = INI_INT("session.cache_expire");
 	PS(nr_open_sessions) = 0;
 	PS(mod_data) = NULL;
 }
@@ -999,6 +1112,7 @@ static void php_rshutdown_session_globals(PSLS_D)
 	if(PS(save_path)) efree(PS(save_path));
 	if(PS(session_name)) efree(PS(session_name));
 	if(PS(id)) efree(PS(id));
+	efree(PS(cache_limiter));
 	efree(PS(cookie_path));
 	efree(PS(cookie_domain));
 	zend_hash_destroy(&PS(vars));
