@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Fixed a compatibility problem in some file functions (fgets, fputs, fread,
+  fwrite). The ANSI standard says that if a file is opened in read/write
+  mode, fseek() should be called before switching from reading to writing
+  and vice versa. (alex@zend.com)
 - Fixed argument checking for call_user_func* functions and allowed
   specifying array($obj, 'method') syntax for call_user_func_array. (Andrei)
 - Fixed parent::method() to also work with runtime bindings (Zeev, Zend Engine)
