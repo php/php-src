@@ -208,8 +208,6 @@ typedef struct _virtual_cwd_globals {
 #define VCWD_STAT(path, buff) virtual_stat(path, buff TSRMLS_CC)
 #if !defined(TSRM_WIN32) && !defined(NETWARE)
 #define VCWD_LSTAT(path, buff) virtual_lstat(path, buff TSRMLS_CC)
-#else
-#define VCWD_LSTAT(path, buff) virtual_lstat(path, buff TSRMLS_CC)
 #endif
 #define VCWD_UNLINK(path) virtual_unlink(path TSRMLS_CC)
 #define VCWD_MKDIR(pathname, mode) virtual_mkdir(pathname, mode TSRMLS_CC)
