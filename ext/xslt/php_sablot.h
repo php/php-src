@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Id$ */
+
 #ifndef PHP_XSLT_H
 #define PHP_XSLT_H
 
@@ -41,6 +43,7 @@ extern zend_module_entry xslt_module_entry;
 #define XSLT_ERROR(handle)     ((handle)->handlers->error)
 
 #define XSLT_PROCESSOR(handle) ((handle)->processor.ptr)
+#define XSLT_CONTEXT(handle)   ((handle)->processor.ctx)
 
 #define XSLT_ERRNO(handle)     ((handle)->err->no)
 #define XSLT_ERRSTR(handle)    ((handle)->err->str)
@@ -51,15 +54,15 @@ extern zend_module_entry xslt_module_entry;
 PHP_MINIT_FUNCTION(xslt);
 PHP_MINFO_FUNCTION(xslt);
 
-PHP_FUNCTION(xslt_sax_create);
-PHP_FUNCTION(xslt_sax_set_sax_handlers);
-PHP_FUNCTION(xslt_sax_set_scheme_handlers);
-PHP_FUNCTION(xslt_sax_set_error_handler);
-PHP_FUNCTION(xslt_sax_set_base);
-PHP_FUNCTION(xslt_sax_set_encoding);
-PHP_FUNCTION(xslt_sax_set_log);
-PHP_FUNCTION(xslt_sax_process);
-PHP_FUNCTION(xslt_sax_free);
+PHP_FUNCTION(xslt_create);
+PHP_FUNCTION(xslt_set_sax_handlers);
+PHP_FUNCTION(xslt_set_scheme_handlers);
+PHP_FUNCTION(xslt_set_error_handler);
+PHP_FUNCTION(xslt_set_base);
+PHP_FUNCTION(xslt_set_encoding);
+PHP_FUNCTION(xslt_set_log);
+PHP_FUNCTION(xslt_process);
+PHP_FUNCTION(xslt_free);
 PHP_FUNCTION(xslt_error);
 PHP_FUNCTION(xslt_errno);
 
@@ -90,8 +93,9 @@ struct xslt_handlers {
 };
 
 struct xslt_processor {
-	SablotHandle ptr;
-	long         idx;
+	SablotSituation ctx;
+	SablotHandle    ptr;
+	long            idx;
 };
 
 struct xslt_log {
@@ -107,9 +111,10 @@ struct xslt_error {
 };
 
 typedef struct {
-	struct xslt_handlers  *handlers;
 	struct xslt_processor  processor;
+	struct xslt_handlers  *handlers;
 	struct xslt_error     *err;
+	int cacheable;
 } php_xslt;
 
 #else
