@@ -33,6 +33,20 @@
 #include "php_pdo_pgsql_int.h"
 #include "zend_exceptions.h"
 
+static char * _pdo_pgsql_trim_message(const char *message)
+{
+	register int i = strlen(message)-1;
+
+	if (i>1 && (message[i-1] == '\r' || message[i-1] == '\n') && message[i] == '.') {
+		--i;
+	}
+	while (i>0 && (message[i] == '\r' || message[i] == '\n')) {
+		--i;
+	}
+	++i;
+	return estrndup(message, i);
+}
+
 int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *file, int line TSRMLS_DC) /* {{{ */
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
@@ -60,7 +74,7 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 	}
 
 	if (errmsg) {
-		einfo->errmsg = estrdup(errmsg);
+		einfo->errmsg = _pdo_pgsql_trim_message(errmsg);
 	}
 
 	if (!dbh->methods) {
