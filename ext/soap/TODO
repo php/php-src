@@ -81,6 +81,8 @@ Schema
 	? union
 ? support for user defined complex types
   ? full support for content model encoding/decoding
+  - <any>
+  - <anyAttribute>
 
 Transport
 ---------
