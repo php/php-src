@@ -41,32 +41,32 @@ volatile LONG TPHPClassFactory::object_count = 0;
 TPHPClassFactory::TPHPClassFactory()
 {
 	m_refcount = 1;
-	InterlockedIncrement(&factory_count);
+	InterlockedIncrement(const_cast<long*> (&factory_count));
 }
 
 TPHPClassFactory::~TPHPClassFactory()
 {
-	InterlockedDecrement(&factory_count);
+	InterlockedDecrement(const_cast<long*> (&factory_count));
 }
 
 void TPHPClassFactory::AddToObjectCount(void)
 {
-	InterlockedIncrement(&object_count);
+	InterlockedIncrement(const_cast<long*> (&object_count));
 }
 
 void TPHPClassFactory::RemoveFromObjectCount(void)
 {
-	InterlockedDecrement(&object_count);
+	InterlockedDecrement(const_cast<long*> (&object_count));
 }
 
 STDMETHODIMP_(DWORD) TPHPClassFactory::AddRef(void)
 {
-	return InterlockedIncrement(&m_refcount);
+	return InterlockedIncrement(const_cast<long*> (&m_refcount));
 }
 
 STDMETHODIMP_(DWORD) TPHPClassFactory::Release(void)
 {
-	DWORD ret = InterlockedDecrement(&m_refcount);
+	DWORD ret = InterlockedDecrement(const_cast<long*> (&m_refcount));
 	if (ret == 0)
 		delete this;
 	return ret;
