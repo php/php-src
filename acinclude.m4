@@ -1580,6 +1580,64 @@ AC_DEFUN([PHP_CHECK_FRAMEWORK], [
   ])
 ])
 
+dnl
+dnl PHP_SETUP_KERBEROS(shared-add [, action-found [, action-not-found]])
+dnl
+dnl Common setup macro for kerberos
+dnl
+AC_DEFUN([PHP_SETUP_KERBEROS],[
+  found_kerberos=no
+  unset KERBEROS_CFLAGS
+  unset KERBEROS_LIBS
+
+  dnl First try to find krb5-config
+  if test -z "$KRB5_CONFIG"; then
+    AC_PATH_PROG(KRB5_CONFIG, krb5-config, no, [$PATH:/usr/kerberos/bin:/usr/local/bin])
+  fi
+
+  dnl If krb5-config is found try using it
+  if test "$PHP_KERBEROS" = "yes" && test -x "$KRB5_CONFIG"; then
+    KERBEROS_LIBS=`$KRB5_CONFIG --libs gssapi`
+    KERBEROS_CFLAGS=`$KRB5_CONFIG --cflags gssapi`
+
+    if test -n "$KERBEROS_LIBS" && test -n "$KERBEROS_CFLAGS"; then
+      found_kerberos=yes
+      PHP_EVAL_LIBLINE($KERBEROS_LIBS, $1)
+      PHP_EVAL_INCLINE($KERBEROS_CFLAGS)
+    fi
+  fi
+
+  dnl If still not found use old skool method
+  if test "$found_kerberos" = "no"; then
+
+    if test "$PHP_KERBEROS" = "yes"; then
+      PHP_KERBEROS="/usr/kerberos /usr/local /usr"
+    fi
+
+    for i in $PHP_KERBEROS; do
+      if test -f $i/lib/libkrb5.a || test -f $i/lib/libkrb5.$SHLIB_SUFFIX_NAME; then
+        PHP_KERBEROS_DIR=$i
+        break
+      fi
+    done
+
+    if test "$PHP_KERBEROS_DIR"; then
+      found_kerberos=yes
+      PHP_ADD_LIBPATH($PHP_KERBEROS_DIR/lib, $1)
+      PHP_ADD_LIBRARY(gssapi_krb5, 1, $1)
+      PHP_ADD_LIBRARY(krb5, 1, $1)
+      PHP_ADD_LIBRARY(k5crypto, 1, $1)
+      PHP_ADD_LIBRARY(com_err,  1, $1)
+      PHP_ADD_INCLUDE($PHP_KERBEROS_DIR/include)
+    fi
+  fi
+
+  if test "$found_kerberos" = "yes"; then
+ifelse([$2],[],:,[$2])
+ifelse([$3],[],,[else $3])
+  fi
+])
+
 dnl 
 dnl PHP_SETUP_OPENSSL(shared-add [, action-found [, action-not-found]])
 dnl
@@ -1590,13 +1648,20 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
   unset OPENSSL_INCDIR
   unset OPENSSL_LIBDIR
 
+  dnl Fallbacks for different configure options
+  if test "$PHP_OPENSSL" != "no"; then
+    PHP_OPENSSL_DIR=$PHP_OPENSSL
+  elif test "$PHP_IMAP_SSL" != "no"; then
+    PHP_OPENSSL_DIR=$PHP_IMAP_SSL
+  fi
+
   dnl First try to find pkg-config
   if test -z "$PKG_CONFIG"; then
     AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
   fi
 
   dnl If pkg-config is found try using it
-  if test "$PHP_OPENSSL" = "yes" && test -x "$PKG_CONFIG" && $PKG_CONFIG --exists openssl; then
+  if test "$PHP_OPENSSL_DIR" = "yes" && test -x "$PKG_CONFIG" && $PKG_CONFIG --exists openssl; then
     if $PKG_CONFIG --atleast-version=0.9.6 openssl; then
       found_openssl=yes
       OPENSSL_LIBS=`$PKG_CONFIG --libs openssl`
@@ -1610,15 +1675,16 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
       PHP_EVAL_LIBLINE($OPENSSL_LIBS, $1)
       PHP_EVAL_INCLINE($OPENSSL_INCS)
     fi
+  fi
 
-  else 
-
-    dnl If pkg-config fails for some reason, revert to the old method
-    if test "$PHP_OPENSSL" = "yes"; then
-      PHP_OPENSSL="/usr/local/ssl /usr/local /usr /usr/local/openssl"
+  dnl If pkg-config fails for some reason, revert to the old method
+  if test "$found_openssl" = "no"; then
+  
+    if test "$PHP_OPENSSL_DIR" = "yes"; then
+      PHP_OPENSSL_DIR="/usr/local/ssl /usr/local /usr /usr/local/openssl"
     fi
 
-    for i in $PHP_OPENSSL; do
+    for i in $PHP_OPENSSL_DIR; do
       if test -r $i/include/openssl/evp.h; then
         OPENSSL_INCDIR=$i/include
       fi
@@ -1676,11 +1742,11 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
     PHP_ADD_LIBPATH($OPENSSL_LIBDIR, $1)
   fi
 
+  if test "$found_openssl" = "yes"; then
   dnl For apache 1.3.x static build
   OPENSSL_INCDIR_OPT=-I$OPENSSL_INCDIR
   AC_SUBST(OPENSSL_INCDIR_OPT)
 
-  if test "$found_openssl" = "yes"; then
 ifelse([$2],[],:,[$2])
 ifelse([$3],[],,[else $3])
   fi
