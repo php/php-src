@@ -317,6 +317,25 @@ ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_fu
 	return list_destructors.nNextFreeElement-1;
 }
 
+ZEND_API int zend_fetch_list_dtor_id(char *type_name)
+{
+	zend_rsrc_list_dtors_entry *lde;
+	HashPosition pos;
+
+	zend_hash_internal_pointer_reset_ex(&list_destructors, &pos);
+	while(zend_hash_get_current_data_ex(&list_destructors, (void **)&lde, &pos) == SUCCESS) {
+		if(strcmp(type_name, lde->type_name) == 0)
+		{
+#if 0
+			printf("Found resource id %d for resource type %s\n",(*lde).resource_id,type_name);
+#endif
+			return lde->resource_id;
+		}
+		zend_hash_move_forward_ex(&list_destructors, &pos);
+	}
+
+	return 0;
+}
 
 int zend_init_rsrc_list_dtors(void)
 {
