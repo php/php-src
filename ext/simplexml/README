@@ -2,17 +2,22 @@ SimpleXML is meant to be an easy way to access XML data.
 
 SimpleXML objects follow four basic rules:
 
-1) properties denote elements
+1) properties denote element iterators
 2) numeric indices denote elements
 3) non numeric indices denote attributes
 4) string conversion allows to access TEXT data
 
+When iterating proerties then the extension always iterates over
+all nodes with that elemtnt name. Thus method childen() must be 
+called to iterate over subnodes. But also doing the following:
+foreach $obj->node_name as $elem) {
+  // do something with $elem
+}
+Always result in iteration of 'node_name' elements. So no further 
+check is needed to distinguish the number of nodes of that type.
+
 When an elements TEXT data is being accessed through a property
 then the result does not include the TEXT data of subelements.
-
-If PHP is compiled with ext/SPL being compiled into the binary
-then SimpleXML objects implement the interface RecursiveIterator 
-so that they can be iterated recursively (http://pecl.php.net/spl).
 
 Known issues
 ============

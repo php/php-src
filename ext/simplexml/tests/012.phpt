@@ -18,11 +18,11 @@ $sxe = simplexml_load_string($xml);
 $sxe[""] = "warning";
 $sxe["attr"] = "value";
 
-echo $sxe->to_xml_string();
+echo $sxe->asXML();
 
 $sxe["attr"] = "new value";
 
-echo $sxe->to_xml_string();
+echo $sxe->asXML();
 
 $sxe[] = "error";
 

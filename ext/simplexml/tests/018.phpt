@@ -28,7 +28,7 @@ $xml1 =<<<EOF
 EOF;
 
 function traverse_xml($pad,$xml) {
-  foreach($xml as $name => $node) {
+  foreach($xml->children() as $name => $node) {
     echo $pad."<$name";
     foreach($node->attributes() as $attr => $value) {
       echo " $attr=\"$value\"";

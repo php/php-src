@@ -18,23 +18,39 @@ $person['name'] = "XXX";
 var_dump($people->person[0]['name']);
 $people->person[0]['age'] = 30;
 var_dump($people->person[0]['age']);
-$people->person[0]['age'] += 5;
-var_dump($people->person[0]['age']);
 echo "---Unset:---\n";
 unset($people->person[0]['age']);
 echo "---Unset?---\n";
 var_dump($people->person[0]['age']);
 var_dump(isset($people->person[0]['age']));
-echo "---Done---\n";
+echo "---Unsupported---\n";
+var_dump($people->person[0]['age']);
+$people->person['age'] += 5;
+var_dump($people->person[0]['age']);
 ?>
---EXPECT--
-string(3) "Joe"
+===DONE===
+--EXPECTF--
+object(simplexml_element)#%d (1) {
+  [0]=>
+  string(3) "Joe"
+}
 NULL
-string(3) "XXX"
-string(2) "30"
-string(2) "35"
+object(simplexml_element)#%d (1) {
+  [0]=>
+  string(3) "XXX"
+}
+object(simplexml_element)#%d (1) {
+  [0]=>
+  string(2) "30"
+}
 ---Unset:---
 ---Unset?---
 NULL
 bool(false)
----Done---
+---Unsupported---
+object(simplexml_element)#%d (1) {
+  [0]=>
+  string(2) "30"
+}
+
+Fatal error: Unsupported operand types in %s014.php on line %d

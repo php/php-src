@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML and foreach
+SimpleXML and foreach with children()
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
@@ -33,28 +33,28 @@ $sxe = simplexml_load_string(<<<EOF
 EOF
 );
 
-foreach($sxe as $name => $data) {
+foreach($sxe->children() as $name => $data) {
 	var_dump($name);
 	var_dump(trim($data));
 }
 
 echo "===CLONE===\n";
 
-foreach($sxe->__clone() as $name => $data) {
+foreach($sxe->children()->__clone() as $name => $data) {
 	var_dump($name);
 	var_dump(trim($data));
 }
 
 echo "===ELEMENT===\n";
 
-foreach($sxe->elem11 as $name => $data) {
+foreach($sxe->elem11->children() as $name => $data) {
 	var_dump($name);
 	var_dump(trim($data));
 }
 
 echo "===COMMENT===\n";
 
-foreach($sxe->elem1 as $name => $data) {
+foreach($sxe->elem1->children() as $name => $data) {
 	var_dump($name);
 	var_dump(trim($data));
 }
@@ -72,9 +72,9 @@ string(10) "Bla bla 1."
 string(6) "elem11"
 string(10) "Bla bla 2."
 ===ELEMENT===
-string(6) "elem11"
-string(10) "Bla bla 2."
+string(7) "elem111"
+string(7) "Foo Bar"
 ===COMMENT===
-string(5) "elem1"
-string(10) "Bla bla 1."
+string(5) "elem2"
+string(28) "Here we have some text data."
 ===DONE===

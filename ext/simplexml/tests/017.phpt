@@ -25,52 +25,62 @@ $xml1 =<<<EOF
 EOF;
 
 function print_xml($xml) {
-  foreach($xml as $person) {
+  foreach($xml->children() as $person) {
     echo "person: ".$person['name']."\n";
-    foreach($person as $child) {
+    foreach($person->children() as $child) {
       echo "  child: ".$child['name']."\n";
     }
   }
-  echo "----------\n";
 }
 
 function print_xml2($xml) {
-  $persons = count($xml->person);
+  $persons = 2;
   for ($i=0;$i<$persons;$i++) {
     echo "person: ".$xml->person[$i]['name']."\n";
-	$children = count($xml->person[$i]->child);
+	$children = 2;
     for ($j=0;$j<$children;$j++) {
       echo "  child: ".$xml->person[$i]->child[$j]['name']."\n";
     }
   }
-  echo "----------\n";
 }
 
+echo "---11---\n";
 print_xml(simplexml_load_string($xml));
+echo "---12---\n";
 print_xml(simplexml_load_string($xml1));
+echo "---21---\n";
 print_xml2(simplexml_load_string($xml));
+echo "---22---\n";
 print_xml2(simplexml_load_string($xml1));
-echo "---Done---\n";
 ?>
---EXPECT--
+===DONE===
+--EXPECTF--
+---11---
 person: Joe
   child: Ann
   child: Marray
 person: Boe
   child: Joe
   child: Ann
-----------
+---12---
 person: Joe
   child: Ann
-----------
+---21---
 person: Joe
   child: Ann
   child: Marray
 person: Boe
   child: Joe
   child: Ann
-----------
+---22---
 person: Joe
   child: Ann
-----------
----Done---
+  child: 
+person: 
+
+Notice: Trying to get property of non-object in %s017.php on line %d
+  child: 
+
+Notice: Trying to get property of non-object in %s017.php on line %d
+  child: 
+===DONE===
