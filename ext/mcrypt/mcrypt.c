@@ -59,6 +59,9 @@ function_entry mcrypt_functions[] = {
 	PHP_FE(mcrypt_generic, NULL)
 	PHP_FE(mdecrypt_generic, NULL)
 	PHP_FE(mcrypt_generic_end, NULL)
+#if HAVE_MCRYPT_GENERIC_DEINIT
+	PHP_FE(mcrypt_generic_deinit, NULL)
+#endif
 	PHP_FE(mcrypt_enc_self_test, NULL)
 	PHP_FE(mcrypt_enc_is_block_algorithm_mode, NULL)
 	PHP_FE(mcrypt_enc_is_block_algorithm, NULL)
@@ -273,40 +276,41 @@ static PHP_MINIT_FUNCTION(mcrypt)
 	
 	/* ciphers */
 #if HAVE_LIBMCRYPT22
-	MCRYPT_ENTRY2(BLOWFISH_448);
-	MCRYPT_ENTRY2(DES);
 	MCRYPT_ENTRY2(3DES);
 	MCRYPT_ENTRY2(3WAY);
-	MCRYPT_ENTRY2(GOST);
-	MCRYPT_ENTRY2(SAFER_64);
-	MCRYPT_ENTRY2(SAFER_128);
-	MCRYPT_ENTRY2(CAST_128);
-	MCRYPT_ENTRY2(XTEA);
-	MCRYPT_ENTRY2(RC2_1024);
-	MCRYPT_ENTRY2(TWOFISH_128);
-	MCRYPT_ENTRY2(TWOFISH_192);
-	MCRYPT_ENTRY2(TWOFISH_256);
 	MCRYPT_ENTRY2(BLOWFISH_128);
 	MCRYPT_ENTRY2(BLOWFISH_192);
 	MCRYPT_ENTRY2(BLOWFISH_256);
+	MCRYPT_ENTRY2(BLOWFISH_448);
+	MCRYPT_ENTRY2(CAST_128);
 	MCRYPT_ENTRY2(CAST_256);
-	MCRYPT_ENTRY2(SAFERPLUS);
+	MCRYPT_ENTRY2(DES);
+	MCRYPT_ENTRY2(GOST);
+	MCRYPT_ENTRY2(IDEA);
 	MCRYPT_ENTRY2(LOKI97);
-	MCRYPT_ENTRY2(SERPENT_128);
-	MCRYPT_ENTRY2(SERPENT_192);
-	MCRYPT_ENTRY2(SERPENT_256);
 	MCRYPT_ENTRY2(RIJNDAEL_128);
 	MCRYPT_ENTRY2(RIJNDAEL_192);
 	MCRYPT_ENTRY2(RIJNDAEL_256);
-	MCRYPT_ENTRY2(RC2_256);
 	MCRYPT_ENTRY2(RC2_128);
-	MCRYPT_ENTRY2(RC6_256);
-	MCRYPT_ENTRY2(IDEA);
+	MCRYPT_ENTRY2(RC2_256);
+	MCRYPT_ENTRY2(RC2_1024);
+	MCRYPT_ENTRY2(RC4);
 	MCRYPT_ENTRY2(RC6_128);
 	MCRYPT_ENTRY2(RC6_192);
-	MCRYPT_ENTRY2(RC4);
+	MCRYPT_ENTRY2(RC6_256);
+	MCRYPT_ENTRY2(SAFER_64);
+	MCRYPT_ENTRY2(SAFER_128);
+	MCRYPT_ENTRY2(SAFERPLUS);
+	MCRYPT_ENTRY2(SERPENT_128);
+	MCRYPT_ENTRY2(SERPENT_192);
+	MCRYPT_ENTRY2(SERPENT_256);
+	MCRYPT_ENTRY2(TWOFISH_128);
+	MCRYPT_ENTRY2(TWOFISH_192);
+	MCRYPT_ENTRY2(TWOFISH_256);
+	MCRYPT_ENTRY2(XTEA);
 #endif
 #if HAVE_LIBMCRYPT24
+	MCRYPT_ENTRY2_2_4(3DES, "tripledes");
 	MCRYPT_ENTRY2_2_4(ARCFOUR_IV, "arcfour-iv");
 	MCRYPT_ENTRY2_2_4(ARCFOUR, "arcfour");
 	MCRYPT_ENTRY2_2_4(BLOWFISH, "blowfish");
@@ -638,6 +642,7 @@ PHP_FUNCTION(mcrypt_module_close)
 }
 /* }}} */
 
+
 /* {{{ proto bool mcrypt_generic_end(resource td)
    This function terminates encrypt specified by the descriptor td */
 PHP_FUNCTION(mcrypt_generic_end)
@@ -647,6 +652,9 @@ PHP_FUNCTION(mcrypt_generic_end)
 	
 	MCRYPT_GET_TD_ARG
 
+#if HAVE_MCRYPT_GENERIC_DEINIT
+	php_error(E_WARNING, "mcrypt_generic_end is deprecated, please use mcrypt_generic_deinit");
+#endif
 	if (mcrypt_generic_end (td) < 0) {
 		php_error (E_WARNING, "could not terminate encryption specifier");
 		RETURN_FALSE
@@ -654,6 +662,28 @@ PHP_FUNCTION(mcrypt_generic_end)
 	RETURN_TRUE
 }
 /* }}} */
+
+
+#if HAVE_MCRYPT_GENERIC_DEINIT
+
+/* {{{ proto bool mcrypt_generic_deinit(resource td)
+   This function terminates encrypt specified by the descriptor td */
+PHP_FUNCTION(mcrypt_generic_deinit)
+{
+	zval **mcryptind;
+	MCRYPT td;
+	
+	MCRYPT_GET_TD_ARG
+
+	if (mcrypt_generic_deinit (td) < 0) {
+		php_error (E_WARNING, "could not terminate encryption specifier");
+		RETURN_FALSE
+	}
+	RETURN_TRUE
+}
+/* }}} */
+
+#endif
 
 
 /* {{{ proto bool mcrypt_enc_is_block_algorithm_mode(resource td)
