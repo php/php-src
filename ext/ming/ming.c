@@ -1440,8 +1440,6 @@ static void phpByteOutputMethod(byte b, void *data)
 
 PHP_FUNCTION(swfmovie_output)
 {
-	zval **zlimit = NULL;
-	int limit = -1;
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
 
 #ifdef HAVE_MING_ZLIB
@@ -1478,8 +1476,6 @@ static void phpStreamOutputMethod(byte b, void * data)
 PHP_FUNCTION(swfmovie_saveToFile)
 {
 	zval **x;
-	zval **zlimit = NULL;
-	int limit = -1;
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
 	php_stream *what;
 
@@ -1517,8 +1513,7 @@ PHP_FUNCTION(swfmovie_saveToFile)
   Saves the movie. 'where' can be stream and the movie will be saved there otherwise it is treated as string and written in file with that name */
 PHP_FUNCTION(swfmovie_save)
 {
-	zval **x, **zlimit = NULL;
-	int limit = -1;
+	zval **x;
 	long retval;
 	php_stream *stream;
 
