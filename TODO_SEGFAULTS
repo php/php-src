@@ -11,6 +11,7 @@ Fixed:
 	array_pad (Rasmus)
 	str_repeat (Ilia)
     setlocale (Rasmus)
+    unregister_tick_function (Rasmus)
 
 Open:
 
@@ -20,8 +21,7 @@ Open:
     mb_eregi (2)
     mb_split
     ob_start (3)
-    unregister_tick_function
-    xml_parser_create
+    xml_parser_create (Unable to reproduce - Rasmus)
 
     Notes:
 
