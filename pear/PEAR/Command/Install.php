@@ -75,6 +75,7 @@ class PEAR_Command_Install extends PEAR_Command_Common
                   "   -f    forces the installation of the package\n".
                   "         when it is already installed\n".
                   "   -n    do not take care of package dependencies\n".
+                  "   -r    only (un)register package, do not (un)install files\n".
                   "   -s    soft update: install or upgrade only if needed\n".
                   "   -Z    no compression: download plain .tar files";
         return $ret;
@@ -85,7 +86,7 @@ class PEAR_Command_Install extends PEAR_Command_Common
 
     function getOptions()
     {
-        return array('f', 'n', 's', 'Z');
+        return array('f', 'n', 'r', 's', 'Z');
     }
 
     // }}}
@@ -104,6 +105,9 @@ class PEAR_Command_Install extends PEAR_Command_Common
         }
         if (isset($options['n'])) {
             $opts['nodeps'] = true;
+        }
+        if (isset($options['r'])) {
+            $opts['register_only'] = true;
         }
         if (isset($options['s'])) {
             $opts['soft'] = true;
