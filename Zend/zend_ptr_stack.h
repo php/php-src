@@ -18,7 +18,7 @@
 #ifndef _ZEND_PTR_STACK_H
 #define _ZEND_PTR_STACK_H
 
-typedef struct {
+typedef struct _zend_ptr_stack {
 	short top, max;
 	void **elements;
 	void **top_element;

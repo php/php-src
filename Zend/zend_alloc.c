@@ -357,7 +357,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 					/* flush old leak */
 					if (leak_count>0) {
 						if (!silent && leak_count>1) {
-							zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *) leak_count-1);
+							zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *) (leak_count-1));
 						}
 						leak_count=0;
 						total_bytes=0;
@@ -382,7 +382,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 	}
 #if ZEND_DEBUG
 	if (!silent && leak_count>1) {
-		zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *) leak_count-1);
+		zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *) (leak_count-1));
 	}
 #endif
 }

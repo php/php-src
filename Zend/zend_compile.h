@@ -51,7 +51,7 @@
 
 typedef struct _zend_op_array zend_op_array;
 
-typedef struct {
+typedef struct _znode {
 	int op_type;
 	union {
 		zval constant;
@@ -78,7 +78,7 @@ typedef struct _zend_op {
 } zend_op;
 
 
-typedef struct {
+typedef struct _zend_brk_cont_element {
 	int cont;
 	int brk;
 	int parent;
@@ -117,7 +117,7 @@ struct _zend_op_array {
 };
 
 
-typedef struct {
+typedef struct _zend_internal_function {
 	int type;	/* MUST be the first element of this struct! */
 
 	unsigned char *arg_types;		/* MUST be the second element of this struct */
@@ -127,7 +127,7 @@ typedef struct {
 } zend_internal_function;
 
 
-typedef union {
+typedef union _zend_function {
 	int type;	/* MUST be the first element of this struct! */
 	struct {
 		int type;  /* never used */
@@ -146,14 +146,14 @@ typedef struct _zend_function_state {
 } zend_function_state;
 
 
-typedef struct {
+typedef struct _zend_switch_entry {
 	znode cond;
 	int default_case;
 	int control_var;
 } zend_switch_entry;
 
 
-typedef struct {
+typedef struct _list_llist_element {
 	znode var;
 	zend_llist dimensions;
 	znode value;
@@ -531,5 +531,8 @@ int zendlex(znode *zendlval CLS_DC);
 
 #define ZEND_DECLARE_CLASS		1
 #define ZEND_DECLARE_FUNCTION	2
+
+#define ZEND_FETCH_STANDARD		0
+#define ZEND_FETCH_NO_AI_COUNT	1
 
 #endif /* _COMPILE_H */

@@ -65,7 +65,7 @@
 typedef struct _zval_struct zval;
 typedef struct _zend_class_entry zend_class_entry;
 
-typedef union {
+typedef union _zvalue_value {
 	long lval;					/* long value */
 	double dval;				/* double value */
 	struct {
@@ -91,14 +91,14 @@ struct _zval_struct {
 
 
 
-typedef struct {
+typedef struct _zend_function_entry {
 	char *fname;
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
 	unsigned char *func_arg_types;
 } zend_function_entry;
 
 
-typedef struct {
+typedef struct _zend_property_reference {
 	int type;  /* read, write or r/w */
 	zval **object;
 	zend_llist elements_list;
@@ -106,7 +106,7 @@ typedef struct {
 
 
 
-typedef struct {
+typedef struct _zend_overloaded_element {
 	int type;		/* array offset or object proprety */
 	zval element;
 } zend_overloaded_element;
@@ -130,7 +130,7 @@ struct _zend_class_entry {
 
 
 
-typedef struct {
+typedef struct _zend_utility_functions {
 	void (*error_function)(int type, const char *format, ...);
 	int (*printf_function)(const char *format, ...);
 	int (*write_function)(const char *str, uint str_length);
@@ -141,7 +141,7 @@ typedef struct {
 } zend_utility_functions;
 
 		
-typedef struct {
+typedef struct _zend_utility_values {
 	unsigned char short_tags;
 	unsigned char asp_tags;
 } zend_utility_values;

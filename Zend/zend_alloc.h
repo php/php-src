@@ -37,7 +37,7 @@ typedef struct _mem_header {
 	unsigned int cached:1;
 } mem_header;
 
-typedef union {
+typedef union _align_test {
 	void *ptr;
 	double dbl;
 	long lng;

@@ -20,7 +20,7 @@
 #include "zend_compile.h"
 #include "zend_hash.h"
 
-typedef union {
+typedef union _temp_variable {
 	zval tmp_var;
 	zval **var;
 	struct {

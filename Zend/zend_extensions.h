@@ -21,7 +21,7 @@
 
 #define ZEND_EXTENSION_API_NO		2
 
-typedef struct {
+typedef struct _zend_extension_version_info {
 	int zend_extension_api_no;
 	char *required_zend_version;
 	unsigned char thread_safe;

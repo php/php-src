@@ -22,7 +22,7 @@
 #define CONST_CS 0x1				/* Case Sensitive */
 #define CONST_PERSISTENT 0x2
 
-typedef struct {
+typedef struct _zend_constant {
 	zval value;
 	int flags;
 	char *name;

@@ -17,7 +17,7 @@
 #ifndef _ZEND_STACK_H
 #define _ZEND_STACK_H
 
-typedef struct {
+typedef struct _zend_stack {
 	int top, max;
 	void **elements;
 } zend_stack;

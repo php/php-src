@@ -216,6 +216,7 @@ void fetch_array_dim(znode *result, znode *parent, znode *dim CLS_DC)
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->op1 = *parent;
 	opline->op2 = *dim;
+	opline->extended_value = ZEND_FETCH_STANDARD;
 	*result = opline->result;
 
 	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
@@ -1435,7 +1436,7 @@ void do_add_list_element(znode *element CLS_DC)
 {
 	list_llist_element lle;
 
-	if(element) {
+	if (element) {
 		lle.var = *element;
 		zend_llist_copy(&lle.dimensions, &CG(dimension_llist));
 		zend_llist_add_element(&CG(list_llist), &lle);
@@ -1453,7 +1454,6 @@ void do_new_list_begin(CLS_D)
 
 void do_new_list_end(CLS_D)
 {
-
 	zend_llist_remove_tail(&CG(dimension_llist));
 	(*((int *)CG(dimension_llist).tail->data))++;
 }
@@ -1503,6 +1503,11 @@ void do_list_end(znode *result, znode *expr CLS_DC)
 			opline->op2.u.constant.value.lval = *((int *) dimension->data);
 			opline->op2.u.constant.refcount = 1;
 			opline->op2.u.constant.is_ref = 0;
+			if (le == CG(list_llist).tail) {
+				opline->extended_value = ZEND_FETCH_STANDARD;
+			} else {
+				opline->extended_value = ZEND_FETCH_NO_AI_COUNT;
+			}
 			last_container = opline->result;
 			dimension = dimension->next;
 		}
@@ -1682,6 +1687,7 @@ void do_foreach_cont(znode *value, znode *key, znode *as_token CLS_DC)
 	opline->op2.op_type = IS_CONST;
 	opline->op2.u.constant.type = IS_LONG;
 	opline->op2.u.constant.value.lval = 0;
+	opline->extended_value = ZEND_FETCH_STANDARD; /* ignored in fetch_dim_tmp_var, but what the hell. */
 	result_value = opline->result;
 
 	if (key->op_type != IS_UNUSED) {
@@ -1694,6 +1700,7 @@ void do_foreach_cont(znode *value, znode *key, znode *as_token CLS_DC)
 		opline->op2.op_type = IS_CONST;
 		opline->op2.u.constant.type = IS_LONG;
 		opline->op2.u.constant.value.lval = 1;
+		opline->extended_value = ZEND_FETCH_STANDARD; /* ignored in fetch_dim_tmp_var, but what the hell. */
 		result_key = opline->result;
 	}
 
