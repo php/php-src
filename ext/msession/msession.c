@@ -281,7 +281,7 @@ int PHPMsessionSetData(const char *session, const char *data)
 	DoRequest(s_conn,&s_reqb);
 	ret = (s_reqb->req.stat==REQ_OK);
 	if(s_reqb->req.stat!=REQ_OK)
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 
 	return ret;
 
@@ -297,7 +297,7 @@ int PHPMsessionDestroy(const char *session)
 	DoRequest(s_conn,&s_reqb);
 	ret = (s_reqb->req.stat==REQ_OK);
 	if(s_reqb->req.stat!=REQ_OK)
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 	return ret;
 	
 	IFCONNECT_ENDVAL(0)
@@ -386,7 +386,7 @@ PHP_FUNCTION(msession_create)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 		RETURN_FALSE;
 	}
 	IFCONNECT_END
@@ -434,7 +434,7 @@ PHP_FUNCTION(msession_lock)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 		RETURN_FALSE;
 	}
 
@@ -542,7 +542,7 @@ PHP_FUNCTION(msession_unlock)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 		RETURN_FALSE;
 	}
 	IFCONNECT_END
@@ -583,7 +583,7 @@ PHP_FUNCTION(msession_set)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 		RETURN_FALSE;
 	}
 	IFCONNECT_END
@@ -623,7 +623,7 @@ PHP_FUNCTION(msession_get)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -656,7 +656,7 @@ PHP_FUNCTION(msession_uniq)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -689,7 +689,7 @@ PHP_FUNCTION(msession_randstr)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -735,7 +735,7 @@ PHP_FUNCTION(msession_find)
 	}
 	else if(s_reqb->req.stat != REQ_OK)
 	{
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -768,7 +768,7 @@ PHP_FUNCTION(msession_list)
 	{
 		// May this should be an error?
 		if(s_reqb->req.param !=  REQE_NOSESSION)
-			php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+			php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -819,7 +819,7 @@ PHP_FUNCTION(msession_get_array)
 	else
 	{
 		if(s_reqb->req.param !=  REQE_NOSESSION)
-			php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+			php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -905,7 +905,7 @@ PHP_FUNCTION(msession_set_array)
 	DoRequest(s_conn,&s_reqb);
 
 	if(s_reqb->req.stat != REQ_OK)
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 	efree((void *)pairs);
 	IFCONNECT_END
 }
@@ -952,7 +952,7 @@ PHP_FUNCTION(msession_listvar)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -993,7 +993,7 @@ PHP_FUNCTION(msession_timeout)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -1026,7 +1026,7 @@ PHP_FUNCTION(msession_inc)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 		RETURN_FALSE;
 	}
 	IFCONNECT_END
@@ -1131,7 +1131,7 @@ PHP_FUNCTION(msession_plugin)
 	}
 	else if(s_reqb->req.stat != REQ_OK)
 	{
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 		RETURN_FALSE;
 		
 	}
@@ -1181,7 +1181,7 @@ PHP_FUNCTION(msession_call)
 	}
 	else if(s_reqb->req.stat != REQ_OK)
 	{
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 		RETURN_FALSE;
 	}
 	IFCONNECT_END
@@ -1256,7 +1256,7 @@ PS_CREATE_SID_FUNC(msession)
 		}
 		else
 		{
-			php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+			php_error(E_WARNING, s_szErrFmt, ReqbErr(s_reqb));
 		}
 	}
 	ELOG("Yikes, could not get sid from msession");

@@ -137,7 +137,7 @@ int DoSingleRequest(char *hostname, int port, REQB **preq);
 void *OpenReqConn(char *hostname, int port);
 void CloseReqConn(void *conn);
 int DoRequest(void *conn, REQB **preq);
-char *ReqErr(int param);
+char *ReqbErr(REQB *reqb);
 
 #define ASSERT_STAT(PREQ) if(PREQ->stat != REQ_OK) \
 	{fprintf(stderr, "Error in Request %s %d %s\n", \
