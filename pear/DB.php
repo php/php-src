@@ -187,8 +187,8 @@ class DB
         $classname = "DB_${type}";
 
         if (!class_exists($classname)) {
-            return PEAR::raiseError(DB_ERROR_NOT_FOUND,
-                                    null, null, null, null, 'DB_Error', true);
+            return PEAR::raiseError(null, DB_ERROR_NOT_FOUND,
+                                    null, null, null, 'DB_Error', true);
         }
 
         @$obj =& new $classname;
@@ -234,8 +234,8 @@ class DB
 
         $classname = "DB_${type}";
         if (!class_exists($classname)) {
-            return PEAR::raiseError(DB_ERROR_NOT_FOUND,
-                                    null, null, null, null, 'DB_Error', true);
+            return PEAR::raiseError(null, DB_ERROR_NOT_FOUND,
+                                    null, null, null, 'DB_Error', true);
         }
 
         @$obj =& new $classname;
