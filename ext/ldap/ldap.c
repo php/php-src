@@ -31,7 +31,7 @@
 #include "ext/standard/dl.h"
 #include "php_ldap.h"
 
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 #include <string.h>
 #if HAVE_NSLDAP
 #include <winsock.h>
