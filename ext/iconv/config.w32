@@ -9,7 +9,6 @@ if (PHP_ICONV == "yes") {
 	AC_DEFINE("HAVE_LIBICONV", 1, "Define if libiconv is available");
 	AC_DEFINE("PHP_ICONV_IMPL", "\"libiconv\"", "Which iconv implementation to use");
 	AC_DEFINE("ICONV_SUPPORTS_ERRNO", 1, "Whether iconv supports errno or not");
-	AC_DEFINE("PHP_ICONV_H_PATH", "<iconv.h>", "Path to iconv.h");
 	CHECK_LIB("iconv.lib", "iconv");
 	CHECK_HEADER_ADD_INCLUDE("iconv.h", "CFLAGS");
 }

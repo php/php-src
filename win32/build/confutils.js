@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.8 2003-12-03 18:31:04 wez Exp $
+// $Id: confutils.js,v 1.9 2003-12-03 22:59:48 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -362,6 +362,16 @@ function CHECK_LIB(libname, target, path_to_check)
 	} else if (p == true) {
 		ADD_FLAG("LIBS_" + target.toUpperCase(), libname);
 		have = 1;
+	} else {
+		/* not found in the defaults or the explicit paths,
+		 * so check the general extra libs; if we find
+		 * it here, no need to add another /libpath: for it as we
+		 * already have it covered, but we need to add the lib
+		 * to LIBS_XXX */
+		if (false != search_paths(header_name, PHP_EXTRA_LIBS, null)) {
+			ADD_FLAG("LIBS_" + target.toUpperCase(), libname);
+			have = 1;
+		}
 	}
 
 //	AC_DEFINE("HAVE_" + header_name.toUpperCase().replace(new RegExp("/\\\\-\.", "g"), "_"), have);
@@ -389,6 +399,12 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	if (typeof(p) == "string") {
 		ADD_FLAG(flag_name, '/I "' + p + '" ');
 		have = 1;
+	} else if (p == false) {
+		/* not found in the defaults or the explicit paths,
+		 * so check the general extra includes; if we find
+		 * it here, no need to add another /I for it as we
+		 * already have it covered */
+		p = search_paths(header_name, PHP_EXTRA_INCLUDES, null);
 	}
 
 	sym = header_name.toUpperCase();
@@ -430,6 +446,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 	
 	MFO.WriteLine("\t$(LD) /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LDFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ")");
 
+	DEFINE('CFLAGS_' + SAPI + '_OBJ', '$(CFLAGS_' + SAPI + ')');
 	ADD_FLAG("SAPI_TARGETS", makefiletarget);
 	MFO.WriteBlankLines(1);
 }
@@ -483,11 +500,13 @@ function EXTENSION(extname, file_list, shared, cflags)
 		MFO.WriteLine(dllname + ": $(BUILD_DIR)\\" + dllname);
 		MFO.WriteLine("\t@echo EXT " + extname + " build complete");
 		MFO.WriteBlankLines(1);
+		
+		DEFINE('CFLAGS_' + EXT + '_OBJ', '$(CFLAGS_' + EXT + ')');
 	} else {
 		ADD_FLAG("STATIC_EXT_OBJS", "$(" + EXT + "_GLOBAL_OBJS)");
 		ADD_FLAG("STATIC_EXT_LIBS", "$(LIBS_" + EXT + ")");
 		ADD_FLAG("STATIC_EXT_LDFLAGS", "$(LDFLAGS_" + EXT + ")");
-		ADD_FLAG("CFLAGS_" + EXT, "$(CFLAGS_PHP)");
+		ADD_FLAG("STATIC_EXT_CFLAGS", "$(CFLAGS_" + EXT + ")");
 
 		/* find the header that declars the module pointer,
 		 * so we can include it in internal_functions.c */
@@ -506,8 +525,8 @@ function EXTENSION(extname, file_list, shared, cflags)
 		}
 	
 		extension_module_ptrs += '\tphpext_' + extname + '_ptr,\r\n';
-
-		cflags = "$(CFLAGS_PHP) " + cflags;
+	
+		DEFINE('CFLAGS_' + EXT + '_OBJ', '$(CFLAGS_PHP) $(CFLAGS_' + EXT + ')');
 	}
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
 }
@@ -523,7 +542,7 @@ function ADD_SOURCES(dir, file_list, target)
 	}
 
 	sym = target.toUpperCase() + "_GLOBAL_OBJS";
-	flags = "CFLAGS_" + target.toUpperCase();
+	flags = "CFLAGS_" + target.toUpperCase() + '_OBJ';
 
 	if (configure_subst.Exists(sym)) {
 		tv = configure_subst.Item(sym);
