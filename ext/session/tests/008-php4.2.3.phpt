@@ -11,6 +11,8 @@ register_globals=0
 session.bug_compat_42=1
 session.bug_compat_warn=1
 track_errors=1
+log_errors=0
+html_errors=0
 --FILE--
 <?php
 error_reporting(E_ALL & ~E_NOTICE);
