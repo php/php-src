@@ -213,6 +213,8 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(xpath_eval,													NULL)
 	PHP_FE(xpath_eval_expression,										NULL)
 	PHP_FE(xpath_register_ns,											NULL)
+	PHP_FE(domxml_doc_get_elements_by_tagname,							NULL)
+	PHP_FE(domxml_doc_get_element_by_id,								NULL)
 #endif
 #if defined(LIBXML_XPTR_ENABLED)
 	PHP_FE(xptr_new_context,											NULL)
@@ -272,6 +274,8 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(xpath_init,				xpath_init,						NULL)
 	PHP_FALIAS(xpath_new_context,		xpath_new_context,				NULL)
 	PHP_FALIAS(xptr_new_context,		xptr_new_context,				NULL)
+	PHP_FALIAS(get_elements_by_tagname,	domxml_doc_get_elements_by_tagname,	NULL)
+	PHP_FALIAS(get_element_by_id,		domxml_doc_get_element_by_id,	NULL)
 #endif
 	{NULL, NULL, NULL}
 };
@@ -336,7 +340,7 @@ static zend_function_entry php_domxmlelement_class_functions[] = {
 	PHP_FALIAS(remove_attribute,		domxml_elem_remove_attribute,	NULL)
 	PHP_FALIAS(get_attribute_node,		domxml_elem_get_attribute_node,	NULL)
 	PHP_FALIAS(set_attribute_node,		domxml_elem_set_attribute_node,	NULL)
-	PHP_FALIAS(get_element_by_tagname,	domxml_elem_get_element_by_tagname,	NULL)
+	PHP_FALIAS(get_elements_by_tagname,	domxml_elem_get_elements_by_tagname,	NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -500,6 +504,27 @@ static inline void node_list_wrapper_dtor(xmlNodePtr node)
 	}
 }
 
+static xmlNodeSetPtr php_get_elements_by_tagname(xmlNodePtr n, xmlChar* name)
+{
+	xmlNodeSetPtr rv = NULL;
+	xmlNodePtr cld = NULL;
+
+	if ( n != NULL && name != NULL ) {
+		cld = n->children;
+		while ( cld != NULL ) {
+			if ( xmlStrcmp( name, cld->name ) == 0 ){
+				if ( rv == NULL ) {
+					rv = xmlXPathNodeSetCreate( cld ) ;
+				}
+				else {
+					xmlXPathNodeSetAdd( rv, cld );
+				}
+			}
+			cld = cld->next;
+		}
+	}
+	return rv;
+}
 
 static void php_free_xml_doc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
@@ -2259,25 +2284,205 @@ PHP_FUNCTION(domxml_elem_set_attribute_node)
 }
 /* }}} */
 
-/* {{{ proto string domxml_elem_get_element_by_tagname(string tagname)
-   Returns element for given attribute */
-PHP_FUNCTION(domxml_elem_get_element_by_tagname)
+#if defined(LIBXML_XPATH_ENABLED)
+/* {{{ proto string domxml_doc_get_elements_by_tagname(string tagname [,object xpathctx_handle] )
+   Returns array with nodes with given tagname in document or empty array, if not found*/
+PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 {
-	zval *id, *arg1;
-	xmlNode *nodep;
+	zval *id, *rv, *contextnode = NULL,*ctxpin = NULL;
+	xmlXPathContextPtr ctxp;
+   	xmlDocPtr docp;
 
-	DOMXML_NOT_IMPLEMENTED();
+	xmlXPathObjectPtr xpathobjp;
+	xmlNode *contextnodep;
+	int name_len;
+	char *str,*name;
 
-	if ((ZEND_NUM_ARGS() == 1) && getParameters(ht, 1, &arg1) == SUCCESS) {
-		id = getThis();
-		nodep = php_dom_get_object(id, le_domxmlelementp, 0 TSRMLS_CC);
-	} else {
-		WRONG_PARAM_COUNT;
+	contextnode = NULL;
+	contextnodep = NULL;
+
+    DOMXML_PARAM_FOUR(docp, id, le_domxmldocp, "s|oo", &name, &name_len,&ctxpin,&contextnodep);
+	
+	/* if no xpath_context was submitted, create a new one */
+	if (ctxpin == NULL)
+	{
+		ctxp = xmlXPathNewContext(docp);
+	}
+	else
+	{
+		DOMXML_GET_OBJ(ctxp, ctxpin, le_xpathctxp);
 	}
 
-	convert_to_string(arg1);
+	if (contextnode) {
+		DOMXML_GET_OBJ(contextnodep, contextnode, le_domxmlnodep);
+	}
+	ctxp->node = contextnodep;
+	str = (char*) emalloc((name_len+3) * sizeof(char)) ;
+	if (str == NULL)
+	{
+		php_error(E_WARNING, "%s(): cannot allocate memory for string", get_active_function_name(TSRMLS_C));		
+	}		
+	sprintf(str ,"//%s",name);
 
-	/* FIXME: not implemented */
+	xpathobjp = xmlXPathEval(str, ctxp);
+	efree(str);
+	ctxp->node = NULL;
+	if (!xpathobjp) {
+		RETURN_FALSE;
+	}
+	MAKE_STD_ZVAL(rv);
+
+	if(array_init(rv) != SUCCESS)
+	{
+		php_error(E_WARNING, "%s(): cannot create required array", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	switch (Z_TYPE_P(xpathobjp)) {
+
+		case XPATH_NODESET:
+		{
+			int i;
+			xmlNodeSetPtr nodesetp;
+
+			if (NULL == (nodesetp = xpathobjp->nodesetval)) {
+				zval_dtor(rv);
+				RETURN_FALSE;
+			}
+
+			for (i = 0; i < nodesetp->nodeNr; i++) {
+				xmlNodePtr node = nodesetp->nodeTab[i];
+				zval *child;
+				int retnode;
+
+				/* construct a node object */
+				child = php_domobject_new(node, &retnode TSRMLS_CC);
+				zend_hash_next_index_insert(Z_ARRVAL_P(rv), &child, sizeof(zval *), NULL);
+			}
+
+			break;
+		}
+		default:
+			break;
+	}
+
+	*return_value = *rv;
+	FREE_ZVAL(rv);
+}
+/* }}} */
+
+/* {{{ proto string domxml_doc_get_element_by_id(string id [,object xpathctx_handle] )
+   Returns element for given id or false if not found */
+PHP_FUNCTION(domxml_doc_get_element_by_id)
+{
+	zval *id, *rv, *contextnode = NULL, *ctxpin = NULL;
+	xmlXPathContextPtr ctxp ;
+   	xmlDocPtr docp;
+
+	xmlXPathObjectPtr xpathobjp;
+	xmlNode *contextnodep;
+	int name_len;
+	char *str,*name;
+
+	contextnode = NULL;
+	contextnodep = NULL;
+
+	DOMXML_PARAM_FOUR(docp, id, le_domxmldocp, "s|oo", &name, &name_len,&ctxpin,&contextnodep);
+	
+	/* if no xpath_context was submitted, create a new one */
+	if (ctxpin == NULL)
+	{
+		ctxp = xmlXPathNewContext(docp);
+	}
+	else
+	{
+		DOMXML_GET_OBJ(ctxp, ctxpin, le_xpathctxp);
+	}
+	
+	if (contextnode) {
+		DOMXML_GET_OBJ(contextnodep, contextnode, le_domxmlnodep);
+	}
+	ctxp->node = contextnodep;
+	str = (char*) emalloc((name_len+14) * sizeof(char)) ;
+	if (str == NULL)
+	{
+		php_error(E_WARNING, "%s(): cannot allocate memory for string", get_active_function_name(TSRMLS_C));		
+	}		
+	sprintf(str ,"//*[@ID = '%s']",name);   
+	xpathobjp = xmlXPathEval(str, ctxp);
+	efree(str);
+	ctxp->node = NULL;
+	if (!xpathobjp) {
+		RETURN_FALSE;
+	}
+
+	switch (Z_TYPE_P(xpathobjp)) {
+
+		case XPATH_NODESET:
+		{
+			xmlNodeSetPtr nodesetp;
+
+			if (NULL == (nodesetp = xpathobjp->nodesetval)) {
+				zval_dtor(rv);
+				RETURN_FALSE;
+			}
+
+			if (nodesetp->nodeNr > 0) {
+				xmlNodePtr node = nodesetp->nodeTab[0];
+				int retnode;
+				rv = php_domobject_new(node, &retnode TSRMLS_CC);
+			}
+			else {
+				/*return false array, if no nodes were found */
+				RETURN_FALSE;
+			}
+
+			break;
+		}
+		default:
+			break;
+	}
+
+	*return_value = *rv;
+	FREE_ZVAL(rv);
+}	
+/* }}} */
+#endif
+/* {{{ proto string domxml_elem_get_elements_by_tagname(string tagname)
+   Returns array with nodes with given tagname in element or empty array, if not found */
+PHP_FUNCTION(domxml_elem_get_elements_by_tagname)
+{
+	zval *id,*rv;
+	xmlNode *nodep;
+	int name_len,i;
+	char *name;	
+	xmlNodeSet *nodesetp;
+
+	DOMXML_PARAM_TWO(nodep, id, le_domxmlelementp, "s", &name, &name_len);
+
+	MAKE_STD_ZVAL(rv);
+	
+	if(array_init(rv) != SUCCESS)
+	{
+		php_error(E_WARNING, "%s(): cannot create required array", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	nodesetp = php_get_elements_by_tagname(nodep,name);
+
+	if(nodesetp) {
+
+		for (i = 0; i < nodesetp->nodeNr; i++) {
+			xmlNodePtr node = nodesetp->nodeTab[i];
+			zval *child;
+			int retnode;
+
+			child = php_domobject_new(node, &retnode TSRMLS_CC);
+			zend_hash_next_index_insert(Z_ARRVAL_P(rv), &child, sizeof(zval *), NULL);
+		}
+	}
+	*return_value = *rv;
+	FREE_ZVAL(rv);
 
 }
 /* }}} */
