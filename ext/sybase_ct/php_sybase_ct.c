@@ -127,6 +127,12 @@ static void _close_sybase_link(sybase_link *sybase_ptr)
 	CS_INT con_status;
 
 	sybase_ptr->valid = 0;
+
+	/* 
+	  this can cause crashes in the current model.
+	  if the resource gets destroyed via destroy_resource_list() resource_list 
+	  will *not* be in a consistent state. thies@digicol.de
+    */
 	zend_hash_apply(resource_list,(int (*)(void *))_clean_invalid_results);
 
 	/* Non-persistent connections will always be connected or we wouldn't
