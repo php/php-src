@@ -579,7 +579,6 @@ PHP_MINIT_FUNCTION(mysqli)
 PHP_MSHUTDOWN_FUNCTION(mysqli)
 {
 	zend_hash_destroy(&mysqli_driver_properties);
-	zend_hash_destroy(&mysqli_driver_properties);
 	zend_hash_destroy(&mysqli_result_properties);
 	zend_hash_destroy(&mysqli_stmt_properties);
 	zend_hash_destroy(&mysqli_warning_properties);
