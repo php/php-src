@@ -1047,6 +1047,7 @@ ZEND_API int is_smaller_function(zval *result, zval *op1, zval *op2)
 		return FAILURE;
 	}
 	if (result->type == IS_LONG) {
+		result->type = IS_BOOL;
 		if (result->value.lval < 0) {
 			result->value.lval = 1;
 		} else {
@@ -1055,7 +1056,7 @@ ZEND_API int is_smaller_function(zval *result, zval *op1, zval *op2)
 		return SUCCESS;
 	}
 	if (result->type == IS_DOUBLE) {
-		result->type = IS_LONG;
+		result->type = IS_BOOL;
 		if (result->value.dval < 0) {
 			result->value.lval = 1;
 		} else {
@@ -1074,6 +1075,7 @@ ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2)
 		return FAILURE;
 	}
 	if (result->type == IS_LONG) {
+		result->type = IS_BOOL;
 		if (result->value.lval <= 0) {
 			result->value.lval = 1;
 		} else {
@@ -1082,7 +1084,7 @@ ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2)
 		return SUCCESS;
 	}
 	if (result->type == IS_DOUBLE) {
-		result->type = IS_LONG;
+		result->type = IS_BOOL;
 		if (result->value.dval <= 0) {
 			result->value.lval = 1;
 		} else {
