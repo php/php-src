@@ -1607,15 +1607,12 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe)
 	}
 
 	for (i=0; i< fe->common.num_args; i++) {
-		if (fe->common.arg_info[i].class_name) {
-			if (fe->common.prototype->common.arg_info[i].class_name) {
-				if (strcmp(fe->common.arg_info[i].class_name, fe->common.prototype->common.arg_info[i].class_name)!=0) {
-					return 0;
-				}
-			} else {
-				return 0;
-			}
-		} else if (fe->common.prototype->common.arg_info[i].class_name) {
+		if (ZEND_LOG_XOR(fe->common.arg_info[i].class_name, fe->common.prototype->common.arg_info[i].class_name)) {
+			/* Only one has a type hint and the other one doesn't */
+			return 0;
+		}
+		if (fe->common.arg_info[i].class_name
+			&& strcmp(fe->common.arg_info[i].class_name, fe->common.prototype->common.arg_info[i].class_name)!=0) {
 			return 0;
 		}
 		if (fe->common.arg_info[i].pass_by_reference != fe->common.prototype->common.arg_info[i].pass_by_reference) {
