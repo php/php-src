@@ -162,7 +162,7 @@ PHP_MSHUTDOWN_FUNCTION(fdf)
 
 
 /* {{{ proto int fdf_open(string filename)
-   Open a new FDF document */
+   Opens a new FDF document */
 PHP_FUNCTION(fdf_open) 
 {
 	zval **file;
@@ -188,7 +188,7 @@ PHP_FUNCTION(fdf_open)
 
 
 /* {{{ proto int fdf_create(void)
-   Create a new FDF document */
+   Creates a new FDF document */
 PHP_FUNCTION(fdf_create) 
 {
 	FDFDoc fdf;
@@ -207,7 +207,7 @@ PHP_FUNCTION(fdf_create)
 
 
 /* {{{ proto bool fdf_close(int fdfdoc)
-   Close the FDF document */
+   Closes the FDF document */
 PHP_FUNCTION(fdf_close) 
 {
 	zval **fdfp;
@@ -224,7 +224,7 @@ PHP_FUNCTION(fdf_close)
 
 
 /* {{{ proto string fdf_get_value(int fdfdoc, string fieldname)
-   Get the value of a field as string */
+   Gets the value of a field as string */
 PHP_FUNCTION(fdf_get_value) 
 {
 	zval **fdfp, **fieldname;
@@ -261,7 +261,7 @@ PHP_FUNCTION(fdf_get_value)
 
 
 /* {{{ proto bool fdf_set_value(int fdfdoc, string fieldname, string value, int isname)
-   Set the value of a field */
+   Sets the value of a field */
 PHP_FUNCTION(fdf_set_value) 
 {
 	zval **fdfp, **fieldname, **value, **isname;
@@ -289,7 +289,7 @@ PHP_FUNCTION(fdf_set_value)
 
 
 /* {{{ proto string fdf_next_field_name(int fdfdoc [, string fieldname])
-   Get the name of the next field name or the first field name */
+   Gets the name of the next field name or the first field name */
 PHP_FUNCTION(fdf_next_field_name) 
 {
 	zval **fdfp, **field;
@@ -331,7 +331,7 @@ PHP_FUNCTION(fdf_next_field_name)
 
 
 /* {{{ proto bool fdf_set_ap(int fdfdoc, string fieldname, int face, string filename, int pagenr)
-   Set the appearence of a field */
+   Sets the appearence of a field */
 PHP_FUNCTION(fdf_set_ap) 
 {
 	zval **fdfp, **fieldname, **face, **filename, **pagenr;
@@ -381,7 +381,7 @@ PHP_FUNCTION(fdf_set_ap)
 
 
 /* {{{ proto bool fdf_set_status(int fdfdoc, string status)
-   Set the value of /Status key */
+   Sets the value of /Status key */
 PHP_FUNCTION(fdf_set_status) 
 {
 	zval **fdfp, **status;
@@ -408,7 +408,7 @@ PHP_FUNCTION(fdf_set_status)
 
 
 /* {{{ proto string fdf_get_status(int fdfdoc)
-   Get the value of /Status key */
+   Gets the value of /Status key */
 PHP_FUNCTION(fdf_get_status) 
 {
 	zval **fdfp;
@@ -444,7 +444,7 @@ PHP_FUNCTION(fdf_get_status)
 
 
 /* {{{ proto bool fdf_set_file(int fdfdoc, string filename)
-   Set the value of /F key */
+   Sets the value of /F key */
 PHP_FUNCTION(fdf_set_file) 
 {
 	zval **fdfp, **filename;
@@ -471,7 +471,7 @@ PHP_FUNCTION(fdf_set_file)
 
 
 /* {{{ proto string fdf_get_file(int fdfdoc)
-   Get the value of /F key */
+   Gets the value of /F key */
 PHP_FUNCTION(fdf_get_file) 
 {
 	zval **fdfp;
@@ -507,7 +507,7 @@ PHP_FUNCTION(fdf_get_file)
 
 
 /* {{{ proto bool fdf_save(int fdfdoc, string filename)
-   Write out the FDF file */
+   Writes out the FDF file */
 PHP_FUNCTION(fdf_save) 
 {
 	zval **fdfp, **filename;
@@ -534,7 +534,7 @@ PHP_FUNCTION(fdf_save)
 
 
 /* {{{ proto bool fdf_add_template(int fdfdoc, int newpage, string filename, string template, int rename)
-   Add a template into the FDF document */
+   Adds a template into the FDF document */
 PHP_FUNCTION(fdf_add_template) 
 {
 	zval **fdfp, **newpage, **filename, **template, **rename;
@@ -574,7 +574,7 @@ PHP_FUNCTION(fdf_add_template)
 
 
 /* {{{ proto bool fdf_set_flags(int fdfdoc, string fieldname, int whichflags, int newflags)
-   Set flags for a field in the FDF document. */
+   Sets flags for a field in the FDF document */
 PHP_FUNCTION(fdf_set_flags) 
 {
 	zval **fdfp, **fieldname, **flags, **newflags;
@@ -603,7 +603,7 @@ PHP_FUNCTION(fdf_set_flags)
 
 
 /* {{{ proto bool fdf_set_opt(int fdfdoc, string fieldname, int element, string value, string name)
-   Set a value in the opt array for a field. */
+   Sets a value in the opt array for a field */
 PHP_FUNCTION(fdf_set_opt)
 {
 	zval **fdfp, **fieldname, **element, **value, **name;
@@ -632,7 +632,7 @@ PHP_FUNCTION(fdf_set_opt)
 
 
 /* {{{ proto bool fdf_set_submit_form_action(int fdfdoc, string fieldname, int whichtrigger, string url, int flags)
-   Set the submit form action for a field. */
+   Sets the submit form action for a field */
 PHP_FUNCTION(fdf_set_submit_form_action) 
 {
 	zval **fdfp, **fieldname, **trigger, **url, **flags;
@@ -661,7 +661,7 @@ PHP_FUNCTION(fdf_set_submit_form_action)
 
 
 /* {{{ proto bool fdf_set_javascript_action(int fdfdoc, string fieldname, int whichtrigger, string script)
-   Set the javascript action for a field. */
+   Sets the javascript action for a field */
 PHP_FUNCTION(fdf_set_javascript_action) 
 {
 	zval **fdfp, **fieldname, **trigger, **script;
