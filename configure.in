@@ -5,11 +5,6 @@ divert(1)
 
 AC_INIT(README.CVS-RULES)
 
-dnl Remove config.cache as it might cause unexpected behaviour
-dnl in case of a reconfigure.
-divert(0)
-rm -f config.cache
-
 PHP_FAST_OUTPUT(sapi/Makefile ext/Makefile Makefile pear/Makefile main/Makefile)
 
 if test "$with_shared_apache" != "no" && test -n "$with_shared_apache" ; then
