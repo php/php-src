@@ -70,7 +70,7 @@ static ZEND_FUNCTION(get_defined_constants);
 static ZEND_FUNCTION(debug_backtrace);
 #if ZEND_DEBUG
 static ZEND_FUNCTION(zend_test_func);
-#if ZEND_ZTS
+#ifdef ZTS
 static ZEND_FUNCTION(zend_thread_id);
 #endif
 #endif
@@ -127,7 +127,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(debug_backtrace, NULL)
 #if ZEND_DEBUG
 	ZEND_FE(zend_test_func,		NULL)
-#if ZTS
+#ifdef ZTS
 	ZEND_FE(zend_thread_id,		NULL)
 #endif
 #endif
