@@ -396,7 +396,7 @@ ZEND_FUNCTION(get_parent_class)
 /* }}} */
 
 /* {{{ proto bool is_subclass_of(object object, string class_name)
-   Returns true if the object is part of hierarchy derived from passed class */
+   Returns true if the object has this class as one of its parents */
 ZEND_FUNCTION(is_subclass_of)
 {
 	zval **obj, **class_name;
@@ -412,23 +412,16 @@ ZEND_FUNCTION(is_subclass_of)
 		RETURN_FALSE;
 	}
 
-	parent_ce = (*obj)->value.obj.ce->parent;
-	if (!parent_ce) {
-		RETURN_FALSE;
-	}
-
 	convert_to_string_ex(class_name);
 	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
 	zend_str_tolower(lcname, (*class_name)->value.str.len);
 
-	do {
+	for (parent_ce = (*obj)->value.obj.ce->parent; parent_ce != NULL; parent_ce = parent_ce->parent) {
 		if (!strcmp(parent_ce->name, lcname)) {
 			efree(lcname);
 			RETURN_TRUE;
 		}
-	} while (parent_ce->parent
-             && zend_hash_find(CG(class_table), parent_ce->parent->name,
-                               parent_ce->parent->name_length+1, (void**)&parent_ce)==SUCCESS);
+	}
 	efree(lcname);
 	RETURN_FALSE;
 }
