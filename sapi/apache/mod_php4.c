@@ -225,25 +225,35 @@ static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC 
 	array_header *arr = table_elts(((request_rec *) SG(server_context))->subprocess_env);
 	table_entry *elts = (table_entry *) arr->elts;
 	char *script_filename=NULL;
+	zval **path_translated;
+	HashTable *symbol_table;
 
 	for (i = 0; i < arr->nelts; i++) {
 		char *val;
 
 		if (elts[i].val) {
 			val = elts[i].val;
-			if (!strcmp(elts[i].key, "SCRIPT_FILENAME")) {
-				script_filename = val;
-			}
 		} else {
 			val = empty_string;
 		}
 		php_register_variable(elts[i].key, val, track_vars_array  ELS_CC PLS_CC);
 	}
 
-	/* insert special variables */
-	if (script_filename) {
-		php_register_variable("PATH_TRANSLATED", script_filename, track_vars_array ELS_CC PLS_CC);
+	/* If PATH_TRANSLATED doesn't exist, copy it from SCRIPT_FILENAME */
+	if (track_vars_array) {
+		symbol_table = track_vars_array->value.ht;
+	} else if (PG(register_globals)) {
+		/* should never happen nowadays */
+		symbol_table = EG(active_symbol_table);
+	} else {
+		symbol_table = NULL;
 	}
+	if (symbol_table
+		&& !zend_hash_exists(symbol_table, "PATH_TRANSLATED", sizeof("PATH_TRANSLATED"))
+		&& zend_hash_find(symbol_table, "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME"), (void **) &path_translated)) {
+		php_register_variable("PATH_TRANSLATED", Z_STRVAL_PP(path_translated), track_vars_array ELS_CC PLS_CC);
+	}
+
 	php_register_variable("PHP_SELF", ((request_rec *) SG(server_context))->uri, track_vars_array ELS_CC PLS_CC);
 }
 
