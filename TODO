@@ -24,6 +24,10 @@ ext/oci8
 ext/standard
 ------------
     * strpad() (Andrei)
+	* comparing arrays semantically (Andrei)
+	* get_loaded_modules()
+      is_module_loaded()
+      get_module_functions() (Andrei)
 	* NOT binary safe:
 		strtok()
 		basename()
