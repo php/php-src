@@ -13,8 +13,8 @@ if test "$PHP_MSSQL" != "no"; then
   if test "$PHP_MSSQL" = "yes"; then
 
     for i in /usr/local /usr; do
-      if test -f $i/freetds/include/tds.h; then
-        FREETDS_INSTALLATION_DIR=$i/freetds
+      if test -f $i/include/tds.h; then
+        FREETDS_INSTALLATION_DIR=$i
         break
       fi
     done
@@ -27,8 +27,6 @@ if test "$PHP_MSSQL" != "no"; then
 
     if test -f $PHP_MSSQL/include/tds.h; then
       FREETDS_INSTALLATION_DIR=$PHP_MSSQL
-    elif test -f $PHP_MSSQL/freetds/include/tds.h; then
-      FREETDS_INSTALLATION_DIR=$PHP_MSSQL/freetds
     else
       AC_MSG_ERROR(Directory $PHP_MSSQL is not a FreeTDS installation directory)
     fi
