@@ -3800,6 +3800,7 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 					lc = '<';
 					state = 1;
 					if (allow) {
+						tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
 						*(tp++) = '<';
 					}
 				} else if (state == 1) {
@@ -3814,6 +3815,7 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 						br++;
 					}
 				} else if (allow && state == 1) {
+					tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
 					*(tp++) = c;
 				} else if (state == 0) {
 					*(rp++) = c;
@@ -3827,6 +3829,7 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 						br--;
 					}
 				} else if (allow && state == 1) {
+					tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
 					*(tp++) = c;
 				} else if (state == 0) {
 					*(rp++) = c;
@@ -3844,6 +3847,7 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 						lc = '>';
 						state = 0;
 						if (allow) {
+							tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
 							*(tp++) = '>';
 							*tp='\0';
 							if (php_tag_find(tbuf, tp-tbuf, allow)) {
@@ -3890,6 +3894,7 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 				} else if (state == 0) {
 					*(rp++) = c;
 				} else if (allow && state == 1) {
+					tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
 					*(tp++) = c;
 				}
 				break;
@@ -3903,11 +3908,8 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 					if (state == 0) {
 						*(rp++) = c;
 					} else if (allow && state == 1) {
+						tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
 						*(tp++) = c;
-						if ( (tp-tbuf) >= PHP_TAG_BUF_SIZE ) {
-							/* prevent buffer overflows */
-							tp = tbuf;
-						}
 					}
 				}
 				break;
@@ -3922,7 +3924,7 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 
 			case '?':
 
-				if (state == 1 && *(p-1)=='<') { 
+				if (state == 1 && *(p-1) == '<') { 
 					br=0;
 					state=2;
 					break;
@@ -3960,10 +3962,8 @@ reg_char:
 				if (state == 0) {
 					*(rp++) = c;
 				} else if (allow && state == 1) {
+					tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
 					*(tp++) = c;
-					if ( (tp-tbuf) >= PHP_TAG_BUF_SIZE ) { /* no buffer overflows */
-						tp = tbuf;
-					}
 				} 
 				break;
 		}
