@@ -53,6 +53,8 @@ typedef struct _zend_function_entry {
 #define ZEND_FALIAS(name, alias, arg_info)			ZEND_FENTRY(name, ZEND_FN(alias), arg_info, 0)
 #define ZEND_ME(classname, name, arg_info, flags)	ZEND_FENTRY(name, ZEND_FN(classname##_##name), arg_info, flags)
 #define ZEND_ABSTRACT_ME(classname, name, arg_info)	ZEND_FENTRY(name, NULL, arg_info, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+#define ZEND_MALIAS(name, classname, alias, arg_info, flags) \
+                                                    ZEND_FENTRY(name, ZEND_FN(classname##_##alias), arg_info, flags)
 
 #define ZEND_ARG_INFO(pass_by_ref, name)							{ #name, sizeof(#name)-1, NULL, 0, 0, pass_by_ref },
 #define ZEND_ARG_PASS_INFO(pass_by_ref)								{ NULL, 0, NULL, 0, 0, pass_by_ref },
