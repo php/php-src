@@ -480,7 +480,7 @@ static void sxe_prop_dim_delete(zval *object, zval *member, zend_bool elements, 
 				anext = attr->next;
 				if (!xmlStrcmp(attr->name, Z_STRVAL_P(member))) {
 					xmlUnlinkNode((xmlNodePtr) attr);
-					xmlFreeProp(attr);
+					php_libxml_node_free_resource((xmlNodePtr) attr TSRMLS_CC);
 				}
 				attr = anext;
 			}
@@ -495,7 +495,7 @@ static void sxe_prop_dim_delete(zval *object, zval *member, zend_bool elements, 
 				
 				if (!xmlStrcmp(node->name, Z_STRVAL_P(member))) {
 					xmlUnlinkNode(node);
-					xmlFreeNode(node);
+					php_libxml_node_free_resource(node TSRMLS_CC);
 				}
 
 next_iter:
