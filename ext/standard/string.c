@@ -3995,35 +3995,45 @@ PHP_FUNCTION(str_rot13)
 /* }}} */
 
 
-static int php_string_shuffle(const void *a, const void *b TSRMLS_DC)
+static void php_string_shuffle(char *str, long len TSRMLS_DC)
 {
-	long rnd;
-	rnd = php_rand(TSRMLS_C);
-	if (rnd % 3)
-		return 1;
-	else if (rnd % 5)
-		return 0;
-	else 
-		return -1;
+	long n_elems, rnd_idx, n_left;
+	char temp;
+	/* The implementation is stolen from array_data_shuffle       */
+	/* Thus the characteristics of the randomization are the same */
+	n_elems = len;
+	
+	if (n_elems <= 1) {
+		return;
+	}
+
+	n_left = n_elems;
+	
+	while (--n_left) {
+		rnd_idx = php_rand(TSRMLS_C);
+		RAND_RANGE(rnd_idx, 0, n_left, PHP_RAND_MAX);
+		if (rnd_idx != n_left) {
+			temp = str[n_left];
+			str[n_left] = str[rnd_idx];
+			str[rnd_idx] = temp;
+		}
+	}
 }
 
-/* {{{ proto string str_shuffle(string str)
+
+/* {{{ proto void str_shuffle(string str)
    Shuffles string. One permutation of all possible is created */
 PHP_FUNCTION(str_shuffle)
 {
-	/* Note : by using current php_string_shuffle for string  */
-	/* with 6 chars (6! permutations) about 2/3 of them are   */
-	/* computed for 6! calls for the function. So it isn't so */
-	/* unique. The ratio is the same for other lengths.       */
 	char *str;
-	int i, str_len;
+	int str_len;
 	
-	i = 0;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-	zend_qsort((void *)str, str_len, sizeof(char), php_string_shuffle TSRMLS_CC);
-	RETURN_STRINGL(str, str_len, 1);
+	php_string_shuffle(str, str_len TSRMLS_CC);
+	
+	return;
 }
 /* }}} */
 
