@@ -1726,7 +1726,7 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	}
 	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt"); 
 
-	if (rc = mysql_stmt_attr_set(stmt->stmt, attr, (void *)&mode)) {
+	if ((rc = mysql_stmt_attr_set(stmt->stmt, attr, (void *)&mode))) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1748,7 +1748,7 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 	}
 	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt"); 
 
-	if (rc = mysql_stmt_attr_get(stmt->stmt, attr, &value)) {
+	if ((rc = mysql_stmt_attr_get(stmt->stmt, attr, &value))) {
 		RETURN_FALSE;
 	}
 	RETURN_LONG(value);
