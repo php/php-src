@@ -249,7 +249,7 @@ struct _sdlAttribute {
 	encodePtr  encode;
 };
 
-sdlPtr get_sdl(char *uri TSRMLS_DC);
+sdlPtr get_sdl(zval *this_ptr, char *uri TSRMLS_DC);
 
 encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, const char *type);
 encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type);

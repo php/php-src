@@ -877,7 +877,7 @@ PHP_METHOD(SoapServer, SoapServer)
 	zend_hash_init(service->soap_functions.ft, 0, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (wsdl) {
-		service->sdl = get_sdl(Z_STRVAL_P(wsdl) TSRMLS_CC);
+		service->sdl = get_sdl(this_ptr, Z_STRVAL_P(wsdl) TSRMLS_CC);
 		if (service->uri == NULL) {
 			if (service->sdl->target_ns) {
 				service->uri = estrdup(service->sdl->target_ns);
@@ -2000,7 +2000,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		old_soap_version = SOAP_GLOBAL(soap_version);
 		SOAP_GLOBAL(soap_version) = soap_version;
 
-		sdl = get_sdl(Z_STRVAL_P(wsdl) TSRMLS_CC);
+		sdl = get_sdl(this_ptr, Z_STRVAL_P(wsdl) TSRMLS_CC);
 		ret = zend_list_insert(sdl, le_sdl);
 
 		add_property_resource(this_ptr, "sdl", ret);

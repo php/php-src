@@ -20,6 +20,7 @@
 /* $Id$ */
 
 #include "php_soap.h"
+#include "ext/libxml/php_libxml.h"
 #include "libxml/uri.h"
 
 #include "ext/standard/md5.h"
@@ -194,18 +195,51 @@ static int is_wsdl_element(xmlNodePtr node)
 	return 1;
 }
 
-static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
+static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include TSRMLS_DC)
 {
 	sdlPtr tmpsdl = ctx->sdl;
 	xmlDocPtr wsdl;
 	xmlNodePtr root, definitions, trav;
 	xmlAttrPtr targetNamespace;
+	php_stream_context *context=NULL;
+	zval **proxy_host, **proxy_port, *orig_context, *new_context;
 
 	if (zend_hash_exists(&ctx->docs, struri, strlen(struri)+1)) {
 		return;
 	}
 
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_host", sizeof("_proxy_host"), (void **) &proxy_host) == SUCCESS &&
+	    Z_TYPE_PP(proxy_host) == IS_STRING &&
+	    zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port"), (void **) &proxy_port) == SUCCESS &&
+	    Z_TYPE_PP(proxy_port) == IS_LONG) {
+	    	zval str_port, *str_proxy;
+	    	smart_str proxy = {0};
+		str_port = **proxy_port;
+		zval_copy_ctor(&str_port);
+		convert_to_string(&str_port);
+		smart_str_appends(&proxy,"tcp://");
+		smart_str_appends(&proxy,Z_STRVAL_PP(proxy_host));
+		smart_str_appends(&proxy,":");
+		smart_str_appends(&proxy,Z_STRVAL(str_port));
+		zval_dtor(&str_port);
+		MAKE_STD_ZVAL(str_proxy);
+		ZVAL_STRING(str_proxy, proxy.c, 1);
+		smart_str_free(&proxy);
+		
+		context = php_stream_context_alloc();
+		php_stream_context_set_option(context, "http", "proxy", str_proxy);
+		zval_ptr_dtor(&str_proxy);
+		MAKE_STD_ZVAL(new_context);
+		php_stream_context_to_zval(context, new_context);
+		orig_context = php_libxml_switch_context(new_context TSRMLS_CC);
+	}
+	
 	wsdl = soap_xmlParseFile(struri);
+	
+	if (context) {
+		php_libxml_switch_context(orig_context TSRMLS_CC);
+		zval_ptr_dtor(&new_context);
+	}
 
 	if (!wsdl) {
 		soap_error1(E_ERROR, "Parsing WSDL: Couldn't load from '%s'", struri);
@@ -264,7 +298,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 					uri = xmlBuildURI(tmp->children->content, base);
 					xmlFree(base);
 				}
-				load_wsdl_ex(uri, ctx, 1);
+				load_wsdl_ex(this_ptr, uri, ctx, 1 TSRMLS_CC);
 				xmlFree(uri);
 			}
 
@@ -557,7 +591,7 @@ static HashTable* wsdl_message(sdlCtx *ctx, char* message_name)
 	return parameters;
 }
 
-static sdlPtr load_wsdl(char *struri)
+static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 {
 	sdlCtx ctx;
 	int i,n;
@@ -574,7 +608,7 @@ static sdlPtr load_wsdl(char *struri)
 	zend_hash_init(&ctx.portTypes, 0, NULL, NULL, 0);
 	zend_hash_init(&ctx.services,  0, NULL, NULL, 0);
 
-	load_wsdl_ex(struri,&ctx, 0);
+	load_wsdl_ex(this_ptr, struri,&ctx, 0 TSRMLS_CC);
 	schema_pass2(&ctx);
 
 	n = zend_hash_num_elements(&ctx.services);
@@ -2163,7 +2197,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	zend_hash_destroy(&tmp_types);
 }
 
-sdlPtr get_sdl(char *uri TSRMLS_DC)
+sdlPtr get_sdl(zval *this_ptr, char *uri TSRMLS_DC)
 {
 	sdlPtr sdl = NULL;
 	char* old_error_code = SOAP_GLOBAL(error_code);
@@ -2177,7 +2211,7 @@ sdlPtr get_sdl(char *uri TSRMLS_DC)
 		if (strchr(uri,':') != NULL || IS_ABSOLUTE_PATH(uri, uri_len)) {
 			strcpy(fn, uri);
 		} else if (VCWD_REALPATH(uri, fn) == NULL) {
-			sdl = load_wsdl(uri);
+			sdl = load_wsdl(this_ptr, uri TSRMLS_CC);
 		}
 		if (sdl == NULL) {
 			char* key;
@@ -2198,7 +2232,7 @@ sdlPtr get_sdl(char *uri TSRMLS_DC)
 			memcpy(key+len+sizeof("/wsdl-")-1,md5str,sizeof(md5str));
 
 			if ((sdl = get_sdl_from_cache(key, fn, t-SOAP_GLOBAL(cache_ttl))) == NULL) {
-				sdl = load_wsdl(fn);
+				sdl = load_wsdl(this_ptr, fn TSRMLS_CC);
 				if (sdl != NULL) {
 					add_sdl_to_cache(key, fn, t, sdl);
 				}
@@ -2206,7 +2240,7 @@ sdlPtr get_sdl(char *uri TSRMLS_DC)
 			efree(key);
 		}
 	} else {
-		sdl = load_wsdl(uri);
+		sdl = load_wsdl(this_ptr, uri TSRMLS_CC);
 	}
 	SOAP_GLOBAL(error_code) = old_error_code;
 	return sdl;
