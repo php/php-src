@@ -327,7 +327,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 
 static void spl_array_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC) /* {{{ */
 {
-	return spl_array_write_dimension_ex(1, object, offset, value TSRMLS_CC);
+	spl_array_write_dimension_ex(1, object, offset, value TSRMLS_CC);
 } /* }}} */
 
 static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval *offset TSRMLS_DC) /* {{{ */
@@ -374,7 +374,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 
 static void spl_array_unset_dimension(zval *object, zval *offset TSRMLS_DC) /* {{{ */
 {
-	return spl_array_unset_dimension_ex(1, object, offset TSRMLS_CC);
+	spl_array_unset_dimension_ex(1, object, offset TSRMLS_CC);
 } /* }}} */
 
 static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *offset, int check_empty TSRMLS_DC) /* {{{ */
