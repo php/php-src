@@ -40,7 +40,7 @@ typedef struct {
 	MYSQL_RES		*result;
 	MYSQL_ROW		current_data;
 	long			*current_lengths;
-	unsigned int		last_err;
+	int		last_err;
 	pdo_mysql_column 	*cols;
 } pdo_mysql_stmt;
 
@@ -53,9 +53,9 @@ typedef struct {
 
 extern pdo_driver_t pdo_mysql_driver;
 
-int _mysql_error(char *what, int errno, const char *file, int line TSRMLS_DC);
+extern int _mysql_error(char *what, int errno, const char *file, int line TSRMLS_DC);
 #define pdo_mysql_error(w,s)	_mysql_error(w, s, __FILE__, __LINE__ TSRMLS_CC)
-int mysql_handle_error(pdo_dbh_t *dbh, pdo_mysql_db_handle *H, int errcode);
+extern int mysql_handle_error(pdo_dbh_t *dbh, pdo_mysql_db_handle *H, int errcode);
 
 extern struct pdo_stmt_methods mysql_stmt_methods;
 #endif
