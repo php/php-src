@@ -244,6 +244,7 @@ static Yaz_Association get_assoc (pval **id)
 #ifdef ZTS
 		tsrm_mutex_unlock (yaz_mutex);
 #endif
+		php_error(E_WARNING, "Invalid YAZ handle");
 		return 0;
 	}
 	return assoc;
@@ -492,6 +493,7 @@ static void handle_apdu (Yaz_Association t, Z_APDU *apdu)
 			}
 			if (t->action)
 				(*t->action) (t);
+			t->action = 0;
 		}
 		break;
 	case Z_APDU_searchResponse:
@@ -1193,7 +1195,6 @@ PHP_FUNCTION(yaz_present)
 	p = get_assoc (id);
 	if (!p)
 	{
-		zend_error(E_WARNING, "get_assoc failed for present");
 		RETURN_FALSE;
 	}
 	p->action = 0;
@@ -1219,7 +1220,8 @@ PHP_FUNCTION(yaz_wait)
 	for (i = 0; i<MAX_ASSOC; i++)
 	{
 		Yaz_Association p = shared_associations[i];
-		if (!p || p->order != order_associations || !p->action)
+		if (!p || p->order != order_associations || !p->action
+			|| p->mask_select)
 			continue;
 		if (!p->cs)
 		{
@@ -1648,6 +1650,11 @@ PHP_FUNCTION(yaz_record)
 			{
 				if (ent && ent->desc)
 					RETVAL_STRING(ent->desc, 1);
+			}
+			else if (!strcmp (type, "database"))
+			{
+				if (npr->databaseName)
+					RETVAL_STRING(npr->databaseName, 1);
 			}
 			else if (!strcmp (type, "string"))
 			{
@@ -2201,8 +2208,13 @@ PHP_FUNCTION(yaz_ccl_conf)
 			zend_hash_move_forward_ex(ht, &pos)) 
 		{
 			ulong idx;
+#if PHP_API_VERSION > 20010101
 			int type = zend_hash_get_current_key_ex(ht, &key, 0, 
 													&idx, 0, &pos);
+#else
+			int type = zend_hash_get_current_key_ex(ht, &key, 0, 
+													&idx, &pos);
+#endif
 			if (type != HASH_KEY_IS_STRING || Z_TYPE_PP(ent) != IS_STRING)
 				continue;
 			ccl_qual_fitem(p->ccl_parser->bibset, (*ent)->value.str.val, key);
