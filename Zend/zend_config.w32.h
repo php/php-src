@@ -29,6 +29,7 @@ typedef unsigned long ulong;
 typedef unsigned int uint;
 
 #define HAVE_ALLOCA 1
+#define HAVE_LIMITS_H 1
 #include <malloc.h>
 
 #undef HAVE_KILL
