@@ -212,7 +212,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	the_time = time(NULL);
 	ta = php_localtime_r(&the_time, &tmbuf);
 
-	snprintf (&api_no, 9, "%d", ZEND_EXTENSION_API_NO);
+	snprintf (api_no, 9, "%d", ZEND_EXTENSION_API_NO);
 
 	PUTS("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n");
 
