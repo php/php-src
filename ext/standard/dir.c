@@ -398,7 +398,7 @@ PHP_FUNCTION(glob)
 
 #ifndef GLOB_NOMATCH
 	/* now catch the FreeBSD style of "no matches" */
-	if (!globbuf.gl_pathc) {
+	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
 		array_init(return_value);
 		return;
 	}
