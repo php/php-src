@@ -83,12 +83,16 @@
 # define ZEND_EXTENSIONS_SUPPORT	0
 #endif
 
+#if defined(HAVE_ALLOCA) && defined(HAVE_ALLOCA_H)
+# include <alloca.h>
+#endif
+
 #if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(ZEND_WIN32))
-#	define do_alloca(p) alloca(p)
-#	define free_alloca(p)
+# define do_alloca(p) alloca(p)
+# define free_alloca(p)
 #else
-#	define do_alloca(p)		emalloc(p)
-#	define free_alloca(p)	efree(p)
+# define do_alloca(p)		emalloc(p)
+# define free_alloca(p)	efree(p)
 #endif
 
 #if ZEND_DEBUG
