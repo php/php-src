@@ -117,6 +117,10 @@ function_entry mnogosearch_functions[] = {
 	
 	PHP_FE(udm_free_res,		NULL)
 	PHP_FE(udm_free_agent,		NULL)
+
+#if UDM_VERSION_ID > 30110
+	PHP_FE(udm_get_doc_count,	NULL)
+#endif
 	
 	{NULL, NULL, NULL}
 };
@@ -275,8 +279,13 @@ DLEXPORT PHP_RINIT_FUNCTION(mnogosearch)
 
 DLEXPORT PHP_MINFO_FUNCTION(mnogosearch)
 {
+	char buf[32];
+	
 	php_info_print_table_start();
 	php_info_print_table_row(2, "mnoGoSearch Support", "enabled" );
+	
+	sprintf(buf,"%d", UDM_VERSION_ID);
+	php_info_print_table_row(2, "mnoGoSearch library version", buf );
 	php_info_print_table_end();
 }
 
@@ -1033,6 +1042,33 @@ DLEXPORT PHP_FUNCTION(udm_error)
 	RETURN_STRING(UdmDBErrorMsg(Agent->db),1);
 }
 /* }}} */
+
+
+#if UDM_VERSION_ID > 30110
+/* {{{ proto int udm_get_doc_count(int agent)
+   Get total number of documents in database */
+DLEXPORT PHP_FUNCTION(udm_get_doc_count)
+{
+	pval ** yyagent;
+	UDM_AGENT * Agent;
+	int id=-1;
+
+	switch(ZEND_NUM_ARGS()){
+		case 1: {
+				if (zend_get_parameters_ex(1, &yyagent)==FAILURE) {
+					RETURN_FALSE;
+				}
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
+	RETURN_LONG(UdmGetDocCount(Agent));
+}
+/* }}} */
+#endif
 
 
 #endif
