@@ -60,6 +60,21 @@ enum pdo_attribute_type {
 	PDO_ATTR_PREFETCH,		/* configure the prefetch size for drivers that support it */
 };
 
+/* generic error code values.
+ * Don't want to go overboard with these.
+ * */
+enum pdo_error_type {
+	PDO_ERR_NONE,			/* no error condition */
+	PDO_ERR_CANT_MAP,		/* no way to map native error to the generic codes; consult the native error for more info */
+	PDO_ERR_SYNTAX,
+	PDO_ERR_CONSTRAINT,
+	PDO_ERR_NOT_FOUND,
+	PDO_ERR_ALREADY_EXISTS,
+	PDO_ERR_NOT_IMPLEMENTED,
+	PDO_ERR_MISMATCH,
+	PDO_ERR_TRUNCATED,
+};
+
 /* {{{ utils for reading attributes set as driver_options */
 static inline long pdo_attr_lval(zval *options, enum pdo_fetch_type option_name, long defval TSRMLS_DC)
 {
@@ -220,6 +235,8 @@ struct _pdo_dbh_t {
 	 * meaningful */
 	int affected_rows;
 
+	/* the global error code. */
+	enum pdo_error_type error_code;
 #if 0
 	/* persistent hash key associated with this handle */
 	const char *persistent_id;
@@ -294,6 +311,9 @@ struct _pdo_stmt_t {
 	/* the copy of the query with expanded binds ONLY for emulated-prepare drivers */
 	char *active_query_string;
 	int active_query_stringlen;
+
+	/* the cursor specific error code. */
+	enum pdo_error_type error_code;
 };
 
 /* call this in MINIT to register your PDO driver */
