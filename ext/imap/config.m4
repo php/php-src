@@ -42,11 +42,12 @@ if test "$PHP_IMAP_SSL" != "no"; then
   PHP_SSL_LIBDIR=$PHP_IMAP_SSL/lib
 fi
 
+
 PHP_ARG_WITH(imap,for IMAP support,
 [  --with-imap[=DIR]       Include IMAP support.  DIR is the IMAP include
                           and c-client.a directory.])
 
-  if test "$PHP_IMAP" != "no"; then  
+if test "$PHP_IMAP" != "no"; then  
     for i in /usr/local /usr $PHP_IMAP; do
       IMAP_INC_CHK()
       el[]IMAP_INC_CHK(/include/c-client)
@@ -97,13 +98,45 @@ PHP_ARG_WITH(imap,for IMAP support,
     fi
 
     if test "$PHP_IMAP_SSL" != "no"; then
-      AC_DEFINE(HAVE_IMAP_SSL,1,[ ])
-      PHP_ADD_LIBPATH($PHP_SSL_LIBDIR, IMAP_SHARED_LIBADD)
-      PHP_ADD_LIBRARY(ssl,, IMAP_SHARED_LIBADD)
-      PHP_ADD_LIBRARY(crypto,, IMAP_SHARED_LIBADD)
+      old_LIBS=$LIBS
+      old_LDFLAGS=$LDFLAGS
+      
+      LIBS="-lssl -lcrypto -lc-client"
+      LDFLAGS="-L$IMAP_LIBDIR -L$PHP_SSL_LIBDIR"
+      AC_TRY_RUN([
+        void mm_log(void){}
+        void mm_dlog(void){}
+        void mm_flags(void){}
+        void mm_fatal(void){}
+        void mm_critical(void){}
+        void mm_nocritical(void){}
+        void mm_notify(void){}
+        void mm_login(void){}
+        void mm_diskerror(void){}
+        void mm_status(void){}
+        void mm_lsub(void){}
+        void mm_list(void){}
+        void mm_exists(void){}
+        void mm_searched(void){}
+        void mm_expunged(void){}
+        char ssl_onceonlyinit();
+        int main() {
+          ssl_onceonlyinit();
+          return 0;
+        }
+      ],[
+        LIBS=$old_LIBS
+        LDFLAGS=$old_LDFLAGS
+
+        AC_DEFINE(HAVE_IMAP_SSL,1,[ ])
+        PHP_ADD_LIBPATH($PHP_SSL_LIBDIR, IMAP_SHARED_LIBADD)
+        PHP_ADD_LIBRARY(ssl,, IMAP_SHARED_LIBADD)
+        PHP_ADD_LIBRARY(crypto,, IMAP_SHARED_LIBADD)
+      ], [
+        AC_MSG_ERROR(This c-client library does not support SSL. Recompile or remove --with-imap-ssl from configure line.)
+      ])
     fi
 
     PHP_EXTENSION(imap, $ext_shared)
-
     AC_DEFINE(HAVE_IMAP,1,[ ])
-  fi
+fi
