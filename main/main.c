@@ -459,14 +459,15 @@ PHPAPI void php_error(int type, const char *format,...)
 }
 
 
-
+static long php_timeout_seconds;
 
 #ifdef HAVE_SETITIMER
 static void php3_timeout(int dummy)
 {
 	PLS_FETCH();
 
-	php_error(E_ERROR, "Maximum execution time of %s seconds exceeded", INI_STR("max_execution_time"));
+	php_error(E_ERROR, "Maximum execution time of %d second%s exceeded",
+			  php_timeout_seconds, php_timeout_seconds == 1 ? "" : "s");
 }
 #endif
 
@@ -485,6 +486,7 @@ static void php3_set_timeout(long seconds)
 	t_r.it_value.tv_sec = seconds;
 	t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
 
+	php_timeout_seconds = seconds;
 	setitimer(ITIMER_PROF, &t_r, NULL);
 	signal(SIGPROF, php3_timeout);
 #	endif
