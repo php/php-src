@@ -23,6 +23,7 @@ AC_ARG_WITH(imap,
       IMAP_INC_CHK()
       el[]IMAP_INC_CHK(/include)
       el[]IMAP_INC_CHK(/include/imap)
+      el[]IMAP_INC_CHK(/include/c-client)
       el[]IMAP_INC_CHK(/imap)
       el[]IMAP_INC_CHK(/c-client)
       fi
