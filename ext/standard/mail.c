@@ -230,7 +230,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(mail)
-
+{
 	char *sendmail_path = INI_STR("sendmail_path");
 
 #ifdef PHP_WIN32
