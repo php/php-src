@@ -11,7 +11,7 @@ if test "$PHP_MIME_MAGIC" = "yes"; then
 
   # Try to see if we can find the path of the magic file in its 
   # default locations.
-  if test-f /usr/share/magic.mime ; then
+  if test -f /usr/share/magic.mime ; then
 	PHP_MIME_MAGIC_FILE_PATH=/usr/share/magic.mime
   elif test -f /usr/share/magic ; then
 	PHP_MIME_MAGIC_FILE_PATH=/usr/share/magic	
