@@ -95,7 +95,7 @@ DBA_FETCH_FUNC(cdb)
 	unsigned int len;
 	char *new_entry = NULL;
 	
-//	cdb_findstart(&cdb->c);
+/*	cdb_findstart(&cdb->c); */
 	if (cdb_find(&cdb->c, key, keylen) == 1) {
 		while(skip--) {
 			if (cdb_findnext(&cdb->c, key, keylen) != 1) {
