@@ -83,7 +83,7 @@ static int var_access(php_unserialize_data_t *var_hashx, int id, zval ***store)
 
 	if (!var_hash) return !SUCCESS;
 
-	if (id >= var_hash->used_slots) return !SUCCESS;
+	if (id < 0 || id >= var_hash->used_slots) return !SUCCESS;
 
 	*store = &var_hash->data[id];
 
