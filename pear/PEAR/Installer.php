@@ -729,63 +729,79 @@ class PEAR_Installer extends PEAR_Common
             if (!is_file($pkgfile)) {
                 $origpkgfile = $pkgfile;
                 $pkgfile = $this->extractDownloadFileName($pkgfile, $version);
-                if ($this->validPackageName($pkgfile)) {
-                    if ($this->registry->packageExists($pkgfile)
-                          && !isset($options['upgrade'])) {
-                        $this->log(0, "Package '$pkgfile' already installed, skipping");
-                        // ignore dependencies that are installed unless we are upgrading
-                        continue;
-                    }
-                    if ($version === null) {
-                        // {{{ use preferred state if no version number was specified
-                        include_once 'PEAR/Remote.php';
-                        $curver = $this->registry->packageInfo($pkgfile, 'version');
-                        $remote = &new PEAR_Remote($config);
-                        $releases = $remote->call('package.info', $pkgfile, 'releases');
-                        if (!count($releases)) {
-                            return $this->raiseError("No releases found for package '$pkgfile'");
+                if (!$this->validPackageName($pkgfile)) {
+                    return $this->raiseError("Package name '$pkgfile' not valid");
+                }
+                // ignore packages that are installed unless we are upgrading
+                $curinfo = $this->registry->packageInfo($pkgfile);
+                if ($this->registry->packageExists($pkgfile) && empty($options['upgrade']) && empty($options['force'])) {
+                    $this->log(0, "Package '{$curinfo['package']}' already installed, skipping");
+                    continue;
+                }
+                // Retrieve remote release list
+                include_once 'PEAR/Remote.php';
+                $curver = $curinfo['version'];
+                $remote = &new PEAR_Remote($config);
+                $releases = $remote->call('package.info', $pkgfile, 'releases');
+                if (!count($releases)) {
+                    return $this->raiseError("No releases found for package '$pkgfile'");
+                }
+                // Want a specific version/state
+                if ($version !== null) {
+                    // Passed Foo-1.2
+                    if ($this->validPackageVersion($version)) {
+                        if (!isset($releases[$version])) {
+                            return $this->raiseError("No release with version '$version' found for '$pkgfile'");
                         }
-                        $states = $this->betterStates($state, true);
-                        $possible = false;
-                        $_err_latest = false;
+                    // Passed Foo-alpha
+                    } elseif (in_array($version, $this->getReleaseStates())) {
+                        $state = $version;
+                        $version = 0;
                         foreach ($releases as $ver => $inf) {
-                            if (!$_err_latest) {
-                                $_err_latest = "$pkgfile-$ver";
-                                $_err_latest_state = $inf['state'];
-                            }
-                            if (in_array($inf['state'], $states)) {
-                                if (is_array($possible)) {
-                                    if (version_compare(key($possible), $ver) < 0) {
-                                        $possible = array($ver => $inf['state']);
-                                    }
-                                } else {
-                                    if (version_compare($ver, $curver) > 0) {
-                                        $possible = array($ver => $inf['state']);
-                                    }
-                                }
+                            if ($inf['state'] == $state && version_compare("$version", "$ver") < 0) {
+                                $version = $ver;
                             }
                         }
-                        if ($possible) {
-                            $pkgfile = $this->_downloadFile($pkgfile, $config, $options,
-                                                    $errors, key($possible), $origpkgfile,
-                                                    $state);
-                        } else {
-                            return $this->raiseError('No release with state equal to: \'' . implode(', ', $states) .
-                                                     "' found. The latest is $_err_latest ($_err_latest_state). Use " .
-                                                     "'pear install $_err_latest' or set the 'preferred_state' ".
-                                                     "to '$_err_latest_state' for installing this package.");
+                        if ($version == 0) {
+                            return $this->raiseError("No release with state '$state' found for '$pkgfile'");
                         }
-                        // }}}
+                    // invalid postfix passed
                     } else {
-                        $pkgfile = $this->_downloadFile($pkgfile, $config, $options,
-                                                        $errors, $version, $origpkgfile,
-                                                        $state);
-                        if (PEAR::isError($pkgfile)) {
-                            return $pkgfile;
+                        return $this->raiseError("Invalid postfix '-$version', be sure to pass a valid PEAR ".
+                                                 "version number or release state");
+                    }
+                // Guess what to download
+                } else {
+                    $states = $this->betterStates($state, true);
+                    $possible = false;
+                    $version = 0;
+                    foreach ($releases as $ver => $inf) {
+                        if (in_array($inf['state'], $states) && version_compare("$version", "$ver") < 0) {
+                            $version = $ver;
                         }
+                    }
+                    if ($version == 0) {
+                        return $this->raiseError('No release with state equal to: \'' . implode(', ', $states) .
+                                                 "' found for '$pkgfile'");
                     }
                 }
-            }
+                // Check if we haven't already the version
+                if (empty($options['force'])) {
+                    if ($curinfo['version'] == $version) {
+                        $this->log(0, "Package '{$curinfo['package']}-{$curinfo['version']}' already installed, skipping");
+                        continue;
+                    } elseif (version_compare("$version", "{$curinfo['version']}") < 0) {
+                        $this->log(0, "Already got '{$curinfo['package']}-{$curinfo['version']}' greater than requested '$version', skipping");
+                        continue;
+                    }
+                }
+                $pkgfile = $this->_downloadFile($pkgfile, $config, $options,
+                                                $errors, $version, $origpkgfile,
+                                                $state);
+                if (PEAR::isError($pkgfile)) {
+                    return $pkgfile;
+                }
+            } // end is_file()
             $tempinfo = $this->infoFromAny($pkgfile);
             if (isset($options['alldeps']) || isset($options['onlyreqdeps'])) {
                 // ignore dependencies if there are any errors
@@ -795,7 +811,7 @@ class PEAR_Installer extends PEAR_Common
             }
             $installpackages[] = array('pkg' => $tempinfo['package'],
                                        'file' => $pkgfile, 'info' => $tempinfo);
-        }
+        } // end foreach($packages)
         // }}}
 
         // {{{ extract dependencies from downloaded files and then download
@@ -832,7 +848,7 @@ class PEAR_Installer extends PEAR_Common
                     if (!count($releases)) {
                         if (!isset($installed[strtolower($info['name'])])) {
                             $errors[] = "Package $package dependency $info[name] ".
-                                "has no releases";
+                                        "has no releases";
                         }
                         continue;
                     }
@@ -842,8 +858,8 @@ class PEAR_Installer extends PEAR_Common
                         if (!empty($state) && $state != 'any') {
                             list($release_version,$release) = each($releases);
                             if ($state != $release['state'] &&
-                                  !in_array($release['state'],
-                                    $this->betterStates($state))) {
+                                !in_array($release['state'], $this->betterStates($state)))
+                            {
                                 // drop this release - it ain't stable enough
                                 array_shift($releases);
                             } else {
@@ -909,7 +925,7 @@ class PEAR_Installer extends PEAR_Common
                 }
                 $willinstall = array_merge($willinstall, $temppack);
                 $this->download($deppackages, $options, $config, $installpackages,
-                    $errors, $installed, $willinstall, $state);
+                                $errors, $installed, $willinstall, $state);
             }
         } // }}} if --alldeps or --onlyreqdeps
     }
