@@ -108,6 +108,10 @@ size_t strlcat(char *dst, const char *src, size_t siz);
 char *strtok_r(char *s, const char *delim, char **last);
 #endif
 
+#ifndef HAVE_SOCKLEN_T
+typedef unsigned int socklen_t;
+#endif
+
 #include "request_info.h"
 
 #if HAVE_LIBDL
