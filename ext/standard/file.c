@@ -1699,6 +1699,12 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 {
 	php_stream *srcstream = NULL, *deststream = NULL;
 	int ret = FAILURE;
+	struct stat src_s, dest_s;
+
+	/* safety check to ensure that source & destination files are not the same file */
+	if (stat(src, &src_s) || (stat(dest, &dest_s) == 0 && src_s.st_ino == dest_s.st_ino)) {
+		return ret;
+	}
 
 	srcstream = php_stream_open_wrapper(src, "rb", STREAM_DISABLE_OPEN_BASEDIR | REPORT_ERRORS, NULL);
 	
