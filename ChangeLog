@@ -1,3 +1,52 @@
+2002-09-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * win32/php4ts_cli.rc
+      win32/php4dllts.rc
+      win32/php4ts.rc: - Fix line-endings
+    - Changed afxres.h to winres.h to make it compile when MFC is not installed
+      (see http://www.winprog.org/tutorial/errors.html,
+      "Fatal error RC1015: cannot open include file 'afxres.h'.")
+
+2002-09-20  Sander Roobol  <phy@wanadoo.nl>
+
+    * main/main.c:
+    Changing the magic_quotes_gpc setting has no effect at USER level
+
+2002-09-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/yaz/config.m4: fix typo
+
+2002-09-20  Martin Kraemer  <Martin.Kraemer@fujitsu-siemens.com>
+
+    * ext/cyrus/cyrus.c:
+    Since the cyrus extension prints only one line, and no subsequent info,
+    it should have a similar appearance as the other one-liners.
+    Use php_info_print_table_row() instead of php_info_print_table_header(),
+    as in the other extensions.
+
+2002-09-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c: Fixed bugs #12989 and #12120
+
+2002-09-20  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp: Sync MSVC project files.
+
+2002-09-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/yaz/config.m4: Added check for yaz version into configure.
+
+2002-09-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c: Fixed bug #19487
+
+2002-09-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c: MFH
+
+    * ext/gd/gd.c: Added missing convert_to_* funcs. (should fix some crashes)
+
 2002-09-19  Colin Viebrock  <colin@easydns.com>
 
     * sapi/apache/php_apache.c
