@@ -461,28 +461,6 @@ PHP_MSHUTDOWN_FUNCTION(oci)
 	return SUCCESS;
 }
 
-#if 0
-static int _session_cleanup(oci_session *session)
-{
-   	if (session->persistent)
-		return 0;
-
-	_oci_close_session(session);
-
-	return 1;
-}
-
-static int _server_cleanup(oci_server *server)
-{
-	if (server->persistent)
-		return 0;
-
-	_oci_close_server(server);
-
-	return 1;
-}
-#endif
-
 PHP_RSHUTDOWN_FUNCTION(oci)
 {
 	OCILS_FETCH();
@@ -554,6 +532,23 @@ _oci_bind_pre_exec(void *data)
 	/* reset all bind stuff to a normal state..-. */
 
    	bind->indicator = 0; 
+
+	return 0;
+}
+
+/* }}} */
+/* {{{ _oci_bind_post_exec() */
+
+static int
+_oci_bind_post_exec(void *data)
+{
+	oci_bind *bind = (oci_bind *) data;
+
+	if (bind->indicator == -1) { /* NULL */
+		zval *val = bind->zval;
+		zval_dtor(val);
+		ZVAL_NULL(val);
+	}
 
 	return 0;
 }
@@ -1149,13 +1144,13 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 		iters = 1;
 	}
 	
-	if (statement->binds) {
-		zend_hash_apply(statement->binds, (int (*)(void *)) _oci_bind_pre_exec);
-	}
-
 	if (statement->last_query) { 
 		/* if we execute refcursors we don't have a query and 
 		   we don't want to execute!!! */
+
+		if (statement->binds) {
+			zend_hash_apply(statement->binds, (int (*)(void *)) _oci_bind_pre_exec);
+		}
 
 		statement->error = 
 			oci_error(statement->pError,
@@ -1169,6 +1164,10 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 									 NULL,
 									 mode));
 		
+		if (statement->binds) {
+			zend_hash_apply(statement->binds, (int (*)(void *)) _oci_bind_post_exec);
+		}
+
 		switch (statement->error) {
 		case 0:
 			break;
@@ -1734,8 +1733,9 @@ oci_bind_out_callback(dvoid *octxp,      /* context pointer */
 
 	if (val->type == IS_OBJECT) {
 		retval = OCI_CONTINUE;
-	} else if (val->type == IS_STRING) {
-		STR_FREE(val->value.str.val);
+	} else {
+		convert_to_string(val);
+		zval_dtor(val);
 		
 		val->value.str.len = OCI_PIECE_SIZE; /* 64K-1 is max XXX */
 		val->value.str.val = emalloc(phpbind->zval->value.str.len);
@@ -2110,8 +2110,9 @@ static oci_server *_oci_open_server(char *dbname,int persistent)
 /* {{{ _oci_close_server()
  */
 
-static int _oci_session_cleanup(list_entry *le)
+static int _oci_session_cleanup(void *data)
 {
+	list_entry *le = (list_entry *) data;
 	if (le->type == le_session) {
 		oci_server *server = ((oci_session*) le->ptr)->server;
 		if (server->open == 2) 
