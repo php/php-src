@@ -165,6 +165,7 @@
 
 		$this->resources[] = new php_resource($attr['name'], 
 																					@$attr['payload'], 
+																					@$attr['alloc'], 
 																					@$this->resource_destruct, 
 																					@$this->resource_description);
 

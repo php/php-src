@@ -32,9 +32,14 @@
 			$opts=0;
 			$params=array();
 			$return_type = ($this->is_type($tokens[$n])) ? $tokens[$n++] : "void";
-			if(! $this->is_name($tokens[$n])) return("$tokens[$n] is not a valid function name");
 			$function_name = $tokens[$n++];
-
+			if($return_type === "resource" && $tokens[$n] !== "(") {
+				$return_subtype = $function_name;
+				$function_name = $tokens[$n++];
+			}
+			if(! $this->is_name($function_name)) {
+				return("$function_name is not a valid function name");
+			}
 			if($function_name != $this->name) {
 				return "proto function name is '$function_name' instead of '{$this->name}'";
 			}
@@ -58,6 +63,11 @@
 						$params[$param]['name']=$tokens[$n];
 						$n++;
 					}
+					if($params[$param]['type'] === "resource" && $this->is_name($tokens[$n])) {
+						$params[$param]['subtype'] = $params[$param]['name'];
+						$params[$param]['name'] = $tokens[$n];
+						$n++;
+					}
 					if($tokens[$n]=='[') {
 						$n--;
 						continue;
@@ -77,14 +87,19 @@
 			
 			$this->name     = $function_name;
 			$this->returns  = $return_type;
+			if(isset($return_subtype)) {
+				$this->returns .= " $return_subtype";
+			}
 			$this->params   = $params;
 			$this->optional = $numopts;
 
 			return true;
 		}
 
-		function c_code() {
+		function c_code(&$extension) {
 			$code = "";
+
+			$returns = explode(" ", $this->returns);
 
 			switch($this->role) {
 			case "public":
@@ -96,6 +111,9 @@
 					if($key) 
 						$code.=", ";
 					$code .= $param['type']." ";
+					if(isset($param['subtype'])) {
+						$code .= $param['subtype']." ";
+					}
 					if($param['type'] !== 'void') {
 					  $code .= $param['name']; 
           }
@@ -111,12 +129,21 @@
 			$code .= " */\n";
 			$code .= "PHP_FUNCTION({$this->name})\n";
 			$code .= "{\n";
+
+			if($returns[0] === "resource" && isset($returns[1])) {
+				$resource = $extension->resources[$returns[1]];
+				if($resource->alloc === "yes") {
+					$payload  = $resource->payload;
+					$code .= "\t$payload * return_res = ($payload *)emalloc(sizeof($payload));\n";
+				}
+			}
+
 			if(isset($this->params) && count($this->params)) {
 				$arg_string="";
 				$arg_pointers=array();
 				$optional=false;
 				$res_fetch="";
-				foreach($this->params as $param) {
+				foreach($this->params as $key => $param) {
           if($param["type"] === "void") continue;
 					$name = $param['name']; 
 					$arg_pointers[]="&$name";
@@ -154,11 +181,21 @@
 					case "resource":
 						$arg_string.="r";
 						$code .= "  zval * $name = NULL;\n";
-						$code .= "  int * {$name}_id = -1;\n";
-						$arg_pointers[]="&{$name}_id";
-						$res_fetch.="  if ($name) {\n"
-							."    ZEND_FETCH_RESOURCE(???, ???, $name, {$name}_id, \"???\", ???_rsrc_id);\n"
-							."  }\n";
+						$code .= "  int {$name}_id = -1;\n";
+						// dummfug?						$arg_pointers[]="&{$name}_id";
+						if(isset($param['subtype'])) {
+							$resource = $extension->resources[$param['subtype']];
+							$varname = "res_{$name}";
+							$code .= "  {$resource->payload} * $varname;\n";
+
+							$res_fetch.="  if ($name) {\n"
+								."    ZEND_FETCH_RESOURCE($varname, {$resource->payload} *, &$name, {$name}_id, \"$param[subtype]\", le_$param[subtype]);\n"
+								."  }\n";
+						} else {
+							$res_fetch.="  if ($name) {\n"
+								."    ZEND_FETCH_RESOURCE(???, ???, $name, {$name}_id, \"???\", ???_rsrc_id);\n"
+								."  }\n";
+						}
 						break;
 					case "mixed":
 					case "callback":
@@ -177,17 +214,69 @@
 				$code .= "  if (ZEND_NUM_ARGS()>0) { WRONG_PARAM_COUNT; }\n\n";
 			}
 
-			$code .= "  php_error(E_WARNING, \"{$this->name}: not yet implemented\");\n";
+			if($this->code) {
+				$code .= "\t{\n$this->code\t}\n"; // {...} for local variables ...
+			} else {
+				$code .= "  php_error(E_WARNING, \"{$this->name}: not yet implemented\"); RETURN_FALSE;\n\n";
+
+				switch($returns[0]) {
+				case "void":
+					break;
+				
+				case "bool":
+					$code .= "\tRETURN_FALSE;\n"; 
+					break;
+				
+				case "int":
+					$code .= "\tRETURN_LONG(0);\n"; 
+					break;
+				
+				case "float":
+					$code .= "\tRETURN_DOUBLE(0.0);\n";
+					break;
+				
+				case "string":
+					$code .= "\tRETURN_STRINGL(\"\", 0, 1);\n";
+					break;
+				
+				case "array":
+					$code .= "\tarray_init(return_value);\n";
+					break;
+				
+				case "object": 
+					$code .= "\tobject_init(return_value)\n";
+					break;
+				
+				case "resource":
+					if($returns[1]) {
+						$code .= "\tZEND_REGISTER_RESOURCE(return_value, return_res, le_$returns[1]);\n";
+					} else {
+						$code .= "\t/* RETURN_RESOURCE(...); /*\n";
+					}
+					break;
+				
+				case "mixed":
+					$code .= "\t/* RETURN_...(...); /*\n";				
+					break;
+
+				default: 
+					$code .= "\t/* UNKNOWN RETURN TYPE '$this->returns' /*\n";
+					break;
+				}
+			}
+			
 			$code .= "}\n/* }}} */\n\n";
-			  break;
-		  case "internal":
+			break;
+		  
+			case "internal":
 				if(!empty($this->code)) {
 					$code .= "    {\n";
 					$code .= $this->code."\n";
 					$code .= "    }\n";
 				}
 				break;
-  		case "private":
+  		
+			case "private":
 				$code .= $this->code."\n";				
 				break;
 		  }
@@ -209,7 +298,7 @@
 ';
 
 			$xml .= "      <type>{$this->returns}</type><methodname>{$this->name}</methodname>\n";
-			if(empty($this->params)) {
+			if(empty($this->params) || $this->params[0]["type"]==="void") {
 				$xml .= "      <void/>\n";
 			} else {
 				foreach($this->params as $key => $param) {
@@ -223,11 +312,16 @@
 				}
 			}
 
+
+			$desc = $this->desc;
+
+			if(!strstr($this->desc,"<para>")) {
+				$desc = "     <para>\n$desc     </para>\n";
+			}
+
 $xml .= 
 '     </methodsynopsis>
-    <para>
-'.$this->desc.'
-    </para>
+'.$desc.'
    </refsect1>
   </refentry>
 ';

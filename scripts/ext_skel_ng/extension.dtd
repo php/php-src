@@ -91,5 +91,6 @@
 <!ATTLIST resource
   name       CDATA #REQUIRED
   payload    CDATA #IMPLIED
+	alloc      (yes|no) "no"
 >
 <!ELEMENT destruct (#PCDATA)>
