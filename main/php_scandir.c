@@ -18,7 +18,11 @@
  */
 
 #include "php_scandir.h"
+#ifdef PHP_WIN32
+#include "config.w32.h"
+#else
 #include "php_config.h"
+#endif
 
 #ifndef HAVE_SCANDIR
  #include <sys/types.h>
