@@ -768,6 +768,19 @@ if test "$PHP_IPV6" != "no" && test "$ac_cv_ipv6_support" = yes; then
   AC_DEFINE(HAVE_IPV6,1,[Whether to enable IPv6 support])
 fi
 
+AC_MSG_CHECKING([how big to make fd sets])
+AC_ARG_ENABLE(fd-setsize,
+[  --enable-fd-setsize     Set size of descriptor sets],[
+  if test "x$enableval" != "xyes"; then
+    CPPFLAGS="$CPPFLAGS -DFD_SETSIZE=$enableval"
+    AC_MSG_RESULT(using $enableval)
+  else
+    AC_MSG_RESULT(using system default)
+  fi
+],[
+  AC_MSG_RESULT(using system default)
+])
+
 AC_MSG_CHECKING([whether to enable versioning])
 AC_ARG_ENABLE(versioning,
 [  --enable-versioning     Export only required symbols.

@@ -235,9 +235,7 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle TSRMLS_
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 #ifdef PHP_WIN32
-	fd_set wrfds, efds;
 	int n;
-	struct timeval timeout;
 #endif
 	if (close_handle) {
 		if (sslsock->ssl_active) {
@@ -248,7 +246,7 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle TSRMLS_
 			SSL_free(sslsock->ssl_handle);
 			sslsock->ssl_handle = NULL;
 		}
-		if (sslsock->s.socket != -1) {
+		if (sslsock->s.socket != SOCK_ERR) {
 #ifdef PHP_WIN32
 			/* prevent more data from coming in */
 			shutdown(sslsock->s.socket, SHUT_RD);
@@ -260,19 +258,11 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle TSRMLS_
 			 * but at the same time avoid hanging indefintely.
 			 * */
 			do {
-				FD_ZERO(&wrfds);
-				FD_SET(sslsock->s.socket, &wrfds);
-				efds = wrfds;
-
-				timeout.tv_sec = 0;
-				timeout.tv_usec = 5000; /* arbitrary */
-
-				n = select(sslsock->s.socket + 1, NULL, &wrfds, &efds, &timeout);
+				n = php_pollfd_for_ms(sslsock->s.socket, POLLOUT, 500);
 			} while (n == -1 && php_socket_errno() == EINTR);
 #endif
-
 			closesocket(sslsock->s.socket);
-			sslsock->s.socket = -1;
+			sslsock->s.socket = SOCK_ERR;
 		}
 	}
 
@@ -512,47 +502,48 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 				char buf;
 				int alive = 1;
 
-				if (sslsock->s.timeout.tv_sec == -1) {
-					tv.tv_sec = FG(default_socket_timeout);
+				if (value == -1) {
+					if (sslsock->s.timeout.tv_sec == -1) {
+						tv.tv_sec = FG(default_socket_timeout);
+						tv.tv_usec = 0;
+					} else {
+						tv = sslsock->s.timeout;
+					}
 				} else {
-					tv = sslsock->s.timeout;
+					tv.tv_sec = value;
+					tv.tv_usec = 0;
 				}
 
 				if (sslsock->s.socket == -1) {
 					alive = 0;
-				} else {
-					FD_ZERO(&rfds);
-					FD_SET(sslsock->s.socket, &rfds);
+				} else if (php_pollfd_for(sslsock->s.socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0) {
+					if (sslsock->ssl_active) {
+						int n;
 
-					if (select(sslsock->s.socket + 1, &rfds, NULL, NULL, &tv) > 0 && FD_ISSET(sslsock->s.socket, &rfds)) {
-						if (sslsock->ssl_active) {
-							int n;
+						do {
+							n = SSL_peek(sslsock->ssl_handle, &buf, sizeof(buf));
+							if (n <= 0) {
+								int err = SSL_get_error(sslsock->ssl_handle, n);
 
-							do {
-								n = SSL_peek(sslsock->ssl_handle, &buf, sizeof(buf));
-								if (n <= 0) {
-									int err = SSL_get_error(sslsock->ssl_handle, n);
-
-									if (err == SSL_ERROR_SYSCALL) {
-										alive = php_socket_errno() == EAGAIN;
-										break;
-									}
-
-									if (err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE) {
-										/* re-negotiate */
-										continue;
-									}
-
-									/* any other problem is a fatal error */
-									alive = 0;
+								if (err == SSL_ERROR_SYSCALL) {
+									alive = php_socket_errno() == EAGAIN;
+									break;
 								}
-								/* either peek succeeded or there was an error; we
-								 * have set the alive flag appropriately */
-								break;
-							} while (1);
-						} else if (0 == recv(sslsock->s.socket, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EAGAIN) {
-							alive = 0;
-						}
+
+								if (err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE) {
+									/* re-negotiate */
+									continue;
+								}
+
+								/* any other problem is a fatal error */
+								alive = 0;
+							}
+							/* either peek succeeded or there was an error; we
+							 * have set the alive flag appropriately */
+							break;
+						} while (1);
+					} else if (0 == recv(sslsock->s.socket, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EAGAIN) {
+						alive = 0;
 					}
 				}
 				return alive ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
