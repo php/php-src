@@ -1883,6 +1883,16 @@ PHP_FUNCTION(odbc_free_result)
 	}
 
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
+	if (result->values) {
+		for (i = 0; i < result->numcols; i++) {
+			if (result->values[i].value) {
+				efree(result->values[i].value);
+			}
+		}
+		efree(result->values);
+		result->values = NULL;
+	}
+			
 	zend_list_delete(result->id);
 	
 	RETURN_TRUE;
@@ -2125,7 +2135,7 @@ try_and_get_another_connection:
 					SQL_DATA_SOURCE_READ_ONLY, 
 					d_name, sizeof(d_name), &len);
 
-				if(ret != SQL_SUCCESS){
+				if(ret != SQL_SUCCESS || len == 0) {
 					zend_hash_del(&EG(persistent_list), hashed_details, hashed_len + 1);
 					safe_odbc_disconnect(db_conn->hdbc);
 					SQLFreeConnect(db_conn->hdbc);
