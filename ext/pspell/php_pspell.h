@@ -41,6 +41,8 @@ PHP_FUNCTION(pspell_config_runtogether);
 PHP_FUNCTION(pspell_config_mode);
 PHP_FUNCTION(pspell_config_ignore);
 PHP_FUNCTION(pspell_config_personal);
+PHP_FUNCTION(pspell_config_dict_dir);
+PHP_FUNCTION(pspell_config_data_dir);
 PHP_FUNCTION(pspell_config_repl);
 PHP_FUNCTION(pspell_config_save_repl);
 #else

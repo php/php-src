@@ -68,6 +68,8 @@ function_entry pspell_functions[] = {
 	PHP_FE(pspell_config_mode,		NULL)
 	PHP_FE(pspell_config_ignore,		NULL)
 	PHP_FE(pspell_config_personal,		NULL)
+	PHP_FE(pspell_config_dict_dir,		NULL)
+	PHP_FE(pspell_config_data_dir,		NULL)
 	PHP_FE(pspell_config_repl,		NULL)
 	PHP_FE(pspell_config_save_repl,		NULL)
 	{NULL, NULL, NULL} 
@@ -803,18 +805,15 @@ PHP_FUNCTION(pspell_config_ignore)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_personal(int conf, string personal)
-   Use a personal dictionary for this config */
-PHP_FUNCTION(pspell_config_personal)
-{
+static int pspell_config_path( INTERNAL_FUNCTION_PARAMETERS, char *option ) {
 	int type;
-	zval **sccin, **personal;
+	zval **sccin, **value;
 	int argc;
 
 	PspellConfig *config;
 	
 	argc = ZEND_NUM_ARGS();
-	if (argc != 2 || zend_get_parameters_ex(argc,&sccin,&personal) == FAILURE) {
+	if (argc != 2 || zend_get_parameters_ex(argc,&sccin,&value) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -825,19 +824,44 @@ PHP_FUNCTION(pspell_config_personal)
 		RETURN_FALSE;
 	}
 
-	convert_to_string_ex(personal);
+	convert_to_string_ex(value);
 
-	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(personal), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(value), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(Z_STRVAL_PP(personal) TSRMLS_CC)) {
+	if (php_check_open_basedir(Z_STRVAL_PP(value) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-	pspell_config_replace(config, "personal", Z_STRVAL_PP(personal));
+	pspell_config_replace(config, option, Z_STRVAL_PP(value));
 
 	RETURN_TRUE;
+}
+
+/* {{{ proto bool pspell_config_personal(int conf, string personal)
+   Use a personal dictionary for this config */
+PHP_FUNCTION(pspell_config_personal)
+{
+	pspell_config_path( INTERNAL_FUNCTION_PARAM_PASSTHRU, "personal");
+}
+/* }}} */
+
+/* {{{ proto bool pspell_config_dict_dir(int conf, string directory)
+
+   location of the main word list */
+PHP_FUNCTION(pspell_config_dict_dir)
+{
+	pspell_config_path( INTERNAL_FUNCTION_PARAM_PASSTHRU, "dict-dir");
+}
+
+/* }}} */
+
+/* {{{ proto bool pspell_config_data_dir(int conf, string directory)
+    location of language data files */
+PHP_FUNCTION(pspell_config_data_dir)
+{
+	pspell_config_path( INTERNAL_FUNCTION_PARAM_PASSTHRU, "data-dir");
 }
 /* }}} */
 
