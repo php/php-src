@@ -98,7 +98,7 @@ static void (*php_php_import_environment_variables)(zval *array_ptr TSRMLS_DC);
 /**
  * Number of child processes that will get created to service requests
  */
-static int children = 0;
+static int children = 8;
 
 /**
  * Set to non-zero if we are the parent process
