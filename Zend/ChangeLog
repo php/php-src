@@ -1,3 +1,11 @@
+2003-02-23  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Move abstract inheritance logic to the right spot
+
+    * zend_compile.c:
+      Fixed abstract handling in inheritence
+
 2003-02-20  Wez Furlong  <wez.php@thebrainroom.net>
 
     * zend_stream.c:

@@ -1,3 +1,71 @@
+2003-02-23  Jani Taskinen  <sniper@iki.fi>
+
+    * main/fopen_wrappers.c:
+      MFB: Fix for open_basedir error message
+
+2003-02-23  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      main/fopen_wrappers.c
+      main/streams.c:
+      open_basedir fixes from David Saez
+
+2003-02-23  Stig Bakken  <ssb@fast.no>
+
+    * pear/packages/XML_Parser-1.0.1.tar
+      pear/packages/XML_Parser-1.0.tar:
+      
+      - upgrading XML_Parser to 1.0.1
+
+2003-02-23  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache/libpre.c
+      sapi/apache/php_apache_http.h:
+      Added missing headers and $Id$ tags.
+
+    * sapi/cgi/config9.m4:
+      MFB: Fixed bug #22356 (Do not add empty -I flags).
+
+    * (PHP_4_3)
+      sapi/cgi/config9.m4:
+      Fixed bug #22356 (Do not add empty -I flags).
+
+    * ext/imap/config.m4:
+      Fix for bug #22353
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      sapi/apache/config.m4
+      sapi/apache2filter/config.m4:
+      MFH: - Fixed bug #22376 (wrong httpd.conf modified when using INSTALL_ROOT)
+
+    * sapi/apache/config.m4
+      sapi/apache2filter/config.m4
+      sapi/apache2handler/config.m4:
+      - Fixed bug #22376 (wrong httpd.conf modified when using INSTALL_ROOT)
+
+2003-02-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/abstract_inherit.phpt:
+      New test which currently fails
+
+    * NEWS:
+      Fix the name
+
+2003-02-23  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache2filter/EXPERIMENTAL
+      sapi/apache2handler/EXPERIMENTAL:
+      
+      These both are experimental still. (there has been a note in config.m4
+      all the time but these marker files were missing)
+
+    * NEWS:
+      Style
+
 2003-02-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/dba/libinifile/inifile.c:
