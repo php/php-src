@@ -20,7 +20,7 @@
    |          Rasmus Lerdorf      <rasmus@php.net>                        |
    |          Chuck Hagenbuch     <chuck@horde.org>                       |
    |          Andrew Skalski      <askalski@chekinc.com>                  |
-   |          Hartmut Holzgraefe  <hartmut@six.de>                        |
+   |          Hartmut Holzgraefe  <hholzgra@php.net>                      |
    |          Jani Taskinen       <sniper@iki.fi>                         |
    |          Daniel R. Kalowsky  <kalowsky@php.net>                      |
    | PHP 4.0 updates:  Zeev Suraski <zeev@zend.com>                       |
@@ -3162,7 +3162,9 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 			addr = addr->next;
 		}
 		efree(tempMailTo);
-		bufferTo[offset] = 0;
+		if (offset>0) {
+			bufferTo[offset-1] = 0;
+		}
 	}
 
 	if (cc && *cc) {
@@ -3180,7 +3182,9 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 			addr = addr->next;
 		}
 		efree(tempMailTo);
-		bufferCc[offset] = 0;
+		if (offset>0) {
+			bufferCc[offset-1] = 0;
+		}
 	}
 
 	if (bcc && *bcc) {
@@ -3198,7 +3202,9 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 			addr = addr->next;
 		}
 		efree(tempMailTo);
-		bufferBcc[offset] = 0;
+		if (offset>0) {
+			bufferBcc[offset-1] = 0;
+		}
 	}
 
 
@@ -3211,8 +3217,15 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		}
 		return 0;
 	}
-	if (bufferCc) efree(bufferCc);
-	if (bufferBcc) efree(bufferBcc);
+	if (bufferTo) {
+		efree(bufferTo);
+	}
+	if (bufferCc) {
+		efree(bufferCc);
+	}
+	if (bufferBcc) {
+		efree(bufferBcc);
+	}
 #else
 	if (!INI_STR("sendmail_path")) {
 		return 0;
