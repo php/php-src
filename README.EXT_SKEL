@@ -51,9 +51,13 @@ FORMAT OF FUNCTION DEFINITIONS FILE
   ']'s as there where '['s. Currently, it does not harm if you forget to do it
   or there is a wrong amount of ']'s, but this may change in the future.
 
+	An additional short description may be added after the parameters. 
+  If present it will be filled into the 'proto' header comments in the stubs
+  code and the <refpurpose> tag in the XML documentation.
+
   An example:
 
-    my_function(int arg1, int arg2 [, int arg3 [, int arg4]])
+    my_function(int arg1, int arg2 [, int arg3 [, int arg4]]) this is my 1st
 
   Arguments arg3 and arg4 are optional.
 

@@ -147,6 +147,11 @@ BEGIN {
 		}
 	}
 
+	if (x = gobble("\\)")) {
+		sub(/^[ \t]+/, "", line)
+		fcomments[num_funcs] = line
+	}
+
 	funcs[num_funcs]   = func_name
 	types[num_funcs]   = func_type
 	maxargs[num_funcs] = args_max
@@ -171,7 +176,7 @@ END {
 	 xmlstr = "  <refentry id=\"function." refid "\">\n" \
 		"   <refnamediv>\n" \
 		"    <refname>" funcs[i] "</refname>\n" \
-		"    <refpurpose></refpurpose>\n" \
+		"    <refpurpose>" fcomments[i] "</refpurpose>\n" \
 		"   </refnamediv>\n" \
 		"   <refsect1>\n" \
 		"    <title>Description</title>\n" \
@@ -261,7 +266,7 @@ END {
 			}
 		}
 
-		proto = proto closeopts ")\n    */\nPHP_FUNCTION(" funcs[i] ")\n{"
+		proto = proto closeopts ")\n   " fcomments[i] " */\nPHP_FUNCTION(" funcs[i] ")\n{"
 		if (maxargs[i]) {
 			zvals = zvals ";"
 			fetchargs = fetchargs ") == FAILURE)" closefetch "{\n\t\tWRONG_PARAM_COUNT;\n\t}\n"
