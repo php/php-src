@@ -1,3 +1,17 @@
+2001-01-06  Mika Tuupola  <tuupola@appelsiini.net>
+
+    * pear/Image/Remote.php:
+    Initial commit.
+
+2001-01-06  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/gd/config.m4: fixed option name mismatch.
+
+    * ext/sablot/config.m4
+      ext/sablot/php_sablot.h
+      ext/sablot/sablot.c:
+    linked with libexpat. it's necessary to use sablot-0.50. added xslt_set_encoding() function.
+
 2001-01-05  Frank M. Kromann  <fmk@swwwing.com>
 
     * ext/odbc/php_odbc.c:
