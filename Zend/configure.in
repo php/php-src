@@ -188,7 +188,7 @@ AC_SUBST(LDFLAGS_SHLIB)
 AC_SUBST(LDFLAGS_SHLIB_EXPORT)
 
 AC_OUTPUT(Makefile zend_config)
-
+AC_OUTPUT_COMMANDS([chmod +x zend_config])
 
 # Local Variables:
 # tab-width: 4
