@@ -642,10 +642,11 @@ static void last_modified(TSRMLS_D)
 CACHE_LIMITER_FUNC(public)
 {
 	char buf[MAX_STR + 1];
+	struct timeval tv;
 	time_t now;
 	
-	time(&now);
-	now += PS(cache_expire) * 60;
+	gettimeofday(&tv, NULL);
+	now = tv.tv_sec + PS(cache_expire) * 60;
 #define EXPIRES "Expires: "
 	memcpy(buf, EXPIRES, sizeof(EXPIRES) - 1);
 	strcpy_gmt(buf + sizeof(EXPIRES) - 1, &now);
@@ -656,7 +657,7 @@ CACHE_LIMITER_FUNC(public)
 	
 	last_modified(TSRMLS_C);
 }
-	
+
 CACHE_LIMITER_FUNC(private)
 {
 	char buf[MAX_STR + 1];
@@ -741,7 +742,10 @@ static void php_session_send_cookie(TSRMLS_D)
 	smart_str_appends(&ncookie, PS(id));
 	
 	if (PS(cookie_lifetime) > 0) {
-		date_fmt = php_std_date(time(NULL) + PS(cookie_lifetime));
+		struct timeval tv;
+		
+		gettimeofday(&tv, NULL);
+		date_fmt = php_std_date(tv.tv_sec + PS(cookie_lifetime));
 		
 		smart_str_appends(&ncookie, COOKIE_EXPIRES);
 		smart_str_appends(&ncookie, date_fmt);
