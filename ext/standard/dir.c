@@ -437,7 +437,7 @@ PHP_FUNCTION(glob)
 				continue;
 			}
 
-			if (S_IFDIR != s.st_mode & S_IFMT) {
+			if (S_IFDIR != (s.st_mode & S_IFMT)) {
 				continue;
 			}
 		}
