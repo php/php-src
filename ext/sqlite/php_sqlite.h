@@ -69,6 +69,10 @@ PHP_FUNCTION(sqlite_error_string);
 PHP_FUNCTION(sqlite_create_aggregate);
 PHP_FUNCTION(sqlite_create_function);
 
+ZEND_BEGIN_MODULE_GLOBALS(sqlite)
+	 int assoc_case;
+ZEND_END_MODULE_GLOBALS(sqlite)
+
 #ifdef ZTS
 #define SQLITE_G(v) TSRMG(sqlite_globals_id, zend_sqlite_globals *, v)
 #else

@@ -37,12 +37,38 @@
 
 #include <sqlite.h>
 
+ZEND_DECLARE_MODULE_GLOBALS(sqlite)
+
 extern int sqlite_encode_binary(const unsigned char *in, int n, unsigned char *out);
 extern int sqlite_decode_binary(const unsigned char *in, unsigned char *out);
 
 static unsigned char arg3_force_ref[] = {3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 
 static int le_sqlite_db, le_sqlite_result, le_sqlite_pdb;
+
+static inline void php_sqlite_strtoupper(char *s)
+{
+  while (*s!='\0') {
+    *s = toupper(*s);
+    s++;
+  }
+}
+
+static inline void php_sqlite_strtolower(char *s)
+{
+  while (*s!='\0') {
+    *s = tolower(*s);
+    s++;
+  }
+}
+
+/* {{{ PHP_INI
+ */
+PHP_INI_BEGIN()
+STD_PHP_INI_ENTRY_EX("sqlite.assoc_case", "0", PHP_INI_ALL, OnUpdateInt, assoc_case, zend_sqlite_globals, sqlite_globals, display_link_numbers)
+PHP_INI_END()
+/* }}} */
+
 
 #define DB_FROM_ZVAL(db, zv)	ZEND_FETCH_RESOURCE2(db, struct php_sqlite_db *, zv, -1, "sqlite database", le_sqlite_db, le_sqlite_pdb)
 
@@ -535,6 +561,7 @@ static int php_sqlite_authorizer(void *autharg, int access_type, const char *arg
 
 PHP_MINIT_FUNCTION(sqlite)
 {
+	REGISTER_INI_ENTRIES();
 	le_sqlite_db = zend_register_list_destructors_ex(php_sqlite_db_dtor, NULL, "sqlite database", module_number);
 	le_sqlite_pdb = zend_register_list_destructors_ex(NULL, php_sqlite_db_dtor, "sqlite database (persistent)", module_number);
 	le_sqlite_result = zend_register_list_destructors_ex(php_sqlite_result_dtor, NULL, "sqlite result", module_number);
@@ -581,6 +608,8 @@ PHP_MINFO_FUNCTION(sqlite)
 	php_info_print_table_row(2, "SQLite Library", sqlite_libversion());
 	php_info_print_table_row(2, "SQLite Encoding", sqlite_libencoding());
 	php_info_print_table_end();
+
+	DISPLAY_INI_ENTRIES();
 }
 
 static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *persistent_id, zval *return_value, zval *errmsg)
@@ -1007,6 +1036,12 @@ PHP_FUNCTION(sqlite_fetch_array)
 			}
 		}
 		if (mode & PHPSQLITE_ASSOC) {
+			/* Lets see if we need to change case of the assoc key */
+			if (SQLITE_G(assoc_case) == 1) {
+				php_sqlite_strtoupper((char*)colnames[j]);
+			} else if (SQLITE_G(assoc_case) == 2) {
+				php_sqlite_strtolower((char*)colnames[j]);
+			}
 			if (decoded == NULL) {
 				add_assoc_null(return_value, (char*)colnames[j]);
 			} else {
@@ -1386,3 +1421,12 @@ PHP_FUNCTION(sqlite_create_function)
 	}
 }
 /* }}} */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
