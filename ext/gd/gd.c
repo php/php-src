@@ -188,6 +188,7 @@ function_entry gd_functions[] = {
 	PHP_FE(imagefilledarc,							NULL)
 	PHP_FE(imagefilledellipse,						NULL)
 	PHP_FE(imagealphablending,						NULL)
+	PHP_FE(imagecolorallocatealpha,					NULL)
 	PHP_FE(imagecolorresolvealpha, 					NULL)
 	PHP_FE(imagecolorclosestalpha,					NULL)
 	PHP_FE(imagecolorexactalpha,					NULL)
@@ -971,6 +972,24 @@ PHP_FUNCTION(imagelayereffect)
 }
 /* }}} */
 #endif
+
+/* {{{ proto int imagecolorallocatealpha(resource im, int red, int green, int blue, int alpha)
+   Allocate a color with an alpha level.  Works for true color and palette based images */
+PHP_FUNCTION(imagecolorallocatealpha)
+{
+	zval *IM;
+	int red, green, blue, alpha;
+	gdImagePtr im;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zllll", &IM, &red, &green, &blue, &alpha) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
+
+	RETURN_LONG(gdImageColorAllocateAlpha(im, red, green, blue, alpha));
+}
+/* }}} */
 
 /* {{{ proto int imagecolorresolvealpha(resource im, int red, int green, int blue, int alpha)
    Resolve/Allocate a colour with an alpha level.  Works for true colour and palette based images */
