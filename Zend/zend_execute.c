@@ -490,15 +490,15 @@ static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_vari
 			return Ts[opline->op2.u.var].EA.class_entry->static_members;
 			break;
 		case ZEND_FETCH_FROM_THIS:
-			if (!EG(this)) {
+			if (!EG(This)) {
 				zend_error(E_ERROR, "Using $this when not in object context");
 			}
 			/* HACK!! 'this' should be always zend_object */
-			return Z_OBJPROP_P(EG(this));
+			return Z_OBJPROP_P(EG(This));
 			break;
 		case ZEND_FETCH_THIS:
 			{
-				if (!EG(this)) {
+				if (!EG(This)) {
 					zend_error(E_ERROR, "Using $this when not in object context");
 				}
 				/* FIXME: Put this error back.
@@ -506,8 +506,8 @@ static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_vari
 				//	zend_error(E_ERROR, "Can't overwrite $this");
 				//}
 				*/
-				Ts[opline->result.u.var].var.ptr_ptr = &EG(this);
-				SELECTIVE_PZVAL_LOCK(EG(this), &opline->result);
+				Ts[opline->result.u.var].var.ptr_ptr = &EG(This);
+				SELECTIVE_PZVAL_LOCK(EG(This), &opline->result);
 				AI_USE_PTR(Ts[opline->result.u.var].var);
 				return NULL;
 				break;
@@ -935,7 +935,7 @@ typedef struct _zend_execute_data {
 	object_info object;
 	temp_variable *Ts;
 	zend_bool original_in_execution;
-	zend_class_entry *calling_namespace;
+	zend_class_entry *calling_scope;
 } zend_execute_data;
 
 #define EX(element) execute_data.element
@@ -1412,22 +1412,22 @@ binary_assign_op_addr: {
 						int class_name_strlen;
 						
 						if (EX(opline)->extended_value == ZEND_FETCH_CLASS_SELF) {
-							if (!EG(namespace)) {
+							if (!EG(scope)) {
 								zend_error(E_ERROR, "Cannot fetch self:: when no class scope is active");
 							}
-							EX(Ts)[EX(opline)->result.u.var].EA.class_entry = EG(namespace);
+							EX(Ts)[EX(opline)->result.u.var].EA.class_entry = EG(scope);
 							NEXT_OPCODE();
 						} else if (EX(opline)->extended_value == ZEND_FETCH_CLASS_MAIN) {
 							EX(Ts)[EX(opline)->result.u.var].EA.class_entry = EG(main_class_ptr);
 							NEXT_OPCODE();
 						} else if (EX(opline)->extended_value == ZEND_FETCH_CLASS_PARENT) {
-							if (!EG(namespace)) {
+							if (!EG(scope)) {
 								zend_error(E_ERROR, "Cannot fetch parent:: when no class scope is active");
 							}
-							if (!EG(namespace)->parent) {
+							if (!EG(scope)->parent) {
 								zend_error(E_ERROR, "Cannot fetch parent:: as current class scope has no parent");
 							}
-							EX(Ts)[EX(opline)->result.u.var].EA.class_entry = EG(namespace)->parent;
+							EX(Ts)[EX(opline)->result.u.var].EA.class_entry = EG(scope)->parent;
 							NEXT_OPCODE();
 						} 
 
@@ -1486,9 +1486,9 @@ binary_assign_op_addr: {
 
 					EX(fbc) = EX(fbc_constructor);
 					if(EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
-						EX(calling_namespace) = Z_OBJCE_P(EX(object).ptr);
+						EX(calling_scope) = Z_OBJCE_P(EX(object).ptr);
 					} else {
-						EX(calling_namespace) = NULL;
+						EX(calling_scope) = NULL;
 					}
 
 					NEXT_OPCODE();
@@ -1521,13 +1521,13 @@ binary_assign_op_addr: {
 						function_name_strlen = tmp.value.str.len;
 					}
 					
-					EX(calling_namespace) = EG(namespace);
+					EX(calling_scope) = EG(scope);
 
 					if (EX(opline)->extended_value == ZEND_FETCH_FROM_THIS) {
-						if (!EG(this)) {
+						if (!EG(This)) {
 							zend_error(E_ERROR, "Can't fetch $this as not in object context");
 						}
-						EX(object).ptr = EG(this);
+						EX(object).ptr = EG(This);
 					} else {
 						EX(object).ptr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 					}
@@ -1553,9 +1553,9 @@ binary_assign_op_addr: {
 					}
 
 					if(EX(fbc)->type == ZEND_USER_FUNCTION) {
-						EX(calling_namespace) = Z_OBJCE_P(EX(object).ptr);
+						EX(calling_scope) = Z_OBJCE_P(EX(object).ptr);
 					} else {
-						EX(calling_namespace) = NULL;
+						EX(calling_scope) = NULL;
 					}
 
 					if (!is_const) {
@@ -1594,15 +1594,15 @@ binary_assign_op_addr: {
 						function_name_strlen = tmp.value.str.len;
 					}
 					
-					EX(calling_namespace) = EG(namespace);
+					EX(calling_scope) = EG(scope);
 					
-					if ((EX(object).ptr = EG(this))) {
+					if ((EX(object).ptr = EG(This))) {
 						EX(object).ptr->refcount++;
 					}
 
 					ce = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
 
-					EX(calling_namespace) = ce;
+					EX(calling_scope) = ce;
 
 					if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen+1, (void **) &function)==FAILURE) {
 						zend_error(E_ERROR, "Call to undefined function:  %s()", function_name_strval);
@@ -1645,12 +1645,12 @@ binary_assign_op_addr: {
 						function_name_strlen = tmp.value.str.len;
 					}
 					
-					EX(calling_namespace) = EG(namespace);
+					EX(calling_scope) = EG(scope);
 
 					do {
-						if (EG(namespace)) {
-							if (zend_hash_find(&EG(namespace)->function_table, function_name_strval, function_name_strlen+1, (void **) &function) == SUCCESS) {
-								if ((EX(object).ptr = EG(this))) {
+						if (EG(scope)) {
+							if (zend_hash_find(&EG(scope)->function_table, function_name_strval, function_name_strlen+1, (void **) &function) == SUCCESS) {
+								if ((EX(object).ptr = EG(This))) {
 									EX(object).ptr->refcount++;
 								}
 								break;
@@ -1659,7 +1659,7 @@ binary_assign_op_addr: {
 						if (zend_hash_find(EG(function_table), function_name_strval, function_name_strlen+1, (void **) &function)==FAILURE) {
 							zend_error(E_ERROR, "Call to undefined function:  %s()", function_name_strval);
 						}
-						EX(calling_namespace) = NULL;
+						EX(calling_scope) = NULL;
 						EX(object).ptr = NULL;
 					} while (0);
 					
@@ -1680,9 +1680,9 @@ binary_assign_op_addr: {
 					zend_ptr_stack_push(&EG(arg_types_stack), EX(object).ptr);
 
 					do {
-						if (EG(namespace)) {
-							if (zend_hash_find(&EG(namespace)->function_table, fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function) == SUCCESS) {
-								if ((EX(object).ptr = EG(this))) {
+						if (EG(scope)) {
+							if (zend_hash_find(&EG(scope)->function_table, fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function) == SUCCESS) {
+								if ((EX(object).ptr = EG(This))) {
 									EX(object).ptr->refcount++;
 								}
 								break;
@@ -1694,7 +1694,7 @@ binary_assign_op_addr: {
 						EX(object).ptr = NULL;
 					} while (0);
 
-					EX(calling_namespace) = EG(namespace);
+					EX(calling_scope) = EG(scope);
 					FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
 					
 					goto do_fcall_common;
@@ -1702,16 +1702,16 @@ binary_assign_op_addr: {
 do_fcall_common:
 				{
 					zval **original_return_value;
-					zend_class_entry *current_namespace;
+					zend_class_entry *current_scope;
 					zval *current_this;
 					int return_value_used = RETURN_VALUE_USED(EX(opline));
 
 					zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) EX(opline)->extended_value, NULL);
-					current_namespace = EG(namespace);
-					EG(namespace) = EX(calling_namespace);
+					current_scope = EG(scope);
+					EG(scope) = EX(calling_scope);
 
-					current_this = EG(this);
-					EG(this) = EX(object).ptr;
+					current_this = EG(This);
+					EG(This) = EX(object).ptr;
 
 					EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr = &EX(Ts)[EX(opline)->result.u.var].var.ptr;
 
@@ -1788,13 +1788,13 @@ do_fcall_common:
 					EG(function_state_ptr) = &EX(function_state);
 					zend_ptr_stack_clear_multiple(TSRMLS_C);
 
-					EG(namespace) = current_namespace;
+					EG(scope) = current_scope;
 
-					if (EG(this)) {
-						zval_ptr_dtor(&EG(this));
+					if (EG(This)) {
+						zval_ptr_dtor(&EG(This));
 					}
 
-					EG(this) = current_this;
+					EG(This) = current_this;
 					
 					if (EG(exception)) {
 						if (EX(opline)->op2.u.opline_num == -1) {
@@ -1895,17 +1895,6 @@ exception_should_be_taken:
 					zend_hash_update(EG(active_symbol_table), EX(opline)->op2.u.constant.value.str.val,
 						EX(opline)->op2.u.constant.value.str.len+1, &EG(exception), sizeof(zval *), (void **) NULL);
 					EG(exception) = NULL;
-					NEXT_OPCODE();
-				}
-			case ZEND_NAMESPACE:
-				{
-#if 0
-					if (EX(opline)->op1.op_type == IS_UNUSED) {
-						EG(namespace) = NULL;
-					} else {
-						EG(namespace) = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
-					}
-#endif
 					NEXT_OPCODE();
 				}
 			case ZEND_SEND_VAL: 
@@ -2153,8 +2142,8 @@ send_by_ref:
 					zval **value;
 
 					if (EX(opline)->op1.op_type == IS_UNUSED) {
-						if (EG(namespace)) {
-							ce = EG(namespace);
+						if (EG(scope)) {
+							ce = EG(scope);
 							if (zend_hash_find(&ce->constants_table, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, (void **) &value) == SUCCESS) {
 								zval_update_constant(value, (void *) 1 TSRMLS_CC);
 								EX(Ts)[EX(opline)->result.u.var].tmp_var = **value;

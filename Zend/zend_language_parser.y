@@ -116,7 +116,6 @@
 %token T_UNSET
 %token T_ISSET
 %token T_EMPTY
-%token T_NAMESPACE
 %token T_CLASS
 %token T_EXTENDS
 %token T_OBJECT_OPERATOR

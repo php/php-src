@@ -158,10 +158,10 @@ struct _zend_executor_globals {
 	HashTable *class_table;		/* class table */
 	HashTable *zend_constants;	/* constants table */
 
-	zend_class_entry *namespace;
+	zend_class_entry *scope;
 	zend_class_entry *main_class_ptr;
 
-	zval *this;
+	zval *This;
 
 	long precision;
 

@@ -591,10 +591,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_PRINT;
 }
 
-<ST_IN_SCRIPTING>"namespace" {
-	return T_NAMESPACE;
-}
-
 <ST_IN_SCRIPTING>"class" {
 	return T_CLASS;
 }
