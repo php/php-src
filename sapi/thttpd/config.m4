@@ -9,7 +9,7 @@ AC_ARG_WITH(thttpd,
     echo 'PHP_LDFLAGS = \$(NATIVE_RPATHS) \$(PHP_LDFLAGS)' >> $THTTPD/php_makefile; \
     echo 'PHP_CFLAGS = \$(COMMON_FLAGS) \$(CFLAGS) \$(CPPFLAGS) \$(EXTRA_CFLAGS)' >> $THTTPD/php_makefile; \
     \$(LN_S) $abs_srcdir/sapi/thttpd/thttpd.c $THTTPD/php_thttpd.c; \
-    \$(LN_S) $abs_srcdir/sapi/thttpd/php_thttpd.h $SAPI_STATIC $THTTPD/;\
+    \$(LN_S) $abs_srcdir/sapi/thttpd/php_thttpd.h $abs_builddir/$SAPI_STATIC $THTTPD/;\
     test -f $THTTPD/php_patched || \
     (cd $THTTPD && patch < $abs_srcdir/sapi/thttpd/thttpd_patch && touch php_patched)"
   PHP_THTTPD="yes, using $THTTPD"
