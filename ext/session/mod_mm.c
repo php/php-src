@@ -247,16 +247,16 @@ static void ps_mm_destroy(ps_mm *data)
 
 PHP_MINIT_FUNCTION(ps_mm)
 {
-    char *ps_mm_path = calloc(strlen(PS(save_path))+1+strlen(PS_MM_FILE)+1, 1); /* Directory + '/' + File + \0 */
+	char *ps_mm_path = calloc(strlen(PS(save_path))+1+strlen(PS_MM_FILE)+1, 1); /* Directory + '/' + File + \0 */
 
 	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
 
-    strcpy(ps_mm_path, PS(save_path));
+	strcpy(ps_mm_path, PS(save_path));
 
-    if((strlen(ps_mm_path) > 0) && (ps_mm_path[strlen(ps_mm_path)-1] != '/'))
-        strcat(ps_mm_path, "/");  /* Fixme Windows */
+	if((strlen(ps_mm_path) > 0) && (ps_mm_path[strlen(ps_mm_path)-1] != '/'))
+		strcat(ps_mm_path, "/");  /* Fixme Windows */
 
-    strcat(ps_mm_path, PS_MM_FILE);
+	strcat(ps_mm_path, PS_MM_FILE);
 
 	if (ps_mm_initialize(ps_mm_instance, ps_mm_path) != SUCCESS) {
 		ps_mm_instance = NULL;
