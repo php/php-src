@@ -7,19 +7,7 @@ AC_ARG_WITH(xml,
                           in DIR if specified.  Set DIR to "shared" to
                           build as a dl, or "shared,DIR" to build as a dl
                           and still specify DIR.],[
-  case $withval in
-    shared)
-      shared=yes
-      withval=yes
-      ;;
-    shared,*)
-      shared=yes
-      withval=`echo $withval | sed -e 's/^shared,//'`
-      ;;
-    *)
-      shared=no
-      ;;
-  esac
+  PHP_WITH_SHARED
   if test "$withval" != "no"; then
     if test "$shared" = "yes"; then
       AC_MSG_RESULT([yes (shared)])

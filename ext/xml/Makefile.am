@@ -1,7 +1,5 @@
 # $Id$
 
-phplibdir=$(libdir)/php
-
 SRC=xml.c
 INCLUDES=@INCLUDES@ @XML_INCLUDE@ -I@top_srcdir@ -I@top_srcdir@/libzend
 noinst_LIBRARIES=@XML_STATIC@
