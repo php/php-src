@@ -81,7 +81,12 @@ static FILE *tsrm_error_file;
 	}
 #else
 #define TSRM_ERROR
-#define TSRM_SAFE_RETURN_RSRC(array, offset, range)	return array[offset]
+#define TSRM_SAFE_RETURN_RSRC(array, offset, range)		\
+	if (offset==0) {									\
+		return &array;									\
+	} else {											\
+		return array[TSRM_UNSHUFFLE_RSRC_ID(offset)];	\
+	}
 #endif
 
 #if defined(PTHREADS)
