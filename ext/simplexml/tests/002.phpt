@@ -27,11 +27,6 @@ simplexml_element Object
                 (
                     [elem3] => simplexml_element Object
                         (
-                            [included-entity] => simplexml_element Object
-                                (
-                                    [included-entity] => This is text included from an entity
-                                )
-
                             [elem4] => simplexml_element Object
                                 (
                                     [test] => simplexml_element Object
