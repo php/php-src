@@ -143,6 +143,7 @@
 %token T_PAAMAYIM_NEKUDOTAYIM
 %token T_IMPORT T_FROM
 %token T_NAMESPACE
+%token T_NAMESPACE_NAME
 
 %% /* Rules */
 
