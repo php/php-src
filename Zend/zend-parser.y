@@ -521,7 +521,7 @@ compound_variable:
 
 dim_list:
 		dim_list ']' '[' dim_offset	{ fetch_array_dim(&$$, &$1, &$4 CLS_CC); }
-	|	compound_variable  { do_begin_variable_parse(CLS_C); } '[' dim_offset		{ fetch_array_begin(&$$, &$1, &$4 CLS_CC); }
+	|	compound_variable  { do_fetch_globals(&$1); do_begin_variable_parse(CLS_C); } '[' dim_offset		{ fetch_array_begin(&$$, &$1, &$4 CLS_CC); }
 ;
 
 
@@ -604,10 +604,10 @@ encaps_list:
 
 
 encaps_var:
-		VARIABLE { do_begin_variable_parse(CLS_C); fetch_simple_variable(&$$, &$1, 1 CLS_CC); }
-	|	VARIABLE '[' encaps_var_offset ']'	{ do_begin_variable_parse(CLS_C); fetch_array_begin(&$$, &$1, &$3 CLS_CC); }
+		VARIABLE { do_fetch_globals(&$1); do_begin_variable_parse(CLS_C); fetch_simple_variable(&$$, &$1, 1 CLS_CC); }
+	|	VARIABLE '[' encaps_var_offset ']'	{ do_fetch_globals(&$1); do_begin_variable_parse(CLS_C); fetch_array_begin(&$$, &$1, &$3 CLS_CC); }
 	|	VARIABLE ZEND_OBJECT_OPERATOR STRING { do_begin_variable_parse(CLS_C); fetch_simple_variable(&$2, &$1, 1 CLS_CC); do_fetch_property(&$$, &$2, &$3 CLS_CC); }
-	|	DOLLAR_OPEN_CURLY_BRACES expr '}' { do_begin_variable_parse(CLS_C); fetch_simple_variable(&$$, &$2, 1 CLS_CC); }
+	|	DOLLAR_OPEN_CURLY_BRACES expr '}' { do_begin_variable_parse(CLS_C);  fetch_simple_variable(&$$, &$2, 1 CLS_CC); }
 	|	DOLLAR_OPEN_CURLY_BRACES STRING '[' expr ']' '}' { do_begin_variable_parse(CLS_C);  fetch_array_begin(&$$, &$2, &$4 CLS_CC); }
 	|	T_CURLY_OPEN cvar '}' { $$ = $2; }
 ;

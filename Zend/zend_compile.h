@@ -91,6 +91,7 @@ struct _zend_op_array {
 	zend_brk_cont_element *brk_cont_array;
 	int last_brk_cont;
 	int current_brk_cont;
+	unsigned char initialized_globals;
 
 	/* static variables support */
 	HashTable *static_variables;
@@ -195,6 +196,7 @@ void do_assign_ref(znode *result, znode *lvar, znode *rvar CLS_DC);
 void fetch_simple_variable(znode *result, znode *varname, int bp CLS_DC);
 void do_indirect_references(znode *result, znode *num_references, znode *variable CLS_DC);
 void do_fetch_global_or_static_variable(znode *varname, znode *static_assignment, int fetch_type CLS_DC);
+void do_fetch_globals(znode *varname);
 
 void fetch_array_begin(znode *result, znode *varname, znode *first_dim CLS_DC);
 void fetch_array_dim(znode *result, znode *parent, znode *dim CLS_DC);
@@ -450,11 +452,13 @@ int zendlex(znode *zendlval CLS_DC);
 
 #define ZEND_FETCH_DIM_TMP_VAR		89
 #define ZEND_FETCH_CONSTANT			90
-									
-#define ZEND_EXT_STMT				91
-#define ZEND_EXT_FCALL_BEGIN		92
-#define ZEND_EXT_FCALL_END			93
-#define ZEND_EXT_NOP				94
+
+#define ZEND_INIT_GLOBALS			91
+
+#define ZEND_EXT_STMT				92
+#define ZEND_EXT_FCALL_BEGIN		93
+#define ZEND_EXT_FCALL_END			94
+#define ZEND_EXT_NOP				95
 
 /* end of block */
 
