@@ -1,5 +1,6 @@
 
 $(srcdir)/parsedate.c: $(srcdir)/parsedate.y
+	$(YACC) $(srcdir)/parsedate.y -o $@
 
 $(srcdir)/var_unserializer.c: $(srcdir)/var_unserializer.re
 	re2c -b $(srcdir)/var_unserializer.re > $@
