@@ -209,6 +209,7 @@ class PEAR_Common extends PEAR
     {
         if ($this->debug >= $level) {
             if (is_object($this->ui)) {
+                // XXX convert to new Frontend API?
                 $this->ui->displayLine($msg);
             } else {
                 print "$msg\n";

@@ -46,8 +46,7 @@ configuration layers are "user", "system" and "default".
             'function' => 'doConfigGet',
             'shortcut' => 'cg',
             'options' => array(),
-            'doc' => '<parameter> [layer]
-Displays the value of one configuration parameter.  The
+            'doc' => 'Displays the value of one configuration parameter.  The
 first argument is the name of the parameter, an optional second argument
 may be used to tell which configuration layer to look in.  Valid configuration
 layers are "user", "system" and "default".  If no layer is specified, a value
@@ -60,23 +59,12 @@ just specified.
             'function' => 'doConfigSet',
             'shortcut' => 'cs',
             'options' => array(),
-            'doc' => '<parameter> <new-value> [layer]
-Sets the value of one configuration parameter.  The first
+            'doc' => 'Sets the value of one configuration parameter.  The first
 argument is the name of the parameter, the second argument is the new value.
 Some parameters are be subject to validation, and the command will fail with
 an error message if the new value does not make sense.  An optional third
 argument may be used to specify which layer to set the configuration parameter
 in.  The default layer is "user".
-',
-            ),
-        'config-help' => array(
-            'summary' => 'Show Information About Setting',
-            'function' => 'doConfigHelp',
-            'shortcut' => 'ch',
-            'options' => array(),
-            'doc' => '[parameter]
-Displays help for a configuration parameter.  Without arguments it
-displays help for all configuration parameters.
 ',
             ),
         );
@@ -95,11 +83,12 @@ displays help for all configuration parameters.
     {
         // $params[0] -> the layer
         if ($error = $this->_checkLayer(@$params[0])) {
-            return $this->raiseError($error);
+            $failmsg .= $error;
+            break;
         }
         $keys = $this->config->getKeys();
         sort($keys);
-        $this->ui->startTable(array('caption' => 'Configuration:'));
+        $data = array('caption' => 'Configuration:');
         foreach ($keys as $key) {
             $type = $this->config->getType($key);
             $value = $this->config->get($key, @$params[0]);
@@ -115,9 +104,9 @@ displays help for all configuration parameters.
             } elseif ($value === true) {
                 $value = 'true';
             }
-            $this->ui->tableRow(array($key, $value));
+            $data['data'][] = array($key, $value);
         }
-        $this->ui->endTable();
+        $this->ui->outputData($data, $command);
         return true;
     }
 
@@ -126,15 +115,16 @@ displays help for all configuration parameters.
         // $params[0] -> the parameter
         // $params[1] -> the layer
         if ($error = $this->_checkLayer(@$params[1])) {
-            return $this->raiseError($error);
+            $failmsg .= $error;
+            break;
         }
         if (sizeof($params) < 1 || sizeof($params) > 2) {
-            return $this->raiseError("config-get expects 1 or 2 parameters");
+            $failmsg .= "config-get expects 1 or 2 parameters";
         } elseif (sizeof($params) == 1) {
-            $this->ui->displayLine("$params[0] = " . $this->config->get($params[0]));
+            $this->ui->outputData("$params[0] = " . $this->config->get($params[0]), $command);
         } else {
-            $this->ui->displayLine("($params[1])$params[0] = " .
-                                   $this->config->get($params[0], $params[1]));
+            $data = "($params[1])$params[0] = " .$this->config->get($params[0], $params[1]);
+            $this->ui->outputData($data, $command);
         }
         return true;
     }
@@ -145,50 +135,24 @@ displays help for all configuration parameters.
         // $param[1] -> the value for the parameter
         // $param[2] -> the layer
         $failmsg = '';
-        do {
-            if (sizeof($params) < 2 || sizeof($params) > 3) {
-                $failmsg .= "config-set expects 2 or 3 parameters";
-                break;
-            }
-            if ($error = $this->_checkLayer(@$params[2])) {
-                $failmsg .= $error;
-                break;
-            }
-            if ($params[0] == 'umask') {
-                list($params[1]) = sscanf($params[1], '%o');
-            }
-            if (!call_user_func_array(array(&$this->config, 'set'), $params))
-            {
-                $failmsg = "config-set (" . implode(", ", $params) . ") failed";
-            } else {
-                $this->config->store();
-            }
-        } while (false);
+        if (sizeof($params) < 2 || sizeof($params) > 3) {
+            $failmsg .= "config-set expects 2 or 3 parameters";
+            break;
+        }
+        if ($error = $this->_checkLayer(@$params[2])) {
+            $failmsg .= $error;
+            break;
+        }
+        if (!call_user_func_array(array(&$this->config, 'set'), $params))
+        {
+            $failmsg = "config-set (" . implode(", ", $params) . ") failed";
+        } else {
+            $this->config->store();
+        }
         if ($failmsg) {
             return $this->raiseError($failmsg);
         }
         return true;
-    }
-
-    function doConfigHelp($command, $options, $params)
-    {
-        if (empty($params)) {
-            $params = $this->config->getKeys();
-        }
-        $this->ui->startTable();
-        $this->ui->tableRow(array('Name', 'Type', 'Description'),
-                            array('bold' => true));
-        foreach ($params as $name) {
-            $type = $this->config->getType($name);
-            $docs = $this->config->getDocs($name);
-            if ($type == 'set') {
-                $docs = rtrim($docs) . "\nValid set: " .
-                    implode(' ', $this->config->getSetValues($name));
-            }
-            $this->ui->tableRow(array($name, $type, $docs), null,
-                                array(2 => array('wrap' => 50)));
-        }
-        $this->ui->endTable();
     }
 
     /**
