@@ -706,7 +706,7 @@ function settings2array($settings, &$ini_settings)
 {
 	foreach($settings as $setting) {
 		if (strpos($setting, '=')!==false) {
-			$setting = explode("=", $setting);
+			$setting = explode("=", $setting, 2);
 			$name = trim(strtolower($setting[0]));
 			$value = trim($setting[1]);
 			$ini_settings[$name] = $value;
