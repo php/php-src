@@ -122,7 +122,7 @@ struct _zend_executor_globals {
 	zend_function_state *function_state_ptr;
 	zend_ptr_stack arg_types_stack;
 	zend_stack overloaded_objects_stack;
-	zval global_return_value;
+	zval *global_return_value;
 
 	/* symbol table cache */
 	HashTable *symtable_cache[SYMTABLE_CACHE_SIZE];

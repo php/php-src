@@ -1475,14 +1475,15 @@ do_fcall_common:
 					zval **original_return_value;
 					int return_value_not_used = (opline->result.u.EA.type & EXT_TYPE_UNUSED);
 
-					zend_ptr_stack_push(&EG(argument_stack), (void *) opline->extended_value);
-					Ts[opline->result.u.var].var.ptr = (zval *)emalloc(sizeof(zval));
-					Ts[opline->result.u.var].var.ptr_ptr = &Ts[opline->result.u.var].var.ptr;
-					var_uninit(Ts[opline->result.u.var].var.ptr);
-					Ts[opline->result.u.var].var.ptr->is_ref = 0;
-					Ts[opline->result.u.var].var.ptr->refcount = 1;
 
-					if (function_state.function->type==ZEND_INTERNAL_FUNCTION) {
+					zend_ptr_stack_push(&EG(argument_stack), (void *) opline->extended_value);
+					Ts[opline->result.u.var].var.ptr_ptr = &Ts[opline->result.u.var].var.ptr;
+					/* The emalloc() could be optimized out for call user function but it
+					   creates a problem with include() */
+					Ts[opline->result.u.var].var.ptr = (zval *)emalloc(sizeof(zval));
+					INIT_ZVAL(*(Ts[opline->result.u.var].var.ptr));
+
+					if (function_state.function->type==ZEND_INTERNAL_FUNCTION) {	
 						((zend_internal_function *) function_state.function)->handler(opline->extended_value, Ts[opline->result.u.var].var.ptr, &EG(regular_list), &EG(persistent_list), object.ptr, !return_value_not_used);
 						if (object.ptr) {
 							object.ptr->refcount--;
@@ -1567,6 +1568,7 @@ do_fcall_common:
 					
 						if (!EG(free_op1)) { /* Not a temp var */
 							if (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0) {
+								/**(EG(return_value_ptr_ptr)) = (zval *)emalloc(sizeof(zval));*/
 								**EG(return_value_ptr_ptr) = *retval_ptr;
 								(*EG(return_value_ptr_ptr))->is_ref = 0;
 								(*EG(return_value_ptr_ptr))->refcount = 1;
@@ -1577,6 +1579,7 @@ do_fcall_common:
 								retval_ptr->refcount++;
 							}
 						} else {
+							/**(EG(return_value_ptr_ptr))= (zval *)emalloc(sizeof(zval));*/
 							**EG(return_value_ptr_ptr) = *retval_ptr;
 							(*EG(return_value_ptr_ptr))->refcount = 1;
 							(*EG(return_value_ptr_ptr))->is_ref = 0;
@@ -1615,9 +1618,8 @@ do_fcall_common:
 
 					if (varptr == &EG(uninitialized_zval)) {
 						varptr = (zval *) emalloc(sizeof(zval));
-						var_uninit(varptr);
-						varptr->refcount=0;
-						varptr->is_ref=0;
+						INIT_ZVAL(*varptr);
+						varptr->refcount = 0;
 					} else if (PZVAL_IS_REF(varptr)) {
 						zval *original_var = varptr;
 
@@ -1923,7 +1925,7 @@ send_by_ref:
 				break;
 			case ZEND_INCLUDE_OR_EVAL: {
 					zend_op_array *new_op_array=NULL;
-					zval *original_return_value = EG(return_value);
+					zval **original_return_value = EG(return_value_ptr_ptr);
 					CLS_FETCH();
 
 					switch (opline->op2.u.constant.value.lval) {
@@ -1938,12 +1940,26 @@ send_by_ref:
 							break;
 					}
 					FREE_OP(&opline->op1, EG(free_op1));
+
 					if (new_op_array) {
-						Ts[opline->result.u.var].tmp_var.value.lval = 1;
+						zval *return_value_ptr;
+						/*Ts[opline->result.u.var].tmp_var.value.lval = 1;
 						Ts[opline->result.u.var].tmp_var.type = IS_LONG;
 						EG(return_value) = &Ts[opline->result.u.var].tmp_var;
+						*/
+						return_value_ptr = emalloc(sizeof(zval));
+						
+						INIT_PZVAL(return_value_ptr);
+						return_value_ptr->value.lval = 1;
+						return_value_ptr->type = IS_LONG;
+						EG(return_value_ptr_ptr) = &return_value_ptr;
 						EG(active_op_array) = new_op_array;
+
 						zend_execute(new_op_array ELS_CC);
+
+						Ts[opline->result.u.var].tmp_var = *return_value_ptr;
+						zval_copy_ctor(&Ts[opline->result.u.var].tmp_var);
+						zval_ptr_dtor(&return_value_ptr);
 
 						EG(opline_ptr) = &opline;
 						EG(active_op_array) = op_array;
@@ -1951,9 +1967,9 @@ send_by_ref:
 						destroy_op_array(new_op_array);
 						efree(new_op_array);
 					} else {
-						var_uninit(&Ts[opline->result.u.var].tmp_var);
+						INIT_ZVAL(Ts[opline->result.u.var].tmp_var);
 					}
-					EG(return_value) = original_return_value;
+					EG(return_value_ptr_ptr) = original_return_value;
 				}
 				break;
 			case ZEND_UNSET_VAR: {
