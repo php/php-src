@@ -618,7 +618,6 @@ enable_static=yes
 case "$php_build_target" in
 program)
     enable_shared=no
-    PHP_PROGRAM=php
 ;;
 shared)
     enable_static=no
@@ -628,6 +627,10 @@ static)
     enable_shared=no
 ;;
 esac
+
+if test "$PHP_SAPI" = "cgi"; then
+  PHP_PROGRAM=php
+fi
 
 PHP_REGEX
 
