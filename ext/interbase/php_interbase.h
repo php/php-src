@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Jouni Ahto <jouni.ahto@exdec.fi>                            |
    |          Andrew Avdeev <andy@simgts.mv.ru>                           |
+   |          Ard Biesheuvel <a.k.biesheuvel@its.tudelft.nl>              |
    +----------------------------------------------------------------------+
  */
 
@@ -92,6 +93,7 @@ PHP_FUNCTION(ibase_errcode);
 
 PHP_FUNCTION(ibase_wait_event);
 PHP_FUNCTION(ibase_set_event_handler);
+PHP_FUNCTION(ibase_free_event_handler);
 
 #define IBASE_MSGSIZE 256
 #define MAX_ERRMSG (IBASE_MSGSIZE*2)
