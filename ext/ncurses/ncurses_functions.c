@@ -75,7 +75,7 @@ PHP_FUNCTION(ncurses_color_set)
 	}
 	RETURN_LONG(color_set(pair,NULL));
 #else
-	php_error(E_WARNING,"%s not supported in this build");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s not supported in this build");
 	RETURN_FALSE;
 #endif
 }
@@ -320,7 +320,7 @@ PHP_FUNCTION(ncurses_start_color)
 	if (NCURSES_G(is_initialised)) {
 		RETURN_LONG(start_color());
 	} else {
-		php_error(E_WARNING, "ncurses library is not initialised by ncurses_init().");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "ncurses library is not initialised by ncurses_init().");
 		RETURN_FALSE;
 	}
 }
@@ -996,7 +996,7 @@ PHP_FUNCTION(ncurses_slk_color)
 
 	RETURN_LONG(slk_color(intarg));
 #else
-	php_error(E_WARNING,"%s not supported in this build");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s not supported in this build");
 	RETURN_FALSE;
 #endif
 }
@@ -1071,7 +1071,7 @@ PHP_FUNCTION(ncurses_use_extended_names)
 
 	RETURN_LONG(use_extended_names(intarg));
 #else
-	php_error(E_WARNING,"%s not supported in this build");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s not supported in this build");
 	RETURN_FALSE;
 #endif  
 }
@@ -1606,7 +1606,7 @@ PHP_FUNCTION(ncurses_assume_default_colors)
 	
 	RETURN_LONG(assume_default_colors(i1,i2));
 #else
-	php_error(E_WARNING,"%s not supported in this build");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s not supported in this build");
 	RETURN_FALSE;
 #endif  
 }
@@ -1831,7 +1831,7 @@ PHP_FUNCTION(ncurses_ungetmouse)
   }
 
 	if (Z_TYPE_PP(arg) != IS_ARRAY){
-		php_error(E_WARNING, "ncurses_ungetmouse: expected mevent as array");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected mevent as array");
 		RETURN_FALSE;
  	}
 
@@ -2018,7 +2018,7 @@ PHP_FUNCTION(ncurses_wcolor_set)
 
 	RETURN_LONG(wcolor_set(*win, Z_LVAL_PP(color_pair), 0));
 #else
-	php_error(E_WARNING,"%s not supported in this build");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING,"%s not supported in this build");
 	RETURN_FALSE;
 #endif
 }
