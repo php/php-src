@@ -593,6 +593,14 @@ static void php_ob_append(const char *text, uint text_length TSRMLS_DC)
 	memcpy(target, text, text_length);
 	target[text_length]=0;
 
+	/* If implicit_flush is On, send contents to next buffer and return.
+	   Both PG() and OG() should be used since we should flush implicitly
+	   always when implicit_flush is enabled in php.ini */
+	if (PG(implicit_flush) || OG(implicit_flush)) {
+		php_end_ob_buffer(1, 1 TSRMLS_CC);
+		return;
+	}
+	
 	if (OG(active_ob_buffer).chunk_size
 		&& OG(active_ob_buffer).text_length >= OG(active_ob_buffer).chunk_size) {
 		zval *output_handler = OG(active_ob_buffer).output_handler;
