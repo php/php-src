@@ -94,10 +94,7 @@ PHPAPI void php_output_activate(TSRMLS_D)
 
 
 /* {{{ php_output_set_status
-   Toggle output status. Use this function for internal functions uses
-   buffers. If you don't implict flush (both php.ini implicit_flush and ob_impilict_flush())
-   may flush your php_printf() output.
-   status: 0 for disable output, 1 for enable.*/
+   Toggle output status.  Do NOT use in application code, only in SAPIs where appropriate. */
 PHPAPI void php_output_set_status(zend_bool status TSRMLS_DC)
 {
 	OG(disable_output) = !status;
@@ -592,9 +589,8 @@ static inline void php_ob_append(const char *text, uint text_length TSRMLS_DC)
 	target[text_length]=0;
 
  	/* If implicit_flush is On or chunked buffering, send contents to next buffer and return. */
-	if (OG(implicit_flush) || (OG(active_ob_buffer).chunk_size
-		&& OG(active_ob_buffer).text_length >= OG(active_ob_buffer).chunk_size))
-	{
+	if (OG(active_ob_buffer).chunk_size
+		&& OG(active_ob_buffer).text_length >= OG(active_ob_buffer).chunk_size) {
 		zval *output_handler = OG(active_ob_buffer).output_handler;
 		
 		if (output_handler) {
