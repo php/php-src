@@ -39,10 +39,11 @@ struct pdo_bound_param_data;
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
-	PDO_PARAM_INT,
+	PDO_PARAM_INT,	/* int as in long, the php native int type */
 	PDO_PARAM_STR,
 	PDO_PARAM_LOB,
 	PDO_PARAM_STMT, /* hierarchical result set */
+	PDO_PARAM_BOOL
 };
 
 enum pdo_fetch_type {
@@ -260,7 +261,10 @@ typedef int (*pdo_stmt_fetch_func)(pdo_stmt_t *stmt TSRMLS_DC);
  * Driver should populate stmt->columns[colno] with appropriate info */
 typedef int (*pdo_stmt_describe_col_func)(pdo_stmt_t *stmt, int colno TSRMLS_DC);
 
-/* retrieves pointer and size of the value for a column */
+/* retrieves pointer and size of the value for a column.
+ * Note that PDO expects the driver to manage the lifetime of this data;
+ * it will copy the value into a zval on behalf of the script.
+ */
 typedef int (*pdo_stmt_get_col_data_func)(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len TSRMLS_DC);
 
 /* hook for bound params */
@@ -336,7 +340,7 @@ struct _pdo_dbh_t {
 	/* these items mst appear in this order at the beginning of the
        struct so that this can be cast as a zend_object.  we need this
        to allow the extending class to escape all the custom handlers
-	   that PDO decalres.
+	   that PDO declares.
     */
 	zend_class_entry *ce; 
 	HashTable *properties;
