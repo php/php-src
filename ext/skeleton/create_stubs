@@ -71,7 +71,7 @@ BEGIN {
 		"  <titleabbrev></titleabbrev>\n\n" \
 		"  <partintro>\n" \
     		"   <para>\n" \
-    		"   </para\n" \
+    		"   </para>\n" \
     		"  </partintro>\n\n";
 
 	xmlfoot = " </reference>\n\n" \
@@ -84,12 +84,16 @@ BEGIN {
 		"sgml-always-quote-attributes:t\n" \
 		"sgml-indent-step:1\n" \
 		"sgml-indent-data:t\n" \
+		"indent-tabs-mode:nil" \
 		"sgml-parent-document:nil\n" \
 		"sgml-default-dtd-file:\"../../manual.ced\"\n" \
 		"sgml-exposed-tags:nil\n" \
 		"sgml-local-catalogs:nil\n" \
 		"sgml-local-ecat-files:nil\n" \
 		"End:\n" \
+		"vim600: syn=xml fen fdm=syntax fdl=2 si\n" \
+		"vim: et tw=78 syn=sgml\n" \
+		"vi: ts=1 sw=1\n" \
 		"-->\n"
 }
 
