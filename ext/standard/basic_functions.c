@@ -1412,8 +1412,9 @@ PHP_FUNCTION(getopt)
 	 * Get argv from the global symbol table.  We calculate argc ourselves
 	 * in order to be on the safe side, even though it is also available
 	 * from the symbol table.
+	 *
+	 * TODO: Take from trackbars instead.
 	 */
-	// TODO take fromm trackvars instead
 	if (zend_hash_find(HASH_OF(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"),
 					   (void **) &args) != FAILURE) {
 		int pos = 0;
@@ -1468,7 +1469,7 @@ PHP_FUNCTION(getopt)
 		while (zend_hash_get_current_data(Z_ARRVAL_P(p_longopts),
 										  (void **)&arg) == SUCCESS) {
 
-			// todo check for : and ::, strip'em, efrees ...
+			/* TODO: check for : and ::, strip'em, efrees ... */
 			p->has_arg = 0;
 			name = estrdup(Z_STRVAL_PP(arg));
 			len = strlen(name);
