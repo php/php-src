@@ -4,6 +4,7 @@ PHP 4                                                                      NEWS
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
+- Fixed bug #19280 (imap_header fails with many To: addresses). (Ilia)
 - Added mb_regex_set_options(). The Options parameters of various mbregex
   functions are now deprecated. (Moriyoshi)
 - Fixed bug #19482 (Segfault with PCRE and locale). (Andrei)
