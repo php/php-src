@@ -57,6 +57,8 @@ if test "$PHP_PGSQL" != "no"; then
   AC_CHECK_LIB(pq, PQcmdTuples,AC_DEFINE(HAVE_PQCMDTUPLES,1,[Broken libpq under windows]))
   AC_CHECK_LIB(pq, PQoidValue,AC_DEFINE(HAVE_PQOIDVALUE,1,[Older PostgreSQL]))
   AC_CHECK_LIB(pq, PQclientEncoding,AC_DEFINE(HAVE_PQCLIENTENCODING,1,[PostgreSQL 7.0.x or later]))
+  AC_CHECK_LIB(pq, PQparameterStatus,AC_DEFINE(HAVE_PQPARAMETERSTATUS,1,[PostgreSQL 7.4 or later]))
+  AC_CHECK_LIB(pq, PQprotocolVersion,AC_DEFINE(HAVE_PQPROTOCOLVERSION,1,[PostgreSQL 7.4 or later]))
   AC_CHECK_LIB(pq, pg_encoding_to_char,AC_DEFINE(HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT,1,[Whether libpq is compiled with --enable-multibye]))
   LIBS=$old_LIBS
   LDFLAGS=$old_LDFLAGS
