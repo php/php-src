@@ -316,8 +316,10 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 			http_close = FALSE;
 		}
 		efree(connection);
+/*
 	} else if (http_1_1) {
 		http_close = FALSE;
+*/
 	}
 
 	if (http_close) {
