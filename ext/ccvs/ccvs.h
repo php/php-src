@@ -32,22 +32,22 @@
 	
 	
 		/* Pre-declarations of functions */
-		ZEND_FUNCTION(ccvs_init);
-		ZEND_FUNCTION(ccvs_done);
-		ZEND_FUNCTION(ccvs_new);
-		ZEND_FUNCTION(ccvs_add);
-		ZEND_FUNCTION(ccvs_delete);
-		ZEND_FUNCTION(ccvs_auth);
-		ZEND_FUNCTION(ccvs_return);
-		ZEND_FUNCTION(ccvs_reverse);
-		ZEND_FUNCTION(ccvs_sale);
-		ZEND_FUNCTION(ccvs_void);
-		ZEND_FUNCTION(ccvs_status);
-		ZEND_FUNCTION(ccvs_count);
-		ZEND_FUNCTION(ccvs_lookup);
-		ZEND_FUNCTION(ccvs_report);
-		ZEND_FUNCTION(ccvs_command);
-		ZEND_FUNCTION(ccvs_textvalue); 
+		PHP_FUNCTION(ccvs_init);
+		PHP_FUNCTION(ccvs_done);
+		PHP_FUNCTION(ccvs_new);
+		PHP_FUNCTION(ccvs_add);
+		PHP_FUNCTION(ccvs_delete);
+		PHP_FUNCTION(ccvs_auth);
+		PHP_FUNCTION(ccvs_return);
+		PHP_FUNCTION(ccvs_reverse);
+		PHP_FUNCTION(ccvs_sale);
+		PHP_FUNCTION(ccvs_void);
+		PHP_FUNCTION(ccvs_status);
+		PHP_FUNCTION(ccvs_count);
+		PHP_FUNCTION(ccvs_lookup);
+		PHP_FUNCTION(ccvs_report);
+		PHP_FUNCTION(ccvs_command);
+		PHP_FUNCTION(ccvs_textvalue); 
 		PHP_MINFO_FUNCTION(ccvs);
 		
 		/* Declare the information we need to dynamically link this module later */
