@@ -338,6 +338,7 @@ ZEND_API void start_memory_manager(ALS_D)
 	memset(AG(fast_cache_list_head), 0, sizeof(AG(fast_cache_list_head)));
 	memset(AG(cache_count),0,MAX_CACHED_MEMORY*sizeof(unsigned char));
 
+#if 0
 	/* Initialize cache, to prevent fragmentation */
 	for (i=1; i<MAX_CACHED_MEMORY; i++) {
 		for (j=0; j<MAX_CACHED_ENTRIES; j++) {
@@ -349,6 +350,7 @@ ZEND_API void start_memory_manager(ALS_D)
 			efree(cached_entries[i][j]);
 		}
 	}
+#endif
 }
 
 
