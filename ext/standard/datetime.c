@@ -214,7 +214,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	time_t the_time;
 	struct tm *ta, tmbuf;
 	int i, size = 0, length, h, beat;
-	char tmp_buff[16];
+	char tmp_buff[32];
 
 	switch(ZEND_NUM_ARGS()) {
 	case 1:
