@@ -401,6 +401,11 @@ static char *exif_get_tagformat(int format)
 #define TAG_FOCALLENGTH                 0x920A
 #define TAG_MARKER_NOTE                 0x927C
 #define TAG_USERCOMMENT                 0x9286
+#define TAG_XP_TITLE                    0x9c9b
+#define TAG_XP_COMMENTS                 0x9c9c
+#define TAG_XP_AUTHOR                   0x9c9d
+#define TAG_XP_KEYWORDS                 0x9c9e
+#define TAG_XP_SUBJECT                  0x9c9f
 #define TAG_FLASH_PIX_VERSION           0xA000
 #define TAG_COLOR_SPACE                 0xA001
 #define TAG_COMP_IMAGEWIDTH             0xA002 /* compressed images only */
@@ -555,6 +560,11 @@ static const struct {
   { 0x9290, "SubSecTime"},
   { 0x9291, "SubSecTimeOriginal"},
   { 0x9292, "SubSecTimeDigitized"},
+  { 0x9c9b, "Title" },                      /* Win XP specific, Unicode  */
+  { 0x9c9c, "Comments" },                   /* Win XP specific, Unicode  */
+  { 0x9c9d, "Author" },                     /* Win XP specific, Unicode  */
+  { 0x9c9e, "Keywords" },                   /* Win XP specific, Unicode  */
+  { 0x9c9f, "Subject" },                    /* Win XP specific, Unicode, not to be confused with SubjectDistance and SubjectLocation */
   { 0xA000, "FlashPixVersion"},
   { 0xA001, "ColorSpace"},
   { 0xA002, "ExifImageWidth"},
@@ -883,7 +893,8 @@ typedef struct {
 #define SECTION_GPS         9
 #define SECTION_INTEROP     10
 #define SECTION_APP12       11
-#define SECTION_COUNT       12
+#define SECTION_WINXP       12
+#define SECTION_COUNT       13
 
 #define FOUND_FILE          (1<<SECTION_FILE)
 #define FOUND_COMPUTED      (1<<SECTION_COMPUTED)
@@ -897,6 +908,7 @@ typedef struct {
 #define FOUND_GPS           (1<<SECTION_GPS)
 #define FOUND_INTEROP       (1<<SECTION_INTEROP)
 #define FOUND_APP12         (1<<SECTION_APP12)
+#define FOUND_WINXP         (1<<SECTION_WINXP)
 
 static char *exif_get_sectionname(int section)
 {
@@ -913,6 +925,7 @@ static char *exif_get_sectionname(int section)
 		case SECTION_GPS:       return "GPS";
 		case SECTION_INTEROP:   return "INTEROP";
 		case SECTION_APP12:     return "APP12";
+		case SECTION_WINXP:     return "WINXP";
 	}
 	return "";
 }
@@ -973,6 +986,17 @@ typedef struct {
 	char 	        *data;
 } thumbnail_data;
 
+typedef struct {
+	char			*value;
+	size_t			size;
+	int				tag;
+} xp_field_type;
+
+typedef struct {
+	int             count;
+	xp_field_type   *list;
+} xp_field_list;
+
 /* EXIF standard defines Copyright as "<Photographer> [ '\0' <Editor> ] ['\0']" */
 /* This structure is used to store a section of a Jpeg file. */
 typedef struct {
@@ -1007,6 +1031,8 @@ typedef struct {
 	char            *Copyright;
 	char            *CopyrightPhotographer;
 	char            *CopyrightEditor;
+
+	xp_field_list   xp_fields;
 
 	thumbnail_data  Thumbnail;
 	/* other */
@@ -2177,6 +2203,29 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 }
 /* }}} */
 
+/* {{{ exif_process_unicode
+ * Process unicode field in IFD. */
+static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_field, int tag, char *szValuePtr, int ByteCount TSRMLS_DC)
+{
+	xp_field->tag = tag;	
+
+	/* Copy the comment */
+#ifdef HAVE_MBSTRING
+/*  What if MS supports big-endian with XP? */
+/*	if (ImageInfo->motorola_intel) {
+		xp_field->value = php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_unicode, ImageInfo->decode_unicode_be, &xp_field->size TSRMLS_CC);
+	} else {
+		xp_field->value = php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_unicode, ImageInfo->decode_unicode_le, &xp_field->size TSRMLS_CC);
+	}*/
+	xp_field->value = php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_unicode, ImageInfo->decode_unicode_le, &xp_field->size TSRMLS_CC);
+	return xp_field->size;
+#else
+	xp_field->size = exif_process_string_raw(&xp_field->value, szValuePtr, ByteCount);
+	return xp_field->size;
+#endif
+}
+/* }}} */
+
 /* {{{ exif_process_IFD_TAG
  * Process one of the nested IFDs directories. */
 static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, char *offset_base, size_t IFDlength, int section_index, int ReadNextIFD TSRMLS_DC)
@@ -2185,6 +2234,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 	int tag, format, components;
 	char *value_ptr, tagname[64], cbuf[32], *outside=NULL;
 	size_t byte_count, offset_val, fpos, fgot;
+	xp_field_type *tmp_xp;
 
 	tag = php_ifd_get16u(dir_entry, ImageInfo->motorola_intel);
 	format = php_ifd_get16u(dir_entry+2, ImageInfo->motorola_intel);
@@ -2323,6 +2373,22 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 
 			case TAG_USERCOMMENT:
 				ImageInfo->UserCommentLength = exif_process_user_comment(ImageInfo, &(ImageInfo->UserComment), &(ImageInfo->UserCommentEncoding), value_ptr, byte_count TSRMLS_CC);
+				break;
+
+			case TAG_XP_TITLE:
+			case TAG_XP_COMMENTS:
+			case TAG_XP_AUTHOR:
+			case TAG_XP_KEYWORDS:
+			case TAG_XP_SUBJECT:
+				tmp_xp = (xp_field_type*)erealloc(ImageInfo->xp_fields.list, sizeof(xp_field_type)*(ImageInfo->xp_fields.count+1));
+				if (!tmp_xp) {
+					EXIF_ERRLOG_EALLOC
+				} else {
+					ImageInfo->sections_found |= FOUND_WINXP;
+					ImageInfo->xp_fields.list = tmp_xp;
+					ImageInfo->xp_fields.count++;
+					exif_process_unicode(ImageInfo, &(ImageInfo->xp_fields.list[ImageInfo->xp_fields.count-1]), tag, value_ptr, byte_count TSRMLS_CC);
+				}
 				break;
 
 			case TAG_FNUMBER:
@@ -3099,6 +3165,10 @@ static int exif_discard_imageinfo(image_info_type *ImageInfo)
 	EFREE_IF(ImageInfo->encode_jis);
 	EFREE_IF(ImageInfo->decode_jis_be);
 	EFREE_IF(ImageInfo->decode_jis_le);
+	for (i=0; i<ImageInfo->xp_fields.count; i++) {
+		EFREE_IF(ImageInfo->xp_fields.list[i].value);
+	}
+	EFREE_IF(ImageInfo->xp_fields.list);
 	for (i=0; i<SECTION_COUNT; i++) {
 		exif_iif_free(ImageInfo, i);
 	}
@@ -3304,6 +3374,9 @@ PHP_FUNCTION(exif_read_data)
 	exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "Copyright.Photographer", ImageInfo.CopyrightPhotographer);
 	exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "Copyright.Editor",       ImageInfo.CopyrightEditor);
 
+	for (i=0; i<ImageInfo.xp_fields.count; i++) {
+		exif_iif_add_str(&ImageInfo, SECTION_WINXP, exif_get_tagname(ImageInfo.xp_fields.list[i].tag, NULL, 0), ImageInfo.xp_fields.list[i].value);
+	}
 	if (ImageInfo.Thumbnail.size) {
 		if (read_thumbnail) {
 			/* not exif_iif_add_str : this is a buffer */
@@ -3335,6 +3408,7 @@ PHP_FUNCTION(exif_read_data)
 	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_INTEROP);
 	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_FPIX);
 	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_APP12);
+	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_WINXP);
 
 #ifdef EXIF_DEBUG
 	php_error(E_NOTICE, "Discarding info");
