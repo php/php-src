@@ -1,6 +1,20 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Implemented features/changes requested in Bug #16960 (Timm):
+- . Added a new function sybase_unbuffered_query()
+  . Added a new function sybase_fetch_assoc()
+  . Added sybase_set_message_handler() which enables users to handle
+  server messages in a callback function
+  . Added an ini entry for deadlock retries - retrying deadlocks
+  can cause transaction state to break (sybct.deadlock_retry_count,
+  defaults to -1 "forever").
+  . Fixed sybase_fetch_object() not to return objects with numeric
+  members
+  . Fixed issues with identical fieldnames
+  . Made sybase_fetch_*() functions return correct datatypes
+  . Made phpinfo() section more verbose
+  . Made sybase_query() error messages more verbose
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
