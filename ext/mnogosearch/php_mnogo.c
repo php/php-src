@@ -429,21 +429,38 @@ DLEXPORT PHP_MINFO_FUNCTION(mnogosearch)
 }
 
 static char* MyRemoveHiLightDup(const char *s){
-	size_t	len=strlen(s)+1;
-	char	*res=malloc(len);
-	char	*d;
-	
-	for(d=res;s[0];s++){
-		switch(s[0]){
-			case '\2':
-			case '\3':
-				break;
-			default:
-				*d++=*s;
-		}
-	}
-	*d='\0';
-	return res;
+  size_t len=strlen(s)+1;
+  char	 *d, *res = (char*)UdmMalloc(len);
+  
+  for(d=res; s[0]; s++)
+  {
+    switch(s[0])
+    {
+      case '\2':
+      case '\3':
+        break;
+      case '&':
+        if (s[1] == '#')
+        {
+          char *e;
+          int code= 0;
+          
+          for (e= (char *)s+2; (*e >= '0') && (*e <= '9'); code= code*10 + e[0]-'0', e++);
+          if (*e == ';')
+          {
+            *d++= (code < 128) ? code : '?';
+            s= e;
+            break;
+          }
+        }
+        /* pass through */
+        
+      default:
+        *d++=*s;
+    }
+  }
+  *d='\0';
+  return res;
 }
 
 /* {{{ proto int udm_alloc_agent(string dbaddr [, string dbmode])
@@ -1612,15 +1629,18 @@ DLEXPORT PHP_FUNCTION(udm_make_excerpt)
 		
 #if UDM_VERSION_ID >= 30216
 		Excerpt = UdmExcerptDoc(Agent, Res, &(Res->Doc[row]), ExcerptSize, ExcerptPadding);
+		if (Excerpt) {
+			UdmVarListReplaceStr(&(Res->Doc[row].Sections),"Body",Excerpt);
+			UDM_FREE(Excerpt);
+		}
 #else
 		Excerpt = UdmExcerptDoc(Agent, Res, &(Res->Doc[row]), 256);
-#endif
-		
 		if ((Excerpt != NULL) && (strlen(Excerpt) > 6)) {
 			char *HlExcerpt = UdmHlConvert(&Res->WWList, Excerpt, Agent->Conf->lcs, Agent->Conf->bcs);
 			UdmVarListReplaceStr(&(Res->Doc[row].Sections),"Body",HlExcerpt);
 			UDM_FREE(HlExcerpt);
 		}
+#endif
 		if (Excerpt != NULL && (UdmVarListFindStr(&(Res->Doc[row].Sections), "Z", NULL) == NULL)) {
 			UdmVarListReplaceInt(&(Res->Doc[row].Sections),"ST",1);
 			UDM_FREE(Excerpt);
@@ -2065,7 +2085,14 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 				
 			case UDM_FIELD_TITLE:		
 #if UDM_VERSION_ID >= 30204
-				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Title",""),1);
+			    {
+				char	*al;
+				al = (char *)MyRemoveHiLightDup((const char *)(UdmVarListFindStr(&(Res->Doc[row].Sections), "Title", "")));
+				UdmVarListReplaceStr(&Res->Doc[row].Sections,"Title",al);
+				free(al);
+				
+				RETURN_STRING((char *)UdmVarListFindStr(&Res->Doc[row].Sections,"Title",""),1);
+			    }
 #else
 				RETURN_STRING((Res->Doc[row].title)?(Res->Doc[row].title):"",1);
 #endif
@@ -2073,7 +2100,14 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 				
 			case UDM_FIELD_KEYWORDS:	
 #if UDM_VERSION_ID >= 30204
-				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Meta.Keywords",""),1);
+			    {
+				char	*al;
+				al = (char *)MyRemoveHiLightDup((const char *)(UdmVarListFindStr(&(Res->Doc[row].Sections), "Meta.Keywords", "")));
+				UdmVarListReplaceStr(&Res->Doc[row].Sections,"Meta.Keywords",al);
+				free(al);
+				
+				RETURN_STRING((char *)UdmVarListFindStr(&Res->Doc[row].Sections,"Meta.Keywords",""),1);
+			    }
 #else
 				RETURN_STRING((Res->Doc[row].keywords)?(Res->Doc[row].keywords):"",1);
 #endif
@@ -2081,7 +2115,14 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 				
 			case UDM_FIELD_DESC:		
 #if UDM_VERSION_ID >= 30204
-				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Meta.Description",""),1);
+			    {
+				char	*al;
+				al = (char *)MyRemoveHiLightDup((const char *)(UdmVarListFindStr(&(Res->Doc[row].Sections), "Meta.Description", "")));
+				UdmVarListReplaceStr(&Res->Doc[row].Sections,"Meta.Description",al);
+				free(al);
+				
+				RETURN_STRING((char *)UdmVarListFindStr(&Res->Doc[row].Sections,"Meta.Description",""),1);
+			    }
 #else
 				RETURN_STRING((Res->Doc[row].description)?(Res->Doc[row].description):"",1);
 #endif
@@ -2089,7 +2130,15 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 				
 			case UDM_FIELD_TEXT:		
 #if UDM_VERSION_ID >= 30204
-				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Body",""),1);
+/*			    {
+				char	*al;
+				al = (char *)MyRemoveHiLightDup((const char *)(UdmVarListFindStr(&(Res->Doc[row].Sections), "Body", "")));
+				UdmVarListReplaceStr(&Res->Doc[row].Sections,"Body",al);
+				free(al);
+				
+				RETURN_STRING((char *)UdmVarListFindStr(&Res->Doc[row].Sections,"Body",""),1);
+			    }*/
+				RETURN_STRING((char *)UdmVarListFindStr(&Res->Doc[row].Sections,"Body",""),1);
 #else
 				RETURN_STRING((Res->Doc[row].text)?(Res->Doc[row].text):"",1);
 #endif
