@@ -1013,37 +1013,31 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-	if (!cgi
-#if PHP_FASTCGI
-		/* allow ini override for fastcgi */
-#endif
-		) {
-		while ((c=php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0))!=-1) {
-			switch (c) {
-				case 'c':
-					cgi_sapi_module.php_ini_path_override = strdup(php_optarg);
-					break;
-				case 'n':
-					cgi_sapi_module.php_ini_ignore = 1;
-					break;
+	while ((c=php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0))!=-1) {
+		switch (c) {
+			case 'c':
+				cgi_sapi_module.php_ini_path_override = strdup(php_optarg);
+				break;
+			case 'n':
+				cgi_sapi_module.php_ini_ignore = 1;
+				break;
 #if PHP_FASTCGI
 #ifndef PHP_WIN32
-				/* if we're started on command line, check to see if
-				   we are being started as an 'external' fastcgi
-				   server by accepting a bindpath parameter. */
-				case 'b':
-					if (!fastcgi) {
-						bindpath = strdup(php_optarg);
-					}
-					break;
+			/* if we're started on command line, check to see if
+			   we are being started as an 'external' fastcgi
+			   server by accepting a bindpath parameter. */
+			case 'b':
+				if (!fastcgi) {
+					bindpath = strdup(php_optarg);
+				}
+				break;
 #endif
 #endif
-			}
-
 		}
-		php_optind = orig_optind;
-		php_optarg = orig_optarg;
+
 	}
+	php_optind = orig_optind;
+	php_optarg = orig_optarg;
 
 #ifdef ZTS
 	compiler_globals = ts_resource(compiler_globals_id);
@@ -1249,28 +1243,22 @@ consult the installation file that came with this distribution, or visit \n\
 #endif /* FASTCGI */
 
 	zend_first_try {
-		if (!cgi
-#if PHP_FASTCGI
-			&& !fastcgi
-#endif
-			) {
-			while ((c=php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 1))!=-1) {
-				switch (c) {
-					case 'h':
-					case '?':
-						no_headers = 1;
-						php_output_startup();
-						php_output_activate(TSRMLS_C);
-						SG(headers_sent) = 1;
-						php_cgi_usage(argv[0]);
-						php_end_ob_buffers(1 TSRMLS_CC);
-						exit(1);
-						break;
-				}
+		while ((c=php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 1))!=-1) {
+			switch (c) {
+				case 'h':
+				case '?':
+					no_headers = 1;
+					php_output_startup();
+					php_output_activate(TSRMLS_C);
+					SG(headers_sent) = 1;
+					php_cgi_usage(argv[0]);
+					php_end_ob_buffers(1 TSRMLS_CC);
+					exit(1);
+					break;
 			}
-			php_optind = orig_optind;
-			php_optarg = orig_optarg;
 		}
+		php_optind = orig_optind;
+		php_optarg = orig_optarg;
 
 #if PHP_FASTCGI
 		/* start of FAST CGI loop */
