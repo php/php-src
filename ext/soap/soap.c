@@ -235,6 +235,7 @@ PHP_METHOD(SoapClient, __getLastResponseHeaders);
 PHP_METHOD(SoapClient, __getFunctions);
 PHP_METHOD(SoapClient, __getTypes);
 PHP_METHOD(SoapClient, __doRequest);
+PHP_METHOD(SoapClient, __setCookie);
 
 /* SoapVar Functions */
 PHP_METHOD(SoapVar, SoapVar);
@@ -321,6 +322,7 @@ static zend_function_entry soap_client_functions[] = {
 	PHP_ME(SoapClient, __getFunctions, NULL, 0)
 	PHP_ME(SoapClient, __getTypes, NULL, 0)
 	PHP_ME(SoapClient, __doRequest, NULL, 0)
+	PHP_ME(SoapClient, __setCookie, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
@@ -2543,6 +2545,45 @@ PHP_METHOD(SoapClient, __doRequest)
 		return;
 	}
 	RETURN_NULL();
+}
+/* }}} */
+
+/* {{{ proto void SoapClient::__setCookie(string name [, strung value])
+   Sets cookie thet will sent with SOAP request.
+   The call to this function will effect all folowing calls of SOAP methods.
+   If value is not specified cookie is removed. */
+PHP_METHOD(SoapClient, __setCookie)
+{
+	char *name;
+	char *val = NULL;
+	int  name_len, val_len;
+	zval **cookies;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s",
+	    &name, &name_len, &val, &val_len) == FAILURE) {
+	  RETURN_NULL();
+	}
+
+	if (val == NULL) {
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == SUCCESS) {
+			zend_hash_del(Z_ARRVAL_PP(cookies), name, name_len+1);
+		}
+	} else {
+		zval *zcookie;
+
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == FAILURE) {
+			zval *tmp_cookies;
+
+			MAKE_STD_ZVAL(tmp_cookies);
+			array_init(tmp_cookies);
+			zend_hash_update(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), &tmp_cookies, sizeof(zval *), (void **)&cookies);
+		}
+
+		ALLOC_INIT_ZVAL(zcookie);
+		array_init(zcookie);
+		add_index_stringl(zcookie, 0, val, val_len, 1);
+		add_assoc_zval_ex(*cookies, name, name_len+1, zcookie);
+	}
 }
 /* }}} */
 
