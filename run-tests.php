@@ -731,8 +731,8 @@ TEST $file
 		if (trim($section_text['SKIPIF'])) {
 			save_text($tmp_skipif, $section_text['SKIPIF']);
 			$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
-				"unset REQUEST_METHOD;": "";
-			$output = system_with_timeout("$extra $php $info_params $tmp_skipif");
+				"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
+			$output = system_with_timeout("$extra $php -q $info_params $tmp_skipif");
 			@unlink($tmp_skipif);
 			if (eregi("^skip", trim($output))) {
 				echo "SKIP $tested";
