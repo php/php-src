@@ -2289,6 +2289,9 @@ int zendlex(znode *zendlval CLS_DC)
 		case T_OPEN_TAG_WITH_ECHO:
 			retval = T_ECHO;
 			break;
+		case T_END_HEREDOC:
+			efree(zendlval->u.constant.value.str.val);
+			break;
 	}
 		
 	INIT_PZVAL(&zendlval->u.constant);
