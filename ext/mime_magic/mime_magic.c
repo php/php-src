@@ -304,6 +304,11 @@ PHP_FUNCTION(mime_content_type)
 		return;
 	}
 
+	if ((int) conf->magic == -1) {
+		php_error(E_ERROR, MODNAME " could not be initialized, magic file %s is not avaliable",  conf->magicfile);
+		RETURN_FALSE;
+	} 
+
 	if(!conf->magic) {
 		php_error(E_WARNING, MODNAME " not initialized");
 		RETURN_FALSE;
@@ -343,10 +348,9 @@ static int apprentice(void)
     magic_server_config_rec *conf = &mime_global;
 
     fname = conf->magicfile; /* todo cwd? */
-    f = fopen(fname, "r");
+    f = fopen(fname, "rt");
     if (f == NULL) {
-		php_error(E_WARNING,
-					 MODNAME ": can't read magic file %s", fname);
+		(int) conf->magic = -1;
 		return -1;
     }
 
