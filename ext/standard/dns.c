@@ -241,7 +241,9 @@ PHP_FUNCTION(dns_check_record)
 			else if (!strcasecmp("ANY",   Z_STRVAL_PP(arg2))) type = T_ANY;
 			else if (!strcasecmp("SOA",   Z_STRVAL_PP(arg2))) type = T_SOA;
 			else if (!strcasecmp("CNAME", Z_STRVAL_PP(arg2))) type = T_CNAME;
+#ifdef T_AAAA
 			else if (!strcasecmp("AAAA",  Z_STRVAL_PP(arg2))) type = T_AAAA;
+#endif
 			else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type '%s' not supported", Z_STRVAL_PP(arg2));
 				RETURN_FALSE;
@@ -420,6 +422,8 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			GETLONG(n, cp);
 			add_assoc_long(*subarray, "minimum-ttl", n);
 			break;
+
+#ifdef T_AAAA
 		case T_AAAA:
 			tp = name;
 			for(i=0; i < 8; i++) {
@@ -444,6 +448,8 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			add_assoc_string(*subarray, "type", "AAAA", 1);
 			add_assoc_string(*subarray, "ipv6", name, 1);
 			break;
+#endif
+
 		default:
 			cp += dlen;
 	}
@@ -542,9 +548,11 @@ PHP_FUNCTION(dns_get_record)
 			case 7: 
 				type_to_fetch = type_param&PHP_DNS_TXT   ? T_TXT   : 0;
 				break;
+#ifdef T_AAAA
 			case 8:
 				type_to_fetch = type_param&PHP_DNS_AAAA	 ? T_AAAA  : 0;
 				break;
+#endif
 			case 9:
 				store_results = 0;
 				continue;
