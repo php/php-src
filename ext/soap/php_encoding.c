@@ -22,6 +22,7 @@
 #include <time.h>
 
 #include "php_soap.h"
+#include "ext/libxml/php_libxml.h"
 
 /* zval type decode */
 static zval *to_zval_double(encodeTypePtr type, xmlNodePtr data);
@@ -581,32 +582,6 @@ static zval *to_zval_stringb(encodeTypePtr type, xmlNodePtr data)
 	return ret;
 }
 
-static int php_soap_xmlCheckUTF8(const unsigned char *s)
-{
-	int i;
-	unsigned char c;
-
-	for (i = 0; (c = s[i++]);) {
-		if ((c & 0x80) == 0) {
-		} else if ((c & 0xe0) == 0xc0) {
-			if ((s[i++] & 0xc0) != 0x80) {
-				return 0;
-			}
-		} else if ((c & 0xf0) == 0xe0) {
-			if ((s[i++] & 0xc0) != 0x80 || (s[i++] & 0xc0) != 0x80) {
-				return 0;
-			}
-		} else if ((c & 0xf8) == 0xf0) {
-			if ((s[i++] & 0xc0) != 0x80 || (s[i++] & 0xc0) != 0x80 || (s[i++] & 0xc0) != 0x80) {
-				return 0;
-			}
-		} else {
-			return 0;
-		}
-	}
-	return 1;
-}
-
 static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
 	xmlNodePtr ret;
@@ -638,12 +613,12 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNo
 			efree(str);
 			str = estrdup(xmlBufferContent(out));
 			new_len = n;
-		} else if (!php_soap_xmlCheckUTF8(str)) {
+		} else if (!php_libxml_xmlCheckUTF8(str)) {
 			soap_error1(E_ERROR,  "Encoding: string '%s' is not a valid utf-8 string", str);
 		}
 		xmlBufferFree(out);
 		xmlBufferFree(in);
-	} else if (!php_soap_xmlCheckUTF8(str)) {
+	} else if (!php_libxml_xmlCheckUTF8(str)) {
 		soap_error1(E_ERROR,  "Encoding: string '%s' is not a valid utf-8 string", str);
 	}
 
