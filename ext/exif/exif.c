@@ -4064,7 +4064,7 @@ PHP_FUNCTION(exif_imagetype)
 		RETURN_FALSE;
 	}
 
-	itype = itype = php_getimagetype(stream, NULL TSRMLS_CC);
+	itype = php_getimagetype(stream, NULL TSRMLS_CC);
 
 	php_stream_close(stream);
 
