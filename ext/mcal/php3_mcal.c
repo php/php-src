@@ -1167,7 +1167,7 @@ void php3_mcal_days_in_month(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	convert_to_long(month);
 	convert_to_long(leap);
-	convert_to_boolean_long(leap);
+	convert_to_boolean(leap);
 	RETURN_LONG(daysinmonth(month->value.lval,leap->value.lval));
 }
 /* }}} */
