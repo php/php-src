@@ -2270,7 +2270,6 @@ PHP_FUNCTION(xmldocfile)
 	if (!docp) {
 		RETURN_FALSE;
 	}
-	ret = zend_list_insert(docp, le_domxmldocp);
 
 	rv = php_domobject_new((xmlNodePtr) docp, &ret TSRMLS_CC);
 	SEPARATE_ZVAL(&rv);
