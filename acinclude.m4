@@ -2014,6 +2014,16 @@ AC_DEFUN([PHP_TEST_BUILD], [
   ])
 ])
 
+dnl This macro is currently a placeholder in the config.m4 file
+dnl it is scanned by genif.sh when it builds the internal functions
+dnl list, so that modules can be init'd in the correct order
+dnl $1 = name of extension, $2 = extension upon which it depends
+dnl $3 = optional: if true, it's ok for $2 to have not been configured
+dnl default is false and should halt the build.
+dnl See ADD_EXTENSION_DEP in win32 build
+AC_DEFUN([PHP_ADD_EXTENSION_DEP], [])
+
+
 dnl
 dnl PHP_C_BIGENDIAN
 dnl Replacement macro for AC_C_BIGENDIAN
