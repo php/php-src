@@ -248,11 +248,14 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary)
 {
 	zval *buf;
 	char strbuf[MAX_STR + 1];
+	php_serialize_data_t var_hash;
 	ENCODE_VARS;
 
 	buf = ecalloc(sizeof(*buf), 1);
 	Z_TYPE_P(buf) = IS_STRING;
 	buf->refcount++;
+
+	PHP_VAR_SERIALIZE_INIT(var_hash);
 
 	ENCODE_LOOP(
 			size_t slen = strlen(key);
@@ -262,7 +265,7 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary)
 			memcpy(strbuf + 1, key, slen);
 			
 			STR_CAT(buf, strbuf, slen + 1);
-			php_var_serialize(buf, struc);
+			php_var_serialize(buf, struc, &var_hash);
 		} else {
 			size_t slen = strlen(key);
 
@@ -276,6 +279,7 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary)
 	if (newlen) *newlen = Z_STRLEN_P(buf);
 	*newstr = Z_STRVAL_P(buf);
 	efree(buf);
+	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
 	return SUCCESS;
 }
@@ -288,6 +292,9 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 	zval *current;
 	int namelen;
 	int has_value;
+	php_serialize_data_t var_hash;
+
+	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	current = (zval *) ecalloc(sizeof(zval), 1);
 	for (p = val; p < endptr; ) {
@@ -299,7 +306,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 		p += namelen + 1;
 		
 		if (has_value) {
-			if (php_var_unserialize(&current, &p, endptr)) {
+			if (php_var_unserialize(&current, &p, endptr, &var_hash)) {
 				php_set_session_var(name, namelen, current PSLS_CC);
 				zval_dtor(current);
 			}
@@ -308,6 +315,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 		efree(name);
 	}
 	efree(current);
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 
 	return SUCCESS;
 }
@@ -319,11 +327,14 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 {
 	zval *buf;
 	char strbuf[MAX_STR + 1];
+	php_serialize_data_t var_hash;
 	ENCODE_VARS;
 
 	buf = ecalloc(sizeof(*buf), 1);
 	Z_TYPE_P(buf) = IS_STRING;
 	buf->refcount++;
+
+	PHP_VAR_SERIALIZE_INIT(var_hash);
 
 	ENCODE_LOOP(
 			size_t slen = strlen(key);
@@ -333,7 +344,7 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 			strbuf[slen] = PS_DELIMITER;
 			STR_CAT(buf, strbuf, slen + 1);
 			
-			php_var_serialize(buf, struc);
+			php_var_serialize(buf, struc, &var_hash);
 		} else {
 			size_t slen = strlen(key);
 
@@ -349,6 +360,7 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 	*newstr = Z_STRVAL_P(buf);
 	efree(buf);
 
+	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 	return SUCCESS;
 }
 
@@ -360,6 +372,9 @@ PS_SERIALIZER_DECODE_FUNC(php)
 	zval *current;
 	int namelen;
 	int has_value;
+	php_serialize_data_t var_hash;
+
+	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	current = (zval *) ecalloc(sizeof(zval), 1);
 	for (p = q = val; (p < endptr) && (q = memchr(p, PS_DELIMITER, endptr - p)); p = q) {
@@ -375,7 +390,7 @@ PS_SERIALIZER_DECODE_FUNC(php)
 		q++;
 		
 		if (has_value) {
-			if (php_var_unserialize(&current, &q, endptr)) {
+			if (php_var_unserialize(&current, &q, endptr, &var_hash)) {
 				php_set_session_var(name, namelen, current PSLS_CC);
 				zval_dtor(current);
 			}
@@ -385,6 +400,7 @@ PS_SERIALIZER_DECODE_FUNC(php)
 	}
 	efree(current);
 
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	return SUCCESS;
 }
 

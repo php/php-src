@@ -233,7 +233,7 @@ PHP_FUNCTION(shm_put_var)
 	shm_var.type=IS_STRING;
 	shm_var.value.str.len=0;
 	shm_var.value.str.val=0;
-	php_var_serialize(&shm_var,arg_var);
+	php_var_serialize(&shm_var,arg_var,NULL);
 	/* insert serialized variable into shared memory */
 	ret=php_put_shm_data(shm_list_ptr->ptr,key,shm_var.value.str.val,shm_var.value.str.len);
 
