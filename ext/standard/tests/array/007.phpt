@@ -47,8 +47,86 @@ echo '$c='.var_export($c,TRUE).";\n";
 echo "Results:\n\n";
 var_dump(array_diff($a,$b,$c));
 var_dump(array_diff_assoc($a,$b,$c));
+
+echo "-=-=-=-=-=-=-=-=- New functionality from 5.0.0 -=-=-=-=-=-=-=-\n";
+error_reporting(E_ALL);
+class cr {
+	private $priv_member;
+	public  $public_member;
+	function cr($val) {
+		$this->priv_member = $val;
+		$this->public_member = $val;
+	}
+	static function comp_func_cr($a, $b) {
+		if ($a->priv_member === $b->priv_member) return 0;
+		return ($a->priv_member > $b->priv_member)? 1:-1;
+	}
+}
+
+function comp_func($a, $b) {
+	if ($a === $b) return 0;
+	return ($a > $b)? 1:-1;
+
+}
+
+function comp_func_cr($a, $b) {
+	if ($a->public_member === $b->public_member) return 0;
+	return ($a->public_member > $b->public_member)? 1:-1;
+}
+
+
+/*
+$a = array(1,"big"=>2,3,6,3,5,3,3,3,3,3,3,3,3,3,3);
+$b = array(2,2,3,3,3,3,3,3,3,3,3,3,3,3,3);
+$c = array(-1,1);
+echo '$a='.var_export($a,TRUE).";\n";
+echo '$b='.var_export($b,TRUE).";\n";
+echo '$c='.var_export($c,TRUE).";\n";
+var_dump(array_diff($a,$b,$c));
+var_dump(array_diff_assoc($a,$b,$c));
+var_dump(array_udiff($a, $b, $c, "comp_func"));
+var_dump(array_diff_uassoc($a,$b,$c, "comp_func"));
+*/
+
+/*
+ $a = array(new cr(9),new cr(12),new cr(23),new cr(4),new cr(-15),);
+ $b = array(new cr(9),new cr(22),new cr( 3),new cr(4),new cr(-15),);
+ var_dump(array_udiff($a, $b, "comp_func_cr"));
+*/
+$a = array("0.1" => new cr(9), "0.5" => new cr(12), 0 => new cr(23), 1=> new cr(4), 2 => new cr(-15),);
+$b = array("0.2" => new cr(9), "0.5" => new cr(22), 0 => new cr( 3), 1=> new cr(4), 2 => new cr(-15),);
+
+echo '$a='.var_export($a,TRUE).";\n";
+echo '$b='.var_export($b,TRUE).";\n";
+echo 'var_dump(array_udiff_uassoc($a, $b, "comp_func_cr", "comp_func"));'."\n";
+var_dump(array_udiff_uassoc($a, $b, "comp_func_cr", "comp_func"));
+
+
+echo '$a='.var_export($a,TRUE).";\n";
+echo '$b='.var_export($b,TRUE).";\n";
+echo 'var_dump(array_udiff_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func"));'."\n";
+var_dump(array_udiff_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func"));
+
+
+echo '$a='.var_export($a,TRUE).";\n";
+echo '$b='.var_export($b,TRUE).";\n";
+echo 'var_dump(array_diff_assoc($a, $b));'."\n";
+var_dump(array_diff_assoc($a, $b));
+
+
+echo '$a='.var_export($a,TRUE).";\n";
+echo '$b='.var_export($b,TRUE).";\n";
+echo 'var_dump(array_udiff($a, $b, "comp_func_cr"));'."\n";
+var_dump(array_udiff($a, $b, "comp_func_cr"));
+
+
+echo '$a='.var_export($a,TRUE).";\n";
+echo '$b='.var_export($b,TRUE).";\n";
+echo 'var_dump(array_udiff_assoc($a, $b, "comp_func_cr"));'."\n";
+var_dump(array_udiff_assoc($a, $b, "comp_func_cr"));
+
 ?>
---EXPECT--
+--EXPECTF--
 $a=array (
   0 => 1,
   'big' => 2,
@@ -172,4 +250,402 @@ array(9) {
   int(42)
   ["want"]=>
   string(5) "wanna"
+}
+-=-=-=-=-=-=-=-=- New functionality from 5.0.0 -=-=-=-=-=-=-=-
+$a=array (
+  '0.1' => 
+  class cr {
+    var $ = 9;
+    var $public_member = 9;
+  },
+  '0.5' => 
+  class cr {
+    var $ = 12;
+    var $public_member = 12;
+  },
+  0 => 
+  class cr {
+    var $ = 23;
+    var $public_member = 23;
+  },
+  1 => 
+  class cr {
+    var $ = 4;
+    var $public_member = 4;
+  },
+  2 => 
+  class cr {
+    var $ = -15;
+    var $public_member = -15;
+  },
+);
+$b=array (
+  '0.2' => 
+  class cr {
+    var $ = 9;
+    var $public_member = 9;
+  },
+  '0.5' => 
+  class cr {
+    var $ = 22;
+    var $public_member = 22;
+  },
+  0 => 
+  class cr {
+    var $ = 3;
+    var $public_member = 3;
+  },
+  1 => 
+  class cr {
+    var $ = 4;
+    var $public_member = 4;
+  },
+  2 => 
+  class cr {
+    var $ = -15;
+    var $public_member = -15;
+  },
+);
+var_dump(array_udiff_uassoc($a, $b, "comp_func_cr", "comp_func"));
+array(3) {
+  ["0.1"]=>
+  object(cr)#%d (%d) {
+    [""]=>
+    int(9)
+    ["public_member"]=>
+    int(9)
+  }
+  ["0.5"]=>
+  object(cr)#%d (%d) {
+    [""]=>
+    int(12)
+    ["public_member"]=>
+    int(12)
+  }
+  [0]=>
+  object(cr)#%d (%d) {
+    [""]=>
+    int(23)
+    ["public_member"]=>
+    int(23)
+  }
+}
+$a=array (
+  '0.1' => 
+  class cr {
+    var $ = 9;
+    var $public_member = 9;
+  },
+  '0.5' => 
+  class cr {
+    var $ = 12;
+    var $public_member = 12;
+  },
+  0 => 
+  class cr {
+    var $ = 23;
+    var $public_member = 23;
+  },
+  1 => 
+  class cr {
+    var $ = 4;
+    var $public_member = 4;
+  },
+  2 => 
+  class cr {
+    var $ = -15;
+    var $public_member = -15;
+  },
+);
+$b=array (
+  '0.2' => 
+  class cr {
+    var $ = 9;
+    var $public_member = 9;
+  },
+  '0.5' => 
+  class cr {
+    var $ = 22;
+    var $public_member = 22;
+  },
+  0 => 
+  class cr {
+    var $ = 3;
+    var $public_member = 3;
+  },
+  1 => 
+  class cr {
+    var $ = 4;
+    var $public_member = 4;
+  },
+  2 => 
+  class cr {
+    var $ = -15;
+    var $public_member = -15;
+  },
+);
+var_dump(array_udiff_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func"));
+array(3) {
+  ["0.1"]=>
+  object(cr)#%d (%d) {
+    [""]=>
+    int(9)
+    ["public_member"]=>
+    int(9)
+  }
+  ["0.5"]=>
+  object(cr)#%d (%d) {
+    [""]=>
+    int(12)
+    ["public_member"]=>
+    int(12)
+  }
+  [0]=>
+  object(cr)#%d (%d) {
+    [""]=>
+    int(23)
+    ["public_member"]=>
+    int(23)
+  }
+}
+$a=array (
+  '0.1' => 
+  class cr {
+    var $ = 9;
+    var $public_member = 9;
+  },
+  '0.5' => 
+  class cr {
+    var $ = 12;
+    var $public_member = 12;
+  },
+  0 => 
+  class cr {
+    var $ = 23;
+    var $public_member = 23;
+  },
+  1 => 
+  class cr {
+    var $ = 4;
+    var $public_member = 4;
+  },
+  2 => 
+  class cr {
+    var $ = -15;
+    var $public_member = -15;
+  },
+);
+$b=array (
+  '0.2' => 
+  class cr {
+    var $ = 9;
+    var $public_member = 9;
+  },
+  '0.5' => 
+  class cr {
+    var $ = 22;
+    var $public_member = 22;
+  },
+  0 => 
+  class cr {
+    var $ = 3;
+    var $public_member = 3;
+  },
+  1 => 
+  class cr {
+    var $ = 4;
+    var $public_member = 4;
+  },
+  2 => 
+  class cr {
+    var $ = -15;
+    var $public_member = -15;
+  },
+);
+var_dump(array_diff_assoc($a, $b));
+array(5) {
+  ["0.1"]=>
+  object(cr)#%d (%d) {
+    [""]=>
+    int(9)
+    ["public_member"]=>
+    int(9)
+  }
+  ["0.5"]=>
+  object(cr)#%d (%d) {
+    [""]=>
+    int(12)
+    ["public_member"]=>
+    int(12)
+  }
+  [0]=>
+  object(cr)#%d (%d) {
+    [""]=>
+    int(23)
+    ["public_member"]=>
+    int(23)
+  }
+  [1]=>
+  object(cr)#%d (%d) {
+    [""]=>
+    int(4)
+    ["public_member"]=>
+    int(4)
+  }
+  [2]=>
+  object(cr)#%d (%d) {
+    [""]=>
+    int(-15)
+    ["public_member"]=>
+    int(-15)
+  }
+}
+$a=array (
+  '0.1' => 
+  class cr {
+    var $ = 9;
+    var $public_member = 9;
+  },
+  '0.5' => 
+  class cr {
+    var $ = 12;
+    var $public_member = 12;
+  },
+  0 => 
+  class cr {
+    var $ = 23;
+    var $public_member = 23;
+  },
+  1 => 
+  class cr {
+    var $ = 4;
+    var $public_member = 4;
+  },
+  2 => 
+  class cr {
+    var $ = -15;
+    var $public_member = -15;
+  },
+);
+$b=array (
+  '0.2' => 
+  class cr {
+    var $ = 9;
+    var $public_member = 9;
+  },
+  '0.5' => 
+  class cr {
+    var $ = 22;
+    var $public_member = 22;
+  },
+  0 => 
+  class cr {
+    var $ = 3;
+    var $public_member = 3;
+  },
+  1 => 
+  class cr {
+    var $ = 4;
+    var $public_member = 4;
+  },
+  2 => 
+  class cr {
+    var $ = -15;
+    var $public_member = -15;
+  },
+);
+var_dump(array_udiff($a, $b, "comp_func_cr"));
+array(2) {
+  ["0.5"]=>
+  object(cr)#%d (%d) {
+    [""]=>
+    int(12)
+    ["public_member"]=>
+    int(12)
+  }
+  [0]=>
+  object(cr)#%d (%d) {
+    [""]=>
+    int(23)
+    ["public_member"]=>
+    int(23)
+  }
+}
+$a=array (
+  '0.1' => 
+  class cr {
+    var $ = 9;
+    var $public_member = 9;
+  },
+  '0.5' => 
+  class cr {
+    var $ = 12;
+    var $public_member = 12;
+  },
+  0 => 
+  class cr {
+    var $ = 23;
+    var $public_member = 23;
+  },
+  1 => 
+  class cr {
+    var $ = 4;
+    var $public_member = 4;
+  },
+  2 => 
+  class cr {
+    var $ = -15;
+    var $public_member = -15;
+  },
+);
+$b=array (
+  '0.2' => 
+  class cr {
+    var $ = 9;
+    var $public_member = 9;
+  },
+  '0.5' => 
+  class cr {
+    var $ = 22;
+    var $public_member = 22;
+  },
+  0 => 
+  class cr {
+    var $ = 3;
+    var $public_member = 3;
+  },
+  1 => 
+  class cr {
+    var $ = 4;
+    var $public_member = 4;
+  },
+  2 => 
+  class cr {
+    var $ = -15;
+    var $public_member = -15;
+  },
+);
+var_dump(array_udiff_assoc($a, $b, "comp_func_cr"));
+array(3) {
+  ["0.1"]=>
+  object(cr)#%d (%d) {
+    [""]=>
+    int(9)
+    ["public_member"]=>
+    int(9)
+  }
+  ["0.5"]=>
+  object(cr)#%d (%d) {
+    [""]=>
+    int(12)
+    ["public_member"]=>
+    int(12)
+  }
+  [0]=>
+  object(cr)#%d (%d) {
+    [""]=>
+    int(23)
+    ["public_member"]=>
+    int(23)
+  }
 }
