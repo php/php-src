@@ -57,9 +57,9 @@ class PEAR_Common extends PEAR
         while (is_array($this->_tempfiles) &&
                $file = array_shift($this->_tempfiles))
         {
-            if (is_dir($file)) {
+            if (@is_dir($file)) {
                 system("rm -rf $file"); // XXX FIXME Windows
-            } else {
+            } elseif (file_exists($file)) {
                 unlink($file);
             }
         }
@@ -85,7 +85,7 @@ class PEAR_Common extends PEAR
         }
         while ($newdir = array_shift($dirstack)) {
             if (mkdir($newdir, 0777)) {
-                $this->log(2, "created dir $newdir");
+                $this->log(2, "+ created dir $newdir");
             } else {
                 return false;
             }
