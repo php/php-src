@@ -1712,10 +1712,10 @@ PHP_FUNCTION(call_user_func)
 	if (call_user_function_ex(EG(function_table), NULL, *params[0], &retval_ptr, argc-1, params+1, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
-		if (argc>1) {
+		if (argc > 1) {
 			SEPARATE_ZVAL(params[1]);
 			convert_to_string_ex(params[1]);
-			if (argc>2) {
+			if (argc > 2) {
 				SEPARATE_ZVAL(params[2]);
 				convert_to_string_ex(params[2]);
 				php_error_docref1(NULL TSRMLS_CC, name, E_WARNING, "Unable to call %s(%s,%s)", name, Z_STRVAL_PP(params[1]), Z_STRVAL_PP(params[2]));
@@ -2129,7 +2129,7 @@ static int php_ini_get_option(zend_ini_entry *ini_entry, int num_args, va_list a
 	int module_number = va_arg(args, int);
 	zval *option;
 
-	if(module_number != 0 && ini_entry->module_number != module_number) {
+	if (module_number != 0 && ini_entry->module_number != module_number) {
 		return 0;
 	}
 
@@ -2138,7 +2138,7 @@ static int php_ini_get_option(zend_ini_entry *ini_entry, int num_args, va_list a
 		MAKE_STD_ZVAL(option);
 		array_init(option);
 
-		if(ini_entry->orig_value) {
+		if (ini_entry->orig_value) {
 			add_assoc_stringl(option, "global_value", ini_entry->orig_value, ini_entry->orig_value_length, 1);
 		} else if (ini_entry->value) {
 			add_assoc_stringl(option, "global_value", ini_entry->value, ini_entry->value_length, 1);
@@ -2146,7 +2146,7 @@ static int php_ini_get_option(zend_ini_entry *ini_entry, int num_args, va_list a
 			add_assoc_null(option, "global_value");
 		}
 
-		if(ini_entry->value) {
+		if (ini_entry->value) {
 			add_assoc_stringl(option, "local_value", ini_entry->value, ini_entry->value_length, 1);
 		} else {
 			add_assoc_null(option, "local_value");
@@ -2173,7 +2173,7 @@ PHP_FUNCTION(ini_get_all)
 
 	zend_ini_sort_entries(TSRMLS_C);
 
-	if(extname) {
+	if (extname) {
 		if (zend_hash_find(&module_registry, extname, extname_len+1, (void **) &module) == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find extension '%s'", extname);
 			RETURN_FALSE;
@@ -2188,7 +2188,7 @@ PHP_FUNCTION(ini_get_all)
 
 static int php_ini_check_path(char *option_name, int option_len, char *new_option_name, int new_option_len)
 {
-	if( option_len != (new_option_len-1) ) {
+	if ( option_len != (new_option_len-1) ) {
 		return 0;
 	}
 	
@@ -2582,7 +2582,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 	switch (callback_type) {
 	
 		case ZEND_INI_PARSER_ENTRY:
-			if(!arg2) {
+			if (!arg2) {
 				/* bare string - nothing to do */
 				break;
 			}
@@ -2609,7 +2609,7 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, int callback
 		{
 			zval *active_arr;
 
-			if(!arg2) {
+			if (!arg2) {
 				/* bare string - nothing to do */
 				break;
 			}
