@@ -47,6 +47,10 @@ zend_module_entry yp_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
+#ifdef COMPILE_DL_YP
+ZEND_GET_MODULE(yp)
+#endif
+
 /* {{{ proto string yp_get_default_domain(void)
    Returns the domain or false */
 PHP_FUNCTION(yp_get_default_domain) {
