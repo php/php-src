@@ -42,7 +42,7 @@ BEGIN
             VALUE "InternalName", "php-cgi\0"
             VALUE "LegalCopyright", "Copyright © 2002 The PHP Group\0"
             VALUE "LegalTrademarks", "php\0"
-            VALUE "OriginalFilename", "php-cgi.exe\0"
+            VALUE "OriginalFilename", "php.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "PHP Thread Safe CGI\0"
             VALUE "ProductVersion", STRVER3(PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION)
