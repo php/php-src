@@ -194,7 +194,7 @@ class DB
      * @return mixed a newly created DB object, or a DB error code on
      * error
      *
-     * access public     
+     * access public
      */
 
     function &factory($type)
@@ -232,7 +232,7 @@ class DB
      *
      * @see DB::parseDSN
      * @see DB::isError
-     * @see DB_common::setOption     
+     * @see DB_common::setOption
      */
     function &connect($dsn, $options = false)
     {
@@ -425,7 +425,7 @@ class DB
      *
      * @param string $dsn Data Source Name to be parsed
      *
-     * @return array an associative array 
+     * @return array an associative array
      *
      * @author Tomas V.V.Cox <cox@idecnet.com>
      */
@@ -438,11 +438,13 @@ class DB
         $parsed = array(
             'phptype'  => false,
             'dbsyntax' => false,
+            'username' => false,
+            'password' => false,
             'protocol' => false,
             'hostspec' => false,
-            'database' => false,
-            'username' => false,
-            'password' => false
+            'port'     => false,
+            'socket'   => false,
+            'database' => false
         );
 
         // Find phptype and dbsyntax
@@ -457,10 +459,10 @@ class DB
         // Get phptype and dbsyntax
         // $str => phptype(dbsyntax)
         if (preg_match('|^(.+?)\((.*?)\)$|', $str, $arr)) {
-            $parsed['phptype'] = $arr[1];
+            $parsed['phptype']  = $arr[1];
             $parsed['dbsyntax'] = (empty($arr[2])) ? $arr[1] : $arr[2];
         } else {
-            $parsed['phptype'] = $str;
+            $parsed['phptype']  = $str;
             $parsed['dbsyntax'] = $str;
         }
 
@@ -482,22 +484,37 @@ class DB
         }
 
         // Find protocol and hostspec
-        // $dsn => protocol+hostspec/database
-        if (($pos=strpos($dsn, '/')) !== false) {
-            $str = substr($dsn, 0, $pos);
-            $dsn = substr($dsn, $pos + 1);
+
+        // $dsn => proto(proto_opts)/database
+        if (preg_match('|^(.+?)\((.*?)\)/?(.*?)$|', $dsn, $match)) {
+            $proto       = $match[1];
+            $proto_opts  = (!empty($match[2])) ? $match[2] : false;
+            $dsn         = $match[3];
+
+        // $dsn => protocol+hostspec/database (old format)
         } else {
-            $str = $dsn;
-            $dsn = NULL;
+            if (strpos($dsn, '+') !== false) {
+                list($proto, $dsn) = explode('+', $dsn, 2);
+            }
+            if (strpos($dsn, '/') !== false) {
+                list($proto_opts, $dsn) = explode('/', $dsn, 2);
+            } else {
+                $proto_opts = $dsn;
+                $dsn = null;
+            }
         }
 
-        // Get protocol + hostspec
-        // $str => protocol+hostspec
-        if (($pos=strpos($str, '+')) !== false) {
-            $parsed['protocol'] = substr($str, 0, $pos);
-            $parsed['hostspec'] = urldecode(substr($str, $pos + 1));
-        } else {
-            $parsed['hostspec'] = urldecode($str);
+        // process the different protocol options
+        $parsed['protocol'] = (!empty($proto)) ? $proto : 'tcp';
+        $proto_opts = urldecode($proto_opts);
+        if ($parsed['protocol'] == 'tcp') {
+            if (strpos($proto_opts, ':') !== false) {
+                list($parsed['hostspec'], $parsed['port']) = explode(':', $proto_opts);
+            } else {
+                $parsed['hostspec'] = $proto_opts;
+            }
+        } elseif ($parsed['protocol'] == 'unix') {
+            $parsed['socket'] = $proto_opts;
         }
 
         // Get dabase if any
@@ -689,7 +706,7 @@ class DB_result
      * @return  mixed  DB_OK on success, NULL on no more rows or
      *                 a DB_Error object on error
      *
-     * @access public     
+     * @access public
      */
     function fetchInto(&$arr, $fetchmode = DB_FETCHMODE_DEFAULT, $rownum=null)
     {
@@ -751,7 +768,7 @@ class DB_result
      *
      * @return int the number of rows, or a DB error
      *
-     * @access public     
+     * @access public
      */
     function numRows()
     {
@@ -763,7 +780,7 @@ class DB_result
      *
      * @return bool true if a new result is available or false if not.
      *
-     * @access public     
+     * @access public
      */
     function nextResult()
     {
@@ -774,7 +791,7 @@ class DB_result
      * Frees the resources allocated for this result set.
      * @return  int     error code
      *
-     * @access public     
+     * @access public
      */
     function free()
     {
@@ -797,7 +814,7 @@ class DB_result
     /**
     * returns the actual rows number
     * @return integer
-    */    
+    */
     function getRowCounter()
     {
         return $this->row_counter;
@@ -814,7 +831,7 @@ class DB_row
     * constructor
     *
     * @param resource row data as array
-    */ 
+    */
     function DB_row(&$arr)
     {
         for (reset($arr); $key = key($arr); next($arr)) {
