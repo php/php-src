@@ -35,7 +35,8 @@ typedef enum
   IMAGE_FILETYPE_SWF,
   IMAGE_FILETYPE_PSD,
   IMAGE_FILETYPE_BMP,
-  IMAGE_FILETYPE_TIFF
+  IMAGE_FILETYPE_TIFF_II, /* intel */
+  IMAGE_FILETYPE_TIFF_MM, /* motorola */
 } image_filetype;
 /* }}} */
 
