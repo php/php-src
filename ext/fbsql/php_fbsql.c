@@ -250,10 +250,10 @@ ZEND_GET_MODULE(fbsql)
 #endif
 
 
-void phpfbReleaseResult   (PHPFBResult*   result);
-void phpfbReleaseDatabase (PHPFBDatabase* database);
-void phpfbReleaseLink     (PHPFBLink*     link);
-void phpfbReleasePLink    (PHPFBLink*     link);
+static void phpfbReleaseDatabase(zend_rsrc_list_entry *rsrc);
+static void phpfbReleaseResult (zend_rsrc_list_entry *rsrc);
+static void phpfbReleaseLink (zend_rsrc_list_entry *rsrc);
+static void phpfbReleasePLink (zend_rsrc_list_entry *rsrc);
 
 PHPFBResult* phpfbRetainResult (PHPFBResult* result)
 {
@@ -261,9 +261,10 @@ PHPFBResult* phpfbRetainResult (PHPFBResult* result)
 	return result;
 }
 
-void phpfbReleaseResult (PHPFBResult* result)
+static void phpfbReleaseResult (zend_rsrc_list_entry *rsrc)
 {
 	unsigned int i;
+	PHPFBResult* result = (PHPFBResult *)rsrc->ptr;
 	FBSQLLS_FETCH();
 	if (result)
 	{
@@ -289,7 +290,6 @@ void phpfbReleaseResult (PHPFBResult* result)
 						break;
 					}
 				}
-//				phpfbReleaseDatabase(result->database);
 			}
 			if (result->link)
 			{
@@ -301,7 +301,6 @@ void phpfbReleaseResult (PHPFBResult* result)
 						break;
 					}
 				}
-//				phpfbReleaseLink(result->link);
 			}
 			result->link        = 0;
 			result->database    = 0;
@@ -327,8 +326,9 @@ PHPFBDatabase* phpfbRetainDatabase (PHPFBDatabase* database)
 	return database;
 }
 
-void phpfbReleaseDatabase (PHPFBDatabase* database)
+static void phpfbReleaseDatabase(zend_rsrc_list_entry *rsrc)
 {
+	PHPFBDatabase* database = (PHPFBDatabase *)rsrc->ptr;
 	if (database)
 	{
 		database->retainCount--;
@@ -345,7 +345,6 @@ void phpfbReleaseDatabase (PHPFBDatabase* database)
 						break;
 					}
 				}
-//				phpfbReleaseLink(database->link);
 			}
 			fbcdcClose(database->connection);
 			fbcdcRelease(database->connection);
@@ -362,8 +361,9 @@ PHPFBLink* phpfbRetainLink (PHPFBLink* link)
 	return link;
 }
 
-void phpfbReleaseLink (PHPFBLink* link)
+static void phpfbReleaseLink (zend_rsrc_list_entry *rsrc)
 {
+	PHPFBLink* link = (PHPFBLink *)rsrc->ptr;
 	FBSQLLS_FETCH();
 	if (link)
 	{
@@ -383,8 +383,9 @@ void phpfbReleaseLink (PHPFBLink* link)
 	}
 }
 
-void phpfbReleasePLink (PHPFBLink* link)
+static void phpfbReleasePLink (zend_rsrc_list_entry *rsrc)
 {
+	PHPFBLink* link = (PHPFBLink *)rsrc->ptr;
 	FBSQLLS_FETCH();
 	if (link)
 	{
@@ -453,10 +454,10 @@ PHP_MINIT_FUNCTION(fbsql)
 
 	fbcInitialize();
 
-	le_result   = register_list_destructors(phpfbReleaseResult,NULL);
-	le_link     = register_list_destructors(phpfbReleaseLink,NULL);
-	le_plink    = register_list_destructors(NULL, phpfbReleasePLink);
-	le_dba      = register_list_destructors(phpfbReleaseDatabase,NULL);
+	le_result   = zend_register_list_destructors_ex(phpfbReleaseResult, NULL, "fbsql link", module_number);
+	le_link     = zend_register_list_destructors_ex(NULL, phpfbReleasePLink, "fbsql plink", module_number);
+	le_plink    = zend_register_list_destructors_ex(phpfbReleaseLink, NULL, "fbsql result", module_number);
+	le_dba      = zend_register_list_destructors_ex(phpfbReleaseDatabase, NULL, "fbsql database", module_number);
 
 	REGISTER_LONG_CONSTANT("FBSQL_ASSOC", FBSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FBSQL_NUM",   FBSQL_NUM,   CONST_CS | CONST_PERSISTENT);
@@ -565,7 +566,7 @@ PHPFBLink* phpfbConnect(INTERNAL_FUNCTION_PARAMETERS, char *hostName, char *user
 		le.type = le_link; 
 		if (zend_hash_update(persistant?&EG(persistent_list):&EG(regular_list), name, strlen(name), &le, sizeof(le), NULL)==FAILURE)
 		{
-			phpfbReleaseLink(result);
+/*			phpfbReleaseLink(result); */
 			return NULL;
         }
 		result->index = zend_list_insert (phpfbRetainLink(result), le_link);
