@@ -277,6 +277,13 @@ static void php_apache_sapi_log_message_ex(char *msg, request_rec *r)
 	}
 }
 
+static time_t php_apache_sapi_get_request_time(void) {
+	php_struct *ctx = SG(server_context);
+	TSRMLS_FETCH();
+
+	return ctx->r->request_time;
+}
+
 extern zend_module_entry php_apache_module;
 
 static int php_apache2_startup(sapi_module_struct *sapi_module)
@@ -313,6 +320,7 @@ static sapi_module_struct apache2_sapi_module = {
 
 	php_apache_sapi_register_variables,
 	php_apache_sapi_log_message,			/* Log message */
+	php_apache_sapi_get_request_time,		/* Request Time */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };

@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
+- Add SAPI hook to get the current request time. (Rasmus)
 - Fixed bug #29522 (accessing properties without connection) (Georg)
 - Fixed bug #29335 (fetch functions now use MYSQLI_BOTH as default) (Georg)
 - Fixed bug #29311 (calling parent constructor in mysqli). (Georg)

@@ -401,6 +401,14 @@ static int sapi_apache_get_target_gid(gid_t *obj TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ php_apache_get_request_time
+ */
+static time_t php_apache_get_request_time(TSRMLS_D)
+{
+	return ((request_rec *)SG(server_context))->request_time;
+}
+/* }}} */
+
 /* {{{ sapi_module_struct apache_sapi_module
  */
 static sapi_module_struct apache_sapi_module = {
@@ -429,6 +437,7 @@ static sapi_module_struct apache_sapi_module = {
 
 	sapi_apache_register_server_variables,		/* register server variables */
 	php_apache_log_message,			/* Log message */
+	php_apache_get_request_time,	/* Get request time */
 
 	NULL,							/* php.ini path override */
 
