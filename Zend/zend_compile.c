@@ -466,7 +466,7 @@ void zend_do_abstract_method(znode *function_name, znode *modifiers, znode *body
 
 static zend_bool opline_is_fetch_this(zend_op *opline TSRMLS_DC)
 {
-	if (CG(active_class_entry) && (opline->opcode == ZEND_FETCH_W) && (opline->op1.op_type == IS_CONST)
+	if ((opline->opcode == ZEND_FETCH_W) && (opline->op1.op_type == IS_CONST)
 		&& (opline->op1.u.constant.type == IS_STRING)
 		&& (opline->op1.u.constant.value.str.len == (sizeof("this")-1))
 		&& !memcmp(opline->op1.u.constant.value.str.val, "this", sizeof("this"))) {
