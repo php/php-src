@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Fixed compilation errors when compiling with the fribidi extension (Bug #16414) (Tal)
 - Fixed bugs #7472, #12120 and #12989 as well as other potential problems
   with strip_tags() function. (Ilia)
 - Upgraded PCRE to version 3.9. (Wez)
