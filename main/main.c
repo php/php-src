@@ -426,18 +426,20 @@ PHPAPI void php3_error(int type, const char *format,...)
 		}
 	}
 	if (PG(track_errors)) {
-		pval tmp;
+		pval *tmp;
 
 		va_start(args, format);
 		size = vsnprintf(buffer, sizeof(buffer) - 1, format, args);
 		va_end(args);
 		buffer[sizeof(buffer) - 1] = 0;
 
-		tmp.value.str.val = (char *) estrndup(buffer, size);
-		tmp.value.str.len = size;
-		tmp.type = IS_STRING;
+		tmp = (pval *)emalloc(sizeof(pval));
+		INIT_PZVAL(tmp);
+		tmp->value.str.val = (char *) estrndup(buffer, size);
+		tmp->value.str.len = size;
+		tmp->type = IS_STRING;
 
-		_php3_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void *) & tmp, sizeof(pval), NULL);
+		_php3_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(pval *), NULL);
 	}
 
 	switch (type) {
