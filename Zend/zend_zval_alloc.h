@@ -29,6 +29,13 @@ typedef struct _zend_zval_list_entry {
 	struct _zend_zval_list_entry *next;
 } zend_zval_list_entry;
 
+#if ZEND_DEBUG
+# define RECORD_ZVAL_CACHE_HIT()	AG(zval_cache_stats)[1]++;
+# define RECORD_ZVAL_CACHE_MISS()	AG(zval_cache_stats)[0]++;
+#else
+# define RECORD_ZVAL_CACHE_HIT()
+# define RECORD_ZVAL_CACHE_MISS()
+#endif
 
 #ifndef ZTS
 extern zend_alloc_globals alloc_globals;
@@ -40,8 +47,10 @@ extern zend_alloc_globals alloc_globals;
 														\
 		if (((z) = (void *) AG(zval_list_head))) {		\
 			AG(zval_list_head) = ((zend_zval_list_entry *) AG(zval_list_head))->next;	\
+			RECORD_ZVAL_CACHE_HIT();					\
 		} else {										\
 			(z) = emalloc(sizeof(zval));				\
+			RECORD_ZVAL_CACHE_MISS();					\
 		}												\
 	}
 

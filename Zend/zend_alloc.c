@@ -116,11 +116,17 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 		p->orig_lineno = __zend_orig_lineno;
 		p->magic = MEM_BLOCK_START_MAGIC;
 		p->reported = 0;
+		AG(cache_stats)[size][1]++;
 #endif
 		p->persistent = 0;
 		p->cached = 0;
 		return (void *)((char *)p + sizeof(zend_mem_header) + PLATFORM_PADDING);
 	} else {
+#if ZEND_DEBUG
+		if (size<MAX_CACHED_MEMORY) {
+			AG(cache_stats)[size][0]++;
+		}
+#endif
 		p  = (zend_mem_header *) malloc(sizeof(zend_mem_header) + size + PLATFORM_PADDING + END_ALIGNMENT(size) + END_MAGIC_SIZE);
 	}
 
@@ -323,6 +329,10 @@ ZEND_API void start_memory_manager(ALS_D)
 	AG(memory_exhausted)=0;
 #endif
 
+#if ZEND_DEBUG
+	memset(AG(cache_stats), 0, sizeof(AG(cache_stats)));
+	memset(AG(zval_cache_stats), 0, sizeof(AG(zval_cache_stats)));
+#endif
 
 	memset(AG(cache_count),0,MAX_CACHED_MEMORY*sizeof(unsigned char));
 }
@@ -381,6 +391,38 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 			t = t->pNext;
 		}
 	}
+
+#if ZEND_DEBUG
+	do {
+		zval display_memory_cache_stats;
+		int i, j;
+
+		if (zend_get_ini_entry("display_memory_cache_stats", sizeof("display_memory_cache_stats"), &display_memory_cache_stats)==FAILURE) {
+			break;
+		}
+		if (!atoi(display_memory_cache_stats.value.str.val)) {
+			break;
+		}
+		fprintf(stderr, "Memory cache statistics\n"
+						"-----------------------\n\n"
+						"[zval, %2d]\t\t%d / %d (%.2f%%)\n",
+						sizeof(zval),
+						AG(zval_cache_stats)[1], AG(zval_cache_stats)[0]+AG(zval_cache_stats)[1],
+						((double) AG(zval_cache_stats)[1] / (AG(zval_cache_stats)[0]+AG(zval_cache_stats)[1]))*100);
+
+
+		for (i=0; i<MAX_CACHED_MEMORY; i+=2) {
+			fprintf(stderr, "[%2d, %2d]\t\t", i+1, i+2);
+			for (j=0; j<2; j++) {
+				fprintf(stderr, "%d / %d (%.2f%%)\t\t",
+						AG(cache_stats)[i+j][1], AG(cache_stats)[i+j][0]+AG(cache_stats)[i+j][1],
+						((double) AG(cache_stats)[i+j][1] / (AG(cache_stats)[i+j][0]+AG(cache_stats)[i+j][1]))*100);
+			}
+			fprintf(stderr, "\n");
+		}
+					
+	} while (0);
+#endif
 }
 
 
