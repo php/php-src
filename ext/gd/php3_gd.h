@@ -57,7 +57,9 @@ PHP_MINFO_FUNCTION(gd);
 extern PHP_MINIT_FUNCTION(gd);
 extern PHP_MSHUTDOWN_FUNCTION(gd);
 
+#ifndef HAVE_GDIMAGECOLORRESOLVE
 extern int gdImageColorResolve(gdImagePtr, int, int, int);
+#endif
 PHP_FUNCTION(imagearc);
 PHP_FUNCTION(imagechar);
 PHP_FUNCTION(imagecharup);
@@ -102,6 +104,7 @@ PHP_FUNCTION(imagedashedline);
 PHP_FUNCTION(imagettfbbox);
 PHP_FUNCTION(imagettftext);
 #endif
+PHPAPI int phpi_get_le_gd(void);
 #else
 
 #define phpext_gd_ptr NULL

@@ -23,6 +23,10 @@
 #include <freetype.h>
 #endif
 
+#ifndef HAVE_GDIMAGECOLORRESOLVE
+extern int gdImageColorResolve(gdImagePtr, int, int, int);
+#endif
+
 /* number of fonts cached before least recently used is replaced */
 #define FONTCACHESIZE 6
 
@@ -148,61 +152,6 @@ static void bitmapRelease( void *element );
 
 /* local prototype */
 char *gdttfchar(gdImage *im, int fg, font_t *font, int x, int y, TT_F26Dot6 x1,  TT_F26Dot6 y1, TT_F26Dot6 *advance, TT_BBox **bbox, char **next);
-
-#ifndef HAVE_GDIMAGECOLORRESOLVE
-
-int gdImageColorResolve(gdImagePtr im, int r, int g, int b);
-
-/********************************************************************/
-/* gdImageColorResolve is a replacement for the old fragment:       */
-/*                                                                  */
-/*      if ((color=gdImageColorExact(im,R,G,B)) < 0)                */
-/*        if ((color=gdImageColorAllocate(im,R,G,B)) < 0)           */
-/*          color=gdImageColorClosest(im,R,G,B);                    */
-/*                                                                  */
-/* in a single function                                             */
-
-static int
-gdImageColorResolve(gdImagePtr im, int r, int g, int b)
-{
-	int c; 
-	int ct = -1;
-	int op = -1;
-	long rd, gd, bd, dist;
-	long mindist = 3*255*255;  /* init to max poss dist */
-
-	for (c = 0; c < im->colorsTotal; c++) {
-		if (im->open[c]) {
-			op = c;				/* Save open slot */
-			continue;			/* Color not in use */
-		}
-		rd = (long)(im->red  [c] - r);
-		gd = (long)(im->green[c] - g);
-		bd = (long)(im->blue [c] - b);
-		dist = rd * rd + gd * gd + bd * bd;
-		if (dist < mindist) {
-			if (dist == 0) {
-				return c;		/* Return exact match color */
-			}
-			mindist = dist;
-			ct = c;
-		}
-	}       
-	/* no exact match.  We now know closest, but first try to allocate exact */
-	if (op == -1) {
-		op = im->colorsTotal;
-		if (op == gdMaxColors) {    /* No room for more colors */
-			return ct;  		/* Return closest available color */
-		}
-		im->colorsTotal++;
-	}
-	im->red  [op] = r;
-	im->green[op] = g;
-	im->blue [op] = b;
-	im->open [op] = 0;
-	return op;					/* Return newly allocated color */
-}
-#endif
 
 /********************************************************************
  * gdTcl_UtfToUniChar is borrowed from ...

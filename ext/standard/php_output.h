@@ -22,10 +22,10 @@
 
 #include "php.h"
 
-PHPAPI void php_output_startup();
+PHPAPI void php_output_startup(void);
 PHPAPI int  php_body_write(const char *str, uint str_length);
 PHPAPI int  php_header_write(const char *str, uint str_length);
-PHPAPI void php_start_ob_buffering();
+PHPAPI void php_start_ob_buffering(void);
 PHPAPI void php_end_ob_buffering(int send_buffer);
 
 extern zend_module_entry output_module_entry;

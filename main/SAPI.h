@@ -96,7 +96,7 @@ typedef struct {
 # define SLS_FETCH()	sapi_globals_struct *sapi_globals = ts_resource(sapi_globals_id)
 SAPI_API extern int sapi_globals_id;
 #else
-# define SLS_D
+# define SLS_D	void
 # define SLS_DC
 # define SLS_C
 # define SLS_CC
@@ -117,7 +117,7 @@ SAPI_API void sapi_activate(SLS_D);
 SAPI_API void sapi_deactivate(SLS_D);
 
 SAPI_API int sapi_add_header(char *header_line, uint header_line_len);
-SAPI_API int sapi_send_headers();
+SAPI_API int sapi_send_headers(void);
 
 SAPI_API int sapi_register_post_readers(sapi_post_content_type_reader *post_content_type_readers);
 SAPI_API int sapi_register_post_reader(sapi_post_content_type_reader *post_content_type_reader);

@@ -51,13 +51,13 @@ struct _php_ini_entry {
 };
 
 
-int php_ini_mstartup();
-int php_ini_mshutdown();
-int php_ini_rshutdown();
+int php_ini_mstartup(void);
+int php_ini_mshutdown(void);
+int php_ini_rshutdown(void);
 
 PHPAPI int php_register_ini_entries(php_ini_entry *ini_entry, int module_number);
 PHPAPI void php_unregister_ini_entries(int module_number);
-PHPAPI void php_ini_refresh_caches();
+PHPAPI void php_ini_refresh_caches(void);
 PHPAPI int php_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type);
 PHPAPI int php_restore_ini_entry(char *name, uint name_length);
 PHPAPI void display_ini_entries(zend_module_entry *module);

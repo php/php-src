@@ -24,8 +24,12 @@
  * ? Safe mode implementation
  */
 
-#if COMPILE_DL
-#include "dl/phpdl.h"
+#ifdef PIC
+# define COMPILE_DL 1
+#endif
+
+#ifdef COMPILE_DL
+# include "dl/phpdl.h"
 #endif
 
 #include "php.h"

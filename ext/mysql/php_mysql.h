@@ -22,9 +22,9 @@
 #ifndef _PHP_MYSQL_H
 #define _PHP_MYSQL_H
 
-#if COMPILE_DL
-#undef HAVE_MYSQL
-#define HAVE_MYSQL 1
+#ifdef COMPILE_DL
+# undef HAVE_MYSQL
+# define HAVE_MYSQL 1
 #endif
 
 #if WIN32||WINNT
