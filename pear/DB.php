@@ -22,7 +22,7 @@
 // Database independent query interface.
 //
 
-if ($GLOBALS['USED_PACKAGES']['DB']) return;
+if (!empty($GLOBALS['USED_PACKAGES']['DB'])) return;
 $GLOBALS['USED_PACKAGES']['DB'] = true;
 
 // {{{ Database independent error codes.
