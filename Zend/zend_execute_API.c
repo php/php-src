@@ -718,8 +718,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	EX(prev_execute_data) = EG(current_execute_data);
 	EG(current_execute_data) = &execute_data;
 
+
 	if (EX(function_state).function->type == ZEND_USER_FUNCTION) {
 		calling_symbol_table = EG(active_symbol_table);
+		EG(scope) = EX(function_state).function->common.scope;
 		if (fci->symbol_table) {
 			EG(active_symbol_table) = fci->symbol_table;
 		} else {
@@ -751,6 +753,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EG(binary_op) = orig_binary_op;
 	} else {
 		ALLOC_INIT_ZVAL(*fci->retval_ptr_ptr);
+		if(EX(function_state).function->common.scope) {
+			EG(scope) = EX(function_state).function->common.scope;
+		}
 		((zend_internal_function *) EX(function_state).function)->handler(fci->param_count, *fci->retval_ptr_ptr, (fci->object_pp?*fci->object_pp:NULL), 1 TSRMLS_CC);
 		INIT_PZVAL(*fci->retval_ptr_ptr);
 	}
