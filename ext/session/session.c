@@ -234,14 +234,8 @@ typedef struct {
 
 void php_set_session_var(char *name, size_t namelen, zval *state_val PSLS_DC)
 {
-	zval *state_val_copy;
 	PLS_FETCH();
 	ELS_FETCH();
-
-	ALLOC_ZVAL(state_val_copy);
-	*state_val_copy = *state_val;
-	zval_copy_ctor(state_val_copy);
-	state_val_copy->refcount = 0;
 
 	if (PG(register_globals)) {
 		zval **old_symbol;
@@ -253,15 +247,14 @@ void php_set_session_var(char *name, size_t namelen, zval *state_val PSLS_DC)
 			   of a global variable) dangling.
 			 */
 			
-			REPLACE_ZVAL_VALUE(old_symbol,state_val_copy,0);
-			FREE_ZVAL(state_val_copy);
+			REPLACE_ZVAL_VALUE(old_symbol,state_val,0);
 
 			zend_set_hash_symbol(*old_symbol, name, namelen, 1, 1, Z_ARRVAL_P(PS(http_session_vars)));
 		} else {
-			zend_set_hash_symbol(state_val_copy, name, namelen, 1, 2, Z_ARRVAL_P(PS(http_session_vars)), &EG(symbol_table));
+			zend_set_hash_symbol(state_val, name, namelen, 1, 2, Z_ARRVAL_P(PS(http_session_vars)), &EG(symbol_table));
 		}
 	} else {
-		zend_set_hash_symbol(state_val_copy, name, namelen, 0, 1, Z_ARRVAL_P(PS(http_session_vars)));
+		zend_set_hash_symbol(state_val, name, namelen, 0, 1, Z_ARRVAL_P(PS(http_session_vars)));
 	}
 }
 
@@ -329,7 +322,6 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
-	MAKE_STD_ZVAL(current);
 	for (p = val; p < endptr; ) {
 		namelen = *p & (~PS_BIN_UNDEF);
 		has_value = *p & PS_BIN_UNDEF ? 0 : 1;
@@ -339,15 +331,16 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 		p += namelen + 1;
 		
 		if (has_value) {
+			MAKE_STD_ZVAL(current);
 			if (php_var_unserialize(&current, &p, endptr, &var_hash)) {
 				php_set_session_var(name, namelen, current PSLS_CC);
-				zval_dtor(current);
 			}
+			zval_ptr_dtor(&current);
 		}
 		PS_ADD_VARL(name, namelen);
 		efree(name);
 	}
-	FREE_ZVAL(current);
+
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 
 	return SUCCESS;
@@ -405,7 +398,6 @@ PS_SERIALIZER_DECODE_FUNC(php)
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
-	MAKE_STD_ZVAL(current);
 	for (p = q = val; (p < endptr) && (q = memchr(p, PS_DELIMITER, endptr - p)); p = q) {
 		if (p[0] == PS_UNDEF_MARKER) {
 			p++;
@@ -419,17 +411,18 @@ PS_SERIALIZER_DECODE_FUNC(php)
 		q++;
 		
 		if (has_value) {
+			MAKE_STD_ZVAL(current);
 			if (php_var_unserialize(&current, &q, endptr, &var_hash)) {
 				php_set_session_var(name, namelen, current PSLS_CC);
-				zval_dtor(current);
 			}
+			zval_ptr_dtor(&current);
 		}
 		PS_ADD_VARL(name, namelen);
 		efree(name);
 	}
-	FREE_ZVAL(current);
 
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+
 	return SUCCESS;
 }
 
