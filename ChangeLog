@@ -1,3 +1,11 @@
+2003-11-15  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/ming/ming.dsp:
+      Fix win32 compilation. This will import the core_globals_id
+
+    * ext/ming/ming.c:
+      Adding missing class init's for new ming 0.3a functions
+
 2003-11-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * NEWS
