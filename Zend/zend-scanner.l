@@ -215,8 +215,8 @@ int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2)
 		case ZEND_HANDLE_STDIOSTREAM:
 			return fh1->handle.is==fh2->handle.is;
 			break;
-	}
 #endif
+	}
 	return 0;
 }
 
