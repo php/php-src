@@ -103,6 +103,7 @@ static int zend_apache_ub_write(const char *str, uint str_length)
 	}
 	if(ret != str_length) {
 		PG(connection_status) = PHP_CONNECTION_ABORTED;
+		if(!PG(ignore_user_abort)) zend_bailout();
 	}
 	return ret;
 }
