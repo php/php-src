@@ -362,6 +362,23 @@ static int saproxy_object_cast(zval *readobj, zval *writeobj, int type, int shou
 	return FAILURE;
 }
 
+static int saproxy_count_elements(zval *object, long *count TSRMLS_DC)
+{
+	php_com_saproxy *proxy = SA_FETCH(object);
+	LONG ubound, lbound;
+	
+	if (!V_ISARRAY(&proxy->obj->v)) {
+		return FAILURE;
+	}
+
+	SafeArrayGetLBound(V_ARRAY(&proxy->obj->v), proxy->dimensions, &lbound);
+	SafeArrayGetUBound(V_ARRAY(&proxy->obj->v), proxy->dimensions, &ubound);
+
+	*count = ubound - lbound + 1;
+
+	return SUCCESS;
+}
+
 zend_object_handlers php_com_saproxy_handlers = {
 	ZEND_OBJECTS_STORE_HANDLERS,
 	saproxy_property_read,
@@ -382,7 +399,8 @@ zend_object_handlers php_com_saproxy_handlers = {
 	saproxy_class_entry_get,
 	saproxy_class_name_get,
 	saproxy_objects_compare,
-	saproxy_object_cast
+	saproxy_object_cast,
+	saproxy_count_elements
 };
 
 static void saproxy_free_storage(void *object TSRMLS_DC)

@@ -1077,7 +1077,8 @@ static zend_object_handlers sxe_object_handlers = {
 	NULL, /* zend_get_std_object_handlers()->get_class_entry,*/
 	NULL, /* zend_get_std_object_handlers()->get_class_name,*/
 	sxe_objects_compare,
-	sxe_object_cast
+	sxe_object_cast,
+	NULL
 };
 
 /* {{{ sxe_object_clone()
