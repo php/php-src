@@ -608,7 +608,8 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 			}
 		}
 		else {
-			php_stream_write(outstream, data->buf, rcvd);
+			if (rcvd != php_stream_write(outstream, data->buf, rcvd))
+				goto bail;
 		}
 	}
 
@@ -616,10 +617,6 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 		php_stream_putc(outstream, '\r');
 
 	data = data_close(data);
-
-	if (php_stream_error(outstream)) {
-		goto bail;
-	}
 
 	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
 		goto bail;
@@ -692,9 +689,6 @@ ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, i
 	}
 
 	if (size && my_send(ftp, data->fd, data->buf, size) != size)
-		goto bail;
-
-	if (php_stream_error(instream))
 		goto bail;
 
 	data = data_close(data);
@@ -1458,7 +1452,8 @@ ftp_async_continue_read(ftpbuf_t *ftp)
 			}
 		}
 		else {
-			php_stream_write(ftp->stream, data->buf, rcvd);
+			if (rcvd != php_stream_write(ftp->stream, data->buf, rcvd))
+				goto bail;
 		}
 
 		ftp->lastch = lastch;
@@ -1469,10 +1464,6 @@ ftp_async_continue_read(ftpbuf_t *ftp)
 		php_stream_putc(ftp->stream, '\r');
 
 	data = data_close(data);
-
-	if (php_stream_error(ftp->stream)) {
-		goto bail;
-	}
 
 	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
 		goto bail;
@@ -1576,9 +1567,6 @@ ftp_async_continue_write(ftpbuf_t *ftp)
 	}
 
 	if (size && my_send(ftp, ftp->data->fd, ftp->data->buf, size) != size)
-		goto bail;
-
-	if (php_stream_error(ftp->stream))
 		goto bail;
 
 	ftp->data = data_close(ftp->data);
