@@ -115,7 +115,6 @@ struct _sdlSoapBindingFunction {
 
 	sdlSoapBindingFunctionBody  input;
 	sdlSoapBindingFunctionBody  output;
-	sdlSoapBindingFunctionBody  fault;
 };
 
 struct _sdlRestrictionInt {
