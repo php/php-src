@@ -326,6 +326,7 @@ void php_print_credits(int flag)
 		php_info_print_table_header(2, "Module", "Authors");
 		CREDIT_LINE("Apache", "Rasmus Lerdorf, Stig Bakken, David Sklar");
 		CREDIT_LINE("BC Math", "Andi Gutmans");
+		CREDIT_LINE("CyberCash", "Evan Klinger");
 		CREDIT_LINE("Win32 COM", "Zeev Suraski");
 		CREDIT_LINE("DAV", "Stig Bakken");
 		CREDIT_LINE("DBA", "Sascha Schumann");

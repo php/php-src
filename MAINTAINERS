@@ -18,6 +18,10 @@ EXTENSION:           apache
 PRIMARY MAINTAINER:  Rasmus Lerdorf <rasmus@php.net>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
+EXTENSION:           cybercash
+PRIMARY MAINTAINER:  Evan Klinger <evan715@sirius.com>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
 EXTENSION:           dba
 PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
 STATUS:              Maintained
