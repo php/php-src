@@ -188,6 +188,22 @@ if (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
 }
 $installer->rollbackFileTransaction();
 
+echo "==>test invalid php-const replacement:\n";
+$err = $installer->_installFile('installer2.phpt.testfile.php', array('role' => 'script',
+    'replacements' => array(array('type' => 'php-const', 'from' => '@TEST@', 'to' => '%PEARINSTALLERTEST2_FAKE_FOO_CONST'))),
+    $temp_path . DIRECTORY_SEPARATOR . 'tmp', array());
+if (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    '.tmpinstaller2.phpt.testfile.php'))
+{
+    $a = implode(file($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    '.tmpinstaller2.phpt.testfile.php'), '');
+    echo "$a\n";
+} else {
+    echo "no! file installation failed\n";
+}
+
+$installer->rollbackFileTransaction();
+
 var_dump($installer->_installFile('installer2.phpt.testfile.php', array('role' => 'script',
     'replacements' => array(array('type' => 'pear-config', 'from' => '@TEST@', 'to' => 'master_server'))),
     $temp_path . DIRECTORY_SEPARATOR . 'tmp', array()));
@@ -203,10 +219,40 @@ if (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
 }
 $installer->rollbackFileTransaction();
 
+echo "==>test invalid pear-config replacement\n";
+var_dump($installer->_installFile('installer2.phpt.testfile.php', array('role' => 'script',
+    'replacements' => array(array('type' => 'pear-config', 'from' => '@TEST@', 'to' => 'blahblahblah'))),
+    $temp_path . DIRECTORY_SEPARATOR . 'tmp', array()));
+if (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    '.tmpinstaller2.phpt.testfile.php'))
+{
+    $a = implode(file($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    '.tmpinstaller2.phpt.testfile.php'), '');
+    echo "$a\n";
+} else {
+    echo "no! file installation failed\n";
+}
+$installer->rollbackFileTransaction();
+
 var_dump($installer->_installFile('installer2.phpt.testfile.php', array('role' => 'script',
     'replacements' => array(array('type' => 'package-info', 'from' => '@TEST@', 'to' => 'package'))),
     $temp_path . DIRECTORY_SEPARATOR . 'tmp', array()));
 echo "==>test package-info replacement: equals 'Foo stuff'? => ";
+if (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    '.tmpinstaller2.phpt.testfile.php'))
+{
+    $a = implode(file($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    '.tmpinstaller2.phpt.testfile.php'), '');
+    echo "$a\n";
+} else {
+    echo "no! file installation failed\n";
+}
+$installer->rollbackFileTransaction();
+
+echo "==>test invalid package-info replacement:\n";
+var_dump($installer->_installFile('installer2.phpt.testfile.php', array('role' => 'script',
+    'replacements' => array(array('type' => 'package-info', 'from' => '@TEST@', 'to' => 'gronk'))),
+    $temp_path . DIRECTORY_SEPARATOR . 'tmp', array()));
 if (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
     '.tmpinstaller2.phpt.testfile.php'))
 {
@@ -250,9 +296,7 @@ rmdir($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
     'Foo' . DIRECTORY_SEPARATOR . 'Mine');
 rmdir($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
     'Foo');
-
 unlink($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installer2.phpt.testfile.php');
-
 //cleanup
 chdir($curdir);
 unlink ($temp_path . DIRECTORY_SEPARATOR . 'pear.conf');
@@ -317,10 +361,21 @@ file bin/.tmpinstaller2.phpt.testfile.php exists? => yes
 test replacements:
 int(1)
 ==>test php-const replacement: equals 'good stuff'? => good stuff
+==>test invalid php-const replacement:
+invalid php-const replacement: %PEARINSTALLERTEST2_FAKE_FOO_CONST
+@TEST@ stuff
 int(1)
 ==>test pear-config replacement: equals 'pear.php.net stuff'? => pear.php.net stuff
+==>test invalid pear-config replacement
+invalid pear-config replacement: blahblahblah
+int(1)
+@TEST@ stuff
 int(1)
 ==>test package-info replacement: equals 'Foo stuff'? => Foo stuff
+==>test invalid package-info replacement:
+invalid package-info replacement: gronk
+int(1)
+@TEST@ stuff
 
 test install-as:
 int(1)
