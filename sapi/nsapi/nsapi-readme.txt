@@ -68,6 +68,10 @@ After that you can configure a directory in the Administration server and assign
 the style "x-httpd-php". All files in it will get executed as PHP. This is nice to
 hide PHP usage by renaming files to .html
 
+Note: The stacksize that PHP uses depends on the configuration of the webserver. If you get
+crashes with very large PHP scripts, it is recommended to raise it with the Admin Server
+(in the section "MAGNUS EDITOR").
+
 
 Authentication configuration
 ----------------------------
