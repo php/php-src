@@ -115,6 +115,15 @@ static sapi_post_entry supported_post_entries[] = {
 	{ NULL, 0, NULL }
 };
 
+#define FDF_POST_CONTENT_TYPE	"application/vnd.fdf"
+
+static sapi_post_entry php_fdf_post_entry =	{
+	FDF_POST_CONTENT_TYPE,
+	sizeof(FDF_POST_CONTENT_TYPE)-1,
+	sapi_read_standard_form_data,
+	php_std_post_handler
+};
+
 
 
 PHP_MINIT_FUNCTION(fdf)
@@ -123,9 +132,9 @@ PHP_MINIT_FUNCTION(fdf)
 	FDF_GLOBAL(le_fdf) = zend_register_list_destructors_ex(phpi_FDFClose, NULL, "fdf", module_number);
 
 	/* add handler for Acrobat FDF form post requests */
-	sapi_add_post_entry("application/vnd.fdf",	php_default_post_reader, fdf_post_handler);
+	sapi_register_post_entry(&php_fdf_post_entry);
 
-  /* Constants used by fdf_set_opt() */
+	/* Constants used by fdf_set_opt() */
 	REGISTER_LONG_CONSTANT("FDFValue", FDFValue, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FDFStatus", FDFStatus, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FDFFile", FDFFile, CONST_CS | CONST_PERSISTENT);
