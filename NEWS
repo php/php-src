@@ -1,11 +1,17 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
-- Fixed bug #17448 (Print the message when OCI_SUCCESS_WITH_INFO is returned).
-- Enhanced jpeg 2000 support for GetImageSize(). (marcus, Adam Wright)
-- Fixed bug #20155: xmlrpc compile problem with zendengine2 (Derick, Jan
-  Schneider)
-- Implemented string.base64 stream filter. (Moriyoshi)
+- Fixed bug #17448 (Print the message when OCI_SUCCESS_WITH_INFO is returned). 
+  (Maxim)
+- Fixed bug #20155 (xmlrpc compile problem with ZE2). (Derick, Jan Schneider)
+- Fixed bug #20442 (upgraded bundled expat to 1.95.5). (Ilia)
+- Changed ext/mcrypt to require libmcrypt version 2.5.3 or greater. (Derick)
+- Changed uniqid() parameters to be optional and allow any prefix length.
+  (Marcus)
+- Improved JPEG 2000 support for getimagesize(). (Marcus, Adam Wright)
+- Improved array_search() to accept objects as a needle under ZE2. (Moriyoshi)
+- Added OCIPasswordChange() which allows renewing expired Oracle users. (Maxim)
+- Added string.base64 stream filter. (Moriyoshi)
 - Added domxml_node_get_path() (Lukas Schröder)
 - Added iconv related functions (Moriyoshi)
   . iconv_strlen()
@@ -14,20 +20,13 @@ PHP 4                                                                      NEWS
   . iconv_strrpos()
   . iconv_mime_decode()
   . iconv_mime_encode()
-- Removed support for libmcrypt 2.2.x to allow cleaner code. Another reason
-  to upgrade libmcrypt to a 2.5.x series as the older ones have too many bugs
-  to be safely used with PHP. (Derick)
-- Fixed bug #20442 (upgraded bundled expat to 1.95.5). (Ilia)
-- Made uniqid() parameters to be optional and allow any prefix length. (Marcus)
-- Improved array_search() so that it can accept objects as a needle under
-  ZendEngine2. (Moriyoshi)
 - Added new range() functionality (Ilia)
   . Support for float modifier.
   . Detection of numeric values inside strings passed as high & low.
   . Proper handle the situations where high == low.
 - Added imagefilter() function which allows application of various filters.
   This function is only available with bundled GD. (Pierre-Alain Joye, Ilia)
-- Added imageistruecolor(), only available with GD2+(Pierre-Alain Joye)
+- Added imageistruecolor(), only available with GD2. (Pierre-Alain Joye)
 - Added antialiased drawing support (Pierre-Alain Joye, Ilia), available only
   with bundled GD:
    . imageantialias($im, $flag) to (de)active antialias
