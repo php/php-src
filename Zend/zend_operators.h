@@ -179,6 +179,9 @@ ZEND_API int zval_is_true(zval *op);
 ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
+#if HAVE_STRCOLL
+ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
+#endif
 
 ZEND_API void zend_str_tolower(char *str, unsigned int length);
 ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, unsigned int length);
