@@ -36,7 +36,7 @@ ZEND_API int zend_atoi(const char *str, int str_len)
 	if (!str_len) {
 		str_len = strlen(str);
 	}
-	retval = atoi(str);
+	retval = strtol(str, NULL, 0);
 	if (str_len>0) {
 		switch (str[str_len-1]) {
 			case 'k':
