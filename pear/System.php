@@ -391,19 +391,19 @@ class System
     function tmpdir()
     {
         if (OS_WINDOWS) {
-            if (getenv('TEMP')) {
-                return getenv('TEMP');
+            if (($var=$_ENV['TEMP']) || $var=getenv('TEMP')) {
+                 return $var;
             }
-            if (getenv('TMP')) {
-                return getenv('TMP');
+            if (($var=$_ENV['TMP']) || $var=getenv('TMP')) {
+                 return $var;
             }
-            if (getenv('windir')) {
-                return getenv('windir') . '\temp';
+            if (($var=$_ENV['windir']) || $var=getenv('windir')) {
+                 return $var;
             }
             return getenv('SystemRoot') . '\temp';
         }
-        if (getenv('TMPDIR')) {
-            return getenv('TMPDIR');
+        if (($var=$_ENV['TMPDIR']) || $var=getenv('TMPDIR')) {
+             return $var;
         }
         return '/tmp';
     }
