@@ -1,3 +1,16 @@
+2004-05-27  Andi Gutmans  <andi@zend.com>
+
+    * zend.h:
+      - Back to RC3-dev until we roll final
+
+    * (php_5_0_0RC3RC1)
+      zend_execute.c:
+      - Fix problem with exceptions returning from include(). (Dmitry)
+
+    * (php_5_0_0RC3RC1)
+      zend.h:
+      - RC3RC1
+
 2004-05-26  Wez Furlong  <wez.php@thebrainroom.net>
 
     * zend_object_handlers.c:
