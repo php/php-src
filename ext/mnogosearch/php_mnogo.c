@@ -2148,8 +2148,9 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 				*wordinfo = '\0';
 	  
 				for(i = 0; i < Res->WWList.nwords; i++){
-				    if ((Res->WWList.Word[i].count > 0) || (Res->WWList.Word[i].origin == UDM_WORD_ORIGIN_QUERY)) {
-				    if(wordinfo[0]) strcat(wordinfo,", ");
+				    if ((Res->WWList.Word[i].count > 0) || 
+				        (Res->WWList.Word[i].origin == UDM_WORD_ORIGIN_QUERY)) {
+					if(wordinfo[0]) strcat(wordinfo,", ");
 					sprintf(UDM_STREND(wordinfo)," %s : %d", Res->WWList.Word[i].word, Res->WWList.Word[i].count);
 				    } else if (Res->WWList.Word[i].origin == UDM_WORD_ORIGIN_STOP) {
 					if(wordinfo[0]) strcat(wordinfo,", ");
@@ -2167,7 +2168,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 #if UDM_VERSION_ID >= 30204
 		case UDM_PARAM_WORDINFO_ALL: 
 			{
-			    int len,i;
+			    int len,i,j;
 			    for(len = i = 0; i < Res->WWList.nwords; i++) 
 				len += Res->WWList.Word[i].len;
 			    {	
@@ -2177,23 +2178,19 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 	  
 				*wordinfo = '\0';
 				
-				for(i = 0; i < Res->WWList.nwords; i++){
-				    if (Res->WWList.Word[i].order != corder) {
-					if(wordinfo[0]) {
-					    sprintf(UDM_STREND(wordinfo)," / %d, ", ccount);
-					}
-					ccount = Res->WWList.Word[i].count;
-					if (Res->WWList.Word[i].origin == UDM_WORD_ORIGIN_STOP) {
-					    sprintf(UDM_STREND(wordinfo)," %s : stopword", Res->WWList.Word[i].word);
-					} else {
-					    sprintf(UDM_STREND(wordinfo)," %s : %d", Res->WWList.Word[i].word, Res->WWList.Word[i].count);
-					    corder = Res->WWList.Word[i].order; 
-					}
-				    } else {
-					ccount += Res->WWList.Word[i].count;
+				for(i = 0; i < Res->WWList.nwords; i++) {
+				    corder = Res->WWList.Word[i].order;
+				    ccount = 0;
+				    for(j = 0; j < Res->WWList.nwords; j++) {
+					if (Res->WWList.Word[j].order == corder) {
+					    ccount += Res->WWList.Word[j].count;
+				        }
 				    }
-				}
-				if (Res->WWList.nwords) {
+				    if (Res->WWList.Word[i].origin == UDM_WORD_ORIGIN_STOP) {
+					sprintf(UDM_STREND(wordinfo),"%s%s : stopword", (*wordinfo) ? ", " : "",  Res->WWList.Word[i].word);
+				    } else if (Res->WWList.Word[i].origin == UDM_WORD_ORIGIN_QUERY) {
+					sprintf(UDM_STREND(wordinfo),"%s%s : %d", (*wordinfo) ? ", " : "", Res->WWList.Word[i].word, Res->WWList.Word[i].count);
+				    } else continue;
 				    sprintf(UDM_STREND(wordinfo)," / %d", ccount);
 				}
 				RETURN_STRING(wordinfo,1);
