@@ -145,19 +145,26 @@ static void _ps_files_open(ps_files *data, const char *key)
 		if (data->fd != -1)
 			flock(data->fd, LOCK_EX);
 #endif
+
+		if (data->fd == -1)
+			php_error(E_WARNING, "open(%s, O_RDWR) failed: %m (%d)", buf, errno);
 	}
 }
 
-static void _ps_files_cleanup_dir(const char *dirname, int maxlifetime)
+static int _ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 {
 	DIR *dir;
 	struct dirent *entry;
 	struct stat sbuf;
 	char buf[MAXPATHLEN];
 	time_t now;
+	int nrdels = 0;
 
 	dir = opendir(dirname);
-	if (!dir) return;
+	if (!dir) {
+		php_error(E_NOTICE, "_ps_files_cleanup_dir: opendir(%s) failed: %m (%d)\n", dirname, errno);
+		return (0);
+	}
 
 	time(&now);
 
@@ -172,10 +179,13 @@ static void _ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 				/* is it expired? */
 				(now - sbuf.st_atime) > maxlifetime) {
 			unlink(buf);
+			nrdels++;
 		}
 	}
 
 	closedir(dir);
+
+	return (nrdels);
 }
 
 #define PS_FILES_DATA ps_files *data = PS_GET_MOD_DATA()
@@ -277,7 +287,7 @@ PS_GC_FUNC(files)
 	   an external entity (i.e. find -ctime x | xargs rm) */
 	   
 	if (data->dirdepth == 0)
-		_ps_files_cleanup_dir(data->basedir, maxlifetime);
+		*nrdels = _ps_files_cleanup_dir(data->basedir, maxlifetime);
 	
 	return SUCCESS;
 }
