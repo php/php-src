@@ -55,6 +55,11 @@ typedef struct {
 	long id;
 } sysvmsg_queue_t;
 
+struct php_msgbuf {
+	long mtype;
+	char mtext[1];
+};
+
 #endif /* HAVE_SYSVMSG */
 
 #endif	/* PHP_SYSVMSG_H */
