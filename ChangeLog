@@ -1,3 +1,37 @@
+2001-11-15  Jan Lehnardt  <jan@lehnardt.de>
+
+    * pear/HTML/IT.php: whitespace fix.
+
+2001-11-15  Adam Daniel  <adaniel2@cinci.rr.com>
+
+    * pear/HTML/Common.php: fixed bug in getAttribute and added getAttributes
+
+2001-11-15  Jani Taskinen  <sniper@iki.fi>
+
+    * main/rfc1867.c:
+    In case of submitting form without any files selected don't set
+    the tmp_name.
+
+2001-11-15  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/Makefile.in
+      ext/standard/basic_functions.c
+      ext/standard/ftok.c
+      ext/standard/php_ftok.h
+      ext/standard/php_standard.h:
+    Check in ftok() function by Andrew Sitnikov <sitnikov@infonet.ee>
+
+2001-11-15  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h: - MFH name change
+
+2001-11-15  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php
+      pear/scripts/pear.in: implemented "uninstall" command
+
 2001-11-14  Stig Venaas  <venaas@uninett.no>
 
     * ext/ldap/ldap.c:
