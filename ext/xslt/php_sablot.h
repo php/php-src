@@ -21,7 +21,7 @@
 
 #include "php.h"
 
-#if HAVE_SABLOT
+#if HAVE_SABLOT_BACKEND
 
 #include "php_xslt.h"
 
