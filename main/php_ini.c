@@ -441,12 +441,14 @@ int php_init_config()
 			 * Don't need an extra byte for the \0 in this malloc as the last
 			 * element will not get a trailing , which gives us the byte for the \0
 			 */
-			php_ini_scanned_files = (char *) malloc(total_l);
-			*php_ini_scanned_files = '\0';
-			for (element = scanned_ini_list.head; element; element = element->next) {
-				strcat(php_ini_scanned_files, *(char **)element->data);		
-				strcat(php_ini_scanned_files, element->next ? ",\n" : "\n");
-			}	
+			if (total_l) {
+				php_ini_scanned_files = (char *) malloc(total_l);
+				*php_ini_scanned_files = '\0';
+				for (element = scanned_ini_list.head; element; element = element->next) {
+					strcat(php_ini_scanned_files, *(char **)element->data);		
+					strcat(php_ini_scanned_files, element->next ? ",\n" : "\n");
+				}	
+			}
 			zend_llist_destroy(&scanned_ini_list);
 		}
 	}
