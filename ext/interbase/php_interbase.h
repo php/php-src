@@ -45,6 +45,7 @@ PHP_FUNCTION(ibase_pconnect);
 PHP_FUNCTION(ibase_close);
 PHP_FUNCTION(ibase_query);
 PHP_FUNCTION(ibase_fetch_row);
+PHP_FUNCTION(ibase_fetch_assoc);
 PHP_FUNCTION(ibase_fetch_object);
 PHP_FUNCTION(ibase_free_result);
 PHP_FUNCTION(ibase_prepare);

@@ -79,6 +79,7 @@ function_entry ibase_functions[] = {
 	PHP_FE(ibase_close, NULL)
 	PHP_FE(ibase_query, NULL)
 	PHP_FE(ibase_fetch_row, NULL)
+	PHP_FE(ibase_fetch_assoc, NULL)
 	PHP_FE(ibase_fetch_object, NULL)
 	PHP_FE(ibase_free_result, NULL)
 	PHP_FE(ibase_prepare, NULL)
@@ -1919,8 +1920,8 @@ static int _php_ibase_arr_pval(pval *ar_pval, char **datap, ibase_array *ib_arra
 
 /* {{{ _php_ibase_fetch_hash() */
 
-#define FETCH_ARRAY 1
-#define FETCH_OBJECT 2
+#define FETCH_ROW 	2
+#define FETCH_ARRAY 4
 
 static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 {
@@ -1966,15 +1967,9 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 		RETURN_FALSE;
 	}
 	
-	if (fetch_type == FETCH_ARRAY) {
 		if (array_init(return_value)==FAILURE) {
 			RETURN_FALSE;
 		}
-	} else if (fetch_type == FETCH_OBJECT) {
-		if (object_init(return_value)==FAILURE) {
-			RETURN_FALSE;
-		}
-	}
 	
 	arr_cnt = 0;
 	var = ib_result->out_sqlda->sqlvar;
@@ -2101,7 +2096,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 				default:
 					break;
 			} /*switch*/
-			if (fetch_type & FETCH_ARRAY) {
+			if (fetch_type & FETCH_ROW) {
 				switch (Z_TYPE_P(tmp)) {
 				case IS_STRING:
 					add_index_stringl(return_value, i, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), 0);
@@ -2116,22 +2111,22 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 			} else {
 				switch (Z_TYPE_P(tmp)) {
 				case IS_STRING:
-					add_property_stringl(return_value, var->aliasname, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), 0);
+					add_assoc_stringl(return_value, var->aliasname, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), 0);
 					break;
 				case IS_LONG:
-					add_property_long(return_value, var->aliasname, Z_LVAL_P(tmp));
+					add_assoc_long(return_value, var->aliasname, Z_LVAL_P(tmp));
 					break;
 				case IS_DOUBLE:
-					add_property_double(return_value, var->aliasname, Z_DVAL_P(tmp));
+					add_assoc_double(return_value, var->aliasname, Z_DVAL_P(tmp));
 					break;
 				}
 			}
 			efree(tmp);
 		} else {
-			if (fetch_type & FETCH_ARRAY) {
+			if (fetch_type & FETCH_ROW) {
 				add_index_null(return_value, i);
 			} else {
-				add_property_null(return_value, var->aliasname);
+				add_assoc_null(return_value, var->aliasname);
 			}
 		}
 		if ((var->sqltype & ~1) == SQL_ARRAY) {
@@ -2145,6 +2140,14 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
    Fetch a row  from the results of a query */
 PHP_FUNCTION(ibase_fetch_row)
 {
+	_php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FETCH_ROW);
+}
+/* }}} */
+
+/* {{{ proto array ibase_fetch_assoc(int result [, int blob_flag])
+   Fetch a row  from the results of a query */
+PHP_FUNCTION(ibase_fetch_assoc)
+{
 	_php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FETCH_ARRAY);
 }
 /* }}} */
@@ -2153,7 +2156,10 @@ PHP_FUNCTION(ibase_fetch_row)
    Fetch a object from the results of a query */
 PHP_FUNCTION(ibase_fetch_object)
 {
-	_php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FETCH_OBJECT);
+	_php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FETCH_ARRAY);
+	if (Z_TYPE_P(return_value) == IS_ARRAY) {
+		object_and_properties_init(return_value, &zend_standard_class_def, Z_ARRVAL_P(return_value));
+	}
 }
 /* }}} */
 
