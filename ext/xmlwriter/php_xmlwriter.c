@@ -776,10 +776,10 @@ PHP_FUNCTION(xmlwriter_start_document)
 	zval *pind;
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
-	char *version, *enc, *alone;
+	char *version = NULL, *enc = NULL, *alone = NULL;
 	int version_len, enc_len, alone_len, retval;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pind, &version, &version_len, &enc, &enc_len, &alone, &alone_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|s!s!s!", &pind, &version, &version_len, &enc, &enc_len, &alone, &alone_len) == FAILURE) {
 		return;
 	}
 
@@ -830,10 +830,10 @@ PHP_FUNCTION(xmlwriter_start_dtd)
 	zval *pind;
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
-	char *name, *pubid, *sysid;
+	char *name, *pubid = NULL, *sysid = NULL;
 	int name_len, pubid_len, sysid_len, retval;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pind, &name, &name_len, &pubid, &pubid_len, &sysid, &sysid_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|s!s!", &pind, &name, &name_len, &pubid, &pubid_len, &sysid, &sysid_len) == FAILURE) {
 		return;
 	}
 
@@ -883,10 +883,10 @@ PHP_FUNCTION(xmlwriter_write_dtd)
 	zval *pind;
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
-	char *name, *pubid, *sysid, *subset;
+	char *name, *pubid = NULL, *sysid = NULL, *subset = NULL;
 	int name_len, pubid_len, sysid_len, subset_len, retval;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pind, &name, &name_len, &pubid, &pubid_len, &sysid, &sysid_len, &subset, &subset_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|s!s!s!", &pind, &name, &name_len, &pubid, &pubid_len, &sysid, &sysid_len, &subset, &subset_len) == FAILURE) {
 		return;
 	}
 
@@ -1099,7 +1099,7 @@ PHP_FUNCTION(xmlwriter_start_dtd_entity)
 	char *name;
 	int name_len, isparm, retval;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pind, &name, &name_len, &isparm) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsb", &pind, &name, &name_len, &isparm) == FAILURE) {
 		return;
 	}
 
