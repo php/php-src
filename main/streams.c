@@ -2434,7 +2434,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	}
 	
 	if (stream == NULL && (options & REPORT_ERRORS)) {
-		display_wrapper_errors(wrapper, path, "failed to create stream" TSRMLS_CC);
+		display_wrapper_errors(wrapper, path, "failed to open stream" TSRMLS_CC);
 	}
 	tidy_wrapper_error_log(wrapper TSRMLS_CC);
 #if ZEND_DEBUG
