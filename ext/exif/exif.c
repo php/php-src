@@ -86,6 +86,11 @@ typedef unsigned char uchar;
 	#define FALSE 0
 #endif
 
+#ifndef MB_CUR_MAX
+	#define MB_CUR_MAX 8
+	/* Should be a library constant */
+#endif
+
 #ifndef max
 	#define max(a,b) ((a)>(b) ? (a) : (b))
 #endif
