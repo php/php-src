@@ -251,7 +251,7 @@ alpha = [a-zA-Z];
   ">"		{ PASSTHRU(); HANDLE_FORM(); STATE = STATE_PLAIN; continue; }
   [ \n]		{ PASSTHRU(); continue; }
   alpha		{ YYCURSOR--; STATE = STATE_ARG; continue; }
-  any		{ PASSTHRU(); continue; }
+  any		{ PASSTHRU(); STATE = STATE_PLAIN; continue; }
 */
  	 		break;
 
