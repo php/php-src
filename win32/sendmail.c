@@ -198,7 +198,10 @@ int TSendMail(char *host, int *error, char **error_message,
 		if (NULL == (*error_message = ecalloc(1, HOST_NAME_LEN + 128))) {
 			return FAILURE;
 		}
-		snprintf(*error_message, HOST_NAME_LEN + 128, "Failed to connect to mailserver at \"%s\", verify your \"SMTP\" setting in php.ini", MailHost);
+		snprintf(*error_message, HOST_NAME_LEN + 128,
+			"Failed to connect to mailserver at \"%s\" port %d, verify your \"SMTP\""
+			"and \"smtp_port\" setting in php.ini or use ini_set()",
+			MailHost, !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
 	} else {
 		ret = SendText(RPath, Subject, mailTo, data, headers, headers_lc, error_message);
@@ -609,7 +612,7 @@ int MailConnect()
 	}
         */
 
-	portnum = (short) INI_INT("sendmail_port");
+	portnum = (short) INI_INT("smtp_port");
 	if (!portnum) {
 		portnum = 25;
 	}

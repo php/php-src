@@ -288,6 +288,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("error_prepend_string",	NULL,		PHP_INI_ALL,		OnUpdateStringUnempty,	error_prepend_string,	php_core_globals,	core_globals)
 
 	PHP_INI_ENTRY("SMTP",						"localhost",PHP_INI_ALL,		NULL)
+	PHP_INI_ENTRY("smtp_port",					"25",		PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("browscap",					NULL,		PHP_INI_SYSTEM,		NULL)
 	PHP_INI_ENTRY("error_reporting",			NULL,		PHP_INI_ALL,		OnUpdateErrorReporting)
 #if MEMORY_LIMIT
