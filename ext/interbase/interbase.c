@@ -799,7 +799,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		WRONG_PARAM_COUNT;
 	}
 	
-	args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS());
+	args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS(), 0);
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
 		efree(args);
 		RETURN_FALSE;
