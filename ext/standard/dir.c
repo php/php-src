@@ -217,7 +217,7 @@ PHP_FUNCTION(closedir)
 	zend_list_delete(dirp->id);
 
 	if (dirp->id == DIRG(default_dir)) {
-		php_set_default_dir(-1);
+		php_set_default_dir(-1 DIRLS_CC);
 	}
 }
 
