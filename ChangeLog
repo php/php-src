@@ -1,3 +1,181 @@
+2002-10-07  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/zlib/config0.m4:
+    Make zlib-dir actually mean something during the check
+
+2002-10-07  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/standard/quot_print.c:
+    Fix for bug #19798 (submitted by mclap@simpage.mv.ru)
+
+2002-10-07  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * NEWS: Add xslt milestones
+
+2002-10-07  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/zlib/config0.m4:
+    Argh!  Revert.  I'm on drugs.  Was linking in a newer libz when I checked
+    this.
+
+2002-10-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/strings/strpos.phpt
+      ext/standard/tests/strings/strstr.phpt
+      ext/standard/tests/strings/substr_count.phpt:
+    Added tests for strstr(), strpos() and substr_count() functions.
+
+2002-10-07  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/zlib/config0.m4:
+    Oops, should still define that.  Didn't think I needed it as nothing in
+    ext/zlib checks it, but it is checked elsewhere.
+
+    * ext/zlib/config0.m4:
+    This restriction is no longer true after the streams changes.
+
+2002-10-07  Moriyoshi Koizumi  <readjust@deneb.freemail.ne.jp>
+
+    * ext/mbstring/php_mbregex.c: Fixed typo.
+
+2002-10-07  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - Update
+
+2002-10-07  Tal Peer  <tal@twisthost.com>
+
+    * ext/fribidi/tests/001.phpt:
+    Initial commit of fribidi_log2vis test
+
+2002-10-07  Moriyoshi Koizumi  <readjust@deneb.freemail.ne.jp>
+
+    * ext/mbstring/tests/022.inc
+      ext/mbstring/tests/022.phpt
+      ext/mbstring/tests/023.inc
+      ext/mbstring/tests/023.phpt
+      ext/mbstring/tests/024.inc
+      ext/mbstring/tests/024.phpt
+      ext/mbstring/tests/021.inc
+      ext/mbstring/tests/021.phpt: Added test cases for mbregex
+
+    * ext/mbstring/php_mbregex.h
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/php_mbregex.c:
+    Lots of clean-up for upcoming mbstring merging event.
+    Added mb_regex_set_options().
+    The Options parameters of various mbregex functions are now deprecated.
+
+2002-10-07  Colin Viebrock  <colin@easydns.com>
+
+    * php.ini-dist: Document session.save_path option in php.ini
+
+2002-10-07  Andrei Zmievski  <andrei@php.net>
+
+    * ext/pcre/php_pcre.c:
+    Use a copy of locale instead of the original. Fixes bug #19482.
+
+2002-10-07  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: 2. :)
+
+2002-10-07  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * NEWS: .
+
+2002-10-07  David Viner  <dviner@yahoo-inc.com>
+
+    * ext/xslt/tests/008.phpt
+      ext/xslt/tests/xslt_set_object.xsl: adding test of xslt_set_object
+    --dviner
+
+2002-10-07  Moriyoshi Koizumi  <readjust@deneb.freemail.ne.jp>
+
+    * ext/mbstring/php_mbregex.c: fixed mb_split()
+
+    * ext/mbstring/php_mbregex.c:
+    fixed mb_split (the value of third parameter treated wrongly)
+
+2002-10-07  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/standard/dir.c:
+    readdir() was returning NULL instead of FALSE when used on an invalid
+    directory handle.  If someone forgot to check (as someone here did) that
+    the opendir() succeeded, and then followed the documented usage by checking
+    readdir()!==FALSE things would go awry.  The ZEND_FETCH_RESOURCE macro
+    explicitly does a RETURN_NULL on failure which is not what we want in this
+    case, so work around it.  No need to change it for the OO case since the
+    object is not created if the opendir fails.
+
+2002-10-07  Moriyoshi Koizumi  <readjust@deneb.freemail.ne.jp>
+
+    * ext/mbstring/php_mbregex.c: MFH
+
+2002-10-07  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/mbstring/mbfilter.c: never smash the stack...
+
+    * ext/mbstring/mbfilter.c: fixing possible off by one in error case
+
+2002-10-07  Sander Roobol  <phy@wanadoo.nl>
+
+    * run-tests.php:
+    Temporary (?) workaround (?) for is_executable() on Windows.
+
+2002-10-07  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c: MFH: closing protected variables hole
+
+    * main/rfc1867.c: Closing protected variables hole
+
+2002-10-07  Zeev Suraski  <zeev@zend.com>
+
+    * main/output.c: Whitespace
+
+2002-10-07  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/fbsql/config.m4: Fix obvious error..
+
+2002-10-07  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/fbsql/config.m4:  - fix typo and improve error message
+
+2002-10-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/tests/021.phpt:
+    Call ob_flush to force the buffer contents to go through the rewriter.
+
+2002-10-07  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/tests/003.phpt
+      ext/dbx/tests/004.phpt
+      ext/dbx/tests/005.phpt
+      ext/dbx/tests/006.phpt
+      ext/dbx/tests/007.phpt
+      ext/dbx/tests/008.phpt
+      ext/dbx/tests/dbx_test.p:
+    Tests will be skipped if a tester does not explicitly specify the
+    test-database setup in dbx_test.p.
+
+2002-10-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/streams.c:
+    stdio buffers data in user land. By calling fflush(3), this
+    data is sent to the kernel using write(2). fsync'ing a
+    file descriptor is not required -- writing to a fd has the same
+    affect as calling fflush after each fwrite.
+
+    * ext/session/session.c:
+    Print out warning only, if a variable was actually migrated
+
+2002-10-07  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/tests/009.phpt: MFH
+
+    * run-tests.php:
+    Add --EXPECTF-- section: 'sprintf' for EXPECT sections. See for usage
+    example ext/xslt/tests/009.phpt.
+
 2002-10-06  Melvyn Sopacua  <msopacua@idg.nl>
 
     * ext/xslt/tests/009.phpt:

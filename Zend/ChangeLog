@@ -1,3 +1,18 @@
+2002-10-07  Andi Gutmans  <andi@zend.com>
+
+    * tests/zend2.php: - Fix test
+
+    * zend_execute.c:
+    - Require $this-> when calling a methods. This whole automatic lookup
+    - first in the class and then in the global scope is confusing, slow and
+    - not quite BC compatible.
+
+    * zend.c
+      zend_compile.c
+      zend_globals.h:
+    - Allow access to private/protected variables of $clone inside the __clone()
+    - method
+
 2002-10-06  Andi Gutmans  <andi@zend.com>
 
     * zend_execute.c: - Fix problem with unsetting object members.
