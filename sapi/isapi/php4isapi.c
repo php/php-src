@@ -457,7 +457,7 @@ static void init_request_info(sapi_globals_struct *sapi_globals, LPEXTENSION_CON
 
 		if (path_end) {
 			*path_end = 0;
-			PHP_CHDIR(SG(request_info).path_translated);
+			V_CHDIR(SG(request_info).path_translated);
 			*path_end = SEPARATOR;
 		}
 	}

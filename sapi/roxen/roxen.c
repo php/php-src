@@ -601,7 +601,7 @@ static int php_roxen_module_main(SLS_D)
   /* VERY BAD, but should work */
   if(len > 0) {
     dir[len] = '\0';
-    PHP_CHDIR(dir);
+    V_CHDIR(dir);
   }
   free(dir);
 #endif

@@ -387,7 +387,7 @@ PHP_FUNCTION(touch)
 	/* create the file if it doesn't exist already */
 	ret = stat((*filename)->value.str.val, &sb);
 	if (ret == -1) {
-		file = PHP_FOPEN((*filename)->value.str.val, "w");
+		file = V_FOPEN((*filename)->value.str.val, "w");
 		if (file == NULL) {
 			php_error(E_WARNING, "unable to create file %s because %s", (*filename)->value.str.val, strerror(errno));
 			if (newtime) efree(newtime);
