@@ -1,5 +1,5 @@
 EXPORTS
-DllCanUnloadNow @1 PRIVATE
-DllGetClassObject @2 PRIVATE
-DllRegisterServer @3 PRIVATE
-DllUnregisterServer @4 PRIVATE
+DllCanUnloadNow PRIVATE
+DllGetClassObject PRIVATE
+DllRegisterServer PRIVATE
+DllUnregisterServer PRIVATE
