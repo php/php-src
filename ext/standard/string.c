@@ -1764,7 +1764,7 @@ PHP_FUNCTION(nl2br)
 }
 /* }}} */
 
-/* {{{ proto string strip_tags(string str [, allowable_tags])
+/* {{{ proto string strip_tags(string str [, string allowable_tags])
    Strips HTML and PHP tags from a string */
 PHP_FUNCTION(strip_tags)
 {
