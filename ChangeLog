@@ -1,3 +1,40 @@
+2000-10-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: Ignore trailing slashes
+
+2000-10-12  Andi Gutmans  <andi@zend.com>
+
+    * main/fopen-wrappers.c: - Fix memory leak.
+
+2000-10-12  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Makefile.in: fix make install for PEAR. (bug 7109)
+
+2000-10-12  Stanislav Malyshev  <stas@zend.com>
+
+    * TODO: I have a dream...
+
+2000-10-12  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * main/Makefile.in: forgot this one yesterday, fdfdata.[ch] is no more ...
+
+2000-10-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/string.c: Let strtr() use smart_str to reduce complexity
+
+    * ext/standard/string.c: Rewrite php_str_to_str using the smart_str API.
+
+    This removes much complexity from the function.
+
+    Speed is improved by pre-allocating memory instead of reallocating
+    the buffer each time the pattern is found.
+
+    * ext/standard/php_smart_str.h
+      ext/standard/php_smart_str_public.h
+      ext/standard/url_scanner_ex.h:
+    Move structure definition into its own file, so that public header
+    files don't need to include the complete source code.
+
 2000-10-11  Hartmut Holzgraefe  <hartmut@six.de>
 
     * TODO: added generalized SMTP code todo
