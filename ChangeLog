@@ -1,3 +1,123 @@
+2000-06-06  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c
+      TODO:
+
+    Added str_pad() for padding a string with an arbitrary string on left or right.
+
+
+2000-06-06  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/pdf.c
+      ext/pdf/php_pdf.h:
+    - add functions pdf_get_value(), pdf_set_value(), pdf_get_parameter(),
+      pdf_set_border_dash()
+    - some prototype fixes
+
+2000-06-06  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: I guess Zeev's done it already.
+
+2000-06-06  Zeev Suraski  <zeev@php.net>
+
+    * NEWS
+      main.c
+      php_globals.h:
+    - Made the short_tags, asp_tags and allow_call_time_pass_reference INI directives work
+      on a per-directory basis as well, e.g. from .htaccess files 
+
+2000-06-06  Clayton Collie  <clcollie@mindspring.com>
+
+    * tests/scan_cases
+      tests/testscanf.php: PHP code to test sscanf()
+
+    * ext/standard/Makefile.in: Modified Makefile.in so scanf.c compiles
+
+2000-06-06  Jouni Ahto  <jah@mork.net>
+
+    * ext/gd/config.m4:
+    - Preparing to add new image types to gd module.
+
+2000-06-06  Clayton Collie  <clcollie@mindspring.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/php_string.h
+      ext/standard/scanf.c
+      ext/standard/scanf.h
+      ext/standard/string.c: Added sscanf() function.
+
+2000-06-06  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/output.c:
+    - I didn't have anything to do with this buggy code. Just kidding :)
+
+2000-06-06  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/standard/flock_compat.h:
+     adding definition for EWOULDBLOCK for Win32 to compile
+
+2000-06-06  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/info.c:
+    added missing '/' to closing <center> tag (BUG ID #4416)
+
+    * ext/gd/gd.c: added T1LIB information to info function
+
+2000-06-06  David Hedbor  <david@hedbor.org>
+
+    * sapi/roxen/TODO: Added another bug to be fixed
+
+2000-06-06  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/recode/config.m4
+      ext/recode/php_recode.h
+      ext/recode/recode.c: add check for stdbool.h
+
+    * ext/recode/recode.c: bool -> int
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h: - added fflush() function. (Eric Huss)
+
+    * ext/xml/expat/xmlparse/xmlparse.c: hashtable.h -> expat_hashtable.h
+
+2000-06-06  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/pgsql/pgsql.dsp
+      ext/pgsql/php_pgsql.h:
+    Adding correct compiler directives for Win32 compilation
+
+2000-06-06  Joey Smith  <joey@samaritan.com>
+
+    * ext/domxml/Makefile.in
+      ext/domxml/domxml.c
+      ext/domxml/php_domxml.c: Use common naming convention.
+
+    * ext/domxml/config.m4: Get the version #'s right...
+
+2000-06-06  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/swf/swf.c: Move to the Z_*_PP macros.
+
+2000-06-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/xml/expat/xmlparse/expat_hashtable.h
+      ext/xml/expat/xmlparse/hashtable.c
+      ext/xml/expat/xmlparse/hashtable.h:
+    Move hashtable.h to expat_hashtable.h.
+
+2000-06-06  David Hedbor  <david@hedbor.org>
+
+    * sapi/roxen/Makefile.in
+      sapi/roxen/config.m4
+      sapi/roxen/roxen.c: PRE_INCLUDES hack reverted
+
+    * build/rules.mk: PRE_INCLUDE hack reverted
+
 2000-06-05  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/standard/global.h
