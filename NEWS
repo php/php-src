@@ -25,6 +25,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #22376 (wrong httpd.conf modified when using INSTALL_ROOT). (Jani)
 - Fixed bug #22363 (combinations of fwrite(), fread() and fseek() produce
   unexpected results). (Wez)
+- Fixed bug #22355 (PHP would remove folding from Subject & To fields). (Ilia)
 - Fixed bug #22330 (overloaded strrpos() gives wrong results).
   (david@santinoli.com, Moriyoshi)
 - Fixed bug #22308 (optimized passthru, code is now ~40 times faster). (Ilia)
