@@ -1317,7 +1317,7 @@ PHP_FUNCTION(mysql_affected_rows)
 /* }}} */
 
 
-/* {{{ proto char mysql_escape_string([char string])
+/* {{{ proto string mysql_escape_string(string to_be_escaped)
    Escape string for mysql query */
 PHP_FUNCTION(mysql_escape_string)
 {
