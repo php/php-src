@@ -520,6 +520,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 	switch (event_type) {
 		char *value;
 		unsigned long value_len;
+		int caller_frees;
 			
 		case PDO_PARAM_EVT_ALLOC:
 			if (param->is_param) {
@@ -601,8 +602,9 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 		case PDO_PARAM_EVT_FETCH_POST:
 			value = NULL;
 			value_len = 0;
+			caller_frees = 0;
 			
-			if (firebird_stmt_get_col(stmt, param->paramno, &value, &value_len TSRMLS_CC)) {
+			if (firebird_stmt_get_col(stmt, param->paramno, &value, &value_len, &caller_frees TSRMLS_CC)) {
 				switch (param->param_type) {
 					case PDO_PARAM_STR:
 						if (value) {
@@ -623,6 +625,9 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 #endif
 					default:
 						ZVAL_NULL(param->parameter);
+				}
+				if (value && caller_frees) {
+					efree(value);
 				}
 				return 1;
 			}
