@@ -113,6 +113,7 @@ typedef struct _sapi_post_content_type_reader {
 
 
 SAPI_API void sapi_startup(sapi_module_struct *sf);
+SAPI_API void sapi_shutdown(void);
 SAPI_API void sapi_activate(SLS_D);
 SAPI_API void sapi_deactivate(SLS_D);
 

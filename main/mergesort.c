@@ -58,6 +58,8 @@ static char sccsid[] = "@(#)merge.c	8.2 (Berkeley) 2/14/94";
 #include <stdlib.h>
 #include <string.h>
 
+#include "php.h"
+
 #if (WINNT|WIN32)
 #include <winsock.h> /* Includes definition for u_char */
 #endif
