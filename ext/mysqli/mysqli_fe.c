@@ -126,7 +126,7 @@ function_entry mysqli_functions[] = {
  */
 function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(affected_rows,mysqli_affected_rows,NULL)
-	PHP_FALIAS(auto_commit,mysqli_autocommit,NULL)
+	PHP_FALIAS(autocommit,mysqli_autocommit,NULL)
 	PHP_FALIAS(change_user,mysqli_change_user,NULL)
 	PHP_FALIAS(character_set_name,mysqli_character_set_name,NULL)
 	PHP_FALIAS(client_encoding, mysqli_character_set_name,NULL)
@@ -185,6 +185,7 @@ function_entry mysqli_link_methods[] = {
  */
 function_entry mysqli_result_methods[] = {
 	PHP_FALIAS(close,mysqli_free_result,NULL)
+	PHP_FALIAS(free,mysqli_free_result,NULL)
 	PHP_FALIAS(data_seek,mysqli_data_seek,NULL)
 	PHP_FALIAS(fetch_field,mysqli_fetch_field,NULL)
 	PHP_FALIAS(fetch_fields,mysqli_fetch_fields,NULL)
