@@ -100,6 +100,9 @@ class PEAR_Installer extends PEAR_Common
 
     function _deletePackageFiles($package)
     {
+        if (!strlen($package)) {
+            return $this->raiseError("No package to uninstall given");
+        }
         $filelist = $this->registry->packageInfo($package, 'filelist');
         if ($filelist == null) {
             return $this->raiseError("$package not installed");
