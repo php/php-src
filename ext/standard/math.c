@@ -980,57 +980,91 @@ PHP_FUNCTION(base_convert)
 
 PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char thousand_sep)
 {
-	char *tmpbuf, *resbuf;
+	char *tmpbuf = NULL, *resbuf;
 	char *s, *t;  /* source, target */
+	char *dp;
+	int integral;
 	int tmplen, reslen=0;
 	int count=0;
 	int is_negative=0;
 	
-	if (d<0) {
-		is_negative=1;
+	if (d < 0) {
+		is_negative = 1;
 		d = -d;
 	}
 	dec = MAX(0, dec);
-	tmpbuf = (char *) emalloc(1+DBL_MAX_10_EXP+1+dec+1);
-	
-	tmplen=sprintf(tmpbuf, "%.*f", dec, d);
 
-	if (!isdigit((int)tmpbuf[0])) {
+	tmplen = spprintf(&tmpbuf, 0, "%.*f", dec, d);
+
+	if (tmpbuf == NULL || !isdigit((int)tmpbuf[0])) {
 		return tmpbuf;
 	}
 
-	if (dec) {
-		reslen = dec+1 + (tmplen-dec-1) + ((thousand_sep) ? (tmplen-1-dec-1)/3 : 0);
+	/* calculate the length of the return buffer */
+	dp = strchr(tmpbuf, '.');
+	if (dp) {
+		integral = dp - tmpbuf;
 	} else {
-		reslen = tmplen+((thousand_sep) ? (tmplen-1)/3 : 0);
+		/* no decimal point was found */
+		integral = tmplen;
 	}
+
+	/* allow for thousand separators */
+	if (thousand_sep) {
+		integral += integral / 3;
+	}
+	
+	reslen = integral + 1 + dec;
+
+	/* add a byte for minus sign */
 	if (is_negative) {
 		reslen++;
 	}
-	resbuf = (char *) emalloc(reslen+1);
-	
+	resbuf = (char *) emalloc(reslen+1); /* +1 for NUL terminator */
+
 	s = tmpbuf+tmplen-1;
 	t = resbuf+reslen;
-	*t-- = 0;
-	
+	*t-- = '\0';
+
+	/* copy the decimal places.
+	 * Take care, as the sprintf implementation may return less places than
+	 * we requested due to internal buffer limitations */
 	if (dec) {
-		while (isdigit((int)*s)) {
-			*t-- = *s--;
+		int declen = dp ? strlen(dp+1) : 0;
+		int topad = declen > 0 ? dec - declen : 0;
+
+		/* pad with '0's */
+		while (topad--) {
+			*t-- = '0';
 		}
-		*t-- = dec_point;  /* copy that dot */
+			
+		/* now copy the chars after the point */
+		memcpy(t - declen + 1, dp + 1, declen);
+		
+		t -= declen;
+		s -= declen;
+
+		/* add decimal point */
+		*t-- = dec_point;
 		s--;
 	}
 	
-	while(s>=tmpbuf) {
+	/* copy the numbers before the decimal place, adding thousand
+	 * separator every three digits */
+	while(s >= tmpbuf) {
 		*t-- = *s--;
 		if (thousand_sep && (++count%3)==0 && s>=tmpbuf) {
 			*t-- = thousand_sep;
 		}
 	}
+
+	/* and a minus sign, if needed */
 	if (is_negative) {
 		*t-- = '-';
 	}
+
 	efree(tmpbuf);
+
 	return resbuf;
 }
 
