@@ -1,3 +1,41 @@
+2004-04-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_extension.c:
+      Should have tested this change before committing.
+
+2004-04-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_exceptions.h:
+      Fix c++ builds
+
+2004-04-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_saproxy.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      Fix for Bug #28161 (and probably others that I can't find in the bug db;
+      the search interface sucks).
+      
+      Expand the proxy object so it can handle psuedo array style properties.
+      
+      ASP/VB code like this:
+      
+      	headObj.Attribute("RID") = rid
+      
+      can be expressed like this in PHP:
+      
+      	$headObj->Attribute['RID'] = $rid;
+      
+      In theory, this feature can be used for "multi dimensional" properties:
+      
+      	headObj.Attribute("RID", "Foo") = rid;
+      
+      like this:
+      
+      	$headObj->Attribute['RID']['Foo'] = $rid;
+
 2004-04-27  Sara Golemon  <php@alphaweb.net>
 
     * (PHP_4_3)
