@@ -21,6 +21,7 @@ gdImageCreateFromXpm (char *filename)
 #else
 
 #include "xpm.h"
+#include <string.h>
 
 gdImagePtr
 gdImageCreateFromXpm (char *filename)
@@ -32,7 +33,7 @@ gdImageCreateFromXpm (char *filename)
   gdImagePtr im = 0;
   char *apixel;
   int *pointer;
-  int red = 0, green = 0, blue = 0, color = 0;
+  int red = 0, green = 0, blue = 0;
   int *colors;
   int ret;
 
