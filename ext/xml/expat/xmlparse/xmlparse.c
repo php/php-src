@@ -190,7 +190,9 @@ static Processor prologInitProcessor;
 static Processor contentProcessor;
 static Processor cdataSectionProcessor;
 static Processor epilogProcessor;
+#if 0
 static Processor errorProcessor;
+#endif
 static Processor externalEntityInitProcessor;
 static Processor externalEntityInitProcessor2;
 static Processor externalEntityInitProcessor3;
@@ -2333,6 +2335,7 @@ enum XML_Error epilogProcessor(XML_Parser parser,
   }
 }
 
+#if 0
 static
 enum XML_Error errorProcessor(XML_Parser parser,
 			      const char *s,
@@ -2341,6 +2344,7 @@ enum XML_Error errorProcessor(XML_Parser parser,
 {
   return errorCode;
 }
+#endif
 
 static enum XML_Error
 storeAttributeValue(XML_Parser parser, const ENCODING *enc, int isCdata,
@@ -2483,7 +2487,9 @@ enum XML_Error storeEntityValue(XML_Parser parser,
 				const char *entityTextPtr,
 				const char *entityTextEnd)
 {
+#if 0
   const ENCODING *internalEnc = ns ? XmlGetInternalEncodingNS() : XmlGetInternalEncoding();
+#endif
   STRING_POOL *pool = &(dtd.pool);
   entityTextPtr += encoding->minBytesPerChar;
   entityTextEnd -= encoding->minBytesPerChar;
