@@ -122,6 +122,9 @@ static int optind = 1;
 
 static const opt_struct OPTIONS[] = {
 	{'a', 0, "interactive"},
+#ifndef PHP_WIN32
+	{'b', 1, "bindpath"},
+#endif
 	{'C', 0, "no-chdir"},
 	{'c', 1, "php-ini"},
 	{'d', 1, "define"},
@@ -937,7 +940,9 @@ int main(int argc, char *argv[])
 	int max_requests = 500;
 	int requests = 0;
 	int fastcgi = !FCGX_IsCGI();
+#ifndef PHP_WIN32
 	char *bindpath = NULL;
+#endif
 	int fcgi_fd = 0;
 	FCGX_Request request;
 #ifdef PHP_WIN32
@@ -1000,6 +1005,7 @@ int main(int argc, char *argv[])
 					cgi_sapi_module.php_ini_ignore = 1;
 					break;
 #if PHP_FASTCGI
+#ifndef PHP_WIN32
 				/* if we're started on command line, check to see if
 				   we are being started as an 'external' fastcgi
 				   server by accepting a bindpath parameter. */
@@ -1008,6 +1014,7 @@ int main(int argc, char *argv[])
 						bindpath = strdup(optarg);
 					}
 					break;
+#endif
 #endif
 			}
 
@@ -1082,12 +1089,19 @@ consult the installation file that came with this distribution, or visit \n\
 #endif
 
 #if PHP_FASTCGI
+#ifndef PHP_WIN32
+	/* for windows, socket listening is broken in the fastcgi library itself
+	   so dissabling this feature on windows till time is available to fix it */
 	if (bindpath) {
+		int port = 0;
+		/* this must be done to make FCGX_OpenSocket work correctly 
+		   bug 23664 */
+		close(0);
 		/* Pass on the arg to the FastCGI library, with one exception.
 		 * If just a port is specified, then we prepend a ':' onto the
 		 * path (it's what the fastcgi library expects)
 		 */
-		int port = atoi(bindpath);
+		port = atoi(bindpath);
 		if (port) {
 			char bindport[32];
 			snprintf(bindport, 32, ":%s", bindpath);
@@ -1104,6 +1118,7 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 		fastcgi = !FCGX_IsCGI();
 	}
+#endif
 	if (fastcgi) {
 		/* How many times to run PHP scripts before dying */
 		if( getenv( "PHP_FCGI_MAX_REQUESTS" )) {
@@ -1595,9 +1610,11 @@ fastcgi_request_done:
 			requests++;
 			if(max_requests && (requests == max_requests)) {
 				FCGX_Finish_r(&request);
+#ifndef PHP_WIN32
 				if (bindpath) {
 					free(bindpath);
 				}
+#endif
 				break;
 			}
 			/* end of fastcgi loop */
