@@ -282,7 +282,8 @@ static PHP_METHOD(PDOStatement, execute)
 
 			if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(Z_ARRVAL_P(input_params),
 						&param.name, &str_length, &num_index, 0, NULL)) {
-				param.namelen = str_length;
+				/* yes this is correct.  we don't want to count the null byte.  ask wez */
+				param.namelen = str_length - 1;
 				param.paramno = -1;
 			} else {
 				/* we're okay to be zero based here */
@@ -540,14 +541,13 @@ static PHP_METHOD(PDOStatement, fetchAll)
 static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int is_param)
 {
 	struct pdo_bound_param_data param = {0};
-	int param_namelen;
 
 	param.paramno = -1;
 	param.param_type = PDO_PARAM_STR;
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
 				ZEND_NUM_ARGS() TSRMLS_CC, "sz|llz!",
-				&param.name, &param_namelen, &param.parameter, &param.param_type,
+				&param.name, &param.namelen, &param.parameter, &param.param_type,
 				&param.max_value_len,
 				&param.driver_params)) {
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz|llz!", &param.paramno,
@@ -555,12 +555,6 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 			return 0;
 		}	
 	}
-	/* 
-       yes, this is correct.  really.  truly.
-       We need to count the null terminating byte as well, 
-       which parse_parameters does not do. 
-    */
-    param.namelen = param_namelen + 1;
 
 	if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
