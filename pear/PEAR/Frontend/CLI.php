@@ -187,7 +187,7 @@ class PEAR_Frontend_CLI extends PEAR
             }
         }
         if (empty($border)) {
-            $cellstart = ' ';
+            $cellstart = '';
             $cellend = ' ';
             $rowend = '';
             $padrowend = false;
