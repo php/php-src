@@ -1006,7 +1006,7 @@ PHP_FUNCTION(ldap_get_values_len)
 	}
 	
 	for (i=0; i<num_values; i++) {
-		add_next_index_stringl(return_value, ldap_value_len[i]->bv_val, ldap_value_len[i]->bv_len, 1);
+//		add_next_index_stringl(return_value, ldap_value_len[i]->bv_val, ldap_value_len[i]->bv_len, 1);
 	}
 	
 	add_assoc_long(return_value, "count", num_values);
@@ -1119,6 +1119,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	char *ldap_dn;
 	LDAPMod **ldap_mods;
 	int i, j, num_attribs, num_values;
+	int *num_berval;
 	char *attribute;
 	ulong index;
 	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
@@ -1139,22 +1140,20 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	ldap_dn = (*dn)->value.str.val;
 
 	num_attribs = zend_hash_num_elements((*entry)->value.ht);
-
 	ldap_mods = emalloc((num_attribs+1) * sizeof(LDAPMod *));
-
+	num_berval = emalloc(num_attribs * sizeof(int));
 	zend_hash_internal_pointer_reset((*entry)->value.ht);
-        /* added by gerrit thomson to fix ldap_add using ldap_mod_add */
-        if ( oper == PHP_LD_FULL_ADD )
-        {
-                oper = LDAP_MOD_ADD;
-                is_full_add = 1;
-        }
+
+	/* added by gerrit thomson to fix ldap_add using ldap_mod_add */
+	if ( oper == PHP_LD_FULL_ADD ) {
+		oper = LDAP_MOD_ADD;
+		is_full_add = 1;
+	}
 	/* end additional , gerrit thomson */
 
 	for(i=0; i<num_attribs; i++) {
 		ldap_mods[i] = emalloc(sizeof(LDAPMod));
-
-		ldap_mods[i]->mod_op = oper;
+		ldap_mods[i]->mod_op = oper | LDAP_MOD_BVALUES;
 
 		if (zend_hash_get_current_key((*entry)->value.ht,&attribute, &index) == HASH_KEY_IS_STRING) {
 			ldap_mods[i]->mod_type = estrdup(attribute);
@@ -1170,25 +1169,27 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 		} else {
 			num_values = zend_hash_num_elements((*value)->value.ht);
 		}
-
-		ldap_mods[i]->mod_values = emalloc((num_values+1) * sizeof(char *));
+		
+		num_berval[i] = num_values;
+		ldap_mods[i]->mod_bvalues = emalloc((num_values + 1) * sizeof(struct berval *));
 
 /* allow for arrays with one element, no allowance for arrays with none but probably not required, gerrit thomson. */
 /*              if (num_values == 1) {*/
-                if ((num_values == 1) && ((*value)->type != IS_ARRAY)) {
+		if ((num_values == 1) && ((*value)->type != IS_ARRAY)) {
 			convert_to_string_ex(value);
-			ldap_mods[i]->mod_values[0] = (*value)->value.str.val;
-			ldap_mods[i]->mod_values[0][(*value)->value.str.len] = '\0';
+			ldap_mods[i]->mod_bvalues[0] = (struct berval *) emalloc (sizeof(struct berval));
+			ldap_mods[i]->mod_bvalues[0]->bv_len = (*value)->value.str.len;
+			ldap_mods[i]->mod_bvalues[0]->bv_val = (*value)->value.str.val;
 		} else {	
-			for(j=0; j<num_values; j++) {
+			for(j=0; j < num_values; j++) {
 				zend_hash_index_find((*value)->value.ht,j, (void **) &ivalue);
 				convert_to_string_ex(ivalue);
-				ldap_mods[i]->mod_values[j] = (*ivalue)->value.str.val;
-				ldap_mods[i]->mod_values[j][(*ivalue)->value.str.len] = '\0';
+				ldap_mods[i]->mod_bvalues[j] = (struct berval *) emalloc (sizeof(struct berval));
+				ldap_mods[i]->mod_bvalues[j]->bv_len = (*ivalue)->value.str.len;
+				ldap_mods[i]->mod_bvalues[j]->bv_val = (*ivalue)->value.str.val;
 			}
 		}
-		ldap_mods[i]->mod_values[num_values] = NULL;
-
+		ldap_mods[i]->mod_bvalues[num_values] = NULL;
 		zend_hash_move_forward((*entry)->value.ht);
 	}
 	ldap_mods[num_attribs] = NULL;
@@ -1208,11 +1209,15 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 		} else RETVAL_TRUE;	
 	}
 
-	for(i=0; i<num_attribs; i++) {
+	for(i=0; i < num_attribs; i++) {
 		efree(ldap_mods[i]->mod_type);
-		efree(ldap_mods[i]->mod_values);
+		for(j=0; j<num_berval[i]; j++) {
+			efree(ldap_mods[i]->mod_bvalues[j]);
+		}
+		efree(ldap_mods[i]->mod_bvalues);
 		efree(ldap_mods[i]);
 	}
+	efree(num_berval);
 	efree(ldap_mods);	
 
 	return;
