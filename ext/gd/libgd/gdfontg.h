@@ -20,6 +20,7 @@ extern "C" {
 #include "gd.h"
 
 extern gdFontPtr gdFontGiant;
+extern gdFontPtr gdFontGetGiant(void);
 
 #ifdef __cplusplus
 }
