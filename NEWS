@@ -87,6 +87,7 @@ PHP                                                                        NEWS
   non-existent object ref). (Tony)
 - Fixed bug #31444 (Memory leak in zend_language_scanner.c).
   (hexer at studentcenter dot org)
+- Fixed bug #31442 (unserialize broken on 64-bit systems). (Marcus)
 - Fixed bug #31440 ($GLOBALS can be overwritten via GPC when register_globals
   is enabled). (Ilia)
 - Fixed bug #31422 (No Error-Logging on SoapServer-Side). (Dmitry)
