@@ -360,10 +360,11 @@ static void handle_records (Yaz_Association t, Z_Records *sr,
 				t->resultSets->recordList->records[i] = 0;
 			if (t->numberOfRecordsRequested + t->resultSetStartPoint-1 > 
 				t->resultSets->resultCount)
-				t->numberOfRecordsRequested = t->resultSets->resultCount -
-					t->resultSetStartPoint + 1;
-			t->resultSets->recordList->num_records =
-				t->numberOfRecordsRequested;
+				t->resultSets->recordList->num_records =
+					t->resultSets->resultCount - t->resultSetStartPoint + 1;
+			else
+				t->resultSets->recordList->num_records =
+					t->numberOfRecordsRequested;
 		}
 		if (sr && sr->which == Z_Records_DBOSD)
 		{
