@@ -689,6 +689,16 @@ class DB_result
     }
 
     /**
+     * Get the next result if a batch of queries was executed.
+     *
+     * @return bool true if a new result is available or false if not.
+     */
+    function nextResult()
+    {
+        return $this->dbh->nextResult($this->result);
+    }
+
+    /**
      * Frees the resources allocated for this result set.
      * @return  int     error code
      */
