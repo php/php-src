@@ -50,6 +50,8 @@ PHP_FUNCTION(pcntl_wtermsig);
 PHP_FUNCTION(pcntl_wstopsig);
 PHP_FUNCTION(pcntl_signal);
 PHP_FUNCTION(pcntl_exec);
+PHP_FUNCTION(pcntl_getpriority);
+PHP_FUNCTION(pcntl_setpriority);
 
 static void pcntl_signal_handler(int);
 static void pcntl_tick_handler();

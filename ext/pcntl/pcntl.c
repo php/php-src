@@ -36,6 +36,11 @@
 #include "ext/standard/info.h"
 #include "php_pcntl.h"
 
+#if HAVE_GETPRIORITY || HAVE_SETPRIORITY
+#include <sys/time.h>
+#include <sys/resource.h>
+#endif
+
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 
 function_entry pcntl_functions[] = {
@@ -50,6 +55,8 @@ function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_wstopsig,		NULL)
 	PHP_FE(pcntl_exec,			NULL)
 	PHP_FE(pcntl_alarm,			NULL)
+	PHP_FE(pcntl_getpriority,	NULL)
+	PHP_FE(pcntl_setpriority,	NULL)
 	{NULL, NULL, NULL}	
 };
 
@@ -132,6 +139,12 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 #endif
 	REGISTER_LONG_CONSTANT("SIGSYS",   (long) SIGSYS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SIGBABY",  (long) SIGSYS, CONST_CS | CONST_PERSISTENT);
+
+#if HAVE_GETPRIORITY || HAVE_SETPRIORITY
+	REGISTER_LONG_CONSTANT("PRIO_PGRP", PRIO_PGRP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PRIO_USER", PRIO_USER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PRIO_PROCESS", PRIO_PROCESS, CONST_CS | CONST_PERSISTENT);
+#endif
 }
 
 static void php_pcntl_init_globals(zend_pcntl_globals *pcntl_globals)
@@ -493,6 +506,83 @@ PHP_FUNCTION(pcntl_signal)
 	RETURN_TRUE;
 }
 /* }}} */
+
+#ifdef HAVE_GETPRIORITY
+/* {{{ proto int pcntl_getpriority(int pid, [int process_identifier]])
+   Get the priority of any process */
+PHP_FUNCTION(pcntl_getpriority)
+{
+	long who = PRIO_PROCESS;
+	long pid = getpid();
+	int pri;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &pid, &who) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	/* needs to be cleared, since any returned value is valid */ 
+	errno = 0;
+
+	pri = getpriority(who, pid);
+
+	if (errno) {
+		switch (errno) {
+			case ESRCH:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%l: No process was located using the given parameters.", errno);
+				break;
+			case EINVAL:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%l: Invalid identifier flag.", errno);
+				break;
+			default:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error %l has occured.", errno);
+				break;
+		}
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(pri);
+}
+/* }}} */
+#endif
+
+#ifdef HAVE_SETPRIORITY
+/* {{{ proto bool pcntl_setpriority(int priority, [int pid, [int process_identifier]])
+   Change the priority of any process */
+PHP_FUNCTION(pcntl_setpriority)
+{
+	long who = PRIO_PROCESS;
+	long pid = getpid();
+	long pri;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|ll", &pri, &pid, &who) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (setpriority(who, pid, pri)) {
+		switch (errno) {
+			case ESRCH:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%l: No process was located using the given parameters.", errno);
+				break;
+			case EINVAL:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%l: Invalid identifier flag.", errno);
+				break;
+			case EPERM:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%l: A process was located, but neither its effective nor real user ID matched the effective user ID of the caller.", errno);
+				break;
+			case EACCES:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%l: Only a super user may attempt to increase the process priority.", errno);
+				break;
+			default:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error %l has occured.", errno);
+				break;
+		}
+		RETURN_FALSE;
+	}
+	
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
 
 /* Our custom signal handler that calls the appropriate php_function */
 static void pcntl_signal_handler(int signo)
