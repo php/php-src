@@ -46,6 +46,8 @@ if ($test == "003333.33") {
 	echo("failed!\n");
 }
 
+echo sprintf("%.2f\n", "99.00");
+echo sprintf("%.2f\n", 99.00);
 ?>
 --EXPECT--
 sprintf string truncate test:   passed
@@ -53,3 +55,5 @@ sprintf padding and align test: passed
 sprintf octal and hex test:     passed
 sprintf octal binary test:      passed
 sprintf float test:             passed
+99.00
+99.00
