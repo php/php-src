@@ -265,6 +265,9 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	zend_llist_position pos;
 	long rfc2616_headers = 0;
 
+	if(SG(request_info).no_headers == 1) {
+		return  SAPI_HEADER_SENT_SUCCESSFULLY;
+	}
 	/* Check wheater to send RFC2616 style headers compatible with
 	 * PHP versions 4.2.3 and earlier compatible with web servers
 	 * such as IIS. Default is informal CGI RFC header compatible 
@@ -1379,6 +1382,10 @@ consult the installation file that came with this distribution, or visit \n\
             php_module_shutdown(TSRMLS_C);
             return FAILURE;
         }
+		if (no_headers) {
+			SG(headers_sent) = 1;
+			SG(request_info).no_headers = 1;
+		}
 
         /* This actually destructs the elements of the list - ugly hack */
         zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars TSRMLS_CC);
