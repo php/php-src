@@ -56,7 +56,7 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
    <file role="test" name="tests/007.phpt"/>
   </filelist>
   <deps>
-   <dep type="php" rel="ge">5.0.0</dep>
+   <dep type="php" rel="ge" version="5" />
   </deps>
  </release>
 </package>

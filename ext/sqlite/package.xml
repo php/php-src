@@ -127,7 +127,7 @@ http://snaps.php.net/win32/PECL_STABLE/php_sqlite.dll
    </dir>
   </filelist>
   <deps>
-   <dep type="php" rel="ge">5.0.0</dep>
+   <dep type="php" rel="ge" version="5" />
   </deps>
  </release>
 </package>
