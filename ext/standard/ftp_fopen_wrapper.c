@@ -408,7 +408,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 
 	stream = php_ftp_fopen_connect(wrapper, path, mode, options, opened_path, context, &reuseid, &resource, &use_ssl, &use_ssl_on_data STREAMS_CC TSRMLS_CC);
 	if (!stream) {
-		goto errext;
+		goto errexit;
 	}
 
 	/* set the connection to be binary */
