@@ -94,7 +94,7 @@ void init_compiler(CLS_D ELS_DC)
 	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_request_startup);
 	init_resource_list(ELS_C);
 	CG(unclean_shutdown) = 0;
-	zend_llist_init(&CG(open_files), sizeof(void *), zend_open_file_dtor, 0);
+	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), zend_open_file_dtor, 0);
 }
 
 
