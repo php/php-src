@@ -1,3 +1,35 @@
+2003-08-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_ini.h:
+      linkage for C++
+
+2003-08-18  Zeev Suraski  <zeev@zend.com>
+
+    * ZendTS.dsp
+      zend_execute.c
+      zend_execute_locks.h:
+      Prevent access to internal engine functionality
+
+    * zend.h
+      zend_alloc.c
+      zend_compile.h
+      zend_execute.c:
+      - Improve tracking
+      - Fix several overloading issues
+
+    * zend_API.c
+      zend_alloc.h
+      zend_hash.c
+      zend_hash.h
+      zend_ts_hash.c
+      zend_ts_hash.c
+      zend_ts_hash.h
+      zend_ts_hash.h:
+      Improve tracking
+
+    * zend_compile.c:
+      ws
+
 2003-08-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.h

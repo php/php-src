@@ -1,3 +1,123 @@
+2003-08-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/credits_ext.h:
+      Update credits
+
+    * ext/standard/credits.c:
+      5 sir
+
+    * ZendEngine2/zend_ini.h
+      main/SAPI.h
+      main/php.h
+      main/php_ini.h
+      main/php_main.h
+      main/php_variables.h:
+      linkage for C++
+
+2003-08-18  Zeev Suraski  <zeev@zend.com>
+
+    * ext/dom/php_dom.c:
+      Get rid of PZVAL_UNLOCK() - fix untested
+
+    * ZendEngine2/ZendTS.dsp
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_locks.h:
+      Prevent access to internal engine functionality
+
+2003-08-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/bz2/tests/with_strings.phpt
+      ext/mcrypt/tests/blowfish.phpt
+      ext/posix/posix.c
+      ext/standard/parsedate.y
+      ext/standard/tests/array/001.phpt
+      ext/standard/tests/array/002.phpt
+      ext/standard/tests/array/003.phpt
+      ext/standard/tests/array/array_search.phpt
+      ext/standard/tests/file/bug20424.phpt
+      ext/standard/tests/math/abs.phpt
+      ext/standard/tests/math/pow.phpt
+      ext/standard/tests/math/round.phpt
+      ext/standard/tests/strings/trim.phpt
+      ext/standard/tests/strings/wordwrap.phpt:
+      Fixed paths in various tests. In certain conditions usage of partial file
+      paths results in test failures.
+
+2003-08-18  Zeev Suraski  <zeev@zend.com>
+
+    * ext/simplexml/simplexml.c:
+      Fix a gazillion leaks in SimpleXML.  One gazillion to go ;)
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c:
+      - Improve tracking
+      - Fix several overloading issues
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_ts_hash.c
+      ZendEngine2/zend_ts_hash.c
+      ZendEngine2/zend_ts_hash.h
+      ZendEngine2/zend_ts_hash.h
+      main/main.c:
+      Improve tracking
+
+    * ext/com_dotnet/com_extension.c:
+      Fix leak - non persistent hashes cannot be used in MINIT!
+
+    * ZendEngine2/zend_compile.c:
+      ws
+
+2003-08-18  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml
+      pear/OS/Guess.php:
+      fix #25131, OS_Guess warnings
+
+2003-08-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in:
+      RC5 not RC4
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      RC4 is a go
+
+2003-08-18  Zeev Suraski  <zeev@zend.com>
+
+    * ext/simplexml/simplexml.c:
+      WTF was that doing here? :)
+      Fix crash
+
+2003-08-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mssql/php_mssql.c:
+      Fixed typo.
+
+    * ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_olechar.c
+      ext/odbc/birdstep.c:
+      emalloc -> safe_emalloc
+
+2003-08-18  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Nuke bogus BLOB ids
+
 2003-08-17  Jani Taskinen  <sniper@iki.fi>
 
     * (PHP_4_3)
