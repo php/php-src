@@ -20,6 +20,10 @@
 
 /* $Id$ */
 
+#if HAVE_STRPTIME
+#define _XOPEN_SOURCE
+#endif
+
 #include "php.h"
 #include "zend_operators.h"
 #include "datetime.h"
@@ -1094,6 +1098,41 @@ PHP_FUNCTION(strtotime)
 }
 /* }}} */
 
+#if HAVE_STRPTIME
+/* {{{ proto string strptime(string timestamp, string format)
+   Parse a time/date generated with strftime() */
+PHP_FUNCTION(strptime)
+{
+	char      *ts;
+	int        ts_length;
+	char      *format;
+	int        format_length;
+	struct tm  parsed_time;
+	char      *unparsed_part;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", 
+		&ts, &ts_length, &format, &format_length) == FAILURE) {
+		return;
+	}
+
+	unparsed_part = strptime(ts, format, &parsed_time);
+	if (unparsed_part == NULL) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+	add_assoc_long(return_value, "tm_sec",   parsed_time.tm_sec);
+	add_assoc_long(return_value, "tm_min",   parsed_time.tm_min);
+	add_assoc_long(return_value, "tm_hour",  parsed_time.tm_hour);
+	add_assoc_long(return_value, "tm_mday",  parsed_time.tm_mday);
+	add_assoc_long(return_value, "tm_mon",   parsed_time.tm_mon);
+	add_assoc_long(return_value, "tm_year",  parsed_time.tm_year);
+	add_assoc_long(return_value, "tm_wday",  parsed_time.tm_wday);
+	add_assoc_long(return_value, "tm_yday",  parsed_time.tm_yday);
+	add_assoc_string(return_value, "unparsed", unparsed_part, 1);
+}
+/* }}} */
+#endif
 
 /*
  * Local variables:

@@ -170,7 +170,9 @@ function_entry basic_functions[] = {
 	PHP_FE(time,															NULL)
 	PHP_FE(mktime,															NULL)
 	PHP_FE(gmmktime,														NULL)
-
+#if HAVE_STRPTIME
+	PHP_FE(strptime,														NULL)
+#endif
 #if HAVE_STRFTIME
 	PHP_FE(strftime,														NULL)
 	PHP_FE(gmstrftime,														NULL)

@@ -31,6 +31,9 @@ PHP_FUNCTION(gmdate);
 PHP_FUNCTION(localtime);
 PHP_FUNCTION(getdate);
 PHP_FUNCTION(checkdate);
+#if HAVE_STRPTIME
+PHP_FUNCTION(strptime);
+#endif 
 #if HAVE_STRFTIME
 PHP_FUNCTION(strftime);
 PHP_FUNCTION(gmstrftime);
