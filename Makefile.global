@@ -50,11 +50,15 @@ install-tester:
 
 install-su: install-pear install-tester
 
-test: $(SAPI_CLI_PATH)
-	@TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
-	 TEST_PHP_SRCDIR=$(top_srcdir) \
-	 CC="$(CC)" \
-			$(top_builddir)/$(SAPI_CLI_PATH) -d 'open_basedir=' -d 'safe_mode=0' -d 'output_buffering=0' $(top_srcdir)/run-tests.php $(TESTS)
+test: 
+	-@if test -x $(SAPI_CLI_PATH) && test ! -z $(SAPI_CLI_PATH); then \
+		TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
+		TEST_PHP_SRCDIR=$(top_srcdir) \
+		CC="$(CC)" \
+			$(top_builddir)/$(SAPI_CLI_PATH) -d 'open_basedir=' -d 'safe_mode=0' -d 'output_buffering=0' $(top_srcdir)/run-tests.php $(TESTS); \
+	else \
+		echo "ERROR: Cannot run tests without CLI sapi."; \
+	fi
 
 clean:
 	find . -name \*.lo -o -name \*.o | xargs rm -f
