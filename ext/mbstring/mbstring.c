@@ -82,8 +82,9 @@ static int php_mbstr_default_identify_list_size = sizeof(php_mbstr_default_ident
 
 static unsigned char third_and_rest_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST };
 static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
+#if HAVE_MBREGEX
 static unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
-
+#endif
 #if defined(MBSTR_ENC_TRANS)
 SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler);
 
@@ -284,8 +285,13 @@ php_mbstring_parse_encoding_list(const char *value, int value_length, int **retu
 				}
 				p1 = p2 + 1;
 			} while (n < size && p2 != NULL);
-			*return_list = list;
-			*return_size = n;
+			if (n > 0){
+				*return_list = list;
+				*return_size = n;
+			} else {
+				efree(list);
+				*return_list = NULL;
+			}
 		}
 		efree(tmpstr);
 	}
@@ -340,8 +346,13 @@ php_mbstring_parse_encoding_array(zval *array, int **return_list, int *return_si
 				zend_hash_move_forward(target_hash);
 				i--;
 			}
-			*return_list = list;
-			*return_size = n;
+			if (n > 0) {
+				*return_list = list;
+				*return_size = n;
+			} else {
+				efree(list);
+				*return_list = NULL;
+			}
 		}
 	}
 
@@ -913,6 +924,7 @@ PHP_FUNCTION(mb_substitute_character)
 			RETVAL_LONG(MBSTRG(current_filter_illegal_substchar));
 		}
 	} else if (ZEND_NUM_ARGS() == 1 && zend_get_parameters_ex(1, &arg1) != FAILURE) {
+		RETVAL_TRUE;
 		switch (Z_TYPE_PP(arg1)) {
 		case IS_STRING:
 			if (strcasecmp("none", Z_STRVAL_PP(arg1)) == 0) {
@@ -921,17 +933,26 @@ PHP_FUNCTION(mb_substitute_character)
 				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
 			} else {
 				convert_to_long_ex(arg1);
-				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-				MBSTRG(current_filter_illegal_substchar) = Z_LVAL_PP(arg1);
+				if (Z_LVAL_PP(arg1)< 0xffff && Z_LVAL_PP(arg1)> 0x0) {
+					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
+					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_PP(arg1);
+				} else {
+					php_error(E_WARNING, "unknown character.");
+					RETVAL_FALSE;					
+				}
 			}
 			break;
 		default:
 			convert_to_long_ex(arg1);
-			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-			MBSTRG(current_filter_illegal_substchar) = Z_LVAL_PP(arg1);
+			if (Z_LVAL_PP(arg1)< 0xffff && Z_LVAL_PP(arg1)> 0x0) {
+				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
+				MBSTRG(current_filter_illegal_substchar) = Z_LVAL_PP(arg1);
+			} else {
+				php_error(E_WARNING, "unknown character.");
+				RETVAL_FALSE;
+			}
 			break;
 		}
-		RETVAL_TRUE;
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -1452,18 +1473,17 @@ PHP_FUNCTION(mb_output_handler)
  			MBSTRG(outconv) = NULL;
   		}
  		/* if content-type is not yet set, set it and activate the converter */
- 		if (SG(sapi_headers).send_default_content_type) {
- 			mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
- 			charset = mbfl_no2preferred_mime_name(encoding);
- 			len = (sizeof ("Content-Type:")-1) + strlen(mimetype) + (sizeof (";charset=")-1) + strlen(charset) + 1;
- 			p = emalloc(len);
- 			strcpy(p, "Content-Type:");
- 			strcat(p, mimetype);
- 			strcat(p, ";charset=");
- 			strcat(p, charset);
- 			if (sapi_add_header(p, len, 0) != FAILURE)
- 				SG(sapi_headers).send_default_content_type = 0;
- 
+ 		if (SG(sapi_headers).send_default_content_type ) {
+			mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
+			charset = mbfl_no2preferred_mime_name(encoding);
+			len = (sizeof ("Content-Type:")-1) + strlen(mimetype) + (sizeof (";charset=")-1) + strlen(charset) + 1;
+			p = emalloc(len);
+			strcpy(p, "Content-Type:");
+			strcat(p, mimetype);
+			strcat(p, ";charset=");
+			strcat(p, charset);
+			if (sapi_add_header(p, len, 0) != FAILURE)
+				SG(sapi_headers).send_default_content_type = 0;
  			/* activate the converter */
  			MBSTRG(outconv) = mbfl_buffer_converter_new(MBSTRG(current_internal_encoding), encoding, 0);
  		}
@@ -1521,6 +1541,17 @@ PHP_FUNCTION(mb_strlen)
 	    n < 1 || n > 2) {
 		WRONG_PARAM_COUNT;
 	}
+	if (Z_TYPE_PP(arg1) == IS_ARRAY ||
+		Z_TYPE_PP(arg1) == IS_OBJECT) {
+		php_error(E_NOTICE, "arg1 is invalid.");
+		RETURN_FALSE;
+	}
+	if (( n ==2 && Z_TYPE_PP(arg2) == IS_ARRAY) ||
+		( n ==2 && Z_TYPE_PP(arg2) == IS_OBJECT)) {
+		php_error(E_NOTICE, "arg2 is invalid.");
+		RETURN_FALSE;
+	}
+
 	convert_to_string_ex(arg1);
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(current_language);
@@ -1553,7 +1584,7 @@ PHP_FUNCTION(mb_strlen)
 PHP_FUNCTION(mb_strpos)
 {
 	pval **arg1, **arg2, **arg3, **arg4;
-	int offset, n;
+	int offset, n, reverse = 0;
 	mbfl_string haystack, needle;
 
 	mbfl_string_init(&haystack);
@@ -1595,11 +1626,8 @@ PHP_FUNCTION(mb_strpos)
 
 	convert_to_string_ex(arg1);
 	convert_to_string_ex(arg2);
-	if (offset < 0) {
-		php_error(E_WARNING,"offset is minus value");
-		offset = 0;
-	}
-	if (offset > Z_STRLEN_PP(arg1)) {
+
+	if (offset < 0 || offset > Z_STRLEN_PP(arg1)) {
 		php_error(E_WARNING,"offset not contained in string");
 		RETURN_FALSE;
 	}
@@ -1612,10 +1640,26 @@ PHP_FUNCTION(mb_strpos)
 	needle.val = Z_STRVAL_PP(arg2);
 	needle.len = Z_STRLEN_PP(arg2);
 
-	n = mbfl_strpos(&haystack, &needle, offset, 0);
+	n = mbfl_strpos(&haystack, &needle, offset, reverse);
 	if (n >= 0) {
 		RETVAL_LONG(n);
 	} else {
+		switch (-n) {
+		case 1:
+			break;
+		case 2:
+			php_error(E_WARNING,"needle has not positive length.");
+			break;
+		case 4:
+			php_error(E_WARNING,"unknown encoding or conversion error.");
+			break;
+		case 8:
+			php_error(E_NOTICE,"argument is empty.");
+			break;
+		default:
+			php_error(E_WARNING,"unknown error in mb_strpos.");
+			break;			
+		}
 		RETVAL_FALSE;
 	}
 }
@@ -1945,8 +1989,18 @@ PHP_FUNCTION(mb_strimwidth)
 
 	convert_to_long_ex(arg2);
 	from = Z_LVAL_PP(arg2);
+	if (from < 0 || from > Z_STRLEN_PP(arg1)) {
+		php_error(E_WARNING,"start not contained in string");
+		RETURN_FALSE;
+	}
+
 	convert_to_long_ex(arg3);
 	width = Z_LVAL_PP(arg3);
+
+	if (width < 0) {
+		php_error(E_WARNING,"width has negative value");
+		RETURN_FALSE;
+	}
 
 	if (ZEND_NUM_ARGS() >= 4) {
 		convert_to_string_ex(arg4);
