@@ -1,3 +1,42 @@
+2000-05-30  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/imap/imap.dsp
+      ext/imap/imap.h
+      ext/imap/php_imap.h:
+    Making imap module compile on win32 and include imap_mail() function)
+
+2000-05-30  Ben Mansell  <ben@zeus.com>
+
+    * README.Zeus:
+    Updated help section with some more compile problems & solutions
+
+2000-05-30  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h:
+    - Added array_merge_recursive() that will recursively merge values
+      under the same keys. 
+
+    * TODO: retab
+
+    * TODO: Finally figured out what pathinfo() was all about.
+
+2000-05-30  Anthony Whitehead  <anthony.whitehead@rfv.sfa.se>
+
+    * sapi/nsapi/config.m4
+      sapi/nsapi/nsapi-readme.txt
+      sapi/nsapi/nsapi.c:
+    Altered NSAPI autoconf to check for location of include files automatically, tested for Netscape 3.x and iPlanet 4.x.
+    Added very basic variable support for usefull things such as PHP_SELF. I'll extend this to supply this rest of the variables soon.
+    Commited a patch to activate ZTS in the NSAPI module, this patch comes from
+    Jayakumar Muthukumarasamy.
+
+2000-05-30  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c:
+    - fixed crash in OCIParse when parsing invalid SQL. 
+
 2000-05-29  Zeev Suraski  <zeev@php.net>
 
     * ext/standard/Makefile.in: Forgot to update the makefile
