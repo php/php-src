@@ -201,6 +201,18 @@ MAINTENANCE:         Orphaned
 STATUS:              Working
 SINCE:               4.0.3
 -------------------------------------------------------------------------------
+EXTENSION:           dio
+PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
+MAINTENANCE:         Orphaned
+STATUS:              Working
+SINCE:               4.0.6
+-------------------------------------------------------------------------------
+EXTENSION:           cyrus
+PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
+MAINTENANCE:         Orphaned
+STATUS:              Working
+SINCE:               4.0.6
+-------------------------------------------------------------------------------
 EXTENSION:           calendar
 PRIMARY MAINTAINER:  Hartmut Holzgraefe <hartmut@six.de>
 MAINTENANCE:         Odd Fixes
