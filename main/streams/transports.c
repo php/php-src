@@ -74,8 +74,10 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 	if (persistent_id) {
 		switch(php_stream_from_persistent_id(persistent_id, &stream TSRMLS_CC)) {
 			case PHP_STREAM_PERSISTENT_SUCCESS:
-				/* TODO: check if the socket is still live */
-				return stream;
+				if (PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_CHECK_LIVENESS, 0, NULL)) {
+					return stream;
+				}
+				/* fall through */
 
 			case PHP_STREAM_PERSISTENT_FAILURE:
 			default:

@@ -358,6 +358,10 @@ PHPAPI int _php_stream_truncate_set_size(php_stream *stream, size_t newsize TSRM
 #define PHP_STREAM_OPTION_META_DATA_API		11 /* ptrparam is a zval* to which to add meta data information */
 #define php_stream_populate_meta_data(stream, zv)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_META_DATA_API, 0, zv TSRMLS_CC) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
 
+/* Check if the stream is still "live"; for sockets/pipes this means the socket
+ * is still connected; for files, this does not really have meaning */
+#define PHP_STREAM_OPTION_CHECK_LIVENESS	12 /* no parameters */
+
 #define PHP_STREAM_OPTION_RETURN_OK			 0 /* option set OK */
 #define PHP_STREAM_OPTION_RETURN_ERR 		-1 /* problem setting option */
 #define PHP_STREAM_OPTION_RETURN_NOTIMPL	-2 /* underlying stream does not implement; streams can handle it instead */

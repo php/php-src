@@ -148,15 +148,9 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 	if (close_handle) {
 
 		if (sock->socket != -1) {
+#ifdef PHP_WIN32
 			/* prevent more data from coming in */
-
-#ifdef AF_UNIX
-			if (stream->ops != &php_stream_unix_socket_ops && stream->ops != &php_stream_unixdg_socket_ops) {
-#endif
-				shutdown(sock->socket, SHUT_RD);
-#ifdef AF_UNIX
-			}
-#endif
+			shutdown(sock->socket, SHUT_RD);
 
 			/* try to make sure that the OS sends all data before we close the connection.
 			 * Essentially, we are waiting for the socket to become writeable, which means
@@ -174,6 +168,7 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 
 				n = select(sock->socket + 1, NULL, &wrfds, &efds, &timeout);
 			} while (n == -1 && php_socket_errno() == EINTR);
+#endif
 
 			closesocket(sock->socket);
 			sock->socket = -1;
@@ -205,6 +200,28 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 	php_stream_xport_param *xparam;
 	
 	switch(option) {
+		case PHP_STREAM_OPTION_CHECK_LIVENESS:
+			{
+				fd_set rfds;
+				struct timeval tv = {0,0};
+				char buf;
+				int alive = 1;
+
+				if (sock->socket == -1) {
+					alive = 0;
+				} else {
+					FD_ZERO(&rfds);
+					FD_SET(sock->socket, &rfds);
+
+					if (select(sock->socket + 1, &rfds, NULL, NULL, &tv) > 0 && FD_ISSET(sock->socket, &rfds)) {
+						if (0 == recv(sock->socket, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EAGAIN) {
+							alive = 0;
+						}
+					}
+				}
+				return alive ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
+			}
+			
 		case PHP_STREAM_OPTION_BLOCKING:
 	
 			oldmode = sock->is_blocked;
