@@ -5,7 +5,6 @@ PHP 4.0                                                                    NEWS
 - Fixed parent::method() to also work with runtime bindings (Zeev, Zend Engine)
 - Implemented high-performance zlib-based output compression - see
   zlib.output_compression INI directive (Zeev)
-- Ported Documentation structure from phpdoc (jmoore)
 - Improved ob_gzhandler() to support chunked output buffering - it's recommended
   to use it with 4KB chunks (Zeev)
 - Fixed chunked output buffering (Zeev)
