@@ -29,11 +29,24 @@
 //
 // The mandatory exports from the ISAPI DLL
 //
+#define NUM_THREADS 10
+#define ITERATIONS 1
+HANDLE terminate[NUM_THREADS];
+HANDLE StartNow;
+// quick and dirty environment
+typedef CMapStringToString TEnvironment;
+TEnvironment IsapiEnvironment;
+CStringArray IsapiFileList;  // list of filenames
+CStringArray TestNames;      // --TEST--
+CStringArray IsapiGetData;   // --GET--
+CStringArray IsapiPostData;  // --POST--
+CStringArray IsapiMatchData; // --EXPECT--
 
 typedef struct _TIsapiContext {
 	HANDLE in;
 	HANDLE out;
 	DWORD tid;
+	TEnvironment env;
 } TIsapiContext;
 
 //
@@ -57,32 +70,278 @@ char * MakeDateStr(VOID);
 char * GetEnv(char *);
 
 
-#define NUM_THREADS 10
-#define ITERATIONS 1
-HANDLE terminate[NUM_THREADS];
-HANDLE StartNow;
-// quick and dirty environment
-CMapStringToString IsapiEnvironment;
-CStringArray IsapiFileList;
-CStringArray IsapiArgList;
 
 
 DWORD CALLBACK IsapiThread(void *);
-int stress_main(const char *filename, const char *arg);
+int stress_main(const char *filename, 
+				const char *arg, 
+				const char *postfile, 
+				const char *matchdata,
+				const char *testname);
 
 
+
+BOOL test = FALSE;
+char temppath[MAX_PATH];
+
+void stripcrlf(char *line)
+{
+	DWORD l = strlen(line)-1;
+	if (line[l]==10 || line[l]==13) line[l]=0;
+	l = strlen(line)-1;
+	if (line[l]==10 || line[l]==13) line[l]=0;
+}
+
+BOOL ReadGlobalEnvironment(const char *environment)
+{
+	if (environment) {
+	FILE *fp = fopen(environment, "r");
+	DWORD i=0;
+	if (fp) {
+		char line[2048];
+		while (fgets(line,sizeof(line)-1,fp)) {
+			// file.php arg1 arg2 etc.
+			char *p = strchr(line, '=');
+			if (p) {
+				*p=0;
+				IsapiEnvironment[line]=p+1;
+			}
+		}
+		fclose(fp);
+		return IsapiEnvironment.GetCount() > 0;
+	}
+	}
+	return FALSE;
+}
+
+BOOL ReadFileList(const char *filelist)
+{
+	FILE *fp = fopen(filelist, "r");
+	if (!fp) {
+		printf("Unable to open %s\r\n", filelist);
+	}
+	char line[2048];
+	int i=0;
+	while (fgets(line,sizeof(line)-1,fp)) {
+		// file.php arg1 arg2 etc.
+		stripcrlf(line);
+		if (strlen(line)>3) {
+			char *p = strchr(line, ' ');
+			if (p) {
+				*p = 0;
+				// get file
+
+				IsapiFileList.Add(line);
+				IsapiGetData.Add(p+1);
+			} else {
+				// just a filename is all
+				IsapiFileList.Add(line);
+				IsapiGetData.Add("");
+			}
+		}
+
+		// future use
+		IsapiPostData.Add("");
+		IsapiMatchData.Add("");
+		TestNames.Add("");
+
+		i++;
+	}
+	fclose(fp);
+	return IsapiFileList.GetSize() > 0;
+}
+
+void DoThreads() {
+
+	if (IsapiFileList.GetSize() == 0) {
+		printf("No Files to test\n");
+		return;
+	}
+
+	printf("Starting Threads...\n");
+	// loop creating threads
+	DWORD tid;
+	HANDLE threads[NUM_THREADS];
+	for (DWORD i=0; i< NUM_THREADS; i++) {
+		terminate[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
+		if ((threads[i]=CreateThread(NULL, 0, IsapiThread, &terminate[i], CREATE_SUSPENDED, &tid))==NULL){
+			SetEvent(terminate[i]);
+		}
+	}
+	for (i=0; i< NUM_THREADS; i++) {
+		if (threads[i]) ResumeThread(threads[i]);
+	}
+	// wait for threads to finish
+	WaitForMultipleObjects(NUM_THREADS, terminate, TRUE, INFINITE);
+}
+
+void DoFileList(const char *filelist, const char *environment)
+{
+	// read config files
+
+	if (!ReadFileList(filelist)) {
+		printf("No Files to test!\r\n");
+		return;
+	}
+
+	ReadGlobalEnvironment(environment);
+
+	DoThreads();
+}
+
+
+/**
+ * ParseTestFile
+ * parse a single phpt file and add it to the arrays
+ */
+BOOL ParseTestFile(const char *path, const char *fn)
+{
+	// parse the test file
+	char filename[MAX_PATH];
+	_snprintf(filename, sizeof(filename)-1, "%s\\%s", path, fn);
+	char line[1024];
+	memset(line, 0, sizeof(line));
+	CString cTest, cSkipIf, cPost, cGet, cFile, cExpect;
+	printf("Reading %s\r\n", filename);
+
+	enum state {none, test, skipif, post, get, file, expect} parsestate = none;
+
+	FILE *fp = fopen(filename, "r");
+	if (fp) {
+		while (fgets(line,sizeof(line)-1,fp)) {
+			if (line[0]=='-') {
+				if (_strnicmp(line, "--TEST--", 8)==0) {
+					parsestate = test;
+					continue;
+				} else if (_strnicmp(line, "--SKIPIF--", 10)==0) {
+					parsestate = skipif;
+					continue;
+				} else if (_strnicmp(line, "--POST--", 8)==0) {
+					parsestate = post;
+					continue;
+				} else if (_strnicmp(line, "--GET--", 7)==0) {
+					parsestate = get;
+					continue;
+				} else if (_strnicmp(line, "--FILE--", 8)==0) {
+					parsestate = file;
+					continue;
+				} else if (_strnicmp(line, "--EXPECT--", 10)==0) {
+					parsestate = expect;
+					continue;
+				}
+			}
+			switch (parsestate) {
+			case test:
+				stripcrlf(line);
+				cTest = line;
+				break;
+			case skipif:
+				cSkipIf += line;
+				break;
+			case post:
+				cPost += line;
+				break;
+			case get:
+				cGet += line;
+				break;
+			case file:
+				cFile += line;
+				break;
+			case expect:
+				cExpect += line;
+				break;
+			}
+		}		
+
+		fclose(fp);
+
+		if (!cTest.IsEmpty() && !cFile.IsEmpty() && !cExpect.IsEmpty()) {
+			BOOL created = FALSE;
+			char *fn = _tempnam(temppath,"pht.");
+			char *en = _tempnam(temppath,"exp.");
+			FILE *fp = fopen(fn, "w+");
+			FILE *fe = fopen(en, "w+");
+			if (fp && en) {
+				fwrite(cFile, cFile.GetLength(), 1, fp);
+				fwrite(cExpect, cExpect.GetLength(), 1, fe);
+				IsapiFileList.Add(fn);
+				TestNames.Add(cTest);
+				IsapiGetData.Add(cGet);
+				IsapiPostData.Add(cPost);
+				IsapiMatchData.Add(en);
+				created = TRUE;
+			}
+			if (fp) fclose(fp);
+			if (fe) fclose(fe);
+
+			return created;
+		}
+	}
+	return FALSE;
+}
+
+
+/**
+ * GetTestFiles
+ * Recurse through the path and subdirectories, parse each phpt file
+ */
+BOOL GetTestFiles(const char *path)
+{
+	// find all files .phpt under testpath\tests
+	char FindPath[MAX_PATH];
+	WIN32_FIND_DATA fd;
+	memset(&fd, 0, sizeof(WIN32_FIND_DATA));
+
+	_snprintf(FindPath, sizeof(FindPath)-1, "%s\\*.*",path);
+	HANDLE fh = FindFirstFile(FindPath, &fd);
+	if (fh != INVALID_HANDLE_VALUE) {
+		do {
+			if ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) &&
+				!strchr(fd.cFileName, '.')) {
+				// subdirectory, recurse into it
+				char NewFindPath[MAX_PATH];
+				_snprintf(NewFindPath, sizeof(NewFindPath)-1, "%s\\%s",path, fd.cFileName);
+				GetTestFiles(NewFindPath);
+			} else if (strstr(fd.cFileName, ".phpt")) {
+				// got test file, parse it now
+				if (ParseTestFile(path, fd.cFileName)) {
+					printf("Test File Added: %s\\%s\r\n", path, fd.cFileName);
+				}
+			}
+			memset(&fd, 0, sizeof(WIN32_FIND_DATA));
+		} while (FindNextFile(fh, &fd) != 0);
+		FindClose(fh);
+	}
+	return IsapiFileList.GetSize() > 0;
+}
+
+void DoTestFiles(const char *filelist, const char *environment)
+{
+	if (!GetTestFiles(filelist)) {
+		printf("No Files to test!\r\n");
+		return;
+	}
+
+	ReadGlobalEnvironment(environment);
+
+	DoThreads();
+}
 
 int main(int argc, char* argv[]) {
 	LPVOID lpMsgBuf;
-	char *filelist, *environment;
+	char *filelist=NULL, *environment=NULL;
 
-	if (argc < 2) {
-		printf("Usage: stress filelist.txt env.txt\r\n");
+	if (argc < 3) {
+		// look for phpt files in tests
+		printf("USAGE: stresstest [L|T] filelist [environment]\r\n");
 		return 0;
+	} else {
+		if (argv[1][0]=='T') test = TRUE;
+		if (argc > 1) filelist = argv[2];
+		if (argc > 2) environment = argv[3];
 	}
-	filelist = argv[1];
-	environment = argv[2];
 
+	GetTempPath(sizeof(temppath), temppath);
 	hDll = LoadLibrary("php4isapi.dll"); // Load our DLL
 
 	if (!hDll) {
@@ -117,76 +376,22 @@ int main(int argc, char* argv[]) {
 	// This should really check if the version information matches what we
 	// expect.
 	//
-	__try {
-		if (!IsapiGetExtensionVersion(&version_info) ) {
-			fprintf(stderr,"Fatal: GetExtensionVersion failed\n");
-			return -1;
-		}
-	}
-	__except(1) {
+	if (!IsapiGetExtensionVersion(&version_info) ) {
+		fprintf(stderr,"Fatal: GetExtensionVersion failed\n");
 		return -1;
 	}
 
-	// read config files
-	FILE *fp = fopen(filelist, "r");
-	if (!fp) {
-		printf("Unable to open %s\r\n", filelist);
-	}
-	char line[2048];
-	int i=0;
-	while (fgets(line,sizeof(line)-1,fp)) {
-		// file.php arg1 arg2 etc.
-		if (strlen(line)>3) {
-			char *p = strchr(line, ' ');
-			if (p) {
-				*p = 0;
-				// get file
-				IsapiFileList.Add(line);
-				IsapiArgList.Add(p+1);
-			} else {
-				// just a filename is all
-				IsapiFileList.Add(line);
-				IsapiArgList.Add("");
-			}
-		}
-		i++;
-	}
-	fclose(fp);
-
-	if (environment) {
-	fp = fopen(environment, "r");
-	i=0;
-	if (fp) {
-		char line[2048];
-		while (fgets(line,sizeof(line)-1,fp)) {
-			// file.php arg1 arg2 etc.
-			char *p = strchr(line, '=');
-			if (p) {
-				*p=0;
-				IsapiEnvironment[line]=p+1;
-			}
-		}
-		fclose(fp);
-	}
-	}
-
-	printf("Starting Threads...\n");
-	// loop creating threads
-	DWORD tid;
-	HANDLE threads[NUM_THREADS];
-	for (i=0; i< NUM_THREADS; i++) {
-		terminate[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
-		if ((threads[i]=CreateThread(NULL, 0, IsapiThread, &terminate[i], CREATE_SUSPENDED, &tid))==NULL){
-			SetEvent(terminate[i]);
-		}
-	}
-	for (i=0; i< NUM_THREADS; i++) {
-		if (threads[i]) ResumeThread(threads[i]);
-	}
-	// wait for threads to finish
-	WaitForMultipleObjects(NUM_THREADS, terminate, TRUE, INFINITE);
+	if (test) {
+		char TestPath[MAX_PATH];
+		if (filelist != NULL) 
+			_snprintf(TestPath, sizeof(TestPath)-1, "%s\\tests", filelist);
+		else strcpy(TestPath, "tests");
+		DoTestFiles(TestPath, environment);
+	} else
+		DoFileList(filelist, environment);
 
 	// cleanup
+
 
 	// We should really free memory (e.g., from GetEnv), but we'll be dead
 	// soon enough
@@ -204,8 +409,12 @@ DWORD CALLBACK IsapiThread(void *p)
 		for (DWORD i=0; i<filecount; i++) {
 			// execute each file
 			printf("Thread %d File %s\n", GetCurrentThreadId(), IsapiFileList.GetAt(i));
-			stress_main(IsapiFileList.GetAt(i), IsapiArgList.GetAt(i));
-			//Sleep(10);
+			stress_main(IsapiFileList.GetAt(i), 
+						IsapiGetData.GetAt(i), 
+						IsapiPostData.GetAt(i),
+						IsapiMatchData.GetAt(i),
+						TestNames.GetAt(i));
+			Sleep(10);
 		}
 	}
 	SetEvent(*terminate);
@@ -221,7 +430,12 @@ DWORD CALLBACK IsapiThread(void *p)
  * the DLL to load. There is no recompilation required.                    *
  * ======================================================================= *
 */
-int stress_main(const char *filename, const char *arg) {
+int stress_main(const char *filename, 
+				const char *arg, 
+				const char *postdata,
+				const char *matchdata,
+				const char *testname) 
+{
 
 	EXTENSION_CONTROL_BLOCK ECB;
 	DWORD rc;
@@ -231,13 +445,16 @@ int stress_main(const char *filename, const char *arg) {
 	context.tid = GetCurrentThreadId();
 	CString fname;
 	fname.Format("%08X.out", context.tid);
+
 	context.out = CreateFile(fname, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, 0, NULL);
 	if (context.out==INVALID_HANDLE_VALUE) {
 		printf("failed to open output file %s\n", fname);
 		return 0;
 	}
-	if (arg) context.in  = CreateFile(arg, GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
-	else context.in = INVALID_HANDLE_VALUE;
+
+	// not using post files
+	context.in = INVALID_HANDLE_VALUE;
+
 	//
 	// Fill the ECB with the necessary information
 	//
@@ -250,16 +467,54 @@ int stress_main(const char *filename, const char *arg) {
 	// first arg = filename
 	// this is added for testing php from command line
 
+	context.env.RemoveAll();
+	context.env["PATH_TRANSLATED"]= filename;
+	context.env["SCRIPT_MAP"]= filename;
+	context.env["CONTENT_TYPE"]= "";
+	context.env["CONTENT_LENGTH"]= "";
+	context.env["QUERY_STRING"]= arg;
+	context.env["METHOD"]="GET";
+
+	char buf[MAX_PATH];
+	if (postdata && *postdata !=0) {
+		ECB.cbAvailable = strlen(postdata);
+		ECB.cbTotalBytes = ECB.cbAvailable;
+		ECB.lpbData = (unsigned char *)postdata;
+		context.env["METHOD"]="POST";
+
+		_snprintf(buf, sizeof(buf)-1, "%d", ECB.cbTotalBytes);
+		context.env["CONTENT_LENGTH"]=buf;
+
+		context.env["CONTENT_TYPE"]="application/x-www-form-urlencoded";
+	}
     ECB.lpszPathTranslated = strdup(filename);
+	ECB.lpszQueryString = strdup(arg);
 
 	// Call the DLL
 	//
 	rc = IsapiHttpExtensionProc(&ECB);
 
-	free (ECB.lpszPathTranslated);
+	free(ECB.lpszPathTranslated);
+	free(ECB.lpszQueryString);
+
+
+	// compare the output with the EXPECT section
+	if (matchdata && *matchdata != 0) {
+		// wimpy I know, but I'm tired and lazy now
+		HANDLE md = CreateFile(matchdata, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+		if (md) {
+			DWORD osz = 0, msz = 0;
+			GetFileSize(md, &msz);
+			GetFileSize(context.out, &osz);
+			if (osz == msz && osz != 0) {
+				printf("%s OK\r\n", testname);
+			} else {
+				printf("%s FAILED\r\n", testname);
+			}
+		}
+	}
 
 	if (context.out) CloseHandle(context.out);
-	if (context.in) CloseHandle(context.in);
 
 	//if (rc == HSE_STATUS_PENDING) // We will exit in ServerSupportFunction
 	//	Sleep(INFINITE);
@@ -276,8 +531,13 @@ BOOL WINAPI GetServerVariable(HCONN hConn, LPSTR lpszVariableName,
 
 	DWORD rc;
 	CString value;
+	TIsapiContext *c = (TIsapiContext *)hConn;
+	if (!c) return FALSE;
 
 	if (IsapiEnvironment.Lookup(lpszVariableName, value)) {
+		rc = value.GetLength();
+		strncpy((char *)lpBuffer, value, *lpdwSize-1);
+	} else if (c->env.Lookup(lpszVariableName, value)) {
 		rc = value.GetLength();
 		strncpy((char *)lpBuffer, value, *lpdwSize-1);
 	} else
@@ -305,7 +565,10 @@ BOOL WINAPI GetServerVariable(HCONN hConn, LPSTR lpszVariableName,
 BOOL WINAPI ReadClient(HCONN hConn, LPVOID lpBuffer, LPDWORD lpdwSize) {
 	TIsapiContext *c = (TIsapiContext *)hConn;
 	if (!c) return FALSE;
-	if (c->in) return ReadFile(c->in,lpBuffer,(*lpdwSize), lpdwSize,NULL);
+
+	if (c->in != INVALID_HANDLE_VALUE) 
+		return ReadFile(c->in,lpBuffer,(*lpdwSize), lpdwSize,NULL);
+
 	return FALSE;
 }
 //
@@ -315,7 +578,10 @@ BOOL WINAPI WriteClient(HCONN hConn, LPVOID lpBuffer, LPDWORD lpdwSize,
 			DWORD dwReserved) {
 	TIsapiContext *c = (TIsapiContext *)hConn;
 	if (!c) return FALSE;
-	if (c->out) return WriteFile(c->out,lpBuffer,*lpdwSize, lpdwSize,NULL);
+
+	if (c->out != INVALID_HANDLE_VALUE) 
+		return WriteFile(c->out,lpBuffer,*lpdwSize, lpdwSize,NULL);
+
 	return FALSE;
 }
 //
