@@ -106,11 +106,11 @@ PHP_MINFO_FUNCTION(ctype)
 		convert_to_string(c);	\
 	case IS_STRING: \
 		{ \
-			char *p; \
-			int n, len; \
-			p=Z_STRVAL_P(c); \
-			len = Z_STRLEN_P(c); \
-			for(n=0;n<len;n++) { \
+			char *p = Z_STRVAL_P(c), *e = Z_STRVAL_P(c) + Z_STRLEN_P(c); \
+			if (e == p) {	\
+				RETURN_FALSE;	\
+			}	\
+			while (p < e) { \
 				if(!iswhat((int)*(unsigned char *)(p++))) RETURN_FALSE; \
 			} \
 			RETURN_TRUE; \
