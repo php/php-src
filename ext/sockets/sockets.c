@@ -663,6 +663,8 @@ PHP_FUNCTION(socket_create_listen)
 		RETURN_FALSE;
 	}
 
+	php_sock->error = 0;
+
 	ZEND_REGISTER_RESOURCE(return_value, php_sock, le_socket);
 }
 /* }}} */
@@ -681,10 +683,11 @@ PHP_FUNCTION(socket_accept)
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 	
 	if (!php_accept_connect(php_sock, &new_sock, (struct sockaddr *) &sa TSRMLS_CC)) {
-		PHP_SOCKET_ERROR(new_sock, "unable to accept socket connection", errno);
 		RETURN_FALSE;
 	}
-	
+
+	new_sock->error = 0;
+
 	ZEND_REGISTER_RESOURCE(return_value, new_sock, le_socket);
 }
 /* }}} */
@@ -1048,6 +1051,8 @@ PHP_FUNCTION(socket_create)
 		efree(php_sock);
 		RETURN_FALSE;
 	}
+
+	php_sock->error = 0;
 
 	ZEND_REGISTER_RESOURCE(return_value, php_sock, le_socket);
 }
@@ -1685,6 +1690,8 @@ PHP_FUNCTION(socket_create_pair)
 	php_sock[1]->bsd_socket = fds_array[1];
 	php_sock[0]->type		= domain;
 	php_sock[1]->type		= domain;
+	php_sock[0]->error		= 0;
+	php_sock[1]->error		= 0;
 
 	ZEND_REGISTER_RESOURCE(retval[0], php_sock[0], le_socket);
 	ZEND_REGISTER_RESOURCE(retval[1], php_sock[1], le_socket);
