@@ -59,7 +59,7 @@ PEAR Installer:
 * Bug #293 [Patch] PEAR_Error not calling static method callbacks for error-handler
 * Bug #324 pear -G gives Fatal Error (PHP-GTK not installed, but error is at engine level)
 * Moved download code into its own class
-* Fully unit tested the installer and downloader, plus PEAR_Common
+* Fully unit tested the installer, packager, downloader, and PEAR_Common
 
     </notes>
     <provides type="class" name="OS_Guess" />
@@ -123,7 +123,7 @@ PEAR Installer:
     <deps>
       <dep type="php" rel="ge" version="4.1"/>
       <dep type="pkg" rel="ge" version="1.1">Archive_Tar</dep>
-      <dep type="pkg" rel="ge" version="2.0">Console_Getopt</dep>
+      <dep type="pkg" rel="ge" version="1.2">Console_Getopt</dep>
       <dep type="pkg" rel="ge" version="1.0.4">XML_RPC</dep>
       <dep type="ext" rel="has" optional="yes">xmlrpc</dep>
       <dep type="ext" rel="has">xml</dep>
