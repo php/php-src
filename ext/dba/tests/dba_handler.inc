@@ -1,5 +1,8 @@
 <?php
-	echo "database handler: $handler\n";
+
+echo "database handler: $handler\n";
+
+do {
 	if (($db_file = dba_open($db_filename, 'n'.$lock_flag, $handler))!==FALSE) {
 		dba_insert("key1", "Content String 1", $db_file);
 		dba_insert("key2", "Content String 2", $db_file);
@@ -71,5 +74,14 @@
 		dba_close($dba_reader);
 	}
 	if (($db_file = dba_popen($db_filename, 'r'.($handler!='gdbm'?'-':''), $handler))!==FALSE) {
-	}	
+	}
+
+	if ($lock_flag == '') {
+		break;
+	} else {
+		echo "--NO-LOCK--\n";
+		$lock_flag = '';
+	}
+} while(1);
+
 ?>
