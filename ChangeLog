@@ -1,3 +1,133 @@
+2005-01-07  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/standard/head.c:
+      remove duplicated include
+
+2005-01-07  Magnus M‰‰tt‰  <novell@kiruna.se>
+
+    * ext/posix/posix.c:
+      Argh.. Committed old patch.
+      Add safe_mode check and fix error code.
+
+2005-01-07  Antony Dovgal  <tony2001@phpclub.net>
+
+    * acinclude.m4:
+      fix PHP_CHECK_64BIT macro (finally got 64bit machine to test it)
+
+2005-01-07  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli.c:
+      forgot to remove some comments in last commit:(
+
+2005-01-07  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/mysqli/mysqli_exception.c:
+      ZTS fix.
+
+    * ext/mysqli/config.w32:
+      Sync with config.m4.
+
+2005-01-07  Magnus M‰‰tt‰  <novell@kiruna.se>
+
+    * NEWS
+      ext/posix/php_posix.h
+      ext/posix/posix.c:
+      Added new function: posix_access()
+      Feature requests: #29615, #14924
+
+2005-01-07  Georg Richter  <georg@mysql.com>
+
+    * NEWS:
+      new mysqli stuff
+
+    * ext/mysqli/config.m4
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_driver.c
+      ext/mysqli/mysqli_embedded.c
+      ext/mysqli/mysqli_exception.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/mysqli_report.c
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/tests/001.phpt
+      ext/mysqli/tests/014.phpt
+      ext/mysqli/tests/017.phpt
+      ext/mysqli/tests/033.phpt
+      ext/mysqli/tests/034.phpt
+      ext/mysqli/tests/041.phpt
+      ext/mysqli/tests/045.phpt
+      ext/mysqli/tests/047.phpt
+      ext/mysqli/tests/049.phpt
+      ext/mysqli/tests/061.phpt
+      ext/mysqli/tests/connect.inc
+      ext/mysqli/tests/skipif.inc
+      ext/mysqli/tests/skipifemb.inc:
+      Added new classes:
+      	mysqli_driver
+      	mysqli_warning
+      	mysqli_exception
+      	mysqli_sql_exception
+      
+      Improved embedded server support
+      changed testsuite to work also with embedded server
+      
+      Made statement and resultset classes extendable
+      
+      minor fixes
+
+2005-01-07  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_5_0)
+      tests/classes/array_access_001.phpt
+      tests/classes/array_access_002.phpt
+      tests/classes/array_access_003.phpt
+      tests/classes/array_access_004.phpt:
+      removed skipif sections that check for the existence of ArrayAccess class
+      which is nomore a class but a interface.As the corresponding files in
+      PHP-5.1-HEAD had removed the SKIPIF blocks themselves, removing the same
+      for PHP5_0 branch also.
+
+2005-01-07  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2filter/sapi_apache2.c:
+      MFH: - Fixed bug #31055 (apache2filter: per request leak proportional to
+      the full path of the request URI)
+
+    * sapi/apache2filter/sapi_apache2.c:
+      - Fixed bug #31055 (apache2filter: per request leak proportional to the
+      full path of the request URI)
+
+    * (PHP_4_3)
+      acinclude.m4
+      acinclude.m4
+      configure.in
+      configure.in
+      scripts/phpize.m4
+      scripts/phpize.m4:
+      MFH: - Make sure $host_alias is never empty
+
+    * acinclude.m4
+      configure.in
+      scripts/phpize.m4:
+      - Make sure $host_alias is never empty
+
+2005-01-07  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * EXTENSIONS
+      EXTENSIONS
+      EXTENSIONS:
+      update by steph
+
 2005-01-06  Joe Orton  <jorton@redhat.com>
 
     * (PHP_4_3)
