@@ -32,7 +32,7 @@
 
 #include <php.h>
 #include <errno.h>
-#include "php_compat.h"
+#include "ext/standard/flock_compat.h"
 
 #if HAVE_STRUCT_FLOCK
 #include <unistd.h>
@@ -45,7 +45,7 @@
 #endif
 
 #if !HAVE_FLOCK
-PHPAPI int flock(int fd, int operation)
+int flock(int fd, int operation)
 #if HAVE_STRUCT_FLOCK
 {
 	struct flock flck;
@@ -173,8 +173,7 @@ PHPAPI int flock(int fd, int operation)
  * cannot distinguish between failure and a local broadcast address.
  */
 
-PHPAPI int
-inet_aton(const char *cp, struct in_addr *ap)
+int inet_aton(const char *cp, struct in_addr *ap)
 {
     int dots = 0;
     register unsigned long acc = 0, addr = 0;

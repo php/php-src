@@ -281,6 +281,10 @@ SOURCE=.\ext\standard\filestat.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\standard\flock_compat.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\standard\formatted_print.c
 # End Source File
 # Begin Source File
@@ -418,6 +422,10 @@ SOURCE=.\ext\standard\exec.h
 # Begin Source File
 
 SOURCE=.\ext\standard\file.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\flock_compat.h
 # End Source File
 # Begin Source File
 

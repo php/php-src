@@ -108,7 +108,7 @@
 
 #define HAVE_TZSET 1
 /* Define if you have the flock function.  */
-#define HAVE_FLOCK 1
+#define HAVE_FLOCK 0
 
 /* Define if using alloca.c.  */
 /* #undef C_ALLOCA */

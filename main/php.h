@@ -510,8 +510,6 @@ extern void phprestart(FILE *input_file);
 #define XtOffsetOf(s_type,field) XtOffset(s_type*,field)
 #endif
 
-#include "php_compat.h"
-
 #endif
 
 /*
