@@ -831,7 +831,7 @@ PHP_FUNCTION(preg_split)
 		else { /* if no match */
 			/* Add the last piece to the return value, if there is
 			   something left */
-			if (limit != 0)
+			if (limit_val != 0)
 				add_next_index_stringl(return_value,
 									   piece,
 									   subject_end-piece, 1);
