@@ -246,6 +246,11 @@ PHPAPI int php_file_le_fopen(void) /* XXX doe we really want this???? */
 	return le_fopen;
 }
 
+PHPAPI int php_file_le_popen(void) /* XXX you may not like this, but I need it. -- KK */
+{
+	return le_popen;
+}
+
 
 PHPAPI int php_file_le_socket(void) /* XXX doe we really want this???? */
 {
