@@ -800,7 +800,6 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 				DBDATEREC dateinfo;	
 				int res_length = dbdatlen(mssql_ptr->link,offset);
 
-			
 				if ((column_type != SQLDATETIME) || MS_SQL_G(datetimeconvert)) {
 
 					if (column_type == SQLDATETIM4) res_length += 14;
@@ -808,14 +807,11 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			
 					res_buf = (unsigned char *) emalloc(res_length + 1);
 					res_length = dbconvert(NULL,coltype(offset),dbdata(mssql_ptr->link,offset), res_length, SQLCHAR,res_buf,-1);
-
 				} else {
-
 					dbdatecrack(mssql_ptr->link, &dateinfo, (DBDATETIME *) dbdata(mssql_ptr->link,offset));
 			
-					res_length = 20;
+					res_length = 19;
 					res_buf = (unsigned char *) emalloc(res_length + 1);
-
 					sprintf(res_buf, "%d-%02d-%02d %02d:%02d:%02d" , dateinfo.year, dateinfo.month, dateinfo.day, dateinfo.hour, dateinfo.minute, dateinfo.second);
 				}
 		
@@ -866,12 +862,10 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 			res_length = dbconvert(NULL,coltype(offset),dbdata(mssql_ptr->link,offset), res_length, SQLCHAR,res_buf,-1);
 
 		} else {
-
 			dbdatecrack(mssql_ptr->link, &dateinfo, (DBDATETIME *) dbdata(mssql_ptr->link,offset));
 			
-			res_length = 20;
+			res_length = 19;
 			res_buf = (unsigned char *) emalloc(res_length + 1);
-
 			sprintf(res_buf, "%d-%02d-%02d %02d:%02d:%02d" , dateinfo.year, dateinfo.month, dateinfo.day, dateinfo.hour, dateinfo.minute, dateinfo.second);
 		}
 
