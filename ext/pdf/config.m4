@@ -90,6 +90,8 @@ if test "$PHP_PDFLIB" != "no"; then
   dnl #
   dnl # The main PDFlib configure
   dnl #
+
+  dnl # MacOSX requires this
   case $host_alias in
     *darwin*)
       PHP_ADD_FRAMEWORK(CoreServices)
