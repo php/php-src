@@ -65,6 +65,7 @@ function_entry pspell_functions[] = {
 	PHP_FE(pspell_config_personal,		NULL)
 	PHP_FE(pspell_config_repl,		NULL)
 	PHP_FE(pspell_config_save_repl,		NULL)
+	{NULL, NULL, NULL} 
 };
 /* }}} */
 
