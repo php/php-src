@@ -823,10 +823,10 @@ EXEC SQL END DECLARE SECTION;
 	statement = Z_STRVAL_PP(query);
 
 	IFXG(cursorid)++;
-	sprintf(statemid, "statem%x", IFXG(cursorid)); 
-	sprintf(cursorid, "cursor%x", IFXG(cursorid)); 
-	sprintf(descrpid, "descrp%x", IFXG(cursorid)); 
-	sprintf(i_descrpid, "i_descrp%x", IFXG(cursorid));
+	sprintf(statemid, "statem%x_%x", IFX_THRD_ID, IFXG(cursorid));
+	sprintf(cursorid, "cursor%x_%x", IFX_THRD_ID, IFXG(cursorid));
+	sprintf(descrpid, "descrp%x_%x", IFX_THRD_ID, IFXG(cursorid));
+	sprintf(i_descrpid, "i_descrp%x_%x", IFX_THRD_ID,IFXG(cursorid));
 
 	EXEC SQL set connection :ifx;
 	PHP_IFX_CHECK_CONNECTION(ifx);
