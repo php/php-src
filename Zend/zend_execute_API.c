@@ -1101,14 +1101,17 @@ static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wPa
 			if (lParam==0) {
 				KillTimer(timeout_window, wParam);
 			} else {
+#ifdef ZTS
 				void ***tsrm_ls;
-
+#endif
 				SetTimer(timeout_window, wParam, lParam*1000, NULL);
+#ifdef ZTS
 				tsrm_ls = ts_resource_ex(0, &wParam);
 				if (!tsrm_ls) {
 					/* shouldn't normally happen */
 					break;
 				}
+#endif
 				EG(timed_out) = 0;
 			}
 			break;
