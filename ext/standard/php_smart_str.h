@@ -78,32 +78,38 @@ static inline void smart_str_appendl_ex(smart_str *dest, const char *src, size_t
 
 static inline char *smart_str_print_long(char *buf, long num)
 {
-	/* TBFixed: think how to do it one-pass */
+	char *p = buf, *end;
+	int n;
 	long tmp;
-	char *p = buf;
-	int n = 0;
-
-	if(num == 0) {
-		*p++ = '0';
-		return p;
-	}
 	
 	if (num < 0) {
 		num = -num;
 		*p++ = '-';
 	}
 
-	for (tmp = num; tmp > 0; n++) {
+	/* many numbers are < 10 */
+	if (num < 10) {
+		*p++ = num + '0';
+		return p;
+	}
+
+	n = 1;
+	tmp = num;
+
+	/* calculate the number of digits we need */
+	do {
 		tmp /= 10;
-	}
-	p += n;
+		n++;
+	} while (tmp >= 10);
 
-	while (num > 0) {
-		*(--p) = (num % 10) + '0';
+	end = p += n;
+	
+	do {
+		*--p = (num % 10) + '0';
 		num /= 10;
-	}
+	} while (--n > 0);
 
-	return p+n;
+	return end;
 }
 
 static inline void smart_str_append_long_ex(smart_str *dest, long num, int type)
