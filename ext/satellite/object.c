@@ -33,6 +33,9 @@
  *
  * -----------------------------------------------------------------------
  */
+#include <php.h>
+#include "php_orbit.h"
+
 #include "class.h"
 #include "corba.h"
 #include "common.h"
@@ -282,7 +285,7 @@ zend_bool  OrbitObject_Constructor(OrbitObject  ** ppObject,
 	/* check parameter count */
 	if (parameterCount != 1)
 	{
-		wrong_param_count();
+		zend_wrong_param_count(TSRMLS_C);
 		goto error;
 	}
 
@@ -421,7 +424,7 @@ static zend_bool OrbitObject_AddArguments(OrbitObject * pObject,
 /*		printf("%i, %i, %i\n", i, argumentCount, ParameterType_IsValid(p_parameter));*/
 		
 		/* bad number of arguments */
-		wrong_param_count();
+		zend_wrong_param_count(TSRMLS_C);
 		goto error;
 	}
 
@@ -861,5 +864,45 @@ OrbitObject_GetProperty_exit:
 	satellite_release_namedvalue(p_result);
 	
 	return success;
+}
+
+PHP_FUNCTION(satellite_object_to_string)
+{
+	zval **arg = NULL;
+	char * p_ior = NULL;
+	OrbitObject * p_object = NULL;
+
+	if (zend_get_parameters_ex(1, &arg) != SUCCESS)
+	{
+		zend_error(E_WARNING, "(Satellite) Bad parameter count");
+		goto error;
+	}
+	
+	p_object = OrbitObject_RetrieveData(*arg);
+	if (!p_object)
+	{
+		zend_error(E_WARNING, "(Satellite) Object has no data");
+		goto error;
+	}
+
+	if (!p_object->mCorbaObject)
+	{
+		zend_error(E_WARNING, "(Satellite) Object has no CORBA object");
+		goto error;
+	}
+
+  p_ior = CORBA_ORB_object_to_string(orbit_get_orb(), p_object->mCorbaObject, 
+			orbit_get_environment());
+
+	if (!p_ior /*|| orbit_caught_exception()*/)
+	{
+		zend_error(E_WARNING, "(Satellite) CORBA call failed");
+		goto error;
+	}
+
+	RETURN_STRING(p_ior, TRUE);
+
+error:
+	RETURN_NULL();
 }
 
