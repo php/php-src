@@ -102,13 +102,13 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_new_xmldoc,	NULL)
 	PHP_FALIAS(new_xmldoc, domxml_new_xmldoc,	NULL)
 #if defined(LIBXML_XPATH_ENABLED)
-/*	PHP_FE(xpath_new_context, NULL)
+	PHP_FE(xpath_new_context, NULL)
 	PHP_FE(xpath_eval, NULL)
-	PHP_FE(xpath_eval_expression, NULL) */
+	PHP_FE(xpath_eval_expression, NULL)
 #endif
 #if defined(LIBXML_XPTR_ENABLED)
-/*	PHP_FE(xptr_new_context, NULL)
-	PHP_FE(xptr_eval, NULL) */
+	PHP_FE(xptr_new_context, NULL)
+	PHP_FE(xptr_eval, NULL)
 #endif
 	{NULL, NULL, NULL}
 };
@@ -2477,20 +2477,49 @@ PHP_FUNCTION(xptr_new_context)
 }
 /* }}} */
 
+/* {{{ */
 static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 {
-	zval *id, *str, *rv;
+	zval *id, *str, *rv, *contextnode;
 	xmlXPathContextPtr ctxp;
 	xmlXPathObjectPtr xpathobjp;
+	xmlNode *contextnodep;
 	int ret;
 	
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+	contextnode = NULL;
+	contextnodep = NULL;
 
 	id = getThis();
+	
+	if (! id) {
+		switch(ZEND_NUM_ARGS()) {
+			case 2:
+				if ((getParameters(ht, 2, &id, &str)) == FAILURE) 
+				{
+					WRONG_PARAM_COUNT;
+				}
+				break;
+				
+			case 3:
+				if ((getParameters(ht, 3, &id, &str, &contextnode)) == FAILURE) 
+				{
+					WRONG_PARAM_COUNT;
+				}
+				break;
+				
+			default:
+				WRONG_PARAM_COUNT;
+		}
+	}
+	
+	
 	ctxp = php_xpath_get_context(id, le_xpathctxp, 0 TSRMLS_CC);
 	convert_to_string(str);
+	
+	if (contextnode) {
+		contextnodep = php_dom_get_object(contextnode, le_domxmlnodep, 0);
+	}
+	ctxp->node = contextnodep;
 
 #if defined(LIBXML_XPTR_ENABLED)
 	if(mode == PHP_XPTR) {
@@ -2504,7 +2533,8 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 #if defined(LIBXML_XPTR_ENABLED)
 	}
 #endif
-		
+
+	ctxp->node = NULL;
 	if (!xpathobjp) {
 		RETURN_FALSE;
 	}
