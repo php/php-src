@@ -136,6 +136,7 @@ void pack_dbf(dbhead_t *dbh)
 
 	/* Try to truncate the file to the right size. */
 	if (ftruncate(dbh->db_fd, out_off) != 0) {
+	    TSRMLS_FETCH();
 	    php_error_docref(NULL TSRMLS_CC, E_WARNING, "dbase_pack() couldn't truncate the file to the right size. Some deleted records may still be left in there.");
 	}
 

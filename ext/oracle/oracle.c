@@ -619,7 +619,7 @@ PHP_FUNCTION(ora_open)
 	}
 	ZEND_FETCH_RESOURCE2(conn, oraConnection *, arg, -1, "Oracle-Connection", le_conn, le_pconn);
 
-	cursor = (oraCursor *)emalloc(sizeof(oraCursor);
+	cursor = (oraCursor *)emalloc(sizeof(oraCursor));
 	memset(cursor, 0, sizeof(oraCursor));
 	if (oopen(&cursor->cda, &conn->lda, (text *) 0, -1, -1, (text *) 0, -1)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open new cursor (%s)",

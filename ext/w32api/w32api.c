@@ -2178,8 +2178,8 @@ arguments *w32api_parser_make_argument(char *arg_type, char *arg_name, int byref
 	argument_value->type_name = arg_type;
 	argument_value->type_id = php_w32api_get_type_id_from_name(arg_type);
 
-	if(argument_value->type_id == W32API_UNKNOWN)
-	{
+	if(argument_value->type_id == W32API_UNKNOWN) {
+		TSRMLS_FETCH();
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown type %s used as arugment type", arg_type);
 	}
 

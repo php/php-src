@@ -1113,6 +1113,7 @@ oci_get_col(oci_statement *statement, int col, zval **value)
 {
 	oci_out_column *outcol = NULL;
 	int i;
+	TSRMLS_FETCH();
 
 	if (statement->columns == 0) { /* we release the columns at the end of a fetch */
 		return NULL;
