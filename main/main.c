@@ -841,6 +841,10 @@ int php_request_startup(TSRMLS_D)
 {
 	int retval = SUCCESS;
 
+#ifdef PHP_WIN32
+	CoInitialize(NULL);
+#endif
+
 #if PHP_SIGCHILD
 	signal(SIGCHLD, sigchld_handler);
 #endif
@@ -952,6 +956,10 @@ void php_request_shutdown(void *dummy)
 	zend_try { 
 		zend_unset_timeout(TSRMLS_C);
 	} zend_end_try();
+
+#ifdef PHP_WIN32
+	CoUninitialize();
+#endif
 }
 /* }}} */
 
@@ -1015,8 +1023,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	WSADATA wsaData;
 #endif
 #ifdef PHP_WIN32
-	CoInitialize(NULL);
-
 	{
 		DWORD dwVersion = GetVersion();
 
@@ -1236,10 +1242,6 @@ void php_module_shutdown(TSRMLS_D)
 #endif
 
 	module_initialized = 0;
-	
-#ifdef PHP_WIN32
-	CoUninitialize();
-#endif
 }
 /* }}} */
 
