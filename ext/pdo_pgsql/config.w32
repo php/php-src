@@ -8,6 +8,7 @@ if (PHP_PDO_PGSQL != "no") {
 			CHECK_HEADER_ADD_INCLUDE("libpq-fe.h", "CFLAGS_PDO_PGSQL", PHP_PHP_BUILD + "\\include\\pgsql;" + PHP_PDO_PGSQL)) {
 		EXTENSION("pdo_pgsql", "pdo_pgsql.c pgsql_driver.c pgsql_statement.c");
 		ADD_FLAG('CFLAGS_PDO_PGSQL', "/I ..\\pecl");
+		AC_DEFINE('HAVE_PDO_PGSQL', 1, 'Have PostgreSQL library');
 	} else {
 		WARNING("pdo_pgsql not enabled; libraries and headers not found");
 	}
