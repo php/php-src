@@ -166,8 +166,12 @@ PHPAPI void php_session_set_id(char *id TSRMLS_DC);
 
 #define PS_ADD_VAR(name) PS_ADD_VARL(name, strlen(name))
 
-#define PS_DEL_VARL(name,namelen) \
-	zend_hash_del(&PS(vars), name, namelen + 1);
+#define PS_DEL_VARL(name,namelen)											\
+	zend_hash_del(&PS(vars), name, namelen+1);								\
+	if (PS(http_session_vars)) {											\
+		zend_hash_del(Z_ARRVAL_P(PS(http_session_vars)), name, namelen+1);	\
+	}
+
 
 #define PS_ENCODE_VARS 											\
 	char *key;													\
