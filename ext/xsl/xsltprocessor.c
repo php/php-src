@@ -400,7 +400,10 @@ static xmlDocPtr php_xsl_apply_stylesheet(xsl_object *intern, xsltStylesheetPtr 
 	char **params = NULL;
 	int clone;
 
-
+	if (style == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No stylesheet associated to this object");
+		return NULL;
+	}
 	if (intern->parameter) {
 		params = php_xsl_xslt_make_params(intern->parameter, 0 TSRMLS_CC);
 	}
