@@ -1372,6 +1372,122 @@ SOURCE=..\ext\bcmath\libbcmath\src\private.h
 
 # End Source File
 # End Group
+# End Group
+# Begin Group "rpc"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 9"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\rpc\rpc.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\rpc_proxy.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 9"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\rpc\handler.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\layer.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\php_rpc.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\rpc.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\rpc_proxy.h
+# End Source File
+# End Group
+# Begin Group "com"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 10"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\rpc\com\com.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\com\com_wrapper.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\com\conversion.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\com\dispatch.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\com\variant.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 10"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\rpc\com\com.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\com\com_wrapper.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\com\conversion.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\com\variant.h
+# End Source File
+# End Group
+# End Group
+# End Group
+# Begin Group "zlib"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 10 Nr. 1"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\zlib\zlib.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\zlib\zlib_fopen_wrapper.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 10 Nr. 1"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\zlib\php_zlib.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "Standard"
+
+# PROP Default_Filter ""
 # Begin Group "Source Files No. 1"
 
 # PROP Default_Filter ""
@@ -1805,118 +1921,6 @@ SOURCE=..\ext\standard\url_scanner.h
 # Begin Source File
 
 SOURCE=..\ext\standard\url_scanner_ex.h
-# End Source File
-# End Group
-# End Group
-# Begin Group "rpc"
-
-# PROP Default_Filter ""
-# Begin Group "Source Files No. 9"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\ext\rpc\rpc.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\rpc\rpc_proxy.c
-# End Source File
-# End Group
-# Begin Group "Header Files No. 9"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\ext\rpc\handler.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\rpc\layer.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\rpc\php_rpc.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\rpc\rpc.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\rpc\rpc_proxy.h
-# End Source File
-# End Group
-# Begin Group "com"
-
-# PROP Default_Filter ""
-# Begin Group "Source Files No. 10"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\ext\rpc\com\com.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\rpc\com\com_wrapper.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\rpc\com\conversion.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\rpc\com\dispatch.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\rpc\com\variant.c
-# End Source File
-# End Group
-# Begin Group "Header Files No. 10"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\ext\rpc\com\com.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\rpc\com\com_wrapper.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\rpc\com\conversion.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\rpc\com\variant.h
-# End Source File
-# End Group
-# End Group
-# End Group
-# Begin Group "zlib"
-
-# PROP Default_Filter ""
-# Begin Group "Source Files No. 10 Nr. 1"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\ext\zlib\zlib.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\zlib\zlib_fopen_wrapper.c
-# End Source File
-# End Group
-# Begin Group "Header Files No. 10 Nr. 1"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\ext\zlib\php_zlib.h
 # End Source File
 # End Group
 # End Group
