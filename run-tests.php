@@ -170,9 +170,10 @@ function initialize()
     } elseif (@is_executable("./sapi/cli/php{$ext}")) {
         $php = getcwd() . "/sapi/cli/php{$ext}";
     }
-    if (empty($php)) {
-        $php = in_path("php", $windows_p);
-    }
+// Test result can be bogus, if we use php binary in path. - yohgaki@php.net
+//     if (empty($php)) {
+//         $php = in_path("php", $windows_p);
+//     }
     if (empty($php)) {
         dowriteln("Unable to find PHP executable (php{$ext}).");
         dowriteln("Please build PHP as a CGI executable or make sure it is");
@@ -283,7 +284,8 @@ function do_testing($argc, &$argv)
     dowriteln(sprintf("Tests passed:     %4d (%s%%)", $passed, $passed_pstr));
     dowriteln("=============================");
     dowriteln("Skipped ".sizeof($skipped_extensions)." extensions.");
-    dowriteln("PHP Version: ".phpversion());
+	dowriteln("PHP SAPI: ".PHP_SAPI);
+    dowriteln("PHP Version: ".PHP_VERSION);
 }
 
 function find_testdirs($dir = '.', $first_pass = true)
