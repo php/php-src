@@ -1027,15 +1027,19 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 	
-	RETURN_ON_EXCEPTION
-
-	if (result == FAILURE) {
-		zval_dtor(&reflector);
-		_DO_THROW("Could not create reflector");
-	}
-
 	if (retval_ptr) {
 		zval_ptr_dtor(&retval_ptr);
+	}
+
+	RETURN_ON_EXCEPTION
+
+	if (EG(exception)) {
+		zval_dtor(&reflector);
+		return;
+	}
+	if (result == FAILURE || EG(exception)) {
+		zval_dtor(&reflector);
+		_DO_THROW("Could not create reflector");
 	}
 
 	/* Call static reflection::export */
@@ -2263,7 +2267,9 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 	} else { 
 		convert_to_string_ex(&argument);
 		if (zend_lookup_class(Z_STRVAL_P(argument), Z_STRLEN_P(argument), &ce TSRMLS_CC) == FAILURE) {
-			zend_throw_exception_ex(reflection_exception_ptr, -1 TSRMLS_CC, "Class %s does not exist", Z_STRVAL_P(argument));
+			if (!EG(exception)) {
+				zend_throw_exception_ex(reflection_exception_ptr, -1 TSRMLS_CC, "Class %s does not exist", Z_STRVAL_P(argument));
+			}
 			return;
 		}
 
