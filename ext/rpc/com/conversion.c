@@ -62,11 +62,11 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
 			break;
 
 		case IS_OBJECT:
-			if(!strcmp(pval_arg->value.obj.ce->name, "VARIANT"))
+			if(!strcmp(Z_OBJCE_P(pval_arg)->name, "VARIANT"))
 			{
 				type = VT_VARIANT;
 			}
-			else if(!strcmp(pval_arg->value.obj.ce->name, "COM"))
+			else if(!strcmp(Z_OBJCE_P(pval_arg)->name, "COM"))
 			{
 				type = VT_DISPATCH;
 			}
