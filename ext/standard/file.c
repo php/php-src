@@ -1883,6 +1883,9 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 	srcstream = php_stream_open_wrapper(src, "rb", 
 				ENFORCE_SAFE_MODE | REPORT_ERRORS,
 				NULL);
+	
+	if (!srcstream) 
+		return ret;
 
 	deststream = php_stream_open_wrapper(dest, "wb", 
 				ENFORCE_SAFE_MODE | REPORT_ERRORS,
