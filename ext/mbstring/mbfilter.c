@@ -1779,6 +1779,13 @@ mbfl_name2language(const char *name)
 		}
 	}
 
+	i = 0;
+	while ((language = mbfl_language_ptr_table[i++]) != NULL){
+		if (strcasecmp(language->short_name, name) == 0) {
+			return language;
+		}
+	}
+
 	/* serch aliases */
 	i = 0;
 	while ((language = mbfl_language_ptr_table[i++]) != NULL) {
@@ -1824,6 +1831,20 @@ mbfl_name2no_language(const char *name)
 		return language->no_language;
 	}
 }
+
+const char *
+mbfl_no_language2name(enum mbfl_no_language no_language)
+{
+	mbfl_language *language;
+
+	language = mbfl_no2language(no_language);
+	if (language == NULL) {
+		return "";
+	} else {
+		return language->name;
+	}
+}
+
 
 
 /* encoding resolver */
