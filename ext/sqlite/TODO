@@ -1,3 +1,5 @@
+- Implement a PDO driver, called sqlite2
+
 - Transparent binary encoding of return values from PHP callback functions.
 
 - Add user-space callback for the authorizer function (this is potentially
@@ -13,7 +15,5 @@
 	function in an SQL query.
 	--> Our test suite doesn't allow us to test persistent connections
 	    at this time :/
-
-- Add support for compiled SQL.
 
 vim:tw=78
