@@ -623,7 +623,7 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	signal(SIGCHLD,sigchld_handler);
 #endif
 
-	if (setjmp(EG(bailout))==0) {
+	if (setjmp(EG(bailout))!=0) {
 		return FAILURE;
 	}
 
