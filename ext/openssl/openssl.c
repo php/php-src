@@ -1416,7 +1416,7 @@ PHP_FUNCTION(openssl_csr_sign)
 		zend_error(E_WARNING, "cannot get private key from parameter 3");
 		goto cleanup;
 	}
-	if (cert && !X509_check_private_key(cert, key))	{
+	if (cert && !X509_check_private_key(cert, priv_key))	{
 		zend_error(E_WARNING, "private key does not correspond to signing cert");
 		goto cleanup;
 	}
