@@ -4,11 +4,19 @@
  * All Rights Reserved
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "php.h"
+
+#include "ext/standard/flock_compat.h" 
+
 #include <stdio.h>
 #include <fcntl.h>
 
 #include "dbf.h"
-
+ 
 int get_piece(dbhead_t *dbh, long offset, char *cp, int len);
 int put_piece(dbhead_t *dbh, long offset, char *cp, int len);
 
