@@ -405,27 +405,35 @@
 	  // {{{   extension entry
 
 		function generate_extension_entry() {
-			return '
-/* {{{ '.$this->name.'_module_entry
+      $name = $this->name;
+      $upname = strtoupper($this->name);
+
+			$code = "
+/* {{{ {$name}_module_entry
  */
-zend_module_entry '.$this->name.'_module_entry = {
+zend_module_entry {$name}_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"'.$this->name.'",
-	'.$this->name.'_functions,
-	PHP_MINIT('.$this->name.'),     /* Replace with NULL if there is nothing to do at php startup   */ 
-	PHP_MSHUTDOWN('.$this->name.'), /* Replace with NULL if there is nothing to do at php shutdown  */
-	PHP_RINIT('.$this->name.'),		  /* Replace with NULL if there is nothing to do at request start */
-	PHP_RSHUTDOWN('.$this->name.'),	/* Replace with NULL if there is nothing to do at request end   */
-	PHP_MINFO('.$this->name.'),
-	"'.$this->release['version'].'", 
+	\"$name\",
+	{$name}_functions,
+	PHP_MINIT($name),     /* Replace with NULL if there is nothing to do at php startup   */ 
+	PHP_MSHUTDOWN($name), /* Replace with NULL if there is nothing to do at php shutdown  */
+	PHP_RINIT($name),		  /* Replace with NULL if there is nothing to do at request start */
+	PHP_RSHUTDOWN($name),	/* Replace with NULL if there is nothing to do at request end   */
+	PHP_MINFO($name),
+	\"".$this->release['version']."\", 
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
-#ifdef COMPILE_DL_'.strtoupper($this->name).'
-ZEND_GET_MODULE('.$this->name.')
-#endif
-';
+";
+
+      $code .= "#ifdef COMPILE_DL_$upname\n";
+	    if ($this->language == "cpp") $code .= "extern \"C\" {\n";
+      $code .= "ZEND_GET_MODULE($name)\n";
+	    if ($this->language == "cpp") $code .= "}\n";
+	    $code .= "#endif\n\n";
+
+			return $code;
 		}
 
 	// }}} 
@@ -540,6 +548,10 @@ ZEND_GET_MODULE('.$this->name.')
 				}
 			}
 
+			if ($this->language == "cpp") {
+				fputs($fp, "extern \"C\" {\n");
+			}
+
 			fputs($fp, '
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -551,6 +563,10 @@ ZEND_GET_MODULE('.$this->name.')
 #include <ext/standard/info.h>
 
 ');
+
+			if ($this->language == "cpp") {
+				fputs($fp, "}\n");
+			}
 
 			if (isset($this->headers)) {
 				foreach ($this->headers as $header) {
