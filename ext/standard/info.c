@@ -167,20 +167,22 @@ PHPAPI void php_print_info(int flag)
 #ifdef CONFIGURE_COMMAND
 		php_info_print_table_row(2, "Configure Command", CONFIGURE_COMMAND );
 #endif
+		if (sapi_module.name) {
+			php_info_print_table_row(2, "SAPI", sapi_module.name );
+		}
+
 		php_info_print_table_row(2, "php.ini Path", CONFIGURATION_FILE_PATH );
 
 #if ZEND_DEBUG
-		php_info_print_table_row(2, "ZEND_DEBUG", "true" );
+		php_info_print_table_row(2, "ZEND_DEBUG", "Enabled" );
 #else
-		php_info_print_table_row(2, "ZEND_DEBUG", "false" );
+		php_info_print_table_row(2, "ZEND_DEBUG", "Disabled" );
 #endif
 
-		if (sapi_module.name)
-			php_info_print_table_row(2, "SAPI", sapi_module.name );
 #ifdef ZTS
-		php_info_print_table_row(2, "ZTS", "defined" );
+		php_info_print_table_row(2, "Thread Safety", "Enabled" );
 #else
-		php_info_print_table_row(2, "ZTS", "undefined" );
+		php_info_print_table_row(2, "Thread Safety", "Disabled" );
 #endif
 		php_info_print_table_end();
 
