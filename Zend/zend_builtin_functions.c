@@ -869,7 +869,7 @@ ZEND_FUNCTION(create_function)
 
 ZEND_FUNCTION(zend_test_func)
 {
-	zval **arg1, **arg2;
+	zval *arg1, *arg2;
 
-	zend_get_parameters_ex(2, &arg1, &arg2);
+	zend_get_parameters(ht, 2, &arg1, &arg2);
 }
