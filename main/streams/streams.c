@@ -1353,7 +1353,7 @@ int php_init_stream_wrappers(int module_number TSRMLS_DC)
 			php_stream_xport_register("tcp", php_stream_generic_socket_factory TSRMLS_CC) == SUCCESS
 			&&
 			php_stream_xport_register("udp", php_stream_generic_socket_factory TSRMLS_CC) == SUCCESS
-#ifdef AF_UNIX
+#if defined(AF_UNIX) && !(defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE))
 			&&
 			php_stream_xport_register("unix", php_stream_generic_socket_factory TSRMLS_CC) == SUCCESS
 			&&
