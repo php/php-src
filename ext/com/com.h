@@ -42,12 +42,12 @@ END_EXTERN_C()
 			}																		\
 			ZVAL_RESOURCE(handle, zend_list_insert((o), IS_COM));						\
 																					\
-			zval_copy_ctor(handle);													\
 			zend_hash_index_update(properties, 0, &handle, sizeof(zval *), NULL);	\
 			object_and_properties_init(z, &COM_class_entry, properties);			\
+			(z)->is_ref=1;															\
 		}
 
-#define RETVAL_COM(o)	ZVAL_COM(&return_value, o);
+#define RETVAL_COM(o)	ZVAL_COM(return_value, o);
 #define RETURN_COM(o)	RETVAL_COM(o)												\
 						return;
 
@@ -55,6 +55,20 @@ END_EXTERN_C()
 						C_REFCOUNT(z) = 0;
 
 #define FREE_COM(z)		php_COM_destruct(z TSRMLS_CC);
+
+#define FETCH_COM(z, obj) {															\
+		zval **tmp;																	\
+		zend_hash_index_find(Z_OBJPROP_P(z), 0, (void**)&tmp);						\
+		ZEND_FETCH_RESOURCE(obj, comval*, tmp, -1, "comval", IS_COM);				\
+	}																				\
+	if (obj == NULL) {																\
+		php_error(E_WARNING, "%d is not a COM object handler", Z_LVAL_P(z));		\
+		RETURN_NULL();																\
+	}
+
+#define FETCH_COM_SAFE(z, obj)														\
+	if ((Z_TYPE_P(z) == IS_OBJECT) && (Z_OBJCE_P(z) == &COM_class_entry))			\
+	FETCH_COM(z, obj)
 
 #define IS_COM			php_COM_get_le_comval()
 

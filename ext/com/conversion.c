@@ -729,7 +729,6 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 					php_COM_set(obj, &V_DISPATCH(var_arg), FALSE TSRMLS_CC);
 					
 					ZVAL_COM(pval_arg, obj);
-					VariantInit(var_arg);	// to protect C_DISPATCH(obj) from being freed when var_result is destructed
 				}
 			}
 			break;
