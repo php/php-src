@@ -175,7 +175,7 @@ PHP_FUNCTION(swf_openfile)
 	}
 #endif
 	
-	swf_openfile((strcasecmp("php://stdout", na)==0) ? fileno(stdout) : na,
+	swf_openfile((strcasecmp("php://stdout", na)==0) ? "STDOUT" : na,
 			 (float)Z_DVAL_PP(sizeX), (float)Z_DVAL_PP(sizeY),
       		 	 (float)Z_DVAL_PP(frameRate), (float)Z_DVAL_PP(r), (float)Z_DVAL_PP(g), (float)Z_DVAL_PP(b));
 #ifdef VIRTUAL_DIR
