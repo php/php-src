@@ -187,7 +187,7 @@ PHPAPI int php_check_specific_open_basedir(char *basedir, char *path PLS_DC)
 	}
 
 	/* Resolve the real path into resolved_name */
-	if ((V_REALPATH(path, resolved_name) != NULL) && (V_REALPATH(local_open_basedir, resolved_basedir) != NULL)) {
+	if ((expand_filepath(path, resolved_name) != NULL) && (expand_filepath(local_open_basedir, resolved_basedir) != NULL)) {
 		/* Check the path */
 #ifdef PHP_WIN32
 		if (strncasecmp(resolved_basedir, resolved_name, strlen(resolved_basedir)) == 0) {
@@ -239,6 +239,7 @@ PHPAPI int php_check_open_basedir(char *path)
 		}
 		php_error(E_WARNING, "open_basedir restriction in effect. File is in wrong directory.");
 		efree(pathbuf);
+		errno = EPERM; /* we deny permission to open it */
 		return -1;
 	}
 
@@ -275,7 +276,7 @@ PHPAPI FILE *php_fopen_wrapper(char *path, char *mode, int options, int *issock,
 		}
 		fp = V_FOPEN(path, mode);
 		if (fp && opened_path) {
-			*opened_path = expand_filepath(path);
+			*opened_path = expand_filepath(path,NULL);
 		}
 		return fp;
 	}
@@ -405,7 +406,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 		if (php_check_open_basedir(filename)) return NULL;
 		fp = V_FOPEN(filename, mode);
 		if (fp && opened_path) {
-			*opened_path = expand_filepath(filename);
+			*opened_path = expand_filepath(filename,NULL);
 		}
 		return fp;
 	}
@@ -427,7 +428,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 			if (php_check_open_basedir(trypath)) return NULL;
 			fp = V_FOPEN(trypath, mode);
 			if (fp && opened_path) {
-				*opened_path = expand_filepath(trypath);
+				*opened_path = expand_filepath(trypath,NULL);
 			}
 			return fp;
 		} else {
@@ -436,7 +437,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 			}
 			fp = V_FOPEN(filename, mode);
 			if (fp && opened_path) {
-				*opened_path = expand_filepath(filename);
+				*opened_path = expand_filepath(filename,NULL);
 			}
 			return fp;
 		}
@@ -482,7 +483,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 				return NULL;
 			}
 			if (opened_path) {
-				*opened_path = expand_filepath(trypath);
+				*opened_path = expand_filepath(trypath,NULL);
 			}
 			efree(pathbuf);
 			return fp;
@@ -1099,7 +1100,7 @@ PHPAPI char *php_strip_url_passwd(char *url)
 
 #if 1
 
-PHPAPI char *expand_filepath(char *filepath)
+PHPAPI char *expand_filepath(char *filepath, char *real_path)
 {
 	cwd_state new_state;
 	char cwd[MAXPATHLEN+1];
@@ -1113,8 +1114,19 @@ PHPAPI char *expand_filepath(char *filepath)
 	new_state.cwd = strdup(cwd);
 	new_state.cwd_length = strlen(cwd);
 
-	virtual_file_ex(&new_state, filepath, NULL);
-	return new_state.cwd;
+	if(virtual_file_ex(&new_state, filepath, NULL)) {
+		return NULL;
+	}
+
+	if(real_path) {
+		int copy_len = new_state.cwd_length>MAXPATHLEN-1?MAXPATHLEN-1:new_state.cwd_length;
+		memcpy(real_path,new_state.cwd,copy_len);
+		real_path[copy_len]='\0';
+	} else {
+		real_path = new_state.cwd;
+	}
+
+	return real_path;
 }
 
 #else
