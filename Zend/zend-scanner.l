@@ -18,13 +18,14 @@
 
 %}
 
-%x IN_SCRIPTING
-%x DOUBLE_QUOTES
-%x SINGLE_QUOTE
-%x BACKQUOTE
-%x HEREDOC
-%x LOOKING_FOR_PROPERTY
-%x LOOKING_FOR_VARNAME
+%x ST_IN_SCRIPTING
+%x ST_DOUBLE_QUOTES
+%x ST_SINGLE_QUOTE
+%x ST_BACKQUOTE
+%x ST_HEREDOC
+%x ST_LOOKING_FOR_PROPERTY
+%x ST_LOOKING_FOR_VARNAME
+%x ST_COMMENT
 %option stack
 
 %{
@@ -368,9 +369,9 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 	} else {
 		CG(active_op_array) = op_array;
 #ifndef ZTS
-		BEGIN(IN_SCRIPTING);
+		BEGIN(ST_IN_SCRIPTING);
 #else
-		CG(ZFL)->BeginState(IN_SCRIPTING);
+		CG(ZFL)->BeginState(ST_IN_SCRIPTING);
 #endif
 		compiler_result = zendparse(CLS_C);
 		restore_lexical_state(&original_lex_state CLS_CC);
@@ -559,124 +560,124 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 %option noyywrap
 %%
 
-<IN_SCRIPTING>"exit" {
+<ST_IN_SCRIPTING>"exit" {
 	return T_EXIT;
 }
 
-<IN_SCRIPTING>"die" {
+<ST_IN_SCRIPTING>"die" {
 	return T_EXIT;
 }
 
-<IN_SCRIPTING>"old_function" {
+<ST_IN_SCRIPTING>"old_function" {
 	return T_OLD_FUNCTION;
 }
 
-<IN_SCRIPTING>"function"|"cfunction" {
+<ST_IN_SCRIPTING>"function"|"cfunction" {
 	return T_FUNCTION;
 }
 
-<IN_SCRIPTING>"const" {
+<ST_IN_SCRIPTING>"const" {
 	return T_CONST;
 }
 
-<IN_SCRIPTING>"return" {
+<ST_IN_SCRIPTING>"return" {
 	return T_RETURN;
 }
 
-<IN_SCRIPTING>"if" {
+<ST_IN_SCRIPTING>"if" {
 	return T_IF;
 }
 
-<IN_SCRIPTING>"elseif" {
+<ST_IN_SCRIPTING>"elseif" {
 	return T_ELSEIF;
 }
 
-<IN_SCRIPTING>"endif" {
+<ST_IN_SCRIPTING>"endif" {
 	return T_ENDIF;
 }
 
-<IN_SCRIPTING>"else" {
+<ST_IN_SCRIPTING>"else" {
 	return T_ELSE;
 }
 
-<IN_SCRIPTING>"while" {
+<ST_IN_SCRIPTING>"while" {
 	return T_WHILE;
 }
 
-<IN_SCRIPTING>"endwhile" {
+<ST_IN_SCRIPTING>"endwhile" {
 	return T_ENDWHILE;
 }
 
-<IN_SCRIPTING>"do" {
+<ST_IN_SCRIPTING>"do" {
 	return T_DO;
 }
 
-<IN_SCRIPTING>"for" {
+<ST_IN_SCRIPTING>"for" {
 	return T_FOR;
 }
 
-<IN_SCRIPTING>"endfor" {
+<ST_IN_SCRIPTING>"endfor" {
 	return T_ENDFOR;
 }
 
-<IN_SCRIPTING>"foreach" {
+<ST_IN_SCRIPTING>"foreach" {
 	return T_FOREACH;
 }
 
-<IN_SCRIPTING>"endforeach" {
+<ST_IN_SCRIPTING>"endforeach" {
 	return T_ENDFOREACH;
 }
 
-<IN_SCRIPTING>"as" {
+<ST_IN_SCRIPTING>"as" {
 	return T_AS;
 }
 
-<IN_SCRIPTING>"switch" {
+<ST_IN_SCRIPTING>"switch" {
 	return T_SWITCH;
 }
 
-<IN_SCRIPTING>"endswitch" {
+<ST_IN_SCRIPTING>"endswitch" {
 	return T_ENDSWITCH;
 }
 
-<IN_SCRIPTING>"case" {
+<ST_IN_SCRIPTING>"case" {
 	return T_CASE;
 }
 
-<IN_SCRIPTING>"default" {
+<ST_IN_SCRIPTING>"default" {
 	return T_DEFAULT;
 }
 
-<IN_SCRIPTING>"break" {
+<ST_IN_SCRIPTING>"break" {
 	return T_BREAK;
 }
 
-<IN_SCRIPTING>"continue" {
+<ST_IN_SCRIPTING>"continue" {
 	return T_CONTINUE;
 }
 
-<IN_SCRIPTING>"echo" {
+<ST_IN_SCRIPTING>"echo" {
 	return T_ECHO;
 }
 
-<IN_SCRIPTING>"print" {
+<ST_IN_SCRIPTING>"print" {
 	return T_PRINT;
 }
 
-<IN_SCRIPTING>"class" {
+<ST_IN_SCRIPTING>"class" {
 	return T_CLASS;
 }
 
-<IN_SCRIPTING>"extends" {
+<ST_IN_SCRIPTING>"extends" {
 	return T_EXTENDS;
 }
 
-<IN_SCRIPTING,DOUBLE_QUOTES,BACKQUOTE,HEREDOC>"->" {
-	yy_push_state(LOOKING_FOR_PROPERTY);
+<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"->" {
+	yy_push_state(ST_LOOKING_FOR_PROPERTY);
 	return T_OBJECT_OPERATOR;
 }
 
-<LOOKING_FOR_PROPERTY>{LABEL} {
+<ST_LOOKING_FOR_PROPERTY>{LABEL} {
 	yy_pop_state();
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
@@ -684,203 +685,203 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	return T_STRING;
 }
 
-<LOOKING_FOR_PROPERTY>. {
+<ST_LOOKING_FOR_PROPERTY>. {
 	/*unput(yytext[0]);*/
 	yyless(0);
 	yy_pop_state();
 }
 
-<IN_SCRIPTING>"::" {
+<ST_IN_SCRIPTING>"::" {
 	return T_PAAMAYIM_NEKUDOTAYIM;
 }
 
-<IN_SCRIPTING>"new" {
+<ST_IN_SCRIPTING>"new" {
 	return T_NEW;
 }
 
-<IN_SCRIPTING>"var" {
+<ST_IN_SCRIPTING>"var" {
 	return T_VAR;
 }
 
-<IN_SCRIPTING>"("{TABS_AND_SPACES}("int"|"integer"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("int"|"integer"){TABS_AND_SPACES}")" {
 	return T_INT_CAST;
 }
 
-<IN_SCRIPTING>"("{TABS_AND_SPACES}("real"|"double"|"float"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("real"|"double"|"float"){TABS_AND_SPACES}")" {
 	return T_DOUBLE_CAST;
 }
 
-<IN_SCRIPTING>"("{TABS_AND_SPACES}"string"{TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"string"{TABS_AND_SPACES}")" {
 	return T_STRING_CAST;
 }
 
-<IN_SCRIPTING>"("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
 	return T_ARRAY_CAST;
 }
 
-<IN_SCRIPTING>"("{TABS_AND_SPACES}"object"{TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"object"{TABS_AND_SPACES}")" {
 	return T_OBJECT_CAST;
 }
 
-<IN_SCRIPTING>"eval" {
+<ST_IN_SCRIPTING>"eval" {
 	return T_EVAL;
 }
 
-<IN_SCRIPTING>"include" {
+<ST_IN_SCRIPTING>"include" {
 	return T_INCLUDE;
 }
 
-<IN_SCRIPTING>"require" {
+<ST_IN_SCRIPTING>"require" {
 	return T_REQUIRE;
 }
 
-<IN_SCRIPTING>"global" {
+<ST_IN_SCRIPTING>"global" {
 	return T_GLOBAL;
 }
 
-<IN_SCRIPTING>"isset" {
+<ST_IN_SCRIPTING>"isset" {
 	return T_ISSET;
 }
 
-<IN_SCRIPTING>"empty" {
+<ST_IN_SCRIPTING>"empty" {
 	return T_EMPTY;
 }
 
-<IN_SCRIPTING>"static" {
+<ST_IN_SCRIPTING>"static" {
 	return T_STATIC;
 }
 
-<IN_SCRIPTING>"unset" {
+<ST_IN_SCRIPTING>"unset" {
 	return T_UNSET;
 }
 
-<IN_SCRIPTING>"=>" {
+<ST_IN_SCRIPTING>"=>" {
 	return T_DOUBLE_ARROW;
 }
 
-<IN_SCRIPTING>"list" {
+<ST_IN_SCRIPTING>"list" {
 	return T_LIST;
 }
 
-<IN_SCRIPTING>"array" {
+<ST_IN_SCRIPTING>"array" {
 	return T_ARRAY;
 }
 
-<IN_SCRIPTING>"++" {
+<ST_IN_SCRIPTING>"++" {
 	return T_INC;
 }
 
-<IN_SCRIPTING>"--" {
+<ST_IN_SCRIPTING>"--" {
 	return T_DEC;
 }
 
-<IN_SCRIPTING>"==" {
+<ST_IN_SCRIPTING>"==" {
 	return T_IS_EQUAL;
 }
 
-<IN_SCRIPTING>"!="|"<>" {
+<ST_IN_SCRIPTING>"!="|"<>" {
 	return T_IS_NOT_EQUAL;
 }
 
-<IN_SCRIPTING>"<=" {
+<ST_IN_SCRIPTING>"<=" {
 	return T_IS_SMALLER_OR_EQUAL;
 }
 
-<IN_SCRIPTING>">=" {
+<ST_IN_SCRIPTING>">=" {
 	return T_IS_GREATER_OR_EQUAL;
 }
 
-<IN_SCRIPTING>"+=" {
+<ST_IN_SCRIPTING>"+=" {
 	return T_PLUS_EQUAL;
 }
 
-<IN_SCRIPTING>"-=" {
+<ST_IN_SCRIPTING>"-=" {
 	return T_MINUS_EQUAL;
 }
 
-<IN_SCRIPTING>"*=" {
+<ST_IN_SCRIPTING>"*=" {
 	return T_MUL_EQUAL;
 }
 
-<IN_SCRIPTING>"/=" {
+<ST_IN_SCRIPTING>"/=" {
 	return T_DIV_EQUAL;
 }
 
-<IN_SCRIPTING>".=" {
+<ST_IN_SCRIPTING>".=" {
 	return T_CONCAT_EQUAL;
 }
 
 
-<IN_SCRIPTING>"%=" {
+<ST_IN_SCRIPTING>"%=" {
 	return T_MOD_EQUAL;
 }
 
-<IN_SCRIPTING>"<<=" {
+<ST_IN_SCRIPTING>"<<=" {
 	return T_SL_EQUAL;
 }
 
-<IN_SCRIPTING>">>=" {
+<ST_IN_SCRIPTING>">>=" {
 	return T_SR_EQUAL;
 }
 
-<IN_SCRIPTING>"&=" {
+<ST_IN_SCRIPTING>"&=" {
 	return T_AND_EQUAL;
 }
 
-<IN_SCRIPTING>"|=" {
+<ST_IN_SCRIPTING>"|=" {
 	return T_OR_EQUAL;
 }
 
-<IN_SCRIPTING>"^=" {
+<ST_IN_SCRIPTING>"^=" {
 	return XT_OR_EQUAL;
 }
 
-<IN_SCRIPTING>"||" {
+<ST_IN_SCRIPTING>"||" {
 	return T_BOOLEAN_OR;
 }
 
-<IN_SCRIPTING>"&&" {
+<ST_IN_SCRIPTING>"&&" {
 	return T_BOOLEAN_AND;
 }
 
-<IN_SCRIPTING>"OR" {
+<ST_IN_SCRIPTING>"OR" {
 	return T_LOGICAL_OR;
 }
 
-<IN_SCRIPTING>"AND" {
+<ST_IN_SCRIPTING>"AND" {
 	return T_LOGICAL_AND;
 }
 
-<IN_SCRIPTING>"XOR" {
+<ST_IN_SCRIPTING>"XOR" {
 	return T_LOGICAL_XOR;
 }
 
-<IN_SCRIPTING>"<<" {
+<ST_IN_SCRIPTING>"<<" {
 	return T_SL;
 }
 
-<IN_SCRIPTING>">>" {
+<ST_IN_SCRIPTING>">>" {
 	return T_SR;
 }
 
-<IN_SCRIPTING>{TOKENS} {
+<ST_IN_SCRIPTING>{TOKENS} {
 	return yytext[0];
 }
 
 
-<IN_SCRIPTING>"{" {
-	yy_push_state(IN_SCRIPTING);
+<ST_IN_SCRIPTING>"{" {
+	yy_push_state(ST_IN_SCRIPTING);
 	return '{';
 }
 
 
-<DOUBLE_QUOTES,BACKQUOTE,HEREDOC>"${" {
-	yy_push_state(LOOKING_FOR_VARNAME);
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"${" {
+	yy_push_state(ST_LOOKING_FOR_VARNAME);
 	return T_DOLLAR_OPEN_CURLY_BRACES;
 }
 
 
-<IN_SCRIPTING>"}" {
+<ST_IN_SCRIPTING>"}" {
 	/* This is a temporary fix which is dependant on flex and it's implementation */
 	if (yy_start_stack_ptr) {
 		yy_pop_state();
@@ -889,25 +890,25 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<LOOKING_FOR_VARNAME>{LABEL} {
+<ST_LOOKING_FOR_VARNAME>{LABEL} {
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
 	yy_pop_state();
-	yy_push_state(IN_SCRIPTING);
+	yy_push_state(ST_IN_SCRIPTING);
 	return T_STRING_VARNAME;
 }
 
 
-<LOOKING_FOR_VARNAME>. {
+<ST_LOOKING_FOR_VARNAME>. {
 	/*unput(yytext[0]);*/
 	yyless(0);
 	yy_pop_state();
-	yy_push_state(IN_SCRIPTING);
+	yy_push_state(ST_IN_SCRIPTING);
 }
 
 
-<IN_SCRIPTING>{LNUM}|{HNUM} {
+<ST_IN_SCRIPTING>{LNUM}|{HNUM} {
 	errno = 0;
 	zendlval->value.lval = strtol(yytext, NULL, 0);
 	if (errno == ERANGE) { /* overflow */
@@ -920,26 +921,26 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	}
 }
 
-<DOUBLE_QUOTES,BACKQUOTE,HEREDOC>{LNUM}|{HNUM} { /* treat numbers (almost) as strings inside encapsulated strings */
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{LNUM}|{HNUM} { /* treat numbers (almost) as strings inside encapsulated strings */
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
 	return T_NUM_STRING;
 }
 
-<IN_SCRIPTING>{DNUM}|{EXPONENT_DNUM} {
+<ST_IN_SCRIPTING>{DNUM}|{EXPONENT_DNUM} {
 	zendlval->value.dval = strtod(yytext,NULL);
 	zendlval->type = IS_DOUBLE;
 	return T_DNUMBER;
 }
 
-<IN_SCRIPTING>"__LINE__" {
+<ST_IN_SCRIPTING>"__LINE__" {
 	zendlval->value.lval = CG(zend_lineno);
 	zendlval->type = IS_LONG;
 	return T_LINE;
 }
 
-<IN_SCRIPTING>"__FILE__" {
+<ST_IN_SCRIPTING>"__FILE__" {
 	char *filename = zend_get_compiled_filename();
 	
 	zendlval->value.str.len = strlen(filename);
@@ -963,7 +964,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 		zendlval->value.str.val = yytext; /* no copying - intentional */
 		zendlval->value.str.len = yyleng;
 		zendlval->type = IS_STRING;
-		BEGIN(IN_SCRIPTING);
+		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
 		zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
@@ -979,7 +980,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 		zendlval->value.str.val = yytext; /* no copying - intentional */
 		zendlval->value.str.len = yyleng;
 		zendlval->type = IS_STRING;
-		BEGIN(IN_SCRIPTING);
+		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG_WITH_ECHO;
 	} else {
 		zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
@@ -995,7 +996,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 		zendlval->value.str.val = yytext; /* no copying - intentional */
 		zendlval->value.str.len = yyleng;
 		zendlval->type = IS_STRING;
-		BEGIN(IN_SCRIPTING);
+		BEGIN(ST_IN_SCRIPTING);
 	} else {
 		zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 		zendlval->value.str.len = yyleng;
@@ -1010,7 +1011,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
 	HANDLE_NEWLINE(yytext[yyleng-1]);
-	BEGIN(IN_SCRIPTING);
+	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG;
 }
 
@@ -1021,7 +1022,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	return T_PHP_TRACK_VARS;
 }
 
-<IN_SCRIPTING,DOUBLE_QUOTES,HEREDOC>"$"{LABEL} {
+<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC>"$"{LABEL} {
 	zendlval->value.str.val = (char *)estrndup(yytext+1, yyleng-1);
 	zendlval->value.str.len = yyleng-1;
 	zendlval->type = IS_STRING;
@@ -1029,7 +1030,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<IN_SCRIPTING>{LABEL} {
+<ST_IN_SCRIPTING>{LABEL} {
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
@@ -1037,7 +1038,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<DOUBLE_QUOTES,BACKQUOTE,HEREDOC>{LABEL} {
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{LABEL} {
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
@@ -1045,7 +1046,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<IN_SCRIPTING>{WHITESPACE} {
+<ST_IN_SCRIPTING>{WHITESPACE} {
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
@@ -1054,18 +1055,31 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<IN_SCRIPTING>([#]|"//")([^\n\r?]|"?"[^>\n\r])*("?\n"|"?\r\n")? { /* eat one line comments */
+<ST_IN_SCRIPTING>([#]|"//")([^\n\r?]|"?"[^>\n\r])*("?\n"|"?\r\n")? { /* eat one line comments */
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	return T_COMMENT;
 }
 
-<IN_SCRIPTING>"/*"([^*]|"*"[^/])*(("*/")?) {
-	HANDLE_NEWLINES(yytext, yyleng);
-	return T_COMMENT;
+<ST_IN_SCRIPTING>"/*" {
+	BEGIN(ST_COMMENT);
+	yymore();
 }
 
 
-<IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">")([\n]|"\r\n")? {
+<ST_COMMENT>[^*]+ {
+	yymore();
+}
+
+<ST_COMMENT>"*/" {
+	BEGIN(ST_IN_SCRIPTING);
+	return T_COMMENT;
+}
+
+<ST_COMMENT>"*" {
+	yymore();
+}
+
+<ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">")([\n]|"\r\n")? {
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
@@ -1075,7 +1089,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<IN_SCRIPTING>"%>"([\n]|"\r\n")? {
+<ST_IN_SCRIPTING>"%>"([\n]|"\r\n")? {
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
@@ -1089,7 +1103,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<IN_SCRIPTING>(["]([^$"\\]|("\\".))*["]) {
+<ST_IN_SCRIPTING>(["]([^$"\\]|("\\".))*["]) {
 	register char *s, *t;
 	char *end;
 	
@@ -1171,7 +1185,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<IN_SCRIPTING>([']([^'\\]|("\\".))*[']) {
+<ST_IN_SCRIPTING>([']([^'\\]|("\\".))*[']) {
 	register char *s, *t;
 	char *end;
 	
@@ -1211,13 +1225,13 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<IN_SCRIPTING>["] {
-	BEGIN(DOUBLE_QUOTES);
+<ST_IN_SCRIPTING>["] {
+	BEGIN(ST_DOUBLE_QUOTES);
 	return '\"';
 }
 
 
-<IN_SCRIPTING>"<<<"{TABS_AND_SPACES}{LABEL}("\r")?"\n" {
+<ST_IN_SCRIPTING>"<<<"{TABS_AND_SPACES}{LABEL}("\r")?"\n" {
 	char *s;
 	CG(heredoc_len) = yyleng-3-1-(yytext[yyleng-2]=='\r'?1:0);
 	s = yytext+3;
@@ -1226,24 +1240,24 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 		CG(heredoc_len)--;
 	}
 	CG(heredoc) = estrndup(s, CG(heredoc_len));
-	BEGIN(HEREDOC);
+	BEGIN(ST_HEREDOC);
 	return T_HEREDOC;
 }
 	
 
-<IN_SCRIPTING>[`] {
-	BEGIN(BACKQUOTE);
+<ST_IN_SCRIPTING>[`] {
+	BEGIN(ST_BACKQUOTE);
 	return '`';
 }
 
 
-<IN_SCRIPTING>['] {
-	BEGIN(SINGLE_QUOTE);
+<ST_IN_SCRIPTING>['] {
+	BEGIN(ST_SINGLE_QUOTE);
 	return '\'';
 }
 
 
-<HEREDOC>^{LABEL}(";")?("\r")?"\n" {
+<ST_HEREDOC>^{LABEL}(";")?("\r")?"\n" {
 	int label_len;
 	unsigned char unput_semicolon;
 
@@ -1267,7 +1281,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 		efree(CG(heredoc));
 		CG(heredoc)=NULL;
 		CG(heredoc_len)=0;
-		BEGIN(IN_SCRIPTING);
+		BEGIN(ST_IN_SCRIPTING);
 		return T_HEREDOC;
 	} else {
 		zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
@@ -1278,7 +1292,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<DOUBLE_QUOTES,BACKQUOTE,HEREDOC>{ESCAPED_AND_WHITESPACE} {
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{ESCAPED_AND_WHITESPACE} {
 	HANDLE_NEWLINES(yytext,yyleng);
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
@@ -1286,7 +1300,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	return T_ENCAPSED_AND_WHITESPACE;
 }
 
-<SINGLE_QUOTE>([^'\\]|\\[^'\\])+ {
+<ST_SINGLE_QUOTE>([^'\\]|\\[^'\\])+ {
 	HANDLE_NEWLINES(yytext,yyleng);
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
@@ -1295,7 +1309,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<DOUBLE_QUOTES>[`]+ {
+<ST_DOUBLE_QUOTES>[`]+ {
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
@@ -1303,7 +1317,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<BACKQUOTE>["]+ {
+<ST_BACKQUOTE>["]+ {
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
@@ -1311,7 +1325,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<DOUBLE_QUOTES,BACKQUOTE,HEREDOC>"$"[^a-zA-Z_\x7f-\xff{] {
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"$"[^a-zA-Z_\x7f-\xff{] {
 	zendlval->value.chval = yytext[0];
 	if (yyleng == 2) {
 		yyless(1);
@@ -1323,51 +1337,51 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<DOUBLE_QUOTES,BACKQUOTE,HEREDOC>{ENCAPSED_TOKENS} {
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{ENCAPSED_TOKENS} {
 	zendlval->value.chval = yytext[0];
 	return yytext[0];
 }
 
-<DOUBLE_QUOTES,BACKQUOTE,HEREDOC>"{$" {
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
 	zendlval->value.chval = yytext[0];
-	yy_push_state(IN_SCRIPTING);
+	yy_push_state(ST_IN_SCRIPTING);
 	/*unput('$');*/
 	yyless(1);
 	return T_CURLY_OPEN;
 }
 
 
-<SINGLE_QUOTE>"\\'" {
+<ST_SINGLE_QUOTE>"\\'" {
 	zendlval->value.chval='\'';
 	return T_CHARACTER;
 }
 
-<SINGLE_QUOTE>"\\\\" {
+<ST_SINGLE_QUOTE>"\\\\" {
 	zendlval->value.chval='\\';
 	return T_CHARACTER;
 }
 
-<DOUBLE_QUOTES>"\\\"" {
+<ST_DOUBLE_QUOTES>"\\\"" {
 	zendlval->value.chval='"';
 	return T_CHARACTER;
 }
 
-<BACKQUOTE>"\\`" {
+<ST_BACKQUOTE>"\\`" {
 	zendlval->value.chval='`';
 	return T_CHARACTER;
 }
 
-<DOUBLE_QUOTES,BACKQUOTE,HEREDOC>"\\"[0-7]{1,3} {
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\"[0-7]{1,3} {
 	zendlval->value.chval = (char) strtol (yytext+1, NULL, 8);
 	return T_CHARACTER;
 }
 
-<DOUBLE_QUOTES,BACKQUOTE,HEREDOC>"\\x"[0-9A-Fa-f]{1,2} {
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\x"[0-9A-Fa-f]{1,2} {
 	zendlval->value.chval = (char) strtol (yytext+2, NULL, 16);
 	return T_CHARACTER;
 }
 
-<DOUBLE_QUOTES,BACKQUOTE>"\\". {
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE>"\\". {
 	switch (yytext[1]) {
 		case 'n':
 			zendlval->value.chval='\n';
@@ -1398,13 +1412,13 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<HEREDOC>"\\$"|"\\{" {
+<ST_HEREDOC>"\\$"|"\\{" {
 	zendlval->value.chval = yytext[1];
 	return T_CHARACTER;
 }
 
 
-<HEREDOC>["'`]+ {
+<ST_HEREDOC>["'`]+ {
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
@@ -1412,29 +1426,29 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<DOUBLE_QUOTES>["] {
-	BEGIN(IN_SCRIPTING);
+<ST_DOUBLE_QUOTES>["] {
+	BEGIN(ST_IN_SCRIPTING);
 	return '\"';
 }
 
 
-<BACKQUOTE>[`] {
-	BEGIN(IN_SCRIPTING);
+<ST_BACKQUOTE>[`] {
+	BEGIN(ST_IN_SCRIPTING);
 	return '`';
 }
 
 
-<SINGLE_QUOTE>['] {
-	BEGIN(IN_SCRIPTING);
+<ST_SINGLE_QUOTE>['] {
+	BEGIN(ST_IN_SCRIPTING);
 	return '\'';
 }
 
 
-<DOUBLE_QUOTES,BACKQUOTE,INITIAL,IN_SCRIPTING,LOOKING_FOR_PROPERTY><<EOF>> {
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,INITIAL,ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY><<EOF>> {
 	return 0;
 }
 
 
-<IN_SCRIPTING,INITIAL,DOUBLE_QUOTES,BACKQUOTE,SINGLE_QUOTE>. {
+<ST_IN_SCRIPTING,INITIAL,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_SINGLE_QUOTE>. {
 	zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d",yytext[0],yytext[0],YYSTATE);
 }
