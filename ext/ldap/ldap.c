@@ -399,9 +399,6 @@ PHP_FUNCTION(ldap_connect)
 	}
 
 	ld = ecalloc(1, sizeof(ldap_linkdata));
-	if (ld == NULL) {
-		RETURN_FALSE;
-	}
 
 #ifdef LDAP_API_FEATURE_X_OPENLDAP
 	if (host != NULL && strchr(host, '/')) {
