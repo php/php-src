@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(sockets, whether to enable sockets support,
-[  --enable-sockets        Enable sockets support])
+[  --enable-sockets        Enable sockets support], yes)
 
 if test "$PHP_SOCKETS" != "no"; then
   dnl Check for struct cmsghdr
