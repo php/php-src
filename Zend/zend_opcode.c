@@ -30,11 +30,7 @@
 static void zend_extension_op_array_ctor_handler(zend_extension *extension, zend_op_array *op_array)
 {
 	if (extension->op_array_ctor) {
-		if (extension->resource_number>=0) {
-			extension->op_array_ctor(&op_array->reserved[extension->resource_number]);
-		} else {
-			extension->op_array_ctor(NULL);
-		}
+		extension->op_array_ctor(op_array);
 	}
 }
 
@@ -42,11 +38,7 @@ static void zend_extension_op_array_ctor_handler(zend_extension *extension, zend
 static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend_op_array *op_array)
 {
 	if (extension->op_array_dtor) {
-		if (extension->resource_number>=0) {
-			extension->op_array_dtor(&op_array->reserved[extension->resource_number]);
-		} else {
-			extension->op_array_dtor(NULL);
-		}
+		extension->op_array_dtor(op_array);
 	}
 }
 

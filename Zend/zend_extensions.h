@@ -55,8 +55,8 @@ struct _zend_extension {
 	void (*fcall_begin_handler)(zend_op_array *op_array);
 	void (*fcall_end_handler)(zend_op_array *op_array);
 
-	void (*op_array_ctor)(void **resource);
-	void (*op_array_dtor)(void **resource);
+	void (*op_array_ctor)(zend_op_array *op_array);
+	void (*op_array_dtor)(zend_op_array *op_array);
 
 	void *reserved1;
 	void *reserved2;
