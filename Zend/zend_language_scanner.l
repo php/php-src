@@ -46,10 +46,6 @@
 
 %{
 
-#ifdef ZEND_WIN32
-#include <io.h>
-#endif
-
 #include <errno.h>
 #include "zend.h"
 #include "zend_alloc.h"
