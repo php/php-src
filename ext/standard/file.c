@@ -2266,7 +2266,7 @@ PHP_FUNCTION(fgetcsv)
 
 	array_init(return_value);
 
-#define CSV_ADD_ENTRY(s, es, st, copy)	{	\
+#define CSV_ADD_ENTRY(s, es, st)	{	\
 	int len = es - st;	\
 	if (len) {	\
 		while (isspace((int)*(unsigned char *)s)) {	\
@@ -2275,7 +2275,7 @@ PHP_FUNCTION(fgetcsv)
 		}	\
 	}	\
 	if (len) {	\
-		add_next_index_stringl(return_value, s, len, copy);	\
+		add_next_index_stringl(return_value, s, len, 1);	\
 	} else {	\
 		add_next_index_string(return_value, "", 1);	\
 	}	\
@@ -2284,29 +2284,23 @@ PHP_FUNCTION(fgetcsv)
 	if (!enclosure || !(p = _php_fgetcsv_find_enclosure(s, (e - s), enclosure))) {
 no_enclosure:
 		while ((p = memchr(s, delimiter, (e - s)))) {
-			CSV_ADD_ENTRY(s, p, s, 1);
+			CSV_ADD_ENTRY(s, p, s);
 			s = p + 1;
 		}
 	} else {
-		char *p2=NULL, *buf2;
-		int buf2_len;
+		char *p2=NULL, *buf2=NULL;
+		int buf2_len=0;
 enclosure:
 		/* handle complete fields before the enclosure */
 		while (s < p && (p2 = memchr(s, delimiter, (p - s)))) {
-			CSV_ADD_ENTRY(s, p2, s, 1);
+			CSV_ADD_ENTRY(s, p2, s);
 			s = p2 + 1;
 		}
 
-		if ((p - s)) {
-			buf2_len = p - s;
-			buf2 = emalloc(buf2_len + 1);
-			memcpy(buf2, s, buf2_len);
-		} else {
-			buf2 = NULL;
-			buf2_len = 0;
+		p++;
+		if (*s == enclosure) {
 			s++;
 		}
-		p++;
 
 		/* try to find end of enclosure */
 		while (!(p2 = _php_fgetcsv_find_enclosure(p, (e - p), enclosure))) {
@@ -2336,8 +2330,8 @@ enclosure:
 				memcpy(buf2 + buf2_len, p2, (p - p2));
 				buf2_len += (p - p2);
 			}
-			buf2[buf2_len] = '\0';
-			CSV_ADD_ENTRY(buf2, buf2_len, 0, 0);
+			CSV_ADD_ENTRY(buf2, buf2_len, 0);
+			buf2_len = 0;
 
 			if (!(p = _php_fgetcsv_find_enclosure(s, (e - s), enclosure))) {
 				goto no_enclosure;
@@ -2355,15 +2349,18 @@ enclosure:
 				buf2_len += (e - s);
 			}
 enclosure_done:
-			s = e = NULL;
-			buf2[buf2_len] = '\0';
-			CSV_ADD_ENTRY(buf2, buf2_len, 0, 0);
+			CSV_ADD_ENTRY(buf2, buf2_len, 0);
+			if (buf2) {
+				efree(buf2);
+			}
+			goto done;
 		}
 	}
 
 	if (s < e) {
-		CSV_ADD_ENTRY(s, e, s, 1);
+		CSV_ADD_ENTRY(s, e, s);
 	}
+done:
 	efree(buf);
 }
 /* }}} */
