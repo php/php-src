@@ -52,32 +52,6 @@
 #include <strings.h>
 #endif
 #include "safe_mode.h"
-/*
-#include "functions/basic_functions.h"
-#include "functions/phpmath.h"
-#include "functions/php3_string.h"
-#include "functions/dns.h"
-#include "functions/md5.h"
-#include "functions/html.h"
-#include "functions/post.h"
-#include "functions/exec.h"
-#include "functions/info.h"
-#include "functions/url.h"
-#include "functions/datetime.h"
-#include "functions/fsock.h"
-#include "functions/image.h"
-#include "functions/php3_link.h"
-#include "functions/php3_filestat.h"
-#include "functions/microtime.h"
-#include "functions/pageinfo.h"
-#include "functions/uniqid.h"
-#include "functions/base64.h"
-#include "functions/php3_mail.h"
-#include "functions/php3_var.h"
-#include "functions/php3_iptc.h"
-#include "functions/quot_print.h"
-#include "functions/cyr_convert.h"
-*/
 #if WIN32|WINNT
 #include "win32/unistd.h"
 #endif

@@ -21,21 +21,12 @@
 /* type check for in_addr_t */
 #undef in_addr_t
 
-/* crypt capability checks */
-#undef PHP3_STD_DES_CRYPT
-#undef PHP3_EXT_DES_CRYPT
-#undef PHP3_MD5_CRYPT
-#undef PHP3_BLOWFISH_CRYPT
-
 /* Define if you have dirent.h but opendir() resides in libc rather than in libdir */
 /* This will cause HAVE_DIRENT_H defined twice sometimes, but it should be problem */
 #define HAVE_DIRENT_H 0
 
 /* Define if you have the resolv library (-lresolv). */
 #define HAVE_LIBRESOLV 0
-
-/* Define if you have the zlib library */
-#define HAVE_ZLIB 0
 
 /* Define if you want safe mode enabled by default. */
 #define PHP_SAFE_MODE 0
@@ -57,18 +48,6 @@
 /* Define both of these if you want the bundled REGEX library */
 #define REGEX 0
 #define HSREGEX 0
-
-/* Define if you want the SNMP interface */
-#define HAVE_SNMP 0
-
-/* Define if you have libdl (used for dynamic linking) */
-#define HAVE_LIBDL 0
-
-/* Define if you have libdnet_stub (used for Sybase support) */
-#define HAVE_LIBDNET_STUB 0
-
-/* Define if you have and want to use libcrypt */
-#define HAVE_LIBCRYPT 0
 
 /* Define if you have and want to use libnsl */
 #define HAVE_LIBNSL 0
@@ -97,31 +76,6 @@
 /* Define if your Apache has src/include/ap_compat.h */
 #define HAVE_AP_COMPAT_H 0
 
-#define HAVE_SYBASE 0
-#define HAVE_SYBASE_CT 0
-
-#ifndef HAVE_PGSQL
-#define HAVE_PGSQL 0
-#endif
-
-#ifndef HAVE_IFX
-#define HAVE_IFX 0
-#endif
-#ifndef HAVE_IFX_IUS
-#define HAVE_IFX_IUS 0
-#endif
-#ifndef IFX_VERSION
-#define IFX_VERSION 0
-#endif
-
-#ifndef HAVE_IBASE
-#define HAVE_IBASE 0
-#endif
-
-#ifndef HAVE_PQCMDTUPLES
-#define HAVE_PQCMDTUPLES 0
-#endif
-
 #ifndef DEBUG /* should be set to ZEND_DEBUG */
 #define DEBUG 0
 #endif
@@ -149,27 +103,8 @@
  */
 #define PHP3_URL_FOPEN 0
 
-/* Define if you want System V semaphore support.
- */
-#define HAVE_SYSVSEM 0
-
-/* Define if you have union semun.
- */
-#define HAVE_SEMUN 0
-
-/* Define if you want System V shared memory support.
- */
-#define HAVE_SYSVSHM 0
-
-
 /* Define if you have broken header files like SunOS 4 */
 #define MISSING_FCLOSE_DECL 0
 
 /* Define if you have broken sprintf function like SunOS 4 */
 #define BROKEN_SPRINTF 0
-
-/* Define if you have the expat (XML Parser Toolkit) library */
-#define HAVE_LIBEXPAT 0
-
-/* Define if you have the pdflib library */
-#define HAVE_PDFLIB 0

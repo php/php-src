@@ -68,8 +68,6 @@
 #include "control_structures.h"
 #include "fopen-wrappers.h"
 #include "ext/standard/php3_standard.h"
-#include "functions/post.h"
-#include "ext/standard/head.h"
 #include "snprintf.h"
 #if WIN32|WINNT
 #include <io.h>

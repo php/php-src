@@ -1,0 +1,4 @@
+/* define if you want to use the xml extension */
+
+/* Define if you have the expat (XML Parser Toolkit) library */
+#define HAVE_LIBEXPAT 0

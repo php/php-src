@@ -1,0 +1,2 @@
+/* Define if you want the SNMP interface */
+#define HAVE_SNMP 0

@@ -1,0 +1,2 @@
+/* Define if you have the pdflib library */
+#define HAVE_PDFLIB 0

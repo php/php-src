@@ -10,3 +10,6 @@ ifx.c: ifx.ec
 	 else \
 	   touch ifx.c; \
 	 fi)
+
+clean:
+	-rm -f ifx.c

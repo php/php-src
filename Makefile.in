@@ -68,15 +68,8 @@ OBJS = main.o internal_functions.o snprintf.o php3_sprintf.o \
        safe_mode.o fopen-wrappers.o php3_realpath.o alloca.o output.o \
        php_ini.o
 
-FUNCTIONS_SOURCE = functions/fhttpd.c functions/mime.c \
-       functions/pgsql.c functions/post.c functions/sybase.c \
-       functions/sybase-ct.c functions/xml.c functions/zlib.c \
-       functions/pdf.c functions/snmp.c functions/interbase.c \
-       functions/sysvsem.c functions/sysvshm.c
-
-FUNCTIONS = $(FUNCTIONS_SOURCE:.c=.o)
 PHPLIBS = -L@top_srcdir@/libzend -lzend -L@top_srcdir@/ext -lphpext
-LIBS = $(PHPLIBS) $(EXTRA_LIBS) @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @FHTTPD_LIB@ @REGEX_LIB@ @DBM_LIB@ @SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @PGSQL_LFLAGS@ @PGSQL_LIBS@ @ZLIB_LIBS@ @PDFLIB_LIBS@ @SNMP_LFLAGS@ @SNMP_LIBS@ @IBASE_LFLAGS@ @IBASE_LIBS@ @XML_LIBS@ @LIBS@
+LIBS = $(PHPLIBS) $(EXTRA_LIBS) @LIBS@
 
 all: $(BINNAME)
 
@@ -90,12 +83,12 @@ maintainer-clean-depend-recursive:
 	done && test -z "$$fail"
 
 # CGI binary or fhttpd module
-php: all-recursive $(OBJS) $(FUNCTIONS) @REGEX_LIB@ @FHTTPD_LIB@
-	$(CC) $(CFLAGS) -o $(BINNAME) $(LDFLAGS) $(OBJS) $(FUNCTIONS) $(LIBS)
+php: all-recursive $(OBJS) @REGEX_LIB@ @FHTTPD_LIB@
+	$(CC) $(CFLAGS) -o $(BINNAME) $(LDFLAGS) $(OBJS) $(LIBS)
 
 # Apache modules
-libphp3.a libmodphp3.a libmodphp3-so.a: all-recursive $(OBJS) $(FUNCTIONS)
-	$(AR) $@.tmp $(OBJS) $(FUNCTIONS)
+libphp3.a libmodphp3.a libmodphp3-so.a: all-recursive $(OBJS)
+	$(AR) $@.tmp $(OBJS)
 	$(srcdir)/scripts/armerge $@ $@.tmp ext/libphpext.a $(srcdir)/libzend/libzend.a
 	@rm -f $@.tmp
 	$(RANLIB) $(BINNAME)
@@ -118,7 +111,6 @@ configuration-scanner.c:	$(srcdir)/configuration-scanner.l
 
 clean: clean-recursive
 	-rm -f libphp3.a libmodphp3.a php *.o
-	-rm -f $(FUNCTIONS) functions/ifx.c
 	-rm -f test/php.desc test/php.in test/php.out test/php.test
 	-rm -f test/a.tmp test/b.tmp test/test.dbm*
 
@@ -171,17 +163,12 @@ indent:	clean
 	-T pval -T HashTable -T Bucket -T Token -T TokenCache -T TokenCacheManager \
 	-T switch_expr -T internal_function -T control_structure_data \
 	-T MemoryHashTable -T MemoryBucket \
-	-T pvalue_value -T Stack *.c *.h functions/*.c functions/*.h
-	rm -f *~ functions/*~
+	-T pvalue_value -T Stack *.c *.h
+	rm -f *~
 
 .c.o:
 	@rm -f $@
 	$(CC) $(CFLAGS) -c $< -o $@
-	@bn=`echo $@ | sed -e 's#functions/##'`; test -f $@ || \
-	  (test "$@" != "$$bn" && test -f "$$bn" && mv $$bn $@)
-
-functions/number.o: functions/number.c
-	$(CC) $(CFLAGS) -w$(WARNING_LEVEL) -c $< -o $@
 	@bn=`echo $@ | sed -e 's#functions/##'`; test -f $@ || \
 	  (test "$@" != "$$bn" && test -f "$$bn" && mv $$bn $@)
 

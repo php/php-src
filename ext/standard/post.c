@@ -1,0 +1,498 @@
+/*
+   +----------------------------------------------------------------------+
+   | PHP HTML Embedded Scripting Language Version 3.0                     |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
+   +----------------------------------------------------------------------+
+   | This program is free software; you can redistribute it and/or modify |
+   | it under the terms of one of the following licenses:                 |
+   |                                                                      |
+   |  A) the GNU General Public License as published by the Free Software |
+   |     Foundation; either version 2 of the License, or (at your option) |
+   |     any later version.                                               |
+   |                                                                      |
+   |  B) the PHP License as published by the PHP Development Team and     |
+   |     included in the distribution in the file: LICENSE                |
+   |                                                                      |
+   | This program is distributed in the hope that it will be useful,      |
+   | but WITHOUT ANY WARRANTY; without even the implied warranty of       |
+   | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        |
+   | GNU General Public License for more details.                         |
+   |                                                                      |
+   | You should have received a copy of both licenses referred to here.   |
+   | If you did not, or have any questions about PHP licensing, please    |
+   | contact core@php.net.                                                |
+   +----------------------------------------------------------------------+
+   | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
+   +----------------------------------------------------------------------+
+ */
+/* $Id: */
+#ifdef THREAD_SAFE
+#include "tls.h"
+#endif
+#include <stdio.h>
+#include "php.h"
+#include "php3_standard.h"
+#include "php_globals.h"
+
+#include "zend_globals.h"
+
+/*
+ * php3_getpost()
+ *
+ * This reads the post form data into a string.
+ * Remember to free this pointer when done with it.
+ */
+static char *php3_getpost(pval *http_post_vars PLS_DC)
+{
+	char *buf = NULL;
+	const char *ctype;
+#if MODULE_MAGIC_NUMBER > 19961007
+	char argsbuffer[HUGE_STRING_LEN];
+#else
+	int bytes;
+#endif
+	int length, cnt;
+	int file_upload = 0;
+	char *mb;
+	char boundary[100];
+	TLS_VARS;
+	
+	ctype = GLOBAL(request_info).content_type;
+	if (!ctype) {
+		php3_error(E_WARNING, "POST Error: content-type missing");
+		return NULL;
+	}
+	if (strncasecmp(ctype, "application/x-www-form-urlencoded", 33) && strncasecmp(ctype, "multipart/form-data", 19)
+#if HAVE_FDFLIB
+ && strncasecmp(ctype, "application/vnd.fdf", 19)
+#endif
+      ) {
+		php3_error(E_WARNING, "Unsupported content-type: %s", ctype);
+		return NULL;
+	}
+	if (!strncasecmp(ctype, "multipart/form-data", 19)) {
+		file_upload = 1;
+		mb = strchr(ctype, '=');
+		if (mb) {
+			strncpy(boundary, mb + 1, sizeof(boundary));
+		} else {
+			php3_error(E_WARNING, "File Upload Error: No MIME boundary found");
+			php3_error(E_WARNING, "There should have been a \"boundary=something\" in the Content-Type string");
+			php3_error(E_WARNING, "The Content-Type string was: \"%s\"", ctype);
+			return NULL;
+		}
+	}
+	length = GLOBAL(request_info).content_length;
+	cnt = length;
+	buf = (char *) emalloc((length + 1) * sizeof(char));
+	if (!buf) {
+		php3_error(E_WARNING, "Unable to allocate memory in php3_getpost()");
+		return NULL;
+	}
+#if FHTTPD
+    memcpy(buf,req->databuffer,length);
+    buf[length]=0;
+#else
+#if MODULE_MAGIC_NUMBER > 19961007
+	if (should_client_block(GLOBAL(php3_rqst))) {
+		void (*handler) (int);
+		int dbsize, len_read, dbpos = 0;
+
+		hard_timeout("copy script args", GLOBAL(php3_rqst));	/* start timeout timer */
+		handler = signal(SIGPIPE, SIG_IGN);		/* Ignore sigpipes for now */
+		while ((len_read = get_client_block(GLOBAL(php3_rqst), argsbuffer, HUGE_STRING_LEN)) > 0) {
+			if ((dbpos + len_read) > length)
+				dbsize = length - dbpos;
+			else
+				dbsize = len_read;
+			reset_timeout(GLOBAL(php3_rqst));	/* Make sure we don't timeout */
+			memcpy(buf + dbpos, argsbuffer, dbsize);
+			dbpos += dbsize;
+		}
+		signal(SIGPIPE, handler);	/* restore normal sigpipe handling */
+		kill_timeout(GLOBAL(php3_rqst));	/* stop timeout timer */
+	}
+#else
+	cnt = 0;
+	do {
+#if APACHE
+		bytes = read_client_block(php3_rqst, buf + cnt, length - cnt);
+#endif
+#if CGI_BINARY
+		bytes = fread(buf + cnt, 1, length - cnt, stdin);
+#endif
+#if USE_SAPI
+		bytes = GLOBAL(sapi_rqst)->readclient(GLOBAL(sapi_rqst)->scid,buf + cnt, 1, length - cnt);
+#endif
+		cnt += bytes;
+	} while (bytes && cnt < length);
+#endif
+#endif
+	if (file_upload) {
+		php3_mime_split(buf, cnt, boundary, http_post_vars PLS_CC);
+		efree(buf);
+		return NULL;
+	}
+	buf[cnt] = '\0';
+
+#if HAVE_FDFLIB
+	if (!strncasecmp(ctype, "application/vnd.fdf", 19)) {
+		pval *postdata_ptr = (pval *) emalloc(sizeof(pval));
+		
+		postdata_ptr->type = IS_STRING;
+		postdata_ptr->value.str.val = (char *) estrdup(buf);
+		postdata_ptr->value.str.len = cnt;
+		postdata_ptr->refcount=1;
+		postdata_ptr->is_ref=0;
+		_php3_hash_add(&GLOBAL(symbol_table), "HTTP_FDF_DATA", sizeof("HTTP_FDF_DATA"), postdata_ptr, sizeof(pval *),NULL);
+	}
+#endif
+	return (buf);
+}
+
+
+/*
+ * parse Get/Post/Cookie string and create appropriate variable
+ *
+ * This is a tad ugly because it was yanked out of the middle of
+ * the old TreatData function.  This is a temporary measure filling 
+ * the gap until a more flexible parser can be built to do this.
+ */
+void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
+{
+	int var_type;
+	char *ind, *tmp = NULL, *ret = NULL;
+	int var_len;
+	pval *entry;
+	ELS_FETCH();
+	PLS_FETCH();
+	
+	var_type = php3_check_ident_type(var);
+	if (var_type == GPC_INDEXED_ARRAY) {
+		ind = php3_get_ident_index(var);
+		if (PG(magic_quotes_gpc)) {
+			ret = _php3_addslashes(ind, 0, NULL, 1);
+		} else {
+			ret = ind;
+		}
+	}
+	if (var_type & GPC_ARRAY) {		/* array (indexed or not */
+		tmp = strchr(var, '[');
+		if (tmp) {
+			*tmp = '\0';
+		}
+	}
+	/* ignore leading spaces in the variable name */
+	while (*var && *var==' ') {
+		var++;
+	}
+	var_len = strlen(var);
+	if (var_len==0) { /* empty variable name, or variable name with a space in it */
+		return;
+	}
+
+	/* ensure that we don't have spaces or dots in the variable name (not binary safe) */
+	for (tmp=var; *tmp; tmp++) {
+		switch(*tmp) {
+			case ' ':
+			case '.':
+				*tmp='_';
+				break;
+		}
+	}
+
+	tmp = estrdup(val);
+	if (var_type & GPC_ARRAY) {
+		pval *arr1, *arr2;
+		pval **arr_ptr;
+
+		/* If the array doesn't exist, create it */
+		if (_php3_hash_find(EG(active_symbol_table), var, var_len+1, (void **) &arr_ptr) == FAILURE) {
+			arr1 = (pval *) emalloc(sizeof(pval));
+			arr1->refcount=1;
+			arr1->is_ref=0;
+			if (array_init(arr1)==FAILURE) {
+				return;
+			}
+			_php3_hash_update(EG(active_symbol_table), var, var_len+1, &arr1, sizeof(pval *), NULL);
+			if (track_vars_array) {
+				arr2 = (pval *) emalloc(sizeof(pval));
+				arr2->refcount=1;
+				arr2->is_ref=0;
+				if (array_init(arr2)==FAILURE) {
+					return;
+				}
+				_php3_hash_update(track_vars_array->value.ht, var, var_len+1, (void *) &arr2, sizeof(pval *),NULL);
+			}
+		} else {
+			if ((*arr_ptr)->type!=IS_ARRAY) {
+				if (--(*arr_ptr) > 0) {
+					*arr_ptr = (pval *) emalloc(sizeof(pval));
+					(*arr_ptr)->refcount=1;
+					(*arr_ptr)->is_ref=0;
+				} else {
+					pval_destructor(*arr_ptr);
+				}
+				if (array_init(*arr_ptr)==FAILURE) {
+					return;
+				}
+				if (track_vars_array) {
+					arr2 = (pval *) emalloc(sizeof(pval));
+					arr2->refcount=1;
+					arr2->is_ref=0;
+					if (array_init(arr2)==FAILURE) {
+						return;
+					}
+					_php3_hash_update(track_vars_array->value.ht, var, var_len+1, (void *) &arr2, sizeof(pval *),NULL);
+				}
+			}
+			arr1 = *arr_ptr;
+			if (track_vars_array && _php3_hash_find(track_vars_array->value.ht, var, var_len+1, (void **) &arr_ptr) == FAILURE) {
+				return;
+			}
+			arr2 = *arr_ptr;
+		}
+		/* Now create the element */
+		entry = (pval *) emalloc(sizeof(pval));
+		entry->refcount=1;
+		entry->is_ref=0;
+		if (PG(magic_quotes_gpc)) {
+			entry->value.str.val = _php3_addslashes(tmp, 0, &entry->value.str.len, 0);
+		} else {
+			entry->value.str.len = strlen(tmp);
+			entry->value.str.val = estrndup(tmp,entry->value.str.len);
+		}
+		entry->type = IS_STRING;
+
+		/* And then insert it */
+		if (ret) {		/* indexed array */
+			if (php3_check_type(ret) == IS_LONG) {
+				_php3_hash_index_update(arr1->value.ht, atol(ret), &entry, sizeof(pval *),NULL);	/* s[ret]=tmp */
+				if (track_vars_array) {
+					_php3_hash_index_update(arr2->value.ht, atol(ret), &entry, sizeof(pval *),NULL);
+					entry->refcount++;
+				}
+			} else {
+				_php3_hash_update(arr1->value.ht, ret, strlen(ret)+1, &entry, sizeof(pval *),NULL);	/* s["ret"]=tmp */
+				if (track_vars_array) {
+					_php3_hash_update(arr2->value.ht, ret, strlen(ret)+1, &entry, sizeof(pval *),NULL);
+					entry->refcount++;
+				}
+			}
+			efree(ret);
+			ret = NULL;
+		} else {		/* non-indexed array */
+			_php3_hash_next_index_insert(arr1->value.ht, &entry, sizeof(pval *),NULL);
+			if (track_vars_array) {
+				_php3_hash_next_index_insert(arr2->value.ht, &entry, sizeof(pval *),NULL);
+				entry->refcount++;
+			}
+		}
+	} else {			/* we have a normal variable */
+		pval *entry = (pval *) emalloc(sizeof(pval));
+		
+		if (PG(magic_quotes_gpc)) {
+			entry->value.str.val = _php3_addslashes(tmp, 0, &entry->value.str.len, 0);
+		} else {
+			entry->value.str.len = strlen(tmp);
+			entry->value.str.val = estrndup(tmp,entry->value.str.len);
+		}
+		entry->type = IS_STRING;
+		entry->refcount=1;
+		entry->is_ref=0;
+		_php3_hash_update(EG(active_symbol_table), var, var_len+1, (void *) &entry, sizeof(pval *),NULL);
+		if (track_vars_array) {
+			pval_copy_constructor(entry);
+			_php3_hash_update(track_vars_array->value.ht, var, var_len+1, (void *) &entry, sizeof(pval *),NULL);
+		}
+	}
+
+	if (tmp) efree(tmp);
+}
+
+
+void php3_treat_data(int arg, char *str)
+{
+	char *res = NULL, *var, *val;
+	pval *array_ptr;
+	ELS_FETCH();
+	PLS_FETCH();
+	
+	switch (arg) {
+		case PARSE_POST:
+		case PARSE_GET:
+		case PARSE_COOKIE:
+			if (PG(track_vars)) {
+				array_ptr = (pval *) emalloc(sizeof(pval));
+				array_init(array_ptr);
+				array_ptr->refcount=1;
+				array_ptr->is_ref=0;
+				switch (arg) {
+					case PARSE_POST:
+						_php3_hash_add(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), &array_ptr, sizeof(pval *),NULL);
+						break;
+					case PARSE_GET:
+						_php3_hash_add(&EG(symbol_table), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), &array_ptr, sizeof(pval *),NULL);
+						break;
+					case PARSE_COOKIE:
+						_php3_hash_add(&EG(symbol_table), "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"), &array_ptr, sizeof(pval *),NULL);
+						break;
+				}
+			} else {
+				array_ptr=NULL;
+			}
+			break;
+		default:
+			array_ptr=NULL;
+			break;
+	}
+
+	if (arg == PARSE_POST) {
+		res = php3_getpost(array_ptr PLS_CC);
+	} else if (arg == PARSE_GET) {		/* Get data */
+		var = GLOBAL(request_info).query_string;
+		if (var && *var) {
+			res = (char *) estrdup(var);
+		}
+	} else if (arg == PARSE_COOKIE) {		/* Cookie data */
+		var = (char *)GLOBAL(request_info).cookies;
+		if (var && *var) {
+			res = (char *) estrdup(var);
+		}
+	} else if (arg == PARSE_STRING) {		/* String data */
+		res = str;
+	}
+	if (!res) {
+		return;
+	}
+	
+	if (arg == PARSE_COOKIE) {
+		var = strtok(res, ";");
+	} else if (arg == PARSE_POST) {
+		var = strtok(res, "&");
+	} else {
+		var = strtok(res, PG(arg_separator));
+	}
+
+	while (var) {
+		val = strchr(var, '=');
+		if (val) { /* have a value */
+			*val++ = '\0';
+			/* FIXME: XXX: not binary safe, discards returned length */
+			_php3_urldecode(var, strlen(var));
+			_php3_urldecode(val, strlen(val));
+			_php3_parse_gpc_data(val,var,array_ptr);
+		}
+		if (arg == PARSE_COOKIE) {
+			var = strtok(NULL, ";");
+		} else if (arg == PARSE_POST) {
+			var = strtok(NULL, "&");
+		} else {
+			var = strtok(NULL, PG(arg_separator));
+		}
+	}
+	efree(res);
+}
+
+
+void php3_TreatHeaders(void)
+{
+#if APACHE
+#if MODULE_MAGIC_NUMBER > 19961007
+	const char *s = NULL;
+#else
+	char *s = NULL;
+#endif
+	char *t;
+	char *user, *type;
+	int len;
+	char *escaped_str;
+	PLS_FETCH();
+
+	if (GLOBAL(php3_rqst)->headers_in)
+		s = table_get(GLOBAL(php3_rqst)->headers_in, "Authorization");
+	if (!s)
+		return;
+
+	/* Check to make sure that this URL isn't authenticated
+	   using a traditional auth module mechanism */
+	if (auth_type(GLOBAL(php3_rqst))) {
+		/*php3_error(E_WARNING, "Authentication done by server module\n");*/
+		return;
+	}
+	if (strcmp(t=getword(GLOBAL(php3_rqst)->pool, &s, ' '), "Basic")) {
+		/* Client tried to authenticate using wrong auth scheme */
+		php3_error(E_WARNING, "client used wrong authentication scheme (%s)", t);
+		return;
+	}
+	t = uudecode(GLOBAL(php3_rqst)->pool, s);
+#if MODULE_MAGIC_NUMBER > 19961007
+	user = getword_nulls_nc(GLOBAL(php3_rqst)->pool, &t, ':');
+#else
+	user = getword(GLOBAL(php3_rqst)->pool, &t, ':');
+#endif
+	type = "Basic";
+
+	if (user) {
+		if (PG(magic_quotes_gpc)) {
+			escaped_str = _php3_addslashes(user, 0, &len, 0);
+			SET_VAR_STRINGL("PHP_AUTH_USER", escaped_str, len);
+		} else {
+			SET_VAR_STRING("PHP_AUTH_USER", estrdup(user));
+		}
+	}
+	if (t) {
+		if (PG(magic_quotes_gpc)) {
+			escaped_str = _php3_addslashes(t, 0, &len, 0);
+			SET_VAR_STRINGL("PHP_AUTH_PW", escaped_str, len);
+		} else {
+			SET_VAR_STRING("PHP_AUTH_PW", estrdup(t));
+		}
+	}
+	if (type) {
+		if (PG(magic_quotes_gpc)) {
+			escaped_str = _php3_addslashes(type, 0, &len, 0);
+			SET_VAR_STRINGL("PHP_AUTH_TYPE", escaped_str, len);
+		} else {
+			SET_VAR_STRING("PHP_AUTH_TYPE", estrdup(type));
+		}
+	}
+#endif
+#if FHTTPD
+	int i,len;
+	struct rline *l;
+	char *type;
+	char *escaped_str;
+
+	if(req && req->remote_user){
+		for(i=0; i < req->nlines; i++){
+			l=req->lines+i;
+			if((l->paramc > 1)&&!strcasecmp(l->params[0], "REMOTE_PW")){
+				type = "Basic";
+				if (PG(magic_quotes_gpc)) {
+					escaped_str = _php3_addslashes(type, 0, &len, 0);
+					SET_VAR_STRINGL("PHP_AUTH_TYPE", escaped_str, len);
+					escaped_str = _php3_addslashes(l->params[1], 0, &len, 0);
+					SET_VAR_STRINGL("PHP_AUTH_PW", escaped_str, len);
+					escaped_str = _php3_addslashes(req->remote_user, 0, &len, 0);
+					SET_VAR_STRINGL("PHP_AUTH_USER", escaped_str, len);
+
+				} else {
+					SET_VAR_STRING("PHP_AUTH_TYPE", estrdup(type));
+					SET_VAR_STRING("PHP_AUTH_PW", estrdup(l->params[1]));
+					SET_VAR_STRING("PHP_AUTH_USER", estrdup(req->remote_user));
+				}
+				i=req->nlines;
+			}
+		}
+	}
+#endif
+}
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */
