@@ -24,4 +24,5 @@ if test "$PHP_MSSQL" != "no"; then
      ])
   AC_DEFINE(HAVE_MSSQL,1,[ ])
   AC_DEFINE(HAVE_FREETDS,1,[ ])
+  PHP_SUBST(MSSQL_SHARED_LIBADD)
 fi
