@@ -123,7 +123,6 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 	int final_buffer_length=0;
 	zval *alternate_buffer=NULL;
 	char *to_be_destroyed_buffer;
-	char *internal_output_handler_buffer;
 	int status;
 	SLS_FETCH();
 	OLS_FETCH();
@@ -143,8 +142,9 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 	}
 
 	if (OG(active_ob_buffer).internal_output_handler) {
-		internal_output_handler_buffer = OG(active_ob_buffer).internal_output_handler_buffer;
-		OG(active_ob_buffer).internal_output_handler(OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length, &internal_output_handler_buffer, status);
+		final_buffer = OG(active_ob_buffer).internal_output_handler_buffer;
+		final_buffer_length = OG(active_ob_buffer).internal_output_handler_buffer_size;
+		OG(active_ob_buffer).internal_output_handler(OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length, &final_buffer, &final_buffer_length, status);
 	} else if (OG(active_ob_buffer).output_handler) {
 		zval **params[2];
 		zval *orig_buffer;
@@ -196,8 +196,8 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 
 	if (!just_flush) {
 		if (OG(active_ob_buffer).internal_output_handler
-			&& (internal_output_handler_buffer != OG(active_ob_buffer).internal_output_handler_buffer)) {
-			efree(internal_output_handler_buffer);
+			&& (final_buffer != OG(active_ob_buffer).internal_output_handler_buffer)) {
+			efree(final_buffer);
 		}
 		if (OG(nesting_level)>1) { /* restore previous buffer */
 			php_ob_buffer *ob_buffer_p;
