@@ -317,6 +317,7 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(create_document_fragment,	domxml_doc_create_document_fragment,	NULL)
 	PHP_FALIAS(get_elements_by_tagname,	domxml_doc_get_elements_by_tagname,	NULL)
 	PHP_FALIAS(get_element_by_id,		domxml_doc_get_element_by_id,	NULL)
+	PHP_FALIAS(free,					domxml_doc_free_doc,			NULL)
 	/* Everything below this comment is none DOM compliant */
 	/* children is deprecated because it is inherited from DomNode */
 /*	PHP_FALIAS(children,				domxml_node_children,			NULL) */
@@ -537,9 +538,9 @@ zend_module_entry domxml_module_entry = {
 	"domxml",
 	domxml_functions,
 	PHP_MINIT(domxml),
+	PHP_MSHUTDOWN(domxml),
 	NULL,
-	PHP_RINIT(domxml),
-	NULL,
+	NULL(domxml),
 	PHP_MINFO(domxml),
 	DOMXML_API_VERSION, /* Extension versionnumber */
 	STANDARD_MODULE_PROPERTIES
@@ -597,28 +598,105 @@ static inline void node_wrapper_dtor(xmlNodePtr node)
 
 }
 
+
+/*	This function should only be used when freeing nodes 
+	as dependant objects are destroyed */
+static inline void node_wrapper_free(xmlNodePtr node)
+{
+	zval *wrapper, **handle;
+	int type, refcount = 0;
+
+	if (!node) {
+		return;
+	}
+
+	wrapper = dom_object_get_data(node);
+	if (wrapper != NULL ) {
+		/* All references need to be destroyed */
+		if (zend_hash_index_find(Z_OBJPROP_P(wrapper), 0, (void **) &handle) ==	SUCCESS) {
+			TSRMLS_FETCH();
+			if (zend_list_find(Z_LVAL_PP(handle), &type)) {
+				zend_list_delete(Z_LVAL_PP(handle));
+			}
+		} else {
+			refcount = wrapper->refcount;
+			zval_ptr_dtor(&wrapper);
+
+			/* only set it to null, if refcount was 1 before, otherwise it has still needed references */
+			if (refcount == 1) {
+				dom_object_set_data(node, NULL);
+			}
+		}
+	}
+
+}
+
 static inline void attr_list_wrapper_dtor(xmlAttrPtr attr)
 {
 	while (attr != NULL) {
+		/* Attribute nodes contain children which can be accessed */
 		node_wrapper_dtor((xmlNodePtr) attr);
 		attr = attr->next;
 	}
 }
 
-static inline void node_list_wrapper_dtor(xmlNodePtr node)
+/*	destroyref is a bool indicating if all registered objects for nodes 
+	within the tree should be destroyed */
+static inline void node_list_wrapper_dtor(xmlNodePtr node, int destroyref)
 {
 	while (node != NULL) {
-		node_list_wrapper_dtor(node->children);
+		node_list_wrapper_dtor(node->children, destroyref);
 		switch (node->type) {
 			/* Skip property freeing for the following types */
 			case XML_ATTRIBUTE_DECL:
 			case XML_DTD_NODE:
 			case XML_ENTITY_DECL:
+			case XML_ATTRIBUTE_NODE:
 				break;
 			default:
-				attr_list_wrapper_dtor(node->properties);
+				/*	Attribute Nodes contain accessible children
+					Call this function with the propert list
+				attr_list_wrapper_dtor(node->properties);  */
+				node_list_wrapper_dtor((xmlNodePtr) node->properties, destroyref);
 		}
-		node_wrapper_dtor(node);
+
+		if (destroyref == 1) {
+			node_wrapper_free(node);
+		} else {
+			node_wrapper_dtor(node);
+		}
+
+		node = node->next;
+	}
+}
+
+/*	Navigate through the tree and unlink nodes which are referenced by objects */
+static inline void node_list_unlink(xmlNodePtr node)
+{
+	zval *wrapper;
+
+	while (node != NULL) {
+
+		wrapper = dom_object_get_data(node);
+
+		if (wrapper != NULL ) {
+			/* This node is referenced so no need to check children */
+			xmlUnlinkNode(node);
+		} else {
+			node_list_unlink(node->children);
+
+			switch (node->type) {
+				/* Skip property freeing for the following types */
+				case XML_ATTRIBUTE_DECL:
+				case XML_DTD_NODE:
+				case XML_ENTITY_DECL:
+				case XML_ATTRIBUTE_NODE:
+					break;
+				default:
+					node_list_unlink((xmlNodePtr) node->properties);
+			}
+		}
+
 		node = node->next;
 	}
 }
@@ -651,7 +729,7 @@ static void php_free_xml_doc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	xmlDoc *doc = (xmlDoc *) rsrc->ptr;
 
 	if (doc) {
-		node_list_wrapper_dtor(doc->children);
+		node_list_wrapper_dtor(doc->children, 0);
 		node_wrapper_dtor((xmlNodePtr) doc);
 		xmlFreeDoc(doc);
 	}
@@ -664,8 +742,10 @@ static void php_free_xml_node(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	/* if node has no parent, it will not be freed by php_free_xml_doc, so do it here
 	and for all children as well. */
 	if (node->parent == NULL) {
-		attr_list_wrapper_dtor(node->properties);
-		node_list_wrapper_dtor(node->children);
+		/* Attribute Nodes ccontain accessible children 
+		attr_list_wrapper_dtor(node->properties); */
+		node_list_wrapper_dtor((xmlNodePtr) node->properties, 0);
+		node_list_wrapper_dtor(node->children, 0);
 		node_wrapper_dtor(node);
 		xmlFreeNode(node);
 	} else {
@@ -711,43 +791,37 @@ static void php_free_xml_parser(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 
 #if HAVE_DOMXSLT
-static void php_free_xslt_stylesheet(zend_rsrc_list_entry *rsrc TSRMLS_DC)
-{
-	xsltStylesheetPtr sheet = (xsltStylesheetPtr) rsrc->ptr;
-
-	if (sheet) {
-		node_wrapper_dtor((xmlNodePtr) sheet);
-		xsltFreeStylesheet(sheet);
-	}
-}
-
 static void xsltstylesheet_set_data(void *obj, zval *wrapper)
 {
-/*
-	char tmp[20];
-	sprintf(tmp, "%08X", obj);
-	fprintf(stderr, "Adding %s to hash\n", tmp);
-*/
 	((xsltStylesheetPtr) obj)->_private = wrapper;
 }
 
-
-#ifdef HELLY_0
 static zval *xsltstylesheet_get_data(void *obj)
 {
-/*
-	char tmp[20];
-	sprintf(tmp, "%08X", obj);
-	fprintf(stderr, "Trying getting %s from object ...", tmp);
-	if (((xmlNodePtr) obj)->_private) {
-		fprintf(stderr, " found\n");
-	} else {
-		fprintf(stderr, " not found\n");
-	}
-*/
 	return ((zval *) (((xsltStylesheetPtr) obj)->_private));
 }
-#endif
+
+static void php_free_xslt_stylesheet(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+	xsltStylesheetPtr sheet = (xsltStylesheetPtr) rsrc->ptr;
+	zval *wrapper;
+	int refcount = 0;
+
+	if (sheet) {
+		wrapper = xsltstylesheet_get_data(sheet);
+
+		if (wrapper != NULL ) {
+			refcount = wrapper->refcount;
+			zval_ptr_dtor(&wrapper);
+
+			/* only set it to null, if refcount was 1 before, otherwise it has still needed references */
+			if (refcount == 1) {
+				xsltstylesheet_set_data(sheet, NULL);
+			}
+		}
+		xsltFreeStylesheet(sheet);
+	}
+}
 
 void *php_xsltstylesheet_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
 {
@@ -1484,21 +1558,29 @@ xmlDocPtr php_dom_xmlSAXParse(xmlSAXHandlerPtr sax, const char *buffer, int size
 	return(ret);
 }
 
-PHP_RINIT_FUNCTION(domxml)
+PHP_MSHUTDOWN_FUNCTION(domxml)
 {
+#if HAVE_DOMXSLT
+	xsltCleanupGlobals();
+#endif
+   	xmlCleanupParser();
+	
+/*	If you want do find memleaks in this module, compile libxml2 with --with-mem-debug and
+	uncomment the following line, this will tell you the amount of not freed memory
+	and the total used memory into apaches error_log  */
+/*  xmlMemoryDump();*/
+
 	return SUCCESS;
 }
 
-/* PHP_MINIT_FUNCTION(domxml)
- */
 PHP_MINIT_FUNCTION(domxml)
 {
 	zend_class_entry ce;
 
 	le_domxmlnodep = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domnode", module_number);
 	le_domxmlcommentp = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domcomment", module_number);
-	le_domxmlattrp = zend_register_list_destructors_ex(php_free_xml_attr, NULL, "domattribute", module_number);
 	le_domxmltextp = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domtext", module_number);
+	le_domxmlattrp = zend_register_list_destructors_ex(php_free_xml_attr, NULL, "domattribute", module_number);
 	le_domxmlelementp =	zend_register_list_destructors_ex(php_free_xml_node, NULL, "domelement", module_number);
 	le_domxmldtdp = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domdtd", module_number);
 	le_domxmlcdatap = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domcdata", module_number);
@@ -2839,6 +2921,13 @@ PHP_FUNCTION(domxml_elem_set_attribute)
 
 	DOMXML_PARAM_FOUR(nodep, id, le_domxmlelementp, "ss", &name, &name_len, &value, &value_len);
 
+
+	/*	If attribute exists, all children nodes are freed by setprop 
+		unlink referenced children */
+	attr = xmlHasProp(nodep,name);
+	if (attr != NULL) {
+		node_list_unlink(attr->children);
+	}
 	attr = xmlSetProp(nodep, name, value);
 	if (!attr) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such attribute '%s'", name);
@@ -2864,7 +2953,17 @@ PHP_FUNCTION(domxml_elem_remove_attribute)
 	if (attrp == NULL) {
 		RETURN_FALSE;
 	}
-	xmlUnlinkNode((xmlNodePtr)attrp);
+
+	/*	Check for registered nodes within attributes tree when attribute is not referenced  
+		Unlink dependant nodes and free attribute if not registered */
+	if (dom_object_get_data((xmlNodePtr) attrp) == NULL) {
+		node_list_unlink(attrp->children);
+		xmlUnlinkNode((xmlNodePtr) attrp);
+		xmlFreeProp(attrp);
+	} else {
+		xmlUnlinkNode((xmlNodePtr) attrp);
+	}
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2910,47 +3009,36 @@ PHP_FUNCTION(domxml_elem_set_attribute_node)
 		RETURN_FALSE;
 	}
 
-
 	existattrp = xmlHasProp(nodep,attrp->name);
 	if (existattrp != NULL) {
-		/* We cannot unlink an existing attribute as it may never be freed
-		Only the content of the text node of an attribute node is transfered over */
-
-		xmlChar *mem;
-		xmlNode *first, *firstattrp;
-
-		first = existattrp->children;
-		firstattrp = attrp->children;
-		if (mem = xmlNodeGetContent(firstattrp)) {
-			if (!first) {
-				xmlNodeSetContent((xmlNode *) existattrp, mem);
-			} else {
-				xmlNodeSetContent(first, mem);
-			}
-			xmlFree(mem);
-			newattrp = existattrp;
+		/*	Check for registered nodes within attributes tree when attribute is not referenced 
+			Unlink dependant nodes and free attribute if not registered */
+		if (dom_object_get_data((xmlNodePtr) existattrp) == NULL) {
+			node_list_unlink(existattrp->children);
+			xmlUnlinkNode((xmlNodePtr) existattrp);
+			xmlFreeProp(existattrp);
 		} else {
-			RETURN_FALSE;
+			xmlUnlinkNode((xmlNodePtr) existattrp);
 		}
+	}
+
+	/* xmlCopyProp does not add the copy to the element node.
+		It does set the parent of the copy to the element node however */
+	newattrp = xmlCopyProp(nodep, attrp);
+	if (!newattrp) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such attribute '%s'", attrp->name);
+		RETURN_FALSE;
 	} else {
-		/* xmlCopyProp does not add the copy to the element node.
-			It does set the parent of the copy to the element node however */
-		newattrp = xmlCopyProp(nodep, attrp);
-		if (!newattrp) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such attribute '%s'", attrp->name);
-			RETURN_FALSE;
+		xmlAttr *prop;
+		prop = nodep->properties;
+		if (prop == NULL) {
+			nodep->properties = newattrp;
 		} else {
-			xmlAttr *prop;
-			prop = nodep->properties;
-			if (prop == NULL) {
-				nodep->properties = newattrp;
-			} else {
-				while (prop->next != NULL) {
-					prop = prop->next;
-				}
-				prop->next = newattrp;
-				newattrp->prev = prop;
+			while (prop->next != NULL) {
+				prop = prop->next;
 			}
+			prop->next = newattrp;
+			newattrp->prev = prop;
 		}
 	}
 
@@ -4319,6 +4407,30 @@ PHP_FUNCTION(domxml_new_xmldoc)
 }
 /* }}} */
 
+/* {{{ proto bool domxml_doc_free_doc()
+   Frees xmldoc and removed objects from hash */
+PHP_FUNCTION(domxml_doc_free_doc)
+{
+	zval *doc;
+	xmlNode *docp;
+
+	DOMXML_GET_THIS_OBJ(docp, doc, le_domxmldocp);
+
+	if (docp->type != XML_DOCUMENT_NODE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "DOM Document is required");
+		RETURN_FALSE;
+	}
+
+	node_list_wrapper_dtor(docp->children, 1);
+	node_list_wrapper_dtor((xmlNodePtr) docp->properties, 1);
+	/* Attribute Nodes ccontain accessible children 
+	attr_list_wrapper_dtor(docp->properties); */
+	node_wrapper_free(docp);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
 /* {{{ proto object domxml_parser([string buf[,string filename]])
    Creates new xmlparser */
 PHP_FUNCTION(domxml_parser)
@@ -4694,6 +4806,7 @@ static int node_attributes(zval **attributes, xmlNode *nodep TSRMLS_DC)
 	while (attr) {
 		zval *pattr;
 		int ret;
+		xmlChar *content;
 
 		pattr = php_domobject_new((xmlNodePtr) attr, &ret, NULL TSRMLS_CC);
 		/** XXX FIXME XXX */
@@ -4701,7 +4814,9 @@ static int node_attributes(zval **attributes, xmlNode *nodep TSRMLS_DC)
 			zend_hash_update(Z_OBJPROP_P(value), "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
 		}
 */		add_property_string(pattr, "name", (char *) (attr->name), 1);
-		add_property_string(pattr, "value", xmlNodeGetContent((xmlNodePtr) attr), 1);
+		content = xmlNodeGetContent((xmlNodePtr) attr);
+		add_property_string(pattr, "value", content, 1);
+		xmlFree(content);
 		zend_hash_next_index_insert(Z_ARRVAL_PP(attributes), &pattr, sizeof(zval *), NULL);
 		attr = attr->next;
 		count++;
