@@ -21,6 +21,9 @@
 
 #ifndef PHP_MATH_H
 #define PHP_MATH_H
+
+PHPAPI char *_php_math_number_format(double, int, char , char);
+
 PHP_FUNCTION(sin);
 PHP_FUNCTION(cos);
 PHP_FUNCTION(tan);
