@@ -1,3 +1,87 @@
+2000-02-05  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/info.c: Standardize
+
+2000-02-05  Thies C. Arntzen  <thies@digicol.de>
+
+    * main.c:
+    the problem was that we *did* register the signal in the apache
+    master process as well.
+    php_module_startup() -> REGISTER_INI_ENTRIES() -> OnChangeMaxExecutionTime() -> php_set_timeout().
+
+    from now on the .ini mechanism only sets PG(max_execution_time) and that gets
+    "converted" to a timeout-signal() in php_request_startup()!
+
+    we still need to think about the ZTS timeout mechanism.
+
+2000-02-05  Zeev Suraski  <zeev@php.net>
+
+    * ext/imap/imap.c
+      ext/imap/imap.dsp
+      ext/imap/imap.h
+      ext/mysql/mysql.dsp
+      php_modules.dsw: Get Win32 IMAP DLL to compile
+
+2000-02-05  Andi Gutmans  <andi@php.net>
+
+    * ext/odbc/php_odbc.c
+      ext/xml/xml.c
+      tests/testfunc: - Make Win32 compile again
+
+2000-02-05  Zeev Suraski  <zeev@php.net>
+
+    * ext/mssql/php_mssql.c
+      ext/mysql/php_mysql.c
+      ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h
+      php_ini.c
+      php_ini.h: Fix PostgreSQL startup routine in thread-safe mode
+
+    * ext/imap/imap.c: Fix
+
+2000-02-05  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oracle/oracle.c: fix compile
+
+2000-02-05  Zeev Suraski  <zeev@php.net>
+
+    * php.ini-dist: *** empty log message ***
+
+2000-02-05  Andrei Zmievski  <andrei@ispi.net>
+
+    * php.ini-dist: Add default registration of server vars.
+
+
+2000-02-05  Zeev Suraski  <zeev@php.net>
+
+    * ext/pgsql/pgsql.c: PostgreSQL compile fixes
+
+    * ext/session/session.c
+      ext/standard/array.c
+      ext/standard/assert.c
+      ext/standard/browscap.c
+      ext/standard/string.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/msql/php_msql.c
+      ext/mysql/php_mysql.c: Compile fixes
+
+    * ext/pcre/php_pcre.c
+      ext/standard/array.c
+      ext/standard/assert.c
+      ext/standard/basic_functions.c
+      ext/standard/crypt.c
+      ext/standard/dl.c
+      ext/standard/html.c
+      ext/standard/info.c
+      ext/standard/syslog.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/ldap/ldap.c
+      ext/msql/php_msql.c
+      ext/mysql/php_mysql.c
+      ext/db/db.c
+      ext/db/php_db.h
+      main.c: Cleanup patches
+
 2000-02-04  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/session/php_session.h
