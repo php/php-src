@@ -26,7 +26,7 @@ class UpperCaseFilter extends php_user_filter {
 	{
 		echo "write:\n";
 		$x = parent::write($data);
-		return $x;
+		return strlen($data);
 	}
 
 	function read($bytes)
