@@ -418,7 +418,6 @@ PHP_FUNCTION(dio_tcsetattr)
 	zval     *r_fd;
 	zval     *arg = NULL;
 	php_fd_t *f;
-	int       cmd;
 	struct termios newtio;
 	int Baud_Rate, Data_Bits=8, Stop_Bits=1, Parity=0;
 	long BAUD,DATABITS,STOPBITS,PARITYON,PARITY;
