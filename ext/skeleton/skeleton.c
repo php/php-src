@@ -24,6 +24,7 @@ function_entry extname_functions[] = {
 	/* __function_entries_here__ */
 	{NULL, NULL, NULL}	/* Must be the last line in extname_functions[] */
 };
+/* }}} */
 
 /* {{{ extname_module_entry
  */
