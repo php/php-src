@@ -19,6 +19,7 @@
 /* $Id$ */
 
 #include "php.h"
+
 #if defined(COMPILE_DL)
 #include "phpdl.h"
 #endif
@@ -30,6 +31,7 @@
 
 #include "php_aspell.h"
 #include <aspell-c.h>
+#include "ext/standard/info.h"
 
 function_entry aspell_functions[] = {
 	PHP_FE(aspell_new,								NULL)
@@ -194,8 +196,9 @@ PHP_FUNCTION(aspell_check_raw)
 
 PHP_MINFO_FUNCTION(aspell)
 {
-	php_printf("ASpell support enabled");
-
+	php_info_print_table_start();
+	php_info_print_table_row(2, "ASpell Support", "enabled");
+	php_info_print_table_end();
 }
 
 #endif

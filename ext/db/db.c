@@ -30,6 +30,7 @@
 #include "safe_mode.h"
 #include "fopen-wrappers.h"
 #include "ext/standard/flock_compat.h" 
+#include "ext/standard/info.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -230,7 +231,10 @@ static char *php_get_info_db(void)
 
 PHP_MINFO_FUNCTION(db)
 {
+	/* this isn't pretty ... should break out the info a bit more (cmv) */
+	php_info_print_box_start(0);
 	php_printf(php_get_info_db());
+	php_info_print_box_end();
 }
 
 PHP_FUNCTION(dblist)

@@ -193,7 +193,7 @@ PHPAPI void php_print_info(int flag)
 			}
 			PUTS("?=PHPE9568F35-D428-11d2-A769-00AA001ACF42\" border=\"0\" align=\"right\"></a>\n");
 		}
-		php_printf("This program makes use of the Zend scripting language engine:<br><pre>%s</pre>", get_zend_version());
+		php_printf("This program makes use of the Zend scripting language engine:<BR>%s<BR>\n", get_zend_version());
 		php_info_print_box_end();
 	}
 

@@ -43,6 +43,9 @@
 #endif
 
 #if HAVE_LIBGD
+
+#include "ext/standard/info.h"
+
 #include <gd.h>
 #include <gdfontt.h>  /* 1 Tiny font */
 #include <gdfonts.h>  /* 2 Small font */
@@ -221,34 +224,39 @@ PHP_MINIT_FUNCTION(gd)
 
 PHP_MINFO_FUNCTION(gd)
 {
+	php_info_print_table_start();
+	php_info_print_table_row(2, "GD Support", "enabled");
+
 	/* need to use a PHPAPI function here because it is external module in windows */
+
 #if HAVE_GDIMAGECOLORRESOLVE
-	php_printf("Version 1.6.2 or higher");
+	php_info_print_table_row(2, "GD Version", "1.6.2 or higher");
 #elif HAVE_LIBGD13
-	php_printf("Version between 1.3 and 1.6.1");
+	php_info_print_table_row(2, "GD Version", "between 1.3 and 1.6.1");
 #else
-	php_printf("Version 1.2");
+	php_info_print_table_row(2, "GD Version", "1.2");
 #endif
 
 #ifdef ENABLE_GD_TTF
-	php_printf(" with FreeType support");
+	php_info_print_table_row(2, "FreeType Support", "enabled");
 #if HAVE_LIBFREETYPE
-	php_printf(" (linked with freetype)");
+	php_info_print_table_row(2, "FreeType Linkage", "with freetype");
 #elif HAVE_LIBTTF
-	php_printf(" (linked with ttf library)");
+	php_info_print_table_row(2, "FreeType Linkage", "with TTF library");
 #else
-	php_printf(" (linked with unknown library)");
+	php_info_print_table_row(2, "FreeType Linkage", "with unknown library");
 #endif
 #endif
 
-   php_printf(" which supports:");
-   
+/* this next part is stupid ... if I knew better, I'd put them all on one row (cmv) */
+
 #ifdef HAVE_GD_GIF
-	php_printf(" GIF");
+	php_info_print_table_row(2, "GIF Support", "enabled);
 #endif
 #ifdef HAVE_GD_PNG
-	php_printf(" PNG");
+	php_info_print_table_row(2, "PNG Support", "enabled);
 #endif
+	php_info_print_table_end();
 }
 
 /* Need this for cpdf. See also comment in file.c php3i_get_le_fp() */
