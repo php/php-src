@@ -1599,7 +1599,7 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
   fi
 
   dnl If pkg-config is found try using it
-  if test "$PHP_OPENSSL" = "yes" && test -x "$PKG_CONFIG"; then
+  if test "$PHP_OPENSSL" = "yes" && test -x "$PKG_CONFIG" && $PKG_CONFIG --exists openssl; then
     if $PKG_CONFIG --atleast-version=0.9.6 openssl; then
       found_openssl=yes
       OPENSSL_LIBS=`$PKG_CONFIG --libs openssl`
