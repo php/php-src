@@ -72,7 +72,7 @@ hide PHP usage by renaming files to .html
 Authentication configuration
 ----------------------------
 
-PHP authentication cannot be used with any other authentication.  ALL
+PHP authentication cannot be used with any other authentication. ALL
 AUTHENTICATION IS PASSED TO YOUR PHP SCRIPT.  To configure PHP
 Authentication for the entire server, add the following line:
 
@@ -91,3 +91,31 @@ To use PHP Authentication on a single directory, add the following:
     AuthTrans fn=php5_auth_trans
     </Object>
 
+
+Special use for error pages or self-made directory listings
+-----------------------------------------------------------
+
+You can use PHP to generate the error pages for "404 Not Found"
+or similar. Add the following line to the object in obj.conf for
+every error page you want to overwrite:
+
+    Error fn="php5_execute" code=XXX script="/path/to/script.php" [inikey=value inikey=value...]
+
+where XXX ist the HTTP error code. Please delete any other Error
+directives which could interfere with yours.
+If you want to place a page for all errors that could exist, leave
+the "code" parameter out. Your script can get the HTTP status code
+with $_SERVER['ERROR_TYPE'].
+
+Another posibility is to generate self-made directory listings.
+Just generate a PHP script which displays a directory listing and
+replace the corresponding default Service line for
+type="magnus-internal/directory" in obj.conf with the following:
+
+    Service fn="php5_execute" type="magnus-internal/directory" script="/path/to/script.php" [inikey=value inikey=value...]
+
+For both error and directory listing pages the original URI and
+translated URI are in the variables $_SERVER['PATH_INFO'] and
+$_SERVER['PATH_TRANSLATED'].
+
+$ Id: $
