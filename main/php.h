@@ -174,7 +174,15 @@ extern char *strerror(int);
 
 #if APACHE /* apache httpd */
 # if HAVE_AP_CONFIG_H
+#include "ap_config_auto.h"
+#ifdef RHAPSODY
+#undef HAVE_SNPRINTF
+#endif
 #include "ap_config.h"
+#ifdef RHAPSODY
+#undef HAVE_SNPRINTF
+#define HAVE_SNPRINTF 1
+#endif
 # endif
 # if HAVE_OLD_COMPAT_H
 #include "compat.h"
