@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Added class_exists() function (Andrei, Zend library)
 - Made strspn() and strcspn() binary-safe. (Andrei)
 - Added array_multisort() function. (Andrei)
 - Made pageinfo.c thread-safe (Sascha)

@@ -304,8 +304,6 @@ function_entry basic_functions[] = {
 	PHP_NAMED_FE(header,		PHP_FN(Header),							NULL)
 	PHP_FE(headers_sent,							NULL)
 	
-	PHP_FE(function_exists,				NULL)
-
 	PHP_FE(connection_aborted,			NULL)
 	PHP_FE(connection_timeout,			NULL)
 	PHP_FE(connection_status,			NULL)
@@ -1406,35 +1404,6 @@ PHP_FUNCTION(ignore_user_abort)
     RETURN_LONG(old_setting);
 }
 /* }}} */
-
-/* {{{ proto bool function_exists(string function_name) 
-   Checks if a given function has been defined */
-PHP_FUNCTION(function_exists)
-{
-	pval **fname;
-	pval *tmp;
-	char *lcname;
-	CLS_FETCH();
-	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &fname)==FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(fname);
-
-	lcname = estrdup((*fname)->value.str.val);
-	zend_str_tolower(lcname, (*fname)->value.str.len);
-	if (zend_hash_find(CG(function_table), lcname,
-						(*fname)->value.str.len+1, (void**)&tmp) == FAILURE) {
-		efree(lcname);
-		RETURN_FALSE;
-	} else {
-		efree(lcname);
-		RETURN_TRUE;
-	}
-}
-
-/* }}} */
-
 
 /* {{{ proto int getservbyname(string service, string protocol)
    Returns port associated with service. protocol must be "tcp" or "udp". */

@@ -98,8 +98,6 @@ PHP_FUNCTION(connection_timeout);
 PHP_FUNCTION(connection_status);
 PHP_FUNCTION(ignore_user_abort);
 
-PHP_FUNCTION(function_exists);
-
 PHP_FUNCTION(getservbyname);
 PHP_FUNCTION(getservbyport);
 PHP_FUNCTION(getprotobyname);
