@@ -100,6 +100,20 @@ int split_dbx_handle_object(zval **dbx_object, zval ***pdbx_handle, zval ***pdbx
 	return 1;
 }
 
+int split_dbx_result_object(zval **dbx_result, zval ***pdbx_link, zval ***pdbx_handle, zval ***pdbx_flags, zval ***pdbx_info, zval ***pdbx_cols , zval ***pdbx_rows TSRMLS_DC)
+{
+	convert_to_object_ex(dbx_result);
+	if (zend_hash_find(Z_OBJPROP_PP(dbx_result), "link", 5, (void **) pdbx_link)==FAILURE
+	|| zend_hash_find(Z_OBJPROP_PP(dbx_result), "handle", 7, (void **) pdbx_handle)==FAILURE
+	|| zend_hash_find(Z_OBJPROP_PP(dbx_result), "flags", 6, (void **) pdbx_flags)==FAILURE
+	|| zend_hash_find(Z_OBJPROP_PP(dbx_result), "info", 5, (void **) pdbx_info)==FAILURE
+	|| zend_hash_find(Z_OBJPROP_PP(dbx_result), "cols", 5, (void **) pdbx_cols)==FAILURE
+	|| zend_hash_find(Z_OBJPROP_PP(dbx_result), "rows", 5, (void **) pdbx_rows)==FAILURE) {
+		return 0;
+	}
+	return 1;
+}
+
 /* from dbx.h, to be used in support-files (dbx_mysql.c etc...) */
 void dbx_call_any_function(INTERNAL_FUNCTION_PARAMETERS, char *function_name, zval **returnvalue, int number_of_arguments, zval ***params)
 {
@@ -149,6 +163,7 @@ function_entry dbx_functions[] = {
 	ZEND_FE(dbx_connect,	NULL)
 	ZEND_FE(dbx_close,		NULL)
 	ZEND_FE(dbx_query,		NULL)
+	ZEND_FE(dbx_fetch_row,	NULL)
 	ZEND_FE(dbx_error,		NULL)
 	ZEND_FE(dbx_escape_string,	NULL)
 
@@ -197,6 +212,7 @@ ZEND_MINIT_FUNCTION(dbx)
 	REGISTER_LONG_CONSTANT("DBX_RESULT_INFO", DBX_RESULT_INFO, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DBX_RESULT_INDEX", DBX_RESULT_INDEX, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DBX_RESULT_ASSOC", DBX_RESULT_ASSOC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DBX_RESULT_UNBUFFERED", DBX_RESULT_UNBUFFERED, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("DBX_COLNAMES_UNCHANGED", DBX_COLNAMES_UNCHANGED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DBX_COLNAMES_UPPERCASE", DBX_COLNAMES_UPPERCASE, CONST_CS | CONST_PERSISTENT);
@@ -231,7 +247,7 @@ ZEND_MINFO_FUNCTION(dbx)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "dbx support", "enabled");
-	php_info_print_table_row(2, "dbx version", "1.0.1");
+	php_info_print_table_row(2, "dbx version", "1.1.0");
 	php_info_print_table_row(2, "supported databases", "MySQL\nODBC\nPostgreSQL\nMicrosoft SQL Server\nFrontBase\nOracle 8 (oci8)\nSybase-CT\nSQLite");
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
@@ -395,11 +411,12 @@ ZEND_FUNCTION(dbx_query)
 		convert_to_long_ex(arguments[2]);
 		query_flags = Z_LVAL_PP(arguments[2]);
 		/* fieldnames are needed for association! */
-		result_flags = (query_flags & DBX_RESULT_INFO) | (query_flags & DBX_RESULT_INDEX) | (query_flags & DBX_RESULT_ASSOC);
+		result_flags = (query_flags & DBX_RESULT_INFO) | (query_flags & DBX_RESULT_INDEX) | (query_flags & DBX_RESULT_ASSOC) | (query_flags & DBX_RESULT_UNBUFFERED);
 		if (result_flags & DBX_RESULT_ASSOC) {
 			result_flags |= DBX_RESULT_INFO;
 		}
 		if (!result_flags) result_flags = DBX_RESULT_INFO | DBX_RESULT_INDEX | DBX_RESULT_ASSOC;
+		if (result_flags == DBX_RESULT_UNBUFFERED) result_flags |= DBX_RESULT_INFO | DBX_RESULT_INDEX | DBX_RESULT_ASSOC;
 		/* override ini-setting for colcase */
 		if (query_flags & DBX_COLNAMES_UNCHANGED) {
 			colcase = DBX_COLNAMES_UNCHANGED;
@@ -427,8 +444,15 @@ ZEND_FUNCTION(dbx_query)
 	/* init return_value as object (of rows) */
 	object_init(return_value);
 
+	zend_hash_update(Z_OBJPROP_P(return_value), "link", 5, (void *)(arguments[0]), sizeof(zval *), NULL);
+	 /* need extra refcount here otherwise the link object is destroyed when the 
+	  * query resultobject is destroyed (or not assigned!)
+	  */
+	zval_add_ref(arguments[0]);
 	/* add result_handle property to return_value */
 	zend_hash_update(Z_OBJPROP_P(return_value), "handle", 7, (void *)&(rv_result_handle), sizeof(zval *), NULL);
+	/* add flags property to return_value */
+	add_property_long(return_value, "flags", result_flags | colcase);
 	/* init info property as array and add to return_value as a property */
 	if (result_flags & DBX_RESULT_INFO) {
 		MAKE_STD_ZVAL(info); 
@@ -436,9 +460,11 @@ ZEND_FUNCTION(dbx_query)
 		zend_hash_update(Z_OBJPROP_P(return_value), "info", 5, (void *)&(info), sizeof(zval *), NULL);
 	}
 	/* init data property as array and add to return_value as a property */
-	MAKE_STD_ZVAL(data); 
-	array_init(data);
-	zend_hash_update(Z_OBJPROP_P(return_value), "data", 5, (void *)&(data), sizeof(zval *), NULL);
+	if (!(result_flags & DBX_RESULT_UNBUFFERED)) {
+		MAKE_STD_ZVAL(data); 
+		array_init(data);
+		zend_hash_update(Z_OBJPROP_P(return_value), "data", 5, (void *)&(data), sizeof(zval *), NULL);
+	}
 	/* get columncount and add to returnvalue as property */
 	MAKE_STD_ZVAL(rv_column_count); 
 	ZVAL_LONG(rv_column_count, 0);
@@ -490,35 +516,108 @@ ZEND_FUNCTION(dbx_query)
 		zend_hash_update(Z_ARRVAL_P(info), "type", 5, (void *) &info_row_type, sizeof(zval *), NULL);
 	}
 	/* fill each row array with fieldvalues (indexed (and assoc)) */
-	row_count=0;
-	result=1;
-	while (result) {
-		zval *rv_row;
-		MAKE_STD_ZVAL(rv_row);
-		ZVAL_LONG(rv_row, 0);
-		result = switch_dbx_getrow(&rv_row, &rv_result_handle, row_count, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
-		if (result) {
-			zend_hash_index_update(Z_ARRVAL_P(data), row_count, (void *)&(rv_row), sizeof(zval *), (void **) &row_ptr);
-			/* associate results with fieldnames */
-			if (result_flags & DBX_RESULT_ASSOC) {
-				zval **columnname_ptr, **actual_ptr;
-				for (col_index=0; col_index<Z_LVAL_P(rv_column_count); ++col_index) {
-					zend_hash_index_find(Z_ARRVAL_PP(inforow_ptr), col_index, (void **) &columnname_ptr);
-					zend_hash_index_find(Z_ARRVAL_PP(row_ptr), col_index, (void **) &actual_ptr);
-					(*actual_ptr)->refcount+=1;
-					(*actual_ptr)->is_ref=1;
-					zend_hash_update(Z_ARRVAL_PP(row_ptr), Z_STRVAL_PP(columnname_ptr), Z_STRLEN_PP(columnname_ptr) + 1, actual_ptr, sizeof(zval *), NULL);
+	if (!(result_flags & DBX_RESULT_UNBUFFERED)) {
+		row_count=0;
+		result=1;
+		while (result) {
+			zval *rv_row;
+			MAKE_STD_ZVAL(rv_row);
+			ZVAL_LONG(rv_row, 0);
+			result = switch_dbx_getrow(&rv_row, &rv_result_handle, row_count, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
+			if (result) {
+				zend_hash_index_update(Z_ARRVAL_P(data), row_count, (void *)&(rv_row), sizeof(zval *), (void **) &row_ptr);
+				/* associate results with fieldnames */
+				if (result_flags & DBX_RESULT_ASSOC) {
+					zval **columnname_ptr, **actual_ptr;
+					for (col_index=0; col_index<Z_LVAL_P(rv_column_count); ++col_index) {
+						zend_hash_index_find(Z_ARRVAL_PP(inforow_ptr), col_index, (void **) &columnname_ptr);
+						zend_hash_index_find(Z_ARRVAL_PP(row_ptr), col_index, (void **) &actual_ptr);
+						(*actual_ptr)->refcount+=1;
+						(*actual_ptr)->is_ref=1;
+						zend_hash_update(Z_ARRVAL_PP(row_ptr), Z_STRVAL_PP(columnname_ptr), Z_STRLEN_PP(columnname_ptr) + 1, actual_ptr, sizeof(zval *), NULL);
+					}
 				}
+				++row_count;
+			} else {
+				FREE_ZVAL(rv_row);
 			}
-			++row_count;
-		} else {
-			FREE_ZVAL(rv_row);
 		}
+		/* add row_count property */
+		add_property_long(return_value, "rows", row_count);
 	}
-	/* add row_count property */
-	add_property_long(return_value, "rows", row_count);
+	else {
+		add_property_long(return_value, "rows", 0);
+	}
 }
 /* }}} */
+
+/* {{{ proto dbx_row dbx_fetch_row(dbx_query_object dbx_q)
+   Returns a row (index and assoc based on query) on success and returns 0 on failure or no more rows */
+ZEND_FUNCTION(dbx_fetch_row)
+{
+	int min_number_of_arguments=1;
+	int number_of_arguments=1;
+	zval **arguments[1];
+
+	zval **dbx_result_link;
+	zval **dbx_result_handle;
+	zval **dbx_result_flags;
+	zval **dbx_result_info;
+	zval **dbx_result_cols;
+	zval **dbx_result_rows;
+
+	zval **dbx_handle;
+	zval **dbx_module;
+	zval **dbx_database;
+
+	int result;
+	long col_index;
+	long col_count;
+	long row_count;
+	long result_flags;
+	zval **inforow_ptr;
+
+	if (ZEND_NUM_ARGS()!=number_of_arguments || zend_get_parameters_array_ex(ZEND_NUM_ARGS(), arguments) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	if (!split_dbx_result_object(arguments[0], &dbx_result_link, &dbx_result_handle, &dbx_result_flags, &dbx_result_info, &dbx_result_cols, &dbx_result_rows TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "not a valid dbx_result-object...");
+		RETURN_LONG(0);
+	}
+	if (!split_dbx_handle_object(dbx_result_link, &dbx_handle, &dbx_module, &dbx_database TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "not a valid dbx_handle-object...");
+		RETURN_LONG(0);
+	}
+
+	/* default values */
+	result_flags = Z_LVAL_PP(dbx_result_flags);
+	col_count = Z_LVAL_PP(dbx_result_cols);
+	row_count = Z_LVAL_PP(dbx_result_rows);
+
+	/* find fieldnames (for assoc) */
+	if (result_flags & DBX_RESULT_ASSOC) {
+		zend_hash_find(Z_ARRVAL_PP(dbx_result_info), "name", 5, (void **) &inforow_ptr);
+	}
+
+	result = switch_dbx_getrow(&return_value, dbx_result_handle, row_count, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
+	if (result) {
+		/* associate results with fieldnames */
+		if (result_flags & DBX_RESULT_ASSOC) {
+			zval **columnname_ptr, **actual_ptr;
+			for (col_index=0; col_index<col_count; ++col_index) {
+				zend_hash_index_find(Z_ARRVAL_PP(inforow_ptr), col_index, (void **) &columnname_ptr);
+				zend_hash_index_find(Z_ARRVAL_P(return_value), col_index, (void **) &actual_ptr);
+				(*actual_ptr)->refcount+=1;
+				(*actual_ptr)->is_ref=1;
+				zend_hash_update(Z_ARRVAL_P(return_value), Z_STRVAL_PP(columnname_ptr), Z_STRLEN_PP(columnname_ptr) + 1, actual_ptr, sizeof(zval *), NULL);
+			}
+		}
+	++row_count;
+	add_property_long(*arguments[0], "rows", row_count);
+	}
+}
+/* }}} */
+
 
 /* {{{ proto string dbx_error(dbx_link_object dbx_link)
    Returns success or failure 

@@ -58,6 +58,13 @@ else {
                 }
             }
         }
+    // DBX_RESULT_UNBUFFERED
+    if ($dro=dbx_query($dlo, $sql_statement, DBX_RESULT_UNBUFFERED)) {
+        $properties = get_object_vars($dro);
+        if (array_key_exists('data', $properties)) {
+            print("data property not expected with DBX_RESULT_UNBUFFERED flag.");
+            }
+        }
     // colnames_case flags
     if ($dro=dbx_query($dlo, $sql_statement, DBX_COLNAMES_LOWERCASE)) {
         print('column name lowercased: ');
