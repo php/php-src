@@ -2,7 +2,7 @@ dnl $Id$
 dnl config.m4 for extension domxml
 
 PHP_ARG_WITH(dom, for DOM support,
-[  --with-dom[=DIR]        Include DOM support (requires libxml >= 2.0).
+[  --with-dom[=DIR]        Include DOM support (requires libxml >= 2.2.7).
                           DIR is the libxml install directory,
                           defaults to /usr.])
 
@@ -22,7 +22,7 @@ if test "$PHP_DOM" != "no"; then
 
   if test -z "$DOMXML_DIR"; then
     AC_MSG_RESULT(not found)
-    AC_MSG_ERROR(Please reinstall the libxml >= 2.0 distribution)
+    AC_MSG_ERROR(Please reinstall the libxml >= 2.2.7 distribution)
   fi
 
   AC_ADD_INCLUDE($DOMXML_DIR/include)
@@ -53,7 +53,7 @@ if test "$PHP_DOM" != "no"; then
   fi
 
   AC_CHECK_LIB(xml, xmlFreeURI, [AC_DEFINE(HAVE_DOMXML,1,[ ])],
-    [AC_MSG_ERROR(DOM module requires libxml >= 2.0)])
+    [AC_MSG_ERROR(DOM module requires libxml >= 2.2.7)])
   AC_ADD_LIBRARY(z)
 
   PHP_EXTENSION(domxml, $ext_shared)
