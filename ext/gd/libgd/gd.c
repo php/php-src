@@ -9,8 +9,8 @@
 
 #ifdef _MSC_VER
 # if _MSC_VER >= 1300
-/* in MSVC.NET the these are available but only for __cplusplus and not _MSC_EXTENSIONS */
-#  ifdef _MSC_EXTENSIONS
+/* in MSVC.NET these are available but only for __cplusplus and not _MSC_EXTENSIONS */
+#  if !defined(_MSC_EXTENSIONS) && defined(__cplusplus)
 #   define HAVE_FABSF 1
 extern float fabsf(float x);
 #   define HAVE_FLOORF 1
