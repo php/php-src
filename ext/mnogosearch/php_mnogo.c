@@ -44,26 +44,27 @@
 #define UDM_FIELD_CRC		12
 
 /* udm_set_agent_param constants */
-#define UDM_PARAM_PAGE_SIZE	1
-#define UDM_PARAM_PAGE_NUM	2
-#define UDM_PARAM_SEARCH_MODE	3
-#define UDM_PARAM_CACHE_MODE	4
-#define UDM_PARAM_TRACK_MODE	5
-#define UDM_PARAM_CHARSET	6
-#define UDM_PARAM_STOPTABLE	7
-#define UDM_PARAM_STOPFILE	8
-#define UDM_PARAM_WEIGHT_FACTOR	9
-#define UDM_PARAM_WORD_MATCH	10
-#define UDM_PARAM_PHRASE_MODE	11
-#define UDM_PARAM_MIN_WORD_LEN	12
-#define UDM_PARAM_MAX_WORD_LEN	13
-#define UDM_PARAM_ISPELL_MODE	14
+#define UDM_PARAM_PAGE_SIZE		1
+#define UDM_PARAM_PAGE_NUM		2
+#define UDM_PARAM_SEARCH_MODE		3
+#define UDM_PARAM_CACHE_MODE		4
+#define UDM_PARAM_TRACK_MODE		5
+#define UDM_PARAM_CHARSET		6
+#define UDM_PARAM_STOPTABLE		7
+#define UDM_PARAM_STOPFILE		8
+#define UDM_PARAM_WEIGHT_FACTOR		9
+#define UDM_PARAM_WORD_MATCH		10
+#define UDM_PARAM_PHRASE_MODE		11
+#define UDM_PARAM_MIN_WORD_LEN		12
+#define UDM_PARAM_MAX_WORD_LEN		13
+#define UDM_PARAM_ISPELL_PREFIXES	14
 
 /* udm_add_search_limit constants */
 #define UDM_LIMIT_URL		1
 #define UDM_LIMIT_TAG		2
 #define UDM_LIMIT_LANG		3
 #define UDM_LIMIT_CAT		4
+#define UDM_LIMIT_DATE		5
 
 /* track modes */
 #define UDM_TRACK_ENABLED	1
@@ -73,6 +74,10 @@
 #define UDM_PHRASE_ENABLED	1
 #define UDM_PHRASE_DISABLED	0
 
+/* prefix modes */
+#define UDM_PREFIXES_ENABLED	1
+#define UDM_PREFIXES_DISABLED	0
+
 /* udm_get_res_param constants */
 #define UDM_PARAM_NUM_ROWS	256
 #define UDM_PARAM_FOUND		257
@@ -80,6 +85,12 @@
 #define UDM_PARAM_SEARCHTIME	259
 #define UDM_PARAM_FIRST_DOC	260
 #define UDM_PARAM_LAST_DOC	261
+
+/* udm_load_ispell_data constants */
+#define UDM_ISPELL_TYPE_AFFIX	1
+#define UDM_ISPELL_TYPE_SPELL	2
+#define UDM_ISPELL_TYPE_DB	3
+#define UDM_ISPELL_TYPE_SERVER	4
 
 /* True globals, no need for thread safety */
 static int le_link,le_res;
@@ -90,6 +101,9 @@ static int le_link,le_res;
 function_entry mnogosearch_functions[] = {
 	PHP_FE(udm_alloc_agent,		NULL)
 	PHP_FE(udm_set_agent_param,	NULL)
+	
+	PHP_FE(udm_load_ispell_data,	NULL)
+	PHP_FE(udm_free_ispell_data,	NULL)
 	
 	PHP_FE(udm_add_search_limit,	NULL)
 	PHP_FE(udm_clear_search_limits,	NULL)
@@ -158,28 +172,38 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	/* udm_set_agent_param constants */
 	REGISTER_LONG_CONSTANT("UDM_PARAM_PAGE_SIZE",	UDM_PARAM_PAGE_SIZE,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_PAGE_NUM",	UDM_PARAM_PAGE_NUM,CONST_CS | CONST_PERSISTENT);
+	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_SEARCH_MODE",	UDM_PARAM_SEARCH_MODE,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_CACHE_MODE",	UDM_PARAM_CACHE_MODE,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_TRACK_MODE",	UDM_PARAM_TRACK_MODE,CONST_CS | CONST_PERSISTENT);	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_PHRASE_MODE",	UDM_PARAM_PHRASE_MODE,CONST_CS | CONST_PERSISTENT);	
+	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_CHARSET",	UDM_PARAM_CHARSET,CONST_CS | CONST_PERSISTENT);	
+	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_STOPTABLE",	UDM_PARAM_STOPTABLE,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_STOP_TABLE",	UDM_PARAM_STOPTABLE,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_STOPFILE",	UDM_PARAM_STOPFILE,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_STOP_FILE",	UDM_PARAM_STOPFILE,CONST_CS | CONST_PERSISTENT);	
+	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_WEIGHT_FACTOR",UDM_PARAM_WEIGHT_FACTOR,CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("UDM_PARAM_WORD_MATCH",  UDM_PARAM_WORD_MATCH,CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("UDM_PARAM_PHRASE_MODE",	UDM_PARAM_PHRASE_MODE,CONST_CS | CONST_PERSISTENT);	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_WORD_MATCH",  UDM_PARAM_WORD_MATCH,CONST_CS | CONST_PERSISTENT);	
+	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_MAX_WORD_LEN",UDM_PARAM_MAX_WORD_LEN,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_MAX_WORDLEN", UDM_PARAM_MAX_WORD_LEN,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_MIN_WORD_LEN",UDM_PARAM_MIN_WORD_LEN,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_MIN_WORDLEN", UDM_PARAM_MIN_WORD_LEN,CONST_CS | CONST_PERSISTENT);	
-	REGISTER_LONG_CONSTANT("UDM_PARAM_ISPELL_MODE", UDM_PARAM_ISPELL_MODE,CONST_CS | CONST_PERSISTENT);	
+	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_ISPELL_PREFIXES",UDM_PARAM_ISPELL_PREFIXES,CONST_CS | CONST_PERSISTENT);	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_ISPELL_PREFIX",UDM_PARAM_ISPELL_PREFIXES,CONST_CS | CONST_PERSISTENT);	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_PREFIXES",	UDM_PARAM_ISPELL_PREFIXES,CONST_CS | CONST_PERSISTENT);	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_PREFIX",	UDM_PARAM_ISPELL_PREFIXES,CONST_CS | CONST_PERSISTENT);
 	
 	/* udm_add_search_limit constants */
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_CAT",		UDM_LIMIT_CAT,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_URL",		UDM_LIMIT_URL,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_TAG",		UDM_LIMIT_TAG,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_LANG",	UDM_LIMIT_LANG,CONST_CS | CONST_PERSISTENT);	
+	REGISTER_LONG_CONSTANT("UDM_LIMIT_DATE",	UDM_LIMIT_DATE,CONST_CS | CONST_PERSISTENT);	
 	
 	/* udm_get_res_param constants */
 	REGISTER_LONG_CONSTANT("UDM_PARAM_FOUND",	UDM_PARAM_FOUND,CONST_CS | CONST_PERSISTENT);
@@ -209,16 +233,29 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_PHRASE_ENABLED",	UDM_PHRASE_ENABLED,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PHRASE_DISABLED",	UDM_PHRASE_DISABLED,CONST_CS | CONST_PERSISTENT);
 	
-	/* ispell mode params */
-	REGISTER_LONG_CONSTANT("UDM_ISPELL_MODE_DB",	UDM_ISPELL_MODE_DB,CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("UDM_ISPELL_USE_PREFIXES",UDM_ISPELL_USE_PREFIXES,CONST_CS | CONST_PERSISTENT);
+	/* prefixes mode params */
+	REGISTER_LONG_CONSTANT("UDM_PREFIXES_ENABLED",	UDM_PREFIXES_ENABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PREFIX_ENABLED",	UDM_PREFIXES_ENABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_ISPELL_PREFIXES_ENABLED",UDM_PREFIXES_ENABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_ISPELL_PREFIX_ENABLED",UDM_PREFIXES_ENABLED,CONST_CS | CONST_PERSISTENT);
+	
+	REGISTER_LONG_CONSTANT("UDM_PREFIXES_DISABLED",	UDM_PREFIXES_DISABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PREFIX_DISABLED",	UDM_PREFIXES_DISABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_ISPELL_PREFIXES_DISABLED",UDM_PREFIXES_DISABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_ISPELL_PREFIX_DISABLED",UDM_PREFIXES_DISABLED,CONST_CS | CONST_PERSISTENT);
+	
+	/* ispell type params */
+	REGISTER_LONG_CONSTANT("UDM_ISPELL_TYPE_AFFIX",	UDM_ISPELL_TYPE_AFFIX,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_ISPELL_TYPE_SPELL",	UDM_ISPELL_TYPE_SPELL,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_ISPELL_TYPE_DB",	UDM_ISPELL_TYPE_DB,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_ISPELL_TYPE_SERVER",UDM_ISPELL_TYPE_SERVER,CONST_CS | CONST_PERSISTENT);
 	
 	/* word match mode params */
 	REGISTER_LONG_CONSTANT("UDM_MATCH_WORD",	UDM_MATCH_WORD,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_MATCH_BEGIN",	UDM_MATCH_BEGIN,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_MATCH_SUBSTR",	UDM_MATCH_SUBSTR,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_MATCH_END",		UDM_MATCH_END,CONST_CS | CONST_PERSISTENT);
-
+	
 	return SUCCESS;
 }
 
@@ -450,19 +487,20 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			
 			break;
 			
-		case UDM_PARAM_ISPELL_MODE: 
-			Agent->Conf->ispell_mode = atoi(val) & (UDM_ISPELL_MODE_DB | UDM_ISPELL_USE_PREFIXES);
-			
-			if (Agent->Conf->ispell_mode & UDM_ISPELL_MODE_DB) {
-				if (UdmDBImportAffixes(Agent,Agent->charset) || 
-				    UdmImportDictionaryFromDB(Agent)) {
-				    	RETURN_FALSE;
-				} else {
-					if(Agent->Conf->nspell) {
-		  				UdmSortDictionary(Agent->Conf);
-		  				UdmSortAffixes(Agent->Conf);
-					}
-				}
+		case UDM_PARAM_ISPELL_PREFIXES: 
+			switch (atoi(val)){
+				case UDM_PREFIXES_ENABLED:
+					Agent->Conf->ispell_mode |= UDM_ISPELL_USE_PREFIXES;
+					break;
+					
+				case UDM_PREFIXES_DISABLED:
+					Agent->Conf->ispell_mode &= ~UDM_ISPELL_USE_PREFIXES;
+					break;
+				
+				default:
+					php_error(E_WARNING,"Udm_Set_Agent_Param: Unknown ispell prefixes mode");
+					RETURN_FALSE;
+					break;
 			}
 			
 			break;
@@ -507,6 +545,117 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			RETURN_FALSE;
 			break;
 	}
+	RETURN_TRUE;
+}
+/* }}} */
+
+
+/* {{{ proto int udm_load_ispell_data(int agent, int var, string val1, string val2, int flag)
+   Load ispell data */
+DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
+{
+	pval **yyagent, **yyvar, **yyval1, **yyval2, **yyflag;
+	char *val1, *val2;
+	int var, flag;
+	UDM_AGENT * Agent;
+
+	switch(ZEND_NUM_ARGS()){
+	
+		case 5: 		
+			if(zend_get_parameters_ex(5,&yyagent,&yyvar,&yyval1,&yyval2,&yyflag)==FAILURE){
+				RETURN_FALSE;
+			}
+			convert_to_long_ex(yyvar);
+			convert_to_long_ex(yyflag);
+			convert_to_string_ex(yyval1);
+			convert_to_string_ex(yyval2);
+			ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-agent", le_link);
+			var  = (*yyvar)->value.lval;
+			flag = (*yyflag)->value.lval;
+			val1 = (*yyval1)->value.str.val;
+			val2 = (*yyval2)->value.str.val;
+			
+			break;
+			
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	
+	switch(var){
+		case UDM_ISPELL_TYPE_DB: 
+			Agent->Conf->ispell_mode |= UDM_ISPELL_MODE_DB;
+			
+			if (UdmDBImportAffixes(Agent,Agent->charset) || 
+			    UdmImportDictionaryFromDB(Agent)) {
+				RETURN_FALSE;
+			} 
+						
+			break;
+			
+		case UDM_ISPELL_TYPE_AFFIX: 
+			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_DB;
+			
+			if (UdmImportAffixes(Agent->Conf,val1,val2,NULL,0)) {
+				php_error(E_WARNING,"Udm_Load_Ispell_Data: Cannot load affix file %s",val2);
+				RETURN_FALSE;
+			}
+			
+			break;
+			
+		case UDM_ISPELL_TYPE_SPELL: 
+			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_DB;
+			
+			if (UdmImportDictionary(Agent->Conf,val1,val2,1,"")) {
+				php_error(E_WARNING,"Udm_Load_Ispell_Data: Cannot load spell file %s",val2);
+				RETURN_FALSE;
+			}
+			
+			break;
+			
+		case UDM_ISPELL_TYPE_SERVER:
+		
+			break;
+
+		default:
+			php_error(E_WARNING,"Udm_Load_Ispell_Data: Unknown ispell type parameter");
+			RETURN_FALSE;
+			break;
+	}
+	
+	if (flag) {
+		if(Agent->Conf->nspell) {
+			UdmSortDictionary(Agent->Conf);
+		  	UdmSortAffixes(Agent->Conf);
+		}
+	}
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
+
+/* {{{ proto int udm_free_ispell_data(int agent)
+   Free memory allocated for ispell data */
+DLEXPORT PHP_FUNCTION(udm_free_ispell_data)
+{
+	pval ** yyagent;
+	UDM_AGENT * Agent;
+	switch(ZEND_NUM_ARGS()){
+		case 1: {
+				if (zend_get_parameters_ex(1, &yyagent)==FAILURE) {
+					RETURN_FALSE;
+				}
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-Agent", le_link);
+	
+	/* UdmClearIspellData(Agent->Conf); */
+	
 	RETURN_TRUE;
 }
 /* }}} */
@@ -561,6 +710,23 @@ DLEXPORT PHP_FUNCTION(udm_add_search_limit)
 			
 			break;
 			
+		case UDM_LIMIT_DATE: {
+			struct udm_stl_info_t stl_info = { 0, 0, 0 };
+			
+			if (val[0] == '>') {
+				stl_info.type=1;
+			} else if (val[0] == '<') {
+				stl_info.type=-1;
+			} else {
+				php_error(E_WARNING,"Udm_Add_Search_Limit: Incorrect date limit format");
+				RETURN_FALSE;
+			}			
+			
+			stl_info.t1=(time_t)(atol(val+1));
+			UdmAddTimeLimit(Agent->Conf,&stl_info);
+			
+			break;
+			}
 		default:
 			php_error(E_WARNING,"Udm_Add_Search_Limit: Unknown search limit parameter");
 			RETURN_FALSE;
@@ -620,7 +786,7 @@ DLEXPORT PHP_FUNCTION(udm_find)
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
 	convert_to_string_ex(yyquery);
 	
-	if (Res=UdmFind(Agent,UdmTolower((*yyquery)->value.str.val,Agent->charset))) {
+	if ((Res=UdmFind(Agent,UdmTolower((*yyquery)->value.str.val,Agent->charset)))) {
 	    ZEND_REGISTER_RESOURCE(return_value,Res,le_res);
 	} else {
 	    RETURN_FALSE;
