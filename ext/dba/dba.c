@@ -760,7 +760,13 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			FREENOW;
 			RETURN_FALSE;
 		}
-		if (php_flock(info->lock.fd, lock_mode)) {
+		if (php_stream_cast(info->lock.fp, PHP_STREAM_AS_FD, (void*)&info->lock.fd, 1) == FAILURE) {
+			dba_close(info TSRMLS_CC);
+			/* stream operation already wrote an error message */
+			FREENOW;
+			RETURN_FALSE;
+		}
+		if (php_flock(info->lock.fd, lock_mode)) {		
 			error = "Unable to establish lock"; /* force failure exit */
 		}
 	}
