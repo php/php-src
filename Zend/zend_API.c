@@ -1182,8 +1182,7 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 		}
 		fname_len = strlen(ptr->fname);
 		lowercase_name = do_alloca(fname_len+1);
-		memcpy(lowercase_name, ptr->fname, fname_len+1);
-		zend_str_tolower(lowercase_name, fname_len);
+		zend_str_tolower_copy(lowercase_name, ptr->fname, fname_len);
 		if (zend_hash_add(target_function_table, lowercase_name, fname_len+1, &function, sizeof(zend_function), (void**)&reg_function) == FAILURE) {
 			unload=1;
 			free_alloca(lowercase_name);
@@ -1377,7 +1376,7 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_class_entry TSRMLS_DC)
 {
 	zend_class_entry *class_entry = malloc(sizeof(zend_class_entry));
-	char *lowercase_name = zend_strndup(orig_class_entry->name, orig_class_entry->name_length);
+	char *lowercase_name = malloc(orig_class_entry->name_length + 1);
 	*class_entry = *orig_class_entry;
 
 	class_entry->type = ZEND_INTERNAL_CLASS;
@@ -1387,7 +1386,7 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_c
 		zend_register_functions(class_entry, class_entry->builtin_functions, &class_entry->function_table, MODULE_PERSISTENT TSRMLS_CC);
 	}
 
-	zend_str_tolower(lowercase_name, class_entry->name_length);
+	zend_str_tolower_copy(lowercase_name, orig_class_entry->name, class_entry->name_length);
 	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, &class_entry, sizeof(zend_class_entry *), NULL);
 	free(lowercase_name);
 	return class_entry;
@@ -1403,8 +1402,8 @@ ZEND_API zend_class_entry *zend_register_internal_ns_class(zend_class_entry *cla
 	if (!ns && ns_name) {
 		zend_namespace **pns;
 		size_t ns_name_length = strlen(ns_name);
-		char *lowercase_name = zend_strndup(ns_name, ns_name_length);
-		zend_str_tolower(lowercase_name, ns_name_length);
+		char *lowercase_name = malloc(ns_name_length + 1);
+		zend_str_tolower_copy(lowercase_name, ns_name, ns_name_length);
 		if (zend_hash_find(&CG(global_namespace).class_table, lowercase_name, ns_name_length+1, (void **)&pns) == FAILURE) {
 			free(lowercase_name);
 			return NULL;
@@ -1434,13 +1433,13 @@ ZEND_API zend_class_entry *zend_register_internal_ns_class(zend_class_entry *cla
 ZEND_API zend_namespace *zend_register_internal_namespace(zend_namespace *orig_ns TSRMLS_DC)
 {
 	zend_namespace *ns = malloc(sizeof(zend_namespace));
-	char *lowercase_name = zend_strndup(orig_ns->name, orig_ns->name_length);
+	char *lowercase_name = malloc(orig_ns->name_length + 1);
 	*ns = *orig_ns;
 
 	ns->type = ZEND_INTERNAL_NAMESPACE;
 	zend_init_namespace(ns TSRMLS_CC);
 
-	zend_str_tolower(lowercase_name, ns->name_length);
+	zend_str_tolower_copy(lowercase_name, orig_ns->name, orig_ns->name_length);
 	zend_hash_update(&CG(global_namespace).class_table, lowercase_name, ns->name_length+1, &ns, sizeof(zend_namespace *), NULL);
 	free(lowercase_name);
 
