@@ -50,8 +50,8 @@
 #define IBDEBUG(a)
 #endif
 
-#define ISC_LONG_MIN 	(1 << (8*sizeof(ISC_LONG)-1))
-#define ISC_LONG_MAX 	~ISC_LONG_MIN
+#define ISC_LONG_MIN 	INT_MIN
+#define ISC_LONG_MAX 	INT_MAX
 
 #define QUERY_RESULT	1
 #define EXECUTE_RESULT	2
@@ -872,7 +872,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 {
 	char hash[16], *args[] = { NULL, NULL, NULL, NULL, NULL };
 	int i, len[] = { 0, 0, 0, 0, 0 };
-	long largs[] = { 0, SQL_DIALECT_CURRENT };
+	long largs[] = { 0, 0 };
 	PHP_MD5_CTX hash_context;
 	list_entry new_index_ptr, *le;
 	isc_db_handle db_handle = NULL;
@@ -2373,7 +2373,7 @@ PHP_FUNCTION(ibase_query)
 						ib_link->dialect = SQL_DIALECT_CURRENT;
 						ib_link->tr_list = NULL;
 						ib_link->event_head = NULL;
-						
+								
 						ZEND_REGISTER_RESOURCE(return_value, ib_link, le_link);
 						zend_list_addref(Z_LVAL_P(return_value));
 						IBG(default_link) = Z_LVAL_P(return_value);
@@ -2518,11 +2518,9 @@ PHP_FUNCTION(ibase_num_rows)
 	 * - num_rows() for SELECT ... FOR UPDATE is broken -> never returns a
 	 *   higher number than the number of records fetched so far (no pre-fetch);
 	 * - the result of num_rows() for other statements is merely a lower bound 
-	 * on the number of records => calling ibase_num_rows() again after a couple
-	 * of fetches will most likely return a new (higher) figure for large result 
-	 * sets.
-	 *
-	 * 12-aug-2003 Ard Biesheuvel
+	 *   on the number of records => calling ibase_num_rows() again after a couple
+	 *   of fetches will most likely return a new (higher) figure for large result 
+	 *   sets.
 	 */
 	
 	zval **result_arg;
@@ -3466,7 +3464,7 @@ PHP_FUNCTION(ibase_gen_id)
 	}
 
 	/* don't return the generator value as a string unless it doesn't fit in a long */
-#ifdef SQL_INT64
+#if SQL_INT64 && SIZEOF_LONG < 8
 	if (result < LONG_MIN || result > LONG_MAX) {
 		char res[24];
 
@@ -3478,7 +3476,7 @@ PHP_FUNCTION(ibase_gen_id)
 }
 
 /* }}} */
-
+    
 #endif /* HAVE_IBASE */
 
 /*
