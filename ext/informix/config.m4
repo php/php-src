@@ -57,11 +57,11 @@ WARNING: You specified Informix base install directory that is different
         if test "`uname -s 2>/dev/null`" = "AIX"; then
         CFLAGS="$CFLAGS -D__H_LOCALEDEF"
       fi
-      AC_DEFINE(HAVE_IFX,,[ ])
+      AC_DEFINE(HAVE_IFX,1,[ ])
       AC_MSG_CHECKING([Informix version])
       IFX_VERSION=[`esql -V | sed -ne '1 s/^[^0-9]*\([0-9]\)\.\([0-9]*\).*/\1\2/p'`]
       if test $IFX_VERSION -ge "900"; then
-        AC_DEFINE(HAVE_IFX_IUS,,[ ])
+        AC_DEFINE(HAVE_IFX_IUS,1,[ ])
         IFX_ESQL_FLAGS="-EDHAVE_IFX_IUS"
       else
         IFX_ESQL_FLAGS="-EUHAVE_IFX_IUS"

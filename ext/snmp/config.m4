@@ -40,7 +40,7 @@ AC_ARG_WITH(snmp,
       test -d $withval/include/ucd-snmp && SNMP_INCDIR=$withval/include/ucd-snmp
       SNMP_LIBDIR=$withval/lib
     fi
-    AC_DEFINE(HAVE_SNMP,,[ ])
+    AC_DEFINE(HAVE_SNMP,1,[ ])
     if test "$shared" = "yes"; then
       AC_MSG_RESULT(yes (shared))
       SNMP_INCLUDE="-I$SNMP_INCDIR"

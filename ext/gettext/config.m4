@@ -31,7 +31,7 @@ AC_ARG_WITH(gettext,
         ],)
     ],)
 
-    AC_DEFINE(HAVE_LIBINTL,,[ ])
+    AC_DEFINE(HAVE_LIBINTL,1,[ ])
     PHP_EXTENSION(gettext)
 
 	EXTRA_LIBS="$EXTRA_LIBS $GETTEXT_LFLAGS $GETTEXT_LIBS"

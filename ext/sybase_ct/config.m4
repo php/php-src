@@ -10,7 +10,7 @@ AC_ARG_WITH(sybase-ct,
     if test -z "$SYBASE_LIBS"; then
       PHP_EXTENSION(sybase_ct)
     fi
-    AC_DEFINE(HAVE_SYBASE_CT,,[ ])
+    AC_DEFINE(HAVE_SYBASE_CT,1,[ ])
     if test "$withval" = "yes"; then
       SYBASE_CT_INCDIR=/home/sybase/include
       SYBASE_CT_LIBDIR=/home/sybase/lib
