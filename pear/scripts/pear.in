@@ -24,7 +24,9 @@
 /**
  * @nodep Gtk
  */
-ini_set('include_path', '@include_path@');
+if ('@include_path@' != '@'.'include_path'.'@') {
+    ini_set('include_path', '@include_path@');
+}
 ini_set('allow_url_fopen', true);
 set_time_limit(0);
 ob_implicit_flush(true);
@@ -203,6 +205,7 @@ function usage($error = null, $helpsubject = null)
             "Commands:\n";
         $maxlen = max(array_map("strlen", $all_commands));
         $formatstr = "%-{$maxlen}s  %s\n";
+        ksort($all_commands);
         foreach ($all_commands as $cmd => $class) {
             $put .= sprintf($formatstr, $cmd, PEAR_Command::getDescription($cmd));
         }
