@@ -27,6 +27,9 @@ define('PEAR_DEPENDENCY_UPGRADE_MINOR',  -3);
 define('PEAR_DEPENDENCY_UPGRADE_MAJOR',  -4);
 define('PEAR_DEPENDENCY_BAD_DEPENDENCY', -5);
 define('PEAR_DEPENDENCY_MISSING_OPTIONAL', -6);
+define('PEAR_DEPENDENCY_CONFLICT_OPTIONAL',       -7);
+define('PEAR_DEPENDENCY_UPGRADE_MINOR_OPTIONAL',  -8);
+define('PEAR_DEPENDENCY_UPGRADE_MAJOR_OPTIONAL',  -9);
 
 /**
  * Dependency check for PEAR packages
@@ -156,10 +159,11 @@ class PEAR_Dependency
                 if (!$this->registry->packageExists($name)
                     || !version_compare("$version", "$req", $relation))
                 {
-                    $code = $this->codeFromRelation($relation, $version, $req);
+                    $code = $this->codeFromRelation($relation, $version, $req, $opt);
                     if ($opt) {
-                        $errmsg = "package `$name' version $req is recommended to utilize some features.";
-                        return PEAR_DEPENDENCY_MISSING_OPTIONAL;
+                        $errmsg = "package `$name' version " . $this->signOperator($relation) .
+                            " $req is recommended to utilize some features.  Installed version is $version";
+                        return $code;
                     }
                     $errmsg = "requires package `$name' " .
                         $this->signOperator($relation) . " $req";
@@ -425,9 +429,10 @@ class PEAR_Dependency
      * @param  string Relation
      * @param  string Version
      * @param  string Requirement
+     * @param  bool   Optional dependency indicator
      * @return integer
      */
-    function codeFromRelation($relation, $version, $req)
+    function codeFromRelation($relation, $version, $req, $opt = false)
     {
         $code = PEAR_DEPENDENCY_BAD_DEPENDENCY;
         switch ($relation) {
@@ -436,13 +441,16 @@ class PEAR_Dependency
                 $have_major = preg_replace('/\D.*/', '', $version);
                 $need_major = preg_replace('/\D.*/', '', $req);
                 if ($need_major > $have_major) {
-                    $code = PEAR_DEPENDENCY_UPGRADE_MAJOR;
+                    $code = $opt ? PEAR_DEPENDENCY_UPGRADE_MAJOR_OPTIONAL :
+                                   PEAR_DEPENDENCY_UPGRADE_MAJOR;
                 } else {
-                    $code = PEAR_DEPENDENCY_UPGRADE_MINOR;
+                    $code = $opt ? PEAR_DEPENDENCY_UPGRADE_MINOR_OPTIONAL :
+                                   PEAR_DEPENDENCY_UPGRADE_MINOR;
                 }
                 break;
             case 'lt': case 'le': case 'ne':
-                $code = PEAR_DEPENDENCY_CONFLICT;
+                $code = $opt ? PEAR_DEPENDENCY_CONFLICT_OPTIONAL :
+                               PEAR_DEPENDENCY_CONFLICT;
                 break;
         }
         return $code;
