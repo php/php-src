@@ -1,3 +1,56 @@
+2004-09-10  Sara Golemon  <php@alphaweb.net>
+
+    * main/streams/streams.c:
+      A little extra code to allow overriding plainfiles wrapper as well
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.h
+      main/php_streams.h
+      main/streams/streams.c
+      main/streams/userspace.c:
+      Add stream_wrapper_unregister()
+      Disables a wrapper (user-defined or built-in) for the life of the request.
+      
+      Add stream_wrapper_restore()
+      Restores the wrapper originally defined at the time the request started
+      to the protocol name mentioned.
+
+2004-09-10  Sterling Hughes  <winnie@edwardbear.org>
+
+    * ext/curl/multi.c:
+      fix wrong check from return value, binary content should not be \0'd,
+      non-binary content should be \0'd.
+
+2004-09-10  Antony Dovgal  <tony2001@phpclub.net>
+
+    * tests/classes/bug29446.phpt:
+      add testcase for bug #29446
+
+2004-09-10  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * ext/openssl/openssl.c
+      ext/openssl/xp_ssl.c:
+      Fix Bug #29296: add explicit sslv2 and sslv3 transports
+
+2004-09-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      SoapClient->__call() is renamed to SoapClient->__soap_call().
+
+2004-09-10  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      - This one fixes rather strange problem - ZE allows multiple declarations
+      of the same class constant.
+      - It could be a minor BC break, but I'm sure it's a bug. (Antony Dovgal
+      aka tony2001)
+
 2004-09-09  Wez Furlong  <wez.php@thebrainroom.net>
 
     * (PHP_5_0)

@@ -1,3 +1,11 @@
+2004-09-10  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - This one fixes rather strange problem - ZE allows multiple declarations
+      of the same class constant.
+      - It could be a minor BC break, but I'm sure it's a bug. (Antony Dovgal
+      aka tony2001)
+
 2004-09-09  Andi Gutmans  <andi@zend.com>
 
     * zend_extensions.h:
