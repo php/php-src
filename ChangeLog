@@ -1,3 +1,141 @@
+2002-09-25  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * php.ini-dist: on -> On
+
+    * php.ini-recommended: Merge changes from php.ini-dist
+
+2002-09-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Add support for LIST
+
+2002-09-25  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/tests/strings/001.phpt: Test case for strspn()/strcspn().
+
+    * ext/standard/string.c:
+    Added common handler for strspn() and strcspn(). Almost of the code is
+    identical. Modified to accept up to 4 params. Last 2 optional start & len.
+    They are analogic to start & len of substr(). So the behavior when start &
+    len are used is like
+    strspn(substr($s,$start,$len),$good_chars) and
+    strcspn(substr($s,$start,$len), $bad_chars)
+
+2002-09-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * php.ini-dist: add note about url_rewriter.tags
+
+2002-09-25  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+    str_shuffle() function added. Like shuffle() for arrays - however the
+    algorithm for creating the permutation is quite simple. More like
+    the implementation of shuffle() for 4.2.1 .
+
+2002-09-25  Andrei Zmievski  <andrei@php.net>
+
+    * ext/standard/reg.h: *** empty log message ***
+
+2002-09-25  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR.php: * Fix bug #19269.
+
+        This patch makes popErrorHandling() pop the first _two_ elements
+        from the error handler stack to prevent un-necessary memory
+        consumption.
+
+
+2002-09-25  Sterling Hughes  <sterling@bumblebury.com>
+
+    * EXTENSIONS: add two extensions - and orphan them.
+
+2002-09-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS
+      main/main.c
+      php.ini-dist:
+    We are about to enter 2003, sending two-digit years does not make too
+    much sense anymore.  According to an article from '98, only Netscape 3.x was
+    affected anyway.
+
+    * EXTENSIONS
+      NEWS: style police
+
+2002-09-25  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/exec.c
+      ext/standard/file.c
+      ext/posix/posix.c
+      ext/recode/recode.c
+      ext/interbase/interbase.c
+      ext/ming/ming.c
+      ext/pdf/pdf.c
+      ext/bz2/bz2.c
+      ext/ftp/php_ftp.c: Make these all work with persistent streams too.
+
+    * main/main.c
+      main/network.c
+      main/php.h
+      main/php_network.h
+      main/php_streams.h
+      main/streams.c
+      ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/fsock.c: Implement persistent streams. (for pfsockopen).
+    Juggle some includes/definitions.
+    Tidy up streams use in ext/standard/file.c
+
+2002-09-25  Sterling Hughes  <sterling@bumblebury.com>
+
+    * EXTENSIONS:
+    if this makes people happier about me not working on these anymore, so be
+    it :)
+
+2002-09-25  Andrei Zmievski  <andrei@php.net>
+
+    * ext/standard/reg.c
+      ext/standard/reg.h: Fix bug #17570.
+
+2002-09-25  Tal Peer  <tal@twisthost.com>
+
+    * ext/fribidi/fribidi.c: - Update proto
+
+2002-09-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/session/session.c: Fixed bugs #18167 & #16859
+
+2002-09-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_files.c: Improve error messages
+
+2002-09-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/datetime.c:
+    prevent segv on Windows with negative localtime values.
+
+2002-09-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c: Sync
+
+    * ext/standard/url_scanner_ex.re: Allow - as part of an attribute
+
+    PR: #19573
+
+    * php.ini-dist
+      ext/standard/url_scanner_ex.re:
+    Fix #13472 by making it possible to append the <input> stuff after
+    <fieldset> for xhtml compliance.
+
+    * ext/standard/url_scanner_ex.c: Sync with .re
+
+    * ext/standard/url_scanner_ex.re: Allow malformed HTML such as
+
+    <a onClick=window.open("/hardware/somevar.php?hinfoid=","chgti") ..>
+
+    where ["'] are part of the attribute value.
+
 2002-09-24  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/reg.c: Fixed bug #17957
