@@ -563,14 +563,6 @@ Web server configuration
   SUN/Netscape Alliance iPlanet Web Server/SunONE Webserver.
   On other web servers your milage may vary.
   
-  Firstly you may need to add some paths to the LD_LIBRARY_PATH
-  environment for Netscape to find all the shared libs. This is best done
-  in the start script for your Netscape server.  Windows users can
-  probably skip this step. The start script is located in:
-  
-      <path-to-netscape-server>\https-servername\start
-  
-  
   Netscape/iPlanet/SunONE config files are located in:
   
       <path-to-server>\https-servername\config
