@@ -986,7 +986,7 @@ void do_fetch_class(znode *result, znode *class_entry, znode *class_name TSRMLS_
 }
 
 
-void do_fetch_class_name(znode *result, znode *class_name_entry, znode *class_name TSRMLS_DC)
+void do_fetch_class_name(znode *result, znode *class_name_entry, znode *class_name, zend_bool case_sensitive TSRMLS_DC)
 {
 	zend_uint length;
 
@@ -995,7 +995,9 @@ void do_fetch_class_name(znode *result, znode *class_name_entry, znode *class_na
 	} else {
 		*result = *class_name_entry;
 	}
-
+	if (!case_sensitive) {
+		zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
+	}
 	length = 1 + result->u.constant.value.str.len + class_name->u.constant.value.str.len;
 	result->u.constant.value.str.val = erealloc(result->u.constant.value.str.val, length+1);
 	memcpy(&result->u.constant.value.str.val[result->u.constant.value.str.len], ":", sizeof(":")-1);
@@ -2061,7 +2063,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 	switch (mode) {
 		case ZEND_CT:
 			if (constant_container) {
-				do_fetch_class_name(NULL, constant_container, constant_name TSRMLS_CC);
+				do_fetch_class_name(NULL, constant_container, constant_name, 1 TSRMLS_CC);
 				*result = *constant_container;
 			} else {
 				*result = *constant_name;

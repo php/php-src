@@ -243,8 +243,8 @@ unticked_declaration_statement:
 ;
 
 decleration_class_name:
-	|	parse_class_name_entry T_STRING { do_fetch_class_name(&$$, &$1, &$2 TSRMLS_CC); }
-	|	T_STRING { $$ = $1; }
+	|	parse_class_name_entry T_STRING { do_fetch_class_name(&$$, &$1, &$2, 0 TSRMLS_CC); }
+	|	T_STRING { $$ = $1; zend_str_tolower($$.u.constant.value.str.val, $$.u.constant.value.str.len); }
 ;
 
 foreach_optional_arg:
@@ -527,8 +527,8 @@ parse_class_entry:
 ;
 
 parse_class_name_entry:
-		parse_class_name_entry T_STRING T_PAAMAYIM_NEKUDOTAYIM { do_fetch_class_name(&$$, &$1, &$2 TSRMLS_CC); }
-	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM { $$ = $1; }
+		parse_class_name_entry T_STRING T_PAAMAYIM_NEKUDOTAYIM { do_fetch_class_name(&$$, &$1, &$2, 0 TSRMLS_CC); }
+	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM { $$ = $1; zend_str_tolower($$.u.constant.value.str.val, $$.u.constant.value.str.len); }
 ;
 
 namespace_class_entry:
@@ -537,7 +537,7 @@ namespace_class_entry:
 ;
 
 new_class_entry:
-		parse_class_entry static_or_variable_string { do_fetch_class(&$$, &$1, &$2 TSRMLS_CC); }
+		parse_class_entry T_STRING { do_fetch_class(&$$, &$1, &$2 TSRMLS_CC); }
 	|	static_or_variable_string { do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
 ;
 
