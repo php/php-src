@@ -57,6 +57,12 @@ ARCHIVE=$MY_OLDPWD/$PKG-$VER.tar.gz
 # temporary directory used to check out files from CVS
 TMPDIR=$MY_OLDPWD/cvstmp-$PKG-$VER
 
+if test -d "$TMPDIR"; then
+    echo "Temporary directory $TMPDIR"
+    echo "already exists, rename or remove it and run makedist again."
+    exit 1
+fi
+
 # version part of the CVS release tag
 CVSVER=`echo $VER | sed -e 's/\./_/g'`
 
@@ -120,9 +126,9 @@ set +x
 INC="$INC \
 configuration-scanner.c \
 configuration-parser.c configuration-parser.h \
-acconfig.h aclocal.m4 configure.in missing mkinstalldirs \
+acconfig.h aclocal.m4 missing mkinstalldirs \
 ltconfig ltmain.sh config.sub config.guess php_config.h.in \
-configure"
+configure install-sh Makefile.in"
 
 
 mkdir $PKG-$VER || exit 6
