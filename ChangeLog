@@ -1,3 +1,97 @@
+2005-01-11  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      NEWS:
+      Should probably note this
+
+2005-01-11  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_0)
+      NEWS:
+      - I tend to write opposite things these days :P
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug31098.phpt:
+      - MFH: fix for bug #31098.
+
+    * ZendEngine2/tests/bug31098.phpt
+      ZendEngine2/tests/bug31436.phpt:
+      
+      - Test renaming
+
+    * ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug31436.phpt:
+      - Fix bug #31436 (isset() incorrectly returns true in dereference of a
+      wrong type)
+
+    * NEWS
+      NEWS:
+      - BFN
+
+    * ext/standard/html.c:
+      - Fix the fix :)
+
+    * (PHP_4_3)
+      ext/standard/html.c:
+      - MFH: fix htmlentities() / html_decode_entity() UTF-8 related bugs
+        initially reported by Kamesh Jayachandrana
+
+    * (PHP_5_0)
+      ext/standard/html.c
+      ext/standard/tests/strings/htmlentities17.phpt:
+      - MFH: fix htmlentities() / html_decode_entity() UTF-8 related bugs
+        initially reported by Kamesh Jayachandran
+
+    * ext/standard/html.c
+      ext/standard/tests/strings/htmlentities17.phpt:
+      - Fix htmlentities() / html_decode_entity() UTF-8 related bugs
+        initially reported by Kamesh Jayachandran
+
+    * ZendEngine2/zend_compile.c:
+      - Fix bug #31478 (segfault with empty())
+
+2005-01-11  Joe Orton  <jorton@redhat.com>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      sapi/apache2handler/php_functions.c
+      sapi/apache2handler/php_functions.c:
+      MFH: Fixed bug #30446 - virtual() includes files out of sequence,
+      work around 2.0 subrequest/internal redirect issue.
+
+    * sapi/apache2handler/php_functions.c:
+      Fixed bug #30446 - virtual() includes files out of sequence,
+      work around 2.0 subrequest/internal redirect issue.
+
+2005-01-11  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * sapi/cgi/cgi_main.c:
+      Fix ZTS build
+
+2005-01-11  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      ext/dom/php_dom.c:
+      MFH: revert fix for bug #28817 - fix is bad
+
+    * ext/dom/php_dom.c:
+      revert fix for bug #28817 - fix is bad
+
+2005-01-11  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/imap/config.m4
+      ext/imap/config.m4
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      MFH: - Added check for IMAP 2004 versions
+
+    * ext/imap/config.m4
+      ext/imap/php_imap.c:
+      - Added check for IMAP 2005 version
+
 2005-01-10  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * ZendEngine2/zend.h
