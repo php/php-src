@@ -1957,6 +1957,7 @@ void do_foreach_end(znode *foreach_token, znode *open_brackets_token CLS_DC)
 
 	opline->opcode = ZEND_JMP;
 	opline->op1.u.opline_num = foreach_token->u.opline_num;
+	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 
 	CG(active_op_array)->opcodes[foreach_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
