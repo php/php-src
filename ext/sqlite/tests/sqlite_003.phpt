@@ -1,5 +1,7 @@
 --TEST--
 sqlite: Simple insert/select, different result represenatation
+--INI--
+sqlite.assoc_case=0
 --SKIPIF--
 <?php
 if (!extension_loaded("sqlite")) print "skip"; ?>
