@@ -970,6 +970,10 @@ if(($errno=Udm_Errno($udm_agent))>0){
 	}
                         
         for($i=0;$i<$rows;$i++){
+        	if (Udm_Api_Version() >= 30204) {
+        		$excerpt_flag=Udm_Make_Excerpt($udm_agent, $res, $i);
+        	}
+	
 		$ndoc=Udm_Get_Res_Field($res,$i,UDM_FIELD_ORDER);
 		$rating=Udm_Get_Res_Field($res,$i,UDM_FIELD_RATING);
 		$url=Udm_Get_Res_Field($res,$i,UDM_FIELD_URL);

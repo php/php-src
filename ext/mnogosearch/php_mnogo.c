@@ -149,7 +149,8 @@ function_entry mnogosearch_functions[] = {
 	PHP_FE(udm_crc32,	NULL)
 #endif
 #if UDM_VERSION_ID >= 30204
-	PHP_FE(udm_parse_query_string,NULL)
+	PHP_FE(udm_parse_query_string,	NULL)
+	PHP_FE(udm_make_excerpt,	NULL)
 #endif
 #endif
 
@@ -1499,6 +1500,58 @@ DLEXPORT PHP_FUNCTION(udm_parse_query_string)
 	str = Z_STRVAL_PP(yystr);
 
 	UdmParseQueryString(Agent,&Agent->Conf->Vars,str);
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int udm_make_excerpt(int agent, int res, int row)
+   Perform search */
+DLEXPORT PHP_FUNCTION(udm_make_excerpt)
+{
+	pval ** yyagent, **yyres, **yyrow_num;
+	UDM_RESULT * Res;
+	UDM_AGENT * Agent;
+	int id=-1, row;
+
+	switch(ZEND_NUM_ARGS()){
+		case 3: {
+				if (zend_get_parameters_ex(3, &yyagent, &yyres, &yyrow_num)==FAILURE) {
+					RETURN_FALSE;
+				}
+				convert_to_string_ex(yyrow_num);
+				row=atoi(Z_STRVAL_PP(yyrow_num));
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
+	ZEND_FETCH_RESOURCE(Res, UDM_RESULT *, yyres, -1, "mnoGoSearch-Result", le_res);
+	
+	if(row<Res->num_rows){
+		const char	*al;
+		char		*Excerpt;
+		
+		al = UdmVarListFindStr(&(Res->Doc[row].Sections), "URL", "");
+		UdmVarListReplaceInt(&(Res->Doc[row].Sections), "STORED_ID", UdmCRC32(al, strlen(al)));
+		Excerpt = UdmExcerptDoc(Agent, Res, &(Res->Doc[row]), 256);
+		
+		if (Excerpt != NULL) {
+			char *HlExcerpt = UdmHlConvert(&Res->WWList, Excerpt, Agent->Conf->lcs, Agent->Conf->bcs);
+			UdmVarListReplaceInt(&(Res->Doc[row].Sections),"ST",1);
+			UdmVarListReplaceStr(&(Res->Doc[row].Sections),"body",HlExcerpt);
+			UDM_FREE(HlExcerpt);
+			UDM_FREE(Excerpt);
+		} else {
+		        UdmVarListReplaceInt(&(Res->Doc[row].Sections),"ST",0);
+			RETURN_FALSE;
+		}
+	}else{
+		php_error(E_WARNING,"%s(): row number too large", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+	
 	RETURN_TRUE;
 }
 /* }}} */
