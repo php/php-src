@@ -1513,9 +1513,11 @@ PHP_FUNCTION(socket_recvmsg)
 
 			hdr.msg_control = ctl_buf ? ctl_buf : NULL;
 			hdr.msg_controllen = ctl_buf ? Z_LVAL_P(arg4) : 0;
+#ifndef MISSING_MSGHDR_MSGFLAGS
 			hdr.msg_flags	= 0;
-			
-			if (recvmsg(php_sock->bsd_socket, &hdr, Z_LVAL_P(arg5)) != 0) {
+#endif
+
+			if (recvmsg(php_sock->bsd_socket, &hdr, Z_LVAL_P(arg5)) < 0) {
 				PHP_SOCKET_ERROR(php_sock, "unable to receive message", errno);
 				RETURN_FALSE;
 			} else {
@@ -1528,7 +1530,9 @@ PHP_FUNCTION(socket_recvmsg)
 				zval_dtor(arg7);
 				
 				ZVAL_LONG(arg4, hdr.msg_controllen);
+#ifndef MISSING_MSGHDR_MSGFLAGS
 				ZVAL_LONG(arg5, hdr.msg_flags);
+#endif
 				ZVAL_LONG(arg7, ntohs(sin->sin_port));
 				
 				if (array_init(arg3) == FAILURE) {
@@ -1536,9 +1540,11 @@ PHP_FUNCTION(socket_recvmsg)
 					RETURN_FALSE;
 				}
 				
-				add_assoc_long(arg3,	"cmsg_level",	mhdr->cmsg_level);
-				add_assoc_long(arg3,	"cmsg_type",	mhdr->cmsg_type);
-				add_assoc_string(arg3,	"cmsg_data",	CMSG_DATA(mhdr), 1);
+				if (mhdr != NULL) {
+					add_assoc_long(arg3,	"cmsg_level",	mhdr->cmsg_level);
+					add_assoc_long(arg3,	"cmsg_type",	mhdr->cmsg_type);
+					add_assoc_string(arg3,	"cmsg_data",	CMSG_DATA(mhdr), 1);
+				}
 				
 				{
 					char *tmp = inet_ntoa(sin->sin_addr);
@@ -1566,8 +1572,10 @@ PHP_FUNCTION(socket_recvmsg)
 			hdr.msg_control = NULL;
 			hdr.msg_controllen = 0;
 		}
-		
+#ifndef MISSING_MSGHDR_MSGFLAGS		
 		hdr.msg_flags = 0;
+#endif 
+
 		
 		if (recvmsg(php_sock->bsd_socket, &hdr, Z_LVAL_P(arg5)) != 0) {
 			PHP_SOCKET_ERROR(php_sock, "unable to receive message", errno);
@@ -1583,7 +1591,9 @@ PHP_FUNCTION(socket_recvmsg)
 				zval_dtor(arg6);
 				
 				ZVAL_LONG(arg4, hdr.msg_controllen);
+#ifndef MISSING_MSGHDR_MSGFLAGS
 				ZVAL_LONG(arg5, hdr.msg_flags);
+#endif
 				
 				if (array_init(arg3) == FAILURE) {
 					php_error(E_WARNING, "%s() cannot initialize return value", get_active_function_name(TSRMLS_C));
