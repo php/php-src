@@ -156,7 +156,9 @@ static int php_mssql_message_handler(DBPROCESS *dbproc, DBINT msgno,int msgstate
 	if (severity >= MS_SQL_G(min_message_severity)) {
 		php_error(E_WARNING,"MS SQL message:  %s (severity %d)", msgtext, severity);
 	}
-	STR_FREE(MS_SQL_G(server_message));
+	if (MS_SQL_G(server_message)) {
+		STR_FREE(MS_SQL_G(server_message));
+	}
 	MS_SQL_G(server_message) = estrdup(msgtext);
 	return 0;
 }
@@ -1110,7 +1112,12 @@ PHP_FUNCTION(mssql_free_result)
    Gets the last message from the MS-SQL server */
 PHP_FUNCTION(mssql_get_last_message)
 {
-	RETURN_STRING(MS_SQL_G(server_message),1);
+	if (MS_SQL_G(server_message)) {
+		RETURN_STRING(MS_SQL_G(server_message),1);
+	}
+	else {
+		RETURN_STRING(empty_string,1);
+	}
 }
 
 /* }}} */
@@ -1181,6 +1188,11 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	}
 
 	ZEND_FETCH_RESOURCE(result, mssql_result *, mssql_result_index, -1, "MS SQL-result", le_result);	
+
+	if (MS_SQL_G(server_message)) {
+		STR_FREE(MS_SQL_G(server_message));
+		MS_SQL_G(server_message) = NULL;
+	}
 
 	if (result->cur_row >= result->num_rows) {
 		RETURN_FALSE;
@@ -1624,7 +1636,7 @@ PHP_FUNCTION(mssql_result)
 }
 /* }}} */
 
-/* {{{ proto string mssql_next_result(int result_id)
+/* {{{ proto bool mssql_next_result(int result_id)
    Move the internal result pointer to the next result */
 PHP_FUNCTION(mssql_next_result)
 {
