@@ -37,6 +37,10 @@
 #include <sys/socket.h>
 #endif
 
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
 
 
 int php_hostconnect(char *host, unsigned short port, int socktype, int timeout);
