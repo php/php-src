@@ -1,3 +1,71 @@
+2001-02-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/datetime.c:
+    Don't assume that tzname exists, if tm_zone does not exist.
+
+    PR: #9380
+
+    * main/network.c:
+    Declare inet_aton properly, if the system lacks support for it.
+
+    PR: #9382
+
+2001-02-24  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/mgd_internal.h
+      ext/midgard/midgard.c
+      ext/midgard/oop.c
+      ext/midgard/php_midgard.h: fixed the error reporting.
+    added custom log to the lib
+
+2001-02-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_ext_syslog.h
+      ext/standard/syslog.c
+      main/php_syslog.h: Actually compile on systems without syslog.
+
+    PR: #9412
+
+    * sapi/cgi/cgi_main.c:
+    php_register_command_line_global_vars only needs file scope.
+
+    * sapi/cgi/cgi_main.c
+      sapi/servlet/servlet.c:
+    Neither the CGI nor the Servlet SAPI module call syslog, so remove
+    references to the syslog include files.
+
+    * ext/ircg/ircg.c:
+    Replace the sixth and seventh parameter of ircg_pconnect()
+    with a connection-detail array.  Currently, you can set
+    realname, password, ident.  Those information are used
+    during the connection setup process.
+
+2001-02-24  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/page.c: fixed a possible memory leak
+
+    * ext/midgard/article.c
+      ext/midgard/calendar.c
+      ext/midgard/event.c
+      ext/midgard/person.c
+      ext/midgard/topic.c: fixed some possible memory leaks.
+
+2001-02-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/aolserver/README:
+    Change the default to assumption that people don't use AOLserver 3.0 anymore.
+
+    * ext/ircg/ircg.c: Add the ability to set a connection password
+
+2001-02-24  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/mgd_preparser.h: Fixed some potential and real segfaults.
+
+    * ext/midgard/preparser-parser.y
+      ext/midgard/preparser-scanner.l:
+    passing include()'ed files thru the preparser.
+
 2001-02-23  David Guerizec  <david@guerizec.net>
 
     * ext/midgard/config.m4
