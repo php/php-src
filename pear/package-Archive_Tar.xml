@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<!DOCTYPE package SYSTEM "../package.dtd">
+<!DOCTYPE package SYSTEM "package.dtd">
 <package version="1.0">
   <name>Archive_Tar</name>
   <summary>Tar file management class</summary>
@@ -29,11 +29,8 @@ loaded.
     <notes>Windows bugfix: use forward slashes inside archives</notes>
     <state>stable</state>
     <filelist>
-      <dir name="/" baseinstalldir="Archive">
-	<file role="php">Tar.php</file>
-	<dir name="docs">
-	  <file role="doc">Tar.txt</file>
-	</dir>
+      <dir name="Archive">
+        <file role="php">Tar.php</file>
       </dir>
     </filelist>
   </release>
