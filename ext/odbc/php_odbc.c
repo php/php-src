@@ -1586,7 +1586,7 @@ PHP_FUNCTION(odbc_connect)
 /* }}} */
 
 /* {{{ proto int odbc_pconnect(string DSN, string user, string password [, int cursor_option])
-   Establish a persistant connection to a datasource */
+   Establish a persistent connection to a datasource */
 PHP_FUNCTION(odbc_pconnect)
 {
 	odbc_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -2058,9 +2058,9 @@ PHP_FUNCTION(odbc_field_num)
 }
 /* }}} */
 
-/* {{{ proto int odbc_autocommit(int connection_id, [int OnOff])
-   Toggle autocommit mode or get status
-   There can be problems with pconnections!*/
+/* {{{ proto int odbc_autocommit(int connection_id [, int OnOff])
+   Toggle autocommit mode or get status */
+/* There can be problems with pconnections!*/
 PHP_FUNCTION(odbc_autocommit)
 {
 	odbc_connection *conn;
@@ -2187,8 +2187,8 @@ PHP_FUNCTION(odbc_setoption)
  * metadata functions
  */
 
-/* {{{ proto int odbc_tables(int connection_id [, string catalog, string schema, string table, string table_types ] )
-   call the SQLTables function */
+/* {{{ proto int odbc_tables(int connection_id [, string catalog, string schema, string table, string table_types])
+   Call the SQLTables function */
 PHP_FUNCTION(odbc_tables)
 {
 	pval **pv_conn, **pv_cat, **pv_schema, **pv_table, **pv_type;
@@ -2269,8 +2269,8 @@ PHP_FUNCTION(odbc_tables)
 }
 /* }}} */
 
-/* {{{ proto int odbc_columns(int connection_id, string catalog, string schema, string table, string column )
-   call the SQLColumns function */
+/* {{{ proto int odbc_columns(int connection_id, string catalog, string schema, string table, string column)
+   Call the SQLColumns function */
 PHP_FUNCTION(odbc_columns)
 {
 	pval **pv_conn, **pv_cat, **pv_schema, **pv_table, **pv_column;
@@ -2352,8 +2352,8 @@ PHP_FUNCTION(odbc_columns)
 /* }}} */
 
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID)
-/* {{{ proto int odbc_columnprivileges(int connection_id, string catalog, string schema, string table, string column )
-   call the SQLColumnPrivileges function */
+/* {{{ proto int odbc_columnprivileges(int connection_id, string catalog, string schema, string table, string column)
+   Call the SQLColumnPrivileges function */
 PHP_FUNCTION(odbc_columnprivileges)
 {
 	pval **pv_conn, **pv_cat, **pv_schema, **pv_table, **pv_column;
@@ -2432,8 +2432,8 @@ PHP_FUNCTION(odbc_columnprivileges)
 #endif /* HAVE_DBMAKER || HAVE_SOLID*/
 
 #if !defined(HAVE_SOLID)
-/* {{{ proto int odbc_foreignkeys(int connection_id, string pk_catalog, string pk_schema, string pk_table, string fk_catalog, string fk_schema, string fk_table )
-   call the SQLForeignKeys function */
+/* {{{ proto int odbc_foreignkeys(int connection_id, string pk_catalog, string pk_schema, string pk_table, string fk_catalog, string fk_schema, string fk_table)
+   Call the SQLForeignKeys function */
 PHP_FUNCTION(odbc_foreignkeys)
 {
 	pval **pv_conn, **pv_pcat, **pv_pschema, **pv_ptable;
@@ -2531,8 +2531,8 @@ PHP_FUNCTION(odbc_foreignkeys)
 /* }}} */
 #endif /* HAVE_SOLID */
 
-/* {{{ proto int odbc_gettypeinfo(int connection_id [, int data_type ] )
-   call the SQLGetTypeInfo function */
+/* {{{ proto int odbc_gettypeinfo(int connection_id [, int data_type ])
+   Call the SQLGetTypeInfo function */
 PHP_FUNCTION(odbc_gettypeinfo)
 {
 	pval **pv_conn, **pv_data_type;
@@ -2603,8 +2603,8 @@ PHP_FUNCTION(odbc_gettypeinfo)
 }
 /* }}} */
 
-/* {{{ proto int odbc_primarykeys(int connection_id, string database, string schema, string table )
-   call the SQLPrimaryKeys function */
+/* {{{ proto int odbc_primarykeys(int connection_id, string database, string schema, string table)
+   Call the SQLPrimaryKeys function */
 PHP_FUNCTION(odbc_primarykeys)
 {
 	pval **pv_conn, **pv_cat, **pv_schema, **pv_table;
@@ -2679,8 +2679,8 @@ PHP_FUNCTION(odbc_primarykeys)
 /* }}} */
 
 #if !defined(HAVE_SOLID)
-/* {{{ proto int odbc_procedurecolumns(int connection_id [, string database, string schema, string proc, string column ] )
-   call the SQLProcedureColumns function */
+/* {{{ proto int odbc_procedurecolumns(int connection_id [, string database, string schema, string proc, string column])
+   Call the SQLProcedureColumns function */
 PHP_FUNCTION(odbc_procedurecolumns)
 {
 	pval **pv_conn, **pv_cat, **pv_schema, **pv_proc, **pv_col;
@@ -2763,8 +2763,8 @@ PHP_FUNCTION(odbc_procedurecolumns)
 #endif /* HAVE_SOLID */
 
 #if !defined(HAVE_SOLID)
-/* {{{ proto int odbc_procedures(int connection_id [, string database, string schema, string proc ] )
-   call the SQLProcedures function */
+/* {{{ proto int odbc_procedures(int connection_id [, string database, string schema, string proc])
+   Call the SQLProcedures function */
 PHP_FUNCTION(odbc_procedures)
 {
 	pval **pv_conn, **pv_cat, **pv_schema, **pv_proc;
@@ -2843,8 +2843,8 @@ PHP_FUNCTION(odbc_procedures)
 /* }}} */
 #endif /* HAVE_SOLID */
 
-/* {{{ proto int odbc_specialcolumns(int connection_id, int type, string catalog, string schema, string name, int scope, int nullable )
-   call the SQLSpecialColumns function */
+/* {{{ proto int odbc_specialcolumns(int connection_id, int type, string catalog, string schema, string name, int scope, int nullable)
+   Call the SQLSpecialColumns function */
 PHP_FUNCTION(odbc_specialcolumns)
 {
 	pval **pv_conn, **pv_type, **pv_cat, **pv_schema, **pv_name;
@@ -2931,8 +2931,8 @@ PHP_FUNCTION(odbc_specialcolumns)
 }
 /* }}} */
 
-/* {{{ proto int odbc_statistics(int connection_id, string catalog, string schema, string name, int unique, int reserved )
-   call the SQLStatistics function */
+/* {{{ proto int odbc_statistics(int connection_id, string catalog, string schema, string name, int unique, int reserved)
+   Call the SQLStatistics function */
 PHP_FUNCTION(odbc_statistics)
 {
     pval **pv_conn, **pv_cat, **pv_schema, **pv_name;
@@ -3016,8 +3016,8 @@ PHP_FUNCTION(odbc_statistics)
 /* }}} */
 
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID)
-/* {{{ proto int odbc_tableprivilegess(int connection_id, string catalog, string schema, string table )
-   call the SQLTablePrivilegess function */
+/* {{{ proto int odbc_tableprivilegess(int connection_id, string catalog, string schema, string table)
+   Call the SQLTablePrivilegess function */
 PHP_FUNCTION(odbc_tableprivileges)
 {
     pval **pv_conn, **pv_cat, **pv_schema, **pv_table;
