@@ -661,7 +661,6 @@ ZEND_FUNCTION(get_class_vars)
 {
 	zval **class_name;
 	zend_class_entry *ce, **pce;
-	zval *tmp;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class_name)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -674,11 +673,36 @@ ZEND_FUNCTION(get_class_vars)
 	} else {
 		ce = *pce;
 		array_init(return_value);
-		if (!ce->constants_updated) {
-			zend_hash_apply_with_argument(&ce->default_properties, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
-			ce->constants_updated = 1;
+
+		int count = zend_hash_num_elements(&ce->default_properties);
+		if (count > 0) {
+			HashPosition pos;
+			zval **prop;
+	
+			zend_hash_internal_pointer_reset_ex(&ce->default_properties, &pos);
+			while (zend_hash_get_current_data_ex(&ce->default_properties, (void **) &prop, &pos) == SUCCESS) {
+				char *key, *class_name, *prop_name;
+				uint key_len;
+				ulong num_index;
+				zval *prop_copy;
+	
+				zend_hash_get_current_key_ex(&ce->default_properties, &key, &key_len, &num_index, 0, &pos);
+				zend_hash_move_forward_ex(&ce->default_properties, &pos);
+				zend_unmangle_property_name(key, &class_name, &prop_name);
+				if (class_name && class_name[0] != '*' && strcmp(class_name, ce->name)) {
+					/* filter privates from base classes */
+					continue;
+				}
+	
+				/* copy: enforce read only access */
+				ALLOC_ZVAL(prop_copy);
+				*prop_copy = **prop;
+				zval_copy_ctor(prop_copy);
+				INIT_PZVAL(prop_copy);
+	
+				add_assoc_zval(return_value, prop_name, prop_copy);
+			}
 		}
-		zend_hash_copy(return_value->value.ht, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	}
 }
 /* }}} */
