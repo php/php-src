@@ -48,7 +48,7 @@ PHPAPI void php_print_credits(int flag)
 	if (flag & PHP_CREDITS_GENERAL) {
 		/* Design & Concept */
 		php_info_print_table_start();
-		php_info_print_table_header(1, "Language Design & Concept");
+		php_info_print_table_header(1, "Language Design &amp; Concept");
 		php_info_print_table_row(1, "Andi Gutmans, Rasmus Lerdorf, Zeev Suraski");
 		php_info_print_table_end();
 
