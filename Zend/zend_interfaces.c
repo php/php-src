@@ -263,6 +263,7 @@ static zend_object_iterator *zend_user_get_iterator(zend_class_entry *ce, zval *
 static zend_object_iterator *zend_user_get_new_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
 {
 	zval *iterator = zend_user_new_iterator(ce, object TSRMLS_CC);
+	zend_object_iterator *new_iterator;
 
 	zend_class_entry *ce_it = Z_TYPE_P(iterator) == IS_OBJECT ? Z_OBJCE_P(iterator) : NULL;
 
@@ -271,8 +272,9 @@ static zend_object_iterator *zend_user_get_new_iterator(zend_class_entry *ce, zv
 		zval_ptr_dtor(&iterator);
 		return NULL;
 	}
-	iterator->refcount--; /* from return */
-	return ce_it->get_iterator(ce_it, iterator TSRMLS_CC);
+	new_iterator = ce_it->get_iterator(ce_it, iterator TSRMLS_CC);
+	zval_ptr_dtor(&iterator);
+	return new_iterator;
 }
 /* }}} */
 
