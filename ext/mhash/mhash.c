@@ -134,9 +134,13 @@ PHP_FUNCTION(mhash)
 
 	hash_data = (unsigned char *) mhash_end(td);
 	
-	RETVAL_STRINGL(hash_data, bsize, 1);
+	if (hash_data) {
+		RETVAL_STRINGL(hash_data, bsize, 1);
 	
-	free(hash_data);
+		free(hash_data);
+	} else {
+		RETURN_FALSE;
+	}
 }
 
 #endif
