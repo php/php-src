@@ -20,7 +20,6 @@
  * TODO:
  * - write documentation
  * - CGI/1.1 conformance
- * - HTTP basic auth
  */
 
 /* $Id$ */
@@ -321,6 +320,9 @@ php_ns_hash_environment(NSLS_D CLS_DC ELS_DC PLS_DC SLS_DC)
 	strncpy(buf, Ns_ConnPeer(NSG(conn)), 511);
 	ADD_STRING("REMOTE_ADDR");
 
+	strncpy(buf, SG(request_info).path_translated, 511);
+	ADD_STRING("PATH_TRANSLATED");
+
 	MAKE_STD_ZVAL(pval);
 	pval->type = IS_LONG;
 	pval->value.lval = Ns_InfoBootTime();
@@ -365,6 +367,7 @@ php_ns_request_ctor(NSLS_D SLS_DC)
 	Ns_DString ds;
 	char *root;
 	int index;
+	char *tmp;
 	
 	server = Ns_ConnServer(NSG(conn));
 	
@@ -383,8 +386,18 @@ php_ns_request_ctor(NSLS_D SLS_DC)
 	index = Ns_SetIFind(NSG(conn)->headers, "content-type");
 	SG(request_info).content_type = index == -1 ? NULL : 
 		Ns_SetValue(NSG(conn)->headers, index);
-	SG(request_info).auth_user = NULL;
-	SG(request_info).auth_password = NULL;
+
+	tmp = Ns_ConnAuthUser(NSG(conn));
+	if(tmp) {
+		tmp = estrdup(tmp);
+	}
+	SG(request_info).auth_user = tmp;
+
+	tmp = Ns_ConnAuthPasswd(NSG(conn));
+	if(tmp) {
+		tmp = estrdup(tmp);
+	}
+	SG(request_info).auth_password = tmp;
 
 	NSG(data_avail) = SG(request_info).content_length;
 }
