@@ -25,10 +25,10 @@
 #include "php_ini.h"
 
 typedef struct {
-	int active;
-	int bail;
-	int warning;
-	int quiet_eval;
+	long active;
+	long bail;
+	long warning;
+	long quiet_eval;
 	char *default_callback;
 	char *callback;
 } php_assert_globals;
