@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2004, Version 4.3.7
+?? Jun 2004, Version 4.3.7
+
+25 May 2004, Version 4.3.7RC1
 - Upgraded bundled GD library to 2.0.23. (Ilia)
 - Fixed command line escaping routines for win32. (Ilia)
 - Fixed problems with *printf() functions and '%f' formatting. (Marcus)
