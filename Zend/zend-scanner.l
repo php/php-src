@@ -167,11 +167,15 @@ ZEND_API void zend_close_file_handle(zend_file_handle *file_handle)
 			close(file_handle->handle.fd);
 			break;
 		case ZEND_HANDLE_FP:
-			fclose(file_handle->handle.fp);
+			if (file_handle->handle.fp != stdin) {
+				fclose(file_handle->handle.fp);
+			}
 			break;
 #ifdef ZTS
 		case ZEND_HANDLE_ISTREAM:
-			delete file_handle->handle.is;
+			if (file_handle->handle.is != &cin) {
+				delete file_handle->handle.is;
+			}
 			break;
 #endif
 	}
