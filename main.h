@@ -38,25 +38,12 @@
 #include "zend_globals.h"
 #include "php_globals.h"
 
-#define INIT_ENVIRONMENT 0x80
-#define INIT_REQUEST_INFO 0x400
-#define INIT_FUNCTIONS 0x800
-#define INIT_SCANNER 0x1000
-#define INIT_CONFIG 0x10000
-#define INIT_VARIABLE_UNASSIGN_STACK 0x20000
-#define INIT_WINSOCK 0x100000
-#define INIT_CLASS_TABLE 0x400000
-
 int php3_request_startup(CLS_D ELS_DC PLS_DC);
 extern void php3_request_shutdown(void *dummy INLINE_TLS);
 extern void php3_request_shutdown_for_exec(void *dummy);
 extern int php3_module_startup();
 extern void php3_module_shutdown();
 extern void php3_module_shutdown_for_exec(void);
-
-#ifndef THREAD_SAFE
-extern int initialized;
-#endif
 
 extern void php3_call_shutdown_functions(void);
 
