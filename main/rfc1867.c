@@ -182,7 +182,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 					if (lbuf) {
 						efree(lbuf);
 					}
-					lbuf = emalloc(s-name + MAX_SIZE_OF_INDEX);
+					lbuf = emalloc(s-name + MAX_SIZE_OF_INDEX + 1);
 					state = 2;
 					loc2 = memchr(loc + 1, '\n', rem);
 					rem -= (loc2 - ptr) + 1;
