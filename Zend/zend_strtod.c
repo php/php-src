@@ -1224,7 +1224,7 @@ static CONST double tinytens[] = { 1e-16, 1e-32 };
 #endif
 #endif
 
-double
+ZEND_API double
 zend_strtod
 #ifdef KR_headers
 	(s00, se) CONST char *s00; char **se;
