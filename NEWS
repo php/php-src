@@ -3,6 +3,7 @@ PHP 4.0                                                                    NEWS
 
 ?? ??? 2000, Version 4.0.4
 - Renamed the shm_* functions to shmop_* (Derick)
+- Updated ext/mysql/libmysql to version 3.23 (tim@mysql.com)
 - Added ldap_get_option() and ldap_set_option() functions (Stig Venaas)
 - Fixed a crash in CGI mode, in case no file was provided (Daniel Beulshausen
   & Zeev)
