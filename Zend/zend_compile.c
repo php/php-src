@@ -734,16 +734,6 @@ void zend_do_if_end(TSRMLS_D)
 	DEC_BPC(CG(active_op_array));
 }
 
-#if 0
-/* variable parsing type (compile-time) */
-#define ZEND_PARSED_MEMBER			(1<<0)
-#define ZEND_PARSED_METHOD_CALL		(1<<1)
-#define ZEND_PARSED_STATIC_MEMBER	(1<<2)
-#define ZEND_PARSED_FUNCTION_CALL	(1<<3)
-#define ZEND_PARSED_VARIABLE		(1<<4)
-
-#endif
-
 void zend_check_writable_variable(znode *variable)
 {
 	zend_uint type = variable->u.EA.type;
