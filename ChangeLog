@@ -1,3 +1,37 @@
+1999-11-19  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/pcre/php_pcre.c:
+    (PHP preg_replace) Fixed a bug that cause backreferences to lose
+    their value after the first occurrence.
+
+    * ext/pcre/php_pcre.c:
+    Fixed a bug that would replace only the first occurrence and result in
+    a parse error for the rest when using /e modifier.
+
+1999-11-19  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/ftp/ftp.c: <sys/time.h> is needed on linux
+
+1999-11-19  Andi Gutmans  <andi@php.net>
+
+    * internal_functions_win32.c:
+    - Make it consistent with the rest of the stuff there.
+
+    * ext/standard/array.c
+      internal_functions_win32.c
+      php4dllts.dsp: - Add array.c to the Win32 project
+
+1999-11-19  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/xml/xml.c:    (PHP xml_parse_into_struct) buffer was sometimes short by 1.
+
+1999-11-19  Zeev Suraski  <zeev@php.net>
+
+    * ext/sybase_ct/php_sybase_ct.c
+      ext/sybase/sybase.c: Optimize a bit
+
+    * ext/sybase_ct/php_sybase_ct.c: Fix a bug in sybase_fetch_hash()
+
 1999-11-18  Andrew Skalski  <askalski@chek.com>
 
     * ext/ftp/ftp.c
