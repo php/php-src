@@ -1230,10 +1230,23 @@ binary_assign_op_addr: {
 				}
 				break;
 			case ZEND_INIT_FCALL_BY_NAME: {
-					zval *function_name = get_zval_ptr(&opline->op2, Ts, &free_op2, BP_VAR_R);
+					zval *function_name;
 					zend_function *function;
 					HashTable *active_function_table;
 					zval tmp;
+
+					if ((opline>EG(active_op_array)->opcodes)
+						&& (opline-1)->opcode == ZEND_JMP_NO_CTOR) {
+						/* constructor call */
+						if (opline->op1.op_type==IS_VAR) {
+							EG(AiCount)++;
+						}
+						if (opline->op2.op_type==IS_VAR) {
+							EG(AiCount)++;
+						}
+					}
+
+					function_name = get_zval_ptr(&opline->op2, Ts, &free_op2, BP_VAR_R);
 
 					tmp = *function_name;
 					zval_copy_ctor(&tmp);
@@ -1255,12 +1268,6 @@ binary_assign_op_addr: {
 						} else { /* used for member function calls */
 							object_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_R);
 
-							if (opline->op1.op_type==IS_VAR
-								&& opline>EG(active_op_array)->opcodes
-								&& (opline-1)->opcode == ZEND_JMP_NO_CTOR) {
-								/* constructor call */
-								EG(AiCount)++;
-							}
 
 							if (!object_ptr || (*object_ptr)->value.obj.ce->handle_function_call) { /* overloaded function call */
 								zend_overloaded_element overloaded_element;
@@ -1804,9 +1811,10 @@ send_by_ref:
 				}
 				break;
 			case ZEND_JMP_NO_CTOR: {
-					zval *object = get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
+					zval *object;
 
 					EG(AiCount)++;
+					object = get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
 					if (!object->value.obj.ce->handle_function_call
 						&& !zend_hash_exists(&object->value.obj.ce->function_table, object->value.obj.ce->name, object->value.obj.ce->name_length+1)) {
 						opline = op_array->opcodes + opline->op2.u.opline_num;
