@@ -24,51 +24,17 @@
 
 /* Note that there is no code from the FdfTk lib in this file */
 
-#if !PHP_31 && defined(THREAD_SAFE)
-#undef THREAD_SAFE
-#endif
-
 #include "php.h"
-#include "SAPI.h"
-#include "ext/standard/head.h"
-#include "php_open_temporary_file.h"
-#include "php_variables.h"
-
-#include <math.h>
-#include "php_fdf.h"
-
-#if HAVE_SYS_WAIT_H
-# include <sys/wait.h>
-#endif
-#if HAVE_UNISTD_H
-# include <unistd.h>
-#endif
-#ifdef PHP_WIN32
-# include <io.h>
-# include <fcntl.h>
-#endif
 
 #if HAVE_FDFLIB
 
+#include "SAPI.h"
 #include "ext/standard/info.h"
+#include "php_open_temporary_file.h"
+#include "php_variables.h"
+#include "php_fdf.h"
 
-#ifdef THREAD_SAFE
-DWORD FDFlibTls;
-static int numthreads=0;
-
-typedef struct fdflib_global_struct{
-	int le_fdf;
-} fdflib_global_struct;
-
-# define FDF_GLOBAL(a) fdflib_globals->a
-# define FDF_TLS_VARS fdflib_global_struct *fdflib_globals=TlsGetValue(FDFlibTls)
-
-#else
-#  define FDF_GLOBAL(a) a
-#  define FDF_TLS_VARS
-int le_fdf_info;
-int le_fdf;
-#endif
+static int le_fdf;
 
 SAPI_POST_HANDLER_FUNC(fdf_post_handler);
 
@@ -85,7 +51,7 @@ function_entry fdf_functions[] = {
 	PHP_FE(fdf_get_status,							NULL)
 	PHP_FE(fdf_set_file,							NULL)
 	PHP_FE(fdf_get_file,							NULL)
-	PHP_FE(fdf_add_template,							NULL)
+	PHP_FE(fdf_add_template,						NULL)
 	PHP_FE(fdf_set_flags,							NULL)
 	PHP_FE(fdf_set_opt,								NULL)
 	PHP_FE(fdf_set_submit_form_action,				NULL)
@@ -94,19 +60,27 @@ function_entry fdf_functions[] = {
 };
 
 zend_module_entry fdf_module_entry = {
-	"fdf", fdf_functions, PHP_MINIT(fdf), PHP_MSHUTDOWN(fdf), NULL, NULL,
-	PHP_MINFO(fdf), STANDARD_MODULE_PROPERTIES
+	"fdf", 
+	fdf_functions, 
+	PHP_MINIT(fdf), 
+	PHP_MSHUTDOWN(fdf), 
+	NULL, 
+	NULL,
+	PHP_MINFO(fdf), 
+	STANDARD_MODULE_PROPERTIES
 };
 
 #ifdef COMPILE_DL_FDF
 ZEND_GET_MODULE(fdf)
 #endif
 
+
 static void phpi_FDFClose(zend_rsrc_list_entry *rsrc)
 {
 	FDFDoc fdf = (FDFDoc)rsrc->ptr;
-	(void)FDFClose(fdf);
+	(void) FDFClose(fdf);
 }
+
 
 #define FDF_POST_CONTENT_TYPE	"application/vnd.fdf"
 
@@ -118,14 +92,15 @@ static sapi_post_entry php_fdf_post_entry =	{
 };
 
 
-
 PHP_MINIT_FUNCTION(fdf)
 {
 	FDFErc err;
-	FDF_GLOBAL(le_fdf) = zend_register_list_destructors_ex(phpi_FDFClose, NULL, "fdf", module_number);
+	
+	le_fdf = zend_register_list_destructors_ex(phpi_FDFClose, NULL, "fdf", module_number);
 
 	/* add handler for Acrobat FDF form post requests */
 	sapi_register_post_entry(&php_fdf_post_entry);
+
 
 	/* Constants used by fdf_set_opt() */
 	REGISTER_LONG_CONSTANT("FDFValue", FDFValue, CONST_CS | CONST_PERSISTENT);
@@ -158,9 +133,7 @@ PHP_MINIT_FUNCTION(fdf)
 #ifdef PHP_WIN32
 	return SUCCESS;
 #endif
-	err = FDFInitialize();
-	if(err == FDFErcOK)
-		return SUCCESS;
+	if((err = FDFInitialize()) == FDFErcOK) return SUCCESS;
 	return FAILURE;
 }
 
@@ -183,21 +156,18 @@ PHP_MSHUTDOWN_FUNCTION(fdf)
 #ifdef PHP_WIN32
 	return SUCCESS;
 #endif
-	err = FDFFinalize();
-	if(err == FDFErcOK)
-		return SUCCESS;
+	if((err = FDFFinalize()) == FDFErcOK) return SUCCESS;
 	return FAILURE;
 }
 
+
 /* {{{ proto int fdf_open(string filename)
-   Opens a new FDF document */
-PHP_FUNCTION(fdf_open) {
-	pval **file;
-	int id;
+   Open a new FDF document */
+PHP_FUNCTION(fdf_open) 
+{
+	zval **file;
 	FDFDoc fdf;
 	FDFErc err;
-	FDF_TLS_VARS;
-
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -205,159 +175,135 @@ PHP_FUNCTION(fdf_open) {
 
 	convert_to_string_ex(file);
 
-	err = FDFOpen((*file)->value.str.val, 0, &fdf);
-	if(err != FDFErcOK)
-		printf("Aiii, error\n");
-	if(!fdf)
-		RETURN_FALSE;
+	err = FDFOpen(Z_STRVAL_PP(file), 0, &fdf);
 
-	id = zend_list_insert(fdf,FDF_GLOBAL(le_fdf));
-	RETURN_LONG(id);
-} /* }}} */
-
-/* {{{ proto boolean fdf_close(int fdfdoc)
-   Closes the FDF document */
-PHP_FUNCTION(fdf_close) {
-	pval **arg1;
-	int id, type;
-	FDFDoc fdf;
-	FDF_TLS_VARS;
-
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_long_ex(arg1);
-	id=(*arg1)->value.lval;
-	fdf = zend_list_find(id,&type);
-	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+	if(err != FDFErcOK || !fdf) {
+		php_error(E_WARNING, "Could not open fdf document: %s", Z_STRVAL_PP(file));
 		RETURN_FALSE;
 	}
 
-/*	FDFClose(fdf); */
-	zend_list_delete(id);
+	ZEND_REGISTER_RESOURCE(return_value, fdf, le_fdf);
+} 
+/* }}} */
 
-	RETURN_TRUE;
-} /* }}} */
 
 /* {{{ proto int fdf_create(void)
-   Creates a new FDF document */
-PHP_FUNCTION(fdf_create) {
-	int id;
+   Create a new FDF document */
+PHP_FUNCTION(fdf_create) 
+{
 	FDFDoc fdf;
 	FDFErc err;
-	FDF_TLS_VARS;
 
 	err = FDFCreate(&fdf);
-	if(err != FDFErcOK)
-		printf("Aiii, error\n");
-	if(!fdf)
-		RETURN_FALSE;
 
-	id = zend_list_insert(fdf,FDF_GLOBAL(le_fdf));
-	RETURN_LONG(id);
+	if(err != FDFErcOK || !fdf) {
+		php_error(E_WARNING, "Error creating new fdf document!");
+		RETURN_FALSE;
+	}
+
+	ZEND_REGISTER_RESOURCE(return_value, fdf, le_fdf);
 }
 /* }}} */
 
+
+/* {{{ proto bool fdf_close(int fdfdoc)
+   Close the FDF document */
+PHP_FUNCTION(fdf_close) 
+{
+	zval **fdfp;
+	FDFDoc fdf;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &fdfp) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
+	zend_list_delete(Z_RESVAL_PP(fdfp));
+} 
+/* }}} */
+
+
 /* {{{ proto string fdf_get_value(int fdfdoc, string fieldname)
-   Gets the value of a field as string */
-PHP_FUNCTION(fdf_get_value) {
-	pval **arg1, **arg2;
-	int id, type;
-	ASInt32 nr;
+   Get the value of a field as string */
+PHP_FUNCTION(fdf_get_value) 
+{
+	zval **fdfp, **fieldname;
+	ASInt32 nr, size = 256;
 	char *buffer;
 	FDFDoc fdf;
 	FDFErc err;
-	FDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fdfp, &fieldname) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long_ex(arg1);
-	convert_to_string_ex(arg2);
-	id=(*arg1)->value.lval;
-	fdf = zend_list_find(id,&type);
-	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
+
+	convert_to_string_ex(fieldname);
+
+	buffer = emalloc(size);
+	err = FDFGetValue(fdf, Z_STRVAL_PP(fieldname), buffer, size-1, &nr);
+	if(err == FDFErcBufTooShort && nr > 0 ) {
+		buffer = erealloc(buffer,nr+1); 
+		err = FDFGetValue(fdf, Z_STRVAL_PP(fieldname), buffer, nr, &nr);
+	} 
+
+	if(err != FDFErcOK) {
+		php_error(E_WARNING, "Error getting value of %s", Z_STRVAL_PP(fieldname));
+		efree(buffer);
 		RETURN_FALSE;
 	}
 
-	err = FDFGetValue(fdf, (*arg2)->value.str.val, NULL, 0, &nr);
-	if(err != FDFErcOK)
-		printf("Aiii, error\n");
-  /* In the inofficial version of FdfTK 4.0 (as FDFGetVersion says. The
-     library has a name with version 3.0, don't know what adobe has in
-     mind) the number of bytes of the value doesn't include the trailing
-     '\0'. This was not the case in 2.0
-  */
-	if(strcmp(FDFGetVersion(), "2.0"))
-		nr++;
-	buffer = emalloc(nr);
-	err = FDFGetValue(fdf, (*arg2)->value.str.val, buffer, nr, &nr);
-	if(err != FDFErcOK)
-		printf("Aiii, error\n");
-
-	RETURN_STRING(buffer, 0);
+	RETVAL_STRING(buffer, 1);
+	efree(buffer);
 }
 /* }}} */
 
-/* {{{ proto boolean fdf_set_value(int fdfdoc, string fieldname, string value, int isname)
-   Sets the value of a field */
-PHP_FUNCTION(fdf_set_value) {
-	pval **arg1, **arg2, **arg3, **arg4;
-	int id, type;
+
+/* {{{ proto bool fdf_set_value(int fdfdoc, string fieldname, string value, int isname)
+   Set the value of a field */
+PHP_FUNCTION(fdf_set_value) 
+{
+	zval **fdfp, **fieldname, **value, **isname;
 	FDFDoc fdf;
 	FDFErc err;
-	FDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2,&arg3, &arg4) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &fdfp, &fieldname, &value, &isname) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long_ex(arg1);
-	convert_to_string_ex(arg2);
-	convert_to_string_ex(arg3);
-	convert_to_long_ex(arg4);
-	id=(*arg1)->value.lval;
-	fdf = zend_list_find(id,&type);
-	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
+
+	convert_to_string_ex(fieldname);
+	convert_to_string_ex(value);
+	convert_to_long_ex(isname);
+
+	err = FDFSetValue(fdf, Z_STRVAL_PP(fieldname), Z_STRVAL_PP(value), (ASBool) Z_LVAL_PP(isname));
+	if(err != FDFErcOK) {
+		php_error(E_WARNING, "Error setting field: %s to value: %s", Z_STRVAL_PP(fieldname), Z_STRVAL_PP(value));
 		RETURN_FALSE;
 	}
-
-	err = FDFSetValue(fdf, (*arg2)->value.str.val,(*arg3)->value.str.val, (ASBool) (*arg4)->value.lval);
-	if(err != FDFErcOK)
-		printf("Aiii, error\n");
-
 	RETURN_TRUE;
 }
 /* }}} */
 
+
 /* {{{ proto string fdf_next_field_name(int fdfdoc [, string fieldname])
-   Gets the name of the next field name or the first field name */
+   Get the name of the next field name or the first field name */
 PHP_FUNCTION(fdf_next_field_name) 
 {
-	zval **fdfdoc, **field;
-	int id, type, argc=ZEND_NUM_ARGS();
+	zval **fdfp, **field;
+	int argc=ZEND_NUM_ARGS();
 	ASInt32 length=256, nr;
 	char *buffer=NULL, *fieldname=NULL;
 	FDFDoc fdf;
 	FDFErc err;
-	FDF_TLS_VARS;
 
-	if (argc > 2 || argc < 1 || zend_get_parameters_ex(argc, &fdfdoc, &field) == FAILURE) {
+	if (argc > 2 || argc < 1 || zend_get_parameters_ex(argc, &fdfp, &field) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long_ex(fdfdoc);
-	id=Z_LVAL_PP(fdfdoc);
-	fdf = zend_list_find(id,&type);
-	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
 
 	if(argc == 2) {
 		convert_to_string_ex(field);
@@ -366,401 +312,382 @@ PHP_FUNCTION(fdf_next_field_name)
 
 	buffer = emalloc(length);
 	err = FDFNextFieldName(fdf, fieldname, buffer, length-1, &nr);
+
 	if(err == FDFErcBufTooShort && nr > 0 ) {
 		buffer = erealloc(buffer,nr+1); 
 		err = FDFNextFieldName(fdf, fieldname, buffer, length-1,&nr);
 	} 
+
 	if(err != FDFErcOK) {
 		efree(buffer);
-		php_error(E_WARNING,"Unable to get next fieldname");
+		php_error(E_WARNING,"Error getting next fieldname!");
 		RETURN_FALSE;
 	} 
+
 	RETVAL_STRING(buffer, 1);
 	efree(buffer);
 }
 /* }}} */
 
-/* {{{ proto boolean fdf_set_ap(int fdfdoc, string fieldname, int face, string filename, int pagenr)
-   Sets the value of a field */
-PHP_FUNCTION(fdf_set_ap) {
-	pval **arg1, **arg2, **arg3, **arg4, **arg5;
-	int id, type;
+
+/* {{{ proto bool fdf_set_ap(int fdfdoc, string fieldname, int face, string filename, int pagenr)
+   Set the appearence of a field */
+PHP_FUNCTION(fdf_set_ap) 
+{
+	zval **fdfp, **fieldname, **face, **filename, **pagenr;
 	FDFDoc fdf;
 	FDFErc err;
-	FDFAppFace face;
-	FDF_TLS_VARS;
+	FDFAppFace facenr;
 
-	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &arg1, &arg2,&arg3, &arg4, &arg5) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &fdfp, &fieldname, &face, &filename, &pagenr) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long_ex(arg1);
-	convert_to_string_ex(arg2);
-	convert_to_long_ex(arg3);
-	convert_to_string_ex(arg4);
-	convert_to_long_ex(arg5);
-	id=(*arg1)->value.lval;
-	fdf = zend_list_find(id,&type);
-	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
 
-	switch((*arg3)->value.lval) {
+	convert_to_string_ex(fieldname);
+	convert_to_long_ex(face);
+	convert_to_string_ex(filename);
+	convert_to_long_ex(pagenr);
+
+	switch(Z_LVAL_PP(face)) {
 		case 1:
-			face = FDFNormalAP;
+			facenr = FDFNormalAP;
 			break;
 		case 2:
-			face = FDFRolloverAP;
+			facenr = FDFRolloverAP;
 			break;
 		case 3:
-			face = FDFDownAP;
+			facenr = FDFDownAP;
 			break;
 		default:
-			face = FDFNormalAP;
+			facenr = FDFNormalAP;
 	}
 
-	err = FDFSetAP(fdf, (*arg2)->value.str.val, face, NULL,
-(*arg4)->value.str.val, (ASInt32) (*arg5)->value.lval);
-	if(err != FDFErcOK)
-		printf("Aiii, error\n");
+	err = FDFSetAP(fdf, Z_STRVAL_PP(fieldname), facenr, NULL, Z_STRVAL_PP(filename), (ASInt32) Z_LVAL_PP(pagenr));
 
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto boolean fdf_set_status(int fdfdoc, string status)
-   Sets the value in the /Status key */
-PHP_FUNCTION(fdf_set_status) {
-	pval **arg1, **arg2;
-	int id, type;
-	FDFDoc fdf;
-	FDFErc err;
-	FDF_TLS_VARS;
-
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_long_ex(arg1);
-	convert_to_string_ex(arg2);
-	id=(*arg1)->value.lval;
-	fdf = zend_list_find(id,&type);
-	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+	/* This should be made more intelligent, ie. use switch() with the 
+	   possible errors this function can return. Or create global error handler function.
+	 */
+	if(err != FDFErcOK) {
+		php_error(E_WARNING,"Error setting appearence of field: %s", Z_STRVAL_PP(fieldname));
 		RETURN_FALSE;
 	}
 
-	err = FDFSetStatus(fdf, (*arg2)->value.str.val);
-	if(err != FDFErcOK)
-		printf("Aiii, error\n");
+	RETURN_TRUE;
+
+}
+/* }}} */
+
+
+/* {{{ proto bool fdf_set_status(int fdfdoc, string status)
+   Set the value of /Status key */
+PHP_FUNCTION(fdf_set_status) 
+{
+	zval **fdfp, **status;
+	FDFDoc fdf;
+	FDFErc err;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fdfp, &status) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
+
+	convert_to_string_ex(status);
+
+	err = FDFSetStatus(fdf, Z_STRVAL_PP(status));
+	if(err != FDFErcOK) {
+		php_error(E_WARNING,"Error setting fdf document status key to: %s", Z_STRVAL_PP(status));
+		RETURN_FALSE;
+	}
 
 	RETURN_TRUE;
 }
 /* }}} */
+
 
 /* {{{ proto string fdf_get_status(int fdfdoc)
-   Gets the value in the /Status key */
-PHP_FUNCTION(fdf_get_status) {
-	pval **arg1;
-	int id, type;
-	ASInt32 nr;
+   Get the value of /Status key */
+PHP_FUNCTION(fdf_get_status) 
+{
+	zval **fdfp;
+	ASInt32 nr, size = 256;
 	char *buf;
 	FDFDoc fdf;
 	FDFErc err;
-	FDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &fdfp) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long_ex(arg1);
-	id=(*arg1)->value.lval;
-	fdf = zend_list_find(id,&type);
-	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
+
+	buf = emalloc(size);
+	err = FDFGetStatus(fdf, buf, size-1,  &nr);
+
+	if(err == FDFErcBufTooShort && nr > 0 ) {
+		buf = erealloc(buf,nr+1); 
+		err = FDFGetStatus(fdf, buf, size-1,  &nr);
+	}
+	
+	if(err != FDFErcOK) {
+		php_error(E_WARNING,"Error getting fdf document status key!");
+		efree(buf);
 		RETURN_FALSE;
 	}
 
-	err = FDFGetStatus(fdf, NULL, 0,  &nr);
-	if(err != FDFErcOK)
-		printf("Aiii, error\n");
-	if(nr == 0)
-		RETURN_STRING(empty_string, 1);
-	buf = emalloc(nr);
-	err = FDFGetStatus(fdf, buf, nr,  &nr);
-	if(err != FDFErcOK)
-		printf("Aiii, error\n");
-
-	RETURN_STRING(buf, 0);
+	RETVAL_STRING(buf, 1);
+	efree(buf);
 }
 /* }}} */
 
-/* {{{ proto boolean fdf_set_file(int fdfdoc, string filename)
-   Sets the value of the FDF's /F key */
-PHP_FUNCTION(fdf_set_file) {
-	pval **arg1, **arg2;
-	int id, type;
+
+/* {{{ proto bool fdf_set_file(int fdfdoc, string filename)
+   Set the value of /F key */
+PHP_FUNCTION(fdf_set_file) 
+{
+	zval **fdfp, **filename;
 	FDFDoc fdf;
 	FDFErc err;
-	FDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fdfp, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long_ex(arg1);
-	convert_to_string_ex(arg2);
-	id=(*arg1)->value.lval;
-	fdf = zend_list_find(id,&type);
-	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
+
+	convert_to_string_ex(filename);
+
+	err = FDFSetFile(fdf, Z_STRVAL_PP(filename));
+	if(err != FDFErcOK) {
+		php_error(E_WARNING,"Error setting filename key to: %s", Z_STRVAL_PP(filename));
 		RETURN_FALSE;
 	}
-
-	err = FDFSetFile(fdf, (*arg2)->value.str.val);
-	if(err != FDFErcOK)
-		printf("Aiii, error\n");
 
 	RETURN_TRUE;
 }
 /* }}} */
+
 
 /* {{{ proto string fdf_get_file(int fdfdoc)
-   Gets the value in the /F key */
-PHP_FUNCTION(fdf_get_file) {
-	pval **arg1;
-	int id, type;
-	ASInt32 nr;
+   Get the value of /F key */
+PHP_FUNCTION(fdf_get_file) 
+{
+	zval **fdfp;
+	ASInt32 nr, size = 256;
 	char *buf;
 	FDFDoc fdf;
 	FDFErc err;
-	FDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &fdfp) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long_ex(arg1);
-	id=(*arg1)->value.lval;
-	fdf = zend_list_find(id,&type);
-	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
+
+	buf = emalloc(size);
+	err = FDFGetFile(fdf, buf, size-1,  &nr);
+
+	if(err == FDFErcBufTooShort && nr > 0 ) {
+		buf = erealloc(buf,nr+1); 
+		err = FDFGetFile(fdf, buf, size-1,  &nr);
+	}
+	
+	if(err != FDFErcOK) {
+		php_error(E_WARNING,"Error getting fdf document filename key!");
+		efree(buf);
 		RETURN_FALSE;
 	}
 
-	err = FDFGetFile(fdf, NULL, 0,  &nr);
-	if(err != FDFErcOK)
-		printf("Aiii, error\n");
-	if(nr == 0)
-		RETURN_STRING(empty_string, 1);
-	buf = emalloc(nr);
-	err = FDFGetFile(fdf, buf, nr,  &nr);
-	if(err != FDFErcOK)
-		printf("Aiii, error\n");
-
-	RETURN_STRING(buf, 0);
+	RETVAL_STRING(buf, 1);
+	efree(buf);
 }
 /* }}} */
 
-/* {{{ proto boolean fdf_save(int fdfdoc, string filename)
-   Writes out an FDF file */
-PHP_FUNCTION(fdf_save) {
-	pval **arg1, **arg2;
-	int id, type;
+
+/* {{{ proto bool fdf_save(int fdfdoc, string filename)
+   Write out the FDF file */
+PHP_FUNCTION(fdf_save) 
+{
+	zval **fdfp, **filename;
 	FDFDoc fdf;
 	FDFErc err;
-	FDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fdfp, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long_ex(arg1);
-	convert_to_string_ex(arg2);
-	id=(*arg1)->value.lval;
-	fdf = zend_list_find(id,&type);
-	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
+
+	convert_to_string_ex(filename);
+	err = FDFSave(fdf, Z_STRVAL_PP(filename));
+	if(err != FDFErcOK) {
+		php_error(E_WARNING,"Error saving fdf document into filename: %s", Z_STRVAL_PP(filename));
 		RETURN_FALSE;
 	}
 
-	err = FDFSave(fdf, (*arg2)->value.str.val);
-	if(err != FDFErcOK)
-		printf("Aiii, error\n");
-
 	RETURN_TRUE;
-} /* }}} */
 
-/* {{{ proto boolean fdf_add_template(int fdfdoc, int newpage, string filename, string template, int rename)
-   Adds a template to the FDF */
-PHP_FUNCTION(fdf_add_template) {
-	pval **arg1, **arg2, **arg3, **arg4, **arg5;
-	int id, type;
+} 
+/* }}} */
+
+
+/* {{{ proto bool fdf_add_template(int fdfdoc, int newpage, string filename, string template, int rename)
+   Add a template into the FDF document */
+PHP_FUNCTION(fdf_add_template) 
+{
+	zval **fdfp, **newpage, **filename, **template, **rename;
 	FDFDoc fdf;
 	FDFErc err;
 	pdfFileSpecRec filespec;
-	FDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &arg1, &arg2,&arg3, &arg4, &arg5) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &fdfp, &newpage, &filename, &template, &rename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long_ex(arg1);
-	convert_to_long_ex(arg2);
-	convert_to_string_ex(arg3);
-	convert_to_string_ex(arg4);
-	convert_to_long_ex(arg5);
-	id=(*arg1)->value.lval;
-	fdf = zend_list_find(id,&type);
-	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
+
+	convert_to_long_ex(newpage);
+	convert_to_string_ex(filename);
+	convert_to_string_ex(template);
+	convert_to_long_ex(rename);
 
 	filespec.FS = NULL;
-	filespec.F = (*arg3)->value.str.val;
+	filespec.F = Z_STRVAL_PP(filename);
 	filespec.Mac = NULL;
 	filespec.DOS = NULL;
 	filespec.Unix = NULL;
 	filespec.ID[0] = NULL;
 	filespec.ID[1] = NULL;
 	filespec.bVolatile = false;
-	err = FDFAddTemplate(fdf, (*arg2)->value.lval, &filespec,(*arg4)->value.str.val, (*arg5)->value.lval);
-	if(err != FDFErcOK)
-		printf("Aiii, error\n");
+
+	err = FDFAddTemplate(fdf, Z_LVAL_PP(newpage), &filespec, Z_STRVAL_PP(template), Z_LVAL_PP(rename));
+	if(err != FDFErcOK) {
+		php_error(E_WARNING,"Error adding template: %s into fdf document", Z_STRVAL_PP(template));
+		RETURN_FALSE;
+	}
 
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto boolean fdf_set_flags(int fdfdoc, string fieldname, int whichflags, int newflags)
-   Modifies a flag for a field in the FDF */
-PHP_FUNCTION(fdf_set_flags) {
-	pval **arg1, **arg2, **arg3, **arg4;
-	int id, type;
+
+/* {{{ proto bool fdf_set_flags(int fdfdoc, string fieldname, int whichflags, int newflags)
+   Set flags for a field in the FDF document. */
+PHP_FUNCTION(fdf_set_flags) 
+{
+	zval **fdfp, **fieldname, **flags, **newflags;
 	FDFDoc fdf;
 	FDFErc err;
-	FDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2,&arg3, &arg4) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &fdfp, &fieldname, &flags, &newflags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long_ex(arg1);
-	convert_to_string_ex(arg2);
-	convert_to_long_ex(arg3);
-	convert_to_long_ex(arg4);	
-	id=(*arg1)->value.lval;
-	fdf = zend_list_find(id,&type);
-	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
+
+	convert_to_string_ex(fieldname);
+	convert_to_long_ex(flags);
+	convert_to_long_ex(newflags);	
+
+	err=FDFSetFlags(fdf,Z_STRVAL_PP(fieldname), Z_LVAL_PP(flags), Z_LVAL_PP(newflags));
+	if(err != FDFErcOK) {
+		php_error(E_WARNING,"Error setting flags for field: %s", Z_STRVAL_PP(fieldname));
 		RETURN_FALSE;
 	}
-
-	err=FDFSetFlags(fdf,(*arg2)->value.str.val,(*arg3)->value.lval,(*arg4)->value.lval);
-	if(err != FDFErcOK)
-		printf("Error setting FDF flags: %d\n",err);
 
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto boolean fdf_set_opt(int fdfdoc, string fieldname, int element, string value, string name)
-   Sets a value in the opt array for a field in the FDF */
-PHP_FUNCTION(fdf_set_opt) {
-	pval **arg1, **arg2, **arg3, **arg4, **arg5;
-	int id, type;
+
+/* {{{ proto bool fdf_set_opt(int fdfdoc, string fieldname, int element, string value, string name)
+   Set a value in the opt array for a field. */
+PHP_FUNCTION(fdf_set_opt)
+{
+	zval **fdfp, **fieldname, **element, **value, **name;
 	FDFDoc fdf;
 	FDFErc err;	
-	FDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &arg1, &arg2,&arg3, &arg4, &arg5) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &fdfp, &fieldname, &element, &value, &name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long_ex(arg1);
-	convert_to_string_ex(arg2);
-	convert_to_long_ex(arg3);
-	convert_to_string_ex(arg4);
-	convert_to_string_ex(arg5);
-	id=(*arg1)->value.lval;
-	fdf = zend_list_find(id,&type);
-	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
+
+	convert_to_string_ex(fieldname);
+	convert_to_long_ex(element);
+	convert_to_string_ex(value);
+	convert_to_string_ex(name);
+
+	err = FDFSetOpt(fdf,Z_STRVAL_PP(fieldname), Z_LVAL_PP(element), Z_STRVAL_PP(value), Z_STRVAL_PP(name));
+	if(err != FDFErcOK) {
+		php_error(E_WARNING,"Error setting FDF option for field: %s", Z_STRVAL_PP(fieldname));
 		RETURN_FALSE;
 	}
-	
-	err = FDFSetOpt(fdf,(*arg2)->value.str.val,(*arg3)->value.lval,(*arg4)->value.str.val,(*arg5)->value.str.val);
-	if(err != FDFErcOK)
-		printf("Error setting FDF option: %d",err);
-
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto booelan fdf_set_submit_form_action(int fdfdoc, string fieldname, int whichtrigger, string url, int flags)
-   Sets the submit form action for a field in the FDF */
-PHP_FUNCTION(fdf_set_submit_form_action) {
-	pval **arg1, **arg2, **arg3, **arg4, **arg5;
-	int id, type;
+
+/* {{{ proto bool fdf_set_submit_form_action(int fdfdoc, string fieldname, int whichtrigger, string url, int flags)
+   Set the submit form action for a field. */
+PHP_FUNCTION(fdf_set_submit_form_action) 
+{
+	zval **fdfp, **fieldname, **trigger, **url, **flags;
 	FDFDoc fdf;
 	FDFErc err;	
-	FDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &arg1, &arg2,&arg3, &arg4, &arg5) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &fdfp, &fieldname, &trigger, &url, &flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long_ex(arg1);
-	convert_to_string_ex(arg2);
-	convert_to_long_ex(arg3);
-	convert_to_string_ex(arg4);
-	convert_to_long_ex(arg5);
-	id=(*arg1)->value.lval;
-	fdf = zend_list_find(id,&type);
-	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
+
+	convert_to_string_ex(fieldname);
+	convert_to_long_ex(trigger);
+	convert_to_string_ex(url);
+	convert_to_long_ex(flags);
+
+	err = FDFSetSubmitFormAction(fdf, Z_STRVAL_PP(fieldname), Z_LVAL_PP(trigger), Z_STRVAL_PP(url), Z_LVAL_PP(flags));
+	if(err != FDFErcOK) {
+		php_error(E_WARNING,"Error setting FDF submit action for field: %s", Z_STRVAL_PP(fieldname));
 		RETURN_FALSE;
 	}
-	
-	err = FDFSetSubmitFormAction(fdf,(*arg2)->value.str.val,(*arg3)->value.lval,(*arg4)->value.str.val,(*arg5)->value.lval);
-	if(err != FDFErcOK)
-		printf("Error setting FDF submit action: %d",err);
-
 	RETURN_TRUE;
 }
+/* }}} */
 
-/* {{{ proto boolean fdf_set_javascript_action(int fdfdoc, string fieldname, int whichtrigger, string script)
-   Sets the javascript action for a field in the FDF */
-PHP_FUNCTION(fdf_set_javascript_action) {
-	pval **arg1, **arg2, **arg3, **arg4;
-	int id, type;
+
+/* {{{ proto bool fdf_set_javascript_action(int fdfdoc, string fieldname, int whichtrigger, string script)
+   Set the javascript action for a field. */
+PHP_FUNCTION(fdf_set_javascript_action) 
+{
+	zval **fdfp, **fieldname, **trigger, **script;
 	FDFDoc fdf;
 	FDFErc err;	
-	FDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2,&arg3, &arg4) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &fdfp, &fieldname, &trigger, &script) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long_ex(arg1);
-	convert_to_string_ex(arg2);
-	convert_to_long_ex(arg3);
-	convert_to_string_ex(arg4);
-	id=(*arg1)->value.lval;
-	fdf = zend_list_find(id,&type);
-	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
+
+	convert_to_string_ex(fieldname);
+	convert_to_long_ex(trigger);
+	convert_to_string_ex(script);
+	
+	err = FDFSetJavaScriptAction(fdf, Z_STRVAL_PP(fieldname), Z_LVAL_PP(trigger), Z_STRVAL_PP(script));
+	if(err != FDFErcOK) {
+		php_error(E_WARNING,"Error setting FDF javascript action for field: %s", Z_STRVAL_PP(fieldname));
 		RETURN_FALSE;
 	}
-	
-	err = FDFSetJavaScriptAction(fdf,(*arg2)->value.str.val,(*arg3)->value.lval,(*arg4)->value.str.val);
-	if(err != FDFErcOK)
-		printf("Error setting FDF JavaScript action: %d",err);
-
 	RETURN_TRUE;
 }
+/* }}} */
 
-
+/* SAPI post handler for FDF forms */
 SAPI_POST_HANDLER_FUNC(fdf_post_handler)
 {
 	FILE *fp;

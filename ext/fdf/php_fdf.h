@@ -32,8 +32,8 @@
 extern zend_module_entry fdf_module_entry;
 #define fdf_module_ptr &fdf_module_entry
 
-extern PHP_MINIT_FUNCTION(fdf);
-extern PHP_MSHUTDOWN_FUNCTION(fdf);
+PHP_MINIT_FUNCTION(fdf);
+PHP_MSHUTDOWN_FUNCTION(fdf);
 PHP_MINFO_FUNCTION(fdf);
 
 PHP_FUNCTION(fdf_open);
@@ -53,6 +53,7 @@ PHP_FUNCTION(fdf_set_flags);
 PHP_FUNCTION(fdf_set_opt);
 PHP_FUNCTION(fdf_set_submit_form_action);
 PHP_FUNCTION(fdf_set_javascript_action);
+
 #else
 #define fdf_module_ptr NULL
 #endif
