@@ -144,13 +144,24 @@ typedef struct {
 typedef struct {
 	ibase_db_link *link;
 	ibase_trans *trans;
+	struct _ibase_query *query;
 	isc_stmt_handle stmt;
-	int drop_stmt;
+	XSQLDA *out_sqlda;
+	ibase_array *out_array;
+	unsigned char has_more_rows;
+	char statement_type;
+} ibase_result;
+
+typedef struct _ibase_query {
+	ibase_db_link *link;
+	ibase_trans *trans;
+	ibase_result *result;
+	int result_res_id;
+	isc_stmt_handle stmt;
 	XSQLDA *in_sqlda, *out_sqlda;
 	ibase_array *in_array, *out_array;
 	int in_array_cnt, out_array_cnt;
 	unsigned short dialect;
-	int cursor_open;
 	char statement_type;
 	char *query;
 	int trans_res_id;
@@ -158,18 +169,7 @@ typedef struct {
 
 typedef struct {
 	ibase_db_link *link;
-	ibase_trans *trans;
-	isc_stmt_handle stmt;
-	int drop_stmt;
-	XSQLDA *out_sqlda;
-	ibase_array *out_array;
-	unsigned char has_more_rows;
-	char statement_type;
-} ibase_result;
-
-typedef struct {
 	int link_res_id;
-	ibase_db_link *link;
 	ISC_LONG event_id;
 	unsigned short event_count;
 	char **events;
