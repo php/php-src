@@ -40,11 +40,12 @@ New Features:
 * Added PEAR::delExpect() API method. It allows to unset one or more expected error codes
 * System::mkTemp() automatically remove created tmp files/dirs at script shutdown
 * New command "pear search"
-
+* New command "pear upgrade-all"
 Fixed Bugs:
 * fix for XML-RPC bug that made some remote commands fail
 * fix problems under Windows with the DIRECTORY_SEPARATOR
 * lot of other minor fixes
+* --force option did not work on "pear install Package"
 </notes>
     <filelist>
       <file role="data" name="package.dtd"/>
