@@ -1,3 +1,39 @@
+2001-09-14  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTML/Menu.php: * reverted patch
+
+2001-09-14  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/Mail/mime.php:
+    forgot to always put names without path in embedded images names also
+    (thanks to "Robin Vervoorn" <vervoorn@auxilium-sd.nl> for reporting)
+
+2001-09-14  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache/Container/file.php:
+    Patch I revcieved from Vinai Kopp. He's one of the guys that had the
+    initial idea. Here's what he wrote:
+
+    "
+    diff -r1.16 file.php
+    113c113
+    < $expire = trim(fgets($fh, 11));
+    ---
+
+    > $expire = trim(fgets($fh, 12))
+
+
+    Es ging zwar alles bisher, aber wenn ich error_reporting(E_ALL) anschalte,
+    meckert PHP
+
+    Warning:  unserialize() failed at offset 0 of 24897 bytes in
+    /opt/php-4.0.5/lib/php/Cache/Container.php on line 406"
+
+    Translation:
+
+    Everything was fine until I used error_reporting(E_ALL). PHP complained:
+    (see above)
+
 2001-09-13  Sascha Schumann  <sascha@schumann.cx>
 
     * configure.in
