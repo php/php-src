@@ -1297,7 +1297,7 @@ PHP_FUNCTION(socket_recv)
 	php_socket	*php_sock;
 	int			retval, len, flags;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr", &arg1, &len, &flags) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll", &arg1, &len, &flags) == FAILURE)
 		return;
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
@@ -1700,6 +1700,7 @@ PHP_FUNCTION(socket_getopt)
 {
 	zval			*arg1;
 	struct linger	linger_val;
+	struct timeval		tv;
 	socklen_t		optlen;
 	php_socket		*php_sock;
 	int				other_val, level, optname;
@@ -1708,31 +1709,51 @@ PHP_FUNCTION(socket_getopt)
 		return;
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
-	
-	if (optname == SO_LINGER) {
-		optlen = sizeof(struct linger);
+     
+	switch(optname) {
+		case SO_LINGER: 
+			optlen = sizeof(linger_val);
 
-		if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&linger_val, &optlen) != 0) {
-			PHP_SOCKET_ERROR(php_sock, "unable to retrieve socket option", errno);
-			RETURN_FALSE;
-		}
+			if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&linger_val, &optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "unable to retrieve socket option", errno);
+				RETURN_FALSE;
+			}
 
-		if (array_init(return_value) == FAILURE) {
-			RETURN_FALSE;
-		}
+			if (array_init(return_value) == FAILURE) {
+				RETURN_FALSE;
+			}
 
-		add_assoc_long(return_value, "l_onoff", linger_val.l_onoff);
-		add_assoc_long(return_value, "l_linger", linger_val.l_linger);
+			add_assoc_long(return_value, "l_onoff", linger_val.l_onoff);
+			add_assoc_long(return_value, "l_linger", linger_val.l_linger);
+	     
+			break; 
+		case SO_RCVTIMEO:
+		case SO_SNDTIMEO:
+			optlen = sizeof(tv);
 
-	} else {
-		optlen = sizeof(other_val);
+	     		if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&tv, &optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "unable to retrieve socket option", errno);
+				RETURN_FALSE;
+			}
+
+			if (array_init(return_value) == FAILURE) {
+				RETURN_FALSE;
+			}
+	     
+			add_assoc_long(return_value, "sec", tv.tv_sec);
+			add_assoc_long(return_value, "usec", tv.tv_usec);
+		  
+			break;
+		default:
+			optlen = sizeof(other_val);
 		
-		if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&other_val, &optlen) != 0) {
-			PHP_SOCKET_ERROR(php_sock, "unable to retrieve socket option", errno);
-			RETURN_FALSE;
-		}
+			if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&other_val, &optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "unable to retrieve socket option", errno);
+				RETURN_FALSE;
+			}
 
-		RETURN_LONG(other_val);
+			RETURN_LONG(other_val);
+			break;
 	}
 }
 /* }}} */
@@ -1743,8 +1764,20 @@ PHP_FUNCTION(socket_setopt)
 {
 	zval			*arg1, *arg4;
 	struct linger	lv;
+	struct timeval tv;
 	php_socket		*php_sock;
 	int				ov, optlen, retval, level, optname;
+	void 			*opt_ptr;
+     
+ 	HashTable 		*opt_ht;
+	zval 			**l_onoff, **l_linger;
+ 	zval 			**sec, **usec;
+     
+	/* key name constants */     
+	char			*l_onoff_key="l_onoff";
+ 	char 			*l_linger_key="l_linger";
+ 	char 			*sec_key="sec";
+ 	char 			*usec_key="usec";
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllz", &arg1, &level, &optname, &arg4) == FAILURE)
 		return;
@@ -1753,42 +1786,62 @@ PHP_FUNCTION(socket_setopt)
 
 	set_errno(0);
 
-	if (optname == SO_LINGER) {
-		HashTable *ht;
-		zval **l_onoff;
-		zval **l_linger;
+	switch (optname) {
+		case SO_LINGER: 			
+			convert_to_array_ex(&arg4);
+			opt_ht = HASH_OF(arg4);
 
-		convert_to_array_ex(&arg4);
-		ht = HASH_OF(arg4);
+			if (zend_hash_find(opt_ht, l_onoff_key, strlen(l_onoff_key) + 1, (void **)&l_onoff) == FAILURE) {
+				php_error(E_WARNING, "%s() no key \"%s\" passed in optval", get_active_function_name(TSRMLS_C), l_onoff_key);
+				RETURN_FALSE;
+			}
+			if (zend_hash_find(opt_ht, l_linger_key, strlen(l_linger_key) + 1, (void **)&l_linger) == FAILURE) {
+				php_error(E_WARNING, "%s() no key \"%s\" passed in optval", get_active_function_name(TSRMLS_C), l_linger_key);
+				RETURN_FALSE;
+			}
 
-		if (zend_hash_find(ht, "l_onoff", strlen("l_onoff") + 1, (void **)&l_onoff) == FAILURE) {
-			php_error(E_WARNING, "%s() no key \"l_onoff\" passed in optval", get_active_function_name(TSRMLS_C));
-			RETURN_FALSE;
-		}
-		if (zend_hash_find(ht, "l_linger", strlen("l_linger") + 1, (void **)&l_linger) == FAILURE) {
-			php_error(E_WARNING, "%s() no key \"l_linger\" passed in optval", get_active_function_name(TSRMLS_C));
-			RETURN_FALSE;
-		}
+			convert_to_long_ex(l_onoff);
+			convert_to_long_ex(l_linger);
 
-		convert_to_long_ex(l_onoff);
-		convert_to_long_ex(l_linger);
+			lv.l_onoff	= (unsigned short)Z_LVAL_PP(l_onoff);
+	     		lv.l_linger = (unsigned short)Z_LVAL_PP(l_linger);
 
-		lv.l_onoff	= (unsigned short)Z_LVAL_PP(l_onoff);
-		lv.l_linger = (unsigned short)Z_LVAL_PP(l_linger);
+			optlen = sizeof(lv);
+			opt_ptr=&lv;
+			break;
+		case SO_RCVTIMEO:
+		case SO_SNDTIMEO:
+			convert_to_array_ex(&arg4);
+			opt_ht = HASH_OF(arg4);
 
-		optlen = sizeof(lv);
-		
-		retval = setsockopt(php_sock->bsd_socket, level, optname, (char*)&lv, optlen);
+			if (zend_hash_find(opt_ht, sec_key, strlen(sec_key) + 1, (void **)&sec) == FAILURE) {
+				php_error(E_WARNING, "%s() no key \"%s\" passed in optval", get_active_function_name(TSRMLS_C), sec_key);
+				RETURN_FALSE;
+			}
+			if (zend_hash_find(opt_ht, usec_key, strlen(usec_key) + 1, (void **)&usec) == FAILURE) {
+				php_error(E_WARNING, "%s() no key \"%s\" passed in optval", get_active_function_name(TSRMLS_C), usec_key);
+				RETURN_FALSE;
+			}
+			
+			convert_to_long_ex(sec);
+			convert_to_long_ex(usec);
+			tv.tv_sec=Z_LVAL_PP(sec);
+			tv.tv_usec=Z_LVAL_PP(usec);
 
-	} else {
-		convert_to_long_ex(&arg4);
-
-		optlen = sizeof(ov);
-		ov = Z_LVAL_P(arg4);
-
-		retval = setsockopt(php_sock->bsd_socket, level, optname, (char*)&ov, optlen);
+	     		optlen = sizeof(tv);
+			opt_ptr=&tv;
+			break;
+		default:
+	     		convert_to_long_ex(&arg4);
+			ov = Z_LVAL_P(arg4);
+	     
+			optlen = sizeof(ov);
+			opt_ptr=&ov;
+			break;
 	}
 
+	retval = setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen);
+     
 	if (retval != 0) {
 		PHP_SOCKET_ERROR(php_sock, "unable to set socket option", errno);
 		RETURN_FALSE;
