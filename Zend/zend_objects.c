@@ -25,12 +25,6 @@
 #include "zend_API.h"
 #include "zend_interfaces.h"
 
-static inline void zend_nuke_object(zend_object *object TSRMLS_DC)
-{
-	zend_hash_destroy(object->properties);
-	FREE_HASHTABLE(object->properties);
-	efree(object);
-}
 
 ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC)
 {
@@ -46,7 +40,6 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 				if (object->ce != EG(scope)) {
 					zend_class_entry *ce = object->ce;
 
-					zend_nuke_object(object TSRMLS_CC); /* unfortunately we *must* destroy it now anyway */
 					zend_error(EG(in_execution) ? E_ERROR : E_WARNING, 
 						"Call to private %s::__destruct() from context '%s'%s", 
 						ce->name, 
@@ -60,7 +53,6 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 				if (!zend_check_protected(destructor->common.scope, EG(scope))) {
 					zend_class_entry *ce = object->ce;
 
-					zend_nuke_object(object TSRMLS_CC); /* unfortunately we *must* destroy it now anyway */
 					zend_error(EG(in_execution) ? E_ERROR : E_WARNING, 
 						"Call to protected %s::__destruct() from context '%s'%s", 
 						ce->name, 
@@ -82,7 +74,9 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 
 ZEND_API void zend_objects_free_object_storage(zend_object *object TSRMLS_DC)
 {
-	zend_nuke_object(object TSRMLS_CC);
+	zend_hash_destroy(object->properties);
+	FREE_HASHTABLE(object->properties);
+	efree(object);
 }
 
 ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type TSRMLS_DC)
