@@ -746,6 +746,12 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 	ts_free_id(basic_globals_id);
 #endif
 
+	if(PG(allow_url_fopen)) {
+		php_unregister_url_wrapper("http");
+		php_unregister_url_wrapper("ftp");
+		php_unregister_url_wrapper("php");
+	}
+
 	UNREGISTER_INI_ENTRIES();
 
 	PHP_MSHUTDOWN(regex)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
@@ -754,11 +760,6 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 	PHP_MSHUTDOWN(array)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_MSHUTDOWN(assert)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
-	if(PG(allow_url_fopen)) {
-		php_unregister_url_wrapper("http");
-		php_unregister_url_wrapper("ftp");
-		php_unregister_url_wrapper("php");
-	}
 
 	return SUCCESS;	
 }
