@@ -750,7 +750,7 @@ PHP_FUNCTION(wddx_packet_start)
 	
 	_php_wddx_add_chunk(packet, WDDX_STRUCT_S);
 
-	RETURN_RESOURCE(zend_list_insert(packet, le_wddx));
+	ZEND_REGISTER_RESOURCE(return_value, packet, le_wddx);
 }
 /* }}} */
 
@@ -761,32 +761,34 @@ PHP_FUNCTION(wddx_packet_end)
 {
 	zval *packet_id;
 	char *buf;
-	wddx_packet *packet;
-	int type, id;
+	wddx_packet *packet = NULL;
 	
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &packet_id)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	if (packet_id->type != IS_RESOURCE)
-	{
-		zend_error(E_WARNING, "Invalid packet ID in call to wddx_packet_end");
-		return;
-	}
-	id = packet_id->value.lval;
-	packet = zend_list_find(id, &type);
-	if (type!=le_wddx) {
-		zend_error(E_WARNING, "%d is not a valid WDDX packet id", id);
-		RETURN_FALSE;
-	}
-
+/* 	if (packet_id->type != IS_RESOURCE)
+	   {
+		   zend_error(E_WARNING, "Invalid packet ID in call to wddx_packet_end");
+		   return;
+	   }
+	   id = packet_id->value.lval;
+	   packet = zend_list_find(id, &type);
+	   if (type!=le_wddx) {
+		   zend_error(E_WARNING, "%d is not a valid WDDX packet id", id);
+		   RETURN_FALSE;
+	   }
+    */
+	
+	ZEND_FETCH_RESOURCE(packet, wddx_packet *, packet_id, -1, "WDDX packet ID", le_wddx);
+			
 	_php_wddx_add_chunk(packet, WDDX_STRUCT_E);	
 	
 	_php_wddx_packet_end(packet);
 
 	buf = _php_wddx_gather(packet);
 	
-	zend_list_delete(id);
+	zend_list_delete(packet_id->value.lval);
 	
 	RETURN_STRING(buf, 0);
 }
@@ -797,10 +799,10 @@ PHP_FUNCTION(wddx_packet_end)
    Serializes given variables and adds them to packet given by packet_id */
 PHP_FUNCTION(wddx_add_vars)
 {
-	int argc, type, id, i;
+	int argc, i;
 	zval **args;
 	zval *packet_id;
-	wddx_packet *packet;
+	wddx_packet *packet = NULL;
 	
 	argc = ARG_COUNT(ht);
 	if (argc < 2) {
@@ -815,7 +817,8 @@ PHP_FUNCTION(wddx_add_vars)
 	}
 	
 	packet_id = args[0];
-	
+
+	/*	
 	if (packet_id->type != IS_RESOURCE)
 	{
 		zend_error(E_WARNING, "Invalid packet ID in call to wddx_add_vars");
@@ -825,6 +828,14 @@ PHP_FUNCTION(wddx_add_vars)
 	packet = zend_list_find(id, &type);
 	if (type!=le_wddx) {
 		zend_error(E_WARNING, "%d is not a valid WDDX packet id", id);
+		RETURN_FALSE;
+	}
+	*/
+
+	packet = (wddx_packet *)zend_fetch_resource(packet_id, -1, "WDDX packet ID", le_wddx);
+	if (!packet)
+	{
+		efree(args);
 		RETURN_FALSE;
 	}
 		
