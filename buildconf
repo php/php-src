@@ -3,7 +3,7 @@
 # do some version checking for the tools we use
 if test "$1" = "--force"; then
     shift
-elif test buildconf.stamp -nt buildconf ; then 
+elif test -e buildconf.stamp ; then 
     :
 else
     echo "buildconf: checking installation..."
