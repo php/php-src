@@ -4,7 +4,7 @@ class DirectoryTreeIterator extends RecursiveIteratorIterator
 {
 	function __construct($path)
 	{
-		parent::__construct(new CachingRecursiveIterator(new RecursiveDirectoryIterator($path)), 1);
+		parent::__construct(new CachingRecursiveIterator(new RecursiveDirectoryIterator($path), true), 1);
 	}
 	
 	function current()
