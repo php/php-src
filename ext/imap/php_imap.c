@@ -385,6 +385,7 @@ PHP_MINIT_FUNCTION(imap)
 	ZEND_INIT_MODULE_GLOBALS(imap, php_imap_init_globals, NULL)
 
 
+#if 1
 #ifndef PHP_WIN32
 	mail_link(&unixdriver);   /* link in the unix driver */
 #endif
@@ -405,6 +406,11 @@ PHP_MINIT_FUNCTION(imap)
 	auth_link(&auth_log);        /* link in the log authenticator */
 #endif
 	mail_link(&dummydriver);     /* link in the dummy driver */
+#else
+	/* link in the c-client mail and auth drivers */
+#include "linkage.c"
+#endif
+
 	/* lets allow NIL */
 
 	REGISTER_MAIN_LONG_CONSTANT("NIL", NIL, CONST_PERSISTENT | CONST_CS);
@@ -1973,7 +1979,7 @@ PHP_FUNCTION(imap_base64)
 
 	decode = (char *) rfc822_base64((unsigned char *) Z_STRVAL_PP(text), Z_STRLEN_PP(text), &newlength);
 	RETVAL_STRINGL(decode, newlength, 1);
-	fs_give(&decode);
+	fs_give((void**) &decode);
 }
 /* }}} */
 
@@ -1995,7 +2001,7 @@ PHP_FUNCTION(imap_qprint)
 
 	decode = (char *) rfc822_qprint((unsigned char *) Z_STRVAL_PP(text), Z_STRLEN_PP(text), &newlength);
 	RETVAL_STRINGL(decode, newlength, 1);
-	fs_give(&decode);
+	fs_give((void**) &decode);
 }
 /* }}} */
 
@@ -2017,7 +2023,7 @@ PHP_FUNCTION(imap_8bit)
 
 	decode = (char *) rfc822_8bit((unsigned char *) Z_STRVAL_PP(text), Z_STRLEN_PP(text), &newlength);
 	RETVAL_STRINGL(decode, newlength, 1);
-	fs_give(&decode);
+	fs_give((void**) &decode);
 }
 /* }}} */
 
@@ -2036,7 +2042,7 @@ PHP_FUNCTION(imap_binary)
 	convert_to_string_ex(text);
 	decode = rfc822_binary(Z_STRVAL_PP(text), Z_STRLEN_PP(text), &len);
 	RETVAL_STRINGL(decode, len, 1);
-	fs_give(&decode);
+	fs_give((void**) &decode);
 }
 /* }}} */
 
@@ -2217,11 +2223,11 @@ PHP_FUNCTION(imap_utf8)
 PHP_FUNCTION(imap_utf7_decode)
 {
 	/* author: Andrew Skalski <askalski@chek.com> */
-	int	argc;
+	int argc;
 	zval **arg;
 	const unsigned char *in, *inp, *endp;
 	unsigned char *out, *outp;
-	int	inlen, outlen;
+	int inlen, outlen;
 	enum {
 		ST_NORMAL,	/* printable text */
 		ST_DECODE0,	/* encoded text rotation... */
@@ -2229,7 +2235,7 @@ PHP_FUNCTION(imap_utf7_decode)
 		ST_DECODE2,
 		ST_DECODE3
 	} state;
-	
+
 	/* collect arguments */
 	argc = ZEND_NUM_ARGS();
 	if (argc != 1 || zend_get_parameters_ex(argc, &arg) == FAILURE) {
@@ -2372,11 +2378,11 @@ PHP_FUNCTION(imap_utf7_decode)
 PHP_FUNCTION(imap_utf7_encode)
 {
 	/* author: Andrew Skalski <askalski@chek.com> */
-	int	argc;
+	int argc;
 	zval **arg;
-	const unsigned char	*in, *inp, *endp;
+	const unsigned char *in, *inp, *endp;
 	unsigned char *out, *outp;
-	int	inlen, outlen, slen;
+	int inlen, outlen;
 	enum {
 		ST_NORMAL,	/* printable text */
 		ST_ENCODE0,	/* encoded text rotation... */
@@ -2389,7 +2395,7 @@ PHP_FUNCTION(imap_utf7_encode)
 	if (argc != 1 || zend_get_parameters_ex(argc, &arg) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
-	convert_to_writable_string_ex(arg);		/* Is this string really modified? */
+	convert_to_string_ex(arg);
 	in = (const unsigned char *) Z_STRVAL_PP(arg);
 	inlen = Z_STRLEN_PP(arg);
 
@@ -2400,23 +2406,28 @@ PHP_FUNCTION(imap_utf7_encode)
 	while (inp < endp) {
 		if (state == ST_NORMAL) {
 			if (SPECIAL(*inp)) {
-				state = ST_ENCODE1;
-				slen=1;
-			} else if (*inp == '&') {
+				state = ST_ENCODE0;
+				outlen++;
+			} else if (*inp++ == '&') {
 				outlen++;
 			}
 			outlen++;
 		} else if (!SPECIAL(*inp)) {
 			state = ST_NORMAL;
-			outlen+=2+slen*3-slen/3;
-			slen=0;
 		} else {
-		        slen++;
+			/* ST_ENCODE0 -> ST_ENCODE1	- two chars
+			 * ST_ENCODE1 -> ST_ENCODE2	- one char
+			 * ST_ENCODE2 -> ST_ENCODE0	- one char
+			 */
+			if (state == ST_ENCODE2) {
+				state = ST_ENCODE0;
+			}
+			else if (state++ == ST_ENCODE0) {
+				outlen++;
+			}
+			outlen++;
+			inp++;
 		}
-		inp++;
-	}
-	if (state!=ST_NORMAL) {
-		outlen+=1+slen*3-slen/3;
 	}
 
 	/* allocate output buffer */
@@ -2450,41 +2461,22 @@ PHP_FUNCTION(imap_utf7_encode)
 			/* encode input character */
 			switch (state) {
 				case ST_ENCODE0:
-					*outp++ = B64((*inp>>8) >> 2);
-					*outp = (*inp>>8) << 4;
+					*outp++ = B64(*inp >> 2);
+					*outp = *inp++ << 4;
 					state = ST_ENCODE1;
 					break;
 				case ST_ENCODE1:
-					*outp++ = B64(*outp | (*inp>>8) >> 4);
-					*outp = (*inp>>8) << 2;
+					*outp++ = B64(*outp | *inp >> 4);
+					*outp = *inp++ << 2;
 					state = ST_ENCODE2;
 					break;
 				case ST_ENCODE2:
-					*outp++ = B64(*outp | (*inp>>8) >> 6);
-					*outp++ = B64((*inp>>8));
+					*outp++ = B64(*outp | *inp >> 6);
+					*outp++ = B64(*inp++);
 					state = ST_ENCODE0;
 				case ST_NORMAL:
 					break;
 			}
-			switch (state) {
-				case ST_ENCODE0:
-					*outp++ = B64((*inp&0xff) >> 2);
-					*outp = (*inp&0xff) << 4;
-					state = ST_ENCODE1;
-					break;
-				case ST_ENCODE1:
-					*outp++ = B64(*outp | (*inp&0xff) >> 4);
-					*outp = (*inp&0xff) << 2;
-					state = ST_ENCODE2;
-					break;
-				case ST_ENCODE2:
-					*outp++ = B64(*outp | (*inp&0xff) >> 6);
-					*outp++ = B64((*inp&0xff));
-					state = ST_ENCODE0;
-				case ST_NORMAL:
-					break;
-			}
-			inp++;
 		}
 	}
 
@@ -3487,7 +3479,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 						add_property_string(myobject, "charset", charset, 1);
 						add_property_string(myobject, "text", decode, 1);
 						zend_hash_next_index_insert(return_value->value.ht,(void *)&myobject,sizeof(zval *),NULL);
-						fs_give(&decode);
+						fs_give((void**) &decode);
 						
 						offset+=end_token+2;
 						if (string[offset]==' ' && string[offset+1]=='=' && string[offset+2]=='?') {
