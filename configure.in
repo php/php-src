@@ -91,6 +91,8 @@ AC_PROG_CC
 AC_AIX
 
 case "$host_alias" in
+*solaris*)
+    CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS";;
 *dgux*)
     CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR";;
 *rhapsody*)
