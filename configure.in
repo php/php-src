@@ -706,10 +706,7 @@ AC_SUBST(EXTRA_LIBS)
 # reading config stubs
 esyscmd(./scripts/config-stubs ext)
 
-dnl if it's still the default choice, enable this implicitly
-if test "$PHP_SAPI" = "cgi"; then
-  PHP_OUTPUT(sapi/cgi/Makefile)
-fi
+PHP_OUTPUT(sapi/$PHP_SAPI/Makefile)
 
 divert(4)
 
