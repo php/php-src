@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- microtime under windows now returns accurate values (James)
 - Added PREG_SPLIT_DELIM_CAPTURE flag to preg_split() that allows for Perl-like
   functionality of capturing parenthesized delimiter expression. (Andrei)
 - Fixed strip_tags() to not strip a lone > character. (Rasmus)
