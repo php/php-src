@@ -683,7 +683,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 					trigger_break=0;
 					break;
 			}
-//			zend_output_debug_string(trigger_break, "%s(%d) : %s - %s", error_filename, error_lineno, error_type_str, buffer);
+/*			zend_output_debug_string(trigger_break, "%s(%d) : %s - %s", error_filename, error_lineno, error_type_str, buffer); */
 		}
 #endif
 	}

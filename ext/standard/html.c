@@ -677,6 +677,7 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 			return cs_8859_5;
 
 		default:	
+			;
 	}
 #else
 	{
