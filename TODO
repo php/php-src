@@ -5,6 +5,8 @@ Zend
 ----
     * allow foreach ($array as $k => &$val) syntax. right now we can not 
 	  traverse an array without copying each element.
+    * create typedefs for all kinds of callback functions - this would make
+      casting easier. eg: zend_hash_apply(someht,(zend_apply_f) bla);
 
 global
 ------
@@ -41,13 +43,8 @@ ext/wddx
 --------
 	* implement wddx_packet_as_javascript(). (Andrei)
 
-ext/apache
---------
-    * all apache specific functions should be in sapi/apache
-
 ext/oci8
 --------
-    * map boolean value false to oracle NULL.
     * all OCIFetch*() functions should return 0 for no more data and false on error.
 
 ext/standard
