@@ -2,6 +2,8 @@ dnl $Id$
 
 sinclude(ext/mysql/libmysql/acinclude.m4)
 sinclude(ext/mysql/libmysql/mysql.m4)
+sinclude(libmysql/acinclude.m4)
+sinclude(libmysql/mysql.m4)
 
 AC_DEFUN(PHP_MYSQL_SOCK,[
   AC_MSG_CHECKING(for MySQL UNIX socket)
