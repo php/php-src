@@ -2990,6 +2990,11 @@ PHP_FUNCTION(nl2br)
 	
 	convert_to_string_ex(str);
 
+	/* bail out if the string is empty */
+	if (Z_STRLEN_PP(str) == 0) {
+		RETURN_EMPTY_STRING();
+	}
+	
 	/* Windows style line-endings */
 	tmp = php_str_to_str((*str)->value.str.val, (*str)->value.str.len, "\r\n", 2, "<br />\r\n", 8, &new_length);
 	if (new_length != (*str)->value.str.len)
