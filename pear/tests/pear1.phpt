@@ -18,22 +18,41 @@ class TestPEAR extends PEAR {
     }
 }
 
-print "test class TestPEAR\n";
+class Test2 extends PEAR {
+    function _Test2() {
+        print "This is the Test2 destructor\n";
+	$this->_PEAR();
+    }
+}
+
+class Test3 extends Test2 {
+}
+
+print "testing plain destructors\n";
 $o = new TestPEAR("test1");
 $p = new TestPEAR("test2");
-var_dump(get_class($o));
-var_dump(get_class($p));
+print "..\n";
+print "testing inherited destructors\n";
+$q = new Test3;
+
+print "..\n";
+print "script exiting...\n";
+print "..\n";
 
 ?>
 --GET--
 --POST--
 --EXPECT--
-test class TestPEAR
+testing plain destructors
 PEAR constructor called, class=testpear
 PEAR constructor called, class=testpear
-string(8) "testpear"
-string(8) "testpear"
+..
+testing inherited destructors
+..
+script exiting...
+..
 This is the TestPEAR(test1) destructor
 PEAR destructor called, class=testpear
 This is the TestPEAR(test2) destructor
 PEAR destructor called, class=testpear
+This is the Test2 destructor
