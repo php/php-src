@@ -4,7 +4,7 @@
 	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
 	".\zend_alloc.h"\
 	".\zend_compile.h"\
-	".\config.w32.h"\
+	".\zend_config.w32.h"\
 	".\zend_execute.h"\
 	".\zend_llist.h"\
 	".\zend_ptr_stack.h"\
@@ -17,7 +17,7 @@
 
 .\alloca.c : \
 	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
-	".\config.w32.h"\
+	".\zend_config.w32.h"\
 	".\zend.h"\
 	".\zend_errors.h"\
 	".\zend_hash.h"\
@@ -27,7 +27,7 @@
 	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
 	".\zend_alloc.h"\
 	".\zend_compile.h"\
-	".\config.w32.h"\
+	".\zend_config.w32.h"\
 	".\zend_execute.h"\
 	".\zend_llist.h"\
 	".\modules.h"\
@@ -46,7 +46,7 @@
 .\zend_constants.c : \
 	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
 	".\zend_alloc.h"\
-	".\config.w32.h"\
+	".\zend_config.w32.h"\
 	".\zend_constants.h"\
 	".\zend_operators.h"\
 	".\zend_variables.h"\
@@ -59,7 +59,7 @@
 	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
 	".\zend_alloc.h"\
 	".\zend_compile.h"\
-	".\config.w32.h"\
+	".\zend_config.w32.h"\
 	".\zend_constants.h"\
 	".\zend_execute.h"\
 	".\zend_llist.h"\
@@ -80,7 +80,7 @@
 	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
 	".\zend_alloc.h"\
 	".\zend_compile.h"\
-	".\config.w32.h"\
+	".\zend_config.w32.h"\
 	".\zend_execute.h"\
 	".\zend_highlight.h"\
 	".\zend_llist.h"\
@@ -96,7 +96,7 @@
 .\zend_llist.c : \
 	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
 	".\zend_alloc.h"\
-	".\config.w32.h"\
+	".\zend_config.w32.h"\
 	".\zend_llist.h"\
 	".\zend.h"\
 	".\zend_errors.h"\
@@ -107,7 +107,7 @@
 	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
 	".\zend_alloc.h"\
 	".\zend_compile.h"\
-	".\config.w32.h"\
+	".\zend_config.w32.h"\
 	".\zend_execute.h"\
 	".\zend_llist.h"\
 	".\modules.h"\
@@ -127,7 +127,7 @@
 	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
 	".\zend_alloc.h"\
 	".\zend_compile.h"\
-	".\config.w32.h"\
+	".\zend_config.w32.h"\
 	".\zend_execute.h"\
 	".\zend_llist.h"\
 	".\zend_operators.h"\
@@ -143,7 +143,7 @@
 .\zend_ptr_stack.c : \
 	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
 	".\zend_alloc.h"\
-	".\config.w32.h"\
+	".\zend_config.w32.h"\
 	".\zend_ptr_stack.h"\
 	".\zend.h"\
 	".\zend_errors.h"\
@@ -153,7 +153,7 @@
 .\zend_stack.c : \
 	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
 	".\zend_alloc.h"\
-	".\config.w32.h"\
+	".\zend_config.w32.h"\
 	".\zend_stack.h"\
 	".\zend.h"\
 	".\zend_errors.h"\
@@ -164,7 +164,7 @@
 	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
 	".\zend_alloc.h"\
 	".\zend_compile.h"\
-	".\config.w32.h"\
+	".\zend_config.w32.h"\
 	".\zend_constants.h"\
 	".\zend_execute.h"\
 	".\zend_llist.h"\
@@ -184,7 +184,7 @@
 .\zend.c : \
 	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
 	".\zend_alloc.h"\
-	".\config.w32.h"\
+	".\zend_config.w32.h"\
 	".\zend_operators.h"\
 	".\zend_variables.h"\
 	".\zend.h"\
@@ -196,7 +196,7 @@
 	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
 	".\zend_alloc.h"\
 	".\zend_compile.h"\
-	".\config.w32.h"\
+	".\zend_config.w32.h"\
 	".\zend_constants.h"\
 	".\zend_execute.h"\
 	".\zend_llist.h"\
@@ -216,7 +216,7 @@
 
 .\zend_hash.c : \
 	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
-	".\config.w32.h"\
+	".\zend_config.w32.h"\
 	".\zend.h"\
 	".\zend_errors.h"\
 	".\zend_hash.h"\
@@ -225,7 +225,7 @@
 .\zend_ini.c : \
 	"..\..\..\program files\microsoft visual studio\vc98\include\basetsd.h"\
 	".\zend_alloc.h"\
-	".\config.w32.h"\
+	".\zend_config.w32.h"\
 	".\zend.h"\
 	".\zend_errors.h"\
 	".\zend_hash.h"\
