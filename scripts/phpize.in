@@ -10,7 +10,7 @@ FILES="acinclude.m4 Makefile.global"
 CLEAN_FILES="$FILES *.lo *.la *.o .deps .libs/ build/ include/ modules/ install-sh \
     mkinstalldirs missing config.nice config.sub config.guess configure configure.in \
 	aclocal.m4 config.h config.h.in conftest* ltmain.sh libtool config.cache \
-	config.log config.status Makefile Makefile.fragments Makefile.objects"
+	config.log config.status Makefile Makefile.fragments Makefile.objects confdefs.h"
 
 case "$1" in 
   # Cleanup
