@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(mbstring, whether to enable multibyte string support,
-[  --disable-mbstring      Disable multibyte string support], yes)
+[  --enable-mbstring       Enable multibyte string support])
 
 if test "$PHP_MBSTRING" != "no"; then  
   AC_DEFINE(HAVE_MBSTRING,1,[whether to have multibyte string support])
@@ -36,7 +36,7 @@ fi
 
 
 PHP_ARG_ENABLE(mbregex, whether to enable multibyte regex support,
-[  --disable-mbregex       Disable multibyte regex support], yes, no)
+[  --enable-mbregex        Enable multibyte regex support], no, no)
 
 if test "$PHP_MBREGEX" != "no" ; then
   AC_DEFINE(HAVE_MBREGEX, 1, [whether to have multibyte regex support])
