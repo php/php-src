@@ -330,7 +330,6 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 {
 	char buffer[1024];
 	int size = 0;
-	va_list args;
 	ELS_FETCH();
 	PLS_FETCH();
 
@@ -366,9 +365,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 
 		/* get include file name */
 		if (PG(log_errors) || PG(display_errors) || (!module_initialized)) {
-			args = orig_args;
-			size = vsnprintf(buffer, sizeof(buffer) - 1, format, args);
-			va_end(args);
+			size = vsnprintf(buffer, sizeof(buffer) - 1, format, orig_args);
+			va_end(orig_args);
+			
 			buffer[sizeof(buffer) - 1] = 0;
 
 			if (!module_initialized || PG(log_errors)) {
@@ -442,9 +441,8 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	if (PG(track_errors) && EG(active_symbol_table)) {
 		pval *tmp;
 
-		args = orig_args;
-		size = vsnprintf(buffer, sizeof(buffer) - 1, format, args);
-		va_end(args);
+		size = vsnprintf(buffer, sizeof(buffer) - 1, format, orig_args);
+		va_end(orig_args);
 
 		buffer[sizeof(buffer) - 1] = 0;
 
