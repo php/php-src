@@ -1,3 +1,17 @@
+2004-09-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_operators.h:
+      MFH: Fixed a bug causing ".123" * "90" and alike to return a 0.
+
+    * (PHP_5_0)
+      zend_operators.h:
+      Fixed a bug causing ".123" * "90" and alike to return a 0.
+
+2004-09-15  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_config.w32.h:
+      - Windows support strcoll too.
+
 2004-09-13  Stanislav Malyshev  <stas@zend.com>
 
     * zend_execute.c:
