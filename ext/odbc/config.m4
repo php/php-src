@@ -1,9 +1,3 @@
-dnl ODBC_INCDIR
-dnl ODBC_INCLUDE
-dnl ODBC_LIBDIR
-dnl ODBC_LIBS
-dnl ODBC_LFLAGS
-
 dnl
 dnl Figure out which library file to link with for the Solid support.
 dnl
@@ -83,9 +77,12 @@ AC_ARG_WITH(adabas,
   if test "$withval" != "no"; then
     AC_ADD_INCLUDE($withval/incl)
     AC_ADD_LIBPATH($withval/lib)
-    ODBC_OBJS="${ODBC_LIBDIR}/odbclib.a"
-    PHP_SUBST(ODBC_OBJS)
-    AC_ADD_LIBRARY_WITH_PATH(php_odbc, $abs_builddir/ext/odbc)
+    ODBC_OBJS="$withval/lib/odbclib.a"
+    ODBC_LIB="$abs_builddir/ext/odbc/libodbc_adabas.a"
+    $srcdir/build/shtool mkdir -f -p ext/odbc
+    rm -f "$ODBC_LIB"
+    cp "$ODBC_OBJS" "$ODBC_LIB"
+    AC_ADD_LIBRARY_WITH_PATH(odbc_adabas, $abs_builddir/ext/odbc)
     AC_ADD_LIBRARY(sqlrte)
     AC_ADD_LIBRARY(sqlptc)
     ODBC_TYPE=adabas
@@ -258,11 +255,8 @@ AC_ARG_WITH(iodbc,
     withval=/usr/local
   fi
   if test "$withval" != "no"; then
-    ODBC_INCDIR=$withval/include
-    ODBC_LIBDIR=$withval/lib
-    ODBC_LFLAGS=-L$ODBC_LIBDIR
-    ODBC_INCLUDE=-I$ODBC_INCDIR
-    ODBC_LIBS=-liodbc
+    AC_ADD_LIBRARY_WITH_PATH(iodbc, $withval/lib)
+    AC_ADD_INCLUDE($withval/include)
     ODBC_TYPE=iodbc
     AC_DEFINE(HAVE_IODBC,1,[ ])
     AC_MSG_RESULT(yes)
@@ -387,7 +381,7 @@ AC_ARG_WITH(dbmaker,
 ])
 fi
 
-if test -n "$ODBC_TYPE" && test -n "$ODBC_INCLUDE"; then
+if test -n "$ODBC_TYPE"; then
   INCLUDES="$INCLUDES $ODBC_INCLUDE"
   EXTRA_LIBS="$EXTRA_LIBS $ODBC_LFLAGS $ODBC_LIBS"
   AC_DEFINE(HAVE_UODBC,1,[ ])
