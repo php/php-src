@@ -566,16 +566,9 @@ int zendlex(znode *zendlval CLS_DC);
 	}
 
 #define PZVAL_IS_REF(z)		((z)->EA.is_ref)
-#define PZVAL_IS_LOCKED(z)	((z)->EA.locks>0)
 
-#if 0
-#define PZVAL_LOCK(z)	(z)->EA.locks++
-#define PZVAL_UNLOCK(z)	(z)->EA.locks--
-#define SELECTIVE_PZVAL_LOCK(pzv, pzn)		if (!((pzn)->u.EA.type & EXT_TYPE_UNUSED)) { PZVAL_LOCK(pzv); }
-#else
 #define PZVAL_LOCK(z)	((z)->refcount++)
 #define PZVAL_UNLOCK(z)	((z)->refcount--)
 #define SELECTIVE_PZVAL_LOCK(pzv, pzn)		if (!((pzn)->u.EA.type & EXT_TYPE_UNUSED)) { PZVAL_LOCK(pzv); }
-#endif
 
 #endif /* _COMPILE_H */

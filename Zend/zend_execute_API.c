@@ -85,11 +85,9 @@ void init_executor(CLS_D ELS_DC)
 	var_uninit(&EG(error_zval));
 	EG(uninitialized_zval).refcount = 1;
 	EG(uninitialized_zval).EA.is_ref=0;
-	EG(uninitialized_zval).EA.locks = 0;
 	EG(uninitialized_zval_ptr)=&EG(uninitialized_zval);
 	EG(error_zval).refcount = 1;
 	EG(error_zval).EA.is_ref=0;
-	EG(error_zval).EA.locks = 0;
 	EG(error_zval_ptr)=&EG(error_zval);
 	EG(destroying_function_symbol_table) = 0;
 	zend_ptr_stack_init(&EG(arg_types_stack));
@@ -205,8 +203,6 @@ ZEND_API inline void safe_free_zval_ptr(zval *p)
 
 ZEND_API int _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
 {
-	int locked = (*zval_ptr)->EA.locks;
-
 #if DEBUG_ZEND>=2
 	printf("Reducing refcount for %x (%x):  %d->%d\n", *zval_ptr, zval_ptr, (*zval_ptr)->refcount, (*zval_ptr)->refcount-1);
 #endif
@@ -215,17 +211,7 @@ ZEND_API int _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
 		zval_dtor(*zval_ptr);
 		safe_free_zval_ptr(*zval_ptr);
 	}
-	if (locked) {
-		ELS_FETCH();
-
-		if (EG(destroying_function_symbol_table)) {
-			return 1;
-		} else {
-			return 0; /* don't kill the container bucket */
-		}
-	} else {
-		return 1;
-	}
+	return 1;
 }
 
 
@@ -347,7 +333,6 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 				*new_zval = **params[i];
 				zval_copy_ctor(new_zval);
 				new_zval->refcount = 1;
-				new_zval->EA.locks = 0;
 				(*params[i])->refcount--;
 				*params[i] = new_zval;
 			}
@@ -489,7 +474,6 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 			}
 			value_ptr->refcount = 1;
 			value_ptr->EA.is_ref = 1;
-			value_ptr->EA.locks = 0;
 		}
 
 		*variable_ptr_ptr = value_ptr;

@@ -126,7 +126,6 @@ struct _zval_struct {
 	zvalue_value value;		/* value */
 	unsigned char type;	/* active type */
 	struct {
-		unsigned int locks:7;
 		unsigned int is_ref:1;
 	} EA;
 	short refcount;
@@ -268,8 +267,7 @@ extern zend_utility_values zend_uv;
 
 #define INIT_PZVAL(z)		\
 	(z)->refcount = 1;		\
-	(z)->EA.is_ref = 0;		\
-	(z)->EA.locks = 0;
+	(z)->EA.is_ref = 0;	
 
 #define MAKE_STD_ZVAL(zv)				 \
 	zv = (zval *) emalloc(sizeof(zval)); \
@@ -286,7 +284,6 @@ extern zend_utility_values zend_uv;
 			zval_copy_ctor(*(ppzv));						\
 			(*(ppzv))->refcount=1;							\
 			(*(ppzv))->EA.is_ref = 0;						\
-			(*(ppzv))->EA.locks = 0;						\
 		}													\
 	}
 
