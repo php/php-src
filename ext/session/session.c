@@ -929,10 +929,12 @@ static void php_session_start(PSLS_D)
 		php_session_send_cookie(PSLS_C);
 	
 	if (define_sid) {
-		char *buf;
+		smart_str var = {0};
 
-		buf = emalloc(strlen(PS(session_name)) + strlen(PS(id)) + 5);
-		sprintf(buf, "%s=%s", PS(session_name), PS(id));
+		smart_str_appends(&var, PS(session_name));
+		smart_str_appendc(&var, '=');
+		smart_str_appends(&var, PS(id));
+		smart_str_0(&var);
 		REGISTER_STRING_CONSTANT("SID", buf, 0);
 	} else
 		REGISTER_STRING_CONSTANT("SID", empty_string, 0);
