@@ -59,7 +59,7 @@ static int sapi_thttpd_ub_write(const char *str, uint str_length)
 		if (n <= 0) 
 			return n;
 
-		TG(hc)->bytes += n;
+		TG(hc)->bytes_sent += n;
 		str += n;
 		sent += n;
 		str_length -= n;
@@ -86,7 +86,7 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 		vec[n].iov_base = buf;
 		vec[n++].iov_len = len;
 		TG(hc)->status = SG(sapi_headers).http_response_code;
-		TG(hc)->bytes += len;
+		TG(hc)->bytes_sent += len;
 	}
 
 	h = zend_llist_get_first_ex(&sapi_headers->headers, &pos);
@@ -309,7 +309,7 @@ off_t thttpd_php_request(httpd_conn *hc)
 	TLS_FETCH();
 
 	TG(hc) = hc;
-	hc->bytes = 0;
+	hc->bytes_sent = 0;
 	
 	thttpd_request_ctor(TLS_C SLS_CC);
 
