@@ -431,16 +431,16 @@ static void _php_ibase_free_trans(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ *
 
 /* {{{ startup, shutdown and info functions */
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("ibase.allow_persistent", "1", PHP_INI_SYSTEM, OnUpdateLong, allow_persistent, zend_ibase_globals, ibase_globals)
+	STD_PHP_INI_BOOLEAN("ibase.allow_persistent", "1", PHP_INI_SYSTEM, OnUpdateBool, allow_persistent, zend_ibase_globals, ibase_globals)
 	STD_PHP_INI_ENTRY_EX("ibase.max_persistent", "-1", PHP_INI_SYSTEM, OnUpdateLong, max_persistent, zend_ibase_globals, ibase_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX("ibase.max_links", "-1", PHP_INI_SYSTEM, OnUpdateLong, max_links, zend_ibase_globals, ibase_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY("ibase.default_db", NULL, PHP_INI_SYSTEM, OnUpdateString, default_db, zend_ibase_globals, ibase_globals)
 	STD_PHP_INI_ENTRY("ibase.default_user", NULL, PHP_INI_ALL, OnUpdateString, default_user, zend_ibase_globals, ibase_globals)
 	STD_PHP_INI_ENTRY("ibase.default_password", NULL, PHP_INI_ALL, OnUpdateString, default_password, zend_ibase_globals, ibase_globals)
 	STD_PHP_INI_ENTRY("ibase.default_charset", NULL, PHP_INI_ALL, OnUpdateString, default_charset, zend_ibase_globals, ibase_globals)
-	STD_PHP_INI_ENTRY("ibase.timestampformat", "%m/%d/%Y %H:%M:%S", PHP_INI_ALL, OnUpdateString, cfg_timestampformat, zend_ibase_globals, ibase_globals)
-	STD_PHP_INI_ENTRY("ibase.dateformat", "%m/%d/%Y", PHP_INI_ALL, OnUpdateString, cfg_dateformat, zend_ibase_globals, ibase_globals)
-	STD_PHP_INI_ENTRY("ibase.timeformat", "%H:%M:%S", PHP_INI_ALL, OnUpdateString, cfg_timeformat, zend_ibase_globals, ibase_globals)
+	STD_PHP_INI_ENTRY("ibase.timestampformat", IB_DEF_DATE_FMT " " IB_DEF_TIME_FMT, PHP_INI_ALL, OnUpdateString, cfg_timestampformat, zend_ibase_globals, ibase_globals)
+	STD_PHP_INI_ENTRY("ibase.dateformat", IB_DEF_DATE_FMT, PHP_INI_ALL, OnUpdateString, cfg_dateformat, zend_ibase_globals, ibase_globals)
+	STD_PHP_INI_ENTRY("ibase.timeformat", IB_DEF_TIME_FMT, PHP_INI_ALL, OnUpdateString, cfg_timeformat, zend_ibase_globals, ibase_globals)
 PHP_INI_END()
 
 static void php_ibase_init_globals(zend_ibase_globals *ibase_globals)
@@ -628,10 +628,10 @@ PHP_MINFO_FUNCTION(ibase)
 }
 /* }}} */
 
-enum connect_args { DB = 0, USER = 1, PASS = 2, CSET = 3, ROLE = 4, BUF = 0, DLECT = 1 };
+enum connect_args { DB = 0, USER = 1, PASS = 2, CSET = 3, ROLE = 4, BUF = 0, DLECT = 1, SYNC = 2 };
 	
 static char const dpb_args[] = { 
-	0, isc_dpb_user_name, isc_dpb_password, isc_dpb_lc_ctype, isc_dpb_sql_role_name
+	0, isc_dpb_user_name, isc_dpb_password, isc_dpb_lc_ctype, isc_dpb_sql_role_name, 0
 };
 	
 int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db TSRMLS_DC)
@@ -650,6 +650,9 @@ int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db T
 		dpb += sprintf(dpb, "%c\2%c%c", isc_dpb_num_buffers, 
 			(char)(largs[BUF] >> 8), (char)(largs[BUF] & 0xff));
 	}
+	if (largs[SYNC]) {
+		dpb += sprintf(dpb, "%c\1%c", isc_dpb_force_write, largs[SYNC] == isc_spb_prp_wm_sync ? 1 : 0);
+	}
 	if (isc_attach_database(IB_STATUS, (short)len[DB], args[DB], db, (short)(dpb-dpb_buffer), dpb_buffer)) {
 		_php_ibase_error(TSRMLS_C);
 		return FAILURE;
@@ -662,7 +665,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 {
 	char hash[16], *args[] = { NULL, NULL, NULL, NULL, NULL };
 	int i, len[] = { 0, 0, 0, 0, 0 };
-	long largs[] = { 0, 0 };
+	long largs[] = { 0, 0, 0 };
 	PHP_MD5_CTX hash_context;
 	list_entry new_index_ptr, *le;
 	isc_db_handle db_handle = NULL;
@@ -670,9 +673,10 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 
 	RESET_ERRMSG;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sssslls",
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ssssllsl",
 			&args[DB], &len[DB], &args[USER], &len[USER], &args[PASS], &len[PASS],
-			&args[CSET], &len[CSET], &largs[BUF], &largs[DLECT], &args[ROLE], &len[ROLE])) {
+			&args[CSET], &len[CSET], &largs[BUF], &largs[DLECT], &args[ROLE], &len[ROLE],
+			&largs[SYNC])) {
 		RETURN_FALSE;
 	}
 	

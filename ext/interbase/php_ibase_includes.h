@@ -50,6 +50,9 @@ extern int le_link, le_plink, le_trans;
 #define IBASE_MSGSIZE 256
 #define MAX_ERRMSG (IBASE_MSGSIZE*2)
 
+#define IB_DEF_DATE_FMT "%Y-%m-%d"
+#define IB_DEF_TIME_FMT "%H:%M:%S"
+
 /* this value should never be > USHRT_MAX */
 #define IBASE_BLOB_SEG 4096
 
