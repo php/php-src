@@ -2324,6 +2324,10 @@ SOURCE=..\ext\com_dotnet\com_handlers.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\com_dotnet\com_iterator.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\com_dotnet\com_misc.c
 # End Source File
 # Begin Source File

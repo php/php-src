@@ -141,5 +141,8 @@ PHPAPI int php_com_import_typelib(ITypeLib *TL, int mode,
 		int codepage TSRMLS_DC);
 void php_com_typelibrary_dtor(void *pDest);
 
+/* com_iterator.c */
+zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object TSRMLS_DC);
+
 
 #endif
