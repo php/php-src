@@ -2,7 +2,7 @@
 <!DOCTYPE package SYSTEM "../pear/package.dtd">
 <package>
  <name>enchant</name>
- <summary>Date and Time Library</summary>
+ <summary>libenchant binder, support near all spelling tools</summary>
  <maintainers>
   <maintainer>
    <user>pajoye</user>
@@ -28,10 +28,11 @@ A plugin system allows to add custom spell support.
 see www.abisource.com/enchant/</description>
  <license>PHP</license>
  <release>
-  <state>alpha</state>
-  <version>0.1</version>
-  <date>2004-03-08</date>
-  <notes>Initial release</notes>
+  <state>beta</state>
+  <version>0.2.1</version>
+  <date>2004-03-11</date>
+  <notes>- Fix possible leak in suggestions result
+- Move to beta status</notes>
   <filelist>
    <file role="src" name="config.m4"/>
    <file role="src" name="config.w32"/>
@@ -51,6 +52,21 @@ see www.abisource.com/enchant/</description>
    <dep type="php" rel="ge" version="5" />
   </deps>
  </release>
+ <changelog>
+  <release>
+   <state>alpha</state>
+   <version>0.2.0</version>
+   <notes>- Add Ilia Alshanetsky as maintainer
+- Cleanup sources codes (ilia)
+- Add enchant_dict_quick_check (ilia)</notes>
+  </release>
+  <release>
+   <version>0.1</version>
+   <state>alpha</state>
+   <date>2003-03-08</date>
+   <notes>Initial release</notes>
+  </release>
+ </changelog>
 </package>
 <!--
 vim:et:ts=1:sw=1
