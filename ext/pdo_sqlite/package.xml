@@ -25,7 +25,7 @@
  <release>
   <state>beta</state>
   <version>0.2.1</version>
-  <date>2005-02-XX</date>
+  <date>2005-02-10</date>
 
   <notes>
     You need to install the PDO core module before you can make use of this one.
