@@ -237,7 +237,7 @@ PHPAPI php_stream *_php_stream_memory_open(int mode, char *buf, size_t length ST
 	if ((stream = php_stream_memory_create_rel(mode)) != NULL) {
 		ms = stream->abstract;
 		
-		if (mode == TEMP_STREAM_READONLY) {
+		if (mode == TEMP_STREAM_READONLY || mode == TEMP_STREAM_TAKE_BUFFER) {
 			/* use the buffer directly */
 			ms->data = buf;
 			ms->fsize = length;

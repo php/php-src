@@ -27,6 +27,7 @@
 
 #define TEMP_STREAM_DEFAULT  0
 #define TEMP_STREAM_READONLY 1
+#define TEMP_STREAM_TAKE_BUFFER 2
 
 #define php_stream_memory_create(mode) _php_stream_memory_create((mode) STREAMS_CC TSRMLS_CC)
 #define php_stream_memory_create_rel(mode) _php_stream_memory_create((mode) STREAMS_REL_CC TSRMLS_CC)
