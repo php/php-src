@@ -42,6 +42,10 @@ EXTENSION:           informix
 PRIMARY MAINTAINER:  Danny Heijl <Danny.Heijl@cevi.be>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
+EXTENSION:           interbase
+PRIMARY MAINTAINER:  Jouni Ahto <jah@mork.net>
+STATUS:              Odd Fixes
+--------------------------------------------------------------------------------
 EXTENSION:           java
 PRIMARY MAINTAINER:  Sam Ruby <rubys@us.ibm.com>
 STATUS:              Maintained
