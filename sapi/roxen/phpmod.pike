@@ -1,4 +1,4 @@
-/* Roxen PHP module based of the Roxen PHP module for Roxen 1.4. */
+/* Roxen PHP module based of the Roxen CGI module for Roxen 1.4. */
 
 #include <roxen.h>
 #include <module.h>
@@ -16,9 +16,10 @@ string trim( string what )
   what = reverse(what);
   return what;
 }
+
 //#define PHP_DEBUG
 #ifdef PHP_DEBUG
-#define DWERROR(X)	report_debug(X)
+#define DWERROR(X)	report_debug("Thr("+getpid()+"): "+X)
 #else /* !PHP_DEBUG */
 #define DWERROR(X)
 #endif /* PHP_DEBUG */
@@ -157,7 +158,7 @@ class PHPScript
     mapping options = ([
       "env":environment,
     ]);
-    thread_create(interpretor->run, command, options, this_object(), done);
+    interpretor->run(command, options, this_object(), done);
     mid->my_fd->set_close_callback(done);
     return this_object();
   }
