@@ -65,7 +65,6 @@
 #include "php_VARIANT.h"
 
 static ITypeLib *php_COM_find_typelib(char *search_string, int mode TSRMLS_DC);
-static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC);
 static int do_COM_offget(VARIANT *result, comval *array, pval *property, int cleanup TSRMLS_DC);
 static int do_COM_propget(VARIANT *var_result, comval *obj, pval *arg_property, int cleanup TSRMLS_DC);
 static void php_register_COM_class(TSRMLS_D);
@@ -1424,6 +1423,32 @@ PHPAPI int php_COM_set_property_handler(zend_property_reference *property_refere
 	return SUCCESS;
 }
 
+/* create an overloaded COM object from a dispatch pointer */
+PHPAPI zval *php_COM_object_from_dispatch(IDispatch *disp, zval *val TSRMLS_DC)
+{
+	comval *obj;
+	long rid;
+	zval *zobj;
+	
+	ALLOC_COM(obj);
+	C_DISPATCH(obj) = disp;
+	php_COM_set(obj, &C_DISPATCH(obj), FALSE TSRMLS_CC);
+	
+	/* resource */
+	rid = zend_list_insert(obj, IS_COM);
+
+	if (val == NULL)
+		MAKE_STD_ZVAL(val);
+	ZVAL_RESOURCE(val, rid);
+
+	/* now we want an object */
+	MAKE_STD_ZVAL(zobj);
+	object_init_ex(zobj, &COM_class_entry);
+	zend_hash_index_update(Z_OBJPROP_P(zobj), 0, &val, sizeof(zval *), NULL);	
+
+	return zobj;
+}
+
 
 PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
@@ -1672,7 +1697,7 @@ static ITypeLib *php_COM_find_typelib(char *search_string, int mode TSRMLS_DC)
 }
 
 
-static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
+PHPAPI int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 {
 	ITypeComp *TypeComp;
 	int i;
@@ -1800,11 +1825,18 @@ static void php_COM_init(int module_number TSRMLS_DC)
 	php_register_COM_class(TSRMLS_C);
 }
 
+PHPAPI ZEND_DECLARE_MODULE_GLOBALS(com)
+
+static void php_com_init_globals(zend_com_globals *com_globals)
+{
+}
 
 PHP_MINIT_FUNCTION(COM)
 {
+	ZEND_INIT_MODULE_GLOBALS(com, php_com_init_globals, NULL);
 	php_COM_init(module_number TSRMLS_CC);
 	php_VARIANT_init(module_number TSRMLS_CC);
+	php_COM_dispatch_init(module_number TSRMLS_CC);
 
 	REGISTER_LONG_CONSTANT("CLSCTX_INPROC_SERVER",  CLSCTX_INPROC_SERVER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CLSCTX_INPROC_HANDLER", CLSCTX_INPROC_HANDLER, CONST_CS | CONST_PERSISTENT);
@@ -1817,7 +1849,6 @@ PHP_MINIT_FUNCTION(COM)
 
 	return SUCCESS;
 }
-
 
 PHP_MSHUTDOWN_FUNCTION(COM)
 {
@@ -1835,7 +1866,7 @@ zend_module_entry COM_module_entry = {
     PHP_MSHUTDOWN(COM),
     NULL,
     NULL,
-    PHP_MINFO(COM),
+	PHP_MINFO(COM),
     NO_VERSION_YET,
     STANDARD_MODULE_PROPERTIES
 };
