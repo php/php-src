@@ -560,6 +560,12 @@ PHP_MINIT_FUNCTION(oci)
 	REGISTER_LONG_CONSTANT("OCI_D_LOB",OCI_DTYPE_LOB, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_D_ROWID",OCI_DTYPE_ROWID, CONST_CS | CONST_PERSISTENT);
 
+/* for OCIWriteTemporaryLob */
+#ifdef HAVE_OCI8_TEMP_LOB
+	REGISTER_LONG_CONSTANT("OCI_TEMP_CLOB",OCI_TEMP_CLOB, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OCI_TEMP_BLOB",OCI_TEMP_BLOB, CONST_CS | CONST_PERSISTENT);
+#endif
+
 	return SUCCESS;
 }
 
@@ -3432,17 +3438,18 @@ bail:
 /* }}} */
 
 #ifdef HAVE_OCI8_TEMP_LOB
-/* {{{ proto bool ociwritetemporarylob(string var)
+/* {{{ proto bool ociwritetemporarylob(string var [, int lob_type])
    Writes temporary blob */
 
 PHP_FUNCTION(ociwritetemporarylob)
 {
-	zval *id, **var;
+	zval *id, *var;
 	OCILobLocator *mylob;
 	oci_connection *connection;
 	oci_descriptor *descr;
 	ub4 offset = 1;
 	ub4 loblen;
+	int lob_type = OCI_TEMP_CLOB;
 
 	oci_debug ("oci_write_temporary_lob");
 
@@ -3462,11 +3469,10 @@ PHP_FUNCTION(ociwritetemporarylob)
 
 	connection = descr->conn;
 
-	if (zend_get_parameters_ex(1, &var) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() < 1) WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &var, &lob_type) == FAILURE) {
+		RETURN_FALSE;
 	}
-	/* is this convert needed - done again below */
-	convert_to_string_ex(var);
 
 	CALL_OCI_RETURN(connection->error, OCILobCreateTemporary(
 				connection->pServiceContext, 
@@ -3474,7 +3480,7 @@ PHP_FUNCTION(ociwritetemporarylob)
 				mylob, 
 				OCI_DEFAULT, 
 				OCI_DEFAULT, 
-				OCI_TEMP_CLOB, 
+				lob_type, 
 				OCI_ATTR_NOCACHE, 
 				OCI_DURATION_SESSION));
 
@@ -3496,8 +3502,8 @@ PHP_FUNCTION(ociwritetemporarylob)
 		RETURN_FALSE;
 	}
 
-	convert_to_string_ex(var);
-	loblen = Z_STRLEN_PP(var);
+	convert_to_string_ex(&var);
+	loblen = Z_STRLEN_P(var);
 	
 	if (loblen < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot save a lob that is less than 1 byte");
@@ -3510,7 +3516,7 @@ PHP_FUNCTION(ociwritetemporarylob)
 				mylob, 
 				(ub4 *) &loblen, 
 				(ub4) offset, 
-				(dvoid *) Z_STRVAL_PP(var), 
+				(dvoid *) Z_STRVAL_P(var), 
 				(ub4) loblen, 
 				OCI_ONE_PIECE, 
 				(dvoid *)0, 
