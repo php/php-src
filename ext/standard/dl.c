@@ -30,7 +30,7 @@
 #include "build-defs.h"
 #endif
 
-#ifdef HAVE_LIBDL
+#if defined(HAVE_LIBDL) || HAVE_MACH_O_DYLD_H
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -45,10 +45,10 @@
 #define GET_DL_ERROR()	php_win_err()
 #else
 #include <sys/param.h>
-#define GET_DL_ERROR()	dlerror()
+#define GET_DL_ERROR()	DL_ERROR()
 #endif
 
-#endif
+#endif /* defined(HAVE_LIBDL) || HAVE_MACH_O_DYLD_H */
 
 
 /* {{{ proto int dl(string extension_filename)
@@ -83,7 +83,7 @@ PHP_FUNCTION(dl)
 /* }}} */
 
 
-#ifdef HAVE_LIBDL
+#if defined(HAVE_LIBDL) || HAVE_MACH_O_DYLD_H
 
 #ifdef ZTS
 #define USING_ZTS 1
