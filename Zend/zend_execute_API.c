@@ -718,7 +718,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EG(This) = NULL;
 		if (calling_scope && !(EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)) {
 			int severity;
-			if (EX(function_state).function->common.fn_flags & (ZEND_ACC_CTOR|ZEND_ACC_DTOR|ZEND_ACC_CLONE)) {
+			if (EX(function_state).function->common.fn_flags & ZEND_ACC_DYNAMIC) {
 				severity = E_ERROR;
 			} else {
 				severity = E_STRICT;
