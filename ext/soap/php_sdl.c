@@ -98,16 +98,19 @@ zval *sdl_guess_convert_zval(encodeType enc, xmlNodePtr data)
 
 	type = enc.sdl_type;
 	if(type->encode) {
-		if(type->encode->details.type == IS_ARRAY ||
-			type->encode->details.type == SOAP_ENC_ARRAY) {
-			return to_zval_array(enc, data);
-		} else {
+//		if(type->encode->details.type == IS_ARRAY ||
+//			type->encode->details.type == SOAP_ENC_ARRAY) {
+//			return to_zval_array(enc, data);
+//		} else if (type->encode->details.type == IS_OBJECT ||
+//			type->encode->details.type == SOAP_ENC_OBJECT) {
+//			return to_zval_object(enc, data);
+//		} else {
 			if (memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
 				return master_to_zval(type->encode, data);
 			} else {
 				return master_to_zval(get_conversion(UNKNOWN_TYPE), data);
 			}
-		}
+//		}
 	} else if (type->elements) {
 		return to_zval_object(enc, data);
 	}	else {
@@ -122,10 +125,23 @@ xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval *data, int style)
 
 	type = enc.sdl_type;
 
+	if (type->restrictions) {
+		if (type->restrictions->enumeration) {
+		  if (Z_TYPE_P(data) == IS_STRING) {
+		    if (!zend_hash_exists(type->restrictions->enumeration,Z_STRVAL_P(data),Z_STRLEN_P(data)+1)) {
+		      php_error(E_WARNING,"Restriction: invalid enumeration value \"%s\".",Z_STRVAL_P(data));
+		    }
+		  }
+		}
+	}
+
 	if(type->encode) {
-		if(type->encode->details.type == IS_ARRAY ||
+		if (type->encode->details.type == IS_ARRAY ||
 			type->encode->details.type == SOAP_ENC_ARRAY) {
 			ret = sdl_to_xml_array(type, data, style);
+		} else if (type->encode->details.type == IS_OBJECT ||
+			type->encode->details.type == SOAP_ENC_OBJECT) {
+			ret = sdl_to_xml_object(type, data, style);
 		} else {
 			if (memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
 				ret = master_to_xml(type->encode, data, style);
@@ -611,6 +627,8 @@ sdlPtr load_wsdl(char *struri, sdlPtr parent)
 	}
 	else
 		tmpsdl = parent;
+
+	/* TODO: WSDL Caching */
 
 	wsdl = xmlParseFile(struri);
 	xmlCleanupParser();
@@ -1174,8 +1192,10 @@ void delete_type(void *data)
 		delete_restriction_var_int(&type->restrictions->maxLength);
 		delete_schema_restriction_var_char(&type->restrictions->whiteSpace);
 		delete_schema_restriction_var_char(&type->restrictions->pattern);
-		zend_hash_destroy(type->restrictions->enumeration);
-		free(type->restrictions->enumeration);
+		if (type->restrictions->enumeration) {
+			zend_hash_destroy(type->restrictions->enumeration);
+			free(type->restrictions->enumeration);
+		}
 		free(type->restrictions);
 	}
 	free(type);

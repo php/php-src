@@ -55,6 +55,46 @@ WSDL
 ? support for style "rpc"/"document" encoding
 ? support for "encoded"/"literal" encoding
 ? support for "nillable" and "nil"
+- support for user defined simple types
+  - restiction
+	  + base
+	  - minExclusive (for numeric, date types)
+		- minInclusive (for numeric, date types)
+		- maxExclusive (for numeric, date types)
+		- maxInclusive (for numeric, date types)
+		- totalDigits (for decimal)
+		- fractionDigits (for decimal)
+		- length (for string, anyURI, hexBinary, base64Binary and derived)
+		- minLength (for string, hexBinary, base64Binary and derived)
+		- maxLength (for string, hexBinary, base64Binary and derived)
+		- whiteSpace (preserve, replace [#x9,#xA,#xD=>#x20], collapse [replace+?])
+		- pattern
+	  ? enumeration
+	- list ???
+	- union ???
+- support for user defined complex types
+  - simpleContent extension   
+  ? base
+  - group
+  	- name
+  	- all
+  	- choice
+  	- sequence
+  - all
+  	- element
+  - choice
+  	- element
+  	- group
+  	- choice
+  	- sequence
+  	- any ???
+  - sequence
+  	- element
+  	- group
+  	- choice
+  	- sequence
+  	- any ???
+  - attribute
 - function/method overloading (test(int); test(string))
 - wsdl caching
 - wsdl auto generation
@@ -65,7 +105,7 @@ Error Handling
 
 Transport
 ---------
-? support for https://
++ support for https://
 - support for persistent HTTP connections (keep_alive)
 - support for HTTP compression (gzip,x-gzip,defalte)
 - support for HTTP athentication
