@@ -1598,7 +1598,6 @@ void zend_do_end_catch(znode *try_token TSRMLS_DC)
 void zend_do_throw(znode *expr TSRMLS_DC)
 {
 	zend_op *opline;
-	long throw_op_number = get_next_op_number(CG(active_op_array));
 	
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_THROW;
