@@ -114,7 +114,7 @@ $settings = array(
 		'safe_mode=0',
 		'output_buffering=Off',
 		'output_handler=',
-		'zlib.output_compression=',
+		'zlib.output_compression=Off',
 		'auto_prepend_file=',
 		'auto_append_file=',
 		'disable_functions='
@@ -511,7 +511,7 @@ TEST $file
 	// Default ini settings
 	$settings = array (
 		"output_handler=",
-		"zlib.output_compression=0",
+		"zlib.output_compression=Off",
 		"open_basedir=",
 		"disable_functions=",
 		"error_reporting=2047",
