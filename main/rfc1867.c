@@ -686,7 +686,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 {
 	char *boundary, *s=NULL, *boundary_end = NULL, *start_arr=NULL, *array_index=NULL;
 	char *temp_filename=NULL, *lbuf=NULL, *abuf=NULL;
-	int boundary_len=0, total_bytes=0, cancel_upload=0, is_arr_upload=0, array_len=0, max_file_size=0;
+	int boundary_len=0, total_bytes=0, cancel_upload=0, is_arr_upload=0, array_len=0, max_file_size=0, skip_upload=0;
 	zval *http_post_files=NULL;
 	zend_bool magic_quotes_gpc;
 	multipart_buffer *mbuff;
@@ -831,14 +831,23 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				SAFE_RETURN;
 			}
 
-			/* Handle file */
-			fp = php_open_temporary_file(PG(upload_tmp_dir), "php", &temp_filename TSRMLS_CC);
-			if (!fp) {
-				efree(param);
-				efree(filename);
-				sapi_module.sapi_error(E_WARNING, "File upload error - unable to create a temporary file");
-				SAFE_RETURN;
+			if (!skip_upload) {
+				/* Handle file */
+				fp = php_open_temporary_file(PG(upload_tmp_dir), "php", &temp_filename TSRMLS_CC);
+				if (!fp) {
+					sapi_module.sapi_error(E_WARNING, "File upload error - unable to create a temporary file");
+					skip_upload = 1;
+				}
 			}
+			if (skip_upload) {
+				if (param) {
+					efree(param);
+				}	
+				if (filename) {
+					efree(filename);
+				}
+				continue;
+			}	
 
 			total_bytes = 0;
 			cancel_upload = 0;
