@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Fixed buffer overruns in iptcembed(). (Thies)
 - Fixed a bug in ODBC error reporting (Zeev)
 - Added PHP_Logo_GUID() and Zend_Logo_GUID() functions, that return the GUIDs
   of the PHP and Zend logos used in phpinfo() (Zeev)
