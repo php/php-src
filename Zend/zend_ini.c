@@ -31,7 +31,7 @@ static HashTable *registered_zend_ini_directives;
 /*
  * hash_apply functions
  */
-static int zend_remove_ini_entries(zend_ini_entry *ini_entry, int *module_number)
+static int zend_remove_ini_entries(zend_ini_entry *ini_entry, int *module_number TSRMLS_DC)
 {
 	if (ini_entry->module_number == *module_number) {
 		return 1;
@@ -41,10 +41,8 @@ static int zend_remove_ini_entries(zend_ini_entry *ini_entry, int *module_number
 }
 
 
-static int zend_restore_ini_entry_cb(zend_ini_entry *ini_entry, int stage)
+static int zend_restore_ini_entry_cb(zend_ini_entry *ini_entry, int stage TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (ini_entry->modified) {
 		if (ini_entry->on_modify) {
 			ini_entry->on_modify(ini_entry, ini_entry->orig_value, ini_entry->orig_value_length, ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage TSRMLS_CC);
@@ -81,7 +79,7 @@ ZEND_API int zend_ini_shutdown(TSRMLS_D)
 
 ZEND_API int zend_ini_deactivate(TSRMLS_D)
 {
-	zend_hash_apply_with_argument(&EG(ini_directives), (int (*)(void *, void *)) zend_restore_ini_entry_cb, (void *) ZEND_INI_STAGE_DEACTIVATE);
+	zend_hash_apply_with_argument(&EG(ini_directives), (apply_func_arg_t) zend_restore_ini_entry_cb, (void *) ZEND_INI_STAGE_DEACTIVATE TSRMLS_CC);
 	return SUCCESS;
 }
 
@@ -159,14 +157,14 @@ ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_num
 
 ZEND_API void zend_unregister_ini_entries(int module_number)
 {
-	zend_hash_apply_with_argument(registered_zend_ini_directives, (int (*)(void *, void *)) zend_remove_ini_entries, (void *) &module_number);
+	TSRMLS_FETCH();
+
+	zend_hash_apply_with_argument(registered_zend_ini_directives, (apply_func_arg_t) zend_remove_ini_entries, (void *) &module_number TSRMLS_CC);
 }
 
 
-static int zend_ini_refresh_cache(zend_ini_entry *p, int stage)
+static int zend_ini_refresh_cache(zend_ini_entry *p, int stage TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (p->on_modify) {
 		p->on_modify(p, p->value, p->value_length, p->mh_arg1, p->mh_arg2, p->mh_arg3, stage TSRMLS_CC);
 	}
@@ -176,7 +174,7 @@ static int zend_ini_refresh_cache(zend_ini_entry *p, int stage)
 
 ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC)
 {
-	zend_hash_apply_with_argument(&EG(ini_directives), (int (*)(void *, void *)) zend_ini_refresh_cache, (void *)(long) stage);
+	zend_hash_apply_with_argument(&EG(ini_directives), (apply_func_arg_t) zend_ini_refresh_cache, (void *)(long) stage TSRMLS_CC);
 }
 
 
@@ -224,7 +222,7 @@ ZEND_API int zend_restore_ini_entry(char *name, uint name_length, int stage)
 		return FAILURE;
 	}
 
-	zend_restore_ini_entry_cb(ini_entry, stage);
+	zend_restore_ini_entry_cb(ini_entry, stage TSRMLS_CC);
 	return SUCCESS;
 }
 

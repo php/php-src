@@ -37,7 +37,7 @@ typedef ulong (*hash_func_t)(char *arKey, uint nKeyLength);
 typedef int  (*compare_func_t)(const void *, const void *);
 typedef void (*sort_func_t)(void *, size_t, register size_t, compare_func_t);
 typedef void (*dtor_func_t)(void *pDest);
-typedef int (*apply_func_t)(void *pDest);
+typedef int (*apply_func_t)(void *pDest TSRMLS_DC);
 typedef int (*apply_func_arg_t)(void *pDest, void *argument);
 typedef void (*copy_ctor_func_t)(void *pElement);
 
@@ -116,8 +116,8 @@ typedef struct _zend_hash_key {
 typedef int (*apply_func_args_t)(void *pDest, int num_args, va_list args, zend_hash_key *hash_key);
 
 ZEND_API void zend_hash_graceful_destroy(HashTable *ht);
-ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func);
-ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void *);
+ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func TSRMLS_DC);
+ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void * TSRMLS_DC);
 ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, apply_func_args_t apply_func, int, ...);
 
 

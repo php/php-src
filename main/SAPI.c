@@ -496,17 +496,17 @@ SAPI_API int sapi_send_headers()
 
 				http_status_line.header = SG(sapi_headers).http_status_line;
 				http_status_line.header_len = strlen(SG(sapi_headers).http_status_line);
-				sapi_module.send_header(&http_status_line, SG(server_context));
+				sapi_module.send_header(&http_status_line, SG(server_context) TSRMLS_CC);
 			}
-			zend_llist_apply_with_argument(&SG(sapi_headers).headers, (void (*)(void *, void *)) sapi_module.send_header, SG(server_context));
+			zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t) sapi_module.send_header, SG(server_context) TSRMLS_CC);
 			if(SG(sapi_headers).send_default_content_type) {
 				sapi_header_struct default_header;
 
 				sapi_get_default_content_type_header(&default_header TSRMLS_CC);
-				sapi_module.send_header(&default_header, SG(server_context));
+				sapi_module.send_header(&default_header, SG(server_context) TSRMLS_CC);
 				sapi_free_header(&default_header);
 			}
-			sapi_module.send_header(NULL, SG(server_context));
+			sapi_module.send_header(NULL, SG(server_context) TSRMLS_CC);
 			ret = SUCCESS;
 			break;
 		case SAPI_HEADER_SEND_FAILED:

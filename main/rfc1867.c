@@ -83,7 +83,7 @@ static void register_http_post_files_variable_ex(char *var, zval *val, zval *htt
 }
 
 
-static int unlink_filename(char **filename)
+static int unlink_filename(char **filename TSRMLS_DC)
 {
 	VCWD_UNLINK(*filename);
 	return 0;
@@ -92,7 +92,7 @@ static int unlink_filename(char **filename)
 
 void destroy_uploaded_files_hash(TSRMLS_D)
 {
-	zend_hash_apply(SG(rfc1867_uploaded_files), (apply_func_t) unlink_filename);
+	zend_hash_apply(SG(rfc1867_uploaded_files), (apply_func_t) unlink_filename TSRMLS_CC);
 	zend_hash_destroy(SG(rfc1867_uploaded_files));
 	FREE_HASHTABLE(SG(rfc1867_uploaded_files));
 }

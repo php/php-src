@@ -459,7 +459,7 @@ static void init_request_info(TSRMLS_D)
 
 /* {{{ php_apache_alter_ini_entries
  */
-static int php_apache_alter_ini_entries(php_per_dir_entry *per_dir_entry)
+static int php_apache_alter_ini_entries(php_per_dir_entry *per_dir_entry TSRMLS_DC)
 {
 	zend_alter_ini_entry(per_dir_entry->key, per_dir_entry->key_length+1, per_dir_entry->value, per_dir_entry->value_length, per_dir_entry->type, PHP_INI_STAGE_ACTIVATE);
 	return 0;
@@ -493,8 +493,6 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 	int retval;
 	HashTable *per_dir_conf;
 	TSRMLS_FETCH();
-	TSRMLS_FETCH();
-	TSRMLS_FETCH();
 
 	if (AP(in_request)) {
 		zend_file_handle fh;
@@ -521,7 +519,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 
 		per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php4_module);
 		if (per_dir_conf) {
-			zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries);
+			zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
 		}
 
 		/* If PHP parser engine has been turned off with an "engine off"

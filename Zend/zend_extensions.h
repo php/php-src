@@ -110,7 +110,7 @@ ZEND_API int zend_register_extension(zend_extension *new_extension, DL_HANDLE ha
 void zend_append_version_info(zend_extension *extension);
 int zend_startup_extensions_mechanism(void);
 int zend_startup_extensions(void);
-void zend_shutdown_extensions(void);
+void zend_shutdown_extensions(TSRMLS_D);
 ZEND_API zend_extension *zend_get_extension(char *extension_name);
 
 #endif /* ZEND_EXTENSIONS_H */

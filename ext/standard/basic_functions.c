@@ -1801,10 +1801,9 @@ void user_tick_function_dtor(user_tick_function_entry *tick_function_entry)
 	efree(tick_function_entry->arguments);
 }
 
-static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_function_entry)
+static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_function_entry TSRMLS_DC)
 {
 	zval retval;
-	TSRMLS_FETCH();
 
 	if (call_user_function(EG(function_table), NULL, shutdown_function_entry->arguments[0], &retval, shutdown_function_entry->arg_count-1, shutdown_function_entry->arguments+1 TSRMLS_CC)==SUCCESS) {
 		zval_dtor(&retval);
@@ -1815,11 +1814,10 @@ static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_fun
 	return 0;
 }
 
-static void user_tick_function_call(user_tick_function_entry *tick_fe)
+static void user_tick_function_call(user_tick_function_entry *tick_fe TSRMLS_DC)
 {
 	zval retval;
 	zval *function = tick_fe->arguments[0];
-	TSRMLS_FETCH();
 
 	if (call_user_function(EG(function_table), NULL, function, &retval,
 						   tick_fe->arg_count - 1, tick_fe->arguments+1 TSRMLS_CC) == SUCCESS) {
@@ -1846,7 +1844,7 @@ static void run_user_tick_functions(int tick_count)
 {
 	TSRMLS_FETCH();
 
-	zend_llist_apply(BG(user_tick_functions), (llist_apply_func_t)user_tick_function_call);
+	zend_llist_apply(BG(user_tick_functions), (llist_apply_func_t) user_tick_function_call TSRMLS_CC);
 }
 
 static int user_tick_function_compare(user_tick_function_entry *tick_fe1,
@@ -1871,7 +1869,7 @@ void php_call_shutdown_functions(void)
 	TSRMLS_FETCH();
 
 	if (BG(user_shutdown_function_names)) zend_try {
-		zend_hash_apply(BG(user_shutdown_function_names), (apply_func_t) user_shutdown_function_call);
+		zend_hash_apply(BG(user_shutdown_function_names), (apply_func_t) user_shutdown_function_call TSRMLS_CC);
 		memcpy(&EG(bailout), &orig_bailout, sizeof(jmp_buf));
 		zend_hash_destroy(BG(user_shutdown_function_names));
 		efree(BG(user_shutdown_function_names));

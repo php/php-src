@@ -466,12 +466,11 @@ static zval *php_xpathobject_new(xmlXPathObjectPtr obj, int *found) {
 	return(wrapper);
 }
 
-void *php_xpath_get_context(zval *wrapper, int rsrc_type1, int rsrc_type2)
+void *php_xpath_get_context(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
 {
 	void *obj;
 	zval **handle;
 	int type;
-	TSRMLS_FETCH();
 					  
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
 		php_error(E_ERROR, "Wrapper is not an object");
@@ -546,12 +545,11 @@ static zval *php_xpathcontext_new(xmlXPathContextPtr obj, int *found) {
 	return(wrapper);
 }
 
-void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2)
+void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
 {
 	void *obj;
 	zval **handle;
 	int type;
-	TSRMLS_FETCH();
 				  
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
 		php_error(E_ERROR, "Wrapper is not an object");
@@ -878,7 +876,7 @@ PHP_FUNCTION(domxml_attr_name)
 	xmlAttrPtr attrp;
 	
 	id = getThis();
-	attrp = php_dom_get_object(id, le_domxmlattrp, 0);
+	attrp = php_dom_get_object(id, le_domxmlattrp, 0 TSRMLS_CC);
 		
 	RETURN_STRING((char *) (attrp->name), 1);
 }
@@ -892,7 +890,7 @@ PHP_FUNCTION(domxml_attr_value)
 	xmlAttrPtr attrp;
 	
 	id = getThis();
-	attrp = php_dom_get_object(id, le_domxmlattrp, 0);
+	attrp = php_dom_get_object(id, le_domxmlattrp, 0 TSRMLS_CC);
 		
 	RETURN_STRING((char *) xmlNodeGetContent((xmlNodePtr) attrp), 1);
 }
@@ -906,7 +904,7 @@ PHP_FUNCTION(domxml_attr_specified)
 	xmlAttrPtr attrp;
 	
 	id = getThis();
-	attrp = php_dom_get_object(id, le_domxmlattrp, 0);
+	attrp = php_dom_get_object(id, le_domxmlattrp, 0 TSRMLS_CC);
 		
 	RETURN_TRUE;
 }
@@ -923,7 +921,7 @@ PHP_FUNCTION(domxml_pi_target)
 	xmlNodePtr nodep;
 	
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlpip, 0);
+	nodep = php_dom_get_object(id, le_domxmlpip, 0 TSRMLS_CC);
 
 	RETURN_STRING((char *)nodep->name, 1);
 }
@@ -937,7 +935,7 @@ PHP_FUNCTION(domxml_pi_data)
 	xmlNodePtr nodep;
 	
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlpip, 0);
+	nodep = php_dom_get_object(id, le_domxmlpip, 0 TSRMLS_CC);
 
 	RETURN_STRING(xmlNodeGetContent(nodep), 1);
 }
@@ -954,7 +952,7 @@ PHP_FUNCTION(domxml_cdata_length)
 	xmlNodePtr nodep;
 	
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlcdatap, 0);
+	nodep = php_dom_get_object(id, le_domxmlcdatap, 0 TSRMLS_CC);
 		
 	RETURN_LONG(1);
 }
@@ -999,7 +997,7 @@ PHP_FUNCTION(domxml_node_name)
 	const char *str = NULL;
 	
 	id = getThis();
-	n = php_dom_get_object(id, le_domxmlnodep, 0);
+	n = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
 
   switch (n->type)
     {
@@ -1044,7 +1042,7 @@ PHP_FUNCTION(domxml_node_value)
 	char *str = NULL;
 	
 	id = getThis();
-	n = php_dom_get_object(id, le_domxmlnodep, 0);
+	n = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
 
 	if (!n) {
 		RETURN_FALSE;
@@ -1071,7 +1069,7 @@ PHP_FUNCTION(domxml_node_type)
 	xmlNode *n;
 	
 	id = getThis();
-	n = php_dom_get_object(id, le_domxmlnodep, 0);
+	n = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
 
 	if (!n) {
 		RETURN_FALSE;
@@ -1089,7 +1087,7 @@ PHP_FUNCTION(domxml_node_first_child)
 	int ret;
 	
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlnodep, 0);
+	nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
 
 	first = nodep->children;
 	if (!first) {
@@ -1112,7 +1110,7 @@ PHP_FUNCTION(domxml_node_last_child)
 	int ret;
 	
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlnodep, 0);
+	nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
 
 	last = nodep->last;
 	if (!last) {
@@ -1135,7 +1133,7 @@ PHP_FUNCTION(domxml_node_next_sibling)
 	int ret;
 	
 	id = getThis();
-	if(NULL == (nodep = php_dom_get_object(id, le_domxmlnodep, 0)))
+	if(NULL == (nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC)))
 		RETURN_FALSE;
 
 	first = nodep->next;
@@ -1159,7 +1157,7 @@ PHP_FUNCTION(domxml_node_previous_sibling)
 	int ret;
 	
 	id = getThis();
-	if(NULL == (nodep = php_dom_get_object(id, le_domxmlnodep, 0)))
+	if(NULL == (nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC)))
 		RETURN_FALSE;
 
 	first = nodep->prev;
@@ -1184,7 +1182,7 @@ PHP_FUNCTION(domxml_node_owner_document)
 	int ret;
 	
 	id = getThis();
-	if(NULL == (nodep = php_dom_get_object(id, le_domxmlnodep, 0)))
+	if(NULL == (nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC)))
 		RETURN_FALSE;
 
 	docp = nodep->doc;
@@ -1207,7 +1205,7 @@ PHP_FUNCTION(domxml_node_has_child_nodes)
 	xmlNode *nodep;
 	
 	id = getThis();
-	if(NULL == (nodep = php_dom_get_object(id, le_domxmlnodep, 0)))
+	if(NULL == (nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC)))
 		RETURN_FALSE;
 
 	if (nodep->children) {
@@ -1226,7 +1224,7 @@ PHP_FUNCTION(domxml_node_has_attributes)
 	xmlNode *nodep;
 	
 	id = getThis();
-	if(NULL == (nodep = php_dom_get_object(id, le_domxmlnodep, 0)))
+	if(NULL == (nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC)))
 		RETURN_FALSE;
 
 	if(nodep->type != XML_ELEMENT_NODE)
@@ -1249,7 +1247,7 @@ PHP_FUNCTION(domxml_node_prefix)
  	xmlNsPtr	ns;
 	
 	id = getThis();
-	if(NULL == (nodep = php_dom_get_object(id, le_domxmlnodep, 0)))
+	if(NULL == (nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC)))
 		RETURN_FALSE;
 
 	ns = nodep->ns;
@@ -1274,7 +1272,7 @@ PHP_FUNCTION(domxml_node_parent)
 	int ret;
 	
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlnodep, 0);
+	nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
 
 	last = nodep->parent;
 	if (!last) {
@@ -1296,7 +1294,7 @@ PHP_FUNCTION(domxml_node_children)
 	int ret;
 	
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlnodep, le_domxmldocp);
+	nodep = php_dom_get_object(id, le_domxmlnodep, le_domxmldocp TSRMLS_CC);
 
 	/* Even if the nodep is a XML_DOCUMENT_NODE the type is at the
 	   same position.
@@ -1330,7 +1328,7 @@ PHP_FUNCTION(domxml_node_unlink_node)
 	xmlNode *nodep;
 	
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlnodep, 0);
+	nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
 
 	xmlUnlinkNode(nodep);
 	xmlFreeNode(nodep);
@@ -1351,8 +1349,8 @@ PHP_FUNCTION(domxml_node_add_child)
 		WRONG_PARAM_COUNT;
 	}
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlnodep, 0);
-	child = php_dom_get_object(node, le_domxmlnodep, 0);
+	nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
+	child = php_dom_get_object(node, le_domxmlnodep, 0 TSRMLS_CC);
 
 	if (!child || !nodep) {
 		RETURN_FALSE;
@@ -1378,8 +1376,8 @@ PHP_FUNCTION(domxml_node_append_child)
 		WRONG_PARAM_COUNT;
 	}
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlnodep, 0);
-	child = php_dom_get_object(node, le_domxmlnodep, 0);
+	nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
+	child = php_dom_get_object(node, le_domxmlnodep, 0 TSRMLS_CC);
 
 	if (!child || !nodep) {
 		RETURN_FALSE;
@@ -1405,9 +1403,9 @@ PHP_FUNCTION(domxml_node_insert_before)
 		WRONG_PARAM_COUNT;
 	}
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlnodep, 0);
-	child = php_dom_get_object(node, le_domxmlnodep, 0);
-	refp = php_dom_get_object(ref, le_domxmlnodep, 0);
+	nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
+	child = php_dom_get_object(node, le_domxmlnodep, 0 TSRMLS_CC);
+	refp = php_dom_get_object(ref, le_domxmlnodep, 0 TSRMLS_CC);
 
 	if (!child || !nodep || !refp) {
 		RETURN_FALSE;
@@ -1433,7 +1431,7 @@ PHP_FUNCTION(domxml_node_set_name)
 	}
 
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlnodep, 0);
+	nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
 	convert_to_string(name);
 
 	if(name->value.str.len)
@@ -1454,7 +1452,7 @@ PHP_FUNCTION(domxml_node_attributes)
 #endif
 	
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlnodep, 0);
+	nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
 
 	if(node_attributes(&attrs, nodep) < 0)
 		RETURN_FALSE;
@@ -1492,7 +1490,7 @@ PHP_FUNCTION(domxml_node_new_child)
 		WRONG_PARAM_COUNT;
 	}
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlnodep, 0);
+	nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
 
 	convert_to_string(name);
 	convert_to_string(content);
@@ -1523,7 +1521,7 @@ PHP_FUNCTION(domxml_node_set_content)
 	}
 
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlnodep, 0);
+	nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
 	convert_to_string(content);
 
 	if(content->value.str.len)
@@ -1548,7 +1546,7 @@ PHP_FUNCTION(domxml_notation_public_id)
 	xmlNotationPtr nodep;
 	
 	id = getThis();
-	nodep = (xmlNotationPtr) php_dom_get_object(id, le_domxmlnotationp, 0);
+	nodep = (xmlNotationPtr) php_dom_get_object(id, le_domxmlnotationp, 0 TSRMLS_CC);
 
 	RETURN_STRING((char *) (nodep->PublicID), 1);
 }
@@ -1562,7 +1560,7 @@ PHP_FUNCTION(domxml_notation_system_id)
 	xmlNotationPtr nodep;
 	
 	id = getThis();
-	nodep = (xmlNotationPtr) php_dom_get_object(id, le_domxmlnotationp, 0);
+	nodep = (xmlNotationPtr) php_dom_get_object(id, le_domxmlnotationp, 0 TSRMLS_CC);
 
 	RETURN_STRING((char *) (nodep->SystemID), 1);
 }
@@ -1604,7 +1602,7 @@ PHP_FUNCTION(domxml_elem_tagname)
 	xmlNode *nodep;
 	
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlelementp, 0);
+	nodep = php_dom_get_object(id, le_domxmlelementp, 0 TSRMLS_CC);
 
 	RETURN_STRING((char *) (nodep->name), 1);
 }
@@ -1620,7 +1618,7 @@ PHP_FUNCTION(domxml_elem_get_attribute)
 	
 	if ((ZEND_NUM_ARGS() == 1) && getParameters(ht, 1, &arg1) == SUCCESS) {
 		id = getThis();
-		nodep = php_dom_get_object(id, le_domxmlelementp, 0);
+		nodep = php_dom_get_object(id, le_domxmlelementp, 0 TSRMLS_CC);
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -1647,7 +1645,7 @@ PHP_FUNCTION(domxml_elem_set_attribute)
 
 	if ((ZEND_NUM_ARGS() == 2) && getParameters(ht, 2, &arg1, &arg2) == SUCCESS) {
 		id = getThis();
-		nodep = php_dom_get_object(id, le_domxmlelementp, 0);
+		nodep = php_dom_get_object(id, le_domxmlelementp, 0 TSRMLS_CC);
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -1676,7 +1674,7 @@ PHP_FUNCTION(domxml_elem_remove_attribute)
 	
 	if ((ZEND_NUM_ARGS() == 1) && getParameters(ht, 1, &arg1) == SUCCESS) {
 		id = getThis();
-		nodep = php_dom_get_object(id, le_domxmlelementp, 0);
+		nodep = php_dom_get_object(id, le_domxmlelementp, 0 TSRMLS_CC);
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -1697,7 +1695,7 @@ PHP_FUNCTION(domxml_elem_get_attribute_node)
 	
 	if ((ZEND_NUM_ARGS() == 1) && getParameters(ht, 1, &arg1) == SUCCESS) {
 		id = getThis();
-		nodep = php_dom_get_object(id, le_domxmlelementp, 0);
+		nodep = php_dom_get_object(id, le_domxmlelementp, 0 TSRMLS_CC);
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -1720,8 +1718,8 @@ PHP_FUNCTION(domxml_elem_set_attribute_node)
 
 	if ((ZEND_NUM_ARGS() == 1) && getParameters(ht, 1, &arg1) == SUCCESS) {
 		id = getThis();
-		nodep = php_dom_get_object(id, le_domxmlelementp, 0);
-		attrp = php_dom_get_object(arg1, le_domxmlattrp, 0);
+		nodep = php_dom_get_object(id, le_domxmlelementp, 0 TSRMLS_CC);
+		attrp = php_dom_get_object(arg1, le_domxmlattrp, 0 TSRMLS_CC);
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -1741,7 +1739,7 @@ PHP_FUNCTION(domxml_elem_get_element_by_tagname)
 	
 	if ((ZEND_NUM_ARGS() == 1) && getParameters(ht, 1, &arg1) == SUCCESS) {
 		id = getThis();
-		nodep = php_dom_get_object(id, le_domxmlelementp, 0);
+		nodep = php_dom_get_object(id, le_domxmlelementp, 0 TSRMLS_CC);
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -1764,7 +1762,7 @@ PHP_FUNCTION(domxml_doctype_name)
 	xmlNodePtr attrp;
 	
 	id = getThis();
-	attrp = php_dom_get_object(id, le_domxmldoctypep, 0);
+	attrp = php_dom_get_object(id, le_domxmldoctypep, 0 TSRMLS_CC);
 		
 	RETURN_STRING((char *) (attrp->name), 1);
 }
@@ -1784,7 +1782,7 @@ PHP_FUNCTION(domxml_doc_doctype)
 	int ret;
 	
 	id = getThis();
-	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0))) {
+	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0 TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
 
@@ -1804,7 +1802,7 @@ PHP_FUNCTION(domxml_doc_implementation)
 	xmlDocPtr docp;
 	
 	id = getThis();
-	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0))) {
+	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0 TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
 
@@ -1832,7 +1830,7 @@ PHP_FUNCTION(domxml_doc_document_element)
 		}
 	}
 
-	docp = php_dom_get_object(id, le_domxmldocp, 0);
+	docp = php_dom_get_object(id, le_domxmldocp, 0 TSRMLS_CC);
 
 	node = docp->children;
 	if (!node) {
@@ -1863,7 +1861,7 @@ PHP_FUNCTION(domxml_doc_create_element)
 	int ret;
 	
 	id = getThis();
-	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0))) {
+	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0 TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
 
@@ -1895,7 +1893,7 @@ PHP_FUNCTION(domxml_doc_create_text_node)
 	int ret;
 	
 	id = getThis();
-	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0))) {
+	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0 TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
 
@@ -1927,7 +1925,7 @@ PHP_FUNCTION(domxml_doc_create_comment)
 	int ret;
 	
 	id = getThis();
-	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0))) {
+	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0 TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
 
@@ -1959,7 +1957,7 @@ PHP_FUNCTION(domxml_doc_create_attribute)
 	int ret;
 	
 	id = getThis();
-	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0))) {
+	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0 TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
 
@@ -1992,7 +1990,7 @@ PHP_FUNCTION(domxml_doc_create_processing_instruction)
 	int ret;
 	
 	id = getThis();
-	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0))) {
+	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0 TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
 
@@ -2025,14 +2023,14 @@ PHP_FUNCTION(domxml_doc_imported_node)
 	int ret;
 	
 	id = getThis();
-	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0))) {
+	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0 TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	srcnode =  php_dom_get_object(arg1, le_domxmlnodep, 0);
+	srcnode =  php_dom_get_object(arg1, le_domxmlnodep, 0 TSRMLS_CC);
 	if(!srcnode)
 		RETURN_FALSE;
 
@@ -2061,7 +2059,7 @@ PHP_FUNCTION(domxml_intdtd)
 	int ret;
 	
 	id = getThis();
-	docp = php_dom_get_object(id, le_domxmldocp, 0);
+	docp = php_dom_get_object(id, le_domxmldocp, 0 TSRMLS_CC);
 
 	dtd = xmlGetIntSubset(docp);
 	if (!dtd) {
@@ -2084,7 +2082,7 @@ PHP_FUNCTION(domxml_dumpmem)
 	int size;
 	
 	id = getThis();
-	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0))) {
+	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0 TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
 
@@ -2182,7 +2180,7 @@ PHP_FUNCTION(domxml_node_text_concat)
 	}
 
 	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlnodep, 0);
+	nodep = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
 	convert_to_string(content);
 
 	if(content->value.str.len)
@@ -2206,7 +2204,7 @@ PHP_FUNCTION(domxml_add_root)
 	}
 
 	id = getThis();
-	docp = php_dom_get_object(id, le_domxmldocp, 0);
+	docp = php_dom_get_object(id, le_domxmldocp, 0 TSRMLS_CC);
 	convert_to_string(name);
 
 	nodep = xmlNewDocNode(docp, NULL, name->value.str.val, NULL);
@@ -2433,7 +2431,7 @@ static void php_xpathptr_new_context(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	int ret;
 	
 	id = getThis();
-	docp = php_dom_get_object(id, le_domxmldocp, 0);
+	docp = php_dom_get_object(id, le_domxmldocp, 0 TSRMLS_CC);
 		
 #if defined(LIBXML_XPTR_ENABLED)
 	if(mode == PHP_XPTR)
@@ -2477,7 +2475,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 	}
 
 	id = getThis();
-	ctxp = php_xpath_get_context(id, le_xpathctxp, 0);
+	ctxp = php_xpath_get_context(id, le_xpathctxp, 0 TSRMLS_CC);
 	convert_to_string(str);
 
 #if defined(LIBXML_XPTR_ENABLED)

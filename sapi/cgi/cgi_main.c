@@ -82,7 +82,8 @@ extern int ap_php_optind;
 
 #define OPTSTRING "aCc:d:ef:g:hilmnqs?vz:"
 
-static int _print_module_info ( zend_module_entry *module, void *arg ) {
+static int _print_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
+{
 	php_printf("%s\n", module->name);
 	return 0;
 }
@@ -135,7 +136,7 @@ static void sapi_cgibin_flush(void *server_context)
 }
 
 
-static void sapi_cgi_send_header(sapi_header_struct *sapi_header, void *server_context)
+static void sapi_cgi_send_header(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)
 {
 	if (sapi_header) {
 		PHPWRITE_H(sapi_header->header, sapi_header->header_len);
@@ -344,10 +345,9 @@ static void define_command_line_ini_entry(char *arg)
 }
 
 
-static void php_register_command_line_global_vars(char **arg)
+static void php_register_command_line_global_vars(char **arg TSRMLS_DC)
 {
 	char *var, *val;
-	TSRMLS_FETCH();
 
 	var = *arg;
 	val = strchr(var, '=');
@@ -585,9 +585,10 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					SG(headers_sent) = 1;
 					php_printf("Running PHP %s\n%s\n", PHP_VERSION , get_zend_version());
 					php_printf("[PHP Modules]\n");
-					zend_hash_apply_with_argument(&module_registry, (int (*)(void *, void *)) _print_module_info, NULL);
-					php_printf("\n[Zend Modules]\n");			
-					zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) _print_module_info, NULL);
+					zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) _print_module_info, NULL TSRMLS_CC);
+					php_printf("\n[Zend Modules]\n");
+					/* zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) _print_module_info, NULL TSRMLS_CC); */
+					php_printf("Not Implemented\n");
 					php_printf("\n");
 					php_end_ob_buffers(1);
 					exit(1);
@@ -681,7 +682,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		file_handle.free_filename = 0;
 
 		/* This actually destructs the elements of the list - ugly hack */
-		zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars);
+		zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars TSRMLS_CC);
 		zend_llist_destroy(&global_vars);
 
 		if (!cgi) {

@@ -77,7 +77,7 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 
 /* {{{ php_ini_displayer
  */
-static int php_ini_displayer(zend_ini_entry *ini_entry, int module_number)
+static int php_ini_displayer(zend_ini_entry *ini_entry, int module_number TSRMLS_DC)
 {
 	if (ini_entry->module_number != module_number) {
 		return 0;
@@ -109,7 +109,7 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
 	}
 	php_info_print_table_start();
 	php_info_print_table_header(3, "Directive", "Local Value", "Master Value");
-	zend_hash_apply_with_argument(&EG(ini_directives), (apply_func_arg_t) php_ini_displayer, (void *) (long) module_number);
+	zend_hash_apply_with_argument(&EG(ini_directives), (apply_func_arg_t) php_ini_displayer, (void *) (long) module_number TSRMLS_CC);
 	php_info_print_table_end();
 }
 /* }}} */
@@ -176,7 +176,7 @@ static void php_config_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 
 /* {{{ php_load_function_extension_cb
  */
-static void php_load_function_extension_cb(void *arg)
+static void php_load_function_extension_cb(void *arg TSRMLS_DC)
 {
 	zval *extension = (zval *) arg;
 	zval zval;
@@ -187,7 +187,7 @@ static void php_load_function_extension_cb(void *arg)
 
 /* {{{ php_load_zend_extension_cb
  */
-static void php_load_zend_extension_cb(void *arg)
+static void php_load_zend_extension_cb(void *arg TSRMLS_DC)
 {
 	zend_load_extension(*((char **) arg));
 }
@@ -294,10 +294,10 @@ int php_shutdown_config(void)
 
 /* {{{ php_ini_delayed_modules_startup
  */
-void php_ini_delayed_modules_startup(void)
+void php_ini_delayed_modules_startup(TSRMLS_D)
 {
-	zend_llist_apply(&extension_lists.engine, php_load_zend_extension_cb);
-	zend_llist_apply(&extension_lists.functions, php_load_function_extension_cb);
+	zend_llist_apply(&extension_lists.engine, php_load_zend_extension_cb TSRMLS_CC);
+	zend_llist_apply(&extension_lists.functions, php_load_function_extension_cb TSRMLS_CC);
 
 	zend_llist_destroy(&extension_lists.engine);
 	zend_llist_destroy(&extension_lists.functions);

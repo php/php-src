@@ -95,10 +95,8 @@ ZEND_DECLARE_MODULE_GLOBALS(sybase)
 #define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING, "Sybase:  A link to the server could not be established"); RETURN_FALSE; } }
 
 
-static int _clean_invalid_results(list_entry *le)
+static int _clean_invalid_results(list_entry *le TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (le->type == le_result) {
 		sybase_link *sybase_ptr = ((sybase_result *) le->ptr)->sybase_ptr;
 		
@@ -149,7 +147,7 @@ static void _close_sybase_link(zend_rsrc_list_entry *rsrc)
 
 	sybase_ptr->valid = 0;
 
-	zend_hash_apply(&EG(regular_list), (apply_func_t) _clean_invalid_results);
+	zend_hash_apply(&EG(regular_list), (apply_func_t) _clean_invalid_results TSRMLS_CC);
 
 	/* Non-persistent connections will always be connected or we wouldn't
 	 * get here, but since we want to check the death status anyway

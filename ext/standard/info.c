@@ -39,10 +39,9 @@ PHPAPI extern char *php_ini_opened_path;
 
 /* {{{ _display_module_info
  */
-static int _display_module_info(zend_module_entry *module, void *arg)
+static int _display_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 {
 	int show_info_func = *((int *) arg);
-	TSRMLS_FETCH();
 
 	if (show_info_func && module->info_func) {
 		php_printf("<h2 align=\"center\"><a name=\"module_%s\">%s</a></h2>\n", module->name, module->name);
@@ -256,12 +255,12 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		int show_info_func;
 
 		show_info_func = 1;
-		zend_hash_apply_with_argument(&module_registry, (int (*)(void *, void *)) _display_module_info, &show_info_func);
+		zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) _display_module_info, &show_info_func TSRMLS_CC);
 
 		SECTION("Additional Modules");
 		php_info_print_table_start();
 		show_info_func = 0;
-		zend_hash_apply_with_argument(&module_registry, (int (*)(void *, void *)) _display_module_info, &show_info_func);
+		zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) _display_module_info, &show_info_func TSRMLS_CC);
 		php_info_print_table_end();
 	}
 

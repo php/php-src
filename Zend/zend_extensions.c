@@ -114,7 +114,7 @@ int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
 }
 
 
-static void zend_extension_shutdown(zend_extension *extension)
+static void zend_extension_shutdown(zend_extension *extension TSRMLS_DC)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	if (extension->shutdown) {
@@ -153,9 +153,9 @@ int zend_startup_extensions()
 }
 
 
-void zend_shutdown_extensions()
+void zend_shutdown_extensions(TSRMLS_D)
 {
-	zend_llist_apply(&zend_extensions, (void (*)(void *)) zend_extension_shutdown);
+	zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_shutdown TSRMLS_CC);
 	zend_llist_destroy(&zend_extensions);
 }
 
@@ -170,7 +170,7 @@ void zend_extension_dtor(zend_extension *extension)
 }
 
 
-static void zend_extension_message_dispatcher(zend_extension *extension, int num_args, va_list args)
+static void zend_extension_message_dispatcher(zend_extension *extension, int num_args, va_list args TSRMLS_DC)
 {
 	int message;
 	void *arg;
@@ -186,7 +186,9 @@ static void zend_extension_message_dispatcher(zend_extension *extension, int num
 
 ZEND_API void zend_extension_dispatch_message(int message, void *arg)
 {
-	zend_llist_apply_with_arguments(&zend_extensions, (llist_apply_with_args_func_t) zend_extension_message_dispatcher, 2, message, arg);
+	TSRMLS_FETCH();
+
+	zend_llist_apply_with_arguments(&zend_extensions, (llist_apply_with_args_func_t) zend_extension_message_dispatcher TSRMLS_CC, 2, message, arg);
 }
 
 

@@ -683,7 +683,7 @@ ZEND_API void zend_hash_graceful_destroy(HashTable *ht)
  */
 
 
-ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func)
+ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func TSRMLS_DC)
 {
 	Bucket *p;
 
@@ -692,7 +692,7 @@ ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func)
 	HASH_PROTECT_RECURSION(ht);
 	p = ht->pListHead;
 	while (p != NULL) {
-		if (apply_func(p->pData)) {
+		if (apply_func(p->pData TSRMLS_CC)) {
 			p = zend_hash_apply_deleter(ht, p);
 		} else {
 			p = p->pListNext;
@@ -702,7 +702,7 @@ ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func)
 }
 
 
-ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void *argument)
+ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void *argument TSRMLS_DC)
 {
 	Bucket *p;
 
