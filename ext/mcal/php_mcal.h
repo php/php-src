@@ -10,7 +10,7 @@
 #endif
 
 /* Functions accessable to PHP */
-//extern zend_module_entry php_mcal_module_entry;
+/* extern zend_module_entry php_mcal_module_entry; */
 extern zend_module_entry php_mcal_module_entry;
 #define php_mcal_module_ptr &php_mcal_module_entry
 #define phpext_mcal_ptr php_mcal_module_ptr
