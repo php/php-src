@@ -367,9 +367,9 @@ void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var,
 void zend_do_end_catch(znode *try_token TSRMLS_DC);
 void zend_do_throw(znode *expr TSRMLS_DC);
 
-ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, HashTable *class_table, int compile_time);
-ZEND_API zend_class_entry *do_bind_class(zend_op *opline, HashTable *function_table, HashTable *class_table TSRMLS_DC);
-ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *function_table, HashTable *class_table, zend_class_entry *parent_ce TSRMLS_DC);
+ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, zend_bool compile_time);
+ZEND_API zend_class_entry *do_bind_class(zend_op *opline, HashTable *class_table, zend_bool compile_time TSRMLS_DC);
+ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time TSRMLS_DC);
 ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC);
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC);
 void zend_do_implements_interface(znode *interface_znode TSRMLS_DC);

@@ -1225,6 +1225,51 @@ ZEND_API void zend_clear_exception(TSRMLS_D)
 }
 
 
+#define MAX_ABSTRACT_INFO_CNT 3
+#define MAX_ABSTRACT_INFO_FMT "%s%s%s%s"
+#define DISPLAY_ABSTRACT_FN(idx) \
+	ai.afn[idx] ? ZEND_FN_SCOPE_NAME(ai.afn[idx]) : "", \
+	ai.afn[idx] ? "::" : "", \
+	ai.afn[idx] ? ai.afn[idx]->common.function_name : "", \
+	ai.afn[idx] && ai.afn[idx+1] ? ", " : (ai.afn[idx] && ai.cnt >= MAX_ABSTRACT_INFO_CNT ? ", ..." : "")
+
+typedef struct _zend_abstract_info {
+	zend_function *afn[MAX_ABSTRACT_INFO_CNT+1];
+	int cnt;
+} zend_abstract_info;
+
+
+static int zend_verify_abstract_class_function(zend_function *fn, zend_abstract_info *ai TSRMLS_DC)
+{
+	if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+		if (ai->cnt < MAX_ABSTRACT_INFO_CNT) {
+			ai->afn[ai->cnt] = fn;
+		}
+		ai->cnt++;
+	}
+	return 0;
+}
+
+
+void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC)
+{
+	zend_abstract_info ai;
+
+	if ((ce->ce_flags & ZEND_ACC_ABSTRACT) && !(ce->ce_flags & ZEND_ACC_ABSTRACT_CLASS)) {
+		memset(&ai, 0, sizeof(ai));
+
+		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) zend_verify_abstract_class_function, &ai TSRMLS_CC);
+		
+		zend_error(E_ERROR, "Class %s contains %d abstract methods and must therefore be declared abstract (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")", 
+			ce->name, ai.cnt, 
+			DISPLAY_ABSTRACT_FN(0),
+			DISPLAY_ABSTRACT_FN(1),
+			DISPLAY_ABSTRACT_FN(2)
+			);
+	}
+}
+
+
 /*
  * Local variables:
  * tab-width: 4

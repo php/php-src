@@ -145,7 +145,7 @@ ZEND_API void zend_timeout(int dummy);
 ZEND_API zend_class_entry *zend_fetch_class(char *class_name, uint class_name_len, int fetch_type TSRMLS_DC);
 void zend_throw_exception_internal(zval *exception TSRMLS_DC);
 ZEND_API void zend_clear_exception(TSRMLS_D);
-
+void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC);
 
 #ifdef ZEND_WIN32
 void zend_init_timeout_thread();
@@ -160,8 +160,6 @@ void zend_shutdown_timeout_thread();
 #define active_opline (*EG(opline_ptr))
 
 void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, zval **value_ptr_ptr, temp_variable *Ts TSRMLS_DC);
-
-#define IS_STRING_OFFSET 2
 
 /* The following tries to resolve the classname of a zval of type object.
  * Since it is slow it should be only used in error messages.
