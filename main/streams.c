@@ -136,16 +136,14 @@ PHP_RSHUTDOWN_FUNCTION(streams)
 
 PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream **stream TSRMLS_DC)
 {
-	list_entry *le;
+	zend_rsrc_list_entry *le;
 
 	if (zend_hash_find(&EG(persistent_list), (char*)persistent_id, strlen(persistent_id)+1, (void*) &le) == SUCCESS) {
 		if (Z_TYPE_P(le) == le_pstream) {
 			if (stream) {
 				*stream = (php_stream*)le->ptr;
-				if ((*stream)->rsrc_id == FAILURE) {
-					/* first access this request; give it a valid id */
-					(*stream)->rsrc_id = ZEND_REGISTER_RESOURCE(NULL, *stream, le_pstream);
-				}
+				le->refcount++;
+				(*stream)->rsrc_id = ZEND_REGISTER_RESOURCE(NULL, *stream, le_pstream);
 			}
 			return PHP_STREAM_PERSISTENT_SUCCESS;
 		}
@@ -242,14 +240,15 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 		ret->flags |= PHP_STREAM_FLAG_DETECT_EOL;
 
 	if (persistent_id) {
-		list_entry le;
+		zend_rsrc_list_entry le;
 
 		Z_TYPE(le) = le_pstream;
 		le.ptr = ret;
+		le.refcount = 0;
 
 		if (FAILURE == zend_hash_update(&EG(persistent_list), (char *)persistent_id,
 					strlen(persistent_id) + 1,
-					(void *)&le, sizeof(list_entry), NULL)) {
+					(void *)&le, sizeof(le), NULL)) {
 			
 			pefree(ret, 1);
 			return NULL;
