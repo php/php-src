@@ -425,7 +425,7 @@ function_entry basic_functions[] = {
 #endif
 
 #ifdef HAVE_NICE
-	PHP_FE(nice,														NULL)	
+	PHP_FE(proc_nice,														NULL)	
 #endif
 
 	PHP_FE(rand,															NULL)
