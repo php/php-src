@@ -1,5 +1,5 @@
 --TEST--
-ob_output_handler
+ob_iconv_handler()
 --SKIPIF--
 <?php /* include('skipif.inc'); */ ?>
 --INI--

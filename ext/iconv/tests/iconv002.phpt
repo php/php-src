@@ -1,5 +1,5 @@
 --TEST--
-UCS4BE to ASCII
+iconv() test 2 (UCS4BE to ASCII)
 --SKIPIF--
 <?php
 /* include('skipif.inc'); */
