@@ -386,9 +386,10 @@ static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSR
 }
 
 
-static void zend_std_has_dimension(zval *object, zval *offset, int check_empty TSRMLS_DC)
+static int zend_std_has_dimension(zval *object, zval *offset, int check_empty TSRMLS_DC)
 {
 	zend_error(E_ERROR, "Cannot use object as array");
+	return 0;
 }
 
 
@@ -883,7 +884,8 @@ int zend_std_cast_object(zval *readobj, zval *writeobj, int type, int should_fre
 				MAKE_STD_ZVAL(retval);
 				ZVAL_STRINGL(retval, empty_string, 0, 0);
 			}
-			REPLACE_ZVAL_VALUE(&writeobj, retval, 0);
+			REPLACE_ZVAL_VALUE(&writeobj, retval, 1); 
+			zval_ptr_dtor(&retval);
 			return SUCCESS;
 		}
 		break;
