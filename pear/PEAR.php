@@ -127,8 +127,8 @@ class PEAR
      * $_PEAR_destructor_object_list for destructor emulation if a
      * destructor object exists.
      *
-     * @param string  $error_class (optional) which class to use for error
-     *                             objects, defaults to PEAR_Error.
+     * @param string  (optional) which class to use for error objects,
+     *                defaults to PEAR_Error.
      * @access public
      * @return void
      */
@@ -183,10 +183,10 @@ class PEAR
     * You MUST use a reference, or they will not persist!
     *
     * @access public
-    * @param  string $class The calling classname, to prevent clashes
-    * @param  string $var   The variable to retrieve.
-    * @return mixed         A reference to the variable. If not set it will be 
-    *                       auto initialised to NULL.
+    * @param  string  The calling classname, to prevent clashes
+    * @param  string  The variable to retrieve.
+    * @return mixed   A reference to the variable. If not set it will be 
+    *                 auto initialised to NULL.
     */
     function &getStaticProperty($class, $var)
     {
@@ -202,8 +202,8 @@ class PEAR
     * classes.
     *
     * @access public
-    * @param  mixed  $func The function name (or array of class/method) to call
-    * @param  mixed  $args The arguments to pass to the function
+    * @param  mixed  The function name (or array of class/method) to call
+    * @param  mixed  The arguments to pass to the function
     * @return void
     */
     function registerShutdownFunc($func, $args = array())
@@ -217,7 +217,7 @@ class PEAR
     /**
      * Tell whether a value is a PEAR error.
      *
-     * @param   mixed   $data the value to test
+     * @param   mixed   the value to test
      * @access  public
      * @return  bool    true if parameter is an error
      */
@@ -237,12 +237,12 @@ class PEAR
      * PEAR objects.  If called in an object, setErrorHandling sets
      * the default behaviour for that object.
      *
-     * @param int $mode
+     * @param int
      *        One of PEAR_ERROR_RETURN, PEAR_ERROR_PRINT,
      *        PEAR_ERROR_TRIGGER, PEAR_ERROR_DIE or
      *        PEAR_ERROR_CALLBACK.
      *
-     * @param mixed $options
+     * @param mixed
      *        When $mode is PEAR_ERROR_TRIGGER, this is the error level (one
      *        of E_USER_NOTICE, E_USER_WARNING or E_USER_ERROR).
      *
@@ -318,8 +318,7 @@ class PEAR
      *
      * Note that this method can not be called statically
      *
-     * @param mixed  $code  a single error code or an array of error codes
-     *                      to expect
+     * @param mixed  a single error code or an array of error codes to expect
      *
      * @return int     the new depth of the "expected errors" stack
      * @access public
@@ -357,16 +356,16 @@ class PEAR
      * handling applied.  If the $mode and $options parameters are not
      * specified, the object's defaults are used.
      *
-     * @param $message  a text error message or a PEAR error object
+     * @param mixed     a text error message or a PEAR error object
      *
-     * @param $code     a numeric error code (it is up to your class
+     * @param int       a numeric error code (it is up to your class
      *                  to define these if you want to use codes)
      *
-     * @param $mode     One of PEAR_ERROR_RETURN, PEAR_ERROR_PRINT,
+     * @param int       One of PEAR_ERROR_RETURN, PEAR_ERROR_PRINT,
      *                  PEAR_ERROR_TRIGGER, PEAR_ERROR_DIE or
      *                  PEAR_ERROR_CALLBACK.
      *
-     * @param $options  If $mode is PEAR_ERROR_TRIGGER, this parameter
+     * @param mixed     If $mode is PEAR_ERROR_TRIGGER, this parameter
      *                  specifies the PHP-internal error level (one of
      *                  E_USER_NOTICE, E_USER_WARNING or E_USER_ERROR).
      *                  If $mode is PEAR_ERROR_CALLBACK, this
@@ -374,13 +373,13 @@ class PEAR
      *                  method.  In other error modes this parameter
      *                  is ignored.
      *
-     * @param $userinfo If you need to pass along for example debug
+     * @param string    If you need to pass along for example debug
      *                  information, this parameter is meant for that.
      *
-     * @param $error_class The returned error object will be instantiated
+     * @param string    The returned error object will be instantiated
      *                  from this class, if specified.
      *
-     * @param $skipmsg  If true, raiseError will only pass error codes,
+     * @param bool     If true, raiseError will only pass error codes,
      *                  the error message parameter will be dropped.
      *
      * @access public
@@ -442,17 +441,17 @@ class PEAR
     // {{{ pushErrorHandling()
 
     /**
-    * Push a new error handler on top of the error handler options stack. With this
-    * you can easily override the actual error handler for some code and restore
-    * it later with popErrorHandling.
-    *
-    * @param $mode    mixed (same as setErrorHandling)
-    * @param $options mixed (same as setErrorHandling)
-    *
-    * @return bool Always true
-    *
-    * @see PEAR::setErrorHandling
-    */
+     * Push a new error handler on top of the error handler options stack. With this
+     * you can easily override the actual error handler for some code and restore
+     * it later with popErrorHandling.
+     *
+     * @param mixed (same as setErrorHandling)
+     * @param mixed (same as setErrorHandling)
+     *
+     * @return bool Always true
+     *
+     * @see PEAR::setErrorHandling
+     */
     function pushErrorHandling($mode, $options = null)
     {
         $stack = &$GLOBALS['_PEAR_error_handler_stack'];
@@ -558,15 +557,15 @@ class PEAR_Error
     /**
      * PEAR_Error constructor
      *
-     * @param $message error message
+     * @param string  message
      *
-     * @param $code (optional) error code
+     * @param int     (optional) error code
      *
-     * @param $mode (optional) error mode, one of: PEAR_ERROR_RETURN,
+     * @param int     (optional) error mode, one of: PEAR_ERROR_RETURN,
      * PEAR_ERROR_PRINT, PEAR_ERROR_DIE, PEAR_ERROR_TRIGGER or
      * PEAR_ERROR_CALLBACK
      *
-     * @param $level (optional) error level, _OR_ in the case of
+     * @param mixed   (optional) error level, _OR_ in the case of
      * PEAR_ERROR_CALLBACK, the callback function or object/method
      * tuple.
      *
