@@ -63,12 +63,12 @@ function_entry posix_functions[] = {
 #ifdef HAVE_SETEUID
 	PHP_FE(posix_seteuid,	NULL)
 #endif
-#ifdef HAVE_SETEGID
 	PHP_FE(posix_getgid,	NULL)
-#endif
 	PHP_FE(posix_setgid,	NULL)
 	PHP_FE(posix_getegid,	NULL)
+#ifdef HAVE_SETEGID
 	PHP_FE(posix_setegid,	NULL)
+#endif
 	PHP_FE(posix_getgroups,	NULL)
 	PHP_FE(posix_getlogin,	NULL)
 
