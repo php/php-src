@@ -222,6 +222,8 @@ PHP_FUNCTION(closedir)
 }
 
 /* }}} */
+
+#if !defined(ZEND_WIN32)&&!defined(ZTS)
 /* {{{ proto int chroot(string directory)
    Change root directory */
 
@@ -253,6 +255,8 @@ PHP_FUNCTION(chroot)
 }
 
 /* }}} */
+#endif
+
 /* {{{ proto int chdir(string directory)
    Change the current directory */
 
