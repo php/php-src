@@ -60,6 +60,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #23733 (Coredump on startup with Oracle 9+). (Edin)
 - Fixed bug #23285 (Potential Stack overflow in zendlex). (Wez)
 - Fixed bug #23038, #23574 (aggregate() related leaks and crashes). (Andrei)
+- Fixed bug #22592 (Cascading assignments to strings with curly braces broken).
+  (Stas)
 
 29 May 2003, Version 4.3.2
 - Syncronized bundled GD library with GD 2.0.12. (Ilia)
