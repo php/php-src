@@ -304,7 +304,7 @@ static function_entry apache_functions[] = {
 
 zend_module_entry php_apache_module = {
 	STANDARD_MODULE_HEADER,
-	"Apache 2.0",
+	"apache2filter",
 	apache_functions,
 	NULL,
 	NULL,
