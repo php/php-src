@@ -3,7 +3,7 @@ LTLIBRARY_NAME    = libinformix.la
 LTLIBRARY_SOURCES = ifx.c
 LTLIBRARY_LIBADD  = $(IFX_LIBS)
 LTLIBRARY_SHARED_NAME   = informix.la
-LTLIBRARY_SHARED_LIBADD = $(IFX_LIBS)
+LTLIBRARY_SHARED_LIBADD = $(IFX_LIBS) $(INFORMIX_SHARED_LIBADD)
 CLEANFILES        = ifx.c
 
 include $(top_srcdir)/build/dynlib.mk
