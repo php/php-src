@@ -535,7 +535,9 @@ AC_DEFUN(AC_ADD_INCLUDE,[
 ])
 
 AC_DEFUN(PHP_X_ADD_LIBRARY,[
-  ifelse($2,,$3="-l$1 [$]$3", $3="[$]$3 -l$1")
+  if test -n "$1"; then 
+    ifelse($2,,$3="-l$1 [$]$3", $3="[$]$3 -l$1")
+  fi
 ])
 
 dnl
