@@ -89,6 +89,9 @@ void php_mb_gpc_stack_variable(char *param, char *value, char ***pval_list, int 
 	if (*num_vars>=*num_vars_max){	
 		php_mb_gpc_realloc_buffer(pval_list, plen_list, num_vars_max, 
 								  16 TSRMLS_CC);
+		/* in case realloc relocated the buffer */
+		val_list = *pval_list;
+		len_list = *plen_list;
 	}
 
 	val_list[*num_vars] = (char *)estrdup(param);
