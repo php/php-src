@@ -20,46 +20,7 @@
 // $Id$
 //
 
-function generateFault($short, $long)
-{
-    $params = array(
-        "faultcode" => "Server",
-        "faultstring" => $short,
-        "detail" => $long
-    );
-
-    $faultmsg  = new SOAP_Message("Fault",$params,"http://schemas.xmlsoap.org/soap/envelope/");
-    return $faultmsg;
-}
-
-function hex2bin($data)
-{
-    $len = strlen($data);
-    return pack("H" . $len, $data);
-}
-
-
 class SOAP_Interop_Base {
-    var $method_namespace = 'http://soapinterop.org/';
-
-    function SOAP_Interop_Base() {
-	#if ($server) {
-	#    $server->addToMap("echoString",array("string"),array("string"));
-	#    $server->addToMap("echoStringArray",array(),array());
-	#    $server->addToMap("echoInteger",array("int"),array("int"));
-	#    $server->addToMap("echoIntegerArray",array(),array());
-	#    $server->addToMap("echoFloat",array("float"),array("float"));
-	#    $server->addToMap("echoFloatArray",array(),array());
-	#    $server->addToMap("echoStruct",array(),array());
-	#    $server->addToMap("echoStructArray",array(),array());
-	#    $server->addToMap("echoVoid",array(),array());
-	#    $server->addToMap("echoBase64",array("base64Binary"),array("base64Binary"));
-	#    $server->addToMap("echoDate",array("dateTime"),array("dateTime"));
-	#    $server->addToMap("echoHexBinary",array("hexBinary"),array("hexBinary"));
-	#    $server->addToMap("echoDecimal",array("decimal"),array("decimal"));
-	#    $server->addToMap("echoBoolean",array("boolean"),array("boolean"));
-	#}
-    }
 
     function echoString($inputString)
     {
