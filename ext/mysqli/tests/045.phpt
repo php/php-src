@@ -1,5 +1,20 @@
 --TEST--
 mysqli_bind_result (SHOW)
+--SKIPIF--
+<?php	
+	include "connect.inc";
+	$link = mysqli_connect("localhost", $user, $passwd);
+
+
+	$stmt = mysqli_prepare($link, "SHOW VARIABLES LIKE 'port'");
+	mysqli_execute($stmt);
+
+	if (!$stmt->field_count) {
+		printf("skip SHOW command is not supported in prepared statements.");
+	}
+	$stmt->close();
+	mysqli_close($link);
+?>
 --FILE--
 <?php
 	include "connect.inc";
@@ -8,8 +23,8 @@ mysqli_bind_result (SHOW)
 	$link = mysqli_connect("localhost", $user, $passwd);
 
 	$stmt = mysqli_prepare($link, "SHOW VARIABLES LIKE 'port'");
-
 	mysqli_execute($stmt);
+
 	mysqli_bind_result($stmt, $c1, $c2); 	
 	mysqli_fetch($stmt);
 	mysqli_stmt_close($stmt);	

@@ -22,9 +22,11 @@ mysqli fetch functions
 	mysqli_close($link);
 ?>
 --EXPECT--
-array(2) {
+array(3) {
   [0]=>
   string(14) "root@localhost"
   [1]=>
   string(4) "test"
+  [2]=>
+  string(3) "foo"
 }
