@@ -299,6 +299,7 @@ static struct pdo_dbh_methods odbc_methods = {
 	NULL,	/* last id */
 	pdo_odbc_fetch_error_func,
 	NULL,	/* get attr */
+	NULL,	/* check_liveness */
 };
 
 static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */

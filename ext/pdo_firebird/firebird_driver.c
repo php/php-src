@@ -582,6 +582,7 @@ static struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	NULL, /* last_id not supported */
 	pdo_firebird_fetch_error_func,
 	firebird_handle_get_attribute,
+	NULL /* check_liveness */
 };
 /* }}} */
 
