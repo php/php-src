@@ -112,7 +112,7 @@ AC_DEFUN(PHP_GD_XPM,[
     fi
 
     for i in include include/X11; do
-      test -f $GD_XPM_DIR/$i/xpm.h && GD_XPM_INC=$GD_XPM_DIR/$i
+      test -f $GD_XPM_DIR/$i/xpm.h && GD_XPM_INC=$GD_XPM_DIR/include
     done
 
     if test -z "$GD_XPM_INC"; then

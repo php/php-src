@@ -298,6 +298,8 @@ int gdImageColorClosest(gdImagePtr im, int r, int g, int b);
 	beats the exact same color with radically different
 	transparency */
 int gdImageColorClosestAlpha(gdImagePtr im, int r, int g, int b, int a);
+/* An alternate method */
+int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
 /* Returns exact, 100% opaque matches only */
 int gdImageColorExact(gdImagePtr im, int r, int g, int b);
 /* Returns an exact match only, including alpha */
