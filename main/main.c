@@ -564,7 +564,7 @@ static void php_message_handler_for_zend(long message, void *data)
 			php3_error(E_WARNING, "Failed opening '%s' for inclusion", php3_strip_url_passwd((char *) data));
 			break;
 		case ZMSG_FAILED_REQUIRE_FOPEN:
-			php3_error(E_ERROR, "Failed opening required '%s'", php3_strip_url_passwd((char *) data));
+			php3_error(E_COMPILE_ERROR, "Failed opening required '%s'", php3_strip_url_passwd((char *) data));
 			break;
 		case ZMSG_FAILED_HIGHLIGHT_FOPEN:
 			php3_error(E_WARNING, "Failed opening '%s' for highlighting", php3_strip_url_passwd((char *) data));

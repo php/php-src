@@ -261,6 +261,9 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	executor_globals = ts_resource(executor_globals_id);
 	core_globals = ts_resource(core_globals_id);
 	sapi_globals = ts_resource(sapi_globals_id);
+	if (setjmp(EG(bailout))!=0) {
+		return -1;
+	}
 #endif
 
 	init_request_info(SLS_C);
