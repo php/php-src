@@ -262,8 +262,6 @@ ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int in
 
 ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC)
 {
-    zend_write_func_t write_func = zend_write;
-
     switch (expr->type) {
 	case IS_ARRAY:
 	    ZEND_PUTS("Array (");
