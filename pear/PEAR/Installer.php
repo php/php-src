@@ -156,7 +156,6 @@ class PEAR_Installer extends PEAR_Common
     function _installFile($file, $atts, $tmp_path)
     {
         static $os;
-        ini_set("track_errors", 1);
         if (isset($atts['platform'])) {
             if (empty($os)) {
                 include_once "OS/Guess.php";
@@ -305,7 +304,12 @@ class PEAR_Installer extends PEAR_Common
 
     function addFileOperation($type, $data)
     {
-        $this->log(3, "adding to transaction: $type " . implode(" ", $data));
+        if ($type == 'chmod') {
+            $octmode = decoct($data[0]);
+            $this->log(3, "adding to transaction: $type $octmode $data[1]");
+        } else {
+            $this->log(3, "adding to transaction: $type " . implode(" ", $data));
+        }
         $this->file_operations[] = array($type, $data);
     }
 
@@ -346,7 +350,7 @@ class PEAR_Installer extends PEAR_Common
                     break;
                 case 'delete':
                     // check that directory is writable
-                    if (!is_writable(dirname($data[0]))) {
+                    if (file_exists($data[0]) && !is_writable(dirname($data[0]))) {
                         $errors[] = "permission denied ($type): $data[0]";
                     }
                     break;
@@ -370,7 +374,8 @@ class PEAR_Installer extends PEAR_Common
                     break;
                 case 'chmod':
                     @chmod($data[0], $data[1]);
-                    $this->log(3, "+ chmod $data[0] $data[1]");
+                    $octmode = decoct($data[0]);
+                    $this->log(3, "+ chmod $octmode $data[1]");
                     break;
                 case 'delete':
                     @unlink($data[0]);
@@ -779,16 +784,45 @@ class PEAR_Installer extends PEAR_Common
 
     function checkDeps(&$pkginfo)
     {
-        $deps = &new PEAR_Dependency($this->registry);
-        $errors = null;
+        $depchecker = &new PEAR_Dependency($this->registry);
+        $error = $errors = '';
+        $failed_deps = array();
         if (is_array($pkginfo['release_deps'])) {
             foreach($pkginfo['release_deps'] as $dep) {
-                if ($error = $deps->callCheckMethod($dep)) {
-                    $errors .= "\n$error";
+                $code = $depchecker->callCheckMethod($error, $dep);
+                if ($code) {
+                    $failed_deps[] = array($dep, $code, $error);
                 }
             }
-            if ($errors) {
-                return $errors;
+            $n = count($failed_deps);
+            if ($n > 0) {
+                $depinstaller =& new PEAR_Installer($this->ui);
+                $to_install = array();
+                for ($i = 0; $i < $n; $i++) {
+                    if (isset($failed_deps[$i]['type'])) {
+                        $type = $failed_deps[$i]['type'];
+                    } else {
+                        $type = 'pkg';
+                    }
+                    switch ($failed_deps[$i][1]) {
+                        case PEAR_DEPENDENCY_MISSING:
+                            if ($type == 'pkg') {
+                                // install
+                            }
+                            $errors .= "\n" . $failed_deps[$i][2];
+                            break;
+                        case PEAR_DEPENDENCY_UPGRADE_MINOR:
+                            if ($type == 'pkg') {
+                                // upgrade
+                            }
+                            $errors .= "\n" . $failed_deps[$i][2];
+                            break;
+                        default:
+                            $errors .= "\n" . $failed_deps[$i][2];
+                            break;
+                    }
+                }
+                return substr($errors, 1);
             }
         }
         return false;
