@@ -1563,6 +1563,16 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 				data->fd = -1;
 			}
 			return SUCCESS;
+		
+		case PHP_STREAM_AS_FD_FOR_SELECT:
+			PHP_STDIOP_GET_FD(fd, data);
+			if (fd < 0) {
+				return FAILURE;
+			}
+			if (ret) {
+				*(int*)ret = fd;
+			}
+			return SUCCESS;
 
 		case PHP_STREAM_AS_FD:
 			PHP_STDIOP_GET_FD(fd, data);
@@ -2112,7 +2122,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 	castas &= ~PHP_STREAM_CAST_MASK;
 
 	/* synchronize our buffer (if possible) */
-	if (ret) {
+	if (ret && castas != PHP_STREAM_AS_FD_FOR_SELECT) {
 		php_stream_flush(stream);
 		if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
 			off_t dummy;

@@ -1137,24 +1137,29 @@ static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 	switch(castas)	{
 		case PHP_STREAM_AS_STDIO:
 #if HAVE_OPENSSL_EXT
-			if (sock->ssl_active)
+			if (sock->ssl_active) {
 				return FAILURE;
+			}
 #endif
-			if (ret)	{
+			if (ret) {
 				*(FILE**)ret = fdopen(sock->socket, stream->mode);
-				if (*ret)
+				if (*ret) {
 					return SUCCESS;
+				}
 				return FAILURE;
 			}
 			return SUCCESS;
 		case PHP_STREAM_AS_FD:
 		case PHP_STREAM_AS_SOCKETD:
 #if HAVE_OPENSSL_EXT
-			if (sock->ssl_active)
+			if (sock->ssl_active) {
 				return FAILURE;
+			}
 #endif
-			if (ret)
+		case PHP_STREAM_AS_FD_FOR_SELECT:
+			if (ret) {
 				*(int*)ret = sock->socket;
+			}
 			return SUCCESS;
 		default:
 			return FAILURE;
