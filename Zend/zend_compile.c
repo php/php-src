@@ -83,7 +83,7 @@ void init_compiler(CLS_D ELS_DC)
 	CG(active_class_entry) = NULL;
 	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
 	zend_llist_init(&CG(dimension_llist), sizeof(int), NULL, 0);
-	zend_llist_init(&CG(filenames_list), sizeof(char *), free_filename, 0);
+	zend_hash_init(&CG(filenames_table), 5, NULL, (dtor_func_t) free_filename, 0);
 	CG(handle_op_arrays) = 1;
 	CG(in_compilation) = 0;
 	zend_init_rsrc_list(ELS_C);
@@ -101,17 +101,22 @@ void shutdown_compiler(CLS_D)
 	zend_stack_destroy(&CG(foreach_copy_stack));
 	zend_stack_destroy(&CG(object_stack));
 	zend_stack_destroy(&CG(declare_stack));
-	zend_llist_destroy(&CG(filenames_list));
+	zend_hash_destroy(&CG(filenames_table));
 	zend_llist_destroy(&CG(open_files));
 }
 
 
 ZEND_API char *zend_set_compiled_filename(char *new_compiled_filename)
 {
-	char *p = estrdup(new_compiled_filename);
+	char **pp, *p;
+	int length = strlen(new_compiled_filename);
 	CLS_FETCH();
 
-	zend_llist_add_element(&CG(filenames_list), &p);
+	if (zend_hash_find(&CG(filenames_table), new_compiled_filename, length+1, (void **) &pp)==SUCCESS) {
+		return *pp;
+	}
+	p = estrndup(new_compiled_filename, length);
+	zend_hash_update(&CG(filenames_table), new_compiled_filename, length+1, &p, sizeof(char *), (void **) &pp);
 	CG(compiled_filename) = p;
 	return p;
 }

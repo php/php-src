@@ -91,7 +91,7 @@ struct _zend_compiler_globals {
 	HashTable *function_table;	/* function symbol table */
 	HashTable *class_table;		/* class table */
 
-	zend_llist filenames_list;
+	HashTable filenames_table;
 
 	zend_bool in_compilation;
 	zend_bool short_tags;
