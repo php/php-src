@@ -872,8 +872,10 @@ ZEND_METHOD(reflection_function, __construct)
 	char *lcname;
 	reflection_object *intern;
 	zend_function *fptr;
+	char *name_str;
+	int name_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -882,11 +884,11 @@ ZEND_METHOD(reflection_function, __construct)
 	if (intern == NULL) {
 		return;
 	}
-	convert_to_string_ex(&name);
-	zval_add_ref(&name);
+	MAKE_STD_ZVAL(name);
+	ZVAL_STRINGL(name, name_str, name_len, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
-	lcname = zend_str_tolower_dup((const char *)Z_STRVAL_P(name), (int) Z_STRLEN_P(name));
-	if (zend_hash_find(EG(function_table), lcname, (int)(Z_STRLEN_P(name) + 1), (void **)&fptr) == FAILURE) {
+	lcname = zend_str_tolower_dup(name_str, name_len);
+	if (zend_hash_find(EG(function_table), lcname, name_len + 1, (void **)&fptr) == FAILURE) {
 		efree(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 			"Function %s() does not exist", Z_STRVAL_P(name));
@@ -1134,7 +1136,7 @@ ZEND_METHOD(reflection_parameter, export)
 }
 /* }}} */
 
-/* {{{ proto public Reflection_Method::__construct(mixed function, mixed parameter)
+/* {{{ proto public Reflection_Parameter::__construct(mixed function, mixed parameter)
    Constructor. Throws an Exception in case the given method does not exist */
 ZEND_METHOD(reflection_parameter, __construct)
 {
@@ -1357,8 +1359,10 @@ ZEND_METHOD(reflection_method, __construct)
 	zend_class_entry **pce;
 	zend_class_entry *ce;
 	zend_function *mptr;
+	char *name_str;
+	int name_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &classname, &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &classname, &name_str, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -1396,15 +1400,15 @@ ZEND_METHOD(reflection_method, __construct)
 	ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 	
-	convert_to_string_ex(&name);
-	zval_add_ref(&name);
+	MAKE_STD_ZVAL(name);
+	ZVAL_STRINGL(name, name_str, name_len, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
-	lcname = zend_str_tolower_dup((const char *)Z_STRVAL_P(name), (int) Z_STRLEN_P(name));
+	lcname = zend_str_tolower_dup(name_str, name_len);
 
-	if (zend_hash_find(&ce->function_table, lcname, (int)(Z_STRLEN_P(name) + 1), (void **) &mptr) == FAILURE) {
+	if (zend_hash_find(&ce->function_table, lcname, name_len + 1, (void **) &mptr) == FAILURE) {
 		efree(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-			"Method %s::%s() does not exist", ce->name, Z_STRVAL_P(name));
+			"Method %s::%s() does not exist", ce->name, name_str);
 		return;
 	}
 	efree(lcname);
@@ -2517,8 +2521,10 @@ ZEND_METHOD(reflection_extension, __construct)
 	char *lcname;
 	reflection_object *intern;
 	zend_module_entry *module;
+	char *name_str;
+	int name_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -2527,14 +2533,14 @@ ZEND_METHOD(reflection_extension, __construct)
 	if (intern == NULL) {
 		return;
 	}
-	convert_to_string_ex(&name);
-	zval_add_ref(&name);
+	MAKE_STD_ZVAL(name);
+	ZVAL_STRINGL(name, name_str, name_len, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
-	lcname = zend_str_tolower_dup((const char *)Z_STRVAL_P(name), (int) Z_STRLEN_P(name));
+	lcname = zend_str_tolower_dup(name_str, name_len);
 	if (zend_hash_find(&module_registry, lcname, (int)(Z_STRLEN_P(name) + 1), (void **)&module) == FAILURE) {
 		efree(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-			"Extension %s does not exist", Z_STRVAL_P(name));
+			"Extension %s does not exist", name_len);
 		return;
 	}
 	efree(lcname);
