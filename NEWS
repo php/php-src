@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5 Beta 4
+- Added support for ++ and += (and similar) to SimpleXML. (Andi, Zeev)
+- Added infrastructure for ++ and += (and similar) to object overloading
+  modules. (Andi, Zeev)
 - Readded support for using classes before they are declared according to
   the behavior in PHP 4. This won't work with classes who are using PHP 5
   features such as interfaces. (Zeev, Andi)
@@ -8,7 +11,7 @@ PHP                                                                        NEWS
 - Improved destructor implementation to always call destructors on clean
   shutdown. An order of destruction is not guaranteed. (Zeev, Andi)
 - Fixed problem with parse error in include() file not stopping PHP's
-  execution (Ilia)
+  execution. (Ilia)
 - Redesigned exception support. This fixes many bugs in the previous design
   such as nested try's and problems with overloaded extensions. (Zeev, Andi)
 - Redesigned clone by adding a clone keyword (clone $obj) and copying all
@@ -42,11 +45,11 @@ PHP                                                                        NEWS
   (Ilia, runekl[at]opoint[dot]com
 - Fixed bug #26947 (ext/dom: Crash when using DomDocument::getElementById()).
   (Christian)
-- Fixed bug #26911 (crash in sqlite extension when fetching data from empty 
+- Fixed bug #26911 (crash in sqlite extension when fetching data from empty
   queries). (Ilia)
 - Fixed bug #26844 (ext/mime_magic: magic file validation broken). (Jani)
 - Fixed bug #26819 (http_build_query() crashes on NULL output). (Ilia)
-- Fixed bug #26817 (http_build_query() does not handle private & protected 
+- Fixed bug #26817 (http_build_query() does not handle private & protected
   object properties correctly). (Ilia)
 - Fixed bug #26815 (foreach of (DOM) childnodes crashes when Xinclude is used).
   (Rob)
@@ -68,12 +71,12 @@ PHP                                                                        NEWS
 - Fixed bug #26675 (Segfault on ArrayAccess use). (Marcus)
 - Fixed bug #26640 (__autoload() not invoked by Reflection classes). (Jani)
 - Fixed bug #26543 (call_user_func() broken for self, parent). (Stanislav)
-- Fixed bug #26077 (memory leak when new() result is not assigned and no 
+- Fixed bug #26077 (memory leak when new() result is not assigned and no
   constructor is defined). (Stanislav)
 - Fixed bug #26065 (Crash when nesting classes). (Marcus)
 - Fixed bug #25816 (disallow arrays in class constants). (Stanislav)
 - Fixed bug #25329 (sqlite_create_function with method and reference to $this).
-  (Marcus) 
+  (Marcus)
 - Fixed bug #25038 (call_user_func() issues a warning if function throws an
   exception). (Marcus)
 - Fixed bug #24608 (__set not triggered when overloading with array).
@@ -121,19 +124,19 @@ PHP                                                                        NEWS
 - Fixed get_declared_classes() to return only classes. (Andrey, Marcus)
 - Fixed __autoload() to preserve case of the passed class name. (Andi)
 - Fixed bug #26615 () (runekl at opoint dot com, Derick)
-- Fixed bug #26591 ("__autoload threw an exception" during an uncaught). 
+- Fixed bug #26591 ("__autoload threw an exception" during an uncaught).
   (Marcus)
 - Fixed bug #26534 (stream_get_meta_data() -> Access Violation). (Wez)
-- Fixed bug #26528 (HTML entities are not being decoded by 
+- Fixed bug #26528 (HTML entities are not being decoded by
   xml_parse()/xml_parse_into_struct()). (Ilia)
 - Fixed bug #26182 (Object properties created redundantly). (Andi)
 - Fixed bug #26156 (REPLACE_ZVAL_VALUE works on uninit stack-based zvals).
   (Moriyoshi)
 - Fixed bug #26083 (Non-working write support in ext/dom). (Ilia)
 - Fixed bug #26072 (--disable-libxml does not work). (Jani)
-- Fixed bug #26001 (serialize crashes when accessing an overloaded object that 
+- Fixed bug #26001 (serialize crashes when accessing an overloaded object that
   has no properties (NULL hashtable)). (Wez)
-- Fixed bug #25664 (COM crashes when calling a Delphi implementations of 
+- Fixed bug #25664 (COM crashes when calling a Delphi implementations of
   ITypeInfo). (Wez)
 - Fixed bug #24837 (Incorrect behaviour of PPP using foreach). (Marcus)
 - Fixed bug #24693 (Allow session.use_trans_sid to be enabled/disabled from
@@ -159,10 +162,10 @@ PHP                                                                        NEWS
     statements into ibase_query()
   . Added ability to bind PHP arrays to native Interbase arrays
   . Added ibase_commit_ret() and ibase_rollback_ret()
-  . Added ibase_drop_db() 
+  . Added ibase_drop_db()
   . Added ibase_gen_id()
   . Added ibase_name_result()
-  . Added ibase_errcode() 
+  . Added ibase_errcode()
   . Added ibase_affected_rows() and ibase_num_params()
   . Added ibase_param_info()
   . Added ibase_wait_event()
@@ -191,7 +194,7 @@ PHP                                                                        NEWS
 - Fixed IPv6 support in MacOSX Panther. (Dan, Marko)
 - Fixed fgetcsv() to correctly handle international (non-ascii) characters.
   (Moriyoshi)
-- Fixed support for <![CDATA[]]> fields within XML documents in ext/xml. 
+- Fixed support for <![CDATA[]]> fields within XML documents in ext/xml.
   (Sterling)
 - Fixed visibility of __construct and __clone. (Marcus)
 - Fixed bug #25756 (SimpleXML's validate_schema_file() broken). (Moriyoshi)
@@ -199,24 +202,24 @@ PHP                                                                        NEWS
   files). (Marcus)
 - Fixed bug #25494 (array_merge*() allows non-arrays as argument). (Jay)
 - Fixed bug #24766 (strange result array from unpack()). (Moriyoshi)
-- Fixed bug #24729 ($obj = new $className; causes crash when $className is not 
+- Fixed bug #24729 ($obj = new $className; causes crash when $className is not
   set). (Marcus)
 - Fixed bug #24565 (cannot read array elements received via $_REQUEST). (Zeev)
 - Fixed bug #24445 (get_parent_class() returns different values).
   (Sterling, Stanislav)
 - Fixed bug #24403 (preg_replace() problem: Using $this when not in object
   context). (Zeev)
-- Fixed bug #24399 (PEAR DB isError crash [instanceof_function fault?]). 
+- Fixed bug #24399 (PEAR DB isError crash [instanceof_function fault?]).
   (Sterling, Marcus)
 - Fixed bug #24396 (foreach ($k=>$v), the key $k is missing). (Zeev)
 - Fixed bug #24279 (__get() crash when no value is returned). (Ilia)
 - Fixed bug #22367 (undefined variable has a value). (Zeev)
-- Fixed bug #19859 (allow fast_call_user_function to support __call). 
+- Fixed bug #19859 (allow fast_call_user_function to support __call).
   (Stanislav)
 - Fixed bug #17997 (Warning when switch() and reference are combined). (Zeev)
 - Fixed bug #17988 (strtotime failed to parse postgresql timestamp). (Derick)
 
-29 Jun 2003, PHP 5 Beta 1 
+29 Jun 2003, PHP 5 Beta 1
 - Removed the bundled MySQL client library. (Sterling)
 - Switched to Zend Engine 2, which includes numerous engine level improvements.
   A full list is available at http://www.php.net/zend-engine-2.php.
@@ -234,17 +237,17 @@ PHP                                                                        NEWS
   . "session.hash_function" and "session.hash_bits_per_character". (Sascha)
   . "mail.force_extra_paramaters". (Derick)
   . "register_long_arrays". (Zeev)
-- Improved the speed of internal functions that use callbacks by 40% due to a 
+- Improved the speed of internal functions that use callbacks by 40% due to a
   new internal fast_call_user_function() function. (Sterling)
 - Improved the streams support: (Wez)
   . Improved performance of readfile(), fpassthru() and some internal streams
     operations under Win32.
-  . stream_socket_client() - similar to fsockopen(), but more powerful. 
-  . stream_socket_server() - Creates a server socket. 
+  . stream_socket_client() - similar to fsockopen(), but more powerful.
+  . stream_socket_server() - Creates a server socket.
   . stream_socket_accept() - Accept a client connection.
   . stream_socket_get_name() - Get local or remote name of socket.
   . stream_copy_to_stream()
-  . stream_get_line() - Reads either the specified number of bytes or until 
+  . stream_get_line() - Reads either the specified number of bytes or until
     the ending string is found. (Ilia)
   . Added context property to userspace streams object. (Sara)
   . Added generic crypto interface for streams.
@@ -262,7 +265,7 @@ PHP                                                                        NEWS
      o imageline() and imagepolygon() antialias support
 - Changed the length parameter in fgetss() to be optional. (Moriyoshi)
 - Changed ini parser to allow for handling of quoted multi-line values. (Ilia)
-- Changed get_extension_funcs() to return list of the built-in Zend Engine 
+- Changed get_extension_funcs() to return list of the built-in Zend Engine
   functions if "zend" is specified as the module name. (Ilia)
 - Changed array_search() to accept also objects as a needle. (Moriyoshi)
 - Changed ext/mcrypt to require libmcrypt version 2.5.6 or greater. (Derick)
@@ -285,7 +288,7 @@ PHP                                                                        NEWS
   . strpbrk() - Searches a string for a list of characters. (Ilia)
   . get_headers() - Returns headers sent by the server of the specified URL.
     (Ilia)
-  . str_split() - Breaks down a string into an array of elements based on 
+  . str_split() - Breaks down a string into an array of elements based on
     length. (Ilia)
   . array_walk_recursive(). (Ilia)
   . array_combine(). (Andrey)
@@ -309,7 +312,7 @@ PHP                                                                        NEWS
   html_entity_decode(). (Moriyoshi)
 - Added IPv6 support to ext/sockets. (Sara)
 - Added "ftp://" wrapper support to opendir(), stat() and unlink(). (Sara)
-- Added context options 'method', 'header' and 'content' for "http://" fopen 
+- Added context options 'method', 'header' and 'content' for "http://" fopen
   wrapper. (Sara)
 - Added input filter support. See README.input_filter for more info. (Rasmus)
 - Added a replace count for str_[i]replace(), see bug #8218. (Sara)
@@ -317,5 +320,5 @@ PHP                                                                        NEWS
 - Fixed dirname() and strip_tags() to be binary-safe. (Moriyoshi)
 - Fixed bug #24098 (crash in pathinfo()). (Ilia)
 - Fixed bug #21985 and #22064 (various mb_send_mail() issues). (Moriyoshi)
-- Fixed bug #21600 (Assign by reference function call changes variable 
+- Fixed bug #21600 (Assign by reference function call changes variable
   contents). (Zeev)
