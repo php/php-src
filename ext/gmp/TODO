@@ -1,0 +1,26 @@
+mpz_mul_2exp
+mpz_[ft]div_[qr]_2exp
+mpz_popcount
+mpz_hamdist
+mpz_scan0
+mpz_scan1
+
+V 3:
+mpz_nextprime
+mpz_addmul
+mpz_root
+mpz_perfect_power_p
+mpz_lcm
+mpz_si_kronecker
+mpz_kronecker_si
+mpz_remove
+mpz_bin_ui
+mpz_fib_ui 
+mpz_cmpabs
+mpz_xor
+mpz_tstbit
+mpz_urandom[bm]
+mpz_fits_slong_p
+mpz_mul_si
+mpz_odd_p
+mpz_even_p
