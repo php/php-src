@@ -123,35 +123,6 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 	return NULL;
 }
 
-static inline zval *_get_object_zval_ptr(znode *node, temp_variable *Ts, int *should_free TSRMLS_DC)
-{
-	switch(node->op_type) {
-		case IS_TMP_VAR:
-			*should_free = 1;
-			return &Ts[node->u.var].tmp_var;
-			break;
-		case IS_VAR:
-			if (Ts[node->u.var].var.ptr_ptr) {
-				PZVAL_UNLOCK(*Ts[node->u.var].var.ptr_ptr);
-				*should_free = 0;
-				return *Ts[node->u.var].var.ptr_ptr;
-			} else {
-				if (Ts[node->u.var].EA.type==IS_STRING_OFFSET) {
-					PZVAL_UNLOCK(Ts[node->u.var].EA.data.str_offset.str);
-				}
-				*should_free = 1;
-				return NULL;
-			}
-			break;
-		case IS_UNUSED:
-			return NULL;
-			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
-	}
-	return NULL;
-}
-
-
 static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts TSRMLS_DC)
 {
 	if (node->op_type==IS_VAR) {
