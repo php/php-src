@@ -132,7 +132,7 @@ ZEND_API ZEND_INI_MH(OnUpdateEncode)
 {
 #ifdef EXIF_USE_MBSTRING
 	if (new_value && strlen(new_value) && !php_mb_check_encoding_list(new_value TSRMLS_CC)) {
-		php_error_docref( NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value);
 		return FAILURE;
 	}
 #endif
@@ -143,7 +143,7 @@ ZEND_API ZEND_INI_MH(OnUpdateDecode)
 {
 #ifdef EXIF_USE_MBSTRING
 	if (!php_mb_check_encoding_list(new_value TSRMLS_CC)) {
-		php_error_docref( NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value);
 		return FAILURE;
 	}
 #endif
@@ -1134,12 +1134,12 @@ static double exif_convert_any_format(void *value, int format, int motorola_inte
 		/* Not sure if this is correct (never seen float used in Exif format) */
 		case TAG_FMT_SINGLE:
 #ifdef EXIF_DEBUG
-			php_error_docref( NULL TSRMLS_CC, E_NOTICE, "Found value of type single");
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Found value of type single");
 #endif
 			return (double)*(float *)value;
 		case TAG_FMT_DOUBLE:
 #ifdef EXIF_DEBUG
-			php_error_docref( NULL TSRMLS_CC, E_NOTICE, "Found value of type double");
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Found value of type double");
 #endif
 			return *(double *)value;
 	}
@@ -1183,12 +1183,12 @@ static size_t exif_convert_any_to_int(void *value, int format, int motorola_inte
 		/* Not sure if this is correct (never seen float used in Exif format) */
 		case TAG_FMT_SINGLE:
 #ifdef EXIF_DEBUG
-			php_error_docref( NULL TSRMLS_CC, E_NOTICE, "Found value of type single");
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Found value of type single");
 #endif
 			return (size_t)*(float *)value;
 		case TAG_FMT_DOUBLE:
 #ifdef EXIF_DEBUG
-			php_error_docref( NULL TSRMLS_CC, E_NOTICE, "Found value of type double");
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Found value of type double");
 #endif
 			return (size_t)*(double *)value;
 	}
@@ -1660,13 +1660,13 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 
 					case TAG_FMT_SINGLE:
 #ifdef EXIF_DEBUG
-						php_error_docref( NULL TSRMLS_CC, E_WARNING, "Found value of type single");
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Found value of type single");
 #endif
 						info_value->f = *(float *)value;
 
 					case TAG_FMT_DOUBLE:
 #ifdef EXIF_DEBUG
-						php_error_docref( NULL TSRMLS_CC, E_WARNING, "Found value of type double");
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Found value of type double");
 #endif
 						info_value->d = *(double *)value;
 						break;
@@ -1881,7 +1881,7 @@ static void add_assoc_image_info(pval *value, int sub_array, image_info_type *im
 	pval 			 *tmpi, *array = NULL;
 
 #ifdef EXIF_DEBUG
-/*		php_error_docref( NULL TSRMLS_CC, E_NOTICE, "Adding %d infos from section %s", image_info->info_list[section_index].count, exif_get_sectionname(section_index));*/
+/*		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Adding %d infos from section %s", image_info->info_list[section_index].count, exif_get_sectionname(section_index));*/
 #endif
 	if (image_info->info_list[section_index].count) {
 		if (sub_array) {
@@ -1903,7 +1903,7 @@ static void add_assoc_image_info(pval *value, int sub_array, image_info_type *im
 				name = uname;
 			}
 #ifdef EXIF_DEBUG
-/*		php_error_docref( NULL TSRMLS_CC, E_NOTICE, "Adding infos: tag(0x%04X,%12s,L=0x%04X): %s", info_tag, exif_get_tagname(info_tag, buffer, -12, exif_get_tag_table(section_index) TSRMLS_CC), info_data->length, info_data->format==TAG_FMT_STRING?(info_value&&info_value->s?info_value->s:"<no data>"):exif_get_tagformat(info_data->format));*/
+/*		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Adding infos: tag(0x%04X,%12s,L=0x%04X): %s", info_tag, exif_get_tagname(info_tag, buffer, -12, exif_get_tag_table(section_index) TSRMLS_CC), info_data->length, info_data->format==TAG_FMT_STRING?(info_value&&info_value->s?info_value->s:"<no data>"):exif_get_tagformat(info_data->format));*/
 #endif
 			if (info_data->length==0) {
 				add_assoc_null(tmpi, name);
@@ -2173,12 +2173,12 @@ static void exif_process_CME (image_info_type *image_info, char *value, size_t l
 				exif_iif_add_tag(image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_STRING, length, value);
 				break;
 			default:
-				php_error_docref( NULL TSRMLS_CC, E_NOTICE, "Undefined JPEG2000 comment encoding");
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Undefined JPEG2000 comment encoding");
 				break;
 		}
 	} else {
 		exif_iif_add_tag(image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_UNDEFINED, 0, NULL);
-		php_error_docref( NULL TSRMLS_CC, E_NOTICE, "JPEG2000 comment section to small");
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "JPEG2000 comment section to small");
 	}
 }
 #endif
