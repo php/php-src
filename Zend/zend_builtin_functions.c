@@ -233,7 +233,6 @@ ZEND_FUNCTION(each)
 		*tmp = *entry;
 		zval_copy_ctor(tmp);
 		tmp->EA.is_ref=0;
-		tmp->EA.locks = 0;
 		tmp->refcount=0;
 		entry=tmp;
 	}
