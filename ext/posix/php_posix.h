@@ -90,6 +90,9 @@ PHP_FUNCTION(posix_getcwd);
 PHP_FUNCTION(posix_mkfifo);
 #endif
 
+/* POSIX.1, 5.6 */
+PHP_FUNCTION(posix_access);
+
 /* POSIX.1, 9.2 */
 PHP_FUNCTION(posix_getgrnam);
 PHP_FUNCTION(posix_getgrgid);
