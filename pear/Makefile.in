@@ -10,6 +10,7 @@ include $(top_srcdir)/build/rules.mk
 peardir=$(PEAR_INSTALLDIR)
 
 PEAR_SUBDIRS = \
+	Archive \
 	Benchmark \
 	Cache \
 	Cache/Container \
@@ -32,6 +33,7 @@ PEAR_SUBDIRS = \
 	XML 
 
 PEAR_FILES = \
+	Archive/Tar.php \
 	Benchmark/Iterate.php \
 	Benchmark/Timer.php \
 	Cache.php \
