@@ -563,12 +563,11 @@ PHP_FUNCTION(posix_times)
 PHP_FUNCTION(posix_ctermid)
 {
 	char  buffer[L_ctermid];
-	char *p;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
 		return;
 
-	if (NULL == (p = ctermid(buffer))) {
+	if (NULL == ctermid(buffer)) {
 		/* Found no documentation how the defined behaviour is when this
 		 * function fails
 		 */
