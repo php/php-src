@@ -617,7 +617,6 @@ PHP_FUNCTION(sqrt)
 /* {{{ proto float hypot(float num1, float num2)
    Returns sqrt(num1*num1 + num2*num2) */ 
 
-#ifdef HAVE_HYPOT
 PHP_FUNCTION(hypot)
 {
 	zval **num1, **num2;
@@ -627,10 +626,16 @@ PHP_FUNCTION(hypot)
 	}
 	convert_to_double_ex(num1);
 	convert_to_double_ex(num2);
+#if HAVE_HYPOT
 	Z_DVAL_P(return_value) = hypot(Z_DVAL_PP(num1), Z_DVAL_PP(num2));
+#elif defined(_MSC_VER)
+	Z_DVAL_P(return_value) = _hypot(Z_DVAL_PP(num1), Z_DVAL_PP(num2));
+#else
+	Z_DVAL_P(return_value) = sqrt((Z_DVAL_PP(num1) * Z_DVAL_PP(num1)) +
+		(Z_DVAL_PP(num2) * Z_DVAL_PP(num2)));
+#endif
 	Z_TYPE_P(return_value) = IS_DOUBLE;
 }
-#endif
 
 /* }}} */
 
