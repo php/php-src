@@ -1788,9 +1788,6 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 	}
 
 	if (zend_hash_quick_find(&ce->properties_info, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **) &child_info)==SUCCESS) {
-		if (parent_info->flags & ZEND_ACC_FINAL) {
-			zend_error(E_COMPILE_ERROR, "Cannot override final property %s::$%s", parent_ce->name, hash_key->arKey);
-		}
 		if ((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK)) {
 			zend_error(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name, hash_key->arKey, zend_visibility_string(parent_info->flags), parent_ce->name, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		} else if (child_info->flags & ZEND_ACC_IMPLICIT_PUBLIC) {
@@ -2346,6 +2343,11 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 
 	if (access_type & ZEND_ACC_ABSTRACT) {
 		zend_error(E_COMPILE_ERROR, "Properties cannot be declared abstract");
+	}
+
+	if (access_type & ZEND_ACC_FINAL) {
+		zend_error(E_COMPILE_ERROR, "Cannot declare property $%s::%s final, the final modifier is allowed only for methods",
+				   CG(active_class_entry)->name, var_name->u.constant.value.str.val);
 	}
 
 	if (!(access_type & ZEND_ACC_PPP_MASK)) {
