@@ -68,11 +68,32 @@ static char *javahome  = 0;
 static char *javalib   = 0;
 
 static int iniUpdated  = 0;
-
-static JavaVM *jvm = 0;
-static JNIEnv *jenv = 0;
-static jclass php_reflect;
 static void *dl_handle = 0;
+
+typedef struct {
+  JavaVM *jvm;
+  JNIEnv *jenv;
+  jobject php_reflect;
+  jclass  reflect_class;
+} php_java_globals;
+
+#ifdef ZTS
+#define JG(v) (java_globals->v)
+#define JG_FETCH() php_java_globals *java_globals = ts_resource(java_globals_id)
+#define JG_D       php_java_globals *java_globals
+#define JG_DC      , JG_D
+#define JG_C       dir_globals
+#define JG_CC      , JG_C
+int java_globals_id;
+#else
+#define JG(v) (java_globals.v)
+#define JG_FETCH()
+#define JG_D
+#define JG_DC
+#define JG_C
+#define JG_CC
+php_java_globals javadir_globals;
+#endif
 
 static zend_class_entry java_class_entry;
 
@@ -106,15 +127,17 @@ PHP_INI_END()
  * Destroy a Java Virtual Machine.
  */
 void jvm_destroy() {
-  if (php_reflect) (*jenv)->DeleteGlobalRef(jenv, php_reflect);
-  if (jvm) {
-    (*jvm)->DetachCurrentThread(jvm);
-    (*jvm)->DestroyJavaVM(jvm);
-    jvm = 0;
+  JG_FETCH();
+
+  if (JG(php_reflect)) (*JG(jenv))->DeleteGlobalRef(JG(jenv), JG(php_reflect));
+  if (JG(jvm)) {
+    (*JG(jvm))->DetachCurrentThread(JG(jvm));
+    (*JG(jvm))->DestroyJavaVM(JG(jvm));
+    JG(jvm) = 0;
   }
   if (dl_handle) DL_UNLOAD(dl_handle);
-  php_reflect = 0;
-  jenv = 0;
+  JG(php_reflect) = 0;
+  JG(jenv) = 0;
 }
 
 /*
@@ -134,9 +157,10 @@ static void addJVMOption(JavaVMInitArgs *vm_args, char *name, char *value) {
 #endif
 
 static int jvm_create() {
+  JG_FETCH();
 
   int rc;
-  jclass local_php_reflect;
+  jobject local_php_reflect;
   jthrowable error;
 
   jint (JNICALL *JNI_CreateVM)(const void*,const void*,void*);
@@ -217,21 +241,22 @@ static int jvm_create() {
 
 #endif
 
-  rc = (*JNI_CreateVM)(&jvm, &jenv, &vm_args);
+  rc = (*JNI_CreateVM)(&JG(jvm), &JG(jenv), &vm_args);
 
   if (rc) {
     php_error(E_ERROR, "Unable to create Java Virtual Machine");
     return rc;
   }
 
-  local_php_reflect = (*jenv)->FindClass(jenv, "net/php/reflect");
-  error = (*jenv)->ExceptionOccurred(jenv);
+  JG(reflect_class) = (*JG(jenv))->FindClass(JG(jenv), "net/php/reflect");
+  error = (*JG(jenv))->ExceptionOccurred(JG(jenv));
   if (error) {
     jclass errClass;
     jmethodID toString;
     jobject errString;
     const char *errAsUTF;
     jboolean isCopy;
+    JNIEnv *jenv = JG(jenv);
     (*jenv)->ExceptionClear(jenv);
     errClass = (*jenv)->GetObjectClass(jenv, error);
     toString = (*jenv)->GetMethodID(jenv, errClass, "toString",
@@ -244,13 +269,17 @@ static int jvm_create() {
     return -1;
   }
 
-  php_reflect = (*jenv)->NewGlobalRef(jenv, local_php_reflect);
+  local_php_reflect = (*JG(jenv))->AllocObject(JG(jenv), JG(reflect_class));
+  JG(php_reflect) = (*JG(jenv))->NewGlobalRef(JG(jenv), local_php_reflect);
   return rc;
 }
 
 /***************************************************************************/
 
 static jobjectArray _java_makeArray(int argc, pval** argv) {
+  JG_FETCH();
+  JNIEnv *jenv = JG(jenv);
+
   jclass objectClass = (*jenv)->FindClass(jenv, "java/lang/Object");
   jobjectArray result = (*jenv)->NewObjectArray(jenv, argc, objectClass, 0);
   jobject arg;
@@ -273,23 +302,23 @@ static jobjectArray _java_makeArray(int argc, pval** argv) {
         break;
 
       case IS_BOOL:
-        makeArg = (*jenv)->GetStaticMethodID(jenv, php_reflect, "MakeArg",
+        makeArg = (*jenv)->GetMethodID(jenv, JG(reflect_class), "MakeArg",
           "(Z)Ljava/lang/Object;");
-        arg = (*jenv)->CallStaticObjectMethod(jenv, php_reflect, makeArg,
+        arg = (*jenv)->CallObjectMethod(jenv, JG(php_reflect), makeArg,
           (jboolean)(argv[i]->value.lval));
         break;
 
       case IS_LONG:
-        makeArg = (*jenv)->GetStaticMethodID(jenv, php_reflect, "MakeArg",
+        makeArg = (*jenv)->GetMethodID(jenv, JG(reflect_class), "MakeArg",
           "(J)Ljava/lang/Object;");
-        arg = (*jenv)->CallStaticObjectMethod(jenv, php_reflect, makeArg,
+        arg = (*jenv)->CallObjectMethod(jenv, JG(php_reflect), makeArg,
           (jlong)(argv[i]->value.lval));
         break;
 
       case IS_DOUBLE:
-        makeArg = (*jenv)->GetStaticMethodID(jenv, php_reflect, "MakeArg",
+        makeArg = (*jenv)->GetMethodID(jenv, JG(reflect_class), "MakeArg",
           "(D)Ljava/lang/Object;");
-        arg = (*jenv)->CallStaticObjectMethod(jenv, php_reflect, makeArg,
+        arg = (*jenv)->CallObjectMethod(jenv, JG(php_reflect), makeArg,
           (jdouble)(argv[i]->value.dval));
         break;
 
@@ -323,6 +352,9 @@ static int checkError(pval *value) {
 void java_call_function_handler
   (INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
+  JG_FETCH();
+  JNIEnv *jenv;
+
   pval *object = property_reference->object;
   zend_overloaded_element *function_name = (zend_overloaded_element *)
     property_reference->elements_list->tail->data;
@@ -333,9 +365,10 @@ void java_call_function_handler
   pval **arguments = (pval **) emalloc(sizeof(pval *)*arg_count);
   getParametersArray(ht, arg_count, arguments);
 
-  if (iniUpdated && jenv) jvm_destroy();
-  if (!jenv) jvm_create();
-  if (!jenv) return;
+  if (iniUpdated && JG(jenv)) jvm_destroy();
+  if (!JG(jenv)) jvm_create();
+  if (!JG(jenv)) return;
+  jenv = JG(jenv);
 
   if (!strcmp("java",function_name->element.value.str.val)) {
 
@@ -343,12 +376,12 @@ void java_call_function_handler
        First argument is the class name.  Any additional arguments will
        be treated as constructor parameters. */
 
-    jmethodID co = (*jenv)->GetStaticMethodID(jenv, php_reflect, "CreateObject",
+    jmethodID co = (*jenv)->GetMethodID(jenv, JG(reflect_class), "CreateObject",
       "(Ljava/lang/String;[Ljava/lang/Object;J)V");
     jstring className=(*jenv)->NewStringUTF(jenv, arguments[0]->value.str.val);
     (pval*)(long)result = object;
 
-    (*jenv)->CallStaticVoidMethod(jenv, php_reflect, co,
+    (*jenv)->CallVoidMethod(jenv, JG(php_reflect), co,
       className, _java_makeArray(arg_count-1, arguments+1), result);
 
     (*jenv)->DeleteLocalRef(jenv, className);
@@ -362,14 +395,14 @@ void java_call_function_handler
 
     /* invoke a method on the given object */
 
-    jmethodID invoke = (*jenv)->GetStaticMethodID(jenv, php_reflect, "Invoke",
+    jmethodID invoke = (*jenv)->GetMethodID(jenv, JG(reflect_class), "Invoke",
       "(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;J)V");
     zend_hash_index_find(object->value.obj.properties, 0, (void**) &handle);
     obj = zend_list_find((*handle)->value.lval, &type);
     method = (*jenv)->NewStringUTF(jenv, function_name->element.value.str.val);
     (pval*)(long)result = return_value;
 
-    (*jenv)->CallStaticVoidMethod(jenv, php_reflect, invoke,
+    (*jenv)->CallVoidMethod(jenv, JG(php_reflect), invoke,
       obj, method, _java_makeArray(arg_count, arguments), result);
 
     (*jenv)->DeleteLocalRef(jenv, method);
@@ -386,30 +419,38 @@ void java_call_function_handler
 
 PHP_FUNCTION(java_last_exception_get)
 {
+  JG_FETCH();
+
   jlong result = 0;
   jmethodID lastEx;
 
+  if (ZEND_NUM_ARGS()!=0) WRONG_PARAM_COUNT;
+
   (pval*)(long)result = return_value;
   
-  lastEx = (*jenv)->GetStaticMethodID(jenv, php_reflect, "lastException",
-          "(J)V");
+  lastEx = (*JG(jenv))->GetMethodID(JG(jenv), JG(reflect_class), 
+          "lastException", "(J)V");
 
-  (*jenv)->CallStaticVoidMethod(jenv, php_reflect, lastEx, result);
+  (*JG(jenv))->CallVoidMethod(JG(jenv), JG(php_reflect), lastEx, result);
 }
 
 /***************************************************************************/
 
 PHP_FUNCTION(java_last_exception_clear)
 {
+  JG_FETCH();
+
   jlong result = 0;
   jmethodID clearEx;
 
+  if (ZEND_NUM_ARGS()!=0) WRONG_PARAM_COUNT;
+
   (pval*)(long)result = return_value;
   
-  clearEx = (*jenv)->GetStaticMethodID(jenv, php_reflect, "clearException",
-          "()V");
+  clearEx = (*JG(jenv))->GetMethodID(JG(jenv), JG(reflect_class), 
+          "clearException", "()V");
 
-  (*jenv)->CallStaticVoidMethod(jenv, php_reflect, clearEx);
+  (*JG(jenv))->CallVoidMethod(JG(jenv), JG(php_reflect), clearEx);
 }
 
 /***************************************************************************/
@@ -417,6 +458,9 @@ PHP_FUNCTION(java_last_exception_clear)
 static pval _java_getset_property
   (zend_property_reference *property_reference, jobjectArray value)
 {
+  JG_FETCH();
+  JNIEnv *jenv = JG(jenv);
+
   pval presult;
   jlong result = 0;
   pval **pobject;
@@ -441,10 +485,10 @@ static pval _java_getset_property
       "Attempt to access a Java property on a non-Java object");
   } else {
     /* invoke the method */
-    jmethodID gsp = (*jenv)->GetStaticMethodID(jenv, php_reflect, "GetSetProp",
+    jmethodID gsp = (*jenv)->GetMethodID(jenv, JG(reflect_class), "GetSetProp",
       "(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;J)V");
-    (*jenv)->CallStaticVoidMethod
-       (jenv, php_reflect, gsp, obj, propName, value, result);
+    (*jenv)->CallVoidMethod
+       (jenv, JG(php_reflect), gsp, obj, propName, value, result);
   }
 
   (*jenv)->DeleteLocalRef(jenv, propName);
@@ -472,8 +516,15 @@ int java_set_property_handler
 /***************************************************************************/
 
 static void _php_java_destructor(void *jobject) {
-  if (jenv) (*jenv)->DeleteGlobalRef(jenv, jobject);
+  JG_FETCH();
+  if (JG(jenv)) (*JG(jenv))->DeleteGlobalRef(JG(jenv), jobject);
 }
+
+#ifdef ZTS
+static void alloc_java_globals_ctor(php_java_globals *java_globals) {
+  memset(java_globals, 0, sizeof(php_java_globals));
+}
+#endif
 
 PHP_MINIT_FUNCTION(java) {
   INIT_OVERLOADED_CLASS_ENTRY(java_class_entry, "java", NULL,
@@ -494,13 +545,19 @@ PHP_MINIT_FUNCTION(java) {
     libpath=PG(extension_dir);
   }
 
+#ifdef ZTS
+  java_globals_id = ts_allocate_id(sizeof(php_java_globals), 
+    (ts_allocate_ctor)alloc_java_globals_ctor, NULL);
+#endif
+
   return SUCCESS;
 }
 
 
 PHP_MSHUTDOWN_FUNCTION(java) {
+  JG_FETCH();
   UNREGISTER_INI_ENTRIES();
-  if (jvm) jvm_destroy();
+  if (JG(jvm)) jvm_destroy();
   return SUCCESS;
 }
 
@@ -620,8 +677,16 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setException
 JNIEXPORT void JNICALL Java_net_php_reflect_setEnv
   (JNIEnv *newJenv, jclass self)
 {
+  JG_FETCH();
+  jobject local_php_reflect;
+
   iniUpdated=0;
-  jenv=newJenv;
-  if (!self) self = (*jenv)->FindClass(jenv, "net/php/reflect");
-  php_reflect = (*jenv)->NewGlobalRef(jenv, self);
+  JG(jenv)=newJenv;
+
+  if (!self) self = (*JG(jenv))->FindClass(JG(jenv), "net/php/reflect");
+  JG(reflect_class) = self;
+
+  if (JG(php_reflect)) (*JG(jenv))->DeleteGlobalRef(JG(jenv), JG(php_reflect));
+  local_php_reflect = (*JG(jenv))->AllocObject(JG(jenv), JG(reflect_class));
+  JG(php_reflect) = (*JG(jenv))->NewGlobalRef(JG(jenv), local_php_reflect);
 }
