@@ -1432,23 +1432,23 @@ PHP_FUNCTION(mssql_result)
 	}
 	
 	convert_to_long_ex(row);
-	if ((*row)->value.lval < 0 || (*row)->value.lval> = result->num_rows) {
-		php_error(E_WARNING,"MS SQL:  Bad row offset (%d)",row->value.lval);
+	if ((*row)->value.lval < 0 || (*row)->value.lval >= result->num_rows) {
+		php_error(E_WARNING,"MS SQL:  Bad row offset (%d)", (*row)->value.lval);
 		RETURN_FALSE;
 	}
 
-	switch(field->type) {
+	switch((*field)->type) {
 		case IS_STRING: {
 			int i;
 
 			for (i=0; i<result->num_fields; i++) {
-				if (!strcasecmp(result->fields[i].name,field->value.str.val)) {
+				if (!strcasecmp(result->fields[i].name, (*field)->value.str.val)) {
 					field_offset = i;
 					break;
 				}
 			}
 			if (i>=result->num_fields) { /* no match found */
-				php_error(E_WARNING,"MS SQL:  %s field not found in result",field->value.str.val);
+				php_error(E_WARNING,"MS SQL:  %s field not found in result", (*field)->value.str.val);
 				RETURN_FALSE;
 			}
 			break;
