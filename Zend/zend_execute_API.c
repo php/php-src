@@ -141,6 +141,7 @@ void init_executor(TSRMLS_D)
 	EG(in_autoload) = 0;
 
 	zend_ptr_stack_init(&EG(argument_stack));
+	zend_ptr_stack_push(&EG(argument_stack), (void *) NULL);
 
 	zend_hash_init(&EG(symbol_table), 50, NULL, ZVAL_PTR_DTOR, 0);
 	{
