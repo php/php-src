@@ -297,8 +297,8 @@ function_entry basic_functions[] = {
 
 
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY("highlight.string",	"#foobar",	PHP_INI_ALL,		NULL,		NULL)
-	PHP_INI_ENTRY("test2",				"testing",	PHP_INI_SYSTEM,		NULL,		NULL)
+	PHP_INI_ENTRY1("highlight.string",	"#foobar",	PHP_INI_ALL,		NULL,		NULL)
+	PHP_INI_ENTRY1("test2",				"testing",	PHP_INI_SYSTEM,		NULL,		NULL)
 PHP_INI_END()
 
 

@@ -106,17 +106,17 @@ int php_register_ini_entries(php_ini_entry *ini_entry, int module_number)
 			return FAILURE;
 		}
 		if (hashed_ini_entry->on_modify) {
-			hashed_ini_entry->on_modify(hashed_ini_entry, hashed_ini_entry->value, hashed_ini_entry->value_length, hashed_ini_entry->mh_arg);
+			hashed_ini_entry->on_modify(hashed_ini_entry, hashed_ini_entry->value, hashed_ini_entry->value_length, hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3);
 		}
 		if ((default_value=cfg_get_entry(p->name, p->name_length))) {
 			if (!hashed_ini_entry->on_modify
-				|| hashed_ini_entry->on_modify(hashed_ini_entry, default_value->value.str.val, default_value->value.str.len, hashed_ini_entry->mh_arg)==SUCCESS) {
+				|| hashed_ini_entry->on_modify(hashed_ini_entry, default_value->value.str.val, default_value->value.str.len, hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3)==SUCCESS) {
 				hashed_ini_entry->value = default_value->value.str.val;
 				hashed_ini_entry->value_length = default_value->value.str.len;
 			}
 		} else {
 			if (hashed_ini_entry->on_modify) {
-				hashed_ini_entry->on_modify(hashed_ini_entry, hashed_ini_entry->value, hashed_ini_entry->value_length, hashed_ini_entry->mh_arg);
+				hashed_ini_entry->on_modify(hashed_ini_entry, hashed_ini_entry->value, hashed_ini_entry->value_length, hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3);
 			}
 		}
 		hashed_ini_entry->modified = 0;
@@ -148,7 +148,7 @@ int php_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_
 	duplicate = estrndup(new_value, new_value_length);
 	
 	if (!ini_entry->on_modify
-		|| ini_entry->on_modify(ini_entry, duplicate, new_value_length, ini_entry->mh_arg)==SUCCESS) {
+		|| ini_entry->on_modify(ini_entry, duplicate, new_value_length, ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3)==SUCCESS) {
 		if (!ini_entry->orig_value) {
 			ini_entry->orig_value = ini_entry->value;
 			ini_entry->orig_value_length = ini_entry->value_length;
@@ -249,7 +249,7 @@ PHP_INI_MH(OnUpdateInt)
 	base = (char *) core_globals;
 #endif
 
-	p = (long *) (base+(size_t) mh_arg);
+	p = (long *) (base+(size_t) mh_arg1);
 
 	*p = atoi(new_value);
 	return SUCCESS;
@@ -268,7 +268,7 @@ PHP_INI_MH(OnUpdateReal)
 	base = (char *) core_globals;
 #endif
 
-	p = (double *) (base+(size_t) mh_arg);
+	p = (double *) (base+(size_t) mh_arg1);
 
 	*p = strtod(new_value, NULL);
 	return SUCCESS;
@@ -287,7 +287,7 @@ PHP_INI_MH(OnUpdateString)
 	base = (char *) core_globals;
 #endif
 
-	p = (char **) (base+(size_t) mh_arg);
+	p = (char **) (base+(size_t) mh_arg1);
 
 	*p = new_value;
 	return SUCCESS;
@@ -310,7 +310,7 @@ PHP_INI_MH(OnUpdateStringUnempty)
 		return FAILURE;
 	}
 
-	p = (char **) (base+(size_t) mh_arg);
+	p = (char **) (base+(size_t) mh_arg1);
 
 	*p = new_value;
 	return SUCCESS;

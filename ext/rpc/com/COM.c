@@ -213,8 +213,8 @@ static PHP_INI_MH(OnTypelibFileChange)
 
 
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY("allow_dcom",			"0",		PHP_INI_SYSTEM,		NULL,					NULL)
-	PHP_INI_ENTRY("typelib_file",		NULL,		PHP_INI_SYSTEM,		OnTypelibFileChange,	NULL)
+	PHP_INI_ENTRY1("allow_dcom",			"0",		PHP_INI_SYSTEM,		NULL,					NULL)
+	PHP_INI_ENTRY1("typelib_file",		NULL,		PHP_INI_SYSTEM,		OnTypelibFileChange,	NULL)
 PHP_INI_END()
 
 
