@@ -1,3 +1,51 @@
+2003-09-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c
+      sapi/cgi/libfcgi/fcgiapp.c
+      sapi/cgi/libfcgi/os_unix.c
+      sapi/cgi/libfcgi/os_win32.c
+      sapi/cgi/libfcgi/include/fastcgi.h
+      sapi/cgi/libfcgi/include/fcgi_config_win32.h
+      sapi/cgi/libfcgi/include/fcgi_stdio.h
+      sapi/cgi/libfcgi/include/fcgiapp.h
+      sapi/cgi/libfcgi/include/fcgimisc.h
+      sapi/cgi/libfcgi/include/fcgio.h
+      sapi/cgi/libfcgi/include/fcgios.h:
+      Major bug fix upgrade to the bundled libfcgi
+      
+      A delta between libfcgi 2.2.2 and 2.4.1-SNAP has been applied to the
+      source.  Shane's impersonation, putenv and exit->return improvements
+      have been carried over.  One of Shane's changes caused the first process
+      to hang after one request.  The modification has been deactived
+      (os_win32.c).
+      
+      These changes together with a patch to mod_fastcgi, make
+      Apache/mod_fastcgi
+      and PHP work under Win32.  It was basically unusable before that.
+
+2003-09-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/sqlite.c:
+      - return correct hash constants
+      - check for 'memory' in sqlite_factory() too (noticed by John Coggeshal)
+
+2003-09-21  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/xp_ssl.c:
+      Merge remaining code from 4.3 to fix #22238 in HEAD.
+
+2003-09-21  Uwe Steinmann  <uwe@steinmann.cx>
+
+    * ext/dbase/dbase.c:
+      - fixed typo in error message
+
+2003-09-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+      Alias session_commit to session_write_close, a more intuitive name
+      for the functionality.
+
 2003-09-20  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/standard/string.c:
