@@ -52,7 +52,7 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 # include <io.h>
 # include <fcntl.h>
 #endif

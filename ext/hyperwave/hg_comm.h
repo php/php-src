@@ -97,7 +97,7 @@
 #define COLLECTION                    1
 
 
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 # define SOCK_ERR INVALID_SOCKET
 # define SOCK_CONN_ERR SOCKET_ERROR
 # define HWSOCK_FCLOSE(s) closesocket(s)

@@ -42,7 +42,7 @@
 #include "ext/standard/head.h"
 #include "php_ini.h"
 
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 #include <winsock.h>
 
 #define ODBC_TYPE "Win32"
@@ -444,7 +444,7 @@ PHP_MINFO_FUNCTION(odbc)
 	sprintf(buf, "%ld", ODBCG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
 	php_info_print_table_row(2, "ODBC library", PHP_ODBC_TYPE);
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 	php_info_print_table_row(2, "ODBC_INCLUDE", PHP_ODBC_INCLUDE);
 	php_info_print_table_row(2, "ODBC_LFLAGS", PHP_ODBC_LFLAGS);
 	php_info_print_table_row(2, "ODBC_LIBS", PHP_ODBC_LIBS);

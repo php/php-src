@@ -42,7 +42,7 @@
 #ifdef PHP_31
 #include "os/nt/flock.h"
 #else
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 #include "win32/flock.h"
 #else
 #include <sys/file.h>
