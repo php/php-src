@@ -39,7 +39,7 @@ php_sprintf (char*s, const char* format, ...)
   return strlen (s);
 }
 
-#endif /* BROKEN_SPRINTF */
+#endif /* PHP_BROKEN_SPRINTF */
 
 /*
  * Local variables:
