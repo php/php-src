@@ -123,8 +123,7 @@ php_stream_ops php_stream_input_ops = {
 
 php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
-	FILE * fp = NULL;
-	php_stream * stream = NULL;
+	int fd = -1;
 
 	if (!strncasecmp(path, "php://", 6))
 		path += 6;
@@ -138,19 +137,17 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 	}  
 	
 	if (!strcasecmp(path, "stdin")) {
-		fp = fdopen(dup(STDIN_FILENO), mode);
+		fd = STDIN_FILENO;
 	} else if (!strcasecmp(path, "stdout")) {
-		fp = fdopen(dup(STDOUT_FILENO), mode);
+		fd = STDOUT_FILENO;
 	} else if (!strcasecmp(path, "stderr")) {
-		fp = fdopen(dup(STDERR_FILENO), mode);
+		fd = STDERR_FILENO;
 	}
 
-	if (fp)	{
-		stream = php_stream_fopen_from_file(fp, mode);
-		if (stream == NULL)
-			fclose(fp);
+	if (fd != -1) {
+		return php_stream_fopen_from_fd(fd, mode, NULL);
 	}
-	return stream;
+	return NULL;
 }
 
 static php_stream_wrapper_ops php_stdio_wops = {
