@@ -37,8 +37,8 @@ typedef struct {
 extern zend_module_entry php_zlib_module_entry;
 #define zlib_module_ptr &php_zlib_module_entry
 
-extern PHP_MINIT_FUNCTION(zlib);
-extern PHP_MSHUTDOWN_FUNCTION(zlib);
+PHP_MINIT_FUNCTION(zlib);
+PHP_MSHUTDOWN_FUNCTION(zlib);
 PHP_MINFO_FUNCTION(zlib);
 PHP_FUNCTION(gzopen);
 PHP_FUNCTION(gzclose);
