@@ -124,6 +124,7 @@ PHPAPI int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage TSRMLS_DC
 /* com_dotnet.c */
 PHP_FUNCTION(com_dotnet_create_instance);
 void php_com_dotnet_rshutdown(TSRMLS_D);
+void php_com_dotnet_mshutdown(TSRMLS_D);
 
 /* com_misc.c */
 zval *php_com_throw_exception(char *message TSRMLS_DC);

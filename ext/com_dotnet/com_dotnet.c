@@ -49,7 +49,7 @@ static int dotnet_init(TSRMLS_D)
 	IUnknown *unk = NULL;
 	OLECHAR *olename;
 
-	stuff = emalloc(sizeof(*stuff));
+	stuff = malloc(sizeof(*stuff));
 	memset(stuff, 0, sizeof(*stuff));
 
 	if (SUCCEEDED(CoCreateInstance(&CLSID_CorRuntimeHost, NULL, CLSCTX_ALL,
@@ -84,7 +84,7 @@ static int dotnet_init(TSRMLS_D)
 			ICorRuntimeHost_Stop(stuff->dotnet_host);
 			ICorRuntimeHost_Release(stuff->dotnet_host);
 		}
-		efree(stuff);
+		free(stuff);
 
 		return FAILURE;
 	}
@@ -178,18 +178,30 @@ PHP_FUNCTION(com_dotnet_create_instance)
 }
 /* }}} */
 
+void php_com_dotnet_mshutdown(TSRMLS_D)
+{
+	struct dotnet_runtime_stuff *stuff = COMG(dotnet_runtime_stuff);
+	
+	if (stuff->dotnet_domain) {
+		IDispatch_Release(stuff->dotnet_domain);
+	}
+	if (stuff->dotnet_host) {
+		ICorRuntimeHost_Stop(stuff->dotnet_host);
+		ICorRuntimeHost_Release(stuff->dotnet_host);
+		stuff->dotnet_host = NULL;
+	}
+	free(stuff);
+	COMG(dotnet_runtime_stuff) = NULL;
+}
 
 void php_com_dotnet_rshutdown(TSRMLS_D)
 {
 	struct dotnet_runtime_stuff *stuff = COMG(dotnet_runtime_stuff);
 	
-	IDispatch_Release(stuff->dotnet_domain);
-	ICorRuntimeHost_Stop(stuff->dotnet_host);
-	ICorRuntimeHost_Release(stuff->dotnet_host);
-
-	efree(stuff);
-
-	COMG(dotnet_runtime_stuff) = NULL;
+	if (stuff->dotnet_domain) {
+		IDispatch_Release(stuff->dotnet_domain);
+		stuff->dotnet_domain = NULL;
+	}
 }
 
 #endif /* HAVE_MSCOREE_H */
