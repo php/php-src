@@ -364,7 +364,7 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len)
 					ptr++;
 				}
 				mimetype = estrdup(ptr);
-				newlen = sapi_apply_default_charset(&mimetype, len);
+				newlen = sapi_apply_default_charset(&mimetype, len SLS_CC);
 				if (newlen != 0) {
 					newlen += sizeof("Content-type: ");
 					newheader = emalloc(newlen);
