@@ -566,9 +566,6 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 		zend_message_dispatcher(ZMSG_FAILED_HIGHLIGHT_FOPEN, filename);
 		return FAILURE;
 	}
-	if (file_handle.opened_path) {
-		free(file_handle.opened_path);
-	}
 	zend_highlight(syntax_highlighter_ini);
 	zend_close_file_handle(&file_handle CLS_CC);
 	restore_lexical_state(&original_lex_state CLS_CC);
