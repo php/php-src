@@ -17,13 +17,13 @@ AC_DEFUN(AC_FIND_SOLID_LIBS,[
 		ac_solid_os=lux
 	fi;; 
     SunOS) ac_solid_os=ssx;; # should we deal with SunOS 4?
-    FreeBSD) if test "$ac_solid_uname_r" -lt "3"; then
+    FreeBSD) if test `expr $ac_solid_uname_r : '\(.\)'` -gt "2"; then
         AC_DEFINE(SS_FBX,1,[Needed in sqlunix.h for wchar defs ])
 	ac_solid_os=fex
-      else
+       else 
         AC_DEFINE(SS_FBX,1,[Needed in sqlunix.h for wchar defs ])
 	ac_solid_os=fbx
-      fi;;
+       fi	
     # "uname -s" on SCO makes no sense.
   esac
 
@@ -39,21 +39,24 @@ AC_DEFUN(AC_FIND_SOLID_LIBS,[
   fi
 
   ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so | cut -d' ' -f1`
-  if test ! -f $ODBC_LIBS; then
-    ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a | cut -d' ' -f1`
-  fi
-  if test ! -f $ODBC_LIBS; then
-      ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so| cut -d' ' -f1`
-  fi
-  if test ! -f $ODBC_LIBS; then
-      ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a | cut -d' ' -f1`
-  fi
-  if test ! -f $ODBC_LIBS; then
-      ODBC_LIBS=`echo $1/bcl${ac_solid_os}*.so | cut -d' ' -f1`
-  fi
-  if test ! -f $ODBC_LIBS; then
-      ODBC_LIBS=`echo $1/bcl${ac_solid_os}*.a | cut -d' ' -f1`
-  fi
+ if test ! -f $ODBC_LIBS; then
+   echo $ODBC_LIBS
+   ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a | cut -d' ' -f1`
+ fi
+ if test ! -f $ODBC_LIBS; then
+     echo $ODBC_LIBS
+     ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so| cut -d' ' -f1`
+ fi
+ if test ! -f $ODBC_LIBS; then
+    $ODBC_LIBS
+     ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a | cut -d' ' -f1`
+ fi
+if test ! -f $ODBC_LIBS; then
+     ODBC_LIBS=`echo $1/bcl${ac_solid_os}*.so | cut -d' ' -f1`
+ fi
+ if test ! -f $ODBC_LIBS; then
+     ODBC_LIBS=`echo $1/bcl${ac_solid_os}*.a | cut -d' ' -f1`
+ fi
   AC_MSG_RESULT(`echo $ODBC_LIBS | sed -e 's!.*/!!'`)
 ])
 
