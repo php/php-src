@@ -30,12 +30,14 @@
 #include "php_mysqli.h"
 
 
-/* {{{ proto long mysqli_affected_rows(resource link)
+/* {{{ proto mixed mysqli_affected_rows(resource link)
 */
 PHP_FUNCTION(mysqli_affected_rows)
 {
-	MYSQL *mysql;
-	zval  *mysql_link;
+	MYSQL 			*mysql;
+	zval  			*mysql_link;
+	my_ulonglong	rc;
+	char			ret[40];
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
@@ -43,7 +45,12 @@ PHP_FUNCTION(mysqli_affected_rows)
 
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link"); 
 
-	RETURN_LONG(mysql_affected_rows(mysql));
+	rc = mysql_affected_rows(mysql);
+	if (rc != (long)rc) {
+		sprintf((char *)&ret, "%llu", rc);
+		RETURN_STRING(ret,1);
+	} 
+	RETURN_LONG(rc);
 }
 /* }}} */
 
@@ -112,7 +119,7 @@ PHP_FUNCTION(mysqli_bind_param)
 		efree(args);
 		RETURN_FALSE;
 	}
-
+	stmt->is_null = ecalloc(num_vars, sizeof(char));
 	bind = (MYSQL_BIND *)ecalloc(num_vars, sizeof(MYSQL_BIND));
 
 	for (i=start; i < num_vars * 2 + start; i+=2) {
@@ -988,14 +995,14 @@ PHP_FUNCTION(mysqli_init)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_insert_id(resource link)
+/* {{{ proto mixed mysqli_insert_id(resource link)
 */
 PHP_FUNCTION(mysqli_insert_id)
 {
-	MYSQL *mysql;
-	my_ulonglong rc;
-	char  ret[50];
-	zval  *mysql_link;
+	MYSQL		 	*mysql;
+	my_ulonglong 	rc;
+	char  			ret[50];
+	zval  			*mysql_link;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
@@ -1004,11 +1011,10 @@ PHP_FUNCTION(mysqli_insert_id)
 	rc = mysql_insert_id(mysql);
 
 	if (rc != (long)rc) {
-		sprintf((char *)&ret, "%lld", rc);
+		sprintf((char *)&ret, "%llu", rc);
 		RETURN_STRING(ret,1);
-	} else {
-		RETURN_LONG(rc);
-	}
+	} 
+	RETURN_LONG(rc);
 }
 /* }}} */
 
@@ -1179,10 +1185,6 @@ PHP_FUNCTION(mysqli_prepare)
 	if (!stmt->stmt) {
 		efree(stmt);
 		RETURN_FALSE;
-	}
-
-	if (mysql_param_count(stmt->stmt)) {
-		stmt->is_null = (char *)emalloc(mysql_param_count(stmt->stmt));
 	}
 
 	MYSQLI_RETURN_RESOURCE(stmt, mysqli_stmt_class_entry);
@@ -1495,9 +1497,34 @@ PHP_FUNCTION(mysqli_store_result)
 }
 /* }}} */
 
+/* {{{ proto mixed mysqli_stmt_affected_rows(object stmt)
+*/
+PHP_FUNCTION(mysqli_stmt_affected_rows)
+{
+	STMT 			*stmt;
+	zval    		*mysql_stmt;
+	my_ulonglong	rc;
+	char			ret[50];
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(stmt, STMT *, &mysql_stmt, "mysqli_stmt");
+
+	rc = mysql_stmt_affected_rows(stmt->stmt);
+	if (rc != (long)rc) {
+		sprintf((char *)&ret, "%llu", rc);
+		RETURN_STRING(ret, 1); 
+	}
+
+	RETURN_LONG(rc);
+}
+/* }}} */
+
 /* {{{ proto bool mysqli_stmt_close(resource stmt) 
    close statement */
-PHP_FUNCTION(mysqli_stmt_close) {
+PHP_FUNCTION(mysqli_stmt_close)
+{
 	STMT 	*stmt;
 	zval    *mysql_stmt;
 

@@ -34,6 +34,7 @@
 PHP_FUNCTION(mysqli_connect)
 {
 	MYSQL *mysql;
+	zval  *object = getThis();
 	char *hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
 	unsigned int hostname_len, username_len, passwd_len, dbname_len, socket_len;
 	unsigned int port=0;
@@ -69,7 +70,11 @@ PHP_FUNCTION(mysqli_connect)
 		RETURN_FALSE;
 	}
 
-	MYSQLI_RETURN_RESOURCE(mysql, mysqli_link_class_entry);	
+	if (!object) {
+		MYSQLI_RETURN_RESOURCE(mysql, mysqli_link_class_entry);	
+	} else {
+		((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr = mysql;
+	}
 }
 /* }}} */
 
