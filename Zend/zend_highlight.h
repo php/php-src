@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _HIGHLIGHT_H
-#define _HIGHLIGHT_H
+#ifndef ZEND_HIGHLIGHT_H
+#define ZEND_HIGHLIGHT_H
 
 #define HL_COMMENT_COLOR     "#FF8000"    /* orange */
 #define HL_DEFAULT_COLOR     "#0000BB"    /* blue */

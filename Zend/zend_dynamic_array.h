@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _DYNAMIC_ARRAY_H
-#define _DYNAMIC_ARRAY_H
+#ifndef ZEND_DYNAMIC_ARRAY_H
+#define ZEND_DYNAMIC_ARRAY_H
 
 typedef struct _dynamic_array {
 	char *array;

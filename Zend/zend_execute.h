@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _EXECUTE_H
-#define _EXECUTE_H
+#ifndef ZEND_EXECUTE_H
+#define ZEND_EXECUTE_H
 
 #include "zend_compile.h"
 #include "zend_hash.h"
@@ -229,4 +229,4 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 #define IS_OVERLOADED_OBJECT 1
 #define IS_STRING_OFFSET 2
 
-#endif /* _EXECUTE_H */
+#endif /* ZEND_EXECUTE_H */

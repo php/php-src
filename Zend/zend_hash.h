@@ -17,8 +17,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef _HASH_
-#define _HASH_
+#ifndef ZEND_HASH_H
+#define ZEND_HASH_H
 
 #include <sys/types.h>
 
@@ -193,4 +193,4 @@ END_EXTERN_C()
 	zend_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
 
 
-#endif							/* _HASH_ */
+#endif							/* ZEND_HASH_H */
