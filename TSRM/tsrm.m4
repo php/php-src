@@ -1,3 +1,15 @@
+AC_DEFUN(TSRM_CHECK_GCC_ARG,[
+  AC_MSG_CHECKING(whether $CC supports $1)
+  > conftest.c
+  cmd='$CC $1 -c conftest.c'
+  if eval $cmd 2>&1 | egrep -e $1 >/dev/null ; then
+    $2=no
+  else
+    $2=yes
+  fi
+  AC_MSG_RESULT($$2)
+  rm -f conftest.*
+])
 
 AC_DEFUN(TSRM_BASIC_CHECKS,[
 
@@ -31,11 +43,24 @@ AC_MSG_RESULT(yes - installed in $PTH_PREFIX)
 
 AC_DEFUN(TSRM_CHECK_PTHREADS,[
 
-dnl Check for FreeBSD/Linux -pthread option
-
 old_LDFLAGS="$LDFLAGS"
-LDFLAGS="$LDFLAGS -pthread"
-AC_CHECK_FUNCS(pthread_kill)
+
+if test -n "$GCC"; then
+  dnl FreeBSD/Linux 
+  TSRM_CHECK_GCC_ARG(-pthread, gcc_pthread)
+
+  if test "$gcc_pthread" = "yes"; then
+    LDFLAGS="$LDFLAGS -pthread"
+  else
+    dnl gcc on Solaris
+    TSRM_CHECK_GCC_ARG(-pthreads, gcc_pthreads)
+    if test "$gcc_pthreads" = "yes"; then
+      LDFLAGS="$LDFLAGS -pthreads"
+    fi
+  fi
+
+  AC_CHECK_FUNCS(pthread_kill)
+fi
 
 if test "$ac_cv_func_pthread_kill" != "yes"; then
   LDFLAGS="$old_LDFLAGS"
