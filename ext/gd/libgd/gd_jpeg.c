@@ -281,9 +281,8 @@ gdImageCreateFromJpegCtx (gdIOCtx * infile)
   volatile JSAMPROW row = 0;
   volatile gdImagePtr im = 0;
   JSAMPROW rowptr[1];
-  JDIMENSION i, j;
+  int i, j, retval;
   JDIMENSION nrows;
-  int retval;
 
 #ifdef JPEG_DEBUG
   printf ("gd-jpeg: gd JPEG version %s\n", GD_JPEG_VERSION);
@@ -812,7 +811,7 @@ term_destination (j_compress_ptr cinfo)
   /* Write any data remaining in the buffer */
   if (datacount > 0)
     {
-      if ((size_t)gdPutBuf (dest->buffer, datacount, dest->outfile) != datacount)
+      if (gdPutBuf (dest->buffer, datacount, dest->outfile) != datacount)
 	ERREXIT (cinfo, JERR_FILE_WRITE);
     }
 }
