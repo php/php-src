@@ -109,24 +109,6 @@ typedef struct _php_mysql_conn {
 	int active_result_id;
 } php_mysql_conn;
 
-static int _rollback_mysql_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
-{
-	php_mysql_conn *link;
-	char	query[128];
-
-	/* check if its a persistent link */
-	if (Z_TYPE_P(rsrc) != le_plink) 
-		return 0;
-
-	link = (php_mysql_conn *) rsrc->ptr;
-
-	/* rollback possible transactions */
-	strcpy (query, "ROLLBACK");
-	mysql_real_query(&link->conn, query, strlen(query));
-
-	return 0;	
-}
-
 /* {{{ mysql_functions[]
  */
 function_entry mysql_functions[] = {
@@ -235,6 +217,27 @@ void timeout(int sig);
 
 #define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING, "%s(): A link to the server could not be established", get_active_function_name(TSRMLS_C)); RETURN_FALSE; } }
 
+/* {{{ _rollback_mysql_transactions
+ */
+static int _rollback_mysql_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+	php_mysql_conn *link;
+	char	query[128];
+
+	/* check if its a persistent link */
+	if (Z_TYPE_P(rsrc) != le_plink) 
+		return 0;
+
+	link = (php_mysql_conn *) rsrc->ptr;
+
+	/* rollback possible transactions */
+	strcpy (query, "ROLLBACK");
+	mysql_real_query(&link->conn, query, strlen(query));
+
+	return 0;	
+}
+/* }}} */
+
 /* {{{ _free_mysql_result
  * This wrapper is required since mysql_free_result() returns an integer, and
  * thus, cannot be used directly
@@ -246,8 +249,6 @@ static void _free_mysql_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	mysql_free_result(mysql_result);
 }
 /* }}} */
-
-
 
 /* {{{ php_mysql_set_default_link
  */
