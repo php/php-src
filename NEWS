@@ -3,6 +3,7 @@ PHP 4                                                                      NEWS
 ?? ??? 2003, Version 4.3.5
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
+- Fixed bug #26235 (yp_first/yp_next do not specify correct key length). (Ilia)
 - Fixed bug #26216 ("getimagesize(): stream does not support seeking" when
   using remote files). (Marcus)
 - Fixed bug #26201 (crash in ibase_trans() on invalid link handle). (Ilia)
