@@ -551,6 +551,10 @@ SOURCE=..\ext\dom\typeinfo.c
 
 SOURCE=..\ext\dom\userdatahandler.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\xpath.c
+# End Source File
 # End Group
 # Begin Group "DOM Header Files"
 
