@@ -80,7 +80,12 @@ typedef struct {
 	TT_Face				face;
 	TT_Face_Properties  properties;
 	TT_Instance			instance;
-	TT_CharMap			char_map;
+	TT_CharMap			char_map_Unicode;
+	TT_CharMap			char_map_Big5;
+	TT_CharMap			char_map_Roman;
+	int					have_char_map_Unicode;
+	int					have_char_map_Big5;
+	int					have_char_map_Roman;
 	TT_Matrix			matrix;
 	TT_Instance_Metrics	imetrics;
 	gdCache_head_t		*glyphCache;
@@ -152,6 +157,8 @@ static void bitmapRelease( void *element );
 
 /* local prototype */
 char *gdttfchar(gdImage *im, int fg, font_t *font, int x, int y, TT_F26Dot6 x1,  TT_F26Dot6 y1, TT_F26Dot6 *advance, TT_BBox **bbox, char **next);
+
+
 
 /********************************************************************
  * gdTcl_UtfToUniChar is borrowed from ...
@@ -328,7 +335,7 @@ fontFetch ( char **error, void *key )
 	TT_Error		err;
 	font_t			*a;
 	fontkey_t		*b=(fontkey_t *)key;
-	int				i, n;
+	int				i, n, map_found;
 	short			platform, encoding;
 
 	a = (font_t *)malloc(sizeof(font_t));
@@ -372,6 +379,10 @@ fontFetch ( char **error, void *key )
 	if (TT_Set_Instance_Resolutions(a->instance, RESOLUTION, RESOLUTION)) {
 		*error = "Could not set device resolutions";
 		return NULL;
+map_found = 0;
+a->have_char_map_Unicode = 0;
+a->have_char_map_Big5 = 0;
+a->have_char_map_Roman = 0;
 	}
 
 	if (TT_Set_Instance_CharSize(a->instance, (TT_F26Dot6)(a->ptsize*64))) {
@@ -385,14 +396,27 @@ fontFetch ( char **error, void *key )
 	n = TT_Get_CharMap_Count(a->face);
 
 	for (i = 0; i < n; i++) {
-		TT_Get_CharMap_ID(a->face, i, &platform, &encoding);
-		if ((platform == 3 && encoding == 1)  ||
-		    (platform == 2 && encoding == 1)  ||
-	  	    (platform == 0)) {
-			TT_Get_CharMap(a->face, i, &a->char_map);
-			i = n+1;
-		}
+        TT_Get_CharMap_ID(a->face, i, &platform, &encoding);
+		if ((platform == 3 && encoding == 1)           /* Windows Unicode */
+			|| (platform == 0 && encoding == 0)) {        /* ?? Unicode */
+			TT_Get_CharMap(a->face, i, &a->char_map_Unicode);
+			a->have_char_map_Unicode = 1;
+			map_found++;
+		} else if (platform == 3 && encoding == 4) {   /* Windows Big5 */
+			TT_Get_CharMap(a->face, i, &a->char_map_Big5);
+			a->have_char_map_Big5 = 1;
+			map_found++;
+		} else if (platform == 1 && encoding == 0) {   /* Apple Roman */
+			TT_Get_CharMap(a->face, i, &a->char_map_Roman);
+			a->have_char_map_Roman = 1;
+			map_found++;
+        }
 	}
+
+	if (! map_found) {
+		*error = "Unable to find a CharMap that I can handle";
+        return NULL;
+    }
 
 	if (i == n) {
 		*error = "Sorry, but this font doesn't contain any Unicode mapping table";
@@ -462,7 +486,13 @@ glyphFetch ( char **error, void *key )
 	if (a->hinting && b->font->angle == 0.0) {
 		flags |= TTLOAD_HINT_GLYPH;
 	}
-	glyph_code = TT_Char_Index(b->font->char_map, a->character);
+	if (b->font->have_char_map_Unicode) {
+		glyph_code = TT_Char_Index(b->font->char_map_Unicode, a->character);
+	} else if (a->character < 161 && b->font->have_char_map_Roman) {
+		glyph_code = TT_Char_Index(b->font->char_map_Roman, a->character);
+	} else if ( b->font->have_char_map_Big5) {
+		glyph_code = TT_Char_Index(b->font->char_map_Big5, a->character);
+	}
 	if ((err=TT_Load_Glyph(b->font->instance, a->glyph, glyph_code, flags))) {
 		*error = "TT_Load_Glyph problem";
 		return NULL;
@@ -657,8 +687,23 @@ gdttfchar(gdImage *im, int fg, font_t *font,
 	}
 	/**************/
 
-	len = gdTcl_UtfToUniChar(*next, &ch);
-	*next += len;
+	if (font->have_char_map_Unicode) { /* use UTF-8 mapping from ASCII */
+        len = gdTcl_UtfToUniChar(*next, &ch);
+        *next += len;
+	} else {
+	/*
+	 * Big 5 mapping:
+	 * use "JIS-8 half-width katakana" coding from 8-bit characters.  Ref:
+	 * ftp://ftp.ora.com/pub/examples/nutshell/ujip/doc/japan.inf-032092.sjs
+	 */
+		ch = (**next) & 255;         /* don't extend sign */
+		(*next)++;
+		if (ch >= 161                /* first code of JIS-8 pair */
+			&& **next) {                /* don't advance past '\0' */
+			ch = (ch * 256) + **next;
+			(*next)++;
+		}
+	}
 
 	glyphkey.character = ch;
 	glyphkey.hinting = 1;
