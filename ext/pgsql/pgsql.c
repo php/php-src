@@ -231,20 +231,34 @@ static void _close_pgsql_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ _notice_handler
+/* {{{ _php_pgsql_notice_handler
  */
-static void _notice_handler(void *arg, const char *message)
+static void _php_pgsql_notice_handler(void *resource_id, const char *message)
 {
+	php_pgsql_notice *notice;
+	
 	TSRMLS_FETCH();
-
 	if (! PGG(ignore_notices)) {
-		php_log_err((char *) message TSRMLS_CC);
-		if (PGG(last_notice)) {
-			efree(PGG(last_notice));
+		if (PGG(log_notices)) {
+			php_log_err((char *) message TSRMLS_CC);
 		}
-		PGG(last_notice_len) = strlen(message);
-		PGG(last_notice) = estrndup(message, PGG(last_notice_len));
+		notice = (php_pgsql_notice *)emalloc(sizeof(php_pgsql_notice));
+		notice->len = strlen(message);
+		notice->message = estrndup(message, notice->len);
+		zend_hash_index_update(&PGG(notices), *(int *)resource_id, (void **)&notice, sizeof(php_pgsql_notice *), NULL);
 	}
+}
+/* }}} */
+
+#define PHP_PGSQL_NOTICE_PTR_DTOR (void (*)(void *))_php_pgsql_notice_ptr_dtor
+
+/* {{{ _php_pgsql_notice_dtor
+ */
+static void _php_pgsql_notice_ptr_dtor(void **ptr) 
+{
+	php_pgsql_notice *notice = (php_pgsql_notice *)*ptr;
+ 	efree(notice->message);
+  	efree(notice);
 }
 /* }}} */
 
@@ -254,6 +268,7 @@ static int _rollback_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	PGconn *link;
 	PGresult *res;
+	int orig;
 
 	if (Z_TYPE_P(rsrc) != le_plink) 
 		return 0;
@@ -268,10 +283,11 @@ static int _rollback_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	while ((res = PQgetResult(link))) {
 		PQclear(res);
 	}
+	orig = PGG(ignore_notices);
 	PGG(ignore_notices) = 1;
 	res = PQexec(link,"BEGIN;ROLLBACK;");
 	PQclear(res);
-	PGG(ignore_notices) = 0;
+	PGG(ignore_notices) = orig;
 
 	return 0;
 }
@@ -304,6 +320,8 @@ STD_PHP_INI_BOOLEAN("pgsql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateBool
 STD_PHP_INI_ENTRY_EX("pgsql.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_persistent,		php_pgsql_globals,		pgsql_globals,	display_link_numbers)
 STD_PHP_INI_ENTRY_EX("pgsql.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateInt,		max_links,			php_pgsql_globals,		pgsql_globals,	display_link_numbers)
 STD_PHP_INI_BOOLEAN("pgsql.auto_reset_persistent",	"0",	PHP_INI_SYSTEM,		OnUpdateBool,		auto_reset_persistent,	php_pgsql_globals,		pgsql_globals)
+STD_PHP_INI_BOOLEAN("pgsql.ignore_notice",	"0",	PHP_INI_ALL,		OnUpdateBool,		ignore_notices,	php_pgsql_globals,		pgsql_globals)
+STD_PHP_INI_BOOLEAN("pgsql.log_notice",	"0",	PHP_INI_ALL,		OnUpdateBool,		log_notices,	php_pgsql_globals,		pgsql_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -312,8 +330,9 @@ PHP_INI_END()
 static void php_pgsql_init_globals(php_pgsql_globals *pgsql_globals_p TSRMLS_DC)
 {
 	PGG(num_persistent) = 0;
-	PGG(ignore_notices) = 0;
 	PGG(auto_reset_persistent) = 0;
+	/* Initilize notice message hash at MINIT only */
+	zend_hash_init_ex(&PGG(notices), 0, NULL, PHP_PGSQL_NOTICE_PTR_DTOR, 1, 0); 
 }
 /* }}} */
 
@@ -374,7 +393,6 @@ PHP_RINIT_FUNCTION(pgsql)
 {
 	PGG(default_link)=-1;
 	PGG(num_links) = PGG(num_persistent);
-	PGG(last_notice) = NULL;
 	return SUCCESS;
 }
 /* }}} */
@@ -383,9 +401,9 @@ PHP_RINIT_FUNCTION(pgsql)
  */
 PHP_RSHUTDOWN_FUNCTION(pgsql)
 {
-	if (PGG(last_notice)) {
-		efree(PGG(last_notice));
-	}
+	/* clean up notice messages */
+	zend_hash_clean(&PGG(notices));
+	/* clean up persistent connection */
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) _rollback_transactions TSRMLS_CC);
 	return SUCCESS;
 }
@@ -545,8 +563,6 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				RETURN_FALSE;
 			}
 
- 			PQsetNoticeProcessor(pgsql, _notice_handler, NULL);
-
 			/* hash it up */
 			Z_TYPE(new_le) = le_plink;
 			new_le.ptr = pgsql;
@@ -588,8 +604,6 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				}
 			}
 			pgsql = (PGconn *) le->ptr;
-
- 			PQsetNoticeProcessor(pgsql, _notice_handler, NULL);
 		}
 		ZEND_REGISTER_RESOURCE(return_value, pgsql, le_plink);
 	} else {
@@ -638,8 +652,6 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			RETURN_FALSE;
 		}
 
-		PQsetNoticeProcessor(pgsql, _notice_handler, NULL);
-
 		/* add it to the list */
 		ZEND_REGISTER_RESOURCE(return_value, pgsql, le_link);
 
@@ -651,6 +663,10 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			RETURN_FALSE;
 		}
 		PGG(num_links)++;
+	}
+	/* set notice processer */
+	if (! PGG(ignore_notices) && Z_TYPE_P(return_value) == IS_RESOURCE) {
+		PQsetNoticeProcessor(pgsql, _php_pgsql_notice_handler, (void *)&Z_RESVAL_P(return_value));
 	}
 	efree(hashed_details);
 	php_pgsql_set_default_link(Z_LVAL_P(return_value) TSRMLS_CC);
@@ -986,11 +1002,22 @@ PHP_FUNCTION(pg_affected_rows)
    Returns the last notice set by the backend */
 PHP_FUNCTION(pg_last_notice) 
 {
-	if (PGG(last_notice)) {
-		RETURN_STRINGL(PGG(last_notice), PGG(last_notice_len), 1);
-	} else {       
+	zval *pgsql_link;
+	PGconn *pg_link;
+	int id = -1;
+	php_pgsql_notice **notice;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r",
+							  &pgsql_link) == FAILURE) {
+		return;
+	}
+	/* Just to check if user passed valid resoruce */
+	ZEND_FETCH_RESOURCE2(pg_link, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	if (zend_hash_index_find(&PGG(notices), Z_RESVAL_P(pgsql_link), (void **)&notice) == FAILURE) {
 		RETURN_FALSE;
 	}
+	RETURN_STRINGL((*notice)->message, (*notice)->len, 1);
 }
 /* }}} */
 
