@@ -115,6 +115,10 @@ int main() {
       AC_MSG_RESULT(no)
       PHP_DEFINE([ICONV_SUPPORTS_ERRNO],0,[ext/iconv])
       AC_DEFINE([ICONV_SUPPORTS_ERRNO],0,[Whether iconv supports error no or not])
+    ],[
+      AC_MSG_RESULT(no, cross-compiling)
+      PHP_DEFINE([ICONV_SUPPORTS_ERRNO],0,[ext/iconv])
+      AC_DEFINE([ICONV_SUPPORTS_ERRNO],0,[Whether iconv supports error no or not])
     ])
 
     AC_MSG_CHECKING([if your cpp allows macro usage in include lines])

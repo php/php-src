@@ -763,8 +763,8 @@ dnl PHP_REQUIRE_CXX
 dnl
 AC_DEFUN([PHP_REQUIRE_CXX],[
   if test -z "$php_cxx_done"; then
-    AC_PROG_CXX
-    AC_PROG_CXXCPP
+    AC_REQUIRE([AC_PROG_CXX])
+    AC_REQUIRE([AC_PROG_CXXCPP])
     php_cxx_done=yes
   fi
 ])
@@ -1046,6 +1046,8 @@ main() {
 }
   ],[
     ac_cv_time_r_type=irix
+  ],[
+    ac_cv_time_r_type=POSIX
   ],[
     ac_cv_time_r_type=POSIX
   ])
@@ -1631,7 +1633,13 @@ main() {
   exit(1);
 }
 
-], [cookie_io_functions_use_off64_t=yes], [])
+], [
+  cookie_io_functions_use_off64_t=yes
+], [
+  cookie_io_functions_use_off64_t=no
+], [
+  cookie_io_functions_use_off64_t=no
+])
     
     else
 
@@ -1831,7 +1839,7 @@ dnl It could be useful for those external libs, that have different precompiled
 dnl versions in different directories.
 dnl
 AC_DEFUN([PHP_CHECK_64BIT],[
-  AC_CHECK_SIZEOF(long int)
+  AC_CHECK_SIZEOF(long int, 4)
   AC_MSG_CHECKING([checking if we're at 64-bit platform])
   if test "$ac_cv_sizeof_long_int" = "4" ; then
     AC_MSG_RESULT([no])
