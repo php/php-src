@@ -491,7 +491,7 @@ CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, 
 
 	if (!apache_php_initialized) {
 		sapi_startup(&sapi_module);
-		php_module_startup(&sapi_module);
+		php_apache_startup(&sapi_module);
 		apache_php_initialized = 1;
 	}
 	per_dir_entry.type = mode;
