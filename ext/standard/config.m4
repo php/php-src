@@ -127,12 +127,12 @@ AC_ARG_WITH(system-regex,
 [  --with-system-regex     Do not use the bundled regex library],
 [
     if test "$withval" = "no"; then
-      HSREGEX=yes
+      WANT_HSREGEX=yes
     else
-	  HSREGEX=no
-	fi
+      WANT_HSREGEX=no
+    fi
 ],[
-    HSREGEX=yes
+    WANT_HSREGEX=yes
 ])
 	
 AC_CRYPT_CAP
