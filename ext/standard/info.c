@@ -300,7 +300,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_printf("<title>phpinfo()</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"></head>", charset);
 		PUTS("<body text=\"#000000\" bgcolor=\"#f0f0ff\" link=\"#0000ff\" vlink=\"#ff00ff\" alink=\"#0000ff\">");
 	} else {
-		PUTS("phpinfo()");
+		PUTS("phpinfo()\n");
 	}	
 
 	if (flag & PHP_INFO_GENERAL) {
