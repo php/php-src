@@ -518,7 +518,7 @@ PHP_FUNCTION(gzgetss)
 		RETURN_FALSE;
 	}
 
-	_php3_strip_tags(buf, len, ZLIBG(gzgetss_state), allow);
+	_php3_strip_tags(buf, len, ZLIBG(gzgetss_state), allow->value.str.val);
 	RETURN_STRING(buf, 0);
 	
 }
