@@ -347,6 +347,10 @@ PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t coun
 #define php_stream_write_string(stream, str)	_php_stream_write(stream, str, strlen(str) TSRMLS_CC)
 #define php_stream_write(stream, buf, count)	_php_stream_write(stream, (buf), (count) TSRMLS_CC)
 
+PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, ...);
+/* php_stream_printf macro & function require TSRMLS_CC */
+#define php_stream_printf _php_stream_printf
+
 PHPAPI int _php_stream_eof(php_stream *stream TSRMLS_DC);
 #define php_stream_eof(stream)	_php_stream_eof((stream) TSRMLS_CC)
 
