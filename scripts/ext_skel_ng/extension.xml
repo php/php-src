@@ -161,12 +161,16 @@ bar
       </code>
 		</function>
 		
-		<function name ="dummy_void">
+		<function name="dummy_void">
 			<proto>void dummy_void(void)</proto>
 		</function>
 
-		<function name ="dummy_void2">
+		<function name="dummy_void2">
 			<proto>void dummy_void2()</proto>
+		</function>
+
+		<function name="dummy_stream">
+		  <proto>stream dummy_stream(stream s)</proto>
 		</function>
 
   </functions>
