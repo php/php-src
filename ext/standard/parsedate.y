@@ -24,6 +24,10 @@
 # include "php_config.h"
 #endif
 
+#if WIN32||WINNT
+#include <malloc.h>
+#endif
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <time.h>
@@ -41,10 +45,12 @@
 #include <alloca.h>
 #endif
 
-#ifndef HAVE_TM_ZONE
-#ifndef _TIMEZONE
+#if WIN32||WINNT
+#include <time.h>
+#else
+#	if !defined(HAVE_TM_ZONE) && !defined(_TIMEZONE)
 extern time_t timezone;
-#endif
+#	endif
 #endif
 
 #define yylhs		date_yylhs

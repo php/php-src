@@ -363,6 +363,10 @@ SOURCE=.\ext\standard\pageinfo.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\standard\parsedate.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\pcre\php_pcre.c
 # End Source File
 # Begin Source File
@@ -735,6 +739,26 @@ BuildCmds= \
 "configuration-parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
 # End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\parsedate.y
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# Begin Custom Build
+InputPath=.\ext\standard\parsedate.y
+
+"ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd ext\standard 
+	bison --output=parsedate.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple"  parsedate.y 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
 
 !ENDIF 
 
