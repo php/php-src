@@ -6,6 +6,8 @@ PHP_ARG_WITH(ncurses, for ncurses support,
 [  --with-ncurses[=DIR]    Include ncurses support.])
 
 if test "$PHP_NCURSES" != "no"; then
+   PHP_CHECK_INTERACTIVE(ncurses)
+
    # --with-ncurses -> check with-path
    SEARCH_PATH="/usr/local /usr"     
    SEARCH_FOR="/include/curses.h"
