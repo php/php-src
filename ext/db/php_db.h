@@ -62,16 +62,16 @@ typedef struct dbm_info {
 #define phpext_db_ptr NULL
 #endif
 
-dbm_info *_php3_finddbm(pval *id,HashTable *list);
+dbm_info *php_find_dbm(pval *id,HashTable *list);
 int php_dbm_close(dbm_info *info);
 dbm_info *php_dbm_open(char *filename, char *mode);
 int php_dbm_insert(dbm_info *info, char *key, char *value);
 char *php_dbm_fetch(dbm_info *info, char *key);
 int php_dbm_replace(dbm_info *info, char *key, char *value);
-int _php3_dbmexists(dbm_info *info, char *key);
-int _php3_dbmdelete(dbm_info *info, char *key);
-char *_php3_dbmfirstkey(dbm_info *info);
-char *_php3_dbmnextkey(dbm_info *info, char *key);
+int php_dbm_exists(dbm_info *info, char *key);
+int php_dbm_delete(dbm_info *info, char *key);
+char *php_dbm_first_key(dbm_info *info);
+char *php_dbm_nextkey(dbm_info *info, char *key);
 
 /* db file functions */
 PHP_MINIT_FUNCTION(db);
