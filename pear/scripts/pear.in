@@ -1,5 +1,8 @@
-#!@prefix@/bin/php -Cq
-<?php // -*- PHP -*-
+#!/bin/sh
+PHP="@php_bin@"
+test "$PHP" = '@'php_bin'@' && PHP=php
+exec $PHP -C -q -d output_buffering=1 $0 $@
+<?php
 //
 // +----------------------------------------------------------------------+
 // | PHP Version 4                                                        |
@@ -21,6 +24,7 @@
 //
 // $Id$
 
+ob_end_clean();
 /**
  * @nodep Gtk
  */
@@ -287,6 +291,7 @@ function error_handler($errno, $errmsg, $file, $line, $vars) {
  * tab-width: 4
  * c-basic-offset: 4
  * indent-tabs-mode: nil
+ * mode: php
  * End:
  */
 // vim600:syn=php

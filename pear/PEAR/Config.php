@@ -27,60 +27,154 @@ require_once 'System.php';
  */
 $GLOBALS['_PEAR_Config_instance'] = null;
 
-// in case a --without-pear PHP installation is used
-if (!defined('PEAR_INSTALL_DIR')) {
-    define('PEAR_INSTALL_DIR', PHP_LIBDIR);
-}
-if (!defined('PEAR_EXTENSION_DIR')) {
-    define('PEAR_EXTENSION_DIR', PHP_EXTENSION_DIR);
-}
+// Below we define constants with default values for all configuration
+// parameters except username/password.  All of them can have their
+// defaults set through environment variables.  The reason we use the
+// PHP_ prefix is for some security, PHP protects environment
+// variables starting with PHP_*.
 
-define('PEAR_CONFIG_DEFAULT_BINDIR',
-       PHP_BINDIR);
-define('PEAR_CONFIG_DEFAULT_DOCDIR',
-       PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'docs');
-if (@is_dir(PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'lib')) {
-    define('PEAR_CONFIG_DEFAULT_PHPDIR',
-           PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'lib');
-} else {
-    define('PEAR_CONFIG_DEFAULT_PHPDIR',
-           PEAR_INSTALL_DIR);
-}
-define('PEAR_CONFIG_DEFAULT_DATADIR',
-       PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'data');
-define('PEAR_CONFIG_DEFAULT_TESTDIR',
-       PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'tests');
-
-define('PEAR_CONFIG_DEFAULT_CACHEDIR',
-       System::tmpdir() . DIRECTORY_SEPARATOR . 'pear' . DIRECTORY_SEPARATOR . 'cache');
-
-if (@is_dir(PHP_SYSCONFDIR)) {
+if (isset($_ENV['PHP_PEAR_SYSCONF_DIR'])) {
+    define('PEAR_CONFIG_SYSCONFDIR', $_ENV['PHP_PEAR_SYSCONF_DIR']);
+} elseif (isset($_ENV['SystemRoot'])) {
+    define('PEAR_CONFIG_SYSCONFDIR', $_ENV['SystemRoot']);
+} elseif (@is_dir(PHP_SYSCONFDIR)) {
     define('PEAR_CONFIG_SYSCONFDIR', PHP_SYSCONFDIR);
-} else {
-    // real bootstrapping nightmare
-    if (OS_WINDOWS) {
-        if (@is_dir(PHP_CONFIG_FILE_PATH)) {
-            define('PEAR_CONFIG_SYSCONFDIR', PHP_CONFIG_FILE_PATH);
-        } elseif (@is_dir('c:\winnt') && @file_exists('c:\winnt\php.ini')) {
-            define('PEAR_CONFIG_SYSCONFDIR', 'c:\winnt');
-        } elseif (@is_dir('c:\windows') && @file_exists('c:\windows\php.ini')) {
-            define('PEAR_CONFIG_SYSCONFDIR', 'c:\windows');
-        }
-    }
-    if (!defined('PEAR_CONFIG_SYSCONFDIR')) {
-        define('PEAR_CONFIG_SYSCONFDIR', PHP_SYSCONFDIR);
-    }
-}
-define('PEAR_DEFAULT_UMASK', umask());
-
-if (OS_WINDOWS) {
-    define('PEAR_DEFAULT_GPG_BIN', System::which('gpg', 'c:\gnupg\gpg.exe'));
-} else {
-    define('PEAR_DEFAULT_GPG_BIN', System::which('gpg', '/usr/local/bin/gpg'));
 }
 
-define('PEAR_DEFAULT_SIG_KEYDIR',
-       PEAR_CONFIG_SYSCONFDIR . DIRECTORY_SEPARATOR . 'pearkeys');
+// Default for master_server
+if (isset($_ENV['PHP_PEAR_MASTER_SERVER'])) {
+    define('PEAR_CONFIG_DEFAULT_MASTER_SERVER', $_ENV['PHP_PEAR_MASTER_SERVER']);
+} else {
+    define('PEAR_CONFIG_DEFAULT_MASTER_SERVER', 'pear.php.net');
+}
+
+// Default for http_proxy
+if (isset($_ENV['PHP_PEAR_HTTP_PROXY'])) {
+    define('PEAR_CONFIG_DEFAULT_HTTP_PROXY', $_ENV['PHP_PEAR_HTTP_PROXY']);
+} elseif (isset($_ENV['http_proxy'])) {
+    define('PEAR_CONFIG_DEFAULT_HTTP_PROXY', $_ENV['http_proxy']);
+} else {
+    define('PEAR_CONFIG_DEFAULT_HTTP_PROXY', '');
+}
+
+// Default for php_dir
+if (isset($_ENV['PHP_PEAR_INSTALL_DIR'])) {
+    define('PEAR_CONFIG_DEFAULT_PHP_DIR', $_ENV['PHP_PEAR_INSTALL_DIR']);
+} else {
+    if (@is_dir(PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'lib')) {
+        define('PEAR_CONFIG_DEFAULT_PHP_DIR',
+               PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'lib');
+    } else {
+        define('PEAR_CONFIG_DEFAULT_PHP_DIR', PEAR_INSTALL_DIR);
+    }
+}
+
+// Default for ext_dir
+if (isset($_ENV['PHP_PEAR_EXTENSION_DIR'])) {
+    define('PEAR_CONFIG_DEFAULT_EXT_DIR', $_ENV['PHP_PEAR_EXTENSION_DIR']);
+} else {
+    define('PEAR_CONFIG_DEFAULT_EXT_DIR', ini_get('extension_dir'));
+}
+
+// Default for doc_dir
+if (isset($_ENV['PHP_PEAR_DOC_DIR'])) {
+    define('PEAR_CONFIG_DEFAULT_DOC_DIR', $_ENV['PHP_PEAR_DOC_DIR']);
+} else {
+    define('PEAR_CONFIG_DEFAULT_DOC_DIR',
+           PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'docs');
+}
+
+// Default for bin_dir
+if (isset($_ENV['PHP_PEAR_BIN_DIR'])) {
+    define('PEAR_CONFIG_DEFAULT_BIN_DIR', $_ENV['PHP_PEAR_BIN_DIR']);
+} else {
+    define('PEAR_CONFIG_DEFAULT_BIN_DIR', PHP_BINDIR);
+}
+
+// Default for data_dir
+if (isset($_ENV['PHP_PEAR_DATA_DIR'])) {
+    define('PEAR_CONFIG_DEFAULT_DATA_DIR', $_ENV['PHP_PEAR_DATA_DIR']);
+} else {
+    define('PEAR_CONFIG_DEFAULT_DATA_DIR',
+           PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'data');
+}
+
+// Default for test_dir
+if (isset($_ENV['PHP_PEAR_TEST_DIR'])) {
+    define('PEAR_CONFIG_DEFAULT_TEST_DIR', $_ENV['PHP_PEAR_TEST_DIR']);
+} else {
+    define('PEAR_CONFIG_DEFAULT_TEST_DIR',
+           PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'tests');
+}
+
+// Default for cache_dir
+if (isset($_ENV['PHP_PEAR_CACHE_DIR'])) {
+    define('PEAR_CONFIG_DEFAULT_CACHE_DIR', $_ENV['PHP_PEAR_CACHE_DIR']);
+} else {
+    define('PEAR_CONFIG_DEFAULT_CACHE_DIR',
+           System::tmpdir() . DIRECTORY_SEPARATOR . 'pear' .
+           DIRECTORY_SEPARATOR . 'cache');
+}
+
+// Default for php_bin
+if (isset($_ENV['PHP_PEAR_PHP_BIN'])) {
+    define('PEAR_CONFIG_DEFAULT_PHP_BIN', $_ENV['PHP_PEAR_PHP_BIN']);
+} else {
+    define('PEAR_CONFIG_DEFAULT_PHP_BIN', PEAR_CONFIG_DEFAULT_BIN_DIR.
+           DIRECTORY_SEPARATOR.'php'.(OS_WINDOWS ? '.exe' : ''));
+}
+
+// Default for verbose
+if (isset($_ENV['PHP_PEAR_VERBOSE'])) {
+    define('PEAR_CONFIG_DEFAULT_VERBOSE', $_ENV['PHP_PEAR_VERBOSE']);
+} else {
+    define('PEAR_CONFIG_DEFAULT_VERBOSE', 1);
+}
+
+// Default for preferred_state
+if (isset($_ENV['PHP_PEAR_PREFERRED_STATE'])) {
+    define('PEAR_CONFIG_DEFAULT_PREFERRED_STATE', $_ENV['PHP_PEAR_PREFERRED_STATE']);
+} else {
+    define('PEAR_CONFIG_DEFAULT_PREFERRED_STATE', 'stable');
+}
+
+// Default for umask
+if (isset($_ENV['PHP_PEAR_UMASK'])) {
+    define('PEAR_CONFIG_DEFAULT_UMASK', $_ENV['PHP_PEAR_UMASK']);
+} else {
+    define('PEAR_CONFIG_DEFAULT_UMASK', umask());
+}
+
+// Default for cache_ttl
+if (isset($_ENV['PHP_PEAR_CACHE_TTL'])) {
+    define('PEAR_CONFIG_DEFAULT_CACHE_TTL', $_ENV['PHP_PEAR_CACHE_TTL']);
+} else {
+    define('PEAR_CONFIG_DEFAULT_CACHE_TTL', 0);
+}
+
+// Default for sig_type
+if (isset($_ENV['PHP_PEAR_SIG_TYPE'])) {
+    define('PEAR_CONFIG_DEFAULT_SIG_TYPE', $_ENV['PHP_PEAR_SIG_TYPE']);
+} else {
+    define('PEAR_CONFIG_DEFAULT_SIG_TYPE', 'gpg');
+}
+
+// Default for sig_bin
+if (isset($_ENV['PHP_PEAR_SIG_BIN'])) {
+    define('PEAR_CONFIG_DEFAULT_SIG_BIN', $_ENV['PHP_PEAR_SIG_BIN']);
+} else {
+    define('PEAR_CONFIG_DEFAULT_SIG_BIN',
+           System::which(
+               'gpg', OS_WINDOWS ? 'c:\gnupg\gpg.exe' : '/usr/local/bin/gpg'));
+}
+
+// Default for sig_keydir
+if (isset($_ENV['PHP_PEAR_SIG_KEYDIR'])) {
+    define('PEAR_CONFIG_DEFAULT_SIG_KEYDIR', $_ENV['PHP_PEAR_SIG_KEYDIR']);
+} else {
+    define('PEAR_CONFIG_DEFAULT_SIG_KEYDIR',
+           PEAR_CONFIG_SYSCONFDIR . DIRECTORY_SEPARATOR . 'pearkeys');
+}
 
 /**
  * This is a class for storing configuration data, keeping track of
@@ -138,7 +232,7 @@ class PEAR_Config extends PEAR
             ),
         'http_proxy' => array(
             'type' => 'string',
-            'default' => '',
+            'default' => PEAR_CONFIG_DEFAULT_HTTP_PROXY,
             'doc' => 'HTTP proxy (host:port) to use when downloading packages',
             'prompt' => 'HTTP Proxy Server Address',
             'group' => 'Internet Access',
@@ -146,51 +240,58 @@ class PEAR_Config extends PEAR
         // File Locations
         'php_dir' => array(
             'type' => 'directory',
-            'default' => PEAR_CONFIG_DEFAULT_PHPDIR,
+            'default' => PEAR_CONFIG_DEFAULT_PHP_DIR,
             'doc' => 'directory where .php files are installed',
             'prompt' => 'PEAR directory',
             'group' => 'File Locations',
             ),
         'ext_dir' => array(
             'type' => 'directory',
-            'default' => PEAR_EXTENSION_DIR,
+            'default' => PEAR_CONFIG_DEFAULT_EXT_DIR,
             'doc' => 'directory where loadable extensions are installed',
             'prompt' => 'PHP extension directory',
             'group' => 'File Locations',
             ),
         'doc_dir' => array(
             'type' => 'directory',
-            'default' => PEAR_CONFIG_DEFAULT_DOCDIR,
+            'default' => PEAR_CONFIG_DEFAULT_DOC_DIR,
             'doc' => 'directory where documentation is installed',
             'prompt' => 'PEAR documentation directory',
             'group' => 'File Locations',
             ),
         'bin_dir' => array(
             'type' => 'directory',
-            'default' => PEAR_CONFIG_DEFAULT_BINDIR,
+            'default' => PEAR_CONFIG_DEFAULT_BIN_DIR,
             'doc' => 'directory where executables are installed',
             'prompt' => 'PEAR executables directory',
             'group' => 'File Locations',
             ),
         'data_dir' => array(
             'type' => 'directory',
-            'default' => PEAR_CONFIG_DEFAULT_DATADIR,
+            'default' => PEAR_CONFIG_DEFAULT_DATA_DIR,
             'doc' => 'directory where data files are installed',
             'prompt' => 'PEAR data directory',
             'group' => 'File Locations (Advanced)',
             ),
         'test_dir' => array(
             'type' => 'directory',
-            'default' => PEAR_CONFIG_DEFAULT_TESTDIR,
+            'default' => PEAR_CONFIG_DEFAULT_TEST_DIR,
             'doc' => 'directory where regression tests are installed',
             'prompt' => 'PEAR test directory',
             'group' => 'File Locations (Advanced)',
             ),
         'cache_dir' => array(
             'type' => 'directory',
-            'default' => PEAR_CONFIG_DEFAULT_CACHEDIR,
+            'default' => PEAR_CONFIG_DEFAULT_CACHE_DIR,
             'doc' => 'directory which is used for XMLRPC cache',
             'prompt' => 'PEAR Installer cache directory',
+            'group' => 'File Locations (Advanced)',
+            ),
+        'php_bin' => array(
+            'type' => 'file',
+            'default' => PEAR_CONFIG_DEFAULT_PHP_BIN,
+            'doc' => 'PHP CLI/CGI binary for executing scripts',
+            'prompt' => 'PHP CLI/CGI binary',
             'group' => 'File Locations (Advanced)',
             ),
         // Maintainers
@@ -211,7 +312,7 @@ class PEAR_Config extends PEAR
         // Advanced
         'verbose' => array(
             'type' => 'integer',
-            'default' => 1,
+            'default' => PEAR_CONFIG_DEFAULT_VERBOSE,
             'doc' => 'verbosity level
 0: really quiet
 1: somewhat quiet
@@ -222,7 +323,7 @@ class PEAR_Config extends PEAR
             ),
         'preferred_state' => array(
             'type' => 'set',
-            'default' => 'stable',
+            'default' => PEAR_CONFIG_DEFAULT_PREFERRED_STATE,
             'doc' => 'the installer will prefer releases with this state when installing packages without a version or state specified',
             'valid_set' => array(
                 'stable', 'beta', 'alpha', 'devel', 'snapshot'),
@@ -231,21 +332,21 @@ class PEAR_Config extends PEAR
             ),
         'umask' => array(
             'type' => 'mask',
-            'default' => PEAR_DEFAULT_UMASK,
+            'default' => PEAR_CONFIG_DEFAULT_UMASK,
             'doc' => 'umask used when creating files (Unix-like systems only)',
             'prompt' => 'Unix file mask',
             'group' => 'Advanced',
             ),
         'cache_ttl' => array(
             'type' => 'integer',
-            'default' => 0,
+            'default' => PEAR_CONFIG_DEFAULT_CACHE_TTL,
             'doc' => 'amount of secs where the local cache is used and not updated',
             'prompt' => 'Cache TimeToLive',
             'group' => 'Advanced',
             ),
         'sig_type' => array(
             'type' => 'set',
-            'default' => 'gpg',
+            'default' => PEAR_CONFIG_DEFAULT_SIG_TYPE,
             'doc' => 'which package signature mechanism to use',
             'valid_set' => array('gpg'),
             'prompt' => 'Package Signature Type',
@@ -253,7 +354,7 @@ class PEAR_Config extends PEAR
             ),
         'sig_bin' => array(
             'type' => 'string',
-            'default' => PEAR_DEFAULT_GPG_BIN,
+            'default' => PEAR_CONFIG_DEFAULT_SIG_BIN,
             'doc' => 'which package signature mechanism to use',
             'prompt' => 'Signature Handling Program',
             'group' => 'Maintainers',
@@ -267,19 +368,11 @@ class PEAR_Config extends PEAR
             ),
         'sig_keydir' => array(
             'type' => 'string',
-            'default' => PEAR_DEFAULT_SIG_KEYDIR,
+            'default' => PEAR_CONFIG_DEFAULT_SIG_KEYDIR,
             'doc' => 'which package signature mechanism to use',
             'prompt' => 'Signature Key Directory',
             'group' => 'Maintainers',
             ),
-/*
-        'testset1' => array(
-            'type' => 'set',
-            'default' => 'foo',
-            'doc' => 'test set',
-            'valid_set' => array('foo', 'bar'),
-            ),
-*/
         );
 
     // }}}
