@@ -348,8 +348,6 @@ PHP_RINIT_FUNCTION(mssql)
 
 PHP_RSHUTDOWN_FUNCTION(mssql)
 {
-	TSRMLS_FETCH();
-
 	STR_FREE(MS_SQL_G(appname));
 	if (MS_SQL_G(server_message)) {
 		STR_FREE(MS_SQL_G(server_message));
@@ -360,7 +358,6 @@ PHP_RSHUTDOWN_FUNCTION(mssql)
 PHP_MINFO_FUNCTION(mssql)
 {
 	char buf[32];
-	TSRMLS_FETCH();
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "MSSQL Support", "enabled");

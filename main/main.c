@@ -91,8 +91,6 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC);
  */
 static PHP_INI_MH(OnSetPrecision)
 {
-	TSRMLS_FETCH();
-
 	EG(precision) = atoi(new_value);
 	return SUCCESS;
 }
@@ -119,8 +117,6 @@ static PHP_INI_MH(OnChangeMemoryLimit)
  */
 static PHP_INI_MH(OnUpdateErrorReporting)
 {
-	TSRMLS_FETCH();
-
 	if (!new_value) {
 		EG(error_reporting) = E_ALL & ~E_NOTICE;
 	} else {
@@ -151,8 +147,6 @@ static void php_disable_functions()
  */
 static PHP_INI_MH(OnUpdateTimeout)
 {
-	TSRMLS_FETCH();
-
 	EG(timeout_seconds) = atoi(new_value);
 	if (stage==PHP_INI_STAGE_STARTUP) {
 		/* Don't set a timeout on startup, only per-request */

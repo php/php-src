@@ -137,12 +137,9 @@ void vclose();
 
 PHP_RSHUTDOWN_FUNCTION(vpopmail)
 {
-	TSRMLS_FETCH();
-
 	if (VPOPMAILG(vpopmail_open) != 0) {
 		vclose();
 	}
-
 	return SUCCESS;
 }
 

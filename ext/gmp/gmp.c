@@ -154,9 +154,6 @@ ZEND_MINIT_FUNCTION(gmp)
  */
 ZEND_MSHUTDOWN_FUNCTION(gmp)
 {
-/* Remove comments if you have entries in php.ini
-	UNREGISTER_INI_ENTRIES();
-*/
 	return SUCCESS;
 }
 /* }}} */

@@ -139,8 +139,8 @@ PHP_MINFO_FUNCTION(mcal)
 {
 	char tmp[128];
 
-        php_info_print_table_start();
-        php_info_print_table_row(2, "MCAL Support", "enabled" );
+	php_info_print_table_start();
+	php_info_print_table_row(2, "MCAL Support", "enabled" );
 #ifdef MCALVER
 	snprintf(tmp, 128, "%s<BR>%d", CALVER, MCALVER);
 #else

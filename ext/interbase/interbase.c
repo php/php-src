@@ -554,8 +554,6 @@ PHP_MSHUTDOWN_FUNCTION(ibase)
 
 PHP_RSHUTDOWN_FUNCTION(ibase)
 {
-    TSRMLS_FETCH();
-
 	if (IBG(timestampformat))
 	    DL_FREE(IBG(timestampformat));
 	IBG(timestampformat) = NULL;

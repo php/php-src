@@ -752,8 +752,6 @@ PHPAPI void php_msock_destroy(int *data)
 
 PHP_RSHUTDOWN_FUNCTION(fsock)
 {
-	TSRMLS_FETCH();
-
 	php_cleanup_sockbuf(0 TSRMLS_CC);
 	return SUCCESS;
 }

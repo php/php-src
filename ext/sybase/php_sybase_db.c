@@ -1306,7 +1306,7 @@ PHP_FUNCTION(sybase_affected_rows)
 
 PHP_MINFO_FUNCTION(sybase)
 {
-	char maxp[32],maxl[32];
+	char maxp[32], maxl[32];
 	
 	if (php_sybase_module.max_persistent==-1) {
 		snprintf(maxp, 31, "%ld/unlimited", php_sybase_module.num_persistent );

@@ -287,7 +287,6 @@ php_mbstring_parse_encoding_array(zval *array, int **return_list, int *return_si
 static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 {
 	int *list, size;
-	TSRMLS_FETCH();
 
 	if (php_mbstring_parse_encoding_list(new_value, new_value_length, &list, &size, 1)) {
 		if (MBSTRG(detect_order_list) != NULL) {
@@ -305,7 +304,6 @@ static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 static PHP_INI_MH(OnUpdate_mbstring_http_input)
 {
 	int *list, size;
-	TSRMLS_FETCH();
 
 	if (php_mbstring_parse_encoding_list(new_value, new_value_length, &list, &size, 1)) {
 		if (MBSTRG(http_input_list) != NULL) {
@@ -323,7 +321,6 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 static PHP_INI_MH(OnUpdate_mbstring_http_output)
 {
 	enum mbfl_no_encoding no_encoding;
-	TSRMLS_FETCH();
 
 	no_encoding = mbfl_name2no_encoding(new_value);
 	if (no_encoding != mbfl_no_encoding_invalid) {
@@ -341,7 +338,6 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 {
 	enum mbfl_no_encoding no_encoding;
-	TSRMLS_FETCH();
 
 	no_encoding = mbfl_name2no_encoding(new_value);
 	if (no_encoding != mbfl_no_encoding_invalid) {
@@ -358,8 +354,6 @@ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 
 static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 {
-	TSRMLS_FETCH();
-
 	if (new_value != NULL) {
 		if (strcasecmp("none", new_value) == 0) {
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
@@ -428,7 +422,6 @@ PHP_MINIT_FUNCTION(mbstring)
 
 PHP_MSHUTDOWN_FUNCTION(mbstring)
 {
-	TSRMLS_FETCH();
 	UNREGISTER_INI_ENTRIES();
 	
 	if (MBSTRG(http_input_list)) {
@@ -477,8 +470,6 @@ PHP_RINIT_FUNCTION(mbstring)
 
 PHP_RSHUTDOWN_FUNCTION(mbstring)
 {
-	TSRMLS_FETCH();
-
 	if (MBSTRG(current_detect_order_list) != NULL) {
 		efree(MBSTRG(current_detect_order_list));
 		MBSTRG(current_detect_order_list) = NULL;

@@ -405,7 +405,6 @@ PHP_RSHUTDOWN_FUNCTION(fbsql)
 PHP_MINFO_FUNCTION(fbsql)
 {
 	char buf[32];
-	TSRMLS_FETCH();
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "FrontBase support", "enabled");

@@ -147,9 +147,6 @@ PHP_MINIT_FUNCTION(dbplus)
 
 PHP_MSHUTDOWN_FUNCTION(dbplus)
 {
-/* Remove comments if you have entries in php.ini
-	UNREGISTER_INI_ENTRIES();
-*/
 	return SUCCESS;
 }
 

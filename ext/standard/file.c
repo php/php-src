@@ -219,8 +219,6 @@ PHP_MINIT_FUNCTION(file)
 PHP_MSHUTDOWN_FUNCTION(file)
 {
 #ifndef ZTS
-	TSRMLS_FETCH();
-
 	file_globals_dtor(&file_globals TSRMLS_CC);
 #endif
 	return SUCCESS;

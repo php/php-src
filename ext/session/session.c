@@ -85,8 +85,6 @@ static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 
 static PHP_INI_MH(OnUpdateSaveHandler)
 {
-	TSRMLS_FETCH();
-	
 	PS(mod) = _php_find_ps_module(new_value TSRMLS_CC);
 	if(!PS(mod)) {
 	  php_error(E_ERROR,"Cannot find save handler %s",new_value);
@@ -97,8 +95,6 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 
 static PHP_INI_MH(OnUpdateSerializer)
 {
-	TSRMLS_FETCH();
-
 	PS(serializer) = _php_find_ps_serializer(new_value TSRMLS_CC);
 	if(!PS(serializer)) {
 	  php_error(E_ERROR,"Cannot find serialization handler %s",new_value);
@@ -1404,8 +1400,6 @@ PHP_FUNCTION(session_write_close)
 
 PHP_RSHUTDOWN_FUNCTION(session)
 {
-	TSRMLS_FETCH();
-
 	php_session_flush(TSRMLS_C);
 	php_rshutdown_session_globals(TSRMLS_C);
 	return SUCCESS;
@@ -1436,7 +1430,6 @@ PHP_MSHUTDOWN_FUNCTION(session)
 
 PHP_MINFO_FUNCTION(session)
 {
-
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Session Support", "enabled" );
 	php_info_print_table_end();

@@ -211,10 +211,8 @@ static void _free_mysql_result(zend_rsrc_list_entry *rsrc)
 
 /* {{{ php_mysql_set_default_link
  */
-static void php_mysql_set_default_link(int id)
+static void php_mysql_set_default_link(int id TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (MySG(default_link)!=-1) {
 		zend_list_delete(MySG(default_link));
 	}
@@ -261,8 +259,6 @@ static void _close_mysql_plink(zend_rsrc_list_entry *rsrc)
  */
 static PHP_INI_MH(OnMySQLPort)
 {
-	TSRMLS_FETCH();
-
 	if (new_value==NULL) { /* default port */
 #ifndef PHP_WIN32
 		struct servent *serv_ptr;
@@ -360,7 +356,6 @@ PHP_RINIT_FUNCTION(mysql)
  */
 PHP_RSHUTDOWN_FUNCTION(mysql)
 {
-	TSRMLS_FETCH();
 	if (MySG(connect_error)!=NULL) {
 		efree(MySG(connect_error));
 	}
@@ -373,7 +368,6 @@ PHP_RSHUTDOWN_FUNCTION(mysql)
 PHP_MINFO_FUNCTION(mysql)
 {
 	char buf[32];
-	TSRMLS_FETCH();
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "MySQL Support", "enabled");
@@ -606,7 +600,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			if (ptr && (type==le_link || type==le_plink)) {
 				zend_list_addref(link);
 				return_value->value.lval = link;
-				php_mysql_set_default_link(link);
+				php_mysql_set_default_link(link TSRMLS_CC);
 				return_value->type = IS_RESOURCE;
 				efree(hashed_details);
 				MYSQL_DO_CONNECT_CLEANUP();
@@ -656,7 +650,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	efree(hashed_details);
-	php_mysql_set_default_link(return_value->value.lval);
+	php_mysql_set_default_link(return_value->value.lval TSRMLS_CC);
 	MYSQL_DO_CONNECT_CLEANUP();
 }
 /* }}} */
@@ -953,11 +947,10 @@ PHP_FUNCTION(mysql_drop_db)
 
 /* {{{ php_mysql_do_query_general
  */
-static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link_id, zval **db, int use_store, zval *return_value)
+static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link_id, zval **db, int use_store, zval *return_value TSRMLS_DC)
 {
 	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
-	TSRMLS_FETCH();
 	
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, link_id, "MySQL-Link", le_link, le_plink);
 	
@@ -1039,7 +1032,7 @@ static void php_mysql_do_query(INTERNAL_FUNCTION_PARAMETERS, int use_store)
 			WRONG_PARAM_COUNT;
 			break;
 	}
-	php_mysql_do_query_general(query, mysql_link, id, NULL, use_store, return_value);
+	php_mysql_do_query_general(query, mysql_link, id, NULL, use_store, return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1089,7 +1082,7 @@ PHP_FUNCTION(mysql_db_query)
 	
 	zend_error(E_NOTICE, "%s is deprecated; use mysql_select_db() and mysql_query() instead", get_active_function_name());
 	
-	php_mysql_do_query_general(query, mysql_link, id, db, MYSQL_STORE_RESULT, return_value);
+	php_mysql_do_query_general(query, mysql_link, id, db, MYSQL_STORE_RESULT, return_value TSRMLS_CC);
 }
 /* }}} */
 

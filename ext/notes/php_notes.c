@@ -140,7 +140,6 @@ PHP_MINFO_FUNCTION(notes)
 {
 
 	php_info_print_table_start();
-
 	php_info_print_table_row(2, "Lotus Notes Database Support", "enabled");
 	php_info_print_table_end();
 }

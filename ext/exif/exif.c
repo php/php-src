@@ -142,7 +142,8 @@ ZEND_GET_MODULE(exif)
 
 /* {{{ PHP_MINFO_FUNCTION
  */
-PHP_MINFO_FUNCTION(exif) {
+PHP_MINFO_FUNCTION(exif)
+{
 	php_info_print_table_start();
     php_info_print_table_row(2, "EXIF Support", "enabled" );
     php_info_print_table_end();

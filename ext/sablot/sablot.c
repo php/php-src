@@ -239,22 +239,16 @@ PHP_MINIT_FUNCTION(sablot)
 
 PHP_MSHUTDOWN_FUNCTION(sablot)
 {
-	TSRMLS_FETCH();
-
 	if (SABLOTG(processor)) {
 		SablotUnregHandler(SABLOTG(processor), HLR_MESSAGE, NULL, NULL);
 		SablotDestroyProcessor(SABLOTG(processor));
 	}
-
     return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(sablot)
 {
-	TSRMLS_FETCH();
-
 	SABLOT_FREE_ERROR_HANDLE(SABLOTG_HANDLE);
-
 	return SUCCESS;
 }
 

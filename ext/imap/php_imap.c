@@ -310,7 +310,6 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 {
 	ERRORLIST *ecur = NIL;
 	STRINGLIST *acur = NIL;
-	TSRMLS_FETCH();
 
 	if (IMAPG(imap_errorstack) != NIL) {
 		/* output any remaining errors at their original error level */

@@ -94,11 +94,6 @@ PHP_MINIT_FUNCTION(ncurses)
  */
 PHP_MSHUTDOWN_FUNCTION(ncurses)
 {
-/* Remove comments if you have entries in php.ini
-	UNREGISTER_INI_ENTRIES();
-	endwin();
-*/
-
 	return SUCCESS;
 }
 /* }}} */

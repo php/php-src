@@ -204,8 +204,6 @@ PHP_RINIT_FUNCTION(zlib)
 PHP_MSHUTDOWN_FUNCTION(zlib)
 {
 #if HAVE_FOPENCOOKIE
-	TSRMLS_FETCH();
-
 	if(PG(allow_url_fopen)) {
 	    php_unregister_url_wrapper("zlib"); 
     }

@@ -59,9 +59,6 @@ PHP_INI_END()
  */
 PHP_MINIT_FUNCTION(extname)
 {
-/* Remove comments if you have entries in php.ini
-	REGISTER_INI_ENTRIES();
-*/
 	return SUCCESS;
 }
 /* }}} */
@@ -70,9 +67,6 @@ PHP_MINIT_FUNCTION(extname)
  */
 PHP_MSHUTDOWN_FUNCTION(extname)
 {
-/* Remove comments if you have entries in php.ini
-	UNREGISTER_INI_ENTRIES();
-*/
 	return SUCCESS;
 }
 /* }}} */

@@ -104,7 +104,6 @@ ZEND_MINIT_FUNCTION(crack)
 ZEND_MSHUTDOWN_FUNCTION(crack)
 {
 	UNREGISTER_INI_ENTRIES();
-
 	return SUCCESS;
 }
 
@@ -118,12 +117,9 @@ ZEND_RINIT_FUNCTION(crack)
 
 ZEND_RSHUTDOWN_FUNCTION(crack)
 {
-	TSRMLS_FETCH();
-
 	if (NULL != CRACKG(last_message)) {
 		efree(CRACKG(last_message));
 	}
-
 	return SUCCESS;
 }
 

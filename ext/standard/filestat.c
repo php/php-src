@@ -96,8 +96,6 @@ PHP_RINIT_FUNCTION(filestat)
 
 PHP_RSHUTDOWN_FUNCTION(filestat)
 {
-	TSRMLS_FETCH();
-
 	if (BG(CurrentStatFile)) {
 		efree (BG(CurrentStatFile));
 	}

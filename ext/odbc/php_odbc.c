@@ -467,8 +467,6 @@ PHP_RSHUTDOWN_FUNCTION(odbc)
 
 PHP_MSHUTDOWN_FUNCTION(odbc)
 {
-	TSRMLS_FETCH();
-
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
@@ -476,7 +474,6 @@ PHP_MSHUTDOWN_FUNCTION(odbc)
 PHP_MINFO_FUNCTION(odbc)
 {
 	char buf[32];
-	TSRMLS_FETCH();
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "ODBC Support", "enabled");

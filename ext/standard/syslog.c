@@ -116,8 +116,6 @@ PHP_RINIT_FUNCTION(syslog)
 
 PHP_RSHUTDOWN_FUNCTION(syslog)
 {
-	TSRMLS_FETCH();
-	
 	if (BG(syslog_device)) {
 		efree(BG(syslog_device));
 	}
