@@ -703,7 +703,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
 
 	/* pull in supplied extended settings */
 	if (strex)	{
-		if (strex->flags & gdFTEX_LINESPACE == gdFTEX_LINESPACE)
+		if ((strex->flags & gdFTEX_LINESPACE) == gdFTEX_LINESPACE)
 			linespace = strex->linespacing;
 
 	}
@@ -725,7 +725,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
   if (font->have_char_map_sjis)
     {
 #endif
-      if (tmpstr = (char *) gdMalloc (BUFSIZ))
+      if ((tmpstr = (char *) gdMalloc (BUFSIZ)) != NULL)
 	{
 	  any2eucjp (tmpstr, string, BUFSIZ);
 	  next = tmpstr;
