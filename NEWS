@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
+- Added ini_get_all() function which returns all registered ini entries
 - Added mailparse_uudecode_all() which extracts all uuencoded attachments
 - Add support for chinese encodings to htmlentities() and htmlspecialchars()
   (Patch by Alan Knowles <alan_k@hklc.com> and Wez)
