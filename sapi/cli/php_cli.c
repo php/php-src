@@ -616,6 +616,7 @@ int main(int argc, char *argv[])
 		arg_excp = argv+ap_php_optind-1;
 		arg_free = argv[ap_php_optind-1];
 		if (script_file) {
+			SG(request_info).path_translated = script_file;
 			argv[ap_php_optind-1] = script_file;
 		} else {
 			argv[ap_php_optind-1] = "-"; /* should be stdin */
