@@ -118,6 +118,8 @@ if (isset($argc) && $argc > 1) {
 	if (count($test_to_run)) {
 		echo "Running selected tests.\n";
 		foreach($test_to_run AS $name=>$runnable) {
+			if(!preg_match("/\.phpt$/", $name))
+				continue;
 			echo "test: $name runnable: $runnable\n";
 			if ($runnable) {
 				$test_results[$name] = run_test($php,$name);
@@ -412,7 +414,7 @@ COMMAND $cmd
 		$wanted_re = preg_replace('/\r\n/',"\n",$wanted);
 		$wanted_re = preg_quote($wanted_re, '/');
 		// Stick to basics
-		$wanted_re = str_replace("%s", ".*?", $wanted_re); //not greedy
+		$wanted_re = str_replace("%s", ".+?", $wanted_re); //not greedy
 		$wanted_re = str_replace("%i", "[0-9]+", $wanted_re);
 		$wanted_re = str_replace("%f", "[0-9\.+\-]+", $wanted_re);
 /* DEBUG YOUR REGEX HERE
