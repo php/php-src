@@ -212,7 +212,7 @@ PHP_FUNCTION(chdir)
 
 	ret = V_CHDIR((*arg)->value.str.val);
 	
-	if (ret < 0) {
+	if (ret != 0) {
 		php_error(E_WARNING, "ChDir: %s (errno %d)", strerror(errno), errno);
 		RETURN_FALSE;
 	}
