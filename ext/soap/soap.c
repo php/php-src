@@ -3186,15 +3186,37 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf)
 {
 	int i = 0;
 	HashPosition pos;
+	sdlParamPtr *param;
 
-	if (function->responseParameters && function->responseParameters->pListHead) {
-		sdlParamPtr *param;
-		param = function->responseParameters->pListHead->pData;
-		if ((*param)->encode && (*param)->encode->details.type_str) {
-			smart_str_appendl(buf, (*param)->encode->details.type_str, strlen((*param)->encode->details.type_str));
-			smart_str_appendc(buf, ' ');
+	if (function->responseParameters && 
+	    zend_hash_num_elements(function->responseParameters) > 0) {
+		if (zend_hash_num_elements(function->responseParameters) == 1) {
+			param = function->responseParameters->pListHead->pData;
+			if ((*param)->encode && (*param)->encode->details.type_str) {
+				smart_str_appendl(buf, (*param)->encode->details.type_str, strlen((*param)->encode->details.type_str));
+				smart_str_appendc(buf, ' ');
+			} else {
+				smart_str_appendl(buf, "UNKNOWN ", 8);
+			}
 		} else {
-			smart_str_appendl(buf, "mixed ", 6);
+			i = 0;
+			smart_str_appendl(buf, "list(", 5);
+			zend_hash_internal_pointer_reset_ex(function->responseParameters, &pos);
+			while (zend_hash_get_current_data_ex(function->responseParameters, (void **)&param, &pos) != FAILURE) {
+				if (i > 0) {
+					smart_str_appendl(buf, ", ", 2);
+				}
+				if ((*param)->encode && (*param)->encode->details.type_str) {
+					smart_str_appendl(buf, (*param)->encode->details.type_str, strlen((*param)->encode->details.type_str));
+				} else {
+					smart_str_appendl(buf, "UNKNOWN", 7);
+				}
+				smart_str_appendl(buf, " $", 2);
+				smart_str_appendl(buf, (*param)->paramName, strlen((*param)->paramName));
+				zend_hash_move_forward_ex(function->responseParameters, &pos);
+				i++;
+			}
+			smart_str_appendl(buf, ") ", 2);
 		}
 	} else {
 		smart_str_appendl(buf, "void ", 5);
@@ -3204,28 +3226,51 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf)
 
 	smart_str_appendc(buf, '(');
 	if (function->requestParameters) {
-		sdlParamPtr *param;
-
 		i = 0;
 		zend_hash_internal_pointer_reset_ex(function->requestParameters, &pos);
 		while (zend_hash_get_current_data_ex(function->requestParameters, (void **)&param, &pos) != FAILURE) {
+			if (i > 0) {
+				smart_str_appendl(buf, ", ", 2);
+			}
 			if ((*param)->encode && (*param)->encode->details.type_str) {
 				smart_str_appendl(buf, (*param)->encode->details.type_str, strlen((*param)->encode->details.type_str));
 			} else {
-				smart_str_appendl(buf, "mixed ", 6);
+				smart_str_appendl(buf, "UNKNOWN", 7);
 			}
-			smart_str_appendc(buf, ' ');
-			smart_str_appendc(buf, '$');
+			smart_str_appendl(buf, " $", 2);
 			smart_str_appendl(buf, (*param)->paramName, strlen((*param)->paramName));
-			if (zend_hash_num_elements(function->requestParameters) > i + 1) {
-				smart_str_appendl(buf, ", ", 2);
-			}
 			zend_hash_move_forward_ex(function->requestParameters, &pos);
 			i++;
 		}
 	}
 	smart_str_appendc(buf, ')');
 	smart_str_0(buf);
+}
+
+static void model_to_string(sdlContentModelPtr model, smart_str *buf, int level)
+{
+	switch (model->kind) {
+		case XSD_CONTENT_ELEMENT:
+			type_to_string(model->u.element, buf, level);
+			smart_str_appendl(buf, ";\n", 2);		  
+			break;
+		case XSD_CONTENT_SEQUENCE:
+		case XSD_CONTENT_ALL:
+		case XSD_CONTENT_CHOICE: {
+			sdlContentModelPtr *tmp;
+
+			zend_hash_internal_pointer_reset(model->u.content);
+			while (zend_hash_get_current_data(model->u.content, (void**)&tmp) == SUCCESS) {
+				model_to_string(*tmp, buf, level);
+				zend_hash_move_forward(model->u.content);
+			}
+			break;
+		}
+		case XSD_CONTENT_GROUP:
+			model_to_string(model->u.group->model, buf, level);
+		default:
+		  break;
+	}
 }
 
 static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
@@ -3239,29 +3284,124 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 	}
 	smart_str_appendl(buf, spaces.c, spaces.len);
 
-	if (type->elements) {
-		sdlTypePtr *t_type;
+	switch (type->kind) {
+		case XSD_TYPEKIND_SIMPLE:
+		case XSD_TYPEKIND_LIST:
+		case XSD_TYPEKIND_UNION:
+			smart_str_appendl(buf, type->encode->details.type_str, strlen(type->encode->details.type_str));
+			smart_str_appendc(buf, ' ');
+			smart_str_appendl(buf, type->name, strlen(type->name));
+			break;
+		case XSD_TYPEKIND_COMPLEX:
+		case XSD_TYPEKIND_RESTRICTION:
+		case XSD_TYPEKIND_EXTENSION:
+			if (type->encode &&
+			    (type->encode->details.type == IS_ARRAY ||
+			     type->encode->details.type == SOAP_ENC_ARRAY)) {
+			  sdlAttributePtr *attr;
+			  sdlExtraAttributePtr *ext;
 
-		smart_str_appendl(buf, "struct ", 7);
-		smart_str_appendl(buf, type->name, strlen(type->name));
-		smart_str_appendc(buf, '\n');
-		smart_str_appendl(buf, spaces.c, spaces.len);
-		smart_str_appendl(buf, "{\n", 2);
+				if (type->attributes &&
+				    zend_hash_find(type->attributes, SOAP_1_1_ENC_NAMESPACE":arrayType",
+				      sizeof(SOAP_1_1_ENC_NAMESPACE":arrayType"),
+				      (void **)&attr) == SUCCESS &&
+				      zend_hash_find((*attr)->extraAttributes, WSDL_NAMESPACE":arrayType", sizeof(WSDL_NAMESPACE":arrayType"), (void **)&ext) == SUCCESS) {
+				  char *end = strchr((*ext)->val, '[');
+				  int len;
+				  if (end == NULL) {
+				  	len = strlen((*ext)->val);
+				  } else {
+				  	len = end-(*ext)->val;
+				  }
+				  if (len == 0) {
+						smart_str_appendl(buf, "anyType", 7);
+					} else {
+						smart_str_appendl(buf, (*ext)->val, len);
+					}
+					smart_str_appendc(buf, ' ');
+					smart_str_appendl(buf, type->name, strlen(type->name));
+				  if (end != NULL) {
+						smart_str_appends(buf, end);
+					}					
+				} else {
+					sdlTypePtr elementType;
+					if (type->attributes &&
+					    zend_hash_find(type->attributes, SOAP_1_2_ENC_NAMESPACE":itemType",
+					      sizeof(SOAP_1_2_ENC_NAMESPACE":itemType"),
+					      (void **)&attr) == SUCCESS &&
+					      zend_hash_find((*attr)->extraAttributes, WSDL_NAMESPACE":itemType", sizeof(WSDL_NAMESPACE":arrayType"), (void **)&ext) == SUCCESS) {
+						smart_str_appends(buf, (*ext)->val);
+						smart_str_appendc(buf, ' ');
+					} else if (type->elements &&
+					           zend_hash_num_elements(type->elements) == 1 &&
+					           (elementType = *(sdlTypePtr*)type->elements->pListHead->pData) != NULL &&
+					           elementType->encode && elementType->encode->details.type_str) {
+						smart_str_appends(buf, elementType->encode->details.type_str);
+						smart_str_appendc(buf, ' ');
+					} else {
+						smart_str_appendl(buf, "anyType ", 8);
+					}
+					smart_str_appendl(buf, type->name, strlen(type->name));
+					if (type->attributes &&
+					    zend_hash_find(type->attributes, SOAP_1_2_ENC_NAMESPACE":arraySize",
+					      sizeof(SOAP_1_2_ENC_NAMESPACE":arraySize"),
+					      (void **)&attr) == SUCCESS &&
+					      zend_hash_find((*attr)->extraAttributes, WSDL_NAMESPACE":itemType", sizeof(WSDL_NAMESPACE":arraySize"), (void **)&ext) == SUCCESS) {
+						smart_str_appendc(buf, '[');
+						smart_str_appends(buf, (*ext)->val);
+						smart_str_appendc(buf, ']');
+					} else {
+						smart_str_appendl(buf, "[]", 2);
+					}
+				}
+			} else {
+				smart_str_appendl(buf, "struct ", 7);
+				smart_str_appendl(buf, type->name, strlen(type->name));
+				smart_str_appendc(buf, ' ');
+				smart_str_appendl(buf, "{\n", 2);
+				if ((type->kind == XSD_TYPEKIND_RESTRICTION ||
+				     type->kind == XSD_TYPEKIND_EXTENSION) && type->encode) {
+					encodePtr enc = type->encode;
+					while (enc && enc->details.sdl_type &&
+					       enc->details.sdl_type->kind != XSD_TYPEKIND_SIMPLE &&
+					       enc->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
+					       enc->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
+						enc = enc->details.sdl_type->encode;
+					}
+				  if (enc) {
+						smart_str_appendl(buf, spaces.c, spaces.len);
+						smart_str_appendc(buf, ' ');
+						smart_str_appendl(buf, type->encode->details.type_str, strlen(type->encode->details.type_str));
+						smart_str_appendl(buf, " _;\n", 4);		  
+					}
+				}
+				if (type->model) {
+					model_to_string(type->model, buf, level+1);					
+				}
+				if (type->attributes) {
+					sdlAttributePtr *attr;
 
-		zend_hash_internal_pointer_reset_ex(type->elements, &pos);
-		level++;
-		while (zend_hash_get_current_data_ex(type->elements, (void **)&t_type, &pos) != FAILURE) {
-			type_to_string((*t_type), buf, level);
-			zend_hash_move_forward_ex(type->elements, &pos);
-		}
-
-		smart_str_appendl(buf, spaces.c, spaces.len);
-		smart_str_appendl(buf, "}\n", 2);
-	} else {
-		smart_str_appendl(buf, type->encode->details.type_str, strlen(type->encode->details.type_str));
-		smart_str_appendc(buf, ' ');
-		smart_str_appendl(buf, type->name, strlen(type->name));
-		smart_str_appendl(buf, ";\n", 2);
+					zend_hash_internal_pointer_reset_ex(type->attributes, &pos);
+					while (zend_hash_get_current_data_ex(type->attributes, (void **)&attr, &pos) != FAILURE) {
+						smart_str_appendl(buf, spaces.c, spaces.len);
+						smart_str_appendc(buf, ' ');
+						if ((*attr)->encode && (*attr)->encode->details.type_str) {
+							smart_str_appends(buf, (*attr)->encode->details.type_str);
+							smart_str_appendc(buf, ' ');
+						} else {
+							smart_str_appendl(buf, "UNKNOWN ", 8);
+						}
+						smart_str_appends(buf, (*attr)->name);		  
+						smart_str_appendl(buf, ";\n", 2);		  
+						zend_hash_move_forward_ex(type->attributes, &pos);
+					}
+				}
+				smart_str_appendl(buf, spaces.c, spaces.len);
+				smart_str_appendc(buf, '}');
+			}
+			break;
+		default:
+			break;
 	}
 	smart_str_free(&spaces);
 	smart_str_0(buf);
