@@ -13,10 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
-   |          Thies C. Arntzen <thies@thieso.net>						  |
-   |																	  |
+   |          Thies C. Arntzen <thies@thieso.net>                         |
+   |                                                                      |
    | Collection support by Andy Sautins <asautins@veripost.net>           |
-   | Temporary LOB support by David Benson <dbenson@mancala.com>		  |
+   | Temporary LOB support by David Benson <dbenson@mancala.com>          |
    +----------------------------------------------------------------------+
  */
 

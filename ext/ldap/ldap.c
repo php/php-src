@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Amitay Isaacs  <amitay@w-o-i.com>                           |
    |          Eric Warnke    <ericw@albany.edu>                           |
-   |          Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
+   |          Rasmus Lerdorf <rasmus@php.net>                             |
    |          Gerrit Thomson <334647@swin.edu.au>                         |
    |          Jani Taskinen  <sniper@iki.fi>                              |
    |          Stig Venaas    <venaas@uninett.no>                          |

@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
-   |		  Thies C. Arntzen <thies@thieso.net>						  | 
+   |          Thies C. Arntzen <thies@thieso.net>                         | 
    +----------------------------------------------------------------------+
  */
 

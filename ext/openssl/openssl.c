@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Stig Venaas <venaas@php.net>                                |
-   | Wez Furlong <wez@thebrainroom.com>                                   |
-   | Assymetric en/decryption code by Sascha Kettler <kettler@gmx.net>    |
+   |          Wez Furlong <wez@thebrainroom.com>                          |
+   |          Sascha Kettler <kettler@gmx.net>                            |
    +----------------------------------------------------------------------+
  */
 

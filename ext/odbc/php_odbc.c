@@ -15,8 +15,8 @@
    | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
    |          Frank M. Kromann <frank@frontbase.com> Support for DB/2 CLI |
-   |	      Kevin N. Shallow <kshallow@tampabay.rr.com> Velocis Support |
-   |		  Daniel R. Kalowsky <kalowsky@php.net>						  |
+   |          Kevin N. Shallow <kshallow@tampabay.rr.com> Velocis Support |
+   |          Daniel R. Kalowsky <kalowsky@php.net>                       |
    +----------------------------------------------------------------------+
  */
 

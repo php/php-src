@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Brad House <brad@mainstreetsoftworks.com>                   |
-   |		Chris Faulhaber <jedgar@fxp.org>			  |
+   |          Chris Faulhaber <jedgar@fxp.org>                            |
    +----------------------------------------------------------------------+
 */
 

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
    |          Mitch Golden <mgolden@interport.net>                        |
-   |          Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
+   |          Rasmus Lerdorf <rasmus@php.net>                             |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
    |          Thies C. Arntzen <thies@thieso.net>                         |
    +----------------------------------------------------------------------+
