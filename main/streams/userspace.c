@@ -32,7 +32,7 @@ struct php_user_stream_wrapper {
 };
 
 static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filename, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, php_stream_statbuf *ssb TSRMLS_DC);
+static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC);
 static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
 static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filename, char *mode,
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
@@ -145,7 +145,7 @@ typedef struct _php_userstream_data php_userstream_data_t;
 		return array( just like that returned by fstat() );
 	}
 
-	function url_stat(string $url)
+	function url_stat(string $url, int $flags)
 	{
 		return array( just like that returned by stat() );
 	}
@@ -766,11 +766,11 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	return ret;
 }
 
-static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, php_stream_statbuf *ssb TSRMLS_DC)
+static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
-	zval *zfilename, *zfuncname, *zretval;
-	zval **args[1];	
+	zval *zfilename, *zfuncname, *zretval, *zflags;
+	zval **args[2];	
 	int call_result;
 	zval *object;
 	int ret = -1;
@@ -788,6 +788,10 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, php_str
 	ZVAL_STRING(zfilename, url, 1);
 	args[0] = &zfilename;
 
+	MAKE_STD_ZVAL(zflags);
+	ZVAL_LONG(zflags, flags);
+	args[1] = &zflags;
+
 	MAKE_STD_ZVAL(zfuncname);
 	ZVAL_STRING(zfuncname, USERSTREAM_STATURL, 1);
 	
@@ -795,7 +799,7 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, php_str
 			&object,
 			zfuncname,
 			&zretval,
-			1, args,
+			2, args,
 			0, NULL	TSRMLS_CC);
 	
 	if (call_result == SUCCESS && zretval != NULL && Z_TYPE_P(zretval) == IS_ARRAY) {
@@ -816,6 +820,7 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, php_str
 	
 	zval_ptr_dtor(&zfuncname);
 	zval_ptr_dtor(&zfilename);
+	zval_ptr_dtor(&zflags);
 		
 	return ret;
 
