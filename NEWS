@@ -7,6 +7,7 @@ PHP 4                                                                      NEWS
   . Disallow linkage of Berkeley db submodules against libraries with
     different major version.
   . Disallow configuring of more than one Berkeley db handler. 
+- Fixed bug #21445 (gd unable to open fonts). (Ilia)
 - Fixed bug #21169 (Compile Failure, and lots of warnings on UnixWare).
   (Derick)
 - Fixed bug #21338 (html_entity_decode() crashed when "" is passed). (Ilia)
