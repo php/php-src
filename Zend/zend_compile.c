@@ -2349,7 +2349,7 @@ void zend_do_end_heredoc(TSRMLS_D)
 
 void do_namespace(znode *namespace TSRMLS_DC)
 {
-	Namespace *namespace_ptr;
+	zend_namespace *namespace_ptr;
 
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -2365,7 +2365,7 @@ void do_namespace(znode *namespace TSRMLS_DC)
 	SET_UNUSED(opline->op2);
 
 	if (zend_hash_find(CG(namespaces), CG(namespace), CG(namespace_len)+1, (void **) &namespace_ptr) == FAILURE) {
-		Namespace new_namespace;
+		zend_namespace new_namespace;
 		HashTable *new_function_table;
 		HashTable *new_class_table;
 
@@ -2377,7 +2377,7 @@ void do_namespace(znode *namespace TSRMLS_DC)
 		new_namespace.function_table = new_function_table;
 		new_namespace.class_table = new_class_table;
 
-		zend_hash_update(CG(namespaces), CG(namespace), CG(namespace_len)+1, &new_namespace, sizeof(Namespace), NULL);
+		zend_hash_update(CG(namespaces), CG(namespace), CG(namespace_len)+1, &new_namespace, sizeof(zend_namespace), NULL);
 		CG(function_table) = new_function_table;
 		CG(class_table) = new_class_table;
 	} else {

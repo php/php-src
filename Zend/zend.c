@@ -434,13 +434,13 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_hash_init_ex(GLOBAL_NAMESPACES_TABLE, 8, NULL, NULL, 1, 0);
 
 	{
-		Namespace main_namespace;
+		zend_namespace main_namespace;
 
 		main_namespace.type = INTERNAL_NAMESPACE;
 		main_namespace.class_table = GLOBAL_CLASS_TABLE;
 		main_namespace.function_table = GLOBAL_FUNCTION_TABLE;
 
-		zend_hash_update(GLOBAL_NAMESPACES_TABLE, "", sizeof(""), &main_namespace, sizeof(Namespace), NULL);
+		zend_hash_update(GLOBAL_NAMESPACES_TABLE, "", sizeof(""), &main_namespace, sizeof(zend_namespace), NULL);
 	}
 
 	register_standard_class();

@@ -1759,7 +1759,7 @@ do_fcall_common:
 				NEXT_OPCODE();
 			case ZEND_NAMESPACE:
 				{
-					Namespace *namespace_ptr;
+					zend_namespace *namespace_ptr;
 
 					if (zend_hash_find(EG(namespaces), opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len + 1, (void **) &namespace_ptr) == FAILURE) {
 						zend_error(E_ERROR, "Internal namespaces error. Please report this!");

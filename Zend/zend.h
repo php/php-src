@@ -173,11 +173,11 @@ typedef enum {
 	USER_NAMESPACE = 1	
 } namespace_type;
 
-typedef struct _Namespace_struct {
+typedef struct _zend_namespace_struct {
 	namespace_type type;
 	HashTable *class_table;
 	HashTable *function_table;
-} Namespace;
+} zend_namespace;
 
 /*
  * zval
