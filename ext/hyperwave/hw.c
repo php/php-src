@@ -2766,8 +2766,7 @@ PHP_FUNCTION(hw_output_document) {
 		RETURN_FALSE;
 	}
 
-	if(php_header())
-		php_write(ptr->data, ptr->size);
+	php_write(ptr->data, ptr->size);
 
 	RETURN_TRUE;
 }

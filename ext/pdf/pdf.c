@@ -250,7 +250,7 @@ static void pdf_efree(PDF *p, void *mem)
 
 static size_t pdf_flushwrite(PDF *p, void *data, size_t size)
 {
-	if(php_header()) return(php_write(data, size));
+	return(php_write(data, size));
 	return 0;
 }
 

@@ -203,16 +203,6 @@ PHP_FUNCTION(iptcembed)
         RETURN_FALSE;
     }
 
-	if (spool > 0) 
-		if (!php_header()){  /* we got a HEAD request. */
-			if (spool == 2){ 
-				RETURN_TRUE;	/* we only wanted to spool - report success. */
-			} else 
-			if (spool == 1) {
-				spool = 0; 		/* we wanted the file to be spooled/returned, just return it */
-			}
-		}
-
 	len = (*iptcdata)->value.str.len;
 
 	if (spool < 2) {

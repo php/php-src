@@ -61,15 +61,13 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 
 		ctx = gdNewFileCtx(fp);
 	} else {
-		if(!php_header()) {
-			RETURN_TRUE;
-		}
 		ctx = emalloc(sizeof(gdIOCtx));
 		ctx->putC = _php_image_output_putc;
 		ctx->putBuf = _php_image_output_putbuf;
 		ctx->free = _php_image_output_ctxfree;
 
 #if APACHE && defined(CHARSET_EBCDIC)
+		/* XXX this is unlikely to work any more thies@thieso.net */
 		SLS_FETCH();
 		/* This is a binary file already: avoid EBCDIC->ASCII conversion */
 		ap_bsetflag(php3_rqst->connection->client, B_EBCDIC2ASCII, 0);
