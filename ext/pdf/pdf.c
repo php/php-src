@@ -2266,7 +2266,7 @@ PHP_FUNCTION(pdf_get_minorversion)
 }
 
 /* }}} */
-/* {{{ proto void pdf_delete(int pdfdoc)
+/* {{{ proto bool pdf_delete(int pdfdoc)
    Deletes the PDF object */
 PHP_FUNCTION(pdf_delete)
 {
@@ -2278,9 +2278,7 @@ PHP_FUNCTION(pdf_delete)
 	}
 
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
-
-	PDF_delete(pdf);
-	zend_list_delete(Z_LVAL_PP(arg1));
+	zend_list_delete(Z_RESVAL_PP(arg1));
 
 	RETURN_TRUE;
 }
