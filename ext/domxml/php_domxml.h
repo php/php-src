@@ -118,6 +118,7 @@ PHP_FUNCTION(domxml_node_unlink_node);
 PHP_FUNCTION(domxml_node_replace_node);
 PHP_FUNCTION(domxml_node_new_child);
 PHP_FUNCTION(domxml_node_set_content);
+PHP_FUNCTION(domxml_node_get_content);
 PHP_FUNCTION(domxml_node_text_concat);
 PHP_FUNCTION(domxml_node_set_name);
 PHP_FUNCTION(domxml_node_name);
