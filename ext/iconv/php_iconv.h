@@ -44,6 +44,12 @@ PHP_NAMED_FUNCTION(php_if_iconv);
 PHP_FUNCTION(ob_iconv_handler);
 PHP_FUNCTION(iconv_get_encoding);
 PHP_FUNCTION(iconv_set_encoding);
+PHP_FUNCTION(iconv_strlen);
+PHP_FUNCTION(iconv_substr);
+PHP_FUNCTION(iconv_strpos);
+PHP_FUNCTION(iconv_strrpos);
+PHP_FUNCTION(iconv_mime_encode);
+PHP_FUNCTION(iconv_mime_decode);
 
 ZEND_BEGIN_MODULE_GLOBALS(iconv)
 	char *input_encoding;
