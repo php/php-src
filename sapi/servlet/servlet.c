@@ -360,7 +360,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	if (!strcmp(SG(request_info).request_method, "HEAD")) {
 		SG(request_info).headers_only = 1;
 	} else {
-		SG(request_info).headers_only = 1;
+		SG(request_info).headers_only = 0;
 	}
 	SG(request_info).content_length = contentLength;
 	SG(request_info).auth_password = NULL;
