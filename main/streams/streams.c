@@ -1376,7 +1376,7 @@ int php_init_stream_wrappers(int module_number TSRMLS_DC)
 int php_shutdown_stream_wrappers(int module_number TSRMLS_DC)
 {
 	zend_hash_destroy(&url_stream_wrappers_hash);
-	zend_hash_destroy(php_get_stream_filters_hash());
+	zend_hash_destroy(php_get_stream_filters_hash_global());
 	zend_hash_destroy(php_stream_xport_get_hash());
 	return SUCCESS;
 }
