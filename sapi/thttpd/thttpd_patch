@@ -1,3 +1,4 @@
+Only in thttpd-2.21b-cool/: Makefile
 diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
 --- thttpd-2.21b/Makefile.in	Thu Mar 29 20:36:21 2001
 +++ thttpd-2.21b-cool/Makefile.in	Sun Jul 14 13:54:27 2002
@@ -75,7 +76,7 @@ diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
      }
 diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
 --- thttpd-2.21b/libhttpd.c	Tue Apr 24 00:42:40 2001
-+++ thttpd-2.21b-cool/libhttpd.c	Sun Jul 14 14:43:04 2002
++++ thttpd-2.21b-cool/libhttpd.c	Sun Jul 14 15:41:06 2002
 @@ -85,6 +85,8 @@
  #include "match.h"
  #include "tdate_parse.h"
@@ -119,27 +120,11 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      /* Done initializing. */
      if ( hs->binding_hostname == (char*) 0 )
  	syslog( LOG_INFO, "%.80s starting on port %d", SERVER_SOFTWARE, hs->port );
-@@ -1703,7 +1711,9 @@
-     hc->keep_alive = 0;
-     hc->should_linger = 0;
-     hc->file_address = (char*) 0;
--    return GC_OK;
-+    hc->buf_address = (char*) 0;
-+	hc->buf_len = 0;
-+	return GC_OK;
-     }
- 
- 
-@@ -2353,7 +2363,15 @@
+@@ -2353,7 +2361,10 @@
      {
      make_log_entry( hc, nowP );
  
 -    if ( hc->file_address != (char*) 0 )
-+    if (hc->buf_address != 0) {
-+		free(hc->buf_address);
-+		hc->buf_address = 0;
-+		hc->buf_len = 0;
-+	}
 +	if ( hc->file_address == (char*) 1 )
 +    {
 +	thttpd_closed_conn(hc->conn_fd);
@@ -147,7 +132,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  	{
  	mmc_unmap( hc->file_address, &(hc->sb), nowP );
  	hc->file_address = (char*) 0;
-@@ -3026,11 +3044,9 @@
+@@ -3026,11 +3037,9 @@
  post_post_garbage_hack( httpd_conn* hc )
      {
      char buf[2];
@@ -161,7 +146,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      }
  
  
-@@ -3561,6 +3577,11 @@
+@@ -3561,6 +3570,11 @@
  	 match( hc->hs->cgi_pattern, hc->expnfilename ) )
  	return cgi( hc );
  
@@ -173,7 +158,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      /* It's not CGI.  If it's executable or there's pathinfo, someone's
      ** trying to either serve or run a non-CGI file as CGI.   Either case
      ** is prohibited.
-@@ -3611,14 +3632,18 @@
+@@ -3611,14 +3625,18 @@
  	}
      else
  	{
@@ -195,7 +180,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  
 diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
 --- thttpd-2.21b/libhttpd.h	Tue Apr 24 00:36:50 2001
-+++ thttpd-2.21b-cool/libhttpd.h	Sun Jul 14 14:35:58 2002
++++ thttpd-2.21b-cool/libhttpd.h	Sun Jul 14 15:41:32 2002
 @@ -69,6 +69,7 @@
      char* server_hostname;
      int port;
@@ -204,15 +189,6 @@ diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
      char* charset;
      char* cwd;
      int listen4_fd, listen6_fd;
-@@ -137,6 +138,8 @@
-     struct stat sb;
-     int conn_fd;
-     char* file_address;
-+	char *buf_address;
-+	size_t buf_len;
-     } httpd_conn;
- 
- /* Methods. */
 diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
 --- thttpd-2.21b/mime_encodings.txt	Wed May 10 03:22:28 2000
 +++ thttpd-2.21b-cool/mime_encodings.txt	Sun Jul 14 13:54:27 2002
@@ -478,7 +454,7 @@ diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
 +ice	x-conference/x-cooltalk
 diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 --- thttpd-2.21b/thttpd.c	Tue Apr 24 00:41:57 2001
-+++ thttpd-2.21b-cool/thttpd.c	Sun Jul 14 14:56:18 2002
++++ thttpd-2.21b-cool/thttpd.c	Sun Jul 14 15:45:23 2002
 @@ -111,12 +111,15 @@
  static int httpd_conn_count;
  
@@ -495,7 +471,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 +	CNST_SENDING,
 +	CNST_PAUSING,
 +	CNST_LINGERING,
-+	CNST_SENDING_BUF,
++	CNST_SENDING_RESP,
 +	CNST_TOTAL_NR
 +};
  
@@ -505,7 +481,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  static int handle_newconnect( struct timeval* tvP, int listen_fd );
  static void handle_read( connecttab* c, struct timeval* tvP );
  static void handle_send( connecttab* c, struct timeval* tvP );
-+static void handle_send_buf( connecttab* c, struct timeval* tvP );
++static void handle_send_resp( connecttab* c, struct timeval* tvP );
  static void handle_linger( connecttab* c, struct timeval* tvP );
  static int check_throttles( connecttab* c );
  static void clear_throttles( connecttab* c, struct timeval* tvP );
@@ -516,7 +492,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 +typedef void (*handler_func)(connecttab*, struct timeval *);
 +
 +handler_func handler_array[CNST_TOTAL_NR] =
-+{NULL, handle_read, handle_send, NULL, handle_linger, handle_send_buf};
++{NULL, handle_read, handle_send, NULL, handle_linger, handle_send_resp};
 +
 +#define RUN_HANDLER(type, c) handler_array[type](c, &tv)
  
@@ -539,7 +515,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 +			case CNST_READING:
 +			case CNST_SENDING:
 +			case CNST_LINGERING:
-+			case CNST_SENDING_BUF:
++			case CNST_SENDING_RESP:
 +				fdwatch_check_fd(hc->conn_fd);
 +				RUN_HANDLER(c->conn_state, c);
 +				break;
@@ -549,7 +525,45 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	    }
  	tmr_run( &tv );
  
-@@ -1333,7 +1345,7 @@
+@@ -1297,12 +1309,36 @@
+ 	}
+     }
+ 
++static void
++setup_sending(connecttab *c, int state, struct timeval *tvP)
++{
++	httpd_conn *hc = c->hc;
++    ClientData client_data;
++
++    c->conn_state = state;
++    c->started_at = tvP->tv_sec;
++    c->wouldblock_delay = 0;
++    client_data.p = c;
++    tmr_cancel( c->idle_read_timer );
++    c->idle_read_timer = (Timer*) 0;
++    c->idle_send_timer = tmr_create(
++	tvP, idle_send_connection, client_data, IDLE_SEND_TIMELIMIT * 1000L,
++	0 );
++    if ( c->idle_send_timer == (Timer*) 0 )
++	{
++	syslog( LOG_CRIT, "tmr_create(idle_send_connection) failed" );
++	exit( 1 );
++	}
++
++    fdwatch_del_fd( hc->conn_fd );
++    fdwatch_add_fd( hc->conn_fd, c, FDW_WRITE );
++}
++
+ 
+ static void
+ handle_read( connecttab* c, struct timeval* tvP )
+     {
+     int sz;
+-    ClientData client_data;
+     httpd_conn* hc = c->hc;
+ 
+     /* Is there room in our buffer to read more bytes? */
+@@ -1333,7 +1369,7 @@
  	clear_connection( c, tvP );
  	return;
  	}
@@ -558,15 +572,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  
      /* Do we have a complete request yet? */
      switch ( httpd_got_request( hc ) )
-@@ -1379,6 +1391,7 @@
-     else
- 	c->bytes_to_send = hc->bytes_to_send;
- 
-+	if (hc->buf_address == 0) {
-     /* Check if it's already handled. */
-     if ( hc->file_address == (char*) 0 )
- 	{
-@@ -1387,15 +1400,22 @@
+@@ -1387,6 +1423,12 @@
  	clear_connection( c, tvP );
  	return;
  	}
@@ -579,18 +585,35 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
      if ( c->bytes_sent >= c->bytes_to_send )
  	{
  	/* There's nothing to send. */
- 	clear_connection( c, tvP );
- 	return;
+@@ -1395,26 +1437,9 @@
  	}
-+	}
  
      /* Cool, we have a valid connection and a file to send to it. */
 -    c->conn_state = CNST_SENDING;
-+    c->conn_state = hc->buf_address ? CNST_SENDING_BUF : CNST_SENDING;
-     c->started_at = tvP->tv_sec;
-     c->wouldblock_delay = 0;
-     client_data.p = c;
-@@ -1500,7 +1520,7 @@
+-    c->started_at = tvP->tv_sec;
+-    c->wouldblock_delay = 0;
+-    client_data.p = c;
+-    tmr_cancel( c->idle_read_timer );
+-    c->idle_read_timer = (Timer*) 0;
+-    c->idle_send_timer = tmr_create(
+-	tvP, idle_send_connection, client_data, IDLE_SEND_TIMELIMIT * 1000L,
+-	0 );
+-    if ( c->idle_send_timer == (Timer*) 0 )
+-	{
+-	syslog( LOG_CRIT, "tmr_create(idle_send_connection) failed" );
+-	exit( 1 );
+-	}
+-
+-    fdwatch_del_fd( hc->conn_fd );
+-    fdwatch_add_fd( hc->conn_fd, c, FDW_WRITE );
++	setup_sending(c, CNST_SENDING, tvP);
+     }
+ 
+-
+ static void
+ handle_send( connecttab* c, struct timeval* tvP )
+     {
+@@ -1500,7 +1525,7 @@
  	    {
  	    /* Yes; move the unwritten part to the front of the buffer. */
  	    int newlen = hc->responselen - sz;
@@ -599,40 +622,52 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	    hc->responselen = newlen;
  	    sz = 0;
  	    }
-@@ -1568,6 +1588,36 @@
- 	really_clear_connection( c, tvP );
+@@ -1569,6 +1594,35 @@
      }
  
-+
+ 
 +static void
-+handle_send_buf(connecttab *c, struct timeval *tvP)
++handle_send_resp(connecttab *c, struct timeval *tvP)
 +{
 +	httpd_conn* hc = c->hc;
-+	int n = send(hc->conn_fd, hc->buf_address, hc->buf_len, 0);
++	int n = send(hc->conn_fd, hc->response, hc->responselen, 0);
 +
 +	if (n < 0) {
 +		if (errno == EAGAIN)
 +			return;
 +
-+		clear_connection( c, tvP );
-+		return;
++		goto clear;
 +	}
 +
 +	tmr_reset( tvP, c->idle_send_timer );
 +
-+	if (n == hc->buf_len) {
-+		free(hc->buf_address);
-+		hc->buf_address = 0;
-+		hc->buf_len = 0;
++	if (n == hc->responselen) {
++clear:
++		hc->response = realloc(hc->response, hc->maxresponse + 1);
++		hc->responselen = 0;
 +
 +		clear_connection(c, tvP);
 +		return;
 +	}
 +
-+	hc->buf_len -= n;
++	hc->responselen -= n;
 +
-+	memmove(hc->buf_address, hc->buf_address + n, hc->buf_len);
++	memmove(hc->response, hc->response + n, hc->responselen);
 +}
- 
++
  static int
  check_throttles( connecttab* c )
+     {
+@@ -1640,7 +1694,11 @@
+     ClientData client_data;
+ 
+     /* If we haven't actually sent the buffered response yet, do so now. */
+-    httpd_write_response( c->hc );
++    if (c->hc->responselen && c->conn_state != CNST_SENDING_RESP) {
++		setup_sending(c, CNST_SENDING_RESP, tvP);
++
++		return;
++	}
+ 
+     if ( c->idle_read_timer != (Timer*) 0 )
+ 	{
