@@ -461,8 +461,88 @@ static void sapi_isapi_register_zeus_variables(LPEXTENSION_CONTROL_BLOCK lpECB, 
 		php_register_variable( "SERVER_SIGNATURE", static_variable_buf, track_vars_array TSRMLS_CC );
 	}
 }
-#endif
+#else
 
+static void sapi_isapi_register_iis_variables(LPEXTENSION_CONTROL_BLOCK lpECB, zval *track_vars_array TSRMLS_DC)
+{
+	char static_variable_buf[ISAPI_SERVER_VAR_BUF_SIZE];
+	char path_info_buf[ISAPI_SERVER_VAR_BUF_SIZE];
+	DWORD variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+	DWORD scriptname_len = ISAPI_SERVER_VAR_BUF_SIZE;
+	DWORD pathinfo_len = 0;
+	HSE_URL_MAPEX_INFO humi;
+
+	/* Get SCRIPT_NAME, we use this to work out which bit of the URL
+	 * belongs in PHP's version of PATH_INFO
+	 */
+	lpECB->GetServerVariable(lpECB->ConnID, "SCRIPT_NAME", static_variable_buf, &scriptname_len);
+
+	/* Adjust Zeus' version of PATH_INFO, set PHP_SELF,
+	 * and generate REQUEST_URI
+	 */
+	if ( lpECB->GetServerVariable(lpECB->ConnID, "PATH_INFO", static_variable_buf, &variable_len) && static_variable_buf[0] ) {
+
+		/* Chop off filename to get just the 'real' PATH_INFO' */
+		pathinfo_len = variable_len - scriptname_len;
+		strncpy(path_info_buf, static_variable_buf + scriptname_len - 1, sizeof(path_info_buf)-1);
+		php_register_variable( "PATH_INFO", path_info_buf, track_vars_array TSRMLS_CC );
+		/* append query string to give url... extra byte for '?' */
+		if ( strlen(lpECB->lpszQueryString) + variable_len + 1 < ISAPI_SERVER_VAR_BUF_SIZE ) {
+			/* append query string only if it is present... */
+			if ( strlen(lpECB->lpszQueryString) ) {
+				static_variable_buf[ variable_len - 1 ] = '?';
+				strcpy( static_variable_buf + variable_len, lpECB->lpszQueryString );
+			}
+			php_register_variable( "URL", static_variable_buf, track_vars_array TSRMLS_CC );
+			php_register_variable( "REQUEST_URI", static_variable_buf, track_vars_array TSRMLS_CC );
+		}
+	}
+
+	/* Get and adjust PATH_TRANSLATED to what PHP wants */
+	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+	if ( lpECB->GetServerVariable(lpECB->ConnID, "PATH_TRANSLATED", static_variable_buf, &variable_len) && static_variable_buf[0] ) {
+		static_variable_buf[ variable_len - pathinfo_len - 1 ] = '\0';
+		php_register_variable( "SCRIPT_FILENAME", static_variable_buf, track_vars_array TSRMLS_CC );
+		efree(SG(request_info).path_translated);
+		SG(request_info).path_translated = estrdup(static_variable_buf);
+		if (pathinfo_len) {
+			char *t = strrchr(static_variable_buf,'\\');
+			if (t) *t = 0;
+			strncat(static_variable_buf, path_info_buf, sizeof(static_variable_buf)-1);
+		} else {
+			static_variable_buf[0]=0;
+		}
+		php_register_variable( "PATH_TRANSLATED", static_variable_buf, track_vars_array TSRMLS_CC );
+	}
+
+	static_variable_buf[0] = '/';
+	static_variable_buf[1] = 0;
+	variable_len = 2;
+	if (lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_MAP_URL_TO_PATH_EX, static_variable_buf, &variable_len, (LPDWORD) &humi)) {
+		/* Remove trailing \  */
+		if (humi.lpszPath[variable_len-2] == '\\') {
+			humi.lpszPath[variable_len-2] = 0;
+		}
+		php_register_variable("DOCUMENT_ROOT", humi.lpszPath, track_vars_array TSRMLS_CC);
+	}
+
+	if (!SG(request_info).auth_user || !SG(request_info).auth_password || 
+		!SG(request_info).auth_user[0] || !SG(request_info).auth_password[0]) {
+		variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+		if (lpECB->GetServerVariable(lpECB->ConnID, "HTTP_AUTHORIZATION", static_variable_buf, &variable_len)
+			&& static_variable_buf[0]) {
+			php_handle_auth_data(static_variable_buf TSRMLS_CC);
+		}
+	}
+
+	if (SG(request_info).auth_user)  {
+		php_register_variable("PHP_AUTH_USER", SG(request_info).auth_user, track_vars_array TSRMLS_CC );
+	}
+	if (SG(request_info).auth_password) {
+		php_register_variable("PHP_AUTH_PW", SG(request_info).auth_password, track_vars_array TSRMLS_CC );
+	}
+}
+#endif
 
 static void sapi_isapi_register_server_variables2(char **server_variables, LPEXTENSION_CONTROL_BLOCK lpECB, zval *track_vars_array, char **recorded_values TSRMLS_DC)
 {
@@ -529,6 +609,8 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array TSRMLS_D
 
 #ifdef WITH_ZEUS
 	sapi_isapi_register_zeus_variables(lpECB, track_vars_array TSRMLS_CC);
+#else
+	sapi_isapi_register_iis_variables(lpECB, track_vars_array TSRMLS_CC);
 #endif
 
 	/* PHP_SELF support */
@@ -557,41 +639,6 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array TSRMLS_D
 		}
 		efree(isapi_special_server_variables[SPECIAL_VAR_ALL_HTTP]);
 	}
-
-#ifdef PHP_WIN32
-	{
-		HSE_URL_MAPEX_INFO humi;
-		DWORD path_len = 2;
-		char path[] = "/";
-
-		if (lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_MAP_URL_TO_PATH_EX, path, &path_len, (LPDWORD) &humi)) {
-			/* Remove trailing \  */
-			if (humi.lpszPath[path_len-2] == '\\') {
-				humi.lpszPath[path_len-2] = 0;
-			}
-			php_register_variable("DOCUMENT_ROOT", humi.lpszPath, track_vars_array TSRMLS_CC);
-		}
-
-		if (!SG(request_info).auth_user || !SG(request_info).auth_password || 
-			!SG(request_info).auth_user[0] || !SG(request_info).auth_password[0]) {
-			DWORD variable_len;
-			char static_variable_buf[ISAPI_SERVER_VAR_BUF_SIZE];
-
-			variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
-			if (lpECB->GetServerVariable(lpECB->ConnID, "HTTP_AUTHORIZATION", static_variable_buf, &variable_len)
-				&& static_variable_buf[0]) {
-				php_handle_auth_data(static_variable_buf TSRMLS_CC);
-			}
-		}
-	
-		if (SG(request_info).auth_user)  {
-			php_register_variable("PHP_AUTH_USER", SG(request_info).auth_user, track_vars_array TSRMLS_CC );
-		}
-		if (SG(request_info).auth_password) {
-			php_register_variable("PHP_AUTH_PW", SG(request_info).auth_password, track_vars_array TSRMLS_CC );
-		}
-	}
-#endif
 }
 
 
@@ -667,7 +714,7 @@ static void init_request_info(LPEXTENSION_CONTROL_BLOCK lpECB TSRMLS_DC)
 {
 	SG(request_info).request_method = lpECB->lpszMethod;
 	SG(request_info).query_string = lpECB->lpszQueryString;
-	SG(request_info).path_translated = lpECB->lpszPathTranslated;
+	SG(request_info).path_translated = estrdup(lpECB->lpszPathTranslated);
 	SG(request_info).request_uri = lpECB->lpszPathInfo;
 	SG(request_info).content_type = lpECB->lpszContentType;
 	SG(request_info).content_length = lpECB->cbTotalBytes;
@@ -745,6 +792,7 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 			init_request_info(lpECB TSRMLS_CC);
 			SG(server_context) = lpECB;
 
+			php_request_startup(TSRMLS_C);
 #ifdef WITH_ZEUS
 			/* PATH_TRANSLATED can contain extra PATH_INFO stuff after the
 			 * file being loaded, so we must use SCRIPT_FILENAME instead
@@ -758,22 +806,23 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 					 * variable won't be present, so fall back to old behaviour.
 					 */
 					efree( file_handle.filename );
-					file_handle.filename = SG(request_info.path_translated);
+					file_handle.filename = SG(request_info).path_translated;
 					file_handle.free_filename = 0;
 				}
 			}
 #else
-			file_handle.filename = SG(request_info.path_translated);
+			file_handle.filename = SG(request_info).path_translated;
 			file_handle.free_filename = 0;
 #endif
 			file_handle.type = ZEND_HANDLE_FILENAME;
 			file_handle.opened_path = NULL;
 
-			php_request_startup(TSRMLS_C);
+
 			php_execute_script(&file_handle TSRMLS_CC);
 			if (SG(request_info).cookie_data) {
 				efree(SG(request_info).cookie_data);
 			}
+			efree(SG(request_info).path_translated);
 #ifdef PHP_ENABLE_SEH
 		} __except(exceptionhandler(&e, GetExceptionInformation())) {
 			char buf[1024];
