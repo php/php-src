@@ -31,17 +31,27 @@ short and long options.</description>
   <release>
     <version>1.2</version>
     <date>2003-12-11</date>
-    <notes>Revert of erroneous POSIX compatibility fix in getopt().
-getopt2() must be used for POSIX compatibility (BC break).</notes>
+    <notes>Fix to preserve BC with 1.0 and allow correct behaviour for new users</notes>
     <state>stable</state>
     <filelist>
-     <dir name="Console">
-      <file role="php" name="Getopt.php"/>
-     </dir>
+      <dir name="Console">
+        <file role="php" name="Getopt.php"/>
+      </dir>
     </filelist>
   </release>
   <changelog>
     <release>
+      <version>1.0</version>
+      <date>2002-09-13</date>
+      <notes>Stable release</notes>
+      <state>stable</state>
+      <filelist>
+        <dir name="Console">
+          <file role="php" name="Getopt.php"/>
+        </dir>
+      </filelist>
+    </release>
+   <release>
       <version>0.11</version>
       <date>2002-05-26</date>
       <notes>POSIX getopt compatibility fix: treat first element of args

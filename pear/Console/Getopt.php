@@ -52,12 +52,8 @@ class Console_Getopt {
      * Long and short options can be mixed.
      *
      * Most of the semantics of this function are based on GNU getopt_long().
-     * 
-     * <b>WARNING</b>: this function does not maintain full compatibility with GNU getopt_long().
-     * To have full compatibility, use {@link getopt2()}
      *
-     * @param array  $args           an array of command-line arguments.  The first argument
-     *                               should be the filename (like $argv[0]), unless it begins with -
+     * @param array  $args           an array of command-line arguments
      * @param string $short_options  specifies the list of allowed short options
      * @param array  $long_options   specifies the list of allowed long options
      *
@@ -67,33 +63,26 @@ class Console_Getopt {
      * @access public
      *
      */
-    function getopt($args, $short_options, $long_options = null)
-    {
-        // in case you pass directly readPHPArgv() as the first arg
-        if (PEAR::isError($args)) {
-            return $args;
-        }
-        if (empty($args)) {
-            return array(array(), array());
-        }
-
-        settype($args, 'array');
-
-        if ($long_options) {
-            sort($long_options);
-        }
-        if (isset($args[0]{0}) && $args[0]{0} != '-') {
-            array_shift($args);
-        }
-        return Console_Getopt::doGetopt($args, $short_options, $long_options);
-    }
-
-    /**
-     * This function expects $args to contain only options and values
-     * @see getopt()
-     */    
     function getopt2($args, $short_options, $long_options = null)
     {
+        return Console_Getopt::doGetopt(2, $args, $short_options, $long_options);
+    }
+
+    /**
+     * This function expects $args to start with the script name (POSIX-style).
+     * Preserved for backwards compatibility.
+     * @see getopt2()
+     */    
+    function getopt($args, $short_options, $long_options = null)
+    {
+        return Console_Getopt::doGetopt(1, $args, $short_options, $long_options);
+    }
+
+    /**
+     * The actual implementation of the argument parsing code.
+     */
+    function doGetopt($version, $args, $short_options, $long_options = null)
+    {
         // in case you pass directly readPHPArgv() as the first arg
         if (PEAR::isError($args)) {
             return $args;
@@ -101,22 +90,25 @@ class Console_Getopt {
         if (empty($args)) {
             return array(array(), array());
         }
+        $opts     = array();
+        $non_opts = array();
 
         settype($args, 'array');
 
         if ($long_options) {
             sort($long_options);
         }
-        return Console_Getopt::doGetopt($args, $short_options, $long_options);
-    }
-    
-    /**
-     * The meat of {@link getopt()} and {@link getopt2()}
-     */
-    function doGetopt($args, $short_options, $long_options = null)
-    {
-        $opts     = array();
-        $non_opts = array();
+
+        /*
+         * Preserve backwards compatibility with callers that relied on
+         * erroneous POSIX fix.
+         */
+        if ($version < 2) {
+            if (isset($args[0]{0}) && $args[0]{0} != '-') {
+                array_shift($args);
+            }
+        }
+
         reset($args);
         while (list($i, $arg) = each($args)) {
 
