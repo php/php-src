@@ -1633,6 +1633,89 @@ PHP_FUNCTION(readfile)
 }
 /* }}} */
 
+
+#if HAVE_MMAP
+
+/* {{{ proto string mmapfile (string filename [, int bytes_to_read])
+   Read a file into a variable with mmap */
+PHP_FUNCTION(mmapfile)
+{
+	zval        **arg1, **arg2;
+	int         in, bytes_to_read = 0;
+	char        *data;
+	char        *in_addr;
+	struct stat f_stat;
+
+	memset (&f_stat, 0, sizeof (stat));
+   
+	/* check args */
+	switch (ARG_COUNT(ht)) {
+		case 1:
+			if (zend_get_parameters_ex (1, &arg1) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			break;
+		case 2:
+			if (zend_get_parameters_ex (2, &arg1, &arg2) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			convert_to_long_ex (arg2);
+			bytes_to_read = (*arg2)->value.lval;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex (arg1);
+
+	if ((in = open ((*arg1)->value.str.val, O_RDONLY)) == -1) {
+		php_error (E_WARNING, "can't re-open input file for mmap");
+		RETURN_FALSE;
+	}
+   
+	if (fstat (in, &f_stat)) {
+		php_error (E_WARNING, "cannot get file information");
+		RETURN_FALSE;
+	}
+
+	if (!bytes_to_read) {
+		bytes_to_read = f_stat.st_size;
+	} else {
+		bytes_to_read = (bytes_to_read < f_stat.st_size) ? bytes_to_read : f_stat.st_size;
+	}
+
+	if ((in_addr = mmap (NULL, bytes_to_read, PROT_READ, MAP_SHARED, in, 0)) == (char*) -1) {
+		php_error (E_WARNING, "can't mmap file");
+		RETURN_FALSE;
+	}
+   
+	data = emalloc (bytes_to_read + 1);
+	data[bytes_to_read + 1] = '\0';
+
+	if (!memcpy(data, in_addr, bytes_to_read)) {
+		efree (data);
+		php_error (E_WARNING, "cannot copy file to memory");
+		RETURN_FALSE;
+	}
+
+	if (munmap(in_addr, bytes_to_read)) {
+		efree (data);
+		php_error (E_WARNING, "cannot unmap the file");
+		RETURN_FALSE;
+	}
+
+	if (close(in)) {
+		efree (data);
+		php_error (E_WARNING, "cannot close file");
+		RETURN_FALSE;
+	}
+
+	RETURN_STRINGL(data, bytes_to_read + 1, 0); 
+}
+/* }}} */
+
+#endif
+
+
 /* {{{ proto int umask([int mask])
    Return or change the umask */
 PHP_FUNCTION(umask)
@@ -1659,6 +1742,8 @@ PHP_FUNCTION(umask)
 }
 
 /* }}} */
+
+
 /* {{{ proto int fpassthru(int fp)
    Output all remaining data from a file pointer */
 

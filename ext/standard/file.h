@@ -48,6 +48,9 @@ PHP_FUNCTION(mkdir);
 PHP_FUNCTION(rmdir);
 PHP_FUNCTION(fpassthru);
 PHP_FUNCTION(readfile);
+#if HAVE_MMAP
+PHP_FUNCTION(mmapfile);
+#endif
 PHP_FUNCTION(umask);
 PHP_FUNCTION(rename);
 PHP_FUNCTION(unlink);
