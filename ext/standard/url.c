@@ -200,7 +200,11 @@ PHPAPI php_url *php_url_parse(char *str)
 	}
 	
 	/* check for port */
-	if ((p = memchr(s, ':', (e-s)))) {
+	/* memrchr is a GNU specific extension
+	   Emulate for wide compatability */
+	for(p = e; *p != ':' && p >= s; p--);
+
+	if (*p == ':') {
 		if (!ret->port) {
 			p++;
 			if (e-p > 5) { /* port cannot be longer then 5 characters */
@@ -228,7 +232,7 @@ PHPAPI php_url *php_url_parse(char *str)
 		efree(ret);
 		return NULL;
 	}
-	
+
 	ret->host = estrndup(s, (p-s));
 	php_replace_controlchars(ret->host);
 	
