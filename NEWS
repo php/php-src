@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Changed setlocale() to use LC_* constants. (Jani)
 - ctype functions now follow the extension naming conventions (Hartmut)
 - Added iconv() function (using libc or libiconv) (Stig)
 - Added ODBC_TYPE constant (Stig)
