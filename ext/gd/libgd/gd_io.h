@@ -2,6 +2,10 @@
 #define GD_IO_H 1
 
 #include <stdio.h>
+
+#ifdef VMS
+#define Putchar gdPutchar
+#endif
  
 typedef struct gdIOCtx {
 	int	(*getC)(struct gdIOCtx*);

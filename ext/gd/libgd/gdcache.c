@@ -18,7 +18,7 @@
  * element is replaced in the event of a cache miss after the cache has 
  * reached a given size.
  *
- * John Ellson  (ellson@lucent.com)  Oct 31, 1997
+ * John Ellson  (ellson@graphviz.org)  Oct 31, 1997
  *
  * Test this with:
  *               gcc -o gdcache -g -Wall -DTEST gdcache.c
