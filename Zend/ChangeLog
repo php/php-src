@@ -1,3 +1,24 @@
+2002-02-13  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y:    <?php
+    	class MyException1 {
+
+    	}
+
+    	class MyException2 {
+
+    	}
+
+    	try {
+    		throw new MyException2();
+    	} catch (MyException1 $m) {
+    		print "Caught MyException1";
+    	} catch (MyException2 $m) {
+    		print "Caught MyException2";
+    	}
+
 2002-02-10  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * zend_compile.h:
