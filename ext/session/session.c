@@ -538,6 +538,11 @@ static void php_session_initialize(TSRMLS_D)
 	char *val;
 	int vallen;
 
+	if (!PS(mod)) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Failed to initialize session module.");
+		return;
+	}
+
 	/* Open session handler first */
 	if (PS(mod)->open(&PS(mod_data), PS(save_path), PS(session_name) TSRMLS_CC) == FAILURE) {
 		php_error(E_ERROR, "Failed to initialize session module");
