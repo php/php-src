@@ -1,3 +1,63 @@
+2004-02-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.c:
+      Must be initialized in ZTS mode
+
+    * ZEND_CHANGES
+      ZEND_CHANGES:
+      Update
+
+    * zend_compile.c
+      zend_language_parser.y:
+      Fix: <interface> [extends <interface> [, <ineterface>]* ]
+
+2004-02-11  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c:
+      Fix leaks in assignments to overloaded objects
+
+    * zend_execute.c:
+      Fix leak with overloaded objects, when they're used just "for the hell
+      of it" :)
+
+    * zend_execute.c:
+      Fixed a bug the caused overloaded array indices to be converted to strings
+
+    * zend_execute.c:
+      Turn off bogus warnings with overloaded dimensions and += (and friends)
+
+    * zend_execute.c:
+      Improve the implementation of unset() on array dimensions to be more
+      consistent with that of regular variables and string offsets
+
+    * zend_execute_API.c:
+      Fix bug #25038
+
+    * zend_reflection_api.c:
+      Fix crash (patch by Rob Richards)
+
+    * zend.c
+      zend_execute_API.c:
+      Fix exceptions thrown without a stack frame
+      Always enable set_exception_handler()
+
+    * zend_list.h:
+      Change FETCH_RESOURCE to return false on error instead of null, for
+      consistency with other error situations
+
+    * zend_compile.c:
+      Fix bug #26802 (the right aspects of it found by Marcus, anyway :)
+
+    * tests/bug26802.phpt:
+      Fix and clarify the test case
+
+    * zend_execute_API.c:
+      Complete the fix for handling of exceptions happening during the
+      argument passing phase of function calls (fixes bug #26866)
+
+    * zend_execute_API.c:
+      whitespace
+
 2004-02-10  Zeev Suraski  <zeev@zend.com>
 
     * tests/bug26698.phpt:
