@@ -126,9 +126,6 @@ T_ME=`$php_shtool echo -n -e %b`
 dnl We want this one before the checks, so the checks can modify CFLAGS.
 test -z "$CFLAGS" && auto_cflags=1
 
-dnl AC_AIX needs to be before any macros that run the C compiler. 
-AC_AIX
-
 abs_srcdir=`(cd $srcdir; pwd)`
 abs_builddir=`pwd`
 
@@ -151,6 +148,9 @@ AC_PROG_CC_C_O
 dnl Change to AC_PROG_CC_STDC when we start requiring a post-2.13 autoconf
 dnl AC_PROG_CC_STDC
 AC_PROG_CPP
+
+AC_AIX
+
 dnl AC_PROG_CXX
 dnl AC_PROG_CXXCPP
 dnl check for -R, etc. switch
