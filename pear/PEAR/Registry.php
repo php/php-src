@@ -20,6 +20,12 @@
 //
 // $Id$
 
+/*
+TODO:
+    - Transform into singleton()
+    - Add application level lock (avoid change the registry from the cmdline
+      while using the GTK interface, for ex.)
+*/
 require_once "System.php";
 require_once "PEAR.php";
 
@@ -428,17 +434,50 @@ class PEAR_Registry extends PEAR
     Experimental dependencies database handling functions (not yet in production)
     **/
 
+    // XXX Terrible slow, a lot of read, lock, write, unlock
     function rebuildDepsFile()
     {
+        // Init the file with empty data
+        $error = $this->_depWriteDepDB(array());
+        if (PEAR::isError($error)) {
+            return $error;
+        }
         $packages = $this->listPackages();
-        $files = array();
         foreach ($packages as $package) {
             $deps = $this->packageInfo($package, 'release_deps');
-            $this->depUpdatePackage($package, $deps);
+            $error = $this->depSetPackage($package, $deps);
+            if (PEAR::isError($error)) {
+                return $error;
+            }
         }
-        // XXX Change with serialize + write
-        return $this->dependencies;
+        return true;
     }
+
+    function &_depGetDepDB()
+    {
+        if (!$fp = fopen($this->depfile, 'r')) {
+            return $this->raiseError("Could not open dependencies file `".$this->depfile."'");
+        }
+        $data = fread($fp, filesize($this->depfile));
+        fclose($fp);
+        return unserialize($data);
+    }
+
+    function _depWriteDepDB(&$deps)
+    {
+        if (PEAR::isError($e = $this->_lock(LOCK_EX))) {
+            return $e;
+        }
+        if (!$fp = fopen($this->depfile, 'w')) {
+            $this->_unlock();
+            return $this->raiseError("Could not open dependencies file `".$this->depfile."' for writting");
+        }
+        fwrite($fp, serialize($deps));
+        fclose($fp);
+        $this->_unlock();
+        return true;
+    }
+
     /*
     The data structure is as follows:
     $dep_db = array(
@@ -468,27 +507,16 @@ class PEAR_Registry extends PEAR
             ),
         )
     )
+
+    Note: It only supports package dependencies no other type
     */
-    function _addDependency($package, $deps)
-    {
-        if (!is_array($deps) || !count($deps)) {
-            return;
-        }
-        $data = &$this->dependencies;
-        foreach ($deps as $dep) {
-            if ($dep && $dep['type'] == 'pkg' && isset($dep['name'])) {
-                settype($data['deps'][$dep['name']], 'array');
-                $data['deps'][$dep['name']][] = array('depend'  => $package,
-                                                      'version' => $dep['version'],
-                                                      'rel'     => $dep['rel']);
-                $data['pkgs'][$package][] = array($dep['name'], key($data['deps'][$dep['name']]));
-            }
-        }
-    }
 
     function depRemovePackage($package)
     {
-        $data = &$this->dependencies;
+        $data = &$this->_depGetDepDB();
+        if (PEAR::isError($data)) {
+            return $data;
+        }
         // Other packages depends on this package, can't be removed
         if (isset($data['deps'][$package])) {
             return $data['deps'][$package];
@@ -505,17 +533,22 @@ class PEAR_Registry extends PEAR
             // remove the package from the index list
             unset($data['pkgs'][$package]);
         }
-        return $data;
+        return $this->_depWriteDepDB();
     }
 
-    function depUpdatePackage($package, $new_version, $release_deps)
+    function depSetPackage($package, $new_version, $rel_deps = array())
     {
-        $data = &$this->dependencies;
+        $data = &$this->_depGetDepDB();
+        if (PEAR::isError($deps)) {
+            return $deps;
+        }
         // Other packages depend on this package, check deps
         if (isset($data['deps'][$package])) {
             foreach ($data['deps'][$package] as $dep) {
                 $require  = $dep['version'];
                 $relation = $dep['rel'];
+                // XXX (cox) Possible problem with changes in the way
+                // PEAR_Dependency::checkPackage() works
                 if ($relation != 'has') {
                     if (!version_compare($new_version, $require, $relation)) {
                         $fails[] = $dep;
@@ -526,7 +559,25 @@ class PEAR_Registry extends PEAR
                 return $fails;
             }
         }
-        $this->_addDependency($package, $release_deps);
+
+        // This package has no dependencies
+        if (!is_array($rel_deps) || !count($rel_deps)) {
+            return true;
+        }
+
+        // The package depends on others, register the dependencies
+        foreach ($rel_deps as $dep) {
+            if ($dep && $dep['type'] == 'pkg' && isset($dep['name'])) {
+                settype($data['deps'][$dep['name']], 'array');
+                $data['deps'][$dep['name']][] = array('depend'  => $package,
+                                                      'version' => $dep['version'],
+                                                      'rel'     => $dep['rel']);
+                settype($data['pkgs'][$package], 'array');
+                $data['pkgs'][$package][] = array($dep['name'],
+                                                  key($data['deps'][$dep['name']]));
+            }
+        }
+        return $this->_depWriteDepDB($data);
     }
 }
 
