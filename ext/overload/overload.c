@@ -601,9 +601,9 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 			return;
 		}
 
-		*return_value = *retval;
-		INIT_PZVAL(return_value);
-		FREE_ZVAL(retval);
+		return_value->value = retval->value;
+		zval_copy_ctor(return_value);
+		zval_ptr_dtor(&retval);
 	}
 	
 	efree(args);
