@@ -2609,7 +2609,7 @@ void yaz_close_session(Yaz_Association *as)
 	}
 }
 
-static void yaz_close_link (zend_rsrc_list_entry *rsrc)
+static void yaz_close_link (zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	Yaz_Association *as = (Yaz_Association *) rsrc->ptr;
 	yaz_close_session (as);
