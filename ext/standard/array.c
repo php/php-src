@@ -1152,7 +1152,7 @@ PHP_FUNCTION(extract)
 	ulong num_key;
 	uint var_name_len;
 	int var_exists, extract_type, key_type, count = 0;
-	zend_bool extract_refs = 0;
+	int extract_refs = 0;
 	HashPosition pos;
 
 	switch (ZEND_NUM_ARGS()) {
@@ -1169,7 +1169,7 @@ PHP_FUNCTION(extract)
 			}
 			convert_to_long_ex(z_extract_type);
 			extract_type = Z_LVAL_PP(z_extract_type);
-			extract_refs = (extract_type & EXTR_REFS)>>8;
+			extract_refs = (extract_type & EXTR_REFS);
 			extract_type &= 0xff;
 			if (extract_type > EXTR_SKIP && extract_type <= EXTR_PREFIX_IF_EXISTS) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Prefix expected to be specified");
@@ -1183,7 +1183,7 @@ PHP_FUNCTION(extract)
 			}
 			convert_to_long_ex(z_extract_type);
 			extract_type = Z_LVAL_PP(z_extract_type);
-			extract_refs = (extract_type & EXTR_REFS)>>8;
+			extract_refs = (extract_type & EXTR_REFS);
 			extract_type &= 0xff;
 			convert_to_string_ex(prefix);
 			break;
@@ -1273,17 +1273,14 @@ PHP_FUNCTION(extract)
 				if (extract_refs) {
 					zval **orig_var;
 
-					(*entry)->is_ref = 1;
-					(*entry)->refcount++;
-					if (zend_hash_find(EG(active_symbol_table), final_name.c, final_name.len+1, (void **) &orig_var) == SUCCESS
-						&& PZVAL_IS_REF(*orig_var)) {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(entry);
+					zval_add_ref(entry);
 
-						(*entry)->refcount += (*orig_var)->refcount-2;
-						zval_dtor(*orig_var);
-						FREE_ZVAL(*orig_var);
+					if (zend_hash_find(EG(active_symbol_table), final_name.c, final_name.len+1, (void **) &orig_var) == SUCCESS) {
+						zval_ptr_dtor(orig_var);
 						*orig_var = *entry;
 					} else {
-						zend_hash_update(EG(active_symbol_table), final_name.c, final_name.len+1, entry, sizeof(zval *), NULL);
+						zend_hash_update(EG(active_symbol_table), final_name.c, final_name.len+1, (void **) entry, sizeof(zval *), NULL);
 					}
 				} else {
 					MAKE_STD_ZVAL(data);
