@@ -931,7 +931,7 @@ SOURCE=..\win32\wfile.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\dl\snmp\winsnmp.c
+SOURCE=..\ext\snmp\winsnmp.c
 # End Source File
 # Begin Source File
 
