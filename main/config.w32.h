@@ -37,7 +37,6 @@
    ---------------------------------------------------------------*/
 #if !defined(COMPILE_DL)
 #define HAVE_SNMP 0
-#define HAVE_MYSQL 0
 # define HAVE_ERRMSG_H 0 /*needed for mysql 3.21.17 and up*/
 #define HAVE_LDAP 0
 #define DBASE 0

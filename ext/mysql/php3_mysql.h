@@ -36,11 +36,18 @@
 #if COMPILE_DL
 #undef HAVE_MYSQL
 #define HAVE_MYSQL 1
+#	if WIN32||WINNT
+#	define PHP_MYSQL_API __declspec(dllexport)
+#	endif
 #endif
 
 #if HAVE_MYSQL
 #ifndef DLEXPORT
 #define DLEXPORT
+#endif
+
+#ifdef ZTS
+#include "TSRM.h"
 #endif
 
 extern php3_module_entry mysql_module_entry;
@@ -106,7 +113,7 @@ typedef struct {
 # define MySLS_CC
 # define MySG(v) (mysql_globals.v)
 # define MySLS_FETCH()
-extern ZEND_API php_mysql_globals mysql_globals;
+extern PHP_MYSQL_API php_mysql_globals mysql_globals;
 #endif
 
 

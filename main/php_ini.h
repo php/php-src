@@ -111,10 +111,10 @@ pval *cfg_get_entry(char *name, uint name_length);
 
 
 /* Standard message handlers */
-PHP_INI_MH(OnUpdateInt);
-PHP_INI_MH(OnUpdateReal);
-PHP_INI_MH(OnUpdateString);
-PHP_INI_MH(OnUpdateStringUnempty);
+PHPAPI PHP_INI_MH(OnUpdateInt);
+PHPAPI PHP_INI_MH(OnUpdateReal);
+PHPAPI PHP_INI_MH(OnUpdateString);
+PHPAPI PHP_INI_MH(OnUpdateStringUnempty);
 
 
 #define PHP_INI_DISPLAY_ORIG	1
