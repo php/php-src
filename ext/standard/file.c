@@ -906,15 +906,17 @@ PHP_FUNCTION(fgets)
 
 	convert_to_long_ex(arg2);
 	len = (*arg2)->value.lval;
-    if (len < 0) {
+
+	if (len < 0) {
 		php_error(E_WARNING, "length parameter to fgets() may not be negative");
 		RETURN_FALSE;
-    }
+	}
 
 	if (type == le_socket) {
 		issock=1;
 		socketd=*(int*)what;
 	}
+
 	buf = emalloc(sizeof(char) * (len + 1));
 	/* needed because recv doesnt put a null at the end*/
 	memset(buf,0,len+1);
