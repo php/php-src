@@ -997,7 +997,7 @@ PHP_FUNCTION(ldap_first_attribute)
 		ZEND_REGISTER_RESOURCE(return_value, ber, le_ber_entry);
 
 		RETVAL_STRING(attribute,1);
-#ifdef WINDOWS
+#if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
 		ldap_memfree(attribute);
 #endif
 	}
@@ -1028,7 +1028,7 @@ PHP_FUNCTION(ldap_next_attribute)
 		ZEND_REGISTER_RESOURCE(return_value, ber, le_ber_entry);
 
 		RETVAL_STRING(attribute,1);
-#ifdef WINDOWS
+#if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
 		ldap_memfree(attribute);
 #endif
 	}
@@ -1075,8 +1075,15 @@ PHP_FUNCTION(ldap_get_attributes)
 		add_index_string(return_value, num_attrib, attribute, 1);
 
 		num_attrib++;
+#if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
+		ldap_memfree(attribute);
+#endif
 		attribute = ldap_next_attribute(ldap, ldap_result_entry, ber);
 	}
+#if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
+		if (ber != NULL)
+			ber_free(ber, 0);
+#endif
 	
 	add_assoc_long(return_value, "count", num_attrib);
 }
@@ -1185,7 +1192,7 @@ PHP_FUNCTION(ldap_get_dn)
 	text = ldap_get_dn(ldap, ldap_result_entry);
 	if ( text != NULL ) {
 		RETVAL_STRING(text,1);
-#ifdef WINDOWS
+#if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
 		ldap_memfree(text);
 #endif
 	} else {
@@ -1245,7 +1252,7 @@ PHP_FUNCTION(ldap_dn2ufn)
 	
 	if (ufn !=NULL) {
 		RETVAL_STRING(ufn,1);
-#ifdef WINDOWS
+#if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
 		ldap_memfree(ufn);
 #endif
 	} else {
