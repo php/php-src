@@ -293,6 +293,13 @@ ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int in
 ZEND_API void zend_print_zval_r(zval *expr, int indent);
 ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent);
 
+ZEND_API void zend_output_debug_string(zend_bool trigger_break, char *format, ...);
+#if ZEND_DEBUG
+#define Z_DBG(expr)		(expr)
+#else
+#define	Z_DBG(expr)
+#endif
+
 ZEND_API extern char *empty_string;
 
 #define STR_FREE(ptr) if (ptr && ptr!=empty_string) { efree(ptr); }

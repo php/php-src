@@ -181,6 +181,8 @@ struct _zend_executor_globals {
 
 	zval *user_error_handler;
 
+	int lambda_count;
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 #if SUPPORT_INTERACTIVE
 	int interactive;

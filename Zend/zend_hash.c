@@ -78,24 +78,28 @@
 	}
 
 #if ZEND_DEBUG
+#define HT_OK				0
 #define HT_IS_DESTROYING	1
 #define HT_DESTROYED		2
-#define HT_CLEANING		3
-#define HT_OK				0
+#define HT_CLEANING			3
 
 static void _zend_is_inconsistent(HashTable *ht, char *file, int line)
 {
+	if (ht->inconsistent==HT_OK) {
+		return;
+	}
     switch (ht->inconsistent) {
-	case HT_IS_DESTROYING:
-        zend_error(E_CORE_ERROR, "ht=%08x is destroying in %s:%d", ht, file, line);
-		break;
-	case HT_DESTROYED:
-        zend_error(E_CORE_ERROR, "ht=%08x is already destroyed in %s:%d", ht, file, line);
-		break;
-	case HT_CLEANING:
-        zend_error(E_CORE_ERROR, "ht=%08x is cleaning %s:%d", ht, file, line);
-		break;
+		case HT_IS_DESTROYING:
+			zend_output_debug_string(1, "%s(%d) : ht=0x%08x is being destroyed", file, line, ht);
+			break;
+		case HT_DESTROYED:
+			zend_output_debug_string(1, "%s(%d) : ht=0x%08x is already destroyed", file, line, ht);
+			break;
+		case HT_CLEANING:
+			zend_output_debug_string(1, "%s(%d) : ht=0x%08x is being cleaned", file, line, ht);
+			break;
     }
+	zend_bailout();
 }
 #define IS_CONSISTENT(a) _zend_is_inconsistent(a,__FILE__,__LINE__);
 #define SET_INCONSISTENT(n) ht->inconsistent = n;
@@ -1106,7 +1110,7 @@ void zend_hash_display_pListTail(HashTable *ht)
 
 	p = ht->pListTail;
 	while (p != NULL) {
-		zend_printf("pListTail has key %s\n", p->arKey);
+		zend_output_debug_string(0, "pListTail has key %s\n", p->arKey);
 		p = p->pListLast;
 	}
 }
@@ -1119,14 +1123,14 @@ void zend_hash_display(HashTable *ht)
 	for (i = 0; i < ht->nTableSize; i++) {
 		p = ht->arBuckets[i];
 		while (p != NULL) {
-			zend_printf("%s <==> 0x%X\n", p->arKey, p->h);
+			zend_output_debug_string(0, "%s <==> 0x%X\n", p->arKey, p->h);
 			p = p->pNext;
 		}
 	}
 
 	p = ht->pListTail;
 	while (p != NULL) {
-		zend_printf("%s <==> 0x%X\n", p->arKey, p->h);
+		zend_output_debug_string(0, "%s <==> 0x%X\n", p->arKey, p->h);
 		p = p->pListLast;
 	}
 }

@@ -55,6 +55,7 @@ static ZEND_FUNCTION(get_class_methods);
 static ZEND_FUNCTION(trigger_error);
 static ZEND_FUNCTION(set_error_handler);
 static ZEND_FUNCTION(get_declared_classes);
+static ZEND_FUNCTION(lambda);
 
 unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
 unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };
@@ -93,6 +94,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FALIAS(user_error,		trigger_error,		NULL)
 	ZEND_FE(set_error_handler,		NULL)
 	ZEND_FE(get_declared_classes, NULL)
+	ZEND_FE(lambda,				NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -796,5 +798,59 @@ ZEND_FUNCTION(get_declared_classes)
 
 	array_init(return_value);
 	zend_hash_apply_with_argument(CG(class_table), (apply_func_arg_t)copy_class_name, return_value);
+}
+/* }}} */
+
+
+#define LAMBDA_TEMP_FUNCNAME	"__lambda_func"
+
+/* {{ proto string lambda(string args, string code)
+   Creates an anonymous function, and returns its name (funny, eh?) */
+ZEND_FUNCTION(lambda)
+{
+	char *eval_code, *function_name;
+	int eval_code_length, function_name_length;
+	zval **z_function_args, **z_function_code;
+	int retval;
+	CLS_FETCH();
+
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &z_function_args, &z_function_code)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(z_function_args);
+	convert_to_string_ex(z_function_code);
+
+	eval_code_length = sizeof("function " LAMBDA_TEMP_FUNCNAME)
+			+Z_STRLEN_PP(z_function_args)
+			+2	/* for the args parentheses */
+			+2	/* for the curly braces */
+			+Z_STRLEN_PP(z_function_code);
+
+	eval_code = (char *) emalloc(eval_code_length);
+	sprintf(eval_code, "function " LAMBDA_TEMP_FUNCNAME "(%s){%s}", Z_STRVAL_PP(z_function_args), Z_STRVAL_PP(z_function_code));
+
+	retval = zend_eval_string(eval_code, NULL CLS_CC ELS_CC);
+	efree(eval_code);
+	if (retval==SUCCESS) {
+		zend_function *func;
+
+		if (zend_hash_find(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME), (void **) &func)==FAILURE) {
+			zend_error(E_ERROR, "Unexpected inconsistency in lambda()");
+			RETURN_FALSE;
+		}
+		function_add_ref(func);
+
+		function_name = (char *) emalloc(sizeof("0lambda_")+MAX_LENGTH_OF_LONG);
+
+		do {
+			sprintf(function_name, "%clambda_%d", 0, ++EG(lambda_count));
+			function_name_length = strlen(function_name);
+		} while (zend_hash_add(EG(function_table), function_name, function_name_length+1, func, sizeof(zend_function), NULL)==FAILURE);
+		zend_hash_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME));
+		RETURN_STRINGL(function_name, function_name_length, 0);
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */

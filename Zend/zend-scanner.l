@@ -34,7 +34,6 @@
 %{
 
 #ifdef ZEND_WIN32
-#include <winsock.h>
 #include <io.h>
 #endif
 
