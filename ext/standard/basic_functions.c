@@ -2026,7 +2026,7 @@ PHP_FUNCTION(highlight_file)
 /* }}} */
 
 
-/* {{{ proto void highlight_file(string string)
+/* {{{ proto void highlight_string(string string)
    Syntax highlight a string */
 PHP_FUNCTION(highlight_string)
 {
