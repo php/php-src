@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Fixed a bug in preg_match()/preg_match_all() when matching strings containing
+  null bytes. (Andrei)
 - Added xpath_register_ns() function.
   It makes possible to issue XPath queries with namespaces
   like for example: "//namespace:sampletag" (Chris Jarecki)
