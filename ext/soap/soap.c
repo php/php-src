@@ -1392,7 +1392,8 @@ static void do_soap_call(zval* thisObj,
                          int function_len,
                          int arg_count,
                          zval** real_args,
-                         zval* return_value)
+                         zval* return_value
+						 TSRMLS_DC)
 {
   zval **tmp;
 	zval **trace;
@@ -1420,7 +1421,7 @@ static void do_soap_call(zval* thisObj,
 		FETCH_SDL_RES(sdl,tmp);
 	}
 
- 	clear_soap_fault(thisObj);
+ 	clear_soap_fault(thisObj TSRMLS_CC);
 
 zend_try {
 	SOAP_GLOBAL(sdl) = sdl;
@@ -1713,7 +1714,7 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 }
 #endif
 
-void clear_soap_fault(zval *obj)
+void clear_soap_fault(zval *obj TSRMLS_DC)
 {
 	if(obj != NULL && obj->type == IS_OBJECT) {
 /*		zend_hash_del(obj->value.obj.properties, "__soap_fault", sizeof("__soap_fault"));*/
