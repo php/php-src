@@ -89,13 +89,13 @@ function_entry mbstring_functions[] = {
 	PHP_FE(mbstr_gpc_handler,			NULL)
 	PHP_FE(mbstr_output_handler,			NULL)
 	PHP_FE(mbstr_preferred_mime_name,	NULL)
-	PHP_FE(mbstrlen,					NULL)
-	PHP_FE(mbstrpos,					NULL)
-	PHP_FE(mbstrrpos,				NULL)
-	PHP_FE(mbsubstr,					NULL)
-	PHP_FE(mbstrcut,					NULL)
-	PHP_FE(mbstrwidth,				NULL)
-	PHP_FE(mbstrimwidth,				NULL)
+	PHP_FE(mb_strlen,					NULL)
+	PHP_FE(mb_strpos,					NULL)
+	PHP_FE(mb_strrpos,				NULL)
+	PHP_FE(mb_substr,					NULL)
+	PHP_FE(mb_strcut,					NULL)
+	PHP_FE(mb_strwidth,				NULL)
+	PHP_FE(mb_strimwidth,				NULL)
 	PHP_FE(mbstr_convert_encoding,		NULL)
 	PHP_FE(mbstr_detect_encoding,		NULL)
 	PHP_FE(mbstr_convert_kana,			NULL)
@@ -105,6 +105,13 @@ function_entry mbstring_functions[] = {
 	PHP_FE(mbstr_encode_numericentity,		NULL)
 	PHP_FE(mbstr_decode_numericentity,		NULL)
 	PHP_FE(mbstr_send_mail,					NULL)
+	PHP_FALIAS(mbstrlen,	mb_strlen,	NULL)
+	PHP_FALIAS(mbstrpos,	mb_strpos,	NULL)
+	PHP_FALIAS(mbstrrpos,	mb_strrpos,	NULL)
+	PHP_FALIAS(mbsubstr,	mb_substr,	NULL)
+	PHP_FALIAS(mbstrcut,	mb_strcut,	NULL)
+	PHP_FALIAS(mbstrwidth,	mb_strwidth,	NULL)
+	PHP_FALIAS(mbstrimwidth,	mb_strimwidth,	NULL)
 	PHP_FALIAS(i18n_internal_encoding,	mbstr_internal_encoding,	NULL)
 	PHP_FALIAS(i18n_http_input,			mbstr_http_input,		NULL)
 	PHP_FALIAS(i18n_http_output,		mbstr_http_output,		NULL)
@@ -1157,9 +1164,9 @@ PHP_FUNCTION(mbstr_output_handler)
 
 
 
-/* {{{ proto int mbstrlen(string str, [string encoding])
+/* {{{ proto int mb_strlen(string str, [string encoding])
    Get character numbers of a string */
-PHP_FUNCTION(mbstrlen)
+PHP_FUNCTION(mb_strlen)
 {
 	pval **arg1, **arg2;
 	int n;
@@ -1199,9 +1206,9 @@ PHP_FUNCTION(mbstrlen)
 
 
 
-/* {{{ proto int mbstrpos(string haystack, string needle [, int offset [, string encoding]])
+/* {{{ proto int mb_strpos(string haystack, string needle [, int offset [, string encoding]])
    Find position of first occurrence of a string within another */
-PHP_FUNCTION(mbstrpos)
+PHP_FUNCTION(mb_strpos)
 {
 	pval **arg1, **arg2, **arg3, **arg4;
 	int offset, n;
@@ -1275,9 +1282,9 @@ PHP_FUNCTION(mbstrpos)
 
 
 
-/* {{{ proto int mbstrrpos(string haystack, string needle [, string encoding])
+/* {{{ proto int mb_strrpos(string haystack, string needle [, string encoding])
    Find the last occurrence of a character in a string within another */
-PHP_FUNCTION(mbstrrpos)
+PHP_FUNCTION(mb_strrpos)
 {
 	pval **arg1, **arg2, **arg3;
 	int n;
@@ -1336,9 +1343,9 @@ PHP_FUNCTION(mbstrrpos)
 
 
 
-/* {{{ proto string mbsubstr(string str, int start [, int length [, string encoding]])
+/* {{{ proto string mb_substr(string str, int start [, int length [, string encoding]])
    Return part of a string */
-PHP_FUNCTION(mbsubstr)
+PHP_FUNCTION(mb_substr)
 {
 	pval **arg1, **arg2, **arg3, **arg4;
 	int argc, from, len, mblen;
@@ -1426,9 +1433,9 @@ PHP_FUNCTION(mbsubstr)
 
 
 
-/* {{{ proto string mbstrcut(string str, int start [, int length [, string encoding]])
+/* {{{ proto string mb_strcut(string str, int start [, int length [, string encoding]])
    Return part of a string */
-PHP_FUNCTION(mbstrcut)
+PHP_FUNCTION(mb_strcut)
 {
 	pval **arg1, **arg2, **arg3, **arg4;
 	int argc, from, len;
@@ -1510,9 +1517,9 @@ PHP_FUNCTION(mbstrcut)
 
 
 
-/* {{{ proto int mbstrwidth(string str, [string encoding])
+/* {{{ proto int mb_strwidth(string str, [string encoding])
    Get terminal width of a string */
-PHP_FUNCTION(mbstrwidth)
+PHP_FUNCTION(mb_strwidth)
 {
 	pval **arg1, **arg2;
 	int n;
@@ -1552,9 +1559,9 @@ PHP_FUNCTION(mbstrwidth)
 
 
 
-/* {{{ proto string mbstrimwidth(string str, int start, int width [, string trimmarker [, string encoding]])
+/* {{{ proto string mb_strimwidth(string str, int start, int width [, string trimmarker [, string encoding]])
    Trim the string in terminal width */
-PHP_FUNCTION(mbstrimwidth)
+PHP_FUNCTION(mb_strimwidth)
 {
 	pval **arg1, **arg2, **arg3, **arg4, **arg5;
 	int from, width;
