@@ -2371,7 +2371,7 @@ diff -ur thttpd-2.21b/version.h thttpd-2.21b-cool/version.h
  #define _VERSION_H_
  
 -#define SERVER_SOFTWARE "thttpd/2.21b 23apr2001"
-+#define SERVER_SOFTWARE "thttpd/2.21b 23apr2001 Built-in PHP"
++#define SERVER_SOFTWARE "thttpd/2.21b PHP/20030920"
  #define SERVER_ADDRESS "http://www.acme.com/software/thttpd/"
  
  #endif /* _VERSION_H_ */
