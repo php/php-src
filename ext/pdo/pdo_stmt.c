@@ -184,10 +184,15 @@ static void param_dtor(void *data)
 	if (param->stmt->methods->param_hook) {
 		param->stmt->methods->param_hook(param->stmt, param, PDO_PARAM_EVT_FREE TSRMLS_CC);
 	}
-	
-	zval_ptr_dtor(&(param->parameter));
-	zval_ptr_dtor(&(param->driver_params));
 
+	if (param->name) {
+		efree(param->name);
+	}
+
+	zval_ptr_dtor(&(param->parameter));
+	if (param->driver_params) {
+		zval_ptr_dtor(&(param->driver_params));
+	}
 }
 
 static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_stmt_t *stmt, int is_param TSRMLS_DC)
