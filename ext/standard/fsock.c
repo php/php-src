@@ -538,7 +538,7 @@ static void php_sockwait_for_data(php_sockbuf *sock)
 	FD_SET(sock->socket, &fdr);
 	sock->timeout_event = 0;
 
-	if (timeout.tv_sec == -1) 
+	if (sock->timeout.tv_sec == -1) 
 		ptimeout = NULL;
 	else
 		ptimeout = &timeout;
