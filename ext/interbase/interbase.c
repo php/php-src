@@ -116,7 +116,7 @@ function_entry ibase_functions[] = {
 #if HAVE_STRFTIME
 	PHP_FE(ibase_timefmt, NULL)
 #endif
-
+    PHP_FE(ibase_gen_id, NULL)
 	PHP_FE(ibase_num_fields, NULL)
 	PHP_FE(ibase_num_params, NULL)
 #if abies_0
@@ -4403,6 +4403,113 @@ PHP_FUNCTION(ibase_free_event_handler)
 }	
 /* }}} */
   
+/* {{{ proto int ibase_gen_id([ resource link_identifier, ] string generator [, int increment ])
+   Increments the named generator and returns its new value */
+PHP_FUNCTION(ibase_gen_id)
+{
+	char query[128];
+	
+	zval **arg1, **arg2, **arg3, **query_arg;
+	ibase_db_link *ib_link;
+	ibase_trans *trans = NULL;
+	long increment;
+#ifdef SQL_INT64
+	ISC_INT64 result;
+#else
+	ISC_LONG result;
+#endif
+
+	XSQLDA out_sqlda;
+
+	RESET_ERRMSG;
+
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
+				RETURN_FALSE;
+			}
+			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink);
+			query_arg = arg1;
+			increment = 1;
+			break;
+		case 2:
+			if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+				RETURN_FALSE;
+			}
+
+			if (Z_TYPE_PP(arg1) == IS_STRING) /* first param is generator, second is inc */
+			{
+				query_arg = arg1;
+				convert_to_long_ex(arg2);
+				increment = Z_LVAL_PP(arg2);
+
+				ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink);
+			} else {
+				_php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAM_PASSTHRU, arg1, &ib_link, &trans);
+				query_arg = arg2;
+				increment = 1;
+			}
+			break;
+		case 3:
+			if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+				RETURN_FALSE;
+			}
+			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link*, arg1, -1, "InterBase link", le_link, le_plink);
+			
+			query_arg = arg2;
+			convert_to_long_ex(arg3);
+			increment = Z_LVAL_PP(arg3);
+			
+			break;			
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	
+	convert_to_string_ex(query_arg);
+	sprintf(query, "SELECT GEN_ID(%s,%ld) FROM rdb$database", Z_STRVAL_PP(query_arg), increment);
+
+	/* open default transaction */
+	if (_php_ibase_def_trans(ib_link, &trans TSRMLS_CC) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	/* allocate a minimal descriptor area */
+	out_sqlda.sqln = out_sqlda.sqld = 1;
+	out_sqlda.version = SQLDA_CURRENT_VERSION;
+	
+	/* allocate the field for the result */
+#ifdef SQL_INT64
+	out_sqlda.sqlvar[0].sqltype = SQL_INT64;
+#else
+	out_sqlda.sqlvar[0].sqltype = SQL_LONG;
+#endif
+	out_sqlda.sqlvar[0].sqlscale = 0;
+	out_sqlda.sqlvar[0].sqllen = sizeof(result);
+	out_sqlda.sqlvar[0].sqldata = (void*) &result;
+
+	/* execute the query */
+	if (isc_dsql_exec_immed2(IB_STATUS, &ib_link->handle, &trans->handle, 0, query, SQL_DIALECT_CURRENT, NULL, &out_sqlda))
+	{
+		_php_ibase_error(TSRMLS_C);
+		RETURN_FALSE;
+	}
+
+	/* don't return the generator value as a string unless it doesn't fit in a long */
+#ifdef SQL_INT64
+	if (result > LONG_MAX) 
+#endif
+	{
+		char res[24];
+
+		sprintf(res,"%" LL_MASK "d", result);
+		RETURN_STRING(res,1);
+	}
+	RETURN_LONG((long)result);
+}
+
+/* }}} */
+
 #endif /* HAVE_IBASE */
 
 /*
