@@ -36,14 +36,15 @@ extern zend_module_entry pgsql_module_entry;
 #ifdef PHP_WIN32
 #define INV_WRITE            0x00020000
 #define INV_READ             0x00040000
-#undef PHPAPI
+#undef PHP_PGSQL_API
 #ifdef PGSQL_EXPORTS
-#define PHPAPI __declspec(dllexport)
+#define PHP_PGSQL_API __declspec(dllexport)
 #else
-#define PHPAPI __declspec(dllimport)
+#define PHP_PGSQL_API __declspec(dllimport)
 #endif
 #else
 #include <libpq/libpq-fs.h>
+#define PHP_PGSQL_API /* nothing special */
 #endif
 
 #ifdef HAVE_PG_CONFIG_H
@@ -161,13 +162,13 @@ PHP_FUNCTION(pg_select);
 #define PGSQL_DML_STRING            (1<<11)    /* Return query string */
 
 /* exported functions */
-PHPAPI int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC);
-PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, ulong opt TSRMLS_DC);
-PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *values, ulong opt, char **sql TSRMLS_DC);
-PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *values, zval *ids, ulong opt , char **sql TSRMLS_DC);
-PHPAPI int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids, ulong opt, char **sql TSRMLS_DC);
-PHPAPI int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids, zval *ret_array, ulong opt, char **sql  TSRMLS_DC);
-PHPAPI int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, ulong opt TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *values, ulong opt, char **sql TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *values, zval *ids, ulong opt , char **sql TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids, ulong opt, char **sql TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids, zval *ret_array, ulong opt, char **sql  TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TSRMLS_DC);
 
 /* internal functions */
 static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent);
