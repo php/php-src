@@ -34,7 +34,7 @@
 #define	_FTP_H
 
 #include <stdio.h>
-#if !PHP_WIN32
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
