@@ -804,7 +804,7 @@ PHP_FUNCTION(pdf_set_leading) {
 		RETURN_FALSE;
 	}
 	
-	PDF_set_leading(pdf, (float) arg2->value.dval);
+	PDF_set_value(pdf, "leading", (float) arg2->value.dval);
 
 	RETURN_TRUE;
 }
@@ -831,7 +831,7 @@ PHP_FUNCTION(pdf_set_text_rendering) {
 		RETURN_FALSE;
 	}
 	
-	PDF_set_text_rendering(pdf, arg2->value.lval);
+	PDF_set_value(pdf, "textrendering", (float) arg2->value.lval);
 
 	RETURN_TRUE;
 }
@@ -858,7 +858,7 @@ PHP_FUNCTION(pdf_set_horiz_scaling) {
 		RETURN_FALSE;
 	}
 	
-	PDF_set_horiz_scaling(pdf, (float) arg2->value.dval);
+	PDF_set_value(pdf, "horizscaling", (float) arg2->value.dval);
 
 	RETURN_TRUE;
 }
@@ -885,7 +885,7 @@ PHP_FUNCTION(pdf_set_text_rise) {
 		RETURN_FALSE;
 	}
 	
-	PDF_set_text_rise(pdf, (float) arg2->value.dval);
+	PDF_set_value(pdf, "textrise", (float) arg2->value.dval);
 
 	RETURN_TRUE;
 }
@@ -994,7 +994,7 @@ PHP_FUNCTION(pdf_set_char_spacing) {
 		RETURN_FALSE;
 	}
 
-	PDF_set_char_spacing(pdf, (float) arg2->value.dval);
+	PDF_set_value(pdf, "charspacing", (float) arg2->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1021,7 +1021,7 @@ PHP_FUNCTION(pdf_set_word_spacing) {
 		RETURN_FALSE;
 	}
 
-	PDF_set_word_spacing(pdf, (float) arg2->value.dval);
+	PDF_set_value(pdf, "wordspacing", (float) arg2->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1076,7 +1076,7 @@ PHP_FUNCTION(pdf_stringwidth) {
 		RETURN_FALSE;
 	}
 
-	width = (double) PDF_stringwidth(pdf, arg2->value.str.val, PDF_get_font(pdf), PDF_get_fontsize(pdf));
+	width = (double) PDF_stringwidth(pdf, arg2->value.str.val, PDF_get_value(pdf, "font", 0), PDF_get_value(pdf, "fontsize", 0));
 
 	RETURN_DOUBLE((double)width);
 }
@@ -2199,31 +2199,31 @@ PHP_FUNCTION(pdf_set_transition) {
 
 	switch(arg2->value.lval) {
 		case 0:
-			PDF_set_transition(pdf, "none");
+			PDF_set_parameter(pdf, "transition", "none");
 			break;
 		case 1:
-			PDF_set_transition(pdf, "split");
+			PDF_set_parameter(pdf, "transition", "split");
 			break;
 		case 2:
-			PDF_set_transition(pdf, "blinds");
+			PDF_set_parameter(pdf, "transition", "blinds");
 			break;
 		case 3:
-			PDF_set_transition(pdf, "box");
+			PDF_set_parameter(pdf, "transition", "box");
 			break;
 		case 4:
-			PDF_set_transition(pdf, "wipe");
+			PDF_set_parameter(pdf, "transition", "wipe");
 			break;
 		case 5:
-			PDF_set_transition(pdf, "dissolve");
+			PDF_set_parameter(pdf, "transition", "dissolve");
 			break;
 		case 6:
-			PDF_set_transition(pdf, "glitter");
+			PDF_set_parameter(pdf, "transition", "glitter");
 			break;
 		case 7:
-			PDF_set_transition(pdf, "replace");
+			PDF_set_parameter(pdf, "transition", "replace");
 			break;
 		default:
-			PDF_set_transition(pdf, "none");
+			PDF_set_parameter(pdf, "transition", "none");
 			
 	}
 
@@ -2252,7 +2252,7 @@ PHP_FUNCTION(pdf_set_duration) {
 		RETURN_FALSE;
 	}
 
-	PDF_set_duration(pdf, (float) arg2->value.dval);
+	PDF_set_value(pdf, "duration", (float) arg2->value.dval);
 
 	RETURN_TRUE;
 }
@@ -2595,7 +2595,7 @@ PHP_FUNCTION(pdf_get_image_width) {
 		RETURN_FALSE;
 	}
 
-	width = PDF_get_image_width(pdf, pdf_image);
+	width = PDF_get_value(pdf, "imagewidth", pdf_image);
 
 	RETURN_LONG(width);
 }
@@ -2631,7 +2631,7 @@ PHP_FUNCTION(pdf_get_image_height) {
 		RETURN_FALSE;
 	}
 
-	height = PDF_get_image_height(pdf, pdf_image);
+	height = PDF_get_value(pdf, "imageheight", pdf_image);
 
 	RETURN_LONG(height);
 }
