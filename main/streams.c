@@ -355,7 +355,8 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 					stream->readbuflen - stream->writepos
 					TSRMLS_CC);
 		}
-		if (justread == 0)
+		
+		if (justread <= 0)
 			break;
 		stream->writepos += justread;
 	}
@@ -363,15 +364,15 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 
 PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS_DC)
 {
-	size_t avail, toread, didread = 0;
+	size_t toread, didread = 0;
 	
 	/* take from the read buffer first.
 	 * It is possible that a buffered stream was switched to non-buffered, so we
 	 * drain the remainder of the buffer before using the "raw" read mode for
 	 * the excess */
-	avail = stream->writepos - stream->readpos;
-	if (avail) {
-		toread = avail;
+	if (stream->writepos > stream->readpos) {
+		
+		toread = stream->writepos - stream->readpos;
 		if (toread > size)
 			toread = size;
 
@@ -379,7 +380,7 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 		stream->readpos += toread;
 		size -= toread;
 		buf += toread;
-		didread += size;
+		didread += toread;
 	}
 
 	if (size == 0)
@@ -398,10 +399,12 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 
 		if ((off_t)size > stream->writepos - stream->readpos)
 			size = stream->writepos - stream->readpos;
-
-		memcpy(buf, stream->readbuf + stream->readpos, size);
-		stream->readpos += size;
-		didread += size;
+		
+		if (size) {
+			memcpy(buf, stream->readbuf + stream->readpos, size);
+			stream->readpos += size;
+			didread += size;
+		}
 	}
 	stream->position += size;
 	return didread;
