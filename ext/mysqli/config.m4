@@ -3,8 +3,8 @@ dnl $Id$
 dnl config.m4 for extension mysqli
 
 PHP_ARG_WITH(mysqli, for MySQLi support,
-[  --with-mysqli[=FILE]         Include MySQLi support. FILE is the optional 
-                               pathname to mysql_config.])
+[  --with-mysqli[=FILE]    Include MySQLi support. FILE is the optional 
+                          pathname to mysql_config.])
 
 if test "$PHP_MYSQLI" != "no"; then
 
