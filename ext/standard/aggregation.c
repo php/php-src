@@ -21,7 +21,7 @@
 #include "php.h"
 #include "basic_functions.h"
 #include "aggregation.h"
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 #include "ext/pcre/php_pcre.h"
 #endif
 
@@ -86,7 +86,7 @@ static void aggregate_methods(zend_class_entry *ce, zend_class_entry *from_ce, i
 	uint func_name_len;
 	ulong num_key;
 	zval *list_hash = NULL;
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 	pcre *re = NULL;
 	pcre_extra *re_extra = NULL;
 	int re_options = 0;
@@ -98,7 +98,7 @@ static void aggregate_methods(zend_class_entry *ce, zend_class_entry *from_ce, i
 	if (aggr_type == AGGREGATE_BY_LIST) {
 		list_hash = array_to_hash(aggr_filter);
 	}
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 	else if (aggr_type == AGGREGATE_BY_REGEXP) {
 		if ((re = pcre_get_compiled_regex(Z_STRVAL_P(aggr_filter), &re_extra, &re_options)) == NULL) {
 			return;
@@ -128,7 +128,7 @@ static void aggregate_methods(zend_class_entry *ce, zend_class_entry *from_ce, i
 				func_name[0] == '_' ||
 			/* 3. explicitly excluded methods */
 				(aggr_type == AGGREGATE_BY_LIST && zend_hash_exists(Z_ARRVAL_P(list_hash), func_name, func_name_len))
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE) 
 				||
 			/* 4. methods matching regexp as modified by the exclusion flag */
 				(aggr_type == AGGREGATE_BY_REGEXP && (pcre_exec(re, re_extra, func_name, func_name_len-1, 0, 0, NULL, 0) < 0) ^ exclude) == 1
@@ -187,7 +187,7 @@ static void aggregate_properties(zval *obj, zend_class_entry *from_ce, int aggr_
 	uint prop_name_len;
 	ulong num_key;
 	zval *list_hash = NULL;
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 	pcre *re = NULL;
 	pcre_extra *re_extra = NULL;
 	int re_options = 0;
@@ -204,7 +204,7 @@ static void aggregate_properties(zval *obj, zend_class_entry *from_ce, int aggr_
 	if (aggr_type == AGGREGATE_BY_LIST) {
 		list_hash = array_to_hash(aggr_filter);
 	}
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 	else if (aggr_type == AGGREGATE_BY_REGEXP) {
 		if ((re = pcre_get_compiled_regex(Z_STRVAL_P(aggr_filter), &re_extra, &re_options)) == NULL) {
 			return;
@@ -232,7 +232,7 @@ static void aggregate_properties(zval *obj, zend_class_entry *from_ce, int aggr_
 			if (prop_name[0] == '_' ||
 			/* 2. explicitly excluded properties */
 				(aggr_type == AGGREGATE_BY_LIST && zend_hash_exists(Z_ARRVAL_P(list_hash), prop_name, prop_name_len))
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 				||
 			/* 3. properties matching regexp as modified by the exclusion flag */
 				(aggr_type == AGGREGATE_BY_REGEXP && (pcre_exec(re, re_extra, prop_name, prop_name_len-1, 0, 0, NULL, 0) < 0) ^ exclude) == 1
