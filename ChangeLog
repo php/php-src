@@ -1,3 +1,54 @@
+2005-02-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/readline/readline.c
+      ext/readline/readline.c:
+      MFH: Fixed bug #31796 (readline completion handler does not handle empty
+      return values).
+
+    * ext/readline/readline.c:
+      Fixed bug #31796 (readline completion handler does not handle empty return
+      values).
+
+2005-02-03  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * buildconf
+      build/build2.mk:
+      - Fix buildconf with BSD make
+
+2005-02-03  Magnus M‰‰tt‰  <novell@kiruna.se>
+
+    * ext/filepro/package.xml:
+      Fix typos.
+
+2005-02-03  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * EXTENSIONS:
+      cleanup
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_ini_scanner.l:
+      MFH: Fixed bug #28804 (ini-file section parsing pattern is buggy).
+
+    * (PHP_4_3)
+      NEWS
+      Zend/zend_ini_scanner.l:
+      - MFH: Fixed bug #28804 (ini-file section parsing pattern is buggy).
+
+    * ZendEngine2/zend_ini_scanner.l:
+      - Fixed bug #28804 (ini-file section parsing pattern is buggy).
+
+    * (PHP_4_3)
+      Zend/zend_ini_scanner.l:
+      Missing $Id$ tag + ws fix
+
+    * ZendEngine2/zend_ini_scanner.l
+      ZendEngine2/zend_ini_scanner.l:
+      ws fix
+
 2005-02-02  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)

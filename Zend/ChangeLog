@@ -1,3 +1,16 @@
+2005-02-03  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_5_0)
+      zend_ini_scanner.l:
+      MFH: Fixed bug #28804 (ini-file section parsing pattern is buggy).
+
+    * zend_ini_scanner.l:
+      - Fixed bug #28804 (ini-file section parsing pattern is buggy).
+
+    * zend_ini_scanner.l
+      zend_ini_scanner.l:
+      ws fix
+
 2005-02-02  Stanislav Malyshev  <stas@zend.com>
 
     * zend_execute_API.c:
