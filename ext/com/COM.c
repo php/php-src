@@ -672,7 +672,8 @@ VARIANT *_php_COM_get_property_handler(zend_property_reference *property_referen
 
 	obj_prop = (i_dispatch *) emalloc(sizeof(i_dispatch));
 	php_COM_clone(obj_prop, obj, FALSE);
-	
+
+	//leak !!!
 	var_result = (VARIANT *) emalloc(sizeof(VARIANT));
 	var_result->vt = VT_DISPATCH;
 	var_result->pdispVal = obj_prop->i.dispatch;
@@ -705,7 +706,6 @@ VARIANT *_php_COM_get_property_handler(zend_property_reference *property_referen
 				break;
 
 			case OE_IS_METHOD:
-//				var_result->pdispVal = obj_prop->i.dispatch;
 				efree(obj_prop);
 				return var_result;
 				break;
@@ -832,25 +832,28 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		i_dispatch *obj;
 		pval **arguments;
 		int arg_count = ZEND_NUM_ARGS();
-		VARIANTARG var_result;
-
-		var_result.vt = VT_EMPTY;
+		VARIANT *var_result;
 
 		obj = (i_dispatch *) emalloc(sizeof(i_dispatch));
-		php_COM_set(obj, _php_COM_get_property_handler(property_reference)->pdispVal, TRUE);
+
+		var_result = _php_COM_get_property_handler(property_reference);
+		php_COM_set(obj, var_result->pdispVal, TRUE);
+
+		var_result->vt = VT_EMPTY;
  
 		arguments = (pval **) emalloc(sizeof(pval *)*arg_count);
 		getParametersArray(ht, arg_count, arguments);
-
-		if (do_COM_invoke(obj , &function_name->element, &var_result, arguments, arg_count)==FAILURE) {
+			
+		if (do_COM_invoke(obj , &function_name->element, var_result, arguments, arg_count)==FAILURE) {
 			RETVAL_FALSE;
 		}
 		
 		pval_destructor(&function_name->element);
 		php_COM_release(obj);
+		php_variant_to_pval(var_result, return_value, 0, codepage);
 		efree(obj);
+		efree(var_result);
 		efree(arguments);
-		php_variant_to_pval(&var_result, return_value, 0, codepage);
 	}
 
 	for (overloaded_property = (zend_overloaded_element *) zend_llist_get_first(property_reference->elements_list);
