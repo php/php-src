@@ -956,7 +956,7 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 										(void *) &tmp, sizeof(zval *), 0);
 
 						if (incomplete_class) {
-							php_store_class_name(obj, Z_STRVAL_P(ent1->data), Z_STRLEN_P(ent1->data), TSRMLS_CC);
+							php_store_class_name(obj, Z_STRVAL_P(ent1->data), Z_STRLEN_P(ent1->data) TSRMLS_CC);
 						}
 
 						/* Clean up old array entry */
