@@ -147,7 +147,7 @@ function_entry imap_functions[] = {
 
 
 php3_module_entry php3_imap_module_entry = {
-	IMAPVER, imap_functions, imap_init, NULL, NULL, NULL,imap_info, 0, 0, 0, NULL
+	IMAPVER, imap_functions, PHP_MINIT(imap), NULL, NULL, NULL,PHP_MINFO(imap), 0, 0, 0, NULL
 };
 
 
@@ -206,7 +206,7 @@ inline int add_next_index_object(pval *arg, pval *tmp)
 }
 
 
-void imap_info(void)
+PHP_MINFO_FUNCTION(imap)
 {
 	php3_printf("Imap Support enabled<br>");
 	php3_printf("<table>");
@@ -219,7 +219,7 @@ void imap_info(void)
 	php3_printf("</tr></table>");
 }
 
-int imap_init(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(imap)
 {
 #if !(WIN32|WINNT)
 	mail_link(&unixdriver);   /* link in the unix driver */

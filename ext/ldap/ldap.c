@@ -66,39 +66,40 @@ ldap_module php3_ldap_module;
 */
 
 function_entry ldap_functions[] = {
-	{"ldap_connect", 				php3_ldap_connect,				NULL},
-	{"ldap_close", 					php3_ldap_unbind,				NULL},
-	{"ldap_bind",					php3_ldap_bind,					NULL},
-	{"ldap_unbind",					php3_ldap_unbind,				NULL},
-	{"ldap_read",					php3_ldap_read,					NULL},
-	{"ldap_list",					php3_ldap_list,					NULL},
-	{"ldap_search",					php3_ldap_search,				NULL},
-	{"ldap_free_result", 			php3_ldap_free_result,			NULL},
-	{"ldap_count_entries", 			php3_ldap_count_entries, 		NULL},
-	{"ldap_first_entry",			php3_ldap_first_entry,			NULL},
-	{"ldap_next_entry",				php3_ldap_next_entry,			NULL},
-	{"ldap_get_entries",			php3_ldap_get_entries,			NULL},
-	{"ldap_first_attribute",		php3_ldap_first_attribute,		NULL},
-	{"ldap_next_attribute",			php3_ldap_next_attribute,		NULL},
-	{"ldap_get_attributes",			php3_ldap_get_attributes,		NULL},
-	{"ldap_get_values",				php3_ldap_get_values,			NULL},
-	{"ldap_get_dn",					php3_ldap_get_dn,				NULL},
-	{"ldap_explode_dn",				php3_ldap_explode_dn,			NULL},
-	{"ldap_dn2ufn",					php3_ldap_dn2ufn,				NULL},
-	{"ldap_add", 					php3_ldap_add,					NULL},
-	{"ldap_delete",					php3_ldap_delete,				NULL},
-	{"ldap_modify",					php3_ldap_modify,				NULL},
+	PHP_FE(ldap_connect,							NULL)
+	PHP_FE(ldap_close,								NULL)
+	PHP_FE(ldap_bind,								NULL)
+	PHP_FE(ldap_unbind,								NULL)
+	PHP_FE(ldap_read,								NULL)
+	PHP_FE(ldap_list,								NULL)
+	PHP_FE(ldap_search,								NULL)
+	PHP_FE(ldap_free_result,						NULL)
+	PHP_FE(ldap_count_entries,						NULL)
+	PHP_FE(ldap_first_entry,						NULL)
+	PHP_FE(ldap_next_entry,							NULL)
+	PHP_FE(ldap_get_entries,						NULL)
+	PHP_FE(ldap_first_attribute,					NULL)
+	PHP_FE(ldap_next_attribute,						NULL)
+	PHP_FE(ldap_get_attributes,						NULL)
+	PHP_FE(ldap_get_values,							NULL)
+	PHP_FE(ldap_get_dn,								NULL)
+	PHP_FE(ldap_explode_dn,							NULL)
+	PHP_FE(ldap_dn2ufn,								NULL)
+	PHP_FE(ldap_add,								NULL)
+	PHP_FE(ldap_delete,								NULL)
+	PHP_FE(ldap_modify,								NULL)
 /* additional functions for attribute based modifications, Gerrit Thomson */
-	{"ldap_mod_add",				php3_ldap_mod_add,				NULL},
-	{"ldap_mod_replace",			php3_ldap_mod_replace,			NULL},
-	{"ldap_mod_del",				php3_ldap_mod_del,				NULL},
+	PHP_FE(ldap_mod_add,							NULL)
+	PHP_FE(ldap_mod_replace,						NULL)
+	PHP_FE(ldap_mod_del,							NULL)
 /* end gjt mod */
 	{NULL, NULL, NULL}
 };
 
 
 php3_module_entry ldap_module_entry = {
-	"LDAP", ldap_functions, php3_minit_ldap, php3_mshutdown_ldap, NULL, NULL, php3_info_ldap, STANDARD_MODULE_PROPERTIES
+	"LDAP", ldap_functions, PHP_MINIT(ldap), PHP_MSHUTDOWN(ldap), NULL, NULL,
+			PHP_MINFO(ldap), STANDARD_MODULE_PROPERTIES
 };
 
 
@@ -170,7 +171,7 @@ static void _free_ldap_result(LDAPMessage *result)
         ldap_msgfree(result);
 }
 
-int php3_minit_ldap(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(ldap)
 {
 #if defined(THREAD_SAFE)
 	ldap_module	*php3_ldap_module;
@@ -240,7 +241,8 @@ int php3_minit_ldap(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-int php3_mshutdown_ldap(SHUTDOWN_FUNC_ARGS) {
+PHP_MSHUTDOWN_FUNCTION(ldap)
+{
 #ifdef THREAD_SAFE
 	LDAP_TLS_VARS;
 	PHP3_TLS_THREAD_FREE(php3_ldap_module);
@@ -255,7 +257,7 @@ int php3_mshutdown_ldap(SHUTDOWN_FUNC_ARGS) {
 	return SUCCESS;
 }
 
-void php3_info_ldap(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(ldap)
 {
 	char maxl[16];
 #if HAVE_NSLDAP

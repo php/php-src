@@ -39,12 +39,12 @@ function_entry mcrypt_functions[] = {
 	{0},
 };
 
-static int php_minit_mcrypt(INIT_FUNC_ARGS);
+static PHP_MINIT_FUNCTION(mcrypt);
 
 zend_module_entry mcrypt_module_entry = {
 	"mcrypt", 
 	mcrypt_functions,
-	php_minit_mcrypt, NULL,
+	PHP_MINIT(mcrypt), NULL,
 	NULL, NULL,
 	NULL,
 	STANDARD_MODULE_PROPERTIES,
@@ -110,7 +110,7 @@ static mcrypt_global_struct mcryptg;
 
 #define MCRYPT_ENTRY(a) REGISTER_LONG_CONSTANT("MCRYPT_" #a, a, CONST_PERSISTENT)
 
-static int php_minit_mcrypt(INIT_FUNC_ARGS)
+static PHP_MINIT_FUNCTION(mcrypt)
 {
 	/* modes for mcrypt_??? routines */
 	REGISTER_LONG_CONSTANT("MCRYPT_ENCRYPT", 0, CONST_PERSISTENT);

@@ -16,8 +16,8 @@
 extern php3_module_entry php3_imap_module_entry;
 #define php3_imap_module_ptr &php3_imap_module_entry
 
-extern int imap_init(INIT_FUNC_ARGS);
-void imap_info(void);
+extern PHP_MINIT_FUNCTION(imap);
+PHP_MINFO_FUNCTION(imap);
 PHP_FUNCTION(imap_open);
 PHP_FUNCTION(imap_reopen);
 PHP_FUNCTION(imap_close);
