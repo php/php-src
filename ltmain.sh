@@ -1162,7 +1162,7 @@ compiler."
 
       *.o | *.obj | *.a | *.lib)
 	# A standard object.
-	libobjs="$libobjs $arg"
+	objs="$objs $arg"
 	;;
 
       *.lo)
@@ -1796,94 +1796,6 @@ compiler."
 	esac
       fi
 
-      if test -n "$rpath$xrpath"; then
-	# If the user specified any rpath flags, then add them.
-	for libdir in $rpath $xrpath; do
-	  # This is the magic to use -rpath.
-	  case "$compile_rpath " in
-	  *" $libdir "*) ;;
-	  *) compile_rpath="$compile_rpath $libdir" ;;
-	  esac
-	  case "$finalize_rpath " in
-	  *" $libdir "*) ;;
-	  *) finalize_rpath="$finalize_rpath $libdir" ;;
-	  esac
-	done
-      fi
-
-      # Now hardcode the library paths
-      rpath=
-      hardcode_libdirs=
-      for libdir in $compile_rpath; do
-	if test -n "$hardcode_libdir_flag_spec"; then
-	  if test -n "$hardcode_libdir_separator"; then
-	    if test -z "$hardcode_libdirs"; then
-	      hardcode_libdirs="$libdir"
-	    else
-	      # Just accumulate the unique libdirs.
-	      case "$hardcode_libdir_separator$hardcode_libdirs$hardcode_libdir_separator" in
-	      *"$hardcode_libdir_separator$libdir$hardcode_libdir_separator"*)
-		;;
-	      *)
-		hardcode_libdirs="$hardcode_libdirs$hardcode_libdir_separator$libdir"
-		;;
-	      esac
-	    fi
-	  else
-	    eval flag=\"$hardcode_libdir_flag_spec\"
-	    rpath="$rpath $flag"
-	  fi
-	elif test -n "$runpath_var"; then
-	  case "$perm_rpath " in
-	  *" $libdir "*) ;;
-	  *) perm_rpath="$perm_rpath $libdir" ;;
-	  esac
-	fi
-      done
-      # Substitute the hardcoded libdirs into the rpath.
-      if test -n "$hardcode_libdir_separator" &&
-	 test -n "$hardcode_libdirs"; then
-	libdir="$hardcode_libdirs"
-	eval rpath=\" $hardcode_libdir_flag_spec\"
-      fi
-      compile_rpath="$rpath"
-
-      rpath=
-      hardcode_libdirs=
-      for libdir in $finalize_rpath; do
-	if test -n "$hardcode_libdir_flag_spec"; then
-	  if test -n "$hardcode_libdir_separator"; then
-	    if test -z "$hardcode_libdirs"; then
-	      hardcode_libdirs="$libdir"
-	    else
-	      # Just accumulate the unique libdirs.
-	      case "$hardcode_libdir_separator$hardcode_libdirs$hardcode_libdir_separator" in
-	      *"$hardcode_libdir_separator$libdir$hardcode_libdir_separator"*)
-		;;
-	      *)
-		hardcode_libdirs="$hardcode_libdirs$hardcode_libdir_separator$libdir"
-		;;
-	      esac
-	    fi
-	  else
-	    eval flag=\"$hardcode_libdir_flag_spec\"
-	    rpath="$rpath $flag"
-	  fi
-	elif test -n "$runpath_var"; then
-	  case "$finalize_perm_rpath " in
-	  *" $libdir "*) ;;
-	  *) finalize_perm_rpath="$finalize_perm_rpath $libdir" ;;
-	  esac
-	fi
-      done
-      # Substitute the hardcoded libdirs into the rpath.
-      if test -n "$hardcode_libdir_separator" &&
-	 test -n "$hardcode_libdirs"; then
-	libdir="$hardcode_libdirs"
-	eval rpath=\" $hardcode_libdir_flag_spec\"
-      fi
-      finalize_rpath="$rpath"
-
       # Create the output directory, or remove our outputs if we need to.
       if test -d $output_objdir; then
 	$show "${rm}r $output_objdir/$outputname $output_objdir/$libname.* $output_objdir/${libname}${release}.*"
@@ -2043,7 +1955,6 @@ EOF
 		    done
 	      done
 	      if test -n "$a_deplib" ; then
-		newdeplibs="$newdeplibs $a_deplib"
 		droppeddeps=yes
 		echo
 		echo "*** Warning: This library needs some functionality provided by $a_deplib."
