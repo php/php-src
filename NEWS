@@ -1,9 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- ATTENTION!! "make install" will install CLI SAPI version of "php" binary in 
-  {PREFIX}/bin/php *always* while CGI binary is renamed and installed as 
-  {PREFIX}/bin/php-cgi when CGI SAPI is chosen.
+- ATTENTION!! "make install" will *always* install the CLI SAPI binary in 
+  {PREFIX}/bin/php. If you did enable the CGI binary to be build, it is
+  installed as {PREFIX}/bin/php-cgi.
 - Fixed bug #17281 (Sanity checks for encoding sessions). (Ilia)
 - Fixed bug #16995 and #19392 (Prevent crash if $HTTP_SESSION_VARS != ARRAY).
   (Ilia)
