@@ -149,6 +149,7 @@ PHP_FUNCTION(imap_utf8);
 PHP_FUNCTION(imap_utf7_decode);
 PHP_FUNCTION(imap_utf7_encode);
 PHP_FUNCTION(imap_mime_header_decode);
+PHP_FUNCTION(imap_thread);
 
 ZEND_BEGIN_MODULE_GLOBALS(imap)
 	char *imap_user;
