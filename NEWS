@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ???, Version 4.0 Beta 5
+- Added include_once() and require_once() functionality (Andi, Zend library)
 - Removed support for pdflib < 3.0 (Uwe)
 - Added auto-registration of everything in $HTTP_SESSION_VARS[] if
   register_globals is turned off. (Andrei)
