@@ -1540,14 +1540,6 @@ PHP_FUNCTION(fdf_enum_values) {
 
 	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
 
-	if (Z_TYPE_P(callback) != IS_ARRAY && 
-		Z_TYPE_P(callback) != IS_STRING) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong syntax for function name");
-		RETURN_FALSE;
-	}
-
-	convert_to_string_ex(&callback);
-
 	if (!zend_is_callable(callback, 0, &name)) {
 		php_error_docref1(NULL TSRMLS_CC, name, E_WARNING, "Second argument is expected to be a valid callback");
 		efree(name);
