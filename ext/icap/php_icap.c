@@ -51,7 +51,7 @@
 #include "php_icap.h"
 #include "modules.h"
 #include "ext/standard/info.h"
-#include "ext/standard/global.h"
+#include "ext/standard/php_global.h"
 #if (WIN32|WINNT)
 #include "winsock.h"
 #endif
