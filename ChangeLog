@@ -1,3 +1,24 @@
+2004-02-07  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/gmp/gmp.c:
+      Fixed bug #27171
+
+2004-02-07  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli.c:
+      fixed cast warning
+
+2004-02-07  Stig Bakken  <ssb@trd.overture.com>
+
+    * pear/CMD.php:
+      - obsolete
+
+2004-02-07  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR.php:
+      fix PATH_SEPARATOR issues - was defined in PHP 4.3.0, but documentation
+      never showed this.
+
 2004-02-06  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
 
     * ext/interbase/config.w32
