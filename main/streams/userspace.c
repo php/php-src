@@ -630,17 +630,16 @@ static int php_userstreamop_seek(php_stream *stream, off_t offset, int whence, o
 	return 0;
 }
 
-
 /* parse the return value from one of the stat functions and store the
  * relevant fields into the statbuf provided */
 static int statbuf_from_array(zval *array, php_stream_statbuf *ssb TSRMLS_DC)
 {
-	zval *elem;
+	zval **elem;
 
 #define STAT_PROP_ENTRY_EX(name, name2)                        \
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(array), #name, sizeof(#name), (void**)&elem)) {     \
-		convert_to_long(elem);                                                                   \
-		ssb->sb.st_##name2 = Z_LVAL_P(elem);                                                      \
+		convert_to_long(*elem);                                                                   \
+		ssb->sb.st_##name2 = Z_LVAL_PP(elem);                                                      \
 	}
 
 #define STAT_PROP_ENTRY(name) STAT_PROP_ENTRY_EX(name,name)
@@ -701,7 +700,7 @@ static int php_userstreamop_stat(php_stream *stream, php_stream_statbuf *ssb TSR
 					us->wrapper->classname);
 		}
 	}
-	
+
 	if (retval) 
 		zval_ptr_dtor(&retval);
 	
