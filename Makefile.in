@@ -54,7 +54,8 @@ CFLAGS_SHLIB = @CFLAGS_SHLIB@
 LDFLAGS_SHLIB = @LDFLAGS_SHLIB@
 LDFLAGS_SHLIB_EXPORT = @LDFLAGS_SHLIB_EXPORT@
 CPPFLAGS = @CPPFLAGS@
-CFLAGS = @CFLAGS@ $(CFLAGS_SHLIB) $(CPPFLAGS) $(INCLUDE) @DEBUG_CFLAGS@ @STRONGHOLD@ $(PROF_CFLAGS)
+CFLAGS = @CFLAGS@ @DEBUG_CFLAGS@ $(PROF_CFLAGS)
+COMPILE = $(CC) $(CFLAGS) $(CFLAGS_SHLIB) $(CPPFLAGS) $(INCLUDE) @STRONGHOLD@ 
 LDFLAGS = @RPATHS@ @LDFLAGS@ $(LDFLAGS_SHLIB) $(LDFLAGS_SHLIB_EXPORT) -L$(ZEND_DIR)
 REGCFLAGS = $(CFLAGS)
 RANLIB = @RANLIB@
@@ -121,7 +122,7 @@ configuration-parser.h configuration-parser.c:	$(srcdir)/configuration-parser.y
 	bison -p cfg -v -d $(srcdir)/configuration-parser.y -o configuration-parser.c
 
 configuration-scanner.o:	configuration-scanner.c
-	$(CC) $(CFLAGS) $(LEX_CFLAGS) -c configuration-scanner.c
+	$(COMPILE) $(LEX_CFLAGS) -c configuration-scanner.c
 
 configuration-scanner.c:	$(srcdir)/configuration-scanner.l
 	flex -Pcfg -oconfiguration-scanner.c -i $(srcdir)/configuration-scanner.l
@@ -222,10 +223,7 @@ indent:	clean
 	rm -f *~
 
 .c.o:
-	@rm -f $@
-	$(CC) $(CFLAGS) -c $< -o $@
-#	@bn=`echo $@ | sed -e 's#functions/##'`; test -f $@ || \
-#	  (test "$@" != "$$bn" && test -f "$$bn" && mv $$bn $@)
+	$(COMPILE) -c $< 
 
 parser-scanner:	configuration-parser.c configuration-scanner.c
 

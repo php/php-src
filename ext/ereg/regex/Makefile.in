@@ -12,7 +12,8 @@ RANLIB=@RANLIB@
 # Put -Dconst= in for a pre-ANSI compiler.
 # Do not take -DPOSIX_MISTAKE out.
 # REGCFLAGS isn't important to you (it's for my use in some special contexts).
-CFLAGS=-I$(srcdir) -I. -DPOSIX_MISTAKE @CFLAGS@
+CFLAGS=@CFLAGS@
+COMPILE=$(CC) $(CFLAGS) -I$(srcdir) -I. -DPOSIX_MISTAKE
 
 # If you have a pre-ANSI compiler, put -o into MKHFLAGS.  If you want
 # the Berkeley __P macro, put -b in.
@@ -40,6 +41,9 @@ JUNKLINT=possible pointer alignment|null effect
 .SUFFIXES:	.ih .h
 .c.ih:
 	sh $(srcdir)/mkh $(MKHFLAGS) -p $< >$@
+
+.c.o:
+	$(COMPILE) -c $<
 
 all lib: libregex.a
 
