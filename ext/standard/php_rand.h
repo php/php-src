@@ -21,6 +21,41 @@
  */
 /* $Id$ */
 
+/* Layout implementation random functions
+ *
+ * The PHPAPI contains these functions:
+ * - long php_rand()
+ * - long php_rand_range(long min, long max)
+ * - void php_srand()
+ * - long php_getrandmax()
+ *
+ * Note that it is not possible to choose the algoritm. This is done to
+ * give the user the possibility to control all randomness by means of
+ * srand()/php.ini in a portable and consistent way.
+ *
+ * rand.c: (the only rand*.c file with PHP_API and PHP_FUNCTION functions)
+ *
+ * - PHP_FUNCTION([mt_]srand)
+ *   +-> void php_srand(void)
+ *   +-> void php_srand2(long seed, int alg)
+ *       +-> (rand_sys.c) long php_rand_sys()
+ *       +-> (rand_mt.c ) long php_rand_mt()
+ *
+ * - PHP_FUNCTION([mt_]rand)
+ *   +-> long php_rand()
+ *       +-> (rand_sys.c) long php_rand_sys()
+ *       +-> (rand_mt.c ) long php_rand_mt()
+ *   +-> long php_rand_range(long min, long max)
+ *       +-> calls php_rand()
+ *       
+ * - PHP_FUNCTION([mt_]getrandmax)
+ *   +-> PHPAPI long php_randmax(void)
+ *       +-> (rand_sys.c) long php_randmax_sys()
+ *       +-> (rand_mt.c ) long php_randmax_mt()
+ *   
+ *   --Jeroen
+ */
+
 #ifndef PHP_RAND_H
 #define	PHP_RAND_H
 
@@ -31,31 +66,66 @@
 #endif
 
 #if HAVE_LRAND48
-#define PHP_RAND_MAX 2147483647
+#define php_randmax_sys() 2147483647
 #else
-#define PHP_RAND_MAX RAND_MAX
+#define php_randmax_sys() RAND_MAX
 #endif
+
+/*
+ * Melo: it could be 2^^32 but we only use 2^^31 to maintain
+ * compatibility with the previous php_rand
+ */
+#define php_randmax_mt() ((long)(0x7FFFFFFF)) /* 2^^31 - 1 */
+
+PHP_FUNCTION(srand);
+PHP_FUNCTION(rand);
+PHP_FUNCTION(getrandmax);
+PHP_FUNCTION(mt_srand);
+PHP_FUNCTION(mt_rand);
+PHP_FUNCTION(mt_getrandmax);
+
+PHPAPI long php_rand(void);
+PHPAPI long php_rand_range(long min, long max);
+PHPAPI long php_randmax(void);
+long php_rand_mt(void);
+void php_srand_mt(long seed TSRMLS_DC);
 
 /* Define rand Function wrapper */
 #ifdef HAVE_RANDOM
-#define php_rand() random()
+#define php_rand_sys() random()
 #else
 #ifdef HAVE_LRAND48
-#define php_rand() lrand48()
+#define php_rand_sys() lrand48()
 #else
-#define php_rand() rand()
+#define php_rand_sys() rand()
 #endif
 #endif
 
 /* Define srand Function wrapper */
 #ifdef HAVE_SRANDOM
-#define php_srand(seed) srandom((unsigned int)seed)
+#define php_srand_sys(seed) srandom((unsigned int)seed)
 #else
 #ifdef HAVE_SRAND48
-#define php_srand(seed) srand48((long)seed)
+#define php_srand_sys(seed) srand48((long)seed)
 #else
-#define php_srand(seed) srand((unsigned int)seed)
+#define php_srand_sys(seed) srand((unsigned int)seed)
 #endif
 #endif
 
+/* Define random generator constants */
+#define RAND_SYS 1
+#define RAND_MT  2
+
+/* BC */
+#define PHP_RAND_MAX php_randmax()
+
 #endif	/* PHP_RAND_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: fdm=marker
+ * vim: sw=4 ts=4 tw=78
+ */
