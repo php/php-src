@@ -112,6 +112,15 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 	}
 	switch (expr->type) {
 		case IS_BOOL:
+#if 1
+			if (expr->value.lval) {
+				expr_copy->value.str.len = 1;
+				expr_copy->value.str.val = estrndup("1", 1);
+			} else {
+				expr_copy->value.str.len = 0;
+				expr_copy->value.str.val = empty_string;
+			}
+#else
 			if (expr->value.lval) {
 				expr_copy->value.str.len = sizeof("true")-1;
 				expr_copy->value.str.val = estrndup("true", expr_copy->value.str.len);
@@ -119,6 +128,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 				expr_copy->value.str.len = sizeof("false")-1;
 				expr_copy->value.str.val = estrndup("false", expr_copy->value.str.len);
 			}
+#endif
 			break;
 		case IS_RESOURCE:
 			expr_copy->value.str.val = (char *) emalloc(sizeof("Resource id #")-1 + MAX_LENGTH_OF_LONG);
