@@ -579,6 +579,15 @@ AC_ARG_ENABLE(experimental-zts,
 ])
 AC_MSG_RESULT($PHP_EXPERIMENTAL_ZTS)
 
+AC_MSG_CHECKING(whether to try to stay below resource limits)
+AC_ARG_ENABLE(low-memory,
+[  --enable-low-memory     Try to stay below resource limits],[
+  PHP_LOW_MEMORY=$enableval
+],[
+  PHP_LOW_MEMORY=no
+])
+AC_MSG_RESULT($PHP_LOW_MEMORY)
+
 PHP_SAPI=cgi
 PHP_BUILD_PROGRAM
 dnl paths to the targets relative to the build directory
@@ -614,7 +623,10 @@ if test "$PHP_VERSIONING" = "yes"; then
     EXTRA_LDFLAGS="-export-symbols $PHP_SYM_FILE"
   fi
 fi
-  
+
+if test "$PHP_LOW_MEMORY" = "yes"; then
+  passthru="$passthru --disable-inline"
+fi
 
 divert(4)
 
