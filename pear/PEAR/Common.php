@@ -169,13 +169,22 @@ class PEAR_Common extends PEAR
     /**
      * Create and register a temporary directory.
      * 
+     * @param string (optional) Directory to use as tmpdir.  Will use
+     * system defaults (for example /tmp or c:\windows\temp) if not
+     * specified
+     *
      * @return string name of created directory
      * 
      * @access public
      */
-    function mkTempDir()
+    function mkTempDir($tmpdir = '')
     {
-        if (!$tmpdir = System::mktemp('-d pear')) {
+        if ($tmpdir) {
+            $topt = "-t $tmpdir ";
+        } else {
+            $topt = '';
+        }
+        if (!$tmpdir = System::mktemp($topt . '-d pear')) {
             return false;
         }
         $this->addTempFile($tmpdir);
@@ -662,7 +671,6 @@ class PEAR_Common extends PEAR
         if (@sizeof($pkginfo['changelog']) > 0) {
             $ret .= "  <changelog>\n";
             foreach ($pkginfo['changelog'] as $oldrelease) {
-                var_dump($oldrelease);
                 $ret .= $this->_makeReleaseXml($oldrelease, true);
             }
             $ret .= "  </changelog>\n";
@@ -718,29 +726,27 @@ class PEAR_Common extends PEAR
             }
             $ret .= "$indent    </deps>\n";
         }
-        $ret .= "$indent    <filelist>\n";
-/*
-        ob_start();
-        var_dump($pkginfo['filelist']);
-        $tmp = ob_get_contents();
-        ob_end_clean();
-        $ret .= $tmp;
-*/
-        foreach ($pkginfo['filelist'] as $file => $fa) {
-            if ($fa['role'] == 'extsrc') {
-                $ret .= "$indent      <libfile>\n";
-                $ret .= "$indent        <libname>$file</libname>\n";
-                $ret .= "$indent        <sources>$fa[sources]</sources>\n";
-                $ret .= "$indent      </libfile>\n";
-            } else {
-                $ret .= "$indent      <file role=\"$fa[role]\"";
-                if (isset($fa['baseinstalldir'])) {
-                    $ret .= " baseinstalldir=\"$fa[baseinstalldir]\"";
+        if (isset($pkginfo['filelist'])) {
+            $ret .= "$indent    <filelist>\n";
+            foreach ($pkginfo['filelist'] as $file => $fa) {
+                if ($fa['role'] == 'extsrc') {
+                    $ret .= "$indent      <libfile>\n";
+                    $ret .= "$indent        <libname>$file</libname>\n";
+                    $ret .= "$indent        <sources>$fa[sources]</sources>\n";
+                    $ret .= "$indent      </libfile>\n";
+                } else {
+                    $ret .= "$indent      <file role=\"$fa[role]\"";
+                    if (isset($fa['baseinstalldir'])) {
+                        $ret .= " baseinstalldir=\"$fa[baseinstalldir]\"";
+                    }
+                    if (isset($fa['md5sum'])) {
+                        $ret .= " md5sum=\"$fa[md5sum]\"";
+                    }
+                    $ret .= ">$file</file>\n";
                 }
-                $ret .= ">$file</file>\n";
             }
+            $ret .= "$indent    </filelist>\n";
         }
-        $ret .= "$indent    </filelist>\n";
         $ret .= "$indent  </release>\n";
         return $ret;
     }
