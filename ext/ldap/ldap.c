@@ -671,11 +671,10 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			ldap_attrs[num_attribs] = NULL;
 		
 		case 3 :
-			convert_to_string_ex(filter);
-			ldap_filter = (*filter)->value.str.val;
-
 			/* parallel search? */
 			if (Z_TYPE_PP(link) != IS_ARRAY) {
+				convert_to_string_ex(filter);
+				ldap_filter = Z_STRVAL_PP(filter);
 				convert_to_string_ex(base_dn);
 				ldap_base_dn = Z_STRVAL_PP(base_dn);
 			}
@@ -688,7 +687,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 
 	/* parallel search? */
 	if (Z_TYPE_PP(link) == IS_ARRAY) {
-		int i, nlinks, nbases, *rcs;
+		int i, nlinks, nbases, nfilters, *rcs;
 		LDAP **links;
 		zval **entry;
 		
@@ -717,6 +716,22 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			ldap_base_dn = Z_STRLEN_PP(base_dn) < 1 ? NULL : Z_STRVAL_PP(base_dn);
 		}
 
+		if (Z_TYPE_PP(filter) == IS_ARRAY) {
+			nfilters = zend_hash_num_elements(Z_ARRVAL_PP(filter));
+			if (nfilters != nlinks) {
+				php_error(E_WARNING, "LDAP: Filter must either be a string, or an array with the same number of elements as the links array");
+				if (ldap_attrs != NULL) {
+					efree(ldap_attrs);
+				}
+				RETURN_FALSE;
+			}
+			zend_hash_internal_pointer_reset(Z_ARRVAL_PP(filter));
+		} else {
+			nfilters = 0; /* this means string, not array */
+			convert_to_string_ex(filter);
+			ldap_filter = Z_STRVAL_PP(filter);
+		}
+
 		links = emalloc(nlinks * sizeof(*links));
 		rcs = emalloc(nlinks * sizeof(*rcs));
 		
@@ -737,6 +752,12 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 				zend_hash_move_forward(Z_ARRVAL_PP(base_dn));
 				convert_to_string_ex(entry);
 				ldap_base_dn = Z_STRLEN_PP(entry) < 1 ? NULL : Z_STRVAL_PP(entry);
+			}
+			if (nfilters != 0) { /* filter an array? */
+				zend_hash_get_current_data(Z_ARRVAL_PP(filter), (void **)&entry);
+				zend_hash_move_forward(Z_ARRVAL_PP(filter));
+				convert_to_string_ex(entry);
+				ldap_filter = Z_STRVAL_PP(entry);
 			}
 
 			php_set_opts(ldap, ldap_sizelimit, ldap_timelimit, ldap_deref);
