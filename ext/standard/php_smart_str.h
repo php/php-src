@@ -49,13 +49,13 @@
 #define smart_str_append_long(dest, val) smart_str_append_long_ex(dest, val, 0)
 #define smart_str_append_unsigned(dest, val) smart_str_append_unsigned_ex(dest, val, 0)
 
-static inline void smart_str_appendc_ex(smart_str *dest, char c, int what)
+static inline void smart_str_appendc_ex(smart_str *dest, unsigned char c, int what)
 {
 	size_t newlen;
 
 	smart_str_alloc(dest, 1, what);
 	dest->len = newlen;
-	dest->c[dest->len - 1] = c;
+	((unsigned char *) dest->c)[dest->len - 1] = c;
 }
 
 
