@@ -136,6 +136,8 @@ struct _php_core_globals {
 	zend_bool during_request_startup;
 
 	zend_bool allow_url_fopen;
+
+	zend_bool always_populate_raw_post_data;
 };
 
 

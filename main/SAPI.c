@@ -125,6 +125,7 @@ static void sapi_read_post_data(SLS_D)
 	char *p;
 	char oldchar=0;
 	void (*post_reader_func)(SLS_D);
+	PLS_FETCH();
 
 
 	/* dedicated implementation for increased performance:
@@ -162,6 +163,9 @@ static void sapi_read_post_data(SLS_D)
 	}
 	post_reader_func(SLS_C);
 	SG(request_info).content_type_dup = content_type;
+	if(PG(always_populate_raw_post_data) && sapi_module.default_post_reader) {
+		sapi_module.default_post_reader(SLS_C);
+	}
 }
 
 
