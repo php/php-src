@@ -18,6 +18,7 @@ Sybase-CT server message handler
   echo 'Instance method: '; sybase_set_messagehandler_ex(array(new sybase(), 'handler'));
   echo 'Lambda function: '; sybase_set_messagehandler_ex(create_function('', 'return FALSE;'));
   echo 'Unset:           '; sybase_set_messagehandler_ex(NULL);
+  echo 'Incorrect type:  '; sybase_set_messagehandler_ex(1);
   echo 'Function:        '; sybase_set_messagehandler_ex('sybase_msg_handler');
 
   var_dump(sybase_select_ex($db, 'select getdate(NULL)'));
@@ -31,6 +32,9 @@ Static method:   bool(true)
 Instance method: bool(true)
 Lambda function: bool(true)
 Unset:           bool(true)
+Incorrect type:  
+Warning: sybase_set_message_handler(): First argumented is expected to be either NULL, an array or string, integer given in %s/test.inc on line %d
+bool(false)
 Function:        bool(true)
 >>> Query: select getdate(NULL)
 *** Caught Sybase Server Message #%d [Severity %d, state %d] at line %d
