@@ -4735,9 +4735,9 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 	xmlXPathContextPtr ctxp;
 	xmlXPathObjectPtr xpathobjp;
 	xmlNode *contextnodep;
-	int ret, str_len;
+	int ret, str_len, nsNr;
 	char *str;
-
+	xmlNsPtr *namespaces;
 	contextnode = NULL;
 	contextnodep = NULL;
 
@@ -4761,6 +4761,26 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 		DOMXML_GET_OBJ(contextnodep, contextnode, le_domxmlnodep);
 	}
 	ctxp->node = contextnodep;
+  
+	/* automatic namespace definitions registration.
+		it's only done for the context node
+		if you need namespaces defined in other nodes, 
+		you have to specify them explicitely with
+		xpath_register_ns();
+	*/
+	if (contextnodep) {
+		namespaces = xmlGetNsList(ctxp->doc, contextnodep);
+	} else {
+		namespaces = xmlGetNsList(ctxp->doc, xmlDocGetRootElement(ctxp->doc));
+	}
+
+	nsNr = 0;
+	if (namespaces != NULL) {
+		while (namespaces[nsNr] != NULL) {
+			xmlXPathRegisterNs(ctxp, namespaces[nsNr]->prefix, namespaces[nsNr]->href); 
+			nsNr++;
+		}
+	}
 
 #if defined(LIBXML_XPTR_ENABLED)
 	if (mode == PHP_XPTR) {
@@ -4884,20 +4904,25 @@ PHP_FUNCTION(xpath_register_ns)
 
 	int prefix_len, uri_len, result;
 	xmlXPathContextPtr ctxp;
-	char *prefix, *uri, *uri_static;
+	char *prefix, *uri;
 	zval *id;
 
 	DOMXML_PARAM_FOUR(ctxp, id, le_xpathctxp, "ss", &prefix, &prefix_len, &uri, &uri_len);
 
-	/* set the context node to NULL - what is a context node anyway? */
 	ctxp->node = NULL;
 
+	#ifdef CHREGU_0
+	/* this leads to memleaks... commenting it out, as it works for me without copying
+	   it. chregu */
 	/*
 		this is a hack - libxml2 doesn't copy the URI, it simply uses the string
 		given in the parameter - which is normally deallocated after the function
 	*/
-    uri_static = estrndup(uri, uri_len);
+	uri_static = estrndup(uri, uri_len);
 	result = xmlXPathRegisterNs(ctxp, prefix, uri_static);
+	#endif
+	
+	result = xmlXPathRegisterNs(ctxp, prefix, uri);
 
 	if (0 == result) {
 		RETURN_TRUE;
