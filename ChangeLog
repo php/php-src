@@ -1,3 +1,45 @@
+2002-05-10  Edin Kadribasic  <edink@proventum.net>
+
+    * configure.in:
+    Fixed "make install" when compiled with --disable-cli option.
+
+2002-05-10  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+    - Prefix the first version line with 'PHP' so it's easier to use shell tools to
+      parse the version number (both CLI and CGI).
+
+    * sapi/cli/php_cli.c
+      sapi/cgi/cgi_main.c: - This affects both CGI and CLI sapi:
+      Remove Zend version output from -m switch and move it over to the output of
+      the -v switch (-v is supposed to list version numbers, not -m).
+
+2002-05-10  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+    - added fifth optional parameter to domxml_xslt_process. If set,
+       it will output profiling information to the file stated (chregu)
+    - introduced version numbering for this extension
+
+2002-05-10  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/Makefile.frag:
+    * package-pear.xml has been renamed to package-PEAR.xml.
+
+2002-05-10  Edin Kadribasic  <edink@proventum.net>
+
+    * NEWS
+      main/config.w32.h.in
+      win32/crypt_win32.c
+      win32/md5crypt.c
+      win32/md5crypt.h
+      win32/php4dllts.dsp: Added MD5 support for crypt() on Windows.
+
+    * win32/.cvsignore: Ignoring *.aps files.
+
+    * ext/pgsql/php_pgsql.h: Fix win32 build.
+
 2002-05-09  Preston L. Bannister  <preston.bannister@cox.net>
 
     * sapi/cgi/cgi_main.c: Backed out preceding change.

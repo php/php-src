@@ -1,3 +1,26 @@
+2002-05-10  Andi Gutmans  <andi@zend.com>
+
+    * zend_builtin_functions.c: - Nuke C++ comment
+
+    * zend_builtin_functions.c:
+    - Make debug_backtrace() return an array. Still not finished because I
+    might want to differentiate between method calls and static methods.
+
+    Example:
+    $bt = debug_backtrace();
+    foreach ($bt as $frame) {
+    	if (isset($frame['class'])) {
+    		print $frame['class'];
+    		print "::";
+    	}
+    	print $frame['function'];
+    	print "   [";
+    	print $frame['file'];
+    	print ":";
+    	print $frame['line'];
+    	print "]\n";
+    }
+
 2002-05-08  Andi Gutmans  <andi@zend.com>
 
     * zend_execute.c
