@@ -1,27 +1,23 @@
 /*
-   +----------------------------------------------------------------------+
-   | PHP Version 4                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2003 The PHP Group                                |
-   +----------------------------------------------------------------------+
-   | This source file is subject to version 2.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available at through the world-wide-web at                           |
-   | http://www.php.net/license/2_01.txt.                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
-   +----------------------------------------------------------------------+
-   | Author: dave@opaque.net                                              |
-   +----------------------------------------------------------------------+
-   
-  $Id$ 
-
+  +----------------------------------------------------------------------+
+  | PHP Version 4                                                        |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 1997-2002 The PHP Group                                |
+  +----------------------------------------------------------------------+
+  | This source file is subject to version 2.02 of the PHP license,      |
+  | that is bundled with this package in the file LICENSE, and is        |
+  | available at through the world-wide-web at                           |
+  | http://www.php.net/license/2_02.txt.                                 |
+  | If you did not receive a copy of the PHP license and are unable to   |
+  | obtain it through the world-wide-web, please send a note to          |
+  | license@php.net so we can mail you a copy immediately.               |
+  +----------------------------------------------------------------------+
+  | Authors: Dave Hayden <dave@opaque.net>                               |
+  |          Frank M. Kromann <fmk@php.net>                              |
+  +----------------------------------------------------------------------+
 */
 
-
-#include <stdio.h>
-#include <math.h>
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -35,6 +31,10 @@
 #include "php_streams.h"
 
 #if HAVE_MING
+
+#include <stdio.h>
+#include <math.h>
+#include <ming.h>
 
 #define FLOAT_Z_DVAL_PP(x) ((float)Z_DVAL_PP(x))
 #define BYTE_Z_LVAL_PP(x)  ((byte)Z_LVAL_PP(x))
@@ -137,14 +137,14 @@ zend_class_entry morph_class_entry;
 zend_class_entry sprite_class_entry;
 
 /* {{{ internal function SWFgetProperty
- */
+*/
 static void *SWFgetProperty(zval *id, char *name, int namelen, int proptype TSRMLS_DC)
 {
 	zval **tmp;
 	int id_to_find;
 	void *property;
 	int type;
-  
+
 	if (id) {
 		if (zend_hash_find(Z_OBJPROP_P(id), name, namelen+1, (void **)&tmp) == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find property %s", name);
@@ -217,7 +217,7 @@ static SWFInput getInput(zval **zfile TSRMLS_DC)
 	if (php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void *) &file, REPORT_ERRORS) != SUCCESS) {
 		return NULL;
 	}
-  
+
 	input = newSWFInput_file(file);
 	zend_list_addref(Z_LVAL_PP(zfile));
 	zend_list_addref(zend_list_insert(input, le_swfinputp));
@@ -405,7 +405,7 @@ static SWFButton getButton(zval *id TSRMLS_DC)
 {
 	void *button = SWFgetProperty(id, "button", 6, le_swfbuttonp TSRMLS_CC);
 
-	if(!button) {
+	if (!button) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFButton");
 	}
 	return (SWFButton)button;
@@ -456,7 +456,7 @@ PHP_FUNCTION(swfbutton_setUp)
 	SWFButton button = getButton(getThis() TSRMLS_CC);
 	SWFCharacter character;
 
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zchar) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zchar) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -858,7 +858,7 @@ PHP_FUNCTION(swfdisplayitem_multColor)
 		}
 		convert_to_double_ex(za);
 		a = FLOAT_Z_DVAL_PP(za);
-	} else if(ZEND_NUM_ARGS() == 3) {
+	} else if (ZEND_NUM_ARGS() == 3) {
 		if (zend_get_parameters_ex(3, &r, &g, &b) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
@@ -1306,7 +1306,9 @@ static zend_function_entry swfmovie_functions[] = {
 	PHP_FALIAS(setrate,           swfmovie_setRate,           NULL)
 	PHP_FALIAS(setdimension,      swfmovie_setDimension,      NULL)
 	PHP_FALIAS(setframes,         swfmovie_setFrames,         NULL)
+#ifdef HAVE_NEW_MING
 	PHP_FALIAS(streammp3,         swfmovie_streamMp3,         NULL)
+#endif
 	{ NULL, NULL, NULL }
 };
 
@@ -1363,7 +1365,7 @@ PHP_FUNCTION(swfmovie_nextFrame)
 /* }}} */
 
 /* {{{ proto void swfmovie_labelframe(string label)
-  Labels frame */
+   Labels frame */
 PHP_FUNCTION(swfmovie_labelFrame)
 {
 	zval **label;
@@ -1401,7 +1403,7 @@ PHP_FUNCTION(swfmovie_add)
 
 	item = SWFMovie_add(movie, block);
 
-	if(item != NULL) {
+	if (item != NULL) {
 		/* try and create a displayitem object */
 		ret = zend_list_insert(item, le_swfdisplayitemp);
 		object_init_ex(return_value, &displayitem_class_entry);
@@ -1431,9 +1433,9 @@ PHP_FUNCTION(swfmovie_remove)
 */
 static void phpByteOutputMethod(byte b, void *data)
 {
-  TSRMLS_FETCH();
+	TSRMLS_FETCH();
 
-  php_write(&b, 1 TSRMLS_CC);
+	php_write(&b, 1 TSRMLS_CC);
 }
 
 PHP_FUNCTION(swfmovie_output)
@@ -1442,24 +1444,21 @@ PHP_FUNCTION(swfmovie_output)
 	int limit = -1;
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
 
-	switch (ZEND_NUM_ARGS()) {
-#ifdef MING_HAVE_ZLIB
-	case 1:
-		if (zend_get_parameters_ex(1, &zlimit) == FAILURE)
-			WRONG_PARAM_COUNT;
-		convert_to_long_ex(zlimit);
-		limit = Z_LVAL_PP(zlimit);
-		if((limit<0)||(limit>9)) {
-			php_error(E_WARNING,"compression level must be within 0..9");
-			RETURN_FALSE;
-		}
-		break;
-#endif
-	default:
+#ifdef HAVE_MING_ZLIB
+	if (zend_get_parameters_ex(1, &zlimit) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-#ifdef MING_HAVE_ZLIB
+	convert_to_long_ex(zlimit);
+	limit = Z_LVAL_PP(zlimit);
+
+	if ((limit < 0) || (limit > 9)) {
+		php_error(E_WARNING,"compression level must be within 0..9");
+		RETURN_FALSE;
+	}
+#endif
+
+#ifdef HAVE_NEW_MING
 	RETURN_LONG(SWFMovie_output(movie, &phpByteOutputMethod, NULL, limit));
 #else
 	RETURN_LONG(SWFMovie_output(movie, &phpByteOutputMethod, NULL));
@@ -1489,24 +1488,24 @@ PHP_FUNCTION(swfmovie_saveToFile)
 		if (zend_get_parameters_ex(1, &x) == FAILURE)
 			WRONG_PARAM_COUNT;
 		break;
-#ifdef MING_HAVE_ZLIB
 	case 2:
+#ifdef HAVE_MING_ZLIB
 		if (zend_get_parameters_ex(2, &x, &zlimit) == FAILURE)
 			WRONG_PARAM_COUNT;
 		convert_to_long_ex(zlimit);
 		limit = Z_LVAL_PP(zlimit);
-		if((limit<0)||(limit>9)) {
+		if ((limit < 0) || (limit > 9)) {
 			php_error(E_WARNING,"compression level must be within 0..9");
 			RETURN_FALSE;
 		}
-		break;
 #endif
+		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
 
 	ZEND_FETCH_RESOURCE(what, php_stream *, x, -1,"File-Handle",php_file_le_stream());
-#ifdef MING_HAVE_ZLIB
+#ifdef HAVE_NEW_MING
 	RETURN_LONG(SWFMovie_output(movie, &phpStreamOutputMethod, what, limit));
 #else
 	RETURN_LONG(SWFMovie_output(movie, &phpStreamOutputMethod, what));
@@ -1525,28 +1524,30 @@ PHP_FUNCTION(swfmovie_save)
 
 	switch (ZEND_NUM_ARGS()) {
 	case 1:
-		if (zend_get_parameters_ex(1, &x) == FAILURE)
+		if (zend_get_parameters_ex(1, &x) == FAILURE) {
 			WRONG_PARAM_COUNT;
+		}
 		break;
-#ifdef MING_HAVE_ZLIB
 	case 2:
-		if (zend_get_parameters_ex(2, &x, &zlimit) == FAILURE)
+#ifdef HAVE_MING_ZLIB
+		if (zend_get_parameters_ex(2, &x, &zlimit) == FAILURE) {
 			WRONG_PARAM_COUNT;
+		}
 		convert_to_long_ex(zlimit);
 		limit = Z_LVAL_PP(zlimit);
-		if((limit<0)||(limit>9)) {
+		if ((limit < 0) || (limit > 9)) {
 			php_error(E_WARNING,"compression level must be within 0..9");
 			RETURN_FALSE;
 		}
-		break;
 #endif
+		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
 		  
 	if (Z_TYPE_PP(x) == IS_RESOURCE) {
 		ZEND_FETCH_RESOURCE(stream, php_stream *, x, -1,"File-Handle",php_file_le_stream());
-#ifdef MING_HAVE_ZLIB
+#ifdef HAVE_NEW_MING
 		RETURN_LONG(SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, stream, limit));
 #else
 		RETURN_LONG(SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, stream));
@@ -1560,7 +1561,7 @@ PHP_FUNCTION(swfmovie_save)
 		RETURN_FALSE;
 	}
 	
-#ifdef MING_HAVE_ZLIB
+#ifdef HAVE_NEW_MING
 	retval = SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, (void *)stream, limit);
 #else
 	retval = SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, (void *)stream);
@@ -1571,7 +1572,7 @@ PHP_FUNCTION(swfmovie_save)
 /* }}} */
 
 /* {{{ proto void swfmovie_setBackground(int r, int g, int b)
-  Sets background color (r,g,b) */
+   Sets background color (r,g,b) */
 PHP_FUNCTION(swfmovie_setBackground)
 {
 	zval **r, **g, **b;
@@ -1580,6 +1581,7 @@ PHP_FUNCTION(swfmovie_setBackground)
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &r, &g, &b) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+
 	convert_to_long_ex(r);
 	convert_to_long_ex(g);
 	convert_to_long_ex(b);
@@ -1588,7 +1590,7 @@ PHP_FUNCTION(swfmovie_setBackground)
 /* }}} */
 
 /* {{{ proto void swfmovie_setRate(float rate)
-  Sets movie rate */
+   Sets movie rate */
 PHP_FUNCTION(swfmovie_setRate)
 {
 	zval **rate;
@@ -1597,13 +1599,14 @@ PHP_FUNCTION(swfmovie_setRate)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &rate) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+
 	convert_to_double_ex(rate);
 	SWFMovie_setRate(movie, FLOAT_Z_DVAL_PP(rate));
 }
 /* }}} */
 
 /* {{{ proto void swfmovie_setDimension(float x, float y)
-  Sets movie dimension */
+   Sets movie dimension */
 PHP_FUNCTION(swfmovie_setDimension)
 {
 	zval **x, **y;
@@ -1612,6 +1615,7 @@ PHP_FUNCTION(swfmovie_setDimension)
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x, &y) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+
 	convert_to_double_ex(x);
 	convert_to_double_ex(y);
 	SWFMovie_setDimension(movie, FLOAT_Z_DVAL_PP(x), FLOAT_Z_DVAL_PP(y));
@@ -1619,7 +1623,7 @@ PHP_FUNCTION(swfmovie_setDimension)
 /* }}} */
 
 /* {{{ proto void swfmovie_setFrames(int frames)
-  Sets number of frames */
+   Sets number of frames */
 PHP_FUNCTION(swfmovie_setFrames)
 {
 	zval **frames;
@@ -1628,13 +1632,15 @@ PHP_FUNCTION(swfmovie_setFrames)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &frames) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+
 	convert_to_long_ex(frames);
 	SWFMovie_setNumberOfFrames(movie, Z_LVAL_PP(frames));
 }
 /* }}} */
 
+#ifdef HAVE_NEW_MING
 /* {{{ proto void swfmovie_streamMp3(mixed file)
-  Sets sound stream of the SWF movie. The parameter can be stream or string. */
+   Sets sound stream of the SWF movie. The parameter can be stream or string. */
 PHP_FUNCTION(swfmovie_streamMp3)
 {
 	zval **zfile;
@@ -1658,6 +1664,7 @@ PHP_FUNCTION(swfmovie_streamMp3)
 	SWFMovie_setSoundStream(movie, sound);
 }
 /* }}} */
+#endif
 /* }}} */
 
 /* {{{ SWFShape
@@ -1709,6 +1716,7 @@ static SWFShape getShape(zval *id TSRMLS_DC)
 	if (!shape) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFShape");
 	}
+
 	return (SWFShape)shape;
 }
 /* }}} */
@@ -1799,10 +1807,10 @@ PHP_FUNCTION(swfshape_addfill)
 		byte a = 0xff;
 
 		if (ZEND_NUM_ARGS() == 3) {
-			if(zend_get_parameters_ex(3, &r, &g, &b) == FAILURE) {
+			if (zend_get_parameters_ex(3, &r, &g, &b) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
-		} else if(ZEND_NUM_ARGS() == 4) {
+		} else if (ZEND_NUM_ARGS() == 4) {
 			if (zend_get_parameters_ex(4, &r, &g, &b, &za) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
@@ -1815,7 +1823,9 @@ PHP_FUNCTION(swfshape_addfill)
 		convert_to_long_ex(g);
 		convert_to_long_ex(b);
 
-		fill = SWFShape_addSolidFill(getShape(getThis() TSRMLS_CC), BYTE_Z_LVAL_PP(r), BYTE_Z_LVAL_PP(g), BYTE_Z_LVAL_PP(b), a);
+		fill = SWFShape_addSolidFill(getShape(getThis() TSRMLS_CC),
+			BYTE_Z_LVAL_PP(r), BYTE_Z_LVAL_PP(g), BYTE_Z_LVAL_PP(b), a
+		);
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -1914,7 +1924,7 @@ PHP_FUNCTION(swfshape_setrightfill)
 			BYTE_Z_LVAL_PP(r), BYTE_Z_LVAL_PP(g), BYTE_Z_LVAL_PP(b), BYTE_Z_LVAL_PP(a)
 		);
 	} else if (ZEND_NUM_ARGS() == 1) {
-		if (zend_get_parameters_ex(1, &zfill) == FAILURE){
+		if (zend_get_parameters_ex(1, &zfill) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 
@@ -1999,7 +2009,7 @@ PHP_FUNCTION(swfshape_drawcurveto)
 	if (ZEND_NUM_ARGS() == 4) {
 		zval **cx, **cy, **ax, **ay;
 
-		if (zend_get_parameters_ex(4, &cx, &cy, &ax, &ay) == FAILURE){
+		if (zend_get_parameters_ex(4, &cx, &cy, &ax, &ay) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_double_ex(cx);
@@ -2052,7 +2062,7 @@ PHP_FUNCTION(swfshape_drawcurve)
 			FLOAT_Z_DVAL_PP(cx), FLOAT_Z_DVAL_PP(cy), FLOAT_Z_DVAL_PP(ax), FLOAT_Z_DVAL_PP(ay)
 		);
 
-	} else if(ZEND_NUM_ARGS() == 6) {
+	} else if (ZEND_NUM_ARGS() == 6) {
 		zval **bx, **by, **cx, **cy, **dx, **dy;
 
 		if (zend_get_parameters_ex(6, &bx, &by, &cx, &cy, &dx, &dy) == FAILURE) {
@@ -2820,7 +2830,7 @@ PHP_RINIT_FUNCTION(ming)
 
 PHP_MINIT_FUNCTION(ming)
 {
-	Ming_setErrorFunction(php_ming_error);
+	Ming_setErrorFunction((void *) php_ming_error);
 
 #define CONSTANT(s,c) REGISTER_LONG_CONSTANT((s), (c), CONST_CS | CONST_PERSISTENT)
 

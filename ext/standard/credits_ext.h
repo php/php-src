@@ -48,7 +48,7 @@ CREDIT_LINE("mcrypt", "Sascha Schumann, Derick Rethans");
 CREDIT_LINE("MCVE", "Brad House, Chris Faulhaber, Steven Schoch");
 CREDIT_LINE("mhash", "Sascha Schumann");
 CREDIT_LINE("mime_magic", "Hartmut Holzgraefe");
-CREDIT_LINE("MING", "Dave Hayden");
+CREDIT_LINE("MING", "Dave Hayden, Frank M. Kromann");
 CREDIT_LINE("mnoGoSearch", "Sergey Kartashoff, Alex Barkov, Ramil Kalimullin");
 CREDIT_LINE("msession", "Mark L. Woodward");
 CREDIT_LINE("mSQL", "Zeev Suraski");
