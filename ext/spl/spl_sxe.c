@@ -144,7 +144,7 @@ static zend_function_entry spl_funcs_SimpleXMLIterator[] = {
 
 #define SimpleXML_Element sxe_get_element_class_entry()
 
-ZEND_API PHP_MINIT_FUNCTION(spl_sxe) /* {{{ */
+SPL_API PHP_MINIT_FUNCTION(spl_sxe) /* {{{ */
 {
 	zend_class_entry *spl_ce_SimpleXML_Element = sxe_get_element_class_entry();
 
@@ -161,7 +161,7 @@ ZEND_API PHP_MINIT_FUNCTION(spl_sxe) /* {{{ */
 
 #else /* HAVE_LIBXML && HAVE_SIMPLEXML */
 
-ZEND_API PHP_MINIT_FUNCTION(spl_sxe) /* {{{ */
+SPL_API PHP_MINIT_FUNCTION(spl_sxe) /* {{{ */
 {
 	return SUCCESS;
 }
