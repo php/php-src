@@ -93,7 +93,9 @@ static zend_function_entry php_domxmlns_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-//void domxmltestnode_class_startup();
+#ifdef newcode
+void domxmltestnode_class_startup();
+#endif
 
 zend_module_entry php_domxml_module_entry = {
 	"DOM", php_domxml_functions, PHP_MINIT(domxml), NULL, NULL, NULL, PHP_MINFO(domxml), STANDARD_MODULE_PROPERTIES
@@ -111,7 +113,9 @@ PHP_MINIT_FUNCTION(domxml)
 	zend_class_entry domxmlattr_class_entry;
 	zend_class_entry domxmlns_class_entry;
 
-//  domxmltestnode_class_startup();
+#ifdef newcode
+  domxmltestnode_class_startup();
+#endif
 
 	le_domxmldocp = register_list_destructors(xmlFreeDoc, NULL);
 	/* Freeing the document contains freeing the complete tree.
@@ -150,7 +154,7 @@ PHP_MINIT_FUNCTION(domxml)
 	return SUCCESS;
 }
 
-#ifdef kk
+#ifdef newcode
 /* {{{ Node Class */
 pval domxmltestnode_class_get_property(zend_property_reference *property_reference)
 {
@@ -307,7 +311,7 @@ PHP_FUNCTION(domxml_test)
 PHP_MINFO_FUNCTION(domxml)
 {
 		PUTS("DOM/XML support active (compiled with libxml ");
-		PUTS(XML_DEFAULT_VERSION);
+//		php_printf("%s", LIBXML_VERSION);
 		PUTS(".)");
 }
 
