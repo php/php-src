@@ -29,7 +29,10 @@
 
 #if HAVE_SOCKETS
 
+#ifndef _XOPEN_SOURCE_EXTENDED
 #define _XOPEN_SOURCE_EXTENDED
+#endif
+
 #define _XPG4_2
 #define __EXTENSIONS__
 
