@@ -166,7 +166,12 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 			flock(data->fd, LOCK_EX);
 
 #ifdef F_SETFD
+#ifdef NETWARE
+	/* NetWare LibC returns -1 upon error and upon success it returns non-zero unlike zero in other OSes*/
+			if (fcntl(data->fd, F_SETFD, 1) == -1) {
+#else
 			if (fcntl(data->fd, F_SETFD, 1)) {
+#endif
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "fcntl(%d, F_SETFD, 1) failed: %s (%d)", data->fd, strerror(errno), errno);
 			}
 #endif
@@ -216,7 +221,11 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 				buf[dirname_len + entry_len + 1] = '\0';
 				/* check whether its last access was more than maxlifet ago */
 				if (VCWD_STAT(buf, &sbuf) == 0 && 
+#ifdef NETWARE
+						(now - sbuf.st_mtime.tv_sec) > maxlifetime) {
+#else
 						(now - sbuf.st_mtime) > maxlifetime) {
+#endif
 					VCWD_UNLINK(buf);
 					nrdels++;
 				}
