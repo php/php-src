@@ -206,7 +206,7 @@ class DB {
 			return $parsed; // XXX ADDREF
 		}
 
-		if (preg_match('|^(.*)/([^/]+)$|', $dsn, &$arr)) {
+		if (preg_match('|^(.*)/([^/]+)/?$|', $dsn, &$arr)) {
 			$parsed['database'] = $arr[2];
 			$dsn = $arr[1];
 		}
@@ -226,7 +226,7 @@ class DB {
 		}
 
 		if (!$parsed['database'])
-			$dsn = preg_replace('|/+$|', '', $dsn);
+			$dsn = preg_replace('|/+$|', '', &$dsn);
 
 		$parsed['hostspec'] = $dsn;
 
