@@ -41,13 +41,13 @@ static int pcntl_zend_extension_active;
 function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_fork,	NULL)	
 	PHP_FE(pcntl_waitpid,	NULL)	
-       	PHP_FE(pcntl_signal,	NULL)
+	PHP_FE(pcntl_signal,	NULL)
 	PHP_FE(pcntl_wifexited, NULL)
-   	PHP_FE(pcntl_wifstopped, NULL)
-   	PHP_FE(pcntl_wifsignaled, NULL)
-   	PHP_FE(pcntl_wexitstatus, NULL)
-   	PHP_FE(pcntl_wtermsig, NULL)
-   	PHP_FE(pcntl_wstopsig, NULL)
+	PHP_FE(pcntl_wifstopped, NULL)
+	PHP_FE(pcntl_wifsignaled, NULL)
+	PHP_FE(pcntl_wexitstatus, NULL)
+	PHP_FE(pcntl_wtermsig, NULL)
+	PHP_FE(pcntl_wstopsig, NULL)
 	{NULL, NULL, NULL}	
 };
 
@@ -230,7 +230,7 @@ PHP_FUNCTION(pcntl_waitpid)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_wifexited() 
+/* {{{ proto bool pcntl_wifexited(long status) 
    Returns true if the child status code represents a successful exit */
 PHP_FUNCTION(pcntl_wifexited)
 {
@@ -250,7 +250,7 @@ PHP_FUNCTION(pcntl_wifexited)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_wifstopped() 
+/* {{{ proto bool pcntl_wifstopped(long status) 
     Returns true if the child status code represents a stopped process (WUNTRACED must have been used with waitpid) */
 PHP_FUNCTION(pcntl_wifstopped)
 {
@@ -270,7 +270,7 @@ PHP_FUNCTION(pcntl_wifstopped)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_wifsignaled() 
+/* {{{ proto bool pcntl_wifsignaled(long status) 
    Returns true if the child status code represents a process that was terminated due to a signal */
 PHP_FUNCTION(pcntl_wifsignaled)
 {
@@ -290,7 +290,7 @@ PHP_FUNCTION(pcntl_wifsignaled)
 }
 /* }}} */
 
-/* {{{ proto long pcntl_wexitstatus() 
+/* {{{ proto long pcntl_wexitstatus(long status) 
    Returns the status code of a child's exit */
 PHP_FUNCTION(pcntl_wexitstatus)
 {
@@ -313,7 +313,7 @@ PHP_FUNCTION(pcntl_wexitstatus)
 }
 /* }}} */
 
-/* {{{ proto long pcntl_wtermsig() 
+/* {{{ proto long pcntl_wtermsig(long status) 
    Returns the number of the signal that terminated the process who's status code is passed  */
 PHP_FUNCTION(pcntl_wtermsig)
 {
@@ -334,7 +334,7 @@ PHP_FUNCTION(pcntl_wtermsig)
 }
 /* }}} */
 
-/* {{{ proto long pcntl_wstopsig() 
+/* {{{ proto long pcntl_wstopsig(long status) 
    Returns the number of the signal that caused the process to stop who's status code is passed  */
 PHP_FUNCTION(pcntl_wstopsig)
 {
