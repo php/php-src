@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Feb 2004, Version 4.3.5
+18 Mar 2004, Version 4.3.5RC4
 - Fixed possible crash using an invalid color index with a palette image in
   imagecolortransparent (Pierre)
 - Fixed php-cgi to not ignore command-line switches when run in a web context.
@@ -10,7 +10,9 @@ PHP 4                                                                      NEWS
   actually parsed. (Jon)
 - Fixed possible crashes inside socket extension, due to missing check inside
   allocation functions. (Ilia)
-- Fixed bug #27600 (GCC 3.0.4 does not like __attribute__ directive). (Ilia)
+- Fixed bug #27633 (Incorrect EOL translation by ftp_get() in ASCII mode).
+  (Ilia)
+- Fixed bug #27600 (GCC 3.0.4 does not like __attribute__ directive). (Sascha)
 - Fixed bug #27590 (crash during shutdown when freeing persistent resources
   in ZTS mode). (Ilia)
 - Fixed bug #27582 (possible crashes in imagefilltoborder()). (Pierre)
