@@ -28,6 +28,7 @@ PHP_MINIT_FUNCTION(pspell);
 PHP_MINFO_FUNCTION(pspell);
 PHP_FUNCTION(pspell_new);
 PHP_FUNCTION(pspell_new_personal);
+PHP_FUNCTION(pspell_new_config);
 PHP_FUNCTION(pspell_check);
 PHP_FUNCTION(pspell_suggest);
 PHP_FUNCTION(pspell_store_replacement);
@@ -35,6 +36,13 @@ PHP_FUNCTION(pspell_add_to_personal);
 PHP_FUNCTION(pspell_add_to_session);
 PHP_FUNCTION(pspell_clear_session);
 PHP_FUNCTION(pspell_save_wordlist);
+PHP_FUNCTION(pspell_config_create);
+PHP_FUNCTION(pspell_config_runtogether);
+PHP_FUNCTION(pspell_config_mode);
+PHP_FUNCTION(pspell_config_ignore);
+PHP_FUNCTION(pspell_config_personal);
+PHP_FUNCTION(pspell_config_repl);
+PHP_FUNCTION(pspell_config_save_repl);
 #else
 #define pspell_module_ptr NULL
 #endif

@@ -41,6 +41,7 @@
 function_entry pspell_functions[] = {
 	PHP_FE(pspell_new,		NULL)
 	PHP_FE(pspell_new_personal,		NULL)
+	PHP_FE(pspell_new_config,		NULL)
 	PHP_FE(pspell_check,		NULL)
 	PHP_FE(pspell_suggest,		NULL)
 	PHP_FE(pspell_store_replacement,		NULL)
@@ -48,9 +49,16 @@ function_entry pspell_functions[] = {
 	PHP_FE(pspell_add_to_session,		NULL)
 	PHP_FE(pspell_clear_session,		NULL)
 	PHP_FE(pspell_save_wordlist,		NULL)
+	PHP_FE(pspell_config_create,		NULL)
+	PHP_FE(pspell_config_runtogether,		NULL)
+	PHP_FE(pspell_config_mode,		NULL)
+	PHP_FE(pspell_config_ignore,		NULL)
+	PHP_FE(pspell_config_personal,		NULL)
+	PHP_FE(pspell_config_repl,		NULL)
+	PHP_FE(pspell_config_save_repl,		NULL)
 };
 
-static int le_pspell;
+static int le_pspell, le_pspell_config;
 
 zend_module_entry pspell_module_entry = {
 	"pspell", pspell_functions, PHP_MINIT(pspell), NULL, NULL, NULL, PHP_MINFO(pspell), STANDARD_MODULE_PROPERTIES
@@ -64,12 +72,17 @@ static void php_pspell_close(PspellManager *manager){
 	delete_pspell_manager(manager);
 }
 
+static void php_pspell_close_config(PspellConfig *config){
+	delete_pspell_config(config);
+}
+
 PHP_MINIT_FUNCTION(pspell){
 	REGISTER_MAIN_LONG_CONSTANT("PSPELL_FAST", PSPELL_FAST, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PSPELL_NORMAL", PSPELL_NORMAL, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PSPELL_BAD_SPELLERS", PSPELL_BAD_SPELLERS, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PSPELL_RUN_TOGETHER", PSPELL_RUN_TOGETHER, CONST_PERSISTENT | CONST_CS);
 	le_pspell = register_list_destructors(php_pspell_close,NULL);
+	le_pspell_config = register_list_destructors(php_pspell_close_config,NULL);
 	return SUCCESS;
 }
 
@@ -170,6 +183,7 @@ PHP_FUNCTION(pspell_new_personal){
 
 	convert_to_string_ex(personal);
 	pspell_config_replace(config, "personal", (*personal)->value.str.val);
+	pspell_config_replace(config, "save-repl", "false");
 
 	convert_to_string_ex(language);
 	pspell_config_replace(config, "language-tag", (*language)->value.str.val);
@@ -217,6 +231,39 @@ PHP_FUNCTION(pspell_new_personal){
 
 	ret = new_pspell_manager(config);
 	delete_pspell_config(config);
+
+	if(pspell_error_number(ret) != 0){
+		php_error(E_WARNING, "PSPELL couldn't open the dictionary. reason: %s ", pspell_error_message(ret));
+		RETURN_FALSE;
+	}
+	
+	manager = to_pspell_manager(ret);
+	ind = zend_list_insert(manager, le_pspell);
+
+	RETURN_LONG(ind);
+}
+/* }}} */
+
+/* {{{ proto int pspell_new_config(int config)
+   Load a dictionary based on the given config */
+PHP_FUNCTION(pspell_new_config){
+	int type;
+	zval **conf;
+	int argc;
+	int ind;
+	
+	PspellCanHaveError *ret;
+	PspellManager *manager;
+	PspellConfig *config;
+	
+	argc = ZEND_NUM_ARGS();
+	if (argc != 1 || zend_get_parameters_ex(argc,&conf) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(conf);
+	config = (PspellConfig *) zend_list_find((*conf)->value.lval, &type);
+	ret = new_pspell_manager(config);
 
 	if(pspell_error_number(ret) != 0){
 		php_error(E_WARNING, "PSPELL couldn't open the dictionary. reason: %s ", pspell_error_message(ret));
@@ -355,6 +402,11 @@ PHP_FUNCTION(pspell_add_to_personal)
 		RETURN_FALSE;
 	}
 
+	/*If the word is empty, we have to return; otherwise we'll segfault! ouch!*/
+	if((*word)->value.str.len == 0){
+		RETURN_FALSE;
+	}
+	
 	pspell_manager_add_to_personal(manager, (*word)->value.str.val);
 	if(pspell_manager_error_number(manager) == 0){
 		RETURN_TRUE;
@@ -384,6 +436,11 @@ PHP_FUNCTION(pspell_add_to_session)
 	manager = (PspellManager *) zend_list_find((*scin)->value.lval, &type);
 	if(!manager){
 		php_error(E_WARNING, "%d is not an PSPELL result index",(*scin)->value.lval);
+		RETURN_FALSE;
+	}
+
+	/*If the word is empty, we have to return; otherwise we'll segfault! ouch!*/
+	if((*word)->value.str.len == 0){
 		RETURN_FALSE;
 	}
 
@@ -450,21 +507,264 @@ PHP_FUNCTION(pspell_save_wordlist)
 	}
 
 	pspell_manager_save_all_word_lists(manager);
-	RETURN_TRUE;
-/*	FIXME: The following should be back in place once Kevin Atkinson 
-	(the author of pspell & aspell) fixes pspell so that 
-	pspell_manager_save_all_word_lists() does not attempt to write to $HOME/.*.prepl
-	Current version (.11.1) generates an error that can be safely ignored.
+
 	if(pspell_manager_error_number(manager) == 0){
 		RETURN_TRUE;
 	}else{
 		php_error(E_WARNING, "pspell_save_wordlist() gave error: %s", pspell_manager_error_message(manager));
 		RETURN_FALSE;
 	}
-*/
+
 }
 /* }}} */
 
+/* {{{ proto int pspell_config_create(string language [, string spelling [, string jargon [, string encoding]]])
+   Create a new config to be used later to create a manager */
+PHP_FUNCTION(pspell_config_create){
+	zval **language,**spelling,**jargon,**encoding;
+	int argc;
+	int ind;
+
+	PspellConfig *config;
+	
+	argc = ZEND_NUM_ARGS();
+	if (argc < 1 || argc > 4 || zend_get_parameters_ex(argc,&language,&spelling,&jargon,&encoding) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	config = new_pspell_config();
+	convert_to_string_ex(language);
+	pspell_config_replace(config, "language-tag", (*language)->value.str.val);
+
+	if(argc > 1){
+		convert_to_string_ex(spelling);
+	 	if((*spelling)->value.str.len > 0){
+			pspell_config_replace(config, "spelling", (*spelling)->value.str.val);
+		}
+	}
+
+	if(argc > 2){
+		convert_to_string_ex(jargon);
+		if((*jargon)->value.str.len > 0){
+			pspell_config_replace(config, "jargon", (*jargon)->value.str.val);
+		}
+	}
+
+	if(argc > 3){
+		convert_to_string_ex(encoding);
+		if((*encoding)->value.str.len > 0){
+			pspell_config_replace(config, "encoding", (*encoding)->value.str.val);
+		}
+	}
+
+	/* By default I do not want to write anything anywhere because it'll try to write to $HOME
+	which is not what we want */
+	pspell_config_replace(config, "save-repl", "false");
+
+	ind = zend_list_insert(config, le_pspell_config);
+	RETURN_LONG(ind);
+}
+/* }}} */
+
+/* {{{ proto int pspell_config_runtogether(int conf, bool runtogether)
+   Consider run-together words as valid components */
+PHP_FUNCTION(pspell_config_runtogether){
+	int type;
+	zval **sccin, **runtogether;
+	int argc;
+
+	PspellConfig *config;
+	
+	argc = ZEND_NUM_ARGS();
+	if (argc != 2 || zend_get_parameters_ex(argc,&sccin,&runtogether) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(sccin);
+	config = (PspellConfig *) zend_list_find((*sccin)->value.lval, &type);
+	if(!config){
+		php_error(E_WARNING, "%d is not an PSPELL config index",(*sccin)->value.lval);
+		RETURN_FALSE;
+	}
+
+	convert_to_boolean_ex(runtogether);
+	pspell_config_replace(config, "run-together", (*runtogether)->value.lval ? "true" : "false");
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int pspell_config_mode(int conf, long mode)
+   Select mode for config (PSPELL_FAST, PSPELL_NORMAL or PSPELL_BAD_SPELLERS) */
+PHP_FUNCTION(pspell_config_mode){
+	int type;
+	zval **sccin, **mode;
+	int argc;
+
+	PspellConfig *config;
+	
+	argc = ZEND_NUM_ARGS();
+	if (argc != 2 || zend_get_parameters_ex(argc,&sccin,&mode) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(sccin);
+	config = (PspellConfig *) zend_list_find((*sccin)->value.lval, &type);
+	if(!config){
+		php_error(E_WARNING, "%d is not an PSPELL config index",(*sccin)->value.lval);
+		RETURN_FALSE;
+	}
+
+	convert_to_long_ex(mode);
+
+	/* First check what mode we want (how many suggestions) */
+	if((*mode)->value.lval == PSPELL_FAST){
+		pspell_config_replace(config, "sug-mode", "fast");
+	}else if((*mode)->value.lval == PSPELL_NORMAL){
+		pspell_config_replace(config, "sug-mode", "normal");
+	}else if((*mode)->value.lval == PSPELL_BAD_SPELLERS){
+		pspell_config_replace(config, "sug-mode", "bad-spellers");
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int pspell_config_ignore(int conf, int ignore)
+   Ignore words <= n chars */
+PHP_FUNCTION(pspell_config_ignore){
+	int type;
+	zval **sccin, **pignore;
+	int argc;
+
+	/* Hack. But I cannot imagine any word being more than 999 characters long */
+	int loc = 3;
+	char ignore_str[loc + 1];	
+	long ignore = 0L;
+
+	PspellConfig *config;
+	
+	argc = ZEND_NUM_ARGS();
+	if (argc != 2 || zend_get_parameters_ex(argc,&sccin,&pignore) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(sccin);
+	config = (PspellConfig *) zend_list_find((*sccin)->value.lval, &type);
+	if(!config){
+		php_error(E_WARNING, "%d is not an PSPELL config index",(*sccin)->value.lval);
+		RETURN_FALSE;
+	}
+
+	convert_to_long_ex(pignore);
+	ignore = Z_LVAL_PP(pignore);
+
+	/* The following is a very hackish way to convert a long to a string
+	(actually only the numbers 0-999 will get converted properly, but that should
+	be sufficient). If anyone knows of a better way to convert an integer to a string,
+	please, fix it.*/
+	ignore_str[loc] = '\0';
+	while(ignore > 0){
+		if(loc == 0){
+			break;
+		}
+		ignore_str[--loc] = '0' + (ignore % 10);
+		ignore /= 10;
+	}
+	if(ignore_str[loc] == '\0'){
+		ignore_str[--loc] = '0';
+	}
+
+	pspell_config_replace(config, "ignore", &ignore_str[loc]);
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int pspell_config_personal(int conf, string personal)
+   Use a personal dictionary for this config */
+PHP_FUNCTION(pspell_config_personal){
+	int type;
+	zval **sccin, **personal;
+	int argc;
+
+	PspellConfig *config;
+	
+	argc = ZEND_NUM_ARGS();
+	if (argc != 2 || zend_get_parameters_ex(argc,&sccin,&personal) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(sccin);
+	config = (PspellConfig *) zend_list_find((*sccin)->value.lval, &type);
+	if(!config){
+		php_error(E_WARNING, "%d is not an PSPELL config index",(*sccin)->value.lval);
+		RETURN_FALSE;
+	}
+
+	convert_to_string_ex(personal);
+	pspell_config_replace(config, "personal", (*personal)->value.str.val);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int pspell_config_repl(int conf, string repl)
+   Use a personal dictionary with replacement pairs for this config */
+PHP_FUNCTION(pspell_config_repl){
+	int type;
+	zval **sccin, **repl;
+	int argc;
+
+	PspellConfig *config;
+	
+	argc = ZEND_NUM_ARGS();
+	if (argc != 2 || zend_get_parameters_ex(argc,&sccin,&repl) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(sccin);
+	config = (PspellConfig *) zend_list_find((*sccin)->value.lval, &type);
+	if(!config){
+		php_error(E_WARNING, "%d is not an PSPELL config index",(*sccin)->value.lval);
+		RETURN_FALSE;
+	}
+
+	pspell_config_replace(config, "save-repl", "true");
+
+	convert_to_string_ex(repl);
+	pspell_config_replace(config, "repl", (*repl)->value.str.val);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int pspell_config_save_repl(int conf, bool save)
+   Save replacement pairs when personal list is saved for this config */
+PHP_FUNCTION(pspell_config_save_repl){
+	int type;
+	zval **sccin, **save;
+	int argc;
+
+	PspellConfig *config;
+	
+	argc = ZEND_NUM_ARGS();
+	if (argc != 2 || zend_get_parameters_ex(argc,&sccin,&save) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(sccin);
+	config = (PspellConfig *) zend_list_find((*sccin)->value.lval, &type);
+	if(!config){
+		php_error(E_WARNING, "%d is not an PSPELL config index",(*sccin)->value.lval);
+		RETURN_FALSE;
+	}
+
+	convert_to_boolean_ex(save);
+	pspell_config_replace(config, "save-repl", (*save)->value.lval ? "true" : "false");
+
+	RETURN_TRUE;
+}
+/* }}} */
 
 PHP_MINFO_FUNCTION(pspell)
 {
