@@ -126,12 +126,6 @@
 /* Define if you have and want to use libcrypt */
 #define HAVE_LIBCRYPT 0
 
-/* Define if you have and want to use libnsl */
-#define HAVE_LIBNSL 0
-
-/* Define if you have and want to use libsocket */
-#define HAVE_LIBSOCKET 0
-
 /* Define if you have and want to use libpam */
 #define HAVE_LIBPAM 0
 
