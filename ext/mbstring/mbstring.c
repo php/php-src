@@ -508,7 +508,7 @@ static int php_mb_nls_get_default_detect_order_list(enum mbfl_no_language lang, 
 {
 	size_t i;
 
-	*plist = php_mb_default_identify_list_neut;
+	*plist = (enum mbfl_no_encoding *) php_mb_default_identify_list_neut;
 	*plist_size = sizeof(php_mb_default_identify_list_neut) / sizeof(php_mb_default_identify_list_neut[0]);
 
 	for (i = 0; i < sizeof(php_mb_default_identify_list) / sizeof(php_mb_default_identify_list[0]); i++) {
@@ -731,7 +731,7 @@ static void _php_mb_globals_ctor(zend_mbstring_globals *pglobals TSRMLS_DC)
 	MBSTRG(detect_order_list_size) = 0;
 	MBSTRG(current_detect_order_list) = NULL;
 	MBSTRG(current_detect_order_list_size) = 0;
-	MBSTRG(default_detect_order_list) = php_mb_default_identify_list_neut;
+	MBSTRG(default_detect_order_list) = (enum mbfl_no_encoding *) php_mb_default_identify_list_neut;
 	MBSTRG(default_detect_order_list_size) = sizeof(php_mb_default_identify_list_neut) / sizeof(php_mb_default_identify_list_neut[0]);
 	MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 	MBSTRG(filter_illegal_substchar) = 0x3f;	/* '?' */
