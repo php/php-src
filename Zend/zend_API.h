@@ -57,9 +57,9 @@
 
 int zend_next_free_module(void);
 
-ZEND_API int zend_get_parameters(int ht, int param_count,...);
+ZEND_API int zend_get_parameters(int ht, int param_count, ...);
 ZEND_API int zend_get_parameters_array(int ht, int param_count, zval **argument_array);
-ZEND_API int zend_get_parameters_ex(int param_count,...);
+ZEND_API int zend_get_parameters_ex(int param_count, ...);
 ZEND_API int zend_get_parameters_array_ex(int param_count, zval ***argument_array);
 
 ZEND_API int ParameterPassedByReference(int ht, uint n);

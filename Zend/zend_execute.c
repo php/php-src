@@ -2023,7 +2023,7 @@ send_by_ref:
 					}					
 					switch (opline->op2.u.constant.type) {
 						case IS_NULL:
-							convert_to_unset(result);
+							convert_to_null(result);
 							break;
 						case IS_BOOL:
 							convert_to_boolean(result);

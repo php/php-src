@@ -35,7 +35,7 @@ static int module_count=0;
 HashTable list_destructors, module_registry;
 
 /* this function doesn't check for too many parameters */
-ZEND_API int zend_get_parameters(int ht, int param_count,...)
+ZEND_API int zend_get_parameters(int ht, int param_count, ...)
 {
 	void **p;
 	int arg_count;
@@ -115,7 +115,7 @@ ZEND_API int zend_get_parameters_array(int ht, int param_count, zval **argument_
 
 /* Zend-optimized Extended functions */
 /* this function doesn't check for too many parameters */
-ZEND_API int zend_get_parameters_ex(int param_count,...)
+ZEND_API int zend_get_parameters_ex(int param_count, ...)
 {
 	void **p;
 	int arg_count;

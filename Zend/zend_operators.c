@@ -257,7 +257,7 @@ ZEND_API void convert_to_double(zval *op)
 }
 
 
-ZEND_API void convert_to_unset(zval *op)
+ZEND_API void convert_to_null(zval *op)
 {
 	zval_dtor(op);
 	op->type = IS_NULL;
