@@ -378,6 +378,7 @@ function_entry basic_functions[] = {
 	PHP_FE(passthru,				second_arg_force_ref)
 	PHP_FE(shell_exec,														NULL)
 	PHP_FE(proc_open,				third_arg_force_ref)
+	PHP_FE(proc_close,														NULL)
 
 	PHP_FE(rand,															NULL)
 	PHP_FE(srand,															NULL)
