@@ -1,7 +1,11 @@
 Name: php4_module
 ConfigStart
 	RULE_WANTHSREGEX=no
-	LIBS="@NATIVE_RPATHS@ @PHP_LDFLAGS@ @PHP_LIBS@ @EXTRA_LIBS@ $LIBS"
 	RULE_HIDE=yes
-	CFLAGS="$CFLAGS -I@abs_srcdir@ -I@abs_srcdir@/main -I@abs_builddir@/main -I@abs_srcdir@/Zend -I@abs_builddir@/Zend -I@abs_builddir@/TSRM -I@abs_srcdir@/TSRM -I@abs_builddir@"
+	PHP_LIBS="@NATIVE_RPATHS@ @PHP_LDFLAGS@ @PHP_LIBS@ @EXTRA_LIBS@ $LIBS"
+	PHP_CFLAGS="$CFLAGS -I@OPENSSL_INCDIR@ -I@php_abs_top_srcdir@ -I@php_abs_top_srcdir@/sapi -I@php_abs_top_srcdir@/sapi/apache -I@php_abs_top_srcdir@/main -I@php_abs_top_srcdir@/Zend -I@php_abs_top_srcdir@/TSRM"
+	my_outfile="Makefile.config"
+	echo "PHP_CFLAGS=$PHP_CFLAGS" >>$my_outfile
+	echo "PHP_LIBS=$PHP_LIBS" >>$my_outfile
+	LIBS=$PHP_LIBS
 ConfigEnd
