@@ -1,6 +1,22 @@
 dnl
 dnl $Id$
 dnl
+AC_DEFUN([PHP_APACHE_FD_CHECK], [
+AC_CACHE_CHECK([for member fd in BUFF *],ac_cv_php_fd_in_buff,[
+  save=$CPPFLAGS
+  if test -n "$APXS_INCLUDEDIR"; then
+    CPPFLAGS="$CPPFLAGS -I$APXS_INCLUDEDIR"
+  else
+    CPPFLAGS="$CPPFLAGS $APACHE_INCLUDE"
+  fi
+  AC_TRY_COMPILE([#include <httpd.h>],[conn_rec *c; int fd = c->client->fd;],[
+    ac_cv_php_fd_in_buff=yes],[ac_cv_php_fd_in_buff=no],[ac_cv_php_fd_in_buff=no])
+  CPPFLAGS=$save
+])
+if test "$ac_cv_php_fd_in_buff" = "yes"; then
+  AC_DEFINE(PHP_APACHE_HAVE_CLIENT_FD,1,[ ])
+fi
+])
 
 AC_MSG_CHECKING(for Apache 1.x (hooks) module support via DSO through APXS)
 AC_ARG_WITH(apache-hooks,
@@ -9,13 +25,11 @@ AC_ARG_WITH(apache-hooks,
                           pathname to the Apache apxs tool; defaults to "apxs".],[
   if test "$withval" = "yes"; then
     APXS=apxs
-    AC_DEFINE(APACHE_HOOKS,1,[ ])
     $APXS -q CFLAGS >/dev/null 2>&1
     if test "$?" != "0" && test -x /usr/sbin/apxs; then #SUSE 6.x 
       APXS=/usr/sbin/apxs
     fi
   else
-    AC_DEFINE(APACHE_HOOKS,1,[ ])
     PHP_EXPAND_PATH($withval, APXS)
   fi
 
@@ -29,7 +43,7 @@ AC_ARG_WITH(apache-hooks,
     AC_MSG_RESULT([2.  Apache was not compiled with DSO support (--enable-module=so);])
     AC_MSG_RESULT([3.  'apxs' is not in your path.  Try to use --with-apxs=/path/to/apxs])
     AC_MSG_RESULT([The output of $APXS follows])
-    $APXS
+    $APXS -q CFLAGS
     AC_MSG_ERROR([Aborting]) 
   fi 
 
@@ -37,6 +51,7 @@ AC_ARG_WITH(apache-hooks,
   APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
   APXS_CFLAGS=`$APXS -q CFLAGS`
   APXS_HTTPD=`$APXS -q SBINDIR`/`$APXS -q TARGET`
+  APACHE_INCLUDE=-I$APXS_INCLUDEDIR
 
   # Test that we're trying to configure with apache 1.x
   PHP_AP_EXTRACT_VERSION($APXS_HTTPD)
@@ -46,33 +61,49 @@ AC_ARG_WITH(apache-hooks,
 
   for flag in $APXS_CFLAGS; do
     case $flag in
-    -D*) CPPFLAGS="$CPPFLAGS $flag";;
+    -D*) APACHE_CPPFLAGS="$APACHE_CPPFLAGS $flag";;
     esac
   done
+
   case $host_alias in
   *aix*)
     APXS_LIBEXECDIR=`$APXS -q LIBEXECDIR`
-    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
-    PHP_SELECT_SAPI(apache_hooks, shared, sapi_apache.c mod_php5.c php_apache.c, -I$APXS_INCLUDEDIR)
+    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-brtl -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
+    PHP_AIX_LDFLAGS="-Wl,-brtl"
+    build_type=shared
     ;;
   *darwin*)
     MH_BUNDLE_FLAGS="-dynamic -twolevel_namespace -bundle -bundle_loader $APXS_HTTPD"
     PHP_SUBST(MH_BUNDLE_FLAGS)
     SAPI_SHARED=libs/libphp5.so
-    PHP_SELECT_SAPI(apache_hooks, bundle, sapi_apache.c mod_php5.c php_apache.c, -I$APXS_INCLUDEDIR)
+    build_type=bundle
     ;;
   *)
-    PHP_SELECT_SAPI(apache_hooks, shared, sapi_apache.c mod_php5.c php_apache.c, -I$APXS_INCLUDEDIR)
+    build_type=shared
     ;;
   esac
+
+  PHP_SELECT_SAPI(apache_hooks, $build_type, sapi_apache.c mod_php5.c php_apache.c, $APACHE_CPPFLAGS -I$APXS_INCLUDEDIR)
 
   # Test whether apxs support -S option
   $APXS -q -S CFLAGS="$APXS_CFLAGS" CFLAGS >/dev/null 2>&1
 
   if test "$?" != "0"; then
-    APACHE_INSTALL="$APXS -i -a -n php5 $SAPI_SHARED" # Old apxs does not have -S option
+    APACHE_HOOKS_INSTALL="$APXS -i -a -n php5 $SAPI_SHARED" # Old apxs does not have -S option
   else 
-    APACHE_INSTALL="\$(mkinstalldirs) \"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" && $APXS -S LIBEXECDIR=\"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" -i -a -n php5 $SAPI_SHARED"
+    APXS_LIBEXECDIR='$(INSTALL_ROOT)'`$APXS -q LIBEXECDIR`
+    if test -z `$APXS -q SYSCONFDIR`; then
+      APACHE_HOOKS_INSTALL="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
+                       $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
+                             -i -n php5 $SAPI_SHARED"
+    else
+      APXS_SYSCONFDIR='$(INSTALL_ROOT)'`$APXS -q SYSCONFDIR`
+      APACHE_HOOKS_INSTALL="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
+                      \$(mkinstalldirs) '$APXS_SYSCONFDIR' && \
+                       $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
+                             -S SYSCONFDIR='$APXS_SYSCONFDIR' \
+                             -i -a -n php5 $SAPI_SHARED"
+    fi
   fi
 
   if test -z "`$APXS -q LD_SHLIB`" || test "`$APXS -q LIBEXECDIR`" = "modules"; then
@@ -81,12 +112,11 @@ AC_ARG_WITH(apache-hooks,
   STRONGHOLD=
   AC_DEFINE(HAVE_AP_CONFIG_H,1,[ ])
   AC_DEFINE(HAVE_AP_COMPAT_H,1,[ ])
+  AC_DEFINE(HAVE_APACHE_HOOKS,1,[ ])
   AC_MSG_RESULT(yes)
 ],[
   AC_MSG_RESULT(no)
 ])
-
-APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache_hooks/mod_php5.* sapi/apache_hooks/libphp5.module"
 
 if test "$PHP_SAPI" != "apache_hooks"; then
 AC_MSG_CHECKING(for Apache 1.x (hooks) module support)
@@ -94,20 +124,23 @@ AC_ARG_WITH(apache-hooks-static,
 [  --with-apache-hooks-static[=DIR]     
                           EXPERIMENTAL: Build Apache 1.x module. DIR is the top-level Apache
                           build directory, defaults to /usr/local/apache.],[
-   AC_DEFINE(APACHE_HOOKS,1,[ ])
+
+  APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache_hooks/mod_php5.* sapi/apache_hooks/libphp5.module"
+
   if test "$withval" = "yes"; then
     # Apache's default directory
     withval=/usr/local/apache
   fi
   if test "$withval" != "no"; then
-    APACHE_MODULE=yes
+    AC_DEFINE(HAVE_APACHE_HOOKS,1,[ ])
+    APACHE_HOOKS_MODULE=yes
     PHP_EXPAND_PATH($withval, withval)
     # For Apache 1.2.x
     if test -f $withval/src/httpd.h; then 
       APACHE_INCLUDE=-I$withval/src
       APACHE_TARGET=$withval/src
       PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php5.c php_apache.c, $APACHE_INCLUDE)
-      APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_INSTALL_FILES $APACHE_TARGET"
+      APACHE_HOOKS_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_INSTALL_FILES $APACHE_TARGET"
       PHP_LIBS="-L. -lphp3"
       AC_MSG_RESULT(yes - Apache 1.2.x)
       STRONGHOLD=
@@ -117,7 +150,7 @@ AC_ARG_WITH(apache-hooks-static,
     # For Apache 2.0.x
     elif test -f $withval/include/httpd.h &&
          test -f $withval/srclib/apr/include/apr_general.h ; then
-      AC_MSG_ERROR([Use --with-apache2 with Apache 2.x!])
+      AC_MSG_ERROR([Use --with-apxs2 with Apache 2.x!])
     # For Apache 1.3.x
     elif test -f $withval/src/main/httpd.h; then
       APACHE_HAS_REGEX=1
@@ -172,7 +205,7 @@ AC_ARG_WITH(apache-hooks-static,
       fi
     # For StrongHold 2.2
     elif test -f $withval/apache/httpd.h; then
-      APACHE_INCLUDE=-"I$withval/apache -I$withval/ssl/include"
+      APACHE_INCLUDE="-I$withval/apache -I$withval/ssl/include"
       APACHE_TARGET=$withval/apache
       PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php5.c php_apache.c, $APACHE_INCLUDE)
       PHP_LIBS="-Lmodules/php5 -L../modules/php5 -L../../modules/php5 -lmodphp5"
@@ -205,18 +238,6 @@ AC_ARG_WITH(apache-hooks-static,
 
 fi
 
-if test "x$APXS" != "x" -a "`uname -sv`" = "AIX 4" -a "$GCC" != "yes"; then
-  APXS_EXP=-bE:sapi/apache_hooks/mod_php5.exp
-fi
-
-PHP_SUBST(APXS_EXP)
-PHP_SUBST(APACHE_INCLUDE)
-PHP_SUBST(APACHE_TARGET)
-PHP_SUBST(APXS)
-PHP_SUBST(APXS_LDFLAGS)
-PHP_SUBST(APACHE_INSTALL)
-PHP_SUBST(STRONGHOLD)
-
 AC_MSG_CHECKING(for mod_charset compatibility option)
 AC_ARG_WITH(mod_charset,
 [  --with-mod_charset      Enable transfer tables for mod_charset (Rus Apache).],
@@ -227,14 +248,29 @@ AC_ARG_WITH(mod_charset,
   AC_MSG_RESULT(no)
 ])
 
-if test -n "$APACHE_MODULE"; then
+dnl Build as static module
+if test -n "$APACHE_HOOKS_MODULE"; then
   PHP_TARGET_RDYNAMIC
   $php_shtool mkdir -p sapi/apache_hooks
   PHP_OUTPUT(sapi/apache_hooks/libphp5.module)
 fi
 
-if test -n "$APACHE_INSTALL"; then
+dnl General
+if test -n "$APACHE_HOOKS_INSTALL"; then
+  if test "x$APXS" != "x" -a "`uname -sv`" = "AIX 4" -a "$GCC" != "yes"; then
+    APXS_EXP=-bE:sapi/apache_hooks/mod_php5.exp
+  fi
+
+  PHP_APACHE_FD_CHECK
   INSTALL_IT=$APACHE_INSTALL
+
+  PHP_SUBST(APXS_EXP)
+  PHP_SUBST(APACHE_INCLUDE)
+  PHP_SUBST(APACHE_TARGET)
+  PHP_SUBST(APXS)
+  PHP_SUBST(APXS_LDFLAGS)
+  PHP_SUBST(APACHE_HOOKS_INSTALL)
+  PHP_SUBST(STRONGHOLD)
 fi
 
 dnl ## Local Variables:
