@@ -207,7 +207,7 @@ void init_op(zend_op *op CLS_DC)
 
 zend_op *get_next_op(zend_op_array *op_array CLS_DC)
 {
-	int next_op_num = op_array->last++;
+	zend_uint next_op_num = op_array->last++;
 	zend_op *next_op;
 
 	if (next_op_num >= op_array->size) {
