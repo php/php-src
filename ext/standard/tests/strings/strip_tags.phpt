@@ -16,6 +16,8 @@ strip_tags() function
 	echo "\n";
 	echo strip_tags('NEAT <? echo \'\\\'\'?> STUFF');
 	echo "\n";
+	echo strip_tags('TESTS ?!!?!?!!!?!!');
+	echo "\n";
 ?>
 --EXPECT--
 NEAT  STUFF
@@ -24,3 +26,4 @@ NEAT  STUFF
 NEAT  STUFF
 NEAT  STUFF
 NEAT  STUFF
+TESTS ?!!?!?!!!?!!
