@@ -295,6 +295,15 @@ track_errors = Off
 ; Disable the inclusion of HTML tags in error messages.
 ;html_errors = Off
   
+; If html_errors is set On PHP produces clickable error messages that direct 
+; to a page describing the error or function causing the error in detail.
+; You can download a copy of the PHP manual from http://www.php.net/docs.php 
+; and change docref_root to the base URL of your local copy including the
+; leading '/'. You must also specify the file extension being used including 
+; the dot.
+;docref_root = /phpmanual/
+;docref_ext = .html
+  
 ; String to output before an error message.
 ;error_prepend_string = "<font color=ff0000>"
 
