@@ -945,8 +945,6 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 					Z_TYPE_PP(method) == IS_STRING) {
 
 					if (Z_TYPE_PP(obj) == IS_STRING) {
-						int found;
-
 						if (callable_name) {
 							char *ptr;
 
