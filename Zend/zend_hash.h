@@ -180,7 +180,8 @@ ZEND_API int zend_hash_num_elements(HashTable *ht);
 
 ZEND_API int zend_hash_rehash(HashTable *ht);
 
-ZEND_API ulong hashpjw(char *arKey, uint nKeyLength);
+/* ZEND_API ulong hashpjw(char *arKey, uint nKeyLength); */
+ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength);
 
 #if ZEND_DEBUG
 /* debug */
