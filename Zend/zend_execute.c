@@ -1485,6 +1485,10 @@ send_by_ref:
 
 					//if (zend_hash_index_find(EG(active_symbol_table), opline->op1.u.constant.value.lval, (void **) &param)==FAILURE) {
 					if (zend_ptr_stack_get_arg(opline->op1.u.constant.value.lval, (void **) &param)==FAILURE) {
+						if (opline->op2.op_type == IS_UNUSED) {
+							DEC_AI_COUNT();
+							break;
+						}
 						if (opline->op2.u.constant.type == IS_CONSTANT) {
 							zval *default_value = (zval *) emalloc(sizeof(zval));
 							zval tmp;

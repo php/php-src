@@ -257,10 +257,12 @@ non_empty_parameter_list:
 	|	'&' VARIABLE					{ znode tmp;  fetch_simple_variable(&tmp, &$2, 0 CLS_CC); $$.op_type = IS_CONST; $$.u.constant.value.lval=1; $$.u.constant.type=IS_LONG; $$.u.constant.refcount=1; $$.u.constant.is_ref=0; do_receive_arg(ZEND_RECV, &tmp, &$$, NULL, BYREF_FORCE CLS_CC); }
 	|	ZEND_CONST VARIABLE 			{ znode tmp;  fetch_simple_variable(&tmp, &$2, 0 CLS_CC); $$.op_type = IS_CONST; $$.u.constant.value.lval=1; $$.u.constant.type=IS_LONG; $$.u.constant.refcount=1; $$.u.constant.is_ref=0; do_receive_arg(ZEND_RECV, &tmp, &$$, NULL, BYREF_NONE CLS_CC); }
 	|	VARIABLE '=' static_scalar		{ znode tmp;  fetch_simple_variable(&tmp, &$1, 0 CLS_CC); $$.op_type = IS_CONST; $$.u.constant.value.lval=1; $$.u.constant.type=IS_LONG; $$.u.constant.refcount=1; $$.u.constant.is_ref=0; do_receive_arg(ZEND_RECV_INIT, &tmp, &$$, &$3, BYREF_NONE CLS_CC); }
+	|	VARIABLE '=' ZEND_UNSET 		{ znode tmp;  fetch_simple_variable(&tmp, &$1, 0 CLS_CC); $$.op_type = IS_CONST; $$.u.constant.value.lval=1; $$.u.constant.type=IS_LONG; $$.u.constant.refcount=1; $$.u.constant.is_ref=0; do_receive_arg(ZEND_RECV_INIT, &tmp, &$$, NULL, BYREF_NONE CLS_CC); }
 	|	non_empty_parameter_list ',' VARIABLE 						{ znode tmp;  fetch_simple_variable(&tmp, &$3, 0 CLS_CC); $$=$1; $$.u.constant.value.lval++; do_receive_arg(ZEND_RECV, &tmp, &$$, NULL, BYREF_NONE CLS_CC); }
 	|	non_empty_parameter_list ',' '&' VARIABLE					{ znode tmp;  fetch_simple_variable(&tmp, &$4, 0 CLS_CC); $$=$1; $$.u.constant.value.lval++; do_receive_arg(ZEND_RECV, &tmp, &$$, NULL, BYREF_FORCE CLS_CC); }
 	|	non_empty_parameter_list ',' ZEND_CONST VARIABLE			{ znode tmp;  fetch_simple_variable(&tmp, &$4, 0 CLS_CC); $$=$1; $$.u.constant.value.lval++; do_receive_arg(ZEND_RECV, &tmp, &$$, NULL, BYREF_NONE CLS_CC); }
 	|	non_empty_parameter_list ',' VARIABLE '=' static_scalar 	{ znode tmp;  fetch_simple_variable(&tmp, &$3, 0 CLS_CC); $$=$1; $$.u.constant.value.lval++; do_receive_arg(ZEND_RECV_INIT, &tmp, &$$, &$5, BYREF_NONE CLS_CC); }
+	|	non_empty_parameter_list ',' VARIABLE '=' ZEND_UNSET	 	{ znode tmp;  fetch_simple_variable(&tmp, &$3, 0 CLS_CC); $$=$1; $$.u.constant.value.lval++; do_receive_arg(ZEND_RECV_INIT, &tmp, &$$, NULL, BYREF_NONE CLS_CC); }
 ;
 
 
