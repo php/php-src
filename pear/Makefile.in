@@ -49,7 +49,7 @@ PEAR_FILES = \
 	PEAR/Registry.php \
 	PEAR/Remote.php \
 	System.php \
-	XML/Parser.php 
+	XML/Parser.php \
 	Crypt/CBC.php \
 	Crypt/HCEMD5.php \
 	DB.php \
