@@ -133,11 +133,11 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           sybase
 MAINTENANCE:         Unknown
-STATUS:              Unknown
+STATUS:              Not Working
 -------------------------------------------------------------------------------
 EXTENSION:           sybase_ct
 MAINTENANCE:         Unknown
-STATUS:              Unknown
+STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           oci8
 PRIMARY MAINTAINER:  Thies C. Arntzen <thies@digicol.de>
