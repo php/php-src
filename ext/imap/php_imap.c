@@ -132,7 +132,7 @@ function_entry imap_functions[] = {
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 	PHP_FE(imap_get_quota,							NULL)
 	PHP_FE(imap_set_quota,							NULL)
- 	PHP_FE(imap_setacl,		NULL)
+ 	PHP_FE(imap_setacl,								NULL)
 #endif
 
 #ifndef PHP_WIN32
@@ -1066,30 +1066,22 @@ PHP_FUNCTION(imap_set_quota)
 PHP_FUNCTION(imap_setacl)
 {
 	zval **streamind, **mailbox, **id, **rights;
-	int ind, ind_type;
 	pils *imap_le_struct;
-
+	
 	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &streamind, &mailbox, &id, &rights) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
-	convert_to_long_ex(streamind);
-	convert_to_string_ex(mailbox);
-	convert_to_string_ex(id);
-	convert_to_string_ex(rights);
+	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
 
-	ind = Z_LVAL_PP(streamind);
-	imap_le_struct = (pils *) zend_list_find(ind, &ind_type);
-	if (!imap_le_struct || !IS_STREAM(ind_type)) {
-		php_error(E_WARNING, "Unable to find stream pointer");
-		RETURN_FALSE;
-	}
+	convert_to_string_ex(mailbox);
+	convert_to_string_ex(rights);
 
 	RETURN_LONG(imap_setacl(imap_le_struct->imap_stream, Z_STRVAL_PP(mailbox), Z_STRVAL_PP(id), Z_STRVAL_PP(rights)));
 }
 /* }}} */
 
-#endif
+#endif /* HAVE_IMAP2000 || HAVE_IMAP2001 */
 
 
 /* {{{ proto int imap_expunge(int stream_id)
