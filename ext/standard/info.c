@@ -32,6 +32,7 @@
 #include "build-defs.h"
 #endif
 #include "zend_globals.h"		/* needs ELS */
+#include "zend_extensions.h"
 #include "zend_highlight.h"
 #ifdef HAVE_SYS_UTSNAME_H
 #include <sys/utsname.h>
@@ -206,9 +207,12 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	int expose_php = INI_INT("expose_php");
 	time_t the_time;
 	struct tm *ta, tmbuf;
+	char api_no[9];
 
 	the_time = time(NULL);
 	ta = php_localtime_r(&the_time, &tmbuf);
+
+	snprintf (&api_no, 9, "%d", ZEND_EXTENSION_API_NO);
 
 	PUTS("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n");
 
@@ -251,6 +255,8 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 #endif
 
 		php_info_print_table_row(2, "Configuration File (php.ini) Path", php_ini_opened_path?php_ini_opened_path:PHP_CONFIG_FILE_PATH);
+
+		php_info_print_table_row(2, "Zend API No.", api_no);
 
 #if ZEND_DEBUG
 		php_info_print_table_row(2, "Debug Build", "yes" );
