@@ -26,5 +26,8 @@ int mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC);
 int mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter TSRMLS_DC);
 int mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC);
 int mbfl_filt_conv_wchar_uhc(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_wchar_2022kr(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_any_2022kr_flush(mbfl_convert_filter *filter TSRMLS_DC);
 
 #endif /* MBFL_MBFILTER_KR_H */

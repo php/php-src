@@ -353,7 +353,7 @@ mbfl_filt_conv_wchar_hz(int c, mbfl_convert_filter *filter TSRMLS_DC)
 	} else if (c >= ucs_hff_cp936_table_min && c < ucs_hff_cp936_table_max) {
 		s = ucs_hff_cp936_table[c - ucs_hff_cp936_table_min];
 	}
-	if (s >= 0x0080) {
+	if (s & 0x8000) {
 		s -= 0x8080;
 	}
 
