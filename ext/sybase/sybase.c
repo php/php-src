@@ -87,7 +87,6 @@ zend_module_entry *get_module() { return &sybase_module_entry; }
 #endif
 
 THREAD_LS sybase_module php_sybase_module;
-THREAD_LS static HashTable *resource_list, *resource_plist;
 
 
 #define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING,"Sybase:  A link to the server could not be established"); RETURN_FALSE; } }
@@ -159,6 +158,8 @@ static void _free_sybase_result(sybase_result *result)
 
 static void _close_sybase_link(sybase_link *sybase_ptr)
 {
+	ELS_FETCH();
+
 	sybase_ptr->valid = 0;
 
     /* 
@@ -167,7 +168,7 @@ static void _close_sybase_link(sybase_link *sybase_ptr)
       will *not* be in a consistent state. thies@digicol.de
     */
 
-	zend_hash_apply(resource_list,(int (*)(void *))_clean_invalid_results);
+	zend_hash_apply(&EG(regular_list),(int (*)(void *))_clean_invalid_results);
 	dbclose(sybase_ptr->link);
 	dbloginfree(sybase_ptr->login);
 	efree(sybase_ptr);
@@ -257,9 +258,6 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	int hashed_details_length;
 	sybase_link sybase,*sybase_ptr;
 
-	resource_list = list;
-	resource_plist = plist;
-		
 	switch(ARG_COUNT(ht)) {
 		case 0: /* defaults */
 			host=user=passwd=NULL;
@@ -342,7 +340,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		list_entry *le;
 
 		/* try to find if we already have this link in our persistent list */
-		if (zend_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
+		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
 			list_entry new_le;
 
 			if (php_sybase_module.max_links!=-1 && php_sybase_module.num_links>=php_sybase_module.max_links) {
@@ -377,7 +375,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			memcpy(sybase_ptr,&sybase,sizeof(sybase_link));
 			new_le.type = php_sybase_module.le_plink;
 			new_le.ptr = sybase_ptr;
-			if (zend_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry),NULL)==FAILURE) {
+			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry),NULL)==FAILURE) {
 				free(sybase_ptr);
 				efree(hashed_details);
 				dbloginfree(sybase.login);
@@ -396,12 +394,12 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			if (DBDEAD(sybase_ptr->link)==TRUE) {
 				if ((sybase_ptr->link=dbopen(sybase_ptr->login,host))==FAIL) {
 					/*php_error(E_WARNING,"Sybase:  Link to server lost, unable to reconnect");*/
-					zend_hash_del(plist, hashed_details, hashed_details_length+1);
+					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
 					efree(hashed_details);
 					RETURN_FALSE;
 				}
 				if (dbsetopt(sybase_ptr->link,DBBUFFER,"2",-1)==FAIL) {
-					zend_hash_del(plist, hashed_details, hashed_details_length+1);
+					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
 					efree(hashed_details);
 					RETURN_FALSE;
 				}
@@ -417,7 +415,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		 * if it doesn't, open a new sybase link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (zend_hash_find(list,hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
+		if (zend_hash_find(&EG(regular_list),hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
 			int type,link;
 			void *ptr;
 
@@ -432,7 +430,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				efree(hashed_details);
 				return;
 			} else {
-				zend_hash_del(list,hashed_details,hashed_details_length+1);
+				zend_hash_del(&EG(regular_list),hashed_details,hashed_details_length+1);
 			}
 		}
 		if (php_sybase_module.max_links!=-1 && php_sybase_module.num_links>=php_sybase_module.max_links) {
@@ -463,7 +461,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
-		if (zend_hash_update(list,hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry),NULL)==FAILURE) {
+		if (zend_hash_update(&EG(regular_list),hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry),NULL)==FAILURE) {
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
