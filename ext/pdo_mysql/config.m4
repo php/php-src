@@ -18,25 +18,18 @@ PHP_ARG_WITH(pdo_mysql, for MySQL support,
 if test "$PHP_PDO_MYSQL" != "no"; then
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
 
-  AC_MSG_CHECKING([for MySQL UNIX socket location])
-  if test "$PHP_MYSQL_SOCK" != "no" && test "$PHP_MYSQL_SOCK" != "yes"; then
-    MYSQL_SOCK=$PHP_MYSQL_SOCK
-    AC_DEFINE_UNQUOTED(MYSQL_UNIX_ADDR, "$MYSQL_SOCK", [ ])
-    AC_MSG_RESULT([$MYSQL_SOCK])
-  elif test "$PHP_MYSQL" = "yes" || test "$PHP_MYSQL_SOCK" = "yes"; then
-    PHP_MYSQL_SOCKET_SEARCH
-  else
-    AC_MSG_RESULT([no])
-  fi
-
   for i in $PHP_PDO_MYSQL /usr/local /usr; do
-    if test -r $i/include/mysql/mysql.h; then
+    if test -x $i/bin/mysql_config; then
       MYSQL_DIR=$i
+      PDO_MYSQL_CONFIG=$MYSQL_DIR/bin/mysql_config
       MYSQL_INC_DIR=$i/include/mysql
+      MYSQL_LIBS=$i/lib
       break
-    elif test -r $i/include/mysql.h; then
+    elif test -x $i/bin/mysql_config; then
       MYSQL_DIR=$i
+      PDO_MYSQL_CONFIG=$MYSQL_DIR/bin/mysql_config
       MYSQL_INC_DIR=$i/include
+      MYSQL_LIBS=$i/lib
       break
     fi
   done
@@ -46,50 +39,24 @@ if test "$PHP_PDO_MYSQL" != "no"; then
 Note that the MySQL client library is not bundled anymore.])
   fi
 
-  for i in lib lib/mysql; do
-    MYSQL_LIB_CHK($i)
-  done
+  PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs`
+  PDO_MYSQL_SOCKET=`$PDO_MYSQL_CONFIG --socket` 
 
-  if test -z "$MYSQL_LIB_DIR"; then
-    AC_MSG_ERROR([Cannot find libmysqlclient under $MYSQL_DIR.
-Note that the MySQL client library is not bundled anymore.])
-  fi
+  AC_DEFINE_UNQUOTED(PDO_MYSQL_UNIX_ADDR, "$PDO_MYSQL_SOCKET", [ ])
 
-  PHP_CHECK_LIBRARY(mysqlclient, mysql_close, [ ],
-  [
-    if test "$PHP_ZLIB_DIR" != "no"; then
-      PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR, PDO_MYSQL_SHARED_LIBADD)
-      PHP_CHECK_LIBRARY(mysqlclient, mysql_error, [], [
-        AC_MSG_ERROR([mysql configure failed. Please check config.log for more information.])
-      ], [
-        -L$PHP_ZLIB_DIR/lib -L$MYSQL_LIB_DIR 
-      ])  
-      MYSQL_LIBS="-L$PHP_ZLIB_DIR/lib -lz"
-    else
-      PHP_ADD_LIBRARY(z,, PDO_MYSQL_SHARED_LIBADD)
-      PHP_CHECK_LIBRARY(mysqlclient, mysql_errno, [], [
-        AC_MSG_ERROR([Try adding --with-zlib-dir=<DIR>. Please check config.log for more information.])
-      ], [
-        -L$MYSQL_LIB_DIR
-      ])   
-      MYSQL_LIBS="-lz"
-    fi
-  ], [
-    -L$MYSQL_LIB_DIR 
-  ])
-
-  PHP_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIB_DIR, PDO_MYSQL_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIBS, PDO_MYSQL_SHARED_LIBADD)
   PHP_ADD_INCLUDE($MYSQL_INC_DIR)
- 
+
   if test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
   	pdo_inc_path=$prefix/include/php/ext
-  else
+  elif test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
   	pdo_inc_path=$abs_srcdir/ext
+  else
+	AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
   fi
 
   PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_inc_path)
   PDO_MYSQL_MODULE_TYPE=external
-  PDO_MYSQL_LIBS="-L$MYSQL_LIB_DIR -lmysqlclient $MYSQL_LIBS"
   PDO_MYSQL_INCLUDE=-I$MYSQL_INC_DIR
  
   PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)
