@@ -61,8 +61,7 @@ AC_ARG_WITH(apxs2,
 
   case $host_alias in
   *aix*)
-    APXS_SBINDIR=`$APXS -q SBINDIR`
-    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-bI:$APXS_SBINDIR/httpd.exp"
+    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-brtl -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
     PHP_SELECT_SAPI(apache2filter, shared, sapi_apache2.c apache_config.c php_functions.c)
     INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL" 
     ;;
