@@ -2,6 +2,8 @@
 Test usort, uksort and uasort
 --POST--
 --GET--
+--INI--
+precision=14
 --FILE--
 <?php
 require('ext/standard/tests/array/data.inc');
