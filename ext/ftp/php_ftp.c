@@ -160,8 +160,7 @@ PHP_FUNCTION(ftp_connect)
 	}
 
 	/* connect */
-	ftp = ftp_open(host, (short)port, timeout_sec TSRMLS_CC);
-	if (ftp == NULL) {
+	if (!(ftp = ftp_open(host, (short)port, timeout_sec TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
 
@@ -196,8 +195,7 @@ PHP_FUNCTION(ftp_ssl_connect)
 	}
 
 	/* connect */
-	ftp = ftp_open(host, (short)port, timeout_sec TSRMLS_CC);
-	if (ftp == NULL) {
+	if (!(ftp = ftp_open(host, (short)port, timeout_sec TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
 
@@ -250,8 +248,7 @@ PHP_FUNCTION(ftp_pwd)
 
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
-	pwd = ftp_pwd(ftp);
-	if (pwd == NULL) {
+	if (!(pwd = ftp_pwd(ftp))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -891,9 +888,7 @@ PHP_FUNCTION(ftp_put)
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 	XTYPE(xtype, mode);
 
-	instream = php_stream_fopen(local, "rb", NULL);
-
-	if (instream == NULL) {
+	if (!(instream = php_stream_fopen(local, "rb", NULL))) {
 		RETURN_FALSE;
 	}
 
@@ -945,9 +940,7 @@ PHP_FUNCTION(ftp_nb_put)
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 	XTYPE(xtype, mode);
 
-	instream = php_stream_fopen(local, "rb", NULL);
-
-	if (instream == NULL)	{
+	if (!(instream = php_stream_fopen(local, "rb", NULL))) {
 		RETURN_FALSE;
 	}
 
