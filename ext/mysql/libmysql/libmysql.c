@@ -1240,7 +1240,7 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
     net->vio = vio_new(sock, VIO_TYPE_SOCKET, TRUE);
     bzero((char*) &UNIXaddr,sizeof(UNIXaddr));
     UNIXaddr.sun_family = AF_UNIX;
-    strmov(UNIXaddr.sun_path, unix_socket);
+    strmake(UNIXaddr.sun_path, unix_socket, sizeof(UNIXaddr.sun_path) - 1);
     if (connect2(sock,(struct sockaddr *) &UNIXaddr, sizeof(UNIXaddr),
 		 mysql->options.connect_timeout) <0)
     {
