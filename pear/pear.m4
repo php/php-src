@@ -11,14 +11,17 @@ AC_DEFUN(PHP_WITH_PHP_CONFIG,[
 
   prefix=`$PHP_CONFIG --prefix 2>/dev/null`
   INCLUDES=`$PHP_CONFIG --includes 2>/dev/null`
+  EXTENSION_DIR=`$PHP_CONFIG --extension-dir`
  
   if test -z "$prefix"; then
     AC_MSG_ERROR(Cannot find php-config. Please use --with-php-config=[PATH])
   fi
-  AC_MSG_CHECKING(PHP prefix)
+  AC_MSG_CHECKING(for PHP prefix)
   AC_MSG_RESULT($prefix)
-  AC_MSG_CHECKING(PHP includes)
+  AC_MSG_CHECKING(for PHP includes)
   AC_MSG_RESULT($INCLUDES)
+  AC_MSG_CHECKING(for PHP extension directory)
+  AC_MSG_RESULT($EXTENSION_DIR)
 ])
 
 php_always_shared=yes
@@ -43,8 +46,6 @@ phplibdir="`pwd`/modules"
 
 test "$prefix" = "NONE" && prefix="/usr/local"
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
-
-EXTENSION_DIR="$prefix/lib/php/modules"
 
 PHP_SUBST(prefix)
 PHP_SUBST(exec_prefix)
@@ -75,6 +76,7 @@ PHP_FAST_OUTPUT(Makefile)
 PHP_FAST_GENERATE
 
 test -d modules || mkdir modules
+touch .deps
 
 AC_CONFIG_HEADER(php_config.h)
 

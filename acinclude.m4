@@ -36,6 +36,12 @@ no)
   ;;
 esac
 
+if test "$php_always_shared"; then
+  ext_output="yes, shared"
+  ext_shared=yes
+  test "[$]$1" = "no" && $1=yes
+fi
+
 AC_MSG_RESULT($ext_output)
 ])
 
