@@ -784,6 +784,9 @@ session.gc_probability = 1
 
 ; After this number of seconds, stored data will be seen as 'garbage' and
 ; cleaned up by the garbage collection process.
+; WARNING: Your filesystem must store access times.  Windows FAT does
+;          not.  So, see session_set_save_handler() and write your own
+;          session handler with a different mechanism for cleaning up sessions.
 session.gc_maxlifetime = 1440
 
 ; Check HTTP Referer to invalidate externally stored URLs containing ids.
