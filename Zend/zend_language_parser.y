@@ -142,6 +142,9 @@
 %token T_DOLLAR_OPEN_CURLY_BRACES
 %token T_CURLY_OPEN
 %token T_PAAMAYIM_NEKUDOTAYIM
+%token T_NULL
+%token T_FALSE
+%token T_TRUE
 
 %% /* Rules */
 
@@ -675,6 +678,9 @@ common_scalar:
 	|	T_CLASS_C					{ $$ = $1; }
 	|	T_METHOD_C					{ $$ = $1; }
 	|	T_FUNC_C					{ $$ = $1; }
+	|	T_NULL						{ $$ = $1; }
+	|	T_FALSE						{ $$ = $1; }
+	|	T_TRUE						{ $$ = $1; }
 ;
 
 
