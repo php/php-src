@@ -184,7 +184,7 @@ php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
 		}
 	}
 	PRINTF_DEBUG(("sprintf: appending \"%s\"\n", add));
-	strncpy(&(*buffer)[*pos], add, max_width-*pos+1);
+	strncpy(&(*buffer)[*pos], add, MIN(max_width, len)+1);
 	*pos += MIN(max_width, len);
 	if (alignment == ALIGN_LEFT) {
 		while (npad--) {
