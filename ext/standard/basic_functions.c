@@ -356,6 +356,8 @@ function_entry basic_functions[] = {
 
 	PHP_FE(parse_ini_file,				NULL)
 
+	PHP_FE(is_upload_file,				NULL)
+
 	/* functions from reg.c */
 	PHP_FE(ereg,									third_argument_force_ref)
 	PHP_FE(ereg_replace,							NULL)
@@ -2204,6 +2206,27 @@ PHPAPI PHP_FUNCTION(warn_not_available)
     RETURN_FALSE;
 }
 
+
+PHP_FUNCTION(is_upload_file)
+{
+	zval **path;
+	SLS_FETCH();
+
+	if (!SG(rfc1867_uploaded_files)) {
+		RETURN_FALSE;
+	}
+
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &path)!=SUCCESS) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	convert_to_string_ex(path);
+
+	if (zend_hash_exists(SG(rfc1867_uploaded_files), Z_STRVAL_PP(path), Z_STRLEN_PP(path)+1)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
 
 /*
  * Local variables:

@@ -86,7 +86,7 @@ static void register_http_post_files_variable_ex(char *var, zval *val, zval *htt
 /*
  * Split raw mime stream up into appropriate components
  */
-static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
+static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr SLS_DC)
 {
 	char *ptr, *loc, *loc2, *loc3, *s, *name, *filename, *u, *fn;
 	int len, state = 0, Done = 0, rem, urem;
@@ -101,6 +101,9 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 	PLS_FETCH();
 
 	zend_hash_init(&PG(rfc1867_protected_variables), 5, NULL, NULL, 0);
+
+	ALLOC_HASHTABLE(SG(rfc1867_uploaded_files));
+	zend_hash_init(SG(rfc1867_uploaded_files), 5, NULL, NULL, 0);
 
 	ALLOC_ZVAL(http_post_files);
 	array_init(http_post_files);
@@ -348,6 +351,11 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 				}
 				add_protected_variable(namebuf PLS_CC);
 				safe_php_register_variable(namebuf, fn, NULL, 1 ELS_CC PLS_CC);
+				{
+					int dummy=1;
+
+					zend_hash_add(SG(rfc1867_uploaded_files), namebuf, strlen(namebuf)+1, &dummy, sizeof(int), NULL);
+				}
 
 				/* Add $foo[tmp_name] */
 				if(is_arr_upload) {
@@ -404,7 +412,7 @@ SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	boundary_len = strlen(boundary);
 
 	if (SG(request_info).post_data) {
-		php_mime_split(SG(request_info).post_data, SG(request_info).post_data_length, boundary, array_ptr);
+		php_mime_split(SG(request_info).post_data, SG(request_info).post_data_length, boundary, array_ptr SLS_CC);
 	}
 }
 

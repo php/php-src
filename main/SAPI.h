@@ -100,7 +100,7 @@ typedef struct {
 	struct stat global_stat;
 	char *default_mimetype;
 	char *default_charset;
-	HashTable *rfc_1867_uploaded_files;
+	HashTable *rfc1867_uploaded_files;
 } sapi_globals_struct;
 
 

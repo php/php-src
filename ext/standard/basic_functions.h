@@ -109,6 +109,8 @@ PHP_FUNCTION(get_extension_funcs);
 PHP_FUNCTION(register_tick_function);
 PHP_FUNCTION(unregister_tick_function);
 
+PHP_FUNCTION(is_upload_file);
+
 /* From the INI parser */
 PHP_FUNCTION(parse_ini_file);
 

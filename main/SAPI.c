@@ -301,6 +301,7 @@ SAPI_API void sapi_activate(SLS_D)
 			sapi_module.activate(SLS_C);
 		}
 	}
+	SG(rfc1867_uploaded_files) = NULL;
 }
 
 
@@ -324,6 +325,10 @@ SAPI_API void sapi_deactivate(SLS_D)
 	}
 	if (sapi_module.deactivate) {
 		sapi_module.deactivate(SLS_C);
+	}
+	if (SG(rfc1867_uploaded_files)) {
+		zend_hash_destroy(SG(rfc1867_uploaded_files));
+		FREE_HASHTABLE(SG(rfc1867_uploaded_files));
 	}
 }
 
