@@ -560,6 +560,7 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 			if ((*rval)->type == IS_OBJECT) {
 				zval *retval_ptr;
 				zval *fname;
+				CLS_FETCH();
 
 				MAKE_STD_ZVAL(fname);
 				ZVAL_STRING(fname,"_wakeup_",1);
