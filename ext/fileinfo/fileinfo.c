@@ -216,7 +216,7 @@ zend_module_entry fileinfo_module_entry = {
 };
 /* }}} */
 
-#ifdef COMPILE_DL_FILENINFO
+#ifdef COMPILE_DL_FILEINFO
 ZEND_GET_MODULE(fileinfo)
 #endif
 
