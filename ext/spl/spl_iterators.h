@@ -71,8 +71,8 @@ typedef struct _spl_dual_it_object {
 	dual_it_type             dit_type;
 	union {
 		struct {
-			int              offset;
-			int              count;
+			long             offset;
+			long             count;
 		} limit;
 		struct {
 			int              flags; /* CIT_HAS_MORE, CIT_CALL_TOSTRING, CIT_CATCH_GET_CHILD */
