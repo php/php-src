@@ -135,8 +135,8 @@ class PEAR_Remote extends PEAR
         if ($proxy = parse_url($this->config->get('http_proxy'))) {
             $proxy_host = @$proxy['host'];
             $proxy_port = @$proxy['port'];
-            $proxy_user = @$proxy['user'];
-            $proxy_pass = @$proxy['pass'];
+            $proxy_user = @urldecode(@$proxy['user']);
+            $proxy_pass = @urldecode(@$proxy['pass']);
         }
         $c = new XML_RPC_Client('/xmlrpc.php'.$maxAge, $server_host, 80, $proxy_host, $proxy_port, $proxy_user, $proxy_pass);
         if ($username && $password) {
@@ -206,8 +206,8 @@ class PEAR_Remote extends PEAR
             $proxy_host = $proxy_port = $proxy_user = $proxy_pass = '';
             $proxy_host = @$proxy['host'];
             $proxy_port = @$proxy['port'];
-            $proxy_user = @$proxy['user'];
-            $proxy_pass = @$proxy['pass'];
+            $proxy_user = @urldecode(@$proxy['user']);
+            $proxy_pass = @urldecode(@$proxy['pass']);
             $fp = @fsockopen($proxy_host, $proxy_port);
             $use_proxy = true;
         } else {
