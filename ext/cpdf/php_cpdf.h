@@ -42,7 +42,7 @@ extern PHP_MINFO_FUNCTION(cpdf);
 extern PHP_MINIT_FUNCTION(cpdf);
 extern PHP_RINIT_FUNCTION(cpdf);
 extern PHP_MSHUTDOWN_FUNCTION(cpdf);
-PHP_FUNCTION(cpdf_global_set_documents_settings);
+PHP_FUNCTION(cpdf_global_set_document_limits);
 PHP_FUNCTION(cpdf_set_creator);
 PHP_FUNCTION(cpdf_set_title);
 PHP_FUNCTION(cpdf_set_subject);
