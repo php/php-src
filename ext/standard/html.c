@@ -801,7 +801,7 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 
 			}
 			if (!is_basic) {
-				if (this_char > 0xff) {
+				if (mbseqlen > 1) {
 					/* a wide char without a named entity; pass through the original sequence */
 					memcpy(replaced + len, mbsequence, mbseqlen);
 					len += mbseqlen;
