@@ -22,7 +22,7 @@
 /* $Id: */
 
 #include "php.h"
-#include "phpmath.h"
+#include "php_math.h"
 
 #include <math.h>
 #include <float.h>

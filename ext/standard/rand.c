@@ -24,7 +24,7 @@
 #include <stdlib.h>
 
 #include "php.h"
-#include "phpmath.h"
+#include "php_math.h"
 #include "php_rand.h"
 
 #include "basic_functions.h"
