@@ -2283,6 +2283,54 @@ SOURCE=..\main\streams\userspace.c
 SOURCE=..\main\streams\xp_socket.c
 # End Source File
 # End Group
+# Begin Group "COM and DotNet"
+
+# PROP Default_Filter ""
+# Begin Group "Header Files No. 9"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\com_dotnet\php_com_dotnet.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com_dotnet\php_com_dotnet_internal.h
+# End Source File
+# End Group
+# Begin Source File
+
+SOURCE=..\ext\com_dotnet\com_com.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com_dotnet\com_dotnet.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com_dotnet\com_extension.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com_dotnet\com_handlers.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com_dotnet\com_misc.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com_dotnet\com_olechar.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com_dotnet\com_typeinfo.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com_dotnet\com_variant.c
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\php4dllts.rc
