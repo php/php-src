@@ -395,6 +395,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	if (flag & PHP_INFO_GENERAL) {
 		char *zend_version = get_zend_version();
 		char temp_api[9];
+		char *logo_guid;
 
 		php_uname = php_get_uname('a');
 		
@@ -408,7 +409,9 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 				PUTS(SG(request_info).request_uri);
 			}
 			PUTS("?=");
-			PUTS(php_logo_guid());
+			logo_guid = php_logo_guid();
+			PUTS(logo_guid);
+			efree(logo_guid);
 			PUTS("\" alt=\"PHP Logo\" /></a>");
 		}
 
@@ -954,7 +957,7 @@ PHP_FUNCTION(php_logo_guid)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_STRING(php_logo_guid(), 1);
+	RETURN_STRING(php_logo_guid(), 0);
 }
 /* }}} */
 
