@@ -2,6 +2,7 @@ AC_ARG_WITH(thttpd,
 [  --with-thttpd=SRCDIR    Build PHP as thttpd module],[
   test -d $withval || AC_MSG_RESULT(thttpd directory does not exist ($withval))
   PHP_EXPAND_PATH($withval, THTTPD)
+  PHP_TARGET_RDYNAMIC
   INSTALL_IT="\
     echo 'PHP_LIBS = -L. -lphp4 \$(PHP_LIBS) \$(EXTRA_LIBS)' > $THTTPD/php_makefile; \
     echo 'PHP_LDFLAGS = \$(NATIVE_RPATHS) \$(PHP_LDFLAGS)' >> $THTTPD/php_makefile; \
