@@ -58,9 +58,9 @@ MAILSTREAM DEFAULTPROTO;
 #define CRLF	"\015\012"
 #define PHP_EXPUNGE 32768
 
-static void _php_make_header_object(zval *myzvalue, ENVELOPE *en);
-static void _php_imap_add_body(zval *arg, BODY *body);
-static void _php_imap_parse_address(ADDRESS *addresslist, char *fulladdress, zval *paddress);
+static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC);
+static void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC);
+static void _php_imap_parse_address(ADDRESS *addresslist, char *fulladdress, zval *paddress TSRMLS_DC);
 
 /* These function declarations are missing from the IMAP header files... */
 void rfc822_date(char *date);
@@ -1764,7 +1764,7 @@ PHP_FUNCTION(imap_headerinfo)
 	
 	/* call a function to parse all the text, so that we can use the
 	   same function to parse text from other sources */
-	_php_make_header_object(return_value, en);
+	_php_make_header_object(return_value, en TSRMLS_CC);
 	
 	/* now run through properties that are only going to be returned
 	   from a server, not text headers */
@@ -1825,7 +1825,7 @@ PHP_FUNCTION(imap_rfc822_parse_headers)
 	
 	/* call a function to parse all the text, so that we can use the
 	   same function no matter where the headers are from */
-	_php_make_header_object(return_value, en);
+	_php_make_header_object(return_value, en TSRMLS_CC);
 	mail_free_envelope(&en);
 }
 /* }}} */
@@ -2046,7 +2046,7 @@ PHP_FUNCTION(imap_fetchstructure)
 		RETURN_FALSE;
 	}
 	
-	_php_imap_add_body(return_value, body);
+	_php_imap_add_body(return_value, body TSRMLS_CC);
 }
 /* }}} */
 
@@ -3817,7 +3817,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 /* Support Functions */
 /* {{{ _php_imap_parse_address
  */
-static void _php_imap_parse_address (ADDRESS *addresslist, char *fulladdress, zval *paddress)
+static void _php_imap_parse_address (ADDRESS *addresslist, char *fulladdress, zval *paddress TSRMLS_DC)
 {
 	ADDRESS *addresstmp, *addresstmp2;
 	char tempaddress[MAILTMPLEN];
@@ -3859,7 +3859,7 @@ static void _php_imap_parse_address (ADDRESS *addresslist, char *fulladdress, zv
 
 /* {{{ _php_make_header_object
  */
-static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
+static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 {
 	zval *paddress;
 	char fulladdress[MAILTMPLEN];
@@ -3880,7 +3880,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 	if (en->to) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		_php_imap_parse_address(en->to, fulladdress, paddress);
+		_php_imap_parse_address(en->to, fulladdress, paddress TSRMLS_CC);
 		if (fulladdress) add_property_string(myzvalue, "toaddress", fulladdress, 1);
 		add_assoc_object(myzvalue, "to", paddress);
 	}
@@ -3888,7 +3888,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 	if (en->from) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		_php_imap_parse_address(en->from, fulladdress, paddress);
+		_php_imap_parse_address(en->from, fulladdress, paddress TSRMLS_CC);
 		if (fulladdress) add_property_string(myzvalue, "fromaddress", fulladdress, 1);
 		add_assoc_object(myzvalue, "from", paddress);
 	}
@@ -3896,7 +3896,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 	if (en->cc) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		_php_imap_parse_address(en->cc, fulladdress, paddress);
+		_php_imap_parse_address(en->cc, fulladdress, paddress TSRMLS_CC);
 		if (fulladdress) add_property_string(myzvalue, "ccaddress", fulladdress, 1);
 		add_assoc_object(myzvalue, "cc", paddress);
 	}
@@ -3904,7 +3904,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 	if (en->bcc) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		_php_imap_parse_address(en->bcc, fulladdress, paddress);
+		_php_imap_parse_address(en->bcc, fulladdress, paddress TSRMLS_CC);
 		if (fulladdress) add_property_string(myzvalue, "bccaddress", fulladdress, 1);
 		add_assoc_object(myzvalue, "bcc", paddress);
 	}
@@ -3912,7 +3912,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 	if (en->reply_to) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		_php_imap_parse_address(en->reply_to, fulladdress, paddress);
+		_php_imap_parse_address(en->reply_to, fulladdress, paddress TSRMLS_CC);
 		if (fulladdress) add_property_string(myzvalue, "reply_toaddress", fulladdress, 1);
 		add_assoc_object(myzvalue, "reply_to", paddress);
 	}
@@ -3920,7 +3920,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 	if (en->sender) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		_php_imap_parse_address(en->sender, fulladdress, paddress);
+		_php_imap_parse_address(en->sender, fulladdress, paddress TSRMLS_CC);
 		if (fulladdress) add_property_string(myzvalue, "senderaddress", fulladdress, 1);
 		add_assoc_object(myzvalue, "sender", paddress);
 	}
@@ -3928,7 +3928,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 	if (en->return_path) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		_php_imap_parse_address(en->return_path, fulladdress, paddress);
+		_php_imap_parse_address(en->return_path, fulladdress, paddress TSRMLS_CC);
 		if (fulladdress) add_property_string(myzvalue, "return_pathaddress", fulladdress, 1);
 		add_assoc_object(myzvalue, "return_path", paddress);
 	}
@@ -3938,7 +3938,7 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 
 /* {{{ _php_imap_add_body
  */
-void _php_imap_add_body(zval *arg, BODY *body)
+void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC)
 {
 	zval *parametres, *param, *dparametres, *dparam;
 	PARAMETER *par, *dpar;
@@ -4034,7 +4034,7 @@ void _php_imap_add_body(zval *arg, BODY *body)
 		for (part = body->CONTENT_PART; part; part = part->next) {
 			MAKE_STD_ZVAL(param);
 			object_init(param);
-			_php_imap_add_body(param, &part->body);
+			_php_imap_add_body(param, &part->body TSRMLS_CC);
 			add_next_index_object(parametres, param);
 		}
 		add_assoc_object(arg, "parts", parametres);
@@ -4047,7 +4047,7 @@ void _php_imap_add_body(zval *arg, BODY *body)
 		array_init(parametres);
 		MAKE_STD_ZVAL(param);
 		object_init(param);
-		_php_imap_add_body(param, body);
+		_php_imap_add_body(param, body TSRMLS_CC);
 		add_next_index_object(parametres, param);
 		add_assoc_object(arg, "parts", parametres);
 	}
