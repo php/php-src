@@ -40,7 +40,7 @@ lists the files in that package.
         'shell-test' => array(
             'summary' => 'Shell Script Test',
             'function' => 'doShellTest',
-            'shortcut' => 'stest',
+            'shortcut' => 'st',
             'options' => array(),
             'doc' => '<package> [[relation] version]
 Tests if a package is installed in the system. Will exit(1) if it is not.
