@@ -403,24 +403,6 @@ void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
 	}
 }
 /* }}} */
-
-/* {{{ mail_getquotaroot
- *
- * Mail GET_QUOTAROOT callback
- * Called via the mail_parameter function in c-client:src/c-client/mail.c
- * Author DRK
- */
-void mail_getquotaroot(MAILSTREAM *stream, char *mbx, STRINGLIST *qroot)
-{
-	TSRMLS_FETCH();
-
-	add_next_index_stringl(IMAPG(quota_return), mbx, strlen(mbx), 1);
-	for(; qroot; qroot = qroot->next) {
-		add_next_index_stringl(IMAPG(quota_return), qroot->text.data, qroot->text.size, 1);
-	}
-
-}
-/* }}} */
 #endif
 
 
@@ -1126,7 +1108,6 @@ PHP_FUNCTION(imap_get_quotaroot)
 
 	/* set the callback for the GET_QUOTAROOT function */
 	mail_parameters(NIL, SET_QUOTA, (void *) mail_getquota);
-	mail_parameters(NIL, SET_QUOTAROOT, (void *) mail_getquotaroot);
 	if(!imap_getquotaroot(imap_le_struct->imap_stream, Z_STRVAL_PP(mbox))) {
 		php_error(E_WARNING, "%s(): c-client imap_getquotaroot failed", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
