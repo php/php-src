@@ -21,7 +21,7 @@ if test "$PHP_NSAPI" != "no"; then
     AC_MSG_RESULT(Netscape-Enterprise/3.x style)
   fi
   if test -d $PHP_NSAPI/plugins/include ; then
-    NSAPI_INCLUDE=$PHP_NSAPI/plugins/include
+    NSAPI_INCLUDE="$NSAPI_INCLUDE -I$PHP_NSAPI/plugins/include"
     AC_MSG_RESULT(iPlanet/4.x style)
   fi
 
