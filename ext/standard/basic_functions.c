@@ -1442,7 +1442,7 @@ PHP_FUNCTION(getopt)
 		if (optarg != NULL) {
 			ZVAL_STRING(val, optarg, 1);
 		} else {
-			ZVAL_NULL(val);
+			ZVAL_FALSE(val);
 		}
 
 		/* Add this option / argument pair to the result hash. */
