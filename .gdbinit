@@ -193,7 +193,8 @@ define printzn
 end
 
 document printzn
-	print type and content of znode. usage: printzn &opline->op1 
+	print type and content of znode.
+	usage: printzn &opline->op1 
 end
 
 define printzops
@@ -217,7 +218,7 @@ define zmemcheck
 	else
 		set $not_found = 0
 	end
-	printf " block      file:line (orig)                                           status\n"
+	printf " block      status file:line\n"
 	printf "-------------------------------------------------------------------------------\n"
 	while $p
 		set $aptr = $p + sizeof(struct _zend_mem_header) + sizeof(align_test)
@@ -231,10 +232,23 @@ define zmemcheck
 			if $p->magic == 0xfb8277dc
 				set $stat = "CACHED"
 			end
-	
-			printf " 0x%08x %-52s:%5d %-06s\n", $aptr, $p->filename, $p->lineno, $stat
+			set $filename = strrchr($p->filename, '/')
+			if !$filename
+				set $filename = $p->filename
+			else
+				set $filename = $filename + 1
+			end
+			printf " 0x%08x %-06s %s:%d", $aptr, $stat, $filename, $p->lineno
 			if $p->orig_filename
-				printf "         <= %-52s:%5d\n", $p->orig_filename, $p->orig_lineno
+				set $orig_filename = strrchr($p->orig_filename, '/')
+				if !$orig_filename
+					set $orig_filename = $p->orig_filename
+				else
+					set $orig_filename = $orig_filename + 1
+				end
+				printf " <= %s:%d\n", $orig_filename, $p->orig_lineno
+			else
+				printf "\n"
 			end
 			if $arg0 != 0
 				set $p = 0
@@ -252,6 +266,8 @@ define zmemcheck
 end
 
 document zmemcheck
-	show status of a memory block. usage: zmemcheck [ptr]. if ptr = 0 all blocks will be listed.
+	show status of a memory block.
+	usage: zmemcheck [ptr].
+	if ptr is 0, all blocks will be listed.
 end
 
