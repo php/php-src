@@ -191,7 +191,16 @@ PHPAPI void php_print_info(int flag)
 		if (zend_hash_find(&EG(symbol_table), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), (void **) &data) != FAILURE) {
 			zend_hash_internal_pointer_reset((*data)->value.ht);
 			while (zend_hash_get_current_data((*data)->value.ht, (void **) &tmp) == SUCCESS) {
-				convert_to_string(*tmp);
+				zval tmp2, *value_ptr;
+
+				if ((*tmp)->type != IS_STRING) {
+					tmp2 = **tmp;
+					zval_copy_ctor(&tmp2);
+					convert_to_string(&tmp2);
+					value_ptr = &tmp2;
+				} else {
+					value_ptr = *tmp;
+				}
 				PUTS("<tr><td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><b>HTTP_GET_VARS[\"");
 				switch (zend_hash_get_current_key((*data)->value.ht, &string_key, &num_key)) {
 					case HASH_KEY_IS_STRING:
@@ -203,9 +212,12 @@ PHPAPI void php_print_info(int flag)
 						break;
 				}
 				PUTS("\"]</b></td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
-				PUTS((*tmp)->value.str.val); /* This could be "Array" - too ugly to expand that for now */
+				PUTS(value_ptr->value.str.val); /* This could be "Array" - too ugly to expand that for now */
 				PUTS("</td></tr>\n");
 				zend_hash_move_forward((*data)->value.ht);
+				if (value_ptr==&tmp2) {
+					zval_dtor(value_ptr);
+				}
 			}
 		}
 		if (zend_hash_find(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), (void **) &data) != FAILURE) {
