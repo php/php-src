@@ -112,7 +112,7 @@ ZEND_BEGIN_MODULE_GLOBALS(ibase)
 ZEND_END_MODULE_GLOBALS(ibase)
 
 typedef struct {
-	isc_db_handle link;
+	isc_db_handle handle;
 	struct tr_list *tr_list;
 	unsigned short dialect;
 } ibase_db_link;
@@ -144,8 +144,8 @@ typedef struct {
 } ibase_blob_handle;
 
 typedef struct {
-	isc_db_handle link; /* db link for this result */
-	isc_tr_handle trans;
+	ibase_db_link *link;
+	ibase_trans *trans;
 	isc_stmt_handle stmt;
 	int drop_stmt;
 	XSQLDA *in_sqlda, *out_sqlda;
