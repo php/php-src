@@ -715,7 +715,7 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 
 		if (all) {
 			/* look for a match in the maps for this charset */
-			unsigned char *rep;
+			unsigned char *rep = NULL;
 
 
 			for (j = 0; entity_map[j].charset != cs_terminator; j++) {
