@@ -1252,7 +1252,6 @@ PHP_FUNCTION(yaz_search)
 }
 /* }}} */
 
-
 /* {{{ proto int yaz_present(int id)
    Retrieve records */
 PHP_FUNCTION(yaz_present)
@@ -2485,9 +2484,11 @@ ZEND_GET_MODULE(yaz)
 
 
 #endif
+
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

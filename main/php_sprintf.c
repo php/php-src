@@ -40,3 +40,11 @@ php_sprintf (char*s, const char* format, ...)
 }
 
 #endif /* BROKEN_SPRINTF */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
+ */

@@ -24,6 +24,8 @@
    Copyright (C) 1997-1999 Thomas Merz. 2000-2001 PDFlib GmbH */
 /* Note that there is no code from the pdflib package in this file */
 
+/* {{{ includes
+ */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -49,6 +51,7 @@ static int le_gd;
 # include <io.h>
 # include <fcntl.h>
 #endif
+/* }}} */
 
 #if HAVE_PDFLIB
 
@@ -56,6 +59,7 @@ static int le_gd;
 
 static int le_pdf;
 
+/* {{{ constants
 /*
  * to adopt the php way of error handling to PDFlib
  * The image related functions in PDFlib return -1 on error
@@ -67,7 +71,10 @@ static int le_pdf;
 #define PDFLIB_PDI_OFFSET	1
 #define PDFLIB_PATTERN_OFFSET	1
 #define PDFLIB_SPOT_OFFSET	1
+/* }}} */
 
+/* {{{ pdf_functions[]
+ */
 function_entry pdf_functions[] = {
 	/* sorry for sorting this stuff like the pdflib manual,
 	   but this helps me to see what is done :) RJS 
@@ -229,7 +236,10 @@ function_entry pdf_functions[] = {
 
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
+/* {{{ pdf_module_entry
+ */
 zend_module_entry pdf_module_entry = {
 	"pdf", 
 	pdf_functions, 
@@ -240,11 +250,14 @@ zend_module_entry pdf_module_entry = {
 	PHP_MINFO(pdf), 
 	STANDARD_MODULE_PROPERTIES 
 };
+/* }}} */
 
 #ifdef COMPILE_DL_PDF
 ZEND_GET_MODULE(pdf)
 #endif
 
+/* {{{ _free_pdf_doc
+ */
 static void _free_pdf_doc(zend_rsrc_list_entry *rsrc)
 {
 	/* RJS: TODO:
@@ -254,7 +267,10 @@ static void _free_pdf_doc(zend_rsrc_list_entry *rsrc)
 	/* PDF_delete(pdf);
 */
 }
+/* }}} */
 
+/* {{{ custom_errorhandler
+ */
 static void custom_errorhandler(PDF *p, int type, const char *shortmsg)
 {
 	switch (type){
@@ -284,28 +300,43 @@ static void custom_errorhandler(PDF *p, int type, const char *shortmsg)
 			php_error(E_ERROR,"PDFlib error: %s", shortmsg);
 		}
 }
+/* }}} */
 
+/* {{{ pdf_emalloc
+ */
 static void *pdf_emalloc(PDF *p, size_t size, const char *caller)
 {
 	return(emalloc(size));
 }
+/* }}} */
 
+/* {{{ pdf_realloc
+ */
 static void *pdf_realloc(PDF *p, void *mem, size_t size, const char *caller)
 {
 	return(erealloc(mem, size));
 }
+/* }}} */
 
+/* {{{ pdf_efree
+ */
 static void pdf_efree(PDF *p, void *mem)
 {
 	efree(mem);
 }
+/* }}} */
 
+/* {{{ pdf_flushwrite
+ */
 static size_t pdf_flushwrite(PDF *p, void *data, size_t size)
 {
 	return(php_write(data, size));
 	return 0;
 }
+/* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(pdf)
 {
 	char tmp[32];
@@ -324,7 +355,10 @@ PHP_MINFO_FUNCTION(pdf)
 	php_info_print_table_end();
 
 }
+/* }}} */
 
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(pdf)
 {
 	if ((PDF_get_majorversion() != PDFLIB_MAJORVERSION) ||
@@ -337,14 +371,19 @@ PHP_MINIT_FUNCTION(pdf)
 	PDF_boot();
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
 PHP_MSHUTDOWN_FUNCTION(pdf)
 {
 	PDF_shutdown();
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ _php_pdf_set_info
+ */
 static void _php_pdf_set_info(INTERNAL_FUNCTION_PARAMETERS, char *field) 
 {
 	zval **arg1, **arg2;
@@ -361,6 +400,7 @@ static void _php_pdf_set_info(INTERNAL_FUNCTION_PARAMETERS, char *field)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto bool pdf_set_info(int pdfdoc, string fieldname, string value)
    Fills an info field of the document */
@@ -421,7 +461,6 @@ PHP_FUNCTION(pdf_set_info_keywords) {
 	_php_pdf_set_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, "Keywords");
 }
 /* }}} */
-
 
 /* {{{ proto int pdf_open([int filedesc])
    Opens a new pdf document. If filedesc is NULL, document is created in memory. This is the old interface, only for compatibility use pdf_new + pdf_open_file instead */
@@ -640,7 +679,8 @@ PHP_FUNCTION(pdf_set_font)
 }
 /* }}} */
 
-
+/* {{{ _php_pdf_set_value
+ */
 static void _php_pdf_set_value(INTERNAL_FUNCTION_PARAMETERS, char *field) 
 {
 	zval **arg1, **arg2;
@@ -657,6 +697,7 @@ static void _php_pdf_set_value(INTERNAL_FUNCTION_PARAMETERS, char *field)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto void pdf_set_value(int pdfdoc, string key, double value)
    Sets arbitrary value */
@@ -1776,6 +1817,8 @@ PHP_FUNCTION(pdf_set_duration)
 }
 /* }}} */
 
+/* {{{ _php_pdf_open_image
+ */
 static void _php_pdf_open_image(INTERNAL_FUNCTION_PARAMETERS, char *type) 
 {
 	zval **arg1, **arg2;
@@ -1801,6 +1844,7 @@ static void _php_pdf_open_image(INTERNAL_FUNCTION_PARAMETERS, char *type)
 
 	RETURN_LONG(pdf_image+PDFLIB_IMAGE_OFFSET);
 }
+/* }}} */
 
 /* {{{ proto int pdf_open_gif(int pdf, string giffile)
    Opens a GIF file and returns an image for placement in a pdf object */
@@ -2670,6 +2714,7 @@ PHP_FUNCTION(pdf_open_pdi) {
 
 	RETURN_LONG(pdi_handle+PDFLIB_PDI_OFFSET);
 }
+/* }}} */
 
 /* {{{ proto void pdf_close_pdi(int pdf, int doc);
  * Close all open page handles, and close the input PDF document. */
@@ -2690,6 +2735,7 @@ PHP_FUNCTION(pdf_close_pdi) {
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto int pdf_open_pdi_page(int pdf, int doc, int page, string label);
  * Prepare a page for later use with PDF_place_image(). */
@@ -2715,6 +2761,7 @@ PHP_FUNCTION(pdf_open_pdi_page) {
 
 	RETURN_LONG(pdi_image+PDFLIB_IMAGE_OFFSET);
 }
+/* }}} */
 
 /* {{{ proto void pdf_place_pdi_page(int pdf, int page, double x, double y, double sx, double sy)
  * Place a PDF page with the lower left corner at (x, y), and scale it. */
@@ -2743,6 +2790,7 @@ PHP_FUNCTION(pdf_place_pdi_page) {
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto void pdf_close_pdi_page(int pdf, int page);
  * Close the page handle, and free all page-related resources. */
@@ -2763,6 +2811,7 @@ PHP_FUNCTION(pdf_close_pdi_page) {
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto string pdf_get_pdi_parameter(int pdf, string key, int doc, int page, int index);
  * Get the contents of some PDI document parameter with string type. */
@@ -2792,6 +2841,7 @@ PHP_FUNCTION(pdf_get_pdi_parameter) {
 
 	RETURN_STRINGL((char *)buffer, size, 1);
 }
+/* }}} */
 
 /* {{{ proto double pdf_get_pdi_value(int pdf, string key, int doc, int page, int index);
  * Get the contents of some PDI document parameter with numerical type. */
@@ -2819,6 +2869,7 @@ PHP_FUNCTION(pdf_get_pdi_value) {
 
 	RETURN_DOUBLE(value);
 }
+/* }}} */
 
 /* {{{ proto int pdf_begin_pattern(int pdf, double width, double height, double xstep, double ystep, int painttype);
  * Start a new pattern definition. */
@@ -2848,6 +2899,7 @@ PHP_FUNCTION(pdf_begin_pattern) {
 
 	RETURN_LONG(pattern_image+PDFLIB_PATTERN_OFFSET);
 }
+/* }}} */
 
 /* {{{ proto void pdf_end_pattern(int pdf);
  * Finish the pattern definition. */
@@ -2865,6 +2917,7 @@ PHP_FUNCTION(pdf_end_pattern) {
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto int pdf_begin_template(int pdf, double width, double height);
  * Start a new template definition. */
@@ -2888,6 +2941,7 @@ PHP_FUNCTION(pdf_begin_template) {
 
 	RETURN_LONG(tmpl_image+PDFLIB_IMAGE_OFFSET);
 }
+/* }}} */
 
 /* {{{ proto void pdf_end_template(int pdf);
  * Finish the template definition. */
@@ -2906,6 +2960,7 @@ PHP_FUNCTION(pdf_end_template) {
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto void pdf_setcolor(int pdf, string type, string colorspace, double c1 [, double c2 [, double c3 [, double c4]]]);
  * Set the current color space and color. */
@@ -2968,6 +3023,7 @@ PHP_FUNCTION(pdf_setcolor) {
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto int pdf_makespotcolor(int pdf, string spotname);
  * Make a named spot color from the current color. */
@@ -2990,6 +3046,7 @@ PHP_FUNCTION(pdf_makespotcolor) {
 
 	RETURN_LONG(spotcolor+PDFLIB_SPOT_OFFSET);
 }
+/* }}} */
 
 /* {{{ proto void pdf_arcn(int pdf, double x, double y, double r, double alpha, double beta);
  * Draw a clockwise circular arc from alpha to beta degrees. */
@@ -3018,6 +3075,7 @@ PHP_FUNCTION(pdf_arcn) {
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto void pdf_initgraphics(int pdf);
  * Reset all implicit color and graphics state parameters to their defaults. */
@@ -3035,6 +3093,7 @@ PHP_FUNCTION(pdf_initgraphics) {
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto void pdf_add_thumbnail(int pdf, int image);
  * Add an existing image as thumbnail for the current page. */
@@ -3055,6 +3114,7 @@ PHP_FUNCTION(pdf_add_thumbnail) {
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto void pdf_setmatrix(int pdf, double a, double b, double c, double d, double e, double f)
    Explicitly set the current transformation matrix. */
@@ -3085,7 +3145,7 @@ PHP_FUNCTION(pdf_setmatrix) {
 
 	RETURN_TRUE;
 }
-
+/* }}} */
 #endif /* PDFlib >= V4 */
 
 #endif

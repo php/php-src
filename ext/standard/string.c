@@ -113,7 +113,8 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 }
 
 #ifdef HAVE_LOCALECONV
-/* glibc's localeconv is not reentrant, so lets make it so ... sorta */
+/* {{{ localeconv_r
+ * glibc's localeconv is not reentrant, so lets make it so ... sorta */
 struct lconv *localeconv_r(struct lconv *out)
 {
 	struct lconv *res;
@@ -133,15 +134,21 @@ struct lconv *localeconv_r(struct lconv *out)
 
 	return out;
 }
+/* }}} */
 
 # ifdef ZTS
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(localeconv)
 {
 	locale_mutex = tsrm_mutex_alloc();
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
 PHP_MSHUTDOWN_FUNCTION(localeconv)
 {
 	tsrm_mutex_free( locale_mutex );
@@ -150,6 +157,7 @@ PHP_MSHUTDOWN_FUNCTION(localeconv)
 
 	return SUCCESS;
 }
+/* }}} */
 # endif
 #endif
 
@@ -227,8 +235,11 @@ PHP_FUNCTION(strcoll)
 
 	RETURN_LONG(strcoll((const char *)(*s1)->value.str.val, (const char *)(*s2)->value.str.val));
 }
+/* }}} */
 #endif
 
+/* {{{ php_trim
+ */
 PHPAPI void php_trim(zval *str, zval * return_value, int mode)
 /* mode 1 : trim left
    mode 2 : trim right
@@ -264,6 +275,7 @@ PHPAPI void php_trim(zval *str, zval * return_value, int mode)
 	}
 	RETVAL_STRINGL(c, len, 1);
 }
+/* }}} */
 
 /* {{{ proto string rtrim(string str)
    An alias for chop */
@@ -324,7 +336,6 @@ PHP_FUNCTION(ltrim)
 	RETURN_FALSE;
 }
 /* }}} */
-
 
 /* {{{ proto string wordwrap(string str [, int width [, string break [, int cut]]])
    Wrap buffer to selected number of characters using string break char */
@@ -483,7 +494,8 @@ PHP_FUNCTION(wordwrap)
 }
 /* }}} */
 
-
+/* {{{ php_explode
+ */
 PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, int limit) 
 {
 	char *p1, *p2, *endp;
@@ -506,6 +518,7 @@ PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, int limit)
 			add_next_index_stringl(return_value, p1, endp-p1, 1);
 	}
 }
+/* }}} */
 
 /* {{{ proto array explode(string separator, string str [, int limit])
    Split a string on string separator and return array of components */
@@ -550,10 +563,12 @@ PHP_FUNCTION(explode)
 }
 /* }}} */
 
-
 /* {{{ proto string join(array src, string glue)
    An alias for implode */
 /* }}} */
+
+/* {{{ php_implode
+ */
 PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value) 
 {
 	zval **tmp;
@@ -592,7 +607,7 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value)
 	return_value->type = IS_STRING;
 	return_value->value.str.len = len;
 }
-
+/* }}} */
 
 /* {{{ proto string implode(array src, string glue)
    Join array elements placing glue string between items and return one string */
@@ -622,7 +637,6 @@ PHP_FUNCTION(implode)
 	php_implode(delim, arr, return_value);
 }
 /* }}} */
-
 
 /* {{{ proto string strtok([string str,] string token)
    Tokenize a string */
@@ -682,6 +696,8 @@ PHP_FUNCTION(strtok)
 }
 /* }}} */
 
+/* {{{ php_strtoupper
+ */
 PHPAPI char *php_strtoupper(char *s, size_t len)
 {
 	char *c;
@@ -695,6 +711,7 @@ PHPAPI char *php_strtoupper(char *s, size_t len)
 	}
 	return (s);
 }
+/* }}} */
 
 /* {{{ proto string strtoupper(string str)
    Make a string uppercase */
@@ -713,7 +730,8 @@ PHP_FUNCTION(strtoupper)
 }
 /* }}} */
 
-
+/* {{{ php_strtolower
+ */
 PHPAPI char *php_strtolower(char *s, size_t len)
 {
 	register int ch;
@@ -727,6 +745,7 @@ PHPAPI char *php_strtolower(char *s, size_t len)
 	}
 	return (s);
 }
+/* }}} */
 
 /* {{{ proto string strtolower(string str)
    Make a string lowercase */
@@ -746,6 +765,8 @@ PHP_FUNCTION(strtolower)
 }
 /* }}} */
 
+/* {{{ php_basename
+ */
 PHPAPI char *php_basename(char *s, size_t len)
 {
 	char *ret=NULL, *c, *p=NULL, buf='\0';
@@ -776,6 +797,7 @@ PHPAPI char *php_basename(char *s, size_t len)
 	if(buf) *p = buf;
 	return (ret);
 }
+/* }}} */
 
 /* {{{ proto string basename(string path)
    Return the filename component of the path */
@@ -793,7 +815,9 @@ PHP_FUNCTION(basename)
 }
 /* }}} */
 
-/* This function doesn't work with absolute paths in Win32 such as C:\foo
+/* {{{ php_dirname
+ *
+ * This function doesn't work with absolute paths in Win32 such as C:\foo
  *  (and it didn't before either). This needs to be fixed
  */
 PHPAPI void php_dirname(char *path, int len)
@@ -838,6 +862,7 @@ PHPAPI void php_dirname(char *path, int len)
 	}
 	*(end+1) = '\0';
 }
+/* }}} */
 
 /* {{{ proto string dirname(string path)
    Return the directory name component of the path */
@@ -922,7 +947,8 @@ PHP_FUNCTION(pathinfo)
 }
 /* }}} */
 
-/* case insensitve strstr */
+/* {{{ php_stristr
+ * case insensitve strstr */
 PHPAPI char *php_stristr(unsigned char *s, unsigned char *t,
                          size_t s_len, size_t t_len)
 {
@@ -930,7 +956,10 @@ PHPAPI char *php_stristr(unsigned char *s, unsigned char *t,
 	php_strtolower(t, t_len);
 	return php_memnstr(s, t, t_len, s + s_len);
 }
+/* }}} */
 
+/* {{{ php_strspn
+ */
 PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end)
 {
 	register const char *p = s1, *spanp;
@@ -944,7 +973,10 @@ cont:
 		}
 	return (p - s1);
 }
+/* }}} */
 
+/* {{{ php_strcspn
+ */
 PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end)
 {
 	register const char *p, *spanp;
@@ -960,6 +992,7 @@ PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end)
 	}
 	/* NOTREACHED */
 }
+/* }}} */
 
 /* {{{ proto string stristr(string haystack, string needle)
    Find first occurrence of a string within another, case insensitive */
@@ -1178,6 +1211,8 @@ PHP_FUNCTION(strrchr)
 }
 /* }}} */
 
+/* {{{ php_chunk_split
+ */
 static char *php_chunk_split(char *src, int srclen, char *end, int endlen,
 							 int chunklen, int *destlen)
 {
@@ -1213,6 +1248,7 @@ static char *php_chunk_split(char *src, int srclen, char *end, int endlen,
 
 	return(dest);
 }
+/* }}} */
 
 /* {{{ proto string chunk_split(string str [, int chunklen [, string ending]])
    Return split line */
@@ -1323,7 +1359,6 @@ PHP_FUNCTION(substr)
 }
 /* }}} */
 
-
 /* {{{ proto string substr_replace(string str, string repl, int start [, int length])
    Replace part of a string with another string */
 PHP_FUNCTION(substr_replace)
@@ -1395,7 +1430,6 @@ PHP_FUNCTION(substr_replace)
 	RETVAL_STRINGL(result, result_len, 0);
 }
 /* }}} */
-
 
 /* {{{ proto string quotemeta(string str)
    Quote meta characters */
@@ -1526,6 +1560,8 @@ PHP_FUNCTION(ucwords)
 }
 /* }}} */
 
+/* {{{ php_strtr
+ */
 PHPAPI char *php_strtr(char *str, int len, char *str_from,
 					   char *str_to, int trlen)
 {
@@ -1548,7 +1584,10 @@ PHPAPI char *php_strtr(char *str, int len, char *str_from,
 
 	return str;
 }
+/* }}} */
 
+/* {{{ php_strtr_array
+ */
 static void php_strtr_array(zval *return_value,char *str,int slen,HashTable *hash)
 {
 	zval *entry;
@@ -1636,6 +1675,7 @@ static void php_strtr_array(zval *return_value,char *str,int slen,HashTable *has
 	smart_str_0(&result);
 	RETVAL_STRINGL(result.c,result.len,0);
 }
+/* }}} */
 
 /* {{{ proto string strtr(string str, string from, string to)
    Translate characters in str using given translation tables */
@@ -1678,7 +1718,6 @@ PHP_FUNCTION(strtr)
 }
 /* }}} */
 
-
 /* {{{ proto string strrev(string str)
    Reverse a string */
 PHP_FUNCTION(strrev)
@@ -1706,6 +1745,8 @@ PHP_FUNCTION(strrev)
 }
 /* }}} */
 
+/* {{{ php_similar_str
+ */
 static void php_similar_str(const char *txt1, int len1, const char *txt2, 
 							int len2, int *pos1, int *pos2, int *max)
 {
@@ -1727,7 +1768,10 @@ static void php_similar_str(const char *txt1, int len1, const char *txt2,
 		}
 	}
 }
+/* }}} */
 
+/* {{{ php_similar_char
+ */
 static int php_similar_char(const char *txt1, int len1, 
 							const char *txt2, int len2)
 {
@@ -1744,6 +1788,7 @@ static int php_similar_char(const char *txt1, int len1,
 	}
 	return sum;
 }
+/* }}} */
 
 /* {{{ proto int similar_text(string str1, string str2 [, double percent])
    Calculates the similarity between two strings */
@@ -1781,9 +1826,10 @@ PHP_FUNCTION(similar_text)
 	RETURN_LONG(sim);
 }
 /* }}} */
-	
 
-/* be careful, this edits the string in-place */
+/* {{{ php_stripslashes
+ *
+ * be careful, this edits the string in-place */
 PHPAPI void php_stripslashes(char *str, int *len)
 {
 	char *s, *t;
@@ -1831,6 +1877,7 @@ PHPAPI void php_stripslashes(char *str, int *len)
 		*s = '\0';
 	}
 }
+/* }}} */
 
 /* {{{ proto string addcslashes(string str, string charlist)
    Escape all chars mentioned in charlist with backslash. It creates octal representations if asked to backslash characters with 8th bit set or with ASCII<32 (except '\n', '\r', '\t' etc...) */
@@ -1912,6 +1959,8 @@ PHP_FUNCTION(stripslashes)
 /* }}} */
 
 #ifndef HAVE_STRERROR
+/* {{{ php_strerror
+ */
 char *php_strerror(int errnum) 
 {
 	extern int sys_nerr;
@@ -1922,8 +1971,11 @@ char *php_strerror(int errnum)
 	(void)sprintf(BG(str_ebuf), "Unknown error: %d", errnum);
 	return(BG(str_ebuf));
 }
+/* }}} */
 #endif
 
+/* {{{ php_stripcslashes
+ */
 PHPAPI void php_stripcslashes(char *str, int *len)
 {
 	char *source,*target,*end;
@@ -1981,8 +2033,10 @@ PHPAPI void php_stripcslashes(char *str, int *len)
 
 	*len = nlen;
 }
+/* }}} */
 			
-
+/* {{{ php_addcslashes
+ */
 PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_free, char *what, int wlength)
 {
 	char flags[256];
@@ -2042,7 +2096,10 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 	}
 	return new_str;
 }
+/* }}} */
 
+/* {{{ php_addslashes
+ */
 PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_free)
 {
 	/* maximum string length, worst case situation */
@@ -2091,7 +2148,7 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 	}
 	return new_str;
 }
-
+/* }}} */
 
 #define _HEB_BLOCK_TYPE_ENG 1
 #define _HEB_BLOCK_TYPE_HEB 2
@@ -2099,6 +2156,8 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 #define _isblank(c) (((((unsigned char) c)==' ' || ((unsigned char) c)=='\t')) ? 1 : 0)
 #define _isnewline(c) (((((unsigned char) c)=='\n' || ((unsigned char) c)=='\r')) ? 1 : 0)
 
+/* {{{ php_char_to_str
+ */
 PHPAPI void php_char_to_str(char *str,uint len,char from,char *to,int to_len,zval *result)
 {
 	int char_count=0;
@@ -2134,7 +2193,10 @@ PHPAPI void php_char_to_str(char *str,uint len,char from,char *to,int to_len,zva
 	}
 	*target = 0;
 }
+/* }}} */
 
+/* {{{ php_str_to_str
+ */
 PHPAPI char *php_str_to_str(char *haystack, int length, 
 	char *needle, int needle_len, char *str, int str_len, int *_new_length)
 {
@@ -2159,8 +2221,10 @@ PHPAPI char *php_str_to_str(char *haystack, int length,
 
 	return result.c;
 }
+/* }}} */
 
-
+/* {{{ php_str_replace_in_subject
+ */
 static void php_str_replace_in_subject(zval *search, zval *replace, zval **subject, zval *result)
 {
 	zval		**search_entry,
@@ -2258,7 +2322,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 		}
 	}
 }
-
+/* }}} */
 
 /* {{{ proto mixed str_replace(mixed search, mixed replace, mixed subject)
    Replace all occurrences of search in haystack with replace */
@@ -2315,8 +2379,9 @@ PHP_FUNCTION(str_replace)
 }
 /* }}} */
 
-
-/* Converts Logical Hebrew text (Hebrew Windows style) to Visual text
+/* {{{ php_hebrev
+ *
+ * Converts Logical Hebrew text (Hebrew Windows style) to Visual text
  * Cheers/complaints/flames - Zeev Suraski <zeev@php.net>
  */
 static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS,int convert_newlines)
@@ -2481,7 +2546,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS,int convert_newlines)
 		return_value->type = IS_STRING;
 	}
 }
-
+/* }}} */
 
 /* {{{ proto string hebrev(string str [, int max_chars_per_line])
    Convert logical Hebrew text to visual text */
@@ -2659,7 +2724,9 @@ PHP_FUNCTION(parse_str)
 
 #define PHP_TAG_BUF_SIZE 1023
 
-/* Check if tag is in a set of tags 
+/* {{{ php_tag_find
+ *
+ * Check if tag is in a set of tags 
  *
  * states:
  * 
@@ -2715,8 +2782,11 @@ int php_tag_find(char *tag, int len, char *set) {
 	efree(norm);
 	return done;
 }
+/* }}} */
 
-/* A simple little state-machine to strip out html and php tags 
+/* {{{ php_strip_tags
+ 
+    A simple little state-machine to strip out html and php tags 
 	
 	State 0 is the output state, State 1 means we are inside a
 	normal html tag and state 2 means we are inside a php tag.
@@ -2851,6 +2921,7 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow, int allo
 	efree(buf);
 	if(allow) efree(tbuf);
 }
+/* }}} */
 
 /* {{{ proto string str_repeat(string input, int mult)
    Returns the input string repeat mult times */
@@ -2977,6 +3048,8 @@ PHP_FUNCTION(count_chars)
 }
 /* }}} */
 
+/* {{{ php_strnatcmp
+ */
 static void php_strnatcmp(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 {
 	zval **s1, **s2;
@@ -2992,7 +3065,7 @@ static void php_strnatcmp(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 							 (*s2)->value.str.val, (*s2)->value.str.len,
 							 fold_case));
 }
-
+/* }}} */
 
 /* {{{ proto int strnatcmp(string s1, string s2)
    Returns the result of string comparison using 'natural' algorithm */
@@ -3090,7 +3163,7 @@ PHP_FUNCTION(localeconv)
 	zend_hash_update(return_value->value.ht, "grouping", 9, &grouping, sizeof(zval *), NULL);
 	zend_hash_update(return_value->value.ht, "mon_grouping", 13, &mon_grouping, sizeof(zval *), NULL);
 }
-
+/* }}} */
 
 /* {{{ proto int strnatcasecmp(string s1, string s2)
    Returns the result of case-insensitive string comparison using 'natural' algorithm */
@@ -3099,7 +3172,6 @@ PHP_FUNCTION(strnatcasecmp)
 	php_strnatcmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
-
 
 /* {{{ proto int substr_count(string haystack, string needle)
    Returns the number of times a substring occurs in the string */
@@ -3144,7 +3216,6 @@ PHP_FUNCTION(substr_count)
 	RETURN_LONG(count);
 }
 /* }}} */	
-
 
 /* {{{ proto string str_pad(string input, int pad_length [, string pad_string [, int pad_type]])
    Returns input string padded on the left or right to specified length with pad_string */
@@ -3243,7 +3314,6 @@ PHP_FUNCTION(str_pad)
 	RETURN_STRINGL(result, result_len, 0);
 }
 /* }}} */
-
    
 /* {{{ proto mixed sscanf(string str, string format [, string ...])
    Implements an ANSI C compatible sscanf */
@@ -3290,4 +3360,5 @@ PHP_FUNCTION(sscanf)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

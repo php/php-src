@@ -37,6 +37,8 @@
 #include "php_sysvshm.h"
 #include "../standard/php_var.h"
 
+/* {{{ sysvshm_functions[]
+ */
 function_entry sysvshm_functions[] = {
 	PHP_FE(shm_attach, NULL)
 	PHP_FE(shm_remove, NULL)
@@ -46,7 +48,10 @@ function_entry sysvshm_functions[] = {
 	PHP_FE(shm_remove_var, NULL)
 	{0}
 };
+/* }}} */
 
+/* {{{ sysvshm_module_entry
+ */
 zend_module_entry sysvshm_module_entry = {
 	"sysvshm", sysvshm_functions, 
 	PHP_MINIT(sysvshm), NULL,
@@ -54,7 +59,7 @@ zend_module_entry sysvshm_module_entry = {
 	NULL,
 	STANDARD_MODULE_PROPERTIES
 };
-
+/* }}} */
 
 #ifdef COMPILE_DL_SYSVSHM
 ZEND_GET_MODULE(sysvshm)
@@ -64,13 +69,18 @@ ZEND_GET_MODULE(sysvshm)
 
 THREAD_LS sysvshm_module php_sysvshm;
 
+/* {{{ php_release_sysvshm
+ */
 static void php_release_sysvshm(zend_rsrc_list_entry *rsrc) 
 {
 	sysvshm_shm *shm_ptr = (sysvshm_shm *)rsrc->ptr;
 	shmdt((void*)shm_ptr->ptr);
 	efree(shm_ptr);
 }
+/* }}} */
 
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(sysvshm)
 {    
 	php_sysvshm.le_shm = zend_register_list_destructors_ex(php_release_sysvshm, NULL, "sysvshm", module_number);
@@ -80,7 +90,7 @@ PHP_MINIT_FUNCTION(sysvshm)
     	}	
 	return SUCCESS;
 }
-
+/* }}} */
 
 /* {{{ proto int shm_attach(int key [, int memsize [, int perm]])
    Creates or open a shared memory segment */
@@ -155,8 +165,6 @@ PHP_FUNCTION(shm_attach)
 }
 /* }}} */
 
-
-
 /* {{{ proto int shm_detach(int shm_identifier)
    Disconnects from shared memory segment */
 PHP_FUNCTION(shm_detach)
@@ -177,6 +185,7 @@ PHP_FUNCTION(shm_detach)
 	RETURN_TRUE;
 }
 /* }}} */
+
 /* {{{ proto int shm_remove(int shm_identifier)
    Removes shared memory from Unix systems */
 
@@ -204,8 +213,6 @@ PHP_FUNCTION(shm_remove)
 	RETURN_TRUE;
 }
 /* }}} */
-
-
 
 /* {{{ proto int shm_put_var(int shm_identifier, int variable_key, mixed variable)
    Inserts or updates a variable in shared memory */
@@ -255,7 +262,6 @@ PHP_FUNCTION(shm_put_var)
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ proto mixed shm_get_var(int id, int variable_key)
    Returns a variable from shared memory */
@@ -342,8 +348,8 @@ PHP_FUNCTION(shm_remove_var)
 }
 /* }}} */
 
-
-/* inserts an ascii-string into shared memory */
+/* {{{ php_put_shm_data
+ * inserts an ascii-string into shared memory */
 int php_put_shm_data(sysvshm_chunk_head *ptr,long key,char *data, long len) {
 	sysvshm_chunk* shm_var;
 	long total_size;
@@ -367,8 +373,10 @@ int php_put_shm_data(sysvshm_chunk_head *ptr,long key,char *data, long len) {
 	ptr->free-=total_size;
 	return 0;
 }
+/* }}} */
 
-
+/* {{{ php_check_shm_data
+ */
 long php_check_shm_data(sysvshm_chunk_head *ptr, long key) {
 	long pos;
 	sysvshm_chunk *shm_var;
@@ -387,8 +395,10 @@ long php_check_shm_data(sysvshm_chunk_head *ptr, long key) {
 	}
 	return -1;
 }
+/* }}} */
 
-
+/* {{{ php_remove_shm_data
+ */
 int php_remove_shm_data(sysvshm_chunk_head *ptr, long shm_varpos) {
 	sysvshm_chunk *chunk_ptr, *next_chunk_ptr;
 	long memcpy_len;
@@ -403,8 +413,7 @@ int php_remove_shm_data(sysvshm_chunk_head *ptr, long shm_varpos) {
 		memcpy(chunk_ptr,next_chunk_ptr,memcpy_len);
 	return 0;
 }
-
-
+/* }}} */
 
 #endif /* HAVE_SYSVSHM */
 
@@ -413,4 +422,5 @@ int php_remove_shm_data(sysvshm_chunk_head *ptr, long shm_varpos) {
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

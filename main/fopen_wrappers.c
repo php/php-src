@@ -545,10 +545,10 @@ PHPAPI char *expand_filepath(const char *filepath, char *real_path)
 	return real_path;
 }
 
-
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

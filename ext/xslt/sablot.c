@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -70,6 +71,8 @@ static MH_ERROR error_print(void *, SablotHandle, MH_ERROR, MH_LEVEL, char **);
 #define le_xslt_name "XSLT Processor"
 static int  le_xslt;
 
+/* {{{ xslt_functions[]
+ */
 function_entry xslt_functions[] = {
 	PHP_FE(xslt_create,              NULL)
 	PHP_FE(xslt_set_sax_handlers,    NULL)
@@ -87,7 +90,10 @@ function_entry xslt_functions[] = {
 	PHP_FE(xslt_errno,               NULL)
 	PHP_FE(xslt_free,                NULL)
 };
+/* }}} */
 
+/* {{{ xslt_module_entry
+ */
 zend_module_entry xslt_module_entry = {
 	"xslt",
 	xslt_functions,
@@ -98,12 +104,14 @@ zend_module_entry xslt_module_entry = {
 	PHP_MINFO(xslt),
 	STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
 #ifdef COMPILE_DL_XSLT
 ZEND_GET_MODULE(xslt)
 #endif
 
-/* A structure containing the sax handlers, automatically 
+/* {{{ handler structs
+   A structure containing the sax handlers, automatically 
    registered whether the user defines them or not */
 static SAXHandler sax_handlers = 
 {
@@ -134,21 +142,27 @@ static SchemeHandler scheme_handler = {
 	scheme_put,
 	scheme_close
 };
+/* }}} */
 
-
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(xslt)
 {
 	le_xslt = zend_register_list_destructors_ex(free_processor, NULL, le_xslt_name, module_number);
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(xslt)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "XSLT support", "enabled");
 	php_info_print_table_end();
 }
+/* }}} */
 
 /* {{{ proto resource xslt_create(void) 
    Create a new XSLT processor */
@@ -435,7 +449,6 @@ PHP_FUNCTION(xslt_set_log)
 }
 /* }}} */
 
-
 /* {{{ proto string xslt_process(resource processor, string xml, string xslt[, mixed result[, array args[, array params]]])
    Perform the xslt transformation */
 PHP_FUNCTION(xslt_process)
@@ -635,7 +648,6 @@ static void free_processor(zend_rsrc_list_entry *rsrc)
 	efree(handle);
 }
 /* }}} */
-
 
 /* {{{ register_sax_handler_pair()
    Register a pair of sax handlers */
@@ -1014,6 +1026,7 @@ static SAX_RETURN sax_endelement(void *ctx, const char *name)
 	/* Cleanup */
 	zval_ptr_dtor(&retval);
 }
+/* }}} */
 
 /* {{{ sax_startnamespace()
    Called at the beginning of the parsing of a new namespace */
@@ -1531,4 +1544,5 @@ static MH_ERROR error_print(void *user_data, SablotHandle proc, MH_ERROR code, M
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

@@ -44,7 +44,8 @@ static php_msql_globals msql_globals;
 #define MSQL_NUM		1<<1
 #define MSQL_BOTH		(MSQL_ASSOC|MSQL_NUM)
 
-
+/* {{{ msql_functions[]
+ */
 function_entry msql_functions[] = {
 	PHP_FE(msql_connect,							NULL)
 	PHP_FE(msql_pconnect,							NULL)
@@ -99,7 +100,7 @@ function_entry msql_functions[] = {
 	PHP_FALIAS(msql_tablename,		msql_result,			NULL)
 	{NULL, NULL, NULL}
 };
-
+/* }}} */
 
 zend_module_entry msql_module_entry = {
 	"msql", msql_functions, PHP_MINIT(msql), NULL, PHP_RINIT(msql), NULL,
@@ -154,6 +155,8 @@ static void _close_msql_plink(zend_rsrc_list_entry *rsrc)
 	msql_globals.num_links--;
 }
 
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(msql)
 {
 	if (cfg_get_long("msql.allow_persistent",&msql_globals.allow_persistent)==FAILURE) {
@@ -178,7 +181,10 @@ PHP_MINIT_FUNCTION(msql)
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_RINIT_FUNCTION
+ */
 PHP_RINIT_FUNCTION(msql)
 {
 	msql_globals.default_link=-1;
@@ -186,7 +192,10 @@ PHP_RINIT_FUNCTION(msql)
 	msqlErrMsg[0]=0;
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(msql)
 {
 	char maxp[32],maxl[32];
@@ -213,8 +222,10 @@ PHP_MINFO_FUNCTION(msql)
 	php_info_print_table_end();
 
 }
+/* }}} */
 
-
+/* {{{ php_msql_do_connect
+ */
 static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 {
 	char *host;
@@ -353,8 +364,10 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	efree(hashed_details);
 	msql_globals.default_link=return_value->value.lval;
 }
+/* }}} */
 
-
+/* {{{ php_msql_get_default_link
+ */
 static int php_msql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
 	if (msql_globals.default_link==-1) { /* no link opened yet, implicitly open one */
@@ -363,7 +376,7 @@ static int php_msql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	return msql_globals.default_link;
 }
-
+/* }}} */
 
 /* {{{ proto int msql_connect([string hostname[:port]] [, string username] [, string password])
    Open a connection to an mSQL Server */
@@ -373,7 +386,6 @@ PHP_FUNCTION(msql_connect)
 }
 /* }}} */
 
-
 /* {{{ proto int msql_pconnect([string hostname[:port]] [, string username] [, string password])
    Open a persistent connection to an mSQL Server */
 PHP_FUNCTION(msql_pconnect)
@@ -381,7 +393,6 @@ PHP_FUNCTION(msql_pconnect)
 	php_msql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
 /* }}} */
-
 
 /* {{{ proto int msql_close([int link_identifier])
    Close an mSQL connection */
@@ -422,7 +433,6 @@ PHP_FUNCTION(msql_close)
 }
 /* }}} */
 
-
 /* {{{ proto int msql_select_db(string database_name [, int link_identifier])
    Select an mSQL database */
 PHP_FUNCTION(msql_select_db)
@@ -462,7 +472,6 @@ PHP_FUNCTION(msql_select_db)
 }
 /* }}} */
 
-
 /* {{{ proto int msql_create_db(string database_name [, int link_identifier])
    Create an mSQL database */
 PHP_FUNCTION(msql_create_db)
@@ -499,7 +508,6 @@ PHP_FUNCTION(msql_create_db)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto int msql_drop_db(string database_name [, int link_identifier])
    Drop (delete) an mSQL database */
@@ -538,7 +546,6 @@ PHP_FUNCTION(msql_drop_db)
 }
 /* }}} */
 
-
 /* {{{ proto int msql_query(string query [, int link_identifier])
    Send an SQL query to mSQL */
 PHP_FUNCTION(msql_query)
@@ -575,7 +582,6 @@ PHP_FUNCTION(msql_query)
 	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msqlStoreResult(), af_rows), msql_globals.le_query);
 }
 /* }}} */
-
 
 /* {{{ proto int msql_db_query(string database_name, string query [, int link_identifier])
    Send an SQL query to mSQL */
@@ -619,7 +625,6 @@ PHP_FUNCTION(msql_db_query)
 }
 /* }}} */
 
-
 /* {{{ proto int msql_list_dbs([int link_identifier])
    List databases available on an mSQL server */
 PHP_FUNCTION(msql_list_dbs)
@@ -653,7 +658,6 @@ PHP_FUNCTION(msql_list_dbs)
 	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msql_result, 0), msql_globals.le_query);
 }
 /* }}} */
-
 
 /* {{{ proto int msql_list_tables(string database_name [, int link_identifier])
    List tables in an mSQL database */
@@ -696,7 +700,6 @@ PHP_FUNCTION(msql_list_tables)
 }
 /* }}} */
 
-
 /* {{{ proto int msql_list_fields(string database_name, string table_name [, int link_identifier])
    List mSQL result fields */
 PHP_FUNCTION(msql_list_fields)
@@ -738,7 +741,6 @@ PHP_FUNCTION(msql_list_fields)
 	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msql_result, 0), msql_globals.le_query);
 }
 /* }}} */
-
 
 /* {{{ proto string msql_error([int link_identifier])
    Returns the text of the error message from previous mSQL operation */
@@ -854,7 +856,6 @@ PHP_FUNCTION(msql_result)
 }
 /* }}} */
 
-
 /* {{{ proto int msql_num_rows(int query)
    Get number of rows in a result */
 PHP_FUNCTION(msql_num_rows)
@@ -871,7 +872,6 @@ PHP_FUNCTION(msql_num_rows)
 	RETVAL_LONG(msql_result ? msqlNumRows(msql_result) : 0);
 }
 /* }}} */
-
 
 /* {{{ proto int msql_num_fields(int query)
    Get number of fields in a result */
@@ -890,7 +890,8 @@ PHP_FUNCTION(msql_num_fields)
 }
 /* }}} */
 
-
+/* {{{ php_msql_fetch_hash
+ */
 static void php_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
 	pval *result, *arg2;
@@ -965,7 +966,7 @@ static void php_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		}
 	}
 }
-
+/* }}} */
 
 /* {{{ proto array msql_fetch_row(int query)
    Get a result row as an enumerated array */
@@ -974,7 +975,6 @@ PHP_FUNCTION(msql_fetch_row)
 	php_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSQL_NUM);
 }
 /* }}} */
-
 
 /* {{{ proto object msql_fetch_object(int query [, int result_type])
    Fetch a result row as an object */
@@ -1022,6 +1022,8 @@ PHP_FUNCTION(msql_data_seek)
 }
 /* }}} */
 
+/* {{{ php_msql_get_field_name
+ */
 static char *php_msql_get_field_name(int field_type)
 {
 	switch (field_type) {
@@ -1059,6 +1061,7 @@ static char *php_msql_get_field_name(int field_type)
 			break;
 	}
 }
+/* }}} */
 
 /* {{{ proto object msql_fetch_field(int query [, int field_offset])
    Get column information from a result and return as an object */
@@ -1145,7 +1148,9 @@ PHP_FUNCTION(msql_field_seek)
 #define PHP_MSQL_FIELD_LEN 3
 #define PHP_MSQL_FIELD_TYPE 4
 #define PHP_MSQL_FIELD_FLAGS 5
- 
+
+/* {{{ php_msql_field_info
+ */
 static void php_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	pval *result, *field;
@@ -1230,6 +1235,7 @@ static void php_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			RETURN_FALSE;
 	}
 }
+/* }}} */
 
 /* {{{ proto string msql_field_name(int query, int field_index)
    Get the name of the specified field in a result */
@@ -1271,7 +1277,6 @@ PHP_FUNCTION(msql_field_flags)
 }
 /* }}} */
 
-
 /* {{{ proto int msql_free_result(int query)
    Free result memory */
 PHP_FUNCTION(msql_free_result)
@@ -1308,11 +1313,10 @@ PHP_FUNCTION(msql_affected_rows)
 
 #endif
 
-
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */
-

@@ -333,7 +333,6 @@ PHP_FUNCTION(getrandmax)
 }
 /* }}} */
 
-
 /* {{{ proto int mt_getrandmax(void)
    Returns the maximum value a random number from Mersenne Twister can have */
 PHP_FUNCTION(mt_getrandmax)
@@ -346,9 +345,11 @@ PHP_FUNCTION(mt_getrandmax)
   	return_value->value.lval = MT_RAND_MAX;	/* 2^^31 */
 }
 /* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

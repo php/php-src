@@ -37,6 +37,8 @@
 #include <aspell-c.h>
 #include "ext/standard/info.h"
 
+/* {{{ aspell_functions[]
+ */
 function_entry aspell_functions[] = {
 	PHP_FE(aspell_new,								NULL)
 	PHP_FE(aspell_check,							NULL)
@@ -44,6 +46,7 @@ function_entry aspell_functions[] = {
 	PHP_FE(aspell_suggest,							NULL)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
 static int le_aspell;
 
@@ -51,24 +54,27 @@ zend_module_entry aspell_module_entry = {
 	"aspell", aspell_functions, PHP_MINIT(aspell), NULL, NULL, NULL, PHP_MINFO(aspell), STANDARD_MODULE_PROPERTIES
 };
 
-
 #ifdef COMPILE_DL_ASPELL
 ZEND_GET_MODULE(aspell)
 #endif
 
+/* {{{ php_aspell_close
+ */
 static void php_aspell_close(zend_rsrc_list_entry *rsrc)
 {
 	aspell *sc = (aspell *)rsrc->ptr;
 	aspell_free(sc);
 }
+/* }}} */
 
-
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(aspell)
 {
     le_aspell = zend_register_list_destructors_ex(php_aspell_close, NULL, "aspell", module_number);
 	return SUCCESS;
-
 }
+/* }}} */
 
 /* {{{ proto int aspell_new(string master [, string personal])
    Load a dictionary */
@@ -96,7 +102,6 @@ PHP_FUNCTION(aspell_new)
 	RETURN_LONG(ind);
 }
 /* }}} */
-
 
 /* {{{ proto array aspell_suggest(aspell int, string word)
    Return array of Suggestions */
@@ -199,11 +204,22 @@ PHP_FUNCTION(aspell_check_raw)
 }
 /* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(aspell)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "ASpell Support", "enabled");
 	php_info_print_table_end();
 }
+/* }}} */
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
+ */

@@ -302,3 +302,11 @@ FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, 
 	}	
 	return (fp);
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
+ */

@@ -70,6 +70,7 @@ PHP_FUNCTION(ezmlm_hash)
 	
 	RETURN_LONG((int) h);
 }
+/* }}} */
 
 /* {{{ proto int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
    Send an email message */
@@ -129,6 +130,8 @@ PHP_FUNCTION(mail)
 }
 /* }}} */
 
+/* {{{ php_mail
+ */
 int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd)
 {
 #ifdef PHP_WIN32
@@ -186,7 +189,10 @@ int php_mail(char *to, char *subject, char *message, char *headers, char *extra_
 #endif
 	return 1;
 }
+/* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(mail)
 {
 #ifdef PHP_WIN32
@@ -195,6 +201,7 @@ PHP_MINFO_FUNCTION(mail)
         php_info_print_table_row(2, "Path to sendmail", INI_STR("sendmail_path") );
 #endif
 }
+/* }}} */
 
 #else
 
@@ -203,9 +210,10 @@ PHP_MINFO_FUNCTION(mail) {}
 
 #endif
 
-
 /*
  * Local variables:
  * tab-width: 4
+ * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

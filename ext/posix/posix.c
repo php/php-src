@@ -29,7 +29,6 @@
  
 /* $Id$ */
 
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -66,6 +65,8 @@
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
+/* {{{ posix_functions[]
+ */
 function_entry posix_functions[] = {
     /* POSIX.1, 3.3 */
 	PHP_FE(posix_kill,		NULL)
@@ -121,9 +122,12 @@ function_entry posix_functions[] = {
 
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
 static PHP_MINFO_FUNCTION(posix);
 
+/* {{{ posix_module_entry
+ */
 zend_module_entry posix_module_entry = {
 	"posix", 
 	posix_functions, 
@@ -134,17 +138,21 @@ zend_module_entry posix_module_entry = {
 	PHP_MINFO(posix),
 	STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
 #ifdef COMPILE_DL_POSIX
 ZEND_GET_MODULE(posix)
 #endif
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 static PHP_MINFO_FUNCTION(posix)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Revision", "$Revision$");
 	php_info_print_table_end();
 }
+/* }}} */
 
 /* {{{ proto int posix_kill(int pid, int sig)
    Send a signal to a process (POSIX.1, 3.3.2) */
@@ -348,7 +356,6 @@ PHP_FUNCTION(posix_setegid)
 #endif
 }
 /* }}} */
-
 
 /* {{{ proto long posix_getgroups(void) 
    Get supplementary group id's (POSIX.1, 4.2.3) */
@@ -685,6 +692,7 @@ PHP_FUNCTION(posix_mkfifo)
 	RETURN_FALSE;
 #endif
 }    
+/* }}} */
 
 /*
 	POSIX.1, 5.5.1 unlink()
@@ -734,7 +742,6 @@ PHP_FUNCTION(posix_getgrnam)
 	add_assoc_long(return_value, "members", count);
 }
 /* }}} */
-
 
 /* {{{ proto array posix_getgrgid(long gid) 
    Group database access (POSIX.1, 9.2.1) */
@@ -840,6 +847,8 @@ PHP_FUNCTION(posix_getpwuid)
 
 #define UNLIMITED_STRING "unlimited"
 
+/* {{{ posix_addlimit
+ */
 static int posix_addlimit(int limit, char *name, pval *return_value) {
 	int result;
 	struct rlimit rl;
@@ -869,7 +878,10 @@ static int posix_addlimit(int limit, char *name, pval *return_value) {
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ limits[]
+ */
 struct limitlist {
 	int limit;
 	char *name;
@@ -924,6 +936,7 @@ struct limitlist {
 
 	{ 0, NULL }
 };
+/* }}} */
 
 #endif /* HAVE_GETRLIMIT */
 
@@ -948,7 +961,6 @@ PHP_FUNCTION(posix_getrlimit)
 }
 /* }}} */
 
-
 #endif
 
 /*
@@ -956,4 +968,5 @@ PHP_FUNCTION(posix_getrlimit)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

@@ -56,6 +56,8 @@ union semun {
 
 #endif
 
+/* {{{ sysvsem_functions[]
+ */
 function_entry sysvsem_functions[] = {
 	PHP_FE(sem_get,			NULL)
 	PHP_FE(sem_acquire,		NULL)
@@ -63,10 +65,14 @@ function_entry sysvsem_functions[] = {
 	PHP_FE(sem_remove,		NULL)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
+/* {{{ sysvsem_module_entry
+ */
 zend_module_entry sysvsem_module_entry = {
 	"sysvsem", sysvsem_functions, PHP_MINIT(sysvsem), NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
 #ifdef COMPILE_DL_SYSVSEM
 ZEND_GET_MODULE(sysvsem)
@@ -94,7 +100,8 @@ THREAD_LS sysvsem_module php_sysvsem_module;
 #define SYSVSEM_USAGE	1
 #define SYSVSEM_SETVAL	2
 
-
+/* {{{ release_sysvsem_sem
+ */
 static void release_sysvsem_sem(zend_rsrc_list_entry *rsrc)
 {
 	sysvsem_sem *sem_ptr = (sysvsem_sem *)rsrc->ptr;
@@ -129,14 +136,17 @@ static void release_sysvsem_sem(zend_rsrc_list_entry *rsrc)
 
 	efree(sem_ptr);
 }
+/* }}} */
 
-
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(sysvsem)
 {
 	php_sysvsem_module.le_sem = zend_register_list_destructors_ex(release_sysvsem_sem, NULL, "sysvsem", module_number);
 
 	return SUCCESS;
 }
+/* }}} */
 
 #define SETVAL_WANTS_PTR
 
@@ -296,7 +306,8 @@ PHP_FUNCTION(sem_get)
 }
 /* }}} */
 
-
+/* {{{ php_sysvsem_semop
+ */
 static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 {
 	pval **arg_id;
@@ -343,7 +354,7 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 	sem_ptr->count -= acquire ? -1 : 1;
 	RETURN_TRUE;
 }
-
+/* }}} */
 
 /* {{{ proto int sem_acquire(int id)
    Acquires the semaphore with the given id, blocking if necessary */
@@ -360,9 +371,6 @@ PHP_FUNCTION(sem_release)
 	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
-
-
-
 
 /* {{{ proto int sem_remove(int id)
    Removes semaphore from Unix systems */
@@ -419,9 +427,11 @@ PHP_FUNCTION(sem_remove)
 /* }}} */
 
 #endif /* HAVE_SYSVSEM */
+
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

@@ -163,3 +163,11 @@ PHPAPI char *php_get_current_user()
 	
 	return SG(request_info).current_user;		
 }	
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
+ */

@@ -13,9 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Sylvain PAGES <spages@free.fr>                              |
-   |                                                                      |
    +----------------------------------------------------------------------+
  */
+
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -34,103 +35,53 @@ ZEND_DECLARE_MODULE_GLOBALS(cybermut)
 /* True global resources - no need for thread safety here */
 static int le_cybermut;
 
-/* Every user visible function must have an entry in cybermut_functions[].
-*/
+/* {{{ cybermut_functions[]
+ */
 function_entry cybermut_functions[] = {
-	PHP_FE(confirm_cybermut_compiled,	NULL)		/* For testing, remove later. */
 	PHP_FE(cybermut_creerformulairecm,	NULL)
 	PHP_FE(cybermut_testmac,	NULL)
 	PHP_FE(cybermut_creerreponsecm,	NULL)
 	{NULL, NULL, NULL}	/* Must be the last line in cybermut_functions[] */
 };
+/* }}} */
 
+/* {{{ cybermut_module_entry
+ */
 zend_module_entry cybermut_module_entry = {
 	"cybermut",
 	cybermut_functions,
 	PHP_MINIT(cybermut),
 	PHP_MSHUTDOWN(cybermut),
-	PHP_RINIT(cybermut),		/* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(cybermut),	/* Replace with NULL if there's nothing to do at request end */
+	NULL,
+	NULL,
 	PHP_MINFO(cybermut),
 	STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
 #ifdef COMPILE_DL_CYBERMUT
 ZEND_GET_MODULE(cybermut)
 #endif
 
-/* Remove comments and fill if you need to have entries in php.ini
-PHP_INI_BEGIN()
-PHP_INI_END()
-*/
-
 PHP_MINIT_FUNCTION(cybermut)
 {
-/* Remove comments if you have entries in php.ini
-	REGISTER_INI_ENTRIES();
-*/
 	return SUCCESS;
 }
 
 PHP_MSHUTDOWN_FUNCTION(cybermut)
 {
-/* Remove comments if you have entries in php.ini
-	UNREGISTER_INI_ENTRIES();
-*/
 	return SUCCESS;
 }
 
-/* Remove if there's nothing to do at request start */
-PHP_RINIT_FUNCTION(cybermut)
-{
-	return SUCCESS;
-}
-
-/* Remove if there's nothing to do at request end */
-PHP_RSHUTDOWN_FUNCTION(cybermut)
-{
-	return SUCCESS;
-}
-
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(cybermut)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "cybermut support", "enabled");
 	php_info_print_table_end();
-
-	/* Remove comments if you have entries in php.ini
-	DISPLAY_INI_ENTRIES();
-	*/
-}
-
-/* Remove the following function when you have succesfully modified config.m4
-   so that your module can be compiled into PHP, it exists only for testing
-   purposes. */
-
-/* Every user-visible function in PHP should document itself in the source */
-/* {{{ proto string confirm_cybermut_compiled(string arg)
-   Return a string to confirm that the module is compiled in */
-PHP_FUNCTION(confirm_cybermut_compiled)
-{
-	zval **arg;
-	int len;
-	char string[256];
-
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_string_ex(arg);
-
-	len = sprintf(string, "Congratulations, you have successfully modified ext/cybermut/config.m4, module %s is compiled into PHP", Z_STRVAL_PP(arg));
-	RETURN_STRINGL(string, len, 1);
 }
 /* }}} */
-/* The previous line is meant for emacs, so it can correctly fold and unfold
-   functions in source code. See the corresponding marks just before function
-   definition, where the functions purpose is also documented. Please follow
-   this convention for the convenience of others editing your code.
-*/
 
 /* {{{ proto string cybermut_creerformulairecm(string url_CM, string version, string TPE, string montant, string ref_commande, string texte_libre, string url_retour, string url_retour_ok, string url_retour_err, string langue, string code_societe, string texte_bouton)
    Return a string containing source HTML of the form of request for payment.
@@ -222,11 +173,10 @@ PHP_FUNCTION(cybermut_creerreponsecm)
 }
 /* }}} */
 
-
-
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

@@ -171,11 +171,10 @@ PHP_FUNCTION(abs)
 /* }}} */
 
 The {{{ symbols are the default folding symbols for the folding mode in
-Emacs.  vim will soon have support for folding as well.  Folding is very
-useful when dealing with large files because you can scroll through the 
-file quickly and just unfold the function you wish to work on.  The }}}
-at the end of each function marks the end of the fold, and should be on
-a separate line.
+Emacs and vim (set fdm=marker).  Folding is very useful when dealing with 
+large files because you can scroll through the file quickly and just unfold 
+the function you wish to work on.  The }}} at the end of each function marks 
+the end of the fold, and should be on a separate line.
 
 The "proto" keyword there is just a helper for the doc/genfuncsummary script
 which generates a full function summary.  Having this keyword in front of the

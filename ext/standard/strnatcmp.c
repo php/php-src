@@ -156,3 +156,11 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 			return 1;
 	}
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
+ */

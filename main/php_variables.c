@@ -333,4 +333,5 @@ void php_import_environment_variables(zval *array_ptr ELS_DC PLS_DC)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

@@ -47,6 +47,8 @@
 #include "php_db2.h"
 #include "php_db3.h"
 
+/* {{{ dba_functions[]
+ */
 function_entry dba_functions[] = {
 	PHP_FE(dba_open, NULL)
 	PHP_FE(dba_popen, NULL)
@@ -62,6 +64,7 @@ function_entry dba_functions[] = {
 	PHP_FE(dba_sync, NULL)
 	{NULL,NULL,NULL}
 };
+/* }}} */
 
 static PHP_MINIT_FUNCTION(dba);
 static PHP_MSHUTDOWN_FUNCTION(dba);
@@ -179,9 +182,8 @@ static int le_pdb;
 static HashTable ht_keys;
 /* }}} */
 
-/* {{{ helper routines */
-	/* {{{ dba_close */
-
+/* {{{ dba_close 
+ */ 
 static void dba_close(dba_info *info)
 {
 	if(info->hnd) info->hnd->close(info);
@@ -190,12 +192,17 @@ static void dba_close(dba_info *info)
 }
 /* }}} */
 
+/* {{{ dba_close_rsrc
+ */
 static void dba_close_rsrc(zend_rsrc_list_entry *rsrc)
 {
 	dba_info *info = (dba_info *)rsrc->ptr;
 	dba_close(info);
 }
+/* }}} */
 
+/* {{{ PHP_MINIT_FUNCTION
+ */
 static PHP_MINIT_FUNCTION(dba)
 {
 	zend_hash_init(&ht_keys, 0, NULL, NULL, 1);
@@ -203,15 +210,21 @@ static PHP_MINIT_FUNCTION(dba)
 	GLOBAL(le_pdb) = zend_register_list_destructors_ex(NULL, dba_close_rsrc, "dba persistent", module_number);
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
 static PHP_MSHUTDOWN_FUNCTION(dba)
 {
 	zend_hash_destroy(&ht_keys);
 	return SUCCESS;
 }
+/* }}} */
 
 #include "ext/standard/php_smart_str.h"
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 static PHP_MINFO_FUNCTION(dba)
 {
 	dba_handler *hptr;
@@ -233,8 +246,10 @@ static PHP_MINFO_FUNCTION(dba)
 	}
 	php_info_print_table_end();
 }
+/* }}} */
                                 
-
+/* {{{ php_dba_update
+ */
 static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	DBA_ID_PARS;
@@ -253,9 +268,12 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_TRUE;
 	RETURN_FALSE;
 }
+/* }}} */
 
 #define FREENOW if(args) efree(args); if(key) efree(key)
 
+/* {{{ php_dba_open
+ */
 static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	pval ***args = (pval ***) NULL;
@@ -355,9 +373,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	FREENOW;
 	RETURN_LONG(listid);
 }
+/* }}} */
 #undef FREENOW
-/* }}} */
-/* }}} */
 
 /* {{{ proto int dba_popen(string path, string mode, string handlername [, string ...])
    Opens path using the specified handler in mode persistently */
@@ -501,3 +518,11 @@ PHP_FUNCTION(dba_sync)
 /* }}} */
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
+ */

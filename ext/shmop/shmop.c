@@ -16,6 +16,7 @@
    |          Ilia Alshanetsky (iliaa@home.com)                           |
    +----------------------------------------------------------------------+
  */
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -39,8 +40,8 @@ php_shmop_globals shmop_globals;
 
 int shm_type;
 
-/* Every user visible function must have an entry in shmop_functions[].
-*/
+/* {{{ shmop_functions[] 
+ */
 function_entry shmop_functions[] = {
 	PHP_FE(shmop_open, NULL)
 	PHP_FE(shmop_read, NULL)
@@ -50,7 +51,10 @@ function_entry shmop_functions[] = {
 	PHP_FE(shmop_delete, NULL)
 	{NULL, NULL, NULL}	/* Must be the last line in shmop_functions[] */
 };
+/* }}} */
 
+/* {{{ shmop_module_entry
+ */
 zend_module_entry shmop_module_entry = {
 	"shmop",
 	shmop_functions,
@@ -61,36 +65,49 @@ zend_module_entry shmop_module_entry = {
 	PHP_MINFO(shmop),
 	STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
 #ifdef COMPILE_DL_SHMOP
 ZEND_GET_MODULE(shmop)
 #endif
 
+/* {{{ rsclean
+ */
 static void rsclean(zend_rsrc_list_entry *rsrc)
 {
 	struct php_shmop *shmop = (struct php_shmop *)rsrc->ptr;
 	shmdt(shmop->addr);
 	efree(shmop);
 }
+/* }}} */
 
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(shmop)
 {
 	shm_type = zend_register_list_destructors_ex(rsclean, NULL, "shmop", module_number);
 	
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
 PHP_MSHUTDOWN_FUNCTION(shmop)
 {
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(shmop)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "shmop support", "enabled");
 	php_info_print_table_end();
 }
+/* }}} */
 
 /* {{{ proto int shmop_open (int key, int flags, int mode, int size)
    gets and attaches a shared memory segment */
@@ -158,7 +175,6 @@ PHP_FUNCTION(shmop_open)
 }
 /* }}} */
 
-
 /* {{{ proto string shmop_read (int shmid, int start, int count)
    reads from a shm segment */
 PHP_FUNCTION(shmop_read)
@@ -210,7 +226,6 @@ PHP_FUNCTION(shmop_read)
 }
 /* }}} */
 
-
 /* {{{ proto void shmop_close (int shmid)
    closes a shared memory segment */
 PHP_FUNCTION(shmop_close)
@@ -234,7 +249,6 @@ PHP_FUNCTION(shmop_close)
 	RETURN_LONG(0);
 }
 /* }}} */
-
 
 /* {{{ proto int shmop_size (int shmid)
    returns the shm size */
@@ -260,7 +274,6 @@ PHP_FUNCTION(shmop_size)
 	RETURN_LONG(shmop->size);
 }
 /* }}} */
-
 
 /* {{{ proto int shmop_write (int shmid, string data, int offset)
    writes to a shared memory segment */
@@ -298,7 +311,6 @@ PHP_FUNCTION(shmop_write)
 }
 /* }}} */
 
-
 /* {{{ proto bool shmop_delete (int shmid)
    mark segment for deletion */
 PHP_FUNCTION(shmop_delete)
@@ -331,10 +343,10 @@ PHP_FUNCTION(shmop_delete)
 
 #endif	/* HAVE_SHMOP */
 
-
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

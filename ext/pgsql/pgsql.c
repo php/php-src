@@ -45,6 +45,8 @@
 
 #define CHECK_DEFAULT_LINK(x) if (x == -1) { php_error(E_WARNING, "%s: no PostgreSQL link opened yet", get_active_function_name()); }
 
+/* {{{ pgsql_functions[]
+ */
 function_entry pgsql_functions[] = {
 	PHP_FE(pg_connect,		NULL)
 	PHP_FE(pg_pconnect,		NULL)
@@ -94,7 +96,10 @@ function_entry pgsql_functions[] = {
 #endif
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
+/* {{{ pgsql_module_entry
+ */
 zend_module_entry pgsql_module_entry = {
 	"pgsql",
 	pgsql_functions,
@@ -105,6 +110,7 @@ zend_module_entry pgsql_module_entry = {
 	PHP_MINFO(pgsql),
 	STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
 #ifdef COMPILE_DL_PGSQL
 ZEND_GET_MODULE(pgsql)
@@ -118,6 +124,8 @@ int pgsql_globals_id;
 PHP_PGSQL_API php_pgsql_globals pgsql_globals;
 #endif
 
+/* {{{ php_pgsql_set_default_link
+ */
 static void php_pgsql_set_default_link(int id)
 {   
 	PGLS_FETCH();
@@ -130,8 +138,10 @@ static void php_pgsql_set_default_link(int id)
 
 	PGG(default_link) = id;
 }
+/* }}} */
 
-
+/* {{{ _close_pgsql_link
+ */
 static void _close_pgsql_link(zend_rsrc_list_entry *rsrc)
 {
 	PGconn *link = (PGconn *)rsrc->ptr;
@@ -140,8 +150,10 @@ static void _close_pgsql_link(zend_rsrc_list_entry *rsrc)
 	PQfinish(link);
 	PGG(num_links)--;
 }
+/* }}} */
 
-
+/* {{{ _close_pgsql_plink
+ */
 static void _close_pgsql_plink(zend_rsrc_list_entry *rsrc)
 {
 	PGconn *link = (PGconn *)rsrc->ptr;
@@ -154,8 +166,10 @@ static void _close_pgsql_plink(zend_rsrc_list_entry *rsrc)
 		efree(PGG(last_notice));
 	}
 }
+/* }}} */
 
-
+/* {{{ _notice_handler
+ */
 static void
 _notice_handler(void *arg, const char *message)
 {
@@ -169,7 +183,10 @@ _notice_handler(void *arg, const char *message)
 		PGG(last_notice) = estrdup(message);
 	}
 }
+/* }}} */
 
+/* {{{ _rollback_transactions
+ */
 static int _rollback_transactions(zend_rsrc_list_entry *rsrc)
 {
 	PGconn *link;
@@ -186,36 +203,48 @@ static int _rollback_transactions(zend_rsrc_list_entry *rsrc)
 
 	return 0;
 }
+/* }}} */
 
-
+/* {{{ _free_ptr
+ */
 static void _free_ptr(zend_rsrc_list_entry *rsrc)
 {
 	pgLofp *lofp = (pgLofp *)rsrc->ptr;
 	efree(lofp);
 }
+/* }}} */
 
-
+/* {{{ _free_result
+ */
 static void _free_result(zend_rsrc_list_entry *rsrc)
 {
 	pgsql_result_handle *pg_result = (pgsql_result_handle *)rsrc->ptr;
 	PQclear(pg_result->result);
 	efree(pg_result);
 }
+/* }}} */
 
+/* {{{ PHP_INI
+ */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("pgsql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateInt,		allow_persistent,	php_pgsql_globals,		pgsql_globals)
 	STD_PHP_INI_ENTRY_EX("pgsql.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_persistent,		php_pgsql_globals,		pgsql_globals,	display_link_numbers)
 	STD_PHP_INI_ENTRY_EX("pgsql.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateInt,		max_links,			php_pgsql_globals,		pgsql_globals,	display_link_numbers)
 PHP_INI_END()
+/* }}} */
 
-
+/* {{{ php_pgsql_init_globals
+ */
 static void php_pgsql_init_globals(PGLS_D)
 {
 	PGG(num_persistent) = 0;
 	PGG(ignore_notices) = 0;
 	PGG(last_notice) = NULL;
 }
+/* }}} */
 
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(pgsql)
 {
 #ifdef ZTS
@@ -239,15 +268,19 @@ PHP_MINIT_FUNCTION(pgsql)
 
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
 PHP_MSHUTDOWN_FUNCTION(pgsql)
 {
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ PHP_RINIT_FUNCTION
+ */
 PHP_RINIT_FUNCTION(pgsql)
 {
 	PGLS_FETCH();
@@ -256,16 +289,20 @@ PHP_RINIT_FUNCTION(pgsql)
 	PGG(num_links) = PGG(num_persistent);
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_RSHUTDOWN_FUNCTION
+ */
 PHP_RSHUTDOWN_FUNCTION(pgsql)
 {
 	ELS_FETCH();
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) _rollback_transactions);
 	return SUCCESS;
 }
+/* }}} */
 
-
-
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(pgsql)
 {
 	char buf[32];
@@ -282,8 +319,11 @@ PHP_MINFO_FUNCTION(pgsql)
 	DISPLAY_INI_ENTRIES();
 
 }
+/* }}} */
 
 
+/* {{{ php_pgsql_do_connect
+ */
 void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 {
 	char *host=NULL,*port=NULL,*options=NULL,*tty=NULL,*dbname=NULL,*connstring=NULL;
@@ -497,8 +537,10 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	efree(hashed_details);
 	php_pgsql_set_default_link(return_value->value.lval);
 }
+/* }}} */
 
-
+/* {{{ php_pgsql_get_default_link
+ */
 int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
 	PGLS_FETCH();
@@ -509,7 +551,7 @@ int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	return PGG(default_link);
 }
-
+/* }}} */
 
 /* {{{ proto int pg_connect([string connection_string] | [string host, string port [, string options [, string tty,]] string database)
    Open a PostgreSQL connection */
@@ -576,6 +618,8 @@ PHP_FUNCTION(pg_close)
 #define PHP_PG_TTY 5
 #define PHP_PG_HOST 6
 
+/* {{{ php_pgsql_get_link_info
+ */
 void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	zval **pgsql_link = NULL;
@@ -626,6 +670,7 @@ void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	return_value->value.str.val = (char *) estrdup(return_value->value.str.val);
 	return_value->type = IS_STRING;
 }
+/* }}} */
 
 /* {{{ proto string pg_dbname([int connection])
    Get the database name */ 
@@ -743,6 +788,7 @@ PHP_FUNCTION(pg_exec)
 	}
 }
 /* }}} */
+
 /* {{{ proto int pg_end_copy([int connection])
    Sync with backend. Completes the Copy command */
 PHP_FUNCTION(pg_end_copy)
@@ -824,6 +870,8 @@ PHP_FUNCTION(pg_put_line)
 #define PHP_PG_NUM_FIELDS 2
 #define PHP_PG_CMD_TUPLES 3
 
+/* {{{ php_pgsql_get_result_info
+ */
 void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	zval **result;
@@ -858,6 +906,7 @@ void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	}
 	return_value->type = IS_LONG;
 }
+/* }}} */
 
 /* {{{ proto int pg_numrows(int result)
    Return the number of rows in the result */
@@ -897,6 +946,8 @@ PHP_FUNCTION(pg_last_notice)
 }
 /* }}} */
 
+/* {{{ get_field_name
+ */
 char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 {
 	PGresult *result;
@@ -941,12 +992,14 @@ char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 	}
 	return ret;
 }
-			
+/* }}} */			
 
 #define PHP_PG_FIELD_NAME 1
 #define PHP_PG_FIELD_SIZE 2
 #define PHP_PG_FIELD_TYPE 3
 
+/* {{{ php_pgsql_get_field_info
+ */
 void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	zval **result, **field;
@@ -987,6 +1040,7 @@ void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			RETURN_FALSE;
 	}
 }
+/* }}} */
 
 /* {{{ proto string pg_fieldname(int result, int field_number)
    Returns the name of the field */
@@ -1081,7 +1135,8 @@ PHP_FUNCTION(pg_result)
 }
 /* }}} */
 
-
+/* {{{ void php_pgsql_fetch_hash
+ */
 static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
 	zval **result, **row, **arg3;
@@ -1160,7 +1215,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		}
 	}
 }
-
+/* }}} */
 
 /* {{{ proto array pg_fetch_row(int result, int row)
    Get a row as an enumerated array */ 
@@ -1195,6 +1250,8 @@ PHP_FUNCTION(pg_fetch_object)
 #define PHP_PG_DATA_LENGTH 1
 #define PHP_PG_DATA_ISNULL 2
 
+/* {{{ php_pgsql_data_info
+ */
 void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	zval **result, **row, **field;
@@ -1240,6 +1297,7 @@ void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	}
 	return_value->type = IS_LONG;
 }
+/* }}} */
 
 /* {{{ proto int pg_fieldprtlen(int result, int row, mixed field_name_or_number)
    Returns the printed length */
@@ -1311,7 +1369,6 @@ PHP_FUNCTION(pg_getlastoid)
 }
 /* }}} */
 
-
 /* {{{ proto bool pg_trace(string filename [, string mode [, resource connection]])
    Enable tracing a PostgreSQL connection */
 PHP_FUNCTION(pg_trace)
@@ -1367,7 +1424,7 @@ PHP_FUNCTION(pg_trace)
 	ZEND_REGISTER_RESOURCE(NULL, fp, php_file_le_fopen());
 	RETURN_TRUE;
 }
-
+/* }}} */
 
 /* {{{ proto bool pg_untrace([int connection])
    Disable tracing of a PostgreSQL connection */
@@ -1397,7 +1454,7 @@ PHP_FUNCTION(pg_untrace)
 	PQuntrace(pgsql);
 	RETURN_TRUE;
 }
-
+/* }}} */
 
 /* {{{ proto int pg_locreate(int connection)
    Create a large object */
@@ -1901,4 +1958,3 @@ PHP_FUNCTION(pg_client_encoding)
  * c-basic-offset: 4
  * End:
  */
-

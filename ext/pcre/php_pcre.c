@@ -93,7 +93,6 @@ PHP_MINFO_FUNCTION(pcre)
 }
 /* }}} */
 
-
 /* {{{ PHP_MINIT_FUNCTION(pcre) */
 static PHP_MINIT_FUNCTION(pcre)
 {
@@ -114,7 +113,6 @@ static PHP_MINIT_FUNCTION(pcre)
 }
 /* }}} */
 
-
 /* {{{ PHP_MSHUTDOWN_FUNCTION(pcre) */
 static PHP_MSHUTDOWN_FUNCTION(pcre)
 {
@@ -127,7 +125,6 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 }
 /* }}} */
 
-
 /* {{{ PHP_RINIT_FUNCTION(pcre) */
 static PHP_RINIT_FUNCTION(pcre)
 {
@@ -138,7 +135,8 @@ static PHP_RINIT_FUNCTION(pcre)
 }
 /* }}} */
 
-
+/* {{{ pcre_get_compiled_regex
+ */
 static pcre* pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_options) {
 	pcre				*re = NULL;
 	int				 	 coptions = 0;
@@ -320,8 +318,10 @@ static pcre* pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_o
 
 	return re;
 }
+/* }}} */
 
-
+/* {{{ php_pcre_match
+ */
 static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 {
 	zval			**regex,			/* Regular expression */
@@ -521,7 +521,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 
 	RETVAL_LONG(matched);
 }
-
+/* }}} */
 
 /* {{{ proto int preg_match(string pattern, string subject [, array subpatterns])
    Perform a Perl-style regular expression match */
@@ -531,7 +531,6 @@ PHP_FUNCTION(preg_match)
 }
 /* }}} */
 
-
 /* {{{ proto int preg_match_all(string pattern, string subject, array subpatterns [, int order])
    Perform a Perl-style global regular expression match */
 PHP_FUNCTION(preg_match_all)
@@ -540,7 +539,8 @@ PHP_FUNCTION(preg_match_all)
 }
 /* }}} */
 
-
+/* {{{ preg_get_backref
+ */
 static inline int preg_get_backref(const char *walk, int *backref)
 {
 	if (*walk && *walk >= '0' && *walk <= '9')
@@ -553,7 +553,10 @@ static inline int preg_get_backref(const char *walk, int *backref)
 	
 	return 1;	
 }
+/* }}} */
 
+/* {{{ preg_do_repl_func
+ */
 static int preg_do_repl_func(zval *function, char *subject, int *offsets, int count, char **result)
 {
 	zval		*retval_ptr;		/* Function return value */
@@ -584,7 +587,10 @@ static int preg_do_repl_func(zval *function, char *subject, int *offsets, int co
 
 	return result_len;
 }
+/* }}} */
 
+/* {{{ preg_do_eval
+ */
 static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 						int *offsets, int count, char **result)
 {
@@ -674,8 +680,10 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 	
 	return result_len;
 }
+/* }}} */
 
-
+/* {{{ php_pcre_replace
+ */
 char *php_pcre_replace(char *regex,   int regex_len,
 					   char *subject, int subject_len,
 					   zval *replace_val, int is_callable_replace,
@@ -883,8 +891,10 @@ char *php_pcre_replace(char *regex,   int regex_len,
 
 	return result;
 }
+/* }}} */
 
-
+/* {{{ php_replace_in_subject
+ */
 static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, int *result_len, int limit, zend_bool is_callable_replace)
 {
 	zval		**regex_entry,
@@ -960,8 +970,10 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 		return result;
 	}
 }
+/* }}} */
 
-
+/* {{{ preg_replace_impl
+ */
 static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callable_replace)
 {
 	zval		   **regex,
@@ -1039,7 +1051,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 		}
 	}	
 }
-
+/* }}} */
 
 /* {{{ proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit])
    Perform Perl-style regular expression replacement. */
@@ -1049,7 +1061,6 @@ PHP_FUNCTION(preg_replace)
 }
 /* }}} */
 
-
 /* {{{ proto string preg_replace_callback(mixed regex, mixed callback, mixed subject [, int limit])
    Perform Perl-style regular expression replacement using replacement callback. */
 PHP_FUNCTION(preg_replace_callback)
@@ -1057,7 +1068,6 @@ PHP_FUNCTION(preg_replace_callback)
 	preg_replace_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
-
 
 /* {{{ proto array preg_split(string pattern, string subject [, int limit [, int flags]]) 
    Split string into an array using a perl-style regular expression as a delimiter */
@@ -1193,7 +1203,6 @@ PHP_FUNCTION(preg_split)
 }
 /* }}} */
 
-
 /* {{{ proto string preg_quote(string str, string delim_char)
    Quote regular expression characters plus an optional character */
 PHP_FUNCTION(preg_quote)
@@ -1277,7 +1286,6 @@ PHP_FUNCTION(preg_quote)
 	RETVAL_STRINGL(erealloc(out_str, q - out_str + 1), q - out_str, 0);
 }
 /* }}} */
-
 
 /* {{{ proto array preg_grep(string regex, array input)
    Searches array and returns entries which match regex */
@@ -1367,7 +1375,6 @@ PHP_FUNCTION(preg_grep)
 }
 /* }}} */
 
-
 /* {{{ module definition structures */
 
 unsigned char third_arg_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
@@ -1399,7 +1406,6 @@ ZEND_GET_MODULE(pcre)
 
 /* }}} */
 
-
 #endif /* HAVE_PCRE || HAVE_BUNDLED_PCRE */
 
 /*
@@ -1407,4 +1413,5 @@ ZEND_GET_MODULE(pcre)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

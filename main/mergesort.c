@@ -342,3 +342,11 @@ static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const voi
 			swap(u, t);
 		}
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
+ */

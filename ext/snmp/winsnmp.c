@@ -21,16 +21,21 @@ Created from the snmputil sample in the Microsoft SDK for NT
 #include <snmp.h>
 #include <mgmtapi.h>
 
-
+/* {{{ snmp_functions[]
+ */
 function_entry snmp_functions[] = {
     {"snmpget", php3_snmpget, NULL},
     {"snmpwalk", php3_snmpwalk, NULL},
     {NULL,NULL,NULL}
 };
+/* }}} */
 
+/* {{{ snmp_module_entry
+ */
 zend_module_entry snmp_module_entry = {
 	"SNMP",snmp_functions,NULL,NULL,NULL,NULL,NULL,0,0,0,NULL
 };
+/* }}} */
 
 #if COMPILE_DL
 DLEXPORT zend_module_entry *get_module() { return &snmp_module_entry; }
@@ -43,8 +48,9 @@ DLEXPORT zend_module_entry *get_module() { return &snmp_module_entry; }
 #define TIMEOUT 6000 /* milliseconds */
 #define RETRIES 3
 
-
-void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
+/* {{{ _php_snmp
+ */
+void _php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 	pval *a1, *a2, *a3;
 	INT	operation;
     LPSTR              agent;
@@ -209,20 +215,28 @@ void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 		php_error(E_WARNING,"error on SnmpMgrClose %d\n", GetLastError());
 	}
 }
+/* }}} */
 
+/* {{{ php3_snmpget
+ */
 DLEXPORT void php3_snmpget(INTERNAL_FUNCTION_PARAMETERS) {
-	_php3_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
+	_php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
+/* }}} */
 
+/* {{{ php3_snmpwalk
+ */
 DLEXPORT void php3_snmpwalk(INTERNAL_FUNCTION_PARAMETERS) {
-	_php3_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,2);
+	_php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,2);
 }
-
+/* }}} */
 
 #endif
+
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

@@ -45,6 +45,8 @@
 #define PSPELL_SPEED_MASK_INTERNAL 3L
 #define PSPELL_RUN_TOGETHER 8L
 
+/* {{{ pspell_functions[]
+ */
 function_entry pspell_functions[] = {
 	PHP_FE(pspell_new,		NULL)
 	PHP_FE(pspell_new_personal,		NULL)
@@ -64,6 +66,7 @@ function_entry pspell_functions[] = {
 	PHP_FE(pspell_config_repl,		NULL)
 	PHP_FE(pspell_config_save_repl,		NULL)
 };
+/* }}} */
 
 static int le_pspell, le_pspell_config;
 
@@ -87,6 +90,8 @@ static void php_pspell_close_config(zend_rsrc_list_entry *rsrc)
 	delete_pspell_config(config);
 }
 
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(pspell){
 	REGISTER_MAIN_LONG_CONSTANT("PSPELL_FAST", PSPELL_FAST, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PSPELL_NORMAL", PSPELL_NORMAL, CONST_PERSISTENT | CONST_CS);
@@ -96,6 +101,7 @@ PHP_MINIT_FUNCTION(pspell){
 	le_pspell_config = zend_register_list_destructors_ex(php_pspell_close_config, NULL, "pspell config", module_number);
 	return SUCCESS;
 }
+/* }}} */
 
 /* {{{ proto int pspell_new(string language [, string spelling [, string jargon [, string encoding [, int mode]]]])
    Load a dictionary */
@@ -777,11 +783,22 @@ PHP_FUNCTION(pspell_config_save_repl){
 }
 /* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(pspell)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "PSpell Support", "enabled");
 	php_info_print_table_end();
 }
+/* }}} */
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
+ */

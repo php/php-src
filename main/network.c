@@ -332,5 +332,5 @@ int php_hostconnect(char *host, unsigned short port, int socktype, int timeout)
  * tab-width: 8
  * c-basic-offset: 8
  * End:
- * vim: ts=4 sw=4 tw=78
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

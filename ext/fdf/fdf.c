@@ -42,6 +42,8 @@ static int le_fdf;
 
 SAPI_POST_HANDLER_FUNC(fdf_post_handler);
 
+/* {{{ fdf_functions[]
+ */
 function_entry fdf_functions[] = {
 	PHP_FE(fdf_open,								NULL)
 	PHP_FE(fdf_create,								NULL)
@@ -62,6 +64,7 @@ function_entry fdf_functions[] = {
 	PHP_FE(fdf_set_javascript_action,				NULL)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
 zend_module_entry fdf_module_entry = {
 	"fdf", 
@@ -95,7 +98,8 @@ static sapi_post_entry php_fdf_post_entry =	{
 	fdf_post_handler
 };
 
-
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(fdf)
 {
 	FDFErc err;
@@ -140,7 +144,10 @@ PHP_MINIT_FUNCTION(fdf)
 	if((err = FDFInitialize()) == FDFErcOK) return SUCCESS;
 	return FAILURE;
 }
+/* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(fdf)
 {
 	/* need to use a PHPAPI function here because it is external module in windows */
@@ -149,7 +156,10 @@ PHP_MINFO_FUNCTION(fdf)
 	php_info_print_table_row(2, "FdfTk Version", FDFGetVersion() );
 	php_info_print_table_end();
 }
+/* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
 PHP_MSHUTDOWN_FUNCTION(fdf)
 {
 	FDFErc err;
@@ -163,7 +173,7 @@ PHP_MSHUTDOWN_FUNCTION(fdf)
 	if((err = FDFFinalize()) == FDFErcOK) return SUCCESS;
 	return FAILURE;
 }
-
+/* }}} */
 
 /* {{{ proto int fdf_open(string filename)
    Opens a new FDF document */
@@ -190,7 +200,6 @@ PHP_FUNCTION(fdf_open)
 } 
 /* }}} */
 
-
 /* {{{ proto int fdf_create(void)
    Creates a new FDF document */
 PHP_FUNCTION(fdf_create) 
@@ -209,7 +218,6 @@ PHP_FUNCTION(fdf_create)
 }
 /* }}} */
 
-
 /* {{{ proto bool fdf_close(int fdfdoc)
    Closes the FDF document */
 PHP_FUNCTION(fdf_close) 
@@ -225,7 +233,6 @@ PHP_FUNCTION(fdf_close)
 	zend_list_delete(Z_RESVAL_PP(fdfp));
 } 
 /* }}} */
-
 
 /* {{{ proto string fdf_get_value(int fdfdoc, string fieldname)
    Gets the value of a field as string */
@@ -263,7 +270,6 @@ PHP_FUNCTION(fdf_get_value)
 }
 /* }}} */
 
-
 /* {{{ proto bool fdf_set_value(int fdfdoc, string fieldname, string value, int isname)
    Sets the value of a field */
 PHP_FUNCTION(fdf_set_value) 
@@ -290,7 +296,6 @@ PHP_FUNCTION(fdf_set_value)
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ proto string fdf_next_field_name(int fdfdoc [, string fieldname])
    Gets the name of the next field name or the first field name */
@@ -332,7 +337,6 @@ PHP_FUNCTION(fdf_next_field_name)
 	efree(buffer);
 }
 /* }}} */
-
 
 /* {{{ proto bool fdf_set_ap(int fdfdoc, string fieldname, int face, string filename, int pagenr)
    Sets the appearence of a field */
@@ -383,7 +387,6 @@ PHP_FUNCTION(fdf_set_ap)
 }
 /* }}} */
 
-
 /* {{{ proto bool fdf_set_status(int fdfdoc, string status)
    Sets the value of /Status key */
 PHP_FUNCTION(fdf_set_status) 
@@ -409,7 +412,6 @@ PHP_FUNCTION(fdf_set_status)
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ proto string fdf_get_status(int fdfdoc)
    Gets the value of /Status key */
@@ -446,7 +448,6 @@ PHP_FUNCTION(fdf_get_status)
 }
 /* }}} */
 
-
 /* {{{ proto bool fdf_set_file(int fdfdoc, string filename)
    Sets the value of /F key */
 PHP_FUNCTION(fdf_set_file) 
@@ -472,7 +473,6 @@ PHP_FUNCTION(fdf_set_file)
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ proto string fdf_get_file(int fdfdoc)
    Gets the value of /F key */
@@ -509,7 +509,6 @@ PHP_FUNCTION(fdf_get_file)
 }
 /* }}} */
 
-
 /* {{{ proto bool fdf_save(int fdfdoc, string filename)
    Writes out the FDF file */
 PHP_FUNCTION(fdf_save) 
@@ -535,7 +534,6 @@ PHP_FUNCTION(fdf_save)
 
 } 
 /* }}} */
-
 
 /* {{{ proto bool fdf_add_template(int fdfdoc, int newpage, string filename, string template, int rename)
    Adds a template into the FDF document */
@@ -576,7 +574,6 @@ PHP_FUNCTION(fdf_add_template)
 }
 /* }}} */
 
-
 /* {{{ proto bool fdf_set_flags(int fdfdoc, string fieldname, int whichflags, int newflags)
    Sets flags for a field in the FDF document */
 PHP_FUNCTION(fdf_set_flags) 
@@ -604,7 +601,6 @@ PHP_FUNCTION(fdf_set_flags)
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ proto bool fdf_set_opt(int fdfdoc, string fieldname, int element, string value, string name)
    Sets a value in the opt array for a field */
@@ -634,7 +630,6 @@ PHP_FUNCTION(fdf_set_opt)
 }
 /* }}} */
 
-
 /* {{{ proto bool fdf_set_submit_form_action(int fdfdoc, string fieldname, int whichtrigger, string url, int flags)
    Sets the submit form action for a field */
 PHP_FUNCTION(fdf_set_submit_form_action) 
@@ -663,7 +658,6 @@ PHP_FUNCTION(fdf_set_submit_form_action)
 }
 /* }}} */
 
-
 /* {{{ proto bool fdf_set_javascript_action(int fdfdoc, string fieldname, int whichtrigger, string script)
    Sets the javascript action for a field */
 PHP_FUNCTION(fdf_set_javascript_action) 
@@ -691,7 +685,8 @@ PHP_FUNCTION(fdf_set_javascript_action)
 }
 /* }}} */
 
-/* SAPI post handler for FDF forms */
+/* {{{ SAPI_POST_HANDLER_FUNC
+ * SAPI post handler for FDF forms */
 SAPI_POST_HANDLER_FUNC(fdf_post_handler)
 {
 	FILE *fp;
@@ -760,6 +755,7 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler)
 		if(lastfieldname) efree(lastfieldname);
 	} 
 }
+/* }}} */
 
 #endif
 
@@ -768,4 +764,5 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */
