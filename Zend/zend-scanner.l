@@ -398,13 +398,27 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 	zval_dtor(str);
 	return SUCCESS;
 }
-
+END_EXTERN_C()
 
 #ifdef ZTS
+BEGIN_EXTERN_C()
 int lex_scan(zval *zendlval CLS_DC)
 {
 	return CG(ZFL)->lex_scan(zendlval CLS_CC);
 }
+
+
+const char *zend_get_zendtext(CLS_D)
+{
+	return CG(ZFL)->YYText();
+}
+
+
+int zend_get_zendleng(CLS_D)
+{
+	return CG(ZFL)->YYLeng();
+}
+END_EXTERN_C()
 
 
 void ZendFlexLexer::BeginState(int state)
@@ -420,24 +434,6 @@ int yyFlexLexer::yylex()
 }
 
 #endif
-
-
-
-#ifdef ZTS
-const char *zend_get_zendtext(CLS_D)
-{
-	return CG(ZFL)->YYText();
-}
-
-
-int zend_get_zendleng(CLS_D)
-{
-	return CG(ZFL)->YYLeng();
-}
-#endif
-
-
-END_EXTERN_C()
 
 
 /* redefine YY_INPUT to handle urls for win32*/
