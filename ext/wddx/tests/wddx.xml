@@ -20,7 +20,7 @@
                          <dateTime>1980-06-12T04:32:12+00</dateTime>
                      </var>
                      <var name='aDateTime3'>
-                         <dateTime>2040-06-12T04:32:12</dateTime>
+                         <dateTime>2040-06-12T04:32:12+00</dateTime>
                      </var>
                      <var name='aBoolean'>
                          <boolean value='true'/>
