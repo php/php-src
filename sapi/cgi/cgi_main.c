@@ -138,7 +138,7 @@ long fix_pathinfo=1;
 #define TRANSLATE_SLASHES(path)
 #endif
 
-#define OPTSTRING "abCc:d:ef:g:hilmnqsw?vz:"
+#define OPTSTRING "ab:Cc:d:ef:g:hilmnqsw?vz:"
 
 static int print_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 {
