@@ -62,6 +62,7 @@
 #include "snmp.h"
 #include "parse.h"
 #include "mib.h"
+#include "version.h"
 
 /* ucd-snmp 3.3.1 changed the name of a few #defines... They've been changed back to the original ones in 3.5.3! */
 #ifndef SNMP_MSG_GET
@@ -112,6 +113,7 @@ PHP_MINFO_FUNCTION(snmp)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "UCD-SNMP Support", "enabled");
+	php_info_print_table_row(2, "UCD-SNMP Version", VersionInfo);
 	php_info_print_table_end();
 }
 
