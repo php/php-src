@@ -162,28 +162,27 @@ inline void restore_lexical_state(zend_lex_state *lex_state CLS_DC)
 
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_close_file_handle(zend_file_handle *file_handle)
+
+
+ZEND_API void zend_open_file_dtor(void *f)
 {
-	switch (file_handle->type) {
-		case ZEND_HANDLE_FILENAME:
-			break;
-		case ZEND_HANDLE_FD:
-			close(file_handle->handle.fd);
-			break;
-		case ZEND_HANDLE_FP:
-			if (file_handle->handle.fp != stdin) {
-				fclose(file_handle->handle.fp);
-			}
-			break;
 #ifdef ZTS
-		case ZEND_HANDLE_ISTREAM:
-			if (file_handle->handle.is != &cin) {
-				delete file_handle->handle.is;
-			}
-			break;
+	delete *((ifstream **) f);
+#else
+	fclose(*((FILE **) f));
 #endif
-	}
 }
+
+
+ZEND_API void zend_close_file_handle(zend_file_handle *file_handle CLS_DC)
+{
+#ifdef ZTS
+	zend_llist_del_element(&CG(open_files), &file_handle->handle.is);
+#else
+	zend_llist_del_element(&CG(open_files), &file_handle->handle.fp);
+#endif
+}
+
 
 ZEND_API inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 {
@@ -202,8 +201,10 @@ ZEND_API inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 	if (!file_handle->handle.fp) {
 		return FAILURE;
 	}
-	file_handle->type = ZEND_HANDLE_FP;
-	
+	if (file_handle->handle.fp != stdin) {
+		zend_llist_add_element(&CG(open_files), &file_handle->handle.fp);
+	}
+	file_handle->type = ZEND_HANDLE_FP;	
 	/* Reset the scanner for scanning the new file */
 	yyin = file_handle->handle.fp;
 	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
@@ -228,6 +229,9 @@ ZEND_API inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 	if (file_handle->handle.is->fail()) {
 		delete file_handle->handle.is;
 		return FAILURE;
+	}
+	if (file_handle->handle.is != &cin) {
+		zend_llist_add_element(&CG(open_files), &file_handle->handle.is);
 	}
 	file_handle->type = ZEND_HANDLE_ISTREAM;
 
@@ -282,7 +286,7 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 		} else {
 			CG(active_op_array) = op_array;
 			compiler_result = zendparse(CLS_C);
-			zend_close_file_handle(file_handle);
+			zend_close_file_handle(file_handle CLS_CC);
 			restore_lexical_state(&original_lex_state CLS_CC);
 			CG(active_op_array) = original_active_op_array;
 			if (compiler_result==1) { /* parser error */
@@ -421,7 +425,7 @@ int require_file(zend_file_handle *file_handle CLS_DC)
 		return FAILURE;
 	}
 	compiler_result = zendparse(CLS_C);
-	zend_close_file_handle(file_handle);
+	zend_close_file_handle(file_handle CLS_CC);
 	restore_lexical_state(&original_lex_state CLS_CC);
 	if (compiler_result==1) {
 		zend_bailout();
@@ -444,7 +448,7 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 		return FAILURE;
 	}
 	zend_highlight(syntax_highlighter_ini);
-	zend_close_file_handle(&file_handle);
+	zend_close_file_handle(&file_handle CLS_CC);
 	restore_lexical_state(&original_lex_state CLS_CC);
 	return SUCCESS;
 }

@@ -147,6 +147,8 @@ struct _zend_compiler_globals {
 	unsigned char handle_op_arrays;	/* run op_arrays through op_array handlers */
 
 	unsigned char unclean_shutdown;
+
+	zend_llist open_files;
 #ifdef ZTS
 #ifdef __cplusplus
 	ZendFlexLexer *ZFL;
