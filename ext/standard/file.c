@@ -170,6 +170,7 @@ static FILE *php_do_open_temporary_file(char *path, const char *pfx, char **open
 	char *trailing_slash;
 	FILE *fp;
 	char *opened_path;
+	int fd;
 
 	if (!path) {
 		return NULL;
