@@ -27,9 +27,11 @@ PHP 4                                                                      NEWS
   . php4_execute (obj.conf): support for additional php.ini values.
     Allows different settings per virtual server. 
     (See sapi/nsapi/nsapi-readme.txt for more information)
-  . Added support for virtual()
+  . Added support for virtual().
+  . Added nsapi_request_headers() and nsapi_response_headers() with aliases 
+    for apache compatibility.
   . Added "nsapi.read_timeout" php.ini option. 
-  . Synced $_SERVER variables to be similar to Apache variables
+  . Synced $_SERVER variables to be similar to Apache variables.
 - Improved the IMAP extension (Ilia)
   . Added imap_timeout() function. (bug #24161)
   . Added optional 'charset' parameter to imap_search() and imap_sort().
