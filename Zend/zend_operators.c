@@ -184,7 +184,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 
 
 #define DVAL_TO_LVAL(d, l) do {                        \
-       if ((d) > LONG_MAX) {                   \
+       if ((d) >= LONG_MAX) {                   \
                l = LONG_MAX;                   \
        } else if ((d) < LONG_MIN) {            \
                l = LONG_MIN;                   \
