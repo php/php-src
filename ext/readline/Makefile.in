@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME    = libreadline.la
-LTLIBRARY_SOURCES = readline.c
-LTLIBRARY_SHARED_NAME = readline.la
-LTLIBRARY_SHARED_LIBADD = $(READLINE_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk
