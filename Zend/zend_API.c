@@ -935,7 +935,6 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 				zval **method;
 				zval **obj;
 				zend_class_entry *ce;
-				char name_buf[1024];
 				char callable_name_len;
 				
 				if (zend_hash_index_find(Z_ARRVAL_P(callable), 0, (void **) &obj) == SUCCESS &&
@@ -967,15 +966,24 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 							}
 							break;
 						}
-					} else
+					} else {
 						ce = Z_OBJCE_PP(obj);
+					}
 					lcname = estrndup(Z_STRVAL_PP(method), Z_STRLEN_PP(method));
 					zend_str_tolower(lcname, Z_STRLEN_PP(method));
 					if (zend_hash_exists(&ce->function_table, lcname, Z_STRLEN_PP(method)+1))
 						retval = 1;
 					if (!retval && callable_name) {
-						callable_name_len = snprintf(name_buf, 1024, "%s::%s", ce->name, Z_STRVAL_PP(method));
-						*callable_name = estrndup(name_buf, callable_name_len);
+						char *ptr;
+						int ce_name_len = strlen(ce->name);
+
+						callable_name_len = ce_name_len + Z_STRLEN_PP(method) + sizeof("::");
+						ptr = *callable_name = emalloc(callable_name_len);
+						memcpy(ptr, ce->name, ce_name_len);
+						ptr += ce_name_len;
+						memcpy(ptr, "::", sizeof("::") - 1);
+						ptr += sizeof("::") - 1;
+						memcpy(ptr, Z_STRVAL_PP(method), Z_STRLEN_PP(method) + 1);
 					}
 					efree(lcname);
 				} else if (callable_name)
