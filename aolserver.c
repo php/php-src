@@ -60,7 +60,6 @@ sapi_ub_write(const char *str, uint str_length)
 	ctx = (php_aol_context *) SG(server_context);
 
 	Ns_DStringInit(&dstr);
-	Ns_Log(Notice, "writing %d bytes\n", str_length);
 	Ns_DStringNAppend(&dstr, (char *) str, str_length);
 	Ns_ConnSendDString(ctx->conn, &dstr);
 	Ns_DStringFree(&dstr);
@@ -104,7 +103,7 @@ sapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 	php_aol_context *ctx;
 	
 	ctx = (php_aol_context *) SG(server_context);
-	Ns_ConnFlushHeaders(ctx->conn, 200);
+	Ns_ConnFlushHeaders(ctx->conn, SG(sapi_headers).http_response_code);
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
@@ -114,7 +113,12 @@ sapi_read_post(char *buf, uint count_bytes SLS_DC)
 	uint total_read = 0;
 	php_aol_context *ctx = (php_aol_context *) SG(server_context);
 
-	total_read = Ns_ConnRead(ctx->conn, buf, total_read);
+	total_read = Ns_ConnRead(ctx->conn, buf, count_bytes);
+	
+	if(total_read == NS_ERROR) {
+		total_read = -1;
+	}
+
 	return total_read;
 }
 	
@@ -239,21 +243,36 @@ static void config(char *server, char *module, php_aol_context *ctx)
 	int i;
 	char *path;
 	Ns_Set *set;
-	char *map;
 
-	path = Ns_ConfigPath(server, NULL, "php", NULL);
-	map = NULL;
+	path = Ns_ConfigPath(server, module, NULL);
 	set = Ns_ConfigGetSection(path);
 
 	for(i = 0; set && i < Ns_SetSize(set); i++) {
-		char *key = Ns_SetValue(set, i);
+		char *key = Ns_SetKey(set, i);
+		char *value = Ns_SetValue(set, i);
 
 		if(!strcasecmp(key, "map")) {
-			map = Ns_SetValue(set, i);
-			Ns_RegisterRequest(server, "GET", map, request_handler, NULL, ctx, 0);
-			Ns_RegisterRequest(server, "POST", map, request_handler, NULL, ctx, 0);
-			Ns_RegisterRequest(server, "HEAD", map, request_handler, NULL, ctx, 0);
+			Ns_Log(Notice, "Registering PHP for \"%s\"", value);
+			Ns_RegisterRequest(server, "GET", value, request_handler, NULL, ctx, 0);
+			Ns_RegisterRequest(server, "POST", value, request_handler, NULL, ctx, 0);
+			Ns_RegisterRequest(server, "HEAD", value, request_handler, NULL, ctx, 0);
+		} else if(!strcasecmp(key, "php_value")) {
+			char *val;
+
+			val = strchr(value, ' ');
+			if(val) {
+				char *key_end;
+				
+				key_end = val;
+				
+				do { 
+					val++; 
+				} while(*val == ' ');
+
+				php_alter_ini_entry(key, key_end - key, val, strlen(val), PHP_INI_SYSTEM);
+			}
 		}
+		
 	}
 }
 	
