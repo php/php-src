@@ -81,6 +81,17 @@ TSRM_API void tsrm_win32_shutdown(void)
 #endif
 }
 
+TSRM_API int tsrm_win32_access(const char *pathname, int mode)
+{
+	SHFILEINFO sfi;
+	if (mode == 1 /*X_OK*/)
+		return access(pathname, 0)==0 && 
+			SHGetFileInfo(pathname,0,&sfi,sizeof(SHFILEINFO),SHGFI_EXETYPE)!=0?0:-1;
+	else
+		return access(pathname, mode);
+}
+
+
 static process_pair *process_get(FILE *stream TSRMLS_DC)
 {
 	process_pair *ptr;
