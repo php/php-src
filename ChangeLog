@@ -1,3 +1,33 @@
+1999-11-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/config.m4
+      acinclude.m4
+      configure.in
+      ext/standard/config.m4: Enable selective regex library compilation.
+
+    * regex/cclass.h
+      regex/cname.h
+      regex/engine.c
+      regex/regcomp.c
+      regex/regcomp.ih
+      regex/regerror.c
+      regex/regex.h
+      regex/regex2.h
+      regex/regexec.c
+      regex/utils.h: upgrade regex library to alpha3.8
+
+1999-11-12  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c: added missing function-alias
+
+    * ext/oci8/oci8.c: oops, didn't mean to activate this!
+
+    * ext/oci8/oci8.c:    fixed mested-tables again (broke it when resourcified the driver)
+
+1999-11-12  changelog  <changelog@www>
+
+    * NEWS: NEWS update
+
 1999-11-11  Rasmus Lerdorf  <rasmus@php.net>
 
     * MAINTAINERS:
