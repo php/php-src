@@ -367,7 +367,7 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #endif
 
 
-#define PHP_NOT_IN_THIS_BUILD { \
+#define PHP_NOT_IN_THIS_BUILD() { \
   php_error(E_WARNING, "%s: not supported in this PHP build",get_active_function_name()); \
   RETURN_FALSE; \
 }

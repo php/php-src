@@ -179,7 +179,7 @@ PHP_FUNCTION(crypt)
 	return_value->type = IS_STRING;
 	pval_copy_constructor(return_value);
 #else
-    PHP_NOT_IN_THIS_BUILD;
+    PHP_NOT_IN_THIS_BUILD();
 #endif /* HAVE_CRYPT */
 }
 /* }}} */

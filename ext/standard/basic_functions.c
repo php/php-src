@@ -872,7 +872,7 @@ PHP_FUNCTION(putenv)
 		}
 	}
 #else
-    PHP_NOT_IN_THIS_BUILD;
+    PHP_NOT_IN_THIS_BUILD();
 #endif
 }
 /* }}} */

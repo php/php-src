@@ -134,7 +134,7 @@ PHP_FUNCTION(getrusage)
 	PHP_RUSAGE_PARA(ru_stime.tv_sec);
 #undef PHP_RUSAGE_PARA
 #else
-    PHP_NOT_IN_THIS_BUILD;
+    PHP_NOT_IN_THIS_BUILD();
 #endif /* HAVE_GETRUSAGE */
 }
 
