@@ -806,7 +806,7 @@ static void call_overloaded_function(int arg_count, zval *return_value, HashTabl
 }
 
 
-#if HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)
+#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && (WINNT|WIN32))
 #	define free_alloca(p)
 #else
 #	define alloca(p)		emalloc(p)
