@@ -2649,7 +2649,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 			)
 		);
 
-		smart_str_append_unsigned(&hashed_details, charsetid);
+		smart_str_append_unsigned_ex(&hashed_details, charsetid, 1);
 
 		charsetid = 0;
 	}
