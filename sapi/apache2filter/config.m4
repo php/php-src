@@ -31,6 +31,16 @@ AC_ARG_WITH(apxs2,
     AC_MSG_ERROR([Aborting])
   fi 
 
+  APXS_HTTPD=`$APXS -q SBINDIR`/`$APXS -q TARGET`
+
+  # Test that we're trying to configure with apache 2.x
+  APACHE_VERSION=`$APXS_HTTPD -v | head -1 | cut -f3 -d' ' | cut -f2 -d'/' | awk 'BEGIN { FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
+  if test "$APACHE_VERSION" -le 2000000; then
+    AC_MSG_ERROR([Use --with-apxs with Apache 1.3.x!])
+  elif test "$APACHE_VERSION" -lt 2000035; then
+    AC_MSG_ERROR([Apache version >= 2.0.35 required.])
+  fi
+
   APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
   APXS_CFLAGS=`$APXS -q CFLAGS`
   for flag in $APXS_CFLAGS; do
@@ -38,11 +48,6 @@ AC_ARG_WITH(apxs2,
     -D*) CPPFLAGS="$CPPFLAGS $flag";;
     esac
   done
-  
-  # Test that we're trying to configure with apache 2.x
-  if test ! -f "$APXS_INCLUDEDIR/ap_mpm.h"; then
-    AC_MSG_ERROR([Use --with-apxs with Apache 1.3.x!])
-  fi
 
   PHP_ADD_INCLUDE($APXS_INCLUDEDIR)
   PHP_SAPI=apache2filter
