@@ -950,11 +950,13 @@ static void php_putenv_destructor(putenv_entry *pe)
 		}
 # endif
 	}
+#ifdef HAVE_TZSET
 	/* don't forget to reset the various libc globals that
 	 * we might have changed by an earlier call to tzset(). */
 	if (!strncmp(pe->key, "TZ", pe->key_len)) {
 		tzset();
 	}
+#endif
 		
 	efree(pe->putenv_string);
 	efree(pe->key);
