@@ -12,7 +12,6 @@ AC_ARG_WITH(pcre-regex,
     	AC_MSG_RESULT(no) ;;
     yes)
         EXTRA_LIBS="-Lext/pcre/pcrelib -lpcre $EXTRA_LIBS"
-  dnl  	INCLUDES="-Iext/pcre/pcrelib $INCLUDES"
         PCRE_SUBDIR="pcrelib"
     	AC_DEFINE(HAVE_PCRE, 1)
         AC_DEFINE(HAVE_BUNDLED_PCRE, 1)
@@ -36,7 +35,6 @@ AC_ARG_WITH(pcre-regex,
   esac
 ],[
   EXTRA_LIBS="-Lext/pcre/pcrelib -lpcre $EXTRA_LIBS"
-dnl  INCLUDES="-Iext/pcre/pcrelib $INCLUDES"
   PCRE_SUBDIR="pcrelib"
   AC_DEFINE(HAVE_PCRE, 1)
   AC_DEFINE(HAVE_BUNDLED_PCRE, 1)
