@@ -1,3 +1,135 @@
+2004-04-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ext/standard/array.c
+      ext/standard/tests/array/bug27782.phpt:
+      MFB: Revert patch for bug #27782.
+
+    * (PHP_4_3)
+      Zend/zend_execute.c
+      tests/lang/bug27731.phpt:
+      MFH: Fixed reversed condition for error reporting.
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug27731.phpt:
+      Fixed reversed condition for error reporting.
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+2004-04-01  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/parsedate.y
+      ext/standard/tests/time/bug27780.phpt:
+      - MFB: Fixed bug #27780 (strtotime(+1 xxx) returns a wrong date/time)
+
+2004-04-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Prepare for 4.3.6RC1.
+
+2004-04-01  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/tests/time/bug27780.phpt
+      ext/standard/tests/time/bug27780.phpt:
+      
+      file bug27780.phpt was initially added on branch PHP_4_3.
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/parsedate.y:
+      - Fixed bug #27780 (strtotime(+1 xxx) returns a wrong date/time)
+
+2004-04-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/array.c
+      ext/standard/tests/array/bug27782.phpt:
+      Revert patch for bug #27782.
+
+    * (PHP_4_3)
+      Zend/zend_builtin_functions.c:
+      Revert patch for bug #27782.
+      
+
+2004-04-01  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/tests/003.phpt
+      ext/interbase/tests/interbase.inc:
+      CS/WS
+
+2004-04-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * tests/lang/bug27819.phpt
+      tests/lang/bug27819.phpt:
+      
+      file bug27819.phpt was initially added on branch PHP_4_3.
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news & test for bug #27819.
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      MFH: Fixed bug #27819 (problems returning reference to a reference
+      parameter).
+
+2004-04-01  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/tests/006.phpt:
+      Test binding of numeric timestamps
+
+    * ext/interbase/tests/002.phpt
+      ext/interbase/tests/005.phpt
+      ext/interbase/tests/interbase.inc
+      ext/interbase/tests/skipif.inc:
+      Don't rely on isql anymore, as creating databases is now supported by the
+      API
+      Changed tests to include ibase_query("SET TRANSACTION ...")
+
+2004-04-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS:
+      Fixed bug #27722 (Segfault on schema without targetNamespace).
+
+2004-04-01  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      WS
+
+    * ext/interbase/interbase.c:
+      Fix unregistered bug (crash when closing db opened with "CREATE DATABASE
+      ...")
+
+2004-04-01  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/type.c
+      ext/standard/tests/general_functions/is_resource.phpt:
+      - MFH: Fixed bug #27822 (is_resource() returns TRUE for closed resources)
+
+    * ext/standard/type.c:
+      - Fixed bug #27822 (is_resource() returns TRUE for closed resources)
+
+    * ext/standard/tests/general_functions/is_resource.phpt:
+      
+      - Fixed bug #27822 (is_resource() returns TRUE for closed resources)
+
+2004-04-01  Sara Golemon  <php@alphaweb.net>
+
+    * main/streams/filter.c:
+      Only wind filters when appending to the read chain.
+
+    * main/streams/streams.c:
+      This leaks when a stream opener proxy opens another stream.
+
 2004-03-31  Sara Golemon  <php@alphaweb.net>
 
     * NEWS
