@@ -48,6 +48,7 @@ extern zend_module_entry pgsql_module_entry;
 PHP_MINIT_FUNCTION(pgsql);
 PHP_MSHUTDOWN_FUNCTION(pgsql);
 PHP_RINIT_FUNCTION(pgsql);
+PHP_RSHUTDOWN_FUNCTION(pgsql);
 PHP_MINFO_FUNCTION(pgsql);
 PHP_FUNCTION(pg_connect);
 PHP_FUNCTION(pg_pconnect);
