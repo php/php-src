@@ -139,11 +139,15 @@ function_entry mnogosearch_functions[] = {
 	PHP_FE(udm_check_charset,	NULL)
 #endif
 
-#if UDM_VERSION_ID >= 30203			
+#if UDM_VERSION_ID >= 30203
 	PHP_FE(udm_crc32,	NULL)
 	PHP_FE(udm_open_stored,	NULL)
 	PHP_FE(udm_check_stored,NULL)
 	PHP_FE(udm_close_stored,NULL)
+#endif
+
+#if UDM_VERSION_ID >= 30204
+	PHP_FE(udm_parse_query_string,NULL)
 #endif
 
 	PHP_FE(udm_alloc_agent,		NULL)
@@ -399,19 +403,33 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 				}
 				convert_to_string_ex(yydbaddr);
 				dbaddr = Z_STRVAL_PP(yydbaddr);
-				
+			
+#if UDM_VERSION_ID >= 30204
+				Env=UdmEnvInit(NULL);
+				if(!memcmp(dbaddr,"searchd:",8)){
+					UDM_URL	Url;
+					UdmURLParse(&Url,dbaddr);
+					UdmDBListAdd(&Env->sdcl,Url.hostinfo);
+				}
+				UdmVarListReplaceStr(&Env->Vars,"DBAddr",dbaddr);
+				if(UDM_OK!=UdmDBSetAddr(Env->db,dbaddr,UDM_OPEN_MODE_READ)){
+				    sprintf(Env->errstr,"Invalid DBAddr: '%s'",dbaddr);
+				    Env->errcode=1;
+				    php_error(E_WARNING,"Udm_Alloc_Agent: Invalid DBAddr");
+				    RETURN_FALSE;
+				}
+				Agent=UdmAgentInit(NULL,Env,0);
+#elif UDM_VERSION_ID >= 30200
 				Env=UdmAllocEnv();
-				
-#if UDM_VERSION_ID >= 30200
 				Env->vars=UdmAllocVarList();
 				Env->DBAddr=strdup(dbaddr);
 				UdmEnvSetDBMode(Env,"single");
-#else				
-				UdmEnvSetDBAddr(Env,dbaddr);
-#endif							
-								
 				Agent=UdmAllocAgent(Env,0,UDM_OPEN_MODE_READ);
-				
+#else				
+				Env=UdmAllocEnv();
+				UdmEnvSetDBAddr(Env,dbaddr);
+				Agent=UdmAllocAgent(Env,0,UDM_OPEN_MODE_READ);
+#endif							
 				ZEND_REGISTER_RESOURCE(return_value,Agent,le_link);
 			}
 			break;
@@ -432,18 +450,33 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 				dbaddr = Z_STRVAL_PP(yydbaddr);
 				dbmode = Z_STRVAL_PP(yydbmode);
 				
-				Env=UdmAllocEnv();				
-#if UDM_VERSION_ID >= 30200
+#if UDM_VERSION_ID >= 30204
+				Env=UdmEnvInit(NULL);
+				if(!memcmp(dbaddr,"searchd:",8)){
+					UDM_URL	Url;
+					UdmURLParse(&Url,dbaddr);
+					UdmDBListAdd(&Env->sdcl,Url.hostinfo);
+				}
+				UdmVarListReplaceStr(&Env->Vars,"DBAddr",dbaddr);
+				if(UDM_OK!=UdmDBSetAddr(Env->db,dbaddr,UDM_OPEN_MODE_READ)){
+				    sprintf(Env->errstr,"Invalid DBAddr: '%s'",dbaddr);
+				    Env->errcode=1;
+				    php_error(E_WARNING,"Udm_Alloc_Agent: Invalid DBAddr");
+				    RETURN_FALSE;
+				}
+				Agent=UdmAgentInit(NULL,Env,0);
+#elif UDM_VERSION_ID >= 30200
+				Env=UdmAllocEnv();
 				Env->vars=UdmAllocVarList();
 				Env->DBAddr=strdup(dbaddr);
 				UdmEnvSetDBMode(Env,dbmode);
-#else				
-				UdmEnvSetDBAddr(Env,dbaddr);
-				UdmEnvSetDBMode(Env,dbmode);				
-#endif							
-
 				Agent=UdmAllocAgent(Env,0,UDM_OPEN_MODE_READ);
-				
+#else
+				Env=UdmAllocEnv();				
+				UdmEnvSetDBAddr(Env,dbaddr);
+				UdmEnvSetDBMode(Env,dbmode);
+				Agent=UdmAllocAgent(Env,0,UDM_OPEN_MODE_READ);
+#endif
 				ZEND_REGISTER_RESOURCE(return_value,Agent,le_link);
 			}
 			break;
@@ -485,66 +518,110 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 	
 	switch(var){
 		case UDM_PARAM_PAGE_SIZE: 
+#if UDM_VERSION_ID >= 30204
+			UdmVarListAddInt(&Agent->Conf->Vars,"ps",atoi(val));
+#else
 			Agent->page_size=atoi(val);
 			if(Agent->page_size<1)Agent->page_size=20;
-			
+#endif
 			break;
 			
 		case UDM_PARAM_PAGE_NUM: 
+#if UDM_VERSION_ID >= 30204
+			UdmVarListAddInt(&Agent->Conf->Vars,"np",atoi(val));
+#else
 			Agent->page_number=atoi(val);
 			if(Agent->page_number<0)Agent->page_number=0;
-			
+#endif
 			break;
-			
+
 		case UDM_PARAM_SEARCH_MODE:
 			switch (atoi(val)){
 					case UDM_MODE_ALL:
+#if UDM_VERSION_ID >= 30204
+						UdmVarListReplaceStr(&Agent->Conf->Vars,"m","all");
+#else
 						Agent->search_mode=UDM_MODE_ALL;
+#endif
 						break;
 						
 					case UDM_MODE_ANY:
+#if UDM_VERSION_ID >= 30204
+						UdmVarListReplaceStr(&Agent->Conf->Vars,"m","any");
+#else
 						Agent->search_mode=UDM_MODE_ANY;
+#endif
 						break;
 						
 					case UDM_MODE_BOOL: 
+#if UDM_VERSION_ID >= 30204
+						UdmVarListReplaceStr(&Agent->Conf->Vars,"m","all");
+#else
 						Agent->search_mode=UDM_MODE_BOOL;
+#endif
 						break;
 
 					case UDM_MODE_PHRASE: 
+#if UDM_VERSION_ID >= 30200
+    						php_error(E_WARNING,"Udm_Set_Agent_Param: Unknown search mode");
+						RETURN_FALSE;
+#else
 						Agent->search_mode=UDM_MODE_PHRASE;
+#endif
 						break;
 						
 					default:
+#if UDM_VERSION_ID >= 30204
+						UdmVarListReplaceStr(&Agent->Conf->Vars,"m","all");
+#else
 						Agent->search_mode=UDM_MODE_ALL;
-						
-						php_error(E_WARNING,"Udm_Set_Agent_Param: Unknown search mode");						
+#endif						
+						php_error(E_WARNING,"Udm_Set_Agent_Param: Unknown search mode");
 						RETURN_FALSE;
 						break;
 			}
-			
 			break;
 
 		case UDM_PARAM_WORD_MATCH:
 			switch (atoi(val)){
 					case UDM_MATCH_WORD:					
+#if UDM_VERSION_ID >= 30204
+						UdmVarListReplaceStr(&Agent->Conf->Vars,"wm","wrd");
+#else
 						Agent->word_match=UDM_MATCH_WORD;
+#endif
 						break;
 
 					case UDM_MATCH_BEGIN:
+#if UDM_VERSION_ID >= 30204
+						UdmVarListReplaceStr(&Agent->Conf->Vars,"wm","beg");
+#else
 						Agent->word_match=UDM_MATCH_BEGIN;
+#endif
 						break;
 
 					case UDM_MATCH_END:
+#if UDM_VERSION_ID >= 30204
+						UdmVarListReplaceStr(&Agent->Conf->Vars,"wm","end");
+#else
 						Agent->word_match=UDM_MATCH_END;
+#endif
 						break;
 
 					case UDM_MATCH_SUBSTR:
+#if UDM_VERSION_ID >= 30204
+						UdmVarListReplaceStr(&Agent->Conf->Vars,"wm","sub");
+#else
 						Agent->word_match=UDM_MATCH_SUBSTR;
+#endif
 						break;
 						
 					default:
+#if UDM_VERSION_ID >= 30204
+						UdmVarListReplaceStr(&Agent->Conf->Vars,"wm","wrd");
+#else
 						Agent->word_match=UDM_MATCH_WORD;
-						
+#endif						
 						php_error(E_WARNING,"Udm_Set_Agent_Param: Unknown word match mode");
 						RETURN_FALSE;
 						break;
@@ -553,9 +630,11 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 		case UDM_PARAM_CACHE_MODE: 
 			switch (atoi(val)){
 				case UDM_CACHE_ENABLED:
-#if UDM_VERSION_ID < 30200				
+#if UDM_VERSION_ID < 30200
 					Agent->cache_mode=UDM_CACHE_ENABLED;
-#else					
+#elif UDM_VERSION_ID >= 30204
+					UdmVarListReplaceStr(&Agent->Conf->Vars,"Cache","yes");
+#else		
 					UdmReplaceStrVar(Agent->Conf->vars,"Cache","yes",UDM_VARSRC_GLOBAL);
 #endif
 					break;
@@ -563,6 +642,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 				case UDM_CACHE_DISABLED:
 #if UDM_VERSION_ID < 30200								
 					Agent->cache_mode=UDM_CACHE_DISABLED;
+#elif UDM_VERSION_ID >= 30204
+					UdmVarListReplaceStr(&Agent->Conf->Vars,"Cache","no");
 #else										
 					UdmReplaceStrVar(Agent->Conf->vars,"Cache","no",UDM_VARSRC_GLOBAL);
 #endif
@@ -571,6 +652,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 				default:
 #if UDM_VERSION_ID < 30200												
 					Agent->cache_mode=UDM_CACHE_DISABLED;
+#elif UDM_VERSION_ID >= 30204
+					UdmVarListReplaceStr(&Agent->Conf->Vars,"Cache","no");
 #else									
 					UdmReplaceStrVar(Agent->Conf->vars,"Cache","no",UDM_VARSRC_GLOBAL);
 #endif						
@@ -586,6 +669,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 				case UDM_TRACK_ENABLED:
 #if UDM_VERSION_ID < 30200												
 					Agent->track_mode|=UDM_TRACK_QUERIES;
+#elif UDM_VERSION_ID >= 30204
+					UdmVarListReplaceStr(&Agent->Conf->Vars,"TrackQuery","yes");
 #else
 					UdmReplaceStrVar(Agent->Conf->vars,"TrackQuery","yes",UDM_VARSRC_GLOBAL);
 #endif
@@ -594,6 +679,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 				case UDM_TRACK_DISABLED:
 #if UDM_VERSION_ID < 30200						
 					Agent->track_mode &= ~(UDM_TRACK_QUERIES);    
+#elif UDM_VERSION_ID >= 30204
+					UdmVarListReplaceStr(&Agent->Conf->Vars,"TrackQuery","no");
 #else
 					UdmReplaceStrVar(Agent->Conf->vars,"TrackQuery","no",UDM_VARSRC_GLOBAL);
 #endif
@@ -603,6 +690,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 				default:
 #if UDM_VERSION_ID < 30200						
 					Agent->track_mode &= ~(UDM_TRACK_QUERIES);    
+#elif UDM_VERSION_ID >= 30204
+					UdmVarListReplaceStr(&Agent->Conf->Vars,"TrackQuery","no");
 #else
 					UdmReplaceStrVar(Agent->Conf->vars,"TrackQuery","no",UDM_VARSRC_GLOBAL);
 #endif				
@@ -633,7 +722,6 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			break;
 
 		case UDM_PARAM_ISPELL_PREFIXES: 
-
 			switch (atoi(val)){
 				case UDM_PREFIXES_ENABLED:
 #if UDM_VERSION_ID < 30200								
@@ -1256,6 +1344,37 @@ DLEXPORT PHP_FUNCTION(udm_check_stored)
 	if (UdmRecvAll(s, &store_found, sizeof(store_found), MSG_WAITALL) < 0) {
 	    RETURN_LONG(store_found);
 	} else RETURN_FALSE;
+}
+/* }}} */
+#endif
+
+#if UDM_VERSION_ID >= 30204
+/* {{{ proto int udm_parse_query_string(int agent, string str)
+   Parses query string, initialises variables and search limits taken from it */
+DLEXPORT PHP_FUNCTION(udm_parse_query_string)
+{
+	pval ** yystr, ** yyagent;
+	char *str;
+	UDM_AGENT * Agent;
+	int id=-1;
+
+	switch(ZEND_NUM_ARGS()){
+		case 2: {
+				if (zend_get_parameters_ex(2, &yyagent,&yystr)==FAILURE) {
+					RETURN_FALSE;
+				}
+			}
+			break;
+		default:				
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
+	convert_to_string_ex(yystr);
+	str = Z_STRVAL_PP(yystr);
+
+	UdmParseQueryString(Agent,&Agent->Conf->Vars,str);
+	RETURN_TRUE;
 }
 /* }}} */
 #endif
