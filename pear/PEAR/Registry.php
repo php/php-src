@@ -70,9 +70,9 @@ class PEAR_Registry extends PEAR
     {
         parent::PEAR();
         $ds = DIRECTORY_SEPARATOR;
-        $this->statedir = $pear_install_dir.$ds.".registry";
-        $this->filemap  = $pear_install_dir.$ds.".filemap";
-        $this->lockfile = $pear_install_dir.$ds.".lock";
+        $this->statedir = $pear_install_dir.$ds.'.registry';
+        $this->filemap  = $pear_install_dir.$ds.'.filemap';
+        $this->lockfile = $pear_install_dir.$ds.'.lock';
         if (!file_exists($this->filemap)) {
             $this->_rebuildFileMap();
         }
@@ -161,8 +161,8 @@ class PEAR_Registry extends PEAR
         $packages = $this->listPackages();
         $files = array();
         foreach ($packages as $package) {
-            $version = $this->packageInfo($package, "version");
-            $filelist = $this->packageInfo($package, "filelist");
+            $version = $this->packageInfo($package, 'version');
+            $filelist = $this->packageInfo($package, 'filelist');
             if (!is_array($filelist)) {
                 continue;
             }
@@ -180,7 +180,7 @@ class PEAR_Registry extends PEAR
             }
         }
         $this->_assertStateDir();
-        $fp = @fopen($this->filemap, "w");
+        $fp = @fopen($this->filemap, 'w');
         if (!$fp) {
             return false;
         }
@@ -192,19 +192,27 @@ class PEAR_Registry extends PEAR
     // }}}
     // {{{ _lock()
 
+    /**
+     * Lock the registry.
+     *
+     * @param integer lock mode, one of LOCK_EX, LOCK_SH or LOCK_UN.
+     *                See flock manual for more information.
+     *
+     * @return bool TRUE on success, FALSE if locking failed, or a
+     *              PEAR error if some other error occurs (such as the
+     *              lock file not being writable).
+     *
+     * @access private
+     */
     function _lock($mode = LOCK_EX)
     {
         if ($mode != LOCK_UN && is_resource($this->lock_fp)) {
             // XXX does not check type of lock (LOCK_SH/LOCK_EX)
             return true;
         }
-        $php_dir = dirname($this->lockfile);
-        if (!@is_dir($php_dir) && !System::mkDir("-p $php_dir")) {
-            return false;
-        }
-        $this->lock_fp = @fopen($this->lockfile, "w");
+        $this->lock_fp = @fopen($this->lockfile, 'w');
         if (!is_resource($this->lock_fp)) {
-            return null;
+            return $this->raiseError("could not create lock file: $php_errormsg");
         }
         return (int)flock($this->lock_fp, $mode);
     }
@@ -233,10 +241,10 @@ class PEAR_Registry extends PEAR
     function _packageInfo($package = null, $key = null)
     {
         if ($package === null) {
-            return array_map(array($this, "_packageInfo"),
+            return array_map(array($this, '_packageInfo'),
                              $this->_listPackages());
         }
-        $fp = $this->_openPackageFile($package, "r");
+        $fp = $this->_openPackageFile($package, 'r');
         if ($fp === null) {
             return null;
         }
@@ -263,7 +271,7 @@ class PEAR_Registry extends PEAR
             return $pkglist;
         }
         while ($ent = readdir($dp)) {
-            if ($ent{0} == "." || substr($ent, -4) != ".reg") {
+            if ($ent{0} == '.' || substr($ent, -4) != '.reg') {
                 continue;
             }
             $pkglist[] = substr($ent, 0, -4);
@@ -278,7 +286,7 @@ class PEAR_Registry extends PEAR
     function packageExists($package)
     {
         if (!$this->_lock(LOCK_SH)) {
-            return $this->raiseError("could not acquire shared lock", PEAR_REGISTRY_ERROR_LOCK);
+            return $this->raiseError("could not acquire shared lock ($this->lockfile)", PEAR_REGISTRY_ERROR_LOCK, null, null, "lockfile=$this->lockfile");
         }
         $ret = $this->_packageExists($package);
         $this->_unlock();
@@ -291,7 +299,7 @@ class PEAR_Registry extends PEAR
     function packageInfo($package = null, $key = null)
     {
         if (!$this->_lock(LOCK_SH)) {
-            return $this->raiseError("could not acquire shared lock", PEAR_REGISTRY_ERROR_LOCK);
+            return $this->raiseError("could not acquire shared lock ($this->lockfile)", PEAR_REGISTRY_ERROR_LOCK, null, null, "lockfile=$this->lockfile");
         }
         $ret = $this->_packageInfo($package, $key);
         $this->_unlock();
@@ -304,7 +312,7 @@ class PEAR_Registry extends PEAR
     function listPackages()
     {
         if (!$this->_lock(LOCK_SH)) {
-            return $this->raiseError("could not acquire shared lock", PEAR_REGISTRY_ERROR_LOCK);
+            return $this->raiseError("could not acquire shared lock ($this->lockfile)", PEAR_REGISTRY_ERROR_LOCK, null, null, "lockfile=$this->lockfile");
         }
         $ret = $this->_listPackages();
         $this->_unlock();
@@ -320,9 +328,9 @@ class PEAR_Registry extends PEAR
             return false;
         }
         if (!$this->_lock(LOCK_EX)) {
-            return $this->raiseError("could not acquire exclusive lock", PEAR_REGISTRY_ERROR_LOCK);
+            return $this->raiseError("could not acquire exclusive lock ($this->lockfile)", PEAR_REGISTRY_ERROR_LOCK, null, null, "lockfile=$this->lockfile");
         }
-        $fp = $this->_openPackageFile($package, "w");
+        $fp = $this->_openPackageFile($package, 'w');
         if ($fp === null) {
             $this->_unlock();
             return false;
@@ -339,7 +347,7 @@ class PEAR_Registry extends PEAR
     function deletePackage($package)
     {
         if (!$this->_lock(LOCK_EX)) {
-            return $this->raiseError("could not acquire exclusive lock", PEAR_REGISTRY_ERROR_LOCK);
+            return $this->raiseError("could not acquire exclusive lock ($this->lockfile)", PEAR_REGISTRY_ERROR_LOCK, null, null, "lockfile=$this->lockfile");
         }
         $file = $this->_packageFileName($package);
         $ret = @unlink($file);
@@ -358,12 +366,12 @@ class PEAR_Registry extends PEAR
             return false;
         }
         if (!$this->_lock(LOCK_EX)) {
-            return $this->raiseError("could not acquire exclusive lock", PEAR_REGISTRY_ERROR_LOCK);
+            return $this->raiseError("could not acquire exclusive lock ($this->lockfile)", PEAR_REGISTRY_ERROR_LOCK, null, null, "lockfile=$this->lockfile");
         }
         if (!file_exists($this->filemap)) {
             $this->_rebuildFileMap();
         }
-        $fp = $this->_openPackageFile($package, "w");
+        $fp = $this->_openPackageFile($package, 'w');
         if ($fp === null) {
             $this->_unlock();
             return false;
