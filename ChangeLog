@@ -1,3 +1,80 @@
+2003-09-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/sqlite.c:
+      Omitting is also possible here
+
+    * ext/sqlite/sqlite.c:
+      WS
+
+    * ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_profiler.c
+      ext/mysqli/mysqli_profiler.h:
+      Fix warnings
+
+2003-09-05  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/tests/003.phpt
+      ext/interbase/tests/004.phpt
+      ext/interbase/tests/005.phpt
+      ext/interbase/tests/006.phpt
+      ext/interbase/tests/007.phpt:
+      Add missing CVS Ids
+
+2003-09-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Simplify reflection_property::__constructor() and fix property factory
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Don't use resorved words as variable names.
+      - Improve several exception messages.
+      - Fix Reflection_Property::_construct() / getDeclaringClass()
+
+2003-09-05  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Be more relaxed about dimensions of array arguments
+
+2003-09-05  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      grouped DBX stuff
+
+2003-09-05  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/tests/007.phpt:
+      Test array handling
+
+    * ext/interbase/tests/006.phpt:
+      Make the test fail if anything goes wrong :-)
+      Some CS
+
+2003-09-05  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * NEWS:
+      Added updates to dbx module to NEWS by hand as @ doesn't work
+      according to Jani (since when is this?).
+
+2003-09-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fix reflection_api::__construct() (noticed by Andrey)
+
+    * ZendEngine2/zend_default_classes.c:
+      Provide string casting for exceptions by calling toString()
+
+2003-09-05  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx.c
+      ext/dbx/dbx.h
+      ext/dbx/php_dbx.h
+      ext/dbx/tests/002.phpt
+      ext/dbx/tests/005.phpt
+      ext/dbx/tests/010.phpt:
+      Added DBX_RESULT_UNBUFFERED flag for dbx_query.
+      Added dbx_fetch_row() function.
+      Added/updated tests for both.
+
 2003-09-04  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
 
     * ext/interbase/interbase.c:
