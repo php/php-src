@@ -140,7 +140,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 		return;
 	}
 
-	cur = xmlNodeListGetString(node->doc, node, 1);
+	cur = xmlNodeGetContent(node);
 	if (cur == NULL) {
 		RETURN_FALSE;
 	}
@@ -264,7 +264,7 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 		return;
 	}
 
-	cur = xmlNodeListGetString(node->doc, node, 1);
+	cur = xmlNodeGetContent(node);
 	if (cur == NULL) {
 		RETURN_FALSE;
 	}
@@ -321,7 +321,7 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 		return;
 	}
 
-	cur = xmlNodeListGetString(node->doc, node, 1);
+	cur = xmlNodeGetContent(node);
 	if (cur == NULL) {
 		RETURN_FALSE;
 	}
