@@ -10,14 +10,14 @@ Accessing children nodes
 
         function dump_nodes(tidy_node $node) {
 
-            var_dump($node->has_children());
-            if($node->has_children()) {
+            var_dump($node->hasChildren());
+            if($node->hasChildren()) {
 
                 foreach($node->child as $c) {
 
                     var_dump($c);
 
-                    if($c->has_children()) {
+                    if($c->hasChildren()) {
 
                         dump_nodes($c);
 
