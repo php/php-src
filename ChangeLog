@@ -1,3 +1,72 @@
+2003-06-09  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h
+      ext/xsl/xsltprocessor.c:
+      changes for /ext/dom document ref count
+      changes for /ext/dom internal object handling
+
+    * ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/characterdata.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/documenttype.c
+      ext/dom/domimplementation.c
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/node.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/dom/processinginstruction.c
+      ext/dom/text.c
+      ext/dom/xml_common.h:
+      implmentation of document ref counting for persistance
+      re-work of internal object handling
+
+2003-06-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/bug24098.phpt:
+      Fixed bug #24098 (Crash in pathinfo() due to double var initialization).
+      
+
+2003-06-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2003-06-09  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/gd/config.m4:
+      Fixed trivial typo
+
+2003-06-09  Edin Kadribasic  <edink@proventum.net>
+
+    * main/config.w32.h:
+      MFB
+
+    * (PHP_4_3)
+      main/config.w32.h:
+      Fix for #24022
+
+2003-06-09  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      the blame..:)
+
+    * acinclude.m4
+      scan_makefile_in.awk
+      build/scan_makefile_in.awk
+      scripts/Makefile.frag
+      scripts/phpize.in:
+      - Moved scan_makefile_in.awk to better suitable place for it.
+        (other build related scripts are under build/ too..)
+
 2003-06-08  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/openssl/openssl.c:
