@@ -2102,7 +2102,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 			break;
 		}
 
-		if (decoded_header.c != NULL) {
+		if (decoded_header.c == NULL) {
 			break;
 		}
 
