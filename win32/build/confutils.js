@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.12 2003-12-04 02:12:36 wez Exp $
+// $Id: confutils.js,v 1.13 2003-12-04 02:24:23 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -602,10 +602,10 @@ function ADD_SOURCES(dir, file_list, target)
 
 	var sub_build = "$(BUILD_DIR)\\";
 
-	if (target != "php") {
+//	if (target != "php") {
 		build_dirs[build_dirs.length] = target;
 		sub_build += target + "\\";
-	}
+//	}
 	DEFINE("CFLAGS_BD_" + target.toUpperCase(), "/Fo" + sub_build + " /Fd" + sub_build + " /Fp" + sub_build + " /FR" + sub_build + " ");
 
 	for (i in file_list) {
