@@ -382,7 +382,7 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len, zend_bool 
 
 	/* Check the header for a few cases that we have special support for in SAPI */
 	if (header_line_len>=5 
-		&& !memcmp(header_line, "HTTP/", 5)) {
+		&& !strncasecmp(header_line, "HTTP/", 5)) {
 		/* filter out the response code */
 		SG(sapi_headers).http_response_code = sapi_extract_response_code(header_line);
 		SG(sapi_headers).http_status_line = header_line;
