@@ -2407,7 +2407,7 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 		property->type = IS_NULL;
 	}
 
-	zend_declare_property(CG(active_class_entry), var_name->u.constant.value.str.val, var_name->u.constant.value.str.len, property, access_type);
+	zend_declare_property(CG(active_class_entry), var_name->u.constant.value.str.val, var_name->u.constant.value.str.len, property, access_type TSRMLS_CC);
 	efree(var_name->u.constant.value.str.val);
 }
 
