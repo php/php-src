@@ -1167,7 +1167,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	
 	convert_to_string_ex(file);
 
-	if (argc == 4 && image_type == PHP_GDIMG_TYPE_GD2PART) {
+	if (argc == 5 && image_type == PHP_GDIMG_TYPE_GD2PART) {
 		multi_convert_to_long_ex(4, srcx, srcy, width, height);
 	}
 	
