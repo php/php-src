@@ -208,7 +208,6 @@ PHP_FUNCTION(mhash)
 PHP_FUNCTION(mhash_keygen_s2k)
 {
 	pval **hash, **input_password, **bytes, **input_salt;
-	unsigned char *key;
 	int password_len, salt_len;
 	int hashid, size=0, val;
 	KEYGEN keystruct;
