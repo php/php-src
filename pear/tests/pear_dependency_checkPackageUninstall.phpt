@@ -14,6 +14,7 @@ require_once "PEAR/Dependency.php";
 
 // snarfed from pear_registry.phpt
 $reg = new PEAR_Registry;
+@mkdir(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'checkPackagetmp');
 $reg->statedir = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'checkPackagetmp';
 
 $files1 = array(
@@ -149,6 +150,8 @@ function cleanall()
             unlink(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'checkPackagetmp' . DIRECTORY_SEPARATOR . $ent);
         }
     }
+    closedir($dp);
+    rmdir(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'checkPackagetmp');
 }
 
 ?>
