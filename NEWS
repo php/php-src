@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? March 2004, PHP 5 Release Candidate 1
 - Upgraded bundled oniguruma library to version 2.2.2. (Rui, Moriyoshi)
-- Add support for more ISO8601 style datetime formats. (Moriyoshi)
+- Added support for more ISO8601 style datetime formats. (Moriyoshi)
   . Timezone specifier (ex. "20040301T02:00:00+19:00")
   . Week specifier (ex. "1997W021")
 - Renamed php.ini option "zend2.implicit_clone" to 
