@@ -763,8 +763,8 @@ dnl PHP_REQUIRE_CXX
 dnl
 AC_DEFUN([PHP_REQUIRE_CXX],[
   if test -z "$php_cxx_done"; then
-    AC_REQUIRE([AC_PROG_CXX])
-    AC_REQUIRE([AC_PROG_CXXCPP])
+    AC_PROG_CXX
+    AC_PROG_CXXCPP
     php_cxx_done=yes
   fi
 ])
