@@ -1,3 +1,32 @@
+2004-02-13  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/simplexml.c:
+      Fix bug #27237: Working with simplexml crashes apache2
+      object dtor must be used to cleanup iterator data correctly
+      Fix asXML() outputing incorrect node
+
+2004-02-13  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/interbase/interbase.c
+      ext/interbase/tests/003.phpt:
+      Fixed bug #27235 (NUMERIC x.0 field returns empty string on 0)
+      CS/WS
+
+2004-02-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pspell/pspell.c:
+      Fixed compile warnings.
+
+2004-02-13  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/simplexml/php_simplexml.h:
+      Adding mising declaration (needed for Win32 compilation)
+
 2004-02-12  Derick Rethans  <php@derickrethans.nl>
 
     * NEWS
