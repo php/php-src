@@ -18,6 +18,11 @@
 
 /* $Id$ */
 
+#ifndef PHP_PDO_DRIVER_H
+#define PHP_PDO_DRIVER_H
+
+#include "php_pdo.h"
+
 /* forward declarations */
 typedef struct _pdo_dbh_t 	pdo_dbh_t;
 typedef struct _pdo_stmt_t	pdo_stmt_t;
@@ -292,7 +297,7 @@ struct pdo_data_src_parser {
 PDO_API int php_pdo_parse_data_source(const char *data_source,
 		unsigned long data_source_len, struct pdo_data_src_parser *parsed,
 		int nparams);
-
+#endif /* PHP_PDO_DRIVER_H */
 /*
  * Local variables:
  * tab-width: 4
