@@ -28,11 +28,14 @@ mbstring.encoding_translation=1
 ?>
 <?php echo mb_http_input('l').'>'.mb_internal_encoding().'>'.mb_http_output();?>
 
-<?php mb_parse_str("test=&#64;&#65;&#66;&#128;&#129;&#130;&auml;&ouml;&uuml;&euro;&lang;&rang;", $test);
-print_r($test['test']);
+<?php mb_parse_str("test=&#38;&#64;&#65;&#66;&#128;&#129;&#130;&auml;&ouml;&uuml;&euro;&lang;&rang;", $test);
+print_r($test);
 ?>
 ===DONE===
 --EXPECT--
 HTML-ENTITIES>UTF-8>HTML-ENTITIES
-test='&&;&@AB&#128;&#129;&#130;&auml;&ouml;&uuml;&euro;&lang;&rang;'
+Array
+(
+    [test] => &@AB&#128;&#129;&#130;&auml;&ouml;&uuml;&euro;&lang;&rang;
+)
 ===DONE===
