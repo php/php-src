@@ -23,6 +23,9 @@ tidy.default_config=
 		$a->setopt("tab-size", 10);
 		echo "\nNew Value of 'tab-size': ";
 		var_dump($a->getopt("tab-size"));
+		tidy_setopt($a, "tab-size", 12);
+		echo "\nNew Value of 'tab-size': ";
+		var_dump(tidy_getopt($a, "tab-size"));
 	} else {
 		echo "Current Value of 'tidy-mark': ";
 		var_dump(tidy_getopt("tidy-mark"));
@@ -51,3 +54,5 @@ New Value of 'error-file': string(6) "foobar"
 Current Value of 'tab-size': int(8)
 
 New Value of 'tab-size': int(10)
+
+New Value of 'tab-size': int(12)

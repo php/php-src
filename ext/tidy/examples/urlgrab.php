@@ -6,6 +6,8 @@
      * A simple command-line utility to extract all of the URLS contained
      * within <A HREF> tags from a document.
      *
+     * NOTE: Only works with tidy for PHP 4.3.x, please see urlgrab5.php for tidy for PHP 5
+     *
      * By: John Coggeshall <john@php.net>
      *
      * Usage: php urlgrab.php <file>
