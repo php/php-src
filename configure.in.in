@@ -328,7 +328,7 @@ AC_ARG_WITH(apxs,
     APXS="$withval"
     APXS_LDFLAGS="@SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@"
     APACHE_INCLUDE="-I`$APXS -q INCLUDEDIR`"
-    BINNAME=libphp3.so
+    BINNAME=libphp4.so
     INSTALL_IT="\$(APXS) -i -a -n php3 $BINNAME"
     CFLAGS_SHLIB=`perl -V:cccdlflags | cut -d\' -f2`
     LDFLAGS_SHLIB=`perl -V:lddlflags | cut -d\' -f2`
@@ -351,7 +351,7 @@ AC_ARG_WITH(apxs,
 ])
 
 
-APACHE_INSTALL_FILES="$srcdir/mod_php3.* libphp3.module"
+APACHE_INSTALL_FILES="$srcdir/mod_php4.* libphp4.module"
 
 abs_srcdir=`(cd $srcdir; pwd)`
 abs_builddir=`pwd`
@@ -371,7 +371,7 @@ AC_ARG_WITH(shared-apache,
 	if test "$withval" != "no"; then
 	  if test -f $withval/src/include/httpd.h; then
 	    APACHE_INCLUDE="-I$withval/src/include -I$withval/src/os/unix"
-	    APACHE_TARGET=$withval/src/modules/php3
+	    APACHE_TARGET=$withval/src/modules/php4
 		if test ! -d $APACHE_TARGET; then
 			mkdir $APACHE_TARGET
 		fi
@@ -379,7 +379,7 @@ AC_ARG_WITH(shared-apache,
 		LDFLAGS_SHLIB=`perl -V:lddlflags | cut -d\' -f2`
 		LDFLAGS_SHLIB_EXPORT=`perl -V:ccdlflags | cut -d\' -f2`
 		PHP_LIBS=
-	    BINNAME=libmodphp3-so.a
+	    BINNAME=libmodphp4-so.a
 	    INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET; cp apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
 	    AC_DEFINE(APACHE)
 	    AC_MSG_RESULT(yes - Shared Apache 1.3.x)
@@ -414,8 +414,8 @@ AC_ARG_WITH(shared-apache,
 
 
 
-if test "$BINNAME" != "libmodphp3-so.a"; then
-if test "$BINNAME" != "libphp3.so"; then
+if test "$BINNAME" != "libmodphp4-so.a"; then
+if test "$BINNAME" != "libphp4.so"; then
 AC_MSG_CHECKING(for Apache module support)
 AC_ARG_WITH(apache,
 [  --with-apache[=DIR]     Build Apache module.  DIR is the top-level Apache
@@ -430,7 +430,7 @@ AC_ARG_WITH(apache,
 	  if test -f $withval/src/httpd.h; then 
 	    APACHE_INCLUDE=-I$withval/src
 	    APACHE_TARGET=$withval/src
-	    BINNAME=libphp3.a
+	    BINNAME=libphp4.a
 	    INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET"
 	    PHP_LIBS="-L. -lphp3"
 	    AC_DEFINE(APACHE)
@@ -442,13 +442,13 @@ AC_ARG_WITH(apache,
 # For Apache 1.3.x
 	  elif test -f $withval/src/main/httpd.h; then
 	    APACHE_INCLUDE="-I$withval/src/main -I$withval/src/os/unix -I$withval/src/ap"
-	    APACHE_TARGET=$withval/src/modules/php3
+	    APACHE_TARGET=$withval/src/modules/php4
 		if test ! -d $APACHE_TARGET; then
 			mkdir $APACHE_TARGET
 		fi
-	    BINNAME=libmodphp3.a
+	    BINNAME=libmodphp4.a
 	    INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
-	    PHP_LIBS="-Lmodules/php3 -L../modules/php3 -L../../modules/php3 -lmodphp3"
+	    PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
 	    AC_DEFINE(APACHE)
 	    AC_MSG_RESULT(yes - Apache 1.3.x)
 		STRONGHOLD=
@@ -468,12 +468,12 @@ AC_ARG_WITH(apache,
 # Also for Apache 1.3.x
 	  elif test -f $withval/src/include/httpd.h; then
 	    APACHE_INCLUDE="-I$withval/src/include -I$withval/src/os/unix"
-	    APACHE_TARGET=$withval/src/modules/php3
+	    APACHE_TARGET=$withval/src/modules/php4
 		if test ! -d $APACHE_TARGET; then
 			mkdir $APACHE_TARGET
 		fi
-	    BINNAME=libmodphp3.a
-	    PHP_LIBS="-Lmodules/php3 -L../modules/php3 -L../../modules/php3 -lmodphp3"
+	    BINNAME=libmodphp4.a
+	    PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
 	    INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
 	    AC_DEFINE(APACHE)
 	    AC_MSG_RESULT(yes - Apache 1.3.x)
@@ -495,8 +495,8 @@ AC_ARG_WITH(apache,
 	  elif test -f $withval/apache/httpd.h; then
 	    APACHE_INCLUDE=-"I$withval/apache -I$withval/ssl/include"
 	    APACHE_TARGET=$withval/apache
-	    BINNAME=libmodphp3.a
-	    PHP_LIBS="-Lmodules/php3 -L../modules/php3 -L../../modules/php3 -lmodphp3"
+	    BINNAME=libmodphp4.a
+	    PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
 	    INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET"
 		STRONGHOLD=-DSTRONGHOLD=1
 	    AC_DEFINE(APACHE)
@@ -872,7 +872,7 @@ AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME")
 PHP_OS=`uname`
 AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS")
 
-AC_OUTPUT(Makefile libphp3.module
+AC_OUTPUT(Makefile libphp4.module
           scripts/mkextlib regex/Makefile ext/Makefile
           @@EXT_MAKEFILES@@ build-defs.h, [
 ], [

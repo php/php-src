@@ -19,8 +19,8 @@ cd ../php-3.0.x
 make
 make install
 cd ../apache_1.3.x
-./configure --prefix=/www --activate-module=src/modules/php3/libphp3.a
- (The above line is correct!  Yes, we know libphp3.a does not exist at this
+./configure --prefix=/www --activate-module=src/modules/php4/libphp4.a
+ (The above line is correct!  Yes, we know libphp4.a does not exist at this
   stage.  It isn't supposed to.  It will be created.)
 make
  (you should now have an httpd binary which you can copy to your Apache bin dir)
@@ -81,7 +81,7 @@ Installing PHP3 can be done in four simple steps:
 3. Compile and install the files.  Simply type: make install
 
    For the Apache module version this will copy the appropriate files
-   to the src/modules/php3 directory in your Apache distribution if
+   to the src/modules/php4 directory in your Apache distribution if
    you are using Apache 1.3.x.  If you are still running Apache 1.2.x
    these files will be copied directly to the main src directory.
 
@@ -90,7 +90,7 @@ Installing PHP3 can be done in four simple steps:
 
        cd apache_1.3.x
        ./configure --prefix=/<path>/apache \
-                   --activate-module=src/modules/php3/libphp3.a
+                   --activate-module=src/modules/php4/libphp4.a
        make
        make install
 
@@ -103,19 +103,19 @@ Installing PHP3 can be done in four simple steps:
 
    For Apache 1.3.x add:
 
-      AddModule modules/php3/libphp3.a
+      AddModule modules/php4/libphp4.a
 
    For Apache 1.3.x don't do anything else.  Just add this line and then
    run "./Configure" followed by "make".
 
    For Apache 1.2.x add:
 
-      Module php3_module mod_php3.o
+      Module php3_module mod_php4.o
 
-   For Apache 1.2.x you will also have to look in the libphp3.module file,
+   For Apache 1.2.x you will also have to look in the libphp4.module file,
    which was copied to the src directory. The EXTRA_LIBS line in the Apache
    Configuration file needs to be set to use the same libs as specified on
-   the LIBS line in libphp3.module. You also need to make sure to add
+   the LIBS line in libphp4.module. You also need to make sure to add
    "-L." to the beginning of the EXTRA_LIBS line.
 
    So, as an example, your EXTRA_LIBS line might look like:
@@ -123,9 +123,9 @@ Installing PHP3 can be done in four simple steps:
 	EXTRA_LIBS=-L. -lphp3 -lgdbm -ldb -L/usr/local/mysql/lib -lmysqlclient
 
    NOTE: You should not enclose the EXTRA_LIBS line in double-quotes, as it
-   is in the libphp3.module file.
+   is in the libphp4.module file.
 
-   Also, look at the RULE_WANTHSREGEX setting in the libphp3.module file 
+   Also, look at the RULE_WANTHSREGEX setting in the libphp4.module file 
    and set the WANTHSREGEX directive accordingly in your Configuration file.
    This last step applies to versions of Apache prior to 1.3b3.
 

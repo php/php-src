@@ -1,4 +1,4 @@
-Name: php3_module
+Name: php4_module
 ConfigStart
 	RULE_WANTHSREGEX=@HSREGEX@
 	LIBS="@PHP_LIBS@ @EXTRA_LIBS@ @LIBS@ @RDYNAMIC_LFLAGS@ $LIBS"

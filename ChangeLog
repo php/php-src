@@ -223,7 +223,7 @@ July 18 1998 Version 3.0.2
   values.
 - Fixed a problem in the browscap module.  Browscap files weren't being read
   properly.
-- Fix -L path in libphp3.module to make ApacheSSL compile without errors
+- Fix -L path in libphp4.module to make ApacheSSL compile without errors
 - Fix StripSlashes so it correctly decodes a \0 to a NUL
 
 July 04 1998 Version 3.0.1
@@ -416,7 +416,7 @@ March 30 1998 Version 3.0 Release Candidate 2
   order to work around the buggy Solaris libc (and possibly buggy libc's
   in other platforms).
 - Fixed a bug in min() and max() with certain arrays.
-- *WARNING* Move Apache 1.3 php3 file install to src/modules/php3 instead of 
+- *WARNING* Move Apache 1.3 php3 file install to src/modules/php4 instead of 
   src/modules/extra.  Make sure you change your AddModule line correctly
   in your Apache Configuration file.  This change is to take advantage of 
   new Apache-1.3 configuration mechanism which makes it easier to build an
