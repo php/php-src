@@ -540,13 +540,13 @@ PHPAPI void php_trim2(zval **str, zval **what, zval *return_value, int mode TSRM
 }
 /* }}} */
 
-/* {{{ proto string rtrim(string str [, string character_mask])
-   An alias for chop */
+/* {{{ proto string chop(string str [, string character_mask])
+   An alias for rtrim */
 /* }}} */
 
-/* {{{ proto string chop(string str [, string character_mask])
+/* {{{ proto string rtrim(string str [, string character_mask])
    Removes trailing whitespace */
-PHP_FUNCTION(chop)
+PHP_FUNCTION(rtrim)
 {
 	zval **str;
 	zval **what = NULL;
