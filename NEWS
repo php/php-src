@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.0.3RC2
 - Fixed bug #31034 (Problem with non-existing iconv header file). (Derick)
+- Fixed bug #28598 (Lost support for MS Symbol fonts). (Pierre)
 
 29 Nov 2004, PHP 5.0.3RC1
 - Added the %F modifier to *printf to render a non-locale-aware representation
@@ -85,7 +86,6 @@ PHP                                                                        NEWS
 - Fixed bug #29211 (SoapClient doesn't request wsdl through proxy). (Rob)
 - Fixed bug #28817 (Var problem when extending domDocument). (Georg)
 - Fixed bug #28599 (strtotime fails with zero base time). (Derick)
-- Fixed bug #28598 (Lost support for MS Symbol fonts). (Pierre)
 - Fixed bug #28220 (mb_strwidth() returns wrong width values for some hangul
   characters). (Moriyoshi)
 - Fixed bug #28209 (strtotime("now")). (Derick)
