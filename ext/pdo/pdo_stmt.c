@@ -242,7 +242,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 
 	if (param->name) {
 		param->name = estrndup(param->name, param->namelen);
-		zend_hash_update(hash, param->name, param->namelen, param, sizeof(*param), (void**)&pparam);
+		zend_hash_update(hash, param->name, param->namelen+1, param, sizeof(*param), (void**)&pparam);
 	} else {
 		zend_hash_index_update(hash, param->paramno, param, sizeof(*param), (void**)&pparam);
 	}
@@ -554,9 +554,6 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 					&param.parameter, &param.param_type, &param.max_value_len, &param.driver_params)) {
 			return 0;
 		}	
-	} else {
-		/* since we're hashing this, we need the null byte too */
-		param.namelen = name_strlen + 1;
 	}
 
 	if (param.paramno > 0) {
