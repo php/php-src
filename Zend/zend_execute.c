@@ -52,6 +52,37 @@ static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_
 #define EX_T(offset) (*(temp_variable *)((char *) EX(Ts) + offset))
 #define T(offset) (*(temp_variable *)((char *) Ts + offset))
 
+
+/* former zend_execute_locks.h */
+static inline void zend_pzval_lock_func(zval *z)
+{
+	z->refcount++;
+}
+
+
+static inline void zend_pzval_unlock_func(zval *z TSRMLS_DC)
+{
+	z->refcount--;
+	if (!z->refcount) {
+		z->refcount = 1;
+		z->is_ref = 0;
+		EG(garbage)[EG(garbage_ptr)++] = z;
+	}
+}
+
+static inline void zend_clean_garbage(TSRMLS_D)
+{
+	while (EG(garbage_ptr)) {
+		zval_ptr_dtor(&EG(garbage)[--EG(garbage_ptr)]);
+	}
+}
+
+#define PZVAL_UNLOCK(z) zend_pzval_unlock_func(z TSRMLS_CC)
+#define PZVAL_LOCK(z) zend_pzval_lock_func(z)
+#define SELECTIVE_PZVAL_LOCK(pzv, pzn)		if (!((pzn)->u.EA.type & EXT_TYPE_UNUSED)) { PZVAL_LOCK(pzv); }
+
+/* End of zend_execute_locks.h */
+
 static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zval **should_free TSRMLS_DC)
 {
 	switch (node->op_type) {
