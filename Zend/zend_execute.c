@@ -2646,7 +2646,7 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 		NEXT_OPCODE(); /* Never reached */
 	}
 
-	zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) opline->extended_value, NULL);
+	zend_ptr_stack_2_push(&EG(argument_stack), (void *) opline->extended_value, NULL);
 
 	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 
@@ -2790,7 +2790,7 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 		EG(This) = current_this;
 		EG(scope) = current_scope;
 	}
-	zend_ptr_stack_n_pop(&EG(arg_types_stack), 3, &EX(calling_scope), &EX(object), &EX(fbc));
+	zend_ptr_stack_3_pop(&EG(arg_types_stack), &EX(calling_scope), &EX(object), &EX(fbc));
 	
 	EX(function_state).function = (zend_function *) op_array;
 	EG(function_state_ptr) = &EX(function_state);
