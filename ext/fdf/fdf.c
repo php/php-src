@@ -1417,7 +1417,7 @@ PHP_FUNCTION(fdf_remove_item) {
 	
 	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsl", &r_fdf, 
 							 &fieldname, &fieldname_len,
-							 item
+							 &item
 							 )
 	   == FAILURE) {
 		return;
