@@ -710,6 +710,7 @@ PHP_FUNCTION(ftp_get)
 
 	if (!ftp_get(ftp, outstream, remote, xtype, resumepos TSRMLS_CC)) {
 		php_stream_close(outstream);
+		VCWD_UNLINK(local);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -772,6 +773,7 @@ PHP_FUNCTION(ftp_nb_get)
 
 	if ((ret = ftp_nb_get(ftp, outstream, remote, xtype, resumepos TSRMLS_CC)) == PHP_FTP_FAILED) {
 		php_stream_close(outstream);
+		VCWD_UNLINK(local);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_LONG(PHP_FTP_FAILED);
 	}
