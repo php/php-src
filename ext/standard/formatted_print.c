@@ -605,6 +605,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 				case 'e':
 				case 'f':
 					/* XXX not done */
+					convert_to_double_ex(args[argnum]);
 					php_sprintf_appenddouble(&result, &outpos, &size,
 											 Z_DVAL_PP(args[argnum]),
 											 width, padding, alignment,
