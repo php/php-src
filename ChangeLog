@@ -1,3 +1,127 @@
+2004-07-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h:
+      - Add safe_pemalloc()
+
+    * (PHP_4_3)
+      sapi/apache2handler/sapi_apache2.c:
+      - MFH (sapi_apache2.c: 1.41): request_dtor() should be called if a fatal
+        error occurs during activation phase.
+
+    * (PHP_4_3)
+      ext/ctype/ctype.c
+      ext/ctype/ctype.c:
+      - MFH (ctype.c: 1.31): Correct range checks.
+      - MFH (ctype.c: 1.31): Normalize negative values.
+
+    * ext/ctype/ctype.c:
+      - Correct range checks.
+      - Normalize negative values.
+
+    * ext/standard/filters.c:
+      - Cleanups.
+
+    * ext/standard/filters.c
+      ext/standard/filters.c:
+      oops...
+
+2004-07-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS:
+      BFN
+
+    * ext/standard/dl.c:
+      - Need to set handle prior to calling zend_register_module_ex()
+        (Marcus, Kamesh Jayachandran <kameshj at fastmail dot fm>)
+
+2004-07-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_0)
+      ext/iconv/iconv.c:
+      - MFH (iconv.c: 1.119): Fix possible leaks / segfaults in persistent iconv
+        filter.
+
+    * ext/iconv/iconv.c:
+      - Fix possible leaks / segfaults in persistent filter
+
+2004-07-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Fixed bug 28895 again (long live the dead)
+
+2004-07-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_0)
+      ext/standard/filters.c:
+      - MFH (filters.c: 1.41): Add more null checks.
+
+    * ext/standard/filters.c:
+      - Add more null checks.
+
+    * (PHP_5_0)
+      ext/standard/filters.c:
+      - MFH (filters.c: 1.40): pemalloc() might return NULL
+
+    * ext/standard/filters.c:
+      - pemalloc() might return NULL.
+
+2004-07-20  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_exceptions.c:
+      Fix prototypes
+
+    * ZendEngine2/zend_exceptions.c:
+      Add descriptions
+
+2004-07-20  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      add todo
+
+    * (PHP_5_0)
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_ini_parser.y:
+      export ini parser
+
+2004-07-20  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN: Fixed ReflectionClass::getMethod() and ReflectionClass::getProperty()
+      to raise an ReflectionException instead of returning NULL on failure.
+
+2004-07-20  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      ext/bz2/bz2.c
+      ext/bz2/bz2.dsp
+      ext/bz2/bz2_filter.c
+      ext/bz2/config.m4
+      ext/bz2/config.w32
+      ext/bz2/php_bz2.h
+      ext/bz2/tests/bz2_filter_compress.phpt
+      ext/bz2/tests/bz2_filter_decompress.phpt:
+      Add bz2 stream filter support
+
+    * ext/zlib/zlib_filter.c:
+      Make persistency safe
+
+2004-07-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/ctype/ctype.c
+      ext/ctype/ctype.c:
+      MFH: Fixed bug #29226 (ctype_* functions missing validation of numeric
+      string representations).
+
+    * ext/ctype/ctype.c:
+      Fixed bug #29226 (ctype_* functions missing validation of numeric string
+      representations).
+
 2004-07-19  Frank M. Kromann  <frank@kromann.info>
 
     * ext/ming/ming.c:
