@@ -48,6 +48,9 @@
 static int oci_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
+	HashTable *BC = stmt->bound_columns;
+	HashTable *BP = stmt->bound_params;
+	
 	int i;
 
 	if (S->stmt) {
@@ -64,6 +67,16 @@ static int oci_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		S->err = NULL;
 	}
 
+	if (BC) {
+		zend_hash_destroy(BC);
+		efree(stmt->bound_columns);
+	}
+	
+	if (BP) {
+		zend_hash_destroy(BP);
+		efree(stmt->bound_params);
+	}
+	
 	if (S->cols) {
 		for (i = 0; i < stmt->column_count; i++) {
 			if (S->cols[i].data) {
