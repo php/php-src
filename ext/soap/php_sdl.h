@@ -38,14 +38,20 @@
 #define XSD_WHITESPACE_PRESERVE 1
 #define XSD_WHITESPACE_REPLACE  1
 
-#define BINDING_SOAP 1
-#define BINDING_HTTP 2
+typedef enum _sdlBindingType {
+	BINDING_SOAP = 1,
+	BINDING_HTTP = 2
+} sdlBindingType;
 
-#define SOAP_RPC 1
-#define SOAP_DOCUMENT 2
+typedef enum _sdlEncodingStyle {
+	SOAP_RPC = 1,
+	SOAP_DOCUMENT = 2
+} sdlEncodingStyle;
 
-#define SOAP_ENCODED 1
-#define SOAP_LITERAL 2
+typedef enum _sdlEncodingUse {
+	SOAP_ENCODED = 1,
+	SOAP_LITERAL = 2
+} sdlEncodingUse;
 
 struct _sdl {
 	HashTable  functions;        /* array of sdlFunction */
@@ -74,42 +80,42 @@ typedef struct sdlCtx {
 } sdlCtx;
 
 struct _sdlBinding {
-	char *name;
-	char *location;
-	int   bindingType;
-	void *bindingAttributes; /* sdlSoapBindingPtr */
+	char           *name;
+	char           *location;
+	sdlBindingType  bindingType;
+	void           *bindingAttributes; /* sdlSoapBindingPtr */
 };
 
 /* Soap Binding Specfic stuff */
 struct _sdlSoapBinding {
-	char *transport;
-	int   style;
+	char             *transport;
+	sdlEncodingStyle  style;
 };
 
 typedef struct _sdlSoapBindingFunctionHeader {
-	char       *name;
-	char       *ns;
-	int         use;
-	sdlTypePtr  element;
-	encodePtr   encode;
-	char       *encodingStyle; /* not implemented yet */
+	char           *name;
+	char           *ns;
+	sdlEncodingUse  use;
+	sdlTypePtr      element;
+	encodePtr       encode;
+	char           *encodingStyle; /* not implemented yet */
 } sdlSoapBindingFunctionHeader, *sdlSoapBindingFunctionHeaderPtr;
 
 struct _sdlSoapBindingFunctionBody {
-	char      *ns;
-	int        use;
-	char      *parts;          /* not implemented yet */
-	char      *encodingStyle;  /* not implemented yet */
-	HashTable *headers;        /* array of sdlSoapBindingFunctionHeaderPtr */
+	char           *ns;
+	sdlEncodingUse  use;
+	char           *parts;          /* not implemented yet */
+	char           *encodingStyle;  /* not implemented yet */
+	HashTable      *headers;        /* array of sdlSoapBindingFunctionHeaderPtr */
 };
 
 struct _sdlSoapBindingFunction {
-	char *soapAction;
-	int   style;
+	char                       *soapAction;
+	sdlEncodingStyle            style;
 
-	sdlSoapBindingFunctionBody input;
-	sdlSoapBindingFunctionBody output;
-	sdlSoapBindingFunctionBody falut;
+	sdlSoapBindingFunctionBody  input;
+	sdlSoapBindingFunctionBody  output;
+	sdlSoapBindingFunctionBody  fault;
 };
 
 struct _sdlRestrictionInt {
@@ -155,7 +161,7 @@ struct _sdlContentModel {
 	int max_occurs;
 	union {
 		sdlTypePtr          element;      /* pointer to element */
-		sdlContentModelPtr  group;        /* pointer to group */
+		sdlTypePtr          group;        /* pointer to group */
 		HashTable          *content;      /* array of sdlContentModel for sequnce,all,choice*/
 		char               *group_ref;    /* reference to group */
 	} u;
@@ -174,7 +180,7 @@ struct _sdlType {
 	sdlTypeKind         kind;
 	char               *name;
 	char               *namens;
-	int                 nillable;
+	char                nillable;
 	HashTable          *elements;             /* array of sdlTypePtr */
 	HashTable          *attributes;           /* array of sdlAttributePtr */
 	sdlRestrictionsPtr  restrictions;
@@ -231,7 +237,7 @@ struct _sdlAttribute {
 	encodePtr  encode;
 };
 
-sdlPtr get_sdl(char *uri);
+sdlPtr get_sdl(char *uri TSRMLS_DC);
 
 encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, const char *type);
 encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type);

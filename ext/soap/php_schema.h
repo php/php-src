@@ -25,4 +25,10 @@
 int load_schema(sdlCtx *ctx, xmlNodePtr schema);
 void schema_pass2(sdlCtx *ctx);
 
+void delete_model(void *handle);
+void delete_type(void *data);
+void delete_extra_attribute(void *attribute);
+void delete_attribute(void *attribute);
+void delete_restriction_var_int(void *rvi);
+void delete_restriction_var_char(void *srvc);
 #endif

@@ -278,6 +278,20 @@ zend_module_entry soap_module_entry = {
 ZEND_GET_MODULE(soap)
 #endif
 
+PHP_INI_BEGIN()
+STD_PHP_INI_ENTRY("soap.wsdl_cache_enabled",     "1", PHP_INI_ALL, OnUpdateBool,
+                  cache_enabled, zend_soap_globals, soap_globals)
+STD_PHP_INI_ENTRY("soap.wsdl_cache_dir",         "/tmp", PHP_INI_ALL, OnUpdateString,
+                  cache_dir, zend_soap_globals, soap_globals)
+#ifdef ZEND_ENGINE_2
+STD_PHP_INI_ENTRY("soap.wsdl_cache_ttl",         "86400", PHP_INI_ALL, OnUpdateLong,
+                  cache_ttl, zend_soap_globals, soap_globals)
+#else
+STD_PHP_INI_ENTRY("soap.wsdl_cache_ttl",         "86400", PHP_INI_ALL, OnUpdateInt,
+                  cache_ttl, zend_soap_globals, soap_globals)
+#endif
+PHP_INI_END()
+
 static void php_soap_init_globals(zend_soap_globals *soap_globals)
 {
 	int i;
@@ -343,6 +357,7 @@ PHP_MINIT_FUNCTION(soap)
 
 	/* TODO: add ini entry for always use soap errors */
 	ZEND_INIT_MODULE_GLOBALS(soap, php_soap_init_globals, NULL);
+  REGISTER_INI_ENTRIES();
 
 #ifndef ZEND_ENGINE_2
 	/* Enable php stream/wrapper support for libxml */
@@ -489,6 +504,7 @@ PHP_MINFO_FUNCTION(soap)
 	php_info_print_table_row(2, "Soap Client", "enabled");
 	php_info_print_table_row(2, "Soap Server", "enabled");
 	php_info_print_table_end();
+	DISPLAY_INI_ENTRIES();
 }
 
 #ifdef HAVE_PHP_DOMXML
@@ -695,7 +711,7 @@ PHP_METHOD(soapserver,soapserver)
 	zend_hash_init(service->soap_functions.ft, 0, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (wsdl) {
-		service->sdl = get_sdl(Z_STRVAL_P(wsdl));
+		service->sdl = get_sdl(Z_STRVAL_P(wsdl) TSRMLS_CC);
 		if (service->uri == NULL) {
 			if (service->sdl->target_ns) {
 				service->uri = estrdup(service->sdl->target_ns);
@@ -1130,6 +1146,7 @@ PHP_METHOD(soapserver, handle)
 				php_error(E_ERROR, "PHP-SOAP requires 'always_populate_raw_post_data' to be on please check your php.ini file");
 			}
 			php_error(E_ERROR, "Can't find HTTP_RAW_POST_DATA");
+			return;
 		}
 	} else {
 		doc_request = soap_xmlParseMemory(arg,arg_len);
@@ -1577,7 +1594,7 @@ PHP_METHOD(soapclient, soapclient)
 		old_soap_version = SOAP_GLOBAL(soap_version);
 		SOAP_GLOBAL(soap_version) = soap_version;
 
-		sdl = get_sdl(Z_STRVAL_P(wsdl));
+		sdl = get_sdl(Z_STRVAL_P(wsdl) TSRMLS_CC);
 		ret = zend_list_insert(sdl, le_sdl);
 
 		add_property_resource(this_ptr, "sdl", ret);

@@ -240,63 +240,66 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 			char *name, *ns = NULL;
 			zval* tmp;
 			sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)fn->bindingAttributes;
-			int res_count = zend_hash_num_elements(fn->responseParameters);
+			int res_count;
 
 			hdrs = fnb->output.headers;
 
-			zend_hash_internal_pointer_reset(fn->responseParameters);
-			while (zend_hash_get_current_data(fn->responseParameters, (void **)&h_param) == SUCCESS) {
-				param = (*h_param);
-				if (fnb->style == SOAP_DOCUMENT) {
-					name = param->encode->details.type_str;
-					ns = param->encode->details.ns;
-				} else {
-					name = fn->responseName;
-					/* ns = ? */
-				}
-
-				/* Get value of parameter */
-				cur = get_node_ex(resp, name, ns);
-				if (!cur) {
-					cur = get_node(resp, name);
-					/* TODO: produce warning invalid ns */
-				}
-				if (cur) {
+			if (fn->responseParameters) {
+			  res_count = zend_hash_num_elements(fn->responseParameters);
+				zend_hash_internal_pointer_reset(fn->responseParameters);
+				while (zend_hash_get_current_data(fn->responseParameters, (void **)&h_param) == SUCCESS) {
+					param = (*h_param);
 					if (fnb->style == SOAP_DOCUMENT) {
-						val = cur;
+						name = param->encode->details.type_str;
+						ns = param->encode->details.ns;
 					} else {
-						val = get_node(cur->children, param->paramName);
-						if (val == NULL && res_count == 1) {
-							val = get_node(cur->children, "return");
-						}
-						if (val == NULL && res_count == 1) {
-							val = get_node(cur->children, "result");
+						name = fn->responseName;
+						/* ns = ? */
+					}
+
+					/* Get value of parameter */
+					cur = get_node_ex(resp, name, ns);
+					if (!cur) {
+						cur = get_node(resp, name);
+						/* TODO: produce warning invalid ns */
+					}
+					if (cur) {
+						if (fnb->style == SOAP_DOCUMENT) {
+							val = cur;
+						} else {
+							val = get_node(cur->children, param->paramName);
+							if (val == NULL && res_count == 1) {
+								val = get_node(cur->children, "return");
+							}
+							if (val == NULL && res_count == 1) {
+								val = get_node(cur->children, "result");
+							}
 						}
 					}
-				}
 
-				if (!val) {
-					/* TODO: may be "nil" is not OK? */
-					MAKE_STD_ZVAL(tmp);
-					ZVAL_NULL(tmp);
+					if (!val) {
+						/* TODO: may be "nil" is not OK? */
+						MAKE_STD_ZVAL(tmp);
+						ZVAL_NULL(tmp);
 /*
-					add_soap_fault(this_ptr, "Client", "Can't find response data", NULL, NULL TSRMLS_CC);
-					xmlFreeDoc(response);
-					return FALSE;
+						add_soap_fault(this_ptr, "Client", "Can't find response data", NULL, NULL TSRMLS_CC);
+						xmlFreeDoc(response);
+						return FALSE;
 */
-				} else {
-					/* Decoding value of parameter */
-					if (param != NULL) {
-						tmp = master_to_zval(param->encode, val);
 					} else {
-						tmp = master_to_zval(NULL, val);
+						/* Decoding value of parameter */
+						if (param != NULL) {
+							tmp = master_to_zval(param->encode, val);
+						} else {
+							tmp = master_to_zval(NULL, val);
+						}
 					}
+					add_assoc_zval(return_value, param->paramName, tmp);
+
+					param_count++;
+
+					zend_hash_move_forward(fn->responseParameters);
 				}
-				add_assoc_zval(return_value, param->paramName, tmp);
-
-				param_count++;
-
-				zend_hash_move_forward(fn->responseParameters);
 			}
 		} else {
 		  /* Function hasn't WSDL description */
