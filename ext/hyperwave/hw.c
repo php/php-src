@@ -1317,7 +1317,7 @@ PHP_FUNCTION(hw_getobject) {
 	link=argv[0]->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d", link);
 		RETURN_FALSE;
 	}
 
