@@ -85,6 +85,9 @@ function_entry ldap_functions[] = {
 	PHP_FE(ldap_mod_replace,						NULL)
 	PHP_FE(ldap_mod_del,							NULL)
 /* end gjt mod */
+	PHP_FE(ldap_errno,							NULL)
+	PHP_FE(ldap_err2str,							NULL)
+	PHP_FE(ldap_error,							NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -1199,3 +1202,76 @@ PHP_FUNCTION(ldap_delete)
 }
 /* }}} */
 
+/* {{{ proto int ldap_errno(int link)
+   Get the current ldap error number */
+PHP_FUNCTION(ldap_errno) {
+	LDAP* ldap;
+	pval** ldap_link;
+
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(ht, &ldap_link) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(ldap_link);
+
+	ldap = _get_ldap_link(ldap_link);
+	if (ldap == NULL) {
+		RETURN_LONG(0);
+	}
+
+#if !HAVE_NSLDAP
+#if LDAP_API_VERSION > 2000
+	RETURN_LONG( ldap_get_lderrno(ldap, NULL, NULL) );
+#else
+	RETURN_LONG( ldap->ld_errno );
+#endif
+#else
+	RETURN_LONG( ldap_get_lderrno(ldap, NULL, NULL) );
+#endif
+	RETURN_LONG(0);
+}
+/* }}} */
+
+
+/* {{{ proto string ldap_err2str(int errno)
+   Convert error number to error string */
+PHP_FUNCTION(ldap_err2str) {
+	zval** perrno;
+
+	if ( ARG_COUNT(ht) != 1 || zend_get_parameters_ex(ht, &perrno) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long_ex(perrno);
+	RETURN_STRING(ldap_err2string((*perrno)->value.lval), 1);
+}
+/* }}} */
+
+
+/* {{{ proto string ldap_error(int link)
+   Get the current ldap error string */
+PHP_FUNCTION(ldap_error) {
+	LDAP* ldap;
+	pval** link;
+	int ld_errno;
+
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(ht, &link) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ldap = _get_ldap_link(link);
+	if (ldap == NULL) {
+		RETURN_FALSE;
+	}
+
+#if !HAVE_NSLDAP
+#if LDAP_API_VERSION > 2000
+	ld_errno = ldap_get_lderrno(ldap, NULL, NULL);
+#else
+	ld_errno = ldap->ld_errno;
+#endif
+#else
+	ld_errno = ldap_get_lderrno(ldap, NULL, NULL);
+#endif
+
+	RETURN_STRING(ldap_err2string(ld_errno), 1);
+}
+/* }}} */
