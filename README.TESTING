@@ -247,6 +247,13 @@ When you use an include file for the SKIPIF section it should be named
 "skipif.inc" and an include file used in the FILE section of many tests
 should be named "test.inc".
 
+If your test intentionally generates a PHP warning message, insert
+'track_errors=1' into the --INI-- section. This will store the 
+warning inside a $php_errormsg variable, which you can then output.
+This will result in a consistent error message output across all platforms
+and PHP configurations, preventing your test from failing due inconsistencies
+in the error message content.
+
 [How to help us]
 ----------------
  If you find bug in PHP, you can submit bug report AND test script 
