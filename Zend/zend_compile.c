@@ -1215,7 +1215,10 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
 	if ((last_op->op2.op_type == IS_CONST) && (last_op->op2.u.constant.value.str.len == sizeof(ZEND_CLONE_FUNC_NAME)-1)
 		&& !memcmp(last_op->op2.u.constant.value.str.val, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME))) {
 		last_op->opcode = ZEND_CLONE;
-		left_bracket->u.constant.value.lval = ZEND_CLONE;
+		left_bracket->op_type = IS_UNUSED;
+		zval_dtor(&last_op->op2.u.constant); 
+		SET_UNUSED(last_op->op2);
+		left_bracket->u.constant.value.lval = get_next_op_number(CG(active_op_array))-1;
 		zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 		zend_do_extended_fcall_begin(TSRMLS_C); 
 		return;
@@ -1328,14 +1331,22 @@ void zend_do_end_function_call(znode *function_name, znode *result, znode *argum
 {
 	zend_op *opline;
 
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	if (!is_method && !is_dynamic_fcall && function_name->op_type==IS_CONST) {
-		opline->opcode = ZEND_DO_FCALL;
-		opline->op1 = *function_name;
+		
+	if(is_method && function_name && function_name->op_type == IS_UNUSED) {
+		/* clone */
+		if(argument_list->u.constant.value.lval != 0) {
+			zend_error(E_WARNING, "Clone method does not require arguments");
+		}
+		opline = &CG(active_op_array)->opcodes[function_name->u.constant.value.lval];
 	} else {
-		opline->opcode = ZEND_DO_FCALL_BY_NAME;
-		SET_UNUSED(opline->op1);
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		if (!is_method && !is_dynamic_fcall && function_name->op_type==IS_CONST) {
+			opline->opcode = ZEND_DO_FCALL;
+			opline->op1 = *function_name;
+		} else {
+			opline->opcode = ZEND_DO_FCALL_BY_NAME;
+			SET_UNUSED(opline->op1);
+		}
 	}
 	
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));

@@ -3172,6 +3172,12 @@ int zend_clone_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *obj = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 
+	if(Z_TYPE_P(obj) != IS_OBJECT) {
+		zend_error(E_WARNING, "__clone method called on non-object");
+		EX_T(EX(opline)->result.u.var).var.ptr = EG(error_zval_ptr);
+		EX_T(EX(opline)->result.u.var).var.ptr->refcount++;
+		NEXT_OPCODE();
+	} 
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
 	ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
 	EX_T(EX(opline)->result.u.var).var.ptr->value.obj = Z_OBJ_HT_P(obj)->clone_obj(obj TSRMLS_CC);
