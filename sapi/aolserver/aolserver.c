@@ -16,6 +16,12 @@
    +----------------------------------------------------------------------+
  */
 
+/*
+ * TODO:
+ * - fix (?) POST handler (maybe AOLserver bug)
+ * - write documentation
+ */
+
 /* $Id$ */
 
 /* conflict between PHP and AOLserver */
@@ -174,16 +180,18 @@ php_ns_hash_environment(NSLS_D CLS_DC ELS_DC PLS_DC SLS_DC)
 		char *key = Ns_SetKey(NSG(conn->headers), i);
 		char *value = Ns_SetValue(NSG(conn->headers), i);
 		char *p;
+		char c;
 		zval *pval;
 		char buf[512];
 		int buf_len;
 
 		buf_len = snprintf(buf, 511, "HTTP_%s", key);
-		for(p = buf; *p; p++) {
-			*p = toupper(*p);
-			if(*p < 'A' || *p > 'Z') {
-				*p = '_';
+		for(p = buf; (c = *p); p++) {
+			c = toupper(c);
+			if(c < 'A' || c > 'Z') {
+				c = '_';
 			}
+			*p = c;
 		}
 		
 		MAKE_STD_ZVAL(pval);
@@ -261,6 +269,8 @@ php_ns_request_handler(void *context, Ns_Conn *conn)
 	status = php_ns_module_main(NSLS_C SLS_CC);
 	
 	php_ns_request_dtor(NSLS_C SLS_CC);
+
+	ts_free_thread();
 	
 	return status;
 }
