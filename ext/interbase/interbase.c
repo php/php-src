@@ -1210,7 +1210,10 @@ PHP_FUNCTION(ibase_gen_id)
 
 	RESET_ERRMSG;
 
-	zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr", &generator, &gen_len, &inc, &link);
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr", &generator, &gen_len,
+			&inc, &link)) {
+		RETURN_FALSE;
+	}
 
 	PHP_IBASE_LINK_TRANS(link, ib_link, trans);
 	
