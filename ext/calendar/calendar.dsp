@@ -94,11 +94,35 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\cal_unix.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\calendar.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_calendar.c
+SOURCE=.\dow.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\easter.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\french.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\gregor.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\jewish.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\julian.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -110,7 +134,7 @@ SOURCE=.\calendar.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_calendar.h
+SOURCE=.\sdncal.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
