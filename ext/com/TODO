@@ -1,6 +1,7 @@
 1) Multi-dimenstional array support
 -- done 2) IErrorInfo
 -- done 13) export VARIANT through the COM module
+14) trap exceptions and errors
 3) WithEvents
 4) Documentation (internal and user) and howtos
 5) IEnumVariant::All() which would be like IEnumVariant::Next(IDispatch::Count)
