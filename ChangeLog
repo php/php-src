@@ -1,3 +1,41 @@
+2001-10-10  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c:
+    Changed return value for BLOB/CLOB values to a string. and returning false if no handle is created.
+
+2001-10-10  Stig Bakken  <ssb@fast.no>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_versioning.h
+      ext/standard/versioning.c: MFH: version_compare & friends
+
+2001-10-10  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php:
+    fix a problem with the propagation of baseinstalldir and role
+
+2001-10-10  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c:
+    - Make UDM_PARAM_ISPELL_PREFIXES work under mnogosearch-3.2.x (gluke)
+    - Make UDM_PARAM_ISPELL_PREFIXES work under mnogosearch-3.2.x (gluke)
+
+2001-10-10  Stig Bakken  <ssb@fast.no>
+
+    * sapi/apache/config.m4: * fix default path in configure help text
+
+    * ext/standard/basic_functions.c:
+    * added function entries for version_{lt,le,gt,ge,eq}
+
+    * ext/standard/php_versioning.h
+      ext/standard/versioning.c:
+    Added version_{lt,le,gt,ge,eq} functions 
+
+2001-10-10  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h: Adding support for BLOB and CLOB
+
 2001-10-09  Stig Bakken  <ssb@fast.no>
 
     * pear/Makefile.in
