@@ -99,7 +99,9 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_define, NULL)*/
 	PHP_FE(odbc_tables, NULL)
 	PHP_FE(odbc_columns, NULL)
+#ifndef HAVE_DBMAKER   /* not supported now */
 	PHP_FE(odbc_columnprivileges, NULL)
+#endif
 	PHP_FE(odbc_foreignkeys, NULL)
 	PHP_FE(odbc_gettypeinfo, NULL)
 	PHP_FE(odbc_primarykeys, NULL)
@@ -107,7 +109,9 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_procedures, NULL)
 	PHP_FE(odbc_specialcolumns, NULL)
 	PHP_FE(odbc_statistics, NULL)
+#ifndef HAVE_DBMAKER   /* not supported now */
 	PHP_FE(odbc_tableprivileges, NULL)
+#endif
 	PHP_FALIAS(odbc_do, odbc_exec, NULL)
 	{ NULL, NULL, NULL }
 };
@@ -2021,8 +2025,12 @@ PHP_FUNCTION(odbc_autocommit)
 	}
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
-		
+	
+#ifndef HAVE_DBMAKER	
 	if ((*pv_onoff)) {
+#else
+	if (pv_onoff && (*pv_onoff)) {
+#endif
 		convert_to_long_ex(pv_onoff);
 		rc = SQLSetConnectOption(conn->hdbc, SQL_AUTOCOMMIT,
 								 ((*pv_onoff)->value.lval) ?
@@ -2286,6 +2294,7 @@ PHP_FUNCTION(odbc_columns)
 }
 /* }}} */
 
+#ifndef HAVE_DBMAKER
 /* {{{ proto int odbc_columnprivileges(int connection_id, string catalog, string schema, string table, string column )
    call the SQLColumnPrivileges function */
 PHP_FUNCTION(odbc_columnprivileges)
@@ -2363,6 +2372,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
+#endif /* HAVE_DBMAKER */
 
 /* {{{ proto int odbc_foreignkeys(int connection_id, string pk_catalog, string pk_schema, string pk_table, string fk_catalog, string fk_schema, string fk_table )
    call the SQLForeignKeys function */
@@ -2395,6 +2405,17 @@ PHP_FUNCTION(odbc_foreignkeys)
 	    fschema = (*pv_fschema)->value.str.val;
 	    convert_to_string_ex(pv_ftable);
 	    ftable = (*pv_ftable)->value.str.val;
+#ifdef HAVE_DBMAKER
+#define EMPTY_TO_NULL(xstr) \
+    if ((int)strlen((xstr)) == 0) (xstr) = NULL
+
+        EMPTY_TO_NULL(pcat);
+        EMPTY_TO_NULL(pschema);
+        EMPTY_TO_NULL(ptable);
+        EMPTY_TO_NULL(fcat);
+        EMPTY_TO_NULL(fschema);
+        EMPTY_TO_NULL(ftable);
+#endif
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -2780,7 +2801,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(pv_type);
-		type = (SQLUSMALLINT) (*pv_cat)->value.lval;
+		type = (SQLUSMALLINT) (*pv_type)->value.lval;
 		convert_to_string_ex(pv_cat);
 		cat = (*pv_cat)->value.str.val;
 		convert_to_string_ex(pv_schema);
@@ -2931,6 +2952,7 @@ PHP_FUNCTION(odbc_statistics)
 }
 /* }}} */
 
+#ifndef HAVE_DBMAKER
 /* {{{ proto int odbc_tableprivilegess(int connection_id, string catalog, string schema, string table )
    call the SQLTablePrivilegess function */
 PHP_FUNCTION(odbc_tableprivileges)
@@ -3005,6 +3027,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
+#endif /* HAVE_DBMAKER */
 
 #endif /* HAVE_UODBC */
 

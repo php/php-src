@@ -9,3 +9,4 @@
 #undef HAVE_UODBC
 #undef HAVE_EMPRESS
 #undef HAVE_VELOCIS
+#undef HAVE_DBMAKER

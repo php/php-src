@@ -116,6 +116,13 @@ PHP_FUNCTION(solid_fetch_prev);
 #include <sql.h>
 #include <sqlext.h>
 
+#elif defined(HAVE_DBMAKER) /* DBMaker */
+
+#define ODBC_TYPE "DBMaker"
+#define HAVE_SQL_EXTENDED_FETCH 1
+#include <odbc.h>
+
+
 #elif defined(HAVE_CODBC) /* Custom ODBC */
 
 #define ODBC_TYPE "Custom ODBC"
