@@ -248,8 +248,9 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 
 	zend_set_compiled_filename(file_path TSRMLS_CC);
 	
-	if (CG(zend_lineno) < 0) { /* position is (n_lines * -1), position was changed by an external app */
-		CG(zend_lineno) = CG(zend_lineno) * -1;
+	if (CG(start_lineno)) {
+		CG(zend_lineno) = CG(start_lineno);
+		CG(start_lineno) = 0;
 	} else {
 		CG(zend_lineno) = 1;
 	}
