@@ -107,6 +107,8 @@ struct _zend_compiler_globals {
 
 	zend_bool unclean_shutdown;
 
+	zend_bool ini_parser_unbuffered_errors;
+
 	zend_llist open_files;
 #if defined(ZTS) && defined(__cplusplus)
 	ZendFlexLexer *ZFL;

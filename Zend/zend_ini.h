@@ -158,7 +158,7 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty);
 
 /* INI parsing engine */
 typedef void (*zend_ini_parser_cb_t)(zval *arg1, zval *arg2, int callback_type, void *arg);
-int zend_parse_ini_file(zend_file_handle *fh, zend_ini_parser_cb_t ini_parser_cb, void *arg);
+int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, zend_ini_parser_cb_t ini_parser_cb, void *arg);
 #define ZEND_INI_PARSER_ENTRY	1
 #define ZEND_INI_PARSER_SECTION	2
 
