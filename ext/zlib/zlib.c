@@ -95,6 +95,8 @@ function_entry php_zlib_functions[] = {
 	PHP_FE(gzwrite,						NULL)
 	PHP_FALIAS(gzputs,		gzwrite,	NULL)
 	PHP_FE(gzfile,						NULL)
+	PHP_FE(gzcompress,                  NULL)
+	PHP_FE(gzuncompress,                NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -709,6 +711,7 @@ PHP_FUNCTION(gzpassthru) {
 /* }}} */
 
 /* {{{ proto string gzread(int zp, int length)
+
    Binary-safe file read */
 PHP_FUNCTION(gzread)
 {
@@ -736,7 +739,115 @@ PHP_FUNCTION(gzread)
 	}
 	return_value->type = IS_STRING;
 }
+
 /* }}} */
+	
+
+/* {{{ proto string gzcompress(string data [,int level]) 
+   gzip-compress a string */
+PHP_FUNCTION(gzcompress)
+{
+	zval **data, **zlimit = NULL;
+	int limit,status;
+	unsigned long l2;
+	char *s2;
+
+	switch (ARG_COUNT(ht)) {
+	case 1:
+		if (zend_get_parameters_ex(1, &data) == FAILURE)
+			WRONG_PARAM_COUNT;
+		limit=-1;
+		break;
+	case 2:
+		if (zend_get_parameters_ex(2, &data, &zlimit) == FAILURE)
+			WRONG_PARAM_COUNT;
+		convert_to_long_ex(zlimit);
+		limit = (*zlimit)->value.lval;
+		if((limit<0)||(limit>9)) {
+			php_error(E_WARNING,"gzcompress: compression level must be whithin 0..9");
+			RETURN_FALSE;
+		}
+		break;
+	default:
+		WRONG_PARAM_COUNT;                                         
+	}
+	convert_to_string_ex(data);
+	
+	l2 = (*data)->value.str.len + ((*data)->value.str.len/1000) + 15;
+	s2 = (char *) emalloc(l2);
+	if(! s2) RETURN_FALSE;
+	
+	if(limit>=0) {
+		status = compress2(s2,&l2,(*data)->value.str.val, (*data)->value.str.len,limit);
+	} else {
+		status = compress(s2,&l2,(*data)->value.str.val, (*data)->value.str.len);
+	}
+	
+	if(status==Z_OK) {
+		RETURN_STRINGL(s2, l2, 0);
+	} else {
+		efree(s2);
+		php_error(E_WARNING,"gzcompress: %s",zError(status));
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto string gzuncompress(string data ,int length) 
+   unzip a gzip-compressed string */
+PHP_FUNCTION(gzuncompress)
+{
+	zval **data, **zlimit = NULL;
+	int status,factor=1,maxfactor=8;
+	unsigned long plength=0,length;
+	char *s1=NULL,*s2=NULL;
+
+	switch (ARG_COUNT(ht)) {
+	case 1:
+		if (zend_get_parameters_ex(1, &data) == FAILURE)
+			WRONG_PARAM_COUNT;
+		length=0;
+		break;
+	case 2:
+		if (zend_get_parameters_ex(2, &data, &zlimit) == FAILURE)
+			WRONG_PARAM_COUNT;
+		convert_to_long_ex(zlimit);
+		if((*zlimit)->value.lval<=0) {
+			php_error(E_WARNING,"gzuncompress: length must be greater zero");
+			RETURN_FALSE;
+		}
+		plength = (*zlimit)->value.lval;
+		break;
+	default:
+		WRONG_PARAM_COUNT;                                         
+	}
+	convert_to_string_ex(data);
+	
+	// zlib::uncompress() wants to know the output data length
+	// if none was given as a parameter
+	// we try from input length * 2 up to input length * 2^8
+	// doubling it whenever it wasn't big enough
+	// that should be eneugh for all real life cases	
+	do {
+		length=plength?plength:(*data)->value.str.len*(1<<factor++);
+		s2 = (char *) erealloc(s1,length);
+		if(! s2) { if(s1) efree(s1); RETURN_FALSE; }
+		status = uncompress(s2, &length ,(*data)->value.str.val, (*data)->value.str.len);
+		s1=s2;
+	} while((status==Z_BUF_ERROR)&&(!plength)&&(factor<maxfactor));
+
+	if(status==Z_OK) {
+		s2 = erealloc(s2, length);
+		RETURN_STRINGL(s2, length, 0);
+	} else {
+		efree(s2);
+		php_error(E_WARNING,"gzuncompress: %s",zError(status));
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
 
 #endif /* HAVE_ZLIB */
 /*
