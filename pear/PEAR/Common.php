@@ -1087,7 +1087,7 @@ class PEAR_Common extends PEAR
             $i = 1;
             foreach ($info['deps'] as $d) {
                 if (empty($d['type'])) {
-                    $errors[] = "depenency $i: missing type";
+                    $errors[] = "dependency $i: missing type";
                 } elseif (!in_array($d['type'], $_PEAR_Common_dependency_types)) {
                     $errors[] = "dependency $i: invalid type, should be one of: ".implode(' ', $_PEAR_Common_depenency_types);
                 }
