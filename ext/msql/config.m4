@@ -6,7 +6,7 @@ dnl
 AC_DEFUN(AC_MSQL_VERSION,[
   AC_MSG_CHECKING([mSQL version])
   ac_php_oldcflags=$CFLAGS
-  CFLAGS="$INCLUDES $CFLAGS";
+  CFLAGS="$INCLUDES $CFLAGS"
   AC_TRY_COMPILE([#include <sys/types.h>
 #include "msql.h"],[int i = IDX_TYPE],[
     AC_DEFINE(MSQL1,0)
