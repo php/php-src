@@ -2,4 +2,6 @@
 LTLIBRARY_NAME    = libsapi.la
 LTLIBRARY_SOURCES = roxen.c
 
+PRE_INCLUDES = $(PIKE_INCLUDE_DIR)
+
 include $(top_srcdir)/build/ltlib.mk
