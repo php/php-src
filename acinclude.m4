@@ -1616,7 +1616,7 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
     ], [
       AC_MSG_ERROR([libssl not found!])
     ],[
-      -L$OPENSSL_LIBDIR
+      -L$OPENSSL_LIBDIR -lcrypto
     ])
   ], [
     AC_MSG_ERROR([libcrypto not found!])
