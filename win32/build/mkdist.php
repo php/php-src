@@ -13,7 +13,7 @@ $is_debug = preg_match("/^debug/i", $build_dir);
 echo "Making dist for $build_dir\n";
 
 $dist_dir = $build_dir . "/php-" . phpversion();
-$pecl_dir = $dist_dir . "-pecl";
+$pecl_dir = $build_dir . "/pecl-" . phpversion();
 
 @mkdir($dist_dir);
 @mkdir("$dist_dir/ext");
