@@ -3,6 +3,7 @@ PHP 4.0                                                                    NEWS
 
 
 ?? ??? 2000, Version 4.0.4
+- parse_ini_str() is now thread-safe, and supported under Windows (Zeev)
 - Unified aborted-connection semantics of all SAPI modules (Sascha)
 - URL-opened files now store the HTTP response header in $http_response_header
   (Zeev)
