@@ -2511,7 +2511,7 @@ PHP_FUNCTION(substr_count)
 		php_error(E_WARNING, "Empty substring");
 		RETURN_FALSE;
 	} else if ((*needle)->value.str.len == 1) {
-		// Special optimized case to avoid calls to php_memnstr
+		/* Special optimized case to avoid calls to php_memnstr(). */
 		for (i = 0, p = (*haystack)->value.str.val, 
 		     length = (*haystack)->value.str.len, cmp = (*needle)->value.str.val[0]; 
 		     i < length; i++) {
