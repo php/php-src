@@ -42,6 +42,11 @@ typedef unsigned int uint;
 #define HAVE_STDIOSTR_H 1
 #define HAVE_CLASS_ISTDIOSTREAM
 #define istdiostream stdiostream
+#define HAVE_STDARG_H	1
+#define HAVE_SNPRINTF	1
+#define HAVE_VSNPRINTF	1
+
+#define vsnprintf _vsnprintf
 
 #ifdef inline
 #undef inline

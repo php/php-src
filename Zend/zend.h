@@ -23,8 +23,6 @@
 
 #define ZEND_VERSION "1.00"
 
-#define ZEND_NEW_ERROR_HANDLING 0
-
 #ifdef __cplusplus
 #define BEGIN_EXTERN_C() extern "C" {
 #define END_EXTERN_C() }
@@ -221,11 +219,7 @@ struct _zend_class_entry {
 
 
 typedef struct _zend_utility_functions {
-#if ZEND_NEW_ERROR_HANDLING
 	void (*error_function)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
-#else
-	void (*error_function)(int type, const char *format, ...);
-#endif
 	int (*printf_function)(const char *format, ...);
 	int (*write_function)(const char *str, uint str_length);
 	FILE *(*fopen_function)(const char *filename, char **opened_path);
@@ -327,12 +321,7 @@ extern ZEND_API void (*zend_unblock_interruptions)(void);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
 
 
-#if ZEND_NEW_ERROR_HANDLING
 ZEND_API void zend_error(int type, const char *format, ...);
-#else
-#define zend_error zend_error_cb
-ZEND_API void (*zend_error_cb)(int type, const char *format, ...);
-#endif
 
 void zenderror(char *error);
 
