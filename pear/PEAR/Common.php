@@ -100,19 +100,8 @@ class PEAR_Common extends PEAR
 
     function mkDirHier($dir)
     {
-        $dirstack = array();
-        while (!@is_dir($dir) && $dir != DIRECTORY_SEPARATOR) {
-            array_unshift($dirstack, $dir);
-            $dir = dirname($dir);
-        }
-        while ($newdir = array_shift($dirstack)) {
-            if (mkdir($newdir, 0755)) {
-                $this->log(2, "+ created dir $newdir");
-            } else {
-                return false;
-            }
-        }
-        return true;
+        $this->log(2, "+ create dir $dir");
+        return System::mkDir("-p $dir");
     }
 
     // }}}
@@ -130,11 +119,9 @@ class PEAR_Common extends PEAR
 
     function mkTempDir()
     {
-        $dir = (OS_WINDOWS) ? 'c:\\windows\\temp' : '/tmp';
-        $tmpdir = tempnam($dir, 'pear');
-        unlink($tmpdir);
-        if (!mkdir($tmpdir, 0700)) {
-            return $this->raiseError("Unable to create temporary directory $tmpdir");
+        $tmpdir = System::mktemp('-d pear');
+        if (PEAR::isError($tmpdir)) {
+            return $tmpdir;
         }
         $this->addTempFile($tmpdir);
         return $tmpdir;
