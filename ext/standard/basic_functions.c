@@ -419,6 +419,7 @@ function_entry basic_functions[] = {
 #ifdef PHP_CAN_SUPPORT_PROC_OPEN
 	PHP_FE(proc_open,				third_arg_force_ref)
 	PHP_FE(proc_close,														NULL)
+	PHP_FE(proc_terminate,													NULL)
 	PHP_FE(proc_get_status,													NULL)
 #endif
 
