@@ -58,12 +58,6 @@ PHP_RINIT_FUNCTION(head)
 }
 
 
-void php4i_add_header_information(char *header_information, uint header_length)
-{
-	sapi_add_header(header_information, header_length);
-}
-
-
 /* Implementation of the language Header() function */
 PHP_FUNCTION(Header)
 {
@@ -73,9 +67,7 @@ PHP_FUNCTION(Header)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg1);
-	php4i_add_header_information((*arg1)->value.str.val,(*arg1)->value.str.len);
-	(*arg1)->type = IS_LONG; /* change arg1's type so that it doesn't get freed */
-	(*arg1)->value.lval = 0;
+	sapi_add_header(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1), 1);
 }
 
 
@@ -225,8 +217,7 @@ PHP_FUNCTION(setcookie)
 		strcat(cookie, "; secure");
 	}
 
-
-	if (sapi_add_header(cookie, strlen(cookie))==SUCCESS) {
+	if (sapi_add_header(cookie, strlen(cookie), 0)==SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;

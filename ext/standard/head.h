@@ -54,8 +54,6 @@ PHP_FUNCTION(Header);
 PHP_FUNCTION(setcookie);
 PHP_FUNCTION(headers_sent);
 
-void php4i_add_header_information(char *header_information, uint header_length);
-
 PHPAPI int php_header(void);
 int php_headers_unsent(void);
 

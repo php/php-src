@@ -128,7 +128,7 @@ typedef struct {
 #define CACHE_LIMITER_FUNC(name) static void _php_cache_limiter_##name(PSLS_D)
 #define CACHE_LIMITER(name) { #name, _php_cache_limiter_##name },
 
-#define ADD_COOKIE(a) sapi_add_header(estrdup(a), strlen(a));
+#define ADD_COOKIE(a) sapi_add_header(a, strlen(a), 1);
 
 #define STR_CAT(P,S,I) {\
 	pval *__p = (P);\
@@ -638,7 +638,7 @@ static void _php_session_send_cookie(PSLS_D)
 		strcat(cookie, PS(cookie_domain));
 	}
 
-	sapi_add_header(cookie, len);
+	sapi_add_header(cookie, len, 0);
 }
 
 static ps_module *_php_find_ps_module(char *name PSLS_DC)
