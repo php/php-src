@@ -214,6 +214,10 @@ SOURCE=..\main\php_open_temporary_file.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\php_scandir.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\php_ticks.c
 # End Source File
 # Begin Source File
@@ -355,6 +359,10 @@ SOURCE=..\main\php_output.h
 # Begin Source File
 
 SOURCE=..\main\php_regex.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\php_scandir.h
 # End Source File
 # Begin Source File
 
