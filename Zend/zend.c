@@ -474,6 +474,8 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 
 #ifdef ZTS
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
+	*GLOBAL_FUNCTION_TABLE = *compiler_globals->function_table;
+	*GLOBAL_CLASS_TABLE = *compiler_globals->class_table;
 #endif
 
 	return SUCCESS;
@@ -490,10 +492,10 @@ void zend_shutdown(TSRMLS_D)
 #endif
 	zend_destroy_rsrc_list_dtors();
 	zend_hash_destroy(&module_registry);
-#ifndef ZTS
+
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
 	zend_hash_destroy(GLOBAL_CLASS_TABLE);
-#endif
+
 	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
 	zend_shutdown_extensions(TSRMLS_C);
