@@ -626,6 +626,31 @@ PHP_FUNCTION(stream_get_meta_data)
 }
 /* }}} */
 
+/* {{{ proto array stream_get_wrappers()
+    Retrieves list of registered stream wrappers */
+PHP_FUNCTION(stream_get_wrappers)
+{
+	HashTable *url_stream_wrappers_hash;
+	char *stream_protocol;
+	int stream_protocol_len = 0;
+
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash()) {
+		array_init(return_value);
+		for(zend_hash_internal_pointer_reset(url_stream_wrappers_hash);
+			zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, NULL, 0, NULL) == HASH_KEY_IS_STRING;
+			zend_hash_move_forward(url_stream_wrappers_hash)) 
+				add_next_index_string(return_value,stream_protocol,1);
+	} else {
+		RETURN_FALSE;
+	}
+
+}
+/* }}} */
+
 /* {{{ stream_select related functions */
 static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, int *max_fd TSRMLS_DC)
 {
