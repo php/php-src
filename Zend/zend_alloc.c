@@ -42,11 +42,11 @@ static zend_alloc_globals alloc_globals;
 #  endif
 
 #define _CHECK_MEMORY_LIMIT(s,file,lineno) { AG(allocated_memory) += (s);\
-								if (php3_ini.memory_limit<AG(allocated_memory)) {\
+								if (AG(memory_limit)<AG(allocated_memory)) {\
 									if (!file) { \
-										zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted (tried to allocate %d bytes)",php3_ini.memory_limit,s); \
+										zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted (tried to allocate %d bytes)", AG(memory_limit),s); \
 									} else { \
-										zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes)",php3_ini.memory_limit,file,lineno,s); \
+										zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes)", AG(memory_limit), file, lineno, s); \
 									} \
 								} \
 							}
@@ -304,11 +304,25 @@ ZEND_API char *zend_strndup(const char *s, uint length)
 }
 
 
+ZEND_API int set_memory_limit(unsigned int memory_limit)
+{
+#if MEMORY_LIMIT
+	ALS_FETCH();
+
+	AG(memory_limit) = memory_limit;
+	return SUCCESS;
+#else
+	return FAILURE;
+#endif
+}
+
+
 ZEND_API void start_memory_manager(void)
 {
 	AG(phead) = AG(head) = NULL;
 	
 #if MEMORY_LIMIT
+	AG(memory_limit)=1<<30;		/* rediculous limit, effectively no limit */
 	AG(allocated_memory)=0;
 	AG(memory_exhausted)=0;
 #endif
