@@ -255,8 +255,8 @@ static jobjectArray _java_makeArray(int argc, pval** argv) {
         arg=0;
     }
     (*jenv)->SetObjectArrayElement(jenv, result, i, arg);
-        if (argv[i]->type != IS_OBJECT)
-          (*jenv)->DeleteLocalRef(jenv, arg);
+    if (argv[i]->type != IS_OBJECT)
+    (*jenv)->DeleteLocalRef(jenv, arg);
   }
   return result;
 }
@@ -270,6 +270,7 @@ static int checkError(pval *value) {
   };
   return 0;
 }
+
 
 /***************************************************************************/
 
@@ -290,9 +291,9 @@ void java_call_function_handler
   pval **arguments = (pval **) emalloc(sizeof(pval *)*arg_count);
   getParametersArray(ht, arg_count, arguments);
 
-  if (iniUpdated && jvm) jvm_destroy();
-  if (!jvm) jvm_create();
-  if (!jvm) return;
+  if (iniUpdated && jenv) jvm_destroy();
+  if (!jenv) jvm_create();
+  if (!jenv) return;
 
   if (!strcmp("java",function_name->element.value.str.val)) {
 
@@ -399,7 +400,7 @@ int java_set_property_handler
 /***************************************************************************/
 
 static void _php3_java_destructor(void *jobject) {
-  (*jenv)->DeleteGlobalRef(jenv, jobject);
+  if (jenv) (*jenv)->DeleteGlobalRef(jenv, jobject);
 }
 
 PHP_MINIT_FUNCTION(java) {
@@ -448,7 +449,7 @@ DLEXPORT zend_module_entry *get_module(void) { return &java_module_entry; }
 /***************************************************************************/
 
 JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromString
-  (JNIEnv *jenv, jobject self, jlong result, jstring value)
+  (JNIEnv *jenv, jclass self, jlong result, jstring value)
 {
   const char *valueAsUTF = (*jenv)->GetStringUTFChars(jenv, value, 0);
   pval *presult = (pval*)(long)result;
@@ -460,7 +461,7 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromString
 }
 
 JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromLong
-  (JNIEnv *jenv, jobject self, jlong result, jlong value)
+  (JNIEnv *jenv, jclass self, jlong result, jlong value)
 {
   pval *presult = (pval*)(long)result;
   presult->type=IS_LONG;
@@ -468,7 +469,7 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromLong
 }
 
 JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromDouble
-  (JNIEnv *jenv, jobject self, jlong result, jdouble value)
+  (JNIEnv *jenv, jclass self, jlong result, jdouble value)
 {
   pval *presult = (pval*)(long)result;
   presult->type=IS_DOUBLE;
@@ -476,7 +477,7 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromDouble
 }
 
 JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromBoolean
-  (JNIEnv *jenv, jobject self, jlong result, jboolean value)
+  (JNIEnv *jenv, jclass self, jlong result, jboolean value)
 {
   pval *presult = (pval*)(long)result;
   presult->type=IS_BOOL;
@@ -484,7 +485,7 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromBoolean
 }
 
 JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromObject
-  (JNIEnv *jenv, jobject self, jlong result, jobject value)
+  (JNIEnv *jenv, jclass self, jlong result, jobject value)
 {
   /* wrapper the java object in a pval object */
   pval *presult = (pval*)(long)result;
@@ -510,9 +511,18 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromObject
 }
 
 JNIEXPORT void JNICALL Java_net_php_reflect_setException
-  (JNIEnv *jenv, jobject self, jlong result, jstring value)
+  (JNIEnv *jenv, jclass self, jlong result, jstring value)
 {
   pval *presult = (pval*)(long)result;
   Java_net_php_reflect_setResultFromString(jenv, self, result, value);
   presult->type=IS_EXCEPTION;
+}
+
+JNIEXPORT void JNICALL Java_net_php_reflect_setEnv
+  (JNIEnv *newJenv, jclass self)
+{
+  iniUpdated=0;
+  jenv=newJenv;
+  if (!self) self = (*jenv)->FindClass(jenv, "net/php/reflect");
+  php_reflect = (*jenv)->NewGlobalRef(jenv, self);
 }
