@@ -495,6 +495,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "tokenizer"=..\ext\tokenizer\tokenizer.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "w32api"=..\ext\w32api\w32api.dsp - Package Owner=<4>
 
 Package=<5>
