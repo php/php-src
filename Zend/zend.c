@@ -470,7 +470,7 @@ ZEND_API void _zend_bailout(ZEND_FILE_LINE_D)
 	ELS_FETCH();
 
 	if (!EG(bailout_set)) {
-		zend_output_debug_string(1, "%s(%d) : Bailed out without a bailout address!", ZEND_FILE_LINE_RELAY_C);
+		zend_output_debug_string(1, "%s(%d) : Bailed out without a bailout address!" ZEND_FILE_LINE_RELAY_CC);
 		exit(-1);
 	}
 	CG(unclean_shutdown) = 1;
