@@ -33,6 +33,7 @@
 #define _MICROTIME_H
 
 PHP_FUNCTION(microtime);
+PHP_FUNCTION(gettimeofday);
 PHP_FUNCTION(getrusage);
 
 #endif /* _MICROTIME_H */
