@@ -40,44 +40,30 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "ext/standard/php3_standard.h"
+#include "ext/gd/php3_gd.h"
+
 #include "functions/php3_ifx.h"
 #include "functions/php3_ldap.h"
 #include "functions/php3_mysql.h"
 #include "functions/php3_bcmath.h"
 #include "functions/php3_msql.h"
-#include "functions/basic_functions.h"
-#include "functions/phpmath.h"
-#include "functions/php3_string.h"
 #include "functions/php3_oci8.h"
 #include "functions/oracle.h"
-#include "functions/base64.h"
-#include "functions/php3_dir.h"
-#include "functions/dns.h"
 #include "functions/php3_pgsql.h"
 #include "functions/php3_velocis.h"
 #include "functions/php3_sybase.h"
 #include "functions/php3_sybase-ct.h"
-#include "functions/reg.h"
-#include "functions/php3_mail.h"
 #include "functions/imap.h"
-#include "functions/md5.h"
-#include "functions/php3_gd.h"
-#include "functions/html.h"
 #include "functions/dl.h"
 #include "functions/head.h"
 #include "functions/post.h"
-#include "functions/exec.h"
 #include "functions/php3_solid.h"
 #include "functions/adabasd.h"
-#include "functions/file.h"
 #include "functions/dbase.h"
 #include "functions/hw.h"
 #include "functions/filepro.h"
 #include "functions/db.h"
-#include "functions/php3_syslog.h"
-#include "functions/php3_filestat.h"
-#include "functions/php3_browscap.h"
-#include "functions/pack.h"
 #include "functions/php3_unified_odbc.h"
 #include "dl/snmp/php3_snmp.h"
 #include "functions/php3_zlib.h"
@@ -127,7 +113,6 @@ zend_module_entry *php3_builtin_modules[] =
 	crypt_module_ptr,
 	dbm_module_ptr,
 	bcmath_module_ptr,
-	browscap_module_ptr,
 	snmp_module_ptr,
 	pack_module_ptr,
 	php3_zlib_module_ptr,

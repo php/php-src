@@ -1,0 +1,6 @@
+define_option with-gd 'GD support?' yesnodir \
+    "yes /usr GD install" \
+'    Whether to include GD support.  If PHP can find the GD libraries\n
+    on your system, it will be included automatically.  You should enter\n
+    something here if you do not want to include GD support or if you\n
+    have installed GD in some unusual directory.'

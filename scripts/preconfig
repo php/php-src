@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+# $Id$
+
+makefiles=`echo ext/*/Makefile.am | sed -e 's/\.am//g'`
+rm -f configure.in
+sed -e "s#@@EXT_MAKEFILES@@#$makefiles#" configure.in.in > configure.in

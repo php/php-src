@@ -55,10 +55,7 @@
 #include "safe_mode.h"
 #include "php3_realpath.h"
 #include "functions/head.h"
-#include "functions/url.h"
-#include "functions/base64.h"
-#include "functions/fsock.h"
-#include "functions/php3_string.h"
+#include "ext/standard/php3_standard.h"
 #include "zend_compile.h"
 
 #if HAVE_PWD_H

@@ -1964,7 +1964,7 @@ AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS")
 AC_OUTPUT(Makefile build-defs.h libphp3.module
           scripts/mkextlib ext/Makefile
           regex/Makefile dbase/Makefile
-          ext/gd/Makefile ext/standard/Makefile, [
+          @@EXT_MAKEFILES@@, [
 chmod +x scripts/mkextlib
 ], [
 

@@ -39,7 +39,7 @@
 #include <unistd.h>
 #endif
 #include <sys/stat.h>
-#include "functions/pageinfo.h"
+#include "ext/standard/pageinfo.h"
 #include "safe_mode.h"
 
 /*
