@@ -1,3 +1,4 @@
+w
 /*
    +----------------------------------------------------------------------+
    | PHP version 4.0                                                      |
@@ -37,6 +38,8 @@
 #include "dl/phpdl.h"
 #endif
 
+/* prevent mod_ssl.h's header file from being included. */
+#define AP_HOOK_H
 
 #include "php.h"
 #include "php_globals.h"
