@@ -24,8 +24,8 @@
       ext/standard/basic_functions.c
       ext/standard/basic_functions.h
       ext/standard/crc32.c:
-    Add a crc32 checksum function - used by the udm_search search engine
-    and currently run through a system call.  This will speed up the udm_search
+    Add a crc32 checksum function - used by the UdmSearch search engine
+    and currently run through a system call.  This will speed up the UdmSearch
     php frontend significantly.
 
 2000-06-21  Sascha Schumann  <sascha@schumann.cx>
