@@ -436,24 +436,15 @@ ZEND_API void start_memory_manager(TSRMLS_D)
 ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 {
 	zend_mem_header *p, *t;
-	unsigned int fci, i, j;
+
 #if ZEND_DEBUG
 	int had_leaks = 0;
 #endif
-	zend_fast_cache_list_entry *fast_cache_list_entry, *next_fast_cache_list_entry;
 
-#ifdef ZEND_MM
-	if (clean_cache) {
-		zend_mm_shutdown(&AG(mm_heap));
-	}
-	return;
-#elif defined(ZEND_WIN32) && !ZEND_DEBUG
-	if (clean_cache && AG(memory_heap)) {
-		HeapDestroy(AG(memory_heap));
-		return;
-	}
-#endif
 #if ZEND_ENABLE_FAST_CACHE
+	zend_fast_cache_list_entry *fast_cache_list_entry, *next_fast_cache_list_entry;
+	unsigned int fci;
+
 	for (fci=0; fci<MAX_FAST_CACHE_TYPES; fci++) {
 		fast_cache_list_entry = AG(fast_cache_list_head)[fci];
 		while (fast_cache_list_entry) {
@@ -463,9 +454,11 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 		}
 		AG(fast_cache_list_head)[fci] = NULL;
 	}
-#endif
+#endif /* ZEND_ENABLE_FAST_CACHE */
+
 #if !ZEND_DISABLE_MEMORY_CACHE
 	if (1 || clean_cache) {
+		unsigned int i, j;
 		zend_mem_header *ptr;
 
 		for (i=1; i<MAX_CACHED_MEMORY; i++) {
@@ -480,7 +473,8 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 			AG(cache_count)[i] = 0;
 		}
 	}
-#endif
+#endif /* !ZEND_DISABLE_MEMORY_CACHE */
+
 #if ZEND_DEBUG || !defined(ZEND_MM)
 	p = AG(head);
 	t = AG(head);
@@ -566,8 +560,18 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 		}
 					
 	} while (0);
+#endif
 
 #endif
+
+#ifdef ZEND_MM
+	if (clean_cache) {
+		zend_mm_shutdown(&AG(mm_heap));
+	}
+#elif defined(ZEND_WIN32)
+	if (clean_cache && AG(memory_heap)) {
+		HeapDestroy(AG(memory_heap));
+	}
 #endif
 }
 
