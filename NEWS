@@ -25,6 +25,7 @@ PHP                                                                        NEWS
   in using reflection API. (Marcus)
 - Changed tidy error handling to no longer use exceptions and 
   renamed the "error_buf" property to errorBuffer. (John)
+- Changed tidy_node to tidyNode and removed tidy_exception (John)
 - Changed class and method names to use studlyCaps convention. (Marcus)
 - Changed language parser to throw errors when a non-empty signature is used in
   a destructor definition. (Marcus)
