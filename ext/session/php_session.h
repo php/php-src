@@ -118,6 +118,8 @@ typedef struct _php_ps_globals {
 	zend_bool use_only_cookies;
 	zend_bool use_trans_sid;	/* contains the INI value of whether to use trans-sid */
 	zend_bool apply_trans_sid;	/* whether or not to enable trans-sid for the current request */
+	int send_cookie;
+	int define_sid;
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;
@@ -129,6 +131,7 @@ PHP_FUNCTION(session_name);
 PHP_FUNCTION(session_module_name);
 PHP_FUNCTION(session_save_path);
 PHP_FUNCTION(session_id);
+PHP_FUNCTION(session_regenerate_id);
 PHP_FUNCTION(session_decode);
 PHP_FUNCTION(session_register);
 PHP_FUNCTION(session_unregister);
