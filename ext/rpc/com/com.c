@@ -36,13 +36,13 @@ static int com_name(rpc_string, rpc_string *, void *, int);
 static int com_ctor(rpc_string, void **, int , zval ***);
 static int com_dtor(void *);
 static int com_describe(rpc_string, void *, char **, unsigned char **);
-static int com_call(rpc_string, void **, zval *, int, zval ***);
-static int com_get(rpc_string, zval *, void **);
-static int com_set(rpc_string, zval *, void **);
-static int com_compare(void **, void **);
-static int com_has_property(rpc_string, void **);
-static int com_unset_property(rpc_string, void **);
-static int com_get_properties(HashTable **, void **);
+static int com_call(rpc_string, void *, zval *, int, zval ***);
+static int com_get(rpc_string, zval *, void *);
+static int com_set(rpc_string, zval *, void *);
+static int com_compare(void *, void *);
+static int com_has_property(rpc_string, void *);
+static int com_unset_property(rpc_string, void *);
+static int com_get_properties(HashTable **, void *);
 
 static PHP_INI_MH(com_typelib_file_change);
 
@@ -216,13 +216,21 @@ static int com_name(rpc_string hash, rpc_string *name, void *data, int type)
 		switch (type) {
 			case CLASS:
 			{
-				OLECHAR *olestr;
+				if (hash.str != NULL) {
+					OLECHAR *olestr;
 
-				StringFromCLSID((CLSID *) hash.str, &olestr);
-				name->str = php_OLECHAR_to_char(olestr, &(name->len), CP_ACP, TRUE);
-				CoTaskMemFree(olestr);
+					StringFromCLSID((CLSID *) hash.str, &olestr);
+					name->str = php_OLECHAR_to_char(olestr, &(name->len), CP_ACP, TRUE);
+					CoTaskMemFree(olestr);
 
-				return SUCCESS;
+					return SUCCESS;
+				} else {
+					comval *obj = (comval *) data;
+
+					/* try to figure out classname */
+
+					return FAILURE;
+				}
 			}
 
 			case METHOD:
@@ -620,9 +628,8 @@ static int com_describe(rpc_string method_name, void *data, char **arg_types, un
 	return retval;
 }
 
-static int com_call(rpc_string method_name, void **data, zval *return_value, int num_args, zval **args[])
+static int com_call(rpc_string method_name, void *data, zval *return_value, int num_args, zval **args[])
 {
-	DISPID dispid;
 	DISPPARAMS dispparams;
 	HRESULT hr;
 	OLECHAR *funcname = NULL;
@@ -630,17 +637,15 @@ static int com_call(rpc_string method_name, void **data, zval *return_value, int
 	VARIANT result;
 	int current_arg, current_variant;
 	char *ErrString = NULL;
-	TSRMLS_FETCH();
 
 	/* if the length of the name is 0, we are dealing with a pointer to a dispid */
 	assert(method_name.len == 0);
-	dispid = *(DISPID*)method_name.str;
 
 	variant_args = num_args ? (VARIANT *) emalloc(sizeof(VARIANT) * num_args) : NULL;
 
 	for (current_arg = 0; current_arg < num_args; current_arg++) {
 		current_variant = num_args - current_arg - 1;
-		php_zval_to_variant(*args[current_arg], &variant_args[current_variant], C_CODEPAGE((comval *) *data));
+		php_zval_to_variant(*args[current_arg], &variant_args[current_variant], C_CODEPAGE((comval *) data));
 	}
 
 	dispparams.rgvarg = variant_args;
@@ -650,7 +655,7 @@ static int com_call(rpc_string method_name, void **data, zval *return_value, int
 
 	VariantInit(&result);
 
-	hr = php_COM_invoke((comval *) *data, dispid, DISPATCH_METHOD|DISPATCH_PROPERTYGET, &dispparams, &result, &ErrString);
+	hr = php_COM_invoke((comval *) data, *(DISPID*)method_name.str, DISPATCH_METHOD|DISPATCH_PROPERTYGET, &dispparams, &result, &ErrString);
 
 	for (current_arg=0;current_arg<num_args;current_arg++) {
 		/* don't release IDispatch pointers as they are used afterwards */
@@ -670,45 +675,26 @@ static int com_call(rpc_string method_name, void **data, zval *return_value, int
 
 		error_message = php_COM_error_message(hr);
 		if (ErrString) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Invoke() failed: %s %s", error_message, ErrString);
+			rpc_error(E_WARNING,"Invoke() failed: %s %s", error_message, ErrString);
 			efree(ErrString);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Invoke() failed: %s", error_message);
+			rpc_error(E_WARNING,"Invoke() failed: %s", error_message);
 		}
 		LocalFree(error_message);
 		return FAILURE;
 	}
 
-	RETVAL_VARIANT(&result, C_CODEPAGE((comval *) *data));
+	RETVAL_VARIANT(&result, C_CODEPAGE((comval *) data));
 
 	return SUCCESS;
 }
 
-static int com_get(rpc_string property_name, zval *return_value, void **data)
+static int com_get(rpc_string property_name, zval *return_value, void *data)
 {
 	char *ErrString = NULL;
 	VARIANT *result;
-	OLECHAR *propname;
-	DISPID dispid;
 	DISPPARAMS dispparams;
 	HRESULT hr;
-	TSRMLS_FETCH();
-
-	/* obtain property handler */
-	propname = php_char_to_OLECHAR(property_name.str, property_name.len, CP_ACP, FALSE);
-
-	if (FAILED(hr = php_COM_get_ids_of_names((comval *) *data, propname, &dispid))) {
-		char *error_message;
-
-		efree(propname);
-		error_message = php_COM_error_message(hr);
-		rpc_error(E_WARNING,"Unable to lookup %s: %s", property_name.str, error_message);
-		LocalFree(error_message);
-
-		return FAILURE;
-	}
-
-	efree(propname);
 
 	result = (VARIANT *) emalloc(sizeof(VARIANT));
 	VariantInit(result);
@@ -716,7 +702,7 @@ static int com_get(rpc_string property_name, zval *return_value, void **data)
 	dispparams.cArgs = 0;
 	dispparams.cNamedArgs = 0;
 
-	if (FAILED(hr = php_COM_invoke((comval *) data, dispid, DISPATCH_PROPERTYGET, &dispparams, result, &ErrString))) {
+	if (FAILED(hr = php_COM_invoke((comval *) data, *((DISPID *) property_name.str), DISPATCH_PROPERTYGET, &dispparams, result, &ErrString))) {
 		char *error_message;
 
 		efree(result);
@@ -732,51 +718,43 @@ static int com_get(rpc_string property_name, zval *return_value, void **data)
 		return FAILURE;
 	}
 
-	RETVAL_VARIANT(result, C_CODEPAGE((comval *) *data));
+	if (V_VT(result) == VT_DISPATCH) {
+		RETVAL_VARIANT(result, C_CODEPAGE((comval *) data));
+	} else {
+		comval *foo = (comval *) data;
+		php_variant_to_zval(result, return_value, C_CODEPAGE(foo));
+		VariantClear(result);
+	}
+
+	efree(result);
 
 	return SUCCESS;
 }
 
-static int com_set(rpc_string property_name, zval *value, void **data)
+static int com_set(rpc_string property_name, zval *value, void *data)
 {
 	HRESULT hr;
-	OLECHAR *propname;
-	DISPID dispid, mydispid = DISPID_PROPERTYPUT;
+	DISPID mydispid = DISPID_PROPERTYPUT;
 	DISPPARAMS dispparams;
 	VARIANT *var;
 	char *error_message, *ErrString = NULL;
-	TSRMLS_FETCH();
-
-	/* obtain property handler */
-	propname = php_char_to_OLECHAR(property_name.str, property_name.len, CP_ACP, FALSE);
-
-	if (FAILED(hr = php_COM_get_ids_of_names((comval *) *data, propname, &dispid))) {
-		error_message = php_COM_error_message(hr);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unable to lookup %s: %s", property_name.str, error_message);
-		LocalFree(error_message);
-		efree(propname);
-
-		return FAILURE;
-	}
-
-	efree(propname);
 
 	var = (VARIANT *) emalloc(sizeof(VARIANT));
 	VariantInit(var);
 
-	php_zval_to_variant(value, var, C_CODEPAGE((comval *) *data));
+	php_zval_to_variant(value, var, C_CODEPAGE((comval *) data));
 	dispparams.rgvarg = var;
 	dispparams.rgdispidNamedArgs = &mydispid;
 	dispparams.cArgs = 1;
 	dispparams.cNamedArgs = 1;
 
-	if (FAILED(hr = php_COM_invoke((comval *) *data, dispid, DISPATCH_PROPERTYPUT, &dispparams, NULL, &ErrString))) {
+	if (FAILED(hr = php_COM_invoke((comval *) data, *(DISPID*)property_name.str, DISPATCH_PROPERTYPUT, &dispparams, NULL, &ErrString))) {
 		error_message = php_COM_error_message(hr);
 		if (ErrString) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,"PropPut() failed: %s %s", error_message, ErrString);
+			rpc_error(E_WARNING,"PropPut() failed: %s %s", error_message, ErrString);
 			efree(ErrString);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,"PropPut() failed: %s", error_message);
+			rpc_error(E_WARNING,"PropPut() failed: %s", error_message);
 		}
 		LocalFree(error_message);
 		VariantClear(var);
@@ -792,22 +770,22 @@ static int com_set(rpc_string property_name, zval *value, void **data)
 	return SUCCESS;
 }
 
-static int com_compare(void **data1, void **data2)
+static int com_compare(void *data1, void *data2)
 {
 	return SUCCESS;
 }
 
-static int com_has_property(rpc_string property_name, void **data)
+static int com_has_property(rpc_string property_name, void *data)
 {
 	return SUCCESS;
 }
 
-static int com_unset_property(rpc_string property_name, void **data)
+static int com_unset_property(rpc_string property_name, void *data)
 {
 	return SUCCESS;
 }
 
-static int com_get_properties(HashTable **properties, void **data)
+static int com_get_properties(HashTable **properties, void *data)
 {
 	return SUCCESS;
 }
@@ -819,13 +797,11 @@ static int com_get_properties(HashTable **properties, void **data)
    Increases the reference counter on a COM object */
 ZEND_FUNCTION(com_addref)
 {
-	zval *object = getThis();
+	zval *object;
 	rpc_internal *intern;
 
-	if (object == NULL) {
-		zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &object, com_class_entry);
-	} else {
-		zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "");
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, com_class_entry) != SUCCESS) {
+		return;
 	}
 
 	if (GET_INTERNAL_EX(intern, object) != SUCCESS) {
@@ -840,13 +816,11 @@ ZEND_FUNCTION(com_addref)
    Releases a COM object */
 ZEND_FUNCTION(com_release)
 {
-	zval *object = getThis();
+	zval *object;
 	rpc_internal *intern;
 
-	if (object == NULL) {
-		zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &object, com_class_entry);
-	} else {
-		zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "");
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, com_class_entry) != SUCCESS) {
+		return;
 	}
 
 	if (GET_INTERNAL_EX(intern, object) != SUCCESS) {
@@ -859,15 +833,13 @@ ZEND_FUNCTION(com_release)
 
 PHP_FUNCTION(com_next)
 {
-	zval *object = getThis();
+	zval *object;
 	rpc_internal *intern;
 	comval *obj;
 	unsigned long count = 1;
 
-	if (object == NULL) {
-		zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|l", &object, com_class_entry, &count);
-	} else {
-		zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &count);
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &object, com_class_entry, &count) != SUCCESS) {
+		return;
 	}
 
 	if (GET_INTERNAL_EX(intern, object) != SUCCESS) {
@@ -921,7 +893,7 @@ PHP_FUNCTION(com_next)
 				
 				efree(result);
 				error_message = php_COM_error_message(hr);
-				php_error_docref(NULL TSRMLS_CC, E_WARNING,"IEnumVariant::Next() failed: %s", error_message);
+				rpc_error(E_WARNING,"IEnumVariant::Next() failed: %s", error_message);
 				efree(error_message);
 
 				RETURN_NULL();
@@ -968,14 +940,12 @@ PHP_FUNCTION(com_all)
 
 PHP_FUNCTION(com_reset)
 {
-	zval *object = getThis();
+	zval *object;
 	rpc_internal *intern;
 	comval *obj;
 
-	if (object == NULL) {
-		zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &object, com_class_entry);
-	} else {
-		zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "");
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, com_class_entry) != SUCCESS) {
+		return;
 	}
 
 	if (GET_INTERNAL_EX(intern, object) != SUCCESS) {
@@ -989,7 +959,7 @@ PHP_FUNCTION(com_reset)
 
 		if (FAILED(hr = C_ENUMVARIANT_VT(obj)->Reset(C_ENUMVARIANT(obj)))) {
 			char *error_message = php_COM_error_message(hr);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,"IEnumVariant::Next() failed: %s", error_message);
+			rpc_error(E_WARNING,"IEnumVariant::Next() failed: %s", error_message);
 			efree(error_message);
 
 			RETURN_FALSE;
@@ -1004,15 +974,13 @@ PHP_FUNCTION(com_reset)
 
 PHP_FUNCTION(com_skip)
 {
-	zval *object = getThis();
+	zval *object;
 	rpc_internal *intern;
 	comval *obj;
 	unsigned long count = 1;
 
-	if (object == NULL) {
-		zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|l", &object, com_class_entry, &count);
-	} else {
-		zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &count);
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &object, com_class_entry, &count) != SUCCESS) {
+		return;
 	}
 
 	if (GET_INTERNAL_EX(intern, object) != SUCCESS) {
@@ -1026,7 +994,7 @@ PHP_FUNCTION(com_skip)
 
 		if (FAILED(hr = C_ENUMVARIANT_VT(obj)->Skip(C_ENUMVARIANT(obj), count))) {
 			char *error_message = php_COM_error_message(hr);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,"IEnumVariant::Next() failed: %s", error_message);
+			rpc_error(E_WARNING,"IEnumVariant::Next() failed: %s", error_message);
 			efree(error_message);
 			RETURN_FALSE;
 		}
@@ -1042,13 +1010,11 @@ PHP_FUNCTION(com_skip)
    Grabs an IEnumVariant */
 ZEND_FUNCTION(com_isenum)
 {
-	zval *object = getThis();
+	zval *object;
 	rpc_internal *intern;
 
-	if (object == NULL) {
-		zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &object, com_class_entry);
-	} else {
-		zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "");
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, com_class_entry) != SUCCESS) {
+		return;
 	}
 
 	if (GET_INTERNAL_EX(intern, object) != SUCCESS) {

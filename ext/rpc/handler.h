@@ -82,13 +82,13 @@ typedef struct _rpc_object_handlers {
 	int (*rpc_ctor)(rpc_string class_name, void **data, int num_args, zval **args[]);
 	int (*rpc_dtor)(void *data);
 	int (*rpc_describe)(rpc_string method_name, void *data, char **arg_types, unsigned char **ref_types);
-	int (*rpc_call)(rpc_string method_name, void **data, zval *return_value, int num_args, zval **args[]);
-	int (*rpc_get)(rpc_string property_name, zval *return_value, void **data);
-	int (*rpc_set)(rpc_string property_name, zval *value, void **data);
-	int (*rpc_compare)(void **data1, void **data2);
-	int (*rpc_has_property)(rpc_string property_name, void **data);
-	int (*rpc_unset_property)(rpc_string property_name, void **data);
-	int (*rpc_get_properties)(HashTable **properties, void **data);
+	int (*rpc_call)(rpc_string method_name, void *data, zval *return_value, int num_args, zval **args[]);
+	int (*rpc_get)(rpc_string property_name, zval *return_value, void *data);
+	int (*rpc_set)(rpc_string property_name, zval *value, void *data);
+	int (*rpc_compare)(void *data1, void *data2);
+	int (*rpc_has_property)(rpc_string property_name, void *data);
+	int (*rpc_unset_property)(rpc_string property_name, void *data);
+	int (*rpc_get_properties)(HashTable **properties, void *data);
 } rpc_object_handlers;
 
 /* handler entry */
@@ -127,8 +127,17 @@ typedef struct _rpc_proxy {
 	zend_uint				dummy;
 } rpc_proxy;
 
+
+ZEND_API ZEND_FUNCTION(rpc_load);
+ZEND_API ZEND_FUNCTION(rpc_call);
+ZEND_API ZEND_FUNCTION(rpc_set);
+ZEND_API ZEND_FUNCTION(rpc_get);
+ZEND_API ZEND_FUNCTION(rpc_singleton);
+ZEND_API ZEND_FUNCTION(rpc_poolable);
+
 ZEND_API rpc_register_layer(rpc_handler_entry *entry TSRMLS_DC);
-ZEND_API zval* _rpc_object_from_data(zval *z, zend_class_entry *ce, void *data, rpc_class_hash *class_hash TSRMLS_DC);
-#define rpc_object_from_data(z, layer, data, class_hash)  _rpc_object_from_data((z), layer##_class_entry, (data), (class_hash) TSRMLS_CC)
+ZEND_API zval* _rpc_object_from_data(zval *z, rpc_handler_entry *handler, void *data, rpc_class_hash *class_hash);
+#define rpc_object_from_data(layer, data)  rpc_object_from_data_ex(NULL, layer, data, NULL)
+#define rpc_object_from_data_ex(z, layer, data, class_hash)  _rpc_object_from_data((z), &layer##_handler_entry, (data), (class_hash))
 
 #endif /* HANDLER_H */

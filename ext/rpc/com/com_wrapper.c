@@ -880,7 +880,7 @@ ZEND_API int php_COM_load_typelib(ITypeLib *TypeLib, int mode)
 					/* Oops, it already exists. No problem if it is defined as the same value */
 					/* Check to see if they are the same */
 					if (!compare_function(&results, &c.value, &exists TSRMLS_CC) && INI_INT("com.autoregister_verbose")) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type library value %s is already defined and has a different value", c.name);
+						rpc_error(NULL TSRMLS_CC, E_WARNING, "Type library value %s is already defined and has a different value", c.name);
 					}
 					free(c.name);
 					j++;
@@ -912,13 +912,11 @@ ZEND_API int php_COM_load_typelib(ITypeLib *TypeLib, int mode)
 PHPAPI zval *php_COM_object_from_dispatch(IDispatch *disp)
 {
 	comval *obj;
-	TSRMLS_FETCH();
 	
 	ALLOC_COM(obj);
 	php_COM_set(obj, &disp, FALSE);
 	
-	return rpc_object_from_data(NULL, com, obj, NULL);
-
+	return rpc_object_from_data(com, obj);
 }
 
 #endif
