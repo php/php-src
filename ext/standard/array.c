@@ -2291,10 +2291,10 @@ out:
 }
 /* }}} */
 
-/* {{{ proto array array_subtract(array arr1, array arr2 [, ...])
+/* {{{ proto array array_diff(array arr1, array arr2 [, ...])
    Returns the entries of arr1 that have values which are not present in
    any of the others arguments */
-PHP_FUNCTION(array_subtract)
+PHP_FUNCTION(array_diff)
 {
         zval ***args = NULL;
 	HashTable *hash;
