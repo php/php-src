@@ -150,8 +150,8 @@ typedef union _date_ll {
 
 %}
 
-/* This grammar has 14 shift/reduce conflicts. */
-%expect 14
+/* This grammar has 40 shift/reduce conflicts. */
+%expect 40
 %pure_parser
 
 %token	tAGO tDAY tDAY_UNIT tDAYZONE tDST tHOUR_UNIT tID
@@ -192,12 +192,26 @@ time	: tUNUMBER tMERIDIAN {
 	    ((struct date_yy *)parm)->yyMinutes = 0;
 	    ((struct date_yy *)parm)->yySeconds = 0;
 	    ((struct date_yy *)parm)->yyMeridian = $2;
+#ifdef PHP_DEBUG_PARSE_DATE_PARSER
+		printf("[U M]\n");
+#endif
 	}
 	| tUNUMBER ':' tUNUMBER o_merid {
 	    ((struct date_yy *)parm)->yyHour = $1;
 	    ((struct date_yy *)parm)->yyMinutes = $3;
 	    ((struct date_yy *)parm)->yySeconds = 0;
 	    ((struct date_yy *)parm)->yyMeridian = $4;
+#ifdef PHP_DEBUG_PARSE_DATE_PARSER
+		printf("[U:U M]\n");
+#endif
+	}
+	| tUNUMBER ':' tUNUMBER rel {
+	    ((struct date_yy *)parm)->yyHour = $1;
+	    ((struct date_yy *)parm)->yyMinutes = $3;
+	    ((struct date_yy *)parm)->yyMeridian = MER24;
+#ifdef PHP_DEBUG_PARSE_DATE_PARSER
+		printf("[U:U rel]\n");
+#endif
 	}
 	| tUNUMBER ':' tUNUMBER tSNUMBER {
 	    ((struct date_yy *)parm)->yyHour = $1;
@@ -207,12 +221,27 @@ time	: tUNUMBER tMERIDIAN {
 	    ((struct date_yy *)parm)->yyTimezone = ($4 < 0
 			  ? -$4 % 100 + (-$4 / 100) * 60
 			  : - ($4 % 100 + ($4 / 100) * 60));
+#ifdef PHP_DEBUG_PARSE_DATE_PARSER
+		printf("[U:U S]\n");
+#endif
 	}
 	| tUNUMBER ':' tUNUMBER ':' tUNUMBER o_merid {
 	    ((struct date_yy *)parm)->yyHour = $1;
 	    ((struct date_yy *)parm)->yyMinutes = $3;
 	    ((struct date_yy *)parm)->yySeconds = $5;
 	    ((struct date_yy *)parm)->yyMeridian = $6;
+#ifdef PHP_DEBUG_PARSE_DATE_PARSER
+		printf("[U:U:U M]\n");
+#endif
+	}
+	| tUNUMBER ':' tUNUMBER ':' tUNUMBER rel {
+	    /* ISO 8601 format.  hh:mm:ss[+-][0-9]{2}([0-9]{2})?.  */
+	    ((struct date_yy *)parm)->yyHour = $1;
+	    ((struct date_yy *)parm)->yyMinutes = $3;
+	    ((struct date_yy *)parm)->yySeconds = $5;
+#ifdef PHP_DEBUG_PARSE_DATE_PARSER
+		printf("[U:U:U rel]\n");
+#endif
 	}
 	| tUNUMBER ':' tUNUMBER ':' tUNUMBER tSNUMBER {
 	    /* ISO 8601 format.  hh:mm:ss[+-][0-9]{2}([0-9]{2})?.  */
@@ -227,6 +256,9 @@ time	: tUNUMBER tMERIDIAN {
 		} else {
 			((struct date_yy *)parm)->yyTimezone =  -$6 * 60;
 		}
+#ifdef PHP_DEBUG_PARSE_DATE_PARSER
+		printf("[U:U:U S]\n");
+#endif
 	}
 	;
 
@@ -867,6 +899,9 @@ yylex (YYSTYPE *lvalp, void *parm)
 	      date->yyInput--;
 	    }
 	  }
+#ifdef PHP_DEBUG_PARSE_DATE_PARSER
+	  printf ("T: %s\n", sign ? "tS" : "tU");
+#endif
 	  return sign ? tSNUMBER : tUNUMBER;
 	}
       if (ISALPHA (c))
@@ -876,16 +911,27 @@ yylex (YYSTYPE *lvalp, void *parm)
 	      *p++ = c;
 	  *p = '\0';
 	  date->yyInput--;
+#ifdef PHP_DEBUG_PARSE_DATE_PARSER
+	  printf ("T: LW\n");
+#endif
 	  return LookupWord (lvalp, buff);
 	}
-      if (c != '(')
+      if (c != '(') {
+#ifdef PHP_DEBUG_PARSE_DATE_PARSER
+	printf ("T: %c\n", *date->yyInput);
+#endif
 	return *date->yyInput++;
+	  }
       Count = 0;
       do
 	{
 	  c = *date->yyInput++;
-	  if (c == '\0')
+	  if (c == '\0') {
+#ifdef PHP_DEBUG_PARSE_DATE_PARSER
+	printf ("T: %c\n", c);
+#endif
 	    return c;
+	  }
 	  if (c == '(')
 	    Count++;
 	  else if (c == ')')

@@ -8,6 +8,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #27809 (ftp_systype returns null on some ftp servers). (Ilia)
 - Fixed bug #27802 (default number of children to 8 when PHP_FCGI_CHILDREN is
   not defined). (Ilia)
+- Fixed bug #27780 (strtotime(+1 xxx) returns a wrong date/time). (Derick)
 - Fixed bug #27764 (Get return value from a stored procedure not returning any
   result sets). (Frank)
 - Fixed bug #27762 (SCO Openserver doesn't have S_ISSOCK). (Wez)
