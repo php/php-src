@@ -1397,7 +1397,7 @@ static int _zval_array_to_c_array(zval **arg, zval ****params TSRMLS_DC) /* {{{ 
 } /* }}} */
 
 /* {{{ proto public mixed ReflectionFunction::invokeArgs(array args)
-   Invokes the function */
+   Invokes the function and pass its arguments as array. */
 ZEND_METHOD(reflection_function, invokeArgs)
 {
 	zval *retval_ptr;
@@ -1907,7 +1907,7 @@ ZEND_METHOD(reflection_method, __toString)
 /* }}} */
 
 /* {{{ proto public mixed ReflectionMethod::invoke(mixed object, mixed* args)
-   Invokes the function. Pass a  */
+   Invokes the method. */
 ZEND_METHOD(reflection_method, invoke)
 {
 	zval *retval_ptr;
@@ -1924,7 +1924,7 @@ ZEND_METHOD(reflection_method, invoke)
 	METHOD_NOTSTATIC;
 
 	if (argc < 1) {
-		zend_error(E_WARNING, "%s expects at least one parameter, none given", get_active_function_name(TSRMLS_C));
+		zend_error(E_WARNING, "Invoke() expects at least one parameter, none given");
 		RETURN_FALSE;
 	}
 	
@@ -1934,11 +1934,11 @@ ZEND_METHOD(reflection_method, invoke)
 		(mptr->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 		if (mptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-				"Trying to invoke abstract method %s::%s", 
+				"Trying to invoke abstract method %s::%s()", 
 				mptr->common.scope->name, mptr->common.function_name);
 		} else {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
-				"Trying to invoke %s method %s::%s from scope %s", 
+				"Trying to invoke %s method %s::%s() from scope %s", 
 				mptr->common.fn_flags & ZEND_ACC_PROTECTED ? "protected" : "private",
 				mptr->common.scope->name, mptr->common.function_name,
 				Z_OBJCE_P(getThis())->name);
@@ -2010,7 +2010,7 @@ ZEND_METHOD(reflection_method, invoke)
 /* }}} */
 
 /* {{{ proto public mixed ReflectionMethod::invokeArgs(mixed object, array args)
-   Invokes the function. Pass a  */
+   Invokes the function and pass its arguments as array. */
 ZEND_METHOD(reflection_method, invokeArgs)
 {
 	zval *retval_ptr;
