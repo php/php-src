@@ -170,6 +170,7 @@
 #define SIZEOF_INT 4
 #define HAVE_GLOB
 #define PHP_SHLIB_SUFFIX "dll"
+#define HAVE_SQLDATASOURCES
 
 /* Win32 supports strcoll */
 #define HAVE_STRCOLL 1
