@@ -157,7 +157,11 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
 		struct addrinfo hints, *res, *sai;
 
 		memset(&hints, '\0', sizeof(hints));
+#  ifdef HAVE_IPV6
 		hints.ai_family = AF_UNSPEC;
+#  else
+		hints.ai_family = AF_INET;
+#  endif
 		if ((n = getaddrinfo(host, NULL, &hints, &res))) {
 			php_error(E_WARNING, "php_network_getaddresses: getaddrinfo failed: %s", PHP_GAI_STRERROR(n));
 			return 0;
