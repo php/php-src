@@ -47,8 +47,16 @@
 #endif
 #endif
 
+/* DOMXML API_VERSION, please bump it up, if you change anything in the API
+    therefore it's easier for the script-programmers to check, what's working how
+   Can be checked with phpversion("domxml");
+*/
+#define DOMXML_API_VERSION "20020530"
+
 extern zend_module_entry domxml_module_entry;
 #define domxml_module_ptr &domxml_module_entry
+
+PHPAPI zval *php_domobject_new(xmlNodePtr obj, int *found, zval* in TSRMLS_DC);
 
 /* directory functions */
 PHP_MINIT_FUNCTION(domxml);
@@ -138,7 +146,6 @@ PHP_FUNCTION(domxml_attr_value);
 PHP_FUNCTION(domxml_attr_specified);
 
 /* Class Element methods */
-PHP_FUNCTION(domxml_element);
 PHP_FUNCTION(domxml_elem_tagname);
 PHP_FUNCTION(domxml_elem_get_attribute);
 PHP_FUNCTION(domxml_elem_set_attribute);
