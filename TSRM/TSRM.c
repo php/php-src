@@ -58,9 +58,10 @@ static void (*tsrm_new_thread_begin_handler)();
 static void (*tsrm_new_thread_end_handler)();
 
 /* Debug support */
-static int tsrm_error(int level, const char *format, ...);
+int tsrm_error(int level, const char *format, ...);
 static int tsrm_error_level;
-#if TSRM_ERROR
+static FILE *tsrm_error_file;
+#if TSRM_DEBUG
 #define TSRM_ERROR tsrm_error
 #define TSRM_SAFE_ARRAY_OFFSET(array, offset, range)	(((offset)>=0 && (offset)<(range)) ? array[offset] : NULL)
 #else
@@ -69,13 +70,16 @@ static int tsrm_error_level;
 #endif
 
 /* Startup TSRM (call once for the entire process) */
-TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_level)
+TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_level, char *debug_filename)
 {
 #if defined(GNUPTH)
 	pth_init();
 #endif
 
+	tsrm_error_file = stderr;
+	tsrm_error_set(debug_level, debug_filename);
 	tsrm_tls_table_size = expected_threads;
+
 	tsrm_tls_table = (tsrm_tls_entry **) calloc(tsrm_tls_table_size, sizeof(tsrm_tls_entry *));
 	if (!tsrm_tls_table) {
 		TSRM_ERROR(TSRM_ERROR_LEVEL_ERROR, "Unable to allocate TLS table");
@@ -96,9 +100,7 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 
 	tsrm_new_thread_begin_handler = tsrm_new_thread_end_handler = NULL;
 
-	tsrm_error_level = debug_level;
-
-	TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Started up TSRM, %d expected threads, %d expected resources\n", expected_threads, expected_resources);
+	TSRM_ERROR(TSRM_ERROR_LEVEL_CORE, "Started up TSRM, %d expected threads, %d expected resources", expected_threads, expected_resources);
 	return 1;
 }
 
@@ -133,7 +135,10 @@ TSRM_API void tsrm_shutdown(void)
 	}
 	tsrm_mutex_free(tsmm_mutex);
 	tsmm_mutex = NULL;
-	TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Shutdown TSRM\n");
+	TSRM_ERROR(TSRM_ERROR_LEVEL_CORE, "Shutdown TSRM");
+	if (tsrm_error_file!=stderr) {
+		fclose(tsrm_error_file);
+	}
 #if defined(GNUPTH)
 	pth_kill();
 #endif
@@ -146,13 +151,13 @@ TSRM_API ts_rsrc_id ts_allocate_id(size_t size, ts_allocate_ctor ctor, ts_alloca
 	ts_rsrc_id new_id;
 	int i;
 
-	TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Obtaining a new resource id, %d bytes\n", size);
+	TSRM_ERROR(TSRM_ERROR_LEVEL_CORE, "Obtaining a new resource id, %d bytes", size);
 
 	tsrm_mutex_lock(tsmm_mutex);
 
 	/* obtain a resource id */
 	new_id = id_count++;
-	TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Obtained resource id %d\n", new_id);
+	TSRM_ERROR(TSRM_ERROR_LEVEL_CORE, "Obtained resource id %d", TSRM_SHUFFLE_RSRC_ID(new_id));
 
 	/* store the new resource type in the resource sizes table */
 	if (resource_types_table_size < id_count) {
@@ -190,7 +195,7 @@ TSRM_API ts_rsrc_id ts_allocate_id(size_t size, ts_allocate_ctor ctor, ts_alloca
 	}
 	tsrm_mutex_unlock(tsmm_mutex);
 
-	TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Successfully allocated new resource id %d\n", new_id);
+	TSRM_ERROR(TSRM_ERROR_LEVEL_CORE, "Successfully allocated new resource id %d", TSRM_SHUFFLE_RSRC_ID(new_id));
 	return TSRM_SHUFFLE_RSRC_ID(new_id);
 }
 
@@ -199,6 +204,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 {
 	int i;
 
+	TSRM_ERROR(TSRM_ERROR_LEVEL_CORE, "Creating data structures for thread %x", thread_id);
 	(*thread_resources_ptr) = (tsrm_tls_entry *) malloc(sizeof(tsrm_tls_entry));
 	(*thread_resources_ptr)->storage = (void **) malloc(sizeof(void *)*id_count);
 	(*thread_resources_ptr)->count = id_count;
@@ -235,7 +241,7 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 	} else {
 		thread_id = tsrm_thread_id();
 	}
-	TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Fetching resource id %d for thread %ld\n", id, (long) thread_id);
+	TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Fetching resource id %d for thread %ld", id, (long) thread_id);
 	tsrm_mutex_lock(tsmm_mutex);
 
 	hash_value = THREAD_HASH_OF(thread_id, tsrm_tls_table_size);
@@ -268,7 +274,7 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 	tsrm_mutex_unlock(tsmm_mutex);
 
 	if (resource) {
-		TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Successfully fetched resource id %d for thread id %ld - %x\n", id, (long) thread_id, (long) resource);
+		TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Successfully fetched resource id %d for thread id %ld - %x", id, (long) thread_id, (long) resource);
 	} else {
 		TSRM_ERROR(TSRM_ERROR_LEVEL_ERROR, "Resource id %d is out of range (%d..%d)", id, TSRM_SHUFFLE_RSRC_ID(0), TSRM_SHUFFLE_RSRC_ID(thread_resources->count-1));
 	}
@@ -397,7 +403,7 @@ TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
 /* Lock a mutex */
 TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
 {
-	TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Mutex locked thread: %ld\n",tsrm_thread_id());
+	TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Mutex locked thread: %ld", tsrm_thread_id());
 #ifdef TSRM_WIN32
 	EnterCriticalSection(mutexp);
 	return 1;
@@ -416,7 +422,7 @@ TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
 /* Unlock a mutex */
 TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp)
 {
-	TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Mutex unlocked thread: %ld\n",tsrm_thread_id());
+	TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Mutex unlocked thread: %ld", tsrm_thread_id());
 #ifdef TSRM_WIN32
 	LeaveCriticalSection(mutexp);
 	return 1;
@@ -455,25 +461,45 @@ TSRM_API void *tsrm_set_new_thread_end_handler(void (*new_thread_end_handler)(TH
  * Debug support
  */
 
-static int tsrm_error(int level, const char *format, ...)
+#if TSRM_DEBUG
+int tsrm_error(int level, const char *format, ...)
 {
 	if (level<=tsrm_error_level) {
 		va_list args;
 		int size;
 
+		fprintf(tsrm_error_file, "TSRM:  ");
 		va_start(args, format);
-		size = vprintf(format, args);
+		size = vfprintf(tsrm_error_file, format, args);
 		va_end(args);
+		fprintf(tsrm_error_file, "\n");
+		fflush(tsrm_error_file);
 		return size;
 	} else {
 		return 0;
 	}
 }
+#endif
 
 
-void tsrm_error_set(int level)
+void tsrm_error_set(int level, char *debug_filename)
 {
 	tsrm_error_level = level;
+
+#if TSRM_DEBUG
+	if (tsrm_error_file!=stderr) { /* close files opened earlier */
+		fclose(tsrm_error_file);
+	}
+
+	if (debug_filename) {
+		tsrm_error_file = fopen(debug_filename, "w");
+		if (!tsrm_error_file) {
+			tsrm_error_file = stderr;
+		}
+	} else {
+		tsrm_error_file = stderr;
+	}
+#endif
 }
 
 #endif /* ZTS */
