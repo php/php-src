@@ -4,8 +4,12 @@ microtime() function
 --GET--
 --FILE--
 <?php
+
+set_time_limit(180);
+
 $passed = 0;
 $failed = 0;
+$last   = 0;
 for ($i=1;$i<=100000;$i++)    {
    list($micro,$time)=explode(" ",microtime());
    $add=$micro+$time;
