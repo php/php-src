@@ -1081,7 +1081,7 @@ static void _compact_var(HashTable *eg_active_symbol_table, zval *return_value, 
 /* }}} */
 
 
-/* {{{ proto array compact(string var_name |, array var_names [, ... ]])
+/* {{{ proto array compact(mixed var_names [, ... ])
    Creates a hash containing variables and their values */
 PHP_FUNCTION(compact)
 {
