@@ -1,3 +1,138 @@
+2000-06-10  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c: One more place.
+
+    * ext/pcre/php_pcre.c: Terminate the string with '\0'.
+
+2000-06-10  Stig Venaas  <venaas@uninett.no>
+
+    * NEWS: Notice about adding array_unique, array_intersect and array_diff
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h: Changed array_subtract to array_diff
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h:
+    Adding fuctions array_unique, array_intersect and array_subtract.
+
+2000-06-10  Andi Gutmans  <andi@php.net>
+
+    * php_virtual_cwd.c:
+    - Fix bug in virtual_file_ex when the resulting path is the root.
+
+    * NEWS: - Commit message says it all
+
+    * ext/posix/php_posix.h: - Erased an extra line by mistake
+
+    * config.w32.h
+      ext/pgsql/pgsql.dsp: - Fix PostgreSQL project file a bit.
+    - Remove some HAVE_* from config.w32.h. More can be removed. Right now
+    - most HAVE_*'s in config.w32.h can actually be removed as they usually are
+    - only used by the module itself and not by PHP. MSQL is an exception as
+    - log can use it too
+
+2000-06-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Define _POSIX_PTHREAD_SEMANTICS on Solaris by default.
+
+2000-06-10  Jouni Ahto  <jah@mork.net>
+
+    * README.EXT_SKEL
+      ext/skeleton/create_stubs:
+    - Fix incorrect code creation when an optional argument is resource type.
+
+2000-06-10  Andi Gutmans  <andi@php.net>
+
+    * sapi/cgi/cgi_main.c:
+    - This seems to be a bug. Anyone know who wrote this code? Should it stay
+    - in?
+
+    * ext/zlib/zlib.dsp
+      ext/ftp/ftp.dsp
+      ext/java/java.dsp
+      ext/ldap/ldap.dsp
+      ext/mcrypt/mcrypt.dsp
+      ext/mssql/mssql.dsp
+      ext/oci8/oci8.dsp
+      ext/oracle/oracle.dsp
+      ext/pgsql/pgsql.dsp
+      ext/swf/swf.dsp
+      ext/calendar/calendar.dsp
+      ext/exif/exif.dsp: - Update module project files to include:
+    - HAVE_MODULE=1
+    - ZEND_WIN32
+    - PHP_WIN32
+    - COMPILE_DL_MODULE
+    - ZTS=1
+
+2000-06-10  Jouni Ahto  <jah@mork.net>
+
+    * README.EXT_SKEL
+      README.SELF-CONTAINED-EXTENSIONS:
+    - Add some documentation for ext_skel and a note about it's existence.
+
+2000-06-10  Andi Gutmans  <andi@php.net>
+
+    * ext/skeleton/php_skeleton.h
+      ext/skeleton/skeleton.c: - #ifdef COMPILE_DL_FOO
+    - #if HAVE_FOO
+
+    * ext/recode/php_recode.h
+      ext/snmp/php_snmp.h
+      ext/swf/php_swf.h
+      ext/sybase/php_sybase.h
+      ext/sybase_ct/php_sybase_ct.h
+      ext/sysvsem/php_sysvsem.h
+      ext/sysvshm/php_sysvshm.h
+      ext/yp/php_yp.h
+      ext/zlib/php_zlib.h
+      ext/informix/php_informix.h
+      ext/interbase/php_interbase.h
+      ext/mcal/php_mcal.h
+      ext/msql/php_msql.h
+      ext/mysql/php_mysql.h
+      ext/odbc/php_velocis.h
+      ext/pgsql/php_pgsql.h
+      ext/posix/php_posix.h
+      ext/bcmath/php_bcmath.h
+      ext/db/php_db.h
+      ext/exif/config.m4
+      ext/exif/exif.c
+      ext/exif/php_exif.h
+      ext/ftp/php_ftp.h
+      ext/gd/php_gd.h
+      ext/hyperwave/php_hyperwave.h
+      ext/icap/php_icap.h:
+    - Nuke COMPILE_DL. Modules that need to be compiled as dll's in Windows
+    - need to define both COMPILE_DL_MODULE and HAVE_MODULE=1
+
+2000-06-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mysql/config.m4: Fix MYSQL_LIB_CHK ($i is used by the outer loop)
+
+    * ext/mysql/config.m4: Search for mysqlclient library in lib and lib/mysql
+
+    * README.SELF-CONTAINED-EXTENSIONS: Fix typo
+
+2000-06-10  Jouni Ahto  <jah@mork.net>
+
+    * ext/ext_skel
+      ext/skeleton/create_stubs:
+    - Fix typos, add default case to switch and other small things.
+
+    * ext/ext_skel
+      ext/skeleton/create_stubs:
+    - Automatically generate C code to handle arguments passed to a PHP function
+      based on function proto.
+
+2000-06-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/yaz/Makefile.in
+      ext/yaz/config.m4
+      ext/yaz/php_yaz.c: Make yaz compilable as shared module.
+
 2000-06-09  Jouni Ahto  <jah@mork.net>
 
     * ext/skeleton/php_skeleton.h:
