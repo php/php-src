@@ -137,7 +137,7 @@ zlib.output_compression = Off
 ; implications and is generally recommended for debugging purposes only.
 implicit_flush = Off
 
-; The unserialize callback function will called (with the undefind class'
+; The unserialize callback function will be called (with the undefined class'
 ; name as parameter), if the unserializer finds an undefined class
 ; which should be instanciated.
 ; A warning appears if the specified function is not defined, or if the
@@ -259,7 +259,7 @@ memory_limit = 8M      ; Maximum amount of memory a script may consume (8MB)
 ;                     empty string)
 ; E_STRICT			- run-time notices, enable to have PHP suggest changes
 ;                     to your code which will ensure the best interoperability
-;                     and forward compatability of your code
+;                     and forward compatibility of your code
 ; E_CORE_ERROR      - fatal errors that occur during PHP's initial startup
 ; E_CORE_WARNING    - warnings (non-fatal errors) that occur during PHP's
 ;                     initial startup
@@ -927,7 +927,7 @@ session.gc_maxlifetime = 1440
 ; PHP 4.2 and less have an undocumented feature/bug that allows you to
 ; to initialize a session variable in the global scope, albeit register_globals
 ; is disabled.  PHP 4.3 and later will warn you, if this feature is used.
-; You can disable the feature and the warning seperately. At this time,
+; You can disable the feature and the warning separately. At this time,
 ; the warning is only displayed, if bug_compat_42 is enabled.
 
 session.bug_compat_42 = 1
