@@ -1,0 +1,164 @@
+OpenSSL extension for PHP4
+$Id$
+
+The functions implemented so far make it possible to seal and open data,
+and also create and verify signatures. To enable the extension, configure
+PHP with --with-openssl.
+
+
+Functions:
+
+int openssl_get_privatekey(string key [, string passphrase])
+
+Parses the key data and returns a key resource identifier. If the key is
+encrypted a passphrase is needed. This can be supplied as second argument.
+
+
+int openssl_get_publickey(string cert)
+
+Extracts the public key from the given certificate and returns a key
+resource identifier.
+
+
+void openssl_free_key(int key)
+
+Frees the resource given by the key resource identifier.
+
+
+bool openssl_sign(string data, string signature, int key)
+
+Uses key to create signature for data, returns true on success and false
+on failure.
+
+
+int openssl_verify(string data, string signature, int key)
+
+Uses key to verify that the signature is correct for the given data.
+Returns 1 if correct, 0 if incorrect, and -1 on error.
+
+
+int openssl_seal(string data, string sealdata, array ekeys, array pubkeys)
+
+Encrypts data using pubkeys, so that only owners of the respective private
+keys and ekeys can decrypt and read the data. Returns the length of the
+sealed data on success, else false.
+
+
+bool openssl_open(string data, string opendata, string ekey, int privkey)
+
+Opens (decrypts) sealed data using a private key and the corresponding
+envelope key. Returns true on success and false on failure.
+
+
+See below for more details on usage. Also feel free to mail me at
+venaas@php.net if you have questions. The OpenSSL documentation,
+especially the EVP documentation at
+http://www.openssl.org/docs/crypto/evp.html, might also be of help.
+
+
+HOWTO:
+
+To do anything you need a private key and a certificate containing the
+corresponding public key. This is similar to what you have using say an
+Apache webserver with OpenSSL. For testing you could try keys that come
+with OpenSSL, that's what the sample scripts below do. You can also get
+keys from some CA, or you can create them yourself.
+
+
+Creating private key
+
+To generate an unprotected 1024 bit RSA private key you can do
+
+   openssl genrsa -out /tmp/test.key 1024
+
+Private keys should be protected by a passphrase though.
+
+
+Creating a self signed certificate
+
+To generate a self signed certificate from the key that is valid for
+365 days, do
+
+    openssl req -new -key /tmp/test.key -out /tmp/test.crt -days 365 -x509
+
+
+Example usage
+
+These examples use keys that come with OpenSSL, you should perhaps test with
+those first.
+
+
+Seal and open
+
+     <?php
+     $data = "Follow the white rabbit";
+
+     // Get certificate into a string
+     // this file comes with OpenSSL 0.9.6
+     $fp = fopen("/src/openssl-0.9.6/demos/maurice/cert.pem", "r");
+     $cert = fread($fp, 8192);
+     fclose($fp);
+     // get public key from certificate
+     $pk1 = openssl_get_publickey($cert);
+     // $pk1 is an encryption key resource id if success, else false
+     // Repeat if want public keys for multiple parties
+
+     $fp = fopen("/src/openssl-0.9.6/demos/sign/cert.pem", "r");
+     $cert = fread($fp, 8192);
+     fclose($fp);
+     $pk2 = openssl_get_publickey($cert);
+
+     // seal data, only owners of $pk1 and $pk2 can decrypt $sealed with keys
+     // $ekeys[0] and $ekeys[1] respectively.
+     openssl_seal($data, $sealed, $ekeys, array($pk1,$pk2));
+     openssl_free_key($pk1);
+     openssl_free_key($pk2);
+
+     // now we try to decrypt data for one of the recipients
+     $fp = fopen("/src/openssl-0.9.6/demos/sign/key.pem", "r");
+     // Get PEM coded key into $pkey 
+     $pkey = fread($fp, 8192);
+     fclose($fp);
+     // $key will be resource id for unpacked $pkey
+     $key = openssl_get_privatekey($pkey);
+
+     openssl_open($sealed, $open, $ekeys[1], $key);
+     openssl_free_key($key);
+     echo "$open\n";
+     ?>
+
+
+Sign and verify
+
+     <?php
+     $data = "Follow the white rabbit";
+
+     // First we need to have a string containing the private key in PEM format
+     // this file comes with OpenSSL 0.9.6
+     $fp = fopen("/src/openssl-0.9.6/demos/sign/key.pem", "r");
+     $pkey = fread($fp, 8192);
+     fclose($fp);
+
+     // get private key from the PEM format
+     // $key is an encr key resource id if success, else false
+     $key = openssl_get_privatekey($pkey);
+
+     // calculate signature
+     openssl_sign($data, $signature, $key);
+     openssl_free_key($key);
+
+     // recipient verifies signature
+     // read certificate
+     $fp = fopen("/src/openssl-0.9.6/demos/sign/cert.pem", "r");
+     $cert = fread($fp, 8192);
+     fclose($fp);
+
+     // Get public key from the certificate
+     $pubkey = openssl_get_publickey($cert);
+
+     // state whether signature is okay or not
+     echo openssl_verify($data, $signature, $pubkey) == 1 ? "ok\n" : "bad\n";
+
+     // free key
+     openssl_free_key($pubkey);
+     ?>
