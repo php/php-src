@@ -51,10 +51,15 @@ extern pdo_driver_t *pdo_find_driver(const char *name, int namelen);
 
 extern void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC);
 
-#define PDO_DBH_CLEAR_ERR()		dbh->error_code = PDO_ERR_NONE
-#define PDO_STMT_CLEAR_ERR()	stmt->error_code = PDO_ERR_NONE
+#define PDO_DBH_CLEAR_ERR()		strcpy(dbh->error_code, PDO_ERR_NONE)
+#define PDO_STMT_CLEAR_ERR()	strcpy(stmt->error_code, PDO_ERR_NONE)
 #define PDO_HANDLE_DBH_ERR()	if (dbh->error_code) { pdo_handle_error(dbh, NULL TSRMLS_CC); }
 #define PDO_HANDLE_STMT_ERR()	if (stmt->error_code) { pdo_handle_error(stmt->dbh, stmt TSRMLS_CC); }
+
+int pdo_sqlstate_init_error_table(void);
+void pdo_sqlstate_fini_error_table(void);
+const char *pdo_sqlstate_state_to_description(char *state);
+int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC);
 
 
 /*
