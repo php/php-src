@@ -283,6 +283,7 @@ dnl QNX requires unix.h to allow functions in libunix to work properly
 AC_CHECK_HEADERS(
 alloca.h \
 arpa/inet.h \
+arpa/nameser.h \
 crypt.h \
 fcntl.h \
 grp.h \
@@ -291,6 +292,7 @@ limits.h \
 locale.h \
 netinet/in.h \
 pwd.h \
+resolv.h \
 signal.h \
 stdarg.h \
 stdlib.h \
