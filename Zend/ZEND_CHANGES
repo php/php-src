@@ -69,9 +69,6 @@ Changes in the Zend Engine 2.0
       class they are declared in, whereas private member variables can 
       only be accessed by the class they belong to.
 
-      Note: Protected member variables have to be declared in every class 
-            they are used!
-        
     * Private and protected methods. (TBD)
 
     * Object Cloning.
