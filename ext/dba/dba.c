@@ -35,6 +35,7 @@
 #include "php_cdb.h"
 #include "php_db2.h"
 #include "php_db3.h"
+#include "php_flatfile.h"
 
 /* {{{ dba_functions[]
  */

@@ -36,7 +36,7 @@
 #include <unistd.h>
 #endif
 
-#include "dbm.h"
+#include "flatfile.h"
 
 /*
  * ret = -1 means that database was opened for read-only
@@ -46,7 +46,7 @@
 
 /* {{{ dbm_file_store
  */
-PHPAPI int dbm_file_store(dba_dbm_data *dba, datum key_datum, datum value_datum, int mode TSRMLS_DC) {
+PHPAPI int dbm_file_store(flatfile *dba, datum key_datum, datum value_datum, int mode TSRMLS_DC) {
 	if (mode == DBM_INSERT) {
 		if (dbm_file_findkey(dba, key_datum TSRMLS_CC)) {
 			return 1;
@@ -77,7 +77,7 @@ PHPAPI int dbm_file_store(dba_dbm_data *dba, datum key_datum, datum value_datum,
 
 /* {{{ dbm_file_fetch
  */
-PHPAPI datum dbm_file_fetch(dba_dbm_data *dba, datum key_datum TSRMLS_DC) {
+PHPAPI datum dbm_file_fetch(flatfile *dba, datum key_datum TSRMLS_DC) {
 	datum value_datum = {NULL, 0};
 	int num=0, buf_size=1024;
 	char *buf;	
@@ -105,7 +105,7 @@ PHPAPI datum dbm_file_fetch(dba_dbm_data *dba, datum key_datum TSRMLS_DC) {
 
 /* {{{ dbm_file_delete
  */
-PHPAPI int dbm_file_delete(dba_dbm_data *dba, datum key_datum TSRMLS_DC) {
+PHPAPI int dbm_file_delete(flatfile *dba, datum key_datum TSRMLS_DC) {
 	char *key = key_datum.dptr;
 	int size = key_datum.dsize;
 
@@ -164,7 +164,7 @@ PHPAPI int dbm_file_delete(dba_dbm_data *dba, datum key_datum TSRMLS_DC) {
 
 /* {{{ dbm_file_findkey
  */
-PHPAPI int dbm_file_findkey(dba_dbm_data *dba, datum key_datum TSRMLS_DC) {
+PHPAPI int dbm_file_findkey(flatfile *dba, datum key_datum TSRMLS_DC) {
 	char *buf = NULL;
 	int num;
 	int buf_size=1024;
@@ -211,7 +211,7 @@ PHPAPI int dbm_file_findkey(dba_dbm_data *dba, datum key_datum TSRMLS_DC) {
 
 /* {{{ dbm_file_firstkey
  */
-PHPAPI datum dbm_file_firstkey(dba_dbm_data *dba TSRMLS_DC) {
+PHPAPI datum dbm_file_firstkey(flatfile *dba TSRMLS_DC) {
 	datum buf;
 	int num;
 	int buf_size=1024;
@@ -252,7 +252,7 @@ PHPAPI datum dbm_file_firstkey(dba_dbm_data *dba TSRMLS_DC) {
 
 /* {{{ latfile_nextkey
  */
-PHPAPI datum dbm_file_nextkey(dba_dbm_data *dba TSRMLS_DC) {
+PHPAPI datum dbm_file_nextkey(flatfile *dba TSRMLS_DC) {
 	datum buf;
 	int num;
 	int buf_size=1024;
