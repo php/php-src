@@ -1,7 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-???, Version 4.0 Beta 5
+21 February 2000 Version 4.0 Beta 4 patch level 1 
+- Fixed a crash magic_quotes was turned off (Thies)
 - Support for pdflib 2.30 (Uwe)
 
 20 February 2000, Version 4.0 Beta 4
