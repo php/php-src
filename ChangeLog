@@ -1,3 +1,55 @@
+2001-01-02  Zeev Suraski  <zeev@zend.com>
+
+    * ext/com/COM.c: Import COM patch from Harald Radi <h.radi@nme.at>
+    The new code should allow for better international support.
+
+    * sapi/servlet/servlet.c
+      sapi/thttpd/thttpd.c
+      sapi/phttpd/phttpd.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/isapi/php4isapi.c
+      sapi/nsapi/nsapi.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/caudium/caudium.c
+      sapi/cgi/cgi_main.c
+      main/php_ini.h
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      NEWS
+      ext/standard/info.c
+      main/SAPI.c
+      main/SAPI.h
+      main/main.c
+      main/php_ini.c: Many patches.  I hope I remember them all:
+
+    - Make sapi_module available to external modules (PHPAPI)
+    - Make the php.ini path reported in phpinfo() always point to
+      real full path of the php.ini file
+    - Optimized the ISAPI module not to read unnecessary server
+      variables and read necessary variables at most once.
+
+2001-01-02  Stig Venaas  <venaas@uninett.no>
+
+    * acinclude.m4:
+    I think the order is wrong, switched order of ssl and crypto libs
+
+2001-01-02  Jon Parise  <jon@csh.rit.edu>
+
+    * php.ini-dist
+      php.ini-optimized: Make this comment readable.
+
+2001-01-02  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+    Make the generated <input> lower case and terminated with a /,
+    to be xhtml-compliant.
+
+2001-01-02  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/datetime.c: Fix date('r') overflow
+
 2000-12-27  Sterling Hughes  <Sterling.Hughes@pentap.net>
 
     * pear/Numbers/Roman.php:
