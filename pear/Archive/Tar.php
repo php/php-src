@@ -97,14 +97,15 @@ class Archive_Tar extends PEAR
     /**
     * This method creates the archive file and add the files / directories
     * that are listed in $p_filelist.
-    * If the file already exists and is writable, it is replaced by the
-    * new tar. It is a create and not an add. If the file exists and is
-    * read-only or is a directory it is not replaced. The method return
-    * false and a PEAR error text.
+    * If a file with the same name exist and is writable, it is replaced
+    * by the new tar.
+    * The method return false and a PEAR error text.
     * The $p_filelist parameter can be an array of string, each string
     * representing a filename or a directory name with their path if
     * needed. It can also be a single string with names separated by a
     * single blank.
+    * For each directory added in the archive, the files and
+    * sub-directories are also added.
     * See also createModify() method for more details.
     *
     * @param array  $p_filelist An array of filenames and directory names, or a single
@@ -120,6 +121,20 @@ class Archive_Tar extends PEAR
     // }}}
 
     // {{{ add()
+    /**
+    * This method add the files / directories that are listed in $p_filelist in
+    * the archive. If the archive does not exist it is created.
+    * The method return false and a PEAR error text.
+    * The files and directories listed are only added at the end of the archive,
+    * even if a file with the same name is already archived.
+    * See also createModify() method for more details.
+    *
+    * @param array  $p_filelist An array of filenames and directory names, or a single
+    *                           string with names separated by a single blank space.
+    * @return                   true on success, false on error.
+    * @see createModify()
+    * @access public
+    */
     function add($p_filelist)
     {
         return $this->addModify($p_filelist, '', '');
@@ -1103,6 +1118,7 @@ class Archive_Tar extends PEAR
                 }
             }
         }
+        $v_result = strtr($v_result, '\\', '/');
         return $v_result;
     }
     // }}}
