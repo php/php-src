@@ -323,8 +323,7 @@ function_entry yaz_functions [] = {
 	{NULL, NULL, NULL}
 };
 
-static void get_assoc (INTERNAL_FUNCTION_PARAMETERS, pval **id,
-					   Yaz_Association *assocp)
+static void get_assoc (INTERNAL_FUNCTION_PARAMETERS, pval **id, Yaz_Association *assocp)
 {
 	Yaz_Association *as = 0;
 	
@@ -1094,7 +1093,7 @@ static void send_init(Yaz_Association t)
 	send_APDU (t, apdu);
 }
 
-static int do_event (int *id, int timeout)
+static int do_event (int *id, int timeout TSRMLS_DC)
 {
 	fd_set input, output;
 	int i;
@@ -1587,7 +1586,7 @@ PHP_FUNCTION(yaz_wait)
 		while (ZOOM_event (no, conn_ar))
 			;
 #else
-	while (do_event(&id, timeout))
+	while (do_event(&id, timeout TSRMLS_CC))
 		;
 #endif
 	RETURN_TRUE;
@@ -2973,7 +2972,7 @@ static void php_yaz_init_globals(zend_yaz_globals *yaz_globals)
 }
 /* }}} */
 
-void yaz_close_session(Yaz_Association *as)
+void yaz_close_session(Yaz_Association *as TSRMLS_DC)
 {
 	if (*as && (*as)->order == YAZSG(assoc_seq))
 	{
@@ -2987,14 +2986,10 @@ void yaz_close_session(Yaz_Association *as)
 	}
 }
 
-static void yaz_close_link (zend_rsrc_list_entry *rsrc
-#ifdef TSRMLS_DC
-	TSRMLS_DC
-#endif
-)
+static void yaz_close_link (zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	Yaz_Association *as = (Yaz_Association *) rsrc->ptr;
-	yaz_close_session (as);
+	yaz_close_session (as TSRMLS_CC);
 }
 
 /* {{{ PHP_INI_BEGIN
