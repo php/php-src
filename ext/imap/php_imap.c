@@ -336,8 +336,7 @@ void mail_free_errorlist(ERRORLIST **errlist)
  */
 MESSAGELIST *mail_newmessagelist(void)
 {
-	return (MESSAGELIST *) memset(fs_get(sizeof(MESSAGELIST)), 0,
-								  sizeof(MESSAGELIST));
+	return (MESSAGELIST *) memset(fs_get(sizeof(MESSAGELIST)), 0, sizeof(MESSAGELIST));
 }
 /* }}} */
 
@@ -347,12 +346,17 @@ MESSAGELIST *mail_newmessagelist(void)
  * Accepts: pointer to MESSAGELIST pointer
  * Author: CJH
  */
-void mail_free_messagelist(MESSAGELIST **msglist)
+void mail_free_messagelist(MESSAGELIST **msglist, MESSAGELIST **tail)
 {
-	if (*msglist) {		/* only free if exists */
-		mail_free_messagelist (&(*msglist)->next);
-		fs_give ((void **) msglist);	/* return string to free storage */
+	MESSAGELIST *cur, *next;
+
+	for (cur = *msglist, next = cur->next; cur; cur = next) {
+		next = cur->next;
+		fs_give((void **)&cur);
 	}
+
+	*tail = NIL;
+	*msglist = NIL;
 }
 /* }}} */
 
@@ -381,15 +385,16 @@ void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
  */
 static void php_imap_init_globals(zend_imap_globals *imap_globals)
 {
-	imap_globals->imap_user=NIL;
-	imap_globals->imap_password=NIL;
-	imap_globals->imap_folders=NIL;
-	imap_globals->imap_sfolders=NIL;
-	imap_globals->imap_alertstack=NIL;
-	imap_globals->imap_errorstack=NIL;
-	imap_globals->imap_messages=NIL;
-	imap_globals->imap_folder_objects=NIL;
-	imap_globals->imap_sfolder_objects=NIL;
+	imap_globals->imap_user = NIL;
+	imap_globals->imap_password = NIL;
+	imap_globals->imap_folders = NIL;
+	imap_globals->imap_sfolders = NIL;
+	imap_globals->imap_alertstack = NIL;
+	imap_globals->imap_errorstack = NIL;
+	imap_globals->imap_messages = NIL;
+	imap_globals->imap_messages_tail = NIL;
+	imap_globals->imap_folder_objects = NIL;
+	imap_globals->imap_sfolder_objects = NIL;
 	imap_globals->folderlist_style = FLIST_ARRAY;
 }
 /* }}} */
@@ -3357,7 +3362,7 @@ PHP_FUNCTION(imap_search)
 		flags = Z_LVAL_PP(search_flags);
 	}
 	
-	IMAPG(imap_messages) = NIL;
+	IMAPG(imap_messages) = IMAPG(imap_messages_tail) = NIL;
 	mail_search_full(imap_le_struct->imap_stream, NIL, mail_criteria(search_criteria), flags);
 	if (IMAPG(imap_messages) == NIL) {
 		efree(search_criteria);
@@ -3371,7 +3376,7 @@ PHP_FUNCTION(imap_search)
 		add_next_index_long(return_value, cur->msgid);
 		cur = cur->next;
 	}
-	mail_free_messagelist(&IMAPG(imap_messages));
+	mail_free_messagelist(&IMAPG(imap_messages), &IMAPG(imap_messages_tail));
 	efree(search_criteria);
 }
 /* }}} */
@@ -3895,20 +3900,19 @@ void mm_searched(MAILSTREAM *stream, unsigned long number)
 {
 	MESSAGELIST *cur = NIL;
 	TSRMLS_FETCH();
-  
+
 	if (IMAPG(imap_messages) == NIL) {
 		IMAPG(imap_messages) = mail_newmessagelist();
 		IMAPG(imap_messages)->msgid = number;
 		IMAPG(imap_messages)->next = NIL;
+		IMAPG(imap_messages_tail) = IMAPG(imap_messages);
 	} else {
-		cur = IMAPG(imap_messages);
-		while (cur->next != NIL) {
-			cur = cur->next;
-		}
+		cur = IMAPG(imap_messages_tail);
 		cur->next = mail_newmessagelist();
 		cur = cur->next;
 		cur->msgid = number;
 		cur->next = NIL;
+		IMAPG(imap_messages_tail) = cur;
 	}
 }
 
