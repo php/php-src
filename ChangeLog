@@ -1,3 +1,57 @@
+2000-06-01  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/imap/config.m4:
+    patch for redhat 6.2 from Teodor Cimpoesu <teo@digiro.net>.
+
+2000-06-01  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.h: Update header file.
+
+    * ext/pcre/php_pcre.c:
+    - Cleaned up PCRE extension and made it binary-safe. 
+
+2000-06-01  Jouni Ahto  <jah@mork.net>
+
+    * ext/standard/string.c:
+    (ucwords) Remove unnecessary code.
+
+    * ext/standard/string.c:
+    (ucwords) Yet another fix for #4748.
+
+2000-06-01  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/string.c: Some tweaks.
+
+    * TODO
+      ext/standard/array.c:
+
+    Fixes bug #4753
+
+2000-06-01  Jouni Ahto  <jah@mork.net>
+
+    * ext/standard/string.c:
+    (ucwords) Fixed fix for fix for fix for #4748.
+
+2000-06-01  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/string.c:
+    uh, off by one?!! this time it's regression-tested, fast and compact
+
+2000-06-01  Jouni Ahto  <jah@mork.net>
+
+    * ext/standard/string.c:
+    (ucwords) Another try to fix #4748.
+
+2000-06-01  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/string.c:
+    ucwords will now test against isspace() instead of just ==" "
+    (see BUG #4748)
+
+2000-06-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * php_syslog.h: s/sys_syslog/std_syslog/
+
 2000-05-31  Jouni Ahto  <jah@mork.net>
 
     * ext/standard/formatted_print.c:
