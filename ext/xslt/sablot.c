@@ -1633,6 +1633,10 @@ static MH_ERROR error_print(void *user_data, SablotHandle proc, MH_ERROR code, M
 		msgbuf = emalloc((sizeof(msgformat) - 4) + strlen(errmsg) + strlen(errline) + 1);
 		sprintf(msgbuf, msgformat, errline, errmsg);
 
+		/* If an old message exists, remove it -> leak */
+		if (XSLT_ERRSTR(handle))
+			efree(XSLT_ERRSTR(handle));
+
 		/* Copy the error message onto the handle for use when 
 		   the xslt_error function is called */
 		XSLT_ERRSTR(handle) = estrdup(errmsg);
