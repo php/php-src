@@ -361,6 +361,9 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         foreach ($files as $file) {
             $command .= ' ' . escapeshellarg($file);
         }
+        if ($this->config->get('verbose') > 1) {
+            $this->output .= "+ $command\n";
+        }
         $this->output .= "+ $command\n";
         if (empty($options['dry-run'])) {
             $fp = popen($command, "r");
@@ -379,7 +382,6 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
     function doCvsDiff($command, $options, $params)
     {
         $this->output = '';
-        $_cmd = $command;
         if (sizeof($params) < 1) {
             $help = $this->getHelp($command);
             return $this->raiseError("$command: missing parameter: $help[0]");
@@ -408,8 +410,10 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         $execute = true;
         if (isset($options['dry-run'])) {
             $execute = false;
+            unset($options['dry-run']);
         }
         $cmd .= ' diff';
+        // the rest of the options are passed right on to "cvs diff"
         foreach ($options as $option => $optarg) {
             $arg = @$this->commands[$command]['options'][$option]['arg'];
             $short = @$this->commands[$command]['options'][$option]['shortopt'];
@@ -421,7 +425,9 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         foreach ($files as $file) {
             $cmd .= ' ' . escapeshellarg($file);
         }
-        $this->output .= "+ $cmd\n";
+        if ($this->config->get('verbose') > 1) {
+            $this->output .= "+ $cmd\n";
+        }
         if ($execute) {
             $fp = popen($cmd, "r");
             while ($line = fgets($fp, 1024)) {
@@ -429,7 +435,7 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
             }
             pclose($fp);
         }
-        $this->ui->outputData($this->output, $_cmd);
+        $this->ui->outputData($this->output, $command);
         return true;
     }
 
