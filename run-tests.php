@@ -381,7 +381,9 @@ if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 		$failed_tests_data .= "Bison:\n". @shell_exec('bison --version'). "\n";
 		$failed_tests_data .= "\n";
 		
-		$failed_tests_data .= "User's E-mail: ".$user_email."\n\n";
+		if (isset($user_email)) {
+			$failed_tests_data .= "User's E-mail: ".$user_email."\n\n";
+		}	
 		
 		$failed_tests_data .= $sep . "PHPINFO" . $sep;
 		$failed_tests_data .= shell_exec($php.' -dhtml_errors=0 -i');
