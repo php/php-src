@@ -1,3 +1,51 @@
+2002-01-13  Edin Kadribasic  <edink@proventum.net>
+
+    * acinclude.m4
+      sapi/cli/Makefile.in:
+    Fixed build in the directory other than $top_srcdir.
+
+2002-01-13  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/ibase.php:
+    Added modifyLimitQuery(). Only avaible for the Firebird syntax
+    (ibase(firebird)://user:pass@host/db)
+    (contributed by Ludovico Magnocavallo <ludo@sumatrasolutions.com>)
+
+    * pear/DB/tests/db_parsedsn.phpt: Two tests more
+
+    * pear/DB/mysql.php:
+    Added support for socket and port options in connect()
+
+    * pear/DB/pgsql.php: better DSN handling
+
+    * pear/DB/tests/db_parsedsn.phpt: Test update
+
+    * pear/DB.php: New DSN "protcocol(protocol_opts)" format support:
+    phptype://user:pass@protocol(proto_opts)/database
+    ex:
+    pgsql://user@unix()/pear
+    mysql://user@unix(/path/to/socket)/pear
+    pgsql://user:pass@word@tcp(somehost:7777)/pear
+
+2002-01-13  Rasmus Lerdorf  <rasmus@php.net>
+
+    * NEWS: 4.1.1 NEWS entry block was missing from the HEAD tree
+
+2002-01-13  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/gd/config.m4: fixed some link error of gd's configure.
+
+2002-01-13  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/Makefile.in
+      Makefile.in:
+    This should fix cli build when running 'make install' directly.
+
+2002-01-13  Chris Jarecki  <zenderx@ipro.pl>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:  - Added xpath_register_ns() function.
+
 2002-01-12  Edin Kadribasic  <edink@proventum.net>
 
     * sapi/cli/Makefile.in:
