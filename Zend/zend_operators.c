@@ -328,8 +328,13 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 			op->value.lval = tmp;
 			break;
 		case IS_OBJECT:
-			zval_dtor(op);
-			op->value.lval = 1; /* TBI!! */
+			if (op->value.obj.handlers->cast_object) {
+				TSRMLS_FETCH();
+				op->value.obj.handlers->cast_object(op, op, IS_LONG, 1 TSRMLS_CC);
+			} else {
+				zval_dtor(op);
+				op->value.lval = 1;
+			}
 			break;
 		default:
 			zend_error(E_WARNING, "Cannot convert to ordinal value");
@@ -375,8 +380,13 @@ ZEND_API void convert_to_double(zval *op)
 			op->value.dval = tmp;
 			break;
 		case IS_OBJECT:
-			zval_dtor(op);
-			op->value.dval = 1; /* TBI!! */
+			if (op->value.obj.handlers->cast_object) {
+				TSRMLS_FETCH();
+				op->value.obj.handlers->cast_object(op, op, IS_DOUBLE, 1 TSRMLS_CC);
+			} else {
+				zval_dtor(op);
+				op->value.dval = 1; /* TBI!! */
+			}
 			break;			
 		default:
 			zend_error(E_WARNING, "Cannot convert to real value (type=%d)", op->type);
@@ -390,6 +400,14 @@ ZEND_API void convert_to_double(zval *op)
 
 ZEND_API void convert_to_null(zval *op)
 {
+	if (op->type == IS_OBJECT) {
+		if (op->value.obj.handlers->cast_object) {
+			TSRMLS_FETCH();
+			op->value.obj.handlers->cast_object(op, op, IS_NULL, 1 TSRMLS_CC);
+			return;
+		}
+	}
+
 	zval_dtor(op);
 	op->type = IS_NULL;
 }
@@ -435,8 +453,13 @@ ZEND_API void convert_to_boolean(zval *op)
 			op->value.lval = tmp;
 			break;
 		case IS_OBJECT:
-			zval_dtor(op);
-			op->value.lval = 1; /* TBI!! */
+			if (op->value.obj.handlers->cast_object) {
+				TSRMLS_FETCH();
+				op->value.obj.handlers->cast_object(op, op, IS_BOOL, 1 TSRMLS_CC);
+			} else {
+				zval_dtor(op);
+				op->value.lval = 1; /* TBI!! */
+			}
 			break;
 		default:
 			zval_dtor(op);
@@ -497,10 +520,15 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 			zend_error(E_NOTICE, "Array to string conversion");
 			break;
 		case IS_OBJECT:
-			zval_dtor(op);
-			op->value.str.val = estrndup_rel("Object", sizeof("Object")-1);
-			op->value.str.len = sizeof("Object")-1;
-			zend_error(E_NOTICE, "Object to string conversion");
+			if (op->value.obj.handlers->cast_object) {
+				TSRMLS_FETCH();
+				op->value.obj.handlers->cast_object(op, op, IS_STRING, 1 TSRMLS_CC);
+			} else {
+				zval_dtor(op);
+				op->value.str.val = estrndup_rel("Object", sizeof("Object")-1);
+				op->value.str.len = sizeof("Object")-1;
+				zend_error(E_NOTICE, "Object to string conversion");
+			}
 			break;
 		default:
 			zval_dtor(op);
