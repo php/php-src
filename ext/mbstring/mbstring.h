@@ -64,7 +64,7 @@ PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_enco
 PHPAPI int php_mb_check_encoding_list(const char *encoding_list TSRMLS_DC);
 
 #if HAVE_MBREGEX
-#include "mbregex.h"
+#include "php_mbregex.h"
 #endif
 
 extern zend_module_entry mbstring_module_entry;
@@ -106,27 +106,6 @@ PHP_FUNCTION(mb_encode_numericentity);
 PHP_FUNCTION(mb_decode_numericentity);
 PHP_FUNCTION(mb_send_mail);
 PHP_FUNCTION(mb_get_info);
-#if HAVE_MBREGEX
-PHP_FUNCTION(mb_regex_encoding);
-PHP_FUNCTION(mb_ereg);
-PHP_FUNCTION(mb_eregi);
-PHP_FUNCTION(mb_ereg_replace);
-PHP_FUNCTION(mb_eregi_replace);
-PHP_FUNCTION(mb_split);
-PHP_FUNCTION(mb_ereg_match);
-PHP_FUNCTION(mb_ereg_search);
-PHP_FUNCTION(mb_ereg_search_pos);
-PHP_FUNCTION(mb_ereg_search_regs);
-PHP_FUNCTION(mb_ereg_search_init);
-PHP_FUNCTION(mb_ereg_search_getregs);
-PHP_FUNCTION(mb_ereg_search_getpos);
-PHP_FUNCTION(mb_ereg_search_setpos);
-#endif
-
-#if HAVE_MBREGEX
-#define PHP_MBREGEX_MAXCACHE 50
-int php_mbregex_name2mbctype(const char *pname);
-#endif
 
 char *mbstr_strrchr(const char *s, char c TSRMLS_DC);
 int mbstr_is_mb_leadbyte(const char *s TSRMLS_DC);
@@ -161,15 +140,8 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	long func_overload;
 	int encoding_translation;
 	mbfl_buffer_converter *outconv;
-#if HAVE_MBREGEX
-	int default_mbctype;
-	int current_mbctype;
-	HashTable ht_rc;
-	zval **search_str;
-	zval *search_str_val;
-	unsigned int search_pos;
-	mb_regex_t *search_re;
-	struct mbre_registers *search_regs;
+#if HAVE_MBREGEX && defined(PHP_MBREGEX_GLOBALS)
+	PHP_MBREGEX_GLOBALS	
 #endif
 ZEND_END_MODULE_GLOBALS(mbstring)
 
