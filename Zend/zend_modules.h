@@ -75,7 +75,7 @@ struct _zend_module_entry {
 };
 
 
-extern HashTable module_registry;
+extern ZEND_API HashTable module_registry;
 
 void module_destructor(zend_module_entry *module);
 int module_registry_cleanup(zend_module_entry *module);

@@ -30,7 +30,7 @@
 
 /* these variables are true statics/globals, and have to be mutex'ed on every access */
 static int module_count=0;
-HashTable module_registry;
+ZEND_API HashTable module_registry;
 
 /* this function doesn't check for too many parameters */
 ZEND_API int zend_get_parameters(int ht, int param_count, ...)
