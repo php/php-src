@@ -1599,6 +1599,7 @@ static zend_function_entry spl_funcs_EmptyIterator[] = {
 	SPL_ME(EmptyIterator, key,              NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(EmptyIterator, current,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(EmptyIterator, next,             NULL, ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
 };
 
 int spl_append_it_next_iterator(spl_dual_it_object *intern TSRMLS_DC) /* {{{*/
@@ -1729,6 +1730,7 @@ static zend_function_entry spl_funcs_AppendIterator[] = {
 	SPL_ME(dual_it,        current,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(AppendIterator, next,             NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(dual_it,        getInnerIterator, NULL, ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
 };
 
 /* {{{ array iterator_to_array(IteratorAggregate it) 
