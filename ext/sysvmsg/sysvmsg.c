@@ -391,10 +391,33 @@ PHP_FUNCTION(msg_send)
 		message_len = msg_var.len;
 		smart_str_free(&msg_var);
 	} else {
-		convert_to_string_ex(&message);
-		messagebuffer = emalloc(sizeof(struct php_msgbuf) + Z_STRLEN_P(message));
-		memcpy(messagebuffer->mtext, Z_STRVAL_P(message), Z_STRLEN_P(message) + 1);
-		message_len = Z_STRLEN_P(message);
+		char *p;
+		switch (Z_TYPE_P(message)) {
+			case IS_STRING:
+				p = Z_STRVAL_P(message);
+				message_len = Z_STRLEN_P(message);
+				break;
+
+			case IS_LONG:
+			case IS_BOOL:
+				message_len = spprintf(&p, 0, "%ld", Z_LVAL_P(message));
+				break;
+
+			case IS_DOUBLE:
+				message_len = spprintf(&p, 0, "%f", Z_DVAL_P(message));
+				break;
+
+			default:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Message parameter must be either a string or a number.");
+				RETURN_FALSE;
+		}
+
+		messagebuffer = emalloc(sizeof(struct php_msgbuf) + message_len);
+		memcpy(messagebuffer->mtext, p, message_len + 1);
+
+		if (Z_TYPE_P(message) != IS_STRING) {
+			efree(p);
+		}
 	}
 	
 	/* set the message type */
