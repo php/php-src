@@ -125,7 +125,7 @@ static void ps_files_open(ps_files *data, const char *key)
 			data->lastkey = NULL;
 		}
 
-	ps_files_close(data);
+		ps_files_close(data);
 		
 		if (!ps_files_valid_key(key) || 
 				!ps_files_path_create(buf, sizeof(buf), data, key))
