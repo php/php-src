@@ -2,8 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
 - Fix for bug 2181. Now zero is returned instead of an unset value for
-  7-bit encoding and plain text body type.
+  7-bit encoding and plain text body type. (Vlad)
 - Fixed a bug in call_user_*() functions that would not allow calling
+  functions/methods that accepted parameters by reference. (Andrei)
 - Added com_release($obj) and com_addref($obj) functions and the related class
   members $obj->Release() and $obj->AddRef() to gain more control over the used
   COM components. (phanto)
