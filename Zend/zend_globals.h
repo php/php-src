@@ -34,6 +34,7 @@
 #include "zend_fast_cache.h"
 #include "zend_objects.h"
 #include "zend_objects_API.h"
+#include "zend_modules.h"
 
 #ifdef ZEND_MULTIBYTE
 #include "zend_multibyte.h"
@@ -232,6 +233,7 @@ struct _zend_executor_globals {
 
 	struct _zend_execute_data *current_execute_data;
 
+	struct _zend_module_entry *current_module;
 
 	zend_property_info std_property_info;
 

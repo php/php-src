@@ -1165,10 +1165,13 @@ ZEND_API int zend_startup_module(zend_module_entry *module)
 		if (module->module_startup_func) {
 			TSRMLS_FETCH();
 
+			EG(current_module) = module;
 			if (module->module_startup_func(MODULE_PERSISTENT, module->module_number TSRMLS_CC)==FAILURE) {
 				zend_error(E_CORE_ERROR,"Unable to start %s module", module->name);
+				EG(current_module) = NULL;
 				return FAILURE;
 			}
+			EG(current_module) = NULL;
 		}
 		module->type = MODULE_PERSISTENT;
 		zend_register_module(module);
@@ -1467,6 +1470,7 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 	class_entry->type = ZEND_INTERNAL_CLASS;
 	zend_initialize_class_data(class_entry, 0 TSRMLS_CC);
 	class_entry->ce_flags = ce_flags;
+	class_entry->module = EG(current_module);
 
 	if (class_entry->builtin_functions) {
 		zend_register_functions(class_entry, class_entry->builtin_functions, &class_entry->function_table, MODULE_PERSISTENT TSRMLS_CC);

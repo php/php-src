@@ -26,6 +26,7 @@
 #include "zend_operators.h"
 #include "zend_constants.h"
 #include "zend_ini.h"
+#include "zend_interfaces.h"
 
 /* Class entry pointers */
 zend_class_entry *reflector_ptr;
@@ -265,7 +266,11 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	} else {
 		string_printf(str, "%s%s [ ", indent, (ce->ce_flags & ZEND_ACC_INTERFACE) ? "Interface" : "Class");
 	}
-	string_printf(str, (ce->type == ZEND_USER_CLASS) ? "<user>  " : "<internal> ");
+	string_printf(str, (ce->type == ZEND_USER_CLASS) ? "<user" : "<internal");
+	if (ce->module) {
+		string_printf(str, ":%s", ce->module->name);
+	}
+	string_printf(str, "> ");
 	if (ce->get_iterator != NULL) {
 		string_printf(str, "<iterateable> ");
 	}
@@ -693,6 +698,33 @@ static void reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_D
 	reflection_instanciate(reflection_class_ptr, object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	intern->ptr = ce;
+	intern->free_ptr = 0;
+	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
+}
+/* }}} */
+
+/* {{{ reflection_extension_factory */
+static void reflection_extension_factory(zval *object, char *name_str TSRMLS_DC)
+{
+	reflection_object *intern;
+	zval *name;
+	int name_len = strlen(name_str);
+	char *lcname;
+	struct _zend_module_entry *module;
+
+	lcname = do_alloca(name_len + 1);
+	zend_str_tolower_copy(lcname, name_str, name_len);
+	if (zend_hash_find(&module_registry, lcname, name_len + 1, (void **)&module) == FAILURE) {
+		free_alloca(lcname);
+		return;
+	}
+	free_alloca(lcname);
+
+	reflection_instanciate(reflection_extension_ptr, object TSRMLS_CC);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	MAKE_STD_ZVAL(name);
+	ZVAL_STRINGL(name, module->name, name_len, 1);
+	intern->ptr = module;
 	intern->free_ptr = 0;
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 }
@@ -2505,6 +2537,40 @@ ZEND_METHOD(reflection_class, isIterateable)
 }
 /* }}} */
 
+/* {{{ proto public Reflection_Extension|NULL Reflection_Class::getExtension()
+   Returns NULL or the extension the class belongs to */
+ZEND_METHOD(reflection_class, getExtension)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	METHOD_NOTSTATIC;
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	if (ce->module) {
+		reflection_extension_factory(return_value, ce->module->name TSRMLS_CC);
+	}
+}
+/* }}} */
+
+/* {{{ proto public string|false Reflection_Class::getExtensionName()
+   Returns false or the name of the extension the class belongs to */
+ZEND_METHOD(reflection_class, getExtensionName)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	METHOD_NOTSTATIC;
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	if (ce->module) {
+		RETURN_STRING(ce->module->name, 1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 /* {{{ proto public static mixed Reflection_Object::export(mixed argument, [, bool return]) throws Reflection_Exception
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_object, export)
@@ -2989,6 +3055,56 @@ ZEND_METHOD(reflection_extension, getINIEntries)
 }
 /* }}} */
 
+/* {{{ add_extension_class */
+static int add_extension_class(zend_class_entry **pce, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	zval *class_array = va_arg(args, zval*), *zclass;
+	struct _zend_module_entry *module = va_arg(args, struct _zend_module_entry*);
+	int add_reflection_class = va_arg(args, int);
+
+	if ((*pce)->module && !strcasecmp((*pce)->module->name, module->name)) {
+		if (add_reflection_class) {
+			ALLOC_ZVAL(zclass);
+			reflection_class_factory(*pce, zclass TSRMLS_CC);
+			add_assoc_zval_ex(class_array, (*pce)->name, (*pce)->name_length + 1, zclass);
+		} else {
+			add_next_index_stringl(class_array, (*pce)->name, (*pce)->name_length + 1, 1);
+		}
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
+/* {{{ proto public array Reflection_Extension::getClasses()
+   Returns an array containing Reflection_Class objects for all classes of this extension */
+ZEND_METHOD(reflection_extension, getClasses)
+{
+	reflection_object *intern;
+	zend_module_entry *module;
+
+	METHOD_NOTSTATIC_NUMPARAMS(0);	
+	GET_REFLECTION_OBJECT_PTR(module);
+
+	array_init(return_value);
+	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) add_extension_class, 3, return_value, module, 1 TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto public array Reflection_Extension::getClasses()
+   Returns an array containing all names of all classes of this extension */
+ZEND_METHOD(reflection_extension, getClassNames)
+{
+	reflection_object *intern;
+	zend_module_entry *module;
+
+	METHOD_NOTSTATIC_NUMPARAMS(0);	
+	GET_REFLECTION_OBJECT_PTR(module);
+
+	array_init(return_value);
+	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) add_extension_class, 3, return_value, module, 0 TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ method tables */
 static zend_function_entry reflection_exception_functions[] = {
 	{NULL, NULL, NULL}
@@ -3076,6 +3192,8 @@ static zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getDefaultProperties, NULL, 0)
 	ZEND_ME(reflection_class, isIterateable, NULL, 0)
 	ZEND_ME(reflection_class, implementsInterface, NULL, 0)
+	ZEND_ME(reflection_class, getExtension, NULL, 0)
+	ZEND_ME(reflection_class, getExtensionName, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
@@ -3125,6 +3243,8 @@ static zend_function_entry reflection_extension_functions[] = {
 	ZEND_ME(reflection_extension, getFunctions, NULL, 0)
 	ZEND_ME(reflection_extension, getConstants, NULL, 0)
 	ZEND_ME(reflection_extension, getINIEntries, NULL, 0)
+	ZEND_ME(reflection_extension, getClasses, NULL, 0)
+	ZEND_ME(reflection_extension, getClassNames, NULL, 0)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -3136,45 +3256,45 @@ ZEND_API void zend_register_reflection_api(TSRMLS_D) {
 	memcpy(&reflection_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	reflection_object_handlers.clone_obj = NULL;
 
-	INIT_CLASS_ENTRY(_reflection_entry, "reflection_exception", reflection_exception_functions);
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionException", reflection_exception_functions);
 	reflection_exception_ptr = zend_register_internal_class_ex(&_reflection_entry, zend_exception_get_default(), NULL TSRMLS_CC);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "reflection", reflection_functions);
+	INIT_CLASS_ENTRY(_reflection_entry, "Reflection", reflection_functions);
 	reflection_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "reflector", reflector_functions);
+	INIT_CLASS_ENTRY(_reflection_entry, "Reflector", reflector_functions);
 	reflector_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 	reflector_ptr->ce_flags = ZEND_ACC_ABSTRACT | ZEND_ACC_INTERFACE;
 
-	INIT_CLASS_ENTRY(_reflection_entry, "reflection_function", reflection_function_functions);
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionFunction", reflection_function_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_function_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 	reflection_register_implement(reflection_function_ptr, reflector_ptr TSRMLS_CC);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "reflection_parameter", reflection_parameter_functions);
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionParameter", reflection_parameter_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_parameter_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 	reflection_register_implement(reflection_parameter_ptr, reflector_ptr TSRMLS_CC);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "reflection_method", reflection_method_functions);
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionMethod", reflection_method_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_method_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_function_ptr, NULL TSRMLS_CC);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "reflection_class", reflection_class_functions);
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionClass", reflection_class_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_class_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 	reflection_register_implement(reflection_class_ptr, reflector_ptr TSRMLS_CC);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "reflection_object", reflection_object_functions);
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionObject", reflection_object_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_object_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_class_ptr, NULL TSRMLS_CC);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "reflection_property", reflection_property_functions);
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionProperty", reflection_property_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_property_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 	reflection_register_implement(reflection_property_ptr, reflector_ptr TSRMLS_CC);
 
-	INIT_CLASS_ENTRY(_reflection_entry, "reflection_extension", reflection_extension_functions);
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionExtension", reflection_extension_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_extension_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 	reflection_register_implement(reflection_extension_ptr, reflector_ptr TSRMLS_CC);
