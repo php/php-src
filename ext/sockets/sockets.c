@@ -1943,8 +1943,8 @@ PHP_FUNCTION(socket_shutdown)
 }
 /* }}} */
 
-/* {{{ proto int socket_last_error(resource socket)
-   Returns the last error on the socket */
+/* {{{ proto int socket_last_error([resource socket])
+   Returns the last socket error (either the last used or the provided socket resource) */
 PHP_FUNCTION(socket_last_error)
 {
 	zval		*arg1 = NULL;
