@@ -196,6 +196,26 @@ MYSQLI_MAP_PROPERTY_FUNC_LONG(result_field_count_read, mysql_num_fields, MYSQLI_
 MYSQLI_MAP_PROPERTY_FUNC_LONG(result_num_rows_read, mysql_num_rows, MYSQLI_GET_RESULT(), my_ulonglong);
 
 /* statement properties */
+
+/* {{{ property stmt_id_read */
+int stmt_id_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+{
+	MY_STMT *p;
+
+	ALLOC_ZVAL(*retval); 
+	CHECK_OBJECT();
+
+ 	p = (MY_STMT*)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+
+	if (!p) {
+		ZVAL_NULL(*retval);
+	} else {
+		ZVAL_LONG(*retval, p->stmt->stmt_id);
+	}
+	return SUCCESS;
+}
+/* }}} */
+
 MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_affected_rows_read, mysql_stmt_affected_rows, MYSQLI_GET_STMT(), my_ulonglong);
 MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_insert_id_read, mysql_stmt_insert_id, MYSQLI_GET_STMT(), my_ulonglong);
 MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_num_rows_read, mysql_stmt_num_rows, MYSQLI_GET_STMT(), my_ulonglong);
@@ -240,15 +260,11 @@ mysqli_property_entry mysqli_stmt_property_entries[] = {
 	{"insert_id", stmt_insert_id_read, NULL},
 	{"num_rows", stmt_num_rows_read, NULL},
 	{"param_count", stmt_param_count_read, NULL},
-
-/*  TODO: stmt->field_count doesn't work currently, remove comments until mysqli_stmt_field_count
-    is implemented in client library
-*/
 	{"field_count", stmt_field_count_read, NULL},
-
 	{"errno", stmt_errno_read, NULL},
 	{"error", stmt_error_read, NULL},
 	{"sqlstate", stmt_sqlstate_read, NULL},
+	{"id", stmt_id_read, NULL},
 	{NULL, NULL, NULL}
 };
 
