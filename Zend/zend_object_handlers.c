@@ -8,6 +8,8 @@
 
 #define DEBUG_OBJECT_HANDLERS 0
 
+#define Z_OBJ_P(zval_p) zend_objects_get_address(zval_p)
+
 /*
   __X accessors explanation:
 
