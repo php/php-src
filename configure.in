@@ -894,7 +894,8 @@ if test "$enable_shared" = "yes"; then
 else
   if test "$lib_build_shared" = "yes"; then
     PHP_CONFIGURE_PART(Configuring shared libtool)
-    $SHELL $srcdir/ltconfig --output=shlibtool --disable-static --srcdir=$srcdir --cache-file=./config.cache $srcdir/ltmain.sh
+dnl XXX This needs to be fixed
+#    $SHELL $srcdir/ltconfig --output=shlibtool --disable-static --srcdir=$srcdir --cache-file=./config.cache $srcdir/ltmain.sh
     SHARED_LIBTOOL='$(SHELL) $(top_builddir)/shlibtool'
   else
     PHP_COMPILE='$(COMPILE) -c $< && touch $@'
