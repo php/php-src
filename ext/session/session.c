@@ -1354,6 +1354,9 @@ PHP_FUNCTION(session_unset)
 			zend_hash_del(&EG(symbol_table), variable, strlen(variable) + 1);
 		efree(variable);
 	}
+
+	/* Clean $HTTP_SESSION_VARS. */
+	zend_hash_clean(Z_ARRVAL_P(PS(http_session_vars)));
 }
 /* }}} */
 
