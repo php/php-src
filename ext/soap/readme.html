@@ -22,13 +22,38 @@ TD:{
 <TR><TD ALIGN="left">This extension is <I>EXPERIMENTAL</I>. The behaviour of this extension -- including the names of its functions and anything else documented about this extension -- may change without notice in a future release of PHP. Use this extension at your own risk.
 </TD></TR>
 </TABLE>
-<I>FIXME</I>
+<p>
+SOAP extension can be used to write SOAP Servers and Clients. It supports 
+subsets of <a href="http://www.w3.org/TR/2000/NOTE-SOAP-20000508" target="_top">SOAP 1.1</a>,
+<a href="http://www.w3.org/TR/" target="_top">SOAP 1.2</a> and
+<a href="http://www.w3.org/TR/wsdl" target="_top">WSDL 1.1</a> specifications.
+</p>
 <HR>
 <H2>Requirements</H2>
 This extension makes use of the <A HREF="http://www.xmlsoft.org" TARGET="_top">GNOME XML library</A>. Download and install this library. You will need at least libxml-2.5.4.
 <HR>
 <H2>Installation</H2>
 This extension is only available if PHP was configured with --enable-soap.
+<HR>
+<H2>Runtime Configuration</H2>
+<p>The behaviour of these functions is affected by settings in php.ini.</p>
+<TABLE BORDER="1">
+<TR><TH>Name</TH><TH>Default</TH><TH>Changeable</TH></TR>
+<TR><TD>soap.wsdl_cache_enabled</TD><TD>"1"</TD><TD>PHP_INI_ALL</TD></TR>
+<TR><TD>soap.wsdl_cache_dir</TD><TD>"/tmp"</TD><TD>PHP_INI_ALL</TD></TR>
+<TR><TD>soap.wsdl_cache_ttl</TD><TD>86400</TD><TD>PHP_INI_ALL</TD></TR>
+</TABLE>
+</p>Here is a short explanation of the configuration directives.</p>
+<dl>
+<dt><b>soap.wsdl_cache_enabled</b> (boolean)</dt>
+<dd>enables or disables WSDL caching feature.</dd>
+<dt><b>soap.wsdl_cache_dir</b> (string)</dt>
+<dd>sets the directory name where SOAP extension will put cache files</dd>
+<dt><b>soap.wsdl_cache_ttl</b> (integer)</dt>
+<dd>(time to live) sets the number of second while cached file will be used instead of original one.</dd>
+</dl>
+
+
 <HR>
 <H2>Predefined Constants</H2>
 The constants below are defined by this extension, and will only be available when the extension has either been compiled into PHP or dynamically loaded at runtime.
@@ -168,8 +193,9 @@ It is just a data holder and it has not any special method except constructor.
 <h4>SoapFault class</h4>
 <p>
 SoapFault is a special class that can be used for error reporting during
-handling of SOAP request (on server). It has not any special methods except
-constructor.
+handling of SOAP request. It is derived form standard PHP Exception class, 
+so it can be used to throw exceptions in server side and to catch tham on 
+client side.
 </p>
 <table border="0">
 <tr><td><a href="#ref.soap.soapfault.soapfault">SoapFault</a> -- SoapFault constructor</td></tr>
@@ -207,18 +233,31 @@ constructor.
 <h3>Description</h3>
 <p>bool <b>is_soap_fault</b>(mixed obj)</p>
 <p>
-This function is useful when you like to check if the SOAP call was failed.
-In this case SOAP method returns a special SoapFault object which encapsulate
-the fault details (faultcode, faultstring, faultactor and faultdetails).
-is_soap_fault() functions checks if the given parameter is a SoapFault object.
+This function is useful when you like to check if the SOAP call was failed,
+but don't like to use exceptions. To use it you must create SoapClient object
+with <b>exceptions</b> option set to zero or false. In this case SOAP method 
+will return a special SoapFault object which encapsulate the fault details 
+(faultcode, faultstring, faultactor and faultdetails). If <b>exceptions</b> is 
+not set then SOAP call will throw an exception on error.<br>
+is_soap_fault() functions checks if the given parameter is a SoapFault object.<br>
 </p>
 <h4>Example</h4>
 <TABLE BORDER="0" BGCOLOR="#E0E0E0"><TR><TD><PRE CLASS="php">
 &lt;?php
-    $client = SoapClient("some.wsdl");
+    $client = SoapClient("some.wsdl",array("exceptions"=>0));
     $result = $client->SomeFunction(...);
     if (is_soap_fault($result)) {
         trigger_error("SOAP Fault: (faultcode: {$result->faultcode}, faultstring: {$result->faulstring})", E_ERROR);
+    }
+?&gt;</PRE></TD></TR></TABLE>
+<p>Standard method that used by SOAP extension for error reporting is excptions.</p>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0"><TR><TD><PRE CLASS="php">
+&lt;?php
+    try {
+        $client = SoapClient("some.wsdl");
+        $result = $client->SomeFunction(...);
+    } catch {SoapFault $fault) {
+        trigger_error("SOAP Fault: (faultcode: {$fault->faultcode}, faultstring: {$fault->faulstring})", E_ERROR);
     }
 ?&gt;</PRE></TD></TR></TABLE>
 
@@ -607,6 +646,18 @@ This class is useful when you like to send SOAP fault response from PHP handler.
 &lt;?php
     function test($x) {
         return new SoapFault("Server","Some error message");
+    }
+
+    $server = new SoapServer(null,array('uri'=>"http://test-uri/"));
+    $server->addFunction("test");
+    $server->handle();
+?&gt;
+</PRE></TD></TR></TABLE>
+<p>It is possible to use PHP exception mechanism to throw SOAP Fault.</p>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0"><TR><TD><PRE CLASS="php">
+&lt;?php
+    function test($x) {
+        throw new SoapFault("Server","Some error message");
     }
 
     $server = new SoapServer(null,array('uri'=>"http://test-uri/"));
