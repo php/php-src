@@ -376,6 +376,22 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array ELS_DC S
 		}
 		variable = php_strtok_r(NULL, "\r\n", &strtok_buf);
 	}
+
+#ifdef PHP_WIN32
+	{
+		HSE_URL_MAPEX_INFO humi;
+		DWORD plen = 1;
+
+		if (lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_MAP_URL_TO_PATH_EX, "/", &plen, (LPDWORD) &humi)) {
+				/* Remove trailing \  */
+				if(humi.lpszPath[strlen(humi.lpszPath) - 1] == '\\') {
+					humi.lpszPath[strlen(humi.lpszPath) - 1] = '\0';
+				}
+				php_register_variable("DOCUMENT_ROOT", humi.lpszPath, track_vars_array ELS_CC PLS_CC);
+		}
+	}
+#endif
+	
 	if (variable_buf!=static_variable_buf) {
 		efree(variable_buf);
 	}
