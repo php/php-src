@@ -33,11 +33,14 @@
    open a connection to a mysql server */ 
 PHP_FUNCTION(mysqli_connect)
 {
-	MYSQL *mysql;
-	zval  *object = getThis();
-	char *hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
-	unsigned int hostname_len, username_len, passwd_len, dbname_len, socket_len;
-	unsigned int port=0;
+	MYSQL 				*mysql;
+	MYSQLI_RESOURCE 	*mysqli_resource;
+	PR_MYSQL			*prmysql = NULL;
+	zval  				*object = getThis();
+	char 				*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
+	unsigned int 		hostname_len, username_len, passwd_len, dbname_len, socket_len;
+	unsigned int 		port=0;
+	struct timeval		starttime;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ssssls", &hostname, &hostname_len, &username, &username_len, 
 		&passwd, &passwd_len, &dbname, &dbname_len, &port, &socket, &socket_len) == FAILURE) {
@@ -59,6 +62,10 @@ PHP_FUNCTION(mysqli_connect)
 	}	
 	mysql = mysql_init(NULL);
 
+	if (MyG(profiler)){
+		gettimeofday(&starttime, NULL);
+	}
+
 	if (mysql_real_connect(mysql,hostname,username,passwd,dbname,port,socket,0) == NULL) {
 		/* Save error messages */
 
@@ -70,10 +77,24 @@ PHP_FUNCTION(mysqli_connect)
 		RETURN_FALSE;
 	}
 
+	if (MyG(profiler)) {
+		prmysql = (PR_MYSQL *)MYSQLI_PROFILER_NEW(NULL, MYSQLI_PR_MYSQL, 0);
+		php_mysqli_profiler_timediff(starttime, &prmysql->header.elapsedtime);
+		MYSQLI_PROFILER_STARTTIME(prmysql);
+		prmysql->hostname = estrdup(hostname);
+		prmysql->username = estrdup(username);
+		prmysql->thread_id = mysql->thread_id;
+	}
+
+	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+	mysqli_resource->ptr = (void *)mysql;
+	mysqli_resource->prinfo = prmysql;
+
+
 	if (!object) {
-		MYSQLI_RETURN_RESOURCE(mysql, mysqli_link_class_entry);	
+		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);	
 	} else {
-		((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr = mysql;
+		((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr = mysqli_resource;
 	}
 }
 /* }}} */
@@ -109,46 +130,70 @@ PHP_FUNCTION(mysqli_fetch_object)
 /* {{{ proto resource mysqli_query(resource link, string query, [int resultmode])
 */
 PHP_FUNCTION(mysqli_query) {
-	MYSQL	*mysql;
-	zval	*mysql_link;
-	MYSQL_RES *result;
-	char	*query = NULL;
-	unsigned int query_len;
-	unsigned int resultmode = 0;
+	MYSQL				*mysql;
+	zval				*mysql_link;
+	MYSQLI_RESOURCE		*mysqli_resource;
+	MYSQL_RES 			*result;
+	PR_MYSQL			*prmysql;
+	PR_QUERY			*prquery;
+	PR_RESULT			*prresult;
+	char				*query = NULL;
+	unsigned int 		query_len;
+	unsigned int 		resultmode = 0;
+	struct timeval		starttime;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|l", &mysql_link, mysqli_link_class_entry, &query, &query_len, &resultmode) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link"); 
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL*, prmysql, PR_MYSQL *, &mysql_link, "mysqli_link");
 
-	/* profiler reports */
-	if (MyG(profiler.active)) {
-		MYSQLI_PROFILER_HEADER(query);	
-		MYSQLI_PROFILER_EXPLAIN(mysql,query);	
-		MYSQLI_PROFILER_GETTIME;
-		if (mysql_real_query(mysql, query, query_len)){
-			RETURN_FALSE;
+	/* profiling information */
+	if (MyG(profiler)) {
+		prquery = (PR_QUERY *)MYSQLI_PROFILER_NEW(prmysql, MYSQLI_PR_QUERY, 1);
+		prquery->explain.query = my_estrdup(query);
+		if (!strncasecmp("select", query, 6)){
+			if (!(MYSQLI_PROFILER_EXPLAIN(&prquery->explain, &prquery->header, mysql, query))) {
+				RETURN_FALSE;
+			}
 		}
-		MYSQLI_PROFILER_REPORTTIME;
 	}
-	else {
-		if (mysql_real_query(mysql, query, query_len)) {
-			RETURN_FALSE;
-		}
+
+	if (mysql_real_query(mysql, query, query_len)) {
+		RETURN_FALSE;
+	}
+
+	if (MyG(profiler)) {
+		MYSQLI_PROFILER_ELAPSEDTIME(prquery);
+		prquery->insertid = mysql_insert_id(mysql);
+		prquery->affectedrows = mysql_affected_rows(mysql);
 	}
 
 	if (!mysql_field_count(mysql)) {
 		RETURN_FALSE;
 	}
 
+	/* profiler result information */
+	if (MyG(profiler)) {
+		gettimeofday(&starttime, NULL);
+		prresult = (PR_RESULT *)MYSQLI_PROFILER_NEW(prquery, MYSQLI_PR_RESULT, 1);
+	}
+
 	result = (resultmode == MYSQLI_USE_RESULT) ? mysql_use_result(mysql) : mysql_store_result(mysql);
+
+	if (result && MyG(profiler)) {
+		MYSQLI_PROFILER_ELAPSEDTIME(prresult);
+		prresult->rows = result->row_count;
+		prresult->columns = result->field_count;
+	}
+		
 	if (!result) {
 		RETURN_FALSE;
-	}	
-	if (MyG(profiler.active)) {
-		MYSQLI_PROFILER_REPORT_RESULT(result);
 	}
-	MYSQLI_RETURN_RESOURCE(result, mysqli_result_class_entry);
+
+	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+	mysqli_resource->ptr = (void *)result;
+	mysqli_resource->prinfo = (void *)prresult;
+	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);
 }
 /* }}} */
 
