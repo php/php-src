@@ -1218,6 +1218,29 @@ ZEND_API int zend_startup_module(zend_module_entry *module)
 	return zend_register_module_ex(module TSRMLS_CC);
 }
 
+ZEND_API void zend_check_magic_method_implementation(zend_class_entry *ce, zend_function *fptr, int error_type TSRMLS_DC)
+{
+	char lcname[16];
+	int name_len;
+
+	/* we don't care if the function name is longer, in fact lowercasing only 
+	 * the beginning of the name speeds up the check process */
+	name_len = strlen(fptr->common.function_name);
+	zend_str_tolower_copy(lcname, fptr->common.function_name, MIN(name_len, sizeof(lcname)-1));
+	lcname[sizeof(lcname)-1] = '\0'; /* zend_str_tolower_copy won't necessarily set the zero byte */
+
+	if (name_len == sizeof(ZEND_DESTRUCTOR_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_DESTRUCTOR_FUNC_NAME, sizeof(ZEND_DESTRUCTOR_FUNC_NAME)) && fptr->common.num_args != 0) {
+		zend_error(error_type, "Destuctor %s::%s() cannot take arguments", ce->name, ZEND_DESTRUCTOR_FUNC_NAME);
+	} else if (name_len == sizeof(ZEND_CLONE_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME)) && fptr->common.num_args != 0) {
+		zend_error(error_type, "Method %s::%s() cannot accept any arguments", ce->name, ZEND_CLONE_FUNC_NAME);
+	} else if (name_len == sizeof(ZEND_GET_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME)) && fptr->common.num_args != 1) {
+		zend_error(error_type, "Method %s::%s() must take exactly 1 argument", ce->name, ZEND_GET_FUNC_NAME);
+	} else if (name_len == sizeof(ZEND_SET_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)) && fptr->common.num_args != 2) {
+		zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ce->name, ZEND_SET_FUNC_NAME);
+	} else if (name_len == sizeof(ZEND_CALL_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)) && fptr->common.num_args != 2) {
+		zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ce->name, ZEND_CALL_FUNC_NAME);
+	}
+}
 
 /* registers all functions in *library_functions in the function hash */
 ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC)
@@ -1228,9 +1251,11 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 	int count=0, unload=0;
 	HashTable *target_function_table = function_table;
 	int error_type;
-	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL;
+	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__call = NULL;
 	char *lowercase_name;
 	int fname_len;
+	char *lc_class_name;
+	int class_name_len;
 
 	if (type==MODULE_PERSISTENT) {
 		error_type = E_CORE_WARNING;
@@ -1242,6 +1267,11 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		target_function_table = CG(function_table);
 	}
 	internal_function->type = ZEND_INTERNAL_FUNCTION;
+	
+	if (scope) {
+		class_name_len = strlen(scope->name);
+		lc_class_name = zend_str_tolower_dup(scope->name, class_name_len);
+	}
 
 	while (ptr->fname) {
 		internal_function->handler = ptr->handler;
@@ -1311,18 +1341,28 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 			 * If it's an old-style constructor, store it only if we don't have
 			 * a constructor already.
 			 */
-			if (!strcmp(ptr->fname, scope->name) && !ctor) {
+			if ((fname_len == class_name_len) && !memcmp(lowercase_name, lc_class_name, class_name_len+1) && !ctor) {
 				ctor = reg_function;
-			} else if (!strcmp(ptr->fname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
+			} else if ((fname_len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME))) {
 				ctor = reg_function;
-			} else if (!strcmp(ptr->fname, ZEND_DESTRUCTOR_FUNC_NAME)) {
+			} else if ((fname_len == sizeof(ZEND_DESTRUCTOR_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_DESTRUCTOR_FUNC_NAME, sizeof(ZEND_DESTRUCTOR_FUNC_NAME))) {
 				dtor = reg_function;
 				if (internal_function->num_args) {
 					zend_error(error_type, "Destructor %s::%s() cannot take arguments", scope->name, ptr->fname);
 				}
-
-			} else if (!strcmp(ptr->fname, ZEND_CLONE_FUNC_NAME)) {
+			} else if ((fname_len == sizeof(ZEND_CLONE_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME))) {
 				clone = reg_function;
+			} else if ((fname_len == sizeof(ZEND_CALL_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME))) {
+				__call = reg_function;
+			} else if ((fname_len == sizeof(ZEND_GET_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME))) {
+				__get = reg_function;
+			} else if ((fname_len == sizeof(ZEND_SET_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME))) {
+				__set = reg_function;
+			} else {
+				reg_function = NULL;
+			}
+			if (reg_function) {
+				zend_check_magic_method_implementation(scope, reg_function, error_type TSRMLS_CC);
 			}
 		}
 		ptr++;
@@ -1330,6 +1370,9 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		free_alloca(lowercase_name);
 	}
 	if (unload) { /* before unloading, display all remaining bad function in the module */
+		if (scope) {
+			efree(lc_class_name);
+		}
 		while (ptr->fname) {
 			if (zend_hash_exists(target_function_table, ptr->fname, strlen(ptr->fname)+1)) {
 				zend_error(error_type, "Function registration failed - duplicate name - %s", ptr->fname);
@@ -1343,27 +1386,49 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		scope->constructor = ctor;
 		scope->destructor = dtor;
 		scope->clone = clone;
+		scope->__call = __call;
+		scope->__get = __get;
+		scope->__set = __set;
 		if (ctor) {
 			ctor->common.fn_flags |= ZEND_ACC_CTOR;
 			if (ctor->common.fn_flags & ZEND_ACC_STATIC) {
-				zend_error(error_type, "Constructor %s::%s() cannot be static", ctor->common.scope->name, ctor->common.function_name);
+				zend_error(error_type, "Constructor %s::%s() cannot be static", scope->name, ctor->common.function_name);
 			}
 			ctor->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		if (dtor) {
 			dtor->common.fn_flags |= ZEND_ACC_DTOR;
 			if (dtor->common.fn_flags & ZEND_ACC_STATIC) {
-				zend_error(error_type, "Destructor %s::%s() cannot be static", dtor->common.scope->name, dtor->common.function_name);
+				zend_error(error_type, "Destructor %s::%s() cannot be static", scope->name, dtor->common.function_name);
 			}
 			dtor->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		if (clone) {
 			clone->common.fn_flags |= ZEND_ACC_CLONE;
 			if (clone->common.fn_flags & ZEND_ACC_STATIC) {
-				zend_error(error_type, "Constructor %s::%s() cannot be static", clone->common.scope->name, clone->common.function_name);
+				zend_error(error_type, "Constructor %s::%s() cannot be static", scope->name, clone->common.function_name);
 			}
 			clone->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
+		if (__call) {
+			if (__call->common.fn_flags & ZEND_ACC_STATIC) {
+				zend_error(error_type, "Method %s::%s() cannot be static", scope->name, __call->common.function_name);
+			}
+			__call->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
+		}
+		if (__get) {
+			if (__get->common.fn_flags & ZEND_ACC_STATIC) {
+				zend_error(error_type, "Method %s::%s() cannot be static", scope->name, __get->common.function_name);
+			}
+			__get->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
+		}
+		if (__set) {
+			if (__set->common.fn_flags & ZEND_ACC_STATIC) {
+				zend_error(error_type, "Method %s::%s() cannot be static", scope->name, __set->common.function_name);
+			}
+			__set->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
+		}
+		efree(lc_class_name);
 	}
 	return SUCCESS;
 }
