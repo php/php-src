@@ -71,6 +71,22 @@ static mcrypt_global_struct mcryptg;
 
 #endif
 
+#define MCRYPT_ARGS2 \
+	pval *cipher, *data, *key, *mode; \
+	int td; \
+	char *ndata; \
+	size_t bsize; \
+	size_t nr; \
+	size_t nsize
+
+#define MCRYPT_ARGS MCRYPT_ARGS2; pval *iv
+
+#define MCRYPT_CONVERT \
+	convert_to_long(cipher); \
+	convert_to_long(mode); \
+	convert_to_string(data); \
+	convert_to_string(key)
+
 #define MCRYPT_SIZE \
 	bsize = get_block_size(cipher->value.lval); \
 	nr = (data->value.str.len + bsize - 1) / bsize; \
@@ -212,22 +228,13 @@ PHP_FUNCTION(mcrypt_get_block_size)
    OFB crypt/decrypt data using key key with cipher cipher starting with iv */
 PHP_FUNCTION(mcrypt_ofb)
 {
-	pval *cipher, *data, *key, *mode, *iv;
-	int td;
-	char *ndata;
-	size_t bsize;
-	size_t nr;
-	size_t nsize;
-
+	MCRYPT_ARGS;
+	
 	if(ARG_COUNT(ht) != 5 || 
 			getParameters(ht, 5, &cipher, &key, &data, &mode, &iv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(cipher);
-	convert_to_long(mode);
-	convert_to_string(data);
-	convert_to_string(key);
-
+	MCRYPT_CONVERT;
 	MCRYPT_SIZE;
 	MCRYPT_CHECK_IV;
 
@@ -242,22 +249,13 @@ PHP_FUNCTION(mcrypt_ofb)
    CFB crypt/decrypt data using key key with cipher cipher starting with iv */
 PHP_FUNCTION(mcrypt_cfb)
 {
-	pval *cipher, *data, *key, *mode, *iv;
-	int td;
-	char *ndata;
-	size_t bsize;
-	size_t nr;
-	size_t nsize;
+	MCRYPT_ARGS;
 
 	if(ARG_COUNT(ht) != 5 || 
 			getParameters(ht, 5, &cipher, &key, &data, &mode, &iv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(cipher);
-	convert_to_long(mode);
-	convert_to_string(data);
-	convert_to_string(key);
-	
+	MCRYPT_CONVERT;
 	MCRYPT_SIZE;
 	MCRYPT_CHECK_IV;
 
@@ -273,24 +271,15 @@ PHP_FUNCTION(mcrypt_cfb)
    CBC crypt/decrypt data using key key with cipher cipher using optional iv */
 PHP_FUNCTION(mcrypt_cbc)
 {
-	pval *cipher, *data, *key, *mode, *iv;
-	int td;
+	MCRYPT_ARGS;
 	int ac = ARG_COUNT(ht);
-	char *ndata;
-	size_t bsize;
-	size_t nr;
-	size_t nsize;
 
 	if(ac < 4 || ac > 5 || 
 			getParameters(ht, ac, &cipher, &key, &data, &mode, &iv) == 
 			FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(cipher);
-	convert_to_long(mode);
-	convert_to_string(data);
-	convert_to_string(key);
-		
+	MCRYPT_CONVERT;
 	MCRYPT_SIZE;
 	if(ac > 4 && mode == 0) {
 		MCRYPT_CHECK_IV;
@@ -313,22 +302,13 @@ PHP_FUNCTION(mcrypt_cbc)
    ECB crypt/decrypt data using key key with cipher cipher */
 PHP_FUNCTION(mcrypt_ecb)
 {
-	pval *cipher, *data, *key, *mode;
-	int td;
-	char *ndata;
-	size_t bsize;
-	size_t nr;
-	size_t nsize;
+	MCRYPT_ARGS2;
 
 	if(ARG_COUNT(ht) != 4 || 
 			getParameters(ht, 4, &cipher, &key, &data, &mode) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(cipher);
-	convert_to_long(mode);
-	convert_to_string(data);
-	convert_to_string(key);
-	
+	MCRYPT_CONVERT;
 	MCRYPT_SIZE;
 	
 	td = init_mcrypt_ecb(cipher->value.lval, key->value.str.val, key->value.str.len);
