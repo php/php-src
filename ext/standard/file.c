@@ -432,7 +432,7 @@ PHP_FUNCTION(get_meta_tags)
 				if (have_content) {
 					add_assoc_string(return_value, name, value, 0); 
 				} else {
-					add_assoc_string(return_value, name, "", 0);
+					add_assoc_string(return_value, name, "", 1);
 				}
 
 				efree(name);
