@@ -291,8 +291,11 @@ PHP_FUNCTION(bind_textdomain_codeset)
 		
 		retval = bind_textdomain_codeset(Z_STRVAL_PP(domain), Z_STRVAL_PP(codeset));
 
+		if (!retval) {
+			RETURN_FALSE;
+		}
 		RETURN_STRING(retval, 1);
-	}	
+	}
 }
 /* }}} */
 #endif
