@@ -2163,14 +2163,16 @@ static void
 _oci_close_server(oci_server *server)
 {
 	char *dbname;
+	int oldopen;
 	OCILS_FETCH();
 	ELS_FETCH();
 
+	oldopen = server->open;
 	server->open = 2;
-
 	if (! OCI(shutdown)) {
 		zend_hash_apply(&EG(regular_list),_oci_session_cleanup);
 	}
+	server->open = oldopen;
 
 	oci_debug("START _oci_close_server: detaching conn=%d dbname=%s",server->num,server->dbname);
 
@@ -2178,19 +2180,11 @@ _oci_close_server(oci_server *server)
 
 	if (server->open) {
 		if (server->pServer && OCI(pError)) {
-#if 0 && APACHE
-			void (*handler) (int);
-			handler = signal(SIGCHLD, SIG_DFL);
-#endif
 			OCI(error) = 
 				OCIServerDetach(server->pServer,
 								OCI(pError),
 								OCI_DEFAULT);
 
-#if 0 && APACHE
-			signal(SIGCHLD,handler);
-#endif
-			
 			if (OCI(error)) {
 				oci_error(OCI(pError), "oci_close_server OCIServerDetach", OCI(error));
 			}
