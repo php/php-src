@@ -171,9 +171,9 @@ PHP_MINFO_FUNCTION(ldap)
 #endif
 
 	if (LDAPG(max_links) == -1) {
-		snprintf(maxl, 31, "%d/unlimited", LDAPG(num_links) );
+		snprintf(maxl, 31, "%ld/unlimited", LDAPG(num_links) );
 	} else {
-		snprintf(maxl, 31, "%d/%ld", LDAPG(num_links), LDAPG(max_links));
+		snprintf(maxl, 31, "%ld/%ld", LDAPG(num_links), LDAPG(max_links));
 	}
 	maxl[31] = 0;
 
