@@ -841,8 +841,6 @@ ZEND_API int zend_get_configuration_directive(char *name, uint name_length, zval
 }
 
 
-#define ZEND_ERROR_BUFFER_SIZE 1024
-
 ZEND_API void zend_error(int type, const char *format, ...)
 {
 	va_list args;
@@ -890,7 +888,6 @@ ZEND_API void zend_error(int type, const char *format, ...)
 		error_filename = "Unknown";
 	}
 
-
 	va_start(args, format);
 
 	/* if we don't have a user defined error handler */
@@ -913,22 +910,9 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			ALLOC_INIT_ZVAL(z_error_filename);
 			ALLOC_INIT_ZVAL(z_error_lineno);
 			ALLOC_INIT_ZVAL(z_context);
-			z_error_message->value.str.val = (char *) emalloc(ZEND_ERROR_BUFFER_SIZE);
 
-#ifdef HAVE_VSNPRINTF
-			vsnprintf(z_error_message->value.str.val, ZEND_ERROR_BUFFER_SIZE, format, args);
-			/* this MUST be revisited, but for now handle ALL implementation 
-			 * out there correct. Since this is inside an error handler the 
-			 * performance loss by strlne is irrelevant. */
-			z_error_message->value.str.val[ZEND_ERROR_BUFFER_SIZE - 1] = '\0';
-			z_error_message->value.str.len = strlen(z_error_message->value.str.val);
-#else
-			strncpy(z_error_message->value.str.val, format, ZEND_ERROR_BUFFER_SIZE);
-			z_error_message->value.str.val[ZEND_ERROR_BUFFER_SIZE - 1] = '\0';
-			z_error_message->value.str.len = strlen(z_error_message->value.str.val);
-			/* This is risky... */
-			/* z_error_message->value.str.len = vsprintf(z_error_message->value.str.val, format, args); */
-#endif
+			z_error_message->value.str.len = zend_vspprintf(&z_error_message->value.str.val, 0, format, args);
+
 			z_error_message->type = IS_STRING;
 
 			z_error_type->value.lval = type;
