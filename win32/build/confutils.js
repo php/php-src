@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.46 2004-08-03 00:58:29 wez Exp $
+// $Id: confutils.js,v 1.47 2004-11-10 20:12:42 fmk Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1109,7 +1109,7 @@ function ADD_SOURCES(dir, file_list, target)
 			}
 		} else {
 			MFO.WriteLine(sub_build + obj + ": " + dir + "\\" + src);
-			MFO.WriteLine("\t$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") -c " + dir + "\\" + src + " -o " + sub_build + obj);
+			MFO.WriteLine("\t$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") " + dir + "\\" + src + " /Fo" + sub_build + obj);
 		}
 	}
 
