@@ -44,25 +44,29 @@ AC_ARG_WITH(apxs,
 
   for flag in $APXS_CFLAGS; do
     case $flag in
-    -D*) CPPFLAGS="$CPPFLAGS $flag";;
+    -D*) APACHE_CPPFLAGS="$APACHE_CPPFLAGS $flag";;
     esac
   done
+
   case $host_alias in
   *aix*)
     APXS_LIBEXECDIR=`$APXS -q LIBEXECDIR`
-    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
-    PHP_SELECT_SAPI(apache, shared, sapi_apache.c mod_php4.c php_apache.c, -I$APXS_INCLUDEDIR)
+    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-brtl -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
+    PHP_AIX_LDFLAGS="-Wl,-brtl"
+    build_type=shared
     ;;
   *darwin*)
     MH_BUNDLE_FLAGS="-dynamic -twolevel_namespace -bundle -bundle_loader $APXS_HTTPD"
     PHP_SUBST(MH_BUNDLE_FLAGS)
     SAPI_SHARED=libs/libphp4.so
-    PHP_SELECT_SAPI(apache, bundle, sapi_apache.c mod_php4.c php_apache.c, -I$APXS_INCLUDEDIR)
+    build_type=bundle
     ;;
   *)
-    PHP_SELECT_SAPI(apache, shared, sapi_apache.c mod_php4.c php_apache.c, -I$APXS_INCLUDEDIR)
+    build_type=shared
     ;;
   esac
+
+  PHP_SELECT_SAPI(apache, $build_type, sapi_apache.c mod_php4.c php_apache.c, $APACHE_CPPFLAGS -I$APXS_INCLUDEDIR)
 
   # Test whether apxs support -S option
   $APXS -q -S CFLAGS="$APXS_CFLAGS" CFLAGS >/dev/null 2>&1
