@@ -29,6 +29,10 @@ public class servlet extends HttpServlet {
     HttpServletResponse response;
     ServletInputStream stream;
 
+    static int startup_count = 0;
+
+    protected boolean display_source_mode = false;
+
     /******************************************************************/
     /*                          native methods                        */ 
     /******************************************************************/
@@ -38,7 +42,8 @@ public class servlet extends HttpServlet {
     native long define(String name);
     native void send(String requestMethod, String queryString,
       String pathInfo, String pathTranslated,
-      String contentType, int contentLength, String authUser);
+      String contentType, int contentLength, String authUser,
+      boolean display_source_mode);
     native void shutdown();
 
     /******************************************************************/
@@ -65,7 +70,7 @@ public class servlet extends HttpServlet {
 
     void header(String data) {
       try {
-        if (data.startsWith("Content-Type: ")) {
+        if (data.startsWith("Content-type: ")) {
           response.setContentType(data.substring(data.indexOf(" ")+1));
         } else if (data.startsWith("Location: ")) {
           response.sendRedirect(data.substring(data.indexOf(" ")+1));
@@ -96,8 +101,8 @@ public class servlet extends HttpServlet {
     /******************************************************************/
 
     public void init(ServletConfig config) throws ServletException {
-       super.init(config);
-       startup();
+      super.init(config);
+      if (0 == startup_count++) startup();
     }
 
     public void service(HttpServletRequest request,
@@ -113,7 +118,7 @@ public class servlet extends HttpServlet {
        send(request.getMethod(), request.getQueryString(),
             request.getPathInfo(), contextPath,
             request.getContentType(), request.getContentLength(),
-	    request.getRemoteUser());
+	    request.getRemoteUser(), display_source_mode);
 
        try {
          if (stream != null) stream.close();
@@ -123,7 +128,7 @@ public class servlet extends HttpServlet {
     }
 
     public void destroy() {
-      shutdown();
+      if (0 == --startup_count) shutdown();
       super.destroy();
     }
 
