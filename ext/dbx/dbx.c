@@ -302,14 +302,7 @@ ZEND_FUNCTION(dbx_connect)
 		RETURN_LONG(0);
 	}
 
-	if (object_init(return_value) != SUCCESS) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "dbx: unable to create resulting object...");
-		FREE_ZVAL(dbx_module);
-		zval_dtor(db_name); /* to free stringvalue memory */
-		FREE_ZVAL(db_name);
-		FREE_ZVAL(rv_dbx_handle);
-		RETURN_LONG(0);
-	}
+	object_init(return_value);
 
 	zend_hash_update(Z_OBJPROP_P(return_value), "handle", 7, (void *)&(rv_dbx_handle), sizeof(zval *), NULL);
 	zend_hash_update(Z_OBJPROP_P(return_value), "module", 7, (void *)&(dbx_module), sizeof(zval *), NULL);
@@ -427,11 +420,8 @@ ZEND_FUNCTION(dbx_query)
 	 * rv_result_handle holds a resource
 	 */
 	/* init return_value as object (of rows) */
-	if (object_init(return_value) != SUCCESS) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "unable to create resulting object...");
-		FREE_ZVAL(rv_result_handle);
-		RETURN_LONG(0);
-	}
+	object_init(return_value);
+
 	/* add result_handle property to return_value */
 	zend_hash_update(Z_OBJPROP_P(return_value), "handle", 7, (void *)&(rv_result_handle), sizeof(zval *), NULL);
 	/* init info property as array and add to return_value as a property */

@@ -1367,9 +1367,7 @@ PHP_FUNCTION(mcal_next_recurrence)
 	
 	calevent_next_recurrence(mcal_le_struct->event, &mydate, Z_LVAL_PP(weekstart));
 	
-	if (object_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	object_init(return_value);
 	
 	if (mydate.has_date) {
 	    add_property_long(return_value, "year", mydate.year);
