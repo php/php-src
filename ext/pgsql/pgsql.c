@@ -3260,7 +3260,7 @@ PHPAPI int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *me
 	zval *elem;
 	
 	smart_str_appends(&querystr, 
-			"SELECT a.attname, a.attnum, t.typname, a.attlen, a.attnotNULL, a.atthasdef "
+			"SELECT a.attname, a.attnum, t.typname, a.attlen, a.attnotNULL, a.atthasdef, a.attndims "
 			"FROM pg_class as c, pg_attribute a, pg_type t "
 			"WHERE a.attnum > 0 AND a.attrelid = c.oid AND c.relname = '");
 	
@@ -3299,6 +3299,7 @@ PHPAPI int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *me
 		else {
 			add_assoc_bool(elem, "has default", 0);
 		}
+		add_assoc_long(elem, "array dims", atoi(PQgetvalue(pg_result,i,6)));
 		name = PQgetvalue(pg_result,i,0);
 		add_assoc_zval(meta, name, elem);
 	}
