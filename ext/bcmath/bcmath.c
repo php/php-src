@@ -27,13 +27,7 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef MSVC5
-#include "config.h"
-#include "build-defs.h"
-#endif
-
 #include "php.h"
-
 
 #if WITH_BCMATH
 

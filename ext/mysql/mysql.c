@@ -63,7 +63,7 @@
 
 
 /* True globals, no need for thread safety */
-int le_result,le_link,le_plink;
+static int le_result,le_link,le_plink;
 
 #include "php_ini.h"
 
