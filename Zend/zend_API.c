@@ -1275,6 +1275,10 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 				ctor = reg_function;
 			} else if (!strcmp(ptr->fname, ZEND_DESTRUCTOR_FUNC_NAME)) {
 				dtor = reg_function;
+				if (internal_function->num_args) {
+					zend_error(error_type, "Destructor %s::%s() cannot take arguments", scope->name, ptr->fname);
+				}
+
 			} else if (!strcmp(ptr->fname, ZEND_CLONE_FUNC_NAME)) {
 				clone = reg_function;
 			}
