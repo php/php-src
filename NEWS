@@ -3,6 +3,7 @@ PHP 4                                                                      NEWS
 ?? ??? 2003, Version 4.3.5
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
+- Fixed bug #26198 (strtotime() handling of M/F Y date format). (Ilia)
 - Fixed bug #26176 (Fixed handling of numeric keys in INI files). (Ilia)
 - Fixed bug #26168 (shtool availability check in phpize). 
   (robbat2 at gentoo dot org, Ilia)

@@ -308,7 +308,11 @@ date	: tUNUMBER '/' tUNUMBER {
 	}
 	| tMONTH tUNUMBER {
 	    ((struct date_yy *)parm)->yyMonth = $1;
-	    ((struct date_yy *)parm)->yyDay = $2;
+	    if ($2 > 1000) {
+		((struct date_yy *)parm)->yyYear = $2;
+	    } else {
+		((struct date_yy *)parm)->yyDay = $2;
+	    }
 	}
 	| tMONTH tUNUMBER ',' tUNUMBER {
 	    ((struct date_yy *)parm)->yyMonth = $1;
@@ -317,7 +321,11 @@ date	: tUNUMBER '/' tUNUMBER {
 	}
 	| tUNUMBER tMONTH {
 	    ((struct date_yy *)parm)->yyMonth = $2;
-	    ((struct date_yy *)parm)->yyDay = $1;
+	    if ($1 > 1000) {
+		((struct date_yy *)parm)->yyYear = $1;
+	    } else {
+		((struct date_yy *)parm)->yyDay = $1;
+	    }
 	}
 	| tUNUMBER tMONTH tUNUMBER {
 	    ((struct date_yy *)parm)->yyMonth = $2;
