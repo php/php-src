@@ -43,13 +43,16 @@
 # define GetLastError() errno
 #endif
 
+#ifdef PHP_WIN32
+#define PHP_ENABLE_SEH
+#endif
+
 /* 
 uncomment the following lines to turn off 
 exception trapping when running under a debugger 
 
-
 #ifdef _DEBUG
-#define NO_EXCEPTION_HANDLERS
+#undef PHP_ENABLE_SEH
 #endif
 */
 
@@ -701,11 +704,10 @@ static void my_endthread()
 }
 
 #ifdef PHP_WIN32
-/*
- ___except can only call a function, so we have to do this
- to retrieve the pointer.
+/* ep is accessible only in the context of the __except expression,
+ * so we have to call this function to obtain it.
  */
-BOOL exceptionhandler(LPEXCEPTION_POINTERS *e,LPEXCEPTION_POINTERS ep)
+BOOL exceptionhandler(LPEXCEPTION_POINTERS *e, LPEXCEPTION_POINTERS ep)
 {
 	*e=ep;
 	return TRUE;
@@ -720,107 +722,105 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 	CLS_FETCH();
 	ELS_FETCH();
 	PLS_FETCH();
-#if !defined (NO_EXCEPTION_HANDLERS) && defined(PHP_WIN32)
+#ifdef PHP_ENABLE_SEH
 	LPEXCEPTION_POINTERS e;
 #endif
 
-	if (setjmp(EG(bailout))!=0) {
-		php_request_shutdown(NULL);
-		return HSE_STATUS_ERROR;
-	}
-
-#if !defined (NO_EXCEPTION_HANDLERS)
-	__try {
+	zend_try {
+#ifdef PHP_ENABLE_SEH
+		__try {
 #endif
-		init_request_info(sapi_globals, lpECB);
-		SG(server_context) = lpECB;
+			init_request_info(sapi_globals, lpECB);
+			SG(server_context) = lpECB;
 
 #ifdef WITH_ZEUS
-		/* PATH_TRANSLATED can contain extra PATH_INFO stuff after the
-		 * file being loaded, so we must use SCRIPT_FILENAME instead
-		 */
-		file_handle.filename = (char *)emalloc( ISAPI_SERVER_VAR_BUF_SIZE );
-		file_handle.free_filename = 1;
-		{
-			DWORD filename_len = ISAPI_SERVER_VAR_BUF_SIZE;
-			if( !lpECB->GetServerVariable(lpECB->ConnID, "SCRIPT_FILENAME", file_handle.filename, &filename_len) || file_handle.filename[ 0 ] == '\0' ) {
-                /* If we're running on an earlier version of Zeus, this
-                 * variable won't be present, so fall back to old behaviour.
-                 */
-                efree( file_handle.filename );
-                file_handle.filename = sapi_globals->request_info.path_translated;
-                file_handle.free_filename = 0;
-            }
-		}
-#else
-		file_handle.filename = sapi_globals->request_info.path_translated;
-		file_handle.free_filename = 0;
-#endif
-		file_handle.type = ZEND_HANDLE_FILENAME;
-		file_handle.opened_path = NULL;
-
-		php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
-		php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
-		if (SG(request_info).cookie_data) {
-			efree(SG(request_info).cookie_data);
-		}
-#if !defined (NO_EXCEPTION_HANDLERS)
-#ifdef PHP_WIN32
-	} __except(exceptionhandler(&e,GetExceptionInformation())) {
-#else
-	} __except(EXCEPTION_EXECUTE_HANDLER) {
-#endif
-#ifdef PHP_WIN32
-		char buf[1024];
-		if (_exception_code()==EXCEPTION_STACK_OVERFLOW) {
-			LPBYTE lpPage;
-			static SYSTEM_INFO si;
-			static MEMORY_BASIC_INFORMATION mi;
-			static DWORD dwOldProtect;
-
-			GetSystemInfo(&si);
-
-			/* Get page ESP is pointing to */
-			_asm mov lpPage, esp;
-
-			/* Get stack allocation base */
-			VirtualQuery(lpPage, &mi, sizeof(mi));
-
-			/* Go to the page below the current page */
-			lpPage = (LPBYTE) (mi.BaseAddress) - si.dwPageSize;
-
-			/* Free pages below current page */
-			if (!VirtualFree(mi.AllocationBase, (LPBYTE)lpPage - (LPBYTE) mi.AllocationBase, MEM_DECOMMIT)) {
-				_endthread();
+			/* PATH_TRANSLATED can contain extra PATH_INFO stuff after the
+			 * file being loaded, so we must use SCRIPT_FILENAME instead
+			 */
+			file_handle.filename = (char *)emalloc( ISAPI_SERVER_VAR_BUF_SIZE );
+			file_handle.free_filename = 1;
+			{
+				DWORD filename_len = ISAPI_SERVER_VAR_BUF_SIZE;
+				if( !lpECB->GetServerVariable(lpECB->ConnID, "SCRIPT_FILENAME", file_handle.filename, &filename_len) || file_handle.filename[ 0 ] == '\0' ) {
+					/* If we're running on an earlier version of Zeus, this
+					 * variable won't be present, so fall back to old behaviour.
+					 */
+					efree( file_handle.filename );
+					file_handle.filename = sapi_globals->request_info.path_translated;
+					file_handle.free_filename = 0;
+				}
 			}
+#else
+			file_handle.filename = sapi_globals->request_info.path_translated;
+			file_handle.free_filename = 0;
+#endif
+			file_handle.type = ZEND_HANDLE_FILENAME;
+			file_handle.opened_path = NULL;
 
-			/* Restore the guard page */
-			if (!VirtualProtect(lpPage, si.dwPageSize, PAGE_GUARD | PAGE_READWRITE, &dwOldProtect)) {
-				_endthread();
+			php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
+			php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+			if (SG(request_info).cookie_data) {
+				efree(SG(request_info).cookie_data);
 			}
+#ifdef PHP_ENABLE_SEH
+		} __except(exceptionhandler(&e, GetExceptionInformation())) {
+			char buf[1024];
+			if (_exception_code()==EXCEPTION_STACK_OVERFLOW) {
+				LPBYTE lpPage;
+				static SYSTEM_INFO si;
+				static MEMORY_BASIC_INFORMATION mi;
+				static DWORD dwOldProtect;
 
-			CG(unclean_shutdown)=1;
-			_snprintf(buf,sizeof(buf)-1,"PHP has encountered a Stack overflow");
-			php_isapi_report_exception(buf, strlen(buf) SLS_CC);
-		} else if (_exception_code()==EXCEPTION_ACCESS_VIOLATION) {
-			_snprintf(buf,sizeof(buf)-1,"PHP has encountered an Access Violation at %p",e->ExceptionRecord->ExceptionAddress);
-			php_isapi_report_exception(buf, strlen(buf) SLS_CC);
-			my_endthread();
-		} else {
-			_snprintf(buf,sizeof(buf)-1,"PHP has encountered an Unhandled Exception Code %d at %p",e->ExceptionRecord->ExceptionCode , e->ExceptionRecord->ExceptionAddress);
-			php_isapi_report_exception(buf, strlen(buf) SLS_CC);
+				GetSystemInfo(&si);
+
+				/* Get page ESP is pointing to */
+				_asm mov lpPage, esp;
+
+				/* Get stack allocation base */
+				VirtualQuery(lpPage, &mi, sizeof(mi));
+
+				/* Go to the page below the current page */
+				lpPage = (LPBYTE) (mi.BaseAddress) - si.dwPageSize;
+
+				/* Free pages below current page */
+				if (!VirtualFree(mi.AllocationBase, (LPBYTE)lpPage - (LPBYTE) mi.AllocationBase, MEM_DECOMMIT)) {
+					_endthread();
+				}
+
+				/* Restore the guard page */
+				if (!VirtualProtect(lpPage, si.dwPageSize, PAGE_GUARD | PAGE_READWRITE, &dwOldProtect)) {
+					_endthread();
+				}
+
+				CG(unclean_shutdown)=1;
+				_snprintf(buf,sizeof(buf)-1,"PHP has encountered a Stack overflow");
+				php_isapi_report_exception(buf, strlen(buf) SLS_CC);
+			} else if (_exception_code()==EXCEPTION_ACCESS_VIOLATION) {
+				_snprintf(buf,sizeof(buf)-1,"PHP has encountered an Access Violation at %p",e->ExceptionRecord->ExceptionAddress);
+				php_isapi_report_exception(buf, strlen(buf) SLS_CC);
+				my_endthread();
+			} else {
+				_snprintf(buf,sizeof(buf)-1,"PHP has encountered an Unhandled Exception Code %d at %p",e->ExceptionRecord->ExceptionCode , e->ExceptionRecord->ExceptionAddress);
+				php_isapi_report_exception(buf, strlen(buf) SLS_CC);
+				my_endthread();
+			}
+#endif
+		}
+#ifdef PHP_ENABLE_SEH
+		__try {
+			php_request_shutdown(NULL);
+		} __except(EXCEPTION_EXECUTE_HANDLER) {
 			my_endthread();
 		}
-#endif
-	}
-	__try {
-		php_request_shutdown(NULL);
-	} __except(EXCEPTION_EXECUTE_HANDLER) {
-		my_endthread();
-	}
 #else
 		php_request_shutdown(NULL);
 #endif
+	} zend_catch {
+		zend_try {
+			php_request_shutdown(NULL);
+		} zend_end_try();
+		return HSE_STATUS_ERROR;
+	} zend_end_try();
 
 	return HSE_STATUS_SUCCESS;
 }

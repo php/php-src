@@ -251,11 +251,6 @@ JNIEXPORT void JNICALL Java_net_php_servlet_startup
 
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
-#else
-	if (setjmp(EG(bailout))!=0) {
-		ThrowServletException(jenv,"bailout");
-		return;
-	}
 #endif
 
 	sapi_startup(&servlet_sapi_module);
@@ -319,7 +314,6 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	 jstring contentType, jint contentLength, 
 	 jstring authUser, jboolean display_source_mode)
 {
-
 	zend_file_handle file_handle;
 #ifndef VIRTUAL_DIR
 	char cwd[MAXPATHLEN];
@@ -329,95 +323,92 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	CLS_FETCH();
 	ELS_FETCH();
 
-#ifdef ZTS
-	if (setjmp(EG(bailout))!=0) {
-		ThrowServletException(jenv,"bailout");
-		return;
-	}
-#endif
+	zend_try {
+		SG(server_context) = emalloc(sizeof(servlet_request));
+		((servlet_request*)SG(server_context))->jenv=jenv;
+		((servlet_request*)SG(server_context))->servlet=self;
+		((servlet_request*)SG(server_context))->cookies=0;
 
-	SG(server_context) = emalloc(sizeof(servlet_request));
-	((servlet_request*)SG(server_context))->jenv=jenv;
-	((servlet_request*)SG(server_context))->servlet=self;
-	((servlet_request*)SG(server_context))->cookies=0;
+		CG(extended_info) = 0;
 
-	CG(extended_info) = 0;
+		/*
+		 * Initialize the request
+		 */
+		SETSTRING( SG(request_info).auth_user, authUser );
+		SETSTRING( SG(request_info).request_method, requestMethod );
+		SETSTRING( SG(request_info).query_string, queryString );
+		SETSTRING( SG(request_info).request_uri, requestURI );
+		SETSTRING( SG(request_info).content_type, contentType );
+		SG(sapi_headers).http_response_code = 200;
+		SG(request_info).content_length = contentLength;
+		SG(request_info).auth_password = NULL;
+		if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
+			ThrowServletException(jenv,"request startup failure");
+			return;
+		}
 
-	/*
-	 * Initialize the request
-	 */
-	SETSTRING( SG(request_info).auth_user, authUser );
-	SETSTRING( SG(request_info).request_method, requestMethod );
-	SETSTRING( SG(request_info).query_string, queryString );
-	SETSTRING( SG(request_info).request_uri, requestURI );
-	SETSTRING( SG(request_info).content_type, contentType );
-	SG(sapi_headers).http_response_code = 200;
-	SG(request_info).content_length = contentLength;
-	SG(request_info).auth_password = NULL;
-	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
-		ThrowServletException(jenv,"request startup failure");
-		return;
-	}
-
-	/*
-	 * Parse the file
-	 */
-	SETSTRING( SG(request_info).path_translated, pathTranslated );
+		/*
+		 * Parse the file
+		 */
+		SETSTRING( SG(request_info).path_translated, pathTranslated );
 #ifdef VIRTUAL_DIR
-	file_handle.handle.fp = php_fopen_primary_script();
+		file_handle.handle.fp = php_fopen_primary_script();
 #else
-	/*
-	 * The java runtime doesn't like the working directory to be
-	 * changed, so save it and change it back as quickly as possible
-	 * in the hopes that Java doesn't notice.
-	 */
-	getcwd(cwd,MAXPATHLEN);
-	file_handle.handle.fp = php_fopen_primary_script();
-	chdir(cwd);
+		/*
+		 * The java runtime doesn't like the working directory to be
+		 * changed, so save it and change it back as quickly as possible
+		 * in the hopes that Java doesn't notice.
+		 */
+		getcwd(cwd,MAXPATHLEN);
+		file_handle.handle.fp = php_fopen_primary_script();
+		chdir(cwd);
 #endif
-	file_handle.filename = SG(request_info).path_translated;
-	file_handle.opened_path = NULL;
-	file_handle.free_filename = 0;
-	file_handle.type = ZEND_HANDLE_FP;
+		file_handle.filename = SG(request_info).path_translated;
+		file_handle.opened_path = NULL;
+		file_handle.free_filename = 0;
+		file_handle.type = ZEND_HANDLE_FP;
 
-	if (!file_handle.handle.fp) {
-		php_request_shutdown((void *) 0);
-		php_module_shutdown();
-		ThrowIOException(jenv,file_handle.filename);
-		return;
-	}
+		if (!file_handle.handle.fp) {
+			php_request_shutdown((void *) 0);
+			php_module_shutdown();
+			ThrowIOException(jenv,file_handle.filename);
+			return;
+		}
 
-	/*
-	 * Execute the request
-	 */
-	Java_net_php_reflect_setEnv(jenv, 0);
+		/*
+		 * Execute the request
+		 */
+		Java_net_php_reflect_setEnv(jenv, 0);
 
-    if (display_source_mode) {
-        zend_syntax_highlighter_ini syntax_highlighter_ini;
+		if (display_source_mode) {
+			zend_syntax_highlighter_ini syntax_highlighter_ini;
 
-        if (open_file_for_scanning(&file_handle CLS_CC)==SUCCESS) {
-            php_get_highlight_struct(&syntax_highlighter_ini);
-	    sapi_send_headers();
-            zend_highlight(&syntax_highlighter_ini);
-        }
-    } else {
-	    php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
-	    php_header();			/* Make sure headers have been sent */
-    }
+			if (open_file_for_scanning(&file_handle CLS_CC)==SUCCESS) {
+				php_get_highlight_struct(&syntax_highlighter_ini);
+			sapi_send_headers();
+				zend_highlight(&syntax_highlighter_ini);
+			}
+		} else {
+			php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+			php_header();			/* Make sure headers have been sent */
+		}
 
-	/*
-	 * Clean up
-	 */
-	
-	FREESTRING(SG(request_info).request_method);
-	FREESTRING(SG(request_info).query_string);
-	FREESTRING(SG(request_info).request_uri);
-	FREESTRING(SG(request_info).path_translated);
-	FREESTRING(SG(request_info).content_type);
-	FREESTRING(((servlet_request*)SG(server_context))->cookies);    
-	efree(SG(server_context));
-	SG(server_context)=0;
+		/*
+		 * Clean up
+		 */
+		
+		FREESTRING(SG(request_info).request_method);
+		FREESTRING(SG(request_info).query_string);
+		FREESTRING(SG(request_info).request_uri);
+		FREESTRING(SG(request_info).path_translated);
+		FREESTRING(SG(request_info).content_type);
+		FREESTRING(((servlet_request*)SG(server_context))->cookies);    
+		efree(SG(server_context));
+		SG(server_context)=0;
 
-    if (!display_source_mode) php_request_shutdown((void *) 0);
+		if (!display_source_mode) php_request_shutdown((void *) 0);
+	} zend_catch {
+		ThrowServletException(jenv,"bailout");
+	} zend_end_try();
 }
 

@@ -620,54 +620,56 @@ static int php_hash_environment(ELS_D SLS_DC PLS_DC);
  */
 int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 {
+	int retval = SUCCESS;
+
 #if PHP_SIGCHILD
 	signal(SIGCHLD,sigchld_handler);
 #endif
 
-	if (setjmp(EG(bailout))!=0) {
-		return FAILURE;
-	}
+	zend_try {
+		PG(during_request_startup) = 1;
+		
+		php_output_activate();
 
-	PG(during_request_startup) = 1;
-	
-	php_output_activate();
+		/* initialize global variables */
+		PG(modules_activated) = 0;
+		PG(header_is_being_sent) = 0;
+		PG(connection_status) = PHP_CONNECTION_NORMAL;
+		
+		zend_activate(CLS_C ELS_CC);
+		sapi_activate(SLS_C);
 
-	/* initialize global variables */
-	PG(modules_activated) = 0;
-	PG(header_is_being_sent) = 0;
-	PG(connection_status) = PHP_CONNECTION_NORMAL;
-	
-	zend_activate(CLS_C ELS_CC);
-	sapi_activate(SLS_C);
+		zend_set_timeout(EG(timeout_seconds));
 
-	zend_set_timeout(EG(timeout_seconds));
+		if (PG(expose_php)) {
+			sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
+		}
 
-	if (PG(expose_php)) {
-		sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
-	}
+		if (PG(output_handler) && PG(output_handler)[0]) {
+			zval *output_handler;
 
-	if (PG(output_handler) && PG(output_handler)[0]) {
-		zval *output_handler;
+			ALLOC_INIT_ZVAL(output_handler);
+			Z_STRLEN_P(output_handler) = strlen(PG(output_handler));	/* this can be optimized */
+			Z_STRVAL_P(output_handler) = estrndup(PG(output_handler), Z_STRLEN_P(output_handler));
+			Z_TYPE_P(output_handler) = IS_STRING;
+			php_start_ob_buffer(output_handler, 0);
+		} else if (PG(output_buffering)) {
+			php_start_ob_buffer(NULL, 0);
+		} else if (PG(implicit_flush)) {
+			php_start_implicit_flush();
+		}
 
-		ALLOC_INIT_ZVAL(output_handler);
-		Z_STRLEN_P(output_handler) = strlen(PG(output_handler));	/* this can be optimized */
-		Z_STRVAL_P(output_handler) = estrndup(PG(output_handler), Z_STRLEN_P(output_handler));
-		Z_TYPE_P(output_handler) = IS_STRING;
-		php_start_ob_buffer(output_handler, 0);
-	} else if (PG(output_buffering)) {
-		php_start_ob_buffer(NULL, 0);
-	} else if (PG(implicit_flush)) {
-		php_start_implicit_flush();
-	}
+		/* We turn this off in php_execute_script() */
+		/* PG(during_request_startup) = 0; */
 
-	/* We turn this off in php_execute_script() */
-	/* PG(during_request_startup) = 0; */
+		php_hash_environment(ELS_C SLS_CC PLS_CC);
+		zend_activate_modules();
+		PG(modules_activated)=1;
+	} zend_catch {
+		retval = FAILURE;
+	} zend_end_try();
 
-	php_hash_environment(ELS_C SLS_CC PLS_CC);
-	zend_activate_modules();
-	PG(modules_activated)=1;
-
-	return SUCCESS;
+	return retval;
 }
 /* }}} */
 
@@ -692,17 +694,17 @@ void php_request_shutdown(void *dummy)
 
 	php_output_set_status(0);
 
-	if (setjmp(EG(bailout))==0) {
+	zend_try {
 		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1));
-	}
+	} zend_end_try();
 
-	if (setjmp(EG(bailout))==0) {
+	zend_try {
 		sapi_send_headers();
-	}
+	} zend_end_try();
 
-	if (PG(modules_activated) && setjmp(EG(bailout))==0) {
+	if (PG(modules_activated)) zend_try {
 		php_call_shutdown_functions();
-	}
+	} zend_end_try();
 	
 	if (PG(modules_activated)) {
 		zend_deactivate_modules();
@@ -710,17 +712,17 @@ void php_request_shutdown(void *dummy)
 		
 	zend_deactivate(CLS_C ELS_CC);
 
-	if (setjmp(EG(bailout))==0) {
+	zend_try {
 		sapi_deactivate(SLS_C);
-	}
+	} zend_end_try();
 
-	if (setjmp(EG(bailout))==0) { 
+	zend_try { 
 		shutdown_memory_manager(CG(unclean_shutdown), 0);
-	}
+	} zend_end_try();
 
-	if (setjmp(EG(bailout))==0) { 
+	zend_try { 
 		zend_unset_timeout();
-	}
+	} zend_end_try();
 }
 /* }}} */
 
@@ -866,6 +868,7 @@ int php_module_startup(sapi_module_struct *sf)
 	core_globals_id = ts_allocate_id(sizeof(php_core_globals), (ts_allocate_ctor) core_globals_ctor, NULL);
 	core_globals = ts_resource(core_globals_id);
 #endif
+	EG(bailout_set) = 0;
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 	
 	PG(header_is_being_sent) = 0;
@@ -1239,55 +1242,51 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_D
 	SLS_FETCH();
 
 	EG(exit_status) = 0;
-	if (php_handle_special_queries(SLS_C PLS_CC))
+	if (php_handle_special_queries(SLS_C PLS_CC)) {
 		return 0;
+	}
 #define OLD_CWD_SIZE 4096
 	old_cwd = do_alloca(OLD_CWD_SIZE);
 	old_cwd[0] = '\0';
 
-	if (setjmp(EG(bailout))!=0) {
-		if (old_cwd[0] != '\0')
-			VCWD_CHDIR(old_cwd);
-		free_alloca(old_cwd);
-		return EG(exit_status);
-	}
-
+	zend_try {
 #ifdef PHP_WIN32
-	UpdateIniFromRegistry(primary_file->filename);
+		UpdateIniFromRegistry(primary_file->filename);
 #endif
 
-	PG(during_request_startup) = 0;
+		PG(during_request_startup) = 0;
 
-	if (primary_file->type == ZEND_HANDLE_FILENAME 
-			&& primary_file->filename) {
-		VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1);
-		VCWD_CHDIR_FILE(primary_file->filename);
-	}
+		if (primary_file->type == ZEND_HANDLE_FILENAME 
+				&& primary_file->filename) {
+			VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1);
+			VCWD_CHDIR_FILE(primary_file->filename);
+		}
 
-	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
-		prepend_file.filename = PG(auto_prepend_file);
-		prepend_file.opened_path = NULL;
-		prepend_file.free_filename = 0;
-		prepend_file.type = ZEND_HANDLE_FILENAME;
-		prepend_file_p = &prepend_file;
-	} else {
-		prepend_file_p = NULL;
-	}
-	if (PG(auto_append_file) && PG(auto_append_file)[0]) {
-		append_file.filename = PG(auto_append_file);
-		append_file.opened_path = NULL;
-		append_file.free_filename = 0;
-		append_file.type = ZEND_HANDLE_FILENAME;
-		append_file_p = &append_file;
-	} else {
-		append_file_p = NULL;
-	}
-	zend_execute_scripts(ZEND_REQUIRE CLS_CC ELS_CC, 3, prepend_file_p, primary_file, append_file_p);
+		if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
+			prepend_file.filename = PG(auto_prepend_file);
+			prepend_file.opened_path = NULL;
+			prepend_file.free_filename = 0;
+			prepend_file.type = ZEND_HANDLE_FILENAME;
+			prepend_file_p = &prepend_file;
+		} else {
+			prepend_file_p = NULL;
+		}
+		if (PG(auto_append_file) && PG(auto_append_file)[0]) {
+			append_file.filename = PG(auto_append_file);
+			append_file.opened_path = NULL;
+			append_file.free_filename = 0;
+			append_file.type = ZEND_HANDLE_FILENAME;
+			append_file_p = &append_file;
+		} else {
+			append_file_p = NULL;
+		}
+		zend_execute_scripts(ZEND_REQUIRE CLS_CC ELS_CC, 3, prepend_file_p, primary_file, append_file_p);
+	} zend_end_try();
 
-	if (old_cwd[0] != '\0')
+	if (old_cwd[0] != '\0') {
 		VCWD_CHDIR(old_cwd);
+	}
 	free_alloca(old_cwd);
-
 	return EG(exit_status);
 }
 /* }}} */
@@ -1345,20 +1344,20 @@ PHPAPI int php_lint_script(zend_file_handle *file CLS_DC ELS_DC PLS_DC)
 	zend_op_array *op_array;
 	SLS_FETCH();
 
-	if (setjmp(EG(bailout))!=0) {
-		return FAILURE;
-	}
+	zend_try {
+		op_array = zend_compile_file(file, ZEND_INCLUDE CLS_CC);
+		zend_destroy_file_handle(file CLS_CC);
 
-	op_array = zend_compile_file(file, ZEND_INCLUDE CLS_CC);
-	zend_destroy_file_handle(file CLS_CC);
+		if (op_array) {
+			destroy_op_array(op_array);
+			efree(op_array);
+			return SUCCESS;
+		} else {
+			return FAILURE;
+		}
+	} zend_end_try();
 
-	if (op_array) {
-		destroy_op_array(op_array);
-		efree(op_array);
-		return SUCCESS;
-	} else {
-		return FAILURE;
-	}
+	return FAILURE;
 }
 /* }}} */
 

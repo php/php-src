@@ -506,83 +506,83 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		return OK;
 	}
 
-	if (setjmp(EG(bailout))!=0) {
-		return OK;
-	}
-	/* We don't accept OPTIONS requests, but take everything else */
-	if (r->method_number == M_OPTIONS) {
-		r->allowed |= (1 << METHODS) - 1;
-		return DECLINED;
-	}
-
-	/* Make sure file exists */
-	if (filename == NULL && r->finfo.st_mode == 0) {
-		return DECLINED;
-	}
-
-	per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php4_module);
-	if (per_dir_conf) {
-		zend_hash_apply((HashTable *) per_dir_conf, (int (*)(void *)) php_apache_alter_ini_entries);
-	}
-
-	/* If PHP parser engine has been turned off with an "engine off"
-	 * directive, then decline to handle this request
-	 */
-	if (!AP(engine)) {
-		r->content_type = php_apache_get_default_mimetype(r SLS_CC);
-		r->allowed |= (1 << METHODS) - 1;
-		if (setjmp(EG(bailout))==0) {
-			zend_ini_deactivate(ELS_C);
+	zend_try {
+		/* We don't accept OPTIONS requests, but take everything else */
+		if (r->method_number == M_OPTIONS) {
+			r->allowed |= (1 << METHODS) - 1;
+			return DECLINED;
 		}
-		return DECLINED;
-	}
-	if (filename == NULL) {
-		filename = r->filename;
-	}
 
-	/* Apache 1.2 has a more complex mechanism for reading POST data */
-#if MODULE_MAGIC_NUMBER > 19961007
-	if ((retval = setup_client_block(r, REQUEST_CHUNKED_ERROR))) {
-		if (setjmp(EG(bailout))==0) {
-			zend_ini_deactivate(ELS_C);
+		/* Make sure file exists */
+		if (filename == NULL && r->finfo.st_mode == 0) {
+			return DECLINED;
 		}
-		return retval;
-	}
-#endif
 
-	if (AP(last_modified)) {
-#if MODULE_MAGIC_NUMBER < 19970912
-		if ((retval = set_last_modified(r, r->finfo.st_mtime))) {
-			if (setjmp(EG(bailout))==0) {
+		per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php4_module);
+		if (per_dir_conf) {
+			zend_hash_apply((HashTable *) per_dir_conf, (int (*)(void *)) php_apache_alter_ini_entries);
+		}
+
+		/* If PHP parser engine has been turned off with an "engine off"
+		 * directive, then decline to handle this request
+		 */
+		if (!AP(engine)) {
+			r->content_type = php_apache_get_default_mimetype(r SLS_CC);
+			r->allowed |= (1 << METHODS) - 1;
+			zend_try {
 				zend_ini_deactivate(ELS_C);
-			}
+			} zend_end_try();
+			return DECLINED;
+		}
+		if (filename == NULL) {
+			filename = r->filename;
+		}
+
+		/* Apache 1.2 has a more complex mechanism for reading POST data */
+#if MODULE_MAGIC_NUMBER > 19961007
+		if ((retval = setup_client_block(r, REQUEST_CHUNKED_ERROR))) {
+			zend_try {
+				zend_ini_deactivate(ELS_C);
+			} zend_end_try();
 			return retval;
 		}
-#else
-		update_mtime (r, r->finfo.st_mtime);
-		set_last_modified(r);
-		set_etag(r);
 #endif
-	}
-	/* Assume output will be of the default MIME type.  Individual
-	   scripts may change this later in the request. */
-	r->content_type = php_apache_get_default_mimetype(r SLS_CC);
 
-	/* Init timeout */
-	hard_timeout("send", r);
+		if (AP(last_modified)) {
+#if MODULE_MAGIC_NUMBER < 19970912
+			if ((retval = set_last_modified(r, r->finfo.st_mtime))) {
+				zend_try {
+					zend_ini_deactivate(ELS_C);
+				} zend_end_try();
+				return retval;
+			}
+#else
+			update_mtime (r, r->finfo.st_mtime);
+			set_last_modified(r);
+			set_etag(r);
+#endif
+		}
+		/* Assume output will be of the default MIME type.  Individual
+		   scripts may change this later in the request. */
+		r->content_type = php_apache_get_default_mimetype(r SLS_CC);
 
-	SG(server_context) = r;
-	
-	php_save_umask();
-	add_common_vars(r);
-	add_cgi_vars(r);
+		/* Init timeout */
+		hard_timeout("send", r);
 
-	init_request_info(SLS_C);
-	apache_php_module_main(r, display_source_mode CLS_CC ELS_CC PLS_CC SLS_CC);
+		SG(server_context) = r;
+		
+		php_save_umask();
+		add_common_vars(r);
+		add_cgi_vars(r);
 
-	/* Done, restore umask, turn off timeout, close file and return */
-	php_restore_umask();
-	kill_timeout(r);
+		init_request_info(SLS_C);
+		apache_php_module_main(r, display_source_mode CLS_CC ELS_CC PLS_CC SLS_CC);
+
+		/* Done, restore umask, turn off timeout, close file and return */
+		php_restore_umask();
+		kill_timeout(r);
+	} zend_end_try();
+
 	return OK;
 }
 /* }}} */
