@@ -1,12 +1,18 @@
 --TEST--
 dbx_connect
 --SKIPIF--
-<?php if (!extension_loaded("dbx")) print("skip"); ?>
+<?php 
+    if (!extension_loaded("dbx")) print("skip"); 
+    else {
+        include_once("dbx_test.p");
+        if ($connection===NULL) print("skip");
+        }
+?>
 --POST--
 --GET--
 --FILE--
 <?php 
-include_once("ext/dbx/tests/dbx_test.p");
+include_once("dbx_test.p");
 $nonexisting_database="nonexisting_database";
 $nonexisting_username="nonexisting_username";
 $nonexisting_password="nonexisting_password";

@@ -1,5 +1,8 @@
 <?php
-$connection = DBX_SYBASECT;
+// set the $connection to match your test-database setup
+// (possibly change the rest of the settings too)
+// e.g. $connection = DBX_MYSQL;
+$connection = NULL;
 switch ($connection) {
     case DBX_MYSQL:
         $module=DBX_MYSQL;

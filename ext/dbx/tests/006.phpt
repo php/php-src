@@ -1,12 +1,18 @@
 --TEST--
 dbx_error
 --SKIPIF--
-<?php if (!extension_loaded("dbx")) print("skip"); ?>
+<?php 
+    if (!extension_loaded("dbx")) print("skip"); 
+    else {
+        include_once("dbx_test.p");
+        if ($connection===NULL) print("skip");
+        }
+?>
 --POST--
 --GET--
 --FILE--
 <?php 
-include_once("ext/dbx/tests/dbx_test.p");
+include_once("dbx_test.p");
 if ($module==DBX_ODBC) {
     // ODBC module doesn't have an error-message-function (yet?)
     print('query generated an error: dbx_error works ok'."\n");
