@@ -31,7 +31,11 @@ PHPAPI char *_php_stream_mmap_range(php_stream *stream, size_t offset, size_t le
 	range.mode = mode;
 	range.mapped = NULL;
 
-	/* TODO: Enforce system policy and limits for mmap sizes ? */
+	/* For now, we impose an arbitrary 1MB limit to avoid
+	 * runaway swapping when large files are passed thru. */
+	if (length > 1 * 1024 * 1024) {
+		return NULL;
+	}
 	
 	if (PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_MMAP_API, PHP_STREAM_MMAP_MAP_RANGE, &range)) {
 		if (mapped_len) {

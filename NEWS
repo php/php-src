@@ -41,6 +41,7 @@ PHP                                                                        NEWS
 - Fixed bug #27397 (debug_backtrace() not showing function arguments). (Zeev)
 - Fixed bug #27283 (The last catch statement was sometimes skipped). (Andi)
 - Fixed bug #26441 (When __set() returned a value it corrupted it). (Andi)
+- Fixed bug #19749 (shouldn't mmap() files larger than memory_limit). (Wez)
 
 18 March 2004, PHP 5 Release Candidate 1
 - Fixed numerous bugs with the just-in-time auto-global initialization, that
