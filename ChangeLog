@@ -1,3 +1,46 @@
+2001-01-26  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/sybase_ct/php_sybase_ct.c: Mostly off by one.
+
+    * ext/hyperwave/hw.c: Fixed another proto.
+
+    * ext/muscat/muscat.c: Fixed some protos.
+
+    * ext/satellite/php_orbit.c: Whitespace change for funclist.txt.
+
+    * ext/openssl/openssl.c: Fixed some protos.
+
+2001-01-26  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/DB/mysql.php
+      pear/DB.php:
+    have DB::isError return true if passed "null". Now you can more consistently
+    use DB::isError(), since some of the db drivers return nulls from various
+    functions (like fetchRow()), and others don't... We should probably make all
+    of them just return errors. I did this for the mysql driver, as a start.
+
+2001-01-26  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/pdf/pdf.c
+      ext/pdf/php_pdf.h: Fixed some protos.
+
+2001-01-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/README.txt: Whitespace change.
+
+2001-01-26  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/pdf.c
+      ext/pdf/php_pdf.h:
+    - This is major change of the php pdf api to be closer to the pdflib api
+      done by Rainer Schaaf from pdflib GmbH.
+    - Some more functions has been implemented as well.
+    - backwards compatibility has been maintained a much as possible
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+    - changed naming of some functions (kept compatibility)
+
 2001-01-25  Daniel Beulshausen  <daniel@php4win.de>
 
     * ext/msql/msql.dsp
