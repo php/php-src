@@ -248,7 +248,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	for (i = 0; i < (*format)->value.str.len; i++) {
 		switch ((*format)->value.str.val[i]) {
 			case 'r':		/* rfc822 format */
-				size += 29;
+				size += 31;
 				break;
 			case 'U':		/* seconds since the epoch */
 				size += 10;
@@ -462,11 +462,11 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				break;
 			case 'r':
 #if HAVE_TM_GMTOFF				
-				sprintf(tmp_buff, "%3s, %2d %3s %02d %02d:%02d:%02d %c%02d%02d", 
+				sprintf(tmp_buff, "%3s, %2d %3s %04d %02d:%02d:%02d %c%02d%02d", 
 					day_short_names[ta->tm_wday],
 					ta->tm_mday,
 					mon_short_names[ta->tm_mon],
-					((ta->tm_year)%100),
+					ta->tm_year + 1900,
 					ta->tm_hour,
 					ta->tm_min,
 					ta->tm_sec,
@@ -475,11 +475,11 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 					abs( ta->tm_gmtoff % 3600)
 				);
 #else
-				sprintf(tmp_buff, "%3s, %2d %3s %02d %02d:%02d:%02d %c%02d%02d", 
+				sprintf(tmp_buff, "%3s, %2d %3s %04d %02d:%02d:%02d %c%02d%02d", 
 					day_short_names[ta->tm_wday],
 					ta->tm_mday,
 					mon_short_names[ta->tm_mon],
-					((ta->tm_year)%100),
+					ta->tm_year + 1900,
 					ta->tm_hour,
 					ta->tm_min,
 					ta->tm_sec,
