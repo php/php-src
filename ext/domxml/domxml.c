@@ -55,7 +55,7 @@ static zend_function_entry php_domxml_functions[] = {
 
 
 static zend_function_entry php_domxmldoc_class_functions[] = {
-	PHP_FALIAS(root,	domxml_root,	NULL)
+	PHP_FALIAS(root,	domxml_children,	NULL)
 	PHP_FALIAS(add_root,	domxml_add_root,	NULL)
 	PHP_FALIAS(dtd,	domxml_intdtd,	NULL)
 	PHP_FALIAS(dumpmem,	domxml_dumpmem,	NULL)
@@ -66,10 +66,6 @@ static zend_function_entry php_domxmldtd_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* FIXME: If the following list extends 5 entries, then calling
-   any of the functions results in a segm fault in execute().
-   It appears the hash table is somewhat corrupted.
-*/
 static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(lastchild,	domxml_lastchild,	NULL)
 	PHP_FALIAS(children,	domxml_children,	NULL)
@@ -82,6 +78,11 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static zend_function_entry php_domxmltestnode_class_functions[] = {
+	PHP_FE(domxml_test,	NULL)
+	{NULL, NULL, NULL}
+};
+
 static zend_function_entry php_domxmlattr_class_functions[] = {
 	PHP_FALIAS(name,	domxml_attrname,	NULL)
 	{NULL, NULL, NULL}
@@ -90,6 +91,8 @@ static zend_function_entry php_domxmlattr_class_functions[] = {
 static zend_function_entry php_domxmlns_class_functions[] = {
 	{NULL, NULL, NULL}
 };
+
+//void domxmltestnode_class_startup();
 
 zend_module_entry php_domxml_module_entry = {
 	"DOM", php_domxml_functions, PHP_MINIT(domxml), NULL, NULL, NULL, PHP_MINFO(domxml), STANDARD_MODULE_PROPERTIES
@@ -106,6 +109,8 @@ PHP_MINIT_FUNCTION(domxml)
 	zend_class_entry domxmlnode_class_entry;
 	zend_class_entry domxmlattr_class_entry;
 	zend_class_entry domxmlns_class_entry;
+
+//  domxmltestnode_class_startup();
 
 	le_domxmldocp = register_list_destructors(xmlFreeDoc, NULL);
 	/* Freeing the document contains freeing the complete tree.
@@ -144,9 +149,9 @@ PHP_MINIT_FUNCTION(domxml)
 	return SUCCESS;
 }
 
-#ifdef 0
+#ifdef kk
 /* {{{ Node Class */
-pval domxmlnode_class_get_property(zend_property_reference *property_reference)
+pval domxmltestnode_class_get_property(zend_property_reference *property_reference)
 {
 	pval result;
 	zend_overloaded_element *overloaded_property;
@@ -183,7 +188,7 @@ pval domxmlnode_class_get_property(zend_property_reference *property_reference)
 }
 
 
-int domxmlnode_class_set_property(zend_property_reference *property_reference, pval *value)
+int domxmltestnode_class_set_property(zend_property_reference *property_reference, pval *value)
 {
 	zend_overloaded_element *overloaded_property;
 	zend_llist_element *element;
@@ -217,7 +222,7 @@ int domxmlnode_class_set_property(zend_property_reference *property_reference, p
 	return 0;
 }
 
-void domxmlnode_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
+void domxmltestnode_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
 	zend_overloaded_element *overloaded_property;
 	zend_llist_element *element;
@@ -234,8 +239,21 @@ void domxmlnode_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_
 			case OE_IS_OBJECT:
 				printf("Object property:  ");
 				break;
-			case OE_IS_METHOD:
+			case OE_IS_METHOD: {
+				pval *object_handle;
 				printf("Overloaded method:  ");
+				PHP_FN(domxml_xmltree)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+				if (zend_is_true(return_value)) {
+					var_reset(object);
+					return;
+				}
+				ALLOC_ZVAL(object_handle);
+				*object_handle = *return_value;
+				pval_copy_constructor(object_handle);
+				INIT_PZVAL(object_handle);
+				zend_hash_index_update(object->value.obj.properties, 0, &object_handle, sizeof(pval *), NULL);
+				pval_destructor(&overloaded_property->element);
+			}
 		}
 		switch (overloaded_property->element.type) {
 			case IS_LONG:
@@ -255,20 +273,35 @@ void domxmlnode_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_
 }
 
 
-void domxmlnode_class_startup()
+void domxmltestnode_class_startup()
 {
-	zend_class_entry domxmlnode_class_entry;
+	zend_class_entry domxmltestnode_class_entry;
 
-	INIT_OVERLOADED_CLASS_ENTRY(dcomxmlnode_class_entry, "Dom Node",
-	              php_domxmlnode_class_functions,
-								domxmlnode_class_call_function,
-								domxmlnode_class_get_property,
-								domxmlnode_class_set_property);
+	INIT_OVERLOADED_CLASS_ENTRY(domxmltestnode_class_entry, "TestNode",
+	              php_domxmltestnode_class_functions,
+								domxmltestnode_class_call_function,
+								domxmltestnode_class_get_property,
+								domxmltestnode_class_set_property);
 
-	register_internal_class(&domxmlnode_class_entry);
+	register_internal_class(&domxmltestnode_class_entry);
+}
+#endif 
+
+/* {{{ proto string domxml_test(int id)
+   Unity function for testing */
+PHP_FUNCTION(domxml_test)
+{
+	zval *id;
+	
+	if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_long(id);
+	RETURN_LONG(id->value.lval);
 }
 /* }}} */
-#endif
+
+/* }}} */
 
 PHP_MINFO_FUNCTION(domxml)
 {
@@ -481,7 +514,8 @@ PHP_FUNCTION(domxml_children)
 	if (ARG_COUNT(ht) == 0) {
 		id = getThis();
 		if (id) {
-			if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
+			if ((zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) &&
+			    (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE)) {
 				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
@@ -497,12 +531,18 @@ PHP_FUNCTION(domxml_children)
 	}
 		
 	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
-	if (!nodep || type != le_domxmlnodep) {
+	if (!nodep || (type != le_domxmlnodep && type != le_domxmldocp)) {
 		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
 	}
 
-	last = nodep->childs;
+	/* Even if the nodep is a XML_DOCUMENT_NODE the type is at the
+	   same position.
+	*/
+	if(nodep->type == XML_DOCUMENT_NODE)
+		last = ((xmlDoc *) nodep)->root;
+	else
+		last = nodep->childs;
 	if (!last) {
 		RETURN_FALSE;
 	}
@@ -673,9 +713,72 @@ PHP_FUNCTION(domxml_attributes)
 }
 /* }}} */
 
+/* {{{ proto string domxml_root([int doc])
+   Returns list of children nodes */
+PHP_FUNCTION(domxml_root)
+{
+	zval *id, **tmp;
+	int id_to_find;
+	xmlDoc *nodep;
+	xmlNode *last;
+	int type;
+	int ret;
+	
+	if (ARG_COUNT(ht) == 0) {
+		id = getThis();
+		if (id) {
+			if (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE) {
+				php_error(E_WARNING, "unable to find my handle property");
+				RETURN_FALSE;
+			}
+			id_to_find = (*tmp)->value.lval;
+		} else {
+			RETURN_FALSE;
+		}
+	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	} else {
+		convert_to_long(id);
+		id_to_find = id->value.lval;
+	}
+		
+	nodep = (xmlDoc *)zend_list_find(id_to_find, &type);
+	if (!nodep || type != le_domxmldocp) {
+		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
+		RETURN_FALSE;
+	}
+
+	last = nodep->root;
+	if (!last) {
+		RETURN_FALSE;
+	}
+
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	while(last) {
+		zval *child;
+		MAKE_STD_ZVAL(child);
+
+		ret = zend_list_insert(last, le_domxmlnodep);
+
+		/* construct a node object */
+		object_init_ex(child, domxmlnode_class_entry_ptr);
+		add_property_stringl(child, "name", (char *) last->name, strlen(last->name), 1);
+		if(last->content)
+			add_property_stringl(child, "content", (char *) last->content, strlen(last->content), 1);
+		add_property_resource(child, "node", ret);
+		add_property_long(child, "type", last->type);
+		zend_hash_next_index_insert(return_value->value.ht, &child, sizeof(zval *), NULL);
+		last = last->next;
+	}
+}
+/* }}} */
+
 /* {{{ proto string domxml_root([int doc_handle])
    Returns root node of document */
-PHP_FUNCTION(domxml_root)
+PHP_FUNCTION(domxml_rootold)
 {
 	zval *id, **tmp;
 	int id_to_find;
@@ -1020,9 +1123,7 @@ PHP_FUNCTION(domxml_new_xmldoc)
    Returns list of namespaces */
 static int node_namespace(zval **attributes, xmlNode *nodep)
 {
-	zval *children;
 	xmlNs *ns;
-	int ret;
 
 	/* Get the children of the current node */	
 	ns = nodep->ns;
@@ -1053,13 +1154,14 @@ static int node_namespace(zval **attributes, xmlNode *nodep)
 	return 0;
 }
 
+static int node_children(zval **children, xmlNode *nodep);
+
 /* {{{ proto string node_attributes([int node])
    Returns list of children nodes */
 static int node_attributes(zval **attributes, xmlNode *nodep)
 {
 	zval *children;
 	xmlAttr *attr;
-	int ret;
 
 	/* Get the children of the current node */	
 	attr = nodep->properties;
@@ -1100,7 +1202,6 @@ static int node_children(zval **children, xmlNode *nodep)
 {
 	zval *mchildren, *attributes, *namespace;
 	xmlNode *last;
-	int ret;
 
 	/* Get the children of the current node */	
 	last = nodep;
@@ -1154,7 +1255,6 @@ PHP_FUNCTION(xmltree)
 	zval *proot, *children, *attributes;
 	xmlDoc *docp;
 	xmlNode *root;
-	int ret, ret1;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1166,13 +1266,10 @@ PHP_FUNCTION(xmltree)
 	if (!docp) {
 		RETURN_FALSE;
 	}
-//	ret = zend_list_insert(docp, le_domxmldocp);
 
 	/* construct the document is a php object for return */
 	object_init_ex(return_value, domxmldoc_class_entry_ptr);
-//	add_property_resource(return_value, "doc", ret);
 	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
-	zend_list_addref(ret);
 
 	/* get the root and add as a property to the document */
 	root = docp->root;
@@ -1180,25 +1277,14 @@ PHP_FUNCTION(xmltree)
 		xmlFreeDoc(docp);
 		RETURN_FALSE;
 	}
-//	ret1 = zend_list_insert(root, le_domxmlnodep);
 
-	/* construct an object with some methods */
-	MAKE_STD_ZVAL(proot);
-	object_init_ex(proot, domxmlnode_class_entry_ptr);
-//	add_property_resource(proot, "node", ret1);
-	add_property_long(proot, "type", root->type);
-	add_property_stringl(proot, "name", (char *) root->name, strlen(root->name), 1);
-	if(root->content)
-		add_property_stringl(proot, "content", (char *) root->content, strlen(root->content), 1);
+	/* The root itself maybe an array. Though you may not have two Elements
+	   as root, you may have a comment, pi and and element as root.
+	   Thanks to Paul DuBois for pointing me at this.
+	*/
+	if(0 == node_children(&children, root))
+		zend_hash_update(return_value->value.obj.properties, "root", strlen("root")+1, (void *) &children, sizeof(zval *), NULL);
 
-	/* Get the array of children of the root and add as property children */
-	if(0 == node_children(&children, root->childs))
-		zend_hash_update(proot->value.obj.properties, "children", strlen("children")+1, (void *) &children, sizeof(zval *), NULL);
-	if(0 == node_attributes(&attributes, root))
-		zend_hash_update(proot->value.obj.properties, "attributes", strlen("attributes")+1, (void *) &attributes, sizeof(zval *), NULL);
-	zend_list_addref(ret1);
-	/* add the new root object to the document */
-	zend_hash_update(return_value->value.obj.properties, "root", strlen("root")+1, (void *) &proot, sizeof(zval *), NULL);
 	xmlFreeDoc(docp);
 }
 /* }}} */

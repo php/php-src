@@ -67,6 +67,7 @@ PHP_FUNCTION(domxml_new_child);
 /* Class Attribute methods */
 PHP_FUNCTION(domxml_attrname);
 
+PHP_FUNCTION(domxml_test);
 #else
 #define php_domxml_module_ptr NULL
 #endif /* HAVE_DOMXML */
