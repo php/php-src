@@ -123,13 +123,6 @@ AC_ARG_ENABLE(memory-limit,
   ZEND_MEMORY_LIMIT=no
 ])
 
-AC_ARG_ENABLE(memory-usage-info,
-[  --enable-memory-usage-info   Compile with support for memory usage info. ], [
-  ZEND_MEMORY_USAGE_INFO=$enableval
-],[
-  ZEND_MEMORY_USAGE_INFO=no
-])
-
 AC_MSG_CHECKING(whether to enable experimental ZTS)
 AC_MSG_RESULT($ZEND_EXPERIMENTAL_ZTS)
 
@@ -138,9 +131,6 @@ AC_MSG_RESULT($ZEND_INLINE_OPTIMIZATION)
 
 AC_MSG_CHECKING(whether to enable a memory limit)
 AC_MSG_RESULT($ZEND_MEMORY_LIMIT)
-
-AC_MSG_CHECKING(whether to enable a memory usage)
-AC_MSG_RESULT($ZEND_MEMORY_USAGE_INFO)
 
 AC_MSG_CHECKING(whether to enable Zend debugging)
 AC_MSG_RESULT($ZEND_DEBUG)
@@ -175,12 +165,6 @@ if test "$ZEND_MEMORY_LIMIT" = "yes"; then
   AC_DEFINE(MEMORY_LIMIT, 1, [Memory limit])
 else
   AC_DEFINE(MEMORY_LIMIT, 0, [Memory limit])
-fi
-
-if test "$ZEND_MEMORY_USAGE_INFO" = "yes"; then
-  AC_DEFINE(MEMORY_USAGE_INFO, 1, [Memory usage])
-else
-  AC_DEFINE(MEMORY_USAGE_INFO, 0, [Memory usage])
 fi
 
 
