@@ -896,7 +896,7 @@ void zend_do_free(znode *op1 TSRMLS_DC)
 	}		
 }
 
-void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference  TSRMLS_DC)
+void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, int is_static  TSRMLS_DC)
 {
 	zend_op_array op_array;
 	char *name = function_name->u.constant.value.str.val;
@@ -911,6 +911,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	op_array.function_name = name;
 	op_array.arg_types = NULL;
 	op_array.return_reference = return_reference;
+	op_array.is_static = is_static;
 
 	op_array.scope = CG(active_class_entry);
 
