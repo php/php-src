@@ -22,6 +22,7 @@
 int (*zend_body_write)(const char *str, uint str_length);		/* string output */
 int (*zend_header_write)(const char *str, uint str_length);	/* unbuffer string output */
 static int zend_ub_body_write(const char *str, uint str_length);
+static int zend_ub_body_write_no_header(const char *str, uint str_length);
 static int zend_b_body_write(const char *str, uint str_length);
 
 /* output buffering */
@@ -57,10 +58,16 @@ void zend_start_ob_buffering()
 
 void zend_end_ob_buffering(int send_buffer)
 {
+	SLS_FETCH();
+
 	if (!ob_buffer) {
 		return;
 	}
-	zend_body_write = zend_ub_body_write;
+	if (SG(headers_sent)) {
+		zend_body_write = zend_ub_body_write_no_header;
+	} else {
+		zend_body_write = zend_ub_body_write;
+	}
 	if (send_buffer) {
 		zend_ob_send();
 	}
@@ -166,6 +173,12 @@ static int zend_b_body_write(const char *str, uint str_length)
 }
 
 
+static int zend_ub_body_write_no_header(const char *str, uint str_length)
+{
+	return zend_header_write(str, str_length);
+}
+
+
 static int zend_ub_body_write(const char *str, uint str_length)
 {
 	SLS_FETCH();
@@ -174,6 +187,7 @@ static int zend_ub_body_write(const char *str, uint str_length)
 		zend_bailout();
 	}
 	if (php3_header()) {
+		zend_body_write = zend_ub_body_write_no_header;
 		return zend_header_write(str, str_length);
 	} else {
 		return 0;

@@ -49,6 +49,7 @@ typedef struct {
 	void *server_context;
 	sapi_request_info request_info;
 	sapi_headers_struct sapi_headers;
+	unsigned char headers_sent;
 } sapi_globals_struct;
 
 
