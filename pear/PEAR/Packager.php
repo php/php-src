@@ -58,7 +58,7 @@ class PEAR_Packager extends PEAR_Common
 
     // {{{ package()
 
-    function package($pkgfile = null)
+    function package($pkgfile = null, $compress = true)
     {
         $this->orig_pwd = getcwd();
         if (empty($pkgfile)) {
@@ -66,7 +66,7 @@ class PEAR_Packager extends PEAR_Common
         }
         $pkginfo = $this->infoFromDescriptionFile($pkgfile);
         if (PEAR::isError($pkginfo)) {
-            return $pkginfo;
+            return $this->raiseError($pkginfo);
         }
         // XXX This needs to be checked in infoFromDescriptionFile
         //     or at least a helper method to do the proper checks
@@ -107,10 +107,10 @@ class PEAR_Packager extends PEAR_Common
         }
         $new_xml = $this->xmlFromInfo($pkginfo);
         if (PEAR::isError($new_xml)) {
-            return $new_xml;
+            return $this->raiseError($new_xml);
         }
         $tmpdir = $this->mkTempDir(getcwd());
-        $newpkgfile = $tmpdir . DIRECTORY_SEPARATOR . $pkgfile;
+        $newpkgfile = $tmpdir . DIRECTORY_SEPARATOR . 'package.xml';
         $np = @fopen($newpkgfile, "w");
         if (!$np) {
             return $this->raiseError("PEAR_Packager: unable to rewrite $pkgfile");
@@ -119,13 +119,14 @@ class PEAR_Packager extends PEAR_Common
         fclose($np);
 
         // TAR the Package -------------------------------------------
-        $dest_package = $this->orig_pwd . DIRECTORY_SEPARATOR . "{$pkgver}.tgz";
-        $tar =& new Archive_Tar($dest_package, true);
+        $ext = $compress ? '.tgz' : '.tar';
+        $dest_package = $this->orig_pwd . DIRECTORY_SEPARATOR . $pkgver . $ext;
+        $tar =& new Archive_Tar($dest_package, $compress);
         $tar->setErrorHandling(PEAR_ERROR_RETURN); // XXX Don't print errors
         // ----- Creates with the package.xml file
         $ok = $tar->createModify($newpkgfile, '', $tmpdir);
         if (PEAR::isError($ok)) {
-            return $ok;
+            return $this->raiseError($ok);
         } elseif (!$ok) {
             return $this->raiseError('PEAR_Packager: tarball creation failed');
         }
