@@ -2525,7 +2525,7 @@ PHP_FUNCTION(mb_decode_numericentity)
 PHP_FUNCTION(mb_send_mail)
 {
 	int argc, n;
-	pval **argv[4];
+	pval **argv[5];
 	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *extra_cmd=NULL;
 	char *message_buf=NULL, *subject_buf=NULL, *p;
 	mbfl_string orig_str, conv_str;
