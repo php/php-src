@@ -1521,7 +1521,7 @@ PHP_FUNCTION(solid_fetch_prev)
 }
 #endif
 
-/* {{{ proto int odbc_fetch_row(int result_id [, int row_number])
+/*  proto int odbc_fetch_row(int result_id [, int row_number])
    Fetch a row */
 PHP_FUNCTION(odbc_fetch_row)
 {
@@ -1575,9 +1575,9 @@ PHP_FUNCTION(odbc_fetch_row)
 	
 	RETURN_TRUE;
 }	
-/* }}} */
+/*  */
 
-/* {{{ proto string odbc_result(int result_id, mixed field)
+/*  proto string odbc_result(int result_id, mixed field)
    Get result data */ 
 PHP_FUNCTION(odbc_result)
 {
@@ -1746,9 +1746,9 @@ PHP_FUNCTION(odbc_result)
 	}
 	RETURN_TRUE;
 }
-/* }}} */
+/*  */
 
-/* {{{ proto int odbc_result_all(int result_id [, string format])
+/*  proto int odbc_result_all(int result_id [, string format])
    Print result as HTML table */
 PHP_FUNCTION(odbc_result_all)
 {
@@ -1869,14 +1869,15 @@ PHP_FUNCTION(odbc_result_all)
     if (buf) efree(buf);
 	RETURN_LONG(result->fetched);
 }
-/* }}} */
+/*  */
 
-/* {{{ proto int odbc_free_result(int result_id)
+/*  proto int odbc_free_result(int result_id)
    Free resources associated with a result */
 PHP_FUNCTION(odbc_free_result)
 {
 	pval **pv_res;
 	odbc_result *result;
+	int i;
 
 	if (zend_get_parameters_ex(1, &pv_res) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1897,23 +1898,23 @@ PHP_FUNCTION(odbc_free_result)
 	
 	RETURN_TRUE;
 }
-/* }}} */
+/*  */
 
-/* {{{ proto int odbc_connect(string DSN, string user, string password [, int cursor_option])
+/*  proto int odbc_connect(string DSN, string user, string password [, int cursor_option])
    Connect to a datasource */
 PHP_FUNCTION(odbc_connect)
 {
 	odbc_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-/* }}} */
+/*  */
 
-/* {{{ proto int odbc_pconnect(string DSN, string user, string password [, int cursor_option])
+/*  proto int odbc_pconnect(string DSN, string user, string password [, int cursor_option])
    Establish a persistent connection to a datasource */
 PHP_FUNCTION(odbc_pconnect)
 {
 	odbc_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-/* }}} */
+/*  */
 
 int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int cur_opt, int persistent ODBCLS_DC)
 {
