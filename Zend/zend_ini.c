@@ -202,7 +202,7 @@ ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value,
 		return FAILURE;
 	}
 
-	if (!(ini_entry->modifyable & modify_type)) {
+	if (!(ini_entry->modifiable & modify_type)) {
 		return FAILURE;
 	}
 

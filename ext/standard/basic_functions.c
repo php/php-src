@@ -2405,7 +2405,7 @@ static int php_ini_get_option(zend_ini_entry *ini_entry, int num_args, va_list a
 			add_assoc_null(option, "local_value");
 		}
 
-		add_assoc_long(option, "access", ini_entry->modifyable);
+		add_assoc_long(option, "access", ini_entry->modifiable);
 
 		add_assoc_zval_ex(ini_array, ini_entry->name, ini_entry->name_length, option);
 	}
