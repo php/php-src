@@ -2,6 +2,26 @@ dnl $Id$
 dnl
 dnl This file contains local autoconf functions.
 
+
+dnl
+dnl Check for cc option
+dnl
+AC_DEFUN(AC_CHECK_CC_OPTION,[
+  echo "main(){return 0;}" > conftest.$ac_ext
+  opt="$1"
+  var=`echo -n $opt|tr -c a-zA-Z0-9 _`
+  AC_MSG_CHECKING([if compiler supports $1 really])
+  ac_compile='${CC-cc} -$opt -c $CFLAGS $CPPFLAGS conftest.$ac_ext 2>&1'
+  if eval $ac_compile | egrep "$opt" > /dev/null 2>&1 ; then
+    eval php_cc_$var=no
+	AC_MSG_RESULT(no)
+  else
+    eval php_cc_$var=yes
+	AC_MSG_RESULT(yes)
+  fi
+])
+
+
 dnl
 dnl See if we have broken header files like SunOS has.
 dnl
