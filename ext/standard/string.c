@@ -991,8 +991,9 @@ PHP_FUNCTION(substr_replace)
    Quote meta characters */
 PHP_FUNCTION(quotemeta)
 {
-	pval **arg;
+	zval **arg;
 	char *str, *old;
+	char *old_end;
 	char *p, *q;
 	char c;
 	
@@ -1002,14 +1003,16 @@ PHP_FUNCTION(quotemeta)
 	convert_to_string_ex(arg);
 
 	old = (*arg)->value.str.val;
+	old_end = (*arg)->value.str.val + (*arg)->value.str.len;
 
-	if (!*old) {
+	if (old == old_end) {
 		RETURN_FALSE;
 	}
 	
 	str = emalloc(2 * (*arg)->value.str.len + 1);
 	
-	for(p = old, q = str; (c = *p); p++) {
+	for(p = old, q = str; p != old_end; p++) {
+		c = *p;
 		switch(c) {
 			case '.':
 			case '\\':
@@ -1029,7 +1032,7 @@ PHP_FUNCTION(quotemeta)
 		}
 	}
 	*q = 0;
-	RETVAL_STRING(erealloc(str, q - str + 1), 0);
+	RETVAL_STRINGL(erealloc(str, q - str + 1), q - str, 0);
 }
 /* }}} */
 

@@ -33,5 +33,4 @@ ext/standard
 		dirname()
 		strrpos()
 		strrchr()
-		quotemeta()
 		strip_tags()
