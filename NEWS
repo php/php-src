@@ -42,6 +42,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #27995 (imagefilltoborder() stops the fill process prematurely).
   (Ilia)
 - Fixed bug #27810 (don't use php's pemalloc in ext/pcre). (Joe Orton)
+- Fixed bug #23220 (SSL: fatal protocol error when talking to IIS). (Wez)
 
 15 Apr 2004, Version 4.3.6
 - Updated bundled PDFLib library to version 5.0.3p1 in Windows distribution.
