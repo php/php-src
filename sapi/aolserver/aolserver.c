@@ -59,10 +59,6 @@ int Ns_ModuleVersion = 1;
 #define NSG(v) (ns_context->v)
 #define NSLS_FETCH() ns_globals_struct *ns_context = ts_resource(ns_globals_id)
 
-/* TSRM id */
-
-static int ns_globals_id;
-
 /* php_ns_context is per-server (thus only once at all) */
 
 typedef struct {
@@ -77,6 +73,16 @@ typedef struct {
 	Ns_Conn *conn;
 	size_t data_avail;
 } ns_globals_struct;
+
+/* TSRM id */
+
+static int ns_globals_id;
+
+/* global context */
+
+static php_ns_context *global_context;
+
+static void php_ns_config(php_ns_context *ctx, char global);
 
 /*
  * php_ns_sapi_ub_write() writes data to the client connection.
@@ -412,9 +418,11 @@ php_ns_module_main(NSLS_D SLS_DC)
 	file_handle.filename = SG(request_info).path_translated;
 	file_handle.free_filename = 0;
 	
+	php_ns_config(global_context, 0);
 	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
 		return NS_ERROR;
 	}
+	
 	php_ns_hash_environment(NSLS_C CLS_CC ELS_CC PLS_CC SLS_CC);
 	php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
 	php_request_shutdown(NULL);
@@ -510,7 +518,7 @@ php_ns_request_handler(void *context, Ns_Conn *conn)
  */
 
 static void 
-php_ns_config(php_ns_context *ctx)
+php_ns_config(php_ns_context *ctx, char global)
 {
 	int i;
 	char *path;
@@ -519,20 +527,20 @@ php_ns_config(php_ns_context *ctx)
 	path = Ns_ConfigGetPath(ctx->ns_server, ctx->ns_module, NULL);
 	set = Ns_ConfigGetSection(path);
 
-	for(i = 0; set && i < Ns_SetSize(set); i++) {
+	for (i = 0; set && i < Ns_SetSize(set); i++) {
 		char *key = Ns_SetKey(set, i);
 		char *value = Ns_SetValue(set, i);
 
-		if(!strcasecmp(key, "map")) {
+		if (global && !strcasecmp(key, "map")) {
 			Ns_Log(Notice, "Registering PHP for \"%s\"", value);
 			Ns_RegisterRequest(ctx->ns_server, "GET", value, php_ns_request_handler, NULL, ctx, 0);
 			Ns_RegisterRequest(ctx->ns_server, "POST", value, php_ns_request_handler, NULL, ctx, 0);
 			Ns_RegisterRequest(ctx->ns_server, "HEAD", value, php_ns_request_handler, NULL, ctx, 0);
-		} else if(!strcasecmp(key, "php_value")) {
+		} else if (!global && !strcasecmp(key, "php_value")) {
 			char *val;
 
 			val = strchr(value, ' ');
-			if(val) {
+			if (val) {
 				char *new_key;
 				
 				new_key = estrndup(value, val - value);
@@ -598,7 +606,9 @@ int Ns_ModuleInit(char *server, char *module)
 	ctx->ns_module = strdup(module);
 	
 	/* read the configuration */
-	php_ns_config(ctx);
+	php_ns_config(ctx, 1);
+
+	global_context = ctx;
 
 	/* register shutdown handler */
 	Ns_RegisterServerShutdown(server, php_ns_server_shutdown, ctx);
