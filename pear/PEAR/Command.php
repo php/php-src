@@ -107,6 +107,7 @@ class PEAR_Command
      * @return object the command object or a PEAR error
      *
      * @access public
+     * @static
      */
     function factory($command, &$config)
     {
@@ -116,11 +117,14 @@ class PEAR_Command
         if (isset($GLOBALS['_PEAR_Command_shortcuts'][$command])) {
             $command = $GLOBALS['_PEAR_Command_shortcuts'][$command];
         }
-        $class = @$GLOBALS['_PEAR_Command_commandlist'][$command];
-        if (empty($class)) {
+        if (!isset($GLOBALS['_PEAR_Command_commandlist'][$command])) {
             return PEAR::raiseError("unknown command `$command'");
         }
-        $ui = PEAR_Command::getFrontendObject();
+        $class = $GLOBALS['_PEAR_Command_commandlist'][$command];
+        if (!class_exists($class)) {
+            return PEAR::raiseError("unknown command `$command'");
+        }
+        $ui =& PEAR_Command::getFrontendObject();
         $obj = &new $class($ui, $config);
         return $obj;
     }
@@ -132,6 +136,7 @@ class PEAR_Command
      * Get instance of frontend object.
      *
      * @return object
+     * @static
      */
     function &getFrontendObject()
     {
@@ -150,16 +155,21 @@ class PEAR_Command
      * @param string $uiclass Name of class implementing the frontend
      *
      * @return object the frontend object, or a PEAR error
+     * @static
      */
     function &setFrontendClass($uiclass)
     {
         if (is_object($GLOBALS['_PEAR_Command_uiobject']) &&
             strtolower($uiclass) == get_class($GLOBALS['_PEAR_Command_uiobject'])) {
-            return;
+            return $GLOBALS['_PEAR_Command_uiobject'];
         }
-        $file = str_replace('_', '/', $uiclass) . '.php';
-        @include_once $file;
-        if (class_exists(strtolower($uiclass))) {
+        if (!class_exists($uiclass)) {
+            $file = str_replace('_', '/', $uiclass) . '.php';
+            if (PEAR_Command::isIncludeable($file)) {
+                include_once $file;
+            }
+        }
+        if (class_exists($uiclass)) {
             $obj = &new $uiclass;
             // quick test to see if this class implements a few of the most
             // important frontend methods
@@ -168,14 +178,39 @@ class PEAR_Command
                 $GLOBALS['_PEAR_Command_uiclass'] = $uiclass;
                 return $obj;
             } else {
-                return PEAR::raiseError("not a frontend class: $uiclass");
+                $err = PEAR::raiseError("not a frontend class: $uiclass");
+                return $err;
             }
         }
-        return PEAR::raiseError("no such class: $uiclass");
+        $err = PEAR::raiseError("no such class: $uiclass");
+        return $err;
     }
 
     // }}}
     // {{{ setFrontendType()
+
+    // }}}
+    // {{{ isIncludeable()
+
+    /**
+     * @param string $path relative or absolute include path
+     * @return boolean
+     * @static
+     */
+    function isIncludeable($path)
+    {
+        if (file_exists($path) && is_readable($path)) {
+            return true;
+        }
+        $ipath = explode(PATH_SEPARATOR, ini_get('include_path'));
+        foreach ($ipath as $include) {
+            $test = realpath($include . DIRECTORY_SEPARATOR . $path);
+            if (file_exists($test) && is_readable($test)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Set current frontend.
@@ -183,6 +218,7 @@ class PEAR_Command
      * @param string $uitype Name of the frontend type (for example "CLI")
      *
      * @return object the frontend object, or a PEAR error
+     * @static
      */
     function setFrontendType($uitype)
     {
@@ -209,6 +245,7 @@ class PEAR_Command
      * @return bool TRUE on success, a PEAR error on failure
      *
      * @access public
+     * @static
      */
     function registerCommands($merge = false, $dir = null)
     {
@@ -256,6 +293,7 @@ class PEAR_Command
      * @return array command => implementing class
      *
      * @access public
+     * @static
      */
     function getCommands()
     {
@@ -274,6 +312,7 @@ class PEAR_Command
      * @return array shortcut => command
      *
      * @access public
+     * @static
      */
     function getShortcuts()
     {
@@ -296,16 +335,17 @@ class PEAR_Command
      * @return void
      *
      * @access public
+     * @static
      */
     function getGetoptArgs($command, &$short_args, &$long_args)
     {
         if (empty($GLOBALS['_PEAR_Command_commandlist'])) {
             PEAR_Command::registerCommands();
         }
-        $class = @$GLOBALS['_PEAR_Command_commandlist'][$command];
-        if (empty($class)) {
+        if (!isset($GLOBALS['_PEAR_Command_commandlist'][$command])) {
             return null;
         }
+        $class = $GLOBALS['_PEAR_Command_commandlist'][$command];
         $obj = &$GLOBALS['_PEAR_Command_objects'][$class];
         return $obj->getGetoptArgs($command, $short_args, $long_args);
     }
@@ -321,10 +361,14 @@ class PEAR_Command
      * @return string command description
      *
      * @access public
+     * @static
      */
     function getDescription($command)
     {
-        return @$GLOBALS['_PEAR_Command_commanddesc'][$command];
+        if (!isset($GLOBALS['_PEAR_Command_commanddesc'][$command])) {
+            return null;
+        }
+        return $GLOBALS['_PEAR_Command_commanddesc'][$command];
     }
 
     // }}}
@@ -336,6 +380,7 @@ class PEAR_Command
      * @param string $command Name of the command to return help for
      *
      * @access public
+     * @static
      */
     function getHelp($command)
     {
