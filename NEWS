@@ -3,7 +3,7 @@ PHP 4                                                                      NEWS
 ?? Jul 2003, Version 4.3.3
 - Synchronized bundled GD library with GD 2.0.15. (Ilia)
 - Improved the engine to use POSIX/socket IO where feasible. (Sascha)
-- Improved NSAPI SAPI module (Uwe Schindler)
+- Improved the NSAPI SAPI module (Uwe Schindler)
   . php4_init (magnus.conf): new parameter to set alternate path to php.ini.
     (php_ini="/path/to/php.ini")
   . php4_execute (obj.conf): support for additional php.ini values.
@@ -16,16 +16,19 @@ PHP 4                                                                      NEWS
   . Added imap_timeout() function. (bug #24161)
   . Added optional 'charset' parameter to imap_search() and imap_sort().
     (bug #22505)
+- Improved the InterBase extension (Daniela)
+  . Added transaction constants: IBASE_REC_VERSION, IBASE_REC_NO_VERSION, 
+    IBASE_WRITE, IBASE_WAIT and IBASE_CONCURRENCY. (bugs #8797, #23887)
+  . Made numeric/decimal datatype handling work on any platform.
 - Added DBA handler 'inifile' to support ini files. (Marcus)
 - Added a "DEBUG" note to 'php -v' output when --enable-debug is used. (Derick)
 - Added long options into CLI & CGI (e.g. --version). (Marcus)
 - Fixed possible integer overflows in:
-  . base64_encode().    (Moriyoshi)
+  . base64_encode(). (Moriyoshi)
   . bundled GD library. (Ilia)
 - Fixed "mysql.connect_timeout" php.ini option to be settable with ini_set().
   (Rasmus)
-- Fixed ext/yaz to not log if "yaz.log_file" php.ini option is not set.
-  (Adam Dickmeiss)
+- Fixed ext/yaz to not log if "yaz.log_file" php.ini option is not set. (Adam)
 - Fixed a bug in bundled libmysql (mysql bug #564). (Georg)
 - Fixed ext/exif to honor "magic_quotes_runtime" php.ini option. (Marcus)
 - Fixed bug #24155 (gdImageRotate270 incorrectly use x parameter for y axis).
