@@ -34,5 +34,6 @@
 #define _PHPIPTC_H
 
 PHP_FUNCTION(iptcparse);
+PHP_FUNCTION(iptcembed);
 
 #endif /* _PHPIPTC_H */
