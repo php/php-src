@@ -126,7 +126,7 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 			dbh->is_closed = 1;
 			H->attached = 0;
 			*pdo_err = PDO_ERR_DISCONNECTED;
-			return 1;
+			break;
 
 		default:
 			*pdo_err = PDO_ERR_CANT_MAP;
@@ -435,6 +435,7 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC
 	dbh->alloc_own_columns = 1;
 	dbh->supports_placeholders = 1;
 	dbh->placeholders_can_be_strings = 1;
+	dbh->native_case = PDO_CASE_UPPER;
 
 	ret = 1;
 	
