@@ -876,8 +876,6 @@ PHP_FUNCTION(socket_set_timeout)
 
 	php_sockset_timeout(socketd, &t);
 	RETURN_TRUE;
-#else
-    PHP_NOT_IN_THIS_BUILD();
 #endif /* HAVE_SYS_TIME_H */
 }
 
