@@ -235,7 +235,7 @@ PHP_FUNCTION(levenshtein)
 
 		distance = custom_levdist((*str1)->value.str.val
 																, (*str2)->value.str.val
-																, (*callback_name)->value.str.lval
+																, (*callback_name)->value.str.val
 																);
 		break;
 
