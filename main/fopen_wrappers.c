@@ -88,7 +88,7 @@
 	
 	When open_basedir is NULL, always return 0
 */
-PHPAPI int php_check_specific_open_basedir(char *basedir, char *path TSRMLS_DC)
+PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path TSRMLS_DC)
 {
 	char resolved_name[MAXPATHLEN];
 	char resolved_basedir[MAXPATHLEN];
@@ -135,7 +135,7 @@ PHPAPI int php_check_specific_open_basedir(char *basedir, char *path TSRMLS_DC)
 
 /* {{{ php_check_open_basedir
  */
-PHPAPI int php_check_open_basedir(char *path TSRMLS_DC)
+PHPAPI int php_check_open_basedir(const char *path TSRMLS_DC)
 {
 	/* Only check when open_basedir is available */
 	if (PG(open_basedir) && *PG(open_basedir)) {
