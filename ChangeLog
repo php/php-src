@@ -1,3 +1,50 @@
+2001-12-26  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c: unbreak parallel search
+
+2001-12-26  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+    added code to remove overloaded function in RSHUTDOWN.
+
+2001-12-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: - MFH for bug 14690
+
+    * ext/mcrypt/mcrypt.c: - Fix for bug 14690
+
+2001-12-26  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * EXTENSIONS: Added msession
+
+2001-12-26  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/scripts/pear.in: added default target for installing documentation
+
+    * pear/Console/Getopt.php: reverted the last change for now
+
+    * pear/PEAR/Installer.php:
+    - Install files marked as "role=doc" in a central PEAR doc dir
+      (defaults to PHP_DATADIR/pear/doc/Package_name/)
+    - Store a new property of each installed file ['installed_as'] for
+      easy uninstall
+
+2001-12-26  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/session/session.c: Fix crash with external session save handlers
+
+2001-12-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/System.php: * use "windir" env.var on Windows too
+
+    * pear/System.php:
+    * added System::tmpdir() method (now uses SystemRoot env.var on Windows)
+
+2001-12-26  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/msession.c: Moved "ifdef HAVE_PHP_SESSION" oops!
+
 2001-12-25  Georg Richter  <georg.richter@phpev.de>
 
     * ext/ncurses/ncurses.c
