@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- added fifth optional parameter to domxml_xslt_process. If set,
 - Added MD5 support for crypt() on Windows. (Edin)
 - Fixed resource bug in LDAP extension. (Stig Venaas)
 - Fixed output buffer crash when buffer is over written in callback. (Yasuo)
