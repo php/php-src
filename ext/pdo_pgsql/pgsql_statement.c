@@ -106,6 +106,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 	if (status == PGRES_COMMAND_OK) {
 		stmt->row_count = (long)atoi(PQcmdTuples(S->result));
+		H->pgoid = PQoidValue(S->result);
 	} else {
 		stmt->row_count = (long)PQntuples(S->result);
 	}
