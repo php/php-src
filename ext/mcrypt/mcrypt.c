@@ -373,8 +373,11 @@ PHP_MINFO_FUNCTION(mcrypt)
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "mcrypt support", "enabled");
+#if HAVE_LIBMCRYPT22
+	php_info_print_table_row(2, "version", "2.2.x");
+#endif
 #if HAVE_LIBMCRYPT24
-	php_info_print_table_row(2, "API Version", ">= 20000320");
+	php_info_print_table_row(2, "version", "2.4.x");
 	php_info_print_table_row(2, "Supported ciphers", tmp);
 	php_info_print_table_row(2, "Supported modes", tmp2);
 	efree (tmp2);
