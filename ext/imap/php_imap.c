@@ -3253,9 +3253,28 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 
 #ifdef PHP_WIN32
 	char *tempMailTo;
+	char *tsm_errmsg = NULL;
 	ADDRESS *addr;
-	char *bufferCc = NULL, *bufferBcc = NULL;
+	char *bufferTo = NULL, *bufferCc = NULL, *bufferBcc = NULL;
 	int offset;
+
+	if (to && *to) {
+		tempMailTo = estrdup(to);
+		bufferTo = (char *)emalloc(strlen(to));
+		offset = 0;
+		addr = NULL;
+		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
+		while (addr) {
+			if (strcmp(addr->host, ERRHOST) == 0)
+				return (BAD_MSG_DESTINATION);
+			else {
+				offset += sprintf(bufferTo + offset, "%s@%s,", addr->mailbox, addr->host);
+			}
+			addr = addr->next;
+		}
+		efree(tempMailTo);
+		bufferTo[offset] = 0;
+	}
 
 	if (cc && *cc) {
 		tempMailTo = estrdup(cc);
@@ -3294,8 +3313,13 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	}
 
 
-	if (TSendMail(INI_STR("SMTP"), &tsm_err, NULL, headers, subject, to, message, bufferCc, bufferBcc, rpath) != SUCCESS) {
-		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), GetSMErrorText(tsm_err));
+	if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, headers, subject, bufferTo, message, bufferCc, bufferBcc, rpath) != SUCCESS) {
+		if (tsm_errmsg) {
+			php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), tsm_errmsg);
+			efree(tsm_errmsg);
+		} else {
+			php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), GetSMErrorText(tsm_err));
+		}
 		return 0;
 	}
 	if (bufferCc) efree(bufferCc);
