@@ -619,7 +619,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_POST_DEC_OBJ			135
 								 	
 #define ZEND_ASSIGN_OBJ				136
-#define ZEND_MAKE_VAR				137
+#define ZEND_OP_DATA				137
 
 #define ZEND_INSTANCEOF				138
 

@@ -267,11 +267,13 @@ static inline zval *get_obj_zval_ptr(znode *op, temp_variable *Ts, zval **freeop
 	return get_zval_ptr(op, Ts, freeop, type);
 }
 
-static inline void zend_assign_to_object(znode *result, znode *op1, znode *op2, zval *value, temp_variable *Ts TSRMLS_DC)
+static inline void zend_assign_to_object(znode *result, znode *op1, znode *op2, znode *value_op, temp_variable *Ts TSRMLS_DC)
 {
 	zval **object_ptr = get_obj_zval_ptr_ptr(op1, Ts, BP_VAR_W TSRMLS_CC);
 	zval *object;
 	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
+	zval *free_value;
+	zval *value = get_zval_ptr(value_op, Ts, &free_value, BP_VAR_R);
 	zval tmp;
 	zval **retval = &T(result->u.var).var.ptr;
 
@@ -310,10 +312,7 @@ static inline void zend_assign_to_object(znode *result, znode *op1, znode *op2, 
 	}
 
 	/* here property is a string */
-	
 	Z_OBJ_HT_P(object)->write_property(object, property, value TSRMLS_CC);
-
-	PZVAL_UNLOCK(value);
 	if (property == &tmp) {
 		zval_dtor(property);
 	}
@@ -326,11 +325,13 @@ static inline void zend_assign_to_object(znode *result, znode *op1, znode *op2, 
 	}
 }
 
-static inline void zend_assign_to_object_op(znode *result, znode *op1, znode *op2, zval *value, temp_variable *Ts, int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC) TSRMLS_DC)
+static inline void zend_assign_to_object_op(znode *result, znode *op1, znode *op2, znode *value_op, temp_variable *Ts, int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC) TSRMLS_DC)
 {
 	zval **object_ptr = get_obj_zval_ptr_ptr(op1, Ts, BP_VAR_W TSRMLS_CC);
 	zval *object;
 	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
+	zval *free_value;
+	zval *value = get_zval_ptr(value_op, Ts, &free_value, BP_VAR_R);
 	zval tmp;
 	zval **retval = &T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
@@ -365,8 +366,6 @@ static inline void zend_assign_to_object_op(znode *result, znode *op1, znode *op
 	}
 
 	/* here property is a string */
-	PZVAL_UNLOCK(value);
-	
 	if (Z_OBJ_HT_P(object)->get_property_zval_ptr) {
 		zval **zptr = Z_OBJ_HT_P(object)->get_property_zval_ptr(object, property TSRMLS_CC);
 		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
@@ -1506,67 +1505,100 @@ int zend_assign_bw_xor_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_assign_add_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX_T(EX(opline)->extended_value).var.ptr, EX(Ts), add_function TSRMLS_CC);
+	zend_op *op_data = EX(opline)+1;
+	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), add_function TSRMLS_CC);
+	/* assign_obj has two opcodes! */
+	EX(opline)++;
 	NEXT_OPCODE();
 }
 
 int zend_assign_sub_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX_T(EX(opline)->extended_value).var.ptr, EX(Ts), sub_function TSRMLS_CC);
+	zend_op *op_data = EX(opline)+1;
+	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), sub_function TSRMLS_CC);
+	/* assign_obj has two opcodes! */
+	EX(opline)++;
 	NEXT_OPCODE();
 }
 
 int zend_assign_mul_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX_T(EX(opline)->extended_value).var.ptr, EX(Ts), mul_function TSRMLS_CC);
+	zend_op *op_data = EX(opline)+1;
+	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), mul_function TSRMLS_CC);
+	/* assign_obj has two opcodes! */
+	EX(opline)++;
 	NEXT_OPCODE();
 }
 
 int zend_assign_div_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX_T(EX(opline)->extended_value).var.ptr, EX(Ts), div_function TSRMLS_CC);
+	zend_op *op_data = EX(opline)+1;
+	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), div_function TSRMLS_CC);
+	/* assign_obj has two opcodes! */
+	EX(opline)++;
 	NEXT_OPCODE();
 }
 
 int zend_assign_mod_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX_T(EX(opline)->extended_value).var.ptr, EX(Ts), mod_function TSRMLS_CC);
+	zend_op *op_data = EX(opline)+1;
+	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), mod_function TSRMLS_CC);
+	/* assign_obj has two opcodes! */
+	EX(opline)++;
 	NEXT_OPCODE();
 }
 
 int zend_assign_sl_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX_T(EX(opline)->extended_value).var.ptr, EX(Ts), shift_left_function TSRMLS_CC);
+	zend_op *op_data = EX(opline)+1;
+	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), shift_left_function TSRMLS_CC);
+	/* assign_obj has two opcodes! */
+	EX(opline)++;
 	NEXT_OPCODE();
 }
 
 int zend_assign_sr_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX_T(EX(opline)->extended_value).var.ptr, EX(Ts), shift_right_function TSRMLS_CC);
+	zend_op *op_data = EX(opline)+1;
+	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), shift_right_function TSRMLS_CC);
+	/* assign_obj has two opcodes! */
+	EX(opline)++;
 	NEXT_OPCODE();
 }
 
 int zend_assign_concat_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX_T(EX(opline)->extended_value).var.ptr, EX(Ts), concat_function TSRMLS_CC);
+	zend_op *op_data = EX(opline)+1;
+	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), concat_function TSRMLS_CC);
+	/* assign_obj has two opcodes! */
+	EX(opline)++;
 	NEXT_OPCODE();
 }
 
 int zend_assign_bw_or_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX_T(EX(opline)->extended_value).var.ptr, EX(Ts), bitwise_or_function TSRMLS_CC);
+	zend_op *op_data = EX(opline)+1;
+	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), bitwise_or_function TSRMLS_CC);
+	/* assign_obj has two opcodes! */
+	EX(opline)++;
 	NEXT_OPCODE();
 }
 
 int zend_assign_bw_and_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX_T(EX(opline)->extended_value).var.ptr, EX(Ts), bitwise_and_function TSRMLS_CC);
+	zend_op *op_data = EX(opline)+1;
+	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), bitwise_and_function TSRMLS_CC);
+	/* assign_obj has two opcodes! */
+	EX(opline)++;
 	NEXT_OPCODE();
 }
 
 int zend_assign_bw_xor_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX_T(EX(opline)->extended_value).var.ptr, EX(Ts), bitwise_xor_function TSRMLS_CC);
+	zend_op *op_data = EX(opline)+1;
+	zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts), bitwise_xor_function TSRMLS_CC);
+	/* assign_obj has two opcodes! */
+	EX(opline)++;
 	NEXT_OPCODE();
 }
 
@@ -1864,7 +1896,10 @@ int zend_make_var_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_assign_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_assign_to_object(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX_T(EX(opline)->extended_value).var.ptr, EX(Ts) TSRMLS_CC);
+	zend_op *op_data = EX(opline)+1;
+	zend_assign_to_object(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts) TSRMLS_CC);
+	/* assign_obj has two opcodes! */
+	EX(opline)++;
 	NEXT_OPCODE();
 }
 
@@ -3983,7 +4018,7 @@ void zend_init_opcodes_handlers()
 	zend_opcode_handlers[ZEND_POST_DEC_OBJ] = zend_post_dec_obj_handler;
 
 	zend_opcode_handlers[ZEND_ASSIGN_OBJ] = zend_assign_obj_handler;
-	zend_opcode_handlers[ZEND_MAKE_VAR] = zend_make_var_handler;
+	zend_opcode_handlers[ZEND_OP_DATA] = NULL;
 
 	zend_opcode_handlers[ZEND_INSTANCEOF] = zend_instanceof_handler;
 
