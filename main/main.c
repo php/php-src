@@ -132,9 +132,20 @@ PHP_INI_MH(OnSetPrecision)
 /* Need to convert to strings and make use of:
  * DEFAULT_SHORT_OPEN_TAG
  * PHP_SAFE_MODE
+ *
+ * Need to be read from the environment (?):
+ * PHP_AUTO_PREPEND_FILE
+ * PHP_AUTO_APPEND_FILE
  */
+
 #ifndef SAFE_MODE_EXEC_DIR
 #	define SAFE_MODE_EXEC_DIR "/"
+#endif
+
+#ifdef PHP_PROG_SENDMAIL
+#	define DEFAULT_SENDMAIL_PATH PHP_PROG_SENDMAIL " -t"
+#else
+#	define DEFAULT_SENDMAIL_PATH NULL
 #endif
 
 PHP_INI_BEGIN()
@@ -156,6 +167,17 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("safe_mode",				"0",			PHP_INI_SYSTEM,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, safe_mode))
 	PHP_INI_ENTRY("sql.safe_mode",			"0",			PHP_INI_SYSTEM,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, sql_safe_mode))
 	PHP_INI_ENTRY("safe_mode_exec_dir",		SAFE_MODE_EXEC_DIR,		PHP_INI_SYSTEM,	OnUpdateString,	(void *) XtOffsetOf(php_core_globals, safe_mode_exec_dir))
+
+	PHP_INI_ENTRY("SMTP",			"localhost",			PHP_INI_ALL,		NULL,		NULL)
+	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL,		NULL)
+	PHP_INI_ENTRY("sendmail_from",	NULL,					PHP_INI_ALL,		NULL,		NULL)
+
+	PHP_INI_ENTRY("display_errors",		"1",				PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, display_errors))
+	PHP_INI_ENTRY("track_errors",		"0",				PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, track_errors))
+	PHP_INI_ENTRY("log_errors",			"0",				PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, log_errors))
+
+	PHP_INI_ENTRY("auto_prepend_file",	NULL,				PHP_INI_ALL,		OnUpdateString,	(void *) XtOffsetOf(php_core_globals, auto_prepend_file))
+	PHP_INI_ENTRY("auto_append_file",	NULL,				PHP_INI_ALL,		OnUpdateString,	(void *) XtOffsetOf(php_core_globals, auto_append_file))
 PHP_INI_END()
 
 
@@ -360,19 +382,19 @@ PHPAPI void php3_error(int type, const char *format,...)
 		}
 
 		/* get include file name */
-		if (php3_ini.log_errors || php3_ini.display_errors) {
+		if (PG(log_errors) || PG(display_errors)) {
 			va_start(args, format);
 			size = vsnprintf(buffer, sizeof(buffer) - 1, format, args);
 			va_end(args);
 			buffer[sizeof(buffer) - 1] = 0;
 
-			if (php3_ini.log_errors) {
+			if (PG(log_errors)) {
 				char log_buffer[1024];
 
 				snprintf(log_buffer, 1024, "PHP 3 %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
 				php3_log_err(log_buffer);
 			}
-			if (php3_ini.display_errors) {
+			if (PG(display_errors)) {
 				if(php3_ini.error_prepend_string) {
 					PUTS(php3_ini.error_prepend_string);
 				}		
@@ -383,7 +405,7 @@ PHPAPI void php3_error(int type, const char *format,...)
 			}
 		}
 	}
-	if (php3_ini.track_errors) {
+	if (PG(track_errors)) {
 		pval tmp;
 
 		va_start(args, format);
@@ -740,39 +762,12 @@ static int php3_config_ini_startup(ELS_D)
 		if (cfg_get_long("memory_limit", &php3_ini.memory_limit) == FAILURE) {
 			php3_ini.memory_limit = 1<<23;  /* 8MB */
 		}
-		if (cfg_get_string("SMTP", &php3_ini.smtp) == FAILURE) {
-			php3_ini.smtp = "localhost";
-		}
-		if (cfg_get_string("sendmail_path", &php3_ini.sendmail_path) == FAILURE
-			|| !php3_ini.sendmail_path[0]) {
-#ifdef PHP_PROG_SENDMAIL
-			php3_ini.sendmail_path = PHP_PROG_SENDMAIL " -t";
-#else
-			php3_ini.sendmail_path = NULL;
-#endif
-		}
-		if (cfg_get_string("sendmail_from", &php3_ini.sendmail_from) == FAILURE) {
-			php3_ini.sendmail_from = NULL;
-		}
 		if (cfg_get_long("error_reporting", &php3_ini.errors) == FAILURE) {
 			php3_ini.errors = E_ALL & ~E_NOTICE;
 		}
 		EG(error_reporting) = php3_ini.errors;
 		if (cfg_get_string("error_log", &php3_ini.error_log) == FAILURE) {
 			php3_ini.error_log = NULL;
-		}
-
-		if (cfg_get_long("track_errors", &php3_ini.track_errors) == FAILURE) {
-			php3_ini.track_errors = 0;
-		}
-		if (cfg_get_long("display_errors", &php3_ini.display_errors) == FAILURE) {
-			php3_ini.display_errors = 1;
-		}
-		if (cfg_get_long("log_errors", &php3_ini.log_errors) == FAILURE) {
-			php3_ini.log_errors = 0;
-		}
-		if (cfg_get_long("warn_plus_overloading", &php3_ini.warn_plus_overloading) == FAILURE) {
-			php3_ini.warn_plus_overloading = 0;
 		}
 		if (cfg_get_long("y2k_compliance", &php3_ini.y2k_compliance) == FAILURE) {
 			php3_ini.y2k_compliance = 0;
@@ -802,20 +797,6 @@ static int php3_config_ini_startup(ELS_D)
 				php3_ini.include_path = temp;
 			} else {
 				php3_ini.include_path = NULL;
-			}
-		}
-		if (cfg_get_string("auto_prepend_file", &php3_ini.auto_prepend_file) == FAILURE) {
-			if ((temp = getenv("PHP_AUTO_PREPEND_FILE"))) {
-				php3_ini.auto_prepend_file = temp;
-			} else {
-				php3_ini.auto_prepend_file = NULL;
-			}
-		}
-		if (cfg_get_string("auto_append_file", &php3_ini.auto_append_file) == FAILURE) {
-			if ((temp = getenv("PHP_AUTO_APPEND_FILE"))) {
-				php3_ini.auto_append_file = temp;
-			} else {
-				php3_ini.auto_append_file = NULL;
 			}
 		}
 		if (cfg_get_string("upload_tmp_dir", &php3_ini.upload_tmp_dir) == FAILURE) {
@@ -1255,26 +1236,15 @@ static void php3_parse(zend_file_handle *primary_file CLS_DC ELS_DC)
 	_php3_hash_environment();
 
 
-#if 0
-	if (php3_ini.auto_prepend_file && php3_ini.auto_prepend_file[0]) {
-		require_filename(php3_ini.auto_prepend_file CLS_CC);
-	}
-	require_file(primary_file CLS_CC);
-	if (php3_ini.auto_append_file && php3_ini.auto_append_file[0]) {
-		require_filename(php3_ini.auto_append_file CLS_CC);
-	}
-	pass_two(CG(main_op_array));
-#endif
-
-	if (php3_ini.auto_prepend_file && php3_ini.auto_prepend_file[0]) {
-		prepend_file.filename = php3_ini.auto_prepend_file;
+	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
+		prepend_file.filename = PG(auto_prepend_file);
 		prepend_file.type = ZEND_HANDLE_FILENAME;
 		prepend_file_p = &prepend_file;
 	} else {
 		prepend_file_p = NULL;
 	}
-	if (php3_ini.auto_append_file && php3_ini.auto_append_file[0]) {
-		append_file.filename = php3_ini.auto_append_file;
+	if (PG(auto_append_file) && PG(auto_append_file)[0]) {
+		append_file.filename = PG(auto_append_file);
 		append_file.type = ZEND_HANDLE_FILENAME;
 		append_file_p = &append_file;
 	} else {

@@ -32,6 +32,13 @@ struct _php_core_globals {
 	long safe_mode;
 	long sql_safe_mode;
 	char *safe_mode_exec_dir;
+
+    long track_errors;
+    long display_errors;
+    long log_errors;
+
+    char *auto_prepend_file;
+    char *auto_append_file;
 };
 
 

@@ -303,9 +303,6 @@ static void *php3_merge_dir(pool *p, void *basev, void *addv)
 	if (add->sendmail_path != orig.sendmail_path) new->sendmail_path = add->sendmail_path;
 	if (add->sendmail_from != orig.sendmail_from) new->sendmail_from = add->sendmail_from;
 	if (add->errors != orig.errors) new->errors = add->errors;
-	if (add->track_errors != orig.track_errors) new->track_errors = add->track_errors;
-	if (add->display_errors != orig.display_errors) new->display_errors = add->display_errors;
-	if (add->log_errors != orig.log_errors) new->log_errors = add->log_errors;
 	if (add->doc_root != orig.doc_root) new->doc_root = add->doc_root;
 	if (add->user_dir != orig.user_dir) new->user_dir = add->user_dir;
 	if (add->track_vars != orig.track_vars) new->track_vars = add->track_vars;
@@ -313,8 +310,6 @@ static void *php3_merge_dir(pool *p, void *basev, void *addv)
 	if (add->isapi_ext != orig.isapi_ext) new->isapi_ext = add->isapi_ext;
 	if (add->nsapi_ext != orig.nsapi_ext) new->nsapi_ext = add->nsapi_ext;
 	if (add->include_path != orig.include_path) new->include_path = add->include_path;
-	if (add->auto_prepend_file != orig.auto_prepend_file) new->auto_prepend_file = add->auto_prepend_file;
-	if (add->auto_append_file != orig.auto_append_file) new->auto_append_file = add->auto_append_file;
 	if (add->upload_tmp_dir != orig.upload_tmp_dir) new->upload_tmp_dir = add->upload_tmp_dir;
 	if (add->upload_max_filesize != orig.upload_max_filesize) new->upload_max_filesize = add->upload_max_filesize;
 	if (add->extension_dir != orig.extension_dir) new->extension_dir = add->extension_dir;
@@ -347,9 +342,6 @@ char *php3flaghandler(cmd_parms * cmd, php3_ini_structure * conf, int val)
 	int c = (int) cmd->info;
 
 	switch (c) {
-		case 0:
-			conf->track_errors = val;
-			break;
 		case 5:
 			conf->track_vars = val;
 			break;
@@ -361,12 +353,6 @@ char *php3flaghandler(cmd_parms * cmd, php3_ini_structure * conf, int val)
 			break;
 		case 9:
 			conf->last_modified = val;
-			break;
-		case 10:
-			conf->log_errors = val;
-			break;
-		case 11:
-			conf->display_errors = val;
 			break;
 		case 13:
 			conf->enable_dl = val;
@@ -426,20 +412,6 @@ char *php3take1handler(cmd_parms * cmd, php3_ini_structure * conf, char *arg)
 			break;
 		case 4:
 			conf->include_path = pstrdup(cmd->pool, arg);
-			break;
-		case 5:
-			if (strncasecmp(arg, "none", 4)) {
-				conf->auto_prepend_file = pstrdup(cmd->pool, arg);
-			} else {
-				conf->auto_prepend_file = "";
-			}
-			break;
-		case 6:
-			if (strncasecmp(arg, "none", 4)) {
-				conf->auto_append_file = pstrdup(cmd->pool, arg);
-			} else {
-				conf->auto_append_file = "";
-			}
 			break;
 		case 7:
 			conf->upload_tmp_dir = pstrdup(cmd->pool, arg);
@@ -589,13 +561,10 @@ command_rec php3_commands[] =
 	{"php3_dav_script", php3take1handler, (void *)20, OR_OPTIONS|RSRC_CONF, TAKE1,
 	 "Lets PHP handle DAV requests by parsing this script."},
 #endif
-	{"php3_track_errors", php3flaghandler, (void *)0, OR_OPTIONS, FLAG, "on|off"},
 	{"php3_track_vars", php3flaghandler, (void *)5, OR_OPTIONS, FLAG, "on|off"},
 	{"php3_engine", php3flaghandler, (void *)7, RSRC_CONF|ACCESS_CONF, FLAG, "on|off"},
 	{"php3_xbithack", php3flaghandler, (void *)8, OR_OPTIONS, FLAG, "on|off"},
 	{"php3_last_modified", php3flaghandler, (void *)9, OR_OPTIONS, FLAG, "on|off"},
-	{"php3_log_errors", php3flaghandler, (void *)10, OR_OPTIONS, FLAG, "on|off"},
-	{"php3_display_errors", php3flaghandler, (void *)11, OR_OPTIONS, FLAG, "on|off"},
 	{"php3_enable_dl", php3flaghandler, (void *)13, RSRC_CONF|ACCESS_CONF, FLAG, "on|off"},
 	{NULL}
 };
