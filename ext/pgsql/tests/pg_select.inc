@@ -4,15 +4,12 @@ error_reporting(E_ALL);
 include 'config.inc';
 
 $db = pg_connect($conn_str);
-
-$fields = array('num'=>'1234', 'str'=>'XXX', 'bin'=>'YYY');
+$fields = array('num'=>'1234', 'str'=>'ABC', 'bin'=>'XYZ');
 $ids = array('num'=>'1234');
-if (!($res = pg_select($db, $table_name, $ids, 1))) {
-	echo "Error\n";
-}
-else {
-	var_dump($res);
-	echo "Ok\n";
-}
+
+$res = pg_select($db, $table_name, $ids) or print "Error\n";
+var_dump($res);
+echo pg_select($db, $table_name, $ids, PGSQL_DML_STRING)."\n";
+echo "Ok\n";
 
 ?>
