@@ -19,14 +19,16 @@ WARNING: You asked for Informix support, but don't have \\\$INFORMIXDIR
       if test "$withval" = "yes"; then
         IFX_INCDIR=$INFORMIXDIR/incl/esql
         if test -z "$IFX_LIBDIR"; then
-          IFX_LIBDIR="-L$INFORMIXDIR/lib -L$INFORMIXDIR/lib/esql"
+          AC_ADD_LIBPATH($INFORMIXDIR/lib)
+          AC_ADD_LIBPATH($INFORMIXDIR/lib/esql)
         else
           IFX_LIBDIR="$IFX_LIBDIR"
         fi
       else
         IFX_INCDIR=$withval/incl/esql
         if test -z "$IFX_LIBDIR"; then
-          IFX_LIBDIR="-L$withval/lib -L$withval/lib/esql"
+          AC_ADD_LIBPATH($withval/lib)
+          AC_ADD_LIBPATH($withval/lib/esql)
         else
           IFX_LIBDIR="$IFX_LIBDIR"
         fi
@@ -47,7 +49,7 @@ WARNING: You specified Informix base install directory that is different
         dnl According to Perls DBD-Informix, might contain these strings.
       else
         dnl Allow override to use static and/or threaded libs
-        IFX_LIBS="$IFX_LIBS"
+        :
       fi
       CFLAGS="$CFLAGS $IFX_INCLUDE"
       LDFLAGS="$LDFLAGS $IFX_LFLAGS"
@@ -72,7 +74,10 @@ WARNING: You specified Informix base install directory that is different
         case "$i" in
         *.o)
             IFX_OBJS="$IFX_OBJS $i"
-            IFX_LIBADD="$IFX_LIBADD -Lext/informix -lifx";;
+            AC_ADD_LIBRARY_WITH_PATH(php_ifx, $abs_builddir/ext/informix);;
+        -l*)
+            lib=`echo $i|sed 's/^-l//'`
+            AC_ADD_LIBRARY($lib);;
         *)
             IFX_LIBADD="$IFX_LIBADD $i";;
         esac
