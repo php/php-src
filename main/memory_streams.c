@@ -221,7 +221,7 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC TSRMLS_DC)
 	self->smax = -1;
 	self->mode = mode;
 	
-	stream = php_stream_alloc(&php_stream_memory_ops, self, 0, "rwb");
+	stream = php_stream_alloc(&php_stream_memory_ops, self, 0, "r+b");
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 	return stream;
 }
@@ -434,7 +434,7 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 	assert(self != NULL);
 	self->smax = max_memory_usage;
 	self->mode = mode;
-	stream = php_stream_alloc(&php_stream_temp_ops, self, 0, "rwb");
+	stream = php_stream_alloc(&php_stream_temp_ops, self, 0, "r+b");
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 	self->innerstream = php_stream_memory_create(mode);
 

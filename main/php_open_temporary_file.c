@@ -149,7 +149,7 @@ static FILE *php_do_open_temporary_file(const char *path, const char *pfx, char 
 	if (fd==-1) {
 		fp = NULL;
 	} else {
-		fp = fdopen(fd, "wb");
+		fp = fdopen(fd, "r+b");
 	}
 #else
 	if (mktemp(opened_path)) {

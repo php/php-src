@@ -1236,7 +1236,7 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 	FILE *fp = php_open_temporary_file(dir, pfx, opened_path TSRMLS_CC);
 
 	if (fp)	{
-		php_stream *stream = php_stream_fopen_from_file_rel(fp, "wb");
+		php_stream *stream = php_stream_fopen_from_file_rel(fp, "r+b");
 		if (stream) {
 			return stream;
 		}
