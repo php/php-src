@@ -614,7 +614,7 @@ function_entry basic_functions[] = {
 	PHP_FE(file_get_wrapper_data,											NULL)
 	PHP_FE(file_register_wrapper,											NULL)
 
-#if HAVE_SYS_TIME_H
+#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
 	PHP_FE(socket_set_timeout,												NULL)
 #endif
 
