@@ -66,7 +66,7 @@
 
 #if HAVE_MBSTRING
 
-#include "ext/mbstring/libmbfl/mbfl/mbfilter.h"
+#include "mbfilter.h"
 #include "SAPI.h"
 
 #define PHP_MBSTRING_API 20021024
