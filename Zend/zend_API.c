@@ -186,9 +186,9 @@ ZEND_API void wrong_param_count()
 }
 
 	
-ZEND_API inline int array_init(zval *arg)
+ZEND_API inline int _array_init(zval *arg ZEND_FILE_LINE_DC)
 {
-	ALLOC_HASHTABLE(arg->value.ht);
+	ALLOC_HASHTABLE_REL(arg->value.ht);
 
 	if (!arg->value.ht || zend_hash_init(arg->value.ht, 0, NULL, ZVAL_PTR_DTOR, 0)) {
 		zend_error(E_CORE_ERROR, "Cannot allocate memory for array");
@@ -199,7 +199,7 @@ ZEND_API inline int array_init(zval *arg)
 }
 
 
-ZEND_API inline int object_init_ex(zval *arg, zend_class_entry *class_type)
+ZEND_API inline int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_LINE_DC)
 {
 	zval *tmp;
 
@@ -208,7 +208,7 @@ ZEND_API inline int object_init_ex(zval *arg, zend_class_entry *class_type)
 		class_type->constants_updated = 1;
 	}
 	
-	ALLOC_HASHTABLE(arg->value.obj.properties);
+	ALLOC_HASHTABLE_REL(arg->value.obj.properties);
 	zend_hash_init(arg->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(arg->value.obj.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	arg->type = IS_OBJECT;
@@ -217,9 +217,9 @@ ZEND_API inline int object_init_ex(zval *arg, zend_class_entry *class_type)
 }
 
 
-ZEND_API inline int object_init(zval *arg)
+ZEND_API inline int _object_init(zval *arg ZEND_FILE_LINE_DC)
 {
-	return object_init_ex(arg, &zend_standard_class_def);
+	return _object_init_ex(arg, &zend_standard_class_def ZEND_FILE_LINE_CC);
 }
 
 

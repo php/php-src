@@ -84,7 +84,7 @@
 #define HT_OK				0
 
 static void _zend_is_inconsistent(HashTable *ht, char *file, int line)
-{	
+{
     switch (ht->inconsistent) {
 	case HT_IS_DESTROYING:
         zend_error(E_CORE_ERROR, "ht=%08x is destroying in %s:%d", ht, file, line);
@@ -136,7 +136,7 @@ ZEND_API ulong hashpjw(char *arKey, uint nKeyLength)
 #define UPDATE_DATA(ht, p, pData, nDataSize)								\
 	if (flag & HASH_ADD_PTR) {												\
 		if (!(p)->pDataPtr) {												\
-			pefree(p, (ht)->persistent);									\
+			pefree((p)->pData, (ht)->persistent);							\
 		}																	\
 		(p)->pDataPtr = pData;												\
 		(p)->pData = &(p)->pDataPtr;										\
