@@ -243,6 +243,7 @@ struct _sapi_module_struct {
 	unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len TSRMLS_DC);
 	
 	void (*ini_defaults)(HashTable *configuration_hash);
+	int phpinfo_as_text;
 };
 
 
