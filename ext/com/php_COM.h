@@ -12,6 +12,7 @@ PHP_MSHUTDOWN_FUNCTION(COM);
 
 PHP_FUNCTION(com_load);
 PHP_FUNCTION(com_invoke);
+PHP_FUNCTION(com_invoke_ex);
 PHP_FUNCTION(com_addref);
 PHP_FUNCTION(com_release);
 PHP_FUNCTION(com_propget);
