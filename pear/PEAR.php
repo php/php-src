@@ -53,13 +53,12 @@ $GLOBALS['_PEAR_destructor_object_list'] = array();
  * If you want a destructor in your class, inherit PEAR and make a
  * destructor method called _yourclassname (same name as the
  * constructor, but with a "_" prefix).  Also, in your constructor you
- * have to call the PEAR constructor: <code>$this->PEAR();</code>.
+ * have to call the PEAR constructor: $this->PEAR();.
  * The destructor method will be called without parameters.  Note that
  * at in some SAPI implementations (such as Apache), any output during
  * the request shutdown (in which destructors are called) seems to be
  * discarded.  If you need to get any debug information from your
- * destructor, use <code>error_log()</code>, <code>syslog()</code> or
- * something like that instead.
+ * destructor, use error_log(), syslog() or something similar.
  *
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@fast.no>
@@ -116,7 +115,7 @@ class PEAR
      * @var     array
      * @access  private
      */
-    var $_expected_errors = null;
+    var $_expected_errors = array();
 
     // }}}
 
@@ -200,22 +199,25 @@ class PEAR
      * PEAR objects.  If called in an object, setErrorHandling sets
      * the default behaviour for that object.
      *
-     * @param $mode int
-     *        one of PEAR_ERROR_RETURN, PEAR_ERROR_PRINT,
+     * @param int $mode
+     *        One of PEAR_ERROR_RETURN, PEAR_ERROR_PRINT,
      *        PEAR_ERROR_TRIGGER, PEAR_ERROR_DIE or
      *        PEAR_ERROR_CALLBACK.
      *
-     * @param $options mixed
-     *        Ignored unless $mode is PEAR_ERROR_TRIGGER or
-     *        PEAR_ERROR_CALLBACK.  When $mode is PEAR_ERROR_TRIGGER,
-     *        this parameter is expected to be an integer and one of
-     *        E_USER_NOTICE, E_USER_WARNING or E_USER_ERROR.  When
-     *        $mode is PEAR_ERROR_CALLBACK, this parameter is expected
+     * @param mixed $options
+     *        When $mode is PEAR_ERROR_TRIGGER, this is the error level (one
+     *        of E_USER_NOTICE, E_USER_WARNING or E_USER_ERROR).
+     *
+     *        When $mode is PEAR_ERROR_CALLBACK, this parameter is expected
      *        to be the callback function or method.  A callback
      *        function is a string with the name of the function, a
      *        callback method is an array of two elements: the element
      *        at index 0 is the object, and the element at index 1 is
      *        the name of the method to call in the object.
+     *
+     *        When $mode is PEAR_ERROR_PRINT or PEAR_ERROR_DIE, this is
+     *        a printf format string used when printing the error
+     *        message.
      *
      * @access public
      * @return void
@@ -273,21 +275,38 @@ class PEAR
     /**
      * This method is used to tell which errors you expect to get.
      * Expected errors are always returned with error mode
-     * PEAR_ERROR_RETURN.  To stop expecting errors, call this method
-     * again without parameters.
+     * PEAR_ERROR_RETURN.  Expected error codes are stored in a stack,
+     * and this method pushes a new element onto it.  The list of
+     * expected errors are in effect until they are popped off the
+     * stack with the popExpect() method.
      *
      * @param mixed    a single error code or an array of error codes
      *                 to expect
      *
-     * @return void
+     * @return int     the new depth of the "expected errors" stack
      */
-    function expectError($code = null)
+    function expectError($code)
     {
-        if ($code === null || is_array($code)) {
-            $this->_expected_errors = $code;
+        if (is_array($code)) {
+            array_push($this->_expected_errors, $code);
         } else {
-            $this->_expected_errors = array($code);
+            array_push($this->_expected_errors, array($code));
         }
+        return sizeof($this->_expected_errors);
+    }
+
+    // }}}
+    // {{{ popExpect()
+
+    /**
+     * This method pops one element off the expected error codes
+     * stack.
+     *
+     * @return array   the list of error codes that were popped
+     */
+    function popExpect()
+    {
+        return array_pop($this->_expected_errors);
     }
 
     // }}}
@@ -347,7 +366,7 @@ class PEAR
             $message     = $message->getMessage();
         }
 
-        if (@in_array($code, $this->_expected_errors)) {
+        if (sizeof($this->_expected_errors) > 0 && in_array($code, end($this->_expected_errors))) {
             $mode = PEAR_ERROR_RETURN;
         }
 
@@ -561,17 +580,27 @@ class PEAR_Error
             $this->callback = null;
         }
         if ($this->mode & PEAR_ERROR_PRINT) {
-            print $this->getMessage();
+            if (is_null($options) || is_int($options)) {
+                $format = "%s";
+            } else {
+                $format = $options;
+            }
+            printf($format, $this->getMessage());
         }
         if ($this->mode & PEAR_ERROR_TRIGGER) {
             trigger_error($this->getMessage(), $this->level);
         }
         if ($this->mode & PEAR_ERROR_DIE) {
             $msg = $this->getMessage();
-            if (substr($msg, -1) != "\n") {
-                $msg .= "\n";
+            if (is_null($options) || is_int($options)) {
+                $format = "%s";
+                if (substr($msg, -1) != "\n") {
+                    $msg .= "\n";
+                }
+            } else {
+                $format = $options;
             }
-            die($msg);
+            die(sprintf($format, $msg));
         }
         if ($this->mode & PEAR_ERROR_CALLBACK) {
             if (is_string($this->callback) && strlen($this->callback)) {
@@ -758,7 +787,7 @@ register_shutdown_function("_PEAR_call_destructors");
 
 /*
  * Local Variables:
- * mode: c++
+ * mode: php
  * tab-width: 4
  * c-basic-offset: 4
  * End:
