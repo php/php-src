@@ -841,6 +841,7 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRML
         
 		if(opt_name) {
 			_php_tidy_set_tidy_opt(doc, opt_name, *opt_val TSRMLS_CC);
+			opt_name = NULL;
 		}
 					
 	}
