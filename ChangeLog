@@ -1,3 +1,27 @@
+2000-11-19  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/info.c: typo fix (copy/paste bug?)
+
+2000-11-19  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/skeleton/php_skeleton.h
+      NEWS: *** empty log message ***
+
+2000-11-19  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/session/session.c:
+    Fix #3261 - variables declared as "global" in function do not get the right
+    value after session_start.
+
+2000-11-19  David Hedbor  <david@hedbor.org>
+
+    * sapi/caudium/config.m4
+      sapi/roxen/config.m4: Patch to find module dir
+
+2000-11-19  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/mcal/config.m4: include checks for cal_misc.h and icalroutines.h
+
 2000-11-18  dickmeiss  <dickmeiss@toye.p.sourceforge.net>
 
     * ext/yaz/.cvsignore: Added .cvsignore file.
