@@ -29,7 +29,7 @@
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
 
-static zval *com_property_read(zval *object, zval *member, zend_bool silent TSRMLS_DC)
+static zval *com_property_read(zval *object, zval *member, int type TSRMLS_DC)
 {
 	zval *return_value;
 	php_com_dotnet_object *obj;
@@ -52,9 +52,7 @@ static zval *com_property_read(zval *object, zval *member, zend_bool silent TSRM
 			VariantClear(&v);
 		}
 	} else {
-		if (!silent) {
-			php_com_throw_exception(E_INVALIDARG, "this variant has no properties" TSRMLS_CC);
-		}
+		php_com_throw_exception(E_INVALIDARG, "this variant has no properties" TSRMLS_CC);
 	}
 
 	return return_value;
