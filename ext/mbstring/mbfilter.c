@@ -7440,8 +7440,10 @@ mbfl_convert_encoding(
 	if (filter1 == NULL) {
 		return NULL;
 	}
-	filter2->illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-	filter2->illegal_substchar = 0x3f;		/* '?' */
+	if (filter2 != NULL) {
+		filter2->illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
+		filter2->illegal_substchar = 0x3f;		/* '?' */
+	}
 	mbfl_memory_device_init(&device, string->len, (string->len >> 2) + 8 TSRMLS_CC);
 
 	/* feed data */

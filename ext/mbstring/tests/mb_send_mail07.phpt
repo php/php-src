@@ -31,7 +31,7 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=%s
 Content-Transfer-Encoding: %s
 
-test
+dGVzdA==
 To: example@example.com
 Subject: =?ISO-2022-KR?B?GyQpQw5FVz06Ri4PIEtvcmVhbg8=?=
 Mime-Version: 1.0
