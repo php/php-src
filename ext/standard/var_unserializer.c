@@ -213,7 +213,7 @@ static inline size_t parse_uiv(const unsigned char *p)
 static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, int elements)
 {
 	while (elements-- > 0) {
-		zval *key, *data, *old_data;
+		zval *key, *data, **old_data;
 
 		ALLOC_INIT_ZVAL(key);
 
