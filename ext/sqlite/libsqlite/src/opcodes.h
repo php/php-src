@@ -1,4 +1,3 @@
-
 /* Automatically generated file.  Do not edit */
 #define OP_Goto                          1
 #define OP_Gosub                         2

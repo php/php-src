@@ -1,4 +1,3 @@
-
 /* Automatically generated file.  Do not edit */
 char *sqliteOpcodeNames[] = { "???", 
   "Goto", 

@@ -1,4 +1,3 @@
-
 /* Driver template for the LEMON parser generator.
 ** The author disclaims copyright to this source code.
 */
