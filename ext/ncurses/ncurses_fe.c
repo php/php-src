@@ -63,6 +63,7 @@ function_entry ncurses_functions[] = {
   PHP_FE(ncurses_doupdate, NULL)
   PHP_FE(ncurses_echo, NULL)
   PHP_FE(ncurses_erase, NULL)
+  PHP_FE(ncurses_werase, NULL)
   PHP_FE(ncurses_erasechar, NULL)
   PHP_FE(ncurses_flash, NULL)
   PHP_FE(ncurses_flushinp, NULL)
@@ -78,6 +79,7 @@ function_entry ncurses_functions[] = {
   PHP_FE(ncurses_nonl, NULL)
   PHP_FE(ncurses_noraw, NULL)
   PHP_FE(ncurses_raw, NULL)
+  PHP_FE(ncurses_meta, NULL)
   PHP_FE(ncurses_resetty, NULL)
   PHP_FE(ncurses_savetty, NULL)
   PHP_FE(ncurses_termattrs, NULL)
@@ -176,6 +178,7 @@ function_entry ncurses_functions[] = {
 	PHP_FE(ncurses_whline,		NULL)
 	PHP_FE(ncurses_wvline,		NULL)
 	PHP_FE(ncurses_getyx,		secondandthird_args_force_ref)
+	PHP_FE(ncurses_getmaxyx,		secondandthird_args_force_ref)
 	
 #if HAVE_NCURSES_PANEL
 	PHP_FE(ncurses_update_panels,	NULL)

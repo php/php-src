@@ -583,6 +583,42 @@ PHP_FUNCTION(ncurses_raw)
 }
 /* }}} */
 
+/* {{{ proto long ncurses_meta(resource window, bool 8bit)
+   Enables/Disable 8-bit meta key information */
+PHP_FUNCTION(ncurses_meta)
+{
+	zend_bool enable;
+	zval *handle;
+	WINDOW **win;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb", &handle, &enable)==FAILURE) {
+        return;
+	}
+
+	FETCH_WINRES(win, &handle);
+
+	RETURN_LONG(meta(*win, enable));
+}
+/* }}} */
+
+/* {{{ proto long ncurses_werase(resource window)
+   Erase window contents */
+PHP_FUNCTION(ncurses_werase)
+{
+	zval *handle;
+	WINDOW **win;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &handle)==FAILURE) {
+        return;
+	}
+
+	FETCH_WINRES(win, &handle);
+
+	RETURN_LONG(werase(*win));
+}
+/* }}} */
+
+
 /* {{{ proto bool ncurses_resetty(void)
    Restores saved terminal state */
 PHP_FUNCTION(ncurses_resetty)
@@ -1815,6 +1851,27 @@ PHP_FUNCTION(ncurses_getyx)
 	getyx(*win, Z_LVAL_PP(y), Z_LVAL_PP(x));
 }
 /* }}} */
+
+/* {{{ proto void ncurses_getmaxyx(resource window, int &y, int &x)
+   Returns the size of a window */
+PHP_FUNCTION(ncurses_getmaxyx)
+{
+	zval **handle, **x, **y;
+	WINDOW **win;
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &handle, &y, &x) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+
+	FETCH_WINRES(win, handle);
+
+	convert_to_long_ex(x);
+	convert_to_long_ex(y);
+
+	getmaxyx(*win, Z_LVAL_PP(y), Z_LVAL_PP(x));
+}
+/* }}} */
+
+
 
 /* {{{ proto int ncurses_wmove(resource window, int y, int x)
    Moves windows output position */
