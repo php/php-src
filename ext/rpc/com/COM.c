@@ -220,7 +220,7 @@ PHP_INI_END()
 PHP_MINIT_FUNCTION(COM)
 {
 	CoInitialize(NULL);
-	le_idispatch = register_list_destructors(php_idispatch_destructor,NULL);
+	le_idispatch = register_list_destructors(php_idispatch_destructor, NULL);
 	php_register_COM_class();
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
@@ -507,7 +507,7 @@ int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_re
 	dispparams.cNamedArgs = 0;
 
 	hr = i_dispatch->lpVtbl->Invoke(i_dispatch, dispid, &IID_NULL,
-									LOCALE_SYSTEM_DEFAULT, DISPATCH_METHOD,
+									LOCALE_SYSTEM_DEFAULT, DISPATCH_METHOD|DISPATCH_PROPERTYGET,
 									&dispparams, var_result, NULL, 0);
 
 	if (FAILED(hr)) {
@@ -773,7 +773,8 @@ VARIANTARG _php_COM_get_property_handler(zend_property_reference *property_refer
 	zend_hash_index_find(object->value.obj.properties, 0, (void **) &idispatch_handle);
 	i_dispatch = zend_list_find((*idispatch_handle)->value.lval,&type);
 	if (!i_dispatch || (type!=le_idispatch)) {
-		/* bail out */
+		var_result.vt = VT_EMPTY;
+		return var_result;
 	}
 
 	var_result.vt = VT_DISPATCH;
@@ -784,16 +785,19 @@ VARIANTARG _php_COM_get_property_handler(zend_property_reference *property_refer
 		switch (overloaded_property->type) {
 			case OE_IS_ARRAY:
 				if (do_COM_offget(&var_result, &var_result, &overloaded_property->element, element!=property_reference->elements_list->head)==FAILURE) {
-					/* bail out */
+					var_result.vt = VT_EMPTY;
+					return var_result;
 				}
 				/*printf("Array offset:  ");*/
 				break;
 			case OE_IS_OBJECT:
 				if (var_result.vt != VT_DISPATCH) {
-					/* bail out */
+					var_result.vt = VT_EMPTY;
+					return var_result;
 				} else {
 					if (do_COM_propget(&var_result, var_result.pdispVal, &overloaded_property->element, element!=property_reference->elements_list->head)==FAILURE) {
-						/* bail out */
+						var_result.vt = VT_EMPTY;
+						return var_result;
 					}
 					/*printf("Object property:  ");*/
 				}
@@ -844,7 +848,7 @@ int php_COM_set_property_handler(zend_property_reference *property_reference, pv
 	zend_hash_index_find(object->value.obj.properties, 0, (void **) &idispatch_handle);
 	i_dispatch = zend_list_find((*idispatch_handle)->value.lval,&type);
 	if (!i_dispatch || (type!=le_idispatch)) {
-		/* bail out */
+		return FAILURE;
 	}
 	var_result.vt = VT_DISPATCH;
 	var_result.pdispVal = i_dispatch;
@@ -857,7 +861,7 @@ int php_COM_set_property_handler(zend_property_reference *property_reference, pv
 				break;
 			case OE_IS_OBJECT:
 				if (var_result.vt != VT_DISPATCH) {
-					/* bail out */
+					return FAILURE;
 				} else {
 					do_COM_propget(&var_result, i_dispatch, &overloaded_property->element, element!=property_reference->elements_list->head);
 					/*printf("Object property:  ");*/
