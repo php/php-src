@@ -346,7 +346,7 @@ PHPAPI FILE *php3_fopen_with_path(char *filename, char *mode, char *path, char *
 			if(PG(doc_root)) {
 				snprintf(trypath, MAXPATHLEN, "%s%s", PG(doc_root), filename);
 			} else {
-				strncpy(trypath,filename,MAXPATHLEN);
+				strlcpy(trypath,filename,sizeof(trypath));
 			}
 			if (!_php3_checkuid(trypath, cm)) {
 				return NULL;
@@ -494,24 +494,19 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 #endif							/*win32 */
 
 		strcpy(hdr_line, "GET ");
-		len = 4;
+		
 		/* tell remote http which file to get */
 		if (resource->path != NULL) {
-			strncat(hdr_line, resource->path, sizeof(hdr_line)-len);
-			len += strlen(resource->path);
+			strlcat(hdr_line, resource->path, sizeof(hdr_line));
 		} else {
-			strncat(hdr_line, "/", sizeof(hdr_line)-len);
-			len++;
+			strlcat(hdr_line, "/", sizeof(hdr_line));
 		}
 		/* append the query string, if any */
 		if (resource->query != NULL) {
-			strncat(hdr_line, "?", sizeof(hdr_line)-len);
-			len++;
-			strncat(hdr_line, resource->query, sizeof(hdr_line)-len);
-			len += strlen(resource->query);
+			strlcat(hdr_line, "?", sizeof(hdr_line));
+			strlcat(hdr_line, resource->query, sizeof(hdr_line));
 		}
-		strncat(hdr_line, " HTTP/1.0\r\n", sizeof(hdr_line)-len);
-		hdr_line[sizeof(hdr_line)-1] = '\0';
+		strlcat(hdr_line, " HTTP/1.0\r\n", sizeof(hdr_line));
 		SOCK_WRITE(hdr_line, *socketd);
 		
 		/* send authorization header if we have user/pass */
