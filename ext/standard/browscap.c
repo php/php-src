@@ -35,8 +35,6 @@ static zval *current_section;
 static void browscap_entry_dtor(zval *pvalue)
 {
 	if (Z_TYPE_P(pvalue) == IS_ARRAY) {
-		TSRMLS_FETCH();
-
 		zend_hash_destroy(Z_ARRVAL_P(pvalue));
 		free(Z_ARRVAL_P(pvalue));
 	}
@@ -95,7 +93,6 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, vo
 			if (current_section && arg2) {
 				zval *new_property;
 				char *new_key;
-				TSRMLS_FETCH();
 
 				new_property = (zval *) malloc(sizeof(zval));
 				INIT_PZVAL(new_property);
@@ -113,7 +110,6 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, vo
 				zval *processed;
 				zval *unprocessed;
 				HashTable *section_properties;
-				TSRMLS_FETCH();
 
 				/*printf("'%s' (%d)\n",$1.value.str.val,$1.value.str.len+1);*/
 				current_section = (zval *) malloc(sizeof(zval));
@@ -192,7 +188,6 @@ static int browser_reg_compare(zval **browser, int num_args, va_list args, zend_
 	regex_t r;
 	char *lookup_browser_name = va_arg(args, char *);
 	zval **found_browser_entry = va_arg(args, zval **);
-	TSRMLS_FETCH();
 
 	if (*found_browser_entry) { /* already found */
 		return 0;
