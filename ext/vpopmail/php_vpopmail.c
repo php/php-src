@@ -285,7 +285,7 @@ PHP_FUNCTION(vpopmail_add_alias_domain)
  * Domain management functions - exec
  */
 
-/* {{{ proto int vpopmail_add_domain_ex(string domain, string passwd [, string quota [, string bounce [, bool apop]]])
+/* {{{ proto bool vpopmail_add_domain_ex(string domain, string passwd [, string quota [, string bounce [, bool apop]]])
    Add a new virtual domain */
 PHP_FUNCTION(vpopmail_add_domain_ex) {
 	zval **domain, **passwd, **quota, **bounce, **apop;
@@ -411,7 +411,7 @@ PHP_FUNCTION(vpopmail_add_domain_ex) {
 }
 /* }}} */
 
-/* {{{ proto int vpopmail_del_domain_ex(string domain)
+/* {{{ proto bool vpopmail_del_domain_ex(string domain)
    Delete a virtual domain */
 PHP_FUNCTION(vpopmail_del_domain_ex) {
 	zval **domain;
@@ -455,7 +455,7 @@ PHP_FUNCTION(vpopmail_del_domain_ex) {
 }
 /* }}} */
 
-/* {{{ proto int vpopmail_add_alias_domain_ex(string olddomain, string newdomain)
+/* {{{ proto bool vpopmail_add_alias_domain_ex(string olddomain, string newdomain)
    Add alias to an existing virtual domain */
 PHP_FUNCTION(vpopmail_add_alias_domain_ex) {
 	zval **olddomain, **newdomain;
