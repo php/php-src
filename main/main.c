@@ -688,10 +688,6 @@ int return_one(void *p)
 
 void php_request_shutdown(void *dummy)
 {
-#if FHTTPD
-	char tmpline[128];
-	int i, serverdefined;
-#endif
 	CLS_FETCH();
 	ELS_FETCH();
 	PLS_FETCH();
@@ -712,54 +708,12 @@ void php_request_shutdown(void *dummy)
 	php3_unset_timeout();
 
 
-
 #if CGI_BINARY
 	fflush(stdout);
 	if(request_info.php_argv0) {
 		free(request_info.php_argv0);
 		request_info.php_argv0 = NULL;
 	}
-#endif
-#if FHTTPD
-	if (response) {
-		if (!headermade) {
-			makestandardheader(response, 200, "text/html", "fhttpd", req && req->keepalive);
-		} else {
-			if (headerfirstline)
-				putlinetoheader(response, headerfirstline);
-			else
-				putlinetoheader(response, "HTTP/1.0 200 OK\r\n");
-			serverdefined = 0;
-			for (i = 0; i < headerlines; i++) {
-				if (!strncmp(currentheader[i], "Server:", 7))
-					serverdefined = 1;
-				putlinetoheader(response, currentheader[i]);
-			}
-			if (!serverdefined)
-				putlinetoheader(response, "Server: fhttpd\r\n");
-			if (response->datasize) {
-				sprintf(tmpline, "Content-Length: %ld\r\n", response->datasize);
-				putlinetoheader(response, tmpline);
-				if (req && req->keepalive)
-					putlinetoheader(response,
-									"Connection: Keep-Alive\r\nKeep-Alive: max=0, timeout=30\r\n");
-			}
-			php3_fhttpd_free_header();
-		}
-		sendresponse(server, response);
-		if (response->datasize)
-			finishresponse(server, response);
-		else
-			finishdropresponse(server, response);
-		deleteresponse(response);
-	}
-	response = NULL;
-	if (req)
-		deleterequest(req);
-	req = NULL;
-#endif
-#if USE_SAPI
-	sapi_rqst->flush(sapi_rqst->scid);
 #endif
 }
 
@@ -1018,54 +972,6 @@ int _php3_hash_environment(PLS_D ELS_DC)
 		_php3_hash_update(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF"), (void *) &tmp, sizeof(pval *), NULL);
 	}
 #else
-#if FHTTPD
-	{
-		int i, j;
-		if (req) {
-			for (i = 0; i < req->nlines; i++) {
-				if (req->lines[i].paramc > 1 && req->lines[i].params[0] && req->lines[i].params[1]) {
-					tmp = (pval *) emalloc(sizeof(pval));
-					tmp->value.str.len = strlen(req->lines[i].params[1]);
-					tmp->value.str.val = estrndup(req->lines[i].params[1], tmp->value.str.len);
-					tmp->type = IS_STRING;
-					tmp->refcount=1;
-					tmp->is_ref=0;
-					_php3_hash_update(&EG(symbol_table), req->lines[i].params[0],
-									strlen(req->lines[i].params[0]) + 1, &tmp, 
-									sizeof(pval *), NULL);
-				}
-			}
-			if (req->script_name_resolved) {
-				i = strlen(req->script_name_resolved);
-				tmp = (pval *) emalloc(sizeof(pval));
-				tmp->value.str.len = i;
-				tmp->value.str.val = estrndup(req->script_name_resolved, i);
-				tmp->type = IS_STRING;
-				tmp->refcount=1;
-				tmp->is_ref=0;
-				_php3_hash_update(&EG(symbol_table), "PATH_TRANSLATED",
-								sizeof("PATH_TRANSLATED"),
-								&tmp, sizeof(pval *), NULL);
-				if (req->script_name) {
-					j = i - strlen(req->script_name);
-					if (j > 0
-						&& !strcmp(req->script_name_resolved + j,
-								   req->script_name)) {
-						tmp = (pval *) emalloc(sizeof(pval));
-						tmp->value.str.len = j;
-						tmp->value.str.val = estrndup(req->script_name_resolved, j);
-						tmp->type = IS_STRING;
-						tmp->refcount=1;
-						tmp->is_ref=0;
-						_php3_hash_update(&EG(symbol_table), "DOCUMENT_ROOT",
-										sizeof("DOCUMENT_ROOT"),
-							   &tmp, sizeof(pval *), NULL);
-					}
-				}
-			}
-		}
-	}
-#endif
 	{
 		/* Build the special-case PHP_SELF variable for the CGI version */
 		char *pi;

@@ -1526,8 +1526,8 @@ PHP_FUNCTION(fgetcsv) {
 
 	pval *fd, *bytes;
 	FILE *fp;
-	int id, len, br, type;
-	char *buf, *p, *rbuf, *rp, c, lc;
+	int id, len, type;
+	char *buf;
 	int issock=0;
 	int *sock,socketd=0;
 
