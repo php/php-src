@@ -66,7 +66,6 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 	char *str;
 	ulong str_len;
 	ulong num_index;
-	char buf[256];
 
 	fprintf(stderr, "Merge dir (%p) (%p)\n", base_conf, new_conf);
 	for (zend_hash_internal_pointer_reset(&d->config);
@@ -78,8 +77,7 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 			if (pe->status >= data->status) continue;
 		}
 		zend_hash_update(&e->config, str, str_len, data, sizeof(*data), NULL);
-		sprintf(buf, "ADDING/OVERWRITING %%%lds (%d vs. %d)\n", str_len, data->status, pe?pe->status:-1);
-		fprintf(stderr, buf, str);
+		fprintf(stderr, "ADDING/OVERWRITING %s (%d vs. %d)\n", str, data->status, pe?pe->status:-1);
 	}
 	return new_conf;
 }
