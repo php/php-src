@@ -248,7 +248,7 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	switch(arg_count) {
 		case 5:
 			convert_to_double(args[4]);
-			conv = (unsigned long) args[4]->value.dval * 1000000.0;
+			conv = (unsigned long) (args[4]->value.dval * 1000000.0);
 			timeout.tv_sec = conv / 1000000;
 			timeout.tv_usec = conv % 1000000;
 			/* fall-through */

@@ -768,11 +768,10 @@ int php_module_startup(sapi_module_struct *sf)
 	sapi_globals_struct *sapi_globals = ts_resource(sapi_globals_id);
 #endif
 #if (WIN32|WINNT) && !(USE_SAPI)
-	WORD wVersionRequested;
+	WORD wVersionRequested = MAKEWORD(2, 0);
 	WSADATA wsaData;
-
-	wVersionRequested = MAKEWORD(2, 0);
 #endif
+	ELS_FETCH();
 
 	SG(server_context) = NULL;
 	SG(request_info).request_method = NULL;
@@ -782,6 +781,8 @@ int php_module_startup(sapi_module_struct *sf)
 		return SUCCESS;
 	}
 
+	EG(error_reporting) = E_ALL & ~E_NOTICE;
+	
 	sapi_module = *sf;
 
 	zend_output_startup();
