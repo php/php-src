@@ -1,6 +1,11 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.0
+- Clean up posix extension (no more unwanted warning messages, introduce
+  posix_errno() and posix_strerror() for fetching error messages); changed the
+  way posix_getgrnam() and posix_getgrgid() return their values (breaks BC but
+  makes more sense); do not include functions in symbol table which aren't
+  supported on host system. (Markus)
 - TIFF support for GetImageSize (Marcus)
 - The Velocis extension is no
 - Added test.php/txt to have a possibility to check ext/exif
