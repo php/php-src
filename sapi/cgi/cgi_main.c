@@ -502,6 +502,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 				case '?':
 					no_headers = 1;
 					php_output_startup();
+					php_output_activate();
 					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
 					php_end_ob_buffers(1);
@@ -566,6 +567,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 				case '?':
 					no_headers = 1;  
 					php_output_startup();
+					php_output_activate();
 					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
 					php_end_ob_buffers(1);
@@ -592,6 +594,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 			case 'm': /* list compiled in modules */
 		        php_output_startup();
+				php_output_activate();
                 SG(headers_sent) = 1;
 				php_printf("Running PHP %s\n%s\n", PHP_VERSION , get_zend_version());
 				php_printf("[PHP Modules]\n");
