@@ -18,7 +18,9 @@
 
 
 #include "php.h"
+#ifndef PHP_WIN32
 #include "build-defs.h"
+#endif
 #include "ext/standard/info.h"
 #include "zend_ini.h"
 #include "php_ini.h"

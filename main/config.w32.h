@@ -1,5 +1,5 @@
 /* config.w32.h.  Configure file for win32 platforms  */
-/* tested only with MS Visual C++ V5 */
+/* tested only with MS Visual C++ V6 */
 
 
 /* Define if PHP to setup it's own SIGCHLD handler (not needed on Win32) */
@@ -325,3 +325,12 @@
 #define PHP_EXTENSION_DIR NULL
 
 #define SIZEOF_INT 4
+
+/* Define directory constants for php and pear */
+#define PHP_BINDIR "c:\\php4"
+#define PHP_LIBDIR "c:\\php4"
+#define PHP_DATADIR "c:\\php4"
+#define PHP_SYSCONFDIR "c:\\php4"
+#define PHP_LOCALSTATEDIR "c:\\php4"
+#define PHP_CONFIG_FILE_PATH "c:\\winnt"
+#define PEAR_INSTALLDIR "c:\\php4\\pear"
