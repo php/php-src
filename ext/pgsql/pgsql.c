@@ -2708,15 +2708,13 @@ static unsigned char * php_pgsql_unescape_bytea(unsigned char *strtext, size_t *
 			case 3:
 				if (isdigit(*sp))		/* state=4 */
 				{
-					unsigned int  v,i;
-					unsigned char buf[4]; /* 000 + '\0' */
-
+					unsigned char *start, *end, buf[4]; /* 000 + '\0' */
+					
 					bp -= 3;
-					for (i = 0; i < 3; i++)
-						buf[i] = *((sp-2)+i);
-					buf[i] = '\0';
-					sscanf(buf, "%03o", &v);
-					*bp = v;
+					memcpy(buf, sp-2, 3);
+					buf[3] = '\0';
+					start = buf;
+ 					*bp = (unsigned char)strtoul(start, &end, 8);
 					buflen -= 3;
 					state = 0;
 				}
