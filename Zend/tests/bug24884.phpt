@@ -15,7 +15,7 @@ class Test {
         }
         else
         {
-            return $this->__clone();
+            return clone $this;
         }
     }
 }
