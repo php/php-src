@@ -14,22 +14,23 @@ SOAP
 Encoding
 --------
 - full support for standard simple types (
-  - duration, 
-  - anyURI, 
-  - QName, 
-  - NOTATION,
-  - normalizedString, 
-  - token, 
-  - language, 
-  - NMTOKEN, 
-  - Name, 
-  - NCName, 
-  - ID, 
-  - IDREF,
-  - IDREFS, 
-  - ENTITY, 
-  - ENTITIES, 
-  - unsignedLong)
+  + anyType
+  ? duration, 
+  ? anyURI, 
+  ? QName, 
+  ? NOTATION,
+  ? normalizedString, 
+  ? token, 
+  ? language, 
+  ? NMTOKEN, 
+  ? Name, 
+  ? NCName, 
+  ? ID, 
+  ? IDREF,
+  ? IDREFS, 
+  ? ENTITY, 
+  ? ENTITIES, 
+  ? unsignedLong)
 - full support for standard date/time types (
   ? dateTime,
   ? time,
@@ -43,10 +44,12 @@ Encoding
 ? proper encoding of standard base64Binary type
 - full support for arrays
   ? arrayType attribute
-  - offset attribute
-  - position attribute
+  + offset attribute
+  + position attribute
   ? multidimensional arrays
   ? arrays of arrays
+  - encoding of arrays with holes
+- full support for structures???  
 ? provide schema 1999/2001 support???
 ? make internal refrences for soap encoding (use seralization logic)???
 ? provide user space overriding of serialization certin objects and types???
