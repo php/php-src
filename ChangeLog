@@ -1,3 +1,50 @@
+2002-06-05  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/libgd/gd.c: ws and indent fixes
+
+    * ext/gd/libgd/gd.c: - Fixes a segfault reported in #17584
+
+2002-06-05  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * win32/sendmail.c
+      win32/sendmail.h:
+    - Headers are now rewritten to always have \r\n line endings for SMTP.
+      Also automatically removes superflous line breaks at
+      the start and end of the header.
+
+2002-06-05  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/domxml/php_domxml.c:
+    - Fix a problem in domxml_dump_mem(_file) with xmlKeepBlanksDefault not
+      being set. (patch by Rob Richards <rrichards@digarc.com>)
+
+2002-06-05  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c:
+2002-06-05  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c:
+    fixed multiline header detection (':' is valid within following lines)
+    fixed fill_buffer to fill the buffer always completely
+
+2002-06-05  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h: more mnogosearch compilation fixes
+
+2002-06-05  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c:
+    fixing some crashbugs that can be triggered with bogus uploads.
+
+2002-06-05  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.h
+      ext/mnogosearch/php_mnogo.c:
+    MnoGoSearch extension fixes to compile under latest
+    mnogosearch 3.2.4 and 3.2.5. Still does not compile with them,
+    but the work still in progress...
+
 2002-06-04  Edin Kadribasic  <edink@proventum.net>
 
     * win32/glob.c: Sync with openbsd glob.c 1.19
