@@ -42,7 +42,20 @@
   <date>2004-05-21</date>
 
   <notes>
-	  No documentation yet.
+Note that PDO on its own is useless.
+You need to install a PDO database driver to make use of it,
+check http://pecl.php.net for a list of available PDO drivers.
+
+It is highly recommended that you update to the latest PHP 5 snapshot before using PDO.
+You can obtain it from http://snaps.php.net.
+
+If you are running on Windows, you should download:
+http://snaps.php.net/win32/php5-win32-latest.zip
+http://snaps.php.net/win32/PECL_5_0/php_pdo.dll
+
+You can find additional PDO drivers at:
+http://snaps.php.net/win32/PECL_5_0/
+
   </notes>
 
   <filelist>
