@@ -27,12 +27,22 @@
 #if DBA_DBM
 #include "php_dbm.h"
 
+#ifdef DBA_DBM_BUILTIN
+#include "libdbm/dbm.h"
+#else
 #include <dbm.h>
+#endif
 
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
+#ifndef DBA_DBM_BUILTIN
+typedef struct {
+	datum nextkey;
+} dba_dbm_data;
+#endif
 
 #define DBM_DATA dba_dbm_data *dba = info->dbf
 #define DBM_GKEY datum gkey; gkey.dptr = (char *) key; gkey.dsize = keylen
@@ -45,12 +55,41 @@
 	close(fd);
 
 
-typedef struct {
-	datum nextkey;
-} dba_dbm_data;
-
 DBA_OPEN_FUNC(dbm)
 {
+#ifdef DBA_DBM_BUILTIN
+	char *fmode;
+	php_stream *fp;
+
+	info->dbf = ecalloc(sizeof(dba_dbm_data), 1);
+	if (!info->dbf) {
+		*error = "Out of memory";
+		return FAILURE;
+	}
+
+	switch(info->mode) {
+		case DBA_READER:
+			fmode = "r";
+			break;
+		case DBA_WRITER:
+			fmode = "a+";
+			break;
+		case DBA_CREAT:
+		case DBA_TRUNC:
+			fmode = "w+";
+			break;
+		default:
+			return FAILURE; /* not possible */
+	}
+	fp = php_stream_open_wrapper(info->path, fmode, STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+	if (!fp) {
+		*error = "Unable to open file";
+		return FAILURE;
+	}
+
+	((dba_dbm_data*)info->dbf)->fp = fp;
+	return SUCCESS;
+#else
 	int fd;
 	int filemode = 0644;
 
@@ -84,13 +123,36 @@ DBA_OPEN_FUNC(dbm)
 		return FAILURE;
 	}
 	return SUCCESS;
+#endif
 }
 
 DBA_CLOSE_FUNC(dbm)
 {
-	efree(info->dbf);
+	DBM_DATA;
+
+#ifdef DBA_DBM_BUILTIN
+	php_stream_close(dba->fp);
+	if (dba->nextkey.dptr)
+		efree(dba->nextkey.dptr);
+#else
 	dbmclose();
+#endif
+	efree(dba);
 }
+
+#ifdef DBA_DBM_BUILTIN
+#define DBM_FETCH(gkey)       dbm_file_fetch((dba_dbm_data*)info->dbf, gkey TSRMLS_CC)
+#define DBM_STORE(gkey, gval) dbm_file_store((dba_dbm_data*)info->dbf, gkey, gval, DBM_REPLACE TSRMLS_CC)
+#define DBM_DELETE(gkey)      dbm_file_delete((dba_dbm_data*)info->dbf, gkey TSRMLS_CC)
+#define DBM_FIRSTKEY()        dbm_file_firstkey((dba_dbm_data*)info->dbf TSRMLS_CC)
+#define DBM_NEXTKEY(gkey)     dbm_file_nextkey((dba_dbm_data*)info->dbf TSRMLS_CC)
+#else
+#define DBM_FETCH(gkey)       fetch(gkey)
+#define DBM_STORE(gkey, gval) store(gkey, gval)
+#define DBM_DELETE(gkey)      delete(gkey)
+#define DBM_FIRSTKEY()        firstkey()
+#define DBM_NEXTKEY(gkey)     nextkey(gkey)
+#endif
 
 DBA_FETCH_FUNC(dbm)
 {
@@ -98,10 +160,13 @@ DBA_FETCH_FUNC(dbm)
 	char *new = NULL;
 
 	DBM_GKEY;
-	gval = fetch(gkey);
+	gval = DBM_FETCH(gkey);
 	if(gval.dptr) {
 		if(newlen) *newlen = gval.dsize;
 		new = estrndup(gval.dptr, gval.dsize);
+#ifdef DBA_DBM_BUILTIN
+		efree(gval.dptr);
+#endif
 	}
 	return new;
 }
@@ -114,7 +179,7 @@ DBA_UPDATE_FUNC(dbm)
 	gval.dptr = (char *) val;
 	gval.dsize = vallen;
 	
-	return (store(gkey, gval) == -1 ? FAILURE : SUCCESS);
+	return (DBM_STORE(gkey, gval) == -1 ? FAILURE : SUCCESS);
 }
 
 DBA_EXISTS_FUNC(dbm)
@@ -122,8 +187,11 @@ DBA_EXISTS_FUNC(dbm)
 	datum gval;
 	DBM_GKEY;
 	
-	gval = fetch(gkey);
+	gval = DBM_FETCH(gkey);
 	if(gval.dptr) {
+#ifdef DBA_DBM_BUILTIN
+		efree(gval.dptr);
+#endif
 		return SUCCESS;
 	}
 	return FAILURE;
@@ -132,41 +200,46 @@ DBA_EXISTS_FUNC(dbm)
 DBA_DELETE_FUNC(dbm)
 {
 	DBM_GKEY;
-	return(delete(gkey) == -1 ? FAILURE : SUCCESS);
+	return(DBM_DELETE(gkey) == -1 ? FAILURE : SUCCESS);
 }
 
 DBA_FIRSTKEY_FUNC(dbm)
 {
 	DBM_DATA;
-	datum gkey;
-	char *key = NULL;
 
-	gkey = firstkey();
-	if(gkey.dptr) {
-		if(newlen) *newlen = gkey.dsize;
-		key = estrndup(gkey.dptr, gkey.dsize);
-		dba->nextkey = gkey;
-	} else
-		dba->nextkey.dptr = NULL;
-	return key;
+#ifdef DBA_DBM_BUILTIN
+	if (dba->nextkey.dptr)
+		efree(dba->nextkey.dptr);
+#endif
+	dba->nextkey = DBM_FIRSTKEY();
+	if(dba->nextkey.dptr) {
+		if(newlen) 
+			*newlen = dba->nextkey.dsize;
+		return estrndup(dba->nextkey.dptr, dba->nextkey.dsize);
+	}
+	return NULL;
 }
 
 DBA_NEXTKEY_FUNC(dbm)
 {
 	DBM_DATA;
-	datum gkey;
-	char *nkey = NULL;
+	datum lkey;
 	
-	if(!dba->nextkey.dptr) return NULL;
+	if(!dba->nextkey.dptr) 
+		return NULL;
 	
-	gkey = nextkey(dba->nextkey);
-	if(gkey.dptr) {
-		if(newlen) *newlen = gkey.dsize;
-		nkey = estrndup(gkey.dptr, gkey.dsize);
-		dba->nextkey = gkey;
-	} else
-		dba->nextkey.dptr = NULL;
-	return nkey;
+	lkey = dba->nextkey;
+	dba->nextkey = DBM_NEXTKEY(lkey);
+#ifdef DBA_DBM_BUILTIN
+	if (lkey.dptr)
+		efree(lkey.dptr);
+#endif
+	if(dba->nextkey.dptr) {
+		if(newlen) 
+			*newlen = dba->nextkey.dsize;
+		return estrndup(dba->nextkey.dptr, dba->nextkey.dsize);
+	}
+	return NULL;
 }
 
 DBA_OPTIMIZE_FUNC(dbm)
@@ -177,6 +250,7 @@ DBA_OPTIMIZE_FUNC(dbm)
 
 DBA_SYNC_FUNC(dbm)
 {
+	/* dummy */
 	return SUCCESS;
 }
 

@@ -190,7 +190,13 @@ AC_DBA_STD_RESULT
 
 AC_ARG_WITH(dbm,
 [  --with-dbm[=DIR]        Include DBM support],[
-  if test "$withval" != "no"; then
+  if test "$withval" = "yes"; then
+    PHP_ADD_BUILD_DIR($ext_builddir/libdbm)
+    AC_DEFINE(DBA_DBM_BUILTIN, 1, [ ])
+    AC_DEFINE(DBA_DBM, 1, [ ])
+    dbm_sources="libdbm/dbm.c"
+    THIS_RESULT="builtin"
+  elif test "$withval" != "no"; then
     for i in /usr/local /usr $withval; do
       if test -f "$i/include/dbm.h" ; then
         THIS_PREFIX=$i
@@ -245,7 +251,7 @@ AC_MSG_CHECKING(whether to enable DBA interface)
 if test "$HAVE_DBA" = "1"; then
   AC_MSG_RESULT(yes)
   AC_DEFINE(HAVE_DBA, 1, [ ])
-  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_db2.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db3.c $cdb_sources, $ext_shared)
+  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_db2.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db3.c $cdb_sources $dbm_sources, $ext_shared)
   PHP_SUBST(DBA_SHARED_LIBADD)
 else
   AC_MSG_RESULT(no)
