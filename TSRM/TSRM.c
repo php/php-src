@@ -112,7 +112,7 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 #elif defined(TSRM_WIN32)
 	tls_key = TlsAlloc();
 #elif defined(BETHREADS)
-    tls_key = tls_allocate();
+	tls_key = tls_allocate();
 #endif
 
 	tsrm_error_file = stderr;
@@ -262,7 +262,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 #elif defined(TSRM_WIN32)
 	TlsSetValue(tls_key, (void *) *thread_resources_ptr);
 #elif defined(BETHREADS)
-    tls_set(tls_key, (void*) *thread_resources_ptr);
+	tls_set(tls_key, (void*) *thread_resources_ptr);
 #endif
 
 	if (tsrm_new_thread_begin_handler) {
@@ -303,7 +303,7 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 #elif defined(TSRM_WIN32)
 		thread_resources = TlsGetValue(tls_key);
 #elif defined(BETHREADS)
-        thread_resources = (tsrm_tls_entry*)tls_get(tls_key);
+		thread_resources = (tsrm_tls_entry*)tls_get(tls_key);
 #else
 		thread_resources = NULL;
 #endif
@@ -439,18 +439,18 @@ TSRM_API THREAD_T tsrm_thread_id(void)
 /* Allocate a mutex */
 TSRM_API MUTEX_T tsrm_mutex_alloc(void)
 {
-    MUTEX_T mutexp;
+	MUTEX_T mutexp;
 #ifdef NETWARE
-    long flags = 0;  /* Don't require NX_MUTEX_RECURSIVE, I guess */
-    NXHierarchy_t order = 0;
-    NX_LOCK_INFO_ALLOC (lockInfo, "PHP-TSRM", 0);
+	long flags = 0;  /* Don't require NX_MUTEX_RECURSIVE, I guess */
+	NXHierarchy_t order = 0;
+	NX_LOCK_INFO_ALLOC (lockInfo, "PHP-TSRM", 0);
 #endif    
 
 #ifdef TSRM_WIN32
-    mutexp = malloc(sizeof(CRITICAL_SECTION));
+	mutexp = malloc(sizeof(CRITICAL_SECTION));
 	InitializeCriticalSection(mutexp);
 #elif defined(NETWARE)
-    mutexp = NXMutexAlloc(flags, order, &lockInfo); /* return value ignored for now */
+	mutexp = NXMutexAlloc(flags, order, &lockInfo); /* return value ignored for now */
 #elif defined(GNUPTH)
 	mutexp = (MUTEX_T) malloc(sizeof(*mutexp));
 	pth_mutex_init(mutexp);
@@ -469,16 +469,16 @@ TSRM_API MUTEX_T tsrm_mutex_alloc(void)
 	mutexp->sem = create_sem(1, "PHP sempahore"); 
 #endif
 #ifdef THR_DEBUG
-		printf("Mutex created thread: %d\n",mythreadid());
+	printf("Mutex created thread: %d\n",mythreadid());
 #endif
-    return( mutexp );
+	return( mutexp );
 }
 
 
 /* Free a mutex */
 TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
 {
-    if (mutexp) {
+	if (mutexp) {
 #ifdef TSRM_WIN32
 		DeleteCriticalSection(mutexp);
 #elif defined(NETWARE)
@@ -498,9 +498,9 @@ TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
 		delete_sem(mutexp->sem);
 		free(mutexp);  
 #endif
-    }
+	}
 #ifdef THR_DEBUG
-		printf("Mutex freed thread: %d\n",mythreadid());
+	printf("Mutex freed thread: %d\n",mythreadid());
 #endif
 }
 
@@ -513,7 +513,7 @@ TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
 	EnterCriticalSection(mutexp);
 	return 1;
 #elif defined(NETWARE)
-	return NXLock(mutexp);	
+	return NXLock(mutexp);
 #elif defined(GNUPTH)
 	return pth_mutex_acquire(mutexp, 0, NULL);
 #elif defined(PTHREADS)
@@ -526,8 +526,8 @@ TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
 	return st_mutex_lock(mutexp);
 #elif defined(BETHREADS)
 	if (atomic_add(&mutexp->ben, 1) != 0)  
-	    return acquire_sem(mutexp->sem);   
-    return 0;
+		return acquire_sem(mutexp->sem);   
+	return 0;
 #endif
 }
 
@@ -552,8 +552,8 @@ TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp)
 #elif defined(TSRM_ST)
 	return st_mutex_unlock(mutexp);
 #elif defined(BETHREADS)
-    if (atomic_add(&mutexp->ben, -1) != 1) 
-	    return release_sem(mutexp->sem);
+	if (atomic_add(&mutexp->ben, -1) != 1) 
+		return release_sem(mutexp->sem);
 	return 0;   
 #endif
 }
