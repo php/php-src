@@ -32,7 +32,6 @@
 #include "basic_functions.h"
 #undef STATE_TAG
 
-#define url_adapt_ext url_adapt_ext_ex
 #define url_scanner url_scanner_ex
 
 #include "php_smart_str.h"
@@ -96,11 +95,15 @@ alpha = [a-zA-Z];
 #define YYLIMIT q
 #define YYMARKER r
 	
-static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *name, smart_str *val, const char *separator)
+static inline void append_modified_url(smart_str *url, smart_str *dest, HashTable *rewrite_vars, const char *separator)
 {
 	register const char *p, *q;
 	const char *bash = NULL;
 	const char *sep = "?";
+	char *string_key;
+	url_adapt_var_t *value;
+	int num_key;
+
 	
 	q = (p = url->c) + url->len;
 
@@ -124,10 +127,16 @@ done:
 	else
 		smart_str_append(dest, url);
 
-	smart_str_appends(dest, sep);
-	smart_str_append(dest, name);
-	smart_str_appendc(dest, '=');
-	smart_str_append(dest, val);
+	zend_hash_internal_pointer_reset(rewrite_vars);
+	while (zend_hash_get_current_key(rewrite_vars, &string_key, &num_key, 0) != HASH_KEY_NON_EXISTANT) {
+		zend_hash_get_current_data(rewrite_vars, &value);
+		smart_str_appends(dest, sep);
+		smart_str_append(dest, &(value->var));
+		smart_str_appendc(dest, '=');
+		smart_str_append(dest, &(value->val));
+		zend_hash_move_forward(rewrite_vars);
+		sep = separator;  /* switch from ? to now! */
+	}
 
 	if (bash)
 		smart_str_appendl(dest, bash, q - bash);
@@ -150,7 +159,7 @@ static inline void tag_arg(url_adapt_state_ex_t *ctx, char quotes, char type TSR
 	if (quotes)
 		smart_str_appendc(&ctx->result, type);
 	if (f) {
-		append_modified_url(&ctx->val, &ctx->result, &ctx->q_name, &ctx->q_value, PG(arg_separator).output);
+		append_modified_url(&ctx->val, &ctx->result, ctx->rewrite_vars, PG(arg_separator).output);
 	} else {
 		smart_str_append(&ctx->result, &ctx->val);
 	}
@@ -185,11 +194,20 @@ static inline void passthru(STD_PARA)
 static inline void handle_form(STD_PARA) 
 {
 	if (ctx->tag.len == 4 && strncasecmp(ctx->tag.c, "form", 4) == 0) {
-		smart_str_appends(&ctx->result, "<input type=\"hidden\" name=\""); 
-		smart_str_append(&ctx->result, &ctx->q_name);
-		smart_str_appends(&ctx->result, "\" value=\"");
-		smart_str_append(&ctx->result, &ctx->q_value);
-		smart_str_appends(&ctx->result, "\" />");
+		char *string_key;
+		url_adapt_var_t *value;
+		int num_key;
+
+		zend_hash_internal_pointer_reset(ctx->rewrite_vars);
+		while (zend_hash_get_current_key(ctx->rewrite_vars, &string_key, &num_key, 0) != HASH_KEY_NON_EXISTANT) {
+			zend_hash_get_current_data(ctx->rewrite_vars, &value);
+			smart_str_appends(&ctx->result, "<input type=\"hidden\" name=\""); 
+			smart_str_append(&ctx->result, &(value->var));
+			smart_str_appends(&ctx->result, "\" value=\"");
+			smart_str_append(&ctx->result, &(value->val));
+			smart_str_appends(&ctx->result, "\" />");
+			zend_hash_move_forward(ctx->rewrite_vars);
+		}
 	}
 }
 
@@ -318,34 +336,13 @@ stop:
 }
 
 
-char *url_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen TSRMLS_DC)
-{
-	smart_str surl = {0};
-	smart_str buf = {0};
-	smart_str sname = {0};
-	smart_str sval = {0};
-
-	smart_str_setl(&surl, url, urllen);
-	smart_str_sets(&sname, name);
-	smart_str_sets(&sval, value);
-
-	append_modified_url(&surl, &buf, &sname, &sval, PG(arg_separator).output);
-
-	smart_str_0(&buf);
-	if (newlen) *newlen = buf.len;
-	
-	return buf.c;
-}
-
-char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen, zend_bool do_flush TSRMLS_DC)
+static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, zend_bool do_flush TSRMLS_DC)
 {
 	url_adapt_state_ex_t *ctx;
 	char *retval;
 
 	ctx = &BG(url_adapt_state_ex);
 
-	smart_str_sets(&ctx->q_name, name);
-	smart_str_sets(&ctx->q_value, value);
 	xx_mainloop(ctx, src, srclen TSRMLS_CC);
 
 	*newlen = ctx->result.len;
@@ -389,14 +386,66 @@ int php_url_scanner_ex_deactivate(TSRMLS_D)
 	return SUCCESS;
 }
 
+static void php_url_scanner_output_handler(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC)
+{
+    if (BG(url_adapt_state_ex).rewrite_vars && zend_hash_num_elements(BG(url_adapt_state_ex).rewrite_vars)) {
+        *handled_output = url_adapt_ext(output, output_len, handled_output_len, (zend_bool) (mode&PHP_OUTPUT_HANDLER_END ? 1 : 0) TSRMLS_CC);
+    } else {
+        *handled_output = NULL;
+    }
+}
+
+static void php_url_scanner_var_dtor(url_adapt_var_t *var)
+{
+	smart_str_free(&(var->var));
+	smart_str_free(&(var->val));
+}
+
+int php_url_scanner_add_var(char *name, int name_len, char *value, int value_len, int urlencode TSRMLS_DC)
+{
+	url_adapt_var_t var;
+	char *encoded;
+	int encoded_len;
+
+	if (! BG(url_adapt_state_ex).active) {
+		int chunk_size = 4096; /* XXX where should we get chunk_size from? */
+
+		php_url_scanner_ex_activate(TSRMLS_C);
+		php_start_ob_buffer(NULL, chunk_size, 1 TSRMLS_CC);
+		php_ob_set_internal_handler(php_url_scanner_output_handler, chunk_size, "URL-Rewriter", 1 TSRMLS_CC);
+		BG(url_adapt_state_ex).active = 1;
+	}
+
+	if (! BG(url_adapt_state_ex).rewrite_vars) {
+		BG(url_adapt_state_ex).rewrite_vars = emalloc(sizeof(HashTable));
+		zend_hash_init(BG(url_adapt_state_ex).rewrite_vars, 0, NULL, (void (*)(void *)) php_url_scanner_var_dtor, 0);
+	}
+
+	smart_str_setl(&(var.var), estrndup(name, name_len), name_len);
+
+	if (urlencode) {
+		encoded = php_url_encode(value, value_len, &encoded_len);
+		smart_str_setl(&(var.val), encoded, encoded_len);
+	} else {
+		smart_str_setl(&(var.val), estrndup(value, value_len), value_len);
+	}
+
+	return zend_hash_add(BG(url_adapt_state_ex).rewrite_vars, name, name_len, &var, sizeof(url_adapt_var_t), NULL);
+}
+
+int php_url_scanner_remove_var(char *name, int name_len TSRMLS_DC)
+{
+	if (BG(url_adapt_state_ex).rewrite_vars) {
+		return zend_hash_del(BG(url_adapt_state_ex).rewrite_vars, name, name_len);
+	}
+
+	return FAILURE;
+}
+
 PHP_MINIT_FUNCTION(url_scanner)
 {
-	url_adapt_state_ex_t *ctx;
-	
-	ctx = &BG(url_adapt_state_ex);
+	BG(url_adapt_state_ex).tags = NULL;
 
-	ctx->tags = NULL;
-	
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
@@ -406,5 +455,30 @@ PHP_MSHUTDOWN_FUNCTION(url_scanner)
 	UNREGISTER_INI_ENTRIES();
 	zend_hash_destroy(BG(url_adapt_state_ex).tags);
 	free(BG(url_adapt_state_ex).tags);
+
+	return SUCCESS;
+}
+
+PHP_RINIT_FUNCTION(url_scanner)
+{
+	BG(url_adapt_state_ex).active = 0;
+	BG(url_adapt_state_ex).rewrite_vars = NULL;
+
+	return SUCCESS;
+}
+
+PHP_RSHUTDOWN_FUNCTION(url_scanner)
+{
+	if (BG(url_adapt_state_ex).active) {
+		php_url_scanner_ex_deactivate(TSRMLS_C);
+		BG(url_adapt_state_ex).active = 0;
+	}
+
+	if (BG(url_adapt_state_ex).rewrite_vars) {
+		zend_hash_destroy(BG(url_adapt_state_ex).rewrite_vars);
+		efree(BG(url_adapt_state_ex).rewrite_vars);
+		BG(url_adapt_state_ex).rewrite_vars = NULL;
+	}
+
 	return SUCCESS;
 }

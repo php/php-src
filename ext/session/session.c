@@ -79,34 +79,6 @@ ZEND_DECLARE_MODULE_GLOBALS(ps);
 
 static ps_module *_php_find_ps_module(char *name TSRMLS_DC);
 static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
-static void php_session_end_output_handler(TSRMLS_D);
-
-static void php_session_output_handler(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC)
-{
-	if ((PS(session_status) == php_session_active)) {
-		*handled_output = url_adapt_ext_ex(output, output_len, PS(session_name), PS(id), handled_output_len, (zend_bool) (mode&PHP_OUTPUT_HANDLER_END ? 1 : 0) TSRMLS_CC);
-	} else {
-		*handled_output = NULL;
-	}
-}
-
-
-static void php_session_start_output_handler(uint chunk_size TSRMLS_DC)
-{
-	php_url_scanner_activate(TSRMLS_C);
-	php_url_scanner_ex_activate(TSRMLS_C);
-	php_start_ob_buffer(NULL, chunk_size, 1 TSRMLS_CC);
-	php_ob_set_internal_handler(php_session_output_handler, chunk_size, "trans sid session", 1 TSRMLS_CC);
-	PS(output_handler_registered) = 1;
-}
-
-
-static void php_session_end_output_handler(TSRMLS_D)
-{
-	php_url_scanner_ex_deactivate(TSRMLS_C);
-	php_url_scanner_deactivate(TSRMLS_C);
-}
-
 
 static PHP_INI_MH(OnUpdateSaveHandler)
 {
@@ -956,7 +928,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 
 	PS(session_status) = php_session_active;
 	if (PS(apply_trans_sid)) {
-		php_session_start_output_handler(4096 TSRMLS_CC);
+		php_url_scanner_add_var(PS(session_name), strlen(PS(session_name)), PS(id), strlen(PS(id)), 0);
 	}
 
 	php_session_cache_limiter(TSRMLS_C);
@@ -1404,21 +1376,13 @@ PHP_FUNCTION(session_unset)
 /* }}} */
 
 
-PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newlen TSRMLS_DC)
-{
-	if (PS(apply_trans_sid) && (PS(session_status) == php_session_active)) {
-		*new = url_adapt_single_url(url, urllen, PS(session_name), PS(id), newlen TSRMLS_CC);
-	}
-}
-
-
 static void php_rinit_session_globals(TSRMLS_D)
 {		
 	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
+	php_url_scanner_remove_var(PS(session_name), strlen(PS(session_name))); /* save even if we haven't registered */
 	PS(id) = NULL;
 	PS(session_status) = php_session_none;
 	PS(mod_data) = NULL;
-	PS(output_handler_registered) = 0;
 	PS(http_session_vars) = NULL;
 }
 
@@ -1477,9 +1441,6 @@ PHP_FUNCTION(session_write_close)
 
 PHP_RSHUTDOWN_FUNCTION(session)
 {
-	if (PS(output_handler_registered)) {
-		php_session_end_output_handler(TSRMLS_C);
-	}
 	php_session_flush(TSRMLS_C);
 	php_rshutdown_session_globals(TSRMLS_C);
 	return SUCCESS;
