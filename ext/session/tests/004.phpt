@@ -3,6 +3,7 @@ session_set_save_handler test
 --FILE--
 <?php
 error_reporting(~E_NOTICE);
+ini_set("register_globals", 1);
 
 class handler {
 	var $data = 'baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}';
