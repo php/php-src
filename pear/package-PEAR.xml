@@ -44,7 +44,7 @@ PEAR BASE CLASS:
 
 PEAR INSTALLER:
 
-* Packaging and validation now tokenizes source code (unless
+* Packaging and validation now parses PHP source code (unless
   ext/tokenizer is disabled) and does some coding standard conformance
   checks.  Specifically, the names of classes and functions are
   checked to ensure that they are prefixed with the package name.  If
