@@ -110,17 +110,14 @@ c::getIterator
 c_iter::__construct
 c_iter::valid = true
 c_iter::current
-c_iter::key
 object:0
 c_iter::next
 c_iter::valid = true
 c_iter::current
-c_iter::key
 object:1
 c_iter::next
 c_iter::valid = true
 c_iter::current
-c_iter::key
 object:2
 c_iter::next
 c_iter::valid = false
@@ -129,66 +126,54 @@ c::getIterator
 c_iter::__construct
 c_iter::valid = true
 c_iter::current
-c_iter::key
 c::getIterator
 c_iter::__construct
 c_iter::valid = true
 c_iter::current
-c_iter::key
 double:0:0
 c_iter::next
 c_iter::valid = true
 c_iter::current
-c_iter::key
 double:0:1
 c_iter::next
 c_iter::valid = true
 c_iter::current
-c_iter::key
 double:0:2
 c_iter::next
 c_iter::valid = false
 c_iter::next
 c_iter::valid = true
 c_iter::current
-c_iter::key
 c::getIterator
 c_iter::__construct
 c_iter::valid = true
 c_iter::current
-c_iter::key
 double:1:0
 c_iter::next
 c_iter::valid = true
 c_iter::current
-c_iter::key
 double:1:1
 c_iter::next
 c_iter::valid = true
 c_iter::current
-c_iter::key
 double:1:2
 c_iter::next
 c_iter::valid = false
 c_iter::next
 c_iter::valid = true
 c_iter::current
-c_iter::key
 c::getIterator
 c_iter::__construct
 c_iter::valid = true
 c_iter::current
-c_iter::key
 double:2:0
 c_iter::next
 c_iter::valid = true
 c_iter::current
-c_iter::key
 double:2:1
 c_iter::next
 c_iter::valid = true
 c_iter::current
-c_iter::key
 double:2:2
 c_iter::next
 c_iter::valid = false

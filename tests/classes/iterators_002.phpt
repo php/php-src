@@ -60,7 +60,7 @@ class c implements IteratorAggregate {
 
 $t = new c();
 
-foreach($t as $v) {
+foreach($t as $k => $v) {
 	foreach($t as $w) {
 		echo "double:$v:$w\n";
 		break;
@@ -83,7 +83,6 @@ c_iter::__construct
 c_iter::rewind
 c_iter::valid = true
 c_iter::current
-c_iter::key
 double:0:0
 c_iter::__destruct
 c_iter::next
@@ -95,7 +94,6 @@ c_iter::__construct
 c_iter::rewind
 c_iter::valid = true
 c_iter::current
-c_iter::key
 double:1:0
 c_iter::__destruct
 c_iter::next
@@ -107,7 +105,6 @@ c_iter::__construct
 c_iter::rewind
 c_iter::valid = true
 c_iter::current
-c_iter::key
 double:2:0
 c_iter::__destruct
 c_iter::next
