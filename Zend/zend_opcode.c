@@ -304,7 +304,7 @@ int pass_two(zend_op_array *op_array)
 }
 
 
-void pass_include_eval(zend_op_array *op_array)
+ZEND_API void pass_include_eval(zend_op_array *op_array)
 {
 	zend_op *opline=op_array->opcodes, *end=opline+op_array->last;
 

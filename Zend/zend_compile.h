@@ -391,7 +391,7 @@ int get_next_op_number(zend_op_array *op_array);
 int print_class(zend_class_entry *class_entry);
 void print_op_array(zend_op_array *op_array, int optimizations);
 int pass_two(zend_op_array *op_array);
-void pass_include_eval(zend_op_array *op_array);
+ZEND_API void pass_include_eval(zend_op_array *op_array);
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
 ZEND_API zend_bool zend_is_compiling(void);
 
