@@ -3047,8 +3047,10 @@ PHP_FUNCTION(exif_read_data)
 		}
 	}
 
-	if ( read_thumbnail && ImageInfo.Thumbnail.size) {
-		exif_iif_add_tag( &ImageInfo, SECTION_THUMBNAIL, "THUMBNAIL", TAG_NONE, TAG_FMT_UNDEFINED, ImageInfo.Thumbnail.size, ImageInfo.Thumbnail.data);
+	if ( ImageInfo.Thumbnail.size) {
+		if ( read_thumbnail) {
+			exif_iif_add_tag( &ImageInfo, SECTION_THUMBNAIL, "THUMBNAIL", TAG_NONE, TAG_FMT_UNDEFINED, ImageInfo.Thumbnail.size, ImageInfo.Thumbnail.data);
+		}
 		if ( !ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
 			exif_scan_thumbnail( &ImageInfo);
 		}
