@@ -1247,6 +1247,8 @@ PHP_FUNCTION(mysql_result)
 		}
 	}
 
+	return_value->type = IS_STRING;
+
 	if (sql_row[field_offset]) {
 		if (PG(magic_quotes_runtime)) {
 			return_value->value.str.val = php_addslashes(sql_row[field_offset],sql_row_lengths[field_offset],&return_value->value.str.len,0);
@@ -1257,8 +1259,6 @@ PHP_FUNCTION(mysql_result)
 	} else {
 		return_value->type = IS_UNSET;
 	}
-	
-	return_value->type = IS_STRING;
 }
 /* }}} */
 
