@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib ntwdblib.lib /nologo /dll /machine:I386 /out:"MSSQL_65_Release/php_mssql.dll" /libpath:"..\..\Release_TS"
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib libmcrypt.lib libltdl.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_mcrypt.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\..\php_build\mcrypt" /libpath:"..\..\Release_TS_Inline"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib libmcrypt.lib libltdl.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_mcrypt.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\..\php_build\mcrypt" /libpath:"..\..\Release_TS_Inline" /libpath:"..\..\TSRM\Release_TS" /libpath:"..\..\TSRM\Release_TS_Inline"
 
 !ELSEIF  "$(CFG)" == "mcrypt - Win32 Debug_TS"
 
@@ -96,6 +96,10 @@ LINK32=link.exe
 
 SOURCE=.\mcrypt.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\win32\readdir.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -104,14 +108,10 @@ SOURCE=.\mcrypt.c
 
 SOURCE=.\php_mcrypt.h
 # End Source File
-# End Group
-# Begin Group "Resource Files"
-
-# PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
-# End Group
 # Begin Source File
 
-SOURCE=.\MCRYPT_Win32_HOWTO.txt
+SOURCE=..\..\win32\readdir.h
 # End Source File
+# End Group
 # End Target
 # End Project
