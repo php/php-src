@@ -20,7 +20,9 @@ AC_ARG_WITH(apxs,
 		AC_EXPAND_PATH($withval, APXS)
 	fi
 
-    if ! $APXS -q CFLAGS >/dev/null 2>&1; then
+    if $APXS -q CFLAGS >/dev/null 2>&1; then
+      :
+    else
       AC_MSG_RESULT()
       $APXS
       AC_MSG_ERROR([Sorry, I cannot run apxs. Either you need to install Perl or you need to pass the absolute path of apxs by using --with-apxs=/absolute/path/to/apxs])
