@@ -74,6 +74,9 @@ do {
 		dba_close($dba_reader);
 	}
 	if (($db_file = dba_popen($db_filename, 'r'.($handler!='gdbm'?'-':''), $handler))!==FALSE) {
+		if ($handler == 'dbm') {
+			dba_close($db_file);
+		}
 	}
 
 	if ($lock_flag == '') {
