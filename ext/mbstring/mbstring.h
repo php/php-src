@@ -138,26 +138,26 @@ MBSTRING_API size_t php_mb_mbchar_bytes(const char *s TSRMLS_DC);
 
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
-	int language;
-	int current_language;
-	int internal_encoding;
-	int current_internal_encoding;
+	enum mbfl_no_language language;
+	enum mbfl_no_language current_language;
+	enum mbfl_no_encoding internal_encoding;
+	enum mbfl_no_encoding current_internal_encoding;
 #ifdef ZEND_MULTIBYTE
-	int *script_encoding_list;
+	enum mbfl_no_encoding *script_encoding_list;
 	int script_encoding_list_size;
 #endif /* ZEND_MULTIBYTE */
-	int http_output_encoding;
-	int current_http_output_encoding;
-	int http_input_identify;
-	int http_input_identify_get;
-	int http_input_identify_post;
-	int http_input_identify_cookie;
-	int http_input_identify_string;
-	int *http_input_list;
+	enum mbfl_no_encoding http_output_encoding;
+	enum mbfl_no_encoding current_http_output_encoding;
+	enum mbfl_no_encoding http_input_identify;
+	enum mbfl_no_encoding http_input_identify_get;
+	enum mbfl_no_encoding http_input_identify_post;
+	enum mbfl_no_encoding http_input_identify_cookie;
+	enum mbfl_no_encoding http_input_identify_string;
+	enum mbfl_no_encoding *http_input_list;
 	int http_input_list_size;
-	int *detect_order_list;
+	enum mbfl_no_encoding *detect_order_list;
 	int detect_order_list_size;
-	int *current_detect_order_list;
+	enum mbfl_no_encoding *current_detect_order_list;
 	int current_detect_order_list_size;
 	int filter_illegal_mode;
 	int filter_illegal_substchar;
