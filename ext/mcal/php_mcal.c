@@ -1256,7 +1256,7 @@ PHP_FUNCTION(mcal_day_of_year)
 }
 /* }}} */
 
-/* {{{ proto int mcal_week_of_year(int year, int month, int day)
+/* {{{ proto int mcal_week_of_year(int day, int month, int year)
    Returns the week number of the given date */
 PHP_FUNCTION(mcal_week_of_year)
 {
@@ -1264,7 +1264,7 @@ PHP_FUNCTION(mcal_week_of_year)
 	int myargc;
 	
 	myargc = ARG_COUNT(ht);
-	if (myargc != 3 || getParameters(ht,myargc,&year,&month,&day) == FAILURE) {
+	if (myargc != 3 || getParameters(ht,myargc,&day,&month,&year) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
