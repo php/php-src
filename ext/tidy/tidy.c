@@ -44,6 +44,8 @@ if ((PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR
 	RETURN_FALSE; \
 } \
 
+#define TIDY_CLEAR_ERROR  if (TG(tdoc)->errbuf && TG(tdoc)->errbuf->bp) { tidyBufClear(TG(tdoc)->errbuf); }
+
 function_entry tidy_functions[] = {
 	PHP_FE(tidy_setopt,             NULL)
 	PHP_FE(tidy_getopt,             NULL)
@@ -255,6 +257,9 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	} else {
 		data = arg1;
 	}
+
+	TIDY_CLEAR_ERROR;
+
 	if (cfg) {
 		if(Z_TYPE_P(cfg) == IS_ARRAY) {
 			char *opt_name = NULL;
@@ -341,6 +346,9 @@ PHP_RINIT_FUNCTION(tidy)
 		}
 		TG(used) = 1;
 	}
+
+	TIDY_CLEAR_ERROR;
+
 	return SUCCESS;
 }
 
@@ -394,6 +402,8 @@ PHP_FUNCTION(tidy_parse_string)
 		RETURN_FALSE;
 	}
 
+	TIDY_CLEAR_ERROR;
+
 	if(tidyParseString(TG(tdoc)->doc, input) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "[Tidy error] %s", TG(tdoc)->errbuf->bp);
 		RETURN_FALSE;
@@ -419,7 +429,9 @@ PHP_FUNCTION(tidy_get_error_buffer)
 	if (detailed) {
 		tidyErrorSummary(TG(tdoc)->doc);
 	}
-
+	if (!TG(tdoc)->errbuf || !TG(tdoc)->errbuf->bp) {
+		RETURN_FALSE;
+	}
 	RETVAL_STRING(TG(tdoc)->errbuf->bp, 1);
 	tidyBufClear(TG(tdoc)->errbuf); 
 }
@@ -461,7 +473,9 @@ PHP_FUNCTION(tidy_parse_file)
 	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
-	
+
+	TIDY_CLEAR_ERROR;
+
 	if(tidyParseString(TG(tdoc)->doc, contents) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "[Tidy error] %s", TG(tdoc)->errbuf->bp);
 		RETVAL_FALSE;
