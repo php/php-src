@@ -1,3 +1,68 @@
+2000-09-30  Daniel Beulshausen  <daniel@php4win.de>
+
+    * php_modules.dsw: added filepro & snmp
+
+    * main/config.w32.h: move have_snmp to the dsp already
+
+    * ext/snmp/snmp.dsp: snmp win extension
+
+2000-09-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: .
+
+2000-09-30  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/gd/gd.c
+      ext/gd/gd.dsp: uses php.h define
+
+2000-09-30  Andi Gutmans  <andi@zend.com>
+
+    * ext/mysql/php_mysql.c: - Cleanup output functions
+
+    * ext/standard/incomplete_class.c
+      ext/standard/info.c
+      sapi/cgi/cgi_main.c
+      main/main.c
+      sapi/apache/mod_php4.c: - Cleanup some output functions
+
+2000-09-30  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/filepro/filepro.dsp: added dsp for the filepro extension
+
+    * ext/gd/gd.c: made win32 compile
+
+    * ext/pdf/pdf.dsp: removed zendts.lib from link options
+
+    * ext/mhash/mhash.dsp: cleanup
+
+    * ext/oracle/oracle.dsp: fix not producing valid extension
+
+2000-09-30  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/sablot/config.m4: leftovers.
+
+    * ext/sablot/php_sablot.h
+      ext/sablot/sablot.c:
+    Buncha changes, generally makes the module more stable and removes unnecessary
+    (as of Sablotron 0.44) workarounds.
+
+2000-09-30  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Makefile.in: install Benchmark/Iterate.php
+
+2000-09-30  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/curl/curl.c
+      ext/curl/php_curl.h:    parameters. (Sterling)
+    headers to a remote site from cURL. (Sterling)
+
+    Buncha other changes...
+
+      - Changed if () else if () in curl_setopt to switch .. case
+      - Fixed a couple crashes in certain cases.
+      - Finally a decent error reporting scheme.
+      - A few formatting changes.
+
 2000-09-29  Sascha Schumann  <sascha@schumann.cx>
 
     * NEWS: .
