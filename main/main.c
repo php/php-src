@@ -425,6 +425,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			if (module_initialized) {
 				zend_bailout();
 				return;
+			} else {
+				/* bad error in module startup - no way we can live with this */
+				exit(-2);
 			}
 			break;
 	}
