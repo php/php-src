@@ -22,6 +22,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #28868 (Internal wrapper registry not thread safe). (Sara)
 - Fixed bug #28818 (Apache 2 sapis do not export st_dev).
   (xuefer at 21cn dot com, Ilia).
+- Fixed bug #28800 (strings beginning with "inf" improperly converted). (Ilia)
 - Fixed bug #28723 (Fixed mbstring config.m4 to work on OSes where test
   command does not support -e parameter). (Ilia)
 - Fixed bug #28692 (\0 in Authenticate header passed via safe_mode). (Ilia)
