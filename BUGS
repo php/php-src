@@ -1,0 +1,11 @@
+If you think you've found a bug in PHP3, you can report it on the bug
+reporting page at:
+	http://www.php.net/
+
+Current Known Bugs:
+
+* split() function doesn't return regex errors nicely
+* Preprocessed scripts don't work with require() and define()
+* unset() doesn't actually erase the variables it just marks them as uninitialized
+* Some parts in the language core prevent more than 256 arguments in function
+  calls from being possible

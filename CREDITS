@@ -1,0 +1,176 @@
+PHP Version 3.0 Development Team
+
+------------------------------------------------------------------------------
+
+Core Developers
+===============
+
+Rasmus Lerdorf (rasmus@lerdorf.on.ca)
+
+* Original language definition and implementation
+* CGI loader and many internal functions
+* Apache module support
+* SNMP module
+* Original mSQL, MySQL and Sybase modules
+* Oracle module work
+
+
+Andi Gutmans (andi@php.net) and Zeev Suraski (zeev@php.net)
+
+* New language definition and implementation
+* Internal functions API design
+* General hash table implementation for symbol tables, arrays and objects
+* Memory manager
+* Token cache manager
+* A lot of internal functions (including hebrev :) and migration from PHP 2.0
+* Syntax highlighting mode
+* Configuration file parser
+* New persistent/multilink MySQL, PosgresSQL, Sybase and mSQL modules
+* Win32 COM support
+
+
+Stig Bakken (ssb@guardian.no)
+
+* Oracle support
+* configure/install script work
+* sprintf reimplementation
+* XML support
+* SGML documentation framework
+
+
+Shane Caraveo (shane@caraveo.com)
+
+* Porting to Visual C++
+* Generalization to support different server APIs
+* Work on ISAPI and NSAPI APIs
+
+
+Jim Winstead (jimw@php.net)
+
+* Lots of PHP2 -> PHP3 porting
+* dBase support
+* URL parsing functions
+* Makefile work
+* Regex rewrite
+* Win32 work
+
+
+------------------------------------------------------------------------------	
+
+Major Contributors
+==================
+
+* Jouni Ahto (jah@cultnet.fi)
+  Postgres, Informix
+
+* Alex Belits (abelits@phobos.illtel.denver.co.us)
+  fhttpd support
+
+* Bjørn Borud (borud@guardian.no) 
+  soundex code and lots of enthusiasm
+
+* Christian Cartus (chc@idgruppe.de)
+  Informix Universal Server support
+
+* John Ellson (ellson@lucent.com)
+  Freetype support
+
+* Dean Gaudet (dgaudet@arctic.org)
+  Apache module debugging + helpful hints along the way
+
+* Mitch Golden (mgolden@interport.net)
+  Oracle testing and bug fixes
+
+* Danny Heijl (Danny.Heijl@cevi.be)
+  Informix SE support
+
+* Mark Henderson (mark@togglemedia.com)
+  Various odds and ends
+
+* Jaakko Hyvätti (jaakko@hyvatti.iki.fi)
+  Prototype cop, regular expression code fixes, CGI security issues
+
+* Amitay Isaacs (amitay@w-o-i.com)
+  LDAP
+
+* Andreas Karajannis (Andreas.Karajannis@gmd.de) 
+  Adabas D, ODBC, Oracle
+
+* Igor Kovalenko (owl@infomarket.ru)
+  QNX support issues
+
+* Richard Lynch (lynch@lscorp.com)
+  Documentation
+
+* Tom May (tom@go2net.com)
+  Sybase-CT work
+
+* Muhammad A Muquit (MA_Muquit@fccc.ed)
+  Original Sybase module
+
+* Mark Musone (musone@edgeglobal.com)
+  IMAP
+  
+* Jeroen van der Most (jvdmost@digiface.nl)
+  Solid
+  
+* Chad Robinson (chadr@brttech.com)
+  Documentation, FilePro
+
+* Lachlan Roche (lr@www.wwi.com.au)
+  MD5
+
+* Stefan Roehrich (sr@linux.de)
+  zlib
+
+* Nikolay P. Romanyuk (mag@redcom.ru)
+  Velocis support
+  
+* Brian Schaffner (brian@tool.net)
+  ODBC support, PHP3 API testing
+
+* Egon Schmid (eschmid@delos.lf.net)
+  Documentation
+
+* (sopwith@redhat.com)
+  Solid
+  
+* Colin Viebrock (cmv@privateworld.com)
+  Website graphic design and layout, PHP logo
+
+* Eric Warnke (ericw@albany.edu)   
+  LDAP
+
+* Lars Torben Wilson (torben@netmill.com)
+  Documentation
+
+* Uwe Steinmann (Uwe.Steinmann@fernuni-hagen.de)
+  Hyperwave, PDF, Acrobat FDF Toolkit
+
+------------------------------------------------------------------------------
+
+Beta Testers
+------------
+
+* Niklas Saers (berenmls@saers.com)
+  FreeBSD/x86
+
+* Chuck Hagenbuch <chuck@osmos.ml.org>
+  Linux/x86 glibc2, MySQL, mod_ssl
+
+* Sascha Schumann (sas@schell.de)
+  FreeBSD/x86, PostgreSQL, IMAP, gdttf
+
+* Jim Jagielski (jim@jagunet.com)
+  A/UX, FreeBSD/x86
+
+* Jouni Ahto (jah@cultnet.fi)
+  Debian Linux 2.0
+
+
+
+
+------------------------------------------------------------------------------
+
+Andi Gutmans and Zeev Suraski would like to thank Professor Michael Rodeh for
+his positive input during the initial development of the interpreter.

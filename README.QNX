@@ -1,0 +1,57 @@
+QNX4 Installation Notes
+-----------------------
+
+NOTE: General installation instructions are in the INSTALL file 
+
+
+1. To compile and test PHP3 you have to grab, compile and install:
+	- GNU dbm library or another db library;
+	- GNU bison (1.25 or later; 1.25 tested);
+	- GNU flex (any version supporting -o and -P options; 2.5.4 tested);
+	- GNU diffutils (any version supporting -w option; 2.7 tested);
+
+2. To use CVS version you may need also:
+	- GNU CVS (1.9 tested);
+	- GNU autoconf (2.12 tested);
+	- GNU m4 (1.3 or later preferable; 1.4 tested);
+
+3. To run configure define -lunix in command line:
+	LDFLAGS=-lunix ./configure
+
+4. To use Sybase SQL Anywhere define ODBC_QNX and CUSTOM_ODBC_LIBS in
+	command line and run configure with --with-custom-odbc:
+	CFLAGS=-DODBC_QNX LDFLAGS=-lunix CUSTOM_ODBC_LIBS="-ldblib -lodbc" ./configure --with-custom-odbc=/usr/lib/sqlany50
+   If you have SQL Anywhere version 5.5.00, then you have to add 
+	CFLAGS=-DSQLANY_BUG
+   to workaround its SQLFreeEnv() bug. Other versions has not been tested,
+   so try without this flag first.
+
+5. To build the Apache module, you may have to hardcode an include path for 
+   alloc.h in your Apache base directory:
+	- APACHE_DIRECTORY/src/httpd.h: 
+		change	#include "alloc.h"
+		to 		#include "APACHE_DIRECTORY/src/alloc.h"
+   Unless you want to use system regex library, you have to hardcode also
+   a path to regex.h:
+	- APACHE_DIRECTORY/src/conf.h:  
+		change  #include <regex.h>
+		to		#include "APACHE_DIRECTORY/src/regex/regex.h"
+   I don't know so far why this required for QNX, may be it is Watcom 
+   compiler problem.
+
+  If you building Apache module with SQL Anywhere support, you'll get
+  symbol conflict with BOOL. It is defined in Apache (httpd.h) and in 
+  SQL Anywhere (odbc.h). This has nothing to do with PHP, so you have to 
+  fix it yourself someway.
+
+6. With above precautions, it should compile as is and pass regression
+	tests completely:
+		make
+		make check
+		make install
+
+	Don't bother me unless you really sure you made	that all but it 
+	still doesn't work.
+
+June 28, 1998
+Igor Kovalenko -- owl@infomarket.ru

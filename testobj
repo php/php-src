@@ -1,0 +1,9 @@
+<?
+
+//$a = new TestClass;
+$a->foo = 5;
+$foo = 456;
+
+print $a->foobar[2]["testing 123".$foo]->barbara."\n";
+print "---\n";
+$a->foobar[2]["testing 123".$foo]->barbara=5;

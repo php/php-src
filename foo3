@@ -1,0 +1,43 @@
+<?
+
+class foo {
+	function foo() {
+		print "foo()\n";
+	}
+	function bar(&$blah, $foobar=7) {
+		$foobar += 19;
+	}
+
+	function hello_world() {
+		return "Hello, World!";
+	}
+
+	function print_string($str) {
+		print "$str\n";
+		return 666;
+	}
+	var $foo;
+	var $bar="this is a test...";
+};
+
+class bar {
+	function foo($a,$b) {
+		$a *= 3;
+		return $a+$b;
+	}
+	function bar(&$blah, $foobar=7) {
+		$foobar += 19;
+	}
+
+	var $foo;
+	var $bar="this is a test...";
+};
+
+
+$b = new foo;
+$a = $b;
+print $a->print_string($a->hello_world())."\n";
+print $b->print_string($b->hello_world())."\n";
+$a->foo = 5;
+print $a->foo;
+print $a->foo();

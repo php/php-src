@@ -1,0 +1,47 @@
+
+                        FOR IMMEDIATE RELEASE
+
+                           PHP 3.0 RELEASED
+
+June 6, 1998 -- The PHP Development Team announced the release of
+PHP 3.0, the latest release of the server-side scripting solution already
+in use on over 70,000 World Wide Web sites.
+
+This all-new version of the popular scripting language includes support
+for all major operating systems (Windows 95/NT, most versions of Unix,
+and Macintosh) and web servers (including Apache, Netscape servers,
+WebSite Pro, and Microsoft Internet Information Server).
+
+PHP 3.0 also supports a wide range of databases, including Oracle, Sybase,
+Solid, MySQ, mSQL, and PostgreSQL, as well as ODBC data sources.
+
+New features include persistent database connections, support for the
+SNMP and IMAP protocols, and a revamped C API for extending the language
+with new features.
+
+"PHP is a very programmer-friendly scripting language suitable for
+people with little or no programming experience as well as the
+seasoned web developer who needs to get things done quickly.  The
+best thing about PHP is that you get results quickly," said
+Rasmus Lerdorf, one of the developers of the language.
+
+"Version 3 provides a much more powerful, reliable and efficient
+implementation of the language, while maintaining the ease of use and 
+rapid development that were the key to PHP's success in the past", 
+added Andi Gutmans, one of the implementors of the new language core.
+
+"At Circle Net we have found PHP to be the most robust platform for
+rapid web-based application development available today," said Troy
+Cobb, Chief Technology Officer at Circle Net, Inc.  "Our use of PHP
+has cut our development time in half, and more than doubled our client
+satisfaction.  PHP has enabled us to provide database-driven dynamic
+solutions which perform at phenomenal speeds."
+
+PHP 3.0 is available for free download in source form and binaries for
+several platforms at http://www.php.net/.
+
+The PHP Development Team is an international group of programmers who
+lead the open development of PHP and related projects.
+
+For more information, the PHP Development Team can be contacted at
+core@php.net.

@@ -1,0 +1,243 @@
+[PHP_3]
+
+;;;;;;;;;;;;;;;;;;;
+; About this file ;
+;;;;;;;;;;;;;;;;;;;
+; This file controls many aspects of PHP's behavior.  In order for PHP to
+; read it, it must be named 'php3.ini'.  PHP looks for it in the current
+; working directory, in the path designated by the environment variable
+; PHPRC, and in the path that was defined in compile time (in that order).
+; Under Windows, the compile-time path is the Windows directory.  The
+; path in which the php3.ini file is looked for can be overriden using
+; the -c argument in command line mode.
+;
+; The syntax of the file is extremely simple.  Whitespace and Lines
+; beginning with a semicolon are silently ignored (as you probably guessed).
+; Section headers (e.g. [Foo]) are also silently ignored, even though
+; they might mean something in the future (they probably won't).
+;
+; Options are specified using the syntax key = value or key = "complex value".
+; Key names are *case sensitive*.  foo = bar is different from FOO = bar.
+; 'value' can be any number, word or keyword (keywords are On, Off, True,
+; False, Yes and No, and are case insensitive).
+; 'complex value' can be just about anything, expcept for " and a newline
+; Boolean flags can be turned on using the values 1, On, True or Yes.
+; They can be turned off using the values 0, Off, False or No.
+;
+; All the values in the php3.ini-dist file correspond to the builtin
+; defaults (that is, if no php3.ini is used, or if you delete these lines,
+; the builtin defaults will be identical).
+
+
+;;;;;;;;;;;;;;;;;;;;
+; Language Options ;
+;;;;;;;;;;;;;;;;;;;;
+
+engine			=	On	; enable PHP 3.0 parser
+short_open_tag	=	On	; allow the <? tag.  otherwise, only <?php and <script> tags are recognized.
+asp_tags		=	Off ; allow ASP-style <% %> tags
+precision		=	14	; number of significant digits displayed in floating point numbers
+y2k_compliance	=	Off	; whether to be year 2000 compliant (will cause problems with non y2k compliant browsers)
+; Safe Mode
+safe_mode		=	Off
+safe_mode_exec_dir	=
+; Colors for Syntax Highlighting mode.  Anything that's acceptable in <font color=???> would work.
+highlight.string	=	#DD0000
+highlight.comment	=	#FF8000
+highlight.keyword	=	#007700
+highlight.bg		=	#FFFFFF
+highlight.default	=	#0000BB
+highlight.html		=	#000000
+
+
+;;;;;;;;;;;;;;;;;;;
+; Resource Limits ;
+;;;;;;;;;;;;;;;;;;;
+
+max_execution_time = 30     ; Maximum execution time of each script, in seconds
+memory_limit = 8388608		; Maximum amount of memory a script may consume (8MB)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Error handling and logging ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; error_reporting is a bit-field.  Add each number up to get desired error reporting level
+;  1 = Normal errors
+;  2 = Normal warnings
+;  4 = Parser errors
+;  8 = Notices - warnings you can ignore, but sometimes imply a bug (e.g., using an uninitialized variable)
+error_reporting	=	7
+display_errors	=	On	; Print out errors (as a part of the HTML script)
+log_errors		=	Off	; Log errors into a log file (server-specific log, stderr, or error_log (below))
+track_errors	=	Off	; Store the last error/warning message in $php_errormsg (boolean)
+;error_prepend_string = "<font color=ff0000>"   ; string to output before an error message
+;error_append_string = "</font>"                ; string to output after an error message
+;error_log	=	filename	; log errors to specified file
+;error_log	=	syslog		; log errors to syslog (Event Log on NT, not valid in Windows 95)
+warn_plus_overloading	=	Off		; warn if the + operator is used with strings
+
+
+;;;;;;;;;;;;;;;;;
+; Data Handling ;
+;;;;;;;;;;;;;;;;;
+magic_quotes_gpc	=	On		; magic quotes for incoming GET/POST/Cookie data
+magic_quotes_runtime=	Off		; magic quotes for runtime-generated data, e.g. data from SQL, from exec(), etc.
+magic_quotes_sybase	=	Off		; Use Sybase-style magic quotes (escape ' with '' instead of \')
+track_vars			=	On		; enable $HTTP_GET_VARS[], $HTTP_POST_VARS[] and $HTTP_COOKIE_VARS[] arrays
+; automatically add files before or after any PHP 3.0 document
+auto_prepend_file	=
+auto_append_file	=
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;
+; Paths and Directories ;
+;;;;;;;;;;;;;;;;;;;;;;;;;
+include_path	=                   ; UNIX: "/path1:/path2"  Windows: "\path1;\path2"
+doc_root		=					; the root of the php pages, used only if nonempty
+user_dir		=					; the directory under which php opens the script using /~username, used only if nonempty
+;upload_tmp_dir	=	                ; temporary directory for HTTP uploaded files (will use system default if not specified)
+upload_max_filesize = 2097152       ; 2 Meg default limit on file uploads
+extension_dir	=	./				; directory in which the loadable extensions (modules) reside
+
+
+;;;;;;;;;;;;;;;;;;;;;;
+; Dynamic Extensions ;
+;;;;;;;;;;;;;;;;;;;;;;
+; if you wish to have an extension loaded automaticly, use the
+; following syntax:  extension=modulename.extension
+; for example, on windows,
+; extension=msql.dll
+; or under UNIX,
+; extension=msql.so
+; Note that it should be the name of the module only, no directory information 
+; needs to go here.  Specify the location of the extension with the extension_dir directive above.
+
+
+;Windows Extensions
+;extension=php3_mysql.dll
+;extension=php3_nsmail.dll
+;extension=php3_calendar.dll
+;extension=php3_dbase.dll
+;extension=php3_filepro.dll
+;extension=php3_gd.dll
+;extension=php3_dbm.dll
+;extension=php3_mssql.dll
+;extension=php3_zlib.dll
+;extension=php3_filepro.dll
+;extension=php3_imap4r2.dll
+;extension=php3_ldap.dll
+;extension=php3_crypt.dll
+;extension=php3_msql2.dll
+;extension=php3_odbc.dll
+
+;;;;;;;;;;;;;;;;;;;
+; Module Settings ;
+;;;;;;;;;;;;;;;;;;;
+
+[Syslog]
+define_syslog_variables	= Off	; Whether or not to define the various syslog variables,
+								; e.g. $LOG_PID, $LOG_CRON, etc.  Turning it off is a
+								; good idea performance-wise.  In runtime, you can define
+								; these variables by calling define_syslog_variables()
+
+
+[mail function]
+SMTP			=	localhost			;for win32 only
+sendmail_from	=	me@localhost.com	;for win32 only
+sendmail_path	=						;for unix only, may supply arguments as well (default is sendmail -t)
+
+[Debugger]
+debugger.host	=	localhost
+debugger.port	=	7869
+debugger.enabled	=	False
+
+[Logging]
+; These configuration directives are used by the example logging mechanism.
+; See examples/README.logging for more explanation.
+;logging.method    = db
+;logging.directory = /path/to/log/directory
+
+[SQL]
+sql.safe_mode	=	Off
+
+[ODBC]
+;uodbc.default_db		=	Not yet implemented
+;uodbc.default_user		=	Not yet implemented
+;uodbc.default_pw		=	Not yet implemented
+uodbc.allow_persistent	=	On	; allow or prevent persistent links
+uodbc.max_persistent	=	-1	; maximum number of persistent links. -1 means no limit
+uodbc.max_links			=	-1	; maximum number of links (persistent+non persistent). -1 means no limit
+uodbc.defaultlrl	=	4096	; Handling of LONG fields. Returns number of bytes to variables, 0 means passthru
+uodbc.defaultbinmode	= 	1	; Handling of binary data. 0 means passthru, 1 return as is, 2 convert to char
+; See the documentation on odbc_binmode and odbc_longreadlen for an explanation of uodbc.defaultlrl
+; and uodbc.defaultbinmode
+
+[MySQL]
+mysql.allow_persistent	=	On	; allow or prevent persistent link
+mysql.max_persistent	=	-1	; maximum number of persistent links. -1 means no limit
+mysql.max_links			=	-1	; maximum number of links (persistent+non persistent).  -1 means no limit
+mysql.default_port		=		; default port number for mysql_connect().  If unset,
+								; mysql_connect() will use the $MYSQL_TCP_PORT, or the mysql-tcp
+								; entry in /etc/services, or the compile-time defined MYSQL_PORT
+								; (in that order).  Win32 will only look at MYSQL_PORT.
+mysql.default_host		=		; default host for mysql_connect() (doesn't apply in safe mode)
+mysql.default_user		=		; default user for mysql_connect() (doesn't apply in safe mode)
+mysql.default_password	=		; default password for mysql_connect() (doesn't apply in safe mode)
+								; Note that this is generally a *bad* idea to store passwords
+								; in this file.  *Any* user with PHP access can run
+								; 'echo cfg_get_var("mysql.default_password")' and reveal that
+								; password!  And of course, any users with read access to this
+								; file will be able to reveal the password as well.
+
+[mSQL]
+msql.allow_persistent	=	On	; allow or prevent persistent link
+msql.max_persistent		=	-1	; maximum number of persistent links. -1 means no limit
+msql.max_links			=	-1	; maximum number of links (persistent+non persistent).  -1 means no limit
+
+[PostgresSQL]
+pgsql.allow_persistent	=	On	; allow or prevent persistent link
+pgsql.max_persistent	=	-1	; maximum number of persistent links. -1 means no limit
+pgsql.max_links			=	-1	; maximum number of links (persistent+non persistent).  -1 means no limit
+
+[Sybase]
+sybase.allow_persistent	=	On	; allow or prevent persistent link
+sybase.max_persistent	=	-1	; maximum number of persistent links. -1 means no limit
+sybase.max_links		=	-1	; maximum number of links (persistent+non persistent).  -1 means no limit
+;sybase.interface_file	=	"/usr/sybase/interfaces"
+sybase.min_error_severity	=	10	; minimum error severity to display
+sybase.min_message_severity	=	10	; minimum message severity to display
+sybase.compatability_mode	= Off	; compatability mode with earlier versions of PHP 3.0.
+									; If on, this will cause PHP to automatically assign types to results
+									; according to their Sybase type, instead of treating them all as
+									; strings.  This compatability mode will probably not stay around
+									; forever, so try applying whatever necessary changes to your code,
+									; and turn it off.
+
+[Sybase-CT]
+sybct.allow_persistent	=	On		; allow or prevent persistent link
+sybct.max_persistent	=	-1		; maximum number of persistent links. -1 means no limit
+sybct.max_links			=	-1		; maximum number of links (persistent+non persistent).  -1 means no limit
+sybct.min_server_severity	=	10	; minimum server message severity to display
+sybct.min_client_severity	=	10	; minimum client message severity to display
+
+[bcmath]
+bcmath.scale	=	0	; number of decimal digits for all bcmath functions
+
+[browscap]
+;browscap	=	extra/browscap.ini
+
+[Informix]
+ifx.default_host		=		; default host for ifx_connect() (doesn't apply in safe mode)
+ifx.default_user		=		; default user for ifx_connect() (doesn't apply in safe mode)
+ifx.default_password		=		; default password for ifx_connect() (doesn't apply in safe mode)
+ifx.allow_persistent		=	On	; allow or prevent persistent link
+ifx.max_persistent		=	-1	; maximum number of persistent links. -1 means no limit
+ifx.max_links			=	-1	; maximum number of links (persistent+non persistent).  -1 means no limit
+ifx.textasvarchar		=	0	; if set on, select statements return the contents of a text blob instead of it's id
+ifx.byteasvarchar		=	0	; if set on, select statements return the contents of a byte blob instead of it's id
+ifx.charasvarchar		=	0	; trailing blanks are stripped from fixed-length char columns. May help the life
+						; of Informix SE users. 
+ifx.blobinfile			=	0	; if set on, the contents of text&byte blobs are dumped to a file instead of
+						; keeping them in memory
+ifx.nullformat			=	0	; NULL's are returned as empty strings, unless this is set to 1. In that case,
+						; NULL's are returned as string 'NULL'.

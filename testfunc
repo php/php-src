@@ -1,0 +1,36 @@
+<?
+function foo()
+{
+	$i=0;
+	
+	if ($i) {
+		$a = "zeev";
+	} else {
+		$b = "andi";
+	}
+}
+
+
+function bar()
+{
+	foo();
+}
+
+for ($i=0; $i<100000; $i++) {
+	bar();
+}
+
+
+for ($i=0; $i<10; $i++) {
+	bar();
+}
+
+print "Got here...
+
+";
+
+$a = 7;
+
+$a = 5;
+
+print "Got here...\n\n";

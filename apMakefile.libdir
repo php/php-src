@@ -1,0 +1,4 @@
+This is a place-holder which indicates to Configure that it shouldn't
+provide the default targets when building the Makefile in this directory.
+Instead it'll just prepend all the important variable definitions, and
+copy the Makefile.tmpl onto the end.
