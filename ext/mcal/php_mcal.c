@@ -51,7 +51,7 @@
 #include "php_mcal.h"
 #include "modules.h"
 #include "ext/standard/info.h"
-#include "ext/standard/global.h"
+#include "ext/standard/php_global.h"
 #ifdef PHP_WIN32
 #include "winsock.h"
 #endif
