@@ -1,3 +1,32 @@
+2004-05-03  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_misc.c
+      ext/com_dotnet/com_saproxy.c
+      ext/com_dotnet/com_variant.c
+      ext/com_dotnet/tests/27974.phpt:
+      Enable writing to SafeArray dimensions.
+
+    * ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_saproxy.c
+      ext/com_dotnet/tests/variants.phpt:
+      Fix problem when assigning to a variable that holds an instance of
+      a COM/VARIANT/DOTNET object.
+
+    * ext/com_dotnet/README
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_variant.c
+      ext/com_dotnet/com_wrapper.c:
+      Fixup some constants and error handling.
+      Remove unfinished and un-needed function.
+
+2004-05-03  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      Security fix: Put '\0' string termination before loop
+
 2004-05-02  Andi Gutmans  <andi@zend.com>
 
     * ZendEngine2/zend_operators.c:
