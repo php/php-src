@@ -48,6 +48,12 @@
 #define PGSQL_ESCAPE_STRING   1
 #define PGSQL_ESCAPE_BYTEA    2
 
+#if HAVE_PQSETNONBLOCKING
+#define PQ_SETNONBLOCKING(pg_link, flag) PQsetnonblocking(pg_link, flag)
+#else
+#define PQ_SETNONBLOCKING(pg_link, flag) 0
+#endif
+
 #define CHECK_DEFAULT_LINK(x) if (x == -1) { php_error(E_WARNING, "%s() no PostgreSQL link opened yet", get_active_function_name(TSRMLS_C)); }
 
 /* {{{ pgsql_functions[]
@@ -253,13 +259,18 @@ static int _rollback_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		return 0;
 
 	link = (PGconn *) rsrc->ptr;
+
+	if (PQ_SETNONBLOCKING(link, 0)) {
+		php_error(E_NOTICE,"PostgreSQL cannot set connection to blocking mode");
+		return -1;
+	}
 	
-	PQsetnonblocking(link, 0);
 	while ((res = PQgetResult(link))) {
 		PQclear(res);
 	}
 	PGG(ignore_notices) = 1;
-	PQexec(link,"BEGIN;ROLLBACK;");
+	res = PQexec(link,"BEGIN;ROLLBACK;");
+	PQclear(res);
 	PGG(ignore_notices) = 0;
 
 	return 0;
@@ -845,7 +856,11 @@ PHP_FUNCTION(pg_query)
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
 	convert_to_string_ex(query);
-	PQsetnonblocking(pgsql, 0);
+	if (PQ_SETNONBLOCKING(pgsql, 0)) {
+		php_error(E_NOTICE,"%s() cannot set connection to blocking mode",
+				  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
 		leftover = 1;
@@ -1418,7 +1433,7 @@ PHP_FUNCTION(pg_last_oid)
 	
 	ZEND_FETCH_RESOURCE(pg_result, pgsql_result_handle *, result, -1, "PostgreSQL result", le_result);
 	pgsql_result = pg_result->result;
-#if HAVE_PQOIDVALUE
+#ifdef HAVE_PQOIDVALUE
 	Z_LVAL_P(return_value) = (int) PQoidValue(pgsql_result);
 	if (Z_LVAL_P(return_value) == InvalidOid) {
 		RETURN_FALSE;
@@ -1985,7 +2000,7 @@ PHP_FUNCTION(pg_lo_tell)
 }
 /* }}} */
 
-#if HAVE_PQCLIENTENCODING
+#ifdef HAVE_PQCLIENTENCODING
 /* {{{ proto int pg_set_client_encoding([resource connection,] string encoding)
    Set client encoding */
 PHP_FUNCTION(pg_set_client_encoding)
@@ -2357,7 +2372,7 @@ PHP_FUNCTION(pg_copy_from)
 }
 /* }}} */
 
-#if HAVE_PQESCAPE
+#ifdef HAVE_PQESCAPE
 /* {{{ proto string pg_escape_string(string data)
    Escape string for text/char type */
 PHP_FUNCTION(pg_escape_string)
@@ -2404,6 +2419,7 @@ PHP_FUNCTION(pg_result_error)
 	zval *result;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
+	char *err = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r",
 							  &result) == FAILURE) {
@@ -2416,7 +2432,8 @@ PHP_FUNCTION(pg_result_error)
 	if (!pgsql_result) {
 		RETURN_FALSE;
 	}
-	RETURN_STRING(PQresultErrorMessage(pgsql_result),1);
+	err = (char *)PQresultErrorMessage(pgsql_result);
+	RETURN_STRING(err,1);
 }
 /* }}} */
 
@@ -2483,7 +2500,7 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-	if (PQsetnonblocking(pgsql, 1)) {
+	if (PQ_SETNONBLOCKING(pgsql, 1)) {
 		php_error(E_NOTICE,"%s() cannot set connection to nonblocking mode",
 				  get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
@@ -2506,7 +2523,7 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 					  get_active_function_name(TSRMLS_C));
 			break;
 	}
-	if (PQsetnonblocking(pgsql, 0)) {
+	if (PQ_SETNONBLOCKING(pgsql, 0)) {
 		php_error(E_NOTICE,"%s() cannot set connection to blocking mode",
 				  get_active_function_name(TSRMLS_C));
 	}
@@ -2549,7 +2566,7 @@ PHP_FUNCTION(pg_send_query)
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-	if (PQsetnonblocking(pgsql, 1)) {
+	if (PQ_SETNONBLOCKING(pgsql, 1)) {
 		php_error(E_NOTICE,"%s() cannot set connection to nonblocking mode",
 				  get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
@@ -2565,7 +2582,7 @@ PHP_FUNCTION(pg_send_query)
 	if (!PQsendQuery(pgsql, query)) {
 		RETURN_FALSE;
 	}
-	if (PQsetnonblocking(pgsql, 0)) {
+	if (PQ_SETNONBLOCKING(pgsql, 0)) {
 		php_error(E_NOTICE,"%s() cannot set connection to blocking mode",
 				  get_active_function_name(TSRMLS_C));
 	}
