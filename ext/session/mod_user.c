@@ -107,7 +107,7 @@ PS_CLOSE_FUNC(user)
 	retval = ps_call_handler(PSF(close), 0, NULL);
 
 	for (i = 0; i < 6; i++)
-		zval_del_ref(&mdata->names[i]);
+		zval_ptr_dtor(&mdata->names[i]);
 	efree(mdata);
 
 	PS_SET_MOD_DATA(NULL);

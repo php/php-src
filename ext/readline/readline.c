@@ -397,7 +397,7 @@ static char **_readline_completion_cb(char *text, int start, int end)
 	}
 	
 	for (i = 0; i < 4; i++) {
-		zval_del_ref(&params[i]);
+		zval_ptr_dtor(&params[i]);
 	}
 	zval_dtor(&_readline_array);
 	

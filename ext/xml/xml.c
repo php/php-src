@@ -296,7 +296,7 @@ xml_parser_dtor(zend_rsrc_list_entry *rsrc)
 
 	/* please leave this commented - or ask thies@thieso.net before doing it (again) 
     if (parser->object) {
-		zval_del_ref(&parser->object);
+		zval_ptr_dtor(&parser->object);
 	}
 	*/
 	
@@ -310,38 +310,38 @@ xml_parser_dtor(zend_rsrc_list_entry *rsrc)
 		efree(parser->ltags);
 	}
 	if (parser->startElementHandler) {
-		zval_del_ref(&parser->startElementHandler);
+		zval_ptr_dtor(&parser->startElementHandler);
 	}
 	if (parser->endElementHandler) {
-		zval_del_ref(&parser->endElementHandler);
+		zval_ptr_dtor(&parser->endElementHandler);
 	}
 	if (parser->characterDataHandler) {
-		zval_del_ref(&parser->characterDataHandler);
+		zval_ptr_dtor(&parser->characterDataHandler);
 	}
 	if (parser->processingInstructionHandler) {
-		zval_del_ref(&parser->processingInstructionHandler);
+		zval_ptr_dtor(&parser->processingInstructionHandler);
 	}
 	if (parser->defaultHandler) {
-		zval_del_ref(&parser->defaultHandler);
+		zval_ptr_dtor(&parser->defaultHandler);
 	}
 	if (parser->unparsedEntityDeclHandler) {
-		zval_del_ref(&parser->unparsedEntityDeclHandler);
+		zval_ptr_dtor(&parser->unparsedEntityDeclHandler);
 	}
 	if (parser->notationDeclHandler) {
-		zval_del_ref(&parser->notationDeclHandler);
+		zval_ptr_dtor(&parser->notationDeclHandler);
 	}
 	if (parser->externalEntityRefHandler) {
-		zval_del_ref(&parser->externalEntityRefHandler);
+		zval_ptr_dtor(&parser->externalEntityRefHandler);
 	}
 	if (parser->unknownEncodingHandler) {
-		zval_del_ref(&parser->unknownEncodingHandler);
+		zval_ptr_dtor(&parser->unknownEncodingHandler);
 	}
 #ifdef HAVE_LIBEXPAT2
 	if (parser->startNamespaceDeclHandler) {
-		zval_del_ref(&parser->startNamespaceDeclHandler);
+		zval_ptr_dtor(&parser->startNamespaceDeclHandler);
 	}
 	if (parser->endNamespaceDeclHandler) {
-		zval_del_ref(&parser->endNamespaceDeclHandler);
+		zval_ptr_dtor(&parser->endNamespaceDeclHandler);
 	}
 #endif
 	if (parser->baseURI) {
@@ -404,7 +404,7 @@ xml_call_handler(xml_parser *parser, zval *handler, int argc, zval **argv)
 		}
 
 		for (i = 0; i < argc; i++) {
-			zval_del_ref(&(argv[i]));
+			zval_ptr_dtor(&(argv[i]));
 		}
 
 		if (result == FAILURE) {
@@ -1181,7 +1181,7 @@ PHP_FUNCTION(xml_set_object)
 
 	/* please leave this commented - or ask thies@thieso.net before doing it (again) 
     if (parser->object) {
-		zval_del_ref(&parser->object);
+		zval_ptr_dtor(&parser->object);
 	}
 	*/
 	
