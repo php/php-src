@@ -426,6 +426,19 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 #endif							/* FORCE_CGI_REDIRECT */
 	}
 
+	if (php_module_startup(&sapi_module)==FAILURE) {
+		return FAILURE;
+	}
+#ifdef ZTS
+	compiler_globals = ts_resource(compiler_globals_id);
+	executor_globals = ts_resource(executor_globals_id);
+	core_globals = ts_resource(core_globals_id);
+	sapi_globals = ts_resource(sapi_globals_id);
+	if (setjmp(EG(bailout))!=0) {
+		return -1;
+	}
+#endif
+
 	if (!cgi) {
 		while ((c=ap_php_getopt(argc, argv, "c:d:z:g:qvisnaeh?vf:"))!=-1) {
 			switch (c) {
@@ -443,20 +456,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		ap_php_optind = orig_optind;
 		ap_php_optarg = orig_optarg;
 	}
-			
-			
-	if (php_module_startup(&sapi_module)==FAILURE) {
-		return FAILURE;
-	}
-#ifdef ZTS
-	compiler_globals = ts_resource(compiler_globals_id);
-	executor_globals = ts_resource(executor_globals_id);
-	core_globals = ts_resource(core_globals_id);
-	sapi_globals = ts_resource(sapi_globals_id);
-	if (setjmp(EG(bailout))!=0) {
-		return -1;
-	}
-#endif
 
 	init_request_info(SLS_C);
 	SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
