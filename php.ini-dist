@@ -623,6 +623,13 @@ pgsql.max_persistent = -1
 ; Maximum number of links (persistent+non persistent).  -1 means no limit.
 pgsql.max_links = -1
 
+; Ignore PostgreSQL backends Notice message or not.
+pgsql.ignore_notice = 0
+
+; Log PostgreSQL backends Noitce message or not.
+; Unless pgsql.ignore_notice=0, module cannot log notice message.
+pgsql.log_notice = 0
+
 [Sybase]
 ; Allow or prevent persistent links.
 sybase.allow_persistent = On
