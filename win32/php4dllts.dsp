@@ -1126,7 +1126,7 @@ InputPath=..\ext\standard\parsedate.y
 "..\ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd ..\ext\standard 
 	if not "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "%CYGWIN%\share\bison.simple" parsedate.y 
-	if "X%CYGWIN%"=="X" bison --outpt=parsedate.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" parsedate.y 
+	if "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" parsedate.y 
 	
 # End Custom Build
 
@@ -1138,7 +1138,7 @@ InputPath=..\ext\standard\parsedate.y
 "..\ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd ..\ext\standard 
 	if not "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "%CYGWIN%\share\bison.simple" parsedate.y 
-	if "X%CYGWIN%"=="X" bison --outpt=parsedate.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" parsedate.y 
+	if "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" parsedate.y 
 	
 # End Custom Build
 
