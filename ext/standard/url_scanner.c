@@ -87,9 +87,13 @@ static void screw_url(lexdata *state)
 	const char *p, *q;
 	char c;
 
+
 	/* search outer limits for URI */
 	for(p = state->start; p < state->crs && (c = *p); p++)
-		if(c != '"' && c != ' ') break;
+		if(!isspace(c)) break;
+	if(c=='"') p++;
+	for(; p < state->crs && (c = *p); p++)
+		if(!isspace(c)) break;
 
 	/*  
 	 *  we look at q-1, because q points to the character behind the last
@@ -98,14 +102,20 @@ static void screw_url(lexdata *state)
 	 */
 
 	for(q = state->crs; q > state->start && (c = *(q-1)); q--)
-		if(c != '"' && c != ' ') break;
+		if(!isspace(c)) break;
+	if(c=='"') q--;
+	for(; q > state->start && (c = *(q-1)); q--)
+		if(!isspace(c)) break;
+
+	if(q<p) { p=state->start; q=state->crs; }
 
 	/* attach beginning */
-	
 	ATTACH(state->start, p-state->start);
 	
 	/* copy old URI */
 	len = MIN(q - p, sizeof(buf) - 1);
+		php_error(E_WARNING,"%p - %p - %p - %p - %d - %d",state->start,state->crs,p,q,q-p,len);
+
 	memcpy(url, p, len);
 	url[len] = '\0';
 	
