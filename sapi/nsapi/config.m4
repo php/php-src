@@ -2,7 +2,7 @@ dnl ## $Id$ -*- sh -*-
 
 AC_MSG_CHECKING(for NSAPI support)
 AC_ARG_WITH(nsapi,
-[  --with-nsapi=DIR             Specify path to the installed Netscape],[
+[  --with-nsapi=DIR        Specify path to the installed Netscape],[
   PHP_NSAPI=$withval
 ],[
   PHP_NSAPI=no
