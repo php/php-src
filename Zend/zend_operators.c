@@ -907,9 +907,9 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2)
 		memcpy(result->value.str.val+op1->value.str.len, op2->value.str.val,op2->value.str.len);
 		result->value.str.val[result->value.str.len] = 0;
 		result->type = IS_STRING;
-		if (use_copy1) {
-			zval_dtor(op1);
-		}
+	}
+	if (use_copy1) {
+		zval_dtor(op1);
 	}
 	if (use_copy2) {
 		zval_dtor(op2);
