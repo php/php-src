@@ -1993,8 +1993,8 @@ EXEC SQL BEGIN DECLARE SECTION;
 	short fieldtype;      /* field type      */
 	int   fieldleng;      /* field length    */
 $ifdef HAVE_IFX_IUS;
-	ifx_int8_t  int8_var;
-	lvarchar*lvar_tmp;
+	ifx_int8_t int8_var;
+	lvarchar   *lvar_tmp;
 $endif;
 	short     indicator;
 	int       int_data;
