@@ -413,7 +413,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 			size_t justread = 0;
 			int flags;
 			php_stream_bucket *bucket;
-			php_stream_filter_status_t status;
+			php_stream_filter_status_t status = PSFS_ERR_FATAL;
 			php_stream_filter *filter;
 
 			/* read a chunk into a bucket */
@@ -893,7 +893,7 @@ static size_t _php_stream_write_filtered(php_stream *stream, const char *buf, si
 	php_stream_bucket *bucket;
 	php_stream_bucket_brigade brig_in = { NULL, NULL }, brig_out = { NULL, NULL };
 	php_stream_bucket_brigade *brig_inp = &brig_in, *brig_outp = &brig_out, *brig_swap;
-	php_stream_filter_status_t status;
+	php_stream_filter_status_t status = PSFS_ERR_FATAL;
 	php_stream_filter *filter;
 
 	if (buf) {
@@ -1618,7 +1618,10 @@ PHPAPI void php_stream_notification_notify(php_stream_context *context, int noti
 
 PHPAPI void php_stream_context_free(php_stream_context *context)
 {
-	zval_ptr_dtor(&context->options);
+	if (context->options) {
+		zval_ptr_dtor(&context->options);
+		context->options = NULL;
+	}
 	efree(context);
 }
 
