@@ -91,6 +91,131 @@ zend_module_entry libxml_module_entry = {
 
 /* }}} */
 
+/* {{{ internal functions for interoperability */
+static int php_libxml_dec_node(php_libxml_node_ptr *nodeptr)
+{
+	int ret_refcount;
+
+	ret_refcount = --nodeptr->refcount;
+	if (ret_refcount == 0) {
+		if (nodeptr->node != NULL && nodeptr->node->type != XML_DOCUMENT_NODE) {
+			nodeptr->node->_private = NULL;
+		}
+		/* node is destroyed by another object. reset ret_refcount to 1 and node to NULL
+		so the php_libxml_node_ptr is detroyed when the object is destroyed */
+		nodeptr->refcount = 1;
+		nodeptr->node = NULL;
+	}
+
+	return ret_refcount;
+}
+
+static int php_libxml_clear_object(php_libxml_node_object *object TSRMLS_DC)
+{
+	if (object->properties) {
+		object->properties = NULL;
+	}
+	php_libxml_decrement_node_ptr(object TSRMLS_CC);
+	return php_libxml_decrement_doc_ref(object TSRMLS_CC);
+}
+
+static int php_libxml_unregister_node(xmlNodePtr nodep TSRMLS_DC)
+{
+	php_libxml_node_object *wrapper;
+
+	php_libxml_node_ptr *nodeptr = nodep->_private;
+
+	if (nodeptr != NULL) {
+		wrapper = nodeptr->_private;
+		if (wrapper) {
+			php_libxml_clear_object(wrapper TSRMLS_CC);
+		} else {
+			php_libxml_dec_node(nodeptr);
+		}
+	}
+
+	return -1;
+}
+
+static void php_libxml_node_free(xmlNodePtr node)
+{
+	if(node) {
+		if (node->_private != NULL) {
+			((php_libxml_node_ptr *) node->_private)->node = NULL;
+		}
+		switch (node->type) {
+			case XML_ATTRIBUTE_NODE:
+				xmlFreeProp((xmlAttrPtr) node);
+				break;
+			case XML_ENTITY_DECL:
+			case XML_ELEMENT_DECL:
+			case XML_ATTRIBUTE_DECL:
+				break;
+			case XML_NOTATION_NODE:
+				/* These require special handling */
+				if (node->name != NULL) {
+					xmlFree((char *) node->name);
+				}
+				if (((xmlEntityPtr) node)->ExternalID != NULL) {
+					xmlFree((char *) ((xmlEntityPtr) node)->ExternalID);
+				}
+				if (((xmlEntityPtr) node)->SystemID != NULL) {
+					xmlFree((char *) ((xmlEntityPtr) node)->SystemID);
+				}
+				xmlFree(node);
+				break;
+			case XML_NAMESPACE_DECL:
+				if (node->ns) {
+					xmlFreeNs(node->ns);
+					node->ns = NULL;
+				}
+				node->type = XML_ELEMENT_NODE;
+			default:
+				xmlFreeNode(node);
+		}
+	}
+}
+
+static void php_libxml_node_free_list(xmlNodePtr node TSRMLS_DC)
+{
+	xmlNodePtr curnode;
+
+	if (node != NULL) {
+		curnode = node;
+		while (curnode != NULL) {
+			node = curnode;
+			switch (node->type) {
+				/* Skip property freeing for the following types */
+				case XML_NOTATION_NODE:
+					break;
+				case XML_ENTITY_REF_NODE:
+					php_libxml_node_free_list((xmlNodePtr) node->properties TSRMLS_CC);
+					break;
+				case XML_ATTRIBUTE_DECL:
+				case XML_DTD_NODE:
+				case XML_DOCUMENT_TYPE_NODE:
+				case XML_ENTITY_DECL:
+				case XML_ATTRIBUTE_NODE:
+				case XML_NAMESPACE_DECL:
+					php_libxml_node_free_list(node->children TSRMLS_CC);
+					break;
+				default:
+					php_libxml_node_free_list(node->children TSRMLS_CC);
+					php_libxml_node_free_list((xmlNodePtr) node->properties TSRMLS_CC);
+			}
+
+			curnode = node->next;
+			xmlUnlinkNode(node);
+			if (php_libxml_unregister_node(node TSRMLS_CC) == 0) {
+				node->doc = NULL;
+			}
+			php_libxml_node_free(node);
+		}
+	}
+}
+
+/* }}} */
+
 /* {{{ startup, shutdown and info functions */
 #ifdef ZTS
 static void php_libxml_init_globals(php_libxml_globals *libxml_globals_p TSRMLS_DC)
@@ -273,6 +398,149 @@ PHP_FUNCTION(libxml_set_streams_context)
 	}
 	ZVAL_ADDREF(arg);
 	LIBXML(stream_context) = arg;
+}
+/* }}} */
+
+/* {{{ Common functions shared by extensions */
+int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data TSRMLS_DC)
+{
+	int ret_refcount = -1;
+
+	if (object != NULL && node != NULL) {
+		if (object->node != NULL) {
+			if (object->node->node == node) {
+				return object->node->refcount;
+			} else {
+				php_libxml_decrement_node_ptr(object TSRMLS_CC);
+			}
+		}
+		if (node->_private != NULL) {
+			object->node = node->_private;
+			ret_refcount = ++object->node->refcount;
+			/* Only dom uses _private */
+			if (object->node->_private == NULL) {
+				object->node->_private = private_data;
+			}
+		} else {
+			ret_refcount = 1;
+			object->node = emalloc(sizeof(php_libxml_node_ptr));
+			object->node->node = node;
+			object->node->refcount = 1;
+			object->node->_private = private_data;
+			node->_private = object->node;
+		}
+	}
+
+	return ret_refcount;
+}
+
+int php_libxml_decrement_node_ptr(php_libxml_node_object *object TSRMLS_DC) {
+	int ret_refcount = -1;
+	php_libxml_node_ptr *obj_node;
+
+	if (object != NULL && object->node != NULL) {
+		obj_node = (php_libxml_node_ptr *) object->node;
+		ret_refcount = --obj_node->refcount;
+		if (ret_refcount == 0) {
+			if (obj_node->node != NULL && obj_node->node->type != XML_DOCUMENT_NODE) {
+				obj_node->node->_private = NULL;
+			}
+			efree(obj_node);
+		} 
+		object->node = NULL;
+	}
+
+	return ret_refcount;
+}
+
+int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp TSRMLS_DC) {
+	int ret_refcount = -1;
+
+	if (object->document != NULL) {
+		object->document->refcount++;
+		ret_refcount = object->document->refcount;
+	} else if (docp != NULL) {
+		ret_refcount = 1;
+		object->document = emalloc(sizeof(php_libxml_ref_obj));
+		object->document->ptr = docp;
+		object->document->refcount = ret_refcount;
+		object->document->doc_props = NULL;
+	}
+
+	return ret_refcount;
+}
+
+int php_libxml_decrement_doc_ref(php_libxml_node_object *object TSRMLS_DC) {
+	int ret_refcount = -1;
+
+	if (object != NULL && object->document != NULL) {
+		ret_refcount = --object->document->refcount;
+		if (ret_refcount == 0) {
+			if (object->document->ptr != NULL) {
+				xmlFreeDoc((xmlDoc *) object->document->ptr);
+			}
+			if (object->document->doc_props != NULL) {
+				efree(object->document->doc_props);
+			}
+			efree(object->document);
+		}
+		object->document = NULL;
+	}
+
+	return ret_refcount;
+}
+
+void php_libxml_node_free_resource(xmlNodePtr node TSRMLS_DC)
+{
+	if (!node) {
+		return;
+	}
+
+	switch (node->type) {
+		case XML_DOCUMENT_NODE:
+		case XML_HTML_DOCUMENT_NODE:
+			break;
+		default:
+			if (node->parent == NULL || node->type == XML_NAMESPACE_DECL) {
+				php_libxml_node_free_list((xmlNodePtr) node->children TSRMLS_CC);
+				switch (node->type) {
+					/* Skip property freeing for the following types */
+					case XML_ATTRIBUTE_DECL:
+					case XML_DTD_NODE:
+					case XML_DOCUMENT_TYPE_NODE:
+					case XML_ENTITY_DECL:
+					case XML_ATTRIBUTE_NODE:
+					case XML_NAMESPACE_DECL:
+						break;
+					default:
+						php_libxml_node_free_list((xmlNodePtr) node->properties TSRMLS_CC);
+				}
+				if (php_libxml_unregister_node(node TSRMLS_CC) == 0) {
+					node->doc = NULL;
+				}
+				php_libxml_node_free(node);
+			} else {
+				php_libxml_unregister_node(node TSRMLS_CC);
+			}
+	}
+}
+
+void php_libxml_node_decrement_resource(php_libxml_node_object *object TSRMLS_DC)
+{
+	int ret_refcount = -1;
+	xmlNodePtr nodep;
+	php_libxml_node_ptr *obj_node;
+
+	if (object != NULL && object->node != NULL) {
+		obj_node = (php_libxml_node_ptr *) object->node;
+		nodep = object->node->node;
+		ret_refcount = php_libxml_decrement_node_ptr(object TSRMLS_CC);
+		if (ret_refcount == 0) {
+			php_libxml_node_free_resource(nodep TSRMLS_CC);
+		}
+		/* Safe to call as if the resource were freed then doc pointer is NULL */
+		php_libxml_decrement_doc_ref(object TSRMLS_CC);
+	}
 }
 /* }}} */
 
