@@ -167,11 +167,20 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 					SAFE_RETURN;
 				}
 				loc = memchr(ptr, '\n', rem);
-				name = strstr(ptr, " name=\"");
+				name = strstr(ptr, " name=");
 				if (name && name < loc) {
-					name += 7;
+					name += 6;
 					s = memchr(name, '\"', loc - name);
-					if (!s) {
+					if ( name == s ) { 
+						name++;
+						s = memchr(name, '\"', loc - name);
+						if(!s) {
+							php_error(E_WARNING, "File Upload Mime headers garbled name: [%c%c%c%c%c]", *name, *(name + 1), *(name + 2), *(name + 3), *(name + 4));
+							SAFE_RETURN;
+						}
+					} else if(!s) {
+						s = loc;
+					} else {
 						php_error(E_WARNING, "File Upload Mime headers garbled name: [%c%c%c%c%c]", *name, *(name + 1), *(name + 2), *(name + 3), *(name + 4));
 						SAFE_RETURN;
 					}
