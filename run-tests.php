@@ -263,7 +263,7 @@ Options:
 
     -a <file>   Same as -w but append rather then truncating <file>.
 
-    -n          Pass -n option to the php binary.
+    -n          Pass -n option to the php binary (Do not use a php.ini).
 
     -h <file>   This Help.
 
