@@ -1,7 +1,7 @@
 --TEST--
 session_unset() without any session
 --SKIPIF--
-<?php include('./ext/session/tests/skipif.inc'); ?>
+<?php include('skipif.inc'); ?>
 --FILE--
 <?php
 session_unset();
