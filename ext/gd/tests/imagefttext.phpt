@@ -1,12 +1,12 @@
 --TEST--
-imagettftext() function test
+imagefttext() function test
 --SKIPIF--
 <?php 
 	if (!extension_loaded('gd')) {
 		die("skip gd extension not avaliable.");
 	}
-	if (!function_exists("imagettftext")) {
-		die("skip imagettftext() not available.");
+	if (!function_exists("imagefttext")) {
+		die("skip imagefttext() not available.");
 	}
 ?>
 --FILE--
@@ -22,7 +22,7 @@ imagettftext() function test
 		$colour_b = imagecolorallocate($im, 0, 0, 0);
 
 		imagefilledrectangle($im, 0, 0, $sx - 1, $sy - 1, $colour_b);
-		imagettftext($im, $sy * 0.75, 0, 0, $sy - 1, $colour_w, $fontfile, "A");
+		imagefttext($im, $sy * 0.75, 0, 0, $sy - 1, $colour_w, $fontfile, "A", array());
 
 		$cnt = 0;
 		for ($y = 0; $y < $sy; ++$y) {
@@ -43,11 +43,10 @@ imagettftext() function test
 	var_dump(testrun($im, $fontfile_8859));
 	imagedestroy($im);
 
-/* considered to be disabled for now as discussed in the QA list.
 	$im = imagecreatetruecolor(256, 256);
 	var_dump(testrun($im, $fontfile_8859));
 	imagedestroy($im);
-*/
 ?>
 --EXPECT--
+bool(true)
 bool(true)
