@@ -371,19 +371,11 @@ SPL_METHOD(Array, offsetSet)
 	spl_array_write_dimension(getThis(), index, value TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto void ArrayObject::append(mixed $newval)
-       proto void ArrayIterator::append(mixed $newval)
- Appends the value (cannot be called for objects). */
-SPL_METHOD(Array, append)
+
+void spl_array_iterator_append(zval *object, zval *append_value TSRMLS_DC) /* {{{ */
 {
-	zval *object = getThis();
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	HashTable *aht = HASH_OF(intern->array);
-
-	zval *value;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
-		return;
-	}
 
 	if (!aht) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and is no longer an array");
@@ -394,10 +386,23 @@ SPL_METHOD(Array, append)
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot append properties to objects, use %s::offsetSet() instead", Z_OBJCE_P(object)->name);
 	}
 
-	spl_array_write_dimension(object, NULL, value TSRMLS_CC);
+	spl_array_write_dimension(object, NULL, append_value TSRMLS_CC);
 	if (!intern->pos) {
 		intern->pos = aht->pListTail;
 	}
+} /* }}} */
+
+/* {{{ proto void ArrayObject::append(mixed $newval)
+       proto void ArrayIterator::append(mixed $newval)
+ Appends the value (cannot be called for objects). */
+SPL_METHOD(Array, append)
+{
+	zval *value;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
+		return;
+	}
+	spl_array_iterator_append(getThis(), value TSRMLS_CC);
 } /* }}} */
 
 /* {{{ proto void ArrayObject::offsetUnset(mixed $index)

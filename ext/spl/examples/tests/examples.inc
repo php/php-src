@@ -13,10 +13,6 @@ class IncludeFiles extends ArrayIterator
 }
 
 $classes = array(
-	'EmptyIterator',
-	'InfiniteIterator',
-	'AppendIterator',
-	'NoRewindIterator',
 );
 
 foreach (new IncludeFiles(dirname(__FILE__). '/..', $classes) as $file)
