@@ -1,4 +1,5 @@
 /* Defines and types for Windows 95/NT */
+#define HAVE_DECLARED_TIMEZONE
 #define WIN32_LEAN_AND_MEAN
 #include <io.h>
 #include <malloc.h>
