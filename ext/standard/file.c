@@ -372,7 +372,7 @@ PHP_FUNCTION(get_file_contents)
 {
 	char *filename;
 	int filename_len;
-	char *contents, *target_buf;
+	char *contents;
 	zend_bool use_include_path = 0;
 	php_stream *stream;
 	int len, newlen;
@@ -398,7 +398,7 @@ PHP_FUNCTION(get_file_contents)
 			len = newlen;
 		}
 
-		RETVAL_STRINGL(contents, len);
+		RETVAL_STRINGL(contents, len, 0);
 	} else {
 		RETVAL_FALSE;
 	}

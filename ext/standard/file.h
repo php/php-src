@@ -53,6 +53,7 @@ PHP_FUNCTION(rename);
 PHP_FUNCTION(unlink);
 PHP_FUNCTION(copy);
 PHP_FUNCTION(file);
+PHP_FUNCTION(get_file_contents);
 PHP_FUNCTION(set_socket_blocking); /* deprecated */
 PHP_FUNCTION(socket_set_blocking);
 PHP_FUNCTION(socket_set_timeout);
