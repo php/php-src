@@ -1,3 +1,44 @@
+2003-04-03  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c:
+      Patch from Timm Friede for when EG(active_namespace) is NULL initially.
+
+    * zend.c
+      zend_API.c
+      zend_compile.c:
+      Initialize all relevant zend_class_entry fields to avoid accidental
+      crashes.
+
+2003-04-03  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_list.c:
+      Leftover.
+
+2003-04-03  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_list.c
+      zend_list.h:
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+      i will not commit before 12:00
+
 2003-04-02  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c
