@@ -2153,7 +2153,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	oci_session *session = 0, *psession = 0;
 	OCISvcCtx *svchp = 0;
 	char *hashed_details;
-#ifdef HAVE_OCI9
+#ifdef HAVE_OCI_9_2
 	ub2 charsetid = 0;
 #endif
 	TSRMLS_FETCH();
@@ -2204,7 +2204,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	session->server = server;
 	session->exclusive = exclusive;
 
-#ifdef HAVE_OCI9
+#ifdef HAVE_OCI_9_2
 
 	/* following chunk is Oracle 9i+ ONLY */
 	if (*charset) {
@@ -2242,7 +2242,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	session->pEnv = OCI(pEnv);
 	session->charsetId = 0;
 
-#endif  /* HAVE_OCI9 */
+#endif  /* HAVE_OCI_9_2 */
 
 	/* allocate temporary Service Context */
 	CALL_OCI_RETURN(OCI(error), OCIHandleAlloc(
@@ -2349,7 +2349,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 
 	return psession;
 
- CLEANUP:
+CLEANUP:
 	oci_debug("_oci_open_session: FAILURE -> CLEANUP called");
 
 	_oci_close_session(session);
@@ -2526,7 +2526,7 @@ static oci_server *_oci_open_server(char *dbname,int persistent)
 
 	return pserver;
 
- CLEANUP:
+CLEANUP:
 	oci_debug("_oci_open_server: FAILURE -> CLEANUP called");
 
 	_oci_close_server(server);
@@ -2769,7 +2769,7 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 
 	RETURN_RESOURCE(connection->id);
 	
- CLEANUP:
+CLEANUP:
 	oci_debug("oci_do_connect: FAILURE -> CLEANUP called");
 
 	if (connection->id) {
@@ -3415,7 +3415,7 @@ PHP_FUNCTION(ociwritelobtofile)
 		RETURN_TRUE;
 	}
 	
- bail:
+bail:
 	if (fp != -1) {
 		close(fp);
 	}
