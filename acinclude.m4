@@ -4,6 +4,16 @@ dnl This file contains local autoconf functions.
 
 sinclude(dynlib.m4)
 
+AC_DEFUN(PHP_SHLIB_SUFFIX_NAME,[
+  PHP_SUBST(SHLIB_SUFFIX_NAME)
+  SHLIB_SUFFIX_NAME=so
+  case "$host_alias" in
+  *hpux*)
+	SHLIB_SUFFIX_NAME=sl
+	;;
+  esac
+])
+
 AC_DEFUN(PHP_DEBUG_MACRO,[
   DEBUG_LOG="$1"
   cat >$1 <<X
