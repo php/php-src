@@ -118,6 +118,7 @@ static void _oci_stmt_list_dtor(zend_rsrc_list_entry *rsrc);
 static void _oci_descriptor_list_dtor(zend_rsrc_list_entry *rsrc);
 static void _oci_server_list_dtor(zend_rsrc_list_entry *rsrc);
 static void _oci_session_list_dtor(zend_rsrc_list_entry *rsrc);
+static void php_oci_free_conn_list(zend_rsrc_list_entry *rsrc);
 
 static void _oci_column_hash_dtor(void *data);
 static void _oci_define_hash_dtor(void *data);
