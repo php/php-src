@@ -28,8 +28,6 @@
 
 #if HAVE_SYBASE_CT
 
-
-
 function_entry sybase_functions[] = {
 	PHP_FE(sybase_connect,				NULL)
 	PHP_FE(sybase_pconnect,				NULL)
@@ -559,7 +557,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			ptr = zend_list_find(link,&type);   /* check if the link is still there */
 			if (ptr && (type==sybase_globals.le_link || type==sybase_globals.le_plink)) {
 				return_value->value.lval = sybase_globals.default_link = link;
-				return_value->type = IS_LONG;
+				return_value->type = IS_RESOURCE;
 				efree(hashed_details);
 				return;
 			} else {
