@@ -3782,7 +3782,7 @@ static char* php3_intifx_create_tmpfile(long bid) {
  
  sprintf(filename,"blb%d",(int)bid);
  blobfile=tempnam(blobdir,filename);
- free(blobdir);
+ /* free(blobdir); */
  
  if (blobfile == NULL) 
    return NULL;
