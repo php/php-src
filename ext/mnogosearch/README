@@ -2,7 +2,7 @@ $Source$
 $Id$
 
 mnoGoSearch extension module for PHP4.
-Basic mnoGoSearch function implementation.
+mnoGoSearch function implementation.
 
 If used with mysql you should not use bundled mysql library 
 in the php distribution. You should use native mysql 
@@ -12,7 +12,7 @@ library. To do this you should compile php with specefying mysql-dir
   TODO
   ----
 
-1. Implement more mnoGoSearch functions.
+1. Implement all mnoGoSearch functions.
 
 2. Fix  config.m4 to detect whether mnoGoSearch is actually installed.
 Currently there is no any checking. ./configure just trust that mnoGoSearch
