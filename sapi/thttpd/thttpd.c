@@ -24,6 +24,8 @@
 #include "php_variables.h"
 #include "version.h"
 
+#include "ext/standard/php_smart_str.h"
+
 #include <sys/uio.h>
 
 typedef struct {
@@ -57,7 +59,7 @@ static int sapi_thttpd_ub_write(const char *str, uint str_length)
 		if (n <= 0) 
 			return n;
 
-		TG(hc)->bytes += n;
+		TG(hc)->bytes_sent += n;
 		str += n;
 		sent += n;
 		str_length -= n;
@@ -84,7 +86,7 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 		vec[n].iov_base = buf;
 		vec[n++].iov_len = len;
 		TG(hc)->status = SG(sapi_headers).http_response_code;
-		TG(hc)->bytes += len;
+		TG(hc)->bytes_sent += len;
 	}
 
 	h = zend_llist_get_first_ex(&sapi_headers->headers, &pos);
@@ -257,30 +259,24 @@ static void thttpd_module_main(TLS_D SLS_DC)
 
 static void thttpd_request_ctor(TLS_D SLS_DC)
 {
-	char *cp;
-	size_t cp_len;
 	char buf[1024];
 	int offset;
 	size_t filename_len;
 	size_t cwd_len;
-
+	smart_str s = {0};
 
 	SG(request_info).query_string = TG(hc)->query?strdup(TG(hc)->query):NULL;
 
-	filename_len = strlen(TG(hc)->expnfilename);
-	cwd_len = strlen(TG(hc)->hs->cwd);
-
-	cp_len = cwd_len + filename_len;
-	cp = (char *) malloc(cp_len + 1);
-	/* cwd always ends in "/", so this is safe */
-	memcpy(cp, TG(hc)->hs->cwd, cwd_len);
-	memcpy(cp + cwd_len, TG(hc)->expnfilename, filename_len);
-	cp[cp_len] = '\0';
+	smart_str_appends_ex(&s, TG(hc)->hs->cwd, 1);
+	smart_str_appends_ex(&s, TG(hc)->expnfilename, 1);
+	smart_str_0(&s);
+	SG(request_info).path_translated = s.c;
 	
-	SG(request_info).path_translated = cp;
-	
-	snprintf(buf, 1023, "/%s", TG(hc)->origfilename);
-	SG(request_info).request_uri = strdup(buf);
+	s.c = NULL;
+	smart_str_appendc_ex(&s, '/', 1);
+	smart_str_appends_ex(&s, TG(hc)->origfilename, 1);
+	smart_str_0(&s);
+	SG(request_info).request_uri = s.c;
 	SG(request_info).request_method = httpd_method_str(TG(hc)->method);
 	SG(sapi_headers).http_response_code = 200;
 	SG(request_info).content_type = TG(hc)->contenttype;
@@ -313,7 +309,7 @@ off_t thttpd_php_request(httpd_conn *hc)
 	TLS_FETCH();
 
 	TG(hc) = hc;
-	hc->bytes = 0;
+	hc->bytes_sent = 0;
 	
 	thttpd_request_ctor(TLS_C SLS_CC);
 
