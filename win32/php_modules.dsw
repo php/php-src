@@ -183,18 +183,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "gd_bundled"=..\ext\gd\gd_bundled.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "gettext"=..\ext\gettext\gettext.dsp - Package Owner=<4>
 
 Package=<5>
@@ -327,7 +315,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mcve"=..\ext\mcve\mcve\mcve.dsp - Package Owner=<4>
+Project: "mcve"=..\ext\mcve\mcve.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
