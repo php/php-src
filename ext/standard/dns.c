@@ -352,7 +352,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 		return cp;
 	}
 
-	MAKE_STD_ZVAL(*subarray);
+	ALLOC_INIT_ZVAL(*subarray);
 	array_init(*subarray);
 
 	add_assoc_string(*subarray, "host", name, 1);
@@ -402,10 +402,8 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			add_assoc_string(*subarray, "type", "TXT", 1);
 			n = cp[0];
 			tp = emalloc(n + 1);
-			for(i=1; i<=n; i++) {
-				tp[i-1] = cp[i];
-			}
-			tp[i-1] = '\0';
+			memcpy(tp, cp + 1, n);
+			tp[n] = '\0';
 			cp += dlen;
 			add_assoc_stringl(*subarray, "txt", tp, n, 0);
 			break;
@@ -517,11 +515,9 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
    Get any Resource Record corresponding to a given Internet host name */
 PHP_FUNCTION(dns_get_record)
 {
-	zval *subarray[MAXRESOURCERECORDS];
 	pval *addtl, *host, *authns, *fetch_type;
 	int addtl_recs = 0;
 	int type_to_fetch, type_param = PHP_DNS_ANY;
-	int current_subarray = 0;
 	struct __res_state res;
 	HEADER *hp;
 	querybuf buf, answer, *ans;
@@ -670,10 +666,12 @@ PHP_FUNCTION(dns_get_record)
 		
 			/* YAY! Our real answers! */
 			while (an-- && cp && cp < end) {
-				cp = php_parserr(cp, &answer, type_to_fetch, store_results, &subarray[current_subarray]);
-				if (subarray[current_subarray] != NULL && store_results)
-					zend_hash_next_index_insert(HASH_OF(return_value), (void *)&subarray[current_subarray], sizeof(zval *), NULL);
-				current_subarray++;
+				zval *retval;
+
+				cp = php_parserr(cp, &answer, type_to_fetch, store_results, &retval);
+				if (retval != NULL && store_results) {
+					add_next_index_zval(return_value, retval);
+				}
 			}
 			res_nclose(&res);
 		}
@@ -682,17 +680,21 @@ PHP_FUNCTION(dns_get_record)
 	if (addtl_recs) {
 		/* List of Authoritative Name Servers */
 		while (ns-- > 0 && cp && cp < end) {
-			cp = php_parserr(cp, &answer, T_ANY, 1, &subarray[current_subarray]);
-			if (subarray[current_subarray] != NULL)
-				zend_hash_next_index_insert(HASH_OF(authns), (void *)&subarray[current_subarray], sizeof(zval *), NULL);
-			current_subarray++;
+			zval *retval;
+
+			cp = php_parserr(cp, &answer, T_ANY, 1, &retval);
+			if (retval != NULL) {
+				add_next_index_zval(authns, retval);
+			}
 		}
 		/* Additional records associated with authoritative name servers */
 		while (ar-- > 0 && cp && cp < end) {
-			cp = php_parserr(cp, &answer, T_ANY, 1, &subarray[current_subarray]);
-			if (subarray[current_subarray] != NULL)
-				zend_hash_next_index_insert(HASH_OF(addtl), (void *)&subarray[current_subarray], sizeof(zval *), NULL);
-			current_subarray++;
+			zval *retval;
+
+			cp = php_parserr(cp, &answer, T_ANY, 1, &retval);
+			if (retval != NULL) {
+				add_next_index_zval(addtl, retval);
+			}
 		}
 	}
 }
