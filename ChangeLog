@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Fixed flushing of cached information to disk in DBA's DB2 module (Sascha)
 - OCI8 is now ZTS-Save (Thies)
 - Imported PHP 3.0 diskfreespace() function (Thies)
 - Fixed thread-safety issues in the MySQL module (Zeev)
