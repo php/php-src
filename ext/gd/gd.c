@@ -588,7 +588,7 @@ PHP_FUNCTION(imagesetthickness)
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
-	convert_to_boolean_ex(thick);
+	convert_to_long_ex(thick);
 		
 	gdImageSetThickness(im, Z_LVAL_PP(thick));
 
