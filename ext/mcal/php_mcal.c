@@ -154,11 +154,12 @@ PHP_MINFO_FUNCTION(mcal)
 
         php_info_print_table_start();
         php_info_print_table_row(2, "MCAL Support", "enabled" );
-        php_info_print_table_row(2, "MCAL Version", CALVER );
 #ifdef MCALVER
-        sprintf(tmp, "%d", MCALVER );
-        php_info_print_table_row(2, "", tmp );
+	snprintf(tmp, 128, "%s<BR>%d", CALVER, MCALVER);
+#else
+	snprintf(tmp, 128, "%s", CALVER );
 #endif
+        php_info_print_table_row(2, "MCAL Version", tmp );
         php_info_print_table_end();
 }
 
