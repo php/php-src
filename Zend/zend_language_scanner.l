@@ -116,7 +116,7 @@ do {																			\
 
 void zend_fatal_scanner_error(char *message)
 {
-	zend_error(E_COMPILE_ERROR, message);
+	zend_error(E_COMPILE_ERROR, "%s", message);
 }
 
 BEGIN_EXTERN_C()
