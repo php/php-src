@@ -197,33 +197,61 @@ php_xml_compat_handlers = {
 XML_Parser 
 XML_ParserCreate(const XML_Char *encoding)
 {
-	XML_Parser parser;
-
-	parser = (XML_Parser) calloc(1, sizeof(struct _XML_Parser));
-	parser->parser = xmlCreatePushParserCtxt((xmlSAXHandlerPtr) &php_xml_compat_handlers, (void *) parser, NULL, 0, NULL);
-	if (parser->parser == NULL) {
-		return NULL;
-	}
-	parser->parser->encoding = xmlStrdup(encoding);
-
-	return parser;
+	return XML_ParserCreate_MM(encoding, NULL, NULL);
 }
 
 XML_Parser
 XML_ParserCreateNS(const XML_Char *encoding, const XML_Char sep)
 {
-	XML_Parser parser;
+	XML_Char tmp[2];
+	tmp[0] = sep;
+	tmp[1] = '\0';
+	return XML_ParserCreate_MM(encoding, NULL, tmp);
+}
 
-	parser = (XML_Parser) calloc(1, sizeof(struct _XML_Parser));
+static void *(*_expat_cpt_malloc_fcn)(size_t sz);
+
+static char *_expat_cpt_intn_strdup(const chat *str)
+{
+	size_t len;
+	char *retval;
+
+	len = strlen(str);
+	if ((retval = _expat_cpt_malloc_fcn(len + 1)) == NULL) {
+		return NULL;
+	}
+	memcpy(retval, str, len + 1);
+
+	return retval;
+}
+
+XML_Parser
+XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *memsuite, const XML_Char *sep)
+{
+	XML_Parser parser;
+	static XML_Memory_Handling_Suite mtemp_i = { malloc, realloc, free };
+
+	if (memsuite == NULL) {
+		memsuite = &mtemp_i;
+	}
+
+	_expat_cpt_malloc_fcn = memsuite->malloc_fcn; /* FIXME: not reentrant ! */
+
+	xmlMemSetup(memsuite->free_fcn, memsuite->malloc_fcn, memsuite->realloc_fcn, _expat_compat_intn_strdup); /* WHOCANFIXME: not reentrant ! */
+
+	parser = (XML_Parser) memsuite->malloc_fcn(sizeof(struct _XML_Parser));
+	parser->mem_hdlrs = *memsuite;
 	parser->parser = xmlCreatePushParserCtxt((xmlSAXHandlerPtr) &php_xml_compat_handlers, (void *) parser, NULL, 0, NULL);
 	if (parser->parser == NULL) {
+		parser->mem_hdlrs.free_fcn(parser->parser);
 		return NULL;
 	}
 	parser->parser->encoding = xmlStrdup(encoding);
-	parser->namespace = 1;
-	parser->_ns_map = xmlHashCreate(10);
-	parser->_reverse_ns_map = xmlHashCreate(10);
-
+	if (sep != NULL) {
+		parser->namespace = 1;
+		parser->_ns_map = xmlHashCreate(10);
+		parser->_reverse_ns_map = xmlHashCreate(10);
+	}
 	return parser;
 }
 
@@ -353,7 +381,7 @@ XML_ParserFree(XML_Parser parser)
 		xmlHashFree(parser->_reverse_ns_map, _free_ns_name);
 	}
 	xmlFreeParserCtxt(parser->parser);
-	free(parser);
+	parser->mem_hdlrs.free_fcn(parser);
 }
 
 #endif /* LIBXML_EXPAT_COMPAT */

@@ -152,6 +152,8 @@ xml_encoding xml_encodings[] = {
 	{ NULL,         NULL,                  NULL                  }
 };
 
+static XML_Memory_Handling_Suite php_xml_mem_hdlrs;
+
 /* True globals, no need for thread safety */
 static int le_xml_parser; 
 
@@ -164,6 +166,21 @@ static void php_xml_init_globals(php_xml_globals *xml_globals_p TSRMLS_DC)
 	XML(default_encoding) = "ISO-8859-1";
 }
 #endif
+
+static void *php_xml_malloc_wrapper(size_t sz)
+{
+	return emalloc(sz);
+}
+
+static void *php_xml_realloc_wrapper(void *ptr, size_t sz)
+{
+	return erealloc(ptr, sz);
+}
+
+static void php_xml_free_wrapper(void *ptr)
+{
+	efree(ptr);
+}
 
 PHP_MINIT_FUNCTION(xml)
 {
@@ -203,10 +220,13 @@ PHP_MINIT_FUNCTION(xml)
 	REGISTER_LONG_CONSTANT("XML_OPTION_SKIP_TAGSTART", PHP_XML_OPTION_SKIP_TAGSTART, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_OPTION_SKIP_WHITE", PHP_XML_OPTION_SKIP_WHITE, CONST_CS|CONST_PERSISTENT);
 
-#ifdef LIBXML_EXPAT_COMPAT
-	xmlMemSetup(_efree, _emalloc, _erealloc, _estrdup);
-#endif
-	
+	/* this object should not be pre-initialised at compile time,
+	   as the order of members may vary */  
+
+	php_xml_mem_hdlrs.malloc_fcn = php_xml_malloc_wrapper;
+	php_xml_mem_hdlrs.realloc_fcn = php_xml_realloc_wrapper;
+	php_xml_mem_hdlrs.free_fcn = php_xml_free_wrapper;
+
 	return SUCCESS;
 }
 
@@ -1032,7 +1052,7 @@ PHP_FUNCTION(xml_parser_create)
 	}
 
 	parser = ecalloc(sizeof(xml_parser), 1);
-	parser->parser = XML_ParserCreate(encoding);
+	parser->parser = XML_ParserCreate_MM(encoding, &php_xml_mem_hdlrs, NULL);
 	parser->target_encoding = encoding;
 	parser->case_folding = 1;
 	parser->object = NULL;
@@ -1088,7 +1108,7 @@ PHP_FUNCTION(xml_parser_create_ns)
 	}
 
 	parser = ecalloc(sizeof(xml_parser), 1);
-	parser->parser = XML_ParserCreateNS(encoding, sep[0]);
+	parser->parser = XML_ParserCreate_MM(encoding, &php_xml_mem_hdlrs, sep);
 	parser->target_encoding = encoding;
 	parser->case_folding = 1;
 	parser->object = NULL;
