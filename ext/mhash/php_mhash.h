@@ -15,6 +15,7 @@ extern zend_module_entry mhash_module_entry;
 PHP_FUNCTION(mhash_get_block_size);
 PHP_FUNCTION(mhash_get_hash_name);
 PHP_FUNCTION(mhash_count);
+PHP_FUNCTION(mhash_keygen_s2k);
 PHP_FUNCTION(mhash);
 
 #else
