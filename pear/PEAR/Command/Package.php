@@ -293,8 +293,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
 
             case 'package-validate': {
                 if (sizeof($params) < 1) {
-                    $help = $this->getHelp($command);
-                    return $this->raiseError("$command: missing parameter: $help[0]");
+                    $params[0] = "package.xml";
                 }
                 $obj = new PEAR_Common;
                 $info = null;
