@@ -1889,7 +1889,10 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 
 	wx2=im->sx;wy2=im->sy;
 	oc = gdImageGetPixel(im, x, y);
-	if (oc==nc || x<0 || x>wx2 || y<0 || y>wy2) return;
+	if (oc==nc || x<0 || x>wx2 || y<0 || y>wy2) {
+		im->alphaBlendingFlag = alphablending_bak;	
+		return;
+	}
 
 	stack = (struct seg *)safe_emalloc(sizeof(struct seg), ((int)(im->sy*im->sx)/4), 1);
 	sp = stack;
