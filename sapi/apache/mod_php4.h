@@ -33,7 +33,19 @@ typedef struct {
 } php_apache_info_struct;
 
 extern zend_module_entry apache_module_entry;
+
+#ifdef ZTS
+extern int php_apache_info_id;
+#define APLS_D php_apache_info_struct *apache_globals
+#define AP(v) (apache_globals->v)
+#define APLS_FETCH() APLS_D = ts_resource(php_apache_info_id)
+#else
 extern php_apache_info_struct php_apache_info;
+#define APLS_D
+#define AP(v) (php_apache_info.v)
+#define APLS_FETCH()
+#endif
+
 
 #ifdef WIN32
 #define S_IXUSR _S_IEXEC
