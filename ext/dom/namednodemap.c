@@ -61,17 +61,20 @@ int dom_namednodemap_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 	int count = 0;
 
 	objmap = (dom_nnodemap_object *)obj->ptr;
-	if (objmap->ht) {
-		count = xmlHashSize(objmap->ht);
-	} else {
-		nodep = dom_object_get_node(objmap->baseobj);
-		if (nodep) {
-			curnode = nodep->properties;
-			if (curnode) {
-				count++;
-				while (curnode->next != NULL) {
+
+	if (objmap != NULL) {
+		if (objmap->ht) {
+			count = xmlHashSize(objmap->ht);
+		} else {
+			nodep = dom_object_get_node(objmap->baseobj);
+			if (nodep) {
+				curnode = nodep->properties;
+				if (curnode) {
 					count++;
-					curnode = curnode->next;
+					while (curnode->next != NULL) {
+						count++;
+						curnode = curnode->next;
+					}
 				}
 			}
 		}
@@ -110,17 +113,20 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 
 	objmap = (dom_nnodemap_object *)intern->ptr;
-	if (objmap->ht) {
-		if (objmap->nodetype == XML_ENTITY_NODE) {
-			itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, named);
+
+	if (objmap != NULL) {
+		if (objmap->ht) {
+			if (objmap->nodetype == XML_ENTITY_NODE) {
+				itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, named);
+			} else {
+				notep = (xmlNotation *)xmlHashLookup(objmap->ht, named);
+				itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
+			}
 		} else {
-			notep = (xmlNotation *)xmlHashLookup(objmap->ht, named);
-			itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
-		}
-	} else {
-		nodep = dom_object_get_node(objmap->baseobj);
-		if (nodep) {
-			itemnode = (xmlNodePtr)xmlHasProp(nodep, named);
+			nodep = dom_object_get_node(objmap->baseobj);
+			if (nodep) {
+				itemnode = (xmlNodePtr)xmlHasProp(nodep, named);
+			}
 		}
 	}
 
@@ -178,26 +184,27 @@ PHP_FUNCTION(dom_namednodemap_item)
 		intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 
 		objmap = (dom_nnodemap_object *)intern->ptr;
-		if (objmap->ht) {
-			if (objmap->nodetype == XML_ENTITY_NODE) {
-				itemnode = php_dom_libxml_hash_iter(objmap->ht, index);
-			} else {
-				itemnode = php_dom_libxml_notation_iter(objmap->ht, index);
-			}
-		} else {
-			nodep = dom_object_get_node(objmap->baseobj);
-			if (nodep) {
-				curnode = (xmlNodePtr)nodep->properties;
-				count = 0;
-				while (count < index && curnode != NULL) {
-					count++;
-					curnode = (xmlNodePtr)curnode->next;
+
+		if (objmap != NULL) {
+			if (objmap->ht) {
+				if (objmap->nodetype == XML_ENTITY_NODE) {
+					itemnode = php_dom_libxml_hash_iter(objmap->ht, index);
+				} else {
+					itemnode = php_dom_libxml_notation_iter(objmap->ht, index);
 				}
-				itemnode = curnode;
+			} else {
+				nodep = dom_object_get_node(objmap->baseobj);
+				if (nodep) {
+					curnode = (xmlNodePtr)nodep->properties;
+					count = 0;
+					while (count < index && curnode != NULL) {
+						count++;
+						curnode = (xmlNodePtr)curnode->next;
+					}
+					itemnode = curnode;
+				}
 			}
 		}
-	} else {
-		RETURN_NULL();
 	}
 
 	if (itemnode) {
@@ -232,17 +239,20 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 
 	objmap = (dom_nnodemap_object *)intern->ptr;
-	if (objmap->ht) {
-		if (objmap->nodetype == XML_ENTITY_NODE) {
-			itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, named);
+
+	if (objmap != NULL) {
+		if (objmap->ht) {
+			if (objmap->nodetype == XML_ENTITY_NODE) {
+				itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, named);
+			} else {
+				notep = (xmlNotation *)xmlHashLookup(objmap->ht, named);
+				itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
+			}
 		} else {
-			notep = (xmlNotation *)xmlHashLookup(objmap->ht, named);
-			itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
-		}
-	} else {
-		nodep = dom_object_get_node(objmap->baseobj);
-		if (nodep) {
-			itemnode = (xmlNodePtr)xmlHasNsProp(nodep, named, uri);
+			nodep = dom_object_get_node(objmap->baseobj);
+			if (nodep) {
+				itemnode = (xmlNodePtr)xmlHasNsProp(nodep, named, uri);
+			}
 		}
 	}
 

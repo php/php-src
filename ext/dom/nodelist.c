@@ -55,31 +55,33 @@ int dom_nodelist_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 	HashTable *nodeht;
 
 	objmap = (dom_nnodemap_object *)obj->ptr;
-	if (objmap->ht) {
-		count = xmlHashSize(objmap->ht);
-	} else {
-		if (objmap->nodetype == DOM_NODESET) {
-			nodeht = HASH_OF(objmap->baseobjptr);
-			count = zend_hash_num_elements(nodeht);
+	if (objmap != NULL) {
+		if (objmap->ht) {
+			count = xmlHashSize(objmap->ht);
 		} else {
-			nodep = dom_object_get_node(objmap->baseobj);
-			if (nodep) {
-				if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
-					curnode = nodep->children;
-					if (curnode) {
-						count++;
-						while (curnode->next != NULL) {
+			if (objmap->nodetype == DOM_NODESET) {
+				nodeht = HASH_OF(objmap->baseobjptr);
+				count = zend_hash_num_elements(nodeht);
+			} else {
+				nodep = dom_object_get_node(objmap->baseobj);
+				if (nodep) {
+					if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
+						curnode = nodep->children;
+						if (curnode) {
 							count++;
-							curnode = curnode->next;
+							while (curnode->next != NULL) {
+								count++;
+								curnode = curnode->next;
+							}
 						}
-					}
-				} else {
-					if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
-						nodep = xmlDocGetRootElement((xmlDoc *) nodep);
 					} else {
-						nodep = nodep->children;
+						if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
+							nodep = xmlDocGetRootElement((xmlDoc *) nodep);
+						} else {
+							nodep = nodep->children;
+						}
+						curnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &count, -1);
 					}
-					curnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &count, -1);
 				}
 			}
 		}
@@ -118,43 +120,43 @@ PHP_FUNCTION(dom_nodelist_item)
 		intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 
 		objmap = (dom_nnodemap_object *)intern->ptr;
-		if (objmap->ht) {
-			if (objmap->nodetype == XML_ENTITY_NODE) {
-				itemnode = php_dom_libxml_hash_iter(objmap->ht, index);
-			} else {
-				itemnode = php_dom_libxml_notation_iter(objmap->ht, index);
-			}
-		} else {
-			if (objmap->nodetype == DOM_NODESET) {
-				nodeht = HASH_OF(objmap->baseobjptr);
-				if (zend_hash_index_find(nodeht, index, (void **) &entry)==SUCCESS) {
-					*return_value = **entry;
-					zval_copy_ctor(return_value);
-					return;
+		if (objmap != NULL) {
+			if (objmap->ht) {
+				if (objmap->nodetype == XML_ENTITY_NODE) {
+					itemnode = php_dom_libxml_hash_iter(objmap->ht, index);
+				} else {
+					itemnode = php_dom_libxml_notation_iter(objmap->ht, index);
 				}
 			} else {
-				nodep = dom_object_get_node(objmap->baseobj);
-				if (nodep) {
-					if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
-						curnode = nodep->children;
-						while (count < index && curnode != NULL) {
-							count++;
-							curnode = curnode->next;
-						}
-						itemnode = curnode;
-					} else {
-						if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
-							nodep = xmlDocGetRootElement((xmlDoc *) nodep);
+				if (objmap->nodetype == DOM_NODESET) {
+					nodeht = HASH_OF(objmap->baseobjptr);
+					if (zend_hash_index_find(nodeht, index, (void **) &entry)==SUCCESS) {
+						*return_value = **entry;
+						zval_copy_ctor(return_value);
+						return;
+					}
+				} else {
+					nodep = dom_object_get_node(objmap->baseobj);
+					if (nodep) {
+						if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
+							curnode = nodep->children;
+							while (count < index && curnode != NULL) {
+								count++;
+								curnode = curnode->next;
+							}
+							itemnode = curnode;
 						} else {
-							nodep = nodep->children;
+							if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
+								nodep = xmlDocGetRootElement((xmlDoc *) nodep);
+							} else {
+								nodep = nodep->children;
+							}
+							itemnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &count, index);
 						}
-						itemnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &count, index);
 					}
 				}
 			}
 		}
-	} else {
-		RETURN_NULL();
 	}
 
 	if (itemnode) {

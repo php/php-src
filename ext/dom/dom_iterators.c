@@ -268,33 +268,35 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object TS
 
 	intern = (dom_object *)zend_object_store_get_object(object TSRMLS_CC);
 	objmap = (dom_nnodemap_object *)intern->ptr;
-	if (objmap->ht == NULL) {
-		if (objmap->nodetype == DOM_NODESET) {
-			nodeht = HASH_OF(objmap->baseobjptr);
-			zend_hash_internal_pointer_reset(nodeht);
-			if (zend_hash_get_current_data(nodeht, (void **) &entry)==SUCCESS) {
-				curattr = *entry;
-				curattr->refcount++;
-			}
-		} else {
-			nodep = (xmlNode *)dom_object_get_node(objmap->baseobj);
-			if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
-				if (objmap->nodetype == XML_ATTRIBUTE_NODE) {
-					curnode = (xmlNodePtr) nodep->properties;
-				} else {
-					curnode = (xmlNodePtr) nodep->children;
+	if (objmap != NULL) {
+		if (objmap->ht == NULL) {
+			if (objmap->nodetype == DOM_NODESET) {
+				nodeht = HASH_OF(objmap->baseobjptr);
+				zend_hash_internal_pointer_reset(nodeht);
+				if (zend_hash_get_current_data(nodeht, (void **) &entry)==SUCCESS) {
+					curattr = *entry;
+					curattr->refcount++;
 				}
 			} else {
-				if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
-					nodep = xmlDocGetRootElement((xmlDoc *) nodep);
+				nodep = (xmlNode *)dom_object_get_node(objmap->baseobj);
+				if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
+					if (objmap->nodetype == XML_ATTRIBUTE_NODE) {
+						curnode = (xmlNodePtr) nodep->properties;
+					} else {
+						curnode = (xmlNodePtr) nodep->children;
+					}
 				} else {
-					nodep = nodep->children;
+					if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
+						nodep = xmlDocGetRootElement((xmlDoc *) nodep);
+					} else {
+						nodep = nodep->children;
+					}
+					curnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &curindex, 0);
 				}
-				curnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &curindex, 0);
 			}
+		} else {
+			curnode = php_dom_libxml_hash_iter(objmap->ht, 0);
 		}
-	} else {
-		curnode = php_dom_libxml_hash_iter(objmap->ht, 0);
 	}
 
 	if (curnode) {
