@@ -1087,7 +1087,6 @@ static CONST_PREFIX char *php_set_post_read_handler_code(cmd_parms *cmd, php_per
 
 static CONST_PREFIX char *php_set_require(cmd_parms *cmd, void *dummy, char *arg1)
 {
-	php_per_server_config *conf;
 	return php_set_server_handler(cmd->server, arg1, 0, AP_HANDLER_TYPE_FILE);
 }
 /* }}} */
