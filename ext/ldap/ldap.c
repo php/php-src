@@ -851,11 +851,13 @@ PHP_FUNCTION(ldap_get_entries)
 	if (ldap_result == NULL) RETURN_FALSE;
 
 	num_entries = ldap_count_entries(ldap, ldap_result);
-	if (num_entries == 0) RETURN_FALSE;
 
 	array_init(return_value);
-	
+	add_assoc_long(return_value, "count", num_entries);
+
+	if (num_entries == 0) return;
 	num_entries = 0;
+	
 	ldap_result_entry = ldap_first_entry(ldap, ldap_result);
 	if (ldap_result_entry == NULL) RETURN_FALSE;
 
