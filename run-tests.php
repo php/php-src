@@ -330,7 +330,7 @@ TIME END " . date('Y-m-d H:i:s', $end_time);
 $summary = get_summary(true);
 echo $summary;
 
-define('PHP_QA_EMAIL', 'php-qa@lists.php.net');
+define('PHP_QA_EMAIL', 'qa-reports@lists.php.net');
 define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
 
 /* We got failed Tests, offer the user to send and e-mail to QA team, unless NO_INTERACTION is set */
