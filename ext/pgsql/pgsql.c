@@ -1106,7 +1106,7 @@ PHP_FUNCTION(pg_getlastoid)
 
 
 /* {{{ proto bool pg_trace(string filename [, string mode [, resource connection]])
-   Enable tracing a PostgresSQL connection */
+   Enable tracing a PostgreSQL connection */
 PHP_FUNCTION(pg_trace)
 {
 	zval **z_filename, **z_mode, **z_pgsql_link;
@@ -1510,7 +1510,7 @@ PHP_FUNCTION(pg_loreadall)
 }
 /* }}} */
 
-/* {{{ proto int pg_loimport(string filename[, resource connection])
+/* {{{ proto int pg_loimport(string filename [, resource connection])
    Import large object direct from filesystem */
 PHP_FUNCTION(pg_loimport)
 {
