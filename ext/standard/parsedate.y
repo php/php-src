@@ -51,7 +51,8 @@
 
 #if WIN32||WINNT
 #	include <time.h>
-#	define _PHP_H
+#	include "php.h"
+#	undef YYSTYPE
 #	include "php_reentrancy.h"
 #else
 #	if !defined(HAVE_TM_ZONE) && !defined(_TIMEZONE)
