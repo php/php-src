@@ -20,7 +20,8 @@
 #include "php_ini.h"
 #include "php_msession.h"
 #include "reqclient.h"
-#include "../session/php_session.h"
+#include "ext/standard/info.h"
+#include "ext/session/php_session.h"
 
 
 /* Macros and such */
@@ -352,7 +353,7 @@ PHP_FUNCTION(msession_count)
 PHP_FUNCTION(msession_create)
 {
 	IFCONNECT_BEGIN
-	int stat;
+/* 	int stat; */
 	char *szsession;
 	zval **session;
 	
@@ -1062,7 +1063,7 @@ PHP_FUNCTION(msession_call)
 	char *retval;
 	zval **val[MAX_EXT_VAL];
 	char *strings[MAX_EXT_VAL+1];
-	zval **param=NULL;
+/* 	zval **param=NULL; */
 	
 	n = ZEND_NUM_ARGS();
 
