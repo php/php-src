@@ -17,6 +17,7 @@
    |          Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Gerrit Thomson <334647@swin.edu.au>                         |
    |          Jani Taskinen  <sniper@iki.fi>                              |
+   |          Stig Venaas    <venaas@uninett.no>                          |
    | PHP 4.0 updates:  Zeev Suraski <zeev@zend.com>                       |
    +----------------------------------------------------------------------+
  */
@@ -424,6 +425,24 @@ static BerElement * _get_ber_entry(pval **berp)
 }
 
 
+static int _get_lderrno(LDAP *ldap)
+{
+#if !HAVE_NSLDAP
+#if LDAP_API_VERSION > 2000
+	int lderr;
+
+	/* New versions of OpenLDAP do it this way */
+	ldap_get_option(ldap, LDAP_OPT_ERROR_NUMBER, &lderr);
+	return lderr;
+#else
+	return ldap->ld_errno;
+#endif
+#else
+	return ldap_get_lderrno(ldap,NULL,NULL);
+#endif
+}
+
+
 #if 0
 PHP_FUNCTION(ber_free)
 {
@@ -481,12 +500,7 @@ PHP_FUNCTION(ldap_bind)
 
 	if (ldap_bind_s(ldap, ldap_bind_rdn, ldap_bind_pw, LDAP_AUTH_SIMPLE) != LDAP_SUCCESS) {
 #if !HAVE_NSLDAP
-#if LDAP_API_VERSION > 2000
-		/* New versions of OpenLDAP do it this way */
-		php_error(E_WARNING,"LDAP:  Unable to bind to server: %s",ldap_err2string(ldap_get_lderrno(ldap,NULL,NULL)));
-#else
-		php_error(E_WARNING,"LDAP:  Unable to bind to server: %s",ldap_err2string(ldap->ld_errno));
-#endif
+		php_error(E_WARNING,"LDAP:  Unable to bind to server: %s",ldap_err2string(_get_lderrno(ldap)));
 #endif
 		RETURN_FALSE;
 	} else {
@@ -636,11 +650,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 
 	if (errno != LDAP_SUCCESS && errno != LDAP_SIZELIMIT_EXCEEDED) {
 #if !HAVE_NSLDAP
-#if LDAP_API_VERSION > 2000
-		php_error(E_WARNING,"LDAP: Unable to perform the search: %s",ldap_err2string(ldap_get_lderrno(ldap,NULL,NULL)));
-#else
-		php_error(E_WARNING, "LDAP: Unable to perform the search: %s", ldap_err2string(ldap->ld_errno));
-#endif
+		php_error(E_WARNING,"LDAP: Unable to perform the search: %s",ldap_err2string(_get_lderrno(ldap)));
 #endif
 		RETVAL_FALSE; 
 	} else {
@@ -1014,11 +1024,7 @@ PHP_FUNCTION(ldap_get_values)
 
 	if ((ldap_value = ldap_get_values(ldap, ldap_result_entry, attribute)) == NULL) {
 #if !HAVE_NSLDAP
-#if LDAP_API_VERSION > 2000
-		php_error(E_WARNING, "LDAP: Cannot get the value(s) of attribute %s", ldap_err2string(ldap_get_lderrno(ldap,NULL,NULL)));
-#else
-		php_error(E_WARNING, "LDAP: Cannot get the value(s) of attribute %s", ldap_err2string(ldap->ld_errno));
-#endif
+		php_error(E_WARNING, "LDAP: Cannot get the value(s) of attribute %s", ldap_err2string(_get_lderrno(ldap)));
 #endif
 		RETURN_FALSE;
 	}
@@ -1065,15 +1071,7 @@ PHP_FUNCTION(ldap_get_values_len)
 	attribute = (*attr)->value.str.val;
 	
 	if ((ldap_value_len = ldap_get_values_len(ldap, ldap_result_entry, attribute)) == NULL) {
-#if !HAVE_NSLDAP
-#if LDAP_API_VERSION > 2000
-		php_error(E_WARNING, "LDAP: Cannot get the value(s) of attribute %s", ldap_err2string(ldap_get_lderrno(ldap,NULL,NULL)));
-#else
-		php_error(E_WARNING, "LDAP: Cannot get the value(s) of attribute %s", ldap_err2string(ldap->ld_errno));
-#endif
-#else
-		php_error(E_WARNING, "LDAP: Cannot get the value(s) of attribute %s", ldap_err2string(ldap_get_lderrno(ldap,NULL,NULL)));
-#endif
+		php_error(E_WARNING, "LDAP: Cannot get the value(s) of attribute %s", ldap_err2string(_get_lderrno(ldap)));
 		RETURN_FALSE;
 	}
 	
@@ -1396,15 +1394,7 @@ PHP_FUNCTION(ldap_errno) {
 		RETURN_LONG(0);
 	}
 
-#if !HAVE_NSLDAP
-#if LDAP_API_VERSION > 2000
-	RETURN_LONG( ldap_get_lderrno(ldap, NULL, NULL) );
-#else
-	RETURN_LONG( ldap->ld_errno );
-#endif
-#else
-	RETURN_LONG( ldap_get_lderrno(ldap, NULL, NULL) );
-#endif
+	RETURN_LONG( _get_lderrno(ldap) );
 }
 /* }}} */
 
@@ -1439,15 +1429,7 @@ PHP_FUNCTION(ldap_error) {
 		RETURN_FALSE;
 	}
 
-#if !HAVE_NSLDAP
-#if LDAP_API_VERSION > 2000
-	ld_errno = ldap_get_lderrno(ldap, NULL, NULL);
-#else
-	ld_errno = ldap->ld_errno;
-#endif
-#else
-	ld_errno = ldap_get_lderrno(ldap, NULL, NULL);
-#endif
+	ld_errno = _get_lderrno(ldap);
 
 	RETURN_STRING(ldap_err2string(ld_errno), 1);
 }
