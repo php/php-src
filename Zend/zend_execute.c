@@ -1332,7 +1332,6 @@ binary_assign_op_addr: {
 						} else { /* used for member function calls */
 							object_ptr = _get_object_zval_ptr(&opline->op1, Ts, &free_op1 ELS_CC);
 
-
 							if (!object_ptr
 								|| ((object_ptr->type==IS_OBJECT) && (object_ptr->value.obj.ce->handle_function_call))) { /* overloaded function call */
 								zend_overloaded_element overloaded_element;
@@ -1694,6 +1693,9 @@ send_by_ref:
 						zend_error(E_ERROR, "Cannot instanciate non-existant class:  %s", class_name.value.str.val);
 					}
 					object_init_ex(&Ts[opline->result.u.var].tmp_var, ce);
+					Ts[opline->result.u.var].tmp_var.refcount=1;
+					Ts[opline->result.u.var].tmp_var.EA.is_ref=1;
+					Ts[opline->result.u.var].tmp_var.EA.locks=0;
 
 					zval_dtor(&class_name);
 					FREE_OP(&opline->op1, free_op1);
