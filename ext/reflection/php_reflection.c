@@ -117,6 +117,7 @@ string *string_write(string *str, char *buf, int len)
 	}
 	memcpy(str->string + str->len - 1, buf, len);
 	str->len += len;
+	str->string[str->len] = '\0';
 	return str;
 }
 
