@@ -910,6 +910,9 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
 				ndl_buf_left -= GENERIC_SUPERSET_NBYTES;
 				if (ndl_buf_left == 0) {
 					*pretval = match_ofs;
+					ndl_buf_p = ndl_buf;
+					ndl_buf_left = ndl_buf_len;
+					match_ofs = -1;
 				}
 			} else {
 				unsigned int i, j, lim;
