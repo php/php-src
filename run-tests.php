@@ -309,10 +309,12 @@ define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
 /* We got failed Tests, offer the user to send and e-mail to QA team, unless NO_INTERACTION is set */
 if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 	$fp = fopen("php://stdin", "r+");
-	echo "Some tests have failed, would you like to send the\nreport to PHP's QA team? [Yn]: ";
+	echo "Some tests have failed, would you like to send the\nreport to PHP's QA team\n";
+	echo "(choose \"s\" to just save the results to a file)? [Yns]: ";
 	$user_input = fgets($fp, 10);
+	$just_save_results = (strtolower($user_input[0]) == 's');
 	
-	if (strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
+	if ($just_save_results || strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
 		/*  
 		 * Collect information about the host system for our report
 		 * Fetch phpinfo() output so that we can see the PHP enviroment
@@ -329,7 +331,16 @@ if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 			$automake = shell_exec('automake --version');
 			$autoconf = shell_exec('autoconf --version');
 			$libtool = shell_exec('libtool --version');
-			$compiler = shell_exec(getenv('CC').' -v 2>&1');
+			/* Try the most common flags for 'version' */
+			$flags = array('-v', '-V', '--version');
+			$cc_status=0;
+			foreach($flags AS $flag) {
+				system(getenv('CC')." $flag >/dev/null 2>&1", $cc_status);
+				if($cc_status == 0) {
+					$compiler = shell_exec(getenv('CC')." $flag 2>&1");
+					break;
+				}
+			}
 		}
 		$failed_tests_data .= "Automake:\n$automake\n";
 		$failed_tests_data .= "Autoconf:\n$autoconf\n";
@@ -352,13 +363,15 @@ if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 		
 		$compression = 0;
 		
-		if (!mail_qa_team($failed_tests_data, $compression)) {
+		if ($just_save_results || !mail_qa_team($failed_tests_data, $compression)) {
 			$output_file = 'php_test_results_' . date('Ymd') . ( $compression ? '.txt.gz' : '.txt' );
 			$fp = fopen($output_file, "w");
 			fwrite($fp, $failed_tests_data);
 			fclose($fp);
 		
-			echo "\nThe test script was unable to automatically send the report to PHP's QA Team\nPlease send ".$output_file." to ".PHP_QA_EMAIL." manually, thank you.\n";
+			if (!$just_save_results)
+			    echo "\nThe test script was unable to automatically send the report to PHP's QA Team\n";
+			echo "Please send ".$output_file." to ".PHP_QA_EMAIL." manually, thank you.\n";
 		} else {
 			fwrite($fp, "\nThank you for helping to make PHP better.\n");
 			fclose($fp);
