@@ -381,7 +381,8 @@ class PEAR_Downloader extends PEAR_Common
                     // there are no dependencies
                     continue;
                 }
-                foreach($alldeps as $info) {
+                $fail = false;
+                foreach ($alldeps as $info) {
                     if ($info['type'] != 'pkg') {
                         continue;
                     }
@@ -389,11 +390,18 @@ class PEAR_Downloader extends PEAR_Common
                     if ($ret === false) {
                         continue;
                     }
+                    if ($ret === 0) {
+                        $fail = true;
+                        continue;
+                    }
                     if (PEAR::isError($ret)) {
                         return $ret;
                     }
                     $deppackages[] = $ret;
                 } // foreach($alldeps
+                if ($fail) {
+                    $deppackages = array();
+                }
             }
 
             if (count($deppackages)) {
@@ -561,7 +569,7 @@ class PEAR_Downloader extends PEAR_Common
             $savestate = array_shift($get);
             $this->pushError( "Release for '$package' dependency '$info[name]' " .
                 "has state '$savestate', requires '$state'");
-            return false;
+            return 0;
         }
         if (in_array(strtolower($info['name']), $this->_toDownload) ||
               isset($mywillinstall[strtolower($info['name'])])) {

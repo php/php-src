@@ -303,7 +303,13 @@ package if needed.
         $downloaded = $this->downloader->getDownloadedPackages();
         $this->installer->sortPkgDeps($downloaded);
         foreach ($downloaded as $pkg) {
+            PEAR::pushErrorHandling(PEAR_ERROR_RETURN);
             $info = $this->installer->install($pkg['file'], $options, $this->config);
+            PEAR::popErrorHandling();
+            if (PEAR::isError($info)) {
+                $this->ui->outputData('ERROR: ' .$info->getMessage());
+                continue;
+            }
             if (is_array($info)) {
                 if ($this->config->get('verbose') > 0) {
                     $label = "$info[package] $info[version]";
