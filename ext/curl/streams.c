@@ -232,7 +232,7 @@ static int php_curl_stream_cast(php_stream *stream, int castas, void **ret TSRML
 	return php_stream_cast(curlstream->readbuffer.buf, castas, ret, 0);
 }
 
-PHPAPI php_stream_ops php_curl_stream_ops = {
+php_stream_ops php_curl_stream_ops = {
 	php_curl_stream_write,
 	php_curl_stream_read,
 	php_curl_stream_close,
@@ -244,7 +244,7 @@ PHPAPI php_stream_ops php_curl_stream_ops = {
 };
 
 
-PHPAPI php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, char *mode,
+php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, char *mode,
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream;
