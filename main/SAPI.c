@@ -426,7 +426,11 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 				efree(mimetype);
 				SG(sapi_headers).send_default_content_type = 0;
 			} else if (!STRCASECMP(header_line, "Location")) {
-				SG(sapi_headers).http_response_code = 302; /* redirect */
+			        if (SG(sapi_headers).http_response_code < 300 ||
+				    SG(sapi_headers).http_response_code > 307) {
+				   	/* Return a Found Redirect if one is not already specified */
+					SG(sapi_headers).http_response_code = 302;
+				   }
 			} else if (!STRCASECMP(header_line, "WWW-Authenticate")) { /* HTTP Authentication */
 				SG(sapi_headers).http_response_code = 401; /* authentication-required */
 			}
