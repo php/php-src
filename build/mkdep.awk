@@ -1,3 +1,27 @@
+#  +----------------------------------------------------------------------+
+#  | PHP version 4.0                                                      |
+#  +----------------------------------------------------------------------+
+#  | Copyright (c) 2000 The PHP Group                                     |
+#  +----------------------------------------------------------------------+
+#  | This source file is subject to version 2.02 of the PHP license,      |
+#  | that is bundled with this package in the file LICENSE, and is        |
+#  | available at through the world-wide-web at                           |
+#  | http://www.php.net/license/2_02.txt.                                 |
+#  | If you did not receive a copy of the PHP license and are unable to   |
+#  | obtain it through the world-wide-web, please send a note to          |
+#  | license@php.net so we can mail you a copy immediately.               |
+#  +----------------------------------------------------------------------+
+#  | Authors: Sascha Schumann <sascha@schumann.cx>                        |
+#  +----------------------------------------------------------------------+
+#
+# $Id$
+#
+# Usage:
+#
+# echo top_srcdir top_builddir srcdir CPP [CPP-ARGS] filenames | \
+#      awk -f mkdep.awk > dependencies
+
+
 {
 	top_srcdir=$1
 	top_builddir=$2
@@ -34,18 +58,18 @@
 		done=0
 		while ((cmdx | getline) > 0) {
 			if (match($0, "^# [0-9]* \".*\.h\"") != 0) {
-				sub(top_srcdir, "$(top_srcdir)", $3)
-				sub(top_builddir, "$(top_builddir)", $3)
+				if (sub(top_srcdir, "$(top_srcdir)", $3) == 0)
+					sub(top_builddir, "$(top_builddir)", $3)
 				if (substr($3,2,1) != "/" && used[$3] != 1) {
 					if (done == 0)
-						printf("%s", target " " target2 ":")
+						printf(target " " target2 ":")
 					done=1
-					printf("%s", " \\\n\t" substr($3,2,length($3)-2))
+					printf(" \\\n\t" substr($3,2,length($3)-2))
 					used[$3] = 1;
 				}	
 			}
 		}
 		if (done == 1)
-			printf("\n\n")
+			print "\n"
 	}
 } 
