@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.0.1
 - Improved and moved ActiveScript SAPI to PECL.  (Wez)
-- Fixed but #29437 (Possible crash inside array_walk_recursive()). (Ilia)
+- Fixed bug #29474 (win32: usleep() doesn't work). (Wez)
+- Fixed bug #29449 (win32: feof() hangs on empty tcp stream). (Wez)
+- Fixed bug #29437 (Possible crash inside array_walk_recursive()). (Ilia)
 - Fixed bug #29431 (crash when parsing invalid address; invalid address
   returned by stream_socket_recvfrom(), stream_socket_getname()). (Wez)
 - Fixed bug #29409 (Segfault in PHP functions called from XSLT). (Rob)
