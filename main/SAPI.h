@@ -276,7 +276,7 @@ struct _sapi_post_entry {
 #define SAPI_POST_HANDLER_FUNC(post_handler) void post_handler(char *content_type_dup, void *arg TSRMLS_DC)
 
 #define SAPI_TREAT_DATA_FUNC(treat_data) void treat_data(int arg, char *str, zval* destArray TSRMLS_DC)
-#define SAPI_INPUT_FILTER_FUNC(input_filter) unsigned int input_filter(int arg, char *var, char **val, unsigned int val_len TSRMLS_DC)
+#define SAPI_INPUT_FILTER_FUNC(input_filter) unsigned int input_filter(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC)
 
 BEGIN_EXTERN_C()
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
