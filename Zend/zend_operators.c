@@ -895,7 +895,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 		zendi_convert_to_boolean(op1, op1_copy);
 		zendi_convert_to_boolean(op2, op2_copy);
 		result->type = IS_LONG;
-		result->value.lval = (op1->value.lval!=op2->value.lval);
+		result->value.lval = op1->value.lval - op2->value.lval;
 		return SUCCESS;
 	}
 	zendi_convert_scalar_to_number(op1, op1_copy);
