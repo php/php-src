@@ -4159,15 +4159,8 @@ mbfl_filt_conv_cp1252_wchar(int c, mbfl_convert_filter *filter)
 
 	if (c >= 0x80 && c < 0xa0) {
 		s = cp1252_ucs_table[c - 0x80];
-		if (s <= 0) {
-			s = c;
-			s &= MBFL_WCSPLANE_MASK;
-			s |= MBFL_WCSPLANE_8859_1;
-		}
 	} else {
 		s = c;
-		s &= MBFL_WCSGROUP_MASK;
-		s |= MBFL_WCSGROUP_THROUGH;
 	}
 
 	CK((*filter->output_function)(s, filter->data));
