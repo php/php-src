@@ -181,6 +181,9 @@ next_iter:
 		return_value = value;
 	}
 
+	return_value->refcount = 0;
+	return_value->is_ref = 0;
+
 	return return_value;
 }
 /* }}} */
@@ -487,7 +490,7 @@ sxe_method_get(zval *object, char *name, int len TSRMLS_DC)
 	zend_internal_function *f;
 
 	f = emalloc(sizeof(zend_internal_function));
-	f->type = ZEND_OVERLOADED_FUNCTION;
+	f->type = ZEND_OVERLOADED_FUNCTION_TEMPORARY;
 	f->arg_info = NULL;
 	f->num_args = 0;
 	f->scope = sxe_class_entry;
@@ -630,15 +633,19 @@ static void
 simplexml_ce_to_xml_string(INTERNAL_FUNCTION_PARAMETERS)
 {
 	php_sxe_object *sxe;
+	xmlChar *strval;
+
 
 	if (ZEND_NUM_ARGS() != 0) {
 		RETURN_FALSE;
 	}
 
 	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
-	xmlDocDumpMemory((xmlDocPtr) sxe->document->ptr, (xmlChar **) &Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value));
+	xmlDocDumpMemory((xmlDocPtr) sxe->document->ptr, &strval, &Z_STRLEN_P(return_value));
+	Z_STRVAL_P(return_value) = estrndup(strval, Z_STRLEN_P(return_value));
+	xmlFree(strval);
+
 	Z_TYPE_P(return_value) = IS_STRING;
-	zval_add_ref(&return_value);
 }
 /* }}} */
 
@@ -744,10 +751,11 @@ sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_
 {
 	php_sxe_object *sxe;
 	char           *contents = NULL;
+	zval free_obj;
 
 	sxe = php_sxe_fetch_object(readobj TSRMLS_CC);
 	if (should_free) {
-		zval_dtor(writeobj);
+		free_obj = *writeobj;
 	}
 
 	if (!sxe->node) {
@@ -766,6 +774,9 @@ sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_
 
 	if (contents) {
 		xmlFree(contents);
+	}
+	if (should_free) {
+		zval_dtor(&free_obj);
 	}
 }
 /* }}} */
