@@ -42,12 +42,12 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 	einfo->line = line;
 
 	if (einfo->errmsg) {
-		efree(einfo->errmsg);
+		pefree(einfo->errmsg, dbh->is_persistent);
 		einfo->errmsg = NULL;
 	}
 
 	if (einfo->errcode) {
-		einfo->errmsg = estrdup(mysql_error(H->server));
+		einfo->errmsg = pestrdup(mysql_error(H->server), dbh->is_persistent);
 	} else { /* no error */
 		*pdo_err = PDO_ERR_NONE;
 		return 0;
@@ -149,7 +149,7 @@ static int mysql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 			H->server = NULL;
 		}
 		if (H->einfo.errmsg) {
-			efree(H->einfo.errmsg);
+			pefree(H->einfo.errmsg, dbh->is_persistent);
 			H->einfo.errmsg = NULL;
 		}
 		pefree(H, dbh->is_persistent);
