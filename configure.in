@@ -284,6 +284,7 @@ arpa/inet.h \
 crypt.h \
 fcntl.h \
 grp.h \
+ieeefp.h \
 limits.h \
 locale.h \
 netinet/in.h \
