@@ -1690,6 +1690,10 @@ SOURCE=..\ext\standard\soundex.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\streamsfuncs.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\string.c
 # End Source File
 # Begin Source File
@@ -1957,6 +1961,10 @@ SOURCE=..\win32\registry.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\select.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\win32\sendmail.c
 # End Source File
 # Begin Source File
@@ -2010,6 +2018,10 @@ SOURCE=..\win32\pwd.h
 # Begin Source File
 
 SOURCE=..\win32\readdir.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\select.h
 # End Source File
 # Begin Source File
 
