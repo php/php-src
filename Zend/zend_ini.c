@@ -375,7 +375,7 @@ ZEND_INI_DISP(display_link_numbers)
 }
 
 
-ZEND_API zend_ini_apply_with_argument(apply_func_arg_t apply_func, void *arg)
+ZEND_API void zend_ini_apply_with_argument(apply_func_arg_t apply_func, void *arg)
 {
 	zend_hash_apply_with_argument(&known_directives, apply_func, arg);
 }
