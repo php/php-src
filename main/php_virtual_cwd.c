@@ -137,7 +137,7 @@ char *virtual_getcwd(cwd_state *state, uint *length)
 }
 
 /* returns 0 for ok, 1 for error */
-int virtual_chdir(cwd_state *state, char *path, verify_path_func verify_path)
+int virtual_file_ex(cwd_state *state, char *path, verify_path_func verify_path)
 {
 	uint path_length = strlen(path);
 	char *ptr = path;
@@ -220,6 +220,16 @@ int virtual_chdir(cwd_state *state, char *path, verify_path_func verify_path)
 	return (ret);
 }
 
+int virtual_chdir(cwd_state *state, char *path)
+{
+	return virtual_file_ex(state, path, NULL); /* Use NULL right now instead of php_is_dir_ok */
+}
+
+int virtual_filepath(cwd_state *state, char *path)
+{
+	return virtual_file_ex(state, path, php_is_file_ok);
+}
+
 main(void)
 {
 	cwd_state state;
@@ -240,7 +250,7 @@ main(void)
 
 #define T(a) \
 	printf("[%s] $ cd %s\n", virtual_getcwd(&state, &length), a); \
-	virtual_chdir(&state, strdup(a), NULL); \
+	virtual_chdir(&state, strdup(a)); \
 	printf("new path is %s\n", virtual_getcwd(&state, &length));
 	
 	T("..")
