@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.3 2003-12-03 00:56:14 wez Exp $
+// $Id: confutils.js,v 1.4 2003-12-03 02:47:45 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -267,49 +267,111 @@ function DEFINE(name, value)
 	configure_subst.Add(name, value);
 }
 
+// Searches a set of paths for a file;
+// returns the dir in which the file was found,
+// true if it was found in the default env path,
+// or false if it was not found at all.
+// env_name is the optional name of an env var
+// specifying the default path to search
+function search_paths(thing_to_find, explicit_path, env_name)
+{
+	var i, found = false, place = false, file, env;
+
+	STDOUT.Write("Checking for " + thing_to_find + " ... ");
+
+	if (explicit_path != null) {
+		if (typeof(explicit_path) == "string") {
+			explicit_path = explicit_path.split(";");
+		}
+
+		for (i = 0; i < explicit_path.length; i++) {
+			file = FSO.BuildPath(FSO.GetAbsolutePathName(explicit_path[i]), thing_to_find);
+			if (FSO.FileExists(file)) {
+				found = true;
+				place = explicit_path[i];
+				break;
+			}
+		}
+	}
+
+	if (!found && env_name != null) {
+		env = WshShell.Environment("Process").Item(env_name);
+		env = env.split(";");
+		for (i = 0; i < env.length; i++) {
+			file = FSO.BuildPath(env[i], thing_to_find);
+			if (FSO.FileExists(file)) {
+				found = true;
+				place = true;
+				break;
+			}
+		}
+	}
+
+	if (found && place == true) {
+		STDOUT.WriteLine(" <in default path>");
+	} else if (found) {
+		STDOUT.WriteLine(" " + place);
+	} else {
+		STDOUT.WriteLine(" <not found>");
+	}
+	return place;
+}
+
 function PATH_PROG(progname, def, additional_paths)
 {
-	var i;
-	var found = false;
-	var p = def;
 	var exe;
+	var place;
 
 	exe = progname + ".exe";
-	STDOUT.Write("Checking for " + progname + " ... ");
 
-	if (additional_paths != null) {
-		for (i = 0; i < additional_paths.length; i++) {
-			p = FSO.BuildPath(additional_paths[i], exe);
-			if (FSO.FileExists(p)) {
-				found = true;
-				break;
-			}
-		}
+	place = search_paths(exe, additional_paths, "PATH");
+
+	if (place == true) {
+		place = exe;
 	}
 
-	if (!found) {
-		path = WshShell.Environment("Process").Item("PATH");
-		path = path.split(";");
-		for (i = 0; i < path.length; i++) {
-			p = FSO.BuildPath(path[i], exe);
-			if (FSO.FileExists(p)) {
-				// If we find it in the PATH, don't bother
-				// making it fully qualified
-				found = true;
-				p = exe;
-				break;
-			}
-		}
+	if (place) {
+		DEFINE(progname.toUpperCase(), place);
 	}
-	if (!found) {
-		p = def;
+	return place;
+}
+
+function CHECK_LIB(libname, target, path_to_check)
+{
+	var p = search_paths(libname, path_to_check, "LIBS");
+	var have = 0;
+
+	if (typeof(p) == "string") {
+		ADD_FLAG("LDFLAGS_" + target.toUpperCase(), '/libpath:"' + p + '" ');
+		ADD_FLAG("LIBS_" + target.toUpperCase(), libname);
+		have = 1;
 	}
-	if (p == null) {
-		STDOUT.WriteLine(" <not found>");
-	} else {
-		STDOUT.WriteLine(p);
+
+//	AC_DEFINE("HAVE_" + header_name.toUpperCase().replace(new RegExp("/\\\\-\.", "g"), "_"), have);
+
+	return p;
+
+}
+
+function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env)
+{
+	if (use_env == null) {
+		use_env = true;
 	}
-	DEFINE(progname.toUpperCase(), p);
+	var p = search_paths(header_name, path_to_check, use_env ? "INCLUDE" : null);
+	var have = 0;
+	var sym;
+
+	if (typeof(p) == "string") {
+		ADD_FLAG(flag_name, '/I "' + p + '" ');
+		have = 1;
+	}
+
+	sym = header_name.toUpperCase();
+	sym = sym.replace(new RegExp("[\\\\/\.-]", "g"), "_");
+
+	AC_DEFINE("HAVE_" + sym, have);
+
 	return p;
 }
 
@@ -445,6 +507,7 @@ function ADD_SOURCES(dir, file_list, target)
 	}
 
 	file_list = file_list.split(new RegExp("\\s+"));
+	file_list.sort();
 
 	var re = new RegExp("\.[a-z0-9A-Z]+$");
 
