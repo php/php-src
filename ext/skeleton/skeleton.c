@@ -4,11 +4,6 @@
 #include "php_ini.h"
 #include "php_extname.h"
 
-/* You should tweak config.m4 so this symbol (or some else suitable)
-   gets defined.
-*/
-#if HAVE_EXTNAME
-
 /* If you declare any globals in php_extname.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(extname)
 */
@@ -113,7 +108,5 @@ PHP_FUNCTION(confirm_extname_compiled)
 */
 
 /* __function_stubs_here__ */
-
-#endif	/* HAVE_EXTNAME */
 
 /* __footer_here__ */

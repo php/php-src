@@ -131,7 +131,6 @@ if test "\$PHP_$EXTNAME" != "no"; then
   dnl If you will not be testing anything external, like existence of
   dnl headers, libraries or functions in them, just uncomment the 
   dnl following line and you are ready to go.
-  dnl AC_DEFINE(HAVE_$EXTNAME, 1, [ ])
   dnl Write more examples of tests here...
   PHP_EXTENSION($extname, \$ext_shared)
 fi

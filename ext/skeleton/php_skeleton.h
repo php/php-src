@@ -3,11 +3,6 @@
 #ifndef PHP_EXTNAME_H
 #define PHP_EXTNAME_H
 
-/* You should tweak config.m4 so this symbol (or some else suitable)
-   gets defined.
-*/
-#if HAVE_EXTNAME
-
 extern zend_module_entry extname_module_entry;
 #define phpext_extname_ptr &extname_module_entry
 
@@ -48,12 +43,6 @@ ZEND_END_MODULE_GLOBALS(extname)
 #else
 #define EXTNAMEG(v) (extname_globals.v)
 #define EXTNAMELS_FETCH()
-#endif
-
-#else
-
-#define phpext_extname_ptr NULL
-
 #endif
 
 #endif	/* PHP_EXTNAME_H */
