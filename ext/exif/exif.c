@@ -1052,7 +1052,7 @@ void exif_iif_add_value( image_info_type *image_info, int section_index, char *n
 			if ( !info_value->s) {
 				EXIF_ERRLOG_EALLOC
 				info_data->length = 0;
-				return;
+				break; /* better return with "" instead of possible casing problems */
 			}
 			break;
 
@@ -3060,7 +3060,8 @@ PHP_FUNCTION(exif_read_data)
 
 	ImageInfo.sections_found |= FOUND_COMPUTED;/* do not inform about in debug*/
 
-	if (ret==FALSE || array_init(return_value) == FAILURE || (sections_needed && !(sections_needed&ImageInfo.sections_found))) {
+	if (ret==FALSE || (sections_needed && !(sections_needed&ImageInfo.sections_found) || array_init(return_value) == FAILURE)) {
+		/* array_init must be checked at last! otherwise the array must be freed if a later test fails. */
 		exif_discard_imageinfo(&ImageInfo);
 	   	if ( sections_str) efree(sections_str);
 		RETURN_FALSE;
