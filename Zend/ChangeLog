@@ -1,3 +1,14 @@
+2003-12-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      Fix (string) conversion
+
+    * zend.c:
+      Add missing notice
+
+    * zend_execute_API.c:
+      Fix __autoload() with derived classes
+
 2003-12-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c:

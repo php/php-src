@@ -1,3 +1,63 @@
+2003-12-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/formatted_print.c
+      tests/classes/tostring.phpt:
+      Use __tostring() in all printing functions.
+
+    * ext/standard/tests/array/007.phpt
+      ext/standard/tests/array/array_intersect_1.phpt:
+      No Notices here
+
+    * run-tests.php:
+      Fix data source
+
+    * ZendEngine2/zend_execute.c:
+      Fix (string) conversion
+
+    * ZendEngine2/zend.c:
+      Add missing notice
+
+2003-12-29  Rob Richards  <rrichards@ctindustries.net>
+
+    * NEWS:
+      BFN
+
+    * ext/dom/dom_iterators.c
+      ext/dom/nodelist.c:
+      Fixed bug #26743 (getElementsByTagName doesn't work properly)
+
+2003-12-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      Align output if one section shows 100% and display percentages when not
+      counting skipped tests.
+
+2003-12-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pgsql/php_pgsql.h:
+      Removed a useless define.
+
+2003-12-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      BFN
+
+    * tests/classes/autoload_001.phpt
+      tests/classes/autoload_002.phpt
+      tests/classes/autoload_003.phpt
+      tests/classes/autoload_004.phpt
+      tests/classes/autoload_derived.p5c
+      tests/classes/autoload_root.p5c:
+      Add some __autoload() tests.
+
+    * ZendEngine2/zend_execute_API.c:
+      Fix __autoload() with derived classes
+
+2003-12-29  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/TODO:
+      updated todo list (removed finished tasks)
+
 2003-12-28  Georg Richter  <phpinfo@t-online.de>
 
     * ext/mysqli/mysqli_api.c:
