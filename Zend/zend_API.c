@@ -1240,7 +1240,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		}
 		if (ptr->flags&ZEND_ACC_ABSTRACT) {
 			if (scope) {
-				scope->ce_flags |= ZEND_ACC_ABSTRACT;
+				scope->ce_flags |= ZEND_ACC_ABSTRACT_CLASS;
 			}
 		} else {
 			if (scope && scope->ce_flags&ZEND_ACC_INTERFACE) {
