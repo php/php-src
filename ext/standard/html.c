@@ -1076,18 +1076,26 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 		if (!matches_map) {	
 			int is_basic = 0;
 
-			for (j = 0; basic_entities[j].charcode != 0; j++) {
-				if ((basic_entities[j].charcode != this_char) ||
-					(basic_entities[j].flags && (quote_style & basic_entities[j].flags) == 0))
-					continue;
-
-				memcpy(replaced + len, basic_entities[j].entity, basic_entities[j].entitylen);
-				len += basic_entities[j].entitylen;
-				
+			if (this_char == '&') {
+				memcpy(replaced + len, "&amp;", sizeof("&amp;") - 1);
+				len += sizeof("&amp;") - 1;
 				is_basic = 1;
-				break;
+			} else {
+				for (j = 0; basic_entities[j].charcode != 0; j++) {
+					if ((basic_entities[j].charcode != this_char) ||
+							(basic_entities[j].flags &&
+							(quote_style & basic_entities[j].flags) == 0)) {
+						continue;
+					}
 
+					memcpy(replaced + len, basic_entities[j].entity, basic_entities[j].entitylen);
+					len += basic_entities[j].entitylen;
+		
+					is_basic = 1;
+					break;
+				}
 			}
+
 			if (!is_basic) {
 				/* a wide char without a named entity; pass through the original sequence */
 				if (mbseqlen > 1) {
