@@ -2302,7 +2302,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 		goto clean_exit;
 	}
 
-	p7 = PKCS7_encrypt(recipcerts, infile, cipher, flags);
+	p7 = PKCS7_encrypt(recipcerts, infile, (EVP_CIPHER*)cipher, flags);
 
 	if (p7 == NULL) {
 		goto clean_exit;
