@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
+
 ?? ??? 2000, Version 4.0.4
 - Renamed the shm_* functions to shmop_* (Derick)
 - Updated ext/mysql/libmysql to version 3.23 (tim@mysql.com)
