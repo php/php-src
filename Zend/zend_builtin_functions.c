@@ -526,7 +526,6 @@ ZEND_FUNCTION(get_class_vars)
 	char *lcname;
 	zend_class_entry *ce;
 	zval *tmp;
-	CLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class_name)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -536,7 +535,7 @@ ZEND_FUNCTION(get_class_vars)
 	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
 	zend_str_tolower(lcname, (*class_name)->value.str.len);
 
-	if (zend_hash_find(CG(class_table), lcname, (*class_name)->value.str.len+1, (void **)&ce)==FAILURE) {
+	if (zend_hash_find(EG(class_table), lcname, (*class_name)->value.str.len+1, (void **)&ce)==FAILURE) {
 		efree(lcname);
 		RETURN_FALSE;
 	} else {
@@ -572,42 +571,42 @@ ZEND_FUNCTION(get_object_vars)
 }
 /* }}} */
 
-/* {{{ proto array get_class_methods(string class_name)
-   Returns an array of class methods' names */
+/* {{{ proto array get_class_methods(mixed class)
+   Returns an array of method names for class or class instance. */
 ZEND_FUNCTION(get_class_methods)
 {
-	zval **class_name;
+	zval **class;
 	zval *method_name;
-	char *lcname;
-	zend_class_entry *ce;
+	zend_class_entry *ce = NULL;
 	char *string_key;
 	ulong num_key;
 	int key_type;
-	CLS_FETCH();
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class_name)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
-	convert_to_string_ex(class_name);
-	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
-	zend_str_tolower(lcname, (*class_name)->value.str.len);
+	if (Z_TYPE_PP(class) == IS_OBJECT)
+		ce = Z_OBJCE_PP(class);
+	else if (Z_TYPE_PP(class) == IS_STRING) {
+		SEPARATE_ZVAL(class);
+		zend_str_tolower(Z_STRVAL_PP(class), Z_STRLEN_PP(class));
+		zend_hash_find(EG(class_table), Z_STRVAL_PP(class), Z_STRLEN_PP(class)+1, (void **)&ce);
+	}
 
-	if (zend_hash_find(CG(class_table), lcname, (*class_name)->value.str.len+1, (void **)&ce)==FAILURE) {
-		efree(lcname);
+	if (!ce) {
 		RETURN_NULL();
-	} else {
-		efree(lcname);
-		array_init(return_value);
-		zend_hash_internal_pointer_reset(&ce->function_table);
-		while ((key_type = zend_hash_get_current_key(&ce->function_table, &string_key, &num_key, 1)) != HASH_KEY_NON_EXISTANT) {
-			if (key_type == HASH_KEY_IS_STRING) {
-				MAKE_STD_ZVAL(method_name);
-				ZVAL_STRING(method_name, string_key, 0);
-				zend_hash_next_index_insert(return_value->value.ht, &method_name, sizeof(zval *), NULL);
-			}
-			zend_hash_move_forward(&ce->function_table);
+	}
+
+	array_init(return_value);
+	zend_hash_internal_pointer_reset(&ce->function_table);
+	while ((key_type = zend_hash_get_current_key(&ce->function_table, &string_key, &num_key, 1)) != HASH_KEY_NON_EXISTANT) {
+		if (key_type == HASH_KEY_IS_STRING) {
+			MAKE_STD_ZVAL(method_name);
+			ZVAL_STRING(method_name, string_key, 0);
+			zend_hash_next_index_insert(return_value->value.ht, &method_name, sizeof(zval *), NULL);
 		}
+		zend_hash_move_forward(&ce->function_table);
 	}
 }
 /* }}} */
@@ -644,7 +643,6 @@ ZEND_FUNCTION(class_exists)
 {
 	zval **class_name;
 	char *lcname;
-	CLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class_name)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -652,7 +650,7 @@ ZEND_FUNCTION(class_exists)
 	convert_to_string_ex(class_name);
 	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
 	zend_str_tolower(lcname, (*class_name)->value.str.len);
-	if (zend_hash_exists(CG(class_table), lcname, (*class_name)->value.str.len+1)) {
+	if (zend_hash_exists(EG(class_table), lcname, (*class_name)->value.str.len+1)) {
 		efree(lcname);
 		RETURN_TRUE;
 	} else {
@@ -859,14 +857,12 @@ static int copy_class_name(zend_class_entry *ce, int num_args, va_list args, zen
    Returns an array of all declared classes. */
 ZEND_FUNCTION(get_declared_classes)
 {
-	CLS_FETCH();
-
 	if (ZEND_NUM_ARGS() != 0) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(CG(class_table), (apply_func_args_t)copy_class_name, 1, return_value);
+	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t)copy_class_name, 1, return_value);
 }
 /* }}} */
 
