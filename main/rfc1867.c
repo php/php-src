@@ -32,7 +32,6 @@
 #include "php_globals.h"
 #include "php_variables.h"
 #include "rfc1867.h"
-#include "ext/standard/php_string.h"
 
 #define DEBUG_FILE_UPLOAD ZEND_DEBUG
 
@@ -1078,7 +1077,11 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					str_len = strlen(filename);
 					php_mb_gpc_encoding_converter(&filename, &str_len, 1, NULL, NULL TSRMLS_CC);
 				}
+#ifdef PHP_WIN32
 				s = php_mb_strrchr(filename, '\\' TSRMLS_CC);
+#else
+				s = filename;
+#endif
 				if ((tmp = php_mb_strrchr(filename, '/' TSRMLS_CC)) > s) {
 					s = tmp;
 				}
@@ -1086,9 +1089,25 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				goto filedone;
 			}
 #endif			
-			php_basename(filename, strlen(filename), NULL, 0, &s, NULL TSRMLS_CC);
-			efree(filename);
-			filename = s;
+
+#ifdef PHP_WIN32
+			s = strrchr(filename, '\\');
+#else
+			s = filename;
+#endif
+			if ((tmp = strrchr(filename, '/')) > s) {
+				s = tmp;
+			}
+#ifdef PHP_WIN32
+			if (PG(magic_quotes_gpc)) {
+				s = s ? s : filename;
+				tmp = strrchr(s, '\'');
+				s = tmp > s ? tmp : s;
+				tmp = strrchr(s, '"');
+				s = tmp > s ? tmp : s;
+			}
+#endif
+
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 filedone:			
 #endif
