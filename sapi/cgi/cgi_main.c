@@ -211,6 +211,16 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	len = sprintf(buf, "Status: %d\r\n", SG(sapi_headers).http_response_code);
 	PHPWRITE_H(buf, len);
 
+	if (SG(sapi_headers).send_default_content_type) {
+		char *hd;
+
+		hd = sapi_get_default_content_type(TSRMLS_C);
+		PHPWRITE("Content-type: ", sizeof("Content-type: ")-1);
+		PHPWRITE(hd, strlen(hd));
+		PHPWRITE("\r\n", 2);
+		efree(hd);
+	}
+	
 	h = zend_llist_get_first_ex(&sapi_headers->headers, &pos);
     while (h) {
 		PHPWRITE_H(h->header, h->header_len);
