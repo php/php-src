@@ -323,6 +323,7 @@ ieeefp.h \
 langinfo.h \
 limits.h \
 locale.h \
+monetary.h \
 mach-o/dyld.h \
 pwd.h \
 resolv.h \
