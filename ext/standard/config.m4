@@ -3,6 +3,57 @@ dnl $Id$ -*- sh -*-
 divert(3)dnl
 
 dnl
+dnl Check if flush should be called explicitly after buffered io
+dnl
+AC_DEFUN(AC_FLUSH_IO,[
+  AC_CACHE_CHECK([whether flush should be called explicitly after a bufferered io], ac_cv_flush_io,[
+  AC_TRY_RUN( [
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char **argv)
+{
+	char *filename = tmpnam(NULL);
+	char buffer[64];
+	int result = 0;
+	
+	FILE *fp = fopen(filename, "wb");
+	if (NULL == fp)
+		return 0;
+	fputs("line 1\n", fp);
+	fputs("line 2\n", fp);
+	fclose(fp);
+	
+	fp = fopen(filename, "rb+");
+	if (NULL == fp)
+		return 0;
+	fgets(buffer, sizeof(buffer), fp);
+	fputs("line 3\n", fp);
+	rewind(fp);
+	fgets(buffer, sizeof(buffer), fp);
+	if (0 != strcmp(buffer, "line 1\n"))
+		result = 1;
+	fgets(buffer, sizeof(buffer), fp);
+	if (0 != strcmp(buffer, "line 3\n"))
+		result = 1;
+	fclose(fp);
+	unlink(filename);
+
+	exit(result);
+}
+],[
+  ac_cv_flush_io="no"
+],[
+  ac_cv_flush_io="yes"
+],[
+  ac_cv_flush_io="no"
+])])
+  if test "$ac_cv_flush_io" = "yes"; then
+    AC_DEFINE(HAVE_FLUSHIO, 1, [Define if flush should be called explicitly after a buffered io.])
+  fi
+])
+
+dnl
 dnl Check for crypt() capabilities
 dnl
 AC_DEFUN(AC_CRYPT_CAP,[
@@ -143,6 +194,7 @@ AC_CHECK_LIB(pam, pam_start, [
 AC_CHECK_FUNCS(getcwd getwd)
 
 AC_CRYPT_CAP
+AC_FLUSH_IO
 
 divert(5)dnl
 

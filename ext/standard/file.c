@@ -918,6 +918,11 @@ PHP_FUNCTION(fgets)
 	buf = emalloc(sizeof(char) * (len + 1));
 	/* needed because recv doesnt put a null at the end*/
 	memset(buf,0,len+1);
+#ifdef HAVE_FLUSHIO
+	if (!issock) {
+		fseek((FILE*)what, 0, SEEK_CUR);
+	}
+#endif
 	if (FP_FGETS(buf, len, socketd, (FILE*)what, issock) == NULL) {
 		efree(buf);
 		RETVAL_FALSE;
@@ -961,6 +966,11 @@ PHP_FUNCTION(fgetc) {
 		socketd=*(int*)what;
 	}
 
+#ifdef HAVE_FLUSHIO
+	if (!issock) {
+		fseek((FILE*)what, 0, SEEK_CUR);
+	}
+#endif
 	buf = emalloc(sizeof(int));
 	if ((result = FP_FGETC(socketd, (FILE*)what, issock)) == EOF) {
 		efree(buf);
@@ -1159,6 +1169,9 @@ PHP_FUNCTION(fwrite)
 	if (issock){
 		ret = SOCK_WRITEL((*arg2)->value.str.val,num_bytes,socketd);
 	} else {
+#ifdef HAVE_FLUSHIO
+		fseek((FILE*)what, 0, SEEK_CUR);
+#endif
 		ret = fwrite((*arg2)->value.str.val,1,num_bytes,(FILE*)what);
 	}
 	RETURN_LONG(ret);
@@ -1794,6 +1807,9 @@ PHP_FUNCTION(fread)
 	/* needed because recv doesnt put a null at the end*/
 	
 	if (!issock) {
+#ifdef HAVE_FLUSHIO
+		fseek((FILE*)what, 0, SEEK_CUR);
+#endif
 		return_value->value.str.len = fread(return_value->value.str.val, 1, len, (FILE*)what);
 		return_value->value.str.val[return_value->value.str.len] = 0;
 	} else {
