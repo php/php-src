@@ -497,13 +497,15 @@ static void tidy_object_free_storage(void *object TSRMLS_DC)
 	zend_hash_destroy(intern->std.properties);
 	FREE_HASHTABLE(intern->std.properties);
 
-	intern->ptdoc->ref_count--;
+	if (intern->ptdoc) {
+		intern->ptdoc->ref_count--;
 
-	if (intern->ptdoc->ref_count <= 0) {
-		tidyBufFree(intern->ptdoc->errbuf);
-		efree(intern->ptdoc->errbuf);
-		tidyRelease(intern->ptdoc->doc);
-		efree(intern->ptdoc);
+		if (intern->ptdoc->ref_count <= 0) {
+			tidyBufFree(intern->ptdoc->errbuf);
+			efree(intern->ptdoc->errbuf);
+			tidyRelease(intern->ptdoc->doc);
+			efree(intern->ptdoc);
+		}
 	}
 
 	efree(object);
