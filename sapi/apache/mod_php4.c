@@ -56,12 +56,29 @@ static void php_child_exit_handler(server_rec *s, pool *p);
 #else
 #define CONST_PREFIX
 #endif
+
+typedef struct _php_per_dir_config {
+    HashTable *ini_settings;
+    char *header_handler;
+    char *auth_handler;
+    char *access_handler;
+    char *type_handler;
+    char *fixup_handler;
+    char *logger_handler;
+    char *post_read_handler;
+} php_per_dir_config;
+
+typedef struct _php_per_server_config {
+    char *uri_handler;
+} php_per_server_config;
+
+
 static CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode);
-static CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
-static CONST_PREFIX char *php_apache_admin_value_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
-static CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
+static CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1, char *arg2);
+static CONST_PREFIX char *php_apache_admin_value_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1, char *arg2);
+static CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1, char *arg2);
 static CONST_PREFIX char *php_apache_flag_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode);
-static CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
+static CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1, char *arg2);
 
 /* ### these should be defined in mod_php4.h or somewhere else */
 #define USE_PATH 1
@@ -472,9 +489,8 @@ static char *php_apache_get_default_mimetype(request_rec *r TSRMLS_DC)
 static int send_php(request_rec *r, int display_source_mode, char *filename)
 {
 	int retval;
-	HashTable *per_dir_conf;
+	php_per_dir_config *conf;
 	TSRMLS_FETCH();
-
 	if (AP(in_request)) {
 		zend_file_handle fh;
 
@@ -498,9 +514,9 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 			return DECLINED;
 		}
 
-		per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php4_module);
-		if (per_dir_conf) {
-			zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
+		conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+		if (conf) {
+			zend_hash_apply((HashTable *) conf->ini_settings, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
 		}
 		
 		/* We don't accept OPTIONS requests, but take everything else */
@@ -560,9 +576,11 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		SG(server_context) = r;
 		
 		php_save_umask();
-		add_common_vars(r);
-		add_cgi_vars(r);
-
+        if(!AP(setup_env)) {
+		    add_common_vars(r);
+		    add_cgi_vars(r);
+            AP(setup_env) = 1;
+        }
 		init_request_info(TSRMLS_C);
 		apache_php_module_main(r, display_source_mode TSRMLS_CC);
 
@@ -630,6 +648,7 @@ static void copy_per_dir_entry(php_per_dir_entry *per_dir_entry)
 /* }}} */
 
 /* {{{ should_overwrite_per_dir_entry
+
  */
 static zend_bool should_overwrite_per_dir_entry(php_per_dir_entry *orig_per_dir_entry, php_per_dir_entry *new_per_dir_entry)
 {
@@ -641,26 +660,72 @@ static zend_bool should_overwrite_per_dir_entry(php_per_dir_entry *orig_per_dir_
 	}
 }
 /* }}} */
+/* {{{ php_destroy_per_server_info
+ */
+static void php_destroy_per_server_info(php_per_server_config *conf)
+{
+    if(conf->uri_handler)
+        free(conf->uri_handler);
+}
+/* }}} */
 
 /* {{{ php_destroy_per_dir_info
  */
-static void php_destroy_per_dir_info(HashTable *per_dir_info)
+static void php_destroy_per_dir_info(php_per_dir_config *conf) 
 {
-	zend_hash_destroy(per_dir_info);
-	free(per_dir_info);
+	zend_hash_destroy(conf->ini_settings);
+	free(conf->ini_settings);
+    if(conf->header_handler)
+        free(conf->header_handler);
+    if(conf->auth_handler)
+        free(conf->auth_handler);
+    if(conf->access_handler)
+        free(conf->access_handler);
+    if(conf->type_handler)
+        free(conf->type_handler);
+    if(conf->fixup_handler)
+        free(conf->fixup_handler);
+    if(conf->logger_handler)
+        free(conf->logger_handler);
+    if(conf->post_read_handler)
+        free(conf->post_read_handler);
+    
 }
 /* }}} */
+
+/* {{{ php_create_server
+ */
+static void *php_create_server(pool *p, char *dummy)
+{
+    php_per_server_config *conf;
+    conf = (php_per_server_config *) malloc(sizeof(php_per_server_config));
+    register_cleanup(p, (void *) conf, (void (*)(void *)) php_destroy_per_server_info, (void (*)(void *)) php_destroy_per_server_info);
+    
+    conf->uri_handler = NULL;
+    return conf;
+}
+    
+/* }}} */
+
 
 /* {{{ php_create_dir
  */
 static void *php_create_dir(pool *p, char *dummy)
 {
-	HashTable *per_dir_info;
-	per_dir_info = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init_ex(per_dir_info, 5, NULL, (void (*)(void *)) destroy_per_dir_entry, 1, 0);
-	register_cleanup(p, (void *) per_dir_info, (void (*)(void *)) php_destroy_per_dir_info, (void (*)(void *)) zend_hash_destroy);
-
-	return per_dir_info;
+    php_per_dir_config *conf;
+    conf = (php_per_dir_config *) malloc(sizeof(php_per_dir_config));
+	conf->ini_settings = (HashTable *) malloc(sizeof(HashTable));
+	zend_hash_init_ex(conf->ini_settings, 5, NULL, (void (*)(void *)) destroy_per_dir_entry, 1, 0);
+	register_cleanup(p, (void *) conf, (void (*)(void *)) php_destroy_per_dir_info, (void (*)(void *)) php_destroy_per_dir_info);
+    
+    conf->header_handler = NULL;
+    conf->auth_handler = NULL;
+    conf->access_handler = NULL;
+    conf->type_handler = NULL;
+    conf->fixup_handler = NULL;
+    conf->logger_handler = NULL;
+    conf->post_read_handler = NULL;
+	return conf;
 }
 
 /* }}} */
@@ -669,8 +734,10 @@ static void *php_create_dir(pool *p, char *dummy)
  */
 static void *php_merge_dir(pool *p, void *basev, void *addv)
 {
+    php_per_dir_config *a = (php_per_dir_config *) addv;
+    php_per_dir_config *b = (php_per_dir_config *) basev;
 	/* This function *must* return addv, and not modify basev */
-	zend_hash_merge_ex((HashTable *) addv, (HashTable *) basev, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (zend_bool (*)(void *, void *)) should_overwrite_per_dir_entry);
+	zend_hash_merge_ex((HashTable *) a->ini_settings, (HashTable *) b->ini_settings, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (zend_bool (*)(void *, void *)) should_overwrite_per_dir_entry);
 	return addv;
 }
 /* }}} */
@@ -712,19 +779,69 @@ static CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable 
 }
 /* }}} */
 
+static CONST_PREFIX char *php_set_uri_handler(cmd_parms *cmd, void *dummy, char *arg1)
+{
+    php_per_server_config *conf;
+    conf = get_module_config(cmd->server->module_config, &php4_module);
+    conf->uri_handler = strdup(arg1);
+    return NULL;
+}
+
+static CONST_PREFIX char *php_set_header_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1)
+{
+    conf->header_handler = strdup(arg1);
+    return NULL;
+}
+
+static CONST_PREFIX char *php_set_auth_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1)
+{
+    conf->auth_handler = strdup(arg1);
+    return NULL;
+}
+
+static CONST_PREFIX char *php_set_access_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1)
+{
+    conf->access_handler = strdup(arg1);
+    return NULL;
+}
+
+static CONST_PREFIX char *php_set_type_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1)
+{
+    conf->type_handler = strdup(arg1);
+    return NULL;
+}
+
+static CONST_PREFIX char *php_set_fixup_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1)
+{
+    conf->fixup_handler = strdup(arg1);
+    return NULL;
+}
+
+static CONST_PREFIX char *php_set_logger_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1)
+{
+    conf->logger_handler = strdup(arg1);
+    return NULL;
+}
+
+static CONST_PREFIX char *php_set_post_read_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1)
+{
+    conf->post_read_handler = strdup(arg1);
+    return NULL;
+}
+
 /* {{{ php_apache_value_handler
  */
-static CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2)
+static CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1, char *arg2)
 {
-	return php_apache_value_handler_ex(cmd, conf, arg1, arg2, PHP_INI_PERDIR);
+	return php_apache_value_handler_ex(cmd, conf->ini_settings, arg1, arg2, PHP_INI_PERDIR);
 }
 /* }}} */
 
 /* {{{ php_apache_admin_value_handler
  */
-static CONST_PREFIX char *php_apache_admin_value_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2)
+static CONST_PREFIX char *php_apache_admin_value_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1, char *arg2)
 {
-	return php_apache_value_handler_ex(cmd, conf, arg1, arg2, PHP_INI_SYSTEM);
+	return php_apache_value_handler_ex(cmd, conf->ini_settings, arg1, arg2, PHP_INI_SYSTEM);
 }
 /* }}} */
 
@@ -747,17 +864,17 @@ static CONST_PREFIX char *php_apache_flag_handler_ex(cmd_parms *cmd, HashTable *
 
 /* {{{ php_apache_flag_handler
  */
-static CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2)
+static CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1, char *arg2)
 {
-	return php_apache_flag_handler_ex(cmd, conf, arg1, arg2, PHP_INI_PERDIR);
+	return php_apache_flag_handler_ex(cmd, conf->ini_settings, arg1, arg2, PHP_INI_PERDIR);
 }
 /* }}} */
 
 /* {{{ php_apache_admin_flag_handler
  */
-static CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2)
+static CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1, char *arg2)
 {
-	return php_apache_flag_handler_ex(cmd, conf, arg1, arg2, PHP_INI_SYSTEM);
+	return php_apache_flag_handler_ex(cmd, conf->ini_settings, arg1, arg2, PHP_INI_SYSTEM);
 }
 /* }}} */
 
@@ -765,16 +882,16 @@ static CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, HashTabl
  */
 static int php_xbithack_handler(request_rec * r)
 {
-	HashTable *per_dir_conf;
+    php_per_dir_config *conf;
 	TSRMLS_FETCH();
 
 	if (!(r->finfo.st_mode & S_IXUSR)) {
 		r->allowed |= (1 << METHODS) - 1;
 		return DECLINED;
 	}
-	per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php4_module);
-	if (per_dir_conf) {
-		zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
+	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	if (conf) {
+		zend_hash_apply((HashTable *) conf->ini_settings, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
 	}
 	if(!AP(xbithack)) {
 		r->allowed |= (1 << METHODS) - 1;
@@ -843,23 +960,23 @@ static void php_init_handler(server_rec *s, pool *p)
 }
 /* }}} */
 
+#define MKHANDLER(a,b) a->b
+
 static int php_run_hook(request_rec *r, char *handler)
 {
 	zval *ret = NULL;
-	HashTable *conf;
+    php_per_dir_config *conf;
 
 	TSRMLS_FETCH();
-
-	if (!AP(apache_config_loaded)) {
-		conf = (HashTable *) get_module_config(r->per_dir_config, &php4_module);
+    if(!AP(apache_config_loaded)) {
+	    conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+        fprintf(stderr, "I should only appear once\n");
 		if (conf)
-		       zend_hash_apply((HashTable *)conf, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
-		AP(apache_config_loaded) = 1;
-	}
-
+		       zend_hash_apply((HashTable *)conf->ini_settings, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
+        AP(apache_config_loaded) = 1;
+    }
 	if (!handler)
 	        return DECLINED;
-	
 	hard_timeout("send", r);
 	SG(server_context) = r;
 	php_save_umask();
@@ -872,52 +989,77 @@ static int php_run_hook(request_rec *r, char *handler)
 	apache_php_module_hook(r, handler, &ret TSRMLS_CC);
 	php_restore_umask();
 	kill_timeout(r);
-	
 	if (ret) {
 		convert_to_long(ret);
 		return Z_LVAL_P(ret);
 	}
-
 	return HTTP_INTERNAL_SERVER_ERROR;
 }
 
 
 static int php_uri_translation(request_rec *r)
+{    
+    php_per_server_config *conf;
+    conf = (php_per_server_config *) get_module_config(r->server->module_config, &php4_module);
+	fprintf(stderr, "HOOK: %s %s\n", __FUNCTION__,  conf->uri_handler);
+	return php_run_hook(r, conf->uri_handler);
+}
+
+static int php_header_hook(request_rec *r)
 {
-	fprintf(stderr, "HOOK: %s\n", __FUNCTION__);
-	return php_run_hook(r, AP(uri_handler));
+    php_per_dir_config *conf;
+    conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	fprintf(stderr, "HOOK: %s %s\n", __FUNCTION__, conf->auth_handler);
+	return php_run_hook(r, conf->header_handler);
 }
 
 static int php_auth_hook(request_rec *r)
 {
-	fprintf(stderr, "HOOK: %s\n", __FUNCTION__);
-	return php_run_hook(r, AP(auth_handler));
+    php_per_dir_config *conf;
+    conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	fprintf(stderr, "HOOK: %s %s\n", __FUNCTION__, conf->auth_handler);
+	return php_run_hook(r, conf->auth_handler);
 }
 
 static int php_access_hook(request_rec *r)
 {
-	fprintf(stderr, "HOOK: %s\n", __FUNCTION__);
-	return php_run_hook(r, AP(access_handler));
+    php_per_dir_config *conf;
+    conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	fprintf(stderr, "HOOK: %s %s\n", __FUNCTION__, conf->access_handler);
+	return php_run_hook(r, conf->access_handler);
 }
 
 static int php_type_hook(request_rec *r)
 {
-	fprintf(stderr, "HOOK: %s\n", __FUNCTION__);
-	return php_run_hook(r, AP(type_handler));
+    php_per_dir_config *conf;
+    conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	fprintf(stderr, "HOOK: %s %s\n", __FUNCTION__, conf->type_handler);
+	return php_run_hook(r, conf->type_handler);
 }
 
 static int php_fixup_hook(request_rec *r)
 {
-	fprintf(stderr, "HOOK: %s\n", __FUNCTION__);
-	return php_run_hook(r, AP(fixup_handler));
+    php_per_dir_config *conf;
+    conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	fprintf(stderr, "HOOK: %s %s\n", __FUNCTION__, conf->fixup_handler);
+	return php_run_hook(r, conf->fixup_handler);
 }
 
 static int php_logger_hook(request_rec *r)
 {
-	fprintf(stderr, "HOOK: %s\n", __FUNCTION__);
-	return php_run_hook(r, AP(logger_handler));
+    php_per_dir_config *conf;
+    conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	fprintf(stderr, "HOOK: %s %s\n", __FUNCTION__, conf->logger_handler);
+	return php_run_hook(r, conf->logger_handler);
 }
  
+static int php_post_read_hook(request_rec *r)
+{
+    php_per_dir_config *conf;
+    conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	fprintf(stderr, "HOOK: %s %s\n", __FUNCTION__, conf->post_read_handler);
+	return php_run_hook(r, conf->post_read_handler);
+}
 
 /* {{{ handler_rec php_handlers[]
  */
@@ -935,6 +1077,18 @@ handler_rec php_handlers[] =
 command_rec php_commands[] =
 {
 	{"php_value",		php_apache_value_handler, NULL, OR_OPTIONS, TAKE2, "PHP Value Modifier"},
+	{"phpUriHandler",		php_set_uri_handler, NULL, RSRC_CONF, TAKE1, "PHP Value Modifier"},
+#if MODULE_MAGIC_NUMBER >= 19970103
+	{"phpHeaderHandler",		php_set_header_handler, NULL, OR_OPTIONS, TAKE1, "PHP Value Modifier"},
+#endif
+	{"phpAuthHandler",		php_set_auth_handler, NULL, OR_OPTIONS, TAKE1, "PHP Value Modifier"},
+	{"phpAccessHandler",		php_set_access_handler, NULL, OR_OPTIONS, TAKE1, "PHP Value Modifier"},
+	{"phpTypeHandler",		php_set_type_handler, NULL, OR_OPTIONS, TAKE1, "PHP Value Modifier"},
+	{"phpFixupHandler",		php_set_fixup_handler, NULL, OR_OPTIONS, TAKE1, "PHP Value Modifier"},
+	{"phpLoggerHandler",		php_set_logger_handler, NULL, OR_OPTIONS, TAKE1, "PHP Value Modifier"},
+#if MODULE_MAGIC_NUMBER >= 19970902
+	{"phpPostReadHandler",		php_set_post_read_handler, NULL, OR_OPTIONS, TAKE1, "PHP Value Modifier"},
+#endif
 	{"php_flag",		php_apache_flag_handler, NULL, OR_OPTIONS, TAKE2, "PHP Flag Modifier"},
 	{"php_admin_value",	php_apache_admin_value_handler, NULL, ACCESS_CONF|RSRC_CONF, TAKE2, "PHP Value Modifier (Admin)"},
 	{"php_admin_flag",	php_apache_admin_flag_handler, NULL, ACCESS_CONF|RSRC_CONF, TAKE2, "PHP Flag Modifier (Admin)"},
@@ -950,7 +1104,7 @@ module MODULE_VAR_EXPORT php4_module =
 	php_init_handler,			/* initializer */
 	php_create_dir,				/* per-directory config creator */
 	php_merge_dir,				/* dir merger */
-	NULL,						/* per-server config creator */
+	php_create_server,						/* per-server config creator */
 	NULL, 						/* merge server config */
 	php_commands,				/* command table */
 	php_handlers,				/* handlers */
@@ -962,7 +1116,7 @@ module MODULE_VAR_EXPORT php4_module =
 	php_fixup_hook,				/* fixups */
 	php_logger_hook				/* logger */
 #if MODULE_MAGIC_NUMBER >= 19970103
-	, NULL						/* header parser */
+	, php_header_hook						/* header parser */
 #endif
 #if MODULE_MAGIC_NUMBER >= 19970719
 	, NULL             			/* child_init */
@@ -971,7 +1125,7 @@ module MODULE_VAR_EXPORT php4_module =
 	, php_child_exit_handler	/* child_exit */
 #endif
 #if MODULE_MAGIC_NUMBER >= 19970902
-	, NULL						/* post read-request */
+	, php_post_read_hook						/* post read-request */
 #endif
 };
 /* }}} */
