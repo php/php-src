@@ -218,14 +218,14 @@ class DB
         }
 
         if (is_array($options)) {
-            foreach ($persistent as $option => $value) {
+            foreach ($options as $option => $value) {
                 $test = $obj->setOption($option, $value);
                 if (DB::isError($test)) {
                     return $test;
                 }
             }
         } else {
-            $obj->setOption('persistent', $persistent);
+            $obj->setOption('persistent', $options);
         }
         $err = $obj->connect($dsninfo, $obj->getOption('persistent'));
 
