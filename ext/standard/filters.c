@@ -869,15 +869,15 @@ static size_t strfilter_convert_write(php_stream *stream, php_stream_filter *thi
 					break;
 
 				case PHP_CONV_ERR_UNKNOWN:
-					php_error(E_WARNING, "stream filter(%s): unknown error", thisfilter->fops->label, err);
+					php_error(E_WARNING, "stream filter (%s): unknown error", inst->filtername, err);
 					return 0;
 
 				case PHP_CONV_ERR_INVALID_SEQ:
-					php_error(E_WARNING, "stream filter(%s): invalid base64 sequence", thisfilter->fops->label, err);
+					php_error(E_WARNING, "stream filter (%s): invalid base64 sequence", inst->filtername, err);
 					return 0;
 	
  				case PHP_CONV_ERR_UNEXPECTED_EOS:
-					php_error(E_WARNING, "stream filter(%s): unexpected end of stream", thisfilter->fops->label, err);
+					php_error(E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername, err);
 					return 0;
 
 				default:
@@ -923,15 +923,15 @@ static size_t strfilter_convert_read(php_stream *stream, php_stream_filter *this
 
 			switch (err) {
 				case PHP_CONV_ERR_UNKNOWN:
-					php_error(E_WARNING, "stream filter(%s): unknown error", thisfilter->fops->label, err);
+					php_error(E_WARNING, "stream filter (%s): unknown error", inst->filtername, err);
 					return 0;
 
 				case PHP_CONV_ERR_INVALID_SEQ:
-					php_error(E_WARNING, "stream filter(%s): invalid base64 sequence", thisfilter->fops->label, err);
+					php_error(E_WARNING, "stream filter (%s): invalid base64 sequence", inst->filtername, err);
 					return 0;
 
 				case PHP_CONV_ERR_UNEXPECTED_EOS:
-					php_error(E_WARNING, "stream filter(%s): unexpected end of stream", thisfilter->fops->label, err);
+					php_error(E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername, err);
 					return 0;
 
 				default:
@@ -968,7 +968,7 @@ static int strfilter_convert_flush(php_stream *stream, php_stream_filter *thisfi
 					out_p = bucket_buf;
 					out_left = sizeof(bucket_buf);
 				} else {
-					php_error(E_WARNING, "stream filter(%s): unknown error", thisfilter->fops->label);
+					php_error(E_WARNING, "stream filter (%s): unknown error", inst->filtername);
 					return 0;
 				}
 			}
