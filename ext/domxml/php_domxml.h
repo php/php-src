@@ -75,6 +75,8 @@ PHPAPI zval *php_domobject_new(xmlNodePtr obj, int *found, zval* in TSRMLS_DC);
 /* directory functions */
 PHP_MINIT_FUNCTION(domxml);
 PHP_MSHUTDOWN_FUNCTION(domxml);
+PHP_RINIT_FUNCTION(domxml);
+PHP_RSHUTDOWN_FUNCTION(domxml);
 PHP_MINFO_FUNCTION(domxml);
 PHP_FUNCTION(domxml_version);
 PHP_FUNCTION(xmldoc);

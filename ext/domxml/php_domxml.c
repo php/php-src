@@ -540,8 +540,8 @@ zend_module_entry domxml_module_entry = {
 	domxml_functions,
 	PHP_MINIT(domxml),
 	PHP_MSHUTDOWN(domxml),
-	NULL,
-	NULL,
+	PHP_RINIT(domxml),
+	PHP_RSHUTDOWN(domxml),
 	PHP_MINFO(domxml),
 	DOMXML_API_VERSION, /* Extension versionnumber */
 	STANDARD_MODULE_PROPERTIES
@@ -1510,6 +1510,24 @@ static void domxml_error_validate(void *ctx, const char *msg, ...)
 	
 }
 
+PHP_RINIT_FUNCTION(domxml)
+{
+	xmlSetGenericErrorFunc(xmlGenericErrorContext, (xmlGenericErrorFunc)domxml_error);
+#if HAVE_DOMXSLT
+	xsltSetGenericErrorFunc(xsltGenericErrorContext, (xmlGenericErrorFunc)domxml_error);
+#endif
+	return SUCCESS;
+}
+
+PHP_RSHUTDOWN_FUNCTION(domxml)
+{
+	xmlSetGenericErrorFunc(xmlGenericErrorContext, NULL);
+#if HAVE_DOMXSLT
+	xsltSetGenericErrorFunc(xsltGenericErrorContext, NULL);
+#endif
+	return SUCCESS;
+}
+
 PHP_MSHUTDOWN_FUNCTION(domxml)
 {
 #if HAVE_DOMXSLT
@@ -1668,15 +1686,9 @@ PHP_MINIT_FUNCTION(domxml)
 	REGISTER_LONG_CONSTANT("DOMXML_LOAD_SUBSTITUTE_ENTITIES",	DOMXML_LOAD_SUBSTITUTE_ENTITIES,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DOMXML_LOAD_COMPLETE_ATTRS",DOMXML_LOAD_COMPLETE_ATTRS,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DOMXML_LOAD_DONT_KEEP_BLANKS",DOMXML_LOAD_DONT_KEEP_BLANKS,		CONST_CS | CONST_PERSISTENT);
-	xmlSetGenericErrorFunc(xmlGenericErrorContext, (xmlGenericErrorFunc)domxml_error);
-#if (defined(LIBXML_THREAD_ENABLED) && LIBXML_VERSION >= 20511)
-	xmlThrDefSetGenericErrorFunc(xmlGenericErrorContext, (xmlGenericErrorFunc)domxml_error);
-#endif
-#if HAVE_DOMXSLT
-	xsltSetGenericErrorFunc(xsltGenericErrorContext, (xmlGenericErrorFunc)domxml_error);
-#if HAVE_DOMEXSLT
+
+#if HAVE_DOMXSLT && HAVE_DOMEXSLT
 	exsltRegisterAll();
-#endif
 #endif
 	xmlInitParser();
 	return SUCCESS;
