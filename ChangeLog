@@ -1,3 +1,99 @@
+2001-08-10  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Adding SQL statement to the warning
+
+2001-08-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/php_imap.c:
+    Made use of the resource macros here too. And some beutifying.
+
+2001-08-10  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * main/network.c:
+    Possible fix 12360. If it doesn't help, it doesn't hurt, AFAIK...
+
+2001-08-10  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Log/observer.php:
+    clean up some of this. More changes coming at some point.
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.h:
+    Add imap_setacl() function (Brian Masney <masneyb@seul.org>).
+
+2001-08-10  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/standard/string.c: Fix some build probs on *bsd
+
+2001-08-10  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Mail/sendmail.php:
+    Add support for extra command line parameters to sendmail
+
+2001-08-10  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/Function.php
+      pear/Cache/OutputCompression.php
+      pear/Cache.php: Rename storage* to container*.
+
+2001-08-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/php_ircg.h
+      ext/ircg/ircg.c: ircg_get_username retrieves the connection's username.
+
+    ircg will update the username, when/if the server truncates it, so this
+    provides a facility to get hold of that updated view.
+
+2001-08-10  Zeev Suraski  <zeev@zend.com>
+
+    * main/php3_compat.h: Optimize macro usage...
+
+    * ext/sablot/sablot.c: More build fixes
+
+2001-08-10  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c
+      ext/yaz/php_yaz.h: Added yaz_sort. Updates for ZTS.
+
+2001-08-10  Zeev Suraski  <zeev@zend.com>
+
+    * main/php.h
+      main/php3_compat.h: Centralize macros
+
+    * ext/sablot/php_sablot.h: There we go.
+
+    * ext/sablot/sablot.c: build fix
+
+    * main/php.h: Let's not introduce more mess to maintain.
+
+2001-08-10  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/Function.php: Complete rewrite.
+
+2001-08-10  Rasmus Lerdorf  <rasmus@php.net>
+
+    * main/php.h
+      ext/sablot/php_sablot.h
+      ext/sablot/sablot.c: Sablot extension cleanup - it compiles again now
+
+    * ext/sablot/config.m4:
+    The checks were in the wrong order here.  sablot depends on expat, so
+    check for expat first and add -lexpat then check for sablot
+
+2001-08-10  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache2filter/php_functions.c: killed compile warnings.
+
+    * ext/domxml/php_domxml.c: compile fix (missing TSRMLS_CC)
+
+    * ext/standard/dns.c:
+    Cleanup. Also make gethostnamel() to return FALSE on error and not just empty array.
+
+2001-08-10  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/xslt/README.XSLT-BACKENDS:
+    Filter a bit of the "Bronx" out of this README
+
 2001-08-09  David Eriksson  <david@2good.com>
 
     * ext/satellite/namedvalue_to_zval.c: Prevent potential crash
