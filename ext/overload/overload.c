@@ -172,6 +172,7 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 	zval get_handler;
 	zval **args[2];
 	zval *retval = NULL;
+	char *lcase_prop_name;
 	zval **accessor_name;
 	oo_class_data *oo_data;
 
@@ -189,8 +190,11 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 	result_ptr->refcount = 1;
 	ZVAL_NULL(result_ptr);
 
-	if (zend_hash_find(&oo_data->getters, Z_STRVAL_P(prop_name),
+	lcase_prop_name = estrndup(Z_STRVAL_P(prop_name), Z_STRLEN_P(prop_name));
+	zend_str_tolower(lcase_prop_name, Z_STRLEN_P(prop_name));
+	if (zend_hash_find(&oo_data->getters, lcase_prop_name,
 					   Z_STRLEN_P(prop_name)+1, (void **)&accessor_name) == SUCCESS) {
+		efree(lcase_prop_name);
 		args[0] = &result_ptr;
 
 		call_result = call_user_function_ex(NULL,
@@ -206,22 +210,23 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 			return 0;
 		}
 	} else {
-	ZVAL_STRINGL(&get_handler, GET_HANDLER, sizeof(GET_HANDLER)-1, 0);
-	args[0] = &prop_name;
-	args[1] = &result_ptr;
+		efree(lcase_prop_name);
+		ZVAL_STRINGL(&get_handler, GET_HANDLER, sizeof(GET_HANDLER)-1, 0);
+		args[0] = &prop_name;
+		args[1] = &result_ptr;
 
-	call_result = call_user_function_ex(NULL,
-										&object,
-										&get_handler,
-										&retval,
-										2, args,
-										0, NULL TSRMLS_CC);
-	Z_OBJCE_P(object) = orig_ce;
+		call_result = call_user_function_ex(NULL,
+											&object,
+											&get_handler,
+											&retval,
+											2, args,
+											0, NULL TSRMLS_CC);
+		Z_OBJCE_P(object) = orig_ce;
 
-	if (call_result == FAILURE || !retval) {
+		if (call_result == FAILURE || !retval) {
 			php_error(E_WARNING, "unable to call %s::" GET_HANDLER "() handler", Z_OBJCE_P(object)->name);
-		return 0;
-	}
+			return 0;
+		}
 	}
 
 	if (zval_is_true(retval)) {
@@ -252,6 +257,7 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 	zval *value_copy;
 	zval **args[2];
 	zval *retval = NULL;
+	char *lcase_prop_name;
 	zval **accessor_name;
 	oo_class_data *oo_data;
 
@@ -265,7 +271,6 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 	orig_ce = Z_OBJCE_P(object);
 	Z_OBJCE_P(object) = &temp_ce;
 
-	ZVAL_STRINGL(&set_handler, SET_HANDLER, sizeof(SET_HANDLER)-1, 0);
 	if (value->refcount == 0) {
 		MAKE_STD_ZVAL(value_copy);
 		*value_copy = *value;
@@ -273,8 +278,11 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 		value = value_copy;
 	}
 
-	if (zend_hash_find(&oo_data->setters, Z_STRVAL_P(prop_name),
+	lcase_prop_name = estrndup(Z_STRVAL_P(prop_name), Z_STRLEN_P(prop_name));
+	zend_str_tolower(lcase_prop_name, Z_STRLEN_P(prop_name));
+	if (zend_hash_find(&oo_data->setters, lcase_prop_name,
 					   Z_STRLEN_P(prop_name)+1, (void **)&accessor_name) == SUCCESS) {
+		efree(lcase_prop_name);
 		args[0] = &value;
 
 		call_result = call_user_function_ex(NULL,
@@ -290,6 +298,8 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 			return 0;
 		}
 	} else {
+		efree(lcase_prop_name);
+		ZVAL_STRINGL(&set_handler, SET_HANDLER, sizeof(SET_HANDLER)-1, 0);
 		args[0] = &prop_name;
 		args[1] = &value;
 
