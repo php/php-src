@@ -228,6 +228,8 @@ AC_CHECK_FUNCS(glob)
 
 AC_CHECK_FUNCS(strfmon)
 
+AC_CHECK_FUNCS(getopt_long getopt_long_only)
+
 if test "$PHP_SAPI" = "cgi"; then
   AC_DEFINE(ENABLE_CHROOT_FUNC, 1, [Whether to enable chroot() function])
 fi

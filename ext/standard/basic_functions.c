@@ -73,6 +73,10 @@
 # include <sys/mman.h>
 #endif
 
+#ifdef HAVE_GETOPT_LONG
+#include <getopt.h>
+#endif
+
 #include "safe_mode.h"
 
 #ifdef PHP_WIN32
@@ -1367,17 +1371,40 @@ static void free_argv(char **argv, int argc)
 }
 /* }}} */
 
-/* {{{ proto array getopt(string options)
+#ifdef HAVE_GETOPT_LONG
+/* {{{ free_longopts
+   Free the memory allocated to an longopt array. */
+static void free_longopts(struct option *longopts)
+{
+	struct option *p;
+
+	if(longopts) {
+		for(p=longopts; p->name; p++) {
+			efree((char *)(p->name));
+		}
+		
+		efree(longopts);
+	}
+}
+/* }}} */
+#endif
+
+/* {{{ proto array getopt(string options [, array longopts])
    Get options from the command line argument list */
 PHP_FUNCTION(getopt)
 {
 	char *options = NULL, **argv = NULL;
 	char opt[2] = { '\0' };
+	char *optname;
 	int argc = 0, options_len = 0, o;
-	zval *val, **args = NULL;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
-							  &options, &options_len) == FAILURE) {
+	zval *val, **args = NULL, *p_longopts = NULL;
+#ifdef HAVE_GETOPT_LONG
+	struct option *longopts = NULL;
+	int longindex = 0;
+#endif
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|a",
+							  &options, &options_len, &p_longopts) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1386,7 +1413,8 @@ PHP_FUNCTION(getopt)
 	 * in order to be on the safe side, even though it is also available
 	 * from the symbol table.
 	 */
-	if (zend_hash_find(&EG(symbol_table), "argv", sizeof("argv"),
+	// TODO take fromm trackvars instead
+	if (zend_hash_find(HASH_OF(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"),
 					   (void **) &args) != FAILURE) {
 		int pos = 0;
 		zval **arg;
@@ -1421,6 +1449,50 @@ PHP_FUNCTION(getopt)
 		RETURN_FALSE;
 	}
 
+	if(p_longopts) {
+#ifdef HAVE_GETOPT_LONG
+		int len, c = zend_hash_num_elements(Z_ARRVAL_P(p_longopts));
+		struct option *p;
+		zval **arg;
+		char *name;
+
+		longopts = (struct option *)ecalloc(c+1, sizeof(struct option));
+
+		if(!longopts) RETURN_FALSE;
+
+		/* Reset the array indexes. */
+		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p_longopts));
+		p = longopts;
+
+		/* Iterate over the hash to construct the argv array. */
+		while (zend_hash_get_current_data(Z_ARRVAL_P(p_longopts),
+										  (void **)&arg) == SUCCESS) {
+
+			// todo check for : and ::, strip'em, efrees ...
+			p->has_arg = 0;
+			name = estrdup(Z_STRVAL_PP(arg));
+			len = strlen(name);
+			if((len > 0) && (name[len-1] == ':')) {
+				p->has_arg++;
+				name[len-1] = '\0';
+				if((len > 1) && (name[len-2] == ':')) {
+					p->has_arg++;
+					name[len-2] = '\0';
+				}
+			}
+				
+			p->name = name; 
+			p->flag = NULL;
+			p->val = 0;
+
+			zend_hash_move_forward(Z_ARRVAL_P(p_longopts));
+			p++;
+		}
+#else
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No support for long options in this build");
+#endif	
+	}
+
 	/* Initialize the return value as an array. */
 	if (array_init(return_value)) {
 		RETURN_FALSE;
@@ -1429,16 +1501,29 @@ PHP_FUNCTION(getopt)
 	/* Disable getopt()'s error messages. */
 	opterr = 0;
 
-	/* Invoke getopt(3) on the argument array. */
-	while ((o = getopt(argc, argv, options)) != -1) {
+	/* reset option parser position */
+	optind = 0;
 
+	/* Invoke getopt(3) on the argument array. */
+#ifdef HAVE_GETOPT_LONG
+	while ((o = getopt_long(argc, argv, options, longopts, &longindex)) != -1) {
+#else
+	while ((o = getopt(argc, argv, options)) != -1) {
+#endif
 		/* Skip unknown arguments. */
 		if (o == '?') {
+			// TODO bailout?
 			continue;
 		}
 
 		/* Prepare the option character and the argument string. */
-		opt[0] = o;
+		if(o == 0) {
+			optname = (char *)longopts[longindex].name;
+		} else {		
+			if(o == 1) o = '-';
+			opt[0] = o;
+			optname = opt;
+		}
 
 		MAKE_STD_ZVAL(val);
 		if (optarg != NULL) {
@@ -1448,14 +1533,21 @@ PHP_FUNCTION(getopt)
 		}
 
 		/* Add this option / argument pair to the result hash. */
-		if (zend_hash_add(HASH_OF(return_value), opt, sizeof(opt), (void *)&val,
-							 sizeof(zval *), NULL) == FAILURE) {
-			free_argv(argv, argc);
-			RETURN_FALSE;
+		if(zend_hash_find(HASH_OF(return_value), optname, strlen(optname)+1, (void **)&args) != FAILURE) {
+			if(Z_TYPE_PP(args) != IS_ARRAY) {
+				convert_to_array_ex(args);
+			} 
+ 			zend_hash_next_index_insert(HASH_OF(*args),  (void *)&val, sizeof(zval *), NULL);
+		} else {
+			zend_hash_add(HASH_OF(return_value), optname, strlen(optname)+1, (void *)&val,
+						  sizeof(zval *), NULL);
 		}
 	}
 
 	free_argv(argv, argc);
+#ifdef HAVE_GETOPT_LONG
+	free_longopts(longopts);
+#endif
 }
 /* }}} */
 #endif
@@ -1716,7 +1808,7 @@ PHP_FUNCTION(call_user_func)
 	}
 
 	if (!zend_is_callable(*params[0], 0, &name)) {
-		php_error_docref1(NULL TSRMLS_CC, name, E_WARNING, "First argumented is expected to be a valid callback");
+		php_error_docref1(NULL TSRMLS_CC, name, E_WARNING, "First argument is expected to be a valid callback");
 		efree(name);
 		efree(params);
 		RETURN_NULL();
