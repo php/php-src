@@ -1851,7 +1851,7 @@ PHP_FUNCTION(call_user_func)
 		RETURN_NULL();
 	}
 
-	if (call_user_function_ex(EG(function_table), NULL, *params[0], &retval_ptr, argc - 1, params+1, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
+	if (call_user_function_ex(EG(function_table), NULL, *params[0], &retval_ptr, argc-1, params+1, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
 		php_error(E_WARNING, "Unable to call %s()", name);
@@ -1944,7 +1944,7 @@ PHP_FUNCTION(call_user_method)
 	SEPARATE_ZVAL(params[0]);
 	convert_to_string(*params[0]);
 
-	if (call_user_function_ex(EG(function_table), params[1], *params[0], &retval_ptr, arg_count - 2, params+2, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
+	if (call_user_function_ex(EG(function_table), params[1], *params[0], &retval_ptr, arg_count-2, params+2, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
 		php_error(E_WARNING, "Unable to call %s()", Z_STRVAL_PP(params[0]));
@@ -2027,7 +2027,7 @@ static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_fun
 							shutdown_function_entry->arguments[0],
 							&retval, 
 							shutdown_function_entry->arg_count - 1,
-							shutdown_function_entry->arguments+1 
+							shutdown_function_entry->arguments + 1 
 							TSRMLS_CC ) == SUCCESS ) {
 		zval_dtor(&retval);
 
