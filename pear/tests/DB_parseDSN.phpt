@@ -10,30 +10,29 @@ DB::parseDSN test
 
 require_once "DB.php";
 
-print "testing DB::parseDSN...\n";
-var_dump(DB::parseDSN("mysql"));
-var_dump(DB::parseDSN("odbc(mssql)"));
-var_dump(DB::parseDSN("mysql://localhost"));
-var_dump(DB::parseDSN("mysql://remote.host.com/db"));
-var_dump(DB::parseDSN("mysql://testuser:testpw"));
-var_dump(DB::parseDSN("oci8://user:pass@tns-name"));
-var_dump(DB::parseDSN(""));
-var_dump(DB::parseDSN(""));
-var_dump(DB::parseDSN(""));
-var_dump(DB::parseDSN(""));
-var_dump(DB::parseDSN(""));
-var_dump(DB::parseDSN(""));
-var_dump(DB::parseDSN(""));
+function test($dsn) {
+    print implode(",", DB::parseDSN($dsn))."\n";
+}
 
+print "testing DB::parseDSN...\n";
+test("mysql");
+test("odbc(mssql)");
+test("mysql://localhost");
+test("mysql://remote.host.com/db");
+test("mysql://testuser:testpw");
+test("oci8://user:pass@tns-name");
+test("odbc(solid)://foo:bar@tcp+localhost+1313");
+
+/* phptype,dbsyntax,protocol,hostspec,database,username,password */
 ?>
 --GET--
 --POST--
 --EXPECT--
-testing ibase: object: db_ibase: (phptype=ibase, dbsyntax=ibase)
-testing msql: object: db_msql: (phptype=msql, dbsyntax=msql)
-testing mssql: object: db_mssql: (phptype=mssql, dbsyntax=mssql)
-testing mysql: object: db_mysql: (phptype=mysql, dbsyntax=mysql)
-testing oci8: object: db_oci8: (phptype=oci8, dbsyntax=oci8)
-testing odbc: object: db_odbc: (phptype=odbc, dbsyntax=unknown)
-testing pgsql: object: db_pgsql: (phptype=pgsql, dbsyntax=pgsql)
-testing sybase: object: db_sybase: (phptype=sybase, dbsyntax=sybase)
+testing DB::parseDSN...
+mysql,,,,,,
+odbc,mssql,,,,,
+mysql,mysql,,localhost,,,
+mysql,mysql,,remote.host.com,db,,
+mysql,mysql,,,,testuser,testpw
+oci8,oci8,,tns-name,,user,pass
+odbc,solid,tcp,localhost 1313,,foo,bar

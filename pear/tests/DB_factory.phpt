@@ -28,7 +28,7 @@ while (list($i, $name) = each($backends)) {
     if (DB::isError($obj)) {
 	print "error: ".$obj->getMessage()."\n";
     } else {
-	print "object: ".$obj->toString()."\n";
+	print "object: ".$obj."\n";
     }
 }
 
