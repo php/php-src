@@ -77,7 +77,8 @@ if test -n "$auto_cflags" && test "`uname -s 2>/dev/null`" = "HP-UX"; then
 fi
 
 dnl Checks for programs.
-AC_PROG_LIBTOOL
+AM_PROG_LIBTOOL
+AM_SET_LIBTOOL_VARIABLE([--silent])
 AC_PROG_YACC
 if test "$YACC" != "bison -y"; then
     AC_MSG_WARN(You will need bison if you want to regenerate the PHP parsers.)
