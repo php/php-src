@@ -211,7 +211,22 @@ static void safe_odbc_disconnect( void *handle )
  */
 static void _close_odbc_conn(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
+	int i, nument, type;
+	void *ptr;
+	odbc_result *res;
+
 	odbc_connection *conn = (odbc_connection *)rsrc->ptr;
+
+	nument = zend_hash_next_free_element(&EG(regular_list));
+	for(i = 1; i < nument; i++) {
+		ptr = zend_list_find(i, &type);
+		if (ptr && (type == le_result)) {
+			res = (odbc_result *)ptr;
+			if (res->conn_ptr == conn) {
+				zend_list_delete(i);
+			}
+		}
+	}
 
    	safe_odbc_disconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
@@ -225,7 +240,21 @@ static void _close_odbc_conn(zend_rsrc_list_entry *rsrc TSRMLS_DC)
  */
 static void _close_odbc_pconn(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
+	int i, nument, type;
+	void *ptr;
+	odbc_result *res;
 	odbc_connection *conn = (odbc_connection *)rsrc->ptr;
+
+	nument = zend_hash_next_free_element(&EG(regular_list));
+	for(i = 1; i < nument; i++) {
+		ptr = zend_list_find(i, &type);
+		if (ptr && (type == le_result)) {
+			res = (odbc_result *)ptr;
+			if (res->conn_ptr == conn) {
+				zend_list_delete(i);
+			}
+		}
+	}
 	
 	safe_odbc_disconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
