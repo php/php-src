@@ -3,7 +3,7 @@ PHP 4                                                                      NEWS
 ? ? ??? 2002, Version 4.3.0
 - Added stream_select() which works like socket_select but only works on
   streams returned by fopen(), fsockopen() and pfsockopen(). (Wez)
-- Fixed bug #19595 (Missing functions for GD2 format handling).
+- Fixed bug #19595 (Missing functions for GD2 format handling). (Edin)
 - Fix for bug #19633 (wrong directories in ext/ldap/config.m4). (Derick)
 - Fixed bugs #17274 and #19627 (segfault in sem_remove). (Wez)
 - Fixed bug #18022 (fopen does not work with php://stdin anymore on Solaris).
