@@ -2362,7 +2362,7 @@ PHP_FUNCTION(strip_tags)
 }
 /* }}} */
 
-/* {{{ proto string setlocale(string category, string locale)
+/* {{{ proto string setlocale(mixed category, string locale)
    Set locale information */
 PHP_FUNCTION(setlocale)
 {
@@ -2375,34 +2375,44 @@ PHP_FUNCTION(setlocale)
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &pcategory, &plocale)==FAILURE)
 		WRONG_PARAM_COUNT;
 #ifdef HAVE_SETLOCALE
-	convert_to_string_ex(pcategory);
 	convert_to_string_ex(plocale);
-	category = *pcategory;
 	locale = *plocale;
-	if (!strcasecmp ("LC_ALL", category->value.str.val))
-		cat = LC_ALL;
-	else if (!strcasecmp ("LC_COLLATE", category->value.str.val))
-		cat = LC_COLLATE;
-	else if (!strcasecmp ("LC_CTYPE", category->value.str.val))
-		cat = LC_CTYPE;
+
+	if (Z_TYPE_PP(pcategory) == IS_LONG) {
+		convert_to_long_ex(pcategory);	
+		cat = Z_LVAL_PP(pcategory);
+	} else { /* FIXME: The following behaviour should be removed. */
+		php_error(E_NOTICE,"Passing locale category name as string is deprecated. Use the LC_* -constants instead.");
+		convert_to_string_ex(pcategory);
+		category = *pcategory;
+
+		if (!strcasecmp ("LC_ALL", category->value.str.val))
+			cat = LC_ALL;
+		else if (!strcasecmp ("LC_COLLATE", category->value.str.val))
+			cat = LC_COLLATE;
+		else if (!strcasecmp ("LC_CTYPE", category->value.str.val))
+			cat = LC_CTYPE;
 #ifdef LC_MESSAGES
-	else if (!strcasecmp ("LC_MESSAGES", category->value.str.val))
-		cat = LC_MESSAGES;
+		else if (!strcasecmp ("LC_MESSAGES", category->value.str.val))
+			cat = LC_MESSAGES;
 #endif
-	else if (!strcasecmp ("LC_MONETARY", category->value.str.val))
-		cat = LC_MONETARY;
-	else if (!strcasecmp ("LC_NUMERIC", category->value.str.val))
-		cat = LC_NUMERIC;
-	else if (!strcasecmp ("LC_TIME", category->value.str.val))
-		cat = LC_TIME;
-	else {
-		php_error(E_WARNING,"Invalid locale category name %s, must be one of LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC or LC_TIME", category->value.str.val);
-		RETURN_FALSE;
+		else if (!strcasecmp ("LC_MONETARY", category->value.str.val))
+			cat = LC_MONETARY;
+		else if (!strcasecmp ("LC_NUMERIC", category->value.str.val))
+			cat = LC_NUMERIC;
+		else if (!strcasecmp ("LC_TIME", category->value.str.val))
+			cat = LC_TIME;
+		else {
+			php_error(E_WARNING,"Invalid locale category name %s, must be one of LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC or LC_TIME", category->value.str.val);
+			RETURN_FALSE;
+		}
 	}
-	if (!strcmp ("0", locale->value.str.val))
+	if (!strcmp ("0", locale->value.str.val)) {
 		loc = NULL;
-	else
+	} else {
 		loc = locale->value.str.val;
+	}
+	
 	retval = setlocale (cat, loc);
 	if (retval) {
 		/* Remember if locale was changed */
