@@ -4,7 +4,9 @@
 
 /* $Id$ */
 
-#if WIN32|WINNT
+#include "php.h"
+
+#if PHP_WIN32
 #include "config.w32.h"
 #else
 #include "php_config.h"
@@ -44,6 +46,7 @@ extern int gdImageColorResolve(gdImagePtr, int, int, int);
 #define RESOLUTION 72
 
 /* Number of colors used for anti-aliasing */
+#undef NUMCOLORS
 #define NUMCOLORS 4
 
 /* Line separation as a factor of font height.  
@@ -56,8 +59,12 @@ extern int gdImageColorResolve(gdImagePtr, int, int, int);
 #define TRUE !FALSE
 #endif
 
+#ifndef MAX
 #define MAX(a,b) ((a)>(b)?(a):(b))
+#endif
+#ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
 
 typedef struct {
 	char				*fontname;	/* key */
