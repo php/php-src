@@ -82,6 +82,7 @@ function_entry basic_functions[] = {
 	PHP_FE(usleep,									NULL)
 			
 	PHP_FE(ksort,									first_arg_force_ref)
+	PHP_FE(krsort,									first_arg_force_ref)
 	PHP_FE(asort,									first_arg_force_ref)
 	PHP_FE(arsort,									first_arg_force_ref)
 	PHP_FE(sort,									first_arg_force_ref)
@@ -620,6 +621,10 @@ PHP_FUNCTION(strval)
 	pval_copy_constructor(return_value);
 }
 
+static int array_reverse_key_compare(const void *a, const void *b)
+{ return array_key_compare(a,b)*-1;
+}
+
 static int array_key_compare(const void *a, const void *b)
 {
 	Bucket *first;
@@ -644,6 +649,29 @@ static int array_key_compare(const void *a, const void *b)
 	}
 }
 
+
+PHP_FUNCTION(krsort)
+{
+	pval *array;
+	HashTable *target_hash;
+
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	target_hash = HASH_OF(array);
+	if (!target_hash) {
+		php_error(E_WARNING, "Wrong datatype in krsort() call");
+		return;
+	}
+	if (!ParameterPassedByReference(ht,1)) {
+		php_error(E_WARNING, "Array not passed by reference in call to krsort()");
+		return;
+	}
+	if (zend_hash_sort(target_hash, array_reverse_key_compare,0) == FAILURE) {
+		return;
+	}
+	RETURN_TRUE;
+}
 
 PHP_FUNCTION(ksort)
 {
