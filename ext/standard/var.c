@@ -123,7 +123,7 @@ head_done:
 		break;
 	}
 	default:
-		php_printf("%sUNKNOWN:0\n", COMMON);
+		php_printf("%sUNKNOWN(%d):0\n", COMMON, Z_TYPE_PP(struc));
 		break;
 	}
 }
@@ -221,7 +221,7 @@ head_done:
 		break;
 	}
 	default:
-		php_printf("%sUNKNOWN:0\n", COMMON);
+		php_printf("%sUNKNOWN(%d):0\n", COMMON, Z_TYPE_PP(struc));
 		break;
 	}
 }
@@ -329,7 +329,7 @@ void php_var_export(zval **struc, int level TSRMLS_DC)
 		if (level > 1) {
 			php_printf("\n%*c", level - 1, ' ');
 		}
-		php_printf ("class %s {\n", ((*struc)->value.obj.ce)->name);
+		php_printf ("class %s {\n", Z_OBJCE_P(struc)->name);
 		zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_object_element_export, 1, level);
 		if (level > 1) {
 			php_printf("%*c", level - 1, ' ');
