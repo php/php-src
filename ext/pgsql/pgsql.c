@@ -21,10 +21,6 @@
 
 #include <stdlib.h>
 
-#ifdef COMPILE_DL_PGSQL
-#include "dl/phpdl.h"
-#endif
-
 #define PHP_PGSQL_PRIVATE 1
 
 #include "php.h"
