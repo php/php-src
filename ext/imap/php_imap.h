@@ -31,12 +31,13 @@
 #ifndef PHP_IMAP_H
 #define PHP_IMAP_H
 
+#if HAVE_IMAP
 
 #ifndef PHP_WIN32
 #include "build-defs.h"
 #endif
 
-#ifdef HAVE_IMAP2000
+#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
  /* these are used for quota support */
  #include "c-client.h"	/* includes mail.h and rfc822.h */
  #include "imap4r1.h"	/* location of c-client quota functions */
@@ -44,8 +45,6 @@
  #include "mail.h"
  #include "rfc822.h" 
 #endif
-
-#include "zend_modules.h"
 
 extern zend_module_entry imap_module_entry;
 #define imap_module_ptr &imap_module_entry
@@ -114,6 +113,7 @@ PHP_MINIT_FUNCTION(imap);
 PHP_RINIT_FUNCTION(imap);
 PHP_RSHUTDOWN_FUNCTION(imap);
 PHP_MINFO_FUNCTION(imap);
+
 PHP_FUNCTION(imap_open);
 PHP_FUNCTION(imap_popen);
 PHP_FUNCTION(imap_reopen);
@@ -137,10 +137,6 @@ PHP_FUNCTION(imap_renamemailbox);
 PHP_FUNCTION(imap_deletemailbox);
 PHP_FUNCTION(imap_listmailbox);
 PHP_FUNCTION(imap_scanmailbox);
-#ifdef HAVE_IMAP2000
-PHP_FUNCTION(imap_get_quota);
-PHP_FUNCTION(imap_set_quota);
-#endif
 PHP_FUNCTION(imap_subscribe);
 PHP_FUNCTION(imap_unsubscribe);
 PHP_FUNCTION(imap_append);
@@ -181,6 +177,12 @@ PHP_FUNCTION(imap_utf7_encode);
 PHP_FUNCTION(imap_mime_header_decode);
 PHP_FUNCTION(imap_thread);
 
+#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+PHP_FUNCTION(imap_get_quota);
+PHP_FUNCTION(imap_set_quota);
+#endif
+
+
 ZEND_BEGIN_MODULE_GLOBALS(imap)
 	char *imap_user;
 	char *imap_password;
@@ -198,12 +200,11 @@ ZEND_BEGIN_MODULE_GLOBALS(imap)
 	unsigned long status_unseen;
 	unsigned long status_uidnext;
 	unsigned long status_uidvalidity;
-#ifdef HAVE_IMAP2000
+#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 	unsigned long quota_usage;
 	unsigned long quota_limit;
 #endif
 ZEND_END_MODULE_GLOBALS(imap)
-
 
 #ifdef ZTS
 # define IMAPG(v) TSRMG(imap_globals_id, zend_imap_globals *, v)
@@ -211,6 +212,12 @@ ZEND_END_MODULE_GLOBALS(imap)
 # define IMAPG(v) (imap_globals.v)
 #endif
 
-#define phpext_imap_ptr imap_module_ptr
+#else
+
+#define imap_module_ptr NULL
 
 #endif
+
+#define phpext_imap_ptr imap_module_ptr
+
+#endif /* PHP_IMAP_H */

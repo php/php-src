@@ -45,12 +45,11 @@
 #endif
 #include "php_imap.h"
 
-ZEND_DECLARE_MODULE_GLOBALS(imap)
-
 #include <time.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <signal.h>
+
 #ifdef PHP_WIN32
 #include "winsock.h"
 MAILSTREAM DEFAULTPROTO;
@@ -63,7 +62,6 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en);
 static void _php_imap_add_body(zval *arg, BODY *body);
 static void _php_imap_parse_address(ADDRESS *addresslist, char *fulladdress, zval *paddress);
 
-
 /* These function declarations are missing from the IMAP header files... */
 void rfc822_date(char *date);
 char *cpystr(const char *str);
@@ -72,92 +70,100 @@ long utf8_mime2text(SIZEDTEXT *src, SIZEDTEXT *dst);
 unsigned long find_rightmost_bit(unsigned long *valptr);
 void fs_give(void **block);
 void *fs_get(size_t size);
-int imap_mail(char *to, char *subject, char *message, char *headers, char *cc, char *bcc, char *rpath);
 
-
-void mail_close_it(zend_rsrc_list_entry *rsrc TSRMLS_DC);
-#ifdef OP_RELOGIN
-/* AJS: close persistent connection */
-void mail_userlogout_it(zend_rsrc_list_entry *rsrc TSRMLS_DC);
-void mail_nuke_chain(zend_rsrc_list_entry *rsrc TSRMLS_DC);
-#endif
 
 /* {{{ imap_functions[]
  */
 function_entry imap_functions[] = {
-	PHP_FE(imap_open,			NULL)
-	PHP_FE(imap_popen,			NULL)
-	PHP_FE(imap_reopen,			NULL)
-	PHP_FE(imap_num_msg,		NULL)
-	PHP_FE(imap_num_recent,		NULL)
-	PHP_FE(imap_headers,		NULL)
-	PHP_FALIAS(imap_header, imap_headerinfo, NULL)
-	PHP_FE(imap_headerinfo,		NULL)
-	PHP_FE(imap_rfc822_parse_headers,	NULL)
-	PHP_FE(imap_body,			NULL)
-	PHP_FE(imap_fetchstructure,	NULL)
-	PHP_FE(imap_fetchbody,		NULL)
-	PHP_FE(imap_expunge,		NULL)
-	PHP_FE(imap_delete,			NULL)
-	PHP_FE(imap_undelete,		NULL)
-	PHP_FE(imap_check,			NULL)
-	PHP_FE(imap_close,			NULL)
-	PHP_FE(imap_mail_copy,		NULL)
-	PHP_FE(imap_mail_move,		NULL)
-	PHP_FE(imap_createmailbox,	NULL)
-	PHP_FE(imap_renamemailbox,	NULL)
-	PHP_FE(imap_deletemailbox,	NULL)
-#ifdef HAVE_IMAP2000
-	PHP_FE(imap_get_quota,		NULL)
-	PHP_FE(imap_set_quota,		NULL)
+	PHP_FE(imap_open,								NULL)
+	PHP_FE(imap_popen,								NULL)
+	PHP_FE(imap_reopen,								NULL)
+	PHP_FE(imap_close,								NULL)
+	PHP_FE(imap_num_msg,							NULL)
+	PHP_FE(imap_num_recent,							NULL)
+	PHP_FE(imap_headers,							NULL)
+	PHP_FE(imap_headerinfo,							NULL)
+	PHP_FE(imap_rfc822_parse_headers,				NULL)
+	PHP_FE(imap_rfc822_write_address,				NULL)
+	PHP_FE(imap_rfc822_parse_adrlist,				NULL)
+	PHP_FE(imap_body,								NULL)
+	PHP_FE(imap_bodystruct,							NULL)
+	PHP_FE(imap_fetchbody,							NULL)
+	PHP_FE(imap_fetchheader,						NULL)
+	PHP_FE(imap_fetchstructure,						NULL)
+	PHP_FE(imap_expunge,							NULL)
+	PHP_FE(imap_delete,								NULL)
+	PHP_FE(imap_undelete,							NULL)
+	PHP_FE(imap_check,								NULL)
+	PHP_FE(imap_mail_copy,							NULL)
+	PHP_FE(imap_mail_move,							NULL)
+	PHP_FE(imap_mail_compose,						NULL)
+	PHP_FE(imap_createmailbox,						NULL)
+	PHP_FE(imap_renamemailbox,						NULL)
+	PHP_FE(imap_deletemailbox,						NULL)
+	PHP_FE(imap_subscribe,							NULL)
+	PHP_FE(imap_unsubscribe,						NULL)
+	PHP_FE(imap_append,								NULL)
+	PHP_FE(imap_ping,								NULL)
+	PHP_FE(imap_base64,								NULL)
+	PHP_FE(imap_qprint,								NULL)
+	PHP_FE(imap_8bit,								NULL)
+	PHP_FE(imap_binary,								NULL)
+	PHP_FE(imap_utf8,      						 	NULL)
+	PHP_FE(imap_status,								NULL)
+	PHP_FE(imap_mailboxmsginfo,						NULL)
+	PHP_FE(imap_setflag_full,						NULL)
+	PHP_FE(imap_clearflag_full,						NULL)
+	PHP_FE(imap_sort,								NULL)
+	PHP_FE(imap_uid,								NULL)
+	PHP_FE(imap_msgno,								NULL)
+	PHP_FE(imap_list,								NULL)
+	PHP_FE(imap_lsub,								NULL)
+	PHP_FE(imap_fetch_overview,						NULL)
+	PHP_FE(imap_alerts,								NULL)
+	PHP_FE(imap_errors,								NULL)
+	PHP_FE(imap_last_error,							NULL)
+	PHP_FE(imap_search,								NULL)
+	PHP_FE(imap_utf7_decode,						NULL)
+	PHP_FE(imap_utf7_encode,						NULL)
+	PHP_FE(imap_mime_header_decode,					NULL)
+	PHP_FE(imap_thread,								NULL)
+
+#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+	PHP_FE(imap_get_quota,							NULL)
+	PHP_FE(imap_set_quota,							NULL)
 #endif
-	PHP_FALIAS(imap_listmailbox, imap_list,	NULL)
-	PHP_FALIAS(imap_getmailboxes, imap_list_full,	NULL)
-	PHP_FALIAS(imap_scanmailbox, imap_listscan,	NULL)
-	PHP_FALIAS(imap_listsubscribed, imap_lsub,	NULL)
-	PHP_FALIAS(imap_getsubscribed, imap_lsub_full,	NULL)
-	PHP_FE(imap_subscribe,		NULL)
-	PHP_FE(imap_unsubscribe,	NULL)
-	PHP_FE(imap_append,			NULL)
-	PHP_FE(imap_ping,			NULL)
-	PHP_FE(imap_base64,			NULL)
-	PHP_FE(imap_qprint,			NULL)
-	PHP_FE(imap_8bit,			NULL)
-	PHP_FE(imap_binary,			NULL)
-	PHP_FE(imap_mailboxmsginfo,	NULL)
-	PHP_FE(imap_rfc822_write_address,		NULL)
-	PHP_FE(imap_rfc822_parse_adrlist,		NULL)
-	PHP_FE(imap_setflag_full,	NULL)
-	PHP_FE(imap_clearflag_full,	NULL)
-	PHP_FE(imap_sort,			NULL)
-	PHP_FE(imap_fetchheader,	NULL)
-	PHP_FALIAS(imap_fetchtext,	imap_body,		NULL)
-	PHP_FE(imap_uid,			NULL)
-	PHP_FE(imap_msgno,			NULL)
-	PHP_FE(imap_list,			NULL)
-	PHP_FALIAS(imap_scan,		imap_listscan,			NULL)
-	PHP_FE(imap_lsub,			NULL)
-	PHP_FALIAS(imap_create,		imap_createmailbox,			NULL)
-	PHP_FALIAS(imap_rename,		imap_renamemailbox,			NULL)
-	PHP_FE(imap_status,			NULL)
-	PHP_FE(imap_bodystruct,		NULL)
-	PHP_FE(imap_fetch_overview,	NULL)
-	PHP_FE(imap_mail_compose,	NULL)
-	PHP_FE(imap_alerts,			NULL)
-	PHP_FE(imap_errors,			NULL)
-	PHP_FE(imap_last_error,		NULL)
+
 #ifndef PHP_WIN32
-	PHP_FE(imap_mail,           NULL)
+	PHP_FE(imap_mail,								NULL)
 #else
-	PHP_FALIAS(imap_mail, warn_not_available, NULL)
+	PHP_FALIAS(imap_mail, warn_not_available,		NULL)
 #endif
-	PHP_FE(imap_search,			NULL)
-	PHP_FE(imap_utf7_decode,	NULL)
-	PHP_FE(imap_utf7_encode,	NULL)
-	PHP_FE(imap_utf8,       	NULL)
-	PHP_FE(imap_mime_header_decode,	NULL)
-	PHP_FE(imap_thread,		NULL)
+
+	PHP_FALIAS(imap_header, 		imap_headerinfo,	NULL)
+	PHP_FALIAS(imap_listmailbox, 	imap_list,			NULL)
+	PHP_FALIAS(imap_getmailboxes, 	imap_list_full,		NULL)
+	PHP_FALIAS(imap_scanmailbox, 	imap_listscan,		NULL)
+	PHP_FALIAS(imap_listsubscribed, imap_lsub,			NULL)
+	PHP_FALIAS(imap_getsubscribed, 	imap_lsub_full,		NULL)
+	PHP_FALIAS(imap_fetchtext,		imap_body,			NULL)
+	PHP_FALIAS(imap_scan,			imap_listscan,		NULL)
+	PHP_FALIAS(imap_create,			imap_createmailbox,	NULL)
+	PHP_FALIAS(imap_rename,			imap_renamemailbox,	NULL)
 	{NULL, NULL, NULL}
+};
+/* }}} */
+
+/* {{{ imap_module_entry
+ */
+zend_module_entry imap_module_entry = {
+	"imap",
+	imap_functions,
+	PHP_MINIT(imap),
+	NULL, PHP_RINIT(imap),
+	PHP_RSHUTDOWN(imap),
+	PHP_MINFO(imap),
+	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
@@ -167,17 +173,13 @@ function_entry imap_functions[] = {
 #define IS_STREAM(ind_type)     ((ind_type)==le_imap)
 #endif
 
-
-zend_module_entry imap_module_entry = {
-    "imap", imap_functions, PHP_MINIT(imap), NULL, PHP_RINIT(imap), PHP_RSHUTDOWN(imap), PHP_MINFO(imap), STANDARD_MODULE_PROPERTIES
-};
-
+ZEND_DECLARE_MODULE_GLOBALS(imap)
 
 #ifdef COMPILE_DL_IMAP
 ZEND_GET_MODULE(imap)
 #endif
 
-
+/* True globals, no need for thread safety */
 static int le_imap;
 #ifdef OP_RELOGIN
 /* AJS: persistent connection type, chain pointer type */
@@ -185,8 +187,9 @@ static int le_pimap;
 static int le_pimapchain;
 #endif
 
-
-void mail_close_it(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+/* {{{ mail_close_it
+ */
+static void mail_close_it(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	pils *imap_le_struct = (pils *)rsrc->ptr;
 
@@ -203,10 +206,14 @@ void mail_close_it(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	efree(imap_le_struct);
 }
+/* }}} */
+
 
 #ifdef OP_RELOGIN
+/* {{{ mail_userlogout_it
+ */
 /* AJS: stream close functions for persistent connections */
-void mail_userlogout_it(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void mail_userlogout_it(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	pils *imap_le_struct = (pils *)rsrc->ptr;
 
@@ -217,8 +224,11 @@ void mail_userlogout_it(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	imap_le_struct->busy = 0;
 	mail_close_full(imap_le_struct->imap_stream, imap_le_struct->flags | CL_HALF);
 }
+/* }}} */
 
-void mail_nuke_chain(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+/* {{{ mail_nuke_chain
+ */
+static void mail_nuke_chain(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	pils **headp = (pils **)rsrc->ptr;
 	pils		*node, *next;
@@ -231,8 +241,12 @@ void mail_nuke_chain(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	free(headp);
 }
+/* }}} */
 #endif
 
+
+/* {{{ add_assoc_object
+ */
 static int add_assoc_object(zval *arg, char *key, zval *tmp)
 {
 	HashTable *symtable;
@@ -244,19 +258,39 @@ static int add_assoc_object(zval *arg, char *key, zval *tmp)
 	}
 	return zend_hash_update(symtable, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
 }
+/* }}} */
 
-/* Mail instantiate FOBJECTLIST
+/* {{{ add_next_index_object
+ */
+static inline int add_next_index_object(zval *arg, zval *tmp)
+{
+	HashTable *symtable;
+	
+	if (arg->type == IS_OBJECT) {
+		symtable = arg->value.obj.properties;
+	} else {
+		symtable = arg->value.ht;
+	}
+
+	return zend_hash_next_index_insert(symtable, (void *) &tmp, sizeof(zval *), NULL); 
+}
+/* }}} */
+
+/* {{{ mail_newfolderobjectlist
+ *
+ * Mail instantiate FOBJECTLIST
  * Returns: new FOBJECTLIST list
  * Author: CJH
  */
 FOBJECTLIST *mail_newfolderobjectlist(void)
 {
-  return (FOBJECTLIST *) memset(fs_get(sizeof(FOBJECTLIST)),0,
-				sizeof(FOBJECTLIST));
+  return (FOBJECTLIST *) memset(fs_get(sizeof(FOBJECTLIST)), 0, sizeof(FOBJECTLIST));
 }
+/* }}} */
 
-
-/* Mail garbage collect FOBJECTLIST
+/* {{{ mail_free_foblist
+ *
+ * Mail garbage collect FOBJECTLIST
  * Accepts: pointer to FOBJECTLIST pointer
  * Author: CJH
  */
@@ -270,9 +304,11 @@ void mail_free_foblist(FOBJECTLIST **foblist)
 		fs_give ((void **) foblist);	/* return string to free storage */
 	}
 }
+/* }}} */
 
-
-/* Mail instantiate ERRORLIST
+/* {{{ mail_newerrorlist
+ *
+ * Mail instantiate ERRORLIST
  * Returns: new ERRORLIST list
  * Author: CJH
  */
@@ -280,8 +316,11 @@ ERRORLIST *mail_newerrorlist(void)
 {
 	return (ERRORLIST *) memset(fs_get(sizeof(ERRORLIST)), 0, sizeof(ERRORLIST));
 }
+/* }}} */
 
-/* Mail garbage collect FOBJECTLIST
+/* {{{ mail_free_errorlist
+ *
+ * Mail garbage collect FOBJECTLIST
  * Accepts: pointer to FOBJECTLIST pointer
  * Author: CJH
  */
@@ -295,60 +334,11 @@ void mail_free_errorlist(ERRORLIST **errlist)
 		fs_give((void **) errlist);	/* return string to free storage */
 	}
 }
+/* }}} */
 
-
-/* Author: CJH */
-PHP_RINIT_FUNCTION(imap)
-{
-	IMAPG(imap_errorstack) = NIL;
-	IMAPG(imap_alertstack) = NIL;
-	return SUCCESS;
-}
-
-/* Author: CJH */
-PHP_RSHUTDOWN_FUNCTION(imap)
-{
-	ERRORLIST *ecur = NIL;
-	STRINGLIST *acur = NIL;
-
-	if (IMAPG(imap_errorstack) != NIL) {
-		/* output any remaining errors at their original error level */
-		ecur = IMAPG(imap_errorstack);
-		while (ecur != NIL) {
-			php_error(E_NOTICE, "%s (errflg=%d)", ecur->LTEXT, ecur->errflg);
-			ecur = ecur->next;
-		}
-		mail_free_errorlist(&IMAPG(imap_errorstack));
-	}
-
-	if (IMAPG(imap_alertstack) != NIL) {
-		/* output any remaining alerts at E_NOTICE level */
-		acur = IMAPG(imap_alertstack);
-		while (acur != NIL) {
-			php_error(E_NOTICE, acur->LTEXT);
-			acur = acur->next;
-		}
-		mail_free_stringlist(&IMAPG(imap_alertstack));
-	}
-	return SUCCESS;
-}
-
-
-static inline int add_next_index_object(zval *arg, zval *tmp)
-{
-	HashTable *symtable;
-	
-	if (arg->type == IS_OBJECT) {
-		symtable = arg->value.obj.properties;
-	} else {
-		symtable = arg->value.ht;
-	}
-
-	return zend_hash_next_index_insert(symtable, (void *) &tmp, sizeof(zval *), NULL); 
-}
-
-
-/* Mail instantiate MESSAGELIST
+/* {{{ mail_newmessagelist
+ * 
+ * Mail instantiate MESSAGELIST
  * Returns: new MESSAGELIST list
  * Author: CJH
  */
@@ -357,9 +347,27 @@ MESSAGELIST *mail_newmessagelist(void)
 	return (MESSAGELIST *) memset(fs_get(sizeof(MESSAGELIST)),0,
 								  sizeof(MESSAGELIST));
 }
+/* }}} */
 
-#ifdef HAVE_IMAP2000
-/* Mail GET_QUOTA callback
+/* {{{ mail_free_messagelist
+ *
+ * Mail garbage collect MESSAGELIST
+ * Accepts: pointer to MESSAGELIST pointer
+ * Author: CJH
+ */
+void mail_free_messagelist(MESSAGELIST **msglist)
+{
+	if (*msglist) {		/* only free if exists */
+		mail_free_messagelist (&(*msglist)->next);
+		fs_give ((void **) msglist);	/* return string to free storage */
+	}
+}
+/* }}} */
+
+#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001) 
+/* {{{ mail_getquota 
+ *
+ * Mail GET_QUOTA callback
  * Called via the mail_parameter function in c-client:src/c-client/mail.c
  * Author DRK
  */
@@ -374,43 +382,11 @@ void mail_getquota(MAILSTREAM *stream, char *qroot,QUOTALIST *qlist)
 		IMAPG(quota_limit) = qlist->limit;
 	}
 }
-#endif
-
-/* Mail garbage collect MESSAGELIST
- * Accepts: pointer to MESSAGELIST pointer
- * Author: CJH
- */
-void mail_free_messagelist(MESSAGELIST **msglist)
-{
-	if (*msglist) {		/* only free if exists */
-		mail_free_messagelist (&(*msglist)->next);
-		fs_give ((void **) msglist);	/* return string to free storage */
-	}
-}
-
-/* {{{ PHP_MINFO_FUNCTION
- */
-PHP_MINFO_FUNCTION(imap)
-{
-	php_info_print_table_start();
-	php_info_print_table_header(2, "IMAP Support", "enabled" );
-#if HAVE_IMAP2000
-	php_info_print_table_row(2, "IMAP c-Client Version", "2000");               
-#elif defined(IMAP41)
-	php_info_print_table_row(2, "IMAP c-Client Version", "4.1");               
-#else
-	php_info_print_table_row(2, "IMAP c-Client Version", "4.0"); 
-#endif
-#if HAVE_IMAP_SSL
-	php_info_print_table_row(2, "SSL Support", "enabled"); 
-#endif
-#if HAVE_IMAP_KRB
-	php_info_print_table_row(2, "Kerberos Support", "enabled"); 
-#endif
-	php_info_print_table_end();
-}
 /* }}} */
+#endif
 
+/* {{{ php_imap_init_globals
+ */
 static void php_imap_init_globals(zend_imap_globals *imap_globals)
 {
 	imap_globals->imap_user=NIL;
@@ -424,6 +400,7 @@ static void php_imap_init_globals(zend_imap_globals *imap_globals)
 	imap_globals->imap_sfolder_objects=NIL;
 	imap_globals->folderlist_style = FLIST_ARRAY;
 }
+/* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION
  */
@@ -455,7 +432,6 @@ PHP_MINIT_FUNCTION(imap)
 	mail_link(&dummydriver);	/* link in the dummy driver */
 
 	/* lets allow NIL */
-
 	REGISTER_MAIN_LONG_CONSTANT("NIL", NIL, CONST_PERSISTENT | CONST_CS);
 
 
@@ -623,9 +599,75 @@ PHP_MINIT_FUNCTION(imap)
 }
 /* }}} */
 
+/* {{{ PHP_RINIT_FUNCTION
+ */
+PHP_RINIT_FUNCTION(imap)
+{
+	IMAPG(imap_errorstack) = NIL;
+	IMAPG(imap_alertstack) = NIL;
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RSHUTDOWN_FUNCTION
+ */
+PHP_RSHUTDOWN_FUNCTION(imap)
+{
+	ERRORLIST *ecur = NIL;
+	STRINGLIST *acur = NIL;
+
+	if (IMAPG(imap_errorstack) != NIL) {
+		/* output any remaining errors at their original error level */
+		ecur = IMAPG(imap_errorstack);
+		while (ecur != NIL) {
+			php_error(E_NOTICE, "%s (errflg=%d)", ecur->LTEXT, ecur->errflg);
+			ecur = ecur->next;
+		}
+		mail_free_errorlist(&IMAPG(imap_errorstack));
+	}
+
+	if (IMAPG(imap_alertstack) != NIL) {
+		/* output any remaining alerts at E_NOTICE level */
+		acur = IMAPG(imap_alertstack);
+		while (acur != NIL) {
+			php_error(E_NOTICE, acur->LTEXT);
+			acur = acur->next;
+		}
+		mail_free_stringlist(&IMAPG(imap_alertstack));
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+
+/* {{{ PHP_MINFO_FUNCTION
+ */
+PHP_MINFO_FUNCTION(imap)
+{
+	php_info_print_table_start();
+	php_info_print_table_header(2, "IMAP Support", "enabled" );
+#if HAVE_IMAP2001
+	php_info_print_table_row(2, "IMAP c-Client Version", "2001");               
+#elif HAVE_IMAP2000
+	php_info_print_table_row(2, "IMAP c-Client Version", "2000");               
+#elif defined(IMAP41)
+	php_info_print_table_row(2, "IMAP c-Client Version", "4.1");               
+#else
+	php_info_print_table_row(2, "IMAP c-Client Version", "4.0"); 
+#endif
+#if HAVE_IMAP_SSL
+	php_info_print_table_row(2, "SSL Support", "enabled"); 
+#endif
+#if HAVE_IMAP_KRB
+	php_info_print_table_row(2, "Kerberos Support", "enabled"); 
+#endif
+	php_info_print_table_end();
+}
+/* }}} */
+
 /* {{{ imap_do_open
  */
-void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
+static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	zval **mailbox, **user, **passwd, **options;
 	MAILSTREAM *imap_stream;
@@ -831,7 +873,7 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
    Open an IMAP stream to a mailbox */
 PHP_FUNCTION(imap_open)
 {
-	imap_do_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_imap_do_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -840,7 +882,7 @@ PHP_FUNCTION(imap_open)
 PHP_FUNCTION(imap_popen)
 {
 #ifdef OP_RELOGIN
-	imap_do_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_imap_do_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 	RETURN_TRUE;
 #else
 	php_error(E_WARNING, "Persistent IMAP connections are not yet supported.\n");
@@ -864,8 +906,8 @@ PHP_FUNCTION(imap_reopen)
 	int myargc=ZEND_NUM_ARGS();
 
 	if (myargc<2 || myargc>3 || zend_get_parameters_ex(myargc, &streamind, &mailbox, &options) == FAILURE) {
-        ZEND_WRONG_PARAM_COUNT();
-    }
+		ZEND_WRONG_PARAM_COUNT();
+	}
 
 	convert_to_long_ex(streamind);
 	ind = Z_LVAL_PP(streamind);
@@ -1005,7 +1047,7 @@ PHP_FUNCTION(imap_num_recent)
 }
 /* }}} */
 
-#ifdef HAVE_IMAP2000
+#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 /* {{{ proto array imap_get_quota(int stream_id, string qroot)
 	Returns the quota set to the mailbox account qroot */
 PHP_FUNCTION(imap_get_quota)
@@ -1122,13 +1164,15 @@ PHP_FUNCTION(imap_close)
 	if (myargcount < 1 || myargcount > 2 || zend_get_parameters_ex(myargcount, &streamind, &options) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
+
 	convert_to_long_ex(streamind);
 	ind = Z_LVAL_PP(streamind);
 	imap_le_struct = (pils *) zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
-    }
+	}
+
 	if (myargcount==2) {
 		convert_to_long_ex(options);
 		flags = Z_LVAL_PP(options);
@@ -1421,8 +1465,7 @@ PHP_FUNCTION(imap_list)
 	/* set flag for normal, old mailbox list */
 	IMAPG(folderlist_style) = FLIST_ARRAY;
 	
-	if (ZEND_NUM_ARGS()!=3 
-		|| zend_get_parameters_ex(3, &streamind, &ref, &pat) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &streamind, &ref, &pat) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
@@ -1443,11 +1486,11 @@ PHP_FUNCTION(imap_list)
 		RETURN_FALSE;
 	}
 	array_init(return_value);
-    cur=IMAPG(imap_folders);
-    while (cur != NIL) {
+	cur=IMAPG(imap_folders);
+	while (cur != NIL) {
 		add_next_index_string(return_value, cur->LTEXT, 1);
-        cur=cur->next;
-    }
+		cur=cur->next;
+	}
 	mail_free_stringlist (&IMAPG(imap_folders));
 }
 
@@ -1579,7 +1622,8 @@ PHP_FUNCTION(imap_check)
 
 	if (mail_ping (imap_le_struct->imap_stream) == NIL) {
 		RETURN_FALSE;
-    }
+	}
+
 	if (imap_le_struct->imap_stream && imap_le_struct->imap_stream->mailbox) {
 		rfc822_date(date);
 		object_init(return_value);
@@ -1711,7 +1755,7 @@ PHP_FUNCTION(imap_headerinfo)
 		RETURN_FALSE;
 	}
 	
-    mystring = mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, &length, NIL);
+	mystring = mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, &length, NIL);
 	if (myargc == 5) {
 		rfc822_parse_msg(&en, NULL, mystring, length, NULL, Z_STRVAL_PP(defaulthost), NIL);
 	} else {
@@ -1719,11 +1763,11 @@ PHP_FUNCTION(imap_headerinfo)
 	}
 	
 	/* call a function to parse all the text, so that we can use the
-       same function to parse text from other sources */
+	   same function to parse text from other sources */
 	_php_make_header_object(return_value, en);
 	
 	/* now run through properties that are only going to be returned
-       from a server, not text headers */
+	   from a server, not text headers */
 	add_property_string(return_value, "Recent", cache->recent ? (cache->seen ? "R": "N") : " ", 1);
 	add_property_string(return_value, "Unseen", (cache->recent | cache->seen) ? " " : "U", 1);
 	add_property_string(return_value, "Flagged", cache->flagged ? "F" : " ", 1);
@@ -1780,7 +1824,7 @@ PHP_FUNCTION(imap_rfc822_parse_headers)
 	}
 	
 	/* call a function to parse all the text, so that we can use the
-       same function no matter where the headers are from */
+	   same function no matter where the headers are from */
 	_php_make_header_object(return_value, en);
 	mail_free_envelope(&en);
 }
@@ -2192,6 +2236,7 @@ PHP_FUNCTION(imap_rfc822_write_address)
 	ADDRESS *addr;
 	char string[MAILTMPLEN];
 	int argc;
+
 	argc=ZEND_NUM_ARGS();
 
 	if (argc != 3 || zend_get_parameters_ex(argc, &mailbox, &host, &personal) == FAILURE) {
@@ -2336,15 +2381,12 @@ PHP_FUNCTION(imap_utf7_decode)
 		if (state == ST_NORMAL) {
 			/* process printable character */
 			if (SPECIAL(*inp)) {
-				php_error(E_WARNING, "imap_utf7_decode: "
-					"Invalid modified UTF-7 character: "
-					"`%c'", *inp);
+				php_error(E_WARNING, "imap_utf7_decode: Invalid modified UTF-7 character: `%c'", *inp);
 				RETURN_FALSE;
 			} else if (*inp != '&') {
 				outlen++;
 			} else if (inp + 1 == endp) {
-				php_error(E_WARNING, "imap_utf7_decode: "
-					"Unexpected end of string");
+				php_error(E_WARNING, "imap_utf7_decode: Unexpected end of string");
 				RETURN_FALSE;
 			} else if (inp[1] != '-') {
 				state = ST_DECODE0;
@@ -2355,16 +2397,12 @@ PHP_FUNCTION(imap_utf7_decode)
 		} else if (*inp == '-') {
 			/* return to NORMAL mode */
 			if (state == ST_DECODE1) {
-				php_error(E_WARNING, "imap_utf7_decode: "
-					"Stray modified base64 character: "
-					"`%c'", *--inp);
+				php_error(E_WARNING, "imap_utf7_decode: Stray modified base64 character: `%c'", *--inp);
 				RETURN_FALSE;
 			}
 			state = ST_NORMAL;
 		} else if (!B64CHAR(*inp)) {
-			php_error(E_WARNING, "imap_utf7_decode: "
-				"Invalid modified base64 character: "
-				"`%c'", *inp);
+			php_error(E_WARNING, "imap_utf7_decode: Invalid modified base64 character: `%c'", *inp);
 			RETURN_FALSE;
 		} else {
 			switch (state) {
@@ -2385,15 +2423,13 @@ PHP_FUNCTION(imap_utf7_decode)
 
 	/* enforce end state */
 	if (state != ST_NORMAL) {
-		php_error(E_WARNING, "imap_utf7_decode: "
-			"Unexpected end of string");
+		php_error(E_WARNING, "imap_utf7_decode: Unexpected end of string");
 		RETURN_FALSE;
 	}
 
 	/* allocate output buffer */
 	if ((out = emalloc(outlen + 1)) == NULL) {
-		php_error(E_WARNING, "imap_utf7_decode: "
-			"Unable to allocate result string");
+		php_error(E_WARNING, "imap_utf7_decode: Unable to allocate result string");
 		RETURN_FALSE;
 	}
 
@@ -2445,9 +2481,7 @@ PHP_FUNCTION(imap_utf7_decode)
 #if PHP_DEBUG
 	/* warn if we computed outlen incorrectly */
 	if (outp - out != outlen) {
-		php_error(E_WARNING,
-			"imap_utf7_decode: outp - out [%d] != outlen [%d]",
-			outp - out, outlen);
+		php_error(E_WARNING, "imap_utf7_decode: outp - out [%d] != outlen [%d]", outp - out, outlen);
 	}
 #endif
 
@@ -2514,8 +2548,7 @@ PHP_FUNCTION(imap_utf7_encode)
 
 	/* allocate output buffer */
 	if ((out = emalloc(outlen + 1)) == NULL) {
-		php_error(E_WARNING, "imap_utf7_encode: "
-			"Unable to allocate result string");
+		php_error(E_WARNING, "imap_utf7_encode: Unable to allocate result string");
 		RETURN_FALSE;
 	}
 
@@ -2567,9 +2600,7 @@ PHP_FUNCTION(imap_utf7_encode)
 #if PHP_DEBUG
 	/* warn if we computed outlen incorrectly */
 	if (outp - out != outlen) {
-		php_error(E_WARNING,
-			"imap_utf7_encode: outp - out [%d] != outlen [%d]",
-			outp - out, outlen);
+		php_error(E_WARNING, "imap_utf7_encode: outp - out [%d] != outlen [%d]", outp - out, outlen);
 	}
 #endif
 
@@ -2591,7 +2622,7 @@ PHP_FUNCTION(imap_setflag_full)
 	pils *imap_le_struct;
 	int myargc=ZEND_NUM_ARGS();
 
-	if (myargc < 3 || myargc > 4 || zend_get_parameters_ex(myargc, &streamind, &sequence, &flag, &flags) ==FAILURE) {
+	if (myargc < 3 || myargc > 4 || zend_get_parameters_ex(myargc, &streamind, &sequence, &flag, &flags) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	convert_to_long_ex(streamind);
@@ -2654,7 +2685,7 @@ PHP_FUNCTION(imap_sort)
 	pils *imap_le_struct;
 	int myargc = ZEND_NUM_ARGS();
 	
-	if (myargc < 3 || myargc > 5 || zend_get_parameters_ex(myargc, &streamind, &pgm, &rev, &flags, &criteria) ==FAILURE) {
+	if (myargc < 3 || myargc > 5 || zend_get_parameters_ex(myargc, &streamind, &pgm, &rev, &flags, &criteria) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	convert_to_long_ex(streamind);
@@ -2735,12 +2766,13 @@ PHP_FUNCTION(imap_fetchheader)
 	} else {
 		msgindex = Z_LVAL_PP(msgno);
 	}
+
 	if ((msgindex < 1) || ((unsigned) msgindex > imap_le_struct->imap_stream->nmsgs)) {
 		php_error(E_WARNING, "Bad message number");
 		RETURN_FALSE;
 	}
 
-    RETVAL_STRING(mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, NIL, (myargc == 3 ? Z_LVAL_PP(flags) : NIL)), 1);
+	RETVAL_STRING(mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, NIL, (myargc == 3 ? Z_LVAL_PP(flags) : NIL)), 1);
 }
 /* }}} */
 
@@ -2760,15 +2792,13 @@ PHP_FUNCTION(imap_uid)
  	convert_to_long_ex(msgno);
  
  	ind = Z_LVAL_PP(streamind);
- 
 	imap_le_struct = (pils *) zend_list_find(ind, &ind_type);
- 
 	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
- 
-    	msgindex = Z_LVAL_PP(msgno);
+
+	msgindex = Z_LVAL_PP(msgno);
 	if ((msgindex < 1) || ((unsigned) msgindex > imap_le_struct->imap_stream->nmsgs)) {
 		php_error(E_WARNING, "Bad message number");
 		RETURN_FALSE;
@@ -2794,9 +2824,7 @@ PHP_FUNCTION(imap_msgno)
  	convert_to_long_ex(msgno);
  
  	ind = Z_LVAL_PP(streamind);
- 
 	imap_le_struct = (pils *) zend_list_find(ind, &ind_type);
- 
 	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -2822,10 +2850,9 @@ PHP_FUNCTION(imap_status)
  	convert_to_long_ex(streamind);
  	convert_to_string_ex(mbx);
 	convert_to_long_ex(flags);
+
  	ind = Z_LVAL_PP(streamind);
- 
 	imap_le_struct = (pils *) zend_list_find(ind, &ind_type);
- 
 	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -2877,10 +2904,9 @@ PHP_FUNCTION(imap_bodystruct)
  	convert_to_long_ex(streamind);
  	convert_to_long_ex(msg);
 	convert_to_string_ex(section);
+
  	ind = Z_LVAL_PP(streamind);
- 
 	imap_le_struct = (pils *) zend_list_find(ind, &ind_type);
-	
 	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -3013,11 +3039,11 @@ PHP_FUNCTION(imap_fetch_overview)
 	
  	ind = Z_LVAL_PP(streamind);
  	imap_le_struct = (pils *) zend_list_find(ind, &ind_type);
-	
 	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
+
 	array_init(return_value);
 	
 	status = (flags & FT_UID)
@@ -3492,6 +3518,7 @@ PHP_FUNCTION(imap_mail)
 	if (argc < 3 || argc > 7 || zend_get_parameters_array(ht, argc, argv) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
+
 	/* To: */
 	convert_to_string(argv[0]);
 	if (argv[0]->value.str.val) {
@@ -3561,7 +3588,7 @@ PHP_FUNCTION(imap_search)
 	int ind, ind_type, args;
 	pils *imap_le_struct;
 	long flags;
-    char *search_criteria;
+	char *search_criteria;
 	MESSAGELIST *cur;
     
 	args = ZEND_NUM_ARGS();
@@ -3571,7 +3598,7 @@ PHP_FUNCTION(imap_search)
 	
 	convert_to_long_ex(streamind);
 	convert_to_string_ex(criteria);
-    search_criteria = estrndup(Z_STRVAL_PP(criteria), Z_STRLEN_PP(criteria));
+	search_criteria = estrndup(Z_STRVAL_PP(criteria), Z_STRLEN_PP(criteria));
 	
 	if (args == 2) {
 		flags = SE_FREE;
@@ -3634,7 +3661,7 @@ PHP_FUNCTION(imap_alerts)
 /* }}} */
 
 /* {{{ proto array imap_errors(void)
-   Returns an array of all IMAP errors generated since the last  page load, or since the last imap_errors() call, whichever came last. The error stack is cleared after imap_errors() is called. */
+   Returns an array of all IMAP errors generated since the last page load, or since the last imap_errors() call, whichever came last. The error stack is cleared after imap_errors() is called. */
 /* Author: CJH */
 PHP_FUNCTION(imap_errors)
 {
@@ -3790,7 +3817,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 /* Support Functions */
 /* {{{ _php_imap_parse_address
  */
-void _php_imap_parse_address (ADDRESS *addresslist, char *fulladdress, zval *paddress)
+static void _php_imap_parse_address (ADDRESS *addresslist, char *fulladdress, zval *paddress)
 {
 	ADDRESS *addresstmp, *addresstmp2;
 	char tempaddress[MAILTMPLEN];
@@ -3832,23 +3859,23 @@ void _php_imap_parse_address (ADDRESS *addresslist, char *fulladdress, zval *pad
 
 /* {{{ _php_make_header_object
  */
-void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
+static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 {
 	zval *paddress;
 	char fulladdress[MAILTMPLEN];
 	
 	object_init(myzvalue);
 	
-    if (en->remail) add_property_string(myzvalue, "remail", en->remail, 1);
-    if (en->date) add_property_string(myzvalue, "date", en->date, 1);
-    if (en->date) add_property_string(myzvalue, "Date", en->date, 1);
-    if (en->subject) add_property_string(myzvalue, "subject", en->subject, 1);
-    if (en->subject) add_property_string(myzvalue, "Subject", en->subject, 1);
-    if (en->in_reply_to) add_property_string(myzvalue, "in_reply_to", en->in_reply_to, 1);
-    if (en->message_id) add_property_string(myzvalue, "message_id", en->message_id, 1);
-    if (en->newsgroups) add_property_string(myzvalue, "newsgroups", en->newsgroups, 1);
-    if (en->followup_to) add_property_string(myzvalue, "followup_to", en->followup_to, 1);
-    if (en->references) add_property_string(myzvalue, "references", en->references, 1);
+	if (en->remail) add_property_string(myzvalue, "remail", en->remail, 1);
+	if (en->date) add_property_string(myzvalue, "date", en->date, 1);
+	if (en->date) add_property_string(myzvalue, "Date", en->date, 1);
+	if (en->subject) add_property_string(myzvalue, "subject", en->subject, 1);
+	if (en->subject) add_property_string(myzvalue, "Subject", en->subject, 1);
+	if (en->in_reply_to) add_property_string(myzvalue, "in_reply_to", en->in_reply_to, 1);
+	if (en->message_id) add_property_string(myzvalue, "message_id", en->message_id, 1);
+	if (en->newsgroups) add_property_string(myzvalue, "newsgroups", en->newsgroups, 1);
+	if (en->followup_to) add_property_string(myzvalue, "followup_to", en->followup_to, 1);
+	if (en->references) add_property_string(myzvalue, "references", en->references, 1);
 	
 	if (en->to) {
 		MAKE_STD_ZVAL(paddress);
@@ -4027,7 +4054,111 @@ void _php_imap_add_body(zval *arg, BODY *body)
 }
 /* }}} */
 
-/* Interfaces to C-client */
+
+/* imap_thread, stealing this from header cclient -rjs3 */
+/* {{{ build_thread_tree_helper
+ */
+static void build_thread_tree_helper(THREADNODE *cur, zval *tree, long *numNodes, char *buf)
+{
+	unsigned long thisNode = *numNodes;
+
+	/* define "#.num" */
+	snprintf(buf,25,"%ld.num", thisNode);
+
+	add_assoc_long(tree,buf,cur->num);
+
+	snprintf(buf,25,"%ld.next", thisNode);
+	if(cur->next) {
+	    (*numNodes)++;
+	    add_assoc_long(tree,buf,*numNodes);
+	    build_thread_tree_helper(cur->next, tree, numNodes, buf);
+	} else { /* "null pointer" */
+	    add_assoc_long(tree,buf,0);
+	}
+
+	snprintf(buf,25,"%ld.branch", thisNode);
+	if(cur->branch) {
+	    (*numNodes)++;
+	    add_assoc_long(tree,buf,*numNodes);
+	    build_thread_tree_helper(cur->branch, tree, numNodes, buf);	    
+	} else { /* "null pointer" */
+	    add_assoc_long(tree,buf,0);
+	}
+}
+/* }}} */
+
+/* {{{ build_thread_tree 
+ */
+static int build_thread_tree(THREADNODE *top, zval **tree)
+{
+	long numNodes = 0;
+	char buf[25];
+
+	if(array_init(*tree) != SUCCESS) return FAILURE;
+	
+	build_thread_tree_helper(top, *tree, &numNodes, buf);
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ proto int imap_thread(int stream_id)
+   Return threaded by REFERENCES tree */
+PHP_FUNCTION (imap_thread)
+{
+	pval *streamind, *search_flags;
+	int ind, ind_type, args;
+	pils *imap_le_struct;
+	long flags;
+	char criteria[] = "ALL";
+	THREADNODE *top;
+
+	if(!return_value_used) {
+		php_error(E_WARNING, "imap_thread does not make use of return value");
+		RETURN_FALSE;
+	}
+
+	args = ARG_COUNT(ht);
+	if ( args < 1 || args > 2 || getParameters(ht, args, &streamind, &search_flags) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	
+	convert_to_long(streamind);
+	
+	if (args == 1) {
+		flags = SE_FREE;
+	} else {
+		convert_to_long(search_flags);
+		flags = search_flags->value.lval;
+	}
+	
+	ind = streamind->value.lval;
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
+		php_error(E_WARNING, "Unable to find stream pointer");
+		RETURN_FALSE;
+	}
+	
+	top = mail_thread(imap_le_struct->imap_stream, "REFERENCES", NIL, mail_criteria(criteria), flags);
+
+	if(top == NIL) {
+		php_error(E_WARNING, "imap_thread returned an empty tree");
+		RETURN_FALSE;
+	}
+
+	/* Populate our return value data structure here. */
+	if(build_thread_tree(top, &return_value) == FAILURE){
+	    mail_free_threadnode(&top);
+	    RETURN_FALSE;
+	}
+	
+	mail_free_threadnode(&top);
+}
+/* }}} */
+
+
+/* {{{ Interfaces to C-client 
+ */
 void mm_searched(MAILSTREAM *stream,unsigned long number)
 {
 	MESSAGELIST *cur = NIL;
@@ -4262,104 +4393,6 @@ long mm_diskerror(MAILSTREAM *stream, long errcode, long serious)
 
 void mm_fatal(char *str)
 {
-}
-
-/* Added imap_thread functionality */
-/* stealing this from header cclient -rjs3 */
-THREADNODE *imap_thread (MAILSTREAM *stream,char *type,char *charset,
-   SEARCHPGM *spg,long flags);
-
-void build_thread_tree_helper(THREADNODE *cur, zval *tree, long *numNodes, char *buf) {
-	unsigned long thisNode = *numNodes;
-
-	/* define "#.num" */
-	snprintf(buf,25,"%ld.num", thisNode);
-
-	add_assoc_long(tree,buf,cur->num);
-
-	snprintf(buf,25,"%ld.next", thisNode);
-	if(cur->next) {
-	    (*numNodes)++;
-	    add_assoc_long(tree,buf,*numNodes);
-	    build_thread_tree_helper(cur->next, tree, numNodes, buf);
-	} else { /* "null pointer" */
-	    add_assoc_long(tree,buf,0);
-	}
-
-	snprintf(buf,25,"%ld.branch", thisNode);
-	if(cur->branch) {
-	    (*numNodes)++;
-	    add_assoc_long(tree,buf,*numNodes);
-	    build_thread_tree_helper(cur->branch, tree, numNodes, buf);	    
-	} else { /* "null pointer" */
-	    add_assoc_long(tree,buf,0);
-	}
-}
-
-int build_thread_tree(THREADNODE *top, zval **tree) {
-	long numNodes = 0;
-	char buf[25];
-
-	if(array_init(*tree) != SUCCESS) return FAILURE;
-	
-	build_thread_tree_helper(top, *tree, &numNodes, buf);
-
-	return SUCCESS;
-}
-
-/* {{{ proto int imap_thread(int stream_id)
-   Return threaded by REFERENCES tree */
-PHP_FUNCTION (imap_thread)
-{
-	pval *streamind, *search_flags;
-	int ind, ind_type, args;
-	pils *imap_le_struct;
-	long flags;
-	char criteria[] = "ALL";
-        THREADNODE *top;
-
-	if(!return_value_used) {
-		php_error(E_WARNING, "imap_thread does not make use of return value");
-		RETURN_FALSE;
-	}
-
-	args = ARG_COUNT(ht);
-	if (  args < 1 || args > 2
-	   || getParameters(ht, args, &streamind, &search_flags) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long(streamind);
-	
-	if (args == 1) {
-		flags = SE_FREE;
-	} else {
-		convert_to_long(search_flags);
-		flags = search_flags->value.lval;
-	}
-	
-	ind = streamind->value.lval;
-	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if (!imap_le_struct || !IS_STREAM(ind_type)) {
-		php_error(E_WARNING, "Unable to find stream pointer");
-		RETURN_FALSE;
-	}
-	
-	top = mail_thread(imap_le_struct->imap_stream,
-		"REFERENCES", NIL, mail_criteria(criteria), flags);
-
-	if(top == NIL) {
-		php_error(E_WARNING, "imap_thread returned an empty tree");
-		RETURN_FALSE;
-	}
-
-	/* Populate our return value data structure here. */
-	if(build_thread_tree(top, &return_value) == FAILURE){
-	    mail_free_threadnode(&top);
-	    RETURN_FALSE;
-	}
-	
-	mail_free_threadnode(&top);
 }
 /* }}} */
 
