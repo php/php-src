@@ -112,32 +112,6 @@ static sapi_post_entry supported_post_entries[] = {
 };
 
 
-SAPI_API int sapi_add_post_entry(char *content_type, void (*post_reader)(SLS_D),
-								 void (*post_handler)(char *content_type_dup, void *arg SLS_DC)) {
-
-	sapi_post_entry *post_entry = (sapi_post_entry *)emalloc(sizeof(sapi_post_entry));
-	if(!post_entry) return 0;
-
-	post_entry->content_type     = estrdup(content_type);
-	if(post_entry->content_type == NULL) return 0;
-	post_entry->content_type_len = strlen(content_type);
-	post_entry->post_reader      = post_reader;
-	post_entry->post_handler     = post_handler;
-
-	return sapi_register_post_entry(post_entry);
-}
-
-SAPI_API void sapi_remove_post_entry(char *content_type) {
-	sapi_post_entry *post_entry = (sapi_post_entry *)emalloc(sizeof(sapi_post_entry));
-	if(!post_entry) return;
-
-	post_entry->content_type     = estrdup(content_type);
-	if(post_entry->content_type == NULL) return;
-
-	sapi_unregister_post_entry(post_entry);
-
-	efree(post_entry);
-}
 
 PHP_MINIT_FUNCTION(fdf)
 {
@@ -198,7 +172,7 @@ PHP_MSHUTDOWN_FUNCTION(fdf)
 	FDFErc err;
 
 	/* remove handler for Acrobat FDF form post requests */
-	sapi_remove_post_entry("application/vnd.fdf");
+	sapi_remove_post_entry("application/vnd.fdf"); 
 
 #ifdef PHP_WIN32
 	return SUCCESS;
