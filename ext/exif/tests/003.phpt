@@ -1,7 +1,7 @@
 --TEST--
 Check for exif_read_data
 --SKIPIF--
-<?php if (!extension_loaded("exif")) print "skip";?>
+<?php if (!extension_loaded("exif") || !function_exists('mb_convert_encoding')) print "skip";?>
 --POST--
 --GET--
 --FILE--
@@ -16,8 +16,11 @@ $image  = exif_read_data('./ext/exif/tests/test3.jpg','',true,false);
 $accept = '';
 foreach($image as $idx=>$section) {
 	$accept .= $section;
+	if ($idx=="COMPUTED" && array_key_exists("UserCommentEncoding",$section) && $section["UserCommentEncoding"]=="UNICODE") {
+		$section["UserComment"] = mb_convert_encoding($section["UserComment"],"ISO-8859-1","UCS-2BE");
+	}
 	foreach($section as $name=>$value) {
-		if  ( $idx!='FILE' || $name!='FileDateTime') {
+		if  ($idx!='FILE' || $name!='FileDateTime') {
 			$accept .= substr($name,0,2);
 			$accept .= $value;
 		}
@@ -26,4 +29,4 @@ foreach($image as $idx=>$section) {
 echo $accept;
 ?>
 --EXPECT--
-ArrayFitest3.jpgFi1237Fi2SeANY_TAG, IFD0, THUMBNAIL, COMMENTArrayhtwidth="1" height="1"He1Wi1Is1Usƒ÷‹ﬂ‰ˆ¸UsUNICODECoPhoto (c) M.Boerger, Edited by M.Boerger.CoPhoto (c) M.BoergerCoEdited by M.Boerger.ArrayCoPhoto (c) M.BoergerUsUNICODEArrayJP134JP523Array0Comment #1.1Comment #2.2Comment #3end
+ArrayFitest3.jpgFi1237SeCOMPUTED, ANY_TAG, IFD0, THUMBNAIL, COMMENT, EXIFArrayCoPhoto (c) M.BoergerCoEdited by M.Boerger.htwidth="1" height="1"He1Wi1Is1Usƒ÷‹ﬂ‰ˆ¸UsUNICODEArrayCoPhoto (c) M.BoergerUsUNICODEArrayJP134JP523Array0Comment #1.1Comment #2.2Comment #3end

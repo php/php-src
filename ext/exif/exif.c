@@ -720,6 +720,7 @@ typedef struct {
 	int  motorola_intel; /* 1 Motorola; 0 Intel */
 
 	char *UserComment;
+	int  UserCommentLength;
 	char UserCommentEncoding[12];
 
 	char *Thumbnail;
@@ -767,7 +768,7 @@ void exif_add_image_info( image_info_type *image_info, int section_index, char *
 
 		case TAG_FMT_STRING:
 			if ( value) {
-				length = php_strnlen(value,length);
+				/*length = php_strnlen(value,length); would disable UNICODE comments*/
 				info_value->length = length;
 				info_value->value.s = estrndup(value,length);
 			} else {
@@ -917,7 +918,7 @@ void exif_free_image_info( image_info_type *image_info, int section_index)
 void add_assoc_image_info( pval *value, int sub_array, image_info_type *image_info, int section_index)
 {
 	char	buffer[64], *val, *name, uname[64];
-	int		idx=0, unknown=0;
+	int		idx=0, unknown=0, len;
 	image_info_value	*info_value;
 
 	if ( image_info->info_list[section_index].count)
@@ -959,11 +960,16 @@ void add_assoc_image_info( pval *value, int sub_array, image_info_type *image_in
 					break;
 
 				case TAG_FMT_STRING:
-					if ( !(val = info_value->value.s)) val = "";
-					if (section_index==SECTION_COMMENT) {
-						add_index_string(tmpi, idx++, val, 1);
+					if ( !(val = info_value->value.s)) {
+						val = "";
+						len = 0;
 					} else {
-						add_assoc_string(tmpi, name, val, 1);
+						len = info_value->length;
+					}
+					if (section_index==SECTION_COMMENT) {
+						add_index_stringl(tmpi, idx++, val, len, 1);
+					} else {
+						add_assoc_stringl(tmpi, name, val, len , 1);
 					}
 					break;
 
@@ -1065,7 +1071,7 @@ void add_assoc_image_info( pval *value, int sub_array, image_info_type *image_in
 */
 static void exif_process_COM (image_info_type *image_info, uchar *value, int length)
 {
-    exif_add_image_info( image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_STRING, length-2, value+2);
+    exif_add_image_info( image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_STRING, php_strnlen(value+2, length-2), value+2);
 }
 /* }}} */
 
@@ -1254,7 +1260,7 @@ static int exif_process_string(char **result,char *value,size_t byte_count) {
  * Process UserComment in IFD. */
 static int exif_process_user_comment(char **pszInfoPtr,char *szEncoding,char *szValuePtr,int ByteCount)
 {
-	int   a;
+	int   a, size;
 
 	*szEncoding = '\0';
 	/* Copy the comment */
@@ -1264,7 +1270,8 @@ static int exif_process_user_comment(char **pszInfoPtr,char *szEncoding,char *sz
 			strcpy( szEncoding, szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
-			return exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
+			size = exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
+			return size ? size-1 : 0;
 		}
 		if ( !memcmp(szValuePtr, "ASCII\0\0\0", 8)) {
 			strcpy( szEncoding, szValuePtr);
@@ -1283,7 +1290,8 @@ static int exif_process_user_comment(char **pszInfoPtr,char *szEncoding,char *sz
 	if (a) for (a=ByteCount-1;a && szValuePtr[a]==' ';a--) (szValuePtr)[a] = '\0';
 
 	/* normal text without encoding */
-	return exif_process_string(pszInfoPtr, szValuePtr, ByteCount);
+	size = exif_process_string(pszInfoPtr, szValuePtr, ByteCount);
+	return size ? size-1 : 0;
 }
 /* }}} */
 
@@ -1429,7 +1437,7 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, ch
 				break;
 
 			case TAG_USERCOMMENT:
-				exif_process_user_comment(&(ImageInfo->UserComment),ImageInfo->UserCommentEncoding,value_ptr,byte_count);
+				ImageInfo->UserCommentLength = exif_process_user_comment(&(ImageInfo->UserComment),ImageInfo->UserCommentEncoding,value_ptr,byte_count);
 				break;
 
 			/* this is only a comment if type is string! */
@@ -1544,6 +1552,9 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, ch
 	/* correctly would be to set components as length
 	 * but we are ignoring length for those types where it is not the same as byte_count
 	 */
+	if (format==TAG_FMT_STRING) {
+		byte_count = php_strnlen(value_ptr,byte_count);
+	}
 	exif_add_image_info( ImageInfo, section_index, exif_get_tagname(tag,tagname), tag, format, byte_count, value_ptr);
 	if ( outside) efree( outside);
 }
@@ -2266,7 +2277,7 @@ PHP_FUNCTION(exif_read_data)
 		exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "FocusDistance", TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
 	}
 	if (ImageInfo.UserComment) {
-		exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "UserComment", TAG_NONE, TAG_FMT_STRING, strlen(ImageInfo.UserComment), ImageInfo.UserComment);
+		exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "UserComment", TAG_NONE, TAG_FMT_STRING, ImageInfo.UserCommentLength, ImageInfo.UserComment);
 		if ( (len=strlen(ImageInfo.UserCommentEncoding))) {
 			exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "UserCommentEncoding", TAG_NONE, TAG_FMT_STRING, len, ImageInfo.UserCommentEncoding);
 		}
