@@ -1,7 +1,7 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_WITH("gd", "Bundled GD support", "yes");
+ARG_WITH("gd", "Bundled GD support", "yes,shared");
 
 if (PHP_GD != "no") {
 	if (CHECK_LIB("libjpeg.lib", "gd", PHP_GD) &&
