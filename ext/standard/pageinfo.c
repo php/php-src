@@ -35,6 +35,7 @@
 #include <unistd.h>
 #endif
 #include <sys/stat.h>
+#include <sys/types.h>
 #ifdef PHP_WIN32
 #include <process.h>
 #endif
@@ -56,6 +57,10 @@ PHPAPI void php_statpage(TSRMLS_D)
 			BG(page_inode) = pstat->st_ino;
 			BG(page_mtime) = pstat->st_mtime;
 		} 
+		else { /* handler for situations where there is no source file, ex. php -r */
+			BG(page_uid) = getuid();
+			BG(page_gid) = getgid();
+		}
 	}
 }
 /* }}} */
