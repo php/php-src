@@ -34,6 +34,7 @@ static zval *com_property_read(zval *object, zval *member, int type TSRMLS_DC)
 	zval *return_value;
 	php_com_dotnet_object *obj;
 	VARIANT v;
+	HRESULT res;
 
 	MAKE_STD_ZVAL(return_value);
 	ZVAL_NULL(return_value);
@@ -46,10 +47,15 @@ static zval *com_property_read(zval *object, zval *member, int type TSRMLS_DC)
 		VariantInit(&v);
 
 		convert_to_string_ex(&member);
-		if (SUCCESS == php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRLEN_P(member),
-				DISPATCH_PROPERTYGET, &v, 0, NULL TSRMLS_CC)) {
+
+		res = php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRLEN_P(member),
+				DISPATCH_PROPERTYGET, &v, 0, NULL TSRMLS_CC);
+
+		if (res == SUCCESS) {
 			php_com_zval_from_variant(return_value, &v, obj->code_page TSRMLS_CC);
 			VariantClear(&v);
+		} else if (res == DISP_E_BADPARAMCOUNT) {
+			php_com_saproxy_create(object, return_value, member TSRMLS_CC);
 		}
 	} else {
 		php_com_throw_exception(E_INVALIDARG, "this variant has no properties" TSRMLS_CC);
@@ -137,7 +143,7 @@ static zval *com_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 				VariantClear(&v);
 			}
 		} else {
-			php_com_saproxy_create(object, return_value, Z_LVAL_P(offset) TSRMLS_CC);
+			php_com_saproxy_create(object, return_value, offset TSRMLS_CC);
 		}
 
 	} else {
@@ -555,7 +561,6 @@ void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable TSR
 void php_com_object_free_storage(void *object TSRMLS_DC)
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object*)object;
-
 	if (obj->typeinfo) {
 		ITypeInfo_Release(obj->typeinfo);
 		obj->typeinfo = NULL;
@@ -614,7 +619,6 @@ zend_object_value php_com_object_new(zend_class_entry *ce TSRMLS_DC)
 	obj->code_page = CP_ACP;
 	obj->ce = ce;
 
-	
 	retval.handle = zend_objects_store_put(obj, NULL, php_com_object_free_storage, php_com_object_clone TSRMLS_CC);
 	retval.handlers = &php_com_object_handlers;
 

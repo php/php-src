@@ -197,18 +197,16 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	INIT_CLASS_ENTRY(ce, "com_safearray_proxy", NULL);
 	php_com_saproxy_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	php_com_saproxy_class_entry->ce_flags |= ZEND_ACC_FINAL;
-//	php_com_saproxy_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED;
+	php_com_saproxy_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED;
 	php_com_saproxy_class_entry->get_iterator = php_com_saproxy_iter_get;
 	
 	INIT_CLASS_ENTRY(ce, "variant", NULL);
 	ce.create_object = php_com_object_new;
-//	ce.get_iterator = php_com_iter_get;
 	php_com_variant_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	php_com_variant_class_entry->get_iterator = php_com_iter_get;
 
 	INIT_CLASS_ENTRY(ce, "com", NULL);
 	ce.create_object = php_com_object_new;
-//	ce.get_iterator = php_com_iter_get;
 	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry, "variant" TSRMLS_CC);
 	tmp->get_iterator = php_com_iter_get;
 
@@ -217,7 +215,6 @@ PHP_MINIT_FUNCTION(com_dotnet)
 #if HAVE_MSCOREE_H
 	INIT_CLASS_ENTRY(ce, "dotnet", NULL);
 	ce.create_object = php_com_object_new;
-//	ce.get_iterator = php_com_iter_get;
 	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry, "variant" TSRMLS_CC);
 	tmp->get_iterator = php_com_iter_get;
 #endif

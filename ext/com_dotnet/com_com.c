@@ -333,6 +333,17 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 				spprintf(&msg, 0, "Parameter %d: %s", arg_err, desc);
 				LocalFree(desc);
 				break;
+
+			case DISP_E_BADPARAMCOUNT:
+				if ((disp_params->cArgs + disp_params->cNamedArgs == 0) && (flags == DISPATCH_PROPERTYGET)) {
+					/* if getting a property and they are missing all parameters,
+					 * we want to create a proxy object for them; so lets not create an
+					 * exception here */
+					msg = NULL;
+					break;
+				}
+				/* else fall through */
+				
 			default:
 				desc = php_win_err(hr);
 				spprintf(&msg, 0, "Error %s", desc);
@@ -557,6 +568,10 @@ int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 		efree(vargs);
 	}
 
+	/* a bit strange this, but... */
+	if (hr == DISP_E_BADPARAMCOUNT)
+		return hr;
+	
 	return SUCCEEDED(hr) ? SUCCESS : FAILURE;
 }
 
