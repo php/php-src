@@ -43,6 +43,17 @@
 #include "ext/bcmath/php3_bcmath.h"
 #include "ext/db/php3_db.h"
 #include "ext/gd/php3_gd.h"
+#include "ext/standard/dl.h"
+#include "ext/standard/file.h"
+#include "ext/standard/fsock.h"
+#include "ext/standard/head.h"
+#include "ext/standard/pack.h"
+#include "ext/standard/php3_browscap.h"
+#include "ext/standard/php3_crypt.h"
+#include "ext/standard/php3_dir.h"
+#include "ext/standard/php3_filestat.h"
+#include "ext/standard/php3_mail.h"
+#include "ext/standard/php3_syslog.h"
 #include "ext/standard/php3_standard.h"
 #include "ext/COM/php3_COM.h"
 
@@ -55,6 +66,17 @@ unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 unsigned char second_arg_allow_ref[] = { 2, BYREF_NONE, BYREF_ALLOW };
 
 zend_module_entry *php3_builtin_modules[] = {
+    phpext_dl_ptr,
+    phpext_file_ptr,
+    phpext_fsock_ptr,
+    phpext_head_ptr,
+    phpext_pack_ptr,
+    phpext_browscap_ptr,
+    phpext_crypt_ptr,
+    phpext_dir_ptr,
+    phpext_filestat_ptr,
+    phpext_mail_ptr,
+    phpext_syslog_ptr,
 	phpext_bcmath_ptr,
 	phpext_standard_ptr,
 	COM_module_ptr
