@@ -21,7 +21,6 @@
 
 #include <stdlib.h>
 
-
 #if COMPILE_DL
 #include "dl/phpdl.h"
 #endif
@@ -83,6 +82,8 @@ php3_module_entry pgsql_module_entry = {
 php3_module_entry *get_module() { return &pgsql_module_entry; }
 #endif
 
+static int le_link,le_plink,le_result,le_lofp,le_string;
+
 #ifdef ZTS
 int pgsql_globals_id;
 #else
@@ -120,12 +121,9 @@ static void _free_result(pgsql_result_handle *pg_result)
 	efree(pg_result);
 }
 
-
-int php3_minit_pgsql(INIT_FUNC_ARGS)
+static void php_pgsql_init_globals(PGLS_D)
 {
-	PGLS_FETCH();
-	ELS_FETCH();
-
+	PGG(num_persistent) = 0;
 	if (cfg_get_long("pgsql.allow_persistent",&PGG(allow_persistent))==FAILURE) {
 		PGG(allow_persistent)=1;
 	}
@@ -135,13 +133,24 @@ int php3_minit_pgsql(INIT_FUNC_ARGS)
 	if (cfg_get_long("pgsql.max_links",&PGG(max_links))==FAILURE) {
 		PGG(max_links)=-1;
 	}
-	PGG(num_persistent)=0;
-	PGG(le_link) = register_list_destructors(_close_pgsql_link,NULL);
-	PGG(le_plink) = register_list_destructors(NULL,_close_pgsql_plink);
+}
+
+PHP_MINIT_FUNCTION(pgsql)
+{
+	ELS_FETCH();
+
+#ifdef ZTS
+	pgsql_globals_id = ts_allocate_id(sizeof(php_pgsql_globals), php_pgsql_init_globals, NULL);
+#else
+	php_pgsql_init_globals(PGLS_C);
+#endif
+	
+	le_link = register_list_destructors(_close_pgsql_link,NULL);
+	le_plink = register_list_destructors(NULL,_close_pgsql_plink);
 	/*	PGG(le_result = register_list_destructors(PQclear,NULL); */
-	PGG(le_result) = register_list_destructors(_free_result,NULL);
-	PGG(le_lofp) = register_list_destructors(_free_ptr,NULL);
-	PGG(le_string) = register_list_destructors(_free_ptr,NULL);
+	le_result = register_list_destructors(_free_result,NULL);
+	le_lofp = register_list_destructors(_free_ptr,NULL);
+	le_string = register_list_destructors(_free_ptr,NULL);
 
 	REGISTER_LONG_CONSTANT("PGSQL_ASSOC", PGSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_NUM", PGSQL_NUM, CONST_CS | CONST_PERSISTENT);
@@ -277,7 +286,7 @@ void php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			}
 
 			/* hash it up */
-			new_le.type = PGG(le_plink);
+			new_le.type = le_plink;
 			new_le.ptr = pgsql;
 			if (zend_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				efree(hashed_details);
@@ -286,7 +295,7 @@ void php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			PGG(num_links)++;
 			PGG(num_persistent)++;
 		} else {  /* we do */
-			if (le->type != PGG(le_plink)) {
+			if (le->type != le_plink) {
 				RETURN_FALSE;
 			}
 			/* ensure that the link did not die */
@@ -305,7 +314,7 @@ void php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			}
 			pgsql = (PGconn *) le->ptr;
 		}
-		return_value->value.lval = php3_list_insert(pgsql,PGG(le_plink));
+		return_value->value.lval = php3_list_insert(pgsql,le_plink);
 		return_value->type = IS_LONG;
 	} else {
 		list_entry *index_ptr,new_index_ptr;
@@ -324,7 +333,7 @@ void php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			}
 			link = (int) index_ptr->ptr;
 			ptr = php3_list_find(link,&type);   /* check if the link is still there */
-			if (ptr && (type==PGG(le_link) || type==PGG(le_plink))) {
+			if (ptr && (type==le_link || type==le_plink)) {
 				return_value->value.lval = PGG(default_link) = link;
 				return_value->type = IS_LONG;
 				efree(hashed_details);
@@ -350,7 +359,7 @@ void php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		}
 
 		/* add it to the list */
-		return_value->value.lval = php3_list_insert(pgsql,PGG(le_link));
+		return_value->value.lval = php3_list_insert(pgsql,le_link);
 		return_value->type = IS_LONG;
 
 		/* add it to the hash */
@@ -421,7 +430,7 @@ PHP_FUNCTION(pgsql_close)
 	}
 	
 	pgsql = (PGconn *) php3_list_find(id,&type);
-	if (type!=PGG(le_link) && type!=PGG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php_error(E_WARNING,"%d is not a PostgresSQL link index",id);
 		RETURN_FALSE;
 	}
@@ -463,7 +472,7 @@ void php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	}
 	
 	pgsql = (PGconn *) php3_list_find(id,&type);
-	if (type!=PGG(le_link) && type!=PGG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php_error(E_WARNING,"%d is not a PostgresSQL link index",id);
 		RETURN_FALSE;
 	}
@@ -575,7 +584,7 @@ PHP_FUNCTION(pgsql_exec)
 	}
 	
 	pgsql = (PGconn *) php3_list_find(id,&type);
-	if (type!=PGG(le_link) && type!=PGG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php_error(E_WARNING,"%d is not a PostgresSQL link index",id);
 		RETURN_FALSE;
 	}
@@ -604,7 +613,7 @@ PHP_FUNCTION(pgsql_exec)
 				pg_result = (pgsql_result_handle *) emalloc(sizeof(pgsql_result_handle));
 				pg_result->conn = pgsql;
 				pg_result->result = pgsql_result;
-				return_value->value.lval = php3_list_insert(pg_result,PGG(le_result));
+				return_value->value.lval = php3_list_insert(pg_result,le_result);
 				return_value->type = IS_LONG;
 			} else {
 				RETURN_FALSE;
@@ -633,7 +642,7 @@ void php3_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	convert_to_long(result);
 	pg_result = (pgsql_result_handle *) php3_list_find(result->value.lval,&type);
 
-	if (type!=PGG(le_result)) {
+	if (type!=le_result) {
 		php_error(E_WARNING,"%d is not a PostgresSQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -721,7 +730,7 @@ char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 			if ((tmp_name=PQgetvalue(result,i,name_offset))==NULL) {
 				continue;
 			}
-			new_oid_entry.type = PGG(le_string);
+			new_oid_entry.type = le_string;
 			new_oid_entry.ptr = estrdup(tmp_name);
 			zend_hash_update(list,hashed_oid_key,strlen(hashed_oid_key)+1,(void *) &new_oid_entry, sizeof(list_entry), NULL);
 			if (!ret && atoi(tmp_oid)==oid) {
@@ -752,7 +761,7 @@ void php3_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	convert_to_long(result);
 	pg_result = (pgsql_result_handle *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=PGG(le_result)) {
+	if (type!=le_result) {
 		php_error(E_WARNING,"%d is not a PostgresSQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -827,7 +836,7 @@ PHP_FUNCTION(pgsql_field_number)
 	convert_to_long(result);
 	pg_result = (pgsql_result_handle *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=PGG(le_result)) {
+	if (type!=le_result) {
 		php_error(E_WARNING,"%d is not a PostgresSQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -856,7 +865,7 @@ PHP_FUNCTION(pgsql_result)
 	convert_to_long(result);
 	pg_result = (pgsql_result_handle *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=PGG(le_result)) {
+	if (type!=le_result) {
 		php_error(E_WARNING,"%d is not a PostgresSQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -925,7 +934,7 @@ static void php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	convert_to_long(result);
 	pg_result = (pgsql_result_handle *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=PGG(le_result)) {
+	if (type!=le_result) {
 		php_error(E_WARNING,"%d is not a PostgresSQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -1017,7 +1026,7 @@ void php3_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	convert_to_long(result);
 	pg_result = (pgsql_result_handle *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=PGG(le_result)) {
+	if (type!=le_result) {
 		php_error(E_WARNING,"%d is not a PostgresSQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -1088,7 +1097,7 @@ PHP_FUNCTION(pgsql_free_result)
 	}
 	pg_result = (pgsql_result_handle *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=PGG(le_result)) {
+	if (type!=le_result) {
 		php_error(E_WARNING,"%d is not a PostgresSQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -1114,7 +1123,7 @@ PHP_FUNCTION(pgsql_last_oid)
 	convert_to_long(result);
 	pg_result = (pgsql_result_handle *) php3_list_find(result->value.lval,&type);
 	
-	if (type!=PGG(le_result)) {
+	if (type!=le_result) {
 		php_error(E_WARNING,"%d is not a PostgresSQL result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -1157,7 +1166,7 @@ PHP_FUNCTION(pgsql_lo_create)
 	}
 	
 	pgsql = (PGconn *) php3_list_find(id,&type);
-	if (type!=PGG(le_link) && type!=PGG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php_error(E_WARNING,"%d is not a PostgresSQL link index",id);
 		RETURN_FALSE;
 	}
@@ -1214,7 +1223,7 @@ PHP_FUNCTION(pgsql_lo_unlink)
 	}
 	
 	pgsql = (PGconn *) php3_list_find(id,&type);
-	if (type!=PGG(le_link) && type!=PGG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php_error(E_WARNING,"%d is not a PostgresSQL link index",id);
 		RETURN_FALSE;
 	}
@@ -1268,7 +1277,7 @@ PHP_FUNCTION(pgsql_lo_open)
 	}
 
 	pgsql = (PGconn *) php3_list_find(id,&type);
-	if (type!=PGG(le_link) && type!=PGG(le_plink)) {
+	if (type!=le_link && type!=le_plink) {
 		php_error(E_WARNING,"%d is not a PostgresSQL link index",id);
 		RETURN_FALSE;
 	}
@@ -1314,7 +1323,7 @@ PHP_FUNCTION(pgsql_lo_open)
 				} else {
 					pgsql_lofp->conn = pgsql;
 					pgsql_lofp->lofd = pgsql_lofd;
-					return_value->value.lval = php3_list_insert(pgsql_lofp, PGG(le_lofp));
+					return_value->value.lval = php3_list_insert(pgsql_lofp, le_lofp);
 					return_value->type = IS_LONG;
 				}
 			}
@@ -1326,7 +1335,7 @@ PHP_FUNCTION(pgsql_lo_open)
 	} else {
 		pgsql_lofp->conn = pgsql;
 		pgsql_lofp->lofd = pgsql_lofd;
-		return_value->value.lval = php3_list_insert(pgsql_lofp, PGG(le_lofp));
+		return_value->value.lval = php3_list_insert(pgsql_lofp, le_lofp);
 		return_value->type = IS_LONG;
 	}
 }
@@ -1355,7 +1364,7 @@ PHP_FUNCTION(pgsql_lo_close)
 	}
 
 	pgsql = (pgLofp *) php3_list_find(id,&type);
-	if (type!=PGG(le_lofp)) {
+	if (type!=le_lofp) {
 		php_error(E_WARNING,"%d is not a PostgresSQL large object index",id);
 		RETURN_FALSE;
 	}
@@ -1397,7 +1406,7 @@ PHP_FUNCTION(pgsql_lo_read)
 	}
 
 	pgsql = (pgLofp *) php3_list_find(id,&type);
-	if (type!=PGG(le_lofp)) {
+	if (type!=le_lofp) {
 		php_error(E_WARNING,"%d is not a PostgresSQL large object index",id);
 		RETURN_FALSE;
 	}
@@ -1440,7 +1449,7 @@ PHP_FUNCTION(pgsql_lo_write)
 	}
 
 	pgsql = (pgLofp *) php3_list_find(id,&type);
-	if (type!=PGG(le_lofp)) {
+	if (type!=le_lofp) {
 		php_error(E_WARNING,"%d is not a PostgresSQL large object index",id);
 		RETURN_FALSE;
 	}
@@ -1480,7 +1489,7 @@ PHP_FUNCTION(pgsql_lo_readall)
 	}
 
 	pgsql = (pgLofp *) php3_list_find(id,&type);
-	if (type!=PGG(le_lofp)) {
+	if (type!=le_lofp) {
 		php_error(E_WARNING,"%d is not a PostgresSQL large object index",id);
 		RETURN_FALSE;
 	}

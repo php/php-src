@@ -58,7 +58,7 @@ extern php3_module_entry pgsql_module_entry;
 #define PHP_PGSQL_API
 #endif
 
-extern int php3_minit_pgsql(INIT_FUNC_ARGS);
+extern PHP_MINIT_FUNCTION(pgsql);;
 extern int php3_rinit_pgsql(INIT_FUNC_ARGS);
 PHP_FUNCTION(pgsql_connect);
 PHP_FUNCTION(pgsql_pconnect);
@@ -117,7 +117,7 @@ typedef struct {
 	long num_links,num_persistent;
 	long max_links,max_persistent;
 	long allow_persistent;
-	int le_link,le_plink,le_result,le_lofp,le_string;
+	int le_lofp,le_string;
 } php_pgsql_globals;
 
 /* extern pgsql_module php3_pgsql_module; */
