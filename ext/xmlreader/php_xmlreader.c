@@ -765,9 +765,20 @@ PHP_METHOD(xmlreader, open)
 	xmlreader_object *intern;
 	char *source, *valid_file = NULL;
 	char resolved_path[MAXPATHLEN + 1];
+	xmlTextReaderPtr reader = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
 		return;
+	}
+
+	id = getThis();
+	if (id != NULL) {
+		if (! instanceof_function(Z_OBJCE_P(id), xmlreader_class_entry TSRMLS_CC)) {
+			id = NULL;
+		} else {
+			intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
+			xmlreader_free_resources(intern);
+		}
 	}
 
 	if (!source_len) {
@@ -775,22 +786,25 @@ PHP_METHOD(xmlreader, open)
 		RETURN_FALSE;
 	}
 
-	id = getThis();
-
-	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
-
-	xmlreader_free_resources(intern);
-
 	valid_file = _xmlreader_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
 
 	if (valid_file) {
-		intern->ptr = xmlNewTextReaderFilename(valid_file);
+		reader = xmlNewTextReaderFilename(valid_file);
 	}
 
-	if (intern->ptr == NULL) {
+	if (reader == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open source data");
 		RETURN_FALSE;
 	}
+
+	if (id == NULL) {
+		object_init_ex(return_value, xmlreader_class_entry);
+		intern = (xmlreader_object *)zend_objects_get_address(return_value TSRMLS_CC);
+		intern->ptr = reader;
+		return;
+	}
+
+	intern->ptr = reader;
 
 	RETURN_TRUE;
 
@@ -873,9 +887,20 @@ PHP_METHOD(xmlreader, XML)
 	char *source, *uri = NULL;
 	int resolved_path_len;
 	char *directory=NULL, resolved_path[MAXPATHLEN];
+	xmlParserInputBufferPtr inputbfr;
+	xmlTextReaderPtr reader;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
 		return;
+	}
+
+	id = getThis();
+	if (id != NULL && ! instanceof_function(Z_OBJCE_P(id), xmlreader_class_entry TSRMLS_CC)) {
+		id = NULL;
+	}
+	if (id != NULL) {
+		intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
+		xmlreader_free_resources(intern);
 	}
 
 	if (!source_len) {
@@ -883,15 +908,9 @@ PHP_METHOD(xmlreader, XML)
 		RETURN_FALSE;
 	}
 
-	id = getThis();
+	inputbfr = xmlParserInputBufferCreateMem(source, source_len, XML_CHAR_ENCODING_NONE);
 
-	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
-	
-	xmlreader_free_resources(intern);
-
-	intern->input = xmlParserInputBufferCreateMem(source, source_len, XML_CHAR_ENCODING_NONE);
-
-    if (intern->input != NULL) {
+    if (inputbfr != NULL) {
 /* Get the URI of the current script so that we can set the base directory in libxml */
 #if HAVE_GETCWD
 		directory = VCWD_GETCWD(resolved_path, MAXPATHLEN);
@@ -906,16 +925,29 @@ PHP_METHOD(xmlreader, XML)
 			}
 			uri = (char *) xmlCanonicPath((const xmlChar *) resolved_path);
 		}
-		intern->ptr = xmlNewTextReader(intern->input, uri);
+		reader = xmlNewTextReader(inputbfr, uri);
 		if (uri) {
 			xmlFree(uri);
 		}
-		if (intern->ptr != NULL) {
-			RETURN_TRUE;
+		if (reader != NULL) {
+			if (id == NULL) {
+				object_init_ex(return_value, xmlreader_class_entry);
+				intern = (xmlreader_object *)zend_objects_get_address(return_value TSRMLS_CC);
+				intern->input = inputbfr;
+				intern->ptr = reader;
+				return;
+			} else {
+				intern->input = inputbfr;
+				intern->ptr = reader;
+				RETURN_TRUE;
+
+			}
 		}
 	}
 
-	xmlreader_free_resources(intern);
+	if (inputbfr) {
+		xmlFreeParserInputBuffer(inputbfr);
+	}
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to load source data");
 	RETURN_FALSE;
 }
@@ -935,7 +967,7 @@ static zend_function_entry xmlreader_functions[] = {
 	PHP_ME(xmlreader, moveToElement, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, moveToFirstAttribute, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, moveToNextAttribute, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(xmlreader, open, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(xmlreader, open, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
 	PHP_ME(xmlreader, read, NULL, ZEND_ACC_PUBLIC)
 /* Not Yet Implemented though defined in libxml as of 2.6.9dev
 	PHP_ME(xmlreader, readInnerXml, NULL, ZEND_ACC_PUBLIC)
@@ -946,7 +978,7 @@ static zend_function_entry xmlreader_functions[] = {
 	PHP_ME(xmlreader, setParserProperty, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, setRelaxNGSchema, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, setRelaxNGSchemaSource, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(xmlreader, XML, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(xmlreader, XML, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
 	{NULL, NULL, NULL}
 };
 
