@@ -33,20 +33,13 @@
 
 #define ZVAL_VARIANT(z, v, cp)													\
 	if (V_VT(v) == VT_DISPATCH) {												\
-		rpc_internal *intern;													\
 		comval *obj;															\
 		ALLOC_COM(obj);															\
-		Z_TYPE_P(z) = IS_OBJECT;												\
-		(z)->value.obj = rpc_objects_new(com_class_entry TSRMLS_CC);			\
-		if (GET_INTERNAL_EX(intern, (z)) != SUCCESS) {							\
-			/* TODO: exception */												\
-		}																		\
 		php_COM_set(obj, &V_DISPATCH(v), TRUE);									\
-		intern->data = obj;														\
+		rpc_object_from_data(z, com, obj, NULL);								\
 	} else {																	\
 		php_variant_to_zval((v), (z), cp);										\
 		VariantClear(v);														\
-		efree(v);																\
 	}
 
 #define RETVAL_VARIANT(v, cp)	ZVAL_VARIANT(return_value, v, cp)
