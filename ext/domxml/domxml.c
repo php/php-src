@@ -36,6 +36,7 @@ static zend_class_entry *domxmlattr_class_entry_ptr;
 static zend_function_entry php_domxml_functions[] = {
 	PHP_FE(getdom,	NULL)
 	PHP_FE(getdomfile,	NULL)
+	PHP_FE(xmltree,	NULL)
 	PHP_FALIAS(dom,		getdom,	NULL)
 	PHP_FALIAS(domfile,		getdomfile,	NULL)
 	PHP_FE(domxml_root,	NULL)
@@ -864,6 +865,94 @@ PHP_FUNCTION(domxml_newxmldoc)
 	add_property_long(return_value, "doc", ret);
 	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
 	zend_list_addref(ret);
+}
+/* }}} */
+
+/* {{{ proto string domxml_children([int node])
+   Returns list of children nodes */
+int node_children(pval **children, xmlNode *nodep)
+{
+#if 0
+	pval *id, **tmp, *mchildren;
+	int id_to_find;
+	xmlNode *nodep, *last;
+	int type;
+	int ret;
+	
+	last = nodep->childs;
+	if (!last) {
+		RETURN_FALSE;
+	}
+
+	if (array_init(*children) == FAILURE) {
+		return -1;
+	}
+
+	while(last) {
+		zval *child;
+		MAKE_STD_ZVAL(child);
+
+		ret = zend_list_insert(last, le_domxmlnodep);
+
+		/* construct a node object */
+		object_init_ex(child, domxmlnode_class_entry_ptr);
+		add_property_stringl(child, "name", (char *) last->name, strlen(last->name), 1);
+		if(last->content)
+			add_property_stringl(child, "content", (char *) last->content, strlen(last->content), 1);
+		add_property_long(child, "node", ret);
+		add_property_long(child, "type", last->type);
+		zend_hash_next_index_insert(children->value.ht, &child, sizeof(zval *), NULL);
+		node_children(&mchildren, last);
+		last = last->next;
+	}
+#endif
+}
+/* }}} */
+
+/* {{{ proto class xmltree(string xmldoc)
+   Create a tree of php objects from an xml document */
+PHP_FUNCTION(xmltree)
+{
+	pval *arg;
+	pval *proot;
+	xmlDoc *docp;
+	xmlNode *root, *node;
+	int ret, ret1;
+	
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(arg);
+
+	docp = xmlParseMemory(arg->value.str.val, arg->value.str.len);
+	if (!docp) {
+		RETURN_FALSE;
+	}
+	ret = zend_list_insert(docp, le_domxmldocp);
+
+	/* construct an object with some methods */
+	object_init_ex(return_value, domxmldoc_class_entry_ptr);
+	add_property_long(return_value, "doc", ret);
+	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
+	zend_list_addref(ret);
+
+	root = docp->root;
+	if (!root) {
+		RETURN_FALSE;
+	}
+	ret1 = zend_list_insert(root, le_domxmlnodep);
+
+	add_property_long(return_value, "root", ret);
+	/* construct an object with some methods */
+	object_init_ex(proot, domxmlnode_class_entry_ptr);
+	add_property_long(proot, "node", ret1);
+	add_property_long(proot, "type", root->type);
+	add_property_stringl(proot, "name", (char *) root->name, strlen(root->name), 1);
+	if(root->content)
+		add_property_stringl(return_value, "content", (char *) root->content, strlen(root->content), 1);
+	zend_list_addref(ret1);
+
+	
 }
 /* }}} */
 

@@ -45,6 +45,7 @@ extern PHP_MINIT_FUNCTION(domxml);
 extern PHP_MINFO_FUNCTION(domxml);
 PHP_FUNCTION(getdom);
 PHP_FUNCTION(getdomfile);
+PHP_FUNCTION(xmltree);
 PHP_FUNCTION(domxml_newxmldoc);
 
 /* Class Document methods */
