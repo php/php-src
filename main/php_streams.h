@@ -318,8 +318,8 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, const
 # define php_stream_to_zval(stream, zval)	{ ZVAL_RESOURCE(zval, (stream)->rsrc_id); }
 #endif
 
-#define php_stream_from_zval(stream, ppzval)	ZEND_FETCH_RESOURCE2((stream), php_stream *, (ppzval), -1, "stream", php_file_le_stream(), php_file_le_pstream())
-#define php_stream_from_zval_no_verify(stream, ppzval)	(stream) = (php_stream*)zend_fetch_resource((ppzval) TSRMLS_CC, -1, "stream", NULL, 2, php_file_le_stream(), php_file_le_pstream())
+#define php_stream_from_zval(str, ppzval)	ZEND_FETCH_RESOURCE2((str), php_stream *, (ppzval), -1, "stream", php_file_le_stream(), php_file_le_pstream())
+#define php_stream_from_zval_no_verify(str, ppzval)	(str) = (php_stream*)zend_fetch_resource((ppzval) TSRMLS_CC, -1, "stream", NULL, 2, php_file_le_stream(), php_file_le_pstream())
 
 PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream **stream TSRMLS_DC);
 #define PHP_STREAM_PERSISTENT_SUCCESS	0 /* id exists */
