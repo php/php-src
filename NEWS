@@ -1,5 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Feb 2004, Version 4.3.5
+- Fixed bug #27278 (*printf() functions treat arguments as if passed by
+  reference). (ilia)
+
 16 Feb 2004, Version 4.3.5RC3
 - Fixed zero bytes memory allocation when no extra ini files are found in the
   --with-config-file-scan-dir specified directory. (Eric Colinet, Derick)
