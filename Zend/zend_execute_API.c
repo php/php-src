@@ -463,7 +463,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 
 			switch (const_value.type) {
 				case IS_STRING:
-					zend_hash_update(p->value.ht, const_value.value.str.val, const_value.value.str.len+1, &new_val, sizeof(zval *), NULL);
+					zend_symtable_update(p->value.ht, const_value.value.str.val, const_value.value.str.len+1, &new_val, sizeof(zval *), NULL);
 					break;
 				case IS_LONG:
 					zend_hash_index_update(p->value.ht, const_value.value.lval, &new_val, sizeof(zval *), NULL);
