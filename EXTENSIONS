@@ -32,8 +32,9 @@ MAINTENANCE:         Unknown
 STATUS:              Unknown
 -------------------------------------------------------------------------------
 EXTENSION:           activescript
-MAINTENANCE:         Unknown
-STATUS:              Unknown
+PRIMARY MAINTAINER:  Wez Furlong <wez@php.net>
+MAINTENANCE:         Odd Fixes
+STATUS:              Experimental
 -------------------------------------------------------------------------------
 EXTENSION:           apache
 PRIMARY MAINTAINER:  Rasmus Lerdorf <rasmus@php.net>
