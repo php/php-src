@@ -259,6 +259,7 @@ static pcre* pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_o
 			case 'S':	do_study  = 1;					break;
 			case 'U':	coptions |= PCRE_UNGREEDY;		break;
 			case 'X':	coptions |= PCRE_EXTRA;			break;
+			case 'u':	coptions |= PCRE_UTF8;			break;
 
 			/* Custom preg options */
 			case 'e':	poptions |= PREG_REPLACE_EVAL;	break;
