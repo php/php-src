@@ -89,9 +89,11 @@
  *	directly -- and assumed always to succeed.
  */
 
-/* $Id$ */
-
 #include <zend_strtod.h>
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 
 #if defined(HAVE_INTTYPES_H)
 #include <inttypes.h>
@@ -99,8 +101,12 @@
 #include <stdint.h>
 #endif
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+#ifndef HAVE_UINT32_T
+# if SIZEOF_INT == 4
+typedef unsigned int uint32_t;
+# elif SIZEOF_LONG == 4
+typedef unsigned long int uint32_t;
+# endif
 #endif
 
 #ifdef WORDS_BIGENDIAN
