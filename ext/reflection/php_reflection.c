@@ -2873,7 +2873,7 @@ ZEND_METHOD(reflection_property, getValue)
 	METHOD_NOTSTATIC;
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (ref->prop->flags & ~ZEND_ACC_PUBLIC) {
+	if (!(ref->prop->flags & ZEND_ACC_PUBLIC)) {
 		_DO_THROW("Cannot access non-public member");
 		/* Returns from this function */
 	}
@@ -2882,9 +2882,16 @@ ZEND_METHOD(reflection_property, getValue)
 		return;
 	}
 
-	if (zend_hash_quick_find(Z_OBJPROP_P(object), ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &member) == FAILURE) {
-		zend_error(E_ERROR, "Internal error: Could not find the property %s", ref->prop->name);
-		/* Bails out */
+	if ((ref->prop->flags & ZEND_ACC_STATIC)) {
+		if (zend_hash_quick_find(Z_OBJCE_P(object)->static_members, ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &member) == FAILURE) {
+			zend_error(E_ERROR, "Internal error: Could not find the property %s", ref->prop->name);
+			/* Bails out */
+		}
+	} else {
+		if (zend_hash_quick_find(Z_OBJPROP_P(object), ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &member) == FAILURE) {
+			zend_error(E_ERROR, "Internal error: Could not find the property %s", ref->prop->name);
+			/* Bails out */
+		}
 	}
 
 	*return_value= **member;
