@@ -167,6 +167,99 @@ static php_stream_filter_factory strfilter_tolower_factory = {
 };
 /* }}} */
 
+/* {{{ strip_tags filter implementation */
+typedef struct _php_strip_tags_filter {
+	const char *allowed_tags;
+	int allowed_tags_len;
+	int state;
+	int persistent;
+} php_strip_tags_filter;
+
+static int php_strip_tags_filter_ctor(php_strip_tags_filter *inst, const char *allowed_tags, int allowed_tags_len, int persistent)
+{
+	if (allowed_tags != NULL) {
+		inst->allowed_tags = pemalloc(allowed_tags_len, persistent);
+		memcpy((char *)inst->allowed_tags, allowed_tags, allowed_tags_len);
+		inst->allowed_tags_len = allowed_tags_len; 
+	} else {
+		inst->allowed_tags = NULL;
+	}
+	inst->state = 0;
+	inst->persistent = persistent;
+
+	return SUCCESS;
+}	
+
+static void php_strip_tags_filter_dtor(php_strip_tags_filter *inst)
+{
+	if (inst->allowed_tags != NULL) {
+		pefree((void *)inst->allowed_tags, inst->persistent);
+	}
+}
+
+static php_stream_filter_status_t strfilter_strip_tags_filter(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	php_stream_bucket_brigade *buckets_in,
+	php_stream_bucket_brigade *buckets_out,
+	size_t *bytes_consumed,
+	int flags
+	TSRMLS_DC)
+{
+	php_stream_bucket *bucket;
+	size_t consumed = 0;
+	php_strip_tags_filter *inst = (php_strip_tags_filter *) thisfilter->abstract;
+
+	while (buckets_in->head) {
+		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
+		consumed = bucket->buflen;
+		
+		php_strip_tags(bucket->buf, bucket->buflen, &(inst->state), (char *)inst->allowed_tags, inst->allowed_tags_len);
+	
+		bucket->buflen = strlen(bucket->buf); 
+		php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
+	}
+
+	if (bytes_consumed) {
+		*bytes_consumed = consumed;
+	}
+	
+	return PSFS_PASS_ON;
+}
+
+static void strfilter_strip_tags_dtor(php_stream_filter *thisfilter TSRMLS_DC)
+{
+	assert(thisfilter->abstract != NULL);
+
+	php_strip_tags_filter_dtor((php_strip_tags_filter *)thisfilter->abstract);
+}
+
+static php_stream_filter_ops strfilter_strip_tags_ops = {
+	strfilter_strip_tags_filter,
+	strfilter_strip_tags_dtor,
+	"string.strip_tags"
+};
+
+static php_stream_filter *strfilter_strip_tags_create(const char *filtername, const char *filterparams,
+		int filterparamslen, int persistent TSRMLS_DC)
+{
+	php_strip_tags_filter *inst;
+	inst = pemalloc(sizeof(php_strip_tags_filter), persistent);
+
+	if (php_strip_tags_filter_ctor(inst, filterparams, filterparamslen, persistent) != SUCCESS) {
+		pefree(inst, persistent);
+		return NULL;
+	}
+
+	return php_stream_filter_alloc(&strfilter_strip_tags_ops, inst, persistent);
+}
+
+static php_stream_filter_factory strfilter_strip_tags_factory = {
+	strfilter_strip_tags_create
+};
+
+/* }}} */
+
 /* {{{ base64 / quoted_printable stream filter implementation */
 
 typedef enum _php_conv_err_t {
@@ -1770,6 +1863,7 @@ static const struct {
 	{ &strfilter_rot13_ops, &strfilter_rot13_factory },
 	{ &strfilter_toupper_ops, &strfilter_toupper_factory },
 	{ &strfilter_tolower_ops, &strfilter_tolower_factory },
+	{ &strfilter_strip_tags_ops, &strfilter_strip_tags_factory },
 	{ &strfilter_convert_ops, &strfilter_convert_factory },
 	/* additional filters to go here */
 	{ NULL, NULL }
