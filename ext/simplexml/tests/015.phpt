@@ -41,15 +41,15 @@ object(simplexml_element)#4 (1) {
   [0]=>
   string(3) "Joe"
 }
-object(simplexml_element)#3 (1) {
+object(simplexml_element)#4 (1) {
   [0]=>
   string(3) "Joe"
 }
-object(simplexml_element)#2 (1) {
+object(simplexml_element)#1 (1) {
   [0]=>
   string(3) "Joe"
 }
-object(simplexml_element)#2 (1) {
+object(simplexml_element)#1 (1) {
   [0]=>
   string(3) "Boe"
 }
