@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
 
@@ -1398,3 +1399,4 @@ PHP_FUNCTION(dom_node_get_user_data)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_node_get_user_data */
+#endif

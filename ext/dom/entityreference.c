@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
 
@@ -76,3 +77,4 @@ PHP_FUNCTION(dom_entityreference_entityreference)
 }
 
 /* }}} end dom_entityreference_entityreference */
+#endif

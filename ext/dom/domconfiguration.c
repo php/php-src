@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
 
@@ -75,3 +76,4 @@ PHP_FUNCTION(dom_domconfiguration_can_set_parameter)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_domconfiguration_can_set_parameter */
+#endif

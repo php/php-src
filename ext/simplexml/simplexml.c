@@ -23,6 +23,8 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_SIMPLEXML
+
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_simplexml.h"
@@ -1070,6 +1072,8 @@ PHP_MINFO_FUNCTION(simplexml)
 	php_info_print_table_end();
 }
 /* }}} */
+
+#endif
 
 /**
  * Local Variables:

@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
 typedef struct _idsIterator idsIterator;
@@ -1273,3 +1274,4 @@ PHP_FUNCTION(dom_document_savexml)
 	}
 }
 /* }}} end dom_document_savexml */
+#endif

@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
 
@@ -63,3 +64,4 @@ PHP_FUNCTION(dom_string_extend_find_offset32)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_string_extend_find_offset32 */
+#endif

@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
 
@@ -79,3 +80,4 @@ PHP_FUNCTION(dom_namelist_get_namespace_uri)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_namelist_get_namespace_uri */
+#endif

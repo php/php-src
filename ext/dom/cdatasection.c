@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
 
@@ -71,3 +72,5 @@ PHP_FUNCTION(dom_cdatasection_cdatasection)
 	}
 }
 /* }}} end dom_cdatasection_cdatasection */
+
+#endif

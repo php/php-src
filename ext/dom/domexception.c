@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
 
@@ -110,3 +111,4 @@ void php_dom_throw_error(int error_code, zval **retval TSRMLS_DC)
 	EG(exception) = dom_exception;
 }
 /* }}} end php_dom_throw_error */
+#endif

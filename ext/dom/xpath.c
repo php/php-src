@@ -24,6 +24,7 @@
 #endif
 
 #include "php.h"
+#if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
 
@@ -165,3 +166,4 @@ PHP_FUNCTION(dom_xpath_query)
 #endif /* LIBXML_XPATH_ENABLED */
 
 /* }}} */
+#endif

@@ -24,6 +24,9 @@
 #endif
 
 #include "php.h"
+
+#if HAVE_LIBXML && HAVE_DOM
+
 #include "php_dom.h"
 
 
@@ -232,3 +235,5 @@ PHP_FUNCTION(dom_attr_is_id)
 	}
 }
 /* }}} end dom_attr_is_id */
+
+#endif
