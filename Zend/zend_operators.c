@@ -912,7 +912,8 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 		return SUCCESS;
 	}
 	
-	if (op1->type == IS_BOOL || op2->type == IS_BOOL) {
+	if (op1->type == IS_BOOL || op2->type == IS_BOOL
+		|| op1->type == IS_UNSET || op2->type == IS_UNSET) {
 		zendi_convert_to_boolean(op1, op1_copy, result);
 		zendi_convert_to_boolean(op2, op2_copy, result);
 		result->type = IS_LONG;
