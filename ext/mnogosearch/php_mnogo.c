@@ -1279,6 +1279,18 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 		  	UdmSortAffixes(Agent->Conf);
 		}
 #endif
+#else
+		if(Agent->Conf->Spells.nitems && Agent->Conf->Affixes.nitems) {
+		    char *err= Agent->Conf->errstr;
+		    int flags= strcasecmp(UdmVarListFindStr(&Agent->Conf->Vars,
+							    "IspellUsePrefixes","no"),"no");
+		    flags= flags ? 0 : UDM_SPELL_NOPREFIX;
+		    if (UdmSpellListListLoad(&Agent->Conf->Spells, err, 128) ||
+    			UdmAffixListListLoad(&Agent->Conf->Affixes, flags, err, 128)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error loading ispell data");
+			RETURN_FALSE;
+		    }
+		}
 #endif
 	}
 	
@@ -2000,7 +2012,7 @@ DLEXPORT PHP_FUNCTION(udm_hash32)
    Perform search */
 DLEXPORT PHP_FUNCTION(udm_find)
 {
-	pval ** yyquery, ** yyagent;
+	pval ** yyquery=NULL, ** yyagent;
 	UDM_RESULT * Res;
 	UDM_AGENT * Agent;
 	int id=-1;
@@ -2031,6 +2043,9 @@ DLEXPORT PHP_FUNCTION(udm_find)
 	if ((Res=UdmFind(Agent,UdmTolower(Z_STRVAL_PP(yyquery),Agent->charset)))) {
 #else
 #if UDM_VERSION_ID >= 30213
+	if ((yyquery) && (strlen(Z_STRVAL_PP(yyquery)))) 
+	    UdmVarListReplaceStr(&Agent->Conf->Vars, "q",
+				  Z_STRVAL_PP(yyquery));
 	if ((Res=UdmFind(Agent))) {
 #else
 	if ((Res=UdmFind(Agent,Z_STRVAL_PP(yyquery)))) {
