@@ -303,7 +303,7 @@ void zend_do_case_before_statement(znode *case_list, znode *case_token, znode *c
 void zend_do_case_after_statement(znode *result, znode *case_token TSRMLS_DC);
 void zend_do_default_before_statement(znode *case_list, znode *default_token TSRMLS_DC);
 
-void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znode *parent_class_name TSRMLS_DC);
+void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znode *parent_class_name, zend_bool is_namespace TSRMLS_DC);
 void zend_do_end_class_declaration(znode *class_token TSRMLS_DC);
 void zend_do_declare_property(znode *var_name, znode *value, int declaration_type TSRMLS_DC);
 

@@ -532,8 +532,7 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 
 	switch (opline->extended_value) {
 		case ZEND_FETCH_LOCAL:
-			//target_symbol_table = EG(active_symbol_table);
-			target_symbol_table = EG(namespace)?&EG(namespace)->static_members:EG(active_symbol_table);
+			target_symbol_table = EG(active_symbol_table);
 			break;
 		case ZEND_FETCH_GLOBAL:
 			if (opline->op1.op_type == IS_VAR) {
@@ -1009,6 +1008,7 @@ typedef struct _zend_execute_data {
 	object_info object;
 	temp_variable *Ts;
 	zend_bool original_in_execution;
+	zend_class_entry *calling_namespace;
 } zend_execute_data;
 
 #define EX(element) execute_data.element
@@ -1552,7 +1552,8 @@ binary_assign_op_addr: {
 					convert_to_string(&tmp);
 					function_name = &tmp;
 					zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
-						
+					
+					EX(calling_namespace) = EG(namespace);
 					if (EX(opline)->op1.op_type != IS_UNUSED) {
 						if (EX(opline)->op1.op_type==IS_CONST) { /* used for class::function() */
 							zval **object_ptr_ptr;
@@ -1565,7 +1566,14 @@ binary_assign_op_addr: {
 								EX(object).ptr = *object_ptr_ptr;
 								EX(object).ptr->refcount++; /* For this pointer */
 							}
-							active_function_table = &EX(Ts)[EX(opline)->op1.u.var].EA.class_entry->function_table;
+
+							{
+								zend_class_entry *ce = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
+								active_function_table = &ce->function_table;
+								if (ce->is_namespace) {
+									EX(calling_namespace) = ce;
+								}
+							}
 						} else { /* used for member function calls */
 							EX(object).ptr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 							
@@ -1637,9 +1645,12 @@ overloaded_function_call_cont:
 do_fcall_common:
 				{
 					zval **original_return_value;
+					zend_class_entry *current_namespace;
 					int return_value_used = RETURN_VALUE_USED(EX(opline));
 
 					zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) EX(opline)->extended_value, NULL);
+					current_namespace = EG(namespace);
+					EG(namespace) = EX(calling_namespace);
 
 					EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr = &EX(Ts)[EX(opline)->result.u.var].var.ptr;
 
@@ -1722,6 +1733,8 @@ do_fcall_common:
 					EX(function_state).function = (zend_function *) op_array;
 					EG(function_state_ptr) = &EX(function_state);
 					zend_ptr_stack_clear_multiple(TSRMLS_C);
+
+					EG(namespace) = current_namespace;
 
 					if (EG(exception)) {
 						if (EX(opline)->op2.u.opline_num == -1) {
@@ -2034,6 +2047,9 @@ send_by_ref:
 				NEXT_OPCODE();
 			case ZEND_NEW:
 				{
+					if (EX(Ts)[EX(opline)->op1.u.var].EA.class_entry->is_namespace) {
+						zend_error(E_ERROR, "Cannot instantiate a namespace");
+					}
 					EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr = &EX(Ts)[EX(opline)->result.u.var].var.ptr;
 					ALLOC_ZVAL(EX(Ts)[EX(opline)->result.u.var].var.ptr);
 					object_init_ex(EX(Ts)[EX(opline)->result.u.var].var.ptr, EX(Ts)[EX(opline)->op1.u.var].EA.class_entry);
