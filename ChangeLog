@@ -1,3 +1,188 @@
+2000-01-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * TODO: Add some points
+
+    * ext/standard/datetime.c: Remove second (equal) definition of isleap()
+
+    * build/build.mk
+      build/build2.mk
+      build/fastgen.sh
+      build/library.mk
+      build/program.mk
+      build/rules.mk
+      build/rules_pear.mk: Y2K updates
+
+2000-01-01  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/mysql/php_mysql.c: tiny optimisation
+
+    * ext/mysql/php_mysql.c: Happy new year (especially to Zeev :)
+
+2000-01-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/datetime.c
+      ext/standard/parsedate.y
+      acconfig.h.in
+      acinclude.m4
+      configure.in
+      win95nt.h: Declare timezone only, if the system fails to do so.
+
+    * sapi/thttpd/thttpd.c
+      sapi/servlet/servlet.c
+      sapi/servlet/servlet.java
+      sapi/thttpd/php_thttpd.h
+      sapi/phttpd/php_phttpd.h
+      sapi/phttpd/phttpd.c
+      sapi/roxen/roxen.c
+      sapi/fhttpd/fhttpd.c
+      sapi/isapi/php4isapi.c
+      sapi/apache/mod_php4.c
+      sapi/apache/mod_php4.h
+      sapi/apache/sapi_apache.c
+      sapi/cgi/cgi_main.c
+      sapi/aolserver/aolserver.c
+      pear/DB.php
+      pear/DB/common.php
+      pear/DB/mysql.php
+      pear/DB/odbc.php
+      ext/zlib/zlib.c
+      ext/xml/php_xml.h
+      ext/xml/xml.c
+      ext/yp/yp.c
+      ext/sysvshm/sysvshm.c
+      ext/wddx/php_wddx_api.h
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sysvsem/sysvsem.c
+      ext/standard/syslog.c
+      ext/standard/type.c
+      ext/standard/uniqid.c
+      ext/standard/url.c
+      ext/standard/url_scanner.c
+      ext/standard/url_scanner.h
+      ext/standard/url_scanner.re
+      ext/standard/var.c
+      ext/sybase/sybase.c
+      ext/standard/filestat.c
+      ext/standard/flock_compat.c
+      ext/standard/formatted_print.c
+      ext/standard/fsock.c
+      ext/standard/head.c
+      ext/standard/html.c
+      ext/standard/image.c
+      ext/standard/info.c
+      ext/standard/iptc.c
+      ext/standard/lcg.c
+      ext/standard/link.c
+      ext/standard/mail.c
+      ext/standard/math.c
+      ext/standard/md5.c
+      ext/standard/metaphone.c
+      ext/standard/microtime.c
+      ext/standard/output.c
+      ext/standard/pack.c
+      ext/standard/pageinfo.c
+      ext/standard/php_assert.h
+      ext/standard/php_dir.h
+      ext/standard/php_image.h
+      ext/standard/php_lcg.h
+      ext/standard/php_metaphone.h
+      ext/standard/php_output.h
+      ext/standard/php_rand.h
+      ext/standard/post.c
+      ext/standard/quot_print.c
+      ext/standard/rand.c
+      ext/standard/reg.c
+      ext/standard/soundex.c
+      ext/standard/string.c
+      ext/standard/dns.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/dl.c
+      ext/standard/datetime.c
+      ext/standard/dir.c
+      ext/snmp/php_snmp.h
+      ext/snmp/snmp.c
+      ext/standard/array.c
+      ext/standard/assert.c
+      ext/standard/base64.c
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      ext/standard/crypt.c
+      ext/standard/cyr_convert.c
+      ext/readline/php_readline.h
+      ext/readline/readline.c
+      ext/session/mod_files.c
+      ext/session/mod_mm.c
+      ext/session/mod_user.c
+      ext/session/mod_user.h
+      ext/session/session.c
+      ext/pcre/php_pcre.c
+      ext/pgsql/pgsql.c
+      ext/odbc/velocis.c
+      ext/oracle/oracle.c
+      ext/odbc/php_odbc.c
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h
+      ext/oci8/oci8.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h
+      ext/mcrypt/mcrypt.c
+      ext/mhash/mhash.c
+      ext/java/java.c
+      ext/java/reflect.java
+      ext/ldap/ldap.c
+      ext/interbase/interbase.c
+      ext/informix/ifx.ec
+      ext/imap/imap.c
+      ext/gettext/gettext.c
+      ext/hyperwave/hg_comm.c
+      ext/hyperwave/hw.c
+      ext/filepro/filepro.c
+      ext/gd/gd.c
+      ext/gd/gdt1.c
+      ext/gd/gdt1.h
+      ext/domxml/domxml.c
+      ext/fdf/fdf.c
+      ext/dbase/dbase.c
+      ext/dav/dav.c
+      ext/db/db.c
+      ext/bcmath/bcmath.c
+      ext/com/COM.c
+      ext/apache/apache.c
+      ext/aspell/aspell.c
+      LICENSE
+      SAPI.c
+      SAPI.h
+      configuration-parser.y
+      configuration-scanner.l
+      fopen-wrappers.c
+      fopen-wrappers.h
+      header
+      internal_functions.c.in
+      internal_functions_registry.h
+      internal_functions_win32.c
+      main.c
+      main.h
+      php.h
+      php_globals.h
+      php_ini.c
+      php_ini.h
+      php_realpath.c
+      php_realpath.h
+      php_reentrancy.h
+      php_sprintf.c
+      reentrancy.c
+      request_info.c
+      request_info.h
+      rfc1867.c
+      safe_mode.c
+      snprintf.h:
+    Happy Y2K patch! Happy new year (or the new millennium, depending on whether
+    you start counting at 0 or 1).
+
+    * ext/informix/config.m4: Be as portable as possible
+
 1999-12-31  Zeev Suraski  <zeev@php.net>
 
     * sapi/isapi/php4isapi.dsp
