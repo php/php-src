@@ -104,7 +104,8 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 		goto out;
 
 	/* avoid buffering issues while reading header */
-	chunk_size = php_stream_sock_set_chunk_size(stream, 1 TSRMLS_CC);
+	if (options & STREAM_WILL_CAST)
+		chunk_size = php_stream_sock_set_chunk_size(stream, 1 TSRMLS_CC);
 	
 	php_stream_context_set(stream, context);
 
@@ -199,10 +200,12 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 			} else {
 				switch(response_code) {
 					case 403:
-						php_stream_notify_error(context, PHP_STREAM_NOTIFY_AUTH_RESULT, tmp_line, response_code);
+						php_stream_notify_error(context, PHP_STREAM_NOTIFY_AUTH_RESULT,
+								tmp_line, response_code);
 						break;
 					default:
-						php_stream_notify_error(context, PHP_STREAM_NOTIFY_FAILURE, tmp_line, response_code);
+						php_stream_notify_error(context, PHP_STREAM_NOTIFY_FAILURE,
+								tmp_line, response_code);
 				}
 			}
 			
@@ -332,7 +335,8 @@ out:
 	if (stream)	{
 		stream->wrapperdata = response_header;
 		php_stream_notify_progress_init(context, 0, file_size);
-		php_stream_sock_set_chunk_size(stream, chunk_size TSRMLS_CC);
+		if (options & STREAM_WILL_CAST)
+			php_stream_sock_set_chunk_size(stream, chunk_size TSRMLS_CC);
 	}
 
 	if (response_header)	{
@@ -342,7 +346,6 @@ out:
 		zval_copy_ctor(sym);
 		ZEND_SET_SYMBOL(EG(active_symbol_table), "http_response_header", sym);
 	}
-
 	
 	return stream;
 }
