@@ -1,6 +1,6 @@
 <?php
 
-class LimitIterator implements Iterator
+class LimitIterator implements OuterIterator
 {
 	protected $it;
 	protected $offset;
@@ -66,6 +66,14 @@ class LimitIterator implements Iterator
 
 	function getPosition() {
 		return $this->pos;
+	}
+
+	/**
+	 * @return The inner iterator
+	 */	
+	function getInnerIterator()
+	{
+		return $this->it;
 	}
 }
 

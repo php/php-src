@@ -3,7 +3,7 @@
 define('CIT_CALL_TOSTRING', 1);
 define('CIT_CATCH_GET_CHILD', 2);
 
-class CachingIterator
+class CachingIterator implements OuterIterator
 {
 	protected $it;
 	protected $current;
@@ -75,6 +75,11 @@ class CachingIterator
 			throw new exception('CachingIterator does not fetch string value (see CachingIterator::__construct)');
 		}
 		return $this->strValue;
+	}
+	
+	function getInnerIterator()
+	{
+		return $this->it;
 	}
 }
 

@@ -9,7 +9,7 @@
  * you can put an iterator into the constructor and the instance will only 
  * return selected (accepted) elements.
  */
-abstract class FilterIterator implements Iterator
+abstract class FilterIterator implements OuterIterator
 {
 	protected $it;
 
@@ -91,6 +91,14 @@ abstract class FilterIterator implements Iterator
 	 */
 	protected function __clone() {
 		// disallow clone 
+	}
+
+	/**
+	 * @return The inner iterator
+	 */	
+	function getInnerIterator()
+	{
+		return $this->it;
 	}
 }
 
