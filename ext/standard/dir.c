@@ -400,6 +400,9 @@ PHP_FUNCTION(glob)
 
 	/* we assume that any glob pattern will match files from one directory only
 	   so checking the dirname of the first match should be sufficient */
+	if (!globbuf.gl_pathv) {
+		RETURN_FALSE;
+	}
 	strncpy(cwd, globbuf.gl_pathv[0], MAXPATHLEN);
 	if (PG(safe_mode) && (!php_checkuid(cwd, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
