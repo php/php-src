@@ -20,12 +20,6 @@ $cat = proc_open(
 		$pipes
 		);
 
-/* As per manual: avoid deadlock */
-for ($i = 0; $i < count($pipes); $i++)
-{
-    fclose($pipes[$i]);
-}
-
 proc_close($cat);
 
 echo "I didn't segfault!\n";
