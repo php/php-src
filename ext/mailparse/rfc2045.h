@@ -160,11 +160,11 @@ struct  rfc2045ac {
 	int curlinepos;
 	struct rfc2045 *currwp;
 	enum {
-		raw,
-		quotedprint,
-		qpseeneq,
-		qpseeneqh,
-		base64
+		rfc2045ac_raw,
+		rfc2045ac_quotedprint,
+		rfc2045ac_qpseeneq,
+		rfc2045ac_qpseeneqh,
+		rfc2045ac_base64
 	} curstate;
 	int statechar;
 
