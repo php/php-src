@@ -206,7 +206,7 @@ static void xmlrpc_server_destructor(zend_rsrc_list_entry *rsrc) {
    }
 }
 
-static void xmlrpc_init_globals(TSRMLS_D)
+static void xmlrpc_init_globals(php_xmlrpc_globals *xmlrpc_globals)
 {
     return;
 }
