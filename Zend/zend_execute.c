@@ -3946,7 +3946,7 @@ int zend_declare_namespace_handler(ZEND_OPCODE_HANDLER_ARGS)
 		zend_error(E_ERROR, "Internal error: Cannot locate namespace '%s'", Z_STRVAL_P(namespace_name));
 	}
 
-	new_op_array = (*pns)->constructor;
+	new_op_array = (zend_op_array *)(*pns)->constructor;
 	
 	FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
