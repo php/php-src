@@ -1675,7 +1675,10 @@ PHP_FUNCTION(mysqli_stmt_init)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
 
+	stmt = (STMT *)ecalloc(1,sizeof(STMT));
+
 	if (!(stmt->stmt = mysql_stmt_init(mysql))) {
+		efree(stmt);
 		RETURN_FALSE;
 	}
 
