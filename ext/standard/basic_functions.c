@@ -272,6 +272,9 @@ function_entry basic_functions[] = {
 	PHP_FE(is_string,								first_arg_allow_ref)
 	PHP_FE(is_array,								first_arg_allow_ref)
 	PHP_FE(is_object,								first_arg_allow_ref)
+	PHP_FE(get_class,								NULL)
+	PHP_FE(get_parent_class,						NULL)
+	PHP_FE(method_exists,							NULL)
 
 	PHP_FE(leak,									NULL)
 	PHP_FE(error_log,								NULL)
@@ -1594,12 +1597,70 @@ void php3_is_type(INTERNAL_FUNCTION_PARAMETERS,int type)
 }
 
 
-PHP_FUNCTION(is_long) { php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG); }
-PHP_FUNCTION(is_double) { php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_DOUBLE); }
-PHP_FUNCTION(is_string) { php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_STRING); }
-PHP_FUNCTION(is_array) { php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_ARRAY); }
-PHP_FUNCTION(is_object) { php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_OBJECT); }
+PHP_FUNCTION(is_long) 
+{
+	php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG);
+}
 
+PHP_FUNCTION(is_double)
+{
+	php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_DOUBLE);
+}
+
+PHP_FUNCTION(is_string)
+{ 
+	php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_STRING);
+}
+
+PHP_FUNCTION(is_array)
+{
+	php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_ARRAY);
+}
+
+PHP_FUNCTION(is_object)
+{
+	php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_OBJECT);
+}
+
+PHP_FUNCTION(get_class)
+{
+	pval *arg;
+	
+	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &arg)==FAILURE) {
+		RETURN_FALSE;
+	}
+	if (arg->type != IS_OBJECT) {
+		RETURN_FALSE;
+	}
+	RETURN_STRINGL(arg->value.obj.ce->name,	arg->value.obj.ce->name_length, 1);
+}
+
+PHP_FUNCTION(get_parent_class)
+{
+	pval *arg;
+	
+	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &arg)==FAILURE) {
+		RETURN_FALSE;
+	}
+	if ((arg->type != IS_OBJECT) || !arg->value.obj.ce->parent) {
+		RETURN_FALSE;
+	}
+	RETURN_STRINGL(arg->value.obj.ce->parent->name,	arg->value.obj.ce->parent->name_length, 1);
+}
+
+PHP_FUNCTION(method_exists)
+{
+	pval *arg1, *arg2;
+	
+	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &arg1, &arg2)==FAILURE) {
+		RETURN_FALSE;
+	}
+	if (arg1->type != IS_OBJECT) {
+		RETURN_FALSE;
+	}
+	convert_to_string(arg2);
+	RETURN_LONG(zend_hash_exists(&arg1->value.obj.ce->function_table, arg2->value.str.val, arg2->value.str.len+1));
+}
 
 PHP_FUNCTION(leak)
 {

@@ -93,6 +93,10 @@ PHP_FUNCTION(is_string);
 PHP_FUNCTION(is_array);
 PHP_FUNCTION(is_object);
 
+PHP_FUNCTION(get_class);
+PHP_FUNCTION(get_parent_class);
+PHP_FUNCTION(method_exists);
+
 PHP_FUNCTION(leak);
 
 PHP_FUNCTION(error_log);

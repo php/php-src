@@ -29,7 +29,7 @@
 PHP_FUNCTION(soundex)
 {
 	char	*somestring;
-	int	i, small, len, code, last;
+	int	i, _small, len, code, last;
 	pval	*arg;
 	char	soundex[4 + 1];
 
@@ -73,16 +73,16 @@ PHP_FUNCTION(soundex)
 
 	/* build soundex string */
 	last = -1;
-	for (i = 0, small = 0; i < len && small < 4; i++) {
+	for (i = 0, _small = 0; i < len && _small < 4; i++) {
 		/* convert chars to upper case and strip non-letter chars */
 		/* BUG: should also map here accented letters used in non */
 		/* English words or names (also found in English text!): */
 		/* esstsett, thorn, n-tilde, c-cedilla, s-caron, ... */
 		code = toupper(somestring[i]);
 		if (code >= 'A' && code <= 'Z') {
-			if (small == 0) {
+			if (_small == 0) {
 				/* remember first valid char */
-				soundex[small++] = code;
+				soundex[_small++] = code;
 				last = soundex_table[code - 'A'];
 			}
 			else {
@@ -92,7 +92,7 @@ PHP_FUNCTION(soundex)
 				code = soundex_table[code - 'A'];
 				if (code != last) {
 					if (code != 0) {
-						soundex[small++] = code;
+						soundex[_small++] = code;
 					}
 					last = code;
 				}
@@ -100,13 +100,13 @@ PHP_FUNCTION(soundex)
 		}
 	}
 	/* pad with '0' and terminate with 0 ;-) */
-	while (small < 4) {
-		soundex[small++] = '0';
+	while (_small < 4) {
+		soundex[_small++] = '0';
 	}
-	soundex[small] = '\0';
+	soundex[_small] = '\0';
 
-	return_value->value.str.val = estrndup(soundex, small);
-	return_value->value.str.len = small;
+	return_value->value.str.val = estrndup(soundex, _small);
+	return_value->value.str.len = _small;
 	return_value->type = IS_STRING;
 }
 /* }}} */
