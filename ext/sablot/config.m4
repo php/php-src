@@ -45,7 +45,7 @@ if test "$PHP_SABLOT" != "no"; then
     fi
   done
 
-  if test "$testval" == "no"; then
+  if test "$testval" = "no"; then
     AC_ADD_LIBRARY(xmlparse)
     AC_ADD_LIBRARY(xmltok)
   fi
