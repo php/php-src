@@ -48,6 +48,7 @@ PHP_FUNCTION(pcntl_wexitstatus);
 PHP_FUNCTION(pcntl_wtermsig);
 PHP_FUNCTION(pcntl_wstopsig);
 PHP_FUNCTION(pcntl_signal);
+PHP_FUNCTION(pcntl_exec);
 
 static void pcntl_signal_handler(int);
 

@@ -50,6 +50,7 @@ function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_wexitstatus, NULL)
 	PHP_FE(pcntl_wtermsig, NULL)
 	PHP_FE(pcntl_wstopsig, NULL)
+	PHP_FE(pcntl_exec, NULL)
 	{NULL, NULL, NULL}	
 };
 
@@ -360,6 +361,92 @@ PHP_FUNCTION(pcntl_wstopsig)
 #else
 	RETURN_FALSE;
 #endif
+}
+/* }}} */
+
+/* {{{ proto bool pcntl_exec(string path, [array args], [array envs])
+      Executes specified program in current process space as defined by exec(2)  */
+PHP_FUNCTION(pcntl_exec)
+{
+	zval *args, *envs;
+	zval **element;
+	HashTable *args_hash, *envs_hash;
+	int argc=0, argi=0;
+	int envc=0, envi=0;
+	int return_val=0;
+   	char **argv=NULL, **envp=NULL;
+   	char **current_arg, **pair;
+	int pair_length;
+ 	char *key;
+	int key_length;
+	char *path;
+	int path_len;
+	long key_num;
+		 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|aa", &path, &path_len, &args, &envs) == FAILURE) {
+		return;
+	}
+	
+  	if (ZEND_NUM_ARGS() > 1) {
+		/* Build argumnent list */
+		args_hash=HASH_OF(args);
+		argc=zend_hash_num_elements(args_hash);
+  	 
+		argv=alloca((argc+2) * sizeof(char *));
+		*argv=path;
+		for ( zend_hash_internal_pointer_reset(args_hash), current_arg=argv+1; 
+		      (argi < argc && (zend_hash_get_current_data(args_hash, (void **) &element) == SUCCESS));
+		      (argi++, current_arg++, zend_hash_move_forward(args_hash)) ) {
+			*current_arg=Z_STRVAL_PP(element);
+		}
+		*(current_arg)=NULL;
+		/* while(*argv != NULL) printf("Arg: %s\n",*argv++); */
+	} else {
+		argv=alloca(2 * sizeof(char *));
+		*argv=path;
+		*(argv+1)=NULL;
+	}
+   
+ 	if ( ZEND_NUM_ARGS() == 3 ) {
+		/* Build environment pair list */
+		envs_hash=HASH_OF(envs);
+		envc=zend_hash_num_elements(envs_hash);
+  	 
+		envp=alloca((envc+1) * sizeof(char *));
+		for ( zend_hash_internal_pointer_reset(envs_hash), pair=envp; 
+		      (envi < envc && (zend_hash_get_current_data(envs_hash, (void **) &element) == SUCCESS));
+		      (envi++, pair++, zend_hash_move_forward(envs_hash)) ) {
+			switch (return_val=zend_hash_get_current_key_ex(envs_hash, &key, &key_length, &key_num, 0, NULL)) {
+				case HASH_KEY_IS_LONG:
+					key=alloca(101);
+					snprintf(key, 100, "%ld", key_num);
+					key_length=strlen(key);
+ 					break;
+				case HASH_KEY_NON_EXISTANT:
+					pair--;
+					continue;
+			}
+			/* Length of element + equal sign + length of key + null */ 
+			pair_length=Z_STRLEN_PP(element) + key_length + 2;
+			*pair=emalloc(pair_length);			   
+			strlcpy(*pair, key, key_length);   
+			strlcat(*pair, "=", pair_length);
+			strlcat(*pair, Z_STRVAL_PP(element), pair_length);
+						
+			/* Cleanup */
+			if (return_val == HASH_KEY_IS_LONG) free_alloca(101);
+		}
+		*(pair)=NULL;
+		/* while(*envp != NULL) printf("Env: %s\n",*envp++); */
+	}
+   
+	if (execve(path, argv, envp) == -1) {
+		php_error(E_ERROR, "Error has occured in %s: (errno %d) %s", get_active_function_name(TSRMLS_CC),
+			errno, strerror(errno));
+ 
+	}
+   
+	RETURN_FALSE;
 }
 /* }}} */
 
