@@ -1,3 +1,26 @@
+2002-05-31  Andi Gutmans  <andi@zend.com>
+
+    * ZendTS.dsp: - Add zend_objects_API.* to dsp
+
+    * zend_objects_API.c: - Fix build (one more coming up)
+
+    * zend_objects.c: - Fix build
+
+2002-05-31  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * Zend.dsp: Add zend_objects_API.c to project.
+
+2002-05-31  Stanislav Malyshev  <stas@zend.com>
+
+    * Makefile.am
+      zend_execute_API.c
+      zend_globals.h
+      zend_object_handlers.c
+      zend_objects.c
+      zend_objects.h
+      zend_objects_API.c
+      zend_objects_API.h: Generalize object storage and reference bookkeeping
+
 2002-05-30  Venkat Raghavan S  <rvenkat@novell.com>
 
     * zend.h
