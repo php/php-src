@@ -1,3 +1,9 @@
+2004-11-16  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_strtod.c
+      zend_strtod.c:
+      - Make this compile for the Mac again
+
 2004-11-15  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_0)

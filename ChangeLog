@@ -1,3 +1,23 @@
+2004-11-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #30799 (SoapServer doesn't handle private or protected
+      properties)
+
+    * (PHP_5_0)
+      NEWS:
+      Class mapping was implemented (Bug #29385 Soapserver always uses std
+      class).
+
+2004-11-16  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      Zend/zend_strtod.c
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.c:
+      - Make this compile for the Mac again
+
 2004-11-15  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_0)
