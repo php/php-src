@@ -2405,7 +2405,7 @@ ZEND_METHOD(reflection_class, isInstance)
 }
 /* }}} */
 
-/* {{{ proto public stdclass Reflection_Class::newInstance(mixed* args)
+/* {{{ proto public stdclass Reflection_Class::newInstance(mixed* args, ...)
    Returns an instance of this class */
 ZEND_METHOD(reflection_class, newInstance)
 {
