@@ -2471,6 +2471,10 @@ PHP_FUNCTION(domxml_node_append_child)
 	}
 	/* end libxml2 code */
 	else if (child->type == XML_ATTRIBUTE_NODE) {
+		if (parent->type != XML_ELEMENT_NODE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Element node required to append Attribute");
+			RETURN_FALSE;
+		}
 		if (parent->properties != NULL) {
 			/* Check if an attribute with the same name exists */
 			xmlAttrPtr foundattrp;

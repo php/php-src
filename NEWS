@@ -4,6 +4,7 @@ PHP 4                                                                      NEWS
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
 - Changed phpize not to require libtool. (Jani)
 - Updated bundled libmbfl library (used for multibyte functions). (Moriyoshi)
+- Fixed bug #32114 (DOM crashing when attribute appended to Document). (Rob)
   Fixed bugs:
   . Bug #32063 (mb_convert_encoding ignores named entity 'alpha')
   . Bug #31911 (mb_decode_mimeheader() is case-sensitive to hex escapes)
