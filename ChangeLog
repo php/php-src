@@ -1,3 +1,31 @@
+2003-01-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      Removed non-needed code.
+
+2003-01-22  Anil Madhavapeddy  <anil@recoil.org>
+
+    * ext/standard/config.m4:
+      typo
+
+2003-01-22  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/ming/ming.dsp
+      ext/ming/ming.dsp:
+      adding missing zlib.lib and path to bindlib
+
+2003-01-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c:
+      Fixed a crash when invalid color is passed to imagepstext().
+
+2003-01-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/ircg/ircg.c
+      ext/ircg/ircg.c:
+      Fix for treating a NAMES list as single join
+
 2003-01-21  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/mbstring/php_mbregex.c:

@@ -1,3 +1,13 @@
+2003-01-22  Stanislav Malyshev  <stas@zend.com>
+
+    * OBJECTS2_HOWTO:
+      some small refinements for get_class_*
+
+2003-01-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_execute.c:
+      Fixed bug #21814 (Allow booleans to be used as array keys).
+
 2003-01-21  Sterling Hughes  <sterling@bumblebury.com>
 
     * zend_objects_API.c:
