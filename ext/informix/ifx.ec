@@ -675,7 +675,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
             if (ptr && (type==IFXG(le_link) || type==IFXG(le_plink))) {
             	zend_list_addref(link);
                 return_value->value.lval = IFXG(default_link) = link;
-                return_value->type = IS_RESOURCE;
+                return_value->type = IS_LONG;
                 efree(hashed_details);
                 return;
             } else {
@@ -709,7 +709,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 
         /* add it to the list */
         return_value->value.lval = php3_list_insert(ifx,IFXG(le_link));
-        return_value->type = IS_RESOURCE;
+        return_value->type = IS_LONG;
         
         /* add it to the hash */
         new_index_ptr.ptr = (void *) return_value->value.lval;
