@@ -4,7 +4,11 @@
 
 #include <stddef.h>
 #include <string.h>                     /* memset(), memcpy() */
-#include <php_config.h>
+#if PHP_WIN32
+#include "config.w32.h"
+#else
+#include "php_config.h"
+#endif
 #include "php_compat.h"
 
 #ifdef COMPILED_FROM_DSP
