@@ -131,13 +131,19 @@ PHPAPI HRESULT php_COM_set(i_dispatch *obj, IDispatch FAR* pDisp, int cleanup)
 {
 	HRESULT hr;
 
-	obj->i.dispatch = pDisp;
-	obj->typelib = !FAILED(obj->i.dispatch->lpVtbl->GetTypeInfo(obj->i.dispatch, 0, LANG_NEUTRAL, &(obj->i.typeinfo)));
+	if((obj->i.dispatch = pDisp) == NULL)
+	{
+		php_error(E_ERROR, "NULL pointer exception");
+	}
+	else
+	{
+		obj->typelib = !FAILED(obj->i.dispatch->lpVtbl->GetTypeInfo(obj->i.dispatch, 0, LANG_NEUTRAL, &(obj->i.typeinfo)));
 
-	if(cleanup) {
-		pDisp = NULL;
-	} else {
-		hr = obj->i.dispatch->lpVtbl->AddRef(obj->i.dispatch);
+		if(cleanup) {
+			pDisp = NULL;
+		} else {
+			hr = obj->i.dispatch->lpVtbl->AddRef(obj->i.dispatch);
+		}
 	}
 
 	return hr;
