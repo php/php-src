@@ -555,7 +555,6 @@ PHP_FUNCTION(usort)
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
 	}
-	convert_to_string_ex(BG(user_compare_func_name));
 	if (zend_hash_sort(target_hash, qsort, array_user_compare, 1) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
@@ -585,7 +584,6 @@ PHP_FUNCTION(uasort)
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
 	}
-	convert_to_string_ex(BG(user_compare_func_name));
 	if (zend_hash_sort(target_hash, qsort, array_user_compare, 0) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
@@ -664,7 +662,6 @@ PHP_FUNCTION(uksort)
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
 	}
-	convert_to_string_ex(BG(user_compare_func_name));
 	if (zend_hash_sort(target_hash, qsort, array_user_key_compare, 0) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;

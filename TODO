@@ -10,7 +10,6 @@ Zend
 global
 ------
     * make everything on the language-level independent of your locale setings.
-    * allow methods to be called as callbacks. eg: array_walk($myarray,"this->print()");
     * always build the standalone executable as well as the chosen SAPI 
       target.
     * make sure all source files have the "right" copyright.
