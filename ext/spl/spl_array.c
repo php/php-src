@@ -303,8 +303,8 @@ PHP_MINIT_FUNCTION(spl_array)
 }
 /* }}} */
 
-/* {{{ proto void spl_array::__construct(array|object ar = array())
-       proto void spl_array_it::__construct(array|object ar = array())
+/* {{{ proto void ArrayObject::__construct(array|object ar = array())
+       proto void ArrayIterator::__construct(array|object ar = array())
  Cronstructs a new array iterator from a path. */
 SPL_METHOD(Array, __construct)
 {
@@ -338,7 +338,7 @@ SPL_METHOD(Array, __construct)
 }
 /* }}} */
 
-/* {{{ proto spl_array_it|NULL ArrayObject::getIterator()
+/* {{{ proto ArrayIterator ArrayObject::getIterator()
    Create a new iterator from a ArrayObject instance */
 SPL_METHOD(Array, getIterator)
 {
@@ -381,7 +381,7 @@ ZEND_API int spl_hash_pos_exists(spl_array_object * intern TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto void spl_array_it::rewind()
+/* {{{ proto void ArrayIterator::rewind()
    Rewind array back to the start */
 SPL_METHOD(Array, rewind)
 {
@@ -398,7 +398,7 @@ SPL_METHOD(Array, rewind)
 }
 /* }}} */
 
-/* {{{ proto mixed|false spl_array_it::current()
+/* {{{ proto mixed|false ArrayIterator::current()
    Return current array entry */
 SPL_METHOD(Array, current)
 {
@@ -425,7 +425,7 @@ SPL_METHOD(Array, current)
 }
 /* }}} */
 
-/* {{{ proto mixed|false spl_array_it::key()
+/* {{{ proto mixed|false ArrayIterator::key()
    Return current array key */
 SPL_METHOD(Array, key)
 {
@@ -459,7 +459,7 @@ SPL_METHOD(Array, key)
 }
 /* }}} */
 
-/* {{{ proto void spl_array_it::next()
+/* {{{ proto void ArrayIterator::next()
    Move to next entry */
 SPL_METHOD(Array, next)
 {
@@ -480,7 +480,7 @@ SPL_METHOD(Array, next)
 }
 /* }}} */
 
-/* {{{ proto bool spl_array_it::hasMore()
+/* {{{ proto bool ArrayIterator::hasMore()
    Check whether array contains more entries */
 SPL_METHOD(Array, hasMore)
 {

@@ -42,37 +42,8 @@ PHP_RINIT_FUNCTION(spl);
 PHP_RSHUTDOWN_FUNCTION(spl);
 PHP_MINFO_FUNCTION(spl);
 
-#define ZEND_EXECUTE_HOOK_PTR(name) \
-	opcode_handler_t handler_ ## name
-
-#define ZEND_EXECUTE_HOOK(name) \
-	spl_globals->handler_ ## name = zend_opcode_handlers[name]; \
-	zend_opcode_handlers[name] = spl_handler_ ## name
-
-#define ZEND_EXECUTE_HOOK_RESTORE(name) \
-	zend_opcode_handlers[name] = SPL_G(handler_ ## name)
-
-#define ZEND_EXECUTE_HOOK_ORIGINAL(name) \
-	return SPL_G(handler_ ## name)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)
-
-#define ZEND_EXECUTE_HOOK_FUNCTION(name) \
-	int spl_handler_ ## name(ZEND_OPCODE_HANDLER_ARGS)
 
 ZEND_BEGIN_MODULE_GLOBALS(spl)
-#ifdef SPL_FOREACH
-	ZEND_EXECUTE_HOOK_PTR(ZEND_FE_RESET);
-	ZEND_EXECUTE_HOOK_PTR(ZEND_FE_FETCH);
-	ZEND_EXECUTE_HOOK_PTR(ZEND_SWITCH_FREE);
-#endif
-#if defined(SPL_ARRAY_READ) | defined(SPL_ARRAY_WRITE)
-	ZEND_EXECUTE_HOOK_PTR(ZEND_FETCH_DIM_R);
-	ZEND_EXECUTE_HOOK_PTR(ZEND_FETCH_DIM_W);
-	ZEND_EXECUTE_HOOK_PTR(ZEND_FETCH_DIM_RW);
-#endif
-#ifdef SPL_ARRAY_WRITE
-	ZEND_EXECUTE_HOOK_PTR(ZEND_ASSIGN_DIM);
-	ZEND_EXECUTE_HOOK_PTR(ZEND_UNSET_DIM_OBJ);
-#endif
 ZEND_END_MODULE_GLOBALS(spl)
 
 #ifdef ZTS

@@ -1,5 +1,5 @@
 --TEST--
-SPL: spl_array_iterator
+SPL: ArrayIterator
 --SKIPIF--
 <?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
@@ -8,7 +8,7 @@ SPL: spl_array_iterator
 echo "==Normal==\n";
 
 $arr = array(0=>0, 1=>1, 2=>2);
-$obj = new spl_array($arr);
+$obj = new ArrayObject($arr);
 
 foreach($obj as $ak=>$av) {
 	foreach($obj as $bk=>$bv) {
@@ -22,7 +22,7 @@ foreach($obj as $ak=>$av) {
 echo "==UseRef==\n";
 
 $arr = array(0=>0, 1=>1, 2=>2);
-$obj = new spl_array(&$arr);
+$obj = new ArrayObject(&$arr);
 
 foreach($obj as $ak=>$av) {
 	foreach($obj as $bk=>$bv) {
@@ -33,7 +33,7 @@ foreach($obj as $ak=>$av) {
 echo "==Modify==\n";
 
 $arr = array(0=>0, 1=>1, 2=>2);
-$obj = new spl_array(&$arr);
+$obj = new ArrayObject(&$arr);
 
 foreach($obj as $ak=>$av) {
 	foreach($obj as $bk=>$bv) {
@@ -47,7 +47,7 @@ foreach($obj as $ak=>$av) {
 echo "==Delete==\n";
 
 $arr = array(0=>0, 1=>1, 2=>2);
-$obj = new spl_array(&$arr);
+$obj = new ArrayObject(&$arr);
 
 foreach($obj as $ak=>$av) {
 	foreach($obj as $bk=>$bv) {
@@ -61,7 +61,7 @@ foreach($obj as $ak=>$av) {
 echo "==Change==\n";
 
 $arr = array(0=>0, 1=>1, 2=>2);
-$obj = new spl_array(&$arr);
+$obj = new ArrayObject(&$arr);
 
 foreach($obj as $ak=>$av) {
 	foreach($obj as $bk=>$bv) {
@@ -112,11 +112,11 @@ echo "Done\n";
 1=>1 - 0=>0
 1=>1 - 1=>1
 
-Notice: spl_array_it::next(): Array was modified outside object and internal position is no longer valid in %sarray_iterator.php on line %d
+Notice: ArrayIterator::next(): Array was modified outside object and internal position is no longer valid in %sarray_iterator.php on line %d
 1=>1 - 0=>0
 1=>1 - 2=>2
 
-Notice: spl_array_it::next(): Array was modified outside object and internal position is no longer valid in %sarray_iterator.php on line %d
+Notice: ArrayIterator::next(): Array was modified outside object and internal position is no longer valid in %sarray_iterator.php on line %d
 0=>0 - 0=>0
 0=>0 - 2=>2
 2=>2 - 0=>0
@@ -128,11 +128,11 @@ Notice: spl_array_it::next(): Array was modified outside object and internal pos
 1=>1 - 0=>0
 1=>1 - 1=>1
 
-Notice: spl_array_it::next(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
+Notice: ArrayIterator::next(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
 
-Notice: spl_array_it::hasMore(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
+Notice: ArrayIterator::hasMore(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
 
-Notice: spl_array_it::next(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
+Notice: ArrayIterator::next(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
 
-Notice: spl_array_it::hasMore(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
+Notice: ArrayIterator::hasMore(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
 Done

@@ -62,11 +62,6 @@ zend_module_entry spl_module_entry = {
 };
 /* }}} */
 
-zend_class_entry *spl_ce_recursive_it;
-zend_class_entry *spl_ce_recursive_it_it;
-zend_class_entry *spl_ce_array_read;
-zend_class_entry *spl_ce_array_access;
-
 /* {{{ spl_functions_none
  */
 function_entry spl_functions_none[] = {
@@ -117,22 +112,6 @@ PHP_MSHUTDOWN_FUNCTION(spl)
 {                      
 	SPL_DEBUG(fprintf(stderr, "%s\n", "Shutting down SPL");)
 
-#ifdef SPL_FOREACH
-	ZEND_EXECUTE_HOOK_RESTORE(ZEND_FE_RESET);
-	ZEND_EXECUTE_HOOK_RESTORE(ZEND_FE_FETCH);
-	ZEND_EXECUTE_HOOK_RESTORE(ZEND_SWITCH_FREE);
-#endif
-
-#if defined(SPL_ARRAY_READ) | defined(SPL_ARRAY_WRITE)
-	ZEND_EXECUTE_HOOK_RESTORE(ZEND_FETCH_DIM_R);
-	ZEND_EXECUTE_HOOK_RESTORE(ZEND_FETCH_DIM_W);
-	ZEND_EXECUTE_HOOK_RESTORE(ZEND_FETCH_DIM_RW); 
-#endif
-
-#ifdef SPL_ARRAY_WRITE
-	ZEND_EXECUTE_HOOK_RESTORE(ZEND_ASSIGN_DIM);
-#endif /* SPL_ARRAY_WRITE */
-
 	return SUCCESS;
 }
 /* }}} */
@@ -141,30 +120,8 @@ PHP_MSHUTDOWN_FUNCTION(spl)
  */
 PHP_MINFO_FUNCTION(spl)
 {
-#ifdef SPL_FOREACH
-	char *foreach = "beta";
-#else /* SPL_ARRAY_WRITE */
-	char *foreach = "beta, not hooked";
-#endif
-#ifdef SPL_ARRAY_READ
-	char *array_read = "beta";
-#else /* SPL_ARRAY_WRITE */
-	char *array_read = "beta, not hooked";
-#endif
-#ifdef SPL_ARRAY_WRITE
-	char *array_write = "beta";
-#else /* SPL_ARRAY_WRITE */
-	char *array_write = "beta, not hooked";
-#endif /* SPL_ARRAY_WRITE */
-
 	php_info_print_table_start();
 	php_info_print_table_header(2, "SPL support",        "enabled");
-	php_info_print_table_row(2,    "iterator",           foreach);
-	php_info_print_table_row(2,    "forward",            foreach);
-	php_info_print_table_row(2,    "sequence",           foreach);
-	php_info_print_table_row(2,    "assoc",              foreach);
-	php_info_print_table_row(2,    "ArrayRead",         array_read);
-	php_info_print_table_row(2,    "ArrayAccess",       array_write);
 	php_info_print_table_end();
 }
 /* }}} */
