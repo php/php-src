@@ -7,10 +7,8 @@ Accessing the error buffer via $obj->error_buf...
 --INI--
 --FILE--
 <?php 
-
    	$a = tidy_parse_string("<HTML><asd asdf></HTML>");
-	echo $a->error_buf;
- 
+	echo $a->errorBuffer;
 ?>
 --EXPECT--
 line 1 column 1 - Warning: missing <!DOCTYPE> declaration
