@@ -646,9 +646,15 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb TSRMLS_DC)
 	STAT_PROP_ENTRY(rdev);
 #endif
 	STAT_PROP_ENTRY(size);
+#if defined(NETWARE) && defined(CLIB_STAT_PATCH)
+	STAT_PROP_ENTRY(atime.tv_sec);
+	STAT_PROP_ENTRY(mtime.tv_sec);
+	STAT_PROP_ENTRY(ctime.tv_sec);
+#else
 	STAT_PROP_ENTRY(atime);
 	STAT_PROP_ENTRY(mtime);
 	STAT_PROP_ENTRY(ctime);
+#endif
 #ifdef HAVE_ST_BLKSIZE
 	STAT_PROP_ENTRY(blksize);
 #endif
