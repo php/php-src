@@ -1,6 +1,12 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2004, Version 4.3.5
+- Improved the sybase_ct module (Timm)
+  . Added ability to define a message handler not only globally, but also per 
+    connection.
+  . Made sybct.login_timeout changeable at runtime.
+  . Added ini option sybct.packet_size which lets you control the packet size.
+  . Fixed memory leak in sybase_set_message_handler().
 - Fixed bug #26974 (rename() doesn't check the destination file against 
   safe_mode/open_basedir). (Ilia)
 - Fixed bug #26973 (*printf() '+' modifier broken). (Jani)
@@ -21,6 +27,8 @@ PHP 4                                                                      NEWS
   (Wez, Ilia)
 - Fixed bug #26381 (rand() without srand() doesn't work with certain php.ini).
   (Jani)
+- Fixed bug #22403 (PHP crashes when executing a sql procedure without
+  parameters). (Timm)
 - Fixed bug #21513 (shutdown functions not executed if timed out). (Zeev)
 
 12 Jan 2004, Version 4.3.5RC1
