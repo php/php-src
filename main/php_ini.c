@@ -134,7 +134,7 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
 	}
 	php_info_print_table_start();
 	php_info_print_table_header(3, "Directive", "Local Value", "Master Value");
-	zend_hash_apply_with_argument(&EG(ini_directives), (apply_func_arg_t) php_ini_displayer, (void *) (long) module_number TSRMLS_CC);
+	zend_hash_apply_with_argument(EG(ini_directives), (apply_func_arg_t) php_ini_displayer, (void *) (long) module_number TSRMLS_CC);
 	php_info_print_table_end();
 }
 /* }}} */
