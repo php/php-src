@@ -47,6 +47,9 @@ class PEAR_Remote extends PEAR
     }
 
     // }}}
+
+    // {{{ getCache()
+
     
     function getCache($args)
     {
@@ -66,7 +69,11 @@ class PEAR_Remote extends PEAR
             );
         return $result;
     }
+
+    // }}}
     
+    // {{{ saveCache()
+
     function saveCache($args, $data)
     {
         $id       = md5(serialize($args));
@@ -82,6 +89,8 @@ class PEAR_Remote extends PEAR
             fclose($fp);
         };
     }
+
+    // }}}
     
     // {{{ call(method, [args...])
 
