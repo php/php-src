@@ -21,7 +21,13 @@
 #define IS_EXT_MODULE
 
 #include "php.h"
+
+#if WIN32
+#include "config.w32.h"
+#else
 #include "php_config.h"
+#endif
+
 #define PHP_XML_INTERNAL
 #include "php_xml.h"
 #include "zend_variables.h"
