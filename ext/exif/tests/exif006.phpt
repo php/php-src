@@ -8,7 +8,7 @@ Check for exif_read_data, magic_quotes_runtime
 --INI--
 output_handler=
 zlib.output_compression=0
-magic_quotes_runtime=On
+magic_quotes_runtime=1
 --FILE--
 <?php
 /*
@@ -17,7 +17,6 @@ magic_quotes_runtime=On
             copy of test1.jpg as a thumbnail.
   test6.jpg is the same as test2.jpg but with a UNICODE UserComment: &Auml;&Ouml;&&Uuml;&szlig;&auml;&ouml;&uuml;
 */
-print_r(ini_get("magic_quotes_runtime"));
 var_dump(exif_read_data(dirname(__FILE__).'/test6.jpg','',true,false));
 ?>
 --EXPECTF--
