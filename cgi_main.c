@@ -85,20 +85,19 @@ static void sapi_cgi_send_header(sapi_header_struct *sapi_header, void *server_c
 }
 
 
-static char *sapi_cgi_read_post(SLS_D)
+static int sapi_cgi_read_post(char *buffer, uint count_bytes SLS_DC)
 {
 	uint read_bytes=0, tmp_read_bytes;
-	char *result = (char *) emalloc(SG(request_info).content_length+1);
 
-	while (read_bytes < SG(request_info).content_length) {
-		tmp_read_bytes = read(0, result+read_bytes, SG(request_info).content_length-read_bytes);
+	count_bytes = MIN(count_bytes, SG(request_info).content_length-SG(read_post_bytes));
+	while (read_bytes < count_bytes) {
+		tmp_read_bytes = read(0, buffer+read_bytes, count_bytes-read_bytes);
 		if (tmp_read_bytes<=0) {
 			break;
 		}
 		read_bytes += tmp_read_bytes;
 	}
-	result[read_bytes]=0;
-	return result;
+	return read_bytes;
 }
 
 
