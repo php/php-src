@@ -10,7 +10,6 @@ if (PHP_MCRYPT != "no") {
 		EXTENSION('mcrypt', 'mcrypt.c');
 		AC_DEFINE('HAVE_LIBMCRYPT', 1);
 		AC_DEFINE('HAVE_LIBMCRYPT24', 1);
-		AC_DEFINE('HAVE_MCRYPT_GENERIC_DEINIT', 1);
 	} else {
 		WARNING("mcrypt not enabled; libraries and headers not found");
 	}
