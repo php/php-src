@@ -235,6 +235,7 @@ PS_OPEN_FUNC(files)
 		data->dirdepth = (size_t) strtol(save_path, NULL, 10);
 		if (errno == ERANGE) {
 			efree(data);
+			PS_SET_MOD_DATA(0);
 			return FAILURE;
 		}
 		save_path = p + 1;
@@ -249,6 +250,8 @@ PS_CLOSE_FUNC(files)
 {
 	PS_FILES_DATA;
 
+	if (!data) return FAILURE;
+	
 	ps_files_close(data);
 
 	if (data->lastkey) 
@@ -265,6 +268,8 @@ PS_READ_FUNC(files)
 	long n;
 	struct stat sbuf;
 	PS_FILES_DATA;
+	
+	if (!data) return FAILURE;
 
 	ps_files_open(data, key TSRMLS_CC);
 	if (data->fd < 0)
@@ -299,6 +304,8 @@ PS_WRITE_FUNC(files)
 {
 	long n;
 	PS_FILES_DATA;
+	
+	if (!data) return FAILURE;
 
 	ps_files_open(data, key TSRMLS_CC);
 	if (data->fd < 0)
@@ -334,6 +341,8 @@ PS_DESTROY_FUNC(files)
 {
 	char buf[MAXPATHLEN];
 	PS_FILES_DATA;
+	
+	if (!data) return FAILURE;
 
 	if (!ps_files_path_create(buf, sizeof(buf), data, key))
 		return FAILURE;
@@ -350,6 +359,8 @@ PS_DESTROY_FUNC(files)
 PS_GC_FUNC(files) 
 {
 	PS_FILES_DATA;
+	
+	if (!data) return FAILURE;
 	
 	/* we don't perform any cleanup, if dirdepth is larger than 0.
 	   we return SUCCESS, since all cleanup should be handled by
