@@ -86,6 +86,11 @@ class PEAR_Installer extends PEAR_Common
      */
     var $registry;
 
+    /** List of file transactions queued for an install/upgrade/uninstall.
+     * @var array
+     */
+    var $transactions = array();
+
     // }}}
 
     // {{{ constructor
