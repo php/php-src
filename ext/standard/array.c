@@ -1051,15 +1051,8 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	HashPosition pos;			/* hash iterator */
    	ulong num_key;
    	char *string_key;
-	int (*compare_func)(zval *, zval *, zval *);
-   
-   	if (behavior == 0) {
-		compare_func = is_equal_function;
-	} else {
-		/* Lets not return a key unless the values are exact */
-		compare_func = is_identical_function;
-	}
-
+	int (*compare_func)(zval *, zval *, zval *) = is_equal_function;
+      	
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
 		zend_get_parameters_ex(ZEND_NUM_ARGS(), &value, &array, &strict) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1079,9 +1072,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 		convert_to_boolean_ex(strict);
 		if (Z_LVAL_PP(strict)) {
 			compare_func = is_identical_function;
-	        } else {
-			compare_func = is_equal_function;
-		}
+	        } 
 	}
 
 	target_hash = HASH_OF(*array);
