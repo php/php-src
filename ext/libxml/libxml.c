@@ -377,7 +377,7 @@ void php_libxml_ctx_warning(void *ctx, const char *msg, ...)
 	va_end(args);
 }
 
-void php_libxml_error_handler(void *ctx, const char *msg, ...)
+PHP_LIBXML_API void php_libxml_error_handler(void *ctx, const char *msg, ...)
 {
 	va_list args;
 	va_start(args, msg);
