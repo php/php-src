@@ -311,7 +311,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 
 		ZVAL_RESOURCE(argv[0], ch->id);
 		zend_list_addref(ch->id);
-		ZVAL_STRINGL(argv[1], data, (int) length, 1);
+		ZVAL_STRINGL(argv[1], data, length, 1);
 
 		error = call_user_function(EG(function_table),
 		                           NULL,
@@ -365,7 +365,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 		zend_list_addref(ch->id);
 		ZVAL_RESOURCE(argv[1], t->fd);
 		zend_list_addref(t->fd);
-		ZVAL_LONG(argv[2], size * nmemb);
+		ZVAL_LONG(argv[2], (int) size * nmemb);
 
 		error = call_user_function(EG(function_table),
 		                           NULL,
@@ -398,8 +398,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 {
 	php_curl       *ch  = (php_curl *) ctx;
 	php_curl_write *t   = ch->handlers->write_header;
-	int             error;
-	int             length;
+	size_t          length = size * nmemb;
 	TSRMLS_FETCH();
 	
 	switch (t->method) {
@@ -407,33 +406,30 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 		/* Handle special case write when we're returning the entire transfer
 		 */
 		if (ch->handlers->write->method == PHP_CURL_RETURN)
-			smart_str_appendl(&ch->handlers->write->buf, data, size * nmemb);
+			smart_str_appendl(&ch->handlers->write->buf, data, (int) length);
 		else
 			PUTS(data);
-
-		length = size * nmemb;
-
 		break;
 	case PHP_CURL_FILE:
-		length = fwrite(data, size, nmemb, t->fp);
-		break;
+		return fwrite(data, size, nmemb, t->fp);
 	case PHP_CURL_USER: {
 		zval *argv[2];
 		zval *retval;
+		int   error;
 		TSRMLS_FETCH();
-	
+
 		MAKE_STD_ZVAL(argv[0]);
 		MAKE_STD_ZVAL(argv[1]);
 		MAKE_STD_ZVAL(retval);
 
 		ZVAL_RESOURCE(argv[0], ch->id);
 		zend_list_addref(ch->id);
-		ZVAL_STRINGL(argv[0], data, size * nmemb, 1);
+		ZVAL_STRINGL(argv[1], data, length, 1);
 
-		error = call_user_function(EG(function_table), 
-	    	                       NULL,
+		error = call_user_function(EG(function_table),
+		                           NULL,
 		                           t->func,
-	        	                   retval, 2, argv TSRMLS_CC);
+		                           retval, 2, argv TSRMLS_CC);
 		if (error == FAILURE) {
 			php_error(E_WARNING, "Couldn't call the CURLOPT_HEADERFUNCTION");
 			length = -1;
@@ -441,17 +437,14 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 		else {
 			length = Z_LVAL_P(retval);
 		}
-
 		zval_ptr_dtor(&argv[0]);
 		zval_ptr_dtor(&argv[1]);
 		zval_ptr_dtor(&retval);
 		break;
 	}
 	case PHP_CURL_IGNORE:
-		length = size * nmemb;
-		break;
-	}
-	
+		return length;
+    	}
 	return length;
 }
 /* }}} */
