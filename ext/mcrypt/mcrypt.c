@@ -31,17 +31,12 @@
 
 #if HAVE_LIBMCRYPT
 
-#if PHP_API_VERSION < 19990421
-#define  zend_module_entry php3_module_entry
-#include "modules.h"
-#include "internal_functions.h"
-#endif
-
+#include "php_mcrypt.h"
 #include "fcntl.h"
 
-#include "php_mcrypt.h"
-
-#include "lcrypt.h"
+/* we should find a way to figure out whether RC6/IDEA are available */
+#define NON_FREE
+#include "mcrypt.h"
 
 function_entry mcrypt_functions[] = {
 	PHP_FE(mcrypt_ecb, NULL)
@@ -143,15 +138,29 @@ static int php_minit_mcrypt(INIT_FUNC_ARGS)
 	MCRYPT_ENTRY(TripleDES);
 	MCRYPT_ENTRY(ThreeWAY);
 	MCRYPT_ENTRY(GOST);
+#ifdef MCRYPT2
+	MCRYPT_ENTRY(CRYPT);
+	MCRYPT_ENTRY(DES_COMPAT);
+#endif
 	MCRYPT_ENTRY(SAFER64);
 	MCRYPT_ENTRY(SAFER128);
 	MCRYPT_ENTRY(CAST128);
 	MCRYPT_ENTRY(TEAN);
-	MCRYPT_ENTRY(TWOFISH);
 	MCRYPT_ENTRY(RC2);
-#ifdef CRYPT
-	MCRYPT_ENTRY(CRYPT);
+#ifdef TWOFISH
+	MCRYPT_ENTRY(TWOFISH);
+#elif defined(TWOFISH128)
+	MCRYPT_ENTRY(TWOFISH128);
+	MCRYPT_ENTRY(TWOFISH192);
+	MCRYPT_ENTRY(TWOFISH256);
 #endif
+#ifdef RC6
+	MCRYPT_ENTRY(RC6);
+#endif
+#ifdef IDEA
+	MCRYPT_ENTRY(IDEA);
+#endif
+	
 	return SUCCESS;
 }
 
@@ -179,6 +188,11 @@ PHP_FUNCTION(mcrypt_create_iv)
 	source = psource->value.lval;
 
 	i = size->value.lval;
+	if(i <= 0) {
+		php3_error(E_WARNING, "illegal size input parameter");
+		RETURN_FALSE;
+	}
+	
 	iv = ecalloc(i, 1);
 	
 	if(source == RANDOM || source == URANDOM) {

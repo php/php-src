@@ -9,10 +9,14 @@ AC_ARG_WITH(mcrypt,
 [
   if test "$withval" != "no"; then
     for i in /usr/local /usr $withval; do
-      if test -f $i/include/lcrypt.h; then
+      if test -f $i/include/mcrypt.h; then
         MCRYPT_DIR=$i
       fi
     done
+    if test "$MCRYPT_DIR" = ""; then
+      AC_MSG_ERROR(Please install mcrypt.h and libmcrypt.a accordingly to the do
+cumentation - I cannot find mcrypt.h)
+    fi
     INCLUDES="$INCLUDES -I$MCRYPT_DIR/include"
     EXTRA_LIBS="$EXTRA_LIBS -L$MCRYPT_DIR/lib -lmcrypt"
 
