@@ -75,6 +75,9 @@ zend_module_entry pcntl_module_entry = {
 
 #ifdef COMPILE_DL_PCNTL
 ZEND_GET_MODULE(pcntl)
+# ifdef PHP_WIN32
+# include "zend_arg_defs.c"
+# endif
 #endif
 
 static void pcntl_signal_handler(int);

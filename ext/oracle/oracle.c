@@ -195,6 +195,9 @@ static const text *ora_func_tab[] =
 
 #ifdef COMPILE_DL_ORACLE
 ZEND_GET_MODULE(oracle)
+# ifdef PHP_WIN32
+# include "zend_arg_defs.c"
+# endif
 #endif
 
 /* {{{ _close_oraconn

@@ -175,6 +175,9 @@ zend_module_entry sockets_module_entry = {
 
 #ifdef COMPILE_DL_SOCKETS
 ZEND_GET_MODULE(sockets)
+# ifdef PHP_WIN32
+# include "zend_arg_defs.c"
+# endif
 #endif
 
 /* inet_ntop should be used instead of inet_ntoa */

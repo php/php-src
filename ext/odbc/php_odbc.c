@@ -154,6 +154,9 @@ ZEND_API php_odbc_globals odbc_globals;
 
 #ifdef COMPILE_DL_ODBC
 ZEND_GET_MODULE(odbc)
+# ifdef PHP_WIN32
+# include "zend_arg_defs.c"
+# endif
 #endif
 
 /* {{{ _free_odbc_result

@@ -1604,6 +1604,9 @@ zend_module_entry yaz_module_entry = {
 
 #ifdef COMPILE_DL_YAZ
 ZEND_GET_MODULE(yaz)
+# ifdef PHP_WIN32
+# include "zend_arg_defs.c"
+# endif
 #endif
 
 #endif
