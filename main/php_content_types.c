@@ -10,10 +10,12 @@ static sapi_post_content_type_reader php_post_content_types[] = {
 
 SAPI_POST_READER_FUNC(php_default_post_reader)
 {
+	char *data;
 	ELS_FETCH();
 
 	sapi_read_standard_form_data(content_type_dup SLS_CC);
-	SET_VAR_STRINGL("HTTP_RAW_POST_DATA", SG(request_info).post_data, SG(request_info).post_data_length);
+	data = estrndup(SG(request_info).post_data,SG(request_info).post_data_length);
+	SET_VAR_STRINGL("HTTP_RAW_POST_DATA", data, SG(request_info).post_data_length);
 }
 
 
