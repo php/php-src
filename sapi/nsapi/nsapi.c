@@ -172,11 +172,6 @@ ZEND_DECLARE_MODULE_GLOBALS(nsapi)
 
 #define NSAPI_G(v) TSRMG(nsapi_globals_id, zend_nsapi_globals *, v)
 
-/* compatibility with PHP4_3 */
-#if !defined(OnUpdateLong)
-#define OnUpdateLong OnUpdateInt
-#endif
-
 /* {{{ nsapi_functions[]
  *
  * Every user visible function must have an entry in nsapi_functions[].
