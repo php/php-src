@@ -320,11 +320,9 @@ static void ifx_free_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 static void ifx_free_blob(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-       IFX_IDRES *Ifx_blob = (IFX_IDRES *)rsrc->ptr;
+	IFX_IDRES *Ifx_blob = (IFX_IDRES *)rsrc->ptr;
 
-       
-	php_intifx_release_blob(&Ifx_blob->BLOB.blob_data TSRMLS_C);
-
+	php_intifx_release_blob(&Ifx_blob->BLOB.blob_data TSRMLS_CC);
 	efree(Ifx_blob); 
 }
 
@@ -785,7 +783,7 @@ EXEC SQL END DECLARE SECTION;
 	affected_rows = sqlca.sqlerrd[0];	/* save estimated affected rows */
 	for (e = 0; e < 6; e++) sqlerrd[e] = sqlca.sqlerrd[e];
    
-	num_params = php_intifx_preparse(statement);
+	num_params = php_intifx_preparse(statement TSRMLS_CC);
 
 	Ifx_Result = (IFX_RES *) emalloc(sizeof(IFX_RES));
 	if (Ifx_Result == NULL) {
@@ -808,7 +806,7 @@ EXEC SQL END DECLARE SECTION;
 		Ifx_Result->res_id[i] = -1;
 	}
 
-	if (!php_intifx_alloc_ibind(Ifx_Result, num_params))   {
+	if (!php_intifx_alloc_ibind(Ifx_Result, num_params TSRMLS_CC))   {
 		IFXG(sv_sqlcode) = SQLCODE;
 		EXEC SQL free :statemid;
 		efree(Ifx_Result);
@@ -816,8 +814,7 @@ EXEC SQL END DECLARE SECTION;
 		RETURN_FALSE;
 	}
 
-
-	desc_count = php_intifx_count_descriptors(statemid);
+	desc_count = php_intifx_count_descriptors(statemid TSRMLS_CC);
 	if (desc_count == 0)
 		desc_count = 1;
 
@@ -1190,7 +1187,7 @@ EXEC SQL END DECLARE SECTION;
 	affected_rows = sqlca.sqlerrd[0];	/* save estimated affected rows */
 	for (e = 0; e < 6; e++) sqlerrd[e] = sqlca.sqlerrd[e];
 
-	num_params = php_intifx_preparse(statement);
+	num_params = php_intifx_preparse(statement TSRMLS_CC);
 
 	Ifx_Result = (IFX_RES *) emalloc(sizeof(IFX_RES));
 	if (Ifx_Result == NULL) {
@@ -1214,7 +1211,7 @@ EXEC SQL END DECLARE SECTION;
 		Ifx_Result->res_id[i] = -1;
 	}
 
-	if (!php_intifx_alloc_ibind(Ifx_Result, num_params))   {
+	if (!php_intifx_alloc_ibind(Ifx_Result, num_params TSRMLS_CC))   {
 		IFXG(sv_sqlcode) = SQLCODE;
 		EXEC SQL free :statemid;
 		efree(Ifx_Result);
@@ -1222,7 +1219,7 @@ EXEC SQL END DECLARE SECTION;
 		RETURN_FALSE;
 	}
 
-	desc_count = php_intifx_count_descriptors(statemid);
+	desc_count = php_intifx_count_descriptors(statemid TSRMLS_CC);
 	if (desc_count == 0)
 		desc_count = 1;
 
