@@ -28,6 +28,8 @@ PHP                                                                        NEWS
   . snmp_read_mib(). (Jani)
   . http_build_query(). (Sara)
   . ftp_alloc(). (Sara)
+- Changed fgetcsv() in order for the second parameter to be optional.
+  (Moriyoshi)
 - Added "resume_pos" context option to "ftp://" wrapper. (Sara)
 - Added optional parameter to OCIWriteTemporaryLob() to specify the type of LOB
   (Patch by Novicky Marek <novicky@aarongroup.cz>). (Thies)
