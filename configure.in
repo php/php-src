@@ -603,6 +603,7 @@ PHP_CONFIGURE_PART(Configuring extensions)
 # reading config stubs
 esyscmd(./scripts/config-stubs ext)
 
+test "$PHP_SAPI" != "cgi" && PHP_FAST_OUTPUT(sapi/cgi/Makefile)
 PHP_FAST_OUTPUT(sapi/$PHP_SAPI/Makefile)
 
 AC_MSG_CHECKING(whether to enable versioning)
