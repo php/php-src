@@ -232,6 +232,7 @@ PHP 4                                                                      NEWS
   (Maxim)
 - Fixed bug #14532 (fixed connection_status() to return 2 for timeouts). (Jani)
 - Fixed bug #14245 ('make install' fails on AIX when using --with-apxs). (Jani)
+- Fixed bug #13757 (CGI: passing query string on command line broken). (Shane)
 - Fixed bug #13561 (--without-pear disabled phpize/php-config install). (Jani)
 - Fixed bug #13551 (bcmath functions applying scale incorrectly). (Sara)
 
