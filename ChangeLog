@@ -1,3 +1,19 @@
+1999-10-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/php_session.h
+      ext/session/session.c
+      NEWS
+      php.ini-dist: Add session.use_cookies option
+
+1999-10-22  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/var.c:
+    unserialize no longer complaints about unserializing empty-strings (started that just a few days ago)
+
+1999-10-22  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
 1999-10-21  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/standard/url_scanner.c
