@@ -572,8 +572,6 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		RETURN_FALSE;
 	}
 
-#ifndef PHP_WIN32
-
 	switch (type) {
 		case FS_IS_W:
 			RETURN_BOOL (!VCWD_ACCESS(filename, W_OK));
@@ -584,7 +582,6 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		case FS_EXISTS:
 			RETURN_BOOL (!VCWD_ACCESS(filename, F_OK));
 	}
-#endif
 
 	stat_sb = &BG(sb);
 

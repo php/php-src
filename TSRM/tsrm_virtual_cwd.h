@@ -150,9 +150,21 @@ CWD_API int virtual_mkdir(const char *pathname, mode_t mode TSRMLS_DC);
 CWD_API int virtual_rmdir(const char *pathname TSRMLS_DC);
 CWD_API DIR *virtual_opendir(const char *pathname TSRMLS_DC);
 CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC);
-
-#if !defined(TSRM_WIN32)
 CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC);
+#if defined(TSRM_WIN32)
+/* these are not defined in win32 headers */
+#ifndef W_OK
+#define W_OK 0x02
+#endif
+#ifndef R_OK
+#define R_OK 0x04
+#endif
+#ifndef X_OK
+#define X_OK 0x01
+#endif
+#ifndef F_OK
+#define F_OK 0x00
+#endif
 #endif
 
 #if HAVE_UTIME
@@ -231,7 +243,11 @@ typedef struct _virtual_cwd_globals {
 #define VCWD_RMDIR(pathname) rmdir(pathname)
 #define VCWD_OPENDIR(pathname) opendir(pathname)
 #define VCWD_POPEN(command, type) popen(command, type)
+#if defined(TSRM_WIN32)
+#define VCWD_ACCESS(pathname, mode) tsrm_win32_access(pathname, mode)
+#else
 #define VCWD_ACCESS(pathname, mode) access(pathname, mode)
+#endif
 
 #ifdef HAVE_REALPATH
 #define VCWD_REALPATH(path, real_path) realpath(path, real_path)

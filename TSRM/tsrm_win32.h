@@ -95,6 +95,7 @@ TSRM_API void tsrm_win32_shutdown(void);
 TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env);
 TSRM_API FILE *popen(const char *command, const char *type);
 TSRM_API int pclose(FILE *stream);
+TSRM_API int tsrm_win32_access(const char *pathname, int mode);
 
 TSRM_API int shmget(int key, int size, int flags);
 TSRM_API void *shmat(int key, const void *shmaddr, int flags);
