@@ -870,7 +870,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 					if (call_user_function_ex(CG(function_table), NULL, orig_user_exception_handler, &retval2, 1, params, 1, NULL TSRMLS_CC) == SUCCESS) {
 						zval_ptr_dtor(&retval2);
 					}
-                                        efree(params);
+					efree(params);
 					zval_ptr_dtor(&EG(exception));
 					EG(exception) = NULL;
 				} else {
@@ -878,10 +878,10 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 					EG(exception) = NULL;
 					zend_error(E_ERROR, "Uncaught exception!");
 				}
-                                if (!retval) {
-                                    zval_ptr_dtor(EG(return_value_ptr_ptr));
-                                    local_retval = NULL;
-                                }
+				if (!retval) {
+					zval_ptr_dtor(EG(return_value_ptr_ptr));
+					local_retval = NULL;
+				}
 #else
 				zval_ptr_dtor(&EG(exception));
 				zend_error(E_ERROR, "Uncaught exception!");
