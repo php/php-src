@@ -18,11 +18,6 @@ while test $# -gt 0; do
         automake_flags=--copy
     fi
 
-    if test "$1" = "--ZendEngine2"; then
-        ZENDDIR=ZendEngine2
-        echo "Using Zend Engine 2 code"
-    fi
-
 	if test "$1" = "--force"; then
 		devok=1
 		echo "Forcing buildconf"
@@ -38,6 +33,28 @@ if test "$dev" = "0" -a "$devok" = "0"; then
 fi
 
 if test -z "$ZENDDIR"; then
+    if grep "PHP_MAJOR_VERSION 5" main/php_version.h >/dev/null; then
+      v=5
+    else
+      v=4
+    fi
+  
+    if test "$v" = "5"; then
+      if test -r "Zend/OBJECTS2_HOWTO"; then
+        :
+      else
+        mv Zend ZendEngine1 2>/dev/null
+        mv ZendEngine2 Zend
+      fi
+    else
+      if test -r "Zend/zend_execute_globals.h"; then
+           :
+      else
+        mv Zend ZendEngine2 2>/dev/null
+        mv ZendEngine1 Zend
+      fi
+    fi
+
     ZENDDIR=Zend
     echo "using default Zend directory"
 fi
