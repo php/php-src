@@ -33,7 +33,7 @@ extern int zendleng;
 #define zendleng zend_get_zendleng(CLS_C)
 #endif
 
-static void html_putc(char c)
+ZEND_API void zend_html_putc(char c)
 {
 	switch (c) {
 		case '\n':
@@ -61,12 +61,12 @@ static void html_putc(char c)
 }
 
 
-static void html_puts(char *s, uint len)
+ZEND_API void zend_html_puts(char *s, uint len)
 {
 	register char *ptr=s, *end=s+len;
 	
 	while (ptr<end) {
-		html_putc(*ptr++);
+		zend_html_putc(*ptr++);
 	}
 }
 
@@ -108,7 +108,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				in_string = !in_string;
 				break;				
 			case T_WHITESPACE:
-				html_puts(zendtext, zendleng);  /* no color needed */
+				zend_html_puts(zendtext, zendleng);  /* no color needed */
 				token.type = 0;
 				continue;
 				break;
@@ -136,10 +136,10 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 		}
 		switch (token_type) {
 			case T_END_HEREDOC:
-				html_puts(token.value.str.val, token.value.str.len);
+				zend_html_puts(token.value.str.val, token.value.str.len);
 				break;
 			default:
-				html_puts(zendtext, zendleng);
+				zend_html_puts(zendtext, zendleng);
 				break;
 		}
 

@@ -42,6 +42,8 @@ BEGIN_EXTERN_C()
 ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini);
 int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini);
 int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_ini);
+ZEND_API void zend_html_putc(char c);
+ZEND_API void zend_html_puts(char *s, uint len);
 END_EXTERN_C()
 
 extern zend_syntax_highlighter_ini syntax_highlighter_ini;
