@@ -388,8 +388,7 @@ ZEND_FUNCTION(defined)
 }
 
 /* {{{ proto string get_class(object object)
-     Retrieves the class name ...
-*/
+   Retrieves the class name */
 ZEND_FUNCTION(get_class)
 {
 	zval **arg;
@@ -405,8 +404,7 @@ ZEND_FUNCTION(get_class)
 /* }}} */
 
 /* {{{ proto string get_parent_class(object object)
-     Retrieves the parent class name ...
-*/
+   Retrieves the parent class name */
 ZEND_FUNCTION(get_parent_class)
 {
 	zval **arg;
@@ -503,8 +501,7 @@ ZEND_FUNCTION(get_object_vars)
 /* }}} */
 
 /* {{{ proto bool method_exists(object object, string method)
-     Checks if the class method exists ...
-*/
+   Checks if the class method exists */
 ZEND_FUNCTION(method_exists)
 {
 	zval **klass, **method_name;
@@ -530,8 +527,7 @@ ZEND_FUNCTION(method_exists)
 /* }}} */
 
 /* {{{ proto bool class_exists(string classname)
-     Checks if the class exists ...
-*/
+   Checks if the class exists */
 ZEND_FUNCTION(class_exists)
 {
 	zval **class_name;
