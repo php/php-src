@@ -377,7 +377,16 @@ PHP_FUNCTION(posix_setpgid)
 #ifdef HAVE_GETPGID
 PHP_FUNCTION(posix_getpgid)
 {
-	PHP_POSIX_SINGLE_ARG_FUNC(getpgid);
+	long val;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &val) == FAILURE) {
+		return;
+	}
+	
+	if ((val = getpgid(val)) < 0) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+	RETURN_LONG(val);
 }
 #endif
 /* }}} */
@@ -387,7 +396,16 @@ PHP_FUNCTION(posix_getpgid)
 #ifdef HAVE_GETSID
 PHP_FUNCTION(posix_getsid)
 {
-	PHP_POSIX_SINGLE_ARG_FUNC(getsid);
+	long val;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &val) == FAILURE) {
+		return;
+	}
+	
+	if ((val = getsid(val)) < 0) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+	RETURN_LONG(val);
 }
 #endif
 /* }}} */
