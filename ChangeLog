@@ -1,3 +1,41 @@
+2002-12-23  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/standard/dir.c:
+      Verify if gl_pathv is not NULL, which it is, when GLOB_NOMATCH isn't
+      supported and there are no matches.
+      
+
+2002-12-23  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/mime_magic/mime_magic.c:
+      MFH
+
+    * ext/mime_magic/mime_magic.c:
+      fix compile error on IRIX
+
+    * ext/exif/exif.c:
+      MFH: fix compile error with IRIX compiler
+
+2002-12-23  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cgi/.cvsignore:
+      MFB:
+      Ignore the new name of the binary built. Allows cvsclean to work again
+      in sapi/cgi.
+
+    * sapi/cgi/.cvsignore:
+      Ignore the new name of the binary built. Allows cvsclean to work again
+      in sapi/cgi.
+
+2002-12-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c:
+      MFB: fpos_t -> off_t
+
+    * main/streams.c:
+      fpos_t should have been off_t.
+      Noticed by Philip Olson.
+
 2002-12-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/ncurses/ncurses_functions.c:
