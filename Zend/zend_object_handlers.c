@@ -722,7 +722,10 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, char *propert
 #endif
 
 	if (!zend_verify_property_access(property_info, ce TSRMLS_CC)) {
-		zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name, property_name);
+		if (!silent) {
+			zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name, property_name);
+		}
+		return NULL;
 	}
 
 	zend_hash_quick_find(tmp_ce->static_members, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval);
