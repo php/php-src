@@ -667,7 +667,7 @@ COMMAND $cmd
 			$wanted_re = str_replace("%i", "[+\-]?[0-9]+", $wanted_re);
 			$wanted_re = str_replace("%d", "[0-9]+", $wanted_re);
 			$wanted_re = str_replace("%x", "[0-9a-fA-F]+", $wanted_re);
-			$wanted_re = str_replace("%f", "[+\-]?\.?[0-9]+\.?[0-9]*", $wanted_re);
+			$wanted_re = str_replace("%f", "[+\-]?\.?[0-9]+\.?[0-9]*(E-?[0-9]+)?", $wanted_re);
 			$wanted_re = str_replace("%c", ".", $wanted_re);
 			// %f allows two points "-.0.0" but that is the best *simple* expression
 		}
