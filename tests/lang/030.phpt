@@ -1,7 +1,5 @@
 --TEST--
 $this in constructor test
---POST--
---GET--
 --FILE--
 <?php
 class foo {
@@ -21,7 +19,7 @@ function &foo2(&$foo) {
 }
 
 
-$bar1 =& new foo('constructor');
+$bar1 =new foo('constructor');
 $bar1->Name = 'outside';
 $bar1->echoName();
 $List->echoName();
