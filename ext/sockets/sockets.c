@@ -511,7 +511,7 @@ PHP_FUNCTION(open_listen_sok)
 /* }}} */
 
 /* {{{ proto int accept_connect(long fd)
-   accepts a connection on the listening socket fd */
+   Accepts a connection on the listening socket fd */
 int accept_connect(int fd, struct sockaddr *la)
 {
 	int foo, m;
@@ -545,7 +545,7 @@ PHP_FUNCTION(accept_connect)
 /* }}} */
 
 /* {{{ proto bool set_nonblock(long fd)
-   sets nonblocking mode for file descriptor fd */
+   Sets nonblocking mode for file descriptor fd */
 PHP_FUNCTION(set_nonblock)
 {
 	zval **fd;
@@ -566,7 +566,7 @@ PHP_FUNCTION(set_nonblock)
 /* }}} */
 
 /* {{{ proto bool listen(long fd, long backlog)
-   sets the maximum number of connections allowed to be waited for on the socket specified by fd */
+   Sets the maximum number of connections allowed to be waited for on the socket specified by fd */
 PHP_FUNCTION(listen)
 {
 	zval **fd, **backlog;
@@ -664,7 +664,7 @@ PHP_FUNCTION(read)
 /* }}} */
 
 /* {{{ proto long getsockname(long fd, string &addr, long &port)
-   Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port into addr and port describing the local side of a socket. */
+   Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port into addr and port describing the local side of a socket */
 
 /* A lock to prevent inet_ntoa() from causing problems in threading */
 volatile int inet_ntoa_lock = 0;
@@ -759,7 +759,7 @@ PHP_FUNCTION(gethostbyname)
 #endif
 
 /* {{{ proto long getpeername(long fd, string &addr, long &port)
-   Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port into addr and port describing the remote side of a socket. */
+   Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port into addr and port describing the remote side of a socket */
 
 PHP_FUNCTION(getpeername)
 {
@@ -944,7 +944,7 @@ PHP_FUNCTION(strerror)
 /* }}} */
 
 /* {{{ proto long bind(long sockfd, long addr [, long port])
-   Binds an open socket to a listening port. */
+   Binds an open socket to a listening port */
 /* Port is only specified if sockfd is in the AF_INET family. */
 PHP_FUNCTION(bind)
 {
@@ -1016,8 +1016,8 @@ PHP_FUNCTION(bind)
 }
 /* }}} */
 
-/* {{{ proto resource build_iovec(int num_vectors, ...)
-   Build a 'struct iovec' for use with sendmsg, recvmsg, writev, and readv. */
+/* {{{ proto resource build_iovec(int num_vectors [, int ...])
+   Build a 'struct iovec' for use with sendmsg, recvmsg, writev, and readv */
 /* First parameter is number of vectors, each additional parameter is the
    length of the vector to create.
  */
@@ -1066,7 +1066,7 @@ PHP_FUNCTION(build_iovec)
 /* }}} */
 
 /* {{{ proto string fetch_iovec(resource iovec_id, long iovec_position)
-   Returns the data held in the iovec specified by iovec_id[iovec_position]. */
+   Returns the data held in the iovec specified by iovec_id[iovec_position] */
 PHP_FUNCTION(fetch_iovec)
 {
 	zval **iovec_id, **iovec_position;
@@ -1089,7 +1089,7 @@ PHP_FUNCTION(fetch_iovec)
 /* }}} */
 
 /* {{{ proto bool set_iovec(resource iovec_id, long iovec_position, string new_val)
-   Sets the data held in iovec_id[iovec_position] to new_val. */
+   Sets the data held in iovec_id[iovec_position] to new_val */
 PHP_FUNCTION(set_iovec)
 {
 	zval **iovec_id, **iovec_position, **new_val;
@@ -1181,7 +1181,7 @@ PHP_FUNCTION(delete_iovec)
 /* }}} */
 
 /* {{{ proto bool free_iovec(resource iovec_id)
-   Frees the iovec specified by iovec_id. */
+   Frees the iovec specified by iovec_id */
 PHP_FUNCTION(free_iovec)
 {
 	zval **iovec_id;
@@ -1208,7 +1208,7 @@ PHP_FUNCTION(free_iovec)
 /* }}} */
 
 /* {{{ proto long readv(long fd, resource iovec_id)
-   Reads from an fd, using the scatter-gather array defined by iovec_id. */
+   Reads from an fd, using the scatter-gather array defined by iovec_id */
 PHP_FUNCTION(readv)
 {
 	zval **fd, **iovec_id;
@@ -1231,7 +1231,7 @@ PHP_FUNCTION(readv)
 /* }}} */
 
 /* {{{ proto long writev(long fd, resource iovec_id)
-   Writes to a fd, using the scatter-gather array defined by iovec_id. */
+   Writes to a fd, using the scatter-gather array defined by iovec_id */
 PHP_FUNCTION(writev)
 {
 	zval **fd, **iovec_id;
@@ -1254,7 +1254,7 @@ PHP_FUNCTION(writev)
 /* }}} */
 
 /* {{{ proto long recv(long fd, string buf, long len, long flags)
-   Receive data from a connected socket. */
+   Receive data from a connected socket */
 /* May be used with SOCK_DGRAM sockets. */
 PHP_FUNCTION(recv)
 {
@@ -1290,7 +1290,7 @@ PHP_FUNCTION(recv)
 /* }}} */
 
 /* {{{ proto long send(long fd, string buf, long len, long flags)
-   Send data to a connected socket. */
+   Send data to a connected socket */
 /* May be used with SOCK_DGRAM sockets. */
 PHP_FUNCTION(send)
 {
@@ -1315,7 +1315,7 @@ PHP_FUNCTION(send)
 /* }}} */
 
 /* {{{ proto long recvfrom(long fd, string &buf, long len, long flags, string &name [, long &port])
-   Receive data from a socket, connected or not. */
+   Receive data from a socket, connected or not */
 PHP_FUNCTION(recvfrom)
 {
 	zval **fd, **buf, **len, **flags, **name, **port;
@@ -1434,7 +1434,7 @@ PHP_FUNCTION(recvfrom)
 /* }}} */
 
 /* {{{ proto long sendto(long fd, string buf, long len, long flags, string addr [, long port])
-   Sends a message to a socket, whether it is connected or not. */
+   Sends a message to a socket, whether it is connected or not */
 PHP_FUNCTION(sendto)
 {
 	zval **fd, **buf, **len, **flags, **addr, **port;
@@ -1528,7 +1528,7 @@ PHP_FUNCTION(sendto)
 /* }}} */
 
 /* {{{ proto long recvmsg(long fd, resource iovec, array &control, long &controllen, long &flags, string &addr [, long &port])
-   Used to receive messages on a socket, whether connection-oriented or not. */
+   Used to receive messages on a socket, whether connection-oriented or not */
 PHP_FUNCTION(recvmsg)
 {
 	zval **fd, **iovec, **control, **controllen, **flags, **addr, **port;
@@ -1766,8 +1766,8 @@ PHP_FUNCTION(sendmsg)
 }
 /* }}} */
 
-/* {{{ proto long getsockopt(long fd, long level, long optname, array/long &optval)
-   Gets socket options for the socket. */
+/* {{{ proto long getsockopt(long fd, long level, long optname, array|long &optval)
+   Gets socket options for the socket */
 /* If optname is SO_LINGER, optval is returned as an array with members 
    "l_onoff" and "l_linger", otherwise it is an integer.
 */
@@ -1816,8 +1816,8 @@ PHP_FUNCTION(getsockopt)
 }
 /* }}} */
 
-/* {{{ proto long setsockopt(long fd, long level, long optname, long/array optval)
-   Sets socket options for the socket. */
+/* {{{ proto long setsockopt(long fd, long level, long optname, long|array optval)
+   Sets socket options for the socket */
 /* If optname is SO_LINGER, optval is expected to be an array
    with members "l_onoff" and "l_linger", otherwise it should be an integer. */
 PHP_FUNCTION(setsockopt)
