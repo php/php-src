@@ -378,8 +378,8 @@ PHP_FUNCTION(pi)
 
 /* }}} */
 
-/* {{{ proto number pow(number lbase, number lexponent)
-   Returns lbase raised to the power of lexponent. Returns
+/* {{{ proto number pow(number base, number exponent)
+   Returns base raised to the power of exponent. Returns
    integer result when possible. */
 
 PHP_FUNCTION(pow)
@@ -390,8 +390,7 @@ PHP_FUNCTION(pow)
 	
 	zval **zbase, **zexp;
 	long lbase,lexp;
-	double dval,dbase,pos_result;
-	long result = 1;
+	double dval;
 	
 	if (ZEND_NUM_ARGS() != 2) {
 		WRONG_PARAM_COUNT;
@@ -407,15 +406,15 @@ PHP_FUNCTION(pow)
 	
 	if (Z_TYPE_PP(zexp) == IS_DOUBLE) {
 		/* pow(?,float), this is the ^^ case */
-		dbase = Z_TYPE_PP(zbase) == IS_LONG ? (double) Z_LVAL_PP(zbase)
-											:          Z_DVAL_PP(zbase);
-		if ( dbase <= 0.0 ) {
+		convert_to_double_ex(zbase);
+
+		if ( Z_DVAL_PP(zbase) <= 0.0 ) {
 			/* Note that with the old behaviour, php pow() returned bogus
 			   results. Try pow(-1,2.5) in PHP <= 4.0.6 ... */
 			php_error(E_WARNING,"Trying to raise a nonpositive value to a broken power");
 			RETURN_FALSE;
 		}
-		RETURN_DOUBLE(exp(log(dbase) * Z_DVAL_PP(zexp)));
+		RETURN_DOUBLE(exp(log(Z_DVAL_PP(zbase)) * Z_DVAL_PP(zexp)));
 	}
 
 	/* pow(?,int), this is the ** case */
@@ -439,8 +438,8 @@ PHP_FUNCTION(pow)
 				RETURN_DOUBLE(0.0);
 			}
 		} else { /* lbase < 0.0 */
-			pos_result = exp(log(-Z_DVAL_PP(zbase)) * (double)lexp);
-			RETURN_DOUBLE(lexp & 1 ? -pos_result : pos_result);
+			dval = exp(log(-Z_DVAL_PP(zbase)) * (double)lexp);
+			RETURN_DOUBLE(lexp & 1 ? -dval : dval);
 		}
 			
 	}
@@ -475,14 +474,17 @@ PHP_FUNCTION(pow)
 				RETURN_DOUBLE(((lexp & 1) && lbase<0) ? -dval : dval);
 			}
 
+			Z_TYPE_P(return_value) = IS_LONG;
+			Z_LVAL_P(return_value) = 1;
+
 			/* loop runs at most log(log(LONG_MAX)) times, i.e. ~ 5 */
 			while (lexp > 0) { 
 				if (lexp & 1) /* odd */
-					result *= lbase;
+					Z_LVAL_P(return_value) *= lbase;
 				lexp >>= 1;
 				lbase *= lbase;
 			}
-			RETURN_LONG(result);
+			/* return */
 	}
 }
 
