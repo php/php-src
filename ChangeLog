@@ -1,3 +1,83 @@
+2003-03-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/streams/streams.c:
+      Win32 build fix.
+
+2003-03-17  Ian Holsman  <Ian@holsman.net>
+
+    * sapi/apache2handler/sapi_apache2.c:
+      PR#22672 -   User not logged under Apache2
+      patch provided by Andrew Bradford.
+
+2003-03-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * main/streams/streams.c:
+      Fixed bug #22538 (failed stat on stdio/stdin/stderr streams).
+
+2003-03-17  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/sybase_ct/config.m4:
+      Fix the bad logic..
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * ext/curl/interface.c
+      ext/curl/multi.c
+      ext/curl/streams.c
+      ext/zlib/zlib.c
+      ext/zlib/zlib_fopen_wrapper.c:
+      WS & CS fixes
+
+2003-03-17  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/gd/gd.c:
+      fixing my proto fix :|
+
+2003-03-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * acinclude.m4
+      configure.in
+      main/main.c
+      main/safe_mode.c:
+      Fix for Bug #21310, based on a patch by jflemer@php.net.
+
+2003-03-17  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/curl/multi.c
+      ext/fdf/fdf.c
+      ext/ncurses/ncurses_functions.c
+      ext/standard/aggregation.c
+      ext/standard/dns.c:
+      proto fixes
+
+    * ext/db/db.c
+      ext/dbx/dbx.c
+      ext/gd/gd.c
+      ext/ircg/ircg.c
+      ext/zlib/zlib.c:
+      proto fix
+
+    * ext/mysqli/mysqli_api.c:
+      more proto fixes
+
+2003-03-17  Jani Taskinen  <sniper@iki.fi>
+
+    * run-tests.php:
+      Be sure we get the correct version..
+
+    * run-tests.php:
+      added the version info to be send as-is to buildtest-process
+
+    * (PHP_4_3)
+      NEWS:
+      Note about apache2 change
+
 2003-03-16  Sascha Schumann  <sascha@schumann.cx>
 
     * (PHP_4)
