@@ -1,17 +1,20 @@
 --TEST--
 Test strtoupper on non-ASCII characters
---POST--
---GET--
+--SKIPIF--
+<?php
+if (!setlocale(LC_CTYPE, "de_DE", "de", "german", "ge")) {
+        die("skip locale needed for this test is not supported on this platform");
+}
+?>
 --FILE--
 <?php
 $chars = "ЮКО";
-setlocale(LC_ALL, "C");
 // Not sure which is most portable. BSD's answer to
 // this one. A small array based on PHP_OS should
 // cover a majority of systems and makes the problem
 // of locales transparent for the end user.
-setlocale(LC_CTYPE, "ISO8859-1");
-print(strtoupper($chars));
+setlocale(LC_CTYPE, "de_DE", "de", "german", "ge");
+echo strtoupper($chars)."\n";
 ?>
 --EXPECT--
-дко
+юко
