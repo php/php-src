@@ -1451,7 +1451,7 @@ ZEND_API int increment_function(zval *op1)
 {
 	switch (op1->type) {
 		case IS_BOOL:
-			if (!op->value.lval) {
+			if (!op1->value.lval) {
 				op1->value.lval = 1;
 			}
 			break;
@@ -1518,7 +1518,7 @@ ZEND_API int decrement_function(zval *op1)
 	
 	switch (op1->type) {
 		case IS_BOOL:
-			if (op->value.lval) {
+			if (op1->value.lval) {
 				op1->value.lval = 0;
 			} else {
 				op1->value.lval = 1;
