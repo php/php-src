@@ -2,4 +2,6 @@
 LTLIBRARY_NAME          = libexpat.la
 LTLIBRARY_SOURCES       = xmlparse.c xmlrole.c xmltok.c
 
+EXTRA_INCLUDES = $(XML_CPPFLAGS)
+
 include $(top_srcdir)/build/dynlib.mk
