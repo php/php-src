@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _ZEND_ERRORS_H
-#define _ZEND_ERRORS_H
+#ifndef ZEND_ERRORS_H
+#define ZEND_ERRORS_H
 
 #define E_ERROR				(1<<0L)
 #define E_WARNING			(1<<1L)
@@ -36,5 +36,5 @@
 #define E_ALL (E_ERROR | E_WARNING | E_PARSE | E_NOTICE | E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_COMPILE_WARNING | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE)
 #define E_CORE (E_CORE_ERROR | E_CORE_WARNING)
 
-#endif /* _ZEND_ERRORS_H */
+#endif /* ZEND_ERRORS_H */
 

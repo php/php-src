@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _ZEND_CONFIG_W32_H
-#define _ZEND_CONFIG_W32_H
+#ifndef ZEND_CONFIG_W32_H
+#define ZEND_CONFIG_W32_H
 
 
 #include <string.h>
@@ -84,4 +84,4 @@ typedef unsigned int uint;
 
 #define ZEND_SERVICE_MB_STYLE		(MB_TOPMOST|MB_SERVICE_NOTIFICATION)
 
-#endif /* _ZEND_CONFIG_W32_H */
+#endif /* ZEND_CONFIG_W32_H */

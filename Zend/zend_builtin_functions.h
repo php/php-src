@@ -18,9 +18,9 @@
 */
 
 
-#ifndef _ZEND_BUILTIN_FUNCTIONS_H
-#define _ZEND_BUILTIN_FUNCTIONS_H
+#ifndef ZEND_BUILTIN_FUNCTIONS_H
+#define ZEND_BUILTIN_FUNCTIONS_H
 
 int zend_startup_builtin_functions(void);
 
-#endif /* _ZEND_BUILTIN_FUNCTIONS_H */
+#endif /* ZEND_BUILTIN_FUNCTIONS_H */

@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _ZEND_PTR_STACK_H
-#define _ZEND_PTR_STACK_H
+#ifndef ZEND_PTR_STACK_H
+#define ZEND_PTR_STACK_H
 
 typedef struct _zend_ptr_stack {
 	int top, max;
@@ -40,4 +40,4 @@ ZEND_API void zend_ptr_stack_apply(zend_ptr_stack *stack, void (*func)(void *));
 ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), zend_bool free_elements);
 ZEND_API int zend_ptr_stack_num_elements(zend_ptr_stack *stack);
 
-#endif /* _ZEND_PTR_STACK_H */
+#endif /* ZEND_PTR_STACK_H */

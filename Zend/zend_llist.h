@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _ZEND_LLIST_H
-#define _ZEND_LLIST_H
+#ifndef ZEND_LLIST_H
+#define ZEND_LLIST_H
 
 #include <stdlib.h>
 
@@ -73,4 +73,4 @@ ZEND_API void *zend_llist_get_prev_ex(zend_llist *l, zend_llist_position *pos);
 
 END_EXTERN_C()
 
-#endif /* _ZEND_LLIST_H */
+#endif /* ZEND_LLIST_H */

@@ -35,4 +35,4 @@ ZEND_API void *zend_dynamic_array_pop(dynamic_array *da);
 ZEND_API void *zend_dynamic_array_get_element(dynamic_array *da, unsigned int index);
 END_EXTERN_C()
 
-#endif /* _ZEND_DYNAMIC_ARRAY_H */
+#endif /* ZEND_DYNAMIC_ARRAY_H */
