@@ -264,5 +264,5 @@
 #define PHP_DATADIR "c:\\php4"
 #define PHP_SYSCONFDIR "c:\\php4"
 #define PHP_LOCALSTATEDIR "c:\\php4"
-#define PHP_CONFIG_FILE_PATH "c:\\winnt"
+#define PHP_CONFIG_FILE_PATH (getenv("SystemRoot"))?getenv("SystemRoot"):""
 #define PEAR_INSTALLDIR "c:\\php4\\pear"
