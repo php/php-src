@@ -165,9 +165,20 @@ PHP_FUNCTION(odbc_longreadlen);
  * PHP_FUNCTION(odbc_bind_param);
  * PHP_FUNCTION(odbc_define);
 */
+PHP_FUNCTION(odbc_tables);
+PHP_FUNCTION(odbc_columns);
+PHP_FUNCTION(odbc_columnprivileges);
+PHP_FUNCTION(odbc_foreignkeys);
+PHP_FUNCTION(odbc_gettypeinfo);
+PHP_FUNCTION(odbc_primarykeys);
+PHP_FUNCTION(odbc_procedurecolumns);
+PHP_FUNCTION(odbc_procedures);
+PHP_FUNCTION(odbc_specialcolumns);
+PHP_FUNCTION(odbc_statistics);
+PHP_FUNCTION(odbc_tableprivileges);
 
 typedef struct odbc_connection {
-#if HAVE_DB2
+#if defined( HAVE_DB2 ) || defined( HAVE_UNIXODBC )
 	SQLHANDLE hdbc;
 #else
 	HDBC hdbc;
@@ -184,7 +195,7 @@ typedef struct odbc_result_value {
 } odbc_result_value;
 
 typedef struct odbc_result {
-#if HAVE_DB2
+#if defined( HAVE_DB2 ) || defined( HAVE_UNIXODBC )
 	SQLHANDLE stmt;
 #else
 	HSTMT stmt;
@@ -202,7 +213,7 @@ typedef struct odbc_result {
 } odbc_result;
 
 typedef struct {
-#if HAVE_DB2
+#if defined( HAVE_DB2 ) || defined( HAVE_UNIXODBC )
 	SQLHANDLE henv;
 #else
 	HENV henv;
@@ -228,7 +239,7 @@ void odbc_del_result(HashTable *list, int count);
 int odbc_add_conn(HashTable *list, HDBC conn);
 odbc_connection *odbc_get_conn(HashTable *list, int count);
 void odbc_del_conn(HashTable *list, int ind);
-#if HAVE_DB2
+#if defined( HAVE_DB2 ) || defined( HAVE_UNIXODBC )
 void odbc_sql_error(SQLHANDLE conn, SQLHANDLE stmt, char *func);
 #else
 void odbc_sql_error(HDBC conn, HSTMT stmt, char *func);
