@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.22 2003-01-13 10:27:50 sas Exp $ 
+# $Id: buildcheck.sh,v 1.23 2003-02-11 21:11:42 sniper Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -70,26 +70,32 @@ else
 echo "buildconf: automake version $am_version (ok)"
 fi
 
-# libtool 1.4 or newer
+# libtool 1.4.3 or newer
 # Prefer glibtool over libtool for Mac OS X compatibility
 libtool=`./build/shtool path glibtool 2> /dev/null`
 if test ! -f "$libtool"; then libtool=`./build/shtool path libtool`; fi
 lt_pversion=`$libtool --version 2>/dev/null|sed -n -e 's/^[^0-9]*//' -e 1's/[- ].*//p'`
 if test "$lt_pversion" = ""; then
 echo "buildconf: libtool not found."
-echo "           You need libtool version 1.4 or newer installed"
+echo "           You need libtool version 1.4.3 or newer installed"
 echo "           to build PHP from CVS."
 exit 1
 fi
 lt_version=`echo $lt_pversion|sed -e 's/\([a-z]*\)$/.\1/'`
 IFS=.; set $lt_version; IFS=' '
 
-if test "$1" -gt "1" || test "$2" -ge "4";
+if test "$3" = ""; then
+  third=0
+else
+  third=$3
+fi
+
+if test "$1" -gt "1" || test "$2" -ge "5" || (test "$2" -ge "4" && test "$third" -ge "3")
 then
 echo "buildconf: libtool version $lt_pversion (ok)"
 else
 echo "buildconf: libtool version $lt_pversion found."
-echo "           You need libtool version 1.4 or newer installed"
+echo "           You need libtool version 1.4.3 or newer installed"
 echo "           to build PHP from CVS."
 exit 1
 fi
