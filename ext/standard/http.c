@@ -1,0 +1,186 @@
+/* 
+   +----------------------------------------------------------------------+
+   | PHP Version 4                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2003 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.0 of the PHP license,       |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_0.txt.                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Sara Golemon <pollia@php.net>                               |
+   +----------------------------------------------------------------------+
+*/
+
+/* $Id$ */
+
+#include "http.h"
+#include "php_ini.h"
+#include "url.h"
+
+#define URL_DEFAULT_ARG_SEP "&"
+
+/* {{{ php_url_encode_hash */
+PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
+				const char *num_prefix, int num_prefix_len,
+				const char *key_prefix, int key_prefix_len,
+				const char *key_suffix, int key_suffix_len TSRMLS_DC)
+{
+	char *arg_sep = NULL, *key = NULL, *ekey, *newprefix, *p;
+	int arg_sep_len, key_len, ekey_len, key_type, newprefix_len;
+	ulong idx;
+	zval **zdata = NULL, *copyzval;
+
+	if (!ht) {
+		return FAILURE;
+	}
+
+	arg_sep = INI_STR("arg_separator.output");
+	if (!arg_sep || !strlen(arg_sep)) {
+		arg_sep = URL_DEFAULT_ARG_SEP;
+	}
+	arg_sep_len = strlen(arg_sep);
+
+	for(zend_hash_internal_pointer_reset(ht);
+		(key_type = zend_hash_get_current_key_ex(ht, &key, &key_len, &idx, 0, NULL)) != HASH_KEY_NON_EXISTANT;
+		zend_hash_move_forward(ht)) {
+		if (key_len && key[key_len-1] == '\0') {
+			/* We don't want that trailing NULL */
+			key_len -= 1;
+		}
+
+		if (zend_hash_get_current_data_ex(ht, (void **)&zdata, NULL) == FAILURE || !zdata) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error traversing form data array.");
+			return FAILURE;
+		}
+		if (Z_TYPE_PP(zdata) == IS_ARRAY || Z_TYPE_PP(zdata) == IS_OBJECT) {
+			if (key_type == HASH_KEY_IS_STRING) {
+				ekey = php_url_encode(key, key_len, &ekey_len);
+				newprefix_len = key_suffix_len + ekey_len + key_prefix_len + 1;
+				newprefix = emalloc(newprefix_len + 1);
+				p = newprefix;
+
+				if (key_prefix) {
+					memcpy(p, key_prefix, key_prefix_len);
+					p += key_prefix_len;
+				}
+
+				memcpy(p, ekey, ekey_len);
+				p += ekey_len;
+				efree(ekey);
+
+				if (key_suffix) {
+					memcpy(p, key_suffix, key_suffix_len);
+					p += key_suffix_len;
+				}
+
+				*(p++) = '[';
+				*p = '\0';
+			} else {
+				/* Is an integer key */
+				ekey_len = spprintf(&ekey, 12, "%ld", idx);
+				newprefix_len = key_prefix_len + num_prefix_len + ekey_len + key_suffix_len + 1;
+				newprefix = emalloc(newprefix_len + 1);
+				p = newprefix;
+
+				if (key_prefix) {
+					memcpy(p, key_prefix, key_prefix_len);
+					p += key_prefix_len;
+				}
+
+				memcpy(p, num_prefix, num_prefix_len);
+				p += num_prefix_len;
+
+				memcpy(p, ekey, ekey_len);
+				p += ekey_len;
+				efree(ekey);
+
+				if (key_suffix) {
+					memcpy(p, key_suffix, key_suffix_len);
+					p += key_suffix_len;
+				}
+				*(p++) = '[';
+				*p = '\0';
+			}
+			php_url_encode_hash_ex(Z_ARRVAL_PP(zdata), formstr, NULL, 0, newprefix, newprefix_len, "]", 1 TSRMLS_CC);
+			efree(newprefix);
+		} else {
+			if (formstr->len) {
+				smart_str_appendl(formstr, arg_sep, arg_sep_len);
+			}
+			/* Simple key=value */
+			smart_str_appendl(formstr, key_prefix, key_prefix_len);
+			if (key_type == HASH_KEY_IS_STRING) {
+				ekey = php_url_encode(key, key_len, &ekey_len);
+				smart_str_appendl(formstr, ekey, ekey_len);
+				efree(ekey);
+			} else {
+				/* Numeric key */
+				if (num_prefix) {
+					smart_str_appendl(formstr, num_prefix, num_prefix_len);
+				}
+				ekey_len = spprintf(&ekey, 12, "%ld", idx); 
+				smart_str_appendl(formstr, ekey, ekey_len);
+				efree(ekey);
+			}
+			smart_str_appendl(formstr, key_suffix, key_suffix_len);
+			smart_str_appendl(formstr, "=", 1);
+			switch (Z_TYPE_PP(zdata)) {
+				case IS_STRING:
+					ekey = php_url_encode(Z_STRVAL_PP(zdata), Z_STRLEN_PP(zdata), &ekey_len);
+					break;
+				case IS_LONG:
+					ekey_len = spprintf(&ekey, 12, "%ld", idx);
+					break;
+				default:
+					/* fall back on convert to string */
+					*copyzval = **zdata;
+					zval_copy_ctor(copyzval);
+					convert_to_string_ex(&copyzval);
+					ekey = php_url_encode(Z_STRVAL_P(copyzval), Z_STRLEN_P(copyzval), &ekey_len);
+					zval_ptr_dtor(&copyzval);
+			}
+			smart_str_appendl(formstr, ekey, ekey_len);
+			efree(ekey);
+		}
+	} 	
+
+	return SUCCESS;
+}
+/* }}} */
+
+PHP_FUNCTION(http_build_query)
+{
+	zval *formdata;
+	char *prefix = NULL;
+	int prefix_len = 0;
+	smart_str formstr = {0};
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|s", &formdata, &prefix, &prefix_len) != SUCCESS) {
+		RETURN_FALSE;
+	}
+
+	if (php_url_encode_hash_ex(HASH_OF(formdata), &formstr, prefix, prefix_len, NULL, 0, NULL, 0 TSRMLS_CC) == FAILURE) {
+		if (formstr.c) {
+			efree(formstr.c);
+		}
+		RETURN_FALSE;
+	}
+	smart_str_0(&formstr);
+	RETURN_STRINGL(formstr.c, formstr.len, 0);
+}
+/* }}} */
+ 
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
+
