@@ -1051,6 +1051,8 @@ PHP_FUNCTION(imagecolorsforindex)
 }
 /* }}} */
 
+/* {{{ proto int imagegammacorrect(int im, double inputgamma, double outputgamma)
+   Apply a gamma correction to a GD image */
 PHP_FUNCTION(imagegammacorrect)
 {
 	zval **IM, **inputgamma, **outputgamma;
@@ -1076,6 +1078,7 @@ PHP_FUNCTION(imagegammacorrect)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto int imagesetpixel(int im, int x, int y, int col)
    Set a single pixel */
