@@ -39,6 +39,7 @@ extern zend_module_entry snmp_module_entry;
 #endif
 
 PHP_MINIT_FUNCTION(snmp);
+PHP_MSHUTDOWN_FUNCTION(snmp);
 PHP_MINFO_FUNCTION(snmp);
 
 PHP_FUNCTION(snmpget);

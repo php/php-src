@@ -147,7 +147,7 @@ zend_module_entry snmp_module_entry = {
 	"snmp",
 	snmp_functions,
 	PHP_MINIT(snmp),
-	NULL,
+	PHP_MSHUTDOWN(snmp),
 	NULL,
 	NULL,
 	PHP_MINFO(snmp),
@@ -174,7 +174,7 @@ static void php_snmp_init_globals(zend_snmp_globals *snmp_globals)
  */
 PHP_MINIT_FUNCTION(snmp)
 {
-	init_snmp("snmpapp");
+	init_snmp("php");
 
 	ZEND_INIT_MODULE_GLOBALS(snmp, php_snmp_init_globals, NULL);
 
@@ -194,6 +194,16 @@ PHP_MINIT_FUNCTION(snmp)
 	REGISTER_LONG_CONSTANT("SNMP_UINTEGER", ASN_UINTEGER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_INTEGER", ASN_INTEGER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_COUNTER64", ASN_COUNTER64, CONST_CS | CONST_PERSISTENT);
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
+PHP_MSHUTDOWN_FUNCTION(snmp)
+{
+	snmp_shutdown("php");
 
 	return SUCCESS;
 }
@@ -828,7 +838,7 @@ static int netsnmp_session_gen_auth_key(struct snmp_session *s, char *pass TSRML
 		s->securityAuthKeyLen = USM_AUTH_KU_LEN;
 		if (s->securityAuthProto == NULL) {
 			/* get .conf set default */
-			oid *def = get_default_authtype(&(s->securityAuthProtoLen));
+			const oid *def = get_default_authtype(&(s->securityAuthProtoLen));
 			s->securityAuthProto = snmp_duplicate_objid(def, s->securityAuthProtoLen);
 		}
 		if (s->securityAuthProto == NULL) {
@@ -857,7 +867,7 @@ static int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass TSRM
 		s->securityPrivKeyLen = USM_PRIV_KU_LEN;
 		if (s->securityPrivProto == NULL) {
 			/* get .conf set default */
-			oid *def = get_default_privtype(&(s->securityPrivProtoLen));
+			const oid *def = get_default_privtype(&(s->securityPrivProtoLen));
 			s->securityPrivProto = snmp_duplicate_objid(def, s->securityPrivProtoLen);
 		}
 		if (s->securityPrivProto == NULL) {
