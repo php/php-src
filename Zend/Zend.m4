@@ -111,12 +111,13 @@ AC_ARG_ENABLE(experimental-zts,
 ],[
   ZEND_EXPERIMENTAL_ZTS=no
 ])  
-		
-AC_ARG_ENABLE(inline,
-[  --disable-inline        Disable the inline specifier],[
-  ZEND_INLINE=$enableval
+
+AC_ARG_ENABLE(large-mem,
+[  --enable-inline-optimization   If you have much memory and are using
+                                 gcc, you might try this.],[
+  ZEND_INLINE_OPTIMIZATION=$enableval
 ],[
-  ZEND_INLINE=yes
+  ZEND_INLINE_OPTIMIZATION=no
 ])
 
 AC_ARG_ENABLE(memory-limit,
@@ -129,8 +130,8 @@ AC_ARG_ENABLE(memory-limit,
 AC_MSG_CHECKING(whether to enable experimental ZTS)
 AC_MSG_RESULT($ZEND_EXPERIMENTAL_ZTS)
 
-AC_MSG_CHECKING(whether to enable inline)
-AC_MSG_RESULT($ZEND_INLINE)
+AC_MSG_CHECKING(whether to enable inline optimization for GCC)
+AC_MSG_RESULT($ZEND_INLINE_OPTIMIZATION)
 
 AC_MSG_CHECKING(whether to enable a memory limit)
 AC_MSG_RESULT($ZEND_MEMORY_LIMIT)
@@ -167,12 +168,17 @@ else
   AC_DEFINE(MEMORY_LIMIT, 0, [Memory limit])
 fi
 
-if test "$ZEND_INLINE" = "yes"; then
-  AC_C_INLINE
+changequote({,})
+if test -n "$GCC" && test "$ZEND_INLINE_OPTIMIZATION" != "yes"; then
+  INLINE_CFLAGS="`echo $ac_n "$CFLAGS $ac_c"|sed 's/-O[0-9]*//'` -O0"
 else
-  AC_DEFINE(inline, [])
+  INLINE_CFLAGS="$CFLAGS"
 fi
+changequote([,])
 
+AC_C_INLINE
+
+AC_SUBST(INLINE_CFLAGS)
 
 ])
 
