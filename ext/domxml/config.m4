@@ -13,11 +13,11 @@ AC_ARG_WITH(dom,
       AC_MSG_RESULT(yes)
       PHP_EXTENSION(domxml)
       old_LIBS=$LIBS
-      LIBS="$LIBS -lgz"
+      LIBS="$LIBS -lz"
       AC_CHECK_LIB(xml, xmlNewDoc, [AC_DEFINE(HAVE_DOMXML,1,[ ])],
         [AC_MSG_ERROR(DOM module requires libxml >= 1.0)])
       LIBS=$old_LIBS
-      AC_ADD_LIBRARY(gz)
+      AC_ADD_LIBRARY(z)
       AC_ADD_LIBRARY(xml)
       AC_ADD_INCLUDE(/usr/local/include)
       ;;
