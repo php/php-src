@@ -45,25 +45,25 @@ static char EntTable[][7] =
 
 static void _php3_htmlentities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
-    pval *arg;
+    pval **arg;
     int i, len, maxlen;
     unsigned char *old;
 	char *new;
 
-    if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+    if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
     }
 
-    convert_to_string(arg);
+    convert_to_string_ex(arg);
 
-	maxlen = 2 * arg->value.str.len;
+	maxlen = 2 * (*arg)->value.str.len;
 	if (maxlen < 128)
 		maxlen = 128;
 	new = emalloc (maxlen);
 	len = 0;
 
-	old = (unsigned char *)arg->value.str.val;
-	i = arg->value.str.len;
+	old = (unsigned char *)(*arg)->value.str.val;
+	i = (*arg)->value.str.len;
 	while (i--) {
 		if (len + 9 > maxlen)
 			new = erealloc (new, maxlen += 128);
