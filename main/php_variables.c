@@ -492,7 +492,7 @@ static inline void php_register_server_variables(TSRMLS_D)
 
 static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS_DC);
 static zend_bool php_auto_globals_create_env(char *name, uint name_len TSRMLS_DC);
-
+static zend_bool php_auto_globals_create_request(char *name, uint name_len TSRMLS_DC);
 
 /* {{{ php_hash_environment
  */
@@ -503,7 +503,6 @@ int php_hash_environment(TSRMLS_D)
 	zend_bool have_variables_order;
 	zval *dummy_track_vars_array = NULL;
 	zend_bool initialized_dummy_track_vars_array=0;
-	int i;
 	zend_bool jit_initialization = (!PG(register_globals) && !PG(register_long_arrays));
 	char *variables_order;
 	struct auto_global_record {
@@ -521,7 +520,9 @@ int php_hash_environment(TSRMLS_D)
 		{ "_FILES", sizeof("_FILES"), "HTTP_FILES_GLOBALS", sizeof("HTTP_FILES_GLOBALS"), 0 },
 	};
 	size_t num_track_vars = sizeof(auto_global_records)/sizeof(struct auto_global_record);
+	size_t i;
 
+	/* jit_initialization = 0; */
 	for (i=0; i<num_track_vars; i++) {
 		PG(http_globals)[i] = NULL;
 	}
@@ -614,31 +615,8 @@ int php_hash_environment(TSRMLS_D)
 	}
 
 	/* Create _REQUEST */
-	{
-		zval *form_variables;
-
-		ALLOC_ZVAL(form_variables);
-		array_init(form_variables);
-		INIT_PZVAL(form_variables);
-
-		for (p=variables_order; p && *p; p++) {
-			switch (*p) {
-				case 'g':
-				case 'G':
-					zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 1);
-					break;
-				case 'p':
-				case 'P':
-					zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 1);
-					break;
-				case 'c':
-				case 'C':
-					zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 1);
-					break;
-			}
-		}
-
-		zend_hash_update(&EG(symbol_table), "_REQUEST", sizeof("_REQUEST"), &form_variables, sizeof(zval *), NULL);
+	if (!jit_initialization) {
+		php_auto_globals_create_request("_REQUEST", sizeof("_REQUEST")-1 TSRMLS_CC);
 	}
 
 	return SUCCESS;
@@ -681,16 +659,55 @@ static zend_bool php_auto_globals_create_env(char *name, uint name_len TSRMLS_DC
 }
 
 
+static zend_bool php_auto_globals_create_request(char *name, uint name_len TSRMLS_DC)
+{
+	zval *form_variables;
+	char *variables_order;
+	char *p;
+
+	if (PG(variables_order)) {
+		variables_order = PG(variables_order);
+	} else {
+		variables_order = PG(gpc_order);
+	}
+
+	ALLOC_ZVAL(form_variables);
+	array_init(form_variables);
+	INIT_PZVAL(form_variables);
+
+	for (p=variables_order; p && *p; p++) {
+		switch (*p) {
+			case 'g':
+			case 'G':
+				zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 1);
+				break;
+			case 'p':
+			case 'P':
+				zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 1);
+				break;
+			case 'c':
+			case 'C':
+				zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 1);
+				break;
+		}
+	}
+
+	zend_hash_update(&EG(symbol_table), "_REQUEST", sizeof("_REQUEST"), &form_variables, sizeof(zval *), NULL);
+	return 0;
+}
+
+
 void php_startup_auto_globals(TSRMLS_D)
 {
 	zend_bool cb = (!PG(register_globals) && !PG(register_long_arrays));
 
+	/*cb = 0;*/
 	zend_register_auto_global("_GET", sizeof("_GET")-1, NULL TSRMLS_CC);
 	zend_register_auto_global("_POST", sizeof("_POST")-1, NULL TSRMLS_CC);
 	zend_register_auto_global("_COOKIE", sizeof("_COOKIE")-1, NULL TSRMLS_CC);
 	zend_register_auto_global("_SERVER", sizeof("_SERVER")-1, cb?php_auto_globals_create_server:NULL TSRMLS_CC);
 	zend_register_auto_global("_ENV", sizeof("_ENV")-1, cb?php_auto_globals_create_env:NULL TSRMLS_CC);
-	zend_register_auto_global("_REQUEST", sizeof("_REQUEST")-1, NULL TSRMLS_CC);
+	zend_register_auto_global("_REQUEST", sizeof("_REQUEST")-1, cb?php_auto_globals_create_request:NULL TSRMLS_CC);
 }
 
 /*
