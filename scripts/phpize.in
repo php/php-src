@@ -38,10 +38,10 @@ sed \
 
 touch install-sh mkinstalldirs missing
 
-aclocal
-autoconf
-autoheader
-libtoolize -f -c
+aclocal || exit 1
+autoconf || exit 1
+autoheader || exit 1
+libtoolize -f -c || exit 1
 
 # dumping API NOs:
 PHP_API_VERSION=`grep -E '#define PHP_API_VERSION' $includedir/main/php.h|sed 's/#define PHP_API_VERSION//'`
