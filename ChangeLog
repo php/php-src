@@ -1,3 +1,62 @@
+2004-01-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/config.m4:
+      Proper configure switch for sqlite.
+
+    * (PHP_4_3)
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: Apache 2 portion of the fix for bug #25753.
+
+    * sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      Apache 2 portion of the fix for bug #25753.
+
+    * (PHP_4_3)
+      ext/standard/file.c
+      ext/standard/tests/file/fgetcsv.phpt:
+      Fix for a possible crash in fgetcsv(). (Patch by Moriyoshi Koizumi)
+
+2004-01-29  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      typofix
+
+2004-01-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/pgsql/pgsql.c:
+      MFH: Fixed bug #27007 (missing connection closure when connect fails in
+      pgsql)
+
+    * ext/pgsql/pgsql.c:
+      Fixed bug #27007 (missing connection closure when connect fails in pgsql).
+
+    * (PHP_4_3)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: Fixed bug #27037 (fixed possible crash in apache2handler output code).
+
+    * sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #27037 (fixed possible crash in apache2handler output code).
+
+2004-01-29  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/xsltprocessor.c:
+      fix corruption when cloneDocument is not defined
+
+2004-01-29  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * main/main.c
+      main/main.c:
+      This should not have been an INI_ALL directive.
+
 2004-01-28  Georg Richter  <phpinfo@t-online.de>
 
     * ext/mysqli/EXPERIMENTAL
