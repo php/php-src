@@ -2702,7 +2702,7 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 
 /************************* EXTENSION FUNCTIONS *************************/
 
-/* {{{ proto int ocidefinebyname(int stmt, string name, mixed &var [, int type])
+/* {{{ proto bool ocidefinebyname(int stmt, string name, mixed &var [, int type])
    Define a PHP variable to an Oracle column by name */
 /* if you want to define a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE defining!!!
  */
@@ -2761,7 +2761,7 @@ PHP_FUNCTION(ocidefinebyname)
 
 /* }}} */
 
-/* {{{ proto int ocibindbyname(int stmt, string name, mixed &var, [, int maxlength] [, int type])
+/* {{{ proto bool ocibindbyname(int stmt, string name, mixed &var, [, int maxlength] [, int type])
    Bind a PHP variable to an Oracle placeholder by name */
 /* if you want to bind a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE binding!!!
  */
@@ -2939,7 +2939,7 @@ PHP_FUNCTION(ocibindbyname)
 
 /* }}} */
 
-/* {{{ proto string ocifreedesc(object lob)
+/* {{{ proto bool ocifreedesc(object lob)
    Deletes large object description */
 
 PHP_FUNCTION(ocifreedesc)
@@ -2963,7 +2963,7 @@ PHP_FUNCTION(ocifreedesc)
 }
 /* }}} */
 
-/* {{{ proto string ocisavelob(object lob)
+/* {{{ proto bool ocisavelob(object lob)
    Saves a large object */
 
 PHP_FUNCTION(ocisavelob)
@@ -3054,7 +3054,7 @@ PHP_FUNCTION(ocisavelob)
 
 /* }}} */
 
-/* {{{ proto string ocisavelobfile(object lob)
+/* {{{ proto bool ocisavelobfile(object lob)
    Saves a large object file */
 
 PHP_FUNCTION(ocisavelobfile)
@@ -3160,7 +3160,7 @@ PHP_FUNCTION(ociloadlob)
 }
 /* }}} */
 
-/* {{{ proto void ociwritelobtofile(object lob [, string filename] [, int start] [, int length])
+/* {{{ proto bool ociwritelobtofile(object lob [, string filename] [, int start] [, int length])
    Writes a large object into a file */
 
 PHP_FUNCTION(ociwritelobtofile)
@@ -3346,7 +3346,7 @@ PHP_FUNCTION(ociwritelobtofile)
 /* }}} */
 
 #ifdef HAVE_OCI8_TEMP_LOB
-/* {{{ proto int ociwritetemporarylob(int stmt, int loc, string var)
+/* {{{ proto bool ociwritetemporarylob(int stmt, int loc, string var)
    Return the row count of an OCI statement */
 
 PHP_FUNCTION(ociwritetemporarylob)
@@ -3443,7 +3443,7 @@ PHP_FUNCTION(ociwritetemporarylob)
 
 /* }}} */
 
-/* {{{ proto string ocicloselob(object lob)
+/* {{{ proto bool ocicloselob(object lob)
    Closes lob descriptor */
 
 PHP_FUNCTION(ocicloselob)
@@ -3540,7 +3540,7 @@ PHP_FUNCTION(ocinewdescriptor)
 
 /* }}} */
 
-/* {{{ proto string ocirollback(int conn)
+/* {{{ proto bool ocirollback(int conn)
    Rollback the current context */
 
 PHP_FUNCTION(ocirollback)
@@ -3576,7 +3576,7 @@ PHP_FUNCTION(ocirollback)
 
 /* }}} */
 
-/* {{{ proto string ocicommit(int conn)
+/* {{{ proto bool ocicommit(int conn)
    Commit the current context */
 
 PHP_FUNCTION(ocicommit)
@@ -3815,7 +3815,7 @@ PHP_FUNCTION(ocicolumntyperaw)
 
 /* }}} */
 
-/* {{{ proto int ocicolumnisnull(int stmt, int col)
+/* {{{ proto bool ocicolumnisnull(int stmt, int col)
    Tell whether a column is NULL */
 
 PHP_FUNCTION(ocicolumnisnull)
@@ -3891,7 +3891,7 @@ PHP_FUNCTION(ociexecute)
 
 /* }}} */
 
-/* {{{ proto int ocicancel(int stmt)
+/* {{{ proto bool ocicancel(int stmt)
    Prepare a new row of data for reading */
 
 PHP_FUNCTION(ocicancel)
@@ -3914,7 +3914,7 @@ PHP_FUNCTION(ocicancel)
 
 /* }}} */
 
-/* {{{ proto int ocifetch(int stmt)
+/* {{{ proto bool ocifetch(int stmt)
    Prepare a new row of data for reading */
 
 PHP_FUNCTION(ocifetch)
@@ -4139,7 +4139,7 @@ PHP_FUNCTION(ocifetchstatement)
 
 /* }}} */
 
-/* {{{ proto int ocifreestatement(int stmt)
+/* {{{ proto bool ocifreestatement(int stmt)
    Free all resources associated with a statement */
 
 PHP_FUNCTION(ocifreestatement)
@@ -4160,7 +4160,7 @@ PHP_FUNCTION(ocifreestatement)
 
 /* }}} */
 
-/* {{{ proto int ocilogoff(int conn)
+/* {{{ proto bool ocilogoff(int conn)
    Disconnect from database */
 
 PHP_FUNCTION(ocilogoff)
@@ -4476,7 +4476,7 @@ PHP_FUNCTION(ociserverversion)
 
 /* }}} */
 
-/* {{{ proto int ocistatementtype(int stmt)
+/* {{{ proto string ocistatementtype(int stmt)
    Return the query type of an OCI statement */
  
 /* XXX it would be better with a general interface to OCIAttrGet() */
@@ -4593,7 +4593,7 @@ static oci_collection *oci_get_coll(int ind TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto string ocifreecollection(object lob)
+/* {{{ proto bool ocifreecollection(object lob)
    Deletes collection object*/
 
 PHP_FUNCTION(ocifreecollection)
@@ -4633,7 +4633,7 @@ PHP_FUNCTION(ocifreecollection)
 }
 /* }}} */
 
-/* {{{ proto string ocicollappend(object collection,value)
+/* {{{ proto bool ocicollappend(object collection,value)
    Append an object to the collection */
 
 PHP_FUNCTION(ocicollappend)
@@ -4885,7 +4885,7 @@ PHP_FUNCTION(ocicollgetelem)
 }
 /* }}} */
 
-/* {{{ proto string ocicollassign(object collection,object)
+/* {{{ proto bool ocicollassign(object collection,object)
    Assign a collection from another existing collection */
 
 PHP_FUNCTION(ocicollassign)
@@ -4927,7 +4927,7 @@ PHP_FUNCTION(ocicollassign)
 }
 /* }}} */
 
-/* {{{ proto string ocicollassignelem(object collection,ndx,val)
+/* {{{ proto bool ocicollassignelem(object collection,ndx,val)
    Assign element val to collection at index ndx */
 
 PHP_FUNCTION(ocicollassignelem)
@@ -5090,7 +5090,7 @@ PHP_FUNCTION(ocicollassignelem)
 }
 /* }}} */
 
-/* {{{ proto string ocicollsize(object collection)
+/* {{{ proto int ocicollsize(object collection)
    Return the size of a collection */
 
 PHP_FUNCTION(ocicollsize)
@@ -5117,13 +5117,14 @@ PHP_FUNCTION(ocicollsize)
 			oci_error(connection->pError, "OCICollSize", connection->error);
 			RETURN_FALSE;
 		}
+
 		RETURN_LONG(sz);
 	}
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto string ocicollmax(object collection)
+/* {{{ proto int ocicollmax(object collection)
    Return the max value of a collection.  For a varray this is the maximum length of the array */
 
 PHP_FUNCTION(ocicollmax)
@@ -5145,7 +5146,7 @@ PHP_FUNCTION(ocicollmax)
 }
 /* }}} */
 
-/* {{{ proto string ocicolltrim(object collection,num)
+/* {{{ proto bool ocicolltrim(object collection,num)
    Trim num elements from the end of a collection */
 
 PHP_FUNCTION(ocicolltrim)
@@ -5179,7 +5180,7 @@ PHP_FUNCTION(ocicolltrim)
 }
 /* }}} */
 
-/* {{{ proto string ocinewcollection(int connection, string tdo,[string schema])
+/* {{{ proto bool ocinewcollection(int connection, string tdo,[string schema])
    Initialize a new collection */
 
 PHP_FUNCTION(ocinewcollection)
