@@ -31,6 +31,10 @@
 #include "php_session.h"
 #include "mod_mm.h"
 
+#ifdef ZTS
+# error mm is not thread-safe
+#endif
+
 #define PS_MM_PATH "/tmp/session_mm"
 
 /* For php_uint32 */
@@ -44,21 +48,21 @@ typedef struct ps_sd {
 	struct ps_sd *next;
 	php_uint32 hv;		/* hash value of key */
 	time_t ctime;		/* time of last change */
-	char *key;
 	void *data;
 	size_t datalen;		/* amount of valid data */
 	size_t alloclen;	/* amount of allocated memory for data */
+	char key[1];		/* inline key */
 } ps_sd;
 
 typedef struct {
 	MM *mm;
 	ps_sd **hash;
+	php_uint32 hash_max;
+	php_uint32 hash_cnt;
+	pid_t owner;
 } ps_mm;
 
 static ps_mm *ps_mm_instance = NULL;
-
-/* should be a prime */
-#define HASH_SIZE 577
 
 #if 0
 #define ps_mm_debug(a) printf a
@@ -66,53 +70,81 @@ static ps_mm *ps_mm_instance = NULL;
 #define ps_mm_debug(a)
 #endif
 
-static inline php_uint32 ps_sd_hash(const char *data)
+static inline php_uint32 ps_sd_hash(const char *data, int len)
 {
 	php_uint32 h;
-	char c;
+	const char *e = data + len;
 	
-	for (h = 2166136261U; (c = *data++); ) {
+	for (h = 2166136261U; data < e; ) {
 		h *= 16777619;
-		h ^= c;
+		h ^= *data++;
 	}
 	
 	return h;
 }
-	
 
-static ps_sd *ps_sd_new(ps_mm *data, const char *key, const void *sdata, size_t sdatalen)
+static void hash_split(ps_mm *data)
+{
+	php_uint32 nmax;
+	ps_sd **nhash;
+	ps_sd **ohash, **ehash;
+	ps_sd *ps, *next;
+	
+	nmax = ((data->hash_max + 1) << 1) - 1;
+	nhash = mm_calloc(data->mm, nmax + 1, sizeof(*data->hash));
+	
+	if (!nhash) {
+		/* no further memory to expand hash table */
+		return;
+	}
+
+	ehash = data->hash + data->hash_max + 1;
+	for (ohash = data->hash; ohash < ehash; ohash++) {
+		for (ps = *ohash; ps; ps = next) {
+			next = ps->next;
+			ps->next = nhash[ps->hv & nmax];
+			nhash[ps->hv & nmax] = ps;
+		}
+	}
+	mm_free(data->mm, data->hash);
+
+	data->hash = nhash;
+	data->hash_max = nmax;
+}
+
+static ps_sd *ps_sd_new(ps_mm *data, const char *key)
 {
 	php_uint32 hv, slot;
 	ps_sd *sd;
-
-	hv = ps_sd_hash(key);
-	slot = hv % HASH_SIZE;
+	int keylen;
 	
-	sd = mm_malloc(data->mm, sizeof(*sd));
-	if (!sd)
+	keylen = strlen(key);
+	
+	sd = mm_malloc(data->mm, sizeof(ps_sd) + keylen);
+	if (!sd) {
+		php_error(E_WARNING, "mm_malloc failed, avail %d, err %s", mm_available(data->mm), mm_error());
 		return NULL;
+	}
+
+	hv = ps_sd_hash(key, keylen);
+	slot = hv & data->hash_max;
+	
 	sd->ctime = 0;
 	sd->hv = hv;
+	sd->data = NULL;
+	sd->alloclen = sd->datalen = 0;
 	
-	sd->data = mm_malloc(data->mm, sdatalen);
-	if (!sd->data) {
-		mm_free(data->mm, sd);
-		return NULL;
-	}
-
-	sd->alloclen = sd->datalen = sdatalen;
-	
-	sd->key = mm_strdup(data->mm, key);
-	if (!sd->key) {
-		mm_free(data->mm, sd->data);
-		mm_free(data->mm, sd);
-		return NULL;
-	}
-	
-	memcpy(sd->data, sdata, sdatalen);
+	memcpy(sd->key, key, keylen + 1);
 	
 	sd->next = data->hash[slot];
 	data->hash[slot] = sd;
+
+	data->hash_cnt++;
+	
+	if (!sd->next) {
+		if (data->hash_cnt >= data->hash_max)
+			hash_split(data);
+	}
 	
 	ps_mm_debug(("inserting %s(%p) into slot %d\n", key, sd, slot));
 
@@ -123,7 +155,7 @@ static void ps_sd_destroy(ps_mm *data, ps_sd *sd)
 {
 	php_uint32 slot;
 
-	slot = ps_sd_hash(sd->key) % HASH_SIZE;
+	slot = ps_sd_hash(sd->key, strlen(sd->key)) & data->hash_max;
 
 	if (data->hash[slot] == sd)
 		data->hash[slot] = sd->next;
@@ -135,7 +167,7 @@ static void ps_sd_destroy(ps_mm *data, ps_sd *sd)
 		prev->next = sd->next;
 	}
 		
-	mm_free(data->mm, sd->key);
+	data->hash_cnt--;
 	if (sd->data) 
 		mm_free(data->mm, sd->data);
 	mm_free(data->mm, sd);
@@ -144,18 +176,20 @@ static void ps_sd_destroy(ps_mm *data, ps_sd *sd)
 static ps_sd *ps_sd_lookup(ps_mm *data, const char *key, int rw)
 {
 	php_uint32 hv, slot;
-	ps_sd *ret;
+	ps_sd *ret, *prev;
 
-	hv = ps_sd_hash(key);
-	slot = hv % HASH_SIZE;
+	hv = ps_sd_hash(key, strlen(key));
+	slot = hv & data->hash_max;
 	
-	for (ret = data->hash[slot]; ret; ret = ret->next)
+	for (prev = NULL, ret = data->hash[slot]; ret; prev = ret, ret = ret->next)
 		if (ret->hv == hv && !strcmp(ret->key, key)) 
 			break;
-
+	
 	if (ret && rw && ret != data->hash[slot]) {
 		/* Move the entry to the top of the linked list */
 		
+		if (prev)
+			prev->next = ret->next;
 		ret->next = data->hash[slot];
 		data->hash[slot] = ret;
 	}
@@ -173,12 +207,15 @@ ps_module ps_mod_mm = {
 
 static int ps_mm_initialize(ps_mm *data, const char *path)
 {
+	data->owner = getpid();
 	data->mm = mm_create(0, path);
 	if (!data->mm) {
 		return FAILURE;
 	}
 
-	data->hash = mm_calloc(data->mm, HASH_SIZE, sizeof(*data->hash));
+	data->hash_cnt = 0;
+	data->hash_max = 511;
+	data->hash = mm_calloc(data->mm, data->hash_max + 1, sizeof(ps_sd *));
 	if (!data->hash) {
 		mm_destroy(data->mm);
 		return FAILURE;
@@ -192,7 +229,12 @@ static void ps_mm_destroy(ps_mm *data)
 	int h;
 	ps_sd *sd, *next;
 
-	for (h = 0; h < HASH_SIZE; h++)
+	/* This function is called during each module shutdown,
+	   but we must not release the shared memory pool, when
+	   an Apache child dies! */
+	if (data->owner != getpid()) return;
+
+	for (h = 0; h < data->hash_max + 1; h++)
 		for (sd = data->hash[h]; sd; sd = next) {
 			next = sd->next;
 			ps_sd_destroy(data, sd);
@@ -200,6 +242,7 @@ static void ps_mm_destroy(ps_mm *data)
 	
 	mm_free(data->mm, data->hash);
 	mm_destroy(data->mm);
+	free(data);
 }
 
 PHP_MINIT_FUNCTION(ps_mm)
@@ -209,6 +252,7 @@ PHP_MINIT_FUNCTION(ps_mm)
 		ps_mm_instance = NULL;
 		return FAILURE;
 	}
+	
 	php_session_register_module(&ps_mod_mm);
 	return SUCCESS;
 }
@@ -217,7 +261,6 @@ PHP_MSHUTDOWN_FUNCTION(ps_mm)
 {
 	if (ps_mm_instance) {
 		ps_mm_destroy(ps_mm_instance);
-		free(ps_mm_instance);
 		return SUCCESS;
 	}
 	return FAILURE;
@@ -273,29 +316,29 @@ PS_WRITE_FUNC(mm)
 
 	sd = ps_sd_lookup(data, key, 1);
 	if (!sd) {
-		sd = ps_sd_new(data, key, val, vallen);
+		sd = ps_sd_new(data, key);
 		ps_mm_debug(("new entry for %s\n", key));
-	} else {
-		ps_mm_debug(("found existing entry for %s\n", key));
+	}
 
+	if (sd) {
 		if (vallen >= sd->alloclen) {
-			mm_free(data->mm, sd->data);
+			if (data->mm) 
+				mm_free(data->mm, sd->data);
 			sd->alloclen = vallen + 1;
 			sd->data = mm_malloc(data->mm, sd->alloclen);
 
 			if (!sd->data) {
 				ps_sd_destroy(data, sd);
+				php_error(E_WARNING, "cannot allocate new data segment");
 				sd = NULL;
 			}
 		}
 		if (sd) {
 			sd->datalen = vallen;
 			memcpy(sd->data, val, vallen);
+			time(&sd->ctime);
 		}
 	}
-
-	if (sd)
-		time(&sd->ctime);
 
 	mm_unlock(data->mm);
 	
@@ -321,8 +364,8 @@ PS_DESTROY_FUNC(mm)
 PS_GC_FUNC(mm) 
 {
 	PS_MM_DATA;
-	int h;
 	time_t limit;
+	ps_sd **ohash, **ehash;
 	ps_sd *sd, *next;
 	
 	*nrdels = 0;
@@ -334,8 +377,9 @@ PS_GC_FUNC(mm)
 
 	mm_lock(data->mm, MM_LOCK_RW);
 
-	for (h = 0; h < HASH_SIZE; h++)
-		for (sd = data->hash[h]; sd; sd = next) {
+	ehash = data->hash + data->hash_max + 1;
+	for (ohash = data->hash; ohash < ehash; ohash++)
+		for (sd = *ohash; sd; sd = next) {
 			next = sd->next;
 			if (sd->ctime < limit) {
 				ps_mm_debug(("purging %s\n", sd->key));
