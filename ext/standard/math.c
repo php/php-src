@@ -433,7 +433,7 @@ _php_math_longtobase(zval *arg, int base)
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 	char *result, *ptr, *ret;
 	int len, digit;
-	long value;
+	unsigned long value;
 
 	if (arg->type != IS_LONG || base < 2 || base > 36) {
 		return empty_string;
