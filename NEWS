@@ -31,6 +31,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #22544 (writing transparency to truecolor png images). (Ilia)
 - Fixed bug #22520 (mcrypt_generic_deinit() was not available on Windows). (Edin)
 - Fixed bug #22508 (Added protection against circular HTML redirects). (Ilia)
+- Fixed bug #22473 (ISAPI Secure Server variables not available). (Christian Swoboda)
 - Fixed bug #22402 (opening of ftp for read/write could fail due to invalid
   return code handling). (Ilia)
 - Fixed bug #22384 (FNM_CASEFOLD is not available). (Hartmut)

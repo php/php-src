@@ -517,7 +517,9 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array TSRMLS_D
 	sapi_isapi_register_server_variables2(isapi_server_variable_names, lpECB, track_vars_array, NULL TSRMLS_CC);
 
 	if (isapi_special_server_variables[SPECIAL_VAR_HTTPS]
-		&& atoi(isapi_special_server_variables[SPECIAL_VAR_HTTPS])) {
+		&& (atoi(isapi_special_server_variables[SPECIAL_VAR_HTTPS])
+		|| !strcasecmp(isapi_special_server_variables[SPECIAL_VAR_HTTPS], "on"))
+	) {
 		/* Register SSL ISAPI variables */
 		sapi_isapi_register_server_variables2(isapi_secure_server_variable_names, lpECB, track_vars_array, NULL TSRMLS_CC);
 	}
