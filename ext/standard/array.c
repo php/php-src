@@ -3276,6 +3276,77 @@ PHP_FUNCTION(key_exists)
 }
 /* }}} */
 
+
+/* {{{ proto array array_chunk(array input, int size [, bool preserve_keys])
+   Split array into chunks */
+PHP_FUNCTION(array_chunk)
+{
+	int argc = ZEND_NUM_ARGS(), key_type;
+	long size, current = 0;
+	char *str_key;
+	uint str_key_len;
+	ulong num_key;
+	zend_bool preserve_keys = 0;
+	zval *input = NULL;
+	zval *chunk = NULL;
+	zval **entry;
+	HashPosition pos;
+
+	if (zend_parse_parameters(argc TSRMLS_CC, "al|b", &input, &size,
+							  &preserve_keys) == FAILURE) 
+		return;
+
+	/* Do bounds checking for size parameter. */
+	if (size < 1) {
+		php_error(E_WARNING, "%s() expects the size parameter to be > 0",
+				  get_active_function_name(TSRMLS_C));
+		return;
+	}
+
+	array_init(return_value);
+
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(input), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(input), (void**)&entry, &pos) == SUCCESS) {
+		/* If new chunk, create and initialize it. */
+		if (!chunk) {
+			MAKE_STD_ZVAL(chunk);
+			array_init(chunk);
+		}
+
+		/* Add entry to the chunk, preserving keys if necessary. */
+		zval_add_ref(entry);
+
+		if (preserve_keys) {
+			key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &str_key,
+													&str_key_len, &num_key, 0, &pos);
+			if (key_type == HASH_KEY_IS_STRING) {
+				add_assoc_zval_ex(chunk, str_key, str_key_len, *entry);
+			} else {
+				add_index_zval(chunk, num_key, *entry);
+			}
+		} else {
+		   	add_next_index_zval(chunk, *entry);
+		}
+
+		/*
+		 * If reached the chunk size, add it to the result array, and reset the
+		 * pointer.
+		 */
+		if (!(++current % size)) {
+			add_next_index_zval(return_value, chunk);
+			chunk = NULL;
+		}
+
+		zend_hash_move_forward_ex(Z_ARRVAL_P(input), &pos);
+	}
+
+	/* Add the final chunk if there is one. */
+	if (chunk) {
+		add_next_index_zval(return_value, chunk);
+	}
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
