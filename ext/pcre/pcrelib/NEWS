@@ -1,6 +1,37 @@
 News about PCRE releases
 ------------------------
 
+Release 4.5 01-Dec-03
+---------------------
+
+Again mainly a bug-fix and tidying release, with only a couple of new features:
+
+1. It's possible now to compile PCRE so that it does not use recursive
+function calls when matching. Instead it gets memory from the heap. This slows
+things down, but may be necessary on systems with limited stacks.
+
+2. UTF-8 string checking has been tightened to reject overlong sequences and to
+check that a starting offset points to the start of a character. Failure of the
+latter returns a new error code: PCRE_ERROR_BADUTF8_OFFSET.
+
+3. PCRE can now be compiled for systems that use EBCDIC code.
+
+
+Release 4.4 21-Aug-03
+---------------------
+
+This is mainly a bug-fix and tidying release. The only new feature is that PCRE
+checks UTF-8 strings for validity by default. There is an option to suppress
+this, just in case anybody wants that teeny extra bit of performance.
+
+
+Releases 4.1 - 4.3
+------------------
+
+Sorry, I forgot about updating the NEWS file for these releases. Please take a
+look at ChangeLog.
+
+
 Release 4.0 17-Feb-03
 ---------------------
 

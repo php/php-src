@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2003, PHP 5 Beta 3
+- Upgraded PCRE library to version 4.5. (Andrei)
 - Dropped Windows 95 support. (Andi)
 - Moved extensions to PECL:
   . ext/crack (Jani, Derick)
