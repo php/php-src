@@ -1856,12 +1856,7 @@ PHP_FUNCTION(mb_output_handler)
  		if (SG(sapi_headers).send_default_content_type || send_text_mimetype) {
 			charset = mbfl_no2preferred_mime_name(encoding);
 			if (charset) {
-				len = (sizeof ("Content-Type:")-1) + strlen(mimetype) + (sizeof (";charset=")-1) + strlen(charset) + 1;
-				p = emalloc(len);
-				strcpy(p, "Content-Type:");
-				strcat(p, mimetype);
-				strcat(p, ";charset=");
-				strcat(p, charset);
+				len = spprintf( &p, 0, "Content-Type: %s; charset=%s",  mimetype, charset ); 
 				if (sapi_add_header(p, len, 0) != FAILURE)
 					SG(sapi_headers).send_default_content_type = 0;
 			}
