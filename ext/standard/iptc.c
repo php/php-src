@@ -320,7 +320,7 @@ PHP_FUNCTION(iptcparse)
 	tagsfound = 0; /* number of tags already found */
 
 	while (inx < length) { /* find 1st tag */
-		if ((buffer[inx] == 0x1c) && (buffer[inx+1] == 0x02)){ 
+		if ((buffer[inx] == 0x1c) && ((buffer[inx+1] == 0x01) || (buffer[inx+1] == 0x02))){
 			break;
 		} else {
 			inx++;
