@@ -301,6 +301,17 @@ Changes in the Zend Engine 2.0
             func2();
             ?>
 
+          Example:
+
+            <?php
+            class MyOuterClass {
+              const Hello = "Hello, World\n";
+            }
+            
+            import const Hello from MyOuterClass;
+            print Hello;
+            ?>
+
       Old code that does not take advantage of namespaces will run
       without modifications.
 
