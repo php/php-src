@@ -196,6 +196,7 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("FILE_USE_INCLUDE_PATH",	PHP_FILE_USE_INCLUDE_PATH, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILE_IGNORE_NEW_LINES",	PHP_FILE_IGNORE_NEW_LINES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILE_SKIP_EMPTY_LINES",	PHP_FILE_SKIP_EMPTY_LINES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_APPEND", PHP_FILE_APPEND, CONST_CS | CONST_PERSISTENT);
 	
 #ifdef HAVE_FNMATCH
 	REGISTER_LONG_CONSTANT("FNM_NOESCAPE", FNM_NOESCAPE, CONST_CS | CONST_PERSISTENT);
@@ -465,20 +466,19 @@ PHP_FUNCTION(file_get_contents)
 }
 /* }}} */
 
-/* {{{ proto string file_put_contents(string file, string data[, bool use_include_path[, resource context]])
+/* {{{ proto string file_put_contents(string file, string data[, int flags[, resource context]])
    Write/Create a file with contents data */
 PHP_FUNCTION(file_put_contents)
 {
 	php_stream *stream;
 	char *filename, *data;
 	size_t filename_len, data_len;
-	int numbytes;
-	zend_bool use_include_path = 0;
+	int numbytes, flags = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|br!", &filename, &filename_len, 
-				&data, &data_len, &use_include_path, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|lr!", &filename, &filename_len, 
+				&data, &data_len, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 
@@ -486,8 +486,8 @@ PHP_FUNCTION(file_put_contents)
 		context = zend_fetch_resource(&zcontext TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
 	}
 
-	stream = php_stream_open_wrapper_ex(filename, "wb", 
-			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
+	stream = php_stream_open_wrapper_ex(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb", 
+			((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
