@@ -9,6 +9,8 @@ PHP 4                                                                      NEWS
 - Added a warning when creating temp stream fails with ftp_(n)list(). (Sara)
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
+- Fixed Bug #26703 (Certain characters inside strings incorrectly treated as
+  keywords). (vrana [at] php [dot] net, Ilia)
 - Fixed bug #26667 (Added safety checks to ip2long()). (Ilia)
 - Fixed bug #26639 (mb_convert_variables() clutters variables beyond the
   references). (Moriyoshi)
