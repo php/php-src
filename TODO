@@ -138,7 +138,6 @@ ext/standard
     * Implement regex-cache for url-functions.
     * Move socket related functions to fsock.c.
     * NOT binary safe:
-        strtok()
         basename()
 
 ext/wddx
