@@ -45,7 +45,7 @@ static int sapi_thttpd_ub_write(const char *str, uint str_length)
 	
 	n = send(TG(hc)->conn_fd, str, str_length, 0);
 
-	if (n == EPIPE) {
+	if (n == -1 && errno == EPIPE) {
 		php_handle_aborted_connection();
 	}
 
@@ -224,7 +224,8 @@ static void thttpd_request_ctor(TLS_D SLS_DC)
 	size_t filename_len;
 	size_t cwd_len;
 
-	SG(request_info).query_string = TG(hc)->query;
+
+	SG(request_info).query_string = TG(hc)->query?strdup(TG(hc)->query):NULL;
 
 	filename_len = strlen(TG(hc)->expnfilename);
 	cwd_len = strlen(TG(hc)->hs->cwd);
@@ -260,6 +261,8 @@ static void thttpd_request_ctor(TLS_D SLS_DC)
 
 static void thttpd_request_dtor(TLS_D SLS_DC)
 {
+	if (SG(request_info).query_string)
+		free(SG(request_info).query_string);
 	free(SG(request_info).request_uri);
 	free(SG(request_info).path_translated);
 }
