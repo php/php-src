@@ -338,6 +338,18 @@ SAPI_API void sapi_activate(TSRMLS_D)
 }
 
 
+static void sapi_send_headers_free(TSRMLS_D)
+{
+	if (SG(sapi_headers).http_status_line) {
+		efree(SG(sapi_headers).http_status_line);
+		SG(sapi_headers).http_status_line = NULL;
+	}
+	if (SG(sapi_headers).mimetype) {
+		efree(SG(sapi_headers).mimetype);
+		SG(sapi_headers).mimetype = NULL;
+	}
+}
+	
 SAPI_API void sapi_deactivate(TSRMLS_D)
 {
 	zend_llist_destroy(&SG(sapi_headers).headers);
@@ -362,6 +374,7 @@ SAPI_API void sapi_deactivate(TSRMLS_D)
 	if (SG(rfc1867_uploaded_files)) {
 		destroy_uploaded_files_hash(TSRMLS_C);
 	}
+	sapi_send_headers_free(TSRMLS_C);
 }
 
 
@@ -633,23 +646,12 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 }
 
 
-static void sapi_send_headers_free(TSRMLS_D)
-{
-	if (SG(sapi_headers).http_status_line) {
-		efree(SG(sapi_headers).http_status_line);
-	}
-	if (SG(sapi_headers).mimetype) {
-		efree(SG(sapi_headers).mimetype);
-	}
-}
-	
 SAPI_API int sapi_send_headers(TSRMLS_D)
 {
 	int retval;
 	int ret = FAILURE;
 
 	if (SG(headers_sent) || SG(request_info).no_headers) {
-		sapi_send_headers_free(TSRMLS_C);
 		return SUCCESS;
 	}
 
