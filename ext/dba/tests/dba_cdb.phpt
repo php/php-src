@@ -4,7 +4,7 @@ DBA CDB handler test
 <?php 
 	require_once('skipif.inc');
 	if (!in_array('cdb', dba_handlers())) die('skip CDB handler not available');
-	die('skip CDB does not support replace or delete');
+	die('info CDB does not support replace or delete');
 ?>
 --FILE--
 <?php
@@ -14,17 +14,17 @@ DBA CDB handler test
 ?>
 --EXPECT--
 database handler: cdb
-3NYNYY
+5YYYYY
 Content String 2
-Content 2 replaced
-Read during write: not allowed
-Content 2 replaced 2nd time
-The 6th value
-array(3) {
-  ["key number 6"]=>
-  string(13) "The 6th value"
+array(5) {
+  ["key1"]=>
+  string(16) "Content String 1"
   ["key2"]=>
-  string(27) "Content 2 replaced 2nd time"
+  string(16) "Content String 2"
+  ["key3"]=>
+  string(20) "Third Content String"
+  ["key4"]=>
+  string(22) "Another Content String"
   ["key5"]=>
   string(23) "The last content string"
 }

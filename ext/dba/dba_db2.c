@@ -76,7 +76,7 @@ DBA_OPEN_FUNC(db2)
 		return FAILURE;
 	}
 
-	info->dbf = emalloc(sizeof(dba_db2_data));
+	info->dbf = pemalloc(sizeof(dba_db2_data), info->flags&DBA_PERSISTENT);
 	memset(info->dbf, 0, sizeof(dba_db2_data));
 	((dba_db2_data *) info->dbf)->dbp = dbp;
 	return SUCCESS;
@@ -89,7 +89,7 @@ DBA_CLOSE_FUNC(db2)
 	if (dba->cursor) 
 		dba->cursor->c_close(dba->cursor);
 	dba->dbp->close(dba->dbp, 0);
-	efree(dba);
+	pefree(dba, info->flags&DBA_PERSISTENT);
 }
 
 DBA_FETCH_FUNC(db2)

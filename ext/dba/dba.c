@@ -211,7 +211,7 @@ static int le_pdb;
 static void dba_close(dba_info *info TSRMLS_DC)
 {
 	if (info->hnd) info->hnd->close(info TSRMLS_CC);
-	if (info->path) efree(info->path);
+	if (info->path) pefree(info->path, info->flags&DBA_PERSISTENT);
 	if (info->fp && info->fp!=info->lock.fp) php_stream_close(info->fp);
 	if (info->lock.fd) {
 		php_flock(info->lock.fd, LOCK_UN);
@@ -219,8 +219,8 @@ static void dba_close(dba_info *info TSRMLS_DC)
 		info->lock.fd = 0;
 	}
 	if (info->lock.fp) php_stream_close(info->lock.fp);
-	if (info->lock.name) efree(info->lock.name);
-	efree(info);
+	if (info->lock.name) pefree(info->lock.name, info->flags&DBA_PERSISTENT);
+	pefree(info, info->flags&DBA_PERSISTENT);
 }
 /* }}} */
 
@@ -228,7 +228,7 @@ static void dba_close(dba_info *info TSRMLS_DC)
  */
 static void dba_close_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-	dba_info *info = (dba_info *)rsrc->ptr;
+	dba_info *info = (dba_info *)rsrc->ptr; 
 
 	dba_close(info TSRMLS_CC);
 }
@@ -510,7 +510,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	info->mode = modenr;
 	info->argc = ac - 3;
 	info->argv = args + 3;
-	info->flags = (hptr->flags & ~DBA_LOCK_ALL) | (lock_flag & DBA_LOCK_ALL);
+	info->flags = (hptr->flags & ~DBA_LOCK_ALL) | (lock_flag & DBA_LOCK_ALL) | (persistent ? DBA_PERSISTENT : 0);
 	info->lock.mode = lock_mode;
 
 	/* if any open call is a locking call:
@@ -536,12 +536,12 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			if (!strcmp(file_mode, "r")) {
 				/* when in read only mode try to use existing .lck file first */
 				/* do not log errors for .lck file while in read ony mode on .lck file */
-			lock_file_mode = "rb";
+				lock_file_mode = "rb";
 				info->lock.fp = php_stream_open_wrapper(info->lock.name, lock_file_mode, STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
-		}
+			}
 			if (!info->lock.fp) {
 				/* when not in read mode or failed to open .lck file read only. now try again in create(write) mode and log errors */
-			lock_file_mode = "a+b";
+				lock_file_mode = "a+b";
 			}
 		}
 		if (!info->lock.fp) {

@@ -78,14 +78,14 @@ DBA_OPEN_FUNC(dbm)
 		return FAILURE;
 	}
 
-	info->dbf = emalloc(sizeof(dba_dbm_data));
+	info->dbf = pemalloc(sizeof(dba_dbm_data), info->flags&DBA_PERSISTENT);
 	memset(info->dbf, 0, sizeof(dba_dbm_data));
 	return SUCCESS;
 }
 
 DBA_CLOSE_FUNC(dbm)
 {
-	efree(info->dbf);
+	pefree(info->dbf, info->flags&DBA_PERSISTENT);
 	dbmclose();
 }
 
