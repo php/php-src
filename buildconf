@@ -1,7 +1,7 @@
 #!/bin/sh
 
 test -d libzend || ln -s ../libzend .
-test -f TSRM || ln -s ../TSRM .
+test -d TSRM || ln -s ../TSRM .
 
 ./scripts/preconfig
 
