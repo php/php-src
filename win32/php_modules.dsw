@@ -291,6 +291,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "openssl"=..\ext\openssl\openssl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "oracle"=..\ext\oracle\oracle.dsp - Package Owner=<4>
 
 Package=<5>
