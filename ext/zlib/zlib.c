@@ -480,14 +480,28 @@ PHP_FUNCTION(gzgetc) {
 Get a line from file pointer and strip HTML tags */
 PHP_FUNCTION(gzgetss)
 {
-	pval *fd, *bytes;
+	pval *fd, *bytes, *allow=NULL;
 	gzFile *zp;
 	int len;
 	char *buf;
 	ZLIBLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &fd, &bytes) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	switch(ARG_COUNT(ht)) {
+		case 2:
+			if(getParameters(ht, 2, &fd, &bytes) == FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		case 3:
+			if(getParameters(ht, 3, &fd, &bytes, &allow) == FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_string(allow);
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			/* NOTREACHED */
+			break;
 	}
 
 	convert_to_long(bytes);
@@ -504,7 +518,7 @@ PHP_FUNCTION(gzgetss)
 		RETURN_FALSE;
 	}
 
-	_php3_strip_tags(buf, ZLIBG(gzgetss_state));
+	_php3_strip_tags(buf, len, ZLIBG(gzgetss_state), allow);
 	RETURN_STRING(buf, 0);
 	
 }
