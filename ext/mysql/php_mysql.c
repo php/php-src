@@ -933,7 +933,7 @@ PHP_FUNCTION(mysql_info)
 
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	if (str = mysql_info(&mysql->conn)) {
+	if ((str = mysql_info(&mysql->conn))) {
 		RETURN_STRING(str,1);
 	} else {
 		RETURN_FALSE;
