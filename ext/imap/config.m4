@@ -20,11 +20,10 @@ AC_DEFUN(IMAP_LIB_CHK,[
   done
 ])
 
-dnl PHP_IMAP_TEST_BUILD(function, action-if-ok, action-if-not-ok [, extra-libs])
+dnl PHP_IMAP_TEST_BUILD(function, action-if-ok, action-if-not-ok, extra-libs)
 AC_DEFUN(PHP_IMAP_TEST_BUILD, [
-  old_LIBS=$LIBS
-  LIBS="$4 $LIBS"
-  AC_TRY_RUN([
+  PHP_TEST_BUILD([$1], [$2], [$3], [$4],
+  [
     void mm_log(void){}
     void mm_dlog(void){}
     void mm_flags(void){}
@@ -40,17 +39,6 @@ AC_DEFUN(PHP_IMAP_TEST_BUILD, [
     void mm_exists(void){}
     void mm_searched(void){}
     void mm_expunged(void){}
-    char $1();
-    int main() {
-      $1();
-      return 0;
-    }
-  ], [
-    LIBS=$old_LIBS
-    $2
-  ],[
-    LIBS=$old_LIBS
-    $3
   ])
 ])
 
@@ -206,7 +194,7 @@ if test "$PHP_IMAP" != "no"; then
       AC_DEFINE(HAVE_IMAP_AUTH_GSS, 1, [ ])
     ], [], $TST_LIBS)
 
-    AC_MSG_CHECKING(whether IMAP works)
+    AC_MSG_CHECKING(whether build with IMAP works)
     PHP_IMAP_TEST_BUILD(mail_newbody, [
       AC_MSG_RESULT(yes)
     ], [
