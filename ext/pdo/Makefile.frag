@@ -20,4 +20,8 @@ install-pdo-headers:
 # mini hack
 install: $(all_targets) $(install_targets) install-pdo-headers
 
+$(top_srcdir)/ext/pdo/pdo_sql_parser.c: $(top_srcdir)/ext/pdo/pdo_sql_parser.re
+	re2c -b $(top_srcdir)/ext/pdo/pdo_sql_parser.re > $@
 
+$(srcdir)/pdo_sql_parser.c: $(srcdir)/pdo_sql_parser.re
+	re2c -b $(srcdir)/pdo_sql_parser.re > $@

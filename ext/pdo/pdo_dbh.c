@@ -133,7 +133,9 @@ static PHP_METHOD(PDO, prepare)
 	}
 	
 	stmt = ecalloc(1, sizeof(*stmt));
-	
+	/* uncoditionally keep this for later reference */
+	stmt->query_string = estrndup(statement, statement_len);
+	stmt->query_stringlen = statement_len;
 	if (dbh->methods->preparer(dbh, statement, statement_len, stmt TSRMLS_CC)) {
 		/* prepared; create a statement object for PHP land to access it */
 		Z_TYPE_P(return_value) = IS_OBJECT;
@@ -146,9 +148,7 @@ static PHP_METHOD(PDO, prepare)
 		stmt->dbh = dbh;
 		return;
 	}
-
 	efree(stmt);
-
 	RETURN_FALSE;
 }
 
