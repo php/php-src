@@ -98,7 +98,6 @@ Transport
 ---------
 ? HTTP status codes
 ? HTTP chunked Transfer-Encoding
-- support fo https:// through proxy
 - support for HTTP compression (gzip,x-gzip,defalte)
 - transport abstraction layer???
 
