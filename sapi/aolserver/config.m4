@@ -15,7 +15,7 @@ AC_ARG_WITH(aolserver,
 	AC_DEFINE(HAVE_AOLSERVER)
 	PHP_SAPI=aolserver
 	PHP_BUILD_SHARED
-	INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 libs/libphp4.so $NS_DIR/root/bin/libphp4.so"
+	INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $SAPI_SHARED $NS_DIR/root/bin/"
 	RESULT=yes
 ])
 AC_MSG_RESULT($RESULT)

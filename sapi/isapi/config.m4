@@ -18,7 +18,7 @@ dnl 		fi
 dnl 		AC_DEFINE(WITH_ZEUS)
 dnl 		AC_ADD_INCLUDE($zeuspath/web/include)
 dnl 		PHP_SAPI=isapi
-dnl 		SAPI_TARGET=php4isapi.so
+dnl 		PHP_BUILD_SHARED
 dnl 	else
 dnl 		AC_MSG_RESULT(no)
 dnl 	fi

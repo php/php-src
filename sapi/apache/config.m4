@@ -17,8 +17,7 @@ AC_ARG_WITH(apxs,
 	AC_ADD_INCLUDE($APXS_INCLUDEDIR)
     PHP_EXTENSION(apache)
 	PHP_SAPI=apache
-	SAPI_TARGET=libphp4.so
-    APACHE_INSTALL="$APXS -i -a -n php4 libs/libphp4.so"
+    APACHE_INSTALL="$APXS -i -a -n php4 $SAPI_SHARED"
 	PHP_BUILD_SHARED
 	STRONGHOLD=
 	AC_DEFINE(APACHE)
@@ -31,7 +30,7 @@ AC_ARG_WITH(apxs,
 
 APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache/mod_php4.* sapi/apache/libphp4.module"
 
-if test "$SAPI_TARGET" != "libphp4.so"; then
+if test "$PHP_SAPI" != "apache"; then
 AC_MSG_CHECKING(for Apache module support)
 AC_ARG_WITH(apache,
 [  --with-apache[=DIR]	   Build Apache module.	 DIR is the top-level Apache
@@ -49,8 +48,7 @@ AC_ARG_WITH(apache,
 			APACHE_INCLUDE=-I$withval/src
 			APACHE_TARGET=$withval/src
 			PHP_SAPI=apache
-			SAPI_TARGET=libphp4.a
-			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_TARGET $APACHE_INSTALL_FILES $APACHE_TARGET"
+			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_INSTALL_FILES $APACHE_TARGET"
 			PHP_LIBS="-L. -lphp3"
 			AC_DEFINE(APACHE)
 			AC_MSG_RESULT(yes - Apache 1.2.x)
@@ -66,8 +64,7 @@ AC_ARG_WITH(apache,
 				mkdir $APACHE_TARGET
 			fi
 			PHP_SAPI=apache
-			SAPI_TARGET=libs/libphp4.a
-			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_TARGET $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
+			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
 			PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
 			AC_DEFINE(APACHE)
 			AC_MSG_RESULT(yes - Apache 1.3.x)
@@ -96,9 +93,8 @@ AC_ARG_WITH(apache,
 				mkdir $APACHE_TARGET
 			fi
 			PHP_SAPI=apache
-			SAPI_TARGET=libs/libphp4.a
 			PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
-			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_TARGET $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
+			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
 			AC_DEFINE(APACHE)
 			AC_MSG_RESULT(yes - Apache 1.3.x)
 			STRONGHOLD=
@@ -120,9 +116,8 @@ AC_ARG_WITH(apache,
 			APACHE_INCLUDE=-"I$withval/apache -I$withval/ssl/include"
 			APACHE_TARGET=$withval/apache
 			PHP_SAPI=apache
-			SAPI_TARGET=libs/libphp4.a
 			PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
-			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_TARGET $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET"
+			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET"
 			STRONGHOLD=-DSTRONGHOLD=1
 			AC_DEFINE(APACHE)
 			AC_MSG_RESULT(yes - StrongHold)
