@@ -81,8 +81,8 @@ _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value TSRMLS_DC)
 	}
 
 #define GET_NODE(__s, __n) { \
-	if (__s->node && __s->node->node) { \
-		__n = __s->node->node; \
+	if ((__s)->node && (__s)->node->node) { \
+		__n = (__s)->node->node; \
 	} else { \
 		__n = NULL; \
 		php_error(E_WARNING, "Node no longer exists"); \
