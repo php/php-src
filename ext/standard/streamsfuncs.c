@@ -43,7 +43,7 @@ static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC)
 
 #if HAVE_SOCKETPAIR
 /* {{{ proto array stream_socket_pair(int domain, int type, int protocol)
-   Creates a pair of indistinguishable socket streams */
+   Creates a pair of connected, indistinguishable socket streams */
 PHP_FUNCTION(stream_socket_pair)
 {
 	long domain, type, protocol;
@@ -57,8 +57,9 @@ PHP_FUNCTION(stream_socket_pair)
 	}
 
 	if (0 != socketpair(domain, type, protocol, pair)) {
+		char errbuf[256];
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to create sockets: [%d]: %s",
-			php_socket_errno(), php_socket_strerror(php_socket_errno()));
+			php_socket_errno(), php_socket_strerror(php_socket_errno(), errbuf, sizeof(errbuf)));
 		RETURN_FALSE;
 	}
 
@@ -67,8 +68,8 @@ PHP_FUNCTION(stream_socket_pair)
 	s1 = php_stream_sock_open_from_socket(pair[0], 0);
 	s2 = php_stream_sock_open_from_socket(pair[1], 0);
 
-	add_next_index_zval(return_value, php_stream_get_resource_id(s1));
-	add_next_index_zval(return_value, php_stream_get_resource_id(s2));
+	add_next_index_resource(return_value, php_stream_get_resource_id(s1));
+	add_next_index_resource(return_value, php_stream_get_resource_id(s2));
 }
 /* }}} */
 #endif
