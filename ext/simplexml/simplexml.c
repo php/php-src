@@ -1191,6 +1191,10 @@ PHP_FUNCTION(simplexml_import_dom)
 
 	if (object->node && object->node->node) {
 		nodep = object->node->node;
+		if (nodep->doc == NULL) {
+			php_error(E_WARNING, "Imported Node must have associated Document");
+			RETURN_NULL();
+		}
 		if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
 			nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
 		}
