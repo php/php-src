@@ -1,3 +1,12 @@
+2003-07-11  Andi Gutmans  <andi@zend.com>
+
+    * zend_API.c:
+      - Add support for Z in zend_parse_parameters(). It will allow the extension
+      - to retreive the zval **, thus allowing it to use the convert_to_*_ex()
+      - family of functions to do type conversions without effecting the value
+      in
+      - the engine itself. (Josh Fuhs <fuhs@purdue.edu>)
+
 2003-07-08  Zeev Suraski  <zeev@zend.com>
 
     * zend_execute.c:
