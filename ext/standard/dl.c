@@ -76,6 +76,7 @@ PHP_FUNCTION(dl)
 		php_error(E_ERROR, "Dynamically loaded extensions aren't allowed when running in SAFE MODE.");
 	} else {
 		php_dl(*file, MODULE_TEMPORARY, return_value TSRMLS_CC);
+		EG(full_tables_cleanup) = 1;
 	}
 }
 
