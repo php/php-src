@@ -1,3 +1,4 @@
+shared=no
 AC_MSG_CHECKING(whether to include GD support)
 AC_ARG_WITH(gd,
 [  --without-gd            Disable GD support.
@@ -5,19 +6,7 @@ AC_ARG_WITH(gd,
                           Set DIR to "shared" to build as a dl, or 
                           "shared,DIR" to build as a dl and still specify DIR.],
 [
-  case $withval in
-    shared)
-      shared=yes
-      withval=yes
-      ;;
-    shared,*)
-      shared=yes
-      withval=`echo $withval | sed -e 's/^shared,//'`
-      ;;
-    *)
-      shared=no
-      ;;
-  esac
+  PHP_WITH_SHARED
 
   case "$withval" in
     no)
@@ -59,16 +48,16 @@ dnl A whole whack of possible places where this might be
 
       if test -n "$GD_INCLUDE" && test -n "$GD_LIB" ; then
         AC_DEFINE(HAVE_LIBGD)
-        if test "$shared" != "yes"; then
-          AC_MSG_RESULT(yes (static))
-          AC_ADD_LIBRARY_WITH_PATH(gd, $GD_LIB)
-        else
+        if test "$shared" = "yes"; then
           AC_MSG_RESULT(yes (shared))
           GD_LIBS="-lgd"
           GD_LFLAGS="-L$GD_LIB"
+        else
+          AC_MSG_RESULT(yes (static))
+          AC_ADD_LIBRARY_WITH_PATH(gd, $GD_LIB)
         fi
         AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13) ])
-	ac_cv_lib_gd_gdImageLine=yes
+        ac_cv_lib_gd_gdImageLine=yes
       else
         AC_MSG_ERROR([Unable to find libgd.(a|so) anywhere under $withval])
       fi ;;
@@ -100,25 +89,25 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
     done
     if test -n "$FREETYPE_DIR" ; then
       AC_DEFINE(HAVE_LIBFREETYPE)
-      if test "$shared" != "yes"; then
-        AC_ADD_LIBRARY_WITH_PATH(freetype, $FREETYPE_DIR/lib)
-        AC_ADD_INCLUDE($FREETYPE_DIR/include)
-      else 
+      if test "$shared" = "yes"; then
         GD_LIBS="$GD_LIBS -lfreetype"
         GD_LFLAGS="$GD_LFLAGS -L$FREETYPE_DIR/lib"
         GD_INCLUDES="$GD_INCLUDES -I$FREETYPE_DIR/include"
+      else 
+        AC_ADD_LIBRARY_WITH_PATH(freetype, $FREETYPE_DIR/lib)
+        AC_ADD_INCLUDE($FREETYPE_DIR/include)
       fi
       AC_MSG_RESULT(yes)
     else
       if test -n "$TTF_DIR" ; then
         AC_DEFINE(HAVE_LIBTTF)
         if test "$shared" != "yes"; then
-          AC_ADD_LIBRARY_WITH_PATH(ttf, $TTF_DIR/lib)
-          AC_ADD_INCLUDE($TTF_DIR/include)
-        else
           GD_LIBS="$GD_LIBS -lttf"
           GD_LFLAGS="$GD_LFLAGS -L$TTF_DIR/lib"
           GD_INCLUDES="$GD_INCLUDES -I$TTF_DIR/include"
+        else
+          AC_ADD_LIBRARY_WITH_PATH(ttf, $TTF_DIR/lib)
+          AC_ADD_INCLUDE($TTF_DIR/include)
         fi
         AC_MSG_RESULT(yes)
       else
