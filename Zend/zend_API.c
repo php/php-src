@@ -592,7 +592,7 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 			zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 		}
 	} else {
-		arg->value.obj = class_type->create_object(class_type);
+		arg->value.obj = class_type->create_object(class_type TSRMLS_CC);
 	}
 	return SUCCESS;
 }
