@@ -11,6 +11,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #27135 (Possible crash inside mb_strlen()). (Moriyoshi)
 - Fixed bug #27026 (Added cgi.nph that allows forcing of the Status: 200
   header that is not normally needed). (Ilia)
+- Fixed bug #26758 (FastCGI exits immediately with status 255). (Ilia, 
+  tcarter at noggin dot com dot au)
 - Fixed bug #24773 (unseting of strings as arrays causes a crash). (Sara)
 
 03 Feb 2004, Version 4.3.5RC2

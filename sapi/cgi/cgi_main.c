@@ -275,7 +275,7 @@ static void sapi_cgibin_flush(void *server_context)
 #if PHP_FASTCGI
 	if (!FCGX_IsCGI()) {
 		FCGX_Request *request = (FCGX_Request *)server_context;
-		if(!request || FCGX_FFlush( request->out ) == -1 ) {
+		if (!parent && (!request || FCGX_FFlush(request->out) == -1)) {
 			php_handle_aborted_connection();
 		}
 		return;
