@@ -268,20 +268,20 @@ PS_SERIALIZER_ENCODE_FUNC(wddx)
 	wddx_packet *packet;
 	ENCODE_VARS;
 
-	packet = _php_wddx_constructor();
+	packet = php_wddx_constructor();
 	if(!packet) return FAILURE;
 
-	_php_wddx_packet_start(packet, NULL);
-	_php_wddx_add_chunk(packet, WDDX_STRUCT_S);
+	php_wddx_packet_start(packet, NULL);
+	php_wddx_add_chunk(packet, WDDX_STRUCT_S);
 	
 	ENCODE_LOOP(
-		_php_wddx_serialize_var(packet, *struc, key);
+		php_wddx_serialize_var(packet, *struc, key);
 	);
 	
-	_php_wddx_add_chunk(packet, WDDX_STRUCT_E);
-	_php_wddx_packet_end(packet);
-	*newstr = _php_wddx_gather(packet);
-	_php_wddx_destructor(packet);
+	php_wddx_add_chunk(packet, WDDX_STRUCT_E);
+	php_wddx_packet_end(packet);
+	*newstr = php_wddx_gather(packet);
+	php_wddx_destructor(packet);
 	
 	if(newlen) *newlen = strlen(*newstr);
 
@@ -302,7 +302,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	
 	MAKE_STD_ZVAL(retval);
 
-	_php_wddx_deserialize_ex((char *)val, vallen, retval);
+	php_wddx_deserialize_ex((char *)val, vallen, retval);
 
 	for(zend_hash_internal_pointer_reset(retval->value.ht);
 			zend_hash_get_current_data(retval->value.ht, (void **) &ent) == SUCCESS;
