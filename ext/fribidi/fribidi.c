@@ -134,8 +134,8 @@ PHP_FUNCTION(fribidi_log2vis)
 
 	FriBidiCharType base_dir;
 
-	guint16 *position_L_to_V_list;
-	guint16 *position_V_to_L_list;
+	FriBidiStrIndex *position_L_to_V_list;
+	FriBidiStrIndex *position_V_to_L_list;
 	guint8  *embedding_level_list;
 				   
 	/* get parameters from input */
@@ -162,8 +162,8 @@ PHP_FUNCTION(fribidi_log2vis)
 	u_logical_str = (FriBidiChar*) emalloc(sizeof(FriBidiChar)*alloc_len);
 	u_visual_str = (FriBidiChar*) emalloc(sizeof(FriBidiChar)*alloc_len);
 	
-	position_L_to_V_list = (guint16*) emalloc(sizeof(guint16)*alloc_len);
-	position_V_to_L_list = (guint16*) emalloc(sizeof(guint16)*alloc_len);
+	position_L_to_V_list =  (FriBidiStrIndex*) emalloc(sizeof(FriBidiStrIndex)*alloc_len);
+	position_V_to_L_list =  (FriBidiStrIndex*) emalloc(sizeof(FriBidiStrIndex)*alloc_len);
 	embedding_level_list = (guint8*) emalloc(sizeof(guint8)*alloc_len);
 
 	outString = (guchar*)emalloc(sizeof(guchar)*alloc_len);
@@ -174,25 +174,32 @@ PHP_FUNCTION(fribidi_log2vis)
 
 	switch(Z_LVAL_PP(parameter3)) {
 		case FRIBIDI_CHARSET_UTF8:
-			utf8_len=fribidi_utf8_to_unicode(inString, u_logical_str);
+			utf8_len=fribidi_utf8_to_unicode(inString, len, u_logical_str);
 			break;
 		case FRIBIDI_CHARSET_ISO8859_6:
-			fribidi_iso8859_6_to_unicode(inString, u_logical_str);
+			fribidi_iso8859_6_to_unicode(inString, len, u_logical_str);
 			break;
 		case FRIBIDI_CHARSET_ISO8859_8:
-			fribidi_iso8859_8_to_unicode(inString, u_logical_str);
+			fribidi_iso8859_8_to_unicode(inString, len, u_logical_str);
 			break;
 		case FRIBIDI_CHARSET_CP1255:
-			fribidi_cp1255_to_unicode(inString, u_logical_str);
+			fribidi_cp1255_to_unicode(inString, len, u_logical_str);
 			break;
 		case FRIBIDI_CHARSET_CP1256:
-			fribidi_cp1256_to_unicode(inString, u_logical_str);
+			fribidi_cp1256_to_unicode(inString, len, u_logical_str);
 			break;
 		case FRIBIDI_CHARSET_ISIRI_3342:
-			fribidi_isiri_3342_to_unicode(inString, u_logical_str);
+			fribidi_isiri_3342_to_unicode(inString, len, u_logical_str);
 			break;
 		default:
-			zend_error(E_ERROR,"unknown character set %d<br />", Z_LVAL_PP(parameter3));
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unknown charset");
+			efree(u_logical_str);
+			efree(u_visual_str);
+			efree(position_L_to_V_list);
+			efree(position_V_to_L_list);
+			efree(embedding_level_list);
+			efree(outString);
+			RETURN_FALSE;
 	}
 	
 	
