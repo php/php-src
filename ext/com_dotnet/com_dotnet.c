@@ -29,7 +29,7 @@
 # include "ext/standard/info.h"
 # include "php_com_dotnet.h"
 # include "php_com_dotnet_internal.h"
-# include "Zend/zend_default_classes.h"
+# include "Zend/zend_exceptions.h"
 # include <mscoree.h>
 
 struct dotnet_runtime_stuff {

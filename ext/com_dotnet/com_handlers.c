@@ -27,7 +27,7 @@
 #include "ext/standard/info.h"
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
-#include "Zend/zend_default_classes.h"
+#include "Zend/zend_exceptions.h"
 
 static zval *com_property_read(zval *object, zval *member, zend_bool silent TSRMLS_DC)
 {

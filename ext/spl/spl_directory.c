@@ -26,7 +26,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "zend_compile.h"
-#include "zend_default_classes.h"
+#include "zend_exceptions.h"
 #include "zend_interfaces.h"
 
 #include "php_spl.h"

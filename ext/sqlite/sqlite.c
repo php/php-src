@@ -41,7 +41,7 @@
 
 #include <sqlite.h>
 
-#include "zend_default_classes.h"
+#include "zend_exceptions.h"
 
 #ifndef safe_emalloc
 # define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
