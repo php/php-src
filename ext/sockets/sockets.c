@@ -602,11 +602,14 @@ PHP_FUNCTION(read)
 	ret = read(Z_LVAL_PP(fd), tmpbuf, Z_LVAL_PP(length));
 	
 	if (ret >= 0) {
-		Z_STRVAL_PP(buf) = tmpbuf;
+		Z_STRVAL_PP(buf) = estrndup(tmpbuf,strlen(tmpbuf));
 		Z_STRLEN_PP(buf) = ret;
 		
+		efree(tmpbuf);
+
 		RETURN_LONG(ret);
 	} else {
+		efree(tmpbuf);
 		RETURN_LONG(-errno);
 	}
 }
