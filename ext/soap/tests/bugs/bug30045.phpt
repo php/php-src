@@ -1,5 +1,5 @@
 --TEST--
-Bug #29844 (SOAP doesn't return the result of a valid SOAP request)
+Bug #30045 (Cannot pass big integers (> 2147483647) in SOAP requests)
 --SKIPIF--
 <?php 
   if (!extension_loaded('soap')) die('skip soap extension not available');
