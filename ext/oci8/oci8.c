@@ -2840,7 +2840,7 @@ PHP_FUNCTION(ocisavelob)
 
 			if (offparam == -1) {
 				offset = curloblen;
-			} else if (offparam >= curloblen) {
+			} else if ((ub4) offparam >= curloblen) {
 				php_error(E_WARNING, "Offset smaller than current LOB-Size - appending");
 				offset = curloblen;
 			} else {
@@ -3131,7 +3131,7 @@ PHP_FUNCTION(ociwritelobtofile)
 			}
 
 			if (fp != -1) {
-				if (write(fp,buffer,toread) != toread) {
+				if ((ub4) write(fp,buffer,toread) != toread) {
 					php_error(E_WARNING, "cannot write file!");
 					goto bail;
 				}
