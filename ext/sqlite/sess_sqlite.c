@@ -149,7 +149,6 @@ PS_READ_FUNC(sqlite)
 			}
 			break;
 		default:
-			//php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLite: session read query failed: %s", error);
 			sqlite_freemem(error);
 			error = NULL;
 	}
