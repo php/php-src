@@ -119,7 +119,7 @@ foreach ($fallback_config as $key => $value) {
     }
 }
 
-$verbose    = $config->get("verbose");
+//$verbose    = $config->get("verbose");
 $script_dir = $config->get("php_dir");
 $ext_dir    = $config->get("ext_dir");
 $doc_dir    = $config->get("doc_dir");
@@ -151,14 +151,13 @@ switch ($command) {
 
     case 'install': {
         include_once 'PEAR/Installer.php';
-        $package = $options[1][2];
+        $pkgfile = $options[1][2];
         $installer =& new PEAR_Installer($script_dir, $ext_dir, $doc_dir);
+        $installer->setErrorHandling(PEAR_ERROR_DIE,
+                                     basename($pkgfile) . ": %s\n");
         $installer->debug = $verbose;
-        if (PEAR::isError($installer->Install($package))) {
-            print "\ninstall failed\n";
-        } else {
-            print "install ok\n";
-        }
+        $installer->install($pkgfile);
+        print "install ok\n";
         break;
     }
 
@@ -204,14 +203,13 @@ switch ($command) {
                 if ($j++ > 0) {
                     print "\n";
                 }
-                printf("%-20s %-10s %-15s %s\n",
-                       "Package", "Stable", "Lead", "Category");
+                printf("%-20s %-10s %s\n",
+                       "Package", "Version", "State");
                 print str_repeat("=", 75)."\n";
             }
             $stable = $package['stable'];
-            printf("%-20s %-10s %-15s %s\n", $package['name'],
-                   $stable ? $stable : "???",
-                   $package['lead'], $package['category']);
+            printf("%-20s %-10s %s\n", $package['package'],
+                   $package['version'], $package['release_state']);
         }
         break;
     }
