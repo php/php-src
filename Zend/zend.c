@@ -44,7 +44,7 @@ BOOL WINAPI IsDebuggerPresent(VOID);
 #endif
 
 /* true multithread-shared globals */
-ZEND_API zend_class_entry zend_standard_class_def;
+ZEND_API zend_class_entry *zend_standard_class_def = NULL;
 ZEND_API int (*zend_printf)(const char *format, ...);
 ZEND_API zend_write_func_t zend_write;
 ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
@@ -148,7 +148,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			break;
 		case IS_OBJECT:
 			expr_copy->value.str.val = (char *) emalloc(sizeof("Object id #")-1 + MAX_LENGTH_OF_LONG);
-			expr_copy->value.str.len = sprintf(expr_copy->value.str.val, "Object id #%ld", expr->value.obj.handle);
+			expr_copy->value.str.len = sprintf(expr_copy->value.str.val, "Object id #%ld", (long)expr->value.obj.handle);
 #if 0
 			/* FIXME: This might break BC for some people */
 			expr_copy->value.str.len = sizeof("Object")-1;
@@ -246,26 +246,28 @@ static FILE *zend_fopen_wrapper(const char *filename, char **opened_path)
 
 static void register_standard_class(void)
 {
-	zend_standard_class_def.type = ZEND_INTERNAL_CLASS;
-	zend_standard_class_def.name_length = sizeof("stdClass") - 1;
-	zend_standard_class_def.name = zend_strndup("stdClass", zend_standard_class_def.name_length);
-	zend_standard_class_def.parent = NULL;
-	zend_hash_init_ex(&zend_standard_class_def.default_properties, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
-	zend_hash_init_ex(&zend_standard_class_def.private_properties, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
-	zend_standard_class_def.static_members = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init_ex(zend_standard_class_def.static_members, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
-	zend_hash_init_ex(&zend_standard_class_def.constants_table, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
-	zend_hash_init_ex(&zend_standard_class_def.class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
-	zend_hash_init_ex(&zend_standard_class_def.function_table, 0, NULL, ZEND_FUNCTION_DTOR, 1, 0);
-	zend_standard_class_def.constructor = NULL;
-	zend_standard_class_def.destructor = NULL;
-	zend_standard_class_def.clone = NULL;
-	zend_standard_class_def.handle_function_call = NULL;
-	zend_standard_class_def.handle_property_get = NULL;
-	zend_standard_class_def.handle_property_set = NULL;
-	zend_standard_class_def.refcount = (int *) malloc(sizeof(int));
-	*zend_standard_class_def.refcount = 1;
-	zend_hash_add(GLOBAL_CLASS_TABLE, "stdclass", sizeof("stdclass"), &zend_standard_class_def, sizeof(zend_class_entry), NULL);
+	zend_standard_class_def = malloc(sizeof(zend_class_entry));
+	
+	zend_standard_class_def->type = ZEND_INTERNAL_CLASS;
+	zend_standard_class_def->name_length = sizeof("stdClass") - 1;
+	zend_standard_class_def->name = zend_strndup("stdClass", zend_standard_class_def->name_length);
+	zend_standard_class_def->parent = NULL;
+	zend_hash_init_ex(&zend_standard_class_def->default_properties, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
+	zend_hash_init_ex(&zend_standard_class_def->private_properties, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
+	zend_standard_class_def->static_members = (HashTable *) malloc(sizeof(HashTable));
+	zend_hash_init_ex(zend_standard_class_def->static_members, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
+	zend_hash_init_ex(&zend_standard_class_def->constants_table, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
+	zend_hash_init_ex(&zend_standard_class_def->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
+	zend_hash_init_ex(&zend_standard_class_def->function_table, 0, NULL, ZEND_FUNCTION_DTOR, 1, 0);
+	zend_standard_class_def->constructor = NULL;
+	zend_standard_class_def->destructor = NULL;
+	zend_standard_class_def->clone = NULL;
+	zend_standard_class_def->handle_function_call = NULL;
+	zend_standard_class_def->handle_property_get = NULL;
+	zend_standard_class_def->handle_property_set = NULL;
+	zend_standard_class_def->refcount = (int *) malloc(sizeof(int));
+	*zend_standard_class_def->refcount = 1;
+	zend_hash_add(GLOBAL_CLASS_TABLE, "stdclass", sizeof("stdclass"), &zend_standard_class_def, sizeof(zend_class_entry *), NULL);
 }
 
 

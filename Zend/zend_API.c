@@ -1202,9 +1202,12 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 	zend_class_entry *register_class;
 
 	if (!parent_ce && parent_name) {
-			if (zend_hash_find(CG(class_table), parent_name, strlen(parent_name)+1, (void **) &parent_ce)==FAILURE) {
-				return NULL;
-			}
+		zend_class_entry **pce;
+		if (zend_hash_find(CG(class_table), parent_name, strlen(parent_name)+1, (void **) &pce)==FAILURE) {
+			return NULL;
+		} else {
+			parent_ce = *pce;
+		}
 	}
 
 	register_class = zend_register_internal_class(class_entry TSRMLS_CC);
@@ -1215,10 +1218,11 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 	return register_class;
 }
 
-ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry TSRMLS_DC)
+ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_class_entry TSRMLS_DC)
 {
-	zend_class_entry *register_class;
-	char *lowercase_name = zend_strndup(class_entry->name, class_entry->name_length);
+	zend_class_entry *class_entry = malloc(sizeof(zend_class_entry));
+	char *lowercase_name = zend_strndup(orig_class_entry->name, orig_class_entry->name_length);
+	*class_entry = *orig_class_entry;
 
 	zend_str_tolower(lowercase_name, class_entry->name_length);
 
@@ -1239,9 +1243,9 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_
 		zend_register_functions(class_entry->builtin_functions, &class_entry->function_table, MODULE_PERSISTENT TSRMLS_CC);
 	}
 
-	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, class_entry, sizeof(zend_class_entry), (void **) &register_class);
+	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, &class_entry, sizeof(zend_class_entry *), NULL);
 	free(lowercase_name);
-	return register_class;
+	return class_entry;
 }
 
 
@@ -1327,7 +1331,7 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 			{
 				zval **method;
 				zval **obj;
-				zend_class_entry *ce = NULL;
+				zend_class_entry *ce = NULL, **pce;
 				char callable_name_len;
 				
 				if (zend_hash_num_elements(Z_ARRVAL_P(callable)) == 2 &&
@@ -1354,7 +1358,10 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 
 						lcname = estrndup(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
 						zend_str_tolower(lcname, Z_STRLEN_PP(obj));
-						zend_hash_find(EG(class_table), lcname, Z_STRLEN_PP(obj) + 1, (void**)&ce);
+						if(zend_hash_find(EG(class_table), lcname, Z_STRLEN_PP(obj) + 1, (void**)&pce) == SUCCESS) {
+							ce = *pce;
+						}
+						
 						efree(lcname);
 					} else {
 						ce = Z_OBJCE_PP(obj); /* ??? */
