@@ -1546,14 +1546,19 @@ PHP_FUNCTION(odbc_fetch_row)
 #endif
 
 	numArgs = ZEND_NUM_ARGS();
-	if (numArgs ==  1) {
-		if (zend_get_parameters_ex(1, &pv_res) == FAILURE)
+	switch (numArgs) {
+		case 1:
+			if (zend_get_parameters_ex(1, &pv_res) == FAILURE)
+				WRONG_PARAM_COUNT;
+			break;
+		case 2:
+			if (zend_get_parameters_ex(2, &pv_res, &pv_row) == FAILURE)
+				WRONG_PARAM_COUNT;
+			convert_to_long_ex(pv_row);
+			rownum = Z_LVAL_PP(pv_row);
+			break;
+		default:
 			WRONG_PARAM_COUNT;
-	} else {
-		if (zend_get_parameters_ex(2, &pv_res, &pv_row) == FAILURE)
-			WRONG_PARAM_COUNT;
-		convert_to_long_ex(pv_row);
-		rownum = Z_LVAL_PP(pv_row);
 	}
 	
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
@@ -1647,7 +1652,7 @@ PHP_FUNCTION(odbc_result)
 	}
 
 	if (result->fetched == 0) {
-		/* User forgot to call odbc_fetchrow(), let's do it here */
+		/* User forgot to call odbc_fetch_row(), or wants to reload the results, do it now */
 #ifdef HAVE_SQL_EXTENDED_FETCH
 		if (result->fetch_abs)
 			rc = SQLExtendedFetch(result->stmt, SQL_FETCH_NEXT, 1, &crow,RowStatus);
