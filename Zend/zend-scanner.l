@@ -401,6 +401,10 @@ zend_op_array *compile_filename(int type, zval *filename CLS_DC ELS_DC)
 
 
 	retval = zend_compile_file(&file_handle, type CLS_CC);
+	if (retval && file_handle.opened_path) {
+		int dummy = 1;
+		zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL);
+	}
 	zend_destroy_file_handle(&file_handle CLS_CC);
 
 	if (filename==&tmp) {
