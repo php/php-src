@@ -16,83 +16,6 @@ Responsibility: Andi, Stig?
 Time frame:     ?
 
 
-Component:      Introspection
-
-                get_function_definition(<is_callable> [field]) =>
-                array(
-                	file => filename
-                	line_start =>
-                	line_end =>
-                	parameters => array( name, byref, default )
-                	static_variables => array( name, value/default )
-                	scope => 'namespace' | 'class' | null
-                	namespace => classname | namespacename | 'main'
-                	protection => protection_flags
-                	phpdoc => pre-scanned-phpdoc-string
-                	type => 'internal' | 'user'
-                )
-                
-                get_class_definition(<class> [field]) =>
-                array(
-                	type => 'internal' | 'user'
-                	file => filename
-                	line_start => 
-                	line_end =>
-                	name => pretty-name
-                	parent => classname | namespace | null
-                	flags => bitfield (ABSTRACT)
-                	methods => array( array( name, phpdoc ) )
-                	default_properties => array( array( name, value, phpdoc ) )
-                	private_properties => array( array( name, value, phpdoc ) )
-                	protected_properties => array( array( name, value, phpdoc ) )
-                	public_properties => array( array( name, value, phpdoc ) )
-                	static_members => array( array( name, value, phpdoc ) )
-                	constants => array( array( name, value, phpdoc ) )
-                	classes => array( array( name, phpdoc ) )
-                	phpdoc => pre-scanned-phpdoc-string
-                )
-                
-                get_constant_definition(<constant> [field]) =>
-                array(
-                	file => filename
-                	line_start =>
-                	line_end =>
-                	name => 
-                	value =>
-                	phpdoc =>
-                )
-                
-                get_global_variable_defintion(<name> [field]) =>
-                array(
-                	file =>
-                	line_start =>
-                	line_end =>
-                	name =>
-                	phpdoc =>
-                )
-                
-                We tried to take into account the implementation of each piece of
-                information, and there are some that are problematic, especially those
-                regarding constants and global variables (where do we store the extra
-                information?)
-                
-                With "pre-scanned-phpdoc-string" we mean converting:
-                
-                /**
-                 * Blah blah blah
-                 * @param foo ...
-                 */
-                
-                to:
-                
-                Blah blah blah
-                @param foo
-                
-                The rest of the phpdoc handling should be left to an extension.
-Responsibility: Stig, Andrei, Harald
-Time frame:     ?
-
-
 Component:      Redesign of API Versioning
 Responsibility: ?
 Time frame:     1 month
@@ -170,31 +93,6 @@ Responsibility: Harald (, extension maintainers)
 Component:      Abstract Data Types (ADT)
 Responsibility: Sterling, Harald
 Time frame:     ?
-
-
-Component:      MySQL Extension
-                Complete rewrite, leveraging the new MySQL 4 / MySQL 5
-                features.
-Responsibility: Georg Richter, Zak Greant
-Timeframe:      ?
-
-
-Component:      XML
-                - Rewrite DOMXML and incorporate all (or most of) W3C-DOM2.
-                - Use the new ZE2 features (Exceptions, setter/getter).
-                - Add SAX(2), XML Schema.
-                - XSLT, HTML, XPath, XPointer, DTD Validation will still be
-                  supported, have to find a meaningful API for it.
-                - Break BC, warn users now.
-                - Look at the libxml2 patch by lukas schröder and see if we can prevent
-                  memory leaks with it (anyway, getting rid of mem-leaks and intelligent
-                  memory management is on top prio...)
-                - In the longer term, domxml (or another name, as with todays features
-                  domxml is a little bit misleading) shall be the main xml-class, which
-                  covers most of what's needed for decent XML support in PHP ;)
-                  But there is certainly place for others like Sablotron etc.
-Responsibility: Christian Stocker
-Timeframe:      ?
 
 
 Component:      Test Suite
