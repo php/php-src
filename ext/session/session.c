@@ -654,7 +654,7 @@ static void php_session_save_current_state(TSRMLS_D)
 				if (Z_TYPE_PP(val) == IS_NULL) {
 					do_warn = 1;
 
-					migrate_global(ht, &pos);
+					migrate_global(ht, &pos TSRMLS_CC);
 				}
 				zend_hash_move_forward_ex(ht, &pos);
 			}
