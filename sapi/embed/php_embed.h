@@ -54,6 +54,7 @@
 BEGIN_EXTERN_C() 
 int php_embed_init(int argc, char **argv PTSRMLS_DC);
 void php_embed_shutdown(TSRMLS_D);
+extern sapi_module_struct php_embed_module;
 END_EXTERN_C()
 
 

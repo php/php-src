@@ -99,7 +99,7 @@ static int php_embed_startup(sapi_module_struct *sapi_module)
 	return SUCCESS;
 }
 
-static sapi_module_struct php_embed_module = {
+sapi_module_struct php_embed_module = {
 	"embedded",                    /* name */
 	"PHP Embedded Library",        /* pretty name */
 	
