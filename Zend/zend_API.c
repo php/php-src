@@ -436,7 +436,7 @@ static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int
 	expected_type = zend_parse_arg_impl(arg, va, spec);
 	if (expected_type) {
 		if (!quiet) {
-			sprintf(buf, "%s() expects argument %d to be %s, %s given",
+			sprintf(buf, "%s() expects parameter %d to be %s, %s given",
 					get_active_function_name(TSRMLS_C), arg_num, expected_type,
 					zend_zval_type_name(*arg));
 			zend_error(E_WARNING, buf);
@@ -481,7 +481,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 
 			default:
 				if (!quiet) {
-					zend_error(E_WARNING, "%s(): bad type specifier while parsing arguments", get_active_function_name(TSRMLS_C));
+					zend_error(E_WARNING, "%s(): bad type specifier while parsing parameters", get_active_function_name(TSRMLS_C));
 				}
 				return FAILURE;
 		}
@@ -493,7 +493,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 
 	if (num_args < min_num_args || num_args > max_num_args) {
 		if (!quiet) {
-			sprintf(buf, "%s() requires %s %d argument%s, %d given",
+			sprintf(buf, "%s() expects %s %d parameter%s, %d given",
 					get_active_function_name(TSRMLS_C),
 					min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
 					num_args < min_num_args ? min_num_args : max_num_args,
@@ -508,7 +508,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 	arg_count = (ulong) *p;
 
 	if (num_args > arg_count) {
-		zend_error(E_WARNING, "%s(): could not obtain arguments for parsing",
+		zend_error(E_WARNING, "%s(): could not obtain parameters for parsing",
 				   get_active_function_name(TSRMLS_C));
 		return FAILURE;
 	}
