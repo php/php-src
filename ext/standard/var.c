@@ -136,6 +136,101 @@ PHP_FUNCTION(var_dump)
 /* }}} */
 
 
+/* {{{ php_var_export */
+
+static int php_array_element_export(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	int level;
+	TSRMLS_FETCH();
+
+	level = va_arg(args, int);
+
+	if (hash_key->nKeyLength==0) { /* numeric key */
+		php_printf("%*c%ld => ", level + 1, ' ', hash_key->h);
+	} else { /* string key */
+		php_printf("%*c'%s' => ", level + 1, ' ', hash_key->arKey);
+	}
+	php_var_export(zv, level + 2 TSRMLS_CC);
+	PUTS (",\n");
+	return 0;
+}
+
+void php_var_export(zval **struc, int level TSRMLS_DC)
+{
+	HashTable *myht;
+/*
+	if (level > 1) {
+		php_printf("%*c", level - 1, ' ');
+	}
+*/
+	switch (Z_TYPE_PP(struc)) {
+	case IS_BOOL:
+		php_printf("%s", Z_LVAL_PP(struc) ? "true" : "false");
+		break;
+	case IS_NULL:
+		php_printf("NULL");
+		break;
+	case IS_LONG:
+		php_printf("%ld", Z_LVAL_PP(struc));
+		break;
+	case IS_DOUBLE:
+		php_printf("%.*G", (int) EG(precision), Z_DVAL_PP(struc));
+		break;
+	case IS_STRING:
+		PUTS ("'");
+		PHPWRITE(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc));
+		PUTS ("'");
+		break;
+	case IS_ARRAY:
+		myht = Z_ARRVAL_PP(struc);
+		goto head_done;
+	case IS_OBJECT:
+		myht = Z_OBJPROP_PP(struc);
+head_done:
+		if (level > 1) {
+			php_printf("\n%*c", level - 1, ' ');
+		}
+		PUTS ("array (\n");
+		zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_array_element_export, 1, level);
+		if (level > 1) {
+			php_printf("%*c", level-1, ' ');
+		}
+		PUTS(")");
+		break;
+	default:
+		PUTS ("NULL");
+		break;
+	}
+}
+
+/* }}} */
+
+
+/* {{{ proto void var_export(mixed var)
+   Dumps a string representation of variable to output */
+PHP_FUNCTION(var_export)
+{
+	zval ***args;
+	int argc;
+	int	i;
+	
+	argc = ZEND_NUM_ARGS();
+	
+	args = (zval ***)emalloc(argc * sizeof(zval **));
+	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}
+	
+	for (i=0; i<argc; i++)
+		php_var_export(args[i], 1 TSRMLS_CC);
+	
+	efree(args);
+}
+/* }}} */
+
+
+
 /* {{{ php_var_serialize */
 
 static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *var_hash TSRMLS_DC);
