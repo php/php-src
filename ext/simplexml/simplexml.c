@@ -31,11 +31,7 @@
 #include "ext/standard/php_string.h"
 #include "php_simplexml.h"
 #include "zend_default_classes.h"
-
-#if HAVE_SPL && !defined(COMPILE_DL_SPL)
-#include "ext/spl/spl_iterators.h"
-#endif
-
+#include "zend_interfaces.h"
 
 zend_class_entry *sxe_class_entry;
 
@@ -1483,11 +1479,7 @@ zend_module_entry simplexml_module_entry = {
 	simplexml_functions,
 	PHP_MINIT(simplexml),
 	NULL,
-#if HAVE_SPL && !defined(COMPILE_DL_SPL)
-	PHP_RINIT(simplexml),
-#else
 	NULL,
-#endif
 	NULL,
 	PHP_MINFO(simplexml),
 	"0.1",
@@ -1524,6 +1516,7 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe.create_object = sxe_object_new;
 	sxe_class_entry = zend_register_internal_class(&sxe TSRMLS_CC);
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;
+	zend_class_implements(sxe_class_entry TSRMLS_CC, 1, zend_ce_traversable);
 	sxe_object_handlers.get_method = zend_get_std_object_handlers()->get_method;
 	sxe_object_handlers.get_constructor = zend_get_std_object_handlers()->get_constructor;
 	sxe_object_handlers.get_class_entry = zend_get_std_object_handlers()->get_class_entry;
@@ -1532,17 +1525,6 @@ PHP_MINIT_FUNCTION(simplexml)
 	return SUCCESS;
 }
 /* }}} */
-
-#if HAVE_SPL && !defined(COMPILE_DL_SPL)
-/* {{{ PHP_RINIT_FUNCTION(simplexml)
- */
-PHP_RINIT_FUNCTION(simplexml)
-{
-	zend_class_implements(sxe_class_entry TSRMLS_CC, 1, spl_ce_RecursiveIterator);
-	return SUCCESS;
-}
-/* }}} */
-#endif
 
 /* {{{ PHP_MINFO_FUNCTION(simplexml)
  */
