@@ -1,3 +1,106 @@
+2004-07-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      tests/classes/abstract_derived.phpt
+      tests/classes/autoload_001.phpt
+      tests/classes/autoload_002.phpt
+      tests/classes/autoload_003.phpt
+      tests/classes/autoload_004.phpt
+      tests/classes/autoload_005.phpt
+      tests/classes/ctor_failure.phpt
+      tests/classes/destructor_and_echo.phpt:
+      - Update/Add tests
+
+    * tests/classes/autoload_001.phpt
+      tests/classes/autoload_002.phpt
+      tests/classes/autoload_003.phpt
+      tests/classes/autoload_004.phpt:
+      - Do not autoload classes in skip code
+
+    * tests/classes/ctor_failure.phpt:
+      
+      - Add new test
+
+    * tests/classes/autoload_005.phpt:
+      
+      - Add test
+
+2004-07-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      main/rfc1867.c
+      main/rfc1867.c:
+      MFH: Fixed bug #29369 (Uploaded files with ' or " in their names get their
+      names truncated at those characters).
+
+    * main/rfc1867.c:
+      Fixed bug #29369 (Uploaded files with ' or " in their names get their names
+      truncated at those characters).
+
+2004-07-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dom/php_dom.c:
+      - Fixed Bug #29354 Exception constructor marked as both public and
+        protected
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Show visibility errors (try to fix #29354)
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h:
+      - MFH: Fix bug #29368 : The destructor is called when an exception is
+        thrown from the constructor
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h:
+      - Fix bug #29368 : The destructor is called when an exception is thrown
+      from the constructor
+
+    * tests/classes/destructor_and_echo.phpt:
+      
+      - Add new patch for reordered shutdown sequence
+
+2004-07-25  Christian Stocker  <chregu@phant.ch>
+
+    * NEWS
+      ext/simplexml/simplexml.c:
+      renamed registerNamespace() to registerXPathNamespace()
+
+    * NEWS
+      ext/simplexml/simplexml.c:
+      added new method SimpleXMLElement->registerNamespace(string prefix, string
+      uri)
+      "registers a prefix <-> namespaceURI combination for use in a later xpath
+      query. "
+
+    * ext/xsl/php_xsl.c:
+      set errorhandler to generic php_libxml_error_handler
+
+2004-07-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      main/main.c:
+      - Execute destructors earlier (Florian Schaper, fschaper at intux org)
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Add ReflectionParameter::isOptional() to test whether a parameter is
+        optional and also show this information in export.
+
+    * ZendEngine2/zend_exceptions.c:
+      - Add optional parameters $filename and $lineno to ErrorException
+        constructor to allow overwriting automatically retrieved information.
+
 2004-07-24  Rob Richards  <rrichards@ctindustries.net>
 
     * sapi/activescript/classfactory.cpp

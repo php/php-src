@@ -1,3 +1,35 @@
+2004-07-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      - Show visibility errors (try to fix #29354)
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_objects_API.c
+      zend_objects_API.h:
+      - MFH: Fix bug #29368 : The destructor is called when an exception is
+        thrown from the constructor
+
+    * zend_execute.c
+      zend_objects_API.c
+      zend_objects_API.h:
+      - Fix bug #29368 : The destructor is called when an exception is thrown
+      from the constructor
+
+    * zend.c
+      zend.h
+      zend_execute.h
+      zend_execute_API.c:
+      - Execute destructors earlier (Florian Schaper, fschaper at intux org)
+
+    * zend_reflection_api.c:
+      - Add ReflectionParameter::isOptional() to test whether a parameter is
+        optional and also show this information in export.
+
+    * zend_exceptions.c:
+      - Add optional parameters $filename and $lineno to ErrorException
+        constructor to allow overwriting automatically retrieved information.
+
 2004-07-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute.c:
