@@ -123,6 +123,12 @@ static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len,
 	stmt->driver_data = S;
 	stmt->methods = &sqlite_stmt_methods;
 
+	if (PDO_CURSOR_FWDONLY != pdo_attr_lval(driver_options, PDO_ATTR_CURSOR, PDO_CURSOR_FWDONLY TSRMLS_CC)) {
+		H->einfo.errcode = SQLITE_ERROR;
+		pdo_sqlite_error(dbh);
+		return 0;
+	}
+
 	i = sqlite3_prepare(H->db, sql, sql_len, &S->stmt, &tail);
 	if (i == SQLITE_OK) {
 		return 1;
