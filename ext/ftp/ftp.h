@@ -53,6 +53,8 @@ typedef struct ftpbuf
 	char		*pwd;			/* cached pwd */
 	char		*syst;			/* cached system type */
 	ftptype_t	type;			/* current transfer type */
+	int		pasv;			/* 0=off; 1=pasv; 2=ready */
+	struct sockaddr_in	pasvaddr;	/* passive mode address */
 } ftpbuf_t;
 
 typedef struct databuf
@@ -118,6 +120,11 @@ char**		ftp_nlist(ftpbuf_t *ftp, const char *path);
  */
 char**		ftp_list(ftpbuf_t *ftp, const char *path);
 
+/* switches passive mode on or off
+ * returns true on success, false on error
+ */
+int		ftp_pasv(ftpbuf_t *ftp, int pasv);
+
 /* retrieves a file and saves its contents to outfp
  * returns true on success, false on error
  */
@@ -129,5 +136,11 @@ int		ftp_get(ftpbuf_t *ftp, FILE *outfp, const char *path,
  */
 int		ftp_put(ftpbuf_t *ftp, const char *path, FILE *infp,
 			ftptype_t type);
+
+/* returns the size of the given file, or -1 on error */
+int		ftp_size(ftpbuf_t *ftp, const char *path);
+
+/* returns the last modified time  of the given file, or -1 on error */
+time_t		ftp_mdtm(ftpbuf_t *ftp, const char *path);
 
 #endif

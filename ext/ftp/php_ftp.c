@@ -57,8 +57,13 @@ function_entry php3_ftp_functions[] = {
 	PHP_FE(ftp_nlist,			NULL)
 	PHP_FE(ftp_rawlist,			NULL)
 	PHP_FE(ftp_systype,			NULL)
+	PHP_FE(ftp_pasv,			NULL)
 	PHP_FE(ftp_get,				NULL)
+	PHP_FE(ftp_fget,			NULL)
 	PHP_FE(ftp_put,				NULL)
+	PHP_FE(ftp_fput,			NULL)
+	PHP_FE(ftp_size,			NULL)
+	PHP_FE(ftp_mdtm,			NULL)
 	PHP_FE(ftp_quit,			NULL)
 	{NULL, NULL, NULL}
 };
@@ -101,12 +106,47 @@ PHP_MINIT_FUNCTION(ftp)
 	return SUCCESS;
 }
 
+
+#define	FTPBUF(ftp, pval) { \
+	int	id, type; \
+	convert_to_long(pval); \
+	id = (pval)->value.lval; \
+	(ftp) = php3_list_find(id, &type); \
+	if (!(ftp) || type != le_ftpbuf) { \
+		php_error(E_WARNING, "Unable to find ftpbuf %d", id); \
+		RETURN_FALSE; \
+	} \
+	}
+
+#define	XTYPE(xtype, pval) { \
+	convert_to_long(pval); \
+	if (	pval->value.lval != FTPTYPE_ASCII && \
+		pval->value.lval != FTPTYPE_IMAGE) \
+	{ \
+		php_error(E_WARNING, "arg4 must be FTP_ASCII or FTP_IMAGE"); \
+		RETURN_FALSE; \
+	} \
+	(xtype) = pval->value.lval; \
+	}
+
+#define	FILEP(fp, pval) { \
+	int	id, type; \
+	int	le_fp; \
+	le_fp = php3i_get_le_fp(); \
+	convert_to_long(pval); \
+	id = (pval)->value.lval; \
+	(fp) = php3_list_find(id, &type); \
+	if (!(fp) || type != le_fp) { \
+		php_error(E_WARNING, "Unable to find fp %d", id); \
+		RETURN_FALSE; \
+	} \
+	}
+
 /* {{{ proto int ftp_connect(string host [, int port])
    Open a FTP stream */
 PHP_FUNCTION(ftp_connect)
 {
 	pval		*arg1, *arg2;
-	int		id;
 	ftpbuf_t	*ftp;
 	short		port = 0;
 
@@ -137,8 +177,7 @@ PHP_FUNCTION(ftp_connect)
 	if (ftp == NULL)
 		RETURN_FALSE;
 
-	id = php3_list_insert(ftp, le_ftpbuf);
-	RETURN_LONG(id);
+	RETURN_LONG(php3_list_insert(ftp, le_ftpbuf));
 }
 /* }}} */
 
@@ -147,7 +186,6 @@ PHP_FUNCTION(ftp_connect)
 PHP_FUNCTION(ftp_login)
 {
 	pval		*arg1, *arg2, *arg3;
-	int		id, type;
 	ftpbuf_t	*ftp;
 
 	/* arg1 - ftp
@@ -160,16 +198,10 @@ PHP_FUNCTION(ftp_login)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
 	convert_to_string(arg2);
 	convert_to_string(arg3);
 
-	id = arg1->value.lval;
-	ftp = php3_list_find(id, &type);
-	if (!ftp || type != le_ftpbuf) {
-		php_error(E_WARNING, "Unable to find ftpbuf %d", id);
-		RETURN_FALSE;
-	}
+	FTPBUF(ftp, arg1);
 
 	/* log in */
 	if (!ftp_login(ftp, arg2->value.str.val, arg3->value.str.val)) {
@@ -186,7 +218,6 @@ PHP_FUNCTION(ftp_login)
 PHP_FUNCTION(ftp_pwd)
 {
 	pval		*arg1;
-	int		id, type;
 	ftpbuf_t	*ftp;
 	const char	*pwd;
 
@@ -196,14 +227,7 @@ PHP_FUNCTION(ftp_pwd)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-
-	id = arg1->value.lval;
-	ftp = php3_list_find(id, &type);
-	if (!ftp || type != le_ftpbuf) {
-		php_error(E_WARNING, "Unable to find ftpbuf %d", id);
-		RETURN_FALSE;
-	}
+	FTPBUF(ftp, arg1);
 
 	pwd = ftp_pwd(ftp);
 	if (pwd == NULL) {
@@ -220,7 +244,6 @@ PHP_FUNCTION(ftp_pwd)
 PHP_FUNCTION(ftp_cdup)
 {
 	pval		*arg1;
-	int		id, type;
 	ftpbuf_t	*ftp;
 
 	/* arg1 - ftp
@@ -229,14 +252,7 @@ PHP_FUNCTION(ftp_cdup)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-
-	id = arg1->value.lval;
-	ftp = php3_list_find(id, &type);
-	if (!ftp || type != le_ftpbuf) {
-		php_error(E_WARNING, "Unable to find ftpbuf %d", id);
-		RETURN_FALSE;
-	}
+	FTPBUF(ftp, arg1);
 
 	if (!ftp_cdup(ftp)) {
 		php_error(E_WARNING, "ftp_cdup: %s", ftp->inbuf);
@@ -252,7 +268,6 @@ PHP_FUNCTION(ftp_cdup)
 PHP_FUNCTION(ftp_chdir)
 {
 	pval		*arg1, *arg2;
-	int		id, type;
 	ftpbuf_t	*ftp;
 
 	/* arg1 - ftp
@@ -264,15 +279,9 @@ PHP_FUNCTION(ftp_chdir)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
 	convert_to_string(arg2);
 
-	id = arg1->value.lval;
-	ftp = php3_list_find(id, &type);
-	if (!ftp || type != le_ftpbuf) {
-		php_error(E_WARNING, "Unable to find ftpbuf %d", id);
-		RETURN_FALSE;
-	}
+	FTPBUF(ftp, arg1);
 
 	/* change directories */
 	if (!ftp_chdir(ftp, arg2->value.str.val)) {
@@ -289,7 +298,6 @@ PHP_FUNCTION(ftp_chdir)
 PHP_FUNCTION(ftp_mkdir)
 {
 	pval		*arg1, *arg2;
-	int		id, type;
 	ftpbuf_t	*ftp;
 	char		*ret, *tmp;
 
@@ -302,15 +310,9 @@ PHP_FUNCTION(ftp_mkdir)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
 	convert_to_string(arg2);
 
-	id = arg1->value.lval;
-	ftp = php3_list_find(id, &type);
-	if (!ftp || type != le_ftpbuf) {
-		php_error(E_WARNING, "Unable to find ftpbuf %d", id);
-		RETURN_FALSE;
-	}
+	FTPBUF(ftp, arg1);
 
 	/* change directories */
 	tmp = ftp_mkdir(ftp, arg2->value.str.val);
@@ -334,7 +336,6 @@ PHP_FUNCTION(ftp_mkdir)
 PHP_FUNCTION(ftp_rmdir)
 {
 	pval		*arg1, *arg2;
-	int		id, type;
 	ftpbuf_t	*ftp;
 
 	/* arg1 - ftp
@@ -346,15 +347,9 @@ PHP_FUNCTION(ftp_rmdir)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
 	convert_to_string(arg2);
 
-	id = arg1->value.lval;
-	ftp = php3_list_find(id, &type);
-	if (!ftp || type != le_ftpbuf) {
-		php_error(E_WARNING, "Unable to find ftpbuf %d", id);
-		RETURN_FALSE;
-	}
+	FTPBUF(ftp, arg1);
 
 	/* change directories */
 	if (!ftp_rmdir(ftp, arg2->value.str.val)) {
@@ -371,7 +366,6 @@ PHP_FUNCTION(ftp_rmdir)
 PHP_FUNCTION(ftp_nlist)
 {
 	pval		*arg1, *arg2;
-	int		id, type;
 	ftpbuf_t	*ftp;
 	char		**nlist, **ptr;
 
@@ -384,15 +378,9 @@ PHP_FUNCTION(ftp_nlist)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
 	convert_to_string(arg2);
 
-	id = arg1->value.lval;
-	ftp = php3_list_find(id, &type);
-	if (!ftp || type != le_ftpbuf) {
-		php_error(E_WARNING, "Unable to find ftpbuf %d", id);
-		RETURN_FALSE;
-	}
+	FTPBUF(ftp, arg1);
 
 	/* get list of files */
 	nlist = ftp_nlist(ftp, arg2->value.str.val);
@@ -412,7 +400,6 @@ PHP_FUNCTION(ftp_nlist)
 PHP_FUNCTION(ftp_rawlist)
 {
 	pval		*arg1, *arg2;
-	int		id, type;
 	ftpbuf_t	*ftp;
 	char		**llist, **ptr;
 
@@ -425,15 +412,9 @@ PHP_FUNCTION(ftp_rawlist)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
 	convert_to_string(arg2);
 
-	id = arg1->value.lval;
-	ftp = php3_list_find(id, &type);
-	if (!ftp || type != le_ftpbuf) {
-		php_error(E_WARNING, "Unable to find ftpbuf %d", id);
-		RETURN_FALSE;
-	}
+	FTPBUF(ftp, arg1);
 
 	/* get directory listing */
 	llist = ftp_list(ftp, arg2->value.str.val);
@@ -453,7 +434,6 @@ PHP_FUNCTION(ftp_rawlist)
 PHP_FUNCTION(ftp_systype)
 {
 	pval		*arg1;
-	int		id, type;
 	ftpbuf_t	*ftp;
 	const char	*syst;
 
@@ -465,14 +445,7 @@ PHP_FUNCTION(ftp_systype)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-
-	id = arg1->value.lval;
-	ftp = php3_list_find(id, &type);
-	if (!ftp || type != le_ftpbuf) {
-		php_error(E_WARNING, "Unable to find ftpbuf %d", id);
-		RETURN_FALSE;
-	}
+	FTPBUF(ftp, arg1);
 
 	syst = ftp_syst(ftp);
 	if (syst == NULL) {
@@ -484,12 +457,76 @@ PHP_FUNCTION(ftp_systype)
 }
 /* }}} */
 
+/* {{{ proto int ftp_fget(int stream, int fp, string remote_file, int mode)
+   Retrieves a file from the FTP server and writes it to an open file. */
+PHP_FUNCTION(ftp_fget)
+{
+	pval		*arg1, *arg2, *arg3, *arg4;
+	ftpbuf_t	*ftp;
+	ftptype_t	xtype;
+	FILE		*fp;
+
+	/* arg1 - ftp
+	 * arg2 - fp
+	 * arg3 - remote file
+	 * arg4 - transfer mode
+	 */
+	if (	ARG_COUNT(ht) != 4 ||
+		getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
+	{
+			WRONG_PARAM_COUNT;
+	}
+
+	FTPBUF(ftp, arg1);
+	FILEP(fp, arg2);
+	convert_to_string(arg3);
+	XTYPE(xtype, arg4);
+
+	if (!ftp_get(ftp, fp, arg3->value.str.val, xtype) || ferror(fp)) {
+		php_error(E_WARNING, "ftp_get: %s", ftp->inbuf);
+		RETURN_FALSE;
+	}
+
+	if (ferror(fp)) {
+		php_error(E_WARNING, "error writing %s", arg2->value.str.val);
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int ftp_pasv(int stream, int pasv)
+   Turns passive mode on or off. */
+PHP_FUNCTION(ftp_pasv)
+{
+	pval		*arg1, *arg2;
+	ftpbuf_t	*ftp;
+
+	/* arg1 - ftp
+	 * arg2 - pasv
+	 */
+	if (	ARG_COUNT(ht) != 2 ||
+		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	FTPBUF(ftp, arg1);
+	convert_to_long(arg2);
+
+	if (!ftp_pasv(ftp, (arg2->value.lval) ? 1 : 0))
+		RETURN_FALSE;
+
+	RETURN_TRUE;
+}
+/* }}} */
+
 /* {{{ proto int ftp_get(int stream, string local_file, string remote_file, int mode)
-   Retrieves a file from the FTP server. */
+   Retrieves a file from the FTP server and writes it to a local file. */
 PHP_FUNCTION(ftp_get)
 {
 	pval		*arg1, *arg2, *arg3, *arg4;
-	int		id, type;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	FILE		*outfp, *tmpfp;
@@ -507,26 +544,10 @@ PHP_FUNCTION(ftp_get)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	FTPBUF(ftp, arg1);
 	convert_to_string(arg2);
 	convert_to_string(arg3);
-	convert_to_long(arg4);
-
-	id = arg1->value.lval;
-	ftp = php3_list_find(id, &type);
-	if (!ftp || type != le_ftpbuf) {
-		php_error(E_WARNING, "Unable to find ftpbuf %d", id);
-		RETURN_FALSE;
-	}
-
-	if (	arg4->value.lval != FTPTYPE_ASCII &&
-		arg4->value.lval != FTPTYPE_IMAGE)
-	{
-		php_error(E_WARNING, "arg4 must be FTP_ASCII or FTP_IMAGE");
-		RETURN_FALSE;
-	}
-
-	xtype = arg4->value.lval;
+	XTYPE(xtype, arg4);
 
 	/* get to temporary file, so if there is an error, no existing
 	 * file gets clobbered
@@ -568,12 +589,45 @@ PHP_FUNCTION(ftp_get)
 }
 /* }}} */
 
+/* {{{ proto int ftp_fput(int stream, string local_file, string remote_file, int mode)
+   Stores a file from an open file to the FTP server. */
+PHP_FUNCTION(ftp_fput)
+{
+	pval		*arg1, *arg2, *arg3, *arg4;
+	ftpbuf_t	*ftp;
+	ftptype_t	xtype;
+	FILE		*fp;
+
+	/* arg1 - ftp
+	 * arg2 - remote file
+	 * arg3 - fp
+	 * arg4 - transfer mode
+	 */
+	if (	ARG_COUNT(ht) != 4 ||
+		getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	FTPBUF(ftp, arg1);
+	convert_to_string(arg2);
+	FILEP(fp, arg3);
+	XTYPE(xtype, arg4);
+
+	if (!ftp_put(ftp, arg2->value.str.val, fp, xtype)) {
+		php_error(E_WARNING, "ftp_put: %s", ftp->inbuf);
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+
 /* {{{ proto int ftp_put(int stream, string remote_file, string local_file, int mode)
    Stores a file on the FTP server */
 PHP_FUNCTION(ftp_put)
 {
 	pval		*arg1, *arg2, *arg3, *arg4;
-	int		id, type;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	FILE		*infp;
@@ -590,26 +644,10 @@ PHP_FUNCTION(ftp_put)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	FTPBUF(ftp, arg1);
 	convert_to_string(arg2);
 	convert_to_string(arg3);
-	convert_to_long(arg4);
-
-	id = arg1->value.lval;
-	ftp = php3_list_find(id, &type);
-	if (!ftp || type != le_ftpbuf) {
-		php_error(E_WARNING, "Unable to find ftpbuf %d", id);
-		RETURN_FALSE;
-	}
-
-	if (	arg4->value.lval != FTPTYPE_ASCII &&
-		arg4->value.lval != FTPTYPE_IMAGE)
-	{
-		php_error(E_WARNING, "arg4 must be FTP_ASCII or FTP_IMAGE");
-		RETURN_FALSE;
-	}
-
-	xtype = arg4->value.lval;
+	XTYPE(xtype, arg4);
 
 	if ((infp = fopen(arg3->value.str.val, "r")) == NULL) {
 		php_error(E_WARNING, "error opening %s", arg3->value.str.val);
@@ -628,13 +666,60 @@ PHP_FUNCTION(ftp_put)
 }
 /* }}} */
 
+/* {{{ proto int ftp_size(int stream, string path)
+   Returns the size of the file, or -1 on error. */
+PHP_FUNCTION(ftp_size)
+{
+	pval		*arg1, *arg2;
+	ftpbuf_t	*ftp;
+
+	/* arg1 - ftp
+	 * arg2 - path
+	 */
+	if (	ARG_COUNT(ht) != 2 ||
+		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	FTPBUF(ftp, arg1);
+	convert_to_string(arg2);
+
+	/* get file size */
+	RETURN_LONG(ftp_size(ftp, arg2->value.str.val));
+}
+/* }}} */
+
+/* {{{ proto int ftp_mdtm(int stream, string path)
+   Returns the last modification time of the file, or -1 on error */
+PHP_FUNCTION(ftp_mdtm)
+{
+	pval		*arg1, *arg2;
+	ftpbuf_t	*ftp;
+
+	/* arg1 - ftp
+	 * arg2 - path
+	 */
+	if (	ARG_COUNT(ht) != 2 ||
+		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	FTPBUF(ftp, arg1);
+	convert_to_string(arg2);
+
+	/* get file mod time */
+	RETURN_LONG(ftp_mdtm(ftp, arg2->value.str.val));
+}
+/* }}} */
+
 /* {{{ proto int ftp_quit(int stream)
    Closes the FTP stream */
 PHP_FUNCTION(ftp_quit)
 {
 	pval		*arg1;
 	int		id, type;
-	ftpbuf_t	*ftp;
 
 	/* arg1 - ftp
 	 */
@@ -642,15 +727,9 @@ PHP_FUNCTION(ftp_quit)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
 	id = arg1->value.lval;
-	ftp = php3_list_find(id, &type);
-	if (!ftp || type != le_ftpbuf) {
-		php_error(E_WARNING, "Unable to find ftpbuf %d", id);
-		RETURN_FALSE;
-	}
-
-	php3_list_delete(id);
+	if (php3_list_find(id, &type) && type == le_ftpbuf)
+		php3_list_delete(id);
 
 	RETURN_TRUE;
 }
