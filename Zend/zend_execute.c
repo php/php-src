@@ -882,16 +882,16 @@ void execute(zend_op_array *op_array ELS_DC)
 			case ZEND_CONCAT:
 				binary_op = concat_function;
 				goto binary_op_addr;
-			case ZEND_T_IS_EQUAL:
+			case ZEND_IS_EQUAL:
 				binary_op = is_equal_function;
 				goto binary_op_addr;
-			case ZEND_T_IS_NOT_EQUAL:
+			case ZEND_IS_NOT_EQUAL:
 				binary_op = is_not_equal_function;
 				goto binary_op_addr;
 			case ZEND_IS_SMALLER:
 				binary_op = is_smaller_function;
 				goto binary_op_addr;
-			case ZEND_T_IS_SMALLER_OR_EQUAL:
+			case ZEND_IS_SMALLER_OR_EQUAL:
 				binary_op = is_smaller_or_equal_function;
 				goto binary_op_addr;
 			case ZEND_BW_OR:
@@ -921,37 +921,37 @@ binary_op_addr:
 				FREE_OP(&opline->op1, free_op1);
 				break;
 
-			case T_ASSIGN_ADD:
+			case ZEND_ASSIGN_ADD:
 				binary_op = add_function;
 				goto binary_assign_op_addr;
-			case T_ASSIGN_SUB:
+			case ZEND_ASSIGN_SUB:
 				binary_op = sub_function;
 				goto binary_assign_op_addr;
-			case T_ASSIGN_MUL:
+			case ZEND_ASSIGN_MUL:
 				binary_op = mul_function;
 				goto binary_assign_op_addr;
-			case T_ASSIGN_DIV:
+			case ZEND_ASSIGN_DIV:
 				binary_op = div_function;
 				goto binary_assign_op_addr;
-			case T_ASSIGN_MOD:
+			case ZEND_ASSIGN_MOD:
 				binary_op = mod_function;
 				goto binary_assign_op_addr;
-			case T_ASSIGN_SL:
+			case ZEND_ASSIGN_SL:
 				binary_op = shift_left_function;
 				goto binary_assign_op_addr;
-			case T_ASSIGN_SR:
+			case ZEND_ASSIGN_SR:
 				binary_op = shift_right_function;
 				goto binary_assign_op_addr;
-			case T_ASSIGN_CONCAT:
+			case ZEND_ASSIGN_CONCAT:
 				binary_op = concat_function;
 				goto binary_assign_op_addr;
-			case T_ASSIGN_BW_OR:
+			case ZEND_ASSIGN_BW_OR:
 				binary_op = bitwise_or_function;
 				goto binary_assign_op_addr;
-			case T_ASSIGN_BW_AND:
+			case ZEND_ASSIGN_BW_AND:
 				binary_op = bitwise_and_function;
 				goto binary_assign_op_addr;
-			case T_ASSIGN_BW_XOR:
+			case ZEND_ASSIGN_BW_XOR:
 				binary_op = bitwise_xor_function;
 				/* Fall through */
 binary_assign_op_addr: {
@@ -1030,13 +1030,13 @@ binary_assign_op_addr: {
 					}
 				}
 				break;
-			case T_PRINT_OP:
+			case ZEND_PRINT:
 				zend_print_variable(get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R));
 				Ts[opline->result.u.var].tmp_var.value.lval = 1;
 				Ts[opline->result.u.var].tmp_var.type = IS_LONG;
 				FREE_OP(&opline->op1, free_op1);
 				break;
-			case T_ECHO_OP:
+			case ZEND_ECHO:
 				zend_print_variable(get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R));
 				FREE_OP(&opline->op1, free_op1);
 				break;
@@ -1079,14 +1079,14 @@ binary_assign_op_addr: {
 			case ZEND_FETCH_DIM_TMP_VAR:
 				zend_fetch_dimension_address_from_tmp_var(&opline->result, &opline->op1, &opline->op2, Ts ELS_CC);
 				break;
-			case T_ASSIGN: {
+			case ZEND_ASSIGN: {
 					zval *value = get_zval_ptr(&opline->op2, Ts, &free_op2, BP_VAR_R);
 
 					zend_assign_to_variable(&opline->result, &opline->op1, value, (free_op2?IS_TMP_VAR:opline->op2.op_type), Ts ELS_CC);
 					/* zend_assign_to_variable() always takes care of op2, never free it! */
 				}
 				break;
-			case T_ASSIGN_REF:
+			case ZEND_ASSIGN_REF:
 				zend_assign_to_variable_reference(&opline->result, get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_W), get_zval_ptr_ptr(&opline->op2, Ts, BP_VAR_W), Ts ELS_CC);
 				INC_AI_COUNT(&opline->result);
 				break;
@@ -1710,7 +1710,7 @@ send_by_ref:
 					FREE_OP(&opline->op1, free_op1);
 				}
 				break;
-			case T_UNSET_VAR: {
+			case ZEND_UNSET_VAR: {
 					zval tmp, *variable = get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
 
 					if (variable->type != IS_STRING) {
@@ -1728,7 +1728,7 @@ send_by_ref:
 					FREE_OP(&opline->op1, free_op1);
 				}
 				break;
-			case T_UNSET_DIM_OBJ: {
+			case ZEND_UNSET_DIM_OBJ: {
 					zval **container = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_R);
 					zval *offset = get_zval_ptr(&opline->op2, Ts, &free_op2, BP_VAR_R);
 

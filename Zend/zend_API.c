@@ -167,7 +167,7 @@ ZEND_API int getThis(zval **this_ptr)
 	/*
 	zval *data;
 
-	if (zend_hash_find(GLOBAL(function_state.calling_symbol_table), "this", sizeof("this"), (void **)&data) == FAILURE) {
+	if (zend_hash_find(function_state.calling_symbol_table, "this", sizeof("this"), (void **)&data) == FAILURE) {
 		return FAILURE;
 	}
 
