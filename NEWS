@@ -1,15 +1,15 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 27 May 2004, PHP 5 Release Candidate 3
-- Fixed problem with exceptions returning from include(). (Dmitry)
-- Changed class type hints for function parameters to not allow the passing of
-  NULL values.
-- Fixed memory leak in memory manager. (Andi)
 - Moved the PDFLib extension to PECL. (Wez)
 - Added support for dumping private/protected properties to var_dump().
   (Andrey)
 - Added count() support for COM arrays. (Wez)
+- Changed class type hints for function parameters to not allow the passing of
+  NULL values. (Andi)
 - Changed tidy_node to tidyNode and removed tidy_exception. (John)
+- Fixed memory leak in memory manager. (Andi)
+- Fixed problem with exceptions returning from include(). (Dmitry)
 - Fixed bug #28311 (Transparency detection code is off by 1).
   (Ilia, pikeman at pikeman dot sytes dot net)
 - Fixed bug #28304 (Missing bounds check inside imagefilter()). (Ilia)
