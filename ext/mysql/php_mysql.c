@@ -350,7 +350,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysql.default_password",		NULL,	PHP_INI_ALL,		OnUpdateString,		default_password,	zend_mysql_globals,		mysql_globals)
 	PHP_INI_ENTRY("mysql.default_port",				NULL,	PHP_INI_ALL,		OnMySQLPort)
 	STD_PHP_INI_ENTRY("mysql.default_socket",		NULL,	PHP_INI_ALL,		OnUpdateStringUnempty,	default_socket,	zend_mysql_globals,		mysql_globals)
-	STD_PHP_INI_ENTRY_EX("mysql.connect_timeout",	"0",	PHP_INI_SYSTEM,		OnUpdateInt,		connect_timeout, 	zend_mysql_globals,		mysql_globals, display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("mysql.connect_timeout",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		connect_timeout, 	zend_mysql_globals,		mysql_globals, display_link_numbers)
 PHP_INI_END()
 /* }}} */
 
