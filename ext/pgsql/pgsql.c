@@ -79,7 +79,7 @@ php3_module_entry pgsql_module_entry = {
 };
 
 #if COMPILE_DL
-php3_module_entry *get_module() { return &pgsql_module_entry; }
+PHP_PGSQL_API php3_module_entry *get_module() { return &pgsql_module_entry; }
 #endif
 
 static int le_link,le_plink,le_result,le_lofp,le_string;
