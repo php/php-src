@@ -31,6 +31,10 @@
 #include "SAPI.h"
 #include "php_main.h"
 
+#ifndef S_ISDIR
+#define S_ISDIR( m )    (((m) & S_IFMT) == S_IFDIR)
+#endif
+
 typedef struct _php_extension_lists {
 	zend_llist engine;
 	zend_llist functions;
