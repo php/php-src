@@ -1,3 +1,77 @@
+2002-05-28  Andrei Zmievski  <andrei@php.net>
+
+    * acinclude.m4: Fix a bug in case statement.
+
+2002-05-28  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command.php: * don't create duplicate ui objects
+
+    * pear/PEAR/Frontend/CLI.php: * gotta love these extra newlines
+
+2002-05-28  Venkat Raghavan S  <rvenkat@novell.com>
+
+    * netware/bisonflexzend.bat:
+    Batch file to do the Lex / Yacc stuff for Zend
+
+    * netware/common.mif: SDK directory path change
+
+2002-05-28  Bertrand Mansion  <bmansion@mamasam.com>
+
+    * pear/HTML/Table.php
+      pear/HTML/Common.php: Moved to /pear
+
+2002-05-28  Venkat Raghavan S  <rvenkat@novell.com>
+
+    * netware/build.bat
+      netware/common.mif
+      netware/tsrm.mak
+      netware/zend.mak:
+    Makefiles and batch file required to build Zend and TSRM
+
+    * netware/php-nw.bat: *** empty log message ***
+
+2002-05-28  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Auth.php
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Command/Registry.php
+      pear/PEAR/Command/Remote.php
+      pear/PEAR/Frontend/CLI.php
+      pear/PEAR/Common.php: * imported Christian Dickmann's new UI code
+    * converted PEAR_Frontend_CLI::userDialog() to new API
+
+    * pear/package-PEAR.xml: * 0.11 release coming up
+
+    * pear/PEAR/Command/Package.php:
+    * drop package-info command (deprecated by "info")
+
+    * pear/tests/pear_config.phpt: * update test
+
+    * pear/PEAR/Command/Build.php
+      pear/PEAR/Builder.php
+      pear/package-PEAR.xml: * update 0.11 release notes
+    * move build logic into PEAR_Builder
+
+    * pear/scripts/pear.in
+      pear/PEAR/Config.php:
+    * disable *&$^*#@ runtime ^@#*&$@ magical ^*!@@!! quoting
+
+    * pear/Archive/Tar.php
+      pear/docs/Archive_Tar.txt
+      pear/package-Archive_Tar.xml: * sync up
+
+    * pear/PEAR/Config.php:
+    * disable magic_quotes_runtime (what a broken concept!!) while
+      reading config files
+
+    * pear/PEAR/Installer.php: * fix some errors/warnings
+    * install data and test files now
+
+    * pear/PEAR/Config.php: * added data_dir and test_dir
+
 2002-05-27  Stig Bakken  <ssb@fast.no>
 
     * pear/PEAR/Config.php:
