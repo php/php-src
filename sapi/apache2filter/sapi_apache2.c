@@ -346,12 +346,12 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	ap_add_cgi_vars(f->r);
 
 	ctx = SG(server_context);
-	ctx->f = f; /* safe whatever filters are after us in the chain. */
 	if (ctx == NULL) {
 		ap_log_rerror(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, f->r,
 					 "php failed to get server context");
         return HTTP_INTERNAL_SERVER_ERROR;
 	}
+	ctx->f = f; /* save whatever filters are after us in the chain. */
 
 	if (ctx->request_processed) {
 		return ap_pass_brigade(f->next, bb);
