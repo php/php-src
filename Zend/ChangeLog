@@ -1,3 +1,25 @@
+2003-03-31  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend.h
+      zend_compile.c
+      zend_compile.h
+      zend_globals.h
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_opcode.c:
+      Multi-purpose patch:
+       - The fields of zend_namespace were not completely initialized which
+         led to a variety of problems.
+       - The occurrence of class/interface/namespace definition is now
+         captured.
+       - Functions/classes/interfaces/namespaces can be preceded by doc
+         comments which are stored for use by extensions.
+
+2003-03-31  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.c:
+      Use strncpy instead of sprintf
+
 2003-03-30  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_language_parser.y:

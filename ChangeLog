@@ -1,3 +1,124 @@
+2003-03-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/serialize/001.phpt:
+      oops
+
+2003-03-31  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN & houshold
+
+    * NEWS:
+      Householding..
+
+2003-03-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * main/streams/streams.c:
+      Fixed bug #22538 (stream filter problem)
+
+2003-03-31  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      acinclude.m4:
+      MFH: Fixed bug #22989 (sendmail not found by configure)
+
+    * acinclude.m4:
+      Fixed bug #22989 (sendmail not found by configure)
+
+2003-03-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/serialize/001.phpt:
+      Fixed test; in ZE2, all the properties used in any methods are populated
+      at compile time.
+
+2003-03-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/streams/streams.c:
+      WS
+
+2003-03-31  Brian France  <list@firehawksystems.com>
+
+    * (PHP_4_3)
+      main/main.c:
+      
+      	Fixes the problem where argv and argc are not populated unless S
+      	is in the variables_order, even if register_argc_argv is on.
+
+2003-03-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/imap/php_imap.c:
+      MFH(r-1.161): fixed proto to sync with the documentation
+
+    * ext/imap/php_imap.c:
+      Fixed proto to sync with the documentation
+
+    * (PHP_4_3)
+      ext/mime_magic/config.m4:
+      MFH(r-1.10): rearranged search order for the magic file to avoid further
+      confusions
+
+    * ext/mime_magic/config.m4:
+      Rearranged search order for the magic file to avoid further confusions
+
+2003-03-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/main.c:
+      use the correct macro - noticed by Andrei
+
+2003-03-31  Moshe Doron  <mosdoron@netvision.net.il>
+
+    * ext/standard/tests/strings/bug22904.phpt:
+      
+
+    * ext/standard/string.c:
+      fix for 22904
+
+2003-03-31  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/openssl.c:
+      Fix const warning
+
+2003-03-31  David Hill  <David.Hill@hp.com>
+
+    * (PHP_4_3)
+      ext/standard/parsedate.y:
+      Changing parsedate to be reentrant using pure_parse (Dave)
+
+    * (PHP_4_3)
+      configure.in:
+      Correcting checking of flex version (Dave)
+
+2003-03-31  Moshe Doron  <mosdoron@netvision.net.il>
+
+    * ext/standard/string.c:
+      
+
+2003-03-31  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c
+      ext/gd/gd.c
+      ext/gd/php_gd.h
+      ext/gd/php_gd.h:
+      cleanup
+
+2003-03-31  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/standard/lcg.c
+      ext/standard/lcg.c:
+      MFH TS issue, noticed by Sebastian Bergmann
+
+    * ext/standard/lcg.c:
+      TS issue, noticed by Sebastian Bergmann
+
+    * ext/standard/lcg.c:
+      Ensure that the seed function has been called, even if we are used by
+      another module's request init function.
+      
+      Noticed by: marcus.boerger@t-online.de
+
 2003-03-30  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ext/openssl/openssl.c:
