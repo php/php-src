@@ -1953,7 +1953,7 @@ PHP_FUNCTION(mb_decode_mimeheader)
 
 
 /* {{{ proto string mb_convert_kana(string str [,string option] [, string encoding])
-    Conversion between full-width character and half-width character (Japanese) */
+   Conversion between full-width character and half-width character (Japanese) */
 PHP_FUNCTION(mb_convert_kana)
 {
 	pval **arg1, **arg2, **arg3;
@@ -2069,8 +2069,8 @@ PHP_FUNCTION(mb_convert_kana)
 
 #define PHP_MBSTR_STACK_BLOCK_SIZE 32
 
-/* {{{ proto string mb_convert_variables(string to-encoding, mixed from-encoding, mixed ...)
-  Convert the string resource in variables to desired encoding */
+/* {{{ proto string mb_convert_variables(string to-encoding, mixed from-encoding [, mixed ...])
+   Converts the string resource in variables to desired encoding */
 PHP_FUNCTION(mb_convert_variables)
 {
 	pval ***args, ***stack, **var, **hash_entry;
@@ -2391,7 +2391,7 @@ PHP_FUNCTION(mb_encode_numericentity)
 
 
 /* {{{ proto string mb_decode_numericentity(string string, array convmap [, string encoding])
-   Convert HTML numeric entities to character code */
+   Converts HTML numeric entities to character code */
 PHP_FUNCTION(mb_decode_numericentity)
 {
 	php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -2402,7 +2402,7 @@ PHP_FUNCTION(mb_decode_numericentity)
 
 #if HAVE_SENDMAIL
 /* {{{ proto int mb_send_mail(string to, string subject, string message [, string additional_headers])
-   Send an email message with MIME scheme */
+   Sends an email message with MIME scheme */
 PHP_FUNCTION(mb_send_mail)
 {
 	int argc, n;
