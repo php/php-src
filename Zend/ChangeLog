@@ -1,3 +1,17 @@
+2003-03-02  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute_API.c:
+      Fix destructors some more
+
+    * zend_compile.c
+      zend_compile.h:
+      Improve infrastructure
+
+    * zend.c
+      zend_compile.c
+      zend_compile.h:
+      Add infrastructure for JIT initialization of auto globals
+
 2003-03-01  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c:

@@ -1,3 +1,84 @@
+2003-03-02  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/config.m4:
+      typofix
+
+    * ext/ldap/config.m4:
+      Special case for MacosX..
+
+    * ext/ldap/config.m4:
+      Fixed bug #22485 (hardcoded shared lib extensions)
+
+2003-03-02  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_variables.c:
+      Fix old variable names
+
+2003-03-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      fix problem in current HEAD
+      
+
+2003-03-02  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * sapi/activescript/scriptengine.cpp:
+      typo fix
+
+2003-03-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      New function news.
+
+2003-03-02  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/CREDITS:
+      -** empty log message ***
+
+2003-03-02  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/info.c
+      main/php_variables.c:
+      - Optimize $_REQUEST
+      - Fix phpinfo()
+
+2003-03-02  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * sapi/activescript/classfactory.cpp
+      sapi/activescript/php4activescript.c:
+      Build-performance tweaks
+
+    * ext/rpc/com/com.h
+      sapi/activescript/classfactory.cpp
+      sapi/activescript/scriptengine.cpp:
+      Fix build for activescript sapi
+
+2003-03-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * php.ini-dist
+      php.ini-recommended:
+      - It was called _VARS, not _GLOBALS :-)
+
+2003-03-02  Zeev Suraski  <zeev@zend.com>
+
+    * php.ini-dist
+      php.ini-recommended
+      ext/filepro/filepro.c
+      ext/session/session.c
+      main/main.c
+      main/php_globals.h
+      main/php_variables.c
+      main/php_variables.h:
+      Add JIT initialization for _SERVER and _ENV
+      (it's less important for the others, even though it should be fairly
+      easy now too)
+
+2003-03-02  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      Fixed my silly mistake in the filter code
+
 2003-03-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * main/network.c:
