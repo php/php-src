@@ -29,160 +29,184 @@ import javax.servlet.http.*;
 import java.lang.reflect.Method;
 
 public class servlet extends HttpServlet {
+  char slash = System.getProperty("file.separator").charAt(0);
 
-    char slash=System.getProperty("file.separator").charAt(0);
-    HttpServletRequest request;
-    HttpServletResponse response;
-    ServletInputStream stream;
+  HttpServletRequest  request;
+  HttpServletResponse response;
+  ServletInputStream  stream;
 
-    static int startup_count = 0;
+  static int startup_count = 0;
 
-    protected boolean display_source_mode = false;
-    private Method addHeader;
+  protected boolean display_source_mode = false;
+  private Method addHeader;
 
-    /******************************************************************/
-    /*                          native methods                        */ 
-    /******************************************************************/
+  // Native methods
 
-    public native void startup();
-    public native long define(String name);
-    public native void send(String requestMethod, String queryString,
-      String pathInfo, String pathTranslated,
-      String contentType, int contentLength, String authUser,
-      boolean display_source_mode);
-    public native void shutdown();
+  public native void startup();
+  public native long define(String name);
+  public native void send(String  requestMethod,
+                          String  queryString,
+                          String  pathInfo,
+                          String  pathTranslated,
+                          String  contentType,
+                          int     contentLength,
+                          String  authUser,
+                          boolean display_source_mode
+                         );
+  public native void shutdown();
 
-    /******************************************************************/
-    /*                         sapi callbacks                         */ 
-    /******************************************************************/
+  // SAPI Callbacks
 
-    public String readPost(int bytes) {
-      String result;
-      if (!request.getMethod().equals("POST")) {
-        result = request.getQueryString();
-      } else { 
-        Enumeration e = request.getParameterNames();
-        result="";
-        String concat="";
-        while (e.hasMoreElements()) {
-          String name = (String)e.nextElement();
-          String value = request.getParameter(name);
-          result+=concat+name+"="+URLEncoder.encode(value);
-          concat="&";
-        }
+  public String readPost(int bytes) {
+    String result;
+
+    if (!request.getMethod().equals("POST")) {
+      result = request.getQueryString();
+    } else { 
+      Enumeration e = request.getParameterNames();
+      String concat = "";
+      result = "";
+
+      while (e.hasMoreElements()) {
+        String name  = (String)e.nextElement();
+        String value = request.getParameter(name);
+
+        result += concat + name + "=" + URLEncoder.encode(value);
+        concat = "&";
       }
-      if (result == null) return "";
-      return result; 
     }
 
-    public String readCookies() {
-       reflect.setResult(define("request"), request);
-       reflect.setResult(define("response"), response);
-       reflect.setResult(define("PHP_SELF"), request.getRequestURI());
-       return request.getHeader("cookie");
-    }
+    if (result == null) return "";
 
-    public void header(String data) {
+    return result; 
+  }
 
-      // try to send the header using the most specific servlet API
-      // as possible (some servlet engines will add a content type
-      // header unless the setContentType method is called).
-      try {
-        if (data.startsWith("Content-type: ")) {
-          response.setContentType(data.substring(data.indexOf(" ")+1));
-        } else if (data.startsWith("Location: ")) {
-          response.sendRedirect(data.substring(data.indexOf(" ")+1));
-        } else {
-          int colon = data.indexOf(": ");
-          if (colon > 0) {
-            try {
-              addHeader.invoke(response, new Object[]
-                { data.substring(0,colon), data.substring(colon+2) } );
-            } catch (Exception e) {
-              e.printStackTrace(System.err);
-            }
-          } else {
-            write(data);
+  public String readCookies() {
+     reflect.setResult(define("request"),  request);
+     reflect.setResult(define("response"), response);
+     reflect.setResult(define("PHP_SELF"), request.getRequestURI());
+
+     return request.getHeader("cookie");
+  }
+
+  public void header(String data) {
+    // try to send the header using the most specific servlet API
+    // as possible (some servlet engines will add a content type
+    // header unless the setContentType method is called).
+    try {
+      if (data.startsWith("Content-type: ")) {
+        response.setContentType(data.substring(data.indexOf(" ") + 1));
+      }
+
+      else if (data.startsWith("Location: ")) {
+        response.sendRedirect(data.substring(data.indexOf(" ") + 1));
+      }
+
+      else {
+        int colon = data.indexOf(": ");
+
+        if (colon > 0) {
+          try {
+            addHeader.invoke(response, new Object[]
+              { data.substring(0,colon), data.substring(colon + 2) } );
+          }
+
+          catch (Exception e) {
+            e.printStackTrace(System.err);
           }
         }
-      } catch (IOException e) {
-        e.printStackTrace(System.err);
-      }
 
-    }
-
-    public void write(String data) {
-      try {
-        response.getWriter().print(data);
-      } catch (IOException e) {
-        e.printStackTrace(System.err);
-      }
-    }
-
-    /******************************************************************/
-    /*                        servlet interface                       */ 
-    /******************************************************************/
-
-    public void init(ServletConfig config) throws ServletException {
-      super.init(config);
-
-      // first time in, initialize native code
-      if (0 == startup_count++) {
-        reflect.loadLibrary("servlet");
-        startup();
-      }
-
-      // try to find the addHeader method (added in the servlet API 2.2)
-      // otherwise settle for the setHeader method
-      try {
-        Class c = Class.forName("javax.servlet.http.HttpServletResponse");
-        Method method[] = c.getDeclaredMethods();
-        for (int i=0; i<method.length; i++) {
-          if (method[i].getName().equals("addHeader")) {
-            addHeader = method[i];
-            break;
-          }
-          if (method[i].getName().equals("setHeader")) {
-            addHeader = method[i];
-          }
+        else {
+          write(data);
         }
-      } catch (Exception e) {
-        e.printStackTrace(System.err);
       }
     }
 
-    public void service(HttpServletRequest request,
-                        HttpServletResponse response,
-                        String contextPath) 
-       throws ServletException
-    {
-       this.request=request;
-       this.response=response;
+    catch (IOException e) {
+      e.printStackTrace(System.err);
+    }
+  }
 
-       send(request.getMethod(), request.getQueryString(),
-            request.getRequestURI(), contextPath,
-            request.getContentType(), request.getContentLength(),
-	    request.getRemoteUser(), display_source_mode);
-
-       try {
-         if (stream != null) stream.close();
-       } catch (IOException e) {
-         throw new ServletException(e.toString());
-       }
+  public void write(String data) {
+    try {
+      response.getWriter().print(data);
     }
 
-    public void service(HttpServletRequest request,
-                        HttpServletResponse response) 
-       throws ServletException
-    {
-       String servletPath=request.getServletPath();
-       String contextPath=getServletContext().getRealPath(servletPath);
-       service(request, response, contextPath);
+    catch (IOException e) {
+      e.printStackTrace(System.err);
+    }
+  }
+
+  // Servlet interface
+
+  public void init(ServletConfig config)
+  throws ServletException {
+    super.init(config);
+
+    // first time in, initialize native code
+    if (0 == startup_count++) {
+      reflect.loadLibrary("servlet");
+      startup();
     }
 
-    public void destroy() {
-      if (0 == --startup_count) shutdown();
-      super.destroy();
+    // try to find the addHeader method (added in the servlet API 2.2)
+    // otherwise settle for the setHeader method
+
+    try {
+      Class c = Class.forName("javax.servlet.http.HttpServletResponse");
+      Method method[] = c.getDeclaredMethods();
+
+      for (int i = 0; i < method.length; i++) {
+        if (method[i].getName().equals("addHeader")) {
+          addHeader = method[i];
+          break;
+        }
+
+        if (method[i].getName().equals("setHeader")) {
+          addHeader = method[i];
+        }
+      }
     }
 
+    catch (Exception e) {
+      e.printStackTrace(System.err);
+    }
+  }
+
+  public void service(HttpServletRequest request, HttpServletResponse response, String contextPath)
+  throws ServletException {
+    this.request  = request;
+    this.response = response;
+
+    send(request.getMethod(),
+         request.getQueryString(),
+         request.getRequestURI(),
+         contextPath,
+         request.getContentType(),
+         request.getContentLength(),
+         request.getRemoteUser(),
+         display_source_mode
+        );
+
+    try {
+      if (stream != null) stream.close();
+    }
+
+    catch (IOException e) {
+      throw new ServletException(e.toString());
+    }
+  }
+
+  public void service(HttpServletRequest request, HttpServletResponse response)
+  throws ServletException {
+    String servletPath = request.getServletPath();
+    String contextPath = getServletContext().getRealPath(servletPath);
+
+    service(request, response, contextPath);
+  }
+
+  public void destroy() {
+    if (0 == --startup_count) shutdown();
+    super.destroy();
+  }
 }
