@@ -34,7 +34,9 @@
 #if HAVE_TIME_H
 # include <time.h>
 #endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include <sqlite.h>
 
