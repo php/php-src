@@ -7,11 +7,11 @@
 		if (in_array('flatfile', $handlers)) {
 			$handler = 'flatfile';
 		} else {
-			$handler = array_diff($handler, array('cdb', 'cdb_make')); /* these can only read OR write */
+			$handler = array_diff($handlers, array('cdb', 'cdb_make')); /* these can only read OR write */
 			if (count($handler)==0) {
 				die('skip no handler available that can be used for the test');
 			}
-			$handler = array_shift($handler);
+			$handler = array_shift($handlers);
 		}
 	} else {
 		if (!in_array($handler, dba_handlers())) {
