@@ -373,7 +373,7 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 
 	va_start(row_elements, num_cols);
 
-	php_printf("<TR VALIGN=\"bottom\" bgcolor=\"" PHP_HEADER_COLOR "\">");
+	php_printf("<TR VALIGN=\"middle\" bgcolor=\"" PHP_HEADER_COLOR "\">");
 	for (i=0; i<num_cols; i++) {
 		row_element = va_arg(row_elements, char *);
 		if (!row_element || !*row_element) {
