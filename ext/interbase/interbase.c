@@ -82,8 +82,8 @@ A lot... */
 #endif
 
 #ifdef ZEND_DEBUG
-#define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__);
-/* #define IBDEBUG(a) */
+/* #define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__); */
+#define IBDEBUG(a)
 #else
 #define IBDEBUG(a)
 #endif
