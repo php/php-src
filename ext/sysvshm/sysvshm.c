@@ -47,7 +47,7 @@ function_entry sysvshm_functions[] = {
 	PHP_FE(shm_put_var, NULL)
 	PHP_FE(shm_get_var, NULL)
 	PHP_FE(shm_remove_var, NULL)
-	{0}
+	{NULL, NULL, NULL}	
 };
 /* }}} */
 
