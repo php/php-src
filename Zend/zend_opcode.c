@@ -271,7 +271,7 @@ int pass_two(zend_op_array *op_array)
 {
 	CLS_FETCH();
 
-	if (op_array->type != ZEND_USER_FUNCTION) {
+	if (op_array->type!=ZEND_USER_FUNCTION && op_array->type!=ZEND_EVAL_CODE) {
 		return 0;
 	}
 	if (CG(extended_info)) {

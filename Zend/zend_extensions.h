@@ -25,6 +25,7 @@ typedef struct {
 	int zend_extension_api_no;
 	char *required_zend_version;
 	unsigned char thread_safe;
+	unsigned char debug;
 } zend_extension_version_info;
 
 
@@ -73,9 +74,15 @@ ZEND_API int zend_get_resource_handle();
 #define ZTS_V 0
 #endif
 
+#ifdef ZEND_DEBUG
+#define ZEND_DEBUG_V 1
+#else
+#define ZEND_DEBUG_V 0
+#endif
+
 
 #define ZEND_EXTENSION()	\
-	ZEND_EXT_API zend_extension_version_info extension_version_info = { ZEND_EXTENSION_API_NO, "0.80A", ZTS_V }
+	ZEND_EXT_API zend_extension_version_info extension_version_info = { ZEND_EXTENSION_API_NO, "0.80A", ZTS_V, ZEND_DEBUG_V }
 
 #define STANDARD_ZEND_EXTENSION_PROPERTIES NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1
 

@@ -300,6 +300,7 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 	source_string = &tmp;
 
 	init_op_array(op_array, INITIAL_OP_ARRAY_SIZE);
+	op_array->type = ZEND_EVAL_CODE;
 	save_lexical_state(&original_lex_state CLS_CC);
 	if (prepare_string_for_scanning(source_string CLS_CC)==FAILURE) {
 		destroy_op_array(op_array);
