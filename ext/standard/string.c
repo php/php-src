@@ -1712,9 +1712,9 @@ PHP_FUNCTION(setlocale)
 }
 /* }}} */
 
-/* {{{ proto void parsestr(string encoded_string)
+/* {{{ proto void parse_str(string encoded_string)
    Parses GET/POST/COOKIE data and sets global variables. */
-PHP_FUNCTION(parsestr)
+PHP_FUNCTION(parse_str)
 {
 	pval *arg;
 	char *res = NULL;

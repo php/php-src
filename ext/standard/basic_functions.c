@@ -58,216 +58,223 @@ int user_shutdown_function_executor(pval *user_shutdown_function_name);
 void php3_call_shutdown_functions(void);
 
 function_entry basic_functions[] = {
-	{"intval",		int_value,					NULL},
-	{"doubleval",	double_value,				NULL},
-	{"strval",		string_value,				NULL},
-	PHP_FE(define,		NULL)
-	PHP_FE(defined,		NULL)
-	PHP_FE(bin2hex, NULL)
-	{"short_tags",	php3_toggle_short_open_tag, NULL},
-	{"sleep",		php3_sleep,					NULL},
-	{"usleep",		php3_usleep,				NULL},
-	{"ksort",		php3_key_sort,				first_arg_force_ref},
-	{"asort",		php3_asort,					first_arg_force_ref},
-	{"arsort",		php3_arsort,				first_arg_force_ref},
-	{"sort",		php3_sort,					first_arg_force_ref},
-	{"rsort",		php3_rsort,					first_arg_force_ref},
-	{"usort",		php3_user_sort,				first_arg_force_ref},
-	{"uasort",		php3_auser_sort,			first_arg_force_ref},
-	{"uksort",		php3_user_key_sort,			first_arg_force_ref},
-	{"array_walk",  php3_array_walk,			first_arg_force_ref},
-	{"sizeof",		php3_count,					first_arg_allow_ref},
-	{"count",		php3_count,					first_arg_allow_ref},
-	{"time",		php3_time,					NULL},
-	{"mktime",		php3_mktime,				NULL},
-	{"gmmktime",	php3_gmmktime,				NULL},
+	PHP_FE(intval,									NULL)
+	PHP_FE(doubleval,								NULL)
+	PHP_FE(strval,									NULL)
+	PHP_FE(define,									NULL)
+	PHP_FE(defined,									NULL)
+	PHP_FE(bin2hex, 								NULL)
+	PHP_FE(toggle_short_open_tag,					NULL)
+	PHP_FE(sleep,									NULL)
+	PHP_FE(usleep,									NULL)
+			
+	PHP_FE(ksort,									first_arg_force_ref)
+	PHP_FE(asort,									first_arg_force_ref)
+	PHP_FE(arsort,									first_arg_force_ref)
+	PHP_FE(sort,									first_arg_force_ref)
+	PHP_FE(rsort,									first_arg_force_ref)
+	PHP_FE(usort,									first_arg_force_ref)
+	PHP_FE(uasort,									first_arg_force_ref)
+	PHP_FE(uksort,									first_arg_force_ref)
+	PHP_FE(array_walk,								first_arg_force_ref)
+	PHP_FALIAS(sizeof,			count,				first_arg_force_ref)
+	PHP_FE(count,									first_arg_force_ref)
+	PHP_FE(end, 									first_arg_force_ref)
+	PHP_FE(prev, 									first_arg_force_ref)
+	PHP_FE(next, 									first_arg_force_ref)
+	PHP_FE(reset, 									first_arg_force_ref)
+	PHP_FE(current, 								first_arg_force_ref)
+	PHP_FE(key, 									first_arg_force_ref)
+	PHP_FE(each, 									first_arg_force_ref)
+	PHP_FALIAS(pos,				current,			first_arg_force_ref)
+	
+	PHP_FE(time,									NULL)
+	PHP_FE(mktime,									NULL)
+	PHP_FE(gmmktime,								NULL)
 #if HAVE_STRFTIME
-	{"strftime",		php3_strftime,				NULL},
+	PHP_FE(strftime,								NULL)
 #endif
-	PHP_FE(strtotime, NULL)
-	{"date",		php3_date,					NULL},
-	{"gmdate",		php3_gmdate,				NULL},
-	{"getdate",		php3_getdate,				NULL},
-	{"checkdate",	php3_checkdate,				NULL},
-	{"chr",			php3_chr,					NULL},
-	{"ord",			php3_ord,					NULL},
-	{"flush",		php3_flush,					NULL},
-	{"end",			array_end,					first_arg_force_ref},
-	{"prev",		array_prev,					first_arg_force_ref},
-	{"next",		array_next,					first_arg_force_ref},
-	{"reset",		array_reset,				first_arg_force_ref},
-	{"current",		array_current,				first_arg_force_ref},
-	{"key",			array_current_key,			first_arg_force_ref},
-	{"each",		array_each,					first_arg_force_ref},
-	{"gettype",		php3_gettype,				NULL},
-	{"settype",		php3_settype,				first_arg_force_ref},
-	{"min",			php3_min,					NULL},
-	{"max",			php3_max,					NULL},
+	PHP_FE(strtotime,								NULL)
+	PHP_FE(date,									NULL)
+	PHP_FE(gmdate,									NULL)
+	PHP_FE(getdate,									NULL)
+	PHP_FE(checkdate,								NULL)
 
-	{"addslashes",	php3_addslashes,			NULL},
-	{"chop",		php3_chop,					NULL},
-	{"str_replace",	php3_str_replace,			NULL},
-	{"chunk_split",	php3_chunk_split,			NULL},
-	{"trim",		php3_trim,					NULL},
-	{"ltrim",		php3_ltrim,					NULL},
-	{"rtrim",		php3_chop,					NULL},
-	PHP_FE(strip_tags, NULL)
-	PHP_FE(similar_text, NULL)
-	{"pos",			array_current,				first_arg_force_ref},
+	PHP_FE(flush,									NULL)
+	
+	PHP_FE(gettype,									NULL)
+	PHP_FE(settype,									first_arg_force_ref)
+	
+	PHP_FE(min,										NULL)
+	PHP_FE(max,										NULL)
 
-	{"getimagesize",		php3_getimagesize,	NULL},
-	{"htmlspecialchars",	php3_htmlspecialchars,	NULL},
-	{"htmlentities",		php3_htmlentities,	NULL},
-	{"md5",					php3_md5,			NULL},
+	PHP_FE(getimagesize,							NULL)
+	
+	PHP_FE(htmlspecialchars,						NULL)
+	PHP_FE(htmlentities,							NULL)
+	
+	PHP_FE(md5,										NULL)
 
-	{"iptcparse",	php3_iptcparse,				NULL},
-	{"iptcembed",	php3_iptcembed,				NULL},
-	{"parse_url",	php3_parse_url,				NULL},
+	PHP_FE(iptcparse,								NULL)
+	PHP_FE(iptcembed,								NULL)
+		
+	PHP_FE(phpinfo,									NULL)
+	PHP_FE(phpversion,								NULL)
+	PHP_FE(phpcredits,								NULL)
+	
+	PHP_FE(strlen,									NULL)
+	PHP_FE(strcmp,									NULL)
+	PHP_FE(strspn,									NULL)
+	PHP_FE(strcspn,									NULL)
+	PHP_FE(strcasecmp,								NULL)
+	PHP_FE(strtok,									NULL)
+	PHP_FE(strtoupper,								NULL)
+	PHP_FE(strtolower,								NULL)
+	PHP_FE(strpos,									NULL)
+	PHP_FE(strrpos,									NULL)
+	PHP_FE(strrev,									NULL)
+	PHP_FE(hebrev,									NULL)
+	PHP_FE(hebrevc,									NULL)
+	PHP_FE(nl2br,									NULL)
+	PHP_FE(basename,								NULL)
+	PHP_FE(dirname,									NULL)
+	PHP_FE(stripslashes,							NULL)
+	PHP_FE(strstr,									NULL)
+	PHP_FE(stristr,									NULL)
+	PHP_FE(strrchr,									NULL)
+	PHP_FE(substr,									NULL)
+	PHP_FE(quotemeta,								NULL)
+	PHP_FE(ucfirst,									NULL)
+	PHP_FE(ucwords,									NULL)
+	PHP_FE(strtr,									NULL)
+	PHP_FE(addslashes,								NULL)
+	PHP_FE(chop,									NULL)
+	PHP_FE(str_replace,								NULL)
+	PHP_FE(chunk_split,								NULL)
+	PHP_FE(trim,									NULL)
+	PHP_FE(ltrim,									NULL)
+	PHP_FE(strip_tags,								NULL)
+	PHP_FE(similar_text,							NULL)
+	PHP_FE(explode,									NULL)
+	PHP_FE(implode,									NULL)
+	PHP_FE(setlocale,								NULL)
+	PHP_FE(soundex,									NULL)
+	PHP_FE(chr,										NULL)
+	PHP_FE(ord,										NULL)
+	PHP_FE(parse_str,								NULL)
+	PHP_FALIAS(rtrim,			chop,				NULL)
+	PHP_FALIAS(strchr,			strstr,				NULL)
+	PHP_NAMED_FE(sprintf,		php3_user_sprintf,	NULL)
+	PHP_NAMED_FE(printf,		php3_user_printf,	NULL)
+	
+	PHP_FE(parse_url,								NULL)
+	PHP_FE(urlencode,								NULL)
+	PHP_FE(urldecode,								NULL)
+	PHP_FE(rawurlencode,							NULL)
+	PHP_FE(rawurldecode,							NULL)
+	
+	PHP_FE(exec, 									second_and_third_args_force_ref)
+	PHP_FE(system, 									second_arg_force_ref)
+	PHP_FE(escapeshellcmd, 							NULL)
+	PHP_FE(passthru, 								second_arg_force_ref)
+	PHP_FE(shell_exec, 								NULL)
 
-	{"parse_str",	php3_parsestr,				NULL},
-	PHP_FE(phpinfo,		NULL)
-	PHP_FE(phpversion,	NULL)
-	PHP_FE(phpcredits,	NULL)
-	{"strlen",		php3_strlen,				NULL},
-	{"strcmp",		php3_strcmp,				NULL},
-	{"strspn",		php3_strspn,				NULL},
-	{"strcspn",		php3_strcspn,				NULL},
-	{"strcasecmp",	php3_strcasecmp,			NULL},
-	{"strtok",		php3_strtok,				NULL},
-	{"strtoupper",	php3_strtoupper,			NULL},
-	{"strtolower",	php3_strtolower,			NULL},
-	{"strchr",		php3_strstr,				NULL},
-	{"strpos",		php3_strpos,				NULL},
-	{"strrpos",		php3_strrpos,				NULL},
-	{"strrev",		php3_strrev,				NULL},
-	{"hebrev",		php3_hebrev,				NULL},
-	PHP_FE(hebrevc,								NULL)
-	PHP_FE(nl2br,								NULL)
-	{"basename",	php3_basename,				NULL},
-	{"dirname", 	php3_dirname,				NULL},
-	{"stripslashes",	php3_stripslashes,		NULL},
-	{"strstr",		php3_strstr,				NULL},
-	{"stristr",		php3_stristr,				NULL},
-	{"strrchr",		php3_strrchr,				NULL},
-	{"substr",		php3_substr,				NULL},
-	{"quotemeta",	php3_quotemeta,				NULL},
-	{"urlencode",	php3_urlencode,				NULL},
-	{"urldecode",	php3_urldecode,				NULL},
-	{"rawurlencode",	php3_rawurlencode,		NULL},
-	{"rawurldecode",	php3_rawurldecode,		NULL},
-	{"ucfirst",		php3_ucfirst,				NULL},
-	{"ucwords",		php3_ucwords,				NULL},
-	{"strtr",		php3_strtr,					NULL},
-	{"sprintf",		php3_user_sprintf,			NULL},
-	{"printf",		php3_user_printf,			NULL},
-	{"setlocale",	php3_setlocale,				NULL},
-
-	{"exec",			php3_exec,				second_and_third_args_force_ref},
-	{"system",			php3_system,			second_arg_force_ref},
-	{"escapeshellcmd",	php3_escapeshellcmd,	NULL},
-	{"passthru",		php3_passthru,			second_arg_force_ref},
-	PHP_FE(shell_exec, 							NULL)
-
-	{"soundex",		soundex,					NULL},
-
-	{"rand",		php3_rand,					NULL},
-	{"srand",		php3_srand,					NULL},
-	{"getrandmax",	php3_getrandmax,			NULL},
-	{"mt_rand",		php3_mt_rand,				NULL},
-	{"mt_srand",		php3_mt_srand,			NULL},
-	{"mt_getrandmax",	php3_mt_getrandmax,		NULL},
-	{"gethostbyaddr",	php3_gethostbyaddr,		NULL},
-	{"gethostbyname",	php3_gethostbyname,		NULL},
-	{"gethostbynamel",	php3_gethostbynamel,	NULL},
+	PHP_FE(rand,									NULL)
+	PHP_FE(srand,									NULL)
+	PHP_FE(getrandmax,								NULL)
+	PHP_FE(mt_rand,									NULL)
+	PHP_FE(mt_srand,								NULL)
+	PHP_FE(mt_getrandmax,							NULL)
+	
+	PHP_FE(gethostbyaddr,							NULL)
+	PHP_FE(gethostbyname,							NULL)
+	PHP_FE(gethostbynamel,							NULL)
 #if !(WIN32|WINNT)||HAVE_BINDLIB
-	{"checkdnsrr",          php3_checkdnsrr,        NULL},
-	{"getmxrr",             php3_getmxrr,           second_and_third_args_force_ref},
+	PHP_FE(checkdnsrr,								NULL)
+	PHP_FE(getmxrr,									second_and_third_args_force_ref)
 #endif
-	{"explode",		php3_explode,				NULL},
-	{"implode",		php3_implode,				NULL},
-	{"getenv",		php3_getenv,				NULL},
-	{"error_reporting",	php3_error_reporting,	NULL},
-	{"clearstatcache",	php3_clearstatcache,	NULL},
 
-	{"unlink",		php3_unlink,				NULL},
+	PHP_FE(error_reporting,							NULL)
 
-	{"getmyuid",	php3_getmyuid,				NULL},
-	{"getmypid",	php3_getmypid,				NULL},
+	PHP_FE(getmyuid,								NULL)
+	PHP_FE(getmypid,								NULL)
+	PHP_FE(getmyinode,								NULL)
+	PHP_FE(getlastmod,								NULL)
 	/*getmyiid is here for forward compatibility with 3.1
 	  See pageinfo.c in 3.1 for more information*/
-	{"getmyiid",	php3_getmypid,				NULL},
-	{"getmyinode",	php3_getmyinode,			NULL},
-	{"getlastmod",	php3_getlastmod,			NULL},
+	/* {"getmyiid",	php3_getmypid,				NULL}, */
 
-	{"base64_decode",	php3_base64_decode,		NULL},
-	{"base64_encode",	php3_base64_encode,		NULL},
+	PHP_FE(base64_decode,							NULL)
+	PHP_FE(base64_encode,							NULL)
 
-	{"abs",			php3_abs,					NULL},
-	{"ceil",		php3_ceil,					NULL},
-	{"floor",		php3_floor,					NULL},
-	{"round",		php3_round,					NULL},
-	{"sin",			php3_sin,					NULL},
-	{"cos",			php3_cos,					NULL},
-	{"tan",			php3_tan,					NULL},
-	{"asin",		php3_asin,					NULL},
-	{"acos",		php3_acos,					NULL},
-	{"atan",		php3_atan,					NULL},
-	{"atan2",		php3_atan2,					NULL},
-	{"pi",			php3_pi,					NULL},
-	{"pow",			php3_pow,					NULL},
-	{"exp",			php3_exp,					NULL},
-	{"log",			php3_log,					NULL},
-	{"log10",		php3_log10,					NULL},
-	{"sqrt",		php3_sqrt,					NULL},
-	{"deg2rad",		php3_deg2rad,				NULL},
-	{"rad2deg",		php3_rad2deg,				NULL},
-	{"bindec",		php3_bindec,				NULL},
-	{"hexdec",		php3_hexdec,				NULL},
-	{"octdec",		php3_octdec,				NULL},
-	{"decbin",		php3_decbin,				NULL},
-	{"decoct",		php3_decoct,				NULL},
-	{"dechex",		php3_dechex,				NULL},
-	{"base_convert",php3_base_convert,			NULL},
-	{"number_format",	php3_number_format,		NULL},
+	PHP_FE(abs,										NULL)
+	PHP_FE(ceil,									NULL)
+	PHP_FE(floor,									NULL)
+	PHP_FE(round,									NULL)
+	PHP_FE(sin,										NULL)
+	PHP_FE(cos,										NULL)
+	PHP_FE(tan,										NULL)
+	PHP_FE(asin,									NULL)
+	PHP_FE(acos,									NULL)
+	PHP_FE(atan,									NULL)
+	PHP_FE(atan2,									NULL)
+	PHP_FE(pi,										NULL)
+	PHP_FE(pow,										NULL)
+	PHP_FE(exp,										NULL)
+	PHP_FE(log,										NULL)
+	PHP_FE(log10,									NULL)
+	PHP_FE(sqrt,									NULL)
+	PHP_FE(deg2rad,									NULL)
+	PHP_FE(rad2deg,									NULL)
+	PHP_FE(bindec,									NULL)
+	PHP_FE(hexdec,									NULL)
+	PHP_FE(octdec,									NULL)
+	PHP_FE(decbin,									NULL)
+	PHP_FE(decoct,									NULL)
+	PHP_FE(dechex,									NULL)
+	PHP_FE(base_convert,							NULL)
+	PHP_FE(number_format,							NULL)
 
+	PHP_FE(getenv,									NULL)
 #ifdef HAVE_PUTENV
-	{"putenv",		php3_putenv,				NULL},
+	PHP_FE(putenv,									NULL)
 #endif
-	{"microtime",	php3_microtime,				NULL},
-	{"uniqid",		php3_uniqid,				NULL},
-	{"linkinfo",	php3_linkinfo,				NULL},
-	{"readlink",	php3_readlink,				NULL},
-	{"symlink",		php3_symlink,				NULL},
-	{"link",		php3_link,					NULL},
-	{"quoted_printable_decode",	php3_quoted_printable_decode, NULL},	
-	{"convert_cyr_string",	php3_convert_cyr_string, NULL},	
-	{"get_current_user",	php3_get_current_user,	NULL},
-	{"set_time_limit",	php3_set_time_limit,	NULL},
-	
-	{"get_cfg_var",	php3_get_cfg_var,			NULL},
-	{"magic_quotes_runtime",	php3_set_magic_quotes_runtime,	NULL},
-	{"set_magic_quotes_runtime",	php3_set_magic_quotes_runtime,	NULL},
-	{"get_magic_quotes_gpc",		php3_get_magic_quotes_gpc,	NULL},
-	{"get_magic_quotes_runtime",	php3_get_magic_quotes_runtime,	NULL},
-	
-	{"is_long",		php3_is_long,				first_arg_allow_ref},
-	{"is_int",		php3_is_long,				first_arg_allow_ref},
-	{"is_integer",	php3_is_long,				first_arg_allow_ref},
-	{"is_float",	php3_is_double,				first_arg_allow_ref},
-	{"is_double",	php3_is_double,				first_arg_allow_ref},
-	{"is_real",		php3_is_double,				first_arg_allow_ref},
-	{"is_string",	php3_is_string,				first_arg_allow_ref},
-	{"is_array",	php3_is_array,				first_arg_allow_ref},
-	{"is_object",	php3_is_object,				first_arg_allow_ref},
 
-	{"leak",		php3_leak,					NULL},	
-	{"error_log",	php3_error_log,				NULL},	
-	{"call_user_func",	php3_call_user_func,	NULL},
-	{"call_user_method", php3_call_user_method,	NULL},
+	PHP_FE(microtime,								NULL)
+	PHP_FE(getrusage,								NULL)
+	
+	PHP_FE(uniqid,									NULL)
+		
+	PHP_FE(quoted_printable_decode,					NULL)
+	
+	PHP_FE(convert_cyr_string,						NULL)
+	PHP_FE(get_current_user,						NULL)
+	PHP_FE(set_time_limit,							NULL)
+	
+	PHP_FE(get_cfg_var,								NULL)
+	PHP_FALIAS(magic_quotes_runtime, set_magic_quotes_runtime,	NULL)
+	PHP_FE(set_magic_quotes_runtime,				NULL)
+	PHP_FE(get_magic_quotes_gpc,					NULL)
+	PHP_FE(get_magic_quotes_runtime,				NULL)
+	
+	PHP_FE(is_long,									first_arg_allow_ref)
+	PHP_FALIAS(is_int,			is_long,			first_arg_allow_ref)
+	PHP_FALIAS(is_integer,		is_long,			first_arg_allow_ref)
+	PHP_FALIAS(is_float,		is_double,			first_arg_allow_ref)
+	PHP_FE(is_double,								first_arg_allow_ref)
+	PHP_FALIAS(is_real,			is_double,			first_arg_allow_ref)
+	PHP_FE(is_string,								first_arg_allow_ref)
+	PHP_FE(is_array,								first_arg_allow_ref)
+	PHP_FE(is_object,								first_arg_allow_ref)
 
-	PHP_FE(var_dump,					NULL)
-	PHP_FE(serialize,					first_arg_allow_ref)
-	PHP_FE(unserialize,					first_arg_allow_ref)
+	PHP_FE(leak,									NULL)
+	PHP_FE(error_log,								NULL)
+	PHP_FE(call_user_func,							NULL)
+	PHP_FE(call_user_method,						NULL)
+
+	PHP_FE(var_dump,								NULL)
+	PHP_FE(serialize,								first_arg_allow_ref)
+	PHP_FE(unserialize,								first_arg_allow_ref)
 	
 	PHP_FE(register_shutdown_function,	NULL)
 
@@ -285,9 +292,11 @@ function_entry basic_functions[] = {
 	PHP_FE(ini_restore,					NULL)
 
 	PHP_FE(print_r,					NULL)
-	{"setcookie",		php3_SetCookie,		NULL},
-	{"header",			php3_Header,		NULL},
-	PHP_FE(headers_sent,				NULL)
+	
+	PHP_FE(setcookie,								NULL)
+	PHP_FE(Header,									NULL)
+	PHP_FE(headers_sent,							NULL)
+	
 	PHP_FE(function_exists,				NULL)
 	PHP_FE(in_array,					NULL)
 	PHP_FE(extract,						NULL)
@@ -562,7 +571,7 @@ PHP_FUNCTION(toggle_short_open_tag)
  * Basic Functions *
  *******************/
 
-void int_value(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(intval)
 {
 	pval *num, *arg_base;
 	int base;
@@ -590,7 +599,7 @@ void int_value(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void double_value(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(doubleval)
 {
 	pval *num;
 
@@ -602,7 +611,7 @@ void double_value(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void string_value(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(strval)
 {
 	pval *num;
 
@@ -639,7 +648,7 @@ static int array_key_compare(const void *a, const void *b)
 }
 
 
-PHP_FUNCTION(key_sort)
+PHP_FUNCTION(ksort)
 {
 	pval *array;
 	HashTable *target_hash;
@@ -856,7 +865,7 @@ static int array_user_compare(const void *a, const void *b)
 }
 
 
-PHP_FUNCTION(user_sort)
+PHP_FUNCTION(usort)
 {
 	pval *array;
 	pval *old_compare_func;
@@ -882,7 +891,7 @@ PHP_FUNCTION(user_sort)
 	RETURN_TRUE;
 }
 
-PHP_FUNCTION(auser_sort)
+PHP_FUNCTION(uasort)
 {
 	pval *array;
 	pval *old_compare_func;
@@ -956,7 +965,7 @@ static int array_user_key_compare(const void *a, const void *b)
 }
 
 
-PHP_FUNCTION(user_key_sort)
+PHP_FUNCTION(uksort)
 {
 	pval *array;
 	pval *old_compare_func;
@@ -983,7 +992,7 @@ PHP_FUNCTION(user_key_sort)
 }
 
 
-void array_end(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(end)
 {
 	pval *array, **entry;
 	HashTable *target_hash;
@@ -1008,7 +1017,7 @@ void array_end(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void array_prev(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(prev)
 {
 	pval *array, **entry;
 	HashTable *target_hash;
@@ -1031,7 +1040,7 @@ void array_prev(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void array_next(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(next)
 {
 	pval *array, **entry;
 	HashTable *target_hash;
@@ -1054,7 +1063,7 @@ void array_next(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void array_each(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(each)
 {
 	pval *array,*entry,**entry_ptr, *tmp;
 	char *string_key;
@@ -1106,7 +1115,7 @@ void array_each(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 	
-void array_reset(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(reset)
 {
 	pval *array, **entry;
 	HashTable *target_hash;
@@ -1129,7 +1138,7 @@ void array_reset(INTERNAL_FUNCTION_PARAMETERS)
 	INIT_PZVAL(return_value);
 }
 
-void array_current(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(current)
 {
 	pval *array, **entry;
 	HashTable *target_hash;
@@ -1150,7 +1159,7 @@ void array_current(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void array_current_key(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(key)
 {
 	pval *array;
 	char *string_key;

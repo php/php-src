@@ -51,8 +51,8 @@
 #endif
 
 function_entry pack_functions[] = {
-	{"pack",		php3_pack,	NULL},
-	{"unpack",		php3_unpack,		NULL},
+	PHP_FE(pack,									NULL)
+	PHP_FE(unpack,									NULL)
 	{NULL, NULL, NULL}
 };
 

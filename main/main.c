@@ -508,7 +508,7 @@ static void php3_unset_timeout()
 }
 
 
-void php3_set_time_limit(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(set_time_limit)
 {
 	pval *new_timeout;
 	PLS_FETCH();

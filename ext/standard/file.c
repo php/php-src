@@ -196,7 +196,7 @@ function_entry php3_file_functions[] = {
 	PHP_FE(fseek,				NULL)
 	PHP_FE(ftell,				NULL)
 	PHP_FE(fwrite,				NULL)
-	{"fputs",	php3_fwrite,	NULL},
+	PHP_FALIAS(fputs,	fwrite,	NULL)
 	PHP_FE(mkdir,				NULL)
 	PHP_FE(rename,				NULL)
 	PHP_FE(copy,				NULL)
@@ -1027,7 +1027,7 @@ PHP_FUNCTION(fwrite)
 /*
    wrapper for setvbuf()
 */
-void php3_set_file_buffer(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(set_file_buffer)
 {
 	pval *arg1, *arg2;
 	FILE *fp;

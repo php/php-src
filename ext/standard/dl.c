@@ -105,6 +105,7 @@ void php3_dl(pval *file,int type,pval *return_value)
 #if MSVC5
 		php3_error(E_ERROR,"Unable to load dynamic library '%s'<br>\n%s",libpath,php3_win_err());
 #else
+		printf("dlerror = %s\n", dlerror());
 		php3_error(E_ERROR,"Unable to load dynamic library '%s' - %s",libpath,dlerror());
 #endif
 		RETURN_FALSE;

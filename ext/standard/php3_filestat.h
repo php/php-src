@@ -44,19 +44,20 @@ PHP_FUNCTION(fileowner);
 PHP_FUNCTION(fileperms);
 PHP_FUNCTION(filesize);
 PHP_FUNCTION(filetype);
-PHP_FUNCTION(iswritable);
-PHP_FUNCTION(isreadable);
-PHP_FUNCTION(isexec);
-PHP_FUNCTION(isfile);
-PHP_FUNCTION(isdir);
-PHP_FUNCTION(islink);
-PHP_FUNCTION(fileexists);
+PHP_FUNCTION(is_writable);
+PHP_FUNCTION(is_readable);
+PHP_FUNCTION(is_executable);
+PHP_FUNCTION(is_file);
+PHP_FUNCTION(is_dir);
+PHP_FUNCTION(is_link);
+PHP_FUNCTION(file_exists);
 PHP_FUNCTION(stat);
 PHP_FUNCTION(lstat);
 PHP_FUNCTION(chown);
 PHP_FUNCTION(chgrp);
 PHP_FUNCTION(chmod);
 PHP_FUNCTION(touch);
+PHP_FUNCTION(clearstatcache);
 
 extern php3_module_entry php3_filestat_module_entry;
 #define php3_filestat_module_ptr &php3_filestat_module_entry

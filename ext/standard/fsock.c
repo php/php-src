@@ -83,8 +83,8 @@ extern int le_fp;
 static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 
 function_entry fsock_functions[] = {
-      PHP_FE(fsockopen, third_and_fourth_args_force_ref)
-      PHP_FE(pfsockopen, third_and_fourth_args_force_ref)
+      PHP_FE(fsockopen, 							third_and_fourth_args_force_ref)
+      PHP_FE(pfsockopen, 							third_and_fourth_args_force_ref)
       {NULL, NULL, NULL}
 };
 
