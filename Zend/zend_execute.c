@@ -1492,9 +1492,9 @@ do_fcall_common:
                                 	*tmp = *object.ptr;
                                 	zendi_zval_copy_ctor(*tmp);
 									object.ptr = tmp;
-									*object.ptr_ptr = tmp;
+									object.ptr_ptr = &tmp;
                         		}
-                        		object.ptr->refcount = 1;
+                        		object.ptr->refcount = 0;
                         		object.ptr->is_ref = 1;
                 			}
 							*this_ptr = object.ptr;
