@@ -65,6 +65,10 @@ PHPAPI long php_rand(TSRMLS_D)
 {
 	long ret;
 
+	if (!BG(rand_is_seeded)) {
+		php_srand(GENERATE_SEED() TSRMLS_CC);
+	}
+
 #ifdef ZTS
 	ret = php_rand_r(&BG(rand_seed));
 #else
@@ -322,10 +326,6 @@ PHP_FUNCTION(rand)
 
 	if (argc != 0 && zend_parse_parameters(argc TSRMLS_CC, "ll", &min, &max) == FAILURE)
 		return;
-
-	if (!BG(rand_is_seeded)) {
-		php_srand(GENERATE_SEED() TSRMLS_CC);
-	}
 
 	number = php_rand(TSRMLS_C);
 	if (argc == 2) {
