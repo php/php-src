@@ -209,6 +209,7 @@ PHP_MINIT_FUNCTION(zlib)
 	ts_allocate_id(&zlib_globals_id, sizeof(zend_zlib_globals), (ts_allocate_ctor) php_zlib_init_globals, NULL);
 #endif
 	php_register_url_stream_wrapper("compress.zlib", &php_stream_gzip_wrapper TSRMLS_CC);
+	php_stream_filter_register_factory("zlib.*", &php_zlib_filter_factory TSRMLS_CC);
 
 	REGISTER_LONG_CONSTANT("FORCE_GZIP", CODING_GZIP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FORCE_DEFLATE", CODING_DEFLATE, CONST_CS | CONST_PERSISTENT);
@@ -243,6 +244,7 @@ PHP_RINIT_FUNCTION(zlib)
 PHP_MSHUTDOWN_FUNCTION(zlib)
 {
 	php_unregister_url_stream_wrapper("zlib" TSRMLS_CC);
+	php_stream_filter_unregister_factory("zlib.*" TSRMLS_CC);
 	
 	UNREGISTER_INI_ENTRIES();
 
@@ -256,6 +258,8 @@ PHP_MINFO_FUNCTION(zlib)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "ZLib Support", "enabled");
+	php_info_print_table_row(2, "Stream Wrapper support", "compress.zlib://");
+	php_info_print_table_row(2, "Stream Filter support", "zlib.inflate, zlib.deflate");
 	php_info_print_table_row(2, "Compiled Version", ZLIB_VERSION);
 	php_info_print_table_row(2, "Linked Version", (char *) zlibVersion());
 	php_info_print_table_end();
