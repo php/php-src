@@ -1340,7 +1340,6 @@ PHP_FUNCTION(sybase_fetch_object)
 		return_value->value.obj.ce = &zend_standard_class_def;
 	}
 }
-
 /* }}} */
 
 /* {{{ proto array sybase_fetch_array(int result)
@@ -1349,7 +1348,6 @@ PHP_FUNCTION(sybase_fetch_array)
 {
 	php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
-
 /* }}} */
 
 /* {{{ proto bool sybase_data_seek(int result, int offset)
@@ -1376,7 +1374,6 @@ PHP_FUNCTION(sybase_data_seek)
 	result->cur_row = offset->value.lval;
 	RETURN_TRUE;
 }
-
 /* }}} */
 
 static char *php_sybase_get_field_name(CS_INT type)
@@ -1474,7 +1471,6 @@ PHP_FUNCTION(sybase_fetch_field)
 	add_property_long(return_value, "numeric", result->fields[field_offset].numeric);
 	add_property_string(return_value, "type", php_sybase_get_field_name(result->fields[field_offset].type), 1);
 }
-
 /* }}} */
 
 
@@ -1504,7 +1500,6 @@ PHP_FUNCTION(sybase_field_seek)
 	result->cur_field = field_offset;
 	RETURN_TRUE;
 }
-
 /* }}} */
 
 
@@ -1559,10 +1554,11 @@ PHP_FUNCTION(sybase_result)
 	*return_value = result->data[row->value.lval][field_offset];
 	pval_copy_constructor(return_value);
 }
-
 /* }}} */
 
 
+/* {{{ proto int sybase_affected_rows([int link_id])
+    Get number of affected rows in last query */
 PHP_FUNCTION(sybase_affected_rows)
 {
 	pval *sybase_link_index;
@@ -1590,6 +1586,7 @@ PHP_FUNCTION(sybase_affected_rows)
 	return_value->value.lval = sybase_ptr->affected_rows;
 	return_value->type = IS_LONG;
 }
+/* }}} */
 
 
 PHP_MINFO_FUNCTION(sybase)
@@ -1610,6 +1607,8 @@ PHP_MINFO_FUNCTION(sybase)
 }
 
 
+/* {{{ proto void sybase_min_client_severity(int severity)
+   Sets minimum client severity */
 PHP_FUNCTION(sybase_min_client_severity)
 {
 	pval *severity;
@@ -1621,8 +1620,11 @@ PHP_FUNCTION(sybase_min_client_severity)
 	convert_to_long(severity);
 	SybCtG(min_client_severity) = severity->value.lval;
 }
+/* }}} */
 
 
+/* {{{ proto void sybase_min_server_severity(int severity)
+    Sets minimum server severity */
 PHP_FUNCTION(sybase_min_server_severity)
 {
 	pval *severity;
@@ -1634,6 +1636,7 @@ PHP_FUNCTION(sybase_min_server_severity)
 	convert_to_long(severity);
 	SybCtG(min_server_severity) = severity->value.lval;
 }
+/* }}} */
 
 
 #endif
