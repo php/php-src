@@ -647,7 +647,7 @@ _oci_conn_list_dtor(oci_connection *connection)
 
 	oci_debug("START _oci_conn_list_dtor: id=%d",connection->id);
 
-	if (connection->session->exclusive) {
+	if (connection->session && connection->session->exclusive) {
 		/* exclusive connection created via OCINLogon() close their 
 		   associated session when destructed */
 		zend_list_delete(connection->session->num);
