@@ -53,8 +53,8 @@
 
 typedef smart_str wddx_packet;
 
-wddx_packet *php_wddx_constructor(void);
-#define	php_wddx_destructor(packet) smart_str_free(packet)
+wddx_packet* php_wddx_constructor(void);
+void		 php_wddx_destructor(wddx_packet *packet);
 
 void 		 php_wddx_packet_start(wddx_packet *packet, char *comment, int comment_len);
 void 		 php_wddx_packet_end(wddx_packet *packet);
