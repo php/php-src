@@ -871,7 +871,10 @@ PHP_FUNCTION(fdf_save_string)
 				struct stat stat;
 				char *buf;
 
-				fstat(fileno(fp), &stat);
+				if (fstat(fileno(fp), &stat) == -1) {
+					RETVAL_FALSE;
+					goto err;
+				}
 				buf = emalloc(stat.st_size +1);
 				fread(buf, stat.st_size, 1, fp);
 				buf[stat.st_size] = '\0';
@@ -889,7 +892,7 @@ PHP_FUNCTION(fdf_save_string)
 	if(err != FDFErcOK) {
 		FDF_FAILURE(err);
 	}
-
+err:
 	if(temp_filename) {
 		unlink(temp_filename);
 		efree(temp_filename);
