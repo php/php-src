@@ -250,11 +250,11 @@ public:
 	}
 	
 	STDMETHODIMP_(DWORD) AddRef(void) {
-		return InterlockedIncrement(&m_refcount);
+		return InterlockedIncrement(const_cast<long*> (&m_refcount));
 	}
 	
 	STDMETHODIMP_(DWORD) Release(void) {
-		DWORD ret = InterlockedDecrement(&m_refcount);
+		DWORD ret = InterlockedDecrement(const_cast<long*> (&m_refcount));
 		trace("%08x: IDispatchImpl: release ref count is now %d\n", this, ret);
 		if (ret == 0)
 			delete this;
@@ -1286,12 +1286,12 @@ trace("Add %s to global namespace\n", name);
 
 STDMETHODIMP_(DWORD) TPHPScriptingEngine::AddRef(void)
 {
-	return InterlockedIncrement(&m_refcount);
+	return InterlockedIncrement(const_cast<long*> (&m_refcount));
 }
 
 STDMETHODIMP_(DWORD) TPHPScriptingEngine::Release(void)
 {
-	DWORD ret = InterlockedDecrement(&m_refcount);
+	DWORD ret = InterlockedDecrement(const_cast<long*> (&m_refcount));
 	if (ret == 0) {
 		trace("%08x: Release: zero refcount, destroy the engine!\n", this);
 		delete this;
@@ -1305,9 +1305,9 @@ STDMETHODIMP TPHPScriptingEngine::QueryInterface(REFIID iid, void **ppvObject)
 	
 	if (IsEqualGUID(IID_IActiveScript, iid)) {
 		*ppvObject = (IActiveScript*)this;
-	} else if (IsEqualGUID(IID_IActiveScriptParse32, iid)) {
-		*ppvObject = (IActiveScriptParse32*)this;
-	} else if (IsEqualGUID(IID_IActiveScriptParseProcedure32, iid)) {
+	} else if (IsEqualGUID(IID_IActiveScriptParse, iid)) {
+		*ppvObject = (IActiveScriptParse*)this;
+	} else if (IsEqualGUID(IID_IActiveScriptParseProcedure, iid)) {
 		*ppvObject = (IActiveScriptParseProcedure*)this;
 	} else if (IsEqualGUID(IID_IUnknown, iid)) {
 		*ppvObject = this;	
@@ -1717,11 +1717,11 @@ public:
 	}
 	
 	STDMETHODIMP_(DWORD) AddRef(void) {
-		return InterlockedIncrement(&m_refcount);
+		return InterlockedIncrement(const_cast<long*> (&m_refcount));
 	}
 	
 	STDMETHODIMP_(DWORD) Release(void) {
-		DWORD ret = InterlockedDecrement(&m_refcount);
+		DWORD ret = InterlockedDecrement(const_cast<long*> (&m_refcount));
 		trace("Release: errobj refcount=%d\n", ret);
 		if (ret == 0)
 			delete this;
