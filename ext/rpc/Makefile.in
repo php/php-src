@@ -14,8 +14,7 @@ make_shared = yes
 include $(top_srcdir)/build/dynlib.mk
 
 php_java.jar : reflect.java
-	@test -d net || mkdir net
-	@test -d net/php || mkdir net/php
+	$(mkinstalldirs) net/php
 	@cp $(srcdir)/reflect.java net/php
 	@echo library=php_java>net/php/reflect.properties
 	javac net/php/reflect.java
