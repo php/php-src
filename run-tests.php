@@ -114,6 +114,7 @@ $settings = array(
 		'safe_mode=0',
 		'output_buffering=Off',
 		'output_handler=',
+		'track_errors=1',
 		'zlib.output_compression=Off',
 		'auto_prepend_file=',
 		'auto_append_file=',
