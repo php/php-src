@@ -94,6 +94,7 @@ php_basic_globals basic_globals;
 
 #include "php_fopen_wrappers.h"
 
+static unsigned char first_and_second__args_force_ref[] = { 2, BYREF_FORCE, BYREF_FORCE };
 static unsigned char second_and_third_args_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
@@ -540,7 +541,7 @@ function_entry basic_functions[] = {
 	PHP_FE(ini_restore,														NULL)
 
 	PHP_FE(setcookie,														NULL)
-	PHP_FE(header,															NULL)
+	PHP_FE(header,															first_and_second__args_force_ref)
 	PHP_FE(headers_sent,													NULL)
 
 	PHP_FE(connection_aborted,												NULL)
