@@ -35,9 +35,27 @@ if test "$PHP_MING" != "no"; then
   ],[
     -L$MING_DIR/lib
   ])
-
+  
   PHP_ADD_INCLUDE($MING_INC_DIR)
   PHP_ADD_LIBRARY_WITH_PATH(ming, $MING_DIR/lib, MING_SHARED_LIBADD)
+
+  AC_MSG_CHECKING([for destroySWFBlock])
+  AC_TRY_RUN([
+#include "ming.h"
+int destroySWFBlock(int a, int b) {
+	return a+b;
+}
+int main() {
+	return destroySWFBlock(-1,1); /* returns 0 only if function is not yet defined */
+}
+  ],[
+    AC_MSG_RESULT([missing])
+  ],[
+    AC_DEFINE(HAVE_DESTROY_SWF_BLOCK,1,[ ])
+    AC_MSG_RESULT([ok])
+  ],[
+    AC_MSG_RESULT([unknown])
+  ]) 
 
   PHP_NEW_EXTENSION(ming, ming.c, $ext_shared)
   PHP_SUBST(MING_SHARED_LIBADD)
