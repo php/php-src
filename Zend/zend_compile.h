@@ -41,6 +41,12 @@
 #define DEC_BPC(op_array)	if (CG(interactive)) { ((op_array)->backpatch_count--); }
 #define HANDLE_INTERACTIVE()  if (CG(interactive)) { execute_new_code(TSRMLS_C); }
 
+#define RESET_DOC_COMMENT()      \
+    do {                         \
+        CG(doc_comment) = NULL;  \
+        CG(doc_comment_len) = 0; \
+    } while (0)
+
 typedef struct _zend_op_array zend_op_array;
 typedef struct _zend_op zend_op;
 
