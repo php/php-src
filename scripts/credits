@@ -1,7 +1,7 @@
 #!/bin/sh
 awkprog='
 BEGIN { FS = "\n"; RS = "" }
-{ print "CREDIT_LINE(\""$1"\",\""$2"\");" }'
+{ print "CREDIT_LINE(\""$1"\", \""$2"\");" }'
 
 for what in ext sapi
 do
