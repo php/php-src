@@ -1,7 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libexif.la
-LTLIBRARY_SOURCES     = exif.c
-LTLIBRARY_SHARED_NAME = exif.la
-
-include $(top_srcdir)/build/dynlib.mk
