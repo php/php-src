@@ -219,6 +219,13 @@ enum pdo_param_event {
 
 typedef int (*pdo_stmt_param_hook_func)(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, enum pdo_param_event event_type TSRMLS_DC);
 
+/* setting of attributes */
+typedef int (*pdo_stmt_set_attr_func)(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC);
+
+/* fetching of attributes */
+typedef int (*pdo_stmt_get_attr_func)(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC);
+
+
 struct pdo_stmt_methods {
 	pdo_stmt_dtor_func			dtor;
 	pdo_stmt_execute_func		executer;
@@ -226,6 +233,8 @@ struct pdo_stmt_methods {
 	pdo_stmt_describe_col_func	describer;
 	pdo_stmt_get_col_data_func	get_col;
 	pdo_stmt_param_hook_func	param_hook;
+	pdo_stmt_set_attr_func		set_attribute;
+	pdo_stmt_get_attr_func		get_attribute;
 };
 
 /* }}} */

@@ -636,7 +636,70 @@ static PHP_METHOD(PDOStatement, errorInfo)
 }
 /* }}} */
 
+/* {{{ proto bool PDOStatement::setAttribute(long attribute, mixed value)
+   Set an attribute */
+static PHP_METHOD(PDOStatement, setAttribute)
+{
+	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	long attr;
+	zval *value = NULL;
 
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz!", &attr, &value)) {
+		RETURN_FALSE;
+	}
+
+	if (!stmt->methods->set_attribute) {
+		goto fail;
+	}
+
+	PDO_STMT_CLEAR_ERR();
+	if (stmt->methods->set_attribute(stmt, attr, value TSRMLS_CC)) {
+		RETURN_TRUE;
+	}
+
+fail:
+	if (!stmt->methods->set_attribute) {
+		/* XXX: do something better here */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver doesn't support setting attributes");
+	} else {
+		PDO_HANDLE_STMT_ERR();
+	}
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto mixed PDOStatement::getAttribute(long attribute)
+   Get an attribute */
+static PHP_METHOD(PDOStatement, getAttribute)
+{
+	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	long attr;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &attr)) {
+		RETURN_FALSE;
+	}
+
+	if (!stmt->methods->get_attribute) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver doesn't support fetching attributes");
+		RETURN_FALSE;
+	}
+
+	PDO_STMT_CLEAR_ERR();
+	switch (stmt->methods->get_attribute(stmt, attr, return_value TSRMLS_CC)) {
+		case -1:
+			PDO_HANDLE_STMT_ERR();
+			RETURN_FALSE;
+
+		case 0:
+			/* XXX: should do something better here */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver doesn't support fetching %ld attribute", attr);
+			break;
+
+		default:
+			return;
+	}
+}
+/* }}} */
 
 function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, execute,		NULL,					ZEND_ACC_PUBLIC)
@@ -648,6 +711,8 @@ function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, fetchAll,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, errorCode,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, errorInfo,		NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, setAttribute,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, getAttribute,	NULL,					ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
