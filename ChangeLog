@@ -1,3 +1,116 @@
+2003-01-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_files.c
+      ext/session/session.c:
+      Remove ugly netware hacks from the code
+
+2003-01-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/wddx/wddx.c:
+      Removed unnecessary checks.
+
+2003-01-24  Dan Kalowsky  <dank@deadmime.org>
+
+    * (PHP_4_3)
+      ext/odbc/php_odbc.c:
+      busted by the style police...
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.c:
+      Patch for bug #21844
+
+2003-01-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c:
+      Fixed bug #21533 (a rare condition where error can remain undefined and
+      result in undefined behavior when it is used without being initialized).
+
+    * ext/informix/ifx.ec:
+      Fixed bug #21865.
+
+2003-01-24  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      ext/oci8/config.m4:
+      MFH: Fix bug #21795, Undeclared statement in oci8.c (OCI_ATTR_STATEMENT)
+
+    * ext/oci8/config.m4:
+      Fix bug #21795, Undeclared statement in oci8.c (OCI_ATTR_STATEMENT)
+
+2003-01-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/yp/yp.c:
+      Fixed a memory leak.
+      zend_error -> php_error_docref.
+
+    * ext/crack/crack.c
+      ext/gmp/gmp.c
+      ext/standard/array.c
+      ext/standard/assert.c
+      ext/standard/browscap.c
+      ext/standard/html.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/sysvmsg/sysvmsg.c:
+      zend_error -> php_error_docref.
+
+    * ext/gd/gd.c
+      ext/hyperwave/hw.c
+      ext/standard/proc_open.c:
+      Fixed compile warning.
+
+2003-01-24  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/string.c:
+      Resolving problem on OSF1 and probably other
+      64 bit platforms. Thanks for the feedback of Magnus (novell kiruna se).
+
+    * ext/standard/string.c:
+      Adding cast.
+
+2003-01-24  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/php_imap.c:
+      - Fixed stupid typo..
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      MFH: Fix potential problem for 64-bit architectures.
+
+    * (PHP_4_3)
+      NEWS:
+      figbug news
+
+    * ext/snmp/snmp.c:
+      Fixed bug: #20857, snmpset() fails
+
+    * ext/snmp/snmp.c:
+      ws fixes
+
+    * tests/func/001.phpt
+      tests/func/005.phpt
+      tests/func/005a.phpt
+      tests/func/007.phpt
+      tests/func/008.phpt
+      tests/func/009.phpt:
+      MFB, removed unused GET/POST entries
+
+    * (PHP_4_3)
+      tests/func/001.phpt
+      tests/func/005.phpt
+      tests/func/005a.phpt
+      tests/func/007.phpt
+      tests/func/008.phpt
+      tests/func/009.phpt:
+      Remove unused GET/POST entries
+
+2003-01-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dbx/dbx.c
+      ext/dio/dio.c
+      ext/pcre/php_pcre.c:
+      zend_error() -> php_error_docref().
+
 2003-01-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * tests/lang/bug21849.phpt:
