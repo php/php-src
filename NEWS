@@ -34,6 +34,8 @@ PHP 4                                                                      NEWS
   (Jani, Markus dot Lidel at shadowconnect dot com)
 - Fixed bug #26005 (Random "cannot change the session ini settings" errors).
   (Jani, jsnajdr at kerio dot com)
+- Fixed bug #24582 (extensions can't be loaded dynamically in Solaris/iPlanet).
+  (Jani)
 - Fixed bug #22127 (Invalid response code when force-cgi-redirect safety 
   mechanism is triggered). (Ilia, scottmacvicar at ntlworld dot com)
 - Fixed bug #21760 (Use of uninitialized pointer inside php_read()). (Ilia, 
