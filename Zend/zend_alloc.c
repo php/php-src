@@ -137,6 +137,9 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 		p->orig_lineno = __zend_orig_lineno;
 		p->magic = MEM_BLOCK_START_MAGIC;
 		p->reported = 0;
+		/* Setting the thread id should not be necessary, because we fetched this block
+		 * from this thread's cache
+		 */
 		AG(cache_stats)[CACHE_INDEX][1]++;
 #endif
 		p->persistent = 0;
@@ -177,6 +180,9 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	p->orig_lineno = __zend_orig_lineno;
 	p->magic = MEM_BLOCK_START_MAGIC;
 	p->reported = 0;
+# ifdef ZTS
+	p->thread_id = tsrm_thread_id();
+# endif
 	*((long *)(((char *) p) + sizeof(zend_mem_header)+SIZE+PLATFORM_PADDING+END_ALIGNMENT(SIZE))) = MEM_BLOCK_END_MAGIC;
 #endif
 #if MEMORY_LIMIT
@@ -192,6 +198,17 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	zend_mem_header *p = (zend_mem_header *) ((char *)ptr - sizeof(zend_mem_header) - PLATFORM_PADDING);
 	DECLARE_CACHE_VARS
 	ALS_FETCH();
+
+#ifdef ZTS
+	if (p->thread_id != tsrm_thread_id()) {
+# if ZEND_DEBUG
+		tsrm_error(TSRM_ERROR_LEVEL_ERROR, "Memory block allocated at %s:(%d) on thread %x freed at %s:(%d) on thread %x, ignoring",
+			p->filename, p->lineno, p->thread_id,
+			__zend_filename, __zend_lineno, tsrm_thread_id());
+# endif
+		return;
+	}
+#endif
 
 	CALCULATE_REAL_SIZE_AND_CACHE_INDEX(p->size);
 #if ZEND_DEBUG
@@ -252,6 +269,21 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 	if (!ptr) {
 		return _emalloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
+
+#ifdef ZTS
+	if (p->thread_id != tsrm_thread_id()) {
+		void *new_p;
+
+# if ZEND_DEBUG
+		tsrm_error(TSRM_ERROR_LEVEL_ERROR, "Memory block allocated at %s:(%d) on thread %x reallocated at %s:(%d) on thread %x, duplicating",
+			p->filename, p->lineno, p->thread_id,
+			__zend_filename, __zend_lineno, tsrm_thread_id());
+# endif
+		new_p = _emalloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+		memcpy(new_p, ptr, p->size);
+		return new_p;
+	}
+#endif
 
 	CALCULATE_REAL_SIZE_AND_CACHE_INDEX(size);
 
