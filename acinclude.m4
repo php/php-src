@@ -89,13 +89,18 @@ AC_DEFUN(AC_CHECK_CC_OPTION,[
   opt="$1"
   var=`echo $ac_n "$opt$ac_c"|tr -c a-zA-Z0-9 _`
   AC_MSG_CHECKING([if compiler supports -$1 really])
-  ac_php_compile="${CC-cc} -$opt -c $CFLAGS $CPPFLAGS conftest.$ac_ext 2>&1"
-  if eval $ac_php_compile | egrep "$opt" > /dev/null 2>&1 ; then
+  ac_php_compile="${CC-cc} -$opt -o conftest $CFLAGS $CPPFLAGS conftest.$ac_ext 2>&1"
+  if eval $ac_php_compile 2>&1 | egrep "$opt" > /dev/null 2>&1 ; then
     eval php_cc_$var=no
 	AC_MSG_RESULT(no)
   else
-    eval php_cc_$var=yes
-	AC_MSG_RESULT(yes)
+    if eval ./conftest 2>/dev/null ; then
+      eval php_cc_$var=yes
+	  AC_MSG_RESULT(yes)
+    else
+      eval php_cc_$var=no
+	  AC_MSG_RESULT(no)
+    fi
   fi
 ])
 
