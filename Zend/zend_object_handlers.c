@@ -220,7 +220,9 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 				/* To check: can't *variable_ptr be some system variable like error_zval here? */
 				(*variable_ptr)->type = value->type;
 				(*variable_ptr)->value = value->value;
-				zval_copy_ctor(*variable_ptr);
+				if (value->refcount>0) {
+					zval_copy_ctor(*variable_ptr);
+				}
 				setter_done = 1;
 			}
 		}
