@@ -47,10 +47,10 @@ $sql = "SELECT * FROM ".$table_name." WHERE num = -2";
 $result = pg_query($db, $sql);
 $row = pg_fetch_row($result, 0);
 if ($data === $row['bin']) {
-	echo "pg_escape_bytea actually works\n";
+	echo "pg_escape_bytea() actually works with databse\n";
 }
 else {
-	echo "pg_escape_bytea is broken\n";
+	echo "pg_escape_bytea() is broken\n";
 }
 
 ?>
