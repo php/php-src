@@ -57,7 +57,7 @@ struct _php_core_globals {
 	zend_bool allow_call_time_pass_reference;
 	zend_bool implicit_flush;
 
-	long output_buffering;
+	int output_buffering;
 
 	char *safe_mode_include_dir;
 	zend_bool safe_mode_gid;
@@ -67,7 +67,6 @@ struct _php_core_globals {
 	char *output_handler;
 
 	char *unserialize_callback_func;
-	long serialize_precision;
 
 	char *safe_mode_exec_dir;
 
@@ -141,6 +140,7 @@ struct _php_core_globals {
 
 	zend_bool always_populate_raw_post_data;
 	
+	long serialize_precision;
 };
 
 
