@@ -252,7 +252,7 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 
 	/* don't allow strange buffer overruns due to bogus return */
 	if (didwrite > count) {
-		zend_error(E_WARNING, "%s::" USERSTREAM_READ " - wrote more data than requested",
+		zend_error(E_WARNING, "%s::" USERSTREAM_WRITE " - wrote more data than requested",
 				us->wrapper->classname);
 		didwrite = count;
 	}
