@@ -77,7 +77,7 @@ PHP_FUNCTION(time)
 void _php3_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
 	pval *arguments[7];
-	struct tm *ta;
+	struct tm *ta, tmbuf;
 	time_t t;
 	int i, gmadjust, seconds, arg_count = ARG_COUNT(ht);
 
@@ -103,7 +103,7 @@ void _php3_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	** default parameters for PHP gmmktime would be the current
 	** GMT time values...
 	*/
-	ta = localtime(&t);
+	ta = localtime_r(&t, &tmbuf);
 
 	/* Let DST be unknown. mktime() should compute the right value
 	** and behave correctly. Unless the user overrides this.
@@ -187,7 +187,7 @@ _php3_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
 	pval *format, *timestamp;
 	time_t the_time;
-	struct tm *ta;
+	struct tm *ta, tmbuf;
 	int i, size = 0, length, h, beat;
 	char tmp_buff[16];
 
@@ -211,9 +211,9 @@ _php3_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	convert_to_string(format);
 
 	if (gm) {
-		ta = gmtime(&the_time);
+		ta = gmtime_r(&the_time, &tmbuf);
 	} else {
-		ta = localtime(&the_time);
+		ta = localtime_r(&the_time, &tmbuf);
 	}
 
 	if (!ta) {			/* that really shouldn't happen... */
@@ -441,7 +441,7 @@ PHP_FUNCTION(gmdate)
 PHP_FUNCTION(getdate)
 {
 	pval *timestamp_arg;
-	struct tm *ta;
+	struct tm *ta, tmbuf;
 	time_t timestamp;
 
 	if (ARG_COUNT(ht) == 0) {
@@ -453,7 +453,7 @@ PHP_FUNCTION(getdate)
 		timestamp = timestamp_arg->value.lval;
 	}
 
-	ta = localtime(&timestamp);
+	ta = localtime_r(&timestamp, &tmbuf);
 	if (!ta) {
 		php_error(E_WARNING, "Cannot perform date calculation");
 		return;
@@ -478,11 +478,11 @@ PHP_FUNCTION(getdate)
 /* Return date string in standard format for http headers */
 char *php3_std_date(time_t t)
 {
-	struct tm *tm1;
+	struct tm *tm1, tmbuf;
 	char *str;
 	PLS_FETCH();
 
-	tm1 = gmtime(&t);
+	tm1 = gmtime_r(&t, &tmbuf);
 	str = emalloc(81);
 	if (PG(y2k_compliance)) {
 		snprintf(str, 80, "%s, %02d-%s-%04d %02d:%02d:%02d GMT",
@@ -549,7 +549,7 @@ PHP_FUNCTION(strftime)
 	pval *format_arg, *timestamp_arg;
 	char *format,*buf;
 	time_t timestamp;
-	struct tm *ta;
+	struct tm *ta, tmbuf;
 	int max_reallocs = 5;
 	size_t buf_len=64, real_len;
 
@@ -577,7 +577,7 @@ PHP_FUNCTION(strftime)
 		RETURN_FALSE;
 	}
 	format = format_arg->value.str.val;
-	ta = localtime(&timestamp);
+	ta = localtime_r(&timestamp, &tmbuf);
 
 	buf = (char *) emalloc(buf_len);
 	while ((real_len=strftime(buf,buf_len,format,ta))==buf_len || real_len==0) {
