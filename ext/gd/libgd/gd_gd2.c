@@ -26,7 +26,7 @@
 /* 2.11: not part of the API, as the save routine can figure it out
  *	from im->trueColor, and the load routine doesn't need to tell
  *	the end user the saved format. NOTE: adding 2 is assumed
- *	to result in the correct format value for truecolor! 
+ *	to result in the correct format value for truecolor!
 */
 #define GD2_FMT_TRUECOLOR_RAW 3
 #define GD2_FMT_TRUECOLOR_COMPRESSED 4
@@ -220,7 +220,7 @@ static int _gd2ReadChunk (int offset, char *compBuf, int compSize, char *chunkBu
 		return FALSE;
 	}
 	GD2_DBG(php_gd_error("Got chunk\n"));
-	
+
 	return TRUE;
 }
 
@@ -280,7 +280,7 @@ gdImagePtr gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 		}
 		chunkBuf = gdCalloc(chunkMax, 1);
 		compBuf = gdCalloc(compMax, 1);
-		
+
 		GD2_DBG(php_gd_error("Largest compressed chunk is %d bytes\n", compMax));
 	}
 
@@ -377,7 +377,7 @@ fail2:
 	return 0;
 }
 
-gdImagePtr gdImageCreateFromGd2Part (FILE * inFile, int srcx, int srcy, int w, int h) 
+gdImagePtr gdImageCreateFromGd2Part (FILE * inFile, int srcx, int srcy, int w, int h)
 {
 	gdImagePtr im;
 	gdIOCtx *in = gdNewFileCtx(inFile);
@@ -456,7 +456,7 @@ gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w,
 		if (chunkMax <= 0) {
 			goto fail2;
 		}
-		
+
 		chunkBuf = gdCalloc(chunkMax, 1);
 		compBuf = gdCalloc(compMax, 1);
 	}
@@ -556,11 +556,11 @@ gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w,
 
 					/* Only use a point that is in the image. */
 					if ((x >= srcx) && (x < (srcx + w)) && (x < fsx) && (x >= 0) && (y >= srcy) && (y < (srcy + h)) && (y < fsy) && (y >= 0)) {
-						if (im->trueColor) {  
+						if (im->trueColor) {
 							im->tpixels[y - srcy][x - srcx] = ch;
 						} else {
 							im->pixels[y - srcy][x - srcx] = ch;
-						}   
+						}
 					}
 				}
 			}
@@ -576,7 +576,7 @@ gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w,
 	if (chunkIdx) {
 		gdFree(chunkIdx);
 	}
-	
+
 	return im;
 
 fail2:
@@ -632,7 +632,7 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 	int compMax = 0;
 
 	/* Force fmt to a valid value since we don't return anything. */
-	if ((fmt != GD2_FMT_RAW) && (fmt != GD2_FMT_COMPRESSED)) { 	
+	if ((fmt != GD2_FMT_RAW) && (fmt != GD2_FMT_COMPRESSED)) {
 		fmt = im->trueColor ? GD2_FMT_TRUECOLOR_COMPRESSED : GD2_FMT_COMPRESSED;
 	}
 	if (im->trueColor) {
@@ -672,12 +672,12 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 		chunkData = safe_emalloc(cs * bytesPerPixel, cs, 0);
 		memset(chunkData, 0, cs * bytesPerPixel * cs);
 		if (compMax <= 0) {
-			goto fail;		
+			goto fail;
 		}
 		compData = gdCalloc(compMax, 1);
 
 		/* Save the file position of chunk index, and allocate enough space for
-		 * each chunk_info block . 
+		 * each chunk_info block .
 		 */
 		idxPos = gdTell(out);
 		idxSize = ncx * ncy * sizeof(t_chunk_info);
@@ -726,7 +726,7 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 					}
 				} else {
 					for (x = xlo; x < xhi; x++) {
-						GD2_DBG(php_gd_error("%d, ",x)); 
+						GD2_DBG(php_gd_error("%d, ",x));
 
 						if (im->trueColor) {
 							gdPutInt(im->tpixels[y][x], out);
@@ -735,7 +735,7 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 						}
 					}
 				}
-				GD2_DBG(php_gd_error("y=%d done.\n",y)); 
+				GD2_DBG(php_gd_error("y=%d done.\n",y));
 			}
 
 			if (gd2_compressed(fmt)) {
@@ -774,7 +774,7 @@ fail:
 	if (chunkData) {
 		gdFree(chunkData);
 	}
-	if (compData) { 
+	if (compData) {
 		gdFree(compData);
 	}
 	if (chunkIdx) {
@@ -788,7 +788,7 @@ void gdImageGd2 (gdImagePtr im, FILE * outFile, int cs, int fmt)
 	gdIOCtx *out = gdNewFileCtx(outFile);
 
 	_gdImageGd2(im, out, cs, fmt);
-	
+
 	out->gd_free(out);
 }
 
@@ -800,6 +800,6 @@ void *gdImageGd2Ptr (gdImagePtr im, int cs, int fmt, int *size)
 	_gdImageGd2(im, out, cs, fmt);
 	rv = gdDPExtractData(out, size);
 	out->gd_free(out);
-	
+
 	return rv;
 }

@@ -46,7 +46,7 @@ gdImagePtr gdImageCreateFromXbm(FILE * fd)
 	int ch;
 	char h[8];
 	unsigned int b;
-	
+
 	rewind(fd);
 	while (fgets(fline, MAX_XBM_LINE_SIZE, fd)) {
 		fline[MAX_XBM_LINE_SIZE-1] = '\0';
@@ -59,7 +59,7 @@ gdImagePtr gdImageCreateFromXbm(FILE * fd)
 			} else {
 				type++;
 			}
-	
+
 			if (!strcmp("width", type)) {
 				width = (unsigned int) value;
 			}
@@ -159,7 +159,7 @@ void gdCtxPrintf(gdIOCtx * out, const char *format, ...)
 	char *buf;
 	int len;
 	va_list args;
-	
+
 	va_start(args, format);
 	len = vspprintf(&buf, 0, format, args);
 	va_end(args);

@@ -41,7 +41,7 @@
  * If it is not working, it's not Thomas G. Lane's fault.
  */
 
-/* 
+/*
  * SETTING THIS ONE CAUSES STRIPED IMAGE
  *  to be done: solve this
  * #define ORIGINAL_LIB_JPEG_REVERSE_ODD_ROWS
@@ -148,7 +148,7 @@
  * color space, and repeatedly splits the "largest" remaining box until we
  * have as many boxes as desired colors.  Then the mean color in each
  * remaining box becomes one of the possible output colors.
- * 
+ *
  * The second pass over the image maps each input pixel to the closest output
  * color (optionally after applying a Floyd-Steinberg dithering correction).
  * This mapping is logically trivial, but making it go fast enough requires
@@ -546,7 +546,7 @@ have_c2min:
 		for (c2 = c2max; c2 >= c2min; c2--) {
 			for (c0 = c0min; c0 <= c0max; c0++) {
 				histp = &histogram[c0][c1min][c2];
-				for (c1 = c1min; c1 <= c1max; c1++, histp += HIST_C2_ELEMS) { 
+				for (c1 = c1min; c1 <= c1max; c1++, histp += HIST_C2_ELEMS) {
 					if (*histp != 0) {
 						boxp->c2max = c2max = c2;
 						goto have_c2max;
@@ -1284,7 +1284,7 @@ pass2_no_dither (j_decompress_ptr cinfo, JSAMPARRAY input_buf, JSAMPARRAY output
 			*outptr++ = (JSAMPLE) (*cachep - 1);
 #else
 			*outptr++ = (*cachep - 1);
-#endif	
+#endif
 		}
 	}
 }
@@ -1849,7 +1849,7 @@ gdImageTrueColorToPalette (gdImagePtr im, int dither, int colorsWanted)
 		}
 		im->pixels = 0;
 	}
-		
+
 	for (i = 0; i < HIST_C0_ELEMS; i++) {
 		if (cquantize->histogram[i]) {
 			gdFree(cquantize->histogram[i]);

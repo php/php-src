@@ -57,7 +57,7 @@ int _gdGetColors (gdIOCtx * in, gdImagePtr im, int gd2xFlag)
 	}
 
 	GD2_DBG(printf("Pallette had %d colours (T=%d)\n", im->colorsTotal, im->transparent));
-	
+
 	if (im->trueColor) {
 		return TRUE;
 	}
@@ -214,7 +214,7 @@ void _gdPutColors (gdImagePtr im, gdIOCtx * out)
 
 static void _gdPutHeader (gdImagePtr im, gdIOCtx * out)
 {
-	/* 65535 indicates this is a gd 2.x .gd file.  
+	/* 65535 indicates this is a gd 2.x .gd file.
 	 * 2.0.12: 65534 indicates truecolor.
 	 */
 	if (im->trueColor) {

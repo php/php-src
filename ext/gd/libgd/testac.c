@@ -33,7 +33,7 @@ main (int argc, char *argv[])
     }
   /* Load original PNG, which should contain alpha channel
      information. We will use it in two ways: preserving it
-     literally, for use with compatible browsers, and 
+     literally, for use with compatible browsers, and
      compositing it ourselves against a background of our
      choosing (alpha blending). We'll change its size
      and try creating palette versions of it. */
@@ -80,7 +80,7 @@ testDrawing (
   /* Create output image. */
   im_out = gdImageCreateTrueColor ((int) (gdImageSX (im_in) * scale),
 				   (int) (gdImageSY (im_in) * scale));
-  /*      
+  /*
      Request alpha blending. This causes future
      drawing operations to perform alpha channel blending
      with the background, resulting in an opaque image.
@@ -111,7 +111,7 @@ testDrawing (
 
   /* If this image is the result of alpha channel blending,
      it will not contain an interesting alpha channel itself.
-     Save a little file size by not saving the alpha channel. 
+     Save a little file size by not saving the alpha channel.
      Otherwise the file would typically be slightly larger. */
   gdImageSaveAlpha (im_out, !blending);
 

@@ -6,7 +6,7 @@
 #ifdef VMS
 #define Putchar gdPutchar
 #endif
- 
+
 typedef struct gdIOCtx {
 	int	(*getC)(struct gdIOCtx*);
 	int	(*getBuf)(struct gdIOCtx*, void*, int);

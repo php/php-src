@@ -1,8 +1,8 @@
 /*
    WBMP: Wireless Bitmap Type 0: B/W, Uncompressed Bitmap
-   Specification of the WBMP format can be found in the file: 
+   Specification of the WBMP format can be found in the file:
    SPEC-WAESpec-19990524.pdf
-   You can download the WAP specification on: http://www.wapforum.com/ 
+   You can download the WAP specification on: http://www.wapforum.com/
 
    gd_wbmp.c
 
@@ -14,7 +14,7 @@
    (wbmp library included, but you can find the latest distribution
    at http://www.vandenbrande.com/wbmp)
 
-   Implemented: gdImageCreateFromWBMPCtx, gdImageCreateFromWBMP 
+   Implemented: gdImageCreateFromWBMPCtx, gdImageCreateFromWBMP
 
    ---------------------------------------------------------------------------
 
@@ -32,7 +32,7 @@
    ** implied warranty.
 
    ---------------------------------------------------------------------------
-   Parts od this code are inspired by  'pbmtowbmp.c' and 'wbmptopbm.c' by 
+   Parts od this code are inspired by  'pbmtowbmp.c' and 'wbmptopbm.c' by
    Terje Sannum <terje@looplab.com>.
    **
    ** Permission to use, copy, modify, and distribute this software and its
@@ -87,7 +87,7 @@ int gd_getin (void *in)
    **  Write the image as a wbmp file
    **  Parameters are:
    **  image:  gd image structure;
-   **  fg:     the index of the foreground color. any other value will be 
+   **  fg:     the index of the foreground color. any other value will be
    **          considered as background and will not be written
    **  out:    the stream where to write
  */
@@ -196,6 +196,6 @@ void * gdImageWBMPPtr (gdImagePtr im, int *size, int fg)
 	gdImageWBMPCtx(im, fg, out);
 	rv = gdDPExtractData(out, size);
 	out->gd_free(out);
-	
+
 	return rv;
 }

@@ -1,4 +1,4 @@
-#ifndef GDHELPERS_H 
+#ifndef GDHELPERS_H
 #define GDHELPERS_H 1
 
 #include <sys/types.h>
