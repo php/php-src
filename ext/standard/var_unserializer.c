@@ -387,8 +387,6 @@ yy22:
 	zend_class_entry *ce;
 	int incomplete_class = 0;
 	
-	char *rval_temp;
-	
 	zval *user_func;
 	zval *retval_ptr;
 	zval **args[1];
