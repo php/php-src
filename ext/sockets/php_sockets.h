@@ -17,8 +17,8 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef _PHP_SOCKETS_H
-#define _PHP_SOCKETS_H
+#ifndef PHP_SOCKETS_H
+#define PHP_SOCKETS_H
 
 /* $Id$ */
 
@@ -99,7 +99,7 @@ typedef struct {
 
 #endif
 
-#endif	/* _PHP_SOCKETS_H */
+#endif	/* PHP_SOCKETS_H */
 
 
 /*
