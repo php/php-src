@@ -2133,10 +2133,16 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 	if (type->ref != NULL) {
 		if (ctx->sdl->elements != NULL) {
 			if (zend_hash_find(ctx->sdl->elements, type->ref, strlen(type->ref)+1, (void**)&tmp) == SUCCESS) {
+				type->kind = (*tmp)->kind;
 				type->encode = (*tmp)->encode;
-				/* TODO: nillable */
 				if ((*tmp)->nillable) {
 				  type->nillable = 1;
+				}
+				if ((*tmp)->fixed) {
+				  type->fixed = estrdup((*tmp)->fixed);
+				}
+				if ((*tmp)->def) {
+				  type->def = estrdup((*tmp)->def);
 				}
 			} else {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unresolved element 'ref' attribute");
