@@ -328,6 +328,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 							int i;
 
 							if (T->EA.data.str_offset.str->value.str.len==0) {
+								STR_FREE(T->EA.data.str_offset.str->value.str.val);
 								T->EA.data.str_offset.str->value.str.val = (char *) emalloc(T->EA.data.str_offset.offset+1+1);
 							} else {
 								T->EA.data.str_offset.str->value.str.val = (char *) erealloc(T->EA.data.str_offset.str->value.str.val, T->EA.data.str_offset.offset+1+1);
@@ -1085,12 +1086,9 @@ ZEND_API void execute(zend_op_array *op_array ELS_DC)
 				EG(binary_op) = boolean_xor_function;
 		  	    /* Fall through */
 binary_op_addr:
-				{
-					zval *zp1 = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
-					zval *zp2 = get_zval_ptr(&opline->op2, Ts, &EG(free_op1), BP_VAR_R);
-
-					EG(binary_op)(&Ts[opline->result.u.var].tmp_var, zp1, zp2);
-				}
+				EG(binary_op)(&Ts[opline->result.u.var].tmp_var, 
+					get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R),
+					get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R) );
 				FREE_OP(&opline->op1, EG(free_op1));
 				FREE_OP(&opline->op2, EG(free_op2));
 				NEXT_OPCODE();
