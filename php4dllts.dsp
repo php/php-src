@@ -160,6 +160,10 @@ SOURCE=.\php_content_types.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\php_gpce.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\php_ini.c
 # End Source File
 # Begin Source File
@@ -253,6 +257,10 @@ SOURCE=.\php_content_types.h
 # Begin Source File
 
 SOURCE=.\php_globals.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_gpce.h
 # End Source File
 # Begin Source File
 
@@ -440,10 +448,6 @@ SOURCE=.\ext\standard\parsedate.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_gpce.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\ext\mcal\php_mcal.c
 # End Source File
 # Begin Source File
@@ -585,10 +589,6 @@ SOURCE=.\ext\standard\php_filestat.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_gpce.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\ext\standard\php_lcg.h
 # End Source File
 # Begin Source File
@@ -630,10 +630,6 @@ SOURCE=.\functions\phpdir.h
 # Begin Source File
 
 SOURCE=.\functions\phpmath.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ext\standard\post.h
 # End Source File
 # Begin Source File
 

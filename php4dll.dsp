@@ -164,6 +164,10 @@ SOURCE=.\php_content_types.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\php_gpce.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\php_ini.c
 # End Source File
 # Begin Source File
@@ -252,10 +256,6 @@ SOURCE=.\php3_compat.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\php3_realpath.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\php_content_types.h
 # End Source File
 # Begin Source File
@@ -264,7 +264,15 @@ SOURCE=.\php_globals.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\php_gpce.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\php_ini.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_realpath.h
 # End Source File
 # Begin Source File
 
@@ -455,10 +463,6 @@ SOURCE=.\ext\pcre\php_pcre.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\post.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\ext\standard\rand.c
 # End Source File
 # Begin Source File
@@ -571,43 +575,39 @@ SOURCE=.\ext\standard\pageinfo.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\bcmath\php3_bcmath.h
+SOURCE=.\ext\bcmath\php_bcmath.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\php3_dir.h
+SOURCE=.\ext\standard\php_dir.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\php3_filestat.h
+SOURCE=.\ext\standard\php_filestat.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\php3_ldap.h
+SOURCE=.\ext\ldap\php_ldap.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\php3_mail.h
+SOURCE=.\ext\standard\php_mail.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\odbc\php3_odbc.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ext\standard\php3_string.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\functions\php3_string.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\functions\php3_syslog.h
+SOURCE=.\ext\odbc\php_odbc.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\ext\pcre\php_pcre.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\php_string.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\php_syslog.h
 # End Source File
 # Begin Source File
 
@@ -616,10 +616,6 @@ SOURCE=.\functions\phpdir.h
 # Begin Source File
 
 SOURCE=.\functions\phpmath.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ext\standard\post.h
 # End Source File
 # Begin Source File
 
