@@ -158,6 +158,7 @@ typedef struct _user_tick_function_entry {
 static void user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_entry);
 static void user_tick_function_dtor(user_tick_function_entry *tick_function_entry);
 
+#undef sprintf
 
 function_entry basic_functions[] = {
 	PHP_FE(constant,														NULL)
