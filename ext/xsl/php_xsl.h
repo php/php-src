@@ -57,6 +57,7 @@ typedef struct _xsl_object {
 	HashTable *parameter;
 	int hasKeys;
 	int registerPhpFunctions;
+	HashTable *node_list;
 } xsl_object;
 
 void php_xsl_set_object(zval *wrapper, void *obj TSRMLS_DC);

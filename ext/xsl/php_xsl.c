@@ -132,6 +132,11 @@ void xsl_objects_free_storage(void *object TSRMLS_DC)
 	zend_hash_destroy(intern->parameter);
 	FREE_HASHTABLE(intern->parameter);
 	
+	if (intern->node_list) {
+		zend_hash_destroy(intern->node_list);
+		FREE_HASHTABLE(intern->node_list);
+	}
+
 	if (intern->ptr) {
 		/* free wrapper */
 		if (((xsltStylesheetPtr) intern->ptr)->_private != NULL) {
@@ -160,6 +165,7 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern->parameter = NULL;
 	intern->hasKeys = 0;
 	intern->registerPhpFunctions = 0;
+	intern->node_list = NULL;
 
 	ALLOC_HASHTABLE(intern->std.properties);
 	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
