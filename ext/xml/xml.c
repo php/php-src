@@ -354,6 +354,11 @@ static void xml_set_handler(zval **handler, zval **data)
 		convert_to_string_ex(data);
 	}
 
+	/* If we have already a handler, release it */
+	if (*handler) {
+		zval_ptr_dtor(handler);
+	}
+
 	zval_add_ref(data);
 	*handler = *data;
 }
