@@ -79,7 +79,7 @@ static FILE *tsrm_error_file;
 		}																												\
 	}
 #else
-#define TSRM_ERROR
+#define TSRM_ERROR(args)
 #define TSRM_SAFE_RETURN_RSRC(array, offset, range)		\
 	if (offset==0) {									\
 		return &array;									\
