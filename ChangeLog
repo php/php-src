@@ -1,3 +1,18 @@
+2005-03-27  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h:
+      - allow to keep or ignore the transparent color in imagerotate (thx
+        Ken Coar to report this "bug")
+      - be sure to restore alphablending in imagefill
+      - use zend_parse_parameter in imagerotate
+
+2005-03-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/file.c:
+      revert copy patch.
+
 2005-03-26  Edin Kadribasic  <edink@emini.dk>
 
     * pear/make-pear-bundle.php:
