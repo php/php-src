@@ -5,6 +5,15 @@ PHP 4.0                                                                    NEWS
 - Empty entry. Enjoy
 
 ?? ??? 2000, Version 4.0.4
+- Allow passing certain non-variables references by reference. You can do:
+  a) func(new myclass());
+  b) func(func2()); where func2() returns a reference, i.e. is defined as
+     function &func2(...)
+     {
+      ...
+     }
+  c) func($var); where func() is defined as function func(&$var) {...}
+  You CAN'T count on any other expressions to be passable by reference.
 - Fixed bad mod_perl interaction which caused segfaults when using LFS (Sascha)
 - const CONSTNAME now gets recognized. Before the patch only @const CONSTNAME description was recognized.
 - Added extension for the cracklib library. (Alexander Feldman)
