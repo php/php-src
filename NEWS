@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Fixed potential problems with unserializing invalid serialize data. (Marcus)
 - Fixed bug #31034 (Problem with non-existing iconv header file). (Derick)
 - Fixed bug #30995 (snmp extension does not build with net-snmp 5.2). (Ilia)
+- Fixed bug #30994 (SOAP server unable to handle request with references).
+  (Dmitry)
 - Fixed bug #30990 (allow popen() on *NIX to accept 'b' flag). (Ilia)
 - Fixed bug #30967 (properties in extended mysqli classes don't work). (Georg)
 - Fixed bug #30928 (When Using WSDL, SoapServer doesn't handle private or

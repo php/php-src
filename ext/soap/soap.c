@@ -2800,10 +2800,13 @@ static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, c
 	trav = body->children;
 	while (trav != NULL) {
 		if (trav->type == XML_ELEMENT_NODE) {
+/*
 			if (func != NULL) {
 				soap_server_fault("Client", "looks like we got \"Body\" with several functions call", NULL, NULL, NULL TSRMLS_CC);
 			}
+*/
 			func = trav;
+			break; /* FIXME: the rest of body is ignored */
 		}
 		trav = trav->next;
 	}
