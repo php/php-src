@@ -1,3 +1,11 @@
+2004-01-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_interfaces.c
+      zend_interfaces.h:
+      - Export struct zend_user_iterator
+      - Ad 'it' to function prefix to prevent naming clashes
+      - Export zend_user_it_free_current
+
 2004-01-25  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_execute.c:
