@@ -46,6 +46,7 @@
 #include "php_session.h"
 #include "mod_files.h"
 #include "ext/standard/flock_compat.h"
+#include "php_open_temporary_file.h"
 
 #define FILE_PREFIX "sess_"
 
@@ -233,6 +234,10 @@ PS_OPEN_FUNC(files)
 
 	data = ecalloc(sizeof(*data), 1);
 	PS_SET_MOD_DATA(data);
+
+	if (*save_path == '\0') {
+		save_path = php_get_temporary_directory();
+	}
 
 	data->fd = -1;
 	if ((p = strchr(save_path, ';'))) {

@@ -166,7 +166,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 /*
  *  Determine where to place temporary files.
  */
-const char* get_temporary_directory()
+PHPAPI const char* php_get_temporary_directory(void)
 {
 	/* Cache the chosen temporary directory. */
 	static char* temporary_directory;
@@ -233,7 +233,7 @@ PHPAPI int php_open_temporary_fd(const char *dir, const char *pfx, char **opened
 	fd = php_do_open_temporary_file(dir, pfx, opened_path_p TSRMLS_CC);
 	if (fd == -1) {
 		/* Use default temporary directory. */
-		fd = php_do_open_temporary_file(get_temporary_directory(), pfx, opened_path_p TSRMLS_CC);
+		fd = php_do_open_temporary_file(php_get_temporary_directory(), pfx, opened_path_p TSRMLS_CC);
 	}
 	return fd;
 }

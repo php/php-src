@@ -819,7 +819,7 @@ session.save_handler = files
 ;         You can use the script in the ext/session dir for that purpose.
 ; NOTE 2: See the section on garbage collection below if you choose to
 ;         use subdirectories for session storage
-session.save_path = /tmp
+;session.save_path = /tmp
 
 ; Whether to use cookies.
 session.use_cookies = 1
