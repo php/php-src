@@ -1,3 +1,28 @@
+2005-03-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.h
+      zend_compile.c
+      zend_interfaces.c
+      zend_interfaces.h:
+      - New Interface Serializeable
+      - Change signature of unserialize() callback to ease inheritance and
+        support code reuse of handlers
+
+    * tests/bug32226.phpt
+      tests/bug32226.phpt:
+      
+      - Add updated description
+
+    * zend_builtin_functions.c
+      tests/bug32226.phpt:
+      - Fix #32226
+
+2005-03-07  Zeev Suraski  <zeev@zend.com>
+
+    * zend_language_scanner.l
+      zend_language_scanner.l:
+      Revert // </script> patch
+
 2005-03-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
