@@ -44,6 +44,8 @@ PHP                                                                        NEWS
 - Fixed bug #30356 (str_ireplace() does not work on all strings). (Ilia)
 - Fixed bug #30344 (Reflection::getModifierNames() returns too long strings).
   (Marcus)
+- Fixed bug #30329 (Error Fetching http body, No Content-Length, connection
+  closed or chunked data). (Dmitry)
 - Fixed bug #30282 (segfault when using unknown/unsupported 
   session.save_handler and/or session.serialize_handler). (Tony)
 - Fixed bug #30281 (Prevent non-wbmp images from being detected as such).
