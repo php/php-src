@@ -554,7 +554,8 @@ php3_formatted_print(int ht, int *len)
 	return result;
 }
 
-
+/* {{{ proto string sprintf(string format [, mixed arg1 [, ...]])
+   Return a formatted string */
 PHP_FUNCTION(user_sprintf)
 {
 	char *result;
@@ -566,8 +567,10 @@ PHP_FUNCTION(user_sprintf)
 	RETVAL_STRINGL(result,len,1);
 	efree(result);
 }
+/* }}} */
 
-
+/* {{{ proto int printf(string format [, mixed arg1 [, ...]])
+   Output a formatted string */
 PHP_FUNCTION(user_printf)
 {
 	char *result;
@@ -579,7 +582,7 @@ PHP_FUNCTION(user_printf)
 	PHPWRITE(result,len);
 	efree(result);
 }
-
+/* }}} */
 
 /*
  * Local variables:
