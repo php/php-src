@@ -298,8 +298,8 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 		zend_error(E_WARNING, "Insufficient data for unserializing - %d required, %d present", datalen, max - (*p));
 		return 0;
 	}
-	
-	if(ce->unserialize(rval, *p, datalen, (zend_unserialize_data *)var_hash TSRMLS_CC) != SUCCESS) {
+
+	if(ce->unserialize(rval, ce, (const unsigned char*)*p, datalen, (zend_unserialize_data *)var_hash TSRMLS_CC) != SUCCESS) {
 		return 0;
 	}
 
