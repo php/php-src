@@ -921,7 +921,7 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int op
 	ZVAL_STRINGL(&funcname, "clearstatcache", sizeof("clearstatcache")-1, 0);
 	call_user_function_ex(CG(function_table), NULL, &funcname, &retval, 0, NULL, 0, NULL TSRMLS_CC);
 	if (retval) {
-		zval_dtor(retval);
+		zval_ptr_dtor(&retval);
 	}
 	return 1;
 }
