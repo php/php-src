@@ -102,7 +102,7 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_num_msg,		NULL)
 	PHP_FE(imap_num_recent,		NULL)
 	PHP_FE(imap_headers,		NULL)
-	PHP_FE(imap_header,			NULL)
+	PHP_FALIAS(imap_header,imap_headerinfo,			NULL)
 	PHP_FE(imap_headerinfo,		NULL)
 	PHP_FE(imap_body,			NULL)
 	PHP_FE(imap_fetchstructure,	NULL)
@@ -117,8 +117,8 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_createmailbox,	NULL)
 	PHP_FE(imap_renamemailbox,	NULL)
 	PHP_FE(imap_deletemailbox,	NULL)
-	PHP_FE(imap_listmailbox,	NULL)
-	PHP_FE(imap_scanmailbox,	NULL)
+	PHP_FALIAS(imap_listmailbox,imap_list,	NULL)
+	PHP_FALIAS(imap_scanmailbox,imap_listscan,	NULL)
 	PHP_FE(imap_subscribe,		NULL)
 	PHP_FE(imap_unsubscribe,	NULL)
 	PHP_FE(imap_append,			NULL)
@@ -134,14 +134,14 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_clearflag_full,	NULL)
 	PHP_FE(imap_sort,			NULL)
 	PHP_FE(imap_fetchheader,	NULL)
-	PHP_FE(imap_fetchtext,		NULL)
+	PHP_FALIAS(imap_fetchtext,imap_body,		NULL)
 	PHP_FE(imap_uid,			NULL)
 	PHP_FE(imap_msgno,			NULL)
 	PHP_FE(imap_list,			NULL)
-	PHP_FE(imap_scan,			NULL)
+	PHP_FALIAS(imap_scan,imap_listscan,			NULL)
 	PHP_FE(imap_lsub,			NULL)
-	PHP_FE(imap_create,			NULL)
-	PHP_FE(imap_rename,			NULL)
+	PHP_FALIAS(imap_create,imap_createmailbox,			NULL)
+	PHP_FALIAS(imap_rename,imap_renamemailbox,			NULL)
 	PHP_FE(imap_status,			NULL)
 	PHP_FE(imap_bodystruct,		NULL)
 	PHP_FE(imap_fetch_overview,	NULL)
@@ -2610,6 +2610,7 @@ PHP_FUNCTION(imap_mail_compose)
 /* }}} */
 
 /* {{{ proto array imap_search(int stream_id, string criteria [, long flags])
+
    Return a list of messages matching the criteria. */
 PHP_FUNCTION(imap_search)
 {
@@ -2655,6 +2656,7 @@ PHP_FUNCTION(imap_search)
 	}
 	mail_free_messagelist(&imap_messages);
 }
+
 /* }}} */
 
 
