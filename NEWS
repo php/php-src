@@ -1,8 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- Added an aditional parameter to the jdtojewish() function which makes
-  the function return the symbolic hebrew name. (Moshe Doron, Derick)
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
@@ -13,6 +11,8 @@ PHP 4                                                                      NEWS
   . ext/icap
   . sapi/fhttpd
 - Moved ext/vpopmail to PECL. (James)
+- Added an aditional parameter to the jdtojewish() function which makes
+  the function return the symbolic hebrew name. (Moshe Doron, Derick)
 - Fixed bug #20169 (implode() clobbers first argument). (Moriyoshi)
 - Improved dba extension (Marcus)
   . Added dba_handlers() that returns an array of installed handlers and
