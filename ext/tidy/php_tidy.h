@@ -254,20 +254,20 @@ PHP_FUNCTION(tidy_get_head);
 PHP_FUNCTION(tidy_get_body);
 
 TIDY_DOC_METHOD(__construct);
-TIDY_DOC_METHOD(parse_file);
-TIDY_DOC_METHOD(parse_string);
+TIDY_DOC_METHOD(parseFile);
+TIDY_DOC_METHOD(parseString);
 
 TIDY_NODE_METHOD(__construct);
-TIDY_NODE_METHOD(has_children);
-TIDY_NODE_METHOD(has_siblings);
-TIDY_NODE_METHOD(is_comment);
-TIDY_NODE_METHOD(is_html);
-TIDY_NODE_METHOD(is_xhtml);
-TIDY_NODE_METHOD(is_xml);
-TIDY_NODE_METHOD(is_text);
-TIDY_NODE_METHOD(is_jste);
-TIDY_NODE_METHOD(is_asp);
-TIDY_NODE_METHOD(is_php);
+TIDY_NODE_METHOD(hasChildren);
+TIDY_NODE_METHOD(hasSiblings);
+TIDY_NODE_METHOD(isComment);
+TIDY_NODE_METHOD(isHtml);
+TIDY_NODE_METHOD(isXhtml);
+TIDY_NODE_METHOD(isXml);
+TIDY_NODE_METHOD(isText);
+TIDY_NODE_METHOD(isJste);
+TIDY_NODE_METHOD(isAsp);
+TIDY_NODE_METHOD(isPhp);
 
 ZEND_BEGIN_MODULE_GLOBALS(tidy)
 	char *default_config;
