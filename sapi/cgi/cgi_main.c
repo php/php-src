@@ -201,12 +201,24 @@ static void sapi_cgibin_flush(void *server_context)
 }
 
 
-static void sapi_cgi_send_header(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)
+static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
-	if (sapi_header) {
-		PHPWRITE_H(sapi_header->header, sapi_header->header_len);
+	char buf[1024];
+	int len;
+	sapi_header_struct *h;
+	zend_llist_position pos;
+	
+	len = sprintf(buf, "Status: %d\r\n", SG(sapi_headers).http_response_code);
+	PHPWRITE_H(buf, len);
+
+	h = zend_llist_get_first_ex(&sapi_headers->headers, &pos);
+    while (h) {
+		PHPWRITE_H(h->header, h->header_len);
+		PHPWRITE_H("\r\n", 2);
+		h = zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 	}
-	PHPWRITE_H("\r\n", 2);
+
+	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
 
@@ -297,8 +309,8 @@ static sapi_module_struct cgi_sapi_module = {
 	php_error,						/* error handler */
 
 	NULL,							/* header handler */
-	NULL,							/* send headers handler */
-	sapi_cgi_send_header,			/* send header handler */
+	sapi_cgi_send_headers,			/* send headers handler */
+	NULL,							/* send header handler */
 
 	sapi_cgi_read_post,				/* read POST data */
 	sapi_cgi_read_cookies,			/* read Cookies */
