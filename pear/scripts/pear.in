@@ -24,19 +24,20 @@ require_once "PEAR/Config.php";
 require_once "PEAR/Command.php";
 require_once "Console/Getopt.php";
 
-error_reporting(E_ALL);
-
 PEAR_Command::setUIType('CLI');
 $all_commands = PEAR_Command::getCommands();
+$cmd_options  = PEAR_Command::getOptions();
 
 $progname = basename($argv[0]);
 
 PEAR::setErrorHandling(PEAR_ERROR_DIE, "$progname: %s\n");
 $argv = Console_Getopt::readPHPArgv();
 
-PEAR::pushErrorHandling(PEAR_ERROR_CALLBACK, 'usage');
-$options = Console_Getopt::getopt($argv, "c:C:d:D:h?sSqu:v");
-PEAR::popErrorHandling();
+// XXX change Getopt to use raiseError() ?
+$options = Console_Getopt::getopt($argv, "c:C:d:D:h?sSqu:v" . $cmd_options);
+if (PEAR::isError($options)) {
+    usage($options);
+}
 
 $opts = $options[0];
 
@@ -59,9 +60,10 @@ foreach ($opts as $opt) {
 
 $config = &PEAR_Config::singleton($pear_user_config, $pear_system_config);
 $verbose = $config->get("verbose");
+$cmdopts = array();
 
 foreach ($opts as $opt) {
-    $param = $opt[1];
+    $param = !empty($opt[1]) ? $opt[1] : null;
     switch ($opt[0]) {
         case 'd':
             list($key, $value) = explode('=', $param);
@@ -85,6 +87,10 @@ foreach ($opts as $opt) {
             break;
         case 'q':
             $config->set('verbose', $verbose - 1);
+            break;
+        default:
+            // all non pear params goes to the command
+            $cmdopts[$opt[0]] = $param;
             break;
     }
 }
@@ -113,7 +119,7 @@ if (PEAR::isError($cmd)) {
 }
 
 $cmdargs = array_slice($options[1], 2);
-$ok = $cmd->run($command, $cmdargs);
+$ok = $cmd->run($command, $cmdopts, $cmdargs);
 if ($ok === false) {
     PEAR::raiseError("unknown command `$command'");
 }
