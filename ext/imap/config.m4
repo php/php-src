@@ -22,8 +22,12 @@ AC_DEFUN(IMAP_LIB_CHK,[
 ])
 
 AC_DEFUN(PHP_IMAP_KRB_CHK, [
-  PHP_ARG_WITH(kerberos,for Kerberos support in IMAP,
-  [  --with-kerberos[=DIR]     IMAP: Include Kerberos support. DIR is the Kerberos install dir.])
+  AC_ARG_WITH(kerberos,
+  [  --with-kerberos[=DIR]     IMAP: Include Kerberos support. DIR is the Kerberos install dir.],[
+    PHP_KERBEROS=$withval
+  ],[
+    PHP_KERBEROS=no
+  ])
 
   if test "$PHP_KERBEROS" = "yes"; then
     test -d /usr/kerberos && PHP_KERBEROS=/usr/kerberos
@@ -36,27 +40,40 @@ AC_DEFUN(PHP_IMAP_KRB_CHK, [
     PHP_ADD_LIBRARY(krb5, 1, IMAP_SHARED_LIBADD)
     PHP_ADD_LIBRARY(k5crypto, 1, IMAP_SHARED_LIBADD)
     PHP_ADD_LIBRARY(com_err,  1, IMAP_SHARED_LIBADD)
+  else
+    AC_EGREP_HEADER(auth_gss, $IMAP_INC_DIR/linkage.h, [
+      AC_MSG_ERROR(This c-client library is build with Kerberos support. 
+
+      Add --with-kerberos<=DIR> to your configure line. Check config.log for details.)
+    ])
   fi
+
 ])
 
 AC_DEFUN(PHP_IMAP_SSL_CHK, [
-  PHP_ARG_WITH(imap-ssl,for SSL support in IMAP,
-  [  --with-imap-ssl[=DIR]     IMAP: Include SSL support. DIR is the OpenSSL install dir.])
+  AC_ARG_WITH(imap-ssl,
+  [  --with-imap-ssl[=DIR]     IMAP: Include SSL support. DIR is the OpenSSL install dir.],[
+    PHP_IMAP_SSL=$withval
+  ],[
+    PHP_IMAP_SSL=no
+  ])
 
   if test "$PHP_IMAP_SSL" = "yes"; then
     PHP_IMAP_SSL=/usr
   fi
 
   if test "$PHP_IMAP_SSL" != "no"; then
+    AC_DEFINE(HAVE_IMAP_SSL,1,[ ])
     PHP_ADD_LIBPATH($PHP_IMAP_SSL/lib, IMAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_DEFER(crypto)
-    PHP_ADD_LIBRARY_DEFER(ssl)
-
+    PHP_ADD_LIBRARY_DEFER(ssl,, IMAP_SHARED_LIBADD)
+    PHP_ADD_LIBRARY_DEFER(crypto,, IMAP_SHARED_LIBADD)
+  else
     old_LIBS=$LIBS
-    LIBS="$LIBS -lc-client -lcrypto -lssl"
+    LIBS="$LIBS -L$IMAP_LIBDIR -lc-client"
     if test $PHP_KERBEROS != "no"; then
-      LIBS="$LIBS -lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err"
+      LIBS="$LIBS -L$PHP_KERBEROS/lib -lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err"
     fi
+
     AC_TRY_RUN([
       void mm_log(void){}
       void mm_dlog(void){}
@@ -73,15 +90,15 @@ AC_DEFUN(PHP_IMAP_SSL_CHK, [
       void mm_exists(void){}
       void mm_searched(void){}
       void mm_expunged(void){}
-      char ssl_onceonlyinit();
+      char mail_open();
       int main() {
-        ssl_onceonlyinit();
+        mail_open();
         return 0;
       }
-    ],[
-      AC_DEFINE(HAVE_IMAP_SSL,1,[ ])
-    ], [
-      AC_MSG_ERROR(Problem with c-client library. Please check config.log for more information.)
+    ],,[
+      AC_MSG_ERROR(This c-client library is build with SSL support. 
+      
+      Add --with-imap-ssl<=DIR> to your configure line. Check config.log for details.)
     ])
     LIBS=$old_LIBS
   fi
@@ -89,8 +106,7 @@ AC_DEFUN(PHP_IMAP_SSL_CHK, [
 
 
 PHP_ARG_WITH(imap,for IMAP support,
-[  --with-imap[=DIR]       Include IMAP support.  DIR is the IMAP include
-                          and c-client.a directory.])
+[  --with-imap[=DIR]       Include IMAP support. DIR is the c-client install prefix.])
 
 if test "$PHP_IMAP" != "no"; then  
 
@@ -109,7 +125,8 @@ if test "$PHP_IMAP" != "no"; then
     done
 
     AC_CHECK_LIB(pam, pam_start) 
-    
+    AC_CHECK_LIB(crypt, crypt)
+	    
     PHP_EXPAND_PATH($IMAP_DIR, IMAP_DIR)
 
     if test -z "$IMAP_DIR"; then
@@ -134,7 +151,7 @@ if test "$PHP_IMAP" != "no"; then
 
     PHP_ADD_INCLUDE($IMAP_INC_DIR)
     PHP_ADD_LIBPATH($IMAP_LIBDIR, IMAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_DEFER($IMAP_LIB)
+    PHP_ADD_LIBRARY_DEFER($IMAP_LIB,, IMAP_SHARED_LIBADD)
     PHP_IMAP_KRB_CHK
     PHP_IMAP_SSL_CHK
 fi

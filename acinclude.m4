@@ -749,13 +749,27 @@ ifelse($3,,[
 ])
 
 dnl
-dnl PHP_ADD_LIBRARY_DEFER(library[, append])
+dnl PHP_ADD_LIBRARY_DEFER(library[, append[, shared-libadd]])
 dnl
 dnl add a library to the link line (deferred)
+dnl
 AC_DEFUN(PHP_ADD_LIBRARY_DEFER,[
-  ifelse($#, 1, DLIBS="-l$1 $DLIBS", DLIBS="$DLIBS -l$1")
+ case $1 in
+ c|c_r|pthread*) ;;
+ *)
+ifelse($3,,[
+   PHP_X_ADD_LIBRARY($1,$2,DLIBS)
+],[
+   if test "$ext_shared" = "yes"; then
+     PHP_X_ADD_LIBRARY($1,$2,$3)
+   else
+     PHP_ADD_LIBRARY_DEFER($1,$2)
+   fi
 ])
-
+  ;;
+  esac
+])
+  
 dnl
 dnl PHP_ADD_LIBRARY_WITH_PATH(library, path[, shared-libadd])
 dnl

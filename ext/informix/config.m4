@@ -62,7 +62,7 @@ if test "$PHP_INFORMIX" != "no"; then
       *.o)
         IFX_LIBOBJS="$IFX_LIBOBJS $i"
         PHP_ADD_LIBPATH($ext_builddir, INFORMIX_SHARED_LIBADD)
-        PHP_ADD_LIBRARY_DEFER(phpifx, 1)
+        PHP_ADD_LIBRARY_DEFER(phpifx, 1, INFORMIX_SHARED_LIBADD)
         ;;
       -lm)
         ;;
@@ -70,7 +70,7 @@ if test "$PHP_INFORMIX" != "no"; then
         ;;
       -l*)
         lib=`echo $i | cut -c 3-`
-        PHP_ADD_LIBRARY_DEFER($lib, 1)
+        PHP_ADD_LIBRARY_DEFER($lib, 1, INFORMIX_SHARED_LIBADD)
         ;;
       *.a)
         case "`uname -s 2>/dev/null`" in
