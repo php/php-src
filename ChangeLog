@@ -1,3 +1,37 @@
+1999-11-25  Zeev Suraski  <zeev@php.net>
+
+    * main.c: *** empty log message ***
+
+1999-11-25  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/cpdf/cpdf.c:
+    - changed encoding parameter of cpdf_set_font to string on advice from
+      fastio to better support asian fonts.
+
+    * ext/domxml/Makefile.am
+      ext/domxml/config.m4
+      ext/domxml/php3_domxml.h: - made domxml compile
+
+1999-11-25  David Hedbor  <david@hedbor.org>
+
+    * sapi/roxen/phpmod.pike: Now the new direct write is enabled too...
+
+    * sapi/roxen/README
+      sapi/roxen/phpmod.pike
+      sapi/roxen/roxen.c:
+    Implemented direct writing to the client's FD if RXML parsing of the result isn't selected.
+
+    * sapi/roxen/config.h.stub
+      sapi/roxen/config.m4
+      sapi/roxen/phpmod.pike
+      sapi/roxen/roxen.c:
+    Now ZTS can be used. Unless --enable-roxen-zts is specified at the
+    configure line the default process global Roxen PHP lock will be
+    used. In tests this was a lot faster for some reason and until the
+    reasons are figured out, it's recommended to use the non-thead-safe
+    version.
+    Cvs: ----------------------------------------------------------------------
+
 1999-11-24  Egon Schmid  <eschmid@s.netic.de>
 
     * ext/gd/gd.c:
