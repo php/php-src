@@ -2028,6 +2028,7 @@ PHP_FUNCTION(ldap_rename)
    Start TLS */
 PHP_FUNCTION(ldap_start_tls)
 {
+#ifdef HAVE_LDAP_START_TLS_S
 	pval **link;
 	ldap_linkdata *ld;
 
@@ -2044,6 +2045,10 @@ PHP_FUNCTION(ldap_start_tls)
 	} else {
 		RETURN_TRUE;
 	}
+#else
+	php_error(E_ERROR, "ldap_start_tls not available in this LDAP library");
+	RETURN_FALSE;
+#endif
 }
 /* }}} */
 #endif
