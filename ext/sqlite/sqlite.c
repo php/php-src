@@ -36,6 +36,10 @@
 
 #include <sqlite.h>
 
+extern int sqlite_encode_binary(const unsigned char *in, int n, unsigned char *out);
+extern int sqlite_decode_binary(const unsigned char *in, unsigned char *out);
+
+
 static unsigned char arg3_force_ref[] = {3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 
 static int le_sqlite_db, le_sqlite_result, le_sqlite_pdb;
@@ -686,7 +690,7 @@ next_row:
 }
 /* }}} */
 
-/* {{{ proto array sqlite_fetch_array(resource result [, int result_type])
+/* {{{ proto array sqlite_fetch_array(resource result [, int result_type, bool decode_binary])
    Fetches the next row from a result set as an array */
 PHP_FUNCTION(sqlite_fetch_array)
 {
@@ -696,8 +700,9 @@ PHP_FUNCTION(sqlite_fetch_array)
 	int j, ret;
 	const char **rowdata, **colnames;
 	char *errtext = NULL;
+	zend_bool decode_binary = 1;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zres, &mode)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lb", &zres, &mode, &decode_binary)) {
 		return;
 	}
 
@@ -750,19 +755,37 @@ PHP_FUNCTION(sqlite_fetch_array)
 	array_init(return_value);
 
 	for (j = 0; j < res->ncolumns; j++) {
+		char *decoded = NULL;
+		int decoded_len;
+
+		if (decode_binary && rowdata[j] != NULL && rowdata[j][0] == '\x01') {
+			int l = strlen(rowdata[j]);
+			decoded = do_alloca(l);
+			decoded_len = sqlite_decode_binary(rowdata[j]+1, decoded);
+		} else {
+			decoded = (char*)rowdata[j];
+			if (decoded) {
+				decoded_len = strlen(decoded);
+			}
+		}
+		
 		if (mode & PHPSQLITE_NUM) {
-			if (rowdata[j] == NULL) {
+			if (decoded == NULL) {
 				add_index_null(return_value, j);
 			} else {
-				add_index_string(return_value, j, (char*)rowdata[j], 1);
+				add_index_stringl(return_value, j, decoded, decoded_len, 1);
 			}
 		}
 		if (mode & PHPSQLITE_ASSOC) {
-			if (rowdata[j] == NULL) {
+			if (decoded == NULL) {
 				add_assoc_null(return_value, (char*)colnames[j]);
 			} else {
-				add_assoc_string(return_value, (char*)colnames[j], (char*)rowdata[j], 1);
+				add_assoc_stringl(return_value, (char*)colnames[j], decoded, decoded_len, 1);
 			}
+		}
+
+		if (decode_binary && rowdata[j] != NULL && rowdata[j][0] == '\x01') {
+			free_alloca(decoded);
 		}
 	}
 
@@ -933,7 +956,7 @@ PHP_FUNCTION(sqlite_seek)
    Escapes a string for use as a query parameter */
 PHP_FUNCTION(sqlite_escape_string)
 {
-	char *string;
+	char *string = NULL;
 	long stringlen;
 	char *ret;
 
@@ -941,11 +964,21 @@ PHP_FUNCTION(sqlite_escape_string)
 		return;
 	}
 
-	ret = sqlite_mprintf("%q", string);
-
-	if (ret) {
-		RETVAL_STRING(ret, 1);
-		sqlite_freemem(ret);
+	if (stringlen && (string[0] == '\x01' || memchr(string, '\0', stringlen) != NULL)) {
+		/* binary string */
+		int enclen;
+		
+		ret = emalloc( 1 + ((256 * stringlen + 1262) / 253) );
+		ret[0] = '\x01';
+		enclen = sqlite_encode_binary((const unsigned char*)string, stringlen, ret+1);
+		RETVAL_STRINGL(ret, enclen+1, 0);
+		
+	} else  {
+		ret = sqlite_mprintf("%q", string);
+		if (ret) {
+			RETVAL_STRING(ret, 1);
+			sqlite_freemem(ret);
+		}
 	}
 }
 /* }}} */

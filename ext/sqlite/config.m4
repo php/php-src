@@ -42,7 +42,7 @@ if test "$PHP_SQLITE" != "no"; then
 	])
  
 	PHP_SUBST(SQLITE_SHARED_LIBADD)
-	PHP_NEW_EXTENSION(sqlite, sqlite.c, $ext_shared)
+	PHP_NEW_EXTENSION(sqlite, sqlite.c libsqlite/src/encode.c, $ext_shared)
   else
 	# use bundled library
 	sources="libsqlite/src/opcodes.c
