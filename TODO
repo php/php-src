@@ -16,6 +16,15 @@ documentation
     * add remarks in the documentation which functions are not implemented on win32.
     * add remarks in the documentation which functions are not binary-safe.
 
+ext/xml
+-------
+	* allow class methods to be used as handlers 
+
+ext/oci8
+--------
+	* map boolean value false to oracle NULL.
+	* all OCIFetch*() functions should return 0 for no more data and false on error.
+
 ext/standard
 ------------
     * strpad() (Andrei)
