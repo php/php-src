@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2004, PHP 5.0.1
 - Fixed unloading of dynamically loaded extensions. 
   (Marcus, kameshj at fastmail dot fm)
+- Fixed bug 29395 (sqlite_escape_string() returns bogus data on empty
+  strings). (Ilia, Tony)
 - Fixed bug #29368 (The destructor is called when an exception is thrown from 
   the constructor). (Marcus)
 - Fixed bug #29335 (fetch functions now use MYSQLI_BOTH as default) (Georg)
