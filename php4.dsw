@@ -15,18 +15,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "bindlib"=.\bindlib_w32\bindlib.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "libmysql"=.\ext\mysql\libmysql\libmysql.dsp - Package Owner=<4>
 
 Package=<5>
@@ -67,9 +55,6 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libmysql
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name bindlib
     End Project Dependency
 }}}
 
