@@ -1,3 +1,24 @@
+2004-09-04  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_API.c:
+      - Don't destroy object when calling overloaded cast method in
+      - zend_parse_parameters()
+
+2004-09-04  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/tests/061.csv
+      ext/mysqli/tests/061.csv
+      ext/mysqli/tests/061.phpt:
+      MFH: LOAD DATA INFILE now uses PHP's fopen wrapper
+
+    * ext/mysqli/mysqli_api.c:
+      forgot to remove comment in last commit
+
 2004-09-03  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/dio/dio.c:
