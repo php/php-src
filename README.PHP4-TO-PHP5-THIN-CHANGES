@@ -1,0 +1,8 @@
+1. strr(i)pos() now uses the full needle when searching - be aware that code that previous have run now can stop working.
+   EX :
+   <?php
+   var_dump(strrpos("ABCDEF","DEF"));
+   var_dump(strrpos("ABCDEF","DAF"));
+   ?>
+   Will give you differents results. The diffence is in the second cal to strrpos(). The same applies and for strripos().
+2. Change illegal use of string offset from E_WARNING to E_ERROR
