@@ -13,12 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
+   | PHP 4.0 patches by Thies C. Arntzen (thies@digicol.de)               |
    +----------------------------------------------------------------------+
  */
 
 /* $Id$ */
 
 /* Synced with php3 revision 1.218 1999-06-16 [ssb] */
+
+/* {{{ includes */
 
 #include "php.h"
 #include "php_globals.h"
@@ -39,7 +42,6 @@
 #else
 #include <sys/param.h>
 #include <sys/socket.h>
-/* #include <sys/uio.h> */
 #endif
 #include "ext/standard/head.h"
 #include "safe_mode.h"
@@ -53,7 +55,7 @@
 #endif
 #endif
 #ifdef HAVE_SYS_TIME_H
-# include <sys/time.h>
+#include <sys/time.h>
 #endif
 #if WIN32|WINNT
 #include <winsock.h>
@@ -83,12 +85,34 @@ extern int fclose();
 #define MAP_FAILED ((void *) -1)
 #endif
 
-static void _file_socket_dtor(int *);
+/* }}} */
+/* {{{ ZTS-stuff / Globals / Prototypes */
 
-int le_fopen,le_popen, le_socket, le_uploads;
+typedef struct {
+	int fgetss_state;
+	int pclose_ret;
+} php_file_globals;
 
-static int fgetss_state = 0;
-static int pclose_ret;
+#ifdef ZTS
+#define FIL(v) (file_globals->v)
+#define FIL_FETCH() php_file_globals *file_globals = ts_resource(file_globals_id)
+int file_globals_id;
+#else
+#define FIL(v) (file_globals.v)
+#define FIL_FETCH()
+php_file_globals file_globals;
+#endif
+
+static void _file_fopen_dtor(FILE *pipe);
+static void _file_popen_dtor(FILE *pipe);
+static void _file_socket_dtor(int *sock);
+static void _file_upload_dtor(char *file);
+
+/* sharing globals is *evil* */
+static int le_fopen,le_popen, le_socket, le_uploads; 
+
+/* }}} */
+/* {{{ tempnam */
 
 #ifndef HAVE_TEMPNAM
 /*
@@ -136,28 +160,27 @@ static int pclose_ret;
 # endif
 #endif
 
-
 char *tempnam(const char *dir, const char *pfx)
 {
 	int save_errno;
 	char *f, *name;
 	static char path_tmp[] = "/tmp";
-
+	
 	if (!(name = emalloc(MAXPATHLEN))) {
 		return(NULL);
 	}
-
+	
 	if (!pfx) {
 		pfx = "tmp.";
 	}
-
+	
 	if (f = getenv("TMPDIR")) {
 		(void)snprintf(name, MAXPATHLEN, "%s%s%sXXXXXX", f,
 					   *(f + strlen(f) - 1) == '/'? "": "/", pfx);
 		if (f = mktemp(name))
 			return(f);
 	}
-
+	
 	if (f = (char *)dir) {
 		(void)snprintf(name, MAXPATHLEN, "%s%s%sXXXXXX", f,
 					   *(f + strlen(f) - 1) == '/'? "": "/", pfx);
@@ -180,8 +203,11 @@ char *tempnam(const char *dir, const char *pfx)
 	errno = save_errno;
 	return(NULL);
 }
+
 #endif
 
+/* }}} */
+/* {{{ Module-Stuff */
 
 function_entry file_functions[] = {
 	PHP_FE(pclose,				NULL)
@@ -229,24 +255,95 @@ zend_module_entry file_module_entry = {
 };
 
 
+static void _file_popen_dtor(FILE *pipe)
+{
+	FIL_FETCH();
+	FIL(pclose_ret) = pclose(pipe);
+}
+
+
+static void _file_socket_dtor(int *sock) 
+{
+	SOCK_FCLOSE(*sock);
+#if HAVE_SHUTDOWN
+	shutdown(*sock, 0);
+#endif
+	efree(sock);
+}
+
+
+static void _file_upload_dtor(char *file)
+{
+	unlink(file);
+}
+
+
+static void _file_fopen_dtor(FILE *fp) 
+{
+	fclose(fp);
+}
+
+
+PHPAPI int php_file_le_fopen(void) /* XXX doe we really want this???? */
+{
+	return le_fopen;
+}
+
+
+PHPAPI int php_file_le_socket(void) /* XXX doe we really want this???? */
+{
+	return le_socket;
+}
+
+
+PHPAPI int php_file_le_uploads(void) /* XXX doe we really want this???? */
+{
+	return le_uploads;
+}
+
+
+#ifdef ZTS
+static void php_file_init_globals(php_file_globals *file_globals)
+{
+	FIL(fgetss_state) = 0;
+	FIL(pclose_ret) = 0;
+}
+#endif
+
+PHP_MINIT_FUNCTION(file)
+{
+	le_fopen = register_list_destructors(_file_fopen_dtor, NULL);
+	le_popen = register_list_destructors(_file_popen_dtor, NULL);
+	le_socket = register_list_destructors(_file_socket_dtor, NULL);
+	le_uploads = register_list_destructors(_file_upload_dtor, NULL);
+
+#ifdef ZTS
+	file_globals_id = ts_allocate_id(sizeof(php_file_globals), php_file_init_globals, NULL);
+#else
+	FIL(fgetss_state) = 0;
+	FIL(pclose_ret) = 0;
+#endif
+
+	return SUCCESS;
+}
+
+/* }}} */
+/* {{{ proto bool flock(int fp, int operation)
+   portable file locking */
+
 static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 
-/* {{{ proto bool flock(int fp, int operation)
-
-   portable file locking */
 PHP_FUNCTION(flock)
 {
     pval **arg1, **arg2;
-    int type;
-    int fd=0;
-    int act = 0;
+    int type, fd, act;
 	void *what;
-
+	
     if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
-
-	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,3,le_socket,le_popen,le_socket);
+	
+	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
 	ZEND_VERIFY_RESOURCE(what);
 	
 	if (type == le_socket) {
@@ -274,13 +371,12 @@ PHP_FUNCTION(flock)
 }
 
 /* }}} */
-
-
 /* {{{ proto array get_meta_tags(string filename [, int use_include_path])
 	Extracts all meta tag content attributes from a file and returns an array */
+
 PHP_FUNCTION(get_meta_tags)
 {
-	pval *filename, *arg2;
+	pval **filename, **arg2;
 	FILE *fp;
 	char buf[8192];
 	int use_include_path = 0;
@@ -291,32 +387,34 @@ PHP_FUNCTION(get_meta_tags)
 	
 	/* check args */
 	switch (ARG_COUNT(ht)) {
-		case 1:
-			if (getParameters(ht,1,&filename) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			break;
-		case 2:
-			if (getParameters(ht,2,&filename,&arg2) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			convert_to_long(arg2);
-			use_include_path = arg2->value.lval;
-			break;
-		default:
+	case 1:
+		if (getParametersEx(1,&filename) == FAILURE) {
 			WRONG_PARAM_COUNT;
+		}
+		break;
+	case 2:
+		if (getParametersEx(2,&filename,&arg2) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		convert_to_long_ex(arg2);
+		use_include_path = (*arg2)->value.lval;
+		break;
+	default:
+		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(filename);
-
-	fp = php3_fopen_wrapper(filename->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd);
+	convert_to_string_ex(filename);
+	
+	fp = php3_fopen_wrapper((*filename)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd);
 	if (!fp && !socketd) {
 		if (issock != BAD_URL) {
-			php3_strip_url_passwd(filename->value.str.val);
-			php_error(E_WARNING,"File(\"%s\") - %s",filename->value.str.val,strerror(errno));
+			char *tmp = estrdup((*filename)->value.str.val);
+			php3_strip_url_passwd(tmp);
+			php_error(E_WARNING,"get_meta_tags(\"%s\") - %s", tmp, strerror(errno));
+			efree(tmp);
 		}
 		RETURN_FALSE;
 	}
-
+	
 	if (array_init(return_value)==FAILURE) {
 		if (issock) {
 			SOCK_FCLOSE(socketd);
@@ -396,14 +494,14 @@ PHP_FUNCTION(get_meta_tags)
 		fclose(fp);
 	}
 }
+
 /* }}} */
-
-
 /* {{{ proto array file(string filename)
-Read entire file into an array */
+   Read entire file into an array */
+
 PHP_FUNCTION(file)
 {
-	pval *filename, *arg2;
+	pval **filename, **arg2;
 	FILE *fp;
 	char *slashed, buf[8192];
 	register int i=0;
@@ -413,28 +511,30 @@ PHP_FUNCTION(file)
 	
 	/* check args */
 	switch (ARG_COUNT(ht)) {
-		case 1:
-			if (getParameters(ht,1,&filename) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			break;
-		case 2:
-			if (getParameters(ht,2,&filename,&arg2) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			convert_to_long(arg2);
-			use_include_path = arg2->value.lval;
-			break;
-		default:
+	case 1:
+		if (getParametersEx(1,&filename) == FAILURE) {
 			WRONG_PARAM_COUNT;
+		}
+		break;
+	case 2:
+		if (getParametersEx(2,&filename,&arg2) == FAILURE) {
+				WRONG_PARAM_COUNT;
+		}
+		convert_to_long_ex(arg2);
+		use_include_path = (*arg2)->value.lval;
+		break;
+	default:
+		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(filename);
-
-	fp = php3_fopen_wrapper(filename->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd);
+	convert_to_string_ex(filename);
+	
+	fp = php3_fopen_wrapper((*filename)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd);
 	if (!fp && !socketd) {
 		if (issock != BAD_URL) {
-			php3_strip_url_passwd(filename->value.str.val);
-			php_error(E_WARNING,"File(\"%s\") - %s",filename->value.str.val,strerror(errno));
+			char *tmp = estrdup((*filename)->value.str.val);
+			php3_strip_url_passwd(tmp);
+			php_error(E_WARNING,"file(\"%s\") - %s", tmp, strerror(errno));
+			efree(tmp);
 		}
 		RETURN_FALSE;
 	}
@@ -443,7 +543,7 @@ PHP_FUNCTION(file)
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}	
-
+	
 	/* Now loop through the file and do the magic quotes thing if needed */
 	memset(buf,0,8191);
 	while (FP_FGETS(buf,8191,socketd,fp,issock) != NULL) {
@@ -462,62 +562,25 @@ PHP_FUNCTION(file)
 		fclose(fp);
 	}
 }
+
 /* }}} */
-
-
-static void _file_popen_dtor(FILE *pipe)
-{
-	pclose_ret = pclose(pipe);
-}
-
-
-static void _file_socket_dtor(int *sock) 
-{
-	SOCK_FCLOSE(*sock);
-#if HAVE_SHUTDOWN
-	shutdown(*sock, 0);
-#endif
-	efree(sock);
-}
-
-
-static void _file_upload_dtor(char *file)
-{
-	unlink(file);
-}
-
-
-static void _file_fopen_dtor(FILE *fp) 
-{
-	fclose(fp);
-}
-
-PHP_MINIT_FUNCTION(file)
-{
-	le_fopen = register_list_destructors(_file_fopen_dtor, NULL);
-	le_popen = register_list_destructors(_file_popen_dtor, NULL);
-	le_socket = register_list_destructors(_file_socket_dtor, NULL);
-	le_uploads = register_list_destructors(_file_upload_dtor, NULL);
-	return SUCCESS;
-}
-
-
 /* {{{ proto string tempnam(string dir, string prefix)
-Create a unique filename in a directory */
+   Create a unique filename in a directory */
+
 PHP_FUNCTION(tempnam)
 {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	char *d;
 	char *t;
 	char p[64];
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg1);
-	convert_to_string(arg2);
-	d = estrndup(arg1->value.str.val,arg1->value.str.len);
-	strlcpy(p,arg2->value.str.val,sizeof(p));
+	convert_to_string_ex(arg1);
+	convert_to_string_ex(arg2);
+	d = estrndup((*arg1)->value.str.val,(*arg1)->value.str.len);
+	strlcpy(p,(*arg2)->value.str.val,sizeof(p));
 
 	t = tempnam(d,p);
 	efree(d);
@@ -526,57 +589,59 @@ PHP_FUNCTION(tempnam)
 	}
 	RETURN_STRING(t,1);
 }
+
 /* }}} */
-
-
 /* {{{ proto int fopen(string filename, string mode [, int use_include_path])
-Open a file or a URL and return a file pointer */
+   Open a file or a URL and return a file pointer */
+
 PHP_FUNCTION(fopen)
 {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	FILE *fp;
 	char *p;
 	int *sock;
 	int use_include_path = 0;
 	int issock=0, socketd=0;
+	FIL_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
-		case 2:
-			if (getParameters(ht,2,&arg1,&arg2) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			break;
-		case 3:
-			if (getParameters(ht,3,&arg1,&arg2,&arg3) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			convert_to_long(arg3);
-			use_include_path = arg3->value.lval;
-			break;
-		default:
+	case 2:
+		if (getParametersEx(2,&arg1,&arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
+		}
+		break;
+	case 3:
+		if (getParametersEx(3,&arg1,&arg2,&arg3) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		convert_to_long_ex(arg3);
+		use_include_path = (*arg3)->value.lval;
+		break;
+	default:
+		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg1);
-	convert_to_string(arg2);
-	p = estrndup(arg2->value.str.val,arg2->value.str.len);
+	convert_to_string_ex(arg1);
+	convert_to_string_ex(arg2);
+	p = estrndup((*arg2)->value.str.val,(*arg2)->value.str.len);
 
 	/*
 	 * We need a better way of returning error messages from
 	 * php3_fopen__wrapper().
 	 */
-	fp = php3_fopen_wrapper(arg1->value.str.val, p, use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd);
+	fp = php3_fopen_wrapper((*arg1)->value.str.val, p, use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd);
 	if (!fp && !socketd) {
 		if (issock != BAD_URL) {
-			php3_strip_url_passwd(arg1->value.str.val);
-			php_error(E_WARNING,"fopen(\"%s\",\"%s\") - %s",
-						arg1->value.str.val, p, strerror(errno));
+			char *tmp = estrdup((*arg1)->value.str.val);
+			php3_strip_url_passwd(tmp);
+			php_error(E_WARNING,"fopen(\"%s\",\"%s\") - %s", tmp, p, strerror(errno));
+			efree(tmp);
 		}
 		efree(p);
 		RETURN_FALSE;
 	}
 
 	efree(p);
-	fgetss_state=0;
+	FIL(fgetss_state)=0;
 
 	if (issock) {
 		sock=emalloc(sizeof(int));
@@ -586,56 +651,53 @@ PHP_FUNCTION(fopen)
 		ZEND_REGISTER_RESOURCE(return_value,fp,le_fopen);
 	}
 }
+
 /* }}} */	
-
-
 /* {{{ proto int fclose(int fp)
-Close an open file pointer */
+	Close an open file pointer */
+
 PHP_FUNCTION(fclose)
 {
-	pval *arg1;
-	int id, type;
-	FILE *fp;
+	pval **arg1;
+	int type;
+	void *what;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id=arg1->value.lval;
-	fp = php3_list_find(id,&type);
-	if (!fp || (type!=le_fopen && type!=le_socket)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
-	}
-	php3_list_delete(id);
+
+	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,2,le_fopen,le_socket);
+	ZEND_VERIFY_RESOURCE(what);
+	
+	php3_list_delete((*arg1)->value.lval);
 	RETURN_TRUE;
 }
+
 /* }}} */
-
-
 /* {{{ proto int popen(string command, string mode)
-Execute a command and open either a read or a write pipe to it */
+   Execute a command and open either a read or a write pipe to it */
+
 PHP_FUNCTION(popen)
 {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	FILE *fp;
 	char *p;
 	char *b, buf[1024];
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg1);
-	convert_to_string(arg2);
-	p = estrndup(arg2->value.str.val,arg2->value.str.len);
+	convert_to_string_ex(arg1);
+	convert_to_string_ex(arg2);
+	p = estrndup((*arg2)->value.str.val,(*arg2)->value.str.len);
 	if (PG(safe_mode)){
-		b = strchr(arg1->value.str.val,' ');
+		b = strchr((*arg1)->value.str.val,' ');
 		if (!b) {
-			b = strrchr(arg1->value.str.val,'/');
+			b = strrchr((*arg1)->value.str.val,'/');
 		} else {
 			char *c;
-			c = arg1->value.str.val;
+			c = (*arg1)->value.str.val;
 			while((*b!='/')&&(b!=c)) {
 				b--;
 			}
@@ -646,7 +708,7 @@ PHP_FUNCTION(popen)
 		if (b) {
 			snprintf(buf,sizeof(buf),"%s%s",PG(safe_mode_exec_dir),b);
 		} else {
-			snprintf(buf,sizeof(buf),"%s/%s",PG(safe_mode_exec_dir),arg1->value.str.val);
+			snprintf(buf,sizeof(buf),"%s/%s",PG(safe_mode_exec_dir),(*arg1)->value.str.val);
 		}
 		fp = popen(buf,p);
 		if (!fp) {
@@ -654,9 +716,9 @@ PHP_FUNCTION(popen)
 			RETURN_FALSE;
 		}
 	} else {
-		fp = popen(arg1->value.str.val,p);
+		fp = popen((*arg1)->value.str.val,p);
 		if (!fp) {
-			php_error(E_WARNING,"popen(\"%s\",\"%s\") - %s",arg1->value.str.val,p,strerror(errno));
+			php_error(E_WARNING,"popen(\"%s\",\"%s\") - %s",(*arg1)->value.str.val,p,strerror(errno));
 			efree(p);
 			RETURN_FALSE;
 		}
@@ -665,68 +727,60 @@ PHP_FUNCTION(popen)
 
 	ZEND_REGISTER_RESOURCE(return_value,fp,le_popen);
 }
+
 /* }}} */
-
-
 /* {{{ proto int pclose(int fp)
-Close a file pointer opened by popen() */
+   Close a file pointer opened by popen() */
+
 PHP_FUNCTION(pclose)
 {
-	pval *arg1;
-	int id,type;
-	FILE *fp;
+	pval **arg1;
+	void *what;
+	FIL_FETCH();
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id = arg1->value.lval;
 
-	fp = php3_list_find(id,&type);
-	if (!fp || type!=le_popen) {
-		php_error(E_WARNING,"Unable to find pipe identifier %d",id);
-		RETURN_FALSE;
-	}
-	php3_list_delete(id);
-	RETURN_LONG(pclose_ret);
+	what = zend_fetch_resource(arg1,-1,"File-Handle",NULL,1,le_popen);
+	ZEND_VERIFY_RESOURCE(what);
+	
+	php3_list_delete((*arg1)->value.lval);
+	RETURN_LONG(FIL(pclose_ret));
 }
+
 /* }}} */
-
-
 /* {{{ proto int feof(int fp)
-Test for end-of-file on a file pointer */
+   Test for end-of-file on a file pointer */
+
 PHP_FUNCTION(feof)
 {
-	pval *arg1;
-	FILE *fp;
-	int id, type;
+	pval **arg1;
+	int type;
 	int issock=0;
-	int socketd=0, *sock;
+	int socketd=0;
+	void *what;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id = arg1->value.lval;
-	fp = php3_list_find(id,&type);
-	if (type==le_socket){
+	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	ZEND_VERIFY_RESOURCE(what);
+
+	if (type == le_socket) {
 		issock=1;
-		sock = php3_list_find(id,&type);
-		socketd=*sock;
-	}
-	if ((!fp || (type!=le_fopen && type!=le_popen)) && (!socketd || type!=le_socket)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		/* we're at the eof if the file doesn't exist */
-		RETURN_TRUE;
-	}
-	if (FP_FEOF(socketd, fp, issock)) {
+		socketd=*(int *) what;
+	} 
+
+	if (FP_FEOF(socketd, (FILE*)what, issock)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
 	}
 }
 /* }}} */
-
+/* {{{ proto int set_socket_blocking(int socket descriptor, int mode)
+   Set blocking/non-blocking mode on a socket */
 
 PHPAPI int _php3_set_sock_blocking(int socketd, int block)
 {
@@ -758,35 +812,36 @@ PHPAPI int _php3_set_sock_blocking(int socketd, int block)
       return ret;
 }
 
-/* {{{ proto int set_socket_blocking(int socket descriptor, int mode)
-Set blocking/non-blocking mode on a socket */
 PHP_FUNCTION(set_socket_blocking)
 {
-	pval *arg1, *arg2;
-	int id, type, block;
-	int socketd = 0, *sock;
+	pval **arg1, **arg2;
+	int block;
+	int socketd = 0;
+	void *what;
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	id = arg1->value.lval;
-	block = arg2->value.lval;
+
+	what = zend_fetch_resource(arg1,-1,"File-Handle",NULL,1,le_socket);
+	ZEND_VERIFY_RESOURCE(what);
+
+	convert_to_long_ex(arg2);
+	block = (*arg2)->value.lval;
 	
-	sock = php3_list_find(id,&type);
-	if (type != le_socket) {
-		php_error(E_WARNING,"%d is not a socket id",id);
+	socketd = *(int*)what;
+
+	if (_php3_set_sock_blocking(socketd, block) == FAILURE)
 		RETURN_FALSE;
-	}
-	socketd = *sock;
-	if(_php3_set_sock_blocking(socketd, block) == FAILURE)
-		RETURN_FALSE;
+
 	_php3_sock_set_blocking(socketd, block == 0 ? 0 : 1);
+	
 	RETURN_TRUE;
 }
-/* }}} */
 
+/* }}} */
+/* {{{ proto int set_socket_timeout(int socket descriptor, int timeout )
+   NYI */
 
 #if (0 && defined(HAVE_SYS_TIME_H) && HAVE_SETSOCKOPT && defined(SO_SNDTIMEO) && defined(SO_RCVTIMEO))
 /* this doesn't work, as it appears those properties are read-only :( */
@@ -815,41 +870,38 @@ PHP_FUNCTION(set_socket_timeout)
 }
 #endif
 
-
+/* }}} */
 /* {{{ proto string fgets(int fp, int length)
-Get a line from file pointer */
+   Get a line from file pointer */
+
 PHP_FUNCTION(fgets)
 {
-	pval *arg1, *arg2;
-	FILE *fp;
-	int id, len, type;
+	pval **arg1, **arg2;
+	int len, type;
 	char *buf;
 	int issock=0;
-	int *sock, socketd=0;
+	int socketd=0;
+	void *what;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	id = arg1->value.lval;
-	len = arg2->value.lval;
 
-	fp = php3_list_find(id,&type);
-	if (type==le_socket){
+	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	ZEND_VERIFY_RESOURCE(what);
+
+	convert_to_long_ex(arg2);
+	len = (*arg2)->value.lval;
+
+	if (type == le_socket) {
 		issock=1;
-		sock = php3_list_find(id,&type);
-		socketd=*sock;
-	}
-	if ((!fp || (type!=le_fopen && type!=le_popen)) && (!socketd || type!=le_socket)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
+		socketd=*(int*)what;
 	}
 	buf = emalloc(sizeof(char) * (len + 1));
 	/* needed because recv doesnt put a null at the end*/
 	memset(buf,0,len+1);
-	if (FP_FGETS(buf, len, socketd, fp, issock) == NULL) {
+	if (FP_FGETS(buf, len, socketd, (FILE*)what, issock) == NULL) {
 		efree(buf);
 		RETVAL_FALSE;
 	} else {
@@ -861,39 +913,34 @@ PHP_FUNCTION(fgets)
 		}
 		return_value->type = IS_STRING;
 	}
-	return;
 }
+
 /* }}} */
-
-
 /* {{{ proto string fgetc(int fp)
-Get a character from file pointer */
+   Get a character from file pointer */
+
 PHP_FUNCTION(fgetc) {
-	pval *arg1;
-	FILE *fp;
-	int id, type;
+	pval **arg1;
+	int type;
 	char *buf;
 	int issock=0;
-	int *sock, socketd=0;
+	int socketd=0;
+	void *what;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id = arg1->value.lval;
 
-	fp = php3_list_find(id,&type);
-	if (type==le_socket){
+	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	ZEND_VERIFY_RESOURCE(what);
+
+	if (type == le_socket) {
 		issock=1;
-		sock = php3_list_find(id,&type);
-		socketd = *sock;
+		socketd=*(int*)what;
 	}
-	if ((!fp || (type!=le_fopen && type!=le_popen)) && (!socketd || type!=le_socket)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
-	}
+
 	buf = emalloc(sizeof(char) * 2);
-	if (!(*buf = FP_FGETC(socketd, fp, issock))) {
+	if (!(*buf = FP_FGETC(socketd, (FILE*)what, issock))) {
 		efree(buf);
 		RETVAL_FALSE;
 	} else {
@@ -903,325 +950,274 @@ PHP_FUNCTION(fgetc) {
 		return_value->type = IS_STRING;
 	}
 }
+
 /* }}} */
-
-
-/* Strip any HTML tags while reading */
 /* {{{ proto string fgetss(int fp, int length [, string allowable_tags])
-Get a line from file pointer and strip HTML tags */
+   Get a line from file pointer and strip HTML tags */
+
 PHP_FUNCTION(fgetss)
 {
-	pval *fd, *bytes, *allow=NULL;
-	FILE *fp;
-	int id, len, type;
+	pval **fd, **bytes, **allow=NULL;
+	int len, type;
 	char *buf;
 	int issock=0;
-	int *sock,socketd=0;
-	
+	int socketd=0;
+	void *what;
+	FIL_FETCH();
+
 	switch(ARG_COUNT(ht)) {
-		case 2:
-			if (getParameters(ht, 2, &fd, &bytes) == FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
-		case 3:
-			if (getParameters(ht, 3, &fd, &bytes, &allow) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string(allow);
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			/* NOTREACHED */
-			break;
+	case 2:
+		if (getParametersEx(2, &fd, &bytes) == FAILURE) {
+			RETURN_FALSE;
+		}
+		break;
+	case 3:
+		if (getParametersEx(3, &fd, &bytes, &allow) == FAILURE) {
+			RETURN_FALSE;
+		}
+		convert_to_string_ex(allow);
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+		/* NOTREACHED */
+		break;
 	}
 
-	convert_to_long(fd);
-	convert_to_long(bytes);
+	what = zend_fetch_resource(fd,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	ZEND_VERIFY_RESOURCE(what);
 
-	id = fd->value.lval;
-	len = bytes->value.lval;
+	if (type == le_socket) {
+		issock=1;
+		socketd=*(int*)what;
+	}
 
-	fp = php3_list_find(id,&type);
-	if (type == le_socket){
-		issock = 1;
-		sock = php3_list_find(id, &type);
-		socketd=*sock;
-	}
-	if ((!fp || (type!=le_fopen && type!=le_popen)) && (!socketd || type!=le_socket)) {
-		php_error(E_WARNING, "Unable to find file identifier %d", id);
-		RETURN_FALSE;
-	}
+	convert_to_long_ex(bytes);
+	len = (*bytes)->value.lval;
 
 	buf = emalloc(sizeof(char) * (len + 1));
 	/*needed because recv doesnt set null char at end*/
 	memset(buf, 0, len + 1);
-	if (FP_FGETS(buf, len, socketd, fp, issock) == NULL) {
+	if (FP_FGETS(buf, len, socketd, (FILE*)what, issock) == NULL) {
 		efree(buf);
 		RETURN_FALSE;
 	}
 
 	/* strlen() can be used here since we are doing it on the return of an fgets() anyway */
-	_php3_strip_tags(buf, strlen(buf), fgetss_state, allow?allow->value.str.val:NULL);
+	_php3_strip_tags(buf, strlen(buf), FIL(fgetss_state), allow?(*allow)->value.str.val:NULL);
+
 	RETURN_STRING(buf, 0);
 }
-/* }}} */
 
-/* {{{ proto int fputs(int fp, string str [, int length])
-   An alias for fwrite */
 /* }}} */
-
 /* {{{ proto int fwrite(int fp, string str [, int length])
-Binary-safe file write */
+   Binary-safe file write */
+
 PHP_FUNCTION(fwrite)
 {
-	pval *arg1, *arg2, *arg3=NULL;
-	FILE *fp;
-	int ret,id,type;
+	pval **arg1, **arg2, **arg3=NULL;
+	int ret,type;
 	int num_bytes;
 	int issock=0;
-	int *sock, socketd=0;
+	int socketd=0;
+	void *what;
 	PLS_FETCH();
 
 	switch (ARG_COUNT(ht)) {
-		case 2:
-			if (getParameters(ht, 2, &arg1, &arg2)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string(arg2);
-			num_bytes = arg2->value.str.len;
-			break;
-		case 3:
-			if (getParameters(ht, 3, &arg1, &arg2, &arg3)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string(arg2);
-			convert_to_long(arg3);
-			num_bytes = MIN(arg3->value.lval, arg2->value.str.len);
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			/* NOTREACHED */
-			break;
+	case 2:
+		if (getParametersEx(2, &arg1, &arg2)==FAILURE) {
+			RETURN_FALSE;
+		}
+		convert_to_string_ex(arg2);
+		num_bytes = (*arg2)->value.str.len;
+		break;
+	case 3:
+		if (getParametersEx(3, &arg1, &arg2, &arg3)==FAILURE) {
+			RETURN_FALSE;
+		}
+		convert_to_string_ex(arg2);
+		convert_to_long_ex(arg3);
+		num_bytes = MIN((*arg3)->value.lval, (*arg2)->value.str.len);
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+		/* NOTREACHED */
+		break;
 	}				
-	convert_to_long(arg1);
-	id = arg1->value.lval;	
 
-	fp = php3_list_find(id,&type);
-	if (type==le_socket){
+	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	ZEND_VERIFY_RESOURCE(what);
+
+	if (type == le_socket) {
 		issock=1;
-		sock = php3_list_find(id,&type);
-		socketd=*sock;
-	}
-	if ((!fp || (type!=le_fopen && type!=le_popen)) && (!socketd || type!=le_socket)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
+		socketd=*(int*)what;
 	}
 
-	/* strip slashes only if the length wasn't specified explicitly */
 	if (!arg3 && PG(magic_quotes_runtime)) {
-		php_stripslashes(arg2->value.str.val,&num_bytes);
+		zval_copy_ctor(*arg2);
+		php_stripslashes((*arg2)->value.str.val,&num_bytes);
 	}
 
 	if (issock){
-		ret = SOCK_WRITEL(arg2->value.str.val,num_bytes,socketd);
+		ret = SOCK_WRITEL((*arg2)->value.str.val,num_bytes,socketd);
 	} else {
-		ret = fwrite(arg2->value.str.val,1,num_bytes,fp);
+		ret = fwrite((*arg2)->value.str.val,1,num_bytes,(FILE*)what);
 	}
 	RETURN_LONG(ret);
 }
+
 /* }}} */	
-
-
 /* {{{ proto int set_file_buffer(int fp, int buffer)
    Set file write buffer */
-/*
-   wrapper for setvbuf()
-*/
+
 PHP_FUNCTION(set_file_buffer)
 {
-	pval *arg1, *arg2;
-	FILE *fp;
-	int ret,id,type,buff;
-	int issock=0;
-	int *sock, socketd=0;
+	pval **arg1, **arg2;
+	int ret,type,buff;
+	void *what;
 	PLS_FETCH();
       
 	switch (ARG_COUNT(ht)) {
-		case 2:
-			if (getParameters(ht, 2, &arg1, &arg2)==FAILURE) {
-				RETURN_FALSE;
-			} 
-			convert_to_long(arg1);
-			convert_to_long(arg2);
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			/* NOTREACHED */
-			break;
+	case 2:
+		if (getParametersEx(2, &arg1, &arg2)==FAILURE) {
+			RETURN_FALSE;
+		} 
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+		/* NOTREACHED */
+		break;
 	}                               
 
-	id = arg1->value.lval;  
-	buff = arg2->value.lval;    
-	fp = php3_list_find(id,&type);
-	if (type == le_socket){
-		issock = 1;
-		sock = php3_list_find(id,&type);
-		socketd = *sock;
-	}
-	if ((!fp || (type != le_fopen && type != le_popen)) &&
-		(!socketd || type != le_socket)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
-	}
+	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,2,le_fopen,le_popen);
+	ZEND_VERIFY_RESOURCE(what);
+
+	convert_to_long_ex(arg2);
+	buff = (*arg2)->value.lval;    
 
 	/* if buff is 0 then set to non-buffered */
 	if (buff == 0){
-		ret = setvbuf(fp, NULL, _IONBF, 0);
+		ret = setvbuf((FILE*)what, NULL, _IONBF, 0);
 	} else {
-		ret = setvbuf(fp, NULL, _IOFBF, buff);
+		ret = setvbuf((FILE*)what, NULL, _IOFBF, buff);
 	}
 
 	RETURN_LONG(ret);
 }
-/* }}} */     
 
+/* }}} */     
 /* {{{ proto int rewind(int fp)
-Rewind the position of a file pointer */
+   Rewind the position of a file pointer */
+
 PHP_FUNCTION(rewind)
 {
-	pval *arg1;
-	int id,type;
-	FILE *fp;
+	pval **arg1;
+	void *what;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id = arg1->value.lval;	
-	fp = php3_list_find(id,&type);
-	if (!fp || (type!=le_fopen && type!=le_popen)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
-	}
-	rewind(fp);
+	
+	what = zend_fetch_resource(arg1,-1,"File-Handle",NULL,2,le_fopen,le_popen);
+	ZEND_VERIFY_RESOURCE(what);
+	
+	rewind((FILE*) what);
 	RETURN_TRUE;
 }
+
 /* }}} */
-
-
 /* {{{ proto int ftell(int fp)
-Get file pointer's read/write position */
+   Get file pointer's read/write position */
+
 PHP_FUNCTION(ftell)
 {
-	pval *arg1;
-	int id, type;
-	long pos;
-	FILE *fp;
+	pval **arg1;
+	void *what;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id = arg1->value.lval;	
-	fp = php3_list_find(id,&type);
-	if (!fp || (type!=le_fopen && type!=le_popen)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
-	}
-	pos = ftell(fp);
-	RETURN_LONG(pos);
+	
+	what = zend_fetch_resource(arg1,-1,"File-Handle",NULL,2,le_fopen,le_popen);
+	ZEND_VERIFY_RESOURCE(what);
+	
+	RETURN_LONG(ftell((FILE*) what));
 }
+
 /* }}} */
-
-
 /* {{{ proto int fseek(int fp, int offset)
-Seek on a file pointer */
+   Seek on a file pointer */
+
 PHP_FUNCTION(fseek)
 {
-	pval *arg1, *arg2;
-	int ret,id,type;
-	long pos;
-	FILE *fp;
+	pval **arg1, **arg2;
+	void *what;
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	pos = arg2->value.lval;
-	id = arg1->value.lval;
-	fp = php3_list_find(id,&type);
-	if (!fp || (type!=le_fopen && type!=le_popen)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
-	}
-/*fseek is flaky on windows, use setfilepointer, but we have to live with
-	it until we use win32 api for all the file functions in 3.1 */
-#if 0
-	ret = SetFilePointer (fp, pos, NULL, FILE_BEGIN);
-	if (ret == 0xFFFFFFFF){
-		php_error(E_WARNING,"Unable to move file postition: %s",php3_win_err());
-		RETURN_FALSE;
-	}
-#else
- 	ret = fseek(fp,pos,SEEK_SET);
-#endif
-	RETURN_LONG(ret);
+	
+	what = zend_fetch_resource(arg1,-1,"File-Handle",NULL,2,le_fopen,le_popen);
+	ZEND_VERIFY_RESOURCE(what);
+
+	convert_to_long_ex(arg2);
+	
+	RETURN_LONG(fseek((FILE*)what,(*arg2)->value.lval,SEEK_SET));
 }
+
 /* }}} */
-
-
 /* {{{ proto int mkdir(string pathname, int mode)
-Create a directory */
+   Create a directory */
+
 PHP_FUNCTION(mkdir)
 {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int ret,mode;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg1);
-	convert_to_long(arg2);
-	mode = arg2->value.lval;
-	if (PG(safe_mode) &&(!_php3_checkuid(arg1->value.str.val,3))) {
+	convert_to_string_ex(arg1);
+	convert_to_long_ex(arg2);
+	mode = (*arg2)->value.lval;
+	if (PG(safe_mode) &&(!_php3_checkuid((*arg1)->value.str.val,3))) {
 		RETURN_FALSE;
 	}
-	ret = mkdir(arg1->value.str.val,mode);
+	ret = mkdir((*arg1)->value.str.val,mode);
 	if (ret < 0) {
 		php_error(E_WARNING,"MkDir failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
+
 /* }}} */	
-
-
 /* {{{ proto int rmdir(string dirname)
-Remove a directory */
+   Remove a directory */
+
 PHP_FUNCTION(rmdir)
 {
-	pval *arg1;
+	pval **arg1;
 	int ret;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg1);
-	if (PG(safe_mode) &&(!_php3_checkuid(arg1->value.str.val,1))) {
+	convert_to_string_ex(arg1);
+	if (PG(safe_mode) &&(!_php3_checkuid((*arg1)->value.str.val,1))) {
 		RETURN_FALSE;
 	}
-	ret = rmdir(arg1->value.str.val);
+	ret = rmdir((*arg1)->value.str.val);
 	if (ret < 0) {
 		php_error(E_WARNING,"RmDir failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
+
 /* }}} */	
+/* {{{ php_passthru_fd */
 
 static size_t php_passthru_fd(int socketd, FILE *fp, int issock)
 {
@@ -1266,11 +1262,13 @@ static size_t php_passthru_fd(int socketd, FILE *fp, int issock)
 	return bcount;
 }
 
+/* }}} */
 /* {{{ proto int readfile(string filename [, int use_include_path])
-Output a file or a URL */
+   Output a file or a URL */
+
 PHP_FUNCTION(readfile)
 {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	FILE *fp;
 	int size=0;
 	int use_include_path=0;
@@ -1279,35 +1277,37 @@ PHP_FUNCTION(readfile)
 	/* check args */
 	switch (ARG_COUNT(ht)) {
 	case 1:
-		if (getParameters(ht,1,&arg1) == FAILURE) {
+		if (getParametersEx(1,&arg1) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 2:
-		if (getParameters(ht,2,&arg1,&arg2) == FAILURE) {
+		if (getParametersEx(2,&arg1,&arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		convert_to_long(arg2);
-		use_include_path = arg2->value.lval;
+		convert_to_long_ex(arg2);
+		use_include_path = (*arg2)->value.lval;
 		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg1);	
+	convert_to_string_ex(arg1);
 
 	/*
 	 * We need a better way of returning error messages from
 	 * php3_fopen_wrapper().
 	 */
-	fp = php3_fopen_wrapper(arg1->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd);
+	fp = php3_fopen_wrapper((*arg1)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd);
 	if (!fp && !socketd){
 		if (issock != BAD_URL) {
-			php3_strip_url_passwd(arg1->value.str.val);
-			php_error(E_WARNING,"ReadFile(\"%s\") - %s",arg1->value.str.val,strerror(errno));
+			char *tmp = estrdup((*arg1)->value.str.val);
+			php3_strip_url_passwd(tmp);
+			php_error(E_WARNING,"readfile(\"%s\") - %s", tmp, strerror(errno));
+			efree(tmp);
 		}
 		RETURN_FALSE;
 	}
-	if(php3_header()) {
+	if (php3_header()) {
 		size = php_passthru_fd(socketd, fp, issock);
 	}
 	if (issock) {
@@ -1317,14 +1317,14 @@ PHP_FUNCTION(readfile)
 	}
 	RETURN_LONG(size);
 }
+
 /* }}} */
-
-
 /* {{{ proto int umask([int mask])
-Return or change the umask */
+   Return or change the umask */
+
 PHP_FUNCTION(umask)
 {
-	pval *arg1;
+	pval **arg1;
 	int oldumask;
 	int arg_count = ARG_COUNT(ht);
 	
@@ -1332,75 +1332,72 @@ PHP_FUNCTION(umask)
 
 	if (arg_count == 0) {
 		umask(oldumask);
-	}
-	else {
-		if (arg_count > 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	} else {
+		if (arg_count > 1 || getParametersEx(1, &arg1) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		convert_to_long(arg1);
-		umask(arg1->value.lval);
+		convert_to_long_ex(arg1);
+		umask((*arg1)->value.lval);
 	}
+
+	/* XXX we should maybe reset the umask after each request! */
+
 	RETURN_LONG(oldumask);
 }
+
 /* }}} */
-
-
-/*
- * Read to EOF on a file descriptor and write the output to stdout.
- */
 /* {{{ proto int fpassthru(int fp)
-Output all remaining data from a file pointer */
+   Output all remaining data from a file pointer */
+
 PHP_FUNCTION(fpassthru)
 {
-	pval *arg1;
-	FILE *fp;
-	int id, size, type;
+	pval **arg1;
+	int size, type;
 	int issock=0;
-	int socketd=0, *sock;
+	int socketd=0;
+	void *what;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id = arg1->value.lval;
-	fp = php3_list_find(id,&type);
-	if (type==le_socket){
+
+	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	ZEND_VERIFY_RESOURCE(what);
+
+	if (type == le_socket) {
 		issock=1;
-		sock = php3_list_find(id,&type);
-		socketd=*sock;
+		socketd=*(int*)what;
 	}
-	if ((!fp || (type!=le_fopen && type!=le_popen)) && (!socketd || type!=le_socket)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
-	}
+
 	size = 0;
 	if (php3_header()) { /* force headers if not already sent */
-		size = php_passthru_fd(socketd, fp, issock);
+		size = php_passthru_fd(socketd, (FILE*) what, issock);
 	}
-	php3_list_delete(id);
+
+	php3_list_delete((*arg1)->value.lval);
 	RETURN_LONG(size);
 }
+
 /* }}} */
-
-
 /* {{{ proto int rename(string old_name, string new_name)
-Rename a file */
+   Rename a file */
+
 PHP_FUNCTION(rename)
 {
-	pval *old_arg, *new_arg;
+	pval **old_arg, **new_arg;
 	char *old_name, *new_name;
 	int ret;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &old_arg, &new_arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &old_arg, &new_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(old_arg);
-	convert_to_string(new_arg);
+	convert_to_string_ex(old_arg);
+	convert_to_string_ex(new_arg);
 
-	old_name = old_arg->value.str.val;
-	new_name = new_arg->value.str.val;
+	old_name = (*old_arg)->value.str.val;
+	new_name = (*new_arg)->value.str.val;
 
 	if (PG(safe_mode) &&(!_php3_checkuid(old_name, 2))) {
 		RETURN_FALSE;
@@ -1408,57 +1405,56 @@ PHP_FUNCTION(rename)
 	ret = rename(old_name, new_name);
 
 	if (ret == -1) {
-		php_error(E_WARNING,
-					"Rename failed (%s)", strerror(errno));
+		php_error(E_WARNING,"Rename failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
 
 	RETVAL_TRUE;
 }
+
 /* }}} */
-
-
 /* {{{ proto int copy(string source_file, string destination_file)
-Copy a file */
+   Copy a file */
+
 PHP_FUNCTION(copy)
 {
-	pval *source, *target;
+	pval **source, **target;
 	char buffer[8192];
 	int fd_s,fd_t,read_bytes;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &source, &target) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &source, &target) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(source);
-	convert_to_string(target);
+	convert_to_string_ex(source);
+	convert_to_string_ex(target);
 
-	if (PG(safe_mode) &&(!_php3_checkuid(source->value.str.val,2))) {
+	if (PG(safe_mode) &&(!_php3_checkuid((*source)->value.str.val,2))) {
 		RETURN_FALSE;
 	}
 	
 #if WIN32|WINNT
-	if ((fd_s=open(source->value.str.val,O_RDONLY|_O_BINARY))==-1) {
+	if ((fd_s=open((*source)->value.str.val,O_RDONLY|_O_BINARY))==-1) {
 #else
-	if ((fd_s=open(source->value.str.val,O_RDONLY))==-1) {
+	if ((fd_s=open((*source)->value.str.val,O_RDONLY))==-1) {
 #endif
-		php_error(E_WARNING,"Unable to open '%s' for reading:  %s",source->value.str.val,strerror(errno));
+		php_error(E_WARNING,"Unable to open '%s' for reading:  %s",(*source)->value.str.val,strerror(errno));
 		RETURN_FALSE;
 	}
 #if WIN32|WINNT
-	if ((fd_t=open(target->value.str.val,_O_WRONLY|_O_CREAT|_O_TRUNC|_O_BINARY,_S_IREAD|_S_IWRITE))==-1){
+	if ((fd_t=open((*target)->value.str.val,_O_WRONLY|_O_CREAT|_O_TRUNC|_O_BINARY,_S_IREAD|_S_IWRITE))==-1){
 #else
-	if ((fd_t=creat(target->value.str.val,0777))==-1) {
+	if ((fd_t=creat((*target)->value.str.val,0777))==-1) {
 #endif
-		php_error(E_WARNING,"Unable to create '%s':  %s", target->value.str.val,strerror(errno));
+		php_error(E_WARNING,"Unable to create '%s':  %s", (*target)->value.str.val,strerror(errno));
 		close(fd_s);
 		RETURN_FALSE;
 	}
 
 	while ((read_bytes=read(fd_s,buffer,8192))!=-1 && read_bytes!=0) {
 		if (write(fd_t,buffer,read_bytes)==-1) {
-			php_error(E_WARNING,"Unable to write to '%s':  %s",target->value.str.val,strerror(errno));
+			php_error(E_WARNING,"Unable to write to '%s':  %s",(*target)->value.str.val,strerror(errno));
 			close(fd_s);
 			close(fd_t);
 			RETURN_FALSE;
@@ -1470,43 +1466,40 @@ PHP_FUNCTION(copy)
 
 	RETVAL_TRUE;
 }
+
 /* }}} */
-
-
 /* {{{ proto int fread(int fp, int length)
-Binary-safe file read */
+   Binary-safe file read */
+
 PHP_FUNCTION(fread)
 {
-	pval *arg1, *arg2;
-	FILE *fp;
-	int id, len, type;
+	pval **arg1, **arg2;
+	int len, type;
 	int issock=0;
-	int *sock, socketd=0;
+	int socketd=0;
+	void *what;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	id = arg1->value.lval;
-	len = arg2->value.lval;
 
-	fp = php3_list_find(id,&type);
-	if (type==le_socket){
+	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	ZEND_VERIFY_RESOURCE(what);
+
+	if (type == le_socket) {
 		issock=1;
-		sock = php3_list_find(id,&type);
-		socketd=*sock;
+		socketd=*(int*)what;
 	}
-	if ((!fp || (type!=le_fopen && type!=le_popen)) && (!socketd || type!=le_socket)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
-	}
+
+	convert_to_long_ex(arg2);
+	len = (*arg2)->value.lval;
+
 	return_value->value.str.val = emalloc(sizeof(char) * (len + 1));
 	/* needed because recv doesnt put a null at the end*/
 	
 	if (!issock) {
-		return_value->value.str.len = fread(return_value->value.str.val, 1, len, fp);
+		return_value->value.str.len = fread(return_value->value.str.val, 1, len, (FILE*)what);
 		return_value->value.str.val[return_value->value.str.len] = 0;
 	} else {
 		return_value->value.str.len = SOCK_FREAD(return_value->value.str.val, len, socketd);
@@ -1516,79 +1509,66 @@ PHP_FUNCTION(fread)
 	}
 	return_value->type = IS_STRING;
 }
+
 /* }}} */
-
-
-/* aparently needed for pdf to be compiled as a module under windows */
-PHPAPI int php3i_get_le_fopen(void)
-{
-	return le_fopen;
-}
-
 /* {{{ proto array fgetcsv(int fp, int length)
    get line from file pointer and parse for CSV fields */
+ 
 PHP_FUNCTION(fgetcsv) {
 	char *temp, *tptr, *bptr;
 	char delimiter = ',';	/* allow this to be set as parameter */
 
 	/* first section exactly as php3_fgetss */
 
-	pval *fd, *bytes, *p_delim;
-	FILE *fp;
-	int id, len, type;
+	pval **fd, **bytes, **p_delim;
+	int len, type;
 	char *buf;
 	int issock=0;
-	int *sock,socketd=0;
+	int socketd=0;
+	void *what;
 	PLS_FETCH();
-
+	
 	switch(ARG_COUNT(ht)) {
-		case 2:
-			if (getParameters(ht, 2, &fd, &bytes) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			break;
-		
-		case 3:
-			if (getParameters(ht, 3, &fd, &bytes, &p_delim) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			convert_to_string(p_delim);
-			/* Make sure that there is at least one character in string */
-			if (p_delim->value.str.len < 1) {
-				WRONG_PARAM_COUNT;
-			}
-			/* use first character from string */
-			delimiter = p_delim->value.str.val[0];
-			break;
-		
-		default:
+	case 2:
+		if (getParametersEx(2, &fd, &bytes) == FAILURE) {
 			WRONG_PARAM_COUNT;
-			/* NOTREACHED */
-			break;
+		}
+		break;
+		
+	case 3:
+		if (getParametersEx(3, &fd, &bytes, &p_delim) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		convert_to_string_ex(p_delim);
+		/* Make sure that there is at least one character in string */
+		if ((*p_delim)->value.str.len < 1) {
+			WRONG_PARAM_COUNT;
+		}
+			/* use first character from string */
+		delimiter = (*p_delim)->value.str.val[0];
+		break;
+		
+	default:
+		WRONG_PARAM_COUNT;
+		/* NOTREACHED */
+		break;
 	}
 
-	convert_to_long(fd);
-	convert_to_long(bytes);
+	what = zend_fetch_resource(fd,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	ZEND_VERIFY_RESOURCE(what);
 
-	id = fd->value.lval;
-	len = bytes->value.lval;
+	if (type == le_socket) {
+		issock=1;
+		socketd=*(int*)what;
+	}
 
-	fp = php3_list_find(id, &type);
-	if (type == le_socket){
-		issock = 1;
-		sock = php3_list_find(id,&type);
-		socketd = *sock;
-	}
-	if ((!fp || (type != le_fopen && type != le_popen)) &&
-		(!socketd || type != le_socket)) {
-		php_error(E_WARNING, "Unable to find file identifier %d", id);
-		RETURN_FALSE;
-	}
+	convert_to_long_ex(bytes);
+	len = (*bytes)->value.lval;
 
 	buf = emalloc(sizeof(char) * (len + 1));
 	/*needed because recv doesnt set null char at end*/
 	memset(buf, 0, len + 1);
-	if (FP_FGETS(buf, len, socketd, fp, issock) == NULL) {
+	if (FP_FGETS(buf, len, socketd, (FILE*)what, issock) == NULL) {
 		efree(buf);
 		RETURN_FALSE;
 	}
@@ -1665,7 +1645,7 @@ PHP_FUNCTION(fgetcsv) {
 
 /* }}} */
 
-/*
+/*<
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4

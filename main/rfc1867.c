@@ -20,14 +20,11 @@
 #include <stdio.h>
 #include "php.h"
 #include "ext/standard/php3_standard.h"
+#include "ext/standard/file.h" /* for php_file_le_uploads() */
 #include "zend_globals.h"
 #include "php_globals.h"
 #include "rfc1867.h"
 
-#ifndef THREAD_SAFE
-extern int le_uploads; /* "borrowed" from file.c */
-extern HashTable list;
-#endif
 
 #define NEW_BOUNDARY_CHECK 1
 #define SAFE_RETURN { if (namebuf) efree(namebuf); if (filenamebuf) efree(filenamebuf); if (lbuf) efree(lbuf); return; }
@@ -220,7 +217,7 @@ void php_mime_split(char *buf, int cnt, char *boundary)
 					}
 					bytes = fwrite(ptr, 1, loc - ptr - 4, fp);
 					fclose(fp);
-					php3_list_insert(fn,le_uploads);  /* Tell PHP about the file so the destructor can unlink it later */
+					php3_list_insert(fn,php_file_le_uploads());  /* Tell PHP about the file so the destructor can unlink it later */
 					if (bytes < (loc - ptr - 4)) {
 						php_error(E_WARNING, "Only %d bytes were written, expected to write %ld", bytes, loc - ptr - 4);
 					}

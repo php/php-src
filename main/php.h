@@ -307,9 +307,6 @@ int module_startup_modules(void);
 int module_global_startup_modules(void);
 int module_global_shutdown_modules(void);
 
-/* needed for modules only */
-extern PHPAPI int php3i_get_le_fp(void);
-
 /*from basic functions*/
 extern PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers);
 

@@ -206,6 +206,7 @@ PHP_MSHUTDOWN_FUNCTION(pdf){
 }
 
 /* {{{ proto bool pdf_set_info_creator(int info, string creator)
+
    Fills the creator field of the info structure */
 PHP_FUNCTION(pdf_set_info_creator) {
 	pval *arg1, *arg2;
@@ -231,9 +232,11 @@ PHP_FUNCTION(pdf_set_info_creator) {
 
 	RETURN_TRUE;
 }
+
 /* }}} */
 
 /* {{{ proto bool pdf_set_info_title(int info, string title)
+
    Fills the title field of the info structure */
 PHP_FUNCTION(pdf_set_info_title) {
 	pval *arg1, *arg2;
@@ -259,9 +262,11 @@ PHP_FUNCTION(pdf_set_info_title) {
 
 	RETURN_TRUE;
 }
+
 /* }}} */
 
 /* {{{ proto bool pdf_set_info_subject(int info, string subject)
+
    Fills the subject field of the info structure */
 PHP_FUNCTION(pdf_set_info_subject) {
 	pval *arg1, *arg2;
@@ -287,9 +292,11 @@ PHP_FUNCTION(pdf_set_info_subject) {
 
 	RETURN_TRUE;
 }
+
 /* }}} */
 
 /* {{{ proto bool pdf_set_info_author(int info, string author)
+
    Fills the author field of the info structure */
 PHP_FUNCTION(pdf_set_info_author) {
 	pval *arg1, *arg2;
@@ -315,9 +322,11 @@ PHP_FUNCTION(pdf_set_info_author) {
 
 	RETURN_TRUE;
 }
+
 /* }}} */
 
 /* {{{ proto bool pdf_set_info_keywords(int info, string keywords)
+
    Fills the keywords field of the info structure */
 PHP_FUNCTION(pdf_set_info_keywords) {
 	pval *arg1, *arg2;
@@ -343,30 +352,25 @@ PHP_FUNCTION(pdf_set_info_keywords) {
 
 	RETURN_TRUE;
 }
+
 /* }}} */
 
 /* {{{ proto int pdf_open(int filedesc)
    Opens a new pdf document */
 PHP_FUNCTION(pdf_open) {
-	pval *file;
+	pval **file;
 	pval *info;
 	int id, type;
 	FILE *fp;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &file) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &file) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(file);
-	id=file->value.lval;
-	fp = php3_list_find(id,&type);
-	if (!fp || type!=php3i_get_le_fp()) {
-		php3_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(fp, FILE *, file, -1, "File-Handle", php_file_le_fopen());
+	/* XXX should do anzend_list_addref for <fp> here! */
 
 	pdf = PDF_new();
 	if (0 > PDF_open_fp(pdf, fp)) {
