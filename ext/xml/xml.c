@@ -647,7 +647,7 @@ void _xml_startElementHandler(void *userData, const char *name, const char **att
 	const char **attrs = attributes;
 	char *tag_name;
 	char *att, *val;
-	int att_len, val_len;
+	int val_len;
 	zval *retval, *args[3];
 
 	if (parser) {
