@@ -274,14 +274,9 @@ static SWFInput getInput(zval **zfile TSRMLS_DC)
 
 /* {{{ SWFAction
 */
-static zend_function_entry swfaction_functions[] = {
-	PHP_FALIAS(__construct,              swfaction_init,         NULL)
-	{ NULL, NULL, NULL }
-};
-
 /* {{{ proto object swfaction_init(string)
    Returns a new SWFAction object, compiling the given script */
-PHP_FUNCTION(swfaction_init)
+PHP_METHOD(swfaction, __construct)
 {
 	SWFAction action;
 	zval **script;
@@ -319,20 +314,18 @@ static SWFAction getAction(zval *id TSRMLS_DC)
 	return (SWFAction)action;
 }
 /* }}} */
+
+static zend_function_entry swfaction_functions[] = {
+	PHP_ME(swfaction, __construct,         NULL, 0)
+	{ NULL, NULL, NULL }
+};
 /* }}} */
 
 /* {{{ SWFBitmap 
 */
-static zend_function_entry swfbitmap_functions[] = {
-	PHP_FALIAS(__construct,         swfbitmap_init,                NULL)
-	PHP_FALIAS(getWidth,            swfbitmap_getWidth,            NULL)
-	PHP_FALIAS(getHeight,           swfbitmap_getHeight,           NULL)
-	{ NULL, NULL, NULL }
-};
-
 /* {{{ proto class swfbitmap_init(mixed file [, mixed maskfile])
    Returns a new SWFBitmap object from jpg (with optional mask) or dbl file */
-PHP_FUNCTION(swfbitmap_init)
+PHP_METHOD(swfbitmap, __construct)
 {
 	zval **zfile, **zmask = NULL;
 	SWFBitmap bitmap;
@@ -400,7 +393,7 @@ static SWFBitmap getBitmap(zval *id TSRMLS_DC)
 
 /* {{{ proto float swfbitmap_getWidth(void)
    Returns the width of this bitmap */
-PHP_FUNCTION(swfbitmap_getWidth)
+PHP_METHOD(swfbitmap, getWidth)
 {
 	RETURN_DOUBLE(SWFBitmap_getWidth(getBitmap(getThis() TSRMLS_CC)));
 }
@@ -408,36 +401,26 @@ PHP_FUNCTION(swfbitmap_getWidth)
 
 /* {{{ proto float swfbitmap_getHeight(void)
    Returns the height of this bitmap */
-PHP_FUNCTION(swfbitmap_getHeight)
+PHP_METHOD(swfbitmap, getHeight)
 {
 	RETURN_DOUBLE(SWFBitmap_getHeight(getBitmap(getThis() TSRMLS_CC)));
 }
 /* }}} */
+
+static zend_function_entry swfbitmap_functions[] = {
+	PHP_ME(swfbitmap, __construct,         NULL, 0)
+	PHP_ME(swfbitmap, getWidth,            NULL, 0)
+	PHP_ME(swfbitmap, getHeight,           NULL, 0)
+	{ NULL, NULL, NULL }
+};
+
 /* }}} */
 
 /* {{{ SWFButton
 */
-static zend_function_entry swfbutton_functions[] = {
-	PHP_FALIAS(__construct,            swfbutton_init,            NULL)
-	PHP_FALIAS(setHit,                 swfbutton_setHit,          NULL)
-	PHP_FALIAS(setOver,                swfbutton_setOver,         NULL)
-	PHP_FALIAS(setUp,                  swfbutton_setUp,           NULL)
-	PHP_FALIAS(setDown,                swfbutton_setDown,         NULL)
-	PHP_FALIAS(setAction,              swfbutton_setAction,       NULL)
-	PHP_FALIAS(addShape,               swfbutton_addShape,        NULL)
-#ifdef HAVE_NEW_MING
-	PHP_FALIAS(setMenu,                swfbutton_setMenu,         NULL)
-#endif
-	PHP_FALIAS(addAction,              swfbutton_addAction,       NULL)
-#ifdef HAVE_NEW_MING
-	PHP_FALIAS(addSound,               swfbutton_addSound,        NULL)
-#endif
-	{ NULL, NULL, NULL }
-};
-
 /* {{{ proto object swfbutton_init(void)
    Returns a new SWFButton object */
-PHP_FUNCTION(swfbutton_init)
+PHP_METHOD(swfbutton, __construct)
 {
 	SWFButton button = newSWFButton();
 	int ret = zend_list_insert(button, le_swfbuttonp);
@@ -468,7 +451,7 @@ static SWFButton getButton(zval *id TSRMLS_DC)
 
 /* {{{ proto void swfbutton_setHit(object SWFCharacter)
    Sets the character for this button's hit test state */
-PHP_FUNCTION(swfbutton_setHit)
+PHP_METHOD(swfbutton, setHit)
 {
 	zval **zchar;
 	SWFButton button = getButton(getThis() TSRMLS_CC);
@@ -486,7 +469,7 @@ PHP_FUNCTION(swfbutton_setHit)
 
 /* {{{ proto void swfbutton_setOver(object SWFCharacter)
    Sets the character for this button's over state */
-PHP_FUNCTION(swfbutton_setOver)
+PHP_METHOD(swfbutton, setOver)
 {
 	zval **zchar;
 	SWFButton button = getButton(getThis() TSRMLS_CC);
@@ -504,7 +487,7 @@ PHP_FUNCTION(swfbutton_setOver)
 
 /* {{{ proto void swfbutton_setUp(object SWFCharacter)
    Sets the character for this button's up state */
-PHP_FUNCTION(swfbutton_setUp)
+PHP_METHOD(swfbutton, setUp)
 {
 	zval **zchar;
 	SWFButton button = getButton(getThis() TSRMLS_CC);
@@ -522,7 +505,7 @@ PHP_FUNCTION(swfbutton_setUp)
 
 /* {{{ proto void swfbutton_setDown(object SWFCharacter)
    Sets the character for this button's down state */
-PHP_FUNCTION(swfbutton_setDown)
+PHP_METHOD(swfbutton, setDown)
 {
 	zval **zchar;
 	SWFButton button = getButton(getThis() TSRMLS_CC);
@@ -540,7 +523,7 @@ PHP_FUNCTION(swfbutton_setDown)
 
 /* {{{ proto void swfbutton_addShape(object SWFCharacter, int flags)
    Sets the character to display for the condition described in flags */
-PHP_FUNCTION(swfbutton_addShape)
+PHP_METHOD(swfbutton, addShape)
 {
 	zval **zchar, **flags;
 	SWFButton button = getButton(getThis() TSRMLS_CC);
@@ -561,7 +544,7 @@ PHP_FUNCTION(swfbutton_addShape)
 /* {{{ proto void swfbutton_setMenu(int flag)
 	enable track as menu button behaviour */
 
-PHP_FUNCTION(swfbutton_setMenu)
+PHP_METHOD(swfbutton, setMenu)
 {
 	zval **zflag;
 	SWFButton button = getButton(getThis() TSRMLS_CC);
@@ -576,7 +559,7 @@ PHP_FUNCTION(swfbutton_setMenu)
 
 /* {{{ proto void swfbutton_setAction(object SWFAction)
    Sets the action to perform when button is pressed */
-PHP_FUNCTION(swfbutton_setAction)
+PHP_METHOD(swfbutton, setAction)
 {
 	zval **zaction;
 	SWFButton button = getButton(getThis() TSRMLS_CC);
@@ -597,7 +580,7 @@ PHP_FUNCTION(swfbutton_setAction)
    associates a sound with a button transition
 	NOTE: the transitions are all wrong _UP, _OVER, _DOWN _HIT  */
 
-PHP_FUNCTION(swfbutton_addSound)
+PHP_METHOD(swfbutton, addSound)
 {
 	zval **zsound, **flags;
 	SWFButton button = getButton(getThis() TSRMLS_CC);
@@ -627,7 +610,7 @@ PHP_FUNCTION(swfbutton_addSound)
 
 /* {{{ proto void swfbutton_addAction(object SWFAction, int flags)
    Sets the action to perform when conditions described in flags is met */
-PHP_FUNCTION(swfbutton_addAction)
+PHP_METHOD(swfbutton, addAction)
 {
 	zval **zaction, **flags;
 	SWFButton button = getButton(getThis() TSRMLS_CC);
@@ -665,43 +648,29 @@ PHP_FUNCTION(swfbutton_keypress)
 	RETURN_LONG((c&0x7f)<<9);
 }
 /* }}} */
-/* }}} */
 
-/* {{{ SWFDisplayitem
-*/
-static zend_function_entry swfdisplayitem_functions[] = {
-	PHP_FALIAS(__construct,  swfdisplayitem_moveTo,      NULL)
-	PHP_FALIAS(move,         swfdisplayitem_move,        NULL)
-	PHP_FALIAS(scaleTo,      swfdisplayitem_scaleTo,     NULL)
-	PHP_FALIAS(scale,        swfdisplayitem_scale,       NULL)
-	PHP_FALIAS(rotateTo,     swfdisplayitem_rotateTo,    NULL)
-	PHP_FALIAS(rotate,       swfdisplayitem_rotate,      NULL)
-	PHP_FALIAS(skewXTo,      swfdisplayitem_skewXTo,     NULL)
-	PHP_FALIAS(skewX,        swfdisplayitem_skewX,       NULL)
-	PHP_FALIAS(skewYTo,      swfdisplayitem_skewYTo,     NULL)
-	PHP_FALIAS(skewY,        swfdisplayitem_skewY,       NULL)
-	PHP_FALIAS(setMatrix,    swfdisplayitem_setMatrix,   NULL)
-	PHP_FALIAS(setDepth,     swfdisplayitem_setDepth,    NULL)
-	PHP_FALIAS(setRatio,     swfdisplayitem_setRatio,    NULL)
-	PHP_FALIAS(addColor,     swfdisplayitem_addColor,    NULL)
-	PHP_FALIAS(multColor,    swfdisplayitem_multColor,   NULL)
-	PHP_FALIAS(setName,      swfdisplayitem_setName,     NULL)
-	PHP_FALIAS(addAction,    swfdisplayitem_addAction,   NULL)
+static zend_function_entry swfbutton_functions[] = {
+	PHP_ME(swfbutton, __construct,   NULL, 0)
+	PHP_ME(swfbutton, setHit,        NULL, 0)
+	PHP_ME(swfbutton, setOver,       NULL, 0)
+	PHP_ME(swfbutton, setUp,         NULL, 0)
+	PHP_ME(swfbutton, setDown,       NULL, 0)
+	PHP_ME(swfbutton, setAction,     NULL, 0)
+	PHP_ME(swfbutton, addShape,      NULL, 0)
 #ifdef HAVE_NEW_MING
-	PHP_FALIAS(remove,       swfdisplayitem_remove,      NULL)
-	PHP_FALIAS(setMaskLevel, swfdisplayitem_setMaskLevel,NULL)
-	PHP_FALIAS(endMask,      swfdisplayitem_endMask,     NULL)
-	PHP_FALIAS(getX,         swfdisplayitem_getX,        NULL)
-	PHP_FALIAS(getY,         swfdisplayitem_getY,        NULL)
-	PHP_FALIAS(getXScale,    swfdisplayitem_getXScale,   NULL)
-	PHP_FALIAS(getYScale,    swfdisplayitem_getYScale,   NULL)
-	PHP_FALIAS(getXSkew,     swfdisplayitem_getXSkew,    NULL)
-	PHP_FALIAS(getYSkew,     swfdisplayitem_getYSkew,    NULL)
-	PHP_FALIAS(getRot,       swfdisplayitem_getRot,      NULL)
+	PHP_ME(swfbutton, setMenu,       NULL, 0)
+#endif
+	PHP_ME(swfbutton, addAction,     NULL, 0)
+#ifdef HAVE_NEW_MING
+	PHP_ME(swfbutton, addSound,      NULL, 0)
 #endif
 	{ NULL, NULL, NULL }
 };
 
+/* }}} */
+
+/* {{{ SWFDisplayitem
+*/
 /* {{{ internal function getDisplayItem
    Returns the SWFDisplayItem contained in zval *id */
 static SWFDisplayItem getDisplayItem(zval *id TSRMLS_DC)
@@ -718,7 +687,7 @@ static SWFDisplayItem getDisplayItem(zval *id TSRMLS_DC)
 
 /* {{{ proto void swfdisplayitem_moveTo(int x, int y)
    Moves this SWFDisplayItem to movie coordinates (x, y) */
-PHP_FUNCTION(swfdisplayitem_moveTo)
+PHP_METHOD(swfdisplayitem, moveTo)
 {
 	zval **x, **y;
 
@@ -734,7 +703,7 @@ PHP_FUNCTION(swfdisplayitem_moveTo)
 
 /* {{{ proto void swfdisplayitem_move(float dx, float dy)
    Displaces this SWFDisplayItem by (dx, dy) in movie coordinates */
-PHP_FUNCTION(swfdisplayitem_move)
+PHP_METHOD(swfdisplayitem, move)
 {
 	zval **x, **y;
 
@@ -750,7 +719,7 @@ PHP_FUNCTION(swfdisplayitem_move)
 
 /* {{{ proto void swfdisplayitem_scaleTo(float xScale [, float yScale])
    Scales this SWFDisplayItem by xScale in the x direction, yScale in the y, or both to xScale if only one arg */
-PHP_FUNCTION(swfdisplayitem_scaleTo)
+PHP_METHOD(swfdisplayitem, scaleTo)
 {
 	zval **x, **y;
 
@@ -775,7 +744,7 @@ PHP_FUNCTION(swfdisplayitem_scaleTo)
 
 /* {{{ proto void swfdisplayitem_scale(float xScale, float yScale)
    Multiplies this SWFDisplayItem's current x scale by xScale, its y scale by yScale */
-PHP_FUNCTION(swfdisplayitem_scale)
+PHP_METHOD(swfdisplayitem, scale)
 {
 	zval **x, **y;
 
@@ -791,7 +760,7 @@ PHP_FUNCTION(swfdisplayitem_scale)
 
 /* {{{ proto void swfdisplayitem_rotateTo(float degrees)
    Rotates this SWFDisplayItem the given (clockwise) degrees from its original orientation */
-PHP_FUNCTION(swfdisplayitem_rotateTo)
+PHP_METHOD(swfdisplayitem, rotateTo)
 {
 	zval **degrees;
 
@@ -806,7 +775,7 @@ PHP_FUNCTION(swfdisplayitem_rotateTo)
 
 /* {{{ proto void swfdisplayitem_rotate(float degrees)
    Rotates this SWFDisplayItem the given (clockwise) degrees from its current orientation */
-PHP_FUNCTION(swfdisplayitem_rotate)
+PHP_METHOD(swfdisplayitem, rotate)
 {
 	zval **degrees;
 
@@ -821,7 +790,7 @@ PHP_FUNCTION(swfdisplayitem_rotate)
 
 /* {{{ proto void swfdisplayitem_skewXTo(float xSkew)
    Sets this SWFDisplayItem's x skew value to xSkew */
-PHP_FUNCTION(swfdisplayitem_skewXTo)
+PHP_METHOD(swfdisplayitem, skewXTo)
 {
 	zval **x;
 
@@ -836,7 +805,7 @@ PHP_FUNCTION(swfdisplayitem_skewXTo)
 
 /* {{{ proto void swfdisplayitem_skewX(float xSkew)
    Adds xSkew to this SWFDisplayItem's x skew value */
-PHP_FUNCTION(swfdisplayitem_skewX)
+PHP_METHOD(swfdisplayitem, skewX)
 {
 	zval **x;
 
@@ -851,7 +820,7 @@ PHP_FUNCTION(swfdisplayitem_skewX)
 
 /* {{{ proto void swfdisplayitem_skewYTo(float ySkew)
    Sets this SWFDisplayItem's y skew value to ySkew */
-PHP_FUNCTION(swfdisplayitem_skewYTo)
+PHP_METHOD(swfdisplayitem, skewYTo)
 {
 	zval **y;
 
@@ -866,7 +835,7 @@ PHP_FUNCTION(swfdisplayitem_skewYTo)
 
 /* {{{ proto void swfdisplayitem_skewY(float ySkew)
    Adds ySkew to this SWFDisplayItem's y skew value */
-PHP_FUNCTION(swfdisplayitem_skewY)
+PHP_METHOD(swfdisplayitem, skewY)
 {
 	zval **y;
 
@@ -881,7 +850,7 @@ PHP_FUNCTION(swfdisplayitem_skewY)
 
 /* {{{ proto void swfdisplayitem_setMatrix(float a, float b, float c, float d, float x, float y)
    Sets the item's transform matrix */
-PHP_FUNCTION(swfdisplayitem_setMatrix)
+PHP_METHOD(swfdisplayitem, setMatrix)
 {
 	zval **a, **b, **c, **d, **x, **y;
 
@@ -904,7 +873,7 @@ PHP_FUNCTION(swfdisplayitem_setMatrix)
 
 /* {{{ proto void swfdisplayitem_setDepth(int depth)
    Sets this SWFDisplayItem's z-depth to depth.  Items with higher depth values are drawn on top of those with lower values */
-PHP_FUNCTION(swfdisplayitem_setDepth)
+PHP_METHOD(swfdisplayitem, setDepth)
 {
 	zval **depth;
 
@@ -919,7 +888,7 @@ PHP_FUNCTION(swfdisplayitem_setDepth)
 
 /* {{{ proto void swfdisplayitem_setRatio(float ratio)
    Sets this SWFDisplayItem's ratio to ratio.  Obviously only does anything if displayitem was created from an SWFMorph */
-PHP_FUNCTION(swfdisplayitem_setRatio)
+PHP_METHOD(swfdisplayitem, setRatio)
 {
 	zval **ratio;
 
@@ -934,7 +903,7 @@ PHP_FUNCTION(swfdisplayitem_setRatio)
 
 /* {{{ proto void swfdisplayitem_addColor(int r, int g, int b [, int a])
    Sets the add color part of this SWFDisplayItem's CXform to (r, g, b [, a]), a defaults to 0 */
-PHP_FUNCTION(swfdisplayitem_addColor)
+PHP_METHOD(swfdisplayitem, addColor)
 {
 	zval **r, **g, **b, **za;
 	int a = 0;
@@ -963,7 +932,7 @@ PHP_FUNCTION(swfdisplayitem_addColor)
 
 /* {{{ proto void swfdisplayitem_multColor(float r, float g, float b [, float a])
    Sets the multiply color part of this SWFDisplayItem's CXform to (r, g, b [, a]), a defaults to 1.0 */
-PHP_FUNCTION(swfdisplayitem_multColor)
+PHP_METHOD(swfdisplayitem, multColor)
 {
 	zval **r, **g, **b, **za;
 	float a = 1.0f;
@@ -992,7 +961,7 @@ PHP_FUNCTION(swfdisplayitem_multColor)
 
 /* {{{ proto void swfdisplayitem_setName(string name)
    Sets this SWFDisplayItem's name to name */
-PHP_FUNCTION(swfdisplayitem_setName)
+PHP_METHOD(swfdisplayitem, setName)
 {
 	zval **name;
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
@@ -1008,7 +977,7 @@ PHP_FUNCTION(swfdisplayitem_setName)
 
 /* {{{ proto void swfdisplayitem_addAction(object SWFAction, int flags)
    Adds this SWFAction to the given SWFSprite instance */
-PHP_FUNCTION(swfdisplayitem_addAction)
+PHP_METHOD(swfdisplayitem, addAction)
 {
 	zval **zaction, **flags;
 	SWFAction action;
@@ -1028,7 +997,7 @@ PHP_FUNCTION(swfdisplayitem_addAction)
 #ifdef HAVE_NEW_MING
 /* {{{ swfdisplayitem_remove */
 
-PHP_FUNCTION(swfdisplayitem_remove)
+PHP_METHOD(swfdisplayitem, remove)
 {
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
 
@@ -1042,7 +1011,7 @@ PHP_FUNCTION(swfdisplayitem_remove)
 /* {{{ proto void swfdisplayitem_setMaskLevel(int level)
    defines a MASK layer at level */
 
-PHP_FUNCTION(swfdisplayitem_setMaskLevel)
+PHP_METHOD(swfdisplayitem, setMaskLevel)
 {
 	zval **level;
 
@@ -1058,7 +1027,7 @@ PHP_FUNCTION(swfdisplayitem_setMaskLevel)
 /* {{{ proto void swfdisplayitem_endMask()
    another way of defining a MASK layer */
 
-PHP_FUNCTION(swfdisplayitem_endMask)
+PHP_METHOD(swfdisplayitem, endMask)
 {
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
 
@@ -1071,7 +1040,7 @@ PHP_FUNCTION(swfdisplayitem_endMask)
 
 /* {{{ swfdisplayitem_getX */
 
-PHP_FUNCTION(swfdisplayitem_getX)
+PHP_METHOD(swfdisplayitem, getX)
 {
 	float ret;
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
@@ -1086,7 +1055,7 @@ PHP_FUNCTION(swfdisplayitem_getX)
 
 /* {{{ swfdisplayitem_getY */
 
-PHP_FUNCTION(swfdisplayitem_getY)
+PHP_METHOD(swfdisplayitem, getY)
 {
 	float ret;
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
@@ -1101,7 +1070,7 @@ PHP_FUNCTION(swfdisplayitem_getY)
 
 /* {{{ swfdisplayitem_getXScale */
 
-PHP_FUNCTION(swfdisplayitem_getXScale)
+PHP_METHOD(swfdisplayitem, getXScale)
 {
 	float ret;
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
@@ -1116,7 +1085,7 @@ PHP_FUNCTION(swfdisplayitem_getXScale)
 
 /* {{{ swfdisplayitem_getYScale */
 
-PHP_FUNCTION(swfdisplayitem_getYScale)
+PHP_METHOD(swfdisplayitem, getYScale)
 {
 	float ret;
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
@@ -1131,7 +1100,7 @@ PHP_FUNCTION(swfdisplayitem_getYScale)
 
 /* {{{ swfdisplayitem_getXSkew */
 
-PHP_FUNCTION(swfdisplayitem_getXSkew)
+PHP_METHOD(swfdisplayitem, getXSkew)
 {
 	float ret;
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
@@ -1146,7 +1115,7 @@ PHP_FUNCTION(swfdisplayitem_getXSkew)
 
 /* {{{ swfdisplayitem_getYSkew */
 
-PHP_FUNCTION(swfdisplayitem_getYSkew)
+PHP_METHOD(swfdisplayitem, getYSkew)
 {
 	float ret;
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
@@ -1161,7 +1130,7 @@ PHP_FUNCTION(swfdisplayitem_getYSkew)
 
 /* {{{ swfdisplayitem_getRot */
 
-PHP_FUNCTION(swfdisplayitem_getRot)
+PHP_METHOD(swfdisplayitem, getRot)
 {
 	float ret;
 	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
@@ -1175,23 +1144,46 @@ PHP_FUNCTION(swfdisplayitem_getRot)
 /* }}} */
 #endif
 
+static zend_function_entry swfdisplayitem_functions[] = {
+	PHP_ME(swfdisplayitem, moveTo,      NULL, 0)
+	PHP_ME(swfdisplayitem, move,        NULL, 0)
+	PHP_ME(swfdisplayitem, scaleTo,     NULL, 0)
+	PHP_ME(swfdisplayitem, scale,       NULL, 0)
+	PHP_ME(swfdisplayitem, rotateTo,    NULL, 0)
+	PHP_ME(swfdisplayitem, rotate,      NULL, 0)
+	PHP_ME(swfdisplayitem, skewXTo,     NULL, 0)
+	PHP_ME(swfdisplayitem, skewX,       NULL, 0)
+	PHP_ME(swfdisplayitem, skewYTo,     NULL, 0)
+	PHP_ME(swfdisplayitem, skewY,       NULL, 0)
+	PHP_ME(swfdisplayitem, setMatrix,   NULL, 0)
+	PHP_ME(swfdisplayitem, setDepth,    NULL, 0)
+	PHP_ME(swfdisplayitem, setRatio,    NULL, 0)
+	PHP_ME(swfdisplayitem, addColor,    NULL, 0)
+	PHP_ME(swfdisplayitem, multColor,   NULL, 0)
+	PHP_ME(swfdisplayitem, setName,     NULL, 0)
+	PHP_ME(swfdisplayitem, addAction,   NULL, 0)
+#ifdef HAVE_NEW_MING
+	PHP_ME(swfdisplayitem, remove,      NULL, 0)
+	PHP_ME(swfdisplayitem, setMaskLevel,NULL, 0)
+	PHP_ME(swfdisplayitem, endMask,     NULL, 0)
+	PHP_ME(swfdisplayitem, getX,        NULL, 0)
+	PHP_ME(swfdisplayitem, getY,        NULL, 0)
+	PHP_ME(swfdisplayitem, getXScale,   NULL, 0)
+	PHP_ME(swfdisplayitem, getYScale,   NULL, 0)
+	PHP_ME(swfdisplayitem, getXSkew,    NULL, 0)
+	PHP_ME(swfdisplayitem, getYSkew,    NULL, 0)
+	PHP_ME(swfdisplayitem, getRot,      NULL, 0)
+#endif
+	{ NULL, NULL, NULL }
+};
+
 /* }}} */
 
 /* {{{ SWFFill
 */
-static zend_function_entry swffill_functions[] = {
-	PHP_FALIAS(__construct,  swffill_init,        NULL)
-	PHP_FALIAS(moveTo,       swffill_moveTo,      NULL)
-	PHP_FALIAS(scaleTo,      swffill_scaleTo,     NULL)
-	PHP_FALIAS(rotateTo,     swffill_rotateTo,    NULL)
-	PHP_FALIAS(skewXTo,      swffill_skewXTo,     NULL)
-	PHP_FALIAS(skewYTo,      swffill_skewYTo,     NULL)
-	{ NULL, NULL, NULL }
-};
-
 /* {{{ proto class swffill_init(void)
    Returns a new SWFFill object */
-PHP_FUNCTION(swffill_init)
+PHP_METHOD(swffill, __construct)
 {
   php_error_docref(NULL TSRMLS_CC, E_ERROR, "Instantiating SWFFill won't do any good- use SWFShape::addFill() instead");
 }
@@ -1220,7 +1212,7 @@ static SWFFill getFill(zval *id TSRMLS_DC)
 
 /* {{{ proto void swffill_moveTo(float x, float y)
    Moves this SWFFill to shape coordinates (x,y) */
-PHP_FUNCTION(swffill_moveTo)
+PHP_METHOD(swffill, moveTo)
 {
 	zval **x, **y;
 
@@ -1236,7 +1228,7 @@ PHP_FUNCTION(swffill_moveTo)
 
 /* {{{ proto void swffill_scaleTo(float xScale [, float yScale])
    Scales this SWFFill by xScale in the x direction, yScale in the y, or both to xScale if only one arg */
-PHP_FUNCTION(swffill_scaleTo)
+PHP_METHOD(swffill, scaleTo)
 {
 	zval **x, **y;
 
@@ -1261,7 +1253,7 @@ PHP_FUNCTION(swffill_scaleTo)
 
 /* {{{ proto void swffill_rotateTo(float degrees)
    Rotates this SWFFill the given (clockwise) degrees from its original orientation */
-PHP_FUNCTION(swffill_rotateTo)
+PHP_METHOD(swffill, rotateTo)
 {
 	zval **degrees;
 
@@ -1275,7 +1267,7 @@ PHP_FUNCTION(swffill_rotateTo)
 
 /* {{{ proto void swffill_skewXTo(float xSkew)
    Sets this SWFFill's x skew value to xSkew */
-PHP_FUNCTION(swffill_skewXTo)
+PHP_METHOD(swffill, skewXTo)
 {
 	zval **x;
 
@@ -1289,7 +1281,7 @@ PHP_FUNCTION(swffill_skewXTo)
 
 /* {{{ proto void swffill_skewYTo(float ySkew)
    Sets this SWFFill's y skew value to ySkew */
-PHP_FUNCTION(swffill_skewYTo)
+PHP_METHOD(swffill, skewYTo)
 {
 	zval **y;
 
@@ -1300,20 +1292,23 @@ PHP_FUNCTION(swffill_skewYTo)
 	SWFFill_skewYTo(getFill(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(y));
 }
 /* }}} */
-/* }}} */
-
-#ifdef HAVE_NEW_MING
-/* {{{ SWFFontCharacter */
-
-static zend_function_entry swffontchar_functions[] = {
-	PHP_FALIAS(__construct,      swffontchar_addChars,      NULL)
-	PHP_FALIAS(addUTF8Chars,     swffontchar_addUTF8Chars,  NULL)
+static zend_function_entry swffill_functions[] = {
+	PHP_ME(swffill, __construct, NULL, 0)
+	PHP_ME(swffill, moveTo,      NULL, 0)
+	PHP_ME(swffill, scaleTo,     NULL, 0)
+	PHP_ME(swffill, rotateTo,    NULL, 0)
+	PHP_ME(swffill, skewXTo,     NULL, 0)
+	PHP_ME(swffill, skewYTo,     NULL, 0)
 	{ NULL, NULL, NULL }
 };
 
+/* }}} */
+
+/* {{{ SWFFontCharacter */
+#ifdef HAVE_NEW_MING
+
 /* {{{ internal function SWFText getFont(zval *id)
    Returns the Font object in zval *id */
-
 static
 SWFFontCharacter getFontCharacter(zval *id TSRMLS_DC)
 {
@@ -1324,6 +1319,7 @@ SWFFontCharacter getFontCharacter(zval *id TSRMLS_DC)
 
 	return (SWFFontCharacter)font;
 }
+/* }}} */
 
 static void destroy_SWFFontCharacter_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
@@ -1332,8 +1328,7 @@ static void destroy_SWFFontCharacter_resource(zend_rsrc_list_entry *resource TSR
 
 /* {{{ proto void swffontchar_addChars(string)
    adds characters to a font for exporting font */
-
-PHP_FUNCTION(swffontchar_addChars)
+PHP_METHOD(swffontchar, addChars)
 {
 	zval **zstring;
 
@@ -1345,10 +1340,11 @@ PHP_FUNCTION(swffontchar_addChars)
 	SWFFontCharacter_addChars(getFontCharacter(getThis() TSRMLS_CC), Z_STRVAL_PP(zstring));
 }
 /* }}} */
+
 /* {{{ proto void swffontchar_addChars(string)
    adds characters to a font for exporting font */
 
-PHP_FUNCTION(swffontchar_addUTF8Chars)
+PHP_METHOD(swffontchar, addUTF8Chars)
 {
 	zval **zstring;
 
@@ -1360,28 +1356,18 @@ PHP_FUNCTION(swffontchar_addUTF8Chars)
 	SWFFontCharacter_addUTF8Chars(getFontCharacter(getThis() TSRMLS_CC), Z_STRVAL_PP(zstring));
 }
 /* }}} */
-/* }}} */
-#endif
 
-/* {{{ SWFFont
-*/
-static zend_function_entry swffont_functions[] = {
-	PHP_FALIAS(__construct,      swffont_init,              NULL)
-	PHP_FALIAS(getWidth,         swffont_getWidth,          NULL)
-#ifdef HAVE_NEW_MING
-	PHP_FALIAS(getUTF8Width,     swffont_getUTF8Width,      NULL)
-/*	PHP_FALIAS(getwidewidth,     swffont_getWideWidth,      NULL)*/
-#endif
-	PHP_FALIAS(getAscent,        swffont_getAscent,         NULL)
-	PHP_FALIAS(getDescent,       swffont_getDescent,        NULL)
-	PHP_FALIAS(getLeading,       swffont_getLeading,        NULL)
-#ifdef HAVE_NEW_MING
-/*	PHP_FALIAS(addchars,         swffont_addChars,          NULL)*/
-	PHP_FALIAS(getShape,         swffont_getShape,          NULL)
-#endif
+static zend_function_entry swffontchar_functions[] = {
+	PHP_ME(swffontchar, __construct,   NULL, 0)
+	PHP_ME(swffontchar, addUTF8Chars,  NULL, 0)
 	{ NULL, NULL, NULL }
 };
 
+#endif
+/* }}} */
+
+/* {{{ SWFFont
+*/
 /* {{{ internal function SWFText getFont(zval *id)
    Returns the Font object in zval *id */
 static SWFFont getFont(zval *id TSRMLS_DC)
@@ -1397,7 +1383,7 @@ static SWFFont getFont(zval *id TSRMLS_DC)
 
 /* {{{ proto object swffont_init(string filename)
    Returns a new SWFFont object from given file */
-PHP_FUNCTION(swffont_init)
+PHP_METHOD(swffont, __construct)
 {
 	zval **zfile;
 	SWFFont font;
@@ -1446,7 +1432,7 @@ static void destroy_SWFFont_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 
 /* {{{ proto float swffont_getWidth(string str)
    Calculates the width of the given string in this font at full height */
-PHP_FUNCTION(swffont_getWidth)
+PHP_METHOD(swffont, getWidth)
 {
 	zval **zstring;
 	float width;
@@ -1464,7 +1450,7 @@ PHP_FUNCTION(swffont_getWidth)
 /* {{{ proto int swffont_getUTF8Width(string)
    Calculates the width of the given string in this font at full height */
 
-PHP_FUNCTION(swffont_getUTF8Width)
+PHP_METHOD(swffont, getUTF8Width)
 {
 	zval **zstring;
 	float width;
@@ -1484,7 +1470,7 @@ PHP_FUNCTION(swffont_getUTF8Width)
 /* {{{ proto int swffont_getWideWidth(string)
    Calculates the width of the given string in this font at full height */
 /*
-PHP_FUNCTION(swffont_getWideWidth)
+PHP_METHOD(swffont, getWideWidth)
 {
 	zval **zstring;
 	float width;
@@ -1504,7 +1490,7 @@ PHP_FUNCTION(swffont_getWideWidth)
 
 /* {{{ proto float swffont_getAscent(void)
    Returns the ascent of the font, or 0 if not available */
-PHP_FUNCTION(swffont_getAscent)
+PHP_METHOD(swffont, getAscent)
 {
 	RETURN_DOUBLE(SWFFont_getAscent(getFont(getThis() TSRMLS_CC)));
 }
@@ -1512,7 +1498,7 @@ PHP_FUNCTION(swffont_getAscent)
 
 /* {{{ proto float swffont_getDescent(void)
    Returns the descent of the font, or 0 if not available */
-PHP_FUNCTION(swffont_getDescent)
+PHP_METHOD(swffont, getDescent)
 {
 	RETURN_DOUBLE(SWFFont_getDescent(getFont(getThis() TSRMLS_CC)));
 }
@@ -1520,7 +1506,7 @@ PHP_FUNCTION(swffont_getDescent)
 
 /* {{{ proto float swffont_getLeading(void)
    Returns the leading of the font, or 0 if not available */
-PHP_FUNCTION(swffont_getLeading)
+PHP_METHOD(swffont, getLeading)
 {
 	RETURN_DOUBLE(SWFFont_getLeading(getFont(getThis() TSRMLS_CC)));
 }
@@ -1530,7 +1516,7 @@ PHP_FUNCTION(swffont_getLeading)
 /* {{{ proto void swffont_addChars(string)
    adds characters to a font required within textfields */
 /*
-PHP_FUNCTION(swffont_addChars)
+PHP_METHOD(swffont, addChars)
 {
 	zval **zstring;
 
@@ -1547,7 +1533,7 @@ PHP_FUNCTION(swffont_addChars)
 /* {{{ proto char *swffont_getShape(code)
    Returns the glyph shape of a char as a text string */
 
-PHP_FUNCTION(swffont_getShape)
+PHP_METHOD(swffont, getShape)
 {
 	zval **zcode;
 	char *result;
@@ -1562,22 +1548,33 @@ PHP_FUNCTION(swffont_getShape)
 	free(result);
 }
 /* }}} */
-/* }}} */
+
 #endif
+
+static zend_function_entry swffont_functions[] = {
+	PHP_ME(swffont, __construct,       NULL, 0)
+	PHP_ME(swffont, getWidth,          NULL, 0)
+#ifdef HAVE_NEW_MING
+	PHP_ME(swffont, getUTF8Width,      NULL, 0)
+/*	PHP_ME(swffont, getwidewidth,      NULL, 0)*/
+#endif
+	PHP_ME(swffont, getAscent,         NULL, 0)
+	PHP_ME(swffont, getDescent,        NULL, 0)
+	PHP_ME(swffont, getLeading,        NULL, 0)
+#ifdef HAVE_NEW_MING
+/*	PHP_ME(swffont, addchars,          NULL, 0)*/
+	PHP_ME(swffont, getShape,          NULL, 0)
+#endif
+	{ NULL, NULL, NULL }
+};
 
 /* }}} */
 
 /* {{{ SWFGradient
 */
-static zend_function_entry swfgradient_functions[] = {
-	PHP_FALIAS(__construct,  swfgradient_init,      NULL)
-	PHP_FALIAS(addEntry,     swfgradient_addEntry,  NULL)
-	{ NULL, NULL, NULL }
-};
-
 /* {{{ proto class swfgradient_init(void)
    Returns a new SWFGradient object */
-PHP_FUNCTION(swfgradient_init)
+PHP_METHOD(swfgradient, __construct)
 {
 	SWFGradient gradient = newSWFGradient();
 	int ret = zend_list_insert(gradient, le_swfgradientp);
@@ -1608,7 +1605,7 @@ static SWFGradient getGradient(zval *id TSRMLS_DC)
 
 /* {{{ proto void swfgradient_addEntry(float ratio, int r, int g, int b [, int a])
    Adds given entry to the gradient */
-PHP_FUNCTION(swfgradient_addEntry)
+PHP_METHOD(swfgradient, addEntry)
 {
 	zval **ratio, **r, **g, **b;
 	byte a = 0xff;
@@ -1639,20 +1636,20 @@ PHP_FUNCTION(swfgradient_addEntry)
 	);
 }
 /* }}} */
+
+static zend_function_entry swfgradient_functions[] = {
+	PHP_ME(swfgradient, __construct, NULL, 0)
+	PHP_ME(swfgradient, addEntry,    NULL, 0)
+	{ NULL, NULL, NULL }
+};
+
 /* }}} */
 
 /* {{{ SWFMorph 
 */
-static zend_function_entry swfmorph_functions[] = {
-	PHP_FALIAS(__construct,           swfmorph_init,            NULL)
-	PHP_FALIAS(getShape1,             swfmorph_getShape1,       NULL)
-	PHP_FALIAS(getShape2,             swfmorph_getShape2,       NULL)
-	{ NULL, NULL, NULL }
-};
-
 /* {{{ proto object swfmorph_init(void)
    Returns a new SWFMorph object */
-PHP_FUNCTION(swfmorph_init)
+PHP_METHOD(swfmorph, __construct)
 {
 	SWFMorph morph = newSWFMorphShape();
 	int ret = zend_list_insert(morph, le_swfmorphp);
@@ -1683,7 +1680,7 @@ static SWFMorph getMorph(zval *id TSRMLS_DC)
 
 /* {{{ proto object swfmorph_getShape1(void)
    Return's this SWFMorph's start shape object */
-PHP_FUNCTION(swfmorph_getShape1)
+PHP_METHOD(swfmorph, getShape1)
 {
 	SWFMorph morph = getMorph(getThis() TSRMLS_CC);
 	SWFShape shape = SWFMorph_getShape1(morph);
@@ -1697,7 +1694,7 @@ PHP_FUNCTION(swfmorph_getShape1)
 
 /* {{{ proto object swfmorph_getShape2(void)
    Return's this SWFMorph's start shape object */
-PHP_FUNCTION(swfmorph_getShape2)
+PHP_METHOD(swfmorph, getShape2)
 {
 	SWFMorph morph = getMorph(getThis() TSRMLS_CC);
 	SWFShape shape = SWFMorph_getShape2(morph);
@@ -1708,15 +1705,17 @@ PHP_FUNCTION(swfmorph_getShape2)
 	zend_list_addref(ret);
 }
 /* }}} */
-/* }}} */
 
-/* {{{ SWFSound */
-
-static zend_function_entry swfsound_functions[] = {
-	PHP_FALIAS(__construct,      swfsound_init,             NULL)
+static zend_function_entry swfmorph_functions[] = {
+	PHP_ME(swfmorph, __construct,     NULL, 0)
+	PHP_ME(swfmorph, getShape1,       NULL, 0)
+	PHP_ME(swfmorph, getShape2,       NULL, 0)
 	{ NULL, NULL, NULL }
 };
 
+/* }}} */
+
+/* {{{ SWFSound */
 /* {{{ internal function SWFSound getSound(zval *id)
    Returns the Sound object in zval *id */
 
@@ -1733,7 +1732,7 @@ SWFSound getSound(zval *id TSRMLS_DC)
 /* }}} */
 /* {{{ proto class swfsound_init(string filename, int flags)
    Returns a new SWFSound object from given file */
-PHP_FUNCTION(swfsound_init)
+PHP_METHOD(swfsound, __construct)
 {
 	zval **zfile, **zflags;
 	SWFSound sound;
@@ -1779,26 +1778,24 @@ PHP_FUNCTION(swfsound_init)
 	add_property_resource(getThis(), "sound", ret);
 	zend_list_addref(ret);
 }
+
 static void destroy_SWFSound_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
 	destroySWFBlock((SWFBlock)resource->ptr);
 }
 
 /* }}} */
-/* }}} */
 
-#ifdef HAVE_NEW_MING
-/* should handle envelope functions */
-/* {{{ SWFSoundInstance */
-
-static zend_function_entry swfsoundinstance_functions[] = {
-	PHP_FALIAS(__construct,    swfsoundinstance_noMultiple,    NULL)
-	PHP_FALIAS(loopInPoint,    swfsoundinstance_loopInPoint,   NULL)
-	PHP_FALIAS(loopOutPoint,   swfsoundinstance_loopOutPoint,  NULL)
-	PHP_FALIAS(loopCount,      swfsoundinstance_loopCount,     NULL)
+static zend_function_entry swfsound_functions[] = {
+	PHP_ME(swfsound, __construct,             NULL, 0)
 	{ NULL, NULL, NULL }
 };
 
+/* }}} */
+
+/* {{{ SWFSoundInstance */
+#ifdef HAVE_NEW_MING
+/* should handle envelope functions */
 /* {{{ internal function SWFSoundInstance getSoundInstance(zval *id)
    Returns the SoundInstance object in zval *id */
 
@@ -1815,7 +1812,7 @@ SWFSoundInstance getSoundInstance(zval *id TSRMLS_DC)
 
 /* {{{ swfsoundinstance_nomultiple */
 
-PHP_FUNCTION(swfsoundinstance_noMultiple)
+PHP_METHOD(swfsoundinstance, noMultiple)
 {
 	SWFSoundInstance inst = getSoundInstance(getThis() TSRMLS_CC);
 
@@ -1828,7 +1825,7 @@ PHP_FUNCTION(swfsoundinstance_noMultiple)
 
 /* {{{ swfsoundinstance_loopinpoint(point) */
 
-PHP_FUNCTION(swfsoundinstance_loopInPoint)
+PHP_METHOD(swfsoundinstance, loopInPoint)
 {
 	zval **zpoint;
 	SWFSoundInstance inst = getSoundInstance(getThis() TSRMLS_CC);
@@ -1844,7 +1841,7 @@ PHP_FUNCTION(swfsoundinstance_loopInPoint)
 /* }}} */
 /* {{{ swfsoundinstance_loopoutpoint(point) */
 
-PHP_FUNCTION(swfsoundinstance_loopOutPoint)
+PHP_METHOD(swfsoundinstance, loopOutPoint)
 {
 	zval **zpoint;
 	SWFSoundInstance inst = getSoundInstance(getThis() TSRMLS_CC);
@@ -1860,7 +1857,7 @@ PHP_FUNCTION(swfsoundinstance_loopOutPoint)
 
 /* {{{ swfsoundinstance_loopcount(point) */
 
-PHP_FUNCTION(swfsoundinstance_loopCount)
+PHP_METHOD(swfsoundinstance, loopCount)
 {
 	zval **zcount;
 	SWFSoundInstance inst = getSoundInstance(getThis() TSRMLS_CC);
@@ -1873,40 +1870,23 @@ PHP_FUNCTION(swfsoundinstance_loopCount)
 	SWFSoundInstance_setLoopCount(inst, Z_LVAL_PP(zcount));
 }
 /* }}} */
-/* }}} */
-#endif
 
-/* {{{ SWFMovie
-*/
-static zend_function_entry swfmovie_functions[] = {
-	PHP_FALIAS(__construct,       swfmovie_init,              NULL)
-	PHP_FALIAS(nextFrame,         swfmovie_nextFrame,         NULL)
-	PHP_FALIAS(labelFrame,        swfmovie_labelFrame,        NULL)
-	PHP_FALIAS(add,               swfmovie_add,               NULL)
-	PHP_FALIAS(remove,            swfmovie_remove,            NULL)
-	PHP_FALIAS(output,            swfmovie_output,            NULL)
-	PHP_FALIAS(save,              swfmovie_save,              NULL)
-	PHP_FALIAS(saveToFile,        swfmovie_saveToFile,        NULL)
-	PHP_FALIAS(setBackground,     swfmovie_setBackground,     NULL)
-	PHP_FALIAS(setRate,           swfmovie_setRate,           NULL)
-	PHP_FALIAS(setDimension,      swfmovie_setDimension,      NULL)
-	PHP_FALIAS(setFrames,         swfmovie_setFrames,         NULL)
-#ifdef HAVE_NEW_MING
-	PHP_FALIAS(streamMP3,         swfmovie_streamMp3,         NULL)
-	PHP_FALIAS(addExport,         swfmovie_addExport,         NULL)
-	PHP_FALIAS(writeExports,      swfmovie_writeExports,      NULL)
-	PHP_FALIAS(startSound,        swfmovie_startSound,        NULL)
-	PHP_FALIAS(stopSound,         swfmovie_stopSound,         NULL)
-	PHP_FALIAS(importChar,        swfmovie_importChar,        NULL)
-	PHP_FALIAS(importFont,        swfmovie_importFont,        NULL)
-	PHP_FALIAS(addFont,           swfmovie_addFont,           NULL)
-#endif
+static zend_function_entry swfsoundinstance_functions[] = {
+	PHP_ME(swfsoundinstance, __construct,   NULL, 0)
+	PHP_ME(swfsoundinstance, loopInPoint,   NULL, 0)
+	PHP_ME(swfsoundinstance, loopOutPoint,  NULL, 0)
+	PHP_ME(swfsoundinstance, loopCount,     NULL, 0)
 	{ NULL, NULL, NULL }
 };
 
+#endif
+/* }}} */
+
+/* {{{ SWFMovie
+*/
 /* {{{ proto object swfmovie_init(int version) 
   Creates swfmovie object according to the passed version */
-PHP_FUNCTION(swfmovie_init)
+PHP_METHOD(swfmovie, __construct)
 {
 	zval **version;
 	SWFMovie movie;
@@ -1950,7 +1930,7 @@ static SWFMovie getMovie(zval *id TSRMLS_DC)
 
 /* {{{ proto void swfmovie_nextframe(void)  
 */
-PHP_FUNCTION(swfmovie_nextFrame)
+PHP_METHOD(swfmovie, nextFrame)
 {
 	SWFMovie_nextFrame(getMovie(getThis() TSRMLS_CC));
 }
@@ -1958,7 +1938,7 @@ PHP_FUNCTION(swfmovie_nextFrame)
 
 /* {{{ proto void swfmovie_labelframe(string label)
    Labels frame */
-PHP_FUNCTION(swfmovie_labelFrame)
+PHP_METHOD(swfmovie, labelFrame)
 {
 	zval **label;
 
@@ -1972,7 +1952,7 @@ PHP_FUNCTION(swfmovie_labelFrame)
 
 /* {{{ proto object swfmovie_add(object SWFBlock) 
 */
-PHP_FUNCTION(swfmovie_add)
+PHP_METHOD(swfmovie, add)
 {
 	zval **zchar;
 	int ret;
@@ -2006,7 +1986,7 @@ PHP_FUNCTION(swfmovie_add)
 
 /* {{{ proto void swfmovie_labelframe(object SWFBlock)
 */
-PHP_FUNCTION(swfmovie_remove)
+PHP_METHOD(swfmovie, remove)
 {
 	zval **zchar;
 	SWFDisplayItem item;
@@ -2030,7 +2010,7 @@ static void phpByteOutputMethod(byte b, void *data)
 	php_write(&b, 1 TSRMLS_CC);
 }
 
-PHP_FUNCTION(swfmovie_output)
+PHP_METHOD(swfmovie, output)
 {
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
 #ifdef HAVE_MING_ZLIB
@@ -2067,7 +2047,7 @@ static void phpStreamOutputMethod(byte b, void * data)
 	php_stream_write((php_stream*)data, &b, 1);
 }
 
-PHP_FUNCTION(swfmovie_saveToFile)
+PHP_METHOD(swfmovie, saveToFile)
 {
 	zval **x;
 #ifdef HAVE_MING_ZLIB
@@ -2109,7 +2089,7 @@ PHP_FUNCTION(swfmovie_saveToFile)
 
 /* {{{ proto int swfmovie_save(mixed where [, int compression])
   Saves the movie. 'where' can be stream and the movie will be saved there otherwise it is treated as string and written in file with that name */
-PHP_FUNCTION(swfmovie_save)
+PHP_METHOD(swfmovie, save)
 {
 	zval **x;
 #ifdef HAVE_MING_ZLIB
@@ -2170,7 +2150,7 @@ PHP_FUNCTION(swfmovie_save)
 
 /* {{{ proto void swfmovie_setBackground(int r, int g, int b)
    Sets background color (r,g,b) */
-PHP_FUNCTION(swfmovie_setBackground)
+PHP_METHOD(swfmovie, setBackground)
 {
 	zval **r, **g, **b;
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
@@ -2188,7 +2168,7 @@ PHP_FUNCTION(swfmovie_setBackground)
 
 /* {{{ proto void swfmovie_setRate(float rate)
    Sets movie rate */
-PHP_FUNCTION(swfmovie_setRate)
+PHP_METHOD(swfmovie, setRate)
 {
 	zval **rate;
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
@@ -2204,7 +2184,7 @@ PHP_FUNCTION(swfmovie_setRate)
 
 /* {{{ proto void swfmovie_setDimension(float x, float y)
    Sets movie dimension */
-PHP_FUNCTION(swfmovie_setDimension)
+PHP_METHOD(swfmovie, setDimension)
 {
 	zval **x, **y;
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
@@ -2221,7 +2201,7 @@ PHP_FUNCTION(swfmovie_setDimension)
 
 /* {{{ proto void swfmovie_setFrames(int frames)
    Sets number of frames */
-PHP_FUNCTION(swfmovie_setFrames)
+PHP_METHOD(swfmovie, setFrames)
 {
 	zval **frames;
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
@@ -2238,7 +2218,7 @@ PHP_FUNCTION(swfmovie_setFrames)
 #ifdef HAVE_NEW_MING
 /* {{{ proto void swfmovie_streamMp3(mixed file)
    Sets sound stream of the SWF movie. The parameter can be stream or string. */
-PHP_FUNCTION(swfmovie_streamMp3)
+PHP_METHOD(swfmovie, streamMp3)
 {
 	zval **zfile;
 	SWFSoundStream sound;
@@ -2264,7 +2244,7 @@ PHP_FUNCTION(swfmovie_streamMp3)
 
 /* {{{ swfmovie_addexport */
 
-PHP_FUNCTION(swfmovie_addExport)
+PHP_METHOD(swfmovie, addExport)
 {
 	zval **zchar, **zname;
 	SWFBlock block;
@@ -2285,7 +2265,7 @@ PHP_FUNCTION(swfmovie_addExport)
 
 /* {{{ swfmovie_writeexports */
 			
-PHP_FUNCTION(swfmovie_writeExports)
+PHP_METHOD(swfmovie, writeExports)
 {
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
 
@@ -2295,7 +2275,7 @@ PHP_FUNCTION(swfmovie_writeExports)
 /* }}} */
 /* {{{ SWFSoundInstance swfmovie_startsound */
 
-PHP_FUNCTION(swfmovie_startSound)
+PHP_METHOD(swfmovie, startSound)
 {
 	zval **zsound;
 	int ret;
@@ -2323,7 +2303,7 @@ PHP_FUNCTION(swfmovie_startSound)
 
 /* {{{ void swfmovie_stopsound */
 
-PHP_FUNCTION(swfmovie_stopSound)
+PHP_METHOD(swfmovie, stopSound)
 {
 	zval **zsound;
 	SWFSound sound;
@@ -2341,7 +2321,7 @@ PHP_FUNCTION(swfmovie_stopSound)
 
 /* {{{ void swfmovie_importChar */
 
-PHP_FUNCTION(swfmovie_importChar)
+PHP_METHOD(swfmovie, importChar)
 {
 	SWFMovie movie;
 	SWFCharacter res;
@@ -2367,7 +2347,7 @@ PHP_FUNCTION(swfmovie_importChar)
 
 /* {{{ void swfmovie_importFont */
 
-PHP_FUNCTION(swfmovie_importFont)
+PHP_METHOD(swfmovie, importFont)
 {
 	SWFMovie movie;
 	SWFFontCharacter res;
@@ -2393,8 +2373,7 @@ PHP_FUNCTION(swfmovie_importFont)
 /* }}} */
 
 /* {{{ void swfmovie_addFont */
-
-PHP_FUNCTION(swfmovie_addFont)
+PHP_METHOD(swfmovie, addFont)
 {
 	SWFMovie movie;
 	SWFFontCharacter res;
@@ -2420,35 +2399,41 @@ PHP_FUNCTION(swfmovie_addFont)
 	}	
 }
 /* }}} */
-/* }}} */
-
 #endif
 
-/* {{{ SWFShape
-*/
-static zend_function_entry swfshape_functions[] = {
-	PHP_FALIAS(__construct,       swfshape_init,               NULL)
-	PHP_FALIAS(setLine,           swfshape_setline,            NULL)
-	PHP_FALIAS(addFill,           swfshape_addfill,            NULL)
-	PHP_FALIAS(setLeftFill,       swfshape_setleftfill,        NULL)
-	PHP_FALIAS(setRightFill,      swfshape_setrightfill,       NULL)
-	PHP_FALIAS(movePenTo,         swfshape_movepento,          NULL)
-	PHP_FALIAS(movePen,           swfshape_movepen,            NULL)
-	PHP_FALIAS(drawLineTo,        swfshape_drawlineto,         NULL)
-	PHP_FALIAS(drawLine,          swfshape_drawline,           NULL)
-	PHP_FALIAS(drawCurveTo,       swfshape_drawcurveto,        NULL)
-	PHP_FALIAS(drawCurve,         swfshape_drawcurve,          NULL)
-	PHP_FALIAS(drawGlyph,         swfshape_drawglyph,          NULL)
-	PHP_FALIAS(drawCircle,        swfshape_drawcircle,         NULL)
-	PHP_FALIAS(drawArc,           swfshape_drawarc,            NULL)
-	PHP_FALIAS(drawCubic,         swfshape_drawcubic,          NULL)
-	PHP_FALIAS(drawCubicTo,       swfshape_drawcubicto,        NULL)
+static zend_function_entry swfmovie_functions[] = {
+	PHP_ME(swfmovie, __construct,       NULL, 0)
+	PHP_ME(swfmovie, nextFrame,         NULL, 0)
+	PHP_ME(swfmovie, labelFrame,        NULL, 0)
+	PHP_ME(swfmovie, add,               NULL, 0)
+	PHP_ME(swfmovie, remove,            NULL, 0)
+	PHP_ME(swfmovie, output,            NULL, 0)
+	PHP_ME(swfmovie, save,              NULL, 0)
+	PHP_ME(swfmovie, saveToFile,        NULL, 0)
+	PHP_ME(swfmovie, setBackground,     NULL, 0)
+	PHP_ME(swfmovie, setRate,           NULL, 0)
+	PHP_ME(swfmovie, setDimension,      NULL, 0)
+	PHP_ME(swfmovie, setFrames,         NULL, 0)
+#ifdef HAVE_NEW_MING
+	PHP_ME(swfmovie, streamMP3,         NULL, 0)
+	PHP_ME(swfmovie, addExport,         NULL, 0)
+	PHP_ME(swfmovie, writeExports,      NULL, 0)
+	PHP_ME(swfmovie, startSound,        NULL, 0)
+	PHP_ME(swfmovie, stopSound,         NULL, 0)
+	PHP_ME(swfmovie, importChar,        NULL, 0)
+	PHP_ME(swfmovie, importFont,        NULL, 0)
+	PHP_ME(swfmovie, addFont,           NULL, 0)
+#endif
 	{ NULL, NULL, NULL }
 };
 
+/* }}} */
+
+/* {{{ SWFShape
+*/
 /* {{{ proto object swfshape_init(void)
    Returns a new SWFShape object */
-PHP_FUNCTION(swfshape_init)
+PHP_METHOD(swfshape, __construct)
 {
 	SWFShape shape = newSWFShape();
 	int ret = zend_list_insert(shape, le_swfshapep);
@@ -2480,7 +2465,7 @@ static SWFShape getShape(zval *id TSRMLS_DC)
 
 /* {{{ proto void swfshape_setline(int width, int r, int g, int b [, int a])
    Sets the current line style for this SWFShape */
-PHP_FUNCTION(swfshape_setline)
+PHP_METHOD(swfshape, setLine)
 {
 	zval **w, **r, **g, **b, **a;
 
@@ -2519,7 +2504,7 @@ PHP_FUNCTION(swfshape_setline)
 
 /* {{{ proto object swfshape_addfill(mixed arg1, int arg2, [int b [, int a]])
    Returns a fill object, for use with swfshape_setleftfill and swfshape_setrightfill. If 1 or 2 parameter(s) is (are) passed first should be object (from gradient class) and the second int (flags). Gradient fill is performed. If 3 or 4 parameters are passed : r, g, b [, a]. Solid fill is performed. */
-PHP_FUNCTION(swfshape_addfill)
+PHP_METHOD(swfshape, addFill)
 {
 	SWFFill fill=NULL;
 	int ret;
@@ -2600,7 +2585,7 @@ PHP_FUNCTION(swfshape_addfill)
 
 /* {{{ proto void swfshape_setleftfill(int arg1 [, int g ,int b [,int a]])
    Sets the left side fill style to fill in case only one parameter is passed. When 3 or 4 parameters are passed they are treated as : int r, int g, int b, int a . Solid fill is performed in this case before setting left side fill type. */
-PHP_FUNCTION(swfshape_setleftfill)
+PHP_METHOD(swfshape, setLeftFill)
 {
 	zval **zfill, **r, **g, **b, **a;
 	SWFFill fill;
@@ -2651,7 +2636,7 @@ PHP_FUNCTION(swfshape_setleftfill)
 
 /* {{{ proto void swfshape_setleftfill(int arg1 [, int g ,int b [,int a]])
    Sets the right side fill style to fill in case only one parameter is passed. When 3 or 4 parameters are passed they are treated as : int r, int g, int b, int a . Solid fill is performed in this case before setting right side fill type. */
-PHP_FUNCTION(swfshape_setrightfill)
+PHP_METHOD(swfshape, setRightFill)
 {
 	zval **zfill, **r, **g, **b, **a;
 	SWFFill fill;
@@ -2701,7 +2686,7 @@ PHP_FUNCTION(swfshape_setrightfill)
 
 /* {{{ proto void swfshape_movepento(float x, float y)
    Moves the pen to shape coordinates (x, y) */
-PHP_FUNCTION(swfshape_movepento)
+PHP_METHOD(swfshape, movePenTo)
 {
 	zval **x, **y;
 
@@ -2716,7 +2701,7 @@ PHP_FUNCTION(swfshape_movepento)
 
 /* {{{ proto void swfshape_movepen(float x, float y)
    Moves the pen from its current location by vector (x, y) */
-PHP_FUNCTION(swfshape_movepen)
+PHP_METHOD(swfshape, movePen)
 {
 	zval **x, **y;
 
@@ -2731,7 +2716,7 @@ PHP_FUNCTION(swfshape_movepen)
 
 /* {{{ proto void swfshape_drawlineto(float x, float y)
    Draws a line from the current pen position to shape coordinates (x, y) in the current line style */
-PHP_FUNCTION(swfshape_drawlineto)
+PHP_METHOD(swfshape, drawLineTo)
 {
 	zval **x, **y;
 
@@ -2746,7 +2731,7 @@ PHP_FUNCTION(swfshape_drawlineto)
 
 /* {{{ proto void swfshape_drawline(float dx, float dy)
    Draws a line from the current pen position (x, y) to the point (x+dx, y+dy) in the current line style */
-PHP_FUNCTION(swfshape_drawline)
+PHP_METHOD(swfshape, drawLine)
 {
 	zval **x, **y;
 
@@ -2761,7 +2746,7 @@ PHP_FUNCTION(swfshape_drawline)
 
 /* {{{ proto void swfshape_drawcurveto(float ax, float ay, float bx, float by [, float dx, float dy])
    Draws a curve from the current pen position (x,y) to the point (bx, by) in the current line style, using point (ax, ay) as a control point. Or draws a cubic bezier to point (dx, dy) with control points (ax, ay) and (bx, by) */
-PHP_FUNCTION(swfshape_drawcurveto)
+PHP_METHOD(swfshape, drawCurveTo)
 {
 	if (ZEND_NUM_ARGS() == 4) {
 		zval **cx, **cy, **ax, **ay;
@@ -2802,7 +2787,7 @@ PHP_FUNCTION(swfshape_drawcurveto)
 
 /* {{{ proto void swfshape_drawcurve(float adx, float ady, float bdx, float bdy [, float cdx, float cdy])
    Draws a curve from the current pen position (x, y) to the point (x+bdx, y+bdy) in the current line style, using point (x+adx, y+ady) as a control point or draws a cubic bezier to point (x+cdx, x+cdy) with control points (x+adx, y+ady) and (x+bdx, y+bdy) */
-PHP_FUNCTION(swfshape_drawcurve)
+PHP_METHOD(swfshape, drawCurve)
 {
 	if (ZEND_NUM_ARGS() == 4) {
 		zval **cx, **cy, **ax, **ay;
@@ -2843,7 +2828,7 @@ PHP_FUNCTION(swfshape_drawcurve)
 
 /* {{{ proto void swfshape_drawglyph(SWFFont font, string character [, int size])
    Draws the first character in the given string into the shape using the glyph definition from the given font */
-PHP_FUNCTION(swfshape_drawglyph)
+PHP_METHOD(swfshape, drawGlyph)
 {
 	zval **font, **c, **zsize;
 	int size=0;
@@ -2868,7 +2853,7 @@ PHP_FUNCTION(swfshape_drawglyph)
 
 /* {{{ proto void swfshape_drawcircle(float r)
    Draws a circle of radius r centered at the current location, in a counter-clockwise fashion */
-PHP_FUNCTION(swfshape_drawcircle)
+PHP_METHOD(swfshape, drawCircle)
 {
 	zval **r;
 
@@ -2882,7 +2867,7 @@ PHP_FUNCTION(swfshape_drawcircle)
 
 /* {{{ proto void swfshape_drawarc(float r, float startAngle, float endAngle)
    Draws an arc of radius r centered at the current location, from angle startAngle to angle endAngle measured counterclockwise from 12 o'clock */
-PHP_FUNCTION(swfshape_drawarc)
+PHP_METHOD(swfshape, drawArc)
 {
 	zval **r, **start, **end;
 
@@ -2900,7 +2885,7 @@ PHP_FUNCTION(swfshape_drawarc)
 
 /* {{{ proto void swfshape_drawcubic(float bx, float by, float cx, float cy, float dx, float dy)
    Draws a cubic bezier curve using the current position and the three given points as control points */
-PHP_FUNCTION(swfshape_drawcubic)
+PHP_METHOD(swfshape, drawCubic)
 {
 	zval **bx, **by, **cx, **cy, **dx, **dy;
 
@@ -2922,7 +2907,7 @@ PHP_FUNCTION(swfshape_drawcubic)
 
 /* {{{ proto void swfshape_drawcubic(float bx, float by, float cx, float cy, float dx, float dy)
    Draws a cubic bezier curve using the current position and the three given points as control points */
-PHP_FUNCTION(swfshape_drawcubicto)
+PHP_METHOD(swfshape, drawCubicTo)
 {
 	zval **bx, **by, **cx, **cy, **dx, **dy;
 
@@ -2941,27 +2926,34 @@ PHP_FUNCTION(swfshape_drawcubicto)
 	);
 }
 /* }}} */
+
+static zend_function_entry swfshape_functions[] = {
+	PHP_ME(swfshape, __construct,        NULL, 0)
+	PHP_ME(swfshape, setLine,            NULL, 0)
+	PHP_ME(swfshape, addFill,            NULL, 0)
+	PHP_ME(swfshape, setLeftFill,        NULL, 0)
+	PHP_ME(swfshape, setRightFill,       NULL, 0)
+	PHP_ME(swfshape, movePenTo,          NULL, 0)
+	PHP_ME(swfshape, movePen,            NULL, 0)
+	PHP_ME(swfshape, drawLineTo,         NULL, 0)
+	PHP_ME(swfshape, drawLine,           NULL, 0)
+	PHP_ME(swfshape, drawCurveTo,        NULL, 0)
+	PHP_ME(swfshape, drawCurve,          NULL, 0)
+	PHP_ME(swfshape, drawGlyph,          NULL, 0)
+	PHP_ME(swfshape, drawCircle,         NULL, 0)
+	PHP_ME(swfshape, drawArc,            NULL, 0)
+	PHP_ME(swfshape, drawCubic,          NULL, 0)
+	PHP_ME(swfshape, drawCubicTo,        NULL, 0)
+	{ NULL, NULL, NULL }
+};
+
 /* }}} */
 
 /* {{{ SWFSprite
 */
-static zend_function_entry swfsprite_functions[] = {
-	PHP_FALIAS(__construct,			swfsprite_init,				NULL)
-	PHP_FALIAS(add,					swfsprite_add,				NULL)
-	PHP_FALIAS(remove,				swfsprite_remove,			NULL)
-	PHP_FALIAS(nextFrame,			swfsprite_nextFrame,		NULL)
-	PHP_FALIAS(labelFrame,			swfsprite_labelFrame,		NULL)
-	PHP_FALIAS(setFrames,			swfsprite_setFrames,		NULL)
-#ifdef HAVE_NEW_MING
-	PHP_FALIAS(startSound,			swfsprite_startSound,		NULL)
-	PHP_FALIAS(stopSound,			swfsprite_stopSound,		NULL)
-#endif
-	{ NULL, NULL, NULL }
-};
-
 /* {{{ proto class swfsprite_init(void)
    Returns a new SWFSprite object */
-PHP_FUNCTION(swfsprite_init)
+PHP_METHOD(swfsprite, __construct)
 {
 	SWFMovieClip sprite = newSWFMovieClip();
 	int ret = zend_list_insert(sprite, le_swfspritep);
@@ -2992,7 +2984,7 @@ static SWFMovieClip getSprite(zval *id TSRMLS_DC)
 
 /* {{{ proto object swfsprite_add(object SWFCharacter)
    Adds the character to the sprite, returns a displayitem object */
-PHP_FUNCTION(swfsprite_add)
+PHP_METHOD(swfsprite, add)
 {
 	zval **zchar;
 	int ret;
@@ -3025,7 +3017,7 @@ PHP_FUNCTION(swfsprite_add)
 
 /* {{{ proto void swfsprite_remove(object SWFDisplayItem)
    Remove the named character from the sprite's display list */
-PHP_FUNCTION(swfsprite_remove)
+PHP_METHOD(swfsprite, remove)
 {
 	zval **zchar;
 	SWFDisplayItem item;
@@ -3042,7 +3034,7 @@ PHP_FUNCTION(swfsprite_remove)
 
 /* {{{ proto void swfsprite_nextFrame(void)
    Moves the sprite to the next frame */
-PHP_FUNCTION(swfsprite_nextFrame)
+PHP_METHOD(swfsprite, nextFrame)
 {
 	SWFMovieClip_nextFrame(getSprite(getThis() TSRMLS_CC));
 }
@@ -3050,7 +3042,7 @@ PHP_FUNCTION(swfsprite_nextFrame)
 
 /* {{{ proto void swfsprite_labelFrame(string label)
    Labels frame */
-PHP_FUNCTION(swfsprite_labelFrame)
+PHP_METHOD(swfsprite, labelFrame)
 {
 	zval **label;
 
@@ -3064,7 +3056,7 @@ PHP_FUNCTION(swfsprite_labelFrame)
 
 /* {{{ proto void swfsprite_setFrames(int frames)
    Sets the number of frames in this SWFSprite */
-PHP_FUNCTION(swfsprite_setFrames)
+PHP_METHOD(swfsprite, setFrames)
 {
 	zval **frames;
 	SWFMovieClip sprite = getSprite(getThis() TSRMLS_CC);
@@ -3080,7 +3072,7 @@ PHP_FUNCTION(swfsprite_setFrames)
 #ifdef HAVE_NEW_MING
 /* {{{ SWFSoundInstance swfsprite_startsound */
 
-PHP_FUNCTION(swfsprite_startSound)
+PHP_METHOD(swfsprite, startSound)
 {
 	zval **zsound;
 	int ret;
@@ -3107,7 +3099,7 @@ PHP_FUNCTION(swfsprite_startSound)
 /* }}} */
 /* {{{ void swfsprite_stopsound */
 
-PHP_FUNCTION(swfsprite_stopSound)
+PHP_METHOD(swfsprite, stopSound)
 {
 	zval **zsound;
 	SWFSound sound;
@@ -3123,36 +3115,28 @@ PHP_FUNCTION(swfsprite_stopSound)
 }
 /* }}} */
 #endif
+
+static zend_function_entry swfsprite_functions[] = {
+	PHP_ME(swfsprite, __construct,  	NULL, 0)
+	PHP_ME(swfsprite, add,				NULL, 0)
+	PHP_ME(swfsprite, remove,			NULL, 0)
+	PHP_ME(swfsprite, nextFrame,		NULL, 0)
+	PHP_ME(swfsprite, labelFrame,		NULL, 0)
+	PHP_ME(swfsprite, setFrames,		NULL, 0)
+#ifdef HAVE_NEW_MING
+	PHP_ME(swfsprite, startSound,		NULL, 0)
+	PHP_ME(swfsprite, stopSound,		NULL, 0)
+#endif
+	{ NULL, NULL, NULL }
+};
+
 /* }}} */
 
 /* {{{ SWFText
 */
-static zend_function_entry swftext_functions[] = {
-	PHP_FALIAS(__construct,            swftext_init,              NULL)
-	PHP_FALIAS(setFont,                swftext_setFont,           NULL)
-	PHP_FALIAS(setHeight,              swftext_setHeight,         NULL)
-	PHP_FALIAS(setSpacing,             swftext_setSpacing,        NULL)
-	PHP_FALIAS(setColor,               swftext_setColor,          NULL)
-	PHP_FALIAS(moveTo,                 swftext_moveTo,            NULL)
-	PHP_FALIAS(addString,              swftext_addString,         NULL)
-#ifdef HAVE_NEW_MING
-	PHP_FALIAS(addUTF8String,          swftext_addUTF8String,     NULL)
-/*	PHP_FALIAS(addwidestring,          swftext_addWideString,     NULL)*/
-#endif
-	PHP_FALIAS(getWidth,               swftext_getWidth,          NULL)
-#ifdef HAVE_NEW_MING
-	PHP_FALIAS(getUTF8Width,           swftext_getUTF8Width,      NULL)
-/*	PHP_FALIAS(getwidewidth,           swftext_getWideWidth,      NULL)*/
-#endif
-	PHP_FALIAS(getAscent,              swftext_getAscent,         NULL)
-	PHP_FALIAS(getDescent,             swftext_getDescent,        NULL)
-	PHP_FALIAS(getLeading,             swftext_getLeading,        NULL)
-	{ NULL, NULL, NULL }
-};
-
 /* {{{ proto class swftext_init(void)
    Returns new SWFText object */
-PHP_FUNCTION(swftext_init)
+PHP_METHOD(swftext, __construct)
 {
 	SWFText text = newSWFText2();
 	int ret = zend_list_insert(text, le_swftextp);
@@ -3183,7 +3167,7 @@ static SWFText getText(zval *id TSRMLS_DC)
 
 /* {{{ proto void swftext_setFont(object font)
    Sets this SWFText object's current font to given font */
-PHP_FUNCTION(swftext_setFont)
+PHP_METHOD(swftext, setFont)
 {
 	zval **zfont;
 	SWFText text = getText(getThis() TSRMLS_CC);
@@ -3200,7 +3184,7 @@ PHP_FUNCTION(swftext_setFont)
 
 /* {{{ proto void swftext_setHeight(float height)
    Sets this SWFText object's current height to given height */
-PHP_FUNCTION(swftext_setHeight)
+PHP_METHOD(swftext, setHeight)
 {
 	zval **height;
 	SWFText text = getText(getThis() TSRMLS_CC);
@@ -3215,7 +3199,7 @@ PHP_FUNCTION(swftext_setHeight)
 
 /* {{{ proto void swftext_setSpacing(float spacing)
    Sets this SWFText object's current letterspacing to given spacing */
-PHP_FUNCTION(swftext_setSpacing)
+PHP_METHOD(swftext, setSpacing)
 {
 	zval **spacing;
 	SWFText text = getText(getThis() TSRMLS_CC);
@@ -3230,7 +3214,7 @@ PHP_FUNCTION(swftext_setSpacing)
 
 /* {{{ proto void swftext_setColor(int r, int g, int b [, int a])
    Sets this SWFText object's current color to the given color */
-PHP_FUNCTION(swftext_setColor)
+PHP_METHOD(swftext, setColor)
 {
 	zval **r, **g, **b, **a;
 	SWFText text = getText(getThis() TSRMLS_CC);
@@ -3261,7 +3245,7 @@ PHP_FUNCTION(swftext_setColor)
 
 /* {{{ proto void swftext_moveTo(float x, float y)
    Moves this SWFText object's current pen position to (x, y) in text coordinates */
-PHP_FUNCTION(swftext_moveTo)
+PHP_METHOD(swftext, moveTo)
 {
 	zval **x, **y;
 	SWFText text = getText(getThis() TSRMLS_CC);
@@ -3277,7 +3261,7 @@ PHP_FUNCTION(swftext_moveTo)
 
 /* {{{ proto void swftext_addString(string text)
    Writes the given text into this SWFText object at the current pen position, using the current font, height, spacing, and color */
-PHP_FUNCTION(swftext_addString)
+PHP_METHOD(swftext, addString)
 {
 	zval **s;
 	SWFText text = getText(getThis() TSRMLS_CC);
@@ -3296,7 +3280,7 @@ PHP_FUNCTION(swftext_addString)
    Writes the given text into this SWFText object at the current pen position,
    using the current font, height, spacing, and color */
 
-PHP_FUNCTION(swftext_addUTF8String)
+PHP_METHOD(swftext, addUTF8String)
 {
 	zval **s;
 	SWFText text = getText(getThis() TSRMLS_CC);
@@ -3314,7 +3298,7 @@ PHP_FUNCTION(swftext_addUTF8String)
    Writes the given text into this SWFText object at the current pen position,
    using the current font, height, spacing, and color */
 /*
-PHP_FUNCTION(swftext_addWideString)
+PHP_METHOD(swftext, addWideString)
 {
 	zval **s;
 	SWFText text = getText(getThis() TSRMLS_CC);
@@ -3332,7 +3316,7 @@ PHP_FUNCTION(swftext_addWideString)
 
 /* {{{ proto float swftext_getWidth(string str)
    Calculates the width of the given string in this text objects current font and size */
-PHP_FUNCTION(swftext_getWidth)
+PHP_METHOD(swftext, getWidth)
 {
 	zval **zstring;
 
@@ -3348,7 +3332,7 @@ PHP_FUNCTION(swftext_getWidth)
 /* {{{ proto double swftext_getUTF8Width(string)
    calculates the width of the given string in this text objects current font and size */
 
-PHP_FUNCTION(swftext_getUTF8Width)
+PHP_METHOD(swftext, getUTF8Width)
 {
 	zval **zstring;
 	int width;
@@ -3367,7 +3351,7 @@ PHP_FUNCTION(swftext_getUTF8Width)
 /* {{{ proto double swftext_getWideWidth(string)
    calculates the width of the given string in this text objects current font and size */
 /*
-PHP_FUNCTION(swftext_getWideWidth)
+PHP_METHOD(swftext, getWideWidth)
 {
 	zval **zstring;
 	int width;
@@ -3387,7 +3371,7 @@ PHP_FUNCTION(swftext_getWideWidth)
 
 /* {{{ proto float swftext_getAscent(void)
    Returns the ascent of the current font at its current size, or 0 if not available */
-PHP_FUNCTION(swftext_getAscent)
+PHP_METHOD(swftext, getAscent)
 {
 	RETURN_DOUBLE(SWFText_getAscent(getText(getThis() TSRMLS_CC)));
 }
@@ -3395,7 +3379,7 @@ PHP_FUNCTION(swftext_getAscent)
 
 /* {{{ proto float swftext_getDescent(void)
    Returns the descent of the current font at its current size, or 0 if not available */
-PHP_FUNCTION(swftext_getDescent)
+PHP_METHOD(swftext, getDescent)
 {
   RETURN_DOUBLE(SWFText_getDescent(getText(getThis() TSRMLS_CC)));
 }
@@ -3403,39 +3387,42 @@ PHP_FUNCTION(swftext_getDescent)
 
 /* {{{ proto float swftext_getLeading(void)
    Returns the leading of the current font at its current size, or 0 if not available */
-PHP_FUNCTION(swftext_getLeading)
+PHP_METHOD(swftext, getLeading)
 {
   RETURN_DOUBLE(SWFText_getLeading(getText(getThis() TSRMLS_CC)));
 }
 /* }}} */
+
+static zend_function_entry swftext_functions[] = {
+	PHP_ME(swftext, __construct,       NULL, 0)
+	PHP_ME(swftext, setFont,           NULL, 0)
+	PHP_ME(swftext, setHeight,         NULL, 0)
+	PHP_ME(swftext, setSpacing,        NULL, 0)
+	PHP_ME(swftext, setColor,          NULL, 0)
+	PHP_ME(swftext, moveTo,            NULL, 0)
+	PHP_ME(swftext, addString,         NULL, 0)
+#ifdef HAVE_NEW_MING
+	PHP_ME(swftext, addUTF8String,     NULL, 0)
+/*	PHP_ME(swftext, addwidestring,     NULL, 0)*/
+#endif
+	PHP_ME(swftext, getWidth,          NULL, 0)
+#ifdef HAVE_NEW_MING
+	PHP_ME(swftext, getUTF8Width,      NULL, 0)
+/*	PHP_ME(swftext, getwidewidth,      NULL, 0)*/
+#endif
+	PHP_ME(swftext, getAscent,         NULL, 0)
+	PHP_ME(swftext, getDescent,        NULL, 0)
+	PHP_ME(swftext, getLeading,        NULL, 0)
+	{ NULL, NULL, NULL }
+};
+
 /* }}} */
 
 /* {{{ SWFTextField
 */
-static zend_function_entry swftextfield_functions[] = {
-	PHP_FALIAS(__construct,       swftextfield_init,            NULL)
-	PHP_FALIAS(setFont,           swftextfield_setFont,         NULL)
-	PHP_FALIAS(setBounds,         swftextfield_setBounds,       NULL)
-	PHP_FALIAS(align,             swftextfield_align,           NULL)
-	PHP_FALIAS(setHeight,         swftextfield_setHeight,       NULL)
-	PHP_FALIAS(setLeftMargin,     swftextfield_setLeftMargin,   NULL)
-	PHP_FALIAS(setRightMargin,    swftextfield_setRightMargin,  NULL)
-	PHP_FALIAS(setMargins,        swftextfield_setMargins,      NULL)
-	PHP_FALIAS(setIndentation,    swftextfield_setIndentation,  NULL)
-	PHP_FALIAS(setLineSpacing,    swftextfield_setLineSpacing,  NULL)
-	PHP_FALIAS(setColor,          swftextfield_setColor,        NULL)
-	PHP_FALIAS(setName,           swftextfield_setName,         NULL)
-	PHP_FALIAS(addString,         swftextfield_addString,       NULL)
-#ifdef HAVE_NEW_MING
-	PHP_FALIAS(setPadding,        swftextfield_setPadding,      NULL)
-	PHP_FALIAS(addChars,          swftextfield_addChars,        NULL)
-#endif
-	{ NULL, NULL, NULL }
-};
-
 /* {{{ proto object swftextfield_init([int flags])
    Returns a new SWFTextField object */
-PHP_FUNCTION(swftextfield_init)
+PHP_METHOD(swftextfield, __construct)
 {
 	zval **flags;
 	SWFTextField field = newSWFTextField();
@@ -3475,7 +3462,7 @@ static SWFTextField getTextField(zval *id TSRMLS_DC)
 
 /* {{{ proto void swftextfield_setFont(object font)
    Sets the font for this textfield */
-PHP_FUNCTION(swftextfield_setFont)
+PHP_METHOD(swftextfield, setFont)
 {
 	zval **font;
 	SWFTextField field = getTextField(getThis() TSRMLS_CC);
@@ -3490,7 +3477,7 @@ PHP_FUNCTION(swftextfield_setFont)
 
 /* {{{ proto void swftextfield_setBounds(float width, float height)
    Sets the width and height of this textfield */
-PHP_FUNCTION(swftextfield_setBounds)
+PHP_METHOD(swftextfield, setBounds)
 {
 	zval **width, **height;
 	SWFTextField field = getTextField(getThis() TSRMLS_CC);
@@ -3506,7 +3493,7 @@ PHP_FUNCTION(swftextfield_setBounds)
 
 /* {{{ proto void swftextfield_align(int alignment)
    Sets the alignment of this textfield */
-PHP_FUNCTION(swftextfield_align)
+PHP_METHOD(swftextfield, align)
 {
 	zval **align;
 	SWFTextField field = getTextField(getThis() TSRMLS_CC);
@@ -3521,7 +3508,7 @@ PHP_FUNCTION(swftextfield_align)
 
 /* {{{ proto void swftextfield_setHeight(float height)
    Sets the font height of this textfield */
-PHP_FUNCTION(swftextfield_setHeight)
+PHP_METHOD(swftextfield, setHeight)
 {
 	zval **height;
 	SWFTextField field = getTextField(getThis() TSRMLS_CC);
@@ -3536,7 +3523,7 @@ PHP_FUNCTION(swftextfield_setHeight)
 
 /* {{{ proto void swftextfield_setLeftMargin(float margin)
    Sets the left margin of this textfield */
-PHP_FUNCTION(swftextfield_setLeftMargin)
+PHP_METHOD(swftextfield, setLeftMargin)
 {
 	zval **margin;
 	SWFTextField field = getTextField(getThis() TSRMLS_CC);
@@ -3551,7 +3538,7 @@ PHP_FUNCTION(swftextfield_setLeftMargin)
 
 /* {{{ proto void swftextfield_setRightMargin(float margin)
    Sets the right margin of this textfield */
-PHP_FUNCTION(swftextfield_setRightMargin)
+PHP_METHOD(swftextfield, setRightMargin)
 {
 	zval **margin;
 	SWFTextField field = getTextField(getThis() TSRMLS_CC);
@@ -3566,7 +3553,7 @@ PHP_FUNCTION(swftextfield_setRightMargin)
 
 /* {{{ proto void swftextfield_setMargins(float left, float right)
    Sets both margins of this textfield */
-PHP_FUNCTION(swftextfield_setMargins)
+PHP_METHOD(swftextfield, setMargins)
 {
 	zval **left, **right;
 	SWFTextField field = getTextField(getThis() TSRMLS_CC);
@@ -3583,7 +3570,7 @@ PHP_FUNCTION(swftextfield_setMargins)
 
 /* {{{ proto void swftextfield_setIndentation(float indentation)
    Sets the indentation of the first line of this textfield */
-PHP_FUNCTION(swftextfield_setIndentation)
+PHP_METHOD(swftextfield, setIndentation)
 {
 	zval **indent;
 	SWFTextField field = getTextField(getThis() TSRMLS_CC);
@@ -3598,7 +3585,7 @@ PHP_FUNCTION(swftextfield_setIndentation)
 
 /* {{{ proto void swftextfield_setLineSpacing(float space)
    Sets the line spacing of this textfield */
-PHP_FUNCTION(swftextfield_setLineSpacing)
+PHP_METHOD(swftextfield, setLineSpacing)
 {
 	zval **spacing;
 	SWFTextField field = getTextField(getThis() TSRMLS_CC);
@@ -3613,7 +3600,7 @@ PHP_FUNCTION(swftextfield_setLineSpacing)
 
 /* {{{ proto void swftextfield_setColor(int r, int g, int b [, int a])
    Sets the color of this textfield */
-PHP_FUNCTION(swftextfield_setColor)
+PHP_METHOD(swftextfield, setColor)
 {
 	zval **r, **g, **b, **a;
 	SWFTextField field = getTextField(getThis() TSRMLS_CC);
@@ -3641,7 +3628,7 @@ PHP_FUNCTION(swftextfield_setColor)
 
 /* {{{ proto void swftextfield_setName(string var_name)
    Sets the variable name of this textfield */
-PHP_FUNCTION(swftextfield_setName)
+PHP_METHOD(swftextfield, setName)
 {
 	zval **name;
 	SWFTextField field = getTextField(getThis() TSRMLS_CC);
@@ -3656,7 +3643,7 @@ PHP_FUNCTION(swftextfield_setName)
 
 /* {{{ proto void swftextfield_addString(string str)
    Adds the given string to this textfield */
-PHP_FUNCTION(swftextfield_addString)
+PHP_METHOD(swftextfield, addString)
 {
 	zval **string;
 	SWFTextField field = getTextField(getThis() TSRMLS_CC);
@@ -3672,7 +3659,7 @@ PHP_FUNCTION(swftextfield_addString)
 #ifdef HAVE_NEW_MING
 /* {{{ proto void swftextfield_setPadding(float padding)
    Sets the padding of this textfield */
-PHP_FUNCTION(swftextfield_setPadding)
+PHP_METHOD(swftextfield, setPadding)
 {
 	zval **padding;
 	SWFTextField field = getTextField(getThis() TSRMLS_CC);
@@ -3688,7 +3675,7 @@ PHP_FUNCTION(swftextfield_setPadding)
 
 /* {{{ proto void swftextfield_addChars(string)
    adds characters to a font that will be available within a textfield */
-PHP_FUNCTION(swftextfield_addChars)
+PHP_METHOD(swftextfield, addChars)
 {
 	zval **zstring;
 	SWFTextField field = getTextField(getThis() TSRMLS_CC);
@@ -3703,6 +3690,29 @@ PHP_FUNCTION(swftextfield_addChars)
 }
 /* }}} */
 #endif
+
+static zend_function_entry swftextfield_functions[] = {
+	PHP_ME(swftextfield, __construct,     NULL, 0)
+	PHP_ME(swftextfield, setFont,         NULL, 0)
+	PHP_ME(swftextfield, setBounds,       NULL, 0)
+	PHP_ME(swftextfield, align,           NULL, 0)
+	PHP_ME(swftextfield, setHeight,       NULL, 0)
+	PHP_ME(swftextfield, setLeftMargin,   NULL, 0)
+	PHP_ME(swftextfield, setRightMargin,  NULL, 0)
+	PHP_ME(swftextfield, setMargins,      NULL, 0)
+	PHP_ME(swftextfield, setIndentation,  NULL, 0)
+	PHP_ME(swftextfield, setLineSpacing,  NULL, 0)
+	PHP_ME(swftextfield, setColor,        NULL, 0)
+	PHP_ME(swftextfield, setName,         NULL, 0)
+	PHP_ME(swftextfield, addString,       NULL, 0)
+#ifdef HAVE_NEW_MING
+	PHP_ME(swftextfield, setPadding,      NULL, 0)
+	PHP_ME(swftextfield, addChars,        NULL, 0)
+#endif
+	{ NULL, NULL, NULL }
+};
+
+/* }}} */
 
 zend_module_entry ming_module_entry = {
 	STANDARD_MODULE_HEADER,
