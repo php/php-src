@@ -4764,7 +4764,7 @@ PHP_FUNCTION(str_split)
 	}
 
 	if (split_length <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The length of each segment must be greater then zero.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The length of each segment must be greater than zero.");
 		RETURN_FALSE;
 	}
 
