@@ -57,7 +57,6 @@ function_entry array_functions[] = {
 	PHP_FE(uksort,									first_arg_force_ref)
 	PHP_FE(shuffle,									first_arg_force_ref)
 	PHP_FE(array_walk,								first_arg_force_ref)
-	PHP_FALIAS(sizeof,			count,				first_arg_allow_ref)
 	PHP_FE(count,									first_arg_allow_ref)
 	PHP_FE(end, 									first_arg_force_ref)
 	PHP_FE(prev, 									first_arg_force_ref)
@@ -65,7 +64,6 @@ function_entry array_functions[] = {
 	PHP_FE(reset, 									first_arg_force_ref)
 	PHP_FE(current, 								first_arg_force_ref)
 	PHP_FE(key, 									first_arg_force_ref)
-	PHP_FALIAS(pos,				current,			first_arg_force_ref)
 	PHP_FE(min,										NULL)
 	PHP_FE(max,										NULL)
 	PHP_FE(in_array,								NULL)
@@ -85,6 +83,10 @@ function_entry array_functions[] = {
 	PHP_FE(array_count_values,		 			  	NULL)
 	PHP_FE(array_reverse,							NULL)
 	PHP_FE(array_pad,								NULL)
+
+	/* Aliases */
+	PHP_FALIAS(pos,				current,			first_arg_force_ref)
+	PHP_FALIAS(sizeof,			count,				first_arg_allow_ref)
 	
 	{NULL, NULL, NULL}
 };
@@ -102,6 +104,8 @@ zend_module_entry array_module_entry = {
 
 PHP_MINIT_FUNCTION(array)
 {
+	ELS_FETCH();
+
 	REGISTER_LONG_CONSTANT("EXTR_OVERWRITE", EXTR_OVERWRITE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("EXTR_SKIP", EXTR_SKIP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("EXTR_PREFIX_SAME", EXTR_PREFIX_SAME, CONST_CS | CONST_PERSISTENT);
@@ -574,10 +578,12 @@ PHP_FUNCTION(reset)
 	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
 		return;
 	}
-		
-	*return_value = **entry;
-	pval_copy_constructor(return_value);
-	INIT_PZVAL(return_value); /* XXX is this needed? */
+
+	if (return_value_used) {	
+		*return_value = **entry;
+		pval_copy_constructor(return_value);
+	/*	INIT_PZVAL(return_value);  XXX is this needed? - No! :) */
+	}
 }
 
 PHP_FUNCTION(current)

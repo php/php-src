@@ -271,6 +271,10 @@ SOURCE=.\ext\apache\apache.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\standard\array.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\standard\base64.c
 # End Source File
 # Begin Source File
@@ -557,6 +561,10 @@ SOURCE=.\ext\standard\php3_string.h
 # Begin Source File
 
 SOURCE=.\functions\php3_syslog.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\php_array.h
 # End Source File
 # Begin Source File
 
