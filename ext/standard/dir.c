@@ -184,7 +184,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 }
 
 /* }}} */
-/* {{{ proto int opendir(string path)
+/* {{{ proto mixed opendir(string path)
    Open a directory and return a dir_handle */
 
 PHP_FUNCTION(opendir)
@@ -202,7 +202,7 @@ PHP_FUNCTION(getdir)
 }
 
 /* }}} */
-/* {{{ proto void closedir([int dir_handle])
+/* {{{ proto void closedir([resource dir_handle])
    Close directory connection identified by the dir_handle */
 
 PHP_FUNCTION(closedir)
@@ -279,7 +279,7 @@ PHP_FUNCTION(chdir)
 }
 
 /* }}} */
-/* {{{ proto string getcwd(void)
+/* {{{ proto mixed getcwd(void)
    Gets the current directory */
 
 PHP_FUNCTION(getcwd)
@@ -310,7 +310,7 @@ PHP_FUNCTION(getcwd)
 }
 
 /* }}} */
-/* {{{ proto void rewinddir([int dir_handle])
+/* {{{ proto void rewinddir([resource dir_handle])
    Rewind dir_handle back to the start */
 
 PHP_FUNCTION(rewinddir)
@@ -323,7 +323,7 @@ PHP_FUNCTION(rewinddir)
 	rewinddir(dirp->dir);
 }
 /* }}} */
-/* {{{ proto string readdir([int dir_handle])
+/* {{{ proto string readdir([resource dir_handle])
    Read directory entry from dir_handle */
 
 PHP_NAMED_FUNCTION(php_if_readdir)
