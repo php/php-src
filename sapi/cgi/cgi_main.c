@@ -96,7 +96,7 @@ char **merge_env;
 /**
  * Number of child processes that will get created to service requests
  */
-static int children = 8;
+static int children = 0;
 
 /**
  * Set to non-zero if we are the parent process
