@@ -2950,7 +2950,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 	efree(heb_str);
 
 	if (convert_newlines) {
-		php_char_to_str(broken_str, Z_STRLEN_PP(str),'\n', "<br>\n", 5, return_value);
+		php_char_to_str(broken_str, Z_STRLEN_PP(str),'\n', "<br />\n", 7, return_value);
 		efree(broken_str);
 	} else {
 		Z_STRVAL_P(return_value) = broken_str;
