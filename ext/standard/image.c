@@ -708,6 +708,11 @@ static struct gfxinfo *php_handle_jp2(php_stream *stream TSRMLS_DC)
 			break;
 		}
 
+		/* Stop if this was the last box */
+		if ((int)box_length <= 0) {
+			break;
+		}
+
 		/* Skip over LBox (Which includes both TBox and LBox itself */
 		if (php_stream_seek(stream, box_length - 8, SEEK_CUR)) {
 			break;
