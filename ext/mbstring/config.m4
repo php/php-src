@@ -3,7 +3,9 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(mbstring, whether to enable multibyte string support,
-[  --enable-mbstring       Enable multibyte string support])
+[  --enable-mbstring[[=LANG]]
+                          Enable multibyte string support.
+                          LANG can be any one of ja, cn, tw, kr, ru, or "all".])
 
 if test "$PHP_MBSTRING" != "no"; then  
   AC_DEFINE(HAVE_MBSTRING,1,[whether to have multibyte string support])
