@@ -85,7 +85,7 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv)
 		convert_to_long(retval);			\
 		ret = retval->value.lval;			\
 		zval_dtor(retval);					\
-		efree(retval);						\
+		FREE_ZVAL(retval);					\
 	} 										\
 	return ret
 
@@ -134,7 +134,7 @@ PS_READ_FUNC(user)
 			ret = SUCCESS;
 		}
 		zval_dtor(retval);
-		efree(retval);
+		FREE_ZVAL(retval);
 	}
 
 	return ret;
