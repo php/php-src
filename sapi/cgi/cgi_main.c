@@ -1426,7 +1426,7 @@ consult the installation file that came with this distribution, or visit \n\
 				for (i = optind, len = 0; i < argc; i++) {
 					strcat(s, argv[i]);
 					if (i < (argc - 1)) {
-						strcat(s, "&");
+						strcat(s, PG(arg_separator).input);
 					}
 				}
 				SG(request_info).query_string = s;
