@@ -1549,8 +1549,11 @@ do_fcall_common:
 					
 					if (opline->extended_value) {
 						retval_ptr_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_R);
-						SEPARATE_ZVAL(retval_ptr_ptr);
-						(*retval_ptr_ptr)->is_ref = 1;
+
+						if (!PZVAL_IS_REF(*retval_ptr_ptr)) {
+							SEPARATE_ZVAL(retval_ptr_ptr);
+							(*retval_ptr_ptr)->is_ref = 1;
+						}
 						(*retval_ptr_ptr)->refcount++;
 						efree(*EG(return_value_ptr_ptr));
 						(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
@@ -1558,7 +1561,6 @@ do_fcall_common:
 						retval_ptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 					
 						if (!EG(free_op1)) { /* Not a temp var */
-							
 							if (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0) {
 								**EG(return_value_ptr_ptr) = *retval_ptr;
 								(*EG(return_value_ptr_ptr))->is_ref = 0;
