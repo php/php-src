@@ -288,7 +288,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	
 	MAKE_STD_ZVAL(retval);
 
-	_php_wddx_deserialize_ex(val, vallen, retval);
+	_php_wddx_deserialize_ex((char *)val, vallen, retval);
 
 	for(zend_hash_internal_pointer_reset(retval->value.ht);
 			zend_hash_get_current_data(retval->value.ht, (void **) &ent) == SUCCESS;
@@ -301,7 +301,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 				key = tmp;
 				dofree = 0;
 			case HASH_KEY_IS_STRING:
-				php_set_session_var(key, strlen(key), ent PSLS_CC)
+				php_set_session_var(key, strlen(key), *ent PSLS_CC);
 				PS_ADD_VAR(key);
 				if(dofree) efree(key);
 				dofree = 1;
