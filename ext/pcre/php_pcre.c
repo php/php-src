@@ -989,8 +989,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 		zval_copy_ctor(return_value);
 		return;
 	}
-	if (callback_name)
-		efree(callback_name);
+	efree(callback_name);
 
 	SEPARATE_ZVAL(regex);
 	SEPARATE_ZVAL(subject);
