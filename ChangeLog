@@ -1,3 +1,44 @@
+2004-01-10  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/tests/array/007.phpt
+      ext/standard/tests/array/array_intersect_1.phpt:
+      fixing tests after last Derick's commit that changed the behaviour of
+      var_export() :)
+
+2004-01-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/tests/014.phpt
+      ext/simplexml/tests/014a.phpt
+      ext/simplexml/tests/014b.phpt:
+      Update attribute tests.
+
+    * ext/simplexml/simplexml.c:
+      - Cleanup class_entry
+      - allow derived classes
+      - fix new SimpleXML_Element()
+
+2004-01-10  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_operators.c:
+      Remove conflict
+
+2004-01-10  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/dom_iterators.c
+      ext/dom/nodelist.c
+      ext/dom/php_dom.h
+      ext/dom/xpath.c:
+      XPath query returns nodelist object rather than array
+
+2004-01-10  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_operators.c:
+      Added error mask to set_error_handler()
+      Patch by Christian Schneider <cschneid@cschneid.com>
+
 2004-01-09  Wez Furlong  <wez.php@thebrainroom.net>
 
     * acinclude.m4
