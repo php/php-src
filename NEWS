@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Added 'output_handler' INI directive (Zeev)
+- Fixed some buglets in the output buffering mechanism (Zeev)
+- Added transparent gzip compression support (Jade Nicoletti, Zeev)
 - Major overhaul of domxml. Added basic XPath support as well (Uwe)
 - Added 'r' flag to date() which generates an RFC822 formatted date, e.g.
   "Thu,  9 Nov 2000 16:33:01 -0500" (Colin)

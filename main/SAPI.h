@@ -73,7 +73,8 @@ typedef struct {
 
 	const char *content_type;
 
-	unsigned char headers_only;
+	zend_bool headers_only;
+	zend_bool no_headers;
 
 	sapi_post_entry *post_entry;
 
