@@ -266,7 +266,6 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 	*((long *)(((char *) p) + sizeof(zend_mem_header)+SIZE+PLATFORM_PADDING+END_ALIGNMENT(SIZE))) = MEM_BLOCK_END_MAGIC;
 #endif	
 #if MEMORY_LIMIT
-	/* FIXME: Not sure this is completely accurate with the new code. Need to check it. */
 	CHECK_MEMORY_LIMIT(size - p->size, SIZE - REAL_SIZE(p->size));
 #endif
 	p->size = size;
