@@ -5,7 +5,7 @@ strtotime() function
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Windows does not support dates prior to midnight (00:00:00), January 1, 1970');
 }
-if (!@putenv("TZ=US/Eastern") || getenv("TZ") != 'US/Eastern') {
+if (!@putenv("TZ=EST") || getenv("TZ") != 'EST') {
 	die("skip unable to change TZ enviroment variable\n");
 }
 ?>
@@ -33,7 +33,12 @@ if (!@putenv("TZ=US/Eastern") || getenv("TZ") != 'US/Eastern') {
 	    echo date ("Y-m-d H:i:s\n", strtotime ($date));
 	}
 
-	putenv ("TZ=US/Eastern");
+	if (PHP_OS === "OSF1") {
+		// POSIX style
+		putenv ("TZ=EST5EDT4,M4.1.0,M10.5.0");
+	} else {
+		putenv ("TZ=US/Eastern");
+	}
 	foreach ($dates as $date) {
 	    echo date ("Y-m-d H:i:s\n", strtotime ($date));
 	}
