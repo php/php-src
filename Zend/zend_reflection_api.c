@@ -1800,9 +1800,9 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 			zval_add_ref(&argument);
 		}
 	} else { 
+		convert_to_string_ex(&argument);
 		if (zend_lookup_class(Z_STRVAL_P(argument), Z_STRLEN_P(argument), &ce TSRMLS_CC) == FAILURE) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
-					"Class %s does not exist", Z_STRVAL_P(argument));
+			zend_throw_exception_ex(reflection_exception_ptr, -1 TSRMLS_CC, "Class %s does not exist", Z_STRVAL_P(argument));
 			return;
 		}
 
@@ -2301,6 +2301,11 @@ ZEND_METHOD(reflection_class, newInstance)
 		zval ***params;
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
+
+		if (!(ce->constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Access to non-public constructor of class %s", ce->name);
+			return;
+		}
 
 		params = safe_emalloc(sizeof(zval **), argc, 0);
 		if (zend_get_parameters_array_ex(argc, params) == FAILURE) {
