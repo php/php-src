@@ -20,28 +20,17 @@
 /* $Id$ */
 
 #ifndef PHP_XML_COMMON_H
-#define PHP_XML_COMMON_H 
-
-typedef struct _node_list_pointer {
-	xmlNodePtr nodep;
-	void *next;
-} node_list_pointer;
-
-typedef struct _doc_ref_obj {
-	void *ptr;
-	int   refcount;
-} doc_ref_obj;
+#define PHP_XML_COMMON_H
 
 typedef struct _dom_ref_obj {
 	void *ptr;
 	int   refcount;
-	node_list_pointer *node_list;
 } dom_ref_obj;
 
 typedef struct _node_object {
 	zend_object  std;
 	xmlNodePtr node;
-	doc_ref_obj *document;
+	dom_ref_obj *document;
 } node_object;
 
 typedef struct _dom_object {

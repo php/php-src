@@ -229,7 +229,6 @@ PHP_FUNCTION(dom_element_remove_attribute)
 		xmlUnlinkNode((xmlNodePtr) attrp);
 		xmlFreeProp(attrp);
 	} else {
-		dom_add_to_list((xmlNodePtr) attrp, intern TSRMLS_CC);
 		xmlUnlinkNode((xmlNodePtr) attrp);
 	}
 
@@ -295,13 +294,11 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 	existattrp = xmlHasProp(nodep, attrp->name);
 	if (existattrp != NULL) {
 		if ((oldobj = dom_object_get_data((xmlNodePtr) existattrp)) == NULL) {
-			dom_add_to_list((xmlNodePtr) existattrp, intern TSRMLS_CC);
 			xmlUnlinkNode((xmlNodePtr) existattrp);
 		} else {
 			if (oldobj->ptr == attrp) {
 				RETURN_NULL();
 			}
-			dom_add_to_list((xmlNodePtr) existattrp, intern TSRMLS_CC);
 			xmlUnlinkNode((xmlNodePtr) existattrp);
 		}
 	}
@@ -312,7 +309,6 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 	}
 
 	xmlAddChild(nodep, (xmlNodePtr) attrp);
-	dom_del_from_list((xmlNodePtr) attrp, intern TSRMLS_CC);
 
 	/* Returns old property if removed otherwise NULL */
 	if (existattrp != NULL) {
@@ -356,7 +352,6 @@ PHP_FUNCTION(dom_element_remove_attribute_node)
 		xmlUnlinkNode((xmlNodePtr) attrp);
 		xmlFreeProp(attrp);
 	} else {
-		dom_add_to_list((xmlNodePtr) attrp, intern TSRMLS_CC);
 		xmlUnlinkNode((xmlNodePtr) attrp);
 	}
 
@@ -555,7 +550,6 @@ PHP_FUNCTION(dom_element_remove_attribute_ns)
 			xmlUnlinkNode((xmlNodePtr) attrp);
 			xmlFreeProp(attrp);
 		} else {
-			dom_add_to_list((xmlNodePtr) attrp, intern TSRMLS_CC);
 			xmlUnlinkNode((xmlNodePtr) attrp);
 		}
 	}
@@ -641,13 +635,11 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 
 	if (existattrp != NULL) {
 		if ((oldobj = dom_object_get_data((xmlNodePtr) existattrp)) == NULL) {
-			dom_add_to_list((xmlNodePtr) existattrp, intern TSRMLS_CC);
 			xmlUnlinkNode((xmlNodePtr) existattrp);
 		} else {
 			if (oldobj->ptr == attrp) {
 				RETURN_NULL();
 			}
-			dom_add_to_list((xmlNodePtr) existattrp, intern TSRMLS_CC);
 			xmlUnlinkNode((xmlNodePtr) existattrp);
 		}
 	}
@@ -661,8 +653,6 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 	if (existattrp == NULL) {
 		xmlReconciliateNs(nodep->doc, nodep);
 	}
-
-	dom_del_from_list((xmlNodePtr) attrp, intern TSRMLS_CC);
 
 	/* Returns old property if removed otherwise NULL */
 	if (existattrp != NULL) {

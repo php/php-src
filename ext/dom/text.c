@@ -150,8 +150,6 @@ PHP_FUNCTION(dom_text_split_text)
 		nnode->type = XML_ELEMENT_NODE;
 		xmlAddNextSibling(node, nnode);
 		nnode->type = XML_TEXT_NODE;
-	} else {
-		dom_add_to_list(nnode, intern TSRMLS_CC);
 	}
 	
 	return_value = php_dom_create_object(nnode, &ret, NULL, return_value, intern TSRMLS_CC);

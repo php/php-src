@@ -819,7 +819,6 @@ PHP_FUNCTION(dom_node_insert_before)
 			if (new_child != NULL) {
 				child->children = NULL;
 			}
-			dom_add_to_list(child, intern TSRMLS_CC);
 			DOM_RET_OBJ(rv, new_child, &ret, intern);
 			return;
 		}
@@ -830,8 +829,6 @@ PHP_FUNCTION(dom_node_insert_before)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't add newnode as the previous sibling of refnode");
 		RETURN_FALSE;
 	}
-
-	dom_del_from_list(child, intern TSRMLS_CC);
 
 	DOM_RET_OBJ(rv, new_child, &ret, intern);
 
@@ -891,16 +888,11 @@ PHP_FUNCTION(dom_node_replace_child)
 		zval *rv = NULL;
 		if (oldchild != newchild) {
 			xmlNodePtr node;
-			if (newchild->parent == NULL && newchild->doc != NULL) {
-				dom_del_from_list(newchild, intern TSRMLS_CC);
-			}
 			if (newchild->doc == NULL && nodep->doc != NULL) {
 				newchildobj->document = intern->document;
 				increment_document_reference(newchildobj, NULL TSRMLS_CC);
 			}
-			if((node = xmlReplaceNode(oldchild, newchild)) != NULL) {
-				dom_add_to_list(node, intern TSRMLS_CC);
-			}
+			node = xmlReplaceNode(oldchild, newchild);
 		}
 		DOM_RET_OBJ(rv, oldchild, &ret, intern);
 		return;
@@ -942,7 +934,6 @@ PHP_FUNCTION(dom_node_remove_child)
 		if (children == child) {
 			zval *rv = NULL;
 			xmlUnlinkNode(child);
-			dom_add_to_list(child, intern TSRMLS_CC);
 			DOM_RET_OBJ(rv, child, &ret, intern);
 			return;
 		}
@@ -1029,7 +1020,6 @@ PHP_FUNCTION(dom_node_append_child)
 		if (new_child != NULL) {
 			child->children = NULL;
 		}
-		dom_add_to_list(child, intern TSRMLS_CC);
 		DOM_RET_OBJ(rv, new_child, &ret, intern);
 		return;
 	}
@@ -1037,12 +1027,10 @@ PHP_FUNCTION(dom_node_append_child)
 	new_child = xmlAddChild(nodep, child);
 
 	if (new_child == NULL) {
-		dom_add_to_list(child, intern TSRMLS_CC);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't append node");
 		RETURN_FALSE;
 	}
 
-	dom_del_from_list(child, intern TSRMLS_CC);
 	DOM_RET_OBJ(rv, new_child, &ret, intern);
 }
 /* }}} end dom_node_append_child */
@@ -1094,7 +1082,6 @@ PHP_FUNCTION(dom_node_clone_node)
 	if (!node) {
 		RETURN_FALSE;
 	}
-	dom_add_to_list(node, intern TSRMLS_CC);
 
 	DOM_RET_OBJ(rv, node, &ret, intern);
 }
