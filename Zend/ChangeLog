@@ -1,3 +1,25 @@
+2004-08-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      zend_compile.c:
+      MFH: Enforce semantics: Classes cannot extend Interfaces
+
+    * zend_compile.c:
+      Enforce semantics: Classes cannot extend Interfaces
+
+    * tests/bug29828.phpt:
+      Fix test: Classes cannot extend Interfaces
+
+    * zend_compile.c:
+      Drop doubled check
+
+    * zend_compile.c:
+      - Bugfix #29828 Interfaces no longer work
+
+    * tests/bug29828.phpt:
+      
+      Add new test
+
 2004-08-25  Andi Gutmans  <andi@zend.com>
 
     * zend_builtin_functions.c:
