@@ -492,7 +492,8 @@ binary accessible somewhere in your web tree, people will be able to circumvent\
 this is to define doc_root in your php.ini file to something other than your\n\
 top-level DOCUMENT_ROOT.  This way you can separate the part of your web space\n\n\
 which uses PHP from the normal part using .htaccess security.  If you do not have\n\
-any .htaccess restrictions anywhere on your site you can leave doc_root undefined.\n\
+any .htaccess restrictions anywhere on your site you can leave doc_root undefined.\n\n\n\
+If you are running IIS, you may safely set cgi.force_redirect=0 in php.ini.\n\
 \n");
 
 			/* remove that detailed explanation some time */
