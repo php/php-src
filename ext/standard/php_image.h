@@ -24,7 +24,7 @@
 
 PHP_FUNCTION(getimagesize);
 
-PHP_FUNCTION(imagetype2mimetype);
+PHP_FUNCTION(image_type_to_mime_type);
 
 /* {{{ enum image_filetype
    This enum is used to have ext/standard/image.c and ext/exif/exif.c use
@@ -51,6 +51,6 @@ typedef enum
 
 PHPAPI int php_getimagetype(php_stream *stream, char *filetype TSRMLS_DC);
 
-PHPAPI const char * php_imagetype2mimetype(int image_type);
+PHPAPI const char * php_image_type_to_mime_type(int image_type);
 
 #endif /* PHP_IMAGE_H */

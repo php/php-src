@@ -3330,7 +3330,7 @@ PHP_FUNCTION(exif_read_data)
 	exif_iif_add_int(&ImageInfo, SECTION_FILE, "FileDateTime",  ImageInfo.FileDateTime);
 	exif_iif_add_int(&ImageInfo, SECTION_FILE, "FileSize",      ImageInfo.FileSize);
 	exif_iif_add_int(&ImageInfo, SECTION_FILE, "FileType",      ImageInfo.FileType);
-	exif_iif_add_str(&ImageInfo, SECTION_FILE, "MimeType",      (char*)php_imagetype2mimetype(ImageInfo.FileType));
+	exif_iif_add_str(&ImageInfo, SECTION_FILE, "MimeType",      (char*)php_image_type_to_mime_type(ImageInfo.FileType));
 	exif_iif_add_str(&ImageInfo, SECTION_FILE, "SectionsFound", sections_str ? sections_str : "NONE");
 
 #ifdef EXIF_DEBUG
@@ -3396,7 +3396,7 @@ PHP_FUNCTION(exif_read_data)
 			exif_scan_thumbnail(&ImageInfo);
 		}
 		exif_iif_add_int(&ImageInfo, SECTION_COMPUTED, "Thumbnail.FileType", ImageInfo.Thumbnail.filetype);
-		exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "Thumbnail.MimeType", (char*)php_imagetype2mimetype(ImageInfo.Thumbnail.filetype));
+		exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "Thumbnail.MimeType", (char*)php_image_type_to_mime_type(ImageInfo.Thumbnail.filetype));
 	}
 	if (ImageInfo.Thumbnail.width && ImageInfo.Thumbnail.height) {
 		exif_iif_add_int(&ImageInfo, SECTION_COMPUTED, "Thumbnail.Height", ImageInfo.Thumbnail.height);
