@@ -18,11 +18,6 @@ echo strip_tags($str, '<abc>');
 --EXPECT--
 1:
 2:
-
-?>
---EXPECT--
-1:
-2:
 3:
 4:
 5:abc - def
