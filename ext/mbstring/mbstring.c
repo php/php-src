@@ -2594,7 +2594,7 @@ PHP_FUNCTION(mb_convert_encoding)
 				zend_hash_move_forward(target_hash);
 				i--;
 			}
-			if ( !strlen(_from_encodings)) {
+			if (_from_encodings != NULL && !strlen(_from_encodings)) {
 				efree(_from_encodings);
 				_from_encodings = NULL;
 			}
