@@ -146,6 +146,6 @@ ADDING SHARED MODULE SUPPORT TO A MODULE
 
   4. Add the following lines to your C source file:
 
-        #if defined(COMPILE_DL) || defined(COMPILE_DL_FOO)
+        #ifdef COMPILE_DL_FOO
         ZEND_GET_MODULE(foo)
         #endif
