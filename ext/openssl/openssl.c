@@ -65,11 +65,11 @@ enum php_openssl_key_type {
 };
 
 enum php_openssl_cipher_type {
- 	PHP_OPENSSL_CIPHER_RC2_40,
- 	PHP_OPENSSL_CIPHER_RC2_128,
- 	PHP_OPENSSL_CIPHER_RC2_64,
- 	PHP_OPENSSL_CIPHER_DES,
- 	PHP_OPENSSL_CIPHER_3DES,
+	PHP_OPENSSL_CIPHER_RC2_40,
+	PHP_OPENSSL_CIPHER_RC2_128,
+	PHP_OPENSSL_CIPHER_RC2_64,
+	PHP_OPENSSL_CIPHER_DES,
+	PHP_OPENSSL_CIPHER_3DES,
 
 	PHP_OPENSSL_CIPHER_DEFAULT = PHP_OPENSSL_CIPHER_RC2_40
 };
@@ -104,22 +104,21 @@ function_entry openssl_functions[] = {
 	PHP_FE(openssl_csr_export_to_file,	NULL)
 	PHP_FE(openssl_csr_sign,			NULL)
 
-	
-	PHP_FE(openssl_sign,               arg2_force_ref)
-	PHP_FE(openssl_verify,             NULL)
-	PHP_FE(openssl_seal,               arg2and3_force_ref)
-	PHP_FE(openssl_open,               arg2_force_ref)
+	PHP_FE(openssl_sign,		arg2_force_ref)
+	PHP_FE(openssl_verify,		NULL)
+	PHP_FE(openssl_seal,		arg2and3_force_ref)
+	PHP_FE(openssl_open,		arg2_force_ref)
 
 /* for S/MIME handling */
-	PHP_FE(openssl_pkcs7_verify,	  	  NULL)
-	PHP_FE(openssl_pkcs7_decrypt,		  NULL)
-	PHP_FE(openssl_pkcs7_sign,			  NULL)
-	PHP_FE(openssl_pkcs7_encrypt,		  NULL)
+	PHP_FE(openssl_pkcs7_verify,		NULL)
+	PHP_FE(openssl_pkcs7_decrypt,		NULL)
+	PHP_FE(openssl_pkcs7_sign,			NULL)
+	PHP_FE(openssl_pkcs7_encrypt,		NULL)
 
- 	PHP_FE(openssl_private_encrypt,    arg2_force_ref)
- 	PHP_FE(openssl_private_decrypt,    arg2_force_ref)
- 	PHP_FE(openssl_public_encrypt,     arg2_force_ref)
- 	PHP_FE(openssl_public_decrypt,     arg2_force_ref)
+	PHP_FE(openssl_private_encrypt,		arg2_force_ref)
+	PHP_FE(openssl_private_decrypt,		arg2_force_ref)
+	PHP_FE(openssl_public_encrypt,		arg2_force_ref)
+	PHP_FE(openssl_public_decrypt,		arg2_force_ref)
 
 	PHP_FE(openssl_error_string, NULL)
 	{NULL, NULL, NULL}
@@ -137,7 +136,7 @@ zend_module_entry openssl_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(openssl),
-        NO_VERSION_YET,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -156,7 +155,7 @@ static void php_pkey_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	EVP_PKEY *pkey = (EVP_PKEY *)rsrc->ptr;
 
 	assert(pkey != NULL);
-	
+
 	EVP_PKEY_free(pkey);
 }
 
@@ -213,7 +212,7 @@ struct php_x509_request {
 static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC);
 static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * passphrase, int makeresource, long * resourceval TSRMLS_DC);
 static int php_openssl_is_private_key(EVP_PKEY* pkey TSRMLS_DC);
-static X509_STORE 	  * setup_verify(zval * calist TSRMLS_DC);
+static X509_STORE     * setup_verify(zval * calist TSRMLS_DC);
 static STACK_OF(X509) * load_all_certs_from_file(char *certfile);
 static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC);
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req TSRMLS_DC);
@@ -298,8 +297,9 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC)
 	thestr -= 2;
 	thetime.tm_year = atoi(thestr);
 
-	if (thetime.tm_year < 68)
+	if (thetime.tm_year < 68) {
 		thetime.tm_year += 100;
+	}
 
 	thetime.tm_isdst = -1;
 	ret = mktime(&thetime);
@@ -351,7 +351,7 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC)
 	str = CONF_get_string(req->req_config, NULL, "oid_section");
 	if (str == NULL) {
 		return SUCCESS;
-	}	
+	}
 	sktmp = CONF_get_section(req->req_config, str);
 	if (sktmp == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "problem loading oid section %s", str);
@@ -401,10 +401,10 @@ static int php_openssl_parse_config(
 	SET_OPTIONAL_STRING_ARG("config_section_name", req->section_name, "req");
 	req->global_config = CONF_load(NULL, default_ssl_conf_filename, NULL);
 	req->req_config = CONF_load(NULL, req->config_filename, NULL);
-		
+
 	if (req->req_config == NULL) {
 		return FAILURE;
-	}	
+	}
 
 	/* read in the oids */
 	str = CONF_get_string(req->req_config, NULL, "oid_file");
@@ -419,13 +419,13 @@ static int php_openssl_parse_config(
 		return FAILURE;
 	}
 	SET_OPTIONAL_STRING_ARG("digest_alg", req->digest_name,
-			CONF_get_string(req->req_config, req->section_name, "default_md"));	
+		CONF_get_string(req->req_config, req->section_name, "default_md"));
 	SET_OPTIONAL_STRING_ARG("x509_extensions", req->extensions_section,
-			CONF_get_string(req->req_config, req->section_name, "x509_extensions"));
+		CONF_get_string(req->req_config, req->section_name, "x509_extensions"));
 	SET_OPTIONAL_STRING_ARG("req_extensions", req->extensions_section,
-			CONF_get_string(req->req_config, req->request_extensions_section, "req_extensions"));
+		CONF_get_string(req->req_config, req->request_extensions_section, "req_extensions"));
 	SET_OPTIONAL_LONG_ARG("private_key_bits", req->priv_key_bits,
-			CONF_get_number(req->req_config, req->section_name, "default_bits"));
+		CONF_get_number(req->req_config, req->section_name, "default_bits"));
 
 	SET_OPTIONAL_LONG_ARG("private_key_type", req->priv_key_type, OPENSSL_KEYTYPE_DEFAULT);
 
@@ -435,7 +435,7 @@ static int php_openssl_parse_config(
 		str = CONF_get_string(req->req_config, req->section_name, "encrypt_rsa_key");
 		if (str == NULL) {
 			str = CONF_get_string(req->req_config, req->section_name, "encrypt_key");
-		}	
+		}
 		if (str && strcmp(str, "no") == 0) {
 			req->priv_key_encrypt = 0;
 		} else {
@@ -521,9 +521,9 @@ static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *se
 static int php_openssl_write_rand_file(const char * file, int egdsocket, int seeded)
 {
 	char buffer[MAXPATHLEN];
-	
+
 	TSRMLS_FETCH();
-	
+
 	if (egdsocket || !seeded) {
 		/* if we did not manage to read the seed file, we should not write
 		 * a low-entropy seed file back */
@@ -545,7 +545,7 @@ static int php_openssl_write_rand_file(const char * file, int egdsocket, int see
 PHP_MINIT_FUNCTION(openssl)
 {
 	char * config_filename;
-	
+
 	le_key = zend_register_list_destructors_ex(php_pkey_free, NULL, "OpenSSL key", module_number);
 	le_x509 = zend_register_list_destructors_ex(php_x509_free, NULL, "OpenSSL X.509", module_number);
 	le_csr = zend_register_list_destructors_ex(php_csr_free, NULL, "OpenSSL X.509 CSR", module_number);
@@ -569,12 +569,12 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("X509_PURPOSE_ANY", X509_PURPOSE_ANY, CONST_CS|CONST_PERSISTENT);
 #endif
 
-	/* signature algotithm constants */
+	/* signature algorithm constants */
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA1", OPENSSL_ALGO_SHA1, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD5", OPENSSL_ALGO_MD5, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD4", OPENSSL_ALGO_MD4, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD2", OPENSSL_ALGO_MD2, CONST_CS|CONST_PERSISTENT);
-	
+
 	/* flags for S/MIME */
 	REGISTER_LONG_CONSTANT("PKCS7_DETACHED", PKCS7_DETACHED, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PKCS7_TEXT", PKCS7_TEXT, CONST_CS|CONST_PERSISTENT);
@@ -586,25 +586,25 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("PKCS7_BINARY", PKCS7_BINARY, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PKCS7_NOSIGS", PKCS7_NOSIGS, CONST_CS|CONST_PERSISTENT);
 
- 	REGISTER_LONG_CONSTANT("OPENSSL_PKCS1_PADDING", RSA_PKCS1_PADDING, CONST_CS|CONST_PERSISTENT);
- 	REGISTER_LONG_CONSTANT("OPENSSL_SSLV23_PADDING", RSA_SSLV23_PADDING, CONST_CS|CONST_PERSISTENT);
- 	REGISTER_LONG_CONSTANT("OPENSSL_NO_PADDING", RSA_NO_PADDING, CONST_CS|CONST_PERSISTENT);
- 	REGISTER_LONG_CONSTANT("OPENSSL_PKCS1_OAEP_PADDING", RSA_PKCS1_OAEP_PADDING, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_PKCS1_PADDING", RSA_PKCS1_PADDING, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_SSLV23_PADDING", RSA_SSLV23_PADDING, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_NO_PADDING", RSA_NO_PADDING, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_PKCS1_OAEP_PADDING", RSA_PKCS1_OAEP_PADDING, CONST_CS|CONST_PERSISTENT);
 
 	/* Ciphers */
- 	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_RC2_40", PHP_OPENSSL_CIPHER_RC2_40, CONST_CS|CONST_PERSISTENT);
- 	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_RC2_128", PHP_OPENSSL_CIPHER_RC2_128, CONST_CS|CONST_PERSISTENT);
- 	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_RC2_64", PHP_OPENSSL_CIPHER_RC2_64, CONST_CS|CONST_PERSISTENT);
- 	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_DES", PHP_OPENSSL_CIPHER_DES, CONST_CS|CONST_PERSISTENT);
- 	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_3DES", PHP_OPENSSL_CIPHER_3DES, CONST_CS|CONST_PERSISTENT);
-	
+	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_RC2_40", PHP_OPENSSL_CIPHER_RC2_40, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_RC2_128", PHP_OPENSSL_CIPHER_RC2_128, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_RC2_64", PHP_OPENSSL_CIPHER_RC2_64, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_DES", PHP_OPENSSL_CIPHER_DES, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_3DES", PHP_OPENSSL_CIPHER_3DES, CONST_CS|CONST_PERSISTENT);
+
 	/* Values for key types */
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_RSA", OPENSSL_KEYTYPE_RSA, CONST_CS|CONST_PERSISTENT);
 #ifndef NO_DSA
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_DSA", OPENSSL_KEYTYPE_DSA, CONST_CS|CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_DH", OPENSSL_KEYTYPE_DH, CONST_CS|CONST_PERSISTENT);
-	
+
 	/* Determine default SSL configuration file */
 	config_filename = getenv("OPENSSL_CONF");
 	if (config_filename == NULL) {
@@ -2549,7 +2549,7 @@ PHP_FUNCTION(openssl_private_encrypt)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "key param is not a valid private key");
 		RETURN_FALSE;
 	}
-	
+
 	cryptedlen = EVP_PKEY_size(pkey);
 	cryptedbuf = emalloc(cryptedlen + 1);
 
@@ -2596,18 +2596,18 @@ PHP_FUNCTION(openssl_private_decrypt)
 	long keyresource = -1;
 	char * data;
 	int data_len;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l", &data, &data_len, &crypted, &key, &padding) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
-	
+
 	pkey = php_openssl_evp_from_zval(&key, 0, "", 0, &keyresource TSRMLS_CC);
 	if (pkey == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "key parameter is not a valid private key");
 		RETURN_FALSE;
 	}
-	
+
 	cryptedlen = EVP_PKEY_size(pkey);
 	crypttemp = emalloc(cryptedlen + 1);
 
@@ -2661,7 +2661,7 @@ PHP_FUNCTION(openssl_public_encrypt)
 	long padding = RSA_PKCS1_PADDING;
 	char * data;
 	int data_len;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l", &data, &data_len, &crypted, &key, &padding) == FAILURE)
 		return;
 
@@ -2803,7 +2803,8 @@ PHP_FUNCTION(openssl_sign)
 	int siglen;
 	unsigned char *sigbuf;
 	long keyresource = -1;
-	char * data;	int data_len;
+	char * data;
+	int data_len;
 	EVP_MD_CTX md_ctx;
 	long signature_algo = OPENSSL_ALGO_SHA1;
 	EVP_MD *mdtype;
