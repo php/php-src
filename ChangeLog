@@ -131,6 +131,139 @@
       ext/standard/tests/network/udp6loop.phpt:
       Fixed bugs in various tests.
 
+2003-08-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/sqlite.c
+      ext/sqlite/sqlite.c:
+      
+
+    * ext/sqlite/sqlite.c:
+      Bugfix #25056
+
+2003-08-12  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/php_interbase.h:
+      .... and again
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Re-commit of failed patch
+
+2003-08-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Revert previous patch.
+
+2003-08-12  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Allow prepared execution of any non-query statement except CREATE DB
+      (fixes bug #7014)
+
+2003-08-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c:
+      Fix compile warning (unused variable)
+
+2003-08-12  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Fixed bug #23936 (fail to select and fetch)
+
+2003-08-12  Andrey Hristov  <andrey@hristov.com>
+
+    * ext/oci8/oci8.c:
+      proto fixes(Mehdi Achour)
+
+2003-08-12  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Added comment in code :-)
+
+    * ext/interbase/interbase.c:
+      Revert ugly workaround for erroneous results of ibase_num_rows() (see
+      comment in code)
+
+    * ext/interbase/interbase.c:
+      Fix for missing errmsg in test 005
+
+    * ext/interbase/tests/002.phpt:
+      Tiny fix
+
+    * ext/interbase/tests/005.phpt:
+      Changed to reflect corrected ibase_trans() behaviour
+
+2003-08-12  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_4_3)
+      Zend/zend_hash.c:
+      Remove bogus patch
+
+    * ZendEngine2/zend_hash.c:
+      Remove bogus patch - the number of elements is unrelated
+
+2003-08-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/iconv/iconv.c:
+      Fix compiler warnings.
+
+2003-08-12  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Fix for failed tests except 005
+
+2003-08-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/interbase/interbase.c:
+      fix build
+
+    * ext/mysqli/tests/001.phpt:
+      fix test
+
+2003-08-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/db/db.c
+      ext/dom/document.c
+      ext/dom/element.c
+      ext/fbsql/php_fbsql.c
+      ext/ftp/ftp.c
+      ext/gd/gd.c
+      ext/gd/libgd/gd.c
+      ext/imap/php_imap.c
+      ext/ingres_ii/ii.c
+      ext/interbase/interbase.c
+      ext/mono/php_mono.c
+      ext/msession/msession.c
+      ext/mssql/php_mssql.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_profiler.c
+      ext/oci8/oci8.c
+      ext/odbc/php_odbc.c
+      ext/oracle/oracle.c
+      ext/ovrimos/ovrimos.c
+      ext/pfpro/pfpro.c
+      ext/session/session.c
+      ext/sockets/sockets.c
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/w32api/w32api.c
+      ext/wddx/wddx.c
+      ext/xml/xml.c
+      ext/xsl/xsltprocessor.c
+      main/network.c
+      win32/select.c:
+      emalloc -> safe_emalloc
+
+    * ext/calendar/tests/jdtojewish.phpt
+      ext/sockets/tests/ipv6loop.phpt
+      ext/standard/tests/network/tcp6loop.phpt
+      ext/standard/tests/network/udp6loop.phpt:
+      Fixed bugs in various tests.
+
 2003-06-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/classes/class_final.phpt:
