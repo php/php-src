@@ -116,7 +116,8 @@ fi
 
 rm -f ltmain.sh ltconfig
 libtoolize --automake --copy --force
-cat patch-?? | patch -N
+patch ltconfig < patch-aa
+patch ltmain.sh < patch-ab
 
 mv aclocal.m4 aclocal.m4.old 2>/dev/null
 aclocal
