@@ -32,7 +32,7 @@
 #define DEBUG_ZEND 0
 
 #define FREE_PNODE(znode)	zval_dtor(&znode->u.constant);
-#define FREE_OP(Ts, op, should_free) if (should_free) zval_dtor(&Ts[(op)->u.var].tmp_var);
+#define FREE_OP(Ts, op, should_free) if (should_free) zval_dtor(should_free);
 
 #define SET_UNUSED(op)  (op).op_type = IS_UNUSED
 

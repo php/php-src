@@ -186,7 +186,7 @@ struct _zend_executor_globals {
 	HashTable persistent_list;
 
 	zend_ptr_stack argument_stack;
-	int free_op1, free_op2;
+	zval *free_op1, *free_op2;
 	int (*unary_op)(zval *result, zval *op1);
 	int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 
