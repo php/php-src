@@ -1972,15 +1972,17 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 	int type;
 
 	if (zend_llist_count(property_reference->elements_list)==1
-		&& !strcmp(Z_STRVAL(function_name->element), "com")) {
+			&& !strcmp(Z_STRVAL(function_name->element), "com")) {
+		zval *tmp;
+		
 		/* constructor */
 		PHP_FN(com_load)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-		/* free instance created by 'new' */
-		zval_dtor(object);
 
-		/* and override it with the instance created by 'com_load()' */
-		*object = *return_value;
-		INIT_ZVAL(*return_value);
+		zend_hash_index_find(Z_OBJPROP_P(return_value), 0, (void**)&handle);
+		zend_list_addref(Z_RESVAL_PP(handle));
+		MAKE_STD_ZVAL(tmp);
+		ZVAL_RESOURCE(tmp, Z_RESVAL_PP(handle));
+		zend_hash_index_update(Z_OBJPROP_P(object), 0, &tmp, sizeof(tmp), NULL);
 
 		zval_dtor(&function_name->element);
 		return;
