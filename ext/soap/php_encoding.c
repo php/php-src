@@ -2287,7 +2287,7 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 	int max_reallocs = 5;
 	size_t buf_len=64, real_len;
 	char *buf;
-	char tzbuf[6];
+	char tzbuf[8];
 
 	xmlNodePtr xmlParam;
 
@@ -2309,19 +2309,19 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 
 		/* Time zone support */
 #ifdef HAVE_TM_GMTOFF
-		sprintf(tzbuf, "%c%02d%02d", (ta->tm_gmtoff < 0) ? '-' : '+', abs(ta->tm_gmtoff / 3600), abs( (ta->tm_gmtoff % 3600) / 60 ));
+		sprintf(tzbuf, "%c%02d:%02d", (ta->tm_gmtoff < 0) ? '-' : '+', abs(ta->tm_gmtoff / 3600), abs( (ta->tm_gmtoff % 3600) / 60 ));
 #else
 # ifdef __CYGWIN__
-		sprintf(tzbuf, "%c%02d%02d", ((ta->tm_isdst ? _timezone - 3600:_timezone)>0)?'-':'+', abs((ta->tm_isdst ? _timezone - 3600 : _timezone) / 3600), abs(((ta->tm_isdst ? _timezone - 3600 : _timezone) % 3600) / 60));
+		sprintf(tzbuf, "%c%02d:%02d", ((ta->tm_isdst ? _timezone - 3600:_timezone)>0)?'-':'+', abs((ta->tm_isdst ? _timezone - 3600 : _timezone) / 3600), abs(((ta->tm_isdst ? _timezone - 3600 : _timezone) % 3600) / 60));
 # else
-		sprintf(tzbuf, "%c%02d%02d", ((ta->tm_isdst ? timezone - 3600:timezone)>0)?'-':'+', abs((ta->tm_isdst ? timezone - 3600 : timezone) / 3600), abs(((ta->tm_isdst ? timezone - 3600 : timezone) % 3600) / 60));
+		sprintf(tzbuf, "%c%02d:%02d", ((ta->tm_isdst ? timezone - 3600:timezone)>0)?'-':'+', abs((ta->tm_isdst ? timezone - 3600 : timezone) / 3600), abs(((ta->tm_isdst ? timezone - 3600 : timezone) % 3600) / 60));
 # endif
 #endif
-		if (strcmp(tzbuf,"+0000") == 0) {
+		if (strcmp(tzbuf,"+00:00") == 0) {
 		  strcpy(tzbuf,"Z");
 		  real_len++;
 		} else {
-			real_len += 5;
+			real_len += 6;
 		}
 		if (real_len >= buf_len) {
 			buf = (char *) erealloc(buf, real_len+1);
