@@ -23,6 +23,10 @@
 #include "streams/php_streams_int.h"
 #include "php_network.h"
 
+#if defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE)
+# undef AF_UNIX
+#endif
+
 #if defined(AF_UNIX)
 #include <sys/un.h>
 #endif
@@ -429,6 +433,7 @@ static int php_tcp_sockop_set_option(php_stream *stream, int option, int value, 
 					return PHP_STREAM_OPTION_RETURN_OK;
 				default:
 					/* fall through */
+					;
 			}
 			
 			/* fall through */
