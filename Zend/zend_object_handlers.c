@@ -476,13 +476,11 @@ static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC)
 static void zend_std_unset_dimension(zval *object, zval *offset TSRMLS_DC)
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
-	zval *retval;
 	
 	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
 		SEPARATE_ARG_IF_REF(offset);
-		zend_call_method_with_1_params(&object, ce, NULL, "offsetunset", &retval, offset);
+		zend_call_method_with_1_params(&object, ce, NULL, "offsetunset", NULL, offset);
 		zval_ptr_dtor(&offset);
-		zval_ptr_dtor(&retval);
 	} else {
 		zend_error(E_ERROR, "Cannot use object of type %s as array", ce->name);
 	}
