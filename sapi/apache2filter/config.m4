@@ -36,9 +36,11 @@ AC_ARG_WITH(apxs2filter,
   APXS_HTTPD=`$APXS -q SBINDIR`/`$APXS -q TARGET`
   APXS_CFLAGS=`$APXS -q CFLAGS`
   APXS_MPM=`$APXS -q MPM_NAME`
+  APU_BINDIR=`$APXS -q APU_BINDIR`
+  APR_BINDIR=`$APXS -q APR_BINDIR`
 
-  APU_INCLUDEDIR="`$APXS_BINDIR/apu-config --includes`"
-  APR_INCLUDEDIR="`$APXS_BINDIR/apr-config --includes`"
+  APU_INCLUDEDIR="`$APU_BINDIR/apu-config --includes`"
+  APR_INCLUDEDIR="`$APR_BINDIR/apr-config --includes`"
 
   for flag in $APXS_CFLAGS; do
     case $flag in
@@ -81,11 +83,11 @@ AC_ARG_WITH(apxs2filter,
     dnl the linker does not recursively look at the bundle loader and
     dnl pull in its dependencies.  Therefore, we must pull in the APR
     dnl and APR-util libraries.
-    if test -x "$APXS_BINDIR/apr-config"; then
-        MH_BUNDLE_FLAGS="`$APXS_BINDIR/apr-config --ldflags --link-ld --libs`"
+    if test -x "$APR_BINDIR/apr-config"; then
+        MH_BUNDLE_FLAGS="`$APR_BINDIR/apr-config --ldflags --link-ld --libs`"
     fi
-    if test -x "$APXS_BINDIR/apu-config"; then
-        MH_BUNDLE_FLAGS="`$APXS_BINDIR/apu-config --ldflags --link-ld --libs` $MH_BUNDLE_FLAGS"
+    if test -x "$APU_BINDIR/apu-config"; then
+        MH_BUNDLE_FLAGS="`$APU_BINDIR/apu-config --ldflags --link-ld --libs` $MH_BUNDLE_FLAGS"
     fi
     MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD $MH_BUNDLE_FLAGS"
     PHP_SUBST(MH_BUNDLE_FLAGS)
