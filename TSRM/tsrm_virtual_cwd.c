@@ -474,19 +474,23 @@ CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path
 CWD_API char *virtual_realpath(const char *path, char *real_path TSRMLS_DC)
 {
 	cwd_state new_state;
-	int retval;
+	char *retval;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	retval = virtual_file_ex(&new_state, path, NULL, 1);
 	
-	if (!retval) {
+	if (virtual_file_ex(&new_state, path, NULL, 1)==0) {
 		int len = new_state.cwd_length>MAXPATHLEN-1?MAXPATHLEN-1:new_state.cwd_length;
+
 		memcpy(real_path, new_state.cwd, len);
 		real_path[len] = '\0';
-		return real_path;
+		retval = real_path;
+	} else {
+		retval = NULL;
 	}
 
-	return NULL;
+	CWD_STATE_FREE(&new_state);
+
+	return retval;
 }
 
 CWD_API int virtual_filepath_ex(const char *path, char **filepath, verify_path_func verify_path TSRMLS_DC)

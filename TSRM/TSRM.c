@@ -508,6 +508,7 @@ TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
 	if (mutexp) {
 #ifdef TSRM_WIN32
 		DeleteCriticalSection(mutexp);
+		free(mutexp);
 #elif defined(NETWARE)
 #ifdef USE_MPK
 		kMutexFree(mutexp);
