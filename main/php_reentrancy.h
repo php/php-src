@@ -60,8 +60,21 @@ char *asctime_r(const struct tm *tm, char *buf);
 struct tm *gmtime_r(const time_t *const timep, struct tm *p_tm);
 #endif
 
+#if !defined(HAVE_STRTOK_R)
+#define strtok_r php_strtok_r
+char *strtok_r(char *s, const char *delim, char **last);
+#endif
 
-#if defined(ZTS) && defined(PHP_NEED_REENTRANCY)
+#if !defined(HAVE_RAND_R)
+#define rand_r php_rand_r
+int rand_r(unsigned int *seed);
+#endif
+
+#if !defined(ZTS)
+#undef PHP_NEED_REENTRANCY
+#endif
+
+#if defined(PHP_NEED_REENTRANCY)
 void reentrancy_startup(void);
 void reentrancy_shutdown(void);
 #else
