@@ -107,6 +107,8 @@ public class servlet extends HttpServlet {
 
       else if (data.startsWith("Location: ")) {
         response.sendRedirect(data.substring(data.indexOf(" ") + 1));
+      } else if (data.startsWith("HTTP/1")) {
+      	return; // this one is added from servlet container (Tomcat 4.1), we have to check for others
       }
 
       else {

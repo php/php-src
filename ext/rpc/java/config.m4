@@ -97,7 +97,7 @@ AC_DEFUN(JAVA_CHECK_LIB, [
    dnl We have to find everything
    dnl
    for i in `find $PHP_JAVA/include -type d`; do
-     test -f $i/jni.h      && JAVA_INCLUDE=-I$i
+     test -f $i/jni.h      && JAVA_INCLUDE="$JAVA_INCLUDE -I$i"
      test -f $i/jni_md.h   && JAVA_INCLUDE="$JAVA_INCLUDE -I$i"
    done
 
@@ -178,6 +178,8 @@ if test "$PHP_JAVA" != "no"; then
   fi
 
   PHP_SUBST(JAVA_CLASSPATH)
+  PHP_SUBST(JAVA_INCLUDE)
+  PHP_SUBST(JAVA_CFLAGS)
 
   PHP_ADD_MAKEFILE_FRAGMENT
 fi

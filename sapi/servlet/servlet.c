@@ -71,12 +71,6 @@ typedef struct {
 
 extern zend_module_entry java_module_entry;
 
-static zend_module_entry *additional_php_extensions[] = {
-  &java_module_entry
-};
-
-#define EXTCOUNT (sizeof(additional_php_extensions)/sizeof(zend_module_entry *))
-
 /***************************************************************************/
 
 /*
