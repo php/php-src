@@ -151,7 +151,8 @@ static void _ps_files_open(ps_files *data, const char *key)
 static int _ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 {
 	DIR *dir;
-	struct dirent *entry, dentry;
+	char dentry[sizeof(struct dirent) + PATH_MAX + 1];
+	struct dirent *entry;
 	struct stat sbuf;
 	char buf[MAXPATHLEN];
 	time_t now;
@@ -165,7 +166,7 @@ static int _ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 
 	time(&now);
 
-	while (php_readdir_r(dir, &dentry, &entry) == 0 && entry) {
+	while (php_readdir_r(dir, (struct dirent *) dentry, &entry) == 0 && entry) {
 		/* does the file start with our prefix? */
 		if (!strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1) &&
 				/* create full path */
