@@ -40,6 +40,7 @@ int dbx_pgsql_connect(zval ** rv, zval ** host, zval ** db, zval ** username, zv
     zval *returned_zval=NULL;
 
 	MAKE_STD_ZVAL(conn_zval);
+    ZVAL_LONG(conn_zval, 0);
 
 	if (Z_STRLEN_PP(username)>0 && Z_STRLEN_PP(password)>0){
 		int len;
@@ -85,6 +86,7 @@ int dbx_pgsql_pconnect(zval ** rv, zval ** host, zval ** db, zval ** username, z
     zval *returned_zval=NULL;
 
 	MAKE_STD_ZVAL(conn_zval);
+    ZVAL_LONG(conn_zval, 0);
 
 	if (Z_STRLEN_PP(username)>0 && Z_STRLEN_PP(password)>0){
 		int len;
