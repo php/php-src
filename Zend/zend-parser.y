@@ -717,7 +717,7 @@ internal_functions_in_yacc:
 	|	T_INCLUDE_ONCE expr 	{ do_include_or_eval(ZEND_INCLUDE_ONCE, &$$, &$2 CLS_CC); }
 	|	T_EVAL '(' expr ')' 	{ do_include_or_eval(ZEND_EVAL, &$$, &$3 CLS_CC); }
 	|	T_REQUIRE expr			{ do_include_or_eval(ZEND_REQUIRE, &$$, &$2 CLS_CC); }
-	|	T_REQUIRE_ONCE use_filename		{ do_include_or_eval(ZEND_REQUIRE_ONCE, &$$, &$2 CLS_CC); }
+	|	T_REQUIRE_ONCE expr		{ do_include_or_eval(ZEND_REQUIRE_ONCE, &$$, &$2 CLS_CC); }
 ;
 
 
