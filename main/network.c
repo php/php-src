@@ -31,6 +31,13 @@
 #include <winsock.h>
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
+#elif defined(NETWARE)
+#ifdef NEW_LIBC
+#include <sys/timeval.h>
+#include <sys/param.h>
+#else
+#include "netware/time_nw.h"
+#endif
 #else
 #include <sys/param.h>
 #endif
@@ -51,7 +58,20 @@
 #include <sys/poll.h>
 #endif
 
-#ifndef PHP_WIN32
+#if defined(NETWARE)
+#ifdef USE_WINSOCK
+/*#include <ws2nlm.h>*/
+#include <novsock2.h>
+#else
+/* New headers for socket stuff */
+#ifdef NEW_LIBC
+#include <netinet/in.h>
+#include <netdb.h>
+#include <sys/select.h>
+#endif
+#include <sys/socket.h>
+#endif
+#elif !defined(PHP_WIN32)
 #include <netinet/in.h>
 #include <netdb.h>
 #if HAVE_ARPA_INET_H
@@ -65,7 +85,7 @@ int inet_aton(const char *, struct in_addr *);
 
 #include "php_network.h"
 
-#if defined(PHP_WIN32) || defined(__riscos__)
+#if defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE)
 #undef AF_UNIX
 #endif
 
