@@ -1663,7 +1663,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 	 * safe mode GID/UID checks
 	 */
 
-	not_relative_path:
+not_relative_path:
 
 	/* Absolute path open */
 	if (IS_ABSOLUTE_PATH(filename, filename_length)) {
@@ -1775,7 +1775,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 		}
 		stream = php_stream_fopen_rel(trypath, mode, opened_path, options);
 		if (stream) {
-			stream_done:
+stream_done:
 			efree(pathbuf);
 			return stream;
 		}
