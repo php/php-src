@@ -176,6 +176,9 @@ void whiteSpace_collapse(char* str);
 zval *to_zval_object(encodeType type, xmlNodePtr data);
 zval *to_zval_array(encodeType type, xmlNodePtr data);
 
+xmlNodePtr to_xml_object(encodeType type, zval *data, int style);
+xmlNodePtr to_xml_array(encodeType type, zval *data, int style);
+
 /* Try and guess for non-wsdl clients and servers */
 zval *guess_zval_convert(encodeType type, xmlNodePtr data);
 xmlNodePtr guess_xml_convert(encodeType type, zval *data, int style);
