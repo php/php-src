@@ -764,6 +764,7 @@ static int send_search (Yaz_Association t)
 	
 	/* resultSetPrepare (req, t, req->cur_pa); */
 	if (t->resultSetStartPoint == 1 && t->piggyback  &&
+            t->numberOfRecordsRequested &&
 		(t->sort_criteria == 0 || *t->sort_criteria == 0) )
 	{
 		sreq->largeSetLowerBound = odr_malloc (t->odr_out, sizeof(int));
@@ -779,27 +780,18 @@ static int send_search (Yaz_Association t)
 			sreq->mediumSetElementSetNames = esn;
 			sreq->smallSetElementSetNames = esn;
 		}
-	}
-	else
-	{
-		sreq->smallSetUpperBound = odr_malloc (t->odr_out, sizeof(int));
-		*sreq->smallSetUpperBound = 0;
-		sreq->largeSetLowerBound = odr_malloc (t->odr_out, sizeof(int));
-		*sreq->largeSetLowerBound = 1;
-		sreq->mediumSetPresentNumber = odr_malloc (t->odr_out, sizeof(int));
-		*sreq->mediumSetPresentNumber = 0;
+		if (t->preferredRecordSyntax && *t->preferredRecordSyntax)
+		{
+			struct oident ident;
+		
+			ident.proto = PROTO_Z3950;
+			ident.oclass = CLASS_RECSYN;
+			ident.value = oid_getvalbyname (t->preferredRecordSyntax);
+			sreq->preferredRecordSyntax =
+				odr_oiddup (t->odr_out, oid_getoidbyent (&ident));
+		}
 	}
 	sreq->query = r->query;
-	if (t->preferredRecordSyntax && *t->preferredRecordSyntax)
-	{
-		struct oident ident;
-		
-		ident.proto = PROTO_Z3950;
-		ident.oclass = CLASS_RECSYN;
-		ident.value = oid_getvalbyname (t->preferredRecordSyntax);
-		sreq->preferredRecordSyntax =
-			odr_oiddup (t->odr_out, oid_getoidbyent (&ident));
-	}
 	sreq->databaseNames = set_DatabaseNames (t, &sreq->num_databaseNames);
 
 	send_APDU (t, apdu);
