@@ -136,7 +136,6 @@ struct date_yy {
 	int	yyRelMonth;
 	int	yyRelSeconds;
 	int	yyRelYear;
-	int yyFlag;
 };
 
 typedef union _date_ll {
@@ -151,9 +150,11 @@ typedef union _date_ll {
 
 %}
 
-/* This grammar has 19 shift/reduce conflicts. */
-%expect 19
+/* This grammar has 21 shift/reduce conflicts. */
+%expect 21
 %pure_parser
+
+%debug
 
 %token	tAGO tDAY tDAY_UNIT tDAYZONE tDST tHOUR_UNIT tID tTZONE tZZONE 
 %token	tMERIDIAN tMINUTE_UNIT tMONTH tMONTH_UNIT
@@ -228,14 +229,24 @@ time	: tUNUMBER tMERIDIAN {
 		} else {
 			((struct date_yy *)parm)->yyTimezone =  -$6 * 60;
 		}
-	}
-	| tUNUMBER ':' tUNUMBER ':' tUNUMBER '.' tUNUMBER pgsqlzonepart {
+    }
+    | tUNUMBER ':' tUNUMBER ':' tUNUMBER '.' tUNUMBER pgsqlzonepart {
 	    ((struct date_yy *)parm)->yyHour = $1;
 	    ((struct date_yy *)parm)->yyMinutes = $3;
 	    ((struct date_yy *)parm)->yySeconds = $5;
 	    ((struct date_yy *)parm)->yyMeridian = MER24;
 	}
+	| iso8601time
 	;
+
+iso8601time: tUNUMBER ':' tUNUMBER ':' tUNUMBER  {
+	    ((struct date_yy *)parm)->yyHour = $1;
+	    ((struct date_yy *)parm)->yyMinutes = $3;
+	    ((struct date_yy *)parm)->yySeconds = $5;
+	    ((struct date_yy *)parm)->yyMeridian = MER24;
+	}  
+    ;
+
 
 pgsqlzonepart : tSNUMBER {
 	    ((struct date_yy *)parm)->yyHaveZone++;
@@ -261,14 +272,9 @@ pgsqlzonepart : tSNUMBER {
 	*/
 	   
 zone	: tTZONE {
-	    ((struct date_yy *)parm)->yyFlag = 1;
 	    ((struct date_yy *)parm)->yyTimezone = $1;
 	}
 	| tZZONE {
-		if (((struct date_yy *)parm)->yyFlag) {
-	        ((struct date_yy *)parm)->yyHaveZone--;
-			((struct date_yy *)parm)->yyFlag = 0;
-		}
 	    ((struct date_yy *)parm)->yyTimezone = $1;
 	}
 	| tZONE {
@@ -330,12 +336,17 @@ date	: tUNUMBER '/' tUNUMBER {
 	      ((struct date_yy *)parm)->yyYear = $5;
 	    }
 	}
-	| tUNUMBER tSNUMBER tSNUMBER {
-	    /* ISO 8601 format.  yyyy-mm-dd.  */
-	    ((struct date_yy *)parm)->yyYear = $1;
-	    ((struct date_yy *)parm)->yyMonth = -$2;
-	    ((struct date_yy *)parm)->yyDay = -$3;
-	}
+	| iso8601date
+    | iso8601date tTZONE iso8601time {
+	        ((struct date_yy *)parm)->yyTimezone = 0;
+	        ((struct date_yy *)parm)->yyHaveZone++;
+			((struct date_yy *)parm)->yyHaveTime++;
+    }
+    | iso8601date tTZONE iso8601time tZZONE {
+	        ((struct date_yy *)parm)->yyTimezone = 0;
+	        ((struct date_yy *)parm)->yyHaveZone++;
+			((struct date_yy *)parm)->yyHaveTime++;
+    }
 	| tUNUMBER tMONTH tSNUMBER {
 	    /* e.g. 17-JUN-1992.  */
 	    ((struct date_yy *)parm)->yyDay = $1;
@@ -374,6 +385,14 @@ date	: tUNUMBER '/' tUNUMBER {
 	    ((struct date_yy *)parm)->yyYear = $3;
 	}
 	;
+
+iso8601date: tUNUMBER tSNUMBER tSNUMBER {
+	    /* ISO 8601 format.  yyyy-mm-dd.  */
+	    ((struct date_yy *)parm)->yyYear = $1;
+	    ((struct date_yy *)parm)->yyMonth = -$2;
+	    ((struct date_yy *)parm)->yyDay = -$3;
+	}
+    ;
 
 rel	: relunit tAGO {
 	    ((struct date_yy *)parm)->yyRelSeconds =
@@ -989,13 +1008,12 @@ time_t php_parse_date(char *p, time_t *now)
   date.yyHaveRel = 0;
   date.yyHaveTime = 0;
   date.yyHaveZone = 0;
-  date.yyFlag = 0;
 
   if (yyparse ((void *)&date)
       || date.yyHaveTime > 1 || date.yyHaveZone > 1 
-	  || date.yyHaveDate > 1 || date.yyHaveDay > 1)
+	  || date.yyHaveDate > 1 || date.yyHaveDay > 1) {
     return -1;
-
+  }
   tm.tm_year = ToYear (date.yyYear) - TM_YEAR_ORIGIN + date.yyRelYear;
   tm.tm_mon = date.yyMonth - 1 + date.yyRelMonth;
   tm.tm_mday = date.yyDay + date.yyRelDay;
