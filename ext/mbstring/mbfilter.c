@@ -967,7 +967,7 @@ static mbfl_encoding mbfl_encoding_8859_15 = {
 	MBFL_ENCTYPE_SBCS
 };
 
-#if defined(HAVE_MBSTR_KR)
+#if defined(HAVE_MBSTR_RU)
 static const char *mbfl_encoding_cp1251_aliases[] = {"CP1251", "CP-1251", "WINDOWS-1251", NULL};
 
 static mbfl_encoding mbfl_encoding_cp1251 = {
