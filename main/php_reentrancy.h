@@ -20,7 +20,7 @@
 #ifndef PHP_REENTRANCY_H
 #define PHP_REENTRANCY_H
 
-#include "php_config.h"
+#include "php.h"
 
 #include <time.h>
 
