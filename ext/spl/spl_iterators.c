@@ -445,6 +445,25 @@ SPL_METHOD(RecursiveIteratorIterator, getInnerIterator)
 	RETURN_ZVAL(object->iterators[level].zobject, 1, 0);
 } /* }}} */
 
+static union _zend_function *spl_recursive_it_get_method(zval **object_ptr, char *method, int method_len TSRMLS_DC)
+{
+	union _zend_function    *function_handler;
+	spl_recursive_it_object *object = (spl_recursive_it_object*)zend_object_store_get_object(*object_ptr TSRMLS_CC);
+	long                     level = object->level;
+	zval                    *zobj = object->iterators[level].zobject;
+	
+	function_handler = std_object_handlers.get_method(object_ptr, method, method_len TSRMLS_CC);
+	if (!function_handler) {
+		if (zend_hash_find(&Z_OBJCE_P(zobj)->function_table, method, method_len+1, (void **) &function_handler) == FAILURE) {
+			if (Z_OBJ_HT_P(zobj)->get_method) {
+				*object_ptr = zobj;
+				function_handler = Z_OBJ_HT_P(*object_ptr)->get_method(object_ptr, method, method_len TSRMLS_CC);
+			}
+		}
+	}
+	return function_handler;
+}
+
 /* {{{ spl_RecursiveIteratorIterator_dtor */
 static void spl_RecursiveIteratorIterator_free_storage(void *_object TSRMLS_DC)
 {
@@ -1503,6 +1522,7 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_ITERATOR(RecursiveIteratorIterator);
 
 	memcpy(&spl_handlers_rec_it_it, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	spl_handlers_rec_it_it.get_method = spl_recursive_it_get_method;
 	spl_handlers_rec_it_it.clone_obj = NULL;
 
 	memcpy(&spl_handlers_dual_it, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
