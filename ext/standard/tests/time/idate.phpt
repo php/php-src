@@ -2,7 +2,7 @@
 idate() function
 --FILE--
 <?php
-putenv ("TZ=GMT");
+putenv ("TZ=GMT0");
 
 $tmp = "UYzymndjHGhgistwLBIW";
 for($a = 0;$a < strlen($tmp); $a++){
