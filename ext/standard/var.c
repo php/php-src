@@ -340,7 +340,6 @@ void php_var_serialize(pval *buf, pval **struc, HashTable *var_hash)
 							d->value.str.val = key;
 							d->value.str.len = strlen(key);
 							php_var_serialize(buf, &d, NULL);
-							efree(key);
 							FREE_ZVAL(d);
 							break;
 					}
