@@ -79,6 +79,8 @@ php_core_globals core_globals;
 PHPAPI int core_globals_id;
 #endif
 
+#define NO_GLOBAL_LOCK
+
 /* temporary workaround for thread-safety issues in libzend */
 #if defined(ZTS) && !defined(NO_GLOBAL_LOCK)
 static MUTEX_T global_lock;
