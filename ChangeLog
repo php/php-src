@@ -1,3 +1,17 @@
+2001-02-11  Anders Johannsen  <anders@ignition.dk>
+
+    * pear/CMD.php: The Cmd:: class implements an abstraction for various ways
+    of executing commands (directly using the backtick operator,
+    as a background task after the script has terminated using
+    register_shutdown_function() or as a detached process using nohup).
+
+2001-02-11  Sean Bright  <elixer@erols.com>
+
+    * NEWS: Added note about get_meta_tags bugfix
+
+    * ext/standard/file.c
+      ext/standard/file.h: Fix for bug #4556
+
 2001-02-09  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/gd/gd.c: make _php_image_convert configuration-aware
