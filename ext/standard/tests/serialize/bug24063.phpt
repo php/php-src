@@ -5,10 +5,19 @@ serialize_precision=100
 precision=12
 --FILE--
 <?php 
-$f = 1.0e-6;
-$s = serialize($f);
-var_dump($s, unserialize($s));
+$v = 1;
+for ($i = 1; $i < 10; $i++) {
+	$v /= 10;
+	echo "{$v} ".unserialize(serialize($v))."\n";
+}
 ?>
 --EXPECT--
-string(9) "d:1.0E-6;"
-float(1.0E-6)
+0.1 0.1
+0.01 0.01
+0.001 0.001
+0.0001 0.0001
+1E-05 1E-05
+1E-06 1E-06
+1E-07 1E-07
+1E-08 1E-08
+1E-09 1E-09
