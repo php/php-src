@@ -89,65 +89,64 @@ typedef struct php_imap_le_struct {
 	long flags;
 } pils;
 
-typedef struct php3_imap_message_struct {
+typedef struct _php_imap_message_struct {
 	unsigned long msgid;
-	struct php3_imap_message_struct *next;
+	struct _php_imap_message_struct *next;
 } MESSAGELIST;
  
 MAILSTREAM *mail_close_it (pils *imap_le_struct);
 
 function_entry imap_functions[] = {
-	{"imap_open", php3_imap_open, NULL},
-	{"imap_reopen", php3_imap_reopen, NULL},
-	{"imap_num_msg", php3_imap_num_msg, NULL},
-	{"imap_num_recent", php3_imap_num_recent, NULL},
-	{"imap_headers", php3_imap_headers, NULL},
-	{"imap_header", php3_imap_headerinfo, NULL},
-	{"imap_headerinfo", php3_imap_headerinfo, NULL},
-	{"imap_body", php3_imap_body, NULL},
-	{"imap_fetchstructure", php3_imap_fetchstructure, NULL},
-	{"imap_fetchbody", php3_imap_fetchbody, NULL},
-	{"imap_expunge", php3_imap_expunge, NULL},
-	{"imap_delete", php3_imap_delete, NULL},
-	{"imap_undelete", php3_imap_undelete, NULL},
-	{"imap_check", php3_imap_check, NULL},
-	{"imap_close", php3_imap_close, NULL},
-	{"imap_mail_copy", php3_imap_mail_copy, NULL},
-	{"imap_mail_move", php3_imap_mail_move, NULL},
-	{"imap_createmailbox", php3_imap_createmailbox, NULL},
-	{"imap_renamemailbox", php3_imap_renamemailbox, NULL},
-	{"imap_deletemailbox", php3_imap_deletemailbox, NULL},
-	{"imap_listmailbox", php3_imap_list, NULL},
-	{"imap_scanmailbox", php3_imap_listscan, NULL},
-	{"imap_listsubscribed", php3_imap_lsub, NULL},
-	{"imap_subscribe", php3_imap_subscribe, NULL},
-	{"imap_unsubscribe", php3_imap_unsubscribe, NULL},
-	{"imap_append", php3_imap_append, NULL},
-	{"imap_ping", php3_imap_ping, NULL},
-	{"imap_base64", php3_imap_base64, NULL},
-	{"imap_qprint", php3_imap_qprint, NULL},
-	{"imap_8bit", php3_imap_8bit, NULL},
-	{"imap_binary", php3_imap_binary, NULL},
-	{"imap_mailboxmsginfo", php3_imap_mailboxmsginfo, NULL},
-	{"imap_rfc822_write_address", php3_imap_rfc822_write_address, NULL},
-	{"imap_rfc822_parse_adrlist", php3_imap_rfc822_parse_adrlist, NULL},
-	{"imap_setflag_full", php3_imap_setflag_full, NULL},
-	{"imap_clearflag_full", php3_imap_clearflag_full, NULL},
-	{"imap_sort", php3_imap_sort, NULL},
-	{"imap_fetchheader", php3_imap_fetchheader, NULL},
-	{"imap_fetchtext", php3_imap_body, NULL},
-	{"imap_uid", php3_imap_uid, NULL},
-	{"imap_msgno",php3_imap_msgno, NULL},
-	{"imap_list", php3_imap_list, NULL},
-	{"imap_scan", php3_imap_listscan, NULL},
-	{"imap_lsub", php3_imap_lsub, NULL},
-	{"imap_create", php3_imap_createmailbox, NULL},
-	{"imap_rename", php3_imap_renamemailbox, NULL},
-	{"imap_status", php3_imap_status, NULL},
-	{"imap_bodystruct", php3_imap_bodystruct, NULL},
-	{"imap_fetch_overview", php3_imap_fetch_overview, NULL},
-	{"imap_mail_compose", php3_imap_mail_compose, NULL},
-	{"imap_search", php3_imap_search, NULL},
+	PHP_FE(imap_open,			NULL)
+	PHP_FE(imap_reopen,			NULL)
+	PHP_FE(imap_num_msg,		NULL)
+	PHP_FE(imap_num_recent,		NULL)
+	PHP_FE(imap_headers,		NULL)
+	PHP_FE(imap_header,			NULL)
+	PHP_FE(imap_headerinfo,		NULL)
+	PHP_FE(imap_body,			NULL)
+	PHP_FE(imap_fetchstructure,	NULL)
+	PHP_FE(imap_fetchbody,		NULL)
+	PHP_FE(imap_expunge,		NULL)
+	PHP_FE(imap_delete,			NULL)
+	PHP_FE(imap_undelete,		NULL)
+	PHP_FE(imap_check,			NULL)
+	PHP_FE(imap_close,			NULL)
+	PHP_FE(imap_mail_copy,		NULL)
+	PHP_FE(imap_mail_move,		NULL)
+	PHP_FE(imap_createmailbox,	NULL)
+	PHP_FE(imap_renamemailbox,	NULL)
+	PHP_FE(imap_deletemailbox,	NULL)
+	PHP_FE(imap_listmailbox,	NULL)
+	PHP_FE(imap_scanmailbox,	NULL)
+	PHP_FE(imap_subscribe,		NULL)
+	PHP_FE(imap_unsubscribe,	NULL)
+	PHP_FE(imap_append,			NULL)
+	PHP_FE(imap_ping,			NULL)
+	PHP_FE(imap_base64,			NULL)
+	PHP_FE(imap_qprint,			NULL)
+	PHP_FE(imap_8bit,			NULL)
+	PHP_FE(imap_binary,			NULL)
+	PHP_FE(imap_mailboxmsginfo,	NULL)
+	PHP_FE(imap_rfc822_write_address,		NULL)
+	PHP_FE(imap_rfc822_parse_adrlist,		NULL)
+	PHP_FE(imap_setflag_full,	NULL)
+	PHP_FE(imap_clearflag_full,	NULL)
+	PHP_FE(imap_sort,			NULL)
+	PHP_FE(imap_fetchheader,	NULL)
+	PHP_FE(imap_fetchtext,		NULL)
+	PHP_FE(imap_uid,			NULL)
+	PHP_FE(imap_msgno,			NULL)
+	PHP_FE(imap_list,			NULL)
+	PHP_FE(imap_scan,			NULL)
+	PHP_FE(imap_lsub,			NULL)
+	PHP_FE(imap_create,			NULL)
+	PHP_FE(imap_rename,			NULL)
+	PHP_FE(imap_status,			NULL)
+	PHP_FE(imap_bodystruct,		NULL)
+	PHP_FE(imap_fetch_overview,	NULL)
+	PHP_FE(imap_mail_compose,	NULL)
+	PHP_FE(imap_search,			NULL)
 	{NULL, NULL, NULL}
 };
 
