@@ -1077,11 +1077,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					str_len = strlen(filename);
 					php_mb_gpc_encoding_converter(&filename, &str_len, 1, NULL, NULL TSRMLS_CC);
 				}
-#ifdef PHP_WIN32
 				s = php_mb_strrchr(filename, '\\' TSRMLS_CC);
-#else
-				s = filename;
-#endif
 				if ((tmp = php_mb_strrchr(filename, '/' TSRMLS_CC)) > s) {
 					s = tmp;
 				}
@@ -1089,12 +1085,13 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				goto filedone;
 			}
 #endif			
-
-#ifdef PHP_WIN32
+			/* The \ check should technically be needed for win32 systems only where
+			 * it is a valid path separator. However, IE in all it's wisdom always sends
+			 * the full path of the file on the user's filesystem, which means that unless
+			 * the user does basename() they get a bogus file name. Until IE's user base drops 
+			 * to nill or problem is fixed this code must remain enabled for all systems.
+			 */
 			s = strrchr(filename, '\\');
-#else
-			s = filename;
-#endif
 			if ((tmp = strrchr(filename, '/')) > s) {
 				s = tmp;
 			}
