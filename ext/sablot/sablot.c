@@ -71,7 +71,7 @@ static zval *_php_sablot_resource_zval(long);
 
 /* Free macros */
 #define S_FREE(__var) if (__var) efree(__var);
-#define FUNCH_FREE(__var) if (__var) zval_del_ref(&(__var));        
+#define FUNCH_FREE(__var) if (__var) zval_ptr_dtor(&(__var));        
 
 /* ERROR Macros */
 
@@ -1136,7 +1136,7 @@ static void _php_sablot_handler_pair(php_sablot *handle, zval **first_func, zval
             default:
                 convert_to_string_ex(handler);
                 php_error(E_WARNING, "Sorry, too many elements, %s discarded", Z_STRVAL_PP(handler));
-                zval_del_ref(handler);
+                zval_ptr_dtor(handler);
                 break;
         }
         item++;
@@ -1161,7 +1161,7 @@ static void _php_sablot_call_handler_function(zval *handlerName, int argc, zval 
     efree(retval);
     
     for (i=0; i<argc; i++) {
-        zval_del_ref(&(args[i]));
+        zval_ptr_dtor(&(args[i]));
     }
 }
 /* }}} */
@@ -1460,7 +1460,7 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
         efree(retval);
 
 		for (i = 1; i < argc; i++) {
-			zval_del_ref(&argv[i]);
+			zval_ptr_dtor(&argv[i]);
 		}
     } else {
     	if (level == MH_LEVEL_CRITICAL ||
@@ -1541,7 +1541,7 @@ static int _php_sablot_sh_getAll(void *userData, SablotHandle p, const char *sch
 		*byteCount = Z_STRLEN_P(argv[3]);
 
 		for (idx = 1; idx < 3; idx++) {
-			zval_del_ref(&(argv[idx]));
+			zval_ptr_dtor(&(argv[idx]));
 		}
 	}
 

@@ -227,9 +227,9 @@ PHP_FUNCTION(assert)
 		call_user_function(CG(function_table), NULL, args[0], retval, 3, args+1);
 
 		for (i = 0; i < 4; i++) {
-			zval_del_ref(&(args[i]));
+			zval_ptr_dtor(&(args[i]));
 		}
-		zval_del_ref(&retval);
+		zval_ptr_dtor(&retval);
 	}
 
 	if (ASSERT(warning)) {

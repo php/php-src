@@ -509,7 +509,7 @@ _oci_define_hash_dtor(void *data)
 
 	oci_debug("_oci_define_hash_dtor: %s",define->name);
 
-	zval_del_ref(&define->zval);
+	zval_ptr_dtor(&define->zval);
 
 	if (define->name) {
 		efree(define->name);
@@ -527,7 +527,7 @@ _oci_bind_hash_dtor(void *data)
 
 	oci_debug("_oci_bind_hash_dtor:");
 
-   	zval_del_ref(&(bind->zval));
+   	zval_ptr_dtor(&(bind->zval));
 }
 
 /* }}} */
