@@ -2,6 +2,7 @@
 
 prefix='@prefix@'
 phpdir="$prefix/lib/php/build"
+includedir="$prefix/include/php"
 builddir="`pwd`"
 FILES_BUILD="mkdep.awk shtool"
 FILES="acinclude.m4 Makefile.global scan_makefile_in.awk"
