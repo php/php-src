@@ -4,9 +4,9 @@ README FOR THTTPD MODULE (by Sascha Schumann)
 	This is a SAPI module for PHP 4.x supporting thttpd, the tiny,
 	turbo, throttling HTTP server by Jef Poskanzer.
 
-	NOTE: All requests will be serialized. That means, one long running
+	NOTE: All HTTP requests will be serialized. That means, one long running
 	      script will block all other requests. Choose another web server,
-	      if you want to execute arbitrary scripts.
+	      if you want to execute arbitrarily long running scripts.
 
 	The module contains a patch against version 2.21b of thttpd. The patch
 	fixes a number of bugs and adds some functionality:
@@ -14,11 +14,13 @@ README FOR THTTPD MODULE (by Sascha Schumann)
 	- HTTP/1.1 Persistent Connection/Pipeline Support
 	- PHP Scripting (**.php by default)
 	- Highlighting PHP Scripts (**.phps by default)
-	- Fast Accept Loop
-	- Periodic Connection Expiring
-	- Fixes the Host: header vulnerability
-	- Asynchronous request body handling
-	- Fixup for non-blocking send of thttpd-generated responses
+	- Fast Accept Loop (unique to PHP)
+	- Periodic Connection Expiring (unique to PHP)
+	- Log to stdout (logfile=-)
+	- Fixes the Host: header vulnerability (affects vhosts only)
+	- Asynchronous request body handling (e.g. for POSTs)
+	- Accept filter for Linux
+	- Fix for non-blocking sending of thttpd-generated responses
 
 	You can configure the filename extensions by creating a config file for
 	thttpd and setting these entries:
