@@ -90,5 +90,5 @@ Use ./configure --with-vpopmail=<vpopmail-home-dir> if necessary)
 	fi
 	AC_DEFINE_UNQUOTED(HAVE_VPOPMAIL_API,$vpopmail_internal_api,[Interal definition for vpopmail API changes])
 
-	PHP_NEW_EXTENSION(vpopmail, php_vpopmail.c, $ext_shared)
+	PHP_EXTENSION(vpopmail, $ext_shared)
 fi

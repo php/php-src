@@ -1198,47 +1198,57 @@ dnl Common setup macro for iconv
 dnl
 AC_DEFUN(PHP_SETUP_ICONV, [
   found_iconv=no
-  
-  AC_CHECK_FUNCS(iconv libiconv, [
+  unset ICONV_DIR
+
+  AC_CHECK_FUNC(iconv, [
     AC_DEFINE(HAVE_ICONV, 1, [ ])
     found_iconv=yes
-  ], [
+  ],[
+    AC_CHECK_FUNC(libiconv,[
+      AC_DEFINE(HAVE_LIBICONV, 1, [ ])
+      found_iconv=yes
+  ],[
 
-    iconv_lib_name=iconv
     for i in $PHP_ICONV /usr/local /usr; do
-      if test -r $i/include/giconv.h || test -r $i/include/iconv.h; then
+      if test -r $i/include/giconv.h; then
         ICONV_DIR=$i
-        if test -r $i/include/giconv.h; then
-          iconv_lib_name=giconv
-        fi
+        iconv_lib_name=giconv
         break
-      fi
+      elif test -r $i/include/iconv.h; then
+        ICONV_DIR=$i
+        iconv_lib_name=iconv
+        break
+	  fi
     done
 
     if test -z "$ICONV_DIR"; then
-      AC_MSG_ERROR(Please specify the location of iconv with --with-iconv)
+      AC_MSG_ERROR([Please specify the location of iconv with --with-iconv])
     fi
   
-    if test -f $ICONV_DIR/lib/lib${iconv_lib_name}.a ||
-       test -f $ICONV_DIR/lib/lib${iconv_lib_name}.$SHLIB_SUFFIX_NAME
+    if test -f $ICONV_DIR/lib/lib$iconv_lib_name.a ||
+       test -f $ICONV_DIR/lib/lib$iconv_lib_name.$SHLIB_SUFFIX_NAME
     then
       PHP_CHECK_LIBRARY($iconv_lib_name, libiconv, [
         found_iconv=yes
-        PHP_ADD_LIBRARY_WITH_PATH($iconv_lib_name, $ICONV_DIR/lib, $1)
-        AC_DEFINE(HAVE_ICONV, 1, [ ])
         AC_DEFINE(HAVE_LIBICONV, 1, [ ])
       ], [
-        found_iconv=no
+        PHP_CHECK_LIBRARY($iconv_lib_name, iconv, [
+          found_iconv=yes
+          AC_DEFINE(HAVE_ICONV, 1, [ ])
+        ])
       ], [
         -L$ICONV_DIR/lib
       ])
     fi
   ])
+  ])
 
-  if test "$found_iconv" = "no"; then
-    $3
-  else
+  if test "$found_iconv" = "yes"; then
+    if test -n "$ICONV_DIR"; then
+      PHP_ADD_LIBRARY_WITH_PATH($iconv_lib_name, $ICONV_DIR/lib, $1)
+      PHP_ADD_INCLUDE($ICONV_DIR/include)
+    fi
     $2
-    PHP_ADD_INCLUDE($ICONV_DIR/include)
+ifelse([$3],[],,[else $3])
   fi
 ])
