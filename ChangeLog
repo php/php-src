@@ -1,3 +1,43 @@
+2001-04-10  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c: MFH, I have tested this thoroughly.
+
+2001-04-10  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Fixing database password to actually work
+
+2001-04-10  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/imap/config.m4: Statements end with a period.
+
+2001-04-10  Kevin N Shallow  <sourjan@yahoo.com>
+
+    * ext/odbc/php_odbc.h
+      ext/odbc/Makefile.in
+      ext/odbc/config.m4
+      ext/odbc/php_odbc.c:
+    Fixed compatibility issues in the ODBC extension for the Velocis Database server. Specifically, config.m4 was changed to use the client libraries instead of the serer libraries, and to look for the libs in the $RDSHOME/lin directory ass opposed to the $RDSHOME/bin directory. Makefile.in was changed to use the php_odbc.c file as the source for Velocis support. Other misc changes include a few #defines for some undefined data types and some #ifdefs for unsupported functions.
+
+2001-04-10  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/DB/common.php: fixed typo in inline docs
+
+2001-04-10  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c: Fix for PR #9729, 9664, 9656, 8667.
+    All compilers on Solaris should build this extension correctly now.
+    It turns out the SUN CC, by default, enables a define that enables the use of
+    and gcc wouldn't.
+
+    -Jason
+
+2001-04-10  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: - Removed debug thing
+
+    * ext/mcrypt/mcrypt.c: - Fix for bug #8839
+    - MINFO updated to use smart_str's
+
 2001-04-09  Sean Bright  <elixer@erols.com>
 
     * ext/standard/dir.c: Constand should be case sensitive.
