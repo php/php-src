@@ -394,10 +394,14 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 		case T_HINFO:
 			/* See RFC 1010 for values */
 			add_assoc_string(*subarray, "type", "HINFO", 1);
-			GETSHORT(n, cp);
-			add_assoc_long(*subarray, "cpu", n);
-			GETSHORT(n, cp);
-			add_assoc_long(*subarray, "os", n);
+			n = *cp & 0xFF;
+			cp++;
+			add_assoc_stringl(*subarray, "cpu", cp, n, 1);
+			cp += n;
+			n = *cp & 0xFF;
+			cp++;
+			add_assoc_stringl(*subarray, "os", cp, n, 1);
+			cp += n;
 			break;
 		case T_TXT:
 			add_assoc_string(*subarray, "type", "TXT", 1);
