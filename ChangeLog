@@ -1,3 +1,62 @@
+2001-04-09  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/dir.c: Constand should be case sensitive.
+
+2001-04-09  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/standard/dir.c: Fix whitespace (use tabs).
+
+2001-04-09  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/dir.c:
+    Stop SIGSEGV on Apache startup.  Patch from <adam@indexdata.dk>
+
+2001-04-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/oracle/config.m4: MFH
+
+2001-04-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/cgi/config.m4
+      pear/PEAR.php.in
+      sapi/Makefile.in
+      main/build-defs.h.in
+      Makefile.in
+      configure.in: Revert mega patch.
+
+    This patch has at least the following deficiences:
+
+    - the CGI is built using objects from another SAPI module.
+      This usually results in unsatisfied symbol references.
+    - the CGI makefile is not created properly
+    - building CGI cannot be disabled
+
+2001-04-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/oracle/config.m4: Fix bug #10212.
+
+2001-04-09  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/formatted_print.c
+      tests/strings/002.phpt
+      NEWS: printf argnum (parameter swapping) support from Morten Poulsen
+
+2001-04-09  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx.c:
+    Added optional 'comparison_type' parameter to compare functions, to force
+    either text or number comparison. (Mc)
+
+2001-04-09  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+    - added domxml_version() to retrieve version of libxml
+
+2001-04-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Fix current CVS breakage
+
 2001-04-08  Stig Bakken  <ssb@fast.no>
 
     * main/build-defs.h.in
