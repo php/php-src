@@ -43,9 +43,10 @@ int output_globals_id;
 php_output_globals output_globals;
 #endif
 
-static php_default_output_func(const char *str, uint str_len)
+static int php_default_output_func(const char *str, uint str_len)
 {
 	fwrite(str, 1, str_len, stderr);
+	return str_len;
 }
 
 
