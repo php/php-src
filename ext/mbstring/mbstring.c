@@ -1120,7 +1120,7 @@ PHP_FUNCTION(mb_http_output)
 /* }}} */
 
 
-/* {{{ proto boolean|array mb_detect_order([mixed encoding-list])
+/* {{{ proto bool|array mb_detect_order([mixed encoding-list])
    Sets the current detect_order or Return the current detect_order as a array */
 PHP_FUNCTION(mb_detect_order)
 {
