@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Protect the ISAPI module against exceptions.  Stack overflows in scripts are
+  now nicely detected and handled (Zeev)
+- Fixed possible buffer-overflow in base64_decode. (Thies)
+- Fixed possible buffer-overflow in setcookie(). (Thies)
 - Fixed signal() bug that could cause the Apache master process to
   die. (Thies)
 - Added session_set_cookie_params() function. (Andrei)
