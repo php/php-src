@@ -38,12 +38,12 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "Debug_TS"
+# PROP Output_Dir "c:\php\5d\extensions"
 # PROP Intermediate_Dir "Debug_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SIMPLEXML_EXPORTS" /YX /FD /GZ  /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\..\..\php5" /I "..\..\..\php5\main" /I "..\..\..\php5\Zend" /I "..\..\..\php5\TSRM" /D ZEND_DEBUG=1 /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SIMPLEXML_EXPORTS" /YX /FD /GZ  /c
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SIMPLEXML_EXPORTS" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\..\..\php5" /I "..\..\..\php5\main" /I "..\..\..\php5\Zend" /I "..\..\..\php5\TSRM" /D ZEND_DEBUG=1 /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D COMPILE_DL_SIMPLEXML=1 /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SIMPLEXML_EXPORTS" /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -68,7 +68,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Release_TS"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SIMPLEXML_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\..\php5\main" /I "..\..\..\php5\Zend" /I "..\..\..\php5\TSRM" /I "..\..\..\php5\win32" /I "..\..\..\php5" /D ZTS=1 /D ZEND_DEBUG=0 /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SIMPLEXML_EXPORTS" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\..\php5\main" /I "..\..\..\php5\Zend" /I "..\..\..\php5\TSRM" /I "..\..\..\php5\win32" /I "..\..\..\php5" /D ZTS=1 /D ZEND_DEBUG=0 /D "ZEND_WIN32" /D "PHP_WIN32" /D COMPILE_DL_SIMPLEXML=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SIMPLEXML_EXPORTS" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
