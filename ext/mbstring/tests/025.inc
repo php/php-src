@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	mb_regex_set_options( 'x' );
 	print mb_ereg_replace(' -', '+', '- - - - -' );
 
