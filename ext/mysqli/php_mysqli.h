@@ -203,6 +203,8 @@ PHP_FUNCTION(mysqli_character_set_name);
 PHP_FUNCTION(mysqli_close);
 PHP_FUNCTION(mysqli_commit);
 PHP_FUNCTION(mysqli_connect);
+PHP_FUNCTION(mysqli_connect_errno);
+PHP_FUNCTION(mysqli_connect_error);
 PHP_FUNCTION(mysqli_data_seek);
 PHP_FUNCTION(mysqli_debug);
 PHP_FUNCTION(mysqli_disable_reads_from_master);

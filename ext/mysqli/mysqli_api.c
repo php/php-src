@@ -1422,6 +1422,8 @@ PHP_FUNCTION(mysqli_real_connect)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysql_error(mysql));
 		RETURN_FALSE;
 	}
+	php_mysqli_set_error(mysql_errno(mysql), (char *)mysql_error(mysql) TSRMLS_CC);
+	
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1675,23 +1677,23 @@ PHP_FUNCTION(mysqli_stmt_close)
 /* }}} */
 
 /* {{{ proto void mysqli_stmt_data_seek(object stmt, int offset)
-   Move internal result pointer */
+Move internal result pointer */
 PHP_FUNCTION(mysqli_stmt_data_seek)
 {
-	STMT 		*stmt;
-	zval  		*mysql_stmt;
-	PR_STMT  	*prstmt;  
-	long  		offset;
+STMT 		*stmt;
+zval  		*mysql_stmt;
+PR_STMT  	*prstmt;  
+long  		offset;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &mysql_stmt, mysqli_stmt_class_entry, &offset) == FAILURE) {
-		return;
-	}
-
-	MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, &mysql_stmt, "mysqli_stmt");
-
-
-	mysql_stmt_data_seek(stmt->stmt, offset);
+if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &mysql_stmt, mysqli_stmt_class_entry, &offset) == FAILURE) {
 	return;
+}
+
+MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, &mysql_stmt, "mysqli_stmt");
+
+
+mysql_stmt_data_seek(stmt->stmt, offset);
+return;
 }
 /* }}} */
 
