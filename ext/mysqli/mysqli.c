@@ -733,6 +733,8 @@ int php_local_infile_init(void **ptr, const char *filename, void *userdata)
 	int							argc = 2;
 	int							i, rc = 0;
 
+	TSRMLS_FETCH();
+
 	/* save pointer to MY_MYSQL structure (userdata) */
 	if (!(*ptr= data= ((mysqli_local_infile *)calloc(1, sizeof(mysqli_local_infile))))) {
 		return 1;
@@ -789,6 +791,8 @@ int php_local_infile_read(void *ptr, char *buf, uint buf_len)
 	int							argc = 4;
 	int							i;
 	long						rc;
+
+	TSRMLS_FETCH();
 
 	data= (mysqli_local_infile *)ptr;
 
@@ -860,6 +864,8 @@ void php_local_infile_end(void *ptr)
 	zval						*retval;	
 	int							argc = 1;
 	int							i;
+
+	TSRMLS_FETCH();
 
 	data= (mysqli_local_infile *)ptr;
 
