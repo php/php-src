@@ -1,10 +1,10 @@
 --TEST--
 gdimagefill() function (Bug #19366 (fixed in bundled libgd))
 --SKIPIF--
-<?php if (!extension_loaded('gd') || !GD_BUNDLED) die("skip\n"); ?>
---POST--
---GET--
---INI--
+<?php 
+	if (!extension_loaded('gd')) die("skip gd extension not available\n"); 
+	if (!GD_BUNDLED) die('skip external GD libraries always fail');
+?>
 --FILE--
 <?php
 echo "Alive\n";
