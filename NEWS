@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- added spliti() function. (Thies)
 - Fixed serializer behaviour with regards to serializing objects which class
   definition was not available in the current context. (Sascha)
 - Improve memory cache performance and increase cache size. (Stas, Zend Engine)
