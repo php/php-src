@@ -537,7 +537,7 @@ PHP_FUNCTION(apache_get_modules)
 }
 /* }}} */
 
-/* {{{ proto array apache_reset_timeout(void)
+/* {{{ proto bool apache_reset_timeout(void)
    Reset the Apache write timer */
 PHP_FUNCTION(apache_reset_timeout)
 {
