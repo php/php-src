@@ -957,11 +957,7 @@ class PEAR_Installer extends PEAR_Common
             // {{{ Decompress pack in tmp dir -------------------------------------
 
             // To allow relative package file names
-            $oldcwd = getcwd();
-            if (@chdir(dirname($pkgfile))) {
-                $pkgfile = getcwd() . DIRECTORY_SEPARATOR . basename($pkgfile);
-                chdir($oldcwd);
-            }
+            $pkgfile = realpath($pkgfile);
 
             if (PEAR::isError($tmpdir = System::mktemp('-d'))) {
                 return $tmpdir;
