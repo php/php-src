@@ -339,6 +339,9 @@ class System extends PEAR
             if (isset($_ENV['TMP'])) {
                 return $_ENV['TMP'];
             }
+            if (isset($_ENV['windir'])) {
+                return $_ENV['windir'] . '\temp';
+            }
             return $_ENV['SystemRoot'] . '\temp';
         }
         if (isset($_ENV['TMPDIR'])) {
