@@ -1,3 +1,10 @@
+2004-09-17  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute_API.c
+      zend_objects_API.c
+      zend_objects_API.h:
+      fix crash when dtor is fialing on shutdown
+
 2004-09-16  Andi Gutmans  <andi@zend.com>
 
     * (PHP_5_0)
