@@ -60,7 +60,7 @@ void 		 php_wddx_packet_end(wddx_packet *packet);
 
 void 		 php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name);
 void 		 php_wddx_add_chunk_ex(wddx_packet *packet, char *str, int length);
-void 		 php_wddx_deserialize_ex(char *, int, zval *return_value);
+int 		 php_wddx_deserialize_ex(char *, int, zval *return_value);
 char		*php_wddx_gather(wddx_packet *packet);
 
 #endif /* PHP_WDDX_API_H */

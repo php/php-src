@@ -336,42 +336,35 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	ulong idx;
 	int hash_type;
 	int dofree = 1;
-	int ret = SUCCESS;
+	int ret;
 
 	if (vallen == 0) 
 		return SUCCESS;
 	
 	MAKE_STD_ZVAL(retval);
 
-	retval->type = IS_NULL;
+	if ((ret = php_wddx_deserialize_ex((char *)val, vallen, retval)) == SUCCESS) {
 
-	php_wddx_deserialize_ex((char *)val, vallen, retval);
+		for (zend_hash_internal_pointer_reset(retval->value.ht);
+			 zend_hash_get_current_data(retval->value.ht, (void **) &ent) == SUCCESS;
+			 zend_hash_move_forward(retval->value.ht)) {
+			hash_type = zend_hash_get_current_key(retval->value.ht, &key, &idx);
 
-	if (retval->type == IS_NULL) {
-		ret = FAILURE;
-		goto cleanup;
-	}
-
-	for (zend_hash_internal_pointer_reset(retval->value.ht);
-			zend_hash_get_current_data(retval->value.ht, (void **) &ent) == SUCCESS;
-			zend_hash_move_forward(retval->value.ht)) {
-		hash_type = zend_hash_get_current_key(retval->value.ht, &key, &idx);
-
-		switch (hash_type) {
-			case HASH_KEY_IS_LONG:
-				sprintf(tmp, "%ld", idx);
-				key = tmp;
-				dofree = 0;
-				/* fallthru */
-			case HASH_KEY_IS_STRING:
-				php_set_session_var(key, strlen(key), *ent PSLS_CC);
-				PS_ADD_VAR(key);
-				if (dofree) efree(key);
-				dofree = 1;
+			switch (hash_type) {
+				case HASH_KEY_IS_LONG:
+					sprintf(tmp, "%ld", idx);
+					key = tmp;
+					dofree = 0;
+					/* fallthru */
+				case HASH_KEY_IS_STRING:
+					php_set_session_var(key, strlen(key), *ent PSLS_CC);
+					PS_ADD_VAR(key);
+					if (dofree) efree(key);
+					dofree = 1;
+			}
 		}
 	}
 
-cleanup:
 	zval_dtor(retval);
 	efree(retval);
 
