@@ -367,7 +367,7 @@ session.cookie_path       = /       ; the path the cookie is valid for
 session.cookie_domain     =         ; the domain the cookie is valid for
 session.serialize_handler = php     ; handler used to serialize data
                                     ; php is the standard serializer of PHP
-session.gc_probability    = 1       ; procentual probability that the 
+session.gc_probability    = 1       ; percentual probability that the 
                                     ; 'garbage collection' process is started
                                     ; on every session initialization
 session.gc_maxlifetime    = 1440    ; after this number of seconds, stored
