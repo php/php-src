@@ -2340,7 +2340,7 @@ enclosure:
 				goto enclosure;
 			}
 		} else {
-			while (e < re && *(e - 1) == enclosure) {
+			while (e < re && e > s && *(e - 1) == enclosure) {
 				e--;
 			}
 
