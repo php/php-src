@@ -531,12 +531,6 @@ sendmail_from = me@localhost.com
 ; For Unix only.  You may supply arguments as well (default: "sendmail -t -i").
 ;sendmail_path =
 
-[Logging]
-; These configuration directives are used by the example logging mechanism.
-; See examples/README.logging for more explanation.
-;logging.method = db
-;logging.directory = /path/to/log/directory
-
 [Java]
 ;java.class.path = .\php_java.jar
 ;java.home = c:\jdk
