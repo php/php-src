@@ -218,6 +218,20 @@ if (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
 }
 $installer->rollbackFileTransaction();
 
+echo "\ntest install-as:\n";
+var_dump($installer->_installFile('installer2.phpt.testfile.php', array('role' => 'script',
+    'install-as' => 'foobar.php'),
+    $temp_path . DIRECTORY_SEPARATOR . 'tmp', array()));
+echo "==>test install as 'foobar.php'.  file exists? ";
+if (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    '.tmpfoobar.php'))
+{
+    echo "yes\n";
+} else {
+    echo "no\n";
+}
+$installer->rollbackFileTransaction();
+
 unlink($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installer2.phpt.testfile.php');
 
 //cleanup
@@ -288,3 +302,8 @@ int(1)
 ==>test pear-config replacement: equals 'pear.php.net stuff'? => pear.php.net stuff
 int(1)
 ==>test package-info replacement: equals 'Foo stuff'? => Foo stuff
+
+test install-as:
+int(1)
+==>test install as 'foobar.php'.  file exists? yes
+
