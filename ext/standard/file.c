@@ -339,13 +339,13 @@ PHP_FUNCTION(flock)
 
 	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
 	act = flock_values[act - 1] | (operation & 4 ? LOCK_NB : 0);
-	if (!php_stream_lock(stream, act)) {
+	if (php_stream_lock(stream, act)) {
 		if (operation && errno == EWOULDBLOCK && arg3 && PZVAL_IS_REF(arg3)) {
 			Z_LVAL_P(arg3) = 1;
 		}
-		RETURN_TRUE;
+		RETURN_FALSE;
 	}
-	RETURN_FALSE;
+	RETURN_TRUE;
 }
 
 /* }}} */
