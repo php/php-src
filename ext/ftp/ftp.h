@@ -17,7 +17,11 @@ extern PHP_MINIT_FUNCTION(ftp);
 
 PHP_FUNCTION(ftp_connect);
 PHP_FUNCTION(ftp_login);
+PHP_FUNCTION(ftp_pwd);
+PHP_FUNCTION(ftp_cdup);
 PHP_FUNCTION(ftp_chdir);
+PHP_FUNCTION(ftp_mkdir);
+PHP_FUNCTION(ftp_rmdir);
 PHP_FUNCTION(ftp_nlist);
 PHP_FUNCTION(ftp_listraw);
 PHP_FUNCTION(ftp_systype);
