@@ -4049,7 +4049,7 @@ int zend_fe_reset_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (opline->extended_value) {
 		array_ptr_ptr = get_zval_ptr_ptr(&opline->op1, EX(Ts), &free_op1, BP_VAR_R);
 		if (array_ptr_ptr == NULL) {
-			MAKE_STD_ZVAL(array_ptr);
+			ALLOC_INIT_ZVAL(array_ptr);
 		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_PP(array_ptr_ptr);
 			if (!ce || ce->get_iterator == NULL) {
