@@ -754,7 +754,9 @@ mbstring_globals_dtor(zend_mbstring_globals *pglobals TSRMLS_DC)
 PHP_MINIT_FUNCTION(mbstring)
 {
 #ifdef ZTS
-	ts_allocate_id(&mbstring_globals_id, sizeof(zend_mbstring_globals), (ts_allocate_ctor) php_mbstring_init_globals, (ts_allocate_dtor) mbstring_globals_dtor);
+	ts_allocate_id(&mbstring_globals_id, sizeof(zend_mbstring_globals),
+		(ts_allocate_ctor) php_mbstring_init_globals,
+		(ts_allocate_dtor) mbstring_globals_dtor);
 #else
 	php_mbstring_init_globals(&mbstring_globals TSRMLS_CC);
 #endif
@@ -3498,7 +3500,7 @@ char* php_mbstring_encoding_detector(const char *arg_string, int arg_length, cha
 	string.no_language = MBSTRG(current_language);
 	string.val = (char*)arg_string;
 	string.len = arg_length;
-	ret = mbfl_identify_encoding_name(&string, elist, size);
+	ret = mbfl_identify_encoding_name(&string, elist, size TSRMLS_CC);
 	if (list != NULL) {
 		efree((void *)list);
 	}
@@ -3540,19 +3542,19 @@ int php_mbstring_encoding_converter(char **to, int *to_length, const char *from,
 	string.len = from_length;
 
 	/* initialize converter */
-	convd = mbfl_buffer_converter_new(from_encoding, to_encoding, string.len);
+	convd = mbfl_buffer_converter_new(from_encoding, to_encoding, string.len TSRMLS_CC);
 	if (convd == NULL)
 		return -1;
-	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
-	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
+	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode) TSRMLS_CC);
+	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar) TSRMLS_CC);
 
 	/* do it */
-	ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
+	ret = mbfl_buffer_converter_feed_result(convd, &string, &result TSRMLS_CC);
 	if (ret != NULL) {
 		*to = ret->val;
 		*to_length = ret->len;
 	}
-	mbfl_buffer_converter_delete(convd);
+	mbfl_buffer_converter_delete(convd TSRMLS_CC);
 
 	return ret ? 0 : -1;
 }
