@@ -2048,55 +2048,31 @@ PHPAPI void php_char_to_str(char *str,uint len,char from,char *to,int to_len,zva
 	*target = 0;
 }
 
+#include "php_smart_str.h"
 
 PHPAPI char *php_str_to_str(char *haystack, int length, 
 	char *needle, int needle_len, char *str, int str_len, int *_new_length)
 {
-	char *p, *q;
-	char *r, *s;
+	char *p;
+	char *r;
 	char *end = haystack + length;
-	char *result;
-	char *off;
-	
-	result = emalloc(length);
-	/* we jump through haystack searching for the needle. hurray! */
-	for(p = haystack, q = result;
-			(r = php_memnstr(p, needle, needle_len, end));) {
-	/* this ain't optimal. you could call it `efficient memory usage' */
-		off = erealloc(result, (q - result) + (r - p) + (str_len) + 1);
-		if(off != result) {
-			if(!off) {
-				goto finish;
-			}
-			q += off - result;
-			result = off;
-		}
-		memcpy(q, p, r - p);
-		q += r - p;
-		memcpy(q, str, str_len);
-		q += str_len;
-		p = r + needle_len;
+	smart_str result = {0};
+
+	for (p = haystack;
+			(r = php_memnstr(p, needle, needle_len, end));
+			p = r + needle_len) {
+		smart_str_appendl(&result, p, r - p);
+		smart_str_appendl(&result, str, str_len);
 	}
-	
-	/* if there is a rest, copy it */
-	if((end - p) > 0) {
-		s = (q) + (end - p);
-		off = erealloc(result, s - result + 1);
-		if(off != result) {
-			if(!off) {
-				goto finish;
-			}
-			q += off - result;
-			result = off;
-			s = q + (end - p);
-		}
-		memcpy(q, p, end - p);
-		q = s;
-	}
-finish:
-	*q = '\0';
-	if(_new_length) *_new_length = q - result;
-	return result;
+
+	if (p < end) 
+		smart_str_appendl(&result, p, end - p);
+
+	smart_str_0(&result);
+
+	if (_new_length) *_new_length = result.len;
+
+	return result.c;
 }
 
 
