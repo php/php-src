@@ -22,7 +22,7 @@
 #ifndef _PHP_PGSQL_H
 #define _PHP_PGSQL_H
 
-#if COMPILE_DL
+#if COMPILE_DL || COMPILE_DL_PGSQL
 #undef HAVE_PGSQL
 #define HAVE_PGSQL 1
 #endif
