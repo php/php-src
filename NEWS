@@ -12,11 +12,11 @@ PHP 4                                                                      NEWS
 - Fixed bug #24312 (base64_decode() does not skip 0xF0-0xFF characters).
   (gereon.steffens[at]onvista.de, Ilia)
 - Fixed bug #24284 (Fixed memory leak inside pg_ping()). (Ilia)
-- Fixed bug #24063 (*printf() did not handle scientific notation correctly).
-  (Ilia)
+- Fixed bug #24063 (scientific notation broken in *printf()). (Ilia)
 - Fixed bug #24028 (Reading raw post message by php://input failed). (Jani)
-- Fixed bug #24009 FastCGI handling of file not found. (Shane)
-- Fixed bug #23664 FastCGI socket listenting. (Shane)
+- Fixed bug #24009 (FastCGI handling of file not found). (Shane)
+- Fixed bug #23808 (broken imagecopymerge()). (Pierre-Alain Joye)
+- Fixed bug #23664 (FastCGI socket listenting). (Shane)
 
 19 Jun 2003, Version 4.3.3RC1
 - Synchronized bundled GD library with GD 2.0.15. (Ilia)
