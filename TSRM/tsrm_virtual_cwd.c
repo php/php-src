@@ -41,6 +41,10 @@
 #include "tsrm_nw.h"
 #endif
 
+#ifdef __BEOS__
+#define realpath(x,y) strcpy(y,x)
+#endif
+
 #define VIRTUAL_CWD_DEBUG 0
 
 #include "TSRM.h"
@@ -298,7 +302,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	if (path_length == 0) 
 		return (0);
 
-#if !defined(TSRM_WIN32) && !defined(__BEOS__) && !defined(NETWARE)
+#if !defined(TSRM_WIN32) && !defined(NETWARE)
 	if (IS_ABSOLUTE_PATH(path, path_length)) {
 		if (realpath(path, resolved_path)) {
 			path = resolved_path;
