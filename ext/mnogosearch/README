@@ -12,14 +12,13 @@ library. To do this you should compile php with specefying mysql-dir
   TODO
   ----
 
-1. Implement more UdmSearch functions.
+1. Implement more mnoGoSearch functions.
 
-2. Fix  config.m4 to detect whether UdmSearch is actually installed.
-Currently there is no any checking. ./configure just trust that UdmSearch
+2. Fix  config.m4 to detect whether mnoGoSearch is actually installed.
+Currently there is no any checking. ./configure just trust that mnoGoSearch
 does exist.
 
-3. Test with more databases. Currently tested with MySQL which is compiled into
-PHP4 by default and does not require any additional UdmSearch libraries.
-  Actually it should work fine with other supported database.
+3. Test with more databases. Currently tested with MySQL.
+Actually it should work fine with other supported databases.
 
 4. Write PHP interface documentation.
