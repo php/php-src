@@ -393,7 +393,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 #define ZEND_SET_GLOBAL_VAR_WITH_LENGTH(name, name_length, var, _refcount, _is_ref)		\
 	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), name, name_length, var, _refcount, _is_ref)
 
-#define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? (p)->value.obj.properties : NULL)))
+#define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? Z_OBJPROP_P(p) : NULL)))
 #define ZVAL_IS_NULL(z) ((z)->type==IS_NULL)
 
 #endif /* ZEND_API_H */
