@@ -1,3 +1,58 @@
+2001-10-12  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/scripts/pear.bat: * streamlined the copyright header
+    * changed path names in pear.bat to more typical values
+
+2001-10-12  Alexander Merz  <alexander.merz@t-online.de>
+
+    * pear/scripts/pear.bat: typo
+
+    * pear/scripts/pear.bat
+      pear/scripts/pearwin.php: win version of pear the pear script
+
+2001-10-12  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/zip/zip.c: revert removal of zend_parse_parameters and properly use
+    zend_parse_parameters (ie zval * instead of zval **).
+
+    * ext/zip/zip.c:
+    fix segv's, zend_parse_parameters seems not to be able to handle
+    resources.
+
+
+2001-10-12  Stig Bakken  <ssb@fast.no>
+
+    * sapi/caudium/caudium.c
+      sapi/isapi/php4isapi.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/aolserver/aolserver.c
+      sapi/apache2filter/php_functions.c:
+    * fix module struct in rest of sapi modules
+
+    * sapi/aolserver/aolserver.c
+      sapi/apache2filter/php_functions.c
+      sapi/caudium/caudium.c
+      sapi/isapi/php4isapi.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c: MFH
+
+2001-10-12  Alexander Merz  <alexander.merz@t-online.de>
+
+    * pear/Experimental/System.php: fix phpdoc
+
+2001-10-12  Thies C. Arntzen  <thies@thieso.net>
+
+    * sapi/apache/php_apache.c: MFH
+
+    * sapi/apache/php_apache.c: make it work again
+
+2001-10-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/crack/config.m4: MFH
+
+    * ext/crack/config.m4: Fixed bug: #13556
+
 2001-10-11  Stig Bakken  <ssb@fast.no>
 
     * ext/zlib/zlib.c
