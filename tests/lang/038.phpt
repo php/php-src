@@ -1,5 +1,5 @@
 --TEST--
-Convert wanrings to exceptions
+Convert warnings to exceptions
 --FILE--
 <?php
 
