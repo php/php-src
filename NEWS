@@ -9,6 +9,8 @@ PHP 4                                                                      NEWS
 - Fixed FastCGI being unable to bind to a specific IP. (Sascha)
 - Fixed bug #25494 (array_merge*() allows non-arrays as argument). (Jay)
 - Fixed bug #23488 (zlib.output_compression overrides Vary header). (Stefan)
+- Fixed bug #25483 (ext/informix: bogus -469 error from ifx_query()). 
+  (Jani, patch by: denisov at kubsu dot ru)
 - Fixed bug #25463 (ext/cpdf: compile failure with bundled GD)
 - Fixed bug #25429 (fix copying of stdin using copy() function). (Ilia)
 - Fixed bug #25424 (ext/informix: lvarchar not supported in win32). (Jani)
