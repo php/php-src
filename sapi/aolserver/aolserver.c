@@ -310,9 +310,9 @@ php_ns_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 		char *value = Ns_SetValue(NSG(conn->headers), i);
 		char *p;
 		char c;
-		int buf_len;
 
-		buf_len = snprintf(buf, NS_BUF_SIZE, "HTTP_%s", key);
+		snprintf(buf, NS_BUF_SIZE, "HTTP_%s", key);
+		
 		for(p = buf + 5; (c = *p); p++) {
 			c = toupper(c);
 			if(c < 'A' || c > 'Z') {
