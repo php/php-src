@@ -4,7 +4,7 @@ README FOR THTTPD MODULE (by Sascha Schumann)
 	This is a SAPI module for PHP 4.0 supporting thttpd, the tiny,
 	turbo, throttling HTTP server by Jef Poskanzer.
 
-	The module contains a patch against version 2.19 of thttpd. The patch
+	The module contains a patch against version 2.21b of thttpd. The patch
 	adds hooks to thttpd to call PHP, if a filename matches *.php. This
 	patch will be applied when you install PHP.
 
