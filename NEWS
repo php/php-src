@@ -5,6 +5,7 @@ PHP 4                                                                      NEWS
   allocation functions. (Ilia)
 - Fixed bug #27530 (broken http auth when safe_mode is on and PCRE is
   disabled). (Ilia)
+- Fixed bug #27509 (broken getaddrinfo() causes fsockopen() error). (Sara)
 - Fixed bug #27505 (htmlentities() does not handle BIG5 correctly). (Ilia, 
   ywliu at hotmail dot com)
 - Fixed bug #27460 (base64_decode() does not handle extra padding).
