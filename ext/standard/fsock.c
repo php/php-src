@@ -103,23 +103,6 @@ function_entry fsock_functions[] = {
       {NULL, NULL, NULL}
 };
 
-struct php_sockbuf {
-	int socket;
-	unsigned char *readbuf;
-	size_t readbuflen;
-	size_t readpos;
-	size_t writepos;
-	struct php_sockbuf *next;
-	struct php_sockbuf *prev;
-	char eof;
-	char persistent;
-	char is_blocked;
-	size_t chunk_size;
-	struct timeval timeout;
-	int timeout_event;
-};
-
-typedef struct php_sockbuf php_sockbuf;
 
 zend_module_entry fsock_module_entry = {
 	"Socket functions",
@@ -463,6 +446,12 @@ static php_sockbuf *php_sockcreate(int socket FLS_DC)
 	sock->timeout.tv_sec = -1;
 	FG(phpsockbuf) = sock;
 
+	return sock;
+}
+
+PHPAPI php_sockbuf *php_get_socket(int socket)
+{
+	SOCK_FIND(sock, socket);
 	return sock;
 }
 

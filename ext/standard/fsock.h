@@ -58,8 +58,27 @@
 extern zend_module_entry fsock_module_entry;
 #define phpext_fsock_ptr &fsock_module_entry
 
+struct php_sockbuf {
+	int socket;
+	unsigned char *readbuf;
+	size_t readbuflen;
+	size_t readpos;
+	size_t writepos;
+	struct php_sockbuf *next;
+	struct php_sockbuf *prev;
+	char eof;
+	char persistent;
+	char is_blocked;
+	size_t chunk_size;
+	struct timeval timeout;
+	char timeout_event;
+};
+
+typedef struct php_sockbuf php_sockbuf;
+
 PHP_FUNCTION(fsockopen);
 PHP_FUNCTION(pfsockopen);
+
 int lookup_hostname(const char *addr, struct in_addr *in);
 char *php_sock_fgets(char *buf, size_t maxlen, int socket);
 size_t php_sock_fread(char *buf, size_t maxlen, int socket);
@@ -74,6 +93,7 @@ size_t php_sock_set_def_chunk_size(size_t size);
 void php_msock_destroy(int *data);
 
 PHPAPI int connect_nonb(int sockfd, struct sockaddr *addr, socklen_t addrlen, struct timeval *timeout);
+PHPAPI struct php_sockbuf *php_get_socket(int socket);
 
 PHP_MINIT_FUNCTION(fsock);
 PHP_MSHUTDOWN_FUNCTION(fsock);
