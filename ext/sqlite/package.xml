@@ -45,7 +45,12 @@
 <version>1.0.2</version>
 <date>2004-07-10</date>
 <notes>
-Upgraded libsqlite to version 2.9.14
+Upgraded libsqlite to version 2.8.14
+
+"Fixed" the bug where calling sqlite_query() with multiple SQL statements in a
+single string would not work if you looked at the return value.  The fix for
+this case is to use the new sqlite_exec() function instead. (Stas)
+
 </notes>
 
     <filelist>
