@@ -295,6 +295,9 @@ int pass_two(zend_op_array *op_array TSRMLS_DC)
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_handler, op_array TSRMLS_CC);
 	}
 
+	op_array->opcodes = (zend_op *) erealloc(op_array->opcodes, sizeof(zend_op)*op_array->last);
+	op_array->size = op_array->last;
+
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
@@ -306,11 +309,16 @@ int pass_two(zend_op_array *op_array TSRMLS_DC)
 			opline->op2.u.constant.is_ref = 1;
 			opline->op2.u.constant.refcount = 2;
 		}
+		if (opline->opcode == ZEND_JMP) {
+			opline->op1.u.jmp_addr = &op_array->opcodes[opline->op1.u.opline_num];
+		}
+		if (opline->opcode == ZEND_JMPZ || opline->opcode == ZEND_JMPNZ) {
+			opline->op2.u.jmp_addr = &op_array->opcodes[opline->op2.u.opline_num];
+		}
 		opline->handler = zend_opcode_handlers[opline->opcode];
 		opline++;
 	}
-	op_array->opcodes = (zend_op *) erealloc(op_array->opcodes, sizeof(zend_op)*op_array->last);
-	op_array->size = op_array->last;
+	
 	op_array->done_pass_two = 1;
 	return 0;
 }
