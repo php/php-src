@@ -45,6 +45,8 @@
 #include "php_apache_http.h"
 #include "http_request.h"
 
+static int php_apache_info_id;
+
 #ifdef PHP_WIN32
 #include "zend.h"
 #include "ap_compat.h"
