@@ -1,3 +1,78 @@
+2000-12-01  David Hedbor  <david@hedbor.org>
+
+    * sapi/caudium/config.m4: Minor cosmetic changes.
+
+    * sapi/caudium/config.m4: More config.m4 fixes.
+
+    * sapi/caudium/config.m4:
+    Updated config test to also work with debian pike 7 cvs etc.
+
+2000-12-01  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/gmp/gmp.c
+      ext/hyperwave/hw.c: Fixed some protos.
+
+2000-12-01  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * pear/DB/ibase.php: Small fix courtesy of Lauri Jesmin
+
+2000-12-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/skeleton/skeleton.c
+      ext/ext_skel
+      ext/skeleton/php_skeleton.h:
+    Get rid of HAVE_EXTNAME. This dates back to PHP 3 where source files
+    were unconditionally compiled. It is not necessary in PHP 4.
+
+2000-12-01  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/fdf/fdf.c: Fixed some protos.
+
+2000-12-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * stub.c:
+    Add newline. Recent GCC snapshots segfault, if the input file is completely
+    empty. Should I report this? This appears to be quite lame.
+
+    * ext/dba/dba.c:
+    Please avoid potential buffer overflows in new code. If you deal
+    with strings, consider storing the string length along with the string
+    data. That will make your life easier.
+
+    * ext/sockets/.cvsignore
+      ext/satellite/.cvsignore
+      ext/sablot/.cvsignore
+      ext/readline/.cvsignore
+      ext/posix/.cvsignore
+      ext/qtdom/.cvsignore
+      ext/ircg/.cvsignore
+      ext/ingres_ii/.cvsignore
+      ext/gmp/.cvsignore
+      ext/ctype/.cvsignore
+      ext/exif/.cvsignore
+      ext/bz2/.cvsignore
+      ext/bcmath/.cvsignore
+      ext/ext_skel: Remove *.o
+
+2000-12-01  Andi Gutmans  <andi@zend.com>
+
+    * ext/swf/php_swf.h
+      ext/swf/swf.c: - Fix swf build issues from bug #7612
+    - Not tested! Someone please compile it.
+
+2000-12-01  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/standard/string.c:
+    Fixing bug 8061. Position counter starts a 0 but was compared with length.
+    oops. the fix should be made twice.
+
+    * ext/standard/string.c:
+    Fixing bug 8061. Position counter starts a 0 but was compared with length.
+
+2000-12-01  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/dba/dba.c: Beautifying of phpinfo().
+
 2000-11-30  Frank M. Kromann  <fmk@swwwing.com>
 
     * ext/mssql/php_mssql.c:
