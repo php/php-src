@@ -153,20 +153,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return TC_ENCAPSULATED_STRING;
 }
 
-<INITIAL>[&|~$(){}!] {
+<INITIAL>[&|~()!] {
 	return yytext[0];
 }
 
-<INITIAL>"${" {
-	return TC_DOLLAR_CURLY;
-}
 
-<INITIAL>"}" {
-	ini_lval->value.lval = (long) yytext[0];
-	return yytext[0];
-}
-
-<INITIAL>[^=\n\r\t;|&$~(){}!"\[]+ {
+<INITIAL>[^=\n\r\t;|&~()!"\[]+ {
 	/* STRING */
 	register int i;
 
@@ -197,6 +189,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		/* whitespace */
 	}
 }
+
+
 
 <INITIAL>[=\n] {
 	if (yytext[0] == '\n') {
