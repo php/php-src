@@ -196,6 +196,7 @@ PHP_FUNCTION(get_browser)
 	zval **agent_name,**agent;
 	zval *found_browser_entry,*tmp_copy;
 	char *lookup_browser_name;
+	PLS_FETCH();
 
 	if (!INI_STR("browscap")) {
 		RETURN_FALSE;
