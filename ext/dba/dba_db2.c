@@ -96,7 +96,7 @@ DBA_CLOSE_FUNC(db2)
 	DB2_DATA;
 	
 	if(dba->cursor) dba->cursor->c_close(dba->cursor);
-	dba->dbp->close(dba->dbp, DB_NOSYNC);
+	dba->dbp->close(dba->dbp, 0);
 	free(dba);
 }
 
