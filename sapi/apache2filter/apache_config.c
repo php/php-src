@@ -56,7 +56,7 @@ static const char *real_value_hnd(cmd_parms *cmd, void *dummy, const char *name,
 	
 	str_len = strlen(name);
 	
-	if (zend_hash_find(&d->config, name, str_len + 1, &pe) == SUCCESS) {
+	if (zend_hash_find(&d->config, name, str_len + 1, (void **) &pe) == SUCCESS) {
 		if (pe->status > status)
 			return NULL;
 	}
@@ -90,8 +90,8 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 			zend_hash_get_current_key_ex(&d->config, &str, &str_len, &num_index, NULL) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&d->config)) {
 		pe = NULL;
-		zend_hash_get_current_data(&d->config, &data);
-		if (zend_hash_find(&e->config, str, str_len, &pe) == SUCCESS) {
+		zend_hash_get_current_data(&d->config, (void **) &data);
+		if (zend_hash_find(&e->config, str, str_len, (void **) &pe) == SUCCESS) {
 			if (pe->status >= data->status) continue;
 		}
 		zend_hash_update(&e->config, str, str_len, data, sizeof(*data), NULL);
@@ -110,7 +110,7 @@ void apply_config(void *dummy)
 	for (zend_hash_internal_pointer_reset(&d->config);
 			zend_hash_get_current_key_ex(&d->config, &str, &str_len, NULL, NULL) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&d->config)) {
-		zend_hash_get_current_data(&d->config, &data);
+		zend_hash_get_current_data(&d->config, (void **) &data);
 		fprintf(stderr, "APPLYING (%s)(%s)\n", str, data->value);
 		if (zend_alter_ini_entry(str, str_len, data->value, data->value_len + 1, 
 				data->status, PHP_INI_STAGE_RUNTIME) == FAILURE)
@@ -118,7 +118,7 @@ void apply_config(void *dummy)
 	}
 }
 
-const command_rec dir_cmds[] =
+const command_rec php_dir_cmds[] =
 {
 	AP_INIT_TAKE2("php_value", php_apache_value_handler, NULL, OR_OPTIONS,
                   "PHP Value Modifier"),

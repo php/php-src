@@ -427,10 +427,10 @@ static void php_register_hook(void)
 module MODULE_VAR_EXPORT php4_module = {
     STANDARD20_MODULE_STUFF,
     create_php_config,		/* create per-directory config structure */
-    merge_php_config,        		/* merge per-directory config structures */
+    merge_php_config,      		/* merge per-directory config structures */
     NULL,			/* create per-server config structure */
     NULL,			/* merge per-server config structures */
-    dir_cmds,			/* command apr_table_t */
+    php_dir_cmds,			/* command apr_table_t */
     NULL,          		/* handlers */
     php_register_hook		/* register hooks */
 };
