@@ -36,12 +36,6 @@ inifile  This is available since PHP 4.3.3 to be able to modify php.ini
          files from within PHP scripts. When working with ini files you 
          can pass arrays of the form array(0=>group,1=>value_name) or 
          strings of the form "[group]value_name" where group is optional. 
-         As the functions dba_firstkey() and dba_nextkey() return string 
-         representations of the key there is a new function dba_key_split() 
-         available since PHP 5 which allows to convert the string keys into 
-         array keys without loosing FALSE.  
-qdbm     This is available since PHP 5.0.0. The qdbm library can be loaded 
-         from http://qdbm.sourceforge.net.  
 
 
 After configuring and compiling PHP you must execute the following test
