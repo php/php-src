@@ -58,7 +58,7 @@ PHPAPI void php_url_free(php_url *theurl)
 }
 /* }}} */
 
-/* {{{ url_parse
+/* {{{ php_url_parse
  */
 PHPAPI php_url *php_url_parse(char *str)
 {
