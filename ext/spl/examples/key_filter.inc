@@ -53,7 +53,7 @@ class KeyFilter implements Iterator
 	protected function fetch() {
 		$this->key = false;
 		$this->curr = false;
-		while ($this->it->hasMore()) {
+		while ($this->it->valid()) {
 			$key = $this->it->key();
 			if (ereg($this->regex, $key)) {
 				$this->key = $key;
@@ -77,7 +77,7 @@ class KeyFilter implements Iterator
 	/**
 	 * @return Whether more elements are available
 	 */
-	function hasMore() {
+	function valid() {
 		return $this->key !== false;
 	}
 	

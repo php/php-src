@@ -17,7 +17,7 @@ class c_iter implements Iterator {
 	}
 	function rewind() {
 	}
-	function hasMore() {
+	function valid() {
 		$more = $this->num < $this->obj->max;
 		echo __METHOD__ . ' = ' .($more ? 'true' : 'false') . "\n";
 		return $more;
@@ -60,7 +60,7 @@ foreach($a as $v) {
 
 echo "===Manual===\n";
 $t = new c();
-for ($iter = $t->getIterator(); $iter->hasMore(); $iter->next()) {
+for ($iter = $t->getIterator(); $iter->valid(); $iter->next()) {
 	echo $iter->current() . "\n";
 }
 
@@ -92,125 +92,125 @@ array:2
 ===Manual===
 c::getIterator
 c_iter::__construct
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 0
 c_iter::next
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 1
 c_iter::next
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 2
 c_iter::next
-c_iter::hasMore = false
+c_iter::valid = false
 ===foreach/std===
 c::getIterator
 c_iter::__construct
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 object:0
 c_iter::next
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 object:1
 c_iter::next
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 object:2
 c_iter::next
-c_iter::hasMore = false
+c_iter::valid = false
 ===foreach/rec===
 c::getIterator
 c_iter::__construct
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 c::getIterator
 c_iter::__construct
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 double:0:0
 c_iter::next
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 double:0:1
 c_iter::next
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 double:0:2
 c_iter::next
-c_iter::hasMore = false
+c_iter::valid = false
 c_iter::next
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 c::getIterator
 c_iter::__construct
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 double:1:0
 c_iter::next
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 double:1:1
 c_iter::next
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 double:1:2
 c_iter::next
-c_iter::hasMore = false
+c_iter::valid = false
 c_iter::next
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 c::getIterator
 c_iter::__construct
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 double:2:0
 c_iter::next
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 double:2:1
 c_iter::next
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 double:2:2
 c_iter::next
-c_iter::hasMore = false
+c_iter::valid = false
 c_iter::next
-c_iter::hasMore = false
+c_iter::valid = false
 ===foreach/key===
 c::getIterator
 c_iter::__construct
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 object:1st=>0
 c_iter::next
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 object:2nd=>1
 c_iter::next
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 object:3rd=>2
 c_iter::next
-c_iter::hasMore = false
+c_iter::valid = false
 Done

@@ -130,9 +130,9 @@ Notice: ArrayIterator::next(): Array was modified outside object and internal po
 
 Notice: ArrayIterator::next(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
 
-Notice: ArrayIterator::hasMore(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
+Notice: ArrayIterator::valid(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
 
 Notice: ArrayIterator::next(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
 
-Notice: ArrayIterator::hasMore(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
+Notice: ArrayIterator::valid(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
 Done

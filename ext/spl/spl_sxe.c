@@ -47,7 +47,7 @@ SPL_METHOD(SimpleXMLIterator, rewind) /* {{{ */
 }
 /* }}} */
 
-SPL_METHOD(SimpleXMLIterator, hasMore) /* {{{ */
+SPL_METHOD(SimpleXMLIterator, valid) /* {{{ */
 {
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 
@@ -134,7 +134,7 @@ SPL_METHOD(SimpleXMLIterator, getChildren)
 
 static zend_function_entry spl_funcs_SimpleXMLIterator[] = {
 	SPL_ME(SimpleXMLIterator, rewind,                 NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(SimpleXMLIterator, hasMore,                NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(SimpleXMLIterator, valid,                  NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SimpleXMLIterator, current,                NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SimpleXMLIterator, key,                    NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(SimpleXMLIterator, next,                   NULL, ZEND_ACC_PUBLIC)

@@ -26,7 +26,7 @@ class CachingIterator
 	
 	function next()
 	{
-		if ($this->more = $this->it->hasMore()) {
+		if ($this->more = $this->it->valid()) {
 			$this->current = $this->it->current();
 			$this->key = $this->it->key();
 			if ($this->flags & CIT_CALL_TOSTRING) {
@@ -44,14 +44,14 @@ class CachingIterator
 		$this->it->next();
 	}
 	
-	function hasMore()
+	function valid()
 	{
 		return $this->more;
 	}
 
 	function hasNext()
 	{
-		return $this->it->hasMore();
+		return $this->it->valid();
 	}
 	
 	function current()

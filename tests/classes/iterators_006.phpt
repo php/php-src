@@ -18,7 +18,7 @@ class ai implements Iterator {
 		$this->next();
 	}
 
-	function hasMore() {
+	function valid() {
 		return $this->key !== NULL;
 	}
 
@@ -53,7 +53,7 @@ foreach ($array as $property => $value) {
 
 #$array = $array->getIterator();
 #$array->rewind();
-#$array->hasMore();
+#$array->valid();
 #var_dump($array->key());
 #var_dump($array->current());
 echo "===2nd===\n";

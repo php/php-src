@@ -22,7 +22,7 @@ class NumericArrayIterator implements Iterator
 		$this->i = 0;
 	}
 
-	public function hasMore()
+	public function valid()
 	{
 		$ret = $this->i < count($this->a);
 		echo __METHOD__ . '(' . ($ret ? 'true' : 'false') . ")\n";
@@ -87,20 +87,20 @@ for($i = 1; $i < 4; $i++)
 --EXPECT--
 NumericArrayIterator::__construct
 NumericArrayIterator::rewind
-NumericArrayIterator::hasMore(true)
+NumericArrayIterator::valid(true)
 NumericArrayIterator::next
-NumericArrayIterator::hasMore(true)
-NumericArrayIterator::hasMore(true)
+NumericArrayIterator::valid(true)
+NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 2
 NumericArrayIterator::next
-NumericArrayIterator::hasMore(true)
+NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 3
 NumericArrayIterator::next
-NumericArrayIterator::hasMore(true)
+NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 4
@@ -109,17 +109,17 @@ NumericArrayIterator::next
 NumericArrayIterator::__construct
 NumericArrayIterator::rewind
 SeekableNumericArrayIterator::seek(1)
-NumericArrayIterator::hasMore(true)
+NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 2
 NumericArrayIterator::next
-NumericArrayIterator::hasMore(true)
+NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 3
 NumericArrayIterator::next
-NumericArrayIterator::hasMore(true)
+NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 4
@@ -127,17 +127,17 @@ NumericArrayIterator::next
 ===SEEKING===
 NumericArrayIterator::__construct
 SeekableNumericArrayIterator::seek(1)
-NumericArrayIterator::hasMore(true)
+NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 2
 SeekableNumericArrayIterator::seek(2)
-NumericArrayIterator::hasMore(true)
+NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 3
 SeekableNumericArrayIterator::seek(3)
-NumericArrayIterator::hasMore(true)
+NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 4

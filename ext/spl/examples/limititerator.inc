@@ -33,7 +33,7 @@ class LimitIterator implements Iterator
 			$this->it->seek($position);
 			$this->pos = $position;
 		} else {
-			while($this->pos < $position && $this->it->hasMore()) {
+			while($this->pos < $position && $this->it->valid()) {
 				$this->next();
 			}
 		}
@@ -46,9 +46,9 @@ class LimitIterator implements Iterator
 		$this->seek($this->offset);
 	}
 	
-	function hasMore() {
+	function valid() {
 		return ($this->count == -1 || $this->pos < $this->offset + $this->count)
-			 && $this->it->hasMore();
+			 && $this->it->valid();
 	}
 	
 	function key() {

@@ -217,7 +217,7 @@ function_entry sqlite_funcs_query[] = {
 	/* spl_forward */
 	PHP_ME_MAPPING(current, sqlite_current, NULL)
 	PHP_ME_MAPPING(next, sqlite_next, NULL)
-	PHP_ME_MAPPING(hasmore, sqlite_has_more, NULL)
+	PHP_ME_MAPPING(valid, sqlite_has_more, NULL)
 	/* spl_sequence */
 	PHP_ME_MAPPING(rewind, sqlite_rewind, NULL)
 	/* additional */
@@ -239,7 +239,7 @@ function_entry sqlite_funcs_ub_query[] = {
 	/* spl_forward */
 	PHP_ME_MAPPING(current, sqlite_current, NULL)
 	PHP_ME_MAPPING(next, sqlite_next, NULL)
-	PHP_ME_MAPPING(hasmore, sqlite_has_more, NULL)
+	PHP_ME_MAPPING(valid, sqlite_has_more, NULL)
 	{NULL, NULL, NULL}
 };
 

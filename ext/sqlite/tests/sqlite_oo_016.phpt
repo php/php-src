@@ -22,12 +22,12 @@ foreach ($data as $str) {
 
 echo "====BUFFERED====\n";
 $r = $db->query("SELECT a, b from strings");
-while ($r->hasMore()) {
+while ($r->valid()) {
 	var_dump($r->fetch_single());
 }
 echo "====UNBUFFERED====\n";
 $r = $db->unbuffered_query("SELECT a, b from strings");
-while ($r->hasMore()) {
+while ($r->valid()) {
 	var_dump($r->fetch_single());
 }
 echo "DONE!\n";

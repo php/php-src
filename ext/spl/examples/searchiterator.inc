@@ -9,8 +9,8 @@ abstract class SearchIterator extends FilterIterator
 		$this->done = false;
 	}
 
-	function hasMore() {
-		return !$this->done && parent::hasMore();
+	function valid() {
+		return !$this->done && parent::valid();
 	}
 	
 	function next() {
