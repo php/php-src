@@ -1,3 +1,84 @@
+2002-10-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/url.c:
+    Added handling for file:/ schema, which does not contain a host.
+
+2002-10-18  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/dns.c: ws fixes
+
+2002-10-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/file.c
+      main/php_streams.h
+      main/streams.c: Fixed bug #19971 (optimized the file() function).
+    The file() function is now also binary safe.
+
+2002-10-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * run-tests.php: - Added %x for HEX chars
+    - Added %d as alias for %i (too much C here :)
+    - Added beginning and end markers to regexp
+
+2002-10-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/network.c: Revert my last bogus commit.
+    Change the comparison to something that is less likely to inspire me to
+    make the same mistake again...
+
+    * ext/standard/file.c: Improve file().
+    Patch by Tal Peer <tal@php.net>
+
+2002-10-18  Andrei Zmievski  <andrei@php.net>
+
+    * apidoc-zend.txt: This is deprecated too.
+
+    * apidoc.txt: Remove deprecated apidoc.txt.
+
+    * ext/standard/string.c:
+    - Fixed an infinite loop in setlocale() when only invalid locale names
+      were passed in the array. (patch by Pal Loberg, pallo@initio.no).
+
+2002-10-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/network.c
+      main/streams.c: Improve EOF detection. Fixes #19970.
+
+2002-10-18  Tal Peer  <tal@kaktos.co.il>
+
+    * ext/fribidi/fribidi.c
+      ext/fribidi/tests/002.phpt:
+    Changed fribidi_get_charsets() return value to also include the constant
+    itself (as the key).
+
+2002-10-18  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * NEWS: make jani happy
+
+2002-10-18  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: achtung: keep the style consistent! :)
+
+2002-10-18  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/tests/17result.phpt
+      ext/pgsql/tests/18pg_escape_bytea.phpt
+      ext/pgsql/tests/19pg_ping.phpt
+      ext/pgsql/tests/20pg_get_pid.phpt
+      ext/pgsql/tests/21pg_get_notify.phpt
+      ext/pgsql/tests/README
+      ext/pgsql/tests/createdb.inc
+      ext/pgsql/tests/large_object.inc
+      ext/pgsql/tests/pg_escape_bytea.inc
+      ext/pgsql/tests/pg_get_notify.inc
+      ext/pgsql/tests/pg_get_pid.inc
+      ext/pgsql/tests/pg_ping.inc
+      ext/pgsql/tests/result.inc: Added tests for new functions
+
+2002-10-18  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - word_count() -> str_word_count()
+
 2002-10-17  Yasuo Ohgaki  <yohgaki@ohgaki.net>
 
     * NEWS: Added pg_get_pid() that get backend process PID.

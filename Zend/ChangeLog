@@ -1,3 +1,14 @@
+2002-10-18  Andi Gutmans  <andi@zend.com>
+
+    * zend.c
+      zend_compile.c
+      zend_execute.c:
+    - Change opcode dispatch mechanism to use a function per opcode and use
+    - a lookup table using the opcode # to call the correct function.
+    - Still have lots of tuning to do.
+
+    * zend_execute.c: - Cleanup
+
 2002-10-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * zend_execute.c: Fix ZTS build.
