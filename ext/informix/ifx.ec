@@ -774,6 +774,7 @@ EXEC SQL END DECLARE SECTION;
 	sprintf(cursorid, "cursor%x", IFXG(cursorid)); 
 	sprintf(descrpid, "descrp%x", IFXG(cursorid)); 
 
+	EXEC SQL set connection :ifx;
 	PHP_IFX_CHECK_CONNECTION(ifx);
 
 	EXEC SQL PREPARE :statemid FROM :statement;
