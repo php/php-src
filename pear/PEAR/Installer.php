@@ -396,6 +396,9 @@ class PEAR_Installer extends PEAR_Common
             list($type, $data) = $tr;
             switch ($type) {
                 case 'rename':
+                    if (!file_exists($data[0])) {
+                        $errors[] = "cannot rename file $data[0], doesn't exist";
+                    }
                     // check that dest dir. is writable
                     if (!is_writable(dirname($data[1]))) {
                         $errors[] = "permission denied ($type): $data[1]";
@@ -408,6 +411,9 @@ class PEAR_Installer extends PEAR_Common
                     }
                     break;
                 case 'delete':
+                    if (!file_exists($data[0])) {
+                        $this->log(2, "warning: file $data[0] doesn't exist, can't be deleted");
+                    }
                     // check that directory is writable
                     if (file_exists($data[0]) && !is_writable(dirname($data[0]))) {
                         $errors[] = "permission denied ($type): $data[0]";
@@ -458,7 +464,7 @@ class PEAR_Installer extends PEAR_Common
                     break;
             }
         }
-        $this->log(2, "successfully commited $n file operations");
+        $this->log(2, "successfully committed $n file operations");
         $this->file_operations = array();
         return true;
     }
