@@ -23,7 +23,7 @@
 
 /* Note that there is no code from the cpdflib package in this file */
 
-#if !PHP_31 && defined(THREAD_SAFE)
+#if defined(THREAD_SAFE)
 #undef THREAD_SAFE
 #endif
 
