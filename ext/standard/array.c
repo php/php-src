@@ -232,6 +232,7 @@ PHP_FUNCTION(ksort)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto int count(mixed var)
    Count the number of elements in a variable (usually an array) */
