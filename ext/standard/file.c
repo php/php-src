@@ -1688,8 +1688,8 @@ PHPAPI int php_copy_file(char *src, char *dest)
 		}
 		srcfile = mmap(NULL, sbuf.st_size, PROT_READ, MAP_SHARED, fd_s, 0);
 		if (srcfile != (void *) MAP_FAILED) {
-			write(fd_t, srcfile, sbuf.st_size);
-			ret = SUCCESS;
+			if (write(fd_t, srcfile, sbuf.st_size) == sbuf.st_size)
+				ret = SUCCESS;
 			munmap(srcfile, sbuf.st_size);
 			goto cleanup;
 		}
