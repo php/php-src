@@ -118,6 +118,7 @@ function_entry gd_functions[] = {
 	PHP_FE(imagecreatefromjpeg,						NULL)
 	PHP_FE(imagejpeg,								NULL)
 	PHP_FE(imagedestroy,							NULL)
+	PHP_FE(imagegammacorrect,						NULL)
 	PHP_FE(imagefill,								NULL)
 	PHP_FE(imagefilledpolygon,						NULL)
 	PHP_FE(imagefilledrectangle,					NULL)
@@ -1050,6 +1051,32 @@ PHP_FUNCTION(imagecolorsforindex)
 }
 /* }}} */
 
+PHP_FUNCTION(imagegammacorrect)
+{
+	zval **IM, **inputgamma, **outputgamma;
+	gdImagePtr im;
+	int i;
+	GDLS_FETCH();
+
+	if (ARG_COUNT(ht) != 3 ||
+	    zend_get_parameters_ex(3, &IM, &inputgamma, &outputgamma) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_double_ex(inputgamma);
+	convert_to_double_ex(outputgamma);
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+
+	for (i = 0; i < gdImageColorsTotal(im); i++) {
+		im->red[i] = (int)((pow((pow((im->red[i] / 255.0),(*inputgamma)->value.dval)), 1.0 / (*outputgamma)->value.dval) * 255)+.5);
+		im->green[i] = (int)((pow((pow((im->green[i] / 255.0),(*inputgamma)->value.dval)), 1.0 / (*outputgamma)->value.dval) * 255)+.5);
+		im->blue[i] = (int)((pow((pow((im->blue[i] / 255.0),(*inputgamma)->value.dval)), 1.0 / (*outputgamma)->value.dval) * 255)+.5);
+	}
+
+	RETURN_TRUE;
+}
+
 /* {{{ proto int imagesetpixel(int im, int x, int y, int col)
    Set a single pixel */
 PHP_FUNCTION(imagesetpixel)
@@ -1060,8 +1087,7 @@ PHP_FUNCTION(imagesetpixel)
 	GDLS_FETCH();
 
 	if (ARG_COUNT(ht) != 4 ||
-		zend_get_parameters_ex(4, &imgind, &xarg, &yarg, &colarg) == FAILURE)
-	{
+		zend_get_parameters_ex(4, &imgind, &xarg, &yarg, &colarg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1081,7 +1107,6 @@ PHP_FUNCTION(imagesetpixel)
 }
 /* }}} */	
 
-/* im, x1, y1, x2, y2, col */
 /* {{{ proto int imageline(int im, int x1, int y1, int x2, int y2, int col)
    Draw a line */
 PHP_FUNCTION(imageline)
