@@ -35,7 +35,7 @@
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
 
-#define COMMON ((*struc)->is_ref?"&":"")
+#define COMMON ((*struc)->is_ref ? "&" : "")
 
 /* }}} */
 /* {{{ php_var_dump */
@@ -60,54 +60,52 @@ void php_var_dump(zval **struc, int level TSRMLS_DC)
 {
 	HashTable *myht;
 
-	if (level>1) {
-		php_printf("%*c", level-1, ' ');
+	if (level > 1) {
+		php_printf("%*c", level - 1, ' ');
 	}
 
-	switch ((*struc)->type) {
-		case IS_BOOL:
-			php_printf("%sbool(%s)\n", COMMON, Z_LVAL_PP(struc)?"true":"false");
-			break;
-		case IS_NULL:
-			php_printf("%sNULL\n", COMMON);
-			break;
-		case IS_LONG:
-			php_printf("%sint(%ld)\n", COMMON, Z_LVAL_PP(struc));
-			break;
-		case IS_DOUBLE: {
-
-				php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_PP(struc));
-			}
-			break;
-		case IS_STRING:
-			php_printf("%sstring(%d) \"", COMMON, Z_STRLEN_PP(struc));
-			PHPWRITE(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc));
-			PUTS("\"\n");
-			break;
-		case IS_ARRAY:
-			myht = HASH_OF(*struc);
-			php_printf("%sarray(%d) {\n", COMMON, zend_hash_num_elements(myht));
-			goto head_done;
-		case IS_OBJECT:
-			myht = Z_OBJPROP_PP(struc);
-			php_printf("%sobject(%s)(%d) {\n", COMMON, Z_OBJCE_PP(struc)->name, zend_hash_num_elements(myht));
+	switch (Z_TYPE_PP(struc)) {
+	case IS_BOOL:
+		php_printf("%sbool(%s)\n", COMMON, Z_LVAL_PP(struc)?"true":"false");
+		break;
+	case IS_NULL:
+		php_printf("%sNULL\n", COMMON);
+		break;
+	case IS_LONG:
+		php_printf("%sint(%ld)\n", COMMON, Z_LVAL_PP(struc));
+		break;
+	case IS_DOUBLE:
+		php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_PP(struc));
+		break;
+	case IS_STRING:
+		php_printf("%sstring(%d) \"", COMMON, Z_STRLEN_PP(struc));
+		PHPWRITE(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc));
+		PUTS("\"\n");
+		break;
+	case IS_ARRAY:
+		myht = Z_ARRVAL_PP(struc);
+		php_printf("%sarray(%d) {\n", COMMON, zend_hash_num_elements(myht));
+		goto head_done;
+	case IS_OBJECT:
+		myht = Z_OBJPROP_PP(struc);
+		php_printf("%sobject(%s)(%d) {\n", COMMON, Z_OBJCE_PP(struc)->name, zend_hash_num_elements(myht));
 head_done:
-			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_array_element_dump, 1, level);
-			if (level>1) {
-				php_printf("%*c", level-1, ' ');
-			}
-			PUTS("}\n");
-			break;
-		case IS_RESOURCE: {
-			char *type_name;
-
-			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
-			php_printf("%sresource(%ld) of type (%s)\n", COMMON, Z_LVAL_PP(struc), type_name ? type_name : "Unknown");
-			break;
+		zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_array_element_dump, 1, level);
+		if (level > 1) {
+			php_printf("%*c", level-1, ' ');
 		}
-		default:
-			php_printf("%sUNKNOWN:0\n", COMMON);
-			break;
+		PUTS("}\n");
+		break;
+	case IS_RESOURCE: {
+		char *type_name;
+
+		type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
+		php_printf("%sresource(%ld) of type (%s)\n", COMMON, Z_LVAL_PP(struc), type_name ? type_name : "Unknown");
+		break;
+	}
+	default:
+		php_printf("%sUNKNOWN:0\n", COMMON);
+		break;
 	}
 }
 
