@@ -1,3 +1,14 @@
+2003-03-03  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * zend_API.c:
+      add missing strtolower
+
+    * zend_API.c
+      zend_API.h:
+      commiting zend_disable_class patch for George:
+      disabled classes will be replaced by dummy classes
+      that print a warning upon instanciation
+
 2003-03-02  Zeev Suraski  <zeev@zend.com>
 
     * zend_execute_API.c:
