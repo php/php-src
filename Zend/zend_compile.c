@@ -2358,6 +2358,7 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 			}
 			*result = opline_ptr->result;
 			if (CG(active_class_entry)
+				&& property->op_type == IS_CONST
 				&& !zend_hash_exists(&CG(active_class_entry)->properties_info, property->u.constant.value.str.val, property->u.constant.value.str.len+1)) {
 				property->u.constant.value.str.val = estrndup(property->u.constant.value.str.val, property->u.constant.value.str.len);
 				zend_do_declare_property(property, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_IMPLICIT_PUBLIC TSRMLS_CC);
