@@ -55,6 +55,7 @@ define("DB_ERROR_NOSUCHFIELD",        -19);
 define("DB_ERROR_NEED_MORE_DATA",     -20);
 define("DB_ERROR_NOT_LOCKED",         -21);
 define("DB_ERROR_VALUE_COUNT_ON_ROW", -22);
+define("DB_ERROR_INVALID_DSN",        -23);
 
 /*
  * Warnings are not detected as errors by DB::isError(), and are not
@@ -171,8 +172,8 @@ class DB
     {
 	@include_once("DB/${type}.php");
 
-	$classname = "DB_" . $type;
-	$obj = @new $classname;
+	$classname = "DB_${type}";
+	@$obj =& new $classname;
 
 	if (!$obj) {
 	    return new DB_Error(DB_ERROR_NOT_FOUND);
@@ -188,39 +189,50 @@ class DB
      * method for a description of the dsn format.  Can also be
      * specified as an array of the format returned by DB::parseDSN.
      *
-     * @param $persistent bool whether this connection should be
-     * persistent.  Ignored if the backend extension does not support
-     * persistent connections.
+     * @param $options mixed if boolean (or scalar), tells whether
+     * this connection should be persistent (for backends that support
+     * this).  This parameter can also be an array of options, see
+     * DB_common::setOption for more information on connection
+     * options.
      *
      * @return object a newly created DB object, or a DB error code on
      * error
      *
      * @see DB::parseDSN
      */
-    function &connect($dsn, $persistent = false)
+    function &connect($dsn, $options = false)
     {
-	if (is_array($dsn)) {
-	    $dsninfo = $dsn;
-	} else {
-	    $dsninfo = DB::parseDSN($dsn);
-	}
-	$type = $dsninfo["phptype"];
-	$classname = "DB_" . $type;
+        if (is_array($dsn)) {
+            $dsninfo = $dsn;
+        } else {
+            $dsninfo = DB::parseDSN($dsn);
+        }
+        $type = $dsninfo["phptype"];
 
-	@include_once("DB/${type}.php");
-	$obj = @new $classname;
+        $classname = "DB_${type}";
+        @$obj =& new $classname;
 
-	if (!$obj) {
-	    return new DB_Error(DB_ERROR_NOT_FOUND);
-	}
+        if (!$obj) {
+            return new DB_Error(DB_ERROR_NOT_FOUND);
+        }
 
-	$err = $obj->connect($dsninfo, $persistent);
+        if (is_array($options)) {
+            foreach ($persistent as $option => $value) {
+                $test = $obj->setOption($option, $value);
+                if (DB::isError($test)) {
+                    return $test;
+                }
+            }
+        } else {
+            $obj->setOption('persistent', $persistent);
+        }
+        $err = $obj->connect($dsninfo, $obj->getOption('persistent'));
 
-	if (DB::isError($err)) {
-	    return $err;
-	}
+        if (DB::isError($err)) {
+            return $err;
+        }
 
-	return $obj;
+        return $obj;
     }
 
     /**
@@ -402,11 +414,11 @@ class DB
         }
 
         if (preg_match("|^([^:]+):([^@]+)@?(.*)$|", $dsn, $arr)) {
-	    $parsed["username"] = $arr[1];
-	    $parsed["password"] = $arr[2];
+	    $parsed["username"] = urldecode($arr[1]);
+	    $parsed["password"] = urldecode($arr[2]);
 	    $dsn = $arr[3];
         } elseif (preg_match("|^([^:]+)@(.*)$|", $dsn, $arr)) {
-	    $parsed["username"] = $arr[1];
+	    $parsed["username"] = urldecode($arr[1]);
 	    $dsn = $arr[2];
         }
 
@@ -426,6 +438,29 @@ class DB
         }
 
         return $parsed;
+    }
+
+    /**
+     * Load a PHP database extension if it is not loaded already.
+     *
+     * @access public
+     *
+     * @param $name the base name of the extension (without the .so or
+     * .dll suffix)
+     *
+     * @return bool true if the extension was already or successfully
+     * loaded, false if it could not be loaded
+     */
+    function assertExtension($name)
+    {
+        if (!extension_loaded($name)) {
+            $dlext = (substr(PHP_OS, 0, 3) == "WIN") ? ".dll" : ".so";
+            @dl($name . $dlext);
+        }
+        if (!extension_loaded($name)) {
+            return false;
+        }
+        return true;
     }
 }
 
