@@ -209,11 +209,6 @@ $test_files = array();
 $test_results = array();
 $PHP_FAILED_TESTS = array();
 
-if (!ini_get('register_globals')) {
-	$argc = $_SERVER['argc'];
-	$argv = $_SERVER['argv'];
-}
-
 // If parameters given assume they represent selected tests to run.
 $failed_tests_file= false;
 if (isset($argc) && $argc > 1) {
