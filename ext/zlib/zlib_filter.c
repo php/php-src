@@ -23,7 +23,9 @@
 
 /* {{{ data structure */
 
+/* Passed as opaque in malloc callbacks */
 typedef struct _php_zlib_filter_data {
+	int persistent;
 	z_stream strm;
 	char *inbuf;
 	size_t inbuf_len;
@@ -37,12 +39,12 @@ typedef struct _php_zlib_filter_data {
 
 static voidpf php_zlib_alloc(voidpf opaque, uInt items, uInt size)
 {
-	return (voidpf)safe_emalloc(items, size, 0);
+	return (voidpf)pemalloc(items * size, ((php_zlib_filter_data*)opaque)->persistent);
 }
 
 static void php_zlib_free(voidpf opaque, voidpf address)
 {
-	efree((void*)address);
+	pefree((void*)address, ((php_zlib_filter_data*)opaque)->persistent);
 }
 /* }}} */
 
@@ -140,9 +142,9 @@ static void php_zlib_inflate_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 	if (thisfilter && thisfilter->abstract) {
 		php_zlib_filter_data *data = thisfilter->abstract;
 		inflateEnd(&(data->strm));
-		efree(data->inbuf);
-		efree(data->outbuf);
-		efree(data);
+		pefree(data->inbuf, data->persistent);
+		pefree(data->outbuf, data->persistent);
+		pefree(data, data->persistent);
 	}
 }
 
@@ -248,9 +250,9 @@ static void php_zlib_deflate_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 	if (thisfilter && thisfilter->abstract) {
 		php_zlib_filter_data *data = thisfilter->abstract;
 		deflateEnd(&(data->strm));
-		efree(data->inbuf);
-		efree(data->outbuf);
-		efree(data);
+		pefree(data->inbuf, data->persistent);
+		pefree(data->outbuf, data->persistent);
+		pefree(data, data->persistent);
 	}
 }
 
@@ -270,13 +272,8 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 	php_zlib_filter_data *data;
 	int status;
 
-	if (persistent) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "this filter is not safe to use with a persistent stream");
-		return NULL;
-	}
-
 	/* Create this filter */
-	data = ecalloc(1, sizeof(php_zlib_filter_data));
+	data = pecalloc(1, sizeof(php_zlib_filter_data), persistent);
 
 	/* Circular reference */
 	data->strm.opaque = (voidpf) data;
@@ -284,9 +281,9 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 	data->strm.zalloc = (alloc_func) php_zlib_alloc;
 	data->strm.zfree = (free_func) php_zlib_free;
 	data->strm.avail_out = data->outbuf_len = data->inbuf_len = 2048;
-	data->strm.next_in = data->inbuf = (Bytef *) emalloc(data->inbuf_len);
+	data->strm.next_in = data->inbuf = (Bytef *) pemalloc(data->inbuf_len, persistent);
 	data->strm.avail_in = 0;
-	data->strm.next_out = data->outbuf = (Bytef *) emalloc(data->outbuf_len);
+	data->strm.next_out = data->outbuf = (Bytef *) pemalloc(data->outbuf_len, persistent);
 	data->strm.data_type = Z_ASCII;
 
 	if (strcasecmp(filtername, "zlib.inflate") == 0) {
@@ -384,9 +381,9 @@ factory_setlevel:
 
 	if (status != Z_OK) {
 		/* Unspecified (probably strm) error, let stream-filter error do its own whining */
-		efree(data->strm.next_in);
-		efree(data->strm.next_out);
-		efree(data);
+		pefree(data->strm.next_in, persistent);
+		pefree(data->strm.next_out, persistent);
+		pefree(data, persistent);
 		return NULL;
 	}
 
