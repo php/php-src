@@ -58,8 +58,7 @@ ZEND_API int getParameters(int ht, int param_count,...)
 			new_tmp = (zval *) emalloc(sizeof(zval));
 			*new_tmp = *param_ptr;
 			zval_copy_ctor(new_tmp);
-			new_tmp->refcount = 1;
-			new_tmp->EA = 0;
+			INIT_PZVAL(new_tmp);
 			param_ptr = new_tmp;
 			((zval *) *(p-param_count))->refcount--;
 			*(p-param_count) = param_ptr;
@@ -96,8 +95,7 @@ ZEND_API int getParametersArray(int ht, int param_count, zval **argument_array)
 			new_tmp = (zval *) emalloc(sizeof(zval));
 			*new_tmp = *param_ptr;
 			zval_copy_ctor(new_tmp);
-			new_tmp->refcount = 1;
-			new_tmp->EA = 0;
+			INIT_PZVAL(new_tmp);
 			param_ptr = new_tmp;
 			((zval *) *(p-param_count))->refcount--;
 			*(p-param_count) = param_ptr;
@@ -230,8 +228,7 @@ ZEND_API inline int add_assoc_long(zval *arg, char *key, long n)
 
 	tmp->type = IS_LONG;
 	tmp->value.lval = n;
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_update(arg->value.ht, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
 }
 
@@ -242,8 +239,7 @@ ZEND_API inline int add_assoc_double(zval *arg, char *key, double d)
 
 	tmp->type = IS_DOUBLE;
 	tmp->value.dval = d;
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_update(arg->value.ht, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
 }
 
@@ -259,8 +255,7 @@ ZEND_API inline int add_assoc_string(zval *arg, char *key, char *str, int duplic
 	} else {
 		tmp->value.str.val = str;
 	}
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_update(arg->value.ht, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
 }
 
@@ -276,8 +271,7 @@ ZEND_API inline int add_assoc_stringl(zval *arg, char *key, char *str, uint leng
 	} else {
 		tmp->value.str.val = str;
 	}
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_update(arg->value.ht, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
 }
 
@@ -295,8 +289,7 @@ ZEND_API inline int add_index_long(zval *arg, uint index, long n)
 
 	tmp->type = IS_LONG;
 	tmp->value.lval = n;
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_index_update(arg->value.ht, index, (void *) &tmp, sizeof(zval *),NULL);
 }
 
@@ -307,8 +300,7 @@ ZEND_API inline int add_index_double(zval *arg, uint index, double d)
 
 	tmp->type = IS_DOUBLE;
 	tmp->value.dval = d;
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_index_update(arg->value.ht, index, (void *) &tmp, sizeof(zval *),NULL);
 }
 
@@ -324,8 +316,7 @@ ZEND_API inline int add_index_string(zval *arg, uint index, char *str, int dupli
 	} else {
 		tmp->value.str.val = str;
 	}
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_index_update(arg->value.ht, index, (void *) &tmp, sizeof(zval *), NULL);
 }
 
@@ -341,8 +332,7 @@ ZEND_API inline int add_index_stringl(zval *arg, uint index, char *str, uint len
 	} else {
 		tmp->value.str.val = str;
 	}
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_index_update(arg->value.ht, index, (void *) &tmp, sizeof(zval *),NULL);
 }
 
@@ -353,8 +343,7 @@ ZEND_API inline int add_next_index_long(zval *arg, long n)
 
 	tmp->type = IS_LONG;
 	tmp->value.lval = n;
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_next_index_insert(arg->value.ht, &tmp, sizeof(zval *), NULL);
 }
 
@@ -365,8 +354,7 @@ ZEND_API inline int add_next_index_double(zval *arg, double d)
 
 	tmp->type = IS_DOUBLE;
 	tmp->value.dval = d;
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_next_index_insert(arg->value.ht, &tmp, sizeof(zval *), NULL);
 }
 
@@ -382,8 +370,7 @@ ZEND_API inline int add_next_index_string(zval *arg, char *str, int duplicate)
 	} else {
 		tmp->value.str.val = str;
 	}
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_next_index_insert(arg->value.ht, &tmp, sizeof(zval *),NULL);
 }
 
@@ -399,8 +386,7 @@ ZEND_API inline int add_next_index_stringl(zval *arg, char *str, uint length, in
 	} else {
 		tmp->value.str.val = str;
 	}
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_next_index_insert(arg->value.ht, &tmp, sizeof(zval *),NULL);
 }
 
@@ -416,8 +402,7 @@ ZEND_API inline int add_get_assoc_string(zval *arg, char *key, char *str, void *
 	} else {
 		tmp->value.str.val = str;
 	}
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_update(arg->value.ht, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), dest);
 }
 
@@ -433,8 +418,7 @@ ZEND_API inline int add_get_assoc_stringl(zval *arg, char *key, char *str, uint 
 	} else {
 		tmp->value.str.val = str;
 	}
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_update(arg->value.ht, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), dest);
 }
 
@@ -444,9 +428,8 @@ ZEND_API inline int add_get_index_long(zval *arg, uint index, long l, void **des
 	zval *tmp = (zval *) emalloc(sizeof(zval));
 
 	tmp->type = IS_LONG;
-	tmp->value.lval= l;
-	tmp->refcount=1;
-	tmp->EA=0;
+	tmp->value.lval = l;
+	INIT_PZVAL(tmp);
 	return zend_hash_index_update(arg->value.ht, index, (void *) &tmp, sizeof(zval *),dest);
 }
 
@@ -457,8 +440,7 @@ ZEND_API inline int add_get_index_double(zval *arg, uint index, double d, void *
 
 	tmp->type = IS_DOUBLE;
 	tmp->value.dval= d;
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_index_update(arg->value.ht, index, (void *) &tmp, sizeof(zval *),dest);
 }
 
@@ -474,8 +456,7 @@ ZEND_API inline int add_get_index_string(zval *arg, uint index, char *str, void 
 	} else {
 		tmp->value.str.val = str;
 	}
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_index_update(arg->value.ht, index, (void *) &tmp, sizeof(zval *),dest);
 }
 
@@ -491,8 +472,7 @@ ZEND_API inline int add_get_index_stringl(zval *arg, uint index, char *str, uint
 	} else {
 		tmp->value.str.val = str;
 	}
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_index_update(arg->value.ht, index, (void *) &tmp, sizeof(zval *),dest);
 }
 
@@ -503,8 +483,7 @@ ZEND_API inline int add_property_long(zval *arg, char *key, long n)
 
 	tmp->type = IS_LONG;
 	tmp->value.lval = n;
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_update(arg->value.obj.properties, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
 }
 
@@ -515,8 +494,7 @@ ZEND_API inline int add_property_double(zval *arg, char *key, double d)
 
 	tmp->type = IS_DOUBLE;
 	tmp->value.dval = d;
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_update(arg->value.obj.properties, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
 }
 
@@ -532,8 +510,7 @@ ZEND_API inline int add_property_string(zval *arg, char *key, char *str, int dup
 	} else {
 		tmp->value.str.val = str;
 	}
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_update(arg->value.obj.properties, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
 }
 
@@ -549,8 +526,7 @@ ZEND_API inline int add_property_stringl(zval *arg, char *key, char *str, uint l
 	} else {
 		tmp->value.str.val = str;
 	}
-	tmp->refcount=1;
-	tmp->EA=0;
+	INIT_PZVAL(tmp);
 	return zend_hash_update(arg->value.obj.properties, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
 }
 

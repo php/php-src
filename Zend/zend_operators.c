@@ -332,8 +332,7 @@ static void convert_scalar_to_array(zval *op, int type)
 	zval *entry = (zval *) emalloc(sizeof(zval));
 	
 	*entry = *op;
-	entry->refcount = 1;
-	entry->EA = 0;
+	INIT_PZVAL(entry);
 	
 	switch (type) {
 		case IS_ARRAY:

@@ -80,10 +80,12 @@ void init_executor(CLS_D ELS_DC)
 	var_uninit(&EG(uninitialized_zval));
 	var_uninit(&EG(error_zval));
 	EG(uninitialized_zval).refcount = 1;
-	EG(uninitialized_zval).EA=0;
+	EG(uninitialized_zval).EA.is_ref=0;
+	EG(uninitialized_zval).EA.locks = 0;
 	EG(uninitialized_zval_ptr)=&EG(uninitialized_zval);
 	EG(error_zval).refcount = 1;
-	EG(error_zval).EA=0;
+	EG(error_zval).EA.is_ref=0;
+	EG(error_zval).EA.locks = 0;
 	EG(error_zval_ptr)=&EG(error_zval);
 	zend_ptr_stack_init(&EG(arg_types_stack));
 	zend_stack_init(&EG(overloaded_objects_stack));
@@ -197,6 +199,8 @@ ZEND_API inline void safe_free_zval_ptr(zval *p)
 
 ZEND_API int zval_ptr_dtor(zval **zval_ptr)
 {
+	int locked = PZVAL_IS_LOCKED(*zval_ptr);
+
 #if DEBUG_ZEND>=2
 	printf("Reducing refcount for %x (%x):  %d->%d\n", *zval_ptr, zval_ptr, (*zval_ptr)->refcount, (*zval_ptr)->refcount-1);
 #endif
@@ -205,7 +209,11 @@ ZEND_API int zval_ptr_dtor(zval **zval_ptr)
 		zval_dtor(*zval_ptr);
 		safe_free_zval_ptr(*zval_ptr);
 	}
-	return 1;
+	if (locked) {
+		return 0; /* don't kill the container bucket */
+	} else {
+		return 1;
+	}
 }
 
 
@@ -264,8 +272,7 @@ ZEND_API void zval_update_constant(zval *p)
 			STR_FREE(p->value.str.val);
 			*p = c;
 		}
-		p->refcount = 1;
-		p->EA = 0;
+		INIT_PZVAL(p);
 	}
 }
 
@@ -299,8 +306,7 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 
 		param = (zval *) emalloc(sizeof(zval));
 		*param = *(params[i]);
-		param->refcount=1;
-		param->EA=0;
+		INIT_PZVAL(param);
 		zval_copy_ctor(param);
 		//zend_hash_next_index_insert_ptr(function_state.function_symbol_table, param, sizeof(zval *), NULL);
 		zend_ptr_stack_push(&EG(argument_stack), param);
@@ -317,8 +323,7 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 			zval *dummy = (zval *) emalloc(sizeof(zval)), **this_ptr;
 
 			var_uninit(dummy);
-			dummy->refcount=1;
-			dummy->EA=0;
+			INIT_PZVAL(dummy);
 			zend_hash_update_ptr(EG(active_symbol_table), "this", sizeof("this"), dummy, sizeof(zval *), (void **) &this_ptr);
 			zend_assign_to_variable_reference(NULL, this_ptr, &object, NULL ELS_CC);
 		}
@@ -429,7 +434,7 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 				zendi_zval_copy_ctor(*value_ptr);
 			}
 			value_ptr->refcount = 1;
-			value_ptr->EA = ZEND_EA_IS_REF;
+			INIT_PZVAL(value_ptr);
 		}
 
 		*variable_ptr_ptr = value_ptr;
@@ -440,6 +445,7 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 
 	if (result && (result->op_type != IS_UNUSED)) {
 		Ts[result->u.var].var = variable_ptr_ptr;
+		PZVAL_LOCK(*variable_ptr_ptr);
 	}
 }
 
