@@ -443,7 +443,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 			apr_file_name_get(&path, ((apr_bucket_file *) b->data)->fd);
 			
 			/* Determine if we need to parse the file or show the source */
-			if (!strncmp(ctx->r->handler, "application/x-httpd-php", sizeof("application/x-httpd-php"))) { 
+			if (strncmp(ctx->r->handler, "application/x-httpd-php-source", sizeof("application/x-httpd-php-source"))) { 
 				zfd.type = ZEND_HANDLE_FILENAME;
 				zfd.filename = (char *) path;
 				zfd.free_filename = 0;
