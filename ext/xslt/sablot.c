@@ -571,6 +571,24 @@ PHP_FUNCTION(xslt_sax_process)
 }
 /* }}} */
 
+/* {{{ proto void xslt_sax_free(resource processor)
+   Free the xslt processor up */
+PHP_FUNCTION(xslt_sax_free)
+{
+	zval     **processor_p;   /* Resource pointer to a php-xslt processor */
+	php_xslt  *handle;        /* A PHP-XSLT processor */
+	
+	if (ZEND_NUM_ARGS() != 1 ||
+	    zend_get_parameters_ex(1, &processor_p) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	ZEND_FETCH_RESOURCE(handle, php_xslt *, processor_p, -1, le_xslt_name, le_xslt);
+	
+	/* Remove the entry from the list */
+	zend_list_delete(Z_LVAL_PP(processor_p));
+}
+/* }}} */
+
 /* {{{ proto int xslt_errno(resource processor)
    Error number */
 PHP_FUNCTION(xslt_errno)
@@ -606,24 +624,6 @@ PHP_FUNCTION(xslt_error)
 	} else {
 		RETURN_FALSE;
 	}
-}
-/* }}} */
-
-/* {{{ proto void xslt_sax_free(resource processor)
-   Free the xslt processor up */
-PHP_FUNCTION(xslt_sax_free)
-{
-	zval     **processor_p;   /* Resource pointer to a php-xslt processor */
-	php_xslt  *handle;        /* A PHP-XSLT processor */
-	
-	if (ZEND_NUM_ARGS() != 1 ||
-	    zend_get_parameters_ex(1, &processor_p) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	ZEND_FETCH_RESOURCE(handle, php_xslt *, processor_p, -1, le_xslt_name, le_xslt);
-	
-	/* Remove the entry from the list */
-	zend_list_delete(Z_LVAL_PP(processor_p));
 }
 /* }}} */
 
