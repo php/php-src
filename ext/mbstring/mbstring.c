@@ -1380,7 +1380,7 @@ PHP_FUNCTION(mb_parse_str)
 			str_list[n] = var;
 			len_list[n] = php_url_decode(var, strlen(var));
 			n++;
-			str_list[n] = NULL;
+			str_list[n] = "";
 			len_list[n] = 0;
 		}
 		n++;
