@@ -2278,13 +2278,13 @@ void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRML
 	if (ce->constructor) {
 		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
 		if (ce->constructor->common.fn_flags & ZEND_ACC_STATIC) {
-			zend_error(E_COMPILE_ERROR, "Constructor %s::%s cannot be static", ce->name, ce->constructor->common.function_name);
+			zend_error(E_COMPILE_ERROR, "Constructor %s::%s() cannot be static", ce->name, ce->constructor->common.function_name);
 		}
 	}
 	if (ce->destructor) {
 		ce->destructor->common.fn_flags |= ZEND_ACC_DTOR;
 		if (ce->destructor->common.fn_flags & ZEND_ACC_STATIC) {
-			zend_error(E_COMPILE_ERROR, "Destructor %s::%s cannot be static", ce->name, ce->destructor->common.function_name);
+			zend_error(E_COMPILE_ERROR, "Destructor %s::%s() cannot be static", ce->name, ce->destructor->common.function_name);
 		}
 	}
 
@@ -2357,7 +2357,7 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 	}
 
 	if (access_type & ZEND_ACC_FINAL) {
-		zend_error(E_COMPILE_ERROR, "Cannot declare property $%s::%s final, the final modifier is allowed only for methods",
+		zend_error(E_COMPILE_ERROR, "Cannot declare property %s::$%s final, the final modifier is allowed only for methods",
 				   CG(active_class_entry)->name, var_name->u.constant.value.str.val);
 	}
 
