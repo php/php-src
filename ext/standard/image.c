@@ -834,7 +834,7 @@ PHPAPI const char * php_image_type_to_mime_type(int image_type)
 }
 /* }}} */
 
-/* {{{ proto array image_type_to_mime_type(int imagetype)
+/* {{{ proto string image_type_to_mime_type(int imagetype)
    Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_mime_type)
 {
