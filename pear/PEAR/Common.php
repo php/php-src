@@ -21,6 +21,8 @@
 // $Id$
 
 require_once 'PEAR.php';
+require_once 'Archive/Tar.php';
+require_once 'Experimental/System.php';
 
 /**
 * TODO:
@@ -72,12 +74,11 @@ class PEAR_Common extends PEAR
 
     function _PEAR_Common()
     {
-        $this->_PEAR();
         while (is_array($this->_tempfiles) &&
                $file = array_shift($this->_tempfiles))
         {
             if (@is_dir($file)) {
-                system("rm -rf $file"); // XXX FIXME Windows
+                System::rm("-rf $file");
             } elseif (file_exists($file)) {
                 unlink($file);
             }
@@ -103,7 +104,7 @@ class PEAR_Common extends PEAR
             $dir = dirname($dir);
         }
         while ($newdir = array_shift($dirstack)) {
-            if (mkdir($newdir, 0777)) {
+            if (mkdir($newdir, 0755)) {
                 $this->log(2, "+ created dir $newdir");
             } else {
                 return false;
@@ -123,6 +124,18 @@ class PEAR_Common extends PEAR
     }
 
     // }}}
+
+    function mkTempDir()
+    {
+        $dir = (OS_WINDOWS) ? 'c:\\windows\\temp' : '/tmp';
+        $tmpdir = tempnam($dir, 'pear');
+        unlink($tmpdir);
+        if (!mkdir($tmpdir, 0700)) {
+            return $this->raiseError("Unable to create temporary directory $tmpdir");
+        }
+        $this->addTempFile($tmpdir);
+        return $tmpdir;
+    }
 
     // {{{ _element_start()
 
@@ -260,7 +273,7 @@ class PEAR_Common extends PEAR
             case 'SUMMARY':
                 $this->pkginfo['summary'] .= $data;
                 break;
-            case 'INITIALS':
+            case 'USER':
                 $this->current_maintainer['handle'] .= $data;
                 break;
             case 'EMAIL':
@@ -372,10 +385,24 @@ class PEAR_Common extends PEAR
     */
     function infoFromTgzFile($file)
     {
-        // untar in temp
-        // chdir($tmp);
-        //return $this->infoFromDescriptionFile('package.xml');
-        // clean temp
+        $file = basename($file); // XXX Fixme: Only allows file in the current dir
+        if (!@is_file($file)) {
+            return $this->raiseError('no tar file supplied');
+        }
+        // Assume the decompressed dir name
+        if (($pos = strrpos($file, '.')) === false) {
+            return $this->raiseError('file doesn\'t follow the package name convention');
+        }
+        $pkgdir = substr($file, 0, $pos);
+        $xml = $pkgdir . DIRECTORY_SEPARATOR . 'package.xml';
+
+        $tar = new Archive_Tar($file, true);
+        if (!$tar->extractList($xml)) {
+            return $this->raiseError('could not extract the package.xml file');
+        }
+        $info = $this->infoFromDescriptionFile($xml);
+        unlink($xml);
+        return $info;
     }
 }
 ?>

@@ -102,19 +102,19 @@ print "mode=print&trigger: ";
 $err = new PEAR_Error("test error", -42, PEAR_ERROR_PRINT|PEAR_ERROR_TRIGGER);
 print $err->toString() . "\n";
 
-print "mode=trigger: ";
+print "mode=trigger:";
 $err = new PEAR_Error("test error", -42, PEAR_ERROR_TRIGGER);
 print $err->toString() . "\n";
 
-print "mode=trigger,level=notice: ";
+print "mode=trigger,level=notice:";
 $err = new PEAR_Error("test error", -42, PEAR_ERROR_TRIGGER, E_USER_NOTICE);
 print $err->toString() . "\n";
 
-print "mode=trigger,level=warning: ";
+print "mode=trigger,level=warning:";
 $err = new PEAR_Error("test error", -42, PEAR_ERROR_TRIGGER, E_USER_WARNING);
 print $err->toString() . "\n";
 
-print "mode=trigger,level=error: ";
+print "mode=trigger,level=error:";
 $err = new PEAR_Error("test error", -42, PEAR_ERROR_TRIGGER, E_USER_ERROR);
 print $err->toString() . "\n";
 
@@ -157,16 +157,16 @@ mode=callback(method): errorhandler method called, obj=[pear_error: message="tes
 mode=print&trigger: test error
 User Notice: test error in PEAR.php on line 591
 [pear_error: message="test error" code=-42 mode=print|trigger level=notice prefix="" prepend="" append="" info=""]
-mode=trigger: 
+mode=trigger:
 User Notice: test error in PEAR.php on line 591
 [pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" prepend="" append="" info=""]
-mode=trigger,level=notice: 
+mode=trigger,level=notice:
 User Notice: test error in PEAR.php on line 591
 [pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" prepend="" append="" info=""]
-mode=trigger,level=warning: 
+mode=trigger,level=warning:
 User Warning: test error in PEAR.php on line 591
 [pear_error: message="test error" code=-42 mode=trigger level=warning prefix="" prepend="" append="" info=""]
-mode=trigger,level=error: 
+mode=trigger,level=error:
 User Error: test error in PEAR.php on line 591
 [pear_error: message="test error" code=-42 mode=trigger level=error prefix="" prepend="" append="" info=""]
 testing expectError:

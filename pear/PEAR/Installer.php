@@ -20,14 +20,15 @@
 //
 // $Id$
 
-require_once "PEAR/Common.php";
+require_once 'PEAR/Common.php';
 
 /**
  * Administration class used to install PEAR packages and maintain the
  * installed package database.
  *
  * TODO:
- *  - maintain file perms (look at umask or fileperms+chmod), ideas are welcome
+ *  - finish and test Windows support
+ *  - kill FIXME's
  *
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@fast.no>
@@ -80,10 +81,6 @@ class PEAR_Installer extends PEAR_Common
     function _PEAR_Installer()
     {
         chdir($this->pwd);
-        if ($this->tmpdir && is_dir($this->tmpdir)) {
-            system("rm -rf $this->tmpdir"); // XXX FIXME Windows
-        }
-        $this->tmpdir = null;
         $this->_PEAR_Common();
     }
 
@@ -109,15 +106,15 @@ class PEAR_Installer extends PEAR_Common
         } elseif (!@is_file($pkgfile)) {
             return $this->raiseError("Could not open the package file: $pkgfile");
         }
+
         // Download package -----------------------------------------------
         if ($need_download) {
             $file = basename($pkgfile);
-            // XXX FIXME use ??? on Windows, use $TMPDIR on unix (use tmpnames?)
-            $downloaddir = '/tmp/pearinstall';
-            if (!$this->mkDirHier($downloaddir)) {
-                return $this->raiseError("Failed to create tmp dir: $downloaddir");
+            if (PEAR::isError($downloaddir = $this->mkTempDir())) {
+                return $downloaddir;
             }
-            $downloadfile = $downloaddir.DIRECTORY_SEPARATOR.$file;
+            $this->log(2, '+ tmp dir created at ' . $downloaddir);
+            $downloadfile = $downloaddir . DIRECTORY_SEPARATOR . $file;
             $this->log(1, "downloading $pkgfile ...");
             if (!$fp = @fopen($pkgfile, 'r')) {
                 return $this->raiseError("$pkgfile: failed to download ($php_errormsg)");
@@ -125,7 +122,6 @@ class PEAR_Installer extends PEAR_Common
             if (!$wp = @fopen($downloadfile, 'w')) {
                 return $this->raiseError("$downloadfile: write failed ($php_errormsg)");
             }
-            $this->addTempFile($downloadfile);
             $bytes = 0;
             while ($data = @fread($fp, 16384)) {
                 $bytes += strlen($data);
@@ -147,35 +143,24 @@ class PEAR_Installer extends PEAR_Common
         }
         $pkgfile = getcwd() . DIRECTORY_SEPARATOR . basename($pkgfile);
 
-        // XXX FIXME Windows
-        $this->tmpdir = tempnam('/tmp', 'pear');
-        unlink($this->tmpdir);
-        if (!mkdir($this->tmpdir, 0755)) {
-            return $this->raiseError("Unable to create temporary directory $this->tmpdir.");
-        } else {
-            $this->log(2, '+ tmp dir created at ' . $this->tmpdir);
+        if (PEAR::isError($tmpdir = $this->mkTempDir())) {
+            return $tmpdir;
         }
-        $this->addTempFile($this->tmpdir);
-        if (!chdir($this->tmpdir)) {
-            return $this->raiseError("Unable to chdir to $this->tmpdir.");
+        $this->log(2, '+ tmp dir created at ' . $tmpdir);
+
+        $tar = new Archive_Tar($pkgfile, true);
+        if (!$tar->extract($tmpdir)) {
+            return $this->raiseError("Unable to unpack $pkgfile");
         }
-        // XXX FIXME Windows
-        $fp = popen("gzip -dc $pkgfile | tar -xvf -", 'r');
-        $this->log(2, "+ launched command: gzip -dc $pkgfile | tar -xvf -");
-        if (!is_resource($fp)) {
-            return $this->raiseError("Unable to examine $pkgfile (gzip or tar failed)");
+        $file = basename($pkgfile);
+        // Assume the decompressed dir name
+        if (($pos = strrpos($file, '.')) === false) {
+            return $this->raiseError('package doesn\'t follow the package name convention');
         }
-        while ($line = fgets($fp, 4096)) {
-            $line = rtrim($line);
-            if (preg_match('!^[^/]+/package.xml$!', $line)) {
-                if (isset($descfile)) {
-                    return $this->raiseError("Invalid package: multiple package.xml files at depth one!");
-                }
-                $descfile = $line;
-            }
-        }
-        pclose($fp);
-        if (!isset($descfile) || !is_file($descfile)) {
+        $pkgdir = substr($file, 0, $pos);
+        $descfile = $tmpdir . DIRECTORY_SEPARATOR . $pkgdir . DIRECTORY_SEPARATOR . 'package.xml';
+
+        if (!is_file($descfile)) {
             return $this->raiseError("No package.xml file after extracting the archive.");
         }
 
@@ -213,7 +198,7 @@ class PEAR_Installer extends PEAR_Common
     {
         $type = strtolower($atts['ROLE']);
         switch ($type) {
-            case "test":
+            case 'test':
                 // don't install test files for now
                 $this->log(2, "+ Test file $file won't be installed yet");
                 return true;

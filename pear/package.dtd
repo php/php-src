@@ -1,5 +1,5 @@
 <!--
-     $Id: package.dtd,v 1.6.2.1 2001-08-28 11:40:56 ssb Exp $
+     $Id: package.dtd,v 1.6.2.2 2001-10-09 22:53:59 ssb Exp $
 
      This is the PEAR package description, version 1.1b1.
      It should be used with the informal public identifier:
@@ -23,11 +23,11 @@
 <!--============== attributes present in all elements ======================-->
 <!ENTITY % global.atts "id		ID	#IMPLIED">
 <!--============== attributes common to several elements ===================-->
-<!ENTITY % role.atts "Role		(php|ext|test|doc) 'php'">
-<!ENTITY % extension.atts "Debug	(on|off) 'off'
-			   ThreadSafe	(on|off) 'off'">
-<!ENTITY % format.atts "Format		CDATA	#IMPLIED">
-<!--=============== ELEMENT: Package =======================================-->
+<!ENTITY % role.atts "role		(php|ext|test|doc) 'php'">
+<!ENTITY % extension.atts "debug	(on|off) 'off'
+			   threadsafe	(on|off) 'off'">
+<!ENTITY % format.atts "format		CDATA	#IMPLIED">
+<!--=============== ELEMENT: package =======================================-->
 <!ELEMENT package (name, summary, maintainer, release, filelist)>
 <!ATTLIST package
 	%global.atts; 
@@ -44,13 +44,13 @@
 	%global.atts; 
 >
 <!--=============== ELEMENT: maintainer ====================================-->
-<!ELEMENT maintainer (initials, name, email)>
+<!ELEMENT maintainer (user, name, email)>
 <!ATTLIST maintainer
 	%global.atts; 
 >
-<!--=============== ELEMENT: initials ======================================-->
-<!ELEMENT initials (#PCDATA)>
-<!ATTLIST initials
+<!--=============== ELEMENT: user ==========================================-->
+<!ELEMENT user (#PCDATA)>
+<!ATTLIST user
 	%global.atts; 
 >
 <!--=============== ELEMENT: email =========================================-->
@@ -78,7 +78,7 @@
 <!ATTLIST notes
 	%global.atts; 
 >
-<!--=============== ELEMENT: filelist ======================================-->
+<!--=============== ELEMENT: fileList ======================================-->
 <!ELEMENT filelist (dir | file | libfile)*>
 <!ATTLIST filelist
 	%global.atts; 
@@ -86,7 +86,6 @@
 <!--=============== ELEMENT: dir ===========================================-->
 <!ELEMENT dir (#PCDATA)>
 <!ATTLIST dir
-        baseinstalldir CDATA #IMPLIED
 	%global.atts; 
 >
 <!--=============== ELEMENT: file ==========================================-->
