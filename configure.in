@@ -361,6 +361,7 @@ lockf \
 lrand48 \
 memcpy \
 memmove \
+mkstemp \
 mmap \
 putenv \
 random \
