@@ -1,3 +1,73 @@
+2001-08-08  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: Update NEWS
+
+    * main/main.c
+      ext/standard/basic_functions.h
+      ext/standard/basic_functions.c: Implement import_request_variables()
+
+2001-08-08  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/standard/html.c: Fix probs on OpenBSD-current and RedHat 6.1
+
+2001-08-08  Zeev Suraski  <zeev@zend.com>
+
+    * main/main.c: Put it in the wrong case...
+
+    * main/main.c
+      NEWS: - Fix precedence of the variables order in $_FORM
+    - Rename $_FORM to $_REQUEST for now
+
+    * ext/standard/info.c
+      main/main.c
+      NEWS: - Implement $_FORM
+    - Update phpinfo()
+    - Update NEWS
+
+    * main/main.c:
+    - Implement new short names - $_GET, $_POST, $_COOKIE, $_SERVER, $_ENV and $_FILES
+    - Use the Zend Engine infrastructure - make these variables available in
+      all functions
+
+    * sapi/servlet/servlet.c
+      sapi/cgi/cgi_main.c
+      sapi/isapi/php4isapi.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/apache/mod_php4.c: Use zend_first_try
+
+2001-08-08  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/HTML/Menu.php
+      pear/HTML/Menu_Browser.php: Whitespace fixes. Added setURLEnvVar().
+
+    * pear/HTML/Menu.php: Some fixes.
+
+2001-08-08  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/tests/002.phpt:
+    Fixed a too hasty copy/paste action in the DBX_FBSQL constant check
+
+    * ext/dbx/CREDITS
+      ext/dbx/Makefile.in: Added Frank to the CREDITS for FrontBase support
+    Added dbx_fbsql.c to the Makefile.in
+
+    * ext/dbx/tests/002.phpt
+      ext/dbx/tests/dbx_test.p: Added extra entries for FrontBase support (Mc)
+
+2001-08-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.h:
+    Changed the old skool resource stuff to use the Zend macros.
+
+    * ext/posix/posix.c: Cleanup. (some relics from php3 era?)
+
+    * ext/java/java.c: Make this compile again.
+
+2001-08-08  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/skeleton/create_stubs: Fixed a bunch of problems here
+
 2001-08-07  Jani Taskinen  <sniper@iki.fi>
 
     * ext/ming/ming.c
