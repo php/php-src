@@ -18,10 +18,8 @@ typedef unsigned int uint;
 #define IS_ABSOLUTE_PATH(path, len) \
 	(len >= 2 && isalpha(path[0]) && path[1] == ':')
 
-static int php_check_dots(char *element, uint len) 
+static int php_check_dots(const char *element, uint n) 
 {
-	uint n = len;
-
 	while (n-- > 0) if (element[n] != '.') break;
 
 	return (n != -1);
