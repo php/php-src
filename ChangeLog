@@ -1,3 +1,54 @@
+2001-07-16  Zeev Suraski  <zeev@zend.com>
+
+    * main/rfc1867.c: Another layout fix
+
+    * main/rfc1867.c: Fix layout
+
+    Guys - when submitting patches - please make sure you're not breaking
+    the layout of the code!  It's not less important than the patch
+    itself.
+
+2001-07-16  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php:
+    extend infoFromDescriptionFile() to:
+    - Handle the new FileList->Dir tag format (see
+    http://marc.theaimsgroup.com/?l=pear-dev&m=99071271521558&w=2)
+    - Attributes of Files can inherit from Dir
+    - Support for the experimental LibFile/LibName/Sources tags
+
+    other indents and fixes
+
+2001-07-16  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/file.c: Make read always 0-terminate strings
+
+2001-07-16  Zeev Suraski  <zeev@zend.com>
+
+    * main/fopen_wrappers.c: Fix the crash Joey found
+
+    * main/fopen_wrappers.c: Generalize
+
+2001-07-16  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Fix NEWS.
+
+2001-07-16  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/gmp/CREDITS: Add credits to GMP
+
+2001-07-16  Joey Smith  <joey@joeysmith.com>
+
+    * ext/domxml/php_domxml.c: Close Bug #10235.
+
+    This makes domxml_root() work again. It now works
+    equally as well as object method or a simple function.
+
+2001-07-16  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/sockets/sockets.c
+      main/safe_mode.c: Fix a couple of build warnings
+
 2001-07-15  Stig Bakken  <ssb@fast.no>
 
     * pear/DB.php: (PEAR DB) some doc fixes
