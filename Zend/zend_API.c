@@ -166,7 +166,7 @@ ZEND_API void zend_wrong_param_count(TSRMLS_D)
 
 /* Argument parsing API -- andrei */
 
-static char *zend_zval_type_name(zval *arg)
+ZEND_API char *zend_zval_type_name(zval *arg)
 {
 	switch (Z_TYPE_P(arg)) {
 		case IS_NULL:

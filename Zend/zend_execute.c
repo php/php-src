@@ -2634,8 +2634,9 @@ send_by_ref:
 					ptr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 					if (Z_TYPE_P(ptr) == IS_LONG) {
 						EG(exit_status) = Z_LVAL_P(ptr);
+					} else {
+						zend_print_variable(ptr);
 					}
-					zend_print_variable(ptr);
 					FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
 				}
 				zend_bailout();
