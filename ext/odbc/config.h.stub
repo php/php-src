@@ -7,4 +7,3 @@
 #define HAVE_UODBC 0
 #define HAVE_EMPRESS 0
 #define HAVE_VELOCIS 0
-
