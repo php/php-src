@@ -160,6 +160,9 @@ void TSMClose()
 	   compomise the rest of the application if sockets are used
 	   elesewhere 
 	*/
+
+	shutdown(sc, 0); 
+	closesocket(sc);
 }
 
 
@@ -197,7 +200,6 @@ char *GetSMErrorText(int index)
 //*******************************************************************/
 int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers)
 {
-
 	int res, i;
 	char *p;
 	char *tempMailTo, *token, *pos1, *pos2;
