@@ -957,7 +957,7 @@ PHPAPI PHP_FUNCTION(feof)
 /* }}} */
 
 /* {{{ proto bool socket_set_blocking(resource socket, int mode)
-   Set blocking/non-blocking mode on a socket */
+   Set blocking/non-blocking mode on a socket or stream */
 PHP_FUNCTION(socket_set_blocking)
 {
 	zval **arg1, **arg2;
@@ -974,11 +974,9 @@ PHP_FUNCTION(socket_set_blocking)
 	convert_to_long_ex(arg2);
 	block = Z_LVAL_PP(arg2);
 
-	if (php_stream_is((php_stream*)what, PHP_STREAM_IS_SOCKET))	{
-		php_stream_sock_set_blocking((php_stream*)what, block == 0 ? 0 : 1 TSRMLS_CC);
-		RETURN_TRUE;	
-	}
-	RETURN_FALSE;
+	if (php_stream_set_option((php_stream*)what, PHP_STREAM_OPTION_BLOCKING, block == 0 ? 0 : 1, NULL) == -1)
+		RETURN_FALSE;
+	RETURN_TRUE;
 }
 
 /* }}} */
@@ -1344,9 +1342,9 @@ PHPAPI PHP_FUNCTION(fflush)
 PHP_FUNCTION(set_file_buffer)
 {
 	zval **arg1, **arg2;
-	int ret, type, buff;
+	int ret, type;
+	size_t buff;
 	php_stream *stream;
-	FILE * fp;
 
 	switch (ZEND_NUM_ARGS()) {
 	case 2:
@@ -1359,21 +1357,18 @@ PHP_FUNCTION(set_file_buffer)
 		/* NOTREACHED */
 		break;
 	}
-
+	
 	stream = (php_stream*)zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
 	ZEND_VERIFY_RESOURCE(stream);
-	if (!php_stream_is(stream, PHP_STREAM_IS_STDIO) || FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void**)&fp, REPORT_ERRORS))	{
-		RETURN_FALSE;
-	}
 	
 	convert_to_long_ex(arg2);
 	buff = Z_LVAL_PP(arg2);
 
 	/* if buff is 0 then set to non-buffered */
-	if (buff == 0){
-		ret = setvbuf(fp, NULL, _IONBF, 0);
+	if (buff == 0) {
+		ret = php_stream_set_option(stream, PHP_STREAM_OPTION_BUFFER, PHP_STREAM_BUFFER_NONE, NULL);
 	} else {
-		ret = setvbuf(fp, NULL, _IOFBF, buff);
+		ret = php_stream_set_option(stream, PHP_STREAM_OPTION_BUFFER, PHP_STREAM_BUFFER_FULL, &buff);
 	}
 
 	RETURN_LONG(ret);
