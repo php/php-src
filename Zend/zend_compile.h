@@ -321,7 +321,7 @@ void do_new_list_end(CLS_D);
 
 void do_cast(znode *result, znode *expr, int type CLS_DC);
 void do_include_or_eval(int type, znode *result, znode *op1 CLS_DC);
-void do_require(znode *filename CLS_DC);
+void do_require(znode *filename, zend_bool unique CLS_DC);
 
 void do_unset(znode *variable CLS_DC);
 void do_isset_or_isempty(int type, znode *result, znode *variable CLS_DC);
@@ -356,7 +356,7 @@ void do_ticks(CLS_D);
 
 /* helper functions in zend-scanner.l */
 ZEND_API int require_file(zend_file_handle *file_handle, zend_bool unique CLS_DC);	
-ZEND_API int require_filename(char *filename CLS_DC);
+ZEND_API int require_filename(char *filename, zend_bool unique CLS_DC);
 ZEND_API int use_filename(char *filename, uint filename_length CLS_DC);
 ZEND_API zend_op_array *compile_files(int mark_as_ref CLS_DC, int file_count, ...);
 ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, va_list files);
@@ -551,7 +551,6 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_INCLUDE			(1<<1)
 #define ZEND_INCLUDE_ONCE		(1<<2)
 #define ZEND_REQUIRE			(1<<3)
-#define ZEND_REQUIRE_ONCE		(1<<4)
 
 #define ZEND_ISSET				(1<<0)
 #define ZEND_ISEMPTY			(1<<1)

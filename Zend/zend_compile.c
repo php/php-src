@@ -1911,11 +1911,11 @@ void do_include_or_eval(int type, znode *result, znode *op1 CLS_DC)
 }
 
 
-void do_require(znode *filename CLS_DC)
+void do_require(znode *filename, zend_bool unique CLS_DC)
 {
 	if (filename->op_type==IS_CONST
 		&& filename->u.constant.type==IS_STRING) {
-		require_filename(filename->u.constant.value.str.val CLS_CC);
+		require_filename(filename->u.constant.value.str.val, unique CLS_CC);
 		zval_dtor(&filename->u.constant);
 	} else {
 		znode result;

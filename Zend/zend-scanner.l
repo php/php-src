@@ -514,14 +514,14 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 
 
 BEGIN_EXTERN_C()
-int require_filename(char *filename CLS_DC)
+int require_filename(char *filename, zend_bool unique CLS_DC)
 {
 	zend_file_handle file_handle;
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = filename;
 	file_handle.free_filename = 0;
-	if (require_file(&file_handle, 0 CLS_CC)==FAILURE) {
+	if (require_file(&file_handle, unique CLS_CC)==FAILURE) {
 		zend_bailout();
 		return FAILURE; /* will never get here */
 	}
