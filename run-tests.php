@@ -43,7 +43,7 @@
  */
 
 if (!extension_loaded("pcre")) {
-	echo <<< NO_PCRE_ERROR
+	echo <<<NO_PCRE_ERROR
 
 +-----------------------------------------------------------+
 |                       ! ERROR !                           |
