@@ -186,7 +186,7 @@ Installation of Windows extensions
 
   php_dbase.dll     dBase functions
   php_filepro.dll   Read-only access to Filepro databases
-  php_gd.dll        GD library functions for image manipulation
+  php_gd2.dll       GD library functions for image manipulation
   php_hyperwave.dll HyperWave functions
   php_imap.dll      IMAP functions
   php_ldap.dll      LDAP functions
