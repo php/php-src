@@ -8,8 +8,8 @@ $ini = ini_get('mbstring.http_input');
 
 // It must be url encoded....
 // echo vars
-echo "$a\n";
-echo "$b\n";
+echo $_POST['a']."\n";
+echo $_GET['b']."\n";
 
 // Get encoding
 $enc = mb_http_input('P');
