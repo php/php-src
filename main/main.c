@@ -81,11 +81,6 @@ struct sapi_request_info *sapi_rqst;
 #include "php_getopt.h"
 #endif
 
-#if CGI_BINARY
-#define PHP_ERROR_FORMAT	"PHP %s:  %s in %s on line %d"
-#else
-#define PHP_ERROR_FORMAT	"<br>\n<b>PHP %s</b>:  %s in <b>%s</b> on line <b>%d</b><br>"
-#endif
 
 #ifndef ZTS
 php_core_globals core_globals;
@@ -333,13 +328,11 @@ void php3_log_err(char *log_message)
 	}
 #endif							/*APACHE */
 
-#if 0
 #if CGI_BINARY
 	if (php3_header()) {
 		fprintf(stderr, log_message);
 		fprintf(stderr, "\n");
 	}
-#endif
 #endif
 }
 
@@ -450,7 +443,7 @@ PHPAPI void php_error(int type, const char *format,...)
 			if (PG(log_errors)) {
 				char log_buffer[1024];
 
-				snprintf(log_buffer, 1024, PHP_ERROR_FORMAT, error_type_str, buffer, error_filename, error_lineno);
+				snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
 				php3_log_err(log_buffer);
 			}
 			if (PG(display_errors)) {
@@ -460,7 +453,7 @@ PHPAPI void php_error(int type, const char *format,...)
 				if (prepend_string) {
 					PUTS(prepend_string);
 				}		
-				php_printf(PHP_ERROR_FORMAT "\n", error_type_str, buffer, error_filename, error_lineno);
+				php_printf("<br>\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br>\n", error_type_str, buffer, error_filename, error_lineno);
 				if (append_string) {
 					PUTS(append_string);
 				}		
