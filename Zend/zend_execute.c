@@ -932,8 +932,14 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 				zval *overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim, type TSRMLS_CC);
 
 				if (overloaded_result) {
-					if (type == BP_VAR_RW && !overloaded_result->is_ref) {
-						zend_error(E_ERROR, "Objects used as arrays in post/pre increment/decrement must return values by reference");
+					switch (type) {
+						case BP_VAR_RW:
+						case BP_VAR_W:
+							if (overloaded_result->type != IS_OBJECT
+								&& !overloaded_result->is_ref) {
+								zend_error(E_ERROR, "Objects used as arrays in post/pre increment/decrement must return values by reference");
+							}
+							break;
 					}
 
 					*retval = &overloaded_result;
