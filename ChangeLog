@@ -1,3 +1,72 @@
+2005-02-04  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/tests/time/bug13142.phpt
+      ext/standard/tests/time/bug13142.phpt
+      ext/standard/tests/time/bug13142.phpt:
+      fix test
+
+2005-02-04  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      added some missing zend_[declare|update]_property_...() convenience
+      functions for bool, double and binary safe string data
+
+2005-02-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #31832 (SOAP encoding problem with complex types in WSDL mode
+      with multiple parts)
+
+2005-02-04  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/dbase/dbase.c
+      ext/dbase/dbase.c:
+      - MFH: Fixed bug #31754 (dbase_open() fails for mode = 1). (Mehdi, Derick)
+
+    * ext/dbase/dbase.c:
+      - Fixed bug #31754 (dbase_open() fails for mode = 1). (Mehdi, Derick)
+
+2005-02-04  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/datetime.c
+      ext/standard/datetime.c:
+      MFH: Fixed bug #31842 (*date('r') does not return RFC2822 conforming date
+      string).
+
+    * ext/standard/datetime.c:
+      - Fixed bug #31842 (*date('r') does not return RFC2822 conforming date
+      string).
+
+    * (PHP_4_3)
+      NEWS
+      sapi/cgi/cgi_main.c:
+      MFH: - Fixed bug #28227 (PHP CGI depends upon non-standard SCRIPT_FILENAME)
+
+    * (PHP_5_0)
+      NEWS
+      sapi/cgi/cgi_main.c:
+      MFH: - Fixed bug #28227 (PHP CGI depends upon non-standard SCRIPT_FILENAME)
+
+    * sapi/cgi/cgi_main.c:
+      - Fixed bug #28227 (PHP CGI depends upon non-standard SCRIPT_FILENAME)
+
+2005-02-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/readline/readline.c:
+      Proper fix for bug #31796 .
+
 2005-02-03  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
