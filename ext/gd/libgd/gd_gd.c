@@ -196,7 +196,7 @@ _gdPutColors (gdImagePtr im, gdIOCtx * out)
 {
   int i;
 
-  gdPutC (im->trueColor, out);
+  gdPutC ((unsigned char)im->trueColor, out);
   if (!im->trueColor)
     {
       gdPutWord (im->colorsTotal, out);
