@@ -126,6 +126,20 @@ PHP_FUNCTION(solid_fetch_prev);
 #include <sqlext.h>
 #define HAVE_SQL_EXTENDED_FETCH 1
 
+#elif defined(HAVE_ODBC_ROUTER) /* ODBCRouter.com */
+
+#ifdef CHAR
+#undef CHAR
+#endif
+
+#ifdef SQLCHAR
+#undef SQLCHAR
+#endif
+
+#define ODBC_TYPE "ODBCRouter"
+#include <odbcsdk.h>
+#undef HAVE_SQL_EXTENDED_FETCH
+
 #elif defined(HAVE_OPENLINK) /* OpenLink ODBC drivers */
 
 #define ODBC_TYPE "Openlink"

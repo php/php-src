@@ -2073,6 +2073,47 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 	SQLSetConnectOption((*conn)->hdbc, SQL_TRANSLATE_OPTION,
 			SQL_SOLID_XLATOPT_NOCNV);
 #endif
+#ifdef HAVE_ODBC_ROUTER
+	{
+#define CONNSTRSIZE 2048
+	 char *lpszConnStr = emalloc(CONNSTRSIZE);
+	 if (lpszConnStr && db) {
+		 short cbszConnStr;
+		 if (strstr(db, ";")) {
+			 /* the caller has apparently passed a connection-string */
+			 if (strstr(db, "uid") || strstr(db, "UID")) {
+				 uid = NULL;
+			 }
+			 if (strstr(db, "pwd") || strstr(db, "PWD")) {
+				 pwd = NULL;
+			 }
+			 strncpy( lpszConnStr, db, CONNSTRSIZE);
+		 }
+		 else {
+			 strcpy(lpszConnStr, "DSN=");
+			 strcat(lpszConnStr, db);
+		 }
+		 if (uid) {
+			 if (uid[0]) {
+				 strcat(lpszConnStr, ";UID=");
+				 strcat(lpszConnStr, uid);
+				 strcat(lpszConnStr, ";");
+			 }
+			 if (pwd) {
+				 if (pwd[0]) {
+					 strcat(lpszConnStr, "PWD=");
+					 strcat(lpszConnStr, pwd);
+					 strcat(lpszConnStr, ";");
+				 }
+			 }
+		 }
+		 rc = SQLDriverConnect((*conn)->hdbc, NULL, lpszConnStr, SQL_NTS,
+							   lpszConnStr, CONNSTRSIZE, &cbszConnStr,
+							   SQL_DRIVER_NOPROMPT);
+		 efree(lpszConnStr);
+	 }
+	}
+#else
 #ifdef HAVE_OPENLINK
 	{
 		char dsnbuf[1024];
@@ -2129,6 +2170,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 	}
 #else
 	rc = SQLConnect((*conn)->hdbc, db, SQL_NTS, uid, SQL_NTS, pwd, SQL_NTS);
+#endif
 #endif
 #endif
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
