@@ -956,7 +956,6 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *function
 	opline->op1 = *class_name;
 	opline->op2 = *function_name;
 	opline->extended_value = ZEND_MEMBER_FUNC_CALL;
-	zval_copy_ctor(&opline->op2.u.constant);
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 }
 
