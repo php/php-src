@@ -1,3 +1,49 @@
+2002-05-08  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c: Merge overflow fix
+
+    * ext/sockets/sockets.c: Fix overflow
+
+2002-05-08  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * configure.in
+      sapi/apache/mod_php4.c
+      main/main.c
+      ext/mbstring/mbfilter.h
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/mbfilter.c:
+    Added conversion support from script character encoding to internal character encoding. This feature is very useful for japanese who uses Shift_JIS encoding because some of characters in Shift_JIS are including '0x5c' and it causes some troubles on Zend parser. This patch is made by Masaki Fujimoto.
+
+2002-05-08  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * main/output.c: Added estrdup() needed.
+    Fixed typo.
+
+2002-05-08  Aaron Bannert  <aaron@apache.org>
+
+    * EXTENSIONS: This is a more appropriate address for me.
+
+2002-05-08  Zak Greant  <zak@mysql.com>
+
+    * ext/mysql/php_mysql.c:
+    Minor improvement to error message for mysql_data_seek
+
+2002-05-08  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * run-tests.php: - Add a warning if running with safe_mode enabled.
+
+2002-05-08  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/credits_sapi.h: - Forgot one
+
+    * sapi/apache2filter/CREDITS
+      EXTENSIONS: - Added Aaron Bannert as maintainer
+
+2002-05-08  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/standard/php_smart_str.h: Kill a compiler warning on Win32
+
 2002-05-07  Sascha Schumann  <sascha@schumann.cx>
 
     * main/php.h:
