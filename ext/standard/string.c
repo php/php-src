@@ -1807,19 +1807,32 @@ PHP_FUNCTION(nl2br)
 }
 /* }}} */
 
-/* {{{ proto string strip_tags(string str)
+/* {{{ proto string strip_tags(string str [, allowable_tags])
    Strips HTML and PHP tags from a string */
 PHP_FUNCTION(strip_tags)
 {
 	char *buf;
-	pval *str;
+	pval *str, *allow=NULL;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	switch(ARG_COUNT(ht)) {
+		case 1:
+			if(getParameters(ht, 1, &str)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		case 2:
+			if(getParameters(ht, 2, &str, &allow)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_string(allow);
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
 	}
 	convert_to_string(str);
 	buf = estrdup(str->value.str.val);
-	_php3_strip_tags(buf, 0);
+	_php3_strip_tags(buf, str->value.str.len, 0, allow->value.str.val);
 	RETURN_STRING(buf, 0);
 }
 /* }}} */
@@ -1888,6 +1901,59 @@ PHP_FUNCTION(parse_str)
 }
 /* }}} */
 
+#define PHP_TAG_BUF_SIZE 1023
+
+/* Check if tag is in a set of tags 
+ *
+ * states:
+ * 
+ * 0 start tag
+ * 1 first non-whitespace char seen
+ */
+int php_tag_find(char *tag, int len, char *set) {
+	char c, *n, *t;
+	int i=0, state=0, done=0;
+	char *norm = emalloc(len);
+
+	n = norm;
+	t = tag;
+	c = tolower(*t);
+	/* 
+	   normalize the tag removing leading and trailing whitespace
+	   and turn any <a whatever...> into just <a> and any </tag>
+	   into <tag>
+	*/
+	while(i<len && !done) {
+		switch(c) {
+		case '<':
+			*(n++) = c;
+			break;
+		case '>':
+			done =1;
+			break;
+		default:
+			if(!isspace(c)) {
+				if(state==0) {
+					state=1;
+					if(c!='/') *(n++) = c;
+				} else {
+					*(n++) = c;
+				}
+			} else {
+				if(state==1) done=1;
+			}
+			break;
+		}
+		c = tolower(*(++t));
+	}  
+	*(n++) = '>';
+	*n = '\0'; 
+	if(strstr(set,norm)) done=1;
+	else done=0;
+	efree(norm);
+	return done;
+}
+
 /* A simple little state-machine to strip out html and php tags 
 	
 	State 0 is the output state, State 1 means we are inside a
@@ -1898,10 +1964,14 @@ PHP_FUNCTION(parse_str)
 
 	lc holds the last significant character read and br is a bracket
 	counter.
+
+	When an allow string is passed in we keep track of the string
+	in state 1 and when the tag is closed check it against the
+	allow string to see if we should allow it.
 */
-void _php3_strip_tags(char *rbuf, int state) {
-	char *buf, *p, *rp, c, lc;
-	int br;
+void _php3_strip_tags(char *rbuf, int len, int state, char *allow) {
+	char *tbuf, *buf, *p, *tp, *rp, c, lc;
+	int br, i=0;
 
 	buf = estrdup(rbuf);
 	c = *buf;
@@ -1909,13 +1979,21 @@ void _php3_strip_tags(char *rbuf, int state) {
 	p = buf;
 	rp = rbuf;
 	br = 0;
+	if(allow) {
+		_php3_strtolower(allow);
+		tbuf = emalloc(PHP_TAG_BUF_SIZE+1);
+		tp = tbuf;
+	} else tp=NULL;
 
-	while (c) { /* This is not binary-safe.  Don't see why it should be */
+	while(i<len) {
 		switch (c) {
 			case '<':
 				if (state == 0) {
 					lc = '<';
 					state = 1;
+					if(allow) {
+						*(tp++) = '<';
+					}
 				}
 				break;
 
@@ -1945,6 +2023,15 @@ void _php3_strip_tags(char *rbuf, int state) {
 				if (state == 1) {
 					lc = '>';
 					state = 0;
+					if(allow) {
+						*(tp++) = '>';
+						*tp='\0';
+						if(php_tag_find(tbuf, tp-tbuf, allow)) {
+							memcpy(rp,tbuf,tp-tbuf);
+							rp += tp-tbuf;
+						}
+						tp = tbuf;
+					}
 				} else if (state == 2) {
 					if (!br && lc != '\"' && *(p-1)=='?') {
 						state = 0;
@@ -1961,6 +2048,8 @@ void _php3_strip_tags(char *rbuf, int state) {
 					}
 				} else if (state == 0) {
 					*(rp++) = c;
+				} else if (allow && state == 1) {
+					*(tp++) = c;
 				}
 				break;
 
@@ -1975,13 +2064,20 @@ void _php3_strip_tags(char *rbuf, int state) {
 			default:
 				if (state == 0) {
 					*(rp++) = c;
-				}	
+				} else if(allow && state == 1) {
+					*(tp++) = c;
+					if( (tp-tbuf)>=PHP_TAG_BUF_SIZE ) { /* no buffer overflows */
+						tp = tbuf;
+					}
+				}
 				break;
 		}
 		c = *(++p);
+		i++;
 	}	
 	*rp = '\0';
 	efree(buf);
+	if(allow) efree(tbuf);
 }
 
 /*

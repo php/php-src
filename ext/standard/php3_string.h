@@ -99,7 +99,7 @@ extern PHPAPI char *php3i_stristr(unsigned char *s, unsigned char *t);
 extern PHPAPI char *_php3_str_to_str(char *haystack, int length, char *needle,
 		int needle_len, char *str, int str_len, int *_new_length);
 extern PHPAPI void _php3_trim(pval *str, pval *return_value, int mode);
-extern PHPAPI void _php3_strip_tags(char *rbuf, int state);
+extern PHPAPI void _php3_strip_tags(char *rbuf, int len, int state, char *allow);
 
 extern PHPAPI void _php3_char_to_str(char *str, uint len, char from, char *to, int to_len, pval *result);
 
