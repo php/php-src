@@ -633,20 +633,24 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 
 	if (IMAPG(imap_errorstack) != NIL) {
 		/* output any remaining errors at their original error level */
-		ecur = IMAPG(imap_errorstack);
-		while (ecur != NIL) {
-			php_error(E_NOTICE, "%s (errflg=%d)", ecur->LTEXT, ecur->errflg);
-			ecur = ecur->next;
+		if (EG(error_reporting) & E_NOTICE) {
+			ecur = IMAPG(imap_errorstack);
+			while (ecur != NIL) {
+				php_error(E_NOTICE, "%s (errflg=%d)", ecur->LTEXT, ecur->errflg);
+				ecur = ecur->next;
+			}
 		}
 		mail_free_errorlist(&IMAPG(imap_errorstack));
 	}
 
 	if (IMAPG(imap_alertstack) != NIL) {
 		/* output any remaining alerts at E_NOTICE level */
-		acur = IMAPG(imap_alertstack);
-		while (acur != NIL) {
-			php_error(E_NOTICE, acur->LTEXT);
-			acur = acur->next;
+		if (EG(error_reporting) & E_NOTICE) {
+			acur = IMAPG(imap_alertstack);
+			while (acur != NIL) {
+				php_error(E_NOTICE, acur->LTEXT);
+				acur = acur->next;
+			}
 		}
 		mail_free_stringlist(&IMAPG(imap_alertstack));
 		IMAPG(imap_alertstack) = NIL;
@@ -4088,9 +4092,6 @@ void mm_log(char *str, long errflg)
 	TSRMLS_FETCH();
   
 	/* Author: CJH */
-	if (!(EG(error_reporting) & E_NOTICE)) {
-		return;
-	}
 	if (errflg != NIL) { /* CJH: maybe put these into a more comprehensive log for debugging purposes? */
 		if (IMAPG(imap_errorstack) == NIL) {
 			IMAPG(imap_errorstack) = mail_newerrorlist();
