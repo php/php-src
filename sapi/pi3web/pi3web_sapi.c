@@ -391,7 +391,7 @@ DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB)
 
 		switch ( lpCB->dwBehavior ) {
 			case PHP_MODE_STANDARD:
-				iRet = ( php_execute_script( &file_handle TSRMLS_CC ) == SUCCESS ) ?
+				iRet = ( php_execute_script( &file_handle TSRMLS_CC ) ) ?
 					PIAPI_COMPLETED : PIAPI_ERROR;
 				break;
 			case PHP_MODE_HIGHLIGHT: {
