@@ -4091,7 +4091,10 @@ PHP_FUNCTION(money_format) {
 
 	str_len = format_len + 1024;
 	str = emalloc(str_len);
-	str_len = strfmon(str, str_len, format, value); 	
+	if ((str_len = strfmon(str, str_len, format, value)) < 0) {
+		efree(str);
+		RETURN_FALSE;
+	}
 	str[str_len] = 0;
 
 	RETURN_STRINGL(erealloc(str, str_len + 1), str_len, 0);
