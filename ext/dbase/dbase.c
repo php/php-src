@@ -684,7 +684,7 @@ PHP_FUNCTION(dbase_create)
 	strcpy(dbh->db_date, "19930818");
 	dbh->db_records = 0;
 	dbh->db_nfields = num_fields;
-	dbh->db_hlen = sizeof(struct dbf_dhead) + 2 + num_fields * sizeof(struct dbf_dfield);
+	dbh->db_hlen = sizeof(struct dbf_dhead) + 1 + num_fields * sizeof(struct dbf_dfield);
 
 	rlen = 1;
 	/**
