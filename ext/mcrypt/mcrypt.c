@@ -391,7 +391,7 @@ PHP_MINFO_FUNCTION(mcrypt)
 	php_info_print_table_row(2, "version", "2.2.x");
 #endif
 #if HAVE_LIBMCRYPT24
-	php_info_print_table_row(2, "version", "2.4.x");
+	php_info_print_table_row(2, "version", ">= 2.4.x");
 	php_info_print_table_row(2, "Supported ciphers", tmp1.c);
 	php_info_print_table_row(2, "Supported modes", tmp2.c);
 	smart_str_free (&tmp1);
@@ -414,23 +414,22 @@ typedef enum {
    Opens the module of the algorithm and the mode to be used */
 PHP_FUNCTION(mcrypt_module_open)
 {
-	zval **cipher, **cipher_directory, **mode, **mode_directory;
+	char *cipher, *cipher_dir;
+	char *mode,   *mode_dir;
+	int   cipher_len, cipher_dir_len;
+	int   mode_len,   mode_dir_len;
 	MCRYPT td;
-	int argc;
-    
-	argc = ZEND_NUM_ARGS();
-	MCRYPT_CHECK_PARAM_COUNT (4,4)
+   
+	if (zend_parse_parameters (ZEND_NUM_ARGS() TSRMLS_CC, "ssss",
+		&cipher, &cipher_len, &cipher_dir, &cipher_dir_len,
+		&mode,   &mode_len,   &mode_dir,   &mode_dir_len)) {
+		return;
+	}
 	
-	zend_get_parameters_ex(4, &cipher, &cipher_directory, &mode, &mode_directory);
-	convert_to_string_ex(cipher);
-	convert_to_string_ex(cipher_directory);
-	convert_to_string_ex(mode);
-	convert_to_string_ex(mode_directory);
-	
-	td = mcrypt_module_open (Z_STRVAL_PP(cipher),
-		Z_STRLEN_PP(cipher_directory) > 0 ? Z_STRVAL_PP(cipher_directory) : MCG(algorithms_dir),
-		Z_STRVAL_PP(mode), 
-		Z_STRLEN_PP(mode_directory) > 0 ? Z_STRVAL_PP(mode_directory) : MCG(modes_dir));
+	td = mcrypt_module_open (cipher,
+		cipher_dir_len > 0 ? cipher_dir : MCG(algorithms_dir),
+		mode, 
+		mode_dir_len > 0 ? mode_dir : MCG(modes_dir));
 
 	if (td == MCRYPT_FAILED) {
 		php_error (E_WARNING, "could not open encryption module");
@@ -837,8 +836,7 @@ PHP_FUNCTION(mcrypt_module_self_test)
 	
 	if (mcrypt_module_self_test (module, dir) == 0) {
 		RETURN_TRUE;
-	}
-	else {
+	} else {
 		RETURN_FALSE;
 	}
 }
@@ -916,7 +914,7 @@ PHP_FUNCTION(mcrypt_module_get_algo_key_size)
    This function decrypts the crypttext */
 PHP_FUNCTION(mcrypt_module_get_supported_key_sizes)
 {
-	int argc, i, count;
+	int i, count;
 	int *key_sizes;
 	
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
