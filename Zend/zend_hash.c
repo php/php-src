@@ -750,21 +750,21 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, int (*destruct)(void
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size)
 {
 	Bucket *p;
+	void *new_entry;
 
 	IS_CONSISTENT(source);
 	IS_CONSISTENT(target);
 
 	p = source->pListHead;
 	while (p) {
-		memcpy(tmp, p->pData, size);
-		if (pCopyConstructor) {
-			pCopyConstructor(tmp);
-		}
 		if (p->nKeyLength) {
-			zend_hash_update(target, p->arKey, p->nKeyLength, tmp, size, NULL);
+			zend_hash_update(target, p->arKey, p->nKeyLength, p->pData, size, &new_entry);
 		} else {
-			zend_hash_index_update(target, p->h, tmp, size, NULL);
+			zend_hash_index_update(target, p->h, p->pData, size, &new_entry);
 		}
+        if (pCopyConstructor) {
+            pCopyConstructor(new_entry);
+        }
 		p = p->pListNext;
 	}
 	target->pInternalPointer = target->pListHead;
