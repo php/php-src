@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- mnoGoSearch extension module initial version has been added.
+  This module currently at the alpha state, but it can be used already.
+- Allow url encoding in DB usernames and passwords (Stig, PEAR)
+- Added raiseError and setErrorHandling methods to PEAR class (Stig, PEAR)
 - Added support for converting images from JPG/PNG on the fly with the GD
   extension, which is usefull for creating dynamic WAP-sites (Derick)
 - Updated ext/mysql/libmysql to version 3.23.32; bug fixes (tim@mysql.com)
