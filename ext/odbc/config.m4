@@ -17,7 +17,7 @@ AC_DEFUN(AC_FIND_SOLID_LIBS,[
 		ac_solid_os=lux
 	fi;; 
     SunOS) ac_solid_os=ssx;; # should we deal with SunOS 4?
-    FreeBSD) if test "$ac_solid_uname_r" \> "3"; then
+    FreeBSD) if test "$ac_solid_uname_r" -lt "3"; then
         AC_DEFINE(SS_FBX,1,[Needed in sqlunix.h for wchar defs ])
 	ac_solid_os=fex
       else
