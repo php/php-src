@@ -104,11 +104,18 @@ void php3_dl(pval *file,int type,pval *return_value)
 	/* load dynamic symbol */
 	handle = dlopen(libpath, RTLD_LAZY);
 	if (!handle) {
+		int error_type;
+
+		if (type==MODULE_TEMPORARY) {
+			error_type = E_ERROR;
+		} else {
+			error_type = E_CORE_ERROR;
+		}
 #if MSVC5
-		php_error(E_ERROR,"Unable to load dynamic library '%s'<br>\n%s",libpath,php3_win_err());
+		php_error(error_type,"Unable to load dynamic library '%s'<br>\n%s",libpath,php3_win_err());
 #else
 		printf("dlerror = %s\n", dlerror());
-		php_error(E_ERROR,"Unable to load dynamic library '%s' - %s",libpath,dlerror());
+		php_error(error_type,"Unable to load dynamic library '%s' - %s",libpath,dlerror());
 #endif
 		RETURN_FALSE;
 	}
