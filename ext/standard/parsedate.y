@@ -320,6 +320,11 @@ date	: tUNUMBER '/' tUNUMBER {
 	    yyMonth = $2;
 	    yyYear = -$3;
 	}
+	| tMONTH tUNUMBER tUNUMBER {
+	    yyMonth = $1;
+	    yyDay = $2;
+		yyYear = $3;
+	}
 	| tMONTH tUNUMBER {
 	    yyMonth = $1;
 	    yyDay = $2;
