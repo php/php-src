@@ -222,6 +222,8 @@ $text_files = array(
 	"php.ini-dist" => 	"php.ini-dist",
 	"php.ini-recommended" => "php.ini-recommended",
 	"win32/install.txt" => 	"install.txt",
+	"win32/pws-php5cgi.reg" => "pws-php5cgi.reg",
+	"win32/pws-php5isapi.reg" => "pws-php5isapi.reg",
 );
 
 foreach ($text_files as $src => $dest) {
