@@ -37,6 +37,8 @@
 #include <msql.h>
 #endif
 
+static php_msql_globals msql_globals;
+
 #define MSQL_ASSOC		1<<0
 #define MSQL_NUM		1<<1
 #define MSQL_BOTH		(MSQL_ASSOC|MSQL_NUM)
@@ -114,7 +116,7 @@ typedef struct {
 } m_query;
 
 #define MSQL_GET_QUERY(res)																			\
-	ZEND_FETCH_RESOURCE(msql_query, m_query *, res, -1, "mSQL result", php_msql_module.le_query);	\
+	ZEND_FETCH_RESOURCE(msql_query, m_query *, res, -1, "mSQL result", msql_globals.le_query);	\
 	msql_result = msql_query->result
 
 static void _delete_query(void *arg)
@@ -138,32 +140,32 @@ static m_query *php_msql_query_wrapper(m_result *res, int af_rows)
 static void _close_msql_link(int link)
 {
 	msqlClose(link);
-	php_msql_module.num_links--;
+	msql_globals.num_links--;
 }
 
 
 static void _close_msql_plink(int link)
 {
 	msqlClose(link);
-	php_msql_module.num_persistent--;
-	php_msql_module.num_links--;
+	msql_globals.num_persistent--;
+	msql_globals.num_links--;
 }
 
 DLEXPORT PHP_MINIT_FUNCTION(msql)
 {
-	if (cfg_get_long("msql.allow_persistent",&php_msql_module.allow_persistent)==FAILURE) {
-		php_msql_module.allow_persistent=1;
+	if (cfg_get_long("msql.allow_persistent",&msql_globals.allow_persistent)==FAILURE) {
+		msql_globals.allow_persistent=1;
 	}
-	if (cfg_get_long("msql.max_persistent",&php_msql_module.max_persistent)==FAILURE) {
-		php_msql_module.max_persistent=-1;
+	if (cfg_get_long("msql.max_persistent",&msql_globals.max_persistent)==FAILURE) {
+		msql_globals.max_persistent=-1;
 	}
-	if (cfg_get_long("msql.max_links",&php_msql_module.max_links)==FAILURE) {
-		php_msql_module.max_links=-1;
+	if (cfg_get_long("msql.max_links",&msql_globals.max_links)==FAILURE) {
+		msql_globals.max_links=-1;
 	}
-	php_msql_module.num_persistent=0;
-	php_msql_module.le_query = register_list_destructors(_delete_query,NULL);
-	php_msql_module.le_link = register_list_destructors(_close_msql_link,NULL);
-	php_msql_module.le_plink = register_list_destructors(NULL,_close_msql_plink);
+	msql_globals.num_persistent=0;
+	msql_globals.le_query = register_list_destructors(_delete_query,NULL);
+	msql_globals.le_link = register_list_destructors(_close_msql_link,NULL);
+	msql_globals.le_plink = register_list_destructors(NULL,_close_msql_plink);
 	
 	msql_module_entry.type = type;
 
@@ -176,8 +178,8 @@ DLEXPORT PHP_MINIT_FUNCTION(msql)
 
 DLEXPORT PHP_RINIT_FUNCTION(msql)
 {
-	php_msql_module.default_link=-1;
-	php_msql_module.num_links = php_msql_module.num_persistent;
+	msql_globals.default_link=-1;
+	msql_globals.num_links = msql_globals.num_persistent;
 	msqlErrMsg[0]=0;
 	return SUCCESS;
 }
@@ -186,16 +188,16 @@ DLEXPORT PHP_MINFO_FUNCTION(msql)
 {
 	char maxp[16],maxl[16];
 
-	if (php_msql_module.max_persistent==-1) {
+	if (msql_globals.max_persistent==-1) {
 		strcpy(maxp,"Unlimited");
 	} else {
-		snprintf(maxp,15,"%ld",php_msql_module.max_persistent);
+		snprintf(maxp,15,"%ld",msql_globals.max_persistent);
 		maxp[15]=0;
 	}
-	if (php_msql_module.max_links==-1) {
+	if (msql_globals.max_links==-1) {
 		strcpy(maxl,"Unlimited");
 	} else {
-		snprintf(maxl,15,"%ld",php_msql_module.max_links);
+		snprintf(maxl,15,"%ld",msql_globals.max_links);
 		maxl[15]=0;
 	}
 	php_printf("<table>"
@@ -203,9 +205,9 @@ DLEXPORT PHP_MINFO_FUNCTION(msql)
 				"<tr><td>Persistent links:</td><td>%d/%s</td></tr>\n"
 				"<tr><td>Total links:</td><td>%d/%s</td></tr>\n"
 				"</table>\n",
-				(php_msql_module.allow_persistent?"Yes":"No"),
-				php_msql_module.num_persistent,maxp,
-				php_msql_module.num_links,maxl);
+				(msql_globals.allow_persistent?"Yes":"No"),
+				msql_globals.num_persistent,maxp,
+				msql_globals.num_links,maxl);
 }
 
 
@@ -240,19 +242,19 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			break;
 	}
 	
-	if (!php_msql_module.allow_persistent) {
+	if (!msql_globals.allow_persistent) {
 		persistent=0;
 	}
 	if (persistent) {
 		list_entry *le;
 		
-		if (php_msql_module.max_links!=-1 && php_msql_module.num_links>=php_msql_module.max_links) {
-			php_error(E_WARNING,"mSQL:  Too many open links (%d)",php_msql_module.num_links);
+		if (msql_globals.max_links!=-1 && msql_globals.num_links>=msql_globals.max_links) {
+			php_error(E_WARNING,"mSQL:  Too many open links (%d)",msql_globals.num_links);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
-		if (php_msql_module.max_persistent!=-1 && php_msql_module.num_persistent>=php_msql_module.max_persistent) {
-			php_error(E_WARNING,"mSQL:  Too many open persistent links (%d)",php_msql_module.num_persistent);
+		if (msql_globals.max_persistent!=-1 && msql_globals.num_persistent>=msql_globals.max_persistent) {
+			php_error(E_WARNING,"mSQL:  Too many open persistent links (%d)",msql_globals.num_persistent);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -268,16 +270,16 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			}
 			
 			/* hash it up */
-			new_le.type = php_msql_module.le_plink;
+			new_le.type = msql_globals.le_plink;
 			new_le.ptr = (void *) msql;
 			if (zend_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
-			php_msql_module.num_persistent++;
-			php_msql_module.num_links++;
+			msql_globals.num_persistent++;
+			msql_globals.num_links++;
 		} else {  /* we do */
-			if (le->type != php_msql_module.le_plink) {
+			if (le->type != msql_globals.le_plink) {
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -295,7 +297,7 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 #endif
 			msql = (int) le->ptr;
 		}
-		ZEND_REGISTER_RESOURCE(return_value, (void *) msql, php_msql_module.le_plink);
+		ZEND_REGISTER_RESOURCE(return_value, (void *) msql, msql_globals.le_plink);
 	} else {
 		list_entry *index_ptr,new_index_ptr;
 		
@@ -313,8 +315,8 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			}
 			link = (int) index_ptr->ptr;
 			ptr = zend_list_find(link,&type);   /* check if the link is still there */
-			if (ptr && (type==php_msql_module.le_link || type==php_msql_module.le_plink)) {
-				return_value->value.lval = php_msql_module.default_link = link;
+			if (ptr && (type==msql_globals.le_link || type==msql_globals.le_plink)) {
+				return_value->value.lval = msql_globals.default_link = link;
 				return_value->type = IS_LONG;
 				efree(hashed_details);
 				return;
@@ -322,8 +324,8 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				zend_hash_del(list,hashed_details,hashed_details_length+1);
 			}
 		}
-		if (php_msql_module.max_links!=-1 && php_msql_module.num_links>=php_msql_module.max_links) {
-			php_error(E_WARNING,"mSQL:  Too many open links (%d)",php_msql_module.num_links);
+		if (msql_globals.max_links!=-1 && msql_globals.num_links>=msql_globals.max_links) {
+			php_error(E_WARNING,"mSQL:  Too many open links (%d)",msql_globals.num_links);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -333,7 +335,7 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		}
 
 		/* add it to the list */
-		ZEND_REGISTER_RESOURCE(return_value, (void *) msql, php_msql_module.le_plink);
+		ZEND_REGISTER_RESOURCE(return_value, (void *) msql, msql_globals.le_plink);
 		
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) return_value->value.lval;
@@ -342,20 +344,20 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
-		php_msql_module.num_links++;
+		msql_globals.num_links++;
 	}
 	efree(hashed_details);
-	php_msql_module.default_link=return_value->value.lval;
+	msql_globals.default_link=return_value->value.lval;
 }
 
 
 static int php_msql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
-	if (php_msql_module.default_link==-1) { /* no link opened yet, implicitly open one */
+	if (msql_globals.default_link==-1) { /* no link opened yet, implicitly open one */
 		ht = 0;
 		php_msql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	}
-	return php_msql_module.default_link;
+	return msql_globals.default_link;
 }
 
 
@@ -387,7 +389,7 @@ DLEXPORT PHP_FUNCTION(msql_close)
 	
 	switch (ARG_COUNT(ht)) {
 		case 0:
-			id = php_msql_module.default_link;
+			id = msql_globals.default_link;
 			break;
 		case 1:
 			if (getParameters(ht, 1, &msql_link)==FAILURE) {
@@ -400,7 +402,7 @@ DLEXPORT PHP_FUNCTION(msql_close)
 			break;
 	}
 	
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 	
 	zend_list_delete(id);
@@ -436,7 +438,7 @@ DLEXPORT PHP_FUNCTION(msql_select_db)
 	}
 	
 
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 
 	convert_to_string(db);
@@ -476,7 +478,7 @@ DLEXPORT PHP_FUNCTION(msql_create_db)
 			break;
 	}
 	
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(db);
@@ -515,7 +517,7 @@ DLEXPORT PHP_FUNCTION(msql_drop_db)
 			break;
 	}
 	
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(db);
@@ -542,7 +544,7 @@ DLEXPORT PHP_FUNCTION(msql_query)
 			if (getParameters(ht, 1, &query)==FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
-			id = php_msql_module.default_link;
+			id = msql_globals.default_link;
 			break;
 		case 2:
 			if (getParameters(ht, 2, &query, &msql_link)==FAILURE) {
@@ -555,14 +557,14 @@ DLEXPORT PHP_FUNCTION(msql_query)
 			break;
 	}
 	
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(query);
 	if ((af_rows = msqlQuery(msql,query->value.str.val))==-1) {
 		RETURN_FALSE;
 	}
-	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msqlStoreResult(), af_rows), php_msql_module.le_query);
+	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msqlStoreResult(), af_rows), msql_globals.le_query);
 }
 /* }}} */
 
@@ -594,7 +596,7 @@ DLEXPORT PHP_FUNCTION(msql_db_query)
 			break;
 	}
 	
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(db);
@@ -606,7 +608,7 @@ DLEXPORT PHP_FUNCTION(msql_db_query)
 	if ((af_rows = msqlQuery(msql,query->value.str.val))==-1) {
 		RETURN_FALSE;
 	}
-	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msqlStoreResult(), af_rows), php_msql_module.le_query);
+	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msqlStoreResult(), af_rows), msql_globals.le_query);
 }
 /* }}} */
 
@@ -635,14 +637,14 @@ DLEXPORT PHP_FUNCTION(msql_list_dbs)
 			break;
 	}
 	
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 
 	if ((msql_result=msqlListDBs(msql))==NULL) {
 		php_error(E_WARNING,"Unable to save mSQL query result");
 		RETURN_FALSE;
 	}
-	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msql_result, 0), php_msql_module.le_query);
+	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msql_result, 0), msql_globals.le_query);
 }
 /* }}} */
 
@@ -674,7 +676,7 @@ DLEXPORT PHP_FUNCTION(msql_list_tables)
 			break;
 	}
 	
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(db);
@@ -685,7 +687,7 @@ DLEXPORT PHP_FUNCTION(msql_list_tables)
 		php_error(E_WARNING,"Unable to save mSQL query result");
 		RETURN_FALSE;
 	}
-	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msql_result, 0), php_msql_module.le_query);
+	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msql_result, 0), msql_globals.le_query);
 }
 /* }}} */
 
@@ -717,7 +719,7 @@ DLEXPORT PHP_FUNCTION(msql_list_fields)
 			break;
 	}
 	
-	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, msql_globals.le_link, msql_globals.le_plink);
 	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(db);
@@ -729,7 +731,7 @@ DLEXPORT PHP_FUNCTION(msql_list_fields)
 		php_error(E_WARNING,"Unable to save mSQL query result");
 		RETURN_FALSE;
 	}
-	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msql_result, 0), php_msql_module.le_query);
+	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msql_result, 0), msql_globals.le_query);
 }
 /* }}} */
 
