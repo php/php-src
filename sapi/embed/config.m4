@@ -5,15 +5,17 @@ dnl
 AC_MSG_CHECKING(for embedded SAPI library support)
 
 AC_ARG_ENABLE(embed,
-[  --enable-embed[=TYPE]   Enable building embedded SAPI library of PHP
-                          TYPE is either 'shared' or 'static'. Defaults to 'static' library.],
+[  --enable-embed[=TYPE]   Enable building of embedded SAPI library
+                          TYPE is either 'shared' or 'static'. [TYPE=shared]],
 [ 
   case $enableval in
     yes|shared)
       PHP_EMBED_TYPE=shared
+      INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED \$(INSTALL_ROOT)/lib"
       ;;
     static)
       PHP_EMBED_TYPE=static
+      INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_STATIC \$(INSTALL_ROOT)/lib"
       ;;
     *)
       PHP_EMBED_TYPE=no
