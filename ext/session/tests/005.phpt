@@ -9,7 +9,7 @@ class handler {
 	var $data = 'baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}';
     function open($save_path, $session_name)
     {
-        print "OPEN: $save_path, $session_name\n";
+        print "OPEN: $session_name\n";
         return true;
     }
     function close()
@@ -50,7 +50,7 @@ ob_start();
 
 session_set_save_handler(array($hnd, "open"), array($hnd, "close"), array($hnd, "read"), array($hnd, "write"), array($hnd, "destroy"), array($hnd, "gc"));
 
-session_id("test");
+session_id("abtest");
 session_start();
 $baz->method();
 $arr[3]->method();
@@ -79,8 +79,8 @@ var_dump($baz); var_dump($arr); var_dump($c);
 session_destroy();
 ?>
 --EXPECT--
-OPEN: /tmp, PHPSESSID
-READ: test
+OPEN: PHPSESSID
+READ: abtest
 object(foo)(2) {
   ["bar"]=>
   string(2) "ok"
@@ -96,10 +96,10 @@ array(1) {
     int(2)
   }
 }
-WRITE: test, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}}
+WRITE: abtest, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}}
 CLOSE
-OPEN: /tmp, PHPSESSID
-READ: test
+OPEN: PHPSESSID
+READ: abtest
 object(foo)(2) {
   ["bar"]=>
   string(2) "ok"
@@ -116,10 +116,10 @@ array(1) {
   }
 }
 int(123)
-WRITE: test, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}}c|i:123;
+WRITE: abtest, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}}c|i:123;
 CLOSE
-OPEN: /tmp, PHPSESSID
-READ: test
+OPEN: PHPSESSID
+READ: abtest
 object(foo)(2) {
   ["bar"]=>
   string(2) "ok"
@@ -136,5 +136,5 @@ array(1) {
   }
 }
 int(123)
-DESTROY: test
+DESTROY: abtest
 CLOSE
