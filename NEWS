@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- PHP's cURL extention now requires cURL version 7.9.8 (Derick)
+- Expanded ob_start() to allow object parameters without methodnames and
+  use default method __output_handler(). (Marcus)
 - Added zend_execute_internal which is called like zend_execute but for
   internal functions. (Thies)
 - Changed pg_connection_status(), pg_connection_reset(), pg_connection_busy(),
