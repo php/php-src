@@ -2904,7 +2904,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			}
 			arr_argc = argc;
 			diff_data_compare_func = array_data_compare;
-		} else if (data_compare_type = DIFF_COMP_DATA_USER) {
+		} else if (data_compare_type == DIFF_COMP_DATA_USER) {
 			/* array_udiff */
 			if (argc < 3) {
 				WRONG_PARAM_COUNT;
