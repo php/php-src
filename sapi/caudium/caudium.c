@@ -780,7 +780,7 @@ void pike_module_init( void )
 {
   if (!caudium_php_initialized) {
 #ifdef ZTS
-    tsrm_startup(1, 1, 0);
+    tsrm_startup(1, 1, 0, NULL);
     caudium_globals_id = ts_allocate_id(sizeof(php_caudium_request), NULL, NULL);
 #endif
     sapi_startup(&sapi_module);

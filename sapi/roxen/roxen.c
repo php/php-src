@@ -703,7 +703,7 @@ void pike_module_init( void )
 {
   if (!roxen_php_initialized) {
 #ifdef ZTS
-    tsrm_startup(1, 1, 0);
+    tsrm_startup(1, 1, 0, NULL);
 #ifdef ROXEN_USE_ZTS
     roxen_globals_id = ts_allocate_id(sizeof(php_roxen_request), NULL, NULL);
 #endif	 

@@ -589,7 +589,7 @@ CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, 
 	if (!apache_php_initialized) {
 		apache_php_initialized = 1;
 #ifdef ZTS
-		tsrm_startup(1, 1, 0);
+		tsrm_startup(1, 1, 0, NULL);
 #endif
 		sapi_startup(&sapi_module_conf);
 		php_apache_startup(&sapi_module_conf);
@@ -708,7 +708,7 @@ void php_init_handler(server_rec *s, pool *p)
 	if (!apache_php_initialized) {
 		apache_php_initialized = 1;
 #ifdef ZTS
-		tsrm_startup(1, 1, 0);
+		tsrm_startup(1, 1, 0, NULL);
 #endif
 		sapi_startup(&sapi_module_conf);
 		php_apache_startup(&sapi_module_conf);

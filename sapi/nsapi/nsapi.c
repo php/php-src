@@ -542,7 +542,7 @@ php4_init(pblock *pb, Session *sn, Request *rq)
 {
 	php_core_globals *core_globals;
 
-	tsrm_startup(1, 1, 0);
+	tsrm_startup(1, 1, 0, NULL);
 	core_globals = ts_resource(core_globals_id);
 
 	sapi_startup(&sapi_module);
