@@ -92,24 +92,6 @@ void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 	result->type = IS_STRING;
 }
 
-void zend_ini_init_string(zval *result)
-{
-	result->value.str.val = malloc(1);
-	result->value.str.val[0] = 0;
-	result->value.str.len = 0;
-	result->type = IS_STRING;
-}
-
-void zend_ini_add_string(zval *result, zval *op1, zval *op2)
-{           
-    int length = op1->value.str.len + op2->value.str.len;
-
-	result->value.str.val = (char *) realloc(op1->value.str.val, length+1);
-    memcpy(result->value.str.val+op1->value.str.len, op2->value.str.val, op2->value.str.len);
-    result->value.str.val[length] = 0;
-    result->value.str.len = length;
-    result->type = IS_STRING;
-}    
 
 void zend_ini_get_constant(zval *result, zval *name)
 {
@@ -127,20 +109,6 @@ void zend_ini_get_constant(zval *result, zval *name)
 		free(name->value.str.val);	
 	} else {
 		*result = *name;
-	}
-}
-
-void zend_ini_get_var(zval *result, zval *name)
-{
-	zval curval;
-	char *envvar;
-	TSRMLS_FETCH();
-
-	if (zend_get_configuration_directive(name->value.str.val, name->value.str.len+1, &curval) == SUCCESS) {
-		result->value.str.val = zend_strndup(curval.value.str.val, curval.value.str.len);
-		result->value.str.len = curval.value.str.len;
-	} else {
-		zend_ini_init_string(result);
 	}
 }
 
@@ -207,7 +175,6 @@ int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, zend_
 %token SECTION
 %token CFG_TRUE
 %token CFG_FALSE
-%token TC_DOLLAR_CURLY
 %left '|' '&'
 %right '~' '!'
 
@@ -243,26 +210,12 @@ statement:
 
 string_or_value:
 		expr { $$ = $1; }
+	|	TC_ENCAPSULATED_STRING { $$ = $1; }
 	|	CFG_TRUE { $$ = $1; }
 	|	CFG_FALSE { $$ = $1; }
-	|   var_string_list { $$ = $1; }
-	|	'\n' { zend_ini_init_string(&$$); }
-	|	/* empty */ { zend_ini_init_string(&$$); }
+	|	'\n' { $$.value.str.val = strdup(""); $$.value.str.len=0; $$.type = IS_STRING; }
+	|	/* empty */ { $$.value.str.val = strdup(""); $$.value.str.len=0; $$.type = IS_STRING; }
 ;
-
-
-var_string_list:
-		var_string_list cfg_var_ref { zend_ini_add_string(&$$, &$1, &$2); free($2.value.str.val); }
-	|	var_string_list TC_ENCAPSULATED_STRING { zend_ini_add_string(&$$, &$1, &$2); }
-	|	var_string_list constant_string { zend_ini_add_string(&$$, &$1, &$2); }
-	|	/* empty */ { zend_ini_init_string(&$$); }
-;
-
-
-cfg_var_ref:
-		TC_DOLLAR_CURLY TC_STRING '}' { zend_ini_get_var(&$$, &$2); }
-;
-
 
 expr:
 		constant_string			{ $$ = $1; }
