@@ -214,11 +214,10 @@ PHP_FUNCTION(yp_next) {
 static int php_foreach_all (int instatus, char *inkey, int inkeylen, char *inval, int invallen, char *indata)
 {
 	int r;
-	CLS_FETCH();
-
 	zval *status, *key, *value;
 	zval **args [3] = { &status, &key, &value };
 	zval *retval;
+	CLS_FETCH();
 
 	MAKE_STD_ZVAL (status);
 	ZVAL_LONG (status, ypprot_err (instatus));
