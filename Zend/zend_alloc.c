@@ -720,7 +720,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_
 	if (valid_beginning && (end_magic != MEM_BLOCK_END_MAGIC)) {
 		char *overflow_ptr, *magic_ptr=(char *) &mem_block_end_magic;
 		int overflows=0;
-		int i;
+		long i;
 
 		if (silent) {
 			return _mem_block_check(ptr, 0 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -749,12 +749,6 @@ ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_
 		} else {
 			zend_debug_alloc_output("Unknown\n");
 		}
-	}
-
-	if (had_problems) {
-		int foo = 5;
-
-		foo += 1;
 	}
 		
 	if (!silent) {
