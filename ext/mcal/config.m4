@@ -11,13 +11,13 @@ if test "$PHP_MCAL" != "no"; then
     AC_EXPAND_PATH($PHP_MCAL, MCAL_DIR)
   fi
 
-  for i in $MCAL_DIR $MCAL_DIR/mcal $MCAL_DIR/mcal/include $MCAL_DIR/include; do
+  for i in $MCAL_DIR $MCAL_DIR/mcal $MCAL_DIR/mcal/include $MCAL_DIR/include/mcal $MCAL_DIR/include; do
     if test -r "$i/mcal.h"; then
       MCAL_INCLUDE=$i
     fi
   done
 
-  for i in $MCAL_DIR $MCAL_DIR/mcal $MCAL_DIR/mcal/lib $MCAL_DIR/lib; do
+  for i in $MCAL_DIR $MCAL_DIR/mcal $MCAL_DIR/mcal/lib $MCAL_DIR/lib/mcal $MCAL_DIR/lib; do
     if test -r "$i/libmcal.a"; then
       MCAL_LIBRARY=$i
     fi
