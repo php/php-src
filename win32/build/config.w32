@@ -1,0 +1,133 @@
+// vim:ft=javascript
+// $Id$
+// "Master" config file; think of it as a configure.in
+// equivalent.
+
+PATH_PROG('cl');
+PATH_PROG('link');
+PATH_PROG('nmake');
+PATH_PROG('make');
+
+// one-shot build optimizes build by asking compiler to build
+// several objects at once, reducing overhead of starting new
+// compiler processes.
+ARG_ENABLE('one-shot', 'optimize for fast one-shot build', 'no');
+
+ARG_ENABLE('debug', 'Compile with debugging symbols', "no");
+ARG_ENABLE('zts', 'Thread safety', 'yes');
+
+// Configures the hard-coded installation dir
+ARG_ENABLE('prefix', 'where PHP will be installed', 'C:\\php5');
+
+DEFINE("BASE_INCLUDES", "/I . /I main /I regex /I Zend /I TSRM \
+/I $(PHP_BUILD)\\include");
+
+// CFLAGS for building the PHP dll
+DEFINE("CFLAGS_PHP", "/D _USRDLL /D PHP4DLLTS_EXPORTS /D PHP_EXPORTS \
+/D LIBZEND_EXPORTS /D TSRM_EXPORTS /D SAPI_EXPORTS /D _WIN32_WINNT=0x400");
+
+// General CFLAGS for building objects
+DEFINE("CFLAGS", "/nologo /YX /FD $(BASE_INCLUDES) /D _WINDOWS \
+/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS");
+
+// General link flags
+DEFINE("LDFLAGS", "/nologo /libpath:$(PHP_BUILD)\\lib");
+
+// General DLL link flags
+DEFINE("DLL_LDFLAGS", "/dll");
+
+// PHP DLL link flags
+DEFINE("PHP_LDFLAGS", "$(DLL_LDFLAGS)");
+
+// General libs
+DEFINE("LIBS", "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib \
+advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib \
+ws2_32.lib urlmon.lib resolv.lib");
+
+// Set some debug/release specific options
+if (PHP_DEBUG == "yes") {
+	ADD_FLAG("CFLAGS", "/LDd /MDd /Gm /ZI /Od /GZ /D _DEBUG /D ZEND_DEBUG=1");
+	ADD_FLAG("LDFLAGS", "/debug");
+	// Avoid problems when linking to release libraries that use the release
+	// version of the libc
+	ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:msvcrt");
+} else {
+	// Equivalent to Release_TSInline build -> best optimization
+	ADD_FLAG("CFLAGS", "/LD /MD /W3 /O2 /D NDebug /D NDEBUG \
+/D ZEND_WIN32_FORCE_INLINE /GB /GF /GS /D ZEND_DEBUG=0");
+}
+
+if (PHP_ZTS == "yes") {
+	ADD_FLAG("CFLAGS", "/D ZTS=1");
+}
+	
+// we want msvcrt in the PHP DLL
+ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
+
+// set up the build dir and DLL name
+if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
+	DEFINE("BUILD_DIR", "Debug_TS");
+	DEFINE("PHPDLL", "php5ts_debug.dll");
+	DEFINE("PHPLIB", "php5ts_debug.lib");
+} else if (PHP_DEBUG == "yes" && PHP_ZTS == "no") {
+	DEFINE("BUILD_DIR", "Debug");
+	DEFINE("PHPDLL", "php5_debug.dll");
+	DEFINE("PHPLIB", "php5_debug.lib");
+} else if (PHP_DEBUG == "no" && PHP_ZTS == "yes") {
+	DEFINE("BUILD_DIR", "Release_TS");
+	DEFINE("PHPDLL", "php5ts.dll");
+	DEFINE("PHPLIB", "php5ts.lib");
+} else if (PHP_DEBUG == "no" && PHP_ZTS == "no") {
+	DEFINE("BUILD_DIR", "Release");
+	DEFINE("PHPDLL", "php5.dll");
+	DEFINE("PHPLIB", "php5.lib");
+}
+
+// Find the php_build dir - it contains headers and libraries
+// that we need
+ARG_WITH('php-build', 'where the php_build dir can be found', 'no');
+
+if (PHP_PHP_BUILD == "no") {
+	if (FSO.FolderExists("..\\php_build")) {
+		PHP_PHP_BUILD = "..\\php_build";
+	}
+}
+
+if (!FSO.FolderExists(PHP_PHP_BUILD)) {
+	ERROR("Could not find the php_build dir; please specify it\r\n\
+using the --with-php-build option to configure");
+}
+
+DEFINE("PHP_BUILD", PHP_PHP_BUILD);
+
+STDOUT.WriteBlankLines(1);
+STDOUT.WriteLine("Build dir: " + get_define('BUILD_DIR'));
+STDOUT.WriteLine("PHP Core:  " + get_define('PHPDLL') + " and " + get_define('PHPLIB'));
+
+ADD_SOURCES("TSRM", "TSRM.c tsrm_strtok_r.c tsrm_virtual_cwd.c tsrm_win32.c");
+ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
+	zend_ini_parser.c zend_ini_scanner.c zend_alloc.c zend_compile.c \
+	zend_constants.c zend_dynamic_array.c zend_execute_API.c zend_highlight.c \
+	zend_llist.c zend_opcode.c zend_operators.c zend_ptr_stack.c \
+	zend_stack.c zend_variables.c zend.c zend_API.c zend_extensions.c \
+	zend_hash.c zend_list.c zend_indent.c zend_builtin_functions.c \
+	zend_sprintf.c zend_ini.c zend_qsort.c zend_multibyte.c zend_ts_hash.c \
+	zend_stream.c zend_iterators.c zend_interfaces.c zend_objects.c \
+	zend_object_handlers.c zend_objects_API.c \
+	zend_mm.c zend_default_classes.c zend_reflection_api.c zend_execute.c");
+
+ADD_SOURCES("main", "main.c snprintf.c spprintf.c safe_mode.c fopen_wrappers.c \
+	php_scandir.c php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
+	strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c network.c \
+	php_open_temporary_file.c php_logos.c output.c internal_functions.c");
+
+ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c \
+	userspace.c transports.c xp_socket.c mmap.c");
+
+ADD_SOURCES("win32", "crypt_win32.c flock.c glob.c md5crypt.c pwd.c readdir.c \
+	registry.c select.c sendmail.c time.c wfile.c winutil.c wsyslog.c");
+
+ADD_SOURCES("regex", "regcomp.c regerror.c regexec.c regfree.c");
+
+STDOUT.WriteBlankLines(1);
+

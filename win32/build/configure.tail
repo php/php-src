@@ -1,0 +1,6 @@
+// vim:ft=javascript
+// $Id$
+// tail end of configure
+
+generate_files();
+

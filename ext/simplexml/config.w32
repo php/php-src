@@ -1,0 +1,11 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_WITH("simplexml", "Simple XML support", "yes");
+
+if (PHP_SIMPLEXML == "yes" && PHP_LIBXML == "yes") {
+	EXTENSION("simplexml", "simplexml.c");
+	AC_DEFINE("HAVE_SIMPLEXML", 1, "Simple XML support");
+}
+
+

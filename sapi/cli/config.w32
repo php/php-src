@@ -1,0 +1,9 @@
+// vim:ft=javascript
+// $Id$
+
+ARG_ENABLE('cli', 'Build CLI version of PHP', 'yes');
+
+if (PHP_CLI == "yes") {
+	SAPI('cli', 'getopt.c php_cli.c', 'php.exe');
+}
+
