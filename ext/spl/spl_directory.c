@@ -1196,9 +1196,11 @@ static int spl_file_object_call(INTERNAL_FUNCTION_PARAMETERS, spl_file_object *i
 } /* }}} */
 
 #define FileFunctionCall(func_name, arg2) \
+{ \
 	zend_function *func_ptr; \
 	zend_hash_find(EG(function_table), #func_name, sizeof(#func_name), (void **) &func_ptr); \
-	spl_file_object_call(INTERNAL_FUNCTION_PARAM_PASSTHRU, intern, func_ptr, arg2)
+	spl_file_object_call(INTERNAL_FUNCTION_PARAM_PASSTHRU, intern, func_ptr, arg2); \
+}
 
 /* {{{ FileFunction */
 #define FileFunction(func_name) \
