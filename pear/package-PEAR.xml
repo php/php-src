@@ -35,11 +35,31 @@
     <state>stable</state>
     <date>2003-01-10</date>
     <notes>
+PEAR BASE CLASS:
+
 * PEAR_Error now supports exceptions when using Zend Engine 2.  Set the
   error mode to PEAR_ERROR_EXCEPTION to make PEAR_Error throw itself
   as an exception (invoke PEAR errors with raiseError() or throwError()
   just like before).
+
+PEAR INSTALLER:
+
+* Packaging and validation now tokenizes source code (unless
+  ext/tokenizer is disabled) and does some coding standard conformance
+  checks.  Specifically, the names of classes and functions are
+  checked to ensure that they are prefixed with the package name.  If
+  your package has symbols that should be without this prefix, you can
+  override this warning by explicitly adding a "provides" entry in
+  your package.xml file.  See the package.xml file for this release
+  for an example (OS_Guess, System and md5_file).
+
+  All classes and non-private (not underscore-prefixed) methods and
+  functions are now registered during "pear package".
+
 </notes>
+    <provides type="class" name="OS_Guess" />
+    <provides type="class" name="System" />
+    <provides type="function" name="md5_file" />
     <filelist>
       <file role="data" name="package.dtd"/>
       <file role="data" name="template.spec"/>
