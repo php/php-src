@@ -35,6 +35,13 @@
 #include <db.h>
 #endif
 
+static void php_dba_db3_errcall_fcn(const char *errpfx, char *msg)
+{
+	TSRMLS_FETCH();
+	
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s%s", errpfx?errpfx:"", msg);
+}
+
 #define DB3_DATA dba_db3_data *dba = info->dbf
 #define DB3_GKEY \
 	DBT gkey; \
@@ -50,7 +57,7 @@ DBA_OPEN_FUNC(db3)
 {
 	DB *dbp = NULL;
 	DBTYPE type;
-	int gmode = 0;
+	int gmode = 0, err;
 	int filemode = 0644;
 	struct stat check_stat;
 	int s = VCWD_STAT(info->path, &check_stat);
@@ -65,30 +72,37 @@ DBA_OPEN_FUNC(db3)
 		info->mode == DBA_WRITER ? 0         : 
 		info->mode == DBA_TRUNC ? DB_CREATE | DB_TRUNCATE : -1;
 
-	if (gmode == -1)
+	if (gmode == -1) {
 		return FAILURE; /* not possible */
+	}
 
 	if (info->argc > 0) {
 		convert_to_long_ex(info->argv[0]);
 		filemode = Z_LVAL_PP(info->argv[0]);
 	}
 
-	if (db_create(&dbp, NULL, 0) == 0 &&
+	if ((err=db_create(&dbp, NULL, 0)) == 0) {
+	    dbp->set_errcall(dbp, php_dba_db3_errcall_fcn);
+	    if (
 #if (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1)
-			dbp->open(dbp, 0, info->path, NULL, type, gmode, filemode) == 0) {
+			(err=dbp->open(dbp, 0, info->path, NULL, type, gmode, filemode)) == 0) {
 #else
-			dbp->open(dbp, info->path, NULL, type, gmode, filemode) == 0) {
+			(err=dbp->open(dbp, info->path, NULL, type, gmode, filemode)) == 0) {
 #endif
-		dba_db3_data *data;
+			dba_db3_data *data;
 
-		data = pemalloc(sizeof(*data), info->flags&DBA_PERSISTENT);
-		data->dbp = dbp;
-		data->cursor = NULL;
-		info->dbf = data;
+			data = pemalloc(sizeof(*data), info->flags&DBA_PERSISTENT);
+			data->dbp = dbp;
+			data->cursor = NULL;
+			info->dbf = data;
 		
-		return SUCCESS;
-	} else if (dbp != NULL) {
-		dbp->close(dbp, 0);
+			return SUCCESS;
+		} else {
+			dbp->close(dbp, 0);
+			*error = db_strerror(err);
+		}
+	} else {
+		*error = db_strerror(err);
 	}
 
 	return FAILURE;
