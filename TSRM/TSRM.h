@@ -51,7 +51,7 @@ typedef int ts_rsrc_id;
 # define THREAD_T DWORD
 # define MUTEX_T CRITICAL_SECTION *
 #elif defined(GNUPTH)
-# define THREAD_T pth_attr_t
+# define THREAD_T pth_t
 # define MUTEX_T pth_mutex_t *
 #elif defined(PTHREADS)
 # define THREAD_T pthread_t
