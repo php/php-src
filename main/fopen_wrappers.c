@@ -39,7 +39,6 @@
 #endif
 
 #include "safe_mode.h"
-#include "php_realpath.h"
 #include "ext/standard/head.h"
 #include "ext/standard/php_standard.h"
 #include "zend_compile.h"
