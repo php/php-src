@@ -2,6 +2,9 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+
+- Fixed pg_fetch_array() with three arguments (Sascha)
+  Patch submitted by: brian@soda.berkeley.edu
 - Upgraded a lot internal functions to use new Zend function API (Thies)
 - fdf support ported; not completely tested with latest version 4.0 for
   glibc (Uwe)
