@@ -1123,12 +1123,23 @@ PHP_FUNCTION(dom_node_normalize)
 
 
 /* {{{ proto boolean dom_node_is_supported(string feature, string version);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-Node-supports
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Level-2-Core-Node-supports
 Since: DOM Level 2
 */
 PHP_FUNCTION(dom_node_is_supported)
 {
- DOM_NOT_IMPLEMENTED();
+	int feature_len, version_len;
+	char *feature, *version;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &feature, &feature_len, &version, &version_len) == FAILURE) {
+		return;
+	}
+
+	if (dom_has_feature(feature, version)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} end dom_node_is_supported */
 

@@ -75,6 +75,27 @@ zend_function_entry php_dom_document_class_functions[] = {
 };
 
 
+int dom_document_get_formatting(zval *id TSRMLS_DC) {
+	zval *format, *member;
+	zend_object_handlers *std_hnd;
+	int retformat = 0;
+
+	MAKE_STD_ZVAL(member);
+	ZVAL_STRING(member, "formatOutput", 1);
+
+	std_hnd = zend_get_std_object_handlers();
+	format = std_hnd->read_property(id, member TSRMLS_CC);
+
+	if (format->type == IS_BOOL) {
+		retformat = Z_BVAL_P(format);
+	}
+
+	zval_dtor(member);
+	FREE_ZVAL(member);
+
+	return retformat;
+}
+
 /* {{{ proto doctype	documenttype	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-B63ED1A31
@@ -1070,7 +1091,7 @@ PHP_FUNCTION(dom_document_save)
 {
 	zval *id;
 	xmlDoc *docp;
-	int file_len, bytes;
+	int file_len, bytes, format;
 	dom_object *intern;
 	char *file;
 
@@ -1084,7 +1105,9 @@ PHP_FUNCTION(dom_document_save)
 		RETURN_FALSE;
 	}
 
-	bytes = xmlSaveFile(file, docp);
+	/* encoding handled by property on doc */
+	format = dom_document_get_formatting(id TSRMLS_CC);
+	bytes = xmlSaveFormatFileEnc(file, docp, NULL, format);
 
 	if (bytes == -1) {
 		RETURN_FALSE;
@@ -1105,13 +1128,15 @@ PHP_FUNCTION(dom_document_savexml)
 	xmlBufferPtr buf;
 	xmlChar *mem;
 	dom_object *intern, *nodeobj;
-	int size;
+	int size, format;
 
 	DOM_GET_THIS_OBJ(docp, id, xmlDocPtr, intern);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|o", &nodep) == FAILURE) {
 		return;
 	}
+
+	format = dom_document_get_formatting(id TSRMLS_CC);
 
 	if (nodep != NULL) {
 		/* Dump contents of Node */
@@ -1126,7 +1151,8 @@ PHP_FUNCTION(dom_document_savexml)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not fetch buffer");
 			RETURN_FALSE;
 		}
-		xmlNodeDump(buf, docp, node, 0, 0);
+
+		xmlNodeDump(buf, docp, node, 0, format);
 		mem = (xmlChar*) xmlBufferContent(buf);
 		if (!mem) {
 			xmlBufferFree(buf);
@@ -1135,9 +1161,8 @@ PHP_FUNCTION(dom_document_savexml)
 		RETVAL_STRING(mem,  1);
 		xmlBufferFree(buf);
 	} else {
-		/* Dump Document Contents 
-		Encoding is handled from the encoding property set on the document */
-		xmlDocDumpMemory(docp, &mem, &size);
+		/* Encoding is handled from the encoding property set on the document */
+		xmlDocDumpFormatMemory(docp, &mem, &size, format);
 		if (!size) {
 			RETURN_FALSE;
 		}

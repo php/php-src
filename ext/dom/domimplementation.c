@@ -50,7 +50,18 @@ Since:
 */
 PHP_FUNCTION(dom_domimplementation_has_feature)
 {
- DOM_NOT_IMPLEMENTED();
+	int feature_len, version_len;
+	char *feature, *version;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &feature, &feature_len, &version, &version_len) == FAILURE) {
+		return;
+	}
+
+	if (dom_has_feature(feature, version)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} end dom_domimplementation_has_feature */
 
