@@ -29,6 +29,7 @@ typedef struct _mem_header {
 	long magic;
 	char *filename;
 	uint lineno;
+	int reported;
 #endif
     struct _mem_header *pNext;
     struct _mem_header *pLast;
