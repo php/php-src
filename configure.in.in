@@ -18,9 +18,9 @@ done
 
 if test "$recurse" = "yes"; then
 	cwd=`pwd`
-	(set -x; test -d libzend || mkdir -p libzend ; cd libzend; $cwd/$srcdir/libzend/configure --cache-file=$cwd/config.cache $@)
+	(set -x; test -d libzend || mkdir libzend ; cd libzend; $cwd/$srcdir/libzend/configure --cache-file=$cwd/config.cache $@)
 	if test "$threadsafe" = "yes"; then
-		(set -x; test -d libzend; mkdir -p TSRM; cd TSRM; $cwd/$srcdir/TSRM/configure --cache-file=$cwd/config.cache $@)
+		(set -x; test -d TSRM || mkdir TSRM; cd TSRM; $cwd/$srcdir/TSRM/configure --cache-file=$cwd/config.cache $@)
 	fi
 fi
 
