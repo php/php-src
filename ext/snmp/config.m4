@@ -31,6 +31,10 @@ AC_ARG_WITH(snmp,
 	  test -f /usr/include/snmp/include/ucd-snmp/snmp.h && SNMP_INCDIR=/usr/include/snmp/include/ucd-snmp
 	  test -f /usr/lib/libsnmp.a && SNMP_LIBDIR=/usr/lib
 	  test -f /usr/lib/libsnmp.so && SNMP_LIBDIR=/usr/lib
+	  test -f /usr/local/lib/libsnmp.a && SNMP_LIBDIR=/usr/local/lib
+	  test -f /usr/local/lib/libsnmp.so && SNMP_LIBDIR=/usr/local/lib
+	  test -f /usr/local/snmp/lib/libsnmp.a && SNMP_LIBDIR=/usr/local/snmp/lib
+	  test -f /usr/local/snmp/lib/libsnmp.so && SNMP_LIBDIR=/usr/local/snmp/lib
     else
       SNMP_INCDIR=$withval/include
       test -d $withval/include/ucd-snmp && SNMP_INCDIR=$withval/include/ucd-snmp
