@@ -311,7 +311,7 @@ static inline void gmp_zval_binary_ui_op2_ex(zval *return_value, zval **a_arg, z
 	mpz_t *gmpnum_a, *gmpnum_b, *gmpnum_result1, *gmpnum_result2;
 	zval r;
 	int use_ui=0;
-	unsigned long long_result;
+	unsigned long long_result = 0;
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg);
 	if(gmp_ui_op && Z_TYPE_PP(b_arg) == IS_LONG && Z_LVAL_PP(b_arg) >= 0) {
