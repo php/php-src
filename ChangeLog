@@ -1,3 +1,55 @@
+2001-01-30  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/README
+      ext/yaz/php_yaz.c:
+    Fixed problem with looping present requests for Isite targets.
+
+2001-01-30  Harald Radi  <h.radi@nme.at>
+
+    * win32/.cvsignore: fixing .cvsignore
+
+    * ext/dotnet/.cvsignore: adding .cvsignore
+
+2001-01-30  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/config.m4
+      ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h
+      ext/mnogosearch/setup.stub
+      ext/mnogosearch/test.php
+      ext/mnogosearch/README
+      ext/mnogosearch/Makefile.in:
+    mnoGoSearch extension module initial version has been added.
+    This module currently at the alpha state, but it can be used already.
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+2001-01-30  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB.php
+      pear/DB/tests/db_parsedsn.phpt:
+    Allow url encoding in DB usernames and passwords (Stig, PEAR)
+
+2001-01-30  David Eriksson  <david@2good.com>
+
+    * ext/satellite/namedvalue_to_zval.c
+      ext/satellite/typecode.c:
+    Applied patch from Oleg Sharoiko <os@rsu.ru> to fix bug in satellite_any_to_zval_sequence
+
+2001-01-30  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/conversion.c
+      ext/com/typedef_VARIANT.c: pass another com object as parameter
+
+2001-01-30  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR.php.in
+      pear/tests/pear_error.phpt
+      pear/tests/pear_error3.phpt:
+    Added raiseError and setErrorHandling methods to PEAR class (Stig, PEAR)
+
 2001-01-29  Jani Taskinen  <sniper@iki.fi>
 
     * ext/domxml/config.m4:
