@@ -122,20 +122,20 @@ static int le_swfmorphp;
 static int le_swfspritep;
 static int le_swfinputp;
 
-zend_class_entry movie_class_entry;
-zend_class_entry shape_class_entry;
-zend_class_entry fill_class_entry;
-zend_class_entry gradient_class_entry;
-zend_class_entry bitmap_class_entry;
-zend_class_entry font_class_entry;
-zend_class_entry text_class_entry;
-zend_class_entry textfield_class_entry;
-zend_class_entry displayitem_class_entry;
-zend_class_entry button_class_entry;
-zend_class_entry action_class_entry;
-zend_class_entry morph_class_entry;
-zend_class_entry sprite_class_entry;
-
+static zend_class_entry *movie_class_entry_ptr;
+static zend_class_entry *shape_class_entry_ptr;
+static zend_class_entry *fill_class_entry_ptr;
+static zend_class_entry *gradient_class_entry_ptr;
+static zend_class_entry *bitmap_class_entry_ptr;
+static zend_class_entry *font_class_entry_ptr;
+static zend_class_entry *text_class_entry_ptr;
+static zend_class_entry *textfield_class_entry_ptr;
+static zend_class_entry *displayitem_class_entry_ptr;
+static zend_class_entry *button_class_entry_ptr;
+static zend_class_entry *action_class_entry_ptr;
+static zend_class_entry *morph_class_entry_ptr;
+static zend_class_entry *sprite_class_entry_ptr;
+ 
 /* {{{ internal function SWFgetProperty
 */
 static void *SWFgetProperty(zval *id, char *name, int namelen, int proptype TSRMLS_DC)
@@ -173,21 +173,21 @@ static void *SWFgetProperty(zval *id, char *name, int namelen, int proptype TSRM
    Returns the SWFCharacter contained in zval *id */
 static SWFCharacter getCharacter(zval *id TSRMLS_DC)
 {
-	if (Z_OBJCE_P(id) == &shape_class_entry)
+	if (Z_OBJCE_P(id) == shape_class_entry_ptr)
 		return (SWFCharacter)getShape(id TSRMLS_CC);
-	else if (Z_OBJCE_P(id) == &font_class_entry)
+	else if (Z_OBJCE_P(id) == font_class_entry_ptr)
 		return (SWFCharacter)getFont(id TSRMLS_CC);
-	else if (Z_OBJCE_P(id) == &text_class_entry)
+	else if (Z_OBJCE_P(id) == text_class_entry_ptr)
 		return (SWFCharacter)getText(id TSRMLS_CC);
-	else if (Z_OBJCE_P(id) == &textfield_class_entry)
+	else if (Z_OBJCE_P(id) == textfield_class_entry_ptr)
 		return (SWFCharacter)getTextField(id TSRMLS_CC);
-	else if (Z_OBJCE_P(id) == &button_class_entry)
+	else if (Z_OBJCE_P(id) == button_class_entry_ptr)
 		return (SWFCharacter)getButton(id TSRMLS_CC);
-	else if (Z_OBJCE_P(id) == &morph_class_entry)
+	else if (Z_OBJCE_P(id) == morph_class_entry_ptr)
 		return (SWFCharacter)getMorph(id TSRMLS_CC);
-	else if (Z_OBJCE_P(id) == &sprite_class_entry)
+	else if (Z_OBJCE_P(id) == sprite_class_entry_ptr)
 		return (SWFCharacter)getSprite(id TSRMLS_CC);
-	else if (Z_OBJCE_P(id) == &bitmap_class_entry)
+	else if (Z_OBJCE_P(id) == bitmap_class_entry_ptr)
 		return (SWFCharacter)getBitmap(id TSRMLS_CC);
 	else
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFCharacter");
@@ -253,7 +253,7 @@ PHP_FUNCTION(swfaction_init)
 	
 	ret = zend_list_insert(action, le_swfactionp);
 
-	object_init_ex(getThis(), &action_class_entry);
+	object_init_ex(getThis(), action_class_entry_ptr);
 	add_property_resource(getThis(), "action", ret);
 	zend_list_addref(ret);
 }
@@ -326,7 +326,7 @@ PHP_FUNCTION(swfbitmap_init)
 	}
 
 	ret = zend_list_insert(bitmap, le_swfbitmapp);
-	object_init_ex(getThis(), &bitmap_class_entry);
+	object_init_ex(getThis(), bitmap_class_entry_ptr);
 	add_property_resource(getThis(), "bitmap", ret);
 	zend_list_addref(ret);
 }
@@ -388,7 +388,7 @@ PHP_FUNCTION(swfbutton_init)
 	SWFButton button = newSWFButton();
 	int ret = zend_list_insert(button, le_swfbuttonp);
 
-	object_init_ex(getThis(), &button_class_entry);
+	object_init_ex(getThis(), button_class_entry_ptr);
 	add_property_resource(getThis(), "button", ret);
 	zend_list_addref(ret);
 }
@@ -1096,7 +1096,7 @@ PHP_FUNCTION(swffont_init)
 
 	ret = zend_list_insert(font, le_swffontp);
 
-	object_init_ex(getThis(), &font_class_entry);
+	object_init_ex(getThis(), font_class_entry_ptr);
 	add_property_resource(getThis(), "font", ret);
 	zend_list_addref(ret);
 }
@@ -1163,7 +1163,7 @@ PHP_FUNCTION(swfgradient_init)
 	SWFGradient gradient = newSWFGradient();
 	int ret = zend_list_insert(gradient, le_swfgradientp);
 
-	object_init_ex(getThis(), &gradient_class_entry);
+	object_init_ex(getThis(), gradient_class_entry_ptr);
 	add_property_resource(getThis(), "gradient", ret);
 	zend_list_addref(ret);
 }
@@ -1238,7 +1238,7 @@ PHP_FUNCTION(swfmorph_init)
 	SWFMorph morph = newSWFMorphShape();
 	int ret = zend_list_insert(morph, le_swfmorphp);
 
-	object_init_ex(getThis(), &morph_class_entry);
+	object_init_ex(getThis(), morph_class_entry_ptr);
 	add_property_resource(getThis(), "morph", ret);
 	zend_list_addref(ret);
 }
@@ -1270,7 +1270,7 @@ PHP_FUNCTION(swfmorph_getShape1)
 	SWFShape shape = SWFMorph_getShape1(morph);
 	int ret = zend_list_insert(shape, le_swfshapep);
 
-	object_init_ex(return_value, &shape_class_entry);
+	object_init_ex(return_value, shape_class_entry_ptr);
 	add_property_resource(return_value, "shape", ret);
 	zend_list_addref(ret);
 }
@@ -1284,7 +1284,7 @@ PHP_FUNCTION(swfmorph_getShape2)
 	SWFShape shape = SWFMorph_getShape2(morph);
 	int ret = zend_list_insert(shape, le_swfshapep);
 
-	object_init_ex(return_value, &shape_class_entry);
+	object_init_ex(return_value, shape_class_entry_ptr);
 	add_property_resource(return_value, "shape", ret);
 	zend_list_addref(ret);
 }
@@ -1332,7 +1332,7 @@ PHP_FUNCTION(swfmovie_init)
 	
 	ret = zend_list_insert(movie, le_swfmoviep);
 	
-	object_init_ex(getThis(), &movie_class_entry);
+	object_init_ex(getThis(), movie_class_entry_ptr);
 	add_property_resource(getThis(), "movie", ret);
 	zend_list_addref(ret);
 }
@@ -1395,7 +1395,7 @@ PHP_FUNCTION(swfmovie_add)
 	convert_to_object_ex(zchar);
 
 	/* XXX - SWFMovie_add deals w/ all block types.  Probably will need to add that.. */
-	if (Z_OBJCE_PP(zchar) == &action_class_entry) {
+	if (Z_OBJCE_PP(zchar) == action_class_entry_ptr) {
 		block = (SWFBlock) getAction(*zchar TSRMLS_CC);
 	} else {
 		block = (SWFBlock) getCharacter(*zchar TSRMLS_CC);
@@ -1406,7 +1406,7 @@ PHP_FUNCTION(swfmovie_add)
 	if (item != NULL) {
 		/* try and create a displayitem object */
 		ret = zend_list_insert(item, le_swfdisplayitemp);
-		object_init_ex(return_value, &displayitem_class_entry);
+		object_init_ex(return_value, displayitem_class_entry_ptr);
 		add_property_resource(return_value, "displayitem", ret);
 	}
 }
@@ -1701,7 +1701,7 @@ PHP_FUNCTION(swfshape_init)
 	SWFShape shape = newSWFShape();
 	int ret = zend_list_insert(shape, le_swfshapep);
 
-	object_init_ex(getThis(), &shape_class_entry);
+	object_init_ex(getThis(), shape_class_entry_ptr);
 	add_property_resource(getThis(), "shape", ret);
 	zend_list_addref(ret);
 }
@@ -1792,12 +1792,12 @@ PHP_FUNCTION(swfshape_addfill)
 
 		convert_to_object_ex(arg1);
 
-		if (Z_OBJCE_PP(arg1) == &gradient_class_entry) {
+		if (Z_OBJCE_PP(arg1) == gradient_class_entry_ptr) {
 			if (flags == 0) {
 				flags = SWFFILL_LINEAR_GRADIENT;
 			}
 			fill = SWFShape_addGradientFill(getShape(getThis() TSRMLS_CC), getGradient(*arg1 TSRMLS_CC), flags);
-		} else if (Z_OBJCE_PP(arg1) == &bitmap_class_entry) {
+		} else if (Z_OBJCE_PP(arg1) == bitmap_class_entry_ptr) {
 			if (flags == 0) {
 				flags = SWFFILL_TILED_BITMAP;
 			}
@@ -1841,7 +1841,7 @@ PHP_FUNCTION(swfshape_addfill)
 
 	/* return an SWFFill object */
 	ret = zend_list_insert(fill, le_swffillp);
-	object_init_ex(return_value, &fill_class_entry);
+	object_init_ex(return_value, fill_class_entry_ptr);
 	add_property_resource(return_value, "fill", ret);
 }
 /* }}} */
@@ -2210,7 +2210,7 @@ PHP_FUNCTION(swfsprite_init)
 	SWFMovieClip sprite = newSWFMovieClip();
 	int ret = zend_list_insert(sprite, le_swfspritep);
 
-	object_init_ex(getThis(), &sprite_class_entry);
+	object_init_ex(getThis(), sprite_class_entry_ptr);
 	add_property_resource(getThis(), "sprite", ret);
 	zend_list_addref(ret);
 }
@@ -2250,7 +2250,7 @@ PHP_FUNCTION(swfsprite_add)
 	
 	convert_to_object_ex(zchar);
 
-	if (Z_OBJCE_PP(zchar) == &action_class_entry) {
+	if (Z_OBJCE_PP(zchar) == action_class_entry_ptr) {
 		block = (SWFBlock)getAction(*zchar TSRMLS_CC);
 	} else {
 		block = (SWFBlock)getCharacter(*zchar TSRMLS_CC);
@@ -2261,7 +2261,7 @@ PHP_FUNCTION(swfsprite_add)
 	if (item != NULL) {
 		/* try and create a displayitem object */
 		ret = zend_list_insert(item, le_swfdisplayitemp);
-		object_init_ex(return_value, &displayitem_class_entry);
+		object_init_ex(return_value, displayitem_class_entry_ptr);
 		add_property_resource(return_value, "displayitem", ret);
 	}
 }
@@ -2346,7 +2346,7 @@ PHP_FUNCTION(swftext_init)
 	SWFText text = newSWFText2();
 	int ret = zend_list_insert(text, le_swftextp);
 
-	object_init_ex(getThis(), &text_class_entry);
+	object_init_ex(getThis(), text_class_entry_ptr);
 	add_property_resource(getThis(), "text", ret);
 	zend_list_addref(ret);
 }
@@ -2546,7 +2546,7 @@ PHP_FUNCTION(swftextfield_init)
 	SWFTextField field = newSWFTextField();
 	int ret = zend_list_insert(field, le_swftextfieldp);
 
-	object_init_ex(getThis(), &textfield_class_entry);
+	object_init_ex(getThis(), textfield_class_entry_ptr);
 	add_property_resource(getThis(), "textfield", ret);
 	zend_list_addref(ret);
 
@@ -2835,6 +2835,20 @@ PHP_RINIT_FUNCTION(ming)
 
 PHP_MINIT_FUNCTION(ming)
 {
+	zend_class_entry shape_class_entry;
+	zend_class_entry fill_class_entry;
+	zend_class_entry gradient_class_entry;
+	zend_class_entry bitmap_class_entry;
+	zend_class_entry text_class_entry;
+	zend_class_entry textfield_class_entry;
+	zend_class_entry font_class_entry;
+	zend_class_entry displayitem_class_entry;
+	zend_class_entry movie_class_entry;
+	zend_class_entry button_class_entry;
+	zend_class_entry action_class_entry;
+	zend_class_entry morph_class_entry;
+	zend_class_entry sprite_class_entry;
+
 	Ming_setErrorFunction((void *) php_ming_error);
 
 #define CONSTANT(s,c) REGISTER_LONG_CONSTANT((s), (c), CONST_CS | CONST_PERSISTENT)
@@ -2887,7 +2901,6 @@ PHP_MINIT_FUNCTION(ming)
 	CONSTANT("SWFACTION_KEYUP",             SWFACTION_KEYUP);
 	CONSTANT("SWFACTION_DATA",              SWFACTION_DATA);
 
-	le_swfmoviep = zend_register_list_destructors_ex(destroy_SWFMovie_resource, NULL, "SWFMovie", module_number);
 	le_swfshapep = zend_register_list_destructors_ex(destroy_SWFShape_resource, NULL, "SWFShape", module_number);
 	le_swffillp = zend_register_list_destructors_ex(destroy_SWFFill_resource, NULL, "SWFFill", module_number);
 	le_swfgradientp = zend_register_list_destructors_ex(destroy_SWFGradient_resource, NULL, "SWFGradient", module_number);
@@ -2895,11 +2908,12 @@ PHP_MINIT_FUNCTION(ming)
 	le_swftextp = zend_register_list_destructors_ex(destroy_SWFText_resource, NULL, "SWFText", module_number);
 	le_swftextfieldp = zend_register_list_destructors_ex(destroy_SWFTextField_resource, NULL, "SWFTextField", module_number);
 	le_swffontp = zend_register_list_destructors_ex(destroy_SWFFont_resource, NULL, "SWFFont", module_number);
+	le_swfdisplayitemp = zend_register_list_destructors_ex(NULL, NULL, "SWFDisplayItem", module_number);
+	le_swfmoviep = zend_register_list_destructors_ex(destroy_SWFMovie_resource, NULL, "SWFMovie", module_number);
 	le_swfbuttonp = zend_register_list_destructors_ex(destroy_SWFButton_resource, NULL, "SWFButton", module_number);
+	le_swfactionp = zend_register_list_destructors_ex(NULL, NULL, "SWFAction", module_number);
 	le_swfmorphp = zend_register_list_destructors_ex(destroy_SWFMorph_resource, NULL, "SWFMorph", module_number);
 	le_swfspritep = zend_register_list_destructors_ex(destroy_SWFSprite_resource, NULL, "SWFSprite", module_number);
-	le_swfdisplayitemp = zend_register_list_destructors_ex(NULL, NULL, "SWFDisplayItem", module_number);
-	le_swfactionp = zend_register_list_destructors_ex(NULL, NULL, "SWFAction", module_number);
 	le_swfinputp = zend_register_list_destructors_ex(destroy_SWFInput_resource, NULL, "SWFInput", module_number);
 
 	INIT_CLASS_ENTRY(shape_class_entry, "swfshape", swfshape_functions);
@@ -2916,19 +2930,19 @@ PHP_MINIT_FUNCTION(ming)
 	INIT_CLASS_ENTRY(morph_class_entry, "swfmorph", swfmorph_functions);
 	INIT_CLASS_ENTRY(sprite_class_entry, "swfsprite", swfsprite_functions);
 
-	zend_register_internal_class(&shape_class_entry TSRMLS_CC);
-	zend_register_internal_class(&fill_class_entry TSRMLS_CC);
-	zend_register_internal_class(&gradient_class_entry TSRMLS_CC);
-	zend_register_internal_class(&bitmap_class_entry TSRMLS_CC);
-	zend_register_internal_class(&text_class_entry TSRMLS_CC);
-	zend_register_internal_class(&textfield_class_entry TSRMLS_CC);
-	zend_register_internal_class(&font_class_entry TSRMLS_CC);
-	zend_register_internal_class(&displayitem_class_entry TSRMLS_CC);
-	zend_register_internal_class(&movie_class_entry TSRMLS_CC);
-	zend_register_internal_class(&button_class_entry TSRMLS_CC);
-	zend_register_internal_class(&action_class_entry TSRMLS_CC);
-	zend_register_internal_class(&morph_class_entry TSRMLS_CC);
-	zend_register_internal_class(&sprite_class_entry TSRMLS_CC);
+	shape_class_entry_ptr = zend_register_internal_class(&shape_class_entry TSRMLS_CC);
+	fill_class_entry_ptr = zend_register_internal_class(&fill_class_entry TSRMLS_CC);
+	gradient_class_entry_ptr = zend_register_internal_class(&gradient_class_entry TSRMLS_CC);
+	bitmap_class_entry_ptr = zend_register_internal_class(&bitmap_class_entry TSRMLS_CC);
+	text_class_entry_ptr = zend_register_internal_class(&text_class_entry TSRMLS_CC);
+	textfield_class_entry_ptr = zend_register_internal_class(&textfield_class_entry TSRMLS_CC);
+	font_class_entry_ptr = zend_register_internal_class(&font_class_entry TSRMLS_CC);
+	displayitem_class_entry_ptr = zend_register_internal_class(&displayitem_class_entry TSRMLS_CC);
+	movie_class_entry_ptr = zend_register_internal_class(&movie_class_entry TSRMLS_CC);
+	button_class_entry_ptr = zend_register_internal_class(&button_class_entry TSRMLS_CC);
+	action_class_entry_ptr = zend_register_internal_class(&action_class_entry TSRMLS_CC);
+	morph_class_entry_ptr = zend_register_internal_class(&morph_class_entry TSRMLS_CC);
+	sprite_class_entry_ptr = zend_register_internal_class(&sprite_class_entry TSRMLS_CC);
 
 	return SUCCESS;
 }
