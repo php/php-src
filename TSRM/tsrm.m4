@@ -53,21 +53,21 @@ if test -n "$GCC"; then
       break
     fi
   done
-  AC_CHECK_FUNCS(pthread_kill)
 fi
+
+AC_CHECK_FUNCS(pthread_kill)
 
 if test "$ac_cv_func_pthread_kill" != "yes"; then
   CFLAGS="$old_CFLAGS"
-dnl Fall back to the standard -lpthread
   AC_CHECK_LIB(pthread, pthread_kill)
   unset ac_cv_func_pthread_kill
   AC_CHECK_FUNCS(pthread_kill)
   if test "$ac_cv_func_pthread_kill" != "yes"; then
-    AC_MSG_ERROR(You need Pthreads to build TSRM on UNIX.)
+    AC_MSG_ERROR(Your system seems to lack POSIX threads.)
   fi
 fi
 		
-AC_DEFINE(PTHREADS, [], Whether to use Pthreads)
+AC_DEFINE(PTHREADS, 1, Whether to use Pthreads)
 
 AC_MSG_CHECKING(for POSIX threads)
 AC_MSG_RESULT(yes)
