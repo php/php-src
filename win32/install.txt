@@ -1,15 +1,15 @@
 PHP/Windows Installation Notes
 ==============================
 
-Installation on Windows 9x/Me/NT/2000/XP systems
-=============================================
+Installation on Windows 9x/Me/NT/2000/XP/2003 systems
+=====================================================
 
 There are two main ways to install PHP for Windows: either
-manually or by using the InstallShield installer.
+manually or by using the installer.
 
 
-Windows InstallShield
-=====================
+Windows Installer
+=================
 
  The Windows PHP installer is available from the downloads page at
  www.php.net. This installs the CGI version of PHP and, for IIS, PWS,
