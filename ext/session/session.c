@@ -1182,7 +1182,6 @@ PHP_FUNCTION(session_cache_expire)
 	zval **p_cache_expire;
 	int ac = ZEND_NUM_ARGS();
 	long old;
-	PSLS_FETCH();
 
 	old = PS(cache_expire);
 
