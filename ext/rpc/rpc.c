@@ -381,6 +381,7 @@ static HashTable* rpc_get_properties(zval *object TSRMLS_DC)
 static union _zend_function* rpc_get_method(zval *object, char *method, int method_len TSRMLS_DC)
 {
 	zend_function *function;
+	unsigned char *ref_types = NULL;
 	GET_INTERNAL(intern);
 
 	if (zend_ts_hash_find(&(intern->function_table), method, method_len + 1, &function) != SUCCESS) {
@@ -394,11 +395,11 @@ static union _zend_function* rpc_get_method(zval *object, char *method, int meth
 			method_name.str = method;
 			method_name.len = method_len;
 
-			RPC_HT(intern)->rpc_describe(method_name, intern->data, &arg_types);
+			RPC_HT(intern)->rpc_describe(method_name, intern->data, &arg_types, &ref_types);
 		}
 
 		zif = (zend_internal_function *) emalloc(sizeof(zend_internal_function));
-		zif->arg_types = NULL;
+		zif->arg_types = ref_types;
 		zif->function_name = method;
 		zif->handler = ZEND_FN(rpc_call);
 		zif->scope = intern->ce;
