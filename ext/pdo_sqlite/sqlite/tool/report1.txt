@@ -1,0 +1,66 @@
+The SQL database used for ACD contains 113 tables and indices implemented
+in GDBM.  The following are statistics on the sizes of keys and data
+within these tables and indices.
+
+Entries:      962080
+Size:         45573853
+Avg Size:     48
+Key Size:     11045299
+Avg Key Size: 12
+Max Key Size: 99
+
+
+ Size of key              Cummulative
+  and data     Instances  Percentage
+------------  ----------  -----------
+    0..8            266    0%
+    9..12          5485    0%
+   13..16         73633    8%
+   17..24        180918   27%
+   25..32        209823   48%
+   33..40        148995   64%
+   41..48         76304   72%
+   49..56         14346   73%
+   57..64         15725   75%
+   65..80         44916   80%
+   81..96        127815   93%
+   97..112        34769   96%
+  113..128        13314   98%
+  129..144         8098   99%
+  145..160         3355   99%
+  161..176         1159   99%
+  177..192          629   99%
+  193..208          221   99%
+  209..224          210   99%
+  225..240          129   99%
+  241..256           57   99%
+  257..288          496   99%
+  289..320           60   99%
+  321..352           37   99%
+  353..384           46   99%
+  385..416           22   99%
+  417..448           24   99%
+  449..480           26   99%
+  481..512           27   99%
+  513..1024         471   99%
+ 1025..2048         389   99%
+ 2049..4096         182   99%
+ 4097..8192          74   99%
+ 8193..16384         34   99%
+16385..32768         17   99%
+32769..65536          5   99%
+65537..131073         3  100%
+
+
+This information is gathered to help design the new built-in
+backend for sqlite 2.0.  Note in particular that 99% of all
+database entries have a combined key and data size of less than
+144 bytes.  So if a leaf node in the new database is able to
+store 144 bytes of combined key and data, only 1% of the leaves
+will require overflow pages.  Furthermore, note that no key
+is larger than 99 bytes, so if the key will never be on an
+overflow page.
+
+The average combined size of key+data is 48.  Add in 16 bytes of
+overhead for a total of 64.  That means that a 1K page will
+store (on average) about 16 entries.

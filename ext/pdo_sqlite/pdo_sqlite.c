@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2004 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -80,7 +80,12 @@ PHP_MINFO_FUNCTION(pdo_sqlite)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "PDO Driver for SQLite 3.x", "enabled");
-	php_info_print_table_row(2, "PECL Module version", PHP_PDO_SQLITE_MODULE_VERSION " $Id$");
+	php_info_print_table_row(2, "PECL Module version",
+#if PDO_SQLITE_BUNDLED
+	"(bundled) "
+#endif
+		PHP_PDO_SQLITE_MODULE_VERSION 
+		" $Id$");
 	php_info_print_table_row(2, "SQLite Library", sqlite3_libversion());
 	php_info_print_table_end();
 }
