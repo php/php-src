@@ -76,6 +76,9 @@ typedef struct {
 	/* for HTTP authentication */
 	char *auth_user;
 	char *auth_password;
+
+	/* this is necessary for the CGI SAPI module */
+	char *argv0;
 } sapi_request_info;
 
 

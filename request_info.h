@@ -23,7 +23,6 @@ typedef struct {
 	char *current_user;
 	int current_user_length;
 	const char *script_filename;
-	char *php_argv0;
 } php_request_info;
 
 #ifndef THREAD_SAFE
