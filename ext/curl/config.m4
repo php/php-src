@@ -32,7 +32,7 @@ if test "$PHP_CURL" != "no"; then
 
   curl_version_full=`$CURL_CONFIG --version`
   curl_version=`echo ${curl_version_full} | sed -e 's/libcurl //' | awk 'BEGIN { FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
-  if test "$curl_version" -ge 7007003; then
+  if test "$curl_version" -ge 70800; then
     AC_MSG_RESULT($curl_version_full)
     CURL_LIBS=`$CURL_CONFIG --libs`
   else
