@@ -1441,7 +1441,7 @@ static void array_data_shuffle(zval *array TSRMLS_DC)
 {
 	Bucket **elems, *temp;
 	HashTable *hash;
-	int j, n_elems, cur_elem = 0, rnd_idx, n_left;
+	int j, n_elems, rnd_idx, n_left;
 
 	n_elems = zend_hash_num_elements(Z_ARRVAL_P(array));
 	
@@ -1457,13 +1457,12 @@ static void array_data_shuffle(zval *array TSRMLS_DC)
 		elems[j++] = temp;
 	while (--n_left) {
 		rnd_idx = php_rand(TSRMLS_C);
-		RAND_RANGE(rnd_idx, cur_elem, n_left, PHP_RAND_MAX);
-		if (rnd_idx != cur_elem) {
-			temp = elems[cur_elem];
-			elems[cur_elem] = elems[rnd_idx];
+		RAND_RANGE(rnd_idx, 0, n_left, PHP_RAND_MAX);
+		if (rnd_idx != n_left) {
+			temp = elems[n_left];
+			elems[n_left] = elems[rnd_idx];
 			elems[rnd_idx] = temp;
 		}
-		cur_elem++;
 	}
 
 	HANDLE_BLOCK_INTERRUPTIONS();
