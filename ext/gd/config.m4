@@ -18,11 +18,11 @@ PHP_ARG_WITH(png-dir, for the location of libpng,
 PHP_ARG_WITH(xpm-dir, for the location of libXpm,
 [  --with-xpm-dir=DIR        GD: Set the path to libXpm install prefix.])
 
-PHP_ARG_WITH(ttf,for FreeType 1.x support,
+PHP_ARG_WITH(ttf, for FreeType 1.x support,
 [  --with-ttf[=DIR]          GD: Include FreeType 1.x support])
   
-PHP_ARG_WITH(freetype-dir, for freetype(2),
-[  --with-freetype-dir=DIR   GD: Set the path to freetype2 install prefix.])
+PHP_ARG_WITH(freetype-dir, for FreeType 2,
+[  --with-freetype-dir=DIR   GD: Set the path to FreeType 2 install prefix.])
 
 PHP_ARG_WITH(t1lib, for T1lib support,
 [  --with-t1lib[=DIR]        GD: Include T1lib support.])
