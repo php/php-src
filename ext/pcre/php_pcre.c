@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andrey Zmievski <andrey@ispi.net>                           |
+   | Authors: Andrei Zmievski <andrei@ispi.net>                           |
    +----------------------------------------------------------------------+
  */
 
@@ -21,7 +21,6 @@
 /*
 	TODO:
 	- Allow user to set PCRE_NOTEMPTY, PCRE_ANCHORED at execution time
-	- Have an option for preg_split() to not return empty strings
 */
 
 #include "php.h"

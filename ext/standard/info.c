@@ -311,7 +311,7 @@ void php_print_credits(int flag)
 		CREDIT_LINE("CGI SAPI Module", "Rasmus Lerdorf, Stig Bakken");
 		CREDIT_LINE("AOLserver SAPI Module", "Sascha Schumann");
 		CREDIT_LINE("Overall Work", "Thies C. Arntzen, Stig Bakken, Shane Caraveo, \
-					Rasmus Lerdorf, Sascha Schumann, Zeev Suraski, Andrey Zmievski, \
+					Rasmus Lerdorf, Sascha Schumann, Zeev Suraski, Andrei Zmievski, \
 					and others");
 		PUTS("</table>\n");
 	}
@@ -344,15 +344,15 @@ void php_print_credits(int flag)
 		CREDIT_LINE("OCI8", "Stig Bakken, Thies C. Arntzen");
 		CREDIT_LINE("ODBC", "Stig Bakken, Andreas Karajannis, Frank M. Kromann");
 		CREDIT_LINE("Oracle", "Stig Bakken, Mitch Golden, Rasmus Lerdorf, Andreas Karajannis, Thies C. Arntzen");
-		CREDIT_LINE("Perl Compatible Regexps", "Andrey Zmievski");
+		CREDIT_LINE("Perl Compatible Regexps", "Andrei Zmievski");
 		CREDIT_LINE("PDF", "Uwe Steinmann");
 		CREDIT_LINE("PostgreSQL", "Jouni Ahto, Zeev Suraski");
-		CREDIT_LINE("Sessions", "Sascha Schumann, Andrey Zmievski");
+		CREDIT_LINE("Sessions", "Sascha Schumann, Andrei Zmievski");
 		CREDIT_LINE("SNMP", "Rasmus Lerdorf");
 		CREDIT_LINE("Sybase", "Zeev Suraski");
 		CREDIT_LINE("System V Shared Memory", "Christian Cartus");
 		CREDIT_LINE("System V Semaphores", "Tom May");
-		CREDIT_LINE("WDDX", "Andrey Zmievski");
+		CREDIT_LINE("WDDX", "Andrei Zmievski");
 		CREDIT_LINE("XML", "Stig Bakken, Thies C. Arntzen");
 		CREDIT_LINE("Yellow Pages", "Stephanie Wehner");
 		CREDIT_LINE("Zlib", "Rasmus Lerdorf, Stefan Roehrich");
