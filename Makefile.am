@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 ZEND_DIR = $(srcdir)/libzend
-SUBDIRS = libzend ext sapi $(TSRM_DIR) $(REGEX_DIR)
+SUBDIRS = libzend ext sapi $(TSRM_DIR) $(REGEX_DIR) . pecl
 
 BUILDLDFLAGS = $(EXTRA_LDFLAGS) $(LDFLAGS)
 
@@ -21,9 +21,9 @@ libphp4_la_DEPENDENCIES = \
 		$(TSRM_LIB)
 
 libphp4_la_LIBADD = $(libphp4_la_DEPENDENCIES) $(EXTRA_LIBS)
-	
+
 libphp4_la_LDFLAGS = $(BUILDLDFLAGS) $(PHP_RPATHS)		
-	
+
 configuration-parser.h configuration-parser.c: configuration-parser.y
 	$(YACC) -p cfg -v -d $< -o configuration-parser.c
 
