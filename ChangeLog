@@ -1,3 +1,36 @@
+2001-08-30  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR.php: killed obscure bug in pushErrorHandling
+
+2001-08-30  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/basic_functions.h
+      ext/standard/basic_functions.c:
+    - Added ini_get_all() function which returns all registered ini entries
+       or the entries for the specified extension. (Jani)
+
+    * ext/fdf/config.m4: MFH
+
+    * ext/fdf/config.m4:
+    KISS. And the search order must be reversed always. Last one counts.
+
+    * main/main.c: MFH
+
+2001-08-30  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/php_version.h
+      configure.in:
+    HEAD has been 4.0.8-dev for some time now, so name it accordingly.
+
+2001-08-30  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR.php:
+    The "actual" mode must be taken, not the error object mode
+
+2001-08-30  Zeev Suraski  <zeev@zend.com>
+
+    * main/main.c: Fix unclean shutdown value
+
 2001-08-29  Jani Taskinen  <sniper@iki.fi>
 
     * ext/standard/basic_functions.c:
