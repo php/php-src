@@ -292,6 +292,8 @@ class PEAR_Installer extends PEAR_Common
                 $this->log(2, "md5sum ok: $final_dest_file");
             } else {
                 if (empty($options['force'])) {
+                    // delete the file
+                    @unlink($dest_file);
                     return $this->raiseError("bad md5sum for file $final_dest_file",
                                              PEAR_INSTALLER_FAILED);
                 } else {
