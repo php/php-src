@@ -34,8 +34,8 @@ RSC=rc.exe
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "php4aolserver___Win32_Release_TS"
-# PROP BASE Intermediate_Dir "php4aolserver___Win32_Release_TS"
+# PROP BASE Output_Dir "Release_TS"
+# PROP BASE Intermediate_Dir "Release_TS"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
@@ -43,8 +43,8 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "php4aolserver_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I "..\..\..\php_build\nsapi30\include\\" /I "..\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\main" /I "..\..\tsrm" /D "XP_WIN32" /D ZEND_DEBUG=0 /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "php4aolserver_EXPORTS" /D "WIN32" /D "_MBCS" /YX /FD /c
+# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP4AOLSERVER_EXPORTS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I "..\..\..\php_build\nsapi30\include\\" /I "..\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\main" /I "..\..\tsrm" /D "PHP_WIN32" /D ZEND_DEBUG=0 /D "ZTS" /D "ZEND_WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4AOLSERVER_EXPORTS" /D "WIN32" /D "_MBCS" /D "HAVE_AOLSERVER" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -60,8 +60,8 @@ LINK32=link.exe
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "php4aolserver___Win32_Release_TS_inline"
-# PROP BASE Intermediate_Dir "php4aolserver___Win32_Release_TS_inline"
+# PROP BASE Output_Dir "Release_TS_inline"
+# PROP BASE Intermediate_Dir "Release_TS_inline"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Release_TS_inline"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "php4aolserver_EXPORTS" /YX /FD /c
+# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP4AOLSERVER_EXPORTS" /YX /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I "..\..\..\php_build\nsapi30\include\\" /I "..\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\main" /I "..\..\tsrm" /D ZEND_DEBUG=0 /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "ZEND_WIN32_FORCE_INLINE" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHPAOLSERVER_EXPORTS" /D "WIN32" /D "_MBCS" /D "HAVE_AOLSERVER" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
@@ -86,8 +86,8 @@ LINK32=link.exe
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "php4aolserver___Win32_Debug_TS"
-# PROP BASE Intermediate_Dir "php4aolserver___Win32_Debug_TS"
+# PROP BASE Output_Dir "Debug_TS"
+# PROP BASE Intermediate_Dir "Debug_TS"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
@@ -95,8 +95,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "php4aolserver_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /I "..\..\..\php_build\nsapi30\include\\" /I "..\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\main" /I "..\..\tsrm" /D "XP_WIN32" /D "_Debug_TS" /D ZEND_DEBUG=1 /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_USRDLL" /D "php4aolserver_EXPORTS" /D "WIN32" /D "_MBCS" /FR /YX /FD /GZ /c
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP4AOLSERVER_EXPORTS" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /I "..\..\..\php_build\nsapi30\include\\" /I "..\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\main" /I "..\..\tsrm" /D "PHP_WIN32" /D "_DEBUG" /D ZEND_DEBUG=1 /D "ZTS" /D "ZEND_WIN32" /D "_WINDOWS" /D "_USRDLL" /D "PHP4AOLSERVER_EXPORTS" /D "WIN32" /D "_MBCS" /D "HAVE_AOLSERVER" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
