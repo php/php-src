@@ -484,7 +484,7 @@ ftp_get(ftpbuf_t *ftp, FILE *outfp, const char *path, ftptype_t type)
 
 	if (!ftp_putcmd(ftp, "RETR", path))
 		goto bail;
-	if (!ftp_getresp(ftp) || ftp->resp != 150)
+	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125))
 		goto bail;
 
 	if ((data = data_accept(data)) == NULL)
@@ -546,7 +546,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, FILE *infp, ftptype_t type)
 
 	if (!ftp_putcmd(ftp, "STOR", path))
 		goto bail;
-	if (!ftp_getresp(ftp) || ftp->resp != 150)
+	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125))
 		goto bail;
 
 	if ((data = data_accept(data)) == NULL)
@@ -1087,7 +1087,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
 
 	if (!ftp_putcmd(ftp, cmd, path))
 		goto bail;
-	if (!ftp_getresp(ftp) || ftp->resp != 150)
+	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125))
 		goto bail;
 
 	/* pull data buffer into tmpfile */
