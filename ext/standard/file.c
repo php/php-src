@@ -35,6 +35,7 @@
 #include "php_open_temporary_file.h"
 #include "ext/standard/basic_functions.h"
 #include "php_ini.h"
+#include "php_smart_str.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1714,6 +1715,108 @@ quit_loop:
 	}
 	return ptr;
 }
+
+#define FPUTCSV_FLD_CHK(c) php_memnstr(Z_STRVAL_PP(field), c, 1, Z_STRVAL_PP(field) + Z_STRLEN_PP(field))
+
+/* {{{ proto int fputcsv(resource fp, array fields [, string delimiter [, string enclosure]])
+   Format line as CSV and write to file pointer */
+PHP_FUNCTION(fputcsv)
+{
+	char delimiter = ',';	/* allow this to be set as parameter */
+	char enclosure = '"';	/* allow this to be set as parameter */
+	php_stream *stream;
+	int ret;
+	zval *fp = NULL, *fields = NULL, **field = NULL;
+	char *delimiter_str = NULL, *enclosure_str = NULL;
+	int delimiter_str_len, enclosure_str_len;
+	HashPosition pos;
+	int count, i = 0;
+	char enc_double[3];
+	smart_str csvline = {0};
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ass",
+			&fp, &fields, &delimiter_str, &delimiter_str_len,
+			&enclosure_str, &enclosure_str_len) == FAILURE) {
+		return;
+	}	
+
+	if (delimiter_str != NULL) {
+		/* Make sure that there is at least one character in string */
+		if (delimiter_str_len < 1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
+			RETURN_FALSE;
+		} else if (delimiter_str_len > 1) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "delimiter must be a single character");
+		}
+
+		/* use first character from string */
+		delimiter = *delimiter_str;
+	}
+
+	if (enclosure_str != NULL) {
+		if (enclosure_str_len < 1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
+			RETURN_FALSE;
+		} else if (enclosure_str_len > 1) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "enclosure must be a single character");
+		}
+		/* use first character from string */
+		enclosure = *enclosure_str;
+	}
+    
+	PHP_STREAM_TO_ZVAL(stream, &fp);
+
+	enc_double[0] = enclosure;
+	enc_double[1] = enclosure;
+	enc_double[2] = '\0';
+	count = zend_hash_num_elements(Z_ARRVAL_P(fields));
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(fields), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(fields), (void **) &field, &pos) == SUCCESS) {
+ 		if (Z_TYPE_PP(field) != IS_STRING) {
+			SEPARATE_ZVAL(field);
+			convert_to_string(*field);
+		} 
+		/* enclose a field that contains a delimiter, an enclosure character, or a newline */
+		if (FPUTCSV_FLD_CHK(&delimiter) || FPUTCSV_FLD_CHK(&enclosure) || FPUTCSV_FLD_CHK("\n") ||
+			FPUTCSV_FLD_CHK("\r") || FPUTCSV_FLD_CHK(" ") || FPUTCSV_FLD_CHK("\t")
+		) {
+			zval enclosed_field;
+			smart_str_appendl(&csvline, &enclosure, 1);
+
+			php_char_to_str_ex(Z_STRVAL_PP(field), Z_STRLEN_PP(field),
+						enclosure, enc_double, 2, &enclosed_field, 0, NULL);
+			smart_str_appendl(&csvline, Z_STRVAL(enclosed_field), Z_STRLEN(enclosed_field));
+			zval_dtor(&enclosed_field);
+
+			smart_str_appendl(&csvline, &enclosure, 1);
+		} else {
+			smart_str_appendl(&csvline, Z_STRVAL_PP(field), Z_STRLEN_PP(field));
+		}
+
+		if (++i != count) {
+			smart_str_appendl(&csvline, &delimiter, 1);
+		}
+		zend_hash_move_forward_ex(Z_ARRVAL_P(fields), &pos);
+	}
+
+	smart_str_appendc(&csvline, '\n');
+	smart_str_0(&csvline);
+
+	if (!PG(magic_quotes_runtime)) {
+		ret = php_stream_write(stream, csvline.c, csvline.len);
+	} else {
+		char *buffer = estrndup(csvline.c, csvline.len);
+		int len = csvline.len;
+		php_stripslashes(buffer, &len TSRMLS_CC);
+		ret = php_stream_write(stream, buffer, len);
+		efree(buffer);
+	}
+
+	smart_str_free(&csvline);
+
+	RETURN_LONG(ret);
+}
+/* }}} */
 
 /* {{{ proto array fgetcsv(resource fp [,int length [, string delimiter [, string enclosure]]])
    Get line from file pointer and parse for CSV fields */
