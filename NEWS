@@ -2,13 +2,14 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
-- The Satellite CORBA client extension is ready for use (eriksson@php.net)
-- Fix memory leak in x-httpd-source mode (Jason Greene)
+- Added url_rewriter.tags configuration directive (Sascha)
+- Added CORBA client extension, ready for use (eriksson@php.net)
+- Fixed memory leak in x-httpd-source mode (Jason Greene)
 - Changed ext/gd not to be enabled by default (Jani)
 - Make increment of empty string ("") behave like in PHP 3 and result in "1"
   (Andi, Zend Engine)
-- POST handler for Adobe FDF format (Hartmut)
-- read and write .gz-files transparently on glibc based systems
+- Added POST handler for Adobe FDF format (Hartmut)
+- Added transparent read and write .gz-files on glibc based systems
   using the 'zlib:' fopen wrapper (Hartmut)
 - Fixed a problem in the configuration parser (two null bytes were added
   to each ENCAPSULATED TC_STRING) (alex@zend.com)
@@ -30,7 +31,7 @@ PHP 4.0                                                                    NEWS
   (Rasmus)
 - Fixed possible crash bug in parse_url() (Andi)
 - Added support for trans sid under Win32 (Daniel)
-- IPv6 support in fopen (Stig Venaas)
+- Added IPv6 support in fopen (Stig Venaas)
 - Added the shmop extension. It allows more general ways of shared memory
   access. (thanks to Ilia Alshanestky <iliaa@home.com> and Slava Poliakov
   <slavapl@mailandnews.com> (Derick)
