@@ -105,7 +105,7 @@ PHP_MINFO_FUNCTION(ctype)
 			p=Z_STRVAL_P(c); \
 			len = Z_STRLEN_P(c); \
 			for(n=0;n<len;n++) { \
-				if(!iswhat(*p++)) RETURN_FALSE; \
+				if(!iswhat((int)*(unsigned char *)(p++))) RETURN_FALSE; \
 			} \
 			RETURN_TRUE; \
 		} \
