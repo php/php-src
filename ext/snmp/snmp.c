@@ -288,7 +288,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
 		if (st == 1) {
 			pdu = snmp_pdu_create(SNMP_MSG_GET);
 			name_length = MAX_NAME_LEN;
-			if (!read_objid(objid, name, &name_length)1) {
+			if (!read_objid(objid, name, &name_length)) {
 				php_error(E_WARNING,"Invalid object identifier: %s\n", objid);
 				snmp_close(ss);
 				RETURN_FALSE;
