@@ -889,7 +889,7 @@ PHP_FUNCTION(mysql_get_client_info)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_STRING(mysql_get_client_info(),1);	
+	RETURN_STRING((char *)mysql_get_client_info(),1);	
 }
 /* }}} */
 
@@ -919,7 +919,7 @@ PHP_FUNCTION(mysql_get_host_info)
 
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	RETURN_STRING(mysql_get_host_info(&mysql->conn),1);
+	RETURN_STRING((char *)mysql_get_host_info(&mysql->conn),1);
 }
 /* }}} */
 
@@ -979,7 +979,7 @@ PHP_FUNCTION(mysql_get_server_info)
 
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	RETURN_STRING(mysql_get_server_info(&mysql->conn),1);
+	RETURN_STRING((char *)mysql_get_server_info(&mysql->conn),1);
 }
 /* }}} */
 
@@ -1003,7 +1003,7 @@ PHP_FUNCTION(mysql_info)
 
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	if ((str = mysql_info(&mysql->conn))) {
+	if ((str = (char *)mysql_info(&mysql->conn))) {
 		RETURN_STRING(str,1);
 	} else {
 		RETURN_FALSE;
@@ -1051,7 +1051,7 @@ PHP_FUNCTION(mysql_stat)
 	}
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	RETURN_STRING(mysql_stat(&mysql->conn), 1);
+	RETURN_STRING((char *)mysql_stat(&mysql->conn), 1);
 }
 /* }}} */
 
@@ -1542,7 +1542,7 @@ PHP_FUNCTION(mysql_error)
 	
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
-	RETURN_STRING(mysql_error(&mysql->conn), 1);
+	RETURN_STRING((char *)mysql_error(&mysql->conn), 1);
 }
 /* }}} */
 
@@ -1857,7 +1857,6 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 	MYSQL_ROW mysql_row;
 	MYSQL_FIELD *mysql_field;
 	mysql_row_length_type *mysql_row_lengths;
-	int num_fields;
 	int i;
 
 	if (ZEND_NUM_ARGS() > expected_args) {
@@ -1892,8 +1891,6 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 		RETURN_FALSE;
 	}
 
-	num_fields = mysql_num_fields(mysql_result);
-	
 	if (array_init(return_value)==FAILURE) {
 		RETURN_FALSE;
 	}
