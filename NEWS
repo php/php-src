@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Extended the functionality of is_subclass_of() to accept either a class name
   or an object as first parameter. (Andrey) 
 - Fixed potential problems with unserializing invalid serialize data. (Marcus)
+- Fixed bug #30750 (Meaningful error message when upload directory is not 
+  accessible). (Ilia)
 - Fixed bug #30685 (Malformed SOAPClient http header reequest). (Dmitry)
 - Fixed bug #30672 (Problem handling exif data in jpeg images at unusual 
   places). (Marcus)
