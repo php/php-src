@@ -266,6 +266,10 @@ PHP_MINIT_FUNCTION(ncurses)
  */
 PHP_MSHUTDOWN_FUNCTION(ncurses)
 {
+	if (NCURSES_G(registered_constants)) {
+		endwin();
+	}
+
 	return SUCCESS;
 }
 /* }}} */
