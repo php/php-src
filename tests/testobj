@@ -1,14 +1,30 @@
 <?
 
+define("endl","\n");
+
+if (1) {
 class foobar {
 	function foobar() {
-		print "foobar!\n";
 		$this->initialized = 1;
 	}
 };
 
+class barbara extends foobar {
+
+};
+}
+
 $foo = new foobar; // or die("Unable to construct foobar\n");
-print $foo->initialized;
+//print $foo->initialized;
+
+$boo = new barbara;
+print get_class($foo).endl;
+print get_parent_class($foo).endl;
+print get_class($boo).endl;
+print get_parent_class($boo).endl;
+print method_exists($foo,"foobar").endl;
+print method_exists($boo,"foobar").endl;
+print method_exists($boo,"barbara").endl;
 //$word = new COm("word.application");
 //$word->visible = true;
 //sleep(5);

@@ -2,6 +2,9 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Added get_class($obj), get_parent_class($obj) and method_exists($obj,"name")
+  (Andi & Zeev)
+- Fixed various inheritance problems (Andi & Zeev, libzend)
 - Children now inherit their parent's constructor, if they do not supply a
   constructor of their own.
 - Fixed runtime inheritence of classes (parent methods/properties were
