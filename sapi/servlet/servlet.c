@@ -326,11 +326,10 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 		((servlet_request*)SG(server_context))->servlet=self;
 		((servlet_request*)SG(server_context))->cookies=0;
 
-		CG(extended_info) = 0;
-
 		/*
 		 * Initialize the request
 		 */
+
 		SETSTRING( SG(request_info).auth_user, authUser );
 		SETSTRING( SG(request_info).request_method, requestMethod );
 		SETSTRING( SG(request_info).query_string, queryString );

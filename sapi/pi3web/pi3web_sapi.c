@@ -384,7 +384,6 @@ DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB)
 		file_handle.type = ZEND_HANDLE_FILENAME;
 		file_handle.opened_path = NULL;
 
-		CG(extended_info) = 0;
 		init_request_info(lpCB TSRMLS_CC);
 		php_request_startup(TSRMLS_C);
 

@@ -547,7 +547,6 @@ int main(int argc, char *argv[])
 			//break;
 		}
 		SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
-		CG(extended_info) = 0;		      
 		SG(request_info).argv0 = argv0;		       
 		zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
 
