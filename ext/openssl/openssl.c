@@ -197,6 +197,7 @@ struct php_x509_request {
 
 static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC);
 static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * passphrase, int makeresource, long * resourceval TSRMLS_DC);
+static int php_openssl_is_private_key(EVP_PKEY* pkey TSRMLS_DC);
 static X509_STORE 	  * setup_verify(zval * calist TSRMLS_DC);
 static STACK_OF(X509) * load_all_certs_from_file(char *certfile);
 static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC);
@@ -1631,6 +1632,7 @@ PHP_FUNCTION(openssl_csr_new)
 		3. if it starts with file:// interpreted as path to key file
 		4. interpreted as the data from the cert/key file and interpreted in same way as openssl_get_privatekey()
 		5. an array(0 => [items 2..4], 1 => passphrase)
+		6. if val is a string (possibly starting with file:///) and it is not an X509 certificate, then interpret as public key
 	NOTE: If you are requesting a private key but have not specified a passphrase, you should use an
 	empty string rather than NULL for the passphrase - NULL causes a passphrase prompt to be emitted in
 	the Apache error log!
@@ -1682,6 +1684,13 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 			free_cert = 0;
 		}
 		else if (type == le_key) {
+			/* check whether it is actually a private key if requested */
+			if (!public_key && !php_openssl_is_private_key((EVP_PKEY*)what))
+			{
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied key param is a public key");
+				return NULL;
+			}
+			
 			/* got the key - return it */
 			return (EVP_PKEY*)what;
 		}
@@ -1702,6 +1711,20 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 			cert = php_openssl_x509_from_zval(val, 0, &cert_res TSRMLS_CC);
 			free_cert = (cert_res == -1);
 			/* actual extraction done later */
+			if (!cert) {
+				/* not a X509 certificate, try to retrieve public key */
+				BIO* in;
+				if (filename)
+					in = BIO_new_file(filename, "r");
+				else
+					in = BIO_new_mem_buf(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
+
+				if (in == NULL)
+					return NULL;
+
+				key = PEM_read_bio_PUBKEY(in, NULL,NULL, NULL);
+				BIO_free(in);
+			}
 		}
 		else	{
 			/* we want the private key */
@@ -1780,6 +1803,50 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 	}
 	
 	return return_val;
+}
+/* }}} */
+
+/* {{{ php_openssl_is_private_key
+	Check whether the supplied key is a private key by checking if the secret prime factors are set */
+static int php_openssl_is_private_key(EVP_PKEY* pkey TSRMLS_DC)
+{
+	assert(pkey != NULL);
+
+	switch (pkey->type) {
+#ifndef NO_RSA
+		case EVP_PKEY_RSA:
+		case EVP_PKEY_RSA2:
+			assert(pkey->pkey.rsa != NULL);
+
+			if (NULL == pkey->pkey.rsa->p || NULL == pkey->pkey.rsa->q)
+				return 0;
+			break;
+#endif
+#ifndef NO_DSA
+		case EVP_PKEY_DSA:
+		case EVP_PKEY_DSA1:
+		case EVP_PKEY_DSA2:
+		case EVP_PKEY_DSA3:
+		case EVP_PKEY_DSA4:
+			assert(pkey->pkey.dsa != NULL);
+
+			if (NULL == pkey->pkey.dsa->p || NULL == pkey->pkey.dsa->q || NULL == pkey->pkey.dsa->priv_key)
+				return 0;
+			break;
+#endif
+#ifndef NO_DH
+		case EVP_PKEY_DH:
+			assert(pkey->pkey.dh != NULL);
+
+			if (NULL == pkey->pkey.dh->p || NULL == pkey->pkey.dh->priv_key)
+				return 0;
+			break;
+#endif
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "key type not supported in this PHP build!");
+			break;
+	}
+	return 1;
 }
 /* }}} */
 

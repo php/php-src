@@ -60,8 +60,8 @@ encrypted a passphrase is needed. This can be supplied as second argument.
 
 resource openssl_get_publickey(mixed cert)
 
-Extracts the public key from the given certificate and returns a key
-resource identifier.
+Extracts the public key from the given certificate or public key and returns
+a key resource identifier.
 
 
 void openssl_free_key(resource key)
