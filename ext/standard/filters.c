@@ -1615,7 +1615,7 @@ static php_stream_filter_status_t strfilter_convert_filter(
 			}
 
 			/* update consumed by the number of bytes just used */
-			consumed = bucket->buflen - icnt;
+			consumed += bucket->buflen - icnt;
 
 			/* give output bucket to next in chain */
 			if (out_buf_size - ocnt > 0) {
