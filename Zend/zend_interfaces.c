@@ -134,8 +134,8 @@ static void zend_user_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ zend_user_it_has_more */
-static int zend_user_it_has_more(zend_object_iterator *_iter TSRMLS_DC)
+/* {{{ zend_user_it_valid */
+static int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC)
 {
 	if (_iter) {
 		zend_user_iterator *iter = (zend_user_iterator*)_iter;
@@ -143,7 +143,7 @@ static int zend_user_it_has_more(zend_object_iterator *_iter TSRMLS_DC)
 		zval *more;
 		int result;
 	
-		zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_has_more, "valid", &more);
+		zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_valid, "valid", &more);
 		if (more) {
 			result = i_zend_is_true(more);
 			zval_ptr_dtor(&more);
@@ -245,7 +245,7 @@ static void zend_user_it_rewind(zend_object_iterator *_iter TSRMLS_DC)
 
 zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
 	zend_user_it_dtor,
-	zend_user_it_has_more,
+	zend_user_it_valid,
 	zend_user_it_get_current_data,
 	zend_user_it_get_current_key,
 	zend_user_it_move_forward,
@@ -339,7 +339,7 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 		}
 	}
 	class_type->get_iterator = zend_user_it_get_iterator;
-	class_type->iterator_funcs.zf_has_more = NULL;
+	class_type->iterator_funcs.zf_valid = NULL;
 	class_type->iterator_funcs.zf_current = NULL;
 	class_type->iterator_funcs.zf_key = NULL;
 	class_type->iterator_funcs.zf_next = NULL;

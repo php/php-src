@@ -3756,7 +3756,7 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 				 * In case that ever happens we need an additional flag. */
 				iter->funcs->move_forward(iter TSRMLS_CC);
 			}
-			if (!iter || iter->funcs->has_more(iter TSRMLS_CC) == FAILURE) {
+			if (!iter || iter->funcs->valid(iter TSRMLS_CC) == FAILURE) {
 				/* reached end of iteration */
 				SET_OPCODE(op_array->opcodes+opline->op2.u.opline_num);
 				return 0; /* CHECK_ME */

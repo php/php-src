@@ -1294,7 +1294,7 @@ typedef struct {
 } php_sxe_iterator;
 
 static void php_sxe_iterator_dtor(zend_object_iterator *iter TSRMLS_DC);
-static int php_sxe_iterator_has_more(zend_object_iterator *iter TSRMLS_DC);
+static int php_sxe_iterator_valid(zend_object_iterator *iter TSRMLS_DC);
 static void php_sxe_iterator_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC);
 static int php_sxe_iterator_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
 static void php_sxe_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC);
@@ -1302,7 +1302,7 @@ static void php_sxe_iterator_rewind(zend_object_iterator *iter TSRMLS_DC);
 
 zend_object_iterator_funcs php_sxe_iterator_funcs = {
 	php_sxe_iterator_dtor,
-	php_sxe_iterator_has_more,
+	php_sxe_iterator_valid,
 	php_sxe_iterator_current_data,
 	php_sxe_iterator_current_key,
 	php_sxe_iterator_move_forward,
@@ -1388,7 +1388,7 @@ static void php_sxe_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
 	efree(iterator);
 }
 
-static int php_sxe_iterator_has_more(zend_object_iterator *iter TSRMLS_DC)
+static int php_sxe_iterator_valid(zend_object_iterator *iter TSRMLS_DC)
 {
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 

@@ -32,8 +32,8 @@ typedef struct _zend_object_iterator_funcs {
 	/* release all resources associated with this iterator instance */
 	void (*dtor)(zend_object_iterator *iter TSRMLS_DC);
 	
-	/* check for end of iteration (FAILURE or SUCCESS for more data) */
-	int (*has_more)(zend_object_iterator *iter TSRMLS_DC);
+	/* check for end of iteration (FAILURE or SUCCESS if data is valid) */
+	int (*valid)(zend_object_iterator *iter TSRMLS_DC);
 
 	/* fetch the item data for the current element */
 	void (*get_current_data)(zend_object_iterator *iter, zval ***data TSRMLS_DC);
@@ -60,7 +60,7 @@ typedef struct _zend_class_iterator_funcs {
 	zend_object_iterator_funcs  *funcs;
 	zend_object_new_iterator_t  new_iterator;
 	union _zend_function *zf_new_iterator;
-	union _zend_function *zf_has_more;
+	union _zend_function *zf_valid;
 	union _zend_function *zf_current;
 	union _zend_function *zf_key;
 	union _zend_function *zf_next;

@@ -22,17 +22,17 @@ foreach ($data as $str) {
 }
 
 $r = sqlite_unbuffered_query("SELECT a from strings", $db);
-while (sqlite_has_more($r)) {
+while (sqlite_valid($r)) {
 	var_dump(sqlite_current($r, SQLITE_NUM));
 	sqlite_next($r);
 }
 $r = sqlite_query("SELECT a from strings", $db);
-while (sqlite_has_more($r)) {
+while (sqlite_valid($r)) {
 	var_dump(sqlite_current($r, SQLITE_NUM));
 	sqlite_next($r);
 }
 sqlite_rewind($r);
-while (sqlite_has_more($r)) {
+while (sqlite_valid($r)) {
 	var_dump(sqlite_current($r, SQLITE_NUM));
 	sqlite_next($r);
 }
