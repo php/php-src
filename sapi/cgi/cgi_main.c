@@ -214,6 +214,8 @@ int main(int argc, char *argv[])
 	int behavior=PHP_MODE_STANDARD;
 	int no_headers=0;
 	int free_path_translated=0;
+	int orig_optind=optind;
+	char *orig_optarg=optarg;
 #if SUPPORT_INTERACTIVE
 	int interactive=0;
 #endif
@@ -280,6 +282,19 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 #endif							/* FORCE_CGI_REDIRECT */
 	}
 
+	if (!cgi) {
+		while ((c=getopt(argc, argv, "c:d:qvisnaeh?vf:"))!=-1) {
+			switch (c) {
+				case 'c':
+					php_ini_path = strdup(optarg);		/* intentional leak */
+					break;
+			}
+		}
+		optind = orig_optind;
+		optarg = orig_optarg;
+	}
+			
+			
 	if (php_module_startup(&sapi_module)==FAILURE) {
 		return FAILURE;
 	}
@@ -350,9 +365,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					break;
 				case 'n':
 					behavior=PHP_MODE_INDENT;
-					break;
-				case 'c':
-					php_ini_path = strdup(optarg);		/* intentional leak */
 					break;
 				case 'a':
 #if SUPPORT_INTERACTIVE
