@@ -1706,7 +1706,8 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 		return str;
 	}
 	new_str = (char *) emalloc((length?length:(length=strlen(str)))*2+1);
-	for (source=str,end=source+length,target=new_str; (c = *source) || source<end; source++) {
+	for (source=str,end=source+length,target=new_str; source<end; source++) {
+		c = *source;
 		switch(c) {
 			case '\0':
 				*target++ = '\\';
