@@ -1,9 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 4.3.1
-- Fixed bug #22141 (Boyer str_replace method is undocumented and discouraged,
-  HEAD already shows it removed due to str_ireplace feature request,
-  removed in branch as well due to 'hang' bug). (Sara)
 - Enabled read-only GIF support in the bundled GDLIB (php_gd2.dll) on Windows.
   (Sebastian, Edin)
 - Improved dba extension (Marcus)
@@ -18,6 +15,7 @@ PHP 4                                                                      NEWS
 - Added memory_get_usage(). Defined only when PHP is compiled with
   --enable-memory-limit. Returns the number of bytes allocated by the Zend's
   memory routines. (Andrey)
+- Fixed bug #22141 (removed undocumented Boyer str_replace() method). (Sara)
 - Fixed bug #22103 (Added gdImageEllipse and replaced old gdImageFilledEllipse
   with a better implementation). (Pierre)
 - Fixed bug #22088 (array_shift() left next index to be +1 too much). (Jani)
@@ -99,8 +97,8 @@ PHP 4                                                                      NEWS
 - ZLIB extension is now built-in in the Windows distribution.
   External extension (php_zlib.dll) has been removed. (Edin)
 - Fixed a bug in ISO-8601 week calculation
-- Fixed a crash when using invalid color index with imagecolortransparent()
-  (Pierre-Alain Joye).
+- Fixed a crash when using invalid color index with imagecolortransparent().
+  (Pierre-Alain Joye)
 - Fixed bug #20987 (no handling for client certificates). (Ilia)
 - Fixed bug #21039 (crash when not supplying an IV to mcrypt_generic_init).
   (Derick)
@@ -176,7 +174,7 @@ PHP 4                                                                      NEWS
   (Sterling)
 - Remove $_FILES from $_REQUEST (import_request_variables is not modified), 
   this didn't work properly in the first place, and added confusion. (Sterling)
-- Fix the socket_read() function on win32 to work in normal mode (reading to
+- Fixed the socket_read() function on win32 to work in normal mode (reading to
   the end of a line), as well as binary mode. (Sterling)
 - Fixed bug #20110 (added sanity check to prevent include/require functions
   from trying to include directories). (Ilia)
