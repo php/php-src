@@ -545,9 +545,10 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	EG(namespace) = calling_namespace;
 
 	current_this = EG(this);
-	EG(this) = *object_pp;
 
-	if (EG(this)) {
+	if (object_pp) {
+		EG(this) = *object_pp;
+
 		if (!PZVAL_IS_REF(EG(this))) {
 			EG(this)->refcount++; /* For $this pointer */
 		} else {
@@ -559,6 +560,8 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 			zval_copy_ctor(this_ptr);
 			EG(this) = this_ptr;
 		}
+	} else {
+		EG(this) = NULL;
 	}
 
 
