@@ -89,7 +89,4 @@ PHP_FUNCTION(dbmdelete);
 PHP_FUNCTION(dbmfirstkey);
 PHP_FUNCTION(dbmnextkey);
 
-#undef phpext_db_ptr
-#define phpext_db_ptr	NULL
-
 #endif /* _PHP_DB_H */
