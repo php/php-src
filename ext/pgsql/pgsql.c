@@ -381,6 +381,8 @@ PHP_MINIT_FUNCTION(pgsql)
 	le_result = zend_register_list_destructors_ex(_free_result, NULL, "pgsql result", module_number);
 	le_lofp = zend_register_list_destructors_ex(_free_ptr, NULL, "pgsql large object", module_number);
 	le_string = zend_register_list_destructors_ex(_free_ptr, NULL, "pgsql string", module_number);
+	/* For connection option */
+	REGISTER_LONG_CONSTANT("PGSQL_CONNECT_FORCE_NEW", PGSQL_CONNECT_FORCE_NEW, CONST_CS | CONST_PERSISTENT);
 	/* For pg_fetch_array() */
 	REGISTER_LONG_CONSTANT("PGSQL_ASSOC", PGSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_NUM", PGSQL_NUM, CONST_CS | CONST_PERSISTENT);
@@ -489,9 +491,9 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	PGconn *pgsql;
 	smart_str str = {0};
 	zval **args[5];
-	int i;
+	int i, connect_type = 0;
 
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() == 2 || ZEND_NUM_ARGS() > 5
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 5
 			|| zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -508,6 +510,9 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (ZEND_NUM_ARGS() == 1) { /* new style, using connection string */
 		connstring = Z_STRVAL_PP(args[0]);
+	} else if (ZEND_NUM_ARGS() == 2 ) { /* Safe to add conntype_option, since 2 args was illegal */
+		convert_to_long_ex(args[1]);
+		connect_type = Z_LVAL_PP(args[1]);
 	} else {
 		host = Z_STRVAL_PP(args[0]);
 		port = Z_STRVAL_PP(args[1]);
@@ -596,7 +601,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			pgsql = (PGconn *) le->ptr;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, pgsql, le_plink);
-	} else {
+	} else { // Non persistent connection
 		list_entry *index_ptr,new_index_ptr;
 		
 		/* first we check the hash for the hashed_details key.  if it exists,
@@ -604,7 +609,8 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		 * if it doesn't, open a new pgsql link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (zend_hash_find(&EG(regular_list),str.c,str.len+1,(void **) &index_ptr)==SUCCESS) {
+		if (!(connect_type & PGSQL_CONNECT_FORCE_NEW)
+			&& zend_hash_find(&EG(regular_list),str.c,str.len+1,(void **) &index_ptr)==SUCCESS) {
 			int type,link;
 			void *ptr;
 
@@ -678,7 +684,7 @@ static int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 /* }}} */
 #endif
 
-/* {{{ proto resource pg_connect([string connection_string] | [string host, string port [, string options [, string tty,]] string database)
+/* {{{ proto resource pg_connect(string connection_string[, int connect_type] | [string host, string port [, string options [, string tty,]]] string database)
    Open a PostgreSQL connection */
 PHP_FUNCTION(pg_connect)
 {
@@ -686,7 +692,7 @@ PHP_FUNCTION(pg_connect)
 }
 /* }}} */
 
-/* {{{ proto resource pg_pconnect([string connection_string] | [string host, string port [, string options [, string tty,]] string database)
+/* {{{ proto resource pg_pconnect(string connection_string | [string host, string port [, string options [, string tty,]]] string database)
    Open a persistent PostgreSQL connection */
 PHP_FUNCTION(pg_pconnect)
 {
