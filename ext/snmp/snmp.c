@@ -716,7 +716,7 @@ PHP_FUNCTION(snmpset)
 }
 /* }}} */
 
-/* {{{ proto int netsnmp_session_set_sec_name(struct snmp_session *s, char *name)
+/* {{{ int netsnmp_session_set_sec_name(struct snmp_session *s, char *name)
    Set the security name in the snmpv3 session */
 static int netsnmp_session_set_sec_name(struct snmp_session *s, char *name)
 {
@@ -729,7 +729,7 @@ static int netsnmp_session_set_sec_name(struct snmp_session *s, char *name)
 }
 /* }}} */
 
-/* {{{ proto int netsnmp_session_set_sec_level(struct snmp_session *s, char *level)
+/* {{{ int netsnmp_session_set_sec_level(struct snmp_session *s, char *level)
    Set the security level in the snmpv3 session */
 static int netsnmp_session_set_sec_level(struct snmp_session *s, char *level TSRMLS_DC)
 {
@@ -750,7 +750,7 @@ static int netsnmp_session_set_sec_level(struct snmp_session *s, char *level TSR
 }
 /* }}} */
 
-/* {{{ proto int netsnmp_session_set_auth_protocol(struct snmp_session *s, char *prot)
+/* {{{ int netsnmp_session_set_auth_protocol(struct snmp_session *s, char *prot)
    Set the authentication protocol in the snmpv3 session */
 static int netsnmp_session_set_auth_protocol(struct snmp_session *s, char *prot TSRMLS_DC)
 {
@@ -771,7 +771,7 @@ static int netsnmp_session_set_auth_protocol(struct snmp_session *s, char *prot 
 }
 /* }}} */
 
-/* {{{ proto int netsnmp_session_set_sec_protocol(struct snmp_session *s, char *prot)
+/* {{{ int netsnmp_session_set_sec_protocol(struct snmp_session *s, char *prot)
    Set the security protocol in the snmpv3 session */
 static int netsnmp_session_set_sec_protocol(struct snmp_session *s, char *prot TSRMLS_DC)
 {
@@ -802,7 +802,7 @@ static int netsnmp_session_set_sec_protocol(struct snmp_session *s, char *prot T
 }
 /* }}} */
 
-/* {{{ proto int netsnmp_session_gen_auth_key(struct snmp_session *s, char *pass)
+/* {{{ int netsnmp_session_gen_auth_key(struct snmp_session *s, char *pass)
    Make key from pass phrase in the snmpv3 session */
 static int netsnmp_session_gen_auth_key(struct snmp_session *s, char *pass TSRMLS_DC)
 {
@@ -834,7 +834,7 @@ static int netsnmp_session_gen_auth_key(struct snmp_session *s, char *pass TSRML
 }
 /* }}} */
 
-/* {{{ proto int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass)
+/* {{{ int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass)
    Make key from pass phrase in the snmpv3 session */
 static int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass TSRMLS_DC)
 {
