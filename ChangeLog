@@ -1,3 +1,257 @@
+2003-01-15  Edin Kadribasic  <edink@proventum.net>
+
+    * win32/php_modules.dsw:
+      Added some missing modules. Removed some that are built in or moved to
+      ext/rpc.
+
+2003-01-15  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * (PHP_4_3)
+      ext/rpc/.cvsignore
+      ext/rpc/CREDITS
+      ext/rpc/EXPERIMENTAL
+      ext/rpc/RPC_HOWTO
+      ext/rpc/handler.h
+      ext/rpc/hash.h
+      ext/rpc/layer.h
+      ext/rpc/php_rpc.h
+      ext/rpc/rpc.c
+      ext/rpc/rpc.h
+      ext/rpc/rpc_proxy.c
+      ext/rpc/rpc_proxy.h
+      ext/rpc/com/.cvsignore
+      ext/rpc/com/CREDITS
+      ext/rpc/com/TODO
+      ext/rpc/com/com.c
+      ext/rpc/com/com.h
+      ext/rpc/com/com_wrapper.c
+      ext/rpc/com/com_wrapper.h
+      ext/rpc/com/conversion.c
+      ext/rpc/com/conversion.h
+      ext/rpc/com/dispatch.c
+      ext/rpc/com/variant.c
+      ext/rpc/com/variant.h
+      ext/rpc/dotnet/.cvsignore
+      ext/rpc/dotnet/CREDITS
+      ext/rpc/dotnet/EXPERIMENTAL
+      ext/rpc/dotnet/README
+      ext/rpc/dotnet/dotnet.cpp
+      ext/rpc/dotnet/dotnet.dsp
+      ext/rpc/dotnet/dotnet.php
+      ext/rpc/dotnet/php_dotnet.h
+      ext/rpc/java/.cvsignore
+      ext/rpc/java/CREDITS
+      ext/rpc/java/EXPERIMENTAL
+      ext/rpc/java/Makefile.frag
+      ext/rpc/java/README
+      ext/rpc/java/config.m4
+      ext/rpc/java/except.php
+      ext/rpc/java/java.c
+      ext/rpc/java/java.dsp
+      ext/rpc/java/jawt.php
+      ext/rpc/java/jver.php
+      ext/rpc/java/reflect.java
+      ext/rpc/skeleton/skeleton.c
+      ext/rpc/skeleton/skeleton.h
+      ext/rpc/tests/test1.php
+      ext/rpc/tests/test2.php
+      ext/rpc/tests/test3.php
+      ext/rpc/tests/test4.php
+      ext/rpc/tests/tests.php
+      ext/rpc/xmlrpc/.cvsignore
+      ext/rpc/xmlrpc/CREDITS
+      ext/rpc/xmlrpc/EXPERIMENTAL
+      ext/rpc/xmlrpc/config.m4
+      ext/rpc/xmlrpc/php_xmlrpc.h
+      ext/rpc/xmlrpc/xmlrpc-epi-php.c
+      ext/rpc/xmlrpc/xmlrpc.dsp
+      ext/rpc/xmlrpc/libxmlrpc/.cvsignore
+      ext/rpc/xmlrpc/libxmlrpc/README
+      ext/rpc/xmlrpc/libxmlrpc/acinclude.m4
+      ext/rpc/xmlrpc/libxmlrpc/base64.c
+      ext/rpc/xmlrpc/libxmlrpc/base64.h
+      ext/rpc/xmlrpc/libxmlrpc/encodings.c
+      ext/rpc/xmlrpc/libxmlrpc/encodings.h
+      ext/rpc/xmlrpc/libxmlrpc/queue.c
+      ext/rpc/xmlrpc/libxmlrpc/queue.h
+      ext/rpc/xmlrpc/libxmlrpc/simplestring.c
+      ext/rpc/xmlrpc/libxmlrpc/simplestring.h
+      ext/rpc/xmlrpc/libxmlrpc/system_methods.c
+      ext/rpc/xmlrpc/libxmlrpc/system_methods_private.h
+      ext/rpc/xmlrpc/libxmlrpc/xml_element.c
+      ext/rpc/xmlrpc/libxmlrpc/xml_element.h
+      ext/rpc/xmlrpc/libxmlrpc/xml_to_dandarpc.c
+      ext/rpc/xmlrpc/libxmlrpc/xml_to_dandarpc.h
+      ext/rpc/xmlrpc/libxmlrpc/xml_to_soap.c
+      ext/rpc/xmlrpc/libxmlrpc/xml_to_soap.h
+      ext/rpc/xmlrpc/libxmlrpc/xml_to_xmlrpc.c
+      ext/rpc/xmlrpc/libxmlrpc/xml_to_xmlrpc.h
+      ext/rpc/xmlrpc/libxmlrpc/xmlrpc.c
+      ext/rpc/xmlrpc/libxmlrpc/xmlrpc.h
+      ext/rpc/xmlrpc/libxmlrpc/xmlrpc.m4
+      ext/rpc/xmlrpc/libxmlrpc/xmlrpc_introspection.c
+      ext/rpc/xmlrpc/libxmlrpc/xmlrpc_introspection.h
+      ext/rpc/xmlrpc/libxmlrpc/xmlrpc_introspection_private.h
+      ext/rpc/xmlrpc/libxmlrpc/xmlrpc_private.h
+      ext/rpc/xmlrpc/libxmlrpc/xmlrpc_win32.h:
+      removing this stuff from the php 4.3 branch
+
+2003-01-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/SAPI.h:
+      scrap STANDARD_SAPI_MODULE_PROPERTIES; it is causing more harm than good
+
+2003-01-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/interbase/interbase.c:
+      More build fixes.
+
+2003-01-15  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/exec.h
+      ext/standard/proc_open.c
+      ext/standard/proc_open.h
+      ext/standard/tests/general_functions/proc_open.phpt:
+      Relieve scripts of the burden of ensuring that all pipes are closed prior
+      to calling proc_close().
+      Implement proc_get_status(resource $process) which returns an array of
+      information about a process created with proc_open().
+      The information includes:
+      array(
+      	"command" => string "name of the command",
+      	"pid" => long process identifier,
+      	"running" => bool true if the process is still running
+      	"exitcode" => long exitcode if the process exited
+      	"signaled" => bool true if the process was signaled
+      	"termsig" => long signal number if signaled
+      	"stopped" => bool true if the process is stopped
+      	"stopsig" => long signal number if stopped
+      );
+
+2003-01-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/informix/ifx.ec:
+      Fixed a typo.
+
+2003-01-15  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/config.w32.h:
+      Define PHP_CAN_SUPPORT_PROC_OPEN.
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp:
+      Add proc_open.c to project.
+
+2003-01-15  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/config.m4
+      ext/standard/exec.c
+      ext/standard/proc_open.c:
+      - Move proc_open code to a source file of it's own.
+      - Tidy up that netware mess by performing a configure check which will
+        define the symbol PHP_CAN_SUPPORT_PROC_OPEN if PHP can support
+      proc_open.
+      - Protected the proc_open specific code with #ifdef
+      PHP_CAN_SUPPORT_PROC_OPEN
+        so that user-space scripts can use function_exists and react
+      accordingly.
+      
+      ** Heads Up Win32: You need to add ext/standard/proc_open.c to the DSP and
+      ** #define PHP_CAN_SUPPORT_PROC_OPEN in the w32 config header.
+
+2003-01-15  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      ext/session/mod_files.c:
+      MFH:  handle ERANGE from strtol properly
+
+2003-01-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/interbase/interbase.c:
+      Build fixes.
+
+2003-01-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      Fixed a qp encoder bug that the constructor sometimes fails if
+      line-breaking mode is off.
+
+2003-01-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/rpc/java/java.c:
+      Typo fixes.
+
+    * ext/informix/ifx.ec:
+      Fixed typo.
+
+    * ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c:
+      Various corrections.
+
+    * ext/interbase/interbase.c:
+      Fixed typos.
+
+    * ext/dbase/dbase.c:
+      Typo corrections.
+
+2003-01-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/SAPI.c
+      main/SAPI.h:
+      whitespace
+
+2003-01-15  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c:
+      Fixed proto
+
+2003-01-15  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c
+      ext/yaz/php_yaz.h:
+      Fix functions comments (connection resource rather than connection id).
+      New functions yaz_set_option and yaz_get_option.
+      Cleanup in yaz_connect.
+
+    * ext/yaz/config.m4:
+      Fix lib config for the case where YAZ depends on multiple libraries
+
+2003-01-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/interbase/interbase.c:
+      Kill compile warning.
+
+    * ext/informix/ifx.ec
+      ext/interbase/interbase.c
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c:
+      Newer parameter parsing API.
+
+    * ext/hwapi/hwapi.cpp
+      ext/hyperwave/hw.c
+      ext/qtdom/qtdom.c
+      ext/rpc/dotnet/dotnet.cpp
+      ext/rpc/java/java.c
+      ext/snmp/winsnmp.c:
+      Getting rid of the old API parsing code.
+
+    * ext/filepro/filepro.c:
+      Changed php_error to php_error_docref.
+      Made use of the more recent parameter parsing API, zend_get_parameters*.
+
+    * ext/dbase/dbase.c:
+      Removed pointless checks around array_init() & ZE memory allocation macros.
+      Changed php_error to php_error_docref.
+      Dropped getParam* parameter parsing API in favor of zend_get_parameters*.
+
+    * ext/cpdf/cpdf.c
+      ext/cpdf/php_cpdf.h:
+      This patch allows cpdf to be compiled in conjunction with ncurses, which
+      was
+      not possible before due to conflicting defines.
+
 2003-01-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/rpc/xmlrpc/xmlrpc-epi-php.c:

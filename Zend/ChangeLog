@@ -1,3 +1,13 @@
+2003-01-15  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - Revert int -> unsigned int change for str.len
+
+2003-01-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * zend.h:
+      Revert commit which turned the lengths of strings into zend_uint.
+
 2003-01-14  Andi Gutmans  <andi@zend.com>
 
     * ZEND_CHANGES
