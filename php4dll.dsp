@@ -123,7 +123,7 @@ SOURCE=.\main.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\output.c
+SOURCE=.\ext\standard\output.c
 # End Source File
 # Begin Source File
 
