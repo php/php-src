@@ -1578,9 +1578,13 @@ zend_module_entry simplexml_module_entry = {
 	"simplexml",
 	simplexml_functions,
 	PHP_MINIT(simplexml),
-	PHP_MSHUTDOWN(simplexml),
-	PHP_RINIT(simplexml),	
-	PHP_RSHUTDOWN(simplexml),
+	NULL,
+#if HAVE_SPL && !defined(COMPILE_DL_SPL)
+	PHP_RINIT(simplexml),
+#else
+	NULL,
+#endif
+	NULL,
 	PHP_MINFO(simplexml),
 	"0.1",
 	STANDARD_MODULE_PROPERTIES
@@ -1631,32 +1635,16 @@ PHP_MINIT_FUNCTION(simplexml)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION(simplexml)
- */
-PHP_MSHUTDOWN_FUNCTION(simplexml)
-{
-	return SUCCESS;
-}
-/* }}} */
-
+#if HAVE_SPL && !defined(COMPILE_DL_SPL)
 /* {{{ PHP_RINIT_FUNCTION(simplexml)
  */
 PHP_RINIT_FUNCTION(simplexml)
 {
-#if HAVE_SPL && !defined(COMPILE_DL_SPL)
 	zend_class_implements(sxe_class_entry TSRMLS_CC, 1, spl_ce_RecursiveIterator);
+	return SUCCESS;
+}
+/* }}} */
 #endif
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_RSHUTDOWN_FUNCTION(simplexml)
- */
-PHP_RSHUTDOWN_FUNCTION(simplexml)
-{
-	return SUCCESS;
-}
-/* }}} */
 
 /* {{{ PHP_MINFO_FUNCTION(simplexml)
  */

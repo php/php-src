@@ -47,9 +47,9 @@ extern zend_module_entry simplexml_module_entry;
 #include <libxml/xmlschemas.h>
 
 PHP_MINIT_FUNCTION(simplexml);
-PHP_MSHUTDOWN_FUNCTION(simplexml);
+#if HAVE_SPL && !defined(COMPILE_DL_SPL)
 PHP_RINIT_FUNCTION(simplexml);
-PHP_RSHUTDOWN_FUNCTION(simplexml);
+#endif
 PHP_MINFO_FUNCTION(simplexml);
 
 typedef struct {
@@ -81,7 +81,6 @@ typedef struct {
 #endif
 
 #endif
-
 
 /*
  * Local variables:
