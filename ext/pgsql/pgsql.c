@@ -21,7 +21,7 @@
 
 #include <stdlib.h>
 
-#if COMPILE_DL
+#if defined(COMPILE_DL) || defined(COMPILE_DL_PGSQL)
 #include "dl/phpdl.h"
 #endif
 
@@ -79,7 +79,7 @@ zend_module_entry pgsql_module_entry = {
 	"pgsql", pgsql_functions, PHP_MINIT(pgsql), PHP_MSHUTDOWN(pgsql), PHP_RINIT(pgsql), NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
-#if COMPILE_DL
+#if defined(COMPILE_DL) || defined(COMPILE_DL_PGSQL)
 ZEND_GET_MODULE(pgsql)
 #endif
 

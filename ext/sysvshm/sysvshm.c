@@ -50,7 +50,7 @@ zend_module_entry sysvshm_module_entry = {
 };
 
 
-#if COMPILE_DL
+#if defined(COMPILE_DL) || defined(COMPILE_DL_SYSVSHM)
 ZEND_GET_MODULE(sysvshm)
 #endif
 

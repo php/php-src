@@ -20,7 +20,7 @@
 
 /* $Id$ */
 
-#if COMPILE_DL
+#if defined(COMPILE_DL) || defined(COMPILE_DL_ODBC)
 #include "dl/phpdl.h"
 #endif
 
@@ -131,7 +131,7 @@ int odbc_globals_id;
 ZEND_API php_odbc_globals odbc_globals;
 #endif
 
-#if COMPILE_DL
+#if defined(COMPILE_DL) || defined(COMPILE_DL_ODBC)
 ZEND_GET_MODULE(odbc)
 #endif
 
