@@ -2393,7 +2393,7 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		EX_T(EX(opline)->result.u.var).EA.class_entry = ce;
 	}
-	if (!is_const) {
+	if (!is_const && !ce) {
 		efree(class_name_strval);
 		FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 	}
