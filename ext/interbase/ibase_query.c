@@ -615,14 +615,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, /* {{{ *
 
 		var->sqlind = &buf[i].sqlind;
 
-		if (Z_TYPE_P(b_var) == IS_NULL) {
-			if ((var->sqltype & 1) != 1) {
-				_php_ibase_module_error("Parameter %d must have a value" TSRMLS_CC, i+1);
-				rv = FAILURE;
-			}
-			buf[i].sqlind = -1;
-			if ((var->sqltype & ~1) == SQL_ARRAY) ++array_cnt;
-		} else {
+		if (Z_TYPE_P(b_var) != IS_NULL) {
 			buf[i].sqlind = 0;
 
 			if (var->sqlscale < 0) {
@@ -630,7 +623,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, /* {{{ *
 				  DECIMAL or NUMERIC field are stored internally as scaled integers.
 				  Coerce it to string and let InterBase's internal routines handle it.
 				*/
-				var->sqltype = SQL_TEXT;
+				goto php_ibase_bind_default;
 			}
 
 			var->sqldata = (void*)&buf[i];
@@ -775,7 +768,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, /* {{{ *
 						}
 					} else {
 						/* convert the array data into something IB can understand */
-						ibase_array *ar = &ib_query->in_array[array_cnt++];
+						ibase_array *ar = &ib_query->in_array[array_cnt];
 						void *array_data = emalloc(ar->ar_size);
 						ISC_QUAD array_id = { 0, 0 };
 
@@ -797,15 +790,32 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, /* {{{ *
 						buf[i].val.qval = array_id;
 						efree(array_data);
 					}				
+					++array_cnt;
 					break;
-				default:
 php_ibase_bind_default:
+					/* empty strings should be coerced to NULL for non-text types */
+					if (Z_TYPE_P(b_var) == IS_STRING && Z_STRLEN_P(b_var) == 0) {
+						ZVAL_NULL(b_var);
+						break;
+					}
+
+				default:
 					convert_to_string(b_var);
 					var->sqldata = Z_STRVAL_P(b_var);
 					var->sqllen	 = Z_STRLEN_P(b_var);
 					var->sqltype = SQL_TEXT;
 			} /* switch */
 		} /* if */
+
+		if (Z_TYPE_P(b_var) == IS_NULL) {
+			if (! (var->sqltype & 1)) {
+				_php_ibase_module_error("Parameter %d must have a value" TSRMLS_CC, i+1);
+				rv = FAILURE;
+			}
+			buf[i].sqlind = -1;
+
+			if (var->sqltype & SQL_ARRAY) ++array_cnt;
+		}
 	} /* for */
 	return rv;
 }
