@@ -92,4 +92,6 @@
 #define getParameters		zend_get_parameters
 #define getParametersArray	zend_get_parameters_array
 
+#define list_entry			zend_rsrc_list_entry
+
 #endif							/* _PHP_COMPAT_H */
