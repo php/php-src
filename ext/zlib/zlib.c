@@ -660,7 +660,7 @@ PHP_FUNCTION(gzinflate)
 }
 /* }}} */
 
-/*`{{{ proto zlib_get_coding_type()
+/*`{{{ proto string zlib_get_coding_type(void)
    Returns the coding type used for output compression */
 
 PHP_FUNCTION(zlib_get_coding_type)

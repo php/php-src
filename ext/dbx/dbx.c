@@ -548,7 +548,7 @@ ZEND_FUNCTION(dbx_error)
 }
 /* }}} */
 
-/* {{{ proto string dbx_esc(dbx_link_object dbx_link, string sz)
+/* {{{ proto string dbx_escape_string(dbx_link_object dbx_link, string sz)
    Returns escaped string or NULL on error
 */
 ZEND_FUNCTION(dbx_escape_string)

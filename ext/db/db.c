@@ -183,7 +183,7 @@ dbm_info *php_find_dbm(pval *id TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto array dblist(void)
+/* {{{ proto array db_id_list(void)
    Return an associative array id->filename */ 
 #if HELLY_0
 /* New function not needed yet */
