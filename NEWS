@@ -1,12 +1,13 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ??? 2000, Version 4.0.1-dev
+?? ??? 2000, Version 4.0.1
+- Fixed a crash bug triggered by certain cases of class redeclarations
+  (Stanislav & Zeev, Zend Engine)
 - Fixed min()/max() segfault. (Andrei)
 - New module for reading EXIF header data from JPEG files.  Most digital
   cameras will embed all sorts of information about a picture inside the
   jpeg images it generates.  (Rasmus)
-- Fix a couple of warnings in the gd and ldap modules
 - Fixed basename() bug where "file.ext///" would not return the same
   as "/path/file.ext///" (Rasmus)
 - Add the swf_ortho function. (Sterling)
@@ -44,7 +45,7 @@ PHP 4.0                                                                    NEWS
 - ImagePolygon() is no longer limited by a maximum number of polygons.
   (Marc Pohl)
 - Added configure time checking for bcmath package. (Joey, Sascha)
-- Added get_declared_classes(). (Andrei, Zend library)
+- Added get_declared_classes(). (Andrei, Zend Engine)
 - Add initial NSAPI module from Jayakumar Muthukumarasamy. (Rasmus)
 - Added the SWF module which allows you to create Macromedia Flash files via 
   libswf. (Sterling)
