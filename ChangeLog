@@ -1,3 +1,43 @@
+2004-11-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+      Bug #30627
+
+2004-11-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #30685 (Malformed SOAPClient http header reequest).
+
+2004-11-04  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/mysqli/config.w32:
+      MySQL is releasing client libraries that compile out of the box
+      with mysqli extension, so there is no need for a specially compiled
+      client library anymore.
+
+    * ZendEngine2/Zend.dsp
+      ZendEngine2/ZendTS.dsp:
+      Added zend_strtod.* to the build
+
+    * ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.h:
+      Make zend_strtod compile on windows
+
+2004-11-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      Zend/Makefile.am:
+      MFH:
+      - MFH: Add entry for zend_strtod.c in belief that this is still active.
+
+    * (PHP_5_0)
+      ZendEngine2/Makefile.am:
+      - MFH: Add entry for zend_strtod.c in belief that this is still active.
+
+    * ZendEngine2/Makefile.am:
+      - Add entry for zend_strtod.c in belief that this is still active.
+
 2004-11-03  Derick Rethans  <php@derickrethans.nl>
 
     * configure.in
