@@ -60,8 +60,8 @@ test: sapi/cli/php
 			$(top_builddir)/sapi/cli/php -c php.ini-dist $(top_srcdir)/run-tests.php
 
 clean:
-	find . -follow -name \*.lo -o -name \*.o -o -name \*.la -o -name \*.a| xargs rm -f
-	find . -follow -name .libs -a -type d|xargs rm -rf
+	find . -name \*.lo -o -name \*.o -o -name \*.la -o -name \*.a| xargs rm -f
+	find . -name .libs -a -type d|xargs rm -rf
 	rm -f libphp4.la php sapi/cli/php modules/* libs/*
 
 distclean: clean
