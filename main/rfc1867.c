@@ -413,7 +413,9 @@ static char *php_ap_getword(char **line, char stop)
 					++pos;
 				}
 			}
-			++pos;
+			if (*pos) {
+				++pos;
+			}
 		} else ++pos;
 		
 	}
