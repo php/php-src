@@ -15,6 +15,10 @@
    | Author: Harald Radi <h.radi@nme.at>                                  |
    +----------------------------------------------------------------------+
  */
+/*
+ * 03.6.2001
+ * Added SafeArray ==> Hash support
+ */
 
 #ifdef PHP_WIN32
 
@@ -26,7 +30,7 @@
 
 PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage);
 PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type, int codepage);
-PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent, int codepage);
+PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent, int codepage);
 PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage);
 PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent, int codepage);
 
@@ -81,15 +85,16 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
 				var_arg->vt	= VT_EMPTY;
 			break;
 
+		case IS_ARRAY:
+		{
+			/* TODO: Walk the hash and convert the elements */
+			/* into a SafeArray. */
+			var_arg->vt = VT_EMPTY;
+			break;
+		}
 		case IS_RESOURCE:
 		case IS_CONSTANT:
 		case IS_CONSTANT_ARRAY:
-			var_arg->vt = VT_EMPTY;
-			break;
-
-		case IS_ARRAY:
-			//check if assoc or not 
-
 			var_arg->vt = VT_EMPTY;
 			break;
 
@@ -391,10 +396,96 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 	}
 }
 
-PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent, int codepage)
+PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent, int codepage)
 {
+	/* Changed the function to return a value for recursive error testing */
+	/* Existing calls will be unaffected by the change - so it */
+	/* seemed like the smallest impact on unfamiliar code */
+	int ret = 1; 
 
-	switch(var_arg->vt & ~VT_BYREF)
+	/* Add SafeArray support */
+	if (var_arg->vt & VT_ARRAY)
+	{
+		SAFEARRAY *array = V_ARRAY(var_arg);
+		LONG indices[1];
+		LONG lbound=0, ubound;
+		VARTYPE vartype;
+		register int ii;
+		UINT Dims;
+		VARIANT vv;
+		pval *element;
+
+		/* TODO: Add support for multi-dimensional SafeArrays */
+		/* For now just validate that the SafeArray has one dimension */
+		if (1 != (Dims = SafeArrayGetDim(array)))
+		{
+			php_error(E_WARNING,"Unsupported: multi-dimensional (%d) SafeArrays", Dims);
+			var_reset(pval_arg);
+			return 0;
+		}
+
+		/* This call has failed for everything I have tried */
+		/* But best leave it to be on the safe side */
+		if (S_OK != SafeArrayGetVartype(array, &vartype))
+		{
+			/* Fall back to what we do know */
+			/* Mask off the array bit and assume */
+			/* what is left is the type of the array */
+			/* elements */
+			vartype = var_arg->vt & ~VT_ARRAY;
+		}
+		SafeArrayGetUBound(array, 1, &ubound);
+		SafeArrayGetLBound(array, 1, &lbound);
+
+		/* Since COM returned an array we set up the php */
+		/* return value to be an array */
+		array_init(pval_arg);
+		INIT_PZVAL(pval_arg);
+
+		/* Walk the safe array */
+		for (ii=lbound;ii<=ubound;ii++)
+		{
+			indices[0] = ii;
+			VariantInit(&vv); /* Docs say this just set the vt field, but you never know */
+			/* Set up a variant to pass to a recursive call */
+			/* So that we do not need to have two copies */
+			/* of the code */
+			vv.vt = vartype;
+			SafeArrayGetElement(array, indices, (VOID *) &(vv.lVal));
+			/* Create an element to be added to the array */
+			ALLOC_ZVAL(element);
+			/* Call ourself again to handle the base type conversion */
+			/* If SafeArrayGetElement proclaims to allocate */
+			/* memory for a BSTR, so the recursive call frees */
+			/* the string correctly */
+			if (0 == php_variant_to_pval(&vv, element, persistent, codepage))
+			{
+				/* Error occurred setting up array element */
+				/* Error was displayed by the recursive call */
+				FREE_ZVAL(element);
+				/* TODO: Do we stop here, or go on and */
+				/* try to make sense of the rest of the array */
+				/* Going on leads to multiple errors displayed */
+				/* for the same conversion. For large arrays that */
+				/* could be very annoying */
+				/* And if we don't go on - what to do about */
+				/* the parts of the array that are OK? */
+				/* break; */
+			}
+			else
+			{
+				/* Just insert the element into our return array */
+				pval_copy_constructor(element);
+				INIT_PZVAL(element);
+				zend_hash_index_update(pval_arg->value.ht, ii, &element, sizeof(pval *), NULL);
+			}
+		}
+
+		/* Clean up the SafeArray since that is our responsibility */
+		SafeArrayDestroyData(array);
+		SafeArrayDestroyDescriptor(array);
+	}
+	else switch(var_arg->vt & ~VT_BYREF)
 	{
 		case VT_EMPTY:
 			var_uninit(pval_arg);
@@ -580,7 +671,12 @@ PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent
 
 				if(FAILED(hr))
 				{
-					php_error(E_WARNING,"can't query IUnknown");
+					char *error_message;
+
+					error_message = php_COM_error_message(hr);
+					php_error(E_WARNING,"Unable to obtain IDispatch interface:  %s", error_message);
+					LocalFree(error_message);
+
 					var_arg->pdispVal = NULL;
 				}
 			}
@@ -682,8 +778,10 @@ PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent
 		default:
 			php_error(E_WARNING,"Unsupported variant type: %d (0x%X)", var_arg->vt, var_arg->vt);
 			var_reset(pval_arg);
+			ret = 0;
 			break;
 	}
+	return ret;
 }
 
 PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage)
