@@ -165,9 +165,12 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	if (strncasecmp("compress.bzip2://", path, 17) == 0) {
 		path += 17;
 	}
+	if (mode[0] != 'w' && mode[0] != 'r' && mode[1] != '\0') {
+		return NULL;
+	}
 
 #ifdef VIRTUAL_DIR
-	virtual_filepath(path, &path_copy TSRMLS_CC);
+	virtual_filepath_ex(path, &path_copy, NULL TSRMLS_CC);
 #else
 	path_copy = path;
 #endif  
@@ -189,6 +192,12 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 			if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **) &fd, REPORT_ERRORS)) {
 				bz_file = BZ2_bzdopen(fd, mode);
 			}
+		}
+		/* remove the file created by php_stream_open_wrapper(), it is not needed since BZ2 functions
+		 * failed.
+		 */
+		if (!bz_file && mode[0] == 'w') {
+			VCWD_UNLINK(*opened_path);
 		}
 	}
 	
@@ -302,7 +311,12 @@ PHP_FUNCTION(bzopen)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(mode);
-	
+
+	if (Z_STRVAL_PP(mode)[0] != 'r' && Z_STRVAL_PP(mode)[0] != 'w' && Z_STRVAL_PP(mode)[1] != '\0') {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%s' is not a valid mode for bzopen(). Only 'w' and 'r' are supported.", Z_STRVAL_PP(mode));
+		RETURN_FALSE;
+	}
+
 	/* If it's not a resource its a string containing the filename to open */
 	if (Z_TYPE_PP(file) != IS_RESOURCE) {
 		convert_to_string_ex(file);
