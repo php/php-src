@@ -52,23 +52,29 @@ PHP_METHOD(domattr, __construct)
 	xmlNodePtr oldnode = NULL;
 	dom_object *intern;
 	char *name, *value = NULL;
-	int name_len, value_len;
+	int name_len, value_len, name_valid;
 
+	php_set_error_handling(EH_THROW, dom_domexception_class_entry TSRMLS_CC);
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|s", &id, dom_attr_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
+		php_std_error_handling();
 		return;
 	}
 
+	php_std_error_handling();
 	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 
-	if (name_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute name is required");
+	name_valid = xmlValidateName((xmlChar *) name, 0);
+	if (name_valid != 0) {
+		php_dom_throw_error(INVALID_CHARACTER_ERR, 1 TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
 	nodep = xmlNewProp(NULL, (xmlChar *) name, value);
 
-	if (!nodep)
+	if (!nodep) {
+		php_dom_throw_error(INVALID_STATE_ERR, 1 TSRMLS_CC);
 		RETURN_FALSE;
+	}
 
 	if (intern != NULL) {
 		oldnode = (xmlNodePtr)intern->ptr;
