@@ -544,6 +544,17 @@ function make_nav($query_orig){
    if ($localcharset != '') {
    	Udm_Set_Agent_Param($udm_agent,UDM_PARAM_CHARSET,$localcharset);
    }
+   
+   if (Udm_Api_Version() >= 30200) {
+   	if ($localcharset == '') Udm_Set_Agent_Param($udm_agent,UDM_PARAM_CHARSET,'utf-8');
+   	if ($browsercharset != '') {
+   		Udm_Set_Agent_Param($udm_agent,UDM_PARAM_BROWSER_CHARSET,$browsercharset);
+		Header ("Content-Type: text/html; charset=$browsercharset"); ?>	
+	} else {
+		Udm_Set_Agent_Param($udm_agent,UDM_PARAM_BROWSER_CHARSET,'utf-8');
+		Header ("Content-Type: text/html; charset=utf-8"); ?>	
+	}	
+   }
 
    for ($i=0; $i < count($stopwordtable_arr); $i++) {
    	if ($stopwordtable_arr[$i] != '') {
