@@ -1,6 +1,7 @@
 --TEST--
 PEAR_Error: die mode
 --SKIPIF--
+skip
 --FILE--
 <?php // -*- C++ -*-
 

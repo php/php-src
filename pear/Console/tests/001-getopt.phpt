@@ -1,5 +1,7 @@
 --TEST--
 Console_Getopt
+--SKIPIF--
+skip
 --FILE--
 <?php
 

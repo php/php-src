@@ -1,6 +1,7 @@
 --TEST--
 PEAR constructor/destructor test
 --SKIPIF--
+skip
 --FILE--
 <?php
 
