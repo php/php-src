@@ -64,6 +64,7 @@ AC_DEFUN(AC_DBA_STD_RESULT,[
 
 PHP_ARG_ENABLE(dba,whether to enable DBA,
 [  --enable-dba            Build DBA with builtin modules])
+dba_shared=$ext_shared
 
 AC_ARG_WITH(gdbm,
 [  --with-gdbm[=DIR]         DBA: Include GDBM support],[
@@ -170,8 +171,8 @@ AC_DEFUN(PHP_DBA_DB_CHECK,[
       AC_MSG_ERROR(Version 4.1 requires patch level 25)
     ])
   fi
-  if test "$ext_shared" = "yes"; then
-    AC_MSG_CHECKING(if db can be used as shared extension)
+  if test "$dba_shared" = "yes"; then
+    AC_MSG_CHECKING(if dba can be used as shared extension)
     AC_EGREP_CPP(yes,[
 #include "$THIS_INCLUDE"
 #if DB_VERSION_MAJOR > 3 || (DB_VERSION_MAJOR == 3 && DB_VERSION_MINOR > 2)
@@ -429,7 +430,7 @@ AC_MSG_CHECKING(whether to enable DBA interface)
 if test "$HAVE_DBA" = "1"; then
   AC_MSG_RESULT(yes)
   AC_DEFINE(HAVE_DBA, 1, [ ])
-  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_db2.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db3.c dba_db4.c dba_flatfile.c dba_inifile.c $cdb_sources $flat_sources $ini_sources, $ext_shared)
+  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_db2.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db3.c dba_db4.c dba_flatfile.c dba_inifile.c $cdb_sources $flat_sources $ini_sources, $dba_shared)
   PHP_ADD_BUILD_DIR($ext_builddir/libinifile)
   PHP_ADD_BUILD_DIR($ext_builddir/libcdb)
   PHP_ADD_BUILD_DIR($ext_builddir/libflatfile)
