@@ -6,11 +6,11 @@ ZE2 An interface is inherited
 <?php
 
 interface if_a {
-	abstract function f_a();
+	function f_a();
 }
 	
 interface if_b extends if_a {
-	abstract function f_b();
+	function f_b();
 }
 
 class base {
