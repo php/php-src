@@ -302,13 +302,15 @@ static int php_output_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 		SG(request_info).query_string = f->r->args;
 		SG(request_info).request_method = f->r->method;
 		SG(request_info).request_uri = f->r->uri;
-		f->r->no_cache = f->r->no_local_copy = 1;
+		f->r->no_local_copy = 1;
 		content_type = sapi_get_default_content_type(SLS_C);
 		f->r->content_type = apr_pstrdup(f->r->pool, content_type);
 		efree(content_type);
 		apr_table_unset(f->r->headers_out, "Content-Length");
 		apr_table_unset(f->r->headers_out, "Last-Modified");
 		apr_table_unset(f->r->headers_out, "Expires");
+		apr_table_unset(f->r->headers_out, "ETag");
+		apr_table_unset(f->r->headers_in, "Connection");
 		auth = apr_table_get(f->r->headers_in, "Authorization");
 		php_handle_auth_data(auth SLS_CC);
 		
