@@ -741,6 +741,15 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 			}
 		}
 
+		/* return a single element if next() was called without count */
+		if((arg_count == 0) && (count == 1))
+		{
+			long index[] = {1};
+
+			SafeArrayGetElement(pSA, index, var_result);
+			SafeArrayDestroy(pSA);
+		}
+
 		return SUCCESS;
 	}
 	else if(C_HASENUM(obj) && strstr(Z_STRVAL_P(function_name), "reset"))
