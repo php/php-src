@@ -160,6 +160,12 @@
 
 #define WSDL_HTTP_TRANSPORT "http://schemas.xmlsoap.org/soap/http"
 
+#define WSDL_MIME_NAMESPACE "http://schemas.xmlsoap.org/wsdl/mime/"
+
+#define WSDL_DIME_NAMESPACE "http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+#define WSDL_DIME_OPEN      "http://schemas.xmlsoap.org/ws/2002/04/dime/open-layout"
+#define WSDL_DIME_CLOSED    "http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout"
+
 #define UNKNOWN_TYPE 999998
 #define END_KNOWN_TYPES 999999
 
