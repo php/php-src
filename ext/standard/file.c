@@ -993,7 +993,7 @@ PHP_FUNCTION(fgets)
 			return_value->value.str.len = strlen(return_value->value.str.val);
 			/* resize buffer if it's much larger than the result */
 			if(return_value->value.str.len < len/2) {
-				return_value->value.str.val = erealloc(buf,return_value->value.str.len);
+				return_value->value.str.val = erealloc(buf,return_value->value.str.len+1);
 			}
 		}
 		return_value->type = IS_STRING;
