@@ -21,6 +21,13 @@
 #include "zend_list.h"
 
 
+#define ZEND_NAMED_FUNCTION(name) void name(INTERNAL_FUNCTION_PARAMETERS)
+#define ZEND_FUNCTION(name) ZEND_NAMED_FUNCTION(zend_if_##name)
+
+#define ZEND_NAMED_FE(runtime_name, name, arg_types) { #runtime_name, name, arg_types },
+#define ZEND_FE(name, arg_types) ZEND_NAMED_FE(name, zend_if_##name, arg_types)
+
+
 int zend_next_free_module(void);
 
 int getParameters(int ht, int param_count,...);
@@ -32,8 +39,8 @@ int getThis(zval **this);
 
 
 int ParameterPassedByReference(int ht, uint n);
-int register_functions(function_entry *functions);
-void unregister_functions(function_entry *functions, int count);
+int register_functions(zend_function_entry *functions);
+void unregister_functions(zend_function_entry *functions, int count);
 int register_module(zend_module_entry *module_entry);
 zend_class_entry *register_internal_class(zend_class_entry *class_entry);
 

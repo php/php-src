@@ -494,6 +494,8 @@ ZEND_API void _persist_alloc(void *ptr)
 	_mem_block_check(ptr, 1, filename, lineno);
 #endif
 
+	HANDLE_BLOCK_INTERRUPTIONS();
+
 	/* remove the block from the non persistent list */
 	REMOVE_POINTER_FROM_LIST(p);
 
@@ -501,6 +503,7 @@ ZEND_API void _persist_alloc(void *ptr)
 
 	/* add the block to the persistent list */
 	ADD_POINTER_TO_LIST(p);
+	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
 
 

@@ -85,7 +85,7 @@ typedef struct {
 	char *fname;
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
 	unsigned char *func_arg_types;
-} function_entry;
+} zend_function_entry;
 
 
 typedef struct {
@@ -107,6 +107,7 @@ struct _zend_class_entry {
 	char *name;
 	uint name_length;
 	struct _zend_class_entry *parent; 
+	int *refcount;
 
 	HashTable function_table;
 	HashTable default_properties;

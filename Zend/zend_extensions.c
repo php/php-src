@@ -100,13 +100,26 @@ int zend_load_extension(char *path)
 #endif
 }
 
-
-void zend_extension_dtor(zend_extension *extension)
+static void zend_extension_shutdown(zend_extension *extension)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	if (extension->shutdown) {
 		extension->shutdown(extension);
 	}
+#endif
+}
+
+
+void zend_shutdown_extensions()
+{
+	zend_llist_apply(&zend_extensions, (void (*)(void *)) zend_extension_shutdown);
+	zend_llist_destroy(&zend_extensions);
+}
+
+
+void zend_extension_dtor(zend_extension *extension)
+{
+#if ZEND_EXTENSIONS_SUPPORT
 	DL_UNLOAD(extension->handle);
 #endif
 }

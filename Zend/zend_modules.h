@@ -28,7 +28,7 @@
 
 typedef struct {
 	char *name;
-	function_entry *functions;
+	zend_function_entry *functions;
 	int (*module_startup_func)(INIT_FUNC_ARGS);
 	int (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
 	int (*request_startup_func)(INIT_FUNC_ARGS);

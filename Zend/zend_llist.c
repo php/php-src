@@ -72,17 +72,25 @@ ZEND_API void zend_llist_del_element(zend_llist *l, void *element)
 
 ZEND_API void zend_llist_destroy(zend_llist *l)
 {
-	zend_llist_element *current=l->head, *next;
+	zend_llist_element *current, *next;
 
+	if (l->dtor) {
+		current = l->head;
+
+		while (current) {
+			l->dtor(current->data);
+			current = current->next;
+		}
+	}
+	
+	current = l->head;
 	while (current) {
 		next = current->next;
-		if (l->dtor) {
-			l->dtor(current->data);
-		}
 		pefree(current, l->persistent);
 		current = next;
 	}
 }
+
 
 ZEND_API void zend_llist_remove_tail(zend_llist *l)
 {
