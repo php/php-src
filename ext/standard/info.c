@@ -333,9 +333,9 @@ void php_print_credits(int flag)
 		CREDIT_LINE("GD imaging", "Rasmus Lerdorf, Stig Bakken, Jim Winstead");
 		CREDIT_LINE("GetText", "Alex Plotnick");
 		CREDIT_LINE("HyperWave", "Uwe Steinmann");
-		CREDIT_LINE("Java", "Sam Ruby");
 		CREDIT_LINE("IMAP", "Rex Logan, Mark Musone, Brian Wang, Kaj-Michael Lang, Antoni Pamies Olive, Rasmus Lerdorf");
 		CREDIT_LINE("Informix", "Danny Heijl, Christian Cartus, Jouni Ahto");
+		CREDIT_LINE("Java", "Sam Ruby");
 		CREDIT_LINE("Interbase", "Jouni Ahto");
 		CREDIT_LINE("LDAP", "Amitay Isaacs, Eric Warnke, Rasmus Lerdorf, Gerrit Thomson");
 		CREDIT_LINE("mcrypt", "Sascha Schumann");
