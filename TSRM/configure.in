@@ -10,13 +10,14 @@ AM_CONFIG_HEADER(tsrm_config.h)
 sinclude(tsrm.m4)
 	
 TSRM_BASIC_CHECKS
+TSRM_OTHER_CHECKS
 	
 AM_PROG_LIBTOOL
 if test "$enable_debug" != "yes"; then
   AM_SET_LIBTOOL_VARIABLE([--silent])
 fi
 
-TSRM_PTHREAD
+dnl TSRM_PTHREAD
 
 AC_DEFINE(ZTS,1,[ ])
 
