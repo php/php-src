@@ -370,6 +370,34 @@ static char *php_strerror(int error TSRMLS_DC) {
 	return (buf ? (char *) buf : "");
 }
 
+#ifdef HAVE_IPV6
+/* Sets addr by hostname, or by ip in string form (AF_INET6) */
+int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock  TSRMLS_DC) {
+	struct in6_addr tmp;
+	struct hostent *host_entry;
+
+	if (inet_pton(AF_INET6, string, &tmp)) {
+		memcpy(&(sin6->sin6_addr.s6_addr), &(tmp.s6_addr), sizeof(struct in6_addr));
+	} else {
+		if (! (host_entry = gethostbyname2(string, AF_INET6))) {
+#ifdef PHP_WIN32
+			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", WSAGetLastError());
+#else
+			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", (-10000 - h_errno));
+#endif
+			return 0;
+		}
+		if (host_entry->h_addrtype != AF_INET6) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Host lookup failed: Non AF_INET6 domain returned on AF_INET6 socket");
+			return 0;
+		}
+		memcpy(&(sin6->sin6_addr.s6_addr), host_entry->h_addr_list[0], host_entry->h_length);
+	}
+
+	return 1;
+}
+#endif
+
 /* Sets addr by hostname, or by ip in string form (AF_INET)  */
 int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_sock  TSRMLS_DC) {
 	struct in_addr tmp;
@@ -417,6 +445,9 @@ PHP_MINIT_FUNCTION(sockets)
 
 	REGISTER_LONG_CONSTANT("AF_UNIX",		AF_UNIX,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AF_INET",		AF_INET,		CONST_CS | CONST_PERSISTENT);
+#ifdef HAVE_IPV6
+	REGISTER_LONG_CONSTANT("AF_INET6",		AF_INET6,		CONST_CS | CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("SOCK_STREAM",	SOCK_STREAM,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOCK_DGRAM",	SOCK_DGRAM,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOCK_RAW",		SOCK_RAW,		CONST_CS | CONST_PERSISTENT);
@@ -825,6 +856,10 @@ PHP_FUNCTION(socket_getsockname)
 	php_socket				*php_sock;
 	struct sockaddr			*sa;
 	struct sockaddr_in		*sin;
+#ifdef HAVE_IPV6
+	struct sockaddr_in6		*sin6;
+	char					addr6[INET6_ADDRSTRLEN+1];
+#endif
 	struct sockaddr_un		*s_un;
 	char					*addr_string;
 	socklen_t				salen = sizeof(php_sockaddr_storage);
@@ -842,6 +877,20 @@ PHP_FUNCTION(socket_getsockname)
 	}
 	
 	switch (sa->sa_family) {
+#ifdef HAVE_IPV6
+		case AF_INET6:
+			sin6 = (struct sockaddr_in6 *) sa;
+			inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);			
+			zval_dtor(addr);
+			ZVAL_STRING(addr, addr6, 1);
+
+			if (port != NULL) {
+				zval_dtor(port);
+				ZVAL_LONG(port, htons(sin6->sin6_port));
+			}
+			RETURN_TRUE;
+			break;
+#endif
 		case AF_INET:
 			sin = (struct sockaddr_in *) sa;
 			while (inet_ntoa_lock == 1);
@@ -857,6 +906,7 @@ PHP_FUNCTION(socket_getsockname)
 				ZVAL_LONG(port, htons(sin->sin_port));
 			}
 			RETURN_TRUE;
+			break;
 
 		case AF_UNIX:
 			s_un = (struct sockaddr_un *) sa;
@@ -864,6 +914,7 @@ PHP_FUNCTION(socket_getsockname)
 			zval_dtor(addr);
 			ZVAL_STRING(addr, s_un->sun_path, 1);
 			RETURN_TRUE;
+			break;
 
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported address family %d", sa->sa_family);
@@ -881,6 +932,10 @@ PHP_FUNCTION(socket_getpeername)
 	php_socket				*php_sock;
 	struct sockaddr			*sa;
 	struct sockaddr_in		*sin;
+#ifdef HAVE_IPV6
+	struct sockaddr_in6		*sin6;
+	char					addr6[INET6_ADDRSTRLEN+1];
+#endif
 	struct sockaddr_un		*s_un;
 	char					*addr_string;
 	socklen_t				salen = sizeof(php_sockaddr_storage);
@@ -898,6 +953,21 @@ PHP_FUNCTION(socket_getpeername)
 	}
 
 	switch (sa->sa_family) {
+#ifdef HAVE_IPV6
+		case AF_INET6:
+			sin6 = (struct sockaddr_in6 *) sa;
+			inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);			
+			zval_dtor(arg2);
+			ZVAL_STRING(arg2, addr6, 1);
+			
+			if (arg3 != NULL) {
+				zval_dtor(arg3);
+				ZVAL_LONG(arg3, htons(sin6->sin6_port));
+			}
+
+			RETURN_TRUE;
+			break;
+#endif
 		case AF_INET:
 			sin = (struct sockaddr_in *) sa;
 			while (inet_ntoa_lock == 1);
@@ -914,6 +984,7 @@ PHP_FUNCTION(socket_getpeername)
 			}
 
 			RETURN_TRUE;
+			break;
 
 		case AF_UNIX:
 			s_un = (struct sockaddr_un *) sa;
@@ -921,6 +992,7 @@ PHP_FUNCTION(socket_getpeername)
 			zval_dtor(arg2);
 			ZVAL_STRING(arg2, s_un->sun_path, 1);
 			RETURN_TRUE;
+			break;
 
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported address family %d", sa->sa_family);
@@ -941,7 +1013,11 @@ PHP_FUNCTION(socket_create)
 		return;
     }
 
-	if (arg1 != AF_UNIX && arg1 != AF_INET) {
+	if (arg1 != AF_UNIX 
+#ifdef HAVE_IPV6
+		&& arg1 != AF_INET6
+#endif
+		&& arg1 != AF_INET) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid socket domain [%d] specified for argument 1, assuming AF_INET", arg1);
 		arg1 = AF_INET;
 	}
@@ -972,19 +1048,40 @@ PHP_FUNCTION(socket_connect)
 	zval				*arg1;
 	php_socket			*php_sock;
 	struct sockaddr_in	sin;
+#ifdef HAVE_IPV6
+	struct sockaddr_in6	sin6;
+#endif
 	struct sockaddr_un	s_un;
 	char				*addr;
 	int					retval, addr_len;
-	long					port;
+	long				port;
+	int					argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &arg1, &addr, &addr_len, &port) == FAILURE)
+	if (zend_parse_parameters(argc TSRMLS_CC, "rs|l", &arg1, &addr, &addr_len, &port) == FAILURE)
 		return;
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 
 	switch(php_sock->type) {
+#ifdef HAVE_IPV6
+		case AF_INET6:
+			if (argc != 3) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Socket of type AF_INET6 requires 3 arguments");
+				RETURN_FALSE;
+			}
+
+			sin6.sin6_family	= AF_INET6;
+			sin6.sin6_port	= htons((unsigned short int)port);
+
+			if (! php_set_inet6_addr(&sin6, addr, php_sock TSRMLS_CC)) {
+				RETURN_FALSE;
+			}
+
+			retval = connect(php_sock->bsd_socket, (struct sockaddr *)&sin6, sizeof(struct sockaddr_in6));
+			break;
+#endif
 		case AF_INET:
-			if (ZEND_NUM_ARGS() != 3) {
+			if (argc != 3) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Socket of type AF_INET requires 3 arguments");
 				RETURN_FALSE;
 			}
@@ -1077,9 +1174,26 @@ PHP_FUNCTION(socket_bind)
 				retval = bind(php_sock->bsd_socket, (struct sockaddr *)sa, sizeof(struct sockaddr_in));
 				break;
 			}
-		
+#ifdef HAVE_IPV6
+		case AF_INET6:
+			{
+				struct sockaddr_in6 *sa = (struct sockaddr_in6 *) sock_type;
+
+				memset(sa, 0, sizeof(sa_storage)); /* Apparently, Mac OSX needs this */
+
+				sa->sin6_family = AF_INET6;
+				sa->sin6_port = htons((unsigned short) port);
+
+				if (! php_set_inet6_addr(sa, addr, php_sock TSRMLS_CC)) {
+					RETURN_FALSE;
+				}
+
+				retval = bind(php_sock->bsd_socket, (struct sockaddr *)sa, sizeof(struct sockaddr_in6));
+				break;
+			}
+#endif		
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unsupported socket type '%d', must be AF_UNIX or AF_INET", php_sock->type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unsupported socket type '%d', must be AF_UNIX, AF_INET, or AF_INET6", php_sock->type);
 			RETURN_FALSE;
 	}
 
@@ -1392,6 +1506,10 @@ PHP_FUNCTION(socket_recvfrom)
 	php_socket			*php_sock;
 	struct sockaddr_un	s_un;
 	struct sockaddr_in	sin;
+#ifdef HAVE_IPV6
+	struct sockaddr_in6	sin6;
+	char				addr6[INET6_ADDRSTRLEN];
+#endif
 	socklen_t			slen;
 	int					retval;
 	long					arg3, arg4;
@@ -1451,7 +1569,35 @@ PHP_FUNCTION(socket_recvfrom)
 			ZVAL_STRING(arg5, address ? address : "0.0.0.0", 1);
 			ZVAL_LONG(arg6, ntohs(sin.sin_port));
 			break;
+#ifdef HAVE_IPV6
+		case AF_INET6:
+			slen = sizeof(sin6);
+			memset(&sin6, 0, slen);
+			sin6.sin6_family = AF_INET6;
+		
+			if (arg6 == NULL) {
+				WRONG_PARAM_COUNT;
+			}
+			
+			retval = recvfrom(php_sock->bsd_socket, recv_buf, arg3, arg4, (struct sockaddr *)&sin6, (socklen_t *)&slen);
+			
+			if (retval < 0) {
+				efree(recv_buf);
+				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
+				RETURN_FALSE;
+			}
+			
+			zval_dtor(arg2);
+			zval_dtor(arg5);
+			zval_dtor(arg6);
 
+			inet_ntop(AF_INET6, &sin6.sin6_addr, addr6, INET6_ADDRSTRLEN);
+
+			ZVAL_STRINGL(arg2, recv_buf, retval, 0); 
+			ZVAL_STRING(arg5, addr6 ? addr6 : "::", 1);
+			ZVAL_LONG(arg6, ntohs(sin6.sin6_port));
+			break;
+#endif
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported socket type %d", php_sock->type);
 			RETURN_FALSE;
@@ -1469,11 +1615,15 @@ PHP_FUNCTION(socket_sendto)
 	php_socket			*php_sock;
 	struct sockaddr_un	s_un;
 	struct sockaddr_in	sin;
+#ifdef HAVE_IPV6
+	struct sockaddr_in6	sin6;
+#endif
 	int					retval, buf_len, addr_len;
 	long					len, flags, port = 0;
 	char				*buf, *addr;
+	int					argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rslls|l", &arg1, &buf, &buf_len, &len, &flags, &addr, &addr_len, &port) == FAILURE)
+	if (zend_parse_parameters(argc TSRMLS_CC, "rslls|l", &arg1, &buf, &buf_len, &len, &flags, &addr, &addr_len, &port) == FAILURE)
 		return;
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
@@ -1489,7 +1639,7 @@ PHP_FUNCTION(socket_sendto)
 			break;
 
 		case AF_INET:
-			if (ZEND_NUM_ARGS() != 6) {
+			if (argc != 6) {
 				WRONG_PARAM_COUNT;
 			}
 
@@ -1503,7 +1653,23 @@ PHP_FUNCTION(socket_sendto)
 			
 			retval = sendto(php_sock->bsd_socket, buf, (len > buf_len) ? buf_len : len, flags, (struct sockaddr *) &sin, sizeof(sin));
 			break;
+#ifdef HAVE_IPV6
+		case AF_INET6:
+			if (argc != 6) {
+				WRONG_PARAM_COUNT;
+			}
 
+			memset(&sin6, 0, sizeof(sin6));
+			sin6.sin6_family = AF_INET6;
+			sin6.sin6_port = htons((unsigned short) port);
+			
+			if (! php_set_inet6_addr(&sin6, addr, php_sock TSRMLS_CC)) {
+				RETURN_FALSE;
+			}
+			
+			retval = sendto(php_sock->bsd_socket, buf, (len > buf_len) ? buf_len : len, flags, (struct sockaddr *) &sin, sizeof(sin));
+			break;
+#endif
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported socket type %d", php_sock->type);
 			RETURN_FALSE;
@@ -1531,6 +1697,9 @@ PHP_FUNCTION(socket_recvmsg)
 	struct cmsghdr			*ctl_buf;
 	struct sockaddr			*sa = (struct sockaddr *) &sa_storage;
 	struct sockaddr_in		*sin = (struct sockaddr_in *) sa;
+#ifdef HAVE_IPV6
+	struct sockaddr_in6		*sin6 = (struct sockaddr_in6 *) sa;
+#endif
 	struct sockaddr_un		*s_un = (struct sockaddr_un *) sa;
 	socklen_t				salen = sizeof(sa_storage);
 
@@ -1548,6 +1717,65 @@ PHP_FUNCTION(socket_recvmsg)
 	ctl_buf = (Z_LVAL_P(arg4) > sizeof(struct cmsghdr)) ? (struct cmsghdr*)emalloc(Z_LVAL_P(arg4)) : NULL;
 
 	switch (sa->sa_family) {
+#ifdef HAVE_IPV6
+		case AF_INET6:
+			
+			if (arg7 == NULL) {
+				efree(ctl_buf);
+				WRONG_PARAM_COUNT;
+			}
+			
+			memset(sa, 0, sizeof(sa_storage));
+			hdr.msg_name	= (void *) sin6;
+			hdr.msg_namelen	= sizeof(sa_storage);
+			hdr.msg_iov		= iov->iov_array;
+			hdr.msg_iovlen	= iov->count;
+
+			hdr.msg_control = ctl_buf ? (void *) ctl_buf : NULL;
+			hdr.msg_controllen = ctl_buf ? Z_LVAL_P(arg4) : 0;
+#ifndef MISSING_MSGHDR_MSGFLAGS
+			hdr.msg_flags	= 0;
+#endif
+
+			if (recvmsg(php_sock->bsd_socket, &hdr, Z_LVAL_P(arg5)) < 0) {
+				PHP_SOCKET_ERROR(php_sock, "unable to receive message", errno);
+				RETURN_FALSE;
+			} else {
+				struct cmsghdr *mhdr = (struct cmsghdr *) hdr.msg_control;
+				
+				zval_dtor(arg3);
+				zval_dtor(arg4);
+				zval_dtor(arg5);
+				zval_dtor(arg6);
+				zval_dtor(arg7);
+				
+				ZVAL_LONG(arg4, hdr.msg_controllen);
+#ifndef MISSING_MSGHDR_MSGFLAGS
+				ZVAL_LONG(arg5, hdr.msg_flags);
+#endif
+				ZVAL_LONG(arg7, ntohs(sin6->sin6_port));
+				
+				array_init(arg3);
+				
+				if (mhdr != NULL) {
+					add_assoc_long(arg3,	"cmsg_level",	mhdr->cmsg_level);
+					add_assoc_long(arg3,	"cmsg_type",	mhdr->cmsg_type);
+					add_assoc_string(arg3,	"cmsg_data",	CMSG_DATA(mhdr), 1);
+				}
+				
+				{
+					char tmp[INET6_ADDRSTRLEN+1];
+					if (inet_ntop(AF_INET6, &sin6->sin6_addr, tmp, INET6_ADDRSTRLEN)) {
+						ZVAL_STRING(arg6, tmp, 1);
+					} else {
+						ZVAL_STRING(arg6, "::", 1);
+					} 
+				}
+				
+				RETURN_TRUE;
+			}
+			break;
+#endif
 		case AF_INET:
 			
 			if (arg7 == NULL) {
@@ -1604,6 +1832,7 @@ PHP_FUNCTION(socket_recvmsg)
 				
 				RETURN_TRUE;
 			}
+			break;
 
 	case AF_UNIX:
 		memset(sa, 0, sizeof(sa_storage));
@@ -1653,6 +1882,7 @@ PHP_FUNCTION(socket_recvmsg)
 			ZVAL_STRING(arg6, s_un->sun_path, 1);
 			RETURN_TRUE;
 		}
+		break;
 		
 	default:
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported address family %d", sa->sa_family);
@@ -1688,6 +1918,38 @@ PHP_FUNCTION(socket_sendmsg)
 	}
 
 	switch(sa.sa_family) {
+#ifdef HAVE_IPV6
+		case AF_INET6:
+			{
+				struct msghdr hdr;
+				struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) &sa;
+				
+				set_h_errno(0);
+				set_errno(0);
+				
+				memset(&hdr, 0, sizeof(hdr));
+				hdr.msg_name = (void *) &sa;
+				hdr.msg_namelen = sizeof(sa);
+				hdr.msg_iov = iov->iov_array;
+				hdr.msg_iovlen = iov->count;
+				
+				memset(sin6, 0, sizeof(sa));
+				
+				sin6->sin6_family = AF_INET6;
+				sin6->sin6_port = htons((unsigned short)port);
+				
+				if (! php_set_inet6_addr(sin6, addr, php_sock TSRMLS_CC)) {
+					RETURN_FALSE;
+				}
+				
+				if (sendmsg(php_sock->bsd_socket, &hdr, flags) == -1) {
+					PHP_SOCKET_ERROR(php_sock, "unable to send message", errno);
+				}
+				
+				RETURN_TRUE;
+			}
+			break;
+#endif
 		case AF_INET:
 			{
 				struct msghdr hdr;
@@ -1717,6 +1979,7 @@ PHP_FUNCTION(socket_sendmsg)
 				
 				RETURN_TRUE;
 			}
+			break;
 			
 		case AF_UNIX:
 			{
@@ -1740,6 +2003,7 @@ PHP_FUNCTION(socket_sendmsg)
 				
 				RETURN_TRUE;
 			}
+			break;
 
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported address family %d", sa.sa_family);
@@ -1918,7 +2182,11 @@ PHP_FUNCTION(socket_create_pair)
 	php_sock[0] = (php_socket*)emalloc(sizeof(php_socket));
 	php_sock[1] = (php_socket*)emalloc(sizeof(php_socket));
 
-	if (domain != AF_INET && domain != AF_UNIX) {
+	if (domain != AF_INET 
+#ifdef HAVE_IPV6
+		&& domain != AF_INET6
+#endif
+		&& domain != AF_UNIX) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid socket domain [%d] specified for argument 1, assuming AF_INET", domain);
 		domain = AF_INET;
 	}
