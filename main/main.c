@@ -416,6 +416,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 						efree(docref_buf);
 					}
 					docref_buf = ref;
+					docref = docref_buf;
 					p = strrchr(ref, '#');
 					if (p) {
 						target = estrdup(p);
