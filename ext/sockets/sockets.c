@@ -62,12 +62,7 @@
 # define IS_INVALID_SOCKET(a)	(a->bsd_socket == INVALID_SOCKET)
 #endif
 
-#ifdef ZTS
-int sockets_globals_id;
-#else
-php_sockets_globals sockets_globals;
-#endif
-
+ZEND_DECLARE_MODULE_GLOBALS(sockets)
 
 #ifndef MSG_WAITALL
 #ifdef LINUX
@@ -90,7 +85,9 @@ php_sockets_globals sockets_globals;
 #define PHP_BINARY_READ 0x0002
 
 #define PHP_SOCKET_ERROR(socket,msg,errn)	socket->error = errn;	\
-											php_error(E_WARNING, "%s() %s [%d]: %s", get_active_function_name(TSRMLS_C), msg, errn, php_strerror(errn))
+											SOCKETS_G(last_error) = errn; \
+											php_error(E_WARNING, "%s() %s [%d]: %s", \
+													  get_active_function_name(TSRMLS_C), msg, errn, php_strerror(errn))
 
 static int le_iov;
 #define le_iov_name "Socket I/O vector"
@@ -374,11 +371,19 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 	return 1;
 }
 		
+
+static void php_sockets_init_globals(zend_sockets_globals *sockets_globals TSRMLS_DC)
+{
+	sockets_globals->last_error = 0;
+}
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(sockets)
 {
 	struct protoent *pe;
+
+	ZEND_INIT_MODULE_GLOBALS(sockets, php_sockets_init_globals, NULL);
 
 	le_socket	= zend_register_list_destructors_ex(destroy_socket,	NULL, le_socket_name, module_number);
 	le_iov		= zend_register_list_destructors_ex(destroy_iovec,	NULL, le_iov_name, module_number);
@@ -526,6 +531,7 @@ PHP_FUNCTION(socket_select)
 	retval = select(max_fd+1, &rfds, &wfds, &efds, tv_p);
 
 	if (retval == -1) {
+		SOCKETS_G(last_error) = errno;
 		php_error(E_WARNING, "%s() %s [%d]: %s", get_active_function_name(TSRMLS_C), "unable to select", errno, php_strerror(errno));
 		RETURN_FALSE;
 	}
@@ -570,6 +576,8 @@ PHP_FUNCTION(socket_accept)
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 	
 	if (!accept_connect(php_sock, &new_sock, (struct sockaddr *) &sa TSRMLS_CC)) {
+		php_error(E_WARNING, "%s() unable to accept socket connection [%d]: %s",
+				  get_active_function_name(TSRMLS_C), errno, php_strerror(errno));
 		RETURN_FALSE;
 	}
 	
@@ -798,6 +806,8 @@ PHP_FUNCTION(socket_getsockname)
 			RETURN_TRUE;
 
 		default:
+			php_error(E_WARNING, "%s() Unsupported address family %d",
+					  get_active_function_name(TSRMLS_C), sa->sa_family);
 			RETURN_FALSE;
 	}
 }
@@ -854,6 +864,8 @@ PHP_FUNCTION(socket_getpeername)
 			RETURN_TRUE;
 
 		default:
+			php_error(E_WARNING, "%s() Unsupported address family %d",
+					  get_active_function_name(TSRMLS_C), sa->sa_family);
 			RETURN_FALSE;
 	}
 }
@@ -885,6 +897,9 @@ PHP_FUNCTION(socket_create)
 	php_sock->type = arg1;
 
 	if (IS_INVALID_SOCKET(php_sock)) {
+		SOCKETS_G(last_error) = errno;
+		php_error(E_WARNING, "%s() Unable to create socket [%d]: %s",
+				  get_active_function_name(TSRMLS_C), errno, php_strerror(errno));
 		efree(php_sock);
 		RETURN_FALSE;
 	}
@@ -912,6 +927,8 @@ PHP_FUNCTION(socket_connect)
 	switch(php_sock->type) {
 		case AF_INET:
 			if (ZEND_NUM_ARGS() != 3) {
+				php_error(E_WARNING, "%s() Socket of type AF_INET requires 3 arguments",
+						  get_active_function_name(TSRMLS_C));
 				RETURN_FALSE;
 			}
 
@@ -932,6 +949,8 @@ PHP_FUNCTION(socket_connect)
 			break;
 
 		default:
+			php_error(E_WARNING, "%s() Unsupported socket type %d",
+					  get_active_function_name(TSRMLS_C), php_sock->type);
 			RETURN_FALSE;
 		}	
 	
@@ -1370,6 +1389,8 @@ PHP_FUNCTION(socket_recvfrom)
 			break;
 
 		default:
+			php_error(E_WARNING, "%s() Unsupported socket type %d",
+					  get_active_function_name(TSRMLS_C), php_sock->type);
 			RETURN_FALSE;
 	}
 
@@ -1420,6 +1441,8 @@ PHP_FUNCTION(socket_sendto)
 			break;
 
 		default:
+			php_error(E_WARNING, "%s() Unsupported socket type %d",
+					  get_active_function_name(TSRMLS_C), php_sock->type);
 			RETURN_FALSE;
 	}
 
@@ -1565,6 +1588,8 @@ PHP_FUNCTION(socket_recvmsg)
 		}
 
 	default:
+		php_error(E_WARNING, "%s() Unsupported address family %d",
+				  get_active_function_name(TSRMLS_C), sa->sa_family);
 		RETURN_FALSE;
 	}
 }
@@ -1649,6 +1674,8 @@ PHP_FUNCTION(socket_sendmsg)
 			}
 
 		default:
+			php_error(E_WARNING, "%s() Unsupported address family %d",
+					  get_active_function_name(TSRMLS_C), sa.sa_family);
 			RETURN_FALSE;
 	}
 }
@@ -1895,19 +1922,19 @@ PHP_FUNCTION(socket_shutdown)
    Returns the last error on the socket */
 PHP_FUNCTION(socket_last_error)
 {
-	zval		*arg1;
+	zval		*arg1 = NULL;
 	php_socket	*php_sock;
-	int			error;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE)
-		return;	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &arg1) == FAILURE)
+		return;
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket*, &arg1, -1, le_socket_name, le_socket);
-
-	error = php_sock->error;
-
-	RETURN_LONG(error);
-}  
+	if (arg1) {
+		ZEND_FETCH_RESOURCE(php_sock, php_socket*, &arg1, -1, le_socket_name, le_socket);
+		RETVAL_LONG(php_sock->error);
+	} else {
+		RETVAL_LONG(SOCKETS_G(last_error));
+	}
+}
 /* }}} */
 
 /* {{{ proto void socket_clear_error(resource socket)

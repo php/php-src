@@ -102,12 +102,14 @@ int open_listen_sock(php_socket **php_sock, int port, int backlog TSRMLS_DC);
 int accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la TSRMLS_DC);
 int php_read(int bsd_socket, void *buf, int maxlen);
 
+ZEND_BEGIN_MODULE_GLOBALS(sockets)
+    int last_error;
+ZEND_END_MODULE_GLOBALS(sockets)
+
 #ifdef ZTS
-#define SOCKETSG(v) (sockets_globals->v)
-#define SOCKETSLS_FETCH() php_sockets_globals *sockets_globals = ts_resource(sockets_globals_id)
+#define SOCKETS_G(v) TSRMG(sockets_globals_id, zend_sockets_globals *, v)
 #else
-#define SOCKETSG(v) (sockets_globals.v)
-#define SOCKETSLS_FETCH()
+#define SOCKETS_G(v) (sockets_globals.v)
 #endif
 
 #else
