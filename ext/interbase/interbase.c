@@ -934,13 +934,14 @@ PHP_FUNCTION(ibase_pconnect)
    Close an InterBase connection */
 PHP_FUNCTION(ibase_close)
 {
-	zval **link_arg = NULL;
 	ibase_db_link *ib_link;
-	int link_id = -1;
+	int link_id;
 	
 	RESET_ERRMSG;
 	
 	switch (ZEND_NUM_ARGS()) {
+		zval **link_arg;
+
 		case 0:
 			link_id = IBG(default_link);
 			break;
@@ -949,13 +950,14 @@ PHP_FUNCTION(ibase_close)
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(link_arg);
+			link_id = Z_LVAL_PP(link_arg);
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 
-	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, link_arg, link_id, "InterBase link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, link_id, "InterBase link", le_link, le_plink);
 	zend_list_delete(link_id);
 	RETURN_TRUE;
 }
