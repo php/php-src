@@ -1213,7 +1213,6 @@ static void _php3_char_to_str(char *str,uint len,char from,char *to,int to_len,p
 	*target = 0;
 }
 
-#if 0
 /*
  * this is a binary safe equivalent to strnstr
  * note that we don't check for the end in str_to_str but here
@@ -1225,19 +1224,13 @@ _php3_memnstr(char *haystack, char *needle, int needle_len, char *end)
 	char *p = haystack;
 	char *s = NULL;
 
-	for(; p < end - needle_len + 1&& 
-			(s = memchr(p, *needle, end - haystack)); p = s + 1) {
+	for(; p <= end - needle_len && 
+			(s = memchr(p, *needle, end - p - needle_len + 1)); p = s + 1) {
 		if(memcmp(s, needle, needle_len) == 0)
 			return s;
 	}
 	return NULL;
 }
-
-/*
- * because of efficiency we use malloc/realloc/free here
- * erealloc _will_ move your data around - it took me some time
- * to find out ... Sascha Schumann <sas@schell.de> 981220
- */
 
 static char *_php3_str_to_str(char *haystack, int length, 
 	char *needle, int needle_len, char *str, int str_len, int *_new_length)
@@ -1246,78 +1239,48 @@ static char *_php3_str_to_str(char *haystack, int length,
 	char *r, *s;
 	char *end = haystack + length;
 	char *new;
+	char *off;
 	
-	new = malloc(length);
+	new = emalloc(length);
 	/* we jump through haystack searching for the needle. hurray! */
 	for(p = haystack, q = new;
 			(r = _php3_memnstr(p, needle, needle_len, end));) {
 	/* this ain't optimal. you could call it `efficient memory usage' */
-		realloc(new, (q - new) + (r - p) + (str_len) + 1);
+		off = erealloc(new, (q - new) + (r - p) + (str_len) + 1);
+		if(off != new) {
+			if(!off) {
+				goto finish;
+			}
+			q += off - new;
+			new = off;
+		}
 		memcpy(q, p, r - p);
 		q += r - p;
 		memcpy(q, str, str_len);
 		q += str_len;
 		p = r + needle_len;
 	}
+	
 	/* if there is a rest, copy it */
-	if((end - p)) {
+	if((end - p) > 0) {
 		s = (q) + (end - p);
-		new = realloc(new, s - new + 1);
+		off = erealloc(new, s - new + 1);
+		if(off != new) {
+			if(!off) {
+				goto finish;
+			}
+			q += off - new;
+			new = off;
+			s = q + (end - p);
+		}
 		memcpy(q, p, end - p);
 		q = s;
 	}
+finish:
 	*q = '\0';
 	if(_new_length) *_new_length = q - new;
 	return new;
 }
-#endif
-
-static char *_php3_memstr(char *s, char *c, size_t n, size_t m)
-{
-    char *p;
-
-    for(p = s; ((size_t) (p - s)) < n; p++)
-        if(memcmp(p, c, m) == 0)
-            return p;
-    return NULL;
-}
-
-#define ATTCHSTR(st, sz) \
-    nl += sz; \
-    n = realloc(n, nl + 1); \
-    memcpy(n + no, st, sz); \
-    no += sz
-
-
-static char *_php3_str_to_str(char *a, int al, char *b, int bl, char *c, int cl,
-        int *newlen)
-{
-    char *n = NULL, *p, *q;
-    int nl = 0;
-    int no = 0;
-
-    /* run through all occurences of b in a */
-    for(p = q = a; (p = _php3_memstr(p, b, al - (p - a), bl)); q = p) {
-        /* attach everything between the previous occ. and this one */
-        ATTCHSTR(q, p - q);
-        /* attach the replacement string c */
-        ATTCHSTR(c, cl);
-        /* jump over string b in a */
-        p += bl;
-    }
-    
-	/* anything left over ? */
-    if((al - (q - a)) > 0) {
-        ATTCHSTR(q, al - (q - a));
-    }
-
-    if(newlen) *newlen = nl;
-    n[nl] = '\0';
-
-    return n;
-}
-
-#undef ATTCHSTR
 
 /* {{{ proto string str_replace(string needle, string str, string haystack)
    Replace all occurrences of needle in haystack with str */
@@ -1325,29 +1288,29 @@ void php3_str_replace(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *haystack, *needle, *str;
 	char *new;
+	int len = 0;
 
-	if(ARG_COUNT(ht) != 3 || 
+	if(ARG_COUNT(ht) != 3 ||
 			getParameters(ht, 3, &needle, &str, &haystack) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_string(haystack);
 	convert_to_string(needle);
-	convert_to_string(str);
-
-	if(needle->value.str.len == 1) {
-		_php3_char_to_str(haystack->value.str.val,haystack->value.str.len,needle->value.str.val[0],str->value.str.val, str->value.str.len ,return_value);
+	convert_to_string(str);                                                                                                                                         if(needle->value.str.len == 1) {                                                    _php3_char_to_str(haystack->value.str.val,haystack->value.str.len,needle->value.str.val[0],str->value.str.val, str->value.str.len ,return_value);
 		return;
 	}
 
-	new = _php3_str_to_str(haystack->value.str.val, haystack->value.str.len, 
-				needle->value.str.val, needle->value.str.len, 
-				str->value.str.val, str->value.str.len,
-				&return_value->value.str.len);
-	return_value->value.str.val = emalloc(return_value->value.str.len + 1);
-	memcpy(return_value->value.str.val, new, return_value->value.str.len + 1);
-	free(new);
-	return_value->type = IS_STRING;
+	if(needle->value.str.len == 0) {
+		php3_error(E_WARNING, "The length of the needle must not be 0");
+		RETURN_FALSE;
+	}
+
+	new = _php3_str_to_str(haystack->value.str.val, haystack->value.str.len,
+			needle->value.str.val, needle->value.str.len,
+			str->value.str.val, str->value.str.len,
+			&len);
+	RETURN_STRINGL(new, len, 0);
 }
 /* }}} */
 

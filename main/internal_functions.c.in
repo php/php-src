@@ -40,6 +40,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "ext/standard/reg.h"
 @EXT_INCLUDE_CODE@
 
 /* SNMP has to be moved to ext */
@@ -51,6 +52,7 @@ unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 unsigned char second_arg_allow_ref[] = { 2, BYREF_NONE, BYREF_ALLOW };
 
 zend_module_entry *php3_builtin_modules[] = {
+	phpext_regex_ptr,
 @EXT_MODULE_PTRS@
 };
 

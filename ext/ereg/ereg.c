@@ -49,9 +49,94 @@ function_entry reg_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry regexp_module_entry = {
-	"Regular Expressions", reg_functions, NULL, NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
+
+static int php_minit_regex(INIT_FUNC_ARGS);
+static int php_mshutdown_regex(SHUTDOWN_FUNC_ARGS);
+static void php_info_regex(ZEND_MODULE_INFO_FUNC_ARGS);
+
+zend_module_entry regexp_module_entry = {
+	"Regular Expressions", 
+	reg_functions, 
+	php_minit_regex, php_mshutdown_regex,
+	NULL, NULL, php_info_regex, 
+	STANDARD_MODULE_PROPERTIES
 };
+
+#ifdef ZTS
+int reg_globals_id;
+#else
+static php_reg_globals reg_globals;
+#endif
+
+typedef struct {
+	regex_t preg;
+	int cflags;
+} reg_cache;
+
+static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
+{
+	REGSLS_FETCH
+	int r = 0;
+	int patlen = strlen(pattern);
+	reg_cache *rc = NULL;
+	
+	if(_php3_hash_find(&REG(ht_rc), (char *) pattern, patlen, (void **) &rc) == FAILURE ||
+			rc->cflags != cflags) {
+		r = regcomp(preg, pattern, cflags);
+		if(!r) {
+			reg_cache rcp;
+
+			rcp.cflags = cflags;
+			memcpy(&rcp.preg, preg, sizeof(*preg));
+			_php3_hash_update(&REG(ht_rc), (char *) pattern, patlen,
+					(void *) &rcp, sizeof(*rc), NULL);
+		}
+	} else {
+		memcpy(preg, &rc->preg, sizeof(*preg));
+	}
+	
+	return r;
+}
+
+#define regfree(a);
+#define regcomp _php_regcomp
+
+static void _free_reg_cache(reg_cache *rc) 
+{
+	regfree(&rc->preg);
+}
+	
+static void php_reg_init_globals(php_reg_globals *reg_globals) 
+{
+	_php3_hash_init(&reg_globals->ht_rc, 0, NULL, (void (*)(void *)) _free_reg_cache, 1);
+}
+
+static int php_minit_regex(INIT_FUNC_ARGS)
+{
+#ifdef ZTS
+	reg_globals_id = tsrm_allocate_id(sizeof(php_reg_globals), php_reg_init_globals, NULL);
+#else
+	php_reg_init_globals(&reg_globals);
+#endif
+
+	return SUCCESS;
+}
+
+static int php_mshutdown_regex(SHUTDOWN_FUNC_ARGS)
+{
+	_php3_hash_destroy(&REG(ht_rc));
+	return SUCCESS;
+}
+
+static void php_info_regex(ZEND_MODULE_INFO_FUNC_ARGS)
+{
+#if HSREGEX
+	PUTS("Bundled regex library enabled\n");
+#else
+	PUTS("System regex library enabled\n");
+#endif
+}
+
 
 /* This is the maximum number of (..) constructs we'll generate from a
    call to ereg() or eregi() with the optional third argument. */
@@ -562,6 +647,8 @@ PHPAPI void php3_sql_regcase(INTERNAL_FUNCTION_PARAMETERS)
 	RETVAL_STRINGL(tmp, j, 0);
 }
 /* }}} */
+
+
 
 /*
  * Local variables:
