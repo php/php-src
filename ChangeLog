@@ -1,3 +1,22 @@
+2000-02-06  Zeev Suraski  <zeev@php.net>
+
+    * sapi/isapi/php4isapi.c: Fix buglet
+
+    * sapi/isapi/php4isapi.c:
+2000-02-06  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: *** empty log message ***
+
+2000-02-06  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec: - Make it compile again with new (p)list globals.
+
+2000-02-06  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/base64.c:    fix #3226
+
+    * ext/standard/head.c: fix for #3413
+
 2000-02-05  Zeev Suraski  <zeev@php.net>
 
     * ext/standard/info.c: Standardize
