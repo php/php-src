@@ -32,9 +32,9 @@
 #endif
 
 #ifdef PHP_WIN32
-# define finite(x) _finite(x)
-# define isnan(x) _isnan(x)
-# define isinf(x) _isnan(x)
+# define zend_finite(x) _finite(x)
+# define zend_isnan(x) _isnan(x)
+# define zend_isinf(x) _isnan(x)
 #endif
 
 /* {{{ proto int abs(int number)
@@ -393,7 +393,7 @@ PHP_FUNCTION(is_finite)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &dval) == FAILURE) {
 		return;
 	}
-	RETURN_BOOL(finite(dval));
+	RETURN_BOOL(zend_finite(dval));
 }
 /* }}} */
 
@@ -406,7 +406,7 @@ PHP_FUNCTION(is_infinite)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &dval) == FAILURE) {
 		return;
 	}
-	RETURN_BOOL(isinf(dval));
+	RETURN_BOOL(zend_isinf(dval));
 }
 /* }}} */
 
@@ -419,7 +419,7 @@ PHP_FUNCTION(is_nan)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &dval) == FAILURE) {
 		return;
 	}
-	RETURN_BOOL(isnan(dval));
+	RETURN_BOOL(zend_isnan(dval));
 }
 /* }}} */
 
@@ -453,7 +453,7 @@ PHP_FUNCTION(pow)
 	dval = pow(Z_DVAL_P(zbase),Z_DVAL_P(zexp));
 
 	/* if we wanted a long, and dval < LONG_MAX, it must be a long. */
-	if (wantlong && finite(dval) && dval <= (double)LONG_MAX) {
+	if (wantlong && zend_finite(dval) && dval <= (double)LONG_MAX) {
 		RETURN_LONG((long)dval);
 	}
 
