@@ -119,6 +119,7 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_close, NULL)
 	PHP_FE(sqlite_query, NULL)
 	PHP_FE(sqlite_array_query, NULL)
+	PHP_FE(sqlite_single_query, NULL)
 	PHP_FE(sqlite_fetch_array, NULL)
 	PHP_FE(sqlite_fetch_string, NULL)
 	PHP_FE(sqlite_fetch_all, NULL)
@@ -1264,8 +1265,8 @@ PHP_FUNCTION(sqlite_array_query)
 	zend_bool decode_binary = 1;
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-			ZEND_NUM_ARGS() TSRMLS_CC, "sr|l", &sql, &sql_len, &zdb, &mode, &decode_binary) && 
-		FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &zdb, &sql, &sql_len, &mode, &decode_binary)) {
+			ZEND_NUM_ARGS() TSRMLS_CC, "sr|lb", &sql, &sql_len, &zdb, &mode, &decode_binary) && 
+		FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|lb", &zdb, &sql, &sql_len, &mode, &decode_binary)) {
 		return;
 	}
 	DB_FROM_ZVAL(db, &zdb);
@@ -1299,6 +1300,123 @@ PHP_FUNCTION(sqlite_array_query)
 }
 /* }}} */
 
+/* {{{ php_sqlite_fetch_string */
+static void php_sqlite_fetch_string(struct php_sqlite_result *res, zend_bool decode_binary, zval *return_value TSRMLS_DC)
+{
+	int j, buffered = res->buffered;
+	const char **rowdata, **colnames;
+	char *decoded = NULL;
+	int decoded_len;
+	
+	/* check range of the row */
+	if (res->curr_row >= res->nrows) {
+		/* no more */
+		RETURN_FALSE;
+	}
+	
+	if (res->buffered) {
+		rowdata = (const char**)&res->table[res->curr_row * res->ncolumns];
+	} else {
+		rowdata = (const char**)res->table;
+	}
+
+	if (decode_binary && rowdata[0] != NULL && rowdata[0][0] == '\x01') {
+		decoded = emalloc(strlen(rowdata[0]));
+		decoded_len = sqlite_decode_binary(rowdata[0]+1, decoded);
+		efree((char*)rowdata[0]);
+		rowdata[0] = NULL;
+	} else if (rowdata[0]) {
+		decoded_len = strlen((char*)rowdata[0]);
+		if (res->buffered) {
+			decoded = estrndup((char*)rowdata[0], decoded_len);
+		} else {
+			decoded = (char*)rowdata[0];
+			rowdata[0] = NULL;
+		}
+	}
+
+	if (!res->buffered) {
+		/* non buffered: fetch next row */
+		php_sqlite_fetch(res TSRMLS_CC);
+	}
+	/* advance the row pointer */
+	res->curr_row++;
+
+	if (decoded == NULL) {
+		RETURN_NULL();
+	} else {
+		RETURN_STRINGL(decoded, decoded_len, 0);
+	}
+}
+/* }}} */
+
+/* {{{ proto array sqlite_single_query(resource db, string query [ , bool single_row, bool decode_binary ])
+   Executes a query against a given database and returns an array */
+PHP_FUNCTION(sqlite_single_query)
+{
+	zval *zdb, *ent;
+	struct php_sqlite_db *db;
+	struct php_sqlite_result *rres;
+	char *sql;
+	long sql_len;
+	char *errtext = NULL;
+	zend_bool decode_binary = 1;
+	zend_bool srow = 1;
+
+	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
+			ZEND_NUM_ARGS() TSRMLS_CC, "sr|bb", &sql, &sql_len, &zdb, &srow, &decode_binary) && 
+		FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|bb", &zdb, &sql, &sql_len, &srow, &decode_binary)) {
+		return;
+	}
+	DB_FROM_ZVAL(db, &zdb);
+
+	/* avoid doing work if we can */
+	if (!return_value_used) {
+		db->last_err_code = sqlite_exec(db->db, sql, NULL, NULL, &errtext);
+
+		if (db->last_err_code != SQLITE_OK) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
+			sqlite_freemem(errtext);
+		}
+		return;
+	}
+
+	rres = (struct php_sqlite_result *)emalloc(sizeof(*rres));
+	sqlite_query(db, sql, sql_len, PHPSQLITE_NUM, 0, NULL, rres TSRMLS_CC);
+	if (db->last_err_code != SQLITE_OK) {
+		efree(rres);
+		RETURN_FALSE;
+	}
+
+	if (!srow) {
+		array_init(return_value);
+	}
+
+	while (rres->curr_row < rres->nrows) {
+		MAKE_STD_ZVAL(ent);
+		php_sqlite_fetch_string(rres, decode_binary, ent TSRMLS_DC);
+
+		/* if set and we only have 1 row in the result set, return the result as a string. */
+		if (srow) {
+			if (rres->curr_row == 1 && rres->curr_row >= rres->nrows) {
+				*return_value = *ent;
+				zval_copy_ctor(return_value);
+				zval_dtor(ent);
+				FREE_ZVAL(ent);
+				break;
+			} else {
+				srow = 0;
+				array_init(return_value);
+			}
+		}
+		add_next_index_zval(return_value, ent);
+	}
+
+	real_result_dtor(rres TSRMLS_CC);
+}
+/* }}} */
+
+
 /* {{{ proto string sqlite_fetch_array(resource result [, bool decode_binary])
    Fetches first column of a result set as a string */
 PHP_FUNCTION(sqlite_fetch_string)
@@ -1315,51 +1433,7 @@ PHP_FUNCTION(sqlite_fetch_string)
 	}
 	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
 
-	/* check if there are any more rows on the cursor */
-	if (res->curr_row >= res->nrows) {
-		RETURN_FALSE;
-	}
-
-	if (res->buffered) {
-		rowdata = (const char**)&res->table[res->curr_row * res->ncolumns];
-	} else {
-		rowdata = (const char**)res->table;
-	}
-
-	if (decode_binary && rowdata[0] != NULL && rowdata[0][0] == '\x01') {
-		decoded = emalloc(strlen(rowdata[0]));
-		decoded_len = sqlite_decode_binary(rowdata[0]+1, decoded);
-		if (!res->buffered) {
-			efree((char*)rowdata[0]);
-			rowdata[0] = NULL;
-		}
-	} else {
-		if (rowdata[0]) {
-			decoded_len = strlen((char*)rowdata[0]);
-			if (res->buffered) {
-				decoded = estrndup((char*)rowdata[0], decoded_len);
-			} else {
-				decoded = (char*)rowdata[0];
-				rowdata[0] = NULL;
-			}
-		} else {
-			decoded_len = 0;
-			decoded = NULL;
-		}
-	}
-
-	if (!res->buffered) {
-		/* non buffered: fetch next row */
-		php_sqlite_fetch(res TSRMLS_CC);
-	}
-	/* advance the row pointer */
-	res->curr_row++;
-
-	if (decoded == NULL) {
-		RETURN_NULL();
-	} else {
-		RETURN_STRINGL(decoded, decoded_len, 0);
-	}
+	php_sqlite_fetch_string(res, decode_binary, return_value TSRMLS_DC);
 }
 /* }}} */
 

@@ -48,6 +48,7 @@ PHP_FUNCTION(sqlite_close);
 PHP_FUNCTION(sqlite_query);
 PHP_FUNCTION(sqlite_unbuffered_query);
 PHP_FUNCTION(sqlite_array_query);
+PHP_FUNCTION(sqlite_single_query);
 
 PHP_FUNCTION(sqlite_fetch_array);
 PHP_FUNCTION(sqlite_fetch_string);
