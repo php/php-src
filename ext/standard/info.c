@@ -322,6 +322,7 @@ void php_print_credits(int flag)
 		PUTS("<tr><th colspan=\"2\" bgcolor=\"" PHP_HEADER_COLOR "\">Module Authors</th></tr>\n");
 		php_info_print_table_header(2, "Module", "Authors");
 		CREDIT_LINE("Apache", "Rasmus Lerdorf, Stig Bakken, David Sklar");
+		CREDIT_LINE("Assert", "Thies C. Arntzen");
 		CREDIT_LINE("BC Math", "Andi Gutmans");
 		CREDIT_LINE("CyberCash", "Evan Klinger");
 		CREDIT_LINE("Win32 COM", "Zeev Suraski");
@@ -352,6 +353,7 @@ void php_print_credits(int flag)
 		CREDIT_LINE("Perl Compatible Regexps", "Andrei Zmievski");
 		CREDIT_LINE("PDF", "Uwe Steinmann");
 		CREDIT_LINE("PostgreSQL", "Jouni Ahto, Zeev Suraski");
+		CREDIT_LINE("Readline", "Thies C. Arntzen");
 		CREDIT_LINE("Sessions", "Sascha Schumann, Andrei Zmievski");
 		CREDIT_LINE("SNMP", "Rasmus Lerdorf");
 		CREDIT_LINE("Sybase", "Zeev Suraski");
