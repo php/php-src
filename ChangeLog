@@ -1,3 +1,53 @@
+2005-01-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      MFH: - Fix possible crash (PR#26223). Leaks remain.
+
+    * ext/standard/basic_functions.c:
+      - Fix possible crash (PR#26223). Leaks remain.
+
+2005-01-08  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli_embedded.c
+      ext/mysqli/tests/connect.inc:
+      fixed compile bug under Windows (libmysql.def currently doesn't export
+      mysql_server_init/end).
+      Thanks to Sebastian Bergmann for reporting
+
+2005-01-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c:
+      Unnecesary check was removed
+
+2005-01-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/serialize/bug31442.phpt:
+      - Add new test
+
+    * ext/standard/tests/serialize/bug30234.phpt:
+      - Unify
+
+    * ext/mysqli/mysqli_exception.c:
+      - Fix shared build
+
+    * ext/mysqli/mysqli.c:
+      - Remove double destroy (which is definitively wrong and prevents php from
+        normal execution).
+
+    * ext/dom/document.c:
+      - Fix dependency
+
+2005-01-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      NN
+
+    * ext/snmp/php_snmp.h
+      ext/snmp/snmp.c:
+      - Fix some memory leaks
+
 2005-01-07  Antony Dovgal  <tony2001@phpclub.net>
 
     * ext/standard/head.c:
