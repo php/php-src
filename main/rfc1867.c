@@ -207,7 +207,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 					if(is_arr_upload) {
 						arr_len = strlen(start_arr);
 						if(arr_index) efree(arr_index);
-						arr_index = estrndup(start_arr+1,arr_len-1);	
+						arr_index = estrndup(start_arr+1,arr_len-2);	
 					}
 				} else {
 					php_error(E_WARNING, "File upload error - no name component in content disposition");
