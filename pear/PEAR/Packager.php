@@ -114,7 +114,7 @@ class PEAR_Packager extends PEAR_Common
         }
         $pwd = getcwd();
         $pkgfile = basename($pkgfile);
-        if ($pkginfo['release_state'] == 'snapshot') {
+        if (isset($pkginfo['release_state']) && $pkginfo['release_state'] == 'snapshot') {
             $pkginfo['version'] = date('Ymd');
         }
         // don't want strange characters

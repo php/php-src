@@ -147,7 +147,8 @@ class PEAR_Common extends PEAR
     {
         array_push($this->element_stack, $name);
         $this->current_element = $name;
-        $this->prev_element    = $this->element_stack[sizeof($this->element_stack)-2];
+        $spos = sizeof($this->element_stack) - 2;
+        $this->prev_element = ($spos >= 0) ? $this->element_stack[$spos] : '';
         $this->current_attributes = $attribs;
         switch ($name) {
             case 'dir':
@@ -253,7 +254,8 @@ class PEAR_Common extends PEAR
                 $this->in_changelog = false;
         }
         array_pop($this->element_stack);
-        $this->current_element = $this->element_stack[sizeof($this->element_stack)-1];
+        $spos = sizeof($this->element_stack) - 1;
+        $this->current_element = ($spos > 0) ? $this->element_stack[$spos] : '';
     }
 
     // }}}
@@ -265,48 +267,48 @@ class PEAR_Common extends PEAR
             case 'name':
                 switch ($this->prev_element) {
                     case 'package':
-                        $this->pkginfo['package'] .= $data;
+                        $this->pkginfo['package'] = $data;
                         break;
                     case 'maintainer':
-                        $this->current_maintainer['name'] .= $data;
+                        $this->current_maintainer['name'] = $data;
                         break;
                 }
                 break;
             case 'summary':
-                $this->pkginfo['summary'] .= $data;
+                $this->pkginfo['summary'] = $data;
                 break;
             case 'user':
-                $this->current_maintainer['handle'] .= $data;
+                $this->current_maintainer['handle'] = $data;
                 break;
             case 'email':
-                $this->current_maintainer['email'] .= $data;
+                $this->current_maintainer['email'] = $data;
                 break;
             case 'role':
                 if (!in_array($data, $this->maintainer_roles)) {
                     trigger_error("The maintainer role: '$data' is not valid", E_USER_WARNING);
                 } else {
-                    $this->current_maintainer['role'] .= $data;
+                    $this->current_maintainer['role'] = $data;
                 }
                 break;
             case 'version':
                 if ($this->in_changelog) {
-                    $this->current_release['version'] .= $data;
+                    $this->current_release['version'] = $data;
                 } else {
-                    $this->pkginfo['version'] .= $data;
+                    $this->pkginfo['version'] = $data;
                 }
                 break;
             case 'date':
                 if ($this->in_changelog) {
-                    $this->current_release['release_date'] .= $data;
+                    $this->current_release['release_date'] = $data;
                 } else {
-                    $this->pkginfo['release_date'] .= $data;
+                    $this->pkginfo['release_date'] = $data;
                 }
                 break;
             case 'notes':
                 if ($this->in_changelog) {
-                    $this->current_release['release_notes'] .= $data;
+                    $this->current_release['release_notes'] = $data;
                 } else {
-                    $this->pkginfo['release_notes'] .= $data;
+                    $this->pkginfo['release_notes'] = $data;
                 }
                 break;
             case 'state':
@@ -315,13 +317,12 @@ class PEAR_Common extends PEAR
                 } elseif ($this->in_changelog) {
                     $this->current_release['release_state'] = $data;
                 } else {
-                    $this->pkginfo['release_state'] .= $data;
+                    $this->pkginfo['release_state'] = $data;
                 }
                 break;
             case 'dir':
                 break;
             case 'file':
-                $role = strtolower($this->current_attributes['role']);
                 $this->current_file = trim($data);
                 break;
             case 'libname':
