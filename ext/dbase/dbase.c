@@ -306,6 +306,74 @@ PHP_FUNCTION(dbase_add_record) {
 }
 /* }}} */
 
+/* {{{ proto bool dbase_replace_record(int identifier, array data, int recnum)
+   Replaces a record to the database */
+void php3_dbase_replace_record(INTERNAL_FUNCTION_PARAMETERS) {
+	pval *dbh_id, *fields, *field, *recnum;
+	dbhead_t *dbh;
+	int dbh_type;
+
+	int num_fields;
+	dbfield_t *dbf, *cur_f;
+	char *cp, *t_cp;
+	int i;
+	DBase_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 3 || getParameters(ht,3,&dbh_id,&fields,&recnum)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long(dbh_id);
+	convert_to_long(recnum);
+	if (fields->type != IS_ARRAY) {
+		php3_error(E_WARNING, "Expected array as second parameter");
+		RETURN_FALSE;
+	}
+
+	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
+	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
+		php3_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
+		RETURN_FALSE;
+	}
+
+	num_fields = _php3_hash_num_elements(fields->value.ht);
+
+	if (num_fields != dbh->db_nfields) {
+		php3_error(E_WARNING, "Wrong number of fields specified");
+		RETURN_FALSE;
+	}
+
+	cp = t_cp = (char *)emalloc(dbh->db_rlen + 1);
+	if (!cp) {
+		php3_error(E_WARNING, "unable to allocate memory");
+		RETURN_FALSE;
+	}
+	*t_cp++ = VALID_RECORD;
+
+	dbf = dbh->db_fields;
+	for (i = 0, cur_f = dbf; cur_f < &dbf[num_fields]; i++, cur_f++) {
+		if (_php3_hash_index_find(fields->value.ht, i, (void **)&field) == FAILURE) {
+			php3_error(E_WARNING, "unexpected error");
+			efree(cp);
+			RETURN_FALSE;
+		}
+		convert_to_string(field);
+		sprintf(t_cp, cur_f->db_format, field->value.str.val); 
+		t_cp += cur_f->db_flen;
+	}
+
+	if (put_dbf_record(dbh, recnum->value.lval, cp) < 0) {
+		php3_error(E_WARNING, "unable to put record at %ld", dbh->db_records);
+		efree(cp);
+		RETURN_FALSE;
+	}
+
+        put_dbf_info(dbh);
+	efree(cp);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
 /* {{{ proto bool dbase_delete_record(int identifier, int record)
    Marks a record to be deleted */
 PHP_FUNCTION(dbase_delete_record) {
@@ -646,6 +714,7 @@ function_entry dbase_functions[] = {
 	{"dbase_numrecords",	php3_dbase_numrecords,		NULL},
 	{"dbase_numfields",		php3_dbase_numfields,		NULL},
 	{"dbase_add_record",	php3_dbase_add_record,		NULL},
+	{"dbase_replace_record",	php3_dbase_replace_record,		NULL},
 	{"dbase_get_record",	php3_dbase_get_record,		NULL},
 	{"dbase_get_record_with_names", php3_dbase_get_record_with_names,               NULL},
 	{"dbase_delete_record",	php3_dbase_delete_record,	NULL},
