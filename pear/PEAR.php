@@ -490,6 +490,7 @@ class PEAR
             $code        = $message->getCode();
             $userinfo    = $message->getUserInfo();
             $error_class = $message->getType();
+            $message->error_message_prefix = '';
             $message     = $message->getMessage();
         }
 
