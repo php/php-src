@@ -108,7 +108,6 @@ static int execsql(char **pzErrMsg, sqlite *db, const char *zSql){
 */
 static int vacuumCallback2(void *pArg, int argc, char **argv, char **NotUsed){
   vacuumStruct *p = (vacuumStruct*)pArg;
-  int rc = 0;
   const char *zSep = "(";
   int i;
 
@@ -127,8 +126,8 @@ static int vacuumCallback2(void *pArg, int argc, char **argv, char **NotUsed){
     }
   }
   appendText(&p->s2,")", 1);
-  rc = execsql(p->pzErrMsg, p->dbNew, p->s2.z);
-  return rc;
+  p->rc = execsql(p->pzErrMsg, p->dbNew, p->s2.z);
+  return p->rc;
 }
 
 /*
@@ -160,6 +159,7 @@ static int vacuumCallback1(void *pArg, int argc, char **argv, char **NotUsed){
       sqlite_freemem(zErrMsg);
     }
   }
+  if( rc!=SQLITE_ABORT ) p->rc = rc;
   return rc;
 }
 
@@ -170,7 +170,6 @@ static int vacuumCallback1(void *pArg, int argc, char **argv, char **NotUsed){
 */
 static int vacuumCallback3(void *pArg, int argc, char **argv, char **NotUsed){
   vacuumStruct *p = (vacuumStruct*)pArg;
-  int rc = 0;
   char zBuf[200];
   assert( argc==1 );
   if( argv==0 ) return 0;
@@ -178,21 +177,21 @@ static int vacuumCallback3(void *pArg, int argc, char **argv, char **NotUsed){
   assert( strlen(p->zPragma)<100 );
   assert( strlen(argv[0])<30 );
   sprintf(zBuf,"PRAGMA %s=%s;", p->zPragma, argv[0]);
-  rc = execsql(p->pzErrMsg, p->dbNew, zBuf);
-  return rc;
+  p->rc = execsql(p->pzErrMsg, p->dbNew, zBuf);
+  return p->rc;
 }
 
 /*
 ** Generate a random name of 20 character in length.
 */
-static void randomName(char *zBuf){
-  static const char zChars[] =
+static void randomName(unsigned char *zBuf){
+  static const unsigned char zChars[] =
     "abcdefghijklmnopqrstuvwxyz"
     "0123456789";
   int i;
+  sqliteRandomness(20, zBuf);
   for(i=0; i<20; i++){
-    int n = sqliteRandomByte() % (sizeof(zChars)-1);
-    zBuf[i] = zChars[n];
+    zBuf[i] = zChars[ zBuf[i]%(sizeof(zChars)-1) ];
   }
 }
 #endif
@@ -240,6 +239,9 @@ int sqliteRunVacuum(char **pzErrMsg, sqlite *db){
        (char*)0);
     return SQLITE_ERROR;
   }
+  if( db->flags & SQLITE_Interrupt ){
+    return SQLITE_INTERRUPT;
+  }
   memset(&sVac, 0, sizeof(sVac));
 
   /* Get the full pathname of the database file and create two
@@ -257,7 +259,7 @@ int sqliteRunVacuum(char **pzErrMsg, sqlite *db){
   strcpy(zTemp, zFilename);
   for(i=0; i<10; i++){
     zTemp[nFilename] = '-';
-    randomName(&zTemp[nFilename+1]);
+    randomName((unsigned char*)&zTemp[nFilename+1]);
     if( !sqliteOsFileExists(zTemp) ) break;
   }
   if( i>=10 ){
@@ -273,8 +275,8 @@ int sqliteRunVacuum(char **pzErrMsg, sqlite *db){
        zTemp, " - ", zErrMsg, (char*)0);
     goto end_of_vacuum;
   }
-  if( execsql(pzErrMsg, db, "BEGIN") ) goto end_of_vacuum;
-  if( execsql(pzErrMsg, dbNew, "PRAGMA synchronous=off; BEGIN") ){
+  if( (rc = execsql(pzErrMsg, db, "BEGIN"))!=0 ) goto end_of_vacuum;
+  if( (rc = execsql(pzErrMsg, dbNew, "PRAGMA synchronous=off; BEGIN"))!=0 ){
     goto end_of_vacuum;
   }
   
@@ -309,13 +311,17 @@ end_of_vacuum:
        zErrMsg, (char*)0);
   }
   sqlite_exec(db, "ROLLBACK", 0, 0, 0);
+  if( (dbNew && (dbNew->flags & SQLITE_Interrupt)) 
+         || (db->flags & SQLITE_Interrupt) ){
+    rc = SQLITE_INTERRUPT;
+  }
   if( dbNew ) sqlite_close(dbNew);
   sqliteOsDelete(zTemp);
   sqliteFree(zTemp);
   sqliteFree(sVac.s1.z);
   sqliteFree(sVac.s2.z);
   if( zErrMsg ) sqlite_freemem(zErrMsg);
-  if( rc==SQLITE_ABORT ) rc = SQLITE_ERROR;
-  return rc;
+  if( rc==SQLITE_ABORT && sVac.rc!=SQLITE_INTERRUPT ) sVac.rc = SQLITE_ERROR;
+  return sVac.rc;
 #endif
 }

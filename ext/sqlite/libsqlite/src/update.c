@@ -32,7 +32,8 @@ void sqliteUpdate(
 ){
   int i, j;              /* Loop counters */
   Table *pTab;           /* The table to be updated */
-  int addr;              /* VDBE instruction address of the start of the loop */
+  int loopStart;         /* VDBE instruction address of the start of the loop */
+  int jumpInst;          /* Addr of VDBE instruction to jump out of loop */
   WhereInfo *pWInfo;     /* Information about the WHERE clause */
   Vdbe *v;               /* The virtual database engine */
   Index *pIdx;           /* For looping over indices */
@@ -49,6 +50,7 @@ void sqliteUpdate(
   Expr *pRecnoExpr;      /* Expression defining the new record number */
   int openAll;           /* True if all indices need to be opened */
   int isView;            /* Trying to update a view */
+  int iStackDepth;       /* Index of memory cell holding stack depth */
   AuthContext sContext;  /* The authorization context */
 
   int before_triggers;         /* True if there are any BEFORE triggers */
@@ -62,6 +64,7 @@ void sqliteUpdate(
   if( pParse->nErr || sqlite_malloc_failed ) goto update_cleanup;
   db = pParse->db;
   assert( pTabList->nSrc==1 );
+  iStackDepth = pParse->nMem++;
 
   /* Locate the table which we want to update. 
   */
@@ -248,7 +251,11 @@ void sqliteUpdate(
     /* The top of the update loop for when there are triggers.
     */
     sqliteVdbeAddOp(v, OP_ListRewind, 0, 0);
-    addr = sqliteVdbeAddOp(v, OP_ListRead, 0, 0);
+    sqliteVdbeAddOp(v, OP_StackDepth, 0, 0);
+    sqliteVdbeAddOp(v, OP_MemStore, iStackDepth, 1);
+    loopStart = sqliteVdbeAddOp(v, OP_MemLoad, iStackDepth, 0);
+    sqliteVdbeAddOp(v, OP_StackReset, 0, 0);
+    jumpInst = sqliteVdbeAddOp(v, OP_ListRead, 0, 0);
     sqliteVdbeAddOp(v, OP_Dup, 0, 0);
 
     /* Open a cursor and make it point to the record that is
@@ -295,7 +302,7 @@ void sqliteUpdate(
     /* Fire the BEFORE and INSTEAD OF triggers
     */
     if( sqliteCodeRowTrigger(pParse, TK_UPDATE, pChanges, TK_BEFORE, pTab, 
-          newIdx, oldIdx, onError, addr) ){
+          newIdx, oldIdx, onError, loopStart) ){
       goto update_cleanup;
     }
   }
@@ -336,10 +343,10 @@ void sqliteUpdate(
     */
     if( !row_triggers_exist ){
       sqliteVdbeAddOp(v, OP_ListRewind, 0, 0);
-      addr = sqliteVdbeAddOp(v, OP_ListRead, 0, 0);
+      jumpInst = loopStart = sqliteVdbeAddOp(v, OP_ListRead, 0, 0);
       sqliteVdbeAddOp(v, OP_Dup, 0, 0);
     }
-    sqliteVdbeAddOp(v, OP_NotExists, iCur, addr);
+    sqliteVdbeAddOp(v, OP_NotExists, iCur, loopStart);
 
     /* If the record number will change, push the record number as it
     ** will be after the update. (The old record number is currently
@@ -368,7 +375,7 @@ void sqliteUpdate(
     /* Do constraint checks
     */
     sqliteGenerateConstraintChecks(pParse, pTab, iCur, aIdxUsed, chngRecno, 1,
-                                   onError, addr);
+                                   onError, loopStart);
 
     /* Delete the old indices for the current record.
     */
@@ -404,7 +411,7 @@ void sqliteUpdate(
       pParse->nTab = iCur;
     }
     if( sqliteCodeRowTrigger(pParse, TK_UPDATE, pChanges, TK_AFTER, pTab, 
-          newIdx, oldIdx, onError, addr) ){
+          newIdx, oldIdx, onError, loopStart) ){
       goto update_cleanup;
     }
   }
@@ -412,8 +419,8 @@ void sqliteUpdate(
   /* Repeat the above with the next record to be updated, until
   ** all record selected by the WHERE clause have been updated.
   */
-  sqliteVdbeAddOp(v, OP_Goto, 0, addr);
-  sqliteVdbeChangeP2(v, addr, sqliteVdbeCurrentAddr(v));
+  sqliteVdbeAddOp(v, OP_Goto, 0, loopStart);
+  sqliteVdbeChangeP2(v, jumpInst, sqliteVdbeCurrentAddr(v));
   sqliteVdbeAddOp(v, OP_ListReset, 0, 0);
 
   /* Close all tables if there were no FOR EACH ROW triggers */
@@ -430,14 +437,14 @@ void sqliteUpdate(
     sqliteVdbeAddOp(v, OP_Close, oldIdx, 0);
   }
 
+  sqliteVdbeAddOp(v, OP_SetCounts, 0, 0);
   sqliteEndWriteOperation(pParse);
 
   /*
   ** Return the number of rows that were changed.
   */
   if( db->flags & SQLITE_CountRows && !pParse->trigStack ){
-    sqliteVdbeAddOp(v, OP_ColumnName, 0, 0);
-    sqliteVdbeChangeP3(v, -1, "rows updated", P3_STATIC);
+    sqliteVdbeOp3(v, OP_ColumnName, 0, 1, "rows updated", P3_STATIC);
     sqliteVdbeAddOp(v, OP_Callback, 1, 0);
   }
 

@@ -1,7 +1,11 @@
 /*
 ** The "printf" code that follows dates from the 1980's.  It is in
 ** the public domain.  The original comments are included here for
-** completeness.  They are slightly out-of-date.
+** completeness.  They are very out-of-date but might be useful as
+** an historical reference.  Most of the "enhancements" have been backed
+** out so that the functionality is now the same as standard printf().
+**
+**************************************************************************
 **
 ** The following modules is an enhanced replacement for the "printf" subroutines
 ** found in the standard C library.  The following enhancements are
@@ -49,75 +53,79 @@
 #include "sqliteInt.h"
 
 /*
-** Undefine COMPATIBILITY to make some slight changes in the way things
-** work.  I think the changes are an improvement, but they are not
-** backwards compatible.
-*/
-/* #define COMPATIBILITY       / * Compatible with SUN OS 4.1 */
-
-/*
 ** Conversion types fall into various categories as defined by the
 ** following enumeration.
 */
-enum et_type {    /* The type of the format field */
-   etRADIX,            /* Integer types.  %d, %x, %o, and so forth */
-   etFLOAT,            /* Floating point.  %f */
-   etEXP,              /* Exponentional notation. %e and %E */
-   etGENERIC,          /* Floating or exponential, depending on exponent. %g */
-   etSIZE,             /* Return number of characters processed so far. %n */
-   etSTRING,           /* Strings. %s */
-   etDYNSTRING,        /* Dynamically allocated strings. %z */
-   etPERCENT,          /* Percent symbol. %% */
-   etCHARX,            /* Characters. %c */
-   etERROR,            /* Used to indicate no such conversion type */
+#define etRADIX       1 /* Integer types.  %d, %x, %o, and so forth */
+#define etFLOAT       2 /* Floating point.  %f */
+#define etEXP         3 /* Exponentional notation. %e and %E */
+#define etGENERIC     4 /* Floating or exponential, depending on exponent. %g */
+#define etSIZE        5 /* Return number of characters processed so far. %n */
+#define etSTRING      6 /* Strings. %s */
+#define etDYNSTRING   7 /* Dynamically allocated strings. %z */
+#define etPERCENT     8 /* Percent symbol. %% */
+#define etCHARX       9 /* Characters. %c */
+#define etERROR      10 /* Used to indicate no such conversion type */
 /* The rest are extensions, not normally found in printf() */
-   etCHARLIT,          /* Literal characters.  %' */
-   etSQLESCAPE,        /* Strings with '\'' doubled.  %q */
-   etSQLESCAPE2,       /* Strings with '\'' doubled and enclosed in '',
+#define etCHARLIT    11 /* Literal characters.  %' */
+#define etSQLESCAPE  12 /* Strings with '\'' doubled.  %q */
+#define etSQLESCAPE2 13 /* Strings with '\'' doubled and enclosed in '',
                           NULL pointers replaced by SQL NULL.  %Q */
-   etORDINAL           /* 1st, 2nd, 3rd and so forth */
-};
+#define etTOKEN      14 /* a pointer to a Token structure */
+#define etSRCLIST    15 /* a pointer to a SrcList */
+
+
+/*
+** An "etByte" is an 8-bit unsigned value.
+*/
+typedef unsigned char etByte;
 
 /*
 ** Each builtin conversion character (ex: the 'd' in "%d") is described
 ** by an instance of the following structure
 */
 typedef struct et_info {   /* Information about each format field */
-  int  fmttype;              /* The format field code letter */
-  int  base;                 /* The base for radix conversion */
-  char *charset;             /* The character set for conversion */
-  int  flag_signed;          /* Is the quantity signed? */
-  char *prefix;              /* Prefix on non-zero values in alt format */
-  enum et_type type;          /* Conversion paradigm */
+  char fmttype;            /* The format field code letter */
+  etByte base;             /* The base for radix conversion */
+  etByte flags;            /* One or more of FLAG_ constants below */
+  etByte type;             /* Conversion paradigm */
+  char *charset;           /* The character set for conversion */
+  char *prefix;            /* Prefix on non-zero values in alt format */
 } et_info;
+
+/*
+** Allowed values for et_info.flags
+*/
+#define FLAG_SIGNED  1     /* True if the value to convert is signed */
+#define FLAG_INTERN  2     /* True if for internal use only */
+
 
 /*
 ** The following table is searched linearly, so it is good to put the
 ** most frequently used conversion types first.
 */
 static et_info fmtinfo[] = {
-  { 'd',  10,  "0123456789",       1,    0, etRADIX,      },
-  { 's',   0,  0,                  0,    0, etSTRING,     }, 
-  { 'z',   0,  0,                  0,    0, etDYNSTRING,  }, 
-  { 'q',   0,  0,                  0,    0, etSQLESCAPE,  },
-  { 'Q',   0,  0,                  0,    0, etSQLESCAPE2, },
-  { 'c',   0,  0,                  0,    0, etCHARX,      },
-  { 'o',   8,  "01234567",         0,  "0", etRADIX,      },
-  { 'u',  10,  "0123456789",       0,    0, etRADIX,      },
-  { 'x',  16,  "0123456789abcdef", 0, "x0", etRADIX,      },
-  { 'X',  16,  "0123456789ABCDEF", 0, "X0", etRADIX,      },
-  { 'r',  10,  "0123456789",       0,    0, etORDINAL,    },
-  { 'f',   0,  0,                  1,    0, etFLOAT,      },
-  { 'e',   0,  "e",                1,    0, etEXP,        },
-  { 'E',   0,  "E",                1,    0, etEXP,        },
-  { 'g',   0,  "e",                1,    0, etGENERIC,    },
-  { 'G',   0,  "E",                1,    0, etGENERIC,    },
-  { 'i',  10,  "0123456789",       1,    0, etRADIX,      },
-  { 'n',   0,  0,                  0,    0, etSIZE,       },
-  { '%',   0,  0,                  0,    0, etPERCENT,    },
-  { 'b',   2,  "01",               0, "b0", etRADIX,      }, /* Binary */
-  { 'p',  10,  "0123456789",       0,    0, etRADIX,      }, /* Pointers */
-  { '\'',  0,  0,                  0,    0, etCHARLIT,    }, /* Literal char */
+  {  'd', 10, 1, etRADIX,      "0123456789",       0    },
+  {  's',  0, 0, etSTRING,     0,                  0    },
+  {  'z',  0, 2, etDYNSTRING,  0,                  0    },
+  {  'q',  0, 0, etSQLESCAPE,  0,                  0    },
+  {  'Q',  0, 0, etSQLESCAPE2, 0,                  0    },
+  {  'c',  0, 0, etCHARX,      0,                  0    },
+  {  'o',  8, 0, etRADIX,      "01234567",         "0"  },
+  {  'u', 10, 0, etRADIX,      "0123456789",       0    },
+  {  'x', 16, 0, etRADIX,      "0123456789abcdef", "x0" },
+  {  'X', 16, 0, etRADIX,      "0123456789ABCDEF", "X0" },
+  {  'f',  0, 1, etFLOAT,      0,                  0    },
+  {  'e',  0, 1, etEXP,        "e",                0    },
+  {  'E',  0, 1, etEXP,        "E",                0    },
+  {  'g',  0, 1, etGENERIC,    "e",                0    },
+  {  'G',  0, 1, etGENERIC,    "E",                0    },
+  {  'i', 10, 1, etRADIX,      "0123456789",       0    },
+  {  'n',  0, 0, etSIZE,       0,                  0    },
+  {  '%',  0, 0, etPERCENT,    0,                  0    },
+  {  'p', 10, 0, etRADIX,      "0123456789",       0    },
+  {  'T',  0, 2, etTOKEN,      0,                  0    },
+  {  'S',  0, 2, etSRCLIST,    0,                  0    },
 };
 #define etNINFO  (sizeof(fmtinfo)/sizeof(fmtinfo[0]))
 
@@ -181,52 +189,49 @@ static int et_getdigit(LONGDOUBLE_TYPE *val, int *cnt){
 ** will run.
 */
 static int vxprintf(
-  void (*func)(void*,char*,int),
-  void *arg,
-  const char *format,
-  va_list ap
+  void (*func)(void*,const char*,int),     /* Consumer of text */
+  void *arg,                         /* First argument to the consumer */
+  int useExtended,                   /* Allow extended %-conversions */
+  const char *fmt,                   /* Format string */
+  va_list ap                         /* arguments */
 ){
-  register const char *fmt; /* The format string. */
-  register int c;           /* Next character in the format string */
-  register char *bufpt;     /* Pointer to the conversion buffer */
-  register int  precision;  /* Precision of the current field */
-  register int  length;     /* Length of the field */
-  register int  idx;        /* A general purpose loop counter */
-  int count;                /* Total number of characters output */
-  int width;                /* Width of the current field */
-  int flag_leftjustify;     /* True if "-" flag is present */
-  int flag_plussign;        /* True if "+" flag is present */
-  int flag_blanksign;       /* True if " " flag is present */
-  int flag_alternateform;   /* True if "#" flag is present */
-  int flag_zeropad;         /* True if field width constant starts with zero */
-  int flag_long;            /* True if "l" flag is present */
-  int flag_center;          /* True if "=" flag is present */
-  unsigned long longvalue;  /* Value for integer types */
+  int c;                     /* Next character in the format string */
+  char *bufpt;               /* Pointer to the conversion buffer */
+  int precision;             /* Precision of the current field */
+  int length;                /* Length of the field */
+  int idx;                   /* A general purpose loop counter */
+  int count;                 /* Total number of characters output */
+  int width;                 /* Width of the current field */
+  etByte flag_leftjustify;   /* True if "-" flag is present */
+  etByte flag_plussign;      /* True if "+" flag is present */
+  etByte flag_blanksign;     /* True if " " flag is present */
+  etByte flag_alternateform; /* True if "#" flag is present */
+  etByte flag_zeropad;       /* True if field width constant starts with zero */
+  etByte flag_long;          /* True if "l" flag is present */
+  unsigned long longvalue;   /* Value for integer types */
   LONGDOUBLE_TYPE realvalue; /* Value for real types */
-  et_info *infop;           /* Pointer to the appropriate info structure */
-  char buf[etBUFSIZE];      /* Conversion buffer */
-  char prefix;              /* Prefix character.  "+" or "-" or " " or '\0'. */
-  int  errorflag = 0;       /* True if an error is encountered */
-  enum et_type xtype;       /* Conversion paradigm */
-  char *zExtra;             /* Extra memory used for etTCLESCAPE conversions */
-  static char spaces[] = "                                                  "
-     "                                                                      ";
+  et_info *infop;            /* Pointer to the appropriate info structure */
+  char buf[etBUFSIZE];       /* Conversion buffer */
+  char prefix;               /* Prefix character.  "+" or "-" or " " or '\0'. */
+  etByte errorflag = 0;      /* True if an error is encountered */
+  etByte xtype;              /* Conversion paradigm */
+  char *zExtra;              /* Extra memory used for etTCLESCAPE conversions */
+  static char spaces[] = "                                                  ";
 #define etSPACESIZE (sizeof(spaces)-1)
 #ifndef etNOFLOATINGPOINT
-  int  exp;                 /* exponent of real numbers */
-  double rounder;           /* Used for rounding floating point values */
-  int flag_dp;              /* True if decimal point should be shown */
-  int flag_rtz;             /* True if trailing zeros should be removed */
-  int flag_exp;             /* True to force display of the exponent */
-  int nsd;                  /* Number of significant digits returned */
+  int  exp;                  /* exponent of real numbers */
+  double rounder;            /* Used for rounding floating point values */
+  etByte flag_dp;            /* True if decimal point should be shown */
+  etByte flag_rtz;           /* True if trailing zeros should be removed */
+  etByte flag_exp;           /* True to force display of the exponent */
+  int nsd;                   /* Number of significant digits returned */
 #endif
 
-  fmt = format;                     /* Put in a register for speed */
   count = length = 0;
   bufpt = 0;
   for(; (c=(*fmt))!=0; ++fmt){
     if( c!='%' ){
-      register int amt;
+      int amt;
       bufpt = (char *)fmt;
       amt = 1;
       while( (c=(*++fmt))!='%' && c!=0 ) amt++;
@@ -242,7 +247,7 @@ static int vxprintf(
     }
     /* Find out what flags are present */
     flag_leftjustify = flag_plussign = flag_blanksign = 
-     flag_alternateform = flag_zeropad = flag_center = 0;
+     flag_alternateform = flag_zeropad = 0;
     do{
       switch( c ){
         case '-':   flag_leftjustify = 1;     c = 0;   break;
@@ -250,11 +255,9 @@ static int vxprintf(
         case ' ':   flag_blanksign = 1;       c = 0;   break;
         case '#':   flag_alternateform = 1;   c = 0;   break;
         case '0':   flag_zeropad = 1;         c = 0;   break;
-        case '=':   flag_center = 1;          c = 0;   break;
         default:                                       break;
       }
     }while( c==0 && (c=(*++fmt))!=0 );
-    if( flag_center ) flag_leftjustify = 0;
     /* Get the field width */
     width = 0;
     if( c=='*' ){
@@ -279,10 +282,7 @@ static int vxprintf(
       c = *++fmt;
       if( c=='*' ){
         precision = va_arg(ap,int);
-#ifndef etCOMPATIBILITY
-        /* This is sensible, but SUN OS 4.1 doesn't do it. */
         if( precision<0 ) precision = -precision;
-#endif
         c = *++fmt;
       }else{
         while( c>='0' && c<='9' ){
@@ -304,17 +304,15 @@ static int vxprintf(
     }
     /* Fetch the info entry for the field */
     infop = 0;
+    xtype = etERROR;
     for(idx=0; idx<etNINFO; idx++){
       if( c==fmtinfo[idx].fmttype ){
         infop = &fmtinfo[idx];
+        if( useExtended || (infop->flags & FLAG_INTERN)==0 ){
+          xtype = infop->type;
+        }
         break;
       }
-    }
-    /* No info entry found.  It must be an error. */
-    if( infop==0 ){
-      xtype = etERROR;
-    }else{
-      xtype = infop->type;
     }
     zExtra = 0;
 
@@ -337,11 +335,10 @@ static int vxprintf(
     **   infop                       Pointer to the appropriate info struct.
     */
     switch( xtype ){
-      case etORDINAL:
       case etRADIX:
         if( flag_long )  longvalue = va_arg(ap,long);
         else             longvalue = va_arg(ap,int);
-#ifdef etCOMPATIBILITY
+#if 1
         /* For the format %#x, the value zero is printed "0" not "0x0".
         ** I think this is stupid. */
         if( longvalue==0 ) flag_alternateform = 0;
@@ -350,7 +347,7 @@ static int vxprintf(
         ** but leave the prefix for hex. */
         if( longvalue==0 && infop->base==8 ) flag_alternateform = 0;
 #endif
-        if( infop->flag_signed ){
+        if( infop->flags & FLAG_SIGNED ){
           if( *(long*)&longvalue<0 ){
             longvalue = -*(long*)&longvalue;
             prefix = '-';
@@ -361,26 +358,7 @@ static int vxprintf(
         if( flag_zeropad && precision<width-(prefix!=0) ){
           precision = width-(prefix!=0);
         }
-        bufpt = &buf[etBUFSIZE];
-        if( xtype==etORDINAL ){
-          long a,b;
-          a = longvalue%10;
-          b = longvalue%100;
-          bufpt -= 2;
-          if( a==0 || a>3 || (b>10 && b<14) ){
-            bufpt[0] = 't';
-            bufpt[1] = 'h';
-          }else if( a==1 ){
-            bufpt[0] = 's';
-            bufpt[1] = 't';
-          }else if( a==2 ){
-            bufpt[0] = 'n';
-            bufpt[1] = 'd';
-          }else if( a==3 ){
-            bufpt[0] = 'r';
-            bufpt[1] = 'd';
-          }
-        }
+        bufpt = &buf[etBUFSIZE-1];
         {
           register char *cset;      /* Use registers for speed */
           register int base;
@@ -391,7 +369,7 @@ static int vxprintf(
             longvalue = longvalue/base;
           }while( longvalue>0 );
         }
-        length = &buf[etBUFSIZE]-bufpt;
+        length = &buf[etBUFSIZE-1]-bufpt;
         for(idx=precision-length; idx>0; idx--){
           *(--bufpt) = '0';                             /* Zero pad */
         }
@@ -403,7 +381,7 @@ static int vxprintf(
             for(pre=infop->prefix; (x=(*pre))!=0; pre++) *(--bufpt) = x;
           }
         }
-        length = &buf[etBUFSIZE]-bufpt;
+        length = &buf[etBUFSIZE-1]-bufpt;
         break;
       case etFLOAT:
       case etEXP:
@@ -422,7 +400,7 @@ static int vxprintf(
         }
         if( infop->type==etGENERIC && precision>0 ) precision--;
         rounder = 0.0;
-#ifdef COMPATIBILITY
+#if 0
         /* Rounding works like BSD when the constant 0.4999 is used.  Wierd! */
         for(idx=precision, rounder=0.4999; idx>0; idx--, rounder*=0.1);
 #else
@@ -433,12 +411,11 @@ static int vxprintf(
         /* Normalize realvalue to within 10.0 > realvalue >= 1.0 */
         exp = 0;
         if( realvalue>0.0 ){
-          int k = 0;
-          while( realvalue>=1e8 && k++<100 ){ realvalue *= 1e-8; exp+=8; }
-          while( realvalue>=10.0 && k++<100 ){ realvalue *= 0.1; exp++; }
-          while( realvalue<1e-8 && k++<100 ){ realvalue *= 1e8; exp-=8; }
-          while( realvalue<1.0 && k++<100 ){ realvalue *= 10.0; exp--; }
-          if( k>=100 ){
+          while( realvalue>=1e8 && exp<=350 ){ realvalue *= 1e-8; exp+=8; }
+          while( realvalue>=10.0 && exp<=350 ){ realvalue *= 0.1; exp++; }
+          while( realvalue<1e-8 && exp>=-350 ){ realvalue *= 1e8; exp-=8; }
+          while( realvalue<1.0 && exp>=-350 ){ realvalue *= 10.0; exp--; }
+          if( exp>350 || exp<-350 ){
             bufpt = "NaN";
             length = 3;
             break;
@@ -590,6 +567,25 @@ static int vxprintf(
           if( precision>=0 && precision<length ) length = precision;
         }
         break;
+      case etTOKEN: {
+        Token *pToken = va_arg(ap, Token*);
+        (*func)(arg, pToken->z, pToken->n);
+        length = width = 0;
+        break;
+      }
+      case etSRCLIST: {
+        SrcList *pSrc = va_arg(ap, SrcList*);
+        int k = va_arg(ap, int);
+        struct SrcList_item *pItem = &pSrc->a[k];
+        assert( k>=0 && k<pSrc->nSrc );
+        if( pItem->zDatabase && pItem->zDatabase[0] ){
+          (*func)(arg, pItem->zDatabase, strlen(pItem->zDatabase));
+          (*func)(arg, ".", 1);
+        }
+        (*func)(arg, pItem->zName, strlen(pItem->zName));
+        length = width = 0;
+        break;
+      }
       case etERROR:
         buf[0] = '%';
         buf[1] = c;
@@ -609,11 +605,6 @@ static int vxprintf(
       register int nspace;
       nspace = width-length;
       if( nspace>0 ){
-        if( flag_center ){
-          nspace = nspace/2;
-          width -= nspace;
-          flag_leftjustify = 1;
-        }
         count += nspace;
         while( nspace>=etSPACESIZE ){
           (*func)(arg,spaces,etSPACESIZE);
@@ -639,11 +630,7 @@ static int vxprintf(
       }
     }
     if( zExtra ){
-      if( xtype==etDYNSTRING ){
-        free(zExtra);
-      }else{
-        sqliteFree(zExtra);
-      }
+      sqliteFree(zExtra);
     }
   }/* End for loop over the format string */
   return errorflag ? -1 : count;
@@ -657,7 +644,9 @@ struct sgMprintf {
   char *zBase;     /* A base allocation */
   char *zText;     /* The string collected so far */
   int  nChar;      /* Length of the string so far */
+  int  nTotal;     /* Output size if unconstrained */
   int  nAlloc;     /* Amount of space allocated in zText */
+  void *(*xRealloc)(void*,int);  /* Function used to realloc memory */
 };
 
 /* 
@@ -666,24 +655,25 @@ struct sgMprintf {
 ** This routine add nNewChar characters of text in zNewText to
 ** the sgMprintf structure pointed to by "arg".
 */
-static void mout(void *arg, char *zNewText, int nNewChar){
+static void mout(void *arg, const char *zNewText, int nNewChar){
   struct sgMprintf *pM = (struct sgMprintf*)arg;
+  pM->nTotal += nNewChar;
   if( pM->nChar + nNewChar + 1 > pM->nAlloc ){
-    pM->nAlloc = pM->nChar + nNewChar*2 + 1;
-    if( pM->zText==pM->zBase ){
-      pM->zText = sqliteMalloc(pM->nAlloc);
-      if( pM->zText && pM->nChar ) memcpy(pM->zText,pM->zBase,pM->nChar);
+    if( pM->xRealloc==0 ){
+      nNewChar =  pM->nAlloc - pM->nChar - 1;
     }else{
-      char *z = sqliteRealloc(pM->zText, pM->nAlloc);
-      if( z==0 ){
-        sqliteFree(pM->zText);
-        pM->nChar = 0;
-        pM->nAlloc = 0;
+      pM->nAlloc = pM->nChar + nNewChar*2 + 1;
+      if( pM->zText==pM->zBase ){
+        pM->zText = pM->xRealloc(0, pM->nAlloc);
+        if( pM->zText && pM->nChar ){
+          memcpy(pM->zText, pM->zBase, pM->nChar);
+        }
+      }else{
+        pM->zText = pM->xRealloc(pM->zText, pM->nAlloc);
       }
-      pM->zText = z;
     }
   }
-  if( pM->zText ){
+  if( pM->zText && nNewChar>0 ){
     memcpy(&pM->zText[pM->nChar], zNewText, nNewChar);
     pM->nChar += nNewChar;
     pM->zText[pM->nChar] = 0;
@@ -691,113 +681,103 @@ static void mout(void *arg, char *zNewText, int nNewChar){
 }
 
 /*
-** sqlite_mprintf() works like printf(), but allocations memory to hold the
-** resulting string and returns a pointer to the allocated memory.  Use
-** sqliteFree() to release the memory allocated.
+** This routine is a wrapper around xprintf() that invokes mout() as
+** the consumer.  
 */
-char *sqliteMPrintf(const char *zFormat, ...){
-  va_list ap;
-  struct sgMprintf sMprintf;
-  char zBuf[200];
-
-  sMprintf.nChar = 0;
-  sMprintf.nAlloc = sizeof(zBuf);
-  sMprintf.zText = zBuf;
-  sMprintf.zBase = zBuf;
-  va_start(ap,zFormat);
-  vxprintf(mout,&sMprintf,zFormat,ap);
-  va_end(ap);
-  sMprintf.zText[sMprintf.nChar] = 0;
-  return sqliteRealloc(sMprintf.zText, sMprintf.nChar+1);
+static char *base_vprintf(
+  void *(*xRealloc)(void*,int),   /* Routine to realloc memory. May be NULL */
+  int useInternal,                /* Use internal %-conversions if true */
+  char *zInitBuf,                 /* Initially write here, before mallocing */
+  int nInitBuf,                   /* Size of zInitBuf[] */
+  const char *zFormat,            /* format string */
+  va_list ap                      /* arguments */
+){
+  struct sgMprintf sM;
+  sM.zBase = sM.zText = zInitBuf;
+  sM.nChar = sM.nTotal = 0;
+  sM.nAlloc = nInitBuf;
+  sM.xRealloc = xRealloc;
+  vxprintf(mout, &sM, useInternal, zFormat, ap);
+  if( xRealloc ){
+    if( sM.zText==sM.zBase ){
+      sM.zText = xRealloc(0, sM.nChar+1);
+      memcpy(sM.zText, sM.zBase, sM.nChar+1);
+    }else if( sM.nAlloc>sM.nChar+10 ){
+      sM.zText = xRealloc(sM.zText, sM.nChar+1);
+    }
+  }
+  return sM.zText;
 }
 
 /*
-** sqlite_mprintf() works like printf(), but allocations memory to hold the
-** resulting string and returns a pointer to the allocated memory.  Use
-** sqliteFree() to release the memory allocated.
+** Realloc that is a real function, not a macro.
+*/
+static void *printf_realloc(void *old, int size){
+  return sqliteRealloc(old,size);
+}
+
+/*
+** Print into memory obtained from sqliteMalloc().  Use the internal
+** %-conversion extensions.
+*/
+char *sqliteVMPrintf(const char *zFormat, va_list ap){
+  char zBase[1000];
+  return base_vprintf(printf_realloc, 1, zBase, sizeof(zBase), zFormat, ap);
+}
+
+/*
+** Print into memory obtained from sqliteMalloc().  Use the internal
+** %-conversion extensions.
+*/
+char *sqliteMPrintf(const char *zFormat, ...){
+  va_list ap;
+  char *z;
+  char zBase[1000];
+  va_start(ap, zFormat);
+  z = base_vprintf(printf_realloc, 1, zBase, sizeof(zBase), zFormat, ap);
+  va_end(ap);
+  return z;
+}
+
+/*
+** Print into memory obtained from malloc().  Do not use the internal
+** %-conversion extensions.  This routine is for use by external users.
 */
 char *sqlite_mprintf(const char *zFormat, ...){
   va_list ap;
-  struct sgMprintf sMprintf;
-  char *zNew;
+  char *z;
   char zBuf[200];
 
-  sMprintf.nChar = 0;
-  sMprintf.nAlloc = sizeof(zBuf);
-  sMprintf.zText = zBuf;
-  sMprintf.zBase = zBuf;
   va_start(ap,zFormat);
-  vxprintf(mout,&sMprintf,zFormat,ap);
+  z = base_vprintf((void*(*)(void*,int))realloc, 0, 
+                   zBuf, sizeof(zBuf), zFormat, ap);
   va_end(ap);
-  sMprintf.zText[sMprintf.nChar] = 0;
-  zNew = malloc( sMprintf.nChar+1 );
-  if( zNew ) strcpy(zNew,sMprintf.zText);
-  if( sMprintf.zText!=sMprintf.zBase ){
-    sqliteFree(sMprintf.zText);
-  }
-  return zNew;
+  return z;
 }
 
 /* This is the varargs version of sqlite_mprintf.  
 */
 char *sqlite_vmprintf(const char *zFormat, va_list ap){
-  struct sgMprintf sMprintf;
-  char *zNew;
   char zBuf[200];
-  sMprintf.nChar = 0;
-  sMprintf.zText = zBuf;
-  sMprintf.nAlloc = sizeof(zBuf);
-  sMprintf.zBase = zBuf;
-  vxprintf(mout,&sMprintf,zFormat,ap);
-  sMprintf.zText[sMprintf.nChar] = 0;
-  zNew = malloc( sMprintf.nChar+1 );
-  if( zNew ) strcpy(zNew,sMprintf.zText);
-  if( sMprintf.zText!=sMprintf.zBase ){
-    sqliteFree(sMprintf.zText);
-  }
-  return zNew;
-}
-
-/* 
-** This function implements the callback from vxprintf. 
-**
-** This routine add nNewChar characters of text in zNewText to
-** the sgMprintf structure pointed to by "arg".  Unlike mout() above,
-** this routine does not allocate new space when the buffer fills.
-** It just truncates.
-*/
-static void sout(void *arg, char *zNewText, int nNewChar){
-  struct sgMprintf *pM = (struct sgMprintf*)arg;
-  if( pM->nChar + nNewChar + 1 > pM->nAlloc ){
-    nNewChar = pM->nAlloc - pM->nChar - 1;
-    if( nNewChar<=0 ) return;
-  }
-  memcpy(&pM->zText[pM->nChar], zNewText, nNewChar);
-  pM->nChar += nNewChar;
-  pM->zText[pM->nChar] = 0;
+  return base_vprintf((void*(*)(void*,int))realloc, 0,
+                      zBuf, sizeof(zBuf), zFormat, ap);
 }
 
 /*
-** sqlite_sprintf() works like sprintf() except that it ignores the
+** sqlite_snprintf() works like snprintf() except that it ignores the
 ** current locale settings.  This is important for SQLite because we
 ** are not able to use a "," as the decimal point in place of "." as
 ** specified by some locales.
 */
-int sqlite_snprintf(int n, char *zBuf, const char *zFormat, ...){
+char *sqlite_snprintf(int n, char *zBuf, const char *zFormat, ...){
+  char *z;
   va_list ap;
-  struct sgMprintf sMprintf;
 
-  sMprintf.nChar = 0;
-  sMprintf.nAlloc = n;
-  sMprintf.zText = zBuf;
-  sMprintf.zBase = zBuf;
   va_start(ap,zFormat);
-  vxprintf(sout,&sMprintf,zFormat,ap);
+  z = base_vprintf(0, 0, zBuf, n, zFormat, ap);
   va_end(ap);
-  return sMprintf.nChar;
+  return z;
 }
-
-
 
 /*
 ** The following four routines implement the varargs versions of the

@@ -474,7 +474,7 @@ abort_parse:
     pParse->zErrMsg = 0;
     if( !nErr ) nErr++;
   }
-  if( pParse->pVdbe && (pParse->useCallback || pParse->nErr>0) ){
+  if( pParse->pVdbe && pParse->nErr>0 ){
     sqliteVdbeDelete(pParse->pVdbe);
     pParse->pVdbe = 0;
   }

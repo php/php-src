@@ -39,7 +39,9 @@
 */
 #ifndef SQLITE_DISABLE_LFS
 # define _LARGE_FILE       1
-# define _FILE_OFFSET_BITS 64
+# ifndef _FILE_OFFSET_BITS
+#   define _FILE_OFFSET_BITS 64
+# endif
 # define _LARGEFILE_SOURCE 1
 #endif
 
@@ -118,9 +120,6 @@
 #endif
 
 #if OS_WIN
-# if defined(__CYGWIN__)
-#  define __CYGWIN_USE_BIG_TYPES__
-# endif
 #include <windows.h>
 #include <winbase.h>
   typedef struct OsFile OsFile;
