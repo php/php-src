@@ -1487,6 +1487,8 @@ do_fcall_common:
 						if (object.ptr) {
 							object.ptr->refcount--;
 						}
+						Ts[opline->result.u.var].var.ptr->is_ref = 0;
+						Ts[opline->result.u.var].var.ptr->refcount = 1;
 					} else if (function_state.function->type==ZEND_USER_FUNCTION) {
 						HashTable *calling_symbol_table;
 
