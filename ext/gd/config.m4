@@ -1,7 +1,7 @@
 AC_DEFUN(PHP_GD_JPEG,[
         AC_MSG_CHECKING([for libjpeg (needed by gd-1.8+)])
         AC_ARG_WITH(jpeg-dir,
-        [  --with-jpeg-dir[=DIR]   jpeg dir for gd-1.8+],[
+        [  --with-jpeg-dir[=DIR]   GD: jpeg dir for gd-1.8+],[
           AC_MSG_RESULT(yes)
           if test "$withval" = "yes"; then
             withval="/usr/local"
@@ -23,7 +23,7 @@ AC_DEFUN(PHP_GD_JPEG,[
 AC_DEFUN(PHP_GD_XPM,[
         AC_MSG_CHECKING([for libXpm (needed by gd-1.8+)])
         AC_ARG_WITH(xpm-dir,
-        [  --with-xpm-dir[=DIR]    xpm dir for gd-1.8+],[
+        [  --with-xpm-dir[=DIR]    GD: xpm dir for gd-1.8+],[
           AC_MSG_RESULT(yes)
           if test "$withval" = "yes"; then
             withval="/usr/X11R6"
@@ -46,12 +46,14 @@ AC_DEFUN(PHP_GD_XPM,[
 shared=no
 AC_MSG_CHECKING(whether to include GD support)
 AC_ARG_WITH(gd,
-[  --without-gd            Disable GD support.
+[  
   --with-gd[=DIR]         Include GD support (DIR is GD's install dir).
                           Set DIR to "shared" to build as a dl, or 
                           "shared,DIR" to build as a dl and still specify DIR.],
 [
   PHP_WITH_SHARED
+  PHP_GD_JPEG
+  PHP_GD_XPM
 
   case "$withval" in
     no)
@@ -86,8 +88,6 @@ dnl Some versions of GD support both PNG and GIF. Check for both.
           AC_ADD_LIBRARY(z)
         fi
 
-        PHP_GD_JPEG
-        PHP_GD_XPM
         ac_cv_lib_gd_gdImageLine=yes
       ;;
     *)
@@ -140,40 +140,18 @@ dnl A whole whack of possible places where this might be
           AC_ADD_LIBRARY(z)
           AC_ADD_LIBRARY(png)
         fi
-        PHP_GD_JPEG
-	PHP_GD_XPM
 
         ac_cv_lib_gd_gdImageLine=yes
       else
         AC_MSG_ERROR([Unable to find libgd.(a|so) anywhere under $withval])
       fi ;;
   esac
-],[
-  AC_CHECK_LIB(gd, gdImageLine)
-  AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13,1, [ ]) ])
-  if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
-		old_LIBS=$LIBS
-	        old_LDFLAGS=$LDFLAGS
-        AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13,1, [ ]) ])
-		AC_CHECK_LIB(z,compress, LIBS="-lz $LIBS",,)
-		AC_CHECK_LIB(png,png_info_init, LIBS="-lpng $LIBS",,)
-        AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1, [ ])])
-        AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1, [ ])])
-        AC_CHECK_LIB(gd, gdImageCreateFromGif, [AC_DEFINE(HAVE_GD_GIF, 1, [ ])])
-        
-        LIBS=$old_LIBS
-        LDFLAGS=$old_LDFLAGS
-        if test "$ac_cv_lib_gd_gdImageCreateFromPng" = "yes"; then
-          AC_ADD_LIBRARY(z)
-          AC_ADD_LIBRARY(png)
-        fi
-        ac_cv_lib_gd_gdImageLine=yes
-  fi
-])
+],[])
+
 if test "$with_gd" != "no" && test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
   CHECK_TTF="yes"
   AC_ARG_WITH(ttf,
-  [  --with-ttf[=DIR]        Include Freetype support],[
+  [  --with-ttf[=DIR]        GD: Include Freetype support],[
     if test $withval = "no" ; then
       CHECK_TTF=""
     else
@@ -228,36 +206,36 @@ if test "$with_gd" != "no" && test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
     AC_MSG_RESULT(no)
   fi
   
-AC_MSG_CHECKING(for T1lib support)
-AC_ARG_WITH(t1lib,
-[  --with-t1lib[=DIR]      Include T1lib support.],
-[
-  if test "$withval" != "no"; then
-    if test "$withval" = "yes"; then
-      for i in /usr/local /usr; do
-        if test -f "$i/include/t1lib.h"; then
-          AC_ADD_LIBRARY_WITH_PATH(t1, "$i/lib")
-          AC_ADD_INCLUDE("$i/include")
+  AC_MSG_CHECKING(for T1lib support)
+  AC_ARG_WITH(t1lib,
+  [  --with-t1lib[=DIR]      GD: Include T1lib support.],
+  [
+    if test "$withval" != "no"; then
+      if test "$withval" = "yes"; then
+        for i in /usr/local /usr; do
+          if test -f "$i/include/t1lib.h"; then
+            AC_ADD_LIBRARY_WITH_PATH(t1, "$i/lib")
+            AC_ADD_INCLUDE("$i/include")
+          fi
+        done
+      else
+        if test -f "$withval/include/t1lib.h"; then
+          AC_ADD_LIBRARY_WITH_PATH(t1, "$withval/lib")
+          AC_ADD_INCLUDE("$withval/include")
         fi
-      done
-    else
-      if test -f "$withval/include/t1lib.h"; then
-        AC_ADD_LIBRARY_WITH_PATH(t1, "$withval/lib")
-        AC_ADD_INCLUDE("$withval/include")
       fi
-    fi
-    AC_CHECK_LIB(t1, T1_GetExtend, [AC_DEFINE(HAVE_LIBT1,1,[ ])])
-    if test "$ac_cv_lib_t1_T1_GetExtend" = "yes"; then
-      AC_MSG_RESULT(yes)
+      AC_CHECK_LIB(t1, T1_GetExtend, [AC_DEFINE(HAVE_LIBT1,1,[ ])])
+      if test "$ac_cv_lib_t1_T1_GetExtend" = "yes"; then
+        AC_MSG_RESULT(yes)
+      else
+        AC_MSG_RESULT(no)
+      fi
     else
       AC_MSG_RESULT(no)
     fi
-  else
+  ],[
     AC_MSG_RESULT(no)
-  fi
-],[
-  AC_MSG_RESULT(no)
-])
+  ])
 
 dnl NetBSD package structure
   if test -f /usr/pkg/include/gd/gd.h -a -z "$GD_INCLUDE" ; then
@@ -272,7 +250,8 @@ dnl SuSE 6.x package structure
   AC_MSG_CHECKING(whether to enable 4bit antialias hack with FreeType2)
   AC_ARG_ENABLE(freetype-4bit-antialias-hack,
   [  --enable-freetype-4bit-antialias-hack  
-                          Include support for FreeType2 (experimental).],[
+                          GD: Include support for FreeType2 (experimental).
+  ],[
   if test "$enableval" = "yes" ; then
     AC_DEFINE(FREETYPE_4BIT_ANTIALIAS_HACK, 1, [ ])
     AC_MSG_RESULT(yes)
