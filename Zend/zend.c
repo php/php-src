@@ -519,6 +519,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 
 	zend_compile_file = compile_file;
 	zend_execute = execute;
+	zend_execute_internal = NULL;
 
 	zend_init_opcodes_handlers();
 
