@@ -243,7 +243,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 				tmp_ptr = PQunescapeBytea(*ptr, &tmp_len);
 				*ptr = estrndup(tmp_ptr, tmp_len);
 				*len = tmp_len;
-				caller_frees = 1;
+				*caller_frees = 1;
 				free(tmp_ptr);
 				break;
 		}
