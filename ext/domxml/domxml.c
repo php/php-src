@@ -707,7 +707,7 @@ PHP_FUNCTION(domxml_attributes)
 	if(0 > node_attributes(&return_value, nodep))
 		RETURN_FALSE;
 
-#ifdef 0
+#ifdef nichtdefiniert
 	attr = nodep->properties;
 	if (!attr) {
 		RETURN_FALSE;
