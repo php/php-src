@@ -92,10 +92,8 @@ void _xml_unparsedEntityDeclHandler(void *, const XML_Char *, const XML_Char *, 
 void _xml_notationDeclHandler(void *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
 int  _xml_externalEntityRefHandler(XML_Parser, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
 
-#ifdef HAVE_LIBEXPAT2
 void _xml_startNamespaceDeclHandler(void *, const XML_Char *, const XML_Char *);
 void _xml_endNamespaceDeclHandler(void *, const XML_Char *);
-#endif
 /* }}} */
 /* {{{ extension definition structures */
 
@@ -103,9 +101,7 @@ static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_
 
 function_entry xml_functions[] = {
     PHP_FE(xml_parser_create, NULL)
-#ifdef HAVE_LIBEXPAT2
     PHP_FE(xml_parser_create_ns, NULL)
-#endif
     PHP_FE(xml_set_object, second_arg_force_ref)
     PHP_FE(xml_set_element_handler, NULL)
 	PHP_FE(xml_set_character_data_handler, NULL)
@@ -114,10 +110,8 @@ function_entry xml_functions[] = {
 	PHP_FE(xml_set_unparsed_entity_decl_handler, NULL)
 	PHP_FE(xml_set_notation_decl_handler, NULL)
 	PHP_FE(xml_set_external_entity_ref_handler, NULL)
-#ifdef HAVE_LIBEXPAT2
 	PHP_FE(xml_set_start_namespace_decl_handler, NULL)
 	PHP_FE(xml_set_end_namespace_decl_handler, NULL)
-#endif
     PHP_FE(xml_parse, NULL)
     PHP_FE(xml_parse_into_struct, third_and_fourth_args_force_ref)
     PHP_FE(xml_get_error_code, NULL)
@@ -234,9 +228,7 @@ PHP_MINFO_FUNCTION(xml)
 
         php_info_print_table_start();
 		php_info_print_table_row(2, "XML Support", "active");
-#if HAVE_LIBEXPAT2
 		php_info_print_table_row(2, "XML Namespace Support", "active");
-#endif
         php_info_print_table_end();
 }
 
@@ -336,14 +328,12 @@ xml_parser_dtor(zend_rsrc_list_entry *rsrc)
 	if (parser->unknownEncodingHandler) {
 		zval_ptr_dtor(&parser->unknownEncodingHandler);
 	}
-#ifdef HAVE_LIBEXPAT2
 	if (parser->startNamespaceDeclHandler) {
 		zval_ptr_dtor(&parser->startNamespaceDeclHandler);
 	}
 	if (parser->endNamespaceDeclHandler) {
 		zval_ptr_dtor(&parser->endNamespaceDeclHandler);
 	}
-#endif
 	if (parser->baseURI) {
 		efree(parser->baseURI);
 	}
@@ -997,7 +987,6 @@ _xml_externalEntityRefHandler(XML_Parser parserPtr,
 
 /* }}} */
 
-#ifdef HAVE_LIBEXPAT2
     /* {{{ _xml_startNamespaceDeclHandler() */
 
 void _xml_startNamespaceDeclHandler(void *userData,
@@ -1041,7 +1030,6 @@ void _xml_endNamespaceDeclHandler(void *userData,
 }
 
 /* }}} */
-#endif
 
 /* }}} */
 
@@ -1099,7 +1087,6 @@ PHP_FUNCTION(xml_parser_create)
 }
 /* }}} */
 
-#ifdef HAVE_LIBEXPAT2
 /* {{{ proto int xml_parser_create_ns([string encoding][, string sep]) 
    Create an XML parser */
 PHP_FUNCTION(xml_parser_create_ns)
@@ -1158,7 +1145,6 @@ PHP_FUNCTION(xml_parser_create_ns)
 	parser->index = return_value->value.lval;
 }
 /* }}} */
-#endif
 
 /* {{{ proto int xml_set_object(int pind, object &obj) 
    Set up object which should be used for callbacks */
@@ -1327,7 +1313,6 @@ PHP_FUNCTION(xml_set_external_entity_ref_handler)
 }
 /* }}} */
 
-#ifdef HAVE_LIBEXPAT2
 
 /* {{{ proto int xml_set_start_namespace_decl_handler(int pind, string hdl) 
    Set up character data handler */
@@ -1366,7 +1351,6 @@ PHP_FUNCTION(xml_set_end_namespace_decl_handler)
 	RETVAL_TRUE;
 }
 /* }}} */
-#endif
 
 /* {{{ proto int xml_parse(int pind, string data [, int isFinal]) 
    Start parsing an XML document */
