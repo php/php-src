@@ -1045,25 +1045,34 @@ PHP_FUNCTION(call_user_method)
 
 void user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_entry)
 {
-	pval retval;
 	int i;
-	CLS_FETCH();
 
-	if (call_user_function(CG(function_table), NULL, shutdown_function_entry->arguments[0], &retval, shutdown_function_entry->arg_count-1, shutdown_function_entry->arguments+1)==SUCCESS) {
-		pval_destructor(&retval);
-	}
 	for (i=0; i<shutdown_function_entry->arg_count; i++) {
 		zval_ptr_dtor(&shutdown_function_entry->arguments[i]);
 	}
 	efree(shutdown_function_entry->arguments);
 }
 
+int user_shutdown_function_call(php_shutdown_function_entry *shutdown_function_entry)
+{
+	zval retval;
+	CLS_FETCH();
+
+	if (call_user_function(CG(function_table), NULL, shutdown_function_entry->arguments[0], &retval, shutdown_function_entry->arg_count-1, shutdown_function_entry->arguments+1)==SUCCESS) {
+		zval_dtor(&retval);
+	} else
+		php_error(E_WARNING,"Unable to call %s() - function does not exist",
+				  shutdown_function_entry->arguments[0]->value.str.val);
+	return 0;
+}
 
 void php_call_shutdown_functions(void)
 {
 	BLS_FETCH();
 	
 	if (BG(user_shutdown_function_names)) {
+		zend_hash_apply(BG(user_shutdown_function_names),
+						(apply_func_t)user_shutdown_function_call);
 		zend_hash_destroy(BG(user_shutdown_function_names));
 		efree(BG(user_shutdown_function_names));
 	}

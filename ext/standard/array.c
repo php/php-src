@@ -825,12 +825,14 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 		}
 		
 		/* Call the userland function */
-		call_user_function_ex(CG(function_table), NULL, *BG(array_walk_func_name),
-						   &retval_ptr, userdata ? 3 : 2, args, 0);
+		if (call_user_function_ex(CG(function_table), NULL, *BG(array_walk_func_name),
+						   &retval_ptr, userdata ? 3 : 2, args, 0) == SUCCESS) {
 		
-		if (retval_ptr) {
 			zval_ptr_dtor(&retval_ptr);
-		}
+		} else
+			php_error(E_WARNING,"Unable to call %s() - function does not exist",
+					  (*BG(array_walk_func_name))->value.str.val);
+
 		/* Clean up the key */
 		if (zend_hash_get_current_key_type(target_hash) == HASH_KEY_IS_STRING)
 			efree(key->value.str.val);
