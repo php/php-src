@@ -77,10 +77,10 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st);
 static oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 
 function_entry snmp_functions[] = {
-	PHP_FE(snmpget, NULL)
+		PHP_FE(snmpget, NULL)
 		PHP_FE(snmpwalk, NULL)
 		PHP_FE(snmprealwalk, NULL)
-		PHP_FE(snmpwalkoid, NULL)
+		PHP_FALIAS(snmpwalkoid, snmprealwalk, NULL)
 		PHP_FE(snmp_get_quick_print, NULL)
 		PHP_FE(snmp_set_quick_print, NULL)
 		PHP_FE(snmpset, NULL)
@@ -115,17 +115,14 @@ PHP_MINFO_FUNCTION(snmp)
 * st=1   snmpget() - query an agent and return a single value.
 * st=2   snmpwalk() - walk the mib and return a single dimensional array 
 *          containing the values.
-* st=3,4 snmprealwalk() and snmpwalkoid() - walk the mib and return an 
+* st=3 snmprealwalk() and snmpwalkoid() - walk the mib and return an 
 *          array of oid,value pairs.
 * st=5-8 ** Reserved **
-* st=9   snmp_get_quick_print() - Return the current value for quickprint 
-*        (default setting is 0 (false)).
-* st=10  snmp_set_quick_print() - Set the current value for quickprint
 * st=11  snmpset() - query an agent and set a single value
 *
 */
 void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
-	pval *a1, *a2, *a3, *a4, *a5, *a6, *a7;
+	zval **a1, **a2, **a3, **a4, **a5, **a6, **a7;
 	struct snmp_session session, *ss;
 	struct snmp_pdu *pdu=NULL, *response;
 	struct variable_list *vars;
@@ -143,57 +140,53 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
     char type = (char) 0;
     char *value = (char *) 0;
 	
-	switch(st) {
-	case 4:
-		st = 3; /* This is temporary until snmprealwalk() is removed */
-		break;
-	case 9:
-		RETURN_LONG(snmp_get_quick_print()?1:0);
-	case 10:
-		if (myargc != 1 || getParameters(ht, myargc, &a1) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_long(a1);
-		snmp_set_quick_print((int) a1->value.lval);
-		RETURN_TRUE;
-	}
-	
-	if (myargc<3 || myargc>7 || getParameters(ht, myargc, &a1, &a2, &a3, &a4, &a5, &a6, &a7) == FAILURE) {
+	if (myargc < 3 || myargc > 7 ||
+		zend_get_parameters_ex(myargc, &a1, &a2, &a3, &a4, &a5, &a6, &a7) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(a1);
-	convert_to_string(a2);
-	convert_to_string(a3);
-	if (st==11) {
-		if (myargc<5) WRONG_PARAM_COUNT;
-		convert_to_string(a4);
-		convert_to_string(a5);
-		if(myargc>5) {
-			convert_to_long(a6);
-			timeout=a6->value.lval;
+
+	convert_to_string_ex(a1);
+	convert_to_string_ex(a2);
+	convert_to_string_ex(a3);
+	
+	if (st == 11) {
+		if (myargc < 5) {
+			WRONG_PARAM_COUNT;
 		}
-		if(myargc>6) {
-			convert_to_long(a7);
-			retries=a7->value.lval;
+
+		convert_to_string_ex(a4);
+		convert_to_string_ex(a5);
+	
+		if(myargc > 5) {
+			convert_to_long_ex(a6);
+			timeout = (*a6)->value.lval;
 		}
-		type = a4->value.str.val[0];
-		value = a5->value.str.val;
+
+		if(myargc > 6) {
+			convert_to_long_ex(a7);
+			retries = (*a7)->value.lval;
+		}
+
+		type = (*a4)->value.str.val[0];
+		value = (*a5)->value.str.val;
 	} else {
-		if(myargc>3) {
-			convert_to_long(a4);
-			timeout=a4->value.lval;
+		if(myargc > 3) {
+			convert_to_long_ex(a4);
+			timeout = (*a4)->value.lval;
 		}
-		if(myargc>4) {
-			convert_to_long(a5);
-			retries=a5->value.lval;
+
+		if(myargc > 4) {
+			convert_to_long_ex(a5);
+			retries = (*a5)->value.lval;
 		}
 	}
-	objid=a3->value.str.val;
+
+	objid = (*a3)->value.str.val;
 	
-	if (st>=2) { /* walk */
+	if (st >= 2) { /* walk */
 		rootlen = MAX_NAME_LEN;
-		if (strlen(objid)) { /* on a walk, an empty string means top of tree - no error */
-			if (read_objid(objid, root, &rootlen)) {
+		if ( strlen(objid) ) { /* on a walk, an empty string means top of tree - no error */
+			if ( read_objid(objid, root, &rootlen) ) {
 				gotroot = 1;
 			} else {
 				php_error(E_WARNING,"Invalid object identifier: %s\n", objid);
@@ -207,8 +200,8 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 	}
 	
 	memset(&session, 0, sizeof(struct snmp_session));
+
 	session.peername = a1->value.str.val;
-	
 	session.version = SNMP_VERSION_1;
 	/*
 	* FIXME: potential memory leak
@@ -227,64 +220,66 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 	
 	session.authenticator = NULL;
 	snmp_synch_setup(&session);
-	ss = snmp_open(&session);
-	if (ss == NULL){
-		php_error(E_WARNING,"Couldn't open snmp\n");
+
+	if ((ss = snmp_open(&session)) == NULL) {
+		php_error(E_WARNING,"Could not open snmp\n");
 		RETURN_FALSE;
 	}
-	if (st>=2) {
+
+	if (st >= 2) {
 		memmove((char *)name, (char *)root, rootlen * sizeof(oid));
 		name_length = rootlen;
-		/* prepare result array */
-		array_init(return_value);	
+		array_init(return_value); /* prepare result array */	
 	}
-	
+
 	while(keepwalking) {
 		keepwalking=0;
-		if (st==1) pdu = snmp_pdu_create(SNMP_MSG_GET);
-		else if (st==11) pdu = snmp_pdu_create(SNMP_MSG_SET);
-		else if (st>=2) pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
-		
-		if (st==1) {
+		if (st == 1) {
+			pdu = snmp_pdu_create(SNMP_MSG_GET);
 			name_length = MAX_NAME_LEN;
-			if (!read_objid(objid, name, &name_length)) {
+			if ( !read_objid(objid, name, &name_length) ) {
 				php_error(E_WARNING,"Invalid object identifier: %s\n", objid);
 				RETURN_FALSE;
 			}
-		}
-		if (st!=11)
 			snmp_add_null_var(pdu, name, name_length);
-		else {
+		} else if (st == 11) {
+			pdu = snmp_pdu_create(SNMP_MSG_SET);
 			if (snmp_add_var(pdu, name, name_length, type, value)) {
 				php_error(E_WARNING,"Could not add variable: %s\n", name);
 				RETURN_FALSE;
 			}
+		} else if (st >= 2) {
+			pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
+			snmp_add_null_var(pdu, name, name_length);
 		}
 		
 retry:
 		status = snmp_synch_response(ss, pdu, &response);
 		if (status == STAT_SUCCESS) {
 			if (response->errstat == SNMP_ERR_NOERROR) {
-				for(vars = response->variables; vars; vars = vars->next_variable) {
-					if (st>=2 && st!=11 && (vars->name_length < rootlen || memcmp(root, vars->name, rootlen * sizeof(oid))))
+				for (vars = response->variables; vars; vars = vars->next_variable) {
+					if (st >= 2 && st != 11 && 
+						(vars->name_length < rootlen || memcmp(root, vars->name, rootlen * sizeof(oid)))) {
 						continue;       /* not part of this subtree */
-					
-					if (st!=11)
+					}
+
+					if (st != 11) {
 						sprint_value(buf,vars->name, vars->name_length, vars);
+					}
 #if 0
 					Debug("snmp response is: %s\n",buf);
 #endif
-					if (st==1) {
+					if (st == 1) {
 						RETVAL_STRING(buf,1);
-					} else if (st==2) {
-						/* Add to returned array */
-						add_next_index_string(return_value,buf,1);
-					} else if (st==3) {
+					} else if (st == 2) {
+						add_next_index_string(return_value,buf,1); /* Add to returned array */
+					} else if (st == 3)  {
 						sprint_objid(buf2, vars->name, vars->name_length);
 						add_assoc_string(return_value,buf2,buf,1);
 					}
-					if (st>=2 && st!=11) {
-						if (vars->type != SNMP_ENDOFMIBVIEW && vars->type != SNMP_NOSUCHOBJECT && vars->type != SNMP_NOSUCHINSTANCE) {
+					if (st >= 2 && st != 11) {
+						if (vars->type != SNMP_ENDOFMIBVIEW && 
+							vars->type != SNMP_NOSUCHOBJECT && vars->type != SNMP_NOSUCHINSTANCE) {
 							memmove((char *)name, (char *)vars->name,vars->name_length * sizeof(oid));
 							name_length = vars->name_length;
 							keepwalking = 1;
@@ -292,32 +287,42 @@ retry:
 					}
 				}	
 			} else {
-				if (st!=2 || response->errstat != SNMP_ERR_NOSUCHNAME) {
+				if (st != 2 || response->errstat != SNMP_ERR_NOSUCHNAME) {
 					php_error(E_WARNING,"Error in packet.\nReason: %s\n", snmp_errstring(response->errstat));
 					if (response->errstat == SNMP_ERR_NOSUCHNAME) {
-						for(count=1, vars = response->variables; vars && count != response->errindex;
+						for (count=1, vars = response->variables; vars && count != response->errindex;
 						vars = vars->next_variable, count++);
-						if (vars) sprint_objid(buf,vars->name, vars->name_length);
+						if (vars) {
+							sprint_objid(buf,vars->name, vars->name_length);
+						}
 						php_error(E_WARNING,"This name does not exist: %s\n",buf);
 					}
-					if (st==1) {
-						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GET)) != NULL) goto retry;
-					} else if (st==11) {
-						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_SET)) != NULL) goto retry;
-					} else if (st>=2) {
-						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GETNEXT)) != NULL) goto retry;
+					if (st == 1) {
+						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GET)) != NULL) {
+							goto retry;
+						}
+					} else if (st == 11) {
+						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_SET)) != NULL) {
+							goto retry;
+						}
+					} else if (st >= 2) {
+						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GETNEXT)) != NULL) {
+							goto retry;
+						}
 					}
 					RETURN_FALSE;
 				}
 			}
 		} else if (status == STAT_TIMEOUT) {
-			php_error(E_WARNING,"No Response from %s\n", a1->value.str.val);
+			php_error(E_WARNING,"No Response from %s\n", (*a1)->value.str.val);
 			RETURN_FALSE;
 		} else {    /* status == STAT_ERROR */
 			php_error(E_WARNING,"An error occurred, Quitting\n");
 			RETURN_FALSE;
 		}
-		if (response) snmp_free_pdu(response);
+		if (response) {
+			snmp_free_pdu(response);
+		}
 	} /* keepwalking */
 	snmp_close(ss);
 }
@@ -338,33 +343,29 @@ PHP_FUNCTION(snmpwalk) {
 
 /* {{{ proto array snmprealwalk(string host, string community, string object_id [, int timeout [, int retries]])
    Return all objects including their respective object id withing the specified one */
-PHP_FUNCTION(snmprealwalk)
-{
+PHP_FUNCTION(snmprealwalk) {
 	return php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,3);
 }
 /* }}} */
 
-/* {{{ proto array snmpwalkoid(string host, string community, string object_id [, int timeout [, int retries]])
-   Return all objects including their respective object id withing the specified one */
-PHP_FUNCTION(snmpwalkoid)
-{
-	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,4);
-}
-/* }}} */
-
-/* {{{ proto int snmp_get_quick_print(void)
+/* {{{ proto bool snmp_get_quick_print(void)
    Return the current status of quick_print */
-PHP_FUNCTION(snmp_get_quick_print)
-{
-	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,9);
+PHP_FUNCTION(snmp_get_quick_print) {
+	RETURN_LONG(snmp_get_quick_print() ? 1 : 0);
 }
 /* }}} */
 
 /* {{{ proto void snmp_set_quick_print(int quick_print)
    Return all objects including their respective object id withing the specified one */
-PHP_FUNCTION(snmp_set_quick_print)
-{
-	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,10);
+PHP_FUNCTION(snmp_set_quick_print) {
+	zval **a1;
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &a1) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long_ex(a1);
+	int set_val = (*a1)->value.lval;
+	snmp_set_quick_print(set_val);
+	RETURN_TRUE;
 }
 /* }}} */
 
