@@ -1703,7 +1703,7 @@ PHP_FUNCTION(fgetcsv) {
 	lineEnd = emalloc(sizeof(char) * (len + 1));
         bptr = buf;
         tptr = buf + strlen(buf) -1;
-        while ( isspace(*tptr) && (tptr > bptr) ) tptr--;
+        while ( isspace((int)*tptr) && (tptr > bptr) ) tptr--;
         tptr++;
         strcpy(lineEnd, tptr);
 
@@ -1763,7 +1763,7 @@ PHP_FUNCTION(fgetcsv) {
                                                         }
                                                 bptr = buf;
                                                 tptr = buf + strlen(buf) -1;
-                                                while ( isspace(*tptr) && (tptr > bptr) ) tptr--;
+                                                while ( isspace((int)*tptr) && (tptr > bptr) ) tptr--;
                                                 tptr++; strcpy(lineEnd, tptr);
                                                 *tptr++ = ' ';  *tptr = 0;
 
