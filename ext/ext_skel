@@ -230,6 +230,14 @@ if [ ! -z "$no_help" ]; then
 fi
 sed -f sedscript <../skeleton/php_skeleton.h > php_$extname.h
 
+$ECHO_N " CREDITS$ECHO_C"
+echo "s/extname/$extname/g" > sedscript
+sed -f sedscript <../skeleton/CREDITS > CREDITS
+
+$ECHO_N " EXPERIMENTAL$ECHO_C"
+echo "s/extname/$extname/g" > sedscript
+sed -f sedscript <../skeleton/EXPERIMENTAL > EXPERIMENTAL
+
 $ECHO_N " tests/001.phpt$ECHO_C"
 mkdir tests || givup "Cannot create tests directory"
 chmod 755 tests
