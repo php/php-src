@@ -254,7 +254,7 @@ PHP_FUNCTION(dbplus_open)
     convert_to_long_ex(writing);
     convert_to_long_ex(searchpath);
 
-    conn = cdb_open((*name)->value.str.val, (*writing)->value.lval, (*searchpath)->value.lval);
+    conn = cdb_open(Z_STRVAL_PP(name), Z_LVAL_PP(writing), Z_LVAL_PP(searchpath));
     if(conn == NULL) {
         /* TODO error handling */
         RETURN_FALSE;
@@ -278,7 +278,7 @@ PHP_FUNCTION(dbplus_close)
 
     /* TODO resource type check */
 
-    zend_list_delete((*conn)->value.lval);  
+    zend_list_delete(Z_LVAL_PP(conn));  
 }
 /* }}} */
 #endif

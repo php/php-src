@@ -39,7 +39,7 @@ int dbx_odbc_connect(zval **rv, zval **host, zval **db, zval **username, zval **
 	arguments[1]=username;
 	arguments[2]=password;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "odbc_connect", &returned_zval, number_of_arguments, arguments);
-	if (!returned_zval || returned_zval->type!=IS_RESOURCE) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_RESOURCE) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}
@@ -58,7 +58,7 @@ int dbx_odbc_pconnect(zval **rv, zval **host, zval **db, zval **username, zval *
 	arguments[1]=username;
 	arguments[2]=password;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "odbc_pconnect", &returned_zval, number_of_arguments, arguments);
-	if (!returned_zval || returned_zval->type!=IS_RESOURCE) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_RESOURCE) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}
@@ -76,7 +76,7 @@ int dbx_odbc_close(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS)
 
 	int actual_resource_type;
 	void *resource;
-	resource = zend_list_find((*dbx_handle)->value.lval, &actual_resource_type);
+	resource = zend_list_find(Z_LVAL_PP(dbx_handle), &actual_resource_type);
 	if (!resource) {
 		return 0;
 	}
@@ -84,12 +84,12 @@ int dbx_odbc_close(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS)
 	arguments[0]=dbx_handle;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "odbc_close", &returned_zval, number_of_arguments, arguments);
 
-	if (!returned_zval || returned_zval->type!=IS_NULL) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_NULL) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}
 	convert_to_long_ex(&returned_zval);
-	returned_zval->value.lval=1;
+	Z_LVAL_P(returned_zval)=1;
 	MOVE_RETURNED_TO_RV(rv, returned_zval);
 	return 1;
 }
@@ -107,7 +107,7 @@ int dbx_odbc_query(zval **rv, zval **dbx_handle, zval **db_name, zval **sql_stat
 	arguments[1]=sql_statement;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "odbc_exec", &queryresult_zval, number_of_arguments, arguments);
 	/* odbc_query returns a bool for failure, or a result_identifier for success */
-	if (!queryresult_zval || queryresult_zval->type!=IS_RESOURCE) {
+	if (!queryresult_zval || Z_TYPE_P(queryresult_zval)!=IS_RESOURCE) {
 		if (queryresult_zval) zval_ptr_dtor(&queryresult_zval);
 		return 0;
 	}
@@ -118,9 +118,9 @@ int dbx_odbc_query(zval **rv, zval **dbx_handle, zval **db_name, zval **sql_stat
 		if (queryresult_zval) zval_ptr_dtor(&queryresult_zval);
 		return 0;
 	}
-	if (num_fields_zval->value.lval==0) {
-		(*rv)->type=IS_BOOL;
-		(*rv)->value.lval=1; /* success, but no data */
+	if (Z_LVAL_P(num_fields_zval)==0) {
+		Z_TYPE_PP(rv)=IS_BOOL;
+		Z_LVAL_PP(rv)=1; /* success, but no data */
 		FREE_ZVAL(num_fields_zval);
 		if (queryresult_zval) zval_ptr_dtor(&queryresult_zval);
 		return 1;
@@ -139,7 +139,7 @@ int dbx_odbc_getcolumncount(zval **rv, zval **result_handle, INTERNAL_FUNCTION_P
 
 	arguments[0]=result_handle;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "odbc_num_fields", &returned_zval, number_of_arguments, arguments);
-	if (!returned_zval || returned_zval->type!=IS_LONG || returned_zval->value.lval<0) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_LONG || Z_LVAL_P(returned_zval)<0) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}
@@ -161,7 +161,7 @@ int dbx_odbc_getcolumnname(zval **rv, zval **result_handle, long column_index, I
 	arguments[1]=&zval_column_index;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "odbc_field_name", &returned_zval, number_of_arguments, arguments);
 	/* odbc_field_name returns a string */
-	if (!returned_zval || returned_zval->type!=IS_STRING) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_STRING) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		FREE_ZVAL(zval_column_index);
 		return 0;
@@ -185,7 +185,7 @@ int dbx_odbc_getcolumntype(zval **rv, zval **result_handle, long column_index, I
 	arguments[1]=&zval_column_index;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "odbc_field_type", &returned_zval, number_of_arguments, arguments);
 	/* odbc_field_name returns a string */
-	if (!returned_zval || returned_zval->type!=IS_STRING) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_STRING) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		FREE_ZVAL(zval_column_index);
 		return 0;
@@ -215,19 +215,19 @@ int dbx_odbc_getrow(zval **rv, zval **result_handle, long row_number, INTERNAL_F
 	if (!dbx_odbc_getcolumncount(&num_fields_zval, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU)) {
 		return 0;
 	}
-	field_count=num_fields_zval->value.lval;
+	field_count=Z_LVAL_P(num_fields_zval);
 	FREE_ZVAL(num_fields_zval);
 	/* fetch row */
 	number_of_arguments=1;
 	arguments[0]=result_handle;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "odbc_fetch_row", &fetch_row_result_zval, number_of_arguments, arguments);
-	if (!fetch_row_result_zval || fetch_row_result_zval->type!=IS_BOOL) {
+	if (!fetch_row_result_zval || Z_TYPE_P(fetch_row_result_zval)!=IS_BOOL) {
 		if (fetch_row_result_zval) zval_ptr_dtor(&fetch_row_result_zval);
 		return 0;
 	}
-	if (fetch_row_result_zval->value.lval==0) {
-		(*rv)->type=IS_LONG;
-		(*rv)->value.lval=0; /* ok, no more rows */
+	if (Z_LVAL_P(fetch_row_result_zval)==0) {
+		Z_TYPE_PP(rv)=IS_LONG;
+		Z_LVAL_PP(rv)=0; /* ok, no more rows */
 		zval_ptr_dtor(&fetch_row_result_zval);
 		return 0;
 	}
@@ -247,7 +247,7 @@ int dbx_odbc_getrow(zval **rv, zval **result_handle, long row_number, INTERNAL_F
 		arguments[0]=result_handle;
 		arguments[1]=&field_index_zval;
 		dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "odbc_result", &field_result_zval, number_of_arguments, arguments);
-		zend_hash_index_update(returned_zval->value.ht, field_index, (void *)&(field_result_zval), sizeof(zval *), NULL);
+		zend_hash_index_update(Z_ARRVAL_P(returned_zval), field_index, (void *)&(field_result_zval), sizeof(zval *), NULL);
 	}
 	FREE_ZVAL(field_index_zval);
 
@@ -265,7 +265,7 @@ int dbx_odbc_error(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS)
 	arguments[0]=dbx_handle;
 	if (!dbx_handle) number_of_arguments=0;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "odbc_errormsg", &returned_zval, number_of_arguments, arguments);
-	if (!returned_zval || returned_zval->type!=IS_STRING) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_STRING) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}

@@ -306,7 +306,7 @@ static void php_read_APP(int socketd, FILE *fp, int issock, unsigned int marker,
 
 	sprintf(markername, "APP%d", marker - M_APP0);
 
-	if (zend_hash_find(info->value.ht, markername, strlen(markername)+1, (void **) &tmp) == FAILURE) {
+	if (zend_hash_find(Z_ARRVAL_P(info), markername, strlen(markername)+1, (void **) &tmp) == FAILURE) {
 		/* XXX we onyl catch the 1st tag of it's kind! */
 		add_assoc_stringl(info, markername, buffer, length, 1);
 	}

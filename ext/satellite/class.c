@@ -61,7 +61,7 @@ void orbit_class_function_call(
 
 	/* constructor or normal function? */
 	if (zend_llist_count(pPropertyReference->elements_list) == 1
-			&& !strcasecmp(function_name->element.value.str.val, pClass->name))
+			&& !strcasecmp(function_name->Z_STRVAL(element), pClass->name))
 	{
 		/* constructor */
 		if (pConstructor)
@@ -96,7 +96,7 @@ void orbit_class_function_call(
 			}
 			
 			/* pval * return_value is a part of INTERNAL_FUNCTION_PARAMETERS */
-			(*pCallFunction)(p_data, function_name->element.value.str.val,
+			(*pCallFunction)(p_data, function_name->Z_STRVAL(element),
 											 ZEND_NUM_ARGS(), arguments, return_value);
 		}
 		else
@@ -130,8 +130,8 @@ void orbit_save_data(zval * php_object, int type, void * data)
 	 */
 	ALLOC_ZVAL(orbit_data_handle);	/* allocate memory for value */
 	
-	orbit_data_handle->type = IS_LONG;
-	orbit_data_handle->value.lval = id;
+	Z_TYPE_P(orbit_data_handle) = IS_LONG;
+	Z_LVAL_P(orbit_data_handle) = id;
 	
 	pval_copy_constructor(orbit_data_handle);	/* why? */
 	
@@ -172,7 +172,7 @@ void * orbit_retrieve_data(const zval * php_object, int wanted_type)
 
 	/* get corba data */
 	data = zend_list_find(
-			(*orbit_data_handle)->value.lval, 	/* id */
+			Z_LVAL_PP(orbit_data_handle), 	/* id */
 			&type																/* type */
 			);
 

@@ -176,16 +176,16 @@ PHP_FUNCTION(sem_get)
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(arg_key);
-			key = (int)(*arg_key)->value.lval;
+			key = (int)Z_LVAL_PP(arg_key);
 			break;
 		case 2:
 			if (zend_get_parameters_ex(2, &arg_key, &arg_max_acquire)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(arg_key);
-			key = (int)(*arg_key)->value.lval;
+			key = (int)Z_LVAL_PP(arg_key);
 			convert_to_long_ex(arg_max_acquire);
-			max_acquire = (int)(*arg_max_acquire)->value.lval;
+			max_acquire = (int)Z_LVAL_PP(arg_max_acquire);
 			break;
 		case 3:
 			if (zend_get_parameters_ex(3, &arg_key, &arg_max_acquire, &arg_perm)==FAILURE) {
@@ -194,9 +194,9 @@ PHP_FUNCTION(sem_get)
 			convert_to_long_ex(arg_key);
 			convert_to_long_ex(arg_max_acquire);
 			convert_to_long_ex(arg_perm);
-			key = (int)(*arg_key)->value.lval;
-			max_acquire = (int)(*arg_max_acquire)->value.lval;
-			perm = (int)(*arg_perm)->value.lval;
+			key = (int)Z_LVAL_PP(arg_key);
+			max_acquire = (int)Z_LVAL_PP(arg_max_acquire);
+			perm = (int)Z_LVAL_PP(arg_perm);
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -298,10 +298,10 @@ PHP_FUNCTION(sem_get)
 	sem_ptr->semid = semid;
 	sem_ptr->count = 0;
 
-	return_value->value.lval = zend_list_insert(sem_ptr, php_sysvsem_module.le_sem);
-	return_value->type = IS_LONG;
+	Z_LVAL_P(return_value) = zend_list_insert(sem_ptr, php_sysvsem_module.le_sem);
+	Z_TYPE_P(return_value) = IS_LONG;
 
-	sem_ptr->id = (int)return_value->value.lval;
+	sem_ptr->id = (int)Z_LVAL_P(return_value);
 }
 /* }}} */
 
@@ -320,7 +320,7 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(arg_id);
-			id = (int)(*arg_id)->value.lval;
+			id = (int)Z_LVAL_PP(arg_id);
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -392,7 +392,7 @@ PHP_FUNCTION(sem_remove)
         }
         convert_to_long_ex(arg_id);
 
-        id = (*arg_id)->value.lval;
+        id = Z_LVAL_PP(arg_id);
 
         sem_ptr = (sysvsem_sem *) zend_list_find(id, &type);
 

@@ -433,7 +433,7 @@ PHP_INI_ENTRY_EX("com.allow_dcom", "0", PHP_INI_SYSTEM, NULL, php_ini_boolean_di
 PHP_INI_ENTRY_EX("com.autoregister_typelib", "0", PHP_INI_SYSTEM, NULL, php_ini_boolean_displayer_cb)
 PHP_INI_ENTRY_EX("com.autoregister_verbose", "0", PHP_INI_SYSTEM, NULL, php_ini_boolean_displayer_cb)
 PHP_INI_ENTRY_EX("com.autoregister_casesensitive", "1", PHP_INI_SYSTEM, NULL, php_ini_boolean_displayer_cb)
-PHP_INI_ENTRY("com.typelib_file", "", PHP_INI_SYSTEM, OnTypelibFileChange)
+PHP_INI_ENTRY("Z_TYPE(com)lib_file", "", PHP_INI_SYSTEM, OnTypelibFileChange)
 PHP_INI_END()
 
 
@@ -467,7 +467,7 @@ PHP_FUNCTION(com_load)
 			zend_get_parameters(ht, 3, &module_name, &server_name, &code_page);
 
 			convert_to_long_ex(&code_page);
-			codepage = code_page->value.lval;
+			codepage = Z_LVAL_P(code_page);
 			break;
 
 		case 4:
@@ -1123,7 +1123,7 @@ PHP_FUNCTION(com_load_typelib)
 		case 2:
 			zend_get_parameters(ht, 2, &arg_typelib, &arg_cis);
 			convert_to_boolean_ex(&arg_cis);
-			if (arg_cis->value.lval) {
+			if (Z_LVAL_P(arg_cis)) {
 				mode &= ~CONST_CS;
 			}
 			break;
@@ -1171,7 +1171,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 
 	for (element=property_reference->elements_list->head; element; element=element->next) {
 		overloaded_property = (zend_overloaded_element *) element->data;
-		switch (overloaded_property->type) {
+		switch (Z_TYPE_P(overloaded_property)) {
 			case OE_IS_ARRAY:
 				if (do_COM_offget(var_result, obj, &overloaded_property->element, FALSE TSRMLS_CC) == FAILURE) {
 					FREE_VARIANT(var_result);
@@ -1261,7 +1261,7 @@ PHPAPI int php_COM_set_property_handler(zend_property_reference *property_refere
 
 	for (element=property_reference->elements_list->head; element != property_reference->elements_list->tail; element=element->next) {
 		overloaded_property = (zend_overloaded_element *) element->data;
-		switch (overloaded_property->type) {
+		switch (Z_TYPE_P(overloaded_property)) {
 			case OE_IS_ARRAY:
 				if (do_COM_offget(var_result, obj, &overloaded_property->element, FALSE TSRMLS_CC) == FAILURE) {
 					FREE_VARIANT(var_result);
@@ -1347,7 +1347,7 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 	}
 
 	property = php_COM_get_property_handler(property_reference);
-	if (property.type == IS_NULL) {
+	if (Z_TYPE(property) == IS_NULL) {
 		if (property.refcount == 1) {
 			pval_destructor(&property);
 		}

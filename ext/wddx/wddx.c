@@ -681,7 +681,7 @@ static void php_wddx_push_element(void *user_data, const char *name, const char 
 			}
 		}
 	} else if (!strcmp(name, EL_STRING)) {
-		ent.type = ST_STRING;
+		Z_TYPE(ent) = ST_STRING;
 		SET_STACK_VARNAME;
 		
 		ALLOC_ZVAL(ent.data);
@@ -691,7 +691,7 @@ static void php_wddx_push_element(void *user_data, const char *name, const char 
 		Z_STRLEN_P(ent.data) = 0;
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 	} else if (!strcmp(name, EL_BINARY)) {
-		ent.type = ST_BINARY;
+		Z_TYPE(ent) = ST_BINARY;
 		SET_STACK_VARNAME;
 		
 		ALLOC_ZVAL(ent.data);
@@ -711,7 +711,7 @@ static void php_wddx_push_element(void *user_data, const char *name, const char 
 			}
 		}
 	} else if (!strcmp(name, EL_NUMBER)) {
-		ent.type = ST_NUMBER;
+		Z_TYPE(ent) = ST_NUMBER;
 		SET_STACK_VARNAME;
 		
 		ALLOC_ZVAL(ent.data);
@@ -723,7 +723,7 @@ static void php_wddx_push_element(void *user_data, const char *name, const char 
 
 		for (i=0; atts[i]; i++) {
 			if (!strcmp(atts[i], EL_VALUE) && atts[i+1]) {
-				ent.type = ST_BOOLEAN;
+				Z_TYPE(ent) = ST_BOOLEAN;
 				SET_STACK_VARNAME;
 
 				ALLOC_ZVAL(ent.data);
@@ -734,7 +734,7 @@ static void php_wddx_push_element(void *user_data, const char *name, const char 
 			}
 		}
 	} else if (!strcmp(name, EL_NULL)) {
-		ent.type = ST_NULL;
+		Z_TYPE(ent) = ST_NULL;
 		SET_STACK_VARNAME;
 
 		ALLOC_ZVAL(ent.data);
@@ -743,7 +743,7 @@ static void php_wddx_push_element(void *user_data, const char *name, const char 
 		
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 	} else if (!strcmp(name, EL_ARRAY)) {
-		ent.type = ST_ARRAY;
+		Z_TYPE(ent) = ST_ARRAY;
 		SET_STACK_VARNAME;
 		
 		ALLOC_ZVAL(ent.data);
@@ -751,7 +751,7 @@ static void php_wddx_push_element(void *user_data, const char *name, const char 
 		INIT_PZVAL(ent.data);
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 	} else if (!strcmp(name, EL_STRUCT)) {
-		ent.type = ST_STRUCT;
+		Z_TYPE(ent) = ST_STRUCT;
 		SET_STACK_VARNAME;
 		
 		ALLOC_ZVAL(ent.data);

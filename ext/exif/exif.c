@@ -1248,7 +1248,7 @@ PHP_FUNCTION(read_exif_data)
 			for(i=0; i<ImageInfo.numComments; i++) {
 				add_index_string(tmpi, i, (ImageInfo.Comments)[i], 0);
 			}
-			zend_hash_update(return_value->value.ht, "Comments", 9, &tmpi, sizeof(zval *), NULL);
+			zend_hash_update(Z_ARRVAL_P(return_value), "Comments", 9, &tmpi, sizeof(zval *), NULL);
 		}
 	}
 	if(ImageInfo.ThumbnailSize && ImageInfo.Thumbnail) {

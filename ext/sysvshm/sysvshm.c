@@ -116,13 +116,13 @@ PHP_FUNCTION(shm_attach)
 	switch (ac) {
 		case 3:
 			convert_to_long_ex(arg_flag);
-			shm_flag = (*arg_flag)->value.lval;
+			shm_flag = Z_LVAL_PP(arg_flag);
 		case 2:
 			convert_to_long_ex(arg_size);
-			shm_size= (*arg_size)->value.lval;
+			shm_size= Z_LVAL_PP(arg_size);
 		case 1:
 			convert_to_long_ex(arg_key);
-			shm_key = (*arg_key)->value.lval;
+			shm_key = Z_LVAL_PP(arg_key);
 	}
 
 	if((shm_list_ptr = (sysvshm_shm *) emalloc(sizeof(sysvshm_shm)))==NULL) {
@@ -179,7 +179,7 @@ PHP_FUNCTION(shm_detach)
 
 	convert_to_long_ex(arg_id);
 	
-	id = (*arg_id)->value.lval;
+	id = Z_LVAL_PP(arg_id);
 
 	zend_list_delete(id);
 
@@ -203,7 +203,7 @@ PHP_FUNCTION(shm_remove)
 
 	convert_to_long_ex(arg_id);
 	
-	id = (*arg_id)->value.lval;
+	id = Z_LVAL_PP(arg_id);
 
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 	if(shmctl(shm_list_ptr->id,IPC_RMID,NULL)<0) {
@@ -232,9 +232,9 @@ PHP_FUNCTION(shm_put_var)
 	}
 			
 	convert_to_long_ex(arg_id);
-	id = (*arg_id)->value.lval;
+	id = Z_LVAL_PP(arg_id);
 	convert_to_long_ex(arg_key);
-	key = (*arg_key)->value.lval;
+	key = Z_LVAL_PP(arg_key);
 
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 	if (type!=php_sysvshm.le_shm) {
@@ -279,9 +279,9 @@ PHP_FUNCTION(shm_get_var)
 	}
 
 	convert_to_long_ex(arg_id);
-	id = (*arg_id)->value.lval;
+	id = Z_LVAL_PP(arg_id);
 	convert_to_long_ex(arg_key);
-	key = (*arg_key)->value.lval;
+	key = Z_LVAL_PP(arg_key);
 
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 	if (type!=php_sysvshm.le_shm) {
@@ -325,9 +325,9 @@ PHP_FUNCTION(shm_remove_var)
 	}
 
 	convert_to_long_ex(arg_id);
-	id = (*arg_id)->value.lval;
+	id = Z_LVAL_PP(arg_id);
 	convert_to_long_ex(arg_key);
-	key = (*arg_key)->value.lval;
+	key = Z_LVAL_PP(arg_key);
 
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 	if (type!=php_sysvshm.le_shm) {

@@ -49,10 +49,10 @@ static zend_bool satellite_zval_to_namedvalue_boolean(const zval * pSource,
 	if (pSource == NULL)
 		return TRUE;
 		
-	if (pSource->type != IS_BOOL && pSource->type != IS_LONG)
+	if (pSZ_TYPE_P(ource) != IS_BOOL && pSZ_TYPE_P(ource) != IS_LONG)
 		return FALSE;
 
-	*p_value = pSource->value.lval != 0;
+	*p_value = pSZ_LVAL_P(ource) != 0;
 
 	return TRUE;
 }
@@ -72,10 +72,10 @@ static zend_bool satellite_zval_to_namedvalue_double(const zval * pSource,
 		return TRUE;
 		
 	/*convert_to_double(pSource);*/
-	if (pSource->type != IS_DOUBLE)
+	if (pSZ_TYPE_P(ource) != IS_DOUBLE)
 		return FALSE;
 
-	*p_value = pSource->value.dval;
+	*p_value = pSZ_DVAL_P(ource);
 
 	return TRUE;
 }
@@ -93,10 +93,10 @@ static zend_bool satellite_zval_to_namedvalue_long(const zval * pSource,
 		return TRUE;
 	
 	convert_to_long((zval*)pSource);	/* so long "const" */
-	if (pSource->type != IS_LONG)
+	if (pSZ_TYPE_P(ource) != IS_LONG)
 		return FALSE;
 
-	*p_value = pSource->value.lval;
+	*p_value = pSZ_LVAL_P(ource);
 
 	return TRUE;
 }
@@ -114,13 +114,13 @@ static zend_bool satellite_zval_to_namedvalue_short(const zval * pSource,
 		return TRUE;
 	
 /*	convert_to_long((zval *)pSource);*/	/* discard const */;
-	if (pSource->type != IS_LONG)
+	if (pSZ_TYPE_P(ource) != IS_LONG)
 	{
-/*		printf("source value type is %i in satellite_zval_to_namedvalue_short\n", pSource->type);*/
+/*		printf("source value type is %i in satellite_zval_to_namedvalue_short\n", pSZ_TYPE_P(ource));*/
 		return FALSE;
 	}
 
-	*p_value = pSource->value.lval;
+	*p_value = pSZ_LVAL_P(ource);
 
 	return TRUE;
 }
@@ -141,7 +141,7 @@ static zend_bool satellite_zval_to_namedvalue_objref(const zval * pSource,
 	if (pSource == NULL)
 		return TRUE; /* nothing else to do */
 
-	if (pSource->type != IS_OBJECT)
+	if (pSZ_TYPE_P(ource) != IS_OBJECT)
 		goto error;
 
 	/* see that it's a corba object */
@@ -163,7 +163,7 @@ static zend_bool satellite_zval_to_namedvalue_objref(const zval * pSource,
 		goto error;
 	}
 
-/*	printf("satellite_zval_to_namedvalue_objref: %s\n", (*p_value)->type_id);*/
+/*	printf("satellite_zval_to_namedvalue_objref: %s\n", Z_TYPE_PP(p_value)_id);*/
 		
 	return TRUE;
 
@@ -187,10 +187,10 @@ static zend_bool satellite_zval_to_namedvalue_sequence(const zval * pSource,
 	if (pSource == NULL)
 		return TRUE;	/* nothing to do */
 
-	if (pSource->type != IS_ARRAY)
+	if (pSZ_TYPE_P(ource) != IS_ARRAY)
 		goto error;	/* bad source type */
 
-	p_hashtable = pSource->value.ht;
+	p_hashtable = pSZ_ARRVAL_P(ource);
 	member_count = zend_hash_num_elements(p_hashtable);
 
 	/* prepare sequence octet */
@@ -268,14 +268,14 @@ static zend_bool satellite_zval_to_namedvalue_string(const zval * pSource,
 
 #if 0
 	convert_to_string((zval *)pSource);	/* discard const */
-	if (pSource->type == IS_NULL)
+	if (pSZ_TYPE_P(ource) == IS_NULL)
 		return TRUE; 	/* do nothing */
 #endif
 	
-	if (pSource->type != IS_STRING)
+	if (pSZ_TYPE_P(ource) != IS_STRING)
 		goto error;
 
-	*p_value 						= CORBA_string_dup(pSource->value.str.val);
+	*p_value 						= CORBA_string_dup(pSZ_STRVAL_P(ource));
 	pDestination->len		= strlen(*p_value);
 
 	return TRUE;
@@ -304,7 +304,7 @@ static zend_bool satellite_zval_to_namedvalue_struct(const zval * pSource,
 		return TRUE;
 
 	/* see that it's an object */
-	if (pSource->type != IS_OBJECT)
+	if (pSZ_TYPE_P(ource) != IS_OBJECT)
 		goto error; /* bad source type */
 
 	/* see that it's a structure object */

@@ -591,7 +591,7 @@ PHP_FUNCTION(swf_definepoly)
 	convert_to_long_ex(NumPoints);
 	convert_to_double_ex(width);
 	
-	if ((*coordinates)->type != IS_ARRAY) {
+	if (Z_TYPE_PP(coordinates) != IS_ARRAY) {
 		return;
 		php_error(E_WARNING, "Wrong datatype of second argument to swf_definepoly");
 	}

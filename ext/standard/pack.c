@@ -858,8 +858,8 @@ PHP_MINIT_FUNCTION(pack)
 	}
 	else {
 		zval val;
-		int size = sizeof(val.value.lval);
-		val.value.lval=0; /*silence a warning*/
+		int size = sizeof(Z_LVAL(val));
+		Z_LVAL(val)=0; /*silence a warning*/
 
 		/* Where to get hi to lo bytes from */
 		byte_map[0] = size - 1;

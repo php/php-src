@@ -1219,7 +1219,7 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
         result = SCAN_ERROR_EOF;
     } else if (numVars) {
         convert_to_long( *return_value );
-        (*return_value)->value.lval = nconversions;
+        Z_LVAL_PP(return_value) = nconversions;
 	} else if (nconversions < totalVars) {
 		/* to do : not all elements converted. we need to prune the list - cc
 		 */		
@@ -1233,8 +1233,8 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 static inline void scan_set_error_return(int numVars, pval **return_value)
 {
 	if (numVars) {
-		(*return_value)->type = IS_LONG;
-		(*return_value)->value.lval = SCAN_ERROR_EOF;  /* EOF marker */
+		Z_TYPE_PP(return_value) = IS_LONG;
+		Z_LVAL_PP(return_value) = SCAN_ERROR_EOF;  /* EOF marker */
 	} else {	
 	  /* pval_destructor( *return_value ); */ 
 	  /* convert_to_null calls destructor */

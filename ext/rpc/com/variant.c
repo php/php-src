@@ -133,7 +133,7 @@ static void php_VARIANT_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend
 				zend_get_parameters(ht, 3, &data, &type, &code_page);
 				php_pval_to_variant_ex(data, pVar, type, codepage TSRMLS_CC);
 				convert_to_long(code_page);
-				codepage = code_page->value.lval;
+				codepage = Z_LVAL_P(code_page);
 				break;
 			default:
 				ZEND_WRONG_PARAM_COUNT();
@@ -174,13 +174,13 @@ static pval php_VARIANT_get_property_handler(zend_property_reference *property_r
 		ZVAL_FALSE(&result);
 	} else {
 		overloaded_property = (zend_overloaded_element *) property_reference->elements_list->head->data;
-		switch (overloaded_property->type) {
+		switch (Z_TYPE_P(overloaded_property)) {
 			case OE_IS_ARRAY:
 				ZVAL_FALSE(&result);
 				break;
 
 			case OE_IS_OBJECT:
-				if (!strcmp(overloaded_property->element.value.str.val, "value")) {
+				if (!strcmp(overloaded_property->Z_STRVAL(element), "value")) {
 					php_variant_to_pval(var_arg, &result, codepage TSRMLS_CC);
 				} else if (!strcmp(Z_STRVAL(overloaded_property->element), "type")) {
 					ZVAL_LONG(&result, V_VT(var_arg))

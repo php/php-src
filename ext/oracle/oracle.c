@@ -483,7 +483,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 
 			/* hash it up */
-			new_le.type = le_pconn;
+			Z_TYPE(new_le) = le_pconn;
 			new_le.ptr = db_conn;
 			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				free(db_conn);
@@ -494,7 +494,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			ORA(num_links)++;
 			zend_hash_add(ORA(conns),(void*)&db_conn,sizeof(void*),(void*)&db_conn,sizeof(void*),NULL);
 		} else {  /* we do */
-			if (le->type != le_pconn) {
+			if (Z_TYPE_P(le) != le_pconn) {
 				RETURN_FALSE;
 			}
 
@@ -531,15 +531,15 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			int type,link;
 			void *ptr;
 
-			if (index_ptr->type != le_index_ptr) {
+			if (Z_TYPE_P(index_ptr) != le_index_ptr) {
 				RETURN_FALSE;
 			}
 			link = (int) index_ptr->ptr;
 			ptr = zend_list_find(link,&type);   /* check if the link is still there */
 			if (ptr && (type==le_conn || type==le_pconn)) {
 				zend_list_addref(link);
-				return_value->value.lval = link;
-				return_value->type = IS_RESOURCE;
+				Z_LVAL_P(return_value) = link;
+				Z_TYPE_P(return_value) = IS_RESOURCE;
 				efree(hashed_details);
 				return;
 			} else {
@@ -574,8 +574,8 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		ZEND_REGISTER_RESOURCE(return_value, db_conn, le_conn);
 
 		/* add it to the hash */
-		new_index_ptr.ptr = (void *) return_value->value.lval;
-		new_index_ptr.type = le_index_ptr;
+		new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
+		Z_TYPE(new_index_ptr) = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list),hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
 			efree(hashed_details);
 			RETURN_FALSE;
@@ -600,7 +600,7 @@ PHP_FUNCTION(ora_logoff)
 	}
 	ZEND_FETCH_RESOURCE2(conn, oraConnection *, arg, -1, "Oracle-Connection", le_conn, le_pconn);
 
-	zend_list_delete((*arg)->value.lval);
+	zend_list_delete(Z_LVAL_PP(arg));
 }
 /* }}} */
 
@@ -631,7 +631,7 @@ PHP_FUNCTION(ora_open)
 	cursor->open = 1;
 	cursor->conn_ptr = conn;	
 	ZEND_REGISTER_RESOURCE(return_value, cursor, le_cursor);
-	cursor->conn_id = return_value->value.lval;
+	cursor->conn_id = Z_LVAL_P(return_value);
 }
 
 /* }}} */
@@ -648,7 +648,7 @@ PHP_FUNCTION(ora_close)
 	}
 	ZEND_FETCH_RESOURCE(cursor, oraCursor *, arg, -1, "Oracle-Cursor", le_cursor);
 
-	zend_list_delete((*arg)->value.lval);
+	zend_list_delete(Z_LVAL_PP(arg));
 
 	RETURN_TRUE;
 }
@@ -751,7 +751,7 @@ PHP_FUNCTION(ora_parse)
 	case 3:
 		zend_get_parameters_ex(3,&curs,&sql,&def);
 		convert_to_long_ex(def);
-		if ((*def)->value.lval) {
+		if (Z_LVAL_PP(def)) {
 			defer = DEFER_PARSE;
 		}
 		break;
@@ -763,7 +763,7 @@ PHP_FUNCTION(ora_parse)
 	}
 
 	convert_to_string_ex(sql);
- 	query = (text *) estrndup((*sql)->value.str.val,(*sql)->value.str.len);
+ 	query = (text *) estrndup(Z_STRVAL_PP(sql),Z_STRLEN_PP(sql));
 
 	if (query == NULL) {
 		php_error(E_WARNING, "Invalid query");
@@ -811,7 +811,7 @@ PHP_FUNCTION(ora_bind)
 	case 5:
 		zend_get_parameters_ex(5,&curs,&pvar,&svar,&plen,&ptyp);
 		convert_to_long_ex(ptyp);
-		inout = (*ptyp)->value.lval;
+		inout = Z_LVAL_PP(ptyp);
 		break;
 	case 4:
 		zend_get_parameters_ex(4,&curs,&pvar,&svar,&plen);
@@ -843,13 +843,13 @@ PHP_FUNCTION(ora_bind)
 		RETURN_FALSE;
 	}
 
-	if ((paramname = estrndup((*pvar)->value.str.val, (*pvar)->value.str.len)) == NULL) {
+	if ((paramname = estrndup(Z_STRVAL_PP(pvar), Z_STRLEN_PP(pvar))) == NULL) {
 		php_error(E_WARNING, "Out of memory for parametername");
 		efree(newparam);
 		RETURN_FALSE;
 	}
 
-	if (zend_hash_add(cursor->params, paramname, (*pvar)->value.str.len + 1, 
+	if (zend_hash_add(cursor->params, paramname, Z_STRLEN_PP(pvar) + 1, 
 					  newparam, sizeof(oraParam), (void **)&paramptr) == FAILURE) {
 		/* XXX zend_hash_destroy */
 		efree(paramname);
@@ -861,7 +861,7 @@ PHP_FUNCTION(ora_bind)
 	efree(newparam);
 	efree(paramname);
 	
-	paramptr->progvl = (*plen)->value.lval + 1;
+	paramptr->progvl = Z_LVAL_PP(plen) + 1;
 	paramptr->inout = inout;
 
 	if ((paramptr->progv = (text *)emalloc(paramptr->progvl)) == NULL) {
@@ -873,7 +873,7 @@ PHP_FUNCTION(ora_bind)
 	paramptr->alen = paramptr->progvl;
 
 	if (obndra(&cursor->cda,              
-			   (*svar)->value.str.val,
+			   Z_STRVAL_PP(svar),
 			   -1,
 			   (ub1 *)paramptr->progv,
 			   paramptr->progvl,
@@ -1002,7 +1002,7 @@ PHP_FUNCTION(ora_do)
 
 	memset(cursor, 0, sizeof(oraCursor));
 
-	query = (text *) estrndup((*sql)->value.str.val,(*sql)->value.str.len);
+	query = (text *) estrndup(Z_STRVAL_PP(sql),Z_STRLEN_PP(sql));
 
 	if (query == NULL) {
 		php_error(E_WARNING, "Invalid query in Ora_Do");
@@ -1019,7 +1019,7 @@ PHP_FUNCTION(ora_do)
 	}
 	cursor->open = 1;
 	cursor->conn_ptr = conn;	
-	cursor->conn_id = (*con)->value.lval;	
+	cursor->conn_id = Z_LVAL_PP(con);	
 	
 	/* Prepare stmt */
 
@@ -1107,7 +1107,7 @@ PHP_FUNCTION(ora_fetch_into)
 	case 3:
 		zend_get_parameters_ex(3, &curs, &arr, &flg);
 		convert_to_long_ex(flg);
-		flags = (*flg)->value.lval;
+		flags = Z_LVAL_PP(flg);
 		break;
 		
 	default:
@@ -1133,14 +1133,14 @@ PHP_FUNCTION(ora_fetch_into)
 	}
 	cursor->fetched++;
 
-	if ((*arr)->type != IS_ARRAY){
+	if (Z_TYPE_PP(arr) != IS_ARRAY){
 		pval_destructor(*arr);
 	    if (array_init(*arr) == FAILURE){
 			php_error(E_WARNING, "Can't convert to type Array");
 			RETURN_FALSE;
 		}
 	}
-	zend_hash_internal_pointer_reset((*arr)->value.ht);
+	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(arr));
 
 	for (i = 0; i < cursor->ncols; i++) {
 		if (cursor->columns[i].col_retcode == 1405) {
@@ -1162,8 +1162,8 @@ PHP_FUNCTION(ora_fetch_into)
 		} else {
 			MAKE_STD_ZVAL(tmp);
 
-			tmp->type = IS_STRING;
-			tmp->value.str.len = 0;
+			Z_TYPE_P(tmp) = IS_STRING;
+			Z_STRLEN_P(tmp) = 0;
 
 			switch(cursor->columns[i].dbtype) {
 				case SQLT_LNG:
@@ -1201,24 +1201,24 @@ PHP_FUNCTION(ora_fetch_into)
 							}
 						}
 						if (cursor->columns[i].buf && offset) {
-							tmp->value.str.len = offset;
+							Z_STRLEN_P(tmp) = offset;
 						} else {
-							tmp->value.str.len = 0;
+							Z_STRLEN_P(tmp) = 0;
 						}
 					}
 					break;
 				default:
-					tmp->value.str.len = min(cursor->columns[i].col_retlen,
+					Z_STRLEN_P(tmp) = min(cursor->columns[i].col_retlen,
 											 cursor->columns[i].dsize);
 					break;
 			}
-			tmp->value.str.val = estrndup(cursor->columns[i].buf,tmp->value.str.len);
+			Z_STRVAL_P(tmp) = estrndup(cursor->columns[i].buf,Z_STRLEN_P(tmp));
 		}
 
 		if (flags&ORA_FETCHINTO_ASSOC){
-			zend_hash_update((*arr)->value.ht, cursor->columns[i].cbuf, cursor->columns[i].cbufl+1, (void *) &tmp, sizeof(pval*), NULL);
+			zend_hash_update(Z_ARRVAL_PP(arr), cursor->columns[i].cbuf, cursor->columns[i].cbufl+1, (void *) &tmp, sizeof(pval*), NULL);
 		} else {
-			zend_hash_index_update((*arr)->value.ht, i, (void *) &tmp, sizeof(pval*), NULL);
+			zend_hash_index_update(Z_ARRVAL_PP(arr), i, (void *) &tmp, sizeof(pval*), NULL);
 		}
 
 	}
@@ -1249,18 +1249,18 @@ PHP_FUNCTION(ora_columnname)
 		RETURN_FALSE;
 	}
         
-	if ((*col)->value.lval >= cursor->ncols){
+	if (Z_LVAL_PP(col) >= cursor->ncols){
 		php_error(E_WARNING, "Column index larger than number of columns");
 		RETURN_FALSE;
 	}
 
-	if ((*col)->value.lval < 0){
+	if (Z_LVAL_PP(col) < 0){
 		php_error(E_WARNING, "Column numbering starts at 0");
 		RETURN_FALSE;
 	}
         
-	RETURN_STRINGL(cursor->columns[(*col)->value.lval].cbuf,
-				   cursor->columns[(*col)->value.lval].cbufl,1);
+	RETURN_STRINGL(cursor->columns[Z_LVAL_PP(col)].cbuf,
+				   cursor->columns[Z_LVAL_PP(col)].cbufl,1);
 }
 /* }}} */
 
@@ -1281,7 +1281,7 @@ PHP_FUNCTION(ora_columntype)
 	}
 
 	convert_to_long_ex(col);
-	colno = (*col)->value.lval;
+	colno = Z_LVAL_PP(col);
 
 	if (cursor->ncols == 0){
 		php_error(E_WARNING, "No tuples available at this cursor index");
@@ -1355,17 +1355,17 @@ PHP_FUNCTION(ora_columnsize)
 		RETURN_FALSE;
 	}
         
-	if ((*col)->value.lval >= cursor->ncols){
+	if (Z_LVAL_PP(col) >= cursor->ncols){
 		php_error(E_WARNING, "Column index larger than number of columns");
 		RETURN_FALSE;
 	}
 
-	if ((*col)->value.lval < 0){
+	if (Z_LVAL_PP(col) < 0){
 		php_error(E_WARNING, "Column numbering starts at 0");
 		RETURN_FALSE;
 	}
         
-	RETURN_LONG(cursor->columns[(*col)->value.lval].dbsize);
+	RETURN_LONG(cursor->columns[Z_LVAL_PP(col)].dbsize);
 }
 /* }}} */
 
@@ -1394,7 +1394,7 @@ PHP_FUNCTION(ora_getcolumn)
 	}
 
 	convert_to_long_ex(col);
-	colno = (*col)->value.lval;        
+	colno = Z_LVAL_PP(col);        
 
 	if (colno >= cursor->ncols){
 		php_error(E_WARNING, "Column index larger than number of columns");
@@ -1759,7 +1759,7 @@ int ora_set_param_values(oraCursor *cursor, int isout TSRMLS_DC)
 		}
 
 		convert_to_string(*pdata);
-		plen = (*pdata)->value.str.len;
+		plen = Z_STRLEN_PP(pdata);
 
  		if (param->progvl <= plen){
   			php_error(E_NOTICE, "Input value will be truncated");
@@ -1767,7 +1767,7 @@ int ora_set_param_values(oraCursor *cursor, int isout TSRMLS_DC)
 
 		len = min(param->progvl - 1, plen);
 
-		strncpy(param->progv, (*pdata)->value.str.val, len);
+		strncpy(param->progv, Z_STRVAL_PP(pdata), len);
 		param->progv[len] = '\0';
 	}
 

@@ -40,7 +40,7 @@ int dbx_mssql_connect(zval **rv, zval **host, zval **db, zval **username, zval *
 	arguments[1]=username;
 	arguments[2]=password;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mssql_connect", &returned_zval, number_of_arguments, arguments);
-	if (!returned_zval || returned_zval->type!=IS_RESOURCE) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_RESOURCE) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}
@@ -49,12 +49,12 @@ int dbx_mssql_connect(zval **rv, zval **host, zval **db, zval **username, zval *
 	arguments[0]=db;
 	arguments[1]=&returned_zval;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mssql_select_db", &select_db_zval, number_of_arguments, arguments);
-	if (!select_db_zval || (select_db_zval->type==IS_BOOL && select_db_zval->value.lval==0) ) {
+	if (!select_db_zval || (Z_TYPE_P(select_db_zval)==IS_BOOL && Z_LVAL_P(select_db_zval)==0) ) {
 		if (select_db_zval) zval_ptr_dtor(&select_db_zval);
 		/* also close connection */
 		number_of_arguments=1;
 		arguments[0]=&returned_zval;
-		zend_list_addref(returned_zval->value.lval);
+		zend_list_addref(Z_LVAL_P(returned_zval));
 		dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mssql_close", &select_db_zval, number_of_arguments, arguments);
 		if (select_db_zval) zval_ptr_dtor(&select_db_zval);
 		zval_ptr_dtor(&returned_zval);
@@ -78,7 +78,7 @@ int dbx_mssql_pconnect(zval **rv, zval **host, zval **db, zval **username, zval 
 	arguments[1]=username;
 	arguments[2]=password;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mssql_pconnect", &returned_zval, number_of_arguments, arguments);
-	if (!returned_zval || returned_zval->type!=IS_RESOURCE) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_RESOURCE) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}
@@ -87,12 +87,12 @@ int dbx_mssql_pconnect(zval **rv, zval **host, zval **db, zval **username, zval 
 	arguments[0]=db;
 	arguments[1]=&returned_zval;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mssql_select_db", &select_db_zval, number_of_arguments, arguments);
-	if (!select_db_zval || (select_db_zval->type==IS_BOOL && select_db_zval->value.lval==0) ) {
+	if (!select_db_zval || (Z_TYPE_P(select_db_zval)==IS_BOOL && Z_LVAL_P(select_db_zval)==0) ) {
 		if (select_db_zval) zval_ptr_dtor(&select_db_zval);
 		/* also close connection */
 		number_of_arguments=1;
 		arguments[0]=&returned_zval;
-		zend_list_addref(returned_zval->value.lval);
+		zend_list_addref(Z_LVAL_P(returned_zval));
 		dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mssql_close", &select_db_zval, number_of_arguments, arguments);
 		if (select_db_zval) zval_ptr_dtor(&select_db_zval);
 		zval_ptr_dtor(&returned_zval);
@@ -113,7 +113,7 @@ int dbx_mssql_close(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS)
 
 	arguments[0]=dbx_handle;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mssql_close", &returned_zval, number_of_arguments, arguments);
-	if (!returned_zval || returned_zval->type!=IS_BOOL) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_BOOL) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}
@@ -140,7 +140,7 @@ int dbx_mssql_query(zval **rv, zval **dbx_handle, zval **db_name, zval **sql_sta
 	arguments[1]=dbx_handle;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mssql_query", &returned_zval, number_of_arguments, arguments);
 	/* mssql_query returns a bool for success or failure, or a result_identifier for select statements */
-	if (!returned_zval || (returned_zval->type!=IS_BOOL && returned_zval->type!=IS_RESOURCE)) {
+	if (!returned_zval || (Z_TYPE_P(returned_zval)!=IS_BOOL && Z_TYPE_P(returned_zval)!=IS_RESOURCE)) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}
@@ -157,7 +157,7 @@ int dbx_mssql_getcolumncount(zval **rv, zval **result_handle, INTERNAL_FUNCTION_
 
 	arguments[0]=result_handle;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mssql_num_fields", &returned_zval, number_of_arguments, arguments);
-	if (!returned_zval || returned_zval->type!=IS_LONG) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_LONG) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}
@@ -179,7 +179,7 @@ int dbx_mssql_getcolumnname(zval **rv, zval **result_handle, long column_index, 
 	arguments[1]=&zval_column_index;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mssql_field_name", &returned_zval, number_of_arguments, arguments);
 	/* mssql_field_name returns a string */
-	if (!returned_zval || returned_zval->type!=IS_STRING) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_STRING) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		FREE_ZVAL(zval_column_index);
 		return 0;
@@ -203,7 +203,7 @@ int dbx_mssql_getcolumntype(zval **rv, zval **result_handle, long column_index, 
 	arguments[1]=&zval_column_index;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mssql_field_type", &returned_zval, number_of_arguments, arguments);
 	/* mssql_field_name returns a string */
-	if (!returned_zval || returned_zval->type!=IS_STRING) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_STRING) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		FREE_ZVAL(zval_column_index);
 		return 0;
@@ -223,7 +223,7 @@ int dbx_mssql_getrow(zval **rv, zval **result_handle, long row_number, INTERNAL_
 
 	arguments[0]=result_handle;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mssql_fetch_row", &returned_zval, number_of_arguments, arguments);
-	if (!returned_zval || returned_zval->type!=IS_ARRAY) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_ARRAY) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}
@@ -241,7 +241,7 @@ int dbx_mssql_error(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS)
 	arguments[0]=dbx_handle;
 	if (!dbx_handle) number_of_arguments=0;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mssql_get_last_message", &returned_zval, number_of_arguments, arguments);
-	if (!returned_zval || returned_zval->type!=IS_STRING) {
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_STRING) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}

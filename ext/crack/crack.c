@@ -168,7 +168,7 @@ ZEND_FUNCTION(crack_closedict)
 			if (zend_get_parameters_ex(1, &dictionary) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
-			id = (*dictionary)->value.lval;
+			id = Z_LVAL_PP(dictionary);
 			break;
 		default:
 			WRONG_PARAM_COUNT;

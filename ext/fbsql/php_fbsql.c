@@ -383,7 +383,7 @@ PHP_MINIT_FUNCTION(fbsql)
 	le_result   = zend_register_list_destructors_ex(phpfbReleaseResult, NULL, "fbsql result", module_number);
 	le_link     = zend_register_list_destructors_ex(phpfbReleaseLink, NULL, "fbsql link", module_number);
 	le_plink    = zend_register_list_destructors_ex(NULL, phpfbReleasePLink, "fbsql plink", module_number);
-	fbsql_module_entry.type = type;
+	Z_TYPE(fbsql_module_entry) = type;
 
 	REGISTER_LONG_CONSTANT("FBSQL_ASSOC", FBSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FBSQL_NUM",   FBSQL_NUM,   CONST_CS | CONST_PERSISTENT);
@@ -521,7 +521,7 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 
 
 			le.ptr  = phpLink;
-			le.type = le_plink;
+			Z_TYPE(le) = le_plink;
 			if (zend_hash_update(&EG(persistent_list), name, strlen(name) + 1, &le, sizeof(le), NULL)==FAILURE)
 			{
 				free(phpLink->hostName);
@@ -555,9 +555,9 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 			ptr = zend_list_find(link, &type);   /* check if the link is still there */
 			if (ptr && (type==le_link || type==le_plink)) {
 				zend_list_addref(link);
-				return_value->value.lval = link;
+				Z_LVAL_P(return_value) = link;
 				php_fbsql_set_default_link(link TSRMLS_CC);
-				return_value->type = IS_RESOURCE;
+				Z_TYPE_P(return_value) = IS_RESOURCE;
 				return;
 			} else {
 				zend_hash_del(&EG(regular_list), name, strlen(name) + 1);
@@ -581,8 +581,8 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 
 		ZEND_REGISTER_RESOURCE(return_value, phpLink, le_link);
 
-		le.ptr  = (void *)return_value->value.lval;
-		le.type = le_index_ptr;
+		le.ptr  = (void *)Z_LVAL_P(return_value);
+		Z_TYPE(le) = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list), name, strlen(name) + 1, &le, sizeof(le), NULL)==FAILURE)
 		{
 			free(phpLink->hostName);
@@ -594,7 +594,7 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 		}
 		FB_SQL_G(linkCount)++;
 	}
-	php_fbsql_set_default_link(return_value->value.lval TSRMLS_CC);
+	php_fbsql_set_default_link(Z_LVAL_P(return_value) TSRMLS_CC);
 }
 
 int phpfbFetchRow(PHPFBResult* result, int row)
@@ -1085,14 +1085,14 @@ PHP_FUNCTION(fbsql_select_db)
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(dbname);
-			name = (*dbname)->value.str.val;
+			name = Z_STRVAL_PP(dbname);
 			break;
 		case 2:
 			if (zend_get_parameters_ex(2, &dbname, &fbsql_link_index)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(dbname);
-			name = (*dbname)->value.str.val;
+			name = Z_STRVAL_PP(dbname);
 			id = -1;
 			break;
 		default:
@@ -1144,14 +1144,14 @@ PHP_FUNCTION(fbsql_change_user)
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(database);
-			name = (*database)->value.str.val;
+			name = Z_STRVAL_PP(database);
 			break;
 		case 4:
 			if (zend_get_parameters_ex(4, &user, &password, &database, &fbsql_link_index)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(database);
-			name = (*database)->value.str.val;
+			name = Z_STRVAL_PP(database);
 			id = -1;
 			break;
 		default:
@@ -1161,15 +1161,15 @@ PHP_FUNCTION(fbsql_change_user)
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
 
 	convert_to_string_ex(user);
-	userName = (*user)->value.str.val;
+	userName = Z_STRVAL_PP(user);
 
 	convert_to_string_ex(password);
-	userPassword = (*password)->value.str.val;
+	userPassword = Z_STRVAL_PP(password);
 
 	sprintf(buffer, "SET AUTHORIZATION %s;", userName);
 
 	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, buffer, phpLink);
-	if (return_value->value.lval)
+	if (Z_LVAL_P(return_value))
 	{
 		free(phpLink->userName);
 		phpLink->userName = strdup(userName);
@@ -1208,7 +1208,7 @@ PHP_FUNCTION(fbsql_create_db)
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
 
 	convert_to_string_ex(database_name);
-	databaseName = (*database_name)->value.str.val;
+	databaseName = Z_STRVAL_PP(database_name);
 
 	status = fbcehStatusForDatabaseNamed(phpLink->execHandler, databaseName);
 	if (status != FBUnknownStatus)
@@ -1278,7 +1278,7 @@ PHP_FUNCTION(fbsql_drop_db)
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
 
 	convert_to_string_ex(database_name);
-	databaseName = (*database_name)->value.str.val;
+	databaseName = Z_STRVAL_PP(database_name);
 
 	status = fbcehStatusForDatabaseNamed(phpLink->execHandler, databaseName);
 	if (status != FBStopped)
@@ -1349,7 +1349,7 @@ PHP_FUNCTION(fbsql_start_db)
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
 
 	convert_to_string_ex(database_name);
-	databaseName = (*database_name)->value.str.val;
+	databaseName = Z_STRVAL_PP(database_name);
 
 	status = fbcehStatusForDatabaseNamed(phpLink->execHandler, databaseName);
 	if ((status != FBStopped) && (status != FBRunning) && (status != FBStarting))
@@ -1424,7 +1424,7 @@ PHP_FUNCTION(fbsql_stop_db)
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
 
 	convert_to_string_ex(database_name);
-	databaseName = (*database_name)->value.str.val;
+	databaseName = Z_STRVAL_PP(database_name);
 
 	if (!php_fbsql_select_db(databaseName, phpLink TSRMLS_CC)) {
 		RETURN_FALSE;
@@ -1481,7 +1481,7 @@ PHP_FUNCTION(fbsql_db_status)
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
 
 	convert_to_string_ex(database_name);
-	databaseName = (*database_name)->value.str.val;
+	databaseName = Z_STRVAL_PP(database_name);
 
 	if (phpLink->execHandler) {
 		RETURN_LONG(fbcehStatusForDatabaseNamed(phpLink->execHandler, databaseName));
@@ -1645,7 +1645,7 @@ PHP_FUNCTION(fbsql_query)
 
 	convert_to_string_ex(query);
 
-	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, (*query)->value.str.val, phpLink);
+	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_STRVAL_PP(query), phpLink);
 }
 /* }}} */
 
@@ -1680,8 +1680,8 @@ PHP_FUNCTION(fbsql_db_query)
 	convert_to_string_ex(query);
 	convert_to_string_ex(dbname);
 
-	if (php_fbsql_select_db((*dbname)->value.str.val, phpLink TSRMLS_CC)) {
-		phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, (*query)->value.str.val, phpLink);
+	if (php_fbsql_select_db(Z_STRVAL_PP(dbname), phpLink TSRMLS_CC)) {
+		phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_STRVAL_PP(query), phpLink);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1764,7 +1764,7 @@ PHP_FUNCTION(fbsql_list_tables)
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
 
 	convert_to_string_ex(database_name);
-	databaseName = (*database_name)->value.str.val;
+	databaseName = Z_STRVAL_PP(database_name);
 
 	if (databaseName == NULL) {
 		php_fbsql_select_db(FB_SQL_G(databaseName), phpLink TSRMLS_CC);
@@ -1807,9 +1807,9 @@ PHP_FUNCTION(fbsql_list_fields)
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
 
 	convert_to_string_ex(database_name);
-	databaseName = (*database_name)->value.str.val;
+	databaseName = Z_STRVAL_PP(database_name);
 	convert_to_string_ex(table_name);
-	tableName = (*table_name)->value.str.val;
+	tableName = Z_STRVAL_PP(table_name);
 
 	if (!php_fbsql_select_db(databaseName, phpLink TSRMLS_CC)) {
 		RETURN_FALSE;
@@ -2216,8 +2216,8 @@ void phpfbSqlResult (INTERNAL_FUNCTION_PARAMETERS, PHPFBResult* result, int rowI
 		}
 		else if (row[columnIndex])
 		{
-			phpfbColumnAsString(result, columnIndex, row[columnIndex], &return_value->value.str.len, &return_value->value.str.val);
-			return_value->type = IS_STRING;
+			phpfbColumnAsString(result, columnIndex, row[columnIndex], &Z_STRLEN_P(return_value), &Z_STRVAL_P(return_value));
+			Z_TYPE_P(return_value) = IS_STRING;
 		}
 		else
 		{
@@ -2268,20 +2268,20 @@ PHP_FUNCTION(fbsql_result)
 	columnIndex  = result->columnIndex;
 	if (field)
 	{
-		if (((*field)->type == IS_STRING) && (result->metaData))
+		if ((Z_TYPE_PP(field) == IS_STRING) && (result->metaData))
 		{
 			for (columnIndex =0; columnIndex < result->columnCount; columnIndex ++)
 			{
 				const FBCColumnMetaData* cmd = fbcmdColumnMetaDataAtIndex(result->metaData, columnIndex);
 				const char*              lbl = fbccmdLabelName(cmd);
-				if (strcmp((char*)lbl, (*field)->value.str.val) == 0) break;
+				if (strcmp((char*)lbl, Z_STRVAL_PP(field)) == 0) break;
 			}
 			if (columnIndex == result->columnCount) RETURN_FALSE;
 		}
 		else
 		{
 			convert_to_long_ex(field);
-			columnIndex = (*field)->value.lval;
+			columnIndex = Z_LVAL_PP(field);
 			if (columnIndex < 0)
 			{
 				php_error(E_WARNING, "Illegal column index - %d", columnIndex);
@@ -2427,8 +2427,8 @@ PHP_FUNCTION(fbsql_fetch_assoc)
 PHP_FUNCTION(fbsql_fetch_object)
 {
 	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_ASSOC);
-	if (return_value->type==IS_ARRAY) {
-		object_and_properties_init(return_value, &zend_standard_class_def, return_value->value.ht);
+	if (Z_TYPE_P(return_value)==IS_ARRAY) {
+		object_and_properties_init(return_value, &zend_standard_class_def, Z_ARRVAL_P(return_value));
 	}
 }
 /* }}} */
@@ -2670,7 +2670,7 @@ PHP_FUNCTION(fbsql_fetch_field)
 /*	add_property_long(return_value, "primary_key", IS_PRI_KEY(fbsql_field->flags)?1:0); */
 /*	add_property_long(return_value, "multiple_key", (fbsql_field->flags&MULTIPLE_KEY_FLAG?1:0)); */
 /*	add_property_long(return_value, "unique_key", (fbsql_field->flags&UNIQUE_KEY_FLAG?1:0)); */
-/*	add_property_long(return_value, "numeric", IS_NUM(fbsql_field->type)?1:0); */
+/*	add_property_long(return_value, "numeric", IS_NUM(Z_TYPE_P(fbsql_field))?1:0); */
 /*	add_property_long(return_value, "blob", IS_BLOB(fbsql_field->flags)?1:0); */
 /*	add_property_long(return_value, "unsigned", (fbsql_field->flags&UNSIGNED_FLAG?1:0)); */
 /*	add_property_long(return_value, "zerofill", (fbsql_field->flags&ZEROFILL_FLAG?1:0)); */
@@ -3012,7 +3012,7 @@ PHP_FUNCTION(fbsql_free_result)
 	}
 	ZEND_FETCH_RESOURCE(result, PHPFBResult *, fbsql_result_index, -1, "FrontBase-Result", le_result);
 
-	zend_list_delete((*fbsql_result_index)->value.lval);
+	zend_list_delete(Z_LVAL_PP(fbsql_result_index));
 	RETURN_TRUE;
 }
 /* }}} */

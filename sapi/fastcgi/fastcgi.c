@@ -196,7 +196,7 @@ static void fastcgi_module_main(TSRMLS_D)
 	zend_file_handle file_handle;
 	int c, retval = FAILURE;
 
-	file_handle.type = ZEND_HANDLE_FILENAME;
+	Z_TYPE(file_handle) = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;
 	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;

@@ -1413,9 +1413,9 @@ PHP_FUNCTION(gettype)
 		   char *result;
 		   int res_len;
 
-		   res_len = sizeof("object of type ")-1 + arg->value.obj.ce->name_length;
+		   res_len = sizeof("object of type ")-1 + Z_OBJCE_P(arg)->name_length;
 		   result = (char *) emalloc(res_len+1);
-		   sprintf(result, "object of type %s", arg->value.obj.ce->name);
+		   sprintf(result, "object of type %s", Z_OBJCE_P(arg)->name);
 		   RETVAL_STRINGL(result, res_len, 0);
 		   }
 		 */

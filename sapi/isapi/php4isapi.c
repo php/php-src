@@ -748,7 +748,7 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 			file_handle.filename = SG(request_info.path_translated);
 			file_handle.free_filename = 0;
 #endif
-			file_handle.type = ZEND_HANDLE_FILENAME;
+			Z_TYPE(file_handle) = ZEND_HANDLE_FILENAME;
 			file_handle.opened_path = NULL;
 
 			php_request_startup(TSRMLS_C);

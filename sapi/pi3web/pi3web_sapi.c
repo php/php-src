@@ -355,9 +355,9 @@ static void hash_pi3web_variables(TSRMLS_D)
 			}
 			*colon = 0;
 			INIT_PZVAL(entry);
-			entry->value.str.len = strlen(value);
-			entry->value.str.val = estrndup(value, entry->value.str.len);
-			entry->type = IS_STRING;
+			Z_STRLEN_P(entry) = strlen(value);
+			Z_STRVAL_P(entry) = estrndup(value, Z_STRLEN_P(entry));
+			Z_TYPE_P(entry) = IS_STRING;
 			zend_hash_add(&EG(symbol_table), variable, strlen(variable)+1, &entry, sizeof(zval *), NULL);
 			*colon = ':';
 		}
@@ -379,7 +379,7 @@ DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB)
 	zend_first_try {
 		file_handle.filename = lpCB->lpszFileName;
 		file_handle.free_filename = 0;
-		file_handle.type = ZEND_HANDLE_FILENAME;
+		Z_TYPE(file_handle) = ZEND_HANDLE_FILENAME;
 		file_handle.opened_path = NULL;
 
 		CG(extended_info) = 0;

@@ -146,7 +146,7 @@ PHP_FUNCTION(link)
 		RETURN_FALSE;
 	}
 
-	if (!strncasecmp((*topath)->value.str.val, "http://", 7) || !strncasecmp(Z_STRVAL_PP(topath), "ftp://", 6)) {
+	if (!strncasecmp(Z_STRVAL_PP(topath), "http://", 7) || !strncasecmp(Z_STRVAL_PP(topath), "ftp://", 6)) {
 		php_error(E_WARNING, "Unable to link to a URL");
 		RETURN_FALSE;
 	}

@@ -172,7 +172,7 @@ static INLINE struct svalue *lookup_header(char *headername)
   sind = make_shared_string("env");
   headers = low_mapping_string_lookup(REQUEST_DATA, sind);
   free_string(sind);
-  if(!headers || headers->type != PIKE_T_MAPPING) return NULL;
+  if(!headers || Z_TYPE_P(headers) != PIKE_T_MAPPING) return NULL;
   sind = make_shared_string(headername);
   value = low_mapping_string_lookup(headers->u.mapping, sind);
   free_string(sind);
@@ -187,7 +187,7 @@ INLINE static char *lookup_string_header(char *headername, char *default_value)
 {
   struct svalue *head = NULL;
   THREAD_SAFE_RUN(head = lookup_header(headername), "header lookup");
-  if(!head || head->type != PIKE_T_STRING)
+  if(!head || Z_TYPE_P(head) != PIKE_T_STRING)
     return default_value;
   return head->u.string->str;
 }
@@ -199,7 +199,7 @@ INLINE static int lookup_integer_header(char *headername, int default_value)
 {
   struct svalue *head = NULL;
   THREAD_SAFE_RUN(head = lookup_header(headername), "header lookup");
-  if(!head || head->type != PIKE_T_INT)
+  if(!head || Z_TYPE_P(head) != PIKE_T_INT)
     return default_value;
   return head->u.integer;
 }
@@ -301,7 +301,7 @@ static void php_roxen_set_header(char *header_name, char *value, char *p)
   if(!s_headermap)
   {
     struct svalue mappie;                                           
-    mappie.type = PIKE_T_MAPPING;
+    Z_TYPE(mappie) = PIKE_T_MAPPING;
     headermap = allocate_mapping(1);
     mappie.u.mapping = headermap;
     mapping_string_insert(REQUEST_DATA, ind, &mappie);
@@ -309,7 +309,7 @@ static void php_roxen_set_header(char *header_name, char *value, char *p)
   } else
     headermap = s_headermap->u.mapping;
 
-  hsval.type = PIKE_T_STRING;
+  Z_TYPE(hsval) = PIKE_T_STRING;
   hsval.u.string = hval;
   mapping_string_insert(headermap, hind, &hsval);
 
@@ -364,7 +364,7 @@ php_roxen_low_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
   free_string(ind);
   
   push_int(SG(sapi_headers).http_response_code);
-  if(s_headermap && s_headermap->type == PIKE_T_MAPPING)
+  if(s_headermap && Z_TYPE_P(s_headermap) == PIKE_T_MAPPING)
     ref_push_mapping(s_headermap->u.mapping);
   else
     push_int(0);
@@ -513,9 +513,9 @@ static sapi_module_struct roxen_sapi_module = {
  */
 #define ADD_STRING(name)										\
 	MAKE_STD_ZVAL(pval);										\
-	pval->type = IS_STRING;										\
-	pval->value.str.len = strlen(buf);							\
-	pval->value.str.val = estrndup(buf, pval->value.str.len);	\
+	Z_TYPE_P(pval) = IS_STRING;										\
+	Z_STRLEN_P(pval) = strlen(buf);							\
+	Z_STRVAL_P(pval) = estrndup(buf, Z_STRLEN_P(pval));	\
 	zend_hash_update(&EG(symbol_table), name, sizeof(name), 	\
 			&pval, sizeof(zval *), NULL)
 
@@ -535,21 +535,21 @@ php_roxen_hash_environment(TSRMLS_D)
   sind = make_shared_string("env");
   headers = low_mapping_string_lookup(REQUEST_DATA, sind);
   free_string(sind);
-  if(headers && headers->type == PIKE_T_MAPPING) {
+  if(headers && Z_TYPE_P(headers) == PIKE_T_MAPPING) {
     indices = mapping_indices(headers->u.mapping);
     for(i = 0; i < indices->size; i++) {
       ind = &indices->item[i];
       val = low_mapping_lookup(headers->u.mapping, ind);
-      if(ind && ind->type == PIKE_T_STRING &&
-	 val && val->type == PIKE_T_STRING) {
+      if(ind && Z_TYPE_P(ind) == PIKE_T_STRING &&
+	 val && Z_TYPE_P(val) == PIKE_T_STRING) {
 	int buf_len;
 	buf_len = MIN(511, ind->u.string->len);
 	strncpy(buf, ind->u.string->str, buf_len);
 	buf[buf_len] = '\0'; /* Terminate correctly */
 	MAKE_STD_ZVAL(pval);
-	pval->type = IS_STRING;
-	pval->value.str.len = val->u.string->len;
-	pval->value.str.val = estrndup(val->u.string->str, pval->value.str.len);
+	Z_TYPE_P(pval) = IS_STRING;
+	Z_STRLEN_P(pval) = val->u.string->len;
+	Z_STRVAL_P(pval) = estrndup(val->u.string->str, Z_STRLEN_P(pval));
 	
 	zend_hash_update(&EG(symbol_table), buf, buf_len + 1, &pval, sizeof(zval *), NULL);
       }
@@ -559,8 +559,8 @@ php_roxen_hash_environment(TSRMLS_D)
   
   /*
     MAKE_STD_ZVAL(pval);
-    pval->type = IS_LONG;
-    pval->value.lval = Ns_InfoBootTime();
+    Z_TYPE_P(pval) = IS_LONG;
+    Z_LVAL_P(pval) = Ns_InfoBootTime();
     zend_hash_update(&EG(symbol_table), "SERVER_BOOTTIME", sizeof("SERVER_BOOTTIME"), &pval, sizeof(zval *), NULL);
   */
 }
@@ -579,7 +579,7 @@ static int php_roxen_module_main(TSRMLS_D)
   GET_THIS();
 #endif
 
-  file_handle.type = ZEND_HANDLE_FILENAME;
+  Z_TYPE(file_handle) = ZEND_HANDLE_FILENAME;
   file_handle.filename = THIS->filename;
   file_handle.free_filename = 0;
   file_handle.opened_path = NULL;
@@ -620,7 +620,7 @@ void f_php_roxen_request_handler(INT32 args)
 	  "callback!");
   get_all_args("PHP4.Interpreter->run", args, "%S%m%O%*", &script,
 	       &request_data, &my_fd_obj, &done_callback);
-  if(done_callback->type != PIKE_T_FUNCTION) 
+  if(Z_TYPE_P(done_callback) != PIKE_T_FUNCTION) 
     error("PHP4.Interpreter->run: Bad argument 4, expected function.\n");
   PHP_LOCK(THIS); /* Need to lock here or reusing the same object might cause
 		       * problems in changing stuff in that object */
@@ -653,7 +653,7 @@ void f_php_roxen_request_handler(INT32 args)
   
   ind = make_shared_binary_string("my_fd", 5);
   raw_fd = low_mapping_string_lookup(THIS->request_data, ind);
-  if(raw_fd && raw_fd->type == PIKE_T_OBJECT)
+  if(raw_fd && Z_TYPE_P(raw_fd) == PIKE_T_OBJECT)
   {
     int fd = fd_from_object(raw_fd->u.object);
     if(fd == -1)

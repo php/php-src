@@ -175,7 +175,7 @@ PHP_MINIT_FUNCTION(msql)
 	msql_globals.le_link = zend_register_list_destructors_ex(_close_msql_link, NULL, "msql link", module_number);
 	msql_globals.le_plink = zend_register_list_destructors_ex(NULL, _close_msql_plink, "msql link persistent", module_number);
 	
-	msql_module_entry.type = type;
+	Z_TYPE(msql_module_entry) = type;
 
 	REGISTER_LONG_CONSTANT("MSQL_ASSOC", MSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MSQL_NUM", MSQL_NUM, CONST_CS | CONST_PERSISTENT);
@@ -248,10 +248,10 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 					RETURN_FALSE;
 				}
 				convert_to_string(yyhost);
-				host = yyhost->value.str.val;
-				hashed_details_length = yyhost->value.str.len+4+1;
+				host = Z_STRVAL_P(yyhost);
+				hashed_details_length = Z_STRLEN_P(yyhost)+4+1;
 				hashed_details = emalloc(hashed_details_length+1);
-				sprintf(hashed_details,"msql_%s",yyhost->value.str.val); /* SAFE */
+				sprintf(hashed_details,"msql_%s",Z_STRVAL_P(yyhost)); /* SAFE */
 			}
 			break;
 		default:
@@ -287,7 +287,7 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			}
 			
 			/* hash it up */
-			new_le.type = msql_globals.le_plink;
+			Z_TYPE(new_le) = msql_globals.le_plink;
 			new_le.ptr = (void *) msql;
 			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				efree(hashed_details);
@@ -296,7 +296,7 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			msql_globals.num_persistent++;
 			msql_globals.num_links++;
 		} else {  /* we do */
-			if (le->type != msql_globals.le_plink) {
+			if (Z_TYPE_P(le) != msql_globals.le_plink) {
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -327,14 +327,14 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			int type,link;
 			void *ptr;
 
-			if (index_ptr->type != le_index_ptr) {
+			if (Z_TYPE_P(index_ptr) != le_index_ptr) {
 				RETURN_FALSE;
 			}
 			link = (int) index_ptr->ptr;
 			ptr = zend_list_find(link,&type);   /* check if the link is still there */
 			if (ptr && (type==msql_globals.le_link || type==msql_globals.le_plink)) {
-				return_value->value.lval = msql_globals.default_link = link;
-				return_value->type = IS_RESOURCE;
+				Z_LVAL_P(return_value) = msql_globals.default_link = link;
+				Z_TYPE_P(return_value) = IS_RESOURCE;
 				efree(hashed_details);
 				return;
 			} else {
@@ -355,8 +355,8 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		ZEND_REGISTER_RESOURCE(return_value, (void *) msql, msql_globals.le_link);
 		
 		/* add it to the hash */
-		new_index_ptr.ptr = (void *) return_value->value.lval;
-		new_index_ptr.type = le_index_ptr;
+		new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
+		Z_TYPE(new_index_ptr) = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list),hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
 			efree(hashed_details);
 			RETURN_FALSE;
@@ -364,7 +364,7 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		msql_globals.num_links++;
 	}
 	efree(hashed_details);
-	msql_globals.default_link=return_value->value.lval;
+	msql_globals.default_link=Z_LVAL_P(return_value);
 }
 /* }}} */
 
@@ -466,7 +466,7 @@ PHP_FUNCTION(msql_select_db)
 
 	convert_to_string(db);
 	
-	if (msqlSelectDB(msql,db->value.str.val)==-1) {
+	if (msqlSelectDB(msql,Z_STRVAL_P(db))==-1) {
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -503,7 +503,7 @@ PHP_FUNCTION(msql_create_db)
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
 	
 	convert_to_string(db);
-	if (msqlCreateDB(msql,db->value.str.val)<0) {
+	if (msqlCreateDB(msql,Z_STRVAL_P(db))<0) {
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -540,7 +540,7 @@ PHP_FUNCTION(msql_drop_db)
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
 	
 	convert_to_string(db);
-	if (msqlDropDB(msql,db->value.str.val)<0) {
+	if (msqlDropDB(msql,Z_STRVAL_P(db))<0) {
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -578,7 +578,7 @@ PHP_FUNCTION(msql_query)
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
 	
 	convert_to_string(query);
-	if ((af_rows = msqlQuery(msql,query->value.str.val))==-1) {
+	if ((af_rows = msqlQuery(msql,Z_STRVAL_P(query)))==-1) {
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msqlStoreResult(), af_rows), msql_globals.le_query);
@@ -615,12 +615,12 @@ PHP_FUNCTION(msql_db_query)
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
 	
 	convert_to_string(db);
-	if (msqlSelectDB(msql,db->value.str.val)==-1) {
+	if (msqlSelectDB(msql,Z_STRVAL_P(db))==-1) {
 		RETURN_FALSE;
 	}
 	
 	convert_to_string(query);
-	if ((af_rows = msqlQuery(msql,query->value.str.val))==-1) {
+	if ((af_rows = msqlQuery(msql,Z_STRVAL_P(query)))==-1) {
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msqlStoreResult(), af_rows), msql_globals.le_query);
@@ -691,7 +691,7 @@ PHP_FUNCTION(msql_list_tables)
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
 	
 	convert_to_string(db);
-	if (msqlSelectDB(msql,db->value.str.val)==-1) {
+	if (msqlSelectDB(msql,Z_STRVAL_P(db))==-1) {
 		RETURN_FALSE;
 	}
 	if ((msql_result=msqlListTables(msql))==NULL) {
@@ -732,11 +732,11 @@ PHP_FUNCTION(msql_list_fields)
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
 	
 	convert_to_string(db);
-	if (msqlSelectDB(msql,db->value.str.val)==-1) {
+	if (msqlSelectDB(msql,Z_STRVAL_P(db))==-1) {
 		RETURN_FALSE;
 	}
 	convert_to_string(table);
-	if ((msql_result=msqlListFields(msql,table->value.str.val))==NULL) {
+	if ((msql_result=msqlListFields(msql,Z_STRVAL_P(table)))==NULL) {
 		php_error(E_WARNING,"Unable to save mSQL query result");
 		RETURN_FALSE;
 	}
@@ -784,29 +784,29 @@ PHP_FUNCTION(msql_result)
 	MSQL_GET_QUERY(result);
 	
 	convert_to_long(row);
-	if (row->value.lval<0 || row->value.lval>=msqlNumRows(msql_result)) {
-		php_error(E_WARNING,"Unable to jump to row %d on mSQL query index %d",row->value.lval,result->value.lval);
+	if (Z_LVAL_P(row)<0 || Z_LVAL_P(row)>=msqlNumRows(msql_result)) {
+		php_error(E_WARNING,"Unable to jump to row %d on mSQL query index %d",Z_LVAL_P(row),Z_LVAL_P(result));
 		RETURN_FALSE;
 	}
-	msqlDataSeek(msql_result,row->value.lval);
+	msqlDataSeek(msql_result,Z_LVAL_P(row));
 	if ((sql_row=msqlFetchRow(msql_result))==NULL) { /* shouldn't happen? */
 		RETURN_FALSE;
 	}
 
 	if (field) {
-		switch(field->type) {
+		switch(Z_TYPE_P(field)) {
 			case IS_STRING: {
 					int i=0;
 					m_field *tmp_field;
 					char *table_name,*field_name,*tmp;
 					
-					if ((tmp=strchr(field->value.str.val,'.'))) {
+					if ((tmp=strchr(Z_STRVAL_P(field),'.'))) {
 						*tmp = 0;
-						table_name = estrdup(field->value.str.val);
+						table_name = estrdup(Z_STRVAL_P(field));
 						field_name = estrdup(tmp+1);
 					} else {
 						table_name = NULL;
-						field_name = estrndup(field->value.str.val,field->value.str.len);
+						field_name = estrndup(Z_STRVAL_P(field),Z_STRLEN_P(field));
 					}
 					msqlFieldSeek(msql_result,0);
 					while ((tmp_field=msqlFetchField(msql_result))) {
@@ -818,7 +818,7 @@ PHP_FUNCTION(msql_result)
 					}
 					if (!tmp_field) { /* no match found */
 						php_error(E_WARNING,"%s%s%s not found in mSQL query index %d",
-									(table_name?table_name:""), (table_name?".":""), field_name, result->value.lval);
+									(table_name?table_name:""), (table_name?".":""), field_name, Z_LVAL_P(result));
 						efree(field_name);
 						if (table_name) {
 							efree(table_name);
@@ -833,7 +833,7 @@ PHP_FUNCTION(msql_result)
 				break;
 			default:
 				convert_to_long(field);
-				field_offset = field->value.lval;
+				field_offset = Z_LVAL_P(field);
 				if (field_offset<0 || field_offset>=msqlNumFields(msql_result)) {
 					php_error(E_WARNING,"Bad column offset specified");
 					RETURN_FALSE;
@@ -844,12 +844,12 @@ PHP_FUNCTION(msql_result)
 	
 	if (sql_row[field_offset]) {
 		if (PG(magic_quotes_runtime)) {
-			return_value->value.str.val = php_addslashes(sql_row[field_offset],0,&return_value->value.str.len,0 TSRMLS_CC);
+			Z_STRVAL_P(return_value) = php_addslashes(sql_row[field_offset],0,&Z_STRLEN_P(return_value),0 TSRMLS_CC);
 		} else {	
-			return_value->value.str.len = (sql_row[field_offset]?strlen(sql_row[field_offset]):0);
-			return_value->value.str.val = (char *) safe_estrndup(sql_row[field_offset],return_value->value.str.len);
+			Z_STRLEN_P(return_value) = (sql_row[field_offset]?strlen(sql_row[field_offset]):0);
+			Z_STRVAL_P(return_value) = (char *) safe_estrndup(sql_row[field_offset],Z_STRLEN_P(return_value));
 		}
-		return_value->type = IS_STRING;
+		Z_TYPE_P(return_value) = IS_STRING;
 	} else {
 		ZVAL_FALSE(return_value);
 	}
@@ -980,8 +980,8 @@ PHP_FUNCTION(msql_fetch_row)
 PHP_FUNCTION(msql_fetch_object)
 {
 	php_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
-	if (return_value->type==IS_ARRAY) {
-		object_and_properties_init(return_value, &zend_standard_class_def, return_value->value.ht);
+	if (Z_TYPE_P(return_value)==IS_ARRAY) {
+		object_and_properties_init(return_value, &zend_standard_class_def, Z_ARRVAL_P(return_value));
 	}
 }
 /* }}} */
@@ -1009,12 +1009,12 @@ PHP_FUNCTION(msql_data_seek)
 	MSQL_GET_QUERY(result);
 	convert_to_long(offset);
 	if (!msql_result ||
-			offset->value.lval<0 || 
-			offset->value.lval>=msqlNumRows(msql_result)) {
-		php_error(E_WARNING,"Offset %d is invalid for mSQL query index %d",offset->value.lval,result->value.lval);
+			Z_LVAL_P(offset)<0 || 
+			Z_LVAL_P(offset)>=msqlNumRows(msql_result)) {
+		php_error(E_WARNING,"Offset %d is invalid for mSQL query index %d",Z_LVAL_P(offset),Z_LVAL_P(result));
 		RETURN_FALSE;
 	}
-	msqlDataSeek(msql_result,offset->value.lval);
+	msqlDataSeek(msql_result,Z_LVAL_P(offset));
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1087,11 +1087,11 @@ PHP_FUNCTION(msql_fetch_field)
 	MSQL_GET_QUERY(result);
 	
 	if (field) {
-		if (field->value.lval<0 || field->value.lval>=msqlNumRows(msql_result)) {
+		if (Z_LVAL_P(field)<0 || Z_LVAL_P(field)>=msqlNumRows(msql_result)) {
 			php_error(E_NOTICE,"mSQL:  Bad field offset specified");
 			RETURN_FALSE;
 		}
-		msqlFieldSeek(msql_result,field->value.lval);
+		msqlFieldSeek(msql_result,Z_LVAL_P(field));
 	}
 	if (!msql_result || (msql_field=msqlFetchField(msql_result))==NULL) {
 		RETURN_FALSE;
@@ -1109,7 +1109,7 @@ PHP_FUNCTION(msql_fetch_field)
 	add_property_long(return_value, "unique",(msql_field->flags&UNIQUE_FLAG?1:0));
 #endif
 
-	add_property_string(return_value, "type",php_msql_get_field_name(msql_field->type), 1);
+	add_property_string(return_value, "type",php_msql_get_field_name(Z_TYPE_P(msql_field)), 1);
 }
 /* }}} */
 
@@ -1130,12 +1130,12 @@ PHP_FUNCTION(msql_field_seek)
 	if(!msql_result) {
 		RETURN_FALSE;
 	}
-	if (offset->value.lval<0 || offset->value.lval>=msqlNumFields(msql_result)) {
+	if (Z_LVAL_P(offset)<0 || Z_LVAL_P(offset)>=msqlNumFields(msql_result)) {
 		php_error(E_WARNING,"Field %d is invalid for mSQL query index %d",
-				offset->value.lval,result->value.lval);
+				Z_LVAL_P(offset),Z_LVAL_P(result));
 		RETURN_FALSE;
 	}
-	msqlFieldSeek(msql_result,offset->value.lval);
+	msqlFieldSeek(msql_result,Z_LVAL_P(offset));
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1164,65 +1164,65 @@ static void php_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 		RETURN_FALSE;
 	}
 	convert_to_long(field);
-	if (field->value.lval<0 || field->value.lval>=msqlNumFields(msql_result)) {
-		php_error(E_WARNING,"Field %d is invalid for mSQL query index %d",field->value.lval,result->value.lval);
+	if (Z_LVAL_P(field)<0 || Z_LVAL_P(field)>=msqlNumFields(msql_result)) {
+		php_error(E_WARNING,"Field %d is invalid for mSQL query index %d",Z_LVAL_P(field),Z_LVAL_P(result));
 		RETURN_FALSE;
 	}
-	msqlFieldSeek(msql_result,field->value.lval);
+	msqlFieldSeek(msql_result,Z_LVAL_P(field));
 	if ((msql_field=msqlFetchField(msql_result))==NULL) {
 		RETURN_FALSE;
 	}
 	
 	switch (entry_type) {
 		case PHP_MSQL_FIELD_NAME:
-			return_value->value.str.len = strlen(msql_field->name);
-			return_value->value.str.val = estrndup(msql_field->name,return_value->value.str.len);
-			return_value->type = IS_STRING;
+			Z_STRLEN_P(return_value) = strlen(msql_field->name);
+			Z_STRVAL_P(return_value) = estrndup(msql_field->name,Z_STRLEN_P(return_value));
+			Z_TYPE_P(return_value) = IS_STRING;
 			break;
 		case PHP_MSQL_FIELD_TABLE:
-			return_value->value.str.len = strlen(msql_field->table);
-			return_value->value.str.val = estrndup(msql_field->table,return_value->value.str.len);
-			return_value->type = IS_STRING;
+			Z_STRLEN_P(return_value) = strlen(msql_field->table);
+			Z_STRVAL_P(return_value) = estrndup(msql_field->table,Z_STRLEN_P(return_value));
+			Z_TYPE_P(return_value) = IS_STRING;
 			break;
 		case PHP_MSQL_FIELD_LEN:
-			return_value->value.lval = msql_field->length;
-			return_value->type = IS_LONG;
+			Z_LVAL_P(return_value) = msql_field->length;
+			Z_TYPE_P(return_value) = IS_LONG;
 			break;
 		case PHP_MSQL_FIELD_TYPE:
-			return_value->value.str.val = estrdup(php_msql_get_field_name(msql_field->type));
-			return_value->value.str.len = strlen(return_value->value.str.val);
-			return_value->type = IS_STRING;
+			Z_STRVAL_P(return_value) = estrdup(php_msql_get_field_name(Z_TYPE_P(msql_field)));
+			Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
+			Z_TYPE_P(return_value) = IS_STRING;
 			break;
 		case PHP_MSQL_FIELD_FLAGS:
 #if MSQL1
 			if ((msql_field->flags&NOT_NULL_FLAG) && (msql_field->flags&PRI_KEY_FLAG)) {
-				return_value->value.str.val = estrndup("primary key not null",20);
-				return_value->value.str.len = 20;
-				return_value->type = IS_STRING;
+				Z_STRVAL_P(return_value) = estrndup("primary key not null",20);
+				Z_STRLEN_P(return_value) = 20;
+				Z_TYPE_P(return_value) = IS_STRING;
 			} else if (msql_field->flags&NOT_NULL_FLAG) {
-				return_value->value.str.val = estrndup("not null",8);
-				return_value->value.str.len = 8;
-				return_value->type = IS_STRING;
+				Z_STRVAL_P(return_value) = estrndup("not null",8);
+				Z_STRLEN_P(return_value) = 8;
+				Z_TYPE_P(return_value) = IS_STRING;
 			} else if (msql_field->flags&PRI_KEY_FLAG) {
-				return_value->value.str.val = estrndup("primary key",11);
-				return_value->value.str.len = 11;
-				return_value->type = IS_STRING;
+				Z_STRVAL_P(return_value) = estrndup("primary key",11);
+				Z_STRLEN_P(return_value) = 11;
+				Z_TYPE_P(return_value) = IS_STRING;
 			} else {
 				ZVAL_FALSE(return_value);
 			}
 #else
 			if ((msql_field->flags&NOT_NULL_FLAG) && (msql_field->flags&UNIQUE_FLAG)) {
-				return_value->value.str.val = estrndup("unique not null",15);
-				return_value->value.str.len = 15;
-				return_value->type = IS_STRING;
+				Z_STRVAL_P(return_value) = estrndup("unique not null",15);
+				Z_STRLEN_P(return_value) = 15;
+				Z_TYPE_P(return_value) = IS_STRING;
 			} else if (msql_field->flags&NOT_NULL_FLAG) {
-				return_value->value.str.val = estrndup("not null",8);
-				return_value->value.str.len = 8;
-				return_value->type = IS_STRING;
+				Z_STRVAL_P(return_value) = estrndup("not null",8);
+				Z_STRLEN_P(return_value) = 8;
+				Z_TYPE_P(return_value) = IS_STRING;
 			} else if (msql_field->flags&UNIQUE_FLAG) {
-				return_value->value.str.val = estrndup("unique",6);
-				return_value->value.str.len = 6;
-				return_value->type = IS_STRING;
+				Z_STRVAL_P(return_value) = estrndup("unique",6);
+				Z_STRLEN_P(return_value) = 6;
+				Z_TYPE_P(return_value) = IS_STRING;
 			} else {
 				ZVAL_FALSE(return_value);
 			}
@@ -1287,7 +1287,7 @@ PHP_FUNCTION(msql_free_result)
 	}
 
 	MSQL_GET_QUERY(result);
-	zend_list_delete(result->value.lval);
+	zend_list_delete(Z_LVAL_P(result));
 	RETURN_TRUE;
 }
 /* }}} */

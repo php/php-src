@@ -148,12 +148,12 @@ static zend_bool OrbitObject_InitializeData(OrbitObject * pObject, const char * 
 
 	/* find type info */
 	pObject->mpInterface = 
-		TypeManager_FindInterface(pObject->mCorbaObject->type_id);
+		TypeManager_FindInterface(pObject->mCorbaOZ_TYPE_P(bject)_id);
 
 	if (pObject->mpInterface == NULL)
 	{
 		zend_error(E_WARNING, "(Satellite) unknown interface '%s'",
-				pObject->mCorbaObject->type_id);
+				pObject->mCorbaOZ_TYPE_P(bject)_id);
 		/* TODO: set exception */
 		goto error;
 	}
@@ -188,7 +188,7 @@ static void OrbitObject_Wakeup(INTERNAL_FUNCTION_PARAMETERS)
 		goto error;
 	}
 
-	if ((*pp_ior)->type != IS_STRING)
+	if (Z_TYPE_PP(pp_ior) != IS_STRING)
 	{
 		/* TODO: set exception */
 		goto error;
@@ -197,7 +197,7 @@ static void OrbitObject_Wakeup(INTERNAL_FUNCTION_PARAMETERS)
 	/* initialize data */
 	if (!OrbitObject_InitializeData(
 				p_object, 
-				(*pp_ior)->value.str.val))
+				Z_STRVAL_PP(pp_ior)))
 	{
 		goto error;
 	}
@@ -233,12 +233,12 @@ zend_bool OrbitObject_Create(CORBA_Object source, zval * pDestination)
 	
 	/* find type info */
 	p_object->mpInterface = 
-		TypeManager_FindInterface(p_object->mCorbaObject->type_id);
+		TypeManager_FindInterface(p_object->mCorbaOZ_TYPE_P(bject)_id);
 
 	if (p_object->mpInterface == NULL)
 	{
 		zend_error(E_WARNING, "(Satellite) unknown interface '%s'",
-				p_object->mCorbaObject->type_id);
+				p_object->mCorbaOZ_TYPE_P(bject)_id);
 		goto error;
 	}
 
@@ -511,7 +511,7 @@ zend_bool  OrbitObject_CallFunction(OrbitObject  * pObject,
 	{
 		/* no such operation */
 		zend_error(E_WARNING, "(Satellite) unknown operation name '%s' in interface '%s'",
-				pFunctionName, pObject->mCorbaObject->type_id);
+				pFunctionName, pObject->mCorbaOZ_TYPE_P(bject)_id);
 		goto error;
 	}
 
@@ -660,7 +660,7 @@ zend_bool  OrbitObject_PutProperty(OrbitObject  * pObject,
 		/*printf("InterfaceType_FindAttribute failed for property %s\n", pPropertyName);*/
 		/* no such atttribute */
 		zend_error(E_WARNING, "(Satellite) unknown attribute name '%s' in interface '%s'",
-				pPropertyName, pObject->mCorbaObject->type_id);
+				pPropertyName, pObject->mCorbaOZ_TYPE_P(bject)_id);
 		goto OrbitObject_PutProperty_error;
 	}
 
@@ -776,7 +776,7 @@ zend_bool  OrbitObject_GetProperty(OrbitObject  * pObject,
 		/*printf("InterfaceType_FindAttribute failed for property %s\n", pPropertyName);*/
 		/* no such atttribute */
 		zend_error(E_WARNING, "(Satellite) unknown attribute name '%s' in interface '%s'",
-				pPropertyName, pObject->mCorbaObject->type_id);
+				pPropertyName, pObject->mCorbaOZ_TYPE_P(bject)_id);
 		goto OrbitObject_GetProperty_error;
 	}
 

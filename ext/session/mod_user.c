@@ -29,25 +29,25 @@ ps_module ps_mod_user = {
 #define SESS_ZVAL_LONG(val, a) 					\
 {											\
 	MAKE_STD_ZVAL(a); 						\
-	a->type = IS_LONG; 						\
-	a->value.lval = val; 					\
+	Z_TYPE_P(a) = IS_LONG; 						\
+	Z_LVAL_P(a) = val; 					\
 }
 
 #define SESS_ZVAL_STRING(vl, a) 					\
 {											\
 	int len = strlen(vl); 					\
 	MAKE_STD_ZVAL(a); 						\
-	a->type = IS_STRING; 					\
-	a->value.str.len = len; 				\
-	a->value.str.val = estrndup(vl, len); 	\
+	Z_TYPE_P(a) = IS_STRING; 					\
+	Z_STRLEN_P(a) = len; 				\
+	Z_STRVAL_P(a) = estrndup(vl, len); 	\
 }
 
 #define SESS_ZVAL_STRINGN(vl, ln, a) 			\
 {											\
 	MAKE_STD_ZVAL(a); 						\
-	a->type = IS_STRING; 					\
-	a->value.str.len = ln; 					\
-	a->value.str.val = estrndup(vl, ln); 	\
+	Z_TYPE_P(a) = IS_STRING; 					\
+	Z_STRLEN_P(a) = ln; 					\
+	Z_STRVAL_P(a) = estrndup(vl, ln); 	\
 }
 
 
@@ -83,7 +83,7 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv)
 #define FINISH 								\
 	if (retval) {							\
 		convert_to_long(retval);			\
-		ret = retval->value.lval;			\
+		ret = Z_LVAL_P(retval);			\
 		zval_ptr_dtor(&retval);				\
 	} 										\
 	return ret
@@ -127,9 +127,9 @@ PS_READ_FUNC(user)
 	retval = ps_call_handler(PSF(read), 1, args);
 	
 	if (retval) {
-		if (retval->type == IS_STRING) {
-			*val = estrndup(retval->value.str.val, retval->value.str.len);
-			*vallen = retval->value.str.len;
+		if (Z_TYPE_P(retval) == IS_STRING) {
+			*val = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
+			*vallen = Z_STRLEN_P(retval);
 			ret = SUCCESS;
 		}
 		zval_ptr_dtor(&retval);

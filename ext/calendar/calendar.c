@@ -296,7 +296,7 @@ PHP_FUNCTION(jdtogregorian)
 	}
 
 	convert_to_long_ex(julday);
-	SdnToGregorian((*julday)->value.lval, &year, &month, &day);
+	SdnToGregorian(Z_LVAL_PP(julday), &year, &month, &day);
 	sprintf(date, "%i/%i/%i", month, day, year);
 
 	RETURN_STRING(date, 1);
@@ -318,7 +318,7 @@ PHP_FUNCTION(jdtogregorian)
 	convert_to_long_ex(day);
 	convert_to_long_ex(year);
 
-	jdate = GregorianToSdn((*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
+	jdate = GregorianToSdn(Z_LVAL_PP(year), Z_LVAL_PP(month), Z_LVAL_PP(day));
 
 	RETURN_LONG(jdate);
 }
@@ -337,7 +337,7 @@ PHP_FUNCTION(jdtogregorian)
 	}
 
 	convert_to_long_ex(julday);
-	SdnToJulian((*julday)->value.lval, &year, &month, &day);
+	SdnToJulian(Z_LVAL_PP(julday), &year, &month, &day);
 	sprintf(date, "%i/%i/%i", month, day, year);
 
 	RETURN_STRING(date, 1);
@@ -359,7 +359,7 @@ PHP_FUNCTION(jdtogregorian)
 	convert_to_long_ex(day);
 	convert_to_long_ex(year);
 
-	jdate = JulianToSdn((*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
+	jdate = JulianToSdn(Z_LVAL_PP(year), Z_LVAL_PP(month), Z_LVAL_PP(day));
 
 	RETURN_LONG(jdate);
 }
@@ -379,7 +379,7 @@ PHP_FUNCTION(jdtogregorian)
 	
 	convert_to_long_ex(julday);
 	
-	SdnToJewish((*julday)->value.lval, &year, &month, &day);
+	SdnToJewish(Z_LVAL_PP(julday), &year, &month, &day);
 	sprintf(date, "%i/%i/%i", month, day, year);
 
 	RETURN_STRING(date, 1);
@@ -401,7 +401,7 @@ PHP_FUNCTION(jdtogregorian)
 	convert_to_long_ex(day);
 	convert_to_long_ex(year);
 
-	jdate = JewishToSdn((*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
+	jdate = JewishToSdn(Z_LVAL_PP(year), Z_LVAL_PP(month), Z_LVAL_PP(day));
 
 	RETURN_LONG(jdate);
 }
@@ -421,7 +421,7 @@ PHP_FUNCTION(jdtogregorian)
 
 	convert_to_long_ex(julday);
 	
-	SdnToFrench((*julday)->value.lval, &year, &month, &day);
+	SdnToFrench(Z_LVAL_PP(julday), &year, &month, &day);
 	sprintf(date, "%i/%i/%i", month, day, year);
 
 	RETURN_STRING(date, 1);
@@ -443,7 +443,7 @@ PHP_FUNCTION(jdtogregorian)
 	convert_to_long_ex(day);
 	convert_to_long_ex(year);
 
-	jdate = FrenchToSdn((*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
+	jdate = FrenchToSdn(Z_LVAL_PP(year), Z_LVAL_PP(month), Z_LVAL_PP(day));
 
 	RETURN_LONG(jdate);
 }
@@ -465,10 +465,10 @@ PHP_FUNCTION(jdtogregorian)
 	convert_to_long(julday);
 	if(myargc==2) {
 	  convert_to_long(mode);
-	  mymode = mode->value.lval;
+	  mymode = Z_LVAL_P(mode);
 	} 
 
-	day = DayOfWeek(julday->value.lval);
+	day = DayOfWeek(Z_LVAL_P(julday));
 	daynamel = DayNameLong[day];
 	daynames = DayNameShort[day];
 
@@ -502,30 +502,30 @@ PHP_FUNCTION(jdtogregorian)
 	convert_to_long_ex(julday);
 	convert_to_long_ex(mode);
 
-	switch((*mode)->value.lval) {
+	switch(Z_LVAL_PP(mode)) {
 		case CAL_MONTH_GREGORIAN_LONG:			/* gregorian or julian month */
-			SdnToGregorian((*julday)->value.lval, &year, &month, &day);
+			SdnToGregorian(Z_LVAL_PP(julday), &year, &month, &day);
 			monthname = MonthNameLong[month];
 			break;
 		case CAL_MONTH_JULIAN_SHORT:			/* gregorian or julian month */
-			SdnToJulian((*julday)->value.lval, &year, &month, &day);
+			SdnToJulian(Z_LVAL_PP(julday), &year, &month, &day);
 			monthname = MonthNameShort[month];
 			break;
 		case CAL_MONTH_JULIAN_LONG:			/* gregorian or julian month */
-			SdnToJulian((*julday)->value.lval, &year, &month, &day);
+			SdnToJulian(Z_LVAL_PP(julday), &year, &month, &day);
 			monthname = MonthNameLong[month];
 			break;
 		case CAL_MONTH_JEWISH:			/* jewish month */
-			SdnToJewish((*julday)->value.lval, &year, &month, &day);
+			SdnToJewish(Z_LVAL_PP(julday), &year, &month, &day);
 			monthname = JewishMonthName[month];
 			break;
 		case CAL_MONTH_FRENCH:			/* french month */
-			SdnToFrench((*julday)->value.lval, &year, &month, &day);
+			SdnToFrench(Z_LVAL_PP(julday), &year, &month, &day);
 			monthname = FrenchMonthName[month];
 			break;
 		default:			/* default gregorian */
 		case CAL_MONTH_GREGORIAN_SHORT:			/* gregorian or julian month */
-			SdnToGregorian((*julday)->value.lval, &year, &month, &day);
+			SdnToGregorian(Z_LVAL_PP(julday), &year, &month, &day);
 			monthname = MonthNameShort[month];
 			break;
 	}

@@ -552,24 +552,24 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 				case 's':
 					convert_to_string_ex(args[argnum]);
 					php_sprintf_appendstring(&result, &outpos, &size,
-											 (*args[argnum])->value.str.val,
+											 Z_STRVAL_PP(args[argnum]),
 											 width, precision, padding,
 											 alignment,
-											 (*args[argnum])->value.str.len,
+											 Z_STRLEN_PP(args[argnum]),
 											 0, expprec);
 					break;
 
 				case 'd':
 					convert_to_long_ex(args[argnum]);
 					php_sprintf_appendint(&result, &outpos, &size,
-										  (*args[argnum])->value.lval,
+										  Z_LVAL_PP(args[argnum]),
 										  width, padding, alignment);
 					break;
 
 				case 'u':
 					convert_to_long_ex(args[argnum]);
 					php_sprintf_appenduint(&result, &outpos, &size,
-										  (*args[argnum])->value.lval,
+										  Z_LVAL_PP(args[argnum]),
 										  width, padding, alignment);
 					break;
 
@@ -578,7 +578,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 					/* XXX not done */
 					convert_to_double_ex(args[argnum]);
 					php_sprintf_appenddouble(&result, &outpos, &size,
-											 (*args[argnum])->value.dval,
+											 Z_DVAL_PP(args[argnum]),
 											 width, padding, alignment,
 											 precision, adjusting,
 											 format[inpos]);
@@ -587,13 +587,13 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 				case 'c':
 					convert_to_long_ex(args[argnum]);
 					php_sprintf_appendchar(&result, &outpos, &size,
-										(char) (*args[argnum])->value.lval TSRMLS_CC);
+										(char) Z_LVAL_PP(args[argnum]) TSRMLS_CC);
 					break;
 
 				case 'o':
 					convert_to_long_ex(args[argnum]);
 					php_sprintf_append2n(&result, &outpos, &size,
-										 (*args[argnum])->value.lval,
+										 Z_LVAL_PP(args[argnum]),
 										 width, padding, alignment, 3,
 										 hexchars, expprec);
 					break;
@@ -601,7 +601,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 				case 'x':
 					convert_to_long_ex(args[argnum]);
 					php_sprintf_append2n(&result, &outpos, &size,
-										 (*args[argnum])->value.lval,
+										 Z_LVAL_PP(args[argnum]),
 										 width, padding, alignment, 4,
 										 hexchars, expprec);
 					break;
@@ -609,7 +609,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 				case 'X':
 					convert_to_long_ex(args[argnum]);
 					php_sprintf_append2n(&result, &outpos, &size,
-										 (*args[argnum])->value.lval,
+										 Z_LVAL_PP(args[argnum]),
 										 width, padding, alignment, 4,
 										 HEXCHARS, expprec);
 					break;
@@ -617,7 +617,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 				case 'b':
 					convert_to_long_ex(args[argnum]);
 					php_sprintf_append2n(&result, &outpos, &size,
-										 (*args[argnum])->value.lval,
+										 Z_LVAL_PP(args[argnum]),
 										 width, padding, alignment, 1,
 										 hexchars, expprec);
 					break;

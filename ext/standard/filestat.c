@@ -164,7 +164,7 @@ PHP_FUNCTION(disk_total_space)
 
 	convert_to_string_ex(path);
 
-	if (php_check_open_basedir((*path)->value.str.val TSRMLS_CC)) {
+	if (php_check_open_basedir(Z_STRVAL_PP(path) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -178,7 +178,7 @@ PHP_FUNCTION(disk_total_space)
 		/* It's available, so we can call it. */
 		if (gdfse) {
 			func = (gdfse_func)gdfse;
-			if (func((*path)->value.str.val,
+			if (func(Z_STRVAL_PP(path),
 				&FreeBytesAvailableToCaller,
 				&TotalNumberOfBytes,
 				&TotalNumberOfFreeBytes) == 0) RETURN_FALSE;
@@ -190,7 +190,7 @@ PHP_FUNCTION(disk_total_space)
 		}
 		/* If it's not available, we just use GetDiskFreeSpace */
 		else {
-			if (GetDiskFreeSpace((*path)->value.str.val,
+			if (GetDiskFreeSpace(Z_STRVAL_PP(path),
 				&SectorsPerCluster, &BytesPerSector,
 				&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) RETURN_FALSE;
 			bytestotal = (double)TotalNumberOfClusters * (double)SectorsPerCluster * (double)BytesPerSector;
@@ -204,14 +204,14 @@ PHP_FUNCTION(disk_total_space)
 #elif defined(OS2)
 	{
 		FSALLOCATE fsinfo;
-  		char drive = (*path)->value.str.val[0] & 95;
+  		char drive = Z_STRVAL_PP(path)[0] & 95;
 
 		if (DosQueryFSInfo( drive ? drive - 64 : 0, FSIL_ALLOC, &fsinfo, sizeof( fsinfo ) ) == 0)
 			bytestotal = (double)fsinfo.cbSector * fsinfo.cSectorUnit * fsinfo.cUnit;
 	}
 #else /* WINDOWS, OS/2 */
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
-	if (statvfs((*path)->value.str.val, &buf)) RETURN_FALSE;
+	if (statvfs(Z_STRVAL_PP(path), &buf)) RETURN_FALSE;
 	if (buf.f_frsize) {
 		bytestotal = (((double)buf.f_blocks) * ((double)buf.f_frsize));
 	} else {
@@ -219,7 +219,7 @@ PHP_FUNCTION(disk_total_space)
 	}
 
 #elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
-	if (statfs((*path)->value.str.val, &buf)) RETURN_FALSE;
+	if (statfs(Z_STRVAL_PP(path), &buf)) RETURN_FALSE;
 	bytestotal = (((double)buf.f_bsize) * ((double)buf.f_blocks));
 #endif
 #endif /* WINDOWS */
@@ -267,7 +267,7 @@ PHP_FUNCTION(disk_free_space)
 
 	convert_to_string_ex(path);
 
-	if (php_check_open_basedir((*path)->value.str.val TSRMLS_CC)) {
+	if (php_check_open_basedir(Z_STRVAL_PP(path) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -281,7 +281,7 @@ PHP_FUNCTION(disk_free_space)
 		/* It's available, so we can call it. */
 		if (gdfse) {
 			func = (gdfse_func)gdfse;
-			if (func((*path)->value.str.val,
+			if (func(Z_STRVAL_PP(path),
 				&FreeBytesAvailableToCaller,
 				&TotalNumberOfBytes,
 				&TotalNumberOfFreeBytes) == 0) RETURN_FALSE;
@@ -293,7 +293,7 @@ PHP_FUNCTION(disk_free_space)
 		}
 		/* If it's not available, we just use GetDiskFreeSpace */
 		else {
-			if (GetDiskFreeSpace((*path)->value.str.val,
+			if (GetDiskFreeSpace(Z_STRVAL_PP(path),
 				&SectorsPerCluster, &BytesPerSector,
 				&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) RETURN_FALSE;
 			bytesfree = (double)NumberOfFreeClusters * (double)SectorsPerCluster * (double)BytesPerSector;
@@ -307,21 +307,21 @@ PHP_FUNCTION(disk_free_space)
 #elif defined(OS2)
 	{
 		FSALLOCATE fsinfo;
-  		char drive = (*path)->value.str.val[0] & 95;
+  		char drive = Z_STRVAL_PP(path)[0] & 95;
 
 		if (DosQueryFSInfo( drive ? drive - 64 : 0, FSIL_ALLOC, &fsinfo, sizeof( fsinfo ) ) == 0)
 			bytesfree = (double)fsinfo.cbSector * fsinfo.cSectorUnit * fsinfo.cUnitAvail;
 	}
 #else /* WINDOWS, OS/2 */
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
-	if (statvfs((*path)->value.str.val, &buf)) RETURN_FALSE;
+	if (statvfs(Z_STRVAL_PP(path), &buf)) RETURN_FALSE;
 	if (buf.f_frsize) {
 		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_frsize));
 	} else {
 		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_bsize));
 	}
 #elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
-	if (statfs((*path)->value.str.val, &buf)) RETURN_FALSE;
+	if (statfs(Z_STRVAL_PP(path), &buf)) RETURN_FALSE;
 	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bavail));
 #endif
 #endif /* WINDOWS */
@@ -344,29 +344,29 @@ PHP_FUNCTION(chgrp)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
-	if ((*group)->type == IS_STRING) {
-		gr = getgrnam((*group)->value.str.val);
+	if (Z_TYPE_PP(group) == IS_STRING) {
+		gr = getgrnam(Z_STRVAL_PP(group));
 		if (!gr) {
 			php_error(E_WARNING, "unable to find gid for %s",
-					   (*group)->value.str.val);
+					   Z_STRVAL_PP(group));
 			RETURN_FALSE;
 		}
 		gid = gr->gr_gid;
 	} else {
 		convert_to_long_ex(group);
-		gid = (*group)->value.lval;
+		gid = Z_LVAL_PP(group);
 	}
 
-	if (PG(safe_mode) &&(!php_checkuid((*filename)->value.str.val, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
+	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(filename), NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
 		RETURN_FALSE;
 	}
 
 	/* Check the basedir */
-	if (php_check_open_basedir((*filename)->value.str.val TSRMLS_CC)) {
+	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-	ret = VCWD_CHOWN((*filename)->value.str.val, -1, gid);
+	ret = VCWD_CHOWN(Z_STRVAL_PP(filename), -1, gid);
 	if (ret == -1) {
 		php_error(E_WARNING, "chgrp failed: %s", strerror(errno));
 		RETURN_FALSE;
@@ -392,29 +392,29 @@ PHP_FUNCTION(chown)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
-	if ((*user)->type == IS_STRING) {
-		pw = getpwnam((*user)->value.str.val);
+	if (Z_TYPE_PP(user) == IS_STRING) {
+		pw = getpwnam(Z_STRVAL_PP(user));
 		if (!pw) {
 			php_error(E_WARNING, "unable to find uid for %s",
-					   (*user)->value.str.val);
+					   Z_STRVAL_PP(user));
 			RETURN_FALSE;
 		}
 		uid = pw->pw_uid;
 	} else {
 		convert_to_long_ex(user);
-		uid = (*user)->value.lval;
+		uid = Z_LVAL_PP(user);
 	}
 
-	if (PG(safe_mode) &&(!php_checkuid((*filename)->value.str.val, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
+	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(filename), NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
 		RETURN_FALSE;
 	}
 
 	/* Check the basedir */
-	if (php_check_open_basedir((*filename)->value.str.val TSRMLS_CC)) {
+	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-	ret = VCWD_CHOWN((*filename)->value.str.val, uid, -1);
+	ret = VCWD_CHOWN(Z_STRVAL_PP(filename), uid, -1);
 	if (ret == -1) {
 		php_error(E_WARNING, "chown failed: %s", strerror(errno));
 		RETURN_FALSE;
@@ -438,16 +438,16 @@ PHP_FUNCTION(chmod)
 	convert_to_string_ex(filename);
 	convert_to_long_ex(mode);
 
-	if (PG(safe_mode) &&(!php_checkuid((*filename)->value.str.val, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
+	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(filename), NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
 		RETURN_FALSE;
 	}
 
 	/* Check the basedir */
-	if (php_check_open_basedir((*filename)->value.str.val TSRMLS_CC)) {
+	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-	imode = (mode_t) (*mode)->value.lval;
+	imode = (mode_t) Z_LVAL_PP(mode);
 	/* in safe mode, do not allow to setuid files.
 	   Setuiding files could allow users to gain privileges
 	   that safe mode doesn't give them.
@@ -455,7 +455,7 @@ PHP_FUNCTION(chmod)
 	if(PG(safe_mode))
 	  imode &= 0777;
 
-	ret = VCWD_CHMOD((*filename)->value.str.val, imode);
+	ret = VCWD_CHMOD(Z_STRVAL_PP(filename), imode);
 	if (ret == -1) {
 		php_error(E_WARNING, "chmod failed: %s", strerror(errno));
 		RETURN_FALSE;
@@ -493,20 +493,20 @@ PHP_FUNCTION(touch)
 			return;
 		}
 		convert_to_long_ex(filetime);
-		newtime->actime = (*filetime)->value.lval;
-		newtime->modtime = (*filetime)->value.lval;
+		newtime->actime = Z_LVAL_PP(filetime);
+		newtime->modtime = Z_LVAL_PP(filetime);
 	} else {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
 
-	if (PG(safe_mode) &&(!php_checkuid((*filename)->value.str.val, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(filename), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		if (newtime) efree(newtime);
 		RETURN_FALSE;
 	}
 
 	/* Check the basedir */
-	if (php_check_open_basedir((*filename)->value.str.val TSRMLS_CC)) {
+	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
 		if (newtime) {
 			efree(newtime);
 		}
@@ -514,18 +514,18 @@ PHP_FUNCTION(touch)
 	}
 
 	/* create the file if it doesn't exist already */
-	ret = VCWD_STAT((*filename)->value.str.val, &sb);
+	ret = VCWD_STAT(Z_STRVAL_PP(filename), &sb);
 	if (ret == -1) {
-		file = VCWD_FOPEN((*filename)->value.str.val, "w");
+		file = VCWD_FOPEN(Z_STRVAL_PP(filename), "w");
 		if (file == NULL) {
-			php_error(E_WARNING, "unable to create file %s because %s", (*filename)->value.str.val, strerror(errno));
+			php_error(E_WARNING, "unable to create file %s because %s", Z_STRVAL_PP(filename), strerror(errno));
 			if (newtime) efree(newtime);
 			RETURN_FALSE;
 		}
 		fclose(file);
 	}
 
-	ret = VCWD_UTIME((*filename)->value.str.val, newtime);
+	ret = VCWD_UTIME(Z_STRVAL_PP(filename), newtime);
 	if (newtime) efree(newtime);
 	if (ret == -1) {
 		php_error(E_WARNING, "utime failed: %s", strerror(errno));

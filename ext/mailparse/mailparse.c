@@ -420,12 +420,12 @@ PHP_FUNCTION(mailparse_stream_encode)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((*srcfile)->type == IS_RESOURCE && (*srcfile)->value.lval == 0)	{
+	if (Z_TYPE_PP(srcfile) == IS_RESOURCE && Z_LVAL_PP(srcfile) == 0)	{
 		RETURN_FALSE;
 	}
 	ZEND_FETCH_RESOURCE(srcfp, FILE *, srcfile, -1, "File-Handle", php_file_le_fopen());
 
-	if ((*destfile)->type == IS_RESOURCE && (*destfile)->value.lval == 0)	{
+	if (Z_TYPE_PP(destfile) == IS_RESOURCE && Z_LVAL_PP(destfile) == 0)	{
 		RETURN_FALSE;
 	}
 	ZEND_FETCH_RESOURCE(destfp, FILE *, destfile, -1, "File-Handle", php_file_le_fopen());
@@ -477,7 +477,7 @@ PHP_FUNCTION(mailparse_msg_parse)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((*arg)->type == IS_RESOURCE && (*arg)->value.lval == 0)	{
+	if (Z_TYPE_PP(arg) == IS_RESOURCE && Z_LVAL_PP(arg) == 0)	{
 		RETURN_FALSE;
 	}
 
@@ -485,7 +485,7 @@ PHP_FUNCTION(mailparse_msg_parse)
 
 	convert_to_string_ex(data);
 
-	rfc2045_parse(rfcbuf, (*data)->value.str.val, (*data)->value.str.len);
+	rfc2045_parse(rfcbuf, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
 }
 /* }}} */
 
@@ -542,13 +542,13 @@ PHP_FUNCTION(mailparse_msg_free)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((*arg)->type == IS_RESOURCE && (*arg)->value.lval == 0)	{
+	if (Z_TYPE_PP(arg) == IS_RESOURCE && Z_LVAL_PP(arg) == 0)	{
 		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE(rfcbuf, struct rfc2045 *, arg, -1, mailparse_msg_name, le_rfc2045);
 
-	zend_list_delete((*arg)->value.lval);
+	zend_list_delete(Z_LVAL_PP(arg));
 	RETURN_TRUE;
 }
 /* }}} */
@@ -602,7 +602,7 @@ PHP_FUNCTION(mailparse_msg_get_structure)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((*arg)->type == IS_RESOURCE && (*arg)->value.lval == 0)	{
+	if (Z_TYPE_PP(arg) == IS_RESOURCE && Z_LVAL_PP(arg) == 0)	{
 		RETURN_FALSE;
 	}
 
@@ -624,8 +624,8 @@ static int extract_callback_user_func(const char *p, size_t n, zval *userfunc)
 	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(retval);
-	retval->type = IS_BOOL;
-	retval->value.lval = 0;
+	Z_TYPE_P(retval) = IS_BOOL;
+	Z_LVAL_P(retval) = 0;
 
 	MAKE_STD_ZVAL(arg);
 	ZVAL_STRINGL(arg, (char*)p, (int)n, 1);
@@ -678,7 +678,7 @@ PHP_FUNCTION(mailparse_msg_extract_part)
 	}
 	convert_to_string_ex(bodystr);
 
-	if ((*arg)->type == IS_RESOURCE && (*arg)->value.lval == 0)	{
+	if (Z_TYPE_PP(arg) == IS_RESOURCE && Z_LVAL_PP(arg) == 0)	{
 		RETURN_FALSE;
 	}
 	mailparse_fetch_rfc2045_resource(rfcbuf, arg);
@@ -734,7 +734,7 @@ PHP_FUNCTION(mailparse_msg_extract_part_file)
 	}
 	convert_to_string_ex(filename);
 
-	if ((*arg)->type == IS_RESOURCE && (*arg)->value.lval == 0)	{
+	if (Z_TYPE_PP(arg) == IS_RESOURCE && Z_LVAL_PP(arg) == 0)	{
 		RETURN_FALSE;
 	}
 	mailparse_fetch_rfc2045_resource(rfcbuf, arg);
@@ -809,7 +809,7 @@ PHP_FUNCTION(mailparse_msg_get_part_data)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((*arg)->type == IS_RESOURCE && (*arg)->value.lval == 0)	{
+	if (Z_TYPE_PP(arg) == IS_RESOURCE && Z_LVAL_PP(arg) == 0)	{
 		RETURN_FALSE;
 	}
 
@@ -895,7 +895,7 @@ PHP_FUNCTION(mailparse_msg_get_part)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((*arg)->type == IS_RESOURCE && (*arg)->value.lval == 0)	{
+	if (Z_TYPE_PP(arg) == IS_RESOURCE && Z_LVAL_PP(arg) == 0)	{
 		RETURN_FALSE;
 	}
 
@@ -903,10 +903,10 @@ PHP_FUNCTION(mailparse_msg_get_part)
 
 	convert_to_string_ex(mimesection);
 
-	newsection = rfc2045_find(rfcbuf, (*mimesection)->value.str.val);
+	newsection = rfc2045_find(rfcbuf, Z_STRVAL_PP(mimesection));
 
 	if (!newsection)	{
-		php_error(E_WARNING, "%s(): cannot find section %s in message", get_active_function_name(TSRMLS_C), (*mimesection)->value.str.val);
+		php_error(E_WARNING, "%s(): cannot find section %s in message", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(mimesection));
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, newsection, le_rfc2045_nofree);

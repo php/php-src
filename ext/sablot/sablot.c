@@ -829,7 +829,7 @@ PHP_FUNCTION(xslt_set_sax_handler)
         WRONG_PARAM_COUNT;
     }
     
-    if ((*handlers)->type != IS_ARRAY) {
+    if (Z_TYPE_PP(handlers) != IS_ARRAY) {
 		php_error(E_ERROR, "The second parameter must be an array");
 	}
     
@@ -894,7 +894,7 @@ PHP_FUNCTION(xslt_set_scheme_handler)
         WRONG_PARAM_COUNT;
     }
 
-    if ((*handlers)->type != IS_ARRAY) {
+    if (Z_TYPE_PP(handlers) != IS_ARRAY) {
 		php_error(E_ERROR, "The second parameter must be an array");
 	}
 
@@ -1520,7 +1520,7 @@ static int _php_sablot_sh_getAll(void *userData, SablotHandle p, const char *sch
 		                       argc,
 		                       argv TSRMLS_CC) == FAILURE) {
 			php_error(E_WARNING, "Sorry couldn't call function, %s, with handler of type %s",
-			          handle->getAllHandler->value.str.val, "Scheme GetALL");
+			          handle->getAllHZ_STRVAL_P(andler), "Scheme GetALL");
 		}
 
 		zval_dtor(retval);

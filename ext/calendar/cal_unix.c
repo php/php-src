@@ -40,7 +40,7 @@ PHP_FUNCTION(unixtojd)
 
   if(myargc==1) {
     convert_to_long(timestamp);
-    t = timestamp->value.lval;
+    t = Z_LVAL_P(timestamp);
   } else {
     t = time(NULL);
   }
@@ -69,7 +69,7 @@ PHP_FUNCTION(jdtounix)
   
   convert_to_long(jday);
 
-  uday = jday->value.lval - 2440588 /* J.D. of 1.1.1970 */;
+  uday = Z_LVAL_P(jday) - 2440588 /* J.D. of 1.1.1970 */;
   
   if(uday<0)     RETURN_FALSE; /* before beginning of unix epoch */ 
   if(uday>24755) RETURN_FALSE; /* behind end of unix epoch */

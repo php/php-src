@@ -255,7 +255,7 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 
 	/* If PATH_TRANSLATED doesn't exist, copy it from SCRIPT_FILENAME */
 	if (track_vars_array) {
-		symbol_table = track_vars_array->value.ht;
+		symbol_table = Z_ARRVAL_P(track_vars_array);
 	} else if (PG(register_globals)) {
 		/* should never happen nowadays */
 		symbol_table = EG(active_symbol_table);
@@ -458,7 +458,7 @@ static void init_request_info(TSRMLS_D)
  */
 static int php_apache_alter_ini_entries(php_per_dir_entry *per_dir_entry TSRMLS_DC)
 {
-	zend_alter_ini_entry(per_dir_entry->key, per_dir_entry->key_length+1, per_dir_entry->value, per_dir_entry->value_length, per_dir_entry->type, PHP_INI_STAGE_ACTIVATE);
+	zend_alter_ini_entry(per_dir_entry->key, per_dir_entry->key_length+1, per_dir_entry->value, per_dir_entry->value_length, Z_TYPE_P(per_dir_entry), PHP_INI_STAGE_ACTIVATE);
 	return 0;
 }
 /* }}} */
@@ -497,7 +497,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		fh.filename = r->filename;
 		fh.opened_path = NULL;
 		fh.free_filename = 0;
-		fh.type = ZEND_HANDLE_FILENAME;
+		Z_TYPE(fh) = ZEND_HANDLE_FILENAME;
 		zend_execute_scripts(ZEND_INCLUDE TSRMLS_CC, NULL, 1, &fh);
 		return OK;
 	}
@@ -641,8 +641,8 @@ static void copy_per_dir_entry(php_per_dir_entry *per_dir_entry)
  */
 static zend_bool should_overwrite_per_dir_entry(php_per_dir_entry *orig_per_dir_entry, php_per_dir_entry *new_per_dir_entry)
 {
-	if (new_per_dir_entry->type==PHP_INI_SYSTEM
-		&& orig_per_dir_entry->type!=PHP_INI_SYSTEM) {
+	if (Z_TYPE_P(new_per_dir_entry)==PHP_INI_SYSTEM
+		&& Z_TYPE_P(orig_per_dir_entry)!=PHP_INI_SYSTEM) {
 		return 1;
 	} else {
 		return 0;
@@ -697,7 +697,7 @@ CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, 
 		sapi_startup(&apache_sapi_module);
 		php_apache_startup(&apache_sapi_module);
 	}
-	per_dir_entry.type = mode;
+	Z_TYPE(per_dir_entry) = mode;
 
 	if (strcasecmp(arg2, "none") == 0) {
 		arg2 = "";

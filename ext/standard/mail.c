@@ -56,8 +56,8 @@ PHP_FUNCTION(ezmlm_hash)
 	}
 
 	convert_to_string_ex(pstr);
-	if ((*pstr)->value.str.val) {
-		str = (*pstr)->value.str.val;
+	if (Z_STRVAL_PP(pstr)) {
+		str = Z_STRVAL_PP(pstr);
 	} else {
 		php_error(E_WARNING, "Must give string parameter to ezmlm_hash()");
 		RETURN_FALSE;

@@ -656,7 +656,7 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 		else {
 			convert_to_string_ex(script_name);
 			for(i=0; i<5; i++)
-				scriptname[i] = (*script_name)->value.str.val;
+				scriptname[i] = Z_STRVAL_PP(script_name);
 		}
 
 #if 0

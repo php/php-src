@@ -94,10 +94,10 @@ PHP_FUNCTION(aspell_new)
 	if(argc==2)
 	  {
 		convert_to_string_ex(personal) ;
-		sc=aspell_new((*master)->value.str.val, (*personal)->value.str.val);
+		sc=aspell_new(Z_STRVAL_PP(master), Z_STRVAL_PP(personal));
 	  }
 	else
-	  sc=aspell_new((*master)->value.str.val, "");
+	  sc=aspell_new(Z_STRVAL_PP(master), "");
 
 	ind = zend_list_insert(sc, le_aspell);
 	RETURN_LONG(ind);
@@ -122,10 +122,10 @@ PHP_FUNCTION(aspell_suggest)
 	}
 	convert_to_long_ex(scin);
 	convert_to_string_ex(word);
-	sc = (aspell *)zend_list_find((*scin)->value.lval, &type);
+	sc = (aspell *)zend_list_find(Z_LVAL_PP(scin), &type);
 	if(!sc)
 	  {
-		php_error(E_WARNING, "%d is not an ASPELL result index", (*scin)->value.lval);
+		php_error(E_WARNING, "%d is not an ASPELL result index", Z_LVAL_PP(scin));
 		RETURN_FALSE;
 	  }
 
@@ -133,7 +133,7 @@ PHP_FUNCTION(aspell_suggest)
                 RETURN_FALSE;
 	}
 
-	sug = aspell_suggest(sc, (*word)->value.str.val);
+	sug = aspell_suggest(sc, Z_STRVAL_PP(word));
 	  for (i = 0; i != sug->size; ++i) {
                 add_next_index_string(return_value, (char *)sug->data[i], 1);
 	  }
@@ -156,13 +156,13 @@ PHP_FUNCTION(aspell_check)
     }
     convert_to_long_ex(scin);
     convert_to_string_ex(word);
-    sc= (aspell *) zend_list_find((*scin)->value.lval, &type);
+    sc= (aspell *) zend_list_find(Z_LVAL_PP(scin), &type);
     if(!sc)
       {
-        php_error(E_WARNING, "%d is not an ASPELL result index", (*scin)->value.lval);
+        php_error(E_WARNING, "%d is not an ASPELL result index", Z_LVAL_PP(scin));
         RETURN_FALSE;
       }
-    if (aspell_check(sc, (*word)->value.str.val)) 
+    if (aspell_check(sc, Z_STRVAL_PP(word))) 
       {
 	RETURN_TRUE;
       }
@@ -188,13 +188,13 @@ PHP_FUNCTION(aspell_check_raw)
     }
     convert_to_long_ex(scin);
     convert_to_string_ex(word);
-    sc = (aspell *)zend_list_find((*scin)->value.lval, &type);
+    sc = (aspell *)zend_list_find(Z_LVAL_PP(scin), &type);
     if(!sc)
       {
-        php_error(E_WARNING, "%d is not an ASPELL result index", (*scin)->value.lval);
+        php_error(E_WARNING, "%d is not an ASPELL result index", Z_LVAL_PP(scin));
         RETURN_FALSE;
       }
-	if (aspell_check_raw(sc, (*word)->value.str.val)) 
+	if (aspell_check_raw(sc, Z_STRVAL_PP(word))) 
 	  {
 	    RETURN_TRUE;
 	  }

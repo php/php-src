@@ -114,7 +114,7 @@ PHP_FUNCTION(readline)
 		convert_to_string_ex(arg);
 	}
 
-	result = readline(ac?(*arg)->value.str.val:NULL);
+	result = readline(ac?Z_STRVAL_PP(arg):NULL);
 
 	if (! result) {
 		RETURN_FALSE;
@@ -162,57 +162,57 @@ PHP_FUNCTION(readline_info)
 	} else {
 		convert_to_string_ex(what);
 
-		if (! strcasecmp((*what)->value.str.val,"line_buffer")) {
+		if (! strcasecmp(Z_STRVAL_PP(what),"line_buffer")) {
 			oldstr = rl_line_buffer;
 			if (ac == 2) {
 				/* XXX if (rl_line_buffer) free(rl_line_buffer); */
 				convert_to_string_ex(value);
-				rl_line_buffer = strdup((*value)->value.str.val);
+				rl_line_buffer = strdup(Z_STRVAL_PP(value));
 			}
 			RETVAL_STRING(SAFE_STRING(oldstr),1);
-		} else if (! strcasecmp((*what)->value.str.val,"point")) {
+		} else if (! strcasecmp(Z_STRVAL_PP(what),"point")) {
 			RETVAL_LONG(rl_point);
-		} else if (! strcasecmp((*what)->value.str.val,"end")) {
+		} else if (! strcasecmp(Z_STRVAL_PP(what),"end")) {
 			RETVAL_LONG(rl_end);
 #ifdef HAVE_LIBREADLINE
-		} else if (! strcasecmp((*what)->value.str.val,"mark")) {
+		} else if (! strcasecmp(Z_STRVAL_PP(what),"mark")) {
 			RETVAL_LONG(rl_mark);
-		} else if (! strcasecmp((*what)->value.str.val,"done")) {
+		} else if (! strcasecmp(Z_STRVAL_PP(what),"done")) {
 			oldval = rl_done;
 			if (ac == 2) {
 				convert_to_long_ex(value);
-				rl_done = (*value)->value.lval;
+				rl_done = Z_LVAL_PP(value);
 			}
 			RETVAL_LONG(oldval);
-		} else if (! strcasecmp((*what)->value.str.val,"pending_input")) {
+		} else if (! strcasecmp(Z_STRVAL_PP(what),"pending_input")) {
 			oldval = rl_pending_input;
 			if (ac == 2) {
 				convert_to_string_ex(value);
-				rl_pending_input = (*value)->value.str.val[0];
+				rl_pending_input = Z_STRVAL_PP(value)[0];
 			}
 			RETVAL_LONG(oldval);
-		} else if (! strcasecmp((*what)->value.str.val,"prompt")) {
+		} else if (! strcasecmp(Z_STRVAL_PP(what),"prompt")) {
 			RETVAL_STRING(SAFE_STRING(rl_prompt),1);
-		} else if (! strcasecmp((*what)->value.str.val,"terminal_name")) {
+		} else if (! strcasecmp(Z_STRVAL_PP(what),"terminal_name")) {
 			RETVAL_STRING(SAFE_STRING(rl_terminal_name),1);
 #endif
 #if HAVE_ERASE_EMPTY_LINE
-		} else if (! strcasecmp((*what)->value.str.val,"erase_empty_line")) {
+		} else if (! strcasecmp(Z_STRVAL_PP(what),"erase_empty_line")) {
 			oldval = rl_erase_empty_line;
 			if (ac == 2) {
 				convert_to_long_ex(value);
-				rl_erase_empty_line = (*value)->value.lval;
+				rl_erase_empty_line = Z_LVAL_PP(value);
 			}
 			RETVAL_LONG(oldval);
 #endif
-		} else if (! strcasecmp((*what)->value.str.val,"library_version")) {
+		} else if (! strcasecmp(Z_STRVAL_PP(what),"library_version")) {
 			RETVAL_STRING(SAFE_STRING(rl_library_version),1);
-		} else if (! strcasecmp((*what)->value.str.val,"readline_name")) {
+		} else if (! strcasecmp(Z_STRVAL_PP(what),"readline_name")) {
 			oldstr = rl_readline_name;
 			if (ac == 2) {
 				/* XXX if (rl_readline_name) free(rl_readline_name); */
 				convert_to_string_ex(value);
-				rl_readline_name = strdup((*value)->value.str.val);;
+				rl_readline_name = strdup(Z_STRVAL_PP(value));;
 			}
 			RETVAL_STRING(SAFE_STRING(oldstr),1);
 		} 
@@ -232,7 +232,7 @@ PHP_FUNCTION(readline_add_history)
 	}
 	convert_to_string_ex(arg);
 
-	add_history((*arg)->value.str.val);
+	add_history(Z_STRVAL_PP(arg));
 
 	RETURN_TRUE;
 }
@@ -295,7 +295,7 @@ PHP_FUNCTION(readline_read_history)
 
 	if (ac == 1) {
 		convert_to_string_ex(arg);
-		filename = (*arg)->value.str.val;
+		filename = Z_STRVAL_PP(arg);
 	}
 
 	if (read_history(filename)) {
@@ -320,7 +320,7 @@ PHP_FUNCTION(readline_write_history)
 
 	if (ac == 1) {
 		convert_to_string_ex(arg);
-		filename = (*arg)->value.str.val;
+		filename = Z_STRVAL_PP(arg);
 	}
 
 	if (write_history(filename)) {
@@ -337,7 +337,7 @@ char *test[] = { "bleibt", "da", "helfen", "keine", "pillen", "und" , "heissen",
 
 static char *_readline_command_generator(char *text,int state)
 {
-	HashTable  *myht = _readline_array.value.ht;
+	HashTable  *myht = Z_ARRVAL(_readline_array);
 	zval **entry;
 	
 	/*
@@ -352,8 +352,8 @@ static char *_readline_command_generator(char *text,int state)
 		zend_hash_move_forward(myht);
 
 		convert_to_string_ex(entry);
-		if (strncmp ((*entry)->value.str.val, text, strlen(text)) == 0) {
-			return (strdup((*entry)->value.str.val));
+		if (strncmp (Z_STRVAL_PP(entry), text, strlen(text)) == 0) {
+			return (strdup(Z_STRVAL_PP(entry)));
 		}
 	}
 
@@ -366,9 +366,9 @@ static zval *_readline_string_zval(const char *str)
 	int len = strlen(str);
 	MAKE_STD_ZVAL(ret);
 
-	ret->type = IS_STRING;
-	ret->value.str.len = len;
-	ret->value.str.val = estrndup(str, len);
+	Z_TYPE_P(ret) = IS_STRING;
+	Z_STRLEN_P(ret) = len;
+	Z_STRVAL_P(ret) = estrndup(str, len);
 	return ret;
 }
 
@@ -377,8 +377,8 @@ static zval *_readline_long_zval(long l)
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
 
-	ret->type = IS_LONG;
-	ret->value.lval = l;
+	Z_TYPE_P(ret) = IS_LONG;
+	Z_LVAL_P(ret) = l;
 	return ret;
 }
 
@@ -395,7 +395,7 @@ static char **_readline_completion_cb(char *text, int start, int end)
 	params[3]=_readline_long_zval(end);
 
 	if (call_user_function(CG(function_table), NULL, params[0], &_readline_array, 3, params+1 TSRMLS_CC) == SUCCESS) {
-		if (_readline_array.type == IS_ARRAY) {
+		if (Z_TYPE(_readline_array) == IS_ARRAY) {
 			matches = completion_matches(text,_readline_command_generator);
 		}
 	}
@@ -423,7 +423,7 @@ PHP_FUNCTION(readline_completion_function)
 		if (_readline_completion)
 			efree(_readline_completion);
 
-		_readline_completion = estrdup((*arg)->value.str.val);
+		_readline_completion = estrdup(Z_STRVAL_PP(arg));
 		rl_attempted_completion_function = _readline_completion_cb;
 	}
 

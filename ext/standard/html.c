@@ -492,7 +492,7 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	convert_to_string_ex(arg);
 	if(ac==2) {
 		convert_to_long_ex(quotes);
-		quote_style = (*quotes)->value.lval;
+		quote_style = Z_LVAL_PP(quotes);
 	}
 	if (ac == 3)	{
 		convert_to_string_ex(charset);
@@ -500,7 +500,7 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	}
 		
 
-	new = php_escape_html_entities((*arg)->value.str.val, (*arg)->value.str.len, &len, all, quote_style, hint_charset);
+	new = php_escape_html_entities(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &len, all, quote_style, hint_charset);
 	RETVAL_STRINGL(new, len, 0);
 }
 /* }}} */
@@ -553,11 +553,11 @@ PHP_FUNCTION(get_html_translation_table)
 
 	if (ac > 0) {
 		convert_to_long_ex(whichone);
-		which = (*whichone)->value.lval;
+		which = Z_LVAL_PP(whichone);
 	} 
 	if (ac == 2) {
 		convert_to_long_ex(quotes);
-		quote_style = (*quotes)->value.lval;
+		quote_style = Z_LVAL_PP(quotes);
 	}
 
 	array_init(return_value);
