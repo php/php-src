@@ -1,3 +1,18 @@
+2004-05-05  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/ibase_query.c:
+      Fixed unregistered bug: array count is incorrect when binding array ids
+      Fixed unregistered bug: empty numeric/datetime param argument is coerced
+      to
+      	a string that cannot be handled by the IB API layer
+
+2004-05-05  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      ext/standard/user_filters.c
+      main/streams/userspace.c:
+      BugFix#28287 stream_*_register() not calling __autoload().
+
 2004-05-04  Wez Furlong  <wez.php@thebrainroom.net>
 
     * NEWS:
