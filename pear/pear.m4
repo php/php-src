@@ -26,7 +26,10 @@ AC_DEFUN(PHP_WITH_PHP_CONFIG,[
   AC_MSG_CHECKING(for PHP extension directory)
   AC_MSG_RESULT($EXTENSION_DIR)
 ])
-
+dnl
+AC_DEFUN(PHP_EXT_BUILDDIR,[.])dnl
+AC_DEFUN(PHP_EXT_SRCDIR,[$abs_srcdir])dnl
+dnl
 abs_srcdir=`(cd $srcdir && pwd)`
 abs_builddir=`pwd`
 

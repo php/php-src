@@ -1077,7 +1077,7 @@ AC_DEFUN(PHP_SELECT_SAPI,[
 
 dnl deprecated
 AC_DEFUN(PHP_EXTENSION,[
-  sources=`awk -f $abs_srcdir/scan_makefile_in.awk < $abs_srcdir/ext/$1/Makefile.in`
+  sources=`awk -f $abs_srcdir/scan_makefile_in.awk < []PHP_EXT_SRCDIR($1)[]/Makefile.in`
 
   PHP_NEW_EXTENSION($1, $sources, $2, $3)
 
@@ -1111,15 +1111,8 @@ dnl be set to "cli" to mark extension build only with CLI or CGI sapi's.
 dnl extra-cflags are passed to the compiler, with @ext_srcdir@ being
 dnl substituted.
 AC_DEFUN(PHP_NEW_EXTENSION,[
-  if test -d "$abs_srcdir/ext/$1"; then
-dnl ---------------------------------------------- Internal Module
-    ext_builddir=ext/$1
-    ext_srcdir=$abs_srcdir/ext/$1
-  else
-dnl ---------------------------------------------- External Module
-    ext_builddir=.
-    ext_srcdir=$abs_srcdir
-  fi
+  ext_builddir=[]PHP_EXT_BUILDDIR($1)
+  ext_srcdir=[]PHP_EXT_SRCDIR($1)
 
   ifelse($5,,,[ac_extra=`echo $ac_n "$5$ac_c"|sed s#@ext_srcdir@#$ext_srcdir#g`])
 
