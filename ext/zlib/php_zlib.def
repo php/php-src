@@ -2,3 +2,9 @@ EXPORTS
 	compress
 	compress2
 	uncompress
+	inflateInit_
+	inflate
+	inflateEnd
+	crc32
+	inflateReset
+	
