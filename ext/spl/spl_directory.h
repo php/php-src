@@ -37,6 +37,8 @@ typedef struct _spl_ce_dir_object {
 	char              *path;
 	char              *path_name;
 	int               path_name_len;
+	char              *sub_path;
+	int               sub_path_len;
 	int               index;
 } spl_ce_dir_object;
 

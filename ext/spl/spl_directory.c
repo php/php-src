@@ -73,6 +73,9 @@ static void spl_ce_dir_object_free_storage(void *object TSRMLS_DC)
 	if (intern->path_name) {
 		efree(intern->path_name);
 	}
+	if (intern->sub_path) {
+		efree(intern->sub_path);
+	}
 	efree(object);
 }
 /* }}} */
@@ -540,6 +543,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 {
 	zval *object = getThis(), zpath;
 	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
+	spl_ce_dir_object *subdir;
 	
 	spl_dir_get_path_name(intern);
 
@@ -547,6 +551,31 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	ZVAL_STRINGL(&zpath, intern->path_name, intern->path_name_len, 0);
 
 	spl_instantiate_arg_ex1(spl_ce_RecursiveDirectoryIterator, &return_value, 0, &zpath TSRMLS_CC);
+	
+	subdir = (spl_ce_dir_object*)zend_object_store_get_object(return_value TSRMLS_CC);
+	if (subdir) {
+		if (intern->sub_path && intern->sub_path[0]) {
+			subdir->sub_path_len = spprintf(&subdir->sub_path, 0, "%s/%s", intern->sub_path, intern->entry.d_name);
+		} else {
+			subdir->sub_path_len = strlen(intern->entry.d_name);
+			subdir->sub_path = estrndup(intern->entry.d_name, subdir->sub_path_len);
+		}
+	}
+}
+/* }}} */
+
+/* {{{ proto void RecursiveDirectoryIterator::rewind()
+   Get sub path */
+SPL_METHOD(RecursiveDirectoryIterator, getSubPath)
+{
+	zval *object = getThis();
+	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
+
+	if (intern->sub_path) {
+		RETURN_STRINGL(intern->sub_path, intern->sub_path_len, 1);
+	} else {
+		RETURN_STRINGL("", 0, 1);
+	}
 }
 /* }}} */
 
@@ -818,6 +847,7 @@ static zend_function_entry spl_ce_dir_tree_class_functions[] = {
 	SPL_ME(RecursiveDirectoryIterator, key,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, hasChildren,   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, getChildren,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveDirectoryIterator, getSubPath,    NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
