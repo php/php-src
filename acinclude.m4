@@ -1341,10 +1341,10 @@ AC_DEFUN(PHP_CHECK_LIBRARY, [
   LDFLAGS="$5 $LDFLAGS"
   AC_CHECK_LIB([$1],[$2],[
     LDFLAGS=$save_old_LDFLAGS
-    m4_default([$3], :)
+    [$3]
   ],[
     LDFLAGS=$save_old_LDFLAGS
-    m4_default([$4], :)
+    [$4]
   ])dnl
 ])
 
