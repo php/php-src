@@ -201,7 +201,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 		
 #if HAVE_OPENSSL_EXT
-		if (stream)	{
+		if (stream && ssl_flags != php_ssl_none)	{
 			int ssl_ret = FAILURE;
 			switch(ssl_flags)	{
 				case php_ssl_v23:
