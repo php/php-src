@@ -854,6 +854,7 @@ __declspec(dllexport) BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, L
 			if (isapi_sapi_module.shutdown) {
 				isapi_sapi_module.shutdown(&sapi_module);
 			}
+			sapi_shutdown();
 			tsrm_shutdown();
 			break;
 	}
