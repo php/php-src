@@ -34,8 +34,6 @@
 #include "functions/number.h"
 #endif
 
-static inline int is_numeric_string(char *str, int length, long *lval, double *dval);
-
 ZEND_API void convert_scalar_to_number(zval *op)
 {
 	char *strval;
@@ -1237,7 +1235,7 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
  */
  
 #if 1
-static inline int is_numeric_string(char *str, int length, long *lval, double *dval)
+ZEND_API inline int is_numeric_string(char *str, int length, long *lval, double *dval)
 {
 	long local_lval;
 	double local_dval;
