@@ -1,3 +1,51 @@
+2001-10-21  Rasmus Lerdorf  <rasmus@php.net>
+
+    * main/SAPI.c: MFH
+
+    * main/SAPI.c:
+    Check if PCRE support is compiled in and only use the pcre functions if
+    it is.  Otherwise just set the realm to the safe mode user id if it isn't.
+
+2001-10-21  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c: MFB
+
+    * ext/xmlrpc/xmlrpc-epi-php.c: fix zts build
+
+2001-10-21  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/array.c: Oops, leftover crud
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h:
+    Motivated by bug #13607 I wrote up a simple array_init() function that
+    lets you quickly create an array and initialize each element to a certain
+    value.
+
+2001-10-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/crypt.c
+      NEWS: MFH
+
+    * NEWS: missing entry
+
+    * ext/standard/crypt.c
+      NEWS: Fixed bugs: #13251, #9827, #11363
+
+2001-10-21  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache/php_apache.c: MFH
+
+    * ext/pcre/php_pcre.h: MFH
+    (oops, should have been in one commit)
+
+    * main/SAPI.c: MFH
+
+    * sapi/apache/php_apache.c:
+    This made no sense before.  Hide Authorization in getallheaders() but
+    display it from phpinfo()?  Ouch!
+
 2001-10-20  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/pcre/php_pcre.h
