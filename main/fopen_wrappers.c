@@ -251,6 +251,9 @@ FILE *php_fopen_and_set_opened_path(const char *path, char *mode, char **opened_
 {
 		FILE *fp;
 
+		if (php_check_open_basedir((char *)path)) {
+			return NULL;
+		}
 		fp = V_FOPEN(path, mode);
 		if (fp && opened_path) {
 			*opened_path = expand_filepath(path,NULL);
@@ -278,9 +281,6 @@ PHPAPI FILE *php_fopen_wrapper(char *path, char *mode, int options, int *issock,
 		return php_fopen_with_path(path, mode, PG(include_path), opened_path);
 	} else {
 		if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!php_checkuid(path, mode, 0))) {
-			return NULL;
-		}
-		if (php_check_open_basedir(path)) {
 			return NULL;
 		}
 		return php_fopen_and_set_opened_path(path, mode, opened_path);
@@ -396,6 +396,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	char *pathbuf, *ptr, *end;
 	char trypath[MAXPATHLEN + 1];
 	struct stat sb;
+	FILE *fp;
 	PLS_FETCH();
 
 	if (opened_path) {
@@ -407,8 +408,6 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, 0))) {
 			return NULL;
 		}
-		if (php_check_open_basedir(filename)) return NULL;
-		
 		return php_fopen_and_set_opened_path(filename, mode, opened_path);
 	}
 	/* Absolute path open - prepend document_root in safe mode */
@@ -426,20 +425,13 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 			if (!php_checkuid(trypath, mode, 0)) {
 				return NULL;
 			}
-			if (php_check_open_basedir(trypath)) return NULL;
 			return php_fopen_and_set_opened_path(filename, mode, opened_path);
 		} else {
-			if (php_check_open_basedir(filename)) {
-				return NULL;
-			}
 			return php_fopen_and_set_opened_path(filename, mode, opened_path);
 		}
 	}
 	if (!path || (path && !*path)) {
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, 0))) {
-			return NULL;
-		}
-		if (php_check_open_basedir(filename)) {
 			return NULL;
 		}
 		return php_fopen_and_set_opened_path(filename, mode, opened_path);
@@ -465,9 +457,10 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 				return NULL;
 			}
 		}
-		if (!php_check_open_basedir(trypath)) {
+		fp = php_fopen_and_set_opened_path(trypath, mode, opened_path);
+		if (fp) {
 			efree(pathbuf);
-			return php_fopen_and_set_opened_path(trypath, mode, opened_path);
+			return fp;
 		}
 		ptr = end;
 	}
@@ -1014,11 +1007,7 @@ static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, in
 			if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!php_checkuid(path, mode, 0))) {
 				fp = NULL;
 			} else {
-				if (php_check_open_basedir((char *) path)) {
-					fp = NULL;
-				} else {
-					fp = php_fopen_and_set_opened_path(path, mode, opened_path);
-				}
+				fp = php_fopen_and_set_opened_path(path, mode, opened_path);
 			}
 		}
 		return (fp);
