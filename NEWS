@@ -81,6 +81,8 @@ PHP 4                                                                      NEWS
 
 22 Apr 2002, Version 4.2.0
 - ATTENTION!! register_globals defaults to 'off' now !!!
+- PostgreSQL functions are renamed, but all old function names are available.
+  (Yasuo)
 - Moved ext/mailparse to PECL. (Wez/Jim)
 - Modified the mysql extension to disable 'LOAD LOCAL' when safe mode is 
   enabled. (Jason)
