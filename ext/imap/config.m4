@@ -133,7 +133,7 @@ if test "$PHP_IMAP" != "no"; then
       #endif
     ],[
       AC_DEFINE(HAVE_IMAP2001, 1, [ ])
-    ],[ ])
+    ],[])
     CPPFLAGS=$old_CPPFLAGS
 
     AC_CHECK_LIB(pam, pam_start) 
