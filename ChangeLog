@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Added support for transparent session id propagation (Sascha)
 - Made WDDX serialize object properties properly (Andrey)
 - Fixed WDDX mem leak when undefined variable is passed in
   for serialization (Andrey)
@@ -14,6 +15,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
   if it is set to Off, GET, POST and Cookie variables will not be inserted
   to the global scope.  Mostly makes sense when coupled with track_vars (Zeev)
 - Added versioning support for shared library (Sascha)
+  This allows concurrent use of PHP3 and PHP4 as Apache modules. See
+  the end of the INSTALL file for more information.
 - Added second parameter to array_keys which specifies search value
   for which the key should be returned (Andrey)
 - Resourcified Informix driver (Danny)
