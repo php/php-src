@@ -39,7 +39,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDebug" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDebug" /D "_LIB" /D "TSRM_EXPORTS" /D "Zend_EXPORTS" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=0 /FR /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDebug" /D "_LIB" /D "Zend_EXPORTS" /D ZEND_DEBUG=0 /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "WIN32" /D "_MBCS" /FR /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x40d /d "NDebug"
 # ADD RSC /l 0x40d /d "NDebug"
@@ -61,7 +61,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_Debug" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /D "_Debug" /D "_LIB" /D "Zend_EXPORTS" /D "TSRM_EXPORTS" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=1 /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /D "_Debug" /D "_LIB" /D ZEND_DEBUG=1 /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "WIN32" /D "_MBCS" /FR /YX /FD /GZ /c
 # ADD BASE RSC /l 0x40d /d "_Debug"
 # ADD RSC /l 0x40d /d "_Debug"
 BSC32=bscmake.exe
@@ -284,7 +284,8 @@ InputPath=".\zend-parser.y"
 
 BuildCmds= \
 	if not "X%CYGWIN%"=="X" bison --output=zend-parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p zend zend-parser.y \
-	if "X%CYGWIN%"=="X" bison --output=zend-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p zend zend-parser.y
+	if "X%CYGWIN%"=="X" bison --output=zend-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p zend zend-parser.y \
+	
 
 "$(InputDir)\zend-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -301,7 +302,8 @@ InputPath=".\zend-parser.y"
 
 BuildCmds= \
 	if not "X%CYGWIN%"=="X" bison --output=zend-parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p zend zend-parser.y \
-	if "X%CYGWIN%"=="X" bison --output=zend-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p zend zend-parser.y
+	if "X%CYGWIN%"=="X" bison --output=zend-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p zend zend-parser.y \
+	
 
 "$(InputDir)\zend-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
