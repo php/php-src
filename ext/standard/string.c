@@ -2800,9 +2800,8 @@ PHP_FUNCTION(str_replace)
 static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 {
 	zval **str, **max_chars_per_line;
-	char *heb_str, *tmp, *target, *opposite_target, *broken_str;
+	char *heb_str, *tmp, *target, *broken_str;
 	int block_start, block_end, block_type, block_length, i;
-	int block_ended;
 	long max_chars=0;
 	int begin, end, char_count, orig_begin;
 
@@ -2833,11 +2832,9 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 
 	tmp = Z_STRVAL_PP(str);
 	block_start=block_end=0;
-	block_ended=0;
 
 	heb_str = (char *) emalloc(Z_STRLEN_PP(str)+1);
 	target = heb_str+Z_STRLEN_PP(str);
-	opposite_target = heb_str;
 	*target = 0;
 	target--;
 
