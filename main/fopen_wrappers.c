@@ -219,7 +219,7 @@ PHPAPI int php_check_safe_mode_include_dir(char *path TSRMLS_DC)
 	}
 
 	/* Nothing to check... */
-	return 0;
+	return -1;
 }
 /* }}} */
 
