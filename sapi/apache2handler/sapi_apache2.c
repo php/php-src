@@ -50,7 +50,11 @@
 #include "ap_mpm.h"
 
 #include "php_apache.h"
- 
+                                                                                                                     
+#define PHP_MAGIC_TYPE "application/x-httpd-php"
+#define PHP_SOURCE_MAGIC_TYPE "application/x-httpd-php-source"
+#define PHP_SCRIPT "php-script"
+
 #ifdef NETWARE
 #undef shutdown /* To avoid Winsock confusion */
 #endif
@@ -151,36 +155,34 @@ php_apache_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
     ctx = SG(server_context);
     bb = apr_brigade_create(ctx->r->pool, ctx->c->bucket_alloc);
 
-	if ((rv = ap_get_brigade(ctx->r->input_filters, bb, AP_MODE_READBYTES, APR_BLOCK_READ, count_bytes)) != APR_SUCCESS) {
+	if ((rv = ap_get_brigade(ctx->r->input_filters, bb, AP_MODE_READBYTES, 
+                    APR_BLOCK_READ, count_bytes)) != APR_SUCCESS) {
 		return 0;
 	}
 	
     APR_BRIGADE_FOREACH(bucket,bb) {
-            const char*data;
-            apr_size_t len;
-            if (APR_BUCKET_IS_EOS(bucket)) {
-                seen_eos = 1;
-                break;
-            }
-            /* We can't do much with this. */
-            if (APR_BUCKET_IS_FLUSH(bucket)) {
-                continue;
-            }
+        const char*data;
+        apr_size_t len;
+        if (APR_BUCKET_IS_EOS(bucket)) {
+           seen_eos = 1;
+           break;
+        }
+        /* We can't do much with this. */
+        if (APR_BUCKET_IS_FLUSH(bucket)) {
+           continue;
+        }
 
-            apr_bucket_read(bucket, &data, &len, APR_BLOCK_READ);
-            if (last_count +len >  count_bytes) {
-                ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, ctx->r,
+        apr_bucket_read(bucket, &data, &len, APR_BLOCK_READ);
+        if (last_count +len >  count_bytes) {
+           ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, ctx->r,
                       "PHP: Read too much post data raise a bug please: %s", ctx->r->uri);
-                break;
-            }
-            memcpy( last, data, len);
-            last += len;
-            last_count += len;
+           break;
+        }
+        memcpy( last, data, len);
+        last += len;
+        last_count += len;
     }
-    /*
-    ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, ctx->r,
-                      "PHP: read post data : %s %*s len %ld", ctx->r->uri, last_count, buf, last_count);
-*/
+
 	return last_count;
 }
 
@@ -329,7 +331,7 @@ static sapi_module_struct apache2_sapi_module = {
 	"apache2hook",
 	"Apache 2.0 Hook",
 
-	php_apache2_startup,						/* startup */
+	php_apache2_startup,					/* startup */
 	php_module_shutdown_wrapper,			/* shutdown */
 
 	NULL,									/* activate */
@@ -337,7 +339,7 @@ static sapi_module_struct apache2_sapi_module = {
 
 	php_apache_sapi_ub_write,				/* unbuffered write */
 	php_apache_sapi_flush,					/* flush */
-	php_apache_sapi_get_stat,						/* get uid */
+	php_apache_sapi_get_stat,				/* get uid */
 	php_apache_sapi_getenv,					/* getenv */
 
 	php_error,								/* error handler */
@@ -427,29 +429,6 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
 	return OK;
 }
 
-static void php_add_filter(request_rec *r, ap_filter_t *f)
-{
-	int output = (f == r->output_filters);
-
-	/* for those who still have Set*Filter PHP configured */
-	while (f) {
-		if (strcmp(f->frec->name, "PHP") == 0) {
-			ap_log_error(APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO,
-				     0, r->server,
-				     "\"Set%sFilter PHP\" already configured for %s",
-				     output ? "Output" : "Input", r->uri);
-			return;
-		}
-		f = f->next;
-	}
-
-	if (output) {
-		ap_add_output_filter("PHP", NULL, r, r->connection);
-	} else {
-		ap_add_input_filter("PHP", NULL, r, r->connection);
-	}
-}
-
 static apr_status_t php_server_context_cleanup(void *data_)
 {
 	void **data = data_;
@@ -461,14 +440,31 @@ static int php_handler(request_rec *r)
 {
 	int content_type_len = strlen("application/x-httpd-php");
 	const char *auth;
+    void *conf;
+    char *enabled;
 	php_struct *ctx;
-    zend_file_handle zfd;
 	TSRMLS_FETCH();
 
     if (!r->content_type) {
         return DECLINED;
     }
+
     if (strncmp(r->handler, "application/x-httpd-php", content_type_len -1))  {
+       return DECLINED;
+    }
+    /*
+    if (strcmp(r->handler, PHP_MAGIC_TYPE) &&
+        strcmp(r->handler, PHP_SOURCE_MAGIC_TYPE) &&
+        strcmp(r->handler, PHP_SCRIPT)) {
+        return DECLINED;
+    }
+
+    conf = ap_get_module_config(r->per_dir_config, &php4_module);
+    enabled = get_php_config(conf, "engine", sizeof("engine"));
+    */
+
+    /* handle situations where user turns the engine off */
+    if (*enabled == '0') {
         return DECLINED;
     }
 
@@ -505,20 +501,11 @@ static int php_handler(request_rec *r)
 	SG(request_info).request_uri = apr_pstrdup(r->pool, r->uri);
 	r->no_local_copy = 1;
 	r->content_type = apr_pstrdup(r->pool, sapi_get_default_content_type(TSRMLS_C));
-    /*
-     * XXX handle POST data
-     */
-    SG(request_info).post_data = NULL;
-    SG(request_info).post_data_length = 0;
-    /*
-	SG(request_info).post_data = ctx->post_data;
-	SG(request_info).post_data_length = ctx->post_len;
-    */
 	apr_table_unset(r->headers_out, "Content-Length");
 	apr_table_unset(r->headers_out, "Last-Modified");
 	apr_table_unset(r->headers_out, "Expires");
 	apr_table_unset(r->headers_out, "ETag");
-	apr_table_unset(r->headers_in, "Connection");
+
 	if (!PG(safe_mode)) {
 		auth = apr_table_get(r->headers_in, "Authorization");
 		php_handle_auth_data(auth TSRMLS_CC);
@@ -540,21 +527,30 @@ static int php_handler(request_rec *r)
 	php_request_startup(TSRMLS_C);
 
     ctx->bb = apr_brigade_create(r->pool, ctx->c->bucket_alloc);
-
-    zfd.type = ZEND_HANDLE_FILENAME;
-	zfd.filename = r->filename;
-	zfd.free_filename = 0;
-	zfd.opened_path = NULL;
-	php_execute_script(&zfd TSRMLS_CC);
-#if MEMORY_LIMIT
-	{
-        char *mem_usage;
-
-        mem_usage = apr_psprintf(r->pool, "%u", AG(allocated_memory_peak));
-        AG(allocated_memory_peak) = 0;
-        apr_table_set(r->notes, "mod_php_memory_usage", mem_usage);
+    if (strncmp(r->handler, PHP_SOURCE_MAGIC_TYPE, 
+                sizeof(PHP_SOURCE_MAGIC_TYPE)) == 0) {
+        zend_syntax_highlighter_ini syntax_highlighter_ini;
+        php_get_highlight_struct(&syntax_highlighter_ini);
+        highlight_file((char *)r->filename, &syntax_highlighter_ini TSRMLS_CC);
     }
+    else {
+        zend_file_handle zfd;
+
+        zfd.type = ZEND_HANDLE_FILENAME;
+        zfd.filename = r->filename;
+        zfd.free_filename = 0;
+        zfd.opened_path = NULL;
+        php_execute_script(&zfd TSRMLS_CC);
+#if MEMORY_LIMIT
+        {
+            char *mem_usage;
+
+            mem_usage = apr_psprintf(r->pool, "%u", AG(allocated_memory_peak));
+            AG(allocated_memory_peak) = 0;
+            apr_table_set(r->notes, "mod_php_memory_usage", mem_usage);
+        }
 #endif
+    }
 
 	php_request_shutdown(NULL);
 /*
@@ -579,16 +575,8 @@ static void php_register_hook(apr_pool_t *p)
 {
 	ap_hook_pre_config(php_pre_config, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_post_config(php_apache_server_startup, NULL, NULL, APR_HOOK_MIDDLE);
-    /*
-	ap_hook_insert_filter(php_insert_filter, NULL, NULL, APR_HOOK_MIDDLE);
-	ap_hook_post_read_request(php_post_read_request, NULL, NULL, APR_HOOK_MIDDLE);
-    */
     ap_hook_handler(php_handler, NULL, NULL, APR_HOOK_MIDDLE);
-    /*
-	ap_register_output_filter("PHP", php_output_filter, php_apache_disable_caching, AP_FTYPE_RESOURCE);
-	ap_register_input_filter("PHP", php_input_filter, php_apache_disable_caching, AP_FTYPE_RESOURCE);
-    */
-}
+ }
 
 AP_MODULE_DECLARE_DATA module php4_module = {
 	STANDARD20_MODULE_STUFF,
