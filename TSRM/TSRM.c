@@ -254,7 +254,7 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 	int hash_value;
 	tsrm_tls_entry *thread_resources;
 
-	if( !th_id ) {
+	if (!th_id) {
 #if defined(PTHREADS)
 		/* Fast path for looking up the resources for the current
 		* thread. Its used by just about every call to
@@ -262,7 +262,7 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 		* and our hashtable lookup.
 		*/
 		thread_resources = pthread_getspecific( tls_key );
-		if( thread_resources ) {
+		if (thread_resources) {
 			TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Fetching resource id %d for current thread %d", id, (long) thread_resources->thread_id );
 			return ts_resource_read( thread_resources, id );
 		}

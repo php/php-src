@@ -36,18 +36,21 @@ static ts_rsrc_id win32_globals_id;
 static tsrm_win32_globals win32_globals;
 #endif
 
-static void tsrm_win32_ctor(tsrm_win32_globals *globals) {
+static void tsrm_win32_ctor(tsrm_win32_globals *globals)
+{
 	globals->process = NULL;
 	globals->process_size = 0;
 }
 
-static void tsrm_win32_dtor(tsrm_win32_globals *globals) {
-	if(globals->process != NULL) {
+static void tsrm_win32_dtor(tsrm_win32_globals *globals)
+{
+	if (globals->process != NULL) {
 		free(globals->process);
 	}
 }
 
-TSRM_API void tsrm_win32_startup(void) {
+TSRM_API void tsrm_win32_startup(void)
+{
 #ifdef ZTS
 	win32_globals_id = ts_allocate_id(sizeof(tsrm_win32_globals), (ts_allocate_ctor)tsrm_win32_ctor, (ts_allocate_ctor)tsrm_win32_dtor);
 #else
@@ -55,32 +58,33 @@ TSRM_API void tsrm_win32_startup(void) {
 #endif
 }
 
-TSRM_API void tsrm_win32_shutdown(void) {
+TSRM_API void tsrm_win32_shutdown(void)
+{
 #ifndef ZTS
 	tsrm_win32_dtor(&win32_globals);
 #endif
 }
 
-static ProcessPair* process_get(FILE *stream) {
+static ProcessPair* process_get(FILE *stream)
+{
 	ProcessPair* ptr;
 	ProcessPair* newptr;
 	TWLS_FETCH();
 	
-	for(ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
-		if(stream != NULL && ptr->stream == stream){
+	for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
+		if (stream != NULL && ptr->stream == stream) {
 			break;
-		}
-		else if(stream == NULL && !ptr->inuse) {
+		} else if (stream == NULL && !ptr->inuse) {
 			break;
 		}
 	}
 	
-	if(ptr < (TWG(process) + TWG(process_size))) {
+	if (ptr < (TWG(process) + TWG(process_size))) {
 		return ptr;
 	}
 	
 	newptr = (ProcessPair*)realloc((void*)TWG(process), (TWG(process_size)+1)*sizeof(ProcessPair));
-	if(newptr == NULL) {
+	if (newptr == NULL) {
 		return NULL;
 	}
 	
@@ -90,7 +94,8 @@ static ProcessPair* process_get(FILE *stream) {
 	return ptr;
 }
 
-TSRM_API FILE* popen(const char *command, const char *type) {
+TSRM_API FILE* popen(const char *command, const char *type)
+{
 	FILE *stream = NULL;
 	int fno, str_len = strlen(type), read, mode;
 	STARTUPINFO startup;
@@ -103,12 +108,12 @@ TSRM_API FILE* popen(const char *command, const char *type) {
 	security.bInheritHandle			= TRUE;
 	security.lpSecurityDescriptor	= NULL;
 
-	if(!str_len || !CreatePipe(&in, &out, &security, 2048L)) {
+	if (!str_len || !CreatePipe(&in, &out, &security, 2048L)) {
 		return NULL;
 	}
 	
 	memset(&startup, 0, sizeof(STARTUPINFO));
-	memset(&process, 0, sizeof (PROCESS_INFORMATION));
+	memset(&process, 0, sizeof(PROCESS_INFORMATION));
 
 	startup.cb			= sizeof(STARTUPINFO);
 	startup.dwFlags		= STARTF_USESTDHANDLES;
@@ -118,11 +123,10 @@ TSRM_API FILE* popen(const char *command, const char *type) {
 	mode = ((str_len == 2) && (type[1] == 'b')) ? O_BINARY : O_TEXT;
 
 
-	if(read) {
+	if (read) {
 		startup.hStdInput  = GetStdHandle(STD_INPUT_HANDLE);
 		startup.hStdOutput = out;
-	}
-	else {
+	} else {
 		startup.hStdInput  = in;
 		startup.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	}
@@ -135,11 +139,10 @@ TSRM_API FILE* popen(const char *command, const char *type) {
 	CloseHandle(process.hThread);
 	proc = process_get(NULL);
 
-	if(read) {
+	if (read) {
 		fno = _open_osfhandle((long)in, _O_RDONLY | mode);
 		CloseHandle(out);
-	}
-	else {
+	} else {
 		fno = _open_osfhandle((long)out, _O_WRONLY | mode);
 		CloseHandle(in);
 	}
@@ -151,11 +154,12 @@ TSRM_API FILE* popen(const char *command, const char *type) {
 	return stream;
 }
 
-TSRM_API int pclose(FILE* stream) {
+TSRM_API int pclose(FILE* stream)
+{
 	DWORD termstat = 0;
 	ProcessPair* process;
 
-	if((process = process_get(stream)) == NULL) {
+	if ((process = process_get(stream)) == NULL) {
 		return 0;
 	}
 
@@ -163,7 +167,7 @@ TSRM_API int pclose(FILE* stream) {
     fclose(process->stream);
 
 	GetExitCodeProcess(process->prochnd, &termstat);
-	if(termstat == STILL_ACTIVE) {
+	if (termstat == STILL_ACTIVE) {
 		TerminateProcess(process->prochnd, termstat);
 	}
 
@@ -173,4 +177,5 @@ TSRM_API int pclose(FILE* stream) {
 
 	return termstat;
 }
+
 #endif
