@@ -1157,13 +1157,13 @@ PHP_FUNCTION(swffont_init)
     php_stream * stream;
 	FILE * file;
 	
-    stream = php_stream_open_wrapper(Z_STRVAL_PP(zfile), "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL, TSRMLS_CC);
+    stream = php_stream_open_wrapper(Z_STRVAL_PP(zfile), "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL TSRMLS_CC);
 
     if(stream == NULL) {
 		RETURN_FALSE;
 	}
 
-	if (FAILURE = php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void*)&file, REPORT_ERRORS))
+	if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void*)&file, REPORT_ERRORS))
 	{
 		php_stream_close(stream);
 		RETURN_FALSE;
@@ -1181,6 +1181,7 @@ PHP_FUNCTION(swffont_init)
   add_property_resource(getThis(), "font", ret);
   zend_list_addref(ret);
 }
+
 static void destroy_SWFFont_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
   destroySWFBlock((SWFBlock)resource->ptr);
@@ -1601,7 +1602,7 @@ PHP_FUNCTION(swfmovie_save)
 
   convert_to_string_ex(x);
 
-  stream = php_stream_open_wrapper(Z_STRVAL_PP(x), "wb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL, TSRMLS_CC);
+  stream = php_stream_open_wrapper(Z_STRVAL_PP(x), "wb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL TSRMLS_CC);
 
   if (stream == NULL)
 	  RETURN_FALSE;
