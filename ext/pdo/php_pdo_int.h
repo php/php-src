@@ -45,6 +45,7 @@ extern zend_class_entry *pdo_row_ce;
 void pdo_row_free_storage(zend_object *object TSRMLS_DC);
 extern zend_object_handlers pdo_row_object_handlers;
 
+zend_object_iterator *php_pdo_dbstmt_iter_get(zend_class_entry *ce, zval *object TSRMLS_DC);
 
 extern pdo_driver_t *pdo_find_driver(const char *name, int namelen);
 
