@@ -16,8 +16,8 @@ PHP 4                                                                      NEWS
   and should not be cached). (Ilia)
 - Fixed bug #20442 (upgraded bundled expat to 1.95.5). (Ilia)
 - Made uniqid() parameters to be optional and allow any prefix length. (Marcus)
-- Made array_search() to accept objects as a needle under ZendEngine2.
-  (Moriyoshi)
+- Improved array_search() so that it can accept objects as a needle under
+  ZendEngine2. (Moriyoshi)
 - Added new range() functionality (Ilia)
   . Support for float modifier.
   . Detection of numeric values inside strings passed as high & low.
