@@ -628,8 +628,8 @@ static XSQLDA *php_ibase_execute(isc_tr_handle tr_handle, isc_stmt_handle query_
 }
 /* }}} */
 
-/* {{{ proto int ibase_query([int link_identifier, ]string query)
-   Execute a query (without parameter placeholders). */
+/* {{{ proto int ibase_query([int link_identifier], string query)
+   Execute a query (without parameter placeholders) */
 PHP_FUNCTION(ibase_query)
 {
 	pval *query, *ibase_link;
@@ -712,7 +712,7 @@ PHP_FUNCTION(ibase_query)
 /* }}} */
 
 /* {{{ proto int ibase_fetch_row(int result)
-   Fetch a row from the results of a query. */
+   Fetch a row from the results of a query */
 PHP_FUNCTION(ibase_fetch_row)
 {
 	pval *result;
@@ -873,7 +873,7 @@ PHP_FUNCTION(ibase_fetch_row)
 /* }}} */
 
 /* {{{ proto int ibase_free_result(int result)
-   Free the memory used by a result. */
+   Free the memory used by a result */
 PHP_FUNCTION(ibase_free_result)
 {
 	pval *result;
@@ -901,8 +901,8 @@ PHP_FUNCTION(ibase_free_result)
 }
 /* }}} */
 
-/* {{{ proto int ibase_prepare([int link_identifier, ]string query)
-   Prepare a query for later binding of parameter placeholders and execution. */
+/* {{{ proto int ibase_prepare([int link_identifier], string query)
+   Prepare a query for later binding of parameter placeholders and execution */
 PHP_FUNCTION(ibase_prepare)
 {
 	pval *query, *ibase_link;
@@ -960,7 +960,7 @@ PHP_FUNCTION(ibase_prepare)
 }
 /* }}} */
 
-/* {{{ proto int ibase_bind (int query)
+/* {{{ proto int ibase_bind(int query)
    Bind parameter placeholders in a previously prepared query. Still nonfunctional. */
 PHP_FUNCTION(ibase_bind)
 {
@@ -1021,7 +1021,7 @@ PHP_FUNCTION(ibase_bind)
 /* }}} */
 
 /* {{{ proto int ibase_execute(int query)
-   Execute a previously prepared (and possibly binded) query. */
+   Execute a previously prepared (and possibly binded) query */
 PHP_FUNCTION(ibase_execute)
 {
 	pval *query;
