@@ -1493,7 +1493,7 @@ gdImageTrueColorToPalette (gdImagePtr im, int dither, int colorsWanted)
   my_cquantize_ptr cquantize = 0;
   int i;
   size_t arraysize;
-  if (!im->trueColor)
+  if (!im->trueColor || colorsWanted <= 0)
     {
       /* Nothing to do! */
       return;
