@@ -271,7 +271,7 @@ PS_READ_FUNC(files)
 	data->st_size = *vallen = sbuf.st_size;
 	*val = emalloc(sbuf.st_size);
 
-#ifdef HAVE_PREAD
+#if defined(HAVE_WORKING_PREAD_TEST) && defined(HAVE_PREAD)
 	n = pread(data->fd, *val, sbuf.st_size, 0);
 #else
 	lseek(data->fd, 0, SEEK_SET);
@@ -307,7 +307,7 @@ PS_WRITE_FUNC(files)
 	if (vallen < (int)data->st_size)
 		ftruncate(data->fd, 0);
 
-#ifdef HAVE_PWRITE
+#if defined(HAVE_WORKING_PWRITE_TEST) && defined(HAVE_PWRITE)
 	n = pwrite(data->fd, val, vallen, 0);
 #else
 	lseek(data->fd, 0, SEEK_SET);
