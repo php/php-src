@@ -46,6 +46,7 @@ extern void php3_fread(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_fgetc(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_fgets(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_fgetss(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_fgetcsv(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_fwrite(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_rewind(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_ftell(INTERNAL_FUNCTION_PARAMETERS);

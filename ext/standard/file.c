@@ -196,6 +196,7 @@ function_entry php3_file_functions[] = {
 	{"copy",		php3_file_copy,	NULL},
 	{"tempnam",		php3_tempnam,	NULL},
 	{"file",		php3_file,		NULL},
+	{"fgetcsv",		php3_fgetcsv,	NULL},
     PHP_FE(flock, NULL)
 	{"get_meta_tags",	php3_get_meta_tags,	NULL},
 	{"set_socket_blocking",	php3_set_socket_blocking,	NULL},
@@ -1515,6 +1516,121 @@ PHPAPI int php3i_get_le_fp(void)
 {
 	return le_fp;
 }
+
+/* {{{ proto array fgetcsv(int fp, int length)
+   get line from file pointer and parse for CSV fields */
+void php3_fgetcsv(INTERNAL_FUNCTION_PARAMETERS) {
+	char *temp, *tptr, *bptr;
+	char delimiter = ',';	/* allow this to be set as parameter if required in future version? */
+
+	/* first section exactly as php3_fgetss */
+
+	pval *fd, *bytes;
+	FILE *fp;
+	int id, len, br, type;
+	char *buf, *p, *rbuf, *rp, c, lc;
+	int issock=0;
+	int *sock,socketd=0;
+
+	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &fd, &bytes) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(fd);
+	convert_to_long(bytes);
+
+	id = fd->value.lval;
+	len = bytes->value.lval;
+
+	fp = php3_list_find(id,&type);
+	if (type==wsa_fp){
+		issock=1;
+		sock = php3_list_find(id,&type);
+		socketd=*sock;
+	}
+	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
+		php3_error(E_WARNING, "Unable to find file identifier %d", id);
+		RETURN_FALSE;
+	}
+
+	buf = emalloc(sizeof(char) * (len + 1));
+	/*needed because recv doesnt set null char at end*/
+	memset(buf,0,len+1);
+	if (!(issock?SOCK_FGETS(buf,len,socketd):(int)fgets(buf, len, fp))) {
+		efree(buf);
+		RETURN_FALSE;
+	}
+
+	/* Now into new section that parses buf for comma/quote delimited fields */
+
+	/* Strip trailing space from buf */
+
+	bptr = buf;
+	tptr = buf + strlen(buf) -1;
+	while ( isspace(*tptr) && (tptr > bptr) ) *tptr--=0;
+
+	/* add single space - makes it easier to parse trailing null field */
+	*++tptr = ' ';
+	*++tptr = 0;
+
+	/* reserve workspace for building each individual field */
+
+	temp = emalloc(sizeof(char) * len);	/*	unlikely but possible! */
+	tptr=temp;
+
+	/* Initialize return array */
+	if (array_init(return_value) == FAILURE) {
+		efree(temp);
+		efree(buf);
+		RETURN_FALSE;
+	}
+
+	/* Main loop to read CSV fields */
+	/* NB this routine will return a single null entry for a blank line */
+
+	do	{
+		/* 1. Strip any leading space */		
+		while isspace(*bptr) bptr++;	
+		/* 2. Read field, leaving bptr pointing at start of next field */
+		if (*bptr == '"') {
+			/* 2A. handle quote delimited field */
+			bptr++;		/* move on to first character in field */
+			while (*bptr) {
+				if (*bptr == '"') {
+					/* handle the double-quote */
+					if ( *(bptr+1) == '"') {
+					/* embedded double quotes */
+						*tptr++ = *bptr; bptr +=2;
+					} else {
+					/* must be end of string - skip to start of next field or end */
+						while ( (*bptr != delimiter) && *bptr ) bptr++;
+						if (*bptr == delimiter) bptr++;
+						*tptr=0;	/* terminate temporary string */
+						break;	/* .. from handling this field - resumes at 3. */
+					}
+				} else {
+				/* normal character */
+					*tptr++ = *bptr++;
+				}
+			}
+		} else {
+			/* 2B. Handle non-quoted field */
+			while ( (*bptr != delimiter) && *bptr ) *tptr++ = *bptr++;
+			*tptr=0;	/* terminate temporary string */
+			if (strlen(temp)) {
+				tptr--;
+				while (isspace(*tptr)) *tptr-- = 0;	/* strip any trailing spaces */
+			}
+			if (*bptr == delimiter) bptr++;
+		}
+		/* 3. Now pass our field back to php */
+		add_next_index_string(return_value, temp, 1);
+		tptr=temp;
+	} while (*bptr);
+	efree(temp);
+	efree(buf);
+}
+/* }}} */
 
 /*
  * Local variables:
