@@ -1,4 +1,4 @@
-<?php 
+<?php
 //
 // +----------------------------------------------------------------------+
 // | PHP Version 4                                                        |
@@ -77,6 +77,36 @@ switch ($command) {
             print "install ok\n";
         }
         break;
+    case 'uninstall':
+        include_once 'PEAR/Installer.php';
+        $package = $options[1][2];
+        $installer =& new PEAR_Installer($script_dir, $ext_dir, $doc_dir);
+        $installer->debug = $verbose;
+        if (PEAR::isError($installer->uninstall($package))) {
+            print "\nuninstall failed\n";
+        } else {
+            print "uninstall ok\n";
+        }
+        break;
+    case 'list-installed':
+        include_once 'PEAR/Registry.php';
+        $reg = new PEAR_Registry;
+        $installed = $reg->packageInfo();
+        $i = $j = 0;
+        print("Installed packages:\n");
+        foreach ($installed as $package) {
+            if ($i++ % 20 == 0) {
+                if ($j++ > 0) {
+                    print "\n";
+                }
+                printf("%-20s %-10s %s\n",
+                       "Package", "Version", "State");
+                print str_repeat("-", 75)."\n";
+            }
+            printf("%-20s %-10s %s\n", $package['package'],
+                   $package['version'], $package['release_state']);
+        }
+        break;
     case 'package':
         include_once 'PEAR/Packager.php';
         $pkginfofile = $options[1][2];
@@ -108,7 +138,9 @@ function usage($obj = null)
           "     -d <dir>  set documentation dest dir (absolute path)\n".
           "     -h, -?    display help/usage (this message)\n".
           "Commands:\n".
+          "   list-installed \n".
           "   install <package file>\n".
+          "   uninstall <package file>\n".
           "   package [package info file]\n".
           "\n");
     fclose($stderr);
