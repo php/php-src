@@ -366,7 +366,7 @@ AC_ARG_WITH(iodbc,
   fi
   if test "$withval" != "no"; then
     PHP_ADD_LIBRARY_WITH_PATH(iodbc, $withval/lib)
-    PHP_ADD_INCLUDE($withval/include)
+    PHP_ADD_INCLUDE($withval/include, 1)
     ODBC_TYPE=iodbc
     ODBC_INCLUDE=-I$withval/include
     ODBC_LFLAGS=-L$withval/lib
