@@ -20,6 +20,7 @@ if test "$PHP_YAZ" != "no"; then
   if test -f $yazconfig; then
     AC_DEFINE(HAVE_YAZ,1,[Whether you have YAZ])
     . $yazconfig
+    YAZLIB=`echo $YAZLIB|sed 's%/.libs%%'`
     PHP_EVAL_LIBLINE($YAZLIB, YAZ_SHARED_LIBADD)
     PHP_EVAL_INCLINE($YAZINC)
     PHP_SUBST(YAZ_SHARED_LIBADD)
