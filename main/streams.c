@@ -1317,6 +1317,12 @@ PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STRE
 	
 	stream = php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
 
+#ifdef HAVE_BROKEN_GLIBC_FOPEN_APPEND
+	if (strchr(mode, 'a')) {
+		fseek(file, 0, SEEK_END);
+	}
+#endif
+	
 	if (stream) {
 		if (self->is_pipe) {
 			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
@@ -2417,7 +2423,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		}
 	}
 
-	if (stream && stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0 && strchr(mode, 'a')) {
+	if (stream && stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0 && strchr(mode, 'a') && stream->position == 0) {
 		off_t newpos = 0;
 
 		/* if opened for append, we need to revise our idea of the initial file position */
