@@ -647,7 +647,7 @@ print_mbc(c)
 /* Make sure we have at least N more bytes of space in buffer.  */
 #define GET_BUFFER_SPACE(n)						\
   do {								        \
-    while (b - bufp->buffer + (n) >= bufp->allocated)			\
+    while (b - bufp->buffer + (size_t)(n) >= (size_t)bufp->allocated)			\
       EXTEND_BUFFER;							\
   } while (0)
 
@@ -2401,7 +2401,7 @@ re_compile_pattern(pattern, size, bufp)
 	  GET_UNSIGNED_NUMBER(c1);
 	  if (!ISDIGIT(c)) PATUNFETCH;
 
-	if (9 < c1 && c1 >= regnum) {
+	if (9 < c1 && c1 >= (unsigned int)regnum) {
 	    /* need to get octal */
 	  c = scan_oct(p0, 3, &numlen) & 0xff;
 	  p = p0 + numlen;
@@ -3881,7 +3881,7 @@ re_match(bufp, string_arg, size, pos, regs)
 	  register unsigned char *d2, *dend2;
 
 	  /* Check if there's corresponding group */
-	  if (regno >= num_regs) goto fail;
+	  if (regno >= (int)num_regs) goto fail;
 	  /* Check if corresponding group is still open */
 	  if (IS_ACTIVE(reg_info[regno])) goto fail;
 
