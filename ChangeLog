@@ -1,3 +1,125 @@
+2003-10-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/file.c:
+      Some clean-ups
+
+    * NEWS:
+      Add BFN entry to HEAD, as this bug is not likely to be fixed in 4.3.x.
+
+    * (PHP_4_3)
+      NEWS:
+      A bit pickier about platform.
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/standard/dir.c:
+      MFH(r-1.131): This check's always necessary.
+
+    * ext/standard/dir.c:
+      This check's always necessary.
+
+2003-10-29  Andi Gutmans  <andi@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c:
+      - This should work.
+
+2003-10-29  Dan Kalowsky  <dank@deadmime.org>
+
+    * NEWS:
+      Added in NEWS entries for the Panther updates
+
+2003-10-29  Andi Gutmans  <andi@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c:
+      - Allow for case-insensitivity of include_once()/require_once() on
+      - Windows
+
+2003-10-29  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_fe.c:
+      added functions for embedded server
+
+    * ext/mysqli/config.m4
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli.h:
+      added support for embedded MySQL Server
+      some prototype fixes
+
+2003-10-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/file/bug26003.phpt
+      ext/standard/tests/file/test3.csv:
+      Add test case for bug #26003
+
+    * ext/standard/dir.c:
+      MFB(r-1.109.2.12): A possible fix for bug #26026
+
+    * (PHP_4_3)
+      ext/standard/dir.c:
+      A possible fix for bug #26026.
+
+    * ext/simplexml/simplexml.c:
+      Oops.
+
+    * ext/simplexml/tests/007.phpt:
+      Update test for an additional check to ensure the variable used for an
+      index would not be modified during deference.
+
+    * ext/simplexml/simplexml.c:
+      Do not use convert_to_*_ex() for ordinary zval pointers.
+
+    * ZendEngine2/zend_operators.h:
+      Use pretty macro instead.
+
+2003-10-29  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c:
+      Adding missing TSRMLS_CC to fix zts build
+
+2003-10-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Go with RC3 release.
+
+2003-10-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/007.phpt:
+      Add simplexml array handlers that allow to explicitly work with attributes.
+
+2003-10-29  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/ext_skel_win32.php
+      ext/skeleton/skeleton.dsp:
+      On win32 extensions starts with php_
+
+    * ext/ext_skel_win32.php
+      ext/ext_skel_win32.php:
+      Fix typo in parameter
+
+2003-10-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dom/tests/dom005.phpt:
+      Fixed test.
+
+2003-10-29  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/user_filters.c:
+      Allow userspace filters to use wildcards
+
 2003-10-28  Sara Golemon  <php@alphaweb.net>
 
     * ext/standard/user_filters.c:
