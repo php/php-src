@@ -1,3 +1,39 @@
+2000-06-19  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/mcrypt/mcrypt.c:
+    Canged back to uppercase. Are all the backslashes on line 69 to 111 really needed?
+
+2000-06-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/imap/php_imap.c: Unbreak imap by fixing the assignment
+
+2000-06-19  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/pdf.c: - minor changes
+
+    * ext/domxml/php_domxml.c: - added prototype
+
+2000-06-19  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/wddx/wddx.c:
+    Call __wakeup() after all the instance variables are initialized.
+
+2000-06-19  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/mysql/php_mysql.h: kill warinig
+
+    * ext/oci8/config.m4
+      ext/oracle/config.m4: good morning, thies!
+
+    * ext/oci8/config.m4
+      ext/oracle/config.m4: some adjustments to the sysliblist
+
+    * ext/standard/fsock.c: (fsockopen) fix #5090
+
+2000-06-19  Andi Gutmans  <andi@php.net>
+
+    * ext/imap/php_imap.c: - Fixed problem in imap_fetch_overview
+
 2000-06-18  Andi Gutmans  <andi@php.net>
 
     * ext/standard/image.c: - Nuke warning
