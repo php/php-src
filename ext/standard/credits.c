@@ -107,7 +107,7 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC)
 	}
 
 	if (flag & PHP_CREDITS_FULLPAGE) {
-		PUTS("</center></body></html>\n");
+		PUTS("</div></body></html>\n");
 	}
 }
 /* }}} */
