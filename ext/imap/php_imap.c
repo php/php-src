@@ -38,6 +38,7 @@
 #include "php_ini.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
+#include "ext/standard/file.h"
 
 #ifdef ERROR
 #undef ERROR
@@ -130,6 +131,7 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_utf7_encode,						NULL)
 	PHP_FE(imap_mime_header_decode,					NULL)
 	PHP_FE(imap_thread,								NULL)
+	PHP_FE(imap_timeout,								NULL)
 
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 	PHP_FE(imap_get_quota,							NULL)
@@ -336,6 +338,7 @@ void mail_free_messagelist(MESSAGELIST **msglist, MESSAGELIST **tail)
  * Called via the mail_parameter function in c-client:src/c-client/mail.c
  * Author DRK
  */
+
 void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
 {
 	zval *t_map;
@@ -436,6 +439,17 @@ PHP_MINIT_FUNCTION(imap)
 	/* lets allow NIL */
 	REGISTER_LONG_CONSTANT("NIL", NIL, CONST_PERSISTENT | CONST_CS);
 
+	/* set default timeout values */
+	mail_parameters(NIL, SET_OPENTIMEOUT, (void *) FG(default_socket_timeout));
+	mail_parameters(NIL, SET_READTIMEOUT, (void *) FG(default_socket_timeout));
+	mail_parameters(NIL, SET_WRITETIMEOUT, (void *) FG(default_socket_timeout));
+	mail_parameters(NIL, SET_CLOSETIMEOUT, (void *) FG(default_socket_timeout));
+
+	/* timeout constants */
+	REGISTER_LONG_CONSTANT("IMAP_OPENTIMEOUT", 1, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("IMAP_READTIMEOUT", 2, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("IMAP_WRITETIMEOUT", 3, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("IMAP_CLOSETIMEOUT", 4, CONST_PERSISTENT | CONST_CS);
 
 	/* Open Options */
 
@@ -703,7 +717,7 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	IMAPG(imap_user)     = estrndup(Z_STRVAL_PP(user), Z_STRLEN_PP(user));
 	IMAPG(imap_password) = estrndup(Z_STRVAL_PP(passwd), Z_STRLEN_PP(passwd));
-	
+
 	imap_stream = mail_open(NIL, Z_STRVAL_PP(mailbox), flags);
 
 	if (imap_stream == NIL) {
@@ -2359,11 +2373,11 @@ PHP_FUNCTION(imap_clearflag_full)
 }
 /* }}} */
 
-/* {{{ proto array imap_sort(resource stream_id, int criteria, int reverse [, int options [, string search_criteria]])
+/* {{{ proto array imap_sort(resource stream_id, int criteria, int reverse [, int options [, string search_criteria [, string charset]]])
    Sort an array of message headers, optionally including only messages that meet specified criteria. */
 PHP_FUNCTION(imap_sort)
 {
-	zval **streamind, **pgm, **rev, **flags, **criteria;
+	zval **streamind, **pgm, **rev, **flags, **criteria, **charset;
 	pils *imap_le_struct;
 	unsigned long *slst, *sl;
 	char *search_criteria;
@@ -2371,7 +2385,7 @@ PHP_FUNCTION(imap_sort)
 	SEARCHPGM *spg=NIL;
 	int myargc = ZEND_NUM_ARGS();
 	
-	if (myargc < 3 || myargc > 5 || zend_get_parameters_ex(myargc, &streamind, &pgm, &rev, &flags, &criteria) == FAILURE) {
+	if (myargc < 3 || myargc > 6 || zend_get_parameters_ex(myargc, &streamind, &pgm, &rev, &flags, &criteria, &charset) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
@@ -2386,10 +2400,13 @@ PHP_FUNCTION(imap_sort)
 	if (myargc >= 4) {
 		convert_to_long_ex(flags);
 	}
-	if (myargc == 5) {
+	if (myargc >= 5) {
 		search_criteria = estrndup(Z_STRVAL_PP(criteria), Z_STRLEN_PP(criteria));
 		spg = mail_criteria(search_criteria);
 		efree(search_criteria);
+		if (myargc == 6) {
+			convert_to_string_ex(charset);
+		}
 	} else {
 		spg = mail_newsearchpgm();
 	}
@@ -2399,7 +2416,7 @@ PHP_FUNCTION(imap_sort)
 	mypgm->function = (short) Z_LVAL_PP(pgm);
 	mypgm->next = NIL;
 	
-	slst = mail_sort(imap_le_struct->imap_stream, NIL, spg, mypgm, myargc >= 4 ? Z_LVAL_PP(flags) : NIL);
+	slst = mail_sort(imap_le_struct->imap_stream, (myargc == 6 ? Z_STRVAL_PP(charset) : NIL), spg, mypgm, (myargc >= 4 ? Z_LVAL_PP(flags) : NIL));
 
 	if (spg) {
 		mail_free_searchpgm(&spg);
@@ -3351,18 +3368,18 @@ PHP_FUNCTION(imap_mail)
 }
 /* }}} */
 
-/* {{{ proto array imap_search(resource stream_id, string criteria [, int options])
+/* {{{ proto array imap_search(resource stream_id, string criteria [, int options [, string charset]])
    Return a list of messages matching the given criteria */
 PHP_FUNCTION(imap_search)
 {
-	zval **streamind, **criteria, **search_flags;
+	zval **streamind, **criteria, **search_flags, **charset;
 	pils *imap_le_struct;
 	long flags;
 	char *search_criteria;
 	MESSAGELIST *cur;
 	int argc = ZEND_NUM_ARGS();
 
-	if (argc < 2 || argc > 3 || zend_get_parameters_ex(argc, &streamind, &criteria, &search_flags) == FAILURE) {
+	if (argc < 2 || argc > 4 || zend_get_parameters_ex(argc, &streamind, &criteria, &search_flags, &charset) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
@@ -3376,10 +3393,13 @@ PHP_FUNCTION(imap_search)
 	} else {
 		convert_to_long_ex(search_flags);
 		flags = Z_LVAL_PP(search_flags);
+		if (argc == 4) {
+			convert_to_string_ex(charset);
+		}
 	}
 	
 	IMAPG(imap_messages) = IMAPG(imap_messages_tail) = NIL;
-	mail_search_full(imap_le_struct->imap_stream, NIL, mail_criteria(search_criteria), flags);
+	mail_search_full(imap_le_struct->imap_stream, (argc == 4 ? Z_STRVAL_PP(charset) : NIL), mail_criteria(search_criteria), flags);
 	if (IMAPG(imap_messages) == NIL) {
 		efree(search_criteria);
 		RETURN_FALSE;
@@ -3978,6 +3998,61 @@ PHP_FUNCTION (imap_thread)
 }
 /* }}} */
 
+PHP_FUNCTION (imap_timeout)
+{
+	long ttype, timeout=-1;
+	int timeout_type;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &ttype, &timeout) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (timeout == -1) {
+		switch (ttype) {
+			case 1:
+				timeout_type = GET_OPENTIMEOUT;
+				break;
+			case 2:
+				timeout_type = GET_READTIMEOUT;
+				break;
+			case 3:
+				timeout_type = GET_WRITETIMEOUT;
+				break;
+			case 4:
+				timeout_type = GET_CLOSETIMEOUT;
+				break;
+			default:
+				RETURN_FALSE;
+				break;
+		}
+
+		timeout = (long) mail_parameters(NIL, timeout_type, NIL);
+		RETURN_LONG(timeout);
+	} else if (timeout >= 0) {
+		switch (ttype) {
+			case 1:
+				timeout_type = SET_OPENTIMEOUT;
+				break;
+			case 2:
+				timeout_type = SET_READTIMEOUT;
+				break;
+			case 3:
+				timeout_type = SET_WRITETIMEOUT;
+				break;
+			case 4:
+				timeout_type = SET_CLOSETIMEOUT;
+				break;
+			default:
+				RETURN_FALSE;
+				break;
+		}
+
+		timeout = (long) mail_parameters(NIL, timeout_type, (void *) timeout);
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
 
 /* {{{ Interfaces to C-client 
  */
