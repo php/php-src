@@ -1,3 +1,7 @@
+2002-07-05  Stig Bakken  <ssb@fast.no>
+
+    * zend_builtin_functions.c: * folding fixes
+
 2002-07-01  Andi Gutmans  <andi@zend.com>
 
     * zend_compile.c: - Fix bug when acccessing $this not in class scope.
