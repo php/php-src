@@ -117,9 +117,9 @@ typedef struct dba_handler {
 	
 #define DBA_ID_GET 												\
 	convert_to_long_ex(id); 									\
-	DBA_IF_NOT_CORRECT_TYPE((*id)->value.lval) { 				\
+	DBA_IF_NOT_CORRECT_TYPE(Z_LVAL_PP(id)) { 				\
 		php_error(E_WARNING, "Unable to find DBA identifier %d", \
-				(*id)->value.lval); 							\
+				Z_LVAL_PP(id)); 							\
 		RETURN_FALSE; 											\
 	}
 	
@@ -267,7 +267,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	/* we only take string arguments */
 	for(i = 0; i < ac; i++) {
 		convert_to_string_ex(args[i]);
-		keylen += (*args[i])->value.str.len;
+		keylen += Z_STRLEN_PP(args[i]);
 	}
 
 	if(persistent) {
@@ -276,8 +276,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		keylen = 0;
 		
 		for(i = 0; i < ac; i++) {
-			memcpy(key+keylen,(*args[i])->value.str.val,(*args[i])->value.str.len);
-			keylen += (*args[i])->value.str.len;
+			memcpy(key+keylen,Z_STRVAL_PP(args[i]),Z_STRLEN_PP(args[i]));
+			keylen += Z_STRLEN_PP(args[i]);
 		}
 		
 		if(zend_hash_find(&ht_keys, key, keylen, (void **) &info) == SUCCESS) {
@@ -366,7 +366,7 @@ PHP_FUNCTION(dba_close)
 {
 	DBA_ID_GET1;	
 	
-	zend_list_delete((*id)->value.lval);
+	zend_list_delete(Z_LVAL_PP(id));
 }
 /* }}} */
 
