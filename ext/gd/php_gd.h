@@ -43,6 +43,9 @@
 #define PHP_GDIMG_TYPE_XBM 5
 #define PHP_GDIMG_TYPE_XPM 6
 
+extern const char php_sig_gif[3];
+extern const char php_sig_jpg[3];
+extern const char php_sig_png[3];
 
 extern zend_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry
@@ -84,6 +87,7 @@ PHP_FUNCTION(imagecopymerge);
 PHP_FUNCTION(imagecopyresized);
 PHP_FUNCTION(imagetypes);
 PHP_FUNCTION(imagecreate);
+PHP_FUNCTION(imagecreatefromstring);
 PHP_FUNCTION(imagecreatefromgif);
 PHP_FUNCTION(imagecreatefromjpeg);
 PHP_FUNCTION(imagecreatefromxbm);
@@ -128,9 +132,11 @@ PHP_FUNCTION(imagepstext);
 PHP_FUNCTION(imagepsbbox);
 PHPAPI int phpi_get_le_gd(void);
 
+gdImagePtr _php_image_create_from_string ( zval **Data, char *tn, gdImagePtr (*ioctx_func_p)() );
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)());
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
 static void _php_image_output_wbmp(gdImagePtr im, FILE *fp);
+static int _php_image_type ( char data[8] );
 
 #ifdef ZTS
 #define GDLS_D php_gd_globals *gd_globals
