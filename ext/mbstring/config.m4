@@ -84,6 +84,7 @@ int main() { return foo(10, "", 3.14); }
 
     PHP_MBSTRING_ADD_CFLAG([-DNOT_RUBY])
     PHP_MBSTRING_ADD_BUILD_DIR([oniguruma])
+    PHP_MBSTRING_ADD_BUILD_DIR([oniguruma/enc])
     PHP_MBSTRING_ADD_INCLUDE([oniguruma])
     PHP_MBSTRING_ADD_CONFIG_HEADER([oniguruma/config.h])
 
