@@ -1,3 +1,10 @@
+2004-09-05  Zeev Suraski  <zeev@zend.com>
+
+    * zend.c
+      zend.h
+      zend_ini_parser.y:
+      Fix reverse dependency
+
 2004-09-04  Andi Gutmans  <andi@zend.com>
 
     * zend_API.c:
