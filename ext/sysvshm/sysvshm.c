@@ -215,7 +215,7 @@ PHP_FUNCTION(shm_remove)
 	}
 
 	if(shmctl(shm_list_ptr->id,IPC_RMID,NULL)<0) {
-		php_error(E_WARNING, "shm_remove() failed for key 0x%x, id %i: %s", shm_list_ptr->key, id,strerror(errno));
+		php_error(E_WARNING, "shm_remove() failed for key 0x%x, id %ld: %s", shm_list_ptr->key, id,strerror(errno));
 		RETURN_FALSE;
 	} 
 
@@ -246,7 +246,7 @@ PHP_FUNCTION(shm_put_var)
 
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 	if (type!=php_sysvshm.le_shm) {
-		php_error(E_WARNING, "%d is not a SysV shared memory index", id);
+		php_error(E_WARNING, "%ld is not a SysV shared memory index", id);
 		RETURN_FALSE;
 	}
 
@@ -293,7 +293,7 @@ PHP_FUNCTION(shm_get_var)
 
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 	if (type!=php_sysvshm.le_shm) {
-		php_error(E_WARNING, "%d is not a SysV shared memory index", id);
+		php_error(E_WARNING, "%ld is not a SysV shared memory index", id);
 		RETURN_FALSE;
 	}
 
@@ -302,7 +302,7 @@ PHP_FUNCTION(shm_get_var)
 	shm_varpos=php_check_shm_data((shm_list_ptr->ptr),key);
 
 	if(shm_varpos<0) {
-		php_error(E_WARNING, "variable key %d doesn't exist", key);
+		php_error(E_WARNING, "variable key %ld doesn't exist", key);
 		RETURN_FALSE;
 	}
 	shm_var=(sysvshm_chunk*)((char*)shm_list_ptr->ptr+shm_varpos);
@@ -339,14 +339,14 @@ PHP_FUNCTION(shm_remove_var)
 
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 	if (type!=php_sysvshm.le_shm) {
-		php_error(E_WARNING, "%d is not a SysV shared memory index", id);
+		php_error(E_WARNING, "%ld is not a SysV shared memory index", id);
 		RETURN_FALSE;
 	}
 
 	shm_varpos=php_check_shm_data((shm_list_ptr->ptr),key);
 
 	if(shm_varpos<0) {
-		php_error(E_WARNING, "variable key %d doesn't exist", key);
+		php_error(E_WARNING, "variable key %ld doesn't exist", key);
 		RETURN_FALSE;
 	}
 	php_remove_shm_data((shm_list_ptr->ptr),shm_varpos);	

@@ -483,13 +483,13 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			list_entry new_le;
 
 			if (MS_SQL_G(max_links) != -1 && MS_SQL_G(num_links) >= MS_SQL_G(max_links)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%d)", MS_SQL_G(num_links));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", MS_SQL_G(num_links));
 				efree(hashed_details);
 				dbfreelogin(mssql.login);
 				RETURN_FALSE;
 			}
 			if (MS_SQL_G(max_persistent) != -1 && MS_SQL_G(num_persistent) >= MS_SQL_G(max_persistent)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%d)", MS_SQL_G(num_persistent));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%ld)", MS_SQL_G(num_persistent));
 				efree(hashed_details);
 				dbfreelogin(mssql.login);
 				RETURN_FALSE;
@@ -604,7 +604,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 		}
 		if (MS_SQL_G(max_links) != -1 && MS_SQL_G(num_links) >= MS_SQL_G(max_links)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%d)", MS_SQL_G(num_links));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", MS_SQL_G(num_links));
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -1730,7 +1730,7 @@ PHP_FUNCTION(mssql_result)
 	
 	convert_to_long_ex(row);
 	if (Z_LVAL_PP(row) < 0 || Z_LVAL_PP(row) >= result->num_rows) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad row offset (%d)", Z_LVAL_PP(row));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad row offset (%ld)", Z_LVAL_PP(row));
 		RETURN_FALSE;
 	}
 

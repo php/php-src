@@ -818,7 +818,7 @@ PHP_FUNCTION(gzencode)
 	}
 
 	if((level<-1)||(level>9)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "compression level(%d) must be within -1..9", level);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "compression level(%ld) must be within -1..9", level);
 		RETURN_FALSE;
 	}
 

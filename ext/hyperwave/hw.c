@@ -766,7 +766,7 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			list_entry new_le;
 
 			if (HwSG(max_links)!=-1 && HwSG(num_links)>=HwSG(max_links)) {
-				php_error(E_ERROR, "%s(): Too many open links (%d)", get_active_function_name(TSRMLS_C), HwSG(num_links));
+				php_error(E_ERROR, "%s(): Too many open links (%ld)", get_active_function_name(TSRMLS_C), HwSG(num_links));
 				if(host) efree(host);
 				if(username) efree(username);
 				if(password) efree(password);
@@ -774,7 +774,7 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				RETURN_FALSE;
 			}
 			if (HwSG(max_persistent!=-1) && HwSG(num_persistent)>=HwSG(max_persistent)) {
-				php_error(E_ERROR, "%s(): Too many open persistent links (%d)", get_active_function_name(TSRMLS_C), HwSG(num_persistent));
+				php_error(E_ERROR, "%s(): Too many open persistent links (%ld)", get_active_function_name(TSRMLS_C), HwSG(num_persistent));
 				if(host) efree(host);
 				if(username) efree(username);
 				if(password) efree(password);

@@ -161,7 +161,7 @@ PHP_FUNCTION(dio_open)
 	}
 
 	if (fd == -1) {
-		php_error(E_WARNING, "%s(): cannot open file %s with flags %d and permissions %d: %s", 
+		php_error(E_WARNING, "%s(): cannot open file %s with flags %ld and permissions %ld: %s", 
 				  get_active_function_name(TSRMLS_C), file_name, flags, mode, strerror(errno));
 		RETURN_FALSE;
 	}
@@ -240,7 +240,7 @@ PHP_FUNCTION(dio_truncate)
 	ZEND_FETCH_RESOURCE(f, php_fd_t *, &r_fd, -1, le_fd_name, le_fd);
 
 	if (ftruncate(f->fd, offset) == -1) {
-		php_error(E_WARNING, "%s(): couldn't truncate %d to %d bytes: %s",
+		php_error(E_WARNING, "%s(): couldn't truncate %d to %ld bytes: %s",
 				  get_active_function_name(TSRMLS_C), f->fd, offset, strerror(errno));
 		RETURN_FALSE;
 	}

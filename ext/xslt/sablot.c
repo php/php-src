@@ -279,7 +279,7 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 		key_type = zend_hash_get_current_key(sax_handlers, &string_key, &num_key, 0);
 		if (key_type == HASH_KEY_IS_LONG) {
 			convert_to_string_ex(handler);
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Skipping numerical index %d (with value %s)",
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Skipping numerical index %ld (with value %s)",
 			          num_key, Z_STRVAL_PP(handler));
 			continue;
 		}
@@ -363,7 +363,7 @@ PHP_FUNCTION(xslt_set_scheme_handlers)
 
 		key_type = zend_hash_get_current_key(scheme_handlers, &string_key, &num_key, 0);
 		if (key_type == HASH_KEY_IS_LONG) {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Numerical key %d (with value %s) being ignored",
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Numerical key %ld (with value %s) being ignored",
 					  num_key, Z_STRVAL_PP(handler));
 			continue;
 		}

@@ -161,7 +161,7 @@ PHP_FUNCTION(cal_info)
 	}
 	convert_to_long_ex(cal);
 	if (Z_LVAL_PP(cal) < 0 || Z_LVAL_PP(cal) >= CAL_NUM_CALS) {
-		zend_error(E_WARNING, "%s(): invalid calendar ID %d", get_active_function_name(TSRMLS_C), Z_LVAL_PP(cal));
+		zend_error(E_WARNING, "%s(): invalid calendar ID %ld", get_active_function_name(TSRMLS_C), Z_LVAL_PP(cal));
 		RETURN_FALSE;
 	}
 
@@ -203,7 +203,7 @@ PHP_FUNCTION(cal_days_in_month)
 	convert_to_long_ex(year);
 
 	if (Z_LVAL_PP(cal) < 0 || Z_LVAL_PP(cal) >= CAL_NUM_CALS) {
-		zend_error(E_WARNING, "%s(): invalid calendar ID %d", get_active_function_name(TSRMLS_C), Z_LVAL_PP(cal));
+		zend_error(E_WARNING, "%s(): invalid calendar ID %ld", get_active_function_name(TSRMLS_C), Z_LVAL_PP(cal));
 		RETURN_FALSE;
 	}
 
@@ -239,7 +239,7 @@ PHP_FUNCTION(cal_to_jd)
 	convert_to_long_ex(year);
 
 	if (Z_LVAL_PP(cal) < 0 || Z_LVAL_PP(cal) >= CAL_NUM_CALS) {
-		zend_error(E_WARNING, "%s(): invalid calendar ID %d", get_active_function_name(TSRMLS_C), Z_LVAL_PP(cal));
+		zend_error(E_WARNING, "%s(): invalid calendar ID %ld", get_active_function_name(TSRMLS_C), Z_LVAL_PP(cal));
 		RETURN_FALSE;
 	}
 
@@ -265,7 +265,7 @@ PHP_FUNCTION(cal_from_jd)
 	convert_to_long_ex(cal);
 
 	if (Z_LVAL_PP(cal) < 0 || Z_LVAL_PP(cal) >= CAL_NUM_CALS) {
-		zend_error(E_WARNING, "%s(): invalid calendar ID %d", get_active_function_name(TSRMLS_C), Z_LVAL_PP(cal));
+		zend_error(E_WARNING, "%s(): invalid calendar ID %ld", get_active_function_name(TSRMLS_C), Z_LVAL_PP(cal));
 		RETURN_FALSE;
 	}
 	calendar = &cal_conversion_table[Z_LVAL_PP(cal)];

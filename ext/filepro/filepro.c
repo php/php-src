@@ -386,7 +386,7 @@ PHP_FUNCTION(filepro_fieldname)
 	}
 
 	php_error(E_WARNING,
-				"%s(): Unable to locate field number %d.", get_active_function_name(TSRMLS_C),
+				"%s(): Unable to locate field number %ld.", get_active_function_name(TSRMLS_C),
 				Z_LVAL_P(fno));
 
 	RETVAL_FALSE;
@@ -426,7 +426,7 @@ PHP_FUNCTION(filepro_fieldtype)
 		}
 	}
 	php_error(E_WARNING,
-				"%s(): Unable to locate field number %d.", get_active_function_name(TSRMLS_C),
+				"%s(): Unable to locate field number %ld.", get_active_function_name(TSRMLS_C),
 				Z_LVAL_P(fno));
 	RETVAL_FALSE;
 }
@@ -465,7 +465,7 @@ PHP_FUNCTION(filepro_fieldwidth)
 		}
 	}
 	php_error(E_WARNING,
-				"%s(): Unable to locate field number %d.", get_active_function_name(TSRMLS_C),
+				"%s(): Unable to locate field number %ld.", get_active_function_name(TSRMLS_C),
 				Z_LVAL_P(fno));
 	RETVAL_FALSE;
 }

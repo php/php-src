@@ -374,7 +374,7 @@ PHP_FUNCTION(ldap_connect)
 #endif
 
 	if (LDAPG(max_links) != -1 && LDAPG(num_links) >= LDAPG(max_links)) {
-		php_error(E_WARNING, "%s(): Too many open links (%d)", get_active_function_name(TSRMLS_C), LDAPG(num_links));
+		php_error(E_WARNING, "%s(): Too many open links (%ld)", get_active_function_name(TSRMLS_C), LDAPG(num_links));
 		RETURN_FALSE;
 	}
 

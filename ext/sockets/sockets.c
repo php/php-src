@@ -960,12 +960,12 @@ PHP_FUNCTION(socket_create)
     }
 
 	if (arg1 != AF_UNIX && arg1 != AF_INET) {
-		php_error(E_WARNING, "%s() invalid socket domain [%d] specified for argument 1, assuming AF_INET", get_active_function_name(TSRMLS_C), arg1);
+		php_error(E_WARNING, "%s() invalid socket domain [%ld] specified for argument 1, assuming AF_INET", get_active_function_name(TSRMLS_C), arg1);
 		arg1 = AF_INET;
 	}
 
 	if (arg2 > 10) {
-		php_error(E_WARNING, "%s() invalid socket type [%d] specified for argument 2, assuming SOCK_STREAM", get_active_function_name(TSRMLS_C), arg2);
+		php_error(E_WARNING, "%s() invalid socket type [%ld] specified for argument 2, assuming SOCK_STREAM", get_active_function_name(TSRMLS_C), arg2);
 		arg2 = SOCK_STREAM;
 	}
 	
@@ -1979,12 +1979,12 @@ PHP_FUNCTION(socket_create_pair)
 	php_sock[1] = (php_socket*)emalloc(sizeof(php_socket));
 
 	if (domain != AF_INET && domain != AF_UNIX) {
-		php_error(E_WARNING, "%s() invalid socket domain [%d] specified for argument 1, assuming AF_INET", get_active_function_name(TSRMLS_C), domain);
+		php_error(E_WARNING, "%s() invalid socket domain [%ld] specified for argument 1, assuming AF_INET", get_active_function_name(TSRMLS_C), domain);
 		domain = AF_INET;
 	}
 	
 	if (type > 10) {
-		php_error(E_WARNING, "%s() invalid socket type [%d] specified for argument 2, assuming SOCK_STREAM", get_active_function_name(TSRMLS_C), type);
+		php_error(E_WARNING, "%s() invalid socket type [%ld] specified for argument 2, assuming SOCK_STREAM", get_active_function_name(TSRMLS_C), type);
 		type = SOCK_STREAM;
 	}
 	
