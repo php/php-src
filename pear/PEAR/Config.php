@@ -181,6 +181,14 @@ class PEAR_Config extends PEAR
     }
 
     // }}}
+    // {{{ getKeys()
+
+    function getKeys()
+    {
+        return array_keys($this->configuration);
+    }
+
+    // }}}
     // {{{ toDefault(key)
 
     function toDefault($key)
