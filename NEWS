@@ -1,6 +1,11 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Remove $_FILES from $_REQUEST (import_request_variables is not modified), 
+  this didn't work properly in the first place, and added confusion. 
+  (Sterling)
+- Fix the socket_read() function on win32 to work in normal mode (reading to
+  the end of a line), as well as binary mode. (Sterling)
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
