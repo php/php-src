@@ -29,7 +29,7 @@ PHPAPI void php_output_set_status(zend_bool status TSRMLS_DC);
 void php_output_register_constants(TSRMLS_D);
 PHPAPI int  php_body_write(const char *str, uint str_length TSRMLS_DC);
 PHPAPI int  php_header_write(const char *str, uint str_length TSRMLS_DC);
-PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size TSRMLS_DC);
+PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC);
 PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS_DC);
 PHPAPI void php_end_ob_buffers(zend_bool send_buffer TSRMLS_DC);
 PHPAPI int php_ob_get_buffer(zval *p TSRMLS_DC);
@@ -38,7 +38,7 @@ PHPAPI void php_start_implicit_flush(TSRMLS_D);
 PHPAPI void php_end_implicit_flush(TSRMLS_D);
 PHPAPI char *php_get_output_start_filename(TSRMLS_D);
 PHPAPI int php_get_output_start_lineno(TSRMLS_D);
-PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size TSRMLS_DC);
+PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size, char *handler_name, zend_bool erase TSRMLS_DC);
 
 PHP_FUNCTION(ob_start);
 PHP_FUNCTION(ob_flush);
@@ -48,6 +48,7 @@ PHP_FUNCTION(ob_end_clean);
 PHP_FUNCTION(ob_get_contents);
 PHP_FUNCTION(ob_get_length);
 PHP_FUNCTION(ob_get_level);
+PHP_FUNCTION(ob_get_status);
 PHP_FUNCTION(ob_implicit_flush);
 
 typedef struct _php_ob_buffer {
@@ -61,6 +62,8 @@ typedef struct _php_ob_buffer {
 	php_output_handler_func_t internal_output_handler;
 	char *internal_output_handler_buffer;
 	uint internal_output_handler_buffer_size;
+	char *handler_name;
+	zend_bool erase;
 } php_ob_buffer;
 
 typedef struct _php_output_globals {
@@ -76,7 +79,6 @@ typedef struct _php_output_globals {
 	zend_bool disable_output;
 } php_output_globals;
 
-
 #ifdef ZTS
 #define OG(v) TSRMG(output_globals_id, php_output_globals *, v)
 ZEND_API extern int output_globals_id;
@@ -88,5 +90,9 @@ ZEND_API extern php_output_globals output_globals;
 #define PHP_OUTPUT_HANDLER_START		(1<<0)
 #define PHP_OUTPUT_HANDLER_CONT			(1<<1)
 #define PHP_OUTPUT_HANDLER_END			(1<<2)
+
+#define PHP_OUTPUT_HANDLER_INTERNAL     0
+#define PHP_OUTPUT_HANDLER_USER        1
+
 
 #endif /* PHP_OUTPUT_H */

@@ -29,7 +29,7 @@ static int php_ub_body_write(const char *str, uint str_length TSRMLS_DC);
 static int php_ub_body_write_no_header(const char *str, uint str_length TSRMLS_DC);
 static int php_b_body_write(const char *str, uint str_length TSRMLS_DC);
 
-static void php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size TSRMLS_DC);
+static void php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC);
 static void php_ob_append(const char *text, uint text_length TSRMLS_DC);
 #if 0
 static void php_ob_prepend(const char *text, uint text_length);
@@ -110,15 +110,15 @@ PHPAPI int php_header_write(const char *str, uint str_length TSRMLS_DC)
 
 /* {{{ php_start_ob_buffer
  * Start output buffering */
-PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size TSRMLS_DC)
+PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
 {
 	if (OG(ob_lock)) {
 		return FAILURE;
 	}
 	if (chunk_size) {
-		php_ob_init((chunk_size*3/2), chunk_size/2, output_handler, chunk_size TSRMLS_CC);
+		php_ob_init((chunk_size*3/2), chunk_size/2, output_handler, chunk_size, erase TSRMLS_CC);
 	} else {
-		php_ob_init(40*1024, 10*1024, output_handler, chunk_size TSRMLS_CC);
+		php_ob_init(40*1024, 10*1024, output_handler, chunk_size, erase TSRMLS_CC);
 	}
 	OG(php_body_write) = php_b_body_write;
 	return SUCCESS;
@@ -185,6 +185,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 			orig_buffer->refcount-=2;
 		}
 		zval_ptr_dtor(&z_status);
+		zval_ptr_dtor(&OG(active_ob_buffer).output_handler);
 	}
 
 	if (!final_buffer) {
@@ -283,7 +284,7 @@ PHPAPI void php_end_implicit_flush(TSRMLS_D)
 
 /* {{{ php_ob_set_internal_handler
  */
-PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size TSRMLS_DC)
+PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size, char *handler_name, zend_bool erase TSRMLS_DC)
 {
 	if (OG(ob_nesting_level)==0) {
 		return;
@@ -292,6 +293,8 @@ PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_outpu
 	OG(active_ob_buffer).internal_output_handler = internal_output_handler;
 	OG(active_ob_buffer).internal_output_handler_buffer = (char *) emalloc(buffer_size);
 	OG(active_ob_buffer).internal_output_handler_buffer_size = buffer_size;
+	OG(active_ob_buffer).handler_name = handler_name;
+	OG(active_ob_buffer).erase = erase;	
 }
 /* }}} */
 
@@ -315,7 +318,7 @@ static inline void php_ob_allocate(TSRMLS_D)
 
 /* {{{ php_ob_init
  */
-static void php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size TSRMLS_DC)
+static void php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
 {
 	if (OG(ob_nesting_level)>0) {
 		if (OG(ob_nesting_level)==1) { /* initialize stack */
@@ -332,6 +335,18 @@ static void php_ob_init(uint initial_size, uint block_size, zval *output_handler
 	OG(active_ob_buffer).chunk_size = chunk_size;
 	OG(active_ob_buffer).status = 0;
 	OG(active_ob_buffer).internal_output_handler = NULL;
+	if (output_handler && output_handler->type == IS_STRING) {
+		OG(active_ob_buffer).handler_name = Z_STRVAL_P(output_handler);
+	}
+	else if (output_handler && output_handler->type == IS_ARRAY) {
+		/* FIXME: Array type is not supported yet.
+		   See call_user_function_ex() for detials. */
+		OG(active_ob_buffer).handler_name = "array is not supported yet";
+	}
+	else {
+		OG(active_ob_buffer).handler_name = "default output handler";
+	}
+	OG(active_ob_buffer).erase = erase;	
 }
 /* }}} */
 
@@ -478,47 +493,24 @@ static int php_ub_body_write(const char *str, uint str_length TSRMLS_DC)
  * HEAD support
  */
 
-/* {{{ proto void ob_start([ string user_function [, int chunk_size]])
+/* {{{ proto void ob_start([ string user_function [, int chunk_size [, bool erase]]])
    Turn on Output Buffering (specifying an optional output handler). */
 PHP_FUNCTION(ob_start)
 {
 	zval *output_handler=NULL;
 	uint chunk_size=0;
+	zend_bool erase=1;
+	int argc = ZEND_NUM_ARGS();
+	
+	if (zend_parse_parameters(argc TSRMLS_CC, "|zlb", &output_handler, 
+							  &chunk_size, &erase) == FAILURE)
+		return;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 0:
-			break;
-		case 1: {
-				zval **output_handler_p;
-
-				if (zend_get_parameters_ex(1, &output_handler_p)==FAILURE) {
-					RETURN_FALSE;
-				}
-				SEPARATE_ZVAL(output_handler_p);
-				output_handler = *output_handler_p;
-				output_handler->refcount++;
-			}
-			break;
-		case 2: {
-				zval **output_handler_p, **chunk_size_p;
-
-				if (zend_get_parameters_ex(2, &output_handler_p, &chunk_size_p)==FAILURE) {
-					RETURN_FALSE;
-				}
-				if (Z_STRLEN_PP(output_handler_p)>0) {
-					SEPARATE_ZVAL(output_handler_p);
-					output_handler = *output_handler_p;
-					output_handler->refcount++;
-				}
-				convert_to_long_ex(chunk_size_p);
-				chunk_size = (uint) Z_LVAL_PP(chunk_size_p);
-			}
-			break;
-		default:
-			ZEND_WRONG_PARAM_COUNT();
-			break;
-	}
-	if (php_start_ob_buffer(output_handler, chunk_size TSRMLS_CC)==FAILURE) {
+	if (output_handler) {
+		SEPARATE_ZVAL(&output_handler);
+		output_handler->refcount++;
+	}	
+	if (php_start_ob_buffer(output_handler, chunk_size, erase TSRMLS_CC)==FAILURE) {
 		if (SG(headers_sent) && !SG(request_info).headers_only) {
 			OG(php_body_write) = php_ub_body_write_no_header;
 		} else {
@@ -532,47 +524,91 @@ PHP_FUNCTION(ob_start)
 }
 /* }}} */
 
-/* {{{ proto void ob_flush(void)
-   Flush (send) the output buffer */
+/* {{{ proto bool ob_flush(void)
+   Flush (send) contents of the output buffers */
 PHP_FUNCTION(ob_flush)
 {
 	if (ZEND_NUM_ARGS() != 0)
 			WRONG_PARAM_COUNT;
+
+	if (!OG(ob_nesting_level)) {
+		php_error(E_NOTICE, "%s() failed to flush buffer. No buffer to flush.",
+				  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
 		
 	php_end_ob_buffer(1, 1 TSRMLS_CC);
+	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto void ob_clean(void)
-   Clean (erase) the output buffer */
+/* {{{ proto bool ob_clean(void)
+   Clean (delete) the current output buffer */
 PHP_FUNCTION(ob_clean)
 {
 	if (ZEND_NUM_ARGS() != 0)
 			WRONG_PARAM_COUNT;
-		
+
+	
+	if (!OG(ob_nesting_level)) {
+		php_error(E_NOTICE, "%s() failed to delete buffer. No buffer to delete.",
+				  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+	if (OG(ob_nesting_level) && !OG(active_ob_buffer).status && !OG(active_ob_buffer).erase) {
+		php_error(E_NOTICE, "%s() failed to delete buffer %s.",
+				  get_active_function_name(TSRMLS_C), OG(active_ob_buffer).handler_name);
+		RETURN_FALSE;
+	}
+	
 	php_end_ob_buffer(0, 1 TSRMLS_CC);
+	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto void ob_end_flush(void)
-   Flush (send) the output buffer, and turn off output buffering */
+/* {{{ proto bool ob_end_flush(void)
+   Flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_end_flush)
 {
 	if (ZEND_NUM_ARGS() != 0)
 			WRONG_PARAM_COUNT;
-		
+	
+	if (!OG(ob_nesting_level)) {
+		php_error(E_NOTICE, "%s() failed to delete and flush buffer. No buffer to delete or flush.",
+				  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+	if (OG(ob_nesting_level) && !OG(active_ob_buffer).status && !OG(active_ob_buffer).erase) {
+		php_error(E_NOTICE, "%s() failed to delete buffer %s.",
+				  get_active_function_name(TSRMLS_C), OG(active_ob_buffer).handler_name);
+		RETURN_FALSE;
+	}
+	
 	php_end_ob_buffer(1, 0 TSRMLS_CC);
+	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto void ob_end_clean(void)
-   Clean (erase) the output buffer, and turn off output buffering */
+/* {{{ proto bool ob_end_clean(void)
+   Clean the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_end_clean)
 {
 	if (ZEND_NUM_ARGS() != 0)
 			WRONG_PARAM_COUNT;
 		
+	if (!OG(ob_nesting_level)) {
+		php_error(E_NOTICE, "%s() failed to delete buffer. No buffer to delete.",
+				  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+	if (OG(ob_nesting_level) && !OG(active_ob_buffer).status && !OG(active_ob_buffer).erase) {
+		php_error(E_NOTICE, "%s() failed to delete buffer %s.",
+				  get_active_function_name(TSRMLS_C), OG(active_ob_buffer).handler_name);
+		RETURN_FALSE;
+	}
+	
 	php_end_ob_buffer(0, 0 TSRMLS_CC);
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -612,6 +648,79 @@ PHP_FUNCTION(ob_get_length)
 	}
 }
 /* }}} */
+
+static int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result) 
+{
+	zval *elem;
+
+	MAKE_STD_ZVAL(elem);
+	if (array_init(elem))
+		return FAILURE;
+	
+	if (ob_buffer->internal_output_handler) {
+		add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_INTERNAL);
+	}
+	else {
+		add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_USER);
+	}
+	add_assoc_long(elem, "status", ob_buffer->status);
+	add_assoc_string(elem, "name", ob_buffer->handler_name, 1);
+	add_assoc_bool(elem, "del", ob_buffer->erase);
+	add_next_index_zval(result, elem);
+
+	return SUCCESS;
+}
+
+
+/* {{{ poto array ob_get_status([bool full_status])
+   Return the nesting level of the output buffer */
+PHP_FUNCTION(ob_get_status)
+{
+	int argc = ZEND_NUM_ARGS();
+	zend_bool full_status = 0;
+	
+	if (zend_parse_parameters(argc TSRMLS_CC, "|b", &full_status) == FAILURE )
+			return;
+	
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (full_status) {
+		zval *elem;
+
+		zend_stack_apply_with_argument(&OG(ob_buffers), ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *elem, void *))php_ob_buffer_status, return_value);
+
+		MAKE_STD_ZVAL(elem);
+		if (array_init(elem))
+			RETURN_FALSE;
+	
+		if (OG(active_ob_buffer).internal_output_handler) {
+			add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_INTERNAL);
+		}
+		else {
+			add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_USER);
+		}
+		add_assoc_long(elem, "status", OG(active_ob_buffer).status);
+		add_assoc_string(elem, "name", OG(active_ob_buffer).handler_name, 1);
+		add_assoc_bool(elem, "del", OG(active_ob_buffer).erase);
+		add_next_index_zval(return_value, elem);
+	}
+	else {
+		add_assoc_long(return_value, "level", OG(ob_nesting_level));
+		if (OG(active_ob_buffer).internal_output_handler) {
+			add_assoc_long(return_value, "type", PHP_OUTPUT_HANDLER_INTERNAL);
+		}
+		else {
+			add_assoc_long(return_value, "type", PHP_OUTPUT_HANDLER_USER);
+		}
+		add_assoc_long(return_value, "status", OG(active_ob_buffer).status);
+		add_assoc_string(return_value, "name", OG(active_ob_buffer).handler_name, 1);
+		add_assoc_bool(return_value, "del", OG(active_ob_buffer).erase);
+	}
+}
+/* }}} */
+
 
 /* {{{ proto void ob_implicit_flush([int flag])
    Turn implicit flush on/off and is equivalent to calling flush() after every output call */

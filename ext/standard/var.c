@@ -316,7 +316,7 @@ PHP_FUNCTION(var_export)
 	}
 	
 	if (i) {
-		php_start_ob_buffer (NULL, 0 TSRMLS_CC);
+		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
 	}
 	
 	php_var_export(&var, 1 TSRMLS_CC);

@@ -71,7 +71,7 @@ function_entry session_functions[] = {
 	PHP_FE(session_set_cookie_params, NULL)
 	PHP_FE(session_get_cookie_params, NULL)
 	PHP_FE(session_write_close, NULL)
-	{0}
+	{NULL, NULL, NULL} 
 };
 /* }}} */
 
@@ -95,8 +95,8 @@ static void php_session_start_output_handler(uint chunk_size TSRMLS_DC)
 {
 	php_url_scanner_activate(TSRMLS_C);
 	php_url_scanner_ex_activate(TSRMLS_C);
-	php_start_ob_buffer(NULL, chunk_size TSRMLS_CC);
-	php_ob_set_internal_handler(php_session_output_handler, chunk_size TSRMLS_CC);
+	php_start_ob_buffer(NULL, chunk_size, 1 TSRMLS_CC);
+	php_ob_set_internal_handler(php_session_output_handler, chunk_size, "trans sid session", 1 TSRMLS_CC);
 	PS(output_handler_registered) = 1;
 }
 
@@ -124,9 +124,12 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 static PHP_INI_MH(OnUpdateSerializer)
 {
 	PS(serializer) = _php_find_ps_serializer(new_value TSRMLS_CC);
-	if(!PS(serializer)) {
-	  php_error(E_ERROR,"Cannot find serialization handler %s",new_value);
-	}	  
+/* Following lines are commented out to prevent bogus error message at
+   start up. i.e. Serializer modules are not initilzied before Session
+   module. */
+/* 	if(!PS(serializer)) { */
+/* 	  php_error(E_ERROR,"Cannot find serialization handler %s",new_value); */
+/* 	}	   */
 	return SUCCESS;
 }
 

@@ -734,6 +734,7 @@ function_entry basic_functions[] = {
 	PHP_FE(ob_end_clean,													NULL)
 	PHP_FE(ob_get_length,													NULL)
 	PHP_FE(ob_get_level,													NULL)
+	PHP_FE(ob_get_status,													NULL)
 	PHP_FE(ob_get_contents,													NULL)
 	PHP_FE(ob_implicit_flush,												NULL)
 
@@ -1883,7 +1884,7 @@ PHP_FUNCTION(highlight_file)
 	convert_to_string(filename);
 
 	if (i) {
-		php_start_ob_buffer (NULL, 0 TSRMLS_CC);
+		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
 	}
 
 	php_get_highlight_struct(&syntax_highlighter_ini);
@@ -1916,7 +1917,7 @@ PHP_FUNCTION(highlight_string)
 	convert_to_string(expr);
 
 	if (i) {
-		php_start_ob_buffer (NULL, 0 TSRMLS_CC);
+		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
 	}
 
 	php_get_highlight_struct(&syntax_highlighter_ini);
