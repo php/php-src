@@ -104,10 +104,8 @@ void php_var_dump(zval **struc, int level TSRMLS_DC)
 
 		Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
 		php_printf("%sobject(", COMMON);
-		if (ce->ns && ce->ns != &CG(global_namespace) && ce->ns->name) {
-			php_printf("%s::", ce->ns->name);
-		}
 		php_printf("%s)#%d (%d) {\n", class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0);
+		efree(class_name);
 head_done:
 		if (myht) {
 			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_array_element_dump, 1, level);
@@ -213,10 +211,8 @@ void php_debug_zval_dump(zval **struc, int level TSRMLS_DC)
 		ce = Z_OBJCE(**struc);
 		Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
 		php_printf("%sobject(", COMMON);
-		if (ce->ns && ce->ns != &CG(global_namespace) && ce->ns->name) {
-			php_printf("%s::", ce->ns->name);
-		}
 		php_printf("%s)#%d (%d) refcount(%u){\n", class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0, Z_REFCOUNT_PP(struc));
+		efree(class_name);
 head_done:
 		if (myht) {
 			zend_hash_apply_with_arguments(myht, (apply_func_args_t) zval_array_element_dump, 1, level);
@@ -346,6 +342,7 @@ void php_var_export(zval **struc, int level TSRMLS_DC)
 		}
 		Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
 		php_printf ("class %s {\n", class_name);
+		efree(class_name);
 		if (myht) {
 			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_object_element_export, 1, level);
 		}
