@@ -28,7 +28,7 @@
 #ifndef _PHP_ZLIB_H
 #define _PHP_ZLIB_H
 
-#if COMPILE_DL
+#if COMPILE_DL_ZLIB
 #undef HAVE_ZLIB
 #define HAVE_ZLIB 1
 #endif
