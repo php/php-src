@@ -2045,11 +2045,6 @@ EOF
 	      if test -n "$a_deplib" ; then
 		newdeplibs="$newdeplibs $a_deplib"
 		droppeddeps=yes
-		echo
-		echo "*** Warning: This library needs some functionality provided by $a_deplib."
-		echo "*** I have the capability to make that library automatically link in when"
-		echo "*** you link to this library.  But I can only do this if you have a"
-		echo "*** shared version of the library, which you do not appear to have."
 	      fi
 	    else
 	      # Add a -L argument.
