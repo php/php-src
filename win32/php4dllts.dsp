@@ -174,6 +174,10 @@ SOURCE=..\main\main.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\memory_streams.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\mergesort.c
 # End Source File
 # Begin Source File
@@ -234,15 +238,32 @@ SOURCE=..\main\streams.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\user_streams.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\main\strlcat.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\main\strlcpy.c
+
+# End Source File
+
+# Begin Source File
+
+
+
+SOURCE=..\main\snprintf.c
+
+# End Source File
+
+# Begin Source File
+
+
+
+SOURCE=..\main\spprintf.c
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\user_streams.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -329,6 +350,24 @@ SOURCE=..\main\php_regex.h
 SOURCE=..\main\php_streams.h
 # End Source File
 # Begin Source File
+
+
+
+SOURCE=..\main\snprintf.h
+
+# End Source File
+
+# Begin Source File
+
+
+
+SOURCE=..\main\spprintf.h
+
+# End Source File
+
+# Begin Source File
+
+
 
 SOURCE=..\main\php_variables.h
 # End Source File
@@ -433,6 +472,16 @@ SOURCE=..\regex\regfree.c
 SOURCE=..\ext\overload\overload.c
 # End Source File
 # Begin Source File
+
+
+
+SOURCE=..\ext\tokenizer\tokenizer.c
+
+# End Source File
+
+# Begin Source File
+
+
 
 SOURCE=..\ext\wddx\wddx.c
 
@@ -1329,6 +1378,7 @@ SOURCE=..\ext\bcmath\libbcmath\src\private.h
 # End Source File
 # End Group
 # End Group
+
 # Begin Group "Standard"
 
 # PROP Default_Filter ""
@@ -1758,66 +1808,127 @@ SOURCE=..\ext\standard\url_scanner.h
 
 SOURCE=..\ext\standard\url_scanner_ex.h
 # End Source File
+
 # End Group
+
 # End Group
+
 # Begin Group "rpc"
 
+
+
 # PROP Default_Filter ""
+
 # Begin Group "Source Files No. 9"
 
+
+
 # PROP Default_Filter ""
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\rpc\rpc.c
+
 # End Source File
+
 # End Group
+
 # Begin Group "Header Files No. 9"
 
+
+
 # PROP Default_Filter ""
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\rpc\handler.h
+
 # End Source File
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\rpc\layer.h
+
 # End Source File
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\rpc\php_rpc.h
+
 # End Source File
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\rpc\rpc.h
+
 # End Source File
+
 # End Group
+
 # Begin Group "com"
 
+
+
 # PROP Default_Filter ""
+
 # Begin Group "Source Files No. 10"
 
+
+
 # PROP Default_Filter ""
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\rpc\com\com.c
+
 # End Source File
+
 # End Group
+
 # Begin Group "Header Files No. 10"
 
+
+
 # PROP Default_Filter ""
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\rpc\com\com.h
+
 # End Source File
+
 # End Group
+
 # End Group
+
 # Begin Group "tests"
 
+
+
 # PROP Default_Filter ""
+
 # Begin Source File
 
+
+
 SOURCE=..\ext\rpc\tests\test1.php
+
 # End Source File
+
 # End Group
 # End Group
 # End Group
