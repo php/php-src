@@ -196,8 +196,7 @@ void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, z
 
 	if (variable_ptr == EG(error_zval_ptr) || value_ptr==EG(error_zval_ptr)) {
 		variable_ptr_ptr = &EG(uninitialized_zval_ptr);
-/*	} else if (variable_ptr==&EG(uninitialized_zval) || variable_ptr!=value_ptr) { */
-	} else if (variable_ptr_ptr != value_ptr_ptr) {
+	} else if (variable_ptr != value_ptr) {
 		variable_ptr->refcount--;
 		if (variable_ptr->refcount==0) {
 			zendi_zval_dtor(*variable_ptr);
@@ -219,9 +218,18 @@ void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, z
 
 		*variable_ptr_ptr = value_ptr;
 		value_ptr->refcount++;
-	} else {
-		if (variable_ptr->refcount>1) { /* we need to break away */
+	} else if (!variable_ptr->is_ref) {
+		if (variable_ptr_ptr == value_ptr_ptr) {
 			SEPARATE_ZVAL(variable_ptr_ptr);
+		} else if (variable_ptr==EG(uninitialized_zval_ptr)
+			|| variable_ptr->refcount>2) {
+			/* we need to separate */
+			variable_ptr->refcount -= 2;
+			ALLOC_ZVAL(*variable_ptr_ptr);
+			**variable_ptr_ptr = *variable_ptr;
+			zval_copy_ctor(*variable_ptr_ptr);
+			*value_ptr_ptr = *variable_ptr_ptr;
+			(*variable_ptr_ptr)->refcount = 2;
 		}
 		(*variable_ptr_ptr)->is_ref = 1;
 	}
