@@ -4,6 +4,7 @@ PHP 4.0                                                                    NEWS
 ?? ??? 2000, Version 4.0.0 Release
 
 8 May 2000, Version 4.0 Release Candidate 2
+- Apache WIN32 Module compilable and lightly tested. (Shane)
 - Enabled assert() by default in php.ini-dist. (Andrei)
 - Put in safeguards in case dynamic code evaluation in assert() and
   preg_replace() with /e modifier fails. (Andrei)
