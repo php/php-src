@@ -1367,8 +1367,11 @@ class Archive_Tar extends PEAR
 
             // ----- Change the file mode, mtime
             @touch($v_header['filename'], $v_header['mtime']);
-            // To be completed
-            //chmod($v_header[filename], DecOct($v_header[mode]));
+            if ($v_header['mode'] & 0111) {
+                // make file executable, obey umask
+                $mode = fileperms($v_header['filename']) | (~umask() & 0111);
+                @chmod($v_header['filename'], $mode);
+            }
           }
 
           // ----- Check the file size
