@@ -129,7 +129,7 @@ zend_module_entry apache_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-/* {{{ proto string child_terminate()
+/* {{{ proto string apache_child_terminate()
    Get and set Apache request notes */
 PHP_FUNCTION(apache_child_terminate)
 {
