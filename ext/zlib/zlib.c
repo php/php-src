@@ -154,7 +154,7 @@ static gzFile php_gzopen_wrapper(char *path, char *mode, int options)
 {
 	FILE *f;
 
-	f = php_fopen_wrapper(path, mode, options & ~IGNORE_URL, NULL, NULL, NULL);
+	f = php_fopen_wrapper(path, mode, options, NULL, NULL, NULL);
 
 	if (!f) {
 		return NULL;
@@ -184,7 +184,7 @@ PHP_FUNCTION(gzfile) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg2);
-		use_include_path = (*arg2)->value.lval;
+		use_include_path = (*arg2)->value.lval?USE_PATH:0;
 		break;
 	default:
 		WRONG_PARAM_COUNT;
@@ -238,7 +238,7 @@ PHP_FUNCTION(gzopen) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg3);
-		use_include_path = (*arg3)->value.lval;
+		use_include_path = (*arg3)->value.lval?USE_PATH:0;
 		break;
 	default:
 		WRONG_PARAM_COUNT;
@@ -542,7 +542,7 @@ PHP_FUNCTION(readgzfile) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg2);
-		use_include_path = (*arg2)->value.lval;
+		use_include_path = (*arg2)->value.lval?USE_PATH:0;
 		break;
 	default:
 		WRONG_PARAM_COUNT;
