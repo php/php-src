@@ -198,14 +198,12 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 					xmlFree(str);
 				} else if (type == 2) {
 					int j;
-					dom_object *domintern;
+					dom_object *domintern = (dom_object *)intern->doc;
 					array_init(args[i]);
 					if (obj->nodesetval->nodeNr > 0) {
-						domintern = (dom_object *) php_dom_object_get_data((void *) obj->nodesetval->nodeTab[0]->doc);
 						for (j = 0; j < obj->nodesetval->nodeNr; j++) {
 							xmlNodePtr node = obj->nodesetval->nodeTab[j];
 							zval *child;
-							
 							MAKE_STD_ZVAL(child);
 							/* not sure, if we need this... it's copied from xpath.c */
 							if (node->type == XML_NAMESPACE_DECL) {
@@ -409,12 +407,25 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 /* }}} end xsl_xsltprocessor_import_stylesheet */
 
 
-static xmlDocPtr php_xsl_apply_stylesheet(xsl_object *intern, xsltStylesheetPtr style, xmlDocPtr doc TSRMLS_DC)
+static xmlDocPtr php_xsl_apply_stylesheet(xsl_object *intern, xsltStylesheetPtr style, zval *docp TSRMLS_DC)
 {
 	xmlDocPtr newdocp;
+	xmlDocPtr doc = NULL;
+	xmlNodePtr node = NULL;
 	xsltTransformContextPtr ctxt;
+	php_libxml_node_object *object;
 	char **params = NULL;
 	int clone;
+
+	node = php_libxml_import_node(docp TSRMLS_CC);
+	
+	if (node) {
+		doc = node->doc;
+	}
+	if (doc == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Document");
+		return NULL;
+	}
 
 	if (style == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No stylesheet associated to this object");
@@ -424,9 +435,17 @@ static xmlDocPtr php_xsl_apply_stylesheet(xsl_object *intern, xsltStylesheetPtr 
 		params = php_xsl_xslt_make_params(intern->parameter, 0 TSRMLS_CC);
 	}
 
+	intern->doc = emalloc(sizeof(php_libxml_node_object));
+	memset(intern->doc, 0, sizeof(php_libxml_node_object));
+
 	if (intern->hasKeys == 1) {
 		doc = xmlCopyDoc(doc, 1);
+	} else {
+		object = (php_libxml_node_object *)zend_object_store_get_object(docp TSRMLS_CC);
+		intern->doc->document = object->document;
 	}
+
+	php_libxml_increment_doc_ref(intern->doc, doc TSRMLS_CC);
 
 	ctxt = xsltNewTransformContext(style, doc);
 	ctxt->_private = (void *) intern;
@@ -440,10 +459,11 @@ static xmlDocPtr php_xsl_apply_stylesheet(xsl_object *intern, xsltStylesheetPtr 
 		FREE_HASHTABLE(intern->node_list);	
 		intern->node_list = NULL;
 	}
+
+	php_libxml_decrement_doc_ref(intern->doc TSRMLS_CC);
+	efree(intern->doc);
+	intern->doc = NULL;
 	
-	if (intern->hasKeys == 1) {
-		xmlFreeDoc(doc);
-	}
 
 	if (params) {
 		clone = 0;
@@ -464,8 +484,6 @@ Since:
 PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 {
 	zval *id, *rv = NULL, *docp = NULL;
-	xmlDoc *doc = NULL;
-	xmlNodePtr node = NULL;
 	xmlDoc *newdocp;
 	xsltStylesheetPtr sheetp;
 	int ret;
@@ -479,17 +497,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 		RETURN_FALSE;
 	}
 
-	node = php_libxml_import_node(docp TSRMLS_CC);
-	
-	if (node) {
-		doc = node->doc;
-	}
-	if (doc == NULL) {
-		php_error(E_WARNING, "Invalid Document");
-		RETURN_NULL();
-	}
-
-	newdocp = php_xsl_apply_stylesheet(intern, sheetp, doc TSRMLS_CC);
+	newdocp = php_xsl_apply_stylesheet(intern, sheetp, docp TSRMLS_CC);
 
 	if (newdocp) {
 		DOM_RET_OBJ(rv, (xmlNodePtr) newdocp, &ret, NULL);
@@ -506,9 +514,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 {
 	zval *id, *docp = NULL;
-	xmlDoc *doc = NULL;
 	xmlDoc *newdocp;
-	xmlNodePtr node = NULL;
 	xsltStylesheetPtr sheetp;
 	int ret, uri_len;
 	char *uri;
@@ -522,17 +528,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 		RETURN_FALSE;
 	}
 
-	node = php_libxml_import_node(docp TSRMLS_CC);
-	
-	if (node) {
-		doc = node->doc;
-	}
-	if (doc == NULL) {
-		php_error(E_WARNING, "Invalid Document");
-		RETURN_NULL();
-	}
-
-	newdocp = php_xsl_apply_stylesheet(intern, sheetp, doc TSRMLS_CC);
+	newdocp = php_xsl_apply_stylesheet(intern, sheetp, docp TSRMLS_CC);
 
 	ret = -1;
 	if (newdocp) {
@@ -550,9 +546,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 {
 	zval *id, *docp = NULL;
-	xmlDoc *doc = NULL;
 	xmlDoc *newdocp;
-	xmlNodePtr node = NULL;
 	xsltStylesheetPtr sheetp;
 	int ret;
 	xmlChar *doc_txt_ptr;
@@ -567,17 +561,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 		RETURN_FALSE;
 	}
 
-	node = php_libxml_import_node(docp TSRMLS_CC);
-	
-	if (node) {
-		doc = node->doc;
-	}
-	if (doc == NULL) {
-		php_error(E_WARNING, "Invalid Document");
-		RETURN_NULL();
-	}
-
-	newdocp = php_xsl_apply_stylesheet(intern, sheetp, doc TSRMLS_CC);
+	newdocp = php_xsl_apply_stylesheet(intern, sheetp, docp TSRMLS_CC);
 
 	ret = -1;
 	if (newdocp) {
