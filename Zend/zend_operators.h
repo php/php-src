@@ -110,4 +110,12 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 		convert_to_object(*ppzv);							\
 	}
 
+#define convert_to_boolean_ex(ppzv)							\
+	if ((*ppzv)->type!=IS_BOOL) {							\
+		if (!(*ppzv)->EA.is_ref) {							\
+			SEPARATE_ZVAL(ppzv);							\
+		}													\
+		convert_to_boolean(*ppzv);							\
+	}
+
 #endif
