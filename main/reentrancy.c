@@ -16,9 +16,11 @@
    +----------------------------------------------------------------------+
  */
 
-#include "php_reentrancy.h"
 
 #include <string.h>
+
+#include "php_reentrancy.h"
+#include "ext/standard/php_rand.h"                   /* for RAND_MAX */
 
 enum {
 	LOCALTIME_R,
