@@ -53,8 +53,9 @@ if (var_hash) { \
     while (zend_hash_get_current_data_ex(var_hash, (void **) &zval_ref, &pos) == SUCCESS) { \
         if (*zval_ref == ozval) { \
             char *string_key; \
-            ulong str_key_len; \
+            uint str_key_len; \
             ulong num_key; \
+							\
             zend_hash_get_current_key_ex(var_hash, &string_key, &str_key_len, &num_key, 1, &pos); \
             /* this is our hash and it _will_ be number indexed! */ \
             zend_hash_index_update(var_hash, num_key, &nzval, sizeof(zval *), NULL); \

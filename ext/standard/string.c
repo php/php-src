@@ -2713,7 +2713,8 @@ PHP_FUNCTION(str_replace)
 	zval **subject, **search, **replace, **subject_entry, **pboyer;
 	zval *result;
 	char *string_key;
-	ulong string_key_len, num_key;
+	uint string_key_len;
+	ulong num_key;
 	int boyer = 0;
 
 	if(ZEND_NUM_ARGS() < 3 ||

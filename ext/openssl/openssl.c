@@ -1284,7 +1284,8 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	X509 * cert;
 	int argc;
 	EVP_CIPHER *cipher = NULL;
-	ulong strindexlen, intindex;
+	uint strindexlen;
+	ulong intindex;
 	char * strindex;
 
 	argc = ZEND_NUM_ARGS();
@@ -1419,7 +1420,8 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	BIO * infile = NULL, * outfile = NULL;
 	STACK_OF(X509) *others = NULL;
 	long certresource = -1, keyresource = -1;
-	ulong strindexlen, intindex;
+	ulong intindex;
+	uint strindexlen;
 	HashPosition hpos;
 	char * strindex;
 
