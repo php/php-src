@@ -3190,7 +3190,7 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf)
 	if (function->responseParameters && function->responseParameters->pListHead) {
 		sdlParamPtr *param;
 		param = function->responseParameters->pListHead->pData;
-		if ((*param)->encode->details.type_str) {
+		if ((*param)->encode && (*param)->encode->details.type_str) {
 			smart_str_appendl(buf, (*param)->encode->details.type_str, strlen((*param)->encode->details.type_str));
 			smart_str_appendc(buf, ' ');
 		} else {
@@ -3209,7 +3209,7 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf)
 		i = 0;
 		zend_hash_internal_pointer_reset_ex(function->requestParameters, &pos);
 		while (zend_hash_get_current_data_ex(function->requestParameters, (void **)&param, &pos) != FAILURE) {
-			if ((*param)->encode->details.type_str) {
+			if ((*param)->encode && (*param)->encode->details.type_str) {
 				smart_str_appendl(buf, (*param)->encode->details.type_str, strlen((*param)->encode->details.type_str));
 			} else {
 				smart_str_appendl(buf, "mixed ", 6);
