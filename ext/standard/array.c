@@ -2876,8 +2876,10 @@ PHP_FUNCTION(array_reduce)
 	}
 	efree(callback_name);
 
-	if (ZEND_NUM_ARGS() > 2)
+	if (ZEND_NUM_ARGS() > 2) {
 		result = *initial;
+		zval_add_ref(&result);
+	}
 
 	if (zend_hash_num_elements(Z_ARRVAL_PP(input)) == 0) {
 		if (result) {
@@ -2893,18 +2895,23 @@ PHP_FUNCTION(array_reduce)
 			args[0] = &result;
 			args[1] = operand;
 			if (call_user_function_ex(EG(function_table), NULL, *callback, &retval, 2, args, 0, NULL TSRMLS_CC) == SUCCESS && retval) {
+				zval_ptr_dtor(&result);
 				result = retval;
 			} else {
 				php_error(E_WARNING, "%s() had an error invoking the reduction callback", get_active_function_name(TSRMLS_C));
 				return;
 			}
-		} else
+		} else {
 			result = *operand;
+			zval_add_ref(&result);
+		}
 
 		zend_hash_move_forward_ex(Z_ARRVAL_PP(input), &pos);
 	}
 	
 	*return_value = *result;
+	zval_copy_ctor(return_value);
+	zval_ptr_dtor(&result);
 }
 /* }}} */
 
