@@ -1,3 +1,60 @@
+2004-04-23  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      - Fixed bug #27923. foreach() without a key should not check if the key
+      - is a reference (Adam)
+
+    * NEWS:
+      NEWS
+
+2004-04-23  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      NEWS:
+      Reorder NEWS
+
+    * NEWS:
+      This was already in NEWS for the branch, removing
+
+    * NEWS:
+      Cleanup NEWS
+
+2004-04-23  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * NEWS
+      ext/pcre/php_pcre.c:
+      MFB: Fix for bug #27810
+
+    * (PHP_4_3)
+      NEWS
+      ext/pcre/php_pcre.c:
+      bug #27810 from Joe Orton
+
+2004-04-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/mysql/php_mysql.c:
+      MFH: Fixed bug #28087 (Do not force mysql.trace_mode to 0 on every request)
+
+    * ext/mysql/php_mysql.c:
+      Fixed bug #28087 (Do not force mysql.trace_mode to 0 on every request).
+
+2004-04-23  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/info.c:
+      - Fixed buffer overflow in phpinfo() for Zend Extension Api NO.
+
+2004-04-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS:
+      Another one bites the dust
+
+2004-04-23  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/http_fopen_wrapper.c:
+      In-HEAD bugfix# 28115
+
 2004-04-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/sqlite/tests/bug28112.phpt:
