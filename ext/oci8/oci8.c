@@ -100,7 +100,6 @@ DLEXPORT php3_module_entry *get_module() { return &oci_module_entry; };
 /* }}} */
 /* {{{ startup/shutdown/info/internal function prototypes */
 
-
 PHP_MINIT_FUNCTION(oci);
 PHP_RINIT_FUNCTION(oci);
 PHP_MSHUTDOWN_FUNCTION(oci);
@@ -818,7 +817,7 @@ oci_make_pval(pval *value,oci_statement *statement,oci_out_column *column, char 
 
 			loblen = oci_loadlob(statement->conn,descr,&buffer);
 
-			if (loblen > 0)	{
+			if (loblen >= 0)	{
 				value->type = IS_STRING;
 				value->value.str.len = loblen;
 				value->value.str.val = buffer;
@@ -1354,12 +1353,17 @@ oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer)
 
 	if (connection->error) {
 		oci_error(connection->pError, "OCILobGetLength", connection->error);
-		return 0;
+		return -1;
 	}
 		
 	*buffer = emalloc(loblen + 1);
 
 	if (! buffer) {
+		return -1;
+	}
+
+	if (loblen == 0) {
+		(*buffer)[ 0 ] = 0;
 		return 0;
 	}
 
@@ -1372,7 +1376,7 @@ oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer)
 		if (connection->error) {
 			oci_error(connection->pError, "OCILobFileOpen",connection->error);
 			efree(buffer);
-			return 0;
+			return -1;
 		}
 	}
 		
@@ -1392,7 +1396,7 @@ oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer)
 	if (connection->error) {
 		oci_error(connection->pError, "OCILobRead", connection->error);
 		efree(buffer);
-		return 0;
+		return -1;
 	}
 
 	if (mydescr->type == OCI_DTYPE_FILE) {
@@ -1403,7 +1407,7 @@ oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer)
 		if (connection->error) {
 			oci_error(connection->pError, "OCILobFileClose", connection->error);
 			efree(buffer);
-			return 0;
+			return -1;
 		}
 	}
 		
@@ -2624,7 +2628,7 @@ PHP_FUNCTION(ociloadlob)
 
 		loblen = oci_loadlob(connection,descr,&buffer);
 
-		if (loblen > 0) {
+		if (loblen >= 0) {
 	 		RETURN_STRINGL(buffer,loblen,0);
 		}
 	}
