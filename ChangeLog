@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Introduced build process for dynamic modules (Stig)
 - Improved ISAPI module to supprt large server variables (Zeev)
 - Imported PHP3 fixes for problem with PHP as a dynamic module and Redhat
   libc2.1 in zlib module (Stefan)
