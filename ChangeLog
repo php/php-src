@@ -1,3 +1,43 @@
+2005-01-26  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      sapi/apache/config.m4
+      sapi/apache/config.m4:
+      - MFH: There is no --with-apache2, only apxs2
+
+    * sapi/apache/config.m4:
+      - There is no --with-apache2, only apxs2
+
+2005-01-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/var_unserializer.re:
+      MFH: Fixed bug #31699 (unserialize() float problem on non-English locales).
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      Fixed bug #31699 (unserialize() float problem on non-English locales).
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/formatted_print.c:
+      MFH: Fixed bug #29733 (printf() handles repeated placeholders wrong).
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/formatted_print.c:
+      Fixed bug #29733 (printf() handles repeated placeholders wrong).
+      (bugs dot php dot net at bluetwanger dot de, Ilia)
+
+    * ext/standard/formatted_print.c:
+      Fixed bug #29733 (printf() handles repeated placeholders wrong).
+      
+
 2005-01-25  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/browscap.c:
