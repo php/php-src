@@ -24,6 +24,11 @@
 #include "TSRM.h"
 #include <windows.h>
 
+#if HAVE_NEWAPIS_H
+# define WANT_GETLONGPATHNAME_WRAPPER
+# include <NewAPIs.h>
+#endif
+
 struct ipc_perm {
 	int			key;
 	unsigned short	uid;

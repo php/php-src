@@ -29,6 +29,11 @@
 #include "TSRM.h"
 
 #ifdef TSRM_WIN32
+
+#if HAVE_NEWAPIS_H
+# define COMPILE_NEWAPIS_STUBS
+#endif
+
 #include "tsrm_win32.h"
 
 #ifdef ZTS
