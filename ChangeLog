@@ -1,3 +1,100 @@
+2001-03-01  Rainer Schaaf  <rjs@pdflib.com>
+
+    * ext/pdf/php_pdf.h
+      ext/pdf/pdf.c: - integrated new functions vor PDFlib V4.0 (beta1)
+    - all functions accepting strings now support binary strings, by calling
+      the appropriate PDF*2() functions.
+
+2001-03-01  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/Container/db.php: Added Chuck as author.
+
+    * NEWS: Added note about PEAR/Cache.
+
+    * pear/Cache/Graphics.php
+      pear/Cache/Output.php: I have nothing to do with this code :-)
+
+    * pear/Cache/Graphics.php
+      pear/Cache/Output.php
+      pear/Makefile.in: Added Graphics and Output Cache.
+
+2001-03-01  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Cache/Container/db.php: almost working version.
+
+2001-03-01  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/Container/file.php
+      pear/Cache/Container/phplib.php
+      pear/Cache/Container/shm.php
+      pear/Cache/Container.php: Added flushPreload() method.
+
+2001-03-01  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Makefile.in: missing a backslash
+
+    * pear/Makefile.in: update the makefile for the new Cache classes.
+
+    * pear/Cache/Cache.php
+      pear/Cache/Container.php
+      pear/Cache/Container/cache_container.php
+      pear/Cache/Container/cache_container_file.php
+      pear/Cache/Container/cache_container_phplib.php
+      pear/Cache/Container/cache_container_shm.php
+      pear/Cache/Container/file.php
+      pear/Cache/Container/phplib.php
+      pear/Cache/Container/shm.php
+      pear/Cache.php:
+    use standard naming/capitalization, and do a bit of error checking when
+    instantiating the storage classfile.
+
+2001-03-01  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/Container/cache_container_shm.php:
+    Just hired Björn Schotte to foster the Shared Memory Cache Container implementation. He'll start working on it right away.
+
+    * pear/Cache/Container/cache_container_phplib.php:
+    Added Cache Container class for PHPLIB's database abstraction layer DB_Sql. I can't test this right now, but Ulf told me earlier today that it works fine.
+
+    * pear/Cache/Cache.php
+      pear/Cache/Container/cache_container.php
+      pear/Cache/Container/cache_container_file.php
+      pear/Cache/Function_Cache.php:
+    Removed my old Function_Cache class implementation. Initial commit of the multi-purpose Cache System Ulf Wendel and I worked on the last couple of days. In this first phase I commit the Cache base class, the Cache Container Base class and the File-based Cache Container. During the next couple of hours I hope to finish the Cache Container classes for caching with PEAR/DB, PHPLIB/DB_Sql and Native MySQL Heap Table support. I also have working versions of classes extending Cache, namely Function_Cache, Graphics_Cache and Output_Cache. Bare with me, tomorrow at the latest PEAR/Cache will be a extensive and efficient means for general caching purposes, besides specialized caching for graphics.
+
+2001-03-01  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/test.php:
+    UDM_PARAM_CROSS_WORDS mnoGoSearch extension session parameter has been
+    added to use crosswords available since version 3.1.11 of mnogosearch.
+    Example updated.
+
+    * ext/mnogosearch/test.php
+      NEWS:
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h
+      ext/mnogosearch/test.php: Udm_Api_Version function has been added.
+    Example updated.
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h
+      ext/mnogosearch/test.php:
+    Udm_Get_Doc_Count function from mnoGoSearch 3.1.11 has been added.
+    mnoGoSearch library version printing in phpinfo() has been added.
+    Example updated.
+
+    * ext/mnogosearch/php_mnogo.c:
+    Added UdmFreeEnv call to mnoGoSearch link list destructor to
+    free memory allocated for environment.
+
+2001-03-01  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/imap/config.m4
+      ext/imap/php_imap.c:
+    If php is compiled --with-imap-ssl, link in the SSL authenticator from
+    c-client so that we can use php to make ssl imap connections.
+
 2001-02-28  David Guerizec  <david@guerizec.net>
 
     * ext/midgard/attachment.c: function reference: attachments
