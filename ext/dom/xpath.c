@@ -81,7 +81,7 @@ PHP_METHOD(domxpath, __construct)
 }
 /* }}} end DOMXPath::__construct */
 
-/* {{{ proto document DOMDocument*/
+/* {{{ document DOMDocument*/
 int dom_xpath_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
 	xmlDoc *docp = NULL;

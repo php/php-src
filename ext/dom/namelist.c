@@ -41,7 +41,7 @@ zend_function_entry php_dom_namelist_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto length	int	
+/* {{{ length	int	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#NameList-length
 Since: 

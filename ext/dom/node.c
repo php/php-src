@@ -72,7 +72,7 @@ static void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) {
 	}
 }
 
-/* {{{ proto nodeName	string	
+/* {{{ nodeName	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D095
 Since: 
@@ -164,7 +164,7 @@ int dom_node_node_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto nodeValue	string	
+/* {{{ nodeValue	string	
 readonly=no 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D080
 Since: 
@@ -260,7 +260,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 
 
-/* {{{ proto nodeType	int
+/* {{{ nodeType	int
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-111237558
 Since:
@@ -292,7 +292,7 @@ int dom_node_node_type_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto parentNode	DomNode	
+/* {{{ parentNode	DomNode	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1060184317
 Since: 
@@ -327,7 +327,7 @@ int dom_node_parent_node_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto childNodes	DomNodeList	
+/* {{{ childNodes	DomNodeList	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1451460987
 Since: 
@@ -361,7 +361,7 @@ int dom_node_child_nodes_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto firstChild DomNode	
+/* {{{ firstChild DomNode	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-169727388
 Since: 
@@ -399,7 +399,7 @@ int dom_node_first_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto lastChild	DomNode	
+/* {{{ lastChild	DomNode	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-61AD09FB
 Since: 
@@ -437,7 +437,7 @@ int dom_node_last_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto previousSibling	DomNode	
+/* {{{ previousSibling	DomNode	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-640FB3C8
 Since: 
@@ -472,7 +472,7 @@ int dom_node_previous_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto nextSibling	DomNode
+/* {{{ nextSibling	DomNode
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6AC54C2F
 Since:
@@ -507,7 +507,7 @@ int dom_node_next_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto attributes	DomNamedNodeMap	
+/* {{{ attributes	DomNamedNodeMap	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-84CF096
 Since: 
@@ -541,7 +541,7 @@ int dom_node_attributes_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto ownerDocument	DomDocument	
+/* {{{ ownerDocument	DomDocument	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-node-ownerDoc
 Since: 
@@ -583,7 +583,7 @@ int dom_node_owner_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto namespaceUri	string	
+/* {{{ namespaceUri	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSname
 Since: DOM Level 2
@@ -628,7 +628,7 @@ int dom_node_namespace_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto prefix	string	
+/* {{{ prefix	string	
 readonly=no 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSPrefix
 Since: DOM Level 2
@@ -752,7 +752,7 @@ int dom_node_prefix_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 
 
-/* {{{ proto localName	string	
+/* {{{ localName	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSLocalN
 Since: DOM Level 2
@@ -783,7 +783,7 @@ int dom_node_local_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto baseURI	string
+/* {{{ baseURI	string
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-baseURI
 Since: DOM Level 3
@@ -817,7 +817,7 @@ int dom_node_base_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto textContent	string	
+/* {{{ textContent	string	
 readonly=no 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-textContent
 Since: DOM Level 3
