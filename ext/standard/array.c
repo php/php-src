@@ -237,8 +237,10 @@ int php_count_recursive(zval *array, long mode)
 {
 	long cnt = 0;
 	zval **element;
-	
 	HashTable *target_hash;
+
+	TSRMLS_FETCH();
+
 	target_hash = HASH_OF(array);
 
 	if (Z_TYPE_P(array) == IS_ARRAY)
