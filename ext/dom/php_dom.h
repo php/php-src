@@ -64,12 +64,14 @@ extern zend_module_entry dom_module_entry;
 
 #include "dom_fe.h"
 
-void php_dom_set_object(dom_object *wrapper, void *obj TSRMLS_DC);
+void php_dom_set_object(dom_object *object, xmlNodePtr obj TSRMLS_DC);
 dom_object *dom_object_get_data(xmlNodePtr obj);
+xmlNodePtr dom_object_get_node(dom_object *obj);
 zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC);
 void php_dom_throw_error(int error_code, zval **retval TSRMLS_DC);
 void node_free_resource(xmlNodePtr node TSRMLS_DC);
 void node_list_unlink(xmlNodePtr node TSRMLS_DC);
+int decrement_node_ptr(dom_object *object TSRMLS_DC);
 int increment_document_reference(dom_object *object, xmlDocPtr docp TSRMLS_DC);
 int decrement_document_reference(dom_object *object TSRMLS_DC);
 xmlNsPtr dom_get_ns(char *uri, char *qName, int uri_len, int qName_len, int *errorcode, char **localname);
@@ -88,7 +90,7 @@ entry = zend_register_internal_class_ex(&ce, parent_ce, NULL TSRMLS_CC);
 
 #define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = (dom_object *)zend_object_store_get_object(__id TSRMLS_CC); \
-	if (!(__ptr = (__prtype)__intern->ptr)) { \
+	if (__intern->ptr == NULL || !(__ptr = (__prtype)__intern->ptr->node)) { \
   		php_error(E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
   		RETURN_NULL();\
   	} \

@@ -66,7 +66,7 @@ int dom_node_node_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlNode *nodep;
 	char *str = NULL;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 
 	switch (nodep->type) {
 		case XML_ATTRIBUTE_NODE:
@@ -131,7 +131,7 @@ int dom_node_node_value_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlNode *nodep;
 	char *str = NULL;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 /* TODO: Element node is invalid for this property -
 currently here as a convience method while developing */
 	switch (nodep->type) {
@@ -166,7 +166,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
 	xmlNode *nodep;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 
 	switch (nodep->type) {
 		case XML_ATTRIBUTE_NODE:
@@ -199,7 +199,7 @@ int dom_node_node_type_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
 	xmlNode *nodep;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 
 	ALLOC_ZVAL(*retval);
 	ZVAL_LONG(*retval, nodep->type);
@@ -220,7 +220,7 @@ int dom_node_parent_node_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlNode *nodep, *nodeparent;
 	int ret;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 
 	nodeparent = nodep->parent;
 	if (!nodeparent) {
@@ -249,7 +249,8 @@ int dom_node_child_nodes_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
 	xmlNodePtr nodep, last;
 	int ret;
-	nodep = obj->ptr;
+
+	nodep = dom_object_get_node(obj);
 
 	if ((nodep->type == XML_DOCUMENT_NODE) || (nodep->type == XML_HTML_DOCUMENT_NODE)) {
 		last = ((xmlDoc *) nodep)->children;
@@ -285,8 +286,7 @@ int dom_node_first_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlNode *nodep, *first;
 	int ret;
 
-	nodep = obj->ptr;
-
+	nodep = dom_object_get_node(obj);
 
 	first = nodep->children;
 	if (!first) {
@@ -316,7 +316,7 @@ int dom_node_last_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlNode *nodep, *last;
 	int ret;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 
 	last = nodep->last;
 	if (!last) {
@@ -346,7 +346,7 @@ int dom_node_previous_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlNode *nodep, *prevsib;
 	int ret;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 
 	prevsib = nodep->prev;
 	if (!prevsib) {
@@ -376,7 +376,7 @@ int dom_node_next_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlNode *nodep, *nextsib;
 	int ret;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 
 	nextsib = nodep->next;
 	if (!nextsib) {
@@ -405,9 +405,9 @@ int dom_node_attributes_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
 	xmlNodePtr nodep;
 	xmlAttr *attr;
-
 	int ret;
-	nodep = obj->ptr;
+
+	nodep = dom_object_get_node(obj);
 
 	ALLOC_ZVAL(*retval);
 
@@ -444,7 +444,7 @@ int dom_node_owner_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlDocPtr docp;
 	int ret;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 
 	if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
 		ALLOC_ZVAL(*retval);
@@ -480,7 +480,7 @@ int dom_node_namespace_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlNode *nodep;
 	char *str = NULL;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
@@ -520,7 +520,7 @@ int dom_node_prefix_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlNsPtr ns;
 	char *str = NULL;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
@@ -556,7 +556,7 @@ int dom_node_prefix_write(dom_object *obj, zval *newval TSRMLS_DC)
 	char *strURI;
 	char *prefix;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
@@ -617,7 +617,8 @@ Since: DOM Level 2
 int dom_node_local_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
 	xmlNode *nodep;
-	nodep = obj->ptr;
+
+	nodep = dom_object_get_node(obj);
 
 	ALLOC_ZVAL(*retval);
 
@@ -661,7 +662,7 @@ int dom_node_text_content_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlNode *nodep;
 	char *str = NULL;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 
 	str = xmlNodeGetContent(nodep);
 
@@ -767,7 +768,8 @@ PHP_FUNCTION(dom_node_insert_before)
 				if (lastattr != (xmlAttrPtr) child) {
 					xmlUnlinkNode((xmlNodePtr) lastattr);
 					node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
-					xmlFreeProp(lastattr);
+					/* Freed above
+					xmlFreeProp(lastattr); */
 				} else {
 					DOM_RET_OBJ(rv, child, &ret, intern);
 					return;
@@ -808,7 +810,8 @@ PHP_FUNCTION(dom_node_insert_before)
 				if (lastattr != (xmlAttrPtr) child) {
 					xmlUnlinkNode((xmlNodePtr) lastattr);
 					node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
-					xmlFreeProp(lastattr);
+					/* Freed above
+					xmlFreeProp(lastattr); */
 				} else {
 					DOM_RET_OBJ(rv, child, &ret, intern);
 					return;
@@ -1012,7 +1015,8 @@ PHP_FUNCTION(dom_node_append_child)
 			if (lastattr != (xmlAttrPtr) child) {
 				xmlUnlinkNode((xmlNodePtr) lastattr);
 				node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
-				xmlFreeProp(lastattr);
+				/* Freed above
+				xmlFreeProp(lastattr); */
 			}
 		}
 	} else 	if (child->type == XML_DOCUMENT_FRAG_NODE) {

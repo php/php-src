@@ -85,7 +85,7 @@ int dom_processinginstruction_target_read(dom_object *obj, zval **retval TSRMLS_
 {
 	xmlNodePtr nodep;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 
 	ALLOC_ZVAL(*retval);
 	ZVAL_STRING(*retval, (char *) (nodep->name), 1);
@@ -107,7 +107,7 @@ int dom_processinginstruction_data_read(dom_object *obj, zval **retval TSRMLS_DC
 	xmlNodePtr nodep;
 	xmlChar *content;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 
 	ALLOC_ZVAL(*retval);
 
@@ -127,7 +127,7 @@ int dom_processinginstruction_data_write(dom_object *obj, zval *newval TSRMLS_DC
 {
 	xmlNode *nodep;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 	xmlNodeSetContentLen(nodep, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
 
 	return SUCCESS;

@@ -27,15 +27,21 @@ typedef struct _dom_ref_obj {
 	int   refcount;
 } dom_ref_obj;
 
+typedef struct _node_ptr {
+	xmlNodePtr node;
+	int	refcount;
+	void *_private;
+} node_ptr;
+
 typedef struct _node_object {
 	zend_object  std;
-	xmlNodePtr node;
+	node_ptr *node;
 	dom_ref_obj *document;
 } node_object;
 
 typedef struct _dom_object {
 	zend_object  std;
-	void *ptr;
+	node_ptr *ptr;
 	dom_ref_obj *document;
 	HashTable *prop_handler;
 	zend_object_handle handle;
@@ -63,7 +69,7 @@ PHP_DOM_EXPORT(void) dom_write_property(zval *object, zval *member, zval *value 
 
 #define NODE_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = (node_object *)zend_object_store_get_object(__id TSRMLS_CC); \
-	if (!(__ptr = (__prtype)__intern->node)) { \
+	if (__intern->ptr == NULL || !(__ptr = (__prtype)__intern->ptr->node)) { \
   		php_error(E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
   		RETURN_NULL();\
   	} \

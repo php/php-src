@@ -84,7 +84,7 @@ int dom_text_whole_text_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlNodePtr node;
 	xmlChar *wholetext;
 
-	node = obj->ptr;
+	node = dom_object_get_node(obj);
 
 	ALLOC_ZVAL(*retval);
 	wholetext = xmlNodeListGetString(node->doc, node, 1);
