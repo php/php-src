@@ -2695,6 +2695,7 @@ PHP_FUNCTION(register_tick_function)
 
 	tick_fe.calling = 0;
 	tick_fe.arg_count = ZEND_NUM_ARGS();
+
 	if (tick_fe.arg_count < 1) {
 		WRONG_PARAM_COUNT;
 	}
@@ -2737,8 +2738,10 @@ PHP_FUNCTION(unregister_tick_function)
 		WRONG_PARAM_COUNT;
 	}
 
-	if(!BG(user_tick_functions)) return;
-
+	if (!BG(user_tick_functions)) {
+		return;
+	}
+	
 	if (Z_TYPE_PP(function) != IS_ARRAY) {
 		convert_to_string_ex(function);
 	}
