@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 200?, Version 4.2.0-dev
+?? ??? 200?, Version 4.3.0-dev
+- Empty entry. Enjoy.
+
+?? ??? 2002, Version 4.2.0
 - fixed error message handling with PostgreSQL 7.2 (Rui)
 - Added object aggregation capability, see aggregation_*() functions. (Andrei)
 - Added debug_zval_dump(), which works similar to var_dump, yet displays extra
