@@ -453,13 +453,14 @@ session.use_trans_sid     = 1       ; use transient sid support if enabled
 url_rewriter.tags         = "a=href,area=href,frame=src,input=src,form=fakeentry"
 
 [MSSQL]
-;extension=php_mssql.dll
 mssql.allow_persistent		=	On	; allow or prevent persistent link
 mssql.max_persistent		=	-1	; maximum number of persistent links. -1 means no limit
 mssql.max_links				=	-1	; maximum number of links (persistent+non persistent).  -1 means no limit
 mssql.min_error_severity	=	10	; minimum error severity to display
 mssql.min_message_severity	=	10	; minimum message severity to display
-mssql.compatability_mode	= Off	; compatability mode with old versions of PHP 3.0.
+mssql.compatability_mode	=  Off	; compatability mode with old versions of PHP 3.0.
+;mssql.textlimit			= 4096	; valid range 0 - 2147483647 default = 4096
+;mssql.textsize				= 4096	; valid range 0 - 2147483647 default = 4096
 
 [Assertion]
 ;assert.active				=	On	; assert(expr); active by default
