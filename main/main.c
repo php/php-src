@@ -757,7 +757,6 @@ int php_global_shutdown_extensions(zend_module_entry **ptr, int count)
 	return SUCCESS;
 }
 
-
 int php_module_startup(sapi_module_struct *sf)
 {
 	zend_utility_functions zuf;
