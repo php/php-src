@@ -1,3 +1,65 @@
+2001-08-12  Zeev Suraski  <zeev@zend.com>
+
+    * php.ini-recommended: Enable output buffering in the php.ini-recommended
+
+    * configure.in
+      ext/standard/filestat.c:
+    Compile fix for oldie Linux systems (possibly others too)
+
+2001-08-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/xml/xml.c: Fix warning.
+
+2001-08-12  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/xml/tests/007.phpt
+      ext/xml/xml.c: tags need to be UTF8-decoded as well.
+
+    guys, case_folding can only work when the parser target encoding equal (or
+    compatible) with the locale setting of the system as we use toupper to "do it"
+
+2001-08-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/Container/shm.php: Even more whitespace fixes.
+
+    * pear/Cache/Container/shm.php: Whitespace fixes.
+
+2001-08-12  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache/Container/shm.php:
+    Simple and slow implementation of a shared memory container.
+
+2001-08-12  David Eriksson  <david@2good.com>
+
+    * ext/satellite/struct.c
+      ext/satellite/zval_to_namedvalue.c
+      ext/satellite/class.c
+      ext/satellite/object.c: adjusted Satellite for Zend 2
+
+    * ext/satellite/tests/004.phpt: changed IOR values
+
+    * ext/satellite/tests/001.phpt
+      ext/satellite/tests/002.phpt
+      ext/satellite/tests/003.phpt
+      ext/satellite/tests/004.phpt
+      ext/satellite/tests/005.phpt
+      ext/satellite/tests/random.idl: wrote some tests for satellite
+
+2001-08-12  Andi Gutmans  <andi@zend.com>
+
+    * ext/com/com.h
+      ext/com/conversion.c: - Make com work with new object model
+
+2001-08-12  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/skeleton/create_stubs: Save spec_opt for each function.
+
+    * ext/skeleton/create_stubs: Fix it up a bit.
+
+2001-08-12  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/skeleton/create_stubs: Oops, missing () there
+
 2001-08-11  Zeev Suraski  <zeev@zend.com>
 
     * php.ini-recommended
