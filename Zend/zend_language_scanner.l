@@ -333,8 +333,13 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 
 
 	retval = zend_compile_file(&file_handle, type TSRMLS_CC);
-	if (retval && file_handle.opened_path) {
+	if (retval && file_handle.handle.fp) {
 		int dummy = 1;
+		
+		if (!file_handle.opened_path) {
+			file_handle.opened_path = filename->value.str.val;
+		} 
+		
 		zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL);
 	}
 	zend_destroy_file_handle(&file_handle TSRMLS_CC);
