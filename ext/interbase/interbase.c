@@ -1588,7 +1588,7 @@ PHP_FUNCTION(ibase_trans)
 	ibase_trans *ib_trans;
 
 	ISC_TEB *teb;
-    isc_tr_handle tr_handle = NULL;
+	isc_tr_handle tr_handle = NULL;
 	
 	RESET_ERRMSG;
 
@@ -1598,8 +1598,8 @@ PHP_FUNCTION(ibase_trans)
 	}
 
 	if (argn) {
-        /* the number of databases this transaction connects to */
-	    link_cnt = argn-1;
+		/* the number of databases this transaction connects to */
+		link_cnt = argn-1;
 
 		args = (zval ***) emalloc(sizeof(zval **) * argn);
 		if (zend_get_parameters_array_ex(argn, args) == FAILURE) {
@@ -1621,7 +1621,7 @@ PHP_FUNCTION(ibase_trans)
 	}
 
 	if (argn < 2) {
-	    link_cnt = 1;
+		link_cnt = 1;
 		ZEND_FETCH_RESOURCE2(ib_link[0], ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink);
 	}
 
@@ -1639,7 +1639,7 @@ PHP_FUNCTION(ibase_trans)
 			tpb[tpb_len++] = isc_tpb_read_committed;
 			if (trans_argl & PHP_IBASE_REC_VERSION) {
 				tpb[tpb_len++] = isc_tpb_rec_version;
-			}else{
+			} else {
 				tpb[tpb_len++] = isc_tpb_no_rec_version; /* default in read_committed  */ 
 			}	
 		} else if (trans_argl & PHP_IBASE_CONSISTENCY) {
@@ -1659,9 +1659,9 @@ PHP_FUNCTION(ibase_trans)
 	/* allocate a TEB array */
 	teb = (ISC_TEB*) emalloc(sizeof(ISC_TEB) * link_cnt);
 	for (i = 0; i < link_cnt; ++i) {
-	    teb[i].db_ptr = &ib_link[i]->link;
-	    teb[i].tpb_len = tpb_len;
-	    teb[i].tpb_ptr = tpb;
+		teb[i].db_ptr = &ib_link[i]->link;
+		teb[i].tpb_len = tpb_len;
+		teb[i].tpb_ptr = tpb;
 	}
 	
 	/* start the transaction */
@@ -1679,14 +1679,13 @@ PHP_FUNCTION(ibase_trans)
 		ibase_tr_list **l;
 		ib_trans->link[i] = ib_link[i];
 		
-		/* the first item in the connection-transaction list is reserved for 
-			the default transaction */
+		/* the first item in the connection-transaction list is reserved for the default transaction */
 		if (ib_link[i]->trans == NULL) {
 			ib_link[i]->trans = (ibase_tr_list*)emalloc(sizeof(ibase_tr_list));
 			ib_link[i]->trans->trans = NULL;
 			ib_link[i]->trans->next = NULL;
 		}
-			    
+
 		/* link the transaction into the connection-transaction list */
 		for (l = &ib_link[i]->trans; *l != NULL; l = &(*l)->next);
 		*l = (ibase_tr_list*) emalloc(sizeof(ibase_tr_list));
@@ -1707,14 +1706,13 @@ static int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans TSRM
 		return FAILURE;
 	}
 
-    /* the first item in the connection-transaction list is reserved for 
-    	the default transaction */
+	/* the first item in the connection-transaction list is reserved for the default transaction */
 	if (ib_link->trans == NULL) {
 		ib_link->trans = (ibase_tr_list*)emalloc(sizeof(ibase_tr_list));
 		ib_link->trans->trans = NULL;
 		ib_link->trans->next = NULL;
 	}
-			    
+
 	if (*trans == NULL) {
 		if (ib_link->trans->trans == NULL) {
 			ibase_trans *tr = (ibase_trans*)emalloc(sizeof(ibase_trans));
@@ -1731,7 +1729,7 @@ static int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans TSRM
 	}
 	return SUCCESS;
 }
-/*}}}*/
+/* }}} */
 
 /* {{{ _php_ibase_trans_end() */
 #define COMMIT 1
