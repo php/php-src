@@ -23,6 +23,7 @@
 #include "zend_globals.h"
 #include "zend_variables.h"
 #include "zend_API.h"
+#include "zend_interfaces.h"
 
 static inline void zend_nuke_object(zend_object *object TSRMLS_DC)
 {
@@ -36,10 +37,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 	zend_function *destructor = object->ce->destructor;
 
 	if (destructor) {
-		zval *obj;
-		zval *destructor_func_name;
-		zval *retval_ptr;
-		HashTable symbol_table;
+		zval zobj, *obj = &zobj;
 		
 		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
@@ -73,28 +71,12 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 			}
 		}
 
-		MAKE_STD_ZVAL(obj);
-		obj->type = IS_OBJECT;
-		obj->value.obj.handle = handle;
-		obj->value.obj.handlers = &std_object_handlers;
-		zval_copy_ctor(obj);
+		zobj.type = IS_OBJECT;
+		zobj.value.obj.handle = handle;
+		zobj.value.obj.handlers = &std_object_handlers;
+		INIT_PZVAL(obj);
 
-		ZEND_INIT_SYMTABLE(&symbol_table);
-		
-		/* FIXME: Optimize this so that we use the old_object->ce->destructor function pointer instead of the name */
-		MAKE_STD_ZVAL(destructor_func_name);
-		destructor_func_name->type = IS_STRING;
-		destructor_func_name->value.str.val = estrndup("__destruct", sizeof("__destruct")-1);
-		destructor_func_name->value.str.len = sizeof("__destruct")-1;
-
-		call_user_function_ex(NULL, &obj, destructor_func_name, &retval_ptr, 0, NULL, 0, &symbol_table TSRMLS_CC);
-
-		zend_hash_destroy(&symbol_table);
-		zval_ptr_dtor(&obj);
-		zval_ptr_dtor(&destructor_func_name);
-		if (retval_ptr) {
-			zval_ptr_dtor(&retval_ptr);
-		}
+		zend_call_method_with_0_params(&obj, object->ce, NULL, "__destruct", NULL);
 	}
 	zend_nuke_object(object TSRMLS_CC);
 }
