@@ -52,12 +52,13 @@ struct _php_core_globals {
 	zend_bool magic_quotes_runtime;
 	zend_bool magic_quotes_sybase;
 
+	zend_bool safe_mode;
+
 	zend_bool allow_call_time_pass_reference;
-	zend_bool zend_set_utility_values;
-	zend_bool output_buffering;
 	zend_bool implicit_flush;
 
-	zend_bool safe_mode;
+	int output_buffering;
+
 	char *safe_mode_include_dir;
 	zend_bool safe_mode_gid;
 	zend_bool sql_safe_mode;
