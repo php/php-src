@@ -24,8 +24,17 @@
 #endif
 
 #include "php.h"
+#include "php_globals.h"
+#include "ext/standard/info.h"
+#include "main/php_output.h"
+#include "SAPI.h"
+#include "php_ini.h"
 
-#if HAVE_ICONV
+#include <errno.h>
+
+#include "php_iconv.h"
+
+#ifdef HAVE_ICONV
 
 #ifdef HAVE_GICONV_H
 #include <giconv.h>
@@ -33,17 +42,7 @@
 #include <iconv.h>
 #endif
 
-#include <errno.h>
-
-#include "php_globals.h"
-#include "php_iconv.h"
-#include "ext/standard/info.h"
-#include "main/php_output.h"
-#include "SAPI.h"
-#include "php_ini.h"
-
-
-#if HAVE_LIBICONV
+#ifdef HAVE_LIBICONV
 #define LIBICONV_PLUG
 #define icv_open(a, b) libiconv_open(a, b)
 #define icv_close(a) libiconv_close(a)
@@ -51,9 +50,8 @@
 #else
 #define icv_open(a, b) iconv_open(a, b)
 #define icv_close(a) iconv_close(a)
-#define icv(a, b, c, d, e) iconv(a, b, c, d, e)
+#define icv(a, b, c, d, e) iconv(a, (char **) b, c, d, e)
 #endif
-
 
 /* {{{ iconv_functions[]
  */
@@ -141,7 +139,7 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 							char **out, size_t *out_len,
 							const char *in_charset, const char *out_charset, int *err TSRMLS_DC)
 {
-#if !defined(ICONV_SUPPORTS_ERRNO)
+#if ICONV_SUPPORTS_ERRNO
 	unsigned int in_size, out_size, out_left;
 	char *out_buffer, *out_p;
 	iconv_t cd;
@@ -175,7 +173,7 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 		return FAILURE;
 	}
 	
-	result = icv(cd, (char **) &in_p, &in_size, (char **)
+	result = icv(cd, (const char **) &in_p, &in_size, (char **)
 				&out_p, &out_left);
 	
 	if (result == (size_t)(-1)) {
@@ -222,7 +220,7 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 	out_p = out_buf;
 
 	while(in_left > 0) {
-		result = icv(cd, (const char **)&in_p, &in_left, (char **) &out_p, &out_left);
+		result = icv(cd, (const char **) &in_p, &in_left, (char **) &out_p, &out_left);
 		out_size = bsz - out_left;
 		if( result == (size_t)(-1) ) {
 			if( errno == E2BIG && in_left > 0 ) {
