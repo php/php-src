@@ -3,7 +3,7 @@ date_sunrise() and date_sunset() functions
 --INI--
 precision = 14
 --FILE--
-<?
+<?php
 
 putenv ("TZ=Asia/Jerusalem");
 
