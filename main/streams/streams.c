@@ -56,16 +56,17 @@ PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash()
 static int forget_persistent_resource_id_numbers(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_stream *stream;
-	
-	if (Z_TYPE_P(rsrc) != le_pstream)
+
+	if (Z_TYPE_P(rsrc) != le_pstream) {
 		return 0;
+	}
 
 	stream = (php_stream*)rsrc->ptr;
 
 #if STREAM_DEBUG
 fprintf(stderr, "forget_persistent: %s:%p\n", stream->ops->label, stream);
 #endif
-	
+
 	stream->rsrc_id = FAILURE;
 
 	return 0;
@@ -123,15 +124,17 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *
 
 			for (i = 0, l = 0; i < wrapper->err_count; i++) {
 				l += strlen(wrapper->err_stack[i]);
-				if (i < wrapper->err_count - 1)
+				if (i < wrapper->err_count - 1) {
 					l += brlen;
+				}
 			}
 			msg = emalloc(l + 1);
 			msg[0] = '\0';
 			for (i = 0; i < wrapper->err_count; i++) {
 				strcat(msg, wrapper->err_stack[i]);
-				if (i < wrapper->err_count - 1)
+				if (i < wrapper->err_count - 1) { 
 					strcat(msg, br);
+				}
 			}
 
 			free_msg = 1;
@@ -145,8 +148,9 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *
 	php_strip_url_passwd(tmp);
 	php_error_docref1(NULL TSRMLS_CC, tmp, E_WARNING, "%s: %s", caption, msg);
 	efree(tmp);
-	if (free_msg)
+	if (free_msg) {
 		efree(msg);
+	}
 }
 
 void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper TSRMLS_DC)
@@ -155,10 +159,12 @@ void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper TSRMLS_DC)
 		/* tidy up the error stack */
 		int i;
 
-		for (i = 0; i < wrapper->err_count; i++)
+		for (i = 0; i < wrapper->err_count; i++) {
 			efree(wrapper->err_stack[i]);
-		if (wrapper->err_stack)
+		}
+		if (wrapper->err_stack) {
 			efree(wrapper->err_stack);
+		}
 		wrapper->err_stack = NULL;
 		wrapper->err_count = 0;
 	}
@@ -179,8 +185,9 @@ PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int option
 	} else {
 		/* append to stack */
 		wrapper->err_stack = erealloc(wrapper->err_stack, (wrapper->err_count + 1) * sizeof(char *));
-		if (wrapper->err_stack)
+		if (wrapper->err_stack) {
 			wrapper->err_stack[wrapper->err_count++] = buffer;
+		}
 	}
 }
 
@@ -191,7 +198,7 @@ PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int option
 PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract, const char *persistent_id, const char *mode STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	php_stream *ret;
-	
+
 	ret = (php_stream*) pemalloc_rel_orig(sizeof(php_stream), persistent_id ? 1 : 0);
 
 	memset(ret, 0, sizeof(php_stream));
@@ -199,14 +206,15 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract, const 
 #if STREAM_DEBUG
 fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persistent_id);
 #endif
-	
+
 	ret->ops = ops;
 	ret->abstract = abstract;
 	ret->is_persistent = persistent_id ? 1 : 0;
 	ret->chunk_size = FG(def_chunk_size);
-	
-	if (FG(auto_detect_line_endings))
+
+	if (FG(auto_detect_line_endings)) {
 		ret->flags |= PHP_STREAM_FLAG_DETECT_EOL;
+	}
 
 	if (persistent_id) {
 		list_entry le;
@@ -222,10 +230,10 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 			return NULL;
 		}
 	}
-	
+
 	ret->rsrc_id = ZEND_REGISTER_RESOURCE(NULL, ret, persistent_id ? le_pstream : le_stream);
 	strlcpy(ret->mode, mode, sizeof(ret->mode));
-	
+
 	return ret;
 }
 /* }}} */
@@ -240,10 +248,11 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 #if STREAM_DEBUG
 fprintf(stderr, "stream_free: %s:%p[%s] in_free=%d opts=%08x\n", stream->ops->label, stream, stream->__orig_path, stream->in_free, close_options);
 #endif
-	
+
 	/* recursion protection */
-	if (stream->in_free)
+	if (stream->in_free) {
 		return 1;
+	}
 
 	stream->in_free++;
 
@@ -269,17 +278,15 @@ fprintf(stderr, "stream_free: %s:%p[%s] in_free=%d opts=%08x\n", stream->ops->la
 fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remove_rsrc=%d\n",
 		stream->ops->label, stream, stream->__orig_path, preserve_handle, release_cast, remove_rsrc);
 #endif
-	
+
 	/* make sure everything is saved */
 	_php_stream_flush(stream, 1 TSRMLS_CC);
 		
-	/* If not called from the resource dtor, remove the stream
-     * from the resource list.
-	 * */
+	/* If not called from the resource dtor, remove the stream from the resource list. */
 	if ((close_options & PHP_STREAM_FREE_RSRC_DTOR) == 0 && remove_rsrc) {
 		zend_list_delete(stream->rsrc_id);
 	}
-	
+
 	if (close_options & PHP_STREAM_FREE_CALL_DTOR) {
 		if (release_cast && stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
 			/* calling fclose on an fopencookied stream will ultimately
@@ -368,7 +375,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_DC)
 {
 	/* allocate/fill the buffer */
-	
+
 	if (stream->readfilters.head) {
 		char *chunk_buf;
 		int err_flag = 0;
@@ -497,7 +504,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS_DC)
 {
 	size_t toread = 0, didread = 0;
-	
+
 	while (size > 0) {
 
 		/* take from the read buffer first.
@@ -507,8 +514,9 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 		if (stream->writepos > stream->readpos) {
 
 			toread = stream->writepos - stream->readpos;
-			if (toread > size)
+			if (toread > size) {
 				toread = size;
+			}
 
 			memcpy(buf, stream->readbuf + stream->readpos, toread);
 			stream->readpos += toread;
@@ -528,8 +536,9 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 			php_stream_fill_read_buffer(stream, size TSRMLS_CC);
 
 			toread = stream->writepos - stream->readpos;
-			if (toread > size)
+			if (toread > size) {
 				toread = size;
+			}
 
 			if (toread > 0) {
 				memcpy(buf, stream->readbuf + stream->readpos, toread);
@@ -546,8 +555,9 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 		}
 	}
 
-	if (didread > 0)
+	if (didread > 0) {
 		stream->position += didread;
+	}
 
 	return didread;
 }
@@ -555,8 +565,9 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 PHPAPI int _php_stream_eof(php_stream *stream TSRMLS_DC)
 {
 	/* if there is data in the buffer, it's not EOF */
-	if (stream->writepos - stream->readpos > 0)
+	if (stream->writepos - stream->readpos > 0) {
 		return 0;
+	}
 
 	return stream->eof;
 }
@@ -618,7 +629,7 @@ PHPAPI char *php_stream_locate_eol(php_stream *stream, char *buf, size_t buf_len
 	size_t avail;
 	char *cr, *lf, *eol = NULL;
 	char *readptr;
-	
+
 	if (!buf) {
 		readptr = stream->readbuf + stream->readpos;
 		avail = stream->writepos - stream->readpos;
@@ -631,7 +642,7 @@ PHPAPI char *php_stream_locate_eol(php_stream *stream, char *buf, size_t buf_len
 	if (stream->flags & PHP_STREAM_FLAG_DETECT_EOL) {
 		cr = memchr(readptr, '\r', avail);
 		lf = memchr(readptr, '\n', avail);
-	
+
 		if (cr && lf != cr + 1 && !(lf && lf < cr)) {
 			/* mac */
 			stream->flags ^= PHP_STREAM_FLAG_DETECT_EOL;
@@ -664,10 +675,11 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 	int grow_mode = 0;
 	char *bufstart = buf;
 
-	if (buf == NULL)
+	if (buf == NULL) {
 		grow_mode = 1;
-	else if (maxlen == 0)
+	} else if (maxlen == 0) {
 		return NULL;
+	}
 
 	/*
 	 * If the underlying stream operations block when no new data is readable,
@@ -740,8 +752,9 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 				toread = stream->chunk_size;
 			} else {
 				toread = maxlen - 1;
-				if (toread > stream->chunk_size)
+				if (toread > stream->chunk_size) {
 					toread = stream->chunk_size;
+				}
 			}
 
 			php_stream_fill_read_buffer(stream, toread TSRMLS_CC);
@@ -751,17 +764,18 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 			}
 		}
 	}
-	
+
 	if (total_copied == 0) {
 		if (grow_mode) {
 			assert(bufstart == NULL);
 		}
 		return NULL;
 	}
-	
+
 	buf[0] = '\0';
-	if (returned_len)
+	if (returned_len) {
 		*returned_len = total_copied;
+	}
 
 	return bufstart;
 }
@@ -819,7 +833,7 @@ static size_t _php_stream_write_buffer(php_stream *stream, const char *buf, size
 		towrite = count;
 		if (towrite > stream->chunk_size)
 			towrite = stream->chunk_size;
-	
+
 		justwrote = stream->ops->write(stream, buf, towrite TSRMLS_CC);
 
 		if (justwrote > 0) {
@@ -909,22 +923,23 @@ static size_t _php_stream_write_filtered(php_stream *stream, const char *buf, si
 PHPAPI int _php_stream_flush(php_stream *stream, int closing TSRMLS_DC)
 {
 	int ret = 0;
-	
+
 	if (stream->writefilters.head) {
 		_php_stream_write_filtered(stream, NULL, 0, closing ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC  TSRMLS_CC);
 	}
-	
+
 	if (stream->ops->flush) {
 		ret = stream->ops->flush(stream TSRMLS_CC);
 	}
-	
+
 	return ret;
 }
 
 PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
-	if (buf == NULL || count == 0 || stream->ops->write == NULL)
+	if (buf == NULL || count == 0 || stream->ops->write == NULL) {
 		return 0;
+	}
 
 	if (stream->writefilters.head) {
 		return _php_stream_write_filtered(stream, buf, count, PSFS_FLAG_NORMAL TSRMLS_CC);
@@ -938,17 +953,18 @@ PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, 
 	size_t count;
 	char *buf;
 	va_list ap;
-	
+
 	va_start(ap, fmt);
 	count = vspprintf(&buf, 0, fmt, ap);
 	va_end(ap);
-	
-	if (!buf)
+
+	if (!buf) {
 		return 0; /* error condition */
-	
+	}
+
 	count = php_stream_write(stream, buf, count);
 	efree(buf);
-	
+
 	return count;
 }
 
@@ -981,7 +997,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 				break;
 		}
 	}
-	
+
 
 	if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
 		int ret;
@@ -999,8 +1015,9 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 		ret = stream->ops->seek(stream, offset, whence, &stream->position TSRMLS_CC);
 
 		if (((stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) || ret == 0) {
-			if (ret == 0)
+			if (ret == 0) {
 				stream->eof = 0;
+			}
 
 			/* invalidate the buffer contents */
 			stream->readpos = stream->writepos = 0;
@@ -1015,13 +1032,13 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 	if (whence == SEEK_CUR && offset > 0) {
 		char tmp[1024];
 		while(offset >= sizeof(tmp)) {
-			if (php_stream_read(stream, tmp, sizeof(tmp)) == 0)
+			if (php_stream_read(stream, tmp, sizeof(tmp)) == 0) {
 				return -1;
+			}
 			offset -= sizeof(tmp);
 		}
-		if (offset)	{
-			if (php_stream_read(stream, tmp, offset) == 0)
-				return -1;
+		if (offset && (php_stream_read(stream, tmp, offset) == 0)) {
+			return -1;
 		}
 		stream->eof = 0;
 		return 0;
@@ -1035,11 +1052,11 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC)
 {
 	int ret = PHP_STREAM_OPTION_RETURN_NOTIMPL;
-	
+
 	if (stream->ops->set_option) {
 		ret = stream->ops->set_option(stream, option, value, ptrparam TSRMLS_CC);
 	}
-	
+
 	if (ret == PHP_STREAM_OPTION_RETURN_NOTIMPL) {
 		switch(option) {
 			case PHP_STREAM_OPTION_SET_CHUNK_SIZE:
@@ -1061,7 +1078,7 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 				ret = PHP_STREAM_OPTION_RETURN_ERR;
 		}
 	}
-	
+
 	return ret;
 }
 
@@ -1109,14 +1126,17 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 	int min_room = CHUNK_SIZE / 4;
 	php_stream_statbuf ssbuf;
 
-	if (buf)
+	if (buf) { 
 		*buf = NULL;
+	}
 
-	if (maxlen == 0)
+	if (maxlen == 0) { 
 		return 0;
+	}
 
-	if (maxlen == PHP_STREAM_COPY_ALL)
+	if (maxlen == PHP_STREAM_COPY_ALL) {
 		maxlen = 0;
+	}
 
 	if (php_stream_mmap_possible(src)) {
 		char *p;
@@ -1127,7 +1147,7 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 		if (p) {
 			*buf = pemalloc_rel_orig(mapped + 1, persistent);
 
-			if (*buf)	{
+			if (*buf) {
 				memcpy(*buf, p, mapped);
 				(*buf)[mapped] = '\0';
 			}
@@ -1137,7 +1157,7 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 			return mapped;
 		}
 	}
-	
+
 	/* avoid many reallocs by allocating a good sized chunk to begin with, if
 	 * we can.  Note that the stream may be filtered, in which case the stat
 	 * result may be inaccurate, as the filter may inflate or deflate the
@@ -1178,11 +1198,13 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 	size_t didread;
 	php_stream_statbuf ssbuf;
 
-	if (maxlen == 0)
+	if (maxlen == 0) {
 		return 0;
+	}
 
-	if (maxlen == PHP_STREAM_COPY_ALL)
+	if (maxlen == PHP_STREAM_COPY_ALL) {
 		maxlen = 0;
+	}
 
 	if (php_stream_stat(src, &ssbuf) == 0) {
 		/* in the event that the source file is 0 bytes, return 1 to indicate success
@@ -1230,8 +1252,9 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 
 			while(towrite) {
 				didwrite = php_stream_write(dest, writeptr, towrite);
-				if (didwrite == 0)
+				if (didwrite == 0) {
 					return 0;	/* error */
+				}
 
 				towrite -= didwrite;
 				writeptr += didwrite;
@@ -1318,12 +1341,14 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 	const char *p, *protocol = NULL;
 	int n = 0;
 
-	if (path_for_open)
+	if (path_for_open) {
 		*path_for_open = (char*)path;
+	}
 
-	if (options & IGNORE_URL)
+	if (options & IGNORE_URL) {
 		return (options & STREAM_LOCATE_WRAPPERS_ONLY) ? NULL : &php_plain_files_wrapper;
-	
+	}
+
 	for (p = path; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
 		n++;
 	}
@@ -1355,23 +1380,26 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 	/* TODO: curl based streams probably support file:// properly */
 	if (!protocol || !strncasecmp(protocol, "file", n))	{
 		if (protocol && path[n+1] == '/' && path[n+2] == '/')	{
-			if (options & REPORT_ERRORS)
+			if (options & REPORT_ERRORS) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "remote host file access not supported, %s", path);
+			}
 			return NULL;
 		}
-		if (protocol && path_for_open)
+		if (protocol && path_for_open) {
 			*path_for_open = (char*)path + n + 1;
+		}
 		
 		/* fall back on regular file access */
 		return (options & STREAM_LOCATE_WRAPPERS_ONLY) ? NULL : &php_plain_files_wrapper;
 	}
 
 	if (wrapper && wrapper->is_url && !PG(allow_url_fopen)) {
-		if (options & REPORT_ERRORS)
+		if (options & REPORT_ERRORS) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL file-access is disabled in the server configuration");
+		}
 		return NULL;
 	}
-	
+
 	return wrapper;
 }
 /* }}} */
@@ -1397,15 +1425,16 @@ PHPAPI php_stream *_php_stream_opendir(char *path, int options,
 	php_stream *stream = NULL;
 	php_stream_wrapper *wrapper = NULL;
 	char *path_to_open;
-	
-	if (!path || !*path)
+
+	if (!path || !*path) {
 		return NULL;
+	}
 
 	path_to_open = path;
 
 	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, options TSRMLS_CC);
 
-	if (wrapper && wrapper->wops->dir_opener)	{
+	if (wrapper && wrapper->wops->dir_opener) {
 		stream = wrapper->wops->dir_opener(wrapper,
 				path_to_open, "r", options ^ REPORT_ERRORS, NULL,
 				context STREAMS_REL_CC TSRMLS_CC);
@@ -1430,9 +1459,10 @@ PHPAPI php_stream *_php_stream_opendir(char *path, int options,
 PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_dirent *ent TSRMLS_DC)
 {
 
-	if (sizeof(php_stream_dirent) == php_stream_read(dirstream, (char*)ent, sizeof(php_stream_dirent)))
+	if (sizeof(php_stream_dirent) == php_stream_read(dirstream, (char*)ent, sizeof(php_stream_dirent))) {
 		return ent;
-	
+	}
+
 	return NULL;
 }
 /* }}} */
@@ -1448,13 +1478,15 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 #if ZEND_DEBUG
 	char *copy_of_path = NULL;
 #endif
-	
-	
-	if (opened_path)
-		*opened_path = NULL;
 
-	if (!path || !*path)
+	
+	if (opened_path) {
+		*opened_path = NULL;
+	}
+
+	if (!path || !*path) {
 		return NULL;
+	}
 
 	path_to_open = path;
 
@@ -1464,12 +1496,12 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		return NULL;
 	}
 
-	if (wrapper)	{
+	if (wrapper) {
 
 		stream = wrapper->wops->stream_opener(wrapper,
 				path_to_open, mode, options ^ REPORT_ERRORS,
 				opened_path, context STREAMS_REL_CC TSRMLS_CC);
-	
+
 		/* if the caller asked for a persistent stream but the wrapper did not
 		 * return one, force an error here */
 		if (stream && (options & STREAM_OPEN_PERSISTENT) && !stream->is_persistent) {
@@ -1490,7 +1522,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		stream->__orig_path = copy_of_path;
 	}
 #endif
-	
+
 	if (stream != NULL && (options & STREAM_MUST_SEEK)) {
 		php_stream *newstream;
 
@@ -1527,7 +1559,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 			stream->position = newpos;
 		}
 	}
-	
+
 	if (stream == NULL && (options & REPORT_ERRORS)) {
 		php_stream_display_wrapper_errors(wrapper, path, "failed to open stream" TSRMLS_CC);
 	}
@@ -1565,7 +1597,7 @@ PHPAPI void php_stream_context_free(php_stream_context *context)
 PHPAPI php_stream_context *php_stream_context_alloc(void)
 {
 	php_stream_context *context;
-	
+
 	context = ecalloc(1, sizeof(php_stream_context));
 	MAKE_STD_ZVAL(context->options);
 	array_init(context->options);
@@ -1587,9 +1619,10 @@ PHPAPI int php_stream_context_get_option(php_stream_context *context,
 		const char *wrappername, const char *optionname, zval ***optionvalue)
 {
 	zval **wrapperhash;
-	
-	if (FAILURE == zend_hash_find(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&wrapperhash))
+
+	if (FAILURE == zend_hash_find(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&wrapperhash)) {
 		return FAILURE;
+	}
 	return zend_hash_find(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)optionvalue);
 }
 
@@ -1603,8 +1636,9 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 		
 		MAKE_STD_ZVAL(category);
 		array_init(category);
-		if (FAILURE == zend_hash_update(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&category, sizeof(zval *), NULL))
+		if (FAILURE == zend_hash_update(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&category, sizeof(zval *), NULL)) {
 			return FAILURE;
+		}
 
 		ZVAL_ADDREF(optionvalue);
 		wrapperhash = &category;
