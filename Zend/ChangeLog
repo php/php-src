@@ -1,3 +1,40 @@
+2003-02-18  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * zend_stream.c:
+      fileno() needs a FILE * here, and at least on FreeBSD with gcc-2.95.3
+      it is unable to figure out that this is indeed a FILE * and hence it
+      won't compile without this cast.
+
+2003-02-18  Zeev Suraski  <zeev@zend.com>
+
+    * zend.h
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_language_scanner.l
+      zend_opcode.c:
+      Avoid using a C++ reserved word
+
+2003-02-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ZendTS.dsp
+      flex.skl:
+      Fixup build for win32
+
+    * Makefile.am
+      flex.skl
+      zend.c
+      zend.h
+      zend_compile.h
+      zend_execute.c
+      zend_globals.h
+      zend_ini_scanner.l
+      zend_language_scanner.h
+      zend_language_scanner.l
+      zend_stream.c
+      zend_stream.h:
+      Implement simple stream support in the ZE scanners.
+
 2003-02-17  Zeev Suraski  <zeev@zend.com>
 
     * zend_language_parser.y:
