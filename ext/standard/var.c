@@ -678,9 +678,9 @@ PHP_FUNCTION(unserialize)
 /* }}} */
 
 #if MEMORY_LIMIT
-/* {{{ proto int get_memory_usage()
+/* {{{ proto int memory_get_usage()
     Returns the allocated by PHP memory */
-PHP_FUNCTION(get_memory_usage) {
+PHP_FUNCTION(memory_get_usage) {
 	RETURN_LONG(AG(allocated_memory));
 }
 /* }}} */
