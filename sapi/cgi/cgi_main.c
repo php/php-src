@@ -300,7 +300,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	}
 #endif
 
-	SG(request_info).path_translated = NULL;
 	init_request_info(SLS_C);
 	SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
 	CG(extended_info) = 0;
