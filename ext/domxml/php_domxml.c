@@ -150,6 +150,7 @@ static int le_domxmlpip;
 static int le_domxmlcommentp;
 static int le_domxmlnotationp;
 static int le_domxmlparserp;
+
 /*static int le_domxmlentityp;*/
 static int le_domxmlentityrefp;
 /*static int le_domxmlnsp;*/
@@ -158,6 +159,10 @@ static int le_domxmlentityrefp;
 #if HAVE_DOMXSLT
 static int le_domxsltstylesheetp;
 #endif
+static void domxml_error(void *ctx, const char *msg, ...);
+static void domxml_error_ext(void *ctx, const char *msg, ...);
+static void domxml_error_validate(void *ctx, const char *msg, ...);
+static xmlDocPtr php_dom_xmlSAXParse(xmlSAXHandlerPtr sax, const char *buffer, int size, int recovery, void *data);
 
 #if defined(LIBXML_XPATH_ENABLED)
 static int le_xpathctxp;
@@ -193,9 +198,9 @@ static int node_children(zval **children, xmlNode *nodep TSRMLS_DC);
 
 static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_version,												NULL)
-	PHP_FE(xmldoc,														NULL)
+	PHP_FE(xmldoc,														third_arg_force_ref)
 	PHP_FALIAS(domxml_open_mem,				xmldoc,	NULL)
-	PHP_FE(xmldocfile,													NULL)
+	PHP_FE(xmldocfile,														third_arg_force_ref)
 	PHP_FALIAS(domxml_open_file,				xmldocfile,	NULL)
 #if defined(LIBXML_HTML_ENABLED)
 	PHP_FE(html_doc,													NULL)
@@ -262,7 +267,7 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FALIAS(set_content,				domxml_node_set_content,		NULL)
 	PHP_FALIAS(new_xmldoc,				domxml_new_xmldoc,				NULL)
 	PHP_FALIAS(domxml_dumpmem,			domxml_dump_mem,				NULL)
-
+	PHP_FE(domxml_doc_validate,											second_arg_force_ref)
 	{NULL, NULL, NULL}
 };
 
@@ -303,6 +308,8 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(xpath_new_context,		xpath_new_context,				NULL)
 	PHP_FALIAS(xptr_new_context,		xptr_new_context,				NULL)
 #endif
+	PHP_FALIAS(validate,			domxml_doc_validate,				first_arg_force_ref)
+
 	{NULL, NULL, NULL}
 };
 
@@ -498,8 +505,7 @@ static void dom_object_set_data(void *obj, zval *wrapper)
 
 static zval *dom_object_get_data(void *obj)
 {
-/*
-	char tmp[20];
+/*	char tmp[20];
 	sprintf(tmp, "%08X", obj);
 	fprintf(stderr, "Trying getting %s from object ...", tmp);
 	if(((xmlNodePtr) obj)->_private)
@@ -1271,7 +1277,6 @@ PHPAPI zval *php_domobject_new(xmlNodePtr obj, int *found, zval *wrapper_in  TSR
 	return (wrapper);
 }
 
-
 static void domxml_error(void *ctx, const char *msg, ...)
 {
 	char buf[1024];
@@ -1282,6 +1287,145 @@ static void domxml_error(void *ctx, const char *msg, ...)
 	php_error(E_WARNING, buf);
 }
 
+static void domxml_error_ext(void *ctx, const char *msg, ...)
+{
+	xmlParserCtxtPtr ctxt = (xmlParserCtxtPtr) ctx;
+	xmlParserInputPtr input = NULL;
+	char buf[1024];
+	va_list ap;
+
+	va_start(ap, msg);
+	vsnprintf(buf, 1024, msg, ap);
+	va_end(ap);
+
+	if (ctxt != NULL && ctxt->_private != NULL) {
+		zval *errormessages;
+	   	MAKE_STD_ZVAL(errormessages);
+
+		if(array_init(errormessages) != SUCCESS) {
+			// do error handling here
+		} 
+		add_assoc_string(errormessages,"errormessage",buf,1);				
+		input = ctxt->input;
+		add_assoc_string(errormessages,"nodename",ctxt->name,1); 
+		if (input != NULL) {
+			add_assoc_long(errormessages,"line",input->line);
+			add_assoc_long(errormessages,"col",input->col);
+			if (input->filename != NULL) {
+				add_assoc_string(errormessages,"directory",(char *) input->directory,1);				
+				add_assoc_string(errormessages,"file",(char *) input->filename,1);
+			}
+		}
+		add_next_index_zval(ctxt->_private,errormessages);
+	}
+   	php_error(E_WARNING, buf);
+	
+}
+
+static void domxml_error_validate(void *ctx, const char *msg, ...)
+{
+	domxml_ErrorCtxt *ctxt ;
+	char buf[1024];
+
+	va_list ap;
+
+	va_start(ap, msg);
+	vsnprintf(buf, 1024, msg, ap);
+	va_end(ap);
+	ctxt  = (domxml_ErrorCtxt*) ctx;
+
+   	if (ctxt != NULL && ctxt->errors != NULL) {
+		zval *errormessages;
+	   	MAKE_STD_ZVAL(errormessages);
+		if(array_init(errormessages) != SUCCESS) {
+			// do error handling here
+		} 
+		if (ctxt->parser != NULL) {
+			add_assoc_string(errormessages,"nodename",ctxt->parser->name,1); 
+
+			if (ctxt->parser->input != NULL) {
+			add_assoc_long(errormessages,"line",ctxt->parser->input->line);
+			add_assoc_long(errormessages,"col",ctxt->parser->input->col);
+				if (ctxt->parser->input->filename != NULL) {
+					add_assoc_string(errormessages,"directory",(char *) ctxt->parser->input->directory,1);				
+					add_assoc_string(errormessages,"file",(char *) ctxt->parser->input->filename,1);
+				}
+			}
+		}
+		
+		if (ctxt->valid->node != NULL)
+		{
+//		   php_error(E_WARNING,"nodename %s",(char *) ctxt->valid->name);			
+		  
+//			node = *ctxt->node;
+		}
+		add_assoc_string(errormessages,"errormessage",buf,1);			   
+   		add_next_index_zval(ctxt->errors,errormessages);
+	}
+
+   	php_error(E_WARNING, buf);
+	
+}
+
+xmlDocPtr php_dom_xmlSAXParse(xmlSAXHandlerPtr sax, const char *buffer, int size, int recovery, void *data) {
+
+    xmlDocPtr ret;
+    xmlParserCtxtPtr ctxt;
+    domxml_ErrorCtxt errorCtxt;
+    char *directory = NULL;
+    
+    xmlInitParser();
+    /*if size == -1, we assume, it's a filename not a inmemory xml doc*/
+    if (size == -1) {
+		ctxt = (xmlParserCtxt *) xmlCreateFileParserCtxt( buffer);
+    } else {
+		ctxt = (xmlParserCtxt *) xmlCreateMemoryParserCtxt((xmlChar *) buffer, size);
+    }
+    if (ctxt == NULL) {
+		return(NULL);
+    }
+	if (sax != NULL) {
+		if (ctxt->sax != NULL)
+			xmlFree(ctxt->sax);
+		ctxt->sax = sax;
+	}
+	if (data!=NULL) {
+		ctxt->_private=data;
+	}
+
+    /* store directory name */
+	if (size == -1) {
+	    if ((ctxt->directory == NULL) && (directory == NULL))
+    	    directory = xmlParserGetDirectory(buffer);
+	    if ((ctxt->directory == NULL) && (directory != NULL))
+    	    ctxt->directory = (char *) xmlStrdup((xmlChar *) directory);
+	}
+ 	errorCtxt.valid = &ctxt->vctxt;
+	errorCtxt.errors = data;
+	errorCtxt.parser = ctxt;   
+
+	ctxt->sax->error = domxml_error_ext;
+	ctxt->sax->warning = domxml_error_ext;
+	ctxt->vctxt.userData= (void *) &errorCtxt;
+	ctxt->vctxt.error    = (xmlValidityErrorFunc) domxml_error_validate;
+	ctxt->vctxt.warning  = (xmlValidityWarningFunc) domxml_error_validate; 
+
+	xmlParseDocument(ctxt);
+
+	if ((ctxt->wellFormed) || recovery) {
+		ret = ctxt->myDoc;
+	} else {
+		ret = NULL;
+		xmlFreeDoc(ctxt->myDoc);
+		ctxt->myDoc = NULL;
+	}
+    if (sax != NULL)
+        ctxt->sax = NULL;
+
+	xmlFreeParserCtxt(ctxt);
+    
+	return(ret);
+}
 
 PHP_RINIT_FUNCTION(domxml)
 {
@@ -3383,25 +3527,29 @@ PHP_FUNCTION(domxml_doc_ids)
 }
 /* }}} */
 
-/* {{{ proto object xmldoc(string xmldoc[, int mode])
+/* {{{ proto object xmldoc(string xmldoc[, int mode[, array error]])
    Creates DOM object of XML document */
 PHP_FUNCTION(xmldoc)
 {
 	zval *rv = NULL;
 	xmlDoc *docp;
-	int ret;
+	int ret; 
 	char *buffer;
 	int buffer_len;
 	int mode = 0, prevSubstValue;
 	int oldvalue =  xmlDoValidityCheckingDefaultValue;
-/*	xmlDtdPtr dtd; */
+	zval *errors ;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &buffer, &buffer_len, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz", &buffer, &buffer_len, &mode, &errors) == FAILURE) {
 		return;
 	}
 /*	Either of the following line force validation */
 /*	xmlLoadExtDtdDefaultValue = XML_DETECT_IDS; */
 /*	xmlDoValidityCheckingDefaultValue = 1; */
+	if (ZEND_NUM_ARGS() == 3 ) {
+		zval_dtor(errors);
+		array_init(errors);
+	}
 
 	if(mode & DOMXML_LOAD_SUBSTITUTE_ENTITIES)
 		prevSubstValue = xmlSubstituteEntitiesDefault (1);
@@ -3414,15 +3562,27 @@ PHP_FUNCTION(xmldoc)
 	switch (mode & (DOMXML_LOAD_PARSING | DOMXML_LOAD_VALIDATING | DOMXML_LOAD_RECOVERING)) {
 		case DOMXML_LOAD_PARSING:
 			xmlDoValidityCheckingDefaultValue = 0;
-			docp = xmlParseDoc(buffer);
+			if (ZEND_NUM_ARGS() == 3) {
+				docp = php_dom_xmlSAXParse( NULL, (char *) buffer, buffer_len, 0 , errors);
+			} else {
+				docp = xmlParseDoc(buffer);
+			}
 			break;
 		case DOMXML_LOAD_VALIDATING:
 			xmlDoValidityCheckingDefaultValue = 1;
-			docp = xmlParseDoc(buffer);
+			if (ZEND_NUM_ARGS() == 3) {
+				docp = php_dom_xmlSAXParse(NULL, (char *) buffer, buffer_len, 0, errors);
+			} else {
+				docp = xmlParseDoc(buffer);
+			}
 			break;
 		case DOMXML_LOAD_RECOVERING:
 			xmlDoValidityCheckingDefaultValue = 0;
-			docp = xmlRecoverDoc(buffer);
+			if (ZEND_NUM_ARGS() == 3) {
+				docp = php_dom_xmlSAXParse(NULL, (char *) buffer, buffer_len, 1, errors);
+			} else {
+				docp = xmlRecoverDoc(buffer);
+			}
 			break;
 	}
 	xmlSubstituteEntitiesDefault (prevSubstValue);
@@ -3445,7 +3605,7 @@ PHP_FUNCTION(xmldoc)
 }
 /* }}} */
 
-/* {{{ proto object xmldocfile(string filename)
+/* {{{ proto object xmldocfile(string filename[, int mode[, array error])
    Creates DOM object of XML document in file */
 PHP_FUNCTION(xmldocfile)
 {
@@ -3453,31 +3613,67 @@ PHP_FUNCTION(xmldocfile)
 	xmlDoc *docp;
 	int ret, file_len;
 	char *file;
+	int mode = 0, prevSubstValue;
+	int oldvalue =  xmlDoValidityCheckingDefaultValue;
+	zval *errors = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file, &file_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz", &file, &file_len, &mode,  &errors) == FAILURE) {
 		return;
 	}
+			
+	if (ZEND_NUM_ARGS() == 3 ) {
+		zval_dtor(errors);
+		array_init(errors);
+	}
+	 
+	if(mode & DOMXML_LOAD_SUBSTITUTE_ENTITIES)
+		prevSubstValue = xmlSubstituteEntitiesDefault (1);
+	else
+		prevSubstValue = xmlSubstituteEntitiesDefault (0);
 
-	docp = xmlParseFile(file);
+	if(mode & DOMXML_LOAD_COMPLETE_ATTRS)
+		xmlLoadExtDtdDefaultValue |= XML_COMPLETE_ATTRS;
+
+	switch (mode & (DOMXML_LOAD_PARSING | DOMXML_LOAD_VALIDATING | DOMXML_LOAD_RECOVERING)) {
+		case DOMXML_LOAD_PARSING:
+			xmlDoValidityCheckingDefaultValue = 0;
+			if (ZEND_NUM_ARGS() == 3) {
+				docp = php_dom_xmlSAXParse( NULL, (char *) file, -1 , 0 , errors);
+			} else {
+				docp = xmlParseFile(file);
+			}
+			break;
+		case DOMXML_LOAD_VALIDATING:
+			xmlDoValidityCheckingDefaultValue = 1;
+			if (ZEND_NUM_ARGS() == 3) {
+				docp = php_dom_xmlSAXParse(NULL, (char *) file, -1, 0, errors);
+			} else {
+				docp = xmlParseFile(file);
+			}
+			break;
+		case DOMXML_LOAD_RECOVERING:
+			xmlDoValidityCheckingDefaultValue = 0;
+			if (ZEND_NUM_ARGS() == 3) {
+				docp = php_dom_xmlSAXParse(NULL, (char*) file, -1, 1, errors);
+			} else {
+				docp = xmlRecoverFile(file);
+			}
+			break;
+	}
+	xmlSubstituteEntitiesDefault (prevSubstValue);
+	xmlDoValidityCheckingDefaultValue = oldvalue;
+
 	if (!docp) {
 		RETURN_FALSE;
 	}
 
-	DOMXML_RET_OBJ(rv, (xmlNodePtr) docp, &ret);
 
-/*	add_property_resource(return_value, "doc", ret);
-	if (docp->name)
-		add_property_stringl(return_value, "name", (char *) docp->name, strlen(docp->name), 1);
-	if (docp->URL)
-		add_property_stringl(return_value, "url", (char *) docp->URL, strlen(docp->URL), 1);
-	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
-	if (docp->encoding)
-		add_property_stringl(return_value, "encoding", (char *) docp->encoding, strlen(docp->encoding), 1);
-	add_property_long(return_value, "standalone", docp->standalone);
-	add_property_long(return_value, "type", Z_TYPE_P(docp));
-	add_property_long(return_value, "compression", docp->compression);
-	add_property_long(return_value, "charset", docp->charset);
-	zend_list_addref(ret);*/
+	if(DOMXML_IS_TYPE(getThis(), domxmldoc_class_entry)) {
+		DOMXML_DOMOBJ_NEW(getThis(), (xmlNodePtr) docp, &ret);
+	} else {
+		DOMXML_RET_OBJ(rv, (xmlNodePtr) docp, &ret);
+	}
+
 }
 /* }}} */
 
@@ -3647,6 +3843,47 @@ PHP_FUNCTION(domxml_doc_set_root)
 	xmlDocSetRootElement(docp, root);
 
 	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool domxml_doc_validate(array &error)
+   Validates a DomDocument according to his DTD*/
+PHP_FUNCTION(domxml_doc_validate)
+{
+	zval *id;
+	xmlValidCtxt cvp;
+	xmlDoc *docp;
+	domxml_ErrorCtxt errorCtxt;
+	zval *errors ;
+	int oldvalue =  xmlDoValidityCheckingDefaultValue;
+	    
+	DOMXML_PARAM_ONE(docp, id, le_domxmldocp,"|z",&errors);
+	errorCtxt.valid = &cvp;
+
+	if (ZEND_NUM_ARGS() == 1) {
+		zval_dtor(errors);
+		array_init(errors);
+		errorCtxt.errors = errors;
+	} else {
+		errorCtxt.errors = NULL;
+	}
+
+	errorCtxt.parser = NULL;
+	xmlDoValidityCheckingDefaultValue = 1;
+	cvp.userData = (void *) &errorCtxt;
+	cvp.error    = (xmlValidityErrorFunc) domxml_error_validate;
+	cvp.warning  = (xmlValidityWarningFunc) domxml_error_validate;
+	if (docp->intSubset == NULL) {
+		php_error(E_NOTICE, "%s(): No DTD given in XML-Document", get_active_function_name(TSRMLS_C));
+	}
+    
+	if (xmlValidateDocument(&cvp, docp)) {
+		RETVAL_TRUE;
+	} else {
+		RETVAL_FALSE;
+	}
+	xmlDoValidityCheckingDefaultValue = oldvalue;
+    
 }
 /* }}} */
 
