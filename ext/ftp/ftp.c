@@ -1373,9 +1373,6 @@ int
 ftp_async_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, int resumepos)
 {
 	databuf_t		*data = NULL;
-	char			*ptr;
-	int			lastch;
-	int			rcvd;
 	char			arg[11];
 	TSRMLS_FETCH();
 
@@ -1496,9 +1493,6 @@ int
 ftp_async_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, int startpos)
 {
 	databuf_t		*data = NULL;
-	int			size;
-	char			*ptr;
-	int			ch;
 	char			arg[11];
 	TSRMLS_FETCH();
 
