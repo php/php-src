@@ -44,9 +44,18 @@ const char *pdo_mysql_get_sqlstate(unsigned int my_errno) {
 int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC) /* {{{ */
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
-	pdo_error_type *pdo_err = stmt ? &stmt->error_code : &dbh->error_code;
-	pdo_mysql_error_info *einfo = &H->einfo;
+	pdo_error_type *pdo_err; 
+	pdo_mysql_error_info *einfo;
 	char *sqlstate = NULL;
+
+	if (stmt) {
+		pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
+		pdo_err = &stmt->error_code;
+		einfo   = &S->einfo;
+	} else {
+		pdo_err = &dbh->error_code;
+		einfo   = &H->einfo;
+	}
 
 	einfo->errcode = mysql_errno(H->server);
 	einfo->file = file;
@@ -64,12 +73,12 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 		return 0;
 	}
 
+	strcpy(*pdo_err, pdo_mysql_get_sqlstate(einfo->errcode));
+
 	if (!dbh->methods) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
 				*pdo_err, einfo->errcode, einfo->errmsg);
 	}
-
-	strcpy(*pdo_err, pdo_mysql_get_sqlstate(einfo->errcode));
 
 	return einfo->errcode;
 }
@@ -79,6 +88,13 @@ static int pdo_mysql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	pdo_mysql_error_info *einfo = &H->einfo;
+
+	if (stmt) {
+		pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
+		einfo = &S->einfo;
+	} else {
+		einfo = &H->einfo;
+	}
 
 	if (einfo->errcode) {
 		add_next_index_long(info, einfo->errcode);

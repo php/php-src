@@ -50,6 +50,7 @@ typedef struct {
 	MYSQL_FIELD	    *fields;
 	MYSQL_ROW		current_data;
 	long			*current_lengths;
+	pdo_mysql_error_info einfo;
 } pdo_mysql_stmt;
 
 typedef struct {
