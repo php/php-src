@@ -2095,10 +2095,6 @@ EOF
 	    else
 	      build_libtool_libs=no
 	    fi
-	  else
-	    echo "*** The inter-library dependencies that have been dropped here will be"
-	    echo "*** automatically added whenever a program is linked with this library"
-	    echo "*** or is declared to -dlopen it."
 	  fi
 	fi
 	# Done checking deplibs!
