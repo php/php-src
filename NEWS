@@ -14,7 +14,7 @@ PHP 4                                                                      NEWS
   . ext/cybercash
   . ext/icap
   . sapi/fhttpd
-- To PECL moved extensions: (James, Derick)
+- Moved extensions to PECL (http://pear.php.net/): (James, Derick)
   . ext/vpopmail
   . ext/cybermut
 - Added "neutral" language entry to mbstring spec. (Moriyoshi) 
