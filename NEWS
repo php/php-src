@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
+- Removed php_check_syntax() function as it never worked properly. (Ilia)
+- Removed garbage manager in Zend Engine which results in more aggressive
+  freeing of data. (Dmitry, Andi)
 - Moved extensions to PECL:
   . ext/cpdf        (Tony, Derick)
   . ext/dio         (Jani, Derick)
@@ -8,12 +11,9 @@ PHP                                                                        NEWS
   . ext/mnogosearch (Jani, Derick)
   . ext/w32api      (Jani, Derick)
   . ext/yp          (Jani, Derick)
-- Removed php_check_syntax() function, never worked properly.
 - Changed stream_filter_(ap|pre)pend() to return resource. (Sara)
 - Changed mysqli_exception and sqlite_exception to use RuntimeException as base 
   if SPL extension is present. (Georg, Marcus)
-- Removed garbage manager in Zend Engine which results in more aggressive
-  freeing of data. (Dmitry, Andi)
 - Improved support for embedded server in mysqli. (Georg)
 - Improved performance of:
   . general execution/compilation. (Andi, Thies, Sterling, Dmitry, Marcus)
