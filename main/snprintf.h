@@ -62,13 +62,22 @@ Example:
 #ifndef SNPRINTF_H
 #define SNPRINTF_H
 
-int ap_php_snprintf(char *, size_t, const char *, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPAPI int ap_php_snprintf(char *, size_t, const char *, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+#ifdef snprintf
+#undef snprintf
+#endif
 #define snprintf ap_php_snprintf
 
-int ap_php_vsnprintf(char *, size_t, const char *, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
+PHPAPI int ap_php_vsnprintf(char *, size_t, const char *, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
+#ifdef vsnprintf
+#undef vsnprintf
+#endif
 #define vsnprintf ap_php_vsnprintf
 
-int php_sprintf (char* s, const char* format, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
+PHPAPI int php_sprintf (char* s, const char* format, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
+#ifdef sprintf
+#undef sprintf
+#endif
 #define sprintf php_sprintf
 
 typedef enum {

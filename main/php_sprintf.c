@@ -20,9 +20,9 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include "php_config.h"
+#include "php.h"
 
-int
+PHPAPI int
 php_sprintf (char*s, const char* format, ...)
 {
   va_list args;
