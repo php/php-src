@@ -241,8 +241,23 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	int len;
 	sapi_header_struct *h;
 	zend_llist_position pos;
-	
-	len = sprintf(buf, "Status: %d\r\n", SG(sapi_headers).http_response_code);
+	long rfc2616_headers = 0;
+
+	/* Check wheater to send RFC2616 style headers compatible with
+	 * PHP versions 4.2.3 and earlier compatible with web servers
+	 * such as IIS. Default is informal CGI RFC header compatible 
+	 * with Apache.
+	 */
+	if (cfg_get_long("cgi.rfc2616_headers", &rfc2616_headers) == FAILURE) {
+		rfc2616_headers = 0;
+	}
+
+	if (rfc2616_headers && SG(sapi_headers).http_status_line) {
+		len = sprintf(buf, "%s\r\n", SG(sapi_headers).http_status_line);
+	} else {
+		len = sprintf(buf, "Status: %d\r\n", SG(sapi_headers).http_response_code);
+	}
+
 	PHPWRITE_H(buf, len);
 
 	if (SG(sapi_headers).send_default_content_type) {

@@ -461,6 +461,14 @@ enable_dl = On
 ; Set to 1 if running under IIS.  Default is zero.
 ; fastcgi.impersonate = 1;
 
+; cgi.rfc2616_headers configuration option tells PHP what type of headers to
+; use when sending HTTP response code. If it's set 0 PHP sends Status: header that
+; is supported by Apache. When this option is set to 1 PHP will send
+; RFC2616 compliant header.
+; Set to 1 if running under IIS.  Default is zero.
+;cgi.rfc2616_headers = 0 
+
+
 ;;;;;;;;;;;;;;;;
 ; File Uploads ;
 ;;;;;;;;;;;;;;;;
