@@ -3336,8 +3336,8 @@ PHP_FUNCTION(ociwritetemporarylob)
 				OCI_DEFAULT, 
 				OCI_DEFAULT, 
 				OCI_TEMP_CLOB, 
-				TRUE, 
-				OCI_DURATION_SESSION));
+			    OCI_ATTR_NOCACHE, 
+				OCI_DURATION_STATEMENT));
 
     if (connection->error) {
         oci_error(connection->pError, "OCILobCreateTemporary", connection->error);
@@ -3361,7 +3361,7 @@ PHP_FUNCTION(ociwritetemporarylob)
     loblen = (*var)->value.str.len;
 	
     if (loblen < 1) {
-        php_error(E_WARNING, "Cannot save a lob wich size is less than 1 byte");
+        php_error(E_WARNING, "Cannot save a lob that is less than 1 byte");
         RETURN_FALSE;
     }
 
@@ -3400,6 +3400,7 @@ PHP_FUNCTION(ocicloselob)
 	OCILobLocator *mylob;
 	oci_connection *connection;
 	oci_descriptor *descriptor;
+    int is_temporary;
 
 	if ((id = getThis()) != 0) {
 		inx = _oci_get_ocidesc(id,&descriptor TSRMLS_CC);
@@ -3422,6 +3423,26 @@ PHP_FUNCTION(ocicloselob)
                 oci_error(connection->pError, "OCILobClose", connection->error);
                 oci_handle_error(connection, connection->error);
                 RETURN_FALSE;
+            }
+
+            connection->error = 
+                OCILobIsTemporary(OCI(pEnv),
+                                  connection->pError,
+                                  mylob,
+                                  &is_temporary);
+            if (is_temporary) {
+                connection->error = 
+                    OCILobFreeTemporary(connection->pServiceContext,
+                                        connection->pError,
+                                        mylob);
+
+                if (connection->error) {
+                    oci_error(connection->pError, "OCILobFreeTemporary", 
+                              connection->error);
+                    oci_handle_error(connection, connection->error);
+                    RETURN_FALSE;
+                }
+                oci_debug("oci_lob_free_temporary: descr=%d",inx);
             }
 
 			oci_debug("oci_close_lob: descr=%d",inx);
@@ -5100,8 +5121,8 @@ PHP_FUNCTION(ocinewcollection)
     }
 
 	switch(coll->coll_typecode) {
+       case OCI_TYPECODE_TABLE:
 	   case OCI_TYPECODE_VARRAY:
-	   case OCI_TYPECODE_TABLE:
 		   CALL_OCI_RETURN(connection->error, OCIAttrGet(
 					   (dvoid*) parmp1, 
 					   (ub4) OCI_DTYPE_PARAM, 
