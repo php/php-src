@@ -261,21 +261,19 @@ static ZEND_RSRC_DTOR_FUNC(php_sqlite_result_dtor)
 
 static int php_sqlite_forget_persistent_id_numbers(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-	struct php_sqlite_db *db;
+	struct php_sqlite_db *db = (struct php_sqlite_db*)rsrc->ptr;
 
+	/* prevent bad mojo if someone tries to use a previously registered function in the next request */
+	zend_hash_apply(&db->callbacks, (apply_func_t)php_sqlite_callback_invalidator TSRMLS_CC);
+	
 	if (Z_TYPE_P(rsrc) != le_sqlite_pdb) {
 		return 0;
 	}
-
-	db = (struct php_sqlite_db*)rsrc->ptr;
 
 	db->rsrc_id = FAILURE;
 
 	/* don't leave pending commits hanging around */
 	sqlite_exec(db->db, "ROLLBACK", NULL, NULL, NULL);
-	
-	/* prevent bad mojo if someone tries to use a previously registered function in the next request */
-	zend_hash_apply(&db->callbacks, (apply_func_t)php_sqlite_callback_invalidator TSRMLS_CC);
 	
 	return 0;
 }
