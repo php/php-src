@@ -5,7 +5,7 @@ ZE2 errors caught as exceptions
 --FILE--
 <?php
 
-class MyException {
+class MyException extends Exception {
 	function MyException($_errno, $_errmsg) {
 		$this->errno = $_errno;
 		$this->errmsg = $_errmsg;
