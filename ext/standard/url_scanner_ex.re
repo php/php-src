@@ -60,7 +60,7 @@ static inline void smart_str_free(smart_str *s)
 		free(s->c);
 		s->c = NULL;
 	}
-	s->len = 0;
+	s->a = s->len = 0;
 }
 
 static inline void smart_str_copyl(smart_str *dest, const char *src, size_t len)
@@ -81,12 +81,17 @@ static inline void smart_str_appendl(smart_str *dest, const char *src, size_t le
 	smart_str_append(dest, &s);
 }
 
-static inline void smart_str_appends(smart_str *dest, char *src)
+static inline void smart_str_appends(smart_str *dest, const char *src)
 {
 	smart_str_appendl(dest, src, strlen(src));
 }
 
-static inline void attach_url(smart_str *url, smart_str *name, smart_str *val, char *separator)
+static inline void smart_str_copys(smart_str *dest, const char *src)
+{
+	smart_str_copyl(dest, src, strlen(src));
+}
+
+static inline void attach_url(smart_str *url, smart_str *name, smart_str *val, const char *separator)
 {
 	if (strchr(url->c, ':')) return;
 
@@ -133,7 +138,7 @@ static inline void tag_arg(url_adapt_state_t *ctx PLS_DC)
 all = [\000-\377];
 */
 
-#define NEXT goto nextiter
+#define NEXT continue
 
 #define COPY_ALL \
 	smart_str_appendl(&ctx->result, start, YYCURSOR - start); \
@@ -168,7 +173,7 @@ enum {
 static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
 {
 	char *para_start, *arg_start, *tag_start;
-	char *start;
+	char *start = NULL;
 	char *cursor, *marker;
 	PLS_FETCH();
 
@@ -181,7 +186,9 @@ static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
 	while (YYCURSOR < YYLIMIT) {
 		start = YYCURSOR;
 
-//	printf("state %d:%s'\n", ctx->state, YYCURSOR); 
+#ifdef SCANNER_DEBUG
+	printf("state %d:%s'\n", ctx->state, YYCURSOR);
+#endif
 		switch (ctx->state) {
 			
 		case STATE_PLAIN:
@@ -197,7 +204,7 @@ static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
   						YYCURSOR--; 
   						arg_start = YYCURSOR;
 						smart_str_copyl(&ctx->tag, start, YYCURSOR - start); 
-#ifdef DEBUG
+#ifdef SCANNER_DEBUG
 						printf("TAG(%s)\n", ctx->tag.c);
 #endif
 						GO(STATE_NEXT_ARG);
@@ -231,8 +238,11 @@ static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
 				smart_str_appendl(&ctx->result, " ", 1);
 /*!re2c
   [a-zA-Z]+ [ ]* "=" [ ]*  		{
-						smart_str_copyl(&ctx->arg, start, YYCURSOR - start - 1);
-#ifdef DEBUG
+  						char *p;
+
+						for (p = start; isalpha(*p); p++);
+						smart_str_copyl(&ctx->arg, start, p - start);
+#ifdef SCANNER_DEBUG
 						printf("ARG(%s)\n", ctx->arg.c);
 #endif
 						para_start = YYCURSOR;
@@ -253,7 +263,7 @@ static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
   						YYCURSOR--;
 						para_start = NULL;
 						smart_str_copyl(&ctx->para, start + 1, YYCURSOR - start - 2);
-#ifdef DEBUG
+#ifdef SCANNER_DEBUG
 						printf("PARA(%s)\n", ctx->para.c);
 #endif
 						tag_arg(ctx PLS_CC);
@@ -265,7 +275,7 @@ static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
   						YYCURSOR--;
 						para_start = NULL;
 						smart_str_copyl(&ctx->para, start, YYCURSOR - start);
-#ifdef DEBUG
+#ifdef SCANNER_DEBUG
 						printf("PARA(%s)\n", ctx->para.c);
 #endif
 						tag_arg(ctx PLS_CC);
@@ -307,14 +317,12 @@ finish:
 		smart_str_free(&ctx->work);
 	}
 
-#ifdef DEBUG 
+#ifdef SCANNER_DEBUG 
 	if (ctx->work.c) {
 		printf("PRESERVING %s'\n", ctx->work.c);
 	}
 #endif
 }
-
-#define smart_str_copys(a,b) smart_str_copyl(a,b,strlen(b))
 
 char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen)
 {
