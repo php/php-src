@@ -36,6 +36,7 @@
 #define ZEND_NAMED_FE(zend_name, name, arg_types) { #zend_name, name, arg_types },
 #define ZEND_FE(name, arg_types) ZEND_NAMED_FE(name, ZEND_FN(name), arg_types)
 #define ZEND_FALIAS(name, alias, arg_types) ZEND_NAMED_FE(name, ZEND_FN(alias), arg_types)
+#define ZEND_STATIC_FE(name, impl_name, arg_types) { name, impl_name, arg_types },
 
 #define ZEND_MINIT(module)       zend_minit_##module
 #define ZEND_MSHUTDOWN(module)   zend_mshutdown_##module
