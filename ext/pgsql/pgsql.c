@@ -319,7 +319,9 @@ static int _rollback_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	}
 	orig = PGG(ignore_notices);
 	PGG(ignore_notices) = 1;
-	res = PQexec(link,"BEGIN;ROLLBACK;");
+	res = PQexec(link,"BEGIN;");
+	PQclear(res);
+	res = PQexec(link,"ROLLBACK;");
 	PQclear(res);
 	PGG(ignore_notices) = orig;
 
