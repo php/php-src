@@ -42,7 +42,7 @@ modules, but which are not relevant to the outside. */
 #elif defined(NETWARE)
 # include "config.nw.h"
 #else
-# include "php_config.h"
+# include <php_config.h>
 #endif
 
 #ifndef PCRE_SPY

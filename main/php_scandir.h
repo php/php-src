@@ -34,7 +34,7 @@
 #elif NETWARE
 #include "config.nw.h"
 #else
-#include "php_config.h"
+#include <php_config.h>
 #endif
 
 #ifdef HAVE_DIRENT_H
