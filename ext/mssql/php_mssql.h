@@ -33,8 +33,8 @@
 
 
 #define MSSQL_VERSION "7.0"
-#include "sqlfront.h"
-#include "sqldb.h"
+#include <sqlfront.h>
+#include <sqldb.h>
 
 typedef short TDS_SHORT;
 #if HAVE_FREETDS
@@ -62,6 +62,7 @@ typedef short TDS_SHORT;
 #define SQLVARBINARY SYBVARBINARY
 #ifdef SQLUNIQUE /* FreeTSD 0.61+ */
 #define SQLUNIQUE SYBUNIQUE
+#define dbfreelogin dbloginfree
 #endif
 #define DBERRHANDLE(a, b) dberrhandle(b)
 #define DBMSGHANDLE(a, b) dbmsghandle(b)
