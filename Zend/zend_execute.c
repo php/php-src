@@ -2080,8 +2080,6 @@ send_by_ref:
 					if (container) {
 						HashTable *ht;
 
-						SEPARATE_ZVAL_IF_NOT_REF(container);
-
 						switch ((*container)->type) {
 							case IS_ARRAY:
 								ht = (*container)->value.ht;
