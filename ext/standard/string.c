@@ -463,6 +463,7 @@ PHP_FUNCTION(wordwrap)
 								break;
 							}
 						}
+						l ++;
 					}
 				}
 				i += l+1;
