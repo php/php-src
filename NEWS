@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Added possibility to call PHP functions as XSLT-functions. (Christian)
 - Added possibility to prevent PHP from registering variables when
   input filter support is used. (Derick)
+- Added EXSLT support in ext/xsl. (Christian).
 - Added new functions:
   . dba_key_split() to split inifile keys in an array. (Marcus)
   . time_nanosleep() signal safe sleep (Magnus, Ilia)
@@ -13,6 +14,7 @@ PHP                                                                        NEWS
   . image_type_to_extension(). return extension based on image type. (Ilia)
 - Route stat() and family via streams API. (Sara)
 - Fixed __autoload() to preserve case of the passed class name. (Andi)
+- Fixed bug #26384 (xsltprocessor->transformToXxx causes segfault with xsl:key). (Christian)
 - Fixed bug #26072 (--disable-libxml does not work). (Jani)
 - Fixed bug #26083 (Non-working write support in ext/dom). (Ilia)
 - Fixed bug #26001 (serialize crashes when accessing an overloaded object that 
