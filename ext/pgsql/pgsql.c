@@ -21,6 +21,10 @@
 
 #include <stdlib.h>
 
+#ifdef PIC
+# define COMPILE_DL 1
+#endif
+
 #include "php.h"
 #include "php3_pgsql.h"
 #include "ext/standard/php3_standard.h"
