@@ -1997,7 +1997,7 @@ _oci_close_server(oci_server *server)
 
 	if (server->open) {
 		if (server->pServer && OCI(pError)) {
-#if APACHE
+#if 0 && APACHE
 			void (*handler) (int);
 			handler = signal(SIGCHLD, SIG_DFL);
 #endif
@@ -2006,7 +2006,7 @@ _oci_close_server(oci_server *server)
 								OCI(pError),
 								OCI_DEFAULT);
 
-#if APACHE
+#if 0 && APACHE
 			signal(SIGCHLD,handler);
 #endif
 			
