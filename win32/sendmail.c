@@ -31,6 +31,10 @@
 #include "sendmail.h"
 #include "php_ini.h"
 
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+#include "ext/pcre/php_pcre.h"
+#endif
+
 /*
    extern int _daylight;
    extern long _timezone;
@@ -100,10 +104,78 @@ static char *ErrorMessages[] =
 	{"Bad Mail Host"},
 	{"Bad Message File"},
 	{"\"sendmail_from\" not set in php.ini or custom \"From:\" header missing"},
-	{"Mailserver rejected our \"sendmail_from\" setting"} /* 20 */
+	{"Mailserver rejected our \"sendmail_from\" setting"}, /* 20 */
+	{"Error while trimming mail header with PCRE, please file a bug report at http://bugs.php.net/"} /* 21 */
 };
 
+/* This pattern converts all single occurences of \n (Unix)
+ * withour a leading \r to \r\n and all occurences of \r (Mac)
+ * without a trailing \n to \r\n
+ * Thx to Nibbler from ircnet/#linuxger
+ */
+#define PHP_WIN32_MAIL_UNIFY_PATTERN	"/(\r\n?)|\n/"
+#define PHP_WIN32_MAIL_UNIFY_REPLACE	"\r\n"
 
+/* This pattern removes \r\n from the start of the string,
+ * \r\n from the end of the string and also makes sure every line
+ * is only wrapped with a single \r\n (thus reduces multiple
+ * occurences of \r\n between lines to a single \r\n) */
+#define PHP_WIN32_MAIL_RMVDBL_PATTERN	"/^\r\n|(\r\n)+$/m"
+#define PHP_WIN32_MAIL_RMVDBL_REPLACE	""
+
+/* This function is meant to unify the headers passed to to mail()
+ * This means, use PCRE to transform single occurences of \n or \r in \r\n
+ * As a second step we also eleminate all \r\n occurences which are:
+ * 1) At the start of the header
+ * 2) At the end of the header
+ * 3) Two or more occurences in the header are removed so only one is left
+ *
+ * Returns NULL on error, or the new char* buffer on success.
+ * You have to take care and efree() the buffer on your own.
+ */
+static char *php_win32_mail_trim_header(char *header TSRMLS_DC)
+{
+
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+	
+	char *result, *result2;
+	int result_len;
+	zval *replace;
+
+	if (!header) {
+		return NULL;
+	}
+
+	MAKE_STD_ZVAL(replace);
+	ZVAL_STRING(replace, PHP_WIN32_MAIL_UNIFY_REPLACE, 0);
+
+	result = php_pcre_replace(PHP_WIN32_MAIL_UNIFY_PATTERN, sizeof(PHP_WIN32_MAIL_UNIFY_PATTERN)-1,
+							  header, strlen(header),
+							  replace,
+							  0,
+							  &result_len,
+							  -1 TSRMLS_CC);
+	if (NULL == result) {
+		FREE_ZVAL(replace);
+		return NULL;
+	}
+
+	ZVAL_STRING(replace, PHP_WIN32_MAIL_RMVDBL_REPLACE, 0);
+
+	result2 = php_pcre_replace(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1,
+							   result, result_len,
+							   replace,
+							   0,
+							   &result_len,
+							   -1 TSRMLS_CC);
+	efree(result);
+	FREE_ZVAL(replace);
+	return result2;
+#else
+	/* In case we don't have PCRE support (for whatever reason...) simply do nothing and return the unmodified header */
+	return estrdup(header);
+#endif
+}
 
 /*********************************************************************
 // Name:  TSendMail
@@ -124,6 +196,7 @@ int TSendMail(char *host, int *error, char **error_message,
 	int ret;
 	char *RPath = NULL;
 	char *headers_lc = NULL; /* headers_lc is only created if we've a header at all */
+	TSRMLS_FETCH();
 
 	WinsockStarted = FALSE;
 
@@ -140,9 +213,17 @@ int TSendMail(char *host, int *error, char **error_message,
 	if (headers) {
 		char *pos = NULL;
 		size_t i;
+
+		/* Use PCRE to trim the header into the right format */
+		if (NULL == (headers = php_win32_mail_trim_header(headers TSRMLS_CC))) {
+			*error = W32_SM_PCRE_ERROR;
+			return FAILURE;
+		}
+
 		/* Create a lowercased header for all the searches so we're finally case
 		 * insensitive when searching for a pattern. */
 		if (NULL == (headers_lc = estrdup(headers))) {
+			efree(headers);
 			*error = OUT_OF_MEMORY;
 			return FAILURE;
 		}
@@ -155,7 +236,8 @@ int TSendMail(char *host, int *error, char **error_message,
 	if (INI_STR("sendmail_from")) {
 		RPath = estrdup(INI_STR("sendmail_from"));
 	} else {
-		if (headers_lc) {
+		if (headers) {
+			efree(headers);
 			efree(headers_lc);
 		}
 		*error = W32_SM_SENDMAIL_FROM_NOT_SET;
@@ -168,7 +250,8 @@ int TSendMail(char *host, int *error, char **error_message,
 		if (RPath) {
 			efree(RPath);
 		}
-		if (headers_lc) {
+		if (headers) {
+			efree(headers);
 			efree(headers_lc);
 		}
 		/* 128 is safe here, the specifier in snprintf isn't longer than that */
@@ -186,7 +269,8 @@ int TSendMail(char *host, int *error, char **error_message,
 		if (RPath) {
 			efree(RPath);
 		}
-		if (headers_lc) {
+		if (headers) {
+			efree(headers);
 			efree(headers_lc);
 		}
 		if (ret != SUCCESS) {
@@ -311,10 +395,13 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	while(token != NULL)
 	{
 		snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
-		if ((res = Post(Buffer)) != SUCCESS)
+		if ((res = Post(Buffer)) != SUCCESS) {
+			efree(tempMailTo);
 			return (res);
+		}
 		if ((res = Ack(&server_response)) != SUCCESS) {
 			SMTP_ERROR_RESPONSE(server_response);
+			efree(tempMailTo);
 			return (res);
 		}
 		token = strtok(NULL, ",");
