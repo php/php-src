@@ -1543,7 +1543,7 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto bool openssl_csr_new(array dn, resource &privkey [, array extraattribs, array configargs])
+/* {{{ proto bool openssl_csr_new(array dn, resource &privkey [, array configargs, array extraattribs])
    Generates a privkey and CSR */
 PHP_FUNCTION(openssl_csr_new)
 {
@@ -2410,7 +2410,7 @@ PHP_FUNCTION(openssl_private_encrypt)
 						padding) == cryptedlen);
 			break;
 		default:
-			zend_error(E_WARNING, "%s(): key type not supported in this PHP build!");
+			zend_error(E_WARNING, "key type not supported in this PHP build!");
 	}
 
 	if (successful) {
@@ -2427,7 +2427,7 @@ PHP_FUNCTION(openssl_private_encrypt)
 }
 /* }}} */
 
-/* {{{ proto bool openssl_private_decrypt(string data, string decrypted, mixed key [, int padding])
+/* {{{ proto bool openssl_private_decrypt(string data, string &decrypted, mixed key [, int padding])
    Decrypts data with private key */
 PHP_FUNCTION(openssl_private_decrypt)
 {
