@@ -1085,6 +1085,8 @@ PHP_FUNCTION(preg_split)
 	if (argc > 2) {
 		convert_to_long_ex(limit);
 		limit_val = Z_LVAL_PP(limit);
+		if (limit_val == 0)
+			limit_val = -1;
 
 		if (argc > 3) {
 			convert_to_long_ex(flags);
@@ -1130,10 +1132,15 @@ PHP_FUNCTION(preg_split)
 		if (count > 0) {
 			match = Z_STRVAL_PP(subject) + offsets[0];
 
-			if (!no_empty || &Z_STRVAL_PP(subject)[offsets[0]] != last_match)
+			if (!no_empty || &Z_STRVAL_PP(subject)[offsets[0]] != last_match) {
 				/* Add the piece to the return value */
 				add_next_index_stringl(return_value, last_match,
 									   &Z_STRVAL_PP(subject)[offsets[0]]-last_match, 1);
+
+				/* One less left to do */
+				if (limit_val != -1)
+					limit_val--;
+			}
 			
 			last_match = &Z_STRVAL_PP(subject)[offsets[1]];
 
@@ -1147,10 +1154,6 @@ PHP_FUNCTION(preg_split)
 											   match_len, 1);
 				}
 			}
-			
-			/* One less left to do */
-			if (limit_val != -1)
-				limit_val--;
 		} else { /* Failed to match */
 			/* If we previously set PCRE_NOTEMPTY after a null match,
 			   this is not necessarily the end. We need to advance
