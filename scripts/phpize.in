@@ -12,20 +12,28 @@ CLEAN_FILES="$FILES *.lo *.la *.o .deps .libs/ build/ include/ modules/ install-
 	aclocal.m4 config.h config.h.in conftest* ltmain.sh libtool config.cache \
 	config.log config.status Makefile Makefile.fragments Makefile.objects"
 
-if test ! -r config.m4; then
+# Sanity check
+if test ! -r config.m4 && test "$1" != "--help"; then
   echo "Cannot find config.m4. "
   echo "Make sure that you run $0 in the top level source directory of the module"
   exit 1
 fi
 
-# Cleanup
-if test "$1" = "--clean"; then
-  echo "Cleaning.."
-  for i in $CLEAN_FILES; do
-    test -e && rm -rf $i
-  done
-  exit 0
-fi
+# Usage
+case "$args" in 
+  --clean)
+    # Cleanup
+    echo "Cleaning.."
+    for i in $CLEAN_FILES; do
+      test -e $i && rm -rf $i
+    done
+    exit 0
+    ;;
+  --help)
+    echo "Usage: $0 [--clean|--help]"
+    exit 1
+    ;;
+esac
 
 test -d build || mkdir build
 
