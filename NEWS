@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Made $HTTP_SESSION_VARS['foo'] and $foo be references to the same value
+  when register_globals is on. (Andrei)
 - Fixed readfile/passthru losing resources during connection abort (Sascha)
 - Fixed bug in the mcrypt extension that caused segfaults when using a key
   that is too large for the used algorithm, and a bug that caused
