@@ -265,6 +265,34 @@ static int odbc_stmt_set_param(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
 	}
 }
 
+static int odbc_stmt_get_attr(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
+{
+	SQLRETURN rc;
+	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
+
+	switch (attr) {
+		case PDO_ATTR_CURSOR_NAME:
+		{
+			char buf[256];
+			SQLSMALLINT len = 0;
+			rc = SQLGetCursorName(S->stmt, buf, sizeof(buf), &len);
+
+			if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
+				ZVAL_STRINGL(val, buf, len, 1);
+				return 1;
+			}
+			pdo_odbc_stmt_error("SQLGetCursorName");
+			return 0;
+		}
+
+		default:
+			strcpy(S->einfo.last_err_msg, "Unknown Attribute");
+			S->einfo.what = "getAttribute";
+			strcpy(S->einfo.last_state, "IM0001");
+			return -1;
+	}
+}
+
 static int odbc_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	SQLRETURN rc;
@@ -295,7 +323,7 @@ struct pdo_stmt_methods odbc_stmt_methods = {
 	odbc_stmt_get_col,
 	odbc_stmt_param_hook,
 	odbc_stmt_set_param,
-	NULL, /* get attr */
+	odbc_stmt_get_attr, /* get attr */
 	NULL, /* get column meta */
 	odbc_stmt_next_rowset
 };
