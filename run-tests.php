@@ -186,7 +186,8 @@ $php_info = `$php $info_params $info_file`;
 define('TESTED_PHP_VERSION', `$php -r 'echo PHP_VERSION;'`);
 
 // Write test context information.
-
+function write_information() {
+	global $cwd, $php, $php_info, $user_tests;
 echo "
 =====================================================================
 CWD         : $cwd
@@ -198,6 +199,7 @@ foreach ($user_tests as $test_dir) {
 echo "
 =====================================================================
 ";
+}
 
 // Determine the tests to be run.
 
@@ -211,23 +213,81 @@ if (!ini_get('register_globals')) {
 }
 
 // If parameters given assume they represent selected tests to run.
+$failed_tests_file= false;
 if (isset($argc) && $argc > 1) {
 	for ($i=1; $i<$argc; $i++) {
-		$testfile = realpath($argv[$i]);
-		if (is_dir($testfile)) {
-			find_files($testfile);
-		} else if (preg_match("/\.phpt$/", $testfile)) {
-			$test_files[] = $testfile;
+		if (substr($argv[$i],0,1) == '-') {   
+			$switch = strtolower(substr($argv[$i],1,1));
+			switch($switch) {
+				case 'r':
+				case 'l':
+					$test_list = @file($argv[++$i]);
+					if (is_array($test_list) && count($test_list)) {
+						$test_files = array_merge($test_files, $test_list);
+					}
+					if ($switch != 'l') {
+						break;
+					}
+					$i--;
+				case 'w':
+					$failed_tests_file = fopen($argv[++$i], 'w+t');
+					break;
+				case 'a':
+					$failed_tests_file = fopen($argv[++$i], 'a+t');
+					break;
+				default:
+					echo "Illegal switch specified!\n";
+				case "h":
+				case "help":
+				case "-help":
+					echo <<<HELP
+Synopsis:
+    php run-tests.php [options] [files] [directories]
+
+Options:
+    -l <file>   Read the testfiles to be executed from <file>. After the test 
+                has finished all failed tests are written to the same <file>. 
+                If the list is empty and now further test is specified then
+                all tests are executed.
+
+    -r <file>   Read the testfiles to be executed from <file>.
+
+    -w <file>   Write a list of all failed tests to <file>.
+
+    -a <file>   Same as -w but append rather then truncating <file>.
+
+    -h <file>   This Help.
+
+HELP;
+					exit(1);
+			}
+		} else {
+			$testfile = realpath($argv[$i]);
+			if (is_dir($testfile)) {
+				find_files($testfile);
+			} else if (preg_match("/\.phpt$/", $testfile)) {
+				$test_files[] = $testfile;
+			}
 		}
+	}
+	for($i = 0; $i < count($test_files); $i++) {
+		$test_files[$i] = trim($test_files[$i]);
 	}
 
 	// Run selected tests.
 	if (count($test_files)) {
+		write_information();
 		usort($test_files, "test_sort");
 		echo "Running selected tests.\n";
 		$start_time = time();
 		foreach($test_files AS $name) {
 			$test_results[$name] = run_test($php,$name);
+			if ($failed_tests_file && ($test_results[$name] == 'FAILED' || $test_results[$name] == 'WARNED')) {
+				fwrite($failed_tests_file, "$name\n");
+			}
+		}
+		if ($failed_tests_file) {
+			fclose($failed_tests_file);
 		}
 		$end_time = time();
 		if (count($test_files) > 1) {
@@ -242,6 +302,8 @@ if (isset($argc) && $argc > 1) {
 		exit(0);
 	}
 }
+
+write_information();
 
 // Compile a list of all test files (*.phpt).
 $test_files = array();
@@ -620,6 +682,7 @@ TEST $file
 
 	// Check if test should be skipped.
 	$info = '';
+	$warn = false;
 	if (array_key_exists('SKIPIF', $section_text)) {
 		if (trim($section_text['SKIPIF'])) {
 			save_text($tmp_skipif, $section_text['SKIPIF']);
