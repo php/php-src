@@ -106,8 +106,8 @@ PHP_RSHUTDOWN_FUNCTION(filestat)
 
 PHP_FUNCTION(diskfreespace)
 {
+	pval **path;
 #ifdef WINDOWS
-	pval *path;
 	double bytesfree;
 
 	HINSTANCE kernel32;
@@ -127,7 +127,6 @@ PHP_FUNCTION(diskfreespace)
 	DWORD TotalNumberOfClusters;
 
 #else /* not - WINDOWS */
-	pval **path;
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
 	struct statvfs buf;
 #elif defined(HAVE_SYS_STATFS_H) && defined(HAVE_STATFS)
@@ -154,7 +153,7 @@ PHP_FUNCTION(diskfreespace)
 		/* It's available, so we can call it. */
 		if (gdfse) {
 			func = (gdfse_func)gdfse;
-			if (func(path->value.str.val,
+			if (func((*path)->value.str.val,
 				&FreeBytesAvailableToCaller,
 				&TotalNumberOfBytes,
 				&TotalNumberOfFreeBytes) == 0) RETURN_FALSE;
@@ -166,7 +165,7 @@ PHP_FUNCTION(diskfreespace)
 		}
 		/* If it's not available, we just use GetDiskFreeSpace */
 		else {
-			if (GetDiskFreeSpace(path->value.str.val,
+			if (GetDiskFreeSpace((*path)->value.str.val,
 				&SectorsPerCluster, &BytesPerSector,
 				&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) RETURN_FALSE;
 			bytesfree = (double)NumberOfFreeClusters * (double)SectorsPerCluster * (double)BytesPerSector;
@@ -180,7 +179,7 @@ PHP_FUNCTION(diskfreespace)
 #elif defined(OS2)
 	{
 		FSALLOCATE fsinfo;
-  		char drive = path->value.str.val[0] & 95;
+  		char drive = (*path)->value.str.val[0] & 95;
   		
 		if (DosQueryFSInfo( drive ? drive - 64 : 0, FSIL_ALLOC, &fsinfo, sizeof( fsinfo ) ) == 0)
 			bytesfree = (double)fsinfo.cbSector * fsinfo.cSectorUnit * fsinfo.cUnitAvail;
