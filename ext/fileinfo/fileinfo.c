@@ -23,8 +23,10 @@
 #endif
 
 #include <magic.h>
-// HOWMANY specifies the maximum offset libmagic will look at
-// this is currently hardcoded in the libmagic source but not exported
+/* 
+ * HOWMANY specifies the maximum offset libmagic will look at
+ * this is currently hardcoded in the libmagic source but not exported
+ */
 #ifndef HOWMANY
 #define HOWMANY 65536
 #endif
