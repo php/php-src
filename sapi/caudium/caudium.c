@@ -550,6 +550,7 @@ static sapi_module_struct caudium_sapi_module = {
   php_caudium_sapi_read_cookies,	/* read cookies */
   sapi_caudium_register_variables,	/* register server variables */
   NULL,					/* Log message */
+  NULL,					/* Get request time */
 
   STANDARD_SAPI_MODULE_PROPERTIES
 };
