@@ -1,14 +1,20 @@
 <?php
 
 	class php_resource extends php_element {
-		function php_resource($name, $payload, $alloc, $destruct, $description) {
-			$this->name = $name;
-			$this->payload = $payload;
-      $this->alloc = $alloc;
+
+		function __construct($attr, $destruct, $description) {
+			$this->name = $attr['name'];
+			if (!$this->is_name($this->name)) {
+				$this->error[] = "'$attr[name] is not a valid resource name";
+			}
+			
+			
+			$this->payload = @$attr['payload'];
+      $this->alloc = @$attr['alloc'];
 			$this->destruct = $destruct;
 			$this->description = $description;
 
-			if(empty($this->payload)) {
+			if (empty($this->payload)) {
 				$this->payload = "void";
 			}
 		} 
@@ -59,7 +65,7 @@ void {$this->name}_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 			return "
 #define {$upname}_FETCH(r, z)   ZEND_FETCH_RESOURCE(r, {$this->payload} *, z, -1, ${$this->name}, le_{$this->name }); \
-                                    if(!r) { RETURN_FALSE; }
+                                    if (!r) { RETURN_FALSE; }
 
 #define {$upname}_REGISTER(r)   ZEND_REGISTER_RESOURCE(return_value, r, le_{$this->name });
 ";
