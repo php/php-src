@@ -49,60 +49,25 @@
 #define SEC_IN_MIN 60
 
 #ifdef HAVE_GETTIMEOFDAY
-/* {{{ proto mixed microtime([bool get_as_float])
-   Returns either a string or a float containing the current time in seconds and microseconds */
-PHP_FUNCTION(microtime)
+static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	struct timeval tp;
-	long sec = 0L;
-	double msec = 0.0;
 	zend_bool get_as_float = 0;
+	struct timeval tp = {0};
+	struct timezone tz = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &get_as_float) == FAILURE) {
 		return;
 	}
-                
-	if (gettimeofday((struct timeval *) &tp, (NUL)) == 0) {
-		msec = (double) (tp.tv_usec / MICRO_IN_SEC);
-		sec = tp.tv_sec;
-	
-		if (msec >= 1.0) msec -= (long) msec;
-		if (get_as_float == 0) {
-			char ret[100];
-		
-			snprintf(ret, 100, "%.8f %ld", msec, sec);
-			RETURN_STRING(ret,1);
-		} else {
-			RETURN_DOUBLE((double) (sec + msec));
-		}
-	} else {
+
+	if (gettimeofday(&tp, &tz)) {
 		RETURN_FALSE;
 	}
 
-}
-/* }}} */
-#endif
-
-/* {{{ proto array gettimeofday(void)
-   Returns the current time as array */
-#ifdef HAVE_GETTIMEOFDAY
-PHP_FUNCTION(gettimeofday)
-{
-	zend_bool get_as_float = 0;
-	struct timeval tp;
-	struct timezone tz;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &get_as_float) == FAILURE) {
-		return;
+	if (get_as_float) {
+		RETURN_DOUBLE((double)(tp.tv_sec + tp.tv_usec / MICRO_IN_SEC));
 	}
-	
-	memset(&tp, 0, sizeof(tp));
-	memset(&tz, 0, sizeof(tz));
-	if(gettimeofday(&tp, &tz) == 0) {
-		if (get_as_float) {
-			RETURN_DOUBLE((double)(tp.tv_sec + tp.tv_usec / MICRO_IN_SEC));
-		}
 
+	if (mode) {
 		array_init(return_value);
 		add_assoc_long(return_value, "sec", tp.tv_sec);
 		add_assoc_long(return_value, "usec", tp.tv_usec);
@@ -112,10 +77,27 @@ PHP_FUNCTION(gettimeofday)
 		add_assoc_long(return_value, "minuteswest", tz.tz_minuteswest);
 #endif			
 		add_assoc_long(return_value, "dsttime", tz.tz_dsttime);
-		return;
 	} else {
-		RETURN_FALSE;
+		char ret[100];
+
+		snprintf(ret, 100, "%.8f %ld", tp.tv_usec / MICRO_IN_SEC, tp.tv_sec);
+		RETURN_STRING(ret, 1);
 	}
+}
+
+/* {{{ proto mixed microtime([bool get_as_float])
+   Returns either a string or a float containing the current time in seconds and microseconds */
+PHP_FUNCTION(microtime)
+{
+	_php_gettimeofday(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto array gettimeofday(void)
+   Returns the current time as array */
+PHP_FUNCTION(gettimeofday)
+{
+	_php_gettimeofday(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 #endif
 /* }}} */
