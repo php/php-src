@@ -157,6 +157,7 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_popen, third_arg_force_ref)
 	PHP_FE(sqlite_close, NULL)
 	PHP_FE(sqlite_query, NULL)
+	PHP_FE(sqlite_exec, NULL)
 	PHP_FE(sqlite_array_query, NULL)
 	PHP_FE(sqlite_single_query, NULL)
 	PHP_FE(sqlite_fetch_array, NULL)
@@ -198,6 +199,7 @@ function_entry sqlite_funcs_db[] = {
 	PHP_ME_MAPPING(__construct, sqlite_open, NULL)
 /*	PHP_ME_MAPPING(close, sqlite_close, NULL)*/
 	PHP_ME_MAPPING(query, sqlite_query, NULL)
+	PHP_ME_MAPPING(queryExec, sqlite_exec, NULL)
 	PHP_ME_MAPPING(arrayQuery, sqlite_array_query, NULL)
 	PHP_ME_MAPPING(singleQuery, sqlite_single_query, NULL)
 	PHP_ME_MAPPING(unbufferedQuery, sqlite_unbuffered_query, NULL)
@@ -1673,6 +1675,45 @@ PHP_FUNCTION(sqlite_query)
 	}
 
 	sqlite_query(object, db, sql, sql_len, (int)mode, 1, return_value, NULL TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto boolean sqlite_exec(string query, resource db)
+   Executes a result-less query against a given database */
+PHP_FUNCTION(sqlite_exec)
+{
+	zval *zdb;
+	struct php_sqlite_db *db;
+	char *sql;
+	long sql_len;
+	char *errtext = NULL;
+	zval *object = getThis();
+
+	if (object) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &sql, &sql_len)) {
+			return;
+		}
+		DB_FROM_OBJECT(db, object);
+	} else {
+		if(FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
+			ZEND_NUM_ARGS() TSRMLS_CC, "sr", &sql, &sql_len, &zdb) && 
+		   FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &zdb, &sql, &sql_len)) {
+			return;
+		}
+		DB_FROM_ZVAL(db, &zdb);
+	}
+	
+	PHP_SQLITE_EMPTY_QUERY;
+
+	db->last_err_code = sqlite_exec(db->db, sql, NULL, NULL, &errtext);
+
+	if (db->last_err_code != SQLITE_OK) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
+		sqlite_freemem(errtext);
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
 }
 /* }}} */
 
