@@ -184,8 +184,8 @@ static char *php_gethostbyname(char *name)
    Check DNS records corresponding to a given Internet host name or IP address */
 PHP_FUNCTION(checkdnsrr)
 {
-	zval **arg1,**arg2;
-	int type,i;
+	zval **arg1, **arg2;
+	int type, i;
 #ifndef MAXPACKET
 #define MAXPACKET  8192 /* max packet size used internally by BIND */
 #endif
@@ -205,22 +205,22 @@ PHP_FUNCTION(checkdnsrr)
 		}
 		convert_to_string_ex(arg1);
 		convert_to_string_ex(arg2);
-		if ( !strcasecmp("A",Z_STRVAL_PP(arg2)) ) type = T_A;
-		else if ( !strcasecmp("NS",Z_STRVAL_PP(arg2)) ) type = T_NS;
-		else if ( !strcasecmp("MX",Z_STRVAL_PP(arg2)) ) type = T_MX;
-		else if ( !strcasecmp("PTR",Z_STRVAL_PP(arg2)) ) type = T_PTR;
-		else if ( !strcasecmp("ANY",Z_STRVAL_PP(arg2)) ) type = T_ANY;
-		else if ( !strcasecmp("SOA",Z_STRVAL_PP(arg2)) ) type = T_SOA;
-		else if ( !strcasecmp("CNAME",Z_STRVAL_PP(arg2)) ) type = T_CNAME;
+		if ( !strcasecmp("A", Z_STRVAL_PP(arg2)) ) type = T_A;
+		else if ( !strcasecmp("NS", Z_STRVAL_PP(arg2)) ) type = T_NS;
+		else if ( !strcasecmp("MX", Z_STRVAL_PP(arg2)) ) type = T_MX;
+		else if ( !strcasecmp("PTR", Z_STRVAL_PP(arg2)) ) type = T_PTR;
+		else if ( !strcasecmp("ANY", Z_STRVAL_PP(arg2)) ) type = T_ANY;
+		else if ( !strcasecmp("SOA", Z_STRVAL_PP(arg2)) ) type = T_SOA;
+		else if ( !strcasecmp("CNAME", Z_STRVAL_PP(arg2)) ) type = T_CNAME;
 		else {
-			php_error(E_WARNING,"Type '%s' not supported",Z_STRVAL_PP(arg2));
+			php_error(E_WARNING, "Type '%s' not supported", Z_STRVAL_PP(arg2));
 			RETURN_FALSE;
 		}
 		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
-	i = res_search(Z_STRVAL_PP(arg1),C_IN,type,ans,sizeof(ans));
+	i = res_search(Z_STRVAL_PP(arg1), C_IN, type, ans, sizeof(ans));
 	if ( i < 0 ) {
 		RETURN_FALSE;
 	}
@@ -246,12 +246,12 @@ PHP_FUNCTION(getmxrr)
 {
 	pval *host, *mx_list, *weight_list;
 	int need_weight = 0;
-	int count,qdc;
-	u_short type,weight;
+	int count, qdc;
+	u_short type, weight;
 	u_char ans[MAXPACKET];
 	char buf[MAXHOSTNAMELEN];
 	HEADER *hp;
-	u_char *cp,*end;
+	u_char *cp, *end;
 	int i;
 
 	switch(ZEND_NUM_ARGS()) {
@@ -281,7 +281,7 @@ PHP_FUNCTION(getmxrr)
     }
 
 	/* Go! */
-	i = res_search(Z_STRVAL_P(host),C_IN,T_MX,(u_char *)&ans,sizeof(ans));
+	i = res_search(Z_STRVAL_P(host), C_IN, T_MX, (u_char *)&ans, sizeof(ans));
 	if ( i < 0 ) {
 		RETURN_FALSE;
 	}
@@ -290,25 +290,25 @@ PHP_FUNCTION(getmxrr)
 	cp = (u_char *)&ans + HFIXEDSZ;
 	end = (u_char *)&ans +i;
 	for ( qdc = ntohs((unsigned short)hp->qdcount); qdc--; cp += i + QFIXEDSZ) {
-		if ( (i = dn_skipname(cp,end)) < 0 ) {
+		if ( (i = dn_skipname(cp, end)) < 0 ) {
 			RETURN_FALSE;
 		}
 	}
 	count = ntohs((unsigned short)hp->ancount);
 	while ( --count >= 0 && cp < end ) {
-		if ( (i = dn_skipname(cp,end)) < 0 ) {
+		if ( (i = dn_skipname(cp, end)) < 0 ) {
 			RETURN_FALSE;
 		}
 		cp += i;
-		GETSHORT(type,cp);
+		GETSHORT(type, cp);
 		cp += INT16SZ + INT32SZ;
-		GETSHORT(i,cp);
+		GETSHORT(i, cp);
 		if ( type != T_MX ) {
 			cp += i;
 			continue;
 		}
-		GETSHORT(weight,cp);
-		if ( (i = dn_expand(ans,end,cp,buf,sizeof(buf)-1)) < 0 ) {
+		GETSHORT(weight, cp);
+		if ( (i = dn_expand(ans, end, cp, buf, sizeof(buf)-1)) < 0 ) {
 			RETURN_FALSE;
 		}
 		cp += i;

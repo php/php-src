@@ -161,7 +161,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	unsigned long conv;
 	char *key = NULL;
 
-	if (arg_count > 5 || arg_count < 2 || zend_get_parameters_array_ex(arg_count,args)==FAILURE) {
+	if (arg_count > 5 || arg_count < 2 || zend_get_parameters_array_ex(arg_count, args)==FAILURE) {
 		CLOSE_SOCK(1);
 		WRONG_PARAM_COUNT;
 	}
@@ -174,11 +174,11 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 			/* fall-through */
 		case 4:
 			zval_dtor(*args[3]);
-			ZVAL_STRING(*args[3],"",1);
+			ZVAL_STRING(*args[3], "", 1);
 			/* fall-through */
 		case 3:
 			zval_dtor(*args[2]);
-			ZVAL_LONG(*args[2],0);
+			ZVAL_LONG(*args[2], 0);
 			break;
 	}
 	convert_to_string_ex(args[0]);
@@ -192,7 +192,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 				(void *) &sockp) == SUCCESS) {
 		CLOSE_SOCK(0);
 		*sock = *sockp;
-		ZEND_REGISTER_RESOURCE(return_value,sock,php_file_le_socket());
+		ZEND_REGISTER_RESOURCE(return_value, sock, php_file_le_socket());
 		return;
 	}
 
@@ -204,7 +204,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 			udp = 1;
 		}
 
-		socketd = socket(AF_INET,udp ? SOCK_DGRAM : SOCK_STREAM,0);
+		socketd = socket(AF_INET, udp ? SOCK_DGRAM : SOCK_STREAM, 0);
 
 		if (socketd == SOCK_ERR) {
 			CLOSE_SOCK(1);
@@ -213,7 +213,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 
 		server.sin_family = AF_INET;
 
-		if(php_lookup_hostname(udp ? &(*args[0])->value.str.val[6] : (*args[0])->value.str.val,&server.sin_addr)) {
+		if(php_lookup_hostname(udp ? &(*args[0])->value.str.val[6] : (*args[0])->value.str.val, &server.sin_addr)) {
 			CLOSE_SOCK(1);
 			RETURN_FALSE;
 		}
@@ -225,11 +225,11 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 
 			if (arg_count>2) {
 				zval_dtor(*args[2]);
-				ZVAL_LONG(*args[2],errno);
+				ZVAL_LONG(*args[2], errno);
 			}
 			if (arg_count>3) {
 				zval_dtor(*args[3]);
-				ZVAL_STRING(*args[3],strerror(errno),1);
+				ZVAL_STRING(*args[3], strerror(errno), 1);
 			}
 			RETURN_FALSE;
 		}
@@ -237,7 +237,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	} else {
 		/* Unix domain socket.  s->strval is socket name. */
 		struct  sockaddr_un unix_addr;
-		socketd = socket(AF_UNIX,SOCK_STREAM,0);
+		socketd = socket(AF_UNIX, SOCK_STREAM, 0);
 		if (socketd == SOCK_ERR) {
 			CLOSE_SOCK(1);
 			RETURN_FALSE;
@@ -251,11 +251,11 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 			CLOSE_SOCK(1);
 			if (arg_count>2) {
 				zval_dtor(*args[2]);
-				ZVAL_LONG(*args[2],errno);
+				ZVAL_LONG(*args[2], errno);
 			}
 			if (arg_count>3) {
 				zval_dtor(*args[3]);
-				ZVAL_STRING(*args[3],strerror(errno),1);
+				ZVAL_STRING(*args[3], strerror(errno), 1);
 			}
 			RETURN_FALSE;
 		}
@@ -283,7 +283,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	}
 	if(key) efree(key);
 
-	ZEND_REGISTER_RESOURCE(return_value,sock,php_file_le_socket());
+	ZEND_REGISTER_RESOURCE(return_value, sock, php_file_le_socket());
 }
 /* }}} */
 
@@ -325,7 +325,7 @@ PHPAPI void php_cleanup_sockbuf(int persistent TSRMLS_DC)
 #define TOREAD(sock) ((sock)->writepos - (sock)->readpos)
 #define READPTR(sock) ((sock)->readbuf + (sock)->readpos)
 #define WRITEPTR(sock) ((sock)->readbuf + (sock)->writepos)
-#define SOCK_FIND(sock,socket) \
+#define SOCK_FIND(sock, socket) \
       php_sockbuf *sock; \
       TSRMLS_FETCH(); \
       sock = php_sockfind(socket TSRMLS_CC); \

@@ -77,7 +77,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 					zend_html_puts(string_key, strlen(string_key));
 					break;
 				case HASH_KEY_IS_LONG:
-					php_printf("%ld",num_key);
+					php_printf("%ld", num_key);
 					break;
 			}
 			PUTS("\"]</b></td><td>");
@@ -108,10 +108,10 @@ void php_info_print_style(void)
 	php_printf("<style type=\"text/css\"><!--\n");
 	php_printf("a { text-decoration: none; }\n");
 	php_printf("a:hover { text-decoration: underline; }\n");
-	php_printf("h1 { font-family: arial,helvetica,sans-serif; font-size: 18pt; font-weight: bold;}\n");
-	php_printf("h2 { font-family: arial,helvetica,sans-serif; font-size: 14pt; font-weight: bold;}\n");
-	php_printf("body,td { font-family: arial,helvetica,sans-serif; font-size: 10pt; }\n");
-	php_printf("th { font-family: arial,helvetica,sans-serif; font-size: 11pt; font-weight: bold; }\n");
+	php_printf("h1 { font-family: arial, helvetica, sans-serif; font-size: 18pt; font-weight: bold;}\n");
+	php_printf("h2 { font-family: arial, helvetica, sans-serif; font-size: 14pt; font-weight: bold;}\n");
+	php_printf("body, td { font-family: arial, helvetica, sans-serif; font-size: 10pt; }\n");
+	php_printf("th { font-family: arial, helvetica, sans-serif; font-size: 11pt; font-weight: bold; }\n");
 	php_printf("//--></style>\n");
 }
 /* }}} */
@@ -131,9 +131,9 @@ PHPAPI char *php_get_uname()
 	/* Get build numbers for Windows NT or Win95 */
 	if (dwVersion < 0x80000000){
 		dwBuild = (DWORD)(HIWORD(dwVersion));
-		snprintf(php_windows_uname,255,"%s %d.%d build %d","Windows NT",dwWindowsMajorVersion,dwWindowsMinorVersion,dwBuild);
+		snprintf(php_windows_uname, 255, "%s %d.%d build %d", "Windows NT", dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild);
 	} else {
-		snprintf(php_windows_uname,255,"%s %d.%d","Windows 95/98",dwWindowsMajorVersion,dwWindowsMinorVersion);
+		snprintf(php_windows_uname, 255, "%s %d.%d", "Windows 95/98", dwWindowsMajorVersion, dwWindowsMinorVersion);
 	}
 	php_uname = php_windows_uname;
 #else
@@ -147,7 +147,7 @@ PHPAPI char *php_get_uname()
  */
 PHPAPI void php_print_info(int flag TSRMLS_DC)
 {
-	char **env,*tmp1,*tmp2;
+	char **env, *tmp1, *tmp2;
 	char *php_uname;
 	int expose_php = INI_INT("expose_php");
 	time_t the_time;
@@ -484,7 +484,7 @@ PHP_FUNCTION(phpinfo)
    Return the current PHP version */
 PHP_FUNCTION(phpversion)
 {
-    RETURN_STRING(PHP_VERSION,1);
+    RETURN_STRING(PHP_VERSION, 1);
 }
 /* }}} */
 
@@ -546,7 +546,7 @@ PHP_FUNCTION(zend_logo_guid)
 PHP_FUNCTION(php_sapi_name)
 {
 	if (sapi_module.name) {
-		RETURN_STRING(sapi_module.name,1);
+		RETURN_STRING(sapi_module.name, 1);
 	} else {
 		RETURN_FALSE;
 	}

@@ -70,7 +70,7 @@ PHP_FUNCTION(readlink)
 	}
 	/* Append NULL to the end of the string */
 	buff[ret] = '\0';
-	RETURN_STRING(buff,1);
+	RETURN_STRING(buff, 1);
 }
 /* }}} */
 
@@ -112,7 +112,7 @@ PHP_FUNCTION(symlink)
 	if (PG(safe_mode) && !php_checkuid((*topath)->value.str.val, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
 		RETURN_FALSE;
 	}
-	if (!strncasecmp((*topath)->value.str.val,"http://",7) || !strncasecmp((*topath)->value.str.val,"ftp://",6)) {
+	if (!strncasecmp((*topath)->value.str.val, "http://", 7) || !strncasecmp((*topath)->value.str.val, "ftp://", 6)) {
 		php_error(E_WARNING, "Unable to symlink to a URL");
 		RETURN_FALSE;
 	}
@@ -142,7 +142,7 @@ PHP_FUNCTION(link)
 	if (PG(safe_mode) && !php_checkuid((*topath)->value.str.val, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
 		RETURN_FALSE;
 	}
-	if (!strncasecmp((*topath)->value.str.val,"http://",7) || !strncasecmp((*topath)->value.str.val,"ftp://",6)) {
+	if (!strncasecmp((*topath)->value.str.val, "http://", 7) || !strncasecmp((*topath)->value.str.val, "ftp://", 6)) {
 		php_error(E_WARNING, "Unable to link to a URL");
 		RETURN_FALSE;
 	}

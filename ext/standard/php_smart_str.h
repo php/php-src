@@ -30,7 +30,7 @@
 #define SMART_STR_PREALLOC 128
 #endif
 
-#define smart_str_alloc(d,n,what) {\
+#define smart_str_alloc(d, n, what) {\
 	if (!d->c) d->len = d->a = 0; \
 	newlen = d->len + n; \
 	if (newlen >= d->a) {\
@@ -44,9 +44,9 @@
 
 #define smart_str_appendc(dest, c) smart_str_appendc_ex(dest, c, 0)
 #define smart_str_free(s) smart_str_free_ex(s, 0)
-#define smart_str_appendl(dest,src,len) smart_str_appendl_ex(dest,src,len,0)
-#define smart_str_append(dest, src) smart_str_append_ex(dest,src,0)
-#define smart_str_append_long(dest, val) smart_str_append_long_ex(dest,val,0)
+#define smart_str_appendl(dest, src, len) smart_str_appendl_ex(dest, src, len, 0)
+#define smart_str_append(dest, src) smart_str_append_ex(dest, src, 0)
+#define smart_str_append_long(dest, val) smart_str_append_long_ex(dest, val, 0)
 
 static inline void smart_str_appendc_ex(smart_str *dest, char c, int what)
 {

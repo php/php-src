@@ -53,7 +53,7 @@ PHP_FUNCTION(clearstatcache);
 
 #define MAKE_LONG_ZVAL_INCREF(name, val)\
 	MAKE_STD_ZVAL(name); \
-	ZVAL_LONG(name,val); \
+	ZVAL_LONG(name, val); \
 	name->refcount++; 
 
 #ifdef PHP_WIN32
@@ -68,7 +68,7 @@ PHP_FUNCTION(clearstatcache);
 #define S_IXOTH S_IEXEC
 
 #undef getgid
-#define getgroups(a,b) 0
+#define getgroups(a, b) 0
 #define getgid() 1
 #define getuid() 1
 #endif

@@ -32,7 +32,7 @@
 #endif
 
 
-char *_php_math_number_format(double, int, char ,char);
+char *_php_math_number_format(double, int, char , char);
 
 /* {{{ proto int abs(int number)
    Return the absolute value of the number */
@@ -40,7 +40,7 @@ PHP_FUNCTION(abs)
 {
 	zval **value;
 	
-	if (ZEND_NUM_ARGS()!=1||zend_get_parameters_ex(1,&value)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1||zend_get_parameters_ex(1, &value)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -66,7 +66,7 @@ PHP_FUNCTION(ceil)
 {
 	zval **value;
 	
-	if (ZEND_NUM_ARGS()!=1||zend_get_parameters_ex(1,&value)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1||zend_get_parameters_ex(1, &value)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -89,7 +89,7 @@ PHP_FUNCTION(floor)
 {
 	zval **value;
 	
-	if (ZEND_NUM_ARGS()!=1||zend_get_parameters_ex(1,&value)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1||zend_get_parameters_ex(1, &value)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -263,7 +263,7 @@ PHP_FUNCTION(atan2)
 	}
 	convert_to_double_ex(num1);
 	convert_to_double_ex(num2);
-	Z_DVAL_P(return_value) = atan2(Z_DVAL_PP(num1),Z_DVAL_PP(num2));
+	Z_DVAL_P(return_value) = atan2(Z_DVAL_PP(num1), Z_DVAL_PP(num2));
 	Z_TYPE_P(return_value) = IS_DOUBLE;
 }
 
@@ -394,41 +394,41 @@ PHP_FUNCTION(pow)
 	 */
 	
 	zval **zbase, **zexp;
-	long lbase,lexp;
+	long lbase, lexp;
 	double dval;
 	
 	if (ZEND_NUM_ARGS() != 2) {
 		WRONG_PARAM_COUNT;
 	} 
-	zend_get_parameters_ex(ZEND_NUM_ARGS(),&zbase,&zexp);
+	zend_get_parameters_ex(ZEND_NUM_ARGS(), &zbase, &zexp);
 	convert_scalar_to_number_ex(zbase);
 	convert_scalar_to_number_ex(zexp);
 	if ((Z_TYPE_PP(zbase) != IS_LONG && Z_TYPE_PP(zbase) != IS_DOUBLE) ||
 		(Z_TYPE_PP(zexp ) != IS_LONG && Z_TYPE_PP(zexp ) != IS_DOUBLE)) {
-		php_error(E_WARNING,"Invalid argument(s) passed to pow()");
+		php_error(E_WARNING, "Invalid argument(s) passed to pow()");
 		RETURN_FALSE;
 	}
 	
 	if (Z_TYPE_PP(zexp) == IS_DOUBLE) {
-		/* pow(?,float), this is the ^^ case */
+		/* pow(?, float), this is the ^^ case */
 		convert_to_double_ex(zbase);
 
 		if ( Z_DVAL_PP(zbase) <= 0.0 ) {
 			/* Note that with the old behaviour, php pow() returned bogus
-			   results. Try pow(-1,2.5) in PHP <= 4.0.6 ... */
-			php_error(E_WARNING,"Trying to raise a nonpositive value to a broken power");
+			   results. Try pow(-1, 2.5) in PHP <= 4.0.6 ... */
+			php_error(E_WARNING, "Trying to raise a nonpositive value to a broken power");
 			RETURN_FALSE;
 		}
 		RETURN_DOUBLE(exp(log(Z_DVAL_PP(zbase)) * Z_DVAL_PP(zexp)));
 	}
 
-	/* pow(?,int), this is the ** case */
+	/* pow(?, int), this is the ** case */
 
 	lexp = Z_LVAL_PP(zexp);
 
 
 	if (Z_TYPE_PP(zbase) == IS_DOUBLE) {
-		/* pow(float,int) */
+		/* pow(float, int) */
 		if (lexp == 0) {
 			RETURN_DOUBLE(1.0);
 		}
@@ -437,7 +437,7 @@ PHP_FUNCTION(pow)
 		} else if (Z_DVAL_PP(zbase) == 0.0) {
 			if (lexp < 0) {
 				php_error(E_WARNING,
-					"Division by zero: pow(0.0,[negative integer])");
+					"Division by zero: pow(0.0, [negative integer])");
 				RETURN_FALSE;
 			} else {
 				RETURN_DOUBLE(0.0);
@@ -449,7 +449,7 @@ PHP_FUNCTION(pow)
 			
 	}
 	
-	/* pow(int,int) */
+	/* pow(int, int) */
 	if (lexp == 0) {
 		RETURN_LONG(1);
 	}
@@ -463,7 +463,7 @@ PHP_FUNCTION(pow)
 		case 0:
 			if (lexp < 0) {
 				php_error(E_WARNING,
-					"Division by zero: pow(0,[negative integer])");
+					"Division by zero: pow(0, [negative integer])");
 				RETURN_FALSE;
 			} else {
 				RETURN_LONG(0);
@@ -523,7 +523,7 @@ PHP_FUNCTION(exp2)
 	convert_to_double_ex(num);
 	// libc function is broken in RH Linux 6.1, glibc 2.1.3
 	//Z_DVAL_P(return_value) = exp2(Z_DVAL_PP(num));
-	Z_DVAL_P(return_value) = pow(2.0,Z_DVAL_PP(num));
+	Z_DVAL_P(return_value) = pow(2.0, Z_DVAL_PP(num));
 	Z_TYPE_P(return_value) = IS_DOUBLE;
 }
 
@@ -541,7 +541,7 @@ PHP_FUNCTION(exp10)
 	convert_to_double_ex(num);
 	// libc function is broken in RH Linux 6.1, glibc 2.1.3
 	//Z_DVAL_P(return_value) = exp10(Z_DVAL_PP(num));
-	Z_DVAL_P(return_value) = pow(10.0,Z_DVAL_PP(num));
+	Z_DVAL_P(return_value) = pow(10.0, Z_DVAL_PP(num));
 	Z_TYPE_P(return_value) = IS_DOUBLE;
 }
 
@@ -935,11 +935,11 @@ PHP_FUNCTION(base_convert)
 	convert_to_long_ex(frombase);
 	convert_to_long_ex(tobase);
 	if (Z_LVAL_PP(frombase) < 2 || Z_LVAL_PP(frombase) > 36) {
-		php_error(E_WARNING, "base_convert: invalid `from base' (%d)",Z_LVAL_PP(frombase));
+		php_error(E_WARNING, "base_convert: invalid `from base' (%d)", Z_LVAL_PP(frombase));
 		RETURN_FALSE;
 	}
 	if (Z_LVAL_PP(tobase) < 2 || Z_LVAL_PP(tobase) > 36) {
-		php_error(E_WARNING, "base_convert: invalid `to base' (%d)",Z_LVAL_PP(tobase));
+		php_error(E_WARNING, "base_convert: invalid `to base' (%d)", Z_LVAL_PP(tobase));
 		RETURN_FALSE;
 	}
 	Z_TYPE(temp) = IS_LONG;
@@ -951,11 +951,11 @@ PHP_FUNCTION(base_convert)
 /* }}} */
 /* {{{ _php_math_number_format */
 
-char *_php_math_number_format(double d,int dec,char dec_point,char thousand_sep)
+char *_php_math_number_format(double d, int dec, char dec_point, char thousand_sep)
 {
-	char *tmpbuf,*resbuf;
-	char *s,*t;  /* source, target */
-	int tmplen,reslen=0;
+	char *tmpbuf, *resbuf;
+	char *s, *t;  /* source, target */
+	int tmplen, reslen=0;
 	int count=0;
 	int is_negative=0;
 	
@@ -963,10 +963,10 @@ char *_php_math_number_format(double d,int dec,char dec_point,char thousand_sep)
 		is_negative=1;
 		d = -d;
 	}
-	dec = MAX(0,dec);
+	dec = MAX(0, dec);
 	tmpbuf = (char *) emalloc(1+DBL_MAX_10_EXP+1+dec+1);
 	
-	tmplen=sprintf(tmpbuf,"%.*f",dec,d);
+	tmplen=sprintf(tmpbuf, "%.*f", dec, d);
 
 	if (!isdigit((int)tmpbuf[0])) {
 		return tmpbuf;
@@ -1013,7 +1013,7 @@ char *_php_math_number_format(double d,int dec,char dec_point,char thousand_sep)
 
 PHP_FUNCTION(number_format)
 {
-	zval **num,**dec,**t_s,**d_p;
+	zval **num, **dec, **t_s, **d_p;
 	char thousand_sep=',', dec_point='.';
 	
 	switch(ZEND_NUM_ARGS()) {
@@ -1022,7 +1022,7 @@ PHP_FUNCTION(number_format)
 			RETURN_FALSE;
 		}
 		convert_to_double_ex(num);
-		RETURN_STRING(_php_math_number_format(Z_DVAL_PP(num),0,dec_point,thousand_sep),0);
+		RETURN_STRING(_php_math_number_format(Z_DVAL_PP(num), 0, dec_point, thousand_sep), 0);
 		break;
 	case 2:
 		if (zend_get_parameters_ex(2, &num, &dec)==FAILURE) {
@@ -1030,7 +1030,7 @@ PHP_FUNCTION(number_format)
 		}
 		convert_to_double_ex(num);
 		convert_to_long_ex(dec);
-		RETURN_STRING(_php_math_number_format(Z_DVAL_PP(num),Z_LVAL_PP(dec),dec_point,thousand_sep),0);
+		RETURN_STRING(_php_math_number_format(Z_DVAL_PP(num), Z_LVAL_PP(dec), dec_point, thousand_sep), 0);
 		break;
 	case 4:
 		if (zend_get_parameters_ex(4, &num, &dec, &d_p, &t_s)==FAILURE) {
@@ -1048,7 +1048,7 @@ PHP_FUNCTION(number_format)
 		} else if(Z_STRLEN_PP(t_s)==0) {
 			thousand_sep=0;	
 		}
-		RETURN_STRING(_php_math_number_format(Z_DVAL_PP(num),Z_LVAL_PP(dec),dec_point,thousand_sep),0);
+		RETURN_STRING(_php_math_number_format(Z_DVAL_PP(num), Z_LVAL_PP(dec), dec_point, thousand_sep), 0);
 		break;
 	default:
 		WRONG_PARAM_COUNT;

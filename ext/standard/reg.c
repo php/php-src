@@ -82,7 +82,7 @@ static void _free_reg_cache(reg_cache *rc)
 #undef regfree
 #define regfree(a);
 #undef regcomp
-#define regcomp(a,b,c) _php_regcomp(a,b,c)
+#define regcomp(a, b, c) _php_regcomp(a, b, c)
 	
 static void php_reg_init_globals(php_reg_globals *reg_globals TSRMLS_DC)
 {
@@ -440,7 +440,7 @@ static void php_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	if ((*arg_pattern)->type == IS_STRING) {
 		if ((*arg_pattern)->value.str.val && (*arg_pattern)->value.str.len)
-			pattern = estrndup((*arg_pattern)->value.str.val,(*arg_pattern)->value.str.len);
+			pattern = estrndup((*arg_pattern)->value.str.val, (*arg_pattern)->value.str.len);
 		else
 			pattern = empty_string;
 	} else {
@@ -473,7 +473,7 @@ static void php_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	if (ret == (char *) -1) {
 		RETVAL_FALSE;
 	} else {
-		RETVAL_STRING(ret,1);
+		RETVAL_STRING(ret, 1);
 		STR_FREE(ret);
 	}
 	STR_FREE(string);

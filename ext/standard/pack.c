@@ -85,7 +85,7 @@ static void php_pack(pval **val, int size, int *map, char *output)
 /* }}} */
 
 /* pack() idea stolen from Perl (implemented formats behave the same as there)
- * Implemented formats are A,a,h,H,c,C,s,S,i,I,l,L,n,N,f,d,x,X,@.
+ * Implemented formats are A, a, h, H, c, C, s, S, i, I, l, L, n, N, f, d, x, X, @.
  */
 /* {{{ proto string pack(string format, mixed arg1 [, mixed arg2 [, mixed ...]])
    Takes one or more arguments and packs them into a binary string according to the format argument */
@@ -288,7 +288,7 @@ PHP_FUNCTION(pack)
 				memset(&output[outputpos], (code == 'a') ? '\0' : ' ', arg);
 				val = argv[currentarg++];
 				convert_to_string_ex(val);
-				memcpy(&output[outputpos],(*val)->value.str.val,
+				memcpy(&output[outputpos], (*val)->value.str.val,
 					   ((*val)->value.str.len < arg) ? (*val)->value.str.len : arg);
 				outputpos += arg;
 				break;
@@ -304,7 +304,7 @@ PHP_FUNCTION(pack)
 				v = (*val)->value.str.val;
 				outputpos--;
 				if(arg > (*val)->value.str.len) {
-					php_error(E_WARNING,"pack type %c: not enough characters in string",code);
+					php_error(E_WARNING, "pack type %c: not enough characters in string", code);
 					arg = (*val)->value.str.len;
 				}
 
@@ -472,7 +472,7 @@ static long php_unpack(char *data, int size, int issigned, int *map)
  * chars1, chars2, and ints.
  * Numeric pack types will return numbers, a and A will return strings,
  * f and d will return doubles.
- * Implemented formats are A,a,h,H,c,C,s,S,i,I,l,L,n,N,f,d,x,X,@.
+ * Implemented formats are A, a, h, H, c, C, s, S, i, I, l, L, n, N, f, d, x, X, @.
  */
 /* {{{ proto array unpack(string format, string input)
    Unpack binary string into named array elements according to format argument */
@@ -486,7 +486,7 @@ PHP_FUNCTION(unpack)
 	int inputpos, inputlen;
 	int i;
 
-	if ((ZEND_NUM_ARGS() != 2) || zend_get_parameters_ex(2,&formatarg,&inputarg) == FAILURE) {
+	if ((ZEND_NUM_ARGS() != 2) || zend_get_parameters_ex(2, &formatarg, &inputarg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

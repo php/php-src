@@ -82,7 +82,7 @@ PHP_FUNCTION(uniqid)
 		sprintf(uniqid, "%s%08x%05x", (*prefix)->value.str.val, sec, usec);
 	}
 
-	RETURN_STRING(uniqid,1);
+	RETURN_STRING(uniqid, 1);
 #endif
 }
 /* }}} */

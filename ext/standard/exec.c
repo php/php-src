@@ -202,9 +202,9 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 			int len;
 
 			tmp = php_addslashes(buf, 0, &len, 0 TSRMLS_CC);
-			RETVAL_STRINGL(tmp,len,0);
+			RETVAL_STRINGL(tmp, len, 0);
 		} else {
-			RETVAL_STRINGL(buf,l,1);
+			RETVAL_STRINGL(buf, l, 1);
 		}
 	} else {
 		int b, i;
@@ -242,18 +242,18 @@ PHP_FUNCTION(exec)
 	int arg_count = ZEND_NUM_ARGS();
 	int ret;
 
-	if (arg_count > 3 || zend_get_parameters_ex(arg_count, &arg1,&arg2, &arg3) == FAILURE) {
+	if (arg_count > 3 || zend_get_parameters_ex(arg_count, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	switch (arg_count) {
 		case 1:
-			ret = php_Exec(0, Z_STRVAL_PP(arg1), NULL,return_value TSRMLS_CC);
+			ret = php_Exec(0, Z_STRVAL_PP(arg1), NULL, return_value TSRMLS_CC);
 			break;
 		case 2:
-			ret = php_Exec(2, Z_STRVAL_PP(arg1),*arg2,return_value TSRMLS_CC);
+			ret = php_Exec(2, Z_STRVAL_PP(arg1), *arg2, return_value TSRMLS_CC);
 			break;
 		case 3:
-			ret = php_Exec(2,Z_STRVAL_PP(arg1),*arg2,return_value TSRMLS_CC);
+			ret = php_Exec(2, Z_STRVAL_PP(arg1), *arg2, return_value TSRMLS_CC);
 			Z_TYPE_PP(arg3) = IS_LONG;
 			Z_LVAL_PP(arg3)=ret;
 			break;
@@ -270,15 +270,15 @@ PHP_FUNCTION(system)
 	int arg_count = ZEND_NUM_ARGS();
 	int ret;
 
-	if (arg_count > 2 || zend_get_parameters_ex(arg_count, &arg1,&arg2) == FAILURE) {
+	if (arg_count > 2 || zend_get_parameters_ex(arg_count, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	switch (arg_count) {
 		case 1:
-			ret = php_Exec(1, Z_STRVAL_PP(arg1), NULL,return_value TSRMLS_CC);
+			ret = php_Exec(1, Z_STRVAL_PP(arg1), NULL, return_value TSRMLS_CC);
 			break;
 		case 2:
-			ret = php_Exec(1, Z_STRVAL_PP(arg1), NULL,return_value TSRMLS_CC);
+			ret = php_Exec(1, Z_STRVAL_PP(arg1), NULL, return_value TSRMLS_CC);
 			Z_TYPE_PP(arg2) = IS_LONG;
 			Z_LVAL_PP(arg2)=ret;
 			break;
@@ -294,7 +294,7 @@ PHP_FUNCTION(passthru)
 	int arg_count = ZEND_NUM_ARGS();
 	int ret;
 
-	if (arg_count > 2 || zend_get_parameters_ex(arg_count, &arg1,&arg2) == FAILURE) {
+	if (arg_count > 2 || zend_get_parameters_ex(arg_count, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	switch (arg_count) {
@@ -438,37 +438,37 @@ PHP_FUNCTION(escapeshellarg)
 PHP_FUNCTION(shell_exec)
 {
 	FILE *in;
-	int readbytes,total_readbytes=0,allocated_space;
+	int readbytes, total_readbytes=0, allocated_space;
 	pval **cmd;
 	char *ret;
 
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1,&cmd)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &cmd)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
 	if (PG(safe_mode)) {
-		php_error(E_WARNING,"Cannot execute using backquotes in safe mode");
+		php_error(E_WARNING, "Cannot execute using backquotes in safe mode");
 		RETURN_FALSE;
 	}
 
 	convert_to_string_ex(cmd);
 #ifdef PHP_WIN32
-	if ((in=VCWD_POPEN(Z_STRVAL_PP(cmd),"rt"))==NULL) {
+	if ((in=VCWD_POPEN(Z_STRVAL_PP(cmd), "rt"))==NULL) {
 #else
-	if ((in=VCWD_POPEN(Z_STRVAL_PP(cmd),"r"))==NULL) {
+	if ((in=VCWD_POPEN(Z_STRVAL_PP(cmd), "r"))==NULL) {
 #endif
-		php_error(E_WARNING,"Unable to execute '%s'",Z_STRVAL_PP(cmd));
+		php_error(E_WARNING, "Unable to execute '%s'", Z_STRVAL_PP(cmd));
 	}
 	allocated_space = EXEC_INPUT_BUF;
 	ret = (char *) emalloc(allocated_space);
 	while (1) {
-		readbytes = fread(ret+total_readbytes,1,EXEC_INPUT_BUF,in);
+		readbytes = fread(ret+total_readbytes, 1, EXEC_INPUT_BUF, in);
 		if (readbytes<=0) {
 			break;
 		}
 		total_readbytes += readbytes;
 		allocated_space = total_readbytes+EXEC_INPUT_BUF;
-		ret = (char *) erealloc(ret,allocated_space);
+		ret = (char *) erealloc(ret, allocated_space);
 	}
 	pclose(in);
 	

@@ -96,7 +96,7 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 {
 	void *handle;
 	char *libpath;
-	zend_module_entry *module_entry,*tmp;
+	zend_module_entry *module_entry, *tmp;
 	zend_module_entry *(*get_module)(void);
 	int error_type;
 	char *extension_dir;
@@ -122,9 +122,9 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 		libpath = emalloc(extension_dir_len+file->value.str.len+2);
 
 		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
-			sprintf(libpath,"%s%s", extension_dir, file->value.str.val); /* SAFE */
+			sprintf(libpath, "%s%s", extension_dir, file->value.str.val); /* SAFE */
 		} else {
-			sprintf(libpath,"%s/%s", extension_dir, file->value.str.val); /* SAFE */
+			sprintf(libpath, "%s/%s", extension_dir, file->value.str.val); /* SAFE */
 		}
 	} else {
 		libpath = estrndup(file->value.str.val, file->value.str.len);
@@ -190,8 +190,8 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 	}
 	
 	/* update the .request_started property... */
-	if (zend_hash_find(&module_registry, module_entry->name, strlen(module_entry->name)+1,(void **) &tmp)==FAILURE) {
-		php_error(error_type,"%s:  Loaded module got lost", module_entry->name);
+	if (zend_hash_find(&module_registry, module_entry->name, strlen(module_entry->name)+1, (void **) &tmp)==FAILURE) {
+		php_error(error_type, "%s:  Loaded module got lost", module_entry->name);
 		RETURN_FALSE;
 	}
 	tmp->handle = handle;
@@ -209,7 +209,7 @@ PHP_MINFO_FUNCTION(dl)
 
 void php_dl(pval *file, int type, pval *return_value)
 {
-	php_error(E_WARNING,"Cannot dynamically load %s - dynamic modules are not supported", file->value.str.val);
+	php_error(E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", file->value.str.val);
 	RETURN_FALSE;
 }
 

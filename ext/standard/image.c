@@ -74,14 +74,14 @@ static struct gfxinfo *php_handle_gif (int socketd, FILE *fp, int issock)
 	unsigned char a[2];
 	char temp[3];
 
-	result = (struct gfxinfo *) ecalloc(1,sizeof(struct gfxinfo));
+	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
 
 	FP_FREAD(temp, 3, socketd, fp, issock);  /*	fseek(fp, 6L, SEEK_SET); */
 
-	FP_FREAD(a, sizeof(a), socketd, fp, issock); /*	fread(a,sizeof(a),1,fp); */
+	FP_FREAD(a, sizeof(a), socketd, fp, issock); /*	fread(a, sizeof(a), 1, fp); */
 	result->width = (unsigned short)a[0] | (((unsigned short)a[1])<<8);
 
-	FP_FREAD(a, sizeof(a), socketd, fp, issock); /*	fread(a,sizeof(a),1,fp); */
+	FP_FREAD(a, sizeof(a), socketd, fp, issock); /*	fread(a, sizeof(a), 1, fp); */
 	result->height = (unsigned short)a[0] | (((unsigned short)a[1])<<8);
 
 	return result;
@@ -97,7 +97,7 @@ static struct gfxinfo *php_handle_psd (int socketd, FILE *fp, int issock)
 	char temp[11];
 	unsigned long in_width, in_height;
 
-	result = (struct gfxinfo *) ecalloc(1,sizeof(struct gfxinfo));
+	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
 	FP_FREAD(temp, sizeof(temp), socketd, fp, issock);
 
 	if((FP_FREAD(a, sizeof(a), socketd, fp, issock)) <= 0) {
@@ -165,7 +165,7 @@ static struct gfxinfo *php_handle_swf (int socketd, FILE *fp, int issock)
 	result = (struct gfxinfo *) ecalloc (1, sizeof (struct gfxinfo));
 	FP_FREAD(temp, 5, socketd, fp, issock);	/*	fseek(fp, 8L, SEEK_SET); */
 
-	FP_FREAD(a, sizeof(a), socketd, fp, issock); /*	fread(a,sizeof(a),1,fp); */
+	FP_FREAD(a, sizeof(a), socketd, fp, issock); /*	fread(a, sizeof(a), 1, fp); */
 	bits = php_swf_get_bits (a, 0, 5);
 	result->width = (php_swf_get_bits (a, 5 + bits, bits) -
 		php_swf_get_bits (a, 5, bits)) / 20;
@@ -184,7 +184,7 @@ static struct gfxinfo *php_handle_png (int socketd, FILE *fp, int issock)
 	char temp[8];
 	unsigned char a[8];
 
-	result = (struct gfxinfo *) ecalloc(1,sizeof(struct gfxinfo));
+	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
 
 	FP_FREAD(temp, sizeof(temp), socketd, fp, issock);	/* fseek(fp, 16L, SEEK_SET); */
 
@@ -260,7 +260,7 @@ static unsigned int php_next_marker(int socketd, FILE *fp, int issock)
 
 	/* get marker byte, swallowing possible padding */
 	do {
-		if ((c = FP_FGETC(socketd,fp,issock)) == EOF)
+		if ((c = FP_FGETC(socketd, fp, issock)) == EOF)
 			return M_EOI;		/* we hit EOF */
 	} while (c == 0xff);
 
@@ -276,7 +276,7 @@ static void php_skip_variable(int socketd, FILE *fp, int issock)
 	unsigned short length;
 	char *tmp;
 
-	length = php_read2(socketd,fp,issock);
+	length = php_read2(socketd, fp, issock);
 	length -= 2;				/* length includes itself */
 
 	tmp = emalloc(length);
@@ -287,14 +287,14 @@ static void php_skip_variable(int socketd, FILE *fp, int issock)
 
 /* {{{ php_read_APP
  */
-static void php_read_APP(int socketd, FILE *fp, int issock,unsigned int marker,pval *info)
+static void php_read_APP(int socketd, FILE *fp, int issock, unsigned int marker, pval *info)
 {
 	unsigned short length;
 	unsigned char *buffer;
 	unsigned char markername[ 16 ];
 	zval *tmp;
 
-	length = php_read2(socketd,fp,issock);
+	length = php_read2(socketd, fp, issock);
 	length -= 2;				/* length includes itself */
 
 	buffer = emalloc(length);
@@ -304,11 +304,11 @@ static void php_read_APP(int socketd, FILE *fp, int issock,unsigned int marker,p
 		return;
 	}
 
-	sprintf(markername,"APP%d",marker - M_APP0);
+	sprintf(markername, "APP%d", marker - M_APP0);
 
 	if (zend_hash_find(info->value.ht, markername, strlen(markername)+1, (void **) &tmp) == FAILURE) {
 		/* XXX we onyl catch the 1st tag of it's kind! */
-		add_assoc_stringl(info,markername,buffer,length,1);
+		add_assoc_stringl(info, markername, buffer, length, 1);
 	}
 
 	efree(buffer);
@@ -325,7 +325,7 @@ static struct gfxinfo *php_handle_jpeg (int socketd, FILE *fp, int issock, pval 
 	unsigned char a[4];
 
 	for (;;) {
-		marker = php_next_marker(socketd,fp,issock);
+		marker = php_next_marker(socketd, fp, issock);
 		switch (marker) {
 			case M_SOF0:
 			case M_SOF1:
@@ -342,18 +342,18 @@ static struct gfxinfo *php_handle_jpeg (int socketd, FILE *fp, int issock, pval 
 			case M_SOF15:
 				if (result == NULL) {
 					/* handle SOFn block */
-					result = (struct gfxinfo *) ecalloc(1,sizeof(struct gfxinfo));
+					result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
 					FP_FREAD(tmp, sizeof(tmp), socketd, fp, issock);
-					result->bits   = FP_FGETC(socketd,fp,issock);
+					result->bits   = FP_FGETC(socketd, fp, issock);
 					FP_FREAD(a, sizeof(a), socketd, fp, issock);
 					result->height = (((unsigned short) a[ 0 ]) << 8) + ((unsigned short) a[ 1 ]);
 					result->width  = (((unsigned short) a[ 2 ]) << 8) + ((unsigned short) a[ 3 ]);
-					result->channels = FP_FGETC(socketd,fp,issock);
+					result->channels = FP_FGETC(socketd, fp, issock);
 
 					if (! info) /* if we don't want an extanded info -> return */
 						return result;
 				} else {
-					php_skip_variable(socketd,fp,issock);
+					php_skip_variable(socketd, fp, issock);
 				}
 				break;
 
@@ -374,9 +374,9 @@ static struct gfxinfo *php_handle_jpeg (int socketd, FILE *fp, int issock, pval 
 			case M_APP14:
 			case M_APP15:
 				if (info) {
-					php_read_APP(socketd,fp,issock,marker,info); /* read all the app markes... */
+					php_read_APP(socketd, fp, issock, marker, info); /* read all the app markes... */
 				} else {
-					php_skip_variable(socketd,fp,issock);
+					php_skip_variable(socketd, fp, issock);
 				}
 				break;
 
@@ -386,7 +386,7 @@ static struct gfxinfo *php_handle_jpeg (int socketd, FILE *fp, int issock, pval 
 				break;
 
 			default:
-				php_skip_variable(socketd,fp,issock);		/* anything else isn't interesting */
+				php_skip_variable(socketd, fp, issock);		/* anything else isn't interesting */
 				break;
 		}
 	}
@@ -401,7 +401,7 @@ static struct gfxinfo *php_handle_jpeg (int socketd, FILE *fp, int issock, pval 
    Get the size of an image as 4-element array */
 PHP_FUNCTION(getimagesize)
 {
-	pval **arg1,**info = 0;
+	pval **arg1, **info = 0;
 	FILE *fp;
 	int issock=0, socketd=0, rsrc_id;
  	int itype = 0;
@@ -442,7 +442,7 @@ PHP_FUNCTION(getimagesize)
 		if (issock != BAD_URL) {
 			char *tmp = estrndup(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1));
 			php_strip_url_passwd(tmp);
-			php_error(E_WARNING,"getimagesize: Unable to open '%s' for reading.", tmp);
+			php_error(E_WARNING, "getimagesize: Unable to open '%s' for reading.", tmp);
 			efree(tmp);
 		}
 		RETURN_FALSE;
@@ -451,13 +451,13 @@ PHP_FUNCTION(getimagesize)
 	if (issock) {
 		int *sock=emalloc(sizeof(int));
 		*sock = socketd;
-		rsrc_id = ZEND_REGISTER_RESOURCE(NULL,sock,php_file_le_socket());
+		rsrc_id = ZEND_REGISTER_RESOURCE(NULL, sock, php_file_le_socket());
 	} else {
-		rsrc_id = ZEND_REGISTER_RESOURCE(NULL,fp,php_file_le_fopen());
+		rsrc_id = ZEND_REGISTER_RESOURCE(NULL, fp, php_file_le_fopen());
 	}
 
 	if((FP_FREAD(filetype, 3, socketd, fp, issock)) <= 0) {
-		php_error(E_WARNING,"getimagesize: Read error!");
+		php_error(E_WARNING, "getimagesize: Read error!");
 		RETURN_FALSE;
 	}
 
@@ -505,10 +505,10 @@ PHP_FUNCTION(getimagesize)
 		add_index_string(return_value, 3, temp, 1);
 
 		if (result->bits != 0) {
-			add_assoc_long(return_value,"bits",result->bits);
+			add_assoc_long(return_value, "bits", result->bits);
 		}
 		if (result->channels != 0) {
-			add_assoc_long(return_value,"channels",result->channels);
+			add_assoc_long(return_value, "channels", result->channels);
 		}
 		efree(result);
 	}

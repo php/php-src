@@ -18,7 +18,8 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
+/* $Id: var.c
+ 1.111 2001/08/06 13:36:08 thies Exp $ */
 
 
 /* {{{ includes 
@@ -105,7 +106,7 @@ head_done:
 			break;
 		}
 		default:
-			php_printf("%sUNKNOWN:0\n",COMMON);
+			php_printf("%sUNKNOWN:0\n", COMMON);
 			break;
 	}
 }
@@ -275,7 +276,7 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 				char s[256];
 				ulong slen;
 
-				slen = sprintf(s, "d:%.*G;",(int) EG(precision), Z_DVAL_PP(struc));
+				slen = sprintf(s, "d:%.*G;", (int) EG(precision), Z_DVAL_PP(struc));
 				smart_str_appendl(buf, s, slen);
 				return;
 			}
@@ -430,9 +431,9 @@ PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, Has
 			(*p)++;
 			INIT_PZVAL(*rval);
 			if (cur == 'b') {
-				ZVAL_BOOL(*rval,atol(q + 2));
+				ZVAL_BOOL(*rval, atol(q + 2));
 			} else {
-				ZVAL_LONG(*rval,atol(q + 2));
+				ZVAL_LONG(*rval, atol(q + 2));
 			}
 			return 1;
 
@@ -449,7 +450,7 @@ PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, Has
 			}
 			(*p)++;
 			INIT_PZVAL(*rval);
-			ZVAL_DOUBLE(*rval,atof(q + 2));
+			ZVAL_DOUBLE(*rval, atof(q + 2));
 			return 1;
 
 		case 's':
@@ -474,11 +475,11 @@ PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, Has
 			if (i == 0) {
 			  	str = empty_string;
 			} else  {
-			  	str = estrndup(*p,i);
+			  	str = estrndup(*p, i);
 			}
 			(*p) += i + 2;
 			INIT_PZVAL(*rval);
-			ZVAL_STRINGL(*rval,str,i,0);
+			ZVAL_STRINGL(*rval, str, i, 0);
 			return 1;
 
 		case 'a':
@@ -654,7 +655,7 @@ PHP_FUNCTION(unserialize)
 		if (!php_var_unserialize(&return_value, &p, p + Z_STRLEN_PP(buf),  &var_hash TSRMLS_CC)) {
 			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 			zval_dtor(return_value);
-			php_error(E_NOTICE, "unserialize() failed at offset %d of %d bytes",p - Z_STRVAL_PP(buf),Z_STRLEN_PP(buf));
+			php_error(E_NOTICE, "unserialize() failed at offset %d of %d bytes", p - Z_STRVAL_PP(buf), Z_STRLEN_PP(buf));
 			RETURN_FALSE;
 		}
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);

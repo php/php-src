@@ -70,7 +70,7 @@ PHPAPI php_url *php_url_parse(char *str)
 
 	php_url *ret = (php_url *) emalloc(sizeof(php_url));
 	if (!ret) {
-		/*php_error(E_WARNING,"Unable to allocate memory\n");*/
+		/*php_error(E_WARNING, "Unable to allocate memory\n");*/
 		return NULL;
 	}
 	memset(ret, 0, sizeof(php_url));
@@ -79,13 +79,13 @@ PHPAPI php_url *php_url_parse(char *str)
 	   http://www.ics.uci.edu/~fielding/url/url.txt */
 	err = regcomp(&re, "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?", REG_EXTENDED);
 	if (err) {
-		/*php_error(E_WARNING,"Unable to compile regex: %d\n", err);*/
+		/*php_error(E_WARNING, "Unable to compile regex: %d\n", err);*/
 		efree(ret);
 		return NULL;
 	}
 	err = regexec(&re, str, 10, subs, 0);
 	if (err) {
-		/*php_error(E_WARNING,"Error with regex\n");*/
+		/*php_error(E_WARNING, "Error with regex\n");*/
 		efree(ret);
 		regfree(&re);
 		return NULL;
@@ -128,7 +128,7 @@ PHPAPI php_url *php_url_parse(char *str)
 			STR_FREE(ret->fragment);
 			efree(ret);
 			efree(result);
-			/*php_error(E_WARNING,"Unable to compile regex: %d\n", err);*/
+			/*php_error(E_WARNING, "Unable to compile regex: %d\n", err);*/
 			if (!cerr) regfree(&re); 
 			return NULL;
 		}

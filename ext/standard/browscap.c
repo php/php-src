@@ -44,7 +44,7 @@ static void browscap_entry_dtor(zval *pvalue)
  */
 static void convert_browscap_pattern(zval *pattern)
 {
-	register int i,j;
+	register int i, j;
 	char *t;
 
 	for (i=0; i<pattern->value.str.len; i++) {
@@ -60,7 +60,7 @@ static void convert_browscap_pattern(zval *pattern)
 
 	t = (char *) malloc(pattern->value.str.len*2);
 	
-	for (i=0,j=0; i<pattern->value.str.len; i++,j++) {
+	for (i=0, j=0; i<pattern->value.str.len; i++, j++) {
 		switch (pattern->value.str.val[i]) {
 			case '?':
 				t[j] = '.';
@@ -148,7 +148,7 @@ PHP_MINIT_FUNCTION(browscap)
 
 		fh.handle.fp = VCWD_FOPEN(browscap, "r");
 		if (!fh.handle.fp) {
-			php_error(E_CORE_WARNING,"Cannot open '%s' for reading", browscap);
+			php_error(E_CORE_WARNING, "Cannot open '%s' for reading", browscap);
 			return FAILURE;
 		}
 		fh.filename = browscap;
@@ -173,27 +173,27 @@ PHP_MSHUTDOWN_FUNCTION(browscap)
 
 /* {{{ browser_reg_compare
  */
-static int browser_reg_compare(zval **browser,int num_args, va_list args, zend_hash_key *key)
+static int browser_reg_compare(zval **browser, int num_args, va_list args, zend_hash_key *key)
 {
 	zval **browser_name;
 	regex_t r;
-	char *lookup_browser_name = va_arg(args,char *);
-	zval **found_browser_entry = va_arg(args,zval **);
+	char *lookup_browser_name = va_arg(args, char *);
+	zval **found_browser_entry = va_arg(args, zval **);
 
 	if (*found_browser_entry) { /* already found */
 		return 0;
 	}
-	if(zend_hash_find(Z_OBJPROP_PP(browser), "browser_name_pattern",sizeof("browser_name_pattern"),(void **) &browser_name) == FAILURE) {
+	if(zend_hash_find(Z_OBJPROP_PP(browser), "browser_name_pattern", sizeof("browser_name_pattern"), (void **) &browser_name) == FAILURE) {
 		return 0;
 	}
 
 	if (!strchr((*browser_name)->value.str.val,'*')) {
 		return 0;
 	}
-	if (regcomp(&r,(*browser_name)->value.str.val,REG_NOSUB)!=0) {
+	if (regcomp(&r, (*browser_name)->value.str.val, REG_NOSUB)!=0) {
 		return 0;
 	}
-	if (regexec(&r,lookup_browser_name,0,NULL,0)==0) {
+	if (regexec(&r, lookup_browser_name, 0, NULL, 0)==0) {
 		*found_browser_entry = *browser;
 	}
 	regfree(&r);
@@ -205,8 +205,8 @@ static int browser_reg_compare(zval **browser,int num_args, va_list args, zend_h
    Get information about the capabilities of a browser */
 PHP_FUNCTION(get_browser)
 {
-	zval **agent_name,**agent;
-	zval *found_browser_entry,*tmp_copy;
+	zval **agent_name, **agent;
+	zval *found_browser_entry, *tmp_copy;
 	char *lookup_browser_name;
 
 	if (!INI_STR("browscap")) {
@@ -217,12 +217,12 @@ PHP_FUNCTION(get_browser)
 		case 0:
 			if (!PG(http_globals)[TRACK_VARS_SERVER]
 				|| zend_hash_find(PG(http_globals)[TRACK_VARS_SERVER]->value.ht, "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT"), (void **) &agent_name)==FAILURE) {
-				zend_error(E_WARNING,"HTTP_USER_AGENT variable is not set, cannot determine user agent name");
+				zend_error(E_WARNING, "HTTP_USER_AGENT variable is not set, cannot determine user agent name");
 				RETURN_FALSE;
 			}
 			break;
 		case 1:
-			if (zend_get_parameters_ex(1,&agent_name)==FAILURE) {
+			if (zend_get_parameters_ex(1, &agent_name)==FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
@@ -233,7 +233,7 @@ PHP_FUNCTION(get_browser)
 	
 	convert_to_string_ex(agent_name);
 
-	if (zend_hash_find(&browser_hash, (*agent_name)->value.str.val,(*agent_name)->value.str.len+1, (void **) &agent)==FAILURE) {
+	if (zend_hash_find(&browser_hash, (*agent_name)->value.str.val, (*agent_name)->value.str.len+1, (void **) &agent)==FAILURE) {
 		lookup_browser_name = (*agent_name)->value.str.val;
 		found_browser_entry = NULL;
 		zend_hash_apply_with_arguments(&browser_hash, (apply_func_args_t) browser_reg_compare, 2, lookup_browser_name, &found_browser_entry);
@@ -248,9 +248,9 @@ PHP_FUNCTION(get_browser)
 	object_init(return_value);
 	zend_hash_copy(Z_OBJPROP_P(return_value), Z_OBJPROP_PP(agent), (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
 	
-	while (zend_hash_find(Z_OBJPROP_PP(agent), "parent",sizeof("parent"), (void **) &agent_name)==SUCCESS) {
+	while (zend_hash_find(Z_OBJPROP_PP(agent), "parent", sizeof("parent"), (void **) &agent_name)==SUCCESS) {
 
-		if (zend_hash_find(&browser_hash,(*agent_name)->value.str.val, (*agent_name)->value.str.len+1, (void **)&agent)==FAILURE) {
+		if (zend_hash_find(&browser_hash, (*agent_name)->value.str.val, (*agent_name)->value.str.len+1, (void **)&agent)==FAILURE) {
 			break;
 		}
 		
