@@ -1,3 +1,26 @@
+2004-09-11  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ext/standard/array.c:
+      - MFB: Added the sorting flag SORT_LOCALE_STRING to the sort() functions
+      which
+        makes them sort based on the current locale. (Derick)
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ext/standard/array.c:
+      - Added the sorting flag SORT_LOCALE_STRING to the sort() functions which
+      makes
+        them sort based on the current locale. (Derick)
+
+2004-09-11  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_operators.c:
+      - Resolve undefined behavior (joe at redhat)
+
 2004-09-10  Sara Golemon  <php@alphaweb.net>
 
     * main/streams/streams.c:
