@@ -226,7 +226,7 @@ static void register_standard_class()
 	zend_standard_class_def.handle_property_set = NULL;
 	zend_standard_class_def.refcount = (int *) malloc(sizeof(int));
 	*zend_standard_class_def.refcount = 1;
-	zend_hash_add(GLOBAL_CLASS_TABLE, "stdClass", sizeof("stdClass"), &zend_standard_class_def, sizeof(zend_class_entry), NULL);
+	zend_hash_add(GLOBAL_CLASS_TABLE, "stdclass", sizeof("stdclass"), &zend_standard_class_def, sizeof(zend_class_entry), NULL);
 }
 
 
