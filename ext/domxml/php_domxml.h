@@ -63,6 +63,7 @@ PHP_FUNCTION(html_doc_file);
 #endif
 PHP_FUNCTION(xmltree);
 PHP_FUNCTION(domxml_new_xmldoc);
+PHP_FUNCTION(domxml_substitute_entities_default);
 
 /* Class Document methods */
 PHP_FUNCTION(domxml_doc_doctype);
