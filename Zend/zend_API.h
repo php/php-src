@@ -94,7 +94,7 @@ BEGIN_EXTERN_C()
 #define INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset) \
 	{															\
 		class_container.name = strdup(class_name);				\
-		class_container.name_length = strlen(class_name);		\
+		class_container.name_length = sizeof(class_name) - 1;	\
 		class_container.builtin_functions = functions;			\
 		class_container.constructor = NULL;						\
 		class_container.destructor = NULL;						\
