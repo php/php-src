@@ -3056,12 +3056,17 @@ int zend_new_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_clone_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zval *obj = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+	zval *obj;
 	zend_class_entry *ce;
 	zend_function *clone;
 	zend_object_clone_obj_t clone_call;
-
-	if (Z_TYPE_P(obj) != IS_OBJECT) {
+	if(EX(opline)->op1.op_type == IS_UNUSED) {
+		/* this */
+		obj = EG(This);
+	} else {
+		obj = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+	}
+	if (!obj || Z_TYPE_P(obj) != IS_OBJECT) {
 		zend_error(E_WARNING, "__clone method called on non-object");
 		EX_T(EX(opline)->result.u.var).var.ptr = EG(error_zval_ptr);
 		EX_T(EX(opline)->result.u.var).var.ptr->refcount++;
