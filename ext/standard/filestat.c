@@ -34,6 +34,17 @@
 # include <unistd.h>
 #endif
 
+#ifdef OS2
+#  define INCL_DOS
+#  include <os2.h>
+#endif
+
+#if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
+# include <sys/statvfs.h>
+#elif defined(HAVE_SYS_STATFS_H) && defined(HAVE_STATFS)
+# include <sys/statfs.h>
+#endif
+
 #if HAVE_PWD_H
 # if MSVC5
 #  include "win32/pwd.h"
@@ -98,6 +109,104 @@ PHP_RSHUTDOWN_FUNCTION(filestat)
 		efree (CurrentStatFile);
 	}
 	return SUCCESS;
+}
+
+PHP_FUNCTION(diskfreespace)
+{
+#ifdef WINDOWS
+	pval *path;
+	double bytesfree;
+
+	HINSTANCE kernel32;
+	FARPROC gdfse;
+	typedef BOOL (WINAPI *gdfse_func)(LPCTSTR, PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER);
+	gdfse_func func;
+
+	/* These are used by GetDiskFreeSpaceEx, if available. */
+	ULARGE_INTEGER FreeBytesAvailableToCaller;
+	ULARGE_INTEGER TotalNumberOfBytes;
+  	ULARGE_INTEGER TotalNumberOfFreeBytes;
+
+	/* These are used by GetDiskFreeSpace otherwise. */
+	DWORD SectorsPerCluster;
+	DWORD BytesPerSector;
+	DWORD NumberOfFreeClusters;
+	DWORD TotalNumberOfClusters;
+
+#else /* not - WINDOWS */
+	pval *path;
+#if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
+	struct statvfs buf;
+#elif defined(HAVE_SYS_STATFS_H) && defined(HAVE_STATFS)
+	struct statfs buf;
+#endif
+	double bytesfree = 0;
+#endif /* WINDOWS */
+
+	if (ARG_COUNT(ht)!=1 || getParameters(ht,1,&path)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string(path);
+
+	if (_php3_check_open_basedir(path->value.str.val)) RETURN_FALSE;
+
+#ifdef WINDOWS
+	/* GetDiskFreeSpaceEx is only available in NT and Win95 post-OSR2,
+	   so we have to jump through some hoops to see if the function
+	   exists. */
+	kernel32 = LoadLibrary("kernel32.dll");
+	if (kernel32) {
+		gdfse = GetProcAddress(kernel32, "GetDiskFreeSpaceExA");
+		/* It's available, so we can call it. */
+		if (gdfse) {
+			func = (gdfse_func)gdfse;
+			if (func(path->value.str.val,
+				&FreeBytesAvailableToCaller,
+				&TotalNumberOfBytes,
+				&TotalNumberOfFreeBytes) == 0) RETURN_FALSE;
+
+			/* i know - this is ugly, but i works (thies@digicol.de) */
+			bytesfree  = FreeBytesAvailableToCaller.HighPart * 
+				(double) (((unsigned long)1) << 31) * 2.0 +
+				FreeBytesAvailableToCaller.LowPart;
+		}
+		/* If it's not available, we just use GetDiskFreeSpace */
+		else {
+			if (GetDiskFreeSpace(path->value.str.val,
+				&SectorsPerCluster, &BytesPerSector,
+				&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) RETURN_FALSE;
+			bytesfree = (double)NumberOfFreeClusters * (double)SectorsPerCluster * (double)BytesPerSector;
+		}
+	}
+	else {
+		php3_error(E_WARNING, "Unable to load kernel32.dll");
+		RETURN_FALSE;
+	}
+
+#elif defined(OS2)
+	{
+		FSALLOCATE fsinfo;
+  		char drive = path->value.str.val[0] & 95;
+  		
+		if (DosQueryFSInfo( drive ? drive - 64 : 0, FSIL_ALLOC, &fsinfo, sizeof( fsinfo ) ) == 0)
+			bytesfree = (double)fsinfo.cbSector * fsinfo.cSectorUnit * fsinfo.cUnitAvail;
+	}
+#else /* WINDOWS, OS/2 */
+#if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
+	if (statvfs(path->value.str.val,&buf)) RETURN_FALSE;
+	if (buf.f_frsize) {
+		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_frsize));
+	} else {
+		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_bsize));
+	}
+#elif defined(HAVE_SYS_STATFS_H) && defined(HAVE_STATFS)
+	if (statfs(path->value.str.val,&buf)) RETURN_FALSE;
+	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bavail));
+#endif
+#endif /* WINDOWS */
+
+	RETURN_DOUBLE(bytesfree);
 }
 
 PHP_FUNCTION(chgrp)
@@ -479,6 +588,7 @@ function_entry php3_filestat_functions[] = {
 	PHP_FE(chmod,									NULL)
 	PHP_FE(touch,									NULL)
 	PHP_FE(clearstatcache,							NULL)
+	PHP_FE(diskfreespace,							NULL)
 	{NULL, NULL, NULL}
 };
 
