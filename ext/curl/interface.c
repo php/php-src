@@ -730,20 +730,23 @@ PHP_FUNCTION(curl_init)
 {
 	zval       **url;
 	php_curl    *ch;
+	CURL        *cp;
 	int          argc = ZEND_NUM_ARGS();
 
 	if (argc < 0 || argc > 1 || zend_get_parameters_ex(argc, &url) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	alloc_curl_handle(&ch);
-	TSRMLS_SET_CTX(ch->thread_ctx);
-	
-	ch->cp = curl_easy_init();
-	if (!ch->cp) {
+	cp = curl_easy_init();
+	if (!cp) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not initialize a new cURL handle");
 		RETURN_FALSE;
 	}
+
+	alloc_curl_handle(&ch);
+	TSRMLS_SET_CTX(ch->thread_ctx);
+
+	ch->cp = cp;
 	
 	ch->handlers->write->method = PHP_CURL_STDOUT;
 	ch->handlers->write->type   = PHP_CURL_ASCII;
