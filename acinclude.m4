@@ -48,21 +48,21 @@ AC_DEFUN(PHP_SETUP_OPENSSL,[
   done
 
   if test -z "$OPENSSL_DIR"; then
-    AC_MSG_ERROR(Cannot find OpenSSL's <evp.h>)
+    AC_MSG_ERROR([Cannot find OpenSSL's <evp.h>])
   fi
 
   old_CPPFLAGS=$CPPFLAGS
   CPPFLAGS=-I$OPENSSL_INC
-  AC_MSG_CHECKING(for OpenSSL version)
+  AC_MSG_CHECKING([for OpenSSL version])
   AC_EGREP_CPP(yes,[
   #include <openssl/opensslv.h>
   #if OPENSSL_VERSION_NUMBER >= 0x0090500fL
   yes
   #endif
   ],[
-    AC_MSG_RESULT(>= 0.9.5)
+    AC_MSG_RESULT([>= 0.9.5])
   ],[
-    AC_MSG_ERROR(OpenSSL version 0.9.5 or greater required.)
+    AC_MSG_ERROR([OpenSSL version 0.9.5 or greater required.])
   ])
   CPPFLAGS=$old_CPPFLAGS
 
@@ -71,13 +71,13 @@ AC_DEFUN(PHP_SETUP_OPENSSL,[
   AC_CHECK_LIB(crypto, CRYPTO_free, [
     PHP_ADD_LIBRARY(crypto)
   ],[
-    AC_MSG_ERROR(libcrypto not found!)
+    AC_MSG_ERROR([libcrypto not found!])
   ])
 
   AC_CHECK_LIB(ssl, SSL_CTX_set_ssl_version, [
     PHP_ADD_LIBRARY(ssl)
   ],[
-    AC_MSG_ERROR(libssl not found!)
+    AC_MSG_ERROR([libssl not found!])
   ])
   PHP_ADD_INCLUDE($OPENSSL_INC)
 ])
@@ -280,7 +280,7 @@ AC_DEFUN(PHP_MISSING_PWRITE_DECL,[
 ])
 
 AC_DEFUN(PHP_MISSING_TIME_R_DECL,[
-  AC_MSG_CHECKING(for missing declarations of reentrant functions)
+  AC_MSG_CHECKING([for missing declarations of reentrant functions])
   AC_TRY_COMPILE([#include <time.h>],[struct tm *(*func)() = localtime_r],[
     :
   ],[
@@ -306,7 +306,7 @@ AC_DEFUN(PHP_MISSING_TIME_R_DECL,[
   ],[
     AC_DEFINE(MISSING_STRTOK_R_DECL,1,[Whether strtok_r is declared])
   ])
-  AC_MSG_RESULT(done)
+  AC_MSG_RESULT([done])
 ])
 
 dnl
@@ -347,7 +347,7 @@ if test "$php_always_shared" = "yes"; then
   test "[$]$1" = "no" && $1=yes
 fi
 
-AC_MSG_RESULT($ext_output)
+AC_MSG_RESULT([$ext_output])
 ])
 
 dnl
@@ -361,7 +361,7 @@ PHP_REAL_ARG_WITH([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z0-9-,A-Z0-9_))
 ])
 
 AC_DEFUN(PHP_REAL_ARG_WITH,[
-AC_MSG_CHECKING($2)
+AC_MSG_CHECKING([$2])
 AC_ARG_WITH($1,[$3],$5=[$]withval,$5=ifelse($4,,no,$4))
 PHP_ARG_ANALYZE($5)
 ])
@@ -377,7 +377,7 @@ PHP_REAL_ARG_ENABLE([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z-,A-Z_))
 ])
 
 AC_DEFUN(PHP_REAL_ARG_ENABLE,[
-AC_MSG_CHECKING($2)
+AC_MSG_CHECKING([$2])
 AC_ARG_ENABLE($1,[$3],$5=[$]enableval,$5=ifelse($4,,no,$4))
 PHP_ARG_ANALYZE($5)
 ])
@@ -511,7 +511,7 @@ dnl PHP_CONFIGURE_PART(MESSAGE)
 dnl Idea borrowed from mm
 AC_DEFUN(PHP_CONFIGURE_PART,[
   AC_MSG_RESULT()
-  AC_MSG_RESULT(${T_MD}$1${T_ME})
+  AC_MSG_RESULT([${T_MD}$1${T_ME}])
 ])
 
 AC_DEFUN(PHP_PROG_SENDMAIL,[
@@ -523,13 +523,13 @@ fi
 
 AC_DEFUN(PHP_RUNPATH_SWITCH,[
 dnl check for -R, etc. switch
-AC_MSG_CHECKING(if compiler supports -R)
+AC_MSG_CHECKING([if compiler supports -R])
 AC_CACHE_VAL(php_cv_cc_dashr,[
 	SAVE_LIBS=$LIBS
 	LIBS="-R /usr/lib $LIBS"
 	AC_TRY_LINK([], [], php_cv_cc_dashr=yes, php_cv_cc_dashr=no)
 	LIBS=$SAVE_LIBS])
-AC_MSG_RESULT($php_cv_cc_dashr)
+AC_MSG_RESULT([$php_cv_cc_dashr])
 if test $php_cv_cc_dashr = "yes"; then
 	ld_runpath_switch=-R
 else
@@ -539,7 +539,7 @@ else
 		LIBS="-Wl,-rpath,/usr/lib $LIBS"
 		AC_TRY_LINK([], [], php_cv_cc_rpath=yes, php_cv_cc_rpath=no)
 		LIBS=$SAVE_LIBS])
-	AC_MSG_RESULT($php_cv_cc_rpath)
+	AC_MSG_RESULT([$php_cv_cc_rpath])
 	if test $php_cv_cc_rpath = "yes"; then
 		ld_runpath_switch=-Wl,-rpath,
 	else
@@ -600,7 +600,7 @@ dnl
 AC_DEFUN(PHP_BUILD_THREAD_SAFE,[
   enable_experimental_zts=yes
   if test "$pthreads_working" != "yes"; then
-    AC_MSG_ERROR(ZTS currently requires working POSIX threads. We were unable to verify that your system supports Pthreads.)
+    AC_MSG_ERROR([ZTS currently requires working POSIX threads. We were unable to verify that your system supports Pthreads.])
   fi
 ])
 
@@ -826,14 +826,14 @@ AC_DEFUN(PHP_CHECK_CC_OPTION,[
   ac_php_compile="${CC-cc} -$opt -o conftest $CFLAGS $CPPFLAGS conftest.$ac_ext 2>&1"
   if eval $ac_php_compile 2>&1 | egrep "$opt" > /dev/null 2>&1 ; then
     eval php_cc_$var=no
-	AC_MSG_RESULT(no)
+	AC_MSG_RESULT([no])
   else
     if eval ./conftest 2>/dev/null ; then
       eval php_cc_$var=yes
-	  AC_MSG_RESULT(yes)
+	  AC_MSG_RESULT([yes])
     else
       eval php_cc_$var=no
-	  AC_MSG_RESULT(no)
+	  AC_MSG_RESULT([no])
     fi
   fi
 ])
@@ -850,8 +850,8 @@ elif test "$REGEX_TYPE" = "system"; then
   AC_DEFINE(REGEX,0,[ ])
 fi
 
-AC_MSG_CHECKING(which regex library to use)
-AC_MSG_RESULT($REGEX_TYPE)
+AC_MSG_CHECKING([which regex library to use])
+AC_MSG_RESULT([$REGEX_TYPE])
 
 PHP_SUBST(REGEX_DIR)
 PHP_SUBST(REGEX_LIB)
@@ -865,10 +865,10 @@ AC_DEFUN(PHP_MISSING_FCLOSE_DECL,[
   AC_MSG_CHECKING([for fclose declaration])
   AC_TRY_COMPILE([#include <stdio.h>],[int (*func)() = fclose],[
     AC_DEFINE(MISSING_FCLOSE_DECL,0,[ ])
-    AC_MSG_RESULT(ok)
+    AC_MSG_RESULT([ok])
   ],[
     AC_DEFINE(MISSING_FCLOSE_DECL,1,[ ])
-    AC_MSG_RESULT(missing)
+    AC_MSG_RESULT([missing])
   ])
 ])
 
@@ -936,7 +936,7 @@ dnl Must be run after all --with-NN options that let the user
 dnl choose dynamic extensions, and after the gcc test.
 dnl
 AC_DEFUN(PHP_SOLARIS_PIC_WEIRDNESS,[
-  AC_MSG_CHECKING(whether -fPIC is required)
+  AC_MSG_CHECKING([whether -fPIC is required])
   if test -n "$EXT_SHARED"; then
     os=`uname -sr 2>/dev/null`
     case $os in
@@ -945,12 +945,12 @@ AC_DEFUN(PHP_SOLARIS_PIC_WEIRDNESS,[
 	    gcc*|egcs*) CFLAGS="$CFLAGS -fPIC";;
 	    *) CFLAGS="$CFLAGS -fpic";;
 	  esac
-	  AC_MSG_RESULT(yes);;
+	  AC_MSG_RESULT([yes]);;
 	*)
-	  AC_MSG_RESULT(no);;
+	  AC_MSG_RESULT([no]);;
     esac
   else
-    AC_MSG_RESULT(no)
+    AC_MSG_RESULT([no])
   fi
 ])
 
@@ -990,7 +990,7 @@ AC_DEFUN(PHP_SYS_LFS,
 [dnl
   # If available, prefer support for large files unless the user specified
   # one of the CPPFLAGS, LDFLAGS, or LIBS variables.
-  AC_MSG_CHECKING(whether large file support needs explicit enabling)
+  AC_MSG_CHECKING([whether large file support needs explicit enabling])
   ac_getconfs=''
   ac_result=yes
   ac_set=''
@@ -1012,7 +1012,7 @@ AC_DEFUN(PHP_SYS_LFS,
   case "$ac_result$ac_set" in
     yes?*) ac_result="yes, but $ac_set is already set, so use its settings"
   esac
-  AC_MSG_RESULT($ac_result)
+  AC_MSG_RESULT([$ac_result])
   case $ac_result in
     yes)
       for ac_shellvar in $ac_shellvars; do

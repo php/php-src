@@ -13,19 +13,19 @@ AC_DEFUN(PHP_GD_JPEG,[
     done
 
     if test -z "$GD_JPEG_DIR"; then
-      AC_MSG_ERROR(libjpeg.(a|so) not found.)
+      AC_MSG_ERROR([libjpeg.(a|so) not found.])
     fi
 
     PHP_CHECK_LIBRARY(jpeg,jpeg_read_header,
     [
       PHP_ADD_LIBRARY_WITH_PATH(jpeg, $GD_JPEG_DIR/lib, GD_SHARED_LIBADD)
     ],[
-      AC_MSG_ERROR(Problem with libjpeg.(a|so). Please check config.log for more information.) 
+      AC_MSG_ERROR([Problem with libjpeg.(a|so). Please check config.log for more information.]) 
     ],[
       -L$GD_JPEG_DIR/lib
     ])
   else 
-    AC_MSG_RESULT(If configure fails try --with-jpeg-dir=<DIR>)
+    AC_MSG_RESULT([If configure fails try --with-jpeg-dir=<DIR>])
   fi
 ])
 
@@ -40,11 +40,11 @@ AC_DEFUN(PHP_GD_PNG,[
     done
 
     if test -z "$GD_PNG_DIR"; then
-      AC_MSG_ERROR(libpng.(a|so) not found.)
+      AC_MSG_ERROR([libpng.(a|so) not found.])
     fi
 
     if test "$PHP_ZLIB_DIR" = "no"; then
-      AC_MSG_ERROR(PNG support requires ZLIB. Use --with-zlib-dir=<DIR>)
+      AC_MSG_ERROR([PNG support requires ZLIB. Use --with-zlib-dir=<DIR>])
     fi
     
     PHP_CHECK_LIBRARY(png,png_info_init,
@@ -52,13 +52,13 @@ AC_DEFUN(PHP_GD_PNG,[
       PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/lib, GD_SHARED_LIBADD)
       PHP_ADD_LIBRARY_WITH_PATH(png, $GD_PNG_DIR/lib, GD_SHARED_LIBADD)
     ],[
-      AC_MSG_ERROR(Problem with libpng.(a|so) or libz.(a|so). Please check config.log for more information.) 
+      AC_MSG_ERROR([Problem with libpng.(a|so) or libz.(a|so). Please check config.log for more information.]) 
     ],[
       -L$PHP_ZLIB_DIR/lib -lz -L$GD_PNG_DIR/lib
     ])
 
   else 
-    AC_MSG_RESULT(If configure fails try --with-png-dir=<DIR> and --with-zlib-dir=<DIR>)
+    AC_MSG_RESULT([If configure fails try --with-png-dir=<DIR> and --with-zlib-dir=<DIR>])
   fi
 ])
 
@@ -73,7 +73,7 @@ AC_DEFUN(PHP_GD_XPM,[
     done
 
     if test -z "$GD_XPM_DIR"; then
-      AC_MSG_ERROR(libXpm.(a|so) not found.)
+      AC_MSG_ERROR([libXpm.(a|so) not found.])
     fi
 
     PHP_CHECK_LIBRARY(Xpm,XpmFreeXpmImage, 
@@ -81,7 +81,7 @@ AC_DEFUN(PHP_GD_XPM,[
       PHP_ADD_LIBRARY_WITH_PATH(Xpm, $GD_XPM_DIR/lib, GD_SHARED_LIBADD)
       PHP_ADD_LIBRARY_WITH_PATH(X11, $GD_XPM_DIR/lib, GD_SHARED_LIBADD)
     ],[
-      AC_MSG_ERROR(Problem with libXpm.(a|so) or libX11.(a|so). Please check config.log for more information.) 
+      AC_MSG_ERROR([Problem with libXpm.(a|so) or libX11.(a|so). Please check config.log for more information.]) 
     ],[
       -L$GD_XPM_DIR/lib -lX11
     ])
@@ -117,7 +117,7 @@ AC_DEFUN(PHP_GD_FREETYPE1,[
       fi
       PHP_ADD_INCLUDE($TTF_INC_DIR)
     else
-      AC_MSG_RESULT(no - FreeType 2.x is to be used instead)
+      AC_MSG_RESULT([no - FreeType 2.x is to be used instead])
     fi
   fi
 ])
@@ -140,10 +140,10 @@ AC_DEFUN(PHP_GD_FREETYPE2,[
       AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
       AC_DEFINE(HAVE_LIBFREETYPE,1,[ ])
     else
-      AC_MSG_ERROR(freetype2 not found!)
+      AC_MSG_ERROR([freetype2 not found!])
     fi
   else 
-    AC_MSG_RESULT(If configure fails try --with-freetype-dir=<DIR>)
+    AC_MSG_RESULT([If configure fails try --with-freetype-dir=<DIR>])
   fi
 ])
 
@@ -158,7 +158,7 @@ AC_DEFUN(PHP_GD_T1LIB,[
     done
 
     if test -z "$GD_T1_DIR"; then
-      AC_MSG_ERROR(Your t1lib distribution is not installed correctly. Please reinstall it.) 
+      AC_MSG_ERROR([Your t1lib distribution is not installed correctly. Please reinstall it.]) 
     fi
 
     PHP_CHECK_LIBRARY(t1, T1_LoadFont, 
@@ -167,7 +167,7 @@ AC_DEFUN(PHP_GD_T1LIB,[
       PHP_ADD_INCLUDE("$GD_T1_DIR/include")
       PHP_ADD_LIBRARY_WITH_PATH(t1, "$GD_T1_DIR/lib", GD_SHARED_LIBADD)
     ],[
-      AC_MSG_ERROR(Problem with libt1.(a|so). Please check config.log for more information.) 
+      AC_MSG_ERROR([Problem with libt1.(a|so). Please check config.log for more information.]) 
     ],[
       -L$GD_T1_DIR/lib
     ])
