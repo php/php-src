@@ -1,3 +1,17 @@
+2004-02-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/cpdf/cpdf.c:
+      MFH: Fixed possible resource/memory leak.
+
+    * ext/cpdf/cpdf.c:
+      Fixed possible resource/memory leak.
+
+2004-02-19  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/session/session.c:
+      Improve error messages
+
 2004-02-18  Hartmut Holzgraefe  <hartmut@php-groupies.de>
 
     * ZendEngine2/zend.h
