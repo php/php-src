@@ -144,7 +144,6 @@ typedef struct ps_serializer_struct {
 #define PS_SERIALIZER_ENTRY(x) \
 	{ #x, PS_SERIALIZER_ENCODE_NAME(x), PS_SERIALIZER_DECODE_NAME(x) }
 
-void session_adapt_uris(const char *, size_t, char **, size_t *,zend_bool TSRMLS_DC);
 void session_adapt_url(const char *, size_t, char **, size_t * TSRMLS_DC);
 
 void php_set_session_var(char *name, size_t namelen, zval *state_val,HashTable *var_hash TSRMLS_DC);
