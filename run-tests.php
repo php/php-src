@@ -124,11 +124,11 @@ function do_testing($argc, &$argv) {
     global $term, $windows_p, $php, $skip, $testdirs, $tmpfile, $opts,
 	$skipped, $failed, $passed, $total, $term_bold, $term_norm;
 
-    if ($argc > 0) {
-	if (is_dir($argv[0])) {
-	    $dir = $argv[0];
+    if ($argc > 1) {
+	if (is_dir($argv[1])) {
+	    $dir = $argv[1];
 	} else {
-	    for ($i = 0; $i < $argc; $i++) {
+	    for ($i = 1; $i < $argc; $i++) {
 		switch (run_test($argv[$i])) {
 		    case TEST_SKIPPED:
 		    case TEST_INTERNAL_ERROR:
