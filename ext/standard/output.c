@@ -30,7 +30,7 @@ static int php_ub_body_write(const char *str, uint str_length);
 static int php_ub_body_write_no_header(const char *str, uint str_length);
 static int php_b_body_write(const char *str, uint str_length);
 
-static void php_ob_init(uint initial_size, uint block_size, zval *output_handler, int chunk_size);
+static void php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size);
 static void php_ob_append(const char *text, uint text_length);
 #if 0
 static void php_ob_prepend(const char *text, uint text_length);
@@ -88,7 +88,7 @@ PHPAPI int php_header_write(const char *str, uint str_length)
 }
 
 /* Start output buffering */
-PHPAPI int php_start_ob_buffer(zval *output_handler, int chunk_size)
+PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size)
 {
 	OLS_FETCH();
 
@@ -138,7 +138,7 @@ PHPAPI void php_end_ob_buffer(int send_buffer)
 		if (orig_buffer->refcount==2) { /* free the zval */
 			FREE_ZVAL(orig_buffer);
 		} else {
-			orig_buffer->refcount--;
+			orig_buffer->refcount-=2;
 		}
 	}
 
@@ -228,7 +228,7 @@ static inline void php_ob_allocate(void)
 }
 
 
-static void php_ob_init(uint initial_size, uint block_size, zval *output_handler, int chunk_size)
+static void php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size)
 {
 	OLS_FETCH();
 
@@ -252,31 +252,28 @@ static void php_ob_append(const char *text, uint text_length)
 {
 	char *target;
 	int original_ob_text_length;
-	int new_size;
 	OLS_FETCH();
 
 	original_ob_text_length=OG(active_ob_buffer).text_length;
+	OG(active_ob_buffer).text_length = OG(active_ob_buffer).text_length + text_length;
 
-	new_size = OG(active_ob_buffer).text_length + text_length;
+	php_ob_allocate();
+	target = OG(active_ob_buffer).buffer+original_ob_text_length;
+	memcpy(target, text, text_length);
+	target[text_length]=0;
 
 	if (OG(active_ob_buffer).chunk_size
-		&& new_size > OG(active_ob_buffer).chunk_size) {
+		&& OG(active_ob_buffer).text_length >= OG(active_ob_buffer).chunk_size) {
 		zval *output_handler = OG(active_ob_buffer).output_handler;
-		int chunk_size = OG(active_ob_buffer).chunk_size;
+		uint chunk_size = OG(active_ob_buffer).chunk_size;
 
 		if (output_handler) {
 			output_handler->refcount++;
 		}
 		php_end_ob_buffer(1);
 		php_start_ob_buffer(output_handler, chunk_size);
-		php_ob_append(text, text_length);
 		return;
 	}
-	OG(active_ob_buffer).text_length = new_size;
-	php_ob_allocate();
-	target = OG(active_ob_buffer).buffer+original_ob_text_length;
-	memcpy(target, text, text_length);
-	target[text_length]=0;
 }
 
 #if 0
@@ -409,7 +406,7 @@ static int php_ub_body_write(const char *str, uint str_length)
 PHP_FUNCTION(ob_start)
 {
 	zval *output_handler;
-	int chunk_size=0;
+	uint chunk_size=0;
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
@@ -436,7 +433,7 @@ PHP_FUNCTION(ob_start)
 				output_handler = *output_handler_p;
 				output_handler->refcount++;
 				convert_to_long_ex(chunk_size_p);
-				chunk_size = Z_LVAL_PP(chunk_size_p);
+				chunk_size = (uint) Z_LVAL_PP(chunk_size_p);
 			}
 			break;
 		default:
