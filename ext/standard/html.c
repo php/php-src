@@ -526,7 +526,7 @@ static enum entity_charset determine_charset(char *charset_hint)
 {
 	int i;
 	enum entity_charset charset = cs_8859_1;
-	int len;
+	int len = 0;
 
 	/* Guarantee default behaviour for backwards compatibility */
 	if (charset_hint == NULL)
@@ -573,6 +573,7 @@ static enum entity_charset determine_charset(char *charset_hint)
 #endif
 	}
 	if (charset_hint)	{
+		if(!len) len = strlen(charset_hint);
 		/* now walk the charset map and look for the codeset */
 		for (i = 0; charset_map[i].codeset; i++)	{
 			if (strncasecmp(charset_hint, charset_map[i].codeset, len) == 0)	{
