@@ -79,23 +79,26 @@ AC_ARG_WITH(apxs,
   STRONGHOLD=
   AC_DEFINE(HAVE_AP_CONFIG_H,1,[ ])
   AC_DEFINE(HAVE_AP_COMPAT_H,1,[ ])
+  AC_DEFINE(HAVE_APACHE,1,[ ])
   AC_MSG_RESULT(yes)
 ],[
   AC_MSG_RESULT(no)
 ])
-
-APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache/mod_php4.* sapi/apache/libphp4.module"
 
 if test "$PHP_SAPI" != "apache"; then
 AC_MSG_CHECKING(for Apache 1.x module support)
 AC_ARG_WITH(apache,
 [  --with-apache[=DIR]     Build Apache 1.x module. DIR is the top-level Apache
                           build directory, defaults to /usr/local/apache.],[
+
+  APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache/mod_php4.* sapi/apache/libphp4.module"
+
   if test "$withval" = "yes"; then
     # Apache's default directory
     withval=/usr/local/apache
   fi
   if test "$withval" != "no"; then
+    AC_DEFINE(HAVE_APACHE,1,[ ])
     APACHE_MODULE=yes
     PHP_EXPAND_PATH($withval, withval)
     # For Apache 1.2.x
@@ -223,7 +226,6 @@ AC_CACHE_CHECK([for member fd in BUFF *],ac_cv_php_fd_in_buff,[
 if test "$ac_cv_php_fd_in_buff" = "yes"; then
   AC_DEFINE(PHP_APACHE_HAVE_CLIENT_FD,1,[ ])
 fi
-
   
 AC_MSG_CHECKING(for mod_charset compatibility option)
 AC_ARG_WITH(mod_charset,
