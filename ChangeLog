@@ -1,3 +1,26 @@
+2005-02-26  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * run-tests.php:
+      let the test-suite run from an alternate build dir
+
+2005-02-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/config.m4:
+      - Make detection work for macros
+
+    * ext/dba/dba_db1.c:
+      - Simplify
+
+2005-02-26  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/go-pear-list.php:
+      use 1.3.5
+
+2005-02-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/config.w32:
+      - Prepare for db1.85 emulation with db3
+
 2005-02-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/dba/config.m4
