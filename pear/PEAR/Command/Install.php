@@ -182,13 +182,16 @@ specified at once.
         if (empty($this->installer)) {
             $this->installer = &new PEAR_Installer($this->ui);
         }
+        if (sizeof($params) < 1) {
+            return $this->raiseError("Please supply the package(s) you want to uninstall");
+        }
         foreach ($params as $pkg) {
             if ($this->installer->uninstall($pkg, $options)) {
                 if ($this->config->get('verbose') > 0) {
-                    $this->ui->outputData("uninstall ok", $command);
+                    $this->ui->outputData("uninstall $pkg ok", $command);
                 }
             } else {
-                return $this->raiseError("uninstall failed");
+                return $this->raiseError("uninstall $pkg failed");
             }
         }
         return true;

@@ -422,7 +422,7 @@ class PEAR_Frontend_CLI extends PEAR
                     $count = count($data['data'][0]);
                     if ($count == 2) {
                         $opts = array(0 => array('wrap' => 25),
-                                      1 => array('wrap' => 50)
+                                      1 => array('wrap' => 48)
                         );
                     } elseif ($count == 3) {
                         $opts = array(0 => array('wrap' => 20),

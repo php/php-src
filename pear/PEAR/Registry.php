@@ -561,7 +561,7 @@ class PEAR_Registry extends PEAR
                 // XXX (cox) Possible problem with changes in the way
                 // PEAR_Dependency::checkPackage() works
                 if ($relation != 'has') {
-                    if (!version_compare($new_version, $require, $relation)) {
+                    if (!version_compare("$new_version", "$require", $relation)) {
                         $fails[] = $dep;
                     }
                 }

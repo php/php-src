@@ -974,11 +974,11 @@ class PEAR_Common extends PEAR
     function validatePackageInfo($info, &$errors, &$warnings)
     {
         global $_PEAR_Common_maintainer_roles,
-            $_PEAR_Common_release_states,
-            $_PEAR_Common_dependency_types,
-            $_PEAR_Common_dependency_relations,
-            $_PEAR_Common_file_roles,
-            $_PEAR_Common_replacement_types;
+               $_PEAR_Common_release_states,
+               $_PEAR_Common_dependency_types,
+               $_PEAR_Common_dependency_relations,
+               $_PEAR_Common_file_roles,
+               $_PEAR_Common_replacement_types;
         if (PEAR::isError($info = $this->infoFromAny($info))) {
             return $this->raiseError($info);
         }
