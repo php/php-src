@@ -1537,7 +1537,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 			append_file_p = NULL;
 		}
 #if defined(ZEND_MULTIBYTE) && defined(HAVE_MBSTRING)
-		php_mbstring_set_zend_encoding(TSRMLS_C);
+		php_mb_set_zend_encoding(TSRMLS_C);
 #endif /* ZEND_MULTIBYTE && HAVE_MBSTRING */
 		zend_unset_timeout(TSRMLS_C);
 		zend_set_timeout(EG(timeout_seconds));
