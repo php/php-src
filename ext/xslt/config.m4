@@ -49,9 +49,6 @@ if test "$PHP_XSLT" != "no"; then
     AC_MSG_ERROR(not found. Please re-install the $XSLT_BACKEND_NAME distribution)
   fi
 					
-  PHP_ADD_INCLUDE($XSLT_DIR/include)
-  PHP_ADD_LIBRARY_WITH_PATH($XSLT_LIBNAME, $XSLT_DIR/lib, XSLT_SHARED_LIBADD)
-
   if test "$PHP_XSLT_SABLOT" != "no"; then
     found_expat=no
     for i in $PHP_EXPAT_DIR $XSLT_DIR; do
@@ -87,7 +84,11 @@ if test "$PHP_XSLT" != "no"; then
  
     AC_DEFINE(HAVE_SABLOT_BACKEND, 1, [ ])
     AC_CHECK_LIB(sablot, SablotSetEncoding, AC_DEFINE(HAVE_SABLOT_SET_ENCODING, 1, [ ]))
+
   fi
+
+  PHP_ADD_INCLUDE($XSLT_DIR/include)
+  PHP_ADD_LIBRARY_WITH_PATH($XSLT_LIBNAME, $XSLT_DIR/lib, XSLT_SHARED_LIBADD)
 
   AC_DEFINE(HAVE_XSLT, 1, [ ])
 fi
