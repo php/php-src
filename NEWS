@@ -17,7 +17,6 @@ PHP 4                                                                      NEWS
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
-- Fixed bug #20936 (openssl_pkey_get was broken). (jeroen@derks.it, Wez)
 - Removed extensions: (Jan, Jani, Sebastian)
   . ext/aspell
   . ext/ccvs
@@ -28,6 +27,9 @@ PHP 4                                                                      NEWS
 - Moved extensions to PECL (http://pear.php.net/): (James, Derick)
   . ext/vpopmail
   . ext/cybermut
+- Fixed bug #21039 (crash when not supplying an IV to mcrypt_generic_init).
+  (Derick)
+- Fixed bug #20936 (openssl_pkey_get was broken). (jeroen@derks.it, Wez)
 - Fixed bug #20927 (wordwrap crash). (Ilia)
 - Fixed bug #20796 (when register_globals is on & arrays with same names are
   passed via get/post/cookie the data inside $_GET/$_POST/$_COOKIE can would be
