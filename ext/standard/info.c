@@ -99,6 +99,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 	char *string_key;
 	uint string_len;
 	ulong num_key;
+	char *elem_esc = NULL;
 
 	if (zend_hash_find(&EG(symbol_table), name, name_length+1, (void **) &data)!=FAILURE
 		&& (Z_TYPE_PP(data)==IS_ARRAY)) {
@@ -116,7 +117,9 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(data), &string_key, &string_len, &num_key, 0, NULL)) {
 				case HASH_KEY_IS_STRING:
 					if (PG(html_errors)) {
-						PUTS(php_info_html_esc(string_key TSRMLS_CC));
+						elem_esc = php_info_html_esc(string_key TSRMLS_CC);
+						PUTS(elem_esc);
+						efree(elem_esc);
 					} else {
 						PUTS(string_key);
 					}	
@@ -147,7 +150,9 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 					if (Z_STRLEN(tmp2) == 0) {
 						PUTS("<i>no value</i>");
 					} else {
-						PUTS(php_info_html_esc(Z_STRVAL(tmp2) TSRMLS_CC));
+						elem_esc = php_info_html_esc(Z_STRVAL(tmp2) TSRMLS_CC);
+						PUTS(elem_esc);
+						efree(elem_esc);
 					} 
 				} else {
 					PUTS(Z_STRVAL(tmp2));
@@ -158,7 +163,9 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 					if (Z_STRLEN_PP(tmp) == 0) {
 						PUTS("<i>no value</i>");
 					} else {
-						PUTS(php_info_html_esc(Z_STRVAL_PP(tmp) TSRMLS_CC));
+						elem_esc = php_info_html_esc(Z_STRVAL_PP(tmp) TSRMLS_CC);
+						PUTS(elem_esc);
+						efree(elem_esc);
 					}
 				} else {
 					PUTS(Z_STRVAL_PP(tmp));
@@ -713,8 +720,8 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 	int i;
 	va_list row_elements;
 	char *row_element;
+	char *elem_esc = NULL;
 /*
-	char *elem_esc;
 	int elem_esc_len;
 */
 
@@ -739,7 +746,9 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 			}
 		} else {
 			if (PG(html_errors)) {
-				PUTS(php_info_html_esc(row_element TSRMLS_CC));
+				elem_esc = php_info_html_esc(row_element TSRMLS_CC);
+				PUTS(elem_esc);
+				efree(elem_esc);
 			} else {
 				PUTS(row_element);
 				if (i < num_cols-1) {
