@@ -1,4 +1,4 @@
-LTLIBRARY_NAME = libcore.la
+LTLIBRARY_NAME = libmain.la
 
 LTLIBRARY_SOURCES = \
        main.c internal_functions.c snprintf.c php_sprintf.c \
