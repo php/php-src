@@ -174,7 +174,7 @@ void php3_unlink(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *filename;
 	int ret;
-	TLS_VARS;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;

@@ -342,6 +342,7 @@ PHP_FUNCTION(shell_exec)
 	FILE *in;
 	int readbytes,total_readbytes=0,allocated_space;
 	pval *cmd;
+	PLS_FETCH();
 
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &cmd)==FAILURE) {
 		WRONG_PARAM_COUNT;

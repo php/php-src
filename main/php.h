@@ -370,7 +370,7 @@ extern void html_putc(char c);
 #ifndef THREAD_SAFE
 extern int end_current_file_execution(int *retval);
 #endif
-extern int _php3_hash_environment(void);
+extern int _php3_hash_environment(PLS_D);
 extern int module_startup_modules(void);
 
 /* needed for modules only */

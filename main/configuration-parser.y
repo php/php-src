@@ -41,6 +41,9 @@
 #include "ext/standard/php3_browscap.h"
 #include "zend_extensions.h"
 
+#undef YYPARSE_PARAM
+#undef YYLEX_PARAM
+
 #if WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -154,7 +157,7 @@ static void pvalue_browscap_destructor(pval *pvalue)
 
 int php3_init_config(void)
 {
-	TLS_VARS;
+	PLS_FETCH();
 
 	if (_php3_hash_init(&configuration_hash, 0, NULL, (void (*)(void *))pvalue_config_destructor, 1)==FAILURE) {
 		return FAILURE;
