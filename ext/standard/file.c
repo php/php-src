@@ -2408,11 +2408,9 @@ enclosure:
 				e--;
 			}
 
-			if (e - s) {
-				buf2 = erealloc(buf2, buf2_len + (e - s) + 1);
-				memcpy(buf2 + buf2_len, s, (e - s));
-				buf2_len += e - s;
-			}
+			buf2 = erealloc(buf2, buf2_len + (e - s) + 1);
+			memcpy(buf2 + buf2_len, s, (e - s));
+			buf2_len += e - s;
 enclosure_done:
 			_php_fgetcsv_trim_enclosed(buf2, &buf2_len, enclosure);
 			CSV_ADD_ENTRY(buf2, buf2_len, 0);
