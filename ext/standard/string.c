@@ -773,7 +773,7 @@ PHP_FUNCTION(strpos)
 /* }}} */
 
 /* {{{ proto int strrpos(string haystack, string needle)
-   Find the last occurrence of a character in a string within another */
+   Find position of last occurrence of a character in a string within another */
 PHP_FUNCTION(strrpos)
 {
 	zval **haystack, **needle;
@@ -2681,8 +2681,8 @@ PHP_FUNCTION(str_pad)
 /* }}} */
 
    
-/* {{{ proto  mixed sscanf(string str,string format, ...)
-    implements an ANSI compatible sscanf. */
+/* {{{ proto mixed sscanf(string str, string format [, string ...])
+   Implements an ANSI C compatible sscanf */
 PHP_FUNCTION(sscanf)
 {
     zval **format;
