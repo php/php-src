@@ -15,7 +15,7 @@ connection parameter became 1st parameter. Old syntax is preserved,
 but it will raise NOTICE error message.
 
 pg_connect()/pg_pconnect() has obsolete multi parameter syntax.
-This will be deleted in 4.3.0 or later.
+This syntax will be deleted in 4.3.0 or later.
 
 Omitting connectin parameter is NOT recommended. Connection 
 parameter may be required for future PHP version. Specify connection
@@ -68,6 +68,10 @@ are blocked.
    blocked.
  - If libpq under Win32 is *NOT* compiled with 
    WIN32_NON_BLOCKING_CONNECTIONS, non-blocking connection will block. 
+
+Async function may also block if you have not retrive result and 
+send or execute query. If there is result left on connection, 
+pg_send_query() will block until last query is completed.
 
 Garbages are cleaned when resource is cleaned up. There is no need to
 clean up query result if it is not needed.
