@@ -9,6 +9,7 @@ PHP 4                                                                      NEWS
 - Added support for long options in CLI & CGI (e.g. --version). (Marcus)
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
+- Fixed bug #21985 and #22064 (various mb_send_mail() issues). (Moriyoshi)
 - Fixed bug #22059 (ftp_chdir causes segfault). (Sara)
 - Fixed bug #20442 (upgraded bundled expat to 1.95.5). (Ilia)
 - Fixed bug #20155 (xmlrpc compile problem with ZE2). (Derick, Jan Schneider)
