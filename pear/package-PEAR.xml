@@ -31,16 +31,11 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.0b2</version>
+    <version>1.0b3-dev</version>
     <state>stable</state>
-    <date>2002-11-26</date>
+    <date>2002-12-01</date>
     <notes>
-Changes, Installer:
-* --force option no longer ignores errors, use
-  --ignore-errors instead
-* installer transactions: failed installs abort
-  cleanly, without leaving half-installed packages
-  around
+* fixed "info" shortcut (conflicted with "install")
 </notes>
     <filelist>
       <file role="data" name="package.dtd"/>
@@ -91,6 +86,19 @@ Changes, Installer:
     </deps>
   </release>
   <changelog>
+   <release>
+     <version>1.0b2</version>
+     <state>stable</state>
+     <date>2002-11-26</date>
+     <notes>
+Changes, Installer:
+* --force option no longer ignores errors, use
+  --ignore-errors instead
+* installer transactions: failed installs abort
+  cleanly, without leaving half-installed packages
+  around
+</notes>
+   </release>
    <release>
      <version>1.0b1</version>
      <state>stable</state>
