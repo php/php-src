@@ -44,7 +44,6 @@ HEADER_DIRS = \
 	ext/session/ \
 	ext/dom/xml_common.h \
 	ext/xml/ \
-	ext/xml/expat/ \
 	ext/mbstring/ \
 	ext/mbstring/libmbfl/ \
 	ext/mbstring/libmbfl/mbfl/ \
