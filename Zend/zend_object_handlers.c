@@ -398,6 +398,7 @@ static union _zend_function *zend_std_get_method(zval *object, char *method_name
 			call_user_call->handler = zend_std_call_user_call;
 			call_user_call->arg_types = NULL;
 			call_user_call->scope = NULL;
+			call_user_call->is_static = 0;
 			call_user_call->function_name = estrndup(method_name, method_len);
 
 			free_alloca(lc_method_name);
