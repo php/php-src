@@ -29,6 +29,7 @@
 #endif
 
 #include "php.h"
+#include "php_open_temporary_file.h"
 
 #if HAVE_FDFLIB
 
@@ -45,24 +46,41 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler);
 /* {{{ fdf_functions[]
  */
 function_entry fdf_functions[] = {
-	PHP_FE(fdf_open,								NULL)
-	PHP_FE(fdf_create,								NULL)
-	PHP_FE(fdf_close,								NULL)
-	PHP_FE(fdf_save,								NULL)
-	PHP_FE(fdf_get_value,							NULL)
-	PHP_FE(fdf_set_value,							NULL)
-	PHP_FE(fdf_next_field_name,						NULL)
-	PHP_FE(fdf_set_ap,								NULL)
-	PHP_FE(fdf_set_status,							NULL)
-	PHP_FE(fdf_get_status,							NULL)
-	PHP_FE(fdf_set_file,							NULL)
-	PHP_FE(fdf_get_file,							NULL)
+	PHP_FE(fdf_add_doc_javascript,                  NULL)
 	PHP_FE(fdf_add_template,						NULL)
-	PHP_FE(fdf_set_flags,							NULL)
-	PHP_FE(fdf_set_opt,								NULL)
-	PHP_FE(fdf_set_submit_form_action,				NULL)
-	PHP_FE(fdf_set_javascript_action,				NULL)
+	PHP_FE(fdf_close,								NULL)
+	PHP_FE(fdf_create,								NULL)
+	PHP_FE(fdf_enum_values,                         NULL)
+	PHP_FE(fdf_errno,        						NULL)
+	PHP_FE(fdf_error,        						NULL)
+	PHP_FE(fdf_get_ap,								NULL)
+	PHP_FE(fdf_get_attachment,                      NULL)
+	PHP_FE(fdf_get_encoding,						NULL)
+	PHP_FE(fdf_get_file,							NULL)
+	PHP_FE(fdf_get_flags,							NULL)
+	PHP_FE(fdf_get_opt,								NULL)
+	PHP_FE(fdf_get_status,							NULL)
+	PHP_FE(fdf_get_value,							NULL)
+	PHP_FE(fdf_get_version,                         NULL)
+	PHP_FE(fdf_next_field_name,						NULL)
+	PHP_FE(fdf_open,								NULL)
+	PHP_FE(fdf_open_string,							NULL)
+	PHP_FE(fdf_remove_item,                         NULL)
+	PHP_FE(fdf_save,								NULL)
+	PHP_FE(fdf_save_string,	        				NULL)
+	PHP_FE(fdf_set_ap,								NULL)
 	PHP_FE(fdf_set_encoding,						NULL)
+	PHP_FE(fdf_set_file,							NULL)
+	PHP_FE(fdf_set_flags,							NULL)
+	PHP_FE(fdf_set_javascript_action,				NULL)
+	PHP_FE(fdf_set_on_import_javascript,            NULL)
+	PHP_FE(fdf_set_opt,								NULL)
+	PHP_FE(fdf_set_status,							NULL)
+	PHP_FE(fdf_set_submit_form_action,				NULL)
+	PHP_FE(fdf_set_target_frame,                    NULL)
+	PHP_FE(fdf_set_value,							NULL)
+	PHP_FE(fdf_set_version,                         NULL)
+	PHP_FE(fdf_header,                              NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -73,7 +91,7 @@ zend_module_entry fdf_module_entry = {
 	fdf_functions, 
 	PHP_MINIT(fdf), 
 	PHP_MSHUTDOWN(fdf), 
-	NULL, 
+	PHP_RINIT(fdf), 
 	NULL,
 	PHP_MINFO(fdf), 
     NO_VERSION_YET,
@@ -84,6 +102,10 @@ zend_module_entry fdf_module_entry = {
 ZEND_GET_MODULE(fdf)
 #endif
 
+ZEND_DECLARE_MODULE_GLOBALS(fdf)
+
+#define FDF_SUCCESS do { FDF_G(error)=FDFErcOK; RETURN_TRUE;} while(0)
+#define FDF_FAILURE(err)  do { FDF_G(error)=err; RETURN_FALSE;} while(0)
 
 static void phpi_FDFClose(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
@@ -91,7 +113,6 @@ static void phpi_FDFClose(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	(void) FDFClose(fdf);
 }
-
 
 #define FDF_POST_CONTENT_TYPE	"application/vnd.fdf"
 
@@ -110,11 +131,11 @@ PHP_MINIT_FUNCTION(fdf)
 	
 	le_fdf = zend_register_list_destructors_ex(phpi_FDFClose, NULL, "fdf", module_number);
 
-	/* add handler for Acrobat FDF form post requests */
+ 	/* add handler for Acrobat FDF form post requests */
 	sapi_register_post_entry(&php_fdf_post_entry);
 
 
-	/* Constants used by fdf_set_opt() */
+	/* Constants used by fdf_set_opt() */ 
 	REGISTER_LONG_CONSTANT("FDFValue", FDFValue, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FDFStatus", FDFStatus, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FDFFile", FDFFile, CONST_CS | CONST_PERSISTENT);
@@ -142,11 +163,23 @@ PHP_MINIT_FUNCTION(fdf)
 	REGISTER_LONG_CONSTANT("FDFKeystroke", FDFKeystroke, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FDFCalculate", FDFCalculate, CONST_CS | CONST_PERSISTENT);
 
+	/* Constants used by fdf_(set|get)_ap */
+	REGISTER_LONG_CONSTANT("FDFNormalAP", 1, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FDFRolloverAP", 2, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FDFDownAP", 3, CONST_CS | CONST_PERSISTENT);
+	
 #ifdef PHP_WIN32
 	return SUCCESS;
 #endif
 	if((err = FDFInitialize()) == FDFErcOK) return SUCCESS;
 	return FAILURE;
+}
+/* }}} */
+
+/* {{{ RINIT */
+PHP_RINIT_FUNCTION(fdf) {
+	FDF_G(error) = FDFErcOK;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -196,8 +229,45 @@ PHP_FUNCTION(fdf_open)
 	err = FDFOpen(Z_STRVAL_PP(file), 0, &fdf);
 
 	if(err != FDFErcOK || !fdf) {
-		php_error(E_WARNING, "%s(): Could not open fdf document: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(file));
+		if(err == FDFErcOK) err= FDFErcInternalError;
+		FDF_FAILURE(err);
+	}
+
+	ZEND_REGISTER_RESOURCE(return_value, fdf, le_fdf);
+} 
+/* }}} */
+
+/* {{{ proto int fdf_open_string(string fdf_data)
+   Opens a new FDF document from string */
+PHP_FUNCTION(fdf_open_string) 
+{
+	char *fdf_data;
+	int fdf_data_len;
+	FDFDoc fdf;
+	FDFErc err;
+	char *temp_filename;
+	FILE *fp;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
+							 &fdf_data, &fdf_data_len) 
+	   == FAILURE) {
+		return;
+	}
+
+	fp = php_open_temporary_file(PG(upload_tmp_dir), "php", &temp_filename TSRMLS_CC);
+	if(!fp) {
 		RETURN_FALSE;
+	}
+	fwrite(fdf_data, fdf_data_len, 1, fp);
+	fclose(fp);
+
+	err = FDFOpen(temp_filename, 0, &fdf);
+	unlink(temp_filename);
+	efree(temp_filename);
+
+	if(err != FDFErcOK || !fdf) {
+		if(err == FDFErcOK) err= FDFErcInternalError;
+		FDF_FAILURE(err);
 	}
 
 	ZEND_REGISTER_RESOURCE(return_value, fdf, le_fdf);
@@ -218,15 +288,15 @@ PHP_FUNCTION(fdf_create)
 	err = FDFCreate(&fdf);
 
 	if(err != FDFErcOK || !fdf) {
-		php_error(E_WARNING, "%s(): Error creating new fdf document!", get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
+		if(err == FDFErcOK) err= FDFErcInternalError;
+		FDF_FAILURE(err);
 	}
 
 	ZEND_REGISTER_RESOURCE(return_value, fdf, le_fdf);
 }
 /* }}} */
 
-/* {{{ proto bool fdf_close(int fdfdoc)
+/* {{{ proto bool fdf_close(resource fdfdoc)
    Closes the FDF document */
 PHP_FUNCTION(fdf_close) 
 {
@@ -242,70 +312,140 @@ PHP_FUNCTION(fdf_close)
 } 
 /* }}} */
 
-/* {{{ proto string fdf_get_value(int fdfdoc, string fieldname)
+/* {{{ proto string fdf_get_value(resource fdfdoc, string fieldname [, int which])
    Gets the value of a field as string */
 PHP_FUNCTION(fdf_get_value) 
 {
-	zval **fdfp, **fieldname;
-	ASInt32 nr, size = 256;
-	char *buffer;
+	zval *r_fdf;
+	char *fieldname;
+	int fieldname_len;
+	long which = -1;
 	FDFDoc fdf;
 	FDFErc err;
+	ASInt32 nr, size = 256;
+	char *buffer;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fdfp, &fieldname) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l",
+							 &r_fdf, &fieldname, &fieldname_len,
+							 &which) 
+	   == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
-
-	convert_to_string_ex(fieldname);
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
 
 	buffer = emalloc(size);
-	err = FDFGetValue(fdf, Z_STRVAL_PP(fieldname), buffer, size-1, &nr);
+	if(which >= 0) {
+		err = FDFGetNthValue(fdf, fieldname, which, buffer, size-2, &nr);
+	} else {
+		err = FDFGetValue(fdf, fieldname, buffer, size-2, &nr);
+	}
 	if(err == FDFErcBufTooShort && nr > 0 ) {
-		buffer = erealloc(buffer, nr+1); 
-		err = FDFGetValue(fdf, Z_STRVAL_PP(fieldname), buffer, nr, &nr);
-	} 
-
-	if(err != FDFErcOK) {
-		php_error(E_WARNING, "%s(): Error getting value of %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(fieldname));
-		efree(buffer);
-		RETURN_FALSE;
+		buffer = erealloc(buffer, nr+2); 
+		if(which >= 0) {
+			err = FDFGetNthValue(fdf, fieldname, which, buffer, nr, &nr);
+		} else {
+			err = FDFGetValue(fdf, fieldname, buffer, nr, &nr);
+		} 
+	} else if((err == FDFErcValueIsArray) && (which == -1)) {
+		if (array_init(return_value) == FAILURE) {
+			efree(buffer);
+			FDF_FAILURE(FDFErcInternalError);
+		}
+		which = 0;
+		do {
+			err = FDFGetNthValue(fdf, fieldname, which, buffer, size-2, &nr); 
+			if(err == FDFErcBufTooShort && nr > 0 ) {
+				buffer = erealloc(buffer, nr+2); 
+				err = FDFGetNthValue(fdf, fieldname, which, buffer, nr, &nr);
+			} 
+			if (err == FDFErcOK) {
+				add_next_index_string(return_value, buffer, 1);
+			} 
+			which++;
+		} while (err == FDFErcOK);
+		if(err == FDFErcNoValue) err = FDFErcOK;
+		efree(buffer); 
+		buffer = NULL;
 	}
 
-	RETVAL_STRING(buffer, 1);
-	efree(buffer);
+	if(err != FDFErcOK) {
+		if(buffer) efree(buffer);
+		FDF_FAILURE(err);
+	}
+
+	if(buffer) {
+		RETVAL_STRING(buffer, 1);
+		efree(buffer);
+	}
+
+	return;
 }
 /* }}} */
 
-/* {{{ proto bool fdf_set_value(int fdfdoc, string fieldname, string value, int isname)
+/* {{{ proto bool fdf_set_value(resource fdfdoc, string fieldname, mixed value [, int isname])
    Sets the value of a field */
 PHP_FUNCTION(fdf_set_value) 
 {
-	zval **fdfp, **fieldname, **value, **isname;
+	zval **fdfp, **fieldname, **value, **dummy;
 	FDFDoc fdf;
 	FDFErc err;
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &fdfp, &fieldname, &value, &isname) == FAILURE) {
+	switch(ZEND_NUM_ARGS()) {
+	case 3:
+		if (zend_get_parameters_ex(3, &fdfp, &fieldname, &value) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		break;
+	case 4:
+		if (zend_get_parameters_ex(4, &fdfp, &fieldname, &value, &dummy) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		break;
+	default:
 		WRONG_PARAM_COUNT;
 	}
 
 	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
 
 	convert_to_string_ex(fieldname);
-	convert_to_string_ex(value);
-	convert_to_long_ex(isname);
 
-	err = FDFSetValue(fdf, Z_STRVAL_PP(fieldname), Z_STRVAL_PP(value), (ASBool) Z_LVAL_PP(isname));
-	if(err != FDFErcOK) {
-		php_error(E_WARNING, "%s(): Error setting field: %s to value: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(fieldname), Z_STRVAL_PP(value));
-		RETURN_FALSE;
+	if (Z_TYPE_PP(value) == IS_ARRAY) {
+		ASInt32 nValues = zend_hash_num_elements(Z_ARRVAL_PP(value));
+		char **newValues = ecalloc(nValues, sizeof(char *)), **next;
+		HashPosition   pos;
+		zval         **tmp;
+
+		next = newValues;
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(value), &pos);
+		while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(value), 
+											 (void **) &tmp,
+											 &pos) == SUCCESS) {
+			convert_to_string_ex(tmp);
+			*next++ = estrdup(Z_STRVAL_PP(tmp));
+			zend_hash_move_forward_ex(Z_ARRVAL_PP(value), &pos);
+		}
+
+		err = FDFSetValues(fdf, Z_STRVAL_PP(fieldname), nValues, (const char **)newValues);
+
+		
+		for(next = newValues; nValues; nValues--) {
+			efree(*next++);
+		}
+		efree(newValues);
+	} else {
+		convert_to_string_ex(value);
+		
+		err = FDFSetValue(fdf, Z_STRVAL_PP(fieldname), Z_STRVAL_PP(value), (ASBool)0 /*dummy*/);
 	}
-	RETURN_TRUE;
+	if(err != FDFErcOK) {
+		FDF_FAILURE(err);
+	}
+	FDF_SUCCESS;
 }
 /* }}} */
 
-/* {{{ proto string fdf_next_field_name(int fdfdoc [, string fieldname])
+/* {{{ proto string fdf_next_field_name(resource fdfdoc [, string fieldname])
    Gets the name of the next field name or the first field name */
 PHP_FUNCTION(fdf_next_field_name) 
 {
@@ -337,8 +477,7 @@ PHP_FUNCTION(fdf_next_field_name)
 
 	if(err != FDFErcOK) {
 		efree(buffer);
-		php_error(E_WARNING, "%s(): Error getting next fieldname!", get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
+		FDF_FAILURE(err);
 	} 
 
 	RETVAL_STRING(buffer, 1);
@@ -346,7 +485,7 @@ PHP_FUNCTION(fdf_next_field_name)
 }
 /* }}} */
 
-/* {{{ proto bool fdf_set_ap(int fdfdoc, string fieldname, int face, string filename, int pagenr)
+/* {{{ proto bool fdf_set_ap(resource fdfdoc, string fieldname, int face, string filename, int pagenr)
    Sets the appearence of a field */
 PHP_FUNCTION(fdf_set_ap) 
 {
@@ -378,6 +517,7 @@ PHP_FUNCTION(fdf_set_ap)
 			break;
 		default:
 			facenr = FDFNormalAP;
+			break;
 	}
 
 	err = FDFSetAP(fdf, Z_STRVAL_PP(fieldname), facenr, NULL, Z_STRVAL_PP(filename), (ASInt32) Z_LVAL_PP(pagenr));
@@ -386,16 +526,94 @@ PHP_FUNCTION(fdf_set_ap)
 	   possible errors this function can return. Or create global error handler function.
 	 */
 	if(err != FDFErcOK) {
-		php_error(E_WARNING, "%s(): Error setting appearence of field: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(fieldname));
-		RETURN_FALSE;
+		FDF_FAILURE(err);
 	}
 
-	RETURN_TRUE;
+	FDF_SUCCESS;
 
 }
 /* }}} */
 
-/* {{{ proto bool fdf_set_status(int fdfdoc, string status)
+/* {{{ proto bool fdf_get_ap(resource fdfdoc, string fieldname, int face, string filename) 
+	 Gets the appearance of a field and creates a PDF document out of it. */
+PHP_FUNCTION(fdf_get_ap) {
+	zval *r_fdf;
+	char *fieldname, *filename;
+	int fieldname_len, filename_len, face;
+	FDFDoc fdf;
+	FDFErc err;
+	FDFAppFace facenr;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsls",
+							 &r_fdf, &fieldname, &fieldname_len,
+							 &face, &filename, &filename_len) 
+	   == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
+
+	switch(face) {
+		case 1:
+			facenr = FDFNormalAP;
+			break;
+		case 2:
+			facenr = FDFRolloverAP;
+			break;
+		case 3:
+			facenr = FDFDownAP;
+			break;
+		default:
+			facenr = FDFNormalAP;
+			break;
+	}
+
+	err = FDFGetAP(fdf, fieldname, facenr, filename);
+
+	/* This should be made more intelligent, ie. use switch() with the 
+	   possible errors this function can return. Or create global error handler function.
+	 */
+	if(err != FDFErcOK) {
+		FDF_FAILURE(err);
+	}
+
+	FDF_SUCCESS;
+
+	
+}
+/* }}} */
+
+/* {{{ proto string fdf_get_encoding(resource fdf) 
+   Gets FDF file encoding scheme */
+PHP_FUNCTION(fdf_get_encoding) {
+	zval *r_fdf;
+	FDFDoc fdf;
+	FDFErc err;
+	char buffer[32];
+	ASInt32 len;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r",
+							 &r_fdf) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
+
+	err = FDFGetEncoding(fdf, buffer, 32, &len);
+
+	/* This should be made more intelligent, ie. use switch() with the 
+	   possible errors this function can return. Or create global error handler function.
+	 */
+	if(err != FDFErcOK) {
+		FDF_FAILURE(err);
+	}
+	
+	FDF_G(error) = FDFErcOK;
+	RETURN_STRINGL(buffer, (size_t)len, 1);
+}
+/* }}} */
+
+/* {{{ proto bool fdf_set_status(resource fdfdoc, string status)
    Sets the value of /Status key */
 PHP_FUNCTION(fdf_set_status) 
 {
@@ -413,15 +631,14 @@ PHP_FUNCTION(fdf_set_status)
 
 	err = FDFSetStatus(fdf, Z_STRVAL_PP(status));
 	if(err != FDFErcOK) {
-		php_error(E_WARNING, "%s(): Error setting fdf document status key to: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(status));
-		RETURN_FALSE;
+		FDF_FAILURE(err);
 	}
 
-	RETURN_TRUE;
+	FDF_SUCCESS;
 }
 /* }}} */
 
-/* {{{ proto string fdf_get_status(int fdfdoc)
+/* {{{ proto string fdf_get_status(resource fdfdoc)
    Gets the value of /Status key */
 PHP_FUNCTION(fdf_get_status) 
 {
@@ -446,9 +663,8 @@ PHP_FUNCTION(fdf_get_status)
 	}
 	
 	if(err != FDFErcOK) {
-		php_error(E_WARNING, "%s(): Error getting fdf document status key!", get_active_function_name(TSRMLS_C));
 		efree(buf);
-		RETURN_FALSE;
+		FDF_FAILURE(err);
 	}
 
 	RETVAL_STRING(buf, 1);
@@ -456,33 +672,41 @@ PHP_FUNCTION(fdf_get_status)
 }
 /* }}} */
 
-/* {{{ proto bool fdf_set_file(int fdfdoc, string filename)
+/* {{{ proto bool fdf_set_file(resource fdfdoc, string filename [, string target_frame])
    Sets the value of /F key */
 PHP_FUNCTION(fdf_set_file) 
 {
-	zval **fdfp, **filename;
+	zval *r_fdf;
+	char *filename, *target_frame= NULL;
+	int filename_len, target_frame_len;
 	FDFDoc fdf;
 	FDFErc err;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fdfp, &filename) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|s", &r_fdf, 
+							 &filename, &filename_len,
+							 &target_frame, &target_frame_len)
+	   == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
 
-	convert_to_string_ex(filename);
-
-	err = FDFSetFile(fdf, Z_STRVAL_PP(filename));
+	err = FDFSetFile(fdf, filename);
 	if(err != FDFErcOK) {
-		php_error(E_WARNING, "%s(): Error setting filename key to: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(filename));
-		RETURN_FALSE;
+		FDF_FAILURE(err);
+	}
+	if(target_frame) {
+		err = FDFSetTargetFrame(fdf, target_frame);
+		if(err != FDFErcOK) {
+			FDF_FAILURE(err);
+		}
 	}
 
-	RETURN_TRUE;
+	FDF_SUCCESS;
 }
 /* }}} */
 
-/* {{{ proto string fdf_get_file(int fdfdoc)
+/* {{{ proto string fdf_get_file(resource fdfdoc)
    Gets the value of /F key */
 PHP_FUNCTION(fdf_get_file) 
 {
@@ -507,9 +731,8 @@ PHP_FUNCTION(fdf_get_file)
 	}
 	
 	if(err != FDFErcOK) {
-		php_error(E_WARNING, "%s(): Error getting fdf document filename key!", get_active_function_name(TSRMLS_C));
 		efree(buf);
-		RETURN_FALSE;
+		FDF_FAILURE(err);
 	}
 
 	RETVAL_STRING(buf, 1);
@@ -517,33 +740,119 @@ PHP_FUNCTION(fdf_get_file)
 }
 /* }}} */
 
-/* {{{ proto bool fdf_save(int fdfdoc, string filename)
+/* {{{ proto mixed fdf_save(resource fdfdoc [, string filename])
    Writes out the FDF file */
 PHP_FUNCTION(fdf_save) 
 {
-	zval **fdfp, **filename;
+	zval *r_fdf;
+	char *filename = NULL;
+	int filename_len;
 	FDFDoc fdf;
 	FDFErc err;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fdfp, &filename) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|s", &r_fdf, &filename, &filename_len)
+	   == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
 
-	convert_to_string_ex(filename);
-	err = FDFSave(fdf, Z_STRVAL_PP(filename));
+	if(filename) {
+		err = FDFSave(fdf, filename);	
+	} else {
+		FILE *fp;
+		char *temp_filename;
+
+		fp = php_open_temporary_file(PG(upload_tmp_dir), "php", &temp_filename TSRMLS_CC);
+		if(!fp) {
+			err = FDFErcFileSysErr;
+		} else {
+			fclose(fp);
+			err = FDFSave(fdf, temp_filename);
+
+			if(err == FDFErcOK) {
+				php_stream *stream = php_stream_open_wrapper(temp_filename, "rb", 0, NULL);
+				if (stream)	{
+					php_stream_passthru(stream);
+					php_stream_close(stream);
+				} else {
+					err = FDFErcFileSysErr;
+				}	
+			}
+		}
+		if(temp_filename) {
+			unlink(temp_filename);
+			efree(temp_filename);
+		}
+	}
+
 	if(err != FDFErcOK) {
-		php_error(E_WARNING, "%s(): Error saving fdf document into filename: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(filename));
-		RETURN_FALSE;
+		FDF_FAILURE(err);
 	}
-
-	RETURN_TRUE;
-
+	
+	FDF_SUCCESS;
 } 
 /* }}} */
 
-/* {{{ proto bool fdf_add_template(int fdfdoc, int newpage, string filename, string template, int rename)
+/* {{{ proto mixed fdf_save_string(resource fdfdoc)
+   Returns the FDF file as a string */
+PHP_FUNCTION(fdf_save_string) 
+{
+	zval *r_fdf;
+	FDFDoc fdf;
+	FDFErc err;
+	FILE *fp;
+	char *temp_filename = NULL;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &r_fdf)
+	   == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
+
+	fp = php_open_temporary_file(PG(upload_tmp_dir), "php", &temp_filename TSRMLS_CC);
+	if(!fp) {
+		err = FDFErcFileSysErr;
+	} else {
+		fclose(fp);
+		err = FDFSave(fdf, temp_filename);
+
+		if(err == FDFErcOK) {
+			fp = fopen(temp_filename, "rb");
+			if (fp)	{
+				struct stat stat;
+				char *buf;
+
+				fstat(fileno(fp), &stat);
+				buf = emalloc(stat.st_size +1);
+				fread(buf, stat.st_size, 1, fp);
+				buf[stat.st_size] = '\0';
+				fclose(fp);
+
+				unlink(temp_filename);
+				efree(temp_filename);
+				RETURN_STRINGL(buf, stat.st_size, 0);
+			} else {
+				err = FDFErcFileSysErr;
+			}	
+		}
+	}
+
+	if(err != FDFErcOK) {
+		FDF_FAILURE(err);
+	}
+
+	if(temp_filename) {
+		unlink(temp_filename);
+		efree(temp_filename);
+	}
+
+	return;
+} 
+/* }}} */
+
+/* {{{ proto bool fdf_add_template(resource fdfdoc, int newpage, string filename, string template, int rename)
    Adds a template into the FDF document */
 PHP_FUNCTION(fdf_add_template) 
 {
@@ -574,15 +883,14 @@ PHP_FUNCTION(fdf_add_template)
 
 	err = FDFAddTemplate(fdf, Z_LVAL_PP(newpage), &filespec, Z_STRVAL_PP(template), Z_LVAL_PP(rename));
 	if(err != FDFErcOK) {
-		php_error(E_WARNING, "%s(): Error adding template: %s into fdf document", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(template));
-		RETURN_FALSE;
+		FDF_FAILURE(err);
 	}
 
-	RETURN_TRUE;
+	FDF_SUCCESS;
 }
 /* }}} */
 
-/* {{{ proto bool fdf_set_flags(int fdfdoc, string fieldname, int whichflags, int newflags)
+/* {{{ proto bool fdf_set_flags(resource fdfdoc, string fieldname, int whichflags, int newflags)
    Sets flags for a field in the FDF document */
 PHP_FUNCTION(fdf_set_flags) 
 {
@@ -602,15 +910,43 @@ PHP_FUNCTION(fdf_set_flags)
 
 	err=FDFSetFlags(fdf, Z_STRVAL_PP(fieldname), Z_LVAL_PP(flags), Z_LVAL_PP(newflags));
 	if(err != FDFErcOK) {
-		php_error(E_WARNING, "%s(): Error setting flags for field: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(fieldname));
-		RETURN_FALSE;
+		FDF_FAILURE(err);
 	}
 
-	RETURN_TRUE;
+	FDF_SUCCESS;
 }
 /* }}} */
 
-/* {{{ proto bool fdf_set_opt(int fdfdoc, string fieldname, int element, string value, string name)
+/* {{{ proto int fdf_get_flags(resorce fdfdoc, string fieldname, int whichflags) 
+   Gets the flags of a field */
+PHP_FUNCTION(fdf_get_flags) {
+ 	zval *r_fdf;
+	char *fieldname;
+	int fieldname_len, whichflags;
+	FDFDoc fdf;
+	FDFErc err;
+	ASUns32 flags;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsl",
+							 &r_fdf, &fieldname, &fieldname_len,
+							 &whichflags) 
+	   == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
+
+	err = FDFGetFlags(fdf, fieldname, (FDFItem)whichflags, &flags);
+
+	if(err != FDFErcOK) {
+		FDF_FAILURE(err);
+	}
+
+	RETURN_LONG((long)flags);
+}
+/* }}} */
+
+/* {{{ proto bool fdf_set_opt(resource fdfdoc, string fieldname, int element, string value, string name)
    Sets a value in the opt array for a field */
 PHP_FUNCTION(fdf_set_opt)
 {
@@ -631,14 +967,69 @@ PHP_FUNCTION(fdf_set_opt)
 
 	err = FDFSetOpt(fdf, Z_STRVAL_PP(fieldname), Z_LVAL_PP(element), Z_STRVAL_PP(value), Z_STRVAL_PP(name));
 	if(err != FDFErcOK) {
-		php_error(E_WARNING, "%s(): Error setting FDF option for field: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(fieldname));
-		RETURN_FALSE;
+		FDF_FAILURE(err);
 	}
-	RETURN_TRUE;
+	FDF_SUCCESS;
 }
 /* }}} */
 
-/* {{{ proto bool fdf_set_submit_form_action(int fdfdoc, string fieldname, int whichtrigger, string url, int flags)
+/* {{{ proto mixed fdf_get_option(resource fdfdof, string fieldname [, int element])
+   Gets a value from the opt array of a field */
+PHP_FUNCTION(fdf_get_opt) {
+ 	zval *r_fdf;
+	char *fieldname;
+	int fieldname_len, element = -1;
+	FDFDoc fdf;
+	FDFErc err;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l",
+							 &r_fdf, &fieldname, &fieldname_len,
+							 &element) 
+	   == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
+
+	if(element == -1) {
+		ASInt32 elements;
+		err = FDFGetOpt(fdf, fieldname, (ASInt32)-1, NULL, NULL, 0, &elements);
+		if(err != FDFErcOK) {
+			FDF_FAILURE(err);
+		}
+		RETURN_LONG((long)elements);
+	} else {
+		ASInt32 bufSize, nRet;
+		char *buf1, *buf2;
+
+		bufSize = 1024; 
+		buf1 = emalloc(bufSize);
+		buf2 = emalloc(bufSize);
+
+		err = FDFGetOpt(fdf, fieldname, (ASInt32)element, buf1, buf2, bufSize, &nRet);
+		if(err == FDFErcBufTooShort) {
+			efree(buf1);
+			efree(buf2);
+			buf1 = emalloc(nRet);
+			buf2 = emalloc(nRet);
+			bufSize = nRet;
+			err = FDFGetOpt(fdf, fieldname, (ASInt32)element, buf1, buf2, bufSize, &nRet);
+		}
+		if(err != FDFErcOK) {
+			FDF_FAILURE(err);
+		}
+		if (array_init(return_value) == FAILURE) {
+			RETURN_FALSE;
+		}
+		add_next_index_stringl(return_value, buf1, strlen(buf1), 1);
+		add_next_index_stringl(return_value, buf2, strlen(buf2), 1);
+		efree(buf1);
+		efree(buf2);
+	}
+}
+/* }}} */
+
+/* {{{ proto bool fdf_set_submit_form_action(resource fdfdoc, string fieldname, int whichtrigger, string url, int flags)
    Sets the submit form action for a field */
 PHP_FUNCTION(fdf_set_submit_form_action) 
 {
@@ -659,14 +1050,13 @@ PHP_FUNCTION(fdf_set_submit_form_action)
 
 	err = FDFSetSubmitFormAction(fdf, Z_STRVAL_PP(fieldname), Z_LVAL_PP(trigger), Z_STRVAL_PP(url), Z_LVAL_PP(flags));
 	if(err != FDFErcOK) {
-		php_error(E_WARNING, "%s(): Error setting FDF submit action for field: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(fieldname));
-		RETURN_FALSE;
+		FDF_FAILURE(err);
 	}
-	RETURN_TRUE;
+	FDF_SUCCESS;
 }
 /* }}} */
 
-/* {{{ proto bool fdf_set_javascript_action(int fdfdoc, string fieldname, int whichtrigger, string script)
+/* {{{ proto bool fdf_set_javascript_action(resource fdfdoc, string fieldname, int whichtrigger, string script)
    Sets the javascript action for a field */
 PHP_FUNCTION(fdf_set_javascript_action) 
 {
@@ -686,10 +1076,9 @@ PHP_FUNCTION(fdf_set_javascript_action)
 	
 	err = FDFSetJavaScriptAction(fdf, Z_STRVAL_PP(fieldname), Z_LVAL_PP(trigger), Z_STRVAL_PP(script));
 	if(err != FDFErcOK) {
-		php_error(E_WARNING, "%s(): Error setting FDF javascript action for field: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(fieldname));
-		RETURN_FALSE;
+		FDF_FAILURE(err);
 	}
-	RETURN_TRUE;
+	FDF_SUCCESS;
 }
 /* }}} */
 
@@ -712,10 +1101,9 @@ PHP_FUNCTION(fdf_set_encoding)
 	err = FDFSetEncoding(fdf, Z_STRVAL_PP(enc));
     
 	if(err != FDFErcOK) {
-		php_error(E_WARNING, "%s(): Error setting FDF encoding: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(enc));
-		RETURN_FALSE;
+		FDF_FAILURE(err);
 	}
-	RETURN_TRUE;
+	FDF_SUCCESS;
 }
 /* }}} */
 
@@ -789,6 +1177,387 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler)
 }
 /* }}} */
 
+/* {{{ int fdf_errno(void) 
+   Gets error code for last operation */
+PHP_FUNCTION(fdf_errno) {
+	RETURN_LONG((long)FDF_G(error));
+}
+/* }}} */
+
+/* {{{ string fdf_error([int errno]) 
+   Gets error description for error code */
+PHP_FUNCTION(fdf_error) {
+	FDFErc err;
+	long p_err = -1;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &p_err)
+	   == FAILURE) {
+		return;
+	}
+
+	err = (p_err >= 0) ? (FDFErc)p_err : FDF_G(error);
+
+	switch(err) {
+	case FDFErcOK: 
+		RETURN_STRING("no error", 1);
+	case FDFErcInternalError: 
+		RETURN_STRING("An internal FDF Library error occurred", 1);
+	case FDFErcBadParameter: 
+		RETURN_STRING("One or more of the parameters passed were invalid. ", 1);
+	case FDFErcFileSysErr: 
+		RETURN_STRING("A file system error occurred or the file was not found", 1);
+	case FDFErcBadFDF: 
+		RETURN_STRING("The FDF file being opened or parsed was invalid", 1);
+	case FDFErcFieldNotFound: 
+		RETURN_STRING("The field whose name was passed in the parameter fieldName does not exist in the FDF file", 1);
+	case FDFErcNoValue: 
+		RETURN_STRING("The field whose value was requested has no value", 1);
+	case FDFErcEnumStopped: 
+		RETURN_STRING("Enumeration was stopped by FDFEnumValues by returning FALSE", 1);
+	case FDFErcCantInsertField: 
+		RETURN_STRING("The field whose name was passed in the parameter fieldName cannot be inserted into the FDF file", 1);
+	case FDFErcNoOption: 
+		RETURN_STRING("The requested element in a fields /Opt key does not exist, or the field has no /Opt key. ", 1);
+	case FDFErcNoFlags: 
+		RETURN_STRING("The field has no /F or /Ff keys", 1);
+	case FDFErcBadPDF:
+		RETURN_STRING("The PDF file passed as the parameter to FDFSetAP was invalid, or did not contain the requested page ", 1);
+	case FDFErcBufTooShort: 
+		RETURN_STRING("The buffer passed as a parameter was too short", 1);
+	case FDFErcNoAP: 
+		RETURN_STRING("The field has no /AP key", 1);
+	case FDFErcIncompatibleFDF: 
+		RETURN_STRING("An attempt to mix classic and template-based FDF files was made", 1);
+	case FDFErcNoAppendSaves: 
+		RETURN_STRING("The FDF does not include a /Difference key", 1);
+	case FDFErcValueIsArray: 
+		RETURN_STRING("The value of this field is an array. Use FDFGetNthValue. ", 1);
+	case FDFErcEmbeddedFDFs: 
+		RETURN_STRING("The FDF you passed as a parameter is a container for one or more FDFs embedded within it. Use FDFOpenFromEmbedded to gain access to each embedded FDF", 1);
+	case FDFErcNoMoreFDFs: 
+		RETURN_STRING("Returned by FDFOpenFromEmbedded when parameter iWhich >= the number of embedded FDFs (including the case when the passed FDF does not contain any embedded FDFs)", 1);
+	case FDFErcInvalidPassword: 
+		RETURN_STRING("Returned by FDFOpenFromEmbedded when the embedded FDF is encrypted, and you did not provide the correct password", 1);
+	case FDFErcLast: 
+		RETURN_STRING("Reserved for future use", 1);
+	default: 
+		RETURN_STRING("unknown error", 1);
+	}
+}
+/* }}} */
+
+/* {{{ proto string fdf_get_version([resource fdfdoc]) 
+   Gets version number for FDF api or file */
+PHP_FUNCTION(fdf_get_version) {
+	zval *r_fdf = NULL;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &r_fdf)
+	   == FAILURE) {
+		return;
+	}
+
+	if(r_fdf) {
+		const char *fdf_version; 
+		FDFDoc fdf;
+
+		ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
+		fdf_version = FDFGetFDFVersion(fdf);
+		RETURN_STRING((char *)fdf_version, 1);
+	} else {
+		const char *api_version = FDFGetVersion();
+		RETURN_STRING((char *)api_version, 1);
+	}
+}
+/* }}} */
+
+/* {{{ proto bool fdf_set_version(resourece fdfdoc, string version)
+   Sets FDF version for a file*/
+PHP_FUNCTION(fdf_set_version) {
+	zval *r_fdf;
+	char *version;
+	int version_len;
+	FDFDoc fdf;
+	FDFErc err;
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &r_fdf, &version, &version_len)
+	   == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
+
+	err = FDFSetFDFVersion(fdf, version);
+
+	if(err != FDFErcOK) {
+		FDF_FAILURE(err);
+	}
+	FDF_SUCCESS;
+}
+/* }}} */
+
+/* {{{ proto bool fdf_add_doc_javascript(resource fdfdoc, string scriptname, string script) 
+	 Add javascript code to the fdf file */
+PHP_FUNCTION(fdf_add_doc_javascript) {
+	zval *r_fdf;
+	char *name, *script;
+	int name_len, script_len;
+	FDFDoc fdf;
+	FDFErc err;
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss", &r_fdf, 
+							 &name, &name_len,
+							 &script, &script_len
+							 )
+	   == FAILURE) {
+		return;
+	}
+	
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
+	
+	err = FDFAddDocJavaScript(fdf, name, script);
+	
+	if(err != FDFErcOK) {
+		FDF_FAILURE(err);
+	}
+	FDF_SUCCESS;
+}
+/* }}} */
+
+/* {{{ proto bool fdf_set_on_import_javascript(resource fdfdoc, string script [, bool before_data_import])
+   Adds javascript code to be executed when Acrobat opens the FDF */
+PHP_FUNCTION(fdf_set_on_import_javascript) {
+	zval *r_fdf;
+	char *script;
+	int script_len;
+	zend_bool before;
+	FDFDoc fdf;
+	FDFErc err;
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsb", &r_fdf, 
+							 &script, &script_len, &before
+							 )
+	   == FAILURE) {
+		return;
+	}
+	
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
+	
+	err = FDFSetOnImportJavaScript(fdf, script, before);
+	
+	if(err != FDFErcOK) {
+		FDF_FAILURE(err);
+	}
+	FDF_SUCCESS;
+} 
+/* }}} */
+
+/* {{{ proto bool fdf_set_target_frame(resource fdfdoc, string target)
+   Sets target frame for form */
+PHP_FUNCTION(fdf_set_target_frame) {
+	zval *r_fdf;
+	char *target;
+	int target_len;
+	FDFDoc fdf;
+	FDFErc err;
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &r_fdf, 
+							 &target, &target_len
+							 )
+	   == FAILURE) {
+		return;
+	}
+	
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
+	
+	err = FDFSetTargetFrame(fdf, target);
+	
+	if(err != FDFErcOK) {
+		FDF_FAILURE(err);
+	}
+	FDF_SUCCESS;
+} 
+/* }}} */
+
+/* {{{ proto bool fdf_remove_item(resource fdfdoc, string fieldname, int item)
+   Sets target frame for form */
+PHP_FUNCTION(fdf_remove_item) {
+	zval *r_fdf;
+	char *fieldname;
+	int fieldname_len;
+	long item;
+	FDFDoc fdf;
+	FDFErc err;
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsl", &r_fdf, 
+							 &fieldname, &fieldname_len
+							 )
+	   == FAILURE) {
+		return;
+	}
+	
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
+	
+	err = FDFRemoveItem(fdf, *fieldname ? fieldname : NULL, item);
+	
+	if(err != FDFErcOK) {
+		FDF_FAILURE(err);
+	}
+	FDF_SUCCESS;
+} 
+/* }}} */
+
+/* {{{ proto array fdf_get_attachment(resource fdfdoc, string fieldname, string savepath)
+   Get attached uploaded file */
+PHP_FUNCTION(fdf_get_attachment) {
+	zval *r_fdf;
+	char *fieldname, *savepath;
+	int fieldname_len, savepath_len;
+	int is_dir=0;
+	FDFDoc fdf;
+	FDFErc err;
+	char pathbuf[MAXPATHLEN], mimebuf[1024];
+    struct stat statBuf;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss", &r_fdf, 
+							 &fieldname, &fieldname_len,
+							 &savepath, &savepath_len
+							 )
+	   == FAILURE) {
+		return;
+	}
+	
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
+
+	strncpy(pathbuf	, savepath, MAXPATHLEN-1);
+	pathbuf[MAXPATHLEN-1] = '\0';
+
+	if(0 == stat(pathbuf, &statBuf)) {
+		is_dir = S_ISDIR(statBuf.st_mode);
+	}
+
+	err = FDFExtractAttachment(fdf, fieldname, pathbuf, sizeof(pathbuf), is_dir, mimebuf, sizeof(mimebuf)); 
+	
+	if(err != FDFErcOK) {
+		FDF_FAILURE(err);
+	}
+
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	add_assoc_string(return_value, "path", pathbuf, 1);
+    add_assoc_string(return_value, "type", mimebuf, 1);
+	stat(pathbuf, &statBuf);
+	add_assoc_long(return_value, "size", statBuf.st_size);
+}
+/* }}} */
+
+/* {{{ enum_values_callback */
+  static ASBool enum_values_callback(char *name, char *value, void *userdata) {
+	  zval *retval_ptr, *z_name, *z_value, **args[3];
+	  long retval = 0;
+	  int numargs = 2;
+	  TSRMLS_FETCH();
+
+	  MAKE_STD_ZVAL(z_name);
+	  ZVAL_STRING(z_name, name, 1);
+	  args[0] = &z_name;
+
+	  if(*value) { // simple value 
+		  MAKE_STD_ZVAL(z_value);
+		  ZVAL_STRING(z_value, value, 1);
+		  args[1] = &z_value;
+	  } else { // empty value *might* be an array
+		  // todo do it like fdf_get_value (or re-implement yourself?)
+	  }
+	  
+	  if(userdata) {
+		  args[2] = (zval **)userdata;
+		  numargs++;
+	  }
+
+	  if (call_user_function_ex(EG(function_table), 
+								NULL, 
+								FDF_G(enum_callback), 
+								&retval_ptr, 
+								numargs, args, 
+								0, NULL TSRMLS_CC)==SUCCESS
+		  && retval_ptr) {
+		  
+		  convert_to_long_ex(&retval_ptr);
+		  retval = Z_LVAL_P(retval_ptr);
+		  zval_ptr_dtor(&retval_ptr);
+	  } else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "callback failed");
+	  }
+
+	  zval_ptr_dtor(&z_name);
+	  zval_ptr_dtor(&z_value);
+
+	  return retval;
+  }
+/* }}} */
+
+/* {{{ proto bool fdf_enum_values(resource fdfdoc, mixed callback [, mixed userdata])
+ */
+PHP_FUNCTION(fdf_enum_values) {
+	zval *r_fdf;
+	zval *callback;
+	zval *userdata = NULL;
+	FDFDoc fdf;
+	FDFErc err;
+	char *name;
+	char namebuf[1024], valbuf[1024];
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|z", &r_fdf, 
+							 &callback, &userdata
+							 )
+	   == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
+
+	if (Z_TYPE_P(callback) != IS_ARRAY && 
+		Z_TYPE_P(callback) != IS_STRING) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong syntax for function name");
+		RETURN_FALSE;
+	}
+
+	convert_to_string_ex(&callback);
+
+	if (!zend_is_callable(callback, 0, &name)) {
+		php_error_docref1(NULL TSRMLS_CC, name, E_WARNING, "Second argument is expected to be a valid callback");
+		efree(name);
+		RETURN_FALSE;
+	}
+	efree(name);
+	FDF_G(enum_callback) = callback;
+	FDF_G(enum_fdf) = fdf;
+
+	err = FDFEnumValues(fdf, enum_values_callback, 
+						namebuf, sizeof(namebuf), 
+						valbuf, sizeof(valbuf), 
+						userdata ? &userdata : NULL, 0); 
+
+	if(err != FDFErcOK) {
+		FDF_FAILURE(err);
+	}
+	FDF_SUCCESS;
+}
+/* }}} */
+
+/* {{{ proto fdf_header() 
+ Set FDF specific HTTP headers */
+PHP_FUNCTION(fdf_header) {
+	sapi_header_line ctr = {0};
+	
+	ctr.line = "Content-type: application/vnd.fdf";
+	ctr.line_len = strlen(ctr.line);
+	ctr.response_code = 200;
+
+	sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+} 
+/* }}} */
 
 #endif
 
