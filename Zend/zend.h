@@ -178,11 +178,7 @@ char *alloca ();
 #include "zend_errors.h"
 #include "zend_alloc.h"
 
-typedef unsigned char zend_bool;
-typedef unsigned char zend_uchar;
-typedef unsigned int zend_uint;
-typedef unsigned long zend_ulong;
-typedef unsigned short zend_ushort;
+#include "zend_types.h"
 
 #ifdef HAVE_LIMITS_H
 # include <limits.h>
