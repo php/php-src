@@ -174,7 +174,7 @@ SOURCE="..\main\fopen_wrappers.c"
 # Begin Source File
 
 SOURCE=..\main\internal_functions_win32.c
-# ADD CPP /I "..\bundle\expat\xmltok" /I "..\bundle\expat\xmlparse"
+# ADD CPP /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
 # End Source File
 # Begin Source File
 
@@ -474,20 +474,20 @@ SOURCE=..\ext\wddx\wddx.c
 
 !IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
 
-# ADD CPP /I "..\bundle\expat\xmlparse" /I "..\bundle\expat\xmltok"
+# ADD CPP /I "..\ext\xml\expat\xmlparse" /I "..\ext\xml\expat\xmltok"
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
 
-# ADD CPP /I "bundle\expat\xmlparse" /I "..\bundle\expat\xmltok" /I "..\bundle\expat\xmlparse"
+# ADD CPP /I "bundle\expat\xmlparse" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
 
-# ADD CPP /I "bundle\expat\xmlparse" /I "..\bundle\expat\xmltok" /I "..\bundle\expat\xmlparse"
+# ADD CPP /I "bundle\expat\xmlparse" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TSDbg"
 
-# ADD BASE CPP /I "bundle\expat\xmlparse" /I "..\bundle\expat\xmltok" /I "..\bundle\expat\xmlparse"
-# ADD CPP /I "bundle\expat\xmlparse" /I "..\bundle\expat\xmltok" /I "..\bundle\expat\xmlparse"
+# ADD BASE CPP /I "bundle\expat\xmlparse" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
+# ADD CPP /I "bundle\expat\xmlparse" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
 
 !ENDIF 
 
@@ -498,20 +498,20 @@ SOURCE=..\ext\xml\xml.c
 
 !IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
 
-# ADD CPP /I "..\bundle\expat\xmlparse" /I "..\bundle\expat\xmltok"
+# ADD CPP /I "..\ext\xml\expat\xmlparse" /I "..\ext\xml\expat\xmltok"
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
 
-# ADD CPP /I "bundle\expat\xmlparse" /I "..\bundle\expat\xmltok" /I "..\bundle\expat\xmlparse"
+# ADD CPP /I "bundle\expat\xmlparse" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
 
-# ADD CPP /I "bundle\expat\xmlparse" /I "..\bundle\expat\xmltok" /I "..\bundle\expat\xmlparse"
+# ADD CPP /I "bundle\expat\xmlparse" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TSDbg"
 
-# ADD BASE CPP /I "bundle\expat\xmlparse" /I "..\bundle\expat\xmltok" /I "..\bundle\expat\xmlparse"
-# ADD CPP /I "bundle\expat\xmlparse" /I "..\bundle\expat\xmltok" /I "..\bundle\expat\xmlparse"
+# ADD BASE CPP /I "bundle\expat\xmlparse" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
+# ADD CPP /I "bundle\expat\xmlparse" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
 
 !ENDIF 
 
@@ -2147,17 +2147,17 @@ SOURCE=..\TODO
 # PROP Default_Filter ".c"
 # Begin Source File
 
-SOURCE=..\bundle\expat\xmlparse.c
+SOURCE=..\ext\xml\expat\xmlparse.c
 # ADD CPP /D "COMPILED_FROM_DSP"
 # End Source File
 # Begin Source File
 
-SOURCE=..\bundle\expat\xmlrole.c
+SOURCE=..\ext\xml\expat\xmlrole.c
 # ADD CPP /D "COMPILED_FROM_DSP"
 # End Source File
 # Begin Source File
 
-SOURCE=..\bundle\expat\xmltok.c
+SOURCE=..\ext\xml\expat\xmltok.c
 # ADD CPP /D "COMPILED_FROM_DSP"
 # End Source File
 # End Group
@@ -2166,47 +2166,47 @@ SOURCE=..\bundle\expat\xmltok.c
 # PROP Default_Filter ".h"
 # Begin Source File
 
-SOURCE=..\bundle\expat\ascii.h
+SOURCE=..\ext\xml\expat\ascii.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\bundle\expat\asciitab.h
+SOURCE=..\ext\xml\expat\asciitab.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\bundle\expat\expat.h
+SOURCE=..\ext\xml\expat\expat.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\bundle\expat\iasciitab.h
+SOURCE=..\ext\xml\expat\iasciitab.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\bundle\expat\latin1tab.h
+SOURCE=..\ext\xml\expat\latin1tab.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\bundle\expat\nametab.h
+SOURCE=..\ext\xml\expat\nametab.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\bundle\expat\utf8tab.h
+SOURCE=..\ext\xml\expat\utf8tab.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\bundle\expat\winconfig.h
+SOURCE=..\ext\xml\expat\winconfig.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\bundle\expat\xmlrole.h
+SOURCE=..\ext\xml\expat\xmlrole.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\bundle\expat\xmltok.h
+SOURCE=..\ext\xml\expat\xmltok.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\bundle\expat\xmltok_impl.h
+SOURCE=..\ext\xml\expat\xmltok_impl.h
 # End Source File
 # End Group
 # End Group
