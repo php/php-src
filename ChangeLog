@@ -1,3 +1,80 @@
+2004-09-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c:
+      - MFB (synch correctly not only for one problem)
+
+    * ZendEngine2/zend_API.c:
+      - Refix the fix
+
+2004-09-29  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/bench.php
+      ZendEngine2/tests/bench.php:
+      - Move bench.php to Zend/
+
+2004-09-29  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * main/php_scandir.c:
+      NetWare LibC don't have search.h
+
+    * main/php.h:
+      removed unwanted NEW_LIBC checks
+
+    * main/safe_mode.c:
+      NetWare don't have uid for a file so modified the php_checkuid to return 1
+      for NetWAre
+
+    * main/reentrancy.c:
+      removed unneccessary inclusion of headers for NetWare
+
+    * main/php_streams.h:
+      NETWARE has a proper stat structure Now no need of CLIB_STAT_PATCH checks
+
+    * main/main.c:
+      removed redundant NEW_LIBC checks for NETWARE
+
+    * ext/openssl/xp_ssl.c:
+      Included select.h for NetWare
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      removed unwanted comments, NEW_LIBC checks and NetWare specific stat
+      structure population
+
+    * ext/standard/filestat.c:
+      removed redundant NEW_LIBC and CLIB_STAT_PATCH checks for NETWARE
+
+2004-09-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/iterators_001.phpt
+      tests/classes/iterators_002.phpt
+      tests/classes/iterators_003.phpt
+      tests/classes/iterators_004.phpt
+      tests/classes/iterators_005.phpt:
+      - Fix tests by removing erroneous check from --SKIPIF--
+
+    * tests/classes/array_access_001.phpt
+      tests/classes/array_access_002.phpt
+      tests/classes/array_access_003.phpt
+      tests/classes/array_access_004.phpt:
+      - Fix tests by removing corrupt --SKIPIF--
+
+    * tests/classes/array_access_008.phpt
+      tests/classes/destructor_and_exceptions.phpt:
+      - Add new tests
+
+2004-09-29  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/standard/proc_open.c:
+      implemented proc_open for NETWARE
+
+2004-09-29  Sterling Hughes  <winnie@edwardbear.org>
+
+    * configure.in
+      ext/standard/basic_functions.c
+      ext/standard/datetime.c
+      ext/standard/datetime.h:
+      Add strptime function.
+
 2004-09-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/sysvmsg/sysvmsg.c:

@@ -1,3 +1,17 @@
+2004-09-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c:
+      - MFB (synch correctly not only for one problem)
+
+    * zend_API.c:
+      - Refix the fix
+
+2004-09-29  Andi Gutmans  <andi@zend.com>
+
+    * bench.php
+      tests/bench.php:
+      - Move bench.php to Zend/
+
 2004-09-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c
