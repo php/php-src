@@ -313,13 +313,18 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			php_url_decode(var, strlen(var));
 			val_len = php_url_decode(val, strlen(val));
 			val = estrndup(val, val_len);
-			if (sapi_module.input_filter(PARSE_POST, var, &val, val_len, &new_val_len TSRMLS_CC)) {
+			if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len TSRMLS_CC)) {
 				php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
 			}
 			efree(val);
 		} else {
 			php_url_decode(var, strlen(var));
-			php_register_variable_safe(var, "", 0, array_ptr TSRMLS_CC);
+			val_len = 0;
+			val = estrndup("", val_len);
+			if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len TSRMLS_CC)) {
+				php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
+			}
+			efree(val);
 		}
 		var = php_strtok_r(NULL, separator, &strtok_buf);
 	}
