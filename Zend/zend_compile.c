@@ -539,9 +539,11 @@ void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC)
 	zend_llist_element *le;
 	zend_op *opline, *opline_ptr;
 
+	/*
 	if (zend_variable_buffer_empty(TSRMLS_C) && (type == BP_VAR_W || type == BP_VAR_RW)) {
 		zend_error(E_ERROR, "Method can't be used as l-value");
 	}
+	*/
 	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
 
 	le = fetch_list_ptr->head;
