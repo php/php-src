@@ -25,7 +25,7 @@
 #include "php_soap.h"
 #include "ext/session/php_session.h"
 #ifdef ZEND_ENGINE_2
-#  include "zend_default_classes.h"
+#  include "zend_exceptions.h"
 #endif
 
 static int le_sdl = 0;

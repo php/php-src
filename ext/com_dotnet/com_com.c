@@ -27,7 +27,7 @@
 #include "ext/standard/info.h"
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
-#include "Zend/zend_default_classes.h"
+#include "Zend/zend_exceptions.h"
 
 /* {{{ com_create_instance - ctor for COM class */
 PHP_FUNCTION(com_create_instance)

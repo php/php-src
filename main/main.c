@@ -71,7 +71,7 @@
 #include "win32/php_registry.h"
 #endif
 #include "php_syslog.h"
-#include "Zend/zend_default_classes.h"
+#include "Zend/zend_exceptions.h"
 
 #if PHP_SIGCHILD
 #include <sys/types.h>

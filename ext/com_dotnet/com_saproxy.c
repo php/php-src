@@ -32,7 +32,7 @@
 #include "ext/standard/info.h"
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
-#include "Zend/zend_default_classes.h"
+#include "Zend/zend_exceptions.h"
 
 typedef struct {
 	/* the object we a proxying for; we hold a refcount to it */

@@ -32,7 +32,7 @@
 #include "safe_mode.h"
 #include "Zend/zend_API.h"
 #include "Zend/zend_hash.h"
-#include "Zend/zend_default_classes.h"
+#include "Zend/zend_exceptions.h"
 #include "Zend/zend_object_handlers.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(tidy)

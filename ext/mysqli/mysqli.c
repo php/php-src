@@ -29,7 +29,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 #include "php_mysqli.h"
-#include "zend_default_classes.h"
+#include "zend_exceptions.h"
 
 #define MYSQLI_STORE_RESULT 0
 #define MYSQLI_USE_RESULT 1
