@@ -614,31 +614,6 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object 
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION(spl_array) */
-PHP_MINIT_FUNCTION(spl_array)
-{
-	REGISTER_SPL_STD_CLASS_EX(ArrayObject, spl_array_object_new, spl_funcs_ArrayObject);
-	zend_class_implements(spl_ce_ArrayObject TSRMLS_CC, 1, zend_ce_aggregate);
-	zend_class_implements(spl_ce_ArrayObject TSRMLS_CC, 1, zend_ce_arrayaccess);
-	memcpy(&spl_handler_ArrayObject, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	spl_handler_ArrayObject.clone_obj = spl_array_object_clone;
-	spl_handler_ArrayObject.read_dimension = spl_array_read_dimension;
-	spl_handler_ArrayObject.write_dimension = spl_array_write_dimension;
-	spl_handler_ArrayObject.unset_dimension = spl_array_unset_dimension;
-	spl_handler_ArrayObject.has_dimension = spl_array_has_dimension;
-	spl_handler_ArrayObject.get_properties = spl_array_get_properties;
-
-	REGISTER_SPL_STD_CLASS_EX(ArrayIterator, spl_array_object_new, spl_funcs_ArrayIterator);
-	zend_class_implements(spl_ce_ArrayIterator TSRMLS_CC, 1, zend_ce_iterator);
-	zend_class_implements(spl_ce_ArrayIterator TSRMLS_CC, 1, zend_ce_arrayaccess);
-	REGISTER_SPL_IMPLEMENTS(ArrayIterator, SeekableIterator);
-	memcpy(&spl_handler_ArrayIterator, &spl_handler_ArrayObject, sizeof(zend_object_handlers));
-	spl_ce_ArrayIterator->get_iterator = spl_array_get_iterator;
-
-	return SUCCESS;
-}
-/* }}} */
-
 /* {{{ proto void ArrayObject::__construct(array|object ar = array())
        proto void ArrayIterator::__construct(array|object ar = array())
  Cronstructs a new array iterator from a path. */
@@ -744,36 +719,47 @@ SPL_METHOD(Array, seek)
 	while (position-- > 0 && spl_array_next(intern TSRMLS_CC));
 } /* }}} */
 
+int spl_array_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
+{
+	*count = 0;
+
+	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
+	HashTable *aht = HASH_OF(intern->array);
+	HashPosition pos;
+
+	if (!aht) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and is no longer an array");
+		*count = 0;
+		return FAILURE;
+	}
+
+	if (Z_TYPE_P(intern->array) == IS_OBJECT) {
+		/* We need to store the 'pos' since we'll modify it in the functions 
+		 * we're going to call and which do not support 'pos' as parameter. */
+		pos = intern->pos;
+		*count = 0;
+		zend_hash_internal_pointer_reset_ex(aht, &intern->pos);
+		while(intern->pos) {
+			(*count)++;
+			spl_array_next(intern TSRMLS_CC);
+		}
+		intern->pos = pos;
+		return SUCCESS;
+	} else {
+		*count = zend_hash_num_elements(aht);
+		return SUCCESS;
+	}
+} /* }}} */
+
 /* {{{ proto int ArrayObject::count()
        proto int ArrayIterator::count()
  Return the number of elements in the Iterator. */
 SPL_METHOD(Array, count)
 {
-	zval *object = getThis();
-	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
-	HashTable *aht = HASH_OF(intern->array);
-	HashPosition pos;
-	long cnt;
+	long count;
 
-	if (!aht) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and is no longer an array");
-		RETURN_LONG(0);
-	}
-
-	if (Z_TYPE_P(intern->array) == IS_OBJECT) {
-		pos = intern->pos;
-		cnt = 0;
-		zend_hash_internal_pointer_reset_ex(aht, &intern->pos);
-		while(intern->pos) {
-			cnt++;
-			spl_array_next(intern TSRMLS_CC);
-		}
-		intern->pos = pos;
-		RETURN_LONG(cnt);
-	} else {
-		RETURN_LONG(zend_hash_num_elements(aht));
-	}
-	
+	spl_array_object_count_elements(getThis(), &count TSRMLS_CC);
+	RETURN_LONG(count);
 } /* }}} */
 
 /* {{{ proto mixed|NULL ArrayIterator::current()
@@ -877,6 +863,32 @@ SPL_METHOD(Array, valid)
 	} else {
 		RETURN_BOOL(zend_hash_has_more_elements_ex(aht, &intern->pos) == SUCCESS);
 	}
+}
+/* }}} */
+
+/* {{{ PHP_MINIT_FUNCTION(spl_array) */
+PHP_MINIT_FUNCTION(spl_array)
+{
+	REGISTER_SPL_STD_CLASS_EX(ArrayObject, spl_array_object_new, spl_funcs_ArrayObject);
+	zend_class_implements(spl_ce_ArrayObject TSRMLS_CC, 1, zend_ce_aggregate);
+	zend_class_implements(spl_ce_ArrayObject TSRMLS_CC, 1, zend_ce_arrayaccess);
+	memcpy(&spl_handler_ArrayObject, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	spl_handler_ArrayObject.clone_obj = spl_array_object_clone;
+	spl_handler_ArrayObject.read_dimension = spl_array_read_dimension;
+	spl_handler_ArrayObject.write_dimension = spl_array_write_dimension;
+	spl_handler_ArrayObject.unset_dimension = spl_array_unset_dimension;
+	spl_handler_ArrayObject.has_dimension = spl_array_has_dimension;
+	spl_handler_ArrayObject.get_properties = spl_array_get_properties;
+	spl_handler_ArrayObject.count_elements = spl_array_object_count_elements;
+
+	REGISTER_SPL_STD_CLASS_EX(ArrayIterator, spl_array_object_new, spl_funcs_ArrayIterator);
+	zend_class_implements(spl_ce_ArrayIterator TSRMLS_CC, 1, zend_ce_iterator);
+	zend_class_implements(spl_ce_ArrayIterator TSRMLS_CC, 1, zend_ce_arrayaccess);
+	REGISTER_SPL_IMPLEMENTS(ArrayIterator, SeekableIterator);
+	memcpy(&spl_handler_ArrayIterator, &spl_handler_ArrayObject, sizeof(zend_object_handlers));
+	spl_ce_ArrayIterator->get_iterator = spl_array_get_iterator;
+
+	return SUCCESS;
 }
 /* }}} */
 
