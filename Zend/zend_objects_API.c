@@ -65,6 +65,7 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 		if (objects->object_buckets[i].valid) {
 			struct _store_object *obj = &objects->object_buckets[i].bucket.obj;
 
+			objects->object_buckets[i].valid = 0;
 			if (obj->free_storage) {
 				obj->free_storage(obj->object TSRMLS_CC);
 			}
@@ -140,7 +141,7 @@ ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 			}
 		}
 		if (obj->refcount == 1) {
-			if (obj->free_storage) {
+			if (obj->free_storage && EG(objects_store).object_buckets[handle].valid) {
 				obj->free_storage(obj->object TSRMLS_CC);
 			}
 			ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST();
