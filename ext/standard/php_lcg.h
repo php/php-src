@@ -32,7 +32,7 @@ PHP_FUNCTION(lcg_value);
 #define LCG(v) (lcg_globals->v)
 #define LCGLS_FETCH() php_lcg_globals *lcg_globals = ts_resource(lcg_globals_id)
 #else
-#define LCGLS_D
+#define LCGLS_D void
 #define LCG(v) (lcg_globals.v)
 #define LCGLS_FETCH()
 #endif
