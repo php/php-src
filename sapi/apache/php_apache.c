@@ -115,11 +115,11 @@ PHP_FUNCTION(apache_child_terminate)
 		ap_child_terminate( ((request_rec *)SG(server_context)) );
 		RETURN_TRUE;
 	} else { /* tell them to get lost! */
-		php_error(E_WARNING, "apache.child_terminate is disabled");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "apache.child_terminate is disabled");
 		RETURN_FALSE;
 	}
 #else
-		php_error(E_WARNING, "apache_child_terminate() is not supported in this build");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "apache_child_terminate() is not supported in this build");
 		RETURN_FALSE;
 #endif
 }
@@ -304,13 +304,13 @@ PHP_FUNCTION(virtual)
 	convert_to_string_ex(filename);
 	
 	if (!(rr = sub_req_lookup_uri ((*filename)->value.str.val, ((request_rec *) SG(server_context))))) {
-		php_error(E_WARNING, "Unable to include '%s' - URI lookup failed", (*filename)->value.str.val);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - URI lookup failed", (*filename)->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
 
 	if (rr->status != 200) {
-		php_error(E_WARNING, "Unable to include '%s' - error finding URI", (*filename)->value.str.val);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - error finding URI", (*filename)->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
@@ -319,7 +319,7 @@ PHP_FUNCTION(virtual)
 	php_header();
 
 	if (run_sub_req(rr)) {
-		php_error(E_WARNING, "Unable to include '%s' - request execution failed", (*filename)->value.str.val);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - request execution failed", (*filename)->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
 	} else {
@@ -415,7 +415,7 @@ PHP_FUNCTION(apache_lookup_uri)
 	convert_to_string_ex(filename);
 
 	if(!(rr = sub_req_lookup_uri((*filename)->value.str.val, ((request_rec *) SG(server_context))))) {
-		php_error(E_WARNING, "URI lookup failed", (*filename)->value.str.val);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "URI lookup failed", (*filename)->value.str.val);
 		RETURN_FALSE;
 	}
 	object_init(return_value);
@@ -490,7 +490,7 @@ PHP_FUNCTION(apache_exec_uri)
 	convert_to_string_ex(filename);
 
 	if(!(rr = ap_sub_req_lookup_uri((*filename)->value.str.val, ((request_rec *) SG(server_context))))) {
-		php_error(E_WARNING, "URI lookup failed", (*filename)->value.str.val);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "URI lookup failed", (*filename)->value.str.val);
 		RETURN_FALSE;
 	}
 	RETVAL_LONG(ap_run_sub_req(rr));
