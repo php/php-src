@@ -107,6 +107,8 @@ static char const cvsid[] = "$Id$";
 
 /* Full Functions (The actual CCVS functions and any internal php hooked functions such as MINFO) */
 
+/* {{{ proto string ccvs_init(string name)
+ ??? */
 PHP_FUNCTION(ccvs_init) /* cv_init() */
 {
   zval **name;
@@ -151,7 +153,10 @@ PHP_FUNCTION(ccvs_init) /* cv_init() */
   free(p);
   return;
 }
+/* }}} */
 
+/* {{{ proto string ccvs_done(string sess)
+ ??? */
 PHP_FUNCTION(ccvs_done) /* cv_done() */
 {
   zval **sess;
@@ -170,7 +175,10 @@ PHP_FUNCTION(ccvs_done) /* cv_done() */
 
   RETURN_STRING("OK", 1);
 }
+/* }}} */
 
+/* {{{ proto string ccvs_new(string session, string invoice)
+ ??? */
 PHP_FUNCTION(ccvs_new) /* cv_new() */
 {
   zval **psess;
@@ -194,7 +202,10 @@ PHP_FUNCTION(ccvs_new) /* cv_new() */
 
   RETURN_STRING(cv_ret2str(r), 1);
 }
+/* }}} */
 
+/* {{{ proto string ccvs_add(string session, string invoice, string argtype, string argval)
+ ??? */
 PHP_FUNCTION(ccvs_add) /* cv_add() */
 {
   zval **psess;
@@ -226,6 +237,7 @@ PHP_FUNCTION(ccvs_add) /* cv_add() */
 
   RETURN_STRING(cv_ret2str(r), 1);
 }
+/* }}} */
 
 /*
 *	cv_create can't be implemented because of vararg limits in PHP3's C API.
@@ -236,6 +248,9 @@ PHP_FUNCTION(ccvs_add) /* cv_add() */
 *  to the CCVS C API ref.  I didn't try to implement it for that reason.  If anyone needs it, they can add it in
 *	themselves I'm sure.
 */
+
+/* {{{ proto string ccvs_delete(string session, string invoice)
+ ??? */
 PHP_FUNCTION(ccvs_delete) /* cv_delete() */
 {
   zval **psess;
@@ -258,7 +273,10 @@ PHP_FUNCTION(ccvs_delete) /* cv_delete() */
 
   RETURN_STRING(cv_ret2str(r), 1);
 }
+/* }}} */
 
+/* {{{ proto string ccvs_auth(string session, string invoice)
+ ??? */
 PHP_FUNCTION(ccvs_auth) /* cv_auth() */
 {
   zval **psess;
@@ -281,7 +299,10 @@ PHP_FUNCTION(ccvs_auth) /* cv_auth() */
 
   RETURN_STRING(cv_ret2str(r), 1);
 }
+/* }}} */
 
+/* {{{ proto string ccvs_return(string session, string invoice)
+ ??? */
 PHP_FUNCTION(ccvs_return) /* cv_return() */
 {
   zval **psess;
@@ -304,7 +325,10 @@ PHP_FUNCTION(ccvs_return) /* cv_return() */
 
   RETURN_STRING(cv_ret2str(r), 1);
 }
+/* }}} */
 
+/* {{{ proto string ccvs_reverse(string session, string invoice)
+ ??? */
 PHP_FUNCTION(ccvs_reverse) /* cv_reverse() */
 {
   zval **psess;
@@ -327,7 +351,10 @@ PHP_FUNCTION(ccvs_reverse) /* cv_reverse() */
 
   RETURN_STRING(cv_ret2str(r), 1);
 }
+/* }}} */
 
+/* {{{ proto string ccvs_sale(string session, string invoice)
+ ??? */
 PHP_FUNCTION(ccvs_sale) /* cv_sale() */
 {
   zval **psess;
@@ -350,7 +377,10 @@ PHP_FUNCTION(ccvs_sale) /* cv_sale() */
 
   RETURN_STRING(cv_ret2str(r), 1);
 }
+/* }}} */
 
+/* {{{ proto string ccvs_void(string session, string invoice)
+ ??? */
 PHP_FUNCTION(ccvs_void) /* cv_void() */
 {
   zval **psess;
@@ -373,7 +403,10 @@ PHP_FUNCTION(ccvs_void) /* cv_void() */
 
   RETURN_STRING(cv_ret2str(r), 1);
 }
+/* }}} */
 
+/* {{{ proto string ccvs_status(string session, string invoice)
+ ??? */
 PHP_FUNCTION(ccvs_status) /* cv_status() */
 {
   zval **psess;
@@ -396,7 +429,10 @@ PHP_FUNCTION(ccvs_status) /* cv_status() */
 
   RETURN_STRING(cv_stat2str(r), 1);
 }
+/* }}} */
 
+/* {{{ proto int ccvs_count(string session, string type)
+ ??? */
 PHP_FUNCTION(ccvs_count) /* cv_count() */
 {
   zval **psess;
@@ -419,7 +455,10 @@ PHP_FUNCTION(ccvs_count) /* cv_count() */
 
   RETURN_LONG(r);
 }
+/* }}} */
 
+/* {{{ proto string ccvs_lookup(string session, string invoice, int inum)
+ ??? */
 PHP_FUNCTION(ccvs_lookup) /* cv_lookup() */
 {
   zval **psess;
@@ -446,7 +485,10 @@ PHP_FUNCTION(ccvs_lookup) /* cv_lookup() */
 
   RETURN_STRING(cv_textvalue(sess), 1);
 }
+/* }}} */
 
+/* {{{ proto string ccvs_report(string session, string type)
+ ??? */
 PHP_FUNCTION(ccvs_report) /* cv_report() */
 {
   zval **psess;
@@ -470,7 +512,10 @@ PHP_FUNCTION(ccvs_report) /* cv_report() */
 
   RETURN_STRING(cv_stat2str(r), 1);
 }
+/* }}} */
 
+/* {{{ proto string ccvs_command(string session, string type, string argval)
+ ??? */
 PHP_FUNCTION(ccvs_command) /* cv_command() */
 {
   zval **psess;
@@ -497,7 +542,10 @@ PHP_FUNCTION(ccvs_command) /* cv_command() */
 
   RETURN_STRING(cv_stat2str(r), 1);
 }
+/* }}} */
 
+/* {{{ proto string ccvs_textvalue(string session)
+ ??? */
 PHP_FUNCTION(ccvs_textvalue) /* cv_textvalue() */
 {
   zval **psess;
@@ -513,6 +561,7 @@ PHP_FUNCTION(ccvs_textvalue) /* cv_textvalue() */
 
   RETURN_STRING(cv_textvalue(sess), 1);
 }
+/* }}} */
 
 /*
 *	Our Info Function which reports info on this module out to PHP's phpinfo() function
