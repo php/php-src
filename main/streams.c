@@ -464,6 +464,9 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 	/* is there enough data in the buffer ? */
 	if (stream->writepos - stream->readpos < (off_t)size) {
 		size_t justread = 0;
+	
+		if (stream->eof)
+			return;
 		
 		/* no; so lets fetch more data */
 		
@@ -522,7 +525,7 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 			didread += toread;
 		}
 
-		if (size == 0) {
+		if (size == 0 || stream->eof) {
 			break;
 		}
 
@@ -721,6 +724,8 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 			if (done) {
 				break;
 			}
+		} else if (stream->eof) {
+			break;
 		} else {
 			/* XXX: Should be fine to always read chunk_size */
 			size_t toread = maxlen - 1;
