@@ -24,6 +24,7 @@ struct _sdl {
 	HashTable *requests;         /* array of sdlFunction (references) */
 	HashTable *attributes;       /* array of sdlAttributePtr */
 	HashTable *attributeGroups;  /* array of sdlTypesPtr */
+	HashTable *groups;           /* array of sdlTypesPtr */
 	char *target_ns;
 	char *source;
 };
@@ -44,8 +45,8 @@ struct _sdlSoapBinding {
 struct _sdlSoapBindingFunctionBody {
 	char *ns;
 	int use;
-	char *parts;			/* not implemented yet */
-	char *encodingStyle;	/* not implemented yet */
+	char *parts;         /* not implemented yet */
+	char *encodingStyle; /* not implemented yet */
 };
 
 struct _sdlSoapBindingFunction {
@@ -56,14 +57,6 @@ struct _sdlSoapBindingFunction {
 	sdlSoapBindingFunctionBody output;
 	sdlSoapBindingFunctionBody falut;
 };
-
-/* HTTP Binding Specfic stuff */
-/*********** not implemented yet ************
-struct _sdlHttpBinding
-{
-	int holder;
-};
-*********************************************/
 
 struct _sdlRestrictionInt {
 	int value;
@@ -78,7 +71,7 @@ struct _sdlRestrictionChar {
 };
 
 struct _sdlRestrictions {
-	HashTable *enumeration;				/* array of sdlRestrictionCharPtr */
+	HashTable *enumeration;              /* array of sdlRestrictionCharPtr */
 	sdlRestrictionIntPtr minExclusive;
 	sdlRestrictionIntPtr minInclusive;
 	sdlRestrictionIntPtr maxExclusive;
@@ -92,15 +85,35 @@ struct _sdlRestrictions {
 	sdlRestrictionCharPtr pattern;
 };
 
+typedef enum _sdlContentKind {
+	XSD_CONTENT_ELEMENT,
+	XSD_CONTENT_SEQUENCE,
+	XSD_CONTENT_ALL,
+	XSD_CONTENT_CHOICE,
+	XSD_CONTENT_GROUP_REF,
+	XSD_CONTENT_GROUP
+} sdlContentKind;
+
+
+typedef struct _sdlContentModel sdlContentModel, *sdlContentModelPtr;
+
+struct _sdlContentModel {
+	sdlContentKind kind;
+	int min_occurs;
+	int max_occurs;
+	union {
+		sdlTypePtr          element;      /* pointer to element */
+		sdlContentModelPtr  group;        /* pointer to group */
+		HashTable          *content;      /* array of sdlContentModel for sequnce,all,choice*/
+		char               *group_ref;    /* reference to group */
+	} u;
+};
+
 typedef enum _sdlTypeKind {
-	XSD_TYPEKIND_UNKNOWN,
 	XSD_TYPEKIND_SIMPLE,
-	XSD_TYPEKIND_COMPLEX,
 	XSD_TYPEKIND_LIST,
 	XSD_TYPEKIND_UNION,
-	XSD_TYPEKIND_ALL,
-	XSD_TYPEKIND_SEQUENCE,
-	XSD_TYPEKIND_CHOICE
+	XSD_TYPEKIND_COMPLEX
 } sdlTypeKind;
 
 struct _sdlType {
@@ -108,13 +121,12 @@ struct _sdlType {
 	char *name;
 	char *namens;
 	int nillable;
-	int min_occurs;
-	int max_occurs;
-	HashTable *elements;				/* array of sdlTypePtr */
-	HashTable *attributes;				/* array of sdlAttributePtr */
+	HashTable *elements;             /* array of sdlTypePtr */
+	HashTable *attributes;           /* array of sdlAttributePtr */
 	sdlRestrictionsPtr restrictions;
 	encodePtr encode;
 	char *ref;
+	sdlContentModelPtr model;
 };
 
 struct _sdlParam {
@@ -127,10 +139,10 @@ struct _sdlFunction {
 	char *functionName;
 	char *requestName;
 	char *responseName;
-	HashTable *requestParameters;		/* array of sdlParamPtr */
-	HashTable *responseParameters;		/* array of sdlParamPtr (this should only be one) */
+	HashTable *requestParameters;  /* array of sdlParamPtr */
+	HashTable *responseParameters; /* array of sdlParamPtr (this should only be one) */
 	struct _sdlBinding* binding;
-	void* bindingAttributes; /* sdlSoapBindingFunctionPtr */
+	void* bindingAttributes;       /* sdlSoapBindingFunctionPtr */
 };
 
 struct _sdlAttribute {
@@ -140,9 +152,9 @@ struct _sdlAttribute {
 	char *id;
 	char *name;
 	char *ref;
-	char *type;
 	char *use;
 	HashTable *extraAttributes;			/* array of xmlNodePtr */
+	encodePtr encode;
 };
 
 sdlPtr get_sdl(char *uri);

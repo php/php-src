@@ -263,30 +263,33 @@ zval *sdl_guess_convert_zval(encodeType enc, xmlNodePtr data)
 		  php_error(E_WARNING,"Restriction: length is not equal to 'length'");
 		}
 	}	
-	if (type->encode) {
-		if (type->encode->details.type == IS_ARRAY ||
-			type->encode->details.type == SOAP_ENC_ARRAY) {
-			return to_zval_array(enc, data);
-		} else if (type->encode->details.type == IS_OBJECT ||
-			type->encode->details.type == SOAP_ENC_OBJECT) {
-			return to_zval_object(enc, data);
-		} else {
-			if (memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
-				return master_to_zval(type->encode, data);
-			} else {
-				TSRMLS_FETCH();
-				return master_to_zval(get_conversion(UNKNOWN_TYPE), data);
-			}
+	if (type->kind == XSD_TYPEKIND_SIMPLE) {
+		if (type->encode && memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
+			return master_to_zval(type->encode, data);
 		}
 	} else if (type->kind == XSD_TYPEKIND_LIST) {
 		return to_zval_list(enc, data);
 	} else if (type->kind == XSD_TYPEKIND_UNION) {
 		return to_zval_union(enc, data);
-	} else if (type->elements) {
-		return to_zval_object(enc, data);
-	}	else {
-		return guess_zval_convert(enc, data);
+	} else if (type->kind == XSD_TYPEKIND_COMPLEX) {
+		if (type->encode &&
+		    (type->encode->details.type == IS_ARRAY ||
+		     type->encode->details.type == SOAP_ENC_ARRAY)) {
+			return to_zval_array(enc, data);
+		}
+		if (type->encode &&
+		    (type->encode->details.type == IS_OBJECT ||
+		     type->encode->details.type == SOAP_ENC_OBJECT)) {
+			return to_zval_array(enc, data);
+		}
+		if (type->model || type->attributes) {
+			return to_zval_object(enc, data);
+		}
+		if (type->encode && memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
+			return master_to_zval(type->encode, data);
+		}
 	}
+	return guess_zval_convert(enc, data);
 }
 
 xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval *data, int style)
@@ -296,48 +299,51 @@ xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval *data, int style)
 
 	type = enc.sdl_type;
 
-	if (type && type->restrictions && Z_TYPE_P(data) == IS_STRING) {
-		if (type->restrictions->enumeration) {
-			if (!zend_hash_exists(type->restrictions->enumeration,Z_STRVAL_P(data),Z_STRLEN_P(data)+1)) {
-				php_error(E_WARNING,"Restriction: invalid enumeration value \"%s\".",Z_STRVAL_P(data));
+	if (type) {
+		if (type->restrictions && Z_TYPE_P(data) == IS_STRING) {
+			if (type->restrictions->enumeration) {
+				if (!zend_hash_exists(type->restrictions->enumeration,Z_STRVAL_P(data),Z_STRLEN_P(data)+1)) {
+					php_error(E_WARNING,"Restriction: invalid enumeration value \"%s\".",Z_STRVAL_P(data));
+				}
 			}
-		}
-		if (type->restrictions->minLength &&
-		    Z_STRLEN_P(data) < type->restrictions->minLength->value) {
-		  php_error(E_WARNING,"Restriction: length less then 'minLength'");
-		}
-		if (type->restrictions->maxLength &&
-		    Z_STRLEN_P(data) > type->restrictions->maxLength->value) {
-		  php_error(E_WARNING,"Restriction: length greater then 'maxLength'");
-		}
-		if (type->restrictions->length &&
-		    Z_STRLEN_P(data) != type->restrictions->length->value) {
-		  php_error(E_WARNING,"Restriction: length is not equal to 'length'");
+			if (type->restrictions->minLength &&
+			    Z_STRLEN_P(data) < type->restrictions->minLength->value) {
+		  	php_error(E_WARNING,"Restriction: length less then 'minLength'");
+			}
+			if (type->restrictions->maxLength &&
+			    Z_STRLEN_P(data) > type->restrictions->maxLength->value) {
+		  	php_error(E_WARNING,"Restriction: length greater then 'maxLength'");
+			}
+			if (type->restrictions->length &&
+			    Z_STRLEN_P(data) != type->restrictions->length->value) {
+		  	php_error(E_WARNING,"Restriction: length is not equal to 'length'");
+			}
 		}
 	}
-
-	if (type->encode) {
-		if (type->encode->details.type == IS_ARRAY ||
-			type->encode->details.type == SOAP_ENC_ARRAY) {
-			ret = to_xml_array(enc, data, style);
-		} else if (type->encode->details.type == IS_OBJECT ||
-			type->encode->details.type == SOAP_ENC_OBJECT) {
-			ret = to_xml_object(enc, data, style);
-		} else {
-			if (memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
-				ret = master_to_xml(type->encode, data, style);
-			} else {
-				TSRMLS_FETCH();
-				ret = master_to_xml(get_conversion(UNKNOWN_TYPE), data, style);
-			}
+	if (type->kind == XSD_TYPEKIND_SIMPLE) {
+		if (type->encode && memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
+			ret = master_to_xml(type->encode, data, style);
 		}
 	} else if (type->kind == XSD_TYPEKIND_LIST) {
 		ret = to_xml_list(enc, data, style);
 	} else if (type->kind == XSD_TYPEKIND_UNION) {
 		ret = to_xml_union(enc, data, style);
-	} else if (type->elements) {
-		ret = to_xml_object(enc, data, style);
-	}	else {
+	} else if (type->kind == XSD_TYPEKIND_COMPLEX) {
+		if (type->encode &&
+		    (type->encode->details.type == IS_ARRAY ||
+		     type->encode->details.type == SOAP_ENC_ARRAY)) {
+			ret = to_xml_array(enc, data, style);
+		} else if (type->encode &&
+		           (type->encode->details.type == IS_OBJECT ||
+		            type->encode->details.type == SOAP_ENC_OBJECT)) {
+			ret = to_xml_object(enc, data, style);
+		} else if (type->model || type->attributes) {
+			ret = to_xml_object(enc, data, style);
+		} else if (type->encode && memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
+			ret = master_to_xml(type->encode, data, style);
+		}
+	}
+	if (ret == NULL) {
 		ret = guess_xml_convert(enc, data, style);
 	}
 	if (style == SOAP_ENCODED) {
@@ -938,6 +944,7 @@ static sdlPtr load_wsdl(char *struri)
 		php_error(E_ERROR, "Error parsing wsdl (\"Couldn't bind to service\")");
 	}
 
+	schema_pass3(ctx.root);
 	zend_hash_destroy(&ctx.messages);
 	zend_hash_destroy(&ctx.bindings);
 	zend_hash_destroy(&ctx.portTypes);
@@ -995,6 +1002,10 @@ void delete_sdl(void *handle)
 	if (tmp->attributeGroups) {
 		zend_hash_destroy(tmp->attributeGroups);
 		free(tmp->attributeGroups);
+	}
+	if (tmp->groups) {
+		zend_hash_destroy(tmp->groups);
+		free(tmp->groups);
 	}
 	if (tmp->bindings) {
 		zend_hash_destroy(tmp->bindings);
@@ -1175,9 +1186,6 @@ void delete_attribute(void *attribute)
 	}
 	if (attr->ref) {
 		free(attr->ref);
-	}
-	if (attr->type) {
-		free(attr->type);
 	}
 	if (attr->use) {
 		free(attr->use);

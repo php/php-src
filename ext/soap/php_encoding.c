@@ -678,35 +678,160 @@ zval *to_zval_object(encodeType type, xmlNodePtr data)
 	}
 
 	object_init(ret);
-	trav = data->children;
+	if (type.sdl_type) {
+		if (type.sdl_type->elements) {
+			sdlTypePtr *tmpType;
+			zend_hash_internal_pointer_reset(type.sdl_type->elements);
+			while (zend_hash_get_current_data(type.sdl_type->elements, (void**)&tmpType) == SUCCESS) {
+			  if ((*tmpType)->name) {
+			  	xmlNodePtr node = get_node(data->children, (*tmpType)->name);
+			  	if (node) {
+						xmlAttrPtr typeAttr = get_attribute(node->properties,"type");
+				  	encodePtr  enc = NULL;
+				  	zval *val;
 
-	while (trav != NULL) {
-		if (trav->type == XML_ELEMENT_NODE) {
-			sdlTypePtr *element;
-			encodePtr enc = NULL;
-			zval *tmpVal;
-
-			xmlAttrPtr typeAttr = get_attribute(trav->properties,"type");
-			if (typeAttr != NULL && typeAttr->children && typeAttr->children->content) {
-				enc = get_encoder_from_prefix(sdl, trav, typeAttr->children->content);
-			}
-			if (enc == NULL && sdlType != NULL && sdlType->elements != NULL && trav->name != NULL &&
-			    zend_hash_find(sdlType->elements, (char*)trav->name, strlen(trav->name)+1,(void **)&element) == SUCCESS) {
-				enc = (*element)->encode;
-			}
-			if (enc == NULL) {
-				enc = get_conversion(UNKNOWN_TYPE);
-			}
-
-			tmpVal = master_to_zval(enc, trav);
+						if (typeAttr != NULL && typeAttr->children && typeAttr->children->content) {
+							enc = get_encoder_from_prefix(sdl, node, typeAttr->children->content);
+						}
+						if (enc == NULL) {
+							enc = (*tmpType)->encode;
+						}
+						val = master_to_zval(enc, node);
+						if ((node = get_node(node->next, (*tmpType)->name)) != NULL) {
+							zval *array;
+							MAKE_STD_ZVAL(array);
+							array_init(array);
+							add_next_index_zval(array, val);
+							do {
+								typeAttr = get_attribute(node->properties,"type");
+				  	    enc = NULL;
+								if (typeAttr != NULL && typeAttr->children && typeAttr->children->content) {
+									enc = get_encoder_from_prefix(sdl, node, typeAttr->children->content);
+								}
+								if (enc == NULL) {
+									enc = (*tmpType)->encode;
+								}
+								val = master_to_zval(enc, node);
+								add_next_index_zval(array, val);
+							} while ((node = get_node(node->next, (*tmpType)->name)) != NULL);
+							val = array;
+						}
 #ifdef ZEND_ENGINE_2
-			tmpVal->refcount--;
+						val->refcount--;
 #endif
-			add_property_zval(ret, (char *)trav->name, tmpVal);
+						add_property_zval(ret, (*tmpType)->name, val);
+					}
+			  }
+				zend_hash_move_forward(type.sdl_type->elements);
+			}
 		}
-		trav = trav->next;
+		if (type.sdl_type->attributes) {
+			sdlAttributePtr *attr;
+
+			zend_hash_internal_pointer_reset(type.sdl_type->attributes);
+			while (zend_hash_get_current_data(type.sdl_type->attributes, (void**)&attr) == SUCCESS) {
+				if ((*attr)->name) {
+					xmlAttrPtr val = get_attribute(data->properties, (*attr)->name);
+					if (val && val->children && val->children->content) {
+						add_property_string(ret, (*attr)->name, val->children->content, 1);
+					}
+				}
+				zend_hash_move_forward(type.sdl_type->attributes);
+			}
+		}
+	} else {
+		trav = data->children;
+
+		while (trav != NULL) {
+			if (trav->type == XML_ELEMENT_NODE) {
+				encodePtr enc = NULL;
+				zval *tmpVal;
+
+				xmlAttrPtr typeAttr = get_attribute(trav->properties,"type");
+				if (typeAttr != NULL && typeAttr->children && typeAttr->children->content) {
+					enc = get_encoder_from_prefix(sdl, trav, typeAttr->children->content);
+				}
+				tmpVal = master_to_zval(enc, trav);
+#ifdef ZEND_ENGINE_2
+				tmpVal->refcount--;
+#endif
+				add_property_zval(ret, (char *)trav->name, tmpVal);
+			}
+			trav = trav->next;
+		}
 	}
 	return ret;
+}
+
+static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, HashTable *prop, int style, int strict)
+{
+	switch (model->kind) {
+		case XSD_CONTENT_ELEMENT: {
+			zval **data;
+			xmlNodePtr property;
+			encodePtr enc;
+
+			if (zend_hash_find(prop, model->u.element->name, strlen(model->u.element->name)+1, (void**)&data) == SUCCESS) {
+				enc = model->u.element->encode;
+				if ((model->max_occurs == -1 || model->max_occurs > 1) && Z_TYPE_PP(data) == IS_ARRAY) {
+					HashTable *ht = Z_ARRVAL_PP(data);
+					zval **val;
+
+					zend_hash_internal_pointer_reset(ht);
+					while (zend_hash_get_current_data(ht,(void**)&val) == SUCCESS) {
+						property = master_to_xml(enc, *val, style);
+						xmlNodeSetName(property, model->u.element->name);
+						xmlAddChild(node, property);
+						zend_hash_move_forward(ht);
+					}
+				} else {
+					property = master_to_xml(enc, *data, style);
+					xmlNodeSetName(property, model->u.element->name);
+					xmlAddChild(node, property);
+				}
+				return 1;
+			} else if (model->min_occurs == 0) {
+				return 1;
+			} else {
+				if (strict) {
+					php_error(E_ERROR, "object hasn't '%s' property",model->u.element->name);
+				}
+				return 0;
+			}
+			break;
+		}
+		case XSD_CONTENT_SEQUENCE:
+		case XSD_CONTENT_ALL: {
+			sdlContentModelPtr *tmp;
+
+			zend_hash_internal_pointer_reset(model->u.content);
+			while (zend_hash_get_current_data(model->u.content, (void**)&tmp) == SUCCESS) {
+				if (!model_to_xml_object(node, *tmp, prop, style, model->min_occurs > 0)) {
+					return 0;
+				}
+				zend_hash_move_forward(model->u.content);
+			}
+			return 1;
+		}
+		case XSD_CONTENT_CHOICE: {
+			sdlContentModelPtr *tmp;
+
+			zend_hash_internal_pointer_reset(model->u.content);
+			while (zend_hash_get_current_data(model->u.content, (void**)&tmp) == SUCCESS) {
+				if (model_to_xml_object(node, *tmp, prop, style, 0)) {
+					return 1;
+				}
+				zend_hash_move_forward(model->u.content);
+			}
+			return 0;
+		}
+		case XSD_CONTENT_GROUP: {
+			return model_to_xml_object(node, model->u.group, prop, style, model->min_occurs > 0);
+		}
+		default:
+		  break;
+	}
+	return 1;
 }
 
 xmlNodePtr to_xml_object(encodeType type, zval *data, int style)
@@ -756,36 +881,67 @@ xmlNodePtr to_xml_object(encodeType type, zval *data, int style)
 			smart_str_free(ns);
 			efree(ns);
 		}
+	} else if (type.sdl_type) {
+		xmlParam = xmlNewNode(NULL, "BOGUS");
+		FIND_ZVAL_NULL(data, xmlParam, style);
+
+		prop = NULL;
+		if (Z_TYPE_P(data) == IS_OBJECT) {
+			prop = Z_OBJPROP_P(data);
+		} else if (Z_TYPE_P(data) == IS_ARRAY) {
+			prop = Z_ARRVAL_P(data);
+		}
+		if (prop != NULL) {
+			if (type.sdl_type->model) {
+				model_to_xml_object(xmlParam, type.sdl_type->model, prop, style, 1);
+			}
+			if (type.sdl_type->attributes) {
+				sdlAttributePtr *attr;
+				zval **data;
+
+				zend_hash_internal_pointer_reset(type.sdl_type->attributes);
+				while (zend_hash_get_current_data(type.sdl_type->attributes, (void**)&attr) == SUCCESS) {
+					if ((*attr)->name) {
+						if (zend_hash_find(prop, (*attr)->name, strlen((*attr)->name)+1, (void**)&data) == SUCCESS) {
+							xmlNodePtr dummy;
+							
+							dummy = master_to_xml((*attr)->encode, *data, SOAP_LITERAL);
+							if (dummy->children && dummy->children->content) {
+								xmlSetProp(xmlParam, (*attr)->name, dummy->children->content);
+							}
+							xmlFreeNode(dummy);
+						}
+					}
+					zend_hash_move_forward(type.sdl_type->attributes);
+				}
+			}
+		}
+		if (style == SOAP_ENCODED) {
+			set_ns_and_type(xmlParam, type);
+		}
 	} else {
 		xmlParam = xmlNewNode(NULL, "BOGUS");
 		FIND_ZVAL_NULL(data, xmlParam, style);
 
+		prop = NULL;
 		if (Z_TYPE_P(data) == IS_OBJECT) {
-			sdlTypePtr sdl_type = type.sdl_type;
-
 			prop = Z_OBJPROP_P(data);
+		} else if (Z_TYPE_P(data) == IS_ARRAY) {
+			prop = Z_ARRVAL_P(data);
+		}
+		if (prop != NULL) {
 			i = zend_hash_num_elements(prop);
 			zend_hash_internal_pointer_reset(prop);
 
 			for (;i > 0;i--) {
 				xmlNodePtr property;
-				encodePtr enc = NULL;
 				zval **zprop;
 				char *str_key;
 
 				zend_hash_get_current_key(prop, &str_key, NULL, FALSE);
 				zend_hash_get_current_data(prop, (void **)&zprop);
 
-				if (sdl_type && sdl_type->elements) {
-					sdlTypePtr *el_type;
-					if (zend_hash_find(sdl_type->elements, str_key, strlen(str_key) + 1, (void **)&el_type) == SUCCESS) {
-						enc = (*el_type)->encode;
-					}
-				}
-				if (enc == NULL) {
-					enc = get_conversion((*zprop)->type);
-				}
-				property = master_to_xml(enc, (*zprop), style);
+				property = master_to_xml(get_conversion((*zprop)->type), (*zprop), style);
 
 				xmlNodeSetName(property, str_key);
 				xmlAddChild(xmlParam, property);
