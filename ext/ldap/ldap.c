@@ -1525,8 +1525,8 @@ PHP_FUNCTION(ldap_get_option) {
 			if (ldap_get_option(ldap, opt, &val)) {
 				RETURN_FALSE;
 			}
-			(*retval)->type = IS_LONG;
-			(*retval)->value.lval = val;  
+			zval_dtor(*retval);
+                        ZVAL_LONG(*retval, val);
 		} break;
 		/* options with string value */
 	case LDAP_OPT_HOST_NAME:
@@ -1538,10 +1538,8 @@ PHP_FUNCTION(ldap_get_option) {
 			if (ldap_get_option(ldap, opt, &val)) {
 				RETURN_FALSE;
 			}
-			(*retval)->type = IS_STRING;
-			len = strlen(val);
-			(*retval)->value.str.len = len;
-			(*retval)->value.str.val = estrndup(val, len);
+			zval_dtor(*retval);
+                        ZVAL_STRING(*retval, val, 1);
 			ldap_memfree(val);
 		} break;
 		/* options not implemented
