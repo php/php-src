@@ -1,0 +1,206 @@
+This is very beta documentation.  Clearly better stuff can and will follow.
+
+INTRO:
+
+apache_hooks is a full super-set enhancement of the apache 1.3 sapi that allows for
+php code to be run on the apache request object at every stage of the apache
+request.  It supports all of the apache 1.3 sapi commands and configurations, and
+additionally supports the following httpd.conf directives:
+
+
+HTTPD.CONF DIRECTIEVS:
+
+phpRequire /path/to/file  = requires a file at the beginning of an 
+initial apache request
+
+phpUriHandler /path/to/file  = registers a hook that will run the 
+specified file at the uri translation stage of the apache request
+phpUriHandler Class::Method = registers a hook to run  Class::Method at 
+the uri translation stage of the apache request
+
+phpPostReadHandler /path/to/file = hook for post-read phase
+phpPostReadHandlerMethod Class::Method
+
+phpHeaderHandler  = hook for header parsing phase
+phpHeaderHandlerMethod
+
+phpAuthHandler = hook for authentication phase
+phpAuthHandlerMethod
+
+phpAccessHandler = hook for access control phase
+phpAccessHandlerMethod
+
+phpTypeHandler = hook for Type Checking phase
+phpTypeHandlerMethod
+
+phpFixupHandler = hook for 'fixup' phase
+phpFixupHandlerMethod
+
+phpLoggerHandler = hook for logging phase
+phpLoggerHandlerMethod
+
+AddHandler php-script   =  set's up a special type handler
+phpResponseHandler  /path/to/file  = sets file to be called to handle 
+response phase
+phpResponseHandlerMethod Class::Method
+
+
+All handlers may be stacked, i.e. you can list multiple handler directives
+in a single scope and they will be run in order.
+
+
+EXAMPLES:
+
+So, to set up a 'hello world' location handler (so that any request to 
+/hello/* returns hello world) you can:
+
+phpRequire /tmp/setup.php
+<Location /hello>
+AddHandler php-script
+phpResponseHandlerMethod Hello::World
+</Location>
+
+with
+#/tmp/setup.php
+<?
+class Hello {
+         function World() {
+                 global $request;
+                 $request->send_http_header();
+                 echo "Hello World";
+         }
+}
+?>
+
+$request is the apache request.  It is instantiated at all stages 
+automatically.  The methods of that class are:
+
+getallheaders
+args
+boundary
+content_encoding
+content_type
+filename
+handler
+hostname
+method
+path_info
+protocol
+status_line
+the_request
+unparsed_uri
+uri
+allowed
+bytes_sent
+chunked
+content_length
+header_only
+method_number
+mtime
+no_cache
+no_local_copy
+proto_num
+proxyreq
+read_body
+remaining
+request_time
+status
+headers_in
+headers_out
+err_headers_out
+auth_name
+auth_type
+basic_auth_pw
+discard_request_body
+is_initial_req
+meets_conditions
+remote_host
+satisfies
+server_port
+set_etag
+set_last_modified
+some_auth_required
+update_mtime
+send_http_header
+basic_http_header
+send_header_field
+send_http_trace
+send_http_options
+send_error_response
+set_content_length
+set_keepalive
+rputs
+log_error
+lookup_uri
+lookup_file
+method_uri
+run
+internal_redirect
+
+
+These all wrap the ap_* apache EXPORT_API functions using the same 
+semantics (and are also the same as the Apache::Request methods in 
+mod_perl if you are familiar with that)
+
+So, a uri handler to redirect all non-local traffic to /404.php (an 
+error page) would be
+
+phpUriHandler  /tmp/uri.php
+
+#/tmp/uri.php
+<?
+        if($REMOTE_ADDR != '127.0.0.1') {
+                $request->uri('/404.php');
+        }
+        return OK;
+?>
+
+It's important to note that since this is called from the uri 
+translations phase, this validation is performed for every request to 
+the server, not just for php pages.
+
+Also, scope is shared between all the hooks.  So in the above, we could 
+merge the two and do something like:
+
+#/tmp/uri.php
+<?
+        if($REMOTE_ADDR != '127.0.0.1') {
+                $whoami = 'Stranger';
+        }
+        else {
+                $whoami = 'Friend';
+        }
+        return DECLINED;  # because we're not redirecting, just messing around
+?>
+
+and then:
+
+#/tmp/setup.php
+<?
+class Hello {
+         function World() {
+                 global $request;
+                 global $whoami;
+                 $request->send_http_header();
+                 echo "Hello $whoami";
+         }
+}
+?>
+
+These variables are also in the same scope as a script if your script is 
+being handled by the standard application/x-httpd-php handler.
+
+This allows you to make decisions and pass data between your handlers 
+and scripts at all stages.
+
+The above are clearly trite examples, but hopefully give you a starting 
+point.
+
+One note:  all handlers can be validly re-entered 'in sub-requests'.  
+For this reason you should not define functions/classes here without 
+anti-redefinition guards (I would just recommend putting them in an 
+include and using include_one).  This is not true for phpRequire, which 
+is only entered once, at the main request, and so it is safe to make 
+function/class declarations there (in fact that's what it's for).
+
+Hope that helps!
