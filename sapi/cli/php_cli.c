@@ -903,6 +903,7 @@ int main(int argc, char *argv[])
 		zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars TSRMLS_CC);
 		zend_llist_destroy(&global_vars);
 
+		PG(during_request_startup) = 0;
 		switch (behavior) {
 		case PHP_MODE_STANDARD:
 			if (strcmp(file_handle.filename, "-")) {
@@ -912,7 +913,6 @@ int main(int argc, char *argv[])
 			exit_status = EG(exit_status);
 			break;
 		case PHP_MODE_LINT:
-			PG(during_request_startup) = 0;
 			exit_status = php_lint_script(&file_handle TSRMLS_CC);
 			if (exit_status==SUCCESS) {
 				zend_printf("No syntax errors detected in %s\n", file_handle.filename);
