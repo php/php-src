@@ -115,6 +115,7 @@ zend_module_entry apache_module_entry = {
 PHP_FUNCTION(apache_child_terminate)
 {
 	APLS_FETCH();
+	SLS_FETCH();
 
 	if (AP(terminate_child)) {
 		ap_child_terminate( ((request_rec *)SG(server_context)) );
