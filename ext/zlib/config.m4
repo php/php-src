@@ -7,6 +7,13 @@ PHP_ARG_WITH(zlib,whether to include zlib support,
                           DIR is the zlib install directory,
                           defaults to /usr.])
 
+AC_DEFUN(AC_TEMP_LDFLAGS,[
+  old_LDFLAGS="$LDFLAGS"
+  LDFLAGS="$1 $LDFLAGS"
+  $2
+  LDFLAGS="$old_LDFLAGS"
+])
+
 if test "$PHP_ZLIB" != "no"; then
   PHP_EXTENSION(zlib, $ext_shared)
   for i in /usr/local /usr $PHP_ZLIB; do
@@ -25,15 +32,13 @@ if test "$PHP_ZLIB" != "no"; then
 
   ZLIB_LIBDIR=$ZLIB_DIR/lib
 
-  old_LDFLAGS="$LDFLAGS"
-  old_LIBS="$LIBS"
+  AC_TEMP_LDFLAGS(-L$ZLIB_LIBDIR,[
   AC_CHECK_LIB(z, gzgets, [AC_DEFINE(HAVE_ZLIB,1,[ ])],
     [AC_MSG_ERROR(Zlib module requires zlib >= 1.0.9.)])
-  LIBS="$old_LIBS"
-  LDFLAGS="$old_LDFLAGS"
+  ])
 
   PHP_SUBST(ZLIB_SHARED_LIBADD)
   AC_ADD_LIBRARY_WITH_PATH(z, $ZLIB_LIBDIR, ZLIB_SHARED_LIBADD)
   
-  AC_ADD_INCLUDE($ZLIB_INCLUDE)
+  AC_ADD_INCLUDE($ZLIB_INCDIR)
 fi
