@@ -205,6 +205,10 @@ user_dir		=					; the directory under which php opens the script using /~usernam
 ;upload_tmp_dir	=	                ; temporary directory for HTTP uploaded files (will use system default if not specified)
 upload_max_filesize = 2097152       ; 2 Meg default limit on file uploads
 extension_dir	=	./				; directory in which the loadable extensions (modules) reside
+enable_dl		= On				; Whether or not to enable the dl() function.
+									; The dl() function does NOT properly work in multithreaded
+									; servers, such as IIS or Zeus, and is automatically disabled
+									; on them.
 
 
 ;;;;;;;;;;;;;;;;;;;;;;
