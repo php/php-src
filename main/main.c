@@ -497,17 +497,19 @@ static void php_unset_timeout(void)
    Sets the maximum time a script can run */
 PHP_FUNCTION(set_time_limit)
 {
-	pval *new_timeout;
+	zval **new_timeout;
 	PLS_FETCH();
 
 	if (PG(safe_mode)) {
 		php_error(E_WARNING, "Cannot set time limit in safe mode");
 		RETURN_FALSE;
 	}
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &new_timeout) == FAILURE) {
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &new_timeout) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(new_timeout);
+
+	convert_to_long_ex(new_timeout);
 	/* FIXME ** This is BAD...in a threaded situation, any user
 	   can set the timeout for php on a server wide basis. 
 	   INI variables should not be reset via a user script
@@ -519,7 +521,7 @@ PHP_FUNCTION(set_time_limit)
 	   there no way to do per-thread timers on WIN32?
 	 */
 	php_unset_timeout();
-	php_set_timeout(new_timeout->value.lval);
+	php_set_timeout(Z_LVAL_PP(new_timeout));
 }
 /* }}} */
 
