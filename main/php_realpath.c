@@ -63,7 +63,7 @@ char *php_realpath(char *path, char resolved_path []) {
 	if ((*workpos == '\\') || (*workpos == '/')) {
 		/* We start at the root of the current drive */
 		/* Get the current directory */
-		if (getcwd(path_construction, MAXPATHLEN-1) == NULL) {
+		if (PHP_GETCWD(path_construction, MAXPATHLEN-1) == NULL) {
 			/* Unable to get cwd */
 			resolved_path[0] = 0;
 			return NULL;
@@ -79,7 +79,7 @@ char *php_realpath(char *path, char resolved_path []) {
 		workpos++;
 	} else {
 		/* Use the current directory */
-		if (getcwd(path_construction, MAXPATHLEN-1) == NULL) {
+		if (PHP_GETCWD(path_construction, MAXPATHLEN-1) == NULL) {
 			/* Unable to get cwd */
 			resolved_path[0] = 0;
 			return NULL;
@@ -94,7 +94,7 @@ char *php_realpath(char *path, char resolved_path []) {
 		workpos++;
 	} else {
 		/* Use the current directory */
-		if (getcwd(path_construction, MAXPATHLEN-1) == NULL) {
+		if (PHP_GETCWD(path_construction, MAXPATHLEN-1) == NULL) {
 			/* Unable to get cwd */
 			resolved_path[0] = 0;
 			return NULL;

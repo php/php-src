@@ -970,7 +970,7 @@ PHPAPI char *expand_filepath(char *filepath)
 	if (filepath[0] == '.') {
 		char *cwd = malloc(MAXPATHLEN + 1);
 
-		if (getcwd(cwd, MAXPATHLEN)) {
+		if (PHP_GETCWD(cwd, MAXPATHLEN)) {
 			char *cwd_end = cwd + strlen(cwd);
 
 			if (filepath[1] == '.') {	/* parent directory - .. */
