@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Fixed crash in OCIFetchStatement() when trying to read after
+  all data has already been read. (Thies)
+- fopen_wrappers() are now extensible via modules
 - Make trim strip \0 to match php 3 (Rasmus)
 - Added function imagecreatefromxbm(). (Jouni)
 - Added function imagewbmp(). (Jouni, based on patch from Rune Nordbøe Skillingstad)
