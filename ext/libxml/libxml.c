@@ -113,12 +113,24 @@ void *php_libxml_streams_IO_open_wrapper(const char *filename)
 	int file_exist;
 	php_stream_statbuf ssbuf;
 	php_stream_context *context = NULL;
+	php_stream_wrapper *wrapper = NULL;
+	char *path_to_open = NULL;
 
 	TSRMLS_FETCH();
 	xmlURIUnescapeString(filename, 0, resolved_path);
-	file_exist = _php_stream_stat_path((char *) resolved_path, &ssbuf TSRMLS_CC);
-	if (file_exist == -1) {
-		return NULL;
+	path_to_open = resolved_path;
+
+	/* logic copied from _php_stream_stat, but we only want to fail
+	   if the wrapper supports stat, otherwise, figure it out from
+	   the open.  This logic is only to support hiding warnings
+	   that the streams layer puts out at times, but for libxml we
+	   may try to open files that don't exist, but it is not a failure
+	   in xml processing (eg. DTD files)  */
+	wrapper = php_stream_locate_url_wrapper(resolved_path, &path_to_open, ENFORCE_SAFE_MODE TSRMLS_CC);
+	if (wrapper && wrapper->wops->url_stat) {
+		if (wrapper->wops->url_stat(wrapper, path_to_open, &ssbuf TSRMLS_CC) == -1) {
+			return NULL;
+		}
 	}
 
 	if (LIBXML(stream_context)) {
@@ -255,6 +267,11 @@ PHP_FUNCTION(libxml_set_streams_context)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
+	if (LIBXML(stream_context)) {
+		ZVAL_DELREF(LIBXML(stream_context));
+		LIBXML(stream_context) = NULL;
+	}
+	ZVAL_ADDREF(arg);
 	LIBXML(stream_context) = arg;
 }
 /* }}} */
