@@ -2,10 +2,17 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
 - Added html-free phpinfo() output for CLI. (Jan)
+- Made EXIF (digital camera) extension enabled by default. (Marcus)
 - Fixed socket_recvfrom() to be binary safe. (Jason)
+- Changed regression tests produce selectable error reports. The tests now
+  recognize environment variable TEST_PHP_LOG_FORMAT which can
+  contain O and E for old style .out and .exp files, L for new .log format and
+  D for an internal diff format that does not require systems diff. (Marcus)
 - Changed mail() to use escape_shell_cmd() to allow multiple extra parameters 
   to the invocation of the mailer as used in the fifth parameter. (Derick)
 - Changed cURL extension to require cURL version 7.9.8 (Derick)
+- Expanded ob_start() to allow object parameters without methodnames and
+  use default method __output_handler(). (Marcus)
 - Added zend_execute_internal which is called like zend_execute but for
   internal functions. (Thies)
 - Changed pg_connection_status(), pg_connection_reset(), pg_connection_busy(),
