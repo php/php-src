@@ -2,6 +2,7 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2003, Version 4.3.4
 - Made MCVE extension available on win32. (Jani)
+- Added apache_get_version() function. (Ilia)
 - Fixed disk_total_space() and disk_free_space() under FreeBSD. (Jon Parise)
 - Fixed crash bug when non-existing save/serializer handler was used. (Jani)
 - Fixed memory leak in gethostbynamel() if an error occurs. (Sara)
@@ -26,6 +27,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #25218 ("deflate" compressed pages had a gzip header). (Stefan)
 - Fixed bug #23326 (ext/domxml: Attributes via append_child not supported).
   (Melvyn)
+- Fixed bug #21220 (Wrong Apache version shown in phpinfo() output). (Jani)
 
 25 Aug 2003, Version 4.3.3
 - Upgraded the bundled Expat library to version 1.95.6. (Jani)
