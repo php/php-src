@@ -25,6 +25,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #22227 (printf() field limiters broke between 4.2.3 and 4.3.0).
   (Moriyoshi)
 - Fixed bug #22224 (implode() changes object references in array). (Moriyoshi)
+- Fixed bug #22221 (bad rows count in the result object for postgresql). (Marc)
 - Fixed bug #22207 (e notation in *printf would be missing a 0 when there is
   no exponent). (Ilia)
 - Fixed bug #22220 ("php_admin_value open_basedir none" does not work). (Jani)
