@@ -307,6 +307,8 @@ void php_print_credits(int flag)
 		PUTS("<table border=5 width=\"600\">\n");
 		PUTS("<tr><th colspan=\"2\" bgcolor=\"" PHP_HEADER_COLOR "\">PHP 4.0 Authors</th></tr>\n");
 		php_info_print_table_header(2, "Contribution", "Authors");
+		CREDIT_LINE("PHP Group", "Thies C. Arntzen, Stig Bakken, Andi Gutmans, Rasmus Lerdorf, \
+					Sascha Schumann, Zeev Suraski, Jim Winstead, Andrei Zmievski");
 		CREDIT_LINE("Zend Scripting Language Engine", "Andi Gutmans, Zeev Suraski");
 		CREDIT_LINE("Extension Module API", "Andi Gutmans, Zeev Suraski");
 		CREDIT_LINE("UNIX Build and Modularization", "Stig Bakken, Sascha Schumann");
@@ -319,9 +321,6 @@ void php_print_credits(int flag)
 		CREDIT_LINE("Servlet SAPI Module", "Sam Ruby");
 		CREDIT_LINE("Roxen SAPI Module", "David Hedbor");
 		CREDIT_LINE("thttpd SAPI Module", "Sascha Schumann");
-		CREDIT_LINE("Overall Work", "Thies C. Arntzen, Stig Bakken, Shane Caraveo, \
-					Rasmus Lerdorf, Sascha Schumann, Zeev Suraski, Andrei Zmievski, \
-					and others");
 		PUTS("</table>\n");
 	}
 
