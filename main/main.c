@@ -105,6 +105,7 @@ static int short_track_vars_names_length[] = {
 	sizeof("_FILES")
 };
 
+#define NUM_TRACK_VARS		(sizeof(short_track_vars_names_length)/sizeof(int))
 
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
@@ -718,6 +719,15 @@ void php_request_shutdown(void *dummy)
 	if (PG(modules_activated)) {
 		zend_deactivate_modules(TSRMLS_C);
 	}
+
+	zend_try {
+		int i;
+
+		for (i=0; i<NUM_TRACK_VARS; i++) {
+			zval_ptr_dtor(&PG(http_globals)[i]);
+		}
+	} zend_end_try();
+
 		
 	zend_deactivate(TSRMLS_C);
 
@@ -891,7 +901,7 @@ int php_module_startup(sapi_module_struct *sf)
 	}
 
 	zuv.import_use_extension = ".php";
-	for (i=0; i<6; i++) {
+	for (i=0; i<NUM_TRACK_VARS; i++) {
 		zend_register_auto_global(short_track_vars_names[i], short_track_vars_names_length[i]-1 TSRMLS_CC);
 	}
 	zend_register_auto_global("_REQUEST", sizeof("_REQUEST")-1 TSRMLS_CC);
@@ -1057,7 +1067,7 @@ static int php_hash_environment(TSRMLS_D)
 	};
 
 
-	for (i=0; i<6; i++) {
+	for (i=0; i<NUM_TRACK_VARS; i++) {
 		PG(http_globals)[i] = NULL;
 	}
 
@@ -1118,7 +1128,7 @@ static int php_hash_environment(TSRMLS_D)
 		php_register_server_variables(TSRMLS_C);
 	}
 
-	for (i=0; i<6; i++) {
+	for (i=0; i<NUM_TRACK_VARS; i++) {
 		if (!PG(http_globals)[i]) {
 			if (!initialized_dummy_track_vars_array) {
 				ALLOC_ZVAL(dummy_track_vars_array);
@@ -1133,6 +1143,7 @@ static int php_hash_environment(TSRMLS_D)
 		zend_hash_update(&EG(symbol_table), track_vars_names[i], track_vars_names_length[i], &PG(http_globals)[i], sizeof(zval *), NULL);
 		PG(http_globals)[i]->refcount++;
 		zend_hash_update(&EG(symbol_table), short_track_vars_names[i], short_track_vars_names_length[i], &PG(http_globals)[i], sizeof(zval *), NULL);
+		PG(http_globals)[i]->refcount++;
 	}
 
 	{

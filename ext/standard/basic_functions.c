@@ -371,6 +371,7 @@ function_entry basic_functions[] = {
 	PHP_FE(is_object,								NULL)
     PHP_FE(is_scalar,                               NULL)
 	PHP_FE(is_callable,								third_arg_force_ref)
+	PHP_FE(import_request_variables,				NULL)
 
 	PHP_FE(error_log,								NULL)
 	PHP_FE(call_user_func,							NULL)
@@ -2610,6 +2611,90 @@ PHP_FUNCTION(is_callable)
 	RETURN_BOOL(retval);
 }
 /* }}} */
+
+
+static int copy_request_variable(void *pDest, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	char *prefix, *new_key;
+	uint prefix_len, new_key_len;
+	zval **var = (zval **) pDest;
+	TSRMLS_FETCH();
+
+	if (num_args!=2) {
+		return 0;
+	}
+
+	prefix = va_arg(args, char *);
+	prefix_len = va_arg(args, uint);
+
+	new_key_len = prefix_len + hash_key->nKeyLength;
+	new_key = (char *) emalloc(new_key_len);
+
+	memcpy(new_key, prefix, prefix_len);
+	memcpy(new_key+prefix_len, hash_key->arKey, hash_key->nKeyLength);
+
+	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), new_key, new_key_len, *var, 0, 1);
+
+	efree(new_key);
+
+	return 0;
+}
+
+
+/* {{{ proto bool import_request_variables(string types, string prefix)
+   Import GET/POST/Cookie variables into the global scope */
+PHP_FUNCTION(import_request_variables)
+{
+	zval **z_types, **z_prefix;
+	char *types, *prefix;
+	uint prefix_len;
+	char *p;
+
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &z_types)==FAILURE) {
+				RETURN_FALSE;
+			}
+			prefix = "";
+			prefix_len = 0;
+			break;
+		case 2:
+			if (zend_get_parameters_ex(2, &z_types, &z_prefix)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_string_ex(z_prefix);
+			prefix = Z_STRVAL_PP(z_prefix);
+			prefix_len = Z_STRLEN_PP(z_prefix);
+			break;
+		default:
+			ZEND_WRONG_PARAM_COUNT();
+	}
+
+	if (prefix_len==0) {
+		zend_error(E_NOTICE, "No prefix specified in %s() - possible security hazard", get_active_function_name(TSRMLS_C));
+	}
+
+	convert_to_string_ex(z_types);
+	types = Z_STRVAL_PP(z_types);
+
+	for (p=types; p && *p; p++) {
+		switch (*p) {
+			case 'g':
+			case 'G':
+				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]), (apply_func_args_t) copy_request_variable, 2, prefix, prefix_len);
+				break;
+			case 'p':
+			case 'P':
+				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]), (apply_func_args_t) copy_request_variable, 2, prefix, prefix_len);
+				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_FILES]), (apply_func_args_t) copy_request_variable, 2, prefix, prefix_len);
+				break;
+			case 'c':
+			case 'C':
+				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), (apply_func_args_t) copy_request_variable, 2, prefix, prefix_len);
+				break;
+		}
+	}
+}
 
 
 /*
