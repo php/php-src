@@ -1,3 +1,209 @@
+2004-03-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/acconfig.h
+      ext/standard/config.m4:
+      NAN==NAN doest work (Ard)
+
+2004-03-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/tests/time/bug27719.phpt:
+      MFH: Removed extra spaces that cause the test to fail.
+
+    * ext/standard/tests/time/bug27719.phpt:
+      Removed extra spaces that cause the test to fail.
+
+2004-03-29  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * php.ini-dist
+      php.ini-recommended
+      ext/session/mod_files.c
+      ext/session/session.c
+      main/php_open_temporary_file.c
+      main/php_open_temporary_file.h:
+      Fix for Bug #26757: session.save_path defaults to bogus value on win32
+      Merge from branch with one main difference: the default save_path is
+      set to the empty string on all platforms, whereas the code in the
+      branch only does so for win32.
+
+    * (PHP_4_3)
+      php.ini-dist
+      php.ini-recommended
+      ext/session/mod_files.c
+      ext/session/session.c
+      main/php_open_temporary_file.c
+      main/php_open_temporary_file.h:
+      Fix for Bug #26757: session.save_path default is bogus for win32
+      Based on a patch found in the bug report.
+      Concept approved by Ilia.
+
+2004-03-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dom/namednodemap.c:
+      DOM_RET_OBJ for return_value needs to be followed by return
+
+    * ext/dom/tests/dom001.phpt:
+      Remove debug code
+
+    * ext/dom/tests/dom001.phpt
+      ext/dom/tests/dom003.phpt
+      ext/dom/tests/dom006.phpt:
+      Fix tests
+
+2004-03-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dom/namednodemap.c
+      ext/dom/nodelist.c
+      ext/openssl/openssl.c:
+      Fixed compiler warnings.
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+2004-03-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dom/php_dom.c
+      ext/ming/ming.c
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/001.phpt
+      ext/simplexml/tests/002.phpt
+      ext/simplexml/tests/003.phpt
+      ext/simplexml/tests/004.phpt
+      ext/simplexml/tests/007.phpt
+      ext/simplexml/tests/008.phpt
+      ext/simplexml/tests/009.phpt
+      ext/simplexml/tests/010.phpt
+      ext/simplexml/tests/014.phpt
+      ext/simplexml/tests/014a.phpt
+      ext/simplexml/tests/014b.phpt
+      ext/simplexml/tests/015.phpt
+      ext/simplexml/tests/016.phpt
+      ext/sqlite/sqlite.c
+      ext/sqlite/tests/blankdb_oo.inc
+      ext/sqlite/tests/sqlite_oo_001.phpt
+      ext/sqlite/tests/sqlite_oo_002.phpt
+      ext/sqlite/tests/sqlite_oo_014.phpt
+      ext/sqlite/tests/sqlite_oo_020.phpt
+      ext/sqlite/tests/sqlite_oo_021.phpt
+      ext/sqlite/tests/sqlite_oo_022.phpt:
+      Fix class names
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c
+      ext/standard/config.m4
+      main/config.w32.h:
+      MFH: Found a NAN/INF solution that should be portable everywhere(?)
+
+    * ext/standard/basic_functions.c
+      ext/standard/config.m4:
+      Found a NAN/INF solution that should be portable everywhere(?) (Ard,Marcus)
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Allow mixed case search for extensions
+
+2004-03-29  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_4_3)
+      ext/mssql/php_mssql.c:
+      MFH: Fix for #27743. Make sure Money types are converted and returned
+      correct
+
+    * ext/mssql/php_mssql.c:
+      Fix for #27743. Make sure Money types are converted and returned correct
+
+2004-03-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/gd.c
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_gd.c
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_io_dp.c
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_wbmp.c
+      ext/gd/libgd/gdfontg.c
+      ext/gd/libgd/gdfontg.h
+      ext/gd/libgd/gdfontl.c
+      ext/gd/libgd/gdfontl.h
+      ext/gd/libgd/gdfontmb.c
+      ext/gd/libgd/gdfontmb.h
+      ext/gd/libgd/gdfonts.c
+      ext/gd/libgd/gdfonts.h
+      ext/gd/libgd/gdfontt.c
+      ext/gd/libgd/gdfontt.h
+      ext/gd/libgd/gdft.c:
+      MFH: Synchronized bundled GD library with GD 2.0.22.
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_gd.c
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_io_dp.c
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_wbmp.c
+      ext/gd/libgd/gdfontg.c
+      ext/gd/libgd/gdfontg.h
+      ext/gd/libgd/gdfontl.c
+      ext/gd/libgd/gdfontl.h
+      ext/gd/libgd/gdfontmb.c
+      ext/gd/libgd/gdfontmb.h
+      ext/gd/libgd/gdfonts.c
+      ext/gd/libgd/gdfonts.h
+      ext/gd/libgd/gdfontt.c
+      ext/gd/libgd/gdfontt.h
+      ext/gd/libgd/gdft.c:
+      Synchronized bundled GD library with GD 2.0.22.
+
+2004-03-29  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/zend_execute.c:
+      -clonning+cloning
+
+2004-03-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      Implicit clonning strict warning was added for ze1_compatibility_mode
+
+2004-03-29  Jan Lehnardt  <jan@dasmoped.net>
+
+    * run-tests.php:
+       - be more verbose
+
+2004-03-29  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/xml/tests/bug26614.phpt:
+      Test updated to test for additional libxml2/expat inconsistencies
+
+2004-03-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      Zend/zend_execute.c
+      tests/lang/bug27731.phpt
+      tests/lang/bug27731.phpt:
+      MFH: Fixed bug #27731 (error_reporting() inside @ block fails to set
+      error_reporting level).
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug27731.phpt:
+      Fixed bug #27731 (error_reporting() inside @ block fails to set
+      error_reporting level).
+
+    * (PHP_4_3)
+      ext/standard/datetime.h:
+      Fixed build.
+
+    * (PHP_4_3)
+      NEWS
+      ext/xslt/config.m4:
+      Fixed bug #27732 (Fixed compilation bug inside php_sab_info.h).
+
 2004-03-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_API.c:

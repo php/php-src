@@ -1,3 +1,28 @@
+2004-03-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * acconfig.h:
+      NAN==NAN doest work (Ard)
+
+    * zend_builtin_functions.c:
+      Allow mixed case search for extensions
+
+2004-03-29  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_execute.c:
+      -clonning+cloning
+
+2004-03-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c:
+      Implicit clonning strict warning was added for ze1_compatibility_mode
+
+2004-03-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_execute.c
+      tests/bug27731.phpt:
+      Fixed bug #27731 (error_reporting() inside @ block fails to set
+      error_reporting level).
+
 2004-03-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c:
