@@ -644,7 +644,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 
 		/* prepare the new element */
 		overloaded_element.element = *get_zval_ptr(op2, Ts, &free_op2, type);
-		overloaded_element.type = IS_ARRAY;
+		overloaded_element.type = OE_IS_ARRAY;
 		if (!free_op2) {
 			zval_copy_ctor(&overloaded_element.element);
 		}
@@ -802,7 +802,7 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 		}
 
 		overloaded_element.element = *get_zval_ptr(op2, Ts, &free_op2, type);
-		overloaded_element.type = IS_OBJECT;
+		overloaded_element.type = OE_IS_OBJECT;
 		if (!free_op2) {
 			zval_copy_ctor(&overloaded_element.element);
 		}
@@ -832,7 +832,7 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 		property_reference.type = type;
 		zend_llist_init(&property_reference.elements_list, sizeof(zend_overloaded_element), NULL, 0);
 		overloaded_element.element = *get_zval_ptr(op2, Ts, &free_op2, type);
-		overloaded_element.type = IS_OBJECT;
+		overloaded_element.type = OE_IS_OBJECT;
 		if (!free_op2) {
 			zval_copy_ctor(&overloaded_element.element);
 		}
@@ -1459,7 +1459,7 @@ binary_assign_op_addr: {
 								zend_property_reference *property_reference;
 
 								overloaded_element.element = *function_name;
-								overloaded_element.type = IS_METHOD;
+								overloaded_element.type = OE_IS_METHOD;
 
 								if (object.ptr) {
 									zend_property_reference property_reference;
