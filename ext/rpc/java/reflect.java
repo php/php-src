@@ -136,7 +136,7 @@ public class reflect {
       }
 
       Object coercedArgs[] = coerce(selected.getParameterTypes(), args);
-      setResult(result, selected.newInstance(coercedArgs));
+      setResultFromObject(result, selected.newInstance(coercedArgs));
 
     } catch (Exception e) {
       setException(result, e);
