@@ -62,7 +62,7 @@
  * while extending the module as it shows if you are at the right position.
  * You are always considered to have a copy of TIFF6.0 and EXIF 2.10 standard.
  */
-#define EXIF_DEBUG
+/* #define EXIF_DEBUG /**/
 
 #include "php_exif.h"
 #include <math.h>
@@ -393,135 +393,146 @@ static void exif_process_SOFn (image_info_type *ImageInfo, uchar *Data, int mark
 static int php_tiff_bytes_per_format[] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
 #define NUM_FORMATS 12
 
-#define FMT_BYTE       1
-#define FMT_STRING     2
-#define FMT_USHORT     3
-#define FMT_ULONG      4
-#define FMT_URATIONAL  5
-#define FMT_SBYTE      6
-#define FMT_UNDEFINED  7
-#define FMT_SSHORT     8
-#define FMT_SLONG      9
-#define FMT_SRATIONAL 10
-#define FMT_SINGLE    11
-#define FMT_DOUBLE    12
+#define TAG_FMT_BYTE       1
+#define TAG_FMT_STRING     2
+#define TAG_FMT_USHORT     3
+#define TAG_FMT_ULONG      4
+#define TAG_FMT_URATIONAL  5
+#define TAG_FMT_SBYTE      6
+#define TAG_FMT_UNDEFINED  7
+#define TAG_FMT_SSHORT     8
+#define TAG_FMT_SLONG      9
+#define TAG_FMT_SRATIONAL 10
+#define TAG_FMT_SINGLE    11
+#define TAG_FMT_DOUBLE    12
 
 /*
    Describes tag values
 */
 
-#define TAG_TIFF_COMMENT            0x00FE
-#define TAG_NEW_SUBFILE             0x00FE
-#define TAG_SUBFILE_TYPE            0x00FF
+#define TAG_TIFF_COMMENT               0x00FE
+#define TAG_NEW_SUBFILE                0x00FE
+#define TAG_SUBFILE_TYPE               0x00FF
 
-#define TAG_IMAGEWIDTH              0x0100
-#define TAG_IMAGEHEIGHT             0x0101
-#define TAG_BITS_PER_SAMPLE         0x0102
-#define TAG_COMPRESSION             0x0103
-#define TAG_PHOTOMETRIC_INTEROP     0x0106
-#define TAG_TRESHHOLDING            0x0107
-#define TAG_CELL_WIDTH              0x0108
-#define TAG_CELL_HEIGHT             0x0109
-#define TAG_FILL_ORDER              0x010A
-#define TAG_DOCUMENT_NAME           0x010D
-#define TAG_IMAGE_DESCRIPTION       0x010E
-#define TAG_MAKE                    0x010F
-#define TAG_MODEL                   0x0110
-#define TAG_STRIP_OFFSETS           0x0111
-#define TAG_ORIENTATION             0x0112
-#define TAG_SAMPLES_PER_PIXEL       0x0115
-#define TAG_ROWS_PER_STRIP          0x0116
-#define TAG_STRIP_BYTE_COUNTS       0x0117
-#define TAG_MIN_SAMPPLE_VALUE       0x0118
-#define TAG_MAX_SAMPLE_VALUE        0x0119
-#define TAG_X_RESOLUTION            0x011A
-#define TAG_Y_RESOLUTION            0x011B
-#define TAG_PLANAR_CONFIGURATION    0x011C
-#define TAG_PAGE_NAME               0x011D
-#define TAG_X_POSITION              0x011E
-#define TAG_Y_POSITION              0x011F
-#define TAG_FREE_OFFSETS            0x0120
-#define TAG_FREE_BYTE_COUNTS        0x0121
-#define TAG_GRAY_RESPONSE_UNIT      0x0122
-#define TAG_GRAY_RESPONSE_CURVE     0x0123
-#define TAG_RESOLUTION_UNIT         0x0128
-#define TAG_PAGE_NUMBER             0x0129
-#define TAG_TRANSFER_FUNCTION       0x012D
-#define TAG_SOFTWARE                0x0131
-#define TAG_DATETIME                0x0132
-#define TAG_ARTIST                  0x013B
-#define TAG_HOST_COMPUTER           0x013C
-#define TAG_PREDICATOR              0x013D
-#define TAG_WHITE_POINT             0x013E
-#define TAG_PRIMARY_CHROMATICITIES  0x013F
-#define TAG_COLOR_MAP               0x0140
-#define TAG_HALFTONE_HINTS          0x0141
-#define TAG_TILE_WIDTH              0x0142
-#define TAG_TILE_LENGTH             0x0143
-#define TAG_TILE_OFFSETS            0x0144
-#define TAG_TILE_BYTE_COUNTS        0x0145
-#define TAG_INK_SETMPUTER           0x014C
-#define TAG_NUMBER_OF_INKS          0x014E
-#define TAG_INK_NAMES               0x014D
-#define TAG_DOT_RANGE               0x0150
-#define TAG_TARGET_PRINTER          0x0151
-#define TAG_EXTRA_SAMPLE            0x0152
-#define TAG_SAMPLE_FORMAT           0x0153
-#define TAG_S_MIN_SAMPLE_VALUE      0x0154
-#define TAG_S_MAX_SAMPLE_VALUE      0x0155
-#define TAG_TRANSFER_RANGE          0x0156
+#define TAG_IMAGEWIDTH                 0x0100
+#define TAG_IMAGEHEIGHT                0x0101
+#define TAG_BITS_PER_SAMPLE            0x0102
+#define TAG_COMPRESSION                0x0103
+#define TAG_PHOTOMETRIC_INTERPRETATION 0x0106
+#define TAG_TRESHHOLDING               0x0107
+#define TAG_CELL_WIDTH                 0x0108
+#define TAG_CELL_HEIGHT                0x0109
+#define TAG_FILL_ORDER                 0x010A
+#define TAG_DOCUMENT_NAME              0x010D
+#define TAG_IMAGE_DESCRIPTION          0x010E
+#define TAG_MAKE                       0x010F
+#define TAG_MODEL                      0x0110
+#define TAG_STRIP_OFFSETS              0x0111
+#define TAG_ORIENTATION                0x0112
+#define TAG_SAMPLES_PER_PIXEL          0x0115
+#define TAG_ROWS_PER_STRIP             0x0116
+#define TAG_STRIP_BYTE_COUNTS          0x0117
+#define TAG_MIN_SAMPPLE_VALUE          0x0118
+#define TAG_MAX_SAMPLE_VALUE           0x0119
+#define TAG_X_RESOLUTION               0x011A
+#define TAG_Y_RESOLUTION               0x011B
+#define TAG_PLANAR_CONFIGURATION       0x011C
+#define TAG_PAGE_NAME                  0x011D
+#define TAG_X_POSITION                 0x011E
+#define TAG_Y_POSITION                 0x011F
+#define TAG_FREE_OFFSETS               0x0120
+#define TAG_FREE_BYTE_COUNTS           0x0121
+#define TAG_GRAY_RESPONSE_UNIT         0x0122
+#define TAG_GRAY_RESPONSE_CURVE        0x0123
+#define TAG_RESOLUTION_UNIT            0x0128
+#define TAG_PAGE_NUMBER                0x0129
+#define TAG_TRANSFER_FUNCTION          0x012D
+#define TAG_SOFTWARE                   0x0131
+#define TAG_DATETIME                   0x0132
+#define TAG_ARTIST                     0x013B
+#define TAG_HOST_COMPUTER              0x013C
+#define TAG_PREDICATOR                 0x013D
+#define TAG_WHITE_POINT                0x013E
+#define TAG_PRIMARY_CHROMATICITIES     0x013F
+#define TAG_COLOR_MAP                  0x0140
+#define TAG_HALFTONE_HINTS             0x0141
+#define TAG_TILE_WIDTH                 0x0142
+#define TAG_TILE_LENGTH                0x0143
+#define TAG_TILE_OFFSETS               0x0144
+#define TAG_TILE_BYTE_COUNTS           0x0145
+#define TAG_INK_SETMPUTER              0x014C
+#define TAG_NUMBER_OF_INKS             0x014E
+#define TAG_INK_NAMES                  0x014D
+#define TAG_DOT_RANGE                  0x0150
+#define TAG_TARGET_PRINTER             0x0151
+#define TAG_EXTRA_SAMPLE               0x0152
+#define TAG_SAMPLE_FORMAT              0x0153
+#define TAG_S_MIN_SAMPLE_VALUE         0x0154
+#define TAG_S_MAX_SAMPLE_VALUE         0x0155
+#define TAG_TRANSFER_RANGE             0x0156
 
-#define TAG_JPEG_PROC               0x0200
-#define TAG_JPEG_INTERCHANGE_FORMAT 0x0201
-#define TAG_JPEG_INTERCHANGE_F_LEN  0x0202
-#define TAG_JPEG_RESTART_INTERVAL   0x0203
-#define TAG_JPEG_LOSSLESS_PREDICTOR 0x0205
-#define TAG_JPEG_POINT_TRANSFORMS   0x0206
-#define TAG_JPEG_Q_TABLES           0x0207
-#define TAG_JPEG_DC_TABLES          0x0208
-#define TAG_JPEG_AC_TABLES          0x0209
-#define TAG_YCC_COEFFICIENTS        0x0211
-#define TAG_YCC_SUB_SAMPLING        0x0212
-#define TAG_YCC_POSITIONING         0x0213
-#define TAG_REFERENCE_BLACK_WHITE   0x0214
+#define TAG_JPEG_PROC                  0x0200
+#define TAG_JPEG_INTERCHANGE_FORMAT    0x0201
+#define TAG_JPEG_INTERCHANGE_F_LEN     0x0202
+#define TAG_JPEG_RESTART_INTERVAL      0x0203
+#define TAG_JPEG_LOSSLESS_PREDICTOR    0x0205
+#define TAG_JPEG_POINT_TRANSFORMS      0x0206
+#define TAG_JPEG_Q_TABLES              0x0207
+#define TAG_JPEG_DC_TABLES             0x0208
+#define TAG_JPEG_AC_TABLES             0x0209
+#define TAG_YCC_COEFFICIENTS           0x0211
+#define TAG_YCC_SUB_SAMPLING           0x0212
+#define TAG_YCC_POSITIONING            0x0213
+#define TAG_REFERENCE_BLACK_WHITE      0x0214
 
 /* Olympus specific tags */
-#define TAG_SPECIALMODE             0x0200
-#define TAG_JPEGQUAL                0x0201
-#define TAG_MACRO                   0x0202
-#define TAG_DIGIZOOM                0x0204
-#define TAG_SOFTWARERELEASE         0x0207
-#define TAG_PICTINFO                0x0208
-#define TAG_CAMERAID                0x0209
+#define TAG_SPECIALMODE                0x0200
+#define TAG_JPEGQUAL                   0x0201
+#define TAG_MACRO                      0x0202
+#define TAG_DIGIZOOM                   0x0204
+#define TAG_SOFTWARERELEASE            0x0207
+#define TAG_PICTINFO                   0x0208
+#define TAG_CAMERAID                   0x0209
 /* end Olympus specific tags */
 
-#define TAG_COPYRIGHT               0x8298
-#define TAG_EXPOSURETIME            0x829A
-#define TAG_FNUMBER                 0x829D
-#define TAG_EXIF_IFD_POINTER        0x8769
-#define TAG_GPS_IFD_POINTER         0x8825
-#define TAG_ISOSPEED                0x8827
+#define TAG_COPYRIGHT                  0x8298
+#define TAG_EXPOSURETIME               0x829A
+#define TAG_FNUMBER                    0x829D
+#define TAG_EXIF_IFD_POINTER           0x8769
+#define TAG_GPS_IFD_POINTER            0x8825
+#define TAG_ISOSPEED                   0x8827
 
-#define TAG_EXIFVERSION             0x9000
-#define TAG_SHUTTERSPEED            0x9201
-#define TAG_APERTURE                0x9202
-#define TAG_DATETIME_ORIGINAL       0x9003
-#define TAG_MAXAPERTURE             0x9205
-#define TAG_SUBJECT_DISTANCE        0x9206
-#define TAG_LIGHT_SOURCE            0x9208
-#define TAG_FLASH                   0x9209
-#define TAG_FOCALLENGTH             0x920A
-#define TAG_MARKER_NOTE				0x927C
-#define TAG_USERCOMMENT             0x9286
+#define TAG_EXIFVERSION                0x9000
+#define TAG_SHUTTERSPEED               0x9201
+#define TAG_APERTURE                   0x9202
+#define TAG_DATETIME_ORIGINAL          0x9003
+#define TAG_MAXAPERTURE                0x9205
+#define TAG_SUBJECT_DISTANCE           0x9206
+#define TAG_LIGHT_SOURCE               0x9208
+#define TAG_FLASH                      0x9209
+#define TAG_FOCALLENGTH                0x920A
+#define TAG_MARKER_NOTE				   0x927C
+#define TAG_USERCOMMENT                0x9286
 
 
-#define TAG_FLASH_PIX_VERSION       0xA000
-#define TAG_COLOR_SPACE             0xA001
-#define TAG_COMP_IMAGEWIDTH         0xA002 /* compressed images only */
-#define TAG_COMP_IMAGEHEIGHT        0xA003
-#define TAG_INTEROP_IFD_POINTER     0xA005 /* IFD pointer */
-#define TAG_FOCALPLANEXRES          0xA20E
-#define TAG_FOCALPLANEUNITS         0xA210
+#define TAG_FLASH_PIX_VERSION          0xA000
+#define TAG_COLOR_SPACE                0xA001
+#define TAG_COMP_IMAGEWIDTH            0xA002 /* compressed images only */
+#define TAG_COMP_IMAGEHEIGHT           0xA003
+#define TAG_INTEROP_IFD_POINTER        0xA005 /* IFD pointer */
+#define TAG_FOCALPLANEXRES             0xA20E
+#define TAG_FOCALPLANEUNITS            0xA210
+
+/*
+ */
+#define PMI_BLACK_IS_ZERO	    0
+#define PMI_WHITE_IS_ZERO	    1
+#define PMI_RGB          	    2
+#define PMI_PALETTE_COLOR	    3
+#define PMI_TRANSPARENCY_MASK   4
+#define PMI_SEPARATED           5
+#define PMI_YCBCR               6
+#define PMI_CIELAB              8
 
 /* }}} */
 
@@ -721,9 +732,17 @@ static int php_ifd_get16u(void *Short, int MotorolaOrder)
 }
 /* }}} */
 
-/* {{{ php_ifd_getexif_get32s
+/* {{{ php_ifd_get16s
+ * Convert a 16 bit signed value from file's native byte order */
+static signed short php_ifd_get16s(void *Short, int motorola_intel)
+{
+	return (signed short)php_ifd_get16u(Short, motorola_intel);
+}
+/* }}} */
+
+/* {{{ php_ifd_get32s
  * Convert a 32 bit signed value from file's native byte order */
-static int php_ifd_getexif_get32s(void *Long, int MotorolaOrder)
+static int php_ifd_get32s(void *Long, int MotorolaOrder)
 {
 	if (MotorolaOrder) {
 		return  ((( char *)Long)[0] << 24) | (((uchar *)Long)[1] << 16)
@@ -735,11 +754,11 @@ static int php_ifd_getexif_get32s(void *Long, int MotorolaOrder)
 }
 /* }}} */
 
-/* {{{ php_ifd_getexif_get32u
+/* {{{ php_ifd_get32u
  * Convert a 32 bit unsigned value from file's native byte order */
-static unsigned php_ifd_getexif_get32u(void *Long, int MotorolaOrder)
+static unsigned php_ifd_get32u(void *Long, int MotorolaOrder)
 {
-	return (unsigned)php_ifd_getexif_get32s(Long, MotorolaOrder) & 0xffffffff;
+	return (unsigned)php_ifd_get32s(Long, MotorolaOrder) & 0xffffffff;
 }
 /* }}} */
 
@@ -751,19 +770,19 @@ static double exif_convert_any_format(void *ValuePtr, int Format, int MotorolaOr
 	Value = 0;
 
 	switch(Format) {
-		case FMT_SBYTE:     Value = *(signed char *)ValuePtr;  break;
-		case FMT_BYTE:      Value = *(uchar *)ValuePtr;        break;
+		case TAG_FMT_SBYTE:     Value = *(signed char *)ValuePtr;  break;
+		case TAG_FMT_BYTE:      Value = *(uchar *)ValuePtr;        break;
 
-		case FMT_USHORT:    Value = php_ifd_get16u(ValuePtr, MotorolaOrder);          break;
-		case FMT_ULONG:     Value = php_ifd_getexif_get32u(ValuePtr, MotorolaOrder);          break;
+		case TAG_FMT_USHORT:    Value = php_ifd_get16u(ValuePtr, MotorolaOrder);          break;
+		case TAG_FMT_ULONG:     Value = php_ifd_get32u(ValuePtr, MotorolaOrder);          break;
 
-		case FMT_URATIONAL:
-		case FMT_SRATIONAL:
+		case TAG_FMT_URATIONAL:
+		case TAG_FMT_SRATIONAL:
 			{
 				int Num, Den;
 
-				Num = php_ifd_getexif_get32s(ValuePtr, MotorolaOrder);
-				Den = php_ifd_getexif_get32s(4+(char *)ValuePtr, MotorolaOrder);
+				Num = php_ifd_get32s(ValuePtr, MotorolaOrder);
+				Den = php_ifd_get32s(4+(char *)ValuePtr, MotorolaOrder);
 				if (Den == 0) {
 					Value = 0;
 				} else {
@@ -772,12 +791,12 @@ static double exif_convert_any_format(void *ValuePtr, int Format, int MotorolaOr
 				break;
 			}
 
-		case FMT_SSHORT:    Value = (signed short)php_ifd_get16u(ValuePtr, MotorolaOrder);  break;
-		case FMT_SLONG:     Value = php_ifd_getexif_get32s(ValuePtr, MotorolaOrder);                break;
+		case TAG_FMT_SSHORT:    Value = (signed short)php_ifd_get16u(ValuePtr, MotorolaOrder);  break;
+		case TAG_FMT_SLONG:     Value = php_ifd_get32s(ValuePtr, MotorolaOrder);                break;
 
 		/* Not sure if this is correct (never seen float used in Exif format) */
-		case FMT_SINGLE:    Value = (double)*(float *)ValuePtr;      break;
-		case FMT_DOUBLE:    Value = *(double *)ValuePtr;             break;
+		case TAG_FMT_SINGLE:    Value = (double)*(float *)ValuePtr;      break;
+		case TAG_FMT_DOUBLE:    Value = *(double *)ValuePtr;             break;
 	}
 	return Value;
 }
@@ -946,7 +965,7 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *DirEntry, cha
 
 	Tag = php_ifd_get16u(DirEntry, ImageInfo->MotorolaOrder);
 	Format = php_ifd_get16u(DirEntry+2, ImageInfo->MotorolaOrder);
-	Components = php_ifd_getexif_get32u(DirEntry+4, ImageInfo->MotorolaOrder);
+	Components = php_ifd_get32u(DirEntry+4, ImageInfo->MotorolaOrder);
 
 	if ((Format-1) >= NUM_FORMATS) {
 		/* (-1) catches illegal zero case as unsigned underflows to positive large. */
@@ -957,7 +976,7 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *DirEntry, cha
 	ByteCount = Components * php_tiff_bytes_per_format[Format];
 
 	if (ByteCount > 4) {
-		OffsetVal = php_ifd_getexif_get32u(DirEntry+8, ImageInfo->MotorolaOrder);
+		OffsetVal = php_ifd_get32u(DirEntry+8, ImageInfo->MotorolaOrder);
 		/* If its bigger than 4 bytes, the dir entry contains an offset. */
 		if (OffsetVal+ByteCount > IFDlength) {
 			/* Bogus pointer offset and / or bytecount value */
@@ -972,7 +991,7 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *DirEntry, cha
 
 	/* Extract useful components of IFD */
 	#ifdef EXIF_DEBUG
-	php_error(E_NOTICE,"process tag(x%04x=%s,@x%04X+%i): %s", Tag, exif_get_headername(Tag), ValuePtr-OffsetBase, ByteCount, Format==FMT_STRING?(ValuePtr?ValuePtr:"<no data>"):"<no string>");
+	php_error(E_NOTICE,"process tag(x%04x=%s,@x%04X+%i): %s", Tag, exif_get_headername(Tag), ValuePtr-OffsetBase, ByteCount, Format==TAG_FMT_STRING?(ValuePtr?ValuePtr:"<no data>"):"<no string>");
 	#endif
 	switch(Tag) {
 		case TAG_MAKE:
@@ -1036,7 +1055,7 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *DirEntry, cha
 
 		case TAG_TIFF_COMMENT:
 			/* this is only a comment if type is string! */
-			if (Format == FMT_STRING) {
+			if (Format == TAG_FMT_STRING) {
 				php_error(E_WARNING,"Found TIFF Comment with wrong TAG 0x00FE");
 				if (ImageInfo->numComments < EXIF_MAX_COMMENTS) {
 					if (exif_process_string(&((ImageInfo->Comments)[ImageInfo->numComments]),ValuePtr,ByteCount)) {
@@ -1187,7 +1206,7 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *DirEntry, cha
 						ImageInfo->sections_found |= FOUND_INTEROP;
 						break;
 				}
-				SubdirStart = OffsetBase + php_ifd_getexif_get32u(ValuePtr, ImageInfo->MotorolaOrder);
+				SubdirStart = OffsetBase + php_ifd_get32u(ValuePtr, ImageInfo->MotorolaOrder);
 				if (SubdirStart < OffsetBase || SubdirStart > OffsetBase+IFDlength) {
 					php_error(E_WARNING, "Illegal IFD Pointer");
 					return;
@@ -1229,7 +1248,7 @@ static void exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *DirStart,
 	 * Hack to make it process IDF1 I hope
 	 * There are 2 IDFs, the second one holds the keys (0x0201 and 0x0202) to the thumbnail
 	 */
-	NextDirOffset = php_ifd_getexif_get32u(DirStart+2+12*de, ImageInfo->MotorolaOrder);
+	NextDirOffset = php_ifd_get32u(DirStart+2+12*de, ImageInfo->MotorolaOrder);
 	if (NextDirOffset) {
 		if (OffsetBase + NextDirOffset < OffsetBase || OffsetBase + NextDirOffset > OffsetBase+IFDlength) {
 			php_error(E_WARNING, "Illegal directory offset");
@@ -1266,7 +1285,7 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
 
 	/* Check the next two values for correctness. */
 	if (php_ifd_get16u(CharBuf+2, ImageInfo->MotorolaOrder) != 0x2a
-	  || php_ifd_getexif_get32u(CharBuf+4, ImageInfo->MotorolaOrder) != 0x08) {
+	  || php_ifd_get32u(CharBuf+4, ImageInfo->MotorolaOrder) != 0x08) {
 		php_error(E_WARNING, "Invalid TIFF start (1)");
 		return;
 	}
@@ -1359,7 +1378,8 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo, FILE *infile)
 		#endif
 
 		#ifdef EXIF_DEBUG
-		php_error(E_NOTICE,"process section %d", ImageInfo->sections_count);
+		fpos = ftell(infile)-1;
+		php_error(E_NOTICE,"process section at 0x%04X, len=%d", fpos, ImageInfo->sections_count);
 		#endif
 
 		for (a=0;a<7;a++) {
@@ -1405,7 +1425,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo, FILE *infile)
 		ImageInfo->sections_count += 1;
 
 		#ifdef EXIF_DEBUG
-		php_error(E_NOTICE,"process marker  %s(x%02X) at x%04X size %d", exif_get_markername(marker), marker, fpos, itemlen);
+		php_error(E_NOTICE,"process marker(x%02X=%s) at x%04X size %d", marker, exif_get_markername(marker), fpos, itemlen);
 		#endif
 		switch(marker) {
 			case M_SOS:   /* stop before hitting compressed data  */
@@ -1503,7 +1523,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 {
 	int i, sn, num_entries;
 	unsigned char *dir_entry;
-	size_t ifd_size, dir_size, entry_offset, next_offset, entry_length;
+	size_t ifd_size, dir_size, entry_offset, next_offset, entry_length, entry_value;
 	int entry_tag , entry_type;
 
 	sn = ImageInfo->sections_count++;
@@ -1521,7 +1541,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 			ImageInfo->sections[sn].Size = dir_size;
 			ImageInfo->sections[sn].Data = erealloc(ImageInfo->sections[sn].Data,ImageInfo->sections[sn].Size);
 			fread(ImageInfo->sections[sn].Data+2, 1, dir_size-2, infile);
-			next_offset = php_ifd_getexif_get32u(ImageInfo->sections[sn].Data + dir_size - 4, ImageInfo->MotorolaOrder);
+			next_offset = php_ifd_get32u(ImageInfo->sections[sn].Data + dir_size - 4, ImageInfo->MotorolaOrder);
 			#ifdef EXIF_DEBUG
 			php_error(E_NOTICE,"Read in TIFF done, next offset x%04X", next_offset);
 			#endif
@@ -1533,12 +1553,12 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 				entry_type   = php_ifd_get16u(dir_entry+2, ImageInfo->MotorolaOrder);
 				if ( entry_type > NUM_FORMATS) {
 					php_error(E_WARNING,"Error in TIFF: Illegal format, suppose bytes");
-					entry_type = FMT_BYTE;
+					entry_type = TAG_FMT_BYTE;
 				}
-				entry_length = php_ifd_get32u(dir_entry+4, motorola_intel) * php_tiff_bytes_per_format[entry_type];
-				entry_length = php_ifd_getexif_get32u(dir_entry+4, ImageInfo->MotorolaOrder) * php_tiff_bytes_per_format[entry_type];
+				entry_length = php_ifd_get32u(dir_entry+4, ImageInfo->MotorolaOrder) * php_tiff_bytes_per_format[entry_type];
+				entry_length = php_ifd_get32u(dir_entry+4, ImageInfo->MotorolaOrder) * php_tiff_bytes_per_format[entry_type];
 				if ( entry_length > 4) {
-					entry_offset = php_ifd_getexif_get32u(dir_entry+8, ImageInfo->MotorolaOrder);
+					entry_offset = php_ifd_get32u(dir_entry+8, ImageInfo->MotorolaOrder);
 					if ( entry_offset + entry_length > ifd_size) ifd_size = entry_offset + entry_length;
 				} else {
 					switch(entry_type) {
@@ -1566,6 +1586,22 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 						case TAG_COMP_IMAGEHEIGHT:
 							ImageInfo->Height = entry_value;
 							break;
+						case TAG_PHOTOMETRIC_INTERPRETATION:
+							switch (entry_value) {
+								case PMI_BLACK_IS_ZERO:
+								case PMI_WHITE_IS_ZERO:
+								case PMI_TRANSPARENCY_MASK:
+									ImageInfo->IsColor = 0;
+									break;
+								case PMI_RGB:
+								case PMI_PALETTE_COLOR:
+								case PMI_SEPARATED:
+								case PMI_YCBCR:
+								case PMI_CIELAB:
+									ImageInfo->IsColor = 1;
+									break;
+							}
+							break;
 					}
 				}
 			}
@@ -1592,7 +1628,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 					dir_entry 	 = ImageInfo->sections[sn].Data+2+i*12;
 					entry_tag    = php_ifd_get16u(dir_entry+0, ImageInfo->MotorolaOrder);
 					/*entry_type   = php_ifd_get16u(dir_entry+2, ImageInfo->MotorolaOrder);*/
-					/*entry_length = php_ifd_getexif_get32u(dir_entry+4, ImageInfo->MotorolaOrder);*/
+					/*entry_length = php_ifd_get32u(dir_entry+4, ImageInfo->MotorolaOrder);*/
 					if (entry_tag == TAG_EXIF_IFD_POINTER ||
 					    entry_tag == TAG_INTEROP_IFD_POINTER ||
 					    entry_tag == TAG_GPS_IFD_POINTER
@@ -1609,7 +1645,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 								ImageInfo->sections_found |= FOUND_INTEROP;
 								break;
 						}
-						entry_offset = php_ifd_getexif_get32u(dir_entry+8, ImageInfo->MotorolaOrder);
+						entry_offset = php_ifd_get32u(dir_entry+8, ImageInfo->MotorolaOrder);
 						#ifdef EXIF_DEBUG
 						php_error(E_NOTICE,"Found other IFD: %s at x%04X", exif_get_headername(entry_tag), entry_offset);
 						#endif
