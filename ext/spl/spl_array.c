@@ -50,6 +50,7 @@
 typedef struct {
 	zval *obj;
 	zval *idx;
+	int  locked;
 } spl_array_writer_object;
 
 static zend_class_entry *spl_array_writer_default_get_class(zval *object TSRMLS_DC)
@@ -94,8 +95,12 @@ void spl_array_writer_default_dtor(void *object, zend_object_handle handle TSRML
 	}
 	if (writer->idx)
 	{
-		writer->idx->refcount--;
-		DELETE_ZVAL(writer->idx);
+		if (writer->locked) {
+			PZVAL_UNLOCK(writer->idx);
+		} else {
+			writer->idx->refcount--;
+			DELETE_ZVAL(writer->idx);
+		}
 	}
 	efree(writer);
 }
@@ -140,7 +145,6 @@ SPL_CLASS_FUNCTION(array_writer_default, __construct)
 	writer = (spl_array_writer_object *) zend_object_store_get_object(object TSRMLS_CC);
 	writer->obj = obj; obj->refcount++;
 	writer->idx = idx; idx->refcount++;
-
 }
 /* }}} */
 
@@ -205,8 +209,11 @@ int spl_fetch_dimension_address(znode *result, znode *op1, znode *op2, temp_vari
 			T(result->u.var).var.ptr = *retval;
 			AI_PTR_2_PTR_PTR(T(result->u.var).var);
 			writer = (spl_array_writer_object *) zend_object_store_get_object(*retval TSRMLS_CC);
-			writer->obj = *container_ptr; writer->obj->refcount++;
-			writer->idx = dim;            writer->idx->refcount++;
+			writer->obj = *container_ptr; 
+			writer->obj->refcount++;
+			writer->idx = dim;
+			PZVAL_LOCK(writer->idx);
+			writer->locked = 1;
 			SELECTIVE_PZVAL_LOCK(*retval, result);
 		} else {
 			zend_error(E_ERROR, "Object must implement spl_array_access for write access");
