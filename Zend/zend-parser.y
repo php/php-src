@@ -30,7 +30,8 @@
 #define YYERROR_VERBOSE
 #define YYSTYPE znode
 #ifdef ZTS
-#define YYPARSE_PARAM compiler_globals
+# define YYPARSE_PARAM compiler_globals
+# define YYLEX_PARAM compiler_globals
 #endif
 
 #include "zend_compile.h"
