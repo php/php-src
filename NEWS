@@ -19,7 +19,7 @@ PHP 4                                                                      NEWS
 - Changed registry entries under "HKLM\SOFTWARE\PHP\Per Directory Values" to
   work also with administrative directives such as safe_mode, open_basedir,
   etc. (Claudio Felber) 
-- Added word_count() function which counts words inside a string. (Ilia)
+- Added str_word_count() function which counts words inside a string. (Ilia)
 - Added PGSQL_CONNECT_FORCE_NEW option to pg_connect() (Yasuo)
 - Added ICONV_IMPL and ICONV_VERSION constants to iconv extension to
   indicate which iconv implementation is used. (Moriyoshi)
