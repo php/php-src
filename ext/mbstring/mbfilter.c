@@ -129,7 +129,17 @@
 #include "unicode_table.h"
 
 /* language structure */
-static const char *mbfl_language_uni_aliases[] = {"universal", "none", NULL};
+static const mbfl_language mbfl_language_neutral = {
+	mbfl_no_language_neutral,
+	"neutral",
+	"neutral",
+	NULL,
+	mbfl_no_encoding_utf8,
+	mbfl_no_encoding_base64,
+	mbfl_no_encoding_base64
+};
+
+static const char *mbfl_language_uni_aliases[] = {"universal", NULL};
 
 static const mbfl_language mbfl_language_uni = {
 	mbfl_no_language_uni,

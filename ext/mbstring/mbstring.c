@@ -721,7 +721,7 @@ static PHP_INI_MH(OnUpdate_mbstring_encoding_translation)
 
 /* {{{ php.ini directive registration */
 PHP_INI_BEGIN()
-	 PHP_INI_ENTRY("mbstring.language", "none", PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdate_mbstring_language)
+	 PHP_INI_ENTRY("mbstring.language", "neutral", PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdate_mbstring_language)
 	 PHP_INI_ENTRY("mbstring.detect_order", NULL, PHP_INI_ALL, OnUpdate_mbstring_detect_order)
 	 PHP_INI_ENTRY("mbstring.http_input", "pass", PHP_INI_ALL, OnUpdate_mbstring_http_input)
 	 PHP_INI_ENTRY("mbstring.http_output", "pass", PHP_INI_ALL, OnUpdate_mbstring_http_output)
