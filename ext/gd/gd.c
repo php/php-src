@@ -766,7 +766,7 @@ PHP_FUNCTION(imagecolorallocate)
    Copy the palette from the src image onto the dst image */
 PHP_FUNCTION(imagepalettecopy)
 {
-#if HAVE_LIBGD13
+#if HAVE_LIBGD15
 	zval **dstim, **srcim;
 	gdImagePtr dst, src;
 
@@ -1767,7 +1767,7 @@ PHP_FUNCTION(imagecopy)
    Merge one part of an image with another */
 PHP_FUNCTION(imagecopymerge)
 {
-#if HAVE_LIBGD13
+#if HAVE_LIBGD15
 	zval **SIM, **DIM, **SX, **SY, **SW, **SH, **DX, **DY, **PCT;
 	gdImagePtr im_dst;
 	gdImagePtr im_src;

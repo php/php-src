@@ -68,6 +68,7 @@ AC_ARG_WITH(gd,
         old_LDFLAGS=$LDFLAGS
 		old_LIBS=$LIBS
         AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13,1,[ ]) ])
+        AC_CHECK_LIB(gd, gdImagePaletteCopy, [ AC_DEFINE(HAVE_LIBGD15,1,[ ]) ])
 		AC_CHECK_LIB(z,compress, LIBS="$LIBS -lz",,)
 		AC_CHECK_LIB(png,png_info_init, LIBS="$LIBS -lpng",,)
         AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1,[ ])])
