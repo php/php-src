@@ -19,6 +19,8 @@ PHP 4                                                                      NEWS
 - Moved extensions to PECL (http://pear.php.net/): (James, Derick)
   . ext/vpopmail
   . ext/cybermut
+- Added -n command switch to cli and cgi version which allows to skip php.ini
+  parsing at startup. (Marcus, Wez)
 - Added "neutral" language entry to mbstring spec. (Moriyoshi) 
 - Changed bundled gd library to consider php.ini option memory_limit. (Marcus)
 - Modified log() to accept multiple bases. (Jason)
