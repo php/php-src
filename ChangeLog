@@ -1,3 +1,107 @@
+2005-03-17  Harrie Hazewinkel  <harrie@lisanza.net>
+
+    * (PHP_5_0)
+      NEWS:
+      Added SNMPv2 support.
+
+    * (PHP_5_0)
+      ext/snmp/php_snmp.h
+      ext/snmp/snmp.c:
+      Adding SNMPV2 functions for data retrieval.
+
+2005-03-17  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/mysqli/mysqli_api.c:
+      fix typo in error message
+
+2005-03-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/exif/exif.c:
+      MFH: Fixed build of exif extension on win32.
+
+    * ext/exif/exif.c:
+      MFB: Fixed build of exif extension on win32.
+
+    * (PHP_5_0)
+      ext/exif/exif.c:
+      Fixed build of exif extension on win32.
+
+    * ext/ftp/ftp.c:
+      Fixed compiler warning on win32.
+
+2005-03-17  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * main/streams/cast.c:
+      Silence a warning here on systems where off_t is a long long.
+
+2005-03-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * sapi/cli/php_cli.c:
+      - Made CLI option -d output error and exit if an non-existing (or
+      unmodifyable) entry is passed
+
+2005-03-17  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      Fixed bug #32340 (insert_before($node,NULL) does not return)
+
+2005-03-17  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      main/php_version.h:
+      RC1 -> RC2-dev
+
+2005-03-17  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/standard/dl.h:
+      export php_dl to fix windows cli build
+
+2005-03-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * scripts/phpize.m4:
+      Removed unused DEFS subst
+
+    * configure.in:
+      Fixed build properly
+
+    * TSRM/TSRM.h
+      TSRM/tsrm_config_common.h
+      ext/mbstring/mb_gpc.c
+      ext/mbstring/mbstring.c:
+      Revert bad fix
+
+    * (PHP_5_0)
+      scripts/phpize.m4:
+      MFB: remove unused subst
+
+    * (PHP_4_3)
+      scripts/phpize.m4:
+      remove unused subst
+
+    * (PHP_4_3)
+      configure.in
+      configure.in:
+      fix build
+
+2005-03-17  Derick Rethans  <php@derickrethans.nl>
+
+    * sapi/cli/php_cli.c:
+      - ZTS fixes
+
+2005-03-17  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/mbstring/mb_gpc.c
+      ext/mbstring/mbstring.c:
+      Build fixes
+
 2005-03-16  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * TSRM/TSRM.h
