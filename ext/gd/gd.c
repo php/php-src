@@ -99,8 +99,10 @@ function_entry gd_functions[] = {
 	PHP_FE(imagechar,								NULL)
 	PHP_FE(imagecharup,								NULL)
 	PHP_FE(imagecolorallocate,						NULL)
+	PHP_FE(imagepalettecopy,						NULL)
 	PHP_FE(imagecolorat,							NULL)
 	PHP_FE(imagecolorclosest,						NULL)
+	PHP_FE(imagecolorclosesthwb,					NULL)
 	PHP_FE(imagecolordeallocate,					NULL)
 	PHP_FE(imagecolorresolve,						NULL)
 	PHP_FE(imagecolorexact,							NULL)
@@ -109,6 +111,7 @@ function_entry gd_functions[] = {
 	PHP_FE(imagecolorstotal,						NULL)
 	PHP_FE(imagecolorsforindex,						NULL)
 	PHP_FE(imagecopy,								NULL)
+	PHP_FE(imagecopymerge,							NULL)
 	PHP_FE(imagecopyresized,						NULL)
 	PHP_FE(imagecreate,								NULL)
 	PHP_FE(imagecreatefrompng,						NULL)
@@ -759,6 +762,25 @@ PHP_FUNCTION(imagecolorallocate)
 }
 /* }}} */
 
+/* {{{ proto int imagepalettecopy(int dst, int src)
+   Copy the palette from the src image onto the dst image */
+PHP_FUNCTION(imagepalettecopy)
+{
+	zval **dstim, **srcim;
+	gdImagePtr dst, src;
+
+	if (ZEND_NUM_ARGS() != 2 ||
+		zend_get_parameters_ex(2, &dstim, &srcim) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	ZEND_FETCH_RESOURCE(dst, gdImagePtr, dstim, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(src, gdImagePtr, srcim, -1, "Image", GDG(le_gd));
+
+	gdImagePaletteCopy(dst, src);
+}
+/* }}} */
+
 /* im, x, y */
 /* {{{ proto int imagecolorat(int im, int x, int y)
    Get the index of the color of a pixel */
@@ -815,6 +837,31 @@ PHP_FUNCTION(imagecolorclosest)
 	b = (*blue)->value.lval;
 	
 	col = gdImageColorClosest(im, r, g, b);
+	RETURN_LONG(col);
+}
+/* }}} */
+
+/* {{{ proto int imagecolorclosesthwb(int im, int red, int green, int blue)
+   Get the index of the color which has the hue, white and blackness nearest to the given color */
+PHP_FUNCTION(imagecolorclosesthwb)
+{
+	zval **imgind, **r, **g, **b;
+	int col;
+	gdImagePtr im;
+	GDLS_FETCH();
+	
+	if (ZEND_NUM_ARGS() != 4 ||
+		zend_get_parameters_ex(4, &imgind, &r, &g, &b) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", GDG(le_gd));
+	
+	convert_to_long_ex(r);
+	convert_to_long_ex(g);
+	convert_to_long_ex(b);
+
+	col = gdImageColorClosestHWB(im, Z_LVAL_PP(r), Z_LVAL_PP(g), Z_LVAL_PP(b));
 	RETURN_LONG(col);
 }
 /* }}} */
@@ -1705,6 +1752,43 @@ PHP_FUNCTION(imagecopy)
 	RETURN_TRUE;
 }
 /* }}} */
+
+
+PHP_FUNCTION(imagecopymerge)
+{
+	zval **SIM, **DIM, **SX, **SY, **SW, **SH, **DX, **DY, **PCT;
+	gdImagePtr im_dst;
+	gdImagePtr im_src;
+	int srcH, srcW, srcY, srcX, dstY, dstX, pct;
+	GDLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 9 ||
+		zend_get_parameters_ex(9, &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH, &PCT) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", GDG(le_gd));
+
+	convert_to_long_ex(SX);
+	convert_to_long_ex(SY);
+	convert_to_long_ex(SW);
+	convert_to_long_ex(SH);
+	convert_to_long_ex(DX);
+	convert_to_long_ex(DY);
+	convert_to_long_ex(PCT);
+
+	srcX = Z_LVAL_PP(SX);
+	srcY = Z_LVAL_PP(SY);
+	srcH = Z_LVAL_PP(SH);
+	srcW = Z_LVAL_PP(SW);
+	dstX = Z_LVAL_PP(DX)
+	dstY = Z_LVAL_PP(DY);
+	pct  = Z_LVAL_PP(PCT);
+
+	gdImageCopyMerge(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH, pct);
+	RETURN_TRUE;
+}
 
 /* {{{ proto int imagecopyresized(int dst_im, int src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h)
    Copy and resize part of an image */
