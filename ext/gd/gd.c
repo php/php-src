@@ -3639,7 +3639,7 @@ static void _php_image_bw_convert( gdImagePtr im_org, gdIOCtx *out, int threshol
 		return;
 	}
 
-#ifdef HAVE_LIBGD20
+#if HAVE_LIBGD20
 	if (im_org->trueColor) {
 		gdImageTrueColorToPalette(im_org, 1, 256);
 	}
