@@ -136,13 +136,11 @@ ext/standard
     * Possibly modify parsing of GPC data to automatically create arrays if
       variable name is seen more than once.
     * Implement regex-cache for url-functions.
-    * stri_replace(). (Andrei)
     * Move socket related functions to fsock.c.
     * NOT binary safe:
         strtok()
         basename()
         dirname()
-        strrpos()
         strip_tags()
 
 ext/wddx
