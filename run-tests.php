@@ -485,7 +485,11 @@ if (!getenv('NO_INTERACTION')) {
 			$autoconf = shell_exec('autoconf --version');
 			/* Always use the generated libtool - Mac OSX uses 'glibtool' */
 			$libtool = shell_exec($_SERVER['PWD'] . '/libtool --version');
-			$sys_libtool = shell_exec('libtool --version');
+
+			/* Use shtool to find out if there is glibtool present (MacOSX) */
+			$sys_libtool_path = shell_exec("{$_SERVER['PWD']}/build/shtool path glibtool libtool");
+			$sys_libtool = shell_exec(str_replace("\n", "", $sys_libtool_path) . ' --version');
+
 			/* Try the most common flags for 'version' */
 			$flags = array('-v', '-V', '--version');
 			$cc_status=0;
