@@ -1101,6 +1101,35 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 	}
 }
 
+/* private API; don't use in extensions */
+int _php_network_is_stream_alive(php_stream *stream)
+{
+	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
+	int alive = 1;
+	int fd = sock->socket;
+	fd_set rfds;
+	struct timeval tv = {0, 0};
+	char buf;
+
+	/* logic: if the select call indicates that there is data to
+	 * be read, but a read returns 0 bytes of data, then the socket
+	 * has been closed.
+	 */
+	
+	FD_ZERO(&rfds);
+	FD_SET(fd, &rfds);
+	if (select(fd+1, &rfds, NULL, NULL, &tv) > 0) {
+
+		if (FD_ISSET(fd, &rfds)) {
+			if (0 == recv(fd, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EAGAIN) {
+				alive = 0;
+			}
+		}
+	}
+	return alive;
+}
+
+
 static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
