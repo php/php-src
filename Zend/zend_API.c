@@ -1171,6 +1171,9 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 			internal_function->pass_rest_by_reference = 0;
 		}
 		if (ptr->flags) {
+			if (!(ptr->flags & ZEND_ACC_PPP_MASK)) {
+				zend_error(error_type, "Invalid access level for %s() - access must be exactly one of public, protected or private", ptr->fname);
+			}
 			internal_function->fn_flags = ptr->flags;
 		} else {
 			internal_function->fn_flags = ZEND_ACC_PUBLIC;
