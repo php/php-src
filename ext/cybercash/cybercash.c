@@ -33,6 +33,7 @@
 #if HAVE_MCK
 #include "cybercash.h"
 #include "mckcrypt.h"
+#include "base64.h"
 
 function_entry cybercash_functions[] = {
 	PHP_FE(cybercash_encr, NULL)
