@@ -746,6 +746,8 @@ PHP_CONFIGURE_PART(Configuring libtool)
 old_CC="$CC"
 
 if test "$PHP_THREAD_SAFETY" = "yes" && test -n "$ac_cv_pthreads_cflags"; then
+  CXXFLAGS="$CXXFLAGS $ac_cv_pthreads_cflags"
+  INLINE_CFLAGS="$INLINE_CFLAGS $ac_cv_pthreads_cflags"
   cat >meta_ccld<<EOF
 #! /bin/sh
 exec $CC $ac_cv_pthreads_cflags \$@
