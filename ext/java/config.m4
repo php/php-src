@@ -10,6 +10,12 @@ AC_ARG_WITH(java,
   if test "$withval" != "no"; then
     JAVA_SHARED="libphp_java.la"
 
+    pltform=`uname -s 2>/dev/null`
+    java_libext="libjava.so"
+    case "$pltform" in
+      AIX) java_libext="libjava.a" ;;
+      HP-UX) java_libext="libjava.sl" ;;
+    esac  
     # substitute zip for systems which don't have jar in the PATH
     if JAVA_JAR=`which jar 2>/dev/null`; then
       JAVA_JAR="$JAVA_JAR cf"
@@ -29,6 +35,7 @@ AC_ARG_WITH(java,
       JAVA_INCLUDE=-I$withval/include/kaffe
       JAVA_CLASSPATH=$withval/share/kaffe/Klasses.jar
       JAVA_LIB=kaffevm
+      java_libext=kaffevm
 
       test -f $withval/lib/$JAVA_LIB && JAVA_LIBPATH=$withval/lib
       test -f $withval/lib/kaffe/$JAVA_LIB && JAVA_LIBPATH=$withval/lib/kaffe
@@ -38,7 +45,7 @@ AC_ARG_WITH(java,
         JAVA_JAR='zip -q0'
       fi
 
-    elif test -f $withval/lib/libjava.so; then
+    elif test -f $withval/lib/$java_libext; then
       JAVA_LIB=java
       JAVA_LIBPATH=$withval/lib
       JAVA_INCLUDE="-I$withval/include"
@@ -63,10 +70,12 @@ AC_ARG_WITH(java,
         test -f $i/classes.zip && JAVA_CLASSPATH="$i/classes.zip"
         test -f $i/rt.jar      && JAVA_CLASSPATH="$i/rt.jar"
 
-		if test -f $i/libjava.so; then 
+        if test -f $i/$java_libext; then 
           JAVA_LIB=java
           JAVA_LIBPATH=$i
+          test -d $i/hotspot && AC_ADD_LIBPATH($i/hotspot)
           test -d $i/classic && AC_ADD_LIBPATH($i/classic)
+          test -d $i/server && AC_ADD_LIBPATH($i/server)
           test -d $i/native_threads && AC_ADD_LIBPATH($i/native_threads)
         fi
       done
@@ -81,7 +90,7 @@ AC_ARG_WITH(java,
 
     AC_DEFINE(HAVE_JAVA,1,[ ])
     AC_ADD_LIBPATH($JAVA_LIBPATH)
-    JAVA_CFLAGS="$JAVA_CFLAGS '-DJAVALIB=\"$JAVA_LIBPATH/lib$JAVA_LIB.so\"'"
+    JAVA_CFLAGS="$JAVA_CFLAGS '-DJAVALIB=\"$JAVA_LIBPATH/$java_libext\"'"
 
     if test "$PHP_SAPI" != "servlet"; then
       PHP_EXTENSION(java, shared)
