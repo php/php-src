@@ -21,7 +21,7 @@
 
 
 #include "php.h"
-#include "php3_sybase-ct.h"
+#include "php_sybase_ct.h"
 #include "ext/standard/php3_standard.h"
 #include "php_globals.h"
 
