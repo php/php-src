@@ -761,3 +761,9 @@ pfpro.defaulttimeout = 30
 [Sockets]
 ; Use the system read() function instead of the php_read() wrapper.
 sockets.use_system_read = On
+
+[com]
+; path to a file containing GUIDs, IIDs or filenames of files with TypeLibs
+;com.typelib_file = 
+; allow Distributed-COM calls
+;com.allow_dcom = true

@@ -494,6 +494,10 @@ pfpro.defaulttimeout		=	30	; default timeout in seconds
 [Sockets]
 sockets.use_system_read		=	Off	; Use the system read() function instead of
 						; the php_read() wrapper.
+[com]
+;com.typelib_file = 				; path to a file containing GUIDs, IIDs or filenames of files with TypeLibs
+;com.allow_dcom			=	true	; allow Distributed-COM calls
+
 ; Local Variables:
 ; tab-width: 4
 ; End:
