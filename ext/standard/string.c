@@ -410,8 +410,9 @@ PHP_FUNCTION(strtoupper)
 	}
 	convert_to_string_ex(arg);
 
-	ret = _php3_strtoupper((*arg)->value.str.val);
-	RETVAL_STRING(ret,1);
+	*return_value = **arg;
+	zval_copy_ctor(return_value);
+	_php3_strtoupper(return_value->value.str.val);
 }
 /* }}} */
 
@@ -441,8 +442,9 @@ PHP_FUNCTION(strtolower)
 	}
 	convert_to_string_ex(str);
 
-	ret = _php3_strtolower((*str)->value.str.val);
-	RETVAL_STRING(ret,1);
+	*return_value = **str;
+	zval_copy_ctor(return_value);
+	ret = _php3_strtolower(return_value->value.str.val);
 }
 /* }}} */
 
@@ -1214,8 +1216,8 @@ PHP_FUNCTION(stripcslashes)
 	}
 	convert_to_string_ex(str);
 
-	/* let RETVAL do the estrdup() */
-	RETVAL_STRING((*str)->value.str.val,1);
+	*return_value = **str;
+	zval_copy_ctor(return_value);
 	php_stripcslashes(return_value->value.str.val,&return_value->value.str.len);
 }
 /* }}} */
@@ -1231,8 +1233,8 @@ PHP_FUNCTION(stripslashes)
 	}
 	convert_to_string_ex(str);
 
-	/* let RETVAL do the estrdup() */
-	RETVAL_STRING((*str)->value.str.val,1);
+	*return_value = **str;
+	zval_copy_ctor(return_value);
 	php_stripslashes(return_value->value.str.val,&return_value->value.str.len);
 }
 /* }}} */
