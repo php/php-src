@@ -1,3 +1,86 @@
+2002-05-05  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/html.c:
+    Add support for remaining entities in HTML 4 for the UTF-8 encoding in
+    htmlentities/htmlspecial chars.
+    This is a fix for for #17008.
+
+2002-05-05  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * NEWS: Clenup before I forgot.
+
+2002-05-05  Aaron Bannert  <aaron@apache.org>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Fix a graceful restart SEGV. We no longer only perform initialization
+    on the second pass through the post_config. Now we only avoid the
+    initialization only on the first DSO load, and on all subsequent loads
+    we rerun the init code.
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Fix an elusive and intermittent startup SEGV. The problem was
+    the static string we were using to set an initialization flag
+    would get remapped to a different location when Apache reloaded
+    the DSO, causing us to not run our initialization routines.
+
+    Submitted by: Justin Erenkrantz <jerenkrantz@apache.org>
+    Reviewed by: Aaron Bannert (I added the big comment too)
+
+2002-05-05  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/exec.c: Return right exit status
+
+2002-05-05  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/cli/php_cli.c: MFH
+
+    * sapi/cli/php_cli.c: Force register_argc_argv=On for CLI
+
+2002-05-05  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/url_scanner_ex.c: touch
+
+    * ext/session/php_session.h
+      ext/session/session.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re:
+    re-add accidentily nuked session_adapt_url()
+
+2002-05-05  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/unicode_table.h: bug fixed in unicode -> cp1252 table.
+
+2002-05-05  Marko Karppinen  <karppinen@pobox.com>
+
+    * sapi/apache2filter/config.m4:
+    Well that didn't last long! (Reverting previous.)
+
+    * sapi/apache2filter/config.m4:
+    Prelim. patch to enable apache2filter to link on Darwin.
+    Submitted by: Justin Erenkrantz <jerenkrantz@apache.org>
+    Reviewed by: markonen
+
+2002-05-05  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/standard/reg.c:
+    fixed problem that ereg_replace() couldn't match with line stand/end marker.
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter_cn.c
+      ext/mbstring/unicode_table_cn.h:
+    added missing areas on Unicode->CP936 conversion table. added an alias CP932 on sjis-win.
+
+2002-05-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c: sync
+
+    * ext/standard/url_scanner_ex.re:
+    the output buffer is flushed during request shutdown before it
+    reaches our rshutdown, so it is safe to delete the contents of
+    the url rewriter variables here.
+
 2002-05-04  Zeev Suraski  <zeev@zend.com>
 
     * main/output.c:
