@@ -36,7 +36,7 @@
 
 zend_function_entry php_dom_xpath_class_functions[] = {
 	PHP_ME(domxpath, __construct, NULL, ZEND_ACC_PUBLIC)
-	PHP_FALIAS(register_namespace, dom_xpath_register_ns, NULL)
+	PHP_FALIAS(registerNamespace, dom_xpath_register_ns, NULL)
 	PHP_FALIAS(query, dom_xpath_query, NULL)
 	{NULL, NULL, NULL}
 };
