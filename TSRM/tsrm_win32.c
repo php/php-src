@@ -336,7 +336,7 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf) {
 
 	switch (cmd) {
 		case IPC_STAT:
-			memcpy(buf, shm->descriptor, sizeof(shm->descriptor));
+			memcpy(buf, shm->descriptor, sizeof(struct shmid_ds));
 			return 0;
 
 		case IPC_SET:
