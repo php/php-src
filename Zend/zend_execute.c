@@ -394,7 +394,17 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		*value = *orig_value;
 		value->is_ref = 0;
 		value->refcount = 0;
+	} else if (value_op->op_type == IS_CONST) {
+		zval *orig_value = value;
+
+		ALLOC_ZVAL(value);
+		*value = *orig_value;
+		value->is_ref = 0;
+		value->refcount = 0;
+		zval_copy_ctor(value);
 	}
+
+	value->refcount++;
 	if (opcode == ZEND_ASSIGN_OBJ) {
 		zval tmp;
 
@@ -423,6 +433,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		}
 		Z_OBJ_HT_P(object)->write_dimension(object, property_name, value TSRMLS_CC);
 	}
+	zval_ptr_dtor(&value);
 	
 	FREE_OP(Ts, op2, EG(free_op2));
 	if (result) {
