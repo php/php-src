@@ -1,7 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- Added new switch -x to CLI that enables execution of files without @scripting tags. (Marcus)
 - All special fopen wrappers ('php://', 'bz2://' and 'zlib://') now require the
   '://' separator (instead of simply 'php:', 'bz2:' and 'zlib:') to avoid
   ambiguities when filenames have ':' characters. (Wez)
@@ -36,7 +35,7 @@ PHP 4                                                                      NEWS
   process is now more portable and less resource-consuming. (Sascha)
 
 ?? ??? 2002, Version 4.2.0
-- ACHTUNG!! register_globals defaults to 'off' now !!!
+- ATTENTION!! register_globals defaults to 'off' now !!!
 - Modified the mysql extension to disable 'LOAD LOCAL' when safe mode is
   enabled. (Jason)
 - Added CLI (command line interface) sapi which is more suitable for writing 
