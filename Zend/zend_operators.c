@@ -1563,7 +1563,7 @@ ZEND_API int zend_binary_strncasecmp(char *s1, uint len1, char *s2, uint len2, u
 		}
 	}
 
-	return len1 - len2;
+	return MIN(length, len1) - MIN(length, len2);
 }
 
 
