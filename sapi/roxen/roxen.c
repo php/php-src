@@ -29,16 +29,24 @@
 
 #include "php_version.h"
 
+
+#ifdef ZTS
+/* This is true at the moment. It works with a Roxen with threads. As a matter
+ * of fact, that is preferred. However the scripts are executed once at a time.
+ * Once PHP is threadsafe it should be easy enough to fix.
+ */
+#error Roxen PHP module isnt thread safe at the moment.
+#endif
+
+
 /* Pike Include Files 
  *
  * conflicts with pike avoided by only using long names. Requires a new
  * Pike 0.7 since it was implemented for this interface only.
+ *
  */
 #define NO_PIKE_SHORTHAND
 
-#ifdef ZTS
-#error Roxen PHP module isnt thread safe at the moment.
-#endif
 
 #include <fdlib.h>
 #include <program.h>
@@ -56,10 +64,11 @@
 #include <operators.h>
 
 #ifdef _REENTRANT
+/* Lock used to serialize the PHP execution */
 static PIKE_MUTEX_T roxen_php_execution_lock;
 #define PHP_INIT_LOCK()	mt_init(&roxen_php_execution_lock)
-#define PHP_LOCK()	fprintf(stderr, "*** php lock.\n");THREADS_ALLOW();mt_lock(&roxen_php_execution_lock);fprintf(stderr, "*** php locked.\n");THREADS_DISALLOW()
-#define PHP_UNLOCK()	mt_unlock(&roxen_php_execution_lock);fprintf(stderr, "*** php unlocked.\n");
+#define PHP_LOCK()	fprintf(stderr, "*** php lock (thr_id=%d, glob=%d).\n", th_self(), current_thread);THREADS_ALLOW();mt_lock(&roxen_php_execution_lock);fprintf(stderr, "*** php locked.\n");THREADS_DISALLOW()
+#define PHP_UNLOCK()	mt_unlock(&roxen_php_execution_lock);fprintf(stderr, "*** php unlocked (thr_id=%d, glob=%d).\n", th_self(), current_thread);
 #define PHP_DESTROY()	mt_destroy(&roxen_php_execution_lock)
 #else /* !_REENTRANT */
 #define PHP_INIT_LOCK()	
@@ -71,12 +80,16 @@ static PIKE_MUTEX_T roxen_php_execution_lock;
 extern int fd_from_object(struct object *o);
 static unsigned char roxen_php_initialized;
 
+/* Defines to get to the data supplied when the script is started. */
 #define REALTHIS ((php_roxen_request *)fp->current_storage)
 #define GET_THIS() current_request = REALTHIS
 #define THIS current_request
 #define MY_FD ((struct object *)(THIS->my_fd))
 #define REQUEST_DATA ((struct mapping *)(THIS->request_data))
 
+/* This allows calling of pike functions from the PHP callbacks,
+ * which requires the Pike interpretor to be locked.
+ */
 #define THREAD_SAFE_RUN(COMMAND, what)  do {\
   struct thread_state *state;\
   fprintf(stderr,"threads: %d  disabled: %d  id: %d\n",num_threads, threads_disabled, th_self());\
@@ -98,17 +111,16 @@ static unsigned char roxen_php_initialized;
   }\
 } while(0)
 
+/* Toggle debug printouts, for now... */
+//#define MUCH_DEBUG
 #ifndef MUCH_DEBUG
 void no_fprintf(){}
 #define fprintf no_fprintf
 #endif
 
-/* php_roxen_context is per-server (thus only once at all) */
-
 struct program *php_program;
 
-/* roxen_globals_struct is per-request */
-
+/* roxen_globals_struct is per-request object storage */
 typedef struct {
   struct mapping *request_data;
   struct object *my_fd;
@@ -116,9 +128,19 @@ typedef struct {
 } php_roxen_request;
 
 static php_roxen_request *current_request = NULL;
+
+/* To avoid executing a PHP script from a PHP callback, which would
+ * create a deadlock, a global thread id is used. If the thread calling the
+ * php-script is the same as the current thread, it fails. 
+ */
 static int current_thread = -1;
 
-INLINE struct svalue *lookup_header(char *headername)
+
+/* Low level header lookup. Basically looks for the named header in the mapping
+ * headers in the supplied options mapping.
+ */
+ 
+static INLINE struct svalue *lookup_header(char *headername)
 {
   struct svalue *headers, *value;
   struct pike_string *sind;
@@ -136,7 +158,7 @@ INLINE struct svalue *lookup_header(char *headername)
 /* Lookup a header in the mapping and return the value as a string, or
  * return the default if it's missing
  */
-INLINE char *lookup_string_header(char *headername, char *default_value)
+INLINE static char *lookup_string_header(char *headername, char *default_value)
 {
   struct svalue *head;
   THREAD_SAFE_RUN(head = lookup_header(headername), "header lookup");
@@ -153,7 +175,7 @@ INLINE char *lookup_string_header(char *headername, char *default_value)
 /* Lookup a header in the mapping and return the value as if it's an integer
  * and otherwise return the default.
  */
-INLINE int lookup_integer_header(char *headername, int default_value)
+INLINE static int lookup_integer_header(char *headername, int default_value)
 {
   struct svalue *head;
   THREAD_SAFE_RUN(head = lookup_header(headername), "header lookup");
@@ -168,7 +190,9 @@ INLINE int lookup_integer_header(char *headername, int default_value)
 }
 
 /*
- * php_roxen_low_ub_write() writes data to the client connection.
+ * php_roxen_low_ub_write() writes data to the client connection. Might be
+ * rewritten to do more direct IO to save CPU and the need to lock the *
+ * interpretor for better threading.
  */
 
 static int
@@ -204,9 +228,9 @@ php_roxen_sapi_ub_write(const char *str, uint str_length)
   return sent_bytes;
 }
 
-/* php_roxen_set_header() sets a header in the header mapping.
-   Set Header
-*/
+/* php_roxen_set_header() sets a header in the header mapping. Called in a
+ * thread safe manner from php_roxen_sapi_header_handler.
+ */
 static void php_roxen_set_header(char *header_name, char *value, char *p)
 {
   struct svalue hsval;
@@ -244,9 +268,9 @@ static void php_roxen_set_header(char *header_name, char *value, char *p)
  * php_roxen_sapi_header_handler() sets a HTTP reply header to be 
  * sent to the client.
  */
-
 static int
-php_roxen_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers SLS_DC)
+php_roxen_sapi_header_handler(sapi_header_struct *sapi_header,
+			      sapi_headers_struct *sapi_headers SLS_DC)
 {
   char *header_name, *header_content;
   char *p;
@@ -484,7 +508,7 @@ php_roxen_hash_environment(CLS_D ELS_DC PLS_DC SLS_DC)
  * "executes" the script
  */
 
-int php_roxen_module_main(SLS_D)
+static int php_roxen_module_main(SLS_D)
 {
   zend_file_handle file_handle;
   file_handle.type = ZEND_HANDLE_FILENAME;
@@ -498,43 +522,6 @@ int php_roxen_module_main(SLS_D)
   php_request_shutdown(NULL);
   THREADS_DISALLOW();
   return 1;
-}
-
-/*
- * php_roxen_request_ctor() initializes the per-request data structure
- * and fills it with data provided by the web server
- */
-
-static void 
-php_roxen_request_ctor(SLS_D)
-{
-  char *server;
-  char *root;
-  int index;
-  char *tmp;
-
-  SG(request_info).auth_user = NULL; 
-  SG(request_info).auth_password = NULL;
-      /*
-      tmp = Ns_ConnAuthPasswd(NSG(conn));
-      if(tmp) {
-      tmp = estrdup(tmp);
-      }
-      SG(request_info).auth_password = tmp;
-      
-      NSG(data_avail) = SG(request_info).content_length;
-  */
-}
-
-/*
- * php_roxen_request_dtor() destroys all data associated with
- * the per-request structure 
- */
-
-static void
-php_roxen_request_dtor(SLS_D)
-{
-  //  free(SG(request_info).path_translated);
 }
 
 /*
@@ -579,8 +566,6 @@ void f_php_roxen_request_handler(INT32 args)
   SG(request_info).auth_user = NULL; 
   SG(request_info).auth_password = NULL;
   status = php_roxen_module_main(SLS_C);
-	
-  php_roxen_request_dtor(SLS_C);
   current_thread = -1;
   PHP_UNLOCK();
   
@@ -591,7 +576,7 @@ void f_php_roxen_request_handler(INT32 args)
 
 }
 
-void clear_struct(struct object *o)
+static void clear_struct(struct object *o)
 {
   MEMSET(fp->current_storage, 0, sizeof(php_roxen_request));
 }
