@@ -26,6 +26,9 @@
 #include "php.h"
 #include "ext/standard/info.h"
 #include "php_snmp.h"
+
+#if HAVE_SNMP
+
 #include <sys/types.h>
 #ifdef PHP_WIN32
 #include <winsock.h>
@@ -60,7 +63,6 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_SNMP
 
 #ifndef __P
 #ifdef __GNUC__
@@ -70,6 +72,11 @@
 #endif
 #endif
 
+#ifdef HAVE_NET_SNMP
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#define VersionInfo NetSnmpVersionInfo
+#else
 #ifdef HAVE_DEFAULT_STORE_H
 #include "default_store.h"
 #endif
@@ -81,6 +88,7 @@
 #include "parse.h"
 #include "mib.h"
 #include "version.h"
+#endif
 
 /* ucd-snmp 3.3.1 changed the name of a few #defines... They've been changed back to the original ones in 3.5.3! */
 #ifndef SNMP_MSG_GET
@@ -329,7 +337,11 @@ retry:
 					}
 
 					if (st != 11) {
-						sprint_value((struct sbuf *)buf,vars->name, vars->name_length, vars);
+#ifdef HAVE_NET_SNMP
+						snprint_value(buf, strlen(buf), vars->name, vars->name_length, vars);
+#else
+						sprint_value((struct sbuf *) buf,vars->name, vars->name_length, vars);
+#endif
 					}
 
 					if (st == 1) {
@@ -337,7 +349,11 @@ retry:
 					} else if (st == 2) {
 						add_next_index_string(return_value,buf,1); /* Add to returned array */
 					} else if (st == 3)  {
+#ifdef HAVE_NET_SNMP
+						snprint_objid(buf2, strlen(buf2), vars->name, vars->name_length);
+#else
 						sprint_objid((struct sbuf *)buf2, vars->name, vars->name_length);
+#endif
 						add_assoc_string(return_value,buf2,buf,1);
 					}
 					if (st >= 2 && st != 11) {
@@ -356,7 +372,11 @@ retry:
 						for (count=1, vars = response->variables; vars && count != response->errindex;
 						vars = vars->next_variable, count++);
 						if (vars) {
+#ifdef HAVE_NET_SNMP
+							snprint_objid(buf, strlen(buf), vars->name, vars->name_length);
+#else
 							sprint_objid((struct sbuf *)buf,vars->name, vars->name_length);
+#endif
 						}
 						php_error(E_WARNING,"This name does not exist: %s\n",buf);
 					}

@@ -5,7 +5,34 @@ dnl
 PHP_ARG_WITH(snmp,for SNMP support,
 [  --with-snmp[=DIR]       Include SNMP support.])
 
-  if test "$PHP_SNMP" != "no"; then
+if test "$PHP_SNMP" != "no"; then
+
+  dnl
+  dnl Try net-snmp first
+  dnl
+  if test "$PHP_SNMP" = "yes"; then
+    AC_PATH_PROG(SNMP_CONFIG,net-snmp-config,,[/usr/local/bin:$PATH])
+  else
+    SNMP_CONFIG="$PHP_SNMP/bin/net-snmp-config"
+  fi
+
+  if test -x "$SNMP_CONFIG"; then
+    SNMP_LIBS=`$SNMP_CONFIG --netsnmp-libs`
+    SNMP_LIBS="$SNMP_LIBS `$SNMP_CONFIG --external-libs`"
+    SNMP_PREFIX=`$SNMP_CONFIG --prefix`
+
+    if test -n "$SNMP_LIBS" && test -n "$SNMP_PREFIX"; then
+      PHP_ADD_INCLUDE(${SNMP_PREFIX}/include)
+      PHP_EVAL_LIBLINE($SNMP_LIBS, SNMP_SHARED_LIBADD)
+      AC_DEFINE(HAVE_NET_SNMP,1,[ ])
+    else
+      AC_MSG_ERROR([Could not find the required paths. Please check your net-snmp installation.])
+    fi
+  else 
+
+    dnl
+    dnl Try ucd-snmp if net-snmp test failed
+    dnl
 
     if test "$PHP_SNMP" = "yes"; then
       for i in /usr/include /usr/local/include; do
@@ -60,14 +87,14 @@ PHP_ARG_WITH(snmp,for SNMP support,
     fi
 
     AC_CHECK_LIB(kstat, kstat_read, [ PHP_ADD_LIBRARY(kstat,,SNMP_SHARED_LIBADD) ])
-
-    AC_DEFINE(HAVE_SNMP,1,[ ])
     PHP_ADD_INCLUDE($SNMP_INCDIR)
     PHP_ADD_LIBRARY_WITH_PATH(snmp, $SNMP_LIBDIR, SNMP_SHARED_LIBADD)
-
-    PHP_NEW_EXTENSION(snmp, snmp.c, $ext_shared)
-    PHP_SUBST(SNMP_SHARED_LIBADD)
   fi
+
+  PHP_NEW_EXTENSION(snmp, snmp.c, $ext_shared)
+  PHP_SUBST(SNMP_SHARED_LIBADD)
+  AC_DEFINE(HAVE_SNMP,1,[ ])
+fi
 
 
 AC_MSG_CHECKING(whether to enable UCD SNMP hack)
