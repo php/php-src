@@ -20,12 +20,10 @@
 #ifdef PHP_WIN32
 # include <windows.h>
 # include <process.h>
-# define SEPARATOR '\\'
 #else
 # define __try
 # define __except(val)
 # define __declspec(foo)
-# define SEPARATOR '/'
 #endif
 
 #include <httpext.h>
@@ -481,15 +479,6 @@ static void init_request_info(sapi_globals_struct *sapi_globals, LPEXTENSION_CON
 		SG(request_info).headers_only = 1;
 	} else {
 		SG(request_info).headers_only = 0;
-	}
-	{
-		char *path_end = strrchr(SG(request_info).path_translated, SEPARATOR);
-
-		if (path_end) {
-			*path_end = 0;
-			V_CHDIR(SG(request_info).path_translated);
-			*path_end = SEPARATOR;
-		}
 	}
 	if (!bFilterLoaded) { /* we don't have valid ISAPI Filter information */
 		SG(request_info).auth_user = SG(request_info).auth_password = NULL;

@@ -1109,6 +1109,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
 	zend_file_handle prepend_file, append_file;
+	char old_cwd[4096] = "";
 	SLS_FETCH();
 
 	php_hash_environment(ELS_C SLS_CC PLS_CC);
@@ -1138,12 +1139,28 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 
 
 	if (setjmp(EG(bailout))!=0) {
+		if (old_cwd[0] != '\0')
+			V_CHDIR(old_cwd);
 		return;
 	}
 
 #ifdef PHP_WIN32
 	UpdateIniFromRegistry(primary_file->filename);
 #endif
+
+	if (primary_file->type == ZEND_HANDLE_FILENAME 
+			&& primary_file->filename) {
+		char *filename;
+
+		filename = strrchr(primary_file->filename, PHP_SEPARATOR);
+		
+		if (filename) {
+			filename++;
+			V_GETCWD(old_cwd, sizeof(old_cwd)-1);
+			V_CHDIR_FILE(primary_file->filename);
+			primary_file->filename = filename;
+		}
+	}
 
 	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
 		prepend_file.filename = PG(auto_prepend_file);
@@ -1164,6 +1181,9 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 		append_file_p = NULL;
 	}
 	zend_execute_scripts(ZEND_REQUIRE CLS_CC ELS_CC, 3, prepend_file_p, primary_file, append_file_p);
+
+	if (old_cwd[0] != '\0')
+		V_CHDIR(old_cwd);
 }
 
 PHPAPI int php_lint_script(zend_file_handle *file CLS_DC ELS_DC PLS_DC)

@@ -496,7 +496,6 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 	SG(server_context) = r;
 	
 	php_save_umask();
-	V_CHDIR_FILE(filename);
 	add_common_vars(r);
 	add_cgi_vars(r);
 
