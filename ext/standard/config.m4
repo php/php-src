@@ -198,6 +198,33 @@ AC_FLUSH_IO
 
 divert(5)dnl
 
+AC_ARG_WITH(regex,
+[  --with-regex=TYPE       regex library type: system, apache, php. Default: php
+                          WARNING: Do NOT use unless you know what you are doing!],
+[
+  case $withval in 
+    system)
+      if test "$PHP_SAPI" = "apache" || test "$PHP_SAPI" = "apache2filter"; then
+        REGEX_TYPE=php
+      else
+        REGEX_TYPE=system
+      fi
+      ;;
+    apache)
+      REGEX_TYPE=apache
+      ;;
+    php)
+      REGEX_TYPE=php
+      ;;
+    *)
+      REGEX_TYPE=php
+      AC_MSG_WARN(Invalid regex library type. Using default value: php)
+      ;;
+  esac
+],[
+  REGEX_TYPE=php
+])
+	
 AC_CHECK_FUNCS(fnmatch glob)
 
 if test "$PHP_SAPI" = "cgi"; then

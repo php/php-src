@@ -1025,9 +1025,17 @@ AC_DEFUN(PHP_CHECK_CC_OPTION,[
 ])
 
 AC_DEFUN(PHP_REGEX,[
+
+if test "$REGEX_TYPE" = "php"; then
   AC_DEFINE(HSREGEX,1,[ ])
   AC_DEFINE(REGEX,1,[ ])
   PHP_ADD_SOURCES(regex, regcomp.c regexec.c regerror.c regfree.c)
+elif test "$REGEX_TYPE" = "system"; then
+  AC_DEFINE(REGEX,0,[ ])
+fi
+
+AC_MSG_CHECKING([which regex library to use])
+AC_MSG_RESULT([$REGEX_TYPE])
 ])
 
 dnl
