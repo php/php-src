@@ -6,7 +6,7 @@ supplied_flag=$1
 if test "$1" = "--force"; then
     shift
 # this is a posix correct "test -nt"
-elif test "`ls -t buildconf buildconf.stamp|head -1`" != "buildconf"; then
+elif test "`ls -t buildconf buildconf.stamp 2>/dev/null |head -1`" != "buildconf"; then
     :
 else
     echo "buildconf: checking installation..."
