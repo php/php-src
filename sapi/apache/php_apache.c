@@ -99,7 +99,7 @@ static void php_apache_globals_ctor(php_apache_info_struct *apache_globals)
 static PHP_MINIT_FUNCTION(apache)
 {
 #ifdef ZTS
-	php_apache_info_id = ts_allocate_id(sizeof(php_apache_info_struct), ts_allocate_ctor, NULL);
+	php_apache_info_id = ts_allocate_id(sizeof(php_apache_info_struct), php_apache_globals_ctor, NULL);
 #else
 	php_apache_globals_ctor(&php_apache_info);
 #endif
