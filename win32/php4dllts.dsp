@@ -526,6 +526,10 @@ SOURCE=..\ext\standard\url_scanner.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\url_scanner_ex.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\var.c
 # End Source File
 # End Group
@@ -691,6 +695,10 @@ SOURCE=..\ext\standard\url.h
 # Begin Source File
 
 SOURCE=..\ext\standard\url_scanner.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\url_scanner_ex.h
 # End Source File
 # End Group
 # Begin Group "PCRE"
