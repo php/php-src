@@ -1268,7 +1268,6 @@ PHP_FUNCTION(pathinfo)
 	if ((opt & PHP_PATHINFO_EXTENSION) == PHP_PATHINFO_EXTENSION) {
 		char *p;
 		int idx;
-		int ret_len;
 		int have_basename = ((opt & PHP_PATHINFO_BASENAME) == PHP_PATHINFO_BASENAME);
 
 		/* Have we alrady looked up the basename? */
