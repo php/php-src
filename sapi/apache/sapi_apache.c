@@ -27,6 +27,7 @@
  */
 int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 {
+	int retval = OK;	
 	zend_file_handle file_handle;
 
 	if (php_request_startup(TSRMLS_C) == FAILURE) {
@@ -40,10 +41,8 @@ int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 		zend_syntax_highlighter_ini syntax_highlighter_ini;
 
 		php_get_highlight_struct(&syntax_highlighter_ini);
-		if (highlight_file(SG(request_info).path_translated, &syntax_highlighter_ini TSRMLS_CC)){
-			return OK;
-		} else {
-			return NOT_FOUND;
+		if (highlight_file(SG(request_info).path_translated, &syntax_highlighter_ini TSRMLS_CC) != SUCCESS) {
+			retval = NOT_FOUND;
 		}
 	} else {
 		file_handle.type = ZEND_HANDLE_FILENAME;
@@ -61,7 +60,7 @@ int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 		php_request_shutdown(NULL);
 	} zend_end_try();
 	
-	return (OK);
+	return retval;
 }
 /* }}} */
 
