@@ -715,6 +715,9 @@ PHP_FUNCTION(gettype)
 		WRONG_PARAM_COUNT;
 	}
 	switch ((*arg)->type) {
+		case IS_NULL:
+			RETVAL_STRING("NULL",1);
+			break;
 		case IS_BOOL:
 			RETVAL_STRING("boolean",1);
 			break;
