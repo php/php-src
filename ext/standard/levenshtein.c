@@ -25,10 +25,11 @@
 
 static int calc_levdist(const char *s1, const char *s2) /* faster, but obfuscated */
 {
-	register char *p1,*p2;
+	register char *p1,*p2; 
 	register int i,j,n;
 	int l1=0,l2=0;
 	char r[512];
+	const char *tmp;
 
 	/* skip equal start sequence, if any */
 	while(*s1==*s2) {
@@ -54,22 +55,15 @@ static int calc_levdist(const char *s1, const char *s2) /* faster, but obfuscate
 	/* reset pointers, adjust length */
 	s1-=l1++;
 	s2-=l2++;
+	
 
 	/* possible dist to great? */
  	if(abs(l1-l2)>=255) return -1;
 
 	/* swap if l2 longer than l1 */
 	if(l1<l2) {
-		const char *s3;
-		int l3;
-		
-		s3 = s1;
-		s1 = s2;
-		s2 = s3;
-
-		l3 = l1;
-		l1 = l2;
-		l2 = l3;
+		tmp=s1; s1=s2; s2=tmp;
+		l1 ^= l2; l2 ^= l1; l1 ^= l2;
 	}
 
 	
