@@ -357,7 +357,7 @@ static void cyrus_generic_callback(struct imclient *client,
 		argv[3] = &msgno;
 
 		if (call_user_function_ex(EG(function_table), NULL, callback->function, 
-                                  &retval, 4, argv, 0, NULL) == FAILURE) {
+                                  &retval, 4, argv, 0, NULL TSRMLS_CC) == FAILURE) {
 			php_error(E_WARNING, "Couldn't call the %s handler", 
 			          callback->trigger);
 		}
