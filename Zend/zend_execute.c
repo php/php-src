@@ -46,8 +46,8 @@ static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_
 
 #define RETURN_VALUE_USED(opline) (!((opline)->result.u.EA.type & EXT_TYPE_UNUSED))
 
-#define EX_T(offset) EX(Ts)[offset]
-#define T(offset) Ts[offset]
+#define EX_T(offset) (*(temp_variable *)((char *) EX(Ts) + offset))
+#define T(offset) (*(temp_variable *)((char *) Ts + offset))
 
 static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zval **should_free TSRMLS_DC)
 {
