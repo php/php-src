@@ -1473,7 +1473,7 @@ PHP_FUNCTION(mb_output_handler)
  			MBSTRG(outconv) = NULL;
   		}
 		if (encoding == mbfl_no_encoding_pass) {
-			RETRUN_STRINGL(arg_string, arg_string_len, 1);
+			RETURN_STRINGL(arg_string, arg_string_len, 1);
 		}
  		/* if content-type is not yet set, set it and activate the converter */
  		if (SG(sapi_headers).send_default_content_type ) {
