@@ -78,6 +78,8 @@ PHP_FUNCTION(sqlite_error_string);
 
 PHP_FUNCTION(sqlite_create_aggregate);
 PHP_FUNCTION(sqlite_create_function);
+PHP_FUNCTION(sqlite_udf_decode_binary);
+PHP_FUNCTION(sqlite_udf_encode_binary);
 
 ZEND_BEGIN_MODULE_GLOBALS(sqlite)
 	 long assoc_case;

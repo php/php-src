@@ -142,6 +142,8 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_unbuffered_query, NULL)
 	PHP_FE(sqlite_create_aggregate, NULL)
 	PHP_FE(sqlite_create_function, NULL)
+	PHP_FE(sqlite_udf_encode_binary, NULL)
+	PHP_FE(sqlite_udf_decode_binary, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -1371,8 +1373,8 @@ PHP_FUNCTION(sqlite_current)
 }
 /* }}} */
 
-/* {{{ proto array sqlite_column(resource result, mixed index_or_name [, bool decode_binary])
-   Fetches a column from the current row from a result set */
+/* {{{ proto mixed sqlite_column(resource result, mixed index_or_name [, bool decode_binary])
+   Fetches a column from the current row of a result set */
 PHP_FUNCTION(sqlite_column)
 {
 	zval *zres;
@@ -1807,6 +1809,65 @@ PHP_FUNCTION(sqlite_create_function)
 	}
 }
 /* }}} */
+
+/* {{{ proto string sqlite_udf_encode_binary(string data)
+   Apply binary encoding (if required) to a string to return from an UDF */
+PHP_FUNCTION(sqlite_udf_encode_binary)
+{
+	char *data = NULL;
+	long datalen;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &data, &datalen)) {
+		return;
+	}
+
+	if (data == NULL) {
+		RETURN_NULL();
+	}
+	if (datalen && (data[0] == '\x01' || memchr(data, '\0', datalen) != NULL)) {
+		/* binary string */
+		int enclen;
+		char *ret;
+		
+		ret = emalloc( 1 + ((256 * datalen + 1262) / 253) );
+		ret[0] = '\x01';
+		enclen = sqlite_encode_binary((const unsigned char*)data, datalen, ret+1);
+		RETVAL_STRINGL(ret, enclen+1, 0);
+	} else {
+		RETVAL_STRINGL(data, datalen, 1);
+	}
+}
+/* }}} */
+
+/* {{{ proto string sqlite_udf_decode_binary(string data)
+   Decode binary encoding on a string parameter passed to an UDF */
+PHP_FUNCTION(sqlite_udf_decode_binary)
+{
+	char *data = NULL;
+	long datalen;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &data, &datalen)) {
+		return;
+	}
+
+	if (data == NULL) {
+		RETURN_NULL();
+	}
+	if (datalen && data[0] == '\x01') {
+		/* encoded string */
+		int enclen;
+		char *ret;
+		
+		ret = emalloc(datalen);
+		enclen = sqlite_decode_binary((const unsigned char*)data+1, ret);
+		ret[enclen] = '\0';
+		RETVAL_STRINGL(ret, enclen, 0);
+	} else {
+		RETVAL_STRINGL(data, datalen, 1);
+	}
+}
+/* }}} */
+
 
 /*
  * Local variables:
