@@ -1,22 +1,22 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
-- added com_release($obj) and com_addref($obj) functions
-  and the related class members $obj->Release() and $obj->AddRef()
-  to gain more control over the used COM components. (phanto)
-- added an additional parameter to dotnet_load to specify the codepage (phanto)
+- Added com_release($obj) and com_addref($obj) functions and the related class
+  members $obj->Release() and $obj->AddRef() to gain more control over the used
+  COM components. (phanto)
+- Added an additional parameter to dotnet_load to specify the codepage (phanto)
 - Added --enable-memory-usage-info. This creates a new Apache 1.x logging
-  directive "{mod_php_memory_usage}n" which will log the peak amount of
-  memory used by the script. (Thies)
-- fstat() and stat() now return identical output by returning a numerical and
-  string indexed array (Jason)
-- Fixed memory leak upon re-registering constants (Sascha, Zend Engine)
+  directive "{mod_php_memory_usage}n" which will log the peak amount of memory
+  used by the script. (Thies)
+- Made fstat() and stat() provide identical output by returning a numerical and
+  string indexed array. (Jason)
+- Fixed memory leak upon re-registering constants. (Sascha, Zend Engine)
 - Upgraded expat to version 1.95.1. (Thies)
 
 ?? ??? 200?, Version 4.0.6
-- Fixed race in writing session files (Sascha)
+- Fixed race in writing session files. (Sascha)
 - Fixed a possible crash in the PHP CGI when no input file is
-  specified (Zeev)
+  specified. (Zeev)
 - Added is_callable() function that can be used to find out whether
   its argument is a valid callable construct. (Andrei)
 - Fixed a rare possible crash when generating extended information. (Dmitri
