@@ -48,25 +48,30 @@ AC_ARG_WITH(java,
       done
 
     else
+
+      for i in `find $withval/include -type d`; do
+	test -f $i/jni.h && JAVA_INCLUDE="-I$i"
+	test -f $i/jni_md.h && JAVA_INCLUDE="$JAVA_INCLUDE -I$i"
+      done
+
       for i in `find $withval -type d`; do
-	test -f $i/jni.h	&& JAVA_INCLUDE="-I$i"
-	test -f $i/jni_md.h	&& JAVA_INCLUDE="$JAVA_INCLUDE -I$i"
 	test -f $i/classes.zip	&& JAVA_CFLAGS="-DJNI_11"
-	test -f $i/jvm.jar	&& JAVA_CFLAGS="-DJNI_12"
 	test -f $i/rt.jar	&& JAVA_CFLAGS="-DJNI_12"
 	test -f $i/classes.zip	&& JAVA_CLASSPATH="$i/classes.zip"
-	test -f $i/jvm.jar	&& JAVA_CLASSPATH="$i/jvm.jar"
 	test -f $i/rt.jar	&& JAVA_CLASSPATH="$i/rt.jar"
 	if test -f $i/libjava.so; then 
 	  AC_ADD_LIBPATH($i)
 	  test -d $i/classic && AC_ADD_LIBPATH($i/classic)
-	  test -d $i/green_threads && AC_ADD_LIBPATH($i/green_threads)
+	  test -d $i/native_threads && AC_ADD_LIBPATH($i/native_threads)
 	fi
       done
+
       if test -z "$JAVA_INCLUDE"; then
 	AC_MSG_RESULT(no)
 	AC_MSG_ERROR(unable to find Java VM libraries)
       fi
+
+      JAVA_CFLAGS="$JAVA_CFLAGS -D_REENTRANT"
       AC_ADD_LIBRARY(java)
     fi
 
