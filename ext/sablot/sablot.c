@@ -308,8 +308,12 @@ PHP_FUNCTION(xslt_output_endtransform)
 
     /* Nake sure there is data to send */
     if (OG(active_ob_buffer).text_length) {
-        char *args[] = {"/_xmlinput", buffer,
-                        "/_output",   NULL};
+        char *args[4];
+        
+        args[0] = "/_xmlinput";
+        args[1] = buffer;
+        args[2] = "/_output";
+        args[3] = NULL;
         
         SABLOT_BASIC_CREATE_PROCESSOR();
         
@@ -491,6 +495,7 @@ PHP_FUNCTION(xslt_process)
          **input, 
          **result, 
          **base;
+    char *args[7];
     char *tRes = NULL;
     int ret  = 0, 
         argc = ZEND_NUM_ARGS();
@@ -513,21 +518,17 @@ PHP_FUNCTION(xslt_process)
         SablotSetBase(SABLOT_BASIC_HANDLE, Z_STRVAL_PP(base));
     }
     
-    /**
-     * Need to declare args here (to lazy to actually allocate
-     * it with emalloc() ;)
-     */
-    {
-        char *args[] = {"/_stylesheet", Z_STRVAL_PP(xslt),
-                        "/_xmlinput", Z_STRVAL_PP(input),
-                        "/_output", NULL,
-                        NULL};
-        
-        ret = SablotRunProcessor(SABLOT_BASIC_HANDLE, "arg:/_stylesheet", 
-                                 "arg:/_xmlinput", "arg:/_output", 
-                                 NULL, args);
-    }
+    args[0] = "/_stylesheet";
+    args[1] = Z_STRVAL_PP(xslt);
+    args[2] = "/_xmlinput";
+    args[3] = Z_STRVAL_PP(input);
+    args[4] = "/_output";
+    args[5] = NULL;
+    args[6] = NULL;
     
+    ret = SablotRunProcessor(SABLOT_BASIC_HANDLE, "arg:/_stylesheet", 
+                             "arg:/_xmlinput", "arg:/_output", 
+                              NULL, args);
     if (ret) {
         SABLOTG(last_errno) = ret;
         RETURN_FALSE;
