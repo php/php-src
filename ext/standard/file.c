@@ -260,12 +260,13 @@ PHP_FUNCTION(get_meta_tags)
 {
 	pval **filename, **arg2;
 	FILE *fp;
-	char buf[8192];
-	char buf_lcase[8192];
 	int use_include_path = 0;
 	int issock=0, socketd=0;
-	int len, var_namelen;
-	char var_name[50],*val=NULL,*tmp,*end,*slashed;
+	int in_tag=0, in_meta_tag=0, looking_for_val=0, done=0, ulc=0;
+	int num_parts=0, lc=0;
+	int token_len=0;
+	char *token_data=NULL, *name=NULL, *value=NULL, *temp=NULL;
+	php_meta_tags_token tok, tok_last;
 	PLS_FETCH();
 	
 	/* check args */
@@ -306,83 +307,78 @@ PHP_FUNCTION(get_meta_tags)
 		}
 		RETURN_FALSE;
 	}
-	/* Now loop through the file and do the magic quotes thing if needed */
-	memset(buf, 0, 8191);
-	while((FP_FGETS(buf,8191,socketd,fp,issock) != NULL)) {
-	   	memcpy(buf_lcase, buf, 8191);
-		php_strtolower(buf_lcase, 8191);
-		if (php_memnstr(buf_lcase, "</head>", sizeof("</head>")-1, buf_lcase + 8191))
-			break;
 
-		if(php_memnstr(buf_lcase, "<meta", sizeof("<meta")-1, buf_lcase + 8191)) {
+	tok_last = TOK_EOF;
 
-			memset(var_name,0,50);
-			/* get the variable name from the name attribute of the meta tag */
-			tmp = php_memnstr(buf_lcase, "name=\"", sizeof("name=\"")-1, buf_lcase + 8191);
-			if(tmp) {
-				tmp = &buf[tmp - buf_lcase];
-				tmp+=6;
-				end=strstr(tmp,"\"");
-				if(end) {
-					unsigned char *c;
-					*end='\0';
-					snprintf(var_name,50,"%s",tmp);
-					*end='"';
-
-					c = (unsigned char*)var_name;
-					while (*c) {
-						switch(*c) {
-							case '.':
-							case '\\':
-							case '+':
-							case '*':
-							case '?':
-							case '[':
-							case '^':
-							case ']':
-							case '$':
-							case '(':
-							case ')':
-							case ' ':
-								*c++ ='_';
-								break;
-							default:
-								*c++ = tolower((unsigned char)*c);
-						}
-					}
-					var_namelen=strlen(var_name);
+	while (!done && (tok = php_next_meta_token(fp,socketd,issock,&ulc,&lc,&token_data,&token_len)) != TOK_EOF) {
+		if (tok == TOK_ID) {
+			if (tok_last == TOK_OPENTAG) {
+				in_meta_tag = !strcasecmp("meta",token_data);
+			} else if (tok_last == TOK_SLASH && in_tag) {
+				if (strcasecmp("head",token_data) == 0) {
+					/* We are done here! */
+					done = 1;
 				}
-
-				/* get the variable value from the content attribute of the meta tag */
-				tmp = php_memnstr(buf_lcase, "content=\"", sizeof("content=\"")-1, buf_lcase + 8191);
-				val = NULL;
-				if(tmp) {
-					tmp = &buf[tmp - buf_lcase];
-					tmp+=9;
-					end=strstr(tmp,"\"");
-					if(end) {
-						*end='\0';
-						val=estrdup(tmp);
-						*end='"';
+			} else {
+				if (in_meta_tag) {
+					if (strcasecmp("name",token_data) == 0 || strcasecmp("content",token_data) == 0) {
+						looking_for_val = 1;
+					} else {
+						looking_for_val = 0;
 					}
 				}
 			}
-			if(*var_name && val) {
+		} else if (tok == TOK_STRING && tok_last == TOK_EQUAL && looking_for_val) {
+			if (!num_parts) {
+				/* First, get the name value and store it */
+				temp = name = estrndup(token_data,token_len);
+				while (temp && *temp) {
+					if (strchr(".\\+*?[^]$() ",*temp)) {
+						*temp = '_';
+					}
+					temp++;
+				}
+				num_parts++;
+			} else {
+				/* Then get the value value and store it, quoting if neccessary */
 				if (PG(magic_quotes_runtime)) {
-					slashed = php_addslashes(val,0,&len,0);
+					value = php_addslashes(token_data,0,&token_len,0);
 				} else {
-					slashed = estrndup(val,strlen(val));
+					value = estrndup(token_data,token_len);
 				}
-				add_assoc_string(return_value, var_name, slashed, 0);
-				efree(val);
+
+				/* Insert the value into the array */
+				add_assoc_string(return_value, name, value, 0);
+				num_parts = 0;
 			}
+			looking_for_val = 0;
+		} else if (tok == TOK_OPENTAG) {
+			if (looking_for_val) {
+				looking_for_val = 0;
+			}
+			in_tag = 1;
+		} else if (tok == TOK_CLOSETAG) {
+			/* We never made it to the value, free the name */
+			if (num_parts) {
+				efree(name);
+			}
+			/* Reset all of our flags */
+			in_tag = in_meta_tag = looking_for_val = num_parts = 0;
 		}
+
+		tok_last = tok;
+
+		if (token_data)
+			efree(token_data);
+
+		token_data = NULL;
 	}
-	if (issock) {
-		SOCK_FCLOSE(socketd);
-	} else {
-		fclose(fp);
-	}
+
+    if (issock) {
+        SOCK_FCLOSE(socketd);
+    } else {
+        fclose(fp);
+    }
 }
 
 /* }}} */
@@ -2100,6 +2096,88 @@ size_t php_fread_all(char **buf, int socket, FILE *fp, int issock) {
 	}
 
 	return len;
+}
+
+/* Tokenizes an HTML file for get_meta_tags */
+php_meta_tags_token php_next_meta_token(FILE *fp, int socketd, int issock, int *use_last_char, int *last_char, char **data, int *datalen) {
+	int ch;
+	char buff[META_DEF_BUFSIZE + 1];
+
+	memset((void *)buff,0,META_DEF_BUFSIZE + 1);
+
+	while (*use_last_char || (!FP_FEOF(socketd,fp,issock) && (ch = FP_FGETC(socketd,fp,issock)))) {
+
+		if(FP_FEOF(socketd,fp,issock))
+			break;
+
+		if (*use_last_char) {
+			ch = *last_char;
+			*use_last_char = 0;
+		}
+
+        switch (ch) {
+        case '<':
+            return TOK_OPENTAG;
+            break;
+        case '>':
+            return TOK_CLOSETAG;
+            break;
+        case '=':
+            return TOK_EQUAL;
+            break;
+        case '/':
+            return TOK_SLASH;
+            break;
+        case '"':
+            *datalen = 0;
+            while (!FP_FEOF(socketd,fp,issock) && (ch = FP_FGETC(socketd,fp,issock)) && ch != '"') {
+				buff[(*datalen)++] = ch;
+
+				if (*datalen == META_DEF_BUFSIZE)
+					break;
+			}
+			
+            *data = (char *) emalloc( *datalen + 1 );
+			memcpy(*data,buff,*datalen+1);
+
+			return TOK_STRING;
+			break;
+		case '\n':
+		case '\r':
+		case '\t':
+			break;
+		case ' ':
+            return TOK_SPACE;
+            break;
+        default:
+            if (isalpha(ch)) {
+                *datalen = 0;
+                buff[(*datalen)++] = ch;
+				while (!FP_FEOF(socketd,fp,issock) && (ch = FP_FGETC(socketd,fp,issock)) && (isalpha(ch) || ch == '-')) {
+					buff[(*datalen)++] = ch;
+
+					if (*datalen == META_DEF_BUFSIZE)
+						break;
+				}
+
+				/* This is ugly, but we have to replace ungetc */
+                if (!isalpha(ch) && ch != '-') {
+					*use_last_char = 1;
+					*last_char = ch;
+				}
+
+                *data = (char *) emalloc( *datalen + 1 );
+                memcpy(*data,buff,*datalen+1);
+
+				return TOK_ID;
+			} else {
+				return TOK_OTHER;
+			}
+			break;
+		}
+	}
+
+	return TOK_EOF;
 }
 
 /*
