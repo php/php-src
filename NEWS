@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Added new parameter to sha1() and md5() which return the digest as
+  binary data. (Michael Bretterklieber <mbretter@jawa.at>, Derick)
 - Added proc_nice() function, which allows changing priority of the current
   process. (Ilia)
 - Added pcntl_getpriority() and pcntl_setpriority() functions, which can be 
