@@ -661,7 +661,7 @@ _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int option)
    Replace regular expression for multibyte string */
 PHP_FUNCTION(mb_ereg_replace)
 {
-	_php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	_php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, MBSTRG(regex_default_options));
 }
 /* }}} */
 
@@ -669,7 +669,7 @@ PHP_FUNCTION(mb_ereg_replace)
    Case insensitive replace regular expression for multibyte string */
 PHP_FUNCTION(mb_eregi_replace)
 {
-	_php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, MBRE_OPTION_IGNORECASE);
+	_php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, MBRE_OPTION_IGNORECASE | MBSTRG(regex_default_options));
 }
 /* }}} */
 
