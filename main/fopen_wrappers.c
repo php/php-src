@@ -348,8 +348,8 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 		fp = NULL;
 	}
 	if (!fp) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to open %s", filename);
 		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
+		SG(request_info).path_translated = NULL;
 		return FAILURE;
 	}
 

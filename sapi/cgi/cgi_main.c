@@ -76,12 +76,16 @@
 
 #include "php_getopt.h"
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 #include "fcgi_config.h"
 #include "fcgiapp.h"
 /* don't want to include fcgios.h, causes conflicts */
 #ifdef PHP_WIN32
 extern int OS_SetImpersonate(void);
+#else
+/* XXX this will need to change later when threaded fastcgi is 
+   implemented.  shane */
+struct sigaction act, old_term, old_quit, old_int;
 #endif
 
 static void (*php_php_import_environment_variables)(zval *array_ptr TSRMLS_DC);
@@ -114,6 +118,24 @@ static pid_t pgroup;
 
 extern char *ap_php_optarg;
 extern int ap_php_optind;
+
+#if ENABLE_PATHINFO_CHECK
+/* true global.  this is retreived once only, even for fastcgi */
+int fix_pathinfo=1;
+#endif
+
+#ifdef PHP_WIN32
+#define TRANSLATE_SLASHES(path) \
+	{ \
+		char *tmp = path; \
+		while (*tmp) { \
+			if (*tmp == '\\') *tmp = '/'; \
+			tmp++; \
+		} \
+	}
+#else
+#define TRANSLATE_SLASHES(path)
+#endif
 
 #define OPTSTRING "aCc:d:ef:g:hilmnqsw?vz:"
 
@@ -179,7 +201,7 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length T
 	size_t ret;
 #endif
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	if (!FCGX_IsCGI()) {
 		FCGX_Request *request = (FCGX_Request *)SG(server_context);
 		long ret = FCGX_PutStr( str, str_length, request->out );
@@ -221,7 +243,7 @@ static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
 
 static void sapi_cgibin_flush(void *server_context)
 {
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	if (!FCGX_IsCGI()) {
 		FCGX_Request *request = (FCGX_Request *)server_context;
 		if(!request || FCGX_FFlush( request->out ) == -1 ) {
@@ -295,13 +317,13 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
 	uint read_bytes=0, tmp_read_bytes;
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	char *pos = buffer;
 #endif
 
 	count_bytes = MIN(count_bytes, (uint)SG(request_info).content_length-SG(read_post_bytes));
 	while (read_bytes < count_bytes) {
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 		if (!FCGX_IsCGI()) {
 			FCGX_Request *request = (FCGX_Request *)SG(server_context);
 			tmp_read_bytes = FCGX_GetStr( pos, count_bytes-read_bytes, request->in );
@@ -320,20 +342,14 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 
 static char *sapi_cgibin_getenv(char *name, size_t name_len TSRMLS_DC)
 {
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	/* when php is started by mod_fastcgi, no regular environment
 	   is provided to PHP.  It is always sent to PHP at the start
 	   of a request.  So we have to do our own lookup to get env
 	   vars.  This could probably be faster somehow.  */
 	if (!FCGX_IsCGI()) {
-		int cgi_env_size = 0;
 		FCGX_Request *request = (FCGX_Request *)SG(server_context);
-		while( request->envp[ cgi_env_size ] ) { 
-			if (strnicmp(name,request->envp[cgi_env_size],name_len) == 0) {
-				return (request->envp[cgi_env_size])+name_len+1;
-			}
-			cgi_env_size++; 
-		}
+		return FCGX_GetParam(name,request->envp);
 	}
 #endif
 	/*  if cgi, or fastcgi and not found in fcgi env
@@ -341,12 +357,43 @@ static char *sapi_cgibin_getenv(char *name, size_t name_len TSRMLS_DC)
 	return getenv(name);
 }
 
-static char *sapi_cgi_read_cookies(TSRMLS_D)
+static int _sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
 {
-	return sapi_cgibin_getenv((char *)"HTTP_COOKIE",strlen("HTTP_COOKIE") TSRMLS_CC);
+	int len=0;
+	char *buf = NULL;
+	if (!name) return -1;
+	len = strlen(name) + (value?strlen(value):0) + sizeof("=") + 2;
+	buf = (char *)emalloc(len);
+	if (value) {
+		snprintf(buf,len-1,"%s=%s", name, value);
+	} else {
+		snprintf(buf,len-1,"%s=", name);
+	}
+#if PHP_FASTCGI
+	/* when php is started by mod_fastcgi, no regular environment
+	   is provided to PHP.  It is always sent to PHP at the start
+	   of a request.  So we have to do our own lookup to get env
+	   vars.  This could probably be faster somehow.  */
+	if (!FCGX_IsCGI()) {
+		FCGX_Request *request = (FCGX_Request *)SG(server_context);
+		FCGX_PutEnv(request,buf);
+		efree(buf);
+		return 0;
+	}
+#endif
+	/*  if cgi, or fastcgi and not found in fcgi env
+		check the regular environment */
+	putenv(buf);
+	efree(buf);
+	return 0;
 }
 
-#ifdef PHP_FASTCGI
+static char *sapi_cgi_read_cookies(TSRMLS_D)
+{
+	return sapi_cgibin_getenv((char *)"HTTP_COOKIE",0 TSRMLS_CC);
+}
+
+#if PHP_FASTCGI
 void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 {
 	if (!FCGX_IsCGI()) {
@@ -410,7 +457,7 @@ static int php_cgi_startup(sapi_module_struct *sapi_module)
 /* {{{ sapi_module_struct cgi_sapi_module
  */
 static sapi_module_struct cgi_sapi_module = {
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	"cgi-fcgi",						/* name */
 	"CGI/FastCGI",					/* pretty name */
 #else
@@ -441,9 +488,6 @@ static sapi_module_struct cgi_sapi_module = {
 	sapi_cgi_register_variables,	/* register server variables */
 	sapi_cgi_log_message,			/* Log message */
 
-	NULL,							/* Block interruptions */
-	NULL,							/* Unblock interruptions */
-
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */
@@ -464,7 +508,7 @@ static void php_cgi_usage(char *argv0)
 	php_printf("Usage: %s [-q] [-h] [-s [-v] [-i] [-f <file>] \n"
 			   "       %s <file> [args...]\n"
 			   "  -a               Run interactively\n"
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 			   "  -b <address:port>|<port> Bind Path for external FASTCGI Server mode\n"
 #endif
 			   "  -C               Do not chdir to the script's directory\n"
@@ -490,62 +534,218 @@ static void php_cgi_usage(char *argv0)
  */
 static void init_request_info(TSRMLS_D)
 {
-	char *content_length = sapi_cgibin_getenv("CONTENT_LENGTH",strlen("CONTENT_LENGTH") TSRMLS_CC);
-	char *content_type = sapi_cgibin_getenv("CONTENT_TYPE",strlen("CONTENT_TYPE") TSRMLS_CC);
+	char *content_length = sapi_cgibin_getenv("CONTENT_LENGTH",0 TSRMLS_CC);
+	char *content_type = sapi_cgibin_getenv("CONTENT_TYPE",0 TSRMLS_CC);
 	const char *auth;
+	char *env_path_translated;
 
-#if 0
-/* SG(request_info).path_translated is always set to NULL at the end of this function
-   call so why the hell did this code exist in the first place? Am I missing something? */
-	char *script_filename;
+	SG(request_info).path_translated = NULL;
+	/* 
+	 * If for some reason the CGI interface is not setting the
+	 * PATH_TRANSLATED correctly, SG(request_info).path_translated is NULL.
+	 * We still call php_fopen_primary_script, because if you set doc_root
+	 * or user_dir configuration directives, SCRIPT_NAME is used to construct
+	 * the filename as a side effect of php_fopen_primary_script.
+	 *
+	 * Fixup path stuff to conform to CGI spec
+	 * 
+	 * http://localhost/info.php/test?a=b 
+	 * 
+	 * should produce, which btw is the same as if
+	 * we were running under mod_cgi on apache (ie. not
+	 * using ScriptAlias directives):
+	 * 
+	 * PATH_INFO=/test
+	 * PATH_TRANSLATED=/docroot/test
+	 * SCRIPT_NAME=/info.php
+	 * REQUEST_URI=/info.php/test?a=b
+	 * SCRIPT_FILENAME=/docroot/info.php
+	 * QUERY_STRING=a=b
+	 * 
+	 * cgi/mod_fastcgi under apache produce:
+	 * 
+	 * PATH_INFO=/info.php/test
+	 * PATH_TRANSLATED=/docroot/info.php/test
+	 * SCRIPT_NAME=/php/php-cgi  (from the Action setting I suppose)
+	 * REQUEST_URI=/info.php/test?a=b
+	 * SCRIPT_FILENAME=/path/to/php/bin/php-cgi  (Action setting translated)
+	 * QUERY_STRING=a=b
+	 * 
+	 * Comments in the code below refer to using the above URL in a request
+	 * 		
+	 */		
 
+	env_path_translated = sapi_cgibin_getenv("PATH_TRANSLATED",0 TSRMLS_CC);
 
-	script_filename = sapi_cgibin_getenv("SCRIPT_FILENAME",strlen("SCRIPT_FILENAME") TSRMLS_CC);
-	/* Hack for annoying servers that do not set SCRIPT_FILENAME for us */
-	if (!script_filename) {
-		script_filename = SG(request_info).argv0;
-	}
-#ifdef PHP_WIN32
-	/* FIXME WHEN APACHE NT IS FIXED */
-	/* a hack for apache nt because it does not appear to set argv[1] and sets
-	   script filename to php.exe thus makes us parse php.exe instead of file.php
-	   requires we get the info from path translated.  This can be removed at
-	   such a time that apache nt is fixed */
-	if (!script_filename) {
-		script_filename = sapi_cgibin_getenv("PATH_TRANSLATED",strlen("PATH_TRANSLATED") TSRMLS_CC);
-	}
+	if(env_path_translated) {
+#ifdef __riscos__
+		/* Convert path to unix format*/
+		__riscosify_control|=__RISCOSIFY_DONT_CHECK_DIR;
+		env_path_translated=__unixify(env_path_translated,0,NULL,1,0);
 #endif
+		
+#if ENABLE_PATHINFO_CHECK
+		/*
+		 * if the file doesn't exist, try to extract PATH_INFO out
+		 * of it by stat'ing back through the '/'
+		 * this fixes url's like /info.php/test
+		 *
+		 * ini cgi.fix_pathinfo is on by default, but can be turned off
+		 * if someone is running a server that does this correctly
+		 */
+		if (fix_pathinfo) {
+			struct stat st;
+			char *env_script_name = sapi_cgibin_getenv("SCRIPT_NAME",0 TSRMLS_CC);
+			char *env_path_info = sapi_cgibin_getenv("PATH_INFO",0 TSRMLS_CC);
+			if (env_path_info) env_path_info = estrdup(env_path_info);
+			if (sapi_cgibin_getenv("REDIRECT_URL",0 TSRMLS_CC) ||
+				(env_script_name && env_path_info &&
+				strcmp(env_path_info,env_script_name)==0)) {
+				/*
+				 * if PHP is setup under a ScriptAlias in Apache, the
+				 * redirect_url variable will be set.  In this case, script_*
+				 * points to the executable, not the script.  We have to
+				 * reset this stuff and clear PATH_INFO since it is also wrong.
+				 * This unfortunately is Apache specific.  IIS sets PATH_INFO
+				 * and SCRIPT_NAME to the same thing if there is no *real* PATH_INFO.
+				 */
+				_sapi_cgibin_putenv("SCRIPT_FILENAME",env_path_translated TSRMLS_CC);
+				_sapi_cgibin_putenv("PATH_INFO",NULL TSRMLS_CC);
+			}
 
-	/* doc_root configuration variable is currently ignored,
-	   as it is with every other access method currently also. */
+			if (stat( env_path_translated, &st ) == -1 ) {
+				char *pt = estrdup(env_path_translated);
+				int len = strlen(pt);
+				char *ptr;
 
-	/* We always need to emalloc() filename, since it gets placed into
-	   the include file hash table, and gets freed with that table.
-	   Notice that this means that we don't need to efree() it in
-	   php_destroy_request_info()! */
+				while( (ptr = strrchr(pt,'/')) || (ptr = strrchr(pt,'\\')) ) {
+					*ptr = 0;
+					if ( lstat(pt, &st) == 0 && S_ISREG(st.st_mode) ) {
+						/*
+						 * okay, we found the base script!
+						 * work out how many chars we had to strip off;
+						 * then we can modify PATH_INFO
+						 * accordingly
+						 *
+						 * we now have the makings of 
+						 * PATH_INFO=/test
+						 * SCRIPT_FILENAME=/docroot/info.php
+						 *
+						 * we now need to figure out what docroot is.
+						 * if DOCUMENT_ROOT is set, this is easy, otherwise,
+						 * we have to play the game of hide and seek to figure
+						 * out what SCRIPT_NAME should be
+						 */
+						char *env_document_root = sapi_cgibin_getenv("DOCUMENT_ROOT",0 TSRMLS_CC);
+						int slen = len - strlen(pt);
+						int pilen = strlen( env_path_info );
+						char *path_info = env_path_info + pilen - slen;
+
+						_sapi_cgibin_putenv("PATH_INFO",path_info TSRMLS_CC);
+						_sapi_cgibin_putenv("SCRIPT_FILENAME",pt TSRMLS_CC);
+						TRANSLATE_SLASHES(pt);
+
+						/* figure out docroot
+						   SCRIPT_FILENAME minus SCRIPT_NAME
+						   */
+						if (!env_document_root)
+							env_document_root = PG(doc_root);
+						if (env_document_root) {
+							int l = strlen(env_document_root);
+							int path_translated_len = 0;
+							char *path_translated = NULL;
+
+							/* we have docroot, so we should have:
+							 * DOCUMENT_ROOT=/docroot
+							 * SCRIPT_FILENAME=/docroot/info.php
+							 *
+							 * SCRIPT_NAME is the portion of the path beyond docroot
+							 */
+							_sapi_cgibin_putenv("SCRIPT_NAME",pt+l TSRMLS_CC);
+
+							/* 
+							 * PATH_TRANSATED = DOCUMENT_ROOT + PATH_INFO
+							 */
+							path_translated_len = l + strlen(path_info) + 2;
+							path_translated = (char *)emalloc(path_translated_len);
+							*path_translated = 0;
+							strcat(path_translated,env_document_root);
+							strcat(path_translated,path_info);
+							_sapi_cgibin_putenv("PATH_TRANSLATED",path_translated TSRMLS_CC);
+							efree(path_translated);
+						} else if (env_script_name &&
+							strstr(pt,env_script_name)) {
+							/* 
+							 * PATH_TRANSATED = PATH_TRANSATED - SCRIPT_NAME + PATH_INFO
+							 */
+							int ptlen = strlen(pt)-strlen(env_script_name);
+							int path_translated_len = ptlen + strlen(path_info) + 2;
+							char *path_translated = NULL;
+							path_translated = (char *)emalloc(path_translated_len);
+							*path_translated = 0;
+							strncat(path_translated,pt,ptlen);
+							strcat(path_translated,path_info);
+							_sapi_cgibin_putenv("PATH_TRANSLATED",path_translated TSRMLS_CC);
+							efree(path_translated);
+						}
+						break;
+					}
+				}
+				if (pt) efree(pt);
+				/*
+				 * if we stripped out all the '/' and still didn't find
+				 * a valid path... we will fail, badly. of course we would
+				 * have failed anyway... is there a nice way to error?
+				 */
+			}
+			if (env_path_info) efree(env_path_info);
+		} else
+#endif
+		{
+			/* old broken logic here, but at least reverts to
+			 * previous behaviour if the fixup is ignored, or there
+			 * is a working server.
+			 *
+			 * 1. DISCARD_PATH IS BAD
+			 * 2. PATH_INFO will never be right
+			 */
 #if DISCARD_PATH
-	if (script_filename) {
-		SG(request_info).path_translated = estrdup(script_filename);
-	} else {
-		SG(request_info).path_translated = NULL;
-	}
+			env_path_translated = sapi_cgibin_getenv("SCRIPT_FILENAME",0 TSRMLS_CC);
+#else
+			env_path_translated = sapi_cgibin_getenv("PATH_TRANSLATED",0 TSRMLS_CC);
 #endif
-
-#endif /* 0 */
-
-	SG(request_info).request_method = sapi_cgibin_getenv("REQUEST_METHOD",strlen("REQUEST_METHOD") TSRMLS_CC);
-	SG(request_info).query_string = sapi_cgibin_getenv("QUERY_STRING",strlen("QUERY_STRING") TSRMLS_CC);
-	SG(request_info).request_uri = sapi_cgibin_getenv("PATH_INFO",strlen("PATH_INFO") TSRMLS_CC);
-	if (!SG(request_info).request_uri) {
-		SG(request_info).request_uri = sapi_cgibin_getenv("SCRIPT_NAME",strlen("SCRIPT_NAME") TSRMLS_CC);
+			SG(request_info).path_translated = env_path_translated;
+		}
 	}
-	SG(request_info).path_translated = NULL; /* we have to update it later, when we have that information */
+
+	SG(request_info).request_method = sapi_cgibin_getenv("REQUEST_METHOD",0 TSRMLS_CC);
+	SG(request_info).query_string = sapi_cgibin_getenv("QUERY_STRING",0 TSRMLS_CC);
+	SG(request_info).request_uri = sapi_cgibin_getenv("SCRIPT_NAME",0 TSRMLS_CC);
+
+	if (!SG(request_info).request_uri) {
+		/* this is old logic, and completely incorrect by CGI spec
+		 * this is used to generate PHP_SELF, which should actually
+		 * match SCRIPT_NAME.  This is being left so PHP will be as broken
+		 * as it was before if a server does not set SCRIPT_NAME. 
+		 */
+		SG(request_info).request_uri = sapi_cgibin_getenv("PATH_INFO",0 TSRMLS_CC);
+	}
+	if (!SG(request_info).path_translated) {
+		/* if this didn't get set above, do it now, default to script_filename */
+		SG(request_info).path_translated = sapi_cgibin_getenv("SCRIPT_FILENAME",0 TSRMLS_CC);
+	}
+	if (!SG(request_info).path_translated) {
+		/* server didn't set script_filename, default to path_translated */
+		SG(request_info).path_translated = sapi_cgibin_getenv("PATH_TRANSLATED",0 TSRMLS_CC);
+	}
+	if (SG(request_info).path_translated) 
+		SG(request_info).path_translated = estrdup(SG(request_info).path_translated);
 	SG(request_info).content_type = (content_type ? content_type : "" );
 	SG(request_info).content_length = (content_length?atoi(content_length):0);
 	SG(sapi_headers).http_response_code = 200;
 	
 	/* The CGI RFC allows servers to pass on unvalidated Authorization data */
-	auth = sapi_cgibin_getenv("HTTP_AUTHORIZATION",strlen("HTTP_AUTHORIZATION") TSRMLS_CC);
+	auth = sapi_cgibin_getenv("HTTP_AUTHORIZATION",0 TSRMLS_CC);
 	php_handle_auth_data(auth TSRMLS_CC);
 }
 /* }}} */
@@ -581,6 +781,29 @@ static void php_register_command_line_global_vars(char **arg TSRMLS_DC)
 	efree(*arg);
 }
 
+#if PHP_FASTCGI
+/**
+ * Clean up child processes upon exit
+ */
+void fastcgi_cleanup(int signal)
+{
+
+#ifdef DEBUG_FASTCGI
+	fprintf( stderr, "FastCGI shutdown, pid %d\n", getpid() );
+#endif
+
+#ifndef PHP_WIN32
+	sigaction( SIGTERM, &old_term, 0 );
+
+	/* Kill all the processes in our process group */
+	kill( -pgroup, SIGTERM );
+#endif
+
+	/* We should exit at this point, but MacOSX doesn't seem to */
+	exit( 0 );
+}
+#endif
+
 /* {{{ main
  */
 int main(int argc, char *argv[])
@@ -599,7 +822,6 @@ int main(int argc, char *argv[])
 	char *script_file=NULL;
 	zend_llist global_vars;
 	int interactive=0;
-
 #if FORCE_CGI_REDIRECT
 	int force_redirect = 1;
 	char *redirect_status_env = NULL;
@@ -614,7 +836,7 @@ int main(int argc, char *argv[])
 	void ***tsrm_ls;
 #endif
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	int max_requests = 500;
 	int requests = 0;
 	int fastcgi = !FCGX_IsCGI();
@@ -623,6 +845,8 @@ int main(int argc, char *argv[])
 	FCGX_Request request;
 #ifdef PHP_WIN32
 	int impersonate = 0;
+#else
+    int status = 0;
 #endif
 #endif /* PHP_FASTCGI */
 
@@ -637,7 +861,6 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
-
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
 #endif
@@ -651,7 +874,7 @@ int main(int argc, char *argv[])
 	setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
 #endif
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	if (!fastcgi) {
 #endif
 	/* Make sure we detect we are a cgi - a bit redundancy here,
@@ -667,12 +890,12 @@ int main(int argc, char *argv[])
 			argv0 = NULL;
 		}
 	}
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	}
 #endif
 
 	if (!cgi
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 		/* allow ini override for fastcgi */
 #endif
 		) {
@@ -691,7 +914,7 @@ int main(int argc, char *argv[])
 		ap_php_optarg = orig_optarg;
 	}
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	if (!cgi && !fastcgi) {
 		/* if we're started on command line, check to see if
 		   we are being started as an 'external' fastcgi
@@ -768,7 +991,13 @@ consult the installation file that came with this distribution, or visit \n\
 	}
 #endif							/* FORCE_CGI_REDIRECT */
 
-#ifdef PHP_FASTCGI
+#if ENABLE_PATHINFO_CHECK
+	if (cfg_get_long("cgi.fix_pathinfo", &fix_pathinfo) == FAILURE) {
+		fix_pathinfo = 1;
+	}
+#endif
+
+#if PHP_FASTCGI
 	if (bindpath) {
 		/* Pass on the arg to the FastCGI library, with one exception.
 		 * If just a port is specified, then we prepend a ':' onto the
@@ -891,7 +1120,7 @@ consult the installation file that came with this distribution, or visit \n\
 
 	zend_first_try {
 		if (!cgi
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 			&& !fastcgi
 #endif
 			) {
@@ -912,7 +1141,7 @@ consult the installation file that came with this distribution, or visit \n\
 			ap_php_optarg = orig_optarg;
 		}
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 		/* start of FAST CGI loop */
 		/* Initialise FastCGI request structure */
 
@@ -931,19 +1160,22 @@ consult the installation file that came with this distribution, or visit \n\
 			|| FCGX_Accept_r( &request ) >= 0) {
 #endif
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 		SG(server_context) = (void *) &request;
 #else
 		SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
 #endif
+
 		init_request_info(TSRMLS_C);
 
 		SG(request_info).argv0 = argv0;
 
 		zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
 
+		CG(interactive) = 0;
+
 		if (!cgi
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 			&& !fastcgi
 #endif
 			) { /* never execute the arguments if you are a CGI */	
@@ -1078,15 +1310,7 @@ consult the installation file that came with this distribution, or visit \n\
 						break;
 				}
 			}
-		}							/* not cgi */
 
-		CG(interactive) = interactive;
-
-		if (!cgi
-#ifdef PHP_FASTCGI
-			&& !fastcgi
-#endif
-			) {
 			if (!SG(request_info).query_string) {
 				len = 0;
 				if (script_file) {
@@ -1112,21 +1336,24 @@ consult the installation file that came with this distribution, or visit \n\
 				}
 				SG(request_info).query_string = s;
 			}
+
+			if (script_file) {
+				/* override path_translated if -f on command line */
+				SG(request_info).path_translated = script_file;
+			}
+
+			if (no_headers) {
+				SG(headers_sent) = 1;
+				SG(request_info).no_headers = 1;
+			}
+
+			if (!SG(request_info).path_translated && argc > ap_php_optind) {
+				/* file is on command line, but not in -f opt */
+				SG(request_info).path_translated = estrdup(argv[ap_php_optind]);
+			}
 		}
 
-		if (script_file) {
-			SG(request_info).path_translated = script_file;
-		}
-
-		if (php_request_startup(TSRMLS_C)==FAILURE) {
-			php_module_shutdown(TSRMLS_C);
-			return FAILURE;
-		}
-		if (no_headers) {
-			SG(headers_sent) = 1;
-			SG(request_info).no_headers = 1;
-		}
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 		if (fastcgi) {
 			file_handle.type = ZEND_HANDLE_FILENAME;
 			file_handle.filename = SG(request_info).path_translated;
@@ -1135,46 +1362,23 @@ consult the installation file that came with this distribution, or visit \n\
 			file_handle.filename = "-";
 			file_handle.type = ZEND_HANDLE_FP;
 			file_handle.handle.fp = stdin;
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 		}
 #endif
 		file_handle.opened_path = NULL;
 		file_handle.free_filename = 0;
 
-		/* This actually destructs the elements of the list - ugly hack */
-		zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars TSRMLS_CC);
-		zend_llist_destroy(&global_vars);
+		/* request startup only after we've done all we can to
+		   get path_translated */
+        if (php_request_startup(TSRMLS_C)==FAILURE) {
+            php_module_shutdown(TSRMLS_C);
+            return FAILURE;
+        }
 
-		if (!cgi
-#ifdef PHP_FASTCGI
-			&& !fastcgi
-#endif
-			) {
-			if (!SG(request_info).path_translated && argc > ap_php_optind) {
-				SG(request_info).path_translated = estrdup(argv[ap_php_optind]);
-			}
-		} else {
-		/* If for some reason the CGI interface is not setting the
-		   PATH_TRANSLATED correctly, SG(request_info).path_translated is NULL.
-		   We still call php_fopen_primary_script, because if you set doc_root
-		   or user_dir configuration directives, PATH_INFO is used to construct
-		   the filename as a side effect of php_fopen_primary_script.
-		 */
-			char *env_path_translated=NULL;
-#if DISCARD_PATH
-			env_path_translated = sapi_cgibin_getenv("SCRIPT_FILENAME",strlen("SCRIPT_FILENAME") TSRMLS_CC);
-#else
-			env_path_translated = sapi_cgibin_getenv("PATH_TRANSLATED",strlen("PATH_TRANSLATED") TSRMLS_CC);
-#endif
-			if(env_path_translated) {
-#ifdef __riscos__
-				/* Convert path to unix format*/
-				__riscosify_control|=__RISCOSIFY_DONT_CHECK_DIR;
-				env_path_translated=__unixify(env_path_translated,0,NULL,1,0);
-#endif
-				SG(request_info).path_translated = estrdup(env_path_translated);
-			}
-		}
+        /* This actually destructs the elements of the list - ugly hack */
+        zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars TSRMLS_CC);
+        zend_llist_destroy(&global_vars);
+		
 		if (cgi || SG(request_info).path_translated) {
 			retval = php_fopen_primary_script(&file_handle TSRMLS_CC);
 		}
@@ -1188,7 +1392,7 @@ consult the installation file that came with this distribution, or visit \n\
 			}
 			file_handle.filename = argv0;
 			file_handle.opened_path = expand_filepath(argv0, NULL TSRMLS_CC);
-		}
+		} 
 
 		if (file_handle.handle.fp && (file_handle.handle.fp != stdin)) {
 			/* #!php support */
@@ -1263,10 +1467,11 @@ consult the installation file that came with this distribution, or visit \n\
 
 			if (SG(request_info).path_translated) {
 				free(SG(request_info).path_translated);
+				SG(request_info).path_translated = NULL;
 			}
 		}
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 			if (!fastcgi) break;
 			/* only fastcgi will get here */
 			requests++;

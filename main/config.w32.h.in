@@ -82,6 +82,7 @@
 #define MAGIC_QUOTES 0
 #define USE_CONFIG_FILE 1
 #define DEFAULT_SHORT_OPEN_TAG "1"
+#define ENABLE_PATHINFO_CHECK 1
 
 /* Platform-Specific Configuration. Should not be changed. */
 #define PHP_SIGCHILD 0
