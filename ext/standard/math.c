@@ -697,7 +697,7 @@ _php_math_basetozval(zval *arg, int base, zval *ret) {
 	int i;
 	int mode = 0;
 	char c, *s;
-	unsigned long cutoff;
+	long cutoff;
 	int cutlim;
 
 	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
