@@ -1,3 +1,19 @@
+2002-06-19  Andi Gutmans  <andi@zend.com>
+
+    * zend_globals.h:
+    - This was also supposed to be part of the previous ZEND_MM commit :)
+
+    * zend_alloc.c:
+    - Oops, this was supposed to be part of the previous #ifdef ZEND_MM change
+
+    * zend_mm.h: - Use #ifdef for ZEND_MM
+
+    * zend_mm.c: - Make sure MAX is defined
+
+    * zend_constants.c:
+    - Fix problem where you couldn't define constants with different cases but
+    - the same name.
+
 2002-06-18  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * zend.c: - MFZE1
