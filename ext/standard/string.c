@@ -1095,13 +1095,27 @@ PHP_FUNCTION(basename)
 /* }}} */
 
 /* {{{ php_dirname
- *
- * This function doesn't work with absolute paths in Win32 such as C:\foo
- *  (and it didn't before either). This needs to be fixed
- */
+   Returns directory name component of path */
 PHPAPI void php_dirname(char *path, int len)
 {
 	register char *end = path + len - 1;
+
+#ifdef PHP_WIN32
+	/* Note that on Win32 CWD is per drive (heritage from CP/M).
+	 * This means dirname("c:foo") maps to "c:." or "c:" - which means CWD on C: drive.
+	 */
+	if ((2 <= len) && isalpha(path[0]) && (':' == path[1])) {
+		/* Skip over the drive spec (if any) so as not to change */
+		path += 2;
+		if (2 == len) {
+			/* Return "c:" on Win32 for dirname("c:").
+			 * It would be more consistent to return "c:." 
+			 * but that would require making the string *longer*.
+			 */
+			return;
+		}
+	}
+#endif
 
 	if (len <= 0) {
 		/* Illegal use of this function */
