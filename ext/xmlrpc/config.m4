@@ -11,10 +11,10 @@ PHP_ARG_WITH(xmlrpc, for XMLRPC-EPI support,
 [  --with-xmlrpc[=DIR]     Include XMLRPC-EPI support.])
 
 PHP_ARG_WITH(expat-dir, libexpat dir for XMLRPC-EPI,
-[  --with-expat-dir=DIR      XMLRPC-EPI: libexpat dir for XMLRPC-EPI.],yes,no)
+[  --with-expat-dir=DIR      XMLRPC-EPI: libexpat dir for XMLRPC-EPI.],no,no)
 
 PHP_ARG_WITH(iconv-dir, iconv dir for XMLRPC-EPI,
-[  --with-iconv-dir=DIR      XMLRPC-EPI: iconv dir for XMLRPC-EPI.],yes,no)
+[  --with-iconv-dir=DIR      XMLRPC-EPI: iconv dir for XMLRPC-EPI.],no,no)
 
 if test "$PHP_XMLRPC" != "no"; then
 
@@ -87,7 +87,5 @@ dnl for xmlrpc-epi because of this.
 
   PHP_ADD_INCLUDE($XMLRPC_DIR)
   PHP_ADD_LIBRARY_WITH_PATH(xmlrpc, $XMLRPC_DIR/lib, XMLRPC_SHARED_LIBADD)
-  
 fi
-
 
