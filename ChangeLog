@@ -1,3 +1,81 @@
+2004-04-21  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS:
+      News about the ssl server socket bug
+
+    * ext/openssl/openssl.c
+      ext/openssl/xp_ssl.c:
+      Fix bug #28096 - stream_socket_accept() on an SSL server socket doesn't
+      enable SSL on the accepted socket.
+      
+      - Add cipher list context option
+      - Add helpful hint about why SSL server socket fails with mysterious
+        error (eg: you need an SSL certificate for most ciphers).
+
+    * NEWS
+      main/streams/mmap.c:
+      Fixed bug #19749 (shouldn't mmap() files larger than memory_limit)
+
+2004-04-21  Andi Gutmans  <andi@zend.com>
+
+    * configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - RC2-dev
+
+    * (php_5_0_0RC2RC2)
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Prepare for RC2RC2 (if everything is OK especially Zeev's interface
+      - patch I'll roll RC2 tomorrow).
+
+2004-04-21  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (php_5_0_0RC2RC2)
+      NEWS:
+      yaz moved
+
+    * ext/yaz/.cvsignore
+      ext/yaz/CREDITS
+      ext/yaz/README
+      ext/yaz/config.m4
+      ext/yaz/config.w32
+      ext/yaz/package.xml
+      ext/yaz/php_yaz.c
+      ext/yaz/php_yaz.h
+      ext/yaz/yaz.dsp:
+      Moved ext/yaz to PECL.
+
+2004-04-21  Zeev Suraski  <zeev@zend.com>
+
+    * (php_5_0_0RC2RC2)
+      ZendEngine2/zend_compile.c:
+      Restore fatal error in case a method that's supposed to implement an
+      interface/abstract method, breaks its prototype
+
+2004-04-21  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Reorder news
+
+2004-04-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Correct news entry order.
+
+    * (PHP_4_3)
+      ext/sysvshm/sysvshm.c:
+      MFH:
+      	Fixed possible memory leaks.
+      	Prevent shm_attach() from destroying non-shm resources.
+
+    * (php_5_0_0RC2RC2)
+      ext/sysvshm/sysvshm.c:
+      Fixed possible memory leaks.
+      Prevent shm_attach() from destroying non-shm resources.
+
 2004-04-20  Frank M. Kromann  <frank@kromann.info>
 
     * NEWS

@@ -1,3 +1,20 @@
+2004-04-21  Andi Gutmans  <andi@zend.com>
+
+    * zend.h:
+      - RC2-dev
+
+    * (php_5_0_0RC2RC2)
+      zend.h:
+      - Prepare for RC2RC2 (if everything is OK especially Zeev's interface
+      - patch I'll roll RC2 tomorrow).
+
+2004-04-21  Zeev Suraski  <zeev@zend.com>
+
+    * (php_5_0_0RC2RC2)
+      zend_compile.c:
+      Restore fatal error in case a method that's supposed to implement an
+      interface/abstract method, breaks its prototype
+
 2004-04-20  Andi Gutmans  <andi@zend.com>
 
     * zend_language_parser.y:
