@@ -334,18 +334,30 @@ static const ps_serializer *_php_find_ps_serializer(char *name PSLS_DC)
 static void _php_session_start(PSLS_D)
 {
 	pval **ppid;
+	pval **data;
 	int send_cookie = 1;
+	int define_sid = 1;
+	int module_number = PS(module_number);
 	int nrand;
 	ELS_FETCH();
 
 	if (PS(nr_open_sessions) > 0) return;
 
 	if(!PS(id) &&
-		zend_hash_find(&EG(symbol_table), PS(session_name), 
+			zend_hash_find(&EG(symbol_table), PS(session_name),
 				strlen(PS(session_name)) + 1, (void **) &ppid) == SUCCESS) {
 		convert_to_string((*ppid));
 		PS(id) = estrndup((*ppid)->value.str.val, (*ppid)->value.str.len);
 		send_cookie = 0;
+	}
+
+	if(!send_cookie &&
+			zend_hash_find(&EG(symbol_table), "HTTP_COOKIE_VARS",
+				sizeof("HTTP_COOKIE_VARS"), (void **) &data) == SUCCESS &&
+			(*data)->type == IS_ARRAY &&
+			zend_hash_find((*data)->value.ht, PS(session_name),
+				strlen(PS(session_name)) + 1, (void **) &ppid) == SUCCESS) {
+		define_sid = 0;
 	}
 	
 	if(!PS(id)) {
@@ -355,6 +367,17 @@ static void _php_session_start(PSLS_D)
 	if(send_cookie) {
 		_php_session_send_cookie(PSLS_C);
 	}
+	
+	if(define_sid) {
+		char *buf;
+
+		buf = emalloc(strlen(PS(session_name)) + strlen(PS(id)) + 5);
+		sprintf(buf, "%s=%s", PS(session_name), PS(id));
+		REGISTER_STRING_CONSTANT("SID", buf, 0);
+		PS(php_sid) = buf;
+	} else
+		PS(php_sid) = NULL;
+
 	PS(nr_open_sessions)++;
 
 	_php_session_initialize(PSLS_C);
@@ -621,6 +644,8 @@ static void php_rshutdown_session_globals(PSLS_D)
 {
 	if(PS(mod_data))
 		PS(mod)->close(&PS(mod_data));
+	if(PS(php_sid))
+		efree(PS(php_sid));
 	efree(PS(save_path));
 	efree(PS(session_name));
 	if(PS(id)) efree(PS(id));
@@ -659,6 +684,7 @@ int php_minit_session(INIT_FUNC_ARGS)
 #ifdef ZTS
 	ps_globals_id = ts_allocate_id(sizeof(php_ps_globals), NULL, NULL);
 #endif
+	PS(module_number) = module_number;
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
