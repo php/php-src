@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2003, Version 4.3.3RC4
+- Fixed bug #25037 (Possible infinite loop inside SendText()). (Ilia)
 - Fixed bug #25007 (rand() & mt_rand() seed RNG every call). (Jani)
 - Fixed bug #24989 (external libexpat conflicts with bundled libexpat). (Jani)
 - Fixed bug #24980 (array_reduce() uses first element as default running

@@ -623,6 +623,7 @@ send_chunk:
 			i = data_cln_len - (parts * 1024);
 			strlcpy(Buffer, p, i);
 			Buffer[i] = '\0';
+			parts++;
 			goto send_chunk;
 		}
 	}
