@@ -71,13 +71,39 @@ _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix
 {
 	XML_Parser  parser = (XML_Parser) user;
 	xmlChar    *qualified_name = NULL;
-
+	xmlChar **attrs = NULL;
+	int i;
+	int z = 0;
+	int y = 0;
+	
 	if (parser->h_start_element == NULL) {
 		return;
 	}
 	_qualify_namespace(parser, name, URI, &qualified_name);
-	parser->h_start_element(parser->user, (const XML_Char *) qualified_name, (const XML_Char **) attributes);
-
+	
+	if (attributes != NULL) {
+		attrs = safe_emalloc((nb_attributes  * 2) + 1, sizeof(int *), 0);
+		xmlChar    *qualified_name_attr = NULL;
+		
+		for (i = 0; i < nb_attributes; i += 1) {
+			attrs[z] =  xmlStrdup( attributes[y]);
+			
+			if (attributes[y+1] != NULL) {
+				_qualify_namespace(parser, xmlStrndup(attributes[y + 3] , (int) (attributes[y + 4] - attributes[y + 3])), attributes[2], &qualified_name_attr);
+			} else {
+				qualified_name_attr = xmlStrndup(attributes[y + 3] , (int) (attributes[y + 4] - attributes[y + 3]));
+			}
+			attrs[z + 1] = qualified_name_attr;
+			z += 2;
+			y += 5;
+		}
+		
+		attrs[z] = NULL;
+	}
+	parser->h_start_element(parser->user, (const XML_Char *) qualified_name, (const XML_Char **) attrs);
+	if (attrs) {
+		efree(attrs);
+	}
 	xmlFree(qualified_name);
 }
 #endif
