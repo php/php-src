@@ -21,12 +21,14 @@
 
 #include "php_streams.h"
 
-#define php_stream_memory_create(mode) _php_stream_memory_create((mode) STREAMS_REL_CC);
-#define php_stream_memory_open(mode, buf, length) _php_stream_memory_open((mode), (buf), (length) STREAMS_REL_CC);
-#define php_stream_memory_get_buffer(stream, length) _php_stream_memory_get_buffer((stream), (length) STREAMS_REL_CC);
+#define php_stream_memory_create(mode) _php_stream_memory_create((mode) STREAMS_CC)
+#define php_stream_memory_create_rel(mode) _php_stream_memory_create((mode) STREAMS_REL_CC)
+#define php_stream_memory_open(mode, buf, length) _php_stream_memory_open((mode), (buf), (length) STREAMS_CC)
+#define php_stream_memory_get_buffer(stream, length) _php_stream_memory_get_buffer((stream), (length) STREAMS_CC)
 
-#define php_stream_temp_create(mode, max_memory_usage) _php_stream_temp_create((mode), (max_memory_usage) STREAMS_REL_CC);
-#define php_stream_temp_open(mode, max_memory_usage, buf, length) _php_stream_temp_open((mode), (max_memory_usage), (buf), (length) STREAMS_REL_CC);
+#define php_stream_temp_create(mode, max_memory_usage) _php_stream_temp_create((mode), (max_memory_usage) STREAMS_CC)
+#define php_stream_temp_create_rel(mode, max_memory_usage) _php_stream_temp_create((mode), (max_memory_usage) STREAMS_REL_CC)
+#define php_stream_temp_open(mode, max_memory_usage, buf, length) _php_stream_temp_open((mode), (max_memory_usage), (buf), (length) STREAMS_CC)
 
 
 PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC);
