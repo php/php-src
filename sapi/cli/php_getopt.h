@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
+
 #include "php.h"
 
 /* Define structure for one recognized option (both single char and long name).
