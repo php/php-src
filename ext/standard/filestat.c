@@ -122,7 +122,7 @@ PHP_RSHUTDOWN_FUNCTION(filestat)
 		efree (BG(CurrentStatFile));
 	}
 	return SUCCESS;
-} 
+}
 
 /* {{{ proto double diskfreespace(string path)
    Get free diskspace for filesystem that path is on */
@@ -181,7 +181,7 @@ PHP_FUNCTION(diskfreespace)
 				&TotalNumberOfFreeBytes) == 0) RETURN_FALSE;
 
 			/* i know - this is ugly, but i works (thies@digicol.de) */
-			bytesfree  = FreeBytesAvailableToCaller.HighPart * 
+			bytesfree  = FreeBytesAvailableToCaller.HighPart *
 				(double) (((unsigned long)1) << 31) * 2.0 +
 				FreeBytesAvailableToCaller.LowPart;
 		}
@@ -202,7 +202,7 @@ PHP_FUNCTION(diskfreespace)
 	{
 		FSALLOCATE fsinfo;
   		char drive = (*path)->value.str.val[0] & 95;
-  		
+
 		if (DosQueryFSInfo( drive ? drive - 64 : 0, FSIL_ALLOC, &fsinfo, sizeof( fsinfo ) ) == 0)
 			bytesfree = (double)fsinfo.cbSector * fsinfo.cSectorUnit * fsinfo.cUnitAvail;
 	}
@@ -272,8 +272,8 @@ PHP_FUNCTION(chgrp)
 }
 /* }}} */
 
-/* {{{ proto bool chgrp(string filename, mixed group)
-   Change file group */
+/* {{{ proto bool chown (string filename, mixed user)
+   Change file owner */
 PHP_FUNCTION(chown)
 {
 #ifndef WINDOWS
@@ -326,7 +326,7 @@ PHP_FUNCTION(chmod)
 	pval **filename, **mode;
 	int ret,imode;
 	PLS_FETCH();
-	
+
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2,&filename,&mode)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -341,12 +341,12 @@ PHP_FUNCTION(chmod)
 	if (php_check_open_basedir((*filename)->value.str.val))
 		RETURN_FALSE;
 
-	imode = (*mode)->value.lval; 
+	imode = (*mode)->value.lval;
 	/* in safe mode, do not allow to setuid files.
-	   Setuiding files could allow users to gain privileges 
+	   Setuiding files could allow users to gain privileges
 	   that safe mode doesn't give them.
 	*/
-	if(PG(safe_mode)) 
+	if(PG(safe_mode))
 	  imode &= 0777;
 
 	ret = V_CHMOD((*filename)->value.str.val, imode);
@@ -361,7 +361,7 @@ PHP_FUNCTION(chmod)
 
 /* {{{ proto bool touch(string filename [, int time])
    Set modification time of file */
-PHP_FUNCTION(touch) 
+PHP_FUNCTION(touch)
 {
 #if HAVE_UTIME
 	pval **filename, **filetime;
@@ -371,7 +371,7 @@ PHP_FUNCTION(touch)
 	struct utimbuf *newtime = NULL;
 	int ac = ZEND_NUM_ARGS();
 	PLS_FETCH();
-	
+
 	if (ac == 1 && zend_get_parameters_ex(1,&filename) != FAILURE) {
 #ifndef HAVE_UTIME_NULL
 		newtime = (struct utimbuf *)emalloc(sizeof(struct utimbuf));
@@ -504,7 +504,7 @@ static void php_stat(const char *filename, int type, pval *return_value)
 	} else {
 		int   groups,n,i;
 		gid_t *gids;
-		
+
 		groups = getgroups(0,NULL);
 		if(groups) {
 			gids=(gid_t *)emalloc(groups*sizeof(gid_t));
@@ -515,7 +515,7 @@ static void php_stat(const char *filename, int type, pval *return_value)
 					wmask=S_IWGRP;
 					xmask=S_IXGRP;
 					break;
-				} 
+				}
 			}
 			efree(gids);
 		}
