@@ -168,15 +168,13 @@ PHP_FUNCTION(notes_create_db)
 
 	error = NotesInitExtended( argc, (char **) argv );
 
-	if( error ){
-
+	if (error) {
 		OSLoadString(NULLHANDLE, ERR(error), error_string, sizeof(error_string));
 		php_error(E_WARNING,"Unable to initialize Lotus Notes: %s", error_string);
 		RETURN_FALSE;
 	}
 	
-	if (error = NSFDbCreate ((*db)->value.str.val, (USHORT) DBCLASS_NOTEFILE, FALSE)){
-	
+	if (error = NSFDbCreate ((*db)->value.str.val, (USHORT) DBCLASS_NOTEFILE, FALSE)) {
 		OSLoadString(NULLHANDLE, ERR(error), error_string, sizeof(error_string));
 		php_error(E_WARNING,"Unable to create database: %s", error_string);
 		NotesTerm();
@@ -213,15 +211,13 @@ PHP_FUNCTION(notes_drop_db)
 
 	error = NotesInitExtended( argc, (char **) argv );
 
-	if( error ){
-
+	if (error) {
 		OSLoadString(NULLHANDLE, ERR(error), error_string, sizeof(error_string));
 		php_error(E_WARNING,"Unable to initialize Lotus Notes: %s", error_string);
 		RETURN_FALSE;
 	}
 	
-	if (error = NSFDbDelete ((*db)->value.str.val)){
-	
+	if (error = NSFDbDelete ((*db)->value.str.val)) {
 		OSLoadString(NULLHANDLE, ERR(error), error_string, sizeof(error_string));
 		php_error(E_WARNING,"Unable to delete database: %s", error_string);
 		NotesTerm();
@@ -260,16 +256,15 @@ PHP_FUNCTION(notes_version)
 
 	convert_to_string_ex(db);
 
-	error = NotesInitExtended( argc, (char **) argv );
+	error = NotesInitExtended(argc, (char **) argv);
 
-	if( error ){
-
+	if (error) {
 		OSLoadString(NULLHANDLE, ERR(error), error_string, sizeof(error_string));
 		php_error(E_WARNING,"Unable to initialize Lotus Notes: %s", error_string);
 		RETURN_FALSE;
 	}
 	
-	if (error = NSFDbOpen ((*db)->value.str.val, &db_handle)){
+	if (error = NSFDbOpen((*db)->value.str.val, &db_handle)) {
 	
 		OSLoadString(NULLHANDLE, ERR(error), error_string, sizeof(error_string));
 		php_error(E_WARNING,"Unable to open database: %s", error_string);
@@ -277,8 +272,7 @@ PHP_FUNCTION(notes_version)
 		RETURN_FALSE;
 	}
 
-	if( error = NSFDbGetBuildVersion (db_handle, &wbuild) ){
-
+	if (error = NSFDbGetBuildVersion(db_handle, &wbuild)) {
 		OSLoadString(NULLHANDLE, ERR(error), error_string, sizeof(error_string));
 		php_error(E_WARNING,"Unable to get Lotus Notes version: %s", error_string);
 		NSFDbClose(db_handle);
@@ -289,55 +283,22 @@ PHP_FUNCTION(notes_version)
 	NSFDbClose(db_handle);
 	NotesTerm();
 
-	if( wbuild > 0 && wbuild < 82 ){
-
-			RETURN_DOUBLE(1.0);
-	}
-	else{
-
-		if( wbuild > 81 && wbuild < 94 ){
-
-			RETURN_DOUBLE(2.0);
-		}
-		else{
-
-			if(wbuild > 93 && wbuild < 119 ){
-
-				RETURN_DOUBLE(3.0);
-			}
-			else{
-
-				if( wbuild > 118 && wbuild < 137 ){
-
-					RETURN_DOUBLE(4.0);
-				}
-				else{
-
-					if( wbuild == 138 ){
-
-						RETURN_DOUBLE(4.1);
-					}
-					else{
-
-						if( wbuild > 139 && wbuild < 146 ){
-
-							RETURN_DOUBLE(4.5);
-						}
-						else{
-
-							if( wbuild == 147 ){
-		
-								RETURN_DOUBLE(4.6);
-							}
-							else{
-								
-								RETURN_DOUBLE(5.0);
-							}
-						}
-					}
-				}
-			}
-		}
+	if(wbuild > 0 && wbuild < 82) {
+		RETURN_DOUBLE(1.0);
+	} else if (wbuild > 81 && wbuild < 94) {
+		RETURN_DOUBLE(2.0);
+	} else if (wbuild > 93 && wbuild < 119) {
+		RETURN_DOUBLE(3.0);
+	} else if (wbuild > 118 && wbuild < 137) {
+		RETURN_DOUBLE(4.0);
+	} else if (wbuild == 138) {
+		RETURN_DOUBLE(4.1);
+	} else if (wbuild > 139 && wbuild < 146) {
+		RETURN_DOUBLE(4.5);
+	} else if (wbuild == 147) {
+		RETURN_DOUBLE(4.6);
+	} else {
+		RETURN_DOUBLE(5.0);
 	}
 }
 /* }}} */
@@ -372,14 +333,13 @@ PHP_FUNCTION(notes_create_note)
 
 	error = NotesInitExtended( argc, (char **) argv );
 
-	if( error ){
-
+	if (error) {
 		OSLoadString(NULLHANDLE, ERR(error), error_string, sizeof(error_string));
 		php_error(E_WARNING,"Unable to initialize Lotus Notes: %s", error_string);
 		RETURN_FALSE;
 	}
 	
-	if (error = NSFDbOpen ((*db)->value.str.val, &db_handle)){
+	if (error = NSFDbOpen((*db)->value.str.val, &db_handle)) {
 	
 		OSLoadString(NULLHANDLE, ERR(error), error_string, sizeof(error_string));
 		php_error(E_WARNING,"Unable to open database: %s", error_string);
@@ -387,7 +347,7 @@ PHP_FUNCTION(notes_create_note)
 		RETURN_FALSE;
 	}
 
-    if (error = NSFNoteCreate (db_handle, &note_handle)){
+    if (error = NSFNoteCreate (db_handle, &note_handle)) {
 
 		OSLoadString(NULLHANDLE, ERR(error), error_string, sizeof(error_string));
 		php_error(E_WARNING,"Unable to create note: error_string");
@@ -396,11 +356,7 @@ PHP_FUNCTION(notes_create_note)
     }
 
     /* Append the form name item to the new note */
-    if (error = NSFItemSetText( note_handle,
-                                FIELD_FORM,
-                                (*form_name)->value.str.val,
-                                MAXWORD)){
-
+    if (error = NSFItemSetText(note_handle, FIELD_FORM, (*form_name)->value.str.val, MAXWORD)) {
 		OSLoadString(NULLHANDLE, ERR(error), error_string, sizeof(error_string));
 		php_error(E_WARNING,"Unable to use the form: %s", error_string);
         NSFNoteClose (note_handle);
@@ -409,7 +365,6 @@ PHP_FUNCTION(notes_create_note)
     }
 
     if (error = NSFNoteUpdate (note_handle, 0)) {
-
 		OSLoadString(NULLHANDLE, ERR(error), error_string, sizeof(error_string));
 		php_error(E_WARNING,"Unable to save the note: %s", error_string);
         NSFNoteClose (note_handle);
@@ -515,8 +470,7 @@ PHP_FUNCTION(notes_mark_read)
 
 	error = NotesInitExtended( argc, (char **) argv );
 
-	if( error ){
-
+	if (error) {
 		OSLoadString(NULLHANDLE, ERR(error), error_string, sizeof(error_string));
 		php_error(E_WARNING,"Unable to initialize Lotus Notes: %s", error_string);
 		RETURN_FALSE;
@@ -524,18 +478,16 @@ PHP_FUNCTION(notes_mark_read)
 	
 	curArg = 2;
 
-	UserNameLen = strlen ((*user_name)->value.str.val);
+	UserNameLen = Z_STRLEN_PP(user_name);
 
 	curAction = 0;
 	ActionCount = 1;
 
 	ActionTable[curAction].AddFlag = FALSE;
 
-	ActionTable[curAction].NoteID =
-	 strtoul ((*note_id)->value.str.val, &pEnd, 16);
+	ActionTable[curAction].NoteID = strtoul ((*note_id)->value.str.val, &pEnd, 16);
 
-	if (error = NSFDbOpen ((*db)->value.str.val, &db_handle)){
-	
+	if (error = NSFDbOpen((*db)->value.str.val, &db_handle)) {
 		OSLoadString(NULLHANDLE, ERR(error), error_string, sizeof(error_string));
 		php_error(E_WARNING,"Unable to open database: %s", error_string);
 		NotesTerm();
@@ -545,8 +497,7 @@ PHP_FUNCTION(notes_mark_read)
 	error = UpdateUnread (db_handle, (*user_name)->value.str.val, UserNameLen,
 				ActionTable, ActionCount, &UndoID);
 
-	if ( (error == NOERROR) && UndoID ){
-
+	if ((error == NOERROR) && UndoID) {
 	 error = UndoUnreadStatus (db_handle, (*user_name)->value.str.val, UserNameLen, ActionTable,
 								ActionCount, UndoID);
 	}
@@ -554,12 +505,9 @@ PHP_FUNCTION(notes_mark_read)
     /* Close the database */
 	error = NSFDbClose (db_handle);
 
-	if (NOERROR == error){
-	
+	if (NOERROR == error) {
 		RETURN_TRUE;
-	}
-	else{
-
+	} else {
 		OSLoadString(NULLHANDLE, ERR(error), error_string, sizeof(error_string));
 		php_error(E_WARNING,"Unable to close database: %s", error_string);
 		RETURN_FALSE;
