@@ -523,6 +523,7 @@ static void php_session_initialize(TSRMLS_D)
 	}
 }
 
+
 static void php_session_save_current_state(TSRMLS_D)
 {
 	char *val;
@@ -1280,25 +1281,18 @@ PHP_FUNCTION(session_destroy)
 /* }}} */
 
 #ifdef TRANS_SID
-void session_adapt_uris(const char *src, size_t srclen, char **new, size_t *newlen TSRMLS_DC)
+void session_adapt_uris(const char *src, size_t srclen, char **new, size_t *newlen, zend_bool do_flush TSRMLS_DC)
 {
-	if (PS(define_sid) && (PS(session_status) == php_session_active))
-		*new = url_adapt_ext_ex(src, srclen, PS(session_name), PS(id), newlen TSRMLS_CC);
+	if (PS(define_sid) && (PS(session_status) == php_session_active)) {
+		*new = url_adapt_ext_ex(src, srclen, PS(session_name), PS(id), newlen, do_flush TSRMLS_CC);
+	}
 }
 
 void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newlen TSRMLS_DC)
 {
-	if (PS(define_sid) && (PS(session_status) == php_session_active))
+	if (PS(define_sid) && (PS(session_status) == php_session_active)) {
 		*new = url_adapt_single_url(url, urllen, PS(session_name), PS(id), newlen TSRMLS_CC);
-}
-
-void session_adapt_flush(int (*write)(const char *, uint TSRMLS_DC) TSRMLS_DC)
-{
-	char *str;
-	size_t len;
-	
-	str = url_adapt_flush(&len TSRMLS_CC);
-	if (str) write(str, len TSRMLS_CC);
+	}
 }
 
 #endif
@@ -1424,6 +1418,26 @@ PHP_MINFO_FUNCTION(session)
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
+}
+
+
+static void php_session_output_handler(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC)
+{
+	zend_bool do_flush;
+	
+	if (mode&PHP_OUTPUT_HANDLER_END) {
+		do_flush=1;
+	}
+	session_adapt_uris(output, output_len, handled_output, handled_output_len, do_flush TSRMLS_CC);
+}
+
+
+void php_session_start_output_handler(INIT_FUNC_ARGS, uint chunk_size)
+{
+	PHP_RINIT(url_scanner)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_RINIT(url_scanner_ex)(INIT_FUNC_ARGS_PASSTHRU);
+	php_start_ob_buffer(NULL, chunk_size TSRMLS_CC);
+	php_ob_set_internal_handler(php_session_output_handler, chunk_size TSRMLS_CC);
 }
 
 /*

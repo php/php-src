@@ -24,7 +24,7 @@ PHP_MSHUTDOWN_FUNCTION(url_scanner_ex);
 PHP_RSHUTDOWN_FUNCTION(url_scanner_ex);
 PHP_RINIT_FUNCTION(url_scanner_ex);
 
-char *url_adapt_ext_ex(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen TSRMLS_DC);
+char *url_adapt_ext_ex(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen, zend_bool do_flush TSRMLS_DC);
 
 char *url_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen TSRMLS_DC);
 

@@ -28,6 +28,7 @@
 #include "php_math.h"
 #include "php_incomplete_class.h"
 #include "ext/standard/info.h"
+#include "ext/session/php_session.h"
 #include "zend_operators.h"
 #include <stdarg.h>
 #include <stdlib.h>
@@ -882,8 +883,7 @@ PHP_RINIT_FUNCTION(basic)
 
 #ifdef TRANS_SID
 	if (BG(use_trans_sid)) {
-		PHP_RINIT(url_scanner)(INIT_FUNC_ARGS_PASSTHRU);
-		PHP_RINIT(url_scanner_ex)(INIT_FUNC_ARGS_PASSTHRU);
+		php_session_start_output_handler(INIT_FUNC_ARGS_PASSTHRU, 4096);
 	}
 #endif
 
