@@ -197,7 +197,7 @@ static char *php_gethostbyname(char *name)
 
 	hp = gethostbyname(name);
 
-	if (!hp || !hp->h_addr_list) {
+	if (!hp || !*(hp->h_addr_list)) {
 		return estrdup(name);
 	}
 
