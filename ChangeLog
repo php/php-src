@@ -1,3 +1,61 @@
+2001-03-11  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/config.m4
+      ext/midgard/config.m4.session: fixed misplaced PHP_SUBST
+
+    * ext/midgard/attachment.c
+      ext/midgard/config.m4
+      ext/midgard/config.m4.session:
+    added PHP_SUBST(MIDGARD_SHARED_LIB) to dynamically link against libmidgard in config.m4
+    removed debug info in attachments
+
+2001-03-11  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/DB.php: Revised version of the parseDSN function.
+
+    Submitted by: "Tomas V.V.Cox" <cox@idecnet.com>
+
+2001-03-11  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/attachment.c: added missing conversion.
+
+    * ext/midgard/sitegroup.c: Added missing parameter.
+
+2001-03-11  Alexander Feldman  <alex@zend.com>
+
+    * NEWS
+      ext/standard/config.m4
+      ext/standard/file.c:
+    Fixed a compatibility problem is some file functions (fgets, fputs, fread,
+    fwrite). The ANSI standard says that if a file is opened in read/write
+    mode, fseek() should be called before switching from reading to writing
+    and vice versa.
+
+2001-03-11  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/tests/db_error.phpt
+      pear/DB/tests/db_error2.phpt: * new line numbers
+
+2001-03-11  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/Output.php: Updated example.
+
+2001-03-11  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/sybase_ct/php_sybase_ct.c: Added missing alias. PR: #9550
+
+    * ext/standard/basic_functions.c
+      ext/standard/dns.c
+      ext/standard/dns.h
+      main/config.w32.h: HAVE_BINDLIB --> HAVE_LIBBIND
+
+    * configure.in:
+    Check for inet_aton only if libbind is not found (or inet_aton is not in
+    libbind). Fixes bug: #8814
+
+    * ext/curl/config.m4:
+    If AC_CHECK_LIB fails, assume that --with-openssl is needed
+
 2001-03-10  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/ircg/ircg.c:
