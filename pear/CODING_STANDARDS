@@ -124,7 +124,7 @@ function connect(&$dsn, $persistent = false)
 }
 
 Functions should be named using the "studly caps" style (also referred to as
-"bumpy case" or "camel caps".  The initial letter of the name is lowercase,
+"bumpy case" or "camel caps").  The initial letter of the name is lowercase,
 and each letter that starts a new "word" is capitalized.  Some examples:
 
     connect()       getData()       buildSomeWidget()
