@@ -1388,6 +1388,11 @@ PHP_FUNCTION(preg_quote)
 				*q++ = c;
 				break;
 
+			case '\0':
+				*q++ = '\\';
+				*q++ = '0';
+				break;
+
 			default:
 				if (quote_delim && c == delim_char)
 					*q++ = '\\';
