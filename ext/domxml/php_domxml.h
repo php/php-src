@@ -56,6 +56,8 @@ PHP_FUNCTION(domxml_setattr);
 PHP_FUNCTION(domxml_children);
 PHP_FUNCTION(domxml_lastchild);
 PHP_FUNCTION(domxml_parent);
+PHP_FUNCTION(domxml_node);
+PHP_FUNCTION(domxml_newchild);
 
 /* Class Attribute methods */
 PHP_FUNCTION(domxml_attrname);

@@ -40,6 +40,8 @@ static zend_function_entry php_domxml_functions[] = {
 	PHP_FE(domxml_getattr,	NULL)
 	PHP_FE(domxml_setattr,	NULL)
 	PHP_FE(domxml_children,	NULL)
+	PHP_FE(domxml_newchild,	NULL)
+	PHP_FE(domxml_node,	NULL)
 	PHP_FALIAS(dom,		getdom,	NULL)
 	{NULL, NULL, NULL}
 };
@@ -55,13 +57,19 @@ static zend_function_entry php_domxmldtd_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+/* FIXME: If the following list extends 5 entries, then calling
+   any of the functions results in a segm fault in execute().
+   It appears the hash table is somewhat corrupted.
+*/
 static zend_function_entry php_domxmlnode_class_functions[] = {
-	PHP_FALIAS(lastchild,	domxml_lastchild,	NULL)
+//	PHP_FALIAS(lastchild,	domxml_lastchild,	NULL)
 	PHP_FALIAS(children,	domxml_children,	NULL)
 	PHP_FALIAS(parent,	domxml_parent,		NULL)
+	PHP_FALIAS(newchild,	domxml_newchild,		NULL)
 	PHP_FALIAS(getattr,	domxml_getattr,		NULL)
-	PHP_FALIAS(setattr,	domxml_setattr,		NULL)
+//	PHP_FALIAS(setattr,	domxml_setattr,		NULL)
 	PHP_FALIAS(attributes,	domxml_attributes,	NULL)
+//	PHP_FALIAS(node,	domxml_node,	NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -88,6 +96,7 @@ PHP_MINIT_FUNCTION(domxml)
 	le_domxmlnodep = register_list_destructors(xmlFreeNode, NULL);
 	le_domxmlattrp = register_list_destructors(xmlFreeProp, NULL);
 	*/
+	
 
 	INIT_CLASS_ENTRY(domxmldoc_class_entry, "Dom document", php_domxmldoc_class_functions);
 	INIT_CLASS_ENTRY(domxmldtd_class_entry, "Dtd", php_domxmldtd_class_functions);
@@ -122,7 +131,7 @@ PHP_MINFO_FUNCTION(domxml)
 }
 
 /* {{{ proto string domxml_attrname([int dir_handle])
-   Read directory entry from dir_handle */
+   Returns list of attribute objects */
 PHP_FUNCTION(domxml_attrname)
 {
 	pval *id, **tmp;
@@ -168,6 +177,36 @@ PHP_FUNCTION(domxml_attrname)
 		add_property_long(return_value, "attribute", ret);
 		attr = attr->next;
 	}
+}
+/* }}} */
+
+/* {{{ proto class node(string name)
+   Creates node */
+PHP_FUNCTION(domxml_node)
+{
+	pval *arg;
+	xmlNode *node;
+	int ret;
+	
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(arg);
+
+	node = xmlNewNode(NULL, arg->value.str.val);
+	if (!node) {
+		RETURN_FALSE;
+	}
+	ret = zend_list_insert(node, le_domxmlnodep);
+
+	/* construct an object with some methods */
+	object_init_ex(return_value, domxmlnode_class_entry_ptr);
+	add_property_long(return_value, "node", ret);
+	add_property_long(return_value, "type", node->type);
+	add_property_stringl(return_value, "name", (char *) node->name, strlen(node->name), 1);
+	if(node->content)
+		add_property_stringl(return_value, "content", (char *) node->content, strlen(node->content), 1);
+	zend_list_addref(ret);
 }
 /* }}} */
 
@@ -222,8 +261,59 @@ PHP_FUNCTION(domxml_lastchild)
 }
 /* }}} */
 
+/* {{{ proto string domxml_newchild([int node], int parent, string name, string content)
+   Create new child of parent */
+PHP_FUNCTION(domxml_newchild)
+{
+	pval *id, *name, *content, **tmp;
+	int id_to_find;
+	xmlNode *nodep, *newnode;
+	int type;
+	int ret;
+	
+	if (ARG_COUNT(ht) == 3) {
+		id = getThis();
+		if (id) {
+			if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
+				php_error(E_WARNING, "unable to find my handle property");
+				RETURN_FALSE;
+			}
+			id_to_find = (*tmp)->value.lval;
+		} else {
+			RETURN_FALSE;
+		}
+	} else if ((ARG_COUNT(ht) != 3) || getParameters(ht, 3, &id, &name, &content) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	} else {
+		convert_to_long(id);
+		id_to_find = id->value.lval;
+	}
+		
+	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
+	if (!nodep || type != le_domxmlnodep) {
+		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
+		RETURN_FALSE;
+	}
+
+	newnode = xmlNewChild(nodep, NULL, name->value.str.val, content->value.str.val);
+	if (!newnode) {
+		RETURN_FALSE;
+	}
+
+	ret = zend_list_insert(newnode, le_domxmlnodep);
+
+	/* construct an object with some methods */
+	object_init_ex(return_value, domxmlnode_class_entry_ptr);
+	add_property_long(return_value, "node", ret);
+	add_property_long(return_value, "type", newnode->type);
+	add_property_stringl(return_value, "name", (char *) newnode->name, strlen(newnode->name), 1);
+	if(newnode->content)
+		add_property_stringl(return_value, "content", (char *) newnode->content, strlen(newnode->content), 1);
+}
+/* }}} */
+
 /* {{{ proto string domxml_parent([int node])
-   Read directory entry from dir_handle */
+   Returns parent of node */
 PHP_FUNCTION(domxml_parent)
 {
 	pval *id, **tmp;
@@ -274,7 +364,7 @@ PHP_FUNCTION(domxml_parent)
 /* }}} */
 
 /* {{{ proto string domxml_children([int node])
-   Read directory entry from dir_handle */
+   Returns list of children nodes */
 PHP_FUNCTION(domxml_children)
 {
 	pval *id, **tmp;
@@ -336,15 +426,14 @@ PHP_FUNCTION(domxml_children)
 /* }}} */
 
 /* {{{ proto string domxml_getattr([int node,] string attrname)
-   Read directory entry from dir_handle */
+   Returns value of given attribute */
 PHP_FUNCTION(domxml_getattr)
 {
 	pval *id, *arg1, **tmp;
 	int id_to_find;
-	xmlNode *nodep, *last;
+	xmlNode *nodep;
 	char *value;
 	int type;
-	int ret;
 	
 	if ((ARG_COUNT(ht) == 1) && getParameters(ht, 1, &arg1) == SUCCESS) {
 		id = getThis();
@@ -382,15 +471,14 @@ PHP_FUNCTION(domxml_getattr)
 /* }}} */
 
 /* {{{ proto string domxml_setattr([int node,] string attrname, string value)
-   Read directory entry from dir_handle */
+   Sets value of given attribute */
 PHP_FUNCTION(domxml_setattr)
 {
 	pval *id, *arg1, *arg2, **tmp;
 	int id_to_find;
-	xmlNode *nodep, *last;
+	xmlNode *nodep;
 	xmlAttr *attr;
 	int type;
-	int ret;
 	
 	if ((ARG_COUNT(ht) == 2) && getParameters(ht, 2, &arg1, &arg2) == SUCCESS) {
 		id = getThis();
@@ -430,16 +518,14 @@ PHP_FUNCTION(domxml_setattr)
 /* }}} */
 
 /* {{{ proto string domxml_attributes([int node])
-   Read directory entry from dir_handle */
+   Returns list of attributes of node */
 PHP_FUNCTION(domxml_attributes)
 {
-	pval *id, *arg1, **tmp;
+	pval *id, **tmp;
 	int id_to_find;
 	xmlNode *nodep;
 	xmlAttr *attr;
-	char *value;
 	int type;
-	int ret;
 	
 	if (ARG_COUNT(ht) == 0) {
 		id = getThis();
@@ -482,7 +568,7 @@ PHP_FUNCTION(domxml_attributes)
 /* }}} */
 
 /* {{{ proto string domxml_root([int doc_handle])
-   Read directory entry from dir_handle */
+   Returns root node of document */
 PHP_FUNCTION(domxml_root)
 {
 	pval *id, **tmp;
@@ -534,7 +620,7 @@ PHP_FUNCTION(domxml_root)
 /* }}} */
 
 /* {{{ proto string domxml_dtd([int dir_handle])
-   Read directory entry from dir_handle */
+   Returns DTD of document */
 PHP_FUNCTION(domxml_intdtd)
 {
 	pval *id, **tmp;
@@ -585,8 +671,8 @@ PHP_FUNCTION(domxml_intdtd)
 }
 /* }}} */
 
-/* {{{ proto class dom(string directory)
-   Directory class with properties, handle and class and methods read, rewind and close */
+/* {{{ proto class dom(string xmldoc)
+   Creates dom object of xml document */
 PHP_FUNCTION(getdom)
 {
 	pval *arg;
