@@ -77,7 +77,7 @@ Java Servlet SAPI Module for PHP 4
             comes with the Java Servlet SAPI Module into your
             Tomcat/conf/web.xml configuration file.
 
-            Make sure that the element ordering of the web.xml is laegal
+            Make sure that the element ordering of the web.xml is legal
             with Tomcat and put all the <servlet> declarations first,
             followed by all the <servlet-mapping> declarations.
 
@@ -111,10 +111,10 @@ Java Servlet SAPI Module for PHP 4
 
     1.) Build the Java Servlet SAPI Module as described above.
 
-    2.) Get the Cocoon2 source tree, either by CVS or from a
-        release archive; a binary distribution does not suffice.
-        Copy the phpsrvlet.jar file into your xml-cocoon2/lib
-        directory and build Cocoon.
+    2.) Get the Cocoon2 source tree, either by CVS or from a release
+        archive; a binary distribution does not suffice. Copy the
+        phpsrvlet.jar file into your xml-cocoon2/lib/optional directory
+        and build Cocoon.
 
 -- 
  [1] http://jakarta.apache.org/tomcat/
