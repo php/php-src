@@ -331,7 +331,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 
 			last = tsrm_strtok_r(p->value.str.val, ":", &temp);
 
-			if (zend_hash_find(EG(class_table), last, strlen(last)+1, &ce) == FAILURE) {
+			if (zend_hash_find(EG(class_table), last, strlen(last)+1, (void **)&ce) == FAILURE) {
 				zend_error(E_ERROR, "Invalid class! Improve this error message");
 			}
 			
@@ -342,7 +342,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 				if (!cur) {
 					break;
 				}
-				if (zend_hash_find(&ce->class_table, last, strlen(last)+1, &ce) == FAILURE) {
+				if (zend_hash_find(&ce->class_table, last, strlen(last)+1, (void **)&ce) == FAILURE) {
 					zend_error(E_ERROR, "Invalid class! Improve this error message");
 				}
 				last = cur;
@@ -477,7 +477,14 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	if (object_pp && !*object_pp) {
 		object_pp = NULL;
 	}
+
 	if (object_pp) {
+		/* TBI!! new object handlers */
+		if(!IS_ZEND_STD_OBJECT(**object_pp)) {
+			zend_error(E_WARNING, "Cannot use call_user_function on overloaded objects");
+			return FAILURE;
+		}
+
 		if (Z_TYPE_PP(object_pp) == IS_OBJECT) {
 			function_table = &Z_OBJCE_PP(object_pp)->function_table;
 			calling_namespace = Z_OBJCE_PP(object_pp);

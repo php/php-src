@@ -206,6 +206,11 @@ static int zend_check_class(zval *obj, zend_class_entry *expected_ce)
 		return 0;
 	}
 
+	/* TBI!! new object handlers */
+	if(!IS_ZEND_STD_OBJECT(*obj)) {
+		return 0;
+	}
+	
 	for (ce = Z_OBJCE_P(obj); ce != NULL; ce = ce->parent) {
 		if (ce == expected_ce) {
 			return 1;
@@ -577,15 +582,18 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 	}
 	
 	arg->type = IS_OBJECT;
-	arg->value.obj = zend_objects_new(&object, class_type);
-
-	if (properties) {
-		object->properties = properties;
+	if(class_type->create_object == NULL) {
+		arg->value.obj = zend_objects_new(&object, class_type);
+		if (properties) {
+			object->properties = properties;
+		} else {
+			ALLOC_HASHTABLE_REL(object->properties);
+			zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+		}
 	} else {
-		ALLOC_HASHTABLE_REL(object->properties);
-		zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-		zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
-	}	
+		arg->value.obj = class_type->create_object(class_type);
+	}
 	return SUCCESS;
 }
 
@@ -1344,7 +1352,7 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 						zend_hash_find(EG(class_table), lcname, Z_STRLEN_PP(obj) + 1, (void**)&ce);
 						efree(lcname);
 					} else {
-						ce = Z_OBJCE_PP(obj);
+						ce = Z_OBJCE_PP(obj); /* ??? */
 
 						if (callable_name) {
 							char *ptr;

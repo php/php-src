@@ -198,31 +198,14 @@ typedef struct _zend_object {
 } zend_object;
 
 typedef unsigned int zend_object_handle;
+typedef	struct _zend_object_value zend_object_value;
 
-typedef struct _zend_object_handlers zend_object_handlers;
+#include "zend_object_handlers.h"
 
-typedef	struct _zend_object_value {
+struct _zend_object_value {
 	zend_object_handle handle;
 	zend_object_handlers *handlers;
-} zend_object_value;
-
-typedef zend_object *(*get_address_t)(zend_object_handle handle); /* Don't return zval ** so that we can't change it */
-typedef zval **(*get_property_address_t)(zend_object_handle handle, zval *offset, int type);
-typedef void (*add_ref_t)(zend_object_handle handle);
-typedef void (*del_ref_t)(zend_object_handle handle);
-typedef void (*delete_obj_t)(zend_object_handle handle);
-typedef zend_object_value (*clone_obj_t)(zend_object_handle handle);
-
-struct _zend_object_handlers {
-	get_address_t get_address;
-	get_property_address_t get_property_address;
-	add_ref_t add_ref;
-	del_ref_t del_ref;
-	delete_obj_t delete_obj;
-	clone_obj_t clone_obj;
 };
-
-#include "zend_objects.h"
 
 typedef union _zvalue_value {
 	long lval;					/* long value */
@@ -297,6 +280,7 @@ struct _zend_class_entry {
 	union _zend_function *clone;
 
 	/* handlers */
+	zend_object_value (*create_object)(zend_class_entry *class_type);
 	void (*handle_function_call)(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
 	zval (*handle_property_get)(zend_property_reference *property_reference);
 	int (*handle_property_set)(zend_property_reference *property_reference, zval *value);

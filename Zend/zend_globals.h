@@ -31,6 +31,7 @@
 #include "zend_hash.h"
 #include "zend_llist.h"
 #include "zend_fast_cache.h"
+#include "zend_objects.h"
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
