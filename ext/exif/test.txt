@@ -209,7 +209,7 @@ if (function_exists('read_exif_data')) {
 		$len   = 4;
 		$size  = GetImageSize($file);
 		$error = error_msg();// clear message
-		if ( $image === false) {
+		if ( $size === false) {
 		    $getimagesize = '<b style="color:red">GetImageSize returned false</b><br>'.$error;
 		} else {
 			$getimagesize = "[ $size[0], $size[1], $size[2], $size[3] ]";
