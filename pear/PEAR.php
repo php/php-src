@@ -583,6 +583,7 @@ class PEAR
         $stack = &$GLOBALS['_PEAR_error_handler_stack'];
         array_pop($stack);
         list($mode, $options) = $stack[sizeof($stack) - 1];
+        array_pop($stack);
         if (isset($this)) {
             $this->setErrorHandling($mode, $options);
         } else {
