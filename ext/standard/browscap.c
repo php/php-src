@@ -34,6 +34,8 @@ static zval *current_section;
 
 static void browscap_entry_dtor(zval *pvalue)
 {
+	TSRMLS_FETCH();
+
 	if (Z_TYPE_P(pvalue) == IS_OBJECT) {
 		zend_hash_destroy(Z_OBJPROP_P(pvalue));
 		free(Z_OBJPROP_P(pvalue));
@@ -93,6 +95,8 @@ static void convert_browscap_pattern(zval *pattern)
  */
 static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, void *arg)
 {
+	TSRMLS_FETCH();
+
 	if (!arg1) {
 		return;
 	}
@@ -185,6 +189,8 @@ PHP_MSHUTDOWN_FUNCTION(browscap)
  */
 static int browser_reg_compare(zval **browser, int num_args, va_list args, zend_hash_key *key)
 {
+	TSRMLS_FETCH();
+
 	zval **browser_name;
 	regex_t r;
 	char *lookup_browser_name = va_arg(args, char *);

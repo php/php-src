@@ -53,8 +53,8 @@ extern "C" {
 	
 zend_class_entry *php_create_incomplete_class(TSRMLS_D);
 
-char *php_lookup_class_name(zval *object, size_t *nlen, zend_bool del);
-void  php_store_class_name(zval *object, const char *name, size_t len);
+char *php_lookup_class_name(zval *object, size_t *nlen, zend_bool del TSRMLS_DC);
+void  php_store_class_name(zval *object, const char *name, size_t len TSRMLS_DC);
 
 #ifdef __cplusplus
 };

@@ -39,7 +39,7 @@ static void incomplete_class_message(zend_property_reference *ref, int error_typ
 	char *class_name;
 	TSRMLS_FETCH();
 
-	class_name = php_lookup_class_name(ref->object, NULL, 0);
+	class_name = php_lookup_class_name(ref->object, NULL, 0 TSRMLS_CC);
 	
 	if (!class_name)
 		class_name = estrdup("unknown");
@@ -102,7 +102,7 @@ zend_class_entry *php_create_incomplete_class(TSRMLS_D)
 
 /* {{{ php_lookup_class_name
  */
-char *php_lookup_class_name(zval *object, size_t *nlen, zend_bool del)
+char *php_lookup_class_name(zval *object, size_t *nlen, zend_bool del TSRMLS_DC)
 {
 	zval **val;
 	char *retval = NULL;
@@ -126,7 +126,7 @@ char *php_lookup_class_name(zval *object, size_t *nlen, zend_bool del)
 
 /* {{{ php_store_class_name
  */
-void php_store_class_name(zval *object, const char *name, size_t len)
+void php_store_class_name(zval *object, const char *name, size_t len TSRMLS_DC)
 {
 	zval *val;
 

@@ -446,7 +446,7 @@ yy22:
 	elements = object_common1(UNSERIALIZE_PASSTHRU, ce);
 
 	if (incomplete_class) {
-		php_store_class_name(*rval, class_name, len2);
+		php_store_class_name(*rval, class_name, len2 TSRMLS_CC);
 		efree(class_name);
 	}
 
