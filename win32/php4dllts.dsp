@@ -39,12 +39,12 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "Debug_TS"
-# PROP Intermediate_Dir "Debug_TS"
+# PROP Output_Dir "..\Debug_TS"
+# PROP Intermediate_Dir "..\Debug_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /I "regex" /I "..\bindlib_w32" /I "Zend" /I "tsrm" /I "ext\mysql\libmysql" /I "main" /D "_DEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D ZEND_DEBUG=1 /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\Zend" /I "..\TSRM" /I "..\ext\mysql\libmysql" /D "_DEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D ZEND_DEBUG=1 /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "_DEBUG"
@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib /nologo /dll /debug /machine:I386 /nodefaultlib:"libcmt" /nodefaultlib:"libc" /out:"Debug_TS/php4ts_debug.dll" /pdbtype:sept /libpath:"TSRM\Debug_TS" /libpath:"Zend\Debug_TS" /libpath:"..\bindlib_w32\Debug" /libpath:"ext\mysql\libmysql\Debug_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib /nologo /dll /debug /machine:I386 /nodefaultlib:"libcmt" /nodefaultlib:"libc" /out:"..\Debug_TS\php4ts_debug.dll" /pdbtype:sept /libpath:"..\TSRM\Debug_TS" /libpath:"..\Zend\Debug_TS" /libpath:"..\..\bindlib_w32\Debug" /libpath:"..\ext\mysql\libmysql\Debug_TS"
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
 
@@ -65,12 +65,12 @@ LINK32=link.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Release_TS"
-# PROP Intermediate_Dir "Release_TS"
+# PROP Output_Dir "..\Release_TS"
+# PROP Intermediate_Dir "..\Release_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I "regex" /I "..\bindlib_w32" /I "Zend" /I "tsrm" /I "ext\mysql\libmysql" /I "main" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D ZEND_DEBUG=0 /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\Zend" /I "..\TSRM" /I "..\ext\mysql\libmysql" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D ZEND_DEBUG=0 /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -80,7 +80,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib /nologo /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"Release_TS/php4ts.dll" /libpath:"TSRM\Release_TS" /libpath:"Zend\Release_TS" /libpath:"..\bindlib_w32\Release" /libpath:"ext\mysql\libmysql\Release_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib /nologo /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"..\Release_TS\php4ts.dll" /libpath:"..\TSRM\Release_TS" /libpath:"..\Zend\Release_TS" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\ext\mysql\libmysql\Release_TS"
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
 
@@ -92,12 +92,12 @@ LINK32=link.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Release_TS_inline"
-# PROP Intermediate_Dir "Release_TS_inline"
+# PROP Output_Dir "..\Release_TS_inline"
+# PROP Intermediate_Dir "..\Release_TS_inline"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "." /I "regex" /I "..\bindlib_w32" /I "Zend" /I "tsrm" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "MSVC5" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "ZTS" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=0 /FR /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I "regex" /I "..\bindlib_w32" /I "Zend" /I "tsrm" /I "ext\mysql\libmysql" /I "main" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D ZEND_DEBUG=0 /D "ZEND_WIN32_FORCE_INLINE" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\Zend" /I "..\TSRM" /I "..\ext\mysql\libmysql" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D ZEND_DEBUG=0 /D "ZEND_WIN32_FORCE_INLINE" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -107,7 +107,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib /nologo /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"Release_TS/php4ts.dll" /libpath:"TSRM\Release_TS" /libpath:"Zend\Release_TS" /libpath:"..\bindlib_w32\Release"
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib /nologo /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"Release_TS_inline/php4ts.dll" /libpath:"TSRM\Release_TS_inline" /libpath:"Zend\Release_TS_inline" /libpath:"..\bindlib_w32\Release" /libpath:"ext\mysql\libmysql\Release_TS_inline"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib /nologo /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"..\Release_TS_inline\php4ts.dll" /libpath:"..\TSRM\Release_TS_inline" /libpath:"..\Zend\Release_TS_inline" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\ext\mysql\libmysql\Release_TS_inline"
 
 !ENDIF 
 
@@ -124,84 +124,84 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=".\main\configuration-parser.c"
+SOURCE="..\main\configuration-parser.c"
 # End Source File
 # Begin Source File
 
-SOURCE=".\main\configuration-scanner.c"
+SOURCE="..\main\configuration-scanner.c"
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\cyr_convert.c
+SOURCE=..\ext\standard\cyr_convert.c
 # End Source File
 # Begin Source File
 
-SOURCE=".\main\fopen-wrappers.c"
+SOURCE="..\main\fopen-wrappers.c"
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\internal_functions_win32.c
-# ADD CPP /I "ext\xml\expat\xmltok" /I "ext\xml\expat\xmlparse"
+SOURCE=..\main\internal_functions_win32.c
+# ADD CPP /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\main.c
+SOURCE=..\main\main.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\mergesort.c
+SOURCE=..\main\mergesort.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\php_content_types.c
+SOURCE=..\main\php_content_types.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\php_ini.c
+SOURCE=..\main\php_ini.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\php_realpath.c
+SOURCE=..\main\php_realpath.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\php_ticks.c
+SOURCE=..\main\php_ticks.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\php_variables.c
+SOURCE=..\main\php_variables.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\php_virtual_cwd.c
+SOURCE=..\main\php_virtual_cwd.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\quot_print.c
+SOURCE=..\ext\standard\quot_print.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\reentrancy.c
+SOURCE=..\main\reentrancy.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\rfc1867.c
+SOURCE=..\main\rfc1867.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\safe_mode.c
+SOURCE=..\main\safe_mode.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\SAPI.c
+SOURCE=..\main\SAPI.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\strlcat.c
+SOURCE=..\main\strlcat.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\strlcpy.c
+SOURCE=..\main\strlcpy.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -209,95 +209,95 @@ SOURCE=.\main\strlcpy.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\main\config.w32.h
+SOURCE=..\main\config.w32.h
 # End Source File
 # Begin Source File
 
-SOURCE=".\main\configuration-parser.h"
+SOURCE="..\main\configuration-parser.h"
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\cyr_convert.h
+SOURCE=..\ext\standard\cyr_convert.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\getopt.h
+SOURCE=..\main\getopt.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\internal_functions_registry.h
+SOURCE=..\main\internal_functions_registry.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\logos.h
+SOURCE=..\main\logos.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\main.h
+SOURCE=..\main\main.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\output.h
+SOURCE=..\main\output.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\php.h
+SOURCE=..\main\php.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\php3_compat.h
+SOURCE=..\main\php3_compat.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\php_compat.h
+SOURCE=..\main\php_compat.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\php_content_types.h
+SOURCE=..\main\php_content_types.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\php_globals.h
+SOURCE=..\main\php_globals.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\php_ini.h
+SOURCE=..\main\php_ini.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\php_realpath.h
+SOURCE=..\main\php_realpath.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\php_regex.h
+SOURCE=..\main\php_regex.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\php_variables.h
+SOURCE=..\main\php_variables.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\php_virtual_cwd.h
+SOURCE=..\main\php_virtual_cwd.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\quot_print.h
+SOURCE=..\ext\standard\quot_print.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\rfc1867.h
+SOURCE=..\main\rfc1867.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\safe_mode.h
+SOURCE=..\main\safe_mode.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\SAPI.h
+SOURCE=..\main\SAPI.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main\win95nt.h
+SOURCE=..\main\win95nt.h
 # End Source File
 # End Group
 # End Group
@@ -309,212 +309,212 @@ SOURCE=.\main\win95nt.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\ext\standard\array.c
+SOURCE=..\ext\standard\array.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\assert.c
+SOURCE=..\ext\standard\assert.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\base64.c
+SOURCE=..\ext\standard\base64.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\basic_functions.c
+SOURCE=..\ext\standard\basic_functions.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\bcmath\bcmath.c
+SOURCE=..\ext\bcmath\bcmath.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\browscap.c
+SOURCE=..\ext\standard\browscap.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\datetime.c
+SOURCE=..\ext\standard\datetime.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\dir.c
+SOURCE=..\ext\standard\dir.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\dl.c
+SOURCE=..\ext\standard\dl.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\dns.c
+SOURCE=..\ext\standard\dns.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\exec.c
+SOURCE=..\ext\standard\exec.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\file.c
+SOURCE=..\ext\standard\file.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\filestat.c
+SOURCE=..\ext\standard\filestat.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\flock_compat.c
+SOURCE=..\ext\standard\flock_compat.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\formatted_print.c
+SOURCE=..\ext\standard\formatted_print.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\fsock.c
+SOURCE=..\ext\standard\fsock.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\head.c
+SOURCE=..\ext\standard\head.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\html.c
+SOURCE=..\ext\standard\html.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\image.c
+SOURCE=..\ext\standard\image.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\info.c
+SOURCE=..\ext\standard\info.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\iptc.c
+SOURCE=..\ext\standard\iptc.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\lcg.c
+SOURCE=..\ext\standard\lcg.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\levenshtein.c
+SOURCE=..\ext\standard\levenshtein.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\link.c
+SOURCE=..\ext\standard\link.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\mail.c
+SOURCE=..\ext\standard\mail.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\math.c
+SOURCE=..\ext\standard\math.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\md5.c
+SOURCE=..\ext\standard\md5.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\metaphone.c
+SOURCE=..\ext\standard\metaphone.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\microtime.c
+SOURCE=..\ext\standard\microtime.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\session\mod_files.c
+SOURCE=..\ext\session\mod_files.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\session\mod_user.c
+SOURCE=..\ext\session\mod_user.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\bcmath\number.c
+SOURCE=..\ext\bcmath\number.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\output.c
+SOURCE=..\ext\standard\output.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\pack.c
+SOURCE=..\ext\standard\pack.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\pageinfo.c
+SOURCE=..\ext\standard\pageinfo.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\parsedate.c
+SOURCE=..\ext\standard\parsedate.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\mcal\php_mcal.c
+SOURCE=..\ext\mcal\php_mcal.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\mysql\php_mysql.c
+SOURCE=..\ext\mysql\php_mysql.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\odbc\php_odbc.c
+SOURCE=..\ext\odbc\php_odbc.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\pcre\php_pcre.c
+SOURCE=..\ext\pcre\php_pcre.c
 # ADD CPP /D "STATIC"
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\rand.c
+SOURCE=..\ext\standard\rand.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\reg.c
+SOURCE=..\ext\standard\reg.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\scanf.c
+SOURCE=..\ext\standard\scanf.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\session\session.c
+SOURCE=..\ext\session\session.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\soundex.c
+SOURCE=..\ext\standard\soundex.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\string.c
+SOURCE=..\ext\standard\string.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\strnatcmp.c
+SOURCE=..\ext\standard\strnatcmp.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\syslog.c
+SOURCE=..\ext\standard\syslog.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\type.c
+SOURCE=..\ext\standard\type.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\uniqid.c
+SOURCE=..\ext\standard\uniqid.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\url.c
+SOURCE=..\ext\standard\url.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\var.c
+SOURCE=..\ext\standard\var.c
 # End Source File
 # End Group
 # Begin Group "Header Files No. 1"
@@ -522,155 +522,155 @@ SOURCE=.\ext\standard\var.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\ext\standard\base64.h
+SOURCE=..\ext\standard\base64.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\basic_functions.h
+SOURCE=..\ext\standard\basic_functions.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\datetime.h
+SOURCE=..\ext\standard\datetime.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\dl.h
+SOURCE=..\ext\standard\dl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\dns.h
+SOURCE=..\ext\standard\dns.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\exec.h
+SOURCE=..\ext\standard\exec.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\file.h
+SOURCE=..\ext\standard\file.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\flock_compat.h
+SOURCE=..\ext\standard\flock_compat.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\fsock.h
+SOURCE=..\ext\standard\fsock.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\global.h
+SOURCE=..\functions\global.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\head.h
+SOURCE=..\ext\standard\head.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\html.h
+SOURCE=..\ext\standard\html.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\info.h
+SOURCE=..\ext\standard\info.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\md5.h
+SOURCE=..\ext\standard\md5.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\session\mod_user.h
+SOURCE=..\ext\session\mod_user.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\bcmath\number.h
+SOURCE=..\ext\bcmath\number.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\pageinfo.h
+SOURCE=..\ext\standard\pageinfo.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\php_array.h
+SOURCE=..\ext\standard\php_array.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\bcmath\php_bcmath.h
+SOURCE=..\ext\bcmath\php_bcmath.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\php_dir.h
+SOURCE=..\ext\standard\php_dir.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\php_filestat.h
+SOURCE=..\ext\standard\php_filestat.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\php_lcg.h
+SOURCE=..\ext\standard\php_lcg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\ldap\php_ldap.h
+SOURCE=..\ext\ldap\php_ldap.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\php_mail.h
+SOURCE=..\ext\standard\php_mail.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\mcal\php_mcal.h
+SOURCE=..\ext\mcal\php_mcal.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\mysql\php_mysql.h
+SOURCE=..\ext\mysql\php_mysql.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\odbc\php_odbc.h
+SOURCE=..\ext\odbc\php_odbc.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\pcre\php_pcre.h
+SOURCE=..\ext\pcre\php_pcre.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\session\php_session.h
+SOURCE=..\ext\session\php_session.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\php_string.h
+SOURCE=..\ext\standard\php_string.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\php_syslog.h
+SOURCE=..\ext\standard\php_syslog.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\phpdir.h
+SOURCE=..\functions\phpdir.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\phpmath.h
+SOURCE=..\functions\phpmath.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\reg.h
+SOURCE=..\ext\standard\reg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\scanf.h
+SOURCE=..\ext\standard\scanf.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\type.h
+SOURCE=..\ext\standard\type.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\uniqid.h
+SOURCE=..\ext\standard\uniqid.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\url.h
+SOURCE=..\ext\standard\url.h
 # End Source File
 # End Group
 # Begin Group "PCRE"
@@ -681,27 +681,27 @@ SOURCE=.\ext\standard\url.h
 # PROP Default_Filter ".c"
 # Begin Source File
 
-SOURCE=.\ext\pcre\pcrelib\chartables.c
+SOURCE=..\ext\pcre\pcrelib\chartables.c
 # ADD CPP /D "STATIC"
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\pcre\pcrelib\get.c
+SOURCE=..\ext\pcre\pcrelib\get.c
 # ADD CPP /D "STATIC"
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\pcre\pcrelib\maketables.c
+SOURCE=..\ext\pcre\pcrelib\maketables.c
 # ADD CPP /D "STATIC"
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\pcre\pcrelib\pcre.c
+SOURCE=..\ext\pcre\pcrelib\pcre.c
 # ADD CPP /D "STATIC"
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\pcre\pcrelib\study.c
+SOURCE=..\ext\pcre\pcrelib\study.c
 # ADD CPP /D "STATIC"
 # End Source File
 # End Group
@@ -710,11 +710,11 @@ SOURCE=.\ext\pcre\pcrelib\study.c
 # PROP Default_Filter ".h"
 # Begin Source File
 
-SOURCE=.\ext\pcre\pcrelib\internal.h
+SOURCE=..\ext\pcre\pcrelib\internal.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\pcre\pcrelib\pcre.h
+SOURCE=..\ext\pcre\pcrelib\pcre.h
 # End Source File
 # End Group
 # End Group
@@ -723,19 +723,19 @@ SOURCE=.\ext\pcre\pcrelib\pcre.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\regex\regcomp.c
+SOURCE=..\regex\regcomp.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\regex\regerror.c
+SOURCE=..\regex\regerror.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\regex\regexec.c
+SOURCE=..\regex\regexec.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\regex\regfree.c
+SOURCE=..\regex\regfree.c
 # End Source File
 # End Group
 # Begin Group "XML"
@@ -746,13 +746,41 @@ SOURCE=.\regex\regfree.c
 # PROP Default_Filter ".c"
 # Begin Source File
 
-SOURCE=.\ext\wddx\wddx.c
-# ADD CPP /I "ext\xml\expat\xmltok" /I "ext\xml\expat\xmlparse"
+SOURCE=..\ext\wddx\wddx.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# ADD CPP /I "..\ext\xml\expat\xmlparse" /I "..\ext\xml\expat\xmltok"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# ADD CPP /I "ext\xml\expat\xmlparse" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# ADD CPP /I "ext\xml\expat\xmlparse" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\xml\xml.c
-# ADD CPP /I "ext\xml\expat\xmltok" /I "ext\xml\expat\xmlparse"
+SOURCE=..\ext\xml\xml.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# ADD CPP /I "..\ext\xml\expat\xmlparse" /I "..\ext\xml\expat\xmltok"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# ADD CPP /I "ext\xml\expat\xmlparse" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# ADD CPP /I "ext\xml\expat\xmlparse" /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Group "Header Files No. 4"
@@ -760,15 +788,15 @@ SOURCE=.\ext\xml\xml.c
 # PROP Default_Filter ".h"
 # Begin Source File
 
-SOURCE=.\ext\wddx\php_wddx.h
+SOURCE=..\ext\wddx\php_wddx.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\wddx\php_wddx_api.h
+SOURCE=..\ext\wddx\php_wddx_api.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\xml\php_xml.h
+SOURCE=..\ext\xml\php_xml.h
 # End Source File
 # End Group
 # Begin Group "expat"
@@ -779,23 +807,23 @@ SOURCE=.\ext\xml\php_xml.h
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;for;f90"
 # Begin Source File
 
-SOURCE=.\ext\xml\expat\xmlparse\hashtable.c
-# ADD CPP /I "ext\xml\expat\xmltok"
+SOURCE=..\ext\xml\expat\xmlparse\hashtable.c
+# ADD CPP /I "..\ext\xml\expat\xmltok"
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\xml\expat\xmlparse\xmlparse.c
-# ADD CPP /I "ext\xml\expat\xmltok"
+SOURCE=..\ext\xml\expat\xmlparse\xmlparse.c
+# ADD CPP /I "..\ext\xml\expat\xmltok"
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\xml\expat\xmltok\xmlrole.c
-# ADD CPP /I "ext\xml\expat\xmltok"
+SOURCE=..\ext\xml\expat\xmltok\xmlrole.c
+# ADD CPP /I "..\ext\xml\expat\xmltok"
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\xml\expat\xmltok\xmltok.c
-# ADD CPP /I "ext\xml\expat\xmltok"
+SOURCE=..\ext\xml\expat\xmltok\xmltok.c
+# ADD CPP /I "..\ext\xml\expat\xmltok"
 # End Source File
 # End Group
 # Begin Group "Header Files No. 5"
@@ -803,52 +831,52 @@ SOURCE=.\ext\xml\expat\xmltok\xmltok.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl;fi;fd"
 # Begin Source File
 
-SOURCE=.\ext\xml\expat\xmltok\asciitab.h
+SOURCE=..\ext\xml\expat\xmltok\asciitab.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\xml\expat\xmltok\iasciitab.h
+SOURCE=..\ext\xml\expat\xmltok\iasciitab.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\xml\expat\xmltok\latin1tab.h
+SOURCE=..\ext\xml\expat\xmltok\latin1tab.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\xml\expat\xmltok\nametab.h
+SOURCE=..\ext\xml\expat\xmltok\nametab.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\xml\expat\xmltok\utf8tab.h
+SOURCE=..\ext\xml\expat\xmltok\utf8tab.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\xml\expat\xmltok\xmldef.h
+SOURCE=..\ext\xml\expat\xmltok\xmldef.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\xml\expat\xmlparse\xmlparse.h
+SOURCE=..\ext\xml\expat\xmlparse\xmlparse.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\xml\expat\xmltok\xmlrole.h
+SOURCE=..\ext\xml\expat\xmltok\xmlrole.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\xml\expat\xmltok\xmltok.h
+SOURCE=..\ext\xml\expat\xmltok\xmltok.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\xml\expat\xmltok\xmltok_impl.c
+SOURCE=..\ext\xml\expat\xmltok\xmltok_impl.c
 # PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\xml\expat\xmltok\xmltok_impl.h
+SOURCE=..\ext\xml\expat\xmltok\xmltok_impl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\xml\expat\xmltok\xmltok_ns.c
+SOURCE=..\ext\xml\expat\xmltok\xmltok_ns.c
 # PROP Exclude_From_Build 1
 # End Source File
 # End Group
@@ -863,43 +891,43 @@ SOURCE=.\ext\xml\expat\xmltok\xmltok_ns.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\ext\com\COM.c
+SOURCE=..\ext\com\COM.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\pwd.c
+SOURCE=..\win32\pwd.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\readdir.c
+SOURCE=..\win32\readdir.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\registry.c
+SOURCE=..\win32\registry.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\sendmail.c
+SOURCE=..\win32\sendmail.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\time.c
+SOURCE=..\win32\time.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\wfile.c
+SOURCE=..\win32\wfile.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\dl\snmp\winsnmp.c
+SOURCE=..\dl\snmp\winsnmp.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\winutil.c
+SOURCE=..\win32\winutil.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\wsyslog.c
+SOURCE=..\win32\wsyslog.c
 # End Source File
 # End Group
 # Begin Group "Header Files No. 2"
@@ -907,47 +935,47 @@ SOURCE=.\win32\wsyslog.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\win32\grp.h
+SOURCE=..\win32\grp.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\param.h
+SOURCE=..\win32\param.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\com\php_COM.h
+SOURCE=..\ext\com\php_COM.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\php_registry.h
+SOURCE=..\win32\php_registry.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\pwd.h
+SOURCE=..\win32\pwd.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\readdir.h
+SOURCE=..\win32\readdir.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\sendmail.h
+SOURCE=..\win32\sendmail.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\syslog.h
+SOURCE=..\win32\syslog.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\time.h
+SOURCE=..\win32\time.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\unistd.h
+SOURCE=..\win32\unistd.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\wfile.h
+SOURCE=..\win32\wfile.h
 # End Source File
 # End Group
 # End Group
@@ -956,23 +984,23 @@ SOURCE=.\win32\wfile.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=".\main\configuration-parser.y"
+SOURCE="..\main\configuration-parser.y"
 
 !IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
 
 # Begin Custom Build
-InputPath=".\main\configuration-parser.y"
+InputPath="..\main\configuration-parser.y"
 
 BuildCmds= \
-	cd main \
+	cd ..\main \
 	if not "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p cfg configuration-parser.y \
 	if "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y \
 	
 
-"main\configuration-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+"..\main\configuration-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
 
-"main\configuration-parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+"..\main\configuration-parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
 # End Custom Build
 
@@ -985,15 +1013,15 @@ BuildCmds= \
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\standard\parsedate.y
+SOURCE=..\ext\standard\parsedate.y
 
 !IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
 
 # Begin Custom Build
-InputPath=.\ext\standard\parsedate.y
+InputPath=..\ext\standard\parsedate.y
 
-"ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd ext\standard 
+"..\ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd ..\ext\standard 
 	if not "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "%CYGWIN%\share\bison.simple" parsedate.y 
 	if "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" parsedate.y 
 	
@@ -1002,10 +1030,10 @@ InputPath=.\ext\standard\parsedate.y
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
 
 # Begin Custom Build
-InputPath=.\ext\standard\parsedate.y
+InputPath=..\ext\standard\parsedate.y
 
-"ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd ext\standard 
+"..\ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd ..\ext\standard 
 	if not "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "%CYGWIN%\share\bison.simple" parsedate.y 
 	if "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" parsedate.y 
 	
@@ -1014,10 +1042,10 @@ InputPath=.\ext\standard\parsedate.y
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
 
 # Begin Custom Build
-InputPath=.\ext\standard\parsedate.y
+InputPath=..\ext\standard\parsedate.y
 
-"ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd ext\standard 
+"..\ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd ..\ext\standard 
 	if not "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "%CYGWIN%\share\bison.simple" parsedate.y 
 	if "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" parsedate.y 
 	
@@ -1032,15 +1060,15 @@ InputPath=.\ext\standard\parsedate.y
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=".\main\configuration-scanner.l"
+SOURCE="..\main\configuration-scanner.l"
 
 !IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
 
 # Begin Custom Build
-InputPath=".\main\configuration-scanner.l"
+InputPath="..\main\configuration-scanner.l"
 
-"main\configuration-scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd main 
+"..\main\configuration-scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd ..\main 
 	flex -i -Pcfg -oconfiguration-scanner.c configuration-scanner.l 
 	
 # End Custom Build
@@ -1058,31 +1086,31 @@ InputPath=".\main\configuration-scanner.l"
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\ChangeLog
+SOURCE=..\ChangeLog
 # End Source File
 # Begin Source File
 
-SOURCE=.\LICENSE
+SOURCE=..\LICENSE
 # End Source File
 # Begin Source File
 
-SOURCE=.\NEWS
+SOURCE=..\NEWS
 # End Source File
 # Begin Source File
 
-SOURCE=".\php.ini-dist"
+SOURCE="..\php.ini-dist"
 # End Source File
 # Begin Source File
 
-SOURCE=".\php.ini-optimized"
+SOURCE="..\php.ini-optimized"
 # End Source File
 # Begin Source File
 
-SOURCE=".\README.CVS-RULES"
+SOURCE="..\README.CVS-RULES"
 # End Source File
 # Begin Source File
 
-SOURCE=.\TODO
+SOURCE=..\TODO
 # End Source File
 # End Group
 # End Target
