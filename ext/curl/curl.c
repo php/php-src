@@ -703,7 +703,7 @@ PHP_FUNCTION(curl_setopt)
 			}
 
 			zend_llist_add_element(&ch->to_free.post, &first);
-			error = curl_easy_setopt(ch->cp, CURLOPT_HTTPPOST, &first);
+			error = curl_easy_setopt(ch->cp, CURLOPT_HTTPPOST, first);
 		}
 		else {
 			char *post = NULL;
