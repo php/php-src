@@ -90,22 +90,23 @@ php_mbregex_name2mbctype(const char *pname)
 
 	mbctype = -1;
 	if (pname != NULL) {
-		if (strcasecmp("EUC-JP", pname) == 0) {
+		if (strcasecmp("EUC-JP", pname) == 0
+		    || strcasecmp("X-EUC-JP", pname) == 0
+		    || strcasecmp("UJIS", pname) == 0
+		    || strcasecmp("EUCJP", pname) == 0
+		    || strcasecmp("EUC_JP", pname) == 0) {
 			mbctype = MBCTYPE_EUC;
-		} else if (strcasecmp("UTF-8", pname) == 0) {
+		} else if (strcasecmp("UTF-8", pname) == 0
+		           || strcasecmp("UTF8", pname) == 0) {
 			mbctype = MBCTYPE_UTF8;
-		} else if (strcasecmp("SJIS", pname) == 0) {
+		} else if (strcasecmp("SJIS", pname) == 0
+		           || strcasecmp("CP932", pname) == 0
+		           || strcasecmp("MS932", pname) == 0
+		           || strcasecmp("SHIFT_JIS", pname) == 0 ) {
 			mbctype = MBCTYPE_SJIS;
-		} else if (strcasecmp("ascii", pname) == 0) {
+		} else if (strcasecmp("ASCII", pname) == 0) {
 			mbctype = MBCTYPE_ASCII;
-		} else if (strcasecmp("euc", pname) == 0) {
 			mbctype = MBCTYPE_EUC;
-		} else if (strcasecmp("eucJP", pname) == 0) {
-			mbctype = MBCTYPE_EUC;
-		} else if (strcasecmp("EUC_JP", pname) == 0) {
-			mbctype = MBCTYPE_EUC;
-		} else if (strcasecmp("Shift_JIS", pname) == 0) {
-			mbctype = MBCTYPE_SJIS;
 		}
 	}
 
@@ -115,7 +116,7 @@ php_mbregex_name2mbctype(const char *pname)
 static const char*
 php_mbregex_mbctype2name(int mbctype)
 {
-	const char *p;
+	const char *p = NULL;
 
 	if (mbctype == MBCTYPE_EUC) {
 		p = "EUC-JP";
@@ -125,8 +126,6 @@ php_mbregex_mbctype2name(int mbctype)
 		p = "SJIS";
 	} else if(mbctype == MBCTYPE_ASCII) {
 		p = "ascii";
-	} else {
-		p = "unknown";
 	}
 
 	return p;
@@ -224,8 +223,14 @@ PHP_FUNCTION(mb_regex_encoding)
 	int mbctype;
 
 	if (ZEND_NUM_ARGS() == 0) {
-		RETVAL_STRING((char*)php_mbregex_mbctype2name(MBSTRG(current_mbctype)), 1);
-	} else if (ZEND_NUM_ARGS() == 1 && zend_get_parameters_ex(1, &arg1) != FAILURE) {
+		const char *retval = php_mbregex_mbctype2name(MBSTRG(current_mbctype));
+		if ( retval != NULL ) {
+			RETVAL_STRING((char *)retval);
+		} else {
+			RETVAL_FALSE;
+		}
+	} else if (ZEND_NUM_ARGS() == 1 &&
+	           zend_get_parameters_ex(1, &arg1) != FAILURE) {
 		convert_to_string_ex(arg1);
 		mbctype = php_mbregex_name2mbctype(Z_STRVAL_PP(arg1));
 		if (mbctype < 0) {
