@@ -22,10 +22,11 @@
 
 #include "php.h"
 #include "php_assert.h"
+#include "php_ini.h"
 
 typedef struct {
 	int active;
-	int exit;
+	int bail;
 	int warning;
 	char *callback;
 } php_assert_globals;
@@ -71,34 +72,28 @@ zend_module_entry assert_module_entry = {
 
 #define ASSERT_ACTIVE       1
 #define ASSERT_CALLBACK     2
-#define ASSERT_EXIT         3
+#define ASSERT_BAIL         3
 #define ASSERT_WARNING      4
 
-#ifdef ZTS
-static void php_assert_init_globals(php_assert_globals *assert_globals)
-{
-	ASSERT(active)   = 0;
-	ASSERT(exit)     = 0;
-	ASSERT(callback) = 0;
-	ASSERT(warning)  = 1;
-}
-#endif
+PHP_INI_BEGIN()
+	 STD_PHP_INI_BOOLEAN("assert.active",	         "0",	PHP_INI_ALL,		OnUpdateInt,		active,	 php_assert_globals,		assert_globals)
+	 STD_PHP_INI_BOOLEAN("assert.bail",	             "0",	PHP_INI_ALL,		OnUpdateInt,		bail,	 php_assert_globals,		assert_globals)
+	 STD_PHP_INI_BOOLEAN("assert.warning",	         "1",	PHP_INI_ALL,		OnUpdateInt,		warning, php_assert_globals,		assert_globals)
+	 PHP_INI_ENTRY("assert.callback",	         NULL,	PHP_INI_ALL,		NULL)
+PHP_INI_END()
 
 PHP_MINIT_FUNCTION(assert)
 {
 
 #ifdef ZTS
 	assert_globals_id = ts_allocate_id(sizeof(php_assert_globals), (ts_allocate_ctor) php_assert_init_globals, NULL);
-#else
-	ASSERT(active)   = 0;
-	ASSERT(exit)     = 0;
-	ASSERT(callback) = 0;
-	ASSERT(warning)  = 1;
 #endif
+
+	REGISTER_INI_ENTRIES();
 
 	REGISTER_LONG_CONSTANT("ASSERT_ACTIVE", ASSERT_ACTIVE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_CALLBACK", ASSERT_CALLBACK, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_EXIT", ASSERT_EXIT, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ASSERT_BAIL", ASSERT_BAIL, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_WARNING", ASSERT_WARNING, CONST_CS|CONST_PERSISTENT);
 
 	return SUCCESS;
@@ -106,33 +101,32 @@ PHP_MINIT_FUNCTION(assert)
 
 PHP_MSHUTDOWN_FUNCTION(assert)
 {
-	if (ASSERT(callback)) {
-		efree(ASSERT(callback));
-		ASSERT(callback) = NULL;
-	}
-
 	return SUCCESS;
 }
 
 PHP_RINIT_FUNCTION(assert)
 {
+	ASSERTLS_FETCH();
+
+	ASSERT(callback) = estrdup(INI_STR("assert.callback"));
+
 	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(assert)
 {
 	ASSERTLS_FETCH();
-	
-	if (ASSERT(callback)) {
-		efree(ASSERT(callback));
-		ASSERT(callback) = NULL;
-	}
+
+	if (ASSERT(callback)) efree(ASSERT(callback));
 
 	return SUCCESS;
 }
 
 PHP_MINFO_FUNCTION(assert)
 {
+	ASSERTLS_FETCH();
+
+	DISPLAY_INI_ENTRIES();
 }
 
 /* }}} */
@@ -221,7 +215,7 @@ PHP_FUNCTION(assert)
 		}
 	}
 
-	if (ASSERT(exit)) {
+	if (ASSERT(bail)) {
 		zend_bailout();
 	}
 }
@@ -254,11 +248,11 @@ PHP_FUNCTION(assert_options)
 		RETURN_LONG(oldint);
 		break;
 
-	case ASSERT_EXIT:
-		oldint = ASSERT(exit);
+	case ASSERT_BAIL:
+		oldint = ASSERT(bail);
 		if (ac == 2) {
 			convert_to_long_ex(value);
-			ASSERT(exit) = (*value)->value.lval;
+			ASSERT(bail) = (*value)->value.lval;
 		}
 		RETURN_LONG(oldint);
 		break;
