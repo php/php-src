@@ -47,7 +47,7 @@
  * - delay OCIInitialize() as far as we can.
  * - add PHP Array <-> OCICollection conversion
  * - add Collection iterator object for INDEX BY tables
- * - make auto-rollabck only happen if we have an outstanding transaction
+ * - make auto-rollaback only happen if we have an outstanding transaction
  * - implement ocidisconnect
  */
 
