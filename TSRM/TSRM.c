@@ -337,6 +337,11 @@ void ts_free_thread(void)
 
 	while (thread_resources) {
 		if (thread_resources->thread_id == thread_id) {
+			if (last) {
+				last->next = thread_resources->next;
+			} else {
+				tsrm_tls_table[hash_value] = thread_resources->next;
+			}
 			tsrm_mutex_unlock(tsmm_mutex);
 
 			for (i=0; i<thread_resources->count; i++) {
@@ -347,18 +352,12 @@ void ts_free_thread(void)
 			for (i=0; i<thread_resources->count; i++) {
 				free(thread_resources->storage[i]);
 			}
-			tsrm_mutex_lock(tsmm_mutex);
 			free(thread_resources->storage);
-			if (last) {
-				last->next = thread_resources->next;
-			} else {
-				tsrm_tls_table[hash_value] = thread_resources->next;
-			}
 #if defined(PTHREADS)
-			pthread_setspecific( tls_key, 0 );
+			pthread_setspecific(tls_key, 0);
 #endif
 			free(thread_resources);
-			break;
+			return; /* Don't want to reach unlock() a second time */
 		}
 		if (thread_resources->next) {
 			last = thread_resources;
