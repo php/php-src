@@ -20,6 +20,8 @@ PEAR_SUBDIRS = \
 	Mail \
 	Net \
 	PEAR \
+	PEAR/Command \
+	PEAR/CommandUI \
 	Schedule \
 	XML 
 
@@ -67,6 +69,13 @@ PEAR_FILES = \
 	Net/Socket.php \
 	PEAR.php \
 	PEAR/Autoloader.php \
+	PEAR/Command.php \
+	PEAR/Command/Common.php \
+	PEAR/Command/Config.php \
+	PEAR/Command/Install.php \
+	PEAR/Command/Login.php \
+	PEAR/CommandResponse.php \
+	PEAR/CommandUI/CLI.php \
 	PEAR/Common.php \
 	PEAR/Config.php \
 	PEAR/Dependency.php \
@@ -78,17 +87,6 @@ PEAR_FILES = \
 	Schedule/At.php \
 	System.php \
 	XML/Parser.php 
-
-PEAR_COMMAND_LIBS = \
-	pearcmd-common.php \
-	pearcmd-help.php \
-	pearcmd-info.php \
-	pearcmd-install.php \
-	pearcmd-list.php \
-	pearcmd-package.php \
-	pearcmd-remote-list.php \
-	pearcmd-show-config.php \
-	pearcmd-uninstall.php
 
 install-pear:
 	@if $(mkinstalldirs) $(INSTALL_ROOT)$(peardir); then \
@@ -131,10 +129,6 @@ install-programs:
 	for prog in phpextdist; do \
 		echo "Installing program: $$prog"; \
 		$(INSTALL) -m 755 $(srcdir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
-	done; \
-	for lib in $(PEAR_COMMAND_LIBS); do \
-		echo "Installing program library: $$lib"; \
-		$(INSTALL) -m 644 $(srcdir)/scripts/$$lib $(INSTALL_ROOT)$(bindir)/$$lib; \
 	done
 
 HEADER_DIRS = \

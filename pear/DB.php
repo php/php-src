@@ -261,6 +261,9 @@ class DB
 
         @$obj =& new $classname;
 
+        if (isset($options['connect_ondemand']) && !extension_loaded("overload")) {
+            unset($options['connect_ondemand']);
+        }
         if (is_array($options)) {
             foreach ($options as $option => $value) {
                 $test = $obj->setOption($option, $value);
@@ -271,11 +274,14 @@ class DB
         } else {
             $obj->setOption('persistent', $options);
         }
-        $err = $obj->connect($dsninfo, $obj->getOption('persistent'));
-
-        if (DB::isError($err)) {
-            $err->addUserInfo($dsn);
-            return $err;
+        if (!$obj->getOption('connect_ondemand')) {
+            $err = $obj->connect($dsninfo, $obj->getOption('persistent'));
+            if (DB::isError($err)) {
+                $err->addUserInfo($dsn);
+                return $err;
+            }
+        } else {
+            $obj->dsn = $dsninfo;
         }
 
         return $obj;
