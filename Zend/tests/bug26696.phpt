@@ -7,10 +7,10 @@ $len = strlen($str);
 for ($i = 0; $i < $len; $i++) {
 	switch ($str[$i]) {
 	case '?':
-		echo "?\n";
+		echo "?+\n";
 		break;
 	default:
-		echo "x";
+		echo $str[$i].'-';
 		break;
 	}
 }
@@ -18,5 +18,5 @@ for ($i = 0; $i < $len; $i++) {
 ?>
 ===DONE===
 --EXPECT--
-xxxxx?
+a-s-d-d-/-?+
 ===DONE===
