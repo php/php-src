@@ -29,6 +29,8 @@ if test "$PHP_MSESSION" != "no"; then
 	PHOENIX_INCLUDE="-I$PHOENIX_DIR"
 	PHP_SUBST(PHOENIX_LIB)
 
+  	PHP_REQUIRE_CXX
   	PHP_NEW_EXTENSION(msession, msession.c, $ext_shared)
+  	PHP_ADD_LIBRARY(stdc++)
 fi
 
