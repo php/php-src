@@ -80,6 +80,10 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 	sapi_globals_ctor(&sapi_globals);
 #endif
 
+#ifdef VIRTUAL_DIR
+	virtual_cwd_startup(); /* Could use shutdown to free the main cwd but it would just slow it down for CGI */
+#endif
+
 	reentrancy_startup();
 
 	php_global_startup_internal_extensions();
