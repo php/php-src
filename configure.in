@@ -856,7 +856,7 @@ if true; then
         echo "| redirection checking.  By putting this cgi binary somewhere in     |"
         echo "| your web space, users may be able to circumvent existing .htaccess |"
         echo "| security by loading files directly through the parser.  See        |"
-        echo "| http://www.php.net/manual/config-security.php3 for more details.   |"
+        echo "| http://www.php.net/manual/security.php for more details.           |"
       fi
     fi
   fi
