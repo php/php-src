@@ -7,8 +7,9 @@
 /* JCE: Arrange HAVE_LIBPNG so that it can be set in gd.h */
 #ifdef HAVE_LIBPNG
 
-#include "gdhelpers.h"
+
 #include "png.h"		/* includes zlib.h and setjmp.h */
+#include "gdhelpers.h"
 
 #define TRUE 1
 #define FALSE 0
