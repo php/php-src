@@ -370,7 +370,7 @@ static inline void php_ob_allocate(TSRMLS_D)
 /* {{{ php_ob_init_conflict
  * Returns 1 if handler_set is already used and generates error message
  */
-static int php_ob_init_conflict(char *handler_new, char *handler_set TSRMLS_DC)
+PHPAPI int php_ob_init_conflict(char *handler_new, char *handler_set TSRMLS_DC)
 {
 	if (php_ob_handler_used(handler_set TSRMLS_CC))
 	{
@@ -387,26 +387,6 @@ static int php_ob_init_named(uint initial_size, uint block_size, char *handler_n
 {
 	int   handler_gz, handler_mb, handler_ic;
 
-	if (OG(ob_nesting_level>1)) {
-		/* check for specific handlers where rules apply */
-		handler_gz = strcmp(handler_name, "ob_gzhandler");
-		handler_mb = strcmp(handler_name, "mb_output_handler");
-		handler_ic = strcmp(handler_name, "ob_iconv_handler");
-		/* apply rules */
-		if (!handler_gz || !handler_mb || !handler_ic) {
-			if (php_ob_handler_used(handler_name TSRMLS_CC)) {
-				php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "output handler '%s' cannot be used twice", handler_name);
-				return FAILURE;
-			}
-			if (!handler_gz && php_ob_init_conflict(handler_name, "zlib output compression" TSRMLS_CC))
-				return FAILURE;
-			if (!handler_mb && php_ob_init_conflict(handler_name, "ob_iconv_handler" TSRMLS_CC))
-				return FAILURE;
-			if (!handler_ic && php_ob_init_conflict(handler_name, "mb_output_handler" TSRMLS_CC))
-				return FAILURE;
-		}
-	}
-	
 	if (OG(ob_nesting_level)>0) {
 		if (OG(ob_nesting_level)==1) { /* initialize stack */
 			zend_stack_init(&OG(ob_buffers));
@@ -635,7 +615,7 @@ static inline void php_ob_prepend(const char *text, uint text_length)
 
 /* {{{ php_ob_get_buffer
  * Return the current output buffer */
-static int php_ob_get_buffer(zval *p TSRMLS_DC)
+PHPAPI int php_ob_get_buffer(zval *p TSRMLS_DC)
 {
 	if (OG(ob_nesting_level)==0) {
 		return FAILURE;
@@ -647,7 +627,7 @@ static int php_ob_get_buffer(zval *p TSRMLS_DC)
 
 /* {{{ php_ob_get_length
  * Return the size of the current output buffer */
-static int php_ob_get_length(zval *p TSRMLS_DC)
+PHPAPI int php_ob_get_length(zval *p TSRMLS_DC)
 {
 	if (OG(ob_nesting_level) == 0) {
 		return FAILURE;
