@@ -96,105 +96,136 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\libsqlite\src\attach.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\libsqlite\src\auth.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\btree.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
+# End Source File
+# Begin Source File
+
+SOURCE=.\libsqlite\src\btree.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libsqlite\src\btree_rb.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\build.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
+SOURCE=.\libsqlite\src\config.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libsqlite\src\copy.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\libsqlite\src\delete.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\encode.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\expr.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\func.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\hash.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
+SOURCE=.\libsqlite\src\hash.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\libsqlite\src\insert.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\main.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\opcodes.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
+# End Source File
+# Begin Source File
+
+SOURCE=.\libsqlite\src\opcodes.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\os.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
+# End Source File
+# Begin Source File
+
+SOURCE=.\libsqlite\src\os.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\pager.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
+# End Source File
+# Begin Source File
+
+SOURCE=.\libsqlite\src\pager.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\parse.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
+SOURCE=.\libsqlite\src\parse.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libsqlite\src\pragma.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\libsqlite\src\printf.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\random.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\select.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
+# End Source File
+# Begin Source File
+
+SOURCE=.\libsqlite\src\sqlite.h
 # End Source File
 # Begin Source File
 
@@ -256,44 +287,49 @@ InputPath=.\libsqlite\src\sqlite_config.w32.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\libsqlite\src\sqliteInt.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\libsqlite\src\table.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\tokenize.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\trigger.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\update.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\util.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
+# End Source File
+# Begin Source File
+
+SOURCE=.\libsqlite\src\vacuum.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\vdbe.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
+SOURCE=.\libsqlite\src\vdbe.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\libsqlite\src\where.c
-# ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # End Group
