@@ -1276,7 +1276,7 @@ int sqliteVdbeList(
     sprintf(p->zStack[2],"%d", p->aOp[i].p1);
     sprintf(p->zStack[3],"%d", p->aOp[i].p2);
     if( p->aOp[i].p3type==P3_POINTER ){
-      sprintf(p->aStack[4].z, "ptr(%#x)", (int)p->aOp[i].p3);
+      sprintf(p->aStack[4].z, "ptr(%p)", p->aOp[i].p3);
       p->zStack[4] = p->aStack[4].z;
     }else{
       p->zStack[4] = p->aOp[i].p3;
