@@ -2068,7 +2068,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 				UdmVarListReplaceStr(&Res->Doc[row].Sections,"URL",al);
 				free(al);
 				
-				RETURN_STRING((char *)UdmVarListFindStr(&Res->Doc[row].Sections,"URL",""),1);
+				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"URL",""),1);
 			    }
 #else
 				RETURN_STRING((Res->Doc[row].url)?(Res->Doc[row].url):"",1);
@@ -2085,14 +2085,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 				
 			case UDM_FIELD_TITLE:		
 #if UDM_VERSION_ID >= 30204
-			    {
-				char	*al;
-				al = (char *)MyRemoveHiLightDup((const char *)(UdmVarListFindStr(&(Res->Doc[row].Sections), "Title", "")));
-				UdmVarListReplaceStr(&Res->Doc[row].Sections,"Title",al);
-				free(al);
-				
-				RETURN_STRING((char *)UdmVarListFindStr(&Res->Doc[row].Sections,"Title",""),1);
-			    }
+				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Title",""),1);
 #else
 				RETURN_STRING((Res->Doc[row].title)?(Res->Doc[row].title):"",1);
 #endif
@@ -2100,14 +2093,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 				
 			case UDM_FIELD_KEYWORDS:	
 #if UDM_VERSION_ID >= 30204
-			    {
-				char	*al;
-				al = (char *)MyRemoveHiLightDup((const char *)(UdmVarListFindStr(&(Res->Doc[row].Sections), "Meta.Keywords", "")));
-				UdmVarListReplaceStr(&Res->Doc[row].Sections,"Meta.Keywords",al);
-				free(al);
-				
-				RETURN_STRING((char *)UdmVarListFindStr(&Res->Doc[row].Sections,"Meta.Keywords",""),1);
-			    }
+				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Meta.Keywords",""),1);
 #else
 				RETURN_STRING((Res->Doc[row].keywords)?(Res->Doc[row].keywords):"",1);
 #endif
@@ -2115,14 +2101,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 				
 			case UDM_FIELD_DESC:		
 #if UDM_VERSION_ID >= 30204
-			    {
-				char	*al;
-				al = (char *)MyRemoveHiLightDup((const char *)(UdmVarListFindStr(&(Res->Doc[row].Sections), "Meta.Description", "")));
-				UdmVarListReplaceStr(&Res->Doc[row].Sections,"Meta.Description",al);
-				free(al);
-				
-				RETURN_STRING((char *)UdmVarListFindStr(&Res->Doc[row].Sections,"Meta.Description",""),1);
-			    }
+				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Meta.Description",""),1);
 #else
 				RETURN_STRING((Res->Doc[row].description)?(Res->Doc[row].description):"",1);
 #endif
@@ -2130,15 +2109,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 				
 			case UDM_FIELD_TEXT:		
 #if UDM_VERSION_ID >= 30204
-/*			    {
-				char	*al;
-				al = (char *)MyRemoveHiLightDup((const char *)(UdmVarListFindStr(&(Res->Doc[row].Sections), "Body", "")));
-				UdmVarListReplaceStr(&Res->Doc[row].Sections,"Body",al);
-				free(al);
-				
-				RETURN_STRING((char *)UdmVarListFindStr(&Res->Doc[row].Sections,"Body",""),1);
-			    }*/
-				RETURN_STRING((char *)UdmVarListFindStr(&Res->Doc[row].Sections,"Body",""),1);
+				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Body",""),1);
 #else
 				RETURN_STRING((Res->Doc[row].text)?(Res->Doc[row].text):"",1);
 #endif
