@@ -11,6 +11,9 @@ jpeg <--> png conversion test
 	if (!function_exists("imagecreatefrompng") || !function_exists("imagepng")) {
 		die("skip png support unavailable");
 	}
+	if (!function_exists("imagecreatefromjpeg") || !function_exists("imagejpeg")) {
+		die("skip jpeg support unavailable");
+	}
 ?>
 --FILE--
 <?php
