@@ -49,6 +49,8 @@ PHP 4                                                                      NEWS
   (Wez)
 - Fixed bug #21809 (select would not always timeout during socket shutdown). (Wez)
 - Fixed bug #21725 (return behaviour differs between include and require). (Zeev)
+- Fixed bug #21689 (fgetcsv() suppresses some characters before a separator).
+  (Masahiro, Moriyoshi)
 - Fixed bug #21597 (made glob() understand Windows paths). (Edin)
 - Fixed bug #21549 (problem with Ingres II persistent connections). (Jani)
 - Fixed bug #21544 (Extended checks for where FreeTDS is installed). (Frank)
