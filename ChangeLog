@@ -1,3 +1,57 @@
+2004-04-20  Frank M. Kromann  <frank@kromann.info>
+
+    * NEWS
+      NEWS:
+      mssql related fixes
+
+    * (PHP_4_3)
+      ext/mssql/php_mssql.h:
+      MFH: Fix #28007. Compile fails when the SHORT type is undefined (older
+      versions of FreeTDS)
+
+    * ext/mssql/php_mssql.h:
+      Fix #28007. Compile fails when the SHORT type is undefined (older versions
+      of FreeTDS)
+
+    * (PHP_4_3)
+      ext/mssql/php_mssql.c:
+      MFH: Fix problem getting return value from stored procedure when it returns
+      multiple results
+
+    * ext/mssql/php_mssql.c:
+      Fix problem getting return value from stored procedure when it returns
+      multiple results
+
+2004-04-20  John Coggeshall  <john@coggeshall.org>
+
+    * NEWS:
+      minor update
+
+2004-04-20  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - Fix news
+
+    * NEWS:
+      - More news
+
+    * ZendEngine2/zend_language_parser.y:
+      - Fix bug #27283 - Exceptions where the last catch() statement was
+      sometimes
+      - skipped.
+
+2004-04-20  Christian Stocker  <chregu@phant.ch>
+
+    * ext/xsl/xsltprocessor.c:
+      - make static methods calls work from within xslt
+      - extended tests
+
+2004-04-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/interface_construct.phpt
+      tests/classes/interface_optional_arg.phpt:
+      Add new tests (by magnus)
+
 2004-04-19  Rob Richards  <rrichards@ctindustries.net>
 
     * scripts/Makefile.frag:
