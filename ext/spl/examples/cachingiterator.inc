@@ -8,16 +8,19 @@ class CachingIterator
 	protected $more;
 	protected $strvalue;
 
-	function __construct(Iterator $it) {
+	function __construct(Iterator $it)
+	{
 		$this->it = $it;
 	}
 
-	function rewind() {
+	function rewind()
+	{
 		$this->it->rewind();
 		$this->next();
 	}
 	
-	function next() {
+	function next()
+	{
 		if ($this->more = $this->it->hasMore()) {
 			$this->current = $this->it->current();
 			$this->key = $this->it->key();
@@ -30,27 +33,33 @@ class CachingIterator
 		$this->it->next();
 	}
 	
-	function hasMore() {
+	function hasMore()
+	{
 		return $this->more;
 	}
 
-	function hasNext() {
+	function hasNext()
+	{
 		return $this->it->hasMore();
 	}
 	
-	function current() {
+	function current()
+	{
 		return $this->current;
 	}
 
-	function key() {
+	function key()
+	{
 		return $this->key;
 	}
 
-	function __call($func, $params) {
+	function __call($func, $params)
+	{
 		return call_user_func_array(array($this->it, $func), $params);
 	}
 	
-	function __toString() {
+	function __toString()
+	{
 		return $this->strvalue;
 	}
 }
