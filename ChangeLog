@@ -1,3 +1,72 @@
+2003-01-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/informix/config.m4
+      ext/informix/config.m4:
+      Fixed bug: #21543, Informix version detection fails
+
+2003-01-13  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/rpc/com/conversion.c:
+      false should be VT_FALSE
+
+2003-01-13  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      tests/run-test/test008.phpt:
+      MFH
+
+    * tests/run-test/test008.phpt:
+      Fixed typoFixed typoFixed typoFixed typoFixed typoFixed typoFixed typoFixed
+      typo
+
+2003-01-13  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h:
+      added array_combine().
+      Creates an array by using the elements of the first parameter as keys and
+      the elements of the second as correspoding keys. Error is thrown in case
+      the arrays has different number of elements. Number of elements 0 is not
+      valid for both parameters.
+
+2003-01-13  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/servlet/servlet.dsp:
+      Adjust paths for the new location of ext/rpc/java
+
+    * ext/rpc/java/java.dsp:
+      Adjust paths to the new location java.dsp
+
+    * ext/rpc/xmlrpc/xmlrpc-epi-php.c:
+      Fix ZTS build here too.
+
+    * ext/xmlrpc/xmlrpc-epi-php.c:
+      Fixed ZTS build.
+
+2003-01-13  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      Fixed a silly segfault bug caused by lack of strict type checking
+
+2003-01-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/buildcheck.sh:
+      which is not portable. use our bundled shtool instead.
+
+2003-01-13  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      . Implemented a common filter parameter parsing function.
+      . Added automatic line-breaking feature for base64 encode filter. This
+        can be turned on by putting a option entry "base64-encode.line-length"
+        to the filter parameters.
+
+2003-01-13  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/domxml/php_domxml.c:
+      - Fix ZTS build
+
 2003-01-12  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * tests/lang/bug21600.phpt:
