@@ -869,7 +869,9 @@ int main(int argc, char *argv[])
 
 out:
 	php_request_shutdown((void *) 0);
-	exit_status = EG(exit_status);
+	if (exit_status == 0) {
+		exit_status = EG(exit_status);
+	}
 out_err:	
 	if (module_started) {
 		php_module_shutdown(TSRMLS_C);
