@@ -34,10 +34,18 @@ typedef struct {
 } php_assert_globals;
 
 #ifdef ZTS
+#define ASSERTLS_D php_assert_globals *assert_globals
+#define ASSERTLS_DC , ASSERTLS_D
+#define ASSERTLS_C assert_globals
+#define ASSERTLS_CC , ASSERTLS_CC
 #define ASSERT(v) (assert_globals->v)
 #define ASSERTLS_FETCH() php_assert_globals *assert_globals = ts_resource(assert_globals_id)
 int assert_globals_id;
 #else
+#define ASSERTLS_D
+#define ASSERTLS_DC
+#define ASSERTLS_C
+#define ASSERTLS_CC
 #define ASSERT(v) (assert_globals.v)
 #define ASSERTLS_FETCH()
 php_assert_globals assert_globals;
@@ -86,12 +94,10 @@ PHP_INI_BEGIN()
 	 STD_PHP_INI_ENTRY("assert.quiet_eval", "0",	PHP_INI_ALL,	OnUpdateInt,		quiet_eval,		 	php_assert_globals,		assert_globals)
 PHP_INI_END()
 
-#ifdef ZTS
-static void php_assert_init_globals(php_assert_globals *assert_globals)
+static void php_assert_init_globals(ASSERTLS_D)
 {
 	ASSERT(callback) = 0;
 }
-#endif
 
 PHP_MINIT_FUNCTION(assert)
 {
@@ -100,7 +106,7 @@ PHP_MINIT_FUNCTION(assert)
 	ELS_FETCH();
 	assert_globals_id = ts_allocate_id(sizeof(php_assert_globals), (ts_allocate_ctor) php_assert_init_globals, NULL);
 #else
-	ASSERT(callback) = 0;
+	php_assert_init_globals(ASSERTLS_C);
 #endif
 
 	REGISTER_INI_ENTRIES();
@@ -145,8 +151,6 @@ PHP_RSHUTDOWN_FUNCTION(assert)
 
 PHP_MINFO_FUNCTION(assert)
 {
-	ASSERTLS_FETCH();
-
 	DISPLAY_INI_ENTRIES();
 }
 
