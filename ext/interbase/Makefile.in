@@ -1,6 +1,0 @@
-LTLIBRARY_NAME    = libinterbase.la
-LTLIBRARY_SOURCES = interbase.c
-LTLIBRARY_SHARED_NAME   = interbase.la
-LTLIBRARY_SHARED_LIBADD = $(INTERBASE_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

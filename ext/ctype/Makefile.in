@@ -1,8 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libctype.la
-LTLIBRARY_SOURCES     = ctype.c
-LTLIBRARY_SHARED_NAME = ctype.la
-LTLIBRARY_SHARED_LIBADD  = $(CTYPE_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

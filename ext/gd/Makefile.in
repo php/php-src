@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME    = libgd.la
-LTLIBRARY_SOURCES = gd.c gdcache.c gdttf.c gdt1.c
-LTLIBRARY_SHARED_NAME   = gd.la
-LTLIBRARY_SHARED_LIBADD = $(GD_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

@@ -1,8 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libdbplus.la
-LTLIBRARY_SOURCES     = dbplus.c php_dbplus.c 
-LTLIBRARY_SHARED_NAME = dbplus.la
-LTLIBRARY_SHARED_LIBADD  = $(DBPLUS_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

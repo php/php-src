@@ -1,9 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libgmp.la
-LTLIBRARY_SOURCES     = gmp.c
-LTLIBRARY_SHARED_NAME = gmp.la
-LTLIBRARY_LIBADD  = $(GMP_LIBADD)
-LTLIBRARY_SHARED_LIBADD  = $(GMP_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk
