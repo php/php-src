@@ -111,21 +111,21 @@ ZEND_API void destroy_zend_class(zend_class_entry *ce)
 	}
 	switch (ce->type) {
 		case ZEND_USER_CLASS:
+			zend_hash_destroy(&ce->default_properties);
+			zend_hash_destroy(ce->static_members);
 			efree(ce->name);
 			efree(ce->refcount);
 			zend_hash_destroy(&ce->function_table);
-			zend_hash_destroy(&ce->default_properties);
-			zend_hash_destroy(ce->static_members);
-			efree(ce->static_members);
+			FREE_HASHTABLE(ce->static_members);
 			zend_hash_destroy(&ce->constants_table);
 			zend_hash_destroy(&ce->class_table);
 			break;
 		case ZEND_INTERNAL_CLASS:
+			zend_hash_destroy(&ce->default_properties);
+			zend_hash_destroy(ce->static_members);
 			free(ce->name);
 			free(ce->refcount);
 			zend_hash_destroy(&ce->function_table);
-			zend_hash_destroy(&ce->default_properties);
-			zend_hash_destroy(ce->static_members);
 			free(ce->static_members);
 			zend_hash_destroy(&ce->constants_table);
 			zend_hash_destroy(&ce->class_table);

@@ -1365,7 +1365,7 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 	zend_hash_init(&new_class_entry.function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
 	zend_hash_init(&new_class_entry.class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
 	zend_hash_init(&new_class_entry.default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
-	new_class_entry.static_members = (HashTable *) emalloc(sizeof(HashTable));
+	ALLOC_HASHTABLE(new_class_entry.static_members);
 	zend_hash_init(new_class_entry.static_members, 10, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_init(&new_class_entry.constants_table, 10, NULL, ZVAL_PTR_DTOR, 0);
 
@@ -1854,7 +1854,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	zend_hash_init(&new_class_entry.function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
 	zend_hash_init(&new_class_entry.class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
 	zend_hash_init(&new_class_entry.default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
-	new_class_entry.static_members = (HashTable *) emalloc(sizeof(HashTable));
+	ALLOC_HASHTABLE(new_class_entry.static_members);
 	zend_hash_init(new_class_entry.static_members, 10, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_init(&new_class_entry.constants_table, 10, NULL, ZVAL_PTR_DTOR, 0);
 
