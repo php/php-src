@@ -1,3 +1,107 @@
+2004-03-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * run-tests.php:
+      Fixed generate_array_diff().
+
+2004-03-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/lang/bug26640.phpt:
+      Fix tests
+
+    * ZendEngine2/tests/bug26695.phpt
+      tests/classes/static_properties_002.phpt:
+      Fix test
+
+    * scripts/dev/search_underscores.php:
+      Add more statistics
+
+2004-03-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      Zend/zend_builtin_functions.c
+      ext/standard/array.c
+      ext/standard/tests/array/bug27782.phpt:
+      MFH: Fixed bug #27782 (Wrong behaviour of next(), prev() and each()).
+
+    * ZendEngine2/zend_builtin_functions.c
+      ext/standard/array.c:
+      Fixed bug #27782 (Wrong behaviour of next(), prev() and each()).
+
+    * ext/standard/tests/array/bug27782.phpt:
+      
+      Fixed bug #27782 (Wrong behaviour of next(), prev() and each()).
+
+2004-03-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * scripts/dev/search_underscores.php:
+      The test script to search for underscores
+
+    * ZendEngine2/zend_reflection_api.c:
+      TSRM fix
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_reflection_api.c:
+      - Fix Reflection class names
+      - Add ability to get the extension an internal class was defined in
+
+2004-03-30  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_4_3)
+      ext/mssql/php_mssql.c:
+      MFH: Fix for #27764. Get return value from a stored procedure not returning
+      any result sets
+
+    * ext/mssql/php_mssql.c:
+      Fix for #27764. Get return value from a stored procedure not returning any
+      result sets
+
+2004-03-30  Stanislav Malyshev  <stas@zend.com>
+
+    * TSRM/TSRM.c:
+      Disabled calling dtors on tsrm_shutdown - calling dtors in tsrm_shutdown
+      makes
+      modules registering TSRM ids to crash, if they have dtors, since the
+      module
+      is unloaded before tsrm_shutdown is called. Can be re-enabled after
+      tsrm_free_id is implemented.
+
+    * (PHP_4_3)
+      TSRM/TSRM.c:
+      Disabled calling dtors on tsrm_shutdown - calling dtors in tsrm_shutdown
+      makes
+      modules registering TSRM ids to crash, if they have dtors,
+      since the module is unloaded before tsrm_shutdown is called.
+      Can be re-enabled after tsrm_free_id is implemented.
+
+2004-03-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+2004-03-30  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/standard/tests/general_functions/sunfuncts.phpt:
+      Prevent test from failing on least significant digit
+
+2004-03-30  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      main/streams.c:
+      Fix for Bug #27762: SCO Openserver doesn't have S_ISSOCK
+      Possible side effect from this is that CLI scripts run from inetd won't
+      realize that stdin/stdout are sockets.  But thats not our problem.
+
+2004-03-30  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/incomplete_class.c:
+      - Tiny improvement.
+
 2004-03-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/acconfig.h
