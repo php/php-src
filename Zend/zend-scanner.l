@@ -31,6 +31,7 @@
 
 #if WIN32|WINNT
 #include <winsock.h>
+#include <io.h>
 #endif
 
 #include <errno.h>
@@ -146,59 +147,78 @@ inline void restore_lexical_state(zend_lex_state *lex_state CLS_DC)
 	BEGIN(lex_state->state);
 	zend_restore_compiled_filename(lex_state->filename);
 #else
-	delete(CG(ZFL));
+	delete((ZendFlexLexer *) CG(ZFL));
 	CG(ZFL) = lex_state->ZFL;
 #endif
 }
 
 
 BEGIN_EXTERN_C()
+ZEND_API void zend_close_file_handle(zend_file_handle *file_handle)
+{
+	switch (file_handle->type) {
+		case ZEND_HANDLE_FILENAME:
+			break;
+		case ZEND_HANDLE_FD:
+			close(file_handle->handle.fd);
+			break;
+		case ZEND_HANDLE_FP:
+			fclose(file_handle->handle.fp);
+			break;
+#ifdef ZTS
+		case ZEND_HANDLE_ISTREAM:
+			delete file_handle->handle.is;
+			break;
+#endif
+	}
+}
+
 ZEND_API inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 {
 #ifndef ZTS
-	FILE *tmp;
 	YY_BUFFER_STATE buffer_state = YY_CURRENT_BUFFER;
 
 	switch (file_handle->type) {
 		case ZEND_HANDLE_FILENAME:
-			tmp = zend_fopen(file_handle->filename);
+			file_handle->handle.fp = zend_fopen(file_handle->filename);
 			break;
 		case ZEND_HANDLE_FD:
-			tmp = fdopen(file_handle->handle.fd, "r");
+			file_handle->handle.fp = fdopen(file_handle->handle.fd, "r");
 			break;
 		case ZEND_HANDLE_FP:
-			tmp = file_handle->handle.fp;
+			file_handle->handle.fp = file_handle->handle.fp;
 			break;
 	}
-	if (!tmp) {
+	if (!file_handle->handle.fp) {
 		return FAILURE;
 	}
+	file_handle->type = ZEND_HANDLE_FP;
 	
 	/* Reset the scanner for scanning the new file */
-	yyin = tmp;
+	yyin = file_handle->handle.fp;
 	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
 	BEGIN(INITIAL);
 #else
-	ifstream *input_file;
-
 	switch (file_handle->type) {
 		case ZEND_HANDLE_FD:
-			input_file = new ifstream(file_handle->handle.fd);
+			file_handle->handle.is = new ifstream(file_handle->handle.fd);
 			break;
 		case ZEND_HANDLE_FILENAME:
-			input_file = new ifstream(file_handle->filename);
+			file_handle->handle.is = new ifstream(file_handle->filename);
 			break;
 		case ZEND_HANDLE_FP:
 			if (file_handle->handle.fp==stdin) {
-				input_file = (ifstream *) &cin;
+				file_handle->handle.is = (ifstream *) &cin;
 			} else {
-				input_file = new ifstream(file_handle->filename);
+				fclose(file_handle->handle.fp);
+				file_handle->handle.is = new ifstream(file_handle->filename);
 			}	
 			break;
 	}
-	CG(ZFL) = new ZendFlexLexer;
+	file_handle->type = ZEND_HANDLE_ISTREAM;
 
-	CG(ZFL)->switch_streams(input_file, &cout);
+	CG(ZFL) = new ZendFlexLexer;
+	CG(ZFL)->switch_streams(file_handle->handle.is, &cout);
 #endif
 	zend_set_compiled_filename(file_handle->filename);
 	CG(zend_lineno) = 1;
@@ -249,9 +269,7 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 				retval = NULL;
 				break;
 			} else {
-#ifndef ZTS
-				fclose(yyin);
-#endif
+				zend_close_file_handle(file_handle);
 				restore_lexical_state(&original_lex_state CLS_CC);
 				CG(active_op_array) = original_active_op_array;
 				retval = op_array;
@@ -375,9 +393,7 @@ int require_file(zend_file_handle *file_handle CLS_DC)
 		return FAILURE;
 	}
 	zendparse(CLS_C);
-#ifndef ZTS
-	fclose(yyin);
-#endif
+	zend_close_file_handle(file_handle);
 	restore_lexical_state(&original_lex_state CLS_CC);
 	return SUCCESS;
 }
@@ -397,9 +413,7 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 		return FAILURE;
 	}
 	zend_highlight(syntax_highlighter_ini);
-#ifndef ZTS
-	fclose(yyin);
-#endif
+	zend_close_file_handle(&file_handle);
 	restore_lexical_state(&original_lex_state CLS_CC);
 	return SUCCESS;
 }
@@ -448,6 +462,14 @@ END_EXTERN_C()
 void ZendFlexLexer::BeginState(int state)
 {
 	BEGIN(state);
+}
+
+
+ZendFlexLexer::~ZendFlexLexer()
+{
+	if (yy_start_stack) {
+		yy_flex_free(yy_start_stack);
+	}
 }
 
 

@@ -459,6 +459,12 @@ ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno)
 			fprintf(stderr,"Unknown\n");
 		}
 	}
+
+	if (had_problems) {
+		int foo = 5;
+
+		foo+=1;
+	}
 		
 	if (!silent) {
 		fprintf(stderr,"---------------------------------------\n");

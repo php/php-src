@@ -194,10 +194,14 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals)
 
 static void compiler_globals_dtor(zend_compiler_globals *compiler_globals)
 {
-	zend_hash_destroy(compiler_globals->function_table);
-	free(compiler_globals->function_table);
-	zend_hash_destroy(compiler_globals->class_table);
-	free(compiler_globals->class_table);
+	if (compiler_globals->function_table != global_function_table) {
+		zend_hash_destroy(compiler_globals->function_table);
+		free(compiler_globals->function_table);
+	}
+	if (compiler_globals->class_table != global_class_table) {
+		zend_hash_destroy(compiler_globals->class_table);
+		free(compiler_globals->class_table);
+	}
 }
 
 
@@ -271,8 +275,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 	executor_globals_id = ts_allocate_id(sizeof(zend_executor_globals), (void (*)(void *)) executor_globals_ctor, (void (*)(void *)) executor_globals_dtor);
 	compiler_globals = ts_resource(compiler_globals_id);
 	executor_globals = ts_resource(executor_globals_id);
-	zend_hash_destroy(compiler_globals->function_table);
-	zend_hash_destroy(compiler_globals->class_table);
+	compiler_globals_dtor(compiler_globals);
 	compiler_globals->function_table = GLOBAL_FUNCTION_TABLE;
 	compiler_globals->class_table = GLOBAL_CLASS_TABLE;
 #endif
