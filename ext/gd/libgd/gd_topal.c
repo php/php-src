@@ -1260,7 +1260,7 @@ pass2_no_dither (j_decompress_ptr cinfo, JSAMPARRAY input_buf, JSAMPARRAY output
 			 * will later be added at the end of the palette as the transparent
 			 * index.
 			 */
-			if ((im->transparent >= 0) && (im->transparent == *inptr)) {
+			if ((im->transparent >= 0) && (im->transparent == *(inptr - 1))) {
 				*outptr++ = im->colorsTotal;
 				continue;
 			}
