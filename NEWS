@@ -7,7 +7,8 @@ PHP 4                                                                      NEWS
         //Globally enables the ticks modifier for the whole program
         declare (ticks=1);
 
-        //Enables the ticks modifier for just the lexical block containing "statement"
+        //Enables the ticks modifier for just the lexical block containing
+        //"statement".
         deckare (ticks=1) {
            statement;
         }
