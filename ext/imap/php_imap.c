@@ -3183,7 +3183,7 @@ PHP_FUNCTION(imap_mail)
 	int argc;
 	
 	argc = ARG_COUNT(ht);
-	if (argc < 3 || argc > 7 || zend_get_parametersArray(ht, argc, argv) == FAILURE) {
+	if (argc < 3 || argc > 7 || zend_get_parameters_array(ht, argc, argv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	/* To: */
