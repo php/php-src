@@ -94,19 +94,49 @@ PHPAPI php_url *php_url_parse(char *str)
 	ue = s + length;
 
 	/* parse scheme */
-	if ((e = strchr(s, ':')) && *(e+1) == '/' && (e-s)) {
-		ret->scheme = estrndup(s, (e-s));
-		php_replace_controlchars(ret->scheme);
-		
-		if (*(e+2) == '/') {
-			s = e + 3;
+	if ((e = strchr(s, ':')) && (e-s)) {
+		/* 
+		 * certain schemas like mailto: and zlib: may not have any / after them
+		 * this check ensures we support those.
+		 */
+		if (*(e+1) != '/') {
+			/* check if the data we get is a port this allows us to 
+			 * correctly parse things like a.com:80
+			 */
+			p = e + 1;
+			while (isdigit(*p)) {
+				p++;
+			}
+			
+			if ((*p) == '\0' || *p == '/') {
+				goto parse_port;
+			}
+			
+			ret->scheme = estrndup(s, (e-s));
+			php_replace_controlchars(ret->scheme);
+			
+			length -= ++e - s;
+			s = e;
+			goto just_path;
 		} else {
-			s = e + 1;
-			if (!strncasecmp("file", ret->scheme, sizeof("file"))) {
-				goto nohost;
-			}	
+			ret->scheme = estrndup(s, (e-s));
+			php_replace_controlchars(ret->scheme);
+		
+			if (*(e+2) == '/') {
+				s = e + 3;
+			} else {
+				s = e + 1;
+				if (!strncasecmp("file", ret->scheme, sizeof("file"))) {
+					goto nohost;
+				} else {
+					length -= ++e - s;
+					s = e;
+					goto just_path;
+				}	
+			}
 		}	
 	} else if (e) { /* no scheme, look for port */
+		parse_port:
 		p = e + 1;
 		pp = p;
 		
@@ -123,12 +153,14 @@ PHPAPI php_url *php_url_parse(char *str)
 		}
 	} else {
 		just_path:
-		ret->path = estrndup(str, length);
+		ret->path = estrndup(s, length);
 		php_replace_controlchars(ret->path);
 		return ret;
 	}
 	
 	if (!(e = strchr(s, '/'))) {
+		e = ue;
+	} else if (e && e == s) {
 		e = ue;
 	}
 
@@ -145,6 +177,9 @@ PHPAPI php_url *php_url_parse(char *str)
 				ret->pass = estrndup(pp, (p-pp));
 				php_replace_controlchars(ret->pass);
 			}	
+		} else {
+			ret->user = estrndup(s, (p-s));
+			php_replace_controlchars(ret->user);
 		}
 		
 		s = p + 1;
