@@ -542,7 +542,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 }
 /* }}} */
 
-/* {{{ proto void set_time_limit(int seconds)
+/* {{{ proto bool set_time_limit(int seconds)
    Sets the maximum time a script can run */
 PHP_FUNCTION(set_time_limit)
 {
@@ -558,7 +558,11 @@ PHP_FUNCTION(set_time_limit)
 	}
 
 	convert_to_string_ex(new_timeout);
-	zend_alter_ini_entry("max_execution_time", sizeof("max_execution_time"), Z_STRVAL_PP(new_timeout), Z_STRLEN_PP(new_timeout), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	if (zend_alter_ini_entry("max_execution_time", sizeof("max_execution_time"), Z_STRVAL_PP(new_timeout), Z_STRLEN_PP(new_timeout), PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == SUCCESS) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
