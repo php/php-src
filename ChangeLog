@@ -1,3 +1,76 @@
+2004-03-24  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/dbx/package.xml
+      ext/filepro/package.xml
+      ext/session/package.xml
+      ext/sockets/package.xml
+      ext/tokenizer/package.xml
+      ext/wddx/package.xml
+      ext/yaz/package.xml:
+      more visa to sibira ;)
+
+2004-03-24  George Schlossnagle  <george@omniti.com>
+
+    * ext/simplexml/tests/021.phpt:
+      added test for property_exists checks.
+
+2004-03-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h:
+      New autoload protection schema was implemented (Using HashTable instead of
+      boolean flag)
+
+2004-03-24  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_operators.c
+      main/rfc1867.c:
+      - Revert bogus commit
+
+2004-03-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/lang/bug22367.phpt:
+      Fixed (strict warning was added to expected output)
+
+2004-03-24  Stanislav Malyshev  <stas@zend.com>
+
+    * main/main.c:
+      and set module startup flag on startup
+
+    * main/main.c:
+      reset module shutdown flag on startup
+
+2004-03-24  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS
+      ZendEngine2/zend_operators.c
+      main/rfc1867.c:
+      - Fixed NEWS
+
+2004-03-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/tests/bug27641.phpt:
+      Fixed bug #27641 (Object cloning in ze1_compatibility_mode was
+      reimplemented)
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_variables.c:
+      Object cloning in ze1 compatibility mode (zend.ze1_compatibility_mode) was
+      reimplemented (Dmitry, Andi)
+
+2004-03-24  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/package.xml:
+      add account names & emails
+
+2004-03-24  George Schlossnagle  <george@omniti.com>
+
+    * ext/simplexml/simplexml.c:
+      fixed non-existent elements check
+      ref: http://news.php.net/article.php?group=php.internals&article=8660
+
 2004-03-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/sqlite/sqlite.c

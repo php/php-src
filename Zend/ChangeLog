@@ -1,3 +1,30 @@
+2004-03-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c
+      zend_execute_API.c
+      zend_globals.h:
+      New autoload protection schema was implemented (Using HashTable instead of
+      boolean flag)
+
+2004-03-24  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_operators.c:
+      - Revert bogus commit
+
+    * zend_operators.c:
+      - Fixed NEWS
+
+2004-03-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/bug27641.phpt:
+      Fixed bug #27641 (Object cloning in ze1_compatibility_mode was
+      reimplemented)
+
+    * zend_execute.c
+      zend_variables.c:
+      Object cloning in ze1 compatibility mode (zend.ze1_compatibility_mode) was
+      reimplemented (Dmitry, Andi)
+
 2004-03-22  Andi Gutmans  <andi@zend.com>
 
     * zend_compile.c:
