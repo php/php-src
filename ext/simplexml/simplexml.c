@@ -344,12 +344,60 @@ sxe_method_get(zval *object, char *name, int len TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ simplexml_ce_xpath_search()
+ */
+static void 
+simplexml_ce_xpath_search(INTERNAL_FUNCTION_PARAMETERS)
+{
+	php_sxe_object    *sxe;
+	zval              *value;
+	char              *query;
+	int                query_len;
+	int                i;
+	xmlNodeSetPtr      result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &query, &query_len) == FAILURE) {
+		return;
+	}
+
+	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
+	if (!sxe->xpath) {
+		sxe->xpath = xmlXPathNewContext(sxe->document);
+	}
+	sxe->xpath->node = sxe->node;
+
+	result = xmlXPathEval(query, sxe->xpath)->nodesetval;
+	if (!result) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+
+	for (i = 0; i < result->nodeNr; ++i) {
+		MAKE_STD_ZVAL(value);
+		if (!xmlStrcmp(result->nodeTab[i]->name, "text")) {
+			_node_as_zval(sxe, result->nodeTab[i]->parent, value);
+		} else {
+			_node_as_zval(sxe, result->nodeTab[i], value);
+		}
+		add_next_index_zval(return_value, value);
+	}
+	
+}
+/* }}} */
+
+
 /* {{{ sxe_call_method()
  */
 static int
 sxe_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 {
-	RETVAL_NULL();
+	if (!strcmp(method, "xsearch")) {
+		simplexml_ce_xpath_search(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	} else {
+		RETVAL_NULL();
+	}
+
 	return 1;
 }
 /* }}} */
@@ -658,7 +706,6 @@ function_entry simplexml_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-
 zend_module_entry simplexml_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"simplexml",
@@ -675,7 +722,7 @@ zend_module_entry simplexml_module_entry = {
 #ifdef COMPILE_DL_SIMPLEXML
 ZEND_GET_MODULE(simplexml)
 #endif
-
+	
 /* {{{ PHP_MINIT_FUNCTION(simplexml)
  */
 PHP_MINIT_FUNCTION(simplexml)
