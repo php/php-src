@@ -135,6 +135,7 @@ static PHP_INI_MH(OnChangeMaxExecutionTime)
 }
 
 
+#if MEMORY_LIMIT
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
 	int new_limit;
@@ -146,6 +147,7 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	}
 	return zend_set_memory_limit(new_limit);
 }
+#endif
 
 
 static PHP_INI_MH(OnUpdateErrorReporting)
@@ -787,12 +789,6 @@ void php_request_shutdown_for_exec(void *dummy)
 	/* used to close fd's in the 3..255 range here, but it's problematic
 	 */
 	shutdown_memory_manager(1, 1);
-}
-
-
-static int return_one(void *p)
-{
-	return 1;
 }
 
 
