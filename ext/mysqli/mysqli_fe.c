@@ -210,7 +210,7 @@ function_entry mysqli_result_methods[] = {
 	PHP_FALIAS(data_seek,mysqli_data_seek,NULL)
 	PHP_FALIAS(fetch_field,mysqli_fetch_field,NULL)
 	PHP_FALIAS(fetch_fields,mysqli_fetch_fields,NULL)
-	PHP_FALIAS(fetvh_field_direct,mysqli_fetch_field_direct,NULL)
+	PHP_FALIAS(fetch_field_direct,mysqli_fetch_field_direct,NULL)
 	PHP_FALIAS(fetch_array,mysqli_fetch_array,NULL)
 	PHP_FALIAS(fetch_assoc,mysqli_fetch_assoc,NULL) 
 	PHP_FALIAS(fetch_object,mysqli_fetch_object,NULL) 
