@@ -26,6 +26,12 @@
 # define TSRM_WIN32
 #endif
 
+#ifndef TSRM_WIN32
+# include "tsrm_config.h"
+#else
+# include "tsrm_config.w32.h"
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>

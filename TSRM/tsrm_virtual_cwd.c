@@ -29,11 +29,6 @@
 #include <fcntl.h>
 
 #include "tsrm_virtual_cwd.h"
-
-#ifndef TSRM_WIN32
-#include "tsrm_config.h"
-#endif
-
 #include "tsrm_strtok_r.h"
 
 
@@ -513,7 +508,7 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode)
 	return f;
 }
 
-#if HAVE_UTIME || defined(TSRM_WIN32)
+#if HAVE_UTIME
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf)
 {
 	cwd_state new_state;
