@@ -254,16 +254,15 @@
 #define HAVE_STRFTIME 1
 
 /* Default directory for loading extensions.  */
-#define PHP_EXTENSION_DIR "C:\\PHP4"
+#define PHP_EXTENSION_DIR "c:\\php4"
 
 #define SIZEOF_INT 4
 
 /* Define directory constants for php and pear */
-#define PHP_SYSTEM_DRIVE (getenv("SystemDrive"))?getenv("SystemDrive"):"C:"
-#define PHP_BINDIR "C:\\PHP4"
-#define PHP_LIBDIR "C:\\PHP4"
-#define PHP_DATADIR "C:\\PHP4"
-#define PHP_SYSCONFDIR "C:\\PHP4"
-#define PHP_LOCALSTATEDIR "C:\\PHP4"
-#define PHP_CONFIG_FILE_PATH (getenv("SystemRoot"))?getenv("SystemRoot"):""
-#define PEAR_INSTALLDIR "C:\\PHP4"
+#define PHP_BINDIR "c:\\php4"
+#define PHP_LIBDIR "c:\\php4"
+#define PHP_DATADIR "c:\\php4"
+#define PHP_SYSCONFDIR "c:\\php4"
+#define PHP_LOCALSTATEDIR "c:\\php4"
+#define PHP_CONFIG_FILE_PATH "c:\\winnt"
+#define PEAR_INSTALLDIR "c:\\php4\\pear"
