@@ -4,6 +4,7 @@ PEAR_Registry
 <?php
 if (!getenv('PHP_PEAR_RUNTESTS')) {
     echo 'skip';
+    exit();
 }
 $statedir = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'registry_tester';
 if (file_exists($statedir)) {

@@ -4,6 +4,7 @@ PEAR_Config v1.1
 <?php
 if (!getenv('PHP_PEAR_RUNTESTS')) {
     echo 'skip';
+    exit();
 }
 include_once 'PEAR/Config.php';
 $pv = phpversion() . '';

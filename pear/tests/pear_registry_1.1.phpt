@@ -4,6 +4,7 @@ PEAR_Registry v1.1
 <?php
 if (!getenv('PHP_PEAR_RUNTESTS')) {
     echo 'skip';
+    exit();
 }
 $statedir = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'registry_tester';
 if (file_exists($statedir)) {
@@ -15,6 +16,7 @@ $pv = phpversion() . '';
 $av = $pv{0} == '4' ? 'apiversion' : 'apiVersion';
 if (!in_array($av, get_class_methods('PEAR_Registry'))) {
     echo 'skip';
+    exit();
 }
 if (PEAR_Registry::apiVersion() != '1.1') {
     echo 'skip';
