@@ -12,7 +12,7 @@ PHP 4                                                                      NEWS
   . sapi/fhttpd
 - Moved ext/vpopmail to PECL. (James)
 - Fixed an infinite loop in setlocale() when only invalid locale names
-  were passed in the array. (patch by Pal Loberg, pallo@initio.no).
+  were passed in the array. (patch by Pal Loberg, pallo@initio.no)
 - Fixed bugs #19156 and #19544 (COM extension leaks memory and keeps
   components referenced). (Harald)
 - Added fribidi_get_charsets() and fribidi_charset_info() functions. (Tal)
