@@ -64,11 +64,13 @@
 		$rows=Udm_Get_Res_Param($res,UDM_PARAM_NUM_ROWS);
 		$wordinfo=Udm_Get_Res_Param($res,UDM_PARAM_WORDINFO);
 		$searchtime=Udm_Get_Res_Param($res,UDM_PARAM_SEARCHTIME);
+		$first_doc=Udm_Get_Res_Param($res,UDM_PARAM_FIRST_DOC);
+		$last_doc=Udm_Get_Res_Param($res,UDM_PARAM_LAST_DOC);
 
 		printf("Searchtime: ".$searchtime."\n\n");
 
-		printf("Documents %d-%d from %d total found; %s\n\n",
-			$first,$first+$rows-1,$total,$wordinfo);
+		printf("Documents %d(%d)-%d(%d) from %d total found; %s\n\n",
+			$first,$first_doc,$first+$rows-1,$last_doc,$total,$wordinfo);
 
 		// Fetch all rows
 		for($i=0;$i<$rows;$i++){
