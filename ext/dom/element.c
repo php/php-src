@@ -120,7 +120,7 @@ int dom_element_tag_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 		ZVAL_STRING(*retval, qname, 1);
 		xmlFree(qname);
 	} else {
-		ZVAL_STRING(*retval, nodep->name, 1);
+		ZVAL_STRING(*retval, (char *) nodep->name, 1);
 	}
 
 	return SUCCESS;
@@ -508,7 +508,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 
 	DOM_GET_THIS_OBJ(elemp, id, xmlNodePtr, intern);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &uri, &uri_len, &name, &name_len, &value, &value_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!ss", &uri, &uri_len, &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
 
@@ -522,30 +522,32 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 	errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 
 	if (errorcode == 0) {
-		nodep = (xmlNodePtr) xmlHasNsProp(elemp, localname, uri);
-		if (nodep != NULL) {
-			node_list_unlink(nodep->children TSRMLS_CC);
-		}
-		nsptr = xmlSearchNsByHref(elemp->doc, elemp, uri);
-		while (nsptr && nsptr->prefix == NULL) {
-			nsptr = nsptr->next;
-		}
-		if (nsptr == NULL) {
-			if (prefix == NULL) {
-				errorcode = NAMESPACE_ERR;
-			} else {
-				nsptr = dom_get_ns(elemp, uri, &errorcode, prefix);
+		if (uri_len > 0) {
+			nodep = (xmlNodePtr) xmlHasNsProp(elemp, localname, uri);
+			if (nodep != NULL) {
+				node_list_unlink(nodep->children TSRMLS_CC);
 			}
-		}
+			nsptr = xmlSearchNsByHref(elemp->doc, elemp, uri);
+			while (nsptr && nsptr->prefix == NULL) {
+				nsptr = nsptr->next;
+			}
+			if (nsptr == NULL) {
+				if (prefix == NULL) {
+					errorcode = NAMESPACE_ERR;
+				} else {
+					nsptr = dom_get_ns(elemp, uri, &errorcode, prefix);
+				}
+			}
 
-		if (errorcode == 0) {
-			nodep = (xmlNodePtr) xmlSetNsProp(elemp, nsptr, localname, NULL);
-		}
-
-		attr = xmlSetProp(nodep, localname, value);
-		if (!attr) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such attribute '%s'", localname);
-			RETURN_FALSE;
+			if (errorcode == 0) {
+				attr = xmlSetNsProp(elemp, nsptr, localname, value);
+			}
+		} else {
+			attr = xmlHasProp(elemp, localname);
+			if (attr != NULL) {
+				node_list_unlink(attr->children TSRMLS_CC);
+			}
+			attr = xmlSetProp(elemp, localname, value);
 		}
 	}
 

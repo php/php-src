@@ -968,7 +968,7 @@ PHP_FUNCTION(dom_document_create_element_ns)
 
 	DOM_GET_THIS_OBJ(docp, id, xmlDocPtr, intern);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -976,7 +976,7 @@ PHP_FUNCTION(dom_document_create_element_ns)
 
 	if (errorcode == 0) {
 		nodep = xmlNewDocNode (docp, NULL, localname, NULL);
-		if (nodep != NULL) {
+		if (nodep != NULL && uri != NULL) {
 			nsptr = xmlSearchNsByHref (nodep->doc, nodep, uri);
 			if (nsptr == NULL) {
 				nsptr = dom_get_ns(nodep, uri, &errorcode, prefix);
@@ -1028,7 +1028,7 @@ PHP_FUNCTION(dom_document_create_attribute_ns)
 
 	DOM_GET_THIS_OBJ(docp, id, xmlDocPtr, intern);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -1037,7 +1037,7 @@ PHP_FUNCTION(dom_document_create_attribute_ns)
 		errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 		if (errorcode == 0) {
 			nodep = (xmlNodePtr) xmlNewDocProp(docp, localname, NULL);
-			if (nodep != NULL) {
+			if (nodep != NULL && uri_len > 0) {
 				nsptr = xmlSearchNsByHref (nodep->doc, root, uri);
 				if (nsptr == NULL) {
 					nsptr = dom_get_ns(root, uri, &errorcode, prefix);
