@@ -1,3 +1,9 @@
+- Transparent binary encoding of return values from PHP callback functions.
+
+- Add per-db hashtable to store the aggregate+plain function callback
+  structures.  The hashtable and structs also need to be allocated using
+  pemalloc() based on the persistent nature of the db connection.
+
 - Add user-space callback for the authorizer function (this is potentially
   very slow, so it needs to be implemented carefully).
 
