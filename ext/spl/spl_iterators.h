@@ -35,6 +35,9 @@ extern zend_class_entry *spl_ce_CachingRecursiveIterator;
 
 PHP_MINIT_FUNCTION(spl_iterators);
 
+PHP_FUNCTION(iterator_to_array);
+PHP_FUNCTION(iterator_count);
+
 typedef enum {
 	DIT_Default = 0,
 	DIT_LimitIterator,

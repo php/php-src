@@ -1322,6 +1322,70 @@ static zend_function_entry spl_funcs_CachingRecursiveIterator[] = {
 	{NULL, NULL, NULL}
 };
 
+/* {{{ array iterator_to_array(IteratorAggregate $it) 
+   Copy the iterator into an array */
+PHP_FUNCTION(iterator_to_array)
+{
+	zval                   *obj, **data;
+	zend_object_iterator   *iter;
+	char                   *str_key;
+	uint                    str_key_len;
+	ulong                   int_key;
+	int                     key_type;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &obj, zend_ce_aggregate) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	array_init(return_value);
+	
+	iter = Z_OBJCE_P(obj)->get_iterator(Z_OBJCE_P(obj), obj TSRMLS_CC);
+
+	iter->funcs->rewind(iter TSRMLS_CC);
+	while (iter->funcs->valid(iter TSRMLS_CC) == SUCCESS) {
+		key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
+		iter->funcs->get_current_data(iter, &data TSRMLS_CC);
+		(*data)->refcount++;
+		switch(key_type) {
+			case HASH_KEY_IS_STRING:
+				add_assoc_zval_ex(return_value, str_key, str_key_len, *data);
+				efree(str_key);
+				break;
+			case HASH_KEY_IS_LONG:
+				add_index_zval(return_value, int_key, *data);
+				break;
+		}
+		iter->funcs->move_forward(iter TSRMLS_CC);
+	}
+	iter->funcs->dtor(iter TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ int iterator_count(IteratorAggregate $it) 
+   Count the elements in an iterator */
+PHP_FUNCTION(iterator_count)
+{
+	zval                   *obj;
+	zend_object_iterator   *iter;
+	long                    count = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &obj, zend_ce_aggregate) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	iter = Z_OBJCE_P(obj)->get_iterator(Z_OBJCE_P(obj), obj TSRMLS_CC);
+
+	iter->funcs->rewind(iter TSRMLS_CC);
+	while (iter->funcs->valid(iter TSRMLS_CC) == SUCCESS) {
+		count++;
+		iter->funcs->move_forward(iter TSRMLS_CC);
+	}
+	iter->funcs->dtor(iter TSRMLS_CC);
+	
+	RETURN_LONG(count);
+}
+/* }}} */
+
 /* {{{ PHP_MINIT_FUNCTION(spl_iterators)
  */
 PHP_MINIT_FUNCTION(spl_iterators)
