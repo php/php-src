@@ -21,7 +21,6 @@
 //
 
 // TODO:
-// - Test under Windows (help is really appreciated in this point)
 // - Build strong tests
 // - Error reporting (now shows standar php errors)
 // - Write doc
@@ -36,7 +35,7 @@ require_once 'Console/Getopt.php';
 * Unix and Windows. The names and usage has been taken from its repectively
 * GNU commands.
 *
-* Usage: System::rm('-r file1 dir1');
+* Example usage: System::rm('-r file1 dir1');
 *
 * ------------------- EXPERIMENTAL STATUS -------------------
 *
@@ -51,18 +50,17 @@ class System extends PEAR
     * returns the commandline arguments of a function
     *
     * @param    string  $argv           the commandline
-    * @param    string  $short_options  the allowed option short-tags 
+    * @param    string  $short_options  the allowed option short-tags
     * @param    string  $long_options   the allowed option long-tags
     * @return   array   the given options and there values
     * @access private
     */
     function _parseArgs($argv, $short_options, $long_options = null)
     {
-        if (!is_array($argv)) {
+        if (!is_array($argv) && $argv !== null) {
             $argv = preg_split('/\s+/', $argv);
         }
-        $options = Console_Getopt::getopt($argv, $short_options);
-        return $options;
+        return Console_Getopt::getopt($argv, $short_options);
     }
 
     /**
@@ -140,12 +138,12 @@ class System extends PEAR
     }
 
     /**
-    * The rm command for removing files. 
+    * The rm command for removing files.
     * Supports multiple files and dirs and also recursive deletes
     *
     * @param    string  $args   the arguments for rm
     * @return   mixed   PEAR_Error or true for success
-    * @access   public    
+    * @access   public
     */
     function rm($args)
     {
@@ -183,7 +181,7 @@ class System extends PEAR
     *
     * @param    string  $args    the name of the director(y|ies) to create
     * @return   mixed   PEAR_Error or true for success
-    * @access   public    
+    * @access   public
     */
     function mkDir($args)
     {
@@ -280,6 +278,63 @@ class System extends PEAR
             fclose($outputfd);
         }
         return $ret;
+    }
+
+    /**
+    * Creates temporal files or directories
+    *
+    * Usage:
+    *   1) System::mktemp("prefix");
+    *   2) System::mktemp("-d prefix");
+    *   3) System::mktemp();
+    *   4) System::mktemp("-t /var/tmp prefix");
+    *
+    * prefix -> The string that will be prepended to the temp name
+    *           (defaults to "tmp").
+    * -d     -> A temporal dir will be created instead of a file.
+    * -t     -> The target dir where the temporal (file|dir) will be created. If
+    *           this param is missing by default the env vars TMP on Windows or
+    *           TMPDIR in Unix will be used. If these vars are also missing
+    *           c:\windows\temp or /tmp will be used.
+    *
+    * @param   string  $args  The arguments
+    * @return  mixed   PEAR_Error or true for success
+    * @access  public
+    */
+    function mktemp($args = null)
+    {
+        $opts = System::_parseArgs($args, 't:d');
+        if (PEAR::isError($opts)) {
+            return $opts;
+        }
+        foreach($opts[0] as $opt) {
+            if($opt[0] == 'd') {
+                $tmp_is_dir = true;
+            } elseif($opt[0] == 't') {
+                $tmpdir = $opt[1];
+            }
+        }
+        //print_r($opts);
+        $prefix = (isset($opts[1][0])) ? $opts[1][0] : 'tmp';
+        if(!isset($tmpdir)) {
+            if (OS_WINDOWS){
+                $tmpdir = getenv('TMP');
+            } else {
+                $tmpdir = getenv('TMPDIR');
+            }
+            if (empty($tmpdir)) {
+                $tmpdir = (OS_WINDOWS) ? 'c:\\windows\\temp' : '/tmp';
+            }
+        }
+        System::mkDir("-p $tmpdir");
+        $tmp = tempnam($tmpdir, $prefix);
+        if(isset($tmp_is_dir)) {
+            unlink($tmp); // be careful possible race condition here
+            if (!mkdir($tmp, 0700)) {
+                return $this->raiseError("Unable to create temporary directory $tmpdir");
+            }
+        }
+        return $tmp;
     }
 
 }
