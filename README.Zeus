@@ -95,6 +95,13 @@ you should set LD_LIBRARY_PATH to '/usr/local/mysql/lib/mysql'
 and then 'export LD_LIBRARY_PATH'. For convenience, you should add
 this to the 'start-zeus' script provided.
 
+Yet another method of ensuring the linked libraries are found is to
+set the environment variable LD_RUN_PATH before compiling PHP. This
+works in a similar way to LD_LIBRARY_PATH, but at compile-time.
+Libraries produced with this envrionment variable set will have its
+value 'burned' into the resultant binary, specifying a runtime
+search pth to locate other required libraries such as MySQL.
+
 On Linux, you can also tell the dynamic linker where to find the
 libraries, by adding '/usr/local/mysql/lib/mysql' to the file 
 /etc/ld.so.conf - after editting this file, run 'ldconfig' as root,
