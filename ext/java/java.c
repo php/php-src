@@ -513,6 +513,22 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromObject
     &handle, sizeof(pval *), NULL);
 }
 
+JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromArray
+  (JNIEnv *jenv, jclass self, jlong result)
+{
+  array_init( (pval*)(long)result );
+}
+
+JNIEXPORT jlong JNICALL Java_net_php_reflect_nextElement
+  (JNIEnv *jenv, jclass self, jlong array)
+{
+  pval *result;
+  pval *handle = (pval*)(long)array;
+  ALLOC_ZVAL(result);
+  zend_hash_next_index_insert(handle->value.ht, &result, sizeof(zval *), NULL);
+  return (jlong)(long)result;
+}
+
 JNIEXPORT void JNICALL Java_net_php_reflect_setException
   (JNIEnv *jenv, jclass self, jlong result, jstring value)
 {
