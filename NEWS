@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Catch users trying to set "compatibility" parameter, which is not
+  supported from user-land.
+- Fixed dbase_add_record. (Sterling)
 - Added new function "wordwrap" to wordwrap long strings from Chris
   Russel <russel@yorku.ca> (David Croft)
 - Added four additional arguments: attrsonly, sizelimit, timelimit, deref which
