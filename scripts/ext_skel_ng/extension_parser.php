@@ -878,6 +878,7 @@ $code .= "
 			foreach($this->functions as $name => $function) {
 				fputs($fp, sprintf("\tPHP_FE(%-20s, NULL)\n",$name));
 			}
+			fputs($fp, "\t{ NULL, NULL, NULL }\n");
 			fputs($fp, "};\n/* }}} */\n\n");
 			
 			fputs($fp, $this->generate_extension_entry());
