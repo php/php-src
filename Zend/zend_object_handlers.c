@@ -214,6 +214,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 			/* if we are assigning reference, we shouldn't move it, but instead assign variable
 			   to the same pointer */
 			if (PZVAL_IS_REF(*variable_ptr)) {
+				zval_dtor(*variable_ptr); /* old value should be destroyed */
 				(*variable_ptr)->type = value->type;
 				(*variable_ptr)->value = value->value;
 				zval_copy_ctor(*variable_ptr);
@@ -233,10 +234,9 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 
 	if (!setter_done) {
 		/* if we assign referenced variable, we should separate it */
+		value->refcount++;
 		if (PZVAL_IS_REF(value)) {
 			SEPARATE_ZVAL(&value);
-		} else {
-			value->refcount++;
 		}
 		zend_hash_update(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, &value, sizeof(zval *), NULL);
 	}
