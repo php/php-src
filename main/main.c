@@ -329,6 +329,7 @@ PHPAPI int php_printf(const char *format, ...)
 static void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list orig_args)
 {
 	char buffer[1024];
+	zend_bool buffer_ok = 0;
 	int size = 0;
 	ELS_FETCH();
 	PLS_FETCH();
@@ -366,6 +367,8 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		/* get include file name */
 		if (PG(log_errors) || PG(display_errors) || (!module_initialized)) {
 			size = vsnprintf(buffer, sizeof(buffer) - 1, format, orig_args);
+			buffer_ok = 1;
+			va_end(orig_args);
 			
 			buffer[sizeof(buffer) - 1] = 0;
 
@@ -440,9 +443,11 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	if (PG(track_errors) && EG(active_symbol_table)) {
 		pval *tmp;
 
-		size = vsnprintf(buffer, sizeof(buffer) - 1, format, orig_args);
-
-		buffer[sizeof(buffer) - 1] = 0;
+		if (!buffer_ok) {
+			size = vsnprintf(buffer, sizeof(buffer) - 1, format, orig_args);
+			buffer[sizeof(buffer) - 1] = 0;
+			va_end(orig_args);
+		}
 
 		ALLOC_ZVAL(tmp);
 		INIT_PZVAL(tmp);
