@@ -23,18 +23,18 @@
 
 #include "zend_globals.h"
 
-#ifndef THREAD_SAFE
 HashTable browser_hash;
-static char *lookup_browser_name;
-static pval *found_browser_entry;
-#endif
 
-static int browser_reg_compare(zval **browser)
+#define DEFAULT_SECTION_NAME "Default Browser Capability Settings"
+
+static int browser_reg_compare(zval **browser,int num_args, va_list args, zend_hash_key *key)
 {
-	pval *browser_name;
+	zval *browser_name;
 	regex_t r;
+	char *lookup_browser_name = va_arg(args,char *);
+	zval **found_browser_entry = va_arg(args,zval **);
 
-	if (found_browser_entry) { /* already found */
+	if (*found_browser_entry) { /* already found */
 		return 0;
 	}
 	zend_hash_find((*browser)->value.obj.properties, "browser_name_pattern",sizeof("browser_name_pattern"),(void **) &browser_name);
@@ -45,7 +45,7 @@ static int browser_reg_compare(zval **browser)
 		return 0;
 	}
 	if (regexec(&r,lookup_browser_name,0,NULL,0)==0) {
-		found_browser_entry = *browser;
+		*found_browser_entry = *browser;
 	}
 	regfree(&r);
 	return 0;
@@ -55,7 +55,9 @@ static int browser_reg_compare(zval **browser)
    Get information about the capabilities of a browser */
 PHP_FUNCTION(get_browser)
 {
-	pval **agent_name,**agent, tmp;
+	zval **agent_name,**agent;
+	zval *found_browser_entry;
+	char *lookup_browser_name;
 
 	if (!INI_STR("browscap")) {
 		RETURN_FALSE;
@@ -64,8 +66,8 @@ PHP_FUNCTION(get_browser)
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
 			if (zend_hash_find(&EG(symbol_table), "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT"), (void **) &agent_name)==FAILURE) {
-				*agent_name = &tmp;
-				var_reset(*agent_name);
+				zend_error(E_WARNING,"HTTP_USER_AGENT variable is not set, cannot determine user agent name");
+				RETURN_FALSE;
 			}
 			break;
 		case 1:
@@ -83,18 +85,18 @@ PHP_FUNCTION(get_browser)
 	if (zend_hash_find(&browser_hash, (*agent_name)->value.str.val,(*agent_name)->value.str.len+1, (void **) &agent)==FAILURE) {
 		lookup_browser_name = (*agent_name)->value.str.val;
 		found_browser_entry = NULL;
-		zend_hash_apply(&browser_hash,(int (*)(void *)) browser_reg_compare);
+		zend_hash_apply_with_arguments(&browser_hash,(int (*)(void *, int, va_list, zend_hash_key *)) browser_reg_compare,2,lookup_browser_name,&found_browser_entry);
 		
 		if (found_browser_entry) {
 			*agent = found_browser_entry;
-		} else if (zend_hash_find(&browser_hash, "Default Browser", sizeof("Default Browser"), (void **) &agent)==FAILURE) {
+		} else if (zend_hash_find(&browser_hash, DEFAULT_SECTION_NAME, sizeof(DEFAULT_SECTION_NAME), (void **) &agent)==FAILURE) {
 			RETURN_FALSE;
 		}
 	}
 	
 	*return_value = **agent;
 	return_value->type = IS_OBJECT;
-	pval_copy_constructor(return_value);
+	zval_copy_ctor(return_value);
 	return_value->value.obj.properties->pDestructor = ZVAL_DESTRUCTOR;
 
 	while (zend_hash_find((*agent)->value.obj.properties, "parent",sizeof("parent"), (void **) &agent_name)==SUCCESS) {
@@ -103,7 +105,7 @@ PHP_FUNCTION(get_browser)
 		if (zend_hash_find(&browser_hash,(*agent_name)->value.str.val, (*agent_name)->value.str.len+1, (void **)&agent)==FAILURE) {
 			break;
 		}
-		zend_hash_merge(return_value->value.obj.properties,(*agent)->value.obj.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(pval *), 0);
+		zend_hash_merge(return_value->value.obj.properties,(*agent)->value.obj.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *), 0);
 	}
 }
 /* }}} */
