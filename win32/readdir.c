@@ -2,7 +2,6 @@
 #include <string.h>
 #include <errno.h>
 
-#define NEEDRDH 1
 #include "readdir.h"
 #include "php.h"
 
