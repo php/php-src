@@ -256,8 +256,6 @@ extern PHPAPI void php_error_cb(int type, const char *format, ...);
 #endif
 
 
-extern void html_putc(char c);
-
 #define zenderror phperror
 #define zendlex phplex
 
