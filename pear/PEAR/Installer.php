@@ -29,7 +29,6 @@ require_once "PEAR/Common.php";
  *  - move the package db handler methods to its own class.
  *  - install also the package.xml?
  *  - remove unneeded code
- *  - only decrompress pack once
  *
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@fast.no>
@@ -252,10 +251,31 @@ class PEAR_Installer extends PEAR_Common
             fclose($wp);
             $this->log(1, '...done: ' . number_format($bytes, 0, '', ',') . ' bytes');
         }
-        // Test for package.xml -------------------------------------------
-        // XXX FIXME only decompress once
-        $fp = popen("gzip -dc $pkgfile | tar -tf -", 'r');
-        if (!$fp) {
+
+        // Decompress pack in tmp dir -------------------------------------
+
+        // To allow relative package file calls
+        if (!chdir(dirname($pkgfile))) {
+            return $this->raiseError('Unable to chdir to pakage directory');
+        }
+        $pkgfile = getcwd() . DIRECTORY_SEPARATOR . basename($pkgfile);
+
+        // XXX FIXME Windows
+        $this->tmpdir = tempnam('/tmp', 'pear');
+        unlink($this->tmpdir);
+        if (!mkdir($this->tmpdir, 0755)) {
+            return $this->raiseError("Unable to create temporary directory $this->tmpdir.");
+        } else {
+            $this->log(2, '+ tmp dir created at ' . $this->tmpdir);
+        }
+        $this->addTempFile($this->tmpdir);
+        if (!chdir($this->tmpdir)) {
+            return $this->raiseError("Unable to chdir to $this->tmpdir.");
+        }
+        // XXX FIXME Windows
+        $fp = popen("gzip -dc $pkgfile | tar -xvf -", 'r');
+        $this->log(2, "+ launched command: gzip -dc $pkgfile | tar -xvf -");
+        if (!is_resource($fp)) {
             return $this->raiseError("Unable to examine $pkgfile (gzip or tar failed)");
         }
         while ($line = fgets($fp, 4096)) {
@@ -268,37 +288,7 @@ class PEAR_Installer extends PEAR_Common
             }
         }
         pclose($fp);
-        if (!$descfile) {
-            return $this->raiseError("Invalid package: no package.xml file found!");
-        }
-
-        // Decompress pack in tmp dir -------------------------------------
-        // XXX FIXME Windows
-        $this->tmpdir = tempnam("/tmp", "pear");
-        unlink($this->tmpdir);
-        if (!mkdir($this->tmpdir, 0755)) {
-            return $this->raiseError("Unable to create temporary directory $this->tmpdir.");
-        } else {
-            $this->log(2, '...tmp dir created at ' . $this->tmpdir);
-        }
-        $this->addTempFile($this->tmpdir);
-
-
-        // XXX FIXME Windows should check for drive
-        if (substr($pkgfile, 0, 1) == DIRECTORY_SEPARATOR) {
-            $pkgfilepath = $pkgfile;
-        } else {
-            $pkgfilepath = $this->pwd . DIRECTORY_SEPARATOR . $pkgfile;
-        }
-
-        if (!chdir($this->tmpdir)) {
-            return $this->raiseError("Unable to chdir to $this->tmpdir.");
-        }
-        // XXX FIXME Windows
-        system("gzip -dc $pkgfilepath | tar -xf -");
-        $this->log(2, "launched command: gzip -dc $pkgfilepath | tar -xf -");
-        if (!is_file($descfile)) {
-            $this->log(2, "No desc file found: $descfile");
+        if (!isset($descfile) || !is_file($descfile)) {
             return $this->raiseError("No package.xml file after extracting the archive.");
         }
 
@@ -313,9 +303,10 @@ class PEAR_Installer extends PEAR_Common
             return $this->raiseError("No script destination directory found\n",
                                      null, PEAR_ERROR_DIE);
         }
+        $tmp_path = dirname($descfile);
         foreach ($pkginfo['filelist'] as $fname => $atts) {
             $dest_dir = $this->phpdir . DIRECTORY_SEPARATOR . dirname($fname);
-            $fname = dirname($descfile) . DIRECTORY_SEPARATOR . $fname;
+            $fname = $tmp_path . DIRECTORY_SEPARATOR . $fname;
             $this->_copyFile($fname, $dest_dir, $atts);
         }
         return true;
