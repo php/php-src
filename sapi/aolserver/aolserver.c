@@ -244,14 +244,14 @@ static void
 php_ns_hash_environment(NSLS_D CLS_DC ELS_DC PLS_DC SLS_DC)
 {
 	int i;
+	char buf[512];
+	zval *pval;
 
 	for(i = 0; i < Ns_SetSize(NSG(conn->headers)); i++) {
 		char *key = Ns_SetKey(NSG(conn->headers), i);
 		char *value = Ns_SetValue(NSG(conn->headers), i);
 		char *p;
 		char c;
-		zval *pval;
-		char buf[512];
 		int buf_len;
 
 		buf_len = snprintf(buf, 511, "HTTP_%s", key);
@@ -270,6 +270,32 @@ php_ns_hash_environment(NSLS_D CLS_DC ELS_DC PLS_DC SLS_DC)
 
 		zend_hash_update(&EG(symbol_table), buf, buf_len + 1, &pval, sizeof(zval *), NULL);
 	}
+	
+	snprintf(buf, 511, "%s/%s", Ns_InfoServerName(), Ns_InfoServerVersion());
+	
+	MAKE_STD_ZVAL(pval);
+	pval->type = IS_STRING;
+	pval->value.str.len = strlen(buf);
+	pval->value.str.val = estrndup(buf, pval->value.str.len);
+	zend_hash_update(&EG(symbol_table), "SERVER_SOFTWARE", sizeof("SERVER_SOFTWARE"), &pval, sizeof(zval *), NULL);
+
+	MAKE_STD_ZVAL(pval);
+	pval->type = IS_LONG;
+	pval->value.lval = Ns_InfoBootTime();
+	zend_hash_update(&EG(symbol_table), "SERVER_BOOTTIME", sizeof("SERVER_BOOTTIME"), &pval, sizeof(zval *), NULL);
+
+	MAKE_STD_ZVAL(pval);
+	pval->type = IS_STRING;
+	pval->value.str.val = estrdup(Ns_InfoBuildDate());
+	pval->value.str.len = strlen(pval->value.str.val);
+	zend_hash_update(&EG(symbol_table), "SERVER_BUILDDATE", sizeof("SERVER_BUILDDATE"), &pval, sizeof(zval *), NULL);
+
+	snprintf(buf, 511, "HTTP/%1.1f", NSG(conn)->request->version);
+	MAKE_STD_ZVAL(pval);
+	pval->type = IS_STRING;
+	pval->value.str.len = strlen(buf);
+	pval->value.str.val = estrndup(buf, pval->value.str.len);
+	zend_hash_update(&EG(symbol_table), "SERVER_PROTOCOL", sizeof("SERVER_PROTOCOL"), &pval, sizeof(zval *), NULL);
 }
 
 /*
