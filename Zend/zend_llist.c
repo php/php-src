@@ -171,7 +171,7 @@ ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func)
 		*ptr++ = element;
 	}
 
-	qsort(elements, list_size, sizeof(zend_llist_element *), (compare_func_t) comp_func);
+	qsort(elements, list_size, sizeof(zend_llist_element *), (int (*)(const void *, const void *)) comp_func);
 
 	l->head = elements[0];
 	elements[0]->prev = NULL;

@@ -39,7 +39,6 @@ typedef struct _zend_llist {
 } zend_llist;
 
 typedef int (*llist_compare_func_t) (const zend_llist_element *, const zend_llist_element *);
-typedef int  (*compare_func_t)(const void *, const void *);
 
 BEGIN_EXTERN_C()
 ZEND_API void zend_llist_init(zend_llist *l, size_t size, void (*dtor)(void *data), unsigned char persistent);
