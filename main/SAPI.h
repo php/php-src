@@ -101,6 +101,7 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len);
 SAPI_API int sapi_send_headers();
 
 SAPI_API int sapi_register_post_reader(sapi_post_content_type_reader *post_content_type_reader);
+SAPI_API void sapi_unregister_post_reader(sapi_post_content_type_reader *post_content_type_reader);
 
 struct _sapi_module_struct {
 	char *name;
