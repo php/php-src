@@ -200,7 +200,7 @@ dnl Digital Unix 4.0
 AC_CHECK_LIB(cxx, cin)
 AC_CHECK_LIB(cxxstd, __array_delete)
 
-AC_MSG_CHECKING(for class istdiostream)
+AC_CACHE_CHECK(for class istdiostream,ac_cv_class_istdiostream,[
 AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <unistd.h>
@@ -209,11 +209,14 @@ AC_TRY_COMPILE([
 ],[
 istdiostream *foo = new istdiostream((FILE *) 0);
 ],[
-  AC_DEFINE(HAVE_CLASS_ISTDIOSTREAM, 1, [Whether you have class istdiostream])
-  AC_MSG_RESULT(yes)
+  ac_cv_class_istdiostream=yes
 ],[
-  AC_MSG_RESULT(no)
+  ac_cv_class_istdiostream=no
 ])
+])
+  if test "$ac_cv_class_istdiostream" = "yes"; then
+    AC_DEFINE(HAVE_CLASS_ISTDIOSTREAM, 1, [Whether you have class istdiostream])
+  fi
 AC_LANG_C
 fi
 ])

@@ -16,10 +16,11 @@ AC_DEFUN(AC_ZEND_BROKEN_SPRINTF,[
     ])
   ])
   if test "$ac_cv_broken_sprintf" = "yes"; then
-    AC_DEFINE(ZEND_BROKEN_SPRINTF, 1, [Whether sprintf is broken])
+    ac_result=1
   else
-    AC_DEFINE(ZEND_BROKEN_SPRINTF, 0, [Whether sprintf is broken])
+    ac_result=0
   fi
+  AC_DEFINE_UNQUOTED(ZEND_BROKEN_SPRINTF, $ac_result, [Whether sprintf is broken])
 ])
 
 AC_DEFUN(AM_SET_LIBTOOL_VARIABLE,[
