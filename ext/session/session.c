@@ -422,7 +422,7 @@ static void _php_session_save_current_state(PSLS_D)
 	PS(mod)->close(&PS(mod_data));
 }
 
-#define COOKIE_FMT 		"Set-cookie: %s=%s"
+#define COOKIE_FMT 		"Set-Cookie: %s=%s"
 #define COOKIE_EXPIRES	"; expires="
 #define COOKIE_PATH		"; path="
 #define COOKIE_DOMAIN	"; domain="
