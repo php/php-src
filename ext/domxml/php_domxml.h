@@ -68,7 +68,6 @@ PHP_FUNCTION(domxml_substitute_entities_default);
 /* Class Document methods */
 PHP_FUNCTION(domxml_doc_doctype);
 PHP_FUNCTION(domxml_doc_implementation);
-PHP_FUNCTION(domxml_doc_document_element);
 PHP_FUNCTION(domxml_doc_create_element);
 PHP_FUNCTION(domxml_doc_create_text_node);
 PHP_FUNCTION(domxml_doc_create_comment);
@@ -77,7 +76,9 @@ PHP_FUNCTION(domxml_doc_create_attribute);
 PHP_FUNCTION(domxml_doc_create_cdata_section);
 PHP_FUNCTION(domxml_doc_create_entity_reference);
 PHP_FUNCTION(domxml_doc_imported_node);
-PHP_FUNCTION(domxml_add_root);
+PHP_FUNCTION(domxml_doc_add_root);
+PHP_FUNCTION(domxml_doc_document_element);
+PHP_FUNCTION(domxml_doc_set_root);
 PHP_FUNCTION(domxml_intdtd);
 PHP_FUNCTION(domxml_doc_ids);
 PHP_FUNCTION(domxml_dump_mem);
