@@ -578,14 +578,40 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 				smart_str_appendl(buf,"N;", 2);
 				continue;
 			}
-
-			php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
-
 			if (zend_hash_find(Z_OBJPROP_PP(struc), Z_STRVAL_PP(name), 
 						Z_STRLEN_PP(name) + 1, (void *) &d) == SUCCESS) {
-				php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);	
+				php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
+				php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);
 			} else {
-				php_var_serialize_intern(buf, &nvalp, var_hash TSRMLS_CC);	
+				zend_class_entry *ce;
+				ce = zend_get_class_entry(*struc TSRMLS_CC);
+				if (ce) {
+					char *prot_name, *priv_name;
+					int prop_name_length;
+					
+					do {
+						zend_mangle_property_name(&priv_name, &prop_name_length, ce->name, ce->name_length, 
+									Z_STRVAL_PP(name), Z_STRLEN_PP(name) + 1, ce->type & ZEND_INTERNAL_CLASS);
+						if (zend_hash_find(Z_OBJPROP_PP(struc), priv_name, prop_name_length, (void *) &d) == SUCCESS) {
+							php_var_serialize_string(buf, priv_name, prop_name_length-1);
+							php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);
+							break;
+						}
+						zend_mangle_property_name(&prot_name, &prop_name_length,  "*", 1, 
+									Z_STRVAL_PP(name), Z_STRLEN_PP(name) + 1, ce->type & ZEND_INTERNAL_CLASS);
+						if (zend_hash_find(Z_OBJPROP_PP(struc), prot_name, prop_name_length, (void *) &d) == SUCCESS) {
+							php_var_serialize_string(buf, prot_name, prop_name_length - 1);
+							php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);
+							break;
+						}
+						php_error_docref(NULL TSRMLS_CC, E_NOTICE, "\"%s\" returned as member variable from __sleep() but does not exist", Z_STRVAL_PP(name));
+						php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
+						php_var_serialize_intern(buf, &nvalp, var_hash TSRMLS_CC);
+					} while (0);
+				} else {
+					php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
+					php_var_serialize_intern(buf, &nvalp, var_hash TSRMLS_CC);
+				}
 			}
 		}
 	}
