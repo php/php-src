@@ -296,6 +296,9 @@ static void php_oci_init_globals(php_oci_globals *oci_globals)
 	OCI(server) = malloc(sizeof(HashTable));
 	zend_hash_init(OCI(server), 13, NULL, NULL, 1); 
 
+	OCI(conns) = malloc(sizeof(HashTable));
+	zend_hash_init(OCI(conns), 13, NULL, NULL, 1);
+
 	OCIEnvInit(&OCI(pEnv), OCI_DEFAULT, 0, NULL);
 	OCIHandleAlloc(OCI(pEnv), 
 				   (dvoid **)&OCI(pError),
@@ -323,6 +326,9 @@ PHP_MINIT_FUNCTION(oci)
 	OCI(server) = malloc(sizeof(HashTable));
 	zend_hash_init(OCI(server), 13, NULL, NULL, 1); 
 
+	OCI(conns) = malloc(sizeof(HashTable));
+	zend_hash_init(OCI(conns), 13, NULL, NULL, 1);
+
 	OCIEnvInit(&OCI(pEnv), OCI_DEFAULT, 0, NULL);
 	OCIHandleAlloc(OCI(pEnv), 
 				   (dvoid **)&OCI(pError),
@@ -332,8 +338,8 @@ PHP_MINIT_FUNCTION(oci)
 	
 #endif
 
-	le_conn = register_list_destructors(_oci_connection_dtor, NULL);
 	le_stmt = register_list_destructors(_oci_statement_dtor, NULL);
+	le_conn = register_list_destructors(_oci_connection_dtor, NULL);
 
 	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCI-Lob", php_oci_lob_class_functions);
 
@@ -435,9 +441,11 @@ PHP_MSHUTDOWN_FUNCTION(oci)
 
 	zend_hash_destroy(OCI(user));
 	zend_hash_destroy(OCI(server));
+	zend_hash_destroy(OCI(conns));
 
 	free(OCI(user));
 	free(OCI(server));
+	free(OCI(conns));
 
 	OCIHandleFree((dvoid *)OCI(pEnv), OCI_HTYPE_ENV);
 
@@ -518,6 +526,7 @@ _oci_define_dtor(void *data)
 		efree(define->name);
 		define->name = 0;
 	}
+
 	return 1;
 }
 
@@ -528,18 +537,24 @@ static int
 _oci_column_dtor(void *data)
 {	
 	oci_out_column *column = (oci_out_column *) data;
+	oci_connection *db_conn;
+	OCILS_FETCH();
 
-	oci_debug("_oci_column_dtor: %s",column->name);
+	oci_debug("START _oci_column_dtor: %s",column->name);
 
 	if (column->data) {
 		if (column->is_descr) {
-			zend_hash_index_del(column->statement->conn->descriptors,(int) column->data);
+			if (zend_hash_find(OCI(conns),(void*)&(column->statement->conn),sizeof(void*),(void **)&db_conn) == SUCCESS) {
+				zend_hash_index_del(column->statement->conn->descriptors,(int) column->data);
+			}
 		} else {
 			if (column->data) {
 				efree(column->data);
 			}
 		}
 	}
+
+	oci_debug("END _oci_column_dtor: %s",column->name);
 
 	if (column->name) {
 		efree(column->name);
@@ -598,18 +613,18 @@ _oci_statement_dtor(oci_statement *statement)
 static void
 _oci_connection_dtor(oci_connection *connection)
 {
-	if (! connection) {
-		return;
-	}
-
 	/* 
 	   as the connection is "only" a in memory service context we do not disconnect from oracle.
 	*/
 
-	oci_debug("_oci_connection_dtor: id=%d",connection->id);
+	OCILS_FETCH();
+
+	oci_debug("START _oci_connection_dtor: id=%d",connection->id);
+
+	zend_hash_del(OCI(conns),(void*)&connection,sizeof(void*));
 
 	if (connection->descriptors) {
-		zend_hash_destroy(connection->descriptors);
+   		zend_hash_destroy(connection->descriptors);
 		efree(connection->descriptors);
 	}
 
@@ -620,6 +635,8 @@ _oci_connection_dtor(oci_connection *connection)
 	if (connection->pError) {
 		OCIHandleFree((dvoid *) connection->pError, (ub4) OCI_HTYPE_ERROR);
 	}
+
+	oci_debug("END _oci_connection_dtor: id=%d",connection->id);
 
 	efree(connection);
 }
@@ -2142,6 +2159,8 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 	connection->open = 1;
 
 	oci_debug("oci_do_connect: id=%d",connection->id);
+
+	zend_hash_add(OCI(conns),(void*)&connection,sizeof(void*),(void*)&connection,sizeof(void*),NULL);
 
 	RETURN_RESOURCE(connection->id);
 	
