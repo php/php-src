@@ -872,7 +872,7 @@ static MYSQL_DATA *read_rows(MYSQL *mysql,MYSQL_FIELD *mysql_fields,
   uint	field,pkt_len;
   ulong len;
   uchar *cp;
-  char	*to;
+  char	*to, *end_to;
   MYSQL_DATA *result;
   MYSQL_ROWS **prev_ptr,*cur;
   NET *net = &mysql->net;
@@ -910,6 +910,7 @@ static MYSQL_DATA *read_rows(MYSQL *mysql,MYSQL_FIELD *mysql_fields,
     *prev_ptr=cur;
     prev_ptr= &cur->next;
     to= (char*) (cur->data+fields+1);
+    end_to = to + pkt_len - 1;
     for (field=0 ; field < fields ; field++)
     {
       if ((len=(ulong) net_field_length(&cp)) == NULL_LENGTH)
@@ -919,6 +920,13 @@ static MYSQL_DATA *read_rows(MYSQL *mysql,MYSQL_FIELD *mysql_fields,
       else
       {
 	cur->data[field] = to;
+	if (len > end_to - to)
+	{
+	  free_rows(result);
+	  net->last_errno = CR_UNKNOWN_ERROR;
+	  strmov(net->last_error, ER(net->last_errno));
+	  DBUG_RETURN(0);
+	}
 	memcpy(to,(char*) cp,len); to[len]=0;
 	to+=len+1;
 	cp+=len;
@@ -953,7 +961,7 @@ read_one_row(MYSQL *mysql,uint fields,MYSQL_ROW row, ulong *lengths)
 {
   uint field;
   ulong pkt_len,len;
-  uchar *pos,*prev_pos;
+  uchar *pos,*prev_pos,*end_pos;
 
   if ((pkt_len=(uint) net_safe_read(mysql)) == packet_error)
     return -1;
@@ -961,6 +969,7 @@ read_one_row(MYSQL *mysql,uint fields,MYSQL_ROW row, ulong *lengths)
     return 1;				/* End of data */
   prev_pos= 0;				/* allowed to write at packet[-1] */
   pos=mysql->net.read_pos;
+  end_pos=pos+pkt_len;
   for (field=0 ; field < fields ; field++)
   {
     if ((len=(ulong) net_field_length(&pos)) == NULL_LENGTH)
@@ -970,6 +979,12 @@ read_one_row(MYSQL *mysql,uint fields,MYSQL_ROW row, ulong *lengths)
     }
     else
     {
+      if (len > end_pos - pos)
+      {
+	mysql->net.last_errno=CR_UNKNOWN_ERROR;
+	strmov(mysql->net.last_error, ER(mysql->net.last_errno));
+	return -1;
+      }
       row[field] = (char*) pos;
       pos+=len;
       *lengths++=len;
