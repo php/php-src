@@ -95,11 +95,16 @@ install-pear:
 		for i in $(PEAR_SUBDIRS); do \
 			$(mkinstalldirs) $(INSTALL_ROOT)$(peardir)/$$i; \
 		done; \
+		for dir in PEAR/CommandUI; do \
+			test -d $(INSTALL_ROOT)$(peardir)/$$dir && rmdir $(INSTALL_ROOT)$(peardir)/$$dir; \
+		done; \
 		for i in $(PEAR_FILES); do \
 			echo "Installing $$i"; \
 			dir=`echo $$i|sed 's%[^/][^/]*$$%%'`; \
 			$(INSTALL_DATA) $(srcdir)/$$i $(INSTALL_ROOT)$(peardir)/$$dir; \
 		done; \
+		rm -f $(INSTALL_ROOT)$(peardir)/PEAR/Command/Login.php; \
+		rm -f $(INSTALL_ROOT)$(peardir)/PEAR/CommandUI/CLI.php; \
 	else \
 		cat $(srcdir)/install-pear.txt; \
 		exit 5; \
@@ -127,6 +132,9 @@ install-programs:
 	@for prog in $(bin_SCRIPTS); do \
 		echo "Installing program: $$prog"; \
 		$(INSTALL) -m 755 $(builddir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
+	done; \
+	for file in $(INSTALL_ROOT)$(bindir)/pearcmd-*.php; do \
+		rm -f $$file; \
 	done; \
 	for prog in phpextdist; do \
 		echo "Installing program: $$prog"; \
