@@ -3143,7 +3143,6 @@ PHP_FUNCTION(array_reverse)
 /* }}} */
 
 
-#if 0
 /* {{{ proto array array_map(array input, string value_exp [, string key_exp] */
 PHP_FUNCTION(array_map)
 {
@@ -3176,7 +3175,6 @@ PHP_FUNCTION(array_map)
 		zend_hash_move_forward((*input)->value.ht);
 	}		
 }
-#endif
 
 /*
  * Local variables:
