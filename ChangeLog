@@ -1,3 +1,28 @@
+2002-07-15  edink  <edink@pb1.pair.com>
+
+    * ext/mbstring/mbstring.c: MFH
+
+    * ext/mbstring/mbstring.c:
+    Fix bug #16985 (wrong count of GET/POST variables).
+
+2002-07-15  sesser  <sesser@pb1.pair.com>
+
+    * main/rfc1867.c: use Zend API to access llist count
+
+2002-07-15  hyanantha  <hyanantha@pb1.pair.com>
+
+    * ext/mysql/php_mysql.c:
+    mysql_create_db and mysql_drop_db disabled for NetWare
+
+2002-07-15  yohgaki  <yohgaki@pb1.pair.com>
+
+    * ext/pgsql/pgsql.c: Clean up code a little (Remove a use of magic number)
+    Change/add appropriate comments.
+
+    * NEWS: Fixed news
+
+    * NEWS: header sounds like http header. header -> header file
+
 2002-07-14  Andrei Zmievski  <andrei@pb1.pair.com>
 
     * ext/pcre/php_pcre.c: Fix Bug #18341.
