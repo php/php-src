@@ -55,6 +55,8 @@
 
 #include "mbfilter.h"
 
+#define MB_OVERLOAD_MAIL 1
+
 extern zend_module_entry mbstring_module_entry;
 #define mbstring_module_ptr &mbstring_module_entry
 
@@ -113,6 +115,8 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	int filter_illegal_substchar;
 	int current_filter_illegal_mode;
 	int current_filter_illegal_substchar;
+	int func_overload;
+	zend_function *orig_mail;
 	mbfl_buffer_converter *outconv;
 ZEND_END_MODULE_GLOBALS(mbstring);
 
