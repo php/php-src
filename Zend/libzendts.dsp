@@ -1,24 +1,24 @@
-# Microsoft Developer Studio Project File - Name="libzend" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="libzendts" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
 
-CFG=libzend - Win32 Debug
+CFG=libzendts - Win32 Debug_TS
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "libzend.mak".
+!MESSAGE NMAKE /f "libzendts.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "libzend.mak" CFG="libzend - Win32 Debug"
+!MESSAGE NMAKE /f "libzendts.mak" CFG="libzendts - Win32 Debug_TS"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "libzend - Win32 Release" (based on "Win32 (x86) Static Library")
-!MESSAGE "libzend - Win32 Debug" (based on "Win32 (x86) Static Library")
+!MESSAGE "libzendts - Win32 Release_TS" (based on "Win32 (x86) Static Library")
+!MESSAGE "libzendts - Win32 Debug_TS" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -28,23 +28,21 @@ CFG=libzend - Win32 Debug
 CPP=cl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "libzend - Win32 Release"
+!IF  "$(CFG)" == "libzendts - Win32 Release_TS"
 
 # PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "Release"
-# PROP BASE Intermediate_Dir "Release"
+# PROP BASE Output_Dir "Release_TS"
+# PROP BASE Intermediate_Dir "Release_TS"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Release"
-# PROP Intermediate_Dir "Release"
+# PROP Output_Dir "Release_TS"
+# PROP Intermediate_Dir "Release_TS"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDebug" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDebug" /D "_MBCS" /D "_LIB" /D "COMPILE_LIBZEND" /FR /FD /c
+# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDebug_TS" /D "_MBCS" /D "_LIB" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDebug_TS" /D "_MBCS" /D "_LIB" /D "COMPILE_LIBZEND" /D "ZTS" /FR /FD /c
 # SUBTRACT CPP /YX
-# ADD BASE RSC /l 0x40d /d "NDebug"
-# ADD RSC /l 0x40d /d "NDebug"
+# ADD BASE RSC /l 0x40d /d "NDebug_TS"
+# ADD RSC /l 0x40d /d "NDebug_TS"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -52,22 +50,20 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
-!ELSEIF  "$(CFG)" == "libzend - Win32 Debug"
+!ELSEIF  "$(CFG)" == "libzendts - Win32 Debug_TS"
 
 # PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "Debug"
-# PROP BASE Intermediate_Dir "Debug"
+# PROP BASE Output_Dir "Debug_TS"
+# PROP BASE Intermediate_Dir "Debug_TS"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
-# PROP Use_Debug_Libraries 1
-# PROP Output_Dir "Debug"
-# PROP Intermediate_Dir "Debug"
+# PROP Output_Dir "Debug_TS"
+# PROP Intermediate_Dir "Debug_TS"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_Debug" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_Debug" /D "_MBCS" /D "_LIB" /D "COMPILE_LIBZEND" /FR /YX /FD /GZ /c
-# ADD BASE RSC /l 0x40d /d "_Debug"
-# ADD RSC /l 0x40d /d "_Debug"
+# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_Debug_TS" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_Debug_TS" /D "_MBCS" /D "_LIB" /D "COMPILE_LIBZEND" /D "ZTS" /FR /YX /FD /GZ /c
+# ADD BASE RSC /l 0x40d /d "_Debug_TS"
+# ADD RSC /l 0x40d /d "_Debug_TS"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -79,8 +75,8 @@ LIB32=link.exe -lib
 
 # Begin Target
 
-# Name "libzend - Win32 Release"
-# Name "libzend - Win32 Debug"
+# Name "libzendts - Win32 Release_TS"
+# Name "libzendts - Win32 Debug_TS"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
@@ -268,7 +264,7 @@ SOURCE=.\zend_variables.h
 
 SOURCE=".\zend-parser.y"
 
-!IF  "$(CFG)" == "libzend - Win32 Release"
+!IF  "$(CFG)" == "libzendts - Win32 Release_TS"
 
 # Begin Custom Build
 InputDir=.
@@ -284,7 +280,7 @@ BuildCmds= \
    $(BuildCmds)
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "libzend - Win32 Debug"
+!ELSEIF  "$(CFG)" == "libzendts - Win32 Debug_TS"
 
 # Begin Custom Build
 InputDir=.
@@ -311,9 +307,9 @@ BuildCmds= \
 
 SOURCE=".\zend-scanner.l"
 
-!IF  "$(CFG)" == "libzend - Win32 Release"
+!IF  "$(CFG)" == "libzendts - Win32 Release_TS"
 
-!ELSEIF  "$(CFG)" == "libzend - Win32 Debug"
+!ELSEIF  "$(CFG)" == "libzendts - Win32 Debug_TS"
 
 # Begin Custom Build
 InputPath=".\zend-scanner.l"
