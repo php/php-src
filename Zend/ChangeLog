@@ -1,3 +1,28 @@
+2003-12-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_object_handlers.c:
+      Remove automatic call to __toString() since it is supposed to cause too
+      much trouble. See discussion on the mailing list.
+
+2003-12-02  Andi Gutmans  <andi@zend.com>
+
+    * zend_API.c
+      zend_operators.c:
+      - Revert the revert of these patches. This overloading can only be used
+      - by C extensions such as SimpleXML and *NOT* PHP code. Reasons given
+      - on the mailing list and problem with reentrancy inside the opcodes.
+
+    * zend_compile.c:
+      - Fix for bug #26182
+
+    * zend_errors.h:
+      - Don't include E_STRICT in E_ALL.
+
+2003-12-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.h:
+      Free the zval container only if it should be freed and was not copied.
+
 2003-12-01  Andi Gutmans  <andi@zend.com>
 
     * zend_execute.c:

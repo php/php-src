@@ -1,3 +1,159 @@
+2003-12-02  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * .cvsignore
+      buildconf.bat
+      ext/bcmath/config.w32
+      ext/calendar/config.w32
+      ext/com_dotnet/config.w32
+      ext/ctype/config.w32
+      ext/dom/config.w32
+      ext/ftp/config.w32
+      ext/mbstring/config.w32
+      ext/odbc/config.w32
+      ext/pcre/config.w32
+      ext/session/config.w32
+      ext/simplexml/config.w32
+      ext/sqlite/config.w32
+      ext/standard/config.w32
+      ext/tokenizer/config.w32
+      ext/wddx/config.w32
+      ext/xml/config.w32
+      ext/zlib/config.w32
+      sapi/apache/config.w32
+      sapi/cgi/config.w32
+      sapi/cli/config.w32
+      sapi/isapi/config.w32:
+      Add new (optional!) win32 build infrastructure.
+      Will follow up to internals@ shortly.
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+      Export this so that shared session modules can use it under win32.
+
+    * main/network.c
+      main/php_network.h:
+      Export these so that ftp extension can be build as shared ext.
+
+2003-12-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_object_handlers.c:
+      Remove automatic call to __toString() since it is supposed to cause too
+      much trouble. See discussion on the mailing list.
+
+2003-12-02  Andi Gutmans  <andi@zend.com>
+
+    * TSRM/tsrm_virtual_cwd.c:
+      - Uncomment my code which improves Windows behavior of TSRM file paths.
+      - This will now not work on Windows 95 anymore.
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_operators.c:
+      - Revert the revert of these patches. This overloading can only be used
+      - by C extensions such as SimpleXML and *NOT* PHP code. Reasons given
+      - on the mailing list and problem with reentrancy inside the opcodes.
+
+2003-12-02  Sara Golemon  <php@alphaweb.net>
+
+    * main/streams/userspace.c:
+      Register url_stat flag constants in userspace
+
+    * main/streams/userspace.c:
+      Populate userstream objects with context property
+
+    * main/streams/userspace.c:
+      Update userspace/url_stat proto
+
+2003-12-02  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      set freed pointer to null to avoid reuse
+
+2003-12-02  Jon Parise  <jon@csh.rit.edu>
+
+    * configure.in:
+      Improving the wording of the "don't use the DB extension" warning.
+
+2003-12-02  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/xp_socket.c:
+      this can't be persistent
+
+2003-12-02  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/node.c
+      ext/dom/php_dom.c:
+      check node type for ->attributes and ->childNodes
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      Fix bug 26443: No errror reporting for Errors in the domxml extension
+
+2003-12-02  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/credits_ext.h
+      ext/standard/credits_sapi.h:
+      - Updated credits
+
+    * EXTENSIONS:
+      removed some non-existing extensions/sapis
+
+    * NEWS
+      ext/qtdom/.cvsignore
+      ext/qtdom/CREDITS
+      ext/qtdom/EXPERIMENTAL
+      ext/qtdom/config.m4
+      ext/qtdom/qtdom.c
+      ext/qtdom/qtdom.h
+      ext/qtdom/qtdom.php
+      ext/qtdom/qtdom_qt.cpp
+      ext/qtdom/qtdom_qt.h:
+      Moved qtdom to PECL
+
+2003-12-02  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      - Fix for bug #26182
+
+    * ZendEngine2/zend_errors.h:
+      - Don't include E_STRICT in E_ALL.
+
+2003-12-02  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/mbstring/mbstring.h:
+      Fix MBSTRING_API for non-shared win32 builds
+
+2003-12-02  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * buildconf:
+      Revert undiscussed / undecided patch
+
+2003-12-02  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/tests/iconv_mime_decode_headers.phpt:
+      Fix test so it fits the expected behaviour
+
+    * ext/iconv/iconv.c
+      ext/standard/quot_print.c
+      ext/standard/quot_print.h:
+      all '_' (underscores) should be replaced by '\x20' (whitespaces)
+      in encoding.
+
+2003-12-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.h:
+      Free the zval container only if it should be freed and was not copied.
+
+2003-12-02  Sara Golemon  <php@alphaweb.net>
+
+    * main/streams/plain_wrapper.c:
+      CS
+
+2003-12-02  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/tests/iconv_mime_decode_headers.phpt:
+      Add regression test for iconv_mime_decode_headers()
+
 2003-12-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/iconv/iconv.c:
