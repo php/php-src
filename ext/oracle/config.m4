@@ -52,9 +52,9 @@ if test "$PHP_ORACLE" != "no"; then
   fi
 
   if test -f "$ORACLE_DIR/lib/sysliblist"; then
-  	PHP_EVAL_LIBLINE(`$ORACLE_DIR/lib/sysliblist`, ORACLE_SHARED_LIBADD)
+  	PHP_EVAL_LIBLINE(`cat $ORACLE_DIR/lib/sysliblist`, ORACLE_SHARED_LIBADD)
   elif test -f "$ORACLE_DIR/rdbms/lib/sysliblist"; then
-  	PHP_EVAL_LIBLINE(`$ORACLE_DIR/rdbms/lib/sysliblist`, ORACLE_SHARED_LIBADD)
+  	PHP_EVAL_LIBLINE(`cat $ORACLE_DIR/rdbms/lib/sysliblist`, ORACLE_SHARED_LIBADD)
   fi
 
   AC_ORACLE_VERSION($ORACLE_DIR)
