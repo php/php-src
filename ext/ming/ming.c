@@ -221,14 +221,13 @@ static SWFInput newSWFInput_sock(int socket)
   return newSWFInput_allocedBuffer(buffer, offset);
 }
 
-static SWFInput getInput(zval **zfile)
+static SWFInput getInput(zval **zfile TSRMLS_DC)
 {
   FILE *file;
   int type;
   SWFInput input;
 
-  file = (FILE *)zend_fetch_resource(zfile, -1, "File-Handle", &type, 3,
-				     le_fopen, le_socket, le_popen);
+  file = (FILE *) zend_fetch_resource(zfile TSRMLS_CC, -1, "File-Handle", &type, 3, php_file_le_fopen(), php_file_le_popen(), php_file_le_socket());
 
   if(type == le_socket)
     input = newSWFInput_sock(*(int *)file);
@@ -335,7 +334,7 @@ PHP_FUNCTION(swfbitmap_init)
     zend_list_addref(zend_list_insert(input, le_swfinputp));
   }
   else
-    input = getInput(zfile);
+    input = getInput(zfile TSRMLS_CC);
 
   if(zmask != NULL)
   {
@@ -346,7 +345,7 @@ PHP_FUNCTION(swfbitmap_init)
       zend_list_addref(zend_list_insert(maskinput, le_swfinputp));
     }
     else
-      maskinput = getInput(zmask);
+      maskinput = getInput(zmask TSRMLS_CC);
 
     bitmap = newSWFJpegWithAlpha_fromInput(input, maskinput);
   }
@@ -977,7 +976,7 @@ PHP_FUNCTION(swfdisplayitem_addAction)
 {
   zval **zaction, **flags;
   SWFAction action;
-  SWFDisplayItem item = getDisplayItem(getThis());
+  SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
 
   if(ZEND_NUM_ARGS() != 2 ||
      zend_get_parameters_ex(2, &zaction, &flags) == FAILURE)
@@ -986,7 +985,7 @@ PHP_FUNCTION(swfdisplayitem_addAction)
   convert_to_object_ex(zaction);
   convert_to_long_ex(flags);
 
-  action = (SWFBlock)getAction(*zaction);
+  action = (SWFBlock)getAction(*zaction TSRMLS_CC);
 
   SWFDisplayItem_addAction(item, action, Z_LVAL_PP(flags));
 }
@@ -1715,7 +1714,7 @@ PHP_FUNCTION(swfmovie_streamMp3)
     zend_list_addref(zend_list_insert(input, le_swfinputp));
   }
   else
-    input = getInput(zfile);
+    input = getInput(zfile TSRMLS_CC);
 
   sound = newSWFSound_fromInput(input);
   SWFMovie_setSoundStream(movie, sound);
