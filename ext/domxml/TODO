@@ -16,7 +16,7 @@
 	- started with generating of sax-events from file/string (chregu)
 	- generating sax-events from dom-tree is a more tricky one (see mailinglist of libxml2)
 12) error reporting for xslt methods
-13) add possibility to use relative xpath queries
+13) (DONE long time ago) add possibility to use relative xpath queries
 14) implement $dom->free() for freeing documents from memory
 15) implement get_element_by_tagname_ns (and improve namespace support in general)
 
