@@ -52,15 +52,17 @@ struct _zend_ini_entry {
 };
 
 
-int zend_ini_mstartup(void);
-int zend_ini_mshutdown(void);
-int zend_ini_rshutdown(void);
+int zend_ini_startup(ELS_D);
+int zend_ini_shutdown(ELS_D);
+int zend_ini_deactivate(ELS_D);
 
-void zend_ini_sort_entries(void);
+int zend_copy_ini_directives(ELS_D);
+
+void zend_ini_sort_entries(ELS_D);
 
 ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_number);
 ZEND_API void zend_unregister_ini_entries(int module_number);
-ZEND_API void zend_ini_refresh_caches(int stage);
+ZEND_API void zend_ini_refresh_caches(int stage ELS_DC);
 ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage);
 ZEND_API int zend_restore_ini_entry(char *name, uint name_length, int stage);
 ZEND_API void display_ini_entries(zend_module_entry *module);
@@ -71,8 +73,6 @@ ZEND_API char *zend_ini_string(char *name, uint name_length, int orig);
 zend_ini_entry *get_ini_entry(char *name, uint name_length);
 
 ZEND_API int zend_ini_register_displayer(char *name, uint name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
-
-ZEND_API void zend_ini_apply_with_argument(apply_func_arg_t apply_func, void *arg);
 
 ZEND_API ZEND_INI_DISP(zend_ini_boolean_displayer_cb);
 ZEND_API ZEND_INI_DISP(zend_ini_color_displayer_cb);

@@ -25,6 +25,7 @@
 #include "zend_list.h"
 #include "zend_API.h"
 #include "zend_builtin_functions.h"
+#include "zend_ini.h"
 
 #ifdef ZTS
 #	define GLOBAL_FUNCTION_TABLE	global_function_table
@@ -307,6 +308,7 @@ static void executor_globals_dtor(zend_executor_globals *executor_globals)
 {
 	zend_shutdown_constants(ELS_C);
 	zend_destroy_rsrc_plist(ELS_C);
+	zend_ini_shutdown(ELS_C);
 }
 
 
@@ -321,6 +323,17 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 /* FreeBSD floating point precision fix */
 #include <floatingpoint.h>
 #endif
+
+#ifdef ZTS
+static void zend_new_thread_end_handler(THREAD_T thread_id)
+{
+	ELS_FETCH();
+
+	zend_copy_ini_directives(ELS_C);
+	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP ELS_CC);
+}
+#endif
+
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions)
 {
@@ -398,6 +411,12 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	if (start_builtin_functions) {
 		zend_startup_builtin_functions();
 	}
+
+	zend_ini_startup(ELS_C);
+
+#ifdef ZTS
+	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
+#endif
 
 	return SUCCESS;
 }
@@ -516,6 +535,9 @@ void zend_deactivate(CLS_D ELS_DC)
 	}
 	if (setjmp(EG(bailout))==0) {
 		shutdown_compiler(CLS_C);
+	}
+	if (setjmp(EG(bailout))==0) {
+		zend_ini_deactivate(ELS_C);
 	}
 }
 

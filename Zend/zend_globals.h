@@ -191,6 +191,8 @@ struct _zend_executor_globals {
 
 	int lambda_count;
 
+	HashTable ini_directives;
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 #if SUPPORT_INTERACTIVE
 	int interactive;
