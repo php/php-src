@@ -24,6 +24,9 @@
 #include "ext/standard/head.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/url_scanner_ex.h"
+#ifdef HAVE_ZLIB
+#include "ext/zlib/php_zlib.h"
+#endif
 #include "SAPI.h"
 
 #define OB_DEFAULT_HANDLER_NAME "default output handler"
@@ -405,6 +408,11 @@ PHPAPI int php_ob_init_conflict(char *handler_new, char *handler_set TSRMLS_DC)
 static int php_ob_init_named(uint initial_size, uint block_size, char *handler_name, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
 {
 	if (OG(ob_nesting_level)>0) {
+#ifdef HAVE_ZLIB
+		if (!strncmp(handler_name, "ob_gzhandler", sizeof("ob_gzhandler")) && php_ob_gzhandler_check(TSRMLS_CC)) {
+			return FAILURE;
+		}
+#endif
 		if (OG(ob_nesting_level)==1) { /* initialize stack */
 			zend_stack_init(&OG(ob_buffers));
 		}
@@ -420,7 +428,7 @@ static int php_ob_init_named(uint initial_size, uint block_size, char *handler_n
 	OG(active_ob_buffer).status = 0;
 	OG(active_ob_buffer).internal_output_handler = NULL;
 	OG(active_ob_buffer).handler_name = estrdup(handler_name&&handler_name[0]?handler_name:OB_DEFAULT_HANDLER_NAME);
-	OG(active_ob_buffer).erase = erase;	
+	OG(active_ob_buffer).erase = erase;
 	OG(php_body_write) = php_b_body_write;
 	return SUCCESS;
 }
@@ -445,22 +453,20 @@ static zval* php_ob_handler_from_string(const char *handler_name TSRMLS_DC)
  */
 static int php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
 {
-	int res, result, len;
+	int result, len;
 	char *handler_name, *next_handler_name;
 	HashPosition pos;
 	zval **tmp;
 	zval *handler_zval;
 
 	if (output_handler && output_handler->type == IS_STRING) {
-		result = 0;
 		handler_name = Z_STRVAL_P(output_handler);
 		while ((next_handler_name=strchr(handler_name, ',')) != NULL) {
 			len = next_handler_name-handler_name;
 			next_handler_name = estrndup(handler_name, len);
 			handler_zval = php_ob_handler_from_string(next_handler_name TSRMLS_CC);
-			res = php_ob_init_named(initial_size, block_size, next_handler_name, handler_zval, chunk_size, erase TSRMLS_CC);
-			result &= res;
-			if (!res==SUCCESS) {
+			result = php_ob_init_named(initial_size, block_size, next_handler_name, handler_zval, chunk_size, erase TSRMLS_CC);
+			if (result != SUCCESS) {
 				zval_dtor(handler_zval);
 				FREE_ZVAL(handler_zval);
 			}
@@ -468,15 +474,12 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 			efree(next_handler_name);
 		}
 		handler_zval = php_ob_handler_from_string(handler_name TSRMLS_CC);
-		res = php_ob_init_named(initial_size, block_size, handler_name, handler_zval, chunk_size, erase TSRMLS_CC);
-		result &= res;
-		if (!res==SUCCESS) {
+		result = php_ob_init_named(initial_size, block_size, handler_name, handler_zval, chunk_size, erase TSRMLS_CC);
+		if (result != SUCCESS) {
 			zval_dtor(handler_zval);
 			FREE_ZVAL(handler_zval);
 		}
-		result = result ? SUCCESS : FAILURE;
 	} else if (output_handler && output_handler->type == IS_ARRAY) {
-		result = 0;
 		/* do we have array(object,method) */
 		if (zend_is_callable(output_handler, 1, &handler_name)) {
 			SEPARATE_ZVAL(&output_handler);
@@ -487,11 +490,10 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 			/* init all array elements recursively */
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(output_handler), &pos);
 			while (zend_hash_get_current_data_ex(Z_ARRVAL_P(output_handler), (void **)&tmp, &pos) == SUCCESS) {
-				result &= php_ob_init(initial_size, block_size, *tmp, chunk_size, erase TSRMLS_CC);
+				result = php_ob_init(initial_size, block_size, *tmp, chunk_size, erase TSRMLS_CC);
 				zend_hash_move_forward_ex(Z_ARRVAL_P(output_handler), &pos);
 			}
 		}
-		result = result ? SUCCESS : FAILURE;
 	} else if (output_handler && output_handler->type == IS_OBJECT) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No method name given: use ob_start(array($object,'method')) to specify instance $object and the name of a method of class %s to use as output handler", Z_OBJCE_P(output_handler)->name);
 		result = FAILURE;
