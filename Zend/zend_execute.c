@@ -3574,6 +3574,9 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 		EG(function_state_ptr) = &EX(function_state);
 		destroy_op_array(new_op_array TSRMLS_CC);
 		efree(new_op_array);
+		if (EG(exception)) {
+			zend_throw_exception_internal(NULL TSRMLS_CC);
+		}
 	} else {
 		if (return_value_used) {
 			ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
