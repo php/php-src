@@ -1,16 +1,13 @@
 --TEST--
 InterBase: misc sql types (may take a while)
 --SKIPIF--
-<?php if (!extension_loaded("interbase")) print "skip"; ?>
+<?php include("skipif.inc"); ?>
 --POST--
 --GET--
 --FILE--
-<?
-/* $Id$ */
+<?php
 
-    require(dirname(__FILE__)."/interbase.inc");
-    
-	$test_base = dirname(__FILE__)."/ibase_test.tmp";
+    require("interbase.inc");
     
     ibase_connect($test_base);
     
@@ -29,7 +26,7 @@ InterBase: misc sql types (may take a while)
             )");
     ibase_commit();
 
-    /* if timefmt is not supported, suppress error here*/
+    /* if timefmt is not supported, suppress error here */
     @ibase_timefmt("%m/%d/%Y %H:%M:%S");
 
     for($iter = 0; $iter < 10; $iter++){
@@ -81,13 +78,10 @@ InterBase: misc sql types (may take a while)
             echo " out: $row->V_INTEGER\n";
         }
         ibase_free_result($sel);
-    }/* for($iter)*/
+    } /* for($iter) */
 
     ibase_close();
     echo "end of test\n";
 ?>
 --EXPECT--
-
 end of test
-
-

@@ -1,16 +1,13 @@
 --TEST--
 InterBase: BLOB test
 --SKIPIF--
-<?php if (!extension_loaded("interbase")) print "skip"; ?>
+<?php include("skipif.inc"); ?>
 --POST--
 --GET--
 --FILE--
-<?
-/* $Id$ */
+<?php
 
-    require(dirname(__FILE__)."/interbase.inc");
-    
-	$test_base = dirname(__FILE__)."/ibase_test.tmp";
+    require("interbase.inc");
     
     ibase_connect($test_base);
 
@@ -38,7 +35,8 @@ InterBase: BLOB test
     $q = ibase_query("select v_blob from test4 where v_integer = 1");
     $row = ibase_fetch_object($q);
     $bl_h = ibase_blob_open($row->V_BLOB);
-    
+
+	$blob = '';    
     while($piece = ibase_blob_get($bl_h, rand() % 1024))
         $blob .= $piece;
     if($blob != $blob_str)
@@ -63,6 +61,7 @@ InterBase: BLOB test
     $q = ibase_query("select v_blob from test4 where v_integer = 2");
     $row = ibase_fetch_object($q);
     $bl_h = ibase_blob_open($row->V_BLOB);
+	$blob = '';
     while($piece = ibase_blob_get($bl_h, rand() % 1024))
         $blob .= $piece;
     if($blob != $blob_str)
