@@ -191,7 +191,7 @@ dbm_info *php_find_dbm(pval *id TSRMLS_DC)
 
 /* {{{ proto array dblist(void)
    Return an associative array id->filename */ 
-#if 0_HELLY
+#if HELLY_0
 /* New function not needed yet */
 PHP_FUNCTION(db_id_list)
 {
@@ -1183,7 +1183,7 @@ function_entry dbm_functions[] = {
 	PHP_FE(dbmdelete,								NULL)
 	PHP_FE(dbmfirstkey,								NULL)
 	PHP_FE(dbmnextkey,								NULL)
-#if 0_HELLY
+#if HELLY_0
 	PHP_FE(db_id_list,                              NULL)
 #endif
 	{NULL, NULL, NULL}
