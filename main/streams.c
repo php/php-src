@@ -48,7 +48,6 @@
 #endif
 
 #define STREAM_DEBUG 0
-
 #define STREAM_WRAPPER_PLAIN_FILES	((php_stream_wrapper*)-1)
 
 /* {{{ some macros to help track leaks */
@@ -243,24 +242,55 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* {{{ */
 {
 	int ret = 1;
+	int remove_rsrc = 1;
+	int preserve_handle = close_options & PHP_STREAM_FREE_PRESERVE_HANDLE ? 1 : 0;
+	int release_cast = 1;
 
 #if STREAM_DEBUG
 fprintf(stderr, "stream_free: %s:%p[%s] in_free=%d opts=%08x\n", stream->ops->label, stream, stream->__orig_path, stream->in_free, close_options);
 #endif
 	
+	/* recursion protection */
 	if (stream->in_free)
 		return 1;
 
 	stream->in_free++;
 
-	_php_stream_flush(stream, 1 TSRMLS_CC);
+	/* if we are releasing the stream only (and preserving the underlying handle),
+	 * we need to do things a little differently.
+	 * We are only ever called like this when the stream is cast to a FILE*
+	 * for include (or other similar) purposes.
+	 * */
+	if (preserve_handle) {
+		if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
+			/* If the stream was fopencookied, we must NOT touch anything
+			 * here, as the cookied stream relies on it all.
+			 * Instead, mark the stream as OK to auto-clean */
+			php_stream_auto_cleanup(stream);
+			stream->in_free--;
+			return 0;
+		}
+		/* otherwise, make sure that we don't close the FILE* from a cast */
+		release_cast = 0;
+	}
+
+#if STREAM_DEBUG
+fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remove_rsrc=%d\n",
+		stream->ops->label, stream, stream->__orig_path, preserve_handle, release_cast, remove_rsrc);
+#endif
 	
-	if ((close_options & PHP_STREAM_FREE_RSRC_DTOR) == 0) {
-		/* Remove entry from the resource list */
+	/* make sure everything is saved */
+	_php_stream_flush(stream, 1 TSRMLS_CC);
+		
+	/* If not called from the resource dtor, remove the stream
+     * from the resource list.
+	 * */
+	if ((close_options & PHP_STREAM_FREE_RSRC_DTOR) == 0 && remove_rsrc) {
 		zend_list_delete(stream->rsrc_id);
 	}
+	
 	if (close_options & PHP_STREAM_FREE_CALL_DTOR) {
-		if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
+		if (release_cast && stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
 			/* calling fclose on an fopencookied stream will ultimately
 				call this very same function.  If we were called via fclose,
 				the cookie_closer unsets the fclose_stdiocast flags, so
@@ -272,13 +302,14 @@ fprintf(stderr, "stream_free: %s:%p[%s] in_free=%d opts=%08x\n", stream->ops->la
 			return fclose(stream->stdiocast);
 		}
 
-		ret = stream->ops->close(stream, close_options & PHP_STREAM_FREE_PRESERVE_HANDLE ? 0 : 1 TSRMLS_CC);
+		ret = stream->ops->close(stream, preserve_handle ? 0 : 1 TSRMLS_CC);
 		stream->abstract = NULL;
 
 		/* tidy up any FILE* that might have been fdopened */
-		if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FDOPEN && stream->stdiocast) {
+		if (release_cast && stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FDOPEN && stream->stdiocast) {
 			fclose(stream->stdiocast);
 			stream->stdiocast = NULL;
+			stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;
 		}
 	}
 
@@ -1193,6 +1224,8 @@ typedef struct {
 	int fd;					/* underlying file descriptor */
 	int is_process_pipe;	/* use pclose instead of fclose */
 	int is_pipe;			/* don't try and seek */
+	char *temp_file_name;	/* if non-null, this is the path to a temporary file that
+							 * is to be deleted when the stream is closed */
 #if HAVE_FLUSHIO
 	char last_op;
 #endif
@@ -1218,21 +1251,24 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 
 PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 {
-	FILE *fp;
-	php_stream *stream;
+	char *opened_path = NULL;
+	FILE *fp = php_open_temporary_file(NULL, "php", &opened_path TSRMLS_CC);
 
-	fp = tmpfile();
-	if (fp == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "tmpfile(): %s", strerror(errno));
-		return NULL;
-	}
-	stream = php_stream_fopen_from_file_rel(fp, "r+");
-	if (stream == NULL)	{
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "tmpfile(): %s", strerror(errno));
+	if (fp)	{
+		php_stream *stream = php_stream_fopen_from_file_rel(fp, "r+b");
+		if (stream) {
+			php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
+
+			self->temp_file_name = opened_path;
+			return stream;
+		}
 		fclose(fp);
+
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to allocate stream");
+
 		return NULL;
 	}
-	return stream;
+	return NULL;
 }
 
 
@@ -1245,7 +1281,7 @@ PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STRE
 	self->file = file;
 	self->is_pipe = 0;
 	self->is_process_pipe = 0;
-
+	self->temp_file_name = NULL;
 	self->fd = fileno(file);
 
 #ifdef S_ISFIFO
@@ -1268,6 +1304,7 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 	self->is_pipe = 1;
 	self->is_process_pipe = 1;
 	self->fd = fileno(file);
+	self->temp_file_name = NULL;
 
 	return php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
 }
@@ -1331,13 +1368,20 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 	assert(data != NULL);
 
 	if (close_handle) {
-		if (data->is_process_pipe) {
-			ret = pclose(data->file);
-		} else {
-			ret = fclose(data->file);
+		if (data->file) {
+			if (data->is_process_pipe) {
+				ret = pclose(data->file);
+			} else {
+				ret = fclose(data->file);
+			}
+		}
+		if (data->temp_file_name) {
+			unlink(data->temp_file_name);
+			efree(data->temp_file_name);
 		}
 	} else {
 		ret = 0;
+		data->file = NULL;
 	}
 
 	/* STDIO streams are never persistent! */
@@ -1720,7 +1764,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 
 			return ret;
 		}
-		err:
+err:
 		fclose(fp);
 	}
 	efree(realpath);
@@ -1744,12 +1788,12 @@ static ssize_t stream_cookie_writer(void *cookie, const char *buffer, size_t siz
 	return php_stream_write(((php_stream *)cookie), (char *)buffer, size);
 }
 
-#ifdef COOKIE_SEEKER_USES_FPOS_T
-static int stream_cookie_seeker(void *cookie, fpos_t *position, int whence)
+#ifdef COOKIE_SEEKER_USES_OFF64_T
+static int stream_cookie_seeker(void *cookie, __off64_t *position, int whence)
 {
 	TSRMLS_FETCH();
 
-	*position = php_stream_seek((php_stream *)cookie, *position, whence);
+	*position = php_stream_seek((php_stream *)cookie, (off_t)*position, whence);
 
 	if (*position == -1)
 		return -1;
@@ -1850,15 +1894,38 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 		return FAILURE;
 #endif
 
+		if (flags & PHP_STREAM_CAST_TRY_HARD) {
+			php_stream *newstream;
+
+			newstream = php_stream_fopen_tmpfile();
+			if (newstream) {
+				size_t copied = php_stream_copy_to_stream(stream, newstream, PHP_STREAM_COPY_ALL);
+
+				if (copied == 0) {
+					php_stream_close(newstream);
+				} else {
+					int retcode = php_stream_cast(newstream, castas | flags, ret, show_err);
+
+					if (retcode == SUCCESS)
+						rewind((FILE*)*ret);
+					
+					/* do some specialized cleanup */
+					if ((flags & PHP_STREAM_CAST_RELEASE)) {
+						php_stream_free(stream, PHP_STREAM_FREE_CLOSE_CASTED);
+					}
+
+					return retcode;
+				}
+			}
+		}
 	}
 
 	if (stream->filterhead) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot cast a filtered stream on this system");
 		return FAILURE;
-	}
-	
-	if (stream->ops->cast && stream->ops->cast(stream, castas, ret TSRMLS_CC) == SUCCESS)
+	} else if (stream->ops->cast && stream->ops->cast(stream, castas, ret TSRMLS_CC) == SUCCESS) {
 		goto exit_success;
+	}
 
 	if (show_err) {
 		/* these names depend on the values of the PHP_STREAM_AS_XXX defines in php_streams.h */
@@ -1892,16 +1959,7 @@ exit_success:
 		stream->stdiocast = *ret;
 	
 	if (flags & PHP_STREAM_CAST_RELEASE) {
-		/* Something other than php_stream_close will be closing
-		 * the underlying handle, so we should free the stream handle/data
-		 * here now.  The stream may not be freed immediately (in the case
-		 * of fopencookie), but the caller should still not touch their
-		 * original stream pointer in any case. */
-		if (stream->fclose_stdiocast != PHP_STREAM_FCLOSE_FOPENCOOKIE) {
-			/* ask the implementation to release resources other than
-			 * the underlying handle */
-			php_stream_free(stream, PHP_STREAM_FREE_PRESERVE_HANDLE | PHP_STREAM_FREE_CLOSE);
-		}
+		php_stream_free(stream, PHP_STREAM_FREE_CLOSE_CASTED);
 	}
 
 	return SUCCESS;
@@ -2296,6 +2354,28 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int optio
 
 	if (stream == NULL)
 		return NULL;
+
+#ifdef PHP_WIN32
+	/* Avoid possible strange problems when working with socket based streams */
+	if ((options & STREAM_OPEN_FOR_INCLUDE) && php_stream_is(stream, PHP_STREAM_IS_SOCKET)) {
+		char buf[CHUNK_SIZE];
+
+		fp = php_open_temporary_file(NULL, "php", NULL TSRMLS_CC);
+		if (fp) {
+			while (!php_stream_eof(stream)) {
+				size_t didread = php_stream_read(stream, buf, sizeof(buf));
+				if (didread > 0) {
+					fwrite(buf, 1, didread, fp);
+				} else {
+					break;
+				}
+			}
+			php_stream_close(stream);
+			rewind(fp);
+			return fp;
+		}
+	}
+#endif
 	
 	if (php_stream_cast(stream, PHP_STREAM_AS_STDIO|PHP_STREAM_CAST_TRY_HARD|PHP_STREAM_CAST_RELEASE,
 				(void**)&fp, REPORT_ERRORS) == FAILURE)
@@ -2316,7 +2396,7 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 
 	*newstream = NULL;
 	
-	if (origstream->ops->seek != NULL) {
+	if (((flags & PHP_STREAM_FORCE_CONVERSION) == 0) && origstream->ops->seek != NULL) {
 		*newstream = origstream;
 		return PHP_STREAM_UNCHANGED;
 	}
