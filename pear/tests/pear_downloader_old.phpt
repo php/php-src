@@ -584,7 +584,7 @@ pkg4-1.1
 pkg5-1.1
 pkg6-2.0b1
 Test preferred_state = alpha:
-skipping Package pkg3 optional dependency pkg4AndAHalf
+skipping Package 'pkg3' optional dependency 'pkg4AndAHalf'
 Warning: PEAR Warning: PEAR_Installer::download() is deprecated in favor of PEAR_Downloader class
 NULL
 array(0) {

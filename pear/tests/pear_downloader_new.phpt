@@ -557,7 +557,7 @@ pkg4-1.1
 pkg5-1.1
 pkg6-2.0b1
 Test preferred_state = alpha:
-skipping Package pkg3 optional dependency pkg4AndAHalf
+skipping Package 'pkg3' optional dependency 'pkg4AndAHalf'
 NULL
 array(0) {
 }
