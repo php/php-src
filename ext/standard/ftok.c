@@ -23,6 +23,7 @@
 #include <sys/types.h>                                                                                                        
 #include <sys/ipc.h>
 
+#if HAVE_FTOK
 /* {{{ proto int ftok(string pathname, string proj)
    Convert a pathname and a project identifier to a System V IPC key */
 PHP_FUNCTION(ftok)
@@ -53,6 +54,7 @@ PHP_FUNCTION(ftok)
     RETURN_LONG(k);
 }
 /* }}} */
+#endif
 
 /*
  * Local variables:
