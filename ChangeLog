@@ -1,3 +1,62 @@
+2005-02-14  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/sockets/sockets.c:
+      - More sock->error resets
+
+2005-02-14  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/pgsql/pgsql.c:
+      ws fix
+
+    * NEWS
+      ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+      Added pg_field_type_oid() function
+
+    * ext/pgsql/config.w32:
+      Added missing defines (#31751)
+
+2005-02-14  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/sockets/sockets.c:
+      Fix typo
+
+    * (PHP_4_3)
+      ext/sockets/sockets.c:
+      MFH: - Removed duplicate error + reset error in new sockets
+
+    * ext/sockets/sockets.c:
+      - Removed duplicate error + reset error in new sockets
+
+2005-02-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/var_unserializer.c:
+      - Disallow illegal class names (.c part)
+
+    * ext/standard/var_unserializer.re:
+      - Disallow illegal class names
+
+2005-02-14  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * main/php.h:
+      NetWare Libc has php.h so no need of having netware specific block here
+
+2005-02-14  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_5_0)
+      php.ini-dist
+      php.ini-recommended
+      ext/sockets/php_sockets.h:
+      MFH: nuke unused code + non-existing ini option
+
+    * php.ini-dist
+      php.ini-recommended:
+      Nuke non-existing ini option
+
+    * ext/sockets/php_sockets.h:
+      Nuke unused code
+
 2005-02-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_execute_API.c
