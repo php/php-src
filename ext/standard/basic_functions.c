@@ -520,6 +520,7 @@ function_entry basic_functions[] = {
 	PHP_FE(is_numeric,														NULL)
 	PHP_FE(is_string,														NULL)
 	PHP_FE(is_array,														NULL)
+	PHP_FE(is_array_multidimensional,										NULL)
 	PHP_FE(is_object,														NULL)
 	PHP_FE(is_scalar,														NULL)
 	PHP_FE(is_callable,				third_arg_force_ref)
@@ -1630,6 +1631,31 @@ PHP_FUNCTION(is_string)
 PHP_FUNCTION(is_array)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_ARRAY);
+}
+/* }}} */
+
+/* {{{ proto bool is_array_multidimensional(mixed var)
+	Returns true if variable is a multidimensional array */
+PHP_FUNCTION(is_array_multidimensional)
+{
+	zval *var, **element;
+	int i = 0;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &var) == FAILURE) {
+		return;
+	}
+	
+	if (Z_TYPE_P(var) == IS_ARRAY) {
+		while (zend_hash_num_elements (HASH_OF(var)) > i) {
+			if (zend_hash_index_find (Z_ARRVAL_P(var), i, (void **) &element) == SUCCESS) {
+				if(Z_TYPE_PP(element) == IS_ARRAY) {
+					RETURN_TRUE;
+				}
+			}
+			i++;
+		}
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
