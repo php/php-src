@@ -847,7 +847,7 @@ PHP_FUNCTION(substr)
 /* }}} */
 
 
-/* {{{ proto string substr_replace(string str, int start [, int length [, string repl]])
+/* {{{ proto string substr_replace(string str, string repl, int start [, int length])
    Replace part of a string with another string */
 PHP_FUNCTION(substr_replace)
 {
@@ -863,25 +863,22 @@ PHP_FUNCTION(substr_replace)
 	
 	argc = ARG_COUNT(ht);
 
-	if ((argc == 2 && getParametersEx(2, &string, &from) == FAILURE) ||
-		(argc == 3 && getParametersEx(3, &string, &from, &len) == FAILURE) ||
-		(argc == 4 && getParametersEx(4, &string, &from, &len, &repl) == FAILURE) ||
-		argc < 2 || argc > 4) {
+	if ((argc == 3 && getParametersEx(3, &string, &repl, &from) == FAILURE) ||
+		(argc == 4 && getParametersEx(4, &string, &repl, &from, &len) == FAILURE) ||
+		argc < 3 || argc > 4) {
 		WRONG_PARAM_COUNT;
 	}
 	
 	convert_to_string_ex(string);
+	convert_to_string_ex(repl);
 	convert_to_long_ex(from);
 	f = (*from)->value.lval;
 
-	if (argc == 2) {
+	if (argc == 3) {
 		l = (*string)->value.str.len;
 	} else {
 		convert_to_long_ex(len);
 		l = (*len)->value.lval;
-		
-		if (argc == 4)
-			convert_to_string_ex(repl);
 	}
 
 	/* if "from" position is negative, count start position from the end
@@ -912,15 +909,11 @@ PHP_FUNCTION(substr_replace)
 		l = (int)(*string)->value.str.len - f;
 	}
 
-	if (argc == 4)
-		result_len = (*string)->value.str.len - l + (*repl)->value.str.len;
-	else
-		result_len = (*string)->value.str.len - l;
+	result_len = (*string)->value.str.len - l + (*repl)->value.str.len;
 	result = (char *)ecalloc(result_len + 1, sizeof(char *));
 
 	strncat(result, (*string)->value.str.val, f);
-	if (argc == 4)
-		strcat(result, (*repl)->value.str.val);
+	strcat(result, (*repl)->value.str.val);
 	strcat(result, (*string)->value.str.val + f + l);
 
 	RETVAL_STRING(result, 0);
