@@ -186,7 +186,7 @@ int dbx_sybasect_getcolumnname(zval **rv, zval **result_handle, long column_inde
 		FREE_ZVAL(zval_column_index);
 		return 0;
 	}
-	if (zend_hash_find(returned_zval->value.obj.properties, "name", 5, (void **) &zv_name)==FAILURE) {
+	if (zend_hash_find(Z_OBJPROP_P(returned_zval), "name", 5, (void **) &zv_name)==FAILURE) {
 		zval_ptr_dtor(&returned_zval);
 		FREE_ZVAL(zval_column_index);
 		return 0;
@@ -223,7 +223,7 @@ int dbx_sybasect_getcolumntype(zval **rv, zval **result_handle, long column_inde
 		FREE_ZVAL(zval_column_index);
 		return 0;
 	}
-	if (zend_hash_find(returned_zval->value.obj.properties, "type", 5, (void **) &zv_type)==FAILURE) {
+	if (zend_hash_find(Z_OBJPROP_P(returned_zval), "type", 5, (void **) &zv_type)==FAILURE) {
 		zval_ptr_dtor(&returned_zval);
 		FREE_ZVAL(zval_column_index);
 		return 0;
