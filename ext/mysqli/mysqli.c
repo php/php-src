@@ -310,7 +310,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	zend_object_value retval;
 	mysqli_object *intern;
 	zval *tmp;
-	zend_class_entry *parent;
+	zend_class_entry *mysqli_base_class;
 
 	intern = emalloc(sizeof(mysqli_object));
 	memset(intern, 0, sizeof(mysqli_object));
@@ -320,11 +320,14 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	intern->ptr = NULL;
 	intern->valid = 0;
 	intern->prop_handler = NULL;
-	if ((parent = class_type->parent))
+
+	mysqli_base_class = class_type;
+	while (mysqli_base_class->type != ZEND_INTERNAL_CLASS && mysqli_base_class->parent != NULL)
 	{
-		zend_hash_find(&classes, parent->name, parent->name_length + 1, (void **) &intern->prop_handler);
+		mysqli_base_class = mysqli_base_class->parent;
 	}
-	zend_hash_find(&classes, class_type->name, class_type->name_length + 1, (void **) &intern->prop_handler);
+	zend_hash_find(&classes, mysqli_base_class->name, mysqli_base_class->name_length + 1, 
+					(void **) &intern->prop_handler);
 
 	ALLOC_HASHTABLE(intern->zo.properties);
 	zend_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
