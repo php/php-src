@@ -1985,6 +1985,7 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 				int new_len;
 				xmlNodePtr node = xmlNewChild(param, NULL, SOAP_1_2_ENV_NS_PREFIX":Code", NULL);
 				char *str = php_escape_html_entities(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), &new_len, 0, 0, NULL TSRMLS_CC);
+				node = xmlNewChild(node, NULL, SOAP_1_2_ENV_NS_PREFIX":Value", NULL);
 				xmlNodeSetContentLen(node, str, new_len);
 				efree(str);
 			}
@@ -1992,6 +1993,7 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 				int new_len;
 				xmlNodePtr node = xmlNewChild(param, NULL, SOAP_1_2_ENV_NS_PREFIX":Reason", NULL);
 				char *str = php_escape_html_entities(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), &new_len, 0, 0, NULL TSRMLS_CC);
+				node = xmlNewChild(node, NULL, SOAP_1_2_ENV_NS_PREFIX":Text", NULL);
 				xmlNodeSetContentLen(node, str, new_len);
 				efree(str);
 			}

@@ -118,12 +118,19 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 		} else {
 			tmp = get_node(fault->children,"Code");
 			if (tmp != NULL && tmp->children != NULL) {
-				faultcode = tmp->children->content;
+				tmp = get_node(tmp->children,"Value");
+				if (tmp != NULL && tmp->children != NULL) {
+					faultcode = tmp->children->content;
+				}
 			}
 
 			tmp = get_node(fault->children,"Reason");
 			if (tmp != NULL && tmp->children != NULL) {
-				faultstring = tmp->children->content;
+				/* TODO: lang attribute */
+				tmp = get_node(tmp->children,"Text");
+				if (tmp != NULL && tmp->children != NULL) {
+					faultstring = tmp->children->content;
+				}
 			}
 
 			tmp = get_node(fault->children,"Detail");
