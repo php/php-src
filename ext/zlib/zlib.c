@@ -815,7 +815,7 @@ PHP_FUNCTION(gzpassthru) {
 }
 /* }}} */
 
-/* {{{ proto int gzread(int zp, int length)
+/* {{{ proto string gzread(int zp, int length)
 Binary-safe file read */
 PHP_FUNCTION(gzread)
 {
