@@ -1,3 +1,56 @@
+2003-11-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_iterators.c:
+      Don't use zend_class_entry indirection
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Bugfix #26010 (Bug on get_object_vars() function)
+
+    * ZendEngine2/zend_object_handlers.c:
+      Correct default handlers
+
+    * ext/simplexml/simplexml.c:
+      Split into element=property and attribute=dimension overloading.
+
+    * tests/classes/iterators_001.phpt
+      tests/classes/iterators_002.phpt
+      tests/classes/iterators_003.phpt:
+      Update test expectations
+
+    * ZendEngine2/zend_iterators.c:
+      Need to update iterators handler table too.
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c:
+      Fix those warnings
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_objects_API.c:
+      Split isset/isempty for object property and object dimension hooking.
+
+    * ZendEngine2/zend_interfaces.c:
+      Little iterator improvement: ability to store index in iterator
+
+2003-11-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      scripts/phpize.in
+      scripts/phpize.in:
+      Fixed bug #26168 (shtool availability check in phpize).
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/basic_functions.c:
+      MFH: Fixed bug #26176 (Fixed handling of numeric keys in INI files).
+
+    * ext/standard/basic_functions.c:
+      Fixed bug #26176 (Fixed handling of numeric keys in INI files).
+
 2003-11-09  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_4_3)
