@@ -943,6 +943,8 @@ PHP_FUNCTION(yaz_record)
 		if (r) {
 			if (!strcmp(type, "array")) {
 				Z_External *ext = (Z_External *) ZOOM_record_get(r, "ext", 0);
+				if (ext->which == Z_External_OPAC)
+					ext = ext->u.opac->bibliographicRecord;
 				if (ext) {
 					oident *ent = oid_getentbyoid(ext->direct_reference);
 					
