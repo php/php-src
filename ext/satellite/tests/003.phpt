@@ -3,7 +3,7 @@ Get a value from an object of type Random
 --SKIPIF--
 <?php if (!extension_loaded("satellite")) print "skip";
 // internet connection needed, try to lookup www.php.net
-exec("host www.php.net 2>/dev/null", $output, &$rv);
+exec("host www.php.net 2>/dev/null", $output, $rv);
 if ($rv) print "skip";
 ?>
 --POST--
