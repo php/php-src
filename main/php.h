@@ -366,11 +366,8 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define XtOffsetOf(s_type,field) XtOffset(s_type*,field)
 #endif
 
-
-#define PHP_NOT_IN_THIS_BUILD() { \
-  php_error(E_WARNING, "%s: not supported in this PHP build",get_active_function_name()); \
-  RETURN_FALSE; \
-}
+/* warn about unavailable functions */
+#include "ext/standard/php_noavail.h"
 
 #endif
 
