@@ -1236,16 +1236,14 @@ binary_assign_op_addr: {
 					zval tmp;
 
 					if ((opline>EG(active_op_array)->opcodes)
-						&& (opline-1)->opcode == ZEND_JMP_NO_CTOR) {
+						&& opline->op1.op_type==IS_VAR
+						&& opline->op1.u.EA.type & EXT_TYPE_UNUSED) {
 						/* constructor call */
-						if (opline->op1.op_type==IS_VAR) {
-							EG(AiCount)++;
-						}
+						EG(AiCount)++; /* for op1 */
 						if (opline->op2.op_type==IS_VAR) {
 							EG(AiCount)++;
 						}
 					}
-
 					function_name = get_zval_ptr(&opline->op2, Ts, &free_op2, BP_VAR_R);
 
 					tmp = *function_name;
