@@ -18,7 +18,7 @@ array(11) {
   ["aDateTime2"]=>
   int(329632332)
   ["aDateTime3"]=>
-  string(22) "2040-06-12T04:32:12+00"
+  string(19) "2040-06-12T04:32:12"
   ["aBoolean"]=>
   bool(true)
   ["anArray"]=>
