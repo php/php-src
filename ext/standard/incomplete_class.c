@@ -37,17 +37,18 @@ static void incomplete_class_message(zend_property_reference *ref, int error_typ
 {
 	char buf[1024];
 	char *class_name;
+	TSRMLS_FETCH();
 
 	class_name = php_lookup_class_name(ref->object, NULL, 0);
 	
 	if (!class_name)
 		class_name = estrdup("unknown");
 	
-	snprintf(buf, 1023, INCOMPLETE_CLASS_MSG, class_name);
+	snprintf(buf, sizeof(buf)-1, INCOMPLETE_CLASS_MSG, class_name);
 	
 	efree(class_name);
 
-	php_error(error_type, "%s", buf);
+	php_error_docref(NULL TSRMLS_CC, error_type, "%s", buf);
 }
 /* }}} */
 

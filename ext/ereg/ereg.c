@@ -128,6 +128,8 @@ static void php_reg_eprint(int err, regex_t *re) {
 #endif
 	len = regerror(err, re, NULL, 0);
 	if (len) {
+		TSRMLS_FETCH();
+
 		message = (char *)emalloc((buf_len + len + 2) * sizeof(char));
 		if (!message) {
 			return; /* fail silently */
@@ -139,7 +141,7 @@ static void php_reg_eprint(int err, regex_t *re) {
 		/* drop the message into place */
 		regerror(err, re, message + buf_len, len);
 
-		php_error(E_WARNING, "%s", message);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", message);
 	}
 
 	STR_FREE(buf);
@@ -198,10 +200,6 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	/* allocate storage for (sub-)expression-matches */
 	subs = (regmatch_t *)ecalloc(sizeof(regmatch_t),re.re_nsub+1);
-	if (!subs) {
-		php_error(E_WARNING, "Unable to allocate memory in php_ereg");
-		RETURN_FALSE;
-	}
 	
 	/* actually execute the regular expression */
 	err = regexec(&re, string, re.re_nsub+1, subs, 0);
@@ -218,12 +216,6 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		string_len = Z_STRLEN_PP(findin) + 1;
 
 		buf = emalloc(string_len);
-		if (!buf) {
-			php_error(E_WARNING, "Unable to allocate memory in php_ereg");
-			regfree(&re);
-			efree(subs);
-			RETURN_FALSE;
-		}
 
 		zval_dtor(*array);	/* start with clean array */
 		array_init(*array);
@@ -300,21 +292,11 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 
 	/* allocate storage for (sub-)expression-matches */
 	subs = (regmatch_t *)ecalloc(sizeof(regmatch_t),re.re_nsub+1);
-	if (!subs) {
-		php_error(E_WARNING, "Unable to allocate memory in php_ereg_replace");
-		return ((char *) -1);
-	}
 
 	/* start with a buffer that is twice the size of the stringo
 	   we're doing replacements in */
 	buf_len = 2 * string_len + 1;
 	buf = emalloc(buf_len * sizeof(char));
-	if (!buf) {
-		php_error(E_WARNING, "Unable to allocate memory in php_ereg_replace");
-		efree(subs);
-		regfree(&re);
-		return ((char *) -1);
-	}
 
 	err = pos = 0;
 	buf[0] = '\0';
@@ -550,7 +532,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		} else if (subs[0].rm_so == 0 && subs[0].rm_eo == 0) {
 			/* No more matches */
 			regfree(&re);
-			php_error(E_WARNING, "Invalid Regular Expression to split()");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Regular Expression to split()");
 			zend_hash_destroy(Z_ARRVAL_P(return_value));
 			efree(Z_ARRVAL_P(return_value));
 			RETURN_FALSE;

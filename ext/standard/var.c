@@ -457,7 +457,7 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 					(void **) &name, &pos);
 
 			if (Z_TYPE_PP(name) != IS_STRING) {
-				php_error(E_NOTICE, "__sleep should return an array only "
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only "
 						"containing the names of instance-variables to "
 						"serialize.");
 				/* we should still add element even if it's not OK,
@@ -539,7 +539,7 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 							php_var_serialize_class(buf, struc, retval_ptr, 
 									var_hash TSRMLS_CC);
 						} else {
-							php_error(E_NOTICE, "__sleep should return an array only "
+							php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only "
 												"containing the names of instance-variables to "
 												"serialize.");
 						}
@@ -667,12 +667,12 @@ PHP_FUNCTION(unserialize)
 		if (!php_var_unserialize(&return_value, &p, p + Z_STRLEN_PP(buf),  &var_hash TSRMLS_CC)) {
 			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 			zval_dtor(return_value);
-			php_error(E_NOTICE, "unserialize() failed at offset %d of %d bytes", p - Z_STRVAL_PP(buf), Z_STRLEN_PP(buf));
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %d of %d bytes", p - Z_STRVAL_PP(buf), Z_STRLEN_PP(buf));
 			RETURN_FALSE;
 		}
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	} else {
-		php_error(E_NOTICE, "argument passed to unserialize() is not an string");
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Argument is not an string");
 		RETURN_FALSE;
 	}
 }

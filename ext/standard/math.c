@@ -675,8 +675,12 @@ _php_math_basetolong(zval *arg, int base) {
 		if (num > onum)
 			continue;
 
-		php_error(E_WARNING, "base_to_long: number '%s' is too big to fit in long", s);
-		return LONG_MAX;
+		{
+			TSRMLS_FETCH();
+
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number '%s' is too big to fit in long", s);
+			return LONG_MAX;
+		}
 	}
 
 	return num;
@@ -956,11 +960,11 @@ PHP_FUNCTION(base_convert)
 	convert_to_long_ex(frombase);
 	convert_to_long_ex(tobase);
 	if (Z_LVAL_PP(frombase) < 2 || Z_LVAL_PP(frombase) > 36) {
-		php_error(E_WARNING, "base_convert: invalid `from base' (%d)", Z_LVAL_PP(frombase));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid `from base' (%d)", Z_LVAL_PP(frombase));
 		RETURN_FALSE;
 	}
 	if (Z_LVAL_PP(tobase) < 2 || Z_LVAL_PP(tobase) > 36) {
-		php_error(E_WARNING, "base_convert: invalid `to base' (%d)", Z_LVAL_PP(tobase));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid `to base' (%d)", Z_LVAL_PP(tobase));
 		RETURN_FALSE;
 	}
 

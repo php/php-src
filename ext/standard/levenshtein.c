@@ -77,10 +77,12 @@ static int reference_levdist(const char *s1, int l1,
  */
 static int custom_levdist(char *str1, char *str2, char *callback_name) 
 {
-		php_error(E_WARNING, "the general Levenshtein support is not there yet");
-		/* not there yet */
+	TSRMLS_FETCH();
 
-		return -1;
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "The general Levenshtein support is not there yet");
+	/* not there yet */
+
+	return -1;
 }
 /* }}} */
 
