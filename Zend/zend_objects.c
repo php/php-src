@@ -57,6 +57,8 @@ ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_ent
 	(*object)->ce = class_type;
 	retval.handle = zend_objects_store_put(*object, (zend_objects_store_dtor_t) zend_objects_destroy_object, NULL TSRMLS_CC);
 	retval.handlers = &std_object_handlers;
+	(*object)->in_get = 0;
+	(*object)->in_set = 0;
 	return retval;
 }
 

@@ -140,7 +140,7 @@ static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts TSRMLS_DC)
 static inline zval **zend_fetch_property_address_inner(zval *object, znode *op2, temp_variable *Ts, int type TSRMLS_DC)
 {
 	zval *prop_ptr = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
-	zval **retval;
+	zval **retval = NULL;
 	zval tmp;
 
 
@@ -161,7 +161,9 @@ static inline zval **zend_fetch_property_address_inner(zval *object, znode *op2,
 
 	if(Z_OBJ_HT_P(object)->get_property_ptr != NULL) {
 		retval = Z_OBJ_HT_P(object)->get_property_ptr(object, prop_ptr TSRMLS_CC);
-	} else {
+	}
+
+	if(retval == NULL) {
 		zend_error(E_WARNING, "This object doesn't support property references");
 		retval = &EG(error_zval_ptr);
 	}
@@ -321,6 +323,7 @@ static inline void zend_assign_to_object_op(znode *result, znode *op1, znode *op
 	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 	zval tmp;
 	zval **retval = &Ts[result->u.var].var.ptr;
+	int have_get_ptr = 0;
 
 	Ts[result->u.var].var.ptr_ptr = NULL;
 	make_real_object(object_ptr TSRMLS_CC);
@@ -356,12 +359,17 @@ static inline void zend_assign_to_object_op(znode *result, znode *op1, znode *op
 	
 	if(Z_OBJ_HT_P(object)->get_property_zval_ptr) {
 		zval **zptr = Z_OBJ_HT_P(object)->get_property_zval_ptr(object, property TSRMLS_CC);
-		SEPARATE_ZVAL_IF_NOT_REF(zptr);
+		if(zptr != NULL) { 			/* NULL means no success in getting PTR */
+			SEPARATE_ZVAL_IF_NOT_REF(zptr);
 
-		binary_op(*zptr, *zptr, value TSRMLS_CC);
-		*retval = *zptr;
-		SELECTIVE_PZVAL_LOCK(*retval, result);
-	} else {
+			have_get_ptr = 1;
+			binary_op(*zptr, *zptr, value TSRMLS_CC);
+			*retval = *zptr;
+			SELECTIVE_PZVAL_LOCK(*retval, result);
+		}
+	}
+
+	if(!have_get_ptr) {
 		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
 		SEPARATE_ZVAL_IF_NOT_REF(&z);
 		binary_op(z, z, value TSRMLS_CC);
@@ -989,6 +997,7 @@ static void zend_pre_incdec_property(znode *result, znode *op1, znode *op2, temp
 	zval *object;
 	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 	zval **retval = &Ts[result->u.var].var.ptr;
+	int have_get_ptr = 0;
 
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -1006,12 +1015,17 @@ static void zend_pre_incdec_property(znode *result, znode *op1, znode *op2, temp
 
 	if(Z_OBJ_HT_P(object)->get_property_zval_ptr) {
 		zval **zptr = Z_OBJ_HT_P(object)->get_property_zval_ptr(object, property TSRMLS_CC);
-		SEPARATE_ZVAL_IF_NOT_REF(zptr);
+		if(zptr != NULL) { 			/* NULL means no success in getting PTR */
+			SEPARATE_ZVAL_IF_NOT_REF(zptr);
 
-		incdec_op(*zptr);
-		*retval = *zptr;
-		SELECTIVE_PZVAL_LOCK(*retval, result);
-	} else {
+			have_get_ptr = 1;
+			incdec_op(*zptr);
+			*retval = *zptr;
+			SELECTIVE_PZVAL_LOCK(*retval, result);
+		}
+	}
+
+	if(!have_get_ptr) {
 		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
 		SEPARATE_ZVAL_IF_NOT_REF(&z);
 		incdec_op(z);
@@ -1030,6 +1044,7 @@ static void zend_post_incdec_property(znode *result, znode *op1, znode *op2, tem
 	zval *object;
 	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 	zval *retval = &Ts[result->u.var].tmp_var;
+	int have_get_ptr = 0;
 
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -1045,13 +1060,19 @@ static void zend_post_incdec_property(znode *result, znode *op1, znode *op2, tem
 
 	if(Z_OBJ_HT_P(object)->get_property_zval_ptr) {
 		zval **zptr = Z_OBJ_HT_P(object)->get_property_zval_ptr(object, property TSRMLS_CC);
-		SEPARATE_ZVAL_IF_NOT_REF(zptr);
+		if(zptr != NULL) { 			/* NULL means no success in getting PTR */
+			have_get_ptr = 1;
+			SEPARATE_ZVAL_IF_NOT_REF(zptr);
+			
+			*retval = **zptr;
+			zendi_zval_copy_ctor(*retval);
+			
+			incdec_op(*zptr);
 
-		*retval = **zptr;
-		zendi_zval_copy_ctor(*retval);
+		}
+	}
 
-		incdec_op(*zptr);
-	} else {
+	if(!have_get_ptr) {
 		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
 		SEPARATE_ZVAL_IF_NOT_REF(&z);
 		*retval = *z;

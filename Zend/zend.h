@@ -226,6 +226,8 @@ typedef struct _zend_class_entry zend_class_entry;
 typedef struct _zend_object {
 	zend_class_entry *ce;
 	HashTable *properties;
+	int in_get:1;
+	int in_set:1;
 } zend_object;
 
 typedef unsigned int zend_object_handle;
@@ -311,9 +313,14 @@ struct _zend_class_entry {
 	union _zend_function *constructor;
 	union _zend_function *destructor;
 	union _zend_function *clone;
+	union _zend_function *__get;
+	union _zend_function *__set;
+	union _zend_function *__call;
 
 	/* handlers */
 	zend_object_value (*create_object)(zend_class_entry *class_type TSRMLS_DC);
+
+	/* old handlers */
 	void (*handle_function_call)(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
 	zval (*handle_property_get)(zend_property_reference *property_reference);
 	int (*handle_property_set)(zend_property_reference *property_reference, zval *value);
