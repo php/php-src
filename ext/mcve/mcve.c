@@ -214,7 +214,7 @@ PHP_MINFO_FUNCTION(mcve)
 /* }}} */
 
 
-/* {{{ proto int mcve_initengine(char *location)
+/* {{{ proto int mcve_initengine(string location)
    Ready the client for IP/SSL Communication */
 PHP_FUNCTION(mcve_initengine)
 {
@@ -1567,10 +1567,8 @@ PHP_FUNCTION(mcve_liststats)
 }
 /* }}} */
 
-/* {{{ proto int mcve_initusersetup()
-
-    Initialize structure to store user data
-*/
+/* {{{ proto resource mcve_initusersetup(void)
+   Initialize structure to store user data */
 PHP_FUNCTION(mcve_initusersetup)
 {
 	MCVE_UserSetup *usersetup;
@@ -1583,10 +1581,8 @@ PHP_FUNCTION(mcve_initusersetup)
 }
 /* }}} */
 
-/* {{{ proto void mcve_deleteusersetup(int usersetup)
-
-   Deallocate data associated with usersetup structure
-*/
+/* {{{ proto void mcve_deleteusersetup(resource usersetup)
+   Deallocate data associated with usersetup structure */
 PHP_FUNCTION(mcve_deleteusersetup)
 {
 	MCVE_UserSetup *usersetup;
@@ -1605,10 +1601,8 @@ PHP_FUNCTION(mcve_deleteusersetup)
 }
 /* }}} */
 
-/* {{{ proto int mcve_adduserarg(int usersetup, int argtype, string argval)
-
-   Add a value to user configuration structure
-*/
+/* {{{ proto int mcve_adduserarg(resource usersetup, int argtype, string argval)
+   Add a value to user configuration structure */
 PHP_FUNCTION(mcve_adduserarg)
 {
 	MCVE_UserSetup *usersetup;
@@ -1631,10 +1625,8 @@ PHP_FUNCTION(mcve_adduserarg)
 }
 /* }}} */
 
-/* {{{ proto string mcve_getuserarg(int usersetup, int argtype)
-
-   Grab a value from usersetup structure
-*/
+/* {{{ proto string mcve_getuserarg(resource usersetup, int argtype)
+   Grab a value from usersetup structure */
 PHP_FUNCTION(mcve_getuserarg)
 {
 	MCVE_UserSetup *usersetup;
