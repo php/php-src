@@ -2799,7 +2799,7 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 		EG(This) = current_this;
 		EG(scope) = current_scope;
 	}
-	zend_ptr_stack_3_pop(&EG(arg_types_stack), &EX(calling_scope), &EX(object), &EX(fbc));
+	zend_ptr_stack_3_pop(&EG(arg_types_stack), (void**)&EX(calling_scope), (void**)&EX(object), (void**)&EX(fbc));
 	
 	EX(function_state).function = (zend_function *) op_array;
 	EG(function_state_ptr) = &EX(function_state);
