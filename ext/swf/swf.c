@@ -472,7 +472,7 @@ PHP_FUNCTION(swf_defineline)
 }
 /* }}} */
 
-/* {{{ proto void swf_defineline(int objid, double x1, double y1, double x2, double y2, double width)
+/* {{{ proto void swf_definerect(int objid, double x1, double y1, double x2, double y2, double width)
    Create a rectangle with object id, objid, the upper lefthand coordinate is given by x1, y1 the bottom right coordinate is x2, y2 and with is the width of the line */
 PHP_FUNCTION(swf_definerect)
 {
