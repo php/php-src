@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
 	int max_requests = 500;
 	int requests = 0;
 	int status;
-	int env_size;
+	int env_size, cgi_env_size;
 
 #ifdef FASTCGI_DEBUG
 	fprintf( stderr, "Initialising now!\n" );
@@ -384,21 +384,17 @@ int main(int argc, char *argv[])
 		fprintf( stderr, "Got accept\n" );
 #endif
 
-		/* Allocate for our environment */
-		merge_env = malloc( env_size * sizeof( char *));
-		if( !merge_env ) {
-			perror( "Can't malloc environment" );
-			exit( 1 );
-		}
-		memcpy( merge_env, orig_env, env_size * sizeof( char *));
-
-		/* Use the new environment */
-		environ = merge_env;
-
-		/* Populate our environment with the CGI's */
-		for( i = 0; cgi_env[ i ]; i++ ) {
-			putenv( cgi_env[ i ] );
-		}
+                cgi_env_size = 0;
+                while( cgi_env[ cgi_env_size ] ) { cgi_env_size++; }
+                merge_env = malloc( (env_size+cgi_env_size)*sizeof(char*) );
+                if( !merge_env ) {
+                   perror( "Can't malloc environment" );
+                   exit( 1 );
+                }
+                memcpy( merge_env, orig_env, (env_size-1)*sizeof(char *) );
+                memcpy( merge_env + env_size - 1,
+                        cgi_env, (cgi_env_size+1)*sizeof(char *) );
+                environ = merge_env;
 
 		init_request_info( TLS_C SLS_CC );
 		SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
