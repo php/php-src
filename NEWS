@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Feb 2004, Version 4.3.5
+- Fixed possible crash using an invalid color index with a palette image in
+  imagecolortransparent (Pierre)
 - Fixed php-cgi to not ignore command-line switches when run in a web context.
   This fixes our test cases allowing INI with GET sections to work (Rasmus)
 - Fixed getopt() so it works without $_SERVER (Rasmus, bfrance)
