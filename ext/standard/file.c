@@ -677,7 +677,7 @@ static int parse_context_params(php_stream_context *context, zval *params)
 /* given a zval which is either a stream or a context, return the underlying
  * stream_context.  If it is a stream that does not have a context assigned, it
  * will create and assign a context and return that.  */
-static php_stream_context *decode_context_param(zval *contextresource) {
+static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC) {
 	php_stream_context *context = NULL; void *what; int type;
 
 	what = zend_fetch_resource(&contextresource TSRMLS_CC, -1, "Stream-Context", &type, 2, le_stream_context, le_stream);
@@ -704,7 +704,7 @@ PHP_FUNCTION(stream_context_get_options)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
-	context = decode_context_param(zcontext);
+	context = decode_context_param(zcontext TSRMLS_CC);
 	ZEND_VERIFY_RESOURCE(context);
 
 	array_init(return_value);
@@ -734,7 +734,7 @@ PHP_FUNCTION(stream_context_set_option)
 	}
 
 	/* figure out where the context is coming from exactly */
-	context = decode_context_param(zcontext);
+	context = decode_context_param(zcontext TSRMLS_CC);
 	ZEND_VERIFY_RESOURCE(context);
 
 	if (options) {
@@ -760,7 +760,7 @@ PHP_FUNCTION(stream_context_set_params)
 		RETURN_FALSE;
 	}
 
-	context = decode_context_param(zcontext);
+	context = decode_context_param(zcontext TSRMLS_CC);
 	ZEND_VERIFY_RESOURCE(context);
 
 	RETVAL_BOOL(parse_context_params(context, params) == SUCCESS);
