@@ -48,7 +48,7 @@ if (!empty($with_dir)) {
     $config->set('data_dir', $with_dir . $ds . 'data', 'default');
     $config->set('test_dir', $with_dir . $ds . 'test', 'default');
 }
-///* Print PEAR Conf (useful for debuging do NOT REMOVE)
+/* Print PEAR Conf (useful for debuging do NOT REMOVE)
 sort($keys);
 foreach ($keys as $key) {
     echo $config->getPrompt($key) . ": " . $config->get($key) . "\n";
