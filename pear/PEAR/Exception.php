@@ -176,9 +176,10 @@ class PEAR_Exception extends Exception
 
     private function _getCauseMessage()
     {
-        $msg = '     ' . $this->_method . " at {$this->file} ({$this->line})\n";
+        $msg = "    #{$this->_method} at {$this->file} ({$this->line})\n" .
+               "     {$this->message}\n";
         if ($this->cause instanceof Exception) {
-            return $msg . $this->cause->_getCauseMessage();
+            return $this->cause->_getCauseMessage() . $msg;
         }
         return $msg;
     }
