@@ -177,7 +177,7 @@ int virtual_chdir(cwd_state *state, char *path)
 		free(state->cwd);
 
 		state->cwd = old_state->cwd;
-		state->cwd_length = state->cwd_length;
+		state->cwd_length = old_state->cwd_length;
 
 		free(old_state);
 
