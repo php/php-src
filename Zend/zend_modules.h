@@ -27,7 +27,7 @@
 #define SHUTDOWN_FUNC_ARGS_PASSTHRU type, module_number
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module
 
-#define STANDARD_MODULE_PROPERTIES_EX 0, 0, 0, NULL, 0
+#define STANDARD_MODULE_PROPERTIES_EX 0, 0, NULL, 0
 
 #define STANDARD_MODULE_PROPERTIES \
 	NULL, NULL, STANDARD_MODULE_PROPERTIES_EX
@@ -47,7 +47,7 @@ struct _zend_module_entry {
 	void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
 	int (*global_startup_func)(void);
 	int (*global_shutdown_func)(void);
-	int request_started, module_started;
+	int module_started;
 	unsigned char type;
 	void *handle;
 	int module_number;
