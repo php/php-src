@@ -62,7 +62,7 @@ function_entry pdo_functions[] = {
 /* {{{ pdo_module_entry */
 zend_module_entry pdo_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"pdo",
+	"PDO",
 	pdo_functions,
 	PHP_MINIT(pdo),
 	PHP_MSHUTDOWN(pdo),
