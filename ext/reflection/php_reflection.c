@@ -3024,7 +3024,7 @@ ZEND_METHOD(reflection_property, getModifiers)
 }
 /* }}} */
 
-/* {{{ proto public mixed ReflectionProperty::getValue(stdclass object)
+/* {{{ proto public mixed ReflectionProperty::getValue([stdclass object])
    Returns this property's value */
 ZEND_METHOD(reflection_property, getValue)
 {
@@ -3041,16 +3041,15 @@ ZEND_METHOD(reflection_property, getValue)
 		/* Returns from this function */
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &object) == FAILURE) {
-		return;
-	}
-
 	if ((ref->prop->flags & ZEND_ACC_STATIC)) {
-		if (zend_hash_quick_find(Z_OBJCE_P(object)->static_members, ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &member) == FAILURE) {
+		if (zend_hash_quick_find(intern->ce->static_members, ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &member) == FAILURE) {
 			zend_error(E_ERROR, "Internal error: Could not find the property %s", ref->prop->name);
 			/* Bails out */
 		}
 	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &object) == FAILURE) {
+			return;
+		}
 		if (zend_hash_quick_find(Z_OBJPROP_P(object), ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &member) == FAILURE) {
 			zend_error(E_ERROR, "Internal error: Could not find the property %s", ref->prop->name);
 			/* Bails out */
@@ -3062,7 +3061,7 @@ ZEND_METHOD(reflection_property, getValue)
 }
 /* }}} */
 
-/* {{{ proto public void ReflectionProperty::setValue(stdclass object, mixed value)
+/* {{{ proto public void ReflectionProperty::setValue([stdclass object,] mixed value)
    Sets this property's value */
 ZEND_METHOD(reflection_property, setValue)
 {
@@ -3072,38 +3071,48 @@ ZEND_METHOD(reflection_property, setValue)
 	zval *object;
 	zval *value;
 	int setter_done = 0;
+	zval *tmp;
+	HashTable *prop_table;
 
 	METHOD_NOTSTATIC;
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (ref->prop->flags & ~ZEND_ACC_PUBLIC) {
+	if (ref->prop->flags & ~(ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)) {
 		_DO_THROW("Cannot access non-public member");
 		/* Returns from this function */
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oz", &object, &value) == FAILURE) {
-		return;
-	}
-
-	if (zend_hash_quick_find(Z_OBJPROP_P(object), ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &variable_ptr) == SUCCESS) {
-		if (*variable_ptr == value) {
-			setter_done = 1;
-		} else {
-			if (PZVAL_IS_REF(*variable_ptr)) {
-				zval_dtor(*variable_ptr);
-				(*variable_ptr)->type = value->type;
-				(*variable_ptr)->value = value->value;
-				if (value->refcount > 0) {
-					zval_copy_ctor(*variable_ptr);
-				}
-				setter_done = 1;
+	if ((ref->prop->flags & ZEND_ACC_STATIC)) {
+		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &tmp, &value) == FAILURE) {
+				return;
 			}
 		}
+		prop_table = intern->ce->static_members;
 	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oz", &object, &value) == FAILURE) {
+			return;
+		}
+		prop_table = Z_OBJPROP_P(object);
+	}
+
+	if (zend_hash_quick_find(prop_table, ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &variable_ptr) == FAILURE) {
 		zend_error(E_ERROR, "Internal error: Could not find the property %s", ref->prop->name);
 		/* Bails out */
 	}
-
+	if (*variable_ptr == value) {
+		setter_done = 1;
+	} else {
+		if (PZVAL_IS_REF(*variable_ptr)) {
+			zval_dtor(*variable_ptr);
+			(*variable_ptr)->type = value->type;
+			(*variable_ptr)->value = value->value;
+			if (value->refcount > 0) {
+				zval_copy_ctor(*variable_ptr);
+			}
+			setter_done = 1;
+		}
+	}
 	if (!setter_done) {
 		zval **foo;
 
@@ -3111,7 +3120,7 @@ ZEND_METHOD(reflection_property, setValue)
 		if (PZVAL_IS_REF(value)) {
 			SEPARATE_ZVAL(&value);
 		}
-		zend_hash_quick_update(Z_OBJPROP_P(object), ref->prop->name, ref->prop->name_length+1, ref->prop->h, &value, sizeof(zval *), (void **) &foo);
+		zend_hash_quick_update(prop_table, ref->prop->name, ref->prop->name_length+1, ref->prop->h, &value, sizeof(zval *), (void **) &foo);
 	}
 }
 /* }}} */
