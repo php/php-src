@@ -721,14 +721,23 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, char *url, int f
 
 	/* If ssb is NULL then someone is misbehaving */
 	if (!ssb) return -1;
-	memset(ssb, 0, sizeof(php_stream_statbuf));
 
-	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, NULL, context, &resource, NULL, NULL TSRMLS_CC);
+	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, context, NULL, &resource, NULL, NULL TSRMLS_CC);
 	if (!stream) {
 		goto stat_errexit;
 	}
 
-	/* Size is the only reliable attribute returned by FTP */
+	ssb->sb.st_mode = 0644;									/* FTP won't give us a valid mode, so aproximate one based on being readable */
+	php_stream_write_string(stream, "CWD ");				/* If we can CWD to it, it's a directory (maybe a link, but we can't tell) */
+	php_stream_write_string(stream, resource->path);
+	php_stream_write_string(stream, "\r\n");
+	result = GET_FTP_RESULT(stream);
+	if (result < 200 || result > 299) {
+		ssb->sb.st_mode |= S_IFREG;
+	} else {
+		ssb->sb.st_mode |= S_IFDIR;
+	}
+
 	php_stream_write_string(stream, "SIZE ");
 	if (resource->path != NULL) {
 		php_stream_write_string(stream, resource->path);
@@ -736,13 +745,30 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, char *url, int f
 		php_stream_write_string(stream, "/");
 	}
 	php_stream_write_string(stream, "\r\n");
-
 	result = GET_FTP_RESULT(stream);
 	if (result < 200 || result > 299) {
-		goto stat_errexit;
+		/* Failure either means it doesn't exist 
+		   or it's a directory and this server
+		   fails on listing directory sizes */
+		if (ssb->sb.st_mode & S_IFDIR) {
+			ssb->sb.st_size = 0;
+		} else {
+			goto stat_errexit;
+		}
+	} else {
+		ssb->sb.st_size = atoi(tmp_line + 4);
 	}
 
-	sscanf(tmp_line + 4, "%d", (int *)&(ssb->sb.st_size));
+	ssb->sb.st_ino = 0;						/* Unknown values */
+	ssb->sb.st_uid = 0;
+	ssb->sb.st_gid = 0;
+	ssb->sb.st_atime = -1;
+	ssb->sb.st_mtime = -1;
+	ssb->sb.st_ctime = -1;
+	ssb->sb.st_nlink = 1;
+	ssb->sb.st_rdev = -1;
+	ssb->sb.st_blksize = 4096;				/* Guess since FTP won't expose this information */
+	ssb->sb.st_blocks = ceil(ssb->sb.st_size / ssb->sb.st_blksize);
 
 	php_stream_close(stream);
 	php_url_free(resource);
