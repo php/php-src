@@ -1462,9 +1462,52 @@ binary_assign_op_addr: {
 			case ZEND_IMPORT_CONST:
 				{
 					zend_class_entry *ce;
+					zval **import_constant;
+					zend_constant c;
 					
 					ce = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
+					if (EX(opline)->op2.op_type != IS_UNUSED) {
+						char *const_name_strval;
+						int const_name_strlen;
+						
+						const_name_strval = EX(opline)->op2.u.constant.value.str.val;
+						const_name_strlen = EX(opline)->op2.u.constant.value.str.len;
+						
+						if (zend_hash_find(&ce->constants_table, const_name_strval, const_name_strlen + 1, (void **) &import_constant)==FAILURE) {
+							zend_error(E_ERROR, "Import: constant %s not found", const_name_strval);
+						}
+						c.value = **import_constant;
+						zval_copy_ctor(&c.value);
+						c.flags = CONST_CS;
+						c.name = zend_strndup(const_name_strval, const_name_strlen);
+						c.name_len = const_name_strlen + 1;
 
+						if (zend_register_constant(&c TSRMLS_CC) == FAILURE) {
+							zend_error(E_ERROR, "Import: unable to register constant %s", const_name_strval);
+						}
+					} else {
+						HashPosition pos;
+						char *key;
+						uint key_length;
+						int key_type;
+						ulong dummy;
+
+						zend_hash_internal_pointer_reset_ex(&ce->constants_table, &pos);
+						while(zend_hash_get_current_data_ex(&ce->constants_table, (void **)&import_constant, &pos) == SUCCESS) {
+							key_type = zend_hash_get_current_key_ex(&ce->constants_table, &key, &key_length, &dummy, 0, &pos);
+
+							c.value = **import_constant;
+							zval_copy_ctor(&c.value);
+							c.flags = CONST_CS;
+							c.name = zend_strndup(key, key_length - 1);
+							c.name_len = key_length;
+
+							if (zend_register_constant(&c TSRMLS_CC) == FAILURE) {
+								zend_error(E_ERROR, "Import: unable to register constant %s", key);
+							}
+							zend_hash_move_forward_ex(&ce->constants_table, &pos);
+						}
+					}
 					NEXT_OPCODE();
 				}
 			case ZEND_FETCH_CLASS:
