@@ -273,6 +273,7 @@ int clean_module_resource_destructors(list_destructors_entry *ld, int *module_nu
 	if (ld->module_number == *module_number) {
 		ELS_FETCH();
 
+		zend_hash_apply_with_argument(&EG(regular_list), (int (*)(void *,void *)) clean_module_resource, (void *) &(ld->resource_id));
 		zend_hash_apply_with_argument(&EG(persistent_list), (int (*)(void *,void *)) clean_module_resource, (void *) &(ld->resource_id));
 		return 1;
 	} else {
