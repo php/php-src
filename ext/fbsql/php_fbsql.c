@@ -2232,7 +2232,7 @@ int phpSizeOfInt (int i)
 }
 /* }}} */
 
-void phpfbColumnAsString (PHPFBResult* result, int column, void* data , int* length, char** value)
+void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* length, char** value TSRMLS_DC)
 {
 	FBCMetaData*               md          = result->metaData;
 	const FBCDatatypeMetaData* dtmd        = fbcmdDatatypeMetaDataAtIndex(md, column);
@@ -2495,7 +2495,7 @@ void phpfbSqlResult(INTERNAL_FUNCTION_PARAMETERS, PHPFBResult* result, int rowIn
 		}
 		else if (row[columnIndex])
 		{
-			phpfbColumnAsString(result, columnIndex, row[columnIndex], &Z_STRLEN_P(return_value), &Z_STRVAL_P(return_value));
+			phpfbColumnAsString(result, columnIndex, row[columnIndex], &Z_STRLEN_P(return_value), &Z_STRVAL_P(return_value) TSRMLS_CC);
 			Z_TYPE_P(return_value) = IS_STRING;
 		}
 		else
@@ -2910,7 +2910,7 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				char*        value;
 				unsigned int length;
 				unsigned int c = 0;
-				phpfbColumnAsString(result, i, row[i], &length, &value);
+				phpfbColumnAsString(result, i, row[i], &length, &value TSRMLS_CC);
 				if (result_type & FBSQL_NUM)
 				{
 					add_index_stringl(return_value, i, value, length, c);
@@ -3004,7 +3004,7 @@ PHP_FUNCTION(fbsql_fetch_lengths)
 	for (i=0; i < result->columnCount; i++)
 	{
 		unsigned  length = 0;
-		if (result->row[i]) phpfbColumnAsString(result, i, result->row[i], &length, NULL);
+		if (result->row[i]) phpfbColumnAsString(result, i, result->row[i], &length, NULL TSRMLS_CC);
 		add_index_long(return_value, i, length);
 	}
 }
@@ -3427,7 +3427,7 @@ PHP_FUNCTION(fbsql_table_name)
 	result->columnIndex = 0;
 
 	row = fbcrhRowAtIndex(result->rowHandler, index);
-	phpfbColumnAsString(result, 0, row[0], &length, &value);
+	phpfbColumnAsString(result, 0, row[0], &length, &value TSRMLS_CC);
 	RETURN_STRINGL(value, length, 1);
 }
 /* }}} */
