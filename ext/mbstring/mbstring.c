@@ -3713,10 +3713,8 @@ MBSTRING_API int php_mb_gpc_encoding_detector(const char *arg_string, int arg_le
 	encoding = mbfl_identify_encoding_no(&string, elist, size TSRMLS_CC);
 	if (encoding != mbfl_no_encoding_invalid) {
 		MBSTRG(http_input_identify) = encoding;
-		sapi_module.sapi_error(E_WARNING, "encoding: %s %s", string.val, (char *)mbfl_no_encoding2name(encoding));
 		return SUCCESS;
 	} else {
-		sapi_module.sapi_error(E_WARNING, "encoding detection failed: %s ", string.val);
 		return FAILURE;
 	}
 }
