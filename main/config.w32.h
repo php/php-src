@@ -103,7 +103,10 @@
 #undef HAVE_SOLID
 #undef HAVE_LINK
 #undef HAVE_SYMLINK
-#undef HAVE_USLEEP
+
+/* its in win32/time.c */
+#define HAVE_USLEEP 1
+
 #define HAVE_GETCWD 1
 #define HAVE_POSIX_READDIR_R 1
 #define NEED_ISBLANK 1
