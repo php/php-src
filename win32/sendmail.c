@@ -564,26 +564,25 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 		}
 	}
 
+	if (headers_lc) {
+		efree(headers_lc);
+	}
 	if ((res = Post(header_buffer)) != SUCCESS) {
 		efree(header_buffer);
-		if (headers_lc) {
-			efree(headers_lc);
-		}
 		return (res);
 	}
 	efree(header_buffer);
 
 	if ((res = Post("\r\n")) != SUCCESS) {
-		if (headers_lc) {
-			efree(headers_lc);
-		}
 		return (res);
 	}
 
 	return (SUCCESS);
 
 PostHeader_outofmem:
-	efree(headers_lc);
+	if (headers_lc) {
+		efree(headers_lc);
+	}
 	return OUT_OF_MEMORY;
 }
 
