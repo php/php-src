@@ -2035,7 +2035,9 @@ ZEND_API zend_class_entry *do_bind_class(zend_op *opline, HashTable *class_table
 		}
 		return NULL;
 	} else {
-		zend_verify_abstract_class(ce TSRMLS_CC);
+		if (!(ce->ce_flags & ZEND_ACC_INTERFACE)) {
+			zend_verify_abstract_class(ce TSRMLS_CC);
+		}
 		return ce;
 	}
 }
@@ -2085,6 +2087,7 @@ void zend_do_early_binding(TSRMLS_D)
 {
 	zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 	HashTable *table;
+	zend_bool is_abstract_class = 0;
 
 	while (opline->opcode == ZEND_TICKS && opline > CG(active_op_array)->opcodes) {
 		opline--;
@@ -2097,10 +2100,16 @@ void zend_do_early_binding(TSRMLS_D)
 			}
 			table = CG(function_table);
 			break;
+		case ZEND_DECLARE_CLASS:
+		case ZEND_DECLARE_INHERITED_CLASS:
+			is_abstract_class = 1;
+			/* break missing intentionally */
 		case ZEND_VERIFY_ABSTRACT_CLASS: {
 				zend_op *verify_abstract_class_op = opline;
 
-				opline--;
+				if (!is_abstract_class) {
+					opline--;
+				}
 				if (opline->opcode == ZEND_DECLARE_CLASS) {
 					if (do_bind_class(opline, CG(class_table), 1 TSRMLS_CC) == NULL) {
 						return;
@@ -2120,11 +2129,13 @@ void zend_do_early_binding(TSRMLS_D)
 					return;
 				}
 				table = CG(class_table);
-				/* clear the verify_abstract_class op */
-				init_op(verify_abstract_class_op TSRMLS_CC);
-				SET_UNUSED(verify_abstract_class_op->op1);
-				SET_UNUSED(verify_abstract_class_op->op2);
-				verify_abstract_class_op->opcode = ZEND_NOP;
+				if (!is_abstract_class) {
+					/* clear the verify_abstract_class op */
+					init_op(verify_abstract_class_op TSRMLS_CC);
+					SET_UNUSED(verify_abstract_class_op->op1);
+					SET_UNUSED(verify_abstract_class_op->op2);
+					verify_abstract_class_op->opcode = ZEND_NOP;
+				}
 			}
 
 			break;
