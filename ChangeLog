@@ -1,3 +1,101 @@
+2002-09-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS: Bug fixing news
+
+2002-09-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses_fe.h: Added ncurses_getyx().
+
+    * NEWS: WS
+
+    * NEWS: More streams related news.
+
+    * ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/tests/file/userstreams.phpt
+      main/user_streams.c
+      ext/standard/basic_functions.c:
+    Rename streams functions to fit with naming conventions, adding aliases
+    for old functions where required.
+    Make use of recent changes to chunk size and timeout setting code.
+
+    * main/network.c
+      main/php_network.h:
+    remove chunk size setting code (it's now in streams.c).
+    Move timeout setting code.
+
+    * main/php_streams.h
+      main/streams.c:
+    Differentiate between write buffer and streams read buffer sizes.
+    Add options for timeout and chunk size; previously these were only
+    set-able for socket streams.
+
+2002-09-28  Stig Bakken  <ssb@fast.no>
+
+    * pear/scripts/php-config.in: * added --libs option
+
+2002-09-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/main.c: Fixed bug #13936
+
+2002-09-28  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/CREDITS
+      ext/mnogosearch/php_mnogo.c:
+    - Site mirror detection and popularity rank has been added to mnogosearch
+      extension
+
+2002-09-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/ncurses/ncurses_functions.c: Fix crash bug and return value.
+
+2002-09-28  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * main/fopen_wrappers.c: MFH fix for bug 19292
+
+    * main/fopen_wrappers.c: Uh, this is what I meant to do.  Fix for #19292
+
+    * main/fopen_wrappers.c: Probable fix for bug #19292
+
+2002-09-28  Tal Peer  <tal@twisthost.com>
+
+    * ext/fribidi/fribidi.c:
+    - Eliminated LFs
+
+2002-09-28  James Moore  <James@phpuk.org>
+
+    * ext/fribidi/fribidi.c:
+    Make ext/fribidi compile against latest fribidi CVS
+
+2002-09-28  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/iconv/tests/002.phpt: Synch with README.TESTING
+
+2002-09-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/php_streams.h
+      main/streams.c
+      main/user_streams.c:
+    Allow user streams/wrappers to implement fstat(), opendir() and stat().
+
+    * ext/standard/file.c: Add missing folding marker.
+
+2002-09-28  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: - Consistency
+
+2002-09-28  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/standard/dir.c: It must be GLOB_NOCHECK instead of GLOB_NOMATCH.
+    GLOB_NOMATCH does not make sense at all.
+
+2002-09-28  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - Don't forget whom to blame ... ;)
+
 2002-09-27  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/standard/basic_functions.c
