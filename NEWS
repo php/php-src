@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, Version 4.3.10
+- Added the %F modifier to *printf to render a non-locale-aware representation
+  of a float with the . as decimal seperator. (Derick)
 - Fixed a bug in addslashes() handling of the '\0' character. (Ilia)
 - Backported Marcus' foreach() speedup patch from PHP 5.x. (Derick)
 - Fixed potential problems with unserializing invalid serialize data. (Marcus)

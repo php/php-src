@@ -303,13 +303,14 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	char *cvt;
 	register int i = 0, j = 0;
 	int sign, decpt, cvt_len;
+	char decimal_point = '.';
 #ifdef HAVE_LOCALE_H
 	struct lconv lc;
-	char decimal_point;
+	char locale_decimal_point;
 	localeconv_r(&lc);
-	decimal_point = (lc.decimal_point)[0];
+	locale_decimal_point = (lc.decimal_point)[0];
 #else
-	char decimal_point = '.';
+	char locale_decimal_point = '.';
 #endif
 
 	PRINTF_DEBUG(("sprintf: appenddouble(%x, %x, %x, %f, %d, '%c', %d, %c)\n",
@@ -343,12 +344,12 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 		numbuf[i++] = '+';
 	}
 
-	if (fmt == 'f') {
+	if (fmt == 'f' || fmt == 'F') {
 		if (decpt <= 0) {
 			numbuf[i++] = '0';
 			if (precision > 0) {
 				int k = precision;
-				numbuf[i++] = decimal_point;
+				numbuf[i++] = fmt == 'F' ? decimal_point : locale_decimal_point;
 				while ((decpt++ < 0) && k--) {
 					numbuf[i++] = '0';
 				}
@@ -358,7 +359,7 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 				numbuf[i++] = j < cvt_len ? cvt[j++] : '0';
 			}
 			if (precision > 0) {
-				numbuf[i++] = decimal_point;
+				numbuf[i++] = fmt == 'F' ? decimal_point : locale_decimal_point;
 				while (precision-- > 0) {
 					numbuf[i++] = j < cvt_len ? cvt[j++] : '0';
 				}
@@ -472,7 +473,8 @@ php_sprintf_getnumber(char *buffer, int *pos)
  *  "b"   integer argument is printed as binary
  *  "c"   integer argument is printed as a single character
  *  "d"   argument is an integer
- *  "f"   the argument is a float
+ *  "f"   the argument is a float, the decimal separator is locale-aware
+ *  "F"   the argument is a float, but the decimal separator is always "."
  *  "o"   integer argument is printed as octal
  *  "s"   argument is a string
  *  "x"   integer argument is printed as lowercase hexadecimal
@@ -672,6 +674,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 
 				case 'e':
 				case 'f':
+				case 'F':
 					/* XXX not done */
 					convert_to_double(tmp);
 					php_sprintf_appenddouble(&result, &outpos, &size,
