@@ -377,6 +377,10 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 #define PHP_STREAM_BUFFER_LINE	1	/* line buffered */
 #define PHP_STREAM_BUFFER_FULL	2	/* fully buffered */
 
+#define PHP_STREAM_OPTION_RETURN_OK			 0 /* option set OK */
+#define PHP_STREAM_OPTION_RETURN_ERR 		-1 /* problem setting option */
+#define PHP_STREAM_OPTION_RETURN_NOTIMPL	-2 /* underlying stream does not implement; streams can handle it instead */
+
 /* copy up to maxlen bytes from src to dest.  If maxlen is PHP_STREAM_COPY_ALL, copy until eof(src).
  * Uses mmap if the src is a plain file and at offset 0 */
 #define PHP_STREAM_COPY_ALL		-1

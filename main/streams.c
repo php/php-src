@@ -357,8 +357,36 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 
 PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS_DC)
 {
+	size_t avail, toread, didread = 0;
+	
+	/* take from the read buffer first.
+	 * It is possible that a buffered stream was switched to non-buffered, so we
+	 * drain the remainder of the buffer before using the "raw" read mode for
+	 * the excess */
+	avail = stream->writepos - stream->readpos;
+	if (avail) {
+		toread = avail;
+		if (toread > size)
+			toread = size;
+
+		memcpy(buf, stream->readbuf + stream->readpos, toread);
+		stream->readpos += toread;
+		size -= toread;
+		buf += toread;
+		didread += size;
+	}
+
+	if (size == 0)
+		return didread;
+	
 	if (stream->flags & PHP_STREAM_FLAG_NO_BUFFER || stream->chunk_size == 1) {
-		return stream->ops->read(stream, buf, size TSRMLS_CC);
+		if (stream->filterhead) {
+			didread += stream->filterhead->fops->read(stream, stream->filterhead,
+					buf, size
+					TSRMLS_CC);
+		} else {
+			didread += stream->ops->read(stream, buf, size TSRMLS_CC);
+		}
 	} else {
 		php_stream_fill_read_buffer(stream, size TSRMLS_CC);
 
@@ -367,9 +395,10 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 
 		memcpy(buf, stream->readbuf + stream->readpos, size);
 		stream->readpos += size;
-		stream->position += size;
-		return size;
+		didread += size;
 	}
+	stream->position += size;
+	return didread;
 }
 
 PHPAPI int _php_stream_eof(php_stream *stream TSRMLS_DC)
@@ -550,7 +579,7 @@ PHPAPI off_t _php_stream_tell(php_stream *stream TSRMLS_DC)
 PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC)
 {
 	/* not moving anywhere */
-	if (offset == 0 && whence == SEEK_CUR)
+	if ((offset == 0 && whence == SEEK_CUR) || (offset == stream->position && whence == SEEK_SET))
 		return 0;
 
 	/* handle the case where we are in the buffer */
@@ -576,6 +605,8 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 	stream->readpos = stream->writepos = 0;
 
 	if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
+		int ret;
+		
 		if (stream->filterhead)
 			stream->filterhead->fops->flush(stream, stream->filterhead, 0 TSRMLS_CC);
 		
@@ -585,7 +616,12 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 				whence = SEEK_SET;
 				break;
 		}
-		return stream->ops->seek(stream, offset, whence, &stream->position TSRMLS_CC);
+		ret = stream->ops->seek(stream, offset, whence, &stream->position TSRMLS_CC);
+
+		if (((stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) || ret == 0)
+			return ret;
+		/* else the stream has decided that it can't support seeking after all;
+		 * fall through to attempt emulation */
 	}
 
 	/* emulate forward moving seeks with reads */
@@ -603,16 +639,37 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 		return 0;
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "streams of type %s do not support seeking", stream->ops->label);
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream does not support seeking");
 
 	return -1;
 }
 
 PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC)
 {
-	if (stream->ops->set_option)
-		return stream->ops->set_option(stream, option, value, ptrparam TSRMLS_CC);
-	return -1;
+	int ret = PHP_STREAM_OPTION_RETURN_NOTIMPL;
+	
+	if (stream->ops->set_option) {
+		ret = stream->ops->set_option(stream, option, value, ptrparam TSRMLS_CC);
+	}
+	
+	if (ret == PHP_STREAM_OPTION_RETURN_NOTIMPL) {
+		switch(option) {
+			case PHP_STREAM_OPTION_BUFFER:
+				/* try to match the buffer mode as best we can */
+				if (value == PHP_STREAM_BUFFER_NONE) {
+					stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
+				} else {
+					stream->flags ^= PHP_STREAM_FLAG_NO_BUFFER;
+				}
+				ret = PHP_STREAM_OPTION_RETURN_OK;
+				break;
+				
+			default:
+				ret = PHP_STREAM_OPTION_RETURN_ERR;
+		}
+	}
+	
+	return ret;
 }
 
 PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
@@ -1097,12 +1154,15 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 
 			switch(value) {
 				case PHP_STREAM_BUFFER_NONE:
+					stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 					return setvbuf(data->file, NULL, _IONBF, 0);
 					
 				case PHP_STREAM_BUFFER_LINE:
+					stream->flags ^= PHP_STREAM_FLAG_NO_BUFFER;
 					return setvbuf(data->file, NULL, _IOLBF, size);
 					
 				case PHP_STREAM_BUFFER_FULL:
+					stream->flags ^= PHP_STREAM_FLAG_NO_BUFFER;
 					return setvbuf(data->file, NULL, _IOFBF, size);
 
 				default:
