@@ -91,12 +91,70 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
 			break;
 
 		case IS_ARRAY:
-		{
-			/* TODO: Walk the hash and convert the elements */
-			/* into a SafeArray. */
-			VariantInit(var_arg);
+			{
+				/* For now we'll just handle single dimension arrays, we'll use the data type of the first element for the
+				   output data type */
+				HashTable *ht = Z_ARRVAL(*pval_arg);
+				int numberOfElements = zend_hash_num_elements(ht);
+				SAFEARRAY *safeArray;
+				SAFEARRAYBOUND bounds[1];
+				VARIANT *v;
+				zval       **entry;        /* An entry in the input array */
+				
+				VariantInit(var_arg);
+
+				if(pval_arg->is_ref)
+				{
+					V_VT(var_arg) = VT_VARIANT|VT_BYREF;            /* Create a VARIANT to reference */
+					V_VARIANTREF(var_arg) = emalloc(sizeof(VARIANT));
+					var_arg = V_VARIANTREF(var_arg);                        /* & put the array in that VARIANT */
+				}
+
+				bounds[0].lLbound = 0;
+				bounds[0].cElements = numberOfElements;
+				V_VT(var_arg) = VT_EMPTY;                /* until array is created */
+				safeArray = SafeArrayCreate(VT_VARIANT, 1, bounds);
+				
+				if(NULL == safeArray)
+				{
+					php_error( E_WARNING,"Unable to convert php array to VARIANT array - %s", numberOfElements ? "" : "(Empty input array)");
+					var_reset(pval_arg);
+				}
+				else
+				{
+					V_ARRAY(var_arg) = safeArray;
+					V_VT(var_arg) = VT_ARRAY|VT_VARIANT;                /* Now have a valid safe array allocated */
+					if(SUCCEEDED(SafeArrayLock( safeArray)))
+					{
+						ulong i;
+
+						zend_hash_internal_pointer_reset(ht);
+						for( i = 0; i < (ulong)numberOfElements; ++i)
+						{
+							if((zend_hash_get_current_data(ht, (void **)&entry) == SUCCESS) && (entry != NULL)) /* Get a pointer to the php array element */
+							{
+								/* Add another value to the safe array */
+								if(SUCCEEDED(SafeArrayPtrOfIndex( safeArray, &i, &v)))/* Pointer to output element entry retrieved successfully */
+								{
+									php_pval_to_variant(*entry, v, codepage);                    /* Do the required conversion */
+								}
+								else
+								{
+									php_error( E_WARNING,"phpArrayToSafeArray() - Unable to retrieve pointer to output element number (%d)", i);
+								}
+							}
+							zend_hash_move_forward(ht);
+						}
+						SafeArrayUnlock( safeArray);
+					}
+					else
+					{
+						php_error( E_WARNING,"phpArrayToSafeArray() - Unable to lock safeArray");
+					}
+				}
+			}
 			break;
-		}
+
 		case IS_RESOURCE:
 		case IS_CONSTANT:
 		case IS_CONSTANT_ARRAY:
@@ -409,10 +467,11 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 			var_reset(pval_arg);
 			return FAILURE;
 		}
+        SafeArrayLock( array);
 
 		/* This call has failed for everything I have tried */
 		/* But best leave it to be on the safe side */
-		if (S_OK != SafeArrayGetVartype(array, &vartype))
+		if (FAILED(SafeArrayGetVartype(array, &vartype)))
 		{
 			/* Fall back to what we do know */
 			/* Mask off the array bit and assume */
@@ -444,7 +503,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				V_VT(&vv) = vartype;
 				hr = SafeArrayGetElement(array, indices, (VOID *) &(vv.lVal));
 			}
-			if (S_OK != hr)
+			if (FAILED(hr))
             {
 				/* Failure to retieve an element probably means the array is sparse */
 				/* So leave the php array sparse too */
@@ -476,7 +535,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				add_index_zval(pval_arg, ii, element);
 			}
 		}
-
+        SafeArrayUnlock(array);
 		/* Clean up the SafeArray since that is our responsibility */
 		SafeArrayDestroyData(array);
 		SafeArrayDestroyDescriptor(array);
