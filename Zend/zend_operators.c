@@ -29,6 +29,7 @@
 #include "zend_variables.h"
 #include "zend_globals.h"
 #include "zend_list.h"
+#include "zend_zval_alloc.h"
 
 #if WITH_BCMATH
 #include "functions/number.h"
