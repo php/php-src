@@ -32,12 +32,13 @@ typedef union _temp_variable {
 	struct {
 		zval **ptr_ptr;
 		zval *ptr;
-		struct {
-			zval *str;
-			zend_uint offset;
-		} str_offset;
 		zend_bool fcall_returned_reference;
 	} var;
+	struct {
+		zval tmp_var;
+		zval *str;
+		zend_uint offset;
+	} str_offset;
 	zend_class_entry *class_entry;
 } temp_variable;
 
