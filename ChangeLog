@@ -1,3 +1,46 @@
+1999-12-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/mod_php4.c:
+    Make sapi_module static. This is was the majority of SAPI modules uses.
+    I wonder how this has worked up to now..
+
+    * regex/cname.h
+      regex/regcomp.c
+      regex/regcomp.ih
+      regex/regerror.c
+      regex/cclass.h: Fix -Wall warnings
+
+    * ext/standard/php_string.h
+      ext/standard/string.c: Move include into source file
+
+    * ext/mysql/php_mysql.c: Add neccessary includes
+
+1999-12-28  Thies C. Arntzen  <thies@digicol.de>
+
+    * sapi/phttpd/phttpd.c: *** empty log message ***
+
+    * sapi/phttpd/phttpd.c: not too bad: i can see phpinfo()!
+
+    * sapi/phttpd/.cvsignore: shut up
+
+    * sapi/phttpd/Makefile.am
+      sapi/phttpd/config.h.stub
+      sapi/phttpd/config.m4
+      sapi/phttpd/php.sym
+      sapi/phttpd/php_phttpd.h
+      sapi/phttpd/phttpd.c:
+    SAPI module for phttpd - found at ftp://ftp.netuse.de/pub/phttpd/, ftp://ftp.signum.se/pub/phttpd/
+    (DOES NOT WORK YET!!)
+
+    * ext/imap/imap.c: non-ZTS fix
+
+1999-12-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mysql/php_mysql.c:
+    Remove unneccessary include to make stand-alone build work
+
+    * build.mk: Move .PHONY special target to the end
+
 1999-12-27  Ryan Bloom  <rbb@apache.org>
 
     * sapi/apache/config.m4:
