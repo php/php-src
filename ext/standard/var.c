@@ -69,7 +69,6 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC)
 	HashTable *myht = NULL;
 	char *class_name;
 	zend_uint class_name_len;
-	zend_class_entry *ce;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -741,7 +740,7 @@ PHP_FUNCTION(unserialize)
 		if (!php_var_unserialize(&return_value, &p, p + Z_STRLEN_PP(buf),  &var_hash TSRMLS_CC)) {
 			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 			zval_dtor(return_value);
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %ld of %ld bytes", p - Z_STRVAL_PP(buf), Z_STRLEN_PP(buf));
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %d of %d bytes", p - Z_STRVAL_PP(buf), Z_STRLEN_PP(buf));
 			RETURN_FALSE;
 		}
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
