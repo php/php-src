@@ -93,7 +93,7 @@ typedef unsigned char uchar;
 
 #define EFREE_IF(ptr)	if (ptr) efree(ptr)
 
-#define MAX_IFD_NESTING_LEVEL 5
+#define MAX_IFD_NESTING_LEVEL 25
 
 static
 ZEND_BEGIN_ARG_INFO(exif_thumbnail_force_ref, 1)
