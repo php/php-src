@@ -140,7 +140,7 @@ SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(SLS_D
 
 SAPI_API int sapi_flush(void);
 SAPI_API struct stat *sapi_get_stat(void);
-SAPI_API char *sapi_getenv(char *name, int name_len);
+SAPI_API char *sapi_getenv(char *name, size_t name_len);
 
 SAPI_API char *sapi_get_default_content_type(SLS_D);
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header SLS_DC);
@@ -159,7 +159,7 @@ struct _sapi_module_struct {
 	int (*ub_write)(const char *str, unsigned int str_length);
 	void (*flush)(void *server_context);
 	struct stat *(*get_stat)(SLS_D);
-	char *(*getenv)(char *name, int name_len SLS_DC);
+	char *(*getenv)(char *name, size_t name_len SLS_DC);
 
 	void (*sapi_error)(int type, const char *error_msg, ...);
 
