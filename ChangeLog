@@ -1,3 +1,110 @@
+2003-02-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/dir.c:
+      Fixed compiler warning.
+
+    * ext/openssl/xp_ssl.c:
+      fixed compiler warnings.
+
+2003-02-27  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/config.m4:
+      streams.c -> streamsfuncs.c
+
+    * ext/standard/streams.c
+      ext/standard/streamsfuncs.c
+      win32/php4dllts.dsp
+      win32/select.c:
+      Update win32 build.
+      Since msvc sucks, I had to rename ext/standard/streams.c to
+      ext/standed/streamsfuncs.c
+
+    * ext/standard/config.m4
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/streams.c
+      win32/select.c
+      win32/select.h
+      win32/installer/README:
+      Move streams specific stuff from ext/standard/file.c ->
+      ext/standard/streams.c
+      Move win32 select implementation into win32/.
+      Will update win32 build in a moment.
+
+2003-02-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/filestat.c:
+      Fixed a bug that would cause filetype() to return "unknown" for
+      non-existent files on Win32.
+
+2003-02-27  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/file.c
+      main/php_streams.h
+      main/streams/xp_socket.c:
+      Add a generic meta data api for streams.
+
+2003-02-27  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * TODO-PHP5:
+      The basic input filtering framework is done and working nicely
+
+2003-02-27  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * TODO:
+      Update todo slightly
+
+    * ext/openssl/openssl.c
+      ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/php_fopen_wrappers.h:
+      - Move https:// and ftps:// wrapper registration into the openssl module.
+      - Expose the http:// and ftp:// wrappers as PHPAPI
+      - Remove unused variables
+
+    * main/network.c
+      main/streams/transports.c
+      main/streams/xp_socket.c
+      win32/php4dllts.dsp:
+      Fixup build for win32
+
+2003-02-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * ext/standard/filestat.c:
+      Fixed bug #21410 (fixed handling of NULL or "" files on Win32)
+
+2003-02-27  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      ..if only all lakes were kossu..
+
+2003-02-27  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/yp/yp.c:
+      changed from strncpy to strlcpy on request
+
+2003-02-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/php_streams.h:
+      rename macro argument so that it does not partially match the string.
+      
+      fixes a warning on unixware
+
+2003-02-27  Corne' Cornelius  <cornec@reach.co.za>
+
+    * ext/informix/ifx.ec:
+      - Changed maxmsglen in ifx_errormsg() back to normal 255 instead of 10
+
+    * ext/informix/ifx.ec:
+      - Fixed possible Segfault in ifx_errormsg() using malloc() instead of
+      emalloc()
+
 2003-02-26  Pierre-Alain Joye  <paj@pearfr.org>
 
     * ext/gd/gd.c:
