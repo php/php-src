@@ -1,3 +1,138 @@
+2003-09-06  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2003-09-06  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/tests/060.phpt:
+      test for helly's mysqli_fetch_object changes
+
+2003-09-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli.h:
+      Modify mysqli_fetch_object() to be able to instantiate a selected class and
+      pass parameters to the constructor.
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/tests/03sync_query.phpt
+      ext/pgsql/tests/04async_query.phpt
+      ext/pgsql/tests/17result.phpt
+      ext/pgsql/tests/22pg_fetch_object.phpt:
+      Modify pg_fetch_object() to be able to instantiate a selected class and
+      pass
+      parameters to the constructor. Update tests and add a test for these
+      features.
+
+2003-09-06  Stefan Roehrich  <stefan@roehri.ch>
+
+    * ext/zlib/php_zlib.h
+      ext/zlib/zlib.c
+      ext/zlib/tests/001.phpt
+      ext/zlib/tests/002.phpt
+      ext/zlib/tests/gzfilegzreadfile.phpt:
+      Code cleanup:
+      Fixed ob_gzhandler with register_long_arrays = On.
+      Unified compression_coding global var (removed ob_gzip_coding).
+      Switched to zend_parse_parameters().
+      Added some tests.
+
+2003-09-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pgsql/pgsql.c:
+      Bugfix #25404
+
+2003-09-06  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/http.c:
+      Add missing proto
+
+    * ext/standard/basic_functions.c:
+      http.h php_http,h rename
+
+2003-09-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_default_classes.c:
+      Disallow to changing the backtrace
+
+    * ZendEngine2/zend_reflection_api.c:
+      Add missing newline if no static methods are available
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Internal functions shall be static
+      - Fix more nesting
+
+2003-09-06  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/http.c:
+      - Typos, CS, etc.
+
+2003-09-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fix logic
+
+2003-09-06  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/http.c
+      ext/standard/http.h
+      ext/standard/php_http.h
+      win32/php4dllts.dsp:
+      renamed http.h -> php_http.h
+
+2003-09-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Fix CS: {{{ / }}}
+      - Fix static reflection_*::export()
+      - Add class reflection_object which allows to show dynamic properties
+
+    * ZendEngine2/zend_reflection_api.c:
+      Use %s where it makes more sense
+
+2003-09-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dllts.dsp:
+      Add ext/standard/http.{c|h}.
+
+2003-09-06  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/http.c:
+      Fix Objects bug.  (Objects != Arrays)
+
+    * ext/standard/http.c:
+      Fix segfault on uninitialized zval, skip NULL/Resource types, fix integer
+      value handling, and process doubles/bools more efficiently.
+
+    * ext/standard/http.h:
+      Standard Footer
+
+    * ext/standard/http.c:
+      Prevent Recursion
+
+2003-09-06  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Installer.php:
+      make error code helpful if no releases of a package exist at all
+
+    * pear/PEAR/Installer.php:
+      make error code helpful if no releases of a package in preferred-state
+      exist
+
+2003-09-06  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/config.m4
+      ext/standard/http.c
+      ext/standard/http.h:
+      Introducing php_url_encode_hash_ex() internal function
+      and http_build_query() userspace function.
+
 2003-09-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/sqlite/sqlite.c:

@@ -1,3 +1,26 @@
+2003-09-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_default_classes.c:
+      Disallow to changing the backtrace
+
+    * zend_reflection_api.c:
+      Add missing newline if no static methods are available
+
+    * zend_reflection_api.c:
+      - Internal functions shall be static
+      - Fix more nesting
+
+    * zend_reflection_api.c:
+      Fix logic
+
+    * zend_reflection_api.c:
+      - Fix CS: {{{ / }}}
+      - Fix static reflection_*::export()
+      - Add class reflection_object which allows to show dynamic properties
+
+    * zend_reflection_api.c:
+      Use %s where it makes more sense
+
 2003-09-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
