@@ -342,7 +342,7 @@ static void *separate_thread(void *bla)
 	fd = (int) bla;
 
 	while (i++ < 5) {
-		send(fd, "test<br>\n", 9, 0);
+		send(fd, "test<br />\n", 9, 0);
 		sleep(1);
 	}
 	
