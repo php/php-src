@@ -2745,12 +2745,17 @@ PHP_FUNCTION(imap_sort)
 	mypgm->next = NIL;
 	
 	slst = mail_sort(imap_le_struct->imap_stream, NIL, spg, mypgm, myargc >= 4 ? Z_LVAL_PP(flags) : NIL);
-	
-	array_init(return_value);
-	for (sl = slst; *sl; sl++) { 
-		add_next_index_long(return_value, *sl);
+	if (spg) {
+		mail_free_searchpgm(&spg);
 	}
-	fs_give ((void **) &slst); 
+
+	array_init(return_value);
+	if (slst != NIL && slst != 0) {
+		for (sl = slst; *sl; sl++) { 
+			add_next_index_long(return_value, *sl);
+		}
+		fs_give ((void **) &slst);
+	}
 }
 /* }}} */
 
@@ -3547,14 +3552,14 @@ PHP_FUNCTION(imap_search)
 	imap_le_struct = (pils *) zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
-    	efree(search_criteria);
+		efree(search_criteria);
 		RETURN_FALSE;
 	}
 	
 	IMAPG(imap_messages) = NIL;
 	mail_search_full(imap_le_struct->imap_stream, NIL, mail_criteria(search_criteria), flags);
 	if (IMAPG(imap_messages) == NIL) {
-    	efree(search_criteria);
+		efree(search_criteria);
 		RETURN_FALSE;
 	}
 	
@@ -3565,7 +3570,7 @@ PHP_FUNCTION(imap_search)
 		cur = cur->next;
 	}
 	mail_free_messagelist(&IMAPG(imap_messages));
-    efree(search_criteria);
+	efree(search_criteria);
 }
 /* }}} */
 
