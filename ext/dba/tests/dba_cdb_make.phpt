@@ -1,5 +1,7 @@
 --TEST--
 DBA CDB_MAKE handler test
+--INI--
+magic_quotes_runtime=1
 --SKIPIF--
 <?php 
 	require_once('skipif.inc');
