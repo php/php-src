@@ -1,3 +1,18 @@
+2004-11-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ctype/ctype.c:
+      Fixed bug #30945 (make ctype_* functions return FALSE on empty strings).
+      Slight performance improvement of multi-byte string checking via ctype_*.
+
+2004-11-30  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Go with 5.0.3RC1
+
 2004-11-29  Derick Rethans  <php@derickrethans.nl>
 
     * ext/standard/tests/math/bug30695.phpt:
