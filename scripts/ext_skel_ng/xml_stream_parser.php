@@ -36,7 +36,7 @@ class xml_stream_parser  {
     }
 
 		function error($msg) {
-			die("$msg in line ".xml_get_current_line_number($this->parser));
+			die("$msg on line ".xml_get_current_line_number($this->parser));
 		}
 } // end of class xml
 ?>
