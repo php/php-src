@@ -44,62 +44,84 @@ extern zend_module_entry pgsql_module_entry;
 #define PHP_PGSQL_API
 #endif
 
+#ifdef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
+const char * pg_encoding_to_char(int encoding);
+#endif
+
 PHP_MINIT_FUNCTION(pgsql);
 PHP_MSHUTDOWN_FUNCTION(pgsql);
 PHP_RINIT_FUNCTION(pgsql);
 PHP_RSHUTDOWN_FUNCTION(pgsql);
 PHP_MINFO_FUNCTION(pgsql);
+/* connection functions */
 PHP_FUNCTION(pg_connect);
 PHP_FUNCTION(pg_pconnect);
 PHP_FUNCTION(pg_close);
+PHP_FUNCTION(pg_connection_reset);
+PHP_FUNCTION(pg_connection_status);
+PHP_FUNCTION(pg_connection_busy);
+PHP_FUNCTION(pg_host);
 PHP_FUNCTION(pg_dbname);
-PHP_FUNCTION(pg_errormessage);
-PHP_FUNCTION(pg_trace);
-PHP_FUNCTION(pg_untrace);
-PHP_FUNCTION(pg_options);
 PHP_FUNCTION(pg_port);
 PHP_FUNCTION(pg_tty);
-PHP_FUNCTION(pg_host);
-PHP_FUNCTION(pg_exec);
-PHP_FUNCTION(pg_numrows);
-PHP_FUNCTION(pg_numfields);
-PHP_FUNCTION(pg_cmdtuples);
-PHP_FUNCTION(pg_last_notice);
-PHP_FUNCTION(pg_fieldname);
-PHP_FUNCTION(pg_fieldsize);
-PHP_FUNCTION(pg_fieldtype);
-PHP_FUNCTION(pg_fieldnum);
-PHP_FUNCTION(pg_result);
-PHP_FUNCTION(pg_fetch_row);
+PHP_FUNCTION(pg_options);
+/* query functions */
+PHP_FUNCTION(pg_query);
+PHP_FUNCTION(pg_send_query);
+PHP_FUNCTION(pg_cancel_query);
+/* result functions */
 PHP_FUNCTION(pg_fetch_array);
 PHP_FUNCTION(pg_fetch_object);
-PHP_FUNCTION(pg_fieldprtlen);
-PHP_FUNCTION(pg_fieldisnull);
-PHP_FUNCTION(pg_freeresult);
-PHP_FUNCTION(pg_getlastoid);
-PHP_FUNCTION(pg_locreate);
-PHP_FUNCTION(pg_lounlink);
-PHP_FUNCTION(pg_loopen);
-PHP_FUNCTION(pg_loclose);
-PHP_FUNCTION(pg_loread);
-PHP_FUNCTION(pg_lowrite);
-PHP_FUNCTION(pg_loreadall);
-PHP_FUNCTION(pg_loimport);
-PHP_FUNCTION(pg_loexport);
-PHP_FUNCTION(pg_lolseek);
-PHP_FUNCTION(pg_lotell);
+PHP_FUNCTION(pg_fetch_result);
+PHP_FUNCTION(pg_fetch_row);
+PHP_FUNCTION(pg_affected_rows);
+PHP_FUNCTION(pg_get_result);
+PHP_FUNCTION(pg_result_status);
+PHP_FUNCTION(pg_free_result);
+PHP_FUNCTION(pg_last_oid);
+PHP_FUNCTION(pg_num_rows);
+PHP_FUNCTION(pg_num_fields);
+PHP_FUNCTION(pg_field_name);
+PHP_FUNCTION(pg_field_num);
+PHP_FUNCTION(pg_field_size);
+PHP_FUNCTION(pg_field_type);
+PHP_FUNCTION(pg_field_prtlen);
+PHP_FUNCTION(pg_field_is_null);
+/* error message functions */
+PHP_FUNCTION(pg_result_error);
+PHP_FUNCTION(pg_last_error);
+PHP_FUNCTION(pg_last_notice);
+/* copy functions */
 PHP_FUNCTION(pg_put_line);
 PHP_FUNCTION(pg_end_copy);
+PHP_FUNCTION(pg_copy_to);
+PHP_FUNCTION(pg_copy_from);
+/* large object functions */
+PHP_FUNCTION(pg_lo_create);
+PHP_FUNCTION(pg_lo_unlink);
+PHP_FUNCTION(pg_lo_open);
+PHP_FUNCTION(pg_lo_close);
+PHP_FUNCTION(pg_lo_read);
+PHP_FUNCTION(pg_lo_write);
+PHP_FUNCTION(pg_lo_read_all);
+PHP_FUNCTION(pg_lo_import);
+PHP_FUNCTION(pg_lo_export);
+PHP_FUNCTION(pg_lo_seek);
+PHP_FUNCTION(pg_lo_tell);
+
+/* debugging functions */
+PHP_FUNCTION(pg_trace);
+PHP_FUNCTION(pg_untrace);
+
+/* utility functions */
 #if HAVE_PQCLIENTENCODING
 PHP_FUNCTION(pg_client_encoding);
 PHP_FUNCTION(pg_set_client_encoding);
 #endif
-PHP_FUNCTION(pg_reset);
-PHP_FUNCTION(pg_status);
-PHP_FUNCTION(pg_send_query);
-PHP_FUNCTION(pg_request_cancel);
-PHP_FUNCTION(pg_get_result);
-PHP_FUNCTION(pg_is_busy);
+#if HAVE_PQESCAPE
+PHP_FUNCTION(pg_escape_string);
+PHP_FUNCTION(pg_escape_bytea);
+#endif
 
 void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent);
 int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS);
