@@ -916,6 +916,9 @@ int zend_do_verify_access_types(znode *current_access_type, znode *new_modifier)
 		&& ((current_access_type->u.constant.value.lval & ZEND_ACC_PPP_MASK) != (new_modifier->u.constant.value.lval & ZEND_ACC_PPP_MASK))) {
 		zend_error(E_COMPILE_ERROR, "Multiple access type modifiers are not allowed");
 	}
+	if ((current_access_type->u.constant.value.lval | new_modifier->u.constant.value.lval) && (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) {
+		zend_error(E_COMPILE_ERROR, "Cannot use the final modifier on a private class member");
+	}
 	return (current_access_type->u.constant.value.lval | new_modifier->u.constant.value.lval);
 }
 
@@ -1602,6 +1605,11 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 		}
 		return 1; /* method doesn't exist in child, copy from parent */
 	}
+
+	if (parent_flags & ZEND_ACC_FINAL) {
+		zend_error(E_COMPILE_ERROR, "Cannot override final method %s::%s()", ZEND_FN_SCOPE_NAME(parent), child->common.function_name);
+	}
+
 	child_flags	= child->common.fn_flags;
 	/* You cannot change from static to non static and vice versa.
 	 */
@@ -1645,6 +1653,9 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 	}
 
 	if (zend_hash_quick_find(&ce->properties_info, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **) &child_info)==SUCCESS) {
+		if (parent_info->flags & ZEND_ACC_FINAL) {
+			zend_error(E_COMPILE_ERROR, "Cannot override final property %s::$%s", parent_ce->name, hash_key->arKey);
+		}
 		if ((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK)) {
 			zend_error(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name, hash_key->arKey, zend_visibility_string(parent_info->flags), parent_ce->name, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		} else if (child_info->flags & ZEND_ACC_IMPLICIT_PUBLIC) {

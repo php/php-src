@@ -112,7 +112,7 @@
 %token T_THROW
 %token T_USE
 %token T_GLOBAL
-%right T_STATIC T_ABSTRACT T_PRIVATE T_PROTECTED T_PUBLIC
+%right T_STATIC T_ABSTRACT T_FINAL T_PRIVATE T_PROTECTED T_PUBLIC
 %token T_VAR
 %token T_UNSET
 %token T_ISSET
@@ -510,6 +510,7 @@ member_modifier:
 	|	T_PRIVATE				{ $$.u.constant.value.lval = ZEND_ACC_PRIVATE; }
 	|	T_STATIC				{ $$.u.constant.value.lval = ZEND_ACC_STATIC; }
 	|	T_ABSTRACT				{ $$.u.constant.value.lval = ZEND_ACC_ABSTRACT; }
+	|	T_FINAL					{ $$.u.constant.value.lval = ZEND_ACC_FINAL; }
 ;
 
 class_variable_declaration:
