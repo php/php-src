@@ -1,5 +1,0 @@
-
-LTLIBRARY_NAME    = libwddx.la
-LTLIBRARY_SOURCES = wddx.c
-
-include $(top_srcdir)/build/dynlib.mk

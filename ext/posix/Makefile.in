@@ -1,6 +1,0 @@
-
-LTLIBRARY_NAME    = libposix.la
-LTLIBRARY_SOURCES = posix.c
-LTLIBRARY_SHARED_NAME = posix.la
-
-include $(top_srcdir)/build/dynlib.mk

@@ -1,6 +1,0 @@
-LTLIBRARY_NAME    		= liboracle.la
-LTLIBRARY_SOURCES 		= oracle.c
-LTLIBRARY_SHARED_NAME   = oracle.la
-LTLIBRARY_SHARED_LIBADD = $(ORACLE_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

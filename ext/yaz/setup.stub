@@ -1,8 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-yaz 'YAZ support?' yesnodir \
-    'no /usr/bin YAZ base install' \
-'     Whether to build with YAZ (Z39.50 protocol package)\n
-     support.\n
-     More info about YAZ can be found at http://www.indexdata.dk/yaz/'

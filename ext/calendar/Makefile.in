@@ -1,6 +1,0 @@
-
-LTLIBRARY_NAME    = libcalendar.la
-LTLIBRARY_SOURCES = calendar.c dow.c french.c gregor.c jewish.c julian.c easter.c cal_unix.c
-LTLIBRARY_SHARED_NAME = calendar.la
-
-include $(top_srcdir)/build/dynlib.mk

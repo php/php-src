@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME    = libmcrypt.la
-LTLIBRARY_SOURCES = mcrypt.c
-LTLIBRARY_SHARED_NAME   = mcrypt.la
-LTLIBRARY_SHARED_LIBADD = $(MCRYPT_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

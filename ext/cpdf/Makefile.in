@@ -1,5 +1,0 @@
-
-LTLIBRARY_NAME    = libcpdf.la
-LTLIBRARY_SOURCES = cpdf.c
-
-include $(top_srcdir)/build/dynlib.mk

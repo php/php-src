@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME    = libmcal.la
-LTLIBRARY_SOURCES = php_mcal.c
-LTLIBRARY_SHARED_NAME = mcal.la
-LTLIBRARY_SHARED_LIBADD = $(MCAL_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

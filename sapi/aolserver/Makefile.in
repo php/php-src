@@ -1,5 +1,0 @@
-
-LTLIBRARY_NAME    = libsapi.la
-LTLIBRARY_SOURCES = aolserver.c
-
-include $(top_srcdir)/build/ltlib.mk

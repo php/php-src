@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME    = libicap.la
-LTLIBRARY_SOURCES = php_icap.c
-LTLIBRARY_SHARED_NAME = icap.la
-LTLIBRARY_SHARED_LIBADD = $(ICAP_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk
