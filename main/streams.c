@@ -55,6 +55,8 @@
 
 #define PHP_STDIOP_GET_FD(anfd, data)   anfd = (data)->file ? fileno((data)->file) : (data)->fd
 
+static php_stream_wrapper php_plain_files_wrapper;
+
 /* {{{ some macros to help track leaks */
 #if ZEND_DEBUG
 #define emalloc_rel_orig(size)	\
@@ -648,7 +650,8 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 		}
 
 		/* just break anyway, to avoid greedy read */
-		break;
+		if (stream->wrapper != &php_plain_files_wrapper)
+			break;
 	}
 
 	if (didread > 0)
