@@ -60,7 +60,7 @@ typedef unsigned int uint;
 #define vsnprintf _vsnprintf
 #define strcasecmp(s1, s2) stricmp(s1, s2)
 #define strncasecmp(s1, s2, n) strnicmp(s1, s2, n)
-#define zend_isinf(a)	0
+#define zend_isinf(a)	((_fpclass(a) == _FPCLASS_PINF) || (_fpclass(a) == _FPCLASS_NINF))
 #define zend_finite(x)	_finite(x)
 #define zend_isnan(x)	_isnan(x)
 
@@ -75,9 +75,6 @@ typedef unsigned int uint;
 #else
 # define inline
 #endif
-
-#define zend_finite(A) _finite(A)
-#define zend_isnan(A) _isnan(A)
 
 #ifdef LIBZEND_EXPORTS
 #	define ZEND_API __declspec(dllexport)
