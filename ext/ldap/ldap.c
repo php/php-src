@@ -1258,7 +1258,7 @@ PHP_FUNCTION(ldap_mod_replace)
 /* }}} */
 
 /* {{{ proto int ldap_mod_add(int link, string dn, array entry)
-        Add attribute values to current */
+   Add attribute values to current */
 PHP_FUNCTION(ldap_mod_add)
 {
         php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_ADD);
