@@ -2238,7 +2238,7 @@ PHP_MINFO_FUNCTION(hwapi) {
 	php_info_print_table_end();
 }
 
-/* {{{ proto string hwapi_dummy(int link, int id, int msgid)
+/* {{{ proto bool hwapi_dummy(int link, int id, int msgid)
    Hyperwave dummy function */
 PHP_FUNCTION(hwapi_dummy) {
 	pval **arg1, **arg2, **arg3;
@@ -2248,7 +2248,7 @@ PHP_FUNCTION(hwapi_dummy) {
 }
 /* }}} */
 
-/* {{{ proto void hwapi_init(string hostname, int port)
+/* {{{ proto bool hwapi_init(string hostname, int port)
    Hyperwave initialisation */
 PHP_FUNCTION(hwapi_init) {
 	zval **argv[2], *id;
@@ -2296,7 +2296,7 @@ PHP_FUNCTION(hwapi_init) {
 /* }}} */
 
 /* {{{ proto string hwapi_hgcsp(string hostname, int port)
-   Hyperwave dummy function */
+    */
 PHP_FUNCTION(hwapi_hgcsp) {
 	zval **argv[2];
 	HW_API_HGCSP *db;
@@ -2329,7 +2329,7 @@ PHP_FUNCTION(hwapi_hgcsp) {
 /* }}} */
 
 /* {{{ proto object hwapi_object(array object_in)
-   Hyperwave dummy function */
+    */
 PHP_FUNCTION(hwapi_object) {
 	pval **arg1, *rv, *id;
 	HW_API_Object *newobj;
@@ -2375,8 +2375,8 @@ PHP_FUNCTION(hwapi_object) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_mychildren(array parameters)
-   Hyperwave dummy function */
+/* {{{ proto array hwapi_mychildren(string parameters)
+    */
 PHP_FUNCTION(hwapi_mychildren) {
 	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
@@ -2433,8 +2433,8 @@ PHP_FUNCTION(hwapi_mychildren) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_children(array parameters)
-   Hyperwave dummy function */
+/* {{{ proto object hwapi_children(array parameters)
+   */
 PHP_FUNCTION(hwapi_children) {
 	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
@@ -2474,8 +2474,8 @@ PHP_FUNCTION(hwapi_children) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_parents(string hostname, int port)
-   Hyperwave dummy function */
+/* {{{ proto object hwapi_parents(array parameters)
+    */
 PHP_FUNCTION(hwapi_parents) {
 	zval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
@@ -2515,7 +2515,7 @@ PHP_FUNCTION(hwapi_parents) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_find(array parameters)
+/* {{{ proto array hwapi_find(array parameters)
    Finds objects */
 PHP_FUNCTION(hwapi_find) {
 	zval **arg1, *id, *rv;
@@ -2567,7 +2567,7 @@ PHP_FUNCTION(hwapi_find) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_identify(string hostname, int port)
+/* {{{ proto bool hwapi_identify(array parameters)
    Hyperwave dummy function */
 PHP_FUNCTION(hwapi_identify) {
 	pval **arg1, *id, *rv;
@@ -2605,7 +2605,7 @@ PHP_FUNCTION(hwapi_identify) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_remove(array parameters)
+/* {{{ proto bool hwapi_remove(array parameters)
    Remove an object */
 PHP_FUNCTION(hwapi_remove) {
 	pval **arg1, *id, *rv;
@@ -2643,7 +2643,7 @@ PHP_FUNCTION(hwapi_remove) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_content(string hostname, int port)
+/* {{{ proto object hwapi_content(array parameters)
    Retrieve content of object */
 PHP_FUNCTION(hwapi_content) {
 	pval **arg1, *id, *rv;
@@ -2680,8 +2680,8 @@ PHP_FUNCTION(hwapi_content) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_copy(array parameters)
-   Hyperwave dummy function */
+/* {{{ proto object hwapi_copy(array parameters)
+    */
 PHP_FUNCTION(hwapi_copy) {
 	pval **arg1, *id, *rv;
 	HW_API_copy_In *in;
@@ -2719,7 +2719,7 @@ PHP_FUNCTION(hwapi_copy) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_link(array parameters)
+/* {{{ proto bool hwapi_link(array parameters)
    Hyperwave dummy function */
 PHP_FUNCTION(hwapi_link) {
 	pval **arg1, *id, *rv;
@@ -2757,8 +2757,8 @@ PHP_FUNCTION(hwapi_link) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_move(array parameters)
-   Hyperwave dummy function */
+/* {{{ proto bool hwapi_move(array parameters)
+    */
 PHP_FUNCTION(hwapi_move) {
 	pval **arg1, *id, *rv;
 	HW_API_move_In *in;
@@ -2795,8 +2795,8 @@ PHP_FUNCTION(hwapi_move) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_lock(array parameters)
-   Hyperwave dummy function */
+/* {{{ proto bool hwapi_lock(array parameters)
+    */
 PHP_FUNCTION(hwapi_lock) {
 	pval **arg1, *id, *rv;
 	HW_API_lock_In *in;
@@ -2833,8 +2833,8 @@ PHP_FUNCTION(hwapi_lock) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_unlock(array parameters)
-   Hyperwave dummy function */
+/* {{{ proto bool hwapi_unlock(array parameters)
+    */
 PHP_FUNCTION(hwapi_unlock) {
 	pval **arg1, *id, *rv;
 	HW_API_unlock_In *in;
@@ -2871,8 +2871,8 @@ PHP_FUNCTION(hwapi_unlock) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_replace(array parameters)
-   Hyperwave dummy function */
+/* {{{ proto object hwapi_replace(array parameters)
+    */
 PHP_FUNCTION(hwapi_replace) {
 	pval **arg1, *id, *rv;
 	HW_API_replace_In *in;
@@ -2908,8 +2908,8 @@ PHP_FUNCTION(hwapi_replace) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_insert(array parameters)
-   Hyperwave dummy function */
+/* {{{ proto object hwapi_insert(array parameters)
+    */
 PHP_FUNCTION(hwapi_insert) {
 	pval **arg1, *id, *rv;
 	HW_API_insert_In *in;
@@ -2945,8 +2945,8 @@ PHP_FUNCTION(hwapi_insert) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_insertdocument(array parameters)
-   Hyperwave dummy function */
+/* {{{ proto object hwapi_insertdocument(array parameters)
+    */
 PHP_FUNCTION(hwapi_insertdocument) {
 	pval **arg1, *id, *rv;
 	HW_API_insertDocument_In *in;
@@ -2984,8 +2984,8 @@ PHP_FUNCTION(hwapi_insertdocument) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_insertcollection(array parameters)
-   Hyperwave dummy function */
+/* {{{ proto object hwapi_insertcollection(array parameters)
+    */
 PHP_FUNCTION(hwapi_insertcollection) {
 	pval **arg1, *id, *rv;
 	HW_API_insertCollection_In *in;
@@ -3023,8 +3023,8 @@ PHP_FUNCTION(hwapi_insertcollection) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_insertanchor(array parameters)
-   Hyperwave dummy function */
+/* {{{ proto object hwapi_insertanchor(array parameters)
+    */
 PHP_FUNCTION(hwapi_insertanchor) {
 	pval **arg1, *id, *rv;
 	HW_API_insertAnchor_In *in;
@@ -3062,8 +3062,8 @@ PHP_FUNCTION(hwapi_insertanchor) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_srcanchors(array parameters)
-   Hyperwave dummy function */
+/* {{{ proto array hwapi_srcanchors(array parameters)
+    */
 PHP_FUNCTION(hwapi_srcanchors) {
 	pval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
@@ -3103,8 +3103,8 @@ PHP_FUNCTION(hwapi_srcanchors) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_dstanchors(array parameters)
-   Hyperwave dummy function */
+/* {{{ proto array hwapi_dstanchors(array parameters)
+    */
 PHP_FUNCTION(hwapi_dstanchors) {
 	pval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
@@ -3144,8 +3144,8 @@ PHP_FUNCTION(hwapi_dstanchors) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_objectbyanchor(array parameters)
-   Hyperwave dummy function */
+/* {{{ proto object hwapi_objectbyanchor(array parameters)
+    */
 PHP_FUNCTION(hwapi_objectbyanchor) {
 	pval **arg1, *id, *rv;
 	HW_API_objectByAnchor_In *in;
@@ -3186,8 +3186,8 @@ PHP_FUNCTION(hwapi_objectbyanchor) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_dstofsrcanchor(array parameters)
-   Hyperwave dummy function */
+/* {{{ proto object hwapi_dstofsrcanchor(array parameters)
+    */
 PHP_FUNCTION(hwapi_dstofsrcanchor) {
 	pval **arg1, *id, *rv;
 	HW_API_dstOfSrcAnchor_In *in;
@@ -3225,8 +3225,8 @@ PHP_FUNCTION(hwapi_dstofsrcanchor) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_srcsofdst(array parameters)
-   Hyperwave dummy function */
+/* {{{ proto array hwapi_srcsofdst(array parameters)
+    */
 PHP_FUNCTION(hwapi_srcsofdst) {
 	pval **arg1, *id, *rv;
 	HW_API_ObjectArray objarr;
@@ -3266,7 +3266,7 @@ PHP_FUNCTION(hwapi_srcsofdst) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_checkin(array parameters)
+/* {{{ proto object hwapi_checkin(array parameters)
    Checking in a document */
 PHP_FUNCTION(hwapi_checkin) {
 	pval **arg1, *id, *rv;
@@ -3307,7 +3307,7 @@ PHP_FUNCTION(hwapi_checkin) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_checkout(array parameters)
+/* {{{ proto object hwapi_checkout(array parameters)
    Checking out a document */
 PHP_FUNCTION(hwapi_checkout) {
 	pval **arg1, *id, *rv;
@@ -3348,7 +3348,7 @@ PHP_FUNCTION(hwapi_checkout) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_setcommittedversion(array parameters)
+/* {{{ proto object hwapi_setcommittedversion(array parameters)
    setcommittedversion */
 PHP_FUNCTION(hwapi_setcommittedversion) {
 	pval **arg1, *id, *rv;
@@ -3389,7 +3389,7 @@ PHP_FUNCTION(hwapi_setcommittedversion) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_revert(array parameters)
+/* {{{ proto object hwapi_revert(array parameters)
    Reverting to a former document */
 PHP_FUNCTION(hwapi_revert) {
 	pval **arg1, *id, *rv;
@@ -3430,7 +3430,7 @@ PHP_FUNCTION(hwapi_revert) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_history(array parameters)
+/* {{{ proto array hwapi_history(array parameters)
    history */
 PHP_FUNCTION(hwapi_history) {
 	pval **arg1, *id, *rv;
@@ -3471,7 +3471,7 @@ PHP_FUNCTION(hwapi_history) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_removeversion(array parameters)
+/* {{{ proto object hwapi_removeversion(array parameters)
    Reverting to a former document */
 PHP_FUNCTION(hwapi_removeversion) {
 	pval **arg1, *id, *rv;
@@ -3756,7 +3756,7 @@ PHP_FUNCTION(hwapi_removeconfiguration) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_user(array parameters)
+/* {{{ proto object hwapi_user(array parameters)
    Returns information about user */
 PHP_FUNCTION(hwapi_user) {
 	pval **arg1, *id, *rv;
@@ -3807,7 +3807,7 @@ PHP_FUNCTION(hwapi_user) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_userlist(array parameters)
+/* {{{ proto array hwapi_userlist(array parameters)
    Returns list of login in users */
 PHP_FUNCTION(hwapi_userlist) {
 	zval **arg1, *id, *rv;
@@ -3861,7 +3861,7 @@ PHP_FUNCTION(hwapi_userlist) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_hwstat(array parameters)
+/* {{{ proto object hwapi_hwstat(array parameters)
    Returns information about hgserver */
 PHP_FUNCTION(hwapi_hwstat) {
 	pval **arg1, *id, *rv;
@@ -3911,7 +3911,7 @@ PHP_FUNCTION(hwapi_hwstat) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_dcstat(array parameters)
+/* {{{ proto object hwapi_dcstat(array parameters)
    Returns information about hgserver */
 PHP_FUNCTION(hwapi_dcstat) {
 	pval **arg1, *id, *rv;
@@ -3961,7 +3961,7 @@ PHP_FUNCTION(hwapi_dcstat) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_dbstat(array parameters)
+/* {{{ proto object hwapi_dbstat(array parameters)
    Returns information about hgserver */
 PHP_FUNCTION(hwapi_dbstat) {
 	pval **arg1, *id, *rv;
@@ -4011,7 +4011,7 @@ PHP_FUNCTION(hwapi_dbstat) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_ftstat(array parameters)
+/* {{{ proto object hwapi_ftstat(array parameters)
    Returns information about ftserver */
 PHP_FUNCTION(hwapi_ftstat) {
 	pval **arg1, *id, *rv;
@@ -4061,7 +4061,7 @@ PHP_FUNCTION(hwapi_ftstat) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_info(array parameters)
+/* {{{ proto array hwapi_info(array parameters)
    Returns information about server */
 PHP_FUNCTION(hwapi_info) {
 	pval **arg1, *id, *rv, *rv1, *rv2, *rv3;
@@ -4129,7 +4129,7 @@ PHP_FUNCTION(hwapi_info) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_object_new()
+/* {{{ proto object hwapi_object_new()
    Creates new HW_API_Object */
 PHP_FUNCTION(hwapi_object_new) {
 	pval **arg1, **arg2, *rv;
@@ -4159,7 +4159,7 @@ PHP_FUNCTION(hwapi_object_new) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_object_count()
+/* {{{ proto int hwapi_object_count()
    Counts number of attributes of an HW_API_Object */
 PHP_FUNCTION(hwapi_object_count) {
 	zval *id, **tmp;
@@ -4202,7 +4202,7 @@ PHP_FUNCTION(hwapi_object_title) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_object_attreditable(int attr, string username, bool is_system)
+/* {{{ proto bool hwapi_object_attreditable(int attr, string username, bool is_system)
    Hyperwave object_attreditable function */
 PHP_FUNCTION(hwapi_object_attreditable) {
 	zval *id, **arg1, **arg2, **arg3;
@@ -4235,7 +4235,7 @@ PHP_FUNCTION(hwapi_object_attreditable) {
 }
 /* }}} */
 
-/* {{{ proto object hwapi_object_assign(int object)
+/* {{{ proto bool hwapi_object_assign(int object)
    Hyperwave object_assign function */
 PHP_FUNCTION(hwapi_object_assign) {
 	zval *id, **arg1, **arg2;
@@ -4245,7 +4245,7 @@ PHP_FUNCTION(hwapi_object_assign) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_object_attribute(int index, object &attribute)
+/* {{{ proto object hwapi_object_attribute(int index, object &attribute)
    Hyperwave object_attribute function */
 PHP_FUNCTION(hwapi_object_attribute) {
 	zval **arg1, *id, *rv;
@@ -4288,7 +4288,7 @@ PHP_FUNCTION(hwapi_object_attribute) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_object_insert(object attr)
+/* {{{ proto bool hwapi_object_insert(object attr)
    Inserts new HW_API_Attribute into HW_API_Object */
 PHP_FUNCTION(hwapi_object_insert) {
 	zval **arg1, *id;
@@ -4312,7 +4312,7 @@ PHP_FUNCTION(hwapi_object_insert) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_object_remove(string name)
+/* {{{ proto bool hwapi_object_remove(string name)
    Removes HW_API_Attribute with given name from HW_API_Object */
 PHP_FUNCTION(hwapi_object_remove) {
 	zval **arg1, *id, **tmp;
@@ -4370,7 +4370,7 @@ PHP_FUNCTION(hwapi_object_value) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_attribute_new([string name][, string value])
+/* {{{ proto object hwapi_attribute_new([string name][, string value])
    Creates new HW_API_Attribute */
 PHP_FUNCTION(hwapi_attribute_new) {
 	zval *rv, **arg1, **arg2;
@@ -4440,7 +4440,7 @@ PHP_FUNCTION(hwapi_attribute_new) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_attribute_key()
+/* {{{ proto string hwapi_attribute_key(void)
    Returns key of an hwapi_attribute */
 PHP_FUNCTION(hwapi_attribute_key) {
 	zval *id;
@@ -4459,7 +4459,7 @@ PHP_FUNCTION(hwapi_attribute_key) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_attribute_value()
+/* {{{ proto string hwapi_attribute_value(void)
    Returns value of hw_api_attribute */
 PHP_FUNCTION(hwapi_attribute_value) {
 	zval *id;
@@ -4478,7 +4478,7 @@ PHP_FUNCTION(hwapi_attribute_value) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_attribute_values()
+/* {{{ proto array hwapi_attribute_values(void)
    Returns all values of an attribute as an array */
 PHP_FUNCTION(hwapi_attribute_values) {
 	zval *id, **tmp;
@@ -4515,7 +4515,7 @@ PHP_FUNCTION(hwapi_attribute_langdepvalue) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_content_new([string name][, string value])
+/* {{{ proto object hwapi_content_new([string name][, string value])
    Creates new HW_API_Content */
 PHP_FUNCTION(hwapi_content_new) {
 	zval *rv, **arg1, **arg2, **arg3;
@@ -4574,7 +4574,7 @@ PHP_FUNCTION(hwapi_content_new) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_content_read(string buffer, int length)
+/* {{{ proto int hwapi_content_read(string buffer, int length)
    Reads length bytes from content */
 PHP_FUNCTION(hwapi_content_read) {
 	zval **arg1, **arg2, *id, **tmp;
@@ -4604,7 +4604,7 @@ PHP_FUNCTION(hwapi_content_read) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_content_mimetype()
+/* {{{ proto string hwapi_content_mimetype(void)
    Returns MimeType of document */
 PHP_FUNCTION(hwapi_content_mimetype) {
 	zval *id;
@@ -4620,7 +4620,7 @@ PHP_FUNCTION(hwapi_content_mimetype) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_error_count()
+/* {{{ proto int hwapi_error_count()
    Counts number of reasons of an HW_API_Error */
 PHP_FUNCTION(hwapi_error_count) {
 	zval *id, **tmp;
@@ -4639,7 +4639,7 @@ PHP_FUNCTION(hwapi_error_count) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_error_reason(int index)
+/* {{{ proto object hwapi_error_reason(int index)
    Returns a reason of an HW_API_Error */
 PHP_FUNCTION(hwapi_error_reason) {
 	zval **arg1, *id, **tmp;
@@ -4676,7 +4676,7 @@ PHP_FUNCTION(hwapi_error_reason) {
 }
 /* }}} */
 
-/* {{{ proto string hwapi_reason_type()
+/* {{{ proto int hwapi_reason_type(void)
    Returns the type of HW_API_Reason */
 PHP_FUNCTION(hwapi_reason_type) {
 	zval **arg1, *id, **tmp;
