@@ -72,11 +72,7 @@ DBA_OPEN_FUNC(cdb)
 		case DBA_READER: 
 #if DBA_CDB_BUILTIN
 			make = 0;
-			file = php_stream_open_wrapper(info->path, "rb", STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
-			if (!file) {
-				*error = "Unable to open file";
-				return FAILURE;
-			}
+			file = info->fp;
 #else
 			file = VCWD_OPEN(info->path, O_RDONLY);
 			if (file < 0) {
@@ -89,11 +85,7 @@ DBA_OPEN_FUNC(cdb)
 		case DBA_TRUNC:
 		case DBA_CREAT:
 			make = 1;
-			file = php_stream_open_wrapper(info->path, "wb", STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
-			if (!file) {
-				*error = "Unable to open file";
-				return FAILURE;
-			}
+			file = info->fp;
 			break;
 		case DBA_WRITER:
 			*error = "Update operations are not supported";
@@ -134,7 +126,6 @@ DBA_CLOSE_FUNC(cdb)
 	} else {
 		cdb_free(&cdb->c TSRMLS_CC);
 	}
-	php_stream_close(cdb->file);
 #else
 	cdb_free(&cdb->c);
 	close(cdb->file);
