@@ -30,7 +30,6 @@ ALWAYS = generated_lists
 
 
 all: $(STAMP) $(ALWAYS)
-	echo $(SUBDIRS)
 	@$(MAKE) AMFLAGS=$(AMFLAGS) -s -f build/build2.mk
 
 generated_lists:
