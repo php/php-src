@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Bump bundled expat to 1.95.2 (Thies)
 - Improved the stability of OCIPlogon() after a database restart. (Thies)
 - Fixed __FILE__ in the CGI & Java servlet modes when used in the main script.
   It only worked correctly in included files before this fix (Andi)
