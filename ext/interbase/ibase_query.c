@@ -1143,7 +1143,7 @@ PHP_FUNCTION(ibase_query)
 				break;
 			}
 		} else if (bind_n > 0) {
-			bind_args = (zval ***) do_alloca(sizeof(zval **) * ZEND_NUM_ARGS());
+			bind_args = (zval ***) emalloc(sizeof(zval **) * ZEND_NUM_ARGS());
 
 			if (FAILURE == zend_get_parameters_array_ex(ZEND_NUM_ARGS(), bind_args)) {
 				break;
@@ -1169,7 +1169,7 @@ PHP_FUNCTION(ibase_query)
 	_php_ibase_free_query(&ib_query TSRMLS_CC);
 
 	if (bind_args) {
-		free_alloca(bind_args);
+		efree(bind_args);
 	}
 }
 /* }}} */
