@@ -174,10 +174,7 @@ else
 	fi
 fi
 
-AC_PATH_PROG(PROG_SENDMAIL, sendmail, /usr/lib/sendmail, $PATH:/usr/bin:/usr/sbin:/usr/etc:/etc:/usr/ucblib)
-if test -n "$PROG_SENDMAIL"; then
-  AC_DEFINE(HAVE_SENDMAIL)
-fi
+PHP_PROG_SENDMAIL
 
 dnl Check whether the system uses EBCDIC (not ASCII) as its native codeset
 PHP_EBCDIC
