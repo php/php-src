@@ -7,8 +7,8 @@ sinclude(libmysql/mysql.m4)
 
 AC_DEFUN(MYSQL_LIB_CHK,[
   str="$MYSQL_DIR/$1/libmysqlclient.*"
-  for i in `echo $str`; do
-    if test -r $i; then
+  for j in `echo $str`; do
+    if test -r $j; then
       MYSQL_LIB_DIR="$MYSQL_DIR/$1"
       break 2
     fi
