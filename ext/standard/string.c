@@ -1040,11 +1040,15 @@ PHP_FUNCTION(chunk_split)
 			convert_to_string_ex(p_str);
 	}
 			
-	if(chunklen == 0) {
-		php_error(E_WARNING, "chunk length is 0");
+	if(chunklen <= 0) {
+		php_error(E_WARNING, "Chunk length should be greater than zero");
 		RETURN_FALSE;
 	}
-	
+
+	if((*p_str)->value.str.len == 0) {
+		RETURN_EMPTY_STRING();
+	}
+
 	result = php_chunk_split((*p_str)->value.str.val, (*p_str)->value.str.len,
 						     end, endlen, chunklen, &result_len);
 	
