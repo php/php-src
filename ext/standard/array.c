@@ -1693,7 +1693,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	zend_hash_get_current_key_ex(Z_ARRVAL_PP(stack), &key, &key_len, &index, 0, NULL);
 	zend_hash_del_key_or_index(Z_ARRVAL_PP(stack), key, key_len, index, (key) ? HASH_DEL_KEY : HASH_DEL_INDEX);
 	
-	// If we did a shift... re-index like it did before
+	/* If we did a shift... re-index like it did before */
 	if(!off_the_end) {
 		HANDLE_BLOCK_INTERRUPTIONS();
 		{
