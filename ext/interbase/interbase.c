@@ -1600,6 +1600,11 @@ static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int sca
 			long timestamp = -1;
 					 
 			isc_decode_date((ISC_QUAD *) data, &t);
+			/*
+			  XXX - Might have to remove this later - seems that isc_decode_date()
+			   always sets tm_isdst to 0, sometimes incorrectly (InterBase 6 bug?)
+			*/
+			t.tm_isdst = -1;
 			timestamp = mktime(&t);
 #if HAVE_TM_ZONE
 			t.tm_zone = tzname[0];
