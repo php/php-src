@@ -348,7 +348,6 @@ CWD_API FILE *virtual_fopen(char *path, const char *mode)
 {
 	cwd_state new_state;
 	FILE *f;
-	int retval;
 	CWDLS_FETCH();
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
