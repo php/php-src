@@ -44,9 +44,8 @@ documentation
 
 ext/pcre
 --------
-    * use/support latest pcre v3.1.
     * have a non-greedy option for preg_replace()
-	* have an option for preg_grep() to return keys as well
+    * have an option for preg_grep() to return keys as well
 
 ext/wddx
 --------
