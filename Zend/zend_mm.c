@@ -47,6 +47,10 @@ typedef union _mm_align_test {
 #define ZEND_MM_ALIGNMENT (sizeof(mm_align_test))
 #endif
 
+/* We're going to need some kind of configure test for this */
+#undef ZEND_MM_ALIGNMENT
+#define ZEND_MM_ALIGNMENT 8
+
 #define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT-1)
 
 #define ZEND_MM_BUCKET_INDEX(true_size) (true_size >> 3)
