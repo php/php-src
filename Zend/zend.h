@@ -160,6 +160,7 @@ struct _zend_class_entry {
 	uint name_length;
 	struct _zend_class_entry *parent; 
 	int *refcount;
+	zend_bool constants_updated;
 
 	HashTable function_table;
 	HashTable default_properties;

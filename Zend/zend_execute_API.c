@@ -260,8 +260,10 @@ ZEND_API int zend_is_true(zval *op)
 }
 
 
-ZEND_API void zval_update_constant(zval *p)
+ZEND_API int zval_update_constant(zval **pp)
 {
+	zval *p = *pp;
+
 	if (p->type == IS_CONSTANT) {
 		zval c;
 		int refcount = p->refcount;
@@ -277,7 +279,10 @@ ZEND_API void zval_update_constant(zval *p)
 		}
 		INIT_PZVAL(p);
 		p->refcount = refcount;
+	} else if (p->type == IS_ARRAY) {
+		zend_hash_apply(p->value.ht, (int (*)(void *)) zval_update_constant);
 	}
+	return 0;
 }
 
 

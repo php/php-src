@@ -199,21 +199,17 @@ ZEND_API inline int array_init(zval *arg)
 }
 
 
-static void zval_update_const_and_ref(zval **p)
-{
-	zval_update_constant(*p);
-	zval_add_ref(p);
-}
-
-
-
 ZEND_API inline int object_init_ex(zval *arg, zend_class_entry *class_type)
 {
 	zval *tmp;
 
+	if (!class_type->constants_updated) {
+		zend_hash_apply(&class_type->default_properties, (int (*)(void *)) zval_update_constant);
+		class_type->constants_updated = 1;
+	}
 	arg->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
 	zend_hash_init(arg->value.obj.properties, 0, NULL, PVAL_PTR_DTOR, 0);
-	zend_hash_copy(arg->value.obj.properties, &class_type->default_properties, (void (*)(void *)) zval_update_const_and_ref, (void *) &tmp, sizeof(zval *));
+	zend_hash_copy(arg->value.obj.properties, &class_type->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	arg->type = IS_OBJECT;
 	arg->value.obj.ce = class_type;
 	return SUCCESS;
