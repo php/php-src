@@ -19,7 +19,7 @@
     </maintainer>
     <maintainer>
       <user>cox</user>
-      <role>developer</role>
+      <role>lead</role>
       <name>Tomas V.V.Cox</name>
       <email>cox@idecnet.com</email>
     </maintainer>
@@ -47,12 +47,15 @@
     <date>2003-08-27</date>
     <state>alpha</state>
     <notes>
-* Fixed #25131 - OS_Guess warnings on empty lines from
-  popen(&quot;/usr/bin/cpp $tmpfile&quot;, &quot;r&quot;);
-* Fixed #25117 - MD5 checksum should be case-insensitive
+PEAR Base Class:
+
 * Fixed static calls to PEAR error-handling methods in classes
 * Added ability to use a static method callback for error-handling, and removed
 use of inadvisable @ in setErrorHandling
+
+PEAR Installer:
+
+* Fixed #25117 - MD5 checksum should be case-insensitive
 * Added dependency on XML_RPC, and optional dependency on xmlrpc extension
 * Added --alldeps and --onlyreqdeps options to pear install/pear upgrade
 * Sorting of installation/uninstallation so package order on the command-line is
@@ -67,6 +70,17 @@ use of inadvisable @ in setErrorHandling
 * Fixed optional dependencies in Dependency.php
 * Fix #25322 - bad md5sum should be fatal error
 * Package uninstall now also removes empty directories
+
+OS_Guess Class:
+
+* Fixed #25131 - OS_Guess warnings on empty lines from
+  popen(&quot;/usr/bin/cpp $tmpfile&quot;, &quot;r&quot;);
+
+System Class:
+
+* Fixed recursion deep param in _dirToStruct()
+* Added the System::find() command (read API doc for more info)
+
     </notes>
     <provides type="class" name="OS_Guess" />
     <provides type="class" name="System" />
