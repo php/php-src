@@ -399,6 +399,8 @@ static int do_fetch_common(pdo_stmt_t *stmt, int do_bind TSRMLS_DC)
  * If return_value is not null, store values into it according to HOW. */
 static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_fetch_type how TSRMLS_DC)
 {
+	enum pdo_fetch_type really_how = how;
+
 	if (!do_fetch_common(stmt, do_bind TSRMLS_CC)) {
 		return 0;
 	}
@@ -408,7 +410,9 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 
 		array_init(return_value);
 
-		if (how == PDO_FETCH_LAZY || how == PDO_FETCH_OBJ) {
+		if (how == PDO_FETCH_OBJ) {
+			how = PDO_FETCH_ASSOC;
+		} else if (how == PDO_FETCH_LAZY) {
 			how = PDO_FETCH_BOTH;
 		}
 
@@ -427,6 +431,10 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 			if (how == PDO_FETCH_BOTH) {
 				ZVAL_ADDREF(val);
 			}
+		}
+
+		if (really_how == PDO_FETCH_OBJ) {
+			object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL_P(return_value));
 		}
 	}
 
