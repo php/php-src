@@ -25,9 +25,9 @@ cwd=`pwd`
 cachefile=$cwd/config.cache
 
 if test "$recurse" = "yes"; then
-	(set -x; test -d libzend || mkdir libzend ; cd libzend; $cwd/$srcdir/libzend/configure --cache-file=$cachefile $@)
+	(set -x; test -d libzend || mkdir libzend ; cd libzend; $cwd/$srcdir/libzend/configure --cache-file=$cachefile $@) || exit 1
 	if test "$threadsafe" = "yes"; then
-		(set -x; test -d TSRM || mkdir TSRM; cd TSRM; $cwd/$srcdir/TSRM/configure --cache-file=$cachefile $@)
+		(set -x; test -d TSRM || mkdir TSRM; cd TSRM; $cwd/$srcdir/TSRM/configure --cache-file=$cachefile $@) || exit 1
 	fi
 	(set -x; cd $srcdir; sh ltconfig --disable-static --enable-dlopen --cache-file=$cachefile ltmain.sh)
 fi
