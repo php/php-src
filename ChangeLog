@@ -1,3 +1,66 @@
+2004-01-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/sess_sqlite.c:
+      Fixed a bug that would cause the sqlite session database to grow endlessly.
+
+2004-01-12  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      More handsome solution for previous fix
+
+    * ext/interbase/interbase.c:
+      Added sanity check on ibase_[p]connect() dialect argument (fixes obscure
+      unregistered bug)
+
+2004-01-12  Martin Kraemer  <Martin.Kraemer@fujitsu-siemens.com>
+
+    * ext/bz2/php_bz2.h:
+      Avoid duplicate symbols; definition is in bz2.c
+
+2004-01-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+    * (PHP_4_3)
+      NEWS:
+      Set release date.
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Go with 4.3.5RC1
+
+2004-01-12  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      - Return the PHP 4 behavior of not allowing class declerations within
+      - class declerations. This happened when declaring a class within a
+      - method.
+      class A {
+      	function foo() {
+      		class B {
+      		}
+      	}
+      }
+
+2004-01-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/mysql/php_mysql.c:
+      Synch mysql_fetch_object with mysqli, sqlite and pgsql
+
+    * ext/mysqli/mysqli_nonapi.c:
+      Proto fix
+
+    * ext/sqlite/sqlite.c:
+      No longer needed
+
+    * ZendEngine2/zend_API.h
+      main/php.h:
+      Add missing macro
+
 2004-01-11  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ZendEngine2/zend_compile.c
