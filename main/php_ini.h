@@ -23,6 +23,7 @@
 
 int php_init_config(char *php_ini_path_override);
 int php_shutdown_config(void);
+zval *cfg_get_entry(char *name, uint name_length);
 
 #define PHP_INI_USER	ZEND_INI_USER
 #define PHP_INI_PERDIR	ZEND_INI_PERDIR
