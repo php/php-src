@@ -1,6 +1,14 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added 'type juggling' for boolean values. The following conversions are
+  done (Derick):
+- $a = FALSE; $a++; /* $a is now bool(true); */
+  $a = TRUE;  $a++; /* $a is now int(2); */
+  $a = FALSE; $a--; /* $a is now int(-1); */
+  $a = TRUE;  $a--; /* $a is now bool(false); */
+- Fixed cases where preg_split() incorrectly terminated final element if
+  it contained null byte. (Andrei)
 - Added persistent connections/pipelining to thttpd. (Sascha)
 - Fixed two potential blocking issues in thttpd. (Sascha)
 - Fixed broken header detection on Solaris. (Sascha)
