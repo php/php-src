@@ -20,7 +20,7 @@ SOAP
 
 Encoding
 --------
-- full support for standard simple types (
+? full support for standard simple types (
   + anyType
   + anyURI, 
   + QName, 
@@ -39,7 +39,7 @@ Encoding
   ? ENTITIES,  (list: ENTITY; minLength: 1) 
   ? duration, 
   + unsignedLong)
-- full support for standard date/time types (
+? full support for standard date/time types (
   ? dateTime,
   ? time,
   ? date,
@@ -50,7 +50,7 @@ Encoding
   ? gMonth)
 ? proper encoding of standard hexBinary type
 ? proper encoding of standard base64Binary type
-- full support for arrays
+? full support for arrays
   + arrayType attribute
   + offset attribute
   + position attribute
@@ -60,7 +60,9 @@ Encoding
   + SOAP 1.1 - arrayType="xsd:ur-type[]", SOAP 1.2 - itemType="xsd:anyType"
   - SOAP 1.1 encoding of arrays with holes (partially transmitted and sparse arrays)
 	  SOAP 1.2 doesn't support partially transmitted and sparse arrays
-- full support for structures???  
+? full support for structures
+  + support for attribute encoding/decoding
+  - full support for content model encoding/decoding
 + references (id,href)
 + SOAP 1.2 (enc:id,enc:ref)
 - references to external resources
@@ -78,7 +80,7 @@ WSDL
 + support for portType operation input/output name attribute
 + support for <opperation> without <input>
 - support for portType operation parameterOrder attribute
-- support for binding operation input/output name attribute
+- support for binding operation input/output name attribute (part of overloading)
 - support for <opperation> <fault>
 + support for style "rpc"/"document" encoding (client part)
 - support for style "rpc"/"document" encoding (server part)
@@ -98,8 +100,8 @@ WSDL
 
 Schema
 ------
-- <include>, <import>, <redefine>
-- support for user defined simple types
+- <redefine>
+? support for user defined simple types
   ? restiction
 	  + base
 	  + enumeration
@@ -116,30 +118,20 @@ Schema
 		- fractionDigits (for decimal)
 	? list
 	? union
-- support for user defined complex types
-  - simpleContent restriction
+? support for user defined complex types
+  ? full support for content model encoding/decoding
+  ? simpleContent restriction
   - simpleContent extension   
-  - complexContent restriction
+  ? complexContent restriction
   - complexContent extension   
-  + base
-  - all
-  	- element
-  - choice
-  	- element
-  	- group
-  	- choice
-  	- sequence
-  	- any ???
-  - sequence
-  	- element
-  	- group
-  	- choice
-  	- sequence
-  	- any ???
-  - group
-  ? attribute
+  + all
+  + choice
+  + sequence
+  + group
+  + element
+  + attribute
   + attributeGroup
-  - anyAttribute
+	- SOAP 1.2 array encoding/decoding (itemType, arraySize)
 
 Error Handling
 --------------

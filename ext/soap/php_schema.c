@@ -2,7 +2,6 @@
 
 static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, sdlTypePtr cur_type);
 static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, sdlTypePtr cur_type);
-static int schema_sequence(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTypePtr cur_type);
 static int schema_list(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypePtr cur_type);
 static int schema_union(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr unionType, sdlTypePtr cur_type);
 static int schema_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpCompType, sdlTypePtr cur_type);
@@ -10,18 +9,22 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodeP
 static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type);
 static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type);
 static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type);
-static int schema_all(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type);
-static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTypePtr cur_type);
-static int schema_choice(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlTypePtr cur_type);
-static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr cur_type);
+static int schema_sequence(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTypePtr cur_type, sdlContentModelPtr model);
+static int schema_all(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type, sdlContentModelPtr model);
+static int schema_choice(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlTypePtr cur_type, sdlContentModelPtr model);
+static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTypePtr cur_type, sdlContentModelPtr model);
+static int schema_any(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type, sdlContentModelPtr model);
+static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr cur_type, sdlContentModelPtr model);
 static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type);
-static int schema_any(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type);
 static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type);
 
 static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valptr);
 
 static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *valptr);
 
+static void schema_type_fixup(sdlPtr sdl, sdlTypePtr type);
+
+static void delete_model(void *handle);
 
 static int is_blank(const char* str)
 {
@@ -182,6 +185,13 @@ int load_schema(sdlPtr sdl,xmlNodePtr schema)
 			}
 		} else if (node_is_equal(trav,"annotation")) {
 			/* TODO: <annotation> support */
+/* annotation cleanup
+			xmlNodePtr tmp = trav;
+			trav = trav->next;
+			xmlUnlinkNode(tmp);
+			xmlFreeNode(tmp);
+			continue;
+*/
 		} else {
 		  break;
 		}
@@ -194,11 +204,11 @@ int load_schema(sdlPtr sdl,xmlNodePtr schema)
 		} else if (node_is_equal(trav,"complexType")) {
 			schema_complexType(sdl, tns, trav, NULL);
 		} else if (node_is_equal(trav,"group")) {
-			schema_group(sdl, tns, trav, NULL);
+			schema_group(sdl, tns, trav, NULL, NULL);
 		} else if (node_is_equal(trav,"attributeGroup")) {
 			schema_attributeGroup(sdl, tns, trav, NULL);
 		} else if (node_is_equal(trav,"element")) {
-			schema_element(sdl, tns, trav, NULL);
+			schema_element(sdl, tns, trav, NULL, NULL);
 		} else if (node_is_equal(trav,"attribute")) {
 			schema_attribute(sdl, tns, trav, NULL);
 		} else if (node_is_equal(trav,"notation")) {
@@ -671,19 +681,16 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNode
 	}
 	if (trav != NULL) {
 		if (node_is_equal(trav,"group")) {
-			schema_group(sdl, tsn, trav, cur_type);
+			schema_group(sdl, tsn, trav, cur_type, NULL);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"all")) {
-			cur_type->kind = XSD_TYPEKIND_ALL;
-			schema_all(sdl, tsn, trav, cur_type);
+			schema_all(sdl, tsn, trav, cur_type, NULL);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"choice")) {
-			cur_type->kind = XSD_TYPEKIND_CHOICE;
-			schema_choice(sdl, tsn, trav, cur_type);
+			schema_choice(sdl, tsn, trav, cur_type, NULL);
 			trav = trav->next;
-			cur_type->kind = XSD_TYPEKIND_SEQUENCE;
 		} else if (node_is_equal(trav,"sequence")) {
-			schema_sequence(sdl, tsn, trav, cur_type);
+			schema_sequence(sdl, tsn, trav, cur_type, NULL);
 			trav = trav->next;
 		}
 	}
@@ -846,19 +853,16 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePt
 	}
 	if (trav != NULL) {
 		if (node_is_equal(trav,"group")) {
-			schema_group(sdl, tsn, trav, cur_type);
+			schema_group(sdl, tsn, trav, cur_type, NULL);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"all")) {
-			cur_type->kind = XSD_TYPEKIND_ALL;
-			schema_all(sdl, tsn, trav, cur_type);
+			schema_all(sdl, tsn, trav, cur_type, NULL);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"choice")) {
-			cur_type->kind = XSD_TYPEKIND_CHOICE;
-			schema_choice(sdl, tsn, trav, cur_type);
+			schema_choice(sdl, tsn, trav, cur_type, NULL);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"sequence")) {
-			cur_type->kind = XSD_TYPEKIND_SEQUENCE;
-			schema_sequence(sdl, tsn, trav, cur_type);
+			schema_sequence(sdl, tsn, trav, cur_type, NULL);
 			trav = trav->next;
 		}
 	}
@@ -891,9 +895,38 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePt
   Content: (annotation?, element*)
 </all>
 */
-static int schema_all(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr all, sdlTypePtr cur_type)
+static int schema_all(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr all, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
 	xmlNodePtr trav;
+	xmlAttrPtr attr;
+	sdlContentModelPtr newModel;
+
+	newModel = malloc(sizeof(sdlContentModel));
+	newModel->kind = XSD_CONTENT_ALL;
+	newModel->u.content = malloc(sizeof(HashTable));
+	zend_hash_init(newModel->u.content, 0, NULL, delete_model, 1);
+	if (model == NULL) {
+		cur_type->model = newModel;		
+	} else {
+		zend_hash_next_index_insert(model->u.content,&newModel,sizeof(sdlContentModelPtr), NULL);
+	}
+
+	newModel->min_occurs = 1;
+	newModel->max_occurs = 1;
+
+	attr = get_attribute(all->properties, "minOccurs");
+	if (attr) {
+		newModel->min_occurs = atoi(attr->children->content);
+	}
+
+	attr = get_attribute(all->properties, "maxOccurs");
+	if (attr) {
+		if (!strcmp(attr->children->content, "unbounded")) {
+			newModel->max_occurs = -1;
+		} else {
+			newModel->max_occurs = atoi(attr->children->content);
+		}
+	}
 
 	trav = all->children;
 	if (trav != NULL && node_is_equal(trav,"annotation")) {
@@ -902,7 +935,7 @@ static int schema_all(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr all, sdlTypePtr cur
 	}
 	while (trav != NULL) {
 		if (node_is_equal(trav,"element")) {
-			schema_element(sdl, tsn, trav, cur_type);
+			schema_element(sdl, tsn, trav, cur_type, newModel);
 		} else {
 			php_error(E_ERROR, "Error parsing schema (unexpected <%s> in all)",trav->name);
 		}
@@ -913,18 +946,108 @@ static int schema_all(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr all, sdlTypePtr cur
 
 /*
 <group
-  name = NCName>
+  name = NCName
   Content: (annotation?, (all | choice | sequence))
 </group>
+<group
+  name = NCName
+  ref = QName>
+  Content: (annotation?)
+</group>
 */
-static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTypePtr cur_type)
+static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
 	xmlNodePtr trav;
-	xmlAttrPtr name;
+	xmlAttrPtr attr;
+	xmlAttrPtr ns, name, ref = NULL;
+	sdlContentModelPtr newModel;
+
+	ns = get_attribute(groupType->properties, "targetNamespace");
+	if (ns == NULL) {
+		ns = tsn;
+	}
 
 	name = get_attribute(groupType->properties, "name");
-	if (name != NULL) {
-		/*FIXME*/
+	if (name == NULL) {
+		name = ref = get_attribute(groupType->properties, "ref");
+	}
+
+	if (name) {
+		smart_str key = {0};
+
+		if (ref) {
+			char *type, *ns;
+			xmlNsPtr nsptr;
+
+			parse_namespace(ref->children->content, &type, &ns);
+			nsptr = xmlSearchNs(groupType->doc, groupType, ns);
+			if (nsptr != NULL) {
+				smart_str_appends(&key, nsptr->href);
+				smart_str_appendc(&key, ':');
+			}
+			smart_str_appends(&key, type);
+			smart_str_0(&key);
+
+			newModel = malloc(sizeof(sdlContentModel));
+			newModel->kind = XSD_CONTENT_GROUP_REF;
+			newModel->u.group_ref = estrdup(key.c);
+			
+			if (type) {efree(type);}
+			if (ns) {efree(ns);}
+		} else {
+			newModel = malloc(sizeof(sdlContentModel));
+			newModel->kind = XSD_CONTENT_SEQUENCE; /* will be redefined */
+			newModel->u.content = malloc(sizeof(HashTable));
+			zend_hash_init(newModel->u.content, 0, NULL, delete_model, 1);
+
+			smart_str_appends(&key, ns->children->content);
+			smart_str_appendc(&key, ':');
+			smart_str_appends(&key, name->children->content);
+			smart_str_0(&key);
+		}
+
+		if (cur_type == NULL) {
+			sdlTypePtr newType;
+			
+			newType = malloc(sizeof(sdlType));
+			memset(newType, 0, sizeof(sdlType));
+			
+			if (sdl->groups == NULL) {
+				sdl->groups = malloc(sizeof(HashTable));
+				zend_hash_init(sdl->groups, 0, NULL, delete_type, 1);
+			}
+			if (zend_hash_add(sdl->groups, key.c, key.len+1, (void**)&newType, sizeof(sdlTypePtr), NULL) != SUCCESS) {
+				php_error(E_ERROR, "Error parsing schema (group '%s' already defined)",key.c);
+			}
+
+			cur_type = newType;
+		}
+		smart_str_free(&key);
+
+		if (model == NULL) {
+			cur_type->model = newModel;
+		} else {
+			zend_hash_next_index_insert(model->u.content, &newModel, sizeof(sdlContentModelPtr), NULL);
+		}
+	} else {
+		php_error(E_ERROR, "Error parsing schema (group has no 'name' nor 'ref' attributes)");
+	}
+
+	newModel->min_occurs = 1;
+	newModel->max_occurs = 1;
+
+	attr = get_attribute(groupType->properties, "minOccurs");
+	if (attr) {
+		newModel->min_occurs = atoi(attr->children->content);
+	}
+
+	attr = get_attribute(groupType->properties, "maxOccurs");
+	if (attr) {
+		if (!strcmp(attr->children->content, "unbounded")) {
+			newModel->max_occurs = -1;
+		} else {
+			newModel->max_occurs = atoi(attr->children->content);
+		}
 	}
 
 	trav = groupType->children;
@@ -934,16 +1057,25 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTyp
 	}
 	if (trav != NULL) {
 		if (node_is_equal(trav,"choice")) {
-			cur_type->kind = XSD_TYPEKIND_CHOICE;
-			schema_choice(sdl, tsn, trav, cur_type);
+			if (ref != NULL) {
+				php_error(E_ERROR, "Error parsing schema (group have both 'ref' attribute and subcontent)");
+			}
+			newModel->kind = XSD_CONTENT_CHOICE;
+			schema_choice(sdl, tsn, trav, cur_type, newModel);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"sequence")) {
-			cur_type->kind = XSD_TYPEKIND_SEQUENCE;
-			schema_sequence(sdl, tsn, trav, cur_type);
+			if (ref != NULL) {
+				php_error(E_ERROR, "Error parsing schema (group have both 'ref' attribute and subcontent)");
+			}
+			newModel->kind = XSD_CONTENT_SEQUENCE;
+			schema_sequence(sdl, tsn, trav, cur_type, newModel);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"all")) {
-			cur_type->kind = XSD_TYPEKIND_ALL;
-			schema_all(sdl, tsn, trav, cur_type);
+			if (ref != NULL) {
+				php_error(E_ERROR, "Error parsing schema (group have both 'ref' attribute and subcontent)");
+			}
+			newModel->kind = XSD_CONTENT_ALL;
+			schema_all(sdl, tsn, trav, cur_type, newModel);
 			trav = trav->next;
 		} else {
 			php_error(E_ERROR, "Error parsing schema (unexpected <%s> in group)",trav->name);
@@ -963,13 +1095,38 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTyp
   Content: (annotation?, (element | group | choice | sequence | any)*)
 </choice>
 */
-static int schema_choice(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlTypePtr cur_type)
+static int schema_choice(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
 	xmlNodePtr trav;
+	xmlAttrPtr attr;
+	sdlContentModelPtr newModel;
 
-	/*
-	cur_type->property_type = CHOICE;
-	*/
+	newModel = malloc(sizeof(sdlContentModel));
+	newModel->kind = XSD_CONTENT_CHOICE;
+	newModel->u.content = malloc(sizeof(HashTable));
+	zend_hash_init(newModel->u.content, 0, NULL, delete_model, 1);
+	if (model == NULL) {
+		cur_type->model = newModel;		
+	} else {
+		zend_hash_next_index_insert(model->u.content,&newModel,sizeof(sdlContentModelPtr), NULL);
+	}
+
+	newModel->min_occurs = 1;
+	newModel->max_occurs = 1;
+
+	attr = get_attribute(choiceType->properties, "minOccurs");
+	if (attr) {
+		newModel->min_occurs = atoi(attr->children->content);
+	}
+
+	attr = get_attribute(choiceType->properties, "maxOccurs");
+	if (attr) {
+		if (!strcmp(attr->children->content, "unbounded")) {
+			newModel->max_occurs = -1;
+		} else {
+			newModel->max_occurs = atoi(attr->children->content);
+		}
+	}
 
 	trav = choiceType->children;
 	if (trav != NULL && node_is_equal(trav,"annotation")) {
@@ -978,19 +1135,15 @@ static int schema_choice(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlT
 	}
 	while (trav != NULL) {
 		if (node_is_equal(trav,"element")) {
-			schema_element(sdl, tsn, trav, cur_type);
-		} else if (node_is_equal(trav,"grouop")) {
-			/*FIXME*/
-			schema_group(sdl, tsn, trav, cur_type);
+			schema_element(sdl, tsn, trav, cur_type, newModel);
+		} else if (node_is_equal(trav,"group")) {
+			schema_group(sdl, tsn, trav, cur_type, newModel);
 		} else if (node_is_equal(trav,"choice")) {
-			/*FIXME*/
-			schema_choice(sdl, tsn, trav, cur_type);
+			schema_choice(sdl, tsn, trav, cur_type, newModel);
 		} else if (node_is_equal(trav,"sequence")) {
-			/*FIXME*/
-			schema_sequence(sdl, tsn, trav, cur_type);
+			schema_sequence(sdl, tsn, trav, cur_type, newModel);
 		} else if (node_is_equal(trav,"any")) {
-			/*FIXME*/
-			schema_any(sdl, tsn, trav, cur_type);
+			schema_any(sdl, tsn, trav, cur_type, newModel);
 		} else {
 			php_error(E_ERROR, "Error parsing schema (unexpected <%s> in choice)",trav->name);
 		}
@@ -1008,9 +1161,38 @@ static int schema_choice(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlT
   Content: (annotation?, (element | group | choice | sequence | any)*)
 </sequence>
 */
-static int schema_sequence(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTypePtr cur_type)
+static int schema_sequence(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
 	xmlNodePtr trav;
+	xmlAttrPtr attr;
+	sdlContentModelPtr newModel;
+
+	newModel = malloc(sizeof(sdlContentModel));
+	newModel->kind = XSD_CONTENT_SEQUENCE;
+	newModel->u.content = malloc(sizeof(HashTable));
+	zend_hash_init(newModel->u.content, 0, NULL, delete_model, 1);
+	if (model == NULL) {
+		cur_type->model = newModel;		
+	} else {
+		zend_hash_next_index_insert(model->u.content,&newModel,sizeof(sdlContentModelPtr), NULL);
+	}
+
+	newModel->min_occurs = 1;
+	newModel->max_occurs = 1;
+
+	attr = get_attribute(seqType->properties, "minOccurs");
+	if (attr) {
+		newModel->min_occurs = atoi(attr->children->content);
+	}
+
+	attr = get_attribute(seqType->properties, "maxOccurs");
+	if (attr) {
+		if (!strcmp(attr->children->content, "unbounded")) {
+			newModel->max_occurs = -1;
+		} else {
+			newModel->max_occurs = atoi(attr->children->content);
+		}
+	}
 
 	trav = seqType->children;
 	if (trav != NULL && node_is_equal(trav,"annotation")) {
@@ -1019,19 +1201,15 @@ static int schema_sequence(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTy
 	}
 	while (trav != NULL) {
 		if (node_is_equal(trav,"element")) {
-			schema_element(sdl, tsn, trav, cur_type);
-		} else if (node_is_equal(trav,"grouop")) {
-			/*FIXME*/
-			schema_group(sdl, tsn, trav, cur_type);
+			schema_element(sdl, tsn, trav, cur_type, newModel);
+		} else if (node_is_equal(trav,"group")) {
+			schema_group(sdl, tsn, trav, cur_type, newModel);
 		} else if (node_is_equal(trav,"choice")) {
-			/*FIXME*/
-			schema_choice(sdl, tsn, trav, cur_type);
+			schema_choice(sdl, tsn, trav, cur_type, newModel);
 		} else if (node_is_equal(trav,"sequence")) {
-			/*FIXME*/
-			schema_sequence(sdl, tsn, trav, cur_type);
+			schema_sequence(sdl, tsn, trav, cur_type, newModel);
 		} else if (node_is_equal(trav,"any")) {
-			/*FIXME*/
-			schema_any(sdl, tsn, trav, cur_type);
+			schema_any(sdl, tsn, trav, cur_type, newModel);
 		} else {
 			php_error(E_ERROR, "Error parsing schema (unexpected <%s> in sequence)",trav->name);
 		}
@@ -1040,7 +1218,7 @@ static int schema_sequence(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTy
 	return TRUE;
 }
 
-static int schema_any(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type)
+static int schema_any(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
 	/* TODO: <any> support */
 	return TRUE;
@@ -1153,11 +1331,6 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, s
 
 		cur_type = (*ptr);
 		create_encoder(sdl, cur_type, ns->children->content, name->children->content);
-/*
-		if (cur_type->encode == NULL) {
-			cur_type->encode = get_conversion(SOAP_ENC_OBJECT);
-		}
-*/
 	} else {
 		php_error(E_ERROR, "Error parsing schema (complexType has no 'name' attribute)");
 		return FALSE;
@@ -1177,19 +1350,16 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, s
 			trav = trav->next;
 		} else {
 			if (node_is_equal(trav,"group")) {
-				schema_group(sdl, tsn, trav, cur_type);
+				schema_group(sdl, tsn, trav, cur_type, NULL);
 				trav = trav->next;
 			} else if (node_is_equal(trav,"all")) {
-				cur_type->kind = XSD_TYPEKIND_ALL;
-				schema_all(sdl, tsn, trav, cur_type);
+				schema_all(sdl, tsn, trav, cur_type, NULL);
 				trav = trav->next;
 			} else if (node_is_equal(trav,"choice")) {
-				cur_type->kind = XSD_TYPEKIND_CHOICE;
-				schema_choice(sdl, tsn, trav, cur_type);
+				schema_choice(sdl, tsn, trav, cur_type, NULL);
 				trav = trav->next;
 			} else if (node_is_equal(trav,"sequence")) {
-				cur_type->kind = XSD_TYPEKIND_SEQUENCE;
-				schema_sequence(sdl, tsn, trav, cur_type);
+				schema_sequence(sdl, tsn, trav, cur_type, NULL);
 				trav = trav->next;
 			}
 			while (trav != NULL) {
@@ -1233,10 +1403,10 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, s
   Content: (annotation?, ((simpleType | complexType)?, (unique | key | keyref)*))
 </element>
 */
-static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr cur_type)
+static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
 	xmlNodePtr trav;
-	xmlAttrPtr attrs, curattr, ns, name, type, ref = NULL;
+	xmlAttrPtr attrs, attr, ns, name, type, ref = NULL;
 
 	attrs = element->properties;
 	ns = get_attribute(attrs, "targetNamespace");
@@ -1251,7 +1421,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 
 	if (name) {
 		HashTable *addHash;
-		sdlTypePtr newType, *tmp;
+		sdlTypePtr newType;
 		smart_str key = {0};
 
 		newType = malloc(sizeof(sdlType));
@@ -1282,8 +1452,6 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 		}
 
 		newType->nillable = FALSE;
-		newType->min_occurs = 1;
-		newType->max_occurs = 1;
 
 		if (cur_type == NULL) {
 			addHash = sdl->elements;
@@ -1300,33 +1468,46 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 		}
 
 		smart_str_0(&key);
-		zend_hash_update(addHash, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), (void **)&tmp);
-		cur_type = (*tmp);
+		if (zend_hash_add(addHash, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), NULL) != SUCCESS) {
+			php_error(E_ERROR, "Error parsing schema (element '%s' already defined)",key.c);
+		}
 		smart_str_free(&key);
+
+		if (model != NULL) {
+			sdlContentModelPtr newModel = malloc(sizeof(sdlContentModel));
+
+			newModel->kind = XSD_CONTENT_ELEMENT;
+			newModel->u.element = newType;
+			newModel->min_occurs = 1;
+			newModel->max_occurs = 1;
+
+			attr = get_attribute(attrs, "maxOccurs");
+			if (attr) {
+				if (!strcmp(attr->children->content, "unbounded")) {
+					newModel->max_occurs = -1;
+				} else {
+					newModel->max_occurs = atoi(attr->children->content);
+				}
+			}
+
+			attr = get_attribute(attrs, "minOccurs");
+			if (attr) {
+				newModel->min_occurs = atoi(attr->children->content);
+			}
+
+			zend_hash_next_index_insert(model->u.content, &newModel, sizeof(sdlContentModelPtr), NULL);
+		}
+		cur_type = newType;
 	} else {
 		php_error(E_ERROR, "Error parsing schema (element has no 'name' nor 'ref' attributes)");
 	}
 
-	curattr = get_attribute(attrs, "maxOccurs");
-	if (curattr) {
-		if (!strcmp(curattr->children->content, "unbounded")) {
-			cur_type->max_occurs = -1;
-		} else {
-			cur_type->max_occurs = atoi(curattr->children->content);
-		}
-	}
-
-	curattr = get_attribute(attrs, "minOccurs");
-	if (curattr) {
-		cur_type->min_occurs = atoi(curattr->children->content);
-	}
-
 	/* nillable = boolean : false */
 	attrs = element->properties;
-	curattr = get_attribute(attrs, "nillable");
-	if (curattr) {
-		if (!stricmp(curattr->children->content, "true") ||
-			!stricmp(curattr->children->content, "1")) {
+	attr = get_attribute(attrs, "nillable");
+	if (attr) {
+		if (!stricmp(attr->children->content, "true") ||
+			!stricmp(attr->children->content, "1")) {
 			cur_type->nillable = TRUE;
 		} else {
 			cur_type->nillable = FALSE;
@@ -1352,12 +1533,6 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 		if (str_ns) {efree(str_ns);}
 		if (cptype) {efree(cptype);}
 	}
-
-/*
-	if (cur_type->max_occurs == -1 || cur_type->max_occurs > 1) {
-		cur_type->encode = get_conversion(SOAP_ENC_ARRAY);
-	}
-*/
 
 	trav = element->children;
 	if (trav != NULL && node_is_equal(trav, "annotation")) {
@@ -1474,10 +1649,30 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 			addHash = cur_type->attributes;
 		}
 
-		zend_hash_update(addHash, key.c, key.len + 1, &newAttr, sizeof(sdlAttributePtr), NULL);
+		if (zend_hash_add(addHash, key.c, key.len + 1, &newAttr, sizeof(sdlAttributePtr), NULL) != SUCCESS) {
+			php_error(E_ERROR, "Error parsing schema (attribute '%s' already defined)", key.c);
+		}
 		smart_str_free(&key);
 	} else{
 		php_error(E_ERROR, "Error parsing schema (attribute has no 'name' nor 'ref' attributes)");
+	}
+
+	/* type = QName */
+	type = get_attribute(attrType->properties, "type");
+	if (type) {
+		char *cptype, *str_ns;
+		xmlNsPtr nsptr;
+
+		if (ref != NULL) {
+			php_error(E_ERROR, "Error parsing schema (attribute have both 'ref' and 'type' attributes)");
+		}
+		parse_namespace(type->children->content, &cptype, &str_ns);
+		nsptr = xmlSearchNs(attrType->doc, attrType, str_ns);
+		if (nsptr != NULL) {
+			newAttr->encode = get_create_encoder(sdl, cur_type, (char *)nsptr->href, (char *)cptype);
+		}
+		if (str_ns) {efree(str_ns);}
+		if (cptype) {efree(cptype);}
 	}
 
 	attr = attrType->properties;
@@ -1493,10 +1688,9 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 		} else if (attr_is_equal_ex(attr, "name", SCHEMA_NAMESPACE)) {
 			newAttr->name = strdup(attr->children->content);
 		} else if (attr_is_equal_ex(attr, "ref", SCHEMA_NAMESPACE)) {
-			/*newAttr->ref= strdup(attr->children->content);*/
+			/* already processed */
 		} else if (attr_is_equal_ex(attr, "type", SCHEMA_NAMESPACE)) {
-			type = attr;
-			newAttr->type = strdup(attr->children->content);
+			/* already processed */
 		} else if (attr_is_equal_ex(attr, "use", SCHEMA_NAMESPACE)) {
 			newAttr->use = strdup(attr->children->content);
 		} else {
@@ -1528,13 +1722,19 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 	}
 	if (trav != NULL) {
 		if (node_is_equal(trav,"simpleType")) {
+			sdlTypePtr dummy_type;
 			if (ref != NULL) {
 				php_error(E_ERROR, "Error parsing schema (attribute have both 'ref' attribute and subtype)");
 			} else if (type != NULL) {
 				php_error(E_ERROR, "Error parsing schema (attribute have both 'type' attribute and subtype)");
 			}
-			/*FIXME*/
-			/*schema_simpleType(sdl, tsn, trav, cur_type);*/
+			dummy_type = malloc(sizeof(sdlType));
+			memset(dummy_type, 0, sizeof(sdlType));
+			dummy_type->name = strdup("anonymous");
+			dummy_type->namens = strdup(tsn->children->content);
+			schema_simpleType(sdl, tsn, trav, dummy_type);
+			newAttr->encode = dummy_type->encode;
+			delete_type(&dummy_type);
 			trav = trav->next;
 		}
 	}
@@ -1579,7 +1779,9 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrGrou
 			smart_str_appends(&key, newType->name);
 			smart_str_0(&key);
 
-			zend_hash_update(sdl->attributeGroups, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), NULL);
+			if (zend_hash_add(sdl->attributeGroups, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), NULL) != SUCCESS) {
+				php_error(E_ERROR, "Error parsing schema (attributeGroup '%s' already defined)", key.c);
+			}
 			cur_type = newType;
 			smart_str_free(&key);
 		} else if (ref) {
@@ -1665,9 +1867,6 @@ static void schema_attribute_fixup(sdlPtr sdl, sdlAttributePtr attr)
 				if ((*tmp)->form != NULL && attr->form == NULL) {
 					attr->form = strdup((*tmp)->form);
 				}
-				if ((*tmp)->type != NULL && attr->type == NULL) {
-					attr->type = strdup((*tmp)->type);
-				}
 				if ((*tmp)->use != NULL && attr->use == NULL) {
 					attr->use = strdup((*tmp)->use);
 				}
@@ -1679,6 +1878,7 @@ static void schema_attribute_fixup(sdlPtr sdl, sdlAttributePtr attr)
 					zend_hash_init(attr->extraAttributes, 0, NULL, NULL, 1);
 					zend_hash_copy(attr->extraAttributes, (*tmp)->extraAttributes, NULL, &node, sizeof(xmlNodePtr));
 				}
+				attr->encode = (*tmp)->encode;
 			}
 		}
 		efree(attr->ref);
@@ -1709,9 +1909,7 @@ static void schema_attributegroup_fixup(sdlPtr sdl, sdlAttributePtr attr, HashTa
 							if (newAttr->def) {newAttr->def = strdup(newAttr->def);}
 							if (newAttr->fixed) {newAttr->fixed = strdup(newAttr->fixed);}
 							if (newAttr->form) {newAttr->form = strdup(newAttr->form);}
-							if (newAttr->name) {newAttr->fixed = strdup(newAttr->name);}
 							if (newAttr->name) {newAttr->name = strdup(newAttr->name);}
-							if (newAttr->type) {newAttr->type = strdup(newAttr->type);}
 							if (newAttr->use) {newAttr->use = strdup(newAttr->use);}
 							if (newAttr->extraAttributes) {
 							  xmlNodePtr node;
@@ -1742,6 +1940,39 @@ static void schema_attributegroup_fixup(sdlPtr sdl, sdlAttributePtr attr, HashTa
 	}
 }
 
+static void schema_content_model_fixup(sdlPtr sdl, sdlContentModelPtr model)
+{
+	switch (model->kind) {
+		case XSD_CONTENT_GROUP_REF: {
+			sdlTypePtr *tmp;
+
+			if (sdl->groups && zend_hash_find(sdl->groups, model->u.group_ref, strlen(model->u.group_ref)+1, (void**)&tmp) == SUCCESS) {
+				schema_type_fixup(sdl,*tmp);
+				efree(model->u.group_ref);
+				model->kind = XSD_CONTENT_GROUP;
+				model->u.group = (*tmp)->model;
+			} else {
+				php_error(E_ERROR, "Error parsing schema (unresolved group 'ref' attribute)");
+			}
+			break;
+		}
+		case XSD_CONTENT_SEQUENCE:
+		case XSD_CONTENT_ALL:
+		case XSD_CONTENT_CHOICE: {
+			sdlContentModelPtr *tmp;
+
+			zend_hash_internal_pointer_reset(model->u.content);
+			while (zend_hash_get_current_data(model->u.content, (void**)&tmp) == SUCCESS) {
+				schema_content_model_fixup(sdl, *tmp);
+				zend_hash_move_forward(model->u.content);
+			}
+			break;
+		}
+		default:
+			break;
+	}
+}
+
 static void schema_type_fixup(sdlPtr sdl, sdlTypePtr type)
 {
 	sdlTypePtr *tmp;
@@ -1751,7 +1982,7 @@ static void schema_type_fixup(sdlPtr sdl, sdlTypePtr type)
 		if (sdl->elements != NULL) {
 			if (zend_hash_find(sdl->elements, type->ref, strlen(type->ref)+1, (void**)&tmp) == SUCCESS) {
 				type->encode = (*tmp)->encode;
-				/* TODO: nillable minOccurs, maxOccurs */
+				/* TODO: nillable */
 			} else {
 				php_error(E_ERROR, "Error parsing schema (unresolved element 'ref' attribute)");
 			}
@@ -1765,6 +1996,9 @@ static void schema_type_fixup(sdlPtr sdl, sdlTypePtr type)
 			schema_type_fixup(sdl,*tmp);
 			zend_hash_move_forward(type->elements);
 		}
+	}
+	if (type->model) {
+		schema_content_model_fixup(sdl, type->model);
 	}
 	if (type->attributes) {
 		zend_hash_internal_pointer_reset(type->attributes);
@@ -1809,6 +2043,13 @@ int schema_pass2(sdlPtr sdl)
 			zend_hash_move_forward(sdl->elements);
 		}
 	}
+	if (sdl->groups) {
+		zend_hash_internal_pointer_reset(sdl->groups);
+		while (zend_hash_get_current_data(sdl->groups,(void**)&type) == SUCCESS) {
+			schema_type_fixup(sdl,*type);
+			zend_hash_move_forward(sdl->groups);
+		}
+	}
 	if (sdl->types) {
 		zend_hash_internal_pointer_reset(sdl->types);
 		while (zend_hash_get_current_data(sdl->types,(void**)&type) == SUCCESS) {
@@ -1817,4 +2058,44 @@ int schema_pass2(sdlPtr sdl)
 		}
 	}
 	return TRUE;
+}
+
+int schema_pass3(sdlPtr sdl)
+{
+	if (sdl->elements) {
+		zend_hash_destroy(sdl->elements);
+		free(sdl->elements);
+		sdl->elements = NULL;
+	}
+	if (sdl->attributes) {
+		zend_hash_destroy(sdl->attributes);
+		free(sdl->attributes);
+		sdl->attributes = NULL;
+	}
+	if (sdl->attributeGroups) {
+		zend_hash_destroy(sdl->attributeGroups);
+		free(sdl->attributeGroups);
+		sdl->attributeGroups = NULL;
+	}
+	return TRUE;
+}
+
+static void delete_model(void *handle)
+{
+	sdlContentModelPtr tmp = *((sdlContentModelPtr*)handle);
+	switch (tmp->kind) {
+		case XSD_CONTENT_ELEMENT:
+		case XSD_CONTENT_GROUP:
+			break;
+		case XSD_CONTENT_SEQUENCE:
+		case XSD_CONTENT_ALL:
+		case XSD_CONTENT_CHOICE:
+			zend_hash_destroy(tmp->u.content);
+			free(tmp->u.content);
+			break;
+		case XSD_CONTENT_GROUP_REF:
+			efree(tmp->u.group_ref);
+			break;
+	}
+	free(tmp);
 }
