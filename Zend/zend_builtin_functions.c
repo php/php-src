@@ -54,7 +54,10 @@ static ZEND_FUNCTION(is_subclass_of);
 static ZEND_FUNCTION(get_class_vars);
 static ZEND_FUNCTION(get_object_vars);
 
-extern unsigned char first_arg_force_ref[];
+unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
+unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };
+unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
+unsigned char second_arg_allow_ref[] = { 2, BYREF_NONE, BYREF_ALLOW };
 
 static zend_function_entry builtin_functions[] = {
 	ZEND_FE(zend_version,		NULL)
