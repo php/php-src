@@ -45,6 +45,10 @@
 #include <fcntl.h>
 #endif
 
+#if HAVE_NICE && HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 /* {{{ php_Exec
  * If type==0, only last line of output is returned (exec)
  * If type==1, all lines will be printed and last lined returned (system)
@@ -486,6 +490,29 @@ PHP_FUNCTION(shell_exec)
 	Z_STRVAL_P(return_value)[total_readbytes] = '\0';	
 }
 /* }}} */
+
+#ifdef HAVE_NICE
+/* {{{ proto bool nice(int priority)
+   Change the priority of the current process */
+PHP_FUNCTION(nice)
+{
+	long pri;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &pri) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	errno = 0;
+	nice(pri);
+	if (errno) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only a super user may attempt to increase the process priority.");
+		RETURN_FALSE;
+	}
+	
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
 
 /*
  * Local variables:
