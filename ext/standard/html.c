@@ -417,7 +417,6 @@ static const struct {
 	int entitylen;
 	int flags;
 } basic_entities[] = {
-	{ '&',	"&amp;",	5,	0 },
 	{ '"',	"&quot;",	6,	ENT_HTML_QUOTE_DOUBLE },
 	{ '\'',	"&#039;",	6,	ENT_HTML_QUOTE_SINGLE },
 	{ '\'',	"&#39;",	5,	ENT_HTML_QUOTE_SINGLE },
@@ -917,54 +916,69 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 		ret = replaced;
 	}
 
-	/* replace numeric entities */
+	/* replace numeric entities & "&amp;" */
 	lim = ret + retlen;
-	for (p = ret, q = ret; p < lim; p++) {
+	for (p = ret, q = ret; p < lim;) {
 		int code;
 
-		if (p < lim - 1 && p[0] == '&' && p[1] == '#') {
-			code = strtol(p + 2, &next, 10);
-			if (next != NULL && *next == ';') {
-				switch (charset) {
-					case cs_utf_8:
-						q += php_utf32_utf8(q, code);
-						break;
+		if (p[0] == '&') {
+			if (p + 2 < lim) {
+				if (p[1] == '#') {
+					code = strtol(p + 2, &next, 10);
+					if (next != NULL && *next == ';') {
+						switch (charset) {
+							case cs_utf_8:
+								q += php_utf32_utf8(q, code);
+								break;
 
-					case cs_8859_1:
-					case cs_8859_5:
-					case cs_8859_15:
-						if (0xa0 <= code && code <= 0xff) {
-							*(q++) = code;
+							case cs_8859_1:
+							case cs_8859_5:
+							case cs_8859_15:
+								if (0xa0 <= code && code <= 0xff) {
+									*(q++) = code;
+								}
+								break;
+
+							case cs_cp1252:
+							case cs_cp1251:
+							case cs_cp866:
+								if (0x80 <= code && code <= 0xff) {
+									*(q++) = code;
+								}
+								break;
+
+							case cs_big5:
+							case cs_gb2312:
+							case cs_big5hkscs:
+							case cs_sjis:
+							case cs_eucjp:
+								if (code <= 0x7f) {
+									*(q++) = code;
+								}
+								break;
+
+							default:
+								break;
 						}
-						break;
-
-					case cs_cp1252:
-					case cs_cp1251:
-					case cs_cp866:
-						if (0x80 <= code && code <= 0xff) {
-							*(q++) = code;
-						}
-						break;
-
-					case cs_big5:
-					case cs_gb2312:
-					case cs_big5hkscs:
-					case cs_sjis:
-					case cs_eucjp:
-						if (code <= 0x7f) {
-							*(q++) = code;
-						}
-						break;
-
-					default:
-						break;
+						p = next + 1;
+					} else {
+						*(q++) = *(p++);	
+						*(q++) = *(p++);	
+					}
+				} else if (p + 4 < lim &&
+							p[1] == 'a' && p[2] == 'm' &&p[3] == 'p' &&
+							p[4] == ';') {
+					*(q++) = '&';
+					p += 5;
+				} else {
+					*(q++) = *(p++);
+					*(q++) = *(p++);
 				}
-				p = next;
 			} else {
-				*(q++) = *p;
+				*(q++) = *(p++);	
 			}
 		} else {
-			*(q++) = *p;
+			*(q++) = *(p++);	
 		}
 	}
 	*q = '\0';
