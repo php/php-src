@@ -210,7 +210,7 @@ unticked_statement:
 		T_CATCH '(' catch_or_import_class_entry T_VARIABLE ')' { zend_do_begin_catch(&$1, &$8, &$9, 1 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
 		additional_catches
 	|	T_THROW expr ';' { zend_do_throw(&$2 TSRMLS_CC); }
-	|	T_DELETE  variable 	';' { zend_do_end_variable_parse(BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&$1, ZEND_UNSET_OBJ TSRMLS_CC); }
+	|	T_DELETE  variable 	';' { zend_do_end_variable_parse(BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&$2, ZEND_UNSET_OBJ TSRMLS_CC); }
 	|	T_IMPORT { zend_do_begin_import(TSRMLS_C); } import_rule T_FROM catch_or_import_class_entry { zend_do_end_import(&$5 TSRMLS_CC); } ';'
 ;
 
