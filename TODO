@@ -3,6 +3,9 @@ parenthesis means that person has taken on this project.
 
 global
 ------
+    * let every module (source-file) have it's own module & function_entry 
+      block. Right now the math functions are in math.c but the corresponding
+      function-entries are in basic_functions.
     * make sure that all ZTS globals get destructed. Most ts_allocate_id()
       calls should have a dtor entry.
     * activate all extensions by default that don't rely on external
