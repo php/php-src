@@ -23,7 +23,7 @@ PHP_ARG_WITH(xsl, for XSL support,
 [  --with-xsl[=DIR]        Include new XSL support (requires libxslt >= 1.0.18).
                           DIR is the libxslt install directory.])
 
-if test "$PHP_XSL" != "no" -a "$PHP_DOM" == "no"; then
+if test "$PHP_XSL" != "no" -a "$PHP_DOM" = "no"; then
     AC_MSG_ERROR([XSL extension requires DOM extension, add --with-dom.])
 fi
 
