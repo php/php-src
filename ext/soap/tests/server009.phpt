@@ -1,7 +1,12 @@
 --TEST--
 SOAP Server 9: setclass and setpersistence(SOAP_PERSISTENCE_SESSION)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+	require_once('skipif.inc');
+	if (!extension_loaded('session')) {
+		die('skip this test needs session extension');
+	}
+?>
 --FILE--
 <?php
 class foo {
