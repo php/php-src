@@ -34,7 +34,7 @@
 
 #if HAVE_LIBPCRE
 
-#include "pcre.h"
+#include "pcrelib/pcre.h"
 
 extern void php_info_pcre(ZEND_MODULE_INFO_FUNC_ARGS);
 extern int php_minit_pcre(INIT_FUNC_ARGS);
