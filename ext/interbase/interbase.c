@@ -1086,117 +1086,101 @@ PHP_FUNCTION(ibase_drop_db)
 /* }}} */
 
 /* {{{ _php_ibase_alloc_array() */
-static int _php_ibase_alloc_array(ibase_array **ib_arrayp, int *array_cntp, XSQLDA *sqlda, isc_db_handle link, isc_tr_handle trans TSRMLS_DC)
+static int _php_ibase_alloc_array(ibase_array **ib_arrayp, XSQLDA *sqlda, isc_db_handle link, isc_tr_handle trans TSRMLS_DC)
 {
 #define IB_ARRAY (*ib_arrayp)
 
-	int i, dim, ar_cnt, ar_length;
-	XSQLVAR *var;
+	unsigned short i;
+	XSQLVAR *var = sqlda->sqlvar;
 
-	IB_ARRAY = NULL;
+	IB_ARRAY = safe_emalloc(sizeof(ibase_array), sqlda->sqld, 0);
 	
-	ar_cnt = 0; /* find arrays */
-	var = sqlda->sqlvar;
 	for (i = 0; i < sqlda->sqld; i++, var++) {
+		unsigned short dim;
+		unsigned long ar_length;
+		
 		if ((var->sqltype & ~1) == SQL_ARRAY) {
-			ar_cnt++;
-		}
-	}
-
-	if (ar_cnt) {	  /* have  arrays ? */
-		*array_cntp = ar_cnt;
-		IB_ARRAY = safe_emalloc(sizeof(ibase_array), ar_cnt, 0);
-		ar_cnt = 0;
-		var = sqlda->sqlvar;
-		for (i = 0; i < sqlda->sqld; i++, var++) {
-			if ((var->sqltype & ~1) == SQL_ARRAY) {
+			ISC_ARRAY_DESC *ar_desc = &IB_ARRAY[i].ar_desc;
 			
-				ISC_ARRAY_DESC *ar_desc = &IB_ARRAY[ar_cnt].ar_desc;
-				
-				if (isc_array_lookup_bounds(IB_STATUS, &link, &trans, var->relname, var->sqlname, ar_desc)) {
-					_php_ibase_error(TSRMLS_C);
+			if (isc_array_lookup_bounds(IB_STATUS, &link, &trans, var->relname, var->sqlname, ar_desc)) {
+				_php_ibase_error(TSRMLS_C);
+				efree(IB_ARRAY);
+				IB_ARRAY = NULL;
+				return FAILURE;
+			}
+
+			switch (ar_desc->array_desc_dtype) {
+				case blr_text:
+				case blr_text2:
+					IB_ARRAY[i].el_type = SQL_TEXT;
+					IB_ARRAY[i].el_size = ar_desc->array_desc_length + 1;
+					break;
+				case blr_short:
+					IB_ARRAY[i].el_type = SQL_SHORT;
+					IB_ARRAY[i].el_size = sizeof(short);
+					break;
+				case blr_long:
+					IB_ARRAY[i].el_type = SQL_LONG;
+					IB_ARRAY[i].el_size = sizeof(ISC_LONG);
+					break;
+				case blr_float:
+					IB_ARRAY[i].el_type = SQL_FLOAT;
+					IB_ARRAY[i].el_size = sizeof(float);
+					break;
+				case blr_double:
+					IB_ARRAY[i].el_type = SQL_DOUBLE;
+					IB_ARRAY[i].el_size = sizeof(double);
+					break;
+#ifdef blr_int64
+				case blr_int64:
+					IB_ARRAY[i].el_type = SQL_INT64;
+					IB_ARRAY[i].el_size = sizeof(ISC_INT64);
+					break;
+#endif
+#ifndef blr_timestamp
+				case blr_date:
+					IB_ARRAY[i].el_type = SQL_DATE;
+					IB_ARRAY[i].el_size = sizeof(ISC_QUAD);
+					break;
+#else
+				case blr_timestamp:
+					IB_ARRAY[i].el_type = SQL_TIMESTAMP;
+					IB_ARRAY[i].el_size = sizeof(ISC_TIMESTAMP);
+					break;
+				case blr_sql_date:
+					IB_ARRAY[i].el_type = SQL_TYPE_DATE;
+					IB_ARRAY[i].el_size = sizeof(ISC_DATE);
+					break;
+				case blr_sql_time:
+					IB_ARRAY[i].el_type = SQL_TYPE_TIME;
+					IB_ARRAY[i].el_size = sizeof(ISC_TIME);
+					break;
+#endif						
+				case blr_varying:
+				case blr_varying2:	/* changed to SQL_TEXT ? */
+					/* sql_type = SQL_VARYING; Why? FIXME: ??? */
+					IB_ARRAY[i].el_type = SQL_TEXT;
+					IB_ARRAY[i].el_size = ar_desc->array_desc_length + sizeof(short);
+					break;
+				case blr_quad:
+				case blr_blob_id:
+				case blr_cstring:
+				case blr_cstring2:
+					/* FIXME */
+				default:
+					_php_ibase_module_error("Unsupported array type %d in relation '%s' column '%s'" TSRMLS_CC, ar_desc->array_desc_dtype, var->relname, var->sqlname);
 					efree(IB_ARRAY);
 					IB_ARRAY = NULL;
 					return FAILURE;
-				}
-
-				switch (ar_desc->array_desc_dtype) {
-					case blr_text:
-					case blr_text2:
-						IB_ARRAY[ar_cnt].el_type = SQL_TEXT;
-						IB_ARRAY[ar_cnt].el_size = ar_desc->array_desc_length + 1;
-						break;
-					case blr_short:
-						IB_ARRAY[ar_cnt].el_type = SQL_SHORT;
-						IB_ARRAY[ar_cnt].el_size = sizeof(short);
-						break;
-					case blr_long:
-						IB_ARRAY[ar_cnt].el_type = SQL_LONG;
-						IB_ARRAY[ar_cnt].el_size = sizeof(ISC_LONG);
-						break;
-					case blr_float:
-						IB_ARRAY[ar_cnt].el_type = SQL_FLOAT;
-						IB_ARRAY[ar_cnt].el_size = sizeof(float);
-						break;
-					case blr_double:
-						IB_ARRAY[ar_cnt].el_type = SQL_DOUBLE;
-						IB_ARRAY[ar_cnt].el_size = sizeof(double);
-						break;
-#ifdef blr_int64
-					case blr_int64:
-						IB_ARRAY[ar_cnt].el_type = SQL_INT64;
-						IB_ARRAY[ar_cnt].el_size = sizeof(ISC_INT64);
-						break;
-#endif
-#ifndef blr_timestamp
-					case blr_date:
-						IB_ARRAY[ar_cnt].el_type = SQL_DATE;
-						IB_ARRAY[ar_cnt].el_size = sizeof(ISC_QUAD);
-						break;
-#else
-					case blr_timestamp:
-						IB_ARRAY[ar_cnt].el_type = SQL_TIMESTAMP;
-						IB_ARRAY[ar_cnt].el_size = sizeof(ISC_TIMESTAMP);
-						break;
-					case blr_sql_date:
-						IB_ARRAY[ar_cnt].el_type = SQL_TYPE_DATE;
-						IB_ARRAY[ar_cnt].el_size = sizeof(ISC_DATE);
-						break;
-					case blr_sql_time:
-						IB_ARRAY[ar_cnt].el_type = SQL_TYPE_TIME;
-						IB_ARRAY[ar_cnt].el_size = sizeof(ISC_TIME);
-						break;
-#endif						
-					case blr_varying:
-					case blr_varying2:	/* changed to SQL_TEXT ? */
-						/* sql_type = SQL_VARYING; Why? FIXME: ??? */
-						IB_ARRAY[ar_cnt].el_type = SQL_TEXT;
-						IB_ARRAY[ar_cnt].el_size = ar_desc->array_desc_length + sizeof(short);
-						break;
-					case blr_quad:
-					case blr_blob_id:
-					case blr_cstring:
-					case blr_cstring2:
-						/* FIXME */
-					default:
-						_php_ibase_module_error("Unsupported array type %d in relation '%s' column '%s'" TSRMLS_CC, ar_desc->array_desc_dtype, var->relname, var->sqlname);
-						efree(IB_ARRAY);
-						IB_ARRAY = NULL;
-						return FAILURE;
-				} /* switch array_desc_type */
-				
-				ar_length = 0; /* calculate elements count */
-				for (dim = 0; dim < ar_desc->array_desc_dimensions; dim++) {
-					ar_length += 1 + ar_desc->array_desc_bounds[dim].array_bound_upper - ar_desc->array_desc_bounds[dim].array_bound_lower;
-				}
-				IB_ARRAY[ar_cnt].ar_size = IB_ARRAY[ar_cnt].el_size * ar_length;
-				
-				ar_cnt++;
-				
-			} /* if SQL_ARRAY */
-		} /* for column */
-	} /* if array_cnt */
-	
+			} /* switch array_desc_type */
+			
+			ar_length = 0; /* calculate elements count */
+			for (dim = 0; dim < ar_desc->array_desc_dimensions; dim++) {
+				ar_length += 1 + ar_desc->array_desc_bounds[dim].array_bound_upper - ar_desc->array_desc_bounds[dim].array_bound_lower;
+			}
+			IB_ARRAY[i].ar_size = IB_ARRAY[i].el_size * ar_length;
+		} /* if SQL_ARRAY */
+	} /* for column */
 	return SUCCESS;
 #undef IB_ARRAY
 }
@@ -1214,9 +1198,7 @@ static int _php_ibase_alloc_query(ibase_query *ib_query, ibase_db_link *link, ib
 	ib_query->result_res_id = 0;
 	ib_query->stmt = NULL;
 	ib_query->in_array = NULL;
-	ib_query->in_array_cnt = 0;
 	ib_query->out_array = NULL;
-	ib_query->out_array_cnt = 0;
 	ib_query->dialect = dialect;
 	ib_query->query = estrdup(query);
 	ib_query->trans_res_id = trans_res_id;
@@ -1273,24 +1255,19 @@ static int _php_ibase_alloc_query(ibase_query *ib_query, ibase_db_link *link, ib
 		}
 	}
 	
-	/* allocate arrays... */
-	if (_php_ibase_alloc_array(&ib_query->in_array, &ib_query->in_array_cnt, ib_query->in_sqlda, link->handle, trans->handle TSRMLS_CC) == FAILURE) {
-		goto _php_ibase_alloc_query_error; /* error report already done */
-	}
-	
-	if (_php_ibase_alloc_array(&ib_query->out_array, &ib_query->out_array_cnt, ib_query->out_sqlda, link->handle, trans->handle TSRMLS_CC) == FAILURE) {
-		goto _php_ibase_alloc_query_error;
-	}
-
 	/* no, haven't placeholders at all */
 	if (ib_query->in_sqlda->sqld == 0) {
 		efree(ib_query->in_sqlda);
 		ib_query->in_sqlda = NULL;
+	} else if (_php_ibase_alloc_array(&ib_query->in_array, ib_query->in_sqlda, link->handle, trans->handle TSRMLS_CC) == FAILURE) {
+		goto _php_ibase_alloc_query_error;
 	}
 
 	if (ib_query->out_sqlda->sqld == 0) {
 		efree(ib_query->out_sqlda);
 		ib_query->out_sqlda = NULL;
+	} else 	if (_php_ibase_alloc_array(&ib_query->out_array, ib_query->out_sqlda, link->handle, trans->handle TSRMLS_CC) == FAILURE) {
+		goto _php_ibase_alloc_query_error;
 	}
 
 	return SUCCESS;
@@ -1638,8 +1615,8 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 		_php_ibase_alloc_xsqlda(out_sqlda);
 
 		if (ib_query->out_array) {
-			IB_RESULT->out_array = safe_emalloc(sizeof(ibase_array), ib_query->out_array_cnt, 0);
-			memcpy(IB_RESULT->out_array, ib_query->out_array, sizeof(ibase_array) * ib_query->out_array_cnt);
+			IB_RESULT->out_array = safe_emalloc(sizeof(ibase_array), out_sqlda->sqld, 0);
+			memcpy(IB_RESULT->out_array, ib_query->out_array, sizeof(ibase_array) * out_sqlda->sqld);
 		} else {
 			IB_RESULT->out_array = NULL;
 		}
@@ -2324,7 +2301,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 			if (scale == 0) {
 				ZVAL_LONG(val,n);
 			} else {
-				long f = scales[-scale];
+				long f = (long) scales[-scale];
 				
 				if (n >= 0) {
 					l = sprintf(string_data, "%ld.%0*ld", n / f, -scale,  n % f);
@@ -2425,42 +2402,48 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 /* create multidimension array - recursion function
  * (*datap) argument changed 
  */
-static int _php_ibase_arr_zval(zval *ar_zval, char **datap, ibase_array *ib_array, int dim, int flag TSRMLS_DC)
+static int _php_ibase_arr_zval(zval *ar_zval, char *data, unsigned long data_size, ibase_array *ib_array, int dim, int flag TSRMLS_DC)
 {
-	zval tmp;
-	int i, dim_len, l_bound, u_bound;
-
-	if (dim > 16) { /* InterBase limit */
-		_php_ibase_module_error("Too many dimensions" TSRMLS_CC);
-		return FAILURE;
-	}
-
-	u_bound = ib_array->ar_desc.array_desc_bounds[dim].array_bound_upper;
-	l_bound = ib_array->ar_desc.array_desc_bounds[dim].array_bound_lower;
-	dim_len = 1 + u_bound - l_bound;
+	int 
+		u_bound = ib_array->ar_desc.array_desc_bounds[dim].array_bound_upper,
+		l_bound = ib_array->ar_desc.array_desc_bounds[dim].array_bound_lower,
+		dim_len = 1 + u_bound - l_bound;
+	unsigned short i;
 		
+	array_init(ar_zval);
+
 	if (dim < ib_array->ar_desc.array_desc_dimensions - 1) { /* array again */
-		for (i = 0; i < dim_len; i++) {
+		unsigned long slice_size = data_size / dim_len;
+		
+		for (i = 0; i < dim_len; ++i) {
+			zval *slice_zval;
+			ALLOC_INIT_ZVAL(slice_zval);
+
 			/* recursion here */
-			if (_php_ibase_arr_zval(ar_zval, datap, ib_array, dim + 1, flag TSRMLS_CC) == FAILURE) {
+			if (_php_ibase_arr_zval(slice_zval, data, slice_size, ib_array, dim + 1, flag TSRMLS_CC) == FAILURE) {
 				return FAILURE;
 			}
+			data += slice_size;
+			
+			add_index_zval(ar_zval,l_bound+i,slice_zval);
 		}
 	} else { /* data at last */
 		
-		array_init(ar_zval);
-
-		for (i = 0; i < dim_len; i++) {
-			if (_php_ibase_var_zval(&tmp, *datap, 
+		for (i = 0; i < dim_len; ++i) {
+			zval *var_zval;
+			ALLOC_INIT_ZVAL(var_zval);
+			
+			if (_php_ibase_var_zval(var_zval, data, 
 									ib_array->el_type,
 									ib_array->ar_desc.array_desc_length,
 									ib_array->ar_desc.array_desc_scale,
 									flag TSRMLS_CC) == FAILURE) {
 				return FAILURE;
 			}
-			/* FIXME ??? */
-			zend_hash_index_update(Z_ARRVAL_P(ar_zval), l_bound + i, (void *) &tmp, sizeof(zval), NULL);
-			*datap += ib_array->el_size;
+			
+			add_index_zval(ar_zval,l_bound+i,var_zval);
+
+			data += ib_array->el_size;
 		}
 	}
 	return SUCCESS;
@@ -2506,8 +2489,7 @@ static int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned
 static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 {
 	zval **result_arg, **flag_arg;
-	long flag = 0;
-	int i, arr_cnt;
+	long i, flag = 0;
 	ibase_result *ib_result;
 	XSQLVAR *var;
 	
@@ -2553,16 +2535,16 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 	
 	array_init(return_value);
 	
-	arr_cnt = 0;
 	var = ib_result->out_sqlda->sqlvar;
 	for (i = 0; i < ib_result->out_sqlda->sqld; i++, var++) {
 		if (((var->sqltype & 1) == 0) || *var->sqlind != -1) {
-			zval tmp;
+			zval *result;
+			ALLOC_INIT_ZVAL(result);
 
 			switch (var->sqltype & ~1) {
 
 				default:
-					_php_ibase_var_zval(&tmp, var->sqldata, var->sqltype, var->sqllen, var->sqlscale, flag TSRMLS_CC);
+					_php_ibase_var_zval(result, var->sqldata, var->sqltype, var->sqllen, var->sqlscale, flag TSRMLS_CC);
 					break;
 				case SQL_BLOB:
 					if (flag & PHP_IBASE_FETCH_BLOBS) { /* fetch blob contents into hash */
@@ -2578,12 +2560,12 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 			
 						if (isc_open_blob(IB_STATUS, &ib_result->link->handle, &ib_result->trans->handle, &blob_handle.bl_handle, &blob_handle.bl_qd)) {
 							_php_ibase_error(TSRMLS_C);
-							RETURN_FALSE;
+							goto _php_ibase_fetch_error;
 						}
 						
 						if (isc_blob_info(IB_STATUS, &blob_handle.bl_handle, sizeof(bl_items), bl_items, sizeof(bl_info), bl_info)) {
 							_php_ibase_error(TSRMLS_C);
-							RETURN_FALSE;
+							goto _php_ibase_fetch_error;
 						}
 						
 						/* find total length of blob's data */
@@ -2595,7 +2577,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 								item == isc_info_error || i >= sizeof(bl_info)) {
 
 								_php_ibase_module_error("Could not determine BLOB size (internal error)" TSRMLS_CC);
-								RETURN_FALSE;
+								goto _php_ibase_fetch_error;
 							}								
 
 							item_len = (unsigned short) isc_vax_integer(&bl_info[i], 2);
@@ -2608,76 +2590,54 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 						}
 						
 						if (max_len == 0) {
-							ZVAL_STRING(&tmp, "", 1);
-						} else if (_php_ibase_blob_get(&tmp, &blob_handle, max_len TSRMLS_CC) != SUCCESS) {
-							RETURN_FALSE;
+							ZVAL_STRING(result, "", 1);
+						} else if (_php_ibase_blob_get(result, &blob_handle, max_len TSRMLS_CC) != SUCCESS) {
+							goto _php_ibase_fetch_error;
 						}
 						
 						if (isc_close_blob(IB_STATUS, &blob_handle.bl_handle)) {
-							zval_dtor(&tmp);
 							_php_ibase_error(TSRMLS_C);
-							RETURN_FALSE;
+							goto _php_ibase_fetch_error;
 						}
 	
 					} else { /* blob id only */
 						ISC_QUAD bl_qd = *(ISC_QUAD *) var->sqldata;
-						ZVAL_STRINGL(&tmp,_php_ibase_quad_to_string(bl_qd), BLOB_ID_LEN, 0);
+						ZVAL_STRINGL(result,_php_ibase_quad_to_string(bl_qd), BLOB_ID_LEN, 0);
 					}
 					break;
-				case SQL_ARRAY: {
+				case SQL_ARRAY:
 					if (flag & PHP_IBASE_FETCH_ARRAYS) { /* array can be *huge* so only fetch if asked */
 						ISC_QUAD ar_qd = *(ISC_QUAD *) var->sqldata;
-						ibase_array *ib_array = &ib_result->out_array[arr_cnt];
-						void *ar_data;
-						char *tmp_ptr;
-						
-						ar_data = emalloc(ib_array->ar_size);
+						ibase_array *ib_array = &ib_result->out_array[i];
+						void *ar_data = emalloc(ib_array->ar_size);
 						
 						if (isc_array_get_slice(IB_STATUS, &ib_result->link->handle, &ib_result->trans->handle, &ar_qd, &ib_array->ar_desc, ar_data, &ib_array->ar_size)) {
 							_php_ibase_error(TSRMLS_C);
 							efree(ar_data);
-							RETURN_FALSE;
+							goto _php_ibase_fetch_error;
 						}
-						
-						tmp_ptr = ar_data; /* avoid changes in _arr_zval */
-						if (_php_ibase_arr_zval(&tmp, &tmp_ptr, ib_array, 0, flag TSRMLS_CC) == FAILURE) {
+
+						if (_php_ibase_arr_zval(result, ar_data, ib_array->ar_size, ib_array, 0, flag TSRMLS_CC) == FAILURE) {
 							efree(ar_data);
-							RETURN_FALSE;
+							goto _php_ibase_fetch_error;
 						}
 						efree(ar_data);
 
 					} else { /* blob id only */
 						ISC_QUAD ar_qd = *(ISC_QUAD *) var->sqldata;
-						ZVAL_STRINGL(&tmp,_php_ibase_quad_to_string(ar_qd), BLOB_ID_LEN, 0);
+						ZVAL_STRINGL(result,_php_ibase_quad_to_string(ar_qd), BLOB_ID_LEN, 0);
 					}
-				}
-				break;
+					break;
+				_php_ibase_fetch_error:
+					zval_dtor(result);
+					FREE_ZVAL(result);
+					RETURN_FALSE;
 			} /* switch */
 
 			if (fetch_type & FETCH_ROW) {
-				switch (Z_TYPE(tmp)) {
-					case IS_STRING:
-						add_index_stringl(return_value, i, Z_STRVAL(tmp), Z_STRLEN(tmp), 0);
-						break;
-					case IS_LONG:
-						add_index_long(return_value, i, Z_LVAL(tmp));
-						break;
-					case IS_DOUBLE:
-						add_index_double(return_value, i, Z_DVAL(tmp));
-						break;
-				}
+				add_index_zval(return_value, i, result);
 			} else {
-				switch (Z_TYPE(tmp)) {
-					case IS_STRING:
-						add_assoc_stringl(return_value, var->aliasname, Z_STRVAL(tmp), Z_STRLEN(tmp), 0);
-						break;
-					case IS_LONG:
-						add_assoc_long(return_value, var->aliasname, Z_LVAL(tmp));
-						break;
-					case IS_DOUBLE:
-						add_assoc_double(return_value, var->aliasname, Z_DVAL(tmp));
-						break;
-				}
+				add_assoc_zval(return_value, var->aliasname, result);
 			}
 		} else {
 			if (fetch_type & FETCH_ROW) {
@@ -2685,9 +2645,6 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 			} else {
 				add_assoc_null(return_value, var->aliasname);
 			}
-		}
-		if ((var->sqltype & ~1) == SQL_ARRAY) {
-			arr_cnt++;
 		}
 	} /* for field */
 }
