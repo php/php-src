@@ -26,7 +26,6 @@
 #endif
 
 #include "php.h"
-#include "php_network.h"
 
 #if HAVE_SOCKETS
 
@@ -34,7 +33,7 @@
 #define _XPG4_2
 #define __EXTENSIONS__
 
-
+#include "php_network.h"
 #include "ext/standard/info.h"
 #include "php_ini.h"
 
