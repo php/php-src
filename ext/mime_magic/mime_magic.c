@@ -240,6 +240,7 @@ ZEND_GET_MODULE(mime_magic)
  */
 PHP_INI_BEGIN()
 STD_PHP_INI_ENTRY("mime_magic.magicfile", PHP_MIME_MAGIC_FILE_PATH, PHP_INI_SYSTEM, OnUpdateString, magicfile, zend_mime_magic_globals, mime_magic_globals)
+STD_PHP_INI_ENTRY("mime_magic.debug", "0", PHP_INI_SYSTEM, OnUpdateBool, debug, zend_mime_magic_globals, mime_magic_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -261,8 +262,15 @@ PHP_MINIT_FUNCTION(mime_magic)
 	mime_global.magicfile = MIME_MAGIC_G(magicfile);
 
 	if(mime_global.magicfile) {
-		apprentice();
+		if(apprentice()) {
+			MIME_MAGIC_G(status) = "invalid magic file, disabled";
+		} else {
+			MIME_MAGIC_G(status) = "enabled";
+		}
+	} else {
+		MIME_MAGIC_G(status) = "no magic file given, disabled";
 	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -289,7 +297,7 @@ PHP_MSHUTDOWN_FUNCTION(mime_magic)
 PHP_MINFO_FUNCTION(mime_magic)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "mime_magic support", "enabled");
+	php_info_print_table_header(2, "mime_magic support", MIME_MAGIC_G(status));
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -311,12 +319,14 @@ PHP_FUNCTION(mime_content_type)
 	}
 
 	if (conf->magic == (struct magic *)-1) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "mime_magic could not be initialized, magic file %s is not avaliable", conf->magicfile);
+		if(MIME_MAGIC_G(debug))
+			php_error_docref("http://www.php.net/mime_magic" TSRMLS_CC, E_ERROR, "mime_magic could not be initialized, magic file %s is not avaliable", conf->magicfile);
 		RETURN_FALSE;
 	} 
 
 	if(!conf->magic) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "mime_magic not initialized");
+		if(MIME_MAGIC_G(debug))
+			php_error_docref("http://www.php.net/mime_magic" TSRMLS_CC, E_WARNING, "mime_magic not initialized");
 		RETURN_FALSE;
 	}
 
@@ -349,6 +359,7 @@ static int apprentice(void)
     char line[BUFSIZ + 1];
     int errs = 0;
     int lineno;
+	TSRMLS_FETCH();
 
     char *fname;
     magic_server_config_rec *conf = &mime_global;
@@ -390,6 +401,9 @@ static int apprentice(void)
 		/* parse it */
 		if (parse(line + ws_offset, lineno) != 0)
 			++errs;
+
+		if(errs && !MIME_MAGIC_G(debug)) 
+			break;
     }
 
     (void) fclose(f);
@@ -429,11 +443,27 @@ static unsigned long signextend(struct magic *m, unsigned long v)
 		default: 
 		 {
 			TSRMLS_FETCH();
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, ": can't happen: m->type=%d", m->type);
+			if(MIME_MAGIC_G(debug))
+				php_error_docref("http://www.php.net/mime_magic" TSRMLS_CC, E_WARNING, ": can't happen: m->type=%d", m->type);
 			return -1;
 		 }
 		}
     return v;
+}
+
+/*
+ *
+ */
+static int is_valid_mimetype(char *p)
+{
+	do {
+		if(!isalnum(*p) && (*p != '-')) return 0;
+	} while(*(++p) != '/');
+	++p;
+	do {
+		if(!isalnum(*p) && (*p != '-')) return 0;
+	} while(*(++p));
+	return 1;
 }
 
 /*
@@ -477,7 +507,8 @@ static int parse(char *l, int lineno)
     /* get offset, then skip over it */
     m->offset = (int) strtol(l, &t, 0);
     if (l == t) {
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, ": (line %d) offset `%s' invalid", lineno, l);
+		if(MIME_MAGIC_G(debug))
+			php_error_docref("http://www.php.net/mime_magic" TSRMLS_CC, E_WARNING, ": (%s:%d) offset `%s' invalid", MIME_MAGIC_G(magicfile), lineno, l);
     }
     l = t;
 
@@ -499,7 +530,8 @@ static int parse(char *l, int lineno)
 				m->in.type = BYTE;
 				break;
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, ": indirect offset type %c invalid", *l);
+				if(MIME_MAGIC_G(debug))
+					php_error_docref("http://www.php.net/mime_magic" TSRMLS_CC, E_WARNING, ": (%s:%d) indirect offset type %c invalid", MIME_MAGIC_G(magicfile), lineno, *l);
 				break;
 			}
 			l++;
@@ -515,7 +547,8 @@ static int parse(char *l, int lineno)
 		else
 			t = l;
 		if (*t++ != ')') {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, ": missing ')' in indirect offset");
+			if(MIME_MAGIC_G(debug))
+				php_error_docref("http://www.php.net/mime_magic" TSRMLS_CC, E_WARNING, ": (%s:%s) missing ')' in indirect offset", MIME_MAGIC_G(magicfile), lineno);
 		}
 		l = t;
     }
@@ -588,7 +621,8 @@ static int parse(char *l, int lineno)
 		l += NLEDATE;
     }
     else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, ": type %s invalid", l);
+		if(MIME_MAGIC_G(debug))
+			php_error_docref("http://www.php.net/mime_magic" TSRMLS_CC, E_WARNING, ": (%s:%d) type %s invalid", MIME_MAGIC_G(magicfile), lineno, l);
 		return -1;
     }
     /* New-style anding: "0 byte&0x80 =0x80 dynamically linked" */
@@ -646,8 +680,15 @@ static int parse(char *l, int lineno)
     }
     else
 		m->nospflag = 0;
-    strncpy(m->desc, l, sizeof(m->desc) - 1);
-    m->desc[sizeof(m->desc) - 1] = '\0';
+
+	if(!is_valid_mimetype(l)) {
+		if(MIME_MAGIC_G(debug))
+			php_error_docref("http://www.php.net/mime_magic" TSRMLS_CC, E_WARNING, ": (%s:%d) '%s' is not a valid mimetype, etry skipped", MIME_MAGIC_G(magicfile), lineno, l);
+		return -1;
+	}
+	
+	strncpy(m->desc, l, sizeof(m->desc) - 1);
+	m->desc[sizeof(m->desc) - 1] = '\0';
 
     return 0;
 }
@@ -688,7 +729,8 @@ static char *getstr(register char *s, register char *p,
 			break;
 		if (p >= pmax) {
 			TSRMLS_FETCH();
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "string too long: %s", origs);
+			if(MIME_MAGIC_G(debug))
+				php_error_docref("http://www.php.net/mime_magic" TSRMLS_CC, E_WARNING, "string too long: %s", origs);
 			break;
 		}
 		if (c == '\\') {
@@ -846,7 +888,8 @@ static int magic_rsl_add(char *str)
 	
    /* make sure we have a list to put it in */
     if (!req_dat) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "request config should not be NULL");
+		if(MIME_MAGIC_G(debug))
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "request config should not be NULL");
 		if (!(req_dat = magic_set_config())) {
 			/* failure */
 			return -1;
@@ -982,7 +1025,8 @@ static int magic_process(char *filename TSRMLS_DC)
 
     if (stream == NULL) {
 		/* We can't open it, but we were able to stat it. */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "can't read `%s'", filename);
+		if(MIME_MAGIC_G(debug))
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "can't read `%s'", filename);
 		/* let some other handler decide what the problem is */
 		return MIME_MAGIC_DECLINED;
     }
@@ -991,7 +1035,8 @@ static int magic_process(char *filename TSRMLS_DC)
      * try looking at the first HOWMANY bytes
      */
     if ((nbytes = php_stream_read(stream, (char *) buf, sizeof(buf) - 1)) == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "read failed: %s", filename);
+		if(MIME_MAGIC_G(debug))
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "read failed: %s", filename);
 		return MIME_MAGIC_ERROR;
     }
 
@@ -1086,7 +1131,8 @@ static int fsmagic(char *filename TSRMLS_DC)
 		/* We used stat(), the only possible reason for this is that the
 		 * symlink is broken.
 		 */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "broken symlink (%s)", filename);
+		if(MIME_MAGIC_G(debug))
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "broken symlink (%s)", filename);
 		return MIME_MAGIC_ERROR;
 #endif
 #ifdef    S_IFSOCK
@@ -1101,7 +1147,8 @@ static int fsmagic(char *filename TSRMLS_DC)
 	case 0:
 		break;
     default:
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid mode 0%o.", (unsigned int)stat_ssb.sb.st_mode);
+		if(MIME_MAGIC_G(debug))
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid mode 0%o.", (unsigned int)stat_ssb.sb.st_mode);
 		return MIME_MAGIC_ERROR;
     }
 
@@ -1458,9 +1505,9 @@ static int mcheck(union VALUETYPE *p, struct magic *m)
     TSRMLS_FETCH();
 
     if ((m->value.s[0] == 'x') && (m->value.s[1] == '\0')) {
-    
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "BOINK");
-	return 1;
+		if(MIME_MAGIC_G(debug))
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "BOINK");
+		return 1;
     }
 
     switch (m->type) {
@@ -1503,7 +1550,8 @@ static int mcheck(union VALUETYPE *p, struct magic *m)
 		break;
     default:
 		/*  bogosity, pretend that it just wasn't a match */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid type %d in mcheck().", m->type);
+		if(MIME_MAGIC_G(debug))
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid type %d in mcheck().", m->type);
 		return 0;
     }
 
@@ -1551,7 +1599,8 @@ static int mcheck(union VALUETYPE *p, struct magic *m)
     default:
 		/* bogosity, pretend it didn't match */
 		matched = 0;
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "mcheck: can't happen: invalid relation %d.", m->reln);
+		if(MIME_MAGIC_G(debug))
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mcheck: can't happen: invalid relation %d.", m->reln);
 		break;
     }
 
@@ -1635,9 +1684,10 @@ static void mprint(union VALUETYPE *p, struct magic *m)
     default:
     	{
     		TSRMLS_FETCH();
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid m->type (%d) in mprint().", m->type);
-		return;
-	}
+			if(MIME_MAGIC_G(debug))
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid m->type (%d) in mprint().", m->type);
+			return;
+		}
     }
 
     v = signextend(m, v) & m->mask;
@@ -1682,9 +1732,10 @@ static int mconvert(union VALUETYPE *p, struct magic *m)
     default:
     	{
     		TSRMLS_FETCH();
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid type %d in mconvert().", m->type);
-		return 0;
-	}
+			if(MIME_MAGIC_G(debug))
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid type %d in mconvert().", m->type);
+			return 0;
+		}
     }
 }
 
@@ -1758,7 +1809,8 @@ static int magic_rsl_get(char **content_type, char **content_encoding)
 				else {
 					/* should not be possible */
 					/* abandon malfunctioning module */
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, ": bad state %d (ws)", state);
+					if(MIME_MAGIC_G(debug))
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, ": bad state %d (ws)", state);
 					return MIME_MAGIC_DECLINED;
 				}
 				/* NOTREACHED */
@@ -1801,7 +1853,8 @@ static int magic_rsl_get(char **content_type, char **content_encoding)
 				else {
 					/* should not be possible */
 					/* abandon malfunctioning module */
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "bad state %d (ns)", state);
+					if(MIME_MAGIC_G(debug))
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "bad state %d (ns)", state);
 					return MIME_MAGIC_DECLINED;
 				}
 				/* NOTREACHED */
