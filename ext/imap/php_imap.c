@@ -2116,6 +2116,9 @@ PHP_FUNCTION(imap_base64)
 	convert_to_string_ex(text);
 
 	decode = (char *) rfc822_base64((unsigned char *) Z_STRVAL_PP(text), Z_STRLEN_PP(text), &newlength);
+	if (decode == NULL) {
+		RETURN_FALSE;
+	}
 	RETVAL_STRINGL(decode, newlength, 1);
 	fs_give((void**) &decode);
 }
@@ -2137,6 +2140,9 @@ PHP_FUNCTION(imap_qprint)
 	convert_to_string_ex(text);
 
 	decode = (char *) rfc822_qprint((unsigned char *) Z_STRVAL_PP(text), Z_STRLEN_PP(text), &newlength);
+	if (decode == NULL) {
+		RETURN_FALSE;
+	}
 	RETVAL_STRINGL(decode, newlength, 1);
 	fs_give((void**) &decode);
 }
@@ -3714,6 +3720,11 @@ PHP_FUNCTION(imap_mime_header_decode)
 							decode = (char *)rfc822_qprint((unsigned char *) text, strlen(text), &newlength);
 						} else if (encoding == 'b' || encoding == 'B') {
 							decode = (char *)rfc822_base64((unsigned char *) text, strlen(text), &newlength); /* Decode 'B' encoded data */
+						}
+						if (decode == NULL) {
+							efree(charset);
+							zval_dtor(return_value);
+							RETURN_FALSE;
 						}
 						MAKE_STD_ZVAL(myobject);
 						object_init(myobject);
