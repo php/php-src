@@ -1001,7 +1001,7 @@ PHP_FUNCTION(mb_language)
 		convert_to_string_ex(arg1);
 		no_language = mbfl_name2no_language(Z_STRVAL_PP(arg1));
 		if (no_language == mbfl_no_language_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown language \"%s\"", Z_STRVAL_PP(arg1));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown language \"%s\"", Z_STRVAL_PP(arg1));
 			RETURN_FALSE;
 		} else {
 			MBSTRG(current_language) = no_language;
@@ -1034,7 +1034,7 @@ PHP_FUNCTION(mb_internal_encoding)
 		convert_to_string_ex(arg1);
 		no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg1));
 		if (no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(arg1));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg1));
 			RETURN_FALSE;
 		} else {
 			MBSTRG(current_internal_encoding) = no_encoding;
@@ -1162,7 +1162,7 @@ PHP_FUNCTION(mb_http_output)
 		convert_to_string_ex(arg1);
 		no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg1));
 		if (no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(arg1));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg1));
 			RETURN_FALSE;
 		} else {
 			MBSTRG(current_http_output_encoding) = no_encoding;
@@ -1264,7 +1264,7 @@ PHP_FUNCTION(mb_substitute_character)
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_PP(arg1);
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown character.");					  
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character.");					  
 					RETVAL_FALSE;					
 				}
 			}
@@ -1275,7 +1275,7 @@ PHP_FUNCTION(mb_substitute_character)
 				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 				MBSTRG(current_filter_illegal_substchar) = Z_LVAL_PP(arg1);
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown character.");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character.");
 				RETVAL_FALSE;
 			}
 			break;
@@ -1299,7 +1299,7 @@ PHP_FUNCTION(mb_preferred_mime_name)
 		convert_to_string_ex(arg1);
 		no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg1));
 		if (no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_PP(arg1), E_WARNING, "unknown encoding");
+			php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_PP(arg1), E_WARNING, "Unknown encoding");
 			RETVAL_FALSE;
 		} else {
 			name = mbfl_no2preferred_mime_name(no_encoding);
@@ -1944,7 +1944,7 @@ PHP_FUNCTION(mb_strlen)
 		convert_to_string_ex(arg2);
 		string.no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg2));
 		if(string.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(arg2));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg2));
 			RETURN_FALSE;
 		}
 	}
@@ -1997,7 +1997,7 @@ PHP_FUNCTION(mb_strpos)
 		convert_to_string_ex(arg4);
 		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg4));
 		if(haystack.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(arg4));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg4));
 			RETURN_FALSE;
 		}
 		break;
@@ -2009,11 +2009,11 @@ PHP_FUNCTION(mb_strpos)
 	convert_to_string_ex(arg2);
 
 	if (offset < 0 || offset > Z_STRLEN_PP(arg1)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "offset not contained in string");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is out of range");
 		RETURN_FALSE;
 	}
 	if (Z_STRLEN_PP(arg2) == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "empty needle");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty needle");
 		RETURN_FALSE;
 	}
 	haystack.val = Z_STRVAL_PP(arg1);
@@ -2029,16 +2029,16 @@ PHP_FUNCTION(mb_strpos)
 		case 1:
 			break;
 		case 2:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "needle has not positive length.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Needle has not positive length.");
 			break;
 		case 4:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding or conversion error.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding or conversion error.");
 			break;
 		case 8:
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE," argument is empty.");
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Argument is empty.");
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown error in mb_strpos.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error in mb_strpos.");
 			break;			
 		}
 		RETVAL_FALSE;
@@ -2075,7 +2075,7 @@ PHP_FUNCTION(mb_strrpos)
 		convert_to_string_ex(arg3);
 		haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg3));
 		if(haystack.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(arg3));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg3));
 			RETURN_FALSE;
 		}
 		break;
@@ -2086,11 +2086,11 @@ PHP_FUNCTION(mb_strrpos)
 	convert_to_string_ex(arg1);
 	convert_to_string_ex(arg2);
 	if (Z_STRLEN_PP(arg1) <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"empty haystack");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty haystack");
 		RETURN_FALSE;
 	}
 	if (Z_STRLEN_PP(arg2) <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"empty needle");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty needle");
 		RETURN_FALSE;
 	}
 	haystack.val = Z_STRVAL_PP(arg1);
@@ -2139,7 +2139,7 @@ PHP_FUNCTION(mb_substr)
 		convert_to_string_ex(arg4);
 		string.no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg4));
 		if (string.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(arg4));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg4));
 			RETURN_FALSE;
 		}
 		break;
@@ -2228,7 +2228,7 @@ PHP_FUNCTION(mb_strcut)
 		convert_to_string_ex(arg4);
 		string.no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg4));
 		if (string.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(arg4));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg4));
 			RETURN_FALSE;
 		}
 		break;
@@ -2305,7 +2305,7 @@ PHP_FUNCTION(mb_strwidth)
 		convert_to_string_ex(arg2);
 		string.no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg2));
 		if(string.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(arg2));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg2));
 			RETURN_FALSE;
 		}
 	}
@@ -2356,7 +2356,7 @@ PHP_FUNCTION(mb_strimwidth)
 		convert_to_string_ex(arg5);
 		string.no_encoding = marker.no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg5));
 		if (string.no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(arg5));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg5));
 			RETURN_FALSE;
 		}
 		break;
@@ -2417,7 +2417,7 @@ PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_enco
 	if (_to_encoding && strlen(_to_encoding)) {
 		to_encoding = mbfl_name2no_encoding(_to_encoding);
 		if (to_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding \"%s\"", _to_encoding);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", _to_encoding);
 			return NULL;
 		}
 	} else {
@@ -2728,7 +2728,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 		convert_to_string_ex(argv[1]);
 		charset = mbfl_name2no_encoding(Z_STRVAL_PP(argv[1]));
 		if (charset == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(argv[1]));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(argv[1]));
 			RETURN_FALSE;
 		}
 	} else {
@@ -2906,7 +2906,7 @@ PHP_FUNCTION(mb_convert_kana)
 		convert_to_string_ex(arg3);
 		no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg3));
 		if (no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(arg3));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg3));
 			RETURN_FALSE;
 		} else {
 			string.no_encoding = no_encoding;
@@ -2955,7 +2955,7 @@ PHP_FUNCTION(mb_convert_variables)
 	convert_to_string_ex(args[0]);
 	to_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(args[0]));
 	if (to_encoding == mbfl_no_encoding_invalid) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(args[0]));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(args[0]));
 		efree((void *)args);
 		RETURN_FALSE;
 	}
@@ -3184,7 +3184,7 @@ php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 		convert_to_string_ex(arg3);
 		no_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(arg3));
 		if (no_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(arg3));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg3));
 			RETURN_FALSE;
 		} else {
 			string.no_encoding = no_encoding;
