@@ -148,8 +148,8 @@ PHP_FUNCTION(pspell_new){
 }
 /* }}} */
 
-/* {{{ proto int pspell_check(pspell int, string word)
-   Return if word is valid */
+/* {{{ proto int pspell_check(int pspell, string word)
+   Returns true if word is valid */
 PHP_FUNCTION(pspell_check){
 	int type;
 	zval **scin,**word;
@@ -177,8 +177,8 @@ PHP_FUNCTION(pspell_check){
 }
 /* }}} */
 
-/* {{{ proto array pspell_suggest(pspell int, string word)
-   Return array of Suggestions */
+/* {{{ proto array pspell_suggest(int pspell, string word)
+   Returns array of suggestions */
 PHP_FUNCTION(pspell_suggest)
 {
 	zval **scin, **word;
@@ -220,7 +220,7 @@ PHP_FUNCTION(pspell_suggest)
 /* }}} */
 
 
-/* {{{ proto int pspell_store_replacement(pspell int, string misspell, string correct)
+/* {{{ proto int pspell_store_replacement(int pspell, string misspell, string correct)
    Notify the dictionary of a user-selected replacement */
 PHP_FUNCTION(pspell_store_replacement)
 {
@@ -253,8 +253,8 @@ PHP_FUNCTION(pspell_store_replacement)
 }
 /* }}} */
 
-/* {{{ proto int pspell_add_to_personal(pspell int, string word)
-   Add a word to a personal list */
+/* {{{ proto int pspell_add_to_personal(int pspell, string word)
+   Adds a word to a personal list */
 PHP_FUNCTION(pspell_add_to_personal)
 {
 	int type;
@@ -286,8 +286,8 @@ PHP_FUNCTION(pspell_add_to_personal)
 /* }}} */
 
 
-/* {{{ proto int pspell_add_to_session(pspell int, string word)
-   Add a word to the current session */
+/* {{{ proto int pspell_add_to_session(int pspell, string word)
+   Adds a word to the current session */
 PHP_FUNCTION(pspell_add_to_session)
 {
 	int type;
@@ -319,8 +319,8 @@ PHP_FUNCTION(pspell_add_to_session)
 /* }}} */
 
 
-/* {{{ proto int pspell_clear_session(pspell int)
-   Clear the current session */
+/* {{{ proto int pspell_clear_session(int pspell)
+   Clears the current session */
 PHP_FUNCTION(pspell_clear_session)
 {
 	int type;
