@@ -89,8 +89,6 @@ extern char *crypt(char *__key, char *__salt);
 
 #define PHP_CRYPT_RAND php_rand(TSRMLS_C)
 
-static int php_crypt_rand_seeded=0;
-
 PHP_MINIT_FUNCTION(crypt)
 {
 	REGISTER_LONG_CONSTANT("CRYPT_SALT_LENGTH", PHP_MAX_SALT_LEN, CONST_CS | CONST_PERSISTENT);
@@ -99,16 +97,6 @@ PHP_MINIT_FUNCTION(crypt)
 	REGISTER_LONG_CONSTANT("CRYPT_MD5", PHP_MD5_CRYPT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CRYPT_BLOWFISH", PHP_BLOWFISH_CRYPT, CONST_CS | CONST_PERSISTENT);
 
-	return SUCCESS;
-}
-
-
-PHP_RINIT_FUNCTION(crypt)
-{
-	if(!php_crypt_rand_seeded) {
-		php_srand(time(0) * getpid() * (unsigned long) (php_combined_lcg(TSRMLS_C) * 10000.0) TSRMLS_CC);
-		php_crypt_rand_seeded=1;
-	} 
 	return SUCCESS;
 }
 
@@ -130,6 +118,10 @@ PHP_FUNCTION(crypt)
 	char salt[PHP_MAX_SALT_LEN+1];
 	char *str, *salt_in = NULL;
 	int str_len, salt_in_len;
+
+	if (!BG(rand_is_seeded)) {
+		php_srand(GENERATE_SEED() TSRMLS_CC);
+	} 
 
 	salt[0]=salt[PHP_MAX_SALT_LEN]='\0';
 	/* This will produce suitable results if people depend on DES-encryption

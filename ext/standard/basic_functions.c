@@ -1124,10 +1124,6 @@ PHP_RINIT_FUNCTION(basic)
 #endif
 	BG(user_shutdown_function_names) = NULL;
 
-#if HAVE_CRYPT
-	PHP_RINIT(crypt) (INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
 	PHP_RINIT(lcg) (INIT_FUNC_ARGS_PASSTHRU);
 
 	PHP_RINIT(filestat) (INIT_FUNC_ARGS_PASSTHRU);
