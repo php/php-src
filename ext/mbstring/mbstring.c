@@ -415,8 +415,8 @@ php_mb_parse_encoding_list(const char *value, int value_length, int **return_lis
 }
 /* }}} */
 
-/* {{{ PHPAPI php_mb_check_encoding_list */
-PHPAPI int php_mb_check_encoding_list(const char *encoding_list TSRMLS_DC) {
+/* {{{ MBSTRING_API php_mb_check_encoding_list */
+MBSTRING_API int php_mb_check_encoding_list(const char *encoding_list TSRMLS_DC) {
 	return php_mb_parse_encoding_list(encoding_list, strlen(encoding_list), NULL, NULL, 0);	
 }
 /* }}} */
@@ -1525,9 +1525,9 @@ SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler)
 #define IS_SJIS1(c) ((((c)>=0x81 && (c)<=0x9f) || ((c)>=0xe0 && (c)<=0xf5)) ? 1 : 0)
 #define IS_SJIS2(c) ((((c)>=0x40 && (c)<=0x7e) || ((c)>=0x80 && (c)<=0xfc)) ? 1 : 0)
 
-/* {{{ SAPI_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
+/* {{{ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
  * http input processing */
-SAPI_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
+MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 {
 	char *res = NULL, *separator=NULL;
 	const char *c_var;
@@ -2458,8 +2458,8 @@ PHP_FUNCTION(mb_strimwidth)
 }
 /* }}} */
 
-/* {{{ PHPAPI char *php_mb_convert_encoding() */
-PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_encoding, char *_from_encodings, size_t *output_len TSRMLS_DC)
+/* {{{ MBSTRING_API char *php_mb_convert_encoding() */
+MBSTRING_API char * php_mb_convert_encoding(char *input, size_t length, char *_to_encoding, char *_from_encodings, size_t *output_len TSRMLS_DC)
 {
 	mbfl_string string, result, *ret;
 	enum mbfl_no_encoding from_encoding, to_encoding;
@@ -3495,15 +3495,15 @@ PHP_FUNCTION(mb_get_info)
 }
 /* }}} */
 
-/* {{{ PHPAPI int php_mb_encoding_translation() */
-PHPAPI int php_mb_encoding_translation(TSRMLS_D) 
+/* {{{ MBSTRING_API int php_mb_encoding_translation() */
+MBSTRING_API int php_mb_encoding_translation(TSRMLS_D) 
 {
 	return MBSTRG(encoding_translation);
 }
 /* }}} */
 
-/* {{{ PHPAPI size_t php_mb_mbchar_bytes_ex() */
-PHPAPI size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc)
+/* {{{ MBSTRING_API size_t php_mb_mbchar_bytes_ex() */
+MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc)
 {
 	if (enc != NULL) {
 		if (enc->flag & MBFL_ENCTYPE_MBCS) {
@@ -3520,16 +3520,16 @@ PHPAPI size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc)
 }
 /* }}} */
 
-/* {{{ PHPAPI size_t php_mb_mbchar_bytes() */
-PHPAPI size_t php_mb_mbchar_bytes(const char *s TSRMLS_DC)
+/* {{{ MBSTRING_API size_t php_mb_mbchar_bytes() */
+MBSTRING_API size_t php_mb_mbchar_bytes(const char *s TSRMLS_DC)
 {
 	return php_mb_mbchar_bytes_ex(s,
 		mbfl_no2encoding(MBSTRG(internal_encoding)));
 }
 /* }}} */
 
-/* {{{ PHPAPI char *php_mb_safe_strrchr_ex() */
-PHPAPI char *php_mb_safe_strrchr_ex(const char *s, unsigned int c, size_t nbytes, const mbfl_encoding *enc)
+/* {{{ MBSTRING_API char *php_mb_safe_strrchr_ex() */
+MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c, size_t nbytes, const mbfl_encoding *enc)
 {
 	register const char *p = s;
 	char *last=NULL;
@@ -3560,24 +3560,24 @@ PHPAPI char *php_mb_safe_strrchr_ex(const char *s, unsigned int c, size_t nbytes
 }
 /* }}} */
 
-/* {{{ PHPAPI char *php_mb_safe_strrchr() */
-PHPAPI char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nbytes TSRMLS_DC)
+/* {{{ MBSTRING_API char *php_mb_safe_strrchr() */
+MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nbytes TSRMLS_DC)
 {
 	return php_mb_safe_strrchr_ex(s, c, nbytes,
 		mbfl_no2encoding(MBSTRG(internal_encoding)));
 }
 /* }}} */
 
-/* {{{ PHPAPI char *php_mb_strrchr() */
-PHPAPI char *php_mb_strrchr(const char *s, char c TSRMLS_DC)
+/* {{{ MBSTRING_API char *php_mb_strrchr() */
+MBSTRING_API char *php_mb_strrchr(const char *s, char c TSRMLS_DC)
 {
 	return php_mb_safe_strrchr(s, c, -1 TSRMLS_CC);
 }
 /* }}} */
 
 #ifdef ZEND_MULTIBYTE
-/* {{{ PHPAPI int php_mb_set_zend_encoding() */
-PHPAPI int php_mb_set_zend_encoding(TSRMLS_D)
+/* {{{ MBSTRING_API int php_mb_set_zend_encoding() */
+MBSTRING_API int php_mb_set_zend_encoding(TSRMLS_D)
 {
 	/* 'd better use mbfl_memory_device? */
 	char *name, *list = NULL;

@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MBSTRING_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\TSRM" /D "NDEBUG" /D ZEND_DEBUG=0 /D ZTS=1 /D "COMPILE_DL_MBSTRING" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_MBSTRING=1 /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\TSRM" /D ZEND_DEBUG=0 /D "_MBCS" /D "_USRDLL" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_MBSTRING" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D MBSTRING_EXPORTS=1 /D HAVE_MBSTRING=1 /D HAVE_MBREGEX=1 /D HAVE_MBSTR_CN=1 /D HAVE_MBSTR_JA=1 /D HAVE_MBSTR_KR=1 /D HAVE_MBSTR_RU=1 /D HAVE_MBSTR_TW=1 /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MBSTRING_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\TSRM" /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "MBSTRING_EXPORTS" /D "COMPILE_DL_MBSTRING" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_MBSTRING=1 /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\TSRM" /D ZEND_DEBUG=1 /D "MBSTRING_EXPORTS" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_MBSTRING" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D MBSTRING_EXPORTS=1 /D HAVE_MBSTRING=1 /D HAVE_MBREGEX=1 /D HAVE_MBSTR_CN=1 /D HAVE_MBSTR_JA=1 /D HAVE_MBSTR_KR=1 /D HAVE_MBSTR_RU=1 /D HAVE_MBSTR_TW=1 /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
@@ -90,6 +90,10 @@ LINK32=link.exe
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+# Begin Source File
+
+SOURCE=.\html_entities.c
+# End Source File
 # Begin Source File
 
 SOURCE=.\mbfilter.c
@@ -129,10 +133,6 @@ SOURCE=.\php_mbregex.c
 # Begin Source File
 
 SOURCE=.\php_unicode.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\html_entities.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -199,6 +199,5 @@ SOURCE=.\unicode_table_kr.h
 SOURCE=.\unicode_table_tw.h
 # End Source File
 # End Group
-
 # End Target
 # End Project

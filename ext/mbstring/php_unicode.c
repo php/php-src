@@ -96,7 +96,7 @@ static int prop_lookup(unsigned long code, unsigned long n)
 
 }
 
-PHPAPI int php_unicode_is_prop(unsigned long code, unsigned long mask1,
+MBSTRING_API int php_unicode_is_prop(unsigned long code, unsigned long mask1,
 		unsigned long mask2)
 {
 	unsigned long i;
@@ -142,7 +142,7 @@ static unsigned long case_lookup(unsigned long code, long l, long r, int field)
 	return code;
 }
 
-PHPAPI unsigned long php_unicode_toupper(unsigned long code)
+MBSTRING_API unsigned long php_unicode_toupper(unsigned long code)
 {
 	int field;
 	long l, r;
@@ -168,7 +168,7 @@ PHPAPI unsigned long php_unicode_toupper(unsigned long code)
 	return case_lookup(code, l, r, field);
 }
 
-PHPAPI unsigned long php_unicode_tolower(unsigned long code)
+MBSTRING_API unsigned long php_unicode_tolower(unsigned long code)
 {
 	int field;
 	long l, r;
@@ -194,7 +194,7 @@ PHPAPI unsigned long php_unicode_tolower(unsigned long code)
 	return case_lookup(code, l, r, field);
 }
 
-PHPAPI unsigned long php_unicode_totitle(unsigned long code)
+MBSTRING_API unsigned long php_unicode_totitle(unsigned long code)
 {
 	int field;
 	long l, r;
@@ -239,7 +239,7 @@ PHPAPI unsigned long php_unicode_totitle(unsigned long code)
 	((unsigned char*)(ptr))[3] = (v    ) & 0xff;\
 }
 
-PHPAPI char *php_unicode_convert_case(int case_mode, char *srcstr, size_t srclen, size_t *ret_len,
+MBSTRING_API char *php_unicode_convert_case(int case_mode, char *srcstr, size_t srclen, size_t *ret_len,
 		char *src_encoding TSRMLS_DC)
 {
 	char *unicode, *newstr;

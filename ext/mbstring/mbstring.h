@@ -49,9 +49,20 @@
 #ifdef COMPILE_DL_MBSTRING
 #undef HAVE_MBSTRING
 #define HAVE_MBSTRING 1
-#undef PHPAPI
-#define PHPAPI
+#undef MBSTRING_API
+#define MBSTRING_API
+
 #endif
+
+#ifdef PHP_WIN32
+#undef MBSTRING_API
+#ifdef MBSTRING_EXPORTS
+#define MBSTRING_API __declspec(dllexport)
+#else
+#define MBSTRING_API __declspec(dllimport)
+#endif
+#endif
+
 
 #if HAVE_MBSTRING
 
@@ -107,23 +118,23 @@ PHP_FUNCTION(mb_decode_numericentity);
 PHP_FUNCTION(mb_send_mail);
 PHP_FUNCTION(mb_get_info);
 
-PHPAPI int php_mb_encoding_translation(TSRMLS_D);
+MBSTRING_API int php_mb_encoding_translation(TSRMLS_D);
 
-PHPAPI char *php_mb_safe_strrchr_ex(const char *s, unsigned int c,
+MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c,
                                     size_t nbytes, const mbfl_encoding *enc);
-PHPAPI char *php_mb_safe_strrchr(const char *s, unsigned int c,
+MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c,
                                  size_t nbytes TSRMLS_DC);
-PHPAPI char *php_mb_strrchr(const char *s, char c TSRMLS_DC);
+MBSTRING_API char *php_mb_strrchr(const char *s, char c TSRMLS_DC);
 
-PHPAPI char * php_mb_convert_encoding(char *input, size_t length,
+MBSTRING_API char * php_mb_convert_encoding(char *input, size_t length,
                                       char *_to_encoding,
                                       char *_from_encodings,
                                       size_t *output_len TSRMLS_DC);
 
-PHPAPI int php_mb_check_encoding_list(const char *encoding_list TSRMLS_DC);
+MBSTRING_API int php_mb_check_encoding_list(const char *encoding_list TSRMLS_DC);
 
-PHPAPI size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc);
-PHPAPI size_t php_mb_mbchar_bytes(const char *s TSRMLS_DC);
+MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc);
+MBSTRING_API size_t php_mb_mbchar_bytes(const char *s TSRMLS_DC);
 
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
@@ -178,7 +189,7 @@ struct mb_overload_def {
 #endif
 
 #ifdef ZEND_MULTIBYTE
-PHPAPI int php_mb_set_zend_encoding(TSRMLS_D);
+MBSTRING_API int php_mb_set_zend_encoding(TSRMLS_D);
 char* php_mb_encoding_detector(const char *string, int length, char *list
 		TSRMLS_DC);
 int php_mb_encoding_converter(char **to, int *to_length, const char *from,
@@ -188,7 +199,7 @@ int php_mb_oddlen(const char *string, int length, const char *encoding TSRMLS_DC
 #endif /* ZEND_MULTIBYTE */
 
 SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler);
-SAPI_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data);
+MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data);
 
 #else	/* HAVE_MBSTRING */
 
