@@ -142,7 +142,6 @@ PHP_FUNCTION(mail)
  */
 PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd TSRMLS_DC)
 {
-/*#ifdef PHP_WIN32*/
 #if (defined PHP_WIN32 || defined NETWARE)
 	int tsm_err;
 	char *tsm_errmsg = NULL;
@@ -153,7 +152,6 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	char *sendmail_cmd = NULL;
 
 	if (!sendmail_path) {
-/*#ifdef PHP_WIN32*/
 #if (defined PHP_WIN32 || defined NETWARE)
 		/* handle old style win smtp sending */
 		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, headers, subject, to, message, NULL, NULL, NULL) == FAILURE) {
