@@ -11,13 +11,6 @@ Thanks,
 Jason Greeme < jason@inetgurus.net / jason@php.net >
 
 
-TODO					Complete
-------------------------------------------------
-Make Async Safe				X
-Implement wait.h macros as functions
-Platform Checks in config.m4
-
-
 
 
 

@@ -17,6 +17,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
+
 #include "php_signal.h"
 
 /* php_signal using sigaction is taken verbatim from Advanced Programing
