@@ -246,7 +246,7 @@ PHP_FUNCTION(count)
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		if ((*array)->type == IS_UNSET) {
+		if ((*array)->type == IS_NULL) {
 			RETURN_LONG(0);
 		} else {
 			RETURN_LONG(1);

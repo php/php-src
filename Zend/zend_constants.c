@@ -132,7 +132,7 @@ void zend_register_standard_constants(ELS_D)
 
 		c.name = zend_strndup(ZEND_STRL("NULL"));
 		c.name_len = sizeof("NULL");
-		c.value.type = IS_UNSET;
+		c.value.type = IS_NULL;
 		zend_register_constant(&c ELS_CC);
 	}
 }

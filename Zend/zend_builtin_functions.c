@@ -325,7 +325,7 @@ ZEND_FUNCTION(define)
 		case IS_STRING:
 		case IS_BOOL:
 		case IS_RESOURCE:
-		case IS_UNSET:
+		case IS_NULL:
 			break;
 		default:
 			zend_error(E_WARNING,"Constants may only evaluate to scalar values");
