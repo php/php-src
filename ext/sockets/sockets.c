@@ -94,6 +94,9 @@ static int le_iov;
 static int le_socket;
 #define le_socket_name "Socket"
 
+static unsigned char first_through_third_args_force_ref[] =
+{3, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE};
+
 static unsigned char second_and_third_args_force_ref[] =
 {3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE};
 
@@ -115,7 +118,7 @@ function_entry sockets_functions[] = {
 	PHP_FE(socket_iovec_fetch,		NULL)
 	PHP_FE(socket_iovec_add,		NULL)
 	PHP_FE(socket_iovec_delete,		NULL)
-	PHP_FE(socket_select, 			NULL)
+	PHP_FE(socket_select, 			first_through_third_args_force_ref)
 	PHP_FE(socket_create, 			NULL)
 	PHP_FE(socket_create_listen, 	NULL)
 	PHP_FE(socket_create_pair,		NULL)
@@ -487,6 +490,7 @@ int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC) {
 
 	/* Destroy old array, add new one */
 	zend_hash_destroy(Z_ARRVAL_P(sock_array));
+	efree(Z_ARRVAL_P(sock_array));
 
 	zend_hash_internal_pointer_reset(new_hash);
 	Z_ARRVAL_P(sock_array) = new_hash;
