@@ -951,6 +951,19 @@ sockets.use_system_read = On
 ; dictionary files.  Include the base filename, but not the file extension.
 ; crack.default_dictionary = "c:\php\lib\cracklib_dict"
 
+[exif]
+; Exif UNICODE user comments are handled as UCS-2BE/UCS-2LE and JIS as JIS. 
+; With mbstring support this will automatically be converted into the encoding
+; given by corresponding encode setting. When empty mbstring.internal_encoding 
+; is used. For the decode settings you can distinguish between motorola and 
+; intel byte order. A decode setting cannot be empty.
+;exif.encode_unicode = ISO-8859-15
+;exif.decode_unicode_motorola = UCS-2BE
+;exif.decode_unicode_intel    = UCS-2LE
+;exif.encode_jis = 
+;exif.decode_jis_motorola = JIS
+;exif.decode_jis_intel    = JIS
+
 ; Local Variables:
 ; tab-width: 4
 ; End:
