@@ -1,3 +1,46 @@
+2001-03-18  Fredrik Öhrn  <ohrn@chl.chalmers.se>
+
+    * ext/yp/CREDITS
+      ext/yp/php_yp.h
+      ext/yp/yp.c: Much needed cleanup and new functions added
+
+    * ext/cpdf/php_cpdf.h:
+    Solved compile failure due to clash between IMAP and ClibPDF headers.
+
+    * ext/cpdf/php_cpdf.h:
+    Solved compile failure due to clash bewteen IMAP and ClibPDF headers.
+
+2001-03-18  Alexander Bokovoy  <ab@avilink.net>
+
+    * ext/midgard/php_midgard.h: Update includes to the way CVS now works
+
+2001-03-18  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/fdf/fdf.c: Prevent mem leak
+
+    * main/SAPI.c: Fix possible crash if content-type is not set.
+
+    * ext/fdf/fdf.c: Fix the fix. Plus killed some compile warnings.
+
+2001-03-18  Zeev Suraski  <zeev@zend.com>
+
+    * main/SAPI.c
+      main/SAPI.h: MFH
+
+    * ext/fdf/fdf.c: Fix reference to nuked function
+
+    * main/SAPI.c
+      main/SAPI.h:
+    These functions are not necessary - that's what sapi_register_post_entry()
+    and sapi_unregister_post_entry() are for...
+
+    Also, please maintain K&R code layout, it's very messy to have different
+    styles intermixed in the same codebase, and especially in the same files!
+
+    * main/main.c
+      main/php_ini.c
+      main/php_ini.h: MFH
+
 2001-03-17  Zeev Suraski  <zeev@zend.com>
 
     * main/main.c
