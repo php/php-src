@@ -1,3 +1,142 @@
+2003-10-02  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/standard/tests/array/bug25708.phpt:
+      MFH(r-1.1): Add a test case for bug #25708
+
+    * ext/standard/tests/array/bug25708.phpt:
+      
+      Add a test case for bug #25708
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/array.c:
+      MFH(r-1.252): Fixed bug #25708 (extract($GLOBALS, EXTR_REFS) mangles
+      $GLOBALS)
+
+    * ext/standard/array.c:
+      Fixed bug #25708 (extract($GLOBALS, EXTR_REFS) mangles $GLOBALS)
+
+    * ext/simplexml/simplexml.c:
+      A temporary voodoo hack to avoid memory leaks.
+
+    * ext/standard/html.c:
+      Fix for the fix for #25707
+
+    * ext/standard/html.c:
+      Add support for hexadecimal-style numeric entities (&#x..;)
+
+    * ext/standard/html.c:
+      Drop multibyte character support in html_entity_decode().
+
+2003-10-02  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/fbsql/fbsql.dsp
+      ext/fbsql/fbsql.dsp:
+      FrontBase uses ws2_win32 lib now
+
+    * ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.c:
+      Fixing type cast
+
+2003-10-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      This check is no longer needed (Andrei)
+
+2003-10-02  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/mbstring/tests/php_gr_jp_dev_884-1.phpt
+      ext/mbstring/tests/php_gr_jp_dev_884-2.phpt:
+      fix skipif for these tests
+
+    * (PHP_4_3)
+      ext/mbstring/config.m4:
+      Removed extra []
+
+    * (PHP_4_3)
+      NEWS:
+      strawberry fields..
+
+2003-10-02  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/package-PEAR.xml:
+      starting b3 (hope this could be 1.3 final)
+
+    * (RELEASE_1_3b2)
+      pear/package-PEAR.xml:
+      Go with 1.3b2
+
+2003-10-02  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/config.m4
+      ext/mbstring/mbstring.c:
+      Remove leftovers
+
+    * (PHP_4_3)
+      ext/mbstring/config.m4:
+      Add some description to the help text
+
+    * ext/dba/config.m4
+      sapi/servlet/config.m4:
+      Alignment fix
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c:
+      Forgot to commit this one.
+
+    * (PHP_4_3)
+      ext/mbstring/mbregex.c:
+      Silly typo
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/mbstring/mbregex.c
+      ext/mbstring/tests/php_gr_jp_dev_884-1.phpt
+      ext/mbstring/tests/php_gr_jp_dev_884-2.phpt:
+      Fix for a regex bug that leads into an infinite loop due to optimization
+      failure when the pattern is ".*" and both MULTILINE and SINGLELINE options
+      are
+      specified.
+
+    * (PHP_4_3)
+      ext/mbstring/php_mbregex.c:
+      MFH(r-1.46): fix php_regex_encoding() so it can handle two additional
+      encoding
+      names mbfilter supports by default. (Patch by Seiji Masugata)
+
+    * ext/mbstring/php_mbregex.c:
+      Fix php_regex_encoding() so it can handle two additional encoding names
+      mbfilter supports by default.
+
+    * (PHP_4_3)
+      ext/standard/html.c
+      ext/standard/tests/strings/bug25707.phpt:
+      Fixed bug #25707 (html_entity_decode over-decodes &amp;lt;)
+
+    * ext/standard/html.c
+      ext/standard/tests/strings/bug25707.phpt:
+      Fixed bug #25707 (html_entity_decode over-decodes &amp;lt;)
+
+2003-10-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: Fixed bug #25701 (On flush() set headers_sent in apache2handler)
+
+    * sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #25701 (On flush() set headers_sent in apache2handler)
+
+2003-10-02  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * acinclude.m4:
+      Should fix bug #25719
+
 2003-10-01  Andrei Zmievski  <andrei@gravitonic.com>
 
     * (PHP_4_3)
