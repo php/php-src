@@ -307,6 +307,7 @@ typedef enum _php_conv_err_t {
 	PHP_CONV_ERR_INVALID_SEQ,
 	PHP_CONV_ERR_UNEXPECTED_EOS,
 	PHP_CONV_ERR_EXISTS,
+	PHP_CONV_ERR_ALLOC,
 	PHP_CONV_ERR_NOT_FOUND
 } php_conv_err_t;
 
@@ -1167,13 +1168,20 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 	if (zend_hash_find((HashTable *)ht, field_name, field_name_len, (void **)&tmpval) == SUCCESS) {
 		if (Z_TYPE_PP(tmpval) != IS_STRING) {
 			zval zt = **tmpval;
+
 			convert_to_string(&zt);
-			*pretval = pemalloc(Z_STRLEN(zt) + 1, persistent);
+
+			if (NULL == (*pretval = pemalloc(Z_STRLEN(zt) + 1, persistent))) {
+				return PHP_CONV_ERR_ALLOC;
+			}
+
 			*pretval_len = Z_STRLEN(zt);
 			memcpy(*pretval, Z_STRVAL(zt), Z_STRLEN(zt) + 1);
 			zval_dtor(&zt);
 		} else {
-			*pretval = pemalloc(Z_STRLEN_PP(tmpval) + 1, persistent);
+			if (NULL == (*pretval = pemalloc(Z_STRLEN_PP(tmpval) + 1, persistent))) {
+				return PHP_CONV_ERR_ALLOC;
+			}
 			*pretval_len = Z_STRLEN_PP(tmpval);
 			memcpy(*pretval, Z_STRVAL_PP(tmpval), Z_STRLEN_PP(tmpval) + 1);
 		}
