@@ -172,6 +172,8 @@ PHP_FUNCTION(spl_classes)
 	SPL_ADD_CLASS(DirectoryIterator);
 	SPL_ADD_CLASS(RecursiveIterator);
 	SPL_ADD_CLASS(RecursiveIteratorIterator);
+	SPL_ADD_CLASS(FilterIterator);
+	SPL_ADD_CLASS(ParentIterator);
 }
 /* }}} */
 
