@@ -64,8 +64,7 @@ dnl the path is interpreted relative to the top build-directory.
 dnl
 dnl which array to append to?
 AC_DEFUN(PHP_ADD_SOURCES,[
-  ifelse($4,cli,ac_what=PHP_CLI_OBJS,ifelse($4,sapi,ac_what=PHP_SAPI_OBJS,ac_what=PHP_GLOBAL_OBJS))
-  PHP_ADD_SOURCES_X($1, $2, $3, $ac_what)
+  PHP_ADD_SOURCES_X($1, $2, $3, ifelse($4,cli,PHP_CLI_OBJS,ifelse($4,sapi,PHP_SAPI_OBJS,PHP_GLOBAL_OBJS)))
 ])
 
 dnl PHP_ASSIGN_BUILD_VARS(type)
@@ -83,8 +82,6 @@ dnl shared objects will be built from the sources.  Should not be
 dnl used directly.
 dnl 
 AC_DEFUN(PHP_ADD_SOURCES_X,[
-  ac_what=$4
-
 dnl relative to source- or build-directory?
   case $1 in
   /*[)] ac_srcdir=`echo $ac_n "$1$ac_c"|cut -c 2-`; ac_bdir=$ac_srcdir ;;
@@ -95,17 +92,17 @@ dnl how to build .. shared or static?
   ifelse($5,yes,PHP_ASSIGN_BUILD_VARS(shared),PHP_ASSIGN_BUILD_VARS(php))
 
 dnl iterate over the sources
+  old_IFS=[$]IFS
   for ac_src in $2; do
   
 dnl remove the suffix
-      old_IFS=[$]IFS
       IFS=.
       set $ac_src
       ac_obj=[$]1
       IFS=$old_IFS
       
 dnl append to the array which has been dynamically chosen
-      eval "$ac_what=\"[\$$]ac_what $ac_bdir/[$]ac_obj.lo\""
+      $4="[$]$4 [$]ac_bdir/[$]ac_obj.lo"
 
 dnl choose the right compiler/flags/etc. for the source-file
       case $ac_src in
