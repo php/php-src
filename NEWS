@@ -50,6 +50,8 @@ PHP                                                                        NEWS
 - Fixed problem preventing startup errors from being displayed. (Marcus)
 - Fixed start-up problem if both SPL and SimpleXML were enabled. The double
   initialization of apache 1.3 was causing problems here. (Marcus, Derick)
+- Fixed bug #27606 (Expression must be a modifiable lvalue compiler error).
+  (Derick)
 - Fixed bug #27597 (pg_fetch_array not returning false). (Marcus)
 - Fixed bug #27586 (ArrayObject::getIterator crashes with [] assignment). 
   (Marcus)
