@@ -26,4 +26,5 @@ extern zend_module_entry exif_module_entry;
 PHP_FUNCTION(exif_read_data);
 PHP_FUNCTION(exif_tagname);
 PHP_FUNCTION(exif_thumbnail);
+PHP_FUNCTION(exif_imagetype);
 #endif
