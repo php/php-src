@@ -910,12 +910,24 @@ class PEAR_Common extends PEAR
                 } elseif ($fa['role'] == 'extsrc' && empty($fa['sources'])) {
                     $errors[] = "$file: no source files";
                 }
-                // Any checks we can do for baseinstalldir?
+                // (ssb) Any checks we can do for baseinstalldir?
+                // (cox) Perhaps checks that either the target dir and baseInstall
+                //       doesn't cointain "../../"
             }
         }
         return true;
     }
 
     // }}}
+    /**
+    * Get the valid roles for a PEAR package maintainer
+    *
+    * @static
+    */
+    function getUserRoles()
+    {
+        $common = &new PEAR_Common;
+        return $common->maintainer_roles;
+    }
 }
 ?>
