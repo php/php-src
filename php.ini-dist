@@ -485,6 +485,9 @@ pfpro.defaulttimeout		=	30	; default timeout in seconds
 ; pfpro.proxyport			=		; default proxy port
 ; pfpro.proxylogon			=		; default proxy logon
 ; pfpro.proxypassword		=		; default proxy password
+[Sockets]
+sockets.use_system_read		=	On	; Use the system read() function instead of
+						; the php_read() wrapper.
 
 ; Local Variables:
 ; tab-width: 4
