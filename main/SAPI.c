@@ -327,8 +327,7 @@ SAPI_API void sapi_deactivate(SLS_D)
 		sapi_module.deactivate(SLS_C);
 	}
 	if (SG(rfc1867_uploaded_files)) {
-		zend_hash_destroy(SG(rfc1867_uploaded_files));
-		FREE_HASHTABLE(SG(rfc1867_uploaded_files));
+		destroy_uploaded_files_hash(SLS_C);
 	}
 }
 

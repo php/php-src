@@ -10,4 +10,6 @@ SAPI_POST_HANDLER_FUNC(rfc1867_post_handler);
 
 #define FILE_UPLOAD_INPUT_BUFFER_SIZE 8192
 
+void destroy_uploaded_files_hash(SLS_D);
+
 #endif /* RFC1867_H */
