@@ -45,7 +45,7 @@ zend_module_entry fribidi_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(fribidi),
-	NO_VERSION_YET,
+	"0.1",
 	STANDARD_MODULE_PROPERTIES
 };
 
