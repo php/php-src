@@ -156,13 +156,12 @@ int		ftp_pasv(ftpbuf_t *ftp, int pasv);
 /* retrieves a file and saves its contents to outfp
  * returns true on success, false on error
  */
-int		ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path,
-			ftptype_t type, int resumepos);
+int		ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, int resumepos TSRMLS_DC);
 
 /* stores the data from a file, socket, or process as a file on the remote server
  * returns true on success, false on error
  */
-int		ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, int startpos);
+int		ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, int startpos TSRMLS_DC);
 
 /* returns the size of the given file, or -1 on error */
 int		ftp_size(ftpbuf_t *ftp, const char *path);
@@ -191,11 +190,11 @@ int		ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t
 
 /* continues a previous nb_(f)get command
  */
-int		ftp_nb_continue_read(ftpbuf_t *ftp);
+int		ftp_nb_continue_read(ftpbuf_t *ftp TSRMLS_DC);
 
 /* continues a previous nb_(f)put command
  */
-int		ftp_nb_continue_write(ftpbuf_t *ftp);
+int		ftp_nb_continue_write(ftpbuf_t *ftp TSRMLS_DC);
 
 
 #endif
