@@ -191,6 +191,7 @@ static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts ELS_DC)
 	}
 }
 
+
 static inline zval **zend_fetch_property_address_inner(HashTable *ht, znode *op2, temp_variable *Ts, int type ELS_DC)
 {
 	int free_op2;
@@ -240,6 +241,25 @@ static inline zval **zend_fetch_property_address_inner(HashTable *ht, znode *op2
 	}
 	FREE_OP(op2, free_op2);
 	return retval;
+}
+
+
+
+static inline void zend_switch_free(zend_op *opline, temp_variable *Ts ELS_DC)
+{
+	switch (opline->op1.op_type) {
+		case IS_VAR:
+			if (!Ts[opline->op1.u.var].var.ptr_ptr) {
+				get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+				FREE_OP(&opline->op1, EG(free_op1));
+			} else {
+				zval_ptr_dtor(&Ts[opline->op1.u.var].var.ptr);
+			}
+			break;
+		case IS_TMP_VAR:
+			zendi_zval_dtor(Ts[opline->op1.u.var].tmp_var);
+			break;
+	}
 }
 
 
@@ -1758,6 +1778,18 @@ send_by_ref:
 							zend_error(E_ERROR, "Cannot break/continue %d levels\n", original_nest_levels);
 						}
 						jmp_to = &op_array->brk_cont_array[array_offset];
+						if (nest_levels>1) {
+							zend_op *brk_opline = &op_array->opcodes[jmp_to->brk];
+
+							switch (brk_opline->opcode) {
+								case ZEND_SWITCH_FREE:
+									zend_switch_free(brk_opline, Ts ELS_CC);
+									break;
+								case ZEND_FREE:
+									zendi_zval_dtor(Ts[brk_opline->op1.u.var].tmp_var);
+									break;
+							}
+						}
 						array_offset = jmp_to->parent;
 					} while (--nest_levels > 0);
 
@@ -1801,19 +1833,7 @@ send_by_ref:
 				}
 				break;
 			case ZEND_SWITCH_FREE:
-				switch (opline->op1.op_type) {
-					case IS_VAR:
-						if (!Ts[opline->op1.u.var].var.ptr_ptr) {
-							get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
-							FREE_OP(&opline->op1, EG(free_op1));
-						} else {
-							zval_ptr_dtor(&Ts[opline->op1.u.var].var.ptr);
-						}
-						break;
-					case IS_TMP_VAR:
-						zendi_zval_dtor(Ts[opline->op1.u.var].tmp_var);
-						break;
-				}
+				zend_switch_free(opline, Ts ELS_CC);
 				break;
 			case ZEND_NEW: {
 					zval *tmp = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
