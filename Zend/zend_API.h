@@ -58,7 +58,9 @@ BEGIN_EXTERN_C()
 #define ZEND_MODULE_INFO_D(module)			void ZEND_MODULE_INFO_N(module)(ZEND_MODULE_INFO_FUNC_ARGS)
 
 #define ZEND_GET_MODULE(name) \
-	ZEND_DLEXPORT zend_module_entry *get_module(void) { return &name##_module_entry; }
+    BEGIN_EXTERN_C()\
+	ZEND_DLEXPORT zend_module_entry *get_module(void) { return &name##_module_entry; }\
+    END_EXTERN_C()
 
 #define ZEND_BEGIN_MODULE_GLOBALS(module_name)		\
 	typedef struct _zend_##module_name##_globals {

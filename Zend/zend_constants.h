@@ -45,6 +45,7 @@ typedef struct _zend_constant {
 #define REGISTER_MAIN_STRING_CONSTANT(name, str, flags)  zend_register_string_constant((name), sizeof(name), (str), (flags), 0 TSRMLS_CC)
 #define REGISTER_MAIN_STRINGL_CONSTANT(name, str, len, flags)  zend_register_stringl_constant((name), sizeof(name), (str), (len), (flags), 0 TSRMLS_CC)
 
+BEGIN_EXTERN_C()
 void clean_module_constants(int module_number TSRMLS_DC);
 void free_zend_constant(zend_constant *c);
 int zend_startup_constants(TSRMLS_D);
@@ -59,6 +60,7 @@ ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *st
 ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC);
 void zend_copy_constants(HashTable *target, HashTable *sourc);
 void copy_zend_constant(zend_constant *c);
+END_EXTERN_C();
 
 #define ZEND_CONSTANT_DTOR (void (*)(void *)) free_zend_constant
 
