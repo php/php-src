@@ -754,7 +754,7 @@ int main(int argc, char *argv[])
 			file_handle.filename = "-";
 			file_handle.handle.fp = stdin;
 		}
-		file_handle.type = ZEND_HANDLE_FP
+		file_handle.type = ZEND_HANDLE_FP;
 		file_handle.opened_path = NULL;
 		file_handle.free_filename = 0;
 		php_self = file_handle.filename;
