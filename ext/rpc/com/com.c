@@ -618,7 +618,7 @@ static int com_set(rpc_string property_name, zval *value, void **data)
 	DISPPARAMS dispparams;
 	VARIANT *var;
 	char *error_message, *ErrString;
-
+	TSRMLS_FETCH();
 
 	/* obtain property handler */
 	propname = php_char_to_OLECHAR(property_name.str, property_name.len, CP_ACP, FALSE);
