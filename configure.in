@@ -35,8 +35,7 @@ for arg in $0 "$@"; do
   CONFIGURE_COMMAND="$CONFIGURE_COMMAND '$arg'"
 done
 
-AC_CANONICAL_HOST
-AC_CANONICAL_TARGET
+PHP_CANONICAL_HOST_TARGET
 
 AC_CONFIG_HEADER(main/php_config.h)
 
@@ -207,11 +206,6 @@ PHP_C_BIGENDIAN
 
 dnl Platform-specific compile settings.
 dnl -------------------------------------------------------------------------
-
-dnl if host_alias is empty, ac_cv_host_alias may still have the info
-if test -z "$host_alias"; then
-    host_alias=$ac_cv_host_alias
-fi
 
 case $host_alias in
 *solaris*)
