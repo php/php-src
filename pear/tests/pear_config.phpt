@@ -59,6 +59,38 @@ var_dump($config->get("verbose"));
 $config->remove("verbose", "system");
 var_dump($config->get("verbose"));
 
+print "#7 testing: getType\n";
+var_dump($config->getType("__unknown__"));
+var_dump($config->getType("verbose"));
+var_dump($config->getType("master_server"));
+var_dump($config->getType("ext_dir"));
+
+print "#8 testing: getDocs\n";
+print "master_server: " . $config->getDocs("master_server") . "\n";
+
+print "#9 testing: getKeys\n";
+$keys = $config->getKeys();
+sort($keys);
+print implode(" ", $keys) . "\n";
+
+print "#10 testing: definedBy\n";
+var_dump($config->definedBy("verbose"));
+$config->set("verbose", 6, "system");
+$config->set("verbose", 3, "user");
+var_dump($config->definedBy("verbose"));
+$config->remove("verbose", "system");
+var_dump($config->definedBy("verbose"));
+$config->set("verbose", 6, "system");
+$config->remove("verbose", "user");
+var_dump($config->definedBy("verbose"));
+$config->remove("verbose", "system");
+var_dump($config->definedBy("verbose"));
+
+print "#11 testing: isDefined\n";
+var_dump($config->isDefined("php_dir"));
+var_dump($config->isDefined("verbose"));
+var_dump($config->isDefined("HTTP_GET_VARS"));
+var_dump($config->isDefined("query"));
 
 /*
 print "setting user values\n";
@@ -156,4 +188,24 @@ int(2)
 int(50)
 int(2)
 int(1)
+#7 testing: getType
+bool(false)
+string(7) "integer"
+string(6) "string"
+string(9) "directory"
+#8 testing: getDocs
+master_server: name of the main PEAR server
+#9 testing: getKeys
+doc_dir ext_dir master_server password php_dir testset1 username verbose
+#10 testing: definedBy
+string(7) "default"
+string(4) "user"
+string(4) "user"
+string(6) "system"
+string(7) "default"
+#11 testing: isDefined
+bool(true)
+bool(true)
+bool(false)
+bool(false)
 done
