@@ -464,6 +464,7 @@ static void php_session_track_init(TSRMLS_D)
 	} else {
 		if(old_vars) {
 			zend_hash_del(&EG(symbol_table), "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"));
+			zend_hash_del(&EG(symbol_table), "_SESSION", sizeof("_SESSION"));
 		}
 		MAKE_STD_ZVAL(PS(http_session_vars));
 		array_init(PS(http_session_vars));
@@ -1406,6 +1407,7 @@ static void php_rinit_session_globals(TSRMLS_D)
 	PS(session_status) = php_session_none;
 	PS(mod_data) = NULL;
 	PS(output_handler_registered) = 0;
+	PS(http_session_vars) = NULL;
 }
 
 static void php_rshutdown_session_globals(TSRMLS_D)
