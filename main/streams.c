@@ -132,7 +132,7 @@ PHPAPI int php_stream_getc(php_stream *stream)
 	char buf;
 
 	if (php_stream_read(stream, &buf, 1) > 0) {
-		return buf;
+		return buf & 0xff;
 	}
 	return EOF;
 }
@@ -210,10 +210,15 @@ PHPAPI int php_stream_seek(php_stream *stream, off_t offset, int whence)
 
 	/* emulate forward moving seeks with reads */
 	if (whence == SEEK_CUR && offset > 0) {
-		while(offset-- > 0) {
-			if (php_stream_getc(stream) == EOF) {
+		char tmp[1024];
+		while(offset >= sizeof(tmp)) {
+			if (php_stream_read(stream, tmp, sizeof(tmp)) == 0)
 				return -1;
-			}
+			offset -= sizeof(tmp);
+		}
+		if (offset)	{
+			if (php_stream_read(stream, tmp, offset) == 0)
+				return -1;
 		}
 		return 0;
 	}
