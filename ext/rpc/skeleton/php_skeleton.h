@@ -22,4 +22,12 @@
 extern zend_module_entry skeleton_module_entry;
 #define phpext_skeleton_ptr &skeleton_module_entry
 
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * tab-width: 4
+ * End:
+ * vim600: fdm=marker
+ * vim: sw=4 ts=4 noet
+ */
 #endif	/* PHP_SKELETON_H */
