@@ -10,4 +10,4 @@ echo "$arr['foo']";
 
 ?>
 --EXPECTREGEX--
-Parse error: parse error,.*expecting `?T_STRING'? or `?T_VARIABLE'? or `?T_NUM_STRING'? in .* on line .*
+Parse error: (parse|syntax) error, .*expecting `?T_STRING'? or `?T_VARIABLE'? or `?T_NUM_STRING'? in .*bug21820.php on line .*
