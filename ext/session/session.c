@@ -499,9 +499,9 @@ static void php_session_track_init(TSRMLS_D)
 
 	MAKE_STD_ZVAL(PS(http_session_vars));
 	array_init(PS(http_session_vars));
-		
-	ZEND_SET_GLOBAL_VAR("HTTP_SESSION_VARS", PS(http_session_vars));
-	ZEND_SET_GLOBAL_VAR("_SESSION", PS(http_session_vars));
+
+	ZEND_SET_GLOBAL_VAR_WITH_LENGTH("HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"), PS(http_session_vars), 2, 1);
+	ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 2, 1);
 }
 
 static char *php_session_encode(int *newlen TSRMLS_DC)
@@ -662,30 +662,27 @@ static void php_session_save_current_state(TSRMLS_D)
 				php_error(E_WARNING, "Your script possibly relies on a session side-effect which existed until PHP 4.2.3. Please be advised that the session extension does not consider global variables as a source of data, unless register_globals is enabled. You can disable this functionality and this warning by setting session.bug_compat_42 or session.bug_compat_warn.");
 			}
 		}
-	} else {
-		return;
-	}
 
-	if (PS(mod_data)) {
-		char *val;
-		int vallen;
+		if (PS(mod_data)) {
+			char *val;
+			int vallen;
 
-		val = php_session_encode(&vallen TSRMLS_CC);
-		if (val) {
-			ret = PS(mod)->write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
-			efree(val);
-		} else {
-			ret = PS(mod)->write(&PS(mod_data), PS(id), "", 0 TSRMLS_CC);
+			val = php_session_encode(&vallen TSRMLS_CC);
+			if (val) {
+				ret = PS(mod)->write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
+				efree(val);
+			} else {
+				ret = PS(mod)->write(&PS(mod_data), PS(id), "", 0 TSRMLS_CC);
+			}
 		}
+
+		if (ret == FAILURE)
+			php_error(E_WARNING, "Failed to write session data (%s). Please "
+					"verify that the current setting of session.save_path "
+					"is correct (%s)",
+					PS(mod)->name,
+					PS(save_path));
 	}
-	
-	if (ret == FAILURE)
-		php_error(E_WARNING, "Failed to write session data (%s). Please "
-				"verify that the current setting of session.save_path "
-				"is correct (%s)",
-				PS(mod)->name,
-				PS(save_path));
-	
 	
 	if (PS(mod_data))
 		PS(mod)->close(&PS(mod_data) TSRMLS_CC);
