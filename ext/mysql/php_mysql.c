@@ -400,6 +400,11 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		tmp++;
 		if (tmp[0] != '/') {
 			port = atoi(tmp);
+			if(tmp=strchr(tmp,':')) {
+				*tmp=0;
+				tmp++;
+				socket=tmp;
+			} 
 		} else {
 			socket = tmp;
 		}
