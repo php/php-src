@@ -3424,7 +3424,7 @@ void zend_do_foreach_fetch(znode *foreach_token, znode *open_brackets_token, zno
 void zend_do_foreach_cont(znode *foreach_token, znode *as_token, znode *value, znode *key TSRMLS_DC)
 {
 	zend_op *opline;
-	znode dummy;
+	znode dummy, value_node;
 	zend_bool assign_by_ref=0;
 
 	opline = &CG(active_op_array)->opcodes[as_token->u.opline_num];
@@ -3453,21 +3453,25 @@ void zend_do_foreach_cont(znode *foreach_token, znode *as_token, znode *value, z
 		opline->extended_value |= ZEND_FE_FETCH_BYREF;
 	}
 
+	value_node = opline->result;
 	if (assign_by_ref) {
 		/* Mark FE_FETCH as IS_VAR as it holds the data directly as a value */
-		zend_do_assign_ref(NULL, value, &opline->result TSRMLS_CC);
+		zend_do_assign_ref(NULL, value, &value_node TSRMLS_CC);
 	} else {
-		zend_do_assign(&dummy, value, &opline->result TSRMLS_CC);
+		zend_do_assign(&dummy, value, &value_node TSRMLS_CC);
 		zend_do_free(&dummy TSRMLS_CC);
 	}
 
 	if (key->op_type != IS_UNUSED) {
+		znode key_node;
+
 		opline = &CG(active_op_array)->opcodes[as_token->u.opline_num+1];
 		opline->result.op_type = IS_TMP_VAR;
 		opline->result.u.EA.type = 0;
 		opline->result.u.opline_num = get_temporary_variable(CG(active_op_array));
+		key_node = opline->result;
 
-		zend_do_assign(&dummy, key, &opline->result TSRMLS_CC);
+		zend_do_assign(&dummy, key, &key_node TSRMLS_CC);
 		zend_do_free(&dummy TSRMLS_CC);
 	}
 
