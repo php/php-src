@@ -269,15 +269,21 @@ if ($fail_count == 0) {
 }
 
 $fail_count = 0;
+
 fseek($fp, $DATALEN / 2, SEEK_SET);
 fseek($tf, $DATALEN / 2, SEEK_SET);
 
+if (ftell($fp) != ftell($tf)) {
+	echo "SEEK: positions do not match!\n";
+}
+
+$n = 0;
 while(!feof($fp)) {
 	$uline = fgets($fp, 1024);
 	$rline = fgets($tf, 1024);
 
 	if ($uline != $rline) {
-		echo "FGETS: FAIL\nuser=$uline\nreal=$rline\n";
+		echo "FGETS: FAIL\niter=$n user=$uline [pos=" . ftell($fp) . "]\nreal=$rline [pos=" . ftell($tf) . "]\n";
 		$fail_count++;
 		break;
 	}
