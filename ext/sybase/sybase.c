@@ -901,7 +901,7 @@ PHP_FUNCTION(sybase_fetch_row)
 }
 
 
-static PHP_FUNCTION(sybase_fetch_hash)
+static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *sybase_result_index;
 	sybase_result *result;
