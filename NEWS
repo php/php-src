@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Fixed sigfault in ibase_close() if user doesn't free resultset
+  (Bug #15419, #15992) (daniela)
 - Added support for --with-apxs build on Mac OS X / Darwin. (markonen)
 - Added support for dynamically loaded extensions on OS X / Darwin. 
   (dank, markonen)
