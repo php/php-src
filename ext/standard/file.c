@@ -2266,10 +2266,25 @@ PHP_FUNCTION(fgetcsv)
 
 	array_init(return_value);
 
+#define CSV_ADD_ENTRY(s, es, st, copy)	{	\
+	int len = es - st;	\
+	if (len) {	\
+		while (isspace((int)*(unsigned char *)s)) {	\
+			s++;	\
+			len--;	\
+		}	\
+	}	\
+	if (len) {	\
+		add_next_index_stringl(return_value, s, len, copy);	\
+	} else {	\
+		add_next_index_string(return_value, "", 1);	\
+	}	\
+}	\
+
 	if (!enclosure || !(p = _php_fgetcsv_find_enclosure(s, (e - s), enclosure))) {
 no_enclosure:
 		while ((p = memchr(s, delimiter, (e - s)))) {
-			add_next_index_stringl(return_value, s, (p - s), 1);
+			CSV_ADD_ENTRY(s, p, s, 1);
 			s = p + 1;
 		}
 	} else {
@@ -2278,7 +2293,7 @@ no_enclosure:
 enclosure:
 		/* handle complete fields before the enclosure */
 		while (s < p && (p2 = memchr(s, delimiter, (p - s)))) {
-			add_next_index_stringl(return_value, s, (p2 - s), 1);
+			CSV_ADD_ENTRY(s, p2, s, 1);
 			s = p2 + 1;
 		}
 
@@ -2322,7 +2337,7 @@ enclosure:
 				buf2_len += (p - p2);
 			}
 			buf2[buf2_len] = '\0';
-			add_next_index_stringl(return_value, buf2, buf2_len, 0);
+			CSV_ADD_ENTRY(buf2, buf2_len, 0, 0);
 
 			if (!(p = _php_fgetcsv_find_enclosure(s, (e - s), enclosure))) {
 				goto no_enclosure;
@@ -2342,12 +2357,12 @@ enclosure:
 enclosure_done:
 			s = e = NULL;
 			buf2[buf2_len] = '\0';
-			add_next_index_stringl(return_value, buf2, buf2_len, 0);
+			CSV_ADD_ENTRY(buf2, buf2_len, 0, 0);
 		}
 	}
 
 	if (s < e) {
-		add_next_index_stringl(return_value, s, (e - s), 1);
+		CSV_ADD_ENTRY(s, e, s, 1);
 	}
 	efree(buf);
 }
