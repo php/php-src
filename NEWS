@@ -10,6 +10,7 @@ PHP 4                                                                      NEWS
 - Fixed memory leak in gethostbynamel() if an error occurs. (Sara)
 - Fixed FastCGI being unable to bind to a specific IP. (Sascha)
 - Fixed bug #25671 (str_replace corrupting subarrays). (Sara)
+- Fixed bug #25669 (eregi() with non-ascii characters). (Moriyoshi)
 - Fixed Bug #25665 (var_dump() hangs on Nan and INF). (Ilia)
 - Fixed bug #25648 (xslt_set_encoding() being not detected correctly). (Jani)
 - Fixed bug #25636 (SNMP Session not closed on success). (Ilia, 
