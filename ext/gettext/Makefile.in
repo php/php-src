@@ -1,0 +1,11 @@
+
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = libgettext.la
+LTLIBRARY_SOURCES = gettext.c
+
+include $(topsrcdir)/build/ltlib.mk

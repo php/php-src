@@ -26,4 +26,4 @@ else
   subdirs=''
 fi
 
-${MAKE:-make} -s -f build.mk AMFLAGS="$automake_flags" $subdirs
+${MAKE:-make} -s -f build/build.mk AMFLAGS="$automake_flags"

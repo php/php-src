@@ -1,0 +1,10 @@
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = libinterbase.la
+LTLIBRARY_SOURCES = interbase.c
+
+include $(topsrcdir)/build/ltlib.mk

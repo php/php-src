@@ -1,0 +1,7 @@
+#! /bin/sh
+
+if test -n "$1"; then
+  flags="DISTNAME=$1"
+fi
+
+${MAKE:-make} $flags -f build/build.mk snapshot

@@ -48,7 +48,7 @@ AC_ARG_WITH(mysql,
         fi
         MYSQL_INCLUDE=-I$MYSQL_INCDIR
 
-        AC_DEFINE(HAVE_MYSQL)
+        AC_DEFINE(HAVE_MYSQL,1,[Whether you want MySQL])
         if test "$shared" = "yes"; then
             AC_MSG_RESULT(yes (shared))
             MYSQL_LFLAGS="-L$MYSQL_LIBDIR"
@@ -56,9 +56,9 @@ AC_ARG_WITH(mysql,
         else
             AC_MSG_RESULT(yes (static))
             AC_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIBDIR)
-            AC_ADD_INCLUDE($MYSQL_INCDIR)
             MYSQL_STATIC="libphpext_mysql.la"
         fi
+        AC_ADD_INCLUDE($MYSQL_INCDIR)
         PHP_EXTENSION(mysql, $shared)
 
         dnl check for errmsg.h, which isn't installed by some versions of 3.21
@@ -68,12 +68,9 @@ AC_ARG_WITH(mysql,
         CPPFLAGS="$old_CPPFLAGS"
     else
         AC_MSG_RESULT(no)
-        AC_DEFINE(HAVE_MYSQL, 0)
+        AC_DEFINE(HAVE_MYSQL, 0,[Whether you want MySQL])
     fi
 ],[
     AC_MSG_RESULT(no)
 ])
-AC_SUBST(MYSQL_STATIC)
-AC_SUBST(MYSQL_SHARED)
-AC_SUBST(MYSQL_INCLUDE)
-AC_SUBST(MYSQL_LFLAGS)
+PHP_SUBST(MYSQL_LFLAGS)

@@ -1,2 +1,0 @@
-noinst_LTLIBRARIES=libphpsapi_phttpd.la
-libphpsapi_phttpd_la_SOURCES=phttpd.c

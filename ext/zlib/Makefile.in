@@ -1,0 +1,10 @@
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = libzlib.la
+LTLIBRARY_SOURCES = zlib.c
+
+include $(topsrcdir)/build/ltlib.mk

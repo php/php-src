@@ -1,0 +1,26 @@
+#! /bin/sh
+
+prefix='@PREFIX@'
+
+phpdir="$prefix/lib/php/build"
+
+test -d build || mkdir build
+
+for i in fastgen.sh library.mk ltlib.mk program.mk rules.mk rules_pear.mk shtool; do
+	cp $phpdir/$i build
+done
+
+mv build/rules_pear.mk build/rules.mk
+
+cp $phpdir/acinclude.m4 .
+
+sed \
+-e "s#@prefix@#$prefix#" \
+< $phpdir/pear.m4 > configure.in
+
+touch .deps install-sh mkinstalldirs missing
+
+aclocal
+autoconf
+autoheader
+libtoolize -f -c

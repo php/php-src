@@ -1,0 +1,10 @@
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = liboracle.la
+LTLIBRARY_SOURCES = oracle.c
+
+include $(topsrcdir)/build/ltlib.mk

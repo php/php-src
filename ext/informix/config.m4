@@ -1,7 +1,5 @@
 dnl $Id$
 
-divert(3)
-
 PHPIFXLIB=ext/informix/libphp_ifx.a
 	
 AC_MSG_CHECKING(for Informix support)
@@ -68,7 +66,7 @@ WARNING: You specified Informix base install directory that is different
       else
         IFX_ESQL_FLAGS="-EUHAVE_IFX_IUS"
       fi
-      AC_SUBST(IFX_ESQL_FLAGS)
+      PHP_SUBST(IFX_ESQL_FLAGS)
       AC_DEFINE_UNQUOTED(IFX_VERSION, $IFX_VERSION)
       AC_MSG_RESULT(yes)
       PHP_EXTENSION(informix)
@@ -99,10 +97,10 @@ WARNING: You specified Informix base install directory that is different
 ],[
   AC_MSG_RESULT(no)
 ])
-AC_SUBST(INFORMIXDIR)
-AC_SUBST(IFX_LIBS)
+PHP_SUBST(INFORMIXDIR)
+PHP_SUBST(IFX_LIBS)
 	
-divert(5)
+divert(6)dnl
 
 dnl Warn if Informix support was requested but environment is not set up correctly.
 if test "$INFORMIX_WARNING" != ""; then

@@ -2,6 +2,126 @@ dnl $Id$
 dnl
 dnl This file contains local autoconf functions.
 
+AC_DEFUN(PHP_SUBST,[
+  PHP_VAR_SUBST="$PHP_VAR_SUBST $1"
+  AC_SUBST($1)
+])
+
+AC_DEFUN(PHP_FAST_OUTPUT,[
+  PHP_FAST_OUTPUT_FILES="$PHP_FAST_OUTPUT_FILES $1"
+])
+
+AC_DEFUN(PHP_MKDIR_P_CHECK,[
+  AC_CACHE_CHECK(for working mkdir -p, ac_cv_mkdir_p,[
+    test -d conftestdir && rm -rf conftestdir
+    mkdir -p conftestdir/somedir >/dev/null 2>&1
+    if test -d conftestdir/somedir; then
+      ac_cv_mkdir_p=yes
+    else
+      ac_cv_mkdir_p=no
+    fi
+    rm -rf conftestdir
+  ])
+])
+
+AC_DEFUN(PHP_FAST_GENERATE,[
+  PHP_MKDIR_P_CHECK
+  echo creating config_vars.mk
+  > config_vars.mk
+  for i in $PHP_VAR_SUBST; do
+    eval echo "$i = \$$i" >> config_vars.mk
+  done
+  $SHELL $srcdir/build/fastgen.sh $srcdir $ac_cv_mkdir_p $PHP_FAST_OUTPUT_FILES
+])
+
+AC_DEFUN(PHP_TM_GMTOFF,[
+AC_CACHE_CHECK([for tm_gmtoff in struct tm], ac_cv_struct_tm_gmtoff,
+[AC_TRY_COMPILE([#include <sys/types.h>
+#include <$ac_cv_struct_tm>], [struct tm tm; tm.tm_gmtoff;],
+  ac_cv_struct_tm_gmtoff=yes, ac_cv_struct_tm_gmtoff=no)])
+
+if test "$ac_cv_struct_tm_gmtoff" = yes; then
+  AC_DEFINE(HAVE_TM_GMTOFF)
+fi
+])
+
+dnl PHP_CONFIGURE_PART(MESSAGE)
+dnl Idea borrowed from mm
+AC_DEFUN(PHP_CONFIGURE_PART,[
+  AC_MSG_RESULT()
+  AC_MSG_RESULT(${T_MD}$1${T_ME})
+])
+
+AC_DEFUN(PHP_PROG_SENDMAIL,[
+AC_PATH_PROG(PROG_SENDMAIL, sendmail, /usr/lib/sendmail, $PATH /usr/bin /usr/sbin /usr/etc /etc /usr/ucblib)
+if test -n "$PROG_SENDMAIL"; then
+  AC_DEFINE(HAVE_SENDMAIL)
+fi
+])
+
+AC_DEFUN(PHP_RUNPATH_SWITCH,[
+dnl check for -R, etc. switch
+AC_MSG_CHECKING(if compiler supports -R)
+AC_CACHE_VAL(php_cv_cc_dashr,[
+	SAVE_LIBS="${LIBS}"
+	LIBS="-R /usr/lib ${LIBS}"
+	AC_TRY_LINK([], [], php_cv_cc_dashr=yes, php_cv_cc_dashr=no)
+	LIBS="${SAVE_LIBS}"])
+AC_MSG_RESULT($php_cv_cc_dashr)
+if test $php_cv_cc_dashr = "yes"; then
+	ld_runpath_switch="-R"
+else
+	AC_MSG_CHECKING([if compiler supports -Wl,-rpath,])
+	AC_CACHE_VAL(php_cv_cc_rpath,[
+		SAVE_LIBS="${LIBS}"
+		LIBS="-Wl,-rpath,/usr/lib ${LIBS}"
+		AC_TRY_LINK([], [], php_cv_cc_rpath=yes, php_cv_cc_rpath=no)
+		LIBS="${SAVE_LIBS}"])
+	AC_MSG_RESULT($php_cv_cc_rpath)
+	if test $php_cv_cc_rpath = "yes"; then
+		ld_runpath_switch="-Wl,-rpath,"
+	else
+		dnl something innocuous
+		ld_runpath_switch="-L"
+	fi
+fi
+])
+
+AC_DEFUN(PHP_STRUCT_FLOCK,[
+AC_CACHE_CHECK(for struct flock,ac_cv_struct_flock,
+    AC_TRY_COMPILE([
+#include <unistd.h>
+#include <fcntl.h>
+        ],
+        [struct flock x;],
+        [
+          ac_cv_struct_flock=yes
+        ],[
+          ac_cv_struct_flock=no
+        ])
+)
+if test "$ac_cv_struct_flock" = "yes" ; then
+    AC_DEFINE(HAVE_STRUCT_FLOCK, 1)
+fi
+])
+
+AC_DEFUN(PHP_SOCKLEN_T,[
+AC_CACHE_CHECK(for socklen_t,ac_cv_socklen_t,
+  AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+],[
+socklen_t x;
+],[
+  ac_cv_socklen_t=yes
+],[
+  ac_cv_socklen_t=no
+]))
+if test "$ac_cv_socklen_t" = "no"; then
+  AC_DEFINE(socklen_t, unsigned int)
+fi
+])
+
 dnl
 dnl PHP_SET_SYM_FILE(path)
 dnl
@@ -176,7 +296,7 @@ if test "$REGEX_TYPE" = "php"; then
   REGEX_DIR=regex
   AC_DEFINE(HSREGEX)
   AC_DEFINE(REGEX,1)
-  PHP_OUTPUT(regex/Makefile)
+  PHP_FAST_OUTPUT(regex/Makefile)
 elif test "$REGEX_TYPE" = "system"; then
   AC_DEFINE(REGEX,0)
 elif test "$REGEX_TYPE" = "apache"; then
@@ -186,9 +306,9 @@ fi
 AC_MSG_CHECKING(which regex library to use)
 AC_MSG_RESULT($REGEX_TYPE)
 
-AC_SUBST(REGEX_DIR)
-AC_SUBST(REGEX_LIB)
-AC_SUBST(HSREGEX)
+PHP_SUBST(REGEX_DIR)
+PHP_SUBST(REGEX_LIB)
+PHP_SUBST(HSREGEX)
 ])
 
 dnl
@@ -209,17 +329,20 @@ dnl
 dnl Check for broken sprintf()
 dnl
 AC_DEFUN(AC_BROKEN_SPRINTF,[
-  AC_MSG_CHECKING([for broken sprintf])
-  AC_TRY_RUN([main() { char buf[20]; exit (sprintf(buf,"testing 123")!=11); }],[
-    AC_DEFINE(BROKEN_SPRINTF,0)
-    AC_MSG_RESULT(ok)
-  ],[
-    AC_DEFINE(BROKEN_SPRINTF,1)
-    AC_MSG_RESULT(broken)
-  ],[
-    AC_DEFINE(BROKEN_SPRINTF,0)
-    AC_MSG_RESULT(cannot check, guessing ok)
+  AC_CACHE_CHECK(whether sprintf is broken, ac_cv_broken_sprintf,[
+    AC_TRY_RUN([main() {char buf[20];exit(sprintf(buf,"testing 123")!=11); }],[
+      ac_cv_broken_sprintf=no
+    ],[
+      ac_cv_broken_sprintf=yes
+    ],[
+      ac_cv_broken_sprintf=no
+    ])
   ])
+  if test "$ac_cv_broken_sprintf" = "yes"; then
+    AC_DEFINE(BROKEN_SPRINTF, 1)
+  else
+    AC_DEFINE(BROKEN_SPRINTF, 0)
+  fi
 ])
 
 dnl
@@ -234,24 +357,24 @@ dnl
 AC_DEFUN(PHP_EXTENSION,[
   if test -d "$cwd/$srcdir/ext/$1" ; then
     EXT_SUBDIRS="$EXT_SUBDIRS $1"
-    if test "$2" != "shared" -a "$2" != "yes"; then
-      _extlib="libphpext_$1.a"
-      EXT_LTLIBS="$EXT_LTLIBS ext/$1/libphpext_$1.la"
+    if test "$2" != "shared" && test "$2" != "yes" && test -z "$php_always_shared"; then
+      _extlib="lib$1.a"
+      EXT_LTLIBS="$EXT_LTLIBS ext/$1/lib$1.la"
       EXT_LIBS="$EXT_LIBS $1/$_extlib"
       EXT_STATIC="$EXT_STATIC $1"
     else
-      AC_DEFINE_UNQUOTED(COMPILE_DL_`echo $1|tr a-z A-Z`, 1, Whether to build $1 as dynamic module)
+      AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z,A-Z), 1, Whether to build $1 as dynamic module)
       EXT_SHARED="$EXT_SHARED $1"
     fi
-    PHP_OUTPUT(ext/$1/Makefile)
+    PHP_FAST_OUTPUT(ext/$1/Makefile)
   fi
 ])
 
-AC_SUBST(EXT_SUBDIRS)
-AC_SUBST(EXT_STATIC)
-AC_SUBST(EXT_SHARED)
-AC_SUBST(EXT_LIBS)
-AC_SUBST(EXT_LTLIBS)
+PHP_SUBST(EXT_SUBDIRS)
+PHP_SUBST(EXT_STATIC)
+PHP_SUBST(EXT_SHARED)
+PHP_SUBST(EXT_LIBS)
+PHP_SUBST(EXT_LTLIBS)
 
 dnl
 dnl Solaris requires main code to be position independent in order
@@ -298,6 +421,9 @@ AC_DEFUN(PHP_WITH_SHARED,[
 	    shared=no
 	    ;;
     esac
+    if test -n "$php_always_shared"; then
+		shared=yes
+	fi
 ])
 
 dnl The problem is that the default compilation flags in Solaris 2.6 won't
@@ -354,9 +480,11 @@ AC_DEFUN(AC_SOCKADDR_SA_LEN,[
   ])
 ])
 
+
 dnl ## PHP_AC_OUTPUT(file)
 dnl ## adds "file" to the list of files generated by AC_OUTPUT
 dnl ## This macro can be used several times.
 AC_DEFUN(PHP_OUTPUT,[
   PHP_OUTPUT_FILES="$PHP_OUTPUT_FILES $1"
 ])
+

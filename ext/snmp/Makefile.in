@@ -1,0 +1,13 @@
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = libsnmp.la
+LTLIBRARY_SOURCES = snmp.c
+LTLIBRARY_SHARED_LIBADD = $(SNMP_LIBDIR) -lsnmp $(KSTAT_LIBS)
+
+include $(topsrcdir)/build/ltlib.mk
+
+INCLUDES += $(SNMP_INCLUDE)

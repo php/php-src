@@ -1,2 +1,0 @@
-noinst_LTLIBRARIES=libphpext_odbc.la
-libphpext_odbc_la_SOURCES=php_odbc.c velocis.c

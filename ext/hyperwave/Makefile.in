@@ -1,0 +1,10 @@
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = libhyperwave.la
+LTLIBRARY_SOURCES = hw.c hg_comm.c
+
+include $(topsrcdir)/build/ltlib.mk

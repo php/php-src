@@ -1,0 +1,12 @@
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = libmysql.la
+LTLIBRARY_SOURCES = php_mysql.c
+LTLIBRARY_SHARED_NAME    = mysql.la
+LTLIBRARY_SHARED_LIBADD  = $(MYSQL_LFLAGS) -lmysqlclient
+
+include $(topsrcdir)/build/ltlib.mk

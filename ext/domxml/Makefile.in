@@ -1,0 +1,10 @@
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = libdomxml.la
+LTLIBRARY_SOURCES = domxml.c
+
+include $(topsrcdir)/build/ltlib.mk

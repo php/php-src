@@ -1,4 +1,0 @@
-
-noinst_LTLIBRARIES=libphpsapi_isapi.la
-libphpsapi_isapi_la_SOURCES=php4isapi.c
-

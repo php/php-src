@@ -2,7 +2,7 @@ dnl $Id$
 dnl config.m4 for extension db
 dnl don't forget to call PHP_EXTENSION(db)
 
-divert(1)
+divert(2)dnl
 
 AC_CHECK_HEADERS(db1/ndbm.h)
 
@@ -21,13 +21,13 @@ AC_DEFUN(AC_PREFERRED_DB_LIB,[
   else
     AC_MSG_RESULT($DBM_TYPE chosen)
   fi
-  AC_SUBST(DBM_LIB)
-  AC_SUBST(DBM_TYPE)
+  PHP_SUBST(DBM_LIB)
+  PHP_SUBST(DBM_TYPE)
 ])
 
 AC_PREFERRED_DB_LIB
 
-divert(3)
+divert(4)dnl
 
 if test "$DBM_LIB" = "-lgdbm"; then
   AC_CHECK_HEADER(gdbm.h, [ GDBM_INCLUDE="" ], [ 

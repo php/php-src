@@ -1,3 +1,0 @@
-
-noinst_LTLIBRARIES=libphpsapi_roxen.la
-libphpsapi_roxen_la_SOURCES=roxen.c
