@@ -763,13 +763,13 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 		if (zend_hash_find(target_symbol_table, varname->value.str.val, varname->value.str.len+1, (void **) &retval) == FAILURE) {
 			switch (type) {
 				case BP_VAR_R: 
-					zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
+					zend_error(E_NOTICE,"Undefined variable: %s", varname->value.str.val);
 					/* break missing intentionally */
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval_ptr);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
+					zend_error(E_NOTICE,"Undefined variable: %s", varname->value.str.val);
 					/* break missing intentionally */
 				case BP_VAR_W: {					
 						zval *new_zval = &EG(uninitialized_zval);
