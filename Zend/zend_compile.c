@@ -170,7 +170,6 @@ static zend_uint get_temporary_variable(zend_op_array *op_array)
 void zend_do_fold_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
 {
 	int (*do_op)(zval *, zval *, zval * TSRMLS_DC);
-	zend_op *opline;
 
 #define FOLD_CASE(val, func)  \
 	case val: \
