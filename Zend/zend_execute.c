@@ -1910,7 +1910,7 @@ send_by_ref:
 					if (opline->opcode==ZEND_INIT_ARRAY) {
 						array_init(array_ptr);
 						if (!expr_ptr) {
-							break;
+							NEXT_OPCODE();
 						}
 					}
 					if (opline->op1.op_type == IS_TMP_VAR) { /* temporary variable */
