@@ -1738,6 +1738,23 @@ ZEND_API void zend_update_property_string(zend_class_entry *scope, zval *object,
 	zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
 }
 
+ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *name, int name_length, zend_bool silent TSRMLS_DC)
+{
+	zval property, *value;
+	zend_class_entry *old_scope = EG(scope);
+	
+	EG(scope) = scope;
+
+	if (!Z_OBJ_HT_P(object)->read_property) {
+		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be read", Z_OBJCE_P(object)->name, name);
+	}
+	ZVAL_STRINGL(&property, name, name_length, 0);
+	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent TSRMLS_CC);
+
+	EG(scope) = old_scope;
+	return value;
+}
+
 /*
  * Local variables:
  * tab-width: 4
