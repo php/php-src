@@ -41,7 +41,7 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...)
 	zval **param, *param_ptr;
 	ELS_FETCH();
 
-	p = EG(argument_stack).top_element-1;
+	p = EG(argument_stack).top_element-2;
 	arg_count = (ulong) *p;
 
 	if (param_count>arg_count) {
@@ -80,7 +80,7 @@ ZEND_API int zend_get_parameters_array(int ht, int param_count, zval **argument_
 	zval *param_ptr;
 	ELS_FETCH();
 
-	p = EG(argument_stack).top_element-1;
+	p = EG(argument_stack).top_element-2;
 	arg_count = (ulong) *p;
 
 	if (param_count>arg_count) {
@@ -121,7 +121,7 @@ ZEND_API int zend_get_parameters_ex(int param_count, ...)
 	zval ***param;
 	ELS_FETCH();
 
-	p = EG(argument_stack).top_element-1;
+	p = EG(argument_stack).top_element-2;
 	arg_count = (ulong) *p;
 
 	if (param_count>arg_count) {
@@ -145,7 +145,7 @@ ZEND_API int zend_get_parameters_array_ex(int param_count, zval ***argument_arra
 	int arg_count;
 	ELS_FETCH();
 
-	p = EG(argument_stack).top_element-1;
+	p = EG(argument_stack).top_element-2;
 	arg_count = (ulong) *p;
 
 	if (param_count>arg_count) {
@@ -167,7 +167,7 @@ ZEND_API int ParameterPassedByReference(int ht, uint n)
 	zval *arg;
 	ELS_FETCH();
 
-	p = EG(argument_stack).elements+EG(argument_stack).top-1;
+	p = EG(argument_stack).elements+EG(argument_stack).top-2;
 	arg_count = (ulong) *p;
 
 	if (n>arg_count) {
