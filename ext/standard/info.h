@@ -83,6 +83,6 @@ PHPAPI void php_info_print_hr(void);
 PHPAPI char *php_logo_guid(void);
 
 void register_phpinfo_constants(INIT_FUNC_ARGS);
-END_EXTERN_C();
+END_EXTERN_C()
 
 #endif /* INFO_H */

@@ -103,14 +103,14 @@ static
 	ZEND_BEGIN_ARG_INFO(first_and_second__args_force_ref, 0)
 		ZEND_ARG_PASS_INFO(1)
 		ZEND_ARG_PASS_INFO(1)
-	ZEND_END_ARG_INFO();
+	ZEND_END_ARG_INFO()
 
 static
 	ZEND_BEGIN_ARG_INFO(second_and_third_args_force_ref, 0)
 		ZEND_ARG_PASS_INFO(0)
 		ZEND_ARG_PASS_INFO(1)
 		ZEND_ARG_PASS_INFO(1)
-	ZEND_END_ARG_INFO();
+	ZEND_END_ARG_INFO()
 
 static 
 	ZEND_BEGIN_ARG_INFO(third_and_fourth_args_force_ref, 0)
@@ -118,21 +118,21 @@ static
 		ZEND_ARG_PASS_INFO(0)
 		ZEND_ARG_PASS_INFO(1)
 		ZEND_ARG_PASS_INFO(1)
-	ZEND_END_ARG_INFO();
+	ZEND_END_ARG_INFO()
 
 static
 	ZEND_BEGIN_ARG_INFO(third_and_rest_force_ref, 1)
 		ZEND_ARG_PASS_INFO(0)
 		ZEND_ARG_PASS_INFO(0)
 		ZEND_ARG_PASS_INFO(1)
-	ZEND_END_ARG_INFO();
+	ZEND_END_ARG_INFO()
 
 static
 	ZEND_BEGIN_ARG_INFO(first_through_third_args_force_ref, 0)
 		ZEND_ARG_PASS_INFO(1)
 		ZEND_ARG_PASS_INFO(1)
 		ZEND_ARG_PASS_INFO(1)
-	ZEND_END_ARG_INFO();
+	ZEND_END_ARG_INFO()
 
 typedef struct _php_shutdown_function_entry {
 	zval **arguments;

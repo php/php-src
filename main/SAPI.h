@@ -61,9 +61,9 @@ typedef struct {
 typedef struct _sapi_post_entry sapi_post_entry;
 typedef struct _sapi_module_struct sapi_module_struct;
 
-BEGIN_EXTERN_C();
+BEGIN_EXTERN_C()
 extern SAPI_API sapi_module_struct sapi_module;  /* true global */
-END_EXTERN_C();
+END_EXTERN_C()
 
 /* Some values in this structure needs to be filled in before
  * calling sapi_activate(). We WILL change the `char *' entries,
@@ -125,7 +125,7 @@ typedef struct _sapi_globals_struct {
 } sapi_globals_struct;
 
 
-BEGIN_EXTERN_C();
+BEGIN_EXTERN_C()
 #ifdef ZTS
 # define SG(v) TSRMG(sapi_globals_id, sapi_globals_struct *, v)
 SAPI_API extern int sapi_globals_id;
@@ -139,7 +139,7 @@ SAPI_API void sapi_shutdown(void);
 SAPI_API void sapi_activate(TSRMLS_D);
 SAPI_API void sapi_deactivate(TSRMLS_D);
 SAPI_API void sapi_initialize_empty_request(TSRMLS_D);
-END_EXTERN_C();
+END_EXTERN_C()
 
 /*
  * This is the preferred and maintained API for 
@@ -164,7 +164,7 @@ typedef enum {					/* Parameter: 			*/
 	SAPI_HEADER_SET_STATUS		/* int 					*/
 } sapi_header_op_enum;
 
-BEGIN_EXTERN_C();
+BEGIN_EXTERN_C()
 SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC);
 
 /* Deprecated functions. Use sapi_header_op instead. */
@@ -197,7 +197,7 @@ SAPI_API int sapi_force_http_10(TSRMLS_D);
 
 SAPI_API int sapi_get_target_uid(uid_t * TSRMLS_DC);
 SAPI_API int sapi_get_target_gid(gid_t * TSRMLS_DC);
-END_EXTERN_C();
+END_EXTERN_C()
 
 struct _sapi_module_struct {
 	char *name;
@@ -278,12 +278,12 @@ struct _sapi_post_entry {
 #define SAPI_TREAT_DATA_FUNC(treat_data) void treat_data(int arg, char *str, zval* destArray TSRMLS_DC)
 #define SAPI_INPUT_FILTER_FUNC(input_filter) unsigned int input_filter(int arg, char *var, char **val, unsigned int val_len TSRMLS_DC)
 
-BEGIN_EXTERN_C();
+BEGIN_EXTERN_C()
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader);
 SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data);
 SAPI_API SAPI_INPUT_FILTER_FUNC(php_default_input_filter);
-END_EXTERN_C();
+END_EXTERN_C()
 
 #define STANDARD_SAPI_MODULE_PROPERTIES
 
