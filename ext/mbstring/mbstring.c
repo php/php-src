@@ -71,7 +71,7 @@
 #include "mbregex.h"
 #endif
 
-static enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
+static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 	mbfl_no_encoding_ascii,
 	mbfl_no_encoding_jis,
 	mbfl_no_encoding_utf8,
@@ -79,7 +79,7 @@ static enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 	mbfl_no_encoding_sjis
 };
 
-static int php_mbstr_default_identify_list_size = sizeof(php_mbstr_default_identify_list)/sizeof(enum mbfl_no_encoding);
+static const int php_mbstr_default_identify_list_size = sizeof(php_mbstr_default_identify_list)/sizeof(enum mbfl_no_encoding);
 
 static unsigned char third_and_rest_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST };
 static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
@@ -233,6 +233,10 @@ php_mbstring_parse_encoding_list(const char *value, int value_length, int **retu
 
 	list = NULL;
 	if (value == NULL || value_length <= 0) {
+		if (return_list)
+			*return_list = NULL;
+		if (return_size)
+			*return_size = 0;
 		return 0;
 	} else {
 		/* copy the value string for work */
@@ -277,7 +281,7 @@ php_mbstring_parse_encoding_list(const char *value, int value_length, int **retu
 					if (!bauto) {
 						bauto = 1;
 						l = php_mbstr_default_identify_list_size;
-						src = php_mbstr_default_identify_list;
+						src = (int*)php_mbstr_default_identify_list;
 						while (l > 0) {
 							*entry++ = *src++;
 							l--;
@@ -292,23 +296,37 @@ php_mbstring_parse_encoding_list(const char *value, int value_length, int **retu
 				}
 				p1 = p2 + 1;
 			} while (n < size && p2 != NULL);
-			if (n > 0){
-				*return_list = list;
-				*return_size = n;
+			if (n > 0) {
+				if (return_list)
+					*return_list = list;
+				else
+					pefree(list, persistent);
 			} else {
-				efree(list);
-				*return_list = NULL;
+				pefree(list, persistent);
+				if (return_list)
+					*return_list = NULL;
+				ret = 0;
 			}
+			if (return_size)
+				*return_size = n;
+		} else {
+			if (return_list)
+				*return_list = NULL;
+			if (return_size)
+				*return_size = 0;
+			ret = 0;
 		}
 		efree(tmpstr);
 	}
 
-	if (list == NULL) {
-		return 0;
-	}
-
 	return ret;
 }
+
+/* {{{ php_mb_check_encoding_list */
+PHPAPI int php_mb_check_encoding_list(const char *encoding_list TSRMLS_DC) {
+	return php_mbstring_parse_encoding_list(encoding_list, strlen(encoding_list), NULL, NULL, 0);	
+}
+/* }}} */
 
 /*  Return 0 if input contains any illegal encoding, otherwise 1.
  *  Even if any illegal encoding is detected the result may contain a list 
@@ -343,7 +361,7 @@ php_mbstring_parse_encoding_array(zval *array, int **return_list, int *return_si
 					if (!bauto) {
 						bauto = 1;
 						l = php_mbstr_default_identify_list_size;
-						src = php_mbstr_default_identify_list;
+						src = (int*)php_mbstr_default_identify_list;
 						while (l > 0) {
 							*entry++ = *src++;
 							l--;
@@ -360,17 +378,25 @@ php_mbstring_parse_encoding_array(zval *array, int **return_list, int *return_si
 				i--;
 			}
 			if (n > 0) {
-				*return_list = list;
-				*return_size = n;
+				if (return_list)
+					*return_list = list;
+				else
+					pefree(list, persistent);
 			} else {
-				efree(list);
-				*return_list = NULL;
+				pefree(list, persistent);
+				if (return_list)
+					*return_list = NULL;
+				ret = 0;
 			}
+			if (return_size)
+				*return_size = n;
+		} else {
+			if (return_list)
+				*return_list = NULL;
+			if (return_size)
+				*return_size = 0;
+			ret = 0;
 		}
-	}
-
-	if (list == NULL) {
-		return 0;
 	}
 
 	return ret;
@@ -594,7 +620,7 @@ PHP_RINIT_FUNCTION(mbstring)
 		n = MBSTRG(detect_order_list_size);
 	}
 	if (n <= 0) {
-		list = php_mbstr_default_identify_list;
+		list = (int*)php_mbstr_default_identify_list;
 		n = php_mbstr_default_identify_list_size;
 	}
 	entry = (int *)emalloc(n*sizeof(int));
