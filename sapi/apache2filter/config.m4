@@ -57,7 +57,18 @@ AC_ARG_WITH(apxs2,
     INSTALL_IT="$APXS -i -a -n php4 $SAPI_LIBTOOL" 
     ;;
   *darwin*)
-    MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD"
+    dnl When using bundles on Darwin, we must resolve all symbols.  However,
+    dnl the linker does not recursively look at the bundle loader and
+    dnl pull in its dependencies.  Therefore, we must pull in the APR
+    dnl and APR-util libraries.
+    APXS_BINDIR=`$APXS -q BINDIR`
+    if test -f $APXS_BINDIR/apr-config; then
+        MH_BUNDLE_FLAGS="`$APXS_BINDIR/apr-config --ldflags --link-ld --libs`"
+    fi
+    if test -f $APXS_BINDIR/apu-config; then
+        MH_BUNDLE_FLAGS="`$APXS_BINDIR/apu-config --ldflags --link-ld --libs` $MH_BUNDLE_FLAGS"
+    fi
+    MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD $MH_BUNDLE_FLAGS"
     PHP_SUBST(MH_BUNDLE_FLAGS)
     PHP_SELECT_SAPI(apache2filter, bundle, sapi_apache2.c apache_config.c php_functions.c)
     SAPI_SHARED=libs/libphp4.so
