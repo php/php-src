@@ -1010,16 +1010,27 @@ TLS_VARS;
 }
 
 
-<HEREDOC>^{LABEL}("\r")?"\n" {
+<HEREDOC>^{LABEL}(";")?("\r")?"\n" {
 	int label_len;
+	unsigned char unput_semicolon;
 
 	if (yytext[yyleng-2]=='\r') {
 		label_len = yyleng-2;
 	} else {
 		label_len = yyleng-1;
 	}
+	
+	if (yytext[label_len-1]==';') {
+		label_len--;
+		unput_semicolon=1;
+	} else{
+		unput_semicolon=0;
+	}
 
 	if (label_len==CG(heredoc_len) && !memcmp(yytext, CG(heredoc), label_len)) {
+		if (unput_semicolon) {
+			unput(';');
+		}
 		efree(CG(heredoc));
 		CG(heredoc)=NULL;
 		CG(heredoc_len)=0;
