@@ -136,8 +136,12 @@ dnl parameters(version, library list, function)
 AC_DEFUN(PHP_DBA_DB_CHECK,[
   for LIB in $2; do
     if test -f $THIS_PREFIX/lib/lib$LIB.a -o -f $THIS_PREFIX/lib/lib$LIB.$SHLIB_SUFFIX_NAME; then
-      PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-        AC_CHECK_LIB($LIB, $3, [
+      PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib -l$LIB,[
+        AC_TRY_LINK([
+#include "$THIS_INCLUDE"
+        ],[
+          $3;
+        ],[
           AC_EGREP_CPP(yes,[
 #include "$THIS_INCLUDE"
 #if DB_VERSION_MAJOR == $1
@@ -219,7 +223,7 @@ AC_ARG_WITH(db4,
         break
       fi
     done
-    PHP_DBA_DB_CHECK(4, db-4.1 db-4.0 db-4 db4 db, db_create)
+    PHP_DBA_DB_CHECK(4, db-4.1 db-4.0 db-4 db4 db, [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
   fi
 ])
 AC_DBA_STD_RESULT(db4,Berkeley DB4)
@@ -254,7 +258,7 @@ AC_ARG_WITH(db3,
         break
       fi
     done
-    PHP_DBA_DB_CHECK(3, db-3.3 db-3.2 db-3.1 db-3.0 db-3 db3 db, db_create)
+    PHP_DBA_DB_CHECK(3, db-3.3 db-3.2 db-3.1 db-3.0 db-3 db3 db, [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
   fi
       ])
 AC_DBA_STD_RESULT(db3,Berkeley DB3)
@@ -289,7 +293,7 @@ AC_ARG_WITH(db2,
         break
       fi
     done
-    PHP_DBA_DB_CHECK(2, db-2 db2 db, db_appinit)
+    PHP_DBA_DB_CHECK(2, db-2 db2 db, [(void)db_appinit("", NULL, (DB_ENV*)0, 0)])
   fi
 ])
 AC_DBA_STD_RESULT(db2,Berkeley DB2)
