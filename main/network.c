@@ -800,6 +800,7 @@ DUMP_SOCK_STATE("check for EOF", sock);
 	}
 
 #if HAVE_OPENSSL_EXT
+	/* XXX: Where is the complex OpenSSL error handling? */
 	if (sock->ssl_active)
 		nr_bytes = SSL_read(sock->ssl_handle, buf, count);
 	else
