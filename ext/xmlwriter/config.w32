@@ -1,7 +1,7 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_WITH("xmlwriter", "XMLWriter support", "yes");
+ARG_WITH("xmlwriter", "XMLWriter support", "no");
 
 if (PHP_XMLWRITER == "yes" && PHP_LIBXML == "yes") {
 	EXTENSION("xmlwriter", "php_xmlwriter.c");
