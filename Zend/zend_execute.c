@@ -1402,6 +1402,67 @@ binary_assign_op_addr: {
 					FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 				}
 				NEXT_OPCODE();
+			case ZEND_IMPORT_FUNCTION:
+				{
+					zend_class_entry *ce;
+					zend_function *function;
+					
+					ce = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
+
+					if (EX(opline)->op2.op_type != IS_UNUSED) {
+						char *function_name_strval;
+						int function_name_strlen;
+
+						function_name_strval = EX(opline)->op2.u.constant.value.str.val;
+						function_name_strlen = EX(opline)->op2.u.constant.value.str.len;
+
+						if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen + 1, (void **) &function)==FAILURE) {
+							zend_error(E_ERROR, "Import: function %s() not found", function_name_strval);
+						}
+						if (zend_hash_add(EG(function_table), function_name_strval, function_name_strlen + 1, function, sizeof(zend_function), NULL) == FAILURE) {
+							zend_error(E_ERROR, "Import: function %s() already exists in current scope", function_name_strval);
+						}
+						function_add_ref(function);
+					} else {
+						//zend_hash_apply(&ce->function_table, (apply_func_t) zend_import_function, (void *) 1 TSRMLS_CC);
+					}
+					NEXT_OPCODE();
+				}
+			case ZEND_IMPORT_CLASS:
+				{
+					zend_class_entry *ce;
+					zend_class_entry *import_ce;
+					
+					ce = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
+
+					if (EX(opline)->op2.op_type != IS_UNUSED) {
+						char *class_name_strval;
+						int class_name_strlen;
+						
+						class_name_strval = EX(opline)->op2.u.constant.value.str.val;
+						class_name_strlen = EX(opline)->op2.u.constant.value.str.len;
+						
+						if (zend_hash_find(&ce->class_table, class_name_strval, class_name_strlen + 1, (void **) &import_ce)==FAILURE) {
+							zend_error(E_ERROR, "Import: class %s not found", class_name_strval);
+						}
+						if (zend_hash_add(EG(class_table), class_name_strval, class_name_strlen + 1, import_ce, sizeof(zend_class_entry), NULL) == FAILURE) {
+							zend_error(E_ERROR, "Import: class %s already exists in current scope", class_name_strval);
+						}
+						zend_class_add_ref(import_ce);
+					} else {
+						//zend_hash_apply(&ce->function_table, (apply_func_t) zend_import_function, (void *) 1 TSRMLS_CC);
+					}
+
+					NEXT_OPCODE();
+				}
+			case ZEND_IMPORT_CONST:
+				{
+					zend_class_entry *ce;
+					
+					ce = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
+
+					NEXT_OPCODE();
+				}
 			case ZEND_FETCH_CLASS:
 				{
 					if (EX(opline)->op1.op_type == IS_UNUSED) {

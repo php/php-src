@@ -366,6 +366,10 @@ void zend_do_extended_fcall_end(TSRMLS_D);
 
 void zend_do_ticks(TSRMLS_D);
 
+void zend_do_begin_import(TSRMLS_D);
+void zend_do_import(int type, znode *what TSRMLS_DC);
+void zend_do_end_import(znode *import_from TSRMLS_DC);
+
 ZEND_API void function_add_ref(zend_function *function);
 
 #define INITIAL_OP_ARRAY_SIZE 64
@@ -540,16 +544,20 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_CATCH					107
 #define ZEND_THROW					108
 
-#define ZEND_FETCH_CLASS			110
+#define ZEND_FETCH_CLASS			109
 
-#define ZEND_CLONE					111
+#define ZEND_CLONE					110
 
-#define ZEND_INIT_CTOR_CALL			112
-#define ZEND_INIT_METHOD_CALL		113
-#define ZEND_INIT_STATIC_METHOD_CALL 114
+#define ZEND_INIT_CTOR_CALL			111
+#define ZEND_INIT_METHOD_CALL		112
+#define ZEND_INIT_STATIC_METHOD_CALL 113
 
-#define ZEND_ISSET_ISEMPTY_VAR		115
-#define ZEND_ISSET_ISEMPTY_DIM_OBJ	116
+#define ZEND_ISSET_ISEMPTY_VAR		114
+#define ZEND_ISSET_ISEMPTY_DIM_OBJ	115
+
+#define	ZEND_IMPORT_FUNCTION		116
+#define	ZEND_IMPORT_CLASS			117
+#define	ZEND_IMPORT_CONST			118
 
 /* end of block */
 

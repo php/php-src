@@ -552,6 +552,60 @@ zend_bool zend_is_function_or_method_call(znode *variable)
 	return  ((type & ZEND_PARSED_METHOD_CALL) || (type == ZEND_PARSED_FUNCTION_CALL));
 }
 
+void zend_do_begin_import(TSRMLS_D)
+{
+	zend_llist_init(&CG(import_commands), sizeof(zend_op), NULL, 0);
+}
+
+void zend_do_import(int type, znode *what TSRMLS_DC)
+{
+	zend_op opline;
+
+	init_op(&opline TSRMLS_CC);
+
+	switch (type) {
+		case T_FUNCTION:
+			opline.opcode = ZEND_IMPORT_FUNCTION;
+			break;
+		case T_CLASS:
+			opline.opcode = ZEND_IMPORT_CLASS;
+			break;
+		case T_CONST:
+			opline.opcode = ZEND_IMPORT_CONST;
+			break;
+	}
+
+	if (what) {
+		if (type == T_FUNCTION || type == T_CLASS) {
+			zend_str_tolower(what->u.constant.value.str.val, what->u.constant.value.str.len);
+		}
+		opline.op2 = *what;
+	} else {
+		SET_UNUSED(opline.op2);
+	}
+	
+	zend_llist_add_element(&CG(import_commands), &opline);
+}
+
+void zend_do_end_import(znode *import_from TSRMLS_DC)
+{
+	zend_llist_element *le;
+	zend_op *opline, *opline_ptr;
+
+	
+	le = CG(import_commands).head;
+
+	while (le) {
+		opline_ptr = (zend_op *)le->data;
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		memcpy(opline, opline_ptr, sizeof(zend_op));
+		opline->op1 = *import_from;
+		le = le->next;
+	}
+	zend_llist_destroy(&CG(import_commands));
+}
+
+
 
 void zend_do_begin_variable_parse(TSRMLS_D)
 {

@@ -135,6 +135,7 @@
 %token T_DOLLAR_OPEN_CURLY_BRACES
 %token T_CURLY_OPEN
 %token T_PAAMAYIM_NEKUDOTAYIM
+%token T_IMPORT T_FROM
 
 %% /* Rules */
 
@@ -206,10 +207,31 @@ unticked_statement:
 	|	T_DECLARE { zend_do_declare_begin(TSRMLS_C); } '(' declare_list ')' declare_statement { zend_do_declare_end(TSRMLS_C); }
 	|	';'		/* empty statement */
 	|	T_TRY { zend_do_try(&$1 TSRMLS_CC); } '{' inner_statement_list '}'
-		T_CATCH '(' catch_class_entry T_VARIABLE ')' { zend_do_begin_catch(&$1, &$8, &$9, 1 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
+		T_CATCH '(' catch_or_import_class_entry T_VARIABLE ')' { zend_do_begin_catch(&$1, &$8, &$9, 1 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
 		additional_catches
 	|	T_THROW expr ';' { zend_do_throw(&$2 TSRMLS_CC); }
 	|	T_DELETE  cvar 	';' { zend_do_end_variable_parse(BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&$1, ZEND_UNSET_OBJ TSRMLS_CC); }
+	|	T_IMPORT { zend_do_begin_import(TSRMLS_C); } import_rule T_FROM catch_or_import_class_entry { zend_do_end_import(&$5 TSRMLS_CC); } ';'
+;
+
+
+import_rule:
+		'*'	{ zend_do_import(T_FUNCTION, NULL TSRMLS_CC); zend_do_import(T_CLASS, NULL TSRMLS_CC); zend_do_import(T_CONST, NULL TSRMLS_CC); }
+	|	import_commands
+;
+
+import_commands:
+		import_commands ',' import_command
+	|	import_command
+;
+
+import_command:
+		T_FUNCTION T_STRING { zend_do_import(T_FUNCTION, &$2 TSRMLS_CC); }
+	|	T_CLASS	T_STRING	{ zend_do_import(T_CLASS, &$2 TSRMLS_CC); }
+	|	T_CONST	T_STRING	{ zend_do_import(T_CONST, &$2 TSRMLS_CC); }
+	|	T_FUNCTION '*'		{ zend_do_import(T_FUNCTION, NULL TSRMLS_CC); }
+	|	T_CLASS	'*'			{ zend_do_import(T_CLASS, NULL TSRMLS_CC); }
+	|	T_CONST	'*'			{ zend_do_import(T_CONST, NULL TSRMLS_CC); }
 ;
 
 additional_catches:
@@ -218,8 +240,8 @@ additional_catches:
 ;
 
 non_empty_additional_catches:
-		non_empty_additional_catches T_CATCH '(' catch_class_entry T_VARIABLE ')' { zend_do_begin_catch(&$2, &$4, &$5, 0 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$2 TSRMLS_CC); }
-	|	T_CATCH '(' catch_class_entry T_VARIABLE ')' { zend_do_begin_catch(&$1, &$3, &$4, 0 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
+		non_empty_additional_catches T_CATCH '(' catch_or_import_class_entry T_VARIABLE ')' { zend_do_begin_catch(&$2, &$4, &$5, 0 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$2 TSRMLS_CC); }
+	|	T_CATCH '(' catch_or_import_class_entry T_VARIABLE ')' { zend_do_begin_catch(&$1, &$3, &$4, 0 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
 ;
 
 
@@ -542,7 +564,7 @@ parse_class_name_entry:
 	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM { $$ = $1; zend_str_tolower($$.u.constant.value.str.val, $$.u.constant.value.str.len); }
 ;
 
-catch_class_entry:
+catch_or_import_class_entry:
 		parse_class_entry T_STRING { do_fetch_class(&$$, &$1, &$2 TSRMLS_CC); }
 	|	T_STRING { do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
 ;
