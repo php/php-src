@@ -1534,9 +1534,7 @@ PHP_MSHUTDOWN_FUNCTION(yaz)
 	tsrm_mutex_free (yaz_mutex);
 #endif
 
-	if (yaz_log_file()) {
-		fclose(yaz_log_file());
-	}
+	yaz_log_init_file(0);
 	return SUCCESS;
 }
 
