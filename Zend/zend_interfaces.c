@@ -316,13 +316,27 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 /* {{{ zend_implement_aggregate */
 static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entry *class_type TSRMLS_DC)
 {
+	int i, t = -1;
+
 	if (class_type->get_iterator) {
 		if (class_type->type == ZEND_INTERNAL_CLASS) {
 			/* inheritance ensures the class has necessary userland methods */
 			return SUCCESS;
 		} else if (class_type->get_iterator != zend_user_it_get_new_iterator) {
-			/* c-level get_iterator cannot be changed */
-			return FAILURE;
+			/* c-level get_iterator cannot be changed (exception being only Traversable is implmented) */
+			if (class_type->num_interfaces) {
+				for (i = 0; i < class_type->num_interfaces; i++) {
+					if (class_type->interfaces[i] == zend_ce_iterator) {
+						return FAILURE;
+					}
+					if (class_type->interfaces[i] == zend_ce_traversable) {
+						t = i;
+					}
+				}
+			}
+			if (t == -1) {
+				return FAILURE;
+			}
 		}
 	}
 	class_type->iterator_funcs.zf_new_iterator = NULL;
