@@ -106,7 +106,7 @@ ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
 		zend_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
 		ZEND_INIT_SYMTABLE(&symbol_table);
-		ZEND_SET_SYMBOL(&symbol_table, "clone", old_obj);
+		ZEND_SET_SYMBOL(&symbol_table, "that", old_obj);
 		
 		call_user_function_ex(NULL, &new_obj, clone_func_name, &retval_ptr, 0, NULL, 0, &symbol_table TSRMLS_CC);
 
