@@ -170,10 +170,6 @@ SOURCE=.\zend_variables.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\zend_config.w32.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\FlexLexer.h
 # End Source File
 # Begin Source File
@@ -203,6 +199,10 @@ SOURCE=.\zend_API.h
 # Begin Source File
 
 SOURCE=.\zend_compile.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_config.w32.h
 # End Source File
 # Begin Source File
 
@@ -331,7 +331,7 @@ InputPath=".\zend-scanner.l"
 InputPath=".\zend-scanner.l"
 
 "zend-scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -+ -i -Sflex.skl -Pzend -ozend-scanner.cpp zend-scanner.l
+	flex -+ -B -i -Sflex.skl -Pzend -ozend-scanner.cpp zend-scanner.l
 
 # End Custom Build
 
