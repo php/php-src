@@ -784,8 +784,52 @@ PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, int limit)
 }
 /* }}} */
 
+/* {{{ php_explode_negative_limit
+ */
+PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_value, int limit) 
+{
+#define EXPLODE_ALLOC_STEP 50
+	char *p1, *p2, *endp;
+	int allocated = EXPLODE_ALLOC_STEP, found = 0, i = 0, to_return = 0;
+	char **positions = safe_emalloc(allocated, sizeof(char *), 0);
+	
+	endp = Z_STRVAL_P(str) + Z_STRLEN_P(str);
+
+	p1 = Z_STRVAL_P(str);
+	p2 = php_memnstr(Z_STRVAL_P(str), Z_STRVAL_P(delim), Z_STRLEN_P(delim), endp);
+
+	if (p2 == NULL) {
+		/*
+		do nothing since limit <= -1, thus if only one chunk - 1 + (limit) <= 0
+		by doing nothing we return empty array
+		*/
+	} else {
+		positions[found++] = p1;
+		do {
+			if (found >= allocated) {
+				allocated = found + EXPLODE_ALLOC_STEP;/* make sure we have enough memory */
+				positions = erealloc(positions, allocated*sizeof(char *));
+			}
+			positions[found++] = p1 = p2 + Z_STRLEN_P(delim);
+		} while ((p2 = php_memnstr(p1, Z_STRVAL_P(delim), Z_STRLEN_P(delim), endp)) != NULL);
+		
+		to_return = limit + found;
+		/* limit is at least -1 therefore no need of bounds checking : i will be always less than found */
+		for (i = 0;i < to_return;i++) { /* this checks also for to_return > 0 */
+			add_next_index_stringl(return_value, positions[i], 
+					(positions[i+1] - Z_STRLEN_P(delim)) - positions[i],
+					1
+				);
+		}
+	}
+	efree(positions);
+#undef EXPLODE_ALLOC_STEP
+}
+/* }}} */
+
+
 /* {{{ proto array explode(string separator, string str [, int limit])
-   Splits a string on string separator and return array of components */
+   Splits a string on string separator and return array of components. If limit is positive only limit number of components is returned. If limit is negative all components except the last abs(limit) are returned. */
 PHP_FUNCTION(explode)
 {
 	zval **str, **delim, **zlimit = NULL;
@@ -810,8 +854,16 @@ PHP_FUNCTION(explode)
 
 	array_init(return_value);
 
+	if (! Z_STRLEN_PP(str)) {
+		add_next_index_stringl(return_value, "", sizeof("") - 1, 1);
+		return;
+	}
+
+
 	if (limit == 0 || limit == 1) {
 		add_index_stringl(return_value, 0, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
+	} else if (limit < 0 && argc == 3) {
+		php_explode_negative_limit(*delim, *str, return_value, limit);
 	} else {
 		php_explode(*delim, *str, return_value, limit);
 	}
