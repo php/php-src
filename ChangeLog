@@ -1,3 +1,110 @@
+2003-06-18  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      - Added the 'header'. These 4.3.3RCx sections will be combined for the
+        final release, 4.3.3. just added them now to keep better track on
+      changes
+        between the RCs.
+
+2003-06-18  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Config.php:
+      Typo (sorry Pierre ;)
+
+2003-06-18  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      - Go to RC2-dev.
+
+    * (PHP_4_3)
+      NEWS:
+      Correct version info.
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      - Go with PHP 4.3.3RC1
+
+    * (PHP_4_3)
+      main/SAPI.c:
+      This broke more than fixed. Fixes e.g. max_input_time.
+
+2003-06-18  Vincent Blavet  <vincent@blavet.net>
+
+    * pear/Archive/Tar.php:
+      - Syncho with pear/Archive_Tar/Archive/Tar.php 1.14
+
+2003-06-18  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/curl/interface.c:
+      recognize CURLOPT_PORT
+
+2003-06-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/README.txt:
+      update
+
+    * (PHP_4_3)
+      ext/ircg/README.txt:
+      Update
+
+2003-06-18  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Config.php:
+      Be more clever for discovering the default ext_dir
+
+    * pear/package-PEAR.xml:
+      Update to 1.2 for PHP 4.3.3
+
+2003-06-18  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      ext/sybase_ct/config.m4:
+      MFH: Fixed bug #24231: ext/sybase_ct could not be build as shared
+
+    * ext/sybase_ct/config.m4:
+      Fixed bug #24231: ext/sybase_ct could not be build as shared
+
+2003-06-18  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.c:
+      Fix for bug #24219 segfault during resource destruction
+      Used bug fix to optimize free_doc routine
+
+2003-06-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/php_smart_str.h:
+      Use a smaller default size to accomodate the engine
+      
+      Submitted by: Stanislav Malyshev, with some massaging by me
+
+2003-06-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * php.ini-dist
+      php.ini-recommended
+      ext/mysql/php_mysql.c:
+      Make the default mysql connection timeout 60 seconds rather then unlimited.
+
+2003-06-18  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      Fix compiler warnings
+
+2003-06-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg_scanner.c:
+      Sync
+
+    * ext/ircg/ircg_scanner.re
+      ext/ircg/php_ircg_conversion.c:
+      Work-around apparent issue with appendc
+      
+      Fix file inclusion order (Solaris)
+
 2003-06-17  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/ircg/ircg.c:
