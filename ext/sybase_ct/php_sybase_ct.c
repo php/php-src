@@ -1168,7 +1168,7 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr, int
 			case CS_DECIMAL_TYPE:
 				result->datafmt[i].maxlength = result->datafmt[i].precision + 3;
 				/* numeric(10) vs numeric(10, 1) */
-				result->numerics[i] = (result->datafmt[i].scale == 0) ? 1 : 2;
+				result->numerics[i] = (result->datafmt[i].scale == 0 && result->datafmt[i].precision <= 10) ? 1 : 2;
 				break;
 			default:
 				result->datafmt[i].maxlength++;
