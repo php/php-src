@@ -220,10 +220,10 @@ underlying implementation.
 The php_streams ops struct consists of pointers to methods that implement
 read, write, close, flush, seek, gets and cast operations.  Of these, an
 implementation need only implement write, read, close and flush.  The gets
-method is intended to be used for non-buffered streams if there is an
-underlying method that can efficiently behave as fgets.  The ops struct also
-contains a label for the implementation that will be used when printing error
-messages - the stdio implementation has a label of "STDIO" for example.
+method is intended to be used for streams if there is an underlying method
+that can efficiently behave as fgets.  The ops struct also contains a label
+for the implementation that will be used when printing error messages - the
+stdio implementation has a label of "STDIO" for example.
 
 The idea is that a stream implementation defines a php_stream_ops struct, and
 associates it with a php_stream using php_stream_alloc.
@@ -274,6 +274,18 @@ into a FILE*, so it should be compatible with the mode parameter of fopen().
 
 Writing your own stream implementation
 ======================================
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+RULE #1: when writing your own streams: make sure you have configured PHP
+with --enable-debug.  I've some great pains to hook into the zend memory
+manager to help track down allocation problems.  It will also help you
+spot incorrect use of the STREAMS_DC, STREAMS_CC and the semi-private
+STREAMS_REL_CC macros for function definitions.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+RULE #2: Please use the stdio stream as a reference; it will help you
+understand the semantics of the stream operations, and it will always
+be more up to date than these docs :-)
 
 First, you need to figure out what data you need to associate with the
 php_stream.  For example, you might need a pointer to some memory for memory
