@@ -1,3 +1,129 @@
+2004-07-29  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/gettext/gettext.c:
+      Fixed bug #29264. Newer libintl redefines function names so all
+      PHP gettext function names become prefixed with libintl_
+
+    * (PHP_5_0)
+      NEWS
+      ext/informix/config.w32:
+      MFH: Fix informix compilation on Windows (bug #29340)
+
+    * ext/informix/config.w32:
+      Fix compilation on Windows (bug #29340)
+
+2004-07-29  Timm Friebe  <thekid@thekid.de>
+
+    * (PHP_5_0)
+      ext/sybase_ct/php_sybase_ct.c:
+      - MFH:
+        . Fixed bug #29064 (Exact numeric/decimal/money datatypes lose
+      precision)
+        . Fixed bug #27843 (sybase_query() triggers (spurious?) notices when
+          query is a stored procedure)
+        . Fixed multiple memory leaks with sybase_unbuffered_query()
+        . Changed sybase_query() to ignore store_results = false in  buffering
+          mode, it would yield unpredictable results
+        . Fixed sybase_unbuffered_query() when used with store_results = false
+        . Changed sybase_fetch_object() to ignore second argument when passed
+          as NULL
+        . Made sybase_data_seek() error message more verbose
+        . Fixed memory leak in shutdown when not all rows where selected in an
+          unbuffered query
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      - Fixed bug #29064 (Exact numeric/decimal/money datatypes lose precision)
+      - Fixed bug #27843 (sybase_query() triggers (spurious?) notices when
+        query is a stored procedure)
+      - Fixed multiple memory leaks with sybase_unbuffered_query()
+      - Changed sybase_query() to ignore store_results = false in  buffering
+        mode, it would yield unpredictable results
+      - Fixed sybase_unbuffered_query() when used with store_results = false
+      - Changed sybase_fetch_object() to ignore second argument when passed
+        as NULL
+      - Made sybase_data_seek() error message more verbose
+      - Fixed memory leak in shutdown when not all rows where selected in an
+        unbuffered query
+
+2004-07-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_hash.c:
+      - Increase performance of *sort() and some internal sort operations.
+
+2004-07-29  Sara Golemon  <php@alphaweb.net>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_opcode.c:
+      Revert goto opcode
+
+    * ZendEngine2/zend_execute.c:
+      &tmp and label are the same thing, don't free it till we're done with it.
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c:
+      Plug some memory leaks and promote unknown label to E_ERROR.
+      If someone tries to jump to a non-existant label execution really
+      shouldn't try to carry on.
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_opcode.c:
+      Add goto operator by popular request.
+
+2004-07-29  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_wrapper.c:
+      Fix my favourite call user func mistake
+
+    * ext/standard/basic_functions.c:
+      Missing ifdef; thanks Tony
+
+2004-07-29  Christian Stocker  <chregu@phant.ch>
+
+    * NEWS:
+      Remove News entry, which is already in 5.0
+
+2004-07-29  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_wrapper.c:
+      Use the correct lengths when building the name -> dispid mapping
+
+    * win32/globals.c:
+      Missing return statement
+
+    * ext/standard/basic_functions.c
+      ext/standard/syslog.c
+      win32/globals.c
+      win32/php_win32_globals.h
+      win32/pwd.c
+      win32/time.c
+      win32/wsyslog.c:
+      Misc. win32 thread safety fixes.
+
+2004-07-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/array.c:
+      MFH: Fixed but #29437 (Possible crash inside array_walk_recursive()).
+
+    * ext/standard/array.c:
+      Fixed but #29437 (Possible crash inside array_walk_recursive()).
+
+2004-07-29  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
 2004-07-28  Wez Furlong  <wez.php@thebrainroom.net>
 
     * (PHP_5_0)

@@ -1,3 +1,35 @@
+2004-07-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_hash.c:
+      - Increase performance of *sort() and some internal sort operations.
+
+2004-07-29  Sara Golemon  <php@alphaweb.net>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_opcode.c:
+      Revert goto opcode
+
+    * zend_execute.c:
+      &tmp and label are the same thing, don't free it till we're done with it.
+
+    * zend_compile.c
+      zend_execute.c:
+      Plug some memory leaks and promote unknown label to E_ERROR.
+      If someone tries to jump to a non-existant label execution really
+      shouldn't try to carry on.
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_opcode.c:
+      Add goto operator by popular request.
+
 2004-07-28  Wez Furlong  <wez.php@thebrainroom.net>
 
     * zend_ini.c:
