@@ -269,8 +269,8 @@ SAPI_API void sapi_activate(SLS_D)
 
 	/*
 	SG(sapi_headers).http_response_code = 200;
-	SG(sapi_headers).http_status_line = NULL;
 	*/
+	SG(sapi_headers).http_status_line = NULL;
 	SG(headers_sent) = 0;
 	SG(read_post_bytes) = 0;
 	SG(request_info).post_data = NULL;
