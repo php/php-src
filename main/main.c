@@ -1431,6 +1431,11 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					php3_noheader();
 					break;
 				case 'v':
+					if (!_cgi_started) {
+						if (php3_module_startup(CLS_C ELS_CC) == FAILURE || php3_request_startup(CLS_C ELS_CC) == FAILURE) {
+							return FAILURE;
+						}
+					}
 					php3_printf("%s\n", PHP_VERSION);
 					exit(1);
 					break;
