@@ -816,7 +816,7 @@ PHP_FUNCTION(sqlite_popen)
 PHP_FUNCTION(sqlite_open)
 {
 	int mode = 0666;
-	char *filename;
+	char *filename, *fullpath = NULL;
 	long filename_len;
 	zval *errmsg = NULL;
 
@@ -829,16 +829,25 @@ PHP_FUNCTION(sqlite_open)
 	}
 
 	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
-		if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		/* resolve the fully-qualified path name to use as the hash key */
+		fullpath = expand_filepath(filename, NULL TSRMLS_CC);
+	
+		if (PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+			efree(fullpath);
 			RETURN_FALSE;
 		}
 
-		if (php_check_open_basedir(filename TSRMLS_CC)) {
+		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
+			efree(fullpath);
 			RETURN_FALSE;
 		}
 	}
 	
-	php_sqlite_open(filename, mode, NULL, return_value, errmsg TSRMLS_CC);
+	php_sqlite_open(fullpath?fullpath:filename, mode, NULL, return_value, errmsg TSRMLS_CC);
+
+	if (fullpath) {
+		efree(fullpath);
+	}
 }
 /* }}} */
 
