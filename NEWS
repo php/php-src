@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Added extension for the cracklib library. (Alexander Feldman)
 - Added the is_null() function that will return true if a variable is of
   type null. (Sterling)
 - Fixed a bug which made readdir() unusable in some systems. (Jani)
