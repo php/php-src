@@ -18,6 +18,7 @@ PEAR_SUBDIRS = \
 	DB \
 	File \
 	HTML \
+	Image \
 	Log \
 	Mail \
 	Math \
@@ -51,6 +52,7 @@ PEAR_FILES = \
 	File/SearchReplace.php \
 	HTML/Form.php \
 	HTTP.php \
+	Image/Remote.php \
 	Log.php \
 	Log/composite.php \
 	Log/file.php \
