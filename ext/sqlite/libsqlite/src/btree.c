@@ -54,6 +54,10 @@
 #include "btree.h"
 #include <assert.h>
 
+/* Forward declarations */
+static BtOps sqliteBtreeOps;
+static BtCursorOps sqliteBtreeCursorOps;
+
 /*
 ** Macros used for byteswapping.  B is a pointer to the Btree
 ** structure.  This is needed to access the Btree.needSwab boolean
@@ -61,7 +65,7 @@
 ** X is an unsigned integer.  SWAB16 byte swaps a 16-bit integer.
 ** SWAB32 byteswaps a 32-bit integer.
 */
-#define SWAB16(B,X)   ((B)->needSwab? swab16(X) : (X))
+#define SWAB16(B,X)   ((B)->needSwab? swab16((u16)X) : ((u16)X))
 #define SWAB32(B,X)   ((B)->needSwab? swab32(X) : (X))
 #define SWAB_ADD(B,X,A) \
    if((B)->needSwab){ X=swab32(swab32(X)+A); }else{ X += (A); }
@@ -340,6 +344,7 @@ struct MemPage {
 ** Everything we need to know about an open database
 */
 struct Btree {
+  BtOps *pOps;          /* Function table */
   Pager *pPager;        /* The page cache */
   BtCursor *pCursor;    /* A list of all open cursors */
   PageOne *page1;       /* First page of the database */
@@ -356,6 +361,7 @@ typedef Btree Bt;
 ** MemPage.apCell[] of the entry.
 */
 struct BtCursor {
+  BtCursorOps *pOps;        /* Function table */
   Btree *pBt;               /* The Btree to which this cursor belongs */
   BtCursor *pNext, *pPrev;  /* Forms a linked list of all cursors */
   BtCursor *pShared;        /* Loop of cursors with the same root page */
@@ -374,6 +380,9 @@ struct BtCursor {
 #define SKIP_NEXT     1   /* The next sqliteBtreeNext() is a no-op */
 #define SKIP_PREV     2   /* The next sqliteBtreePrevious() is a no-op */
 #define SKIP_INVALID  3   /* Calls to Next() and Previous() are invalid */
+
+/* Forward declarations */
+static int fileBtreeCloseCursor(BtCursor *pCur);
 
 /*
 ** Routines for byte swapping.
@@ -527,7 +536,7 @@ static void freeSpace(Btree *pBt, MemPage *pPage, int start, int size){
       if( idx + iSize + size == SWAB16(pBt, pFBlk->iNext) ){
         pNext = (FreeBlk*)&pPage->u.aDisk[idx + iSize + size];
         if( pBt->needSwab ){
-          pFBlk->iSize = swab16(swab16(pNext->iSize)+iSize+size);
+          pFBlk->iSize = swab16((u16)swab16(pNext->iSize)+iSize+size);
         }else{
           pFBlk->iSize += pNext->iSize;
         }
@@ -709,6 +718,7 @@ int sqliteBtreeOpen(
   pBt->pCursor = 0;
   pBt->page1 = 0;
   pBt->readOnly = sqlitepager_isreadonly(pBt->pPager);
+  pBt->pOps = &sqliteBtreeOps;
   *ppBtree = pBt;
   return SQLITE_OK;
 }
@@ -716,9 +726,9 @@ int sqliteBtreeOpen(
 /*
 ** Close an open database and invalidate all cursors.
 */
-int sqliteBtreeClose(Btree *pBt){
+static int fileBtreeClose(Btree *pBt){
   while( pBt->pCursor ){
-    sqliteBtreeCloseCursor(pBt->pCursor);
+    fileBtreeCloseCursor(pBt->pCursor);
   }
   sqlitepager_close(pBt->pPager);
   sqliteFree(pBt);
@@ -740,7 +750,7 @@ int sqliteBtreeClose(Btree *pBt){
 ** Synchronous is on by default so database corruption is not
 ** normally a worry.
 */
-int sqliteBtreeSetCacheSize(Btree *pBt, int mxPage){
+static int fileBtreeSetCacheSize(Btree *pBt, int mxPage){
   sqlitepager_set_cachesize(pBt->pPager, mxPage);
   return SQLITE_OK;
 }
@@ -753,7 +763,7 @@ int sqliteBtreeSetCacheSize(Btree *pBt, int mxPage){
 ** is a very low but non-zero probability of damage.  Level 3 reduces the
 ** probability of damage to near zero but with a write performance reduction.
 */
-int sqliteBtreeSetSafetyLevel(Btree *pBt, int level){
+static int fileBtreeSetSafetyLevel(Btree *pBt, int level){
   sqlitepager_set_safety_level(pBt->pPager, level);
   return SQLITE_OK;
 }
@@ -860,7 +870,7 @@ static int newDatabase(Btree *pBt){
 **      sqliteBtreeDelete()
 **      sqliteBtreeUpdateMeta()
 */
-int sqliteBtreeBeginTrans(Btree *pBt){
+static int fileBtreeBeginTrans(Btree *pBt){
   int rc;
   if( pBt->inTrans ) return SQLITE_ERROR;
   if( pBt->readOnly ) return SQLITE_READONLY;
@@ -889,7 +899,7 @@ int sqliteBtreeBeginTrans(Btree *pBt){
 ** This will release the write lock on the database file.  If there
 ** are no active cursors, it also releases the read lock.
 */
-int sqliteBtreeCommit(Btree *pBt){
+static int fileBtreeCommit(Btree *pBt){
   int rc;
   rc = pBt->readOnly ? SQLITE_OK : sqlitepager_commit(pBt->pPager);
   pBt->inTrans = 0;
@@ -907,7 +917,7 @@ int sqliteBtreeCommit(Btree *pBt){
 ** This will release the write lock on the database file.  If there
 ** are no active cursors, it also releases the read lock.
 */
-int sqliteBtreeRollback(Btree *pBt){
+static int fileBtreeRollback(Btree *pBt){
   int rc;
   BtCursor *pCur;
   if( pBt->inTrans==0 ) return SQLITE_OK;
@@ -934,7 +944,7 @@ int sqliteBtreeRollback(Btree *pBt){
 ** Only one checkpoint may be active at a time.  It is an error to try
 ** to start a new checkpoint if another checkpoint is already active.
 */
-int sqliteBtreeBeginCkpt(Btree *pBt){
+static int fileBtreeBeginCkpt(Btree *pBt){
   int rc;
   if( !pBt->inTrans || pBt->inCkpt ){
     return pBt->readOnly ? SQLITE_READONLY : SQLITE_ERROR;
@@ -949,7 +959,7 @@ int sqliteBtreeBeginCkpt(Btree *pBt){
 ** Commit a checkpoint to transaction currently in progress.  If no
 ** checkpoint is active, this is a no-op.
 */
-int sqliteBtreeCommitCkpt(Btree *pBt){
+static int fileBtreeCommitCkpt(Btree *pBt){
   int rc;
   if( pBt->inCkpt && !pBt->readOnly ){
     rc = sqlitepager_ckpt_commit(pBt->pPager);
@@ -968,7 +978,7 @@ int sqliteBtreeCommitCkpt(Btree *pBt){
 ** to use a cursor that was open at the beginning of this operation
 ** will result in an error.
 */
-int sqliteBtreeRollbackCkpt(Btree *pBt){
+static int fileBtreeRollbackCkpt(Btree *pBt){
   int rc;
   BtCursor *pCur;
   if( pBt->inCkpt==0 || pBt->readOnly ) return SQLITE_OK;
@@ -1019,7 +1029,7 @@ int sqliteBtreeRollbackCkpt(Btree *pBt){
 ** root page of a b-tree.  If it is not, then the cursor acquired
 ** will not work correctly.
 */
-int sqliteBtreeCursor(Btree *pBt, int iTable, int wrFlag, BtCursor **ppCur){
+static int fileBtreeCursor(Btree *pBt, int iTable, int wrFlag, BtCursor **ppCur){
   int rc;
   BtCursor *pCur, *pRing;
 
@@ -1044,6 +1054,7 @@ int sqliteBtreeCursor(Btree *pBt, int iTable, int wrFlag, BtCursor **ppCur){
   if( rc!=SQLITE_OK ){
     goto create_cursor_exception;
   }
+  pCur->pOps = &sqliteBtreeCursorOps;
   pCur->pBt = pBt;
   pCur->wrFlag = wrFlag;
   pCur->idx = 0;
@@ -1079,7 +1090,7 @@ create_cursor_exception:
 ** Close a cursor.  The read lock on the database file is released
 ** when the last cursor is closed.
 */
-int sqliteBtreeCloseCursor(BtCursor *pCur){
+static int fileBtreeCloseCursor(BtCursor *pCur){
   Btree *pBt = pCur->pBt;
   if( pCur->pPrev ){
     pCur->pPrev->pNext = pCur->pNext;
@@ -1132,7 +1143,7 @@ static void releaseTempCursor(BtCursor *pCur){
 ** pointing to an entry (which can happen, for example, if
 ** the database is empty) then *pSize is set to 0.
 */
-int sqliteBtreeKeySize(BtCursor *pCur, int *pSize){
+static int fileBtreeKeySize(BtCursor *pCur, int *pSize){
   Cell *pCell;
   MemPage *pPage;
 
@@ -1221,7 +1232,7 @@ static int getPayload(BtCursor *pCur, int offset, int amt, char *zBuf){
 ** is raised.  The change was made in an effort to boost performance
 ** by eliminating unneeded tests.
 */
-int sqliteBtreeKey(BtCursor *pCur, int offset, int amt, char *zBuf){
+static int fileBtreeKey(BtCursor *pCur, int offset, int amt, char *zBuf){
   MemPage *pPage;
 
   assert( amt>=0 );
@@ -1243,7 +1254,7 @@ int sqliteBtreeKey(BtCursor *pCur, int offset, int amt, char *zBuf){
 ** pointing to an entry (which can happen, for example, if
 ** the database is empty) then *pSize is set to 0.
 */
-int sqliteBtreeDataSize(BtCursor *pCur, int *pSize){
+static int fileBtreeDataSize(BtCursor *pCur, int *pSize){
   Cell *pCell;
   MemPage *pPage;
 
@@ -1266,7 +1277,7 @@ int sqliteBtreeDataSize(BtCursor *pCur, int *pSize){
 ** amount requested if there are not enough bytes in the data
 ** to satisfy the request.
 */
-int sqliteBtreeData(BtCursor *pCur, int offset, int amt, char *zBuf){
+static int fileBtreeData(BtCursor *pCur, int offset, int amt, char *zBuf){
   Cell *pCell;
   MemPage *pPage;
 
@@ -1304,7 +1315,7 @@ int sqliteBtreeData(BtCursor *pCur, int offset, int amt, char *zBuf){
 ** keys must be exactly the same length. (The length of the pCur key
 ** is the actual key length minus nIgnore bytes.)
 */
-int sqliteBtreeKeyCompare(
+static int fileBtreeKeyCompare(
   BtCursor *pCur,       /* Pointer to entry to compare against */
   const void *pKey,     /* Key to compare against entry that pCur points to */
   int nKey,             /* Number of bytes in pKey */
@@ -1389,6 +1400,7 @@ static int moveToChild(BtCursor *pCur, int newPgno){
   sqlitepager_unref(pCur->pPage);
   pCur->pPage = pNewPage;
   pCur->idx = 0;
+  if( pNewPage->nCell<1 ) return SQLITE_CORRUPT;
   return SQLITE_OK;
 }
 
@@ -1502,7 +1514,7 @@ static int moveToRightmost(BtCursor *pCur){
 ** on success.  Set *pRes to 0 if the cursor actually points to something
 ** or set *pRes to 1 if the table is empty.
 */
-int sqliteBtreeFirst(BtCursor *pCur, int *pRes){
+static int fileBtreeFirst(BtCursor *pCur, int *pRes){
   int rc;
   if( pCur->pPage==0 ) return SQLITE_ABORT;
   rc = moveToRoot(pCur);
@@ -1521,7 +1533,7 @@ int sqliteBtreeFirst(BtCursor *pCur, int *pRes){
 ** on success.  Set *pRes to 0 if the cursor actually points to something
 ** or set *pRes to 1 if the table is empty.
 */
-int sqliteBtreeLast(BtCursor *pCur, int *pRes){
+static int fileBtreeLast(BtCursor *pCur, int *pRes){
   int rc;
   if( pCur->pPage==0 ) return SQLITE_ABORT;
   rc = moveToRoot(pCur);
@@ -1560,7 +1572,8 @@ int sqliteBtreeLast(BtCursor *pCur, int *pRes){
 **     *pRes>0      The cursor is left pointing at an entry that
 **                  is larger than pKey.
 */
-int sqliteBtreeMoveto(BtCursor *pCur, const void *pKey, int nKey, int *pRes){
+static
+int fileBtreeMoveto(BtCursor *pCur, const void *pKey, int nKey, int *pRes){
   int rc;
   if( pCur->pPage==0 ) return SQLITE_ABORT;
   pCur->eSkip = SKIP_NONE;
@@ -1575,7 +1588,7 @@ int sqliteBtreeMoveto(BtCursor *pCur, const void *pKey, int nKey, int *pRes){
     upr = pPage->nCell-1;
     while( lwr<=upr ){
       pCur->idx = (lwr+upr)/2;
-      rc = sqliteBtreeKeyCompare(pCur, pKey, nKey, 0, &c);
+      rc = fileBtreeKeyCompare(pCur, pKey, nKey, 0, &c);
       if( rc ) return rc;
       if( c==0 ){
         pCur->iMatch = c;
@@ -1613,7 +1626,7 @@ int sqliteBtreeMoveto(BtCursor *pCur, const void *pKey, int nKey, int *pRes){
 ** was already pointing to the last entry in the database before
 ** this routine was called, then set *pRes=1.
 */
-int sqliteBtreeNext(BtCursor *pCur, int *pRes){
+static int fileBtreeNext(BtCursor *pCur, int *pRes){
   int rc;
   MemPage *pPage = pCur->pPage;
   assert( pRes!=0 );
@@ -1668,7 +1681,7 @@ int sqliteBtreeNext(BtCursor *pCur, int *pRes){
 ** was already pointing to the first entry in the database before
 ** this routine was called, then set *pRes=1.
 */
-int sqliteBtreePrevious(BtCursor *pCur, int *pRes){
+static int fileBtreePrevious(BtCursor *pCur, int *pRes){
   int rc;
   Pgno pgno;
   MemPage *pPage;
@@ -2594,7 +2607,7 @@ static int checkReadLocks(BtCursor *pCur){
 ** define what database the record should be inserted into.  The cursor
 ** is left pointing at the new record.
 */
-int sqliteBtreeInsert(
+static int fileBtreeInsert(
   BtCursor *pCur,                /* Insert data into the table of this cursor */
   const void *pKey, int nKey,    /* The key of the new record */
   const void *pData, int nData   /* The data of the new record */
@@ -2620,7 +2633,7 @@ int sqliteBtreeInsert(
   if( checkReadLocks(pCur) ){
     return SQLITE_LOCKED; /* The table pCur points to has a read lock */
   }
-  rc = sqliteBtreeMoveto(pCur, pKey, nKey, &loc);
+  rc = fileBtreeMoveto(pCur, pKey, nKey, &loc);
   if( rc ) return rc;
   pPage = pCur->pPage;
   assert( pPage->isInit );
@@ -2662,7 +2675,7 @@ int sqliteBtreeInsert(
 ** sqliteBtreePrevious() will always leave the cursor pointing at the
 ** entry immediately before the one that was deleted.
 */
-int sqliteBtreeDelete(BtCursor *pCur){
+static int fileBtreeDelete(BtCursor *pCur){
   MemPage *pPage = pCur->pPage;
   Cell *pCell;
   int rc;
@@ -2705,7 +2718,7 @@ int sqliteBtreeDelete(BtCursor *pCur){
     int szNext;
     int notUsed;
     getTempCursor(pCur, &leafCur);
-    rc = sqliteBtreeNext(&leafCur, &notUsed);
+    rc = fileBtreeNext(&leafCur, &notUsed);
     if( rc!=SQLITE_OK ){
       return SQLITE_CORRUPT;
     }
@@ -2745,11 +2758,12 @@ int sqliteBtreeDelete(BtCursor *pCur){
 ** number for the root page of the new table.
 **
 ** In the current implementation, BTree tables and BTree indices are the 
-** the same.  But in the future, we may change this so that BTree tables
+** the same.  In the future, we may change this so that BTree tables
 ** are restricted to having a 4-byte integer key and arbitrary data and
 ** BTree indices are restricted to having an arbitrary key and no data.
+** But for now, this routine also serves to create indices.
 */
-int sqliteBtreeCreateTable(Btree *pBt, int *piTable){
+static int fileBtreeCreateTable(Btree *pBt, int *piTable){
   MemPage *pRoot;
   Pgno pgnoRoot;
   int rc;
@@ -2767,19 +2781,6 @@ int sqliteBtreeCreateTable(Btree *pBt, int *piTable){
   sqlitepager_unref(pRoot);
   *piTable = (int)pgnoRoot;
   return SQLITE_OK;
-}
-
-/*
-** Create a new BTree index.  Write into *piTable the page
-** number for the root page of the new index.
-**
-** In the current implementation, BTree tables and BTree indices are the 
-** the same.  But in the future, we may change this so that BTree tables
-** are restricted to having a 4-byte integer key and arbitrary data and
-** BTree indices are restricted to having an arbitrary key and no data.
-*/
-int sqliteBtreeCreateIndex(Btree *pBt, int *piIndex){
-  return sqliteBtreeCreateTable(pBt, piIndex);
 }
 
 /*
@@ -2825,7 +2826,7 @@ static int clearDatabasePage(Btree *pBt, Pgno pgno, int freePageFlag){
 /*
 ** Delete all information from a single table in the database.
 */
-int sqliteBtreeClearTable(Btree *pBt, int iTable){
+static int fileBtreeClearTable(Btree *pBt, int iTable){
   int rc;
   BtCursor *pCur;
   if( !pBt->inTrans ){
@@ -2839,7 +2840,7 @@ int sqliteBtreeClearTable(Btree *pBt, int iTable){
   }
   rc = clearDatabasePage(pBt, (Pgno)iTable, 0);
   if( rc ){
-    sqliteBtreeRollback(pBt);
+    fileBtreeRollback(pBt);
   }
   return rc;
 }
@@ -2849,7 +2850,7 @@ int sqliteBtreeClearTable(Btree *pBt, int iTable){
 ** the freelist.  Except, the root of the principle table (the one on
 ** page 2) is never added to the freelist.
 */
-int sqliteBtreeDropTable(Btree *pBt, int iTable){
+static int fileBtreeDropTable(Btree *pBt, int iTable){
   int rc;
   MemPage *pPage;
   BtCursor *pCur;
@@ -2863,7 +2864,7 @@ int sqliteBtreeDropTable(Btree *pBt, int iTable){
   }
   rc = sqlitepager_get(pBt->pPager, (Pgno)iTable, (void**)&pPage);
   if( rc ) return rc;
-  rc = sqliteBtreeClearTable(pBt, iTable);
+  rc = fileBtreeClearTable(pBt, iTable);
   if( rc ) return rc;
   if( iTable>2 ){
     rc = freePage(pBt, pPage, iTable);
@@ -2874,10 +2875,109 @@ int sqliteBtreeDropTable(Btree *pBt, int iTable){
   return rc;  
 }
 
+#if 0 /* UNTESTED */
+/*
+** Copy all cell data from one database file into another.
+** pages back the freelist.
+*/
+static int copyCell(Btree *pBtFrom, BTree *pBtTo, Cell *pCell){
+  Pager *pFromPager = pBtFrom->pPager;
+  OverflowPage *pOvfl;
+  Pgno ovfl, nextOvfl;
+  Pgno *pPrev;
+  int rc = SQLITE_OK;
+  MemPage *pNew, *pPrevPg;
+  Pgno new;
+
+  if( NKEY(pBtTo, pCell->h) + NDATA(pBtTo, pCell->h) <= MX_LOCAL_PAYLOAD ){
+    return SQLITE_OK;
+  }
+  pPrev = &pCell->ovfl;
+  pPrevPg = 0;
+  ovfl = SWAB32(pBtTo, pCell->ovfl);
+  while( ovfl && rc==SQLITE_OK ){
+    rc = sqlitepager_get(pFromPager, ovfl, (void**)&pOvfl);
+    if( rc ) return rc;
+    nextOvfl = SWAB32(pBtFrom, pOvfl->iNext);
+    rc = allocatePage(pBtTo, &pNew, &new, 0);
+    if( rc==SQLITE_OK ){
+      rc = sqlitepager_write(pNew);
+      if( rc==SQLITE_OK ){
+        memcpy(pNew, pOvfl, SQLITE_PAGE_SIZE);
+        *pPrev = SWAB32(pBtTo, new);
+        if( pPrevPg ){
+          sqlitepager_unref(pPrevPg);
+        }
+        pPrev = &pOvfl->iNext;
+        pPrevPg = pNew;
+      }
+    }
+    sqlitepager_unref(pOvfl);
+    ovfl = nextOvfl;
+  }
+  if( pPrevPg ){
+    sqlitepager_unref(pPrevPg);
+  }
+  return rc;
+}
+#endif
+
+
+#if 0 /* UNTESTED */
+/*
+** Copy a page of data from one database over to another.
+*/
+static int copyDatabasePage(
+  Btree *pBtFrom,
+  Pgno pgnoFrom,
+  Btree *pBtTo,
+  Pgno *pTo
+){
+  MemPage *pPageFrom, *pPage;
+  Pgno to;
+  int rc;
+  Cell *pCell;
+  int idx;
+
+  rc = sqlitepager_get(pBtFrom->pPager, pgno, (void**)&pPageFrom);
+  if( rc ) return rc;
+  rc = allocatePage(pBt, &pPage, pTo, 0);
+  if( rc==SQLITE_OK ){
+    rc = sqlitepager_write(pPage);
+  }
+  if( rc==SQLITE_OK ){
+    memcpy(pPage, pPageFrom, SQLITE_PAGE_SIZE);
+    idx = SWAB16(pBt, pPage->u.hdr.firstCell);
+    while( idx>0 ){
+      pCell = (Cell*)&pPage->u.aDisk[idx];
+      idx = SWAB16(pBt, pCell->h.iNext);
+      if( pCell->h.leftChild ){
+        Pgno newChld;
+        rc = copyDatabasePage(pBtFrom, SWAB32(pBtFrom, pCell->h.leftChild),
+                              pBtTo, &newChld);
+        if( rc ) return rc;
+        pCell->h.leftChild = SWAB32(pBtFrom, newChld);
+      }
+      rc = copyCell(pBtFrom, pBtTo, pCell);
+      if( rc ) return rc;
+    }
+    if( pPage->u.hdr.rightChild ){
+      Pgno newChld;
+      rc = copyDatabasePage(pBtFrom, SWAB32(pBtFrom, pPage->u.hdr.rightChild), 
+                            pBtTo, &newChld);
+      if( rc ) return rc;
+      pPage->u.hdr.rightChild = SWAB32(pBtTo, newChild);
+    }
+  }
+  sqlitepager_unref(pPage);
+  return rc;
+}
+#endif
+
 /*
 ** Read the meta-information out of a database file.
 */
-int sqliteBtreeGetMeta(Btree *pBt, int *aMeta){
+static int fileBtreeGetMeta(Btree *pBt, int *aMeta){
   PageOne *pP1;
   int rc;
   int i;
@@ -2895,7 +2995,7 @@ int sqliteBtreeGetMeta(Btree *pBt, int *aMeta){
 /*
 ** Write meta-information back into the database.
 */
-int sqliteBtreeUpdateMeta(Btree *pBt, int *aMeta){
+static int fileBtreeUpdateMeta(Btree *pBt, int *aMeta){
   PageOne *pP1;
   int rc, i;
   if( !pBt->inTrans ){
@@ -2921,7 +3021,7 @@ int sqliteBtreeUpdateMeta(Btree *pBt, int *aMeta){
 ** is used for debugging and testing only.
 */
 #ifdef SQLITE_TEST
-int sqliteBtreePageDump(Btree *pBt, int pgno, int recursive){
+static int fileBtreePageDump(Btree *pBt, int pgno, int recursive){
   int rc;
   MemPage *pPage;
   int i, j;
@@ -2982,10 +3082,10 @@ int sqliteBtreePageDump(Btree *pBt, int pgno, int recursive){
     idx = SWAB16(pBt, pPage->u.hdr.firstCell);
     while( idx>0 && idx<SQLITE_PAGE_SIZE-MIN_CELL_SIZE ){
       Cell *pCell = (Cell*)&pPage->u.aDisk[idx];
-      sqliteBtreePageDump(pBt, SWAB32(pBt, pCell->h.leftChild), 1);
+      fileBtreePageDump(pBt, SWAB32(pBt, pCell->h.leftChild), 1);
       idx = SWAB16(pBt, pCell->h.iNext);
     }
-    sqliteBtreePageDump(pBt, SWAB32(pBt, pPage->u.hdr.rightChild), 1);
+    fileBtreePageDump(pBt, SWAB32(pBt, pPage->u.hdr.rightChild), 1);
   }
   sqlitepager_unref(pPage);
   return SQLITE_OK;
@@ -3008,7 +3108,7 @@ int sqliteBtreePageDump(Btree *pBt, int pgno, int recursive){
 **
 ** This routine is used for testing and debugging only.
 */
-int sqliteBtreeCursorDump(BtCursor *pCur, int *aResult){
+static int fileBtreeCursorDump(BtCursor *pCur, int *aResult){
   int cnt, idx;
   MemPage *pPage = pCur->pPage;
   Btree *pBt = pCur->pBt;
@@ -3040,7 +3140,7 @@ int sqliteBtreeCursorDump(BtCursor *pCur, int *aResult){
 ** Return the pager associated with a BTree.  This routine is used for
 ** testing and debugging only.
 */
-Pager *sqliteBtreePager(Btree *pBt){
+static Pager *fileBtreePager(Btree *pBt){
   return pBt->pPager;
 }
 #endif
@@ -3129,7 +3229,7 @@ static void checkList(
       FreelistInfo *pInfo = (FreelistInfo*)pOvfl->aPayload;
       int n = SWAB32(pCheck->pBt, pInfo->nFree);
       for(i=0; i<n; i++){
-        checkRef(pCheck, SWAB32(pCheck->pBt, pInfo->aFree[i]), zMsg);
+        checkRef(pCheck, SWAB32(pCheck->pBt, pInfo->aFree[i]), zContext);
       }
       N -= n;
     }
@@ -3320,7 +3420,7 @@ static int checkTreePage(
 ** and a pointer to that error message is returned.  The calling function
 ** is responsible for freeing the error message when it is done.
 */
-char *sqliteBtreeIntegrityCheck(Btree *pBt, int *aRoot, int nRoot){
+char *fileBtreeIntegrityCheck(Btree *pBt, int *aRoot, int nRoot){
   int i;
   int nRef;
   IntegrityCk sCheck;
@@ -3380,3 +3480,104 @@ char *sqliteBtreeIntegrityCheck(Btree *pBt, int *aRoot, int nRoot){
   sqliteFree(sCheck.anRef);
   return sCheck.zErrMsg;
 }
+
+/*
+** Return the full pathname of the underlying database file.
+*/
+static const char *fileBtreeGetFilename(Btree *pBt){
+  assert( pBt->pPager!=0 );
+  return sqlitepager_filename(pBt->pPager);
+}
+
+/*
+** Copy the complete content of pBtFrom into pBtTo.  A transaction
+** must be active for both files.
+**
+** The size of file pBtFrom may be reduced by this operation.
+** If anything goes wrong, the transaction on pBtFrom is rolled back.
+*/
+static int fileBtreeCopyFile(Btree *pBtTo, Btree *pBtFrom){
+  int rc = SQLITE_OK;
+  Pgno i, nPage, nToPage;
+
+  if( !pBtTo->inTrans || !pBtFrom->inTrans ) return SQLITE_ERROR;
+  if( pBtTo->needSwab!=pBtFrom->needSwab ) return SQLITE_ERROR;
+  if( pBtTo->pCursor ) return SQLITE_BUSY;
+  memcpy(pBtTo->page1, pBtFrom->page1, SQLITE_PAGE_SIZE);
+  rc = sqlitepager_overwrite(pBtTo->pPager, 1, pBtFrom->page1);
+  nToPage = sqlitepager_pagecount(pBtTo->pPager);
+  nPage = sqlitepager_pagecount(pBtFrom->pPager);
+  for(i=2; rc==SQLITE_OK && i<=nPage; i++){
+    void *pPage;
+    rc = sqlitepager_get(pBtFrom->pPager, i, &pPage);
+    if( rc ) break;
+    rc = sqlitepager_overwrite(pBtTo->pPager, i, pPage);
+    if( rc ) break;
+    sqlitepager_unref(pPage);
+  }
+  for(i=nPage+1; rc==SQLITE_OK && i<=nToPage; i++){
+    void *pPage;
+    rc = sqlitepager_get(pBtTo->pPager, i, &pPage);
+    if( rc ) break;
+    rc = sqlitepager_write(pPage);
+    sqlitepager_unref(pPage);
+    sqlitepager_dont_write(pBtTo->pPager, i);
+  }
+  if( !rc && nPage<nToPage ){
+    rc = sqlitepager_truncate(pBtTo->pPager, nPage);
+  }
+  if( rc ){
+    fileBtreeRollback(pBtTo);
+  }
+  return rc;  
+}
+
+/*
+** The following tables contain pointers to all of the interface
+** routines for this implementation of the B*Tree backend.  To
+** substitute a different implemention of the backend, one has merely
+** to provide pointers to alternative functions in similar tables.
+*/
+static BtOps sqliteBtreeOps = {
+    fileBtreeClose,
+    fileBtreeSetCacheSize,
+    fileBtreeSetSafetyLevel,
+    fileBtreeBeginTrans,
+    fileBtreeCommit,
+    fileBtreeRollback,
+    fileBtreeBeginCkpt,
+    fileBtreeCommitCkpt,
+    fileBtreeRollbackCkpt,
+    fileBtreeCreateTable,
+    fileBtreeCreateTable,  /* Really sqliteBtreeCreateIndex() */
+    fileBtreeDropTable,
+    fileBtreeClearTable,
+    fileBtreeCursor,
+    fileBtreeGetMeta,
+    fileBtreeUpdateMeta,
+    fileBtreeIntegrityCheck,
+    fileBtreeGetFilename,
+    fileBtreeCopyFile,
+#ifdef SQLITE_TEST
+    fileBtreePageDump,
+    fileBtreePager
+#endif
+};
+static BtCursorOps sqliteBtreeCursorOps = {
+    fileBtreeMoveto,
+    fileBtreeDelete,
+    fileBtreeInsert,
+    fileBtreeFirst,
+    fileBtreeLast,
+    fileBtreeNext,
+    fileBtreePrevious,
+    fileBtreeKeySize,
+    fileBtreeKey,
+    fileBtreeKeyCompare,
+    fileBtreeDataSize,
+    fileBtreeData,
+    fileBtreeCloseCursor,
+#ifdef SQLITE_TEST
+    fileBtreeCursorDump,
+#endif
+};

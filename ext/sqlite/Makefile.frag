@@ -1,6 +1,4 @@
 
-LEMON="@LEMON@"
-
 # sqlite has some generated source files; this specifies how to
 # build them
 
@@ -10,13 +8,13 @@ LEMON="@LEMON@"
 $(srcdir)/libsqlite/src/opcodes.c: $(srcdir)/libsqlite/src/vdbe.c
 	echo '/* Automatically generated file.  Do not edit */' >$@
 	echo 'char *sqliteOpcodeNames[] = { "???", ' >>$@
-	grep '^case OP_' $< | \
+	grep '^case OP_' $(srcdir)/libsqlite/src/vdbe.c | \
 	  sed -e 's/^.*OP_/  "/' -e 's/:.*$$/", /' >>$@
 	echo '};' >>$@
 	
 $(srcdir)/libsqlite/src/opcodes.h: $(srcdir)/libsqlite/src/vdbe.c
 	echo '/* Automatically generated file.  Do not edit */' >$@
-	grep '^case OP_' $< | \
+	grep '^case OP_' $(srcdir)/libsqlite/src/vdbe.c | \
 	  sed -e 's/://' | \
 	  awk '{printf "#define %-30s %3d\n", $$2, ++cnt}' >>$@
 

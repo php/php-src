@@ -42,6 +42,10 @@
 #define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
 #endif
 
+#ifndef OnUpdateLong
+# define OnUpdateLong OnUpdateInt
+#endif
+
 ZEND_DECLARE_MODULE_GLOBALS(sqlite)
 
 extern int sqlite_encode_binary(const unsigned char *in, int n, unsigned char *out);
@@ -70,7 +74,7 @@ static inline void php_sqlite_strtolower(char *s)
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-STD_PHP_INI_ENTRY_EX("sqlite.assoc_case", "0", PHP_INI_ALL, OnUpdateInt, assoc_case, zend_sqlite_globals, sqlite_globals, display_link_numbers)
+STD_PHP_INI_ENTRY_EX("sqlite.assoc_case", "0", PHP_INI_ALL, OnUpdateLong, assoc_case, zend_sqlite_globals, sqlite_globals, display_link_numbers)
 PHP_INI_END()
 /* }}} */
 
@@ -553,7 +557,8 @@ static void php_sqlite_agg_fini_function_callback(sqlite_func *func)
 /* }}} */
 
 /* {{{ Authorization Callback */
-static int php_sqlite_authorizer(void *autharg, int access_type, const char *arg3, const char *arg4)
+static int php_sqlite_authorizer(void *autharg, int access_type, const char *arg3, const char *arg4,
+		const char *arg5, const char *arg6)
 {
 	switch (access_type) {
 		case SQLITE_COPY:
@@ -674,7 +679,9 @@ static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *per
 	 * then fail with a busy status code */
 	sqlite_busy_timeout(sdb, 500);
 
-	/* authorizer hook so we can enforce safe mode */
+	/* authorizer hook so we can enforce safe mode.
+     * Note: the declaration of php_sqlite_authorizer is correct for 2.8.2 of libsqlite,
+     * and IS backwards binary compatible with earlier versions */
 	sqlite_set_authorizer(sdb, php_sqlite_authorizer, NULL);
 	
 	db->rsrc_id = ZEND_REGISTER_RESOURCE(return_value, db, persistent_id ? le_sqlite_pdb : le_sqlite_db);

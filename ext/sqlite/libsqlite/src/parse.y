@@ -96,8 +96,8 @@ create_table ::= CREATE(X) temp(T) TABLE nm(Y). {
    sqliteStartTable(pParse,&X,&Y,T,0);
 }
 %type temp {int}
-temp(A) ::= TEMP.  {A = pParse->isTemp || !pParse->initFlag;}
-temp(A) ::= .      {A = pParse->isTemp;}
+temp(A) ::= TEMP.  {A = 1;}
+temp(A) ::= .      {A = 0;}
 create_table_args ::= LP columnlist conslist_opt RP(X). {
   sqliteEndTable(pParse,&X,0);
 }
@@ -126,8 +126,8 @@ id(A) ::= ID(X).         {A = X;}
 // This obviates the need for the "id" nonterminal.
 //
 %fallback ID 
-  ABORT AFTER ASC BEFORE BEGIN CASCADE CLUSTER CONFLICT
-  COPY DEFERRED DELIMITERS DESC EACH END EXPLAIN FAIL FOR
+  ABORT AFTER ASC ATTACH BEFORE BEGIN CASCADE CLUSTER CONFLICT
+  COPY DATABASE DEFERRED DELIMITERS DESC DETACH EACH END EXPLAIN FAIL FOR
   IGNORE IMMEDIATE INITIALLY INSTEAD MATCH KEY
   OF OFFSET PRAGMA RAISE REPLACE RESTRICT ROW STATEMENT
   TEMP TRIGGER VACUUM VIEW.
@@ -176,7 +176,7 @@ carg ::= DEFAULT NULL.
 ccons ::= NULL onconf.
 ccons ::= NOT NULL onconf(R).               {sqliteAddNotNull(pParse, R);}
 ccons ::= PRIMARY KEY sortorder onconf(R).  {sqliteAddPrimaryKey(pParse,0,R);}
-ccons ::= UNIQUE onconf(R).            {sqliteCreateIndex(pParse,0,0,0,R,0,0);}
+ccons ::= UNIQUE onconf(R).           {sqliteCreateIndex(pParse,0,0,0,R,0,0,0);}
 ccons ::= CHECK LP expr RP onconf.
 ccons ::= REFERENCES nm(T) idxlist_opt(TA) refargs(R).
                                 {sqliteCreateForeignKey(pParse,0,&T,TA,R);}
@@ -223,7 +223,7 @@ tcons ::= CONSTRAINT nm.
 tcons ::= PRIMARY KEY LP idxlist(X) RP onconf(R).
                                              {sqliteAddPrimaryKey(pParse,X,R);}
 tcons ::= UNIQUE LP idxlist(X) RP onconf(R).
-                                       {sqliteCreateIndex(pParse,0,0,X,R,0,0);}
+                                     {sqliteCreateIndex(pParse,0,0,X,R,0,0,0);}
 tcons ::= CHECK expr onconf.
 tcons ::= FOREIGN KEY LP idxlist(FA) RP
           REFERENCES nm(T) idxlist_opt(TA) refargs(R) defer_subclause_opt(D). {
@@ -353,8 +353,8 @@ stl_prefix(A) ::= seltablist(X) joinop(Y).    {
    if( A && A->nSrc>0 ) A->a[A->nSrc-1].jointype = Y;
 }
 stl_prefix(A) ::= .                           {A = 0;}
-seltablist(A) ::= stl_prefix(X) nm(Y) as(Z) on_opt(N) using_opt(U). {
-  A = sqliteSrcListAppend(X,&Y);
+seltablist(A) ::= stl_prefix(X) nm(Y) dbnm(D) as(Z) on_opt(N) using_opt(U). {
+  A = sqliteSrcListAppend(X,&Y,&D);
   if( Z.n ) sqliteSrcListAddAlias(A,&Z);
   if( N ){
     if( A && A->nSrc>1 ){ A->a[A->nSrc-2].pOn = N; }
@@ -366,7 +366,7 @@ seltablist(A) ::= stl_prefix(X) nm(Y) as(Z) on_opt(N) using_opt(U). {
   }
 }
 seltablist(A) ::= stl_prefix(X) LP select(S) RP as(Z) on_opt(N) using_opt(U). {
-  A = sqliteSrcListAppend(X,0);
+  A = sqliteSrcListAppend(X,0,0);
   A->a[A->nSrc-1].pSelect = S;
   if( Z.n ) sqliteSrcListAddAlias(A,&Z);
   if( N ){
@@ -378,6 +378,10 @@ seltablist(A) ::= stl_prefix(X) LP select(S) RP as(Z) on_opt(N) using_opt(U). {
     else { sqliteIdListDelete(U); }
   }
 }
+
+%type dbnm {Token}
+dbnm(A) ::= .          {A.z=0; A.n=0;}
+dbnm(A) ::= DOT nm(X). {A = X;}
 
 %type joinop {int}
 %type joinop2 {int}
@@ -440,15 +444,16 @@ having_opt(A) ::= HAVING expr(X).  {A = X;}
 %type limit_opt {struct LimitVal}
 limit_opt(A) ::= .                  {A.limit = -1; A.offset = 0;}
 limit_opt(A) ::= LIMIT INTEGER(X).  {A.limit = atoi(X.z); A.offset = 0;}
-limit_opt(A) ::= LIMIT INTEGER(X) limit_sep INTEGER(Y). 
+limit_opt(A) ::= LIMIT INTEGER(X) OFFSET INTEGER(Y). 
                                     {A.limit = atoi(X.z); A.offset = atoi(Y.z);}
-limit_sep ::= OFFSET.
-limit_sep ::= COMMA.
+limit_opt(A) ::= LIMIT INTEGER(X) COMMA INTEGER(Y). 
+                                    {A.limit = atoi(Y.z); A.offset = atoi(X.z);}
 
 /////////////////////////// The DELETE statement /////////////////////////////
 //
-cmd ::= DELETE FROM nm(X) where_opt(Y).
-    {sqliteDeleteFrom(pParse, &X, Y);}
+cmd ::= DELETE FROM nm(X) dbnm(D) where_opt(Y). {
+   sqliteDeleteFrom(pParse, sqliteSrcListAppend(0,&X,&D), Y);
+}
 
 %type where_opt {Expr*}
 %destructor where_opt {sqliteExprDelete($$);}
@@ -461,8 +466,8 @@ where_opt(A) ::= WHERE expr(X).       {A = X;}
 
 ////////////////////////// The UPDATE command ////////////////////////////////
 //
-cmd ::= UPDATE orconf(R) nm(X) SET setlist(Y) where_opt(Z).
-    {sqliteUpdate(pParse,&X,Y,Z,R);}
+cmd ::= UPDATE orconf(R) nm(X) dbnm(D) SET setlist(Y) where_opt(Z).
+    {sqliteUpdate(pParse,sqliteSrcListAppend(0,&X,&D),Y,Z,R);}
 
 setlist(A) ::= setlist(Z) COMMA nm(X) EQ expr(Y).
     {A = sqliteExprListAppend(Z,Y,&X);}
@@ -470,10 +475,11 @@ setlist(A) ::= nm(X) EQ expr(Y).   {A = sqliteExprListAppend(0,Y,&X);}
 
 ////////////////////////// The INSERT command /////////////////////////////////
 //
-cmd ::= insert_cmd(R) INTO nm(X) inscollist_opt(F) VALUES LP itemlist(Y) RP.
-               {sqliteInsert(pParse, &X, Y, 0, F, R);}
-cmd ::= insert_cmd(R) INTO nm(X) inscollist_opt(F) select(S).
-               {sqliteInsert(pParse, &X, 0, S, F, R);}
+cmd ::= insert_cmd(R) INTO nm(X) dbnm(D) inscollist_opt(F) 
+        VALUES LP itemlist(Y) RP.
+            {sqliteInsert(pParse, sqliteSrcListAppend(0,&X,&D), Y, 0, F, R);}
+cmd ::= insert_cmd(R) INTO nm(X) dbnm(D) inscollist_opt(F) select(S).
+            {sqliteInsert(pParse, sqliteSrcListAppend(0,&X,&D), 0, S, F, R);}
 
 %type insert_cmd {int}
 insert_cmd(A) ::= INSERT orconf(R).   {A = R;}
@@ -521,6 +527,13 @@ expr(A) ::= nm(X) DOT nm(Y). {
   Expr *temp1 = sqliteExpr(TK_ID, 0, 0, &X);
   Expr *temp2 = sqliteExpr(TK_ID, 0, 0, &Y);
   A = sqliteExpr(TK_DOT, temp1, temp2, 0);
+}
+expr(A) ::= nm(X) DOT nm(Y) DOT nm(Z). {
+  Expr *temp1 = sqliteExpr(TK_ID, 0, 0, &X);
+  Expr *temp2 = sqliteExpr(TK_ID, 0, 0, &Y);
+  Expr *temp3 = sqliteExpr(TK_ID, 0, 0, &Z);
+  Expr *temp4 = sqliteExpr(TK_DOT, temp2, temp3, 0);
+  A = sqliteExpr(TK_DOT, temp1, temp4, 0);
 }
 expr(A) ::= expr(B) ORACLE_OUTER_JOIN. 
                              {A = B; ExprSetProperty(A,EP_Oracle8Join);}
@@ -686,11 +699,12 @@ expritem(A) ::= .                       {A = 0;}
 
 ///////////////////////////// The CREATE INDEX command ///////////////////////
 //
-cmd ::= CREATE(S) uniqueflag(U) INDEX nm(X)
-        ON nm(Y) LP idxlist(Z) RP(E) onconf(R). {
+cmd ::= CREATE(S) temp(T) uniqueflag(U) INDEX nm(X)
+        ON nm(Y) dbnm(D) LP idxlist(Z) RP(E) onconf(R). {
+  SrcList *pSrc = sqliteSrcListAppend(0, &Y, &D);
   if( U!=OE_None ) U = R;
   if( U==OE_Default) U = OE_Abort;
-  sqliteCreateIndex(pParse, &X, &Y, Z, U, &S, &E);
+  sqliteCreateIndex(pParse, &X, pSrc, Z, U, T, &S, &E);
 }
 
 %type uniqueflag {int}
@@ -707,20 +721,22 @@ idxlist_opt(A) ::= .                         {A = 0;}
 idxlist_opt(A) ::= LP idxlist(X) RP.         {A = X;}
 idxlist(A) ::= idxlist(X) COMMA idxitem(Y).  {A = sqliteIdListAppend(X,&Y);}
 idxlist(A) ::= idxitem(Y).                   {A = sqliteIdListAppend(0,&Y);}
-idxitem(A) ::= nm(X).                        {A = X;}
+idxitem(A) ::= nm(X) sortorder.              {A = X;}
 
 ///////////////////////////// The DROP INDEX command /////////////////////////
 //
 
-cmd ::= DROP INDEX nm(X).      {sqliteDropIndex(pParse, &X);}
+cmd ::= DROP INDEX nm(X) dbnm(Y).   {
+  sqliteDropIndex(pParse, sqliteSrcListAppend(0,&X,&Y));
+}
 
 
 ///////////////////////////// The COPY command ///////////////////////////////
 //
-cmd ::= COPY orconf(R) nm(X) FROM nm(Y) USING DELIMITERS STRING(Z).
-    {sqliteCopy(pParse,&X,&Y,&Z,R);}
-cmd ::= COPY orconf(R) nm(X) FROM nm(Y).
-    {sqliteCopy(pParse,&X,&Y,0,R);}
+cmd ::= COPY orconf(R) nm(X) dbnm(D) FROM nm(Y) USING DELIMITERS STRING(Z).
+    {sqliteCopy(pParse,sqliteSrcListAppend(0,&X,&D),&Y,&Z,R);}
+cmd ::= COPY orconf(R) nm(X) dbnm(D) FROM nm(Y).
+    {sqliteCopy(pParse,sqliteSrcListAppend(0,&X,&D),&Y,0,R);}
 
 ///////////////////////////// The VACUUM command /////////////////////////////
 //
@@ -743,13 +759,18 @@ plus_opt ::= PLUS.
 plus_opt ::= .
 
 //////////////////////////// The CREATE TRIGGER command /////////////////////
-cmd ::= CREATE(A) TRIGGER nm(B) trigger_time(C) trigger_event(D) ON nm(E) 
-                  foreach_clause(F) when_clause(G)
-                  BEGIN trigger_cmd_list(S) END(Z). {
+
+cmd ::= CREATE(A) trigger_decl BEGIN trigger_cmd_list(S) END(Z). {
   Token all;
   all.z = A.z;
   all.n = (Z.z - A.z) + Z.n;
-  sqliteCreateTrigger(pParse, &B, C, D.a, D.b, &E, F, G, S, &all);
+  sqliteFinishTrigger(pParse, S, &all);
+}
+
+trigger_decl ::= temp(T) TRIGGER nm(B) trigger_time(C) trigger_event(D)
+                 ON nm(E) dbnm(DB) foreach_clause(F) when_clause(G). {
+  SrcList *pTab = sqliteSrcListAppend(0, &E, &DB);
+  sqliteBeginTrigger(pParse, &B, C, D.a, D.b, pTab, F, G, T);
 }
 
 %type trigger_time  {int}
@@ -775,11 +796,15 @@ when_clause(A) ::= .             { A = 0; }
 when_clause(A) ::= WHEN expr(X). { A = X; }
 
 %type trigger_cmd_list {TriggerStep *}
+%destructor trigger_cmd_list {sqliteDeleteTriggerStep($$);}
 trigger_cmd_list(A) ::= trigger_cmd(X) SEMI trigger_cmd_list(Y). {
-  X->pNext = Y ; A = X; }
+  X->pNext = Y;
+  A = X;
+}
 trigger_cmd_list(A) ::= . { A = 0; }
 
 %type trigger_cmd {TriggerStep *}
+%destructor trigger_cmd {sqliteDeleteTriggerStep($$);}
 // UPDATE 
 trigger_cmd(A) ::= UPDATE orconf(R) nm(X) SET setlist(Y) where_opt(Z).  
                { A = sqliteTriggerUpdateStep(&X, Y, Z, R); }
@@ -822,6 +847,19 @@ expr(A) ::= RAISE(X) LP FAIL COMMA nm(Z) RP(Y).  {
 }
 
 ////////////////////////  DROP TRIGGER statement //////////////////////////////
-cmd ::= DROP TRIGGER nm(X). {
-    sqliteDropTrigger(pParse,&X,0);
+cmd ::= DROP TRIGGER nm(X) dbnm(D). {
+  sqliteDropTrigger(pParse,sqliteSrcListAppend(0,&X,&D),0);
+}
+
+//////////////////////// ATTACH DATABASE file AS name /////////////////////////
+cmd ::= ATTACH database_kw_opt ids(F) AS nm(D). {
+  sqliteAttach(pParse, &F, &D);
+}
+
+database_kw_opt ::= DATABASE.
+database_kw_opt ::= .
+
+//////////////////////// DETACH DATABASE name /////////////////////////////////
+cmd ::= DETACH database_kw_opt nm(D). {
+  sqliteDetach(pParse, &D);
 }

@@ -18,6 +18,11 @@
 #define _SQLITE_OS_H_
 
 /*
+** Helpful hint:  To get this to compile on HP/UX, add -D_INCLUDE_POSIX_SOURCE
+** to the compiler command line.
+*/
+
+/*
 ** These #defines should enable >2GB file support on Posix if the
 ** underlying operating system supports it.  If the OS lacks
 ** large file support, or if the OS is windows, these should be no-ops.
@@ -147,6 +152,7 @@
 
 int sqliteOsDelete(const char*);
 int sqliteOsFileExists(const char*);
+int sqliteOsFileRename(const char*, const char*);
 int sqliteOsOpenReadWrite(const char*, OsFile*, int*);
 int sqliteOsOpenExclusive(const char*, OsFile*, int);
 int sqliteOsOpenReadOnly(const char*, OsFile*);

@@ -255,6 +255,46 @@ static void versionFunc(sqlite_func *context, int argc, const char **argv){
   sqlite_set_result_string(context, sqlite_version, -1);
 }
 
+#ifdef SQLITE_SOUNDEX
+/*
+** Compute the soundex encoding of a word.
+*/
+static void soundexFunc(sqlite_func *context, int argc, const char **argv){
+  char zResult[8];
+  const char *zIn;
+  int i, j;
+  static const unsigned char iCode[] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 2, 3, 0, 1, 2, 0, 0, 2, 2, 4, 5, 5, 0,
+    1, 2, 6, 2, 3, 0, 1, 0, 2, 0, 2, 0, 0, 0, 0, 0,
+    0, 0, 1, 2, 3, 0, 1, 2, 0, 0, 2, 2, 4, 5, 5, 0,
+    1, 2, 6, 2, 3, 0, 1, 0, 2, 0, 2, 0, 0, 0, 0, 0,
+  };
+  assert( argc==1 );
+  zIn = argv[0];
+  for(i=0; zIn[i] && !isalpha(zIn[i]); i++){}
+  if( zIn[i] ){
+    zResult[0] = toupper(zIn[i]);
+    for(j=1; j<4 && zIn[i]; i++){
+      int code = iCode[zIn[i]&0x7f];
+      if( code>0 ){
+        zResult[j++] = code + '0';
+      }
+    }
+    while( j<4 ){
+      zResult[j++] = '0';
+    }
+    zResult[j] = 0;
+    sqlite_set_result_string(context, zResult, 4);
+  }else{
+    sqlite_set_result_string(context, zResult, "?000", 4);
+  }
+}
+#endif
+
 #ifdef SQLITE_TEST
 /*
 ** This function generates a string of random characters.  Used for
@@ -284,8 +324,7 @@ static void randStr(sqlite_func *context, int argc, const char **argv){
   }
   n = iMin;
   if( iMax>iMin ){
-    r = sqliteRandomInteger();
-    if( r<0 ) r = -r;
+    r = sqliteRandomInteger() & 0x7fffffff;
     n += r%(iMax + 1 - iMin);
   }
   r = 0;
@@ -490,6 +529,9 @@ void sqliteRegisterBuiltinFunctions(sqlite *db){
     { "glob",       2, SQLITE_NUMERIC, globFunc   },
     { "nullif",     2, SQLITE_ARGS,    nullifFunc },
     { "sqlite_version",0,SQLITE_TEXT,  versionFunc},
+#ifdef SQLITE_SOUNDEX
+    { "soundex",    1, SQLITE_TEXT,    soundexFunc},
+#endif
 #ifdef SQLITE_TEST
     { "randstr",    2, SQLITE_TEXT,    randStr    },
 #endif

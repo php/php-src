@@ -44,6 +44,7 @@ static Keyword aKeywordTable[] = {
   { "AND",               0, TK_AND,              0 },
   { "AS",                0, TK_AS,               0 },
   { "ASC",               0, TK_ASC,              0 },
+  { "ATTACH",            0, TK_ATTACH,           0 },
   { "BEFORE",            0, TK_BEFORE,           0 },
   { "BEGIN",             0, TK_BEGIN,            0 },
   { "BETWEEN",           0, TK_BETWEEN,          0 },
@@ -59,12 +60,14 @@ static Keyword aKeywordTable[] = {
   { "COPY",              0, TK_COPY,             0 },
   { "CREATE",            0, TK_CREATE,           0 },
   { "CROSS",             0, TK_JOIN_KW,          0 },
+  { "DATABASE",          0, TK_DATABASE,         0 },
   { "DEFAULT",           0, TK_DEFAULT,          0 },
   { "DEFERRED",          0, TK_DEFERRED,         0 },
   { "DEFERRABLE",        0, TK_DEFERRABLE,       0 },
   { "DELETE",            0, TK_DELETE,           0 },
   { "DELIMITERS",        0, TK_DELIMITERS,       0 },
   { "DESC",              0, TK_DESC,             0 },
+  { "DETACH",            0, TK_DETACH,           0 },
   { "DISTINCT",          0, TK_DISTINCT,         0 },
   { "DROP",              0, TK_DROP,             0 },
   { "END",               0, TK_END,              0 },
@@ -349,18 +352,15 @@ static int sqliteGetToken(const unsigned char *z, int *tokenType){
       return i;
     }
     case '.': {
-      if( !isdigit(z[1]) ){
-        *tokenType = TK_DOT;
-        return 1;
-      }
-      /* Fall thru into the next case */
+      *tokenType = TK_DOT;
+      return 1;
     }
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': {
       *tokenType = TK_INTEGER;
       for(i=1; isdigit(z[i]); i++){}
-      if( z[i]=='.' ){
-        i++;
+      if( z[i]=='.' && isdigit(z[i+1]) ){
+        i += 2;
         while( isdigit(z[i]) ){ i++; }
         *tokenType = TK_FLOAT;
       }
@@ -371,8 +371,6 @@ static int sqliteGetToken(const unsigned char *z, int *tokenType){
       ){
         i += 2;
         while( isdigit(z[i]) ){ i++; }
-        *tokenType = TK_FLOAT;
-      }else if( z[0]=='.' ){
         *tokenType = TK_FLOAT;
       }
       return i;
@@ -489,8 +487,198 @@ abort_parse:
     sqliteDeleteTable(pParse->db, pParse->pNewTable);
     pParse->pNewTable = 0;
   }
+  if( pParse->pNewTrigger ){
+    sqliteDeleteTrigger(pParse->pNewTrigger);
+    pParse->pNewTrigger = 0;
+  }
   if( nErr>0 && (pParse->rc==SQLITE_OK || pParse->rc==SQLITE_DONE) ){
     pParse->rc = SQLITE_ERROR;
   }
   return nErr;
+}
+
+/*
+** Token types used by the sqlite_complete() routine.  See the header
+** comments on that procedure for additional information.
+*/
+#define tkEXPLAIN 0
+#define tkCREATE  1
+#define tkTEMP    2
+#define tkTRIGGER 3
+#define tkEND     4
+#define tkSEMI    5
+#define tkWS      6
+#define tkOTHER   7
+
+/*
+** Return TRUE if the given SQL string ends in a semicolon.
+**
+** Special handling is require for CREATE TRIGGER statements.
+** Whenever the CREATE TRIGGER keywords are seen, the statement
+** must end with ";END;".
+**
+** This implementation uses a state machine with 7 states:
+**
+**   (0) START     At the beginning or end of an SQL statement.  This routine
+**                 returns 1 if it ends in the START state and 0 if it ends
+**                 in any other state.
+**
+**   (1) EXPLAIN   The keyword EXPLAIN has been seen at the beginning of 
+**                 a statement.
+**
+**   (2) CREATE    The keyword CREATE has been seen at the beginning of a
+**                 statement, possibly preceeded by EXPLAIN and/or followed by
+**                 TEMP or TEMPORARY
+**
+**   (3) NORMAL    We are in the middle of statement which ends with a single
+**                 semicolon.
+**
+**   (4) TRIGGER   We are in the middle of a trigger definition that must be
+**                 ended by a semicolon, the keyword END, and another semicolon.
+**
+**   (5) SEMI      We've seen the first semicolon in the ";END;" that occurs at
+**                 the end of a trigger definition.
+**
+**   (6) END       We've seen the ";END" of the ";END;" that occurs at the end
+**                 of a trigger difinition.
+**
+** Transitions between states above are determined by tokens extracted
+** from the input.  The following tokens are significant:
+**
+**   (0) tkEXPLAIN   The "explain" keyword.
+**   (1) tkCREATE    The "create" keyword.
+**   (2) tkTEMP      The "temp" or "temporary" keyword.
+**   (3) tkTRIGGER   The "trigger" keyword.
+**   (4) tkEND       The "end" keyword.
+**   (5) tkSEMI      A semicolon.
+**   (6) tkWS        Whitespace
+**   (7) tkOTHER     Any other SQL token.
+**
+** Whitespace never causes a state transition and is always ignored.
+*/
+int sqlite_complete(const char *zSql){
+  u8 state = 0;   /* Current state, using numbers defined in header comment */
+  u8 token;       /* Value of the next token */
+
+  /* The following matrix defines the transition from one state to another
+  ** according to what token is seen.  trans[state][token] returns the
+  ** next state.
+  */
+  static const u8 trans[7][8] = {
+                     /* Token:                                                */
+     /* State:       **  EXPLAIN  CREATE  TEMP  TRIGGER  END  SEMI  WS  OTHER */
+     /* 0   START: */ {       1,      2,    3,       3,   3,    0,  0,     3, },
+     /* 1 EXPLAIN: */ {       3,      2,    3,       3,   3,    0,  1,     3, },
+     /* 2  CREATE: */ {       3,      3,    2,       4,   3,    0,  2,     3, },
+     /* 3  NORMAL: */ {       3,      3,    3,       3,   3,    0,  3,     3, },
+     /* 4 TRIGGER: */ {       4,      4,    4,       4,   4,    5,  4,     4, },
+     /* 5    SEMI: */ {       4,      4,    4,       4,   6,    5,  5,     4, },
+     /* 6     END: */ {       4,      4,    4,       4,   4,    0,  6,     4, },
+  };
+
+  while( *zSql ){
+    switch( *zSql ){
+      case ';': {  /* A semicolon */
+        token = tkSEMI;
+        break;
+      }
+      case ' ':
+      case '\r':
+      case '\t':
+      case '\n':
+      case '\f': {  /* White space is ignored */
+        token = tkWS;
+        break;
+      }
+      case '/': {   /* C-style comments */
+        if( zSql[1]!='*' ){
+          token = tkOTHER;
+          break;
+        }
+        zSql += 2;
+        while( zSql[0] && (zSql[0]!='*' || zSql[1]!='/') ){ zSql++; }
+        if( zSql[0]==0 ) return 0;
+        zSql++;
+        token = tkWS;
+        break;
+      }
+      case '-': {   /* SQL-style comments from "--" to end of line */
+        if( zSql[1]!='-' ){
+          token = tkOTHER;
+          break;
+        }
+        while( *zSql && *zSql!='\n' ){ zSql++; }
+        if( *zSql==0 ) return state==0;
+        token = tkWS;
+        break;
+      }
+      case '[': {   /* Microsoft-style identifiers in [...] */
+        zSql++;
+        while( *zSql && *zSql!=']' ){ zSql++; }
+        if( *zSql==0 ) return 0;
+        token = tkOTHER;
+        break;
+      }
+      case '"':     /* single- and double-quoted strings */
+      case '\'': {
+        int c = *zSql;
+        zSql++;
+        while( *zSql && *zSql!=c ){ zSql++; }
+        if( *zSql==0 ) return 0;
+        token = tkOTHER;
+        break;
+      }
+      default: {
+        if( isIdChar[(u8)*zSql] ){
+          /* Keywords and unquoted identifiers */
+          int nId;
+          for(nId=1; isIdChar[(u8)zSql[nId]]; nId++){}
+          switch( *zSql ){
+            case 'c': case 'C': {
+              if( nId==6 && sqliteStrNICmp(zSql, "create", 6)==0 ){
+                token = tkCREATE;
+              }else{
+                token = tkOTHER;
+              }
+              break;
+            }
+            case 't': case 'T': {
+              if( nId==7 && sqliteStrNICmp(zSql, "trigger", 7)==0 ){
+                token = tkTRIGGER;
+              }else if( nId==4 && sqliteStrNICmp(zSql, "temp", 4)==0 ){
+                token = tkTEMP;
+              }else if( nId==9 && sqliteStrNICmp(zSql, "temporary", 9)==0 ){
+                token = tkTEMP;
+              }else{
+                token = tkOTHER;
+              }
+              break;
+            }
+            case 'e':  case 'E': {
+              if( nId==3 && sqliteStrNICmp(zSql, "end", 3)==0 ){
+                token = tkEND;
+              }else if( nId==7 && sqliteStrNICmp(zSql, "explain", 7)==0 ){
+                token = tkEXPLAIN;
+              }else{
+                token = tkOTHER;
+              }
+              break;
+            }
+            default: {
+              token = tkOTHER;
+              break;
+            }
+          }
+          zSql += nId-1;
+        }else{
+          /* Operators and special symbols */
+          token = tkOTHER;
+        }
+        break;
+      }
+    }
+    state = trans[state][token];
+    zSql++;
+  }
+  return state==0;
 }
