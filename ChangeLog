@@ -1,3 +1,108 @@
+2004-08-19  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      - Cleanup
+
+2004-08-19  Brian France  <list@firehawksystems.com>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      main/SAPI.c
+      main/SAPI.c:
+      
+      [MFH] If you send a post with a content-type header and then the next post
+      without the content-type header, raw_post_data will not be set.  This is
+      because SG(request_info).post_entry is set to the first requests function
+      pointer which makes it follow the wrong code path.
+
+2004-08-19  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h:
+      - Second wave of garbage removal.
+
+2004-08-19  Brian France  <list@firehawksystems.com>
+
+    * NEWS
+      main/SAPI.c:
+      
+      If you send a post with a content-type header and then the next post
+      without the content-type header, raw_post_data will not be set.  This is
+      because SG(request_info).post_entry is set to the first requests function
+      pointer which makes it follow the wrong code path.
+
+2004-08-19  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c:
+      - Stop using garbage. Please let me know if you find any bugs resulting
+      - of this patch (very likely). (Dmitry, Andi)
+
+2004-08-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      Janify [tm]
+
+2004-08-19  Antony Dovgal  <tony2001@phpclub.net>
+
+    * NEWS
+      NEWS:
+      BFN
+
+    * ext/standard/basic_functions.c:
+      fix #29737 in the right way with performance in mind
+
+    * (PHP_5_0)
+      ext/standard/basic_functions.c:
+      MFH: fix #29737 (ip2long should return -1 if IP is 255.255.255.255 and
+      FALSE on error)
+
+    * ext/standard/basic_functions.c:
+      fix #29737 (ip2long should return -1 if IP is 255.255.255.255 and FALSE on
+      error)
+
+2004-08-19  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      NEWS:
+      - Reorder
+
+2004-08-19  Christian Stocker  <chregu@phant.ch>
+
+    * (PHP_5_0)
+      NEWS
+      ext/xml/compat.c
+      ext/xml/xml.c:
+      MFH
+      - Fixed bug #29657 (xml_* functions throw non descriptive error).
+        (Christian, Rob)
+      - Fixed bug #29711 (Changed ext/xml to default to UTF-8 output). (Rob)
+
+    * ext/xml/compat.c
+      ext/xml/xml.c:
+      fix for bug #29657 xml_* functions throw non descriptive error, compared to
+      php4
+      fix for bug #29711 libxml and non iso-8859-1.
+      If no encoding specified, it defaults to UTF-8 now
+
+2004-08-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/tests/dba_handler.inc:
+      Fix issue in test
+
+    * NEWS:
+      BFN + reorder
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Implement #29728: Reflection API Feature: Default parameter value.
+        . ReflectionParameter::isDefaultValueAvailable()
+        . ReflectionParameter::getDefaultValue()
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Nedd to work on copy
+
 2004-08-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_reflection_api.c:
