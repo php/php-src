@@ -42,6 +42,7 @@
 extern zend_module_entry cybercash_module_entry;
 #define cybercash_module_ptr &cybercash_module_entry
 
+PHP_MINFO_FUNCTION(cybercash);
 PHP_FUNCTION(cybercash_encr);
 PHP_FUNCTION(cybercash_decr);
 PHP_FUNCTION(cybercash_base64_encode);
