@@ -1,10 +1,10 @@
 <!--
-     $Id: package.dtd,v 1.26 2002-05-27 01:22:59 ssb Exp $
+     $Id: package.dtd,v 1.27 2002-07-21 07:06:56 ssb Exp $
 
-     This is the PEAR package description, version 1.0b8.
+     This is the PEAR package description, version 1.0b9.
      It should be used with the informal public identifier:
 
-         "-//PHP Group//DTD PEAR Package 1.0b8//EN//XML"
+         "-//PHP Group//DTD PEAR Package 1.0b9//EN//XML"
 
      Copyright (c) 1997-2002 The PHP Group             
 
@@ -30,6 +30,8 @@
 <!ELEMENT summary (#PCDATA)>
 
 <!ELEMENT description (#PCDATA)>
+
+<!ELEMENT license (#PCDATA)>
 
 <!ELEMENT maintainers (maintainer)+>
 
@@ -89,9 +91,9 @@
 
 <!ELEMENT dep (#PCDATA)>
 <!ATTLIST dep
-	type    (pkg|ext|php|prog|ldlib|rtlib|os|websrv|sapi) #REQUIRED
-	rel     (has|eq|lt|le|gt|ge)                          'has'
-	version CDATA                                         #IMPLIED>
+	type    (pkg|ext|php|prog|ldlib|rtlib|os|websrv|sapi|zend) #REQUIRED
+	rel     (has|eq|lt|le|gt|ge) 'has'
+	version CDATA                #IMPLIED>
 
 <!ELEMENT provides (#PCDATA)>
 <!ATTLIST provides
@@ -103,7 +105,6 @@
         phase   (pre-install  |post-install  |
                  pre-uninstall|post-uninstall|
                  pre-build    |post-build    |
-                 pre-configure|post-configure|
                  pre-setup    |post-setup    )         #REQUIRED>
 
 <!ELEMENT configureoptions (configureoption*)>
