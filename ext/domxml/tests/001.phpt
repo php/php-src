@@ -1,7 +1,7 @@
 --TEST--
 Test 1: Accessing single node
 --SKIPIF--
-<?php if(!extension_loaded(domxml)) print "skip"; ?>
+<?php if(!extension_loaded("domxml")) print "skip"; ?>
 --POST--
 --GET--
 --FILE--
