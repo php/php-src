@@ -43,6 +43,22 @@ ZEND_API void zend_llist_add_element(zend_llist *l, void *element)
 }
 
 
+ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element)
+{
+	zend_llist_element *tmp = pemalloc(sizeof(zend_llist_element)+l->size-1, l->persistent);
+
+	tmp->next = l->head;
+	tmp->prev = NULL;
+	if (l->head) {
+		l->head->prev = tmp;
+	} else {
+		l->tail = tmp;
+	}
+	l->head = tmp;
+	memcpy(tmp->data, element, l->size);
+}
+
+
 ZEND_API void zend_llist_del_element(zend_llist *l, void *element)
 {
 	zend_llist_element *current=l->head;

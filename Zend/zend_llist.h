@@ -36,6 +36,7 @@ typedef struct {
 
 ZEND_API void zend_llist_init(zend_llist *l, size_t size, void (*dtor)(void *data), unsigned char persistent);
 ZEND_API void zend_llist_add_element(zend_llist *l, void *element);
+ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element);
 ZEND_API void zend_llist_del_element(zend_llist *l, void *element);
 ZEND_API void zend_llist_destroy(zend_llist *l);
 ZEND_API void zend_llist_clean(zend_llist *l);
