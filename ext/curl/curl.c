@@ -729,20 +729,16 @@ PHP_FUNCTION(curl_setopt)
 		case CURLOPT_USERAGENT:
 		case CURLOPT_FTPPORT:
 		case CURLOPT_COOKIE:
-		case CURLOPT_COOKIEFILE:
 		case CURLOPT_REFERER:
 		case CURLOPT_INTERFACE:
 		case CURLOPT_KRB4LEVEL: 
-		case CURLOPT_RANDOM_FILE:
 		case CURLOPT_EGDSOCKET:
 		case CURLOPT_CAINFO: 
 		case CURLOPT_CAPATH:
-		case CURLOPT_COOKIEJAR:
 		case CURLOPT_SSL_CIPHER_LIST: 
 		case CURLOPT_SSLKEY:
-		case CURLOPT_SSLCERT:
 		case CURLOPT_SSLKEYTYPE: 
-		case CURLOPT_SSLKEYPASSWD: 
+		case CURLOPT_SSLKEYPASSWD:
 		case CURLOPT_SSLENGINE: 
 #ifdef CURLOPT_ENCODING
 		case CURLOPT_ENCODING: 
@@ -953,6 +949,28 @@ PHP_FUNCTION(curl_setopt)
 			zend_llist_add_element(&ch->to_free.slist, &slist);
 
 			error = curl_easy_setopt(ch->cp, option, slist);
+
+			break;
+		}
+		/* the following options deal with files, therefor safe_mode & open_basedir checks
+		 * are required.
+		 */
+		case CURLOPT_COOKIEJAR:
+		case CURLOPT_SSLCERT:
+		case CURLOPT_RANDOM_FILE:
+		case CURLOPT_COOKIEFILE: {
+			char *copystr = NULL;
+
+			convert_to_string_ex(zvalue);
+
+			if (php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(zvalue), "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+				RETURN_FALSE;			
+			}
+
+			copystr = estrndup(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
+
+			error = curl_easy_setopt(ch->cp, option, copystr);
+			zend_llist_add_element(&ch->to_free.str, &copystr);
 
 			break;
 		}
