@@ -1,3 +1,59 @@
+2003-03-06  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c
+      zend_execute.c:
+      Fix warnings
+
+    * zend_execute.c:
+      Fix error message
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_language_parser.y:
+      Require abstract classes to be explicitly declared 'abstract', in order to
+      avoid making developers traverse the entire class/interface hierarchy
+      before they can figure out whether a class is instantiable
+      (ok, so it makes sense :)
+
+2003-03-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES:
+      -german+english+.
+
+    * ZEND_CHANGES:
+      D some TBDs
+
+2003-03-06  Jani Taskinen  <sniper@iki.fi>
+
+    * zend_execute.c:
+      Fixed bug #19943 (the memleaks)
+
+2003-03-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_highlight.c:
+      More cleanup of the zend_strip() function.
+      No longer strip __LINE__, since while it may become useless it could break
+      code where __LINE__ is passed as a function parameter.
+
+    * zend_highlight.c:
+      Fixed in zend_strip() that corrupted heredoc.
+      Optimized the writing routine by moving from putchar() to fwrite().
+      Changed hardcoded opcode # to it's defined name.
+
+2003-03-06  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c:
+      Change opcode name
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_language_parser.y:
+      Add class type hints
+
 2003-03-05  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c:
