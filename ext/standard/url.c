@@ -56,12 +56,12 @@ void free_url(url * theurl)
 	efree(theurl);
 }
 
-url *url_parse(char *string)
+url *url_parse(char *str)
 {
 	regex_t re;
 	regmatch_t subs[10];
 	int err;
-	int length = strlen(string);
+	int length = strlen(str);
 	char *result;
 
 	url *ret = (url *) emalloc(sizeof(url));
@@ -79,7 +79,7 @@ url *url_parse(char *string)
 		efree(ret);
 		return NULL;
 	}
-	err = regexec(&re, string, 10, subs, 0);
+	err = regexec(&re, str, 10, subs, 0);
 	if (err) {
 		/*php_error(E_WARNING,"Error with regex\n");*/
 		efree(ret);
@@ -87,28 +87,28 @@ url *url_parse(char *string)
 	}
 	/* no processing necessary on the scheme */
 	if (subs[2].rm_so != -1 && subs[2].rm_so < length) {
-		ret->scheme = estrndup(string + subs[2].rm_so, subs[2].rm_eo - subs[2].rm_so);
+		ret->scheme = estrndup(str + subs[2].rm_so, subs[2].rm_eo - subs[2].rm_so);
 	}
 
 	/* the path to the resource */
 	if (subs[5].rm_so != -1 && subs[5].rm_so < length) {
-		ret->path = estrndup(string + subs[5].rm_so, subs[5].rm_eo - subs[5].rm_so);
+		ret->path = estrndup(str + subs[5].rm_so, subs[5].rm_eo - subs[5].rm_so);
 	}
 
 	/* the query part */
 	if (subs[7].rm_so != -1 && subs[7].rm_so < length) {
-		ret->query = estrndup(string + subs[7].rm_so, subs[7].rm_eo - subs[7].rm_so);
+		ret->query = estrndup(str + subs[7].rm_so, subs[7].rm_eo - subs[7].rm_so);
 	}
 
 	/* the fragment */
 	if (subs[9].rm_so != -1 && subs[9].rm_so < length) {
-		ret->fragment = estrndup(string + subs[9].rm_so, subs[9].rm_eo - subs[9].rm_so);
+		ret->fragment = estrndup(str + subs[9].rm_so, subs[9].rm_eo - subs[9].rm_so);
 	}
 
 	/* extract the username, pass, and port from the hostname */
 	if (subs[4].rm_so != -1 && subs[4].rm_so < length) {
 		/* extract username:pass@host:port from regex results */
-		result = estrndup(string + subs[4].rm_so, subs[4].rm_eo - subs[4].rm_so);
+		result = estrndup(str + subs[4].rm_so, subs[4].rm_eo - subs[4].rm_so);
 		length = strlen(result);
 
 		regfree(&re);			/* free the old regex */
@@ -155,18 +155,18 @@ url *url_parse(char *string)
    Parse a URL and return its components */
 PHP_FUNCTION(parse_url)
 {
-	pval **string;
+	pval **str;
 	url *resource;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &string) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string_ex(string);
+	convert_to_string_ex(str);
 
-	resource = url_parse((*string)->value.str.val);
+	resource = url_parse((*str)->value.str.val);
 
 	if (resource == NULL) {
-		php_error(E_WARNING, "unable to parse url (%s)", (*string)->value.str.val);
+		php_error(E_WARNING, "unable to parse url (%s)", (*str)->value.str.val);
 		RETURN_FALSE;
 	}
 	/* allocate an array for return */

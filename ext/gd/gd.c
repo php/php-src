@@ -1591,7 +1591,7 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	pval *IM, *SIZE, *X, *Y, *C, *COL;
 	gdImagePtr im;
 	int ch = 0, col, x, y, size, i, l = 0;
-	unsigned char *string = NULL;
+	unsigned char *str = NULL;
 	int ind_type;
 	gdFontPtr font;
 	GD_TLS_VARS;
@@ -1613,8 +1613,8 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	if (mode < 2) {
 		ch = (int)((unsigned char)*(C->value.str.val));
 	} else {
-		string = (unsigned char *) estrndup(C->value.str.val,C->value.str.len);
-		l = strlen(string);
+		str = (unsigned char *) estrndup(C->value.str.val,C->value.str.len);
+		l = strlen(str);
 	}
 
 	y = Y->value.lval;
@@ -1624,8 +1624,8 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	im = zend_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
-		if (string) {
-			efree(string);
+		if (str) {
+			efree(str);
 		}
 		RETURN_FALSE;
 	}
@@ -1641,22 +1641,22 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 			break;
     	case 2:
 			for (i = 0; (i < l); i++) {
-				gdImageChar(im, font, x, y, (int)((unsigned char)string[i]),
+				gdImageChar(im, font, x, y, (int)((unsigned char)str[i]),
 							col);
 				x += font->w;
 			}
 			break;
     	case 3: {
 			for (i = 0; (i < l); i++) {
-				/* php_gdimagecharup(im, font, x, y, (int)string[i], col); */
-				gdImageCharUp(im, font, x, y, (int)string[i], col);
+				/* php_gdimagecharup(im, font, x, y, (int)str[i], col); */
+				gdImageCharUp(im, font, x, y, (int)str[i], col);
 				y -= font->w;
 			}
 			break;
 		}
 	}
-	if (string) {
-		efree(string);
+	if (str) {
+		efree(str);
 	}
 	RETURN_TRUE;
 }	
@@ -1869,7 +1869,7 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	int  col, x, y, l=0, i;
 	int brect[8];
 	double ptsize, angle;
-	unsigned char *string = NULL, *fontname = NULL;
+	unsigned char *str = NULL, *fontname = NULL;
 	int ind_type;
 	char				*error;
 
@@ -1910,11 +1910,11 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	ptsize = PTSIZE->value.dval;
 	angle = ANGLE->value.dval * (M_PI/180); /* convert to radians */
 
-	string = (unsigned char *) C->value.str.val;
-	l = strlen(string);
+	str = (unsigned char *) C->value.str.val;
+	l = strlen(str);
 	fontname = (unsigned char *) FONTNAME->value.str.val;
 
-	error = gdttf(im, brect, col, fontname, ptsize, angle, x, y, string);
+	error = gdttf(im, brect, col, fontname, ptsize, angle, x, y, str);
 
 	if (error) {
 		php_error(E_WARNING, error);

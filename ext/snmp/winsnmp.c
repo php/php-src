@@ -116,13 +116,13 @@ void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
             } else {
                 /* Display the resulting variable bindings.*/
 				UINT i;
-                char *string = NULL;
+                char *str = NULL;
 
                 for(i=0; i < variableBindings.len; i++)
                     {
-                    SnmpMgrOidToStr(&variableBindings.list[i].name, &string);
-                    php_printf("Variable = %s\n", string);
-                    if (string) SNMP_free(string);
+                    SnmpMgrOidToStr(&variableBindings.list[i].name, &str);
+                    php_printf("Variable = %s\n", str);
+                    if (str) SNMP_free(str);
 
                     php_printf("Value    = ");
                     SnmpUtilPrintAsnAny(&variableBindings.list[i].value);
@@ -177,11 +177,11 @@ void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
                 else
                     {
                     /* Display resulting variable binding for this iteration. */
-                    char *string = NULL;
+                    char *str = NULL;
 
-                    SnmpMgrOidToStr(&variableBindings.list[0].name, &string);
-                    php_printf("Variable = %s\n", string);
-                    if (string) SNMP_free(string);
+                    SnmpMgrOidToStr(&variableBindings.list[0].name, &str);
+                    php_printf("Variable = %s\n", str);
+                    if (str) SNMP_free(str);
 
                     php_printf("Value    = ");
                     SnmpUtilPrintAsnAny(&variableBindings.list[0].value);

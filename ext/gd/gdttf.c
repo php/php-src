@@ -719,7 +719,7 @@ gdttfchar(gdImage *im, int fg, font_t *font,
 
 char *
 gdttf(gdImage *im, int *brect, int fg, char *fontname,
-	double ptsize, double angle, int x, int y, char *string)
+	double ptsize, double angle, int x, int y, char *str)
 {
 	TT_F26Dot6 ur_x=0, ur_y=0, ll_x=0, ll_y=0;
 	TT_F26Dot6 advance_x, advance_y, advance, x1, y1;
@@ -756,7 +756,7 @@ gdttf(gdImage *im, int *brect, int fg, char *fontname,
 	cos_a = font->cos_a;
 	advance_x = advance_y = 0;
 
-	next=string;
+	next=str;
 	while (*next) {	  
 		ch = *next;
 
