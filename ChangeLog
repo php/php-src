@@ -1,3 +1,34 @@
+2004-11-27  Jon Parise  <jon+php@csh.rit.edu>
+
+    * (PHP_4_3)
+      pear/packages/Net_SMTP-1.2.3.tar
+      pear/packages/Net_SMTP-1.2.6.tar
+      pear/packages/Net_SMTP-1.2.6.tar:
+      Distribute Net_SMTP 1.2.6 instead of 1.2.3.  The former includes a year's
+      worth of additional bug fixes and improvements, and it has been a stable
+      release for over six months.
+      
+      PEAR Bug: 2839
+
+2004-11-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/shmop/shmop.c
+      ext/shmop/shmop.c:
+      MFH: Improve offset check inside shmop_write().
+
+    * ext/shmop/shmop.c:
+      Improve offset check inside shmop_write().
+
+2004-11-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      BFN
+
+    * (PHP_5_0)
+      NEWS:
+      - Nowadays we drop fixes :-)
+
 2004-11-26  Stanislav Malyshev  <stas@zend.com>
 
     * ext/sqlite/sqlite.c:
