@@ -126,7 +126,7 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
 
 		memset(&hints, '\0', sizeof(hints));
 		hints.ai_family = AF_UNSPEC;
-		if (n = getaddrinfo(host, NULL, &hints, &res)) {
+		if ((n = getaddrinfo(host, NULL, &hints, &res))) {
 			php_error(E_WARNING, "php_network_getaddresses: getaddrinfo failed: %s", PHP_GAI_STRERROR(n));
 			return -1;
 		}
