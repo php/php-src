@@ -497,9 +497,6 @@ static void _php_ibase_service_action(INTERNAL_FUNCTION_PARAMETERS, char svc_act
 			case isc_spb_sts_sys_relations:
 				goto options_argument;
 		}
-	} else if (svc_action == isc_action_svc_display_user) {
-		*buf = svc_action;
-		spb_len = 1;
 	} else {
 		/* these actions all expect different types of arguments */
 		switch (action) {
@@ -508,15 +505,16 @@ unknown_option:
 				_php_ibase_module_error("Unrecognised option (%ld)" TSRMLS_CC, action);
 				RETURN_FALSE;
 				
-			case isc_spb_prp_activate:
-			case isc_spb_prp_db_online:
 			case isc_spb_rpr_check_db:
 			case isc_spb_rpr_ignore_checksum:
 			case isc_spb_rpr_kill_shadows:
 			case isc_spb_rpr_mend_db:
 			case isc_spb_rpr_validate_db:
-			case isc_spb_rpr_full:
 			case isc_spb_rpr_sweep_db:
+				svc_action = isc_action_svc_repair;
+				
+			case isc_spb_prp_activate:
+			case isc_spb_prp_db_online:
 options_argument:	
 				argument |= action;
 				action = isc_spb_options;
