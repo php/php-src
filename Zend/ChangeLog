@@ -1,3 +1,34 @@
+2003-03-09  Zeev Suraski  <zeev@zend.com>
+
+    * zend_language_parser.y:
+      Optimize
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y:
+      Fix handling of ::foo
+
+    * zend_compile.c:
+      Cleanup
+
+2003-03-09  Andi Gutmans  <andi@zend.com>
+
+    * zend_language_scanner.l:
+      - Nuke junk
+
+2003-03-09  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y:
+      Fix parsing rules of namespaces/classes
+
+    * zend_language_parser.y:
+      Add ability to use ::interface_name in implements
+
+    * zend_compile.c:
+      Fix :: handling
+
 2003-03-07  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * ZEND_CHANGES:

@@ -1,3 +1,30 @@
+2003-03-09  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/user_filters.c:
+      Adjustment to user filters reimplementation.  Make a bucket an object
+      containing a resource(the real bucket) and a data element for direct
+      operations.  Simplifies
+      user interface and reduces number of function calls/reallocs needed.
+
+2003-03-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * (PHP_4_3)
+      ext/pgsql/pgsql.c:
+      - No C++ comments! (Patch by Magnus)
+
+2003-03-09  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi-readme.txt
+      sapi/nsapi/nsapi-readme.txt:
+      Changes for iPlanet Webserver 6
+
+2003-03-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/string.c:
+      - Fix proto
+
 2003-03-08  Georg Richter  <georg.richter@phpev.de>
 
     * ext/mysqli/mysqli.c
