@@ -139,7 +139,7 @@ ZEND_API void *zend_plist_find(int id, int *type)
 
 
 ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type)
-{	
+{
 	int rsrc_id;
 
 	rsrc_id = zend_list_insert(rsrc_pointer, rsrc_type);
