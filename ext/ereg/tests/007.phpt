@@ -6,7 +6,7 @@ Test empty result buffer in reg_replace
 <?php 
 	$a="abcd";
 	$b=ereg_replace("abcd","",$a);
-	echo strlen($b);
+	echo "strlen(\$b)=".strlen($b);
 ?>
 --EXPECT--
-0
+strlen($b)=0

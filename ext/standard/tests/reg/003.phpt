@@ -7,5 +7,4 @@ ereg_replace single-quote test
   echo ereg_replace("\\\\'","'",$a)
 ?>
 --EXPECT--
-
 'test

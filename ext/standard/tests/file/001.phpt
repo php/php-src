@@ -88,10 +88,10 @@ if (is_dir('test.link')) {
 } else {
     echo "test.link is not a directory\n";
 }
-if (is_dir('file')) {
-    echo "file is a directory\n";
+if (is_dir('../file')) {
+    echo "../file is a directory\n";
 } else {
-    echo "file is not a directory\n";
+    echo "../file is not a directory\n";
 }
 if (is_dir('test.file')) {
     echo "test.file is a directory\n";
@@ -135,7 +135,7 @@ test.file is not executable
 test.file is a regular file
 test.link is a regular file
 test.link is not a directory
-file is a directory
+../file is a directory
 test.file is not a directory
 test.file does not exist
 test.file does not exist

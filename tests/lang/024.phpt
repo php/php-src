@@ -14,7 +14,6 @@ for ($jdk=0; $jdk<50; $jdk++) {
     * various control structures), while trying to combine code from other parts of the parser as well.
     */
 ?>
-
 *** Testing assignments and variable aliasing: ***
 <?php 
   /* This test tests assignments to variables using other variables as variable-names */
@@ -366,7 +365,7 @@ while ($i<5) {
 ***********************
 
 *** Nested file include test ***
-<?php include("lang/023-2.inc"); ?>
+<?php include("023-2.inc"); ?>
 ********************************
 
 <?php 
@@ -380,18 +379,12 @@ while ($i<5) {
 
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -403,7 +396,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -421,7 +413,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -433,10 +424,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -480,7 +469,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -513,12 +501,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -552,7 +538,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -606,7 +591,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -615,28 +599,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -648,7 +623,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -666,7 +640,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -678,10 +651,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -725,7 +696,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -758,12 +728,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -797,7 +765,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -851,7 +818,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -860,28 +826,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -893,7 +850,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -911,7 +867,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -923,10 +878,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -970,7 +923,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -1003,12 +955,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -1042,7 +992,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -1096,7 +1045,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -1105,28 +1053,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -1138,7 +1077,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -1156,7 +1094,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -1168,10 +1105,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -1215,7 +1150,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -1248,12 +1182,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -1287,7 +1219,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -1341,7 +1272,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -1350,28 +1280,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -1383,7 +1304,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -1401,7 +1321,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -1413,10 +1332,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -1460,7 +1377,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -1493,12 +1409,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -1532,7 +1446,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -1586,7 +1499,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -1595,28 +1507,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -1628,7 +1531,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -1646,7 +1548,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -1658,10 +1559,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -1705,7 +1604,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -1738,12 +1636,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -1777,7 +1673,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -1831,7 +1726,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -1840,28 +1734,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -1873,7 +1758,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -1891,7 +1775,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -1903,10 +1786,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -1950,7 +1831,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -1983,12 +1863,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -2022,7 +1900,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -2076,7 +1953,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -2085,28 +1961,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -2118,7 +1985,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -2136,7 +2002,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -2148,10 +2013,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -2195,7 +2058,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -2228,12 +2090,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -2267,7 +2127,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -2321,7 +2180,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -2330,28 +2188,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -2363,7 +2212,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -2381,7 +2229,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -2393,10 +2240,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -2440,7 +2285,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -2473,12 +2317,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -2512,7 +2354,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -2566,7 +2407,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -2575,28 +2415,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -2608,7 +2439,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -2626,7 +2456,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -2638,10 +2467,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -2685,7 +2512,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -2718,12 +2544,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -2757,7 +2581,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -2811,7 +2634,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -2820,28 +2642,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -2853,7 +2666,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -2871,7 +2683,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -2883,10 +2694,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -2930,7 +2739,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -2963,12 +2771,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -3002,7 +2808,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -3056,7 +2861,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -3065,28 +2869,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -3098,7 +2893,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -3116,7 +2910,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -3128,10 +2921,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -3175,7 +2966,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -3208,12 +2998,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -3247,7 +3035,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -3301,7 +3088,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -3310,28 +3096,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -3343,7 +3120,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -3361,7 +3137,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -3373,10 +3148,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -3420,7 +3193,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -3453,12 +3225,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -3492,7 +3262,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -3546,7 +3315,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -3555,28 +3323,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -3588,7 +3347,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -3606,7 +3364,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -3618,10 +3375,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -3665,7 +3420,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -3698,12 +3452,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -3737,7 +3489,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -3791,7 +3542,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -3800,28 +3550,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -3833,7 +3574,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -3851,7 +3591,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -3863,10 +3602,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -3910,7 +3647,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -3943,12 +3679,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -3982,7 +3716,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -4036,7 +3769,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -4045,28 +3777,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -4078,7 +3801,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -4096,7 +3818,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -4108,10 +3829,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -4155,7 +3874,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -4188,12 +3906,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -4227,7 +3943,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -4281,7 +3996,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -4290,28 +4004,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -4323,7 +4028,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -4341,7 +4045,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -4353,10 +4056,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -4400,7 +4101,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -4433,12 +4133,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -4472,7 +4170,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -4526,7 +4223,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -4535,28 +4231,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -4568,7 +4255,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -4586,7 +4272,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -4598,10 +4283,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -4645,7 +4328,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -4678,12 +4360,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -4717,7 +4397,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -4771,7 +4450,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -4780,28 +4458,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -4813,7 +4482,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -4831,7 +4499,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -4843,10 +4510,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -4890,7 +4555,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -4923,12 +4587,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -4962,7 +4624,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -5016,7 +4677,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -5025,28 +4685,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -5058,7 +4709,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -5076,7 +4726,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -5088,10 +4737,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -5135,7 +4782,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -5168,12 +4814,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -5207,7 +4851,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -5261,7 +4904,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -5270,28 +4912,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -5303,7 +4936,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -5321,7 +4953,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -5333,10 +4964,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -5380,7 +5009,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -5413,12 +5041,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -5452,7 +5078,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -5506,7 +5131,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -5515,28 +5139,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -5548,7 +5163,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -5566,7 +5180,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -5578,10 +5191,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -5625,7 +5236,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -5658,12 +5268,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -5697,7 +5305,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -5751,7 +5358,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -5760,28 +5366,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -5793,7 +5390,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -5811,7 +5407,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -5823,10 +5418,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -5870,7 +5463,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -5903,12 +5495,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -5942,7 +5532,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -5996,7 +5585,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -6005,28 +5593,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -6038,7 +5617,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -6056,7 +5634,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -6068,10 +5645,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -6115,7 +5690,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -6148,12 +5722,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -6187,7 +5759,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -6241,7 +5812,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -6250,28 +5820,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -6283,7 +5844,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -6301,7 +5861,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -6313,10 +5872,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -6360,7 +5917,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -6393,12 +5949,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -6432,7 +5986,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -6486,7 +6039,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -6495,28 +6047,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -6528,7 +6071,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -6546,7 +6088,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -6558,10 +6099,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -6605,7 +6144,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -6638,12 +6176,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -6677,7 +6213,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -6731,7 +6266,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -6740,28 +6274,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -6773,7 +6298,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -6791,7 +6315,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -6803,10 +6326,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -6850,7 +6371,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -6883,12 +6403,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -6922,7 +6440,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -6976,7 +6493,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -6985,28 +6501,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -7018,7 +6525,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -7036,7 +6542,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -7048,10 +6553,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -7095,7 +6598,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -7128,12 +6630,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -7167,7 +6667,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -7221,7 +6720,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -7230,28 +6728,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -7263,7 +6752,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -7281,7 +6769,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -7293,10 +6780,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -7340,7 +6825,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -7373,12 +6857,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -7412,7 +6894,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -7466,7 +6947,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -7475,28 +6955,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -7508,7 +6979,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -7526,7 +6996,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -7538,10 +7007,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -7585,7 +7052,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -7618,12 +7084,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -7657,7 +7121,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -7711,7 +7174,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -7720,28 +7182,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -7753,7 +7206,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -7771,7 +7223,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -7783,10 +7234,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -7830,7 +7279,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -7863,12 +7311,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -7902,7 +7348,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -7956,7 +7401,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -7965,28 +7409,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -7998,7 +7433,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -8016,7 +7450,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -8028,10 +7461,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -8075,7 +7506,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -8108,12 +7538,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -8147,7 +7575,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -8201,7 +7628,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -8210,28 +7636,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -8243,7 +7660,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -8261,7 +7677,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -8273,10 +7688,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -8320,7 +7733,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -8353,12 +7765,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -8392,7 +7802,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -8446,7 +7855,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -8455,28 +7863,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -8488,7 +7887,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -8506,7 +7904,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -8518,10 +7915,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -8565,7 +7960,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -8598,12 +7992,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -8637,7 +8029,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -8691,7 +8082,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -8700,28 +8090,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -8733,7 +8114,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -8751,7 +8131,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -8763,10 +8142,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -8810,7 +8187,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -8843,12 +8219,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -8882,7 +8256,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -8936,7 +8309,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -8945,28 +8317,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -8978,7 +8341,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -8996,7 +8358,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -9008,10 +8369,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -9055,7 +8414,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -9088,12 +8446,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -9127,7 +8483,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -9181,7 +8536,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -9190,28 +8544,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -9223,7 +8568,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -9241,7 +8585,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -9253,10 +8596,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -9300,7 +8641,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -9333,12 +8673,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -9372,7 +8710,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -9426,7 +8763,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -9435,28 +8771,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -9468,7 +8795,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -9486,7 +8812,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -9498,10 +8823,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -9545,7 +8868,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -9578,12 +8900,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -9617,7 +8937,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -9671,7 +8990,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -9680,28 +8998,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -9713,7 +9022,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -9731,7 +9039,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -9743,10 +9050,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -9790,7 +9095,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -9823,12 +9127,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -9862,7 +9164,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -9916,7 +9217,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -9925,28 +9225,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -9958,7 +9249,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -9976,7 +9266,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -9988,10 +9277,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -10035,7 +9322,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -10068,12 +9354,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -10107,7 +9391,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -10161,7 +9444,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -10170,28 +9452,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -10203,7 +9476,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -10221,7 +9493,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -10233,10 +9504,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -10280,7 +9549,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -10313,12 +9581,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -10352,7 +9618,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -10406,7 +9671,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -10415,28 +9679,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -10448,7 +9703,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -10466,7 +9720,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -10478,10 +9731,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -10525,7 +9776,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -10558,12 +9808,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -10597,7 +9845,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -10651,7 +9898,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -10660,28 +9906,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -10693,7 +9930,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -10711,7 +9947,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -10723,10 +9958,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -10770,7 +10003,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -10803,12 +10035,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -10842,7 +10072,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -10896,7 +10125,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -10905,28 +10133,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -10938,7 +10157,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -10956,7 +10174,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -10968,10 +10185,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -11015,7 +10230,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -11048,12 +10262,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -11087,7 +10299,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -11141,7 +10352,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -11150,28 +10360,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -11183,7 +10384,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -11201,7 +10401,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -11213,10 +10412,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -11260,7 +10457,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -11293,12 +10489,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -11332,7 +10526,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -11386,7 +10579,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -11395,28 +10587,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -11428,7 +10611,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -11446,7 +10628,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -11458,10 +10639,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -11505,7 +10684,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -11538,12 +10716,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -11577,7 +10753,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -11631,7 +10806,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -11640,28 +10814,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -11673,7 +10838,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -11691,7 +10855,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -11703,10 +10866,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -11750,7 +10911,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -11783,12 +10943,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -11822,7 +10980,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -11876,7 +11033,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -11885,28 +11041,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -11918,7 +11065,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -11936,7 +11082,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -11948,10 +11093,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -11995,7 +11138,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -12028,12 +11170,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -12067,7 +11207,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -12121,7 +11260,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -12130,28 +11268,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -12163,7 +11292,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -12181,7 +11309,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -12193,10 +11320,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -12240,7 +11365,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -12273,12 +11397,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -12312,7 +11434,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -12366,7 +11487,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -12375,28 +11495,19 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
 
 
-
-
 <html>
 <head>
-
-
 *** Testing assignments and variable aliasing: ***
-
 This should read "blah": blah
-
 This should read "this is nifty": this is nifty
-
 *************************************************
 
 *** Testing integer operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -12408,7 +11519,6 @@ Correct result - 3:  3
 *********************************
 
 *** Testing real operators ***
-
 Correct result - 8:  8
 Correct result - 8:  8
 Correct result - 2:  2
@@ -12426,7 +11536,6 @@ this_still_works
 should_print
 
 
-
 *** Seriously nested if's test ***
 ** spelling correction by kluzz **
 Only two lines of text should follow:
@@ -12438,10 +11547,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4
 4 4
 **********************************
 
-
 *** C-style else-if's ***
 This should be displayed
-
 *************************
 
 *** WHILE tests ***
@@ -12485,7 +11592,6 @@ This should be displayed
 37 is greater than 20
 38 is greater than 20
 39 is greater than 20
-
 *******************
 
 
@@ -12518,12 +11624,10 @@ ${test21}[2] = 5
 ${test22}[0] = 4
 ${test22}[1] = 5
 ${test22}[2] = 6
-
 *********************
 
 *** hash test... ***
 commented out...
-
 **************************
 
 *** Hash resizing test ***
@@ -12557,7 +11661,6 @@ baaaaaaaaa
 2
 baaaaaaaaaa
 1
-
 **************************
 
 
@@ -12611,7 +11714,6 @@ $k should go from 0 to 2
     $k=1
     $k=2
 $i=2
-
 ***********************
 
 *** Nested file include test ***
@@ -12620,7 +11722,6 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************
 
 Tests completed.
