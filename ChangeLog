@@ -1,3 +1,41 @@
+2001-03-09  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    Adding a new function odbc_next_result() allowing the query to return more than one result.
+    This can be done with a stored procedure or by sending more than one select to the server.
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h:
+    Adding a new function mssql_next_result() allowing the query to return more than one result.
+    This can be done with a stored procedure or by sending more than one select to the server.
+
+2001-03-09  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.c:
+    - Fixed argument checking for call_user_func* functions and allowed
+      specifying array($obj, 'method') syntax for call_user_func_array. 
+
+2001-03-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Add a format identifier for escaping %m, so that it can be safely used
+    as a parameter for Javascript.
+
+2001-03-09  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/article.c: still a typo
+
+    * ext/midgard/article.c: Fixed typo.
+
+2001-03-09  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Experimental/HTML/Menu.php
+      pear/Experimental/README:
+    Added a directory Experimental/ as no one said "no" on the PEAR list...
+     - added a PHPlib menu2.inc rewrite
+     - added a README for the directory with a policy for Experimental/
+
 2001-03-08  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/ircg/config.m4: s/--with-ircg/--with-ircg-config/
