@@ -955,8 +955,15 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 						efree(lcname);
 						if (found == FAILURE) {
 							if (callable_name) {
-								callable_name_len = snprintf(name_buf, 1024, "%s::%s", Z_STRVAL_PP(obj), Z_STRVAL_PP(method));
-								*callable_name = estrndup(name_buf, callable_name_len);
+								char *ptr;
+
+								callable_name_len = Z_STRLEN_PP(obj) + Z_STRLEN_PP(method) + sizeof("::");
+								ptr = *callable_name = emalloc(callable_name_len);
+								memcpy(ptr, Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
+								ptr += Z_STRLEN_PP(obj);
+								memcpy(ptr, "::", sizeof("::") - 1);
+								ptr += sizeof("::") - 1;
+								memcpy(ptr, Z_STRVAL_PP(method), Z_STRLEN_PP(method) + 1);
 							}
 							break;
 						}
