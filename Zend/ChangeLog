@@ -1,3 +1,24 @@
+2002-10-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_ini_parser.y
+      zend_ini_scanner.l
+      zend_globals.h: MFZE1
+
+2002-10-14  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c
+      zend_language_parser.y: - Support new classname::$class_name, e.g.:
+    <?
+
+    	class foo::bar {
+    		public $hello = "Hello, World\n";
+    	}
+
+    	$name = "bar";
+    	$obj = new foo::$name;
+    	print $obj->hello;
+    ?>
+
 2002-10-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_extensions.h: Increased the API number. (re: floats patch)

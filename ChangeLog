@@ -1,3 +1,99 @@
+2002-10-14  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/iconv/tests/translit-failure.phpt:
+    This test should not print out the error (which is correct).
+
+2002-10-14  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/embed/config.m4:
+    Respect INSTALL_ROOT var. Thanks to Jani for catching this one.
+
+2002-10-14  Tal Peer  <tal@kaktos.co.il>
+
+    * pear/PEAR/Installer.php:
+    * Fixed a nasty bug preventing installation of pecl exts.
+
+2002-10-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/browscap.c: Fixed bug #19649.
+
+    * ext/standard/tests/general_functions/001.phpt:
+    Added float printing tests.
+
+2002-10-14  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/php_network.h: Revert to 1.34.
+
+2002-10-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/formatted_print.c:
+    Fixed a bug (introduced in previous patch) that caused non-double values to
+    be converted to 0 by printf/sprint functions when %f format is specified.
+
+2002-10-14  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS
+      win32/registry.c:
+    Change the 'security level' of registry entries to PHP_INI_SYSTEM.  They're
+    in the system hive in the registry, so only people with administrative
+    priveleges can add stuff in there.
+
+2002-10-14  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/cli/php_cli.c: - Revert, got tricked by a stale object file
+
+2002-10-14  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * run-tests.php: Fixed warnings
+
+2002-10-14  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/embed/config.m4: Install lib into $(prefix)/lib.
+    Make $(prefix)/lib before trying to copy the lib into it.
+
+2002-10-14  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * run-tests.php:
+    - Added the TEST_PHP_USER environment variable with which you can specify
+      additional directories with tests to run. This is ideal for having your own
+      test suite on your system. You can specify more directories by seperating them
+      with a ",", for example:
+
+      TEST_PHP_USER=/dat/dev/xdebug/tests,/dat/dev/srm/tests make test
+
+    * sapi/cli/php_cli.c: - Fix CLI
+
+2002-10-14  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/php_network.h: Whitespace fixes.
+
+    * main/php_network.h: Fix Win32 build.
+
+2002-10-14  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c: *cough*
+    Fix inverted logic for the assert.
+
+2002-10-14  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/snmp/snmp.c: This is not zval..
+
+2002-10-14  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/file.c
+      main/streams.c:
+    - fgets($fp) (with no length parameter) now uses a buffer as long as the
+      the next line available from the $fp. Previously, there was a 1KB limit.
+      
+
+    * ext/standard/tests/file/userstreams.phpt:
+    Add a sanity check and more verbose output in the case of an error.
+
+    * main/network.c: Implement better SSL error handling.
+
+    * main/user_streams.c:
+    Fix stream_eof result interpretation (and thus the user-streams test).
+
 2002-10-13  Wez Furlong  <wez.php@thebrainroom.net>
 
     * main/streams.c: Remove some old code.
