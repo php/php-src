@@ -465,7 +465,7 @@ static void zend_error_va(int type, const char *file, uint lineno, const char *f
 	va_list args;
 	
 	va_start(args, format);
-	zend_error_cb(E_ERROR, file, lineno, format, args);
+	zend_error_cb(type, file, lineno, format, args);
 	va_end(args);
 }
 
