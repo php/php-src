@@ -67,7 +67,7 @@
 %left '*' '/' '%'
 %right '!' '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right '['
-%nonassoc T_NEW
+%nonassoc T_NEW T_DELETE
 %token T_EXIT
 %token T_IF
 %left T_ELSEIF
@@ -201,6 +201,7 @@ unticked_statement:
 	|	T_FOREACH '(' expr_without_variable T_AS { zend_do_foreach_begin(&$1, &$3, &$2, &$4, 0 TSRMLS_CC); } w_cvar foreach_optional_arg ')' { zend_do_foreach_cont(&$6, &$7, &$4 TSRMLS_CC); } foreach_statement { zend_do_foreach_end(&$1, &$2 TSRMLS_CC); }
 	|	T_DECLARE { zend_do_declare_begin(TSRMLS_C); } '(' declare_list ')' declare_statement { zend_do_declare_end(TSRMLS_C); }
 	|	';'		/* empty statement */
+	|	T_DELETE cvar	';' { zend_do_end_variable_parse(BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&$1, ZEND_UNSET_OBJ TSRMLS_CC); }
 ;
 
 unset_variables:
@@ -209,7 +210,7 @@ unset_variables:
 ;
 
 unset_variable:
-		cvar	{ zend_do_end_variable_parse(BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&$1 TSRMLS_CC); }
+		cvar	{ zend_do_end_variable_parse(BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&$1, ZEND_UNSET_REG TSRMLS_CC); }
 ;
 
 use_filename:

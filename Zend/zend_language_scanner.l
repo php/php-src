@@ -765,6 +765,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_NEW;
 }
 
+<ST_IN_SCRIPTING>"delete" {
+	return T_DELETE;
+}
+
 <ST_IN_SCRIPTING>"var" {
 	return T_VAR;
 }

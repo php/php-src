@@ -175,6 +175,29 @@ typedef struct _zend_object {
 	HashTable *properties;
 } zend_object;
 
+typedef unsigned int zend_object_handle;
+
+typedef zend_object *(*get_address_t)(zend_object_handle handle); /* Don't return zval ** so that we can't change it */
+typedef zval **(*get_property_address_t)(zend_object_handle handle, zval *offset, int type);
+typedef void (*add_ref_t)(zend_object_handle handle);
+typedef void (*del_ref_t)(zend_object_handle handle);
+typedef void (*delete_obj_t)(zend_object_handle handle);
+
+typedef struct _zend_object_handlers {
+	get_address_t get_address;
+	get_property_address_t get_property_address;
+	add_ref_t add_ref;
+	del_ref_t del_ref;
+	delete_obj_t delete_obj;
+} zend_object_handlers;
+
+typedef	struct _zend_object_value {
+	zend_object_handle handle;
+	zend_object_handlers handlers;
+} zend_object_value;
+
+#include "zend_objects.h"
+
 typedef union _zvalue_value {
 	long lval;					/* long value */
 	double dval;				/* double value */
@@ -183,7 +206,12 @@ typedef union _zvalue_value {
 		int len;
 	} str;
 	HashTable *ht;				/* hash table value */
-	zend_object obj;
+/*	struct {
+		zend_class_entry *ce;
+		HashTable *properties;
+	} obj;
+*/
+	zend_object_value obj;
 } zvalue_value;
 
 

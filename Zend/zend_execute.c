@@ -1497,7 +1497,7 @@ binary_assign_op_addr: {
 							object.ptr = _get_object_zval_ptr(&opline->op1, Ts, &EG(free_op1) TSRMLS_CC);
 							
 							if ((!object.ptr && Ts[opline->op1.u.var].EA.type==IS_OVERLOADED_OBJECT)								
-								|| ((object.ptr && object.ptr->type==IS_OBJECT) && (object.ptr->value.obj.ce->handle_function_call))) { /* overloaded function call */
+								|| ((object.ptr && object.ptr->type==IS_OBJECT) && Z_OBJCE_P(object.ptr)->handle_function_call)) { /* overloaded function call */
 								zend_overloaded_element overloaded_element;
 
 								overloaded_element.element = *function_name;
@@ -1517,15 +1517,22 @@ binary_assign_op_addr: {
 								goto overloaded_function_call_cont;
 							}
 
-							if (!object.ptr || object.ptr->type != IS_OBJECT) {
+							if (object.ptr && object.ptr->type == IS_OBJECT) {
+								active_function_table = &Z_OBJCE_P(object.ptr)->function_table;	
+							} else {
 								zend_error(E_ERROR, "Call to a member function on a non-object");
 							}
-							if (!object.ptr->is_ref && object.ptr->refcount > 1) {
-								zend_error(E_ERROR, "Bug: Problem in method call\n");
+							if (!PZVAL_IS_REF(object.ptr)) {
+								object.ptr->refcount++; /* For $this pointer */
+							} else {
+								zval *this_ptr;
+								ALLOC_ZVAL(this_ptr);
+								*this_ptr = *object.ptr;
+								INIT_PZVAL(this_ptr);
+								zval_copy_ctor(this_ptr);
+								object.ptr = this_ptr;
 							}
-							object.ptr->is_ref=1;
-							object.ptr->refcount++; /* For $this pointer */
-							active_function_table = &(object.ptr->value.obj.ce->function_table);
+							active_function_table = &Z_OBJCE_P(object.ptr)->function_table;
 						}
 					} else { /* function pointer */
 						object.ptr = NULL;
@@ -1568,7 +1575,7 @@ do_fcall_common:
 						INIT_ZVAL(*(Ts[opline->result.u.var].var.ptr));
 						((zend_internal_function *) function_state.function)->handler(opline->extended_value, Ts[opline->result.u.var].var.ptr, object.ptr, return_value_used TSRMLS_CC);
 						if (object.ptr) {
-							object.ptr->refcount--;
+							zval_ptr_dtor(&object.ptr);
 						}
 						Ts[opline->result.u.var].var.ptr->is_ref = 0;
 						Ts[opline->result.u.var].var.ptr->refcount = 1;
@@ -1596,9 +1603,6 @@ do_fcall_common:
 							zval *null_ptr = NULL;
 
 							zend_hash_update(function_state.function_symbol_table, "this", sizeof("this"), &null_ptr, sizeof(zval *), (void **) &this_ptr);
-							if (!PZVAL_IS_REF(object.ptr)) {
-								zend_error(E_WARNING, "Problem with method call - please report this bug");
-                			}
 							*this_ptr = object.ptr;
 							object.ptr = NULL;
 						}
@@ -2142,12 +2146,26 @@ send_by_ref:
 				NEXT_OPCODE();
 			case ZEND_UNSET_VAR: {
 					zval tmp, *variable = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+					zval **object;
+					zend_bool unset_object;
 
 					if (variable->type != IS_STRING) {
 						tmp = *variable;
 						zval_copy_ctor(&tmp);
 						convert_to_string(&tmp);
 						variable = &tmp;
+					}
+
+					unset_object = (opline->extended_value == ZEND_UNSET_OBJ);
+					
+					if (unset_object) {
+						if (zend_hash_find(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1, (void **)&object) == FAILURE) {
+							zend_error(E_ERROR, "Cannot delete non-existing object");
+						}
+						if (Z_TYPE_PP(object) != IS_OBJECT) {
+							zend_error(E_ERROR, "Cannot call delete on non-object type");
+						}
+						(*object)->value.obj.handlers.delete_obj((*object)->value.obj.handle);
 					}
 
 					zend_hash_del(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1);
@@ -2161,7 +2179,11 @@ send_by_ref:
 			case ZEND_UNSET_DIM_OBJ: {
 					zval **container = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_R);
 					zval *offset = get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R);
+					zend_bool unset_object;
+					zval **object;
 
+					unset_object = (opline->extended_value == ZEND_UNSET_OBJ);
+					
 					if (container) {
 						HashTable *ht;
 
@@ -2170,7 +2192,7 @@ send_by_ref:
 								ht = (*container)->value.ht;
 								break;
 							case IS_OBJECT:
-								ht = (*container)->value.obj.properties;
+								ht = Z_OBJPROP_PP(container);
 								break;
 							default:
 								ht = NULL;
@@ -2190,13 +2212,44 @@ send_by_ref:
 										} else {
 											index = offset->value.lval;
 										}
+
+										if (unset_object) {
+											if (zend_hash_index_find(ht, index, (void **)&object) == FAILURE) {
+												zend_error(E_ERROR, "Cannot delete non-existing object");
+											}
+											if (Z_TYPE_PP(object) != IS_OBJECT) {
+												zend_error(E_ERROR, "Cannot call delete on non-object type");
+											}
+											(*object)->value.obj.handlers.delete_obj((*object)->value.obj.handle);
+										}
+					
 										zend_hash_index_del(ht, index);
 										break;
 									}
 								case IS_STRING:
+									if (unset_object) {
+										if (zend_hash_find(ht, offset->value.str.val, offset->value.str.len+1, (void **)&object) == FAILURE) {
+											zend_error(E_ERROR, "Cannot delete non-existing object");
+										}
+										if (Z_TYPE_PP(object) != IS_OBJECT) {
+											zend_error(E_ERROR, "Cannot call delete on non-object type");
+										}
+										(*object)->value.obj.handlers.delete_obj((*object)->value.obj.handle);
+									}
+
 									zend_hash_del(ht, offset->value.str.val, offset->value.str.len+1);
 									break;
 								case IS_NULL:
+									if (unset_object) {
+										if (zend_hash_find(ht, "", sizeof(""), (void **)&object) == FAILURE) {
+											zend_error(E_ERROR, "Cannot delete non-existing object");
+										}
+										if (Z_TYPE_PP(object) != IS_OBJECT) {
+											zend_error(E_ERROR, "Cannot call delete on non-object type");
+										}
+										(*object)->value.obj.handlers.delete_obj((*object)->value.obj.handle);
+									}
+
 									zend_hash_del(ht, "", sizeof(""));
 									break;
 								default: 
@@ -2259,7 +2312,6 @@ send_by_ref:
 					PZVAL_LOCK(array);
 
 					fe_ht = HASH_OF(array);
-
 					if (!fe_ht) {
 						zend_error(E_WARNING, "Invalid argument supplied for foreach()");
 						opline = op_array->opcodes+opline->op2.u.opline_num;
@@ -2293,15 +2345,18 @@ send_by_ref:
 				}
 				NEXT_OPCODE();
 			case ZEND_JMP_NO_CTOR: {
-					zval *object;
+					zval *object_zval;
+					zend_object *object;
 
 					if (opline->op1.op_type == IS_VAR) {
 						PZVAL_LOCK(*Ts[opline->op1.u.var].var.ptr_ptr);
 					}
 					
-					object = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
-					if (!object->value.obj.ce->handle_function_call
-						&& !zend_hash_exists(&object->value.obj.ce->function_table, object->value.obj.ce->name, object->value.obj.ce->name_length+1)) {
+					object_zval = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+					object = object_zval->value.obj.handlers.get_address(object_zval->value.obj.handle);
+
+					if (!object->ce->handle_function_call
+						&& !zend_hash_exists(&object->ce->function_table, object->ce->name, object->ce->name_length+1)) {
 						opline = op_array->opcodes + opline->op2.u.opline_num;
 						continue;
 					}

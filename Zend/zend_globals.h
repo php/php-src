@@ -200,6 +200,7 @@ struct _zend_executor_globals {
 	int lambda_count;
 
 	HashTable ini_directives;
+	zend_objects objects;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

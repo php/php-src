@@ -211,7 +211,6 @@ static int zend_check_class(zval *obj, zend_class_entry *expected_ce)
 			return 1;
 		}
 	}
-
 	return 0;
 }
 
@@ -569,17 +568,21 @@ ZEND_API int _array_init(zval *arg ZEND_FILE_LINE_DC)
 ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_LINE_DC TSRMLS_DC)
 {
 	zval *tmp;
+	zend_object *object;
 
 	if (!class_type->constants_updated) {
 		zend_hash_apply_with_argument(&class_type->default_properties, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
 		class_type->constants_updated = 1;
 	}
 	
-	ALLOC_HASHTABLE_REL(arg->value.obj.properties);
-	zend_hash_init(arg->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(arg->value.obj.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	arg->value.obj = zend_objects_new(&object);
+
+	ALLOC_HASHTABLE_REL(object->properties);
+	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	object->ce = class_type;
+
 	arg->type = IS_OBJECT;
-	arg->value.obj.ce = class_type;
 	return SUCCESS;
 }
 
@@ -943,7 +946,7 @@ ZEND_API int add_property_resource_ex(zval *arg, char *key, uint key_len, long n
 	
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_RESOURCE(tmp, n);
-	
+
 	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
@@ -954,7 +957,7 @@ ZEND_API int add_property_double_ex(zval *arg, char *key, uint key_len, double d
 	
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_DOUBLE(tmp, d);
-	
+
 	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &tmp, sizeof(zval *), NULL);
 }
 
