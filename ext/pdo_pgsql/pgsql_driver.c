@@ -257,7 +257,7 @@ static int pdo_pgsql_transaction_cmd(const char *cmd, pdo_dbh_t *dbh TSRMLS_DC)
 	res = PQexec(H->server, cmd);
 
 	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-	  ret = 0;
+		ret = 0;
 	}
 
 	PQclear(res);
@@ -266,17 +266,17 @@ static int pdo_pgsql_transaction_cmd(const char *cmd, pdo_dbh_t *dbh TSRMLS_DC)
 
 static int pgsql_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
 {
-  return pdo_pgsql_transaction_cmd("BEGIN", dbh TSRMLS_CC);
+	return pdo_pgsql_transaction_cmd("BEGIN", dbh TSRMLS_CC);
 }
 
 static int pgsql_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
 {
-  return pdo_pgsql_transaction_cmd("COMMIT", dbh TSRMLS_CC);
+	return pdo_pgsql_transaction_cmd("COMMIT", dbh TSRMLS_CC);
 }
 
 static int pgsql_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 {
-  return pdo_pgsql_transaction_cmd("ROLLBACK", dbh TSRMLS_CC);
+	return pdo_pgsql_transaction_cmd("ROLLBACK", dbh TSRMLS_CC);
 }
 
 static struct pdo_dbh_methods pgsql_methods = {
