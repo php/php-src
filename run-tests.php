@@ -480,28 +480,50 @@ TEST $file
 
 	// Default ini settings
 	$settings = array (
-		"-d 'open_basedir='",
-		"-d 'disable_functions='",
-		"-d 'error_reporting=2047'",
-		"-d 'display_errors=0'",
-		"-d 'log_errors=0'",
-		"-d 'html_errors=0'",
-		"-d 'docref_root=/phpmanual/'",
-		"-d 'docref_ext=.html'",
-		"-d 'error_prepend_string='",
-		"-d 'error_append_string='",
-		"-d 'auto_append_file='",
-		"-d 'auto_prepend_file='",
+		"open_basedir=",
+		"disable_functions=",
+		"error_reporting=2047",
+		"display_errors=0",
+		"log_errors=1",
+		"html_errors=1",
+		"track_errors=1",
+		"docref_root=/phpmanual/",
+		"docref_ext=.html",
+		"error_prepend_string=",
+		"error_append_string=",
+		"auto_append_file=",
+		"auto_prepend_file=",
 	);
-	$ini_settings = ' '. join (' ', $settings);
+	$ini_settings = array();
+	foreach($settings as $setting) {
+		if (strpos($setting, '=')!==false) {
+			$setting = explode("=", $setting);
+			$name = trim(strtolower($setting[0]));
+			$value = trim($setting[1]);
+			$ini_settings[$name] = $value;
+		}
+	}
 
-	// Any special ini settings
+	// Any special ini settings 
+	// these may overwrite the test defaults...
 	if (array_key_exists('INI', $section_text)) {
 		foreach(preg_split( "/[\n\r]+/", $section_text['INI']) as $setting) {
-			if (strlen($setting)) {
-				$ini_settings .= " -d '$setting'";
+			if (strpos($setting, '=')!==false) {
+				$setting = explode("=", $setting);
+				$name = trim(strtolower($setting[0]));
+				$value = trim($setting[1]);
+				$ini_settings[$name] = $value;
 			}
 		}
+	}
+	if (count($ini_settings)) {
+		$settings = '';
+		foreach($ini_settings as $name => $value) {
+			$settings .= " -d '$name=$value'";
+		}
+		$ini_settings = $settings;
+	} else {
+		$ini_settings = '';
 	}
 
 	// We've satisfied the preconditions - run the test!
