@@ -24,22 +24,28 @@ if test "$PHP_READLINE" != "no"; then
   fi
   PHP_ADD_INCLUDE($READLINE_DIR/include)
 
-  AC_CHECK_LIB(ncurses, tgetent, [
-    PHP_ADD_LIBRARY_WITH_PATH(ncurses,,READLINE_SHARED_LIBADD)],[
-    AC_CHECK_LIB(termcap, tgetent, [
-      PHP_ADD_LIBRARY_WITH_PATH(termcap,,READLINE_SHARED_LIBADD)])
+  AC_CHECK_LIB(ncurses, tgetent,
+  [
+    PHP_ADD_LIBRARY_WITH_PATH(ncurses,,READLINE_SHARED_LIBADD)
+  ],[
+    AC_CHECK_LIB(termcap, tgetent,
+    [
+      PHP_ADD_LIBRARY_WITH_PATH(termcap,,READLINE_SHARED_LIBADD)
+    ])
   ])
 
-  PHP_CHECK_LIBRARY(readline, readline, [
-		PHP_ADD_LIBRARY_WITH_PATH(readline, $READLINE_DIR/lib, READLINE_SHARED_LIBADD)
+  PHP_CHECK_LIBRARY(readline, readline,
+  [
+    PHP_ADD_LIBRARY_WITH_PATH(readline, $READLINE_DIR/lib, READLINE_SHARED_LIBADD)
   ], [
     AC_MSG_ERROR(readline library not found)
   ], [
     -L$READLINE_DIR/lib 
   ])
 
-  PHP_CHECK_LIBRARY(history, add_history, [
-	  PHP_ADD_LIBRARY_WITH_PATH(history, $READLINE_DIR/lib, READLINE_SHARED_LIBADD)
+  PHP_CHECK_LIBRARY(history, add_history,
+  [
+    PHP_ADD_LIBRARY_WITH_PATH(history, $READLINE_DIR/lib, READLINE_SHARED_LIBADD)
   ], [
     AC_MSG_ERROR(history library required by readline not found)
   ], [
@@ -64,14 +70,19 @@ if test "$PHP_LIBEDIT" != "no"; then
   fi
   PHP_ADD_INCLUDE($LIBEDIT_DIR/include)
 
-  AC_CHECK_LIB(ncurses, tgetent, [
-    PHP_ADD_LIBRARY_WITH_PATH(ncurses,,READLINE__SHARED_LIBADD)],[
-    AC_CHECK_LIB(termcap, tgetent, [
-      PHP_ADD_LIBRARY_WITH_PATH(termcap,,READLINE_SHARED_LIBADD)])
+  AC_CHECK_LIB(ncurses, tgetent,
+  [
+    PHP_ADD_LIBRARY_WITH_PATH(ncurses,,READLINE__SHARED_LIBADD)
+  ],[
+    AC_CHECK_LIB(termcap, tgetent,
+    [
+      PHP_ADD_LIBRARY_WITH_PATH(termcap,,READLINE_SHARED_LIBADD)
+    ])
   ])
 
-  PHP_CHECK_LIBRARY(edit, readline, [
-	  PHP_ADD_LIBRARY_WITH_PATH(edit, $LIBEDIT_DIR/lib, READLINE_SHARED_LIBADD)  
+  PHP_CHECK_LIBRARY(edit, readline,
+  [
+    PHP_ADD_LIBRARY_WITH_PATH(edit, $LIBEDIT_DIR/lib, READLINE_SHARED_LIBADD)  
   ], [
     AC_MSG_ERROR(edit library required by readline not found)
   ], [
