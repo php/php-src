@@ -697,7 +697,8 @@ PHP_FUNCTION(basename)
 }
 /* }}} */
 
-PHPAPI void php_dirname(char *str, int len) {
+PHPAPI void php_dirname(char *str, int len)
+{
 	register char *c;
 
 	c = str + len - 1;
