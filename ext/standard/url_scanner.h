@@ -45,6 +45,7 @@ typedef struct url_adapt_struct {
 	char delim;
 	char *p;
 	int l,ml;
+	int attr_done;
 } url_adapt_state_t;
 
 #endif
