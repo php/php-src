@@ -109,8 +109,8 @@ static sfsistat	mlfi_connect(SMFICTX *ctx, char *hostname, _SOCK_ADDR *hostaddr)
 	php_execute_script(&file_handle TSRMLS_CC);
 
 	/* call userland */
-	ZVAL_INIT(function_name);
-	ZVAL_INIT(param[0]);
+	INIT_PZVAL(function_name);
+	INIT_PZVAL(param[0]);
 
 	ZVAL_STRING(function_name, "milter_connect", 1);
 	ZVAL_STRING(param[0], hostname, 1);
@@ -118,7 +118,7 @@ static sfsistat	mlfi_connect(SMFICTX *ctx, char *hostname, _SOCK_ADDR *hostaddr)
 	call_user_function(CG(function_table), NULL, function_name, retval, 1, param TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
-		return Z_LONG_P(retval);
+		return Z_LVAL_P(retval);
 	} else {
 		return SMFIS_CONTINUE;
 	}
@@ -134,8 +134,8 @@ static sfsistat mlfi_helo(SMFICTX *ctx, char *helohost)
 	MG(ctx) = ctx;
 	
 	/* call userland */
-	ZVAL_INIT(function_name);
-	ZVAL_INIT(param[0]);
+	INIT_PZVAL(function_name);
+	INIT_PZVAL(param[0]);
 
 	ZVAL_STRING(function_name, "milter_helo", 1);
 	ZVAL_STRING(param[0], helohost, 1);
@@ -143,7 +143,7 @@ static sfsistat mlfi_helo(SMFICTX *ctx, char *helohost)
 	call_user_function(CG(function_table), NULL, function_name, retval, 1, param TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
-		return Z_LONG_P(retval);
+		return Z_LVAL_P(retval);
 	} else {
 		return SMFIS_CONTINUE;
 	}
@@ -159,8 +159,8 @@ static sfsistat mlfi_envfrom(SMFICTX *ctx, char **argv)
 	MG(ctx) = ctx;
 	
 	/* call userland */
-	ZVAL_INIT(function_name);
-	ZVAL_INIT(param[0]);
+	INIT_PZVAL(function_name);
+	INIT_PZVAL(param[0]);
 
 	ZVAL_STRING(function_name, "milter_envelope_from", 1);
 	array_init(param[0]);
@@ -173,7 +173,7 @@ static sfsistat mlfi_envfrom(SMFICTX *ctx, char **argv)
 	call_user_function(CG(function_table), NULL, function_name, retval, 1, param TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
-		return Z_LONG_P(retval);
+		return Z_LVAL_P(retval);
 	} else {
 		return SMFIS_CONTINUE;
 	}
@@ -189,8 +189,8 @@ static sfsistat mlfi_envrcpt(SMFICTX *ctx, char **argv)
 	MG(ctx) = ctx;
 	
 	/* call userland */
-	ZVAL_INIT(function_name);
-	ZVAL_INIT(param[0]);
+	INIT_PZVAL(function_name);
+	INIT_PZVAL(param[0]);
 
 	ZVAL_STRING(function_name, "milter_envelope_recipient", 1);
 	array_init(param[0]);
@@ -203,7 +203,7 @@ static sfsistat mlfi_envrcpt(SMFICTX *ctx, char **argv)
 	call_user_function(CG(function_table), NULL, function_name, retval, 1, param TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
-		return Z_LONG_P(retval);
+		return Z_LVAL_P(retval);
 	} else {
 		return SMFIS_CONTINUE;
 	}
@@ -219,9 +219,9 @@ static sfsistat mlfi_header(SMFICTX *ctx, char *headerf, char *headerv)
 	MG(ctx) = ctx;
 	
 	/* call userland */
-	ZVAL_INIT(function_name);
-	ZVAL_INIT(param[0]);
-	ZVAL_INIT(param[1]);
+	INIT_PZVAL(function_name);
+	INIT_PZVAL(param[0]);
+	INIT_PZVAL(param[1]);
 	
 	ZVAL_STRING(function_name, "milter_header", 1);
 	ZVAL_STRING(param[0], headerf, 1);
@@ -230,7 +230,7 @@ static sfsistat mlfi_header(SMFICTX *ctx, char *headerf, char *headerv)
 	call_user_function(CG(function_table), NULL, function_name, retval, 2, param TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
-		return Z_LONG_P(retval);
+		return Z_LVAL_P(retval);
 	} else {
 		return SMFIS_CONTINUE;
 	}
@@ -246,12 +246,12 @@ static sfsistat mlfi_eoh(SMFICTX *ctx)
 	MG(ctx) = ctx;
 	
 	/* call userland */
-	ZVAL_INIT(function_name);
+	INIT_PZVAL(function_name);
 	ZVAL_STRING(function_name, "milter_eoh", 1);
 	call_user_function(CG(function_table), NULL, function_name, retval, 0, NULL TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
-		return Z_LONG_P(retval);
+		return Z_LVAL_P(retval);
 	} else {
 		return SMFIS_CONTINUE;
 	}
@@ -267,8 +267,8 @@ static sfsistat mlfi_body(SMFICTX *ctx, u_char *bodyp, size_t len)
 	MG(ctx) = ctx;
 	
 	/* call userland */
-	ZVAL_INIT(function_name);
-	ZVAL_INIT(param[0]);
+	INIT_PZVAL(function_name);
+	INIT_PZVAL(param[0]);
 
 	ZVAL_STRING(function_name, "milter_body", 1);
 	ZVAL_STRINGL(param[0], bodyp, len, 1);
@@ -276,7 +276,7 @@ static sfsistat mlfi_body(SMFICTX *ctx, u_char *bodyp, size_t len)
 	call_user_function(CG(function_table), NULL, function_name, retval, 1, param TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
-		return Z_LONG_P(retval);
+		return Z_LVAL_P(retval);
 	} else {
 		return SMFIS_CONTINUE;
 	}
@@ -292,12 +292,12 @@ static sfsistat mlfi_eom(SMFICTX *ctx)
 	MG(ctx) = ctx;
 	
 	/* call userland */
-	ZVAL_INIT(function_name);
+	INIT_PZVAL(function_name);
 	ZVAL_STRING(function_name, "milter_eom", 1);
 	call_user_function(CG(function_table), NULL, function_name, retval, 0, NULL TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
-		return Z_LONG_P(retval);
+		return Z_LVAL_P(retval);
 	} else {
 		return SMFIS_CONTINUE;
 	}
@@ -313,12 +313,12 @@ static sfsistat mlfi_abort(SMFICTX *ctx)
 	MG(ctx) = ctx;
 	
 	/* call userland */
-	ZVAL_INIT(function_name);
+	INIT_PZVAL(function_name);
 	ZVAL_STRING(function_name, "milter_abort", 1);
 	call_user_function(CG(function_table), NULL, function_name, retval, 0, NULL TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
-		return Z_LONG_P(retval);
+		return Z_LVAL_P(retval);
 	} else {
 		return SMFIS_CONTINUE;
 	}
@@ -335,12 +335,12 @@ static sfsistat mlfi_close(SMFICTX *ctx)
 	MG(ctx) = ctx;
 	
 	/* call userland */
-	ZVAL_INIT(function_name);
+	INIT_PZVAL(function_name);
 	ZVAL_STRING(function_name, "milter_close", 1);
 	call_user_function(CG(function_table), NULL, function_name, retval, 0, NULL TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
-		ret = Z_LONG_P(retval);
+		ret = Z_LVAL_P(retval);
 	}
 	
 	php_request_shutdown((void *) 0);
@@ -627,7 +627,7 @@ static void php_milter_usage(char *argv0)
 				"  -e               Generate extended information for debugger/profiler\n"
 				"  -f <file>        Parse <file>.\n"
 				"  -h               This help\n"
-				"  -p               path to create socket\n"
+				"  -p <socket>      path to create socket\n"
 				"  -v               Version number\n"
 				"  -V <n>           set debug level to n (1 or 2).\n"
 				"  -z <file>        Load Zend extension <file>.\n"
@@ -671,8 +671,7 @@ int main(int argc, char *argv[])
 	char *param_error=NULL;
 /* end of temporary locals */
 
-	TSRMLS_FETCH();
-
+	void ***tsrm_ls;
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
@@ -703,6 +702,8 @@ int main(int argc, char *argv[])
 	ap_php_optarg = orig_optarg;
 
 	milter_sapi_module.executable_location = argv[0];
+
+	tsrm_ls = ts_resource(0);
 
 	sapi_module.startup(&milter_sapi_module);
 
@@ -774,7 +775,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'p': /* socket */
-				sock = strdup(optarg);
+				sock = strdup(ap_php_optarg);
 				break;
 
 			case 'v': /* show php version & quit */
@@ -794,7 +795,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'V': /* verbose */
-				flag_debug = atoi(optarg);
+				flag_debug = atoi(ap_php_optarg);
 				break;
 
 			case 'z': /* load extension file */
@@ -886,7 +887,6 @@ int main(int argc, char *argv[])
 			fprintf(stderr, "smfi_register failed\n");
 //				exit_status = EX_UNAVAILABLE;
 		} else {
-			debug(1, "smfi_register succeeded");
 			exit_status = smfi_main();
 		}			
 
