@@ -75,10 +75,10 @@ typedef struct {
 
 static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 {
-	REGSLS_FETCH
 	int r = 0;
 	int patlen = strlen(pattern);
 	reg_cache *rc = NULL;
+	REGLS_FETCH();
 	
 	if(_php3_hash_find(&REG(ht_rc), (char *) pattern, patlen, (void **) &rc) == FAILURE ||
 			rc->cflags != cflags) {
@@ -114,7 +114,7 @@ static void php_reg_init_globals(php_reg_globals *reg_globals)
 static int php_minit_regex(INIT_FUNC_ARGS)
 {
 #ifdef ZTS
-	reg_globals_id = tsrm_allocate_id(sizeof(php_reg_globals), php_reg_init_globals, NULL);
+	reg_globals_id = ts_allocate_id(sizeof(php_reg_globals), php_reg_init_globals, NULL);
 #else
 	php_reg_init_globals(&reg_globals);
 #endif
@@ -124,6 +124,8 @@ static int php_minit_regex(INIT_FUNC_ARGS)
 
 static int php_mshutdown_regex(SHUTDOWN_FUNC_ARGS)
 {
+	REGLS_FETCH();
+
 	_php3_hash_destroy(&REG(ht_rc));
 	return SUCCESS;
 }

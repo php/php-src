@@ -43,7 +43,7 @@ PHP_FUNCTION(eregi);
 PHP_FUNCTION(eregireplace);
 PHP_FUNCTION(eregreplace);
 PHP_FUNCTION(split);
-PHP_FUNCTION(sql_regcase);
+PHPAPI PHP_FUNCTION(sql_regcase);
 
 typedef struct {
 	HashTable ht_rc;
@@ -51,19 +51,19 @@ typedef struct {
 
 
 #ifdef ZTS
-#define REGSLS_D php_reg_globals *reg_globals
-#define REGSLS_DC , REGSLS_D
-#define REGSLS_C reg_globals
-#define REGSLS_CC , REGSLS_C
+#define REGLS_D php_reg_globals *reg_globals
+#define REGLS_DC , REGLS_D
+#define REGLS_C reg_globals
+#define REGLS_CC , REGLS_C
 #define REG(v) (reg_globals->v)
-#define REGSLS_FETCH php_reg_globals *reg_globals = ts_resource(reg_globals_id);
+#define REGLS_FETCH() php_reg_globals *reg_globals = ts_resource(reg_globals_id)
 #else
-#define REGSLS_D
-#define REGSLS_DC
-#define REGSLS_C
-#define REGSLS_CC
+#define REGLS_D
+#define REGLS_DC
+#define REGLS_C
+#define REGLS_CC
 #define REG(v) (reg_globals.v)
-#define REGSLS_FETCH
+#define REGLS_FETCH()
 #endif
 
 #define phpext_regex_ptr regexp_module_ptr
