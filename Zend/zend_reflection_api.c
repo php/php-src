@@ -890,26 +890,26 @@ ZEND_METHOD(reflection, export)
 		return;
 	}
 
-	/* Invoke the toString() method */
+	/* Invoke the __toString() method */
 	MAKE_STD_ZVAL(fname);
-	ZVAL_STRINGL(fname, "tostring", sizeof("tostring") - 1, 1);
+	ZVAL_STRINGL(fname, "__tostring", sizeof("__tostring") - 1, 1);
 	result= call_user_function_ex(NULL, &object, fname, &retval_ptr, 0, NULL, 0, NULL TSRMLS_CC);
 	zval_ptr_dtor(&fname);
 
 	if (result == FAILURE) {
-		_DO_THROW("Invokation of method tostring() failed");
+		_DO_THROW("Invokation of method __toString() failed");
 		/* Returns from this function */
 	}
 
 	if (!retval_ptr) {
-		zend_error(E_WARNING, "%s::tostring() did not return anything", Z_OBJCE_P(object)->name);
+		zend_error(E_WARNING, "%s::__toString() did not return anything", Z_OBJCE_P(object)->name);
 		RETURN_FALSE;
 	}
 
 	if (return_output) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
-		/* No need for _r variant, return of toString should always be a string */
+		/* No need for _r variant, return of __toString should always be a string */
 		zend_print_zval(retval_ptr, 0);
 		zend_printf("\n");
 		zval_ptr_dtor(&retval_ptr);
@@ -1000,9 +1000,9 @@ ZEND_METHOD(reflection_function, __construct)
 }
 /* }}} */
 
-/* {{{ proto public string Reflection_Function::toString()
+/* {{{ proto public string Reflection_Function::__toString()
    Returns a string representation */
-ZEND_METHOD(reflection_function, tostring)
+ZEND_METHOD(reflection_function, __toString)
 {
 	reflection_object *intern;
 	zend_function *fptr;
@@ -1362,9 +1362,9 @@ ZEND_METHOD(reflection_parameter, __construct)
 }
 /* }}} */
 
-/* {{{ proto public string Reflection_Parameter::toString()
+/* {{{ proto public string Reflection_Parameter::__toString()
    Returns a string representation */
-ZEND_METHOD(reflection_parameter, tostring)
+ZEND_METHOD(reflection_parameter, __toString)
 {
 	reflection_object *intern;
 	parameter_reference *param;
@@ -1517,9 +1517,9 @@ ZEND_METHOD(reflection_method, __construct)
 }
 /* }}} */
 
-/* {{{ proto public string Reflection_Method::toString()
+/* {{{ proto public string Reflection_Method::__toString()
    Returns a string representation */
-ZEND_METHOD(reflection_method, tostring)
+ZEND_METHOD(reflection_method, __toString)
 {
 	reflection_object *intern;
 	zend_function *mptr;
@@ -1819,9 +1819,9 @@ ZEND_METHOD(reflection_class, getstaticproperties)
 }
 /* }}} */
 
-/* {{{ proto public string Reflection_Class::toString()
+/* {{{ proto public string Reflection_Class::__toString()
    Returns a string representation */
-ZEND_METHOD(reflection_class, tostring)
+ZEND_METHOD(reflection_class, __toString)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
@@ -2453,9 +2453,9 @@ ZEND_METHOD(reflection_property, __construct)
 }
 /* }}} */
 
-/* {{{ proto public string Reflection_Property::toString()
+/* {{{ proto public string Reflection_Property::__toString()
    Returns a string representation */
-ZEND_METHOD(reflection_property, tostring)
+ZEND_METHOD(reflection_property, __toString)
 {
 	reflection_object *intern;
 	property_reference *ref;
@@ -2687,9 +2687,9 @@ ZEND_METHOD(reflection_extension, __construct)
 }
 /* }}} */
 
-/* {{{ proto public string Reflection_Extension::toString()
+/* {{{ proto public string Reflection_Extension::__toString()
    Returns a string representation */
-ZEND_METHOD(reflection_extension, tostring)
+ZEND_METHOD(reflection_extension, __toString)
 {
 	reflection_object *intern;
 	zend_module_entry *module;
@@ -2835,14 +2835,14 @@ static zend_function_entry reflection_functions[] = {
 
 static zend_function_entry reflector_functions[] = {
 	ZEND_FENTRY(export, NULL, NULL, ZEND_ACC_STATIC|ZEND_ACC_ABSTRACT|ZEND_ACC_PUBLIC)
-	ZEND_ABSTRACT_ME(reflector, tostring, NULL)
+	ZEND_ABSTRACT_ME(reflector, __toString, NULL)
 	{NULL, NULL, NULL}
 };
 
 static zend_function_entry reflection_function_functions[] = {
 	ZEND_ME(reflection_function, export, NULL, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_function, __construct, NULL, 0)
-	ZEND_ME(reflection_function, tostring, NULL, 0)
+	ZEND_ME(reflection_function, __toString, NULL, 0)
 	ZEND_ME(reflection_function, isinternal, NULL, 0)
 	ZEND_ME(reflection_function, isuserdefined, NULL, 0)
 	ZEND_ME(reflection_function, getname, NULL, 0)
@@ -2860,7 +2860,7 @@ static zend_function_entry reflection_function_functions[] = {
 static zend_function_entry reflection_method_functions[] = {
 	ZEND_ME(reflection_method, export, NULL, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_method, __construct, NULL, 0)
-	ZEND_ME(reflection_method, tostring, NULL, 0)
+	ZEND_ME(reflection_method, __toString, NULL, 0)
 	ZEND_ME(reflection_method, ispublic, NULL, 0)
 	ZEND_ME(reflection_method, isprivate, NULL, 0)
 	ZEND_ME(reflection_method, isprotected, NULL, 0)
@@ -2878,7 +2878,7 @@ static zend_function_entry reflection_method_functions[] = {
 static zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, export, NULL, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_class, __construct, NULL, 0)
-	ZEND_ME(reflection_class, tostring, NULL, 0)
+	ZEND_ME(reflection_class, __toString, NULL, 0)
 	ZEND_ME(reflection_class, getname, NULL, 0)
 	ZEND_ME(reflection_class, isinternal, NULL, 0)
 	ZEND_ME(reflection_class, isuserdefined, NULL, 0)
@@ -2916,7 +2916,7 @@ static zend_function_entry reflection_object_functions[] = {
 static zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, export, NULL, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_property, __construct, NULL, 0)
-	ZEND_ME(reflection_property, tostring, NULL, 0)
+	ZEND_ME(reflection_property, __toString, NULL, 0)
 	ZEND_ME(reflection_property, getname, NULL, 0)
 	ZEND_ME(reflection_property, getvalue, NULL, 0)
 	ZEND_ME(reflection_property, setvalue, NULL, 0)
@@ -2933,7 +2933,7 @@ static zend_function_entry reflection_property_functions[] = {
 static zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, export, NULL, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_parameter, __construct, NULL, 0)
-	ZEND_ME(reflection_parameter, tostring, NULL, 0)
+	ZEND_ME(reflection_parameter, __toString, NULL, 0)
 	ZEND_ME(reflection_parameter, getname, NULL, 0)
 	ZEND_ME(reflection_parameter, ispassedbyreference, NULL, 0)
 	ZEND_ME(reflection_parameter, getclass, NULL, 0)
@@ -2944,7 +2944,7 @@ static zend_function_entry reflection_parameter_functions[] = {
 static zend_function_entry reflection_extension_functions[] = {
 	ZEND_ME(reflection_extension, export, NULL, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_extension, __construct, NULL, 0)
-	ZEND_ME(reflection_extension, tostring, NULL, 0)
+	ZEND_ME(reflection_extension, __toString, NULL, 0)
 	ZEND_ME(reflection_extension, getname, NULL, 0)
 	ZEND_ME(reflection_extension, getversion, NULL, 0)
 	ZEND_ME(reflection_extension, getfunctions, NULL, 0)
