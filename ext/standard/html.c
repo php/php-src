@@ -415,12 +415,12 @@ static const struct {
 	int entitylen;
 	int flags;
 } basic_entities[] = {
-	{ '&',	"&amp;",	5,	0 },
 	{ '"',	"&quot;",	6,	ENT_HTML_QUOTE_DOUBLE },
 	{ '\'',	"&#039;",	6,	ENT_HTML_QUOTE_SINGLE },
 	{ '\'',	"&#39;",	5,	ENT_HTML_QUOTE_SINGLE },
 	{ '<',	"&lt;",		4,	0 },
 	{ '>',	"&gt;",		4,	0 },
+	{ '&',	"&amp;",	5,	0 }, /* this should come last */
 	{ 0, NULL, 0, 0 }
 };
 	
