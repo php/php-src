@@ -27,7 +27,7 @@ require_once 'PEAR.php';
 $GLOBALS['_PEAR_Config_instance'] = null;
 
 define('PEAR_CONFIG_DEFAULT_DOCDIR',
-       PHP_DATADIR.DIRECTORY_SEPARATOR.'pear'.DIRECTORY_SEPARATOR.'doc');
+       PHP_DATADIR.DIRECTORY_SEPARATOR.'doc'.DIRECTORY_SEPARATOR.'pear');
 
 // in case a --without-pear PHP installation is used
 if (!defined('PEAR_INSTALL_DIR')) {
@@ -38,21 +38,8 @@ if (!defined('PEAR_EXTENSION_DIR')) {
 }
 
 /**
- * This is a class for storing simple configuration values keeping
- * track of which are system-defined, user-defined or defaulted.  By
- * default, only user-defined settings are stored back to the user's
- * configuration file.
- *
- * Configuration member is a simple associative array.  Used keys:
- *
- *  master_server      which server to query for mirror lists etc.
- *  server             which server/mirror we're currently using
- *  username           PEAR username
- *  password           PEAR password (stored base64-encoded)
- *  php_dir            Where to install .php files
- *  ext_dir            Directory to install compiled libs in
- *  doc_dir            Directory to install documentation in
- *
+ * This is a class for storing configuration data, keeping track of
+ * which are system-defined, user-defined or defaulted.
  */
 class PEAR_Config extends PEAR
 {
@@ -114,7 +101,12 @@ class PEAR_Config extends PEAR
         'doc_dir' => array(
             'type' => 'directory',
             'default' => PEAR_CONFIG_DEFAULT_DOCDIR,
-            'doc' => 'directory where documentation is located',
+            'doc' => 'directory where documentation is installed',
+            ),
+        'bin_dir' => array(
+            'type' => 'directory',
+            'default' => PHP_BINDIR,
+            'doc' => 'directory where executables are installed',
             ),
         'username' => array(
             'type' => 'string',
@@ -775,18 +767,21 @@ when installing packages without a version or state specified',
     }
 
     // }}}
+    // {{{ getLayers()
 
     /**
-    * Returns the layers defined (except the 'default' one)
-    *
-    * @return array of the defined layers
-    */
+     * Returns the layers defined (except the 'default' one)
+     *
+     * @return array of the defined layers
+     */
     function getLayers()
     {
         $cf = $this->configuration;
         unset($cf['default']);
         return array_keys($cf);
     }
+
+    // }}}
 }
 
 ?>

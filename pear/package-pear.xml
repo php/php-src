@@ -48,32 +48,32 @@ First package release.  Commands implemented:
    logout
 </notes>
     <filelist>
-      <file type="php" name="PEAR.php"/>
+      <file role="php" name="PEAR.php"/>
       <dir name="PEAR">
-	<file type="php" name="Autoloader.php"/>
-	<file type="php" name="Command.php"/>
+	<file role="php" name="Autoloader.php"/>
+	<file role="php" name="Command.php"/>
 	<dir name="Command">
-	  <file type="php" name="Auth.php"/>
-	  <file type="php" name="Common.php"/>
-	  <file type="php" name="Config.php"/>
-	  <file type="php" name="Install.php"/>
-	  <file type="php" name="Package.php"/>
-	  <file type="php" name="Registry.php"/>
-	  <file type="php" name="Remote.php"/>
+	  <file role="php" name="Auth.php"/>
+	  <file role="php" name="Common.php"/>
+	  <file role="php" name="Config.php"/>
+	  <file role="php" name="Install.php"/>
+	  <file role="php" name="Package.php"/>
+	  <file role="php" name="Registry.php"/>
+	  <file role="php" name="Remote.php"/>
 	</dir>
-	<file type="php" name="Common.php"/>
-	<file type="php" name="Config.php"/>
-	<file type="php" name="Dependency.php"/>
+	<file role="php" name="Common.php"/>
+	<file role="php" name="Config.php"/>
+	<file role="php" name="Dependency.php"/>
 	<dir name="Frontend">
-	  <file type="php" name="CLI.php"/>
+	  <file role="php" name="CLI.php"/>
 	</dir>
-	<file type="php" name="Installer.php"/>
-	<file type="php" name="Packager.php"/>
-	<file type="php" name="Registry.php"/>
-	<file type="php" name="Remote.php"/>
+	<file role="php" name="Installer.php"/>
+	<file role="php" name="Packager.php"/>
+	<file role="php" name="Registry.php"/>
+	<file role="php" name="Remote.php"/>
       </dir>
       <dir name="scripts">
-	<file baseinstalldir="/" type="script" install-as="pear" name="pear.in" replace="yes">
+	<file baseinstalldir="/" role="script" install-as="pear" name="pear.in" replace="yes">
           <replace from="@prefix@" to="PHP_PREFIX" type="php-const"/>
         </file>
       </dir>

@@ -1,5 +1,5 @@
 <!--
-     $Id: package.dtd,v 1.21 2002-04-09 00:03:18 ssb Exp $
+     $Id: package.dtd,v 1.22 2002-04-09 08:10:08 ssb Exp $
 
      This is the PEAR package description, version 1.0b6.
      It should be used with the informal public identifier:
@@ -68,7 +68,6 @@
                platform       CDATA              #IMPLIED
                md5sum         CDATA              #IMPLIED
                name           CDATA              #REQUIRED
-               replace        (yes|no)           'no'
                install-as     CDATA              #IMPLIED>
 
 <!ELEMENT replace EMPTY>

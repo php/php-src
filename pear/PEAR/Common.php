@@ -84,7 +84,13 @@ class PEAR_Common extends PEAR
      * Valid file roles
      * @var array
      */
-    var $file_roles  = array('php','ext','test','doc','data','extsrc');
+    var $file_roles  = array('php','ext','test','doc','data','extsrc','script');
+
+    /**
+     * Valid replacement types
+     * @var array
+     */
+    var $replacement_types  = array('php-const', 'pear-config');
 
     /**
      * User Interface object (PEAR_Frontend_* class).  If null,
@@ -92,6 +98,8 @@ class PEAR_Common extends PEAR
      * @var object
      */
     var $ui = null;
+
+    var $current_path = null;
 
     // }}}
 
@@ -322,6 +330,34 @@ class PEAR_Common extends PEAR
                     $this->dir_role = $attribs['role'];
                 }
                 break;
+            case 'file':
+                if (isset($attribs['name'])) {
+                    $path = '';
+                    if (count($this->dir_names)) {
+                        foreach ($this->dir_names as $dir) {
+                            $path .= $dir . DIRECTORY_SEPARATOR;
+                        }
+                    }
+                    $path .= $attribs['name'];
+                    unset($attribs['name']);
+                    $this->current_path = $path;
+                    $this->filelist[$path] = $attribs;
+                    // Set the baseinstalldir only if the file don't have this attrib
+                    if (!isset($this->filelist[$path]['baseinstalldir']) &&
+                        isset($this->dir_install))
+                    {
+                        $this->filelist[$path]['baseinstalldir'] = $this->dir_install;
+                    }
+                    // Set the Role
+                    if (!isset($this->filelist[$path]['role']) && isset($this->dir_role)) {
+                        $this->filelist[$path]['role'] = $this->dir_role;
+                    }
+                }
+                break;
+            case 'replace':
+                $this->filelist[$this->current_path]['replacements'][] = $attribs;
+                break;
+
             case 'libfile':
                 $this->lib_atts = $attribs;
                 $this->lib_atts['role'] = 'extsrc';
@@ -452,24 +488,25 @@ class PEAR_Common extends PEAR
                 array_pop($this->dir_names);
                 break;
             case 'file':
-                $this->current_file = $data;
-                $path = '';
-                if (count($this->dir_names)) {
-                    foreach ($this->dir_names as $dir) {
-                        $path .= $dir . DIRECTORY_SEPARATOR;
+                if ($data) {
+                    $path = '';
+                    if (count($this->dir_names)) {
+                        foreach ($this->dir_names as $dir) {
+                            $path .= $dir . DIRECTORY_SEPARATOR;
+                        }
                     }
-                }
-                $path .= $this->current_file;
-                $this->filelist[$path] = $this->current_attributes;
-                // Set the baseinstalldir only if the file don't have this attrib
-                if (!isset($this->filelist[$path]['baseinstalldir']) &&
-                    isset($this->dir_install))
-                {
-                    $this->filelist[$path]['baseinstalldir'] = $this->dir_install;
-                }
-                // Set the Role
-                if (!isset($this->filelist[$path]['role']) && isset($this->dir_role)) {
-                    $this->filelist[$path]['role'] = $this->dir_role;
+                    $path .= $data;
+                    $this->filelist[$path] = $this->current_attributes;
+                    // Set the baseinstalldir only if the file don't have this attrib
+                    if (!isset($this->filelist[$path]['baseinstalldir']) &&
+                        isset($this->dir_install))
+                    {
+                        $this->filelist[$path]['baseinstalldir'] = $this->dir_install;
+                    }
+                    // Set the Role
+                    if (!isset($this->filelist[$path]['role']) && isset($this->dir_role)) {
+                        $this->filelist[$path]['role'] = $this->dir_role;
+                    }
                 }
                 break;
             case 'libfile':
@@ -769,20 +806,41 @@ class PEAR_Common extends PEAR
         if (isset($pkginfo['filelist'])) {
             $ret .= "$indent    <filelist>\n";
             foreach ($pkginfo['filelist'] as $file => $fa) {
-                if ($fa['role'] == 'extsrc') {
+                if (@$fa['role'] == 'extsrc') {
                     $ret .= "$indent      <libfile>\n";
                     $ret .= "$indent        <libname>$file</libname>\n";
                     $ret .= "$indent        <sources>$fa[sources]</sources>\n";
                     $ret .= "$indent      </libfile>\n";
                 } else {
-                    $ret .= "$indent      <file role=\"$fa[role]\"";
+                    @$ret .= "$indent      <file role=\"$fa[role]\"";
                     if (isset($fa['baseinstalldir'])) {
-                        $ret .= " baseinstalldir=\"$fa[baseinstalldir]\"";
+                        $ret .= ' baseinstalldir="' .
+                             htmlspecialchars($fa['baseinstalldir']) . '"';
                     }
                     if (isset($fa['md5sum'])) {
                         $ret .= " md5sum=\"$fa[md5sum]\"";
                     }
-                    $ret .= ">$file</file>\n";
+                    if (!empty($fa['replace'])) {
+                        $ret .= ' replace="yes"';
+                    }
+                    if (!empty($fa['install-as'])) {
+                        $ret .= ' install-as="' .
+                             htmlspecialchars($fa['install-as']) . '"';
+                    }
+                    $ret .= ' name="' . htmlspecialchars($file) . '"';
+                    if (empty($fa['replacements'])) {
+                        $ret .= "/>\n";
+                    } else {
+                        $ret .= ">\n";
+                        foreach ($fa['replacements'] as $r) {
+                            $ret .= "$indent        <replace";
+                            foreach ($r as $k => $v) {
+                                $ret .= " $k=\"" . htmlspecialchars($v) .'"';
+                            }
+                            $ret .= "/>\n";
+                        }
+                        @$ret .= "$indent      </file>\n";
+                    }
                 }
             }
             $ret .= "$indent    </filelist>\n";
