@@ -1802,9 +1802,9 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 				short j;
 				long n, f = 1;
 				if ( (type & ~1) == SQL_SHORT) {
-					n = (long) *(short *) (data);
+					n = *(short *) data;
 				}else {	
-					n = (long) *(long *) (data);
+					n = *(ISC_LONG *) data;
 				}
 				for (j = 0; j < -scale; j++) {
 					f *= 10;
@@ -1821,9 +1821,9 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 			} else {
 				Z_TYPE_P(val) = IS_LONG;
 				if ( (type & ~1) == SQL_SHORT) {
-					Z_LVAL_P(val) = *(short *) (data);
+					Z_LVAL_P(val) = *(short *) data;
 				}else{
-					Z_LVAL_P(val) = *(long *) (data);
+					Z_LVAL_P(val) = *(ISC_LONG *) data;
 				}
 			}
 			break;
