@@ -96,11 +96,13 @@
 	}
 
 #ifndef HAVE_STRLCPY
-PHPAPI size_t strlcpy(char *dst, const char *src, size_t siz);
+PHPAPI size_t php_strlcpy(char *dst, const char *src, size_t siz);
+#define strlcpy php_strlcpy
 #endif
 
 #ifndef HAVE_STRLCAT
-PHPAPI size_t strlcat(char *dst, const char *src, size_t siz);
+PHPAPI size_t php_strlcat(char *dst, const char *src, size_t siz);
+#define strlcat php_strlcat
 #endif
 
 #ifndef HAVE_STRTOK_R
