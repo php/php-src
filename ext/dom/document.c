@@ -997,11 +997,11 @@ Since: DOM Level 3
 */
 PHP_FUNCTION(dom_document_load)
 {
-	zval *id;
+	zval *id, *rv = NULL;
 	xmlDoc *docp = NULL, *newdoc;
 	dom_object *intern;
 	char *source;
-	int source_len, refcount;
+	int source_len, refcount, ret;
 
 	id = getThis();
 	
@@ -1009,27 +1009,31 @@ PHP_FUNCTION(dom_document_load)
 		return;
 	}
 
-	newdoc = docp = xmlParseFile(source);
+	newdoc = xmlParseFile(source);
 
 	if (!newdoc)
 		RETURN_FALSE;
 
-	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
-	if (intern != NULL) {
-		docp = (xmlDocPtr)intern->ptr;
-		if (docp != NULL) {
-			refcount = decrement_document_reference(intern TSRMLS_CC);
-			if (refcount != 0) {
-				docp->_private = NULL;
+	if (id != NULL) {
+		intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+		if (intern != NULL) {
+			docp = (xmlDocPtr)intern->ptr;
+			if (docp != NULL) {
+				refcount = decrement_document_reference(intern TSRMLS_CC);
+				if (refcount != 0) {
+					docp->_private = NULL;
+				}
 			}
+			intern->document = NULL;
+			increment_document_reference(intern, newdoc TSRMLS_CC);
 		}
-		intern->document = NULL;
-		increment_document_reference(intern, newdoc TSRMLS_CC);
+
+		php_dom_set_object(intern, newdoc TSRMLS_CC);
+
+		RETURN_TRUE;
+	} else {
+		DOM_RET_OBJ(rv, (xmlNodePtr) newdoc, &ret, NULL);
 	}
-
-	php_dom_set_object(intern, newdoc TSRMLS_CC);
-
-	RETURN_TRUE;
 }
 /* }}} end dom_document_load */
 
@@ -1039,11 +1043,11 @@ Since: DOM Level 3
 */
 PHP_FUNCTION(dom_document_loadxml)
 {
-	zval *id;
+	zval *id, *rv = NULL;
 	xmlDoc *docp = NULL, *newdoc;
 	dom_object *intern;
 	char *buffer;
-	int buffer_len, refcount;
+	int buffer_len, refcount, ret;
 
 	id = getThis();
 	
@@ -1055,23 +1059,27 @@ PHP_FUNCTION(dom_document_loadxml)
 	if (!newdoc)
 		RETURN_FALSE;
 
-	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
-	if (intern != NULL) {
-		docp = (xmlDocPtr)intern->ptr;
-		if (docp != NULL) {
-			refcount = decrement_document_reference(intern TSRMLS_CC);
-			if (refcount != 0) {
-				docp->_private = NULL;
+	if (id != NULL) {
+		intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+		if (intern != NULL) {
+			docp = (xmlDocPtr)intern->ptr;
+			if (docp != NULL) {
+				refcount = decrement_document_reference(intern TSRMLS_CC);
+				if (refcount != 0) {
+					docp->_private = NULL;
+				}
+				intern->document = NULL;
 			}
 			intern->document = NULL;
+			increment_document_reference(intern, newdoc TSRMLS_CC);
 		}
-		intern->document = NULL;
-		increment_document_reference(intern, newdoc TSRMLS_CC);
+
+		php_dom_set_object(intern, newdoc TSRMLS_CC);
+
+		RETURN_TRUE;
+	} else {
+		DOM_RET_OBJ(rv, (xmlNodePtr) newdoc, &ret, NULL);
 	}
-
-	php_dom_set_object(intern, newdoc TSRMLS_CC);
-
-	RETURN_TRUE;
 }
 /* }}} end dom_document_loadxml */
 
