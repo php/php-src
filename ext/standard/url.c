@@ -182,6 +182,8 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 	if (!(p = memchr(s, '/', (ue - s)))) {
 		if ((p = memchr(s, '?', (ue - s)))) {
 			e = p;
+		} else if ((p = memchr(s, '#', (ue - s)))) {
+			e = p;
 		}
 	} else {
 		e = p;
