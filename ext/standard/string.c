@@ -488,7 +488,7 @@ int php_charmask(unsigned char *input, int len, char *mask TSRMLS_DC)
 /* {{{ php_trim
        Compatibility function, ports old-API to new one. (DEPRECATED)
 */
-void php_trim(zval *str, zval *return_value, int mode TSRMLS_DC)
+void php_trim(zval **str, zval *return_value, int mode TSRMLS_DC)
 {
 	php_trim2(str, NULL, return_value, mode TSRMLS_CC);
 }
