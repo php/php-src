@@ -20,13 +20,13 @@ typedef char * caddr_t;
 #define S_IFBLK		_IFBLK
 #define	S_IFLNK		_IFLNK
 #define pclose(a)		_pclose(a)
-#define popen(a)		_popen(a)
+#define popen(a, b)		_popen(a, b)
 #define chdir(path) SetCurrentDirectory(path)
 #define mkdir(a,b)	_mkdir(a)
 #define rmdir(a)	_rmdir(a)
-#define getpid(a)		_getpid(a)
+#define getpid()		_getpid()
 #define php_sleep(t)	Sleep(t*1000)
-#define getcwd(a)		_getcwd(a)
+#define getcwd(a, b)		_getcwd(a, b)
 #define snprintf	_snprintf
 #define off_t		_off_t
 #define vsnprintf	_vsnprintf
