@@ -74,7 +74,7 @@ PHP_FUNCTION(mysqli_connect)
 		RETURN_FALSE;
 	}
 
-	if (mysql_real_connect(mysql->mysql,hostname,username,passwd,dbname,port,socket,0) == NULL) {
+	if (mysql_real_connect(mysql->mysql,hostname,username,passwd,dbname,port,socket,CLIENT_MULTI_RESULTS) == NULL) {
 		/* Save error messages */
 
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
