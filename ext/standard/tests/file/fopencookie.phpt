@@ -77,7 +77,7 @@ class userstream {
 
 }
 
-stream_register_wrapper("cookietest", "userstream");
+stream_wrapper_register("cookietest", "userstream");
 
 include("cookietest://foo");
 

@@ -38,7 +38,7 @@ PHP_FUNCTION(stream_get_transports);
 PHP_FUNCTION(stream_get_wrappers);
 PHP_FUNCTION(stream_get_line);
 PHP_FUNCTION(stream_get_meta_data);
-PHP_FUNCTION(stream_register_wrapper);
+PHP_FUNCTION(stream_wrapper_register);
 PHP_FUNCTION(stream_context_create);
 PHP_FUNCTION(stream_context_set_params);
 PHP_FUNCTION(stream_context_set_option);

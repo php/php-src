@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ? ? ??? 200?, Version 5.0.0
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
+- Renamed stream_register_wrapper() to stream_wrapper_register(). (Derick)
 - Fixed dirname() and strip_tags() to be binary-safe. (Moriyoshi)
 - Fixed bug #22386 (Using browscap causes segfault). (Jay)
 - Fixed bug #22895 (PHP cli outputs errors in text AND html). (Marcus)

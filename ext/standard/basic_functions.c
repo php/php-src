@@ -699,7 +699,8 @@ function_entry basic_functions[] = {
 
 	PHP_FE(stream_get_meta_data,											NULL)
 	PHP_FE(stream_get_line,												NULL)
-	PHP_FE(stream_register_wrapper,											NULL)
+	PHP_FE(stream_wrapper_register,											NULL)
+	PHP_FALIAS(stream_register_wrapper, stream_wrapper_register,			NULL)
 	PHP_FE(stream_get_wrappers,												NULL)
 	PHP_FE(stream_get_transports,											NULL)
 	PHP_FE(get_headers,													NULL)
@@ -897,7 +898,7 @@ function_entry basic_functions[] = {
 
 	PHP_FE(str_rot13, NULL)
 	PHP_FE(stream_get_filters, NULL)
-	PHP_FE(stream_register_filter, NULL)
+	PHP_FE(stream_filter_register, NULL)
 	PHP_FE(stream_bucket_make_writeable,		NULL)
 	PHP_FE(stream_bucket_prepend,				NULL)
 	PHP_FE(stream_bucket_append,				NULL)

@@ -469,9 +469,9 @@ PHP_FUNCTION(stream_get_filters)
 }
 /* }}} */	
 
-/* {{{ proto bool stream_register_filter(string filtername, string classname)
+/* {{{ proto bool stream_filter_register(string filtername, string classname)
    Registers a custom filter handler class */
-PHP_FUNCTION(stream_register_filter)
+PHP_FUNCTION(stream_filter_register)
 {
 	char *filtername, *classname;
 	int filtername_len, classname_len;
