@@ -1621,14 +1621,14 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 	zend_hash_merge(&ce->constants_table, &parent_ce->constants_table, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
 	zend_hash_merge_ex(&ce->function_table, &parent_ce->function_table, (copy_ctor_func_t) do_inherit_method, sizeof(zend_function), (zend_bool (*)(void *, void *)) do_inherit_method_check);
 	ce->parent = parent_ce;
-	if (!ce->handle_property_get) {
-		ce->handle_property_get	= parent_ce->handle_property_get;
+	if (!ce->__get) {
+		ce->__get	= parent_ce->__get;
 	}
-	if (!ce->handle_property_set) {
-		ce->handle_property_set = parent_ce->handle_property_set;
+	if (!ce->__set) {
+		ce->__set = parent_ce->__set;
 	}
-	if (!ce->handle_function_call) {
-		ce->handle_function_call = parent_ce->handle_function_call;
+	if (!ce->__call) {
+		ce->__call = parent_ce->__call;
 	}
 	do_inherit_parent_constructor(ce);
 }
@@ -1665,10 +1665,6 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 	new_class_entry->__call = NULL;
 
 	new_class_entry->create_object = NULL;
-	new_class_entry->handle_function_call = NULL;
-	new_class_entry->handle_property_set = NULL;
-	new_class_entry->handle_property_get = NULL;
-
 	new_class_entry->parent = NULL;
 
 	if (zend_hash_update(class_table, new_class_entry->name, name_length+1, &new_class_entry, sizeof(zend_class_entry *), NULL) == FAILURE) {
@@ -2143,10 +2139,6 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	new_class_entry->__call = NULL;
 
 	new_class_entry->create_object = NULL;
-	new_class_entry->handle_function_call = NULL;
-	new_class_entry->handle_property_set = NULL;
-	new_class_entry->handle_property_get = NULL;
-	
 	new_class_entry->parent = NULL;
 
 	if (parent_class_name->op_type != IS_UNUSED) {
