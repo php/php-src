@@ -4,7 +4,7 @@
 
 Fixed:
 
-    mb_convert_encoding (Moriyoshi Koizumi)
+    mb_convert_encoding (Moriyoshi)
     socket_iovec_alloc (Rasmus)
     exif_imagetype,exif_thumbnail (Rasmus)
     dbase_open (Rasmus)
@@ -13,12 +13,12 @@ Fixed:
     setlocale (Rasmus)
     unregister_tick_function (Rasmus)
     bcsub (Rasmus)
-    mb_ereg, mb_ereg_match, mb_eregi, mb_split (Moriyoshi Koizumi)
+    mb_ereg, mb_ereg_match, mb_eregi, mb_split (Moriyoshi)
     xml_parser_create (Moriyoshi)
 
 Open:
 
-    ob_start (3)
+    ob_start (3) (Unable to reproduce - Moriyoshi)
 
     Notes:
 
