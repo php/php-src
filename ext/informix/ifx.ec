@@ -1805,11 +1805,16 @@ PHP_FUNCTION(ifx_errormsg)
          ifx_errmsg[0] = 0;
     }
 
-    returnmsg = (char *) emalloc(strlen(ifx_errmsg) + 128);
+    returnmsg = (char *) malloc(strlen(ifx_errmsg) + 128);
     sprintf(returnmsg,ifx_errmsg, sqlca.sqlerrm);
     free(ifx_errmsg);
+    //RETURN_STRING(returnmsg,1); // can not use the macro, have to free the memory   
+    return_value->value.str.len = strlen(returnmsg);	
+    return_value->value.str.val = estrndup(returnmsg,return_value->value.str.len);	
+    return_value->type = IS_STRING;
+    free(returnmsg);	
+    return;							
      
-    RETURN_STRING(returnmsg,0);    /* do not dup, emalloced ! */
 }
 /* }}} */
 
@@ -3783,6 +3788,10 @@ static char* php3_intifx_create_tmpfile(long bid) {
  sprintf(filename,"blb%d",(int)bid);
  blobfile=tempnam(blobdir,filename);
  free(blobdir);
+ 
+ if (blobfile == NULL) 
+   return NULL;
+ 
  retval=emalloc(strlen(blobfile)+1);
  if(retval==NULL) 
   return NULL;
