@@ -17,6 +17,7 @@ PHP                                                                        NEWS
 - Fixed bug #28694 (ReflectionExtension::getFunctions() crashes PHP). (Marcus)
 - Fixed bug #28466 (mbstring_convert_variables() array separation problem).
   (Moriyoshi)
+
 7 Jun 2004, PHP 5 Release Candidate 3
 - Moved the PDFLib extension to PECL. (Wez)
 - Added MySQL 4.1.2-alpha and 4.1.3-beta support to MySQLI extension. (Georg)
