@@ -5051,20 +5051,21 @@ static char *php_domxslt_string_to_xpathexpr(const char *str TSRMLS_DC)
 	const xmlChar *string = (const xmlChar *)str;
 
 	xmlChar *value;
-
+	int str_len;
+	
+	str_len = xmlStrlen(string) + 3;
+	
 	if (xmlStrchr(string, '"')) {
 		if (xmlStrchr(string, '\'')) {
 			php_error(E_WARNING, "%s(): Cannot create XPath expression (string contains both quote and double-quotes)",
 					  get_active_function_name(TSRMLS_C));
 			return NULL;
 		}
-		value = xmlStrdup((const xmlChar *)"'");
-		value = xmlStrcat(value, string);
-		value = xmlStrcat(value, (const xmlChar *)"'");
+		value = (xmlChar*) emalloc (str_len * sizeof(xmlChar *) );
+		snprintf(value, str_len, "'%s'", string);
 	} else {
-		value = xmlStrdup((const xmlChar *)"\"");
-		value = xmlStrcat(value, string);
-		value = xmlStrcat(value, (const xmlChar *)"\"");
+		value = (xmlChar*) emalloc (str_len * sizeof(xmlChar *) );
+		snprintf(value, str_len, "\"%s\"", string);
 	}
 
 	return (char *)value;
