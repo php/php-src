@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Id$ */
+
 #include "php.h"
 
 #include <errno.h>
@@ -130,7 +132,7 @@ static FILE *php_do_open_temporary_file(const char *path, const char *pfx, char 
 
 #ifdef PHP_WIN32
 	if (GetTempFileName(path, pfx, 0, opened_path)) {
-		fp = VCWD_FOPEN(opened_path, "wb");
+		fp = VCWD_FOPEN(opened_path, "r+b");
 	} else {
 		fp = NULL;
 	}
@@ -138,7 +140,7 @@ static FILE *php_do_open_temporary_file(const char *path, const char *pfx, char 
 	/* Using standard mktemp() implementation for NetWare */
 	file_path = mktemp(opened_path);
 	if (file_path) {
-		fp = VCWD_FOPEN(file_path, "wb");
+		fp = VCWD_FOPEN(file_path, "r+b");
 	} else {
 		fp = NULL;
 	}
@@ -151,7 +153,7 @@ static FILE *php_do_open_temporary_file(const char *path, const char *pfx, char 
 	}
 #else
 	if (mktemp(opened_path)) {
-		fp = VCWD_FOPEN(opened_path, "wb");
+		fp = VCWD_FOPEN(opened_path, "r+b");
 	} else {
 		fp = NULL;
 	}
