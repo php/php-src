@@ -293,11 +293,11 @@ dbm_info *_php3_dbmopen(char *filename, char *mode) {
 		return NULL;
 	}
 
-	if (PG(safe_mode) && (!_php3_checkuid(filename, 2))) {
+	if (PG(safe_mode) && (!php_checkuid(filename, 2))) {
 		return NULL;
 	}
 
-	if (_php3_check_open_basedir(filename)) {
+	if (php_check_open_basedir(filename)) {
 		return NULL;
 	}
 

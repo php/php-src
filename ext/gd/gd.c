@@ -308,7 +308,7 @@ PHP_FUNCTION(imageloadfont) {
 #if WIN32|WINNT
 	fp = fopen(file->value.str.val, "rb");
 #else
-	fp = php3_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
+	fp = php_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
 #endif
 	if (fp == NULL) {
 		php_error(E_WARNING, "ImageFontLoad: unable to open file");
@@ -412,10 +412,10 @@ void php3_imagecreatefrompng (INTERNAL_FUNCTION_PARAMETERS) {
 #if WIN32|WINNT
       fp = fopen(file->value.str.val, "rb");
 #else
-      fp = php3_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
+      fp = php_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
 #endif
       if (!fp) {
-              php3_strip_url_passwd(fn);
+              php_strip_url_passwd(fn);
               php3_error(E_WARNING,
                                       "ImageCreateFromPng: Unable to open %s for reading", fn);
               RETURN_FALSE;
@@ -447,7 +447,7 @@ void php3_imagepng (INTERNAL_FUNCTION_PARAMETERS) {
       if (argc == 2) {
               convert_to_string(file);
               fn = file->value.str.val;
-              if (!fn || fn == empty_string || _php3_check_open_basedir(fn)) {
+              if (!fn || fn == empty_string || php_check_open_basedir(fn)) {
                       php3_error(E_WARNING, "ImagePng: Invalid filename");
                       RETURN_FALSE;
               }
@@ -485,7 +485,7 @@ void php3_imagepng (INTERNAL_FUNCTION_PARAMETERS) {
             ap_bsetflag(php3_rqst->connection->client, B_EBCDIC2ASCII, 0);
 #endif
             while ((b = fread(buf, 1, sizeof(buf), tmp)) > 0) {
-                php3_write(buf, b);
+                php_write(buf, b);
             }
         }
         fclose(tmp);
@@ -522,10 +522,10 @@ PHP_FUNCTION(imagecreatefromgif )
 #if WIN32|WINNT
 	fp = fopen(file->value.str.val, "rb");
 #else
-	fp = php3_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
+	fp = php_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
 #endif
 	if (!fp) {
-		php3_strip_url_passwd(fn);
+		php_strip_url_passwd(fn);
 		php_error(E_WARNING,
 					"ImageCreateFromGif: Unable to open %s for reading", fn);
 		RETURN_FALSE;
@@ -565,7 +565,7 @@ PHP_FUNCTION(imagegif )
 	if (argc == 2) {
 		convert_to_string(file);
 		fn = file->value.str.val;
-		if (!fn || fn == empty_string || _php3_check_open_basedir(fn)) {
+		if (!fn || fn == empty_string || php_check_open_basedir(fn)) {
 			php_error(E_WARNING, "ImageGif: Invalid filename");
 			RETURN_FALSE;
 		}
@@ -611,7 +611,7 @@ PHP_FUNCTION(imagegif )
 			}
 #endif
 			while ((b = fread(buf, 1, sizeof(buf), tmp)) > 0) {
-				php3_write(buf, b);
+				php_write(buf, b);
 			}
 		}
 

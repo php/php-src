@@ -341,7 +341,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	 */
 	SETSTRING( SG(request_info).path_translated, pathTranslated );
 	getcwd(cwd,MAXPATHLEN);
-	file_handle.handle.fp = php3_fopen_for_parser();
+	file_handle.handle.fp = php_fopen_primary_script();
 	chdir(cwd);
 	file_handle.filename = SG(request_info).path_translated;
 	file_handle.free_filename = 0;

@@ -2514,7 +2514,7 @@ PHP_FUNCTION(hw_output_document) {
 	}
 
 	if(php3_header())
-		php3_write(ptr->data, ptr->size);
+		php_write(ptr->data, ptr->size);
 
 	RETURN_TRUE;
 }

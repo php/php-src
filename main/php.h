@@ -263,21 +263,21 @@ extern int ap_vsnprintf(char *, size_t, const char *, va_list);
 #define MAXPATHLEN 256    /* Should be safe for any weird systems that do not define it */
 #endif
 
-#define PHP_FN(name) php3_##name
+#define PHP_FN(name) php_if_##name
 #define PHP_NAMED_FUNCTION(name) void name(INTERNAL_FUNCTION_PARAMETERS)
-#define PHP_FUNCTION(name) PHP_NAMED_FUNCTION(php3_##name)
+#define PHP_FUNCTION(name) PHP_NAMED_FUNCTION(PHP_FN(name))
 
 #define PHP_NAMED_FE(php_name, name, arg_types) { #php_name, name, arg_types },
-#define PHP_FE(name, arg_types) PHP_NAMED_FE(name, php3_##name, arg_types)
-#define PHP_FALIAS(name, alias, arg_types) PHP_NAMED_FE(name, php3_##alias, arg_types)
+#define PHP_FE(name, arg_types) PHP_NAMED_FE(name, PHP_FN(name), arg_types)
+#define PHP_FALIAS(name, alias, arg_types) PHP_NAMED_FE(name, PHP_FN(alias), arg_types)
 
-#define PHP_MINIT(module)	php3_minit_##module
-#define PHP_MSHUTDOWN(module)	php3_mshutdown_##module
-#define PHP_RINIT(module)	php3_rinit_##module
-#define PHP_RSHUTDOWN(module)	php3_rshutdown_##module
-#define PHP_MINFO(module)	php3_info_##module
-#define PHP_GINIT(module)		php3_ginit_##module
-#define PHP_GSHUTDOWN(module)	php3_gshutdown_##module
+#define PHP_MINIT(module)	php_minit_##module
+#define PHP_MSHUTDOWN(module)	php_mshutdown_##module
+#define PHP_RINIT(module)	php_rinit_##module
+#define PHP_RSHUTDOWN(module)	php_rshutdown_##module
+#define PHP_MINFO(module)	php_info_##module
+#define PHP_GINIT(module)	php_ginit_##module
+#define PHP_GSHUTDOWN(module)	php_gshutdown_##module
 
 #define PHP_MINIT_FUNCTION(module)	int PHP_MINIT(module)(INIT_FUNC_ARGS)
 #define PHP_MSHUTDOWN_FUNCTION(module)	int PHP_MSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS)
@@ -296,9 +296,9 @@ extern char **environ;
 
 extern void phperror(char *error);
 extern PHPAPI void php_error(int type, const char *format,...);
-extern PHPAPI int php3_write(void *buf, int size);
+extern PHPAPI int php_write(void *buf, int size);
 extern PHPAPI int php_printf(const char *format,...);
-extern void php3_log_err(char *log_message);
+extern void php_log_err(char *log_message);
 extern int Debug(char *format,...);
 extern int cfgparse(void);
 

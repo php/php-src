@@ -195,7 +195,7 @@ PHP_FUNCTION(iptcembed)
         break;
     }
 
-    if (_php3_check_open_basedir((*jpeg_file)->value.str.val)) 
+    if (php_check_open_basedir((*jpeg_file)->value.str.val)) 
 		RETURN_FALSE;
 
     if ((fp = fopen((*jpeg_file)->value.str.val,"rb")) == 0) {

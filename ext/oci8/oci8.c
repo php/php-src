@@ -2532,7 +2532,7 @@ PHP_FUNCTION(ocisavelobfile)
 
 		convert_to_string_ex(arg);
 
-		if (_php3_check_open_basedir((*arg)->value.str.val)) {
+		if (php_check_open_basedir((*arg)->value.str.val)) {
 			RETURN_FALSE;
 		}
 
@@ -2675,7 +2675,7 @@ PHP_FUNCTION(ociwritelobtofile)
 		}
 
 		if (filename && *filename) {
-			if (_php3_check_open_basedir(filename)) {
+			if (php_check_open_basedir(filename)) {
 				goto bail;
 			}
 

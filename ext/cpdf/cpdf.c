@@ -2196,7 +2196,7 @@ PHP_FUNCTION(cpdf_output_buffer) {
 
 	buffer = cpdf_getBufferForPDF(pdf, &lenght);
 	php3_header();
-	php3_write(buffer, lenght);
+	php_write(buffer, lenght);
 
 	RETURN_TRUE;
 }
