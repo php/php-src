@@ -2159,48 +2159,160 @@ PHPAPI char *php_str_to_str(char *haystack, int length,
 }
 
 
-/* {{{ proto string str_replace(string needle, string str, string haystack)
-   Replace all occurrences of needle in haystack with str */
+static void php_str_replace_in_subject(zval *search, zval *replace, zval **subject, zval *result)
+{
+	zval		**search_entry,
+				**replace_entry = NULL,
+				  temp_result;
+	char		*replace_value = NULL;
+	int			 replace_len = 0;
+
+	/* Make sure we're dealing with strings. */	
+	convert_to_string_ex(subject);
+	Z_TYPE_P(result) = IS_STRING;
+	if (Z_STRLEN_PP(subject) == 0) {
+		ZVAL_STRINGL(result, empty_string, 0, 1);
+		return;
+	}
+	
+	/* If search is an array */
+	if (Z_TYPE_P(search) == IS_ARRAY) {
+		/* Duplicate subject string for repeated replacement */
+		*result = **subject;
+		zval_copy_ctor(result);
+		
+		zend_hash_internal_pointer_reset(Z_ARRVAL_P(search));
+
+		if (Z_TYPE_P(replace) == IS_ARRAY) {
+			zend_hash_internal_pointer_reset(Z_ARRVAL_P(replace));
+		} else {
+			/* Set replacement value to the passed one */
+			replace_value = Z_STRVAL_P(replace);
+			replace_len = Z_STRLEN_P(replace);
+		}
+
+		/* For each entry in the search array, get the entry */
+		while (zend_hash_get_current_data(Z_ARRVAL_P(search), (void **)&search_entry) == SUCCESS) {
+			/* Make sure we're dealing with strings. */	
+			convert_to_string_ex(search_entry);
+			if(Z_STRLEN_PP(search_entry) == 0) {
+				zend_hash_move_forward(Z_ARRVAL_P(search));
+				continue;
+			}
+		
+			/* If replace is an array. */
+			if (Z_TYPE_P(replace) == IS_ARRAY) {
+				/* Get current entry */
+				if (zend_hash_get_current_data(Z_ARRVAL_P(replace), (void **)&replace_entry) == SUCCESS) {
+					/* Make sure we're dealing with strings. */	
+					convert_to_string_ex(replace_entry);
+					
+					/* Set replacement value to the one we got from array */
+					replace_value = Z_STRVAL_PP(replace_entry);
+					replace_len = Z_STRLEN_PP(replace_entry);
+
+					zend_hash_move_forward(Z_ARRVAL_P(replace));
+				} else {
+					/* We've run out of replacement strings, so use an empty one. */
+					replace_value = empty_string;
+					replace_len = 0;
+				}
+			}
+			
+			if(Z_STRLEN_PP(search_entry) == 1) {
+				php_char_to_str(Z_STRVAL_P(result),
+								Z_STRLEN_P(result),
+								Z_STRVAL_PP(search_entry)[0],
+								replace_value,
+								replace_len,
+								&temp_result);
+			} else if (Z_STRLEN_PP(search_entry) > 1) {
+				Z_STRVAL(temp_result) = php_str_to_str(Z_STRVAL_P(result), Z_STRLEN_P(result),
+													   Z_STRVAL_PP(search_entry), Z_STRLEN_PP(search_entry),
+													   replace_value, replace_len, &Z_STRLEN(temp_result));
+			}
+
+			efree(Z_STRVAL_P(result));
+			Z_STRVAL_P(result) = Z_STRVAL(temp_result);
+			Z_STRLEN_P(result) = Z_STRLEN(temp_result);
+
+			zend_hash_move_forward(Z_ARRVAL_P(search));
+		}
+	} else {
+		if (Z_STRLEN_P(search) == 1) {
+			php_char_to_str(Z_STRVAL_PP(subject),
+							Z_STRLEN_PP(subject),
+							Z_STRVAL_P(search)[0],
+							Z_STRVAL_P(replace),
+							Z_STRLEN_P(replace),
+							result);
+		} else if (Z_STRLEN_P(search) > 1) {
+			Z_STRVAL_P(result) = php_str_to_str(Z_STRVAL_PP(subject), Z_STRLEN_PP(subject),
+												Z_STRVAL_P(search), Z_STRLEN_P(search),
+												Z_STRVAL_P(replace), Z_STRLEN_P(replace), &Z_STRLEN_P(result));
+		} else {
+			*result = **subject;
+			zval_copy_ctor(result);
+		}
+	}
+}
+
+
+/* {{{ proto mixed str_replace(mixed search, mixed replace, mixed subject)
+   Replace all occurrences of search in haystack with replace */
 PHP_FUNCTION(str_replace)
 {
-	zval **haystack, **needle, **str;
-	char *result;
-	int len = 0;
+	zval **subject, **search, **replace, **subject_entry;
+	zval *result;
+	char *string_key;
+	ulong string_key_len, num_key;
 
 	if(ZEND_NUM_ARGS() != 3 ||
-			zend_get_parameters_ex(3, &needle, &str, &haystack) == FAILURE) {
+	   zend_get_parameters_ex(3, &search, &replace, &subject) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string_ex(haystack);
-	convert_to_string_ex(needle);
-	convert_to_string_ex(str);
+	SEPARATE_ZVAL(search);
+	SEPARATE_ZVAL(replace);
+	SEPARATE_ZVAL(subject);
 
-	if((*haystack)->value.str.len == 0) {
-		RETURN_STRING(empty_string,1);
-	}
+	/* Make sure we're dealing with strings and do the replacement. */
+	if (Z_TYPE_PP(search) != IS_ARRAY) {
+		convert_to_string_ex(search);
+		convert_to_string_ex(replace);
+	} else if (Z_TYPE_PP(replace) != IS_ARRAY)
+		convert_to_string_ex(replace);
 
-	if((*needle)->value.str.len == 1) {
-		php_char_to_str((*haystack)->value.str.val,
-						(*haystack)->value.str.len,
-						(*needle)->value.str.val[0],
-						(*str)->value.str.val,
-						(*str)->value.str.len,
-						return_value);
-		return;
-	}
+	/* if subject is an array */
+	if (Z_TYPE_PP(subject) == IS_ARRAY) {
+		array_init(return_value);
+		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(subject));
 
-	if((*needle)->value.str.len == 0) {
-		php_error(E_WARNING, "The length of the needle must not be 0");
-		RETURN_FALSE;
-	}
+		/* For each subject entry, convert it to string, then perform replacement
+		   and add the result to the return_value array. */
+		while (zend_hash_get_current_data(Z_ARRVAL_PP(subject), (void **)&subject_entry) == SUCCESS) {
+			MAKE_STD_ZVAL(result);
+			php_str_replace_in_subject(*search, *replace, subject_entry, result);
+			/* Add to return array */
+			switch(zend_hash_get_current_key_ex(Z_ARRVAL_PP(subject), &string_key,
+												&string_key_len, &num_key, 0, NULL)) {
+				case HASH_KEY_IS_STRING:
+					add_assoc_zval_ex(return_value, string_key, string_key_len, result);
+					break;
 
-	result = php_str_to_str((*haystack)->value.str.val, (*haystack)->value.str.len,
-						 (*needle)->value.str.val, (*needle)->value.str.len,
-						 (*str)->value.str.val, (*str)->value.str.len, &len);
-	RETURN_STRINGL(result, len, 0);
+				case HASH_KEY_IS_LONG:
+					add_index_zval(return_value, num_key, result);
+					break;
+			}
+		
+			zend_hash_move_forward(Z_ARRVAL_PP(subject));
+		}
+	} else {	/* if subject is not an array */
+		php_str_replace_in_subject(*search, *replace, subject, return_value);
+	}	
 }
 /* }}} */
+
 
 /* Converts Logical Hebrew text (Hebrew Windows style) to Visual text
  * Cheers/complaints/flames - Zeev Suraski <zeev@php.net>
