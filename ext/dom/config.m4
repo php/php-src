@@ -29,7 +29,6 @@ if test -z "$PHP_ZLIB_DIR"; then
 fi
 
 if test "$PHP_DOM" != "no"; then
-
   DOM_DIR_ADD=""
   if test -r $PHP_DOM/include/libxml2/libxml/tree.h; then
     DOM_DIR=$PHP_DOM
@@ -66,6 +65,16 @@ if test "$PHP_DOM" != "no"; then
   fi
 
   PHP_ADD_INCLUDE($DOM_DIR/include$DOM_DIR_ADD)
+
+  dnl Search for the zlib directory
+
+  if test "$PHP_ZLIB_DIR" = "no"; then
+	for i in /usr /usr/local; do
+	  if test -r $i/lib/libz.so; then
+	    PHP_ZLIB_DIR=$i
+	  fi
+	done
+  fi
 
   if test "$PHP_ZLIB_DIR" = "no"; then
     AC_MSG_ERROR(DOM requires ZLIB. Use --with-zlib-dir=<DIR>)
