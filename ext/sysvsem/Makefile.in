@@ -1,6 +1,0 @@
-
-LTLIBRARY_NAME    = libsysvsem.la
-LTLIBRARY_SOURCES = sysvsem.c
-LTLIBRARY_SHARED_NAME = sysvsem.la
-
-include $(top_srcdir)/build/dynlib.mk

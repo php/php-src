@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME    = libsession.la
-LTLIBRARY_SOURCES = session.c mod_files.c mod_mm.c mod_user.c
-LTLIBRARY_SHARED_NAME = session.la
-LTLIBRARY_SHARED_LIBADD = $(SESSION_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

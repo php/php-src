@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME    = libmhash.la
-LTLIBRARY_SOURCES = mhash.c
-LTLIBRARY_SHARED_NAME = mhash.la
-LTLIBRARY_SHARED_LIBADD = $(MHASH_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

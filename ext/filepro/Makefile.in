@@ -1,6 +1,0 @@
-
-LTLIBRARY_NAME    = libfilepro.la
-LTLIBRARY_SOURCES = filepro.c
-LTLIBRARY_SHARED_NAME = filepro.la
-
-include $(top_srcdir)/build/dynlib.mk

@@ -1,6 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME    = libccvs.la
-LTLIBRARY_SOURCES = ccvs.c
-
-include $(top_srcdir)/build/dynlib.mk

@@ -1,9 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-informix 'Informix support?' yesnodir \
-    "no $INFORMIXDIR Informix home" \
-'    Whether to build PHP with Informix support. If you have not set up your\n
-    Informix environment, enter what $INFORMIXDIR is usually set to here.\n
-    You MUST set $INFORMIXDIR before trying to compile!\n
-    More info about Informix can be found at http://www.informix.com/.'

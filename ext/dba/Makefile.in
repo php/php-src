@@ -1,8 +1,0 @@
-
-LTLIBRARY_NAME = libdba.la
-LTLIBRARY_SOURCES = dba.c dba_cdb.c dba_db2.c dba_dbm.c dba_gdbm.c \
-		dba_ndbm.c dba_db3.c
-LTLIBRARY_SHARED_NAME = dba.la
-LTLIBRARY_SHARED_LIBADD = $(DBA_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk
