@@ -285,7 +285,7 @@ PHP_FUNCTION(ftp_chdir)
 /* }}} */
 
 /* {{{ proto int ftp_exec(int stream, string command)
-    Request execution of a program on the ftp server */
+   Requests execution of a program on the ftp server */
 PHP_FUNCTION(ftp_exec)
 {
 	pval		*arg1, *arg2;
