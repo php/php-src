@@ -1,3 +1,100 @@
+2003-11-27  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      sapi/thttpd/config.m4:
+      MFH: - Fixed bug #26438 (error in thttpd SAPI installation)
+
+    * sapi/thttpd/config.m4:
+      - Fixed bug #26438 (error in thttpd SAPI installation)
+
+2003-11-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/image.c
+      ext/standard/php_image.h:
+      Added image_type_to_extension() function.
+
+2003-11-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c:
+      Convert objects to string if string is required by newer parameter parsing
+      since we do this for older parameter parsing does so too.
+
+    * ZendEngine2/zend_object_handlers.c:
+      The macro REPLACE_ZVAL_VALUE cannot be used since we only have zval *
+      writeobj. to allow it the api needs to be changed to zval **writeobj.
+
+2003-11-27  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * win32/select.c:
+      re-implement the win32 select code.
+      The old code implicitly set any sockets into non-blocking mode,
+      and since there is no way to probe a socket to determine its
+      blocking status using the win32 API, this was a real pain in the ass.
+      
+      The New implementation will hand off any sockets to winsock and
+      use the WaitForObject API in win32 to probe other types of handle.
+
+    * ext/com_dotnet/com_handlers.c:
+      fix win32 build - thanks Sebastian.
+
+    * ext/openssl/openssl.c
+      ext/openssl/xp_ssl.c:
+      Port liveness and SSL CA validation from 4.3 branch.
+      Make stream_select() work on ssl-enabled sockets again.
+
+    * main/php_streams.h
+      main/streams/transports.c
+      main/streams/xp_socket.c:
+      port "liveness" checks and a couple of other things from the 4.3 branch.
+      Liveness checks are used to validate persistent socket connects when they
+      are re-used.
+
+    * ext/standard/streamsfuncs.c:
+      initialize this one to be safe
+
+2003-11-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_builtin_functions.c
+      tests/lang/bug26182.phpt:
+      Add a support function to check for property existance which is different
+      from checking a property from being empty/set.
+      Update test #26182.
+
+    * makerpm:
+      Remove problematic configure option
+
+    * makerpm:
+      - Fix requirements for older systems.
+      - Fix rpm build directory for the major distributions.
+      - Fix config dir.
+      - Rename package to php.
+      - Add gd extension.
+      - Support building of shared extensions.
+      - Build CLI only once.
+
+2003-11-27  Uwe Steinmann  <uwe@steinmann.cx>
+
+    * ext/dbase/dbase.c:
+      - set precision to 0 unless the field is of type N or I
+
+    * ext/dbase/dbf_rec.c:
+      - fixed indenting
+
+2003-11-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/string.c:
+      MFH: Removed dead code.
+      
+
+    * ext/standard/string.c:
+      Removed dead code.
+
 2003-11-26  Greg Beaver  <greg@chiaraquartet.net>
 
     * pear/PEAR.php
