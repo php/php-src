@@ -69,14 +69,17 @@ class Console_Getopt {
         if (PEAR::isError($args)) {
             return $args;
         }
+        if (empty($args)) {
+            return array(array(), array());
+        }
         $opts     = array();
         $non_opts = array();
 
         settype($args, 'array');
 
-        if ($long_options)
+        if ($long_options) {
             sort($long_options);
-
+        }
         if ($args[0]{0} != '-') {
             array_shift($args);
         }
