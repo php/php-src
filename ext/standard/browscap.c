@@ -149,7 +149,7 @@ PHP_MINIT_FUNCTION(browscap)
 		zend_file_handle fh;
 		memset(&fh, 0, sizeof(fh));
 
-		if (zend_hash_init(&browser_hash, 0, NULL, (dtor_func_t) browscap_entry_dtor, 1)==FAILURE) {
+		if (zend_hash_init_ex(&browser_hash, 0, NULL, (dtor_func_t) browscap_entry_dtor, 1, 0)==FAILURE) {
 			return FAILURE;
 		}
 
