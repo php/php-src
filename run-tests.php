@@ -181,14 +181,7 @@ echo "TIME START " . date('Y-m-d H:i:s', $start_time) . "
 =====================================================================
 ";
 
-$path_current = '';
 foreach ($test_files as $name) {
-	$path = dirname($name);
-	if ($path_current != $path) {
-		$path_current = $path;
-		echo "       entering directory $path\n";
-	}
-
 	$test_results[$name] = run_test($php,$name);
 }
 
@@ -307,7 +300,8 @@ TEST $file
 	}
 	fclose($fp);
 
-	$tested = trim($section_text['TEST']).' ('.basename($file).')';
+	$shortname = str_replace($GLOBALS['cwd'].'/', '', $file);
+	$tested = trim($section_text['TEST'])." [$shortname]";
 
 	$tmp = realpath(dirname($file));
 	$tmp_skipif = $tmp . uniqid('/phpt.');
