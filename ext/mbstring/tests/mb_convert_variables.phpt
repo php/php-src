@@ -4,6 +4,7 @@ mb_convert_variables()
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --INI--
 output_handler=
+mbstring.language=Japanese
 --FILE--
 <?php
 // TODO: Add more tests
