@@ -8,12 +8,10 @@ tidy_clean_repair()
 --FILE--
 <?php 
 
-    $tidy = tidy_create();
-    
-    tidy_parse_string($tidy, "<HTML></HTML>");
-    tidy_clean_repair($tidy);
+    tidy_parse_string("<HTML></HTML>");
+    tidy_clean_repair();
 
-    echo tidy_get_output($tidy);
+    echo tidy_get_output();
 
 ?>
 --EXPECT--

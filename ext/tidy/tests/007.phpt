@@ -7,23 +7,22 @@ Verbose tidy_setopt() / tidy_getopt()
 --INI--
 --FILE--
 <?php 
-
-    $tidy = tidy_create();
+    
     echo "Current Value of 'tidy-mark': ";
-    var_dump(tidy_getopt($tidy, "tidy-mark"));
+    var_dump(tidy_getopt("tidy-mark"));
     tidy_setopt($tidy, "tidy-mark", true);
     echo "\nNew Value of 'tidy-mark': ";
-    var_dump(tidy_getopt($tidy, "tidy-mark"));
+    var_dump(tidy_getopt("tidy-mark"));
     echo "Current Value of 'error-file': ";
-    var_dump(tidy_getopt($tidy, "error-file"));
+    var_dump(tidy_getopt("error-file"));
     tidy_setopt($tidy, "error-file", "foobar");
     echo "\nNew Value of 'error-file': ";
-    var_dump(tidy_getopt($tidy, "error-file"));
+    var_dump(tidy_getopt("error-file"));
     echo "Current Value of 'tab-size': ";
-    var_dump(tidy_getopt($tidy, "tab-size"));
+    var_dump(tidy_getopt("tab-size"));
     tidy_setopt($tidy, "tab-size", 10);
     echo "\nNew Value of 'tab-size': ";
-    var_dump(tidy_getopt($tidy, "tab-size"));
+    var_dump(tidy_getopt("tab-size"));
 ?>
 --EXPECT--
 Current Value of 'tidy-mark': bool(false)

@@ -7,12 +7,9 @@ tidy_diagnose()
 --INI--
 --FILE--
 <?php 
-
-    $tidy = tidy_create();
-    
-    tidy_parse_string($tidy, "<HTML></HTML>");
-    tidy_diagnose($tidy);
-    echo tidy_get_error_buffer($tidy);
+    tidy_parse_string("<HTML></HTML>");
+    tidy_diagnose();
+    echo tidy_get_error_buffer();
 
 ?>
 --EXPECT--

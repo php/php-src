@@ -10,15 +10,13 @@
      * Usage; php dumpit.php <filename>
      */
      
-    
-    $tidy = tidy_create();
-    tidy_parse_file($tidy, $_SERVER['argv'][1]);
+    tidy_parse_file($_SERVER['argv'][1]);
     
     /* Optionally you can do this here if you want to fix up the document */
     
-    /* tidy_clean_repair($tidy); */
+    /* tidy_clean_repair(); */
               
-    $tree = tidy_get_root($tidy);
+    $tree = tidy_get_root();
     dump_tree($tree);
     echo "\n";
     
@@ -70,12 +68,12 @@
             }
             
             /* Any attributes on this node? */
-            if(count($node->attribs)) {
+            if(count($node->attributes())) {
                 do_leaf(" |\n", $indent);
                 do_leaf(" +---- Attributes\n", $indent);
                 
                 /* Cycle through the attributes and display them and their values. */
-                foreach($node->attribs as $attrib) {
+                foreach($node->attributes() as $attrib) {
                     do_leaf("             +--{$attrib->name}\n", $indent);
                     do_leaf("             |    +-- Value: {$attrib->value}\n", $indent);
                 }
@@ -83,7 +81,7 @@
             
             /* Recurse along the children to generate the remaining nodes */
             if($node->has_children()) {
-                foreach($node->children as $child) {
+                foreach($node->children() as $child) {
                     dump_tree($child, $indent + 3);
                 }
             }
