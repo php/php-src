@@ -1,3 +1,30 @@
+2002-06-27  Jani Taskinen  <sniper@iki.fi>
+
+    * Makefile.global: Fix bug: #18008
+
+    * ext/gd/gd.c: Consistency fix.
+
+    * ext/imap/php_imap.c: - Fixed bug: #15595 (and possibly others too)
+
+2002-06-27  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/standard/Makefile.frag:
+    Update configure line in phpinfo() after re-running configure without
+    running make clean first, bug #18012.
+
+2002-06-27  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/filepro/filepro.c
+      ext/ftp/php_ftp.c
+      ext/fdf/fdf.c
+      ext/fbsql/php_fbsql.c: Unify error messages
+
+    * ext/ldap/ldap.c: - Remove \n
+
+2002-06-27  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/php_imap.c: - Cleaning up the mess..these are NOT zvals.
+
 2002-06-26  Jani Taskinen  <sniper@iki.fi>
 
     * ext/imap/php_imap.c: MFH: fix for bug: #17999
