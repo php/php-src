@@ -14,7 +14,7 @@
 #define TSRM_H
 
 /* #ifndef WIN32 */
-#if !defined(WIN32) && !defined(NETWARE)
+#ifndef WIN32
 # include <tsrm_config.h>
 #endif
 
