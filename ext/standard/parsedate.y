@@ -860,7 +860,6 @@ time_t parsedate(char *p, TIMEINFO *now)
     struct tm		*tm, tmbuf;
     TIMEINFO		ti;
     time_t		Start;
-	CLS_FETCH();
 
     yyInput = p;
     if (now == NULL) {
