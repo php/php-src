@@ -153,7 +153,7 @@ static zend_bool satellite_any_to_zval_sequence(
 		/* add to hashtable */
 		INIT_PZVAL(p_destination_item);	/* testing! */
 		zend_hash_next_index_insert(
-			pDZ_ARRVAL_P(estination),
+			Z_ARRVAL_P(pDestination),
 			&p_destination_item,
 			sizeof(zval *),
 			NULL);

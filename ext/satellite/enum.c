@@ -96,14 +96,14 @@ zend_bool OrbitEnum_Constructor(OrbitEnum ** ppEnum, int parameterCount,
 	}
 
 	/* validate parameter types */
-	if (ppPZ_TYPE_P(arameters[0]) != IS_STRING)
+	if (Z_TYPE_P(ppParameters[0]) != IS_STRING)
 		goto error;
 
 	/* find type information */
-	p_enum->mpEnumType = TypeManager_FindEnum(ppPZ_STRVAL_P(arameters[0]));
+	p_enum->mpEnumType = TypeManager_FindEnum(Z_STRVAL_P(ppParameters[0]));
 	if (p_enum->mpEnumType == NULL)
 	{
-		zend_error(E_WARNING, "(Satellite) unknown enum '%s'", ppPZ_STRVAL_P(arameters[0]));
+		zend_error(E_WARNING, "(Satellite) unknown enum '%s'", Z_STRVAL_P(ppParameters[0]));
 		goto error;
 	}
 
