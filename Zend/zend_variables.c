@@ -138,7 +138,7 @@ ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 				}
 				zvalue->value.ht = (HashTable *) emalloc_rel(sizeof(HashTable));
 				zend_hash_init(zvalue->value.ht, 0, NULL, ZVAL_PTR_DTOR, 0);
-				zend_hash_copy(zvalue->value.ht, original_ht, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *));
+				zend_hash_copy(zvalue->value.ht, original_ht, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 			}
 			break;
 		case IS_OBJECT: {
@@ -147,7 +147,7 @@ ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 
 				zvalue->value.obj.properties = (HashTable *) emalloc_rel(sizeof(HashTable));
 				zend_hash_init(zvalue->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-				zend_hash_copy(zvalue->value.obj.properties, original_ht, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *));
+				zend_hash_copy(zvalue->value.obj.properties, original_ht, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 			}
 			break;
 	}

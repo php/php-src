@@ -1049,7 +1049,7 @@ static void function_add_ref(zend_function *function)
 
 			ALLOC_HASHTABLE(op_array->static_variables);
 			zend_hash_init(op_array->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0);
-			zend_hash_copy(op_array->static_variables, static_variables, (void (*)(void *)) zval_add_ref, (void *) &tmp_zval, sizeof(zval *));
+			zend_hash_copy(op_array->static_variables, static_variables, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_zval, sizeof(zval *));
 		}
 	}
 }
@@ -1479,10 +1479,10 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 
 		if (zend_hash_find(CG(class_table), parent_class_name->u.constant.value.str.val, parent_class_name->u.constant.value.str.len+1, (void **) &parent_class)==SUCCESS) {
 			/* copy functions */
-			zend_hash_copy(&CG(class_entry).function_table, &parent_class->function_table, (void (*)(void *)) function_add_ref, &tmp_zend_function, sizeof(zend_function));
+			zend_hash_copy(&CG(class_entry).function_table, &parent_class->function_table, (copy_ctor_func_t) function_add_ref, &tmp_zend_function, sizeof(zend_function));
 
 			/* copy default properties */
-			zend_hash_copy(&CG(class_entry).default_properties, &parent_class->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *));
+			zend_hash_copy(&CG(class_entry).default_properties, &parent_class->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 			CG(class_entry).parent = parent_class;
 
