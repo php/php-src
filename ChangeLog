@@ -1,3 +1,100 @@
+2001-08-16  Zeev Suraski  <zeev@zend.com>
+
+    * genfiles: MFH
+
+    * genfiles: Remove redundant files
+
+2001-08-16  Joey Smith  <joey@joeysmith.com>
+
+    * ext/dbase/dbase.c:
+    This fixes Bug id #11928.
+
+2001-08-16  Zeev Suraski  <zeev@zend.com>
+
+    * ext/zlib/CREDITS
+      ext/zlib/zlib.c: MFH
+
+    * ext/zlib/CREDITS
+      ext/zlib/zlib.c: Send Content-Length if we're sending just one chunk
+
+2001-08-16  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/exif/exif.c: Missing define
+
+2001-08-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/session/tests/.cvsignore
+      pear/DB/tests/oci8/.cvsignore: Missing entries.
+
+2001-08-16  Zeev Suraski  <zeev@zend.com>
+
+    * ext/skeleton/skeleton.c: MFH
+
+    * ext/skeleton/skeleton.c: sync with CODING_STANDARDS
+
+2001-08-16  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/skeleton/skeleton.c
+      ext/skeleton/skeleton.php: MFH
+
+2001-08-16  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.h: MFH
+
+    * ext/imap/php_imap.h
+      ext/imap/php_imap.c:
+    add tail pointer to speed up imap_search (submitted by Rob Siemborski
+    <rjs3@andrew.cmu.edu>).
+
+2001-08-16  Harald Radi  <h.radi@nme.at>
+
+    * EXTENSIONS: added me and myself
+
+2001-08-16  Rasmus Lerdorf  <rasmus@php.net>
+
+    * EXTENSIONS: that too
+
+    * EXTENSIONS: Add dbx
+
+2001-08-16  Harald Radi  <h.radi@nme.at>
+
+    * ext/iisfunc/iisfunc.cpp: removed atl linkage
+
+2001-08-16  Thies C. Arntzen  <thies@thieso.net>
+
+    * main/main.c: MFH: move php_shutdown_config further down
+
+    * main/main.c: move php_shutdown_config further down
+
+2001-08-16  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mysql.php:
+    re-fix free result when $db->tableinfo($table) is called
+
+2001-08-16  Vincent Blavet  <vincent@blavet.net>
+
+    * pear/Experimental/Archive/docs/Tar.txt
+      pear/Experimental/Archive/Tar.php: First release of Archive_Tar class.
+    Simple public methods are create(), add(), listContent() and extract().
+    More features are available with createModify(), addModify(), extractModify() and extractList().
+
+2001-08-16  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * sapi/apache2filter/sapi_apache2.c: darn noet
+
+    * sapi/apache2filter/sapi_apache2.c: Ryan Bloom's fix of my fix. ;)
+
+    * sapi/apache2filter/sapi_apache2.c: Fix error logging
+
+2001-08-16  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/exif/exif.c
+      ext/skeleton/skeleton.c
+      ext/skeleton/skeleton.php: Commit a bit of random plane hacking.
+     - A slight exif fix from the latest version of jhead
+     - Make ext_skel's confirm_module_compiled function consistent
+
 2001-08-15  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/DB/mysql.php:
