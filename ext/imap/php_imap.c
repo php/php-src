@@ -368,8 +368,8 @@ PHP_MINFO_FUNCTION(imap)
 
 static void php_imap_init_globals(zend_imap_globals *imap_globals)
 {
-	imap_globals->imap_user[0] = 0;
-	imap_globals->imap_password[0] = 0;
+	imap_globals->imap_user=NIL;
+	imap_globals->imap_password=NIL;
 	imap_globals->imap_folders=NIL;
 	imap_globals->imap_sfolders=NIL;
 	imap_globals->imap_alertstack=NIL;
@@ -600,10 +600,7 @@ PHP_MINIT_FUNCTION(imap)
 
 void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
-	zval **mailbox;
-	zval **user;
-	zval **passwd;
-	zval **options;
+	zval **mailbox, **user, **passwd, **options;
 	MAILSTREAM *imap_stream;
 	pils *imap_le_struct;
 	long flags=NIL;
@@ -632,9 +629,10 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			flags ^= PHP_EXPUNGE;
 		}
 	}
-	strcpy(IMAPG(imap_user), Z_STRVAL_PP(user));
-	strcpy(IMAPG(imap_password), Z_STRVAL_PP(passwd));
 
+	IMAPG(imap_user)     = estrndup(Z_STRVAL_PP(user), Z_STRLEN_PP(user));
+	IMAPG(imap_password) = estrndup(Z_STRVAL_PP(passwd), Z_STRLEN_PP(passwd));
+	
 #ifdef OP_RELOGIN
 	/* AJS: persistent connection handling */
 	/* Cannot use a persistent connection if we cannot parse
@@ -765,6 +763,9 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	} else {
 #endif
 		imap_stream = mail_open(NIL, Z_STRVAL_PP(mailbox), flags);
+		efree(IMAPG(imap_user));
+		efree(IMAPG(imap_password));
+
 		if (imap_stream == NIL) {
 			php_error(E_WARNING, "Couldn't open stream %s\n", (*mailbox)->value.str.val);
 			RETURN_FALSE;
@@ -1885,7 +1886,7 @@ PHP_FUNCTION(imap_unsubscribe)
 PHP_FUNCTION(imap_fetchstructure)
 {
 	zval **streamind, **msgno, **flags;
-	int ind, ind_type;
+	int ind, ind_type, msgindex;
 	pils *imap_le_struct;
 	BODY *body;
 	int myargc=ZEND_NUM_ARGS();
@@ -1912,8 +1913,21 @@ PHP_FUNCTION(imap_fetchstructure)
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	
-	mail_fetchstructure_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), &body ,myargc == 3 ? Z_LVAL_PP(flags) : NIL);
+
+	if ((myargc == 3) && (Z_LVAL_PP(flags) & FT_UID)) {
+		/*  This should be cached; if it causes an extra RTT to the
+			IMAP server, then that's the price we pay for making sure
+			we don't crash. */
+		msgindex = mail_msgno(imap_le_struct->imap_stream, Z_LVAL_PP(msgno));
+	} else {
+		msgindex = Z_LVAL_PP(msgno);
+	}
+	if ((msgindex < 1) || ((unsigned) msgindex > imap_le_struct->imap_stream->nmsgs)) {
+		php_error(E_WARNING, "Bad message number");
+		RETURN_FALSE;
+	}
+
+	mail_fetchstructure_full(imap_le_struct->imap_stream, msgindex, &body ,myargc == 3 ? Z_LVAL_PP(flags) : NIL);
 	
 	if (!body) {
 		php_error(E_WARNING, "No body information available");
@@ -4074,19 +4088,19 @@ void mm_login(NETMBX *mb, char *user, char *pwd, long trial)
 #if HAVE_IMSP
 	if (*mb->service && strcmp(mb->service, "imsp") == 0) {
 		if (*mb->user) {
-			strcpy(user, mb->user);
+			strncpy(user, mb->user, MAILTMPLEN);
 		} else {
-			strcpy(user, imsp_user);
+			strncpy(user, imsp_user, MAILTMPLEN);
 		}
-		strcpy (pwd, imsp_password);
+		strncpy (pwd, imsp_password, MAILTMPLEN);
 	} else {
 #endif
 		if (*mb->user) {
-			strcpy (user,mb->user);
+			strncpy (user,mb->user, MAILTMPLEN);
 		} else {
-			strcpy (user, IMAPG(imap_user));
+			strncpy (user, IMAPG(imap_user), MAILTMPLEN);
 		}
-		strcpy (pwd, IMAPG(imap_password));
+		strncpy (pwd, IMAPG(imap_password), MAILTMPLEN);
 #if HAVE_IMSP
 	}
 #endif
