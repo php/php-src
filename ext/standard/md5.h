@@ -66,6 +66,6 @@ void PHP3_MD5Init PROTO_LIST((PHP3_MD5_CTX *));
 void PHP3_MD5Update PROTO_LIST((PHP3_MD5_CTX *, const unsigned char *, unsigned int));
 void PHP3_MD5Final PROTO_LIST((unsigned char[16], PHP3_MD5_CTX *));
 
-PHP_FUNCTION(md5);
+PHP_NAMED_FUNCTION(php_if_md5);
 
 #endif
