@@ -1036,10 +1036,17 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 	char *directory = NULL;
 	int validate, resolve_externals, keep_blanks, substitute_ent;
 
-	validate = dom_document_get_property_int(id, "validateOnParse" TSRMLS_CC);
-	resolve_externals = dom_document_get_property_int(id, "resolveExternals" TSRMLS_CC);
-	keep_blanks = dom_document_get_property_int(id, "preserveWhiteSpace" TSRMLS_CC);
-	substitute_ent = dom_document_get_property_int(id, "substituteEntities" TSRMLS_CC);
+	if (id != NULL) {
+		validate = dom_document_get_property_int(id, "validateOnParse" TSRMLS_CC);
+		resolve_externals = dom_document_get_property_int(id, "resolveExternals" TSRMLS_CC);
+		keep_blanks = dom_document_get_property_int(id, "preserveWhiteSpace" TSRMLS_CC);
+		substitute_ent = dom_document_get_property_int(id, "substituteEntities" TSRMLS_CC);
+	} else {
+		validate = 0;
+		resolve_externals = 0;
+		keep_blanks = 1;
+		substitute_ent = 0;
+	}
 
 	xmlInitParser();
 
