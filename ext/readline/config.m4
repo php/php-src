@@ -23,12 +23,12 @@ if test "$PHP_READLINE" != "no"; then
   AC_CHECK_LIB(ncurses, tgetent,
   [
     PHP_ADD_LIBRARY(ncurses,,READLINE_SHARED_LIBADD)
-	 PHP_READLINE_LIBS="$PHP_READLINE_LIBS -lncurses"
+    PHP_READLINE_LIBS="$PHP_READLINE_LIBS -lncurses"
   ],[
     AC_CHECK_LIB(termcap, tgetent,
     [
       PHP_ADD_LIBRARY(termcap,,READLINE_SHARED_LIBADD)
-	 	PHP_READLINE_LIBS="$PHP_READLINE_LIBS -ltermcap"
+      PHP_READLINE_LIBS="$PHP_READLINE_LIBS -ltermcap"
     ])
   ])
 
