@@ -135,7 +135,9 @@ int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	 * the rest of the request. RFC 2616
 	 *
 	 */
-	if( !ap_should_client_block(r) ) return total_read_bytes;
+	if (!SG(read_post_bytes) && !ap_should_client_block(r)) {
+		return total_read_bytes;
+	}
  
 	handler = signal(SIGPIPE, SIG_IGN);
 	while (total_read_bytes<count_bytes) {
