@@ -311,6 +311,24 @@ char *JewishMonthName[14] =
 	"Elul"
 };
 
+char *JewishMonthHebName[14] =
+{
+	"",
+	"תשרי",
+	"חשון",
+	"כסלו",
+	"טבת",
+	"שבט",
+	"אדר",
+	"'אדר ב",
+	"ניסן",
+	"אייר",
+	"סיון",
+	"תמוז",
+	"אב",
+	"אלול"
+};
+
 /************************************************************************
  * Given the year within the 19 year metonic cycle and the time of a molad
  * (new moon) which starts that year, this routine will calculate what day

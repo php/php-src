@@ -79,6 +79,7 @@ long int JulianToSdn(int year, int month, int day);
 void SdnToJewish(long int sdn, int *pYear, int *pMonth, int *pDay);
 long int JewishToSdn(int year, int month, int day);
 extern char *JewishMonthName[14];
+extern char *JewishMonthHebName[14];
 
 /* French republic calendar conversions. */
 void SdnToFrench(long int sdn, int *pYear, int *pMonth, int *pDay);
@@ -93,4 +94,4 @@ int DayOfWeek(long int sdn);
 extern char *DayNameShort[7];
 extern char *DayNameLong[7];
 
-#endif							/* SDNCAL_H */
+#endif /* SDNCAL_H */
