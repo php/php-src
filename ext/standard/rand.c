@@ -36,7 +36,7 @@
 /* an ARRAY of POINTERS, not vice versa */
 php_randgen_entry *php_randgen_entries[PHP_RAND_NUMRANDS];
 
-#define PHP_HAS_SRAND(which)	(php_randgen_entries[which]->srand)
+#define PHP_HAS_SRAND(which)	(php_randgen_entries[which] && php_randgen_entries[which]->srand)
 #define PHP_SRAND(which,seed)	((*(php_randgen_entries[which]->srand))(seed))
 #define PHP_RAND(which)			((*(php_randgen_entries[which]->rand))())
 #define PHP_RANDMAX(which)		(php_randgen_entries[which]->randmax)
@@ -48,6 +48,8 @@ PHP_MINIT_FUNCTION(rand)
 {
 	PHP_MINIT(rand_sys)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(rand_mt)(INIT_FUNC_ARGS_PASSTHRU);
+	/* lcg not yet implemented */
+	php_randgen_entries[PHP_RAND_LCG] = NULL;
 }
 
 /* TODO: check that this function is called on the start of each script
