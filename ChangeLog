@@ -1,3 +1,88 @@
+2000-06-14  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/datetime.c:
+    return FALSE from strftime on negative timestamp values
+    they do not make sense anyway and seem to crash win2k
+
+2000-06-14  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/datetime.c:
+    Refine checkdate() fix to accept numeric strings and floating point as well
+
+2000-06-14  Zeev Suraski  <zeev@php.net>
+
+    * php4.dsp
+      php4.dsw
+      php4dll.dsp
+      php4dllts.dsp
+      php4ts.dsp
+      php4ts.dsw
+      win32/php4.dsp
+      win32/php4.dsw
+      win32/php4dll.dsp
+      win32/php4dllts.dsp
+      win32/php4ts.dsp
+      win32/php4ts.dsw:
+    - Moved VC++ Win32 project and workspace files to the win32 directory
+      
+
+2000-06-14  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: reminder
+
+2000-06-14  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/datetime.c:
+    Require the year arg to checkdate to be an integer - fix for bug #5034
+
+2000-06-14  Zeev Suraski  <zeev@php.net>
+
+    * php4dll.dsp
+      php4dllts.dsp: Thoroughly fix .dsp problems - restore custom builds
+
+2000-06-14  Andrei Zmievski  <andrei@ispi.net>
+
+    * tests/testarray: test
+
+2000-06-14  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/imap/php_imap.c
+      ext/mcal/php_mcal.h: no c++ comments, please
+
+2000-06-14  Egon Schmid  <eschmid@s.netic.de>
+
+    * configure.in: Fix for #5028.
+
+2000-06-14  Sam Ruby  <rubys@us.ibm.com>
+
+    * php4ts.dsw
+      sapi/servlet/servlet.dsp:
+    Find servlet includes in new "main" directory.  Add (finally) java and
+    servlet to the list of projects
+
+2000-06-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * pear/Makefile.in
+      pear/php-config.in:
+    Copy header files from main and also add that directory to the list
+    of include directories.
+
+    * NEWS: .
+
+    * pear/pear.m4: Use the new PHP_GEN_* macros in pear
+
+2000-06-14  Jouni Ahto  <jah@mork.net>
+
+    * ext/gd/gd.c:
+
+2000-06-14  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/reflect.java
+      sapi/servlet/servlet.java:
+    Export the necessary functions to enable servlet support to be subclassed
+
+    This is in preparation for xml-cocoon support
+
 2000-06-13  Andrei Zmievski  <andrei@ispi.net>
 
     * main/main.c:
