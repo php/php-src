@@ -45,6 +45,15 @@ if test "$PHP_SQLITE" != "no"; then
 	PHP_NEW_EXTENSION(sqlite, sqlite.c libsqlite/src/encode.c, $ext_shared)
   else
 	# use bundled library
+
+	PHP_SQLITE_CFLAGS="-I@ext_srcdir@/libsqlite/src"
+	if test "$PHP_DEBUG" = "1"; then
+		PHP_SQLITE_CFLAGS="$PHP_SQLITE_CFLAGS -DNDEBUG"
+	fi
+	if test "$enable_experimental_zts" = "yes"; then
+		PHP_SQLITE_CFLAGS="$PHP_SQLITE_CFLAGS -DTHREADSAFE"
+	fi
+
 	sources="libsqlite/src/opcodes.c
 		libsqlite/src/parse.c libsqlite/src/encode.c \
 		libsqlite/src/auth.c libsqlite/src/btree.c libsqlite/src/build.c \
@@ -56,7 +65,7 @@ if test "$PHP_SQLITE" != "no"; then
 		libsqlite/src/update.c libsqlite/src/util.c libsqlite/src/vdbe.c \
 		libsqlite/src/where.c libsqlite/src/trigger.c"
 	
-  	PHP_NEW_EXTENSION(sqlite, sqlite.c $sources, $ext_shared,,-I@ext_srcdir@/libsqlite/src)
+  	PHP_NEW_EXTENSION(sqlite, sqlite.c $sources, $ext_shared,,$PHP_SQLITE_CFLAGS)
 	PHP_ADD_BUILD_DIR($ext_builddir/libsqlite)
 	PHP_ADD_BUILD_DIR($ext_builddir/libsqlite/src)
 	AC_CHECK_SIZEOF(char *,4)
