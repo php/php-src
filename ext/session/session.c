@@ -580,7 +580,7 @@ static void php_session_save_current_state(TSRMLS_D)
 		return;
 	}
 		
-	if (PS(http_session_vars) && PS(http_session_vars)->type!=IS_ARRAY) {
+	if (PS(http_session_vars) && PS(http_session_vars)->type != IS_ARRAY) {
 		return;
 	}
 		
