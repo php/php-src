@@ -5,7 +5,6 @@
       ext/standard/basic_functions.h:
     Added get_loaded_extensions(), extension_loaded(), and
     get_extension_funcs() functions.
-    get_extension_funcs() functions. (Andrei)
 
     * TODO: A little renaming.
 
