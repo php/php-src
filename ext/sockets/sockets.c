@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Chris Vandomelen <chrisv@b0rked.dhs.org>                    |
-   |          Sterling Hughes <sterling@php.net>                          |
+   |          Sterling Hughes <Sterling.Hughes@pentap.net>                |
    +----------------------------------------------------------------------+
  */
 
