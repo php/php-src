@@ -12,8 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:                                                             |
-   |                                                                      |
+   | Authors: Andrei Zmievski <andrei@php.net>                            |
    +----------------------------------------------------------------------+
  */
 
@@ -27,8 +26,7 @@
  * - handle both OE_IS_OBJECT and OE_IS_ARRAY in the whole chain
  * + see how to fix the issue of object trying to set its own property inside
  *   the handler
- * - don't overload constructors?
- * - flag to check if function exists in function table, then call it, otherwise
+ * + check if function exists in function table, then call it, otherwise
  *   call handler (aka AUTOLOAD in Perl)
  * + should it check for existing properties first before calling __get/__set:
  *   yes
@@ -419,42 +417,60 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 {
 	zval ***args;
 	zval *retval = NULL;
-	int call_result;
+	int call_result, arg_offset = 1;
+	zend_bool use_call_handler = 1;
 	zend_class_entry temp_ce, *orig_ce;
 	zval *object = property_reference->object;
 	zval call_handler, method_name, *method_name_ptr = &method_name;
 	zend_overloaded_element *method = (zend_overloaded_element *)property_reference->elements_list->tail->data;
 
-	args = (zval ***)emalloc((ZEND_NUM_ARGS() + 1) * sizeof(zval **));
+	if (zend_hash_exists(&Z_OBJCE_P(object)->function_table,
+						 Z_STRVAL(method->element),
+						 Z_STRLEN(method->element) + 1)) {
+		use_call_handler = 0;
+		arg_offset = 0;
+	}
 
-	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), &args[1]) == FAILURE) {
+	args = (zval ***)emalloc((ZEND_NUM_ARGS() + arg_offset) * sizeof(zval **));
+
+	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), &args[arg_offset]) == FAILURE) {
 		efree(args);
 		php_error(E_WARNING, "unable to obtain arguments");
 		return;
 	}
 
-	temp_ce = *Z_OBJCE_P(object);
-	DISABLE_HANDLERS(temp_ce);
-	orig_ce = Z_OBJCE_P(object);
-	Z_OBJCE_P(object) = &temp_ce;
+	if (use_call_handler) {
+		temp_ce = *Z_OBJCE_P(object);
+		DISABLE_HANDLERS(temp_ce);
+		orig_ce = Z_OBJCE_P(object);
+		Z_OBJCE_P(object) = &temp_ce;
 
-	ZVAL_STRINGL(&call_handler, CALL_HANDLER, sizeof(CALL_HANDLER)-1, 0);
-	ZVAL_STRINGL(&method_name, Z_STRVAL(method->element), Z_STRLEN(method->element), 0);
-	INIT_PZVAL(method_name_ptr);
-	args[0] = &method_name_ptr;
+		ZVAL_STRINGL(&call_handler, CALL_HANDLER, sizeof(CALL_HANDLER)-1, 0);
+		ZVAL_STRINGL(&method_name, Z_STRVAL(method->element), Z_STRLEN(method->element), 0);
+		INIT_PZVAL(method_name_ptr);
+		args[0] = &method_name_ptr;
+	} else {
+		ZVAL_STRINGL(&call_handler, Z_STRVAL(method->element), Z_STRLEN(method->element), 0);
+	}
 	
 	call_result = call_user_function_ex(NULL,
 										&object,
 										&call_handler,
 										&retval,
-										ZEND_NUM_ARGS() + 1, args,
+										ZEND_NUM_ARGS() + arg_offset, args,
 										0, NULL TSRMLS_CC);
-	/* Restore object's original CE. */
-	Z_OBJCE_P(object) = orig_ce;
+
+	if (use_call_handler) {
+		/* Restore object's original CE. */
+		Z_OBJCE_P(object) = orig_ce;
+	}
 
 	if (call_result == FAILURE || !retval) {
 		efree(args);
-		php_error(E_WARNING, "unable to call %s::__call() handler", orig_ce->name);
+		if (use_call_handler)
+			php_error(E_WARNING, "unable to call %s::__call() handler", orig_ce->name);
+		else
+			php_error(E_WARNING, "unable to call %s::%s() method", orig_ce->name, Z_STRVAL(method->element));
 		return;
 	}
 
