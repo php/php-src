@@ -796,7 +796,7 @@ PHP_FUNCTION(odbc_prepare)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_prepare");
+		php_error_docref("odbc-prepare" TSRMLS_CC, E_WARNING, "%s(): SQLAllocStmt error 'Invalid Handle'");
 		RETURN_FALSE;
 	}
 
@@ -891,7 +891,7 @@ PHP_FUNCTION(odbc_execute)
 			if (zend_get_parameters_ex(2, &pv_res, &pv_param_arr) == FAILURE)
 				WRONG_PARAM_COUNT;
 			if (Z_TYPE_PP(pv_param_arr) != IS_ARRAY) {
-				php_error(E_WARNING, "No array passed to odbc_execute()");
+				php_error_docref("odbc-execute" TSRMLS_CC, E_WARNING, "%s(): No array passed");
 				return;
 			}
 			break;
@@ -1135,8 +1135,7 @@ PHP_FUNCTION(odbc_data_source)
 	}
 
 	if (zend_get_parameters_ex(2, &zv_conn, &zv_fetch_type) == FAILURE) {
-		php_error(E_WARNING, "Unable to get parameters");
-		RETURN_FALSE;
+		php_error(E_WARNING, "%s(): Unable to get parameters", get_active_function_name(TSRMLS_C));
 	}
 
 	convert_to_long_ex(zv_fetch_type);
@@ -1144,7 +1143,7 @@ PHP_FUNCTION(odbc_data_source)
 
 	if (!(fetch_type == SQL_FETCH_FIRST ||
 	      fetch_type == SQL_FETCH_NEXT)) {
-		php_error(E_WARNING, "%s(): Invalid fetch type (%d)", get_active_function_name(TSRMLS_C), fetch_type);
+		php_error_docref("odbc-data-source" TSRMLS_CC, E_WARNING, "%s(): Invalid fetch type (%d)", fetch_type);
 		RETURN_FALSE;
 	}
 
@@ -1217,7 +1216,7 @@ PHP_FUNCTION(odbc_exec)
 
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
+		php_error_docref("odbc-exec" TSRMLS_CC, E_WARNING, "%s(): SQLAllocStmt error 'Invalid Handle'");
 		efree(result);
 		RETURN_FALSE;
 	}
@@ -2126,7 +2125,7 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				cur_opt == SQL_CUR_USE_ODBC || 
 				cur_opt == SQL_CUR_USE_DRIVER || 
 				cur_opt == SQL_CUR_DEFAULT) ) {
-				php_error(E_WARNING, "odbc: Invalid Cursor type (%d)", cur_opt);
+				php_error_docref("odbc-connect" TSRMLS_CC, E_WARNING, "%s(): Invalid Cursor type (%d)", cur_opt);
 				RETURN_FALSE;
 			}
 			break;
@@ -2174,12 +2173,12 @@ try_and_get_another_connection:
 			list_entry new_le;
 			
 			if (ODBCG(max_links) != -1 && ODBCG(num_links) >= ODBCG(max_links)) {
-				php_error(E_WARNING, "odbc: Too many open links (%d)", ODBCG(num_links));
+				php_error_docref("odbc-exec" TSRMLS_CC, E_WARNING, "%s(): Too many open links (%d)", ODBCG(num_links));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
 			if (ODBCG(max_persistent) != -1 && ODBCG(num_persistent) >= ODBCG(max_persistent)) {
-				php_error(E_WARNING,"odbc: Too many open persistent links (%d)", ODBCG(num_persistent));
+				php_error_docref("odbc-pconnect" TSRMLS_CC, E_WARNING,"%s(): Too many open persistent links (%d)", ODBCG(num_persistent));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -2258,7 +2257,7 @@ try_and_get_another_connection:
 			}
 		}
 		if (ODBCG(max_links) != -1 && ODBCG(num_links) >= ODBCG(max_links)) {
-			php_error(E_WARNING,"ODBC:  Too many open connections (%d)",ODBCG(num_links));
+			php_error_docref("odbc-connect" TSRMLS_CC, E_WARNING,"%s(): Too many open connections (%d)",ODBCG(num_links));
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -2674,7 +2673,7 @@ PHP_FUNCTION(odbc_setoption)
 		case 1:		/* SQLSetConnectOption */
 			ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_handle, -1, "ODBC-Link", le_conn, le_pconn);
 			if (conn->persistent) {
-				php_error(E_WARNING, "Can't set option for persistent connection");
+				php_error(E_WARNING, "Unable to set option for persistent connection");
 				RETURN_FALSE;
 			}
 			rc = SQLSetConnectOption(conn->hdbc, (unsigned short)(Z_LVAL_PP(pv_opt)), Z_LVAL_PP(pv_val));
@@ -2694,7 +2693,7 @@ PHP_FUNCTION(odbc_setoption)
 			}
 			break;
 		default:
-			php_error(E_WARNING, "Unknown option type");
+			php_error_docref("odbc-setoption" TSRMLS_CC, E_WARNING, "%s(): Unknown option type");
 			RETURN_FALSE;
 			break;
 	}
@@ -2748,7 +2747,7 @@ PHP_FUNCTION(odbc_tables)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_tables");
+		php_error_docref("odbc-tables" TSRMLS_CC, E_WARNING, "%s(): SQLAllocStmt error 'Invalid Handle'");
 		RETURN_FALSE;
 	}
 
@@ -2798,6 +2797,7 @@ PHP_FUNCTION(odbc_columns)
 	odbc_result   *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema = NULL, *table = NULL, *column = NULL;
+	SWORD cat_len=0, schema_len=0, table_len=0, column_len=0;
 	RETCODE rc;
 	int argc;
 
@@ -2809,15 +2809,19 @@ PHP_FUNCTION(odbc_columns)
 		case 5:
 			convert_to_string_ex(pv_column);
 			column = Z_STRVAL_PP(pv_column);
+			column_len = Z_STRLEN_PP(pv_column);
 		case 4:
 			convert_to_string_ex(pv_table);
 			table = Z_STRVAL_PP(pv_table);
+			table_len = Z_STRLEN_PP(pv_table);
 		case 3:
 			convert_to_string_ex(pv_schema);
 			schema = Z_STRVAL_PP(pv_schema);
+			schema_len = Z_STRLEN_PP(pv_schema);
 		case 2:
 			convert_to_string_ex(pv_cat);
 			cat = Z_STRVAL_PP(pv_cat);
+			cat_len = Z_STRLEN_PP(pv_cat);
 	}
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
@@ -2831,7 +2835,7 @@ PHP_FUNCTION(odbc_columns)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_columns");
+		php_error_docref("odbc-columns" TSRMLS_CC, E_WARNING, "%s(): SQLAllocStmt error 'Invalid Handle'");
 		RETURN_FALSE;
 	}
 
@@ -2842,10 +2846,10 @@ PHP_FUNCTION(odbc_columns)
 	}
 
 	rc = SQLColumns(result->stmt, 
-			cat, SAFE_SQL_NTS(cat), 
-			schema, SAFE_SQL_NTS(schema), 
-			table, SAFE_SQL_NTS(table), 
-			column, SAFE_SQL_NTS(column));
+			cat, cat_len,
+			schema, schema_len,
+			table, table_len,
+			column, column_len);
 
 	if (rc == SQL_ERROR) {
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLColumns");
@@ -2910,7 +2914,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_columnprivileges");
+		php_error_docref("odbc-columnprivileges" TSRMLS_CC, E_WARNING, "%s(): SQLAllocStmt error 'Invalid Handle'");
 		RETURN_FALSE;
 	}
 
@@ -3008,7 +3012,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_foreignkeys");
+		php_error_docref("odbc-foreignkeys" TSRMLS_CC, E_WARNING, "%s(): SQLAllocStmt error 'Invalid Handle'");
 		RETURN_FALSE;
 	}
 
@@ -3087,7 +3091,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_gettypeinfo");
+		php_error_docref("odbc-gettypeinfo" TSRMLS_CC, E_WARNING, "%s(): SQLAllocStmt error 'Invalid Handle'");
 		RETURN_FALSE;
 	}
 
@@ -3159,7 +3163,7 @@ PHP_FUNCTION(odbc_primarykeys)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_primarykeys");
+		php_error_docref("odbc-primarykeys" TSRMLS_CC, E_WARNING, "%s(): SQLAllocStmt error 'Invalid Handle'");
 		RETURN_FALSE;
 	}
 
@@ -3241,7 +3245,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_procedurecolumns");
+		php_error_docref("odbc-procedurecolumns" TSRMLS_CC, E_WARNING, "%s(): SQLAllocStmt error 'Invalid Handle'");
 		RETURN_FALSE;
 	}
 
@@ -3323,7 +3327,7 @@ PHP_FUNCTION(odbc_procedures)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_procedures");
+		php_error_docref("odbc-procedures" TSRMLS_CC, E_WARNING, "%s(): SQLAllocStmt error 'Invalid Handle'");
 		RETURN_FALSE;
 	}
 
@@ -3409,7 +3413,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_specialcolumns");
+		php_error_docref("odbc-specialcolumns" TSRMLS_CC, E_WARNING, "%s(): SQLAllocStmt error 'Invalid Handle'");
 		RETURN_FALSE;
 	}
 
@@ -3494,7 +3498,7 @@ PHP_FUNCTION(odbc_statistics)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_statistics");
+		php_error_docref("odbc-statistics" TSRMLS_CC, E_WARNING, "%s(): SQLAllocStmt error 'Invalid Handle'");
 		RETURN_FALSE;
 	}
 
@@ -3572,7 +3576,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
 		efree(result);
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in odbc_tableprivileges");
+		php_error_docref("odbc-tableprivileges" TSRMLS_CC, E_WARNING, "%s(): SQLAllocStmt error 'Invalid Handle'");
 		RETURN_FALSE;
 	}
 
