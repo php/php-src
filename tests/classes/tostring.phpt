@@ -89,7 +89,7 @@ test2::__toString()
 Warning: Illegal offset type in %stostring.php on line %d
 ====test8====
 
-Notice: Object of class test2 could not be converted to string in %stostring.php on line %d
+Notice: Object of class test2 to string conversion in %stostring.php on line %d
 string(6) "Object"
 test2::__toString()
 string(9) "Converted"
