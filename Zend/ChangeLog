@@ -1,3 +1,26 @@
+2005-01-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c:
+      Fixed patch for bug #31478 (SegFault/Memory Leak with empty())
+
+    * zend_execute.c:
+      Fixed bug #28444 (Cannot access undefined property for object with
+      overloaded property access).
+
+    * (PHP_5_0)
+      zend_execute.c:
+      Fixed bug #28444 (Cannot access undefined property for object with
+      overloaded property access). (Dmitry)
+
+2005-01-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      zend_operators.h:
+      MFH: Fixed bug #30726 (-.1 like numbers are not being handled correctly).
+
+    * zend_operators.h:
+      Fixed bug #30726 (-.1 like numbers are not being handled correctly).
+
 2005-01-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * (PHP_5_0)
