@@ -5,8 +5,8 @@ phpdir="$prefix/lib/php/build"
 includedir="$prefix/include/php"
 builddir="`pwd`"
 
-FILES_BUILD="mkdep.awk shtool"
-FILES="acinclude.m4 Makefile.global scan_makefile_in.awk"
+FILES_BUILD="mkdep.awk scan_makefile_in.awk shtool"
+FILES="acinclude.m4 Makefile.global"
 CLEAN_FILES="$FILES *.lo *.la *.o .deps .libs/ build/ include/ modules/ install-sh \
     mkinstalldirs missing config.nice config.sub config.guess configure configure.in \
 	aclocal.m4 config.h config.h.in conftest* ltmain.sh libtool config.cache \
@@ -57,7 +57,7 @@ touch install-sh mkinstalldirs missing
 aclocal || exit 1
 autoconf || exit 1
 autoheader || exit 1
-libtoolize=`$phpdir/shtool path glibtoolize libtoolize`
+libtoolize=`$builddir/build/shtool path glibtoolize libtoolize`
 $libtoolize -f -c || exit 1
 
 # dumping API NOs:

@@ -8,7 +8,7 @@ PHP_ARG_WITH(openssl, for OpenSSL support,
 if test "$PHP_OPENSSL" != "no"; then
   PHP_SETUP_OPENSSL(OPENSSL_SHARED_LIBADD, 
   [
-    PHP_NEW_EXTENSION(openssl, openssl.c xp_ssl.c, $ext_shared)
+    PHP_NEW_EXTENSION(openssl, openssl.c, $ext_shared)
     PHP_SUBST(OPENSSL_SHARED_LIBADD)
     AC_DEFINE(HAVE_OPENSSL_EXT,1,[ ])
   ], [
