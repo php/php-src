@@ -1,13 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5 Release Candidate 1
-- Fixed crash with foreach and temporary objects($obj->method()->a ...) where
-  method returns a non-referenced object. (Andi, Zeev)
-- Compatibility mode directive has been renamed to zend.ze2_compatibility_mode,
-  as it doesn't only affect implicit cloning. (Andi, Zeev)
+- Renamed php.ini option "zend2.implicit_clone" to 
+  "zend.ze2_compatibility_mode" as it doesn't only affect implicit cloning.
+  (Andi, Zeev)
 - Methods that override parent methods are now subject to prototype checking,
-  and have to be compatible with the method they're overriding - this check
-  is disabled in compatibility mode. (Andi, Zeev)
+  and have to be compatible with the method they're overriding - this check is 
+  disabled in compatibility mode. (Andi, Zeev)
+- Fixed crash with foreach() and temporary objects($obj->method()->a ...) where
+  method returns a non-referenced object. (Andi, Zeev)
 - Fixed problem preventing startup errors from being displayed. (Marcus)
 - Fixed start-up problem if both SPL and SimpleXML were enabled. The double
   initialization of apache 1.3 was causing problems here. (Marcus, Derick)
