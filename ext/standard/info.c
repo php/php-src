@@ -335,7 +335,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 	if (flag & PHP_INFO_GENERAL) {
 		char *zend_version = get_zend_version();
-		char *api_numbers;
+		char temp_api[9];
 
 		php_uname = php_get_uname('a');
 		
@@ -379,10 +379,14 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 		php_info_print_table_row(2, "Configuration File (php.ini) Path", php_ini_opened_path?php_ini_opened_path:PHP_CONFIG_FILE_PATH);
 		
-		api_numbers = emalloc(sizeof("PHP: \nPHP Extension: \nZend Extension: ") + 3*8);
-		snprintf(api_numbers, sizeof("PHP: \nPHP Extension: \nZend Extension: ") + 3*8, "PHP: %d\nPHP Extension: %d\nZend Extension: %d", PHP_API_VERSION, ZEND_MODULE_API_NO, ZEND_EXTENSION_API_NO);
-		php_info_print_table_row(2, "API Versions:", api_numbers);
-		efree(api_numbers);
+		snprintf(temp_api, sizeof(temp_api), "%d", PHP_API_VERSION);
+		php_info_print_table_row(2, "PHP API", temp_api);
+
+		snprintf(temp_api, sizeof(temp_api), "%d", ZEND_MODULE_API_NO);
+		php_info_print_table_row(2, "PHP Extension", temp_api);
+
+		snprintf(temp_api, sizeof(temp_api), "%d", ZEND_EXTENSION_API_NO);
+		php_info_print_table_row(2, "Zend Extension", temp_api);
 
 #if ZEND_DEBUG
 		php_info_print_table_row(2, "Debug Build", "yes" );
