@@ -723,6 +723,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			case E_USER_NOTICE:
 				error_type_str = "Notice";
 				break;
+			case E_STRICT:
+				error_type_str = "Strict Standards";
+				break;
 			default:
 				error_type_str = "Unknown error";
 				break;
