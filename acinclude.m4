@@ -51,9 +51,13 @@ AC_DEFUN(PHP_READDIR_R_TYPE,[
 #include <sys/types.h>
 #include <dirent.h>
 
+#ifndef PATH_MAX
+#define PATH_MAX 1024
+#endif
+
 main() {
 	DIR *dir;
-	char entry[sizeof(struct dirent)+300];
+	char entry[sizeof(struct dirent)+PATH_MAX];
 	struct dirent *pentry = (struct dirent *) &entry;
 
 	dir = opendir("/");
