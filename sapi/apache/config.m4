@@ -39,7 +39,16 @@ AC_ARG_WITH(apxs,
   done
   PHP_ADD_INCLUDE($APXS_INCLUDEDIR)
   PHP_SAPI=apache
-  APACHE_INSTALL="\$(mkinstalldirs) \"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" && $APXS -S LIBEXECDIR=\"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" -i -a -n php4 $SAPI_SHARED"
+
+  # Test whether apxs support -S option
+  $APXS -q -S CFLAGS=$APXS_CFLAGS CFLAGS >/dev/null 2>&1
+
+  if test "$?" != "0"; then
+    APACHE_INSTALL="$APXS -i -a -n php4 $SAPI_SHARED" # Old apxs does not have -S option
+  else 
+    APACHE_INSTALL="\$(mkinstalldirs) \"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" && $APXS -S LIBEXECDIR=\"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" -i -a -n php4 $SAPI_SHARED"
+  fi
+
   PHP_BUILD_SHARED
   if test -z "`$APXS -q LD_SHLIB`" || test "`$APXS -q LIBEXECDIR`" = "modules"; then
     PHP_APXS_BROKEN=yes
