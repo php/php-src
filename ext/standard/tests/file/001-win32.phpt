@@ -2,8 +2,8 @@
 File type functions
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+    die('skip only for Windows');
 }
 ?>
 --POST--
@@ -26,7 +26,6 @@ if (file_exists('test.file')) {
     echo "test.file does not exist\n";
 }
 sleep (2);
-symlink('test.file','test.link');
 if (file_exists('test.link')) {
     echo "test.link exists\n";
 } else {
@@ -51,14 +50,7 @@ $s = stat ('test.file');
 $ls = lstat ('test.file');
 for ($i = 0; $i <= 12; $i++) {
     if ($ls[$i] != $s[$i]) {
-	echo "test.file lstat and stat differ at element $i\n";
-    }
-}
-$s = stat ('test.link');
-$ls = lstat ('test.link');
-for ($i = 0; $i <= 11; $i++) {
-    if ($ls[$i] != $s[$i]) {
-	if ($i != 6 && $i != 11) echo "test.link lstat and stat differ at element $i\n";
+        echo "test.file lstat and stat differ at element $i\n";
     }
 }
 echo "test.file is " . filetype('test.file') . "\n";
@@ -74,11 +66,6 @@ if (is_readable('test.file')) {
     echo "test.file is readable\n";
 } else {
     echo "test.file is not readable\n";
-}
-if (is_executable('test.file')) {
-    echo "test.file is executable\n";
-} else {
-    echo "test.file is not executable\n";
 }
 if (is_file('test.file')) {
     echo "test.file is a regular file\n";
@@ -106,7 +93,6 @@ if (is_dir('test.file')) {
     echo "test.file is not a directory\n";
 }
 unlink('test.file');
-unlink('test.link');
 if (file_exists('test.file')) {
     echo "test.file exists (cached)\n";
 } else {
@@ -122,25 +108,18 @@ if (file_exists('test.file')) {
 --EXPECT--
 test.file does not exist
 test.file exists
-test.link exists
+test.link does not exist
 test.file is not a symlink
-test.link is a symlink
+test.link is not a symlink
 test.file exists
-test.link lstat and stat differ at element 1
-test.link lstat and stat differ at element 2
-test.link lstat and stat differ at element 7
-test.link lstat and stat differ at element 8
-test.link lstat and stat differ at element 9
-test.link lstat and stat differ at element 10
 test.file is file
-test.link is link
-test.file permissions are 0744
+test.link is file
+test.file permissions are 0666
 test.file size is 0
 test.file is writeable
 test.file is readable
-test.file is executable
 test.file is a regular file
-test.link is a regular file
+test.link is not a regular file
 test.link is not a directory
 ../file is a directory
 test.file is not a directory
