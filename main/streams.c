@@ -1763,6 +1763,12 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 			end++;
 		}
 		snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename);
+
+		/* If file does not exist continue */
+		if (VCWD_STAT(trypath, &sb) != 0) {
+			ptr = end;
+			continue;
+		}
 		
 		if (php_check_open_basedir(trypath TSRMLS_CC)) {
 			stream = NULL;
@@ -1770,17 +1776,15 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 		}
 		
 		if (PG(safe_mode)) {
-			if (VCWD_STAT(trypath, &sb) == 0) {
-				/* file exists ... check permission */
-				if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC) == 0) ||
-						php_checkuid(trypath, mode, CHECKUID_CHECK_MODE_PARAM)) {
-					/* UID ok, or trypath is in safe_mode_include_dir */
-					stream = php_stream_fopen_rel(trypath, mode, opened_path, options);
-				} else {
-					stream = NULL;
-				}
-				goto stream_done;
+			/* file exists ... check permission */
+			if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC) == 0) ||
+					php_checkuid(trypath, mode, CHECKUID_CHECK_MODE_PARAM)) {
+				/* UID ok, or trypath is in safe_mode_include_dir */
+				stream = php_stream_fopen_rel(trypath, mode, opened_path, options);
+			} else {
+				stream = NULL;
 			}
+			goto stream_done;
 		}
 		stream = php_stream_fopen_rel(trypath, mode, opened_path, options);
 		if (stream) {
