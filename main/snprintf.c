@@ -384,6 +384,9 @@ ap_php_gcvt(double number, int ndigit, char *buf, boolean_e altform)
 		*p2++ = '.';
 		for (i = 1; i < ndigit; i++)
 			*p2++ = *p1++;
+		if (*(p2 - 1) == '.') {
+			*p2++ = '0';
+		}	
 		*p2++ = 'e';
 		if (decpt < 0) {
 			decpt = -decpt;
