@@ -2517,6 +2517,17 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 
 	EX_T(EX(opline)->result.u.var).var.fcall_returned_reference = 0;
 
+	if (EX(function_state).function->common.scope) {
+		if (!EG(This) && !(EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)) {
+			int severity;
+			if (EX(function_state).function->common.fn_flags & (ZEND_ACC_CTOR|ZEND_ACC_DTOR|ZEND_ACC_CLONE)) {
+				severity = E_ERROR;
+			} else {
+				severity = E_STRICT;
+			}
+			zend_error(severity, "Cannot call non static method %s::%s() static", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name);
+		}
+	}
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {	
 		ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
 		INIT_ZVAL(*(EX_T(EX(opline)->result.u.var).var.ptr));
