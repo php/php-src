@@ -107,6 +107,7 @@ char *php_lookup_class_name(zval *object, size_t *nlen, zend_bool del)
 	zval **val;
 	char *retval = NULL;
 	HashTable *object_properties;
+	TSRMLS_FETCH();
 
 	object_properties = Z_OBJPROP_P(object);
 
@@ -129,6 +130,7 @@ char *php_lookup_class_name(zval *object, size_t *nlen, zend_bool del)
 void php_store_class_name(zval *object, const char *name, size_t len)
 {
 	zval *val;
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(val);
 
