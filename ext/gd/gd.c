@@ -155,6 +155,7 @@ function_entry gd_functions[] = {
 	PHP_FE(imagepsslantfont,						NULL)
 	PHP_FE(imagepstext,								NULL)
 	PHP_FE(imagepsbbox,								NULL)
+	PHP_FE(imagetypes,								NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -257,6 +258,9 @@ PHP_MINFO_FUNCTION(gd)
 #endif
 #ifdef HAVE_GD_JPG
 	php_info_print_table_row(2, "JPG Support", "enabled");
+#endif
+#ifdef HAVE_GD_WBMP
+	php_info_print_table_row(2, "WBMP Support", "enabled");
 #endif
 	php_info_print_table_end();
 }
@@ -426,6 +430,25 @@ PHP_FUNCTION(imagecreate)
 }
 /* }}} */
 
+/* {{{ proto int imagetypes(void)
+   Return the types of images supported in a bitfield - 1=gif, 2=jpeg, 4=png, 8=wbmp */
+PHP_FUNCTION(imagetypes)
+{
+	int ret=0;	
+#ifdef HAVE_GD_GIF
+	ret = 1;
+#endif
+#ifdef HAVE_GD_JPG
+	ret |= 2;
+#endif
+#ifdef HAVE_GD_PNG
+	ret |= 4;
+#endif
+#ifdef HAVE_GD_WBMP
+	ret |= 8;
+#endif
+	RETURN_LONG(ret);
+}
 
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)()) {
 	zval **file;
