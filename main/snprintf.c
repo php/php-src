@@ -132,6 +132,7 @@ ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
 	return (p);
 }
 
+#define	NDIG	80
 
 
 /*
@@ -253,14 +254,6 @@ char *
 	return (p);
 }
 
-#ifdef HAVE_GCVT
-
-#define ap_php_ecvt ecvt
-#define ap_php_fcvt fcvt
-#define ap_php_gcvt gcvt
-
-#else
-
 /*
  * cvt.c - IEEE floating point formatting routines for FreeBSD
  * from GNU libc-4.6.27
@@ -273,7 +266,6 @@ char *
  *      sign is set to 0 for positive, 1 for negative
  */
 
-#define	NDIG	80
 
 char *
 ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, char *buf)
@@ -421,8 +413,6 @@ ap_php_gcvt(double number, int ndigit, char *buf, boolean_e altform)
 	*p2 = '\0';
 	return (buf);
 }
-
-#endif							/* HAVE_CVT */
 
 #if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF) || defined(BROKEN_SNPRINTF) || defined(BROKEN_VSNPRINTF)
 
