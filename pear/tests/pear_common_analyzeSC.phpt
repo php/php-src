@@ -108,6 +108,7 @@ fclose($fp);
 $ret = PEAR_Common::analyzeSourceCode($testdir . DIRECTORY_SEPARATOR . 'test5.php');
 echo "sixth test: returns false with valid PHP? ";
 echo $ret ? "no\n" : "yes\n";
+$ret['source_file'] = str_replace(array(dirname(__FILE__),DIRECTORY_SEPARATOR), array('', '/'), $ret['source_file']);
 var_dump($ret);
 unlink($testdir . DIRECTORY_SEPARATOR . 'test5.php');
 
@@ -121,7 +122,9 @@ second test: returns false with invalid PHP? yes
 fourth test: returns false with invalid PHP? yes
 fifth test: returns false with invalid PHP? yes
 sixth test: returns false with valid PHP? no
-array(5) {
+array(6) {
+  ["source_file"]=>
+  string(36) "/pear_common_analyzeSCtest/test5.php"
   ["declared_classes"]=>
   array(2) {
     [0]=>
