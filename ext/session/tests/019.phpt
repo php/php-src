@@ -48,24 +48,24 @@ session_destroy();
 --EXPECTF--
 array(2) {
   ["o1"]=>
-  &object(tfoo)#1 (1) {
+  &object(TFoo)#%d (1) {
     ["c"]=>
     int(42)
   }
   ["o2"]=>
-  &object(tfoo)#1 (1) {
+  &object(TFoo)#%d (1) {
     ["c"]=>
     int(42)
   }
 }
 array(2) {
   ["o1"]=>
-  &object(tfoo)#1 (1) {
+  &object(TFoo)#%d (1) {
     ["c"]=>
     int(44)
   }
   ["o2"]=>
-  &object(tfoo)#1 (1) {
+  &object(TFoo)#%d (1) {
     ["c"]=>
     int(44)
   }
