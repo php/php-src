@@ -38,6 +38,8 @@ typedef void (*php_stream_notification_func)(php_stream_context *context,
 		FG(default_context) ? FG(default_context) : \
 		(FG(default_context) = php_stream_context_alloc()) )
 
+#define php_stream_context_to_zval(context, zval) { ZVAL_RESOURCE(zval, (context)->rsrc_id); }
+
 typedef struct _php_stream_notifier {
 	php_stream_notification_func func;
 	void *ptr;
@@ -48,6 +50,7 @@ typedef struct _php_stream_notifier {
 struct _php_stream_context {
 	php_stream_notifier *notifier;
 	zval *options;	/* hash keyed by wrapper family or specific wrapper */
+	int rsrc_id;	/* used for auto-cleanup */
 };
 
 PHPAPI void php_stream_context_free(php_stream_context *context);

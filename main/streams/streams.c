@@ -1630,6 +1630,7 @@ PHPAPI php_stream_context *php_stream_context_alloc(void)
 	MAKE_STD_ZVAL(context->options);
 	array_init(context->options);
 
+	context->rsrc_id = ZEND_REGISTER_RESOURCE(NULL, context, php_le_stream_context());
 	return context;
 }
 

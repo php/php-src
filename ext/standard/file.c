@@ -129,7 +129,9 @@ PHPAPI int php_le_stream_context(void)
 
 static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
 {
-	php_stream_context_free((php_stream_context*)rsrc->ptr);
+	php_stream_context *context = (php_stream_context*)rsrc->ptr;
+	zval_dtor(context->options);
+	php_stream_context_free(context);
 }
 
 static void file_globals_ctor(php_file_globals *file_globals_p TSRMLS_DC)
