@@ -449,7 +449,7 @@ PHP_RSHUTDOWN_FUNCTION(mysql)
 	if (MySG(trace_mode)) {
 		if (MySG(result_allocated)){
 			char tmp[128];
-			sprintf((char *)&tmp, "%d result set(s) not freed. Use mysql_free_result to free result sets which were requested using mysql_query()", MySG(result_allocated));
+			sprintf((char *)&tmp, "%lu result set(s) not freed. Use mysql_free_result to free result sets which were requested using mysql_query()", MySG(result_allocated));
 			php_error_docref("function.mysql-free-result" TSRMLS_CC, E_WARNING, tmp);
 		}
 	}
@@ -1248,7 +1248,7 @@ static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link
 			}
 			else {
     			mysql_result = mysql_use_result(&mysql->conn);
-				while (row = mysql_fetch_row(mysql_result)) {
+				while ((row = mysql_fetch_row(mysql_result))) {
 					if (!strcmp("ALL", row[1])) {
 						sprintf((char *)&tmp, "Your query requires a full tablescan (table %s, %s rows affected). Use EXPLAIN to optimize your query.", row[0], row[6]);
 						php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, tmp);
