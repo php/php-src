@@ -36,24 +36,24 @@ int le_ncurses;
 
 static void ncurses_destruct(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-	WINDOW **pwin = (WINDOW **)rsrc->ptr;
+    WINDOW **pwin = (WINDOW **)rsrc->ptr;
 
-	delwin(*pwin);
-	efree(pwin);
+    delwin(*pwin);
+    efree(pwin);
 }
 
 
 /* {{{ ncurses_module_entry
  */
 zend_module_entry ncurses_module_entry = {
-	"ncurses",
-	ncurses_functions,
-	PHP_MINIT(ncurses),
-	PHP_MSHUTDOWN(ncurses),
-	PHP_RINIT(ncurses),		/* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(ncurses),	/* Replace with NULL if there's nothing to do at request end */
-	PHP_MINFO(ncurses),
-	STANDARD_MODULE_PROPERTIES
+    "ncurses",
+    ncurses_functions,
+    PHP_MINIT(ncurses),
+    PHP_MSHUTDOWN(ncurses),
+    PHP_RINIT(ncurses),     /* Replace with NULL if there's nothing to do at request start */
+    PHP_RSHUTDOWN(ncurses), /* Replace with NULL if there's nothing to do at request end */
+    PHP_MINFO(ncurses),
+    STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
@@ -78,15 +78,15 @@ PHP_INI_END()
 PHP_MINIT_FUNCTION(ncurses)
 {
     /* color constants */
-	PHP_NCURSES_CONST(COLOR_BLACK);
-	PHP_NCURSES_CONST(COLOR_RED);
-	PHP_NCURSES_CONST(COLOR_GREEN);
-	PHP_NCURSES_CONST(COLOR_YELLOW);
-	PHP_NCURSES_CONST(COLOR_BLUE);
-	PHP_NCURSES_CONST(COLOR_MAGENTA);
-	PHP_NCURSES_CONST(COLOR_CYAN);
-	PHP_NCURSES_CONST(COLOR_WHITE);
-	
+    PHP_NCURSES_CONST(COLOR_BLACK);
+    PHP_NCURSES_CONST(COLOR_RED);
+    PHP_NCURSES_CONST(COLOR_GREEN);
+    PHP_NCURSES_CONST(COLOR_YELLOW);
+    PHP_NCURSES_CONST(COLOR_BLUE);
+    PHP_NCURSES_CONST(COLOR_MAGENTA);
+    PHP_NCURSES_CONST(COLOR_CYAN);
+    PHP_NCURSES_CONST(COLOR_WHITE);
+    
     /* keyboard constants */
     PHP_NCURSES_CONST(KEY_DOWN);
     PHP_NCURSES_CONST(KEY_UP);
@@ -94,9 +94,9 @@ PHP_MINIT_FUNCTION(ncurses)
     PHP_NCURSES_CONST(KEY_RIGHT);
     PHP_NCURSES_CONST(KEY_BACKSPACE);
 
-	le_ncurses = zend_register_list_destructors_ex(ncurses_destruct, NULL, "ncurses_handle", module_number);	
+    le_ncurses = zend_register_list_destructors_ex(ncurses_destruct, NULL, "ncurses_handle", module_number);    
 
-	return SUCCESS;
+    return SUCCESS;
 }
 /* }}} */
 
@@ -104,7 +104,7 @@ PHP_MINIT_FUNCTION(ncurses)
  */
 PHP_MSHUTDOWN_FUNCTION(ncurses)
 {
-	return SUCCESS;
+    return SUCCESS;
 }
 /* }}} */
 
@@ -113,7 +113,7 @@ PHP_MSHUTDOWN_FUNCTION(ncurses)
  */
 PHP_RINIT_FUNCTION(ncurses)
 {
-	return SUCCESS;
+    return SUCCESS;
 }
 /* }}} */
 
@@ -122,7 +122,7 @@ PHP_RINIT_FUNCTION(ncurses)
  */
 PHP_RSHUTDOWN_FUNCTION(ncurses)
 {
-	return SUCCESS;
+    return SUCCESS;
 }
 /* }}} */
 
@@ -130,13 +130,13 @@ PHP_RSHUTDOWN_FUNCTION(ncurses)
  */
 PHP_MINFO_FUNCTION(ncurses)
 {
-	php_info_print_table_start();
-	php_info_print_table_header(2, "ncurses support", "enabled");
-	php_info_print_table_end();
+    php_info_print_table_start();
+    php_info_print_table_header(2, "ncurses support", "enabled");
+    php_info_print_table_end();
 
-	/* Remove comments if you have entries in php.ini
-	DISPLAY_INI_ENTRIES();
-	*/
+    /* Remove comments if you have entries in php.ini
+    DISPLAY_INI_ENTRIES();
+    */
 }
 /* }}} */
 
@@ -149,18 +149,18 @@ PHP_MINFO_FUNCTION(ncurses)
    Return a string to confirm that the module is compiled in */
 PHP_FUNCTION(confirm_ncurses_compiled)
 {
-	zval **arg;
-	int len;
-	char string[256];
+    zval **arg;
+    int len;
+    char string[256];
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+    if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
 
-	convert_to_string_ex(arg);
+    convert_to_string_ex(arg);
 
-	len = sprintf(string, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "ncurses", Z_STRVAL_PP(arg));
-	RETURN_STRINGL(string, len, 1);
+    len = sprintf(string, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "ncurses", Z_STRVAL_PP(arg));
+    RETURN_STRINGL(string, len, 1);
 }
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and 
