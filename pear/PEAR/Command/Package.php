@@ -52,14 +52,6 @@ package.xml).
 Extracts information from a package file and displays it.
 ',
             ),
-        'package-list' => array(
-            'summary' => 'List Files in Package',
-            'function' => 'doPackageList',
-            'shortcut' => 'pl',
-            'options' => array(),
-            'doc' => '
-',
-            ),
         'package-validate' => array(
             'summary' => 'Validate Package Consistency',
             'function' => 'doPackageValidate',
@@ -168,54 +160,6 @@ Run regression tests with PHP\'s regression testing script (run-tests.php).',
         if (PEAR::isError($result)) {
             $this->ui->displayLine("Package failed: ".$result->getMessage());
         }
-        return true;
-    }
-
-
-    function doPackageList($command, $options, $params)
-    {
-        // $params[0] -> the PEAR package to list its files
-        if (sizeof($params) != 1) {
-            return $this->raiseError("bad parameters, try \"help $command\"");
-        }
-        $obj = new PEAR_Common();
-
-        if (PEAR::isError($info = $obj->infoFromTgzFile($params[0]))) {
-            return $info;
-        }
-        $list =$info['filelist'];
-        $caption = 'Contents of ' . basename($params[0]);
-        $this->ui->startTable(array('caption' => $caption,
-                                    'border' => true));
-        $this->ui->tableRow(array('Package Files', 'Install Destination'),
-                            array('bold' => true));
-        foreach ($list as $file => $att) {
-            if (isset($att['baseinstalldir'])) {
-                $dest = $att['baseinstalldir'] . DIRECTORY_SEPARATOR .
-                    $file;
-            } else {
-                $dest = $file;
-            }
-            switch ($att['role']) {
-                case 'test':
-                    $dest = '-- will not be installed --'; break;
-                case 'doc':
-                    $dest = $this->config->get('doc_dir') . DIRECTORY_SEPARATOR .
-                        $dest;
-                    break;
-                case 'php':
-                default:
-                    $dest = $this->config->get('php_dir') . DIRECTORY_SEPARATOR .
-                        $dest;
-            }
-            $dest = preg_replace('!/+!', '/', $dest);
-            $file = preg_replace('!/+!', '/', $file);
-            $opts = array(0 => array('wrap' => 23),
-                          1 => array('wrap' => 45)
-                );
-            $this->ui->tableRow(array($file, $dest), null, $opts);
-        }
-        $this->ui->endTable();
         return true;
     }
 
