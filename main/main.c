@@ -305,7 +305,7 @@ void php3_apache_putc(char c)
 void php3_log_err(char *log_message)
 {
 	FILE *log_file;
-	TLS_VARS;
+	PLS_FETCH();
 
 	/* Try to use the specified logging location. */
 	if (PG(error_log) != NULL) {
@@ -355,7 +355,6 @@ void php3_log_err(char *log_message)
 /* wrapper for modules to use PHPWRITE */
 PHPAPI int php3_write(void *buf, int size)
 {
-	TLS_VARS;
 	return PHPWRITE(buf, size);
 }
 
