@@ -1,7 +1,7 @@
 dnl $Id$
 
-PHP_ARG_WITH(bcmath, for bc style precision math functions,
-[  --without-bcmath         Compile without bc style precision math functions. ], yes)
+PHP_ARG_ENABLE(bcmath, for bc style precision math functions,
+[  --enable-bcmath         Enable bc style precision math functions.])
 
 if test "$PHP_BCMATH" != "no"; then
   AC_DEFINE(WITH_BCMATH, 1, [Whether you have bcmath])

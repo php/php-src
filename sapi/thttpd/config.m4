@@ -1,5 +1,5 @@
 AC_ARG_WITH(thttpd,
-[  --with-thttpd=SRCDIR],[
+[  --with-thttpd=SRCDIR    Build PHP as thttpd module],[
   test -d $withval || AC_MSG_RESULT(thttpd directory does not exist ($withval))
   AC_EXPAND_PATH($withval, THTTPD)
   INSTALL_IT="\
