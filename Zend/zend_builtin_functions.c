@@ -531,6 +531,10 @@ ZEND_FUNCTION(get_class_vars)
 	} else {
 		efree(lcname);
 		array_init(return_value);
+		if (!ce->constants_updated) {
+			zend_hash_apply_with_argument(&ce->default_properties, (int (*)(void *,void *)) zval_update_constant, (void *) 1);
+			ce->constants_updated = 1;
+		}
 		zend_hash_copy(return_value->value.ht, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	}
 }
