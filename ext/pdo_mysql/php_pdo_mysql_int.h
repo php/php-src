@@ -49,7 +49,6 @@ typedef struct {
 	MYSQL_RES		*result;
 	MYSQL_ROW		current_data;
 	long			*current_lengths;
-	pdo_mysql_column 	*cols;
 } pdo_mysql_stmt;
 
 typedef struct {
