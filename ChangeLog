@@ -1,3 +1,93 @@
+2000-03-12  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/imap/imap.c
+      ext/imap/imap.h:
+    Adding imap_rfc822_parse_headers(). This function lets you grab mail headers
+    from anywhere - a saved message in an archive, a pop server, a database, etc
+    - and parse them into an object similar to what imap_headerinfo() returns.
+    It's just missing the flag info and other things that only come from the
+    IMAP server.
+
+    In the process of doing this, I seperated some more code out into a support
+    function - _php_make_header_object() - since it was used in multiple
+    functions. The module is slowly getting well organized.
+
+    * ext/mcal/php_mcal.c:
+    spelling correction, and rename make_event_object to _php_make_event_object
+    for consistency.
+
+2000-03-12  Jouni Ahto  <jah@mork.net>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+
+2000-03-12  Kristian Köhntopp  <kk@shonline.de>
+
+    * ext/recode/recode.c
+      ext/standard/file.c
+      ext/standard/file.h: Finished porting recode module.
+
+2000-03-12  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/mcal/php_mcal.c: pval->zval
+    use the *_ex() functions
+    use zend_get_parameters_ex
+
+    Tested on my calendar code, and seems to be crash free. But I think I'll
+    wait on converting the IMAP module, since this was quite a pain. :)
+
+2000-03-12  Kristian Köhntopp  <kk@shonline.de>
+
+    * ext/recode/recode.c: - using _ex() functions now, thanks to Andrej.
+
+2000-03-12  Zeev Suraski  <zeev@php.net>
+
+    * internal_functions.c.in
+      internal_functions_win32.c:
+    - Define these ones and declare them in modules.h
+
+2000-03-12  Andi Gutmans  <andi@php.net>
+
+    * ext/imap/imap.c: - Guessing this is the problem
+
+2000-03-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/odbc/php_odbc.c
+      ext/standard/math.c
+      php.h
+      sapi/cgi/cgi_main.c
+      snprintf.h:
+    Use sprintf everywhere and define sprintf to php_sprintf, if sprintf is broken.
+
+    * ext/gd/config.m4:
+    Also search for freetype headers in $prefix/include/freetype
+
+    PR: #3775
+
+    * sapi/cgi/cgi_main.c
+      sapi/servlet/servlet.c
+      ext/zlib/zlib.c
+      ext/standard/datetime.c
+      ext/standard/file.c
+      ext/standard/math.c
+      ext/standard/microtime.c
+      ext/standard/pack.c
+      ext/standard/url_scanner.c
+      ext/xml/xml.c
+      ext/oracle/oracle.c
+      ext/oci8/oci8.c
+      ext/odbc/php_odbc.c
+      main.c
+      php.h: Fix build on systems which lack snprintf or vsnprintf.
+
+    PR: #3786
+
+2000-03-12  Leo Baschy  <nirvana@got.net>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    remove recent patch to _close_odbc_conn calling _free_odbc_result
+
 2000-03-11  Andrei Zmievski  <andrei@ispi.net>
 
     * acconfig.h.in: Nuke DEBUG.
