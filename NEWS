@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- Converted the IMAP module to the high performance API (Zeev)
 - The fgetcsv() function now handles embedded end-of-line in a quoted field
   (Nick Talbott)
 - Added user_error(), to allow explicitly generate error messages from scripts

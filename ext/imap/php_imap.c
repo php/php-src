@@ -27,6 +27,7 @@
 
 #define IMAP41
 
+#define OP_RELOGIN
 
 #include "php.h"
 #include "php_ini.h"
@@ -190,8 +191,7 @@ void mail_userlogout_it(pils *imap_le_struct)
 	 * support this behavior... yet)
 	 */
 	imap_le_struct->busy = 0;
-	mail_close_full(imap_le_struct->imap_stream,
-			imap_le_struct->flags | CL_HALF);
+	mail_close_full(imap_le_struct->imap_stream, imap_le_struct->flags | CL_HALF);
 }
 
 void mail_nuke_chain(pils **headp)
@@ -631,7 +631,7 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	 * out the server's hostname.
 	 */
 	if (persistent
-		&& !mail_valid_net_parse(mailbox->value.str.val, &netmbx)) {
+		&& !mail_valid_net_parse(ZSTRVAL_PP(mailbox), &netmbx)) {
 		persistent = 0;
 	}
 
@@ -672,7 +672,7 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (node) {
 			imap_stream = mail_open(
 				node->imap_stream,
-				mailbox->value.str.val,
+				ZSTRVAL_PP(mailbox),
 				flags | OP_RELOGIN);
 			if (imap_stream) {
 				/* Ping the stream to see if it is
@@ -690,7 +690,7 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* Open a new connection. */
 			imap_stream = mail_open(
 				NIL,
-				mailbox->value.str.val,
+				ZSTRVAL_PP(mailbox),
 				flags | OP_RELOGIN);
 		}
 
