@@ -59,6 +59,9 @@ function_entry mcrypt_functions[] = {
 	PHP_FE(mcrypt_generic, NULL)
 	PHP_FE(mdecrypt_generic, NULL)
 	PHP_FE(mcrypt_generic_end, NULL)
+#if HAVE_MCRYPT_GENERIC_DEINIT
+	PHP_FE(mcrypt_generic_deinit, NULL)
+#endif
 	PHP_FE(mcrypt_enc_self_test, NULL)
 	PHP_FE(mcrypt_enc_is_block_algorithm_mode, NULL)
 	PHP_FE(mcrypt_enc_is_block_algorithm, NULL)
@@ -673,13 +676,40 @@ PHP_FUNCTION(mcrypt_generic_end)
 	
 	MCRYPT_GET_TD_ARG
 
+#if HAVE_MCRYPT_GENERIC_DEINIT
+	php_error(E_NOTICE, "mcrypt_generic_end is deprecated, please use mcrypt_generic_deinit");
+	if (mcrypt_generic_deinit (td) < 0) {
+#else
 	if (mcrypt_generic_end (td) < 0) {
+#endif
 		php_error (E_WARNING, "could not terminate encryption specifier");
 		RETURN_FALSE
 	}
 	RETURN_TRUE
 }
 /* }}} */
+
+
+#if HAVE_MCRYPT_GENERIC_DEINIT
+
+/* {{{ proto bool mcrypt_generic_deinit(resource td)
+   This function terminates encrypt specified by the descriptor td */
+PHP_FUNCTION(mcrypt_generic_deinit)
+{
+	zval **mcryptind;
+	MCRYPT td;
+	
+	MCRYPT_GET_TD_ARG
+
+	if (mcrypt_generic_deinit (td) < 0) {
+		php_error (E_WARNING, "could not terminate encryption specifier");
+		RETURN_FALSE
+	}
+	RETURN_TRUE
+}
+/* }}} */
+
+#endif
 
 
 /* {{{ proto bool mcrypt_enc_is_block_algorithm_mode(resource td)
