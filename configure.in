@@ -90,6 +90,13 @@ fi
 AC_PROG_CC
 AC_AIX
 
+case "$host_alias" in
+*dgux*)
+    CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR";;
+*rhapsody*)
+    CPPFLAGS="$CPPFLAGS -traditional-cpp";;
+esac
+
 AM_PROG_CC_STDC
 
 AC_PROG_RANLIB
@@ -167,8 +174,7 @@ else
 	fi
 fi
 
-dnl AC_PROG_INSTALL
-AC_PATH_PROG(PROG_SENDMAIL, sendmail, /usr/lib/sendmail, $PATH /usr/bin /usr/sbin /usr/etc /etc /usr/ucblib)
+AC_PATH_PROG(PROG_SENDMAIL, sendmail, /usr/lib/sendmail, $PATH:/usr/bin:/usr/sbin:/usr/etc:/etc:/usr/ucblib)
 if test -n "$PROG_SENDMAIL"; then
   AC_DEFINE(HAVE_SENDMAIL)
 fi
