@@ -37,17 +37,10 @@
 #ifdef ZTS
 
 #ifdef TSRM_WIN32
-# ifndef TSRM_INCLUDE_FULL_WINDOWS_HEADERS
-#  define WIN32_LEAN_AND_MEAN
-# endif
 # include <windows.h>
 #elif defined(NETWARE)
 # include <nks/thread.h>
-#ifdef USE_MPK
-# include <mpklib4php.h>
-#else
 # include <nks/synch.h>
-#endif
 #elif defined(GNUPTH)
 # include <pth.h>
 #elif defined(PTHREADS)
@@ -67,11 +60,7 @@ typedef int ts_rsrc_id;
 # define MUTEX_T CRITICAL_SECTION *
 #elif defined(NETWARE)
 # define THREAD_T NXThreadId_t
-#ifdef USE_MPK
-# define MUTEX_T MUTEX
-#else
 # define MUTEX_T NXMutex_t *
-#endif
 #elif defined(GNUPTH)
 # define THREAD_T pth_t
 # define MUTEX_T pth_mutex_t *
@@ -149,8 +138,6 @@ TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread
 #define TSRM_UNSHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)-1)
 
 #define TSRMLS_FETCH()			void ***tsrm_ls = (void ***) ts_resource_ex(0, NULL)
-#define TSRMLS_FETCH_FROM_CTX(ctx)	void ***tsrm_ls = (void ***) ctx
-#define TSRMLS_SET_CTX(ctx)		(void ***) ctx = tsrm_ls
 #define TSRMG(id, type, element)	(((type) (*((void ***) tsrm_ls))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
 #define TSRMLS_D	void ***tsrm_ls
 #define TSRMLS_DC	, TSRMLS_D
@@ -164,8 +151,6 @@ TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread
 #else /* non ZTS */
 
 #define TSRMLS_FETCH()
-#define TSRMLS_FETCH_FROM_CTX(ctx)
-#define TSRMLS_SET_CTX(ctx)
 #define TSRMLS_D	void
 #define TSRMLS_DC
 #define TSRMLS_C
