@@ -411,6 +411,10 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode)
 	FILE *f;
 	CWDLS_FETCH();
 
+	if (path[0] == '\0') { /* Fail to open empty path */
+		return NULL;
+	}
+
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	virtual_file_ex(&new_state, path, NULL);
 
