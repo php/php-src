@@ -34,7 +34,7 @@
 int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC) /* {{{ */
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
-	enum pdo_error_type *pdo_err = stmt ? &stmt->error_code : &dbh->error_code;
+	pdo_error_type *pdo_err = stmt ? &stmt->error_code : &dbh->error_code;
 	pdo_mysql_error_info *einfo = &H->einfo;
 
 	einfo->errcode = mysql_errno(H->server);
@@ -49,77 +49,53 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 	if (einfo->errcode) {
 		einfo->errmsg = pestrdup(mysql_error(H->server), dbh->is_persistent);
 	} else { /* no error */
-		*pdo_err = PDO_ERR_NONE;
+		strcpy(*pdo_err, PDO_ERR_NONE);
 		return 0;
 	}
 
+	/* mapping taken from: 
+		http://dev.mysql.com/doc/mysql/en/Error-handling.html
+	*/
 	switch (einfo->errcode) {
-		case 1007: /* database already exists */
-		case 1050: /* table already exists */
-		case 1086: /* file already exists */
-		case 1125: /* function already exists */
-			*pdo_err = PDO_ERR_ALREADY_EXISTS;
-			break;
-
-		case 1008: /* database does not exist */
-		case 1029: /* view does not exist */
-		case 1072: /* key column does not exist */
-		case 1091: /* column/key does not exist */
-		case 1146: /* table does not exist */
-		case 1176: /* key not found in table */
-			*pdo_err = PDO_ERR_NOT_FOUND;
-			break;	
-
-		case 1152: /* aborted connection */
-		case 1154: /* cannot read from connection pipe */
-		case 1184: /* aborted new connection */
-		case 1159: /* timeout */
-		case 1160: /* timeout */
-		case 1161: /* timeout */
-			*pdo_err = PDO_ERR_DISCONNECTED;
-			break;
-
-		case 1089: /* unsupported sub-key */
-		case 1163: /* blob/text not supported inside table */
-		case 1164: /* no auto-incremenet support */
-		case 1174: /* no RAID support */
-		case 1178: /* table handler does not support something */
-		case 1185: /* binary dump not supported */
-		case 1214: /* FULLTEXT not supported */
-		case 1235: /* something not supported by MySQL version */
-			*pdo_err = PDO_ERR_NOT_IMPLEMENTED;
-			break;
-
-		case 1252: /* character set mismatch */
-			*pdo_err = PDO_ERR_MISMATCH;
-			break;
-
-		case 1264: /* data truncated */
-			*pdo_err = PDO_ERR_TRUNCATED;
-			break;
-	
-		case 1169: /* unique constraint */
-		case 1216: /* foreign key constraint */
-		case 1217: /* foreign key constraint */
-			*pdo_err = PDO_ERR_CONSTRAINT;
-			break;
-
-		case 1064: /* query parse error */
-		case 1065: /* empty query */
-		/* XXX: MySQL has all sorts of errors that can be considered syntax errors, specifically
-			dealing with table creation & modifications, do we want to include them here?
-		 */
-			*pdo_err = PDO_ERR_SYNTAX;
-			break;
-
 		default:
-			*pdo_err = PDO_ERR_CANT_MAP;
+		case 1000: case 1001: case 1002: case 1003:
+		case 1004: case 1005: case 1006: case 1007:
+		case 1008: case 1009: case 1010: case 1011:
+		case 1012: case 1013: case 1014: case 1015:
+		case 1016: case 1017: case 1018: case 1019:
+		case 1020: case 1021: case 1023: case 1024:
+		case 1025: case 1026: case 1027: case 1028:
+		case 1029: case 1030: case 1031: case 1032:
+		case 1034: case 1035: case 1036: case 1039:
+		case 1041:
+			strcpy(*pdo_err, "HY000");
 			break;
+		case 1022:
+			strcpy(*pdo_err, "23000");
+			break;
+		case 1037: case 1038:
+			strcpy(*pdo_err, "HY001");
+			break;
+		case 1040:
+			strcpy(*pdo_err, "08004");
+			break;
+		case 1042: case 1043:
+			strcpy(*pdo_err, "08S01");
+			break;
+		case 1044:
+			strcpy(*pdo_err, "42000");
+			break;
+		case 1045:
+			strcpy(*pdo_err, "28000");
+			break;
+
+	/* TODO: someone with more time on their hands
+	 * needs to complete this list */
 	}
 
 	if (!dbh->methods) {
-		zend_throw_exception_ex(php_pdo_get_exception(), *pdo_err TSRMLS_CC, "[%d] %s",
-				einfo->errcode, einfo->errmsg);
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
+				*pdo_err, einfo->errcode, einfo->errmsg);
 	}
 	
 	return einfo->errcode;
