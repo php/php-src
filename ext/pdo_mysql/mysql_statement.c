@@ -76,7 +76,6 @@ static int mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		stmt->column_count = (int) mysql_num_fields(S->result);
 		S->cols = ecalloc(stmt->column_count, sizeof(pdo_mysql_column));
 	}
-	stmt->row_count = (long)mysql_num_rows(S->result);
 	return 1;
 }
 
