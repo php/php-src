@@ -23,7 +23,7 @@
 #include "config.h"
 #endif
 
-#define PHP_SQLITE_MODULE_VERSION	"0.7"
+#define PHP_SQLITE_MODULE_VERSION	"0.9a"
 
 #include "php.h"
 #include "php_ini.h"
@@ -858,7 +858,9 @@ PHP_FUNCTION(sqlite_query)
 	const char *tail;
 	const char **rowdata, **colnames;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sr", &sql, &sql_len, &zdb)) {
+	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
+				ZEND_NUM_ARGS() TSRMLS_CC, "sr", &sql, &sql_len, &zdb) && 
+			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &sql, &sql_len, &zdb)) {
 		return;
 	}
 
