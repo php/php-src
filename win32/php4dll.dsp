@@ -201,6 +201,14 @@ SOURCE=..\main\SAPI.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\streams.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\user_streams.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\strlcat.c
 # End Source File
 # Begin Source File
