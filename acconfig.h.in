@@ -118,3 +118,7 @@
 
 /* Define to compile PHP/Zend thread safe */
 #undef ZTS
+
+/* Define when compiling with Zeus support */
+#undef WITH_ZEUS
+

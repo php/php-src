@@ -1,4 +1,25 @@
-#include <windows.h>
+/*
+   +----------------------------------------------------------------------+
+   | PHP version 4.0                                                      |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997, 1998, 1999 The PHP Group                         |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.0 of the PHP license,       |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_0.txt.                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors:                                                             |
+   |                                                                      |
+   +----------------------------------------------------------------------+
+ */
+
+#if WIN32|WINNT
+# include <windows.h>
+#endif
 #include <httpext.h>
 #include <httpfilt.h>
 #include <httpext.h>
@@ -7,6 +28,8 @@
 #include "SAPI.h"
 #include "php_globals.h"
 #include "ext/standard/info.h"
+
+#include "zeus.h"
 
 #define MAX_STATUS_LENGTH sizeof("xxxx LONGEST STATUS DESCRIPTION")
 #define ISAPI_SERVER_VAR_BUF_SIZE 1024
@@ -190,7 +213,9 @@ static int sapi_isapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 			header_info.pszStatus = status_buf;
 			break;
 	}
+#ifndef WITH_ZEUS
 	header_info.cchStatus = strlen(header_info.pszStatus);
+#endif
 	header_info.pszHeader = combined_headers;
 	header_info.cchHeader = total_length;
 	lpECB->dwHttpStatusCode = SG(sapi_headers).http_response_code;
@@ -462,3 +487,10 @@ __declspec(dllexport) BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, L
 	}
 	return TRUE;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */
