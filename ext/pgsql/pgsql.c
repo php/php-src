@@ -1417,10 +1417,10 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 		char *class_name;
 		int class_name_len;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|sz", &result, &class_name, &class_name_len, &ctor_params) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|zsz", &result, &zrow, &class_name, &class_name_len, &ctor_params) == FAILURE) {
 			return;
 		}
-		if (ZEND_NUM_ARGS() < 2) {
+		if (ZEND_NUM_ARGS() < 3) {
 			ce = zend_standard_class_def;
 		} else {
 			ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
@@ -1430,16 +1430,15 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 			return;
 		}
 		result_type = PGSQL_ASSOC;
-		use_row = 0;
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|zl", &result, &zrow, &result_type) == FAILURE) {
 			return;
 		}
-		use_row = ZEND_NUM_ARGS() > 1 && Z_TYPE_P(zrow) != IS_NULL;
-		if (use_row) {
-			convert_to_long_ex(&zrow);
-			row = Z_LVAL_P(zrow);
-		}
+	}
+	use_row = ZEND_NUM_ARGS() > 1 && Z_TYPE_P(zrow) != IS_NULL;
+	if (use_row) {
+		convert_to_long_ex(&zrow);
+		row = Z_LVAL_P(zrow);
 	}
 
 	if (!(result_type & PGSQL_BOTH)) {
@@ -1600,7 +1599,7 @@ PHP_FUNCTION(pg_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto object pg_fetch_object(resource result [, string class_name [, NULL|array ctor_params]])
+/* {{{ proto object pg_fetch_object(resource result [, int row [, string class_name [, NULL|array ctor_params]]])
    Fetch a row as an object */
 PHP_FUNCTION(pg_fetch_object)
 {

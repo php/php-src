@@ -1,5 +1,5 @@
 --TEST--
-PostgreSQL pg_fetch_*() functions
+PostgreSQL pg_fetch_object()
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
@@ -20,7 +20,7 @@ $sql = "SELECT * FROM $table_name";
 $result = pg_query($db, $sql) or die('Cannot qeury db');
 $rows = pg_num_rows($result);
 
-var_dump(pg_fetch_object($result, 'test_class', array(1, 2)));
+var_dump(pg_fetch_object($result, NULL, 'test_class', array(1, 2)));
 
 echo "Ok\n";
 ?>
