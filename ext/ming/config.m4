@@ -7,8 +7,8 @@ dnl in php4/ext/mcrypt
 PHP_ARG_WITH(ming, for ming support,
 [  --with-ming[=DIR]        Include ming support])
 
-if test "$withval" != "no"; then
-  for i in /usr/lib /usr/local /usr $withval; do
+if test "$PHP_MING" != "no"; then
+  for i in /usr/lib /usr/local /usr $PHP_MING; do
     if test -r $i/libming.so; then
       MING_DIR=$i
     fi
