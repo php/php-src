@@ -22,11 +22,6 @@
 #ifndef _PHP_IBASE_H
 #define _PHP_IBASE_H
 
-#if COMPILE_DL
-#undef HAVE_IBASE
-#define HAVE_IBASE 1
-#endif
-
 #if HAVE_IBASE
 #include <ibase.h>
 

@@ -33,11 +33,6 @@
 #ifndef _PHP_BCMATH_H
 #define _PHP_BCMATH_H
 
-#if COMPILE_DL
-#undef WITH_BCMATH
-#define WITH_BCMATH 1
-#endif
-
 #if WITH_BCMATH
 
 extern zend_module_entry bcmath_module_entry;

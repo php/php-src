@@ -57,7 +57,7 @@ typedef struct dbm_info {
   because the dbm module will be external, and we
   do not want flatfile compiled staticly
 */
-#if defined(MSVC5) && !defined(COMPILE_DL)
+#if defined(PHP_WIN32) && !defined(COMPILE_DL_DB)
 #undef phpext_db_ptr
 #define phpext_db_ptr NULL
 #endif

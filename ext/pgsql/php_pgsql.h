@@ -22,11 +22,6 @@
 #ifndef _PHP_PGSQL_H
 #define _PHP_PGSQL_H
 
-#ifdef COMPILE_DL_PGSQL
-#undef HAVE_PGSQL
-#define HAVE_PGSQL 1
-#endif
-
 #if HAVE_PGSQL
 
 extern zend_module_entry pgsql_module_entry;

@@ -22,11 +22,6 @@
 #ifndef _PHP_MYSQL_H
 #define _PHP_MYSQL_H
 
-#ifdef COMPILE_DL
-# undef HAVE_MYSQL
-# define HAVE_MYSQL 1
-#endif
-
 #ifdef PHP_WIN32
 #define PHP_MYSQL_API __declspec(dllexport)
 #else
@@ -35,7 +30,7 @@
 
 #if HAVE_MYSQL
 
-#ifdef __ZTS
+#ifdef ZTS
 #include "TSRM.h"
 #endif
 

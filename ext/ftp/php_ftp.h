@@ -33,11 +33,6 @@
 #ifndef	_INCLUDED_FTP_H
 #define	_INCLUDED_FTP_H
 
-#if COMPILE_DL
-#undef HAVE_FTP
-#define HAVE_FTP 1
-#endif
-
 #if HAVE_FTP
 
 extern zend_module_entry php_ftp_module_entry;
