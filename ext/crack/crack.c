@@ -187,7 +187,7 @@ ZEND_FUNCTION(crack_closedict)
 }
 /* }}} */
 
-/* {{{ proto string crack_check([int dictionary, ] string password)
+/* {{{ proto string crack_check([int dictionary,] string password)
    Performs an obscure check with the given password */
 ZEND_FUNCTION(crack_check)
 {
@@ -240,8 +240,8 @@ ZEND_FUNCTION(crack_check)
 }
 /* }}} */
 
-/* {{{ proto string crack_getlastmessage()
-   Returns the message from the last obscure check. */
+/* {{{ proto string crack_getlastmessage(void)
+   Returns the message from the last obscure check */
 ZEND_FUNCTION(crack_getlastmessage)
 {
 	if (ZEND_NUM_ARGS() != 0) {
