@@ -475,13 +475,20 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 
 	/* Apache 1.2 has a more complex mechanism for reading POST data */
 #if MODULE_MAGIC_NUMBER > 19961007
-	if ((retval = setup_client_block(r, REQUEST_CHUNKED_ERROR)))
+	if ((retval = setup_client_block(r, REQUEST_CHUNKED_ERROR))) {
+		if (setjmp(EG(bailout))==0) {
+			zend_ini_deactivate(ELS_C);
+		}
 		return retval;
+	}
 #endif
 
 	if (AP(last_modified)) {
 #if MODULE_MAGIC_NUMBER < 19970912
 		if ((retval = set_last_modified(r, r->finfo.st_mtime))) {
+			if (setjmp(EG(bailout))==0) {
+				zend_ini_deactivate(ELS_C);
+			}
 			return retval;
 		}
 #else
