@@ -54,6 +54,13 @@
 void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent);
 
 static int le_result, le_conn, le_pconn;
+
+#if defined( HAVE_DB2 ) || defined( HAVE_UNIXODBC )
+	SQLHANDLE henv;
+#else
+	HENV henv;
+#endif
+		
 	
 function_entry odbc_functions[] = {
 	PHP_FE(odbc_setoption, NULL)
@@ -134,7 +141,7 @@ static void _free_odbc_result(odbc_result *res)
 		}
 		if(res->stmt){
 #if HAVE_SOLID
-			SQLTransact(ODBCG(henv), res->conn_ptr->hdbc,
+			SQLTransact(henv, res->conn_ptr->hdbc,
 						(UWORD)SQL_COMMIT);
 #endif
 			SQLFreeStmt(res->stmt,SQL_DROP);
@@ -293,6 +300,7 @@ static void php_odbc_init_globals(php_odbc_globals *odbc_globals)
 PHP_MINIT_FUNCTION(odbc)
 {
 	ELS_FETCH();
+	ODBCLS_D;
 #ifdef SQLANY_BUG
 	HDBC    foobar;
 	RETCODE rc;
@@ -300,25 +308,26 @@ PHP_MINIT_FUNCTION(odbc)
 
 #ifdef ZTS
 	odbc_globals_id = ts_allocate_id(sizeof(php_odbc_globals), php_odbc_init_globals, NULL);
+	odbc_globals = ts_resource(odbc_globals_id);
 #else
 	ODBCG(num_persistent) = 0;
 #endif
 
 	REGISTER_INI_ENTRIES();
-	SQLAllocEnv(&ODBCG(henv));
+	SQLAllocEnv(&henv);
 	le_result = register_list_destructors(_free_odbc_result, NULL);
 	le_conn = register_list_destructors(_close_odbc_conn, NULL);
 	le_pconn = register_list_destructors(NULL, _close_odbc_pconn);
 	odbc_module_entry.type = type;
 	
-	SQLAllocEnv(&ODBCG(henv));
+	SQLAllocEnv(&henv);
 #ifdef SQLANY_BUG
 	/* Make a dumb connection to avoid crash on SQLFreeEnv(),
 	 * then release it immediately.
 	 * This is required for SQL Anywhere 5.5.00 on QNX 4.24 at least.
 	 * The SQLANY_BUG should be defined in CFLAGS.
 	 */
-	if(SQLAllocConnect(ODBCG(henv), &foobar) != SQL_SUCCESS){
+	if(SQLAllocConnect(henv, &foobar) != SQL_SUCCESS){
 			ODBC_SQL_ERROR(SQL_NULL_HDBC, SQL_NULL_HSTMT, "SQLAllocConnect");
 	}else{
 		rc = SQLConnect(foobar, ODBCG(defDB), SQL_NTS, ODBCG(defUser), 
@@ -420,7 +429,7 @@ PHP_MSHUTDOWN_FUNCTION(odbc)
 	ODBCLS_FETCH();
 
 	UNREGISTER_INI_ENTRIES();
-	SQLFreeEnv(ODBCG(henv));
+	SQLFreeEnv(henv);
 	return SUCCESS;
 }
 
@@ -456,9 +465,9 @@ void ODBC_SQL_ERROR(HDBC conn, HSTMT stmt, char *func)
 	SDWORD	error;        /* Not used */
 	char	errormsg[255];
 	SWORD	errormsgsize; /* Not used */
-	ODBC_TLS_VARS;
+	ODBCLS_FETCH();
 	
-	SQLError(ODBCG(henv), conn, stmt, state,
+	SQLError(henv, conn, stmt, state,
 			 &error, errormsg, sizeof(errormsg)-1, &errormsgsize);
 	if(func){
 		php_error(E_WARNING, "SQL error: %s, SQL state %s in %s",
@@ -502,7 +511,8 @@ int odbc_bindcols(odbc_result *result)
     int i;
     SWORD       colnamelen; /* Not used */
 	SDWORD      displaysize;
-	
+	ODBCLS_FETCH();
+
     result->values = (odbc_result_value *)
 		emalloc(sizeof(odbc_result_value)*result->numcols);
 
@@ -569,7 +579,7 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 	conn = (odbc_connection *) zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
 	ZEND_VERIFY_RESOURCE(conn);
 	
-	rc = SQLTransact(ODBCG(henv), conn->hdbc, (UWORD)((type)?SQL_COMMIT:SQL_ROLLBACK));
+	rc = SQLTransact(henv, conn->hdbc, (UWORD)((type)?SQL_COMMIT:SQL_ROLLBACK));
 	if(rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO){
 		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLTransact");
 		RETURN_FALSE;
@@ -875,9 +885,9 @@ PHP_FUNCTION(odbc_cursor)
 	 		SDWORD  error;        /* Not used */
 			char    errormsg[255];
 			SWORD   errormsgsize; /* Not used */
-			ODBC_TLS_VARS;
+			ODBCLS_FETCH();
 
-			SQLError(ODBCG(henv), result->conn_ptr->hdbc,
+			SQLError(henv, result->conn_ptr->hdbc,
 						result->stmt, state, &error, errormsg,
 						sizeof(errormsg)-1, &errormsgsize);
 			if(!strncmp(state,"S1015",5)){
@@ -1564,7 +1574,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 	
 	*conn = (odbc_connection *)pemalloc(sizeof(odbc_connection), persistent);
 	(*conn)->persistent = persistent;
-	SQLAllocConnect(ODBCG(henv), &((*conn)->hdbc));
+	SQLAllocConnect(henv, &((*conn)->hdbc));
 	
 #if HAVE_SOLID
 	SQLSetConnectOption((*conn)->hdbc, SQL_TRANSLATE_OPTION,

@@ -39,6 +39,10 @@
 #define FAR
 #endif
 
+#ifdef ZTS
+#include "TSRM.h"
+#endif
+
 /* checking in the same order as in configure.in */
 
 #if HAVE_SOLID /* Solid Server */
@@ -220,11 +224,6 @@ typedef struct odbc_result {
 } odbc_result;
 
 typedef struct {
-#if defined( HAVE_DB2 ) || defined( HAVE_UNIXODBC )
-	SQLHANDLE henv;
-#else
-	HENV henv;
-#endif
 	char *defDB;
 	char *defUser;
 	char *defPW;
@@ -263,7 +262,6 @@ int odbc_bindcols(odbc_result *result);
 # define ODBCLS_CC , ODBCLS_C
 # define ODBCG(v) (odbc_globals->v)
 # define ODBCLS_FETCH()	php_odbc_globals *odbc_globals = ts_resource(odbc_globals_id)
-# define ODBC_TLS_VARS char *globals; ODBCLS_FETCH(); globals = (char *)odbc_globals;
 #else
 # define ODBCLS_D
 # define ODBCLS_DC
@@ -271,7 +269,6 @@ int odbc_bindcols(odbc_result *result);
 # define ODBCLS_CC
 # define ODBCG(v) (odbc_globals.v)
 # define ODBCLS_FETCH()
-# define ODBC_TLS_VARS char *globals = (char *)&odbc_globals
 extern ZEND_API php_odbc_globals odbc_globals;
 #endif
 
