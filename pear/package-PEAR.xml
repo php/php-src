@@ -51,6 +51,9 @@
 * Added the command "download-all" (Alex Merz)
 * Made package dependency checking back to work
 * Added support for spaces in path names (Greg)
+* Fixed static calls to PEAR error-handling methods in classes (Greg)
+* Added ability to use a static method callback for error-handling, and removed
+use of inadvisable @ in setErrorHandling (Greg)
 * Various bugfixes
 * Added new pear "bundle" command, which downloads and uncompress a PECL package.
 The main purpouse of this command is for easily adding extensions to the PHP sources
