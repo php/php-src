@@ -672,8 +672,24 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (persistent) {
 		list_entry *le;
+		int open_new_connection = 1;
 		
-		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {
+		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, (void **) &le) != FAILURE) {
+			char tmp_1[] = {isc_info_base_level, isc_info_end};
+			char tmp_2[8]; /* Enough? Hope so... */ 
+
+			if (le->type != IBG(le_plink)) {
+				RETURN_FALSE;
+			}
+			/* Check if connection has timed out */
+			ib_link = (ibase_db_link *) le->ptr;
+			if (!isc_database_info(IB_STATUS, &ib_link->link, sizeof(tmp_1), tmp_1, sizeof(tmp_2), tmp_2)) {
+				open_new_connection = 0;
+			}
+		}
+		
+		/* There was no previous connection to use or it has timed out */
+		if (open_new_connection) {
 			list_entry new_le;
 			
 			if ((IBG(max_links) != -1) && (IBG(num_links) >= IBG(max_links))) {
@@ -712,12 +728,6 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			IBG(num_links)++;
 			IBG(num_persistent)++;
-		} else {
-			if (le->type != IBG(le_plink)) {
-				RETURN_FALSE;
-			}
-			/* TODO: ensure that the ib_link did not die */
-			ib_link = (ibase_db_link *) le->ptr;
 		}
 		return_value->value.lval = IBASE_TRANS_ON_LINK *
 			zend_list_insert(ib_link, IBG(le_plink));
