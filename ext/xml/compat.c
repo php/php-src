@@ -82,9 +82,9 @@ _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix
 	_qualify_namespace(parser, name, URI, &qualified_name);
 	
 	if (attributes != NULL) {
-		attrs = safe_emalloc((nb_attributes  * 2) + 1, sizeof(int *), 0);
 		xmlChar    *qualified_name_attr = NULL;
-		
+		attrs = safe_emalloc((nb_attributes  * 2) + 1, sizeof(int *), 0);
+
 		for (i = 0; i < nb_attributes; i += 1) {
 
 			if (attributes[y+1] != NULL) {
@@ -102,6 +102,9 @@ _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix
 	}
 	parser->h_start_element(parser->user, (const XML_Char *) qualified_name, (const XML_Char **) attrs);
 	if (attrs) {
+		for (i = 0; i < z; i++) {
+			xmlFree(attrs[i]);
+		}
 		efree(attrs);
 	}
 	xmlFree(qualified_name);
