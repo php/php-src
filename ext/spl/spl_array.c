@@ -75,8 +75,8 @@ typedef struct _spl_array_object {
 	HashPosition      pos;
 } spl_array_object;
 
-/* {{{ spl_array_object_dtor */
-static void spl_array_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
+/* {{{ spl_array_object_free_storage */
+static void spl_array_object_free_storage(void *object TSRMLS_DC)
 {
 	spl_array_object *intern = (spl_array_object *)object;
 
@@ -114,7 +114,7 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 	}
 	zend_hash_internal_pointer_reset_ex(HASH_OF(intern->array), &intern->pos);
 
-	retval.handle = zend_objects_store_put(intern, spl_array_object_dtor, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t) spl_array_object_free_storage, NULL TSRMLS_CC);
 	if (class_type == spl_ce_ArrayIterator) {
 		retval.handlers = &spl_handler_ArrayIterator;
 	} else {

@@ -413,7 +413,7 @@ SPL_METHOD(RecursiveIteratorIterator, getSubIterator)
 }
 
 /* {{{ spl_RecursiveIteratorIterator_dtor */
-static void spl_RecursiveIteratorIterator_dtor(void *_object, zend_object_handle handle TSRMLS_DC)
+static void spl_RecursiveIteratorIterator_free_storage(void *_object TSRMLS_DC)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object *)_object;
 	zend_object_iterator      *sub_iter;
@@ -449,7 +449,7 @@ static zend_object_value spl_RecursiveIteratorIterator_new(zend_class_entry *cla
 	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(intern, spl_RecursiveIteratorIterator_dtor, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t) spl_RecursiveIteratorIterator_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &spl_handlers_rec_it_it;
 	return retval;
 }
@@ -791,8 +791,8 @@ SPL_METHOD(ParentIterator, getChildren)
 	zval_ptr_dtor(&retval);
 }
 
-/* {{{ spl_dual_it_dtor */
-static INLINE void spl_dual_it_dtor(void *_object, zend_object_handle handle TSRMLS_DC)
+/* {{{ spl_dual_it_free_storage */
+static INLINE void spl_dual_it_free_storage(void *_object TSRMLS_DC)
 {
 	spl_dual_it_object        *object = (spl_dual_it_object *)_object;
 
@@ -828,7 +828,7 @@ static zend_object_value spl_dual_it_new(zend_class_entry *class_type TSRMLS_DC)
 	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(intern, spl_dual_it_dtor, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t) spl_dual_it_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &spl_handlers_dual_it;
 	return retval;
 }
