@@ -61,7 +61,7 @@ typedef struct _dom_object {
 #define PHP_DOM_EXPORT(__type) PHPAPI __type
 
 PHP_DOM_EXPORT(zval *) php_dom_create_object(xmlNodePtr obj, int *found, zval *in, zval* return_value, dom_object *domobj TSRMLS_DC);
-PHP_DOM_EXPORT(zval *) dom_read_property(zval *object, zval *member TSRMLS_DC);
+PHP_DOM_EXPORT(zval *) dom_read_property(zval *object, zval *member, zend_bool silent TSRMLS_DC);
 PHP_DOM_EXPORT(void) dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC);
 
 #define DOM_XMLNS_NAMESPACE \
