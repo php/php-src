@@ -1010,6 +1010,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 				} else {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid function name");
 				}
+				break;
 			}
 		}
 
