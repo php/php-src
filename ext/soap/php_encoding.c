@@ -660,7 +660,7 @@ static xmlNodePtr to_xml_ulong(encodeTypePtr type, zval *data, int style, xmlNod
 
 	if (Z_TYPE_P(data) == IS_DOUBLE) {
 		char s[16];
-		sprintf(s, "%0.0F",Z_DVAL_P(data));
+		sprintf(s, "%0.0f",Z_DVAL_P(data));
 		xmlNodeSetContent(ret, s);
 	} else {
 		zval tmp = *data;
