@@ -25,11 +25,14 @@
 #include <unistd.h>
 #endif
 
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
 #ifdef ZTS
 int lcg_globals_id;
 #else
 static php_lcg_globals lcg_globals;
-static int php_lcg_initialized = 0;
 #endif
  
 
@@ -46,7 +49,7 @@ static int php_lcg_initialized = 0;
 
 #define MODMULT(a, b, c, m, s) q = s/a;s=b*(s-a*q)-c*q;if(s<0)s+=m
 
-double php_combined_lcg(TSRMLS_D)
+PHPAPI double php_combined_lcg(TSRMLS_D)
 {
 	php_int32 q;
 	php_int32 z;
@@ -55,39 +58,53 @@ double php_combined_lcg(TSRMLS_D)
 	MODMULT(52774, 40692, 3791, 2147483399L, LCG(s2));
 
 	z = LCG(s1) - LCG(s2);
-	if(z < 1) {
+	if (z < 1) {
 		z += 2147483562;
 	}
 
 	return z * 4.656613e-10;
 }
 
-static void lcg_init_globals(php_lcg_globals *lcg_globals_p TSRMLS_DC)
+static void lcg_seed(TSRMLS_D)
 {
-	LCG(s1) = 1;
+	struct timeval tv;
+
+	if (gettimeofday(&tv, NULL) == 0) {
+		LCG(s1) = tv.tv_sec ^ (~tv.tv_usec);
+	} else {
+		LCG(s1) = 1;
+	}
 #ifdef ZTS
 	LCG(s2) = (long) tsrm_thread_id();
 #else
 	LCG(s2) = (long) getpid();
 #endif
+
+	LCG(seeded) = 1;
 }
 
-#ifdef ZTS
+static void lcg_init_globals(php_lcg_globals *lcg_globals_p TSRMLS_DC)
+{
+	LCG(seeded) = 0;
+}
+
 PHP_MINIT_FUNCTION(lcg)
 {
+#ifdef ZTS
 	ts_allocate_id(&lcg_globals_id, sizeof(php_lcg_globals), (ts_allocate_ctor) lcg_init_globals, NULL);
+#else
+	lcg_init_globals(&lcg_globals);
+#endif
 	return SUCCESS;
 }
-#else 
+
 PHP_RINIT_FUNCTION(lcg)
 {
-	if (!php_lcg_initialized) {
-		lcg_init_globals(&lcg_globals TSRMLS_CC);
-		php_lcg_initialized = 1;
+	if (!LCG(seeded)) {
+		lcg_seed(TSRMLS_C);
 	}
 	return SUCCESS;
 }
-#endif
 
 /* {{{ proto double lcg_value()
    Returns a value from the combined linear congruential generator */
