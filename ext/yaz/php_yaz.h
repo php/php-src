@@ -50,6 +50,26 @@ PHP_FUNCTION(yaz_ccl_conf);
 PHP_FUNCTION(yaz_ccl_parse);
 PHP_FUNCTION(yaz_database);
 
+ZEND_BEGIN_MODULE_GLOBALS(yaz)
+    int assoc_seq;
+ZEND_END_MODULE_GLOBALS(yaz)
+
+#ifdef ZTS
+# define YAZSLS_D	zend_mysql_globals *yaz_globals
+# define YAZSLS_DC	, YAZSLS_D
+# define YAZSLS_C	yaz_globals
+# define YAZSLS_CC , YAZSLS_C
+# define YAZSG(v) (yaz_globals->v)
+# define YAZSLS_FETCH()	zend_yaz_globals *yaz_globals = ts_resource(yaz_globals_id)
+#else
+# define YAZSLS_D
+# define YAZSLS_DC
+# define YAZSLS_C
+# define YAZSLS_CC
+# define YAZSG(v) (yaz_globals.v)
+# define YAZSLS_FETCH()
+#endif
+
 #else
 
 #define yaz_module_ptr NULL

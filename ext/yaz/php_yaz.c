@@ -18,6 +18,10 @@
 
 /* $Id$ */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php.h"
 
 #if HAVE_YAZ
@@ -84,6 +88,7 @@ struct Yaz_AssociationInfo {
 	char *addinfo;
 	Yaz_ResultSet resultSets;
 	int persistent;
+        int in_use;
 	int order;
 	int state;
 	int mask_select;
@@ -124,6 +129,7 @@ static Yaz_Association yaz_association_mk ()
 	p->error = 0;
 	p->addinfo = 0;
 	p->resultSets = 0;
+        p->in_use = 0;
 	p->order = 0;
 	p->state = PHP_YAZ_STATE_CLOSED;
 	p->mask_select = 0;
@@ -206,8 +212,11 @@ static void yaz_resultset_destroy (Yaz_ResultSet p)
 static MUTEX_T yaz_mutex;
 #endif
 
+ZEND_DECLARE_MODULE_GLOBALS(yaz);
+
 static Yaz_Association *shared_associations;
 static int order_associations;
+static int le_link;
 
 static unsigned char third_argument_force_ref[] = {
 	3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
@@ -238,26 +247,27 @@ function_entry yaz_functions [] = {
 	{NULL, NULL, NULL}
 };
 
-static Yaz_Association get_assoc (pval **id)
+static void get_assoc (INTERNAL_FUNCTION_PARAMETERS, pval **id,
+					   Yaz_Association *assocp)
 {
-	Yaz_Association assoc;
-	int i;
-	convert_to_long_ex(id);
-	i = (*id)->value.lval;
+	Yaz_Association *as = 0;
+	YAZSLS_FETCH();
 	
 #ifdef ZTS
 	tsrm_mutex_lock (yaz_mutex);
 #endif
-	if (i < 1 || i > MAX_ASSOC || !shared_associations ||
-		!(assoc = shared_associations[i-1]))
+	ZEND_FETCH_RESOURCE(as, Yaz_Association *, id, -1,
+						"YAZ link", le_link);
+	if (as && *as && (*as)->order == YAZSG(assoc_seq) && (*as)->in_use)
+		*assocp = *as;
+	else
 	{
 #ifdef ZTS
 		tsrm_mutex_unlock (yaz_mutex);
 #endif
 		php_error(E_WARNING, "Invalid YAZ handle");
-		return 0;
+		*assocp = 0;
 	}
-	return assoc;
 }
 
 static void release_assoc (Yaz_Association assoc)
@@ -281,7 +291,6 @@ static void do_close (Yaz_Association p)
 static void do_connect (Yaz_Association p)
 {
 	void *addr;
-	char *cp;
 	
 	p->reconnect_flag = 0;
 	p->cs = cs_create (tcpip_type, 0, PROTO_Z3950);
@@ -467,7 +476,7 @@ static void present_response (Yaz_Association t, Z_PresentResponse *pr)
 void scan_response (Yaz_Association t, Z_ScanResponse *res)
 {
 	NMEM nmem = odr_extract_mem (t->odr_in);
-    if (res->entries && res->entries->nonsurrogateDiagnostics)
+	if (res->entries && res->entries->nonsurrogateDiagnostics)
 		response_diag(t, res->entries->nonsurrogateDiagnostics[0]);
 	t->scan_response = res;
 	nmem_transfer (t->odr_scan->mem, nmem);
@@ -663,25 +672,12 @@ static int encode_APDU(Yaz_Association t, Z_APDU *a, ODR out)
 	if (a == 0)
 		abort();
 	sprintf (str, "send_APDU t=%p type=%d", t, a->which);
-#if 0
-	php_error (E_WARNING, str);
-#endif
 	if (t->cookie_out)
 	{
 		Z_OtherInformation **oi;
 		yaz_oi_APDU(a, &oi);
 		yaz_oi_set_string_oidval(oi, out, VAL_COOKIE, 1, t->cookie_out);
 	}
-/* from ZAP */
-#if 0
-	if (req->request->connection)
-	{
-		Z_OtherInformation **oi;
-		yaz_oi_APDU(a, &oi);
-		yaz_oi_set_string_oidval(oi, out, VAL_CLIENT_IP, 1,
-								 req->request->connection->remote_ip);
-	}
-#endif
 	if (!z_APDU(out, &a, 0, 0))
 	{
 		FILE *outf = fopen("/tmp/apdu.txt", "w");
@@ -874,7 +870,6 @@ static int send_present (Yaz_Association t)
 
 static void send_init(Yaz_Association t)
 {
-	char *cp;
 	Z_APDU *apdu = zget_APDU(t->odr_out, Z_APDU_initRequest);
 	Z_InitRequest *ireq = apdu->u.initRequest;
 	Z_IdAuthentication *auth = odr_malloc(t->odr_out, sizeof(*auth));
@@ -937,8 +932,9 @@ static void send_init(Yaz_Association t)
 		strcpy(auth->u.open, auth_userId);
 		ireq->idAuthentication = auth;
 	}
-	yaz_oi_set_string_oidval(&ireq->otherInfo, t->odr_out,
-							 VAL_PROXY, 1, t->host_port);
+	if (t->proxy)
+		yaz_oi_set_string_oidval(&ireq->otherInfo, t->odr_out,
+						 VAL_PROXY, 1, t->host_port);
 	send_APDU (t, apdu);
 }
 
@@ -949,6 +945,7 @@ static int do_event (int *id, int timeout)
 	int no = 0;
 	int max_fd = 0;
 	struct timeval tv;
+	YAZSLS_FETCH();
 	
 	tv.tv_sec = timeout;
 	tv.tv_usec = 0;
@@ -962,7 +959,7 @@ static int do_event (int *id, int timeout)
 	{
 		Yaz_Association p = shared_associations[i];
 		int fd;
-		if (!p || p->order != order_associations || !p->cs)
+		if (!p || p->order != YAZSG(assoc_seq) || !p->cs)
 			continue;
 		fd = cs_fileno (p->cs);
 		if (max_fd < fd)
@@ -991,7 +988,7 @@ static int do_event (int *id, int timeout)
 	{
 		int fd;
 		Yaz_Association p = shared_associations[i];
-		if (!p || p->order != order_associations || !p->cs)
+		if (!p || p->order != YAZSG(assoc_seq) || !p->cs)
 			continue;
 		*id = i+1;
 		fd =cs_fileno(p->cs);
@@ -1053,7 +1050,10 @@ PHP_FUNCTION(yaz_connect)
 	const char *user_str = 0, *group_str = 0, *pass_str = 0;
 	const char *cookie_str = 0, *proxy_str = 0;
 	int persistent = 1;
-	pval **zurl, **user = 0, **group = 0, **pass = 0;
+	pval **zurl, **user = 0;
+	Yaz_Association as;
+	YAZSLS_FETCH();
+
 	if (ZEND_NUM_ARGS() == 1)
 	{
 		if (zend_get_parameters_ex (1, &zurl) == FAILURE)
@@ -1100,8 +1100,8 @@ PHP_FUNCTION(yaz_connect)
 #endif
 	for (i = 0; i<MAX_ASSOC; i++)
 	{
-		Yaz_Association as = shared_associations[i];
-		if (persistent && as && as->order != order_associations &&
+		as = shared_associations[i];
+		if (persistent && as && !as->in_use &&
 			!strcmp_null (as->host_port, zurl_str) &&
 			!strcmp_null (as->user, user_str) &&
 			!strcmp_null (as->group, group_str) &&
@@ -1117,12 +1117,14 @@ PHP_FUNCTION(yaz_connect)
 		int min_order = 2000000000;
 		/* find completely free slot or the oldest one */
 		for (i = 0; i<MAX_ASSOC && shared_associations[i]; i++)
-			if (shared_associations[i]->order < min_order
-				&& shared_associations[i]->order != order_associations)
+		{
+			as = shared_associations[i];
+			if (persistent && !as->in_use && as->order < min_order)
 			{
-				min_order = shared_associations[i]->order;
+				min_order = as->order;
 				i0 = i;
 			}
+		}
 		if (i == MAX_ASSOC)
 		{
 			i = i0;
@@ -1136,30 +1138,32 @@ PHP_FUNCTION(yaz_connect)
 			else                         /* "best" free slot */
 				yaz_association_destroy(shared_associations[i]);
 		}
-		shared_associations[i] = yaz_association_mk ();
-		shared_associations[i]->host_port = xstrdup (zurl_str);
+		shared_associations[i] = as = yaz_association_mk ();
+		as->host_port = xstrdup (zurl_str);
 		if (cookie_str)
-			shared_associations[i]->cookie_out = xstrdup (cookie_str);
+			as->cookie_out = xstrdup (cookie_str);
 		if (user_str)
-			shared_associations[i]->user = xstrdup (user_str);
+			as->user = xstrdup (user_str);
 		if (group_str)
-			shared_associations[i]->group = xstrdup (group_str);
+			as->group = xstrdup (group_str);
 		if (pass_str)
-			shared_associations[i]->pass = xstrdup (pass_str);
+			as->pass = xstrdup (pass_str);
 		if (proxy_str)
-			shared_associations[i]->proxy = xstrdup (proxy_str);	
+			as->proxy = xstrdup (proxy_str);	
 	}
-	shared_associations[i]->persistent = persistent;
-	shared_associations[i]->order = order_associations;
-	shared_associations[i]->error = 0;
-	shared_associations[i]->numberOfRecordsRequested = 10;
-	shared_associations[i]->resultSetStartPoint = 1;
-	xfree (shared_associations[i]->local_databases);
-	shared_associations[i]->local_databases = 0;
+	as->in_use = 1;
+	as->persistent = persistent;
+	as->order = YAZSG(assoc_seq);
+	as->error = 0;
+	as->numberOfRecordsRequested = 10;
+	as->resultSetStartPoint = 1;
+	xfree (as->local_databases);
+	as->local_databases = 0;
 #ifdef ZTS
 	tsrm_mutex_unlock (yaz_mutex);
 #endif
-	RETURN_LONG(i+1);
+	ZEND_REGISTER_RESOURCE(return_value, &shared_associations[i], le_link);
+/* 	RETURN_LONG(i+1); */
 }
 /* }}} */
 
@@ -1169,19 +1173,15 @@ PHP_FUNCTION(yaz_close)
 {
 	Yaz_Association p;
 	pval **id;
-	int i;
 	if (ZEND_NUM_ARGS() != 1)
 		WRONG_PARAM_COUNT;
 	if (zend_get_parameters_ex (1, &id) == FAILURE)
 		RETURN_FALSE;
-	p = get_assoc (id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, id, &p);
 	if (!p)
 		RETURN_FALSE;
-	convert_to_long_ex (id);
-	i = (*id)->value.lval - 1;
-	yaz_association_destroy (shared_associations[i]);
-	shared_associations[i] = 0;
 	release_assoc (p);
+	zend_list_delete ((*id)->value.lval);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1205,7 +1205,7 @@ PHP_FUNCTION(yaz_search)
 	{
 		WRONG_PARAM_COUNT;
 	}
-	p = get_assoc (id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, id, &p);
 	if (!p)
 	{
 		RETURN_FALSE;
@@ -1264,7 +1264,7 @@ PHP_FUNCTION(yaz_present)
 	{
 		WRONG_PARAM_COUNT;
 	}
-	p = get_assoc (id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, id, &p);
 	if (!p)
 	{
 		RETURN_FALSE;
@@ -1284,9 +1284,9 @@ PHP_FUNCTION(yaz_present)
    Process events. */
 PHP_FUNCTION(yaz_wait)
 {
-	int i;
-	int id;
-	int timeout = 15;
+	int i, id, timeout = 15;
+	YAZSLS_FETCH();
+
 	if (ZEND_NUM_ARGS() == 1)
 	{
 		long *val = 0;
@@ -1312,7 +1312,7 @@ PHP_FUNCTION(yaz_wait)
 	for (i = 0; i<MAX_ASSOC; i++)
 	{
 		Yaz_Association p = shared_associations[i];
-		if (!p || p->order != order_associations || !p->action
+		if (!p || p->order != YAZSG(assoc_seq) || !p->action
 			|| p->mask_select)
 			continue;
 		if (!p->cs)
@@ -1344,7 +1344,7 @@ PHP_FUNCTION(yaz_errno)
 	{
 		WRONG_PARAM_COUNT;
 	}
-	p = get_assoc (id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, id, &p);
 	if (!p)
 	{
 		RETURN_LONG(0);
@@ -1364,7 +1364,7 @@ PHP_FUNCTION(yaz_error)
 	{
 		WRONG_PARAM_COUNT;
 	}
-	p = get_assoc (id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, id, &p);
 	if (p && p->error)
 	{
 		const char *msg = 0;
@@ -1421,7 +1421,7 @@ PHP_FUNCTION(yaz_addinfo)
 	{
 		WRONG_PARAM_COUNT;
 	}
-	p = get_assoc (id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, id, &p);
 	if (p && p->error > 0 && p->addinfo && *p->addinfo)
 	{
 		RETVAL_STRING(p->addinfo, 1);
@@ -1440,7 +1440,7 @@ PHP_FUNCTION(yaz_hits)
 	{
 		WRONG_PARAM_COUNT;
 	}
-	p = get_assoc (id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, id, &p);
 	if (!p || !p->resultSets)
 	{
 		RETVAL_LONG(0);
@@ -1524,7 +1524,8 @@ static Z_GenericRecord *marc_to_grs1(const char *buf, ODR o, Odr_oid *oid)
 		
 		tag->content->u.subtree =
 			odr_malloc (o, sizeof(*tag->content->u.subtree));
-		tag->content->u.subtree->elements = odr_malloc (o, sizeof(*r->elements));
+		tag->content->u.subtree->elements =
+			odr_malloc (o, sizeof(*r->elements));
 		tag->content->u.subtree->num_elements = 1;
 		
 		tag = tag->content->u.subtree->elements[0] =
@@ -1546,6 +1547,7 @@ static Z_GenericRecord *marc_to_grs1(const char *buf, ODR o, Odr_oid *oid)
 		i = data_offset + base_address;
 		end_offset = i+data_length-1;
 
+		
 		if (indicator_length == 2)
 		{
 			if (buf[i + indicator_length] != ISO2709_IDFS)
@@ -1553,8 +1555,9 @@ static Z_GenericRecord *marc_to_grs1(const char *buf, ODR o, Odr_oid *oid)
 		}
 		else if (!memcmp (tag_str, "00", 2))
 			identifier_flag = 0;
+
 		
-        if (identifier_flag && indicator_length)
+		if (identifier_flag && indicator_length)
 		{
 			/* indicator */
 			tag->tagValue->u.string = odr_malloc(o, indicator_length+1);
@@ -1575,12 +1578,12 @@ static Z_GenericRecord *marc_to_grs1(const char *buf, ODR o, Odr_oid *oid)
 			{
 				int i0;
 				/* prepare tag */
-                Z_TaggedElement *parent_tag = tag;
+				Z_TaggedElement *parent_tag = tag;
 				Z_TaggedElement *tag = odr_malloc (o, sizeof(*tag));
 				
-                if (parent_tag->content->u.subtree->num_elements < 256)
-                    parent_tag->content->u.subtree->elements[
-						parent_tag->content->u.subtree->num_elements++] = tag;
+				if (parent_tag->content->u.subtree->num_elements < 256)
+					parent_tag->content->u.subtree->elements[
+					parent_tag->content->u.subtree->num_elements++] = tag;
 				
 				tag->tagType = odr_malloc(o, sizeof(*tag->tagType));
 				*tag->tagType = 3;
@@ -1728,7 +1731,7 @@ PHP_FUNCTION(yaz_record)
 	{
 		WRONG_PARAM_COUNT;
 	}
-	p = get_assoc (pval_id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 
 	convert_to_long_ex(pval_pos);
 	pos = (*pval_pos)->value.lval;
@@ -1829,7 +1832,7 @@ PHP_FUNCTION(yaz_syntax)
 	{
 		WRONG_PARAM_COUNT;
 	}
-	p = get_assoc (pval_id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 	if (p)
 	{
 		convert_to_string_ex (pval_syntax);
@@ -1851,7 +1854,7 @@ PHP_FUNCTION(yaz_element)
 	{
 		WRONG_PARAM_COUNT;
 	}
-	p = get_assoc (pval_id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 	if (p)
 	{
 		convert_to_string_ex (pval_element);
@@ -1875,7 +1878,7 @@ PHP_FUNCTION(yaz_range)
 	{
 		WRONG_PARAM_COUNT;
 	}
-	p = get_assoc (pval_id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 	if (p)
 	{
 		convert_to_long_ex (pval_start);
@@ -2049,7 +2052,7 @@ PHP_FUNCTION(yaz_itemorder)
 		php_error(E_WARNING, "yaz_itemorder: Expected array parameter");
 		RETURN_FALSE;
 	}
-	p = get_assoc (pval_id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 	if (p)
 	{
 		Z_APDU *apdu;
@@ -2152,7 +2155,7 @@ PHP_FUNCTION(yaz_scan)
 	convert_to_string_ex (pval_type);
 	convert_to_string_ex (pval_query);
 
-	p = get_assoc (pval_id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 	if (p)
 	{
 		Z_APDU *apdu;
@@ -2208,7 +2211,7 @@ PHP_FUNCTION(yaz_scan_result)
 	{
 		RETURN_FALSE;
 	}
-	p = get_assoc (pval_id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 	if (p && p->scan_response)
 	{
 		int i;
@@ -2276,7 +2279,7 @@ PHP_FUNCTION(yaz_ccl_conf)
 		php_error(E_WARNING, "yaz_ccl_conf: Expected array parameter");
 		RETURN_FALSE;
 	}
-	p = get_assoc (pval_id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 	if (p)
 	{
 		HashTable *ht = Z_ARRVAL_PP(pval_package);
@@ -2328,7 +2331,7 @@ PHP_FUNCTION(yaz_ccl_parse)
 		RETURN_FALSE;
 	}
 	convert_to_string_ex (pval_query);
-	p = get_assoc (pval_id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 	if (p)
 	{
 		const char *query_str = (*pval_query)->value.str.val;
@@ -2379,7 +2382,7 @@ PHP_FUNCTION(yaz_database)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex (pval_database);
-	p = get_assoc (pval_id);
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 	if (p)
 	{
 		xfree (p->local_databases);
@@ -2393,6 +2396,36 @@ PHP_FUNCTION(yaz_database)
 /* }}} */
 
 
+/* {{{ php_yaz_init_globals
+ */
+static void php_yaz_init_globals(zend_yaz_globals *yaz_globals)
+{
+	yaz_globals->assoc_seq = 0;
+}
+/* }}} */
+
+void yaz_close_session(Yaz_Association *as)
+{
+	YAZSLS_FETCH();
+
+	if (*as && (*as)->order == YAZSG(assoc_seq))
+	{
+		if ((*as)->persistent)
+			(*as)->in_use = 0;
+		else
+		{
+			yaz_association_destroy(*as);
+			*as = 0;
+		}
+	}
+}
+
+static void yaz_close_link (zend_rsrc_list_entry *rsrc)
+{
+	Yaz_Association *as = (Yaz_Association *) rsrc->ptr;
+	yaz_close_session (as);
+}
+
 PHP_MINIT_FUNCTION(yaz)
 {
 	int i;
@@ -2400,6 +2433,10 @@ PHP_MINIT_FUNCTION(yaz)
 #ifdef ZTS
 	yaz_mutex = tsrm_mutex_alloc();
 #endif
+	ZEND_INIT_MODULE_GLOBALS(yaz, php_yaz_init_globals, NULL);
+
+	le_link = zend_register_list_destructors_ex (yaz_close_link, 0,
+												"YAZ link", module_number);
 	order_associations = 1;
 	shared_associations = xmalloc (sizeof(*shared_associations) * MAX_ASSOC);
 	for (i = 0; i<MAX_ASSOC; i++)
@@ -2435,33 +2472,16 @@ PHP_MINFO_FUNCTION(yaz)
 
 PHP_RSHUTDOWN_FUNCTION(yaz)
 {
-	int i;
-
-#ifdef ZTS
-	tsrm_mutex_lock (yaz_mutex);
-#endif
-	if (shared_associations)
-	{
-		for (i = 0; i<MAX_ASSOC; i++)
-			/* destroy those where password has been used */
-			if (shared_associations[i] && !shared_associations[i]->persistent)
-			{
-				yaz_association_destroy(shared_associations[i]);
-				shared_associations[i] = 0;
-			}
-	}
-#ifdef ZTS
-	tsrm_mutex_unlock (yaz_mutex);
-#endif
 	return SUCCESS;
 }
 
 PHP_RINIT_FUNCTION(yaz)
 {
+	YAZSLS_FETCH();
 #ifdef ZTS
 	tsrm_mutex_lock (yaz_mutex);
 #endif
-	order_associations++;
+	YAZSG(assoc_seq) = order_associations++;
 #ifdef ZTS
 	tsrm_mutex_unlock (yaz_mutex);
 #endif
@@ -2482,7 +2502,6 @@ zend_module_entry yaz_module_entry = {
 #ifdef COMPILE_DL_YAZ
 ZEND_GET_MODULE(yaz)
 #endif
-
 
 #endif
 
