@@ -918,8 +918,19 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	op_array.scope = CG(active_class_entry);
 
 	if (is_method) {
+		char *short_class_name = CG(active_class_entry)->name;
+		zend_uint short_class_name_length = CG(active_class_entry)->name_length;
+		zend_uint i;
+
+		for (i=0; i < CG(active_class_entry)->name_length; i++) {
+			if (CG(active_class_entry)->name[i] == ':') {
+				short_class_name = &CG(active_class_entry)->name[i+1];
+				short_class_name_length = strlen(short_class_name);
+			}
+		}
+		
 		zend_hash_update(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
-		if ((CG(active_class_entry)->name_length == (uint) name_len) && (!memcmp(CG(active_class_entry)->name, name, name_len))) {
+		if ((short_class_name_length == name_len) && (!memcmp(short_class_name, name, name_len))) {
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
 		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)))) {
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
@@ -1151,10 +1162,10 @@ void do_fetch_class_name(znode *result, znode *class_name_entry, znode *class_na
 		zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
 	}
 
-	length = 1 + result->u.constant.value.str.len + class_name->u.constant.value.str.len;
+	length = sizeof("::")-1 + result->u.constant.value.str.len + class_name->u.constant.value.str.len;
 	result->u.constant.value.str.val = erealloc(result->u.constant.value.str.val, length+1);
-	memcpy(&result->u.constant.value.str.val[result->u.constant.value.str.len], ":", sizeof(":")-1);
-	memcpy(&result->u.constant.value.str.val[result->u.constant.value.str.len+1], class_name->u.constant.value.str.val, class_name->u.constant.value.str.len+1);
+	memcpy(&result->u.constant.value.str.val[result->u.constant.value.str.len], "::", sizeof("::")-1);
+	memcpy(&result->u.constant.value.str.val[result->u.constant.value.str.len + sizeof("::")-1], class_name->u.constant.value.str.val, class_name->u.constant.value.str.len+1);
 	STR_FREE(class_name->u.constant.value.str.val);
 	result->u.constant.value.str.len = length;
 }
