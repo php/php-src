@@ -40,9 +40,16 @@ static php_thttpd_globals thttpd_globals;
 
 static int sapi_thttpd_ub_write(const char *str, uint str_length)
 {
+	int n;
 	TLS_FETCH();
 	
-	return send(TG(hc)->conn_fd, str, str_length, 0);
+	n = send(TG(hc)->conn_fd, str, str_length, 0);
+
+	if (n == EPIPE) {
+		php_handle_aborted_connection();
+	}
+
+	return n;
 }
 
 static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers SLS_DC)

@@ -43,12 +43,7 @@ php_apache_sapi_ub_write(const char *str, uint str_length)
 		str_length -= now;
 	}
 	if (ap_pass_brigade(ctx->f->next, bb) != APR_SUCCESS) {
-		PLS_FETCH();
-		PG(connection_status) = PHP_CONNECTION_ABORTED;
-
-		if (!PG(ignore_user_abort)) {
-			zend_bailout();
-		}
+		php_handle_aborted_connection();
 	}
 	
 	return str_length;
@@ -160,12 +155,7 @@ php_apache_sapi_flush(void *server_context)
 	b = ap_bucket_create_flush();
 	AP_BRIGADE_INSERT_TAIL(bb, b);
 	if (ap_pass_brigade(ctx->f->next, bb) != APR_SUCCESS) {
-		PLS_FETCH();
-		PG(connection_status) = PHP_CONNECTION_ABORTED;
-
-		if (!PG(ignore_user_abort)) {
-			zend_bailout();
-		}
+		php_handle_aborted_connection();
 	}
 }
 
