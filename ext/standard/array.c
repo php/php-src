@@ -575,7 +575,7 @@ PHP_FUNCTION(reset)
 		return;
 	}
 
-	if (used_return_value) {	
+	if (return_value_used) {	
 		*return_value = **entry;
 		pval_copy_constructor(return_value);
 	/*	INIT_PZVAL(return_value);  XXX is this needed? - No! :) */
