@@ -59,6 +59,10 @@ enum pdo_attribute_type {
 	PDO_ATTR_SCROLL,		/* ask for a scrollable cursor (when you prepare()) */
 	PDO_ATTR_PREFETCH,		/* configure the prefetch size for drivers that support it */
 	PDO_ATTR_TIMEOUT,		/* connection timeout in seconds */
+	PDO_ATTR_SERVER_VERSION,	/* database server version */
+	PDO_ATTR_CLIENT_VERSION,	/* client library version */
+	PDO_ATTR_SERVER_INFO,		/* server information */
+	PDO_ATTR_CONNECTION_STATUS,	/* connection status */
 };
 
 /* generic error code values.
@@ -125,7 +129,7 @@ typedef int (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const char *unquoted, int unqu
 /* transaction related */
 typedef int (*pdo_dbh_txn_func)(pdo_dbh_t *dbh TSRMLS_DC);
 
-/* setting and getting of attributes */
+/* setting of attributes */
 typedef int (*pdo_dbh_set_attr_func)(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC);
 
 /* return last insert id */
@@ -139,6 +143,9 @@ typedef long (*pdo_dbh_last_id_func)(pdo_dbh_t *dbh TSRMLS_DC);
  *   specific data ...  */
 typedef	int (*pdo_dbh_fetch_error_func)(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC);
 
+/* fetching of attributes */
+typedef int (*pdo_dbh_get_attr_func)(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC);
+
 struct pdo_dbh_methods {
 	pdo_dbh_close_func		closer;
 	pdo_dbh_prepare_func	preparer;
@@ -150,6 +157,7 @@ struct pdo_dbh_methods {
 	pdo_dbh_set_attr_func	set_attribute;
 	pdo_dbh_last_id_func		last_id;
 	pdo_dbh_fetch_error_func	fetch_err;
+	pdo_dbh_get_attr_func   	get_attribute;
 };
 
 /* }}} */
