@@ -52,7 +52,7 @@ ZEND_API int getParameters(int ht, int param_count,...)
 	while (param_count>0) {
 		param = va_arg(ptr, zval **);
 		param_ptr = *(p-param_count);
-		if (!param_ptr->EA && param_ptr->refcount>1) {
+		if (!PZVAL_IS_REF(param_ptr) && param_ptr->refcount>1) {
 			zval *new_tmp;
 
 			new_tmp = (zval *) emalloc(sizeof(zval));
@@ -90,7 +90,7 @@ ZEND_API int getParametersArray(int ht, int param_count, zval **argument_array)
 
 	while (param_count>0) {
 		param_ptr = *(p-param_count);
-		if (!param_ptr->EA && param_ptr->refcount>1) {
+		if (!PZVAL_IS_REF(param_ptr) && param_ptr->refcount>1) {
 			zval *new_tmp;
 
 			new_tmp = (zval *) emalloc(sizeof(zval));
@@ -175,7 +175,7 @@ ZEND_API int ParameterPassedByReference(int ht, uint n)
 		return FAILURE;
 	}
 	arg = (zval *) *(p-arg_count+n-1);
-	return arg->EA;
+	return PZVAL_IS_REF(arg);
 }
 
 

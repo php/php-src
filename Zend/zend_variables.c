@@ -50,7 +50,7 @@ ZEND_API inline void var_uninit(zval *var)
 ZEND_API int zval_dtor(zval *zvalue)
 {
 	if (zvalue->type==IS_LONG) {
-		return;
+		return 1;
 	}
 	switch(zvalue->type) {
 		case IS_STRING:
@@ -89,9 +89,10 @@ ZEND_API int zval_dtor(zval *zvalue)
 		case IS_DOUBLE:
 		case IS_BOOL:
 		default:
-			return;
+			return 1;
 			break;
 	}
+	return 1;
 }
 
 
