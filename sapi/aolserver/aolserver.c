@@ -98,6 +98,9 @@ php_ns_sapi_ub_write(const char *str, uint str_length)
 
 	sent_bytes = Ns_ConnWrite(NSG(conn), (void *) str, str_length);
 
+	if (sent_bytes != str_length)
+		php_handle_aborted_connection();
+	
 	return sent_bytes;
 }
 
