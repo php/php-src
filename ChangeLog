@@ -1,3 +1,14 @@
+2004-04-16  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_4_3)
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c:
+      MFH: set Sybase default APPNAME to ("PHP " PHP_VERSION)
+
+    * ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c:
+      set Sybase default APPNAME to ("PHP " PHP_VERSION)
+
 2004-04-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * main/snprintf.c:
