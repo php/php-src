@@ -29,8 +29,8 @@
 #include "ext/standard/info.h"
 #include "php_mysqli.h"
 
-/* {{{ proto resource mysqli_connect([string hostname, [string username, [string passwd, [string dbname, [int port, [string socket]]]]])
-   open a connection to a mysql server */ 
+/* {{{ proto resource mysqli_connect([string hostname [,string username [,string passwd [,string dbname [,int port [,string socket]]]]]])
+   Open a connection to a mysql server */ 
 PHP_FUNCTION(mysqli_connect)
 {
 	MYSQL 				*mysql;
@@ -99,8 +99,8 @@ PHP_FUNCTION(mysqli_connect)
 }
 /* }}} */
 
-/* {{{ proto array mysqli_fetch_array (resource result, [int resulttype])
-*/
+/* {{{ proto array mysqli_fetch_array (resource result [,int resulttype])
+   Fetch a result row as an associative array, a numeric array, or both */
 PHP_FUNCTION(mysqli_fetch_array) 
 {
 	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
@@ -108,7 +108,7 @@ PHP_FUNCTION(mysqli_fetch_array)
 /* }}} */
 
 /* {{{ proto array mysqli_fetch_assoc (resource result)
-*/
+   Fetch a result row as an associative array */
 PHP_FUNCTION(mysqli_fetch_assoc) 
 {
 	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_ASSOC);
@@ -116,7 +116,7 @@ PHP_FUNCTION(mysqli_fetch_assoc)
 /* }}} */
 
 /* {{{ proto array mysqli_fetch_object (resource result)
-*/
+   Fetch a result row as an object */
 PHP_FUNCTION(mysqli_fetch_object) 
 {
 	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_ASSOC);
@@ -127,8 +127,8 @@ PHP_FUNCTION(mysqli_fetch_object)
 }
 /* }}} */
 
-/* {{{ proto resource mysqli_query(resource link, string query, [int resultmode])
-*/
+/* {{{ proto resource mysqli_query(resource link, string query [,int resultmode])
+   Send a MySQL query */
 PHP_FUNCTION(mysqli_query) {
 	MYSQL				*mysql;
 	zval				*mysql_link;

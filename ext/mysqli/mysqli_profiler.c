@@ -413,7 +413,7 @@ void php_mysqli_profiler_report(PR_COMMON *current, int depth)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_profiler (int flags, char *info, int port)
+/* {{{ proto bool mysqli_profiler (int flags, string info, int port)
 */
 PHP_FUNCTION(mysqli_profiler)
 { 
