@@ -1866,16 +1866,13 @@ PHP_FUNCTION(mssql_init)
    Adds a parameter to a stored procedure or a remote stored procedure  */
 PHP_FUNCTION(mssql_bind)
 {
-	int	type, is_output, is_null, datalen, maxlen;
+	int	type, is_output, is_null, datalen, maxlen = -1;
 	zval **stmt, **param_name, **var, **yytype;
 	mssql_link *mssql_ptr;
 	mssql_statement *statement;
 	mssql_bind bind,*bindp;
-	int id, status;
-	LPBYTE value;
-
-	id=0;
-	status=0;
+	int id = 0, status = 0;
+	LPBYTE value = NULL;
 
 	/* BEGIN input validation */
 	switch(ZEND_NUM_ARGS()) {
@@ -1887,8 +1884,6 @@ PHP_FUNCTION(mssql_bind)
 			type=Z_LVAL_PP(yytype);
 			is_null=FALSE;
 			is_output=FALSE;
-			maxlen=-1;
-	
 			break;
 						
 		case 5: {
@@ -1902,7 +1897,6 @@ PHP_FUNCTION(mssql_bind)
 				type=Z_LVAL_PP(yytype);
 				is_null=FALSE;
 				is_output=Z_LVAL_PP(yyis_output);
-				maxlen=-1;	
 			}
 			break;	
 
@@ -1918,7 +1912,6 @@ PHP_FUNCTION(mssql_bind)
 				type=Z_LVAL_PP(yytype);
 				is_output=Z_LVAL_PP(yyis_output);
 				is_null=Z_LVAL_PP(yyis_null);
-				maxlen=-1;
 			}
 			break;
 		
