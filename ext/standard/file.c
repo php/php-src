@@ -459,6 +459,34 @@ PHP_FUNCTION(file_get_contents)
 }
 /* }}} */
 
+/* {{{ proto string file_set_contents(string file, string data)
+   Write/Create a file with contents data */
+PHP_FUNCTION(file_set_contents)
+{
+	php_stream *stream;
+	char *filename, *data;
+	size_t filename_len, data_len;
+	int numbytes;
+	zend_bool use_include_path = 0;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|b", &filename, &filename_len, 
+				&data, &data_len, &use_include_path) == FAILURE) {
+		return;
+	}
+
+	stream = php_stream_open_wrapper(filename, "wb", 
+			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+	if (data_len) {
+		numbytes = php_stream_write(stream, data, data_len);
+		if (numbytes < 0) {
+			RETURN_FALSE;
+		}
+	}
+	php_stream_close(stream);
+	
+	RETURN_TRUE;
+}
+
 /* {{{ proto array file(string filename [, int flags])
    Read entire file into an array */
 
