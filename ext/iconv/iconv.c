@@ -28,6 +28,7 @@
 #ifdef PHP_ATOM_INC
 #include "php_have_iconv.h"
 #include "php_have_libiconv.h"
+#include "php_iconv_supports_errno.h"
 #endif
 
 #if HAVE_ICONV
@@ -49,6 +50,7 @@
 
 
 #if HAVE_LIBICONV
+#define LIBICONV_PLUG
 #define icv_open(a, b) libiconv_open(a, b)
 #define icv_close(a) libiconv_close(a)
 #define icv(a, b, c, d, e) libiconv(a, b, c, d, e)
@@ -145,8 +147,7 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 							char **out, size_t *out_len,
 							const char *in_charset, const char *out_charset, int *err TSRMLS_DC)
 {
-#if HAVE_LIBICONV
-	/* No errno for libiconv(?) */
+#if !defined(ICONV_SUPPORTS_ERRNO)
 	unsigned int in_size, out_size, out_left;
 	char *out_buffer, *out_p;
 	iconv_t cd;
@@ -163,9 +164,9 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 	  a single char can be more than 4 bytes.
 	  I added 15 extra bytes for safety. <yohgaki@php.net>
 	*/
-	out_size = in_len * sizeof(ucs4_t) + 16;
-	out_buffer = (char *) emalloc(out_size);
-	
+	out_size = in_len * sizeof(ucs4_t) + 15;
+	out_buffer = (char *) emalloc(out_size + 1);
+
 	*out = out_buffer;
 	out_p = out_buffer;
 	out_left = out_size;
@@ -197,71 +198,78 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 
 #else
 	/*
-	  libc iconv should support errno. Handle it better way.
+	  iconv supports errno. Handle it better way.
 	*/
 	iconv_t cd;
 	size_t in_left, out_size, out_left;
 	char *out_p, *out_buf, *tmp_buf;
-	size_t i, bsz, result;
+	size_t bsz, result;
 
 	*err = 0;
-	cd = iconv_open(out_charset, in_charset);
+	cd = icv_open(out_charset, in_charset);
+
 	if (cd == (iconv_t)(-1)) {
 		if (errno == EINVAL) {
 			*err = PHP_ICONV_WRONG_CHARSET;
-			php_error(E_NOTICE, "%s() wrong charset, cannot convert from `%s' to `%s'",
+			php_error(E_NOTICE, "%s(): wrong charset, cannot convert from `%s' to `%s'",
 					  get_active_function_name(TSRMLS_C), in_charset, out_charset);
-		}
-		else {
+		} else {
 			*err = PHP_ICONV_CONVERTER;
-			php_error(E_NOTICE, "%s() cannot open converter",
+			php_error(E_NOTICE, "%s(): cannot open converter",
 					  get_active_function_name(TSRMLS_C));
 		}
 		return FAILURE;
 	}
-	
 	in_left= in_len;
 	out_left = in_len + 32; /* Avoid realloc() most cases */ 
+	out_size = 0;
 	bsz = out_left;
 	out_buf = (char *) emalloc(bsz+1); 
 	out_p = out_buf;
-	result = iconv(cd, (char **)&in_p, &in_left, (char **) &out_p, &out_left);
-	out_size = bsz - out_left;
-	for (i = 2;in_left > 0 && errno == E2BIG; i++) {
-		/* converted string is longer than out buffer */
-		tmp_buf = (char*)erealloc(out_buf, bsz*i+1);
-		if (tmp_buf == NULL) {
-			break;
+
+	while(in_left > 0) {
+		result = icv(cd, (char **)&in_p, &in_left, (char **) &out_p, &out_left);
+		out_size = bsz - out_left;
+		if( result == (size_t)(-1) ) {
+			if( errno == E2BIG && in_left > 0 ) {
+				/* converted string is longer than out buffer */
+				bsz += in_len;
+
+				tmp_buf = (char*) erealloc(out_buf, bsz+1);
+
+				if (tmp_buf != NULL) {
+					out_p = out_buf = tmp_buf;
+					out_p += out_size;
+					out_left = bsz - out_size;
+					continue;	
+				}
+			}
 		}
-		out_buf = tmp_buf;
-		out_p = tmp_buf;
-		out_p += out_size;
-		out_left = bsz;
-		result = iconv(cd, (char **)&in_p, &in_left, &out_p, &out_left);
-		out_size += bsz - out_left;
+		break;
 	}
-	iconv_close(cd);
+	icv_close(cd);
+
 	if (result == (size_t)(-1)) {
 		switch (errno) {
 			case EINVAL:
-				php_error(E_NOTICE, "%s() detected incomplete character in input string",
+				php_error(E_NOTICE, "%s(): detected incomplete character in input string",
 						  get_active_function_name(TSRMLS_C));
 				*err = PHP_ICONV_ILLEGAL_CHAR;
 				break;
 			case EILSEQ:
-				php_error(E_NOTICE, "%s() detected illegal character in input string",
+				php_error(E_NOTICE, "%s(): detected illegal character in input string",
 						  get_active_function_name(TSRMLS_C));
 				*err = PHP_ICONV_ILLEGAL_SEQ;
 				break;
 			case E2BIG:
 				/* should not happen */
-				php_error(E_WARNING, "%s() run out buffer",
+				php_error(E_WARNING, "%s(): run out buffer",
 						  get_active_function_name(TSRMLS_C));
 				*err = PHP_ICONV_TOO_BIG;
 				break;
 			default:
 				/* other error */
-				php_error(E_NOTICE, "%s() unknown error (%d)",
+				php_error(E_NOTICE, "%s(): unknown error (%d)",
 						  get_active_function_name(TSRMLS_C), errno);
 				*err = PHP_ICONV_UNKNOWN;
 				efree(out_buf);
