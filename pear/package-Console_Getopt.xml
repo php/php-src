@@ -5,11 +5,8 @@
 <package version="1.0">
   <name>Console_Getopt</name>
   <summary>Command-line option parser</summary>
-  <description>This class provides handling of tar files in PHP.
-It supports creating, listing, extracting and adding to tar files.
-Gzip support is available if PHP has the zlib extension built-in or
-loaded.
-</description>
+  <description>This is a PHP implementation of "getopt" supporting both
+short and long options.</description>
   <license>PHP License</license>
   <maintainers>
     <maintainer>
@@ -18,10 +15,16 @@ loaded.
       <name>Andrei Zmievski</name>
       <email>andrei@php.net</email>
     </maintainer>
+    <maintainer>
+      <user>ssb</user>
+      <role>helper</role>
+      <name>Stig Bakken</name>
+      <email>stig@php.net</email>
+    </maintainer>
   </maintainers>
   <release>
     <version>0.9</version>
-    <date>2002-05-10</date>
+    <date>2002-05-12</date>
     <notes>Initial release</notes>
     <state>beta</state>
     <filelist>
