@@ -1,3 +1,172 @@
+2004-12-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/php_http.h:
+      MFH: Fixed bug #31087 (broken php_url_encode_hash macro).
+
+    * ext/standard/php_http.h:
+      Fixed bug #31087 (broken php_url_encode_hash macro).
+
+2004-12-16  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.c:
+      - MF43: Make it compile on HPUX on Itanium 2
+
+    * (PHP_4_3)
+      Zend/zend_strtod.c:
+      - Make it compile on HPUX on Itanium 2
+
+2004-12-16  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_0)
+      ext/mssql/php_mssql.c:
+      MFH: Fix #31120 and #31135. mssql_query returns false on successfill
+      inserts and stored procedures
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      Fix #31120 and #31135. mssql_query returns false on successfill inserts and
+      stored procedures
+
+2004-12-16  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      ext/standard/array.c
+      ext/standard/array.c:
+      MFH: fix leak (init array only if we got valid start key)
+
+    * ext/standard/array.c:
+      fix leak (init array only if we got valid start key)
+
+2004-12-16  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.c:
+      - MF43: Fixed bug #31107 (strtod on solaris9/intel)
+
+    * (PHP_4_3)
+      NEWS
+      Zend/zend_strtod.c:
+      - Fixed bug #31107 (strtod on solaris9/intel)
+
+2004-12-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ChangeLog
+      run-tests.php
+      ext/gd/tests/gif2gd.phpt
+      ext/gd/tests/gif2jpg.phpt
+      ext/gd/tests/gif2png.phpt
+      ext/gd/tests/jpeg2png.phpt
+      ext/gd/tests/jpg2gd.phpt
+      ext/gd/tests/png2gd.phpt
+      ext/gd/tests/xpm2gd.phpt
+      ext/gd/tests/xpm2jpg.phpt
+      ext/gd/tests/xpm2png.phpt
+      ext/informix/ifx.ec
+      ext/mbstring/tests/mb_send_mail05.phpt
+      ext/mbstring/tests/mb_send_mail06.phpt
+      ext/mbstring/tests/mb_send_mail07.phpt
+      ext/mhash/tests/skip.inc
+      ext/mime_magic/mime_magic.c
+      ext/pcntl/tests/001.phpt
+      ext/pspell/tests/01pspell_basic.phpt
+      ext/shmop/tests/001.phpt
+      ext/standard/tests/image/getimagesize_swc.phpt
+      pear/CMD.php
+      sapi/apache2handler/sapi_apache2.c
+      tests/lang/overload_leak.phpt:
+      MFH: Fix typo (avaliable -> available). (bug #28725)
+
+    * (PHP_5_0)
+      run-tests.php
+      ZendEngine2/ChangeLog
+      ext/gd/tests/gif2gd.phpt
+      ext/gd/tests/gif2jpg.phpt
+      ext/gd/tests/gif2png.phpt
+      ext/gd/tests/imagefilter.phpt
+      ext/gd/tests/imagefttext.phpt
+      ext/gd/tests/jpeg2png.phpt
+      ext/gd/tests/jpg2gd.phpt
+      ext/gd/tests/png2gd.phpt
+      ext/gd/tests/xbm2png.phpt
+      ext/gd/tests/xpm2gd.phpt
+      ext/gd/tests/xpm2jpg.phpt
+      ext/gd/tests/xpm2png.phpt
+      ext/informix/ifx.ec
+      ext/mbstring/tests/mb_send_mail05.phpt
+      ext/mbstring/tests/mb_send_mail06.phpt
+      ext/mbstring/tests/mb_send_mail07.phpt
+      ext/mhash/tests/skip.inc
+      ext/mime_magic/mime_magic.c
+      ext/pcntl/tests/001.phpt
+      ext/pspell/tests/01pspell_basic.phpt
+      ext/shmop/tests/001.phpt
+      ext/standard/tests/image/getimagesize_swc.phpt
+      sapi/apache2handler/sapi_apache2.c:
+      - MFH: Fix typo (avaliable -> available). (bug #28725)
+
+    * run-tests.php
+      ZendEngine2/ChangeLog
+      ext/gd/tests/gif2gd.phpt
+      ext/gd/tests/gif2jpg.phpt
+      ext/gd/tests/gif2png.phpt
+      ext/gd/tests/imagefilter.phpt
+      ext/gd/tests/imagefttext.phpt
+      ext/gd/tests/jpeg2png.phpt
+      ext/gd/tests/jpg2gd.phpt
+      ext/gd/tests/png2gd.phpt
+      ext/gd/tests/xbm2png.phpt
+      ext/gd/tests/xpm2gd.phpt
+      ext/gd/tests/xpm2jpg.phpt
+      ext/gd/tests/xpm2png.phpt
+      ext/informix/ifx.ec
+      ext/mbstring/tests/mb_send_mail05.phpt
+      ext/mbstring/tests/mb_send_mail06.phpt
+      ext/mbstring/tests/mb_send_mail07.phpt
+      ext/mhash/tests/skip.inc
+      ext/mime_magic/mime_magic.c
+      ext/pcntl/tests/001.phpt
+      ext/pspell/tests/01pspell_basic.phpt
+      ext/shmop/tests/001.phpt
+      ext/standard/tests/image/getimagesize_swc.phpt
+      sapi/apache2handler/sapi_apache2.c:
+      - Fix typo (avaliable -> available). (bug #28725)
+
+    * (PHP_4_3)
+      configure.in
+      configure.in:
+      MFH: - Fixed compile error with HP-UX using GCC.
+
+    * configure.in:
+      - Fixed compile error with HP-UX using GCC.
+
+2004-12-16  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_strtod.c:
+      - MF43: Fixed bug #31110 and #31111 (Zend/zend_strtod.c problems)
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      Zend/zend_strtod.c
+      ZendEngine2/zend_strtod.c:
+      - Fixed bug #31110 and #31111 (Zend/zend_strtod.c problems)
+
+2004-12-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/standard/datetime.c
+      ext/standard/datetime.c:
+      MFH: Fixed bug #31056 (php_std_date() returns invalid formatted date if
+      y2k_compliance is On).
+
 2004-12-15  Frank M. Kromann  <frank@kromann.info>
 
     * ext/ming/ming.c:
