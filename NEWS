@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- Fixed a memory leak when using assign-op bitwise operators on strings (Zeev,
+  Zend Engine)
 - Added support for reading properties that require arguments in the COM
   module - writing to them will only be supported in PHP 4.1 (Zeev)
 - Fixed a very old legacy memory leak in the COM module (Zeev)
