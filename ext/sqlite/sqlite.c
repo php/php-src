@@ -2593,7 +2593,7 @@ PHP_FUNCTION(sqlite_prev)
 PHP_FUNCTION(sqlite_escape_string)
 {
 	char *string = NULL;
-	long stringlen;
+	int stringlen;
 	char *ret;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &string, &stringlen)) {
