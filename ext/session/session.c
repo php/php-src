@@ -876,8 +876,8 @@ PHP_FUNCTION(session_set_cookie_params)
 
 /* {{{ proto array session_get_cookie_params()
    Return the session cookie parameters */ 
-
-PHP_FUNCTION(session_get_cookie_params) {
+PHP_FUNCTION(session_get_cookie_params)
+{
 	PSLS_FETCH();
 
 	if (ARG_COUNT(ht) != 0) {
@@ -889,11 +889,10 @@ PHP_FUNCTION(session_get_cookie_params) {
 		RETURN_FALSE;
 	}
 
-	add_assoc_string(  return_value, "lifetime", PS(cookie_lifetime) );
-	add_assoc_string(  return_value, "path",     PS(cookie_path)     );
-	add_assoc_string(  return_value, "domain",   PS(cookie_domain)   );
+	add_assoc_string(return_value, "lifetime", PS(cookie_lifetime));
+	add_assoc_string(return_value, "path", PS(cookie_path));
+	add_assoc_string(return_value, "domain", PS(cookie_domain));
 }
-
 /* }}} */
 
 /* {{{ proto string session_name([string newname])
