@@ -1,3 +1,126 @@
+2003-08-20  Brian France  <list@firehawksystems.com>
+
+    * NEWS:
+      
+      - Added new setrawcookie function (bfrance)
+
+2003-08-20  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_alloc.c:
+      adhere to silence
+
+2003-08-20  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * (PHP_4_3)
+      ext/interbase/interbase.c:
+      MFH Fix false warning on zero-size BLOB fetch (introduced in RC3)
+
+2003-08-20  Zeev Suraski  <zeev@zend.com>
+
+    * main/main.c:
+      No need for those code blocks anymore...
+
+2003-08-20  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Fix false warning on zero-size BLOB fetch
+
+2003-08-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_alloc.c:
+      Fix counting number of leaks
+
+2003-08-20  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      Add resume_pos (resume position) context option for restarting file
+      downloads.
+
+2003-08-20  Brian France  <list@firehawksystems.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/head.c
+      ext/standard/head.h:
+      
+      Added a parameter to php_setcookie to toggle URL encoding of the cookie
+      data
+      Added the function setrawcookie that turns off URL encoding of the cookie
+      data
+      Changed setcookie to turn on the URL encoding of the cookie data
+
+2003-08-20  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Reuse result data structure and resource id for consecutive executions
+      of a prepared query
+
+2003-08-20  Brad House  <brad@mainstreetsoftworks.com>
+
+    * ext/mcve/mcve.c
+      ext/mcve/mcve.c:
+      allow destructor to clean up connection data
+
+2003-08-20  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/php_dom.c:
+      fix infinite loop in normalize
+
+    * ext/xsl/xsltprocessor.c:
+      doc must be copied when importing stylesheet
+      libxslt uses the _private for processing
+
+2003-08-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/php_rand.h
+      main/reentrancy.c:
+      MFH: Fixed bug #25170 (Problem with generation of random numbers on
+      solaris)
+
+    * ext/standard/php_rand.h
+      main/reentrancy.c:
+      Fixed bug #25170 (Problem with generation of random numbers on solaris)
+
+2003-08-20  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Moved transaction defaults to header file
+
+    * ext/interbase/interbase.c:
+      Cleaned up _php_ibase_var_zval()
+
+    * ext/interbase/interbase.c:
+      Fix Win32 build
+
+    * ext/interbase/interbase.c:
+      Moved some local vars to stack
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Nuke link handle from BLOB id
+      Added link argument to ibase_blob_{open|info|echo}()
+
+2003-08-20  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      scripts/phpize.in:
+      MFH: - Fixed bug #25163 (OSX: phpize has to use glibtoolize instead)
+
+    * ext/bz2/config.m4:
+      Fix phpize build
+
+    * scripts/phpize.in:
+      - Fixed bug #25163 (OSX: phpize has to use glibtoolize instead)
+
+2003-08-20  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/sqlite/Makefile.frag:
+      Explicitly declare the dependencies on the generated sqlite.h file.  This
+      allows the libsqlite source tree (and php-src, as a whole) to be built
+      using 'make -j' once again.
+
 2003-08-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/lang/bug25145.phpt:
