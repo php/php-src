@@ -490,8 +490,8 @@ function_entry basic_functions[] = {
 	PHP_FE(base64_decode,													NULL)
 	PHP_FE(base64_encode,													NULL)
 
-	PHP_FE(uuencode,														NULL)
-	PHP_FE(uudecode,														NULL)
+	PHP_FE(convert_uuencode,														NULL)
+	PHP_FE(convert_uudecode,														NULL)
 
 	PHP_FE(abs,																NULL)
 	PHP_FE(ceil,															NULL)
