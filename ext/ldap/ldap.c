@@ -158,7 +158,7 @@ PHP_MINFO_FUNCTION(ldap)
 {
 	char maxl[32];
 #if HAVE_NSLDAP
-	char tmp[32]
+	char tmp[32];
 	LDAPVersion ver;
 	double SDKVersion;
 #endif
