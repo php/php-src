@@ -1,5 +1,86 @@
 2001-04-03  Wilfredo Sanchez  <wsanchez@mit.edu>
 
+    * sapi/apache/apMakefile.tmpl
+      sapi/apache/libphp4.module.in
+      sapi/thttpd/config.m4
+      ext/msql/config.m4
+      ext/odbc/config.m4
+      ext/bcmath/libbcmath/src/Makefile.am
+      ext/informix/config.m4: Separate CPPFLAGS from CFLAGS.
+
+2001-04-03  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/exif/exif.c: use V_STAT
+
+    * ext/exif/exif.c: resolve realpath if in v-dir mode
+
+2001-04-03  Wilfredo Sanchez  <wsanchez@mit.edu>
+
+    * build/build.mk: Undo oopsie
+
+    * sapi/pi3web/config.m4
+      sapi/nsapi/config.m4
+      sapi/phttpd/config.m4
+      sapi/isapi/config.m4
+      sapi/aolserver/config.m4
+      sapi/apache/config.m4
+      sapi/cgi/config.m4
+      build/build.mk
+      ext/java/config.m4
+      pear/Makefile.in
+      Makefile.in
+      configure.in: Add INSTALL_ROOT variable to specify install location.
+
+2001-04-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    ircg_ignore_del returns true now, if the operation was successful.
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg.h: add ignore interface
+
+2001-04-03  Wilfredo Sanchez  <wsanchez@mit.edu>
+
+    * build/buildcheck.sh: Find libtool if it's called glibtool.
+
+2001-04-03  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Fixing crash when listing databsaes
+    Fixing rowcount to woirk when the result contains an array og data.
+
+2001-04-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/filestat.c:
+    SCO (and maybe others) do not have this defined.
+
+2001-04-03  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/DB/pgsql.php: Style and whitespace.
+
+    * pear/DB/pgsql.php: Make the 'protocol' DSN element optional.
+
+    * pear/PEAR.php.in: Cleaner (and probably safer) condition handling.
+
+2001-04-03  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/odbc.php
+      pear/DB/sybase.php:
+    odbc.php
+    - spaces & idents
+    - new temporary fetchInto()
+    - removed extra checks in connect()
+    Note:
+    in fetchRow this line looks very strange (isn't 3 params?):
+    $cols = odbc_fetch_into($result, &$row);
+
+    sybase.php
+    - spaces & idents
+    - removed extra checks in connect()
+    - changed fetchInto to return null on no more rows and
+        added support for fetching row numbers
+
+2001-04-03  Wilfredo Sanchez  <wsanchez@mit.edu>
+
     * Makefile.in
       configure.in
       php4/ext/java/config.m4
