@@ -1,3 +1,26 @@
+2004-11-29  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/tests/math/bug30695.phpt:
+        1.1.4;
+      - Added testcase for bug #30695
+
+    * (PHP_5_0)
+      ZendEngine2/zend_operators.c:
+      - MF43: Revert Joe's work around a bug in GCC patch as it breaks too many
+      things.
+
+    * ZendEngine2/zend_operators.c:
+      - MFH: Revert Joe's work around a bug in GCC patch as it breaks too many
+      things.
+
+    * (PHP_4_3)
+      Zend/zend_operators.c:
+      - Revert Joe's work around a bug in GCC patch as it breaks too many things.
+
+    * (PHP_4_3)
+      ext/pdf/config.m4:
+      - Make it work with PDFLib 5 again (And the check for PDFLib 6 is gone).
+
 2004-11-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * run-tests.php:
