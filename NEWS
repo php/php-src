@@ -1,6 +1,10 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev 
+- Improve range() function to support range('a','z') and range(9,0) types 
+  of ranges.  (Rasmus)
+- Add getmygid() and safe_mode_gid ini directive to allow safe mode to do
+  a gid check instead of a uid check. (James E. Flemer, Rasmus)
 - Assigning to a string offset beyond the end of the string now automatically
   increases the string length by padding it with spaces, and performs the
   assignment (Zeev, Zend Engine)
