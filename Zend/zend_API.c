@@ -1373,17 +1373,6 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_c
 }
 
 
-ZEND_API zend_module_entry *zend_get_module(int module_number)
-{
-	zend_module_entry *module;
-
-	if (zend_hash_index_find(&module_registry, module_number, (void **) &module)==SUCCESS) {
-		return module;
-	} else {
-		return NULL;
-	}
-}
-
 ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
                                   zend_bool is_ref, int num_symbol_tables, ...)
 {
