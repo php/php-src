@@ -23,8 +23,6 @@
 
 #define ZEND_VERSION "0.90"
 
-#include <stdarg.h>
-
 #ifdef __cplusplus
 #define BEGIN_EXTERN_C() extern "C" {
 #define END_EXTERN_C() }
@@ -33,18 +31,26 @@
 #define END_EXTERN_C()
 #endif
 
-
 #include <stdio.h>
 
 /*
  * general definitions
  */
 
-#if WINNT||WIN32
-#include "config.w32.h"
+#if (defined(WINNT) && WINNT) || (defined(WIN32) && WIN32)
+# include "zend_config.w32.h"
 #else
-#include "zend_config.h"
-#include "config.unix.h"
+# include "zend_config.h"
+#endif
+
+/* all HAVE_XXX test have to be after the include of zend_config above */
+
+#ifdef HAVE_UNIX_H
+# include <unix.h>
+#endif
+
+#ifdef HAVE_STDARG_H
+# include <stdarg.h>
 #endif
 
 #if ZEND_DEBUG
@@ -84,7 +90,7 @@ typedef unsigned char zend_bool;
 #undef SUCCESS
 #undef FAILURE
 #define SUCCESS 0
-#define FAILURE -1				/* this MUST stay a negative number, or it may effect functions! */
+#define FAILURE -1				/* this MUST stay a negative number, or it may affect functions! */
 
 
 #include "zend_hash.h"
@@ -287,3 +293,10 @@ extern zend_utility_values zend_uv;
 #define ZEND_MAX_RESERVED_RESOURCES	1
 
 #endif /* _ZEND_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */

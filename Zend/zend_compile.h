@@ -23,8 +23,8 @@
 
 #include "zend.h"
 
-#if HAVE_STDARG_H
-#include <stdarg.h>
+#ifdef HAVE_STDARG_H
+# include <stdarg.h>
 #endif
 
 #include "zend_llist.h"
@@ -34,9 +34,9 @@
 #define DEBUG_ZEND 0
 
 #ifndef ZTS
-#define SUPPORT_INTERACTIVE 1
+# define SUPPORT_INTERACTIVE 1
 #else
-#define SUPPORT_INTERACTIVE 0
+# define SUPPORT_INTERACTIVE 0
 #endif
 
 #define FREE_PNODE(znode)	zval_dtor(&znode->u.constant);

@@ -12,7 +12,13 @@ libzend_a_SOURCES=\
 	zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
 	zend_list.c zend_indent.c
 
+# taken from automake 1.4
+CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+
 # automake isn't too clever about "non-standard" use of lex and yacc
+
+zend-scanner.o: @ZEND_SCANNER_SRC@
+	@ZEND_SCANNER_COMPILE@
 
 zend-scanner.c: zend-scanner.l
 	$(LEX) -Pzend -ozend-scanner.c -i $(srcdir)/zend-scanner.l

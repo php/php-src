@@ -22,8 +22,8 @@
 
 #include "zend.h"
 
-#if HAVE_STDARG_H
-#include <stdarg.h>
+#ifdef HAVE_STDARG_H
+# include <stdarg.h>
 #endif
 
 #if BROKEN_SPRINTF

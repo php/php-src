@@ -20,10 +20,9 @@
 
 #include "zend.h"
 #include "zend_ptr_stack.h"
-#if HAVE_STDARG_H
-#include <stdarg.h>
+#ifdef HAVE_STDARG_H
+# include <stdarg.h>
 #endif
-
 
 ZEND_API void zend_ptr_stack_init(zend_ptr_stack *stack)
 {

@@ -17,43 +17,49 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef _CONFIG_UNIX_H
-#define _CONFIG_UNIX_H
 
-#define ZEND_API
+#ifndef _ZEND_CONFIG_W32_H
+#define _ZEND_CONFIG_W32_H
 
-#include <stdlib.h>
 
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
-#if HAVE_STRING_H
 #include <string.h>
+#include <windows.h>
+
+typedef unsigned long ulong;
+typedef unsigned int uint;
+
+#define HAVE_ALLOCA 1
+#include <malloc.h>
+
+#undef HAVE_KILL
+#define HAVE_GETPID 1
+#define HAVE_ALLOCA_H 1
+#define HAVE_MEMCPY 1
+#define HAVE_STRDUP 1
+#define HAVE_SYS_TYPES_H 1
+#define HAVE_STDIOSTR_H 1
+#define istdiostream stdiostream
+
+#ifdef inline
+#undef inline
+#endif
+
+#define zend_sprintf sprintf
+
+/* Visual C++ doesn't really work with inline for C */
+#define inline
+
+
+#define DL_LOAD(libname)	LoadLibrary(libname)
+#define DL_FETCH_SYMBOL		GetProcAddress
+#define DL_UNLOAD			FreeLibrary
+#define DL_HANDLE			HMODULE
+#define ZEND_EXTENSIONS_SUPPORT 1
+
+#ifdef LIBZEND_EXPORTS
+#	define ZEND_API __declspec(dllexport)
 #else
-#include <strings.h>
+#	define ZEND_API __declspec(dllimport)
 #endif
 
-#if HAVE_LIBDL
-#	include <dlfcn.h>
-#	define DL_LOAD(libname)	dlopen(libname, RTLD_NOW)
-#	define DL_UNLOAD		dlclose
-#	define DL_FETCH_SYMBOL	dlsym
-#	define DL_HANDLE		void *
-#	define ZEND_EXTENSIONS_SUPPORT 1
-#else
-#	define DL_HANDLE		void *
-#	define ZEND_EXTENSIONS_SUPPORT 0
-#endif
-
-#if BROKEN_SPRINTF
-int zend_sprintf(char *buffer, const char *format, ...);
-#else
-#	define zend_sprintf sprintf
-#endif
-
-#if ZEND_DEBUG
-#	define inline
-#endif
-
-#endif /* _CONFIG_UNIX_H */
+#endif /* _ZEND_CONFIG_W32_H */
