@@ -913,6 +913,102 @@ SOURCE=.\oniguruma\regparse.c
 
 SOURCE=.\oniguruma\regposerr.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\ascii.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\utf8.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\euc_jp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\euc_tw.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\euc_kr.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\sjis.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\iso8859_1.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\iso8859_2.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\iso8859_3.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\iso8859_4.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\iso8859_5.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\iso8859_6.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\iso8859_7.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\iso8859_8.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\iso8859_9.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\iso8859_10.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\iso8859_11.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\iso8859_13.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\iso8859_14.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\iso8859_15.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\iso8859_16.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\koi8.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\koi8_r.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\enc\big5.c
+# End Source File
 # End Group
 # Begin Group "Header Files No. 2"
 
