@@ -229,6 +229,7 @@ php_apache_sapi_flush(void *server_context)
 	apr_bucket_alloc_t *ba;
 	apr_bucket *b;
 	ap_filter_t *f; /* output filters */
+	TSRMLS_FETCH();
 
 	ctx = server_context;
 
