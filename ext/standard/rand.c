@@ -230,7 +230,7 @@ PHPAPI double php_drand(void)
 /* }}} */
 
 /* {{{ PHPAPI long php_rand_range(long min, long max) */
-PHPAPI long php_rand_range(long min, long max TSRMLS_D)
+PHPAPI long php_rand_range(long min, long max TSRMLS_DC)
 {
 	register long result;
 
