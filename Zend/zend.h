@@ -294,8 +294,6 @@ struct _zval_struct {
 /* A lot of stuff needs shifiting around in order to include zend_compile.h here */
 union _zend_function;
 
-#define ZEND_CE_ABSTRACT ZEND_ACC_ABSTRACT /* same as ZEND_ACC_ABSTRACT */
-
 #include "zend_iterators.h"
 
 struct _zend_class_entry {
