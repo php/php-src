@@ -56,7 +56,7 @@ Note that the MySQL client library is not bundled anymore.])
 
   _SAVE_LDFLAGS=$LDFLAGS
   LDFLAGS="$LDFLAGS $PDO_MYSQL_LIBS"
-  AC_CHECK_FUNCS([mysql_commit mysql_rollback mysql_autocommit]) 	
+  AC_CHECK_FUNCS([mysql_commit mysql_stmt_prepare]) 	
   LDFLAGS=$_SAVE_LDFLAGS
 
   if test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
