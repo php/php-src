@@ -37,7 +37,7 @@
 #include <stdio.h>
 #include "php.h"
 #include "reg.h"
-#include "functions/post.h"
+#include "post.h"
 #include "php3_string.h"
 #if HAVE_SETLOCALE
 #include <locale.h>

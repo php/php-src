@@ -60,7 +60,7 @@
 
 #include "base64.h"
 #include "file.h"
-#include "functions/post.h"
+#include "post.h"
 #include "url.h"
 #include "fsock.h"
 

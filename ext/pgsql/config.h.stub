@@ -1,0 +1,8 @@
+#ifndef HAVE_PGSQL
+#define HAVE_PGSQL 0
+#endif
+
+#ifndef HAVE_PQCMDTUPLES
+#define HAVE_PQCMDTUPLES 0
+#endif
+
