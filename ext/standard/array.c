@@ -3010,14 +3010,15 @@ PHP_FUNCTION(array_map)
 	}
 
 	callback = *args[0];
-	if (Z_TYPE_P(callback) != IS_NULL && !zend_is_callable(callback, 0, &callback_name)) {
-		php_error(E_WARNING, "%s() expects argument 1, '%s', to be either NULL or a valid callback",
-				  get_active_function_name(TSRMLS_C), callback_name);
+	if (Z_TYPE_P(callback) != IS_NULL) {
+		if (!zend_is_callable(callback, 0, &callback_name)) {
+			php_error(E_WARNING, "%s() expects argument 1, '%s', to be either NULL or a valid callback", get_active_function_name(TSRMLS_C), callback_name);
+			efree(callback_name);
+			efree(args);
+			return;
+		}
 		efree(callback_name);
-		efree(args);
-		return;
 	}
-	efree(callback_name);
 
 	/* Cache array sizes. */
 	array_len = (int*)emalloc((ZEND_NUM_ARGS()-1) * sizeof(int));
