@@ -65,7 +65,8 @@
 #define NO_MORE_RPC_RESULTS 3
 #define dbfreelogin dbloginfree
 #define dbrpcexec dbrpcsend
-typedef unsigned char *LPBYTE;
+typedef unsigned char	*LPBYTE;
+typedef float           DBFLT4;
 #else
 #define DBERRHANDLE(a, b) dbprocerrhandle(a, b)
 #define DBMSGHANDLE(a, b) dbprocmsghandle(a, b)
