@@ -4,6 +4,7 @@ PHP 4                                                                      NEWS
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
 - Changed phpize not to require libtool. (Jani)
 - Fixed several egregious leaks in ext/browscap and sapi/embed. (Andrei)
+- Fixed several leaks in ext/filepro. (Tony)
 - Fixed build system to always use bundled libtool files. (Jani)  
 - Fixed MacOSX shared extensions crashing on Apache startup. (Rasmus)
 - Fixed bug #31858 (--disable-cli does not force --without-pear). (Jani)
