@@ -1714,7 +1714,8 @@ PHP_FUNCTION(imagecolordeallocate)
 		gdImageColorDeallocate(im, col);
 		RETURN_TRUE;
 	} else {
-		php_error(E_WARNING, "Color index out of range");
+		php_error(E_WARNING, "%s() color index %d out of range",
+				  get_active_function_name(TSRMLS_C), col);
 		RETURN_FALSE;
 	}
 }
@@ -1830,7 +1831,8 @@ PHP_FUNCTION(imagecolorsforindex)
 	}
 #endif
 	else {
-		php_error(E_WARNING, "Color index out of range");
+		php_error(E_WARNING, "%s() color index %d out of range",
+				  get_active_function_name(TSRMLS_C), col);
 		RETURN_FALSE;
 	}
 }
