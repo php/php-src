@@ -339,36 +339,38 @@ static PHP_MSHUTDOWN_FUNCTION(mcrypt)
 	return SUCCESS;
 }
 
+#include "ext/standard/php_smart_str.h"
+
 PHP_MINFO_FUNCTION(mcrypt)
 {
 #if HAVE_LIBMCRYPT24
 	char **modules;
 	int i, count;
-	char *tmp, *tmp2;
+	smart_str tmp1 = {0};
+	smart_str tmp2 = {0};
 	MCLS_FETCH();
 
-	tmp = emalloc (2048);
-	memset (tmp, 0, sizeof(tmp));
 	modules = mcrypt_list_algorithms (MCG(algorithms_dir), &count);
+	printf ("boo\n");
 	if (count == 0) {
-		strcpy (tmp, "none");
+		smart_str_appends (&tmp1, "none");
 	}
 	for (i = 0; i < count; i++) {
-		strcat (tmp, modules[i]);
-		strcat (tmp, " ");
+		smart_str_appends (&tmp1, modules[i]);
+		smart_str_appendc (&tmp1, ' ');
 	}
+	smart_str_0 (&tmp1);
 	mcrypt_free_p (modules, count);
 
-	tmp2 = emalloc (2048);
-	memset (tmp2, 0, sizeof(tmp2));
 	modules = mcrypt_list_modes (MCG(modes_dir), &count);
 	if (count == 0) {
-		strcpy (tmp2, "none");
+		smart_str_appends (&tmp2, "none");
 	}
 	for (i = 0; i < count; i++) {
-		strcat (tmp2, modules[i]);
-		strcat (tmp2, " ");
+		smart_str_appends (&tmp2, modules[i]);
+		smart_str_appendc (&tmp2, ' ');
 	}
+	smart_str_0 (&tmp2);
 	mcrypt_free_p (modules, count);
 #endif
 
@@ -379,10 +381,10 @@ PHP_MINFO_FUNCTION(mcrypt)
 #endif
 #if HAVE_LIBMCRYPT24
 	php_info_print_table_row(2, "version", "2.4.x");
-	php_info_print_table_row(2, "Supported ciphers", tmp);
-	php_info_print_table_row(2, "Supported modes", tmp2);
-	efree (tmp2);
-	efree (tmp);
+	php_info_print_table_row(2, "Supported ciphers", tmp1.c);
+	php_info_print_table_row(2, "Supported modes", tmp2.c);
+	smart_str_free (&tmp1);
+	smart_str_free (&tmp2);
 #endif
 	php_info_print_table_end();
 	
@@ -436,9 +438,9 @@ PHP_FUNCTION(mcrypt_generic_init)
 {
 	zval **key, **iv;
 	zval **mcryptind;
-	char *key_s, *iv_s;
+	unsigned char *key_s, *iv_s;
 	char dummy[256];
-	int key_size, iv_size;
+	int max_key_size, iv_size;
 	MCRYPT td;
 	int argc;
     MCLS_FETCH();
@@ -451,20 +453,21 @@ PHP_FUNCTION(mcrypt_generic_init)
 	convert_to_string_ex (key);
 	convert_to_string_ex (iv);
 
-	key_size = mcrypt_enc_get_key_size (td);
-	key_s = emalloc (key_size + 1);
-	memset (key_s, 0, key_size + 1);
-
+	max_key_size = mcrypt_enc_get_key_size (td);
 	iv_size = mcrypt_enc_get_iv_size (td);
+
+	key_s = emalloc (Z_STRLEN_PP(key));
+	memset (key_s, 0, Z_STRLEN_PP(key));
+
 	iv_s = emalloc (iv_size + 1);
 	memset (iv_s, 0, iv_size + 1);
 
-	if (Z_STRLEN_PP(key) != key_size) {
-		sprintf (dummy, "key size incorrect; supplied length: %d, needed: %d", 
-			Z_STRLEN_PP(key), key_size);
+	if (Z_STRLEN_PP(key) > max_key_size) {
+		sprintf (dummy, "key size too large; supplied length: %d, max: %d", 
+			Z_STRLEN_PP(key), max_key_size);
 		php_error (E_NOTICE, dummy);
 	}
-	strncpy (key_s, Z_STRVAL_PP(key), key_size);
+	strncpy (key_s, Z_STRVAL_PP(key), Z_STRLEN_PP(key));
 
 	if (Z_STRLEN_PP(iv) != iv_size) {
 		sprintf (dummy, "iv size incorrect; supplied length: %d, needed: %d", 
@@ -473,7 +476,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 	}
 	strncpy (iv_s, Z_STRVAL_PP(iv), iv_size);
 
-	RETVAL_LONG (mcrypt_generic_init (td, key_s, key_size, iv_s));
+	RETVAL_LONG (mcrypt_generic_init (td, key_s, Z_STRLEN_PP(key), iv_s));
 	efree (iv_s);
 	efree (key_s);
 }
@@ -487,7 +490,7 @@ PHP_FUNCTION(mcrypt_generic)
 	zval **data, **mcryptind;
 	MCRYPT td;
 	int argc;
-	char* data_s;
+	unsigned char* data_s;
 	int block_size, data_size;
     MCLS_FETCH();
 	
@@ -1294,7 +1297,7 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 		memset (data_s, 0, data_size);
 		memcpy (data_s, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
 	}
-	
+
 	if (mcrypt_generic_init (td, key_s, use_key_length, iv_s) < 0) {
 		php_error (E_ERROR, "generic_init failed");
 	}
