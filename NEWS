@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Renamed getallheaders() to apache_request_headers() and kept
+  getallheaders() as an alias to it.  Also added apache_response_headers()
+  which returns the current response headers from Apache.
 - Added missing AddRef() calls in the COM extension. This should
   fix weird behaviour (in particular with ADODB). (Harald)
 - Fixed some dummy errors. (dets)
