@@ -1,3 +1,34 @@
+2004-09-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/var_unserializer.c:
+      - Moe changed from .re to .c
+
+    * ext/standard/var_unserializer.re:
+      - Readd check for nested data (but correct this time)
+
+    * ext/standard/var_unserializer.re:
+      - Check for legal key types
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      - Remove wrong test
+
+2004-09-12  Stefan Esser  <sesser@suspekt.org>
+
+    * main/rfc1867.c:
+      New Rule: Never try to repair potential malicious user input
+
+2004-09-12  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/config.m4:
+      64-bit related changes
+      ./configure will now behave differently if $ORACLE_HOME/lib32 exists
+      (this mostly happens at Solaris AFAIK)
+
+    * acinclude.m4:
+      add PHP_CHECK_64BIT macro to be able to detect 64-bit platform in
+      ./configure
+
 2004-09-11  Derick Rethans  <php@derickrethans.nl>
 
     * ZendEngine2/zend_operators.c
