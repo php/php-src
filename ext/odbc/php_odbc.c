@@ -73,23 +73,23 @@ static unsigned char a3_arg3_and_3_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, B
 /* {{{ odbc_functions[]
  */
 function_entry odbc_functions[] = {
-	PHP_FE(odbc_error, NULL)
-	PHP_FE(odbc_errormsg, NULL)
-	PHP_FE(odbc_setoption, NULL)
 	PHP_FE(odbc_autocommit, NULL)
+	PHP_FE(odbc_binmode, NULL)
 	PHP_FE(odbc_close, NULL)
 	PHP_FE(odbc_close_all, NULL)
+	PHP_FE(odbc_columns, NULL)
 	PHP_FE(odbc_commit, NULL)
 	PHP_FE(odbc_connect, NULL)
-	PHP_FE(odbc_pconnect, NULL)
 	PHP_FE(odbc_cursor, NULL)
+	PHP_FE(odbc_data_source, NULL)
+	PHP_FE(odbc_execute, NULL)
+	PHP_FE(odbc_error, NULL)
+	PHP_FE(odbc_errormsg, NULL)
+	PHP_FE(odbc_exec, NULL)
 #ifdef HAVE_DBMAKER
 	PHP_FE(odbc_fetch_array, NULL)
 	PHP_FE(odbc_fetch_object, NULL)
 #endif
-	PHP_FE(odbc_exec, NULL)
-	PHP_FE(odbc_prepare, NULL)
-	PHP_FE(odbc_execute, NULL)
 	PHP_FE(odbc_fetch_row, NULL)
 	PHP_FE(odbc_fetch_into, a3_arg3_and_3_force_ref)
 	PHP_FE(odbc_field_len, NULL)
@@ -98,19 +98,22 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_field_type, NULL)
 	PHP_FE(odbc_field_num, NULL)
 	PHP_FE(odbc_free_result, NULL)
+	PHP_FE(odbc_gettypeinfo, NULL)
+	PHP_FE(odbc_longreadlen, NULL)
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
 	PHP_FE(odbc_next_result, NULL)
 #endif
 	PHP_FE(odbc_num_fields, NULL)
 	PHP_FE(odbc_num_rows, NULL)
+	PHP_FE(odbc_pconnect, NULL)
+	PHP_FE(odbc_prepare, NULL)
 	PHP_FE(odbc_result, NULL)
 	PHP_FE(odbc_result_all, NULL)
 	PHP_FE(odbc_rollback, NULL)
-	PHP_FE(odbc_binmode, NULL)
-	PHP_FE(odbc_longreadlen, NULL)
+	PHP_FE(odbc_setoption, NULL)
+	PHP_FE(odbc_specialcolumns, NULL)
+	PHP_FE(odbc_statistics, NULL)
 	PHP_FE(odbc_tables, NULL)
-	PHP_FE(odbc_columns, NULL)
-	PHP_FE(odbc_gettypeinfo, NULL)
 	PHP_FE(odbc_primarykeys, NULL)
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35) && !defined(HAVE_BIRDSTEP)    /* not supported now */
 	PHP_FE(odbc_columnprivileges, NULL)
@@ -123,8 +126,6 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_procedurecolumns, NULL)
 #endif
 #endif
-	PHP_FE(odbc_specialcolumns, NULL)
-	PHP_FE(odbc_statistics, NULL)
 	PHP_FALIAS(odbc_do, odbc_exec, NULL)
 	PHP_FALIAS(odbc_field_precision, odbc_field_len, NULL)
 	{ NULL, NULL, NULL }
@@ -163,6 +164,7 @@ static void _free_odbc_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	odbc_result *res = (odbc_result *)rsrc->ptr;
 	int i;
+	RETCODE rc;
 	
 	if (res) {
 		if (res->values) {
@@ -178,7 +180,7 @@ static void _free_odbc_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 			SQLTransact(res->conn_ptr->henv, res->conn_ptr->hdbc,
 						(UWORD)SQL_COMMIT);
 #endif
-			SQLFreeStmt(res->stmt,SQL_DROP);
+			rc = SQLFreeStmt(res->stmt,SQL_DROP);
 			/* We don't want the connection to be closed after the last statment has been closed
 			 * Connections will be closed on shutdown
 			 * zend_list_delete(res->conn_ptr->id);
@@ -401,6 +403,14 @@ PHP_MINIT_FUNCTION(odbc)
 	REGISTER_LONG_CONSTANT("SQL_CURSOR_STATIC", SQL_CURSOR_STATIC, CONST_PERSISTENT | CONST_CS);
 	
 	REGISTER_LONG_CONSTANT("SQL_KEYSET_SIZE", SQL_KEYSET_SIZE, CONST_PERSISTENT | CONST_CS);
+
+	/* these are for the Data Source type */
+	REGISTER_LONG_CONSTANT("SQL_FETCH_FIRST", SQL_FETCH_FIRST, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_FETCH_NEXT", SQL_FETCH_NEXT, CONST_PERSISTENT | CONST_CS);
+/* These are valid, why aren't they supported by Windows?
+	REGISTER_LONG_CONSTANT("SQL_FETCH_FIRST_USER", SQL_FETCH_FIRST_USER, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_FETCH_FIRST_SYSTEM", SQL_FETCH_FIRST_SYSTEM, CONST_PERSISTENT | CONST_CS);
+*/
 
 	/*
 	 * register the standard data types
@@ -1109,6 +1119,58 @@ PHP_FUNCTION(odbc_cursor)
 	} else {
 		RETVAL_FALSE;
 	}
+}
+/* }}} */
+
+/* {{{ proto array odbc_data_source(int connection_id, int fetch_type)
+   Return information about the currently connected data source */
+PHP_FUNCTION(odbc_data_source)
+{
+	zval **zv_conn, *zv_fetch_type;
+	RETCODE rc;
+	odbc_connection *conn;
+	int num_args = ZEND_NUM_ARGS();
+	UCHAR server_name[100],
+		  desc[200];
+	/* these don't seem to have any actual use,
+	 * but they are needed to complete the call, go figure
+	 */
+	SQLSMALLINT len1, len2;
+
+	if (num_args != 2) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (zend_get_parameters_ex(2, &zv_conn, &zv_fetch_type) == FAILURE) {
+		php_error(E_WARNING, "Unable to get parameters");
+	}
+
+	convert_to_long(zv_fetch_type);
+
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, zv_conn, -1, "ODBC-Link", le_conn, le_pconn);
+
+	/* now we have the connection lets call the DataSource object */
+	rc = SQLDataSources(&conn->henv, 
+			(SQLUSMALLINT)Z_LVAL_P(zv_fetch_type),
+			server_name,
+			(SQLSMALLINT)sizeof(server_name),
+			&len1,
+			desc, 
+			(SQLSMALLINT)sizeof(desc),
+			&len2);
+
+	if (rc != SQL_SUCCESS) {
+		/* ummm.... he did it */
+		odbc_sql_error(conn, NULL, "SQLDataSources");
+		RETURN_FALSE;
+	}
+
+/*	MAKE_STD_ZVAL(return_value); */
+	array_init(return_value);
+
+	add_assoc_string(return_value, "server", server_name, 1);
+	add_assoc_string(return_value, "description", desc, 1);
+
 }
 /* }}} */
 
