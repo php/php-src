@@ -136,8 +136,8 @@ fi
 
 autoheader
 
-find . -name Makefile.am -print|sed -e 's/\.am//' | \
-    xargs automake --add-missing --include-deps $automake_flags
+# suppress stupid automake warning
+automake --add-missing --include-deps $automake_flags 2>&1 | grep -v \$PHP_OUTPUT_FILES >&2
 
 
 mv configure configure.old 2>/dev/null
