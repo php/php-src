@@ -54,13 +54,15 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 	zval **obj, *retval;
 	spl_foreach_proxy proxy;
 	zend_class_entry *instance_ce;
-	spl_is_a is_a = 0;
+	spl_is_a is_a;
 
 	obj = spl_get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
 
-	if (obj && (instance_ce = spl_get_class_entry(*obj TSRMLS_CC)) != NULL) {
-		is_a = spl_implements(instance_ce);
+	if (!obj || (instance_ce = spl_get_class_entry(*obj TSRMLS_CC)) == NULL) {
+		ZEND_EXECUTE_HOOK_ORIGINAL(ZEND_FE_RESET);
 	}
+
+	is_a = spl_implements(instance_ce);
 
 	if (is_a & SPL_IS_A_ITERATOR) {
 		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
