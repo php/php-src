@@ -609,7 +609,6 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 	lcname = zend_str_tolower_dup(Z_STRVAL_PP(class_name), Z_STRLEN_PP(class_name));
 
 	if (zend_lookup_class(lcname, Z_STRLEN_PP(class_name), &ce TSRMLS_CC) == FAILURE) {
-		efree(lcname);
 		retval = 0;
 	} else {
 		if (only_subclass) {
