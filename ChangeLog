@@ -1,3 +1,62 @@
+2004-06-23  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN and order fix
+
+    * ZendEngine2/zend_execute.c:
+      BugFix #28879  Inconsistent behavior between explicit and implicit array
+      creation.
+      
+      Changes:
+      
+      Throw E_WARNING "Illegal offset type" when explicitly creating
+      array elements with objects, arrays, or resorces as indexes.
+      This matches implicit creation w/ obj/arr indices.
+      
+      Throw E_WARNING "Resource ID#%ld used as offset, casting to integer (%ld)"
+      when implicitly creating array with resource as index. (BC)
+
+2004-06-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/tests/bug26639.phpt:
+      - Modify test case for wider coverage.
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c:
+      - Fix buf #28466 (mbstring_convert_variables() problem).
+
+2004-06-23  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_fe.c:
+      added php_mysqli_construct_get to support __construct in extended classes
+
+2004-06-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/session/session.c:
+      - fix logic. if the client already sent us the cookie, we don't
+        need to send it again.  if the id has been changed, we need to
+        update the client side.
+
+2004-06-23  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_4_3)
+      NEWS
+      sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      Addendum to bug #28878: change ini keys as PHP_INI_SYSTEM
+      Also: Adding "bucket" parameter to non-ini-keys, Elemination of double
+      CONTENT_TYPE/_LENGTH environment variables
+
+2004-06-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * php.ini-dist
+      php.ini-recommended:
+      Added SOAP configuration directives
+
 2004-06-22  Andrei Zmievski  <andreiz@gmail.com>
 
     * NEWS

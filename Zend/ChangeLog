@@ -1,3 +1,18 @@
+2004-06-23  Sara Golemon  <php@alphaweb.net>
+
+    * zend_execute.c:
+      BugFix #28879  Inconsistent behavior between explicit and implicit array
+      creation.
+      
+      Changes:
+      
+      Throw E_WARNING "Illegal offset type" when explicitly creating
+      array elements with objects, arrays, or resorces as indexes.
+      This matches implicit creation w/ obj/arr indices.
+      
+      Throw E_WARNING "Resource ID#%ld used as offset, casting to integer (%ld)"
+      when implicitly creating array with resource as index. (BC)
+
 2004-06-19  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * zend_reflection_api.c:
