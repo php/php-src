@@ -386,6 +386,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	chdir(cwd);
 #endif
 	file_handle.filename = SG(request_info).path_translated;
+	file_handle.opened_path = NULL;
 	file_handle.free_filename = 0;
 	file_handle.type = ZEND_HANDLE_FP;
 
