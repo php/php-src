@@ -1,3 +1,53 @@
+2002-06-19  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Frontend/CLI.php
+      pear/PEAR/Command/Remote.php
+      pear/PEAR/Command/Registry.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Registry.php
+      pear/PEAR/Config.php
+      pear/PEAR/Dependency.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Common.php:
+    - Force params to version_compare() to be strings, otherwise some
+      comparations will fail (ex. 0.9 will be equal to 0.90)
+    - Other minor cleanup's
+
+    * pear/PEAR/Installer.php:
+    Do NOT allow install packages with errors in its description file
+
+2002-06-19  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/mbstring/mbstring.c:
+    correct handling/generating of php_mbstr_default_identify_list
+
+2002-06-19  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c: - Make domxml_xslt_process() working again.
+
+2002-06-19  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/standard/info.c: Made the API versions appear better on phpinfo();
+
+2002-06-19  Alan Knowles  <alan@akbkhome.com>
+
+    * pear/Date/Calc.php:
+    Fixed Undefined index: 06 in ..... - commit to correct branch
+
+    * pear/Date/Calc.php: Fixed Undefined index: 06 in .....
+
+2002-06-19  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4: Fix bug: #17130
+
+2002-06-19  Edin Kadribasic  <edink@proventum.net>
+
+    * main/streams.c: No need to check for allow_url_fopen here.
+
+2002-06-19  Jani Taskinen  <sniper@iki.fi>
+
+    * main/main.c: Use correct macro for boolean ini values.
+
 2002-06-18  Stig Venaas  <venaas@uninett.no>
 
     * ext/standard/array.c:
