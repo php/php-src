@@ -191,7 +191,7 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 									var->value.str.val = (str);												\
 									var->value.str.len = strlen((str));										\
 									var->type = IS_STRING;													\
-									ZEND_SET_GLOBAL_VAR(name, var);											\
+									ZEND_SET_GLOBAL_VAR(n, var);											\
 								}																			\
 							}
 
