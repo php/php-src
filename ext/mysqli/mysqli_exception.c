@@ -42,7 +42,7 @@ void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char 
 	char 	*message;
 
 	va_start(arg, format); 
-	zend_vspprintf(&message, 0, format, arg);
+	vspprintf(&message, 0, format, arg);
 	va_end(arg);;
 
 	if (!(MyG(report_mode) & MYSQLI_REPORT_STRICT)) {
