@@ -26,8 +26,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #ifndef RTLD_LAZY
-# define RTLD_LAZY 1    /* Solaris 1, FreeBSD's (2.1.7.1 and older) */
+#define RTLD_LAZY 1    /* Solaris 1, FreeBSD's (2.1.7.1 and older) */
 #endif
+
+#ifndef RTLD_NOW /* Fixes compile problem on FreeBSD */
+#define RTLD_NOW RTLD_LAZY
+#endif
+
+
 #if HAVE_STRING_H
 #include <string.h>
 #else
