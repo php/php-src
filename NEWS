@@ -2,12 +2,13 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- Fixed two 64-bit issues (startup crash, gethostbyaddr). (Sascha)
 - NULL values are now preserved in the return value of mysql_fetch_array()
-- and mysql_fetch_object(). (Andrei)
-- InterBase module finally ported from PHP3 to PHP4. Full support for
+  and mysql_fetch_object(). (Andrei)
+- Ported InterBase module finally from PHP 3 to PHP 4. Full support for
   InterBase 6. (Jouni)
-- Add swf_definepoly for drawing polygons to the SWF functions. (Sterling)
-- Port imagegammacorrect from PHP3 to PHP4. (Sterling)
+- Added swf_definepoly for drawing polygons to the SWF functions. (Sterling)
+- Ported imagegammacorrect from PHP3 to PHP4. (Sterling)
 - Added array_rand() function. (Andrei)
 
 8 May 2000, Version 4.0 Release Candidate 2
