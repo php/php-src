@@ -110,6 +110,11 @@ AC_CHECK_LIB(pam, pam_start, [
   EXTRA_LIBS="$EXTRA_LIBS -lpam"
   AC_DEFINE(HAVE_LIBPAM) ], []) 
 
+AC_CHECK_LIB(bind, inet_aton, [
+  EXTRA_LIBS="$LIBS -lbind"
+  AC_DEFINE(HAVE_LIBBIND) ], []) 
+
+
 AC_CRYPT_CAP
 
 divert(3)
