@@ -156,7 +156,7 @@ class PEAR_Command
             $obj = &new $uiclass;
             // quick test to see if this class implements a few of the most
             // important frontend methods
-            if (method_exists($obj, 'displayLine') && method_exists($obj, 'userConfirm')) {
+            if (method_exists($obj, 'userConfirm')) {
                 $GLOBALS['_PEAR_Command_uiobject'] = &$obj;
                 $GLOBALS['_PEAR_Command_uiclass'] = $uiclass;
                 return $obj;
