@@ -1,7 +1,16 @@
 <?php
 
-/** \ingroup SPL
- * \brief Basic Iterator wrapper
+/** @file iteratoriterator.inc
+ * @ingroup SPL
+ * @brief class IteratorIterator
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
+ *
+ * SPL - Standard PHP Library
+ */
+
+/** @ingroup SPL
+ * @brief Basic Iterator wrapper
  */
 class IteratorIterator implements OuterIterator
 {

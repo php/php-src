@@ -33,6 +33,8 @@ extern zend_class_entry *spl_ce_LimitIterator;
 extern zend_class_entry *spl_ce_CachingIterator;
 extern zend_class_entry *spl_ce_CachingRecursiveIterator;
 extern zend_class_entry *spl_ce_OuterIterator;
+extern zend_class_entry *spl_ce_IteratorIterator;
+extern zend_class_entry *spl_ce_NoRewindIterator;
 
 PHP_MINIT_FUNCTION(spl_iterators);
 
@@ -43,7 +45,9 @@ typedef enum {
 	DIT_Default = 0,
 	DIT_LimitIterator,
 	DIT_CachingIterator,
-	DIT_CachingRecursiveIterator
+	DIT_CachingRecursiveIterator,
+	DIT_IteratorIterator,
+	DIT_NoRewindIterator,
 } dual_it_type;
 
 enum {
