@@ -35,36 +35,47 @@
 
 #include "php_apache.h"
 
-static request_rec *php_apache_lookup_uri(INTERNAL_FUNCTION_PARAMETERS)
+static request_rec *php_apache_lookup_uri(char *filename)
 {
-	zval **p1;
 	php_struct *ctx;
 	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &p1) == FAILURE)
+	if (!filename) {
 		return NULL;
-
-	convert_to_string_ex(p1);
-
+	}
+	
 	ctx = SG(server_context);
-	return ap_sub_req_lookup_uri(Z_STRVAL_PP(p1), ctx->f->r, ctx->f->next);
+	return ap_sub_req_lookup_uri(filename, ctx->f->r, ctx->f->next);
 }
 
 /* {{{ proto bool virtual(string uri)
  Perform an apache sub-request */
 PHP_FUNCTION(virtual)
 {
+	zval **filename;
 	request_rec *rr;
 
-	rr = php_apache_lookup_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-
-	if (!rr)
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(filename);
+	
+	if (!(rr = php_apache_lookup_uri(Z_STRVAL_PP(filename)))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - URI lookup failed", Z_STRVAL_PP(filename));
+		RETURN_FALSE;
+	}
 	
 	if (rr->status == HTTP_OK) {
-		ap_run_sub_req(rr);
+		if (ap_run_sub_req(rr)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - request execution failed", Z_STRVAL_PP(filename));
+			ap_destroy_sub_req(rr);
+			RETURN_FALSE;
+		}
 		ap_destroy_sub_req(rr);
 		RETURN_TRUE;
 	}
+	
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - error finding URI", Z_STRVAL_PP(filename));
 	ap_destroy_sub_req(rr);
 	RETURN_FALSE;
 }
@@ -79,10 +90,18 @@ PHP_FUNCTION(virtual)
 PHP_FUNCTION(apache_lookup_uri)
 {
 	request_rec *rr;
+	zval **filename;
 
-	rr = php_apache_lookup_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	if (!rr)
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(filename);
+	
+	if (!(rr = php_apache_lookup_uri(Z_STRVAL_PP(filename)))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - URI lookup failed", Z_STRVAL_PP(filename));
+		RETURN_FALSE;
+	}
 	
 	if (rr->status == HTTP_OK) {
 		object_init(return_value);
@@ -117,13 +136,15 @@ PHP_FUNCTION(apache_lookup_uri)
 		ap_destroy_sub_req(rr);
 		return;
 	}
+	
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - error finding URI", Z_STRVAL_PP(filename));
 	ap_destroy_sub_req(rr);
 	RETURN_FALSE;
 }
 
 /* {{{ proto array getallheaders(void)
    Fetch all HTTP request headers */
-PHP_FUNCTION(getallheaders)
+PHP_FUNCTION(apache_request_headers)
 {
 	php_struct *ctx;
 	const apr_array_header_t *arr;
@@ -143,6 +164,125 @@ PHP_FUNCTION(getallheaders)
 }
 /* }}} */
 
+/* {{{ proto array apache_response_headers(void)
+   Fetch all HTTP response headers */
+PHP_FUNCTION(apache_response_headers)
+{
+	php_struct *ctx;
+	const apr_array_header_t *arr;
+	char *key, *val;
+
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	ctx = SG(server_context);
+	arr = apr_table_elts(ctx->f->r->headers_out);
+
+	APR_ARRAY_FOREACH_OPEN(arr, key, val)
+		if (!val) val = empty_string;
+		add_assoc_string(return_value, key, val, 1);
+	APR_ARRAY_FOREACH_CLOSE()
+}
+/* }}} */
+
+/* {{{ proto string apache_note(string note_name [, string note_value])
+   Get and set Apache request notes */
+PHP_FUNCTION(apache_note)
+{
+	php_struct *ctx;
+	zval **note_name, **note_val;
+	char *old_note_val=NULL;
+	int arg_count = ZEND_NUM_ARGS();
+
+	if (arg_count<1 || arg_count>2 ||
+		zend_get_parameters_ex(arg_count, &note_name, &note_val) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	ctx = SG(server_context);
+	
+	convert_to_string_ex(note_name);
+
+	old_note_val = (char *) apr_table_get(ctx->r->notes, Z_STRVAL_PP(note_name));
+	
+	if (arg_count == 2) {
+		convert_to_string_ex(note_val);
+		apr_table_set(ctx->r->notes, Z_STRVAL_PP(note_name), Z_STRVAL_PP(note_val));
+	}
+
+	if (old_note_val) {
+		RETURN_STRING(old_note_val, 1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
+/* {{{ proto bool apache_setenv(string variable, string value [, bool walk_to_top])
+   Set an Apache subprocess_env variable */
+PHP_FUNCTION(apache_setenv)
+{
+	php_struct *ctx;
+	zval **variable=NULL, **string_val=NULL, **walk_to_top=NULL;
+	int arg_count = ZEND_NUM_ARGS();
+
+	if (arg_count<1 || arg_count>3 ||
+		zend_get_parameters_ex(arg_count, &variable, &string_val, &walk_to_top) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ctx = SG(server_context);
+
+	if (arg_count == 3 && Z_STRVAL_PP(walk_to_top)) {
+		while(ctx->f->r->prev) {
+			ctx->f->r = ctx->f->r->prev;
+		}	
+	}
+
+	convert_to_string_ex(variable);
+	convert_to_string_ex(string_val);
+	
+	apr_table_set(ctx->r->subprocess_env, Z_STRVAL_PP(variable), Z_STRVAL_PP(string_val));
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool apache_getenv(string variable [, bool walk_to_top])
+   Get an Apache subprocess_env variable */
+PHP_FUNCTION(apache_getenv)
+{
+	php_struct *ctx;
+	zval **variable=NULL, **walk_to_top=NULL;
+	int arg_count = ZEND_NUM_ARGS();
+	char *env_val=NULL;
+
+	if (arg_count<1 || arg_count>2 ||
+		zend_get_parameters_ex(arg_count, &variable, &walk_to_top) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ctx = SG(server_context);
+
+	if (arg_count == 2 && Z_STRVAL_PP(walk_to_top)) {
+		while(ctx->f->r->prev) {
+			ctx->f->r = ctx->f->r->prev;
+		}	
+	}
+
+	convert_to_string_ex(variable);
+	
+	env_val = (char*) apr_table_get(ctx->r->subprocess_env, Z_STRVAL_PP(variable));
+	if (env_val != NULL) {
+		RETURN_STRING(env_val, 1);
+	} else { 
+		RETURN_FALSE;
+	}	
+}
+/* }}} */
+
 PHP_MINFO_FUNCTION(apache)
 {
 }
@@ -150,7 +290,12 @@ PHP_MINFO_FUNCTION(apache)
 static function_entry apache_functions[] = {
 	PHP_FE(apache_lookup_uri, NULL)
 	PHP_FE(virtual, NULL)
-	PHP_FE(getallheaders, NULL)
+	PHP_FE(apache_request_headers, NULL)
+	PHP_FE(apache_response_headers, NULL)
+	PHP_FE(apache_setenv, NULL)
+	PHP_FE(apache_getenv, NULL)
+	PHP_FE(apache_note, NULL)
+	PHP_FALIAS(getallheaders, apache_request_headers, NULL)
 	{NULL, NULL, NULL}
 };
 
