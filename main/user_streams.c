@@ -347,14 +347,13 @@ static int php_userstreamop_close(php_stream *stream, int close_handle TSRMLS_DC
 {
 	zval func_name;
 	zval *retval = NULL;
-	int call_result;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 
 	assert(us != NULL);
 	
 	ZVAL_STRINGL(&func_name, USERSTREAM_CLOSE, sizeof(USERSTREAM_CLOSE)-1, 0);
 	
-	call_result = call_user_function_ex(NULL,
+	call_user_function_ex(NULL,
 			&us->object,
 			&func_name,
 			&retval,
@@ -460,7 +459,6 @@ static char *php_userstreamop_gets(php_stream *stream, char *buf, size_t size TS
 	zval *retval = NULL;
 	zval *zcount;
 	zval **args[2];
-	int call_result;
 	size_t didread = 0;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 
@@ -474,7 +472,7 @@ static char *php_userstreamop_gets(php_stream *stream, char *buf, size_t size TS
 	ZVAL_LONG(zcount, size);
 	args[0] = &zcount;
 
-	call_result = call_user_function_ex(NULL,
+	call_user_function_ex(NULL,
 			&us->object,
 			&func_name,
 			&retval,
