@@ -145,9 +145,9 @@ exit(1);
 ],[
   ac_cv_time_r_type=hpux
 ],[
-  ac_cv_time_r_type=normal
+  ac_cv_time_r_type=SUSV2
 ],[
-  ac_cv_time_r_type=normal
+  ac_cv_time_r_type=SUSV2
 ])
 ])
 if test "$ac_cv_time_r_type" = "hpux"; then
