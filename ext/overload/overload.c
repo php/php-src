@@ -110,7 +110,7 @@ PHP_MINIT_FUNCTION(overload)
 PHP_MINFO_FUNCTION(overload)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "overload support", "enabled");
+	php_info_print_table_header(2, "User-space object overloading support", "enabled");
 	php_info_print_table_end();
 
 	/* Remove comments if you have entries in php.ini
@@ -130,6 +130,7 @@ typedef struct _oo_class_data {
 	(ce).handle_property_set  = NULL; \
 	(ce).handle_function_call = NULL;
 
+/* {{{ int call_get_handler() */
 static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSRMLS_DC)
 {
 	int call_result;
@@ -196,7 +197,9 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 
 	return 0;
 }
+/* }}} */
 
+/* {{{ int call_set_handler() */
 int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 {
 	int call_result;
@@ -264,6 +267,7 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 	return 0;
 
 }
+/* }}} */
 
 #define CLEANUP_OO_CHAIN() { \
 	for (; element; element=element->next) { \
@@ -271,7 +275,7 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 	} \
 } \
 
-
+/* {{{ zval overload_get_property() */
 static zval overload_get_property(zend_property_reference *property_reference)
 {
 	zval result;
@@ -354,7 +358,9 @@ static zval overload_get_property(zend_property_reference *property_reference)
 
 	return result;
 }
+/* }}} */
 
+/* {{{ int overload_set_property() */
 static int overload_set_property(zend_property_reference *property_reference, zval *value)
 {
 	zval result;
@@ -412,7 +418,9 @@ static int overload_set_property(zend_property_reference *property_reference, zv
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ void overload_call_method() */
 static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
 	zval ***args;
@@ -480,6 +488,7 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 	efree(args);
 	zval_dtor(&method->element);
 }
+/* }}} */
 
 /* {{{ proto void overload(string class_entry)
     Enables property and method call overloading for a class. */
@@ -536,4 +545,6 @@ PHP_FUNCTION(overload)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
  */
