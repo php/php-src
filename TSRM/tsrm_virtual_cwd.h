@@ -22,15 +22,7 @@
 #ifndef VIRTUAL_CWD_H
 #define VIRTUAL_CWD_H
 
-#ifdef WIN32
-# define TSRM_WIN32
-#endif
-
-#ifndef TSRM_WIN32
-# include "tsrm_config.h"
-#else
-# include "tsrm_config.w32.h"
-#endif
+#include "tsrm_config_common.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
