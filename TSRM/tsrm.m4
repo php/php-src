@@ -68,7 +68,7 @@ AC_MSG_RESULT(yes)
 ])
 
 
-AC_DEFUN(TSRM_OTHER_CHECKS,[
+AC_DEFUN(TSRM_THREADS_CHECKS,[
 
 dnl For the thread implementations, we always use --with-*
 dnl to maintain consistency
