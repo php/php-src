@@ -101,7 +101,6 @@ typedef struct _zend_user_iterator {
 	zend_object_iterator     it;
 	zend_class_entry         *ce;
 	zval                     *value;
-	ulong                    index;
 } zend_user_iterator;
 
 /* {{{ zend_user_new_iterator */
@@ -166,10 +165,7 @@ static void zend_user_get_current_data(zend_object_iterator *_iter, zval ***data
 #if 0
 static int zend_user_get_current_key_default(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
-	zend_user_iterator *iter = (zend_user_iterator*)_iter;
-	*str_key = NULL;
-	*str_key_len = 0;
-	*int_key = iter->index;
+	*int_key = _iter->index;
 	return HASH_KEY_IS_LONG;
 }
 #endif
@@ -223,7 +219,6 @@ static void zend_user_move_forward(zend_object_iterator *_iter TSRMLS_DC)
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
 
-	++iter->index;
 	if (iter->value) {
 		zval_ptr_dtor(&iter->value);
 		iter->value = NULL;
@@ -261,7 +256,6 @@ static zend_object_iterator *zend_user_get_iterator(zend_class_entry *ce, zval *
 	iterator->it.funcs = ce->iterator_funcs.funcs;
 	iterator->ce = Z_OBJCE_P(object);
 	iterator->value = NULL;
-	iterator->index = 0;
 	return (zend_object_iterator*)iterator;
 }
 /* }}} */
@@ -358,7 +352,7 @@ zend_function_entry zend_funcs_iterator[] = {
 	ZEND_ABSTRACT_ME(iterator, next,     NULL)
 	ZEND_ABSTRACT_ME(iterator, key,      NULL)
 	ZEND_ABSTRACT_ME(iterator, hasMore,  NULL)
-	ZEND_ABSTRACT_ME(iterator, rewind, NULL)
+	ZEND_ABSTRACT_ME(iterator, rewind,   NULL)
 	{NULL, NULL, NULL}
 };
 
