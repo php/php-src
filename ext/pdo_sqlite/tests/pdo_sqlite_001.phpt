@@ -2,20 +2,15 @@
 PDO-SQLite: PDO_FETCH_ASSOC
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded("pdo_sqlite")) print "skip"; ?>
+require_once('skipif.inc'); ?>
 --FILE--
 <?php
 
-$db =new pdo('sqlite::memory:');
+require_once('connection.inc');
+require_once('prepare.inc');
 
-$db->exec('CREATE TABLE test(id int PRIMARY KEY, val VARCHAR(10))');
-$db->exec('INSERT INTO test VALUES(1, "A")'); 
-$db->exec('INSERT INTO test VALUES(2, "B")'); 
-$db->exec('INSERT INTO test VALUES(3, "C")'); 
+require_once($PDO_TESTS . 'pdo_001.inc');
 
-$stmt = $db->query('SELECT * FROM test');
-
-var_dump($stmt->fetchAll(PDO_FETCH_ASSOC));
 ?>
 ===DONE===
 <?php exit(0); ?>

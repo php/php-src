@@ -2,19 +2,14 @@
 PDO-SQLite: PDO_FETCH_UNIQUE conflict
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded("pdo_sqlite")) print "skip"; ?>
+require_once('skipif.inc'); ?>
 --FILE--
 <?php
 
-$db =new pdo('sqlite::memory:');
+require_once('connection.inc');
+require_once('prepare.inc');
 
-$db->exec('CREATE TABLE test(id CHAR(1) PRIMARY KEY, val VARCHAR(10))');
-$db->exec('INSERT INTO test VALUES("A", "A")'); 
-$db->exec('INSERT INTO test VALUES("B", "A")'); 
-$db->exec('INSERT INTO test VALUES("C", "C")'); 
-
-var_dump($db->query('SELECT val, id FROM test')->fetchAll(PDO_FETCH_NUM|PDO_FETCH_UNIQUE));
-// check that repeated first columns overwrite existing array elements
+require_once($PDO_TESTS . 'pdo_008.inc');
 
 ?>
 ===DONE===

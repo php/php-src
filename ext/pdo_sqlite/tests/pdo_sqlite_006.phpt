@@ -2,19 +2,14 @@
 PDO-SQLite: PDO_FETCH_GROUP
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded("pdo_sqlite")) print "skip"; ?>
+require_once('skipif.inc'); ?>
 --FILE--
 <?php
 
-$db =new pdo('sqlite::memory:');
+require_once('connection.inc');
+require_once('prepare.inc');
 
-$db->exec('CREATE TABLE test(id int PRIMARY KEY, val VARCHAR(10))');
-$db->exec('INSERT INTO test VALUES(1, "A")'); 
-$db->exec('INSERT INTO test VALUES(2, "A")'); 
-$db->exec('INSERT INTO test VALUES(3, "C")'); 
-
-var_dump($db->query('SELECT val, id FROM test')->fetchAll(PDO_FETCH_NUM|PDO_FETCH_GROUP));
-var_dump($db->query('SELECT val, id FROM test')->fetchAll(PDO_FETCH_ASSOC|PDO_FETCH_GROUP));
+require_once($PDO_TESTS . 'pdo_006.inc');
 
 ?>
 ===DONE===
