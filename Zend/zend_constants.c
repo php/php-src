@@ -40,6 +40,9 @@ void copy_zend_constant(zend_constant *c)
 	c->name = zend_strndup(c->name, c->name_len);
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_copy_ctor(&c->value);
+		if (c->flags & CONST_EFREE_PERSISTENT) { /* persist_alloc()'d data */
+			persist_alloc(&c->value);
+		}
 	}
 }
 
