@@ -464,6 +464,7 @@ function_entry php3_filestat_functions[] = {
 	PHP_FE(filetype,								NULL)
 	PHP_FE(file_exists,								NULL)
 	PHP_FE(is_writable,								NULL)
+	PHP_FALIAS(is_writeable,	is_writable,		NULL)
 	PHP_FE(is_readable,								NULL)
 	PHP_FE(is_executable,							NULL)
 	PHP_FE(is_file,									NULL)
