@@ -69,26 +69,27 @@ char *get_header(char *h, char *headers);
 /* Error messages */
 static char *ErrorMessages[] =
 {
-	{"Success"},
-	{"Bad arguments from form"},
+	{"Success"}, /* 0 */
+	{"Bad arguments from form"}, /* 1 */
 	{"Unable to open temporary mailfile for read"},
 	{"Failed to Start Sockets"},
 	{"Failed to Resolve Host"},
-	{"Failed to obtain socket handle"},
-	{"Failed to Connect"},
+	{"Failed to obtain socket handle"}, /* 5 */
+	{"Failed to connect to mailserver, verify your \"SMTP\" setting in php.ini"},
 	{"Failed to Send"},
 	{"Failed to Receive"},
 	{"Server Error"},
-	{"Failed to resolve the host IP name"},
+	{"Failed to resolve the host IP name"}, /* 10 */
 	{"Out of memory"},
 	{"Unknown error"},
 	{"Bad Message Contents"},
 	{"Bad Message Subject"},
-	{"Bad Message destination"},
+	{"Bad Message destination"}, /* 15 */
 	{"Bad Message Return Path"},
 	{"Bad Mail Host"},
 	{"Bad Message File"},
-	{"PHP Internal error: php.ini sendmail from variable not set!"}
+	{"\"sendmail_from\" NOT set in php.ini"},
+	{"Mailserver rejected our \"sendmail_from\" setting"} /* 20 */
 };
 
 
@@ -127,7 +128,8 @@ int TSendMail(char *host, int *error,
 	if (INI_STR("sendmail_from")){
 		RPath = estrdup(INI_STR("sendmail_from"));
 		} else {
-			return 19;
+			*error = W32_SM_SENDMAIL_FROM_NOT_SET;
+			return FAILURE;
 	}
 
 	/* attempt to connect with mail host */
@@ -179,10 +181,11 @@ void TSMClose()
 char *GetSMErrorText(int index)
 {
 
-	if ((index > MAX_ERROR_INDEX) || (index < MIN_ERROR_INDEX))
-		return (ErrorMessages[UNKNOWN_ERROR]);
-	else
+	if (MIN_ERROR_INDEX <= index && index < MAX_ERROR_INDEX) {
 		return (ErrorMessages[index]);
+	} else {
+		return (ErrorMessages[UNKNOWN_ERROR]);
+	}
 }
 
 
@@ -235,7 +238,7 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	if ((res = Post(Buffer)) != SUCCESS)
 		return (res);
 	if ((res = Ack()) != SUCCESS)
-		return (res);
+		return W32_SM_SENDMAIL_FROM_MALFORMED;
 
 
 	tempMailTo = estrdup(mailTo);
@@ -255,8 +258,11 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	/* Send mail to all Cc rcpt's */
 	efree(tempMailTo);
 	if (headers && (pos1 = strstr(headers, "Cc:"))) {
-		pos2 = strstr(pos1, "\r\n");
-		tempMailTo = estrndup(pos1, pos2-pos1);
+		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
+			tempMailTo = estrndup(pos1, strlen(pos1));
+		} else {
+			tempMailTo = estrndup(pos1, pos2-pos1);
+		}
 
 		token = strtok(tempMailTo, ",");
 		while(token != NULL)
