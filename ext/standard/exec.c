@@ -39,7 +39,7 @@
  * If type==3, output will be printed binary, no lines will be saved or returned (passthru)
  *
  */
-int _Exec(int type, char *cmd, pval *array, pval *return_value)
+int php_Exec(int type, char *cmd, pval *array, pval *return_value)
 {
 	FILE *fp;
 	char *buf, *tmp=NULL;
@@ -223,13 +223,13 @@ PHP_FUNCTION(exec)
 	}
 	switch (arg_count) {
 		case 1:
-			ret = _Exec(0, Z_STRVAL_PP(arg1), NULL,return_value);
+			ret = php_Exec(0, Z_STRVAL_PP(arg1), NULL,return_value);
 			break;
 		case 2:
 			if (!ParameterPassedByReference(ht,2)) {
 				php_error(E_WARNING,"Array argument to exec() not passed by reference");
 			}
-			ret = _Exec(2, Z_STRVAL_PP(arg1),*arg2,return_value);
+			ret = php_Exec(2, Z_STRVAL_PP(arg1),*arg2,return_value);
 			break;
 		case 3:
 			if (!ParameterPassedByReference(ht,2)) {
@@ -238,7 +238,7 @@ PHP_FUNCTION(exec)
 			if (!ParameterPassedByReference(ht,3)) {
 				php_error(E_WARNING,"return_status argument to exec() not passed by reference");
 			}
-			ret = _Exec(2,Z_STRVAL_PP(arg1),*arg2,return_value);
+			ret = php_Exec(2,Z_STRVAL_PP(arg1),*arg2,return_value);
 			Z_TYPE_PP(arg3) = IS_LONG;
 			Z_LVAL_PP(arg3)=ret;
 			break;
@@ -260,13 +260,13 @@ PHP_FUNCTION(system)
 	}
 	switch (arg_count) {
 		case 1:
-			ret = _Exec(1, Z_STRVAL_PP(arg1), NULL,return_value);
+			ret = php_Exec(1, Z_STRVAL_PP(arg1), NULL,return_value);
 			break;
 		case 2:
 			if (!ParameterPassedByReference(ht,2)) {
 				php_error(E_WARNING,"return_status argument to system() not passed by reference");
 			}
-			ret = _Exec(1, Z_STRVAL_PP(arg1), NULL,return_value);
+			ret = php_Exec(1, Z_STRVAL_PP(arg1), NULL,return_value);
 			Z_TYPE_PP(arg2) = IS_LONG;
 			Z_LVAL_PP(arg2)=ret;
 			break;
@@ -287,13 +287,13 @@ PHP_FUNCTION(passthru)
 	}
 	switch (arg_count) {
 		case 1:
-			ret = _Exec(3, Z_STRVAL_PP(arg1), NULL,return_value);
+			ret = php_Exec(3, Z_STRVAL_PP(arg1), NULL,return_value);
 			break;
 		case 2:
 			if (!ParameterPassedByReference(ht,2)) {
 				php_error(E_WARNING,"return_status argument to system() not passed by reference");
 			}
-			ret = _Exec(3, Z_STRVAL_PP(arg1), NULL,return_value);
+			ret = php_Exec(3, Z_STRVAL_PP(arg1), NULL,return_value);
 			Z_TYPE_PP(arg2) = IS_LONG;
 			Z_LVAL_PP(arg2)=ret;
 			break;
