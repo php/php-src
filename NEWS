@@ -1,5 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2004, Version 4.3.8
+- Fixed bug #28627 (When multiple MySQL links are used default link is leaked).
+  (gavin at ipalsoftware dot com, Ilia)
+
 03 Jun 2004, Version 4.3.7
 - Upgraded bundled GD library to 2.0.23. (Ilia)
 - Changed user error handler mechanism to relay to built-in error handler if it
