@@ -62,8 +62,8 @@ static void php_network_freeaddresses(struct sockaddr **sal)
 	if (sal == NULL)
 		return;
 	for (sap = sal; *sap != NULL; sap++)
-		free(*sap);
-	free(sal);
+		efree(*sap);
+	efree(sal);
 }
 
 static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
@@ -81,7 +81,7 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
                         return -1;
                 sai = res;
 		for (n=2; (sai = sai->ai_next) != NULL; n++);
-		*sal = malloc(n * sizeof(*sal));
+		*sal = emalloc(n * sizeof(*sal));
 		if (*sal == NULL)
 			return -1;
 
@@ -91,7 +91,7 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
                         switch (sai->ai_family) {
 #  ifdef AF_INET6
                         case AF_INET6: {
-				*sap = malloc(sizeof(struct sockaddr_in6));
+				*sap = emalloc(sizeof(struct sockaddr_in6));
 				if (*sap == NULL) {
 					freeaddrinfo(res);
 					goto errexit;
@@ -101,7 +101,7 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
                         } break;
 #  endif
                         case AF_INET: {
-				*sap = malloc(sizeof(struct sockaddr_in));
+				*sap = emalloc(sizeof(struct sockaddr_in));
 				if (*sap == NULL) {
 					freeaddrinfo(res);
 					goto errexit;
@@ -125,11 +125,11 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
 			in = *((struct in_addr *) host_info->h_addr);
 		}
 
-		*sal = malloc(2 * sizeof(*sal));
+		*sal = emalloc(2 * sizeof(*sal));
 		if (*sal == NULL)
 			return -1;
 		sap = *sal;
-		*sap = malloc(sizeof(struct sockaddr_in));
+		*sap = emalloc(sizeof(struct sockaddr_in));
 		if (*sap == NULL)
 			goto errexit;
 
