@@ -116,10 +116,12 @@ int dom_element_tag_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 	if (ns != NULL && ns->prefix) {
 		qname = xmlStrdup(ns->prefix);
 		qname = xmlStrcat(qname, ":");
+		qname = xmlStrcat(qname, nodep->name);
+		ZVAL_STRING(*retval, qname, 1);
+		xmlFree(qname);
+	} else {
+		ZVAL_STRING(*retval, nodep->name, 1);
 	}
-	qname = xmlStrcat(qname, nodep->name);
-	ZVAL_STRING(*retval, qname, 1);
-	xmlFree(qname);
 
 	return SUCCESS;
 }
