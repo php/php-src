@@ -9,6 +9,10 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 	response = xmlParseMemory(buffer, buffer_size);
 	xmlCleanupParser();
+	
+	if (!response) {
+		php_error(E_ERROR, "looks like we got no XML document");
+	}
 
 	(*num_params) = 0;
 
@@ -55,7 +59,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 					sdlParamPtr *h_param, param = NULL;
 					xmlNodePtr val = NULL;
 					encodePtr enc;
-					char *name, *ns;
+					char *name, *ns = NULL;
 
 					if(fn->bindingType == BINDING_SOAP)
 					{
