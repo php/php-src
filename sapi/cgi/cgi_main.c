@@ -1555,6 +1555,7 @@ consult the installation file that came with this distribution, or visit \n\
 				if (open_file_for_scanning(&file_handle TSRMLS_CC) == SUCCESS) {
 					zend_strip(TSRMLS_C);
 					fclose(file_handle.handle.fp);
+					php_end_ob_buffers(1 TSRMLS_CC);
 				}
 				return SUCCESS;
 				break;
@@ -1566,6 +1567,7 @@ consult the installation file that came with this distribution, or visit \n\
 						php_get_highlight_struct(&syntax_highlighter_ini);
 						zend_highlight(&syntax_highlighter_ini TSRMLS_CC);
 						fclose(file_handle.handle.fp);
+						php_end_ob_buffers(1 TSRMLS_CC);
 					}
 					return SUCCESS;
 				}
