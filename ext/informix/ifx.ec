@@ -67,9 +67,9 @@ static long php_intifx2_free_blob(long id, HashTable *list TSRMLS_DC);
 static long php_intifx_get_blob(long bid, HashTable *list, char** content TSRMLS_DC);
 static long php_intifx_update_blob(long bid, char* param, long len, HashTable *list TSRMLS_DC);
 static loc_t *php_intifx_get_blobloc(long bid, HashTable *list TSRMLS_DC);
-static char* php_intifx_create_tmpfile(long bid);
+static char* php_intifx_create_tmpfile(long bid TSRMLS_DC);
 static long php_intifx_copy_blob(long bid, HashTable *list TSRMLS_DC);
-static char* php_intifx_null();
+static char* php_intifx_null(TSRMLS_D);
 static long php_intifx_create_char(char* param, long len, HashTable *list);
 static long php_intifx_free_char(long id, HashTable *list TSRMLS_DC);
 static long php_intifx_update_char(long bid, char* param, long len, HashTable *list TSRMLS_DC);
@@ -221,7 +221,6 @@ EXEC SQL BEGIN DECLARE SECTION;
 	PARAMETER char *ifx;
 EXEC SQL END DECLARE SECTION;
 {
-
 	char *ifx_err_msg;
 	char c;
 	int errorcode;
@@ -265,12 +264,11 @@ EXEC SQL END DECLARE SECTION;
 	return(ifx_err_msg);
 }
 
-static void _close_ifx_link(zend_rsrc_list_entry *rsrc)
+static void _close_ifx_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 EXEC SQL BEGIN DECLARE SECTION;
 	char *link;
 EXEC SQL END DECLARE SECTION;
-	TSRMLS_FETCH();
 
 	link=(char *)rsrc->ptr;
 
@@ -283,12 +281,11 @@ EXEC SQL END DECLARE SECTION;
 	IFXG(num_links)--;
 }
 
-static void _close_ifx_plink(zend_rsrc_list_entry *rsrc)
+static void _close_ifx_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 EXEC SQL BEGIN DECLARE SECTION;
 	char *link;
 EXEC SQL END DECLARE SECTION;
-	TSRMLS_FETCH();
 
 	link = (char *)rsrc->ptr;
 
@@ -1032,7 +1029,7 @@ $endif;
 						bid=php_intifx_create_blob(TYPE_BLBYTE,BLMODE_INMEM,"",-1,&EG(regular_list));
 						locator=php_intifx_get_blobloc(bid,&EG(regular_list) TSRMLS_CC);
 					} else {
-						blobfilename=php_intifx_create_tmpfile(i);
+						blobfilename=php_intifx_create_tmpfile(i TSRMLS_CC);
 						bid=php_intifx_create_blob(TYPE_BLBYTE,BLMODE_INFILE, blobfilename,strlen(blobfilename),&EG(regular_list));
 						locator=php_intifx_get_blobloc(bid,&EG(regular_list) TSRMLS_CC);
 						locator->loc_oflags=LOC_WONLY;
@@ -1444,7 +1441,7 @@ $endif;
 						bid=php_intifx_create_blob(TYPE_BLBYTE,BLMODE_INMEM,"",-1,&EG(regular_list));
 						locator=php_intifx_get_blobloc(bid,&EG(regular_list) TSRMLS_CC);
 					} else {
-						blobfilename=php_intifx_create_tmpfile(i);
+						blobfilename=php_intifx_create_tmpfile(i TSRMLS_CC);
 						bid=php_intifx_create_blob(TYPE_BLBYTE,BLMODE_INFILE,blobfilename,strlen(blobfilename),&EG(regular_list));
 						locator=php_intifx_get_blobloc(bid,&EG(regular_list) TSRMLS_CC);
 						locator->loc_oflags=LOC_WONLY;
@@ -1677,7 +1674,7 @@ EXEC SQL END DECLARE SECTION;
 
 	ZEND_FETCH_RESOURCE(Ifx_Result, IFX_RES *, result, -1, "Informix Result", le_result);
 
-	nullstr=php_intifx_null();
+	nullstr=php_intifx_null(TSRMLS_C);
 	IFXG(sv_sqlcode) = 0;
 
 	if (strcmp(Ifx_Result->cursorid,"") == 0) {
@@ -1927,7 +1924,7 @@ $endif;
 
 				/* and generate new tempfile for next row */
 				if(locator_b->loc_loctype==LOCFNAME) {
-					blobfilename=php_intifx_create_tmpfile(bid_b);
+					blobfilename=php_intifx_create_tmpfile(bid_b TSRMLS_CC);
 					php_intifx_update_blob(bid_b,blobfilename,strlen(blobfilename),&EG(regular_list) TSRMLS_CC);
 					efree(blobfilename);
 					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA= :*locator_b;
@@ -2081,7 +2078,7 @@ EXEC SQL END DECLARE SECTION;
 		RETURN_LONG(0);
 	}
 	num_fields = fieldcount;
-	nullstr = php_intifx_null();
+	nullstr = php_intifx_null(TSRMLS_C);
 
 	/* start table tag */
 	if (table_options == NULL) {
@@ -3158,7 +3155,7 @@ PHP_FUNCTION(ifx_get_blob)
 
 	len=php_intifx_get_blob(pbid->value.lval,&EG(regular_list),&content TSRMLS_CC); 
 	if(content==NULL || len<0) {
-		RETURN_STRING(php_intifx_null(),1);
+		RETURN_STRING(php_intifx_null(TSRMLS_C),1);
 	}
 	RETURN_STRINGL(content,len,1);
 }
@@ -3319,7 +3316,7 @@ static long php_intifx_update_blob(long bid, char* param, long len, HashTable *l
  * creates a temporary file to store a blob in 
  *-------------------------------------------------
 */
-static char* php_intifx_create_tmpfile(long bid) 
+static char* php_intifx_create_tmpfile(long bid TSRMLS_DC) 
 {
 	char filename[10];
 	char *blobdir;
@@ -3332,7 +3329,7 @@ static char* php_intifx_create_tmpfile(long bid)
 	}
 	sprintf(filename,"blb%d",(int)bid);
 
-	if ((fp = php_open_temporary_file(blobdir, filename, &opened_path))) {
+	if ((fp = php_open_temporary_file(blobdir, filename, &opened_path TSRMLS_CC))) {
 		fclose(fp);
 		retval=estrndup(opened_path, strlen(opened_path));
 	} else {
@@ -3452,10 +3449,9 @@ PHP_FUNCTION(ifx_nullformat)
  * return "" or "NULL"
  * ----------------------------------------------------------------------
 */
-static char* php_intifx_null()
+static char* php_intifx_null(TSRMLS_D)
 {
 	char* tmp;
-	TSRMLS_FETCH();
 		
 	if(IFXG(nullformat)==0) {
 		tmp=IFXG(nullvalue);
