@@ -69,8 +69,7 @@ extern PHPAPI time_t parsedate(char *p, struct timeval *now);
 
 PHP_FUNCTION(time)
 {
-	return_value->value.lval = (long) time(NULL);
-	return_value->type = IS_LONG;
+	RETURN_LONG((long)time(NULL));
 }
 
 void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
@@ -270,6 +269,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				size += 3;
 				break;
 			case 'w':		/* day of the week, numeric */
+			case 'I':		/* DST? */
 			default:
 				size++;
 				break;
@@ -418,6 +418,10 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 					((((long)the_time) % 86400) + 3600))) * 10) / 864);
 				if (beat > 999) beat = 0;
 				sprintf(tmp_buff, "%03d", beat); /* SAFE */
+				strcat(return_value->value.str.val, tmp_buff);
+				break;
+			case 'I':
+				sprintf(tmp_buff, "%d", ta->tm_isdst);
 				strcat(return_value->value.str.val, tmp_buff);
 				break;
 			default:
