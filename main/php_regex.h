@@ -17,6 +17,9 @@
 #include "regex/regex_extra.h"
 #undef PHP_NO_ALIASES
 
+#undef _PCREPOSIX_H
+#define _PCREPOSIX_H 1
+
 #ifndef _REGEX_H
 #define _REGEX_H 1				/* this should stop Apache from loading the system version of regex.h */
 #endif
