@@ -156,7 +156,8 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		**array = NULL;		/* Optional register array */
 	regex_t re;
 	regmatch_t *subs;
-	int err, i, match_len, string_len;
+	int err, match_len, string_len;
+	uint i;
 	int copts = 0;
 	off_t start, end;
 	char *buf = NULL;
