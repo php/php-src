@@ -315,6 +315,7 @@ PHPAPI int cfg_get_string(char *varname, char **result);
  * Taken from the Apache code, which in turn, was taken from X code...
  */
 
+#ifndef XtOffset
 #if defined(CRAY) || (defined(__arm) && !defined(LINUX))
 #ifdef __STDC__
 #define XtOffset(p_type, field) _Offsetof(p_type, field)
@@ -335,13 +336,16 @@ PHPAPI int cfg_get_string(char *varname, char **result);
     ((long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
 
 #endif /* !CRAY */
+#endif /* ! XtOffset */
 
+#ifndef XtOffsetOf
 #ifdef offsetof
 #define XtOffsetOf(s_type, field) offsetof(s_type, field)
 #else
 #define XtOffsetOf(s_type, field) XtOffset(s_type*, field)
 #endif
-
+#endif /* !XtOffsetOf */
+	
 PHPAPI PHP_FUNCTION(warn_not_available);
 
 #endif
