@@ -19,6 +19,7 @@
 /* $Id$ */
 
 #include "php.h"
+#include "php_incomplete_class.h"
 
 /* {{{ proto string gettype(mixed var)
    Returns the type of the variable */
@@ -200,6 +201,13 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 	}
 
 	if (Z_TYPE_PP(arg) == type) {
+		if (type == IS_OBJECT) {
+			zend_class_entry *ce;
+			ce = Z_OBJCE_PP(arg);
+			if (!strcmp(ce->name, INCOMPLETE_CLASS)) {
+				RETURN_FALSE;
+			}
+		}
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;

@@ -44,12 +44,13 @@
 	size_t name_len;													\
 	zend_bool free_class_name = 0										\
 
-
+#define INCOMPLETE_CLASS "__PHP_Incomplete_Class"
+#define MAGIC_MEMBER "__PHP_Incomplete_Class_Name"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+	
 zend_class_entry *php_create_incomplete_class(TSRMLS_D);
 
 char *php_lookup_class_name(zval *object, size_t *nlen, zend_bool del);
