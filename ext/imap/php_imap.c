@@ -3161,8 +3161,7 @@ PHP_FUNCTION(imap_mail_compose)
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRINGL(mystring, strlen(mystring), 1);  
-	efree(tempstring);
+	RETVAL_STRINGL(tempstring, 0);  
 }
 /* }}} */
 
