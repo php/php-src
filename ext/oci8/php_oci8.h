@@ -91,6 +91,7 @@ typedef struct {
 	sword error;
     OCIError *pError;
 	int needs_commit;
+    HashTable *descriptors;
 } oci_connection;
 
 typedef struct {
