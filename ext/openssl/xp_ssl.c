@@ -542,8 +542,6 @@ PHPAPI php_stream *php_openssl_ssl_socket_factory(const char *proto, long protol
 		sslsock->method = STREAM_CRYPTO_METHOD_TLS_CLIENT;
 	}
 
-printf("enable_on_connect = %d  --> proto %s\n", sslsock->enable_on_connect, proto);
-	
 	return stream;
 }
 
