@@ -28,7 +28,6 @@
 #if HAVE_DBA
 
 #include "php_ini.h"
-#include "ext/standard/flock_compat.h" 
 #include <stdio.h> 
 #include <fcntl.h>
 #ifdef HAVE_SYS_FILE_H
@@ -319,11 +318,6 @@ static void dba_close(dba_info *info TSRMLS_DC)
 	if (info->hnd) info->hnd->close(info TSRMLS_CC);
 	if (info->path) pefree(info->path, info->flags&DBA_PERSISTENT);
 	if (info->fp && info->fp!=info->lock.fp) php_stream_close(info->fp);
-	if (info->lock.fd) {
-		php_flock(info->lock.fd, LOCK_UN);
-		/*close(info->lock.fd);*/
-		info->lock.fd = 0;
-	}
 	if (info->lock.fp) php_stream_close(info->lock.fp);
 	if (info->lock.name) pefree(info->lock.name, info->flags&DBA_PERSISTENT);
 	pefree(info, info->flags&DBA_PERSISTENT);
@@ -707,13 +701,10 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			FREENOW;
 			RETURN_FALSE;
 		}
-		if (php_stream_cast(info->lock.fp, PHP_STREAM_AS_FD, (void*)&info->lock.fd, 1) == FAILURE)	{
-			dba_close(info TSRMLS_CC);
-			/* stream operation already wrote an error message */
-			FREENOW;
-			RETURN_FALSE;
+		if (!php_stream_supports_lock(info->lock.fp)) {
+			error = "Stream does not support locking";
 		}
-		if (php_flock(info->lock.fd, lock_mode)) {
+		if (php_stream_lock(info->lock.fp, lock_mode)) {
 			error = "Unable to establish lock"; /* force failure exit */
 		}
 	}
