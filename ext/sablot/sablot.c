@@ -715,7 +715,7 @@ PHP_FUNCTION(xslt_error)
 		serrno = SABLOTG(last_errno);
 	}
 
-	RETURN_STRING((char *)SablotGetMsgText(errno), 1);
+	RETURN_STRING((char *)SablotGetMsgText(serrno), 1);
 }
 /* }}} */
 
