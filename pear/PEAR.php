@@ -26,6 +26,8 @@ define('PEAR_ERROR_PRINT',    2);
 define('PEAR_ERROR_TRIGGER',  4);
 define('PEAR_ERROR_DIE',      8);
 define('PEAR_ERROR_CALLBACK', 16);
+define('PEAR_ZE2', (function_exists('version_compare') &&
+                    version_compare(zend_version(), "2-dev", "ge")));
 
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     define('OS_WINDOWS', true);
@@ -348,7 +350,7 @@ class PEAR
     }
 
     // }}}
-   // {{{ _checkDelExpect()
+    // {{{ _checkDelExpect()
 
     /**
      * This method checks unsets an error code if available
@@ -866,9 +868,6 @@ class PEAR_Error
                            get_class($this), $this->message, $this->code,
                            $callback, $this->error_message_prefix,
                            $this->userinfo);
-        }
-        if ($this->mode & PEAR_ERROR_CALLBACK) {
-            $modes[] = 'callback';
         }
         if ($this->mode & PEAR_ERROR_PRINT) {
             $modes[] = 'print';
