@@ -1,3 +1,45 @@
+2005-01-16  Stefan Esser  <sesser@suspekt.org>
+
+    * (PHP_5_0)
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      if 2 of 3 tests are okay still do the 3rd test !
+
+2005-01-16  Zak Greant  <zak@mysql.com>
+
+    * ext/mysqli/mysqli_driver.c
+      ext/mysqli/mysqli_embedded.c
+      ext/mysqli/mysqli_exception.c
+      ext/mysqli/mysqli_report.h
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/php_mysqli.h:
+      Added standard emacs and vim modelines
+
+2005-01-16  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c:
+      - MFH: Fix a critical bug that request-local settings leak to another
+      request.
+
+    * (PHP_5_0)
+      ext/mbstring/mb_gpc.c
+      ext/mbstring/mb_gpc.h
+      ext/mbstring/mbstring.c:
+      -MFH: Fix a critical bug that request-local settings leak to another
+      request.
+
+    * ext/mbstring/mb_gpc.c
+      ext/mbstring/mb_gpc.h
+      ext/mbstring/mbstring.c:
+      - Fix a critical bug that request-local settings leak to another request.
+
+2005-01-16  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      another fix for overloaded objects
+
 2005-01-15  Andi Gutmans  <andi@zend.com>
 
     * (PHP_5_0)
