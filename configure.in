@@ -857,15 +857,15 @@ if test "$PHP_PEAR" != "no"; then
   dnl
   if test "$PHP_SAPI_CLI" = "no"; then
     pear_error_msg="$pear_error_msg 
-                    PEAR requires CLI to be enabled.     Add --enable-cli to the configure line."
+                    PEAR requires CLI to be enabled.     Add --enable-cli to the configure line. (or --disable-pear)"
   fi
   if test "$PHP_PCRE_REGEX" = "no"; then
     pear_error_msg="$pear_error_msg 
-                    PEAR requires PCRE to be enabled.    Add --with-pcre-regex to the configure line."
+                    PEAR requires PCRE to be enabled.    Add --with-pcre-regex to the configure line. (or --disable-pear)"
   fi
   if test "$PHP_XML" = "no"; then
     pear_error_msg="$pear_error_msg 
-                    PEAR requires XML to be enabled.     Add --enable-xml to the configure line."
+                    PEAR requires XML to be enabled.     Add --enable-xml to the configure line. (or --disable-pear)"
   fi
 
 dnl
@@ -873,7 +873,7 @@ dnl ext/xmlrpc is not really there yet to be a requirement..
 dnl
 dnl  if test "$PHP_XMLRPC" = "no"; then
 dnl    pear_error_msg="$pear_error_msg 
-dnl                    PEAR requires XML-RPC to be enabled. Add --with-xmlrpc to the configure line."
+dnl                    PEAR requires XML-RPC to be enabled. Add --with-xmlrpc to the configure line. (or --disable-pear)"
 dnl fi
 dnl
 
@@ -1044,8 +1044,6 @@ if test "$disable_cli" != "1"; then
   PHP_CLI_TARGET="\$(SAPI_CLI_PATH)"
   PHP_INSTALL_CLI_TARGET="install-cli"
   PHP_ADD_SOURCES(sapi/cli, php_cli.c getopt.c,, cli)
-else
-  with_pear=no
 fi
 
 PHP_SUBST(PHP_CLI_TARGET)
