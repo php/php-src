@@ -476,6 +476,7 @@ PHP_FUNCTION(cpdf_open)
 			php_error(E_WARNING, "%s(): Writing to stdout as described in the ClibPDF manual is not possible if php is used as an Apache module. Write to a memory stream and use cpdf_output_buffer() instead.", get_active_function_name(TSRMLS_C));
 #endif
 		if (php_check_open_basedir(Z_STRVAL_P(arg2) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_P(arg2), "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+			cpdf_close(cpdf);
 			RETURN_FALSE;
 		}
 
