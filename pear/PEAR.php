@@ -41,10 +41,6 @@ $GLOBALS['_PEAR_default_error_mode']     = PEAR_ERROR_RETURN;
 $GLOBALS['_PEAR_default_error_options']  = E_USER_NOTICE;
 $GLOBALS['_PEAR_destructor_object_list'] = array();
 
-//
-// Tests needed: - PEAR inheritance
-//
-
 /**
  * Base class for other PEAR classes.  Provides rudimentary
  * emulation of destructors.
@@ -59,8 +55,12 @@ $GLOBALS['_PEAR_destructor_object_list'] = array();
  * discarded.  If you need to get any debug information from your
  * destructor, use error_log(), syslog() or something similar.
  *
+ * IMPORTANT! To use the emulated destructors you need to create the
+ * objects by reference, ej: $obj =& new PEAR_child;
+ *
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@fast.no>
+ * @see http://pear.php.net/manual/
  */
 class PEAR
 {
@@ -125,8 +125,8 @@ class PEAR
      * $_PEAR_destructor_object_list for destructor emulation if a
      * destructor object exists.
      *
-     * @param string      (optional) which class to use for error objects,
-     *                    defaults to PEAR_Error.
+     * @param string  $error_class (optional) which class to use for error
+     *                             objects, defaults to PEAR_Error.
      * @access public
      * @return void
      */
@@ -177,7 +177,7 @@ class PEAR
     /**
      * Tell whether a value is a PEAR error.
      *
-     * @param   mixed   the value to test
+     * @param   mixed   $data the value to test
      * @access  public
      * @return  bool    true if parameter is an error
      */
@@ -276,12 +276,15 @@ class PEAR
      * expected errors are in effect until they are popped off the
      * stack with the popExpect() method.
      *
-     * @param mixed    a single error code or an array of error codes
-     *                 to expect
+     * Note that this method can not be called statically
+     *
+     * @param mixed  $code  a single error code or an array of error codes
+     *                      to expect
      *
      * @return int     the new depth of the "expected errors" stack
+     * @access public
      */
-    function expectError($code = "*")
+    function expectError($code = '*')
     {
         if (is_array($code)) {
             array_push($this->_expected_errors, $code);
@@ -403,7 +406,7 @@ class PEAR
     * you can easily override the actual error handler for some code and restore
     * it later with popErrorHandling.
     *
-    * @param $mode mixed (same as setErrorHandling)
+    * @param $mode    mixed (same as setErrorHandling)
     * @param $options mixed (same as setErrorHandling)
     *
     * @return bool Always true
@@ -619,7 +622,7 @@ class PEAR_Error
      * @return  string  full error message
      * @access public
      */
-    function getMessage ()
+    function getMessage()
     {
         return ($this->error_message_prefix . $this->message);
     }
@@ -648,7 +651,7 @@ class PEAR_Error
      * @return string error/exception name (type)
      * @access public
      */
-    function getType ()
+    function getType()
     {
         return get_class($this);
     }
@@ -662,7 +665,7 @@ class PEAR_Error
      * @return string user-supplied information
      * @access public
      */
-    function getUserInfo ()
+    function getUserInfo()
     {
         return $this->userinfo;
     }
@@ -676,7 +679,7 @@ class PEAR_Error
      * @return string debug information
      * @access public
      */
-    function getDebugInfo ()
+    function getDebugInfo()
     {
         return $this->getUserInfo();
     }
