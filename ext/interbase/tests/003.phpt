@@ -8,7 +8,6 @@ InterBase: misc sql types (may take a while)
 <?php
 
     require("interbase.inc");
-    
     ibase_connect($test_base);
     
     ibase_query(
@@ -16,11 +15,15 @@ InterBase: misc sql types (may take a while)
             iter		integer,
             v_char		char(1000),
             v_date      timestamp,
-            v_decimal   decimal(12,3),
+   	 		v_decimal4_2  		decimal(4,2),
+   	 		v_decimal4_0  		decimal(4,0),
+   	 		v_decimal7_2  		decimal(7,2),
+   	 		v_decimal7_0  		decimal(7,0),
+   	 		v_numeric15_15  	numeric(15,15),
+   	 		v_numeric15_0  	numeric(15,0),
             v_double  	double precision,
             v_float     float,
     		v_integer   integer,
-    		v_numeric   numeric(4,2),
             v_smallint  smallint,
             v_varchar   varchar(10000)
             )");
@@ -33,18 +36,21 @@ InterBase: misc sql types (may take a while)
     	/* prepare data  */
     	$v_char = rand_str(1000);
     	$v_date = rand_datetime();
-    	$v_decimal = rand_number(12,3);
+    	$v_decimal4_2 = rand_number(4,2);
+    	$v_decimal4_0 = rand_number(4,0);
+    	$v_decimal7_2 = rand_number(7,2); 
+    	$v_decimal7_0 = rand_number(7,0);
+    	$v_numeric15_15 = rand_number(15,15);
+    	$v_numeric15_0 = rand_number(15,0);
     	$v_double  = rand_number(18);
     	$v_float   = rand_number(7);
     	$v_integer = rand_number(9,0);
-    	$v_numeric = rand_number(4,2);
     	$v_smallint = rand_number(5) % 32767;
     	$v_varchar = rand_str(10000);
 
     	ibase_query(
-    	"insert into test3 (iter, v_char,v_date,v_decimal,v_double,v_float,v_integer,v_numeric,v_smallint,v_varchar)
-    	values ($iter, '$v_char','$v_date',$v_decimal,$v_double,$v_float,$v_integer,$v_numeric,$v_smallint,'$v_varchar')");
-    	$sel = ibase_query("select * from test3 where iter = $iter");
+    	"insert into test3 (iter, v_char,v_date,v_decimal4_2, v_decimal4_0, v_decimal7_2, v_decimal7_0,v_numeric15_15, v_numeric15_0,v_double,v_float,v_integer,v_smallint,v_varchar)
+    	values ($iter, '$v_char','$v_date',$v_decimal4_2, $v_decimal4_0, $v_decimal7_2, $v_decimal7_0,$v_numeric15_15, $v_numeric15_0,$v_double,$v_float,$v_integer,$v_smallint,'$v_varchar')");
     	$sel = ibase_query("select * from test3 where iter = $iter");
     	$row = ibase_fetch_object($sel);
     	if(substr($row->V_CHAR,0,strlen($v_char)) != $v_char){
@@ -57,11 +63,37 @@ InterBase: misc sql types (may take a while)
             echo " in:  $v_date\n";
             echo " out: $row->V_DATE\n";
         }
-        if($row->V_DECIMAL != $v_decimal){
-            echo " DECIMAL fail\n";
-            echo " in:  $v_decimal\n";
-            echo " out: $row->V_DECIMAL\n";
+        if($row->V_DECIMAL4_2 != $v_decimal4_2){
+            echo " DECIMAL4_2 fail\n";
+            echo " in:  $v_decimal4_2\n";
+            echo " out: $row->V_DECIMAL4_2\n";
         }
+        if($row->V_DECIMAL4_0 != $v_decimal4_0){
+            echo " DECIMAL4_0 fail\n";
+            echo " in:  $v_decimal4_0\n";
+            echo " out: $row->V_DECIMAL4_0\n";
+        }
+        if($row->V_DECIMAL7_2 != $v_decimal7_2){
+            echo " DECIMAL7_2 fail\n";
+            echo " in:  $v_decimal7_2\n";
+            echo " out: $row->V_DECIMAL7_2\n";
+        }
+        if($row->V_DECIMAL7_0 != $v_decimal7_0){
+            echo " DECIMAL7_0 fail\n";
+            echo " in:  $v_decimal7_0\n";
+            echo " out: $row->V_DECIMAL7_0\n";
+        }
+        if($row->V_NUMERIC15_15 != $v_numeric15_15){
+            echo " NUMERIC15_15 fail\n";
+            echo " in:  $v_numeric15_15\n";
+            echo " out: $row->V_NUMERIC15_15\n";
+        }
+        if($row->V_NUMERIC15_0 != $v_numeric15_0){
+            echo " NUMERIC15_0 fail\n";
+            echo " in:  $v_numeric15_0\n";
+            echo " out: $row->V_NUMERIC15_0\n";
+        }
+        
         if(abs($row->V_DOUBLE - $v_double) > abs($v_double / 1E15)){
             echo " DOUBLE fail\n";
             echo " in:  $v_double\n";
@@ -77,6 +109,18 @@ InterBase: misc sql types (may take a while)
             echo " in:  $v_integer\n";
             echo " out: $row->V_INTEGER\n";
         }
+        if($row->V_SMALLINT != $v_smallint){
+            echo " SMALLINT fail\n";
+            echo " in:  $v_smallint\n";
+            echo " out: $row->V_SMALLINT\n";
+        }
+    	 
+		  if(substr($row->V_VARCHAR,0,strlen($v_varchar)) != $v_varchar){
+        	echo " VARCHAR fail:\n";
+            echo " in:  $v_varchar\n";
+            echo " out: $row->V_VARCHAR\n";
+        }
+      
         ibase_free_result($sel);
     } /* for($iter) */
 
