@@ -27,7 +27,7 @@ if test "$PHP_CYRUS" != "no"; then
     AC_MSG_ERROR(Please Re-install the cyrus distribution)
   fi
 
-  dnk
+  dnl
   dnl sasl/sasl2 
   dnl
   for i in $PHP_CYRUS /usr/local /usr; do
@@ -54,7 +54,7 @@ if test "$PHP_CYRUS" != "no"; then
     AC_MSG_ERROR(Please Re-install the cyrus distribution)
   fi
 
-  dnk
+  dnl
   dnl OpenSSL
   dnl
   if test "$PHP_OPENSSL" = "no"; then
