@@ -683,7 +683,7 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 	newtext = text;
 	bgstr[0] = '\0';
 #ifdef newlist
-	zend_llist_sort(pAnchorList, fnCmpAnchors);
+	zend_llist_sort(pAnchorList, fnCmpAnchors TSRMLS_CC);
 	ptr = (ANCHOR **) zend_llist_get_last(pAnchorList);
 	if(ptr)
 		cur_ptr = *ptr;
