@@ -1251,7 +1251,7 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 	else if (count == 1) {  /* only m_k_l = OK */
 		key_s = emalloc (key_length_sizes[0]);
 		memset (key_s, 0, key_length_sizes[0]);
-		memcpy (key_s, Z_STRVAL_PP(key), Z_STRLEN_PP(key));
+		memcpy (key_s, Z_STRVAL_PP(key), MIN(Z_STRLEN_PP(key), key_length_sizes[0]));
 		use_key_length = key_length_sizes[0];
 	}
 	else { /* derterminating smallest supported key > length of requested key */
@@ -1265,7 +1265,7 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 		}
 		key_s = emalloc (use_key_length);
 		memset (key_s, 0, use_key_length);
-		memcpy (key_s, Z_STRVAL_PP(key), Z_STRLEN_PP(key));
+		memcpy (key_s, Z_STRVAL_PP(key), MIN(Z_STRLEN_PP(key), use_key_length));
 	}
 	mcrypt_free (key_length_sizes);
 	
