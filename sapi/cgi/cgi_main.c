@@ -241,13 +241,10 @@ static void php_cgi_usage(char *argv0)
 		prog = "php";
 	}
 
-	php_printf("Usage: %s [-q] [-h]"
-				" [-s]"
-				" [-v] [-i] [-f <file>] | "
-				"{<file> [args...]}\n"
+	php_printf("Usage: %s [-q] [-h] [-s [-v] [-i] [-f <file>] |  {<file> [args...]}\n"
 				"  -q             Quiet-mode.  Suppress HTTP Header output.\n"
 				"  -s             Display colour syntax highlighted source.\n"
-				"  -f<file>       Parse <file>.  Implies `-q'\n"
+				"  -f <file>      Parse <file>.  Implies `-q'\n"
 				"  -v             Version number\n"
 				"  -c<path>       Look for php.ini file in this directory\n"
 #if SUPPORT_INTERACTIVE
