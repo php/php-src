@@ -288,9 +288,9 @@ void php3api_var_serialize(pval *buf, pval **struc)
 /* }}} */
 /* {{{ php3api_var_dump */
 
-int php3api_var_unserialize(pval **rval, char **p, char *max)
+int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 {
-	char *q;
+	const char *q;
 	char *str;
 	int i;
 
@@ -482,7 +482,7 @@ PHP_FUNCTION(unserialize)
 		WRONG_PARAM_COUNT;
 	}
 	if (buf->type == IS_STRING) {
-		char *p = buf->value.str.val;
+		const char *p = buf->value.str.val;
 		if (!php3api_var_unserialize(&return_value, &p, p + buf->value.str.len)) {
 			RETURN_FALSE;
 		}
