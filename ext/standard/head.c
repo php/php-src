@@ -28,7 +28,6 @@
 #include "SAPI.h"
 #include "php_main.h"
 #include "head.h"
-#include "SAPI.h"
 #ifdef TM_IN_SYS_TIME
 #include <sys/time.h>
 #else
