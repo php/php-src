@@ -31,6 +31,7 @@ HEADER_DIRS = \
 	ext/xml \
 	ext/xml/expat \
 	main \
+	main/streams \
 	ext/mbstring \
 	ext/pgsql \
 	regex
