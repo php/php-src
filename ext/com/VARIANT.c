@@ -50,7 +50,6 @@ function_entry VARIANT_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-
 static PHP_MINFO_FUNCTION(VARIANT)
 {
 	php_info_print_table_start();
@@ -58,11 +57,9 @@ static PHP_MINFO_FUNCTION(VARIANT)
 	php_info_print_table_end();
 }
 
-
 zend_module_entry VARIANT_module_entry = {
 	"variant", VARIANT_functions, PHP_MINIT(VARIANT), PHP_MSHUTDOWN(VARIANT), NULL, NULL, PHP_MINFO(VARIANT), STANDARD_MODULE_PROPERTIES
 };
-
 
 PHP_MINIT_FUNCTION(VARIANT)
 {
@@ -92,7 +89,7 @@ PHP_MINIT_FUNCTION(VARIANT)
 	REGISTER_LONG_CONSTANT("VT_UINT", VT_UINT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("VT_ARRAY", VT_ARRAY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("VT_BYREF", VT_BYREF, CONST_CS | CONST_PERSISTENT);
- 
+
 	/* codepages */
 	REGISTER_LONG_CONSTANT("CP_ACP", CP_ACP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CP_MACCP", CP_MACCP, CONST_CS | CONST_PERSISTENT);
@@ -106,7 +103,6 @@ PHP_MINIT_FUNCTION(VARIANT)
 	return SUCCESS;
 }
 
-
 PHP_MSHUTDOWN_FUNCTION(VARIANT)
 {
 	return SUCCESS;
@@ -118,15 +114,15 @@ void php_VARIANT_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_proper
 	zend_overloaded_element *function_name = (zend_overloaded_element *) property_reference->elements_list->tail->data;
 	VARIANT *pVar;
 
-	if ((zend_llist_count(property_reference->elements_list)==1) && !strcmp(function_name->element.value.str.val, "variant"))
+	if((zend_llist_count(property_reference->elements_list)==1) && !strcmp(function_name->element.value.str.val, "variant"))
 	{
 		/* constructor */
 		pval *object_handle, *data, *type, *code_page;
-	
+
 		pVar = emalloc(sizeof(VARIANT));
 		VariantInit(pVar);
 
-		switch (ZEND_NUM_ARGS())
+		switch(ZEND_NUM_ARGS())
 		{
 			case 0:
 				/* nothing to do */
@@ -155,7 +151,8 @@ void php_VARIANT_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_proper
 		return_value->type = IS_LONG;
 		return_value->value.lval = zend_list_insert(pVar, le_variant);
 
-		if (!zend_is_true(return_value)) {
+		if(!zend_is_true(return_value))
+		{
 			var_reset(object);
 			return;
 		}
@@ -174,7 +171,7 @@ pval php_VARIANT_get_property_handler(zend_property_reference *property_referenc
 {
 	zend_overloaded_element *overloaded_property;
 	int type;
-	
+
 	pval result, **var_handle, *object = property_reference->object;
 	VARIANT *var_arg;
 
@@ -182,22 +179,31 @@ pval php_VARIANT_get_property_handler(zend_property_reference *property_referenc
 	zend_hash_index_find(object->value.obj.properties, 0, (void **) &var_handle);
 	var_arg = zend_list_find((*var_handle)->value.lval, &type);
 
-	if (!var_arg || (type != le_variant)) {
+	if(!var_arg || (type != le_variant))
+	{
 		var_reset(&result);
-	} else 	{
+	}
+	else
+	{
 		overloaded_property = (zend_overloaded_element *) property_reference->elements_list->head->data;
-		switch (overloaded_property->type) {
+		switch(overloaded_property->type)
+		{
 			case OE_IS_ARRAY:
 				var_reset(&result);
 				break;
 
 			case OE_IS_OBJECT:
-				if(!strcmp(overloaded_property->element.value.str.val, "value")) {
+				if(!strcmp(overloaded_property->element.value.str.val, "value"))
+				{
 					php_variant_to_pval(var_arg, &result, 0, codepage);
-				} else if(!strcmp(overloaded_property->element.value.str.val, "type")) {
+				}
+				else if(!strcmp(overloaded_property->element.value.str.val, "type"))
+				{
 					result.value.lval = var_arg->vt;
 					result.type = IS_LONG;
-				} else {
+				}
+				else
+				{
 					var_reset(&result);
 					php_error(E_WARNING, "Unknown member.");
 				}
@@ -206,11 +212,11 @@ pval php_VARIANT_get_property_handler(zend_property_reference *property_referenc
 				var_reset(&result);
 				php_error(E_WARNING, "Unknown method.");
 				break;
-		
-			pval_destructor(&overloaded_property->element);
+
+				pval_destructor(&overloaded_property->element);
 		}
 	}
-	
+
 	return result;
 }
 
@@ -218,7 +224,7 @@ int php_VARIANT_set_property_handler(zend_property_reference *property_reference
 {
 	zend_overloaded_element *overloaded_property;
 	int type;
-	
+
 	pval **var_handle, *object = property_reference->object;
 	VARIANT *var_arg;
 
@@ -226,9 +232,9 @@ int php_VARIANT_set_property_handler(zend_property_reference *property_reference
 	zend_hash_index_find(object->value.obj.properties, 0, (void **) &var_handle);
 	var_arg = zend_list_find((*var_handle)->value.lval, &type);
 
-	if (!var_arg || (type != le_variant))
+	if(!var_arg || (type != le_variant))
 		return FAILURE;
-	
+
 	overloaded_property = (zend_overloaded_element *) property_reference->elements_list->head->data;
 	do_VARIANT_propset(var_arg, &overloaded_property->element, value);
 	pval_destructor(&overloaded_property->element);
@@ -240,7 +246,7 @@ static int do_VARIANT_propset(VARIANT *var_arg, pval *arg_property, pval *value)
 	pval type;
 
 	type.type = IS_STRING;
-	
+
 	if(!strcmp(arg_property->value.str.val, "bVal"))
 	{
 		type.value.lval = VT_UI1;
