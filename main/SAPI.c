@@ -150,15 +150,19 @@ static void sapi_read_post_data(TSRMLS_D)
 		}
 	}
 
+	/* now try to find an appropriate POST content handler */
 	if (zend_hash_find(&known_post_content_types, content_type, content_type_length+1, (void **) &post_entry)==SUCCESS) {
+		/* found one, register it for use */
 		SG(request_info).post_entry = post_entry;
 		post_reader_func = post_entry->post_reader;
 	} else {
+		/* fallback */
+		SG(request_info).post_entry = NULL;
 		if (!sapi_module.default_post_reader) {
+			/* no default reader ? */
 			sapi_module.sapi_error(E_WARNING, "Unsupported content type:  '%s'", content_type);
 			return;
 		}
-		SG(request_info).post_entry = NULL;
 	}
 	if (oldchar) {
 		*(p-1) = oldchar;
