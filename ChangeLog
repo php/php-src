@@ -1,3 +1,70 @@
+2004-11-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * run-tests.php:
+      Save test result file inside the build directory.
+
+2004-11-28  Sergey Kartashoff  <gluke@mail.ru>
+
+    * (PHP_4_3)
+      ext/mnogosearch/php_mnogo.h:
+      
+
+    * (PHP_4_3)
+      ext/mnogosearch/php_mnogo.h:
+      - MnoGoSearch extension latest patch reverted (part2)
+
+    * (PHP_4_3)
+      ext/mnogosearch/php_mnogo.c:
+      - MnoGoSearch extension latest patch reverted
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h:
+      - MnoGoSearch extension updated to fix compilation issues with
+        mnogosearch-3.2.25+
+
+2004-11-28  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN + change my mail to my name
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/standard/array.c
+      ext/standard/array.c:
+      MFH: fix #29954 (array_reduce segfaults when initial value is array)
+
+    * ext/standard/array.c:
+      fix #29954 (array_reduce segfaults when initial value is array)
+
+2004-11-28  Stefan Esser  <sesser@suspekt.org>
+
+    * main/SAPI.c:
+      Fixed: Correctly Initialize fields
+
+2004-11-28  Antony Dovgal  <tony2001@phpclub.net>
+
+    * php.ini-dist
+      php.ini-recommended:
+      fix #30314
+
+2004-11-28  Stefan Esser  <sesser@suspekt.org>
+
+    * ext/standard/pack.c
+      main/php.h:
+      Fixed: removed possible integer over-/underflows
+
+2004-11-28  Zeev Suraski  <zeev@zend.com>
+
+    * (PECL_4_3)
+      ext/sqlite/Makefile.frag:
+      Restore Makefile.frag - it's still needed for 4.2.x builds
+
 2004-11-27  Jon Parise  <jon+php@csh.rit.edu>
 
     * (PHP_4_3)
