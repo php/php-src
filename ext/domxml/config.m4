@@ -17,8 +17,8 @@ AC_ARG_WITH(dom,
       AC_CHECK_LIB(xml, xmlNewDoc, [AC_DEFINE(HAVE_DOMXML)],
         [AC_MSG_ERROR(DOM module requires libxml >= 1.0)])
       LIBS=$old_LIBS
-      AC_ADD_LIBRARY(xml)
       AC_ADD_LIBRARY(gz)
+      AC_ADD_LIBRARY(xml)
       AC_ADD_INCLUDE(/usr/local/include)
       ;;
     *)
