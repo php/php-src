@@ -2371,7 +2371,7 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 			if(retval == FAILURE) {
 				/* try namespace */
-				if(zend_hash_find(&EG(global_namespace_ptr)->class_table, class_name_strval, class_name_strlen+1, (void **)&pce) == SUCCESS && ((*pce)->type == ZEND_USER_NAMESPACE || (*pce)->type == ZEND_INTERNAL_NAMESPACE)) {
+				if(zend_hash_find(&EG(global_namespace_ptr)->class_table, class_name_strval, class_name_strlen+1, (void **)&pce) == SUCCESS && CLASS_IS_NAMESPACE((*pce))) {
 					retval = SUCCESS;
 				}
 			}
@@ -2382,7 +2382,7 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 			if(EX(opline)->extended_value == ZEND_FETCH_CLASS_GLOBAL) {
 				ns = EG(global_namespace_ptr);
 			} else {
-				if (zend_hash_find(&EG(global_namespace_ptr)->class_table, EX(opline)->op1.u.constant.value.str.val, EX(opline)->op1.u.constant.value.str.len+1, (void **)&pce) == FAILURE || ((*pce)->type != ZEND_USER_NAMESPACE && (*pce)->type != ZEND_INTERNAL_NAMESPACE)) {
+				if (zend_hash_find(&EG(global_namespace_ptr)->class_table, EX(opline)->op1.u.constant.value.str.val, EX(opline)->op1.u.constant.value.str.len+1, (void **)&pce) == FAILURE || !CLASS_IS_NAMESPACE((*pce))) {
 					zend_error(E_ERROR, "Namespace '%s' not found", EX(opline)->op1.u.constant.value.str.val);
 				}
 				ns = *pce;

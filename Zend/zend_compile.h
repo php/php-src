@@ -753,6 +753,8 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_ARG_SEND_BY_REF (1<<0)
 #define ZEND_ARG_COMPILE_TIME_BOUND (1<<1)
 
+#define CLASS_IS_NAMESPACE(c) ((c)->type == ZEND_INTERNAL_NAMESPACE || (c)->type == ZEND_USER_NAMESPACE)
+
 #define AI_USE_PTR(ai) \
 	if ((ai).ptr_ptr) { \
 		(ai).ptr = *((ai).ptr_ptr); \
