@@ -134,7 +134,7 @@ int main ()
       PHP_CHECK_LIBRARY(js, JS_GetRuntime,
       [
         PHP_ADD_LIBRARY_WITH_PATH(js, $PHP_SABLOT_JS_DIR/lib, XSLT_SHARED_LIBADD)
-        PHP_SABLOT_JS_LIBS=-L$PHP_SABLOT_JS_DIR/lib -ljs
+        PHP_SABLOT_JS_LIBS="-L$PHP_SABLOT_JS_DIR/lib -ljs"
       ], [
         AC_MSG_ERROR([libjs not found. Please check config.log for more information.])
       ], [
