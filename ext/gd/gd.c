@@ -1414,7 +1414,7 @@ PHP_FUNCTION(imagecolortransparent)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
 
-	if ((*COL) != NULL) {
+	if (COL != NULL && (*COL) != NULL) {
 		col = (*COL)->value.lval;
 		gdImageColorTransparent(im,col);
 	}
