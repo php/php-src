@@ -662,7 +662,7 @@ PHP_FUNCTION(wordwrap)
 	else {
 		/* Multiple character line break or forced cut */
 		if (linelength > 0) {
-			newtextlen = textlen + (textlen/linelength) * breakcharlen + 1;
+			newtextlen = textlen + (textlen/linelength + 1) * breakcharlen + 1;
 		}
 		else {
 			newtextlen = textlen * (breakcharlen + 1) + 1;
