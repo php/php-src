@@ -1119,7 +1119,7 @@ PHP_FUNCTION(ob_gzhandler)
 		if (return_original) {
 			zval_dtor(return_value);
 		} else {
-			char lenbuf[ 64 ];
+			char lenbuf[64];
 			
 			sprintf(lenbuf,"Content-Length: %d",Z_STRLEN_P(return_value));
 			sapi_add_header(lenbuf,strlen(lenbuf), 1);
