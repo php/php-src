@@ -1,3 +1,10 @@
+2004-01-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_ini_parser.y:
+      Don't treat strings containing : as potential constant names in
+      the .ini parser.
+      This fixes Bug #26893
+
 2004-01-12  Andi Gutmans  <andi@zend.com>
 
     * zend_compile.c:
