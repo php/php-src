@@ -12,7 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: David Croft <david@infotrek.co.uk>                           |
+   | Authors: David Croft <david@infotrek.co.uk>                          |
+   |          Boian Bonev <boian@bonev.com>                               |
    +----------------------------------------------------------------------+
 */
 
@@ -32,29 +33,30 @@ extern zend_module_entry vpopmail_module_entry;
 #define PHP_VPOPMAIL_API
 #endif
 
-PHP_MINIT_FUNCTION(vpopmail);
-PHP_MSHUTDOWN_FUNCTION(vpopmail);
+PHP_RSHUTDOWN_FUNCTION(vpopmail);
 PHP_MINFO_FUNCTION(vpopmail);
 
+// domain management
 PHP_FUNCTION(vpopmail_adddomain);
 PHP_FUNCTION(vpopmail_deldomain);
+PHP_FUNCTION(vpopmail_addaliasdomain);
+// user management
 PHP_FUNCTION(vpopmail_adduser);
 PHP_FUNCTION(vpopmail_deluser);
 PHP_FUNCTION(vpopmail_passwd);
 PHP_FUNCTION(vpopmail_setuserquota);
 PHP_FUNCTION(vpopmail_auth_user);
 
-typedef struct {
-	int le_vpopmail;
-	int initialised;
-	char *defaulthost;
-	int defaultport;
-	int defaulttimeout;
-	char *proxyaddress;
-	int proxyport;
-	char *proxylogon;
-	char *proxypassword;
-} php_vpopmail_globals;
+// defines for proper operation
+#define VPOPMAIL_ADDD "/vadddomain "
+#define VPOPMAIL_DELD "/vdeldomain "
+#define VPOPMAIL_ADAD "/vaddaliasdomain "
+
+/* removed by intent - will add upon need
+ZEND_BEGIN_MODULE_GLOBALS(vpopmail)
+	int global_variable;
+ZEND_END_MODULE_GLOBALS(vpopmail)
+*/
 
 #ifdef ZTS
 #define VPOPMAILG(v) (vpopmail_globals->v)
