@@ -1114,6 +1114,10 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	zend_arg_info *cur_arg_info;
 
+	if (CG(active_class_entry) && CG(active_class_entry)->destructor == (zend_function *) CG(active_op_array))
+	{
+		zend_error(E_COMPILE_ERROR, "Destuctor %s::%s() cannot take arguments", CG(active_class_entry)->name, CG(active_op_array)->function_name);
+	}
 	CG(active_op_array)->num_args++;
 	opline->opcode = op;
 	opline->result = *var;
