@@ -312,6 +312,9 @@ void fastcgi_cleanup(int signal)
 
 	/* Kill all the processes in our process group */
 	kill( -pgroup, SIGTERM );
+
+	/* We should exit at this point, but MacOSX doesn't seem to */
+	exit( 0 );
 }
 
 
