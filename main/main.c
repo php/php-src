@@ -654,10 +654,10 @@ static void php_message_handler_for_zend(long message, void *data)
 
 int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 {
-	zend_output_startup();
+	php_output_startup();
 
 	if (PG(output_buffering)) {
-		zend_start_ob_buffering();
+		php_start_ob_buffering();
 	}
 #if APACHE
 	/*
@@ -732,7 +732,7 @@ void php_request_shutdown(void *dummy)
 	SLS_FETCH();
 
 	sapi_send_headers();
-	zend_end_ob_buffering(SG(request_info).headers_only?0:1);
+	php_end_ob_buffering(SG(request_info).headers_only?0:1);
 
 	php3_call_shutdown_functions();
 	
@@ -771,9 +771,9 @@ static void php3_config_ini_shutdown()
 }
 
 
-static int zend_body_write_wrapper(const char *str, uint str_length)
+static int php_body_write_wrapper(const char *str, uint str_length)
 {
-	return zend_body_write(str, str_length);
+	return php_body_write(str, str_length);
 }
 
 #ifdef ZTS
@@ -825,11 +825,11 @@ int php_module_startup(sapi_module_struct *sf)
 
 	sapi_module = *sf;
 
-	zend_output_startup();
+	php_output_startup();
 
 	zuf.error_function = php_error;
 	zuf.printf_function = php_printf;
-	zuf.write_function = zend_body_write_wrapper;
+	zuf.write_function = php_body_write_wrapper;
 	zuf.fopen_function = php_fopen_wrapper_for_zend;
 	zuf.message_handler = php_message_handler_for_zend;
 	zuf.block_interruptions = BLOCK_INTERRUPTIONS;
@@ -1210,7 +1210,7 @@ PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mod
 	}
 	
 	php3_header();			/* Make sure headers have been sent */
-	zend_end_ob_buffering(1);
+	php_end_ob_buffering(1);
 	return (OK);
 }
 #endif							/* APACHE */
