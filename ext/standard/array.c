@@ -1042,6 +1042,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	HashTable *target_hash;		/* array hashtable */
 	HashPosition pos;			/* hash iterator */
    	ulong num_key;
+	uint str_key_len;
    	char *string_key;
 	int (*compare_func)(zval *, zval *, zval * TSRMLS_DC) = is_equal_function;
       	
@@ -1076,12 +1077,12 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 				RETURN_TRUE;
 			} else {
 				/* Return current key */
-				switch (zend_hash_get_current_key_ex(target_hash, &string_key, NULL, &num_key, 1,  &pos)) {
+				switch (zend_hash_get_current_key_ex(target_hash, &string_key, &str_key_len, &num_key, 0,  &pos)) {
 					case HASH_KEY_IS_STRING:
-						RETVAL_STRING(string_key, 0);
+						RETURN_STRINGL(string_key, str_key_len-1, 1);
 						break;
 					case HASH_KEY_IS_LONG:
-						RETVAL_LONG(num_key);
+						RETURN_LONG(num_key);
 						break;
 				}
 			}
