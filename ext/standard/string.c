@@ -788,7 +788,7 @@ PHP_FUNCTION(pathinfo)
 	MAKE_STD_ZVAL(tmp);
 	array_init(tmp);
 	
-	if (opt == PHP_PATHINFO_DIRNAME || argc < 2) {
+	if (argc < 2 || opt == PHP_PATHINFO_DIRNAME) {
 		ret = estrndup(Z_STRVAL_PP(path), len);
 		php_dirname(ret, len);
 		if (*ret)
@@ -796,12 +796,12 @@ PHP_FUNCTION(pathinfo)
 		efree(ret);
 	}
 	
-	if (opt == PHP_PATHINFO_BASENAME || argc < 2) {
+	if (argc < 2 || opt == PHP_PATHINFO_BASENAME) 
 		ret = php_basename(Z_STRVAL_PP(path), len);
 		add_assoc_string(tmp, "basename", ret, 0);
 	}			
 	
-	if (opt == PHP_PATHINFO_EXTENSION || argc < 2) {
+	if (argc < 2 || opt == PHP_PATHINFO_EXTENSION) {
 		char *p;
 		int idx;
 
