@@ -706,6 +706,11 @@ AC_SUBST(EXTRA_LIBS)
 # reading config stubs
 esyscmd(./scripts/config-stubs ext)
 
+dnl if it's still the default choice, enable this implicitly
+if test "$PHP_SAPI" = "cgi"; then
+  PHP_OUTPUT(sapi/cgi/Makefile)
+fi
+
 divert(4)
 
 dnl If we are using gcc and the user has not specified CFLAGS, add -O2.
@@ -741,11 +746,8 @@ AC_SUBST(PHP_LIBS)
 AC_SUBST(PHP_SAPI)
 AC_SUBST(SAPI_TARGET)
 
-test -d sapi || mkdir sapi
-test -d ext || mkdir ext
-
 #libphp4.module 
-AC_OUTPUT([Makefile php4.spec $PHP_OUTPUT_FILES
+AC_OUTPUT([Makefile php4.spec ext/Makefile sapi/Makefile $PHP_OUTPUT_FILES
            scripts/mkextlib regex/Makefile build-defs.h], [], [
 
 if test ! -f $srcdir/ext/bcmath/number.c; then

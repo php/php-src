@@ -21,6 +21,7 @@ AC_ARG_WITH(pcre-regex,
 			AC_DEFINE(HAVE_BUNDLED_PCRE, 1)
 			AC_MSG_RESULT(yes)
 			PHP_EXTENSION(pcre)
+			PHP_OUTPUT(ext/pcre/pcrelib/Makefile)
 			;;
 		*)
 			if test -f $withval/pcre.h ; then
@@ -55,5 +56,6 @@ AC_ARG_WITH(pcre-regex,
   AC_DEFINE(HAVE_BUNDLED_PCRE, 1)
   AC_MSG_RESULT(yes)
   PHP_EXTENSION(pcre)
+  PHP_OUTPUT(ext/pcre/pcrelib/Makefile)
 ]) 
 AC_SUBST(PCRE_SUBDIR)
