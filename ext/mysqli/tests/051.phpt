@@ -13,7 +13,7 @@ free statement after close
 	mysqli_execute($stmt1);
 
 	mysqli_close($link);
-	mysqli_stmt_close($stmt1);
+	@mysqli_stmt_close($stmt1);
 	printf("Ok\n");
 ?>
 --EXPECT--
