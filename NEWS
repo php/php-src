@@ -1,7 +1,12 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ??? 2000, Version 4.0.3-dev
+05 Oct 2000, Version 4.0.3
+- Added support for trans sid under Win32 (Daniel)
+- IPv6 support in fopen (Stig Venaas)
+- Added the shmop extension. It allows more general ways of shared memory
+  access. (thanks to Ilia Alshanestky <iliaa@home.com> and Slava Poliakov
+  <slavapl@mailandnews.com> (Derick)
 - Added the ability for CURLOPT_POSTFIELDS to accept an associative array of 
   HTTP POST variables and values. (Sterling)
 - Added the CURLOPT_HTTPHEADER option to curl_setopt(). (Sterling)
