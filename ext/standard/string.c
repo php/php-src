@@ -2650,6 +2650,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 		/* Duplicate subject string for repeated replacement */
 		*result = **subject;
 		zval_copy_ctor(result);
+		INIT_PZVAL(result);
 		
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(search));
 
@@ -2698,13 +2699,17 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 								&temp_result);
 			} else if (Z_STRLEN_PP(search_entry) > 1) {
 				Z_STRVAL(temp_result) = str_to_str(Z_STRVAL_P(result), Z_STRLEN_P(result),
-													   Z_STRVAL_PP(search_entry), Z_STRLEN_PP(search_entry),
-													   replace_value, replace_len, &Z_STRLEN(temp_result));
+												   Z_STRVAL_PP(search_entry), Z_STRLEN_PP(search_entry),
+												   replace_value, replace_len, &Z_STRLEN(temp_result));
 			}
 
 			efree(Z_STRVAL_P(result));
 			Z_STRVAL_P(result) = Z_STRVAL(temp_result);
 			Z_STRLEN_P(result) = Z_STRLEN(temp_result);
+
+			if (Z_STRLEN_P(result) == 0) {
+				return;
+			}
 
 			zend_hash_move_forward(Z_ARRVAL_P(search));
 		}
@@ -2718,11 +2723,12 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 							result);
 		} else if (Z_STRLEN_P(search) > 1) {
 			Z_STRVAL_P(result) = str_to_str(Z_STRVAL_PP(subject), Z_STRLEN_PP(subject),
-												Z_STRVAL_P(search), Z_STRLEN_P(search),
-												Z_STRVAL_P(replace), Z_STRLEN_P(replace), &Z_STRLEN_P(result));
+											Z_STRVAL_P(search), Z_STRLEN_P(search),
+											Z_STRVAL_P(replace), Z_STRLEN_P(replace), &Z_STRLEN_P(result));
 		} else {
 			*result = **subject;
 			zval_copy_ctor(result);
+			INIT_PZVAL(result);
 		}
 	}
 }
@@ -2740,9 +2746,9 @@ PHP_FUNCTION(str_replace)
 	int boyer = 0;
 
 	if(ZEND_NUM_ARGS() < 3 ||
-			ZEND_NUM_ARGS() > 4 ||
-			zend_get_parameters_ex(ZEND_NUM_ARGS(), &search, 
-				&replace, &subject, &pboyer) == FAILURE) {
+	   ZEND_NUM_ARGS() > 4 ||
+	   zend_get_parameters_ex(ZEND_NUM_ARGS(), &search, 
+							  &replace, &subject, &pboyer) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
