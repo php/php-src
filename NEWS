@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fix switch which only has a single default rule. (Andi, Zend Engine)
+- Fix problem with nested foreach()'s. (Andi, Zend Engine)
 - The CCVS module is now stable and compiling. It compiles as a CGI and into
   Apache cleanly without warnings. (Brendan W. McAdams)
 - Fixed mSQL_close(). (nick@loman.net)
