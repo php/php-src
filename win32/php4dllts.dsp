@@ -1983,6 +1983,10 @@ SOURCE=..\ext\sqlite\php_sqlite.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\ext\sqlite\sess_sqlite.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\sqlite\sqlite.c
 # End Source File
 # End Group
