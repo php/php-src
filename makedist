@@ -27,10 +27,11 @@
 # $Id$
 #
 
-CVSROOT=:pserver:cvsread@cvs.php.net:/repository
-export CVSROOT
+PHPROOT=:pserver:cvsread@cvs.php.net:/repository
 ZENDROOT=:pserver:cvsread@cvs.zend.com:/repository
-export ZENDROOT
+PHPMOD=php4
+ZENDMOD=libzend
+TSRMMOD=TSRM
 
 if echo '\c' | grep -s c >/dev/null 2>&1
 then
@@ -70,46 +71,32 @@ CVSVER=`echo $VER | sed -e 's/[\.\-]/_/g'`
 # CVS release tag
 CVSTAG=${PKG}_$CVSVER
 
-# should become "php4"
-CVSMOD=`cat CVS/Repository | sed -e 's!^/[^/]*/!!'`
-# should become "libzend"
-ZENDMOD=`cat libzend/CVS/Repository | sed -e 's!^/[^/]*/!!'`
-# should become "TSRM"
-TSRMMOD=`cat TSRM/CVS/Repository | sed -e 's!^/[^/]*/!!'`
-
 if test ! -d $DIRPATH; then
     mkdir -p $DIRPATH || exit 2
 fi
 
 #cd $DIRPATH || exit 3
 
-$ECHO_N "makedist: exporting tag '$CVSTAG' from '$CVSMOD'...$ECHO_C"
-cvs -Q export -d $DIR -r $CVSTAG $CVSMOD || exit 4
+# Export PHP
+$ECHO_N "makedist: exporting tag '$CVSTAG' from '$PHPMOD'...$ECHO_C"
+cvs -d $PHPROOT -Q export -d $DIR -r $CVSTAG $PHPMOD || exit 4
 echo ""
 
+# Export the other modules inside the PHP directory
 cd $DIR || exit 5
 
-# Check out Zend
+# Export Zend
 $ECHO_N "makedist: exporting tag '$CVSTAG' from '$ZENDMOD'...$ECHO_C"
 cvs -d $ZENDROOT -Q export -r $CVSTAG $ZENDMOD || exit 4
 echo ""
 
-# Check out TSRM
+# Export TSRM
 $ECHO_N "makedist: exporting tag '$CVSTAG' from '$TSRMMOD'...$ECHO_C"
 cvs -d $ZENDROOT -Q export -r $CVSTAG $TSRMMOD || exit 4
 echo ""
 
-INC=""
-
 # remove CVS stuff...
 find . \( \( -name CVS -type d \) -o -name .cvsignore \) -exec rm -rf {} \;
-
-for file in *; do
-    case $file in
-	$PKG-$VER|web_update);; # ignore these
-	*) INC="$INC $file";; # include the rest
-    esac
-done
 
 # generate some files so people don't need bison, flex and autoconf
 # to install
@@ -121,20 +108,6 @@ set -x
 echo "/* Dummy File */" > ext/bcmath/number.c
 echo "/* Dummy File */" > ext/bcmath/number.h
 
-#perl -i -p -e 's/\r\n/\n/' *.dsw *.dsp
-#set +x
-#
-#INC="$INC \
-#configuration-scanner.c \
-#configuration-parser.c configuration-parser.h \
-#acconfig.h aclocal.m4 missing mkinstalldirs \
-#ltconfig ltmain.sh config.sub config.guess php_config.h.in \
-#configure install-sh Makefile.in"
-#
-#
-#mkdir $PKG-$VER || exit 6
-#mv $INC $PKG-$VER || exit 7
- 
 cd $MY_OLDPWD
 $ECHO_N "makedist: making gzipped tar archive...$ECHO_C"
 tar czf $ARCHIVE $PKG-$VER || exit 8
