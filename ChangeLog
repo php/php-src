@@ -1,3 +1,290 @@
+2003-02-13  Sara Golemon  <php@alphaweb.net>
+
+    * ext/ftp/ftp.c:
+      MFB(r-1.68.2.5) Bug 22052
+
+    * (PHP_4_3)
+      ext/ftp/ftp.c:
+      Buf #22052 More casual efree()ing causing segfaults
+
+2003-02-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/domxml/php_domxml.c:
+      pass tsrmls instead of fetching it always
+
+2003-02-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c:
+      MFB: Fix for bug #22199
+
+    * (PHP_4_3)
+      main/streams.c:
+      Fix for Bug #22199 (fputs() + fgets() destroys readbuffer for non-seekable
+      streams).
+
+2003-02-13  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      typofix
+
+2003-02-13  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      ext/ftp/ftp.c:
+      Bug #22059. ftp_chdir() causes segfault.  efree(ftp->pwd) was being called
+      without knowing for certain that ftp->pwd
+      actually pointed anywhere.
+
+2003-02-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cgi/cgi_main.c:
+      fix non FCGI build
+
+2003-02-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/strings/bug22187.phpt:
+      
+      Added test case for bug #22187.
+
+    * main/snprintf.c:
+      Modified fix for bug #22187 so that it does not affect handling of numbers
+      represented in scientific notation.
+
+2003-02-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/tests/strings/crypt.phpt:
+      
+      Added test for those different crypt() methods. Hopefully I got the
+      results right.
+
+2003-02-13  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/tests/connect.inc:
+      include file for test
+
+2003-02-13  Shane Caraveo  <shane@caraveo.com>
+
+    * sapi/cgi/cgi_main.c:
+      There is *absolutely no* definitive way to know if argv0 is the
+      actual php script, or if it is the beginning of a query string.
+      Additionaly, passing parameters on the command line is
+      not part of CGI spec, and is not required by either
+      Apache or IIS.  So I have removed that code altogether,
+      and done some further cleanup.  Also fix pre4.3 behaviour if
+      fix_pathinfo=0.
+      I've tested with IIS and Apache 1.3.27 on w2k and RH 7.3.
+
+2003-02-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/rpc/com/variant.c:
+      Fixed warnings.
+
+2003-02-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/php_open_temporary_file.c:
+      Another IS_SLASH fix.
+
+2003-02-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * ext/standard/formatted_print.c
+      ext/standard/tests/strings/bug22207.phpt:
+      Fixed bug #22207 (e notation in *printf would be missing a 0 when there is
+      no exponent).
+      Added a test case for the bug.
+
+2003-02-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c:
+      A probable cure for many getcwd/relative include related problems for
+      win32.
+
+2003-02-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/spprintf.c:
+      PAD() macro didn't increase the buffer size resulting in loss of the
+      padding.
+
+2003-02-13  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/mysqli/mysqli_api.c:
+      Use my_ulonglong instead of unsigned long long to make msvc++ happy.
+
+2003-02-13  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      change history
+
+    * (PHP_4_3)
+      NEWS:
+      altering history..
+
+2003-02-13  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * (PHP_4_3)
+      ext/standard/info.c:
+      add missing include
+
+2003-02-13  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/mysqli/.cvsignore:
+      Adding missing .cvsignore
+
+2003-02-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/streams.c:
+      Fixed a typo.
+
+    * main/streams.c:
+      Simplified the mode validation code & added support for read+write mode to
+      'x' mode.
+
+    * ext/rpc/com/variant.c:
+      Added missing header needed for rpc_error().
+
+2003-02-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c:
+      Clarify error message.
+
+2003-02-13  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/mysqli/mysqli.dsp:
+      Initial windows project file
+
+2003-02-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      main/streams.c:
+      Added 'x' mode for fopen() used on local files. This mode will create a new
+      file only if a file does not already exist (O_CREAT|O_EXCL).
+
+2003-02-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/network.c:
+      Potential fixes for #21809 and #22099.
+
+    * ext/standard/php_fopen_wrapper.c:
+      Use FILE*-less implementation for php://(stdin|stdout|stderr)
+
+    * (PHP_4_3)
+      ext/standard/http_fopen_wrapper.c:
+      partial MFH: avoid problems with auto_detect_line_endings.
+
+    * main/php_streams.h
+      main/streams.c:
+      Moving away from ANSI stdio for plain files.
+
+    * ext/standard/http_fopen_wrapper.c:
+      Avoid problems with chunk_size and auto_detect_line_endings.
+
+    * (PHP_4_3)
+      ext/standard/config.m4:
+      MFH: cli should be allowed to use chroot() function.
+
+    * ext/standard/config.m4:
+      cli should be allowed to have the chroot() function.
+
+    * main/streams.c:
+      Whitespace-fix these goto labels.
+
+2003-02-13  Uwe Steinmann  <uwe@steinmann.cx>
+
+    * (PHP_4_3)
+      NEWS
+      ext/hwapi/hwapi.cpp:
+      - Some functions with objects as its parameters didn't recognize them
+        as such
+
+2003-02-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * win32/installer/gen-nsis.php:
+      Update installer so that no extensions are enabled by default.
+
+2003-02-13  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/tests/001.phpt:
+      removed warnings (unused vars)
+
+2003-02-13  Uwe Steinmann  <uwe@steinmann.cx>
+
+    * ext/hwapi/hwapi.cpp:
+      - added more missing strcmp()
+
+2003-02-13  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache/config.m4:
+      Added HAVE_APACHE define.
+
+    * (PHP_4_3)
+      ext/standard/image.c
+      ext/standard/php_image.h
+      ext/standard/tests/image/bug13213.phpt
+      ext/standard/tests/image/getimagesize.phpt
+      ext/standard/tests/image/image_type_to_mime_type.phpt
+      ext/standard/tests/image/test1pix.jp2:
+      - MFH: improved jpeg 2000 and wbmp support for getimagesize()
+
+    * NEWS:
+      Merged these to 4.3.x branch
+
+    * ext/standard/image.c:
+      ws fix
+
+    * (PHP_4_3)
+      NEWS:
+      clean..
+
+2003-02-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd_patch:
+      include limits.h for portability
+
+    * sapi/thttpd/config.m4:
+      portability work
+
+2003-02-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      NEWS:
+      Fixed that one...
+
+2003-02-13  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/tests/042.phpt
+      ext/mysqli/tests/043.phpt
+      ext/mysqli/tests/044.phpt:
+       new tests
+
+2003-02-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c:
+      Fix for Bug #21815 (fpassthru ignored buffered data but then complained
+      anyway)
+
+2003-02-13  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      ext/standard/http_fopen_wrapper.c:
+      Reverting earlier patch to reintroduce buggy behavior (yes, you heard that
+      right) of filtered http streams in favor of
+      performance.  This has little consequence given limited filter support in
+      4.3 branch.  Filters will be redesigned in
+      5.0 release. For more information see Wez, Ilia, or myself.
+
+2003-02-13  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/php_mysqli.h:
+      added new function int mysql_get_server_version
+      this function is available since libmysql change set 1.1450 (2002-02-13)
+
 2003-02-12  Georg Richter  <georg.richter@phpev.de>
 
     * ext/mysqli/mysqli_fe.c:

@@ -1,3 +1,13 @@
+2003-02-13  Zeev Suraski  <zeev@zend.com>
+
+    * zend_object_handlers.c:
+      Fix error handling in illegal property access
+
+2003-02-13  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * zend_language_scanner.l:
+      MFB PHP_4_3
+
 2003-02-12  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_API.c
