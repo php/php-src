@@ -62,8 +62,10 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_add_root,	NULL)
 	PHP_FE(domxml_dumpmem,	NULL)
 	PHP_FE(domxml_attributes,	NULL)
-	PHP_FE(domxml_getattr,	NULL)
-	PHP_FE(domxml_setattr,	NULL)
+	PHP_FE(domxml_get_attribute,	NULL)
+	PHP_FALIAS(domxml_getattr,	domxml_get_attribute, NULL)
+	PHP_FE(domxml_set_attribute,	NULL)
+	PHP_FALIAS(domxml_setattr,	domxml_set_attribute, NULL)
 	PHP_FE(domxml_children,	NULL)
 	PHP_FE(domxml_new_child,	NULL)
 	PHP_FE(domxml_node,	NULL)
@@ -102,12 +104,15 @@ static zend_function_entry php_domxmldtd_class_functions[] = {
 };
 
 static zend_function_entry php_domxmlnode_class_functions[] = {
-	PHP_FALIAS(lastchild,	domxml_lastchild,	NULL)
+	PHP_FALIAS(lastchild,	domxml_last_child,	NULL)
+	PHP_FALIAS(last_child,	domxml_last_child,	NULL)
 	PHP_FALIAS(children,	domxml_children,	NULL)
 	PHP_FALIAS(parent,	domxml_parent,		NULL)
 	PHP_FALIAS(new_child,	domxml_new_child,		NULL)
-	PHP_FALIAS(getattr,	domxml_getattr,		NULL)
-	PHP_FALIAS(setattr,	domxml_setattr,		NULL)
+	PHP_FALIAS(getattr,	domxml_get_attribute,		NULL)
+	PHP_FALIAS(get_attribute,	domxml_get_attribute,		NULL)
+	PHP_FALIAS(setattr,	domxml_set_attribute,		NULL)
+	PHP_FALIAS(set_attribute,	domxml_set_attribute,		NULL)
 	PHP_FALIAS(attributes,	domxml_attributes,	NULL)
 	PHP_FALIAS(node,	domxml_node,	NULL)
 	PHP_FALIAS(set_content,	domxml_set_content,	NULL)
@@ -529,9 +534,9 @@ PHP_FUNCTION(domxml_node)
 }
 /* }}} */
 
-/* {{{ proto object domxml_lastchild([int node])
+/* {{{ proto object domxml_last_child([int node])
    Read directory entry from dir_handle */
-PHP_FUNCTION(domxml_lastchild)
+PHP_FUNCTION(domxml_last_child)
 {
 	zval *id, **tmp;
 	xmlNode *nodep, *last;
@@ -697,9 +702,9 @@ PHP_FUNCTION(domxml_children)
 }
 /* }}} */
 
-/* {{{ proto string domxml_getattr([int node,] string attrname)
+/* {{{ proto string domxml_get_attribute([int node,] string attrname)
    Returns value of given attribute */
-PHP_FUNCTION(domxml_getattr)
+PHP_FUNCTION(domxml_get_attribute)
 {
 	zval *id, *arg1, **tmp;
 	xmlNode *nodep;
@@ -737,9 +742,9 @@ PHP_FUNCTION(domxml_getattr)
 }
 /* }}} */
 
-/* {{{ proto bool domxml_setattr([int node,] string attrname, string value)
+/* {{{ proto bool domxml_set_attribute([int node,] string attrname, string value)
    Sets value of given attribute */
-PHP_FUNCTION(domxml_setattr)
+PHP_FUNCTION(domxml_set_attribute)
 {
 	zval *id, *arg1, *arg2, **tmp;
 	xmlNode *nodep;
@@ -1061,8 +1066,12 @@ PHP_FUNCTION(xmldoc)
 	add_property_resource(return_value, "doc", ret);
 	if(docp->name)
 		add_property_stringl(return_value, "name", (char *) docp->name, strlen(docp->name), 1);
+	else
+		add_property_stringl(return_value, "name", "", 0, 1);
 	if(docp->URL)
 		add_property_stringl(return_value, "url", (char *) docp->URL, strlen(docp->URL), 1);
+	else
+		add_property_stringl(return_value, "url", "", 0, 1);
 	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
 	if(docp->encoding)
 		add_property_stringl(return_value, "encoding", (char *) docp->encoding, strlen(docp->encoding), 1);
