@@ -23,7 +23,7 @@ function adjustDoctype($xml) {
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html><head><title>Hello world</title></head><body><p>
 This is a not well-formed<br/>
-html files with undeclared entities 
+html files with undeclared entities&#xA0;
 </p></body></html>
 --- save as HTML
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
