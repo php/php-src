@@ -28,20 +28,29 @@
 /* OpenSSL includes */
 #include <openssl/evp.h>
 #include <openssl/x509.h>
+#include <openssl/pem.h>
 
-static unsigned char second_argument_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_NONE };
-static unsigned char second_to_fourth_argument_force_ref[] = { 5, BYREF_NONE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE, BYREF_NONE };
+static unsigned char arg2of3_force_ref[] =
+                       { 3, BYREF_NONE, BYREF_FORCE, BYREF_NONE };
+static unsigned char arg2of4_force_ref[] =
+                       { 4, BYREF_NONE, BYREF_FORCE, BYREF_NONE, BYREF_NONE };
+static unsigned char arg2and3of4_force_ref[] =
+                       { 4, BYREF_NONE, BYREF_FORCE, BYREF_FORCE, BYREF_NONE };
+
 
 function_entry openssl_functions[] = {
 	PHP_FE(openssl_read_privatekey,    NULL)
-	PHP_FE(openssl_read_publickey,     NULL)
+	PHP_FE(openssl_get_publickey,      NULL)
 	PHP_FE(openssl_free_key,           NULL)
+#if 0
+	PHP_FE(openssl_read_publickey,     NULL)
 	PHP_FE(openssl_read_x509,          NULL)
 	PHP_FE(openssl_free_x509,          NULL)
-	PHP_FE(openssl_sign,               second_argument_force_ref)
+#endif
+	PHP_FE(openssl_sign,               arg2of3_force_ref)
 	PHP_FE(openssl_verify,             NULL)
-	PHP_FE(openssl_seal,               second_to_fourth_argument_force_ref)
-	PHP_FE(openssl_open,               second_argument_force_ref)
+	PHP_FE(openssl_seal,               arg2and3of4_force_ref)
+	PHP_FE(openssl_open,               arg2of4_force_ref)
 	{NULL, NULL, NULL}
 };
 
@@ -61,18 +70,23 @@ ZEND_GET_MODULE(openssl)
 #endif
 
 static void _php_pkey_free(zend_rsrc_list_entry *rsrc);
-static void _php_x509_free(zend_rsrc_list_entry *rsrc);
+static int le_key;
 
-static int le_key, le_x509;
+#if 0
+static void _php_x509_free(zend_rsrc_list_entry *rsrc);
+static int le_x509;
+#endif
 
 PHP_MINIT_FUNCTION(openssl)
 {
 	le_key = zend_register_list_destructors_ex(_php_pkey_free, NULL,
 						   "OpenSSL key",
 						   module_number);
+#if 0
 	le_x509 = zend_register_list_destructors_ex(_php_x509_free, NULL,
 						    "OpenSSL X.509",
 						    module_number);
+#endif
 	return SUCCESS;
 }
 
@@ -84,22 +98,30 @@ PHP_MINFO_FUNCTION(openssl)
 	php_info_print_table_end();
 }
 
-/* {{{ proto int openssl_read_privatekey(int fp)
+/* {{{ proto int openssl_get_privatekey(string key)
    Read private key */
 PHP_FUNCTION(openssl_read_privatekey)
 {
-	zval **file;
+	zval **key;
+	BIO *b;
 	EVP_PKEY *pkey;
-	FILE *fp;
 	
 	if (ZEND_NUM_ARGS() != 1 ||
-	    zend_get_parameters_ex(1, &file) == FAILURE) {
+	    zend_get_parameters_ex(1, &key) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+	convert_to_string_ex(key);
 	
-	ZEND_FETCH_RESOURCE(fp, FILE *, file, -1, "File-Handle", php_file_le_fopen());
-	
-	pkey = (EVP_PKEY *) PEM_read_PrivateKey(fp, NULL, NULL, NULL);
+	b = BIO_new_mem_buf((*key)->value.str.val, -1);
+        if (b == NULL) {
+		RETURN_FALSE;
+	}
+
+        pkey = (EVP_PKEY *) PEM_ASN1_read_bio((char *(*)())d2i_PrivateKey,
+					  PEM_STRING_EVP_PKEY, b,
+					  NULL, NULL, NULL);
+	BIO_free(b);
+
 	if (pkey == NULL) { 
 		RETURN_FALSE;
 	}
@@ -108,21 +130,38 @@ PHP_FUNCTION(openssl_read_privatekey)
 }
 /* }}} */
 
-/* {{{ proto int openssl_read_publickey(int x509)
-   Read public key */
-PHP_FUNCTION(openssl_read_publickey)
+/* {{{ proto int openssl_get_publickey(string cert)
+   Get public key from X.509 certificate */
+PHP_FUNCTION(openssl_get_publickey)
 {
-	zval **x509;
-	X509 *cert;
+	zval **cert;
+	X509 *x509;
+        BIO *b;
 	EVP_PKEY *pkey;
 
 	if (ZEND_NUM_ARGS() != 1 ||
-	    zend_get_parameters_ex(1, &x509) == FAILURE) {
+	    zend_get_parameters_ex(1, &cert) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(cert, X509 *, x509, -1, "OpenSSL X.509", le_x509);
+	convert_to_string_ex(cert);
 
-	pkey = (EVP_PKEY *) X509_get_pubkey(cert);
+	b = BIO_new_mem_buf((*cert)->value.str.val, -1);
+        if (b == NULL) {
+		RETURN_FALSE;
+	}
+
+        x509 = (X509 *) PEM_ASN1_read_bio((char *(*)())d2i_X509,
+					  PEM_STRING_X509, b,
+					  NULL, NULL, NULL);
+	BIO_free(b);
+
+	if (x509 == NULL) { 
+		RETURN_FALSE;
+	}
+
+	pkey = (EVP_PKEY *) X509_get_pubkey(x509);
+	X509_free(x509);
+
 	if (pkey == NULL) { 
 		RETURN_FALSE;
 	}
@@ -148,23 +187,54 @@ PHP_FUNCTION(openssl_free_key)
 }
 /* }}} */
 
-/* {{{ proto int openssl_read_x509(int fp)
+#if 0
+/* {{{ proto int openssl_read_publickey(int x509)
+   Read public key */
+PHP_FUNCTION(openssl_read_publickey)
+{
+	zval **x509;
+	X509 *cert;
+	EVP_PKEY *pkey;
+
+	if (ZEND_NUM_ARGS() != 1 ||
+	    zend_get_parameters_ex(1, &x509) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	ZEND_FETCH_RESOURCE(cert, X509 *, x509, -1, "OpenSSL X.509", le_x509);
+
+	pkey = (EVP_PKEY *) X509_get_pubkey(cert);
+	if (pkey == NULL) { 
+		RETURN_FALSE;
+	}
+
+	ZEND_REGISTER_RESOURCE(return_value, pkey, le_key);
+}
+/* }}} */
+
+/* {{{ proto int openssl_read_x509(string cert)
    Read X.509 certificate */
 PHP_FUNCTION(openssl_read_x509)
 {
-	zval **file;
+	zval **cert;
 	X509 *x509;
-	FILE *fp;
+        BIO *b;
 
 	if (ZEND_NUM_ARGS() != 1 ||
-	    zend_get_parameters_ex(1, &file) == FAILURE) {
+	    zend_get_parameters_ex(1, &cert) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+	convert_to_string_ex(cert);
 
-	ZEND_FETCH_RESOURCE(fp, FILE *, file, -1, "File-Handle",
-			    php_file_le_fopen());
+	b = BIO_new_mem_buf((*cert)->value.str.val, -1);
+        if (b == NULL) {
+		RETURN_FALSE;
+	}
 
-	x509 = (X509 *) PEM_read_X509(fp, NULL, NULL, NULL);
+        x509 = (X509 *) PEM_ASN1_read_bio((char *(*)())d2i_X509,
+					  PEM_STRING_X509, b,
+					  NULL, NULL, NULL);
+	BIO_free(b);
+
 	if (x509 == NULL) { 
 		RETURN_FALSE;
 	}
@@ -189,6 +259,7 @@ PHP_FUNCTION(openssl_free_x509)
 	zend_list_delete((*x509)->value.lval);
 }
 /* }}} */
+#endif
 
 /* {{{ proto bool openssl_sign(string data, string signature, int key)
    Sign data */
@@ -256,21 +327,21 @@ PHP_FUNCTION(openssl_verify)
 /* }}} */
 
 /* {{{ proto int openssl_seal(string data, string sealdata, array ekeys,
-                              string ivec, array pubkeys)
+                              array pubkeys)
    Seal data */
 PHP_FUNCTION(openssl_seal)
 {
-	zval **pubkeys, **pubkey, **data, **sealdata, **ekeys, **ivec;
+	zval **pubkeys, **pubkey, **data, **sealdata, **ekeys;
 	HashTable *pubkeysht;
         HashPosition pos;
 	EVP_PKEY **pkeys;
-	int i, len1, len2, *eksl, ivlen, nkeys;
-	unsigned char *buf, **eks, *iv;
+	int i, len1, len2, *eksl, nkeys;
+	unsigned char *buf, **eks;
 
 	EVP_CIPHER_CTX ctx;
 
-	if (ZEND_NUM_ARGS() != 5 ||
-		zend_get_parameters_ex(5, &data, &sealdata, &ekeys, &ivec,
+	if (ZEND_NUM_ARGS() != 4 ||
+		zend_get_parameters_ex(4, &data, &sealdata, &ekeys,
 				       &pubkeys) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -332,6 +403,8 @@ PHP_FUNCTION(openssl_seal)
 		RETURN_FALSE;
 	}
 
+#if 0
+	/* Need this if allow ciphers that require initialization vector */
 	ivlen = EVP_CIPHER_CTX_iv_length(&ctx);
 	if (ivlen) {
 		iv = emalloc(ivlen + 1);
@@ -347,10 +420,10 @@ PHP_FUNCTION(openssl_seal)
 	} else {
 		iv = NULL;
 	}
+#endif
 	/* allocate one byte extra to make room for \0 */
 	buf = emalloc((*data)->value.str.len + EVP_CIPHER_CTX_block_size(&ctx));
 	if (buf == NULL) {
-		efree(iv);
 		for (i=0; i<nkeys; i++) {
 			efree(eks[i]);
 		}
@@ -360,11 +433,10 @@ PHP_FUNCTION(openssl_seal)
 		RETURN_FALSE;
 	}
 
-	if (!EVP_SealInit(&ctx, EVP_rc4(), eks, eksl, iv, pkeys, nkeys) ||
+	if (!EVP_SealInit(&ctx, EVP_rc4(), eks, eksl, NULL, pkeys, nkeys) ||
 	    !EVP_SealUpdate(&ctx, buf, &len1, (*data)->value.str.val,
 			    (*data)->value.str.len)) {
 		efree(buf);
-		efree(iv);
 		for (i=0; i<nkeys; i++) {
 			efree(eks[i]);
 		}
@@ -387,7 +459,6 @@ PHP_FUNCTION(openssl_seal)
 		zval_dtor(*ekeys);
 		if (array_init(*ekeys) == FAILURE) {
 			php_error(E_ERROR, "Cannot initialize return value");
-			efree(iv);
 			for (i=0; i<nkeys; i++) {
 				efree(eks[i]);
 			}
@@ -404,6 +475,8 @@ PHP_FUNCTION(openssl_seal)
 		efree(eks);
 		efree(eksl);
 
+#if 0
+		/* If allow ciphers that need IV, we need this */
 		zval_dtor(*ivec);
 		if (ivlen) {
 			iv[ivlen] = '\0';
@@ -411,9 +484,9 @@ PHP_FUNCTION(openssl_seal)
 		} else {
 			ZVAL_EMPTY_STRING(*ivec);
 		}
+#endif
 	} else {
 		efree(buf);
-		efree(iv);
 		for (i=0; i<nkeys; i++) {
 			efree(eks[i]);
 		}
@@ -426,25 +499,24 @@ PHP_FUNCTION(openssl_seal)
 /* }}} */
 
 /* {{{ proto bool openssl_open(string data, string opendata, string ekey,
-                              string ivec, int privkey)
+                               int privkey)
    Open data */
 PHP_FUNCTION(openssl_open)
 {
-	zval **privkey, **data, **opendata, **ekey, **ivec;
+	zval **privkey, **data, **opendata, **ekey;
 	EVP_PKEY *pkey;
-	int len1, len2, ekl, ivlen;
-	unsigned char *buf, *ek, *iv;
+	int len1, len2, ekl;
+	unsigned char *buf, *ek;
 
 	EVP_CIPHER_CTX ctx;
 
-	if (ZEND_NUM_ARGS() != 5 ||
-	    zend_get_parameters_ex(5, &data, &opendata, &ekey, &ivec,
+	if (ZEND_NUM_ARGS() != 4 ||
+	    zend_get_parameters_ex(4, &data, &opendata, &ekey,
 				   &privkey) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(data);
 	convert_to_string_ex(ekey);
-	convert_to_string_ex(ivec);
 	
 	ZEND_FETCH_RESOURCE(pkey, EVP_PKEY *, privkey, -1, "OpenSSL key",
 			    le_key);
@@ -455,8 +527,7 @@ PHP_FUNCTION(openssl_open)
 	}
 
 	if (!EVP_OpenInit(&ctx, EVP_rc4(), (*ekey)->value.str.val,
-			  (*ekey)->value.str.len, (*ivec)->value.str.val,
-			  pkey) ||
+			  (*ekey)->value.str.len, NULL, pkey) ||
 	    !EVP_OpenUpdate(&ctx, buf, &len1, (*data)->value.str.val,
 			    (*data)->value.str.len) ||
 	    !EVP_OpenFinal(&ctx, buf + len1, &len2) ||
@@ -480,6 +551,7 @@ static void _php_pkey_free(zend_rsrc_list_entry *rsrc)
 }
 /* }}} */
 
+#if 0
 /* {{{ _php_x509_free() */
 static void _php_x509_free(zend_rsrc_list_entry *rsrc)
 {
@@ -487,6 +559,7 @@ static void _php_x509_free(zend_rsrc_list_entry *rsrc)
 	X509_free(x509);
 }
 /* }}} */
+#endif
 
 /*
  * Local variables:
