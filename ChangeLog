@@ -1,3 +1,159 @@
+2003-01-07  Christian Dickmann  <chrisdicki@gmx.de>
+
+    * pear/PEAR/Config.php:
+      fix default umask(); (thx to Mirco MEEBEY Bauer for bringing this behavior
+      to my attention and testing the patch)
+
+2003-01-07  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+      Version tag for future move to PECL
+
+    * ext/odbc/config.m4
+      ext/odbc/php_odbc.c:
+      Reverting last change as it really doesn't fix longreadlen problems in all
+      cases.
+
+2003-01-07  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      Instances should not be freed in dtor()...
+
+    * ext/standard/filters.c:
+      Made error msg format more consistent
+
+2003-01-07  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * ext/gd/gd.c:
+      Fix line drawed twice (L. Atkinson)
+
+2003-01-07  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/user_filters.c:
+      Backout changes between 1.6 and 1.7
+
+2003-01-07  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/cgi/cgi_main.c:
+      Add missing call
+
+2003-01-07  Levi Dixon  <ldixon@mail.communityconnect.com>
+
+    * ext/oci8/config.m4
+      ext/oci8/oci8.c:
+      Added support for Shared Data Mode for OCI8_VERSION >= 8.1, which will
+      provide memory savings by sharing common statement data
+
+2003-01-07  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      NEWS:
+      Bugfix #17098 in the branch
+
+    * (PHP_4_3)
+      sapi/apache2filter/sapi_apache2.c:
+      MFH:
+      Fixed bug #17098 (make Apache aware that PHP scripts represent dynamic
+      data
+      and should not be cached). Fix suggested by daniel.eckl@gmx.de.
+
+2003-01-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * run-tests.php:
+      Added a check for availability of PCRE extension needed by test-suite.
+
+2003-01-07  Vincent Blavet  <vincent@blavet.net>
+
+    * pear/Archive/Tar.php:
+      - Synchronize with /pear/Archive_Tar/Tar.php 1.5 :
+        - Add support for long filenames (greater than 99 characters)
+        - Add private methods _readLongHeader() and _writeLongHeader()
+
+2003-01-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/domxml/php_domxml.c:
+      Fixed ZTS build with ZE2.
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c:
+      ZTS cleanup.
+
+2003-01-07  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c:
+      whitespace
+
+2003-01-07  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      NEWS:
+      Bugfixing news
+
+    * win32/sendmail.c:
+      MFB:
+      Fixed bug #21442 (Crash of mail() on Windows when the first parameter
+      is empty).
+
+    * (PHP_4_3)
+      win32/sendmail.c:
+      Fixed bug #21442 (Crash of mail() on Windows when the first parameter
+      is empty).
+
+2003-01-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mysql/config.m4:
+      tell user which header files could not be found
+
+2003-01-07  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/user_filters.c:
+      Fixed small leak
+
+2003-01-07  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/config.m4:
+      Making the mssql extension work when build as a shared object
+
+2003-01-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c:
+      Fixed ZTS build.
+
+    * ext/ftp/ftp.c
+      ext/ftp/php_ftp.c:
+      MFB + CS
+
+    * (PHP_4_3)
+      ext/ftp/ftp.c
+      ext/ftp/php_ftp.c:
+      Changed perror() to php_error_docref(), fixed bug #21309.
+      Made extension use ZE memory allocation wrappers, fixed a memory leak in
+      ftp_mkdir.
+      Removed duplicate ftp_syst() call inside ftp_systype().
+      
+
+2003-01-07  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      Trivial grammer fix
+
+    * ext/standard/filters.c:
+      Implemented quoted-printable stream filter
+
+2003-01-07  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/user_filters.c:
+      Add option to stream_get_filters() user-defined fiters vs. all filters,
+      default to user only
+
+2003-01-07  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      Implemented string.base64 stream filter
+
 2003-01-06  Stefan Esser  <s.esser@e-matters.de>
 
     * main/rfc1867.c:
