@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE package SYSTEM "../pear/package.dtd">
+<package>
+ <name>enchant</name>
+ <summary>Date and Time Library</summary>
+ <maintainers>
+  <maintainer>
+   <user>pajoye</user>
+   <name>Pierre-Alain Joye</name>
+   <email>paj@pearfr.org</email>
+   <role>lead</role>
+  </maintainer>
+ </maintainers>
+ <description>Enchant is a binder for libenchant. Libenchant provides a common
+API for many spell libraries:
+- aspell/pspell (intended to replace ispell)
+- hspell (hebrew)
+- ispell 
+- myspell (OpenOffice project, mozilla)
+- uspell (primarily Yiddish, Hebrew, and Eastern European languages)
+A plugin system allows to add custom spell support.
+see www.abisource.com/enchant/</description>
+ <license>PHP</license>
+ <release>
+  <state>alpha</state>
+  <version>0.1</version>
+  <date>2004-03-08</date>
+  <notes>Initial release</notes>
+  <filelist>
+   <file role="src" name="config.m4"/>
+   <file role="src" name="config.w32"/>
+   <file role="src" name="enchant.c"/>
+   <file role="src" name="php_enchant.h"/>
+   <dir name="docs" role="doc">
+     <dir name="examples">
+       <file name="example1.php"/>
+     </dir>
+   </dir>
+  </filelist>
+  <configureoptions>
+   <configureoption name="with-enchant" default="shared" prompt="libenchant prefix?"/>
+  </configureoptions>
+  <deps>
+   <dep type="php" rel="ge" version="5" />
+  </deps>
+ </release>
+</package>
+<!--
+vim:et:ts=1:sw=1
+-->
