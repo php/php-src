@@ -1,3 +1,47 @@
+2004-03-19  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/dns.c:
+      Cleanup, minor refactor, and CS
+
+    * ext/standard/dns.c:
+      Bug Fix #27657: TXT records longer than MAXHOSTNAMELEN cause segfaults.
+
+2004-03-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/tests/sqlite_oo_031.phpt:
+      Fix test
+
+    * ext/sqlite/tests/sqlite_oo_020.phpt:
+      Fix test
+
+    * ext/sqlite/tests/sqlite_027.phpt:
+      Make test work when user has memory limit setting
+
+2004-03-19  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_4_3)
+      ext/mssql/php_mssql.c:
+      MFH Fix for #26589. Crash when selecting many columns of type Money
+
+    * ext/mssql/php_mssql.c:
+      Fix for #26589. Crash when selecting many columns of type Money
+
+2004-03-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/http_fopen_wrapper.c:
+      MFH: Fixed bug #27628 (Simplify the process of making a POST request via
+      stream context).
+
+2004-03-19  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml:
+      update to 1.3.1dev
+
+    * pear/PEAR/ErrorStack.php:
+      
+      new Error Stack for PEAR, EXPERIMENTAL until proven solid and stable
+
 2004-03-18  Pierre-Alain Joye  <paj@pearfr.org>
 
     * ext/gd/tests/bug27582_2.phpt:
