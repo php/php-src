@@ -43,6 +43,7 @@ PHP_FUNCTION(mailparse_msg_get_structure);
 PHP_FUNCTION(mailparse_msg_get_part_data);
 PHP_FUNCTION(mailparse_msg_extract_part);
 PHP_FUNCTION(mailparse_msg_extract_part_file);
+PHP_FUNCTION(mailparse_msg_extract_whole_part_file);
 
 PHP_FUNCTION(mailparse_msg_create);
 PHP_FUNCTION(mailparse_msg_free);

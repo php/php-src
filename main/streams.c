@@ -716,6 +716,7 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 				return FAILURE;
 			}
 			if (ret) {
+				fflush(data->file);
 				*ret = (void*)fd;
 			}
 			return SUCCESS;

@@ -52,6 +52,7 @@ function_entry mailparse_functions[] = {
 	PHP_FE(mailparse_msg_get_part_data,			NULL)
 	PHP_FE(mailparse_msg_extract_part,			NULL)
 	PHP_FE(mailparse_msg_extract_part_file,		NULL)
+	PHP_FE(mailparse_msg_extract_whole_part_file,		NULL)
 	
 	PHP_FE(mailparse_msg_create,				NULL)
 	PHP_FE(mailparse_msg_free,				NULL)
@@ -124,6 +125,7 @@ PHP_MINFO_FUNCTION(mailparse)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "mailparse support", "enabled");
+	php_info_print_table_row(2, "Revision", "$Revision$");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -313,7 +315,7 @@ PHP_FUNCTION(mailparse_rfc822_parse_addresses)
 }
 /* }}} */
 
-/* {{{ proto int mailparse_determine_best_xfer_encoding(resource fp)
+/* {{{ proto string mailparse_determine_best_xfer_encoding(resource fp)
    Figures out the best way of encoding the content read from the file pointer fp, which must be seek-able */
 PHP_FUNCTION(mailparse_determine_best_xfer_encoding)
 {
@@ -322,41 +324,36 @@ PHP_FUNCTION(mailparse_determine_best_xfer_encoding)
 	int linelen = 0;
 	int c;
 	enum mbfl_no_encoding bestenc = mbfl_no_encoding_7bit;
-	void * what;
-	int type;
+	php_stream *stream;
 	char * name;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE)	{
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(file TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
-	ZEND_VERIFY_RESOURCE(what);
+	stream = zend_fetch_resource(file TSRMLS_CC, -1, "File-Handle", NULL, 1, php_file_le_stream());
+	ZEND_VERIFY_RESOURCE(stream);
 
-	if (type == php_file_le_stream())	{
-		php_stream *stream = (php_stream*)what;
-
-		php_stream_rewind(stream);
-		while(!php_stream_eof(stream))	{
-			c = php_stream_getc(stream);
-			if (c == EOF)
-				break;
-			if (c > 0x80)
-				bestenc = mbfl_no_encoding_8bit;
-			else if (c == 0)	{
-				bestenc = mbfl_no_encoding_base64;
-				longline = 0;
-				break;
-			}
-			if (c == '\n')
-				linelen = 0;
-			else if (++linelen > 200)
-				longline = 1;
+	php_stream_rewind(stream);
+	while(!php_stream_eof(stream))	{
+		c = php_stream_getc(stream);
+		if (c == EOF)
+			break;
+		if (c > 0x80)
+			bestenc = mbfl_no_encoding_8bit;
+		else if (c == 0)	{
+			bestenc = mbfl_no_encoding_base64;
+			longline = 0;
+			break;
 		}
-		if (longline)
-			bestenc = mbfl_no_encoding_qprint;
-		php_stream_rewind(stream);
+		if (c == '\n')
+			linelen = 0;
+		else if (++linelen > 200)
+			longline = 1;
 	}
+	if (longline)
+		bestenc = mbfl_no_encoding_qprint;
+	php_stream_rewind(stream);
 
 	name = (char *)mbfl_no2preferred_mime_name(bestenc);
 	if (name)
@@ -510,7 +507,7 @@ PHP_FUNCTION(mailparse_msg_parse_file)
 	zval **filename;
 	struct rfc2045 *rfcbuf;
 	char *filebuf;
-	FILE *fp;
+	php_stream *stream;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE)	{
 		WRONG_PARAM_COUNT;
@@ -519,9 +516,8 @@ PHP_FUNCTION(mailparse_msg_parse_file)
 	convert_to_string_ex(filename);
 
 	/* open file and read it in */
-	fp = VCWD_FOPEN(Z_STRVAL_PP(filename), "r");
-	if (fp == NULL)	{
-		zend_error(E_WARNING, "%s(): unable to open file %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(filename));
+	stream = php_stream_open_wrapper(Z_STRVAL_PP(filename), "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+	if (stream == NULL)	{
 		RETURN_FALSE;
 	}
 
@@ -531,14 +527,14 @@ PHP_FUNCTION(mailparse_msg_parse_file)
 	if (rfcbuf)	{
 		ZEND_REGISTER_RESOURCE(return_value, rfcbuf, le_rfc2045);
 
-		while(!feof(fp))	{
-			int got = fread(filebuf, sizeof(char), MAILPARSE_BUFSIZ, fp);
+		while(!php_stream_eof(stream))	{
+			int got = php_stream_read(stream, filebuf, MAILPARSE_BUFSIZ);
 			if (got > 0)	{
 				rfc2045_parse(rfcbuf, filebuf, got);
 			}
 		}
-		fclose(fp);
 	}
+	php_stream_close(stream);
 	efree(filebuf);
 }
 /* }}} */
@@ -661,56 +657,170 @@ static int extract_callback_stdout(const char *p, size_t n, void *ptr)
 	return 0;
 }
 
+/* callback for decoding to a stream */
+static int extract_callback_stream(const char *p, size_t n, void *ptr)
+{
+	TSRMLS_FETCH();
+	php_stream_write((php_stream*)ptr, p, n);
+	return 0;
+}
+
+
+#define MAILPARSE_DECODE_NONE	0		/* include headers and leave section untouched */
+#define MAILPARSE_DECODE_8BIT	1		/* decode body into 8-bit */
+#define MAILPARSE_DECODE_NOHEADERS	2	/* don't include the headers */
+static int extract_part(struct rfc2045 *rfcbuf, int decode, php_stream *src, void *callbackdata,
+		rfc2045_decode_user_func_t callback TSRMLS_DC)
+{
+	off_t start, end, body;
+	off_t nlines;
+	off_t nbodylines;
+	off_t start_pos;
+	char *filebuf = NULL;
+	int ret = FAILURE;
+	
+	/* figure out where the message part starts/ends */
+	rfc2045_mimepos(rfcbuf, &start, &end, &body, &nlines, &nbodylines);
+
+	start_pos = decode & MAILPARSE_DECODE_NOHEADERS ? body : start;
+
+	if (decode & MAILPARSE_DECODE_8BIT)
+		rfc2045_cdecode_start(rfcbuf, callback, callbackdata);
+	
+	if (php_stream_seek(src, start_pos, SEEK_SET) == -1) {
+		zend_error(E_WARNING, "%s(): unable to seek to section start", get_active_function_name(TSRMLS_C));
+		goto cleanup;
+	}
+	
+	filebuf = emalloc(MAILPARSE_BUFSIZ);
+	
+	while (start_pos < end)
+	{
+		size_t n = MAILPARSE_BUFSIZ - 1;
+
+		if ((off_t)n > end - start_pos)
+			n = end - start_pos;
+		
+		n = php_stream_read(src, filebuf, n);
+		
+		if (n == 0)
+		{
+			zend_error(E_WARNING, "%s(): error reading from file at offset %d", get_active_function_name(TSRMLS_C), start_pos);
+			goto cleanup;
+		}
+
+		filebuf[n] = '\0';
+		
+		if (decode & MAILPARSE_DECODE_8BIT)
+			rfc2045_cdecode(rfcbuf, filebuf, n);
+		else
+			callback(filebuf, n, callbackdata);
+
+		start_pos += n;
+	}
+	ret = SUCCESS;
+
+cleanup:
+	if (decode & MAILPARSE_DECODE_8BIT)
+		rfc2045_cdecode_end(rfcbuf);
+
+	if (filebuf)
+		efree(filebuf);
+	
+	return ret;
+}
+
+static void mailparse_do_extract(INTERNAL_FUNCTION_PARAMETERS, int decode, int isfile)
+{
+	zval *part, *filename, *callbackfunc = NULL;
+	struct rfc2045 *rfcbuf;
+	php_stream *srcstream = NULL, *deststream = NULL;
+	rfc2045_decode_user_func_t cbfunc = NULL;
+	void *cbdata = NULL;
+	int close_src_stream = 0;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|z", &part, &filename, &callbackfunc)) {
+		RETURN_FALSE;
+	}
+
+	if (Z_TYPE_P(part) == IS_RESOURCE && Z_LVAL_P(part) == 0)	{
+		RETURN_FALSE;
+	}
+	mailparse_fetch_rfc2045_resource(rfcbuf, &part);
+
+	/* filename can be a filename or a stream */
+	if (Z_TYPE_P(filename) == IS_RESOURCE) {
+		srcstream = (php_stream*)zend_fetch_resource(&filename TSRMLS_CC, -1, "File-Handle", NULL, 1, php_file_le_stream());
+		ZEND_VERIFY_RESOURCE(srcstream);
+	} else if (isfile) {
+		convert_to_string_ex(&filename);
+		srcstream = php_stream_open_wrapper(Z_STRVAL_P(filename), "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+	} else {
+		/* filename is the actual data */
+		srcstream = php_stream_memory_open(TEMP_STREAM_READONLY, Z_STRVAL_P(filename), Z_STRLEN_P(filename));
+		close_src_stream = 1;
+	}
+
+	if (srcstream == NULL) {
+		RETURN_FALSE;
+	}
+
+	if (callbackfunc != NULL) {
+		if (Z_TYPE_P(callbackfunc) == IS_NULL) {
+			cbfunc = extract_callback_stream;
+			cbdata = deststream = php_stream_memory_create(TEMP_STREAM_DEFAULT);
+		} else if (Z_TYPE_P(callbackfunc) == IS_RESOURCE) {
+			deststream = (php_stream*)zend_fetch_resource(&callbackfunc TSRMLS_CC, -1, "File-Handle", NULL, 1, php_file_le_stream());
+			ZEND_VERIFY_RESOURCE(deststream);
+			cbfunc = extract_callback_stream;
+			cbdata = deststream;
+			deststream = NULL; /* don't free this one */
+		} else {
+			if (Z_TYPE_P(callbackfunc) != IS_ARRAY)
+				convert_to_string_ex(&callbackfunc);
+			cbfunc = (rfc2045_decode_user_func_t)&extract_callback_user_func;
+			cbdata = callbackfunc;
+		}
+	} else {
+		cbfunc = extract_callback_stdout;
+		cbdata = NULL;
+	}
+
+	RETVAL_FALSE;
+	
+	if (SUCCESS == extract_part(rfcbuf, decode, srcstream, cbdata, cbfunc TSRMLS_CC)) {
+
+		if (deststream != NULL) {
+			/* return it's contents as a string */
+			char *membuf = NULL;
+			size_t memlen = 0;
+			membuf = php_stream_memory_get_buffer(deststream, &memlen);
+			RETVAL_STRINGL(membuf, memlen, 1);
+
+		} else {
+			RETVAL_TRUE;
+		}
+	}
+
+	if (deststream)
+		php_stream_close(deststream);
+	if (close_src_stream && srcstream)
+		php_stream_close(srcstream);
+}
+
 /* {{{ proto void mailparse_msg_extract_part(resource rfc2045, string msgbody[, string callbackfunc])
    Extracts/decodes a message section.  If callbackfunc is not specified, the contents will be sent to "stdout" */
 PHP_FUNCTION(mailparse_msg_extract_part)
 {
-	zval **arg, **bodystr, **cbfunc;
-	struct rfc2045 *rfcbuf;
-	off_t start, end, body;
-	off_t nlines;
-	off_t nbodylines;
+	mailparse_do_extract(INTERNAL_FUNCTION_PARAM_PASSTHRU, MAILPARSE_DECODE_8BIT | MAILPARSE_DECODE_NOHEADERS, 0);
+}
+/* }}} */
 
-	switch(ZEND_NUM_ARGS())	{
-		case 3:
-			if (zend_get_parameters_ex(3, &arg, &bodystr, &cbfunc) == FAILURE)	{
-				WRONG_PARAM_COUNT;
-			}
-			if (Z_TYPE_PP(cbfunc) != IS_ARRAY)
-				convert_to_string_ex(cbfunc);
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &arg, &bodystr) == FAILURE)	{
-				WRONG_PARAM_COUNT;
-			}
-			cbfunc = NULL;
-			break;
-	}
-	convert_to_string_ex(bodystr);
-
-	if (Z_TYPE_PP(arg) == IS_RESOURCE && Z_LVAL_PP(arg) == 0)	{
-		RETURN_FALSE;
-	}
-	mailparse_fetch_rfc2045_resource(rfcbuf, arg);
-
-
-	rfc2045_mimepos(rfcbuf, &start, &end, &body, &nlines, &nbodylines);
-
-	if (cbfunc)
-		rfc2045_cdecode_start(rfcbuf, (rfc2045_decode_user_func_t)&extract_callback_user_func, *cbfunc);
-	else
-		rfc2045_cdecode_start(rfcbuf, &extract_callback_stdout, NULL);
-
-	if (Z_STRLEN_PP(bodystr) < end)
-		end = Z_STRLEN_PP(bodystr);
-	else
-		end = end-body;
-
-	rfc2045_cdecode(rfcbuf, Z_STRVAL_PP(bodystr) + body, end);
-	rfc2045_cdecode_end(rfcbuf);
-
-	RETURN_TRUE;
-
+/* {{{ proto string mailparse_msg_extract_whole_part_file(resource rfc2045, string filename [, string callbackfunc])
+   Extracts a message section including headers without decoding the transfer encoding */
+PHP_FUNCTION(mailparse_msg_extract_whole_part_file)
+{
+	mailparse_do_extract(INTERNAL_FUNCTION_PARAM_PASSTHRU, MAILPARSE_DECODE_NONE, 1);
 }
 /* }}} */
 
@@ -718,83 +828,7 @@ PHP_FUNCTION(mailparse_msg_extract_part)
    Extracts/decodes a message section, decoding the transfer encoding */
 PHP_FUNCTION(mailparse_msg_extract_part_file)
 {
-	zval **arg, **filename, **cbfunc;
-	struct rfc2045 *rfcbuf;
-	char *filebuf = NULL;
-	FILE *fp = NULL;
-	off_t start, end, body;
-	off_t nlines;
-	off_t nbodylines;
-
-	switch(ZEND_NUM_ARGS())	{
-		case 3:
-			if (zend_get_parameters_ex(3, &arg, &filename, &cbfunc) == FAILURE)	{
-				WRONG_PARAM_COUNT;
-			}
-			if (Z_TYPE_PP(cbfunc) != IS_ARRAY)
-				convert_to_string_ex(cbfunc);
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &arg, &filename) == FAILURE)	{
-				WRONG_PARAM_COUNT;
-			}
-			cbfunc = NULL;
-			break;
-	}
-	convert_to_string_ex(filename);
-
-	if (Z_TYPE_PP(arg) == IS_RESOURCE && Z_LVAL_PP(arg) == 0)	{
-		RETURN_FALSE;
-	}
-	mailparse_fetch_rfc2045_resource(rfcbuf, arg);
-
-	/* figure out where the message part starts/ends */
-	rfc2045_mimepos(rfcbuf, &start, &end, &body, &nlines, &nbodylines);
-
-	if (cbfunc)
-		rfc2045_cdecode_start(rfcbuf, (rfc2045_decode_user_func_t)&extract_callback_user_func, *cbfunc);
-	else
-		rfc2045_cdecode_start(rfcbuf, &extract_callback_stdout, NULL);
-
-	/* open file and read it in */
-	fp = VCWD_FOPEN(Z_STRVAL_PP(filename), "rb");
-	if (fp == NULL)	{
-		zend_error(E_WARNING, "%s(): unable to open file %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(filename));
-		RETURN_FALSE;
-	}
-	if (fseek(fp, body, SEEK_SET) == -1)
-	{
-		zend_error(E_WARNING, "%s(): unable to seek to section start", get_active_function_name(TSRMLS_C));
-		RETVAL_FALSE;
-		goto cleanup;
-	}
-	filebuf = emalloc(MAILPARSE_BUFSIZ);
-
-
-	while (body < end)
-	{
-		size_t n = MAILPARSE_BUFSIZ;
-
-		if ((off_t)n > end-body)
-			n=end-body;
-		n = fread(filebuf, sizeof(char), n, fp);
-		if (n == 0)
-		{
-			zend_error(E_WARNING, "%s(): error reading from file \"%s\", offset %d", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(filename), body);
-			RETVAL_FALSE;
-			goto cleanup;
-		}
-		rfc2045_cdecode(rfcbuf, filebuf, n);
-		body += n;
-	}
-	RETVAL_TRUE;
-
-cleanup:
-	rfc2045_cdecode_end(rfcbuf);
-	if (fp)
-		fclose(fp);
-	if (filebuf)
-		efree(filebuf);
+	mailparse_do_extract(INTERNAL_FUNCTION_PARAM_PASSTHRU, MAILPARSE_DECODE_8BIT | MAILPARSE_DECODE_NOHEADERS, 1);
 }
 /* }}} */
 
