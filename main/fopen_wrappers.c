@@ -463,8 +463,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 			free_url(resource);
 			return NULL;
 		}
-		server.sin_addr.s_addr = lookup_hostname(resource->host);
-		server.sin_family = AF_INET;
+		lookup_hostname(resource->host, &server.sin_addr);
 
 		if (server.sin_addr.s_addr == -1) {
 			SOCK_FCLOSE(*socketd);
@@ -629,8 +628,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 			free_url(resource);
 			return NULL;
 		}
-		server.sin_addr.s_addr = lookup_hostname(resource->host);
-		server.sin_family = AF_INET;
+		lookup_hostname(resource->host, &server.sin_addr);
 
 		if (server.sin_addr.s_addr == -1) {
 			SOCK_FCLOSE(*socketd);
@@ -842,8 +840,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 			free_url(resource);
 			return NULL;
 		}
-		server.sin_addr.s_addr = lookup_hostname(resource->host);
-		server.sin_family = AF_INET;
+		lookup_hostname(resource->host, &server.sin_addr);
 
 		if (server.sin_addr.s_addr == -1) {
 			free_url(resource);
