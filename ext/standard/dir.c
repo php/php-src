@@ -243,7 +243,7 @@ PHP_FUNCTION(chdir)
 PHP_FUNCTION(getcwd)
 {
 	char path[MAXPATHLEN];
-	char *ret;
+	char *ret=NULL;
 	
 	if (ARG_COUNT(ht) != 0) {
 		WRONG_PARAM_COUNT;
@@ -253,8 +253,11 @@ PHP_FUNCTION(getcwd)
 	ret = getcwd(path,MAXPATHLEN-1);
 #elif HAVE_GETWD
 	ret = getwd(path);
-#elif
-#warning no proper getcwd support for your site
+/*
+ * #warning is not ANSI C
+ * #else
+ * #warning no proper getcwd support for your site
+ */
 #endif
 
 	if (ret) {
