@@ -1201,7 +1201,7 @@ static int node_attributes(zval **attributes, xmlNode *nodep)
 			add_property_stringl(pattr, "content", (char *) attr->val->content, strlen(attr->val->content), 1);
 		else {
 			if(0 == node_children(&children, attr->val))
-				zend_hash_update(pattr->value.obj.properties, "content", strlen("content")+1, (void *) &children, sizeof(zval *), NULL);
+				zend_hash_update(pattr->value.obj.properties, "content", sizeof("content"), (void *) &children, sizeof(zval *), NULL);
 		}
 		zend_hash_next_index_insert((*attributes)->value.ht, &pattr, sizeof(zval *), NULL);
 		attr = attr->next;
@@ -1250,15 +1250,15 @@ static int node_children(zval **children, xmlNode *nodep)
 
 		/* Get the namespace of the current node and add it as a property */
 		if(!node_namespace(&namespace, last))
-			zend_hash_update(child->value.obj.properties, "namespace", strlen("namespace")+1, (void *) &namespace, sizeof(zval *), NULL);
+			zend_hash_update(child->value.obj.properties, "namespace", sizeof("namespace"), (void *) &namespace, sizeof(zval *), NULL);
 
 		/* Get the attributes of the current node and add it as a property */
 		if(!node_attributes(&attributes, last))
-			zend_hash_update(child->value.obj.properties, "attributes", strlen("attributes")+1, (void *) &attributes, sizeof(zval *), NULL);
+			zend_hash_update(child->value.obj.properties, "attributes", sizeof("attributes"), (void *) &attributes, sizeof(zval *), NULL);
 
 		/* Get recursively the children of the current node and add it as a property */
 		if(!node_children(&mchildren, last->childs))
-			zend_hash_update(child->value.obj.properties, "children", strlen("children")+1, (void *) &mchildren, sizeof(zval *), NULL);
+			zend_hash_update(child->value.obj.properties, "children", sizeof("children"), (void *) &mchildren, sizeof(zval *), NULL);
 
 		last = last->next;
 	}
@@ -1305,7 +1305,7 @@ PHP_FUNCTION(xmltree)
 	if(0 == node_children(&children, root)) {
 		int i, count;
 		HashTable *lht;
-		zend_hash_update(return_value->value.obj.properties, "children", strlen("children")+1, (void *) &children, sizeof(zval *), NULL);
+		zend_hash_update(return_value->value.obj.properties, "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
 
 		/* Find the child of xml type element */
 		lht = children->value.ht;

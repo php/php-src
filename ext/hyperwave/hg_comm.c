@@ -457,15 +457,36 @@ DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorr
 							cur_ptr->fragment = estrdup(link);
 					}
 		
-					cur_ptr->htmlattr = NULL;
-					if(NULL != (str = strstr(object, "HtmlAttr="))) {
+					{
+					char *htmlattr, *str2;
+					int offset;
+					str1 = object;
+					htmlattr = emalloc(strlen(object));
+					htmlattr[0] = '\0';
+					offset = 0;
+					while(NULL != (str = strstr(str1, "HtmlAttr="))) {
 						str += 9;
 						str1 = str;
 						while((*str1 != '\n') && (*str1 != '\0'))
 							str1++;
-						cur_ptr->htmlattr = emalloc(str1 - str + 1);
-						strncpy(cur_ptr->htmlattr, str, str1 - str);
-						cur_ptr->htmlattr[str1 - str] = '\0';
+						if(NULL != (str2 = strchr(str, '='))) {
+							str2++;
+							strncpy(&htmlattr[offset], str, str2 - str);
+							offset = offset + (str2 - str);
+							htmlattr[offset++] = '"';
+							strncpy(&htmlattr[offset], str2, str1 - str2);
+							offset = offset + (str1 - str2);
+							htmlattr[offset++] = '"';
+							htmlattr[offset++] = ' ';
+							htmlattr[offset] = '\0';
+						}
+					}
+					if(offset){
+						/* remove last space */
+						htmlattr[offset-1] = '\0';
+						cur_ptr->htmlattr = estrdup(htmlattr);
+					}
+					efree(htmlattr);
 					}
 		
 					if(NULL != (str = strstr(object, "LinkType="))) {
@@ -629,9 +650,14 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 					default:
 						newtext = fnInsStr(newtext, cur_ptr->end+offset, "</A>");
 						if(cur_ptr->fragment)
-							snprintf(istr, BUFFERLEN, "<A HREF='%s#%s' %s>", cur_ptr->link, cur_ptr->fragment, cur_ptr->htmlattr == NULL ? "" : cur_ptr->htmlattr);
+							snprintf(istr, BUFFERLEN, "<A HREF='%s#%s'", cur_ptr->link, cur_ptr->fragment);
 						else
-							snprintf(istr, BUFFERLEN, "<A HREF='%s' %s>", cur_ptr->link, cur_ptr->htmlattr == NULL ? "" : cur_ptr->htmlattr);
+							snprintf(istr, BUFFERLEN, "<A HREF='%s'", cur_ptr->link);
+						if(cur_ptr->htmlattr) {
+							strncat(istr, " ", BUFFERLEN - 1 - strlen(istr));
+							strncat(istr, cur_ptr->htmlattr, BUFFERLEN - 1 - strlen(istr));
+						}
+						strncat(istr, ">", BUFFERLEN - 1 - strlen(istr));
 				}
 			} else {
 				switch(cur_ptr->linktype) {
@@ -643,7 +669,6 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 						break;
 					case HW_INTAG_LINK:
 						if(cur_ptr->fragment)
-/*							snprintf(istr, BUFFERLEN, " %s='%s/%s#%s'", cur_ptr->tagattr, scriptname == NULL ? "." : scriptname, cur_ptr->destdocname, cur_ptr->fragment);*/
 							snprintf(istr, BUFFERLEN, " %s='#%s'", cur_ptr->tagattr, cur_ptr->fragment);
 						else
 							snprintf(istr, BUFFERLEN, " %s='%s/%s'", cur_ptr->tagattr, scriptname == NULL ? "." : scriptname, cur_ptr->destdocname); 
@@ -661,19 +686,19 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 						newtext = fnInsStr(newtext, cur_ptr->end+offset, "</A>");
 
 						if(cur_ptr->nameanchor)
-							snprintf(istr, BUFFERLEN, "<A HREF='%s/%s#%s' %s>", scriptname == NULL ? "schade" : scriptname, cur_ptr->destdocname, cur_ptr->nameanchor, cur_ptr->htmlattr == NULL ? "" : cur_ptr->htmlattr);
+							snprintf(istr, BUFFERLEN, "<A HREF='%s/%s#%s'", scriptname == NULL ? "schade" : scriptname, cur_ptr->destdocname, cur_ptr->nameanchor);
+						else if(cur_ptr->fragment)
+							snprintf(istr, BUFFERLEN, "<A HREF=\"%s/%s#%s\"", scriptname == NULL ? "" : scriptname, cur_ptr->destdocname, cur_ptr->fragment);
 						else
-						if(cur_ptr->fragment)
-							snprintf(istr, BUFFERLEN, "<A HREF='%s/%s#%s' %s>", scriptname == NULL ? "" : scriptname, cur_ptr->destdocname, cur_ptr->fragment, cur_ptr->htmlattr == NULL ? "" : cur_ptr->htmlattr);
-						else
-							snprintf(istr, BUFFERLEN, "<A HREF='%s/%s' %s>", scriptname == NULL ? "" : scriptname, cur_ptr->destdocname, cur_ptr->htmlattr == NULL ? "" : cur_ptr->htmlattr);
+							snprintf(istr, BUFFERLEN, "<A HREF='%s/%s'", scriptname == NULL ? "" : scriptname, cur_ptr->destdocname);
+
+						if(cur_ptr->htmlattr) {
+							strncat(istr, " ", BUFFERLEN - 1 - strlen(istr));
+							strncat(istr, cur_ptr->htmlattr, BUFFERLEN - 1 - strlen(istr));
+						}
+						strncat(istr, ">", BUFFERLEN - 1 - strlen(istr));
 				}
 			}
-			newtext = fnInsStr(newtext, cur_ptr->start, istr);
-			/* In case there are several TAGS nested, we accumulate the offset 
-  			   You wonder what the 4 means? It's the length of </A> */
-			offset += strlen(istr) + 4;
-			laststart = cur_ptr->start;
 		} else {
 			if(laststart >= cur_ptr->end)
 				offset = 0;
@@ -686,12 +711,12 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 				snprintf(istr, BUFFERLEN, "<A NAME='%s'>", cur_ptr->keyword);
 			else if(cur_ptr->nameanchor)
 				snprintf(istr, BUFFERLEN, "<A NAME='%s'>", cur_ptr->nameanchor);
-			newtext = fnInsStr(newtext, cur_ptr->start, istr);
-			/* In case there are several TAGS nested, we accumulate the offset
-			   You wonder what the 4 means? It's the length of </A> */
-			offset += strlen(istr) + 4;
-			laststart = cur_ptr->start;
 		}
+		newtext = fnInsStr(newtext, cur_ptr->start, istr);
+		/* In case there are several TAGS nested, we accumulate the offset
+		   You wonder what the 4 means? It's the length of </A> */
+		offset += strlen(istr) + 4;
+		laststart = cur_ptr->start;
 #ifdef newlist
 		ptr = (ANCHOR **) zend_llist_get_prev(pAnchorList);
 		if(ptr)
