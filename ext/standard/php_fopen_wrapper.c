@@ -96,6 +96,7 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count 
 		}
 	}
 
+	SG(read_post_bytes) += read_bytes;
     return read_bytes;
 }
 
