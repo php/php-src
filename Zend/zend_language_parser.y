@@ -625,6 +625,7 @@ function_call:
 parse_class_entry:
 		T_NAMESPACE_NAME T_PAAMAYIM_NEKUDOTAYIM T_STRING T_PAAMAYIM_NEKUDOTAYIM { do_fetch_class(&$$, &$1, &$3 TSRMLS_CC); }
 	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM { do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
+	|	T_PAAMAYIM_NEKUDOTAYIM { do_fetch_class(&$$, NULL, NULL TSRMLS_CC);  }
 ;
 
 catch_class_entry:

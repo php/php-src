@@ -1167,8 +1167,13 @@ void do_fetch_class(znode *result, znode *namespace_name, znode *class_name TSRM
 		SET_UNUSED(opline->op1);
 		CG(catch_begin) = fetch_class_op_number;
 	}
-	zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
-	if ((class_name->u.constant.value.str.len == (sizeof("self") - 1)) &&
+	if(class_name) {
+		zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
+	}
+	if(class_name == NULL) {
+		SET_UNUSED(opline->op2);
+		opline->extended_value = ZEND_FETCH_CLASS_MAIN;
+	} else if ((class_name->u.constant.value.str.len == (sizeof("self") - 1)) &&
 		!memcmp(class_name->u.constant.value.str.val, "self", sizeof("self"))) {
 		SET_UNUSED(opline->op2);
 		opline->extended_value = ZEND_FETCH_CLASS_SELF;
