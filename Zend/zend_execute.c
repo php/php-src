@@ -763,8 +763,6 @@ fetch_string_dim:
 						retval = &EG(uninitialized_zval_ptr);
 						break;
 					case BP_VAR_RW:
-						offset_key = estrndup(offset_key, offset_key_length);
-						/* calling an user error handler may free zval dim, so we copy the string */
 						zend_error(E_NOTICE,"Undefined index:  %s", offset_key);
 						/* break missing intentionally */
 					case BP_VAR_W: {
@@ -772,9 +770,6 @@ fetch_string_dim:
 
 							new_zval->refcount++;
 							zend_symtable_update(ht, offset_key, offset_key_length+1, &new_zval, sizeof(zval *), (void **) &retval);
-						}
-						if (type == BP_VAR_RW) {
-							efree(offset_key);
 						}
 						break;
 				}
