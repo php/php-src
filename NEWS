@@ -6,10 +6,12 @@ PHP                                                                        NEWS
 - Fixed bug #22386 (Using browscap causes segfault). This fix
   also adds an optional bool argument to get_browser() that
   makes the return value an array instead of an object. (jay)
+- Fixed bug #22895 (PHP cli outputs errors in text AND html). (Marcus)
 - Fixed bug #22059 (ftp_chdir causes segfault). (Sara)
 - Fixed bug #21985 and #22064 (various mb_send_mail() issues). (Moriyoshi)
 - Fixed bug #21600 (Assign by reference function call changes variable contents).
   (Zeev)
+- Fixed bug #21007 (html_errors off text-only output in phpinfo). (Marcus)
 - Fixed bug #20442 (upgraded bundled expat to 1.95.5). (Ilia)
 - Fixed bug #20155 (xmlrpc compile problem with ZE2). (Derick, Jan Schneider)
 - Changed the length parameter in fgetss() to be optional. (Moriyoshi)
@@ -58,7 +60,7 @@ PHP                                                                        NEWS
   based on length. (Ilia)
 - Added array_walk_recursive() function. (Ilia)
 - Added new command line parameters -B, -F, -R and -E which allow to process stdin
-  line by line (See php -h for more). (Marcus)
+  line by line (See 'php -h' or 'man php' for more). (Marcus)
 - Added string.base64 stream filter. (Moriyoshi)
 - Added domxml_node_get_path(). (Lukas Schröder)
 - Added iconv related functions. (Moriyoshi)
