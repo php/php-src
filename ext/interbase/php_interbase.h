@@ -50,7 +50,7 @@ PHP_FUNCTION(ibase_free_query);
 #if HAVE_STRFTIME
 PHP_FUNCTION(ibase_timefmt);
 #endif
-
+PHP_FUNCTION(ibase_gen_id);
 PHP_FUNCTION(ibase_num_fields);
 PHP_FUNCTION(ibase_num_params);
 #if abies_0
