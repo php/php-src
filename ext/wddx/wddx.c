@@ -400,7 +400,7 @@ static void php_wddx_serialize_hash(wddx_packet *packet, zval *var)
 	}
 
 	while(zend_hash_get_current_data(target_hash, (void**)&ent) == SUCCESS) {
-		if (hash_type == HASH_KEY_IS_STRING) {
+		if (var->type == IS_OBJECT || hash_type == HASH_KEY_IS_STRING) {
 			ent_type = zend_hash_get_current_key(target_hash, &key, &idx);
 
 			if (ent_type == HASH_KEY_IS_STRING) {
