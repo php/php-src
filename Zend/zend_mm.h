@@ -31,7 +31,8 @@
 #ifdef ZEND_WIN32
 #undef ZEND_MM
 #else
-#define ZEND_MM
+/* #define ZEND_MM */
+#undef ZEND_MM
 #endif
 
 /* mm block type */
