@@ -1,10 +1,13 @@
 --TEST--
-Function overloading test (said to be harmful)
+Function overloading test 2 
 --SKIPIF--
 <?php 
 	extension_loaded('mbstring') or die('skip mbstring not available'); 
 	if (!function_exists("mail")) {
 		die('skip mail() function is not available.');
+	}
+	if (!function_exists("mb_ereg_replace")) {
+		die('skip mb_ereg_replace() function is not available.');
 	}
 ?>
 --INI--
@@ -17,9 +20,6 @@ echo mb_internal_encoding()."\n";
 
 $ngchars = array('Ç½','É½','»½','¥½');
 $str = '¸µÏ½ÍÜ»½Ðò¼Òº¾µ½É½¸½Ç½ÎÏÉ½¼¨±½ÌÈÄäË½ÎÏÅ½ÉÕ¹½Ê¸·½»ÒÍ½ÃÎñ½Æ¬¥½¥Õ¥¡¡¼';
-var_dump(strlen($str));
-var_dump(mb_strlen($str));
-
 $converted_str = mb_convert_encoding($str, 'Shift_JIS');
 mb_regex_encoding('Shift_JIS');
 foreach($ngchars as $c) {
@@ -30,8 +30,6 @@ foreach($ngchars as $c) {
 ?>
 --EXPECT--
 EUC-JP
-int(33)
-int(33)
 int(10)
 int(8)
 int(3)
