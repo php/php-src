@@ -4,7 +4,11 @@
 ; About this file ;
 ;;;;;;;;;;;;;;;;;;;
 ;
-; This is the 'optimized', PHP 4-style version of the php.ini-dist file.
+; This is the recommended, PHP 4-style version of the php.ini-dist file.  It
+; sets some non standard settings, that make PHP more efficient and more secure.
+; The price is that with these settings, PHP may be incompatible with some
+; applications.  Using this file is warmly recommended for production sites.
+;
 ; For general information about the php.ini file, please consult the php.ini-dist
 ; file, included in your PHP distribution.
 ;
@@ -14,26 +18,44 @@
 ; PHP 3.  Please make sure you read what's different, and modify your scripts
 ; accordingly, if you decide to use this file instead.
 ;
-; - allow_call_time_pass_reference = Off
-;     It's not possible to decide to force a variable to be passed by reference
-;     when calling a function.  The PHP 4 style to do this is by making the
-;     function require the relevant argument by reference.
-; - register_globals = Off
+; - register_globals = Off         [Security, Performance]
 ;     Global variables are no longer registered for input data (POST, GET, cookies,
 ;     environment and other server variables).  Instead of using $foo, you must use
-;     $HTTP_POST_VARS["foo"], $HTTP_GET_VARS["foo"], $HTTP_COOKIE_VARS["foo"], 
-;     $HTTP_ENV_VARS["foo"] or $HTTP_SERVER_VARS["foo"], depending on which kind
-;     of input source you're expecting 'foo' to come from.
-; - register_argc_argv = Off
+;     you can use $_REQUEST["foo"] (includes any variable that arrives through the
+;     request, namely, POST, GET and cookie variables), or use one of the specific
+;     $_GET["foo"], $_POST["foo"], $_COOKIE["foo"] or $_FILES["foo"], depending
+;     on where the input originates.
+;     Note that register_globals is going to be depracated (i.e., turned off by
+;     default) in the next version of PHP, because it often leads to security bugs.
+;     Read http://php.net/manual/en/security.registerglobals.php for further
+;     information.
+; - display_errors = Off           [Security]
+;     With this directive set to off, errors that occur during the execution of
+;     scripts will no longer be displayed as a part of the script output, and thus,
+;     will no longer be exposed to remote users.  With some errors, the error message
+;     content may expose information about your script, web server, or database
+;     server that may be exploitable for hacking.  Production sites should have this
+;     directive set to off.
+; - log_errors = On                [Security]
+;     This directive complements the above one.  Any errors that occur during the
+;     execution of your script will be logged (typically, to your server's error log,
+;     but can be configured in several ways).  Along with setting display_errors to off,
+;     this setup gives you the ability to fully understand what may have gone wrong,
+;     without exposing any sensitive information to remote users.
+; - register_argc_argv = Off       [Performance]
 ;     Disables registration of the somewhat redundant $argv and $argc global
 ;     variables.
-; - magic_quotes_gpc = Off
+; - magic_quotes_gpc = Off         [Performance]
 ;     Input data is no longer escaped with slashes so that it can be sent into
 ;     SQL databases without further manipulation.  Instead, you should use the
 ;     function addslashes() on each input element you wish to send to a database.
-; - variables_order = "GPCS"
+; - variables_order = "GPCS"       [Performance]
 ;     The environment variables are not hashed into the $HTTP_ENV_VARS[].  To access
 ;     environment variables, you can use getenv() instead.
+; - allow_call_time_pass_reference = Off     [Code cleanliness]
+;     It's not possible to decide to force a variable to be passed by reference
+;     when calling a function.  The PHP 4 style to do this is by making the
+;     function require the relevant argument by reference.
 
 
 ;;;;;;;;;;;;;;;;;;;;
@@ -167,7 +189,7 @@ memory_limit = 8M			; Maximum amount of memory a script may consume (8MB)
 ; error_reporting = E_ALL & ~E_NOTICE						; show all errors, except for notices
 ; error_reporting = E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR	; show only errors
 error_reporting	=	E_ALL & ~E_NOTICE		; Show all errors except for notices
-display_errors	=	On	; Print out errors (as a part of the output)
+display_errors	=	Off	; Print out errors (as a part of the output)
 						; For production web sites, you're strongly encouraged
 						; to turn this feature off, and use error logging instead (see below).
 						; Keeping display_errors enabled on a production web site may reveal
@@ -177,7 +199,7 @@ display_startup_errors = Off		; Even when display_errors is on, errors that occu
 									; PHP's startup sequence are not displayed.  It's strongly
 									; recommended to keep display_startup_errors off, except for
 									; when debugging.
-log_errors		=	Off	; Log errors into a log file (server-specific log, stderr, or error_log (below))
+log_errors		=	On	; Log errors into a log file (server-specific log, stderr, or error_log (below))
 						; As stated above, you're strongly advised to use error logging in place of
 						; error displaying on production web sites.
 track_errors	=	Off	; Store the last error/warning message in $php_errormsg (boolean)
