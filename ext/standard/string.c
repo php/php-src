@@ -36,6 +36,9 @@
 #include "php_globals.h"
 #include "basic_functions.h"
 #include "php_smart_str.h"
+#ifdef ZTS
+#include "TSRM.h"
+#endif
 
 #define STR_PAD_LEFT			0
 #define STR_PAD_RIGHT			1
@@ -52,6 +55,17 @@ void register_string_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("PATHINFO_DIRNAME", PHP_PATHINFO_DIRNAME, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PATHINFO_BASENAME", PHP_PATHINFO_BASENAME, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PATHINFO_EXTENSION", PHP_PATHINFO_EXTENSION, CONST_CS | CONST_PERSISTENT);
+
+#ifdef HAVE_LOCALECONV
+	/* If last members of struct lconv equal CHAR_MAX, no grouping is done */	
+
+/* This is bad, but since we are going to be hardcoding in the POSIX stuff anyway... */
+# ifndef HAVE_LIMITS_H
+# define CHAR_MAX 127
+# endif
+
+	REGISTER_LONG_CONSTANT("CHAR_MAX", CHAR_MAX, CONST_CS | CONST_PERSISTENT);
+#endif
 
 #ifdef HAVE_LOCALE_H
 	REGISTER_LONG_CONSTANT("LC_CTYPE", LC_CTYPE, CONST_CS | CONST_PERSISTENT);
@@ -72,6 +86,11 @@ int php_tag_find(char *tag, int len, char *set);
 /* this is read-only, so it's ok */
 static char hexconvtab[] = "0123456789abcdef";
 
+/* localeconv mutex */
+#ifdef ZTS
+static MUTEX_T locale_mutex = NULL;
+#endif
+
 static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *newlen)
 {
 	unsigned char *result = NULL;
@@ -91,6 +110,47 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 
 	return result;
 }
+
+#ifdef HAVE_LOCALECONV
+/* glibc's localeconv is not reentrant, so lets make it so ... sorta */
+struct lconv *localeconv_r(struct lconv *out)
+{
+	struct lconv *res;
+
+# ifdef ZTS
+	tsrm_mutex_lock( locale_mutex );
+# endif
+
+	/* localeconv doesn't return an error condition */
+	res = localeconv();
+
+	*out = *res;
+
+# ifdef ZTS
+	tsrm_mutex_unlock( locale_mutex );
+# endif
+
+	return out;
+}
+
+# ifdef ZTS
+PHP_MINIT_FUNCTION(localeconv)
+{
+	locale_mutex = tsrm_mutex_alloc();
+
+	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(localeconv)
+{
+	tsrm_mutex_free( locale_mutex );
+
+	locale_mutex = NULL;
+
+	return SUCCESS;
+}
+# endif
+#endif
 
 /* {{{ proto string bin2hex(string data)
    Converts the binary representation of data to hex */
@@ -2804,6 +2864,96 @@ PHP_FUNCTION(strnatcmp)
 	php_strnatcmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
+
+/* {{{ proto array localeconv( void )
+   Returns all the information stored in the lconv struct defined
+   in locale.h based on the currently selected locale */
+PHP_FUNCTION(localeconv)
+{
+	zval *grouping, *mon_grouping;
+	int len, i;
+
+	MAKE_STD_ZVAL(grouping);
+	MAKE_STD_ZVAL(mon_grouping);
+
+	/* We don't need no stinkin' parameters... */
+	if (ZEND_NUM_ARGS() > 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (array_init(grouping) == FAILURE || array_init(mon_grouping) == FAILURE) {
+		RETURN_FALSE;
+	}	
+
+#ifdef HAVE_LOCALECONV
+	{
+		struct lconv currlocdata;
+
+		localeconv_r( &currlocdata );
+   
+		/* Grab the grouping data out of the array */
+		len = strlen(currlocdata.grouping);
+
+		for (i=0;i<len;i++) {
+			add_index_long(grouping, i, currlocdata.grouping[i]);
+		}
+
+		/* Grab the monetary grouping data out of the array */
+		len = strlen(currlocdata.mon_grouping);
+
+		for (i=0;i<len;i++) {
+			add_index_long(mon_grouping, i, currlocdata.mon_grouping[i]);
+		}
+
+		add_assoc_string(return_value, "decimal_point",     currlocdata.decimal_point,     1);
+		add_assoc_string(return_value, "thousands_sep",     currlocdata.thousands_sep,     1);
+		add_assoc_string(return_value, "int_curr_symbol",   currlocdata.int_curr_symbol,   1);
+		add_assoc_string(return_value, "currency_symbol",   currlocdata.currency_symbol,   1);
+		add_assoc_string(return_value, "mon_decimal_point", currlocdata.mon_decimal_point, 1);
+		add_assoc_string(return_value, "mon_thousands_sep", currlocdata.mon_thousands_sep, 1);
+		add_assoc_string(return_value, "positive_sign",     currlocdata.positive_sign,     1);
+		add_assoc_string(return_value, "negative_sign",     currlocdata.negative_sign,     1);
+		add_assoc_long(  return_value, "int_frac_digits",   currlocdata.int_frac_digits     );
+		add_assoc_long(  return_value, "frac_digits",       currlocdata.frac_digits         );
+		add_assoc_long(  return_value, "p_cs_precedes",     currlocdata.p_cs_precedes       );
+		add_assoc_long(  return_value, "p_sep_by_space",    currlocdata.p_sep_by_space      );
+		add_assoc_long(  return_value, "n_cs_precedes",     currlocdata.n_cs_precedes       );
+		add_assoc_long(  return_value, "n_sep_by_space",    currlocdata.n_sep_by_space      );
+		add_assoc_long(  return_value, "p_sign_posn",       currlocdata.p_sign_posn         );
+		add_assoc_long(  return_value, "n_sign_posn",       currlocdata.n_sign_posn         );
+	}
+#else
+	/* Ok, it doesn't look like we have locale info floating around, so I guess it
+	   wouldn't hurt to just go ahead and return the POSIX locale information?  */
+
+	add_index_long(grouping, 0, -1);
+	add_index_long(mon_grouping, 0, -1);
+
+	add_assoc_string(return_value, "decimal_point",     "\x2E", 1);
+	add_assoc_string(return_value, "thousands_sep",     "",     1);
+	add_assoc_string(return_value, "int_curr_symbol",   "",     1);
+	add_assoc_string(return_value, "currency_symbol",   "",     1);
+	add_assoc_string(return_value, "mon_decimal_point", "\x2E", 1);
+	add_assoc_string(return_value, "mon_thousands_sep", "",     1);
+	add_assoc_string(return_value, "positive_sign",     "",     1);
+	add_assoc_string(return_value, "negative_sign",     "",     1);
+	add_assoc_long(  return_value, "int_frac_digits",   CHAR_MAX );
+	add_assoc_long(  return_value, "frac_digits",       CHAR_MAX );
+	add_assoc_long(  return_value, "p_cs_precedes",     CHAR_MAX );
+	add_assoc_long(  return_value, "p_sep_by_space",    CHAR_MAX );
+	add_assoc_long(  return_value, "n_cs_precedes",     CHAR_MAX );
+	add_assoc_long(  return_value, "n_sep_by_space",    CHAR_MAX );
+	add_assoc_long(  return_value, "p_sign_posn",       CHAR_MAX );
+	add_assoc_long(  return_value, "n_sign_posn",       CHAR_MAX );
+#endif
+
+	zend_hash_update(return_value->value.ht, "grouping", 9, &grouping, sizeof(zval *), NULL);
+	zend_hash_update(return_value->value.ht, "mon_grouping", 13, &mon_grouping, sizeof(zval *), NULL);
+}
 
 
 /* {{{ proto int strnatcasecmp(string s1, string s2)

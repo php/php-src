@@ -379,6 +379,7 @@ rand_r \
 regcomp \
 setitimer \
 setlocale \
+localeconv \
 setsockopt \
 setvbuf \
 shutdown \

@@ -65,6 +65,7 @@ PHP_FUNCTION(chr);
 PHP_FUNCTION(ord);
 PHP_FUNCTION(nl2br);
 PHP_FUNCTION(setlocale);
+PHP_FUNCTION(localeconv);
 PHP_FUNCTION(stristr);
 PHP_FUNCTION(chunk_split);
 PHP_FUNCTION(parse_str);
