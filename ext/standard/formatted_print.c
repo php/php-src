@@ -200,7 +200,8 @@ php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
 
 inline static void
 php_sprintf_appendint(char **buffer, int *pos, int *size, long number,
-						int width, char padding, int alignment)
+						int width, char padding, int alignment, 
+						int always_sign)
 {
 	char numbuf[NUM_BUF_SIZE];
 	register unsigned long magn, nmagn;
@@ -229,6 +230,8 @@ php_sprintf_appendint(char **buffer, int *pos, int *size, long number,
 	while (magn > 0 && i > 0);
 	if (neg) {
 		numbuf[--i] = '-';
+	} else if (always_sign) {
+		numbuf[--i] = '+';
 	}
 	PRINTF_DEBUG(("sprintf: appending %d as \"%s\", i=%d\n",
 				  number, &numbuf[i], i));
@@ -240,7 +243,7 @@ php_sprintf_appendint(char **buffer, int *pos, int *size, long number,
 inline static void
 php_sprintf_appenduint(char **buffer, int *pos, int *size,
 					   unsigned long number,
-					   int width, char padding, int alignment)
+					   int width, char padding, int alignment, int always_sign)
 {
 	char numbuf[NUM_BUF_SIZE];
 	register unsigned long magn, nmagn;
@@ -260,8 +263,10 @@ php_sprintf_appenduint(char **buffer, int *pos, int *size,
 
 		numbuf[--i] = (unsigned char)(magn - (nmagn * 10)) + '0';
 		magn = nmagn;
-	}
-	while (magn > 0 && i > 0);
+	} while (magn > 0 && i > 0);
+
+	if (always_sign)
+		numbuf[--i] = '+';
 	PRINTF_DEBUG(("sprintf: appending %d as \"%s\", i=%d\n", number, &numbuf[i], i));
 	php_sprintf_appendstring(buffer, pos, size, &numbuf[i], width, 0,
 							 padding, alignment, (NUM_BUF_SIZE - 1) - i, 0, 0);
@@ -272,7 +277,8 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 						 int *size, double number,
 						 int width, char padding,
 						 int alignment, int precision,
-						 int adjust, char fmt)
+						 int adjust, char fmt,
+						 int always_sign)
 {
 	char numbuf[NUM_BUF_SIZE];
 	char *cvt;
@@ -313,6 +319,8 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 
 	if (sign) {
 		numbuf[i++] = '-';
+	} else if (always_sign) {
+		numbuf[i++] = '+';
 	}
 
 	if (fmt == 'f') {
@@ -405,6 +413,7 @@ php_sprintf_getnumber(char *buffer, int *pos)
  *  "-"   left adjusted field
  *   n    field size
  *  "."n  precision (floats only)
+ *  "+"   Always place a sign (+ or -) in front of a number
  *
  * Type specifiers:
  *
@@ -426,6 +435,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 	int argc, size = 240, inpos = 0, outpos = 0, temppos;
 	int alignment, width, precision, currarg, adjusting, argnum;
 	char *format, *result, padding;
+	int always_sign;
 
 	argc = ZEND_NUM_ARGS();
 
@@ -482,6 +492,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 			alignment = ALIGN_RIGHT;
 			adjusting = 0;
 			padding = ' ';
+			always_sign = 0;
 			inpos++;			/* skip the '%' */
 
 			PRINTF_DEBUG(("sprintf: first looking at '%c', inpos=%d\n",
@@ -521,6 +532,8 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 					} else if (format[inpos] == '-') {
 						alignment = ALIGN_LEFT;
 						/* space padding, the default */
+					} else if (format[inpos] == '+') {
+						always_sign = 1;
 					} else if (format[inpos] == '\'') {
 						padding = format[++inpos];
 					} else {
@@ -583,14 +596,16 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 					convert_to_long_ex(args[argnum]);
 					php_sprintf_appendint(&result, &outpos, &size,
 										  Z_LVAL_PP(args[argnum]),
-										  width, padding, alignment);
+										  width, padding, alignment,
+										  always_sign);
 					break;
 
 				case 'u':
 					convert_to_long_ex(args[argnum]);
 					php_sprintf_appenduint(&result, &outpos, &size,
 										  Z_LVAL_PP(args[argnum]),
-										  width, padding, alignment);
+										  width, padding, alignment,
+										  always_sign);
 					break;
 
 				case 'e':
@@ -601,7 +616,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 											 Z_DVAL_PP(args[argnum]),
 											 width, padding, alignment,
 											 precision, adjusting,
-											 format[inpos]);
+											 format[inpos], always_sign);
 					break;
 
 				case 'c':
