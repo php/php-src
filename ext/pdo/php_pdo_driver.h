@@ -65,6 +65,18 @@ enum pdo_attribute_type {
 	PDO_ATTR_SERVER_INFO,		/* server information */
 	PDO_ATTR_CONNECTION_STATUS,	/* connection status */
 	PDO_ATTR_CASE,				/* control case folding for portability */
+	PDO_ATTR_CURSOR_NAME,		/* name a cursor for use in "WHERE CURRENT OF <name>" */
+	PDO_ATTR_CURSOR,			/* cursor type */
+
+	/* this defines the start of the range for driver specific options.
+	 * Drivers should define their own attribute constants beginning with this
+	 * value. */
+	PDO_ATTR_DRIVER_SPECIFIC = 1000
+};
+
+enum pdo_cursor_type {
+	PDO_CURSOR_FWDONLY,		/* forward only cursor (default) */
+	PDO_CURSOR_SCROLL,		/* scrollable cursor */
 };
 
 /* generic error code values.
@@ -100,7 +112,7 @@ static inline long pdo_attr_lval(zval *options, enum pdo_fetch_type option_name,
 {
 	zval **v;
 
-	if (SUCCESS == zend_hash_index_find(Z_ARRVAL_P(options), option_name, (void**)&v)) {
+	if (options && SUCCESS == zend_hash_index_find(Z_ARRVAL_P(options), option_name, (void**)&v)) {
 		convert_to_long_ex(v);
 		return Z_LVAL_PP(v);
 	}
@@ -356,6 +368,7 @@ struct _pdo_stmt_t {
 	/* for lazy fetches, we always return the same lazy object handle.
 	 * Let's keep it here. */
 	zval lazy_object_ref;
+	unsigned long refcount;
 };
 
 /* call this in MINIT to register your PDO driver */

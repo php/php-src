@@ -183,11 +183,7 @@ static PHP_FUNCTION(dbh_constructor)
 	dbh->username = username ? pestrdup(username, is_persistent) : NULL;
 	dbh->password = password ? pestrdup(password, is_persistent) : NULL;
 
-	if (driver_options) {
-		dbh->auto_commit = pdo_attr_lval(driver_options, PDO_ATTR_AUTOCOMMIT, 1 TSRMLS_CC);
-	} else {
-		dbh->auto_commit = 1;
-	}
+	dbh->auto_commit = pdo_attr_lval(driver_options, PDO_ATTR_AUTOCOMMIT, 1 TSRMLS_CC);
 	
 	if (driver->db_handle_factory(dbh, driver_options TSRMLS_CC)) {
 		/* all set */
@@ -246,6 +242,8 @@ static PHP_METHOD(PDO, prepare)
 
 		/* we haven't created a lazy object yet */
 		ZVAL_NULL(&stmt->lazy_object_ref);
+
+		stmt->refcount = 1;
 		return;
 	}
 	efree(stmt);
