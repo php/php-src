@@ -315,6 +315,7 @@ ZEND_API int zend_set_memory_limit(unsigned int memory_limit)
 ZEND_API void start_memory_manager(ALS_D)
 {
 	AG(phead) = AG(head) = NULL;
+	AG(zval_list_head) = NULL;
 	
 #if MEMORY_LIMIT
 	AG(memory_limit)=1<<30;		/* rediculous limit, effectively no limit */
@@ -322,9 +323,6 @@ ZEND_API void start_memory_manager(ALS_D)
 	AG(memory_exhausted)=0;
 #endif
 
-#if !ZEND_DEBUG
-	AG(zval_list_head) = NULL;
-#endif
 
 	memset(AG(cache_count),0,MAX_CACHED_MEMORY*sizeof(unsigned char));
 }
@@ -335,12 +333,10 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 	zend_mem_header *p, *t;
 #if ZEND_DEBUG
 	int had_leaks=0;
-#else
-	zend_zval_list_entry *zval_list_entry, *next_zval_list_entry;
 #endif
+	zend_zval_list_entry *zval_list_entry, *next_zval_list_entry;
 	ALS_FETCH();
 
-#if !ZEND_DEBUG
 	zval_list_entry = AG(zval_list_head);
 	while (zval_list_entry) {
 		next_zval_list_entry = zval_list_entry->next;
@@ -348,7 +344,6 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 		zval_list_entry = next_zval_list_entry;
 	}
 	AG(zval_list_head) = NULL;
-#endif
 
 	p=AG(head);
 	t=AG(head);
