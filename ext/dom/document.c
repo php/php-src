@@ -428,7 +428,6 @@ PHP_FUNCTION(dom_document_create_element)
 		RETURN_FALSE;
 	}
 
-	dom_add_to_list(node, intern TSRMLS_CC);
 	DOM_RET_OBJ(rv, node, &ret, intern);
 }
 /* }}} end dom_document_create_element */
@@ -453,7 +452,6 @@ PHP_FUNCTION(dom_document_create_document_fragment)
 		RETURN_FALSE;
 	}
 
-	dom_add_to_list(node, intern TSRMLS_CC);
 	DOM_RET_OBJ(rv, node, &ret, intern);
 }
 /* }}} end dom_document_create_document_fragment */
@@ -483,7 +481,6 @@ PHP_FUNCTION(dom_document_create_text_node)
 		RETURN_FALSE;
 	}
 
-	dom_add_to_list(node, intern TSRMLS_CC);
 	DOM_RET_OBJ(rv, node, &ret, intern);
 }
 /* }}} end dom_document_create_text_node */
@@ -513,7 +510,6 @@ PHP_FUNCTION(dom_document_create_comment)
 		RETURN_FALSE;
 	}
 
-	dom_add_to_list(node, intern TSRMLS_CC);
 	DOM_RET_OBJ(rv, node, &ret, intern);
 }
 /* }}} end dom_document_create_comment */
@@ -543,7 +539,6 @@ PHP_FUNCTION(dom_document_create_cdatasection)
 		RETURN_FALSE;
 	}
 
-	dom_add_to_list(node, intern TSRMLS_CC);
 	DOM_RET_OBJ(rv, node, &ret, intern);
 }
 /* }}} end dom_document_create_cdatasection */
@@ -575,7 +570,6 @@ PHP_FUNCTION(dom_document_create_processing_instruction)
 
 	node->doc = docp;
 
-	dom_add_to_list(node, intern TSRMLS_CC);
 	DOM_RET_OBJ(rv, node, &ret, intern);
 }
 /* }}} end dom_document_create_processing_instruction */
@@ -610,7 +604,6 @@ PHP_FUNCTION(dom_document_create_attribute)
 		RETURN_FALSE;
 	}
 
-	dom_add_to_list((xmlNodePtr) node, intern TSRMLS_CC);
 	DOM_RET_OBJ(rv, (xmlNodePtr) node, &ret, intern);
 
 }
@@ -641,7 +634,6 @@ PHP_FUNCTION(dom_document_create_entity_reference)
 		RETURN_FALSE;
 	}
 
-	dom_add_to_list((xmlNodePtr) node, intern TSRMLS_CC);
 	DOM_RET_OBJ(rv, (xmlNodePtr) node, &ret, intern);
 }
 /* }}} end dom_document_create_entity_reference */
@@ -745,7 +737,6 @@ PHP_FUNCTION(dom_document_import_node)
 		if (!retnodep) {
 			RETURN_FALSE;
 		}
-		dom_add_to_list((xmlNodePtr) retnodep, intern TSRMLS_CC);
 	}
 
 	DOM_RET_OBJ(rv, (xmlNodePtr) retnodep, &ret, intern);
@@ -798,7 +789,6 @@ PHP_FUNCTION(dom_document_create_element_ns)
 		RETURN_FALSE;
 	}
 
-	dom_add_to_list(nodep, intern TSRMLS_CC);
 	DOM_RET_OBJ(rv, nodep, &ret, intern);
 }
 /* }}} end dom_document_create_element_ns */
@@ -852,7 +842,6 @@ PHP_FUNCTION(dom_document_create_attribute_ns)
 		RETURN_FALSE;
 	}
 
-	dom_add_to_list(nodep, intern TSRMLS_CC);
 	DOM_RET_OBJ(rv, nodep, &ret, intern);
 }
 /* }}} end dom_document_create_attribute_ns */
@@ -996,6 +985,8 @@ PHP_FUNCTION(dom_document_document)
 
 		php_dom_set_object(intern, docp TSRMLS_CC);
 	}
+
+	add_property_bool(id, "formatOutput", 0);
 
 }
 /* }}} end dom_document_document */
