@@ -1,3 +1,62 @@
+2000-03-05  Sam Ruby  <rubys@us.ibm.com>
+
+    * win95nt.h: Eliminate "wrong number of parameters" warning
+
+2000-03-05  Andi Gutmans  <andi@php.net>
+
+    * win95nt.h:
+    - Make some fixes although there is a problem with getpid() being defined
+    in process.h as getpid(void) and thus having an arugment. We might need to
+    define a php_getpid() function to wrap getpid().
+
+2000-03-05  Sam Ruby  <rubys@us.ibm.com>
+
+    * SAPI.c
+      main.c:
+    Fix traps due to sapi_global not being initialized when ZTS is set
+    Don't trap if php.ini can't be read
+
+    * sapi/servlet/Makefile.in
+      sapi/servlet/formatter.java
+      sapi/servlet/servlet.c
+      sapi/servlet/servlet.dsp
+      sapi/servlet/servlet.dsw
+      sapi/servlet/servlet.java
+      sapi/servlet/web.xml: Add support for PHP syntax highlighting
+    Remove debug output
+    Fix trap when string to be output is not null terminated
+    Add a MS workspace for project level dependencies
+    Match case of contentType header
+
+2000-03-05  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/imap/config.m4:
+    SuSE 6.3 imap.rpm puts the library into /usr/lib and the include files into /usr/include/imap
+
+2000-03-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * win95nt.h:
+    Avoid the side-effect of defining function names, so that the PHP functions
+    are not renamed to their prefixed variants.
+
+    PR: #3535
+
+2000-03-05  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/mcal/php_mcal.c
+      ext/hyperwave/hw.c: Protos fixed.
+
+2000-03-05  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/mcal/php_mcal.c
+      ext/mcal/php_mcal.h: Attribute list support ported from php3.
+
+2000-03-05  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/php_metaphone.h: Remove warning.
+
+    * NEWS: *** empty log message ***
+
 2000-03-04  Andi Gutmans  <andi@php.net>
 
     * php.h
