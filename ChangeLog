@@ -1,3 +1,42 @@
+2003-10-21  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * sapi/apache2handler/config.m4
+      sapi/apache2handler/mod_php5.c
+      sapi/apache2handler/php4apache2.dsp
+      sapi/apache2handler/php_apache.h
+      sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #25768
+
+2003-10-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * configure.in:
+      We don't have this yet
+
+    * configure.in
+      main/snprintf.c
+      main/spprintf.c:
+      Bugfix #25930 Can't compile snprintf.c
+
+    * ZendEngine2/ZEND_CHANGES:
+      Make this clear
+
+2003-10-21  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/dom/tests/dom002.phpt:
+      Add a test case for getElementsByTagName() / getElementsByTagNameNS()
+
+    * (PHP_4_3)
+      ext/domxml/tests/bug25900.phpt:
+      typo
+
+    * ext/domxml/tests/bug25900.phpt
+      ext/domxml/tests/bug25900.phpt:
+      
+      file bug25900.phpt was initially added on branch PHP_4_3.
+
+    * ext/standard/html.c:
+      Missing '&' in the result of get_html_translation_table()
+
 2003-10-20  Andi Gutmans  <andi@zend.com>
 
     * ZendEngine2/ZEND_CHANGES:
