@@ -272,7 +272,9 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, zval *valu
 			}
 		}
 	} else {
-		variable_ptr->refcount--;
+		if (--variable_ptr->refcount==0) {
+			zval_dtor(variable_ptr);
+		}
 		variable_ptr = *variable_ptr_ptr;
 		if (variable_ptr->refcount==0) {
 			switch (type) {
