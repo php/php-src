@@ -27,6 +27,7 @@ PHP 4                                                                      NEWS
   . stream_socket_accept() - Accept a client connection.
   . stream_socket_get_name() - Get local or remote name of socket.
   . generic crypto interface for streams (supports dynamic loading of OpenSSL)
+- Added stream_copy_to_stream() function. (Wez)
 - Added memory mapping support under win32 to improve performance of
   readfile(), fpassthru() and some internal streams operations. (Wez)
 - Added DBA handler 'inifile' to support ini files. (Marcus)
