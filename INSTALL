@@ -8,6 +8,11 @@ up to date instructions in the online manual, located here:
 
 http://www.php.net/manual/en/install.apache.php
 
+For Apache 2, instructions and up-to-date information regarding it's
+support status, is available here:
+
+http://www.php.net/manual/en/install.apache2.php
+
 It is strongly recommended that you read the manual page before going
 further. However, for the impatient, here is a quick set of steps that 
 will build PHP as (first) a dynamic Apache module (DSO) for Apache 1.3.x 
