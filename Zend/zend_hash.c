@@ -714,7 +714,7 @@ ZEND_API int zend_hash_rehash(HashTable *ht)
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLength, ulong h, int flag)
 {
 	uint nIndex;
-	Bucket *p, *t = NULL;		/* initialize just to shut gcc up with -Wall */
+	Bucket *p;		/* initialize just to shut gcc up with -Wall */
 
 	IS_CONSISTENT(ht);
 
@@ -729,10 +729,8 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLen
 		if ((p->h == h) && ((p->nKeyLength == 0) || /* Numeric index */
 			((p->nKeyLength == nKeyLength) && (!memcmp(p->arKey, arKey, nKeyLength))))) {
 			HANDLE_BLOCK_INTERRUPTIONS();
-			if (p == ht->arBuckets[nIndex]) {
+			if (ht->arBuckets[nIndex] == p) {
 				ht->arBuckets[nIndex] = p->pNext;
-			} else {
-				t->pNext = p->pNext;
 			}
 			if (p->pListLast != NULL) {
 				p->pListLast->pListNext = p->pListNext;
@@ -761,7 +759,6 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLen
 			ht->nNumOfElements--;
 			return SUCCESS;
 		}
-		t = p;
 		p = p->pNext;
 	}
 	return FAILURE;
@@ -837,8 +834,11 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 static Bucket *zend_hash_apply_deleter(HashTable *ht, Bucket *p)
 {
 	Bucket *retval;
+	uint nIndex;
 
 	HANDLE_BLOCK_INTERRUPTIONS();
+
+	nIndex = p->h % ht->nTableSize;
 
 	if (!p->bIsPointer) {
 		if (ht->pDestructor) {
@@ -849,6 +849,10 @@ static Bucket *zend_hash_apply_deleter(HashTable *ht, Bucket *p)
 		}
 	}
 	retval = p->pListNext;
+
+	if (ht->arBuckets[nIndex] == p) {
+		ht->arBuckets[nIndex] = p->pNext;
+	}
 
 	if (p->pListLast != NULL) {
 		p->pListLast->pListNext = p->pListNext;
