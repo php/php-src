@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.49 2004-11-15 23:59:22 fmk Exp $
+// $Id: confutils.js,v 1.50 2005-01-18 22:37:12 fmk Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -959,7 +959,7 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 	}
 }
 
-function EXTENSION(extname, file_list, shared, cflags, dllname)
+function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 {
 	var objs = null;
 	var EXT = extname.toUpperCase();
@@ -984,7 +984,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname)
 	MFO.WriteBlankLines(1);
 
 
-	ADD_SOURCES(configure_module_dirname, file_list, extname);
+	ADD_SOURCES(configure_module_dirname, file_list, extname, obj_dir);
 	
 	MFO.WriteBlankLines(1);
 
@@ -1040,7 +1040,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname)
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
 }
 
-function ADD_SOURCES(dir, file_list, target)
+function ADD_SOURCES(dir, file_list, target, obj_dir)
 {
 	var i;
 	var tv;
@@ -1077,11 +1077,17 @@ function ADD_SOURCES(dir, file_list, target)
 	 * This probably breaks for non-sibling dirs, but that
 	 * is not a problem as buildconf only checks for pecl
 	 * as either a child or a sibling */
-	var build_dir = dir.replace(new RegExp("^..\\\\"), "");
-
-	var mangle_dir = build_dir.replace(new RegExp("[\\\\/.]", "g"), "_");
-	var bd_flags_name = "CFLAGS_BD_" + mangle_dir.toUpperCase();
-
+	if (obj_dir == null) {
+		var build_dir = dir.replace(new RegExp("^..\\\\"), "");
+		var mangle_dir = build_dir.replace(new RegExp("[\\\\/.]", "g"), "_");
+		var bd_flags_name = "CFLAGS_BD_" + mangle_dir.toUpperCase();
+	}
+	else {
+		var build_dir = obj_dir.replace(new RegExp("^..\\\\"), "");
+		var mangle_dir = build_dir.replace(new RegExp("[\\\\/.]", "g"), "_");
+		var bd_flags_name = "CFLAGS_BD_" + mangle_dir.toUpperCase();
+	}
+	
 	var dirs = build_dir.split("\\");
 	var i, d = "";
 	for (i = 0; i < dirs.length; i++) {
