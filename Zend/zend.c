@@ -763,6 +763,11 @@ void zend_deactivate(TSRMLS_D)
 	EG(opline_ptr) = NULL;
 	EG(active_symbol_table) = NULL;
 
+	/* restore namespace to global */
+	zend_switch_namespace(EG(global_namespace_ptr));
+	CG(function_table) = EG(function_table);
+	CG(class_table) = EG(class_table);
+	
 	zend_try {
 		shutdown_scanner(TSRMLS_C);
 	} zend_end_try();
