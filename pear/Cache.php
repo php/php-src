@@ -65,14 +65,14 @@ require_once "Cache/Error.php";
 class Cache extends PEAR {
 
     /**
-    * Disables the caching.
+    * Enables / disables caching.
     *
     * TODO: Add explanation what this is good for.
     *
     * @var      boolean
-    * @access   public
+    * @access   private
     */
-    var $no_cache = false;
+    var $caching = true;
 
     /**
     * Garbage collection: probability in seconds
@@ -142,6 +142,28 @@ class Cache extends PEAR {
     }
 
     /**
+     * Returns the current caching state.
+     *
+     * @return  boolean     The current caching state.
+     * @access  public
+     */
+    function getCaching()
+    {
+        return ($this->caching);
+    }
+
+    /**
+     * Enables or disables caching.
+     *
+     * @param   boolean     The new caching state.
+     * @access  public
+     */
+    function setCaching($state)
+    {
+        $this->caching = $state;
+    }
+
+    /**
     * Returns the requested dataset it if exists and is not expired
     *
     * @param    string  dataset ID
@@ -150,7 +172,7 @@ class Cache extends PEAR {
     * @access   public
     */
     function get($id, $group = "default") {
-        if ($this->no_cache)
+        if (!$this->caching)
             return "";
 
         if ($this->isCached($id, $group) && !$this->isExpired($id, $group))
@@ -170,7 +192,7 @@ class Cache extends PEAR {
     * @access   public
     */
     function save($id, $data, $expires = 0, $group = "default") {
-        if ($this->no_cache)
+        if (!$this->caching)
             return true;
 
         return $this->extSave($id, $data, "",$expires, $group);
@@ -190,7 +212,7 @@ class Cache extends PEAR {
     * @see      getUserdata()
     */
     function extSave($id, $cachedata, $userdata, $expires = 0, $group = "default") {
-        if ($this->no_cache)
+        if (!$this->caching)
             return true;
 
         return $this->container->save($id, $cachedata, $expires, $group, $userdata);
@@ -205,7 +227,7 @@ class Cache extends PEAR {
     * @access   public
     */
     function load($id, $group = "default") {
-        if ($this->no_cache)
+        if (!$this->caching)
             return "";
 
         return $this->container->load($id, $group);
@@ -221,7 +243,7 @@ class Cache extends PEAR {
     * @see      extSave()
     */
     function getUserdata($id, $group = "default") {
-        if ($this->no_cache)
+        if (!$this->caching)
             return "";
 
         return $this->container->getUserdata($id, $group);
@@ -236,7 +258,7 @@ class Cache extends PEAR {
     * @access   public
     */
     function delete($id, $group = "default") {
-        if ($this->no_cache)
+        if (!$this->caching)
             return true;
 
         return $this->container->delete($id, $group);
@@ -249,7 +271,7 @@ class Cache extends PEAR {
     * @return   integer number of removed datasets
     */
     function flush($group = "") {
-        if ($this->no_cache)
+        if (!$this->caching)
             return true;
 
         return $this->container->flush($group);
@@ -266,7 +288,7 @@ class Cache extends PEAR {
     * @access   public
     */
     function isCached($id, $group = "default") {
-        if ($this->no_cache)
+        if (!$this->caching)
             return false;
 
         return $this->container->isCached($id, $group);
@@ -287,7 +309,7 @@ class Cache extends PEAR {
     * @access   public
     */
     function isExpired($id, $group = "default", $max_age = 0) {
-        if ($this->no_cache)
+        if (!$this->caching)
             return true;
 
         return $this->container->isExpired($id, $group, $max_age);
@@ -317,7 +339,7 @@ class Cache extends PEAR {
     function garbageCollection($force = false) {
         static $last_run = 0;
 
-        if ($this->no_cache)
+        if (!$this->caching)
             return;
 
         srand((double) microtime() * 1000000);
