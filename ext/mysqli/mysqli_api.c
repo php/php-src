@@ -1325,9 +1325,9 @@ PHP_FUNCTION(mysqli_prepare)
 }
 /* }}} */
 
-/* {{{ proto resource mysqli_prepare_result(object stmt)
+/* {{{ proto resource mysqli_get_metadata(object stmt)
  */
-PHP_FUNCTION(mysqli_prepare_result)
+PHP_FUNCTION(mysqli_get_metadata)
 {
 	STMT			*stmt;
 	MYSQL_RES		*result;
@@ -1340,7 +1340,7 @@ PHP_FUNCTION(mysqli_prepare_result)
 	}
 	MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, &mysql_stmt, "mysqli_stmt"); 
 	
-	if (!(result = mysql_prepare_result(stmt->stmt))){
+	if (!(result = mysql_get_metadata(stmt->stmt))){
 		RETURN_FALSE;
 	}
 

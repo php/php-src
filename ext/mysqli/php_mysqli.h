@@ -245,7 +245,7 @@ PHP_FUNCTION(mysqli_param_count);
 PHP_FUNCTION(mysqli_ping);
 PHP_FUNCTION(mysqli_prepare);
 PHP_FUNCTION(mysqli_query);
-PHP_FUNCTION(mysqli_prepare_result);
+PHP_FUNCTION(mysqli_get_metadata);
 PHP_FUNCTION(mysqli_profiler);
 PHP_FUNCTION(mysqli_read_query_result);
 PHP_FUNCTION(mysqli_real_connect);
