@@ -1,7 +1,5 @@
 --TEST--
 Test usort, uksort and uasort
---POST--
---GET--
 --INI--
 precision=14
 --FILE--
@@ -34,7 +32,7 @@ var_dump ($data);
 array(8) {
   [16777216]=>
   float(-0.33333333333333)
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -49,31 +47,31 @@ array(8) {
   string(27) "PHP: Hypertext Preprocessor"
   [5]=>
   string(4) "Test"
-  [-2147483648]=>
+  [1001]=>
   string(6) "monkey"
-  [2147483647]=>
+  [1000]=>
   string(4) "test"
 }
 
  -- Testing uksort() -- 
 array(8) {
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
     [1]=>
     string(6) "orange"
   }
-  [-2147483648]=>
-  string(6) "monkey"
   [0]=>
   string(3) "PHP"
+  [1000]=>
+  string(4) "test"
+  [1001]=>
+  string(6) "monkey"
   [16777216]=>
   float(-0.33333333333333)
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
-  [2147483647]=>
-  string(4) "test"
   [5]=>
   string(4) "Test"
   ["test"]=>

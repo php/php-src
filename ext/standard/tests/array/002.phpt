@@ -1,7 +1,5 @@
 --TEST--
 Test arsort, asort, krsort, ksort, rsort, and sort
---POST--
---GET--
 --INI--
 precision=14
 --FILE--
@@ -24,16 +22,43 @@ function test_sort ($sort_function, $data) {
     var_dump ($data);
 }
 
+echo "Unsorted data:\n";
+var_dump ($data);
 foreach (array ('arsort', 'asort', 'krsort', 'ksort', 'rsort', 'sort') as $test_function) {
     test_sort ($test_function, $data);
 }
 
 ?>
 --EXPECT--
--- Testing arsort() -- 
+Unsorted data:
+array(8) {
+  [0]=>
+  string(3) "PHP"
+  [17]=>
+  string(27) "PHP: Hypertext Preprocessor"
+  [5]=>
+  string(4) "Test"
+  ["test"]=>
+  int(27)
+  [1000]=>
+  string(4) "test"
+  ["-1000"]=>
+  array(2) {
+    [0]=>
+    string(6) "banana"
+    [1]=>
+    string(6) "orange"
+  }
+  [1001]=>
+  string(6) "monkey"
+  [16777216]=>
+  float(-0.33333333333333)
+}
+
+ -- Testing arsort() -- 
 No second argument:
 array(8) {
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -42,9 +67,9 @@ array(8) {
   }
   ["test"]=>
   int(27)
-  [2147483647]=>
+  [1000]=>
   string(4) "test"
-  [-2147483648]=>
+  [1001]=>
   string(6) "monkey"
   [5]=>
   string(4) "Test"
@@ -57,7 +82,7 @@ array(8) {
 }
 Using SORT_REGULAR:
 array(8) {
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -66,9 +91,9 @@ array(8) {
   }
   ["test"]=>
   int(27)
-  [2147483647]=>
+  [1000]=>
   string(4) "test"
-  [-2147483648]=>
+  [1001]=>
   string(6) "monkey"
   [5]=>
   string(4) "Test"
@@ -83,7 +108,7 @@ Using SORT_NUMERIC:
 array(8) {
   ["test"]=>
   int(27)
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -94,20 +119,20 @@ array(8) {
   string(3) "PHP"
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
-  [-2147483648]=>
+  [1001]=>
   string(6) "monkey"
   [5]=>
   string(4) "Test"
-  [2147483647]=>
+  [1000]=>
   string(4) "test"
   [16777216]=>
   float(-0.33333333333333)
 }
 Using SORT_STRING
 array(8) {
-  [2147483647]=>
+  [1000]=>
   string(4) "test"
-  [-2147483648]=>
+  [1001]=>
   string(6) "monkey"
   [5]=>
   string(4) "Test"
@@ -115,7 +140,7 @@ array(8) {
   string(27) "PHP: Hypertext Preprocessor"
   [0]=>
   string(3) "PHP"
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -139,13 +164,13 @@ array(8) {
   string(27) "PHP: Hypertext Preprocessor"
   [5]=>
   string(4) "Test"
-  [-2147483648]=>
+  [1001]=>
   string(6) "monkey"
-  [2147483647]=>
+  [1000]=>
   string(4) "test"
   ["test"]=>
   int(27)
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -163,13 +188,13 @@ array(8) {
   string(27) "PHP: Hypertext Preprocessor"
   [5]=>
   string(4) "Test"
-  [-2147483648]=>
+  [1001]=>
   string(6) "monkey"
-  [2147483647]=>
+  [1000]=>
   string(4) "test"
   ["test"]=>
   int(27)
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -181,9 +206,9 @@ Using SORT_NUMERIC:
 array(8) {
   [16777216]=>
   float(-0.33333333333333)
-  [-2147483648]=>
+  [1001]=>
   string(6) "monkey"
-  [2147483647]=>
+  [1000]=>
   string(4) "test"
   [5]=>
   string(4) "Test"
@@ -191,7 +216,7 @@ array(8) {
   string(27) "PHP: Hypertext Preprocessor"
   [0]=>
   string(3) "PHP"
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -207,7 +232,7 @@ array(8) {
   float(-0.33333333333333)
   ["test"]=>
   int(27)
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -220,19 +245,21 @@ array(8) {
   string(27) "PHP: Hypertext Preprocessor"
   [5]=>
   string(4) "Test"
-  [-2147483648]=>
+  [1001]=>
   string(6) "monkey"
-  [2147483647]=>
+  [1000]=>
   string(4) "test"
 }
 
  -- Testing krsort() -- 
 No second argument:
 array(8) {
-  [2147483647]=>
-  string(4) "test"
   [16777216]=>
   float(-0.33333333333333)
+  [1001]=>
+  string(6) "monkey"
+  [1000]=>
+  string(4) "test"
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
   [5]=>
@@ -241,46 +268,46 @@ array(8) {
   int(27)
   [0]=>
   string(3) "PHP"
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
     [1]=>
     string(6) "orange"
   }
-  [-2147483648]=>
-  string(6) "monkey"
 }
 Using SORT_REGULAR:
 array(8) {
-  [2147483647]=>
-  string(4) "test"
   [16777216]=>
   float(-0.33333333333333)
+  [1001]=>
+  string(6) "monkey"
+  [1000]=>
+  string(4) "test"
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
   [5]=>
   string(4) "Test"
-  ["test"]=>
-  int(27)
   [0]=>
   string(3) "PHP"
-  ["-2147483647"]=>
+  ["test"]=>
+  int(27)
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
     [1]=>
     string(6) "orange"
   }
-  [-2147483648]=>
-  string(6) "monkey"
 }
 Using SORT_NUMERIC:
 array(8) {
-  [2147483647]=>
-  string(4) "test"
   [16777216]=>
   float(-0.33333333333333)
+  [1001]=>
+  string(6) "monkey"
+  [1000]=>
+  string(4) "test"
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
   [5]=>
@@ -289,15 +316,13 @@ array(8) {
   int(27)
   [0]=>
   string(3) "PHP"
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
     [1]=>
     string(6) "orange"
   }
-  [-2147483648]=>
-  string(6) "monkey"
 }
 Using SORT_STRING
 array(8) {
@@ -305,17 +330,17 @@ array(8) {
   int(27)
   [5]=>
   string(4) "Test"
-  [2147483647]=>
-  string(4) "test"
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
   [16777216]=>
   float(-0.33333333333333)
+  [1001]=>
+  string(6) "monkey"
+  [1000]=>
+  string(4) "test"
   [0]=>
   string(3) "PHP"
-  [-2147483648]=>
-  string(6) "monkey"
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -327,9 +352,7 @@ array(8) {
  -- Testing ksort() -- 
 No second argument:
 array(8) {
-  [-2147483648]=>
-  string(6) "monkey"
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -344,16 +367,16 @@ array(8) {
   string(4) "Test"
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
+  [1000]=>
+  string(4) "test"
+  [1001]=>
+  string(6) "monkey"
   [16777216]=>
   float(-0.33333333333333)
-  [2147483647]=>
-  string(4) "test"
 }
 Using SORT_REGULAR:
 array(8) {
-  [-2147483648]=>
-  string(6) "monkey"
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -368,16 +391,16 @@ array(8) {
   string(4) "Test"
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
+  [1000]=>
+  string(4) "test"
+  [1001]=>
+  string(6) "monkey"
   [16777216]=>
   float(-0.33333333333333)
-  [2147483647]=>
-  string(4) "test"
 }
 Using SORT_NUMERIC:
 array(8) {
-  [-2147483648]=>
-  string(6) "monkey"
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -392,30 +415,32 @@ array(8) {
   string(4) "Test"
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
+  [1000]=>
+  string(4) "test"
+  [1001]=>
+  string(6) "monkey"
   [16777216]=>
   float(-0.33333333333333)
-  [2147483647]=>
-  string(4) "test"
 }
 Using SORT_STRING
 array(8) {
-  ["-2147483647"]=>
+  ["-1000"]=>
   array(2) {
     [0]=>
     string(6) "banana"
     [1]=>
     string(6) "orange"
   }
-  [-2147483648]=>
-  string(6) "monkey"
   [0]=>
   string(3) "PHP"
+  [1000]=>
+  string(4) "test"
+  [1001]=>
+  string(6) "monkey"
   [16777216]=>
   float(-0.33333333333333)
   [17]=>
   string(27) "PHP: Hypertext Preprocessor"
-  [2147483647]=>
-  string(4) "test"
   [5]=>
   string(4) "Test"
   ["test"]=>
