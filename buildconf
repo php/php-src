@@ -47,7 +47,7 @@ else
 	echo "buildconf: automake version $am_version (ok)"
     fi
 
-    # libtool 1.2f or newer
+    # libtool 1.3.3 or newer
     lt_pversion=`libtool --version 2>/dev/null|sed -e 's/^[^0-9]*//' -e 's/ .*//'`
     if test "$lt_pversion" = ""; then
 	echo "buildconf: libtool not found."
@@ -57,12 +57,12 @@ else
     fi
     lt_version=`echo $lt_pversion|sed -e 's/\([a-z]*\)$/.\1/'`
     IFS=.; set $lt_version; IFS=' '
-    if test "$1" -gt "1" || test "$2" -ge "3" || test "$2" = "2" -a "$3" = "f"
+    if test "$1" -gt "1" || test "$2" -gt "3" || test "$2" = "3" -a "$3" -ge "3"
     then
 	echo "buildconf: libtool version $lt_pversion (ok)"
     else
 	echo "buildconf: libtool version $lt_pversion found."
-	echo "           You need libtool version 1.2f or newer installed"
+	echo "           You need libtool version 1.3.3 or newer installed"
 	echo "           to build PHP from CVS."
 	exit 1
     fi

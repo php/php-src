@@ -35,7 +35,7 @@
 #include <sys/time.h>
 #endif
 
-#include "../lcg/php_lcg.h"
+#include "php_lcg.h"
 #include "uniqid.h"
 
 /* {{{ proto string uniqid(string prefix, [bool more_entropy])
