@@ -1100,7 +1100,7 @@ dnl
 dnl Set libtool variable
 dnl
 AC_DEFUN([PHP_SET_LIBTOOL_VARIABLE],[
-  if test -z $LIBTOOL; then
+  if test -z "$LIBTOOL"; then
     LIBTOOL='$(SHELL) $(top_builddir)/libtool $1'
   else
     LIBTOOL="$LIBTOOL $1"
