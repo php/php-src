@@ -662,7 +662,6 @@ static PHP_INI_MH(OnUpdateSafeModeAllowedEnvVars)
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY_EX("safe_mode_protected_env_vars",	SAFE_MODE_PROTECTED_ENV_VARS,	PHP_INI_SYSTEM,		OnUpdateSafeModeProtectedEnvVars,		NULL)
 	PHP_INI_ENTRY_EX("safe_mode_allowed_env_vars",		SAFE_MODE_ALLOWED_ENV_VARS,		PHP_INI_SYSTEM,		OnUpdateSafeModeAllowedEnvVars,			NULL)
-	STD_PHP_INI_ENTRY("session.use_trans_sid",          "1",							PHP_INI_ALL,			OnUpdateBool,			use_trans_sid,			php_basic_globals,			basic_globals)
 PHP_INI_END()
 
 
@@ -712,6 +711,9 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC)
 	BG(user_tick_functions) = NULL;
 	zend_hash_init(&BG(sm_protected_env_vars), 5, NULL, NULL, 1);
 	BG(sm_allowed_env_vars) = NULL;
+
+	memset(&BG(url_adapt_state), 0, sizeof(BG(url_adapt_state)));
+	memset(&BG(url_adapt_state_ex), 0, sizeof(BG(url_adapt_state_ex)));
 
 #ifdef PHP_WIN32
 	CoInitialize(NULL);
@@ -871,11 +873,6 @@ PHP_RINIT_FUNCTION(basic)
 	PHP_RINIT(filestat)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_RINIT(syslog)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_RINIT(dir)(INIT_FUNC_ARGS_PASSTHRU);
-
-	if (BG(use_trans_sid)) {
-		php_session_start_output_handler(INIT_FUNC_ARGS_PASSTHRU, 4096);
-	}
-
 	return SUCCESS;
 }
 
@@ -901,10 +898,6 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 	PHP_RSHUTDOWN(filestat)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_RSHUTDOWN(syslog)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_RSHUTDOWN(assert)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
-
-	if (BG(use_trans_sid)) {
-		php_session_end_output_handler(SHUTDOWN_FUNC_ARGS_PASSTHRU);
-	}
 
 	if (BG(user_tick_functions)) {
 		zend_llist_destroy(BG(user_tick_functions));
