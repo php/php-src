@@ -233,6 +233,10 @@ Web server configuration
    AddType application/x-httpd-php .php
    Action application/x-httpd-php "/php/php.exe"
 
+  Please not that you cannot use php-cli.exe with your webserver. You have
+  to use php.exe which can be found in the sapi directory of your 
+  PHP distribution.
+
   Note, we consider installing PHP like this suicidal.
 
   As a further precaution, we recommend you change the "/php/"
@@ -288,9 +292,12 @@ Web server configuration
    Type in the extension you wish to use for your php scripts. ex: .php
    Double click on the new string value and enter the path to
    php.exe in the value data field.
-   ex: c:\php\php.exe
+   ex: c:\php\sapi\php.exe
    Repeat these steps for each extension you wish to associate
    with PHP scripts.
+   Please note that you cannot use php-cli.exe with your webserver, you need
+   to use php.exe which can be found in the sapi directory of your PHP
+   distribution.
 
    The following steps do not affect the web server installation and only
    apply if you want your php scripts to be executed when they are run
@@ -348,7 +355,11 @@ Web server configuration
     and then enter the App Mappings tab.
 
     Click Add, and in the Executable box, type:
-    c:\php\php.exe (assuming that you have unzipped PHP in c:\php\).
+    c:\php\sapi\php.exe (assuming that you have unzipped PHP in c:\php\).
+
+    Please note that you cannot use php-cli.exe with your webserver, you need
+    to use php.exe which can be found in the sapi directory of your PHP
+    distribution.
 
     In the Extension box, type the file name extension you want
     associated with PHP scripts. Leave 'Method exclusions'
@@ -399,7 +410,7 @@ Web server configuration
           tray and select 'Properties'
   Step 3: Click on 'Web Server Global Settings'
   Step 4: On the 'External' tab, enter:
-          virtual = .php | actual = c:\path-to-php-dir\php.exe
+          virtual = .php | actual = c:\php\sapi\php.exe
           and use the Add button.
   Step 5: On the Mime tab, enter:
           virtual = wwwserver/stdcgi | actual = .php
@@ -431,8 +442,12 @@ Web server configuration
    Edit the Server Properties and select the tab "Mapping".
 
    From the List select "Associations" and enter the desired
-   extension (".php") and the path to the CGI exe (ex. c:\php\php.exe)
+   extension (".php") and the path to the CGI exe (ex. c:\php\sapi\php.exe)
    or the ISAPI dll file (ex. c:\php\sapi\php4isapi.dll).
+
+   Please note that you cannot use php-cli.exe with your webserver, you need
+   to use php.exe which can be found in the sapi directory of your PHP
+   distribution.
 
    Select "Content Types" add the same extension ".php"
    and enter the content type. If you choose the CGI exe
@@ -458,7 +473,11 @@ Web server configuration
    into the field File extensions (.xxx).
 
    In Filter command or script put the path and name
-   of your php executable i.e. c:\php\php.exe.
+   of your php executable i.e. c:\php\sapi\php.exe.
+   
+   Please note that you cannot use php-cli.exe with your webserver, you need
+   to use php.exe which can be found in the sapi directory of your PHP
+   distribution.
 
    Press the 'Save' icon.
 
@@ -473,7 +492,11 @@ Web server configuration
 
    Make a file assocition from the command line (type the 2 following lines)
     assoc .php=PHPScript
-    ftype PHPScript=c:\php\php.exe %1 %*
+    ftype PHPScript=c:\php\sapi\php.exe %1 %*
+
+   Please note that you cannot use php-cli.exe with your webserver, you need
+   to use php.exe which can be found in the sapi directory of your PHP
+   distribution.
 
    In the Netscape Enterprise Administration Server create a dummy shellcgi
    directory and remove it just after (this step creates 5 important lines in
