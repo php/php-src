@@ -248,7 +248,7 @@ ZEND_API int zend_check_property_access(zend_object *zobj, char *prop_info_name 
 	char *class_name, *prop_name;
 	zval member;
 
-	unmangle_property_name(prop_info_name, &class_name, &prop_name);
+	zend_unmangle_property_name(prop_info_name, &class_name, &prop_name);
 	ZVAL_STRING(&member, prop_name, 0);
 	property_info = zend_get_property_info(zobj, &member, 1 TSRMLS_CC);
 	if (!property_info) {

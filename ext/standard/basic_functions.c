@@ -2564,7 +2564,7 @@ PHP_FUNCTION(print_r)
 		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
 	}
 
-	zend_print_pval_r(var, 0 TSRMLS_CC);
+	zend_print_zval_r(var, 0 TSRMLS_CC);
 
 	if (i) {
 		php_ob_get_buffer (return_value TSRMLS_CC);

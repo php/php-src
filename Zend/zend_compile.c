@@ -1814,7 +1814,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 			char *prot_name;
 			int prot_name_length;
 
-			mangle_property_name(&prot_name, &prot_name_length, "*", 1, child_info->name, child_info->name_length, ce->type & ZEND_INTERNAL_CLASS);
+			zend_mangle_property_name(&prot_name, &prot_name_length, "*", 1, child_info->name, child_info->name_length, ce->type & ZEND_INTERNAL_CLASS);
 			if (child_info->flags & ZEND_ACC_STATIC) {
 				zval **prop;
 				if (zend_hash_find(parent_ce->static_members, prot_name, prot_name_length+1, (void**)&prop) == SUCCESS) {
@@ -2421,7 +2421,7 @@ void zend_do_implements_interface(znode *interface_znode TSRMLS_DC)
 }
 
 
-void mangle_property_name(char **dest, int *dest_length, char *src1, int src1_length, char *src2, int src2_length, int internal)
+ZEND_API void zend_mangle_property_name(char **dest, int *dest_length, char *src1, int src1_length, char *src2, int src2_length, int internal)
 {
 	char *prop_name;
 	int prop_name_length;
@@ -2437,7 +2437,7 @@ void mangle_property_name(char **dest, int *dest_length, char *src1, int src1_le
 }
 
 
-void unmangle_property_name(char *mangled_property, char **class_name, char **prop_name)
+ZEND_API void zend_unmangle_property_name(char *mangled_property, char **class_name, char **prop_name)
 {
 	*prop_name = *class_name = NULL;
 

@@ -3645,7 +3645,7 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 					zend_hash_move_forward(fe_ht);
 				} while (zend_check_property_access(zobj, str_key TSRMLS_CC) != SUCCESS);
-				unmangle_property_name(str_key, &class_name, &prop_name);
+				zend_unmangle_property_name(str_key, &class_name, &prop_name);
 				str_key_len = strlen(prop_name);
 				str_key = estrndup(prop_name, str_key_len);
 				str_key_len++;

@@ -1763,7 +1763,7 @@ ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_le
 				char *priv_name;
 				int priv_name_length;
 
-				mangle_property_name(&priv_name, &priv_name_length, ce->name, ce->name_length, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+				zend_mangle_property_name(&priv_name, &priv_name_length, ce->name, ce->name_length, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
 				zend_hash_update(target_symbol_table, priv_name, priv_name_length+1, &property, sizeof(zval *), NULL);
 				property_info.name = priv_name;
 				property_info.name_length = priv_name_length;
@@ -1773,7 +1773,7 @@ ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_le
 				char *prot_name;
 				int prot_name_length;
 
-				mangle_property_name(&prot_name, &prot_name_length, "*", 1, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+				zend_mangle_property_name(&prot_name, &prot_name_length, "*", 1, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
 				zend_hash_update(target_symbol_table, prot_name, prot_name_length+1, &property, sizeof(zval *), NULL);
 				property_info.name = prot_name;
 				property_info.name_length = prot_name_length;
@@ -1784,7 +1784,7 @@ ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_le
 				char *prot_name;
 				int prot_name_length;
 
-				mangle_property_name(&prot_name, &prot_name_length, "*", 1, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+				zend_mangle_property_name(&prot_name, &prot_name_length, "*", 1, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
 				zend_hash_del(target_symbol_table, prot_name, prot_name_length+1);
 				pefree(prot_name, ce->type & ZEND_INTERNAL_CLASS);
 			}
