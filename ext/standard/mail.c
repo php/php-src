@@ -134,7 +134,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	if (!sendmail_path) {
 #ifdef PHP_WIN32
 		/* handle old style win smtp sending */
-		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, headers, subject, to, message) == FAILURE) {
+		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, headers, subject, to, message, NULL, NULL, NULL) == FAILURE) {
 			if (tsm_errmsg) {
 				php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), tsm_errmsg);
 				efree(tsm_errmsg);
