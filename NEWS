@@ -44,6 +44,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #23152 ($http_response_header empty on invalid URLs) (Ilia)
 - Fixed bug #23102 (integer overflow in exif_iif_add_value()). (Ilia)
 - Fixed bug #23093 (highlight_string() crashed with __FUNCTION__). (Jani)
+- Fixed bug #23080 (socket_strerror() crashes on win32). (Moriyoshi)
 - Fixed bug #23071 (when DST in effect, date("T") crashed PHP). (Scott MacVicar, Jani)
 - Fixed bug #23069 (tempnam creates readonly file [win32]). (Wez)
 - Fixed bug #23009 (pg_select with timestamp). (Marcus, Jay)
