@@ -3,8 +3,7 @@ dnl ## -*- sh -*-
 AC_MSG_CHECKING(for Apache module support via DSO through APXS)
 AC_ARG_WITH(apxs,
 [  --with-apxs[=FILE]	   Build shared Apache module.	FILE is the optional
-						  pathname to the Apache apxs tool; defaults to "apxs".
-						  (This option needs Perl installed)],
+						  pathname to the Apache apxs tool; defaults to "apxs".]
 [
 	if test "$withval" = "yes"; then
 		withval=apxs
@@ -21,9 +20,6 @@ AC_ARG_WITH(apxs,
 	SAPI_TARGET=libphp4.so
     APACHE_INSTALL="$APXS -i -a -n php4 libs/libphp4.so"
 	PHP_BUILD_SHARED
-	CFLAGS_SHLIB=`perl -V:cccdlflags | cut -d\' -f2`
-	LDFLAGS_SHLIB=`perl -V:lddlflags | cut -d\' -f2`
-	LDFLAGS_SHLIB_EXPORT=`perl -V:ccdlflags | cut -d\' -f2`
 	STRONGHOLD=
 	AC_DEFINE(APACHE)
 	AC_DEFINE(HAVE_AP_CONFIG_H)
