@@ -49,6 +49,10 @@
 
 #define PHP_FSOCK_CHUNK_SIZE 8192
 
+#if HAVE_PHP_STREAM
+extern php_stream_ops php_stream_socket_ops;
+#endif
+
 struct php_sockbuf {
 	int socket;
 	unsigned char *readbuf;

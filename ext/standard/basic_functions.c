@@ -430,6 +430,9 @@ function_entry basic_functions[] = {
 	   use socket_set_blocking() instead */
 	PHP_FE(set_socket_blocking,	NULL)
 	PHP_FE(socket_set_blocking,	NULL)
+#if HAVE_PHP_STREAM
+	PHP_FE(fopenstream,			NULL)
+#endif
 #if HAVE_SYS_TIME_H
 	PHP_FE(socket_set_timeout,	NULL)
 #else
@@ -2491,11 +2494,11 @@ PHP_FUNCTION(move_uploaded_file)
 	if (!zend_hash_exists(SG(rfc1867_uploaded_files), Z_STRVAL_PP(path), Z_STRLEN_PP(path)+1)) {
 		RETURN_FALSE;
 	}
-	
+
 	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(new_path), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
  		RETURN_FALSE;
  	}
-	
+
 	V_UNLINK(Z_STRVAL_PP(new_path));
 	if (rename(Z_STRVAL_PP(path), Z_STRVAL_PP(new_path))==0) {
 		successful=1;
