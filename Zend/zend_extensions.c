@@ -66,7 +66,7 @@ int zend_load_extension(char *path)
 
 	if (extension_version_info->zend_extension_api_no > ZEND_EXTENSION_API_NO) {
 		fprintf(stderr, "%s requires Zend Engine API version %d\n"
-					"The installed Zend Engine API version is %d\n",
+					"The installed Zend Engine API version is %d\n\n",
 					new_extension->name,
 					extension_version_info->zend_extension_api_no,
 					ZEND_EXTENSION_API_NO);
@@ -77,7 +77,7 @@ int zend_load_extension(char *path)
 		fprintf(stderr, "%s designed to be used with the Zend Engine API %d is outdated\n"
 					"It requires a more recent version of the Zend Engine\n"
 					"The installed Zend Engine API version is %d\n"
-					"Contact %s at %s for a later version of this module.\n",
+					"Contact %s at %s for a later version of this module.\n\n",
 					new_extension->name,
 					extension_version_info->zend_extension_api_no,
 					ZEND_EXTENSION_API_NO,
