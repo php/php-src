@@ -185,6 +185,9 @@ void init_executor(TSRMLS_D)
 	EG(float_separator)[0] = '.';
 }
 
+static void do_nothing(void *v)
+{
+}
 
 void shutdown_executor(TSRMLS_D)
 {
