@@ -605,7 +605,7 @@ mbfl_identify_encoding_name(mbfl_string *string, enum mbfl_no_encoding *elist, i
 	}
 }
 
-const enum mbfl_no_encoding
+enum mbfl_no_encoding
 mbfl_identify_encoding_no(mbfl_string *string, enum mbfl_no_encoding *elist, int elistsz)
 {
 	const mbfl_encoding *encoding;
