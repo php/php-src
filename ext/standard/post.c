@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include "php.h"
-#include "php3_standard.h"
+#include "php_standard.h"
 #include "php_globals.h"
 #include "SAPI.h"
 

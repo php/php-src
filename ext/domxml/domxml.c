@@ -20,7 +20,7 @@
 
 
 #include "php.h"
-#include "php3_domxml.h"
+#include "php_domxml.h"
 
 #if HAVE_DOMXML
 

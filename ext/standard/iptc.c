@@ -33,7 +33,7 @@
  */
  
 #include "php.h"
-#include "php3_iptc.h"
+#include "php_iptc.h"
 #include "ext/standard/head.h"
 
 #include <sys/stat.h>

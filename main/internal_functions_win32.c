@@ -29,21 +29,21 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "ext/bcmath/php3_bcmath.h"
-#include "ext/db/php3_db.h"
-#include "ext/gd/php3_gd.h"
+#include "ext/bcmath/php_bcmath.h"
+#include "ext/db/php_db.h"
+#include "ext/gd/php_gd.h"
 #include "ext/standard/dl.h"
 #include "ext/standard/file.h"
 #include "ext/standard/fsock.h"
 #include "ext/standard/head.h"
 #include "ext/standard/pack.h"
-#include "ext/standard/php3_browscap.h"
-#include "ext/standard/php3_crypt.h"
-#include "ext/standard/php3_dir.h"
-#include "ext/standard/php3_filestat.h"
-#include "ext/standard/php3_mail.h"
-#include "ext/standard/php3_syslog.h"
-#include "ext/standard/php3_standard.h"
+#include "ext/standard/php_browscap.h"
+#include "ext/standard/php_crypt.h"
+#include "ext/standard/php_dir.h"
+#include "ext/standard/php_filestat.h"
+#include "ext/standard/php_mail.h"
+#include "ext/standard/php_syslog.h"
+#include "ext/standard/php_standard.h"
 #include "ext/standard/php_lcg.h"
 #include "ext/standard/php_output.h"
 #include "ext/standard/php_array.h"
@@ -54,7 +54,7 @@
 #include "ext/session/php_session.h"
 
 /* SNMP has to be moved to ext */
-/* #include "dl/snmp/php3_snmp.h" */
+/* #include "dl/snmp/php_snmp.h" */
 
 unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
 unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };

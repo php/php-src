@@ -24,8 +24,8 @@
 
 
 #include "php.h"
-#include "php3_sybase.h"
-#include "ext/standard/php3_standard.h"
+#include "php_sybase.h"
+#include "ext/standard/php_standard.h"
 #include "php_globals.h"
 
 #if HAVE_SYBASE

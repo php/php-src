@@ -22,12 +22,12 @@
 
 #include "php.h"
 #include "php_config.h"
-#include "php3_interbase.h"
+#include "php_interbase.h"
 
 #if HAVE_IBASE
 #include <ibase.h>
 #include <time.h>
-#include "php3_string.h"
+#include "php_string.h"
 #include "php_globals.h"
 
 /* {{{ extension definition structures */

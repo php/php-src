@@ -23,87 +23,19 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors: Nikolay P. Romanyuk <mag@redcom.ru>                         |
+   | Authors:                                                             |
    |                                                                      |
    +----------------------------------------------------------------------+
  */
 
 /* $Id$ */
+#ifndef _PHP_LINK_H
+#define _PHP_LINK_H
 
-#ifndef _PHP3_VELOCIS_H
-#define _PHP3_VELOCIS_H
+PHP_FUNCTION(link);
+PHP_FUNCTION(unlink);
+PHP_FUNCTION(readlink);
+PHP_FUNCTION(linkinfo);
+PHP_FUNCTION(symlink);
 
-#if COMPILE_DL
-#undef HAVE_VELOCIS
-#define HAVE_VELOCIS 1
-#endif
-
-#if defined(HAVE_VELOCIS) && !HAVE_UODBC
-#define UNIX
-#include <sql.h>
-#include <sqlext.h>
-
-typedef struct VConn {
-	HDBC    hdbc;
-	long    index;
-} VConn;
-
-typedef struct {
-	char name[32];
-	char *value;
-	long vallen;
-	SDWORD valtype;
-} VResVal;
-
-typedef struct Vresult {
-	HSTMT   hstmt;
-	VConn   *conn; 
-	long    index;
-	VResVal *values;
-	long    numcols;
-	int     fetched;
-} Vresult;
-
-typedef struct {
-	long num_links;
-	long max_links;
-	int le_link,le_result;
-} velocis_module;
-
-extern php3_module_entry velocis_module_entry;
-#define velocis_module_ptr &velocis_module_entry
-
-/* velocis.c functions */
-extern PHP_MINIT_FUNCTION(velocis);
-extern PHP_RINIT_FUNCTION(velocis);
-PHP_MINFO_FUNCTION(velocis);
-extern PHP_MSHUTDOWN_FUNCTION(velocis);
-
-PHP_FUNCTION(velocis_connect);
-PHP_FUNCTION(velocis_close);
-PHP_FUNCTION(velocis_exec);
-PHP_FUNCTION(velocis_fetch);
-PHP_FUNCTION(velocis_result);
-PHP_FUNCTION(velocis_freeresult);
-PHP_FUNCTION(velocis_autocommit);
-PHP_FUNCTION(velocis_off_autocommit);
-PHP_FUNCTION(velocis_commit);
-PHP_FUNCTION(velocis_rollback);
-PHP_FUNCTION(velocis_fieldnum);
-PHP_FUNCTION(velocis_fieldname);
-
-extern velocis_module php3_velocis_module;
-
-#else
-
-#define velocis_module_ptr NULL
-
-#endif /* HAVE_VELOCIS */
-#endif /* _PHP3_VELOCIS_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */
+#endif /* _PHP_LINK_H */

@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 #include "php.h"
-#include "ext/standard/php3_standard.h"
+#include "ext/standard/php_standard.h"
 #include "ext/standard/file.h" /* for php_file_le_uploads() */
 #include "zend_globals.h"
 #include "php_globals.h"

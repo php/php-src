@@ -30,8 +30,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP3_SYBASE_H
-#define _PHP3_SYBASE_H
+#ifndef _PHP_SYBASE_H
+#define _PHP_SYBASE_H
 
 #if COMPILE_DL
 #undef HAVE_SYBASE
@@ -140,4 +140,4 @@ extern sybase_module php3_sybase_module;
 
 #define phpext_sybase_ptr sybase_module_ptr
 
-#endif /* _PHP3_SYBASE_H */
+#endif /* _PHP_SYBASE_H */

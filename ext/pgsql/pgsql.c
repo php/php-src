@@ -26,8 +26,8 @@
 #endif
 
 #include "php.h"
-#include "php3_pgsql.h"
-#include "ext/standard/php3_standard.h"
+#include "php_pgsql.h"
+#include "ext/standard/php_standard.h"
 #include "php_globals.h"
 
 #if HAVE_PGSQL
@@ -331,7 +331,7 @@ void php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			if (index_ptr->type != le_index_ptr) {
 				RETURN_FALSE;
 			}
-			link = (int) index_ptr->ptr;
+			link = (int) (long) index_ptr->ptr;
 			ptr = php3_list_find(link,&type);   /* check if the link is still there */
 			if (ptr && (type==le_link || type==le_plink)) {
 				return_value->value.lval = PGG(default_link) = link;

@@ -21,7 +21,7 @@
 #if WITH_BCMATH
 
 #include "number.h"
-#include "php3_bcmath.h"
+#include "php_bcmath.h"
 
 function_entry bcmath_functions[] = {
 	PHP_FE(bcadd,									NULL)

@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include "php.h"
-#include "php3_gettext.h"
+#include "php_gettext.h"
 
 #if HAVE_LIBINTL
 

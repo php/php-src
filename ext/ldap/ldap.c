@@ -29,7 +29,7 @@
 
 #include "dl/phpdl.h"
 #include "ext/standard/dl.h"
-#include "php3_ldap.h"
+#include "php_ldap.h"
 
 #if WIN32|WINNT
 #include <string.h>
@@ -44,7 +44,7 @@
 #define __STDC__ 1
 #endif
 
-#include "ext/standard/php3_string.h"
+#include "ext/standard/php_string.h"
 
 
 #if THREAD_SAFE & HAVE_NSLDAP
@@ -109,7 +109,7 @@ DLEXPORT php3_module_entry *get_module(void ) { return &ldap_module_entry; }
 #endif
 
 
-#if 0 /* see my note in php3_ldap.h.  smc */
+#if 0 /* see my note in php_ldap.h.  smc */
 /* Function for setting thread-specific LDAP error values */
 static void php3_ldap_set_ld_error( int err, char *matched, char *errmsg, void *dummy )
 {

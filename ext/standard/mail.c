@@ -25,7 +25,7 @@
 #ifndef MSVC5
 #include "build-defs.h"
 #endif
-#include "php3_mail.h"
+#include "php_mail.h"
 #include "php_ini.h"
 
 #if APACHE

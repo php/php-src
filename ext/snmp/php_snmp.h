@@ -19,8 +19,8 @@
 */
 
 /* $Id$ */
-#ifndef _PHP3_SNMP_H
-#define _PHP3_SNMP_H
+#ifndef _PHP_SNMP_H
+#define _PHP_SNMP_H
 
 #if COMPILE_DL
 #undef HAVE_SNMP
@@ -51,4 +51,4 @@ void php3_info_snmp(ZEND_MODULE_INFO_FUNC_ARGS);
 
 #define phpext_snmp_ptr snmp_module_ptr
 
-#endif  /* _PHP3_SNMP_H */
+#endif  /* _PHP_SNMP_H */

@@ -55,7 +55,7 @@
 
 #if HAVE_OCI8
 
-#include "php3_oci8.h"
+#include "php_oci8.h"
 
 /* True globals, no need for thread safety */
 static int le_conn; /* active connections */

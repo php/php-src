@@ -33,14 +33,14 @@
 
 #if HAVE_DBA
 
-#include "php3_dba.h"
+#include "php_dba.h"
 
-#include "php3_gdbm.h"
-#include "php3_ndbm.h"
-#include "php3_dbm.h"
-#include "php3_cdb.h"
-#include "php3_db2.h"
-#include "php3_db3.h"
+#include "php_gdbm.h"
+#include "php_ndbm.h"
+#include "php_dbm.h"
+#include "php_cdb.h"
+#include "php_db2.h"
+#include "php_db3.h"
 
 function_entry dba_functions[] = {
 	PHP_FE(dba_open, NULL)

@@ -32,7 +32,7 @@
 #include "php.h"
 
 #if DBA_GDBM
-#include "php3_gdbm.h"
+#include "php_gdbm.h"
 
 #include <gdbm.h>
 

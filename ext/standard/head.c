@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 #include "php.h"
-#include "ext/standard/php3_standard.h"
+#include "ext/standard/php_standard.h"
 #include "SAPI.h"
 #include "main.h"
 #include "head.h"

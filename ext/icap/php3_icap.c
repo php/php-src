@@ -48,7 +48,7 @@
 #include <signal.h>
 #include <stdarg.h>
 #include "cal.h"
-#include "php3_icap.h"
+#include "php_icap.h"
 #include "modules.h"
 #if (WIN32|WINNT)
 #include "winsock.h"

@@ -17,7 +17,7 @@
  */
 
 #include "php.h"
-#include "php3_browscap.h"
+#include "php_browscap.h"
 #include "php_ini.h"
 
 #include "zend_globals.h"

@@ -33,7 +33,7 @@
 #include <sys/sem.h>
 #include <errno.h>
 
-#include "php3_sysvsem.h"
+#include "php_sysvsem.h"
 
 #if !HAVE_SEMUN && defined(__GNU_LIBRARY__) && __GNU_LIBRARY__ == 6
 

@@ -36,7 +36,7 @@
 #include <errno.h>
 
 #include <stdio.h>
-#include "php3_syslog.h"
+#include "php_syslog.h"
 
 static int syslog_started;
 static char *syslog_device;

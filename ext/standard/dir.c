@@ -24,7 +24,7 @@
 #include "php.h"
 #include "fopen-wrappers.h"
 
-#include "php3_dir.h"
+#include "php_dir.h"
 
 #ifdef HAVE_DIRENT_H
 # include <dirent.h>

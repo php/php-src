@@ -26,7 +26,7 @@
 
 #include "php.h"
 #include "php_globals.h"
-#include "ext/standard/php3_standard.h"
+#include "ext/standard/php_standard.h"
 #include "ext/standard/head.h"
 #include "ext/standard/info.h"
 #include "SAPI.h"
@@ -40,7 +40,7 @@
 #if HYPERWAVE
 
 #include "php_ini.h"
-#include "php3_hyperwave.h"
+#include "php_hyperwave.h"
 
 //hw_module php3_hw_module;
 

@@ -21,7 +21,7 @@
 #include <math.h>				/* modf() */
 #include "php.h"
 #include "ext/standard/head.h"
-#include "php3_string.h"
+#include "php_string.h"
 #include "zend_execute.h"
 #include <stdio.h>
 

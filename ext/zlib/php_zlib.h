@@ -25,8 +25,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP3_ZLIB_H
-#define _PHP3_ZLIB_H
+#ifndef _PHP_ZLIB_H
+#define _PHP_ZLIB_H
 
 #if COMPILE_DL
 #undef HAVE_ZLIB
@@ -76,4 +76,4 @@ PHP_FUNCTION(gzfile);
 
 #define phpext_zlib_ptr zlib_module_ptr
 
-#endif /* _PHP3_ZLIB_H */
+#endif /* _PHP_ZLIB_H */

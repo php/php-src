@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
    | This program is free software; you can redistribute it and/or modify |
    | it under the terms of one of the following licenses:                 |
@@ -23,81 +23,75 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors: Christian Cartus <chc@idgruppe.de>                          |
+   | Authors: Kristian Koehntopp (kris@koehntopp.de)                      |
    +----------------------------------------------------------------------+
  */
 
 
 /* $Id$ */
 
-#ifndef _PHP3_SYSVSHM_H
-#define _PHP3_SYSVSHM_H
+#ifndef _PHP_POSIX_H
+#define _PHP_POSIX_H
 
 #if COMPILE_DL
-#undef HAVE_SYSVSHM
-#define HAVE_SYSVSHM 1
+#define HAVE_POSIX 1
 #endif
 
+#if HAVE_POSIX
+#ifndef DLEXPORT
+#define DLEXPORT
+#endif
 
-#if HAVE_SYSVSHM
+extern php3_module_entry posix_module_entry;
+#define posix_module_ptr &posix_module_entry
 
-extern php3_module_entry sysvshm_module_entry;
-#define sysvshm_module_ptr &sysvshm_module_entry
+PHP_FUNCTION(posix_kill);
 
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
+PHP_FUNCTION(posix_getpid);
+PHP_FUNCTION(posix_getppid);
+
+PHP_FUNCTION(posix_getuid);
+PHP_FUNCTION(posix_getgid);
+PHP_FUNCTION(posix_geteuid);
+PHP_FUNCTION(posix_getegid);
+PHP_FUNCTION(posix_setuid);
+PHP_FUNCTION(posix_setgid);
+PHP_FUNCTION(posix_getgroups);
+PHP_FUNCTION(posix_getlogin);
+
+PHP_FUNCTION(posix_getpgrp);
+PHP_FUNCTION(posix_setsid);
+PHP_FUNCTION(posix_setpgid);
+PHP_FUNCTION(posix_getpgid);
+PHP_FUNCTION(posix_getsid);
+
+PHP_FUNCTION(posix_uname);
+PHP_FUNCTION(posix_times);
+
+PHP_FUNCTION(posix_ctermid);
+PHP_FUNCTION(posix_ttyname);
+PHP_FUNCTION(posix_isatty);
+
+PHP_FUNCTION(posix_getcwd);
+
+PHP_FUNCTION(posix_mkfifo);
+PHP_FUNCTION(posix_getgrnam);
+PHP_FUNCTION(posix_getgrgid);
+PHP_FUNCTION(posix_getpwnam);
+PHP_FUNCTION(posix_getpwuid);
+
+PHP_FUNCTION(posix_getrlimit);
 
 typedef struct {
-	int le_shm;
-	long init_mem;
-} sysvshm_module;
-
-
-typedef struct {
-	long key;
-	long length;
-	long next;
-	char mem;
-} sysvshm_chunk;
-
-
-typedef struct {
-	char magic[8];
-	long start;
-	long end;
-	long free;
-	long total;
-} sysvshm_chunk_head;
-
-
-typedef struct {
-	key_t key;					/* Key set by user */
-	long id;					/* Returned by shmget. */
-	sysvshm_chunk_head *ptr;			/* memoryaddress of shared memory */ 
-} sysvshm_shm;
-
-
-
-PHP_MINIT_FUNCTION(sysvshm);
-PHP_FUNCTION(shm_attach);
-PHP_FUNCTION(shm_detach);
-PHP_FUNCTION(shm_remove);
-PHP_FUNCTION(shm_put_var);
-PHP_FUNCTION(shm_get_var);
-PHP_FUNCTION(shm_remove_var);
-extern int php3int_put_shmdata(sysvshm_chunk_head *ptr,long key,char *data, long len);
-extern long php3int_check_shmdata(sysvshm_chunk_head *ptr, long key);
-extern int php3int_remove_shmdata(sysvshm_chunk_head *ptr, long shm_varpos);
-
-extern sysvshm_module php3_sysvshm_module;
+	int dummy;
+} posix_module;
 
 #else
 
-#define sysvshm_module_ptr NULL
+#define posix_module_ptr NULL
 
 #endif
 
-#define phpext_sysvshm_ptr sysvshm_module_ptr
+#define phpext_posix_ptr posix_module_ptr
 
-#endif /* _PHP3_SYSVSHM_H */
+#endif /* _PHP_POSIX_H */

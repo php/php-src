@@ -23,7 +23,7 @@
 #if defined(COMPILE_DL)
 #include "dl/phpdl.h"
 #endif
-#include "php3_snmp.h"
+#include "php_snmp.h"
 #include <sys/types.h>
 #if MSVC5
 #include <winsock.h>

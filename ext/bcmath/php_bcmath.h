@@ -23,23 +23,42 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors: Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@zend.com>                                |
    +----------------------------------------------------------------------+
  */
 
 
-#ifndef _PHP3_BROWSCAP_H
-#define _PHP3_BROWSCAP_H
+/* $Id$ */
 
-extern php3_module_entry browscap_module_entry;
-#define browscap_module_ptr &browscap_module_entry
+#ifndef _PHP_BCMATH_H
+#define _PHP_BCMATH_H
 
-extern PHP_MINIT_FUNCTION(browscap);
-extern PHP_MSHUTDOWN_FUNCTION(browscap);
+#if COMPILE_DL
+#undef WITH_BCMATH
+#define WITH_BCMATH 1
+#endif
 
-PHP_FUNCTION(get_browser);
+#if WITH_BCMATH
 
+extern php3_module_entry bcmath_module_entry;
+#define phpext_bcmath_ptr &bcmath_module_entry
 
-#define phpext_browscap_ptr browscap_module_ptr
+extern PHP_RINIT_FUNCTION(bcmath);
+extern PHP_RSHUTDOWN_FUNCTION(bcmath);
+PHP_FUNCTION(bcadd);
+PHP_FUNCTION(bcsub);
+PHP_FUNCTION(bcmul);
+PHP_FUNCTION(bcdiv);
+PHP_FUNCTION(bcmod);
+PHP_FUNCTION(bcpow);
+PHP_FUNCTION(bcsqrt);
+PHP_FUNCTION(bccomp);
+PHP_FUNCTION(bcscale);
 
-#endif /* _PHP3_BROWSCAP_H */
+#else
+
+#define phpext_bcmath_ptr NULL
+
+#endif
+
+#endif /* _PHP_BCMATH_H */

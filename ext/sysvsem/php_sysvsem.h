@@ -1,8 +1,8 @@
-/*
+/* 
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
    | This program is free software; you can redistribute it and/or modify |
    | it under the terms of one of the following licenses:                 |
@@ -23,40 +23,54 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors: Stephanie Wehner <_@r4k.net>                                |
+   | Authors: Tom May <tom@go2net.com>                                    |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */ 
 
-#ifndef _PHP3_YP_H
-#define _PHP3_YP_H
+
+/* $Id$ */
+
+#ifndef _PHP_SYSVSEM_H
+#define _PHP_SYSVSEM_H
 
 #if COMPILE_DL
-#undef HAVE_YP
-#define HAVE_YP 1
+#undef HAVE_SYSVSEM
+#define HAVE_SYSVSEM 1
 #endif
 
-#if HAVE_YP
+#if HAVE_SYSVSEM
 
-extern php3_module_entry yp_module_entry;
-#define yp_module_ptr &yp_module_entry
+extern php3_module_entry sysvsem_module_entry;
+#define sysvsem_module_ptr &sysvsem_module_entry
 
-/* yp.c functions */
-int php3_minit_yp(INIT_FUNC_ARGS);
-PHP_FUNCTION(yp_get_default_domain);
-PHP_FUNCTION(yp_order);
-PHP_FUNCTION(yp_master);
-PHP_FUNCTION(yp_match);
-PHP_FUNCTION(yp_first);
-PHP_FUNCTION(yp_next);
-void php3_info_yp(ZEND_MODULE_INFO_FUNC_ARGS);
+extern int php3_minit_sysvsem(INIT_FUNC_ARGS);
+extern int php3_rinit_sysvsem(INIT_FUNC_ARGS);
+extern int php3_mshutdown_sysvsem(SHUTDOWN_FUNC_ARGS);
+extern int php3_rshutdown_sysvsem(SHUTDOWN_FUNC_ARGS);
+void php3_info_sysvsem(void);
+PHP_FUNCTION(sysvsem_get);
+PHP_FUNCTION(sysvsem_acquire);
+PHP_FUNCTION(sysvsem_release);
+
+typedef struct {
+	int le_sem;
+} sysvsem_module;
+
+typedef struct {
+	int id;						/* For error reporting. */
+	int key;					/* For error reporting. */
+	int semid;					/* Returned by semget(). */
+	int count;					/* Acquire count for auto-release. */
+} sysvsem_sem;
+
+extern sysvsem_module php3_sysvsem_module;
 
 #else
 
-#define yp_module_ptr NULL
+#define sysvsem_module_ptr NULL
 
-#endif /* HAVE_YP */
+#endif
 
-#define phpext_yp_ptr yp_module_ptr
+#define phpext_sysvsem_ptr sysvsem_module_ptr
 
-#endif /* _PHP3_YP_H */
+#endif /* _PHP_SYSVSEM_H */

@@ -19,7 +19,7 @@
 /* $Id$ */
 
 #include "php.h"
-#include "php3_filestat.h"
+#include "php_filestat.h"
 #include "php_globals.h"
 
 #include <stdlib.h>
@@ -46,7 +46,7 @@
 #include <ctype.h>
 
 #include "safe_mode.h"
-#include "php3_link.h"
+#include "php_link.h"
 
 /* {{{ proto string readlink(string filename)
    Return the target of a symbolic link */

@@ -21,7 +21,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "internal_functions_registry.h"
-#include "php3_standard.h"
+#include "php_standard.h"
 #include "zend_operators.h"
 #include <stdarg.h>
 #include <stdlib.h>

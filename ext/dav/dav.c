@@ -27,7 +27,7 @@
 # endif
 #endif
 #include "php.h"
-#include "php3_dav.h"
+#include "php_dav.h"
 
 #if defined(THREAD_SAFE) && !PHP_31
 # undef THREAD_SAFE

@@ -35,11 +35,11 @@
 #include "internal_functions.h"
 #endif
 #if PHP_31 || PHP_API_VERSION >= 19990421
-# include "ext/standard/php3_string.h"
+# include "ext/standard/php_string.h"
 #else
-# include "php3_string.h"
+# include "php_string.h"
 #endif
-#include "php3_posix.h"
+#include "php_posix.h"
 
 #if HAVE_POSIX
 #ifdef HAVE_SYS_TIME_H

@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <ctype.h>
-#include "php3_string.h"
+#include "php_string.h"
 
 /* Simple soundex algorithm as described by Knuth in TAOCP, vol 3 */
 /* {{{ proto string soundex(string str)

@@ -27,8 +27,8 @@
 #include <stdlib.h>
 #include <errno.h>
 #include "php.h"
-#include "php3_string.h"
-#include "php3_var.h"
+#include "php_string.h"
+#include "php_var.h"
 
 /* }}} */
 /* {{{ php_var_dump */

@@ -26,7 +26,7 @@
 
 #include "php.h"
 #include "php_globals.h"
-#include "ext/standard/php3_standard.h"
+#include "ext/standard/php_standard.h"
 #include "php_odbc.h"
 
 #if HAVE_UODBC

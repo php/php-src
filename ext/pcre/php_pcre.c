@@ -29,7 +29,7 @@
 
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 
-#include "ext/standard/php3_string.h"
+#include "ext/standard/php_string.h"
 
 #define PREG_PATTERN_ORDER	0
 #define PREG_SET_ORDER		1

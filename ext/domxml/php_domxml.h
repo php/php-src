@@ -1,4 +1,4 @@
-/*
+/* 
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
@@ -23,19 +23,46 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors:                                                             |
+   | Authors: Uwe Steinmann (Uwe.Steinmann@fernuni-hagen.de               |
    |                                                                      |
    +----------------------------------------------------------------------+
  */
 
+
 /* $Id$ */
-#ifndef _PHP3_LINK_H
-#define _PHP3_LINK_H
 
-PHP_FUNCTION(link);
-PHP_FUNCTION(unlink);
-PHP_FUNCTION(readlink);
-PHP_FUNCTION(linkinfo);
-PHP_FUNCTION(symlink);
+#ifndef _PHP_DOMXML_H
+#define _PHP_DOMXML_H
 
-#endif /* _PHP3_LINK_H */
+#if HAVE_DOMXML
+#include <gnome-xml/parser.h>
+
+extern php3_module_entry php3_domxml_module_entry;
+#define php3_domxml_module_ptr &php3_domxml_module_entry
+
+/* directory functions */
+extern PHP_MINIT_FUNCTION(domxml);
+extern PHP_MINFO_FUNCTION(domxml);
+PHP_FUNCTION(getdom);
+
+/* Class Document methods */
+PHP_FUNCTION(domxml_root);
+PHP_FUNCTION(domxml_intdtd);
+
+/* Class Node methods */
+PHP_FUNCTION(domxml_attributes);
+PHP_FUNCTION(domxml_getattr);
+PHP_FUNCTION(domxml_setattr);
+PHP_FUNCTION(domxml_children);
+PHP_FUNCTION(domxml_lastchild);
+PHP_FUNCTION(domxml_parent);
+
+/* Class Attribute methods */
+PHP_FUNCTION(domxml_attrname);
+
+#else
+#define php3_domxml_module_ptr NULL
+#endif /* HAVE_DOMXML */
+#define phpext_domxml_ptr php3_domxml_module_ptr
+
+#endif /* _PHP3_DIR_H */

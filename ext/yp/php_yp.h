@@ -1,8 +1,8 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
    | This program is free software; you can redistribute it and/or modify |
    | it under the terms of one of the following licenses:                 |
@@ -23,46 +23,40 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors: Uwe Steinmann (Uwe.Steinmann@fernuni-hagen.de               |
-   |                                                                      |
+   | Authors: Stephanie Wehner <_@r4k.net>                                |
    +----------------------------------------------------------------------+
  */
+/* $Id$ */ 
 
+#ifndef _PHP_YP_H
+#define _PHP_YP_H
 
-/* $Id$ */
+#if COMPILE_DL
+#undef HAVE_YP
+#define HAVE_YP 1
+#endif
 
-#ifndef _PHP3_DOMXML_H
-#define _PHP3_DOMXML_H
+#if HAVE_YP
 
-#if HAVE_DOMXML
-#include <gnome-xml/parser.h>
+extern php3_module_entry yp_module_entry;
+#define yp_module_ptr &yp_module_entry
 
-extern php3_module_entry php3_domxml_module_entry;
-#define php3_domxml_module_ptr &php3_domxml_module_entry
-
-/* directory functions */
-extern PHP_MINIT_FUNCTION(domxml);
-extern PHP_MINFO_FUNCTION(domxml);
-PHP_FUNCTION(getdom);
-
-/* Class Document methods */
-PHP_FUNCTION(domxml_root);
-PHP_FUNCTION(domxml_intdtd);
-
-/* Class Node methods */
-PHP_FUNCTION(domxml_attributes);
-PHP_FUNCTION(domxml_getattr);
-PHP_FUNCTION(domxml_setattr);
-PHP_FUNCTION(domxml_children);
-PHP_FUNCTION(domxml_lastchild);
-PHP_FUNCTION(domxml_parent);
-
-/* Class Attribute methods */
-PHP_FUNCTION(domxml_attrname);
+/* yp.c functions */
+int php3_minit_yp(INIT_FUNC_ARGS);
+PHP_FUNCTION(yp_get_default_domain);
+PHP_FUNCTION(yp_order);
+PHP_FUNCTION(yp_master);
+PHP_FUNCTION(yp_match);
+PHP_FUNCTION(yp_first);
+PHP_FUNCTION(yp_next);
+void php3_info_yp(ZEND_MODULE_INFO_FUNC_ARGS);
 
 #else
-#define php3_domxml_module_ptr NULL
-#endif /* HAVE_DOMXML */
-#define phpext_domxml_ptr php3_domxml_module_ptr
 
-#endif /* _PHP3_DIR_H */
+#define yp_module_ptr NULL
+
+#endif /* HAVE_YP */
+
+#define phpext_yp_ptr yp_module_ptr
+
+#endif /* _PHP_YP_H */

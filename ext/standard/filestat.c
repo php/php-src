@@ -69,7 +69,7 @@
 # endif
 #endif
 
-#include "php3_filestat.h"
+#include "php_filestat.h"
 
 #ifndef THREAD_SAFE
 static char *CurrentStatFile=NULL;

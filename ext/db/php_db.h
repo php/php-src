@@ -31,8 +31,8 @@
 /* $Id$ */
 
 
-#ifndef _PHP3_DB_H
-#define _PHP3_DB_H
+#ifndef _PHP_DB_H
+#define _PHP_DB_H
 
 
 #ifndef DLEXPORT
@@ -92,4 +92,4 @@ PHP_FUNCTION(dbmnextkey);
 #undef phpext_db_ptr
 #define phpext_db_ptr	NULL
 
-#endif /* _PHP3_DB_H */
+#endif /* _PHP_DB_H */
