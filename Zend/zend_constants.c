@@ -102,7 +102,7 @@ void zend_register_standard_constants(ELS_D)
 	/* ZEND_FIX:  Move to PHP */
 #if 0
 #if WIN32|WINNT
-	// Get build numbers for Windows NT or Win95
+	/* Get build numbers for Windows NT or Win95 */
 	if (dwVersion < 0x80000000){
 		php3_os="WINNT";
 	} else {

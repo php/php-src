@@ -694,7 +694,7 @@ int do_begin_function_call(znode *function_name CLS_DC)
 
 		zval_copy_ctor(&tmp.u.constant);
 		do_begin_dynamic_function_call(&tmp CLS_CC);
-		return 1; // Dynamic
+		return 1; /* Dynamic */
 	}
 	
 	switch (function->type) {
@@ -1411,8 +1411,8 @@ void do_begin_new_object(znode *new_token, znode *class_name CLS_DC)
 	opline->op1 = *class_name;
 	SET_UNUSED(opline->op2);
 
-	//*result = opline->result;
-	//do_assign(result, variable, &opline->result CLS_CC);
+	/* *result = opline->result;
+	do_assign(result, variable, &opline->result CLS_CC); */
 	
 
 	new_token->u.opline_num = get_next_op_number(CG(active_op_array));
