@@ -2425,11 +2425,6 @@ PHP_FUNCTION(domxml_node_append_child)
 	
 	DOMXML_GET_OBJ(child, node, le_domxmlnodep);
 
-	if (child->type == XML_ATTRIBUTE_NODE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't append attribute node");
-		RETURN_FALSE;
-	}
-
 	/* XXX:ls */
 	if (child == parent) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't append node to itself");
@@ -2469,6 +2464,28 @@ PHP_FUNCTION(domxml_node_append_child)
 		}
 	}
 	/* end libxml2 code */
+	else if (child->type == XML_ATTRIBUTE_NODE) {
+		if (parent->properties != NULL) {
+			/* Check if an attribute with the same name exists */
+			xmlAttrPtr foundattrp;
+			if (child->ns == NULL)
+				foundattrp = xmlHasProp(parent, child->name);
+			else
+				foundattrp = xmlHasNsProp(parent, child->name, child->ns->href);
+			if ((foundattrp != NULL) && (foundattrp != (xmlAttrPtr) child)) {
+				xmlUnlinkNode((xmlNodePtr) foundattrp);
+				(void)xmlCopyProp(parent, (xmlAttrPtr) child);
+				/* We're in the dark here, what happened to the parent, let's
+				 * assume it's handled properly and return the new(?) parent
+				 */
+				new_child = parent;
+			}
+		}
+		/* For all other intents and purposes fall through to the xmlAddChild
+		 * call
+		 */
+	}
+
 	
 	if (NULL == new_child) {
 		new_child = xmlAddChild(parent, child);
