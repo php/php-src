@@ -34,7 +34,7 @@
 #include "simplexml.h"
 #include "zend_default_classes.h"
 #include "zend_interfaces.h"
-#if HAVE_SPL
+#if HAVE_SPL && !defined(COMPILE_DL_SPL)
 #include "ext/spl/spl_sxe.h"
 #endif
 
