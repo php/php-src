@@ -37,7 +37,19 @@
 #include <math.h>
 #include <time.h>
 #include <stdio.h>
+
+#ifndef NETWARE
 #include <netdb.h>
+#else
+/*#include "netware/env.h"*/    /* Temporary */
+#ifdef NEW_LIBC /* Same headers hold good for Winsock and Berkeley sockets */
+#include <netinet/in.h>
+/*#include <arpa/inet.h>*/
+#include <netdb.h>
+#else
+#include <sys/socket.h>
+#endif
+#endif
 
 #if HAVE_ARPA_INET_H
 # include <arpa/inet.h>
@@ -415,7 +427,7 @@ function_entry basic_functions[] = {
 	PHP_FE(gethostbyname,													NULL)
 	PHP_FE(gethostbynamel,													NULL)
 
-#if HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(PHP_WIN32))
+#if HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(PHP_WIN32) || defined(NETWARE))
 	PHP_FE(checkdnsrr,														NULL)
 	PHP_FE(getmxrr,second_and_third_args_force_ref)
 #endif
@@ -444,7 +456,8 @@ function_entry basic_functions[] = {
 	PHP_FE(cosh,															NULL)
 	PHP_FE(tanh,															NULL)
 
-#ifndef PHP_WIN32
+/*#ifndef PHP_WIN32*/
+#if !defined(PHP_WIN32) && !defined(NETWARE)
 	PHP_FE(asinh,															NULL)
 	PHP_FE(acosh,															NULL)
 	PHP_FE(atanh,															NULL)
@@ -629,7 +642,7 @@ function_entry basic_functions[] = {
 
 	PHP_FE(socket_get_status,												NULL)
 
-#if (!defined(PHP_WIN32) && !defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
+#if (!defined(PHP_WIN32) && !defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
 	PHP_FE(realpath,														NULL)
 #endif
 
