@@ -176,15 +176,17 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 {
 	int i;
 
-	if (tsrm_new_thread_begin_handler) {
-		tsrm_new_thread_begin_handler(thread_id);
-	}
-
 	(*thread_resources_ptr) = (tsrm_tls_entry *) malloc(sizeof(tsrm_tls_entry));
 	(*thread_resources_ptr)->storage = (void **) malloc(sizeof(void *)*id_count);
 	(*thread_resources_ptr)->count = id_count;
 	(*thread_resources_ptr)->thread_id = thread_id;
 	(*thread_resources_ptr)->next = NULL;
+
+	tsrm_mutex_unlock(tsmm_mutex);
+
+	if (tsrm_new_thread_begin_handler) {
+		tsrm_new_thread_begin_handler(thread_id);
+	}
 	for (i=0; i<id_count; i++) {
 		(*thread_resources_ptr)->storage[i] = (void *) malloc(resource_types_table[i].size);
 		if (resource_types_table[i].ctor) {
@@ -213,7 +215,8 @@ void *ts_resource(ts_rsrc_id id)
 
 	if (!thread_resources) {
 		allocate_new_resource(&tsrm_tls_table[hash_value], thread_id);
-		thread_resources = tsrm_tls_table[hash_value];
+		return ts_resource(id);
+		/* thread_resources = tsrm_tls_table[hash_value]; */
 	} else {
 		 do {
 			if (thread_resources->thread_id == thread_id) {
@@ -223,8 +226,11 @@ void *ts_resource(ts_rsrc_id id)
 				thread_resources = thread_resources->next;
 			} else {
 				allocate_new_resource(&thread_resources->next, thread_id);
-				thread_resources = thread_resources->next;
-				break;
+				return ts_resource(id);
+				/*
+				 * thread_resources = thread_resources->next;
+				 * break;
+				 */
 			}
 		 } while (thread_resources);
 	}
