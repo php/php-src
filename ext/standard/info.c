@@ -411,6 +411,7 @@ void php_print_credits(int flag)
 		CREDIT_LINE("Readline", "Thies C. Arntzen");
 		CREDIT_LINE("Sessions", "Sascha Schumann, Andrei Zmievski");
 		CREDIT_LINE("SNMP", "Rasmus Lerdorf");
+		CREDIT_LINE("SWF", "Sterling Hughes");
 		CREDIT_LINE("Sybase", "Zeev Suraski");
 		CREDIT_LINE("System V Shared Memory", "Christian Cartus");
 		CREDIT_LINE("System V Semaphores", "Tom May");
