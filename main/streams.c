@@ -512,9 +512,9 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 		} else {
 			ret = fclose(data->file);
 		}
-	}
-	else
+	} else {
 		ret = 0;
+	}
 
 	efree(data);
 	
@@ -680,11 +680,12 @@ PHPAPI php_stream *php_stream_fopen_with_path(char *filename, char *mode, char *
 			if (VCWD_STAT(trypath, &sb) == 0) {
 				/* file exists ... check permission */
 				if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC) == 0) ||
-						php_checkuid(trypath, mode, CHECKUID_CHECK_MODE_PARAM))
+						php_checkuid(trypath, mode, CHECKUID_CHECK_MODE_PARAM)) {
 					/* UID ok, or trypath is in safe_mode_include_dir */
 					stream = php_stream_fopen(trypath, mode, opened_path TSRMLS_CC);
-				else
+				} else {
 					stream = NULL;
+				}
 
 				efree(pathbuf);
 				return stream;
