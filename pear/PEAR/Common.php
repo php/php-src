@@ -199,8 +199,6 @@ class PEAR_Common extends PEAR
         switch ($name) {
             case 'DIR':
                 array_pop($this->dir_names);
-                unset($this->dir_install);
-                unset($this->dir_role);
                 break;
             case 'FILE':
                 $path = '';
