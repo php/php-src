@@ -515,8 +515,8 @@ expr_without_variable:
 		T_LIST '(' { zend_do_list_init(TSRMLS_C); } assignment_list ')' '=' expr { zend_do_list_end(&$$, &$7 TSRMLS_CC); }
 	|	variable '=' expr		{ zend_check_writable_variable(&$1); zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign(&$$, &$1, &$3 TSRMLS_CC); }
 	|	variable '=' '&' variable { zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&$$, &$1, &$4 TSRMLS_CC); }
-	|	variable '=' '&' T_NEW dynamic_class_name { zend_check_writable_variable(&$1); zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$4, &$5 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$3, &$4, &$7 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&$$, &$1, &$3 TSRMLS_CC); }
-	|	T_NEW dynamic_class_name { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$1, &$2 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$$, &$1, &$4 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
+	|	variable '=' '&' T_NEW class_name_reference { zend_check_writable_variable(&$1); zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$4, &$5 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$3, &$4, &$7 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&$$, &$1, &$3 TSRMLS_CC); }
+	|	T_NEW class_name_reference { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$1, &$2 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$$, &$1, &$4 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 	|	variable T_PLUS_EQUAL expr 	{ zend_check_writable_variable(&$1); zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_ADD, &$$, &$1, &$3 TSRMLS_CC); }
 	|	variable T_MINUS_EQUAL expr	{ zend_check_writable_variable(&$1); zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_SUB, &$$, &$1, &$3 TSRMLS_CC); }
 	|	variable T_MUL_EQUAL expr		{ zend_check_writable_variable(&$1); zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_MUL, &$$, &$1, &$3 TSRMLS_CC); }
@@ -560,7 +560,7 @@ expr_without_variable:
 	|	expr T_IS_SMALLER_OR_EQUAL expr { zend_do_binary_op(ZEND_IS_SMALLER_OR_EQUAL, &$$, &$1, &$3 TSRMLS_CC); }
 	|	expr '>' expr 					{ zend_do_binary_op(ZEND_IS_SMALLER, &$$, &$3, &$1 TSRMLS_CC); }
 	|	expr T_IS_GREATER_OR_EQUAL expr { zend_do_binary_op(ZEND_IS_SMALLER_OR_EQUAL, &$$, &$3, &$1 TSRMLS_CC); }
-	|	expr T_INSTANCEOF dynamic_class_name { zend_do_instanceof(&$$, &$1, &$3, 0 TSRMLS_CC); }
+	|	expr T_INSTANCEOF class_name_reference { zend_do_instanceof(&$$, &$1, &$3, 0 TSRMLS_CC); }
 	|	'(' expr ')' 	{ $$ = $2; }
 	|	expr '?' { zend_do_begin_qm_op(&$1, &$2 TSRMLS_CC); }
 		expr ':' { zend_do_qm_true(&$4, &$2, &$5 TSRMLS_CC); }
@@ -597,9 +597,28 @@ fully_qualified_class_name:
 		T_STRING { zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
 ;
 
-dynamic_class_name:
-		T_STRING							{ zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
-	|	r_variable_without_static_member	{ zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
+class_name_reference:
+		T_STRING				{ zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
+	|	dynamic_class_name_reference	{ zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC); zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
+;
+
+
+dynamic_class_name_reference:
+		base_variable T_OBJECT_OPERATOR { zend_do_push_object(&$1 TSRMLS_CC); }
+			object_property { zend_do_push_object(&$4 TSRMLS_CC); zend_do_declare_implicit_property(TSRMLS_C); } dynamic_class_name_variable_properties
+			{ zend_do_pop_object(&$$ TSRMLS_CC); $$.u.EA.type = ZEND_PARSED_MEMBER; }
+	|	base_variable { $$ = $1; }
+;
+
+
+dynamic_class_name_variable_properties:
+		dynamic_class_name_variable_properties dynamic_class_name_variable_property
+	|	/* empty */
+;
+
+
+dynamic_class_name_variable_property:
+		T_OBJECT_OPERATOR object_property { zend_do_push_object(&$2 TSRMLS_CC); zend_do_declare_implicit_property(TSRMLS_C); }
 ;
 
 exit_expr:
@@ -719,17 +738,12 @@ rw_variable:
 				{ zend_check_writable_variable(&$1); }
 ;
 
-r_variable_without_static_member:
-		variable_without_objects { zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC); $$ = $1; }
-;
-
 variable:
-		base_variable_without_objects T_OBJECT_OPERATOR { zend_do_push_object(&$1 TSRMLS_CC); }
+		base_variable_with_function_calls T_OBJECT_OPERATOR { zend_do_push_object(&$1 TSRMLS_CC); }
 			object_property { zend_do_push_object(&$4 TSRMLS_CC); } method_or_not variable_properties
 			{ zend_do_pop_object(&$$ TSRMLS_CC); $$.u.EA.type = $1.u.EA.type | ($7.u.EA.type ? $7.u.EA.type : $6.u.EA.type); }
-	|	base_variable_without_objects { $$ = $1; }
+	|	base_variable_with_function_calls { $$ = $1; }
 ;
-
 
 variable_properties:
 		variable_properties variable_property { $$.u.EA.type = $2.u.EA.type; }
@@ -759,13 +773,18 @@ static_member:
 ;
 
 
-base_variable_without_objects:
-		reference_variable { $$ = $1; $$.u.EA.type = ZEND_PARSED_VARIABLE; }
-	|	simple_indirect_reference reference_variable { zend_do_indirect_references(&$$, &$1, &$2 TSRMLS_CC); $$.u.EA.type = ZEND_PARSED_VARIABLE; }
-	|	static_member { $$ = $1; $$.u.EA.type = ZEND_PARSED_STATIC_MEMBER; }
+base_variable_with_function_calls:
+		base_variable		{ $$ = $1; }
 	|	function_call { zend_do_begin_variable_parse(TSRMLS_C); $$ = $1; $$.u.EA.type = ZEND_PARSED_FUNCTION_CALL; }
 ;
 
+
+base_variable:
+		reference_variable { $$ = $1; $$.u.EA.type = ZEND_PARSED_VARIABLE; }
+	|	simple_indirect_reference reference_variable { zend_do_indirect_references(&$$, &$1, &$2 TSRMLS_CC); $$.u.EA.type = ZEND_PARSED_VARIABLE; }
+	|	static_member { $$ = $1; $$.u.EA.type = ZEND_PARSED_STATIC_MEMBER; }
+;
+	
 reference_variable:
 		reference_variable '[' dim_offset ']'	{ fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); }
 	|	reference_variable '{' expr '}'		{ fetch_string_offset(&$$, &$1, &$3 TSRMLS_CC); }
