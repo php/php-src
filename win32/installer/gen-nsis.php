@@ -36,7 +36,7 @@ $sections = array(
 	"cgi" => array(
 		"group" => "SAPI",
 		"label" => "CGI",
-		"description" => "The most stable SAPI for use to serve PHP scripts in your web server",
+		"description" => "CGI Interface - should work with most web servers",
 	  	"files" => array(
 	  		"\$INSTDIR" => array(
 	  			"php.exe"
@@ -47,10 +47,11 @@ $sections = array(
 	  	),
 	),
 
+	/* CLI is required by the installer */
 	"cli" => array(
 		"group" => "SAPI",
-		"label" => "CLI",
-		"description" => "New Command Line Interface for running PHP scripts as batch files",
+		"label" => "-CLI",
+		"description" => "Command Line Interface for running PHP scripts as batch files",
 		"files" => array(
 			"\$INSTDIR\\cli" => array(
 				"cli\\php.exe"
@@ -232,7 +233,7 @@ function add_sections($pattern, $groupname, $abbrev, &$sections, $sourcedirs, $i
 						$filepat
 						),
 					),
-				'extras' => $groupname == 'EXT' ? "Push \"extension=" . basename($extname) . "\"\nCall AddIniSetting\n\n" : ""
+/*				'extras' => $groupname == 'EXT' ? "Push \"extension=" . basename($extname) . "\"\nCall AddIniSetting\n\n" : "" */
 				);
 
 	}
@@ -270,7 +271,7 @@ foreach ($sections as $sectionid => $sectiondata) {
 	}
 
 	$body = "Section \"" . $sectiondata['label'] . "\" Sec$sectionid\n";
-
+	
 	foreach ($sectiondata['files'] as $outputdir => $filelist) {
 		$body .= "\tSetOutPath \"$outputdir\"\n";
 		foreach ($filelist as $pattern) {
@@ -299,7 +300,7 @@ foreach ($sections_stage1 as $group => $data)
 		$SECTIONS .= $data . "\n";
 	} else {
 		$descriptions[] = "\t!insertmacro MUI_DESCRIPTION_TEXT \${SecGroup$group} \"" . $groups[$group][1] . "\"";
-		$SECTIONS .= "SubSection \"" . $groups[$group][0] . "\" SecGroup$group\n$data\nSubSectionEnd\n\n";
+		$SECTIONS .= "SubSection /e \"" . $groups[$group][0] . "\" SecGroup$group\n$data\nSubSectionEnd\n\n";
 	}
 }
 
@@ -341,7 +342,7 @@ $UNINSTALL = implode("\n", $uninstall) . "\n" . implode("\n", $rmdirs) . "\n";
 OutFile "InstallPHP<?= PHPVERSION ?>.exe"
 
 SetCompressor bzip2
-
+ShowInstDetails show
 ;License page
 LicenseData "license.txt"
 
@@ -383,14 +384,11 @@ Function CopyPHPIni
 	; Extensions will call a function to activate their entry
 	; in the ini file as they are installed.
 
-	ifFileExists "$WINDIR\php.ini" "" +2
-	Rename "<?= $SYSDIR ?>\php.ini" "$WINDIR\php.ini.old"
+	Rename "$WINDIR\php.ini" "$WINDIR\php.ini.old"
 	CopyFiles "$INSTDIR\php.ini-dist" "$WINDIR\php.ini"
 
-; For editing the ini, put the cli and the php4ts.dll in the same dir
-; these files will be deleted during post-installation
+; These files will be deleted during post-installation
 	CopyFiles "<?= $SYSDIR ?>\php4ts.dll" "$INSTDIR\php4ts.dll"
-	CopyFiles "$INSTDIR\cli\php.exe" "$INSTDIR\strap-php.exe"
 	File "<?= dirname(__FILE__) ?>\setini.php"
 
 ; Set the extension_dir setting in the php.ini
@@ -406,10 +404,13 @@ FunctionEnd
 ; Perform final actions after everything has been installed
 Section -post
 	; Merge ini settings
-	ExecWait "$\"$INSTDIR\strap-php.exe$\" $\"$INSTDIR\setini.php$\" $\"$WINDIR\php.ini$\" $\"$INSTDIR\.ini-add$\""
+
+	Sleep 1000
+	
+	ExecWait "$\"$INSTDIR\cli\php.exe$\" $\"-n$\" $\"$INSTDIR\setini.php$\" $\"$WINDIR\php.ini$\" $\"$INSTDIR\.ini-add$\""
+
 	Delete "$INSTDIR\.ini-add" ; Created by the AddIniSetting function
 	Delete "$INSTDIR\setini.php"
-	Delete "$INSTDIR\strap-php.exe"
 	Delete "$INSTDIR\php4ts.dll"
 
 	; Add to Add/Remove programs list
