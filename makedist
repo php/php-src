@@ -130,9 +130,6 @@ rm -f buildmk.stamp
 
 ./genfiles
 
-echo "/* Dummy File */" > ext/bcmath/number.c
-echo "/* Dummy File */" > ext/bcmath/number.h
-
 # now restore our versions of libtool-generated files
 for i in $LT_TARGETS; do
   test -f "$i" && mv $i.bak $i
