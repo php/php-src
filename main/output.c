@@ -81,7 +81,7 @@ static void php_output_init_globals(php_output_globals *output_globals)
 #endif
 
 
-PHP_MINIT_FUNCTION(output)
+PHP_GINIT_FUNCTION(output)
 {
 #ifdef ZTS
 	output_globals_id = ts_allocate_id(sizeof(php_output_globals), NULL, NULL);
@@ -111,14 +111,15 @@ PHP_RSHUTDOWN_FUNCTION(output);
 php3_module_entry output_module_entry = {
 	"PHP_output", 
 	php_output_functions, 
-	PHP_MINIT(output),      /* extension-wide startup function */
-    NULL,                   /* extension-wide shutdown function */
-    PHP_RINIT(output),      /* per-request startup function */
-    PHP_RSHUTDOWN(output),  /* per-request shutdown function */
-    NULL,                   /* information function */
-	STANDARD_MODULE_PROPERTIES
+	NULL,                   /* extension-wide startup function */
+	NULL,                   /* extension-wide shutdown function */
+	PHP_RINIT(output),      /* per-request startup function */
+	PHP_RSHUTDOWN(output),  /* per-request shutdown function */
+	NULL,                   /* information function */
+	PHP_GINIT(output),      /* global startup function */
+	NULL,                   /* global shutdown function */
+	STANDARD_MODULE_PROPERTIES_EX
 };
-
 
 PHP_RINIT_FUNCTION(output)
 {

@@ -434,13 +434,13 @@ PHPAPI void php_error(int type, const char *format,...)
 		}
 
 		/* get include file name */
-		if (PG(log_errors) || PG(display_errors)) {
+		if (PG(log_errors) || PG(display_errors) || (!module_initialized)) {
 			va_start(args, format);
 			size = vsnprintf(buffer, sizeof(buffer) - 1, format, args);
 			va_end(args);
 			buffer[sizeof(buffer) - 1] = 0;
 
-			if (PG(log_errors)) {
+			if (PG(log_errors) || (!module_initialized)) {
 				char log_buffer[1024];
 
 				snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
@@ -847,6 +847,7 @@ static void php_new_thread_end_handler(THREAD_T thread_id)
 #ifdef ZTS
 static void core_globals_ctor(php_core_globals *core_globals)
 {
+	memset(core_globals,0,sizeof(*core_globals));
 	zend_hash_init(&core_globals->ht_fsock_keys, 0, NULL, NULL, 1);
 	zend_hash_init(&core_globals->ht_fsock_socks, 0, NULL, (int (*)(void *))php_msock_destroy, 1);
 }
