@@ -115,6 +115,7 @@ struct _zend_op_array {
 	int backpatch_count;
 #endif
 	zend_bool return_reference;
+	zend_bool done_pass_two;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
