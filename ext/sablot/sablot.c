@@ -164,7 +164,7 @@ PHP_FUNCTION(xslt_output_begintransform)
 	S_FREE(SABLOTG(output_transform_file));
 		
 	SABLOTG(output_transform_file) = estrndup(Z_STRVAL_PP(file), Z_STRLEN_PP(file));
-	php_start_ob_buffer();
+	php_start_ob_buffer(NULL);
 }
 /* }}} */
 
