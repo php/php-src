@@ -55,7 +55,7 @@ zend_module_entry pdo_dblib_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-#ifdef COMPILE_DL_PDO_DBLIB
+#if defined(COMPILE_DL_PDO_DBLIB) || defined(COMPILE_DL_PDO_MSSQL)
 ZEND_GET_MODULE(pdo_dblib)
 #endif
 
