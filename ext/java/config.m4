@@ -101,7 +101,7 @@ AC_DEFUN(JAVA_CHECK_LIB, [
      test -f $i/jni_md.h   && JAVA_INCLUDE="$JAVA_INCLUDE -I$i"
    done
 
-   for i in `find $PHP_JAVA -type d`; do
+   for i in `find $PHP_JAVA/ -type d`; do
      test -f $i/classes.zip && JAVA_CFLAGS=-DJNI_11
      test -f $i/rt.jar      && JAVA_CFLAGS=-DJNI_12
      test -f $i/classes.zip && JAVA_CLASSPATH=$i/classes.zip
