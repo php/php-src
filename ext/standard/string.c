@@ -210,6 +210,24 @@ PHP_FUNCTION(strcspn)
 }
 /* }}} */
 
+#ifdef HAVE_STRCOLL
+/* {{{ proto int strcoll(string str1, string str2)
+   Compare two strings using the current locale */
+PHP_FUNCTION(strcoll)
+{
+	zval **s1, **s2;
+
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &s1, &s2) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(s1);
+	convert_to_string_ex(s2);
+
+	RETURN_LONG(strcoll((const char *)(*s1)->value.str.val, (const char *)(*s2)->value.str.val));
+}
+#endif
+
 PHPAPI void php_trim(zval *str, zval * return_value, int mode)
 /* mode 1 : trim left
    mode 2 : trim right
