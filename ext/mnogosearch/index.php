@@ -5,7 +5,7 @@
 
 <?
 
-/*   mnoGoSearch-php-lite v.1.0
+/*   mnoGoSearch-php-lite v.1.1
  *   for mnoGoSearch ( formely known as UdmSearch ) free web search engine
  *   (C) 2001 by Sergey Kartashoff <gluke@mail.ru>,
  *               mnoGoSearch Developers Team <devel@mnogosearch.org>
@@ -32,6 +32,7 @@ $dbaddr='mysql://udm:udm@/udm/';
 $dbmode='single';
 
 $localcharset='koi8-r';
+$browsercharset='utf-8';
 $phrase=$cache=$crosswords='no';
 $ispelluseprefixes=$trackquery='no';
 $spell_host=$vardir=$datadir='';
@@ -545,16 +546,27 @@ function make_nav($query_orig){
    	Udm_Set_Agent_Param($udm_agent,UDM_PARAM_CHARSET,$localcharset);
    }
    
-   if (Udm_Api_Version() >= 30200) {
+   if (Udm_Api_Version() >= 30200) {	   
    	if ($localcharset == '') Udm_Set_Agent_Param($udm_agent,UDM_PARAM_CHARSET,'utf-8');
    	if ($browsercharset != '') {
    		Udm_Set_Agent_Param($udm_agent,UDM_PARAM_BROWSER_CHARSET,$browsercharset);
-		Header ("Content-Type: text/html; charset=$browsercharset"); ?>	
+		Header ("Content-Type: text/html; charset=$browsercharset");
 	} else {
 		Udm_Set_Agent_Param($udm_agent,UDM_PARAM_BROWSER_CHARSET,'utf-8');
-		Header ("Content-Type: text/html; charset=utf-8"); ?>	
+		Header ("Content-Type: text/html; charset=utf-8");	
 	}	
+	if ($hlbeg != '') {
+		Udm_Set_Agent_Param($udm_agent,UDM_PARAM_HLBEG,$hlbeg);	
+	} else {
+		Udm_Set_Agent_Param($udm_agent,UDM_PARAM_HLBEG,'<font color="000088"><b>');	
+	}
+	if ($hlend != '') {
+		Udm_Set_Agent_Param($udm_agent,UDM_PARAM_HLEND,$hlend);	
+	} else {
+		Udm_Set_Agent_Param($udm_agent,UDM_PARAM_HLEND,'</b></font>');	
+	}
    }
+
 
    for ($i=0; $i < count($stopwordtable_arr); $i++) {
    	if ($stopwordtable_arr[$i] != '') {
