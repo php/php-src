@@ -13,25 +13,22 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Preston L. Bannister <pbannister@php.net>                   |
-   |          Sander Roobol <sander@php.net>                              |
+   | Authors: Ilia Alshanetsky <ilia@php.net>                             |
+   |          Preston L. Bannister <pbannister@php.net>                   |
    |          Marcus Boerger <helly@php.net>                              |
+   |          Derick Rethans <derick@php.net>                             |
+   |          Sander Roobol <sander@php.net>                              |
    | (based on version by: Stig Bakken <ssb@fast.no>)                     |
    | (based on the PHP 3 test framework by Rasmus Lerdorf)                |
    +----------------------------------------------------------------------+
  */
 
 /*
-
 	Require exact specification of PHP executable to test (no guessing!).
-
 	Die if any internal errors encountered in test script.
-
 	Regularized output for simpler post-processing of output.
-
 	Optionally output error lines indicating the failing test source and log
 	for direct jump with MSVC or Emacs.
-
 */
 
 /*
@@ -106,6 +103,7 @@ More .INIs  : " . str_replace("\n","", php_ini_scanned_files()) . "
 $test_to_run = array();
 $test_files = array();
 $test_results = array();
+$GLOBALS['__PHP_FAILED_TESTS__'] = array();
 
 // If parameters given assume they represent selected tests to run.
 if (isset($argc) && $argc > 1) {
@@ -227,6 +225,92 @@ Time taken      : " . sprintf("%4d seconds", $end_time - $start_time) . "
 =====================================================================
 ";
 
+define('PHP_QA_EMAIL', 'php-qa@lists.php.net');
+define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
+
+/* We got failed Tests, offer the user to send and e-mail to QA team */
+if ($sum_results['FAILED']) {
+	$fp = fopen("php://stdin", "r+");
+	fwrite($fp, "Some tests have failed, would you like to send the\nreport to PHP's QA team? [Yn]: ");
+	fflush($fp);
+	$user_input = fgets($fp, 10);
+	
+	if (strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
+		/*  
+		 * Collect information about the host system for our report
+		 * Fetch phpinfo() output so that we can see the PHP enviroment
+		 * Make an archive of all the failed tests
+		 * Send an email
+		 */
+		
+		$failed_tests_data = '';
+		$sep = "\n" . str_repeat('=', 80) . "\n";
+		
+		$failed_tests_data .= "Automake:\n". shell_exec('automake --version'). "\n";
+		$failed_tests_data .= "Autoconf:\n". shell_exec('autoconf --version'). "\n";
+		$failed_tests_data .= "Libtool:\n". shell_exec('libtool --version'). "\n";
+		$failed_tests_data .= "Bison:\n". shell_exec('bison --version'). "\n";
+		$failed_tests_data .= "Compiler:\n". shell_exec('cc --version'). "\n";
+		$failed_tests_data .= "\n\n";
+		
+		foreach ($GLOBALS['__PHP_FAILED_TESTS__'] as $test_info) {
+			$failed_tests_data .= $sep . $test_info['name'];
+			$failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']));
+			$failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']));
+			$failed_tests_data .= $sep . "\n\n";
+		}
+		
+		$failed_tests_data .= $sep . "PHPINFO" . $sep;
+		$failed_tests_data .= shell_exec($php.' -i');
+		
+		$compression = 0;
+		
+		if (!mail_qa_team($failed_tests_data, $compression)) {
+			$output_file = 'php_test_results_' . date('Ymd') . ( $compression ? '.txt.gz' : '.txt' );
+			$fp = fopen($output_file, "w");
+			fwrite($fp, $failed_tests_data);
+			fclose($fp);
+		
+			echo "\nThe test script was unable to automatically send the report to PHP's QA Team\nPlease send ".$output_file." to ".PHP_QA_EMAIL." manually, thank you.\n";
+		} else {
+			fwrite($fp, "\nThank you for helping to make PHP better.\n");
+			fclose($fp);
+		}	
+	}
+}
+ 
+//
+// Send Email to QA Team
+//
+
+function mail_qa_team($data, $compression)
+{
+	$url_bits = parse_url(QA_SUBMISSION_PAGE);
+	if (empty($url_bits['port'])) $url_bits['port'] = 80;
+	
+	$data = urlencode(base64_encode(preg_replace("/[\\x00]/", "[0x0]", $data)));
+	$data_length = strlen($data);
+	
+	$fs = fsockopen($url_bits['host'], $url_bits['port'], $errno, $errstr, 10);
+	if (!$fs) {
+		return FALSE;
+	}
+
+	echo "Posting to {$url_bits['host']} {$url_bits['path']}\n";
+	fwrite($fs, "POST ".$url_bits['path']." HTTP/1.1\r\n");
+	fwrite($fs, "Host: ".$url_bits['host']."\r\n");
+	fwrite($fs, "User-Agent: QA Browser 0.1\r\n");
+	fwrite($fs, "Content-Type: application/x-www-form-urlencoded\r\n");
+	fwrite($fs, "Content-Length: ".$data_length."\r\n\r\n");
+	fwrite($fs, "php_test_data=".$data);
+	fwrite($fs, "\r\n\r\n");
+	fflush($fs);
+	fclose($fs);
+
+	return 1;
+} 
+ 
+ 
 //
 //  Write the given text to a temporary file, and return the filename.
 //
@@ -343,8 +427,23 @@ TEST $file
 		}
 	}
 
+	// Default ini settings
+	$settings = array (
+		"-d 'open_basedir='",
+		"-d 'disable_functions='",
+		"-d 'error_reporting=2047'",
+		"-d 'display_errors=1'",
+		"-d 'html_errors=0'",
+		"-d 'docref_root=/phpmanual/'",
+		"-d 'docref_ext=.html'",
+		"-d 'error_prepend_string='",
+		"-d 'error_append_string='",
+		"-d 'auto_append_file='",
+		"-d 'auto_prepend_file='",
+	);
+	$ini_settings = ' '. join (' ', $settings);
+
 	// Any special ini settings
-	$ini_settings = '';
 	if (array_key_exists('INI', $section_text)) {
 		foreach(preg_split( "/[\n\r]+/", $section_text['INI']) as $setting) {
 			if (strlen($setting)) {
@@ -441,6 +540,11 @@ COMMAND $cmd
 	// Test failed so we need to report details.
 	echo "FAIL $tested\n";
 
+	$GLOBALS['__PHP_FAILED_TESTS__'][] = array(
+						'name' => $file,
+						'output' => ereg_replace('\.phpt$','.log', $file),
+						'diff'   => ereg_replace('\.phpt$','.diff', $file)
+						);
 
 	// write .exp
 	if (strpos($log_format,'E') !== FALSE) {
