@@ -282,6 +282,7 @@ PHP_FUNCTION(zip_entry_read)
 
 	buf = emalloc(len + 1);
 	ret = zzip_read(entry->fp, buf, len);
+	buf[ret] = 0;
 	if (ret == 0) {
 		RETURN_FALSE;
 	} else {
