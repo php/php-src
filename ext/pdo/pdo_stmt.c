@@ -336,21 +336,15 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno TSRMLS_DC
 		case PDO_PARAM_STR:
 			if (value) {
 				ZVAL_STRINGL(dest, value, value_len, 1);
+				break;
 			}
-
-			break;
 		default:
 			ZVAL_NULL(dest);
 	}
 }
 
-/* perform a fetch.  If do_bind is true, update any bound columns.
- * If return_value is not null, store values into it according to HOW. */
-static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_fetch_type how TSRMLS_DC)
+static int do_fetch_common(pdo_stmt_t *stmt, int do_bind TSRMLS_DC)
 {
-	int i;
-	zval *val;
-
 	if (!dispatch_param_event(stmt, PDO_PARAM_EVT_FETCH_PRE TSRMLS_CC)) {
 		return 0;
 	}
@@ -366,10 +360,6 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 	
 	if (!dispatch_param_event(stmt, PDO_PARAM_EVT_FETCH_POST TSRMLS_CC)) {
 		return 0;
-	}
-
-	if (return_value) {
-		array_init(return_value);
 	}
 
 	if (do_bind && stmt->bound_columns) {
@@ -396,14 +386,29 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 			zend_hash_move_forward(stmt->bound_columns);
 		}
 	}
-		
+
+	return 1;
+}
+
+/* perform a fetch.  If do_bind is true, update any bound columns.
+ * If return_value is not null, store values into it according to HOW. */
+static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_fetch_type how TSRMLS_DC)
+{
+	if (!do_fetch_common(stmt, do_bind TSRMLS_CC)) {
+		return 0;
+	}
+
 	if (return_value) {
+		int i;
+
+		array_init(return_value);
+
 		if (how == PDO_FETCH_LAZY || how == PDO_FETCH_OBJ) {
 			how = PDO_FETCH_BOTH;
 		}
 
 		for (i = 0; i < stmt->column_count; i++) {
-
+			zval *val;
 			MAKE_STD_ZVAL(val);
 			fetch_value(stmt, val, i TSRMLS_CC);
 
@@ -437,6 +442,49 @@ static PHP_METHOD(PDOStatement, fetch)
 	if (!do_fetch(stmt, TRUE, return_value, how TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
+}
+/* }}} */
+
+/* {{{ proto string PDOStatement::fetchSingle()
+   Returns a data of the 1st column in the result set. */
+static PHP_METHOD(PDOStatement, fetchSingle)
+{
+	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (ZEND_NUM_ARGS()) {
+		RETURN_FALSE;
+	}
+
+	if (!do_fetch_common(stmt, TRUE TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
+	fetch_value(stmt, return_value, 0 TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto array PDOStatement::fetchAll([int $how = PDO_FETCH_BOTH])
+   Returns an array of all of the results. */
+static PHP_METHOD(PDOStatement, fetchAll)
+{
+	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	long how = PDO_FETCH_BOTH;
+	zval *data;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &how)) {
+		RETURN_FALSE;
+	}
+	
+	MAKE_STD_ZVAL(data);
+	if (!do_fetch(stmt, TRUE, data, how TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+	do {
+		add_next_index_zval(return_value, data);
+		MAKE_STD_ZVAL(data);
+	} while (do_fetch(stmt, TRUE, data, how TSRMLS_CC));
 }
 /* }}} */
 
@@ -516,6 +564,8 @@ function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, bindParam,		second_arg_force_ref,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, bindColumn,	second_arg_force_ref,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, rowCount,		NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, fetchSingle,		NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, fetchAll,		NULL,					ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
