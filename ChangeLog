@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Changed phpinfo() to list modules that have no info function (Zeev)
 - Modified array_walk() function so that the userland callback is passed
   a key and possible user data in addition to the value (Andrey)
 - Fixed ldap_search(), ldap_read() and ldap_list() (Zeev)

@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\libzend" /I "." /I "regex\\" /I "..\bindlib_w32" /D "NDEBUG" /D "MSVC5" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=0 /Fr /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "libzend" /I "." /I "regex\\" /I "..\bindlib_w32" /D "NDEBUG" /D "MSVC5" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=0 /Fr /FD /c
 # SUBTRACT CPP /YX /Yc /Yu
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
