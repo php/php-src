@@ -119,7 +119,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 			case PDO_PARAM_EVT_ALLOC:
 			
 				/* figure out what we're doing */
-				switch (param->param_type) {
+				switch (PDO_PARAM_TYPE(param->param_type)) {
 					case PDO_PARAM_LOB:
 					case PDO_PARAM_STMT:
 						return 0;
@@ -136,7 +136,10 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 					ctype = SQL_C_CHAR;
 				}
 				rc = SQLBindParameter(S->stmt, param->paramno+1,
-						param->max_value_len <= 0 ? SQL_PARAM_INPUT : SQL_PARAM_OUTPUT,
+						((param->param_type & PDO_PARAM_INPUT_OUTPUT) == PDO_PARAM_INPUT_OUTPUT) ?
+							SQL_PARAM_INPUT_OUTPUT :
+							param->max_value_len <= 0 ? 
+								SQL_PARAM_INPUT : SQL_PARAM_OUTPUT,
 						ctype, sqltype, precision, scale,
 						Z_STRVAL_P(param->parameter),
 						param->max_value_len <= 0 ? 0 : param->max_value_len,
