@@ -50,6 +50,9 @@
 /* Set to the path to the dir containing safe mode executables */
 #define PHP_SAFE_MODE_EXEC_DIR /usr/local/php/bin
 
+/* Define if PHP to setup it's own SIGCHLD handler */
+#define PHP_SIGCHILD 0
+
 /* Define if you want POST/GET/Cookie track variables by default */
 #define PHP_TRACK_VARS 0
 

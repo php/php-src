@@ -469,6 +469,15 @@ AC_ARG_WITH(exec-dir,
    	AC_MSG_RESULT(/usr/local/php/bin)
 ])
 
+PHP_ARG_ENABLE(sigchild,whether to enable PHP's own SIGCHLD handler,
+[  --enable-sigchild       Enable PHP's own SIGCHLD handler.],no)
+
+if test "$PHP_SIGCHILD" = "yes"; then
+  AC_DEFINE(PHP_SIGCHILD, 1)
+else
+  AC_DEFINE(PHP_SIGCHILD, 0)
+fi
+
 PHP_ARG_ENABLE(track-vars,whether to enable track_vars variables by default,
 [  --enable-track-vars     Enable GET/POST/Cookie track variables by default.],yes)
 

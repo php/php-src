@@ -2,6 +2,9 @@
 /* tested only with MS Visual C++ V5 */
 
 
+/* Define if PHP to setup it's own SIGCHLD handler (not needed on Win32) */
+#define PHP_SIGCHILD 0
+
 /* if you have resolv.lib and lib44bsd95.lib you can compile the extra 
    dns functions located in dns.c.  Set this to 1.  add resolv.lib and
    lib33bsd95.lib to the project settings, and add the path to the
