@@ -480,6 +480,112 @@ static php_stream_filter_factory strfilter_base64_factory = {
 };
 /* }}} */
 
+/* {{{ quoted-printable stream filter implementation */
+
+static size_t strfilter_quoted_printable_write(php_stream *stream, php_stream_filter *thisfilter,
+			const char *buf, size_t count TSRMLS_DC)
+{
+	char chunk[4096];
+	size_t chunk_len;
+	unsigned char *ps;
+	unsigned int bcnt;
+	static char qp_digits[] = "0123456789ABCDEF";
+
+	chunk_len = 0;
+
+	ps = (unsigned char *)buf;
+	for (bcnt = count; bcnt > 0; bcnt--) {
+		unsigned int c = *(ps++);
+
+		if ((c >= 33 && c <= 60) || (c >= 62 && c <= 126)) { 
+			if (chunk_len >= sizeof(chunk)) {
+				php_stream_filter_write_next(stream, thisfilter, chunk, chunk_len);
+				chunk_len = 0;
+			}
+			chunk[chunk_len++] = c;
+		} else {
+			if (chunk_len > sizeof(chunk) - 3) {
+				php_stream_filter_write_next(stream, thisfilter, chunk, chunk_len);
+				chunk_len = 0;
+			}
+			chunk[chunk_len++] = '=';
+			chunk[chunk_len++] = qp_digits[(c >> 4)];
+			chunk[chunk_len++] = qp_digits[(c & 0x0f)]; 
+		}
+	}
+	php_stream_filter_write_next(stream, thisfilter, chunk, chunk_len);
+
+	return count;
+}
+
+static size_t strfilter_quoted_printable_read(php_stream *stream, php_stream_filter *thisfilter,
+			char *buf, size_t count TSRMLS_DC)
+{
+	size_t nbytes_decoded;
+	size_t bcnt;
+	unsigned char *ps, *pd;
+	unsigned int scan_stat = (unsigned int)thisfilter->abstract;
+	unsigned int v;
+
+	bcnt = php_stream_filter_read_next(stream, thisfilter, buf, count);
+	nbytes_decoded = 0; 
+	ps = pd = (unsigned char *)buf;
+	v = 0;
+
+	for (;bcnt > 0; bcnt--) {
+		switch (scan_stat) {
+			case 0:
+				if (*ps == '=') {
+					scan_stat = 1;
+				} else {
+					*(pd++) = *ps;
+					nbytes_decoded++;
+				}
+				break;
+
+			case 1: case 2: {
+				unsigned int nbl = (*ps >= 'A' ? *ps - 0x37 : *ps - 0x30);
+
+				if (nbl > 15) {
+					php_error(E_WARNING, "stream filter(stream.quoted-printable): invalid character sequence"); 
+					return 0;
+				}
+				v = (v << 4) | nbl;
+
+				scan_stat++;
+				if (scan_stat == 3) {
+					*(pd++) = v;
+					nbytes_decoded++;
+					scan_stat = 0;
+				}
+			}
+		}
+		ps++;
+	}
+	(unsigned int)thisfilter->abstract = scan_stat;
+	return nbytes_decoded;
+}
+
+static php_stream_filter_ops strfilter_quoted_printable_ops = {
+	strfilter_quoted_printable_write,
+	strfilter_quoted_printable_read,
+	commonfilter_nop_flush,
+	commonfilter_nop_eof,
+	NULL,
+	"string.quoted-printable"
+};
+
+static php_stream_filter *strfilter_quoted_printable_create(const char *filtername, const char *filterparams,
+		int filterparamslen, int persistent TSRMLS_DC)
+{
+	return php_stream_filter_alloc(&strfilter_quoted_printable_ops, 0, persistent);
+}
+
+static php_stream_filter_factory strfilter_quoted_printable_factory = {
+	strfilter_quoted_printable_create
+};
+/* }}} */
+
 static const struct {
 	php_stream_filter_ops *ops;
 	php_stream_filter_factory *factory;
@@ -488,6 +594,7 @@ static const struct {
 	{ &strfilter_toupper_ops, &strfilter_toupper_factory },
 	{ &strfilter_tolower_ops, &strfilter_tolower_factory },
 	{ &strfilter_base64_ops, &strfilter_base64_factory },
+	{ &strfilter_quoted_printable_ops, &strfilter_quoted_printable_factory },
 	/* additional filters to go here */
 	{ NULL, NULL }
 };
