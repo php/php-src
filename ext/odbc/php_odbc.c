@@ -42,6 +42,15 @@
 #include "build-defs.h"
 #endif
 
+/*
+ * not defined elsewhere
+ */
+
+#ifndef TRUE
+#define TRUE 1
+#define FALSE 0
+#endif
+
 void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent);
 
 static int le_result, le_conn, le_pconn;
@@ -74,6 +83,17 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_longreadlen, NULL)
 /*	PHP_FE(odbc_bind_param, NULL)
 	PHP_FE(odbc_define, NULL)*/
+	PHP_FE(odbc_tables, NULL)
+	PHP_FE(odbc_columns, NULL)
+	PHP_FE(odbc_columnprivileges, NULL)
+	PHP_FE(odbc_foreignkeys, NULL)
+	PHP_FE(odbc_gettypeinfo, NULL)
+	PHP_FE(odbc_primarykeys, NULL)
+	PHP_FE(odbc_procedurecolumns, NULL)
+	PHP_FE(odbc_procedures, NULL)
+	PHP_FE(odbc_specialcolumns, NULL)
+	PHP_FE(odbc_statistics, NULL)
+	PHP_FE(odbc_tableprivileges, NULL)
 	PHP_FALIAS(odbc_do, odbc_exec, NULL)
 	{ NULL, NULL, NULL }
 };
@@ -118,7 +138,7 @@ static void _free_odbc_result(odbc_result *res)
 						(UWORD)SQL_COMMIT);
 #endif
 			SQLFreeStmt(res->stmt,SQL_DROP);
-#if !HAVE_DB2
+#if !defined( HAVE_DB2 ) && !defined( HAVE_UNIXODBC )
 			res->stmt = NULL;
 #endif
 		}
@@ -335,6 +355,53 @@ PHP_MINIT_FUNCTION(odbc)
 	
 	REGISTER_LONG_CONSTANT("SQL_KEYSET_SIZE", SQL_KEYSET_SIZE, CONST_PERSISTENT | CONST_CS);
 
+    /*
+     * register the standard data types
+     */
+	REGISTER_LONG_CONSTANT("SQL_CHAR", SQL_CHAR, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_VARCHAR", SQL_VARCHAR, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_LONGVARCHAR", SQL_LONGVARCHAR, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_DECIMAL", SQL_DECIMAL, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_NUMERIC", SQL_NUMERIC, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_BIT", SQL_BIT, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_TINYINT", SQL_TINYINT, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_SMALLINT", SQL_SMALLINT, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_INTEGER", SQL_INTEGER, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_BIGINT", SQL_BIGINT, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_REAL", SQL_REAL, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_FLOAT", SQL_FLOAT, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_DOUBLE", SQL_DOUBLE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_BINARY", SQL_BINARY, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_VARBINARY", SQL_VARBINARY, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_LONGVARBINARY", SQL_LONGVARBINARY, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_DATE", SQL_DATE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_TIME", SQL_TIME, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_TIMESTAMP", SQL_TIMESTAMP, CONST_PERSISTENT | CONST_CS);
+#if defined( ODBCVER) && (ODBCVER >= 0x0300)
+	REGISTER_LONG_CONSTANT("SQL_TYPE_DATE", SQL_TYPE_DATE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_TYPE_TIME", SQL_TYPE_TIME, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_TYPE_TIMESTAMP", SQL_TYPE_TIMESTAMP, CONST_PERSISTENT | CONST_CS);
+
+    /*
+     * SQLSpecialColumns values
+     */
+	REGISTER_LONG_CONSTANT("SQL_BEST_ROWID", SQL_BEST_ROWID, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_ROWVER", SQL_ROWVER, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_SCOPE_CURROW", SQL_SCOPE_CURROW, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_SCOPE_TRANSACTION", SQL_SCOPE_TRANSACTION, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_SCOPE_SESSION", SQL_SCOPE_SESSION, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_NO_NULLS", SQL_NO_NULLS, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_NULLABLE", SQL_NULLABLE, CONST_PERSISTENT | CONST_CS);
+
+    /*
+     * SQLStatistics values
+     */
+	REGISTER_LONG_CONSTANT("SQL_INDEX_UNIQUE", SQL_INDEX_UNIQUE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_INDEX_ALL", SQL_INDEX_ALL, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_ENSURE", SQL_ENSURE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_QUICK", SQL_QUICK, CONST_PERSISTENT | CONST_CS);
+#endif
+
 	return SUCCESS;
 }
 
@@ -379,7 +446,7 @@ PHP_MINFO_FUNCTION(odbc)
 	php_printf("</table>\n");
 }	 
 
-#if HAVE_DB2
+#if defined ( HAVE_DB2 ) || defined ( HAVE_UNIXODBC )
 void ODBC_SQL_ERROR(SQLHANDLE conn, SQLHANDLE stmt, char *func)
 #else
 void ODBC_SQL_ERROR(HDBC conn, HSTMT stmt, char *func)
@@ -2054,6 +2121,904 @@ PHP_FUNCTION(odbc_setoption)
 	}
 
 	RETURN_TRUE;
+}
+/* }}} */
+
+/*
+ * metadata functions
+ */
+
+/* {{{ proto int odbc_tables(int connection_id [, string catalog, string schema, string table, string table_types ] )
+   call the SQLTables function */
+PHP_FUNCTION(odbc_tables)
+{
+    pval *pv_res, *pv_conn, *pv_cat, *pv_schema, *pv_table, *pv_type;
+	odbc_result   *result = NULL;
+	odbc_connection *conn;
+    char *cat = NULL, *schema = NULL, *table = NULL, *type = NULL;
+	RETCODE rc;
+	int argc;
+
+	argc = ARG_COUNT(ht);
+	if(argc == 1){
+        if(getParameters(ht, 1, &pv_conn) == FAILURE){
+            WRONG_PARAM_COUNT;
+		}
+	}else if(argc == 5){
+		if(getParameters(ht, 5, &pv_conn, &pv_cat, &pv_schema, &pv_table, &pv_type) == FAILURE){
+			WRONG_PARAM_COUNT;
+		}
+	    convert_to_string(pv_cat);
+	    cat = pv_cat->value.str.val;
+	    convert_to_string(pv_schema);
+	    schema = pv_schema->value.str.val;
+	    convert_to_string(pv_table);
+	    table = pv_table->value.str.val;
+	    convert_to_string(pv_type);
+	    type = pv_type->value.str.val;
+	}else{
+		WRONG_PARAM_COUNT;
+	}
+
+	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
+	ZEND_VERIFY_RESOURCE(conn);
+
+	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	if(result == NULL){
+		php_error(E_WARNING, "Out of memory");
+		RETURN_FALSE;
+	}
+	
+	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	if(rc == SQL_INVALID_HANDLE){
+		efree(result);
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_tables");
+		RETURN_FALSE;
+	}
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLAllocStmt");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	rc = SQLTables(result->stmt, 
+            cat, cat ? SQL_NTS : 0, 
+            schema, schema ? SQL_NTS : 0, 
+            table, table ? SQL_NTS : 0, 
+            type, type ? SQL_NTS : 0 );
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLTables");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	result->numparams = 0;
+    SQLNumResultCols(result->stmt, &(result->numcols));
+
+	if(result->numcols > 0){
+        if(!odbc_bindcols(result)){
+			efree(result);
+            RETURN_FALSE;
+		}
+	}else{
+		result->values = NULL;
+	}
+	result->conn_ptr = conn;
+	result->fetched = 0;
+	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+}
+/* }}} */
+
+/* {{{ proto int odbc_columns(int connection_id, string catalog, string schema, string table, string column )
+   call the SQLColumns function */
+PHP_FUNCTION(odbc_columns)
+{
+    pval *pv_res, *pv_conn, *pv_cat, *pv_schema, *pv_table, *pv_column;
+	odbc_result   *result = NULL;
+	odbc_connection *conn;
+    char *cat = NULL, *schema = NULL, *table = NULL, *column = NULL;
+	RETCODE rc;
+	int argc;
+
+	argc = ARG_COUNT(ht);
+	if(argc == 1){
+        if(getParameters(ht, 1, &pv_conn) == FAILURE){
+            WRONG_PARAM_COUNT;
+		}
+	}else if(argc == 5){
+		if(getParameters(ht, 5, &pv_conn, &pv_cat, &pv_schema, &pv_table, &pv_column) == FAILURE){
+			WRONG_PARAM_COUNT;
+		}
+	    convert_to_string(pv_cat);
+	    cat = pv_cat->value.str.val;
+	    convert_to_string(pv_schema);
+	    schema = pv_schema->value.str.val;
+	    convert_to_string(pv_table);
+	    table = pv_table->value.str.val;
+	    convert_to_string(pv_column);
+	    column = pv_column->value.str.val;
+	}else{
+		WRONG_PARAM_COUNT;
+	}
+
+	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
+	ZEND_VERIFY_RESOURCE(conn);
+
+	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	if(result == NULL){
+		php_error(E_WARNING, "Out of memory");
+		RETURN_FALSE;
+	}
+	
+	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	if(rc == SQL_INVALID_HANDLE){
+		efree(result);
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_columns");
+		RETURN_FALSE;
+	}
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLAllocStmt");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	rc = SQLColumns(result->stmt, 
+            cat, cat ? SQL_NTS : 0, 
+            schema, schema ? SQL_NTS : 0, 
+            table, table ? SQL_NTS : 0, 
+            column, column ? SQL_NTS : 0 );
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLColumns");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	result->numparams = 0;
+    SQLNumResultCols(result->stmt, &(result->numcols));
+
+	if(result->numcols > 0){
+        if(!odbc_bindcols(result)){
+			efree(result);
+            RETURN_FALSE;
+		}
+	}else{
+		result->values = NULL;
+	}
+	result->conn_ptr = conn;
+	result->fetched = 0;
+	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+}
+/* }}} */
+
+/* {{{ proto int odbc_columnprivileges(int connection_id, string catalog, string schema, string table, string column )
+   call the SQLColumnPrivileges function */
+PHP_FUNCTION(odbc_columnprivileges)
+{
+    pval *pv_res, *pv_conn, *pv_cat, *pv_schema, *pv_table, *pv_column;
+	odbc_result   *result = NULL;
+	odbc_connection *conn;
+    char *cat = NULL, *schema = NULL, *table = NULL, *column = NULL;
+	RETCODE rc;
+	int argc;
+
+	argc = ARG_COUNT(ht);
+	if(argc == 5){
+		if(getParameters(ht, 5, &pv_conn, &pv_cat, &pv_schema, &pv_table, &pv_column) == FAILURE){
+			WRONG_PARAM_COUNT;
+		}
+	    convert_to_string(pv_cat);
+	    cat = pv_cat->value.str.val;
+	    convert_to_string(pv_schema);
+	    schema = pv_schema->value.str.val;
+	    convert_to_string(pv_table);
+	    table = pv_table->value.str.val;
+	    convert_to_string(pv_column);
+	    column = pv_column->value.str.val;
+	}else{
+		WRONG_PARAM_COUNT;
+	}
+
+	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
+	ZEND_VERIFY_RESOURCE(conn);
+
+	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	if(result == NULL){
+		php_error(E_WARNING, "Out of memory");
+		RETURN_FALSE;
+	}
+	
+	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	if(rc == SQL_INVALID_HANDLE){
+		efree(result);
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_columnprivileges");
+		RETURN_FALSE;
+	}
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLAllocStmt");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	rc = SQLColumnPrivileges(result->stmt, 
+            cat, cat ? SQL_NTS : 0, 
+            schema, schema ? SQL_NTS : 0, 
+            table, table ? SQL_NTS : 0, 
+            column, column ? SQL_NTS : 0 );
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLColumnPrivileges");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	result->numparams = 0;
+    SQLNumResultCols(result->stmt, &(result->numcols));
+
+	if(result->numcols > 0){
+        if(!odbc_bindcols(result)){
+			efree(result);
+            RETURN_FALSE;
+		}
+	}else{
+		result->values = NULL;
+	}
+	result->conn_ptr = conn;
+	result->fetched = 0;
+	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+}
+/* }}} */
+
+/* {{{ proto int odbc_foreignkeys(int connection_id, string pk_catalog, string pk_schema, string pk_table, string fk_catalog, string fk_schema, string fk_table )
+   call the SQLForeignKeys function */
+PHP_FUNCTION(odbc_foreignkeys)
+{
+    pval *pv_res, *pv_conn, *pv_pcat, *pv_pschema, *pv_ptable;
+    pval *pv_fcat, *pv_fschema, *pv_ftable;
+	odbc_result   *result = NULL;
+	odbc_connection *conn;
+    char *pcat = NULL, *pschema = NULL, *ptable = NULL;
+    char *fcat = NULL, *fschema = NULL, *ftable = NULL;
+	RETCODE rc;
+	int argc;
+
+	argc = ARG_COUNT(ht);
+	if(argc == 7){
+		if(getParameters(ht, 7, &pv_conn, &pv_pcat, &pv_pschema, &pv_ptable, 
+                    &pv_fcat, &pv_fschema, &pv_ftable) == FAILURE){
+			WRONG_PARAM_COUNT;
+		}
+	    convert_to_string(pv_pcat);
+	    pcat = pv_pcat->value.str.val;
+	    convert_to_string(pv_pschema);
+	    pschema = pv_pschema->value.str.val;
+	    convert_to_string(pv_ptable);
+	    ptable = pv_ptable->value.str.val;
+	    convert_to_string(pv_fcat);
+	    fcat = pv_fcat->value.str.val;
+	    convert_to_string(pv_fschema);
+	    fschema = pv_fschema->value.str.val;
+	    convert_to_string(pv_ftable);
+	    ftable = pv_ftable->value.str.val;
+	}else{
+		WRONG_PARAM_COUNT;
+	}
+
+	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
+	ZEND_VERIFY_RESOURCE(conn);
+
+	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	if(result == NULL){
+		php_error(E_WARNING, "Out of memory");
+		RETURN_FALSE;
+	}
+	
+	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	if(rc == SQL_INVALID_HANDLE){
+		efree(result);
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_foreignkeys");
+		RETURN_FALSE;
+	}
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLAllocStmt");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	rc = SQLForeignKeys(result->stmt, 
+            pcat, pcat ? SQL_NTS : 0, 
+            pschema, pschema ? SQL_NTS : 0, 
+            ptable, ptable ? SQL_NTS : 0, 
+            fcat, fcat ? SQL_NTS : 0, 
+            fschema, fschema ? SQL_NTS : 0, 
+            ftable, ftable ? SQL_NTS : 0 );
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLForeignKeys");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	result->numparams = 0;
+    SQLNumResultCols(result->stmt, &(result->numcols));
+
+	if(result->numcols > 0){
+        if(!odbc_bindcols(result)){
+			efree(result);
+            RETURN_FALSE;
+		}
+	}else{
+		result->values = NULL;
+	}
+	result->conn_ptr = conn;
+	result->fetched = 0;
+	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+}
+/* }}} */
+
+/* {{{ proto int odbc_gettypeinfo(int connection_id [, int data_type ] )
+   call the SQLGetTypeInfo function */
+PHP_FUNCTION(odbc_gettypeinfo)
+{
+    pval *pv_res, *pv_conn, *pv_data_type;
+	odbc_result   *result = NULL;
+	odbc_connection *conn;
+	RETCODE rc;
+	int argc, data_type = SQL_ALL_TYPES;
+
+	argc = ARG_COUNT(ht);
+	if(argc == 1){
+        if(getParameters(ht, 1, &pv_conn) == FAILURE){
+            WRONG_PARAM_COUNT;
+		}
+	}else if(argc == 2){
+		if(getParameters(ht, 2, &pv_conn, &pv_data_type) == FAILURE){
+			WRONG_PARAM_COUNT;
+		}
+	    convert_to_long(pv_data_type);
+        data_type = pv_data_type->value.lval;
+	}else{
+		WRONG_PARAM_COUNT;
+	}
+
+	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
+	ZEND_VERIFY_RESOURCE(conn);
+
+	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	if(result == NULL){
+		php_error(E_WARNING, "Out of memory");
+		RETURN_FALSE;
+	}
+	
+	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	if(rc == SQL_INVALID_HANDLE){
+		efree(result);
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_gettypeinfo");
+		RETURN_FALSE;
+	}
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLAllocStmt");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	rc = SQLGetTypeInfo(result->stmt, 
+            data_type );
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLGetTypeInfo");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	result->numparams = 0;
+    SQLNumResultCols(result->stmt, &(result->numcols));
+
+	if(result->numcols > 0){
+        if(!odbc_bindcols(result)){
+			efree(result);
+            RETURN_FALSE;
+		}
+	}else{
+		result->values = NULL;
+	}
+	result->conn_ptr = conn;
+	result->fetched = 0;
+	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+}
+/* }}} */
+
+/* {{{ proto int odbc_primarykeys(int connection_id, string database, string schema, string table )
+   call the SQLPrimaryKeys function */
+PHP_FUNCTION(odbc_primarykeys)
+{
+    pval *pv_res, *pv_conn, *pv_cat, *pv_schema, *pv_table;
+	odbc_result   *result = NULL;
+	odbc_connection *conn;
+    char *cat = NULL, *schema = NULL, *table = NULL;
+	RETCODE rc;
+	int argc;
+
+	argc = ARG_COUNT(ht);
+	if(argc == 4){
+		if(getParameters(ht, 4, &pv_conn, &pv_cat, &pv_schema, &pv_table) == FAILURE){
+			WRONG_PARAM_COUNT;
+		}
+	    convert_to_string(pv_cat);
+	    cat = pv_cat->value.str.val;
+	    convert_to_string(pv_schema);
+	    schema = pv_schema->value.str.val;
+	    convert_to_string(pv_table);
+	    table = pv_table->value.str.val;
+	}else{
+		WRONG_PARAM_COUNT;
+	}
+
+	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
+	ZEND_VERIFY_RESOURCE(conn);
+
+	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	if(result == NULL){
+		php_error(E_WARNING, "Out of memory");
+		RETURN_FALSE;
+	}
+	
+	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	if(rc == SQL_INVALID_HANDLE){
+		efree(result);
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_primarykeys");
+		RETURN_FALSE;
+	}
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLAllocStmt");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	rc = SQLPrimaryKeys(result->stmt, 
+            cat, cat ? SQL_NTS : 0, 
+            schema, schema ? SQL_NTS : 0, 
+            table, table ? SQL_NTS : 0 );
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLPrimaryKeys");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	result->numparams = 0;
+    SQLNumResultCols(result->stmt, &(result->numcols));
+
+	if(result->numcols > 0){
+        if(!odbc_bindcols(result)){
+			efree(result);
+            RETURN_FALSE;
+		}
+	}else{
+		result->values = NULL;
+	}
+	result->conn_ptr = conn;
+	result->fetched = 0;
+	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+}
+/* }}} */
+
+/* {{{ proto int odbc_procedurecolumns(int connection_id [, string database, string schema, string proc, string column ] )
+   call the SQLProcedureColumns function */
+PHP_FUNCTION(odbc_procedurecolumns)
+{
+    pval *pv_res, *pv_conn, *pv_cat, *pv_schema, *pv_proc, *pv_col;
+	odbc_result   *result = NULL;
+	odbc_connection *conn;
+    char *cat = NULL, *schema = NULL, *proc = NULL, *col = NULL;
+	RETCODE rc;
+	int argc;
+
+	argc = ARG_COUNT(ht);
+	if(argc == 1){
+        if(getParameters(ht, 1, &pv_conn) == FAILURE){
+            WRONG_PARAM_COUNT;
+		}
+	}else if(argc == 5){
+		if(getParameters(ht, 5, &pv_conn, &pv_cat, &pv_schema, &pv_proc, &pv_col) == FAILURE){
+			WRONG_PARAM_COUNT;
+		}
+	    convert_to_string(pv_cat);
+	    cat = pv_cat->value.str.val;
+	    convert_to_string(pv_schema);
+	    schema = pv_schema->value.str.val;
+	    convert_to_string(pv_proc);
+	    proc = pv_proc->value.str.val;
+	    convert_to_string(pv_col);
+	    col = pv_col->value.str.val;
+	}else{
+		WRONG_PARAM_COUNT;
+	}
+
+	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
+	ZEND_VERIFY_RESOURCE(conn);
+
+	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	if(result == NULL){
+		php_error(E_WARNING, "Out of memory");
+		RETURN_FALSE;
+	}
+	
+	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	if(rc == SQL_INVALID_HANDLE){
+		efree(result);
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_procedurecolumns");
+		RETURN_FALSE;
+	}
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLAllocStmt");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	rc = SQLProcedureColumns(result->stmt, 
+            cat, cat ? SQL_NTS : 0, 
+            schema, schema ? SQL_NTS : 0, 
+            proc, proc ? SQL_NTS : 0, 
+            col, col ? SQL_NTS : 0 );
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLProcedureColumns");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	result->numparams = 0;
+    SQLNumResultCols(result->stmt, &(result->numcols));
+
+	if(result->numcols > 0){
+        if(!odbc_bindcols(result)){
+			efree(result);
+            RETURN_FALSE;
+		}
+	}else{
+		result->values = NULL;
+	}
+	result->conn_ptr = conn;
+	result->fetched = 0;
+	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+}
+/* }}} */
+
+/* {{{ proto int odbc_procedures(int connection_id [, string database, string schema, string proc ] )
+   call the SQLProcedures function */
+PHP_FUNCTION(odbc_procedures)
+{
+    pval *pv_res, *pv_conn, *pv_cat, *pv_schema, *pv_proc;
+	odbc_result   *result = NULL;
+	odbc_connection *conn;
+    char *cat = NULL, *schema = NULL, *proc = NULL;
+	RETCODE rc;
+	int argc;
+
+	argc = ARG_COUNT(ht);
+	if(argc == 1){
+        if(getParameters(ht, 1, &pv_conn) == FAILURE){
+            WRONG_PARAM_COUNT;
+		}
+	}else if(argc == 4){
+		if(getParameters(ht, 4, &pv_conn, &pv_cat, &pv_schema, &pv_proc) == FAILURE){
+			WRONG_PARAM_COUNT;
+		}
+	    convert_to_string(pv_cat);
+	    cat = pv_cat->value.str.val;
+	    convert_to_string(pv_schema);
+	    schema = pv_schema->value.str.val;
+	    convert_to_string(pv_proc);
+	    proc = pv_proc->value.str.val;
+	}else{
+		WRONG_PARAM_COUNT;
+	}
+
+	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
+	ZEND_VERIFY_RESOURCE(conn);
+
+	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	if(result == NULL){
+		php_error(E_WARNING, "Out of memory");
+		RETURN_FALSE;
+	}
+	
+	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	if(rc == SQL_INVALID_HANDLE){
+		efree(result);
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_procedures");
+		RETURN_FALSE;
+	}
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLAllocStmt");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	rc = SQLProcedures(result->stmt, 
+            cat, cat ? SQL_NTS : 0, 
+            schema, schema ? SQL_NTS : 0, 
+            proc, proc ? SQL_NTS : 0 );
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLProcedures");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	result->numparams = 0;
+    SQLNumResultCols(result->stmt, &(result->numcols));
+
+	if(result->numcols > 0){
+        if(!odbc_bindcols(result)){
+			efree(result);
+            RETURN_FALSE;
+		}
+	}else{
+		result->values = NULL;
+	}
+	result->conn_ptr = conn;
+	result->fetched = 0;
+	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+}
+/* }}} */
+
+/* {{{ proto int odbc_specialcolumns(int connection_id, int type, string catalog, string schema, string name, int scope, int nullable )
+   call the SQLSpecialColumns function */
+PHP_FUNCTION(odbc_specialcolumns)
+{
+    pval *pv_res, *pv_conn, *pv_type, *pv_cat, *pv_schema, *pv_name;
+    pval *pv_scope, *pv_nullable;
+	odbc_result   *result = NULL;
+	odbc_connection *conn;
+    char *cat = NULL, *schema = NULL, *name = NULL;
+    int type, scope, nullable;
+	RETCODE rc;
+	int argc;
+
+	argc = ARG_COUNT(ht);
+	if(argc == 7){
+		if(getParameters(ht, 7, &pv_conn, &pv_type, &pv_cat, &pv_schema, 
+                    &pv_name, &pv_scope, &pv_nullable) == FAILURE){
+			WRONG_PARAM_COUNT;
+		}
+        convert_to_long(pv_type);
+        type = pv_cat->value.lval;
+	    convert_to_string(pv_cat);
+	    cat = pv_cat->value.str.val;
+	    convert_to_string(pv_schema);
+	    schema = pv_schema->value.str.val;
+	    convert_to_string(pv_name);
+	    name = pv_name->value.str.val;
+        convert_to_long(pv_scope);
+        scope = pv_scope->value.lval;
+        convert_to_long(pv_nullable);
+        nullable = pv_nullable->value.lval;
+	}else{
+		WRONG_PARAM_COUNT;
+	}
+
+	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
+	ZEND_VERIFY_RESOURCE(conn);
+
+	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	if(result == NULL){
+		php_error(E_WARNING, "Out of memory");
+		RETURN_FALSE;
+	}
+	
+	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	if(rc == SQL_INVALID_HANDLE){
+		efree(result);
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_specialcolumns");
+		RETURN_FALSE;
+	}
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLAllocStmt");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	rc = SQLSpecialColumns(result->stmt, 
+            type,
+            cat, cat ? SQL_NTS : 0, 
+            schema, schema ? SQL_NTS : 0, 
+            name, name ? SQL_NTS : 0,
+            scope,
+            nullable);
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLSpecialColumns");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	result->numparams = 0;
+    SQLNumResultCols(result->stmt, &(result->numcols));
+
+	if(result->numcols > 0){
+        if(!odbc_bindcols(result)){
+			efree(result);
+            RETURN_FALSE;
+		}
+	}else{
+		result->values = NULL;
+	}
+	result->conn_ptr = conn;
+	result->fetched = 0;
+	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+}
+/* }}} */
+
+/* {{{ proto int odbc_statistics(int connection_id, string catalog, string schema, string name, int unique, int reserved )
+   call the SQLStatistics function */
+PHP_FUNCTION(odbc_statistics)
+{
+    pval *pv_res, *pv_conn, *pv_cat, *pv_schema, *pv_name;
+    pval *pv_unique, *pv_reserved;
+	odbc_result   *result = NULL;
+	odbc_connection *conn;
+    char *cat = NULL, *schema = NULL, *name = NULL;
+    int unique, reserved;
+	RETCODE rc;
+	int argc;
+
+	argc = ARG_COUNT(ht);
+	if(argc == 6){
+		if(getParameters(ht, 6, &pv_conn, &pv_cat, &pv_schema, 
+                    &pv_name, &pv_unique, &pv_reserved) == FAILURE){
+			WRONG_PARAM_COUNT;
+		}
+	    convert_to_string(pv_cat);
+	    cat = pv_cat->value.str.val;
+	    convert_to_string(pv_schema);
+	    schema = pv_schema->value.str.val;
+	    convert_to_string(pv_name);
+	    name = pv_name->value.str.val;
+        convert_to_long(pv_unique);
+        unique = pv_unique->value.lval;
+        convert_to_long(pv_reserved);
+        reserved = pv_reserved->value.lval;
+	}else{
+		WRONG_PARAM_COUNT;
+	}
+
+	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
+	ZEND_VERIFY_RESOURCE(conn);
+
+	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	if(result == NULL){
+		php_error(E_WARNING, "Out of memory");
+		RETURN_FALSE;
+	}
+	
+	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	if(rc == SQL_INVALID_HANDLE){
+		efree(result);
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_statistics");
+		RETURN_FALSE;
+	}
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLAllocStmt");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	rc = SQLStatistics(result->stmt, 
+            cat, cat ? SQL_NTS : 0, 
+            schema, schema ? SQL_NTS : 0, 
+            name, name ? SQL_NTS : 0,
+            unique,
+            reserved);
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLStatistics");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	result->numparams = 0;
+    SQLNumResultCols(result->stmt, &(result->numcols));
+
+	if(result->numcols > 0){
+        if(!odbc_bindcols(result)){
+			efree(result);
+            RETURN_FALSE;
+		}
+	}else{
+		result->values = NULL;
+	}
+	result->conn_ptr = conn;
+	result->fetched = 0;
+	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+}
+/* }}} */
+
+/* {{{ proto int odbc_tableprivilegess(int connection_id, string catalog, string schema, string table )
+   call the SQLTablePrivilegess function */
+PHP_FUNCTION(odbc_tableprivileges)
+{
+    pval *pv_res, *pv_conn, *pv_cat, *pv_schema, *pv_table;
+	odbc_result   *result = NULL;
+	odbc_connection *conn;
+    char *cat = NULL, *schema = NULL, *table = NULL;
+	RETCODE rc;
+	int argc;
+
+	argc = ARG_COUNT(ht);
+	if(argc == 4){
+		if(getParameters(ht, 4, &pv_conn, &pv_cat, &pv_schema, &pv_table) == FAILURE){
+			WRONG_PARAM_COUNT;
+		}
+	    convert_to_string(pv_cat);
+	    cat = pv_cat->value.str.val;
+	    convert_to_string(pv_schema);
+	    schema = pv_schema->value.str.val;
+	    convert_to_string(pv_table);
+	    table = pv_table->value.str.val;
+	}else{
+		WRONG_PARAM_COUNT;
+	}
+
+	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
+	ZEND_VERIFY_RESOURCE(conn);
+
+	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	if(result == NULL){
+		php_error(E_WARNING, "Out of memory");
+		RETURN_FALSE;
+	}
+	
+	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
+	if(rc == SQL_INVALID_HANDLE){
+		efree(result);
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in php3_odbc_tableprivileges");
+		RETURN_FALSE;
+	}
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLAllocStmt");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	rc = SQLTablePrivileges(result->stmt, 
+            cat, cat ? SQL_NTS : 0, 
+            schema, schema ? SQL_NTS : 0, 
+            table, table ? SQL_NTS : 0 );
+
+	if(rc == SQL_ERROR){
+		ODBC_SQL_ERROR(conn->hdbc, SQL_NULL_HSTMT, "SQLTablePrivileges");
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	result->numparams = 0;
+    SQLNumResultCols(result->stmt, &(result->numcols));
+
+	if(result->numcols > 0){
+        if(!odbc_bindcols(result)){
+			efree(result);
+            RETURN_FALSE;
+		}
+	}else{
+		result->values = NULL;
+	}
+	result->conn_ptr = conn;
+	result->fetched = 0;
+	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
 
