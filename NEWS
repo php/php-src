@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
+- Added new function pcntl_exec, which behaves similar to execve.
 - initial support of mnogosearch-3.2.x has been added. Not all features
   are implemented currently.
 - Fix segfault and check for truecolor image in ImageColorAt (Rasmus)
