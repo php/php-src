@@ -64,6 +64,10 @@
 #include <signal.h>
 #endif
 
+#ifdef __riscos__
+#include <unixlib/local.h>
+#endif
+
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"
@@ -703,6 +707,11 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			env_path_translated = getenv("PATH_TRANSLATED");
 #endif
 			if(env_path_translated) {
+#ifdef __riscos__
+				/* Convert path to unix format*/
+				__riscosify_control|=__RISCOSIFY_DONT_CHECK_DIR;
+				env_path_translated=__unixify(env_path_translated,0,NULL,1,0);
+#endif
 				SG(request_info).path_translated = estrdup(env_path_translated);
 			}
 		}
