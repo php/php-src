@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Fixed a bug that prevented uksort() from working correctly (Andrey)
 - Fixed a memory leak when using assignment-op operators with lvalue of type
   string.
 - Fixed a problem in inheritence from classes that are defined in include()d
