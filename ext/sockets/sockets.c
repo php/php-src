@@ -104,7 +104,7 @@ static unsigned char second_arg_of_four_force_ref[] =
 {4, BYREF_NONE, BYREF_FORCE, BYREF_NONE, BYREF_NONE};
 
 static unsigned char fourth_arg_force_ref[] =
-{3, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_FORCE};
+{4, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_FORCE};
 
 static unsigned char second_fifth_and_sixth_args_force_ref[] =
 {6, BYREF_NONE, BYREF_FORCE, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE};
@@ -1887,7 +1887,7 @@ PHP_FUNCTION(socket_create_pair)
 
 	zval_dtor(fds_array_zval);
 	if (array_init(fds_array_zval) == FAILURE) {
-		php_error(E_WARNING, "%s() can't initialize array for 3rd argument", get_active_function_name(TSRMLS_C));
+		php_error(E_WARNING, "%s() can't initialize array for 4th argument", get_active_function_name(TSRMLS_C));
 		efree(php_sock[0]);
 		efree(php_sock[1]);
 		RETURN_FALSE;
