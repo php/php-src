@@ -1,3 +1,72 @@
+2001-01-31  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/mysql/php_mysql.c: Only two lines are allowed here.
+
+2001-01-31  Sean Bright  <elixer@erols.com>
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h: Added the mysql_get_*_info() functions.
+
+2001-01-31  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/scanf.c
+      ext/ingres_ii/ii.c
+      ext/mysql/php_mysql.c
+      ext/pgsql/pgsql.c:
+    - Change unset() functions to null(). unset() is legacy
+
+2001-01-31  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/HTTP.php:
+    use $HTTP_SERVER_VARS, in case register_globals is Off, and use !empty()
+    instead of just if () to avoid errors.
+
+2001-01-31  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/php_modules.dsw: add iconv and ming
+
+    * ext/ming/ming.dsp
+      ext/ming/php_ming.h: nuke warning, and add dsp
+
+    * ext/pdf/pdf.c: fix typo
+
+    * ext/iconv/iconv.c
+      ext/iconv/iconv.dsp: make iconv compile under win32 using libiconv
+
+2001-01-31  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/README
+      ext/mnogosearch/config.m4
+      ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h
+      ext/mnogosearch/setup.stub
+      ext/mnogosearch/test.php: Added search cache and track query features.
+
+2001-01-31  James Moore  <James@phpuk.org>
+
+    * RELEASE_PROCESS:
+    Adding readme for release process, this needs to live somewhere and here seems as good a place as any.
+
+2001-01-31  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/conversion.c: added currency, date, IUnknown and NULL datatypes
+
+2001-01-31  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * NEWS: - note about change of pdf api
+
+2001-01-31  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR.php.in: whitespace
+
+2001-01-31  Sean Bright  <elixer@erols.com>
+
+    * ext/mysql/php_mysql.c: Fixed conditional.
+
+    * ext/mysql/php_mysql.c:
+    Fix for bug #8991.  mysql_field_type() now returns "year" for columns of
+    type YEAR.
+
 2001-01-30  Adam Dickmeiss  <adam@indexdata.dk>
 
     * ext/yaz/README
