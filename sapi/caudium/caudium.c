@@ -68,6 +68,11 @@
 # endif
 #endif
 
+/* Pike 7.x and newer */
+#define MY_MAPPING_LOOP(md, COUNT, KEY) \
+  for(COUNT=0;COUNT < md->data->hashsize; COUNT++ ) \
+	for(KEY=md->data->hash[COUNT];KEY;KEY=KEY->next)
+
 #ifndef ZTS
 /* Need thread safety */
 #error You need to compile PHP with threads.
@@ -475,7 +480,13 @@ static zend_module_entry php_caudium_module = {
 
 INLINE static void low_sapi_caudium_register_variables(zval *track_vars_array TSRMLS_DC)   
 {
-  char *tmp;
+  int i;
+  struct keypair *k;
+  struct svalue *headers;
+  struct pike_string *sind;
+  struct svalue *ind;
+  struct svalue *val;
+  GET_THIS();
   php_register_variable("PHP_SELF", SG(request_info).request_uri,
 			track_vars_array TSRMLS_CC);
   php_register_variable("GATEWAY_INTERFACE", "CGI/1.1",
@@ -488,35 +499,20 @@ INLINE static void low_sapi_caudium_register_variables(zval *track_vars_array TS
   php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated,
 			track_vars_array TSRMLS_CC);
 
-  if( (tmp = lookup_string_header("SERVER_NAME", NULL)) != NULL)
-    php_register_variable("SERVER_NAME", tmp, track_vars_array TSRMLS_CC);
-  if( (tmp = lookup_string_header("SERVER_PORT", NULL)) != NULL)
-    php_register_variable("SERVER_PORT", tmp, track_vars_array TSRMLS_CC);
-  if( (tmp = lookup_string_header("SERVER_PROTOCOL", NULL)) != NULL)
-    php_register_variable("SERVER_PROTOCOL", tmp, track_vars_array TSRMLS_CC);
-  if( (tmp = lookup_string_header("SCRIPT_NAME", NULL)) != NULL)
-    php_register_variable("SCRIPT_NAME", tmp, track_vars_array TSRMLS_CC);
-  if( (tmp = lookup_string_header("SCRIPT_FILENAME", NULL)) != NULL)
-    php_register_variable("SCRIPT_FILENAME", tmp, track_vars_array TSRMLS_CC);
-  if( (tmp = lookup_string_header("REMOTE_ADDR", NULL)) != NULL)
-    php_register_variable("REMOTE_ADDR", tmp, track_vars_array TSRMLS_CC);
-  if( (tmp = lookup_string_header("REMOTE_PORT", NULL)) != NULL)
-    php_register_variable("REMOTE_PORT", tmp, track_vars_array TSRMLS_CC);
-  if( (tmp = lookup_string_header("DOCUMENT_ROOT", NULL)) != NULL)
-    php_register_variable("DOCUMENT_ROOT", tmp, track_vars_array TSRMLS_CC);
-  if( (tmp = lookup_string_header("HTTP_CONNECTION", NULL)) != NULL)
-    php_register_variable("HTTP_CONNECTION", tmp, track_vars_array TSRMLS_CC);
-  if( (tmp = lookup_string_header("HTTP_USER_AGENT", NULL)) != NULL)
-    php_register_variable("HTTP_USER_AGENT", tmp, track_vars_array TSRMLS_CC);
-  if( (tmp = lookup_string_header("DOCUMENT_ROOT", NULL)) != NULL)
-    php_register_variable("DOCUMENT_ROOT", tmp, track_vars_array TSRMLS_CC);
-  if( (tmp = lookup_string_header("QUERY_STRING", "")) != NULL)
-    php_register_variable("QUERY_STRING", tmp, track_vars_array TSRMLS_CC);
-  if( (tmp = lookup_string_header("REMOTE_USER", NULL)) != NULL)
-    php_register_variable("REMOTE_USER", tmp, track_vars_array TSRMLS_CC);
-  if( (tmp = lookup_string_header("REMOTE_PASSWORD", NULL)) != NULL)
-    php_register_variable("REMOTE_PASSWORD", tmp, track_vars_array TSRMLS_CC);
-  
+  sind = make_shared_string("env");
+  headers = low_mapping_string_lookup(REQUEST_DATA, sind);
+  free_string(sind);
+  if(headers && headers->type == PIKE_T_MAPPING) {
+    MY_MAPPING_LOOP(headers->u.mapping, i, k) {
+      ind = &k->ind;
+      val = &k->val;
+      if(ind && ind->type == PIKE_T_STRING &&
+	 val && val->type == PIKE_T_STRING) {
+	php_register_variable(ind->u.string->str, val->u.string->str,
+			      track_vars_array TSRMLS_CC );
+      }
+    }
+  }
 }
 
 static void sapi_caudium_register_variables(zval *track_vars_array TSRMLS_DC)
@@ -549,54 +545,6 @@ static sapi_module_struct caudium_sapi_module = {
 
   STANDARD_SAPI_MODULE_PROPERTIES
 };
-
-/*
- * php_caudium_hash_environment() populates the php script environment
- * with a number of variables. HTTP_* variables are created for
- * the HTTP header data, so that a script can access these.
- */
-static void php_caudium_hash_environment(TSRMLS_D)
-{
-  int i;
-  char buf[512];
-  zval *pval;
-  struct svalue *headers;
-  struct pike_string *sind;
-  struct array *indices;
-  struct svalue *ind, *val;
-  GET_THIS();
-  sind = make_shared_string("env");
-  headers = low_mapping_string_lookup(REQUEST_DATA, sind);
-  free_string(sind);
-  if(headers && headers->type == PIKE_T_MAPPING) {
-    indices = mapping_indices(headers->u.mapping);
-    for(i = 0; i < indices->size; i++) {
-      ind = &indices->item[i];
-      val = low_mapping_lookup(headers->u.mapping, ind);
-      if(ind && ind->type == PIKE_T_STRING &&
-	 val && val->type == PIKE_T_STRING) {
-	int buf_len;
-	buf_len = MIN(511, ind->u.string->len);
-	strncpy(buf, ind->u.string->str, buf_len);
-	buf[buf_len] = '\0'; /* Terminate correctly */
-	MAKE_STD_ZVAL(pval);
-	pval->type = IS_STRING;
-	pval->value.str.len = val->u.string->len;
-	pval->value.str.val = estrndup(val->u.string->str, pval->value.str.len);
-	
-	zend_hash_update(&EG(symbol_table), buf, buf_len + 1, &pval, sizeof(zval *), NULL);
-      }
-    }
-    free_array(indices);
-  }
-  
-  /*
-    MAKE_STD_ZVAL(pval);
-    pval->type = IS_LONG;
-    pval->value.lval = Ns_InfoBootTime();
-    zend_hash_update(&EG(symbol_table), "SERVER_BOOTTIME", sizeof("SERVER_BOOTTIME"), &pval, sizeof(zval *), NULL);
-  */
-}
 
 /*
  * php_caudium_module_main() is called by the per-request handler and
@@ -705,8 +653,6 @@ static void php_caudium_module_main(php_caudium_request *ureq)
       free_struct(TSRMLS_C);
     }, "Negative run response");
   } else {
-    THREAD_SAFE_RUN(php_caudium_hash_environment(TSRMLS_C),
-		    "environment hashing");
     php_execute_script(&file_handle TSRMLS_CC);
     php_request_shutdown(NULL);
     THREAD_SAFE_RUN({
