@@ -248,18 +248,22 @@ static int php_ii_get_default_link(INTERNAL_FUNCTION_PARAMETERS IILS_DC)
 	return IIG(default_link);
 }
 
+static void php_ii_globals_init(zend_ii_globals *ii_globals)
+{
+	ii_globals->num_persistent = 0;
+}
+
 /* Module initialization
 */
 PHP_MINIT_FUNCTION(ii)
 {
   IIAPI_INITPARM initParm;
   
+  ZEND_INIT_MODULE_GLOBALS(ii, php_ii_globals_init, NULL);
   REGISTER_INI_ENTRIES();
   
   le_ii_link = zend_register_list_destructors_ex(php_close_ii_link, NULL, "ingres", module_number);
   le_ii_plink = zend_register_list_destructors_ex(_clean_ii_plink, _close_ii_plink, "ingres persistent", module_number);
-
-  IIG(num_persistent) = 0;
 
   /* Constants registration */
   REGISTER_LONG_CONSTANT("INGRES_ASSOC", II_ASSOC, CONST_CS | CONST_PERSISTENT);
