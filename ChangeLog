@@ -1,3 +1,8 @@
+2004-08-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c:
+      Add missing check
+
 2004-08-13  Dan Kalowsky  <dank@deadmime.org>
 
     * ext/odbc/php_odbc.c:
