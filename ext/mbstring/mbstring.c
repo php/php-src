@@ -65,7 +65,7 @@
 #include "php_content_types.h"
 #include "SAPI.h"
 
-#if ZEND_MULTIBYTE
+#ifdef ZEND_MULTIBYTE
 #include "zend_multibyte.h"
 #endif /* ZEND_MULTIBYTE */
 
@@ -110,6 +110,16 @@ static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 	mbfl_no_encoding_utf8,
 	mbfl_no_encoding_euc_kr,
 	mbfl_no_encoding_uhc
+};
+#endif
+
+#if defined(HAVE_MBSTR_RU) & !defined(HAVE_MBSTR_JA) & !defined(HAVE_MBSTR_TW) & !defined(HAVE_MBSTR_KR)
+static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
+	mbfl_no_encoding_ascii,
+	mbfl_no_encoding_utf8,
+	mbfl_no_encoding_koi8r,
+	mbfl_no_encoding_cp1251,
+	mbfl_no_encoding_cp866
 };
 #endif
 
@@ -2059,10 +2069,6 @@ PHP_FUNCTION(mb_strcut)
 		if (from < 0) {
 			from = 0;
 		}
-	} 
-	if (Z_STRLEN_PP(arg1) < from) {
-		/* keep index within string */
-		from = Z_STRLEN_PP(arg1);
 	}
 
 	/* if "length" position is negative, set it to the length
@@ -2073,10 +2079,6 @@ PHP_FUNCTION(mb_strcut)
 		if (len < 0) {
 			len = 0;
 		}
-	}
-	if (Z_STRLEN_PP(arg1) < (from + len)) {
-		/* limit span to characters in string */
-		len = Z_STRLEN_PP(arg1) - from;	
 	}
 
 	ret = mbfl_strcut(&string, &result, from, len TSRMLS_CC);
@@ -2269,7 +2271,7 @@ PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_enco
 				string.no_encoding = from_encoding;
 			}
 		} else {
-			php_error(E_WARNING, "$s() illegal character encoding specified",
+			php_error(E_WARNING, "%s() illegal character encoding specified",
 					  get_active_function_name(TSRMLS_C));
 		}
 		if (list != NULL) {
