@@ -1580,7 +1580,7 @@ PHP_FUNCTION(mysqli_stmt_param_count)
 }
 /* }}} */
 
-/* {{{ proto void mysqli_stmt_reset(object stmt)
+/* {{{ proto bool mysqli_stmt_reset(object stmt)
    reset a prepared statement */
 PHP_FUNCTION(mysqli_stmt_reset) 
 {
@@ -1593,9 +1593,10 @@ PHP_FUNCTION(mysqli_stmt_reset)
 
 	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt");
 
-	mysql_stmt_reset(stmt->stmt);
-
-	return;
+	if (mysql_stmt_reset(stmt->stmt)) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 
