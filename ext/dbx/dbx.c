@@ -219,9 +219,7 @@ ZEND_MINFO_FUNCTION(dbx)
 */
 
 /* {{{ proto dbx_link_object dbx_connect(string module_name, string host, string db, string username, string password [, bool persistent])
-   returns a dbx_link_object on success
-   returns 0 on failure
-*/
+   Returns a dbx_link_object on success and returns 0 on failure */
 ZEND_FUNCTION(dbx_connect)
 {
 	int number_of_arguments=5;
@@ -334,9 +332,7 @@ ZEND_FUNCTION(dbx_close)
 /* }}} */
 
 /* {{{ proto dbx_result_object dbx_query(dbx_link_object dbx_link, string sql_statement [, long flags])
-   returns a dbx_link_object on success
-   returns 0 on failure
-*/
+   Returns a dbx_link_object on success and returns 0 on failure */
 ZEND_FUNCTION(dbx_query)
 {
 	int min_number_of_arguments=2;
@@ -535,9 +531,8 @@ ZEND_FUNCTION(dbx_error)
  *      dbx functions that are database independent... like sorting result_objects!
  */
 
-/* {{{ proto int dbx_compare(array row_x, array row_y, string columnname [, flags])
-   returns row_y[columnname] - row_x[columnname], converted to -1, 0 or 1
-*/
+/* {{{ proto int dbx_compare(array row_x, array row_y, string columnname [, int flags])
+   Returns row_y[columnname] - row_x[columnname], converted to -1, 0 or 1 */
 ZEND_FUNCTION(dbx_compare)
 {
 	int min_number_of_arguments=3;
@@ -627,9 +622,8 @@ ZEND_FUNCTION(dbx_compare)
 }
 /* }}} */
 
-/* {{{ proto int dbx_sort(dbx_result_object dbx_result, string compare_function_name)
-   returns 0 on failure, 1 on success
-*/
+/* {{{ proto int dbx_sort(object dbx_result, string compare_function_name)
+   Returns 0 on failure, 1 on success */
 ZEND_FUNCTION(dbx_sort)
 {
 	int number_of_arguments=2;
