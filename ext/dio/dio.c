@@ -65,6 +65,172 @@ ZEND_GET_MODULE(dio)
 #endif
 
 
+typdef struct _php_dio_stream_data_t {
+	int fd;
+	php_stream *s;
+} php_dio_stream_data_t;
+
+
+/* {{{ DIO stream implementation */
+
+static size_t 
+php_dioiop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+{
+	php_dio_stream_data_t *self = (php_dio_stream_data_t *) stream->abstract;
+
+	if (buf == NULL && count == 0) {
+		/* we have no way of knowing, so let them try to read some more;
+		 * then they will get an error and can stop 
+		 */
+		return 0;
+	}
+
+	return read(self->fd, buf, count);
+}
+
+static size_t 
+php_dioiop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+{
+	php_dio_stream_data_t *self = (php_dio_stream_data_t *) stream->abstract;
+
+	return write(self->fd, (void *) buf, count); 
+}
+
+static int 
+php_dioiop_close(php_stream *stream, int close_handle TSRMLS_DC)
+{
+	php_dio_stream_data_t *self = (php_dio_stream_data_t *)stream->abstract;
+	int ret = EOF;
+
+	if (close_handle)
+		close(self->fd);
+
+	if (self->stream)
+		php_stream_free(self->stream, 
+						PHP_STREAM_FREE_CLOSE | 
+						(close_handle == 0 ? PHP_STREAM_FREE_PRESERVE_HANDLE : 0)
+			);
+
+	efree(self);
+
+	return ret;
+}
+
+static int 
+php_dioiop_flush(php_stream *stream TSRMLS_DC)
+{
+	php_dio_stream_data_t *self = (php_dio_stream_data_t *) stream->abstract;
+
+	return fsync(self->fd);
+}
+/* }}} */
+
+php_stream_ops php_stream_dioio_ops = {
+	php_dioiop_write, php_dioiop_read,
+	php_dioiop_close, php_dioiop_flush,
+	NULL, NULL,
+	NULL, "dio"
+};
+
+/* {{{ Bzip2 stream openers */
+PHPAPI php_stream *_php_stream_diopen_from_fd(int fd, 
+											  char *mode, 
+											  php_stream *innerstream 
+											  STREAMS_DC TSRMLS_DC)
+{
+	struct php_bz2_stream_data_t *self;
+	
+	self = emalloc(sizeof(*self));
+
+	self->stream = innerstream;
+	self->bz_file = bz;
+
+	return php_stream_alloc_rel(&php_stream_bz2io_ops, self, 0, mode);
+}
+
+PHPAPI php_stream *_php_stream_bz2open(char *path, 
+									   char *mode, 
+									   int options, 
+									   char **opened_path, 
+									   void *wrappercontext 
+									   STREAMS_DC TSRMLS_DC)
+{
+	php_stream *retstream = NULL, *stream = NULL;
+	char *path_copy;
+	BZFILE *bz_file;
+
+	if (strncmp("bz2:", path, 4) == 0)
+		path += 4;
+
+#ifdef VIRTUAL_DIR
+	virtual_filepath(path, &path_copy TSRMLS_CC);
+#else
+	path_copy = estrdup(path);
+#endif  
+
+	/* try and open it directly first */
+	bz_file = BZ2_bzopen(path_copy, mode);
+
+	if (opened_path == NULL) {
+		efree(path_copy);
+	} else if (bz_file) {
+		*opened_path = path_copy;
+	}
+	path_copy = NULL;
+	
+	if (bz_file == NULL) {
+		/* that didn't work, so try and get something from the network/wrapper */
+		stream = php_stream_open_wrapper(path, mode, options, opened_path);
+	
+		if (stream) {
+			int fd;
+			if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void**) &fd, REPORT_ERRORS))
+				bz_file = BZ2_bzdopen(fd, mode);
+		}
+	}
+	
+	if (bz_file) {
+		retstream = _php_stream_bz2open_from_BZFILE(bz_file, mode, stream STREAMS_REL_CC TSRMLS_CC);
+		if (retstream)
+			return retstream;
+
+		BZ2_bzclose(bz_file);
+	}
+
+	if (stream)
+		php_stream_close(stream);
+
+	return NULL;
+}
+
+/* }}} */
+
+php_stream_wrapper php_stream_bzip2_wrapper = {
+	_php_stream_bz2open,
+	NULL,
+	NULL
+};
+
+static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int);
+
+PHP_MINIT_FUNCTION(bz2)
+{
+	if(PG(allow_url_fopen))
+		php_register_url_stream_wrapper("bz2", &php_stream_bzip2_wrapper TSRMLS_CC);
+
+	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(bz2)
+{
+	if (PG(allow_url_fopen))
+		php_unregister_url_stream_wrapper("bz2" TSRMLS_CC);
+
+	return SUCCESS;
+}
+
+
+
 static void _dio_close_fd(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_fd_t *f = (php_fd_t *) rsrc->ptr;
