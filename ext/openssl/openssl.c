@@ -1670,6 +1670,7 @@ PHP_FUNCTION(openssl_csr_new)
 						if (we_made_the_key) {
 							/* and a resource for the private key */
 							ZVAL_RESOURCE(out_pkey, zend_list_insert(req.priv_key, le_key));
+							req.priv_key = NULL; /* make sure the cleanup code doesn't zap it! */
 						} else if (key_resource != -1) {
 							req.priv_key = NULL; /* make sure the cleanup code doesn't zap it! */
 						}
