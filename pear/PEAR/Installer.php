@@ -552,7 +552,7 @@ class PEAR_Installer extends PEAR_Common
             $this->log(2, '+ tmp dir created at ' . $tmpdir);
 
             $tar = new Archive_Tar($pkgfile);
-            if (!@$tar->extract(array($tmpdir))) {
+            if (!@$tar->extract($tmpdir)) {
                 return $this->raiseError("unable to unpack $pkgfile");
             }
 
