@@ -1,6 +1,6 @@
 <?php
 class Soap12test {
-	var $header;
+	public $header;
 
 	function echoOk($x) {
   	return $x;
