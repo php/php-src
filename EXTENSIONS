@@ -94,7 +94,7 @@ STATUS:              Unknown
 EXTENSION:           hyperwave
 PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
 MAINTENANCE:         Maintained
-STATUS:              Unknown
+STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           informix
 PRIMARY MAINTAINER:  Danny Heijl <Danny.Heijl@cevi.be>
@@ -179,9 +179,9 @@ MAINTENANCE:         Unknown
 STATUS:              Unknown
 -------------------------------------------------------------------------------
 EXTENSION:           cpdf
-PRIMARY MAINTAINER:  Uwe Steinmann <Uwe.Steinmann@fernuni-hagen.de>
-MAINTENANCE:         Unknown
-STATUS:              Unknown
+PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           CURL
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
@@ -195,8 +195,9 @@ MAINTENANCE:         Maintained
 STATUS:              Unknown
 -------------------------------------------------------------------------------
 EXTENSION:           domxml
-MAINTENANCE:         Unknown
-STATUS:              Unknown
+PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Experimental
 -------------------------------------------------------------------------------
 EXTENSION:           exif
 MAINTENANCE:         Unknown
@@ -262,7 +263,7 @@ STATUS:              Working
 EXTENSION:           pdf
 PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
 MAINTENANCE:         Maintained
-STATUS:              Unknown
+STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           pfpro
 PRIMARY MAINTAINER:  David Croft <david@infotrek.co.uk>
