@@ -1,5 +1,5 @@
 --TEST--
-ArrayIterator::next() with internal arrays
+SPL: ArrayIterator::next() with internal arrays
 --FILE--
 <?php
 
