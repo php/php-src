@@ -24,6 +24,8 @@
 #if !defined(HAVE_LIBEXPAT) && defined(HAVE_LIBXML)
 #define LIBXML_EXPAT_COMPAT 1
 
+#include "php_compat.h"
+
 #include <libxml/hash.h>
 #include <libxml/parser.h>
 #include <libxml/parserInternals.h>
