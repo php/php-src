@@ -124,11 +124,6 @@ php3_module_entry fsock_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
  
-#ifndef ZTS
-static HashTable PG(ht_fsock_keys);
-static HashTable PG(ht_fsock_socks);
-#endif
-
 
 /* {{{ lookup_hostname */
 
