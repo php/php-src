@@ -1014,7 +1014,11 @@ ZEND_API int add_char_to_string(zval *result, zval *op1, zval *op2)
 ZEND_API int add_string_to_string(zval *result, zval *op1, zval *op2)
 {
 	int length = op1->value.str.len + op2->value.str.len;
-	result->value.str.val = (char *) erealloc(op1->value.str.val, length+1);
+	if (op1->value.str.val == empty_string) {
+		result->value.str.val = (char *) emalloc(length+1);
+	} else {
+		result->value.str.val = (char *) erealloc(op1->value.str.val, length+1);
+	}
     memcpy(result->value.str.val+op1->value.str.len, op2->value.str.val, op2->value.str.len);
     result->value.str.val[length] = 0;
 	result->value.str.len = length;
