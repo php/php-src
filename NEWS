@@ -11,6 +11,8 @@ PHP 4                                                                      NEWS
   . ext/icap
   . sapi/fhttpd
 - Moved ext/vpopmail to PECL. (James)
+- Fixed bug #19935 (made OpenSSL file system operations abide by safe_mode
+  & open_basedir restrictions). (Ilia)
 - Fixed bug #18868 (improved the check for availability of realpath()). (Ilia)
 - Fixed width/height detection of bmp images using getimagesize() function on
   big endian systems and added code to retrieve bmp bit depth. (Ilia)
