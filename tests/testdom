@@ -82,7 +82,7 @@ $rootnode = $dom->root();
 /* This one creates a dom tree made of php objects */
 echo "Test 2: creating a tree with php objects\n";
 $dom = xmltree($xmlstr);
-//$dom->root->name = "section";
+$dom->root->name = "section";
 var_dump($dom);
 echo $dom->root->name;
 echo "\n";
