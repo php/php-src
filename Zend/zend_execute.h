@@ -157,7 +157,7 @@ ZEND_API zend_bool zend_is_executing(void);
 
 void zend_set_timeout(long seconds);
 void zend_unset_timeout(void);
-void zend_timeout(int dummy);
+ZEND_API void zend_timeout(int dummy);
 
 #ifdef ZEND_WIN32
 void zend_init_timeout_thread();

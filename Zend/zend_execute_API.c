@@ -554,7 +554,7 @@ void execute_new_code(CLS_D)
 #endif
 
 
-void zend_timeout(int dummy)
+ZEND_API void zend_timeout(int dummy)
 {
 	ELS_FETCH();
 
