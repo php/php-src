@@ -105,7 +105,6 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	mem_header *p;
 	ALS_FETCH();
 
-	HANDLE_BLOCK_INTERRUPTIONS();
 
 	if (!ZEND_DISABLE_MEMORY_CACHE && (size < MAX_CACHED_MEMORY) && (AG(cache_count)[size] > 0)) {
 		p = AG(cache)[size][--AG(cache_count)[size]];
@@ -117,13 +116,14 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 		p->magic = MEM_BLOCK_START_MAGIC;
 		p->reported = 0;
 #endif
-		HANDLE_UNBLOCK_INTERRUPTIONS();
 		p->persistent = 0;
 		p->cached = 0;
 		return (void *)((char *)p + sizeof(mem_header) + PLATFORM_PADDING);
 	} else {
 		p  = (mem_header *) malloc(sizeof(mem_header) + size + PLATFORM_PADDING + END_ALIGNMENT(size) + END_MAGIC_SIZE);
 	}
+
+	HANDLE_BLOCK_INTERRUPTIONS();
 
 	if (!p) {
 		fprintf(stderr,"FATAL:  emalloc():  Unable to allocate %ld bytes\n", (long) size);
