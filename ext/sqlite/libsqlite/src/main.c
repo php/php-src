@@ -80,7 +80,6 @@ int sqliteInitCallback(void *pInit, int argc, char **argv, char **azColName){
         sParse.db = pData->db;
         sParse.initFlag = 1;
         sParse.iDb = atoi(argv[4]);
-        sParse.useDb = -1;
         sParse.newTnum = atoi(argv[2]);
         sParse.useCallback = 1;
         sqliteRunParser(&sParse, argv[3], pData->pzErrMsg);
@@ -322,7 +321,7 @@ static int sqliteInitOne(sqlite *db, int iDb, char **pzErrMsg){
     db->aDb[iDb].pBt = 0;
     return SQLITE_FORMAT;
   }
-  sqliteBtreeSetCacheSize(db->aDb[iDb].pBt, size);
+  sqliteBtreeSetCacheSize(db->aDb[iDb].pBt, db->cache_size);
   sqliteBtreeSetSafetyLevel(db->aDb[iDb].pBt, meta[4]==0 ? 2 : meta[4]);
 
   /* Read the schema information out of the schema tables
@@ -332,7 +331,6 @@ static int sqliteInitOne(sqlite *db, int iDb, char **pzErrMsg){
   sParse.xCallback = sqliteInitCallback;
   sParse.pArg = (void*)&initData;
   sParse.initFlag = 1;
-  sParse.useDb = -1;
   sParse.useCallback = 1;
   if( iDb==0 ){
     sqliteRunParser(&sParse,
@@ -442,6 +440,9 @@ sqlite *sqlite_open(const char *zFilename, int mode, char **pzErrMsg){
   }
   
   /* Open the backend database driver */
+  if( zFilename[0]==':' && strcmp(zFilename,":memory:")==0 ){
+    db->temp_store = 2;
+  }
   rc = sqliteBtreeFactory(db, zFilename, 0, MAX_PAGES, &db->aDb[0].pBt);
   if( rc!=SQLITE_OK ){
     switch( rc ){
@@ -623,7 +624,6 @@ static int sqliteMain(
   sParse.db = db;
   sParse.xCallback = xCallback;
   sParse.pArg = pArg;
-  sParse.useDb = -1;
   sParse.useCallback = ppVm==0;
   if( db->xTrace ) db->xTrace(db->pTraceArg, zSql);
   sqliteRunParser(&sParse, zSql, pzErrMsg);

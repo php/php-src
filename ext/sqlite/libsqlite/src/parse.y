@@ -848,7 +848,7 @@ expr(A) ::= RAISE(X) LP FAIL COMMA nm(Z) RP(Y).  {
 
 ////////////////////////  DROP TRIGGER statement //////////////////////////////
 cmd ::= DROP TRIGGER nm(X) dbnm(D). {
-  sqliteDropTrigger(pParse,sqliteSrcListAppend(0,&X,&D),0);
+  sqliteDropTrigger(pParse,sqliteSrcListAppend(0,&X,&D));
 }
 
 //////////////////////// ATTACH DATABASE file AS name /////////////////////////

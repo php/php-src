@@ -71,7 +71,7 @@ if test "$PHP_SQLITE" != "no"; then
     AC_DEFINE(OS_WIN, 0, [if this is windows])
     dnl use latin 1 for now; the utf-8 handling in funcs.c uses assert(),
     dnl which is a bit silly and something we want to avoid
-    SQLITE_ENCODING="iso8859"
+    SQLITE_ENCODING="ISO8859"
     dnl SQLITE_ENCODING="UTF-8"
     dnl AC_DEFINE(SQLITE_UTF8,1,[if SQLite should use utf-8 encoding])
     PHP_SUBST(SQLITE_ENCODING)
@@ -96,8 +96,6 @@ if test "$PHP_SQLITE" != "no"; then
 # define NDEBUG
 #endif
 EOF
-
-    sed -e s/--VERS--/`cat $ext_srcdir/libsqlite/VERSION`/ -e s/--ENCODING--/$SQLITE_ENCODING/ $ext_srcdir/libsqlite/src/sqlite.h.in >$ext_srcdir/libsqlite/src/sqlite.h
 
     PHP_ADD_MAKEFILE_FRAGMENT
 

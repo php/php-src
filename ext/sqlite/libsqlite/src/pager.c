@@ -496,7 +496,7 @@ static int pager_playback_one_page(Pager *pPager, OsFile *jfd, int format){
   if( pgRec.pgno==0 ){
     return SQLITE_DONE;
   }
-  if( pgRec.pgno>pPager->dbSize ){
+  if( pgRec.pgno>(unsigned)pPager->dbSize ){
     return SQLITE_OK;
   }
   if( format>=JOURNAL_FORMAT_3 ){
@@ -944,7 +944,7 @@ int sqlitepager_truncate(Pager *pPager, Pgno nPage){
     rc = pager_errcode(pPager);
     return rc;
   }
-  if( nPage>=pPager->dbSize ){
+  if( nPage>=(unsigned)pPager->dbSize ){
     return SQLITE_OK;
   }
   syncAllPages(pPager);

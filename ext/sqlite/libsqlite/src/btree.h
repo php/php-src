@@ -95,7 +95,7 @@ struct BtCursorOps {
 #define SQLITE_N_BTREE_META 10
 
 int sqliteBtreeOpen(const char *zFilename, int mode, int nPg, Btree **ppBtree);
-int sqliteRBtreeOpen(const char *zFilename, int mode, int nPg, Btree **ppBtree);
+int sqliteRbtreeOpen(const char *zFilename, int mode, int nPg, Btree **ppBtree);
 
 #define btOps(pBt) (*((BtOps **)(pBt)))
 #define btCOps(pCur) (*((BtCursorOps **)(pCur)))

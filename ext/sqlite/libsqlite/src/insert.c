@@ -293,10 +293,14 @@ void sqliteInsert(
         }
       }
       if( j>=pTab->nCol ){
-        sqliteErrorMsg(pParse, "table %S has no column named %s",
-            pTabList, 0, pColumn->a[i].zName);
-        pParse->nErr++;
-        goto insert_cleanup;
+        if( sqliteIsRowid(pColumn->a[i].zName) ){
+          keyColumn = i;
+        }else{
+          sqliteErrorMsg(pParse, "table %S has no column named %s",
+              pTabList, 0, pColumn->a[i].zName);
+          pParse->nErr++;
+          goto insert_cleanup;
+        }
       }
     }
   }
@@ -482,7 +486,8 @@ void sqliteInsert(
     /* Generate code to check constraints and generate index keys and
     ** do the insertion.
     */
-    sqliteGenerateConstraintChecks(pParse, pTab, base, 0,0,0,onError,endOfLoop);
+    sqliteGenerateConstraintChecks(pParse, pTab, base, 0, keyColumn>=0,
+                                   0, onError, endOfLoop);
     sqliteCompleteInsertion(pParse, pTab, base, 0,0,0,
                             after_triggers ? newIdx : -1);
   }
@@ -660,7 +665,6 @@ void sqliteGenerateConstraintChecks(
   */
   for(i=0; i<nCol; i++){
     if( i==pTab->iPKey ){
-      /* Fix me: Make sure the INTEGER PRIMARY KEY is not NULL. */
       continue;
     }
     onError = pTab->aCol[i].notNull;
@@ -711,10 +715,8 @@ void sqliteGenerateConstraintChecks(
   /* If we have an INTEGER PRIMARY KEY, make sure the primary key
   ** of the new record does not previously exist.  Except, if this
   ** is an UPDATE and the primary key is not changing, that is OK.
-  ** Also, if the conflict resolution policy is REPLACE, then we
-  ** can skip this test.
   */
-  if( (recnoChng || !isUpdate) && pTab->iPKey>=0 ){
+  if( recnoChng ){
     onError = pTab->keyConf;
     if( overrideError!=OE_Default ){
       onError = overrideError;
@@ -723,36 +725,48 @@ void sqliteGenerateConstraintChecks(
     }else if( onError==OE_Default ){
       onError = OE_Abort;
     }
-    if( onError!=OE_Replace ){
-      if( isUpdate ){
-        sqliteVdbeAddOp(v, OP_Dup, nCol+1, 1);
-        sqliteVdbeAddOp(v, OP_Dup, nCol+1, 1);
-        jumpInst1 = sqliteVdbeAddOp(v, OP_Eq, 0, 0);
+    
+    if( isUpdate ){
+      sqliteVdbeAddOp(v, OP_Dup, nCol+1, 1);
+      sqliteVdbeAddOp(v, OP_Dup, nCol+1, 1);
+      jumpInst1 = sqliteVdbeAddOp(v, OP_Eq, 0, 0);
+    }
+    sqliteVdbeAddOp(v, OP_Dup, nCol, 1);
+    jumpInst2 = sqliteVdbeAddOp(v, OP_NotExists, base, 0);
+    switch( onError ){
+      default: {
+        onError = OE_Abort;
+        /* Fall thru into the next case */
       }
-      sqliteVdbeAddOp(v, OP_Dup, nCol, 1);
-      jumpInst2 = sqliteVdbeAddOp(v, OP_NotExists, base, 0);
-      switch( onError ){
-        case OE_Rollback:
-        case OE_Abort:
-        case OE_Fail: {
-          sqliteVdbeAddOp(v, OP_Halt, SQLITE_CONSTRAINT, onError);
-          sqliteVdbeChangeP3(v, -1, "PRIMARY KEY must be unique", P3_STATIC);
-          break;
+      case OE_Rollback:
+      case OE_Abort:
+      case OE_Fail: {
+        sqliteVdbeAddOp(v, OP_Halt, SQLITE_CONSTRAINT, onError);
+        sqliteVdbeChangeP3(v, -1, "PRIMARY KEY must be unique", P3_STATIC);
+        break;
+      }
+      case OE_Replace: {
+        sqliteGenerateRowIndexDelete(pParse->db, v, pTab, base, 0);
+        if( isUpdate ){
+          sqliteVdbeAddOp(v, OP_Dup, nCol+hasTwoRecnos, 1);
+          sqliteVdbeAddOp(v, OP_MoveTo, base, 0);
         }
-        case OE_Ignore: {
-          sqliteVdbeAddOp(v, OP_Pop, nCol+1+hasTwoRecnos, 0);
-          sqliteVdbeAddOp(v, OP_Goto, 0, ignoreDest);
-          break;
-        }
-        default: assert(0);
+        seenReplace = 1;
+        break;
       }
-      contAddr = sqliteVdbeCurrentAddr(v);
-      sqliteVdbeChangeP2(v, jumpInst2, contAddr);
-      if( isUpdate ){
-        sqliteVdbeChangeP2(v, jumpInst1, contAddr);
-        sqliteVdbeAddOp(v, OP_Dup, nCol+1, 1);
-        sqliteVdbeAddOp(v, OP_MoveTo, base, 0);
+      case OE_Ignore: {
+        assert( seenReplace==0 );
+        sqliteVdbeAddOp(v, OP_Pop, nCol+1+hasTwoRecnos, 0);
+        sqliteVdbeAddOp(v, OP_Goto, 0, ignoreDest);
+        break;
       }
+    }
+    contAddr = sqliteVdbeCurrentAddr(v);
+    sqliteVdbeChangeP2(v, jumpInst2, contAddr);
+    if( isUpdate ){
+      sqliteVdbeChangeP2(v, jumpInst1, contAddr);
+      sqliteVdbeAddOp(v, OP_Dup, nCol+1, 1);
+      sqliteVdbeAddOp(v, OP_MoveTo, base, 0);
     }
   }
 
@@ -788,6 +802,11 @@ void sqliteGenerateConstraintChecks(
     }else if( onError==OE_Default ){
       onError = OE_Abort;
     }
+    if( seenReplace ){
+      if( onError==OE_Ignore ) onError = OE_Replace;
+      else if( onError==OE_Fail ) onError = OE_Abort;
+    }
+    
 
     /* Check to see if the new index entry will be unique */
     sqliteVdbeAddOp(v, OP_Dup, extra+nCol+1+hasTwoRecnos, 1);

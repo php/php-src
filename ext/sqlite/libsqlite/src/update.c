@@ -128,8 +128,13 @@ void sqliteUpdate(
       }
     }
     if( j>=pTab->nCol ){
-      sqliteErrorMsg(pParse, "no such column: %s", pChanges->a[i].zName);
-      goto update_cleanup;
+      if( sqliteIsRowid(pChanges->a[i].zName) ){
+        chngRecno = 1;
+        pRecnoExpr = pChanges->a[i].pExpr;
+      }else{
+        sqliteErrorMsg(pParse, "no such column: %s", pChanges->a[i].zName);
+        goto update_cleanup;
+      }
     }
 #ifndef SQLITE_OMIT_AUTHORIZATION
     {

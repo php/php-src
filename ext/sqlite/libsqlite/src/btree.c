@@ -2477,7 +2477,7 @@ static int balance(Btree *pBt, MemPage *pPage, BtCursor *pCur){
     int minV = pgnoNew[i];
     int minI = i;
     for(j=i+1; j<k; j++){
-      if( pgnoNew[j]<minV ){
+      if( pgnoNew[j]<(unsigned)minV ){
         minI = j;
         minV = pgnoNew[j];
       }

@@ -191,6 +191,7 @@ SrcList *sqliteSrcListDup(SrcList *p){
   if( pNew==0 ) return 0;
   pNew->nSrc = p->nSrc;
   for(i=0; i<p->nSrc; i++){
+    pNew->a[i].zDatabase = sqliteStrDup(p->a[i].zDatabase);
     pNew->a[i].zName = sqliteStrDup(p->a[i].zName);
     pNew->a[i].zAlias = sqliteStrDup(p->a[i].zAlias);
     pNew->a[i].jointype = p->a[i].jointype;

@@ -28,7 +28,7 @@ extern "C" {
 /*
 ** The version of the SQLite library.
 */
-#define SQLITE_VERSION         "2.8.2"
+#define SQLITE_VERSION         "2.8.3"
 
 /*
 ** The version string is also compiled into the library so that a program
@@ -42,7 +42,7 @@ extern const char sqlite_version[];
 ** UTF-8 encoded data.  The SQLITE_ISO8859 macro is defined if the
 ** iso8859 encoded should be used.
 */
-#define SQLITE_iso8859 1
+#define SQLITE_ISO8859 1
 
 /*
 ** The following constant holds one of two strings, "UTF-8" or "iso8859",
@@ -391,6 +391,7 @@ int sqlite_get_table_vprintf(
   va_list ap             /* Arguments to the format string */
 );
 char *sqlite_mprintf(const char*,...);
+char *sqlite_vmprintf(const char*, va_list);
 
 /*
 ** Windows systems should call this routine to free memory that
@@ -554,6 +555,9 @@ int sqlite_set_authorizer(
 #define SQLITE_SELECT               21   /* NULL            NULL            */
 #define SQLITE_TRANSACTION          22   /* NULL            NULL            */
 #define SQLITE_UPDATE               23   /* Table Name      Column Name     */
+#define SQLITE_ATTACH               24   /* Filename        NULL            */
+#define SQLITE_DETACH               25   /* Database Name   NULL            */
+
 
 /*
 ** The return value of the authorization function should be one of the

@@ -4,7 +4,7 @@
 /* First off, code is include which follows the "include" declaration
 ** in the input file. */
 #include <stdio.h>
-#line 35 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 35 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 
 #include "sqliteInt.h"
 #include "parse.h"
@@ -30,7 +30,7 @@ struct LimitVal {
 struct TrigEvent { int a; IdList * b; };
 
 
-#line 34 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 34 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
 /* Next is all token values, in a form suitable for use by makeheaders.
 ** This section will be null unless lemon is run with the -m switch.
 */
@@ -4375,144 +4375,144 @@ static void yy_destructor(YYCODETYPE yymajor, YYMINORTYPE *yypminor){
     ** inside the C code.
     */
     case 135:
-#line 673 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 673 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteExprListDelete((yypminor->yy62));}
-#line 4380 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4380 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 157:
-#line 520 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 520 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteExprDelete((yypminor->yy334));}
-#line 4385 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4385 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 158:
-#line 692 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 692 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteExprDelete((yypminor->yy334));}
-#line 4390 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4390 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 159:
-#line 690 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 690 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteExprListDelete((yypminor->yy62));}
-#line 4395 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4395 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 161:
-#line 341 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 341 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteSrcListDelete((yypminor->yy335));}
-#line 4400 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4400 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 162:
-#line 435 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 435 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteExprListDelete((yypminor->yy62));}
-#line 4405 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4405 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 163:
-#line 440 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 440 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteExprDelete((yypminor->yy334));}
-#line 4410 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4410 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 167:
-#line 715 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 715 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteIdListDelete((yypminor->yy92));}
-#line 4415 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4415 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 168:
-#line 717 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 717 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteIdListDelete((yypminor->yy92));}
-#line 4420 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4420 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 171:
-#line 498 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 498 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteIdListDelete((yypminor->yy92));}
-#line 4425 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4425 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 172:
-#line 496 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 496 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteIdListDelete((yypminor->yy92));}
-#line 4430 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4430 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 174:
-#line 490 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 490 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteExprListDelete((yypminor->yy62));}
-#line 4435 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4435 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 183:
-#line 396 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 396 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteExprDelete((yypminor->yy334));}
-#line 4440 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4440 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 185:
-#line 276 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 276 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteSelectDelete((yypminor->yy11));}
-#line 4445 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4445 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 187:
-#line 407 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 407 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteExprListDelete((yypminor->yy62));}
-#line 4450 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4450 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 194:
-#line 312 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 312 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteExprListDelete((yypminor->yy62));}
-#line 4455 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4455 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 195:
-#line 310 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 310 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteExprListDelete((yypminor->yy62));}
-#line 4460 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4460 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 196:
-#line 274 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 274 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteSelectDelete((yypminor->yy11));}
-#line 4465 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4465 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 197:
-#line 337 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 337 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteSrcListDelete((yypminor->yy335));}
-#line 4470 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4470 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 198:
-#line 465 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 465 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteExprListDelete((yypminor->yy62));}
-#line 4475 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4475 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 200:
-#line 411 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 411 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteExprDelete((yypminor->yy334));}
-#line 4480 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4480 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 201:
-#line 409 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 409 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteExprListDelete((yypminor->yy62));}
-#line 4485 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4485 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 203:
-#line 339 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 339 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteSrcListDelete((yypminor->yy335));}
-#line 4490 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4490 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 207:
-#line 807 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 807 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteDeleteTriggerStep((yypminor->yy347));}
-#line 4495 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4495 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 208:
-#line 799 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 799 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteDeleteTriggerStep((yypminor->yy347));}
-#line 4500 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4500 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 210:
-#line 783 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 783 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteIdListDelete((yypminor->yy234).b);}
-#line 4505 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4505 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 215:
-#line 401 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 401 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteIdListDelete((yypminor->yy92));}
-#line 4510 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4510 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     case 217:
-#line 459 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 459 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteExprDelete((yypminor->yy334));}
-#line 4515 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 4515 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
       break;
     default:  break;   /* If no destructor action specified: do nothing */
   }
@@ -5000,26 +5000,26 @@ static void yy_reduce(
         /* No destructor defined for SEMI */
         break;
       case 5:
-#line 77 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 77 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { sqliteExec(pParse); }
-#line 5005 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5005 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for cmd */
         break;
       case 6:
-#line 78 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 78 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { sqliteBeginParse(pParse, 1); }
-#line 5011 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5011 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for EXPLAIN */
         break;
       case 7:
-#line 79 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 79 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { sqliteBeginParse(pParse, 0); }
-#line 5017 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5017 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 8:
-#line 84 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 84 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteBeginTransaction(pParse,yymsp[0].minor.yy52);}
-#line 5022 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5022 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for BEGIN */
         /* No destructor defined for trans_opt */
         break;
@@ -5033,23 +5033,23 @@ static void yy_reduce(
         /* No destructor defined for nm */
         break;
       case 12:
-#line 88 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 88 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteCommitTransaction(pParse);}
-#line 5038 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5038 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for COMMIT */
         /* No destructor defined for trans_opt */
         break;
       case 13:
-#line 89 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 89 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteCommitTransaction(pParse);}
-#line 5045 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5045 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for END */
         /* No destructor defined for trans_opt */
         break;
       case 14:
-#line 90 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 90 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteRollbackTransaction(pParse);}
-#line 5052 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5052 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for ROLLBACK */
         /* No destructor defined for trans_opt */
         break;
@@ -5058,41 +5058,41 @@ static void yy_reduce(
         /* No destructor defined for create_table_args */
         break;
       case 16:
-#line 95 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 95 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
    sqliteStartTable(pParse,&yymsp[-3].minor.yy0,&yymsp[0].minor.yy210,yymsp[-2].minor.yy52,0);
 }
-#line 5065 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5065 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for TABLE */
         break;
       case 17:
-#line 99 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 99 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = 1;}
-#line 5071 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5071 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for TEMP */
         break;
       case 18:
-#line 100 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 100 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = 0;}
-#line 5077 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5077 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 19:
-#line 101 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 101 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   sqliteEndTable(pParse,&yymsp[0].minor.yy0,0);
 }
-#line 5084 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5084 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LP */
         /* No destructor defined for columnlist */
         /* No destructor defined for conslist_opt */
         break;
       case 20:
-#line 104 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 104 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   sqliteEndTable(pParse,0,yymsp[0].minor.yy11);
   sqliteSelectDelete(yymsp[0].minor.yy11);
 }
-#line 5095 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5095 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for AS */
         break;
       case 21:
@@ -5109,72 +5109,72 @@ static void yy_reduce(
         /* No destructor defined for carglist */
         break;
       case 24:
-#line 116 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 116 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteAddColumn(pParse,&yymsp[0].minor.yy210);}
-#line 5114 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5114 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 25:
-#line 122 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 122 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy210 = yymsp[0].minor.yy0;}
-#line 5119 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5119 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 26:
-#line 138 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 138 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy210 = yymsp[0].minor.yy0;}
-#line 5124 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5124 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 27:
-#line 139 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 139 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy210 = yymsp[0].minor.yy0;}
-#line 5129 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5129 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 28:
-#line 144 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 144 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy210 = yymsp[0].minor.yy0;}
-#line 5134 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5134 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 29:
-#line 145 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 145 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy210 = yymsp[0].minor.yy0;}
-#line 5139 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5139 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 30:
-#line 146 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 146 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy210 = yymsp[0].minor.yy0;}
-#line 5144 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5144 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 31:
         break;
       case 32:
-#line 149 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 149 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteAddColumnType(pParse,&yymsp[0].minor.yy210,&yymsp[0].minor.yy210);}
-#line 5151 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5151 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 33:
-#line 150 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 150 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteAddColumnType(pParse,&yymsp[-3].minor.yy210,&yymsp[0].minor.yy0);}
-#line 5156 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5156 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LP */
         /* No destructor defined for signed */
         break;
       case 34:
-#line 152 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 152 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteAddColumnType(pParse,&yymsp[-5].minor.yy210,&yymsp[0].minor.yy0);}
-#line 5163 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5163 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LP */
         /* No destructor defined for signed */
         /* No destructor defined for COMMA */
         /* No destructor defined for signed */
         break;
       case 35:
-#line 154 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 154 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy210 = yymsp[0].minor.yy210;}
-#line 5172 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5172 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 36:
-#line 155 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 155 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy210 = yymsp[-1].minor.yy210;}
-#line 5177 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5177 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for ids */
         break;
       case 37:
@@ -5203,54 +5203,54 @@ static void yy_reduce(
         /* No destructor defined for ccons */
         break;
       case 44:
-#line 163 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 163 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteAddDefaultValue(pParse,&yymsp[0].minor.yy0,0);}
-#line 5208 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5208 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DEFAULT */
         break;
       case 45:
-#line 164 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 164 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteAddDefaultValue(pParse,&yymsp[0].minor.yy0,0);}
-#line 5214 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5214 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DEFAULT */
         break;
       case 46:
-#line 165 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 165 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteAddDefaultValue(pParse,&yymsp[0].minor.yy0,0);}
-#line 5220 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5220 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DEFAULT */
         break;
       case 47:
-#line 166 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 166 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteAddDefaultValue(pParse,&yymsp[0].minor.yy0,0);}
-#line 5226 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5226 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DEFAULT */
         /* No destructor defined for PLUS */
         break;
       case 48:
-#line 167 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 167 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteAddDefaultValue(pParse,&yymsp[0].minor.yy0,1);}
-#line 5233 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5233 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DEFAULT */
         /* No destructor defined for MINUS */
         break;
       case 49:
-#line 168 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 168 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteAddDefaultValue(pParse,&yymsp[0].minor.yy0,0);}
-#line 5240 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5240 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DEFAULT */
         break;
       case 50:
-#line 169 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 169 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteAddDefaultValue(pParse,&yymsp[0].minor.yy0,0);}
-#line 5246 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5246 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DEFAULT */
         /* No destructor defined for PLUS */
         break;
       case 51:
-#line 170 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 170 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteAddDefaultValue(pParse,&yymsp[0].minor.yy0,1);}
-#line 5253 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5253 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DEFAULT */
         /* No destructor defined for MINUS */
         break;
@@ -5263,24 +5263,24 @@ static void yy_reduce(
         /* No destructor defined for onconf */
         break;
       case 54:
-#line 177 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 177 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteAddNotNull(pParse, yymsp[0].minor.yy52);}
-#line 5268 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5268 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for NOT */
         /* No destructor defined for NULL */
         break;
       case 55:
-#line 178 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 178 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteAddPrimaryKey(pParse,0,yymsp[0].minor.yy52);}
-#line 5275 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5275 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for PRIMARY */
         /* No destructor defined for KEY */
         /* No destructor defined for sortorder */
         break;
       case 56:
-#line 179 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 179 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteCreateIndex(pParse,0,0,0,yymsp[0].minor.yy52,0,0,0);}
-#line 5283 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5283 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for UNIQUE */
         break;
       case 57:
@@ -5291,117 +5291,117 @@ static void yy_reduce(
         /* No destructor defined for onconf */
         break;
       case 58:
-#line 182 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 182 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteCreateForeignKey(pParse,0,&yymsp[-2].minor.yy210,yymsp[-1].minor.yy92,yymsp[0].minor.yy52);}
-#line 5296 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5296 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for REFERENCES */
         break;
       case 59:
-#line 183 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 183 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteDeferForeignKey(pParse,yymsp[0].minor.yy52);}
-#line 5302 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5302 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 60:
-#line 184 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 184 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
    sqliteAddCollateType(pParse, sqliteCollateType(yymsp[0].minor.yy210.z, yymsp[0].minor.yy210.n));
 }
-#line 5309 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5309 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for COLLATE */
         break;
       case 61:
-#line 194 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 194 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = OE_Restrict * 0x010101; }
-#line 5315 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5315 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 62:
-#line 195 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 195 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = (yymsp[-1].minor.yy52 & yymsp[0].minor.yy279.mask) | yymsp[0].minor.yy279.value; }
-#line 5320 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5320 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 63:
-#line 197 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 197 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy279.value = 0;     yygotominor.yy279.mask = 0x000000; }
-#line 5325 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5325 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for MATCH */
         /* No destructor defined for nm */
         break;
       case 64:
-#line 198 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 198 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy279.value = yymsp[0].minor.yy52;     yygotominor.yy279.mask = 0x0000ff; }
-#line 5332 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5332 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for ON */
         /* No destructor defined for DELETE */
         break;
       case 65:
-#line 199 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 199 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy279.value = yymsp[0].minor.yy52<<8;  yygotominor.yy279.mask = 0x00ff00; }
-#line 5339 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5339 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for ON */
         /* No destructor defined for UPDATE */
         break;
       case 66:
-#line 200 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 200 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy279.value = yymsp[0].minor.yy52<<16; yygotominor.yy279.mask = 0xff0000; }
-#line 5346 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5346 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for ON */
         /* No destructor defined for INSERT */
         break;
       case 67:
-#line 202 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 202 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = OE_SetNull; }
-#line 5353 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5353 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for SET */
         /* No destructor defined for NULL */
         break;
       case 68:
-#line 203 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 203 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = OE_SetDflt; }
-#line 5360 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5360 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for SET */
         /* No destructor defined for DEFAULT */
         break;
       case 69:
-#line 204 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 204 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = OE_Cascade; }
-#line 5367 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5367 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for CASCADE */
         break;
       case 70:
-#line 205 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 205 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = OE_Restrict; }
-#line 5373 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5373 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for RESTRICT */
         break;
       case 71:
-#line 207 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 207 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = yymsp[0].minor.yy52;}
-#line 5379 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5379 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for NOT */
         /* No destructor defined for DEFERRABLE */
         break;
       case 72:
-#line 208 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 208 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = yymsp[0].minor.yy52;}
-#line 5386 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5386 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DEFERRABLE */
         break;
       case 73:
-#line 210 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 210 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = 0;}
-#line 5392 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5392 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 74:
-#line 211 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 211 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = 1;}
-#line 5397 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5397 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for INITIALLY */
         /* No destructor defined for DEFERRED */
         break;
       case 75:
-#line 212 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 212 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = 0;}
-#line 5404 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5404 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for INITIALLY */
         /* No destructor defined for IMMEDIATE */
         break;
@@ -5428,18 +5428,18 @@ static void yy_reduce(
         /* No destructor defined for nm */
         break;
       case 82:
-#line 224 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 224 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteAddPrimaryKey(pParse,yymsp[-2].minor.yy92,yymsp[0].minor.yy52);}
-#line 5433 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5433 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for PRIMARY */
         /* No destructor defined for KEY */
         /* No destructor defined for LP */
         /* No destructor defined for RP */
         break;
       case 83:
-#line 226 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 226 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteCreateIndex(pParse,0,0,yymsp[-2].minor.yy92,yymsp[0].minor.yy52,0,0,0);}
-#line 5442 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5442 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for UNIQUE */
         /* No destructor defined for LP */
         /* No destructor defined for RP */
@@ -5450,12 +5450,12 @@ static void yy_reduce(
         /* No destructor defined for onconf */
         break;
       case 85:
-#line 229 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 229 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
     sqliteCreateForeignKey(pParse, yymsp[-6].minor.yy92, &yymsp[-3].minor.yy210, yymsp[-2].minor.yy92, yymsp[-1].minor.yy52);
     sqliteDeferForeignKey(pParse, yymsp[0].minor.yy52);
 }
-#line 5458 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5458 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for FOREIGN */
         /* No destructor defined for KEY */
         /* No destructor defined for LP */
@@ -5463,108 +5463,108 @@ static void yy_reduce(
         /* No destructor defined for REFERENCES */
         break;
       case 86:
-#line 234 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 234 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = 0;}
-#line 5468 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5468 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 87:
-#line 235 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 235 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = yymsp[0].minor.yy52;}
-#line 5473 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5473 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 88:
-#line 243 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 243 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = OE_Default; }
-#line 5478 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5478 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 89:
-#line 244 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 244 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = yymsp[0].minor.yy52; }
-#line 5483 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5483 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for ON */
         /* No destructor defined for CONFLICT */
         break;
       case 90:
-#line 245 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 245 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = OE_Default; }
-#line 5490 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5490 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 91:
-#line 246 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 246 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = yymsp[0].minor.yy52; }
-#line 5495 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5495 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for OR */
         break;
       case 92:
-#line 247 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 247 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = OE_Rollback; }
-#line 5501 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5501 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for ROLLBACK */
         break;
       case 93:
-#line 248 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 248 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = OE_Abort; }
-#line 5507 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5507 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for ABORT */
         break;
       case 94:
-#line 249 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 249 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = OE_Fail; }
-#line 5513 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5513 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for FAIL */
         break;
       case 95:
-#line 250 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 250 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = OE_Ignore; }
-#line 5519 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5519 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for IGNORE */
         break;
       case 96:
-#line 251 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 251 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = OE_Replace; }
-#line 5525 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5525 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for REPLACE */
         break;
       case 97:
-#line 255 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 255 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteDropTable(pParse,&yymsp[0].minor.yy210,0);}
-#line 5531 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5531 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DROP */
         /* No destructor defined for TABLE */
         break;
       case 98:
-#line 259 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 259 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   sqliteCreateView(pParse, &yymsp[-5].minor.yy0, &yymsp[-2].minor.yy210, yymsp[0].minor.yy11, yymsp[-4].minor.yy52);
 }
-#line 5540 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5540 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for VIEW */
         /* No destructor defined for AS */
         break;
       case 99:
-#line 262 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 262 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   sqliteDropTable(pParse, &yymsp[0].minor.yy210, 1);
 }
-#line 5549 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5549 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DROP */
         /* No destructor defined for VIEW */
         break;
       case 100:
-#line 268 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 268 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   sqliteSelect(pParse, yymsp[0].minor.yy11, SRT_Callback, 0, 0, 0, 0);
   sqliteSelectDelete(yymsp[0].minor.yy11);
 }
-#line 5559 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5559 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 101:
-#line 278 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 278 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy11 = yymsp[0].minor.yy11;}
-#line 5564 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5564 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 102:
-#line 279 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 279 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   if( yymsp[0].minor.yy11 ){
     yymsp[0].minor.yy11->op = yymsp[-1].minor.yy52;
@@ -5572,137 +5572,137 @@ static void yy_reduce(
   }
   yygotominor.yy11 = yymsp[0].minor.yy11;
 }
-#line 5575 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5575 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 103:
-#line 287 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 287 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = TK_UNION;}
-#line 5580 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5580 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for UNION */
         break;
       case 104:
-#line 288 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 288 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = TK_ALL;}
-#line 5586 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5586 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for UNION */
         /* No destructor defined for ALL */
         break;
       case 105:
-#line 289 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 289 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = TK_INTERSECT;}
-#line 5593 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5593 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for INTERSECT */
         break;
       case 106:
-#line 290 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 290 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = TK_EXCEPT;}
-#line 5599 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5599 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for EXCEPT */
         break;
       case 107:
-#line 292 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 292 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy11 = sqliteSelectNew(yymsp[-6].minor.yy62,yymsp[-5].minor.yy335,yymsp[-4].minor.yy334,yymsp[-3].minor.yy62,yymsp[-2].minor.yy334,yymsp[-1].minor.yy62,yymsp[-7].minor.yy52,yymsp[0].minor.yy280.limit,yymsp[0].minor.yy280.offset);
 }
-#line 5607 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5607 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for SELECT */
         break;
       case 108:
-#line 300 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 300 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = 1;}
-#line 5613 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5613 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DISTINCT */
         break;
       case 109:
-#line 301 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 301 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = 0;}
-#line 5619 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5619 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for ALL */
         break;
       case 110:
-#line 302 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 302 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = 0;}
-#line 5625 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5625 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 111:
-#line 313 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 313 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy62 = yymsp[-1].minor.yy62;}
-#line 5630 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5630 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for COMMA */
         break;
       case 112:
-#line 314 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 314 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy62 = 0;}
-#line 5636 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5636 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 113:
-#line 315 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 315 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
    yygotominor.yy62 = sqliteExprListAppend(yymsp[-2].minor.yy62,yymsp[-1].minor.yy334,yymsp[0].minor.yy210.n?&yymsp[0].minor.yy210:0);
 }
-#line 5643 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5643 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 114:
-#line 318 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 318 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy62 = sqliteExprListAppend(yymsp[-1].minor.yy62, sqliteExpr(TK_ALL, 0, 0, 0), 0);
 }
-#line 5650 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5650 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for STAR */
         break;
       case 115:
-#line 321 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 321 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   Expr *pRight = sqliteExpr(TK_ALL, 0, 0, 0);
   Expr *pLeft = sqliteExpr(TK_ID, 0, 0, &yymsp[-2].minor.yy210);
   yygotominor.yy62 = sqliteExprListAppend(yymsp[-3].minor.yy62, sqliteExpr(TK_DOT, pLeft, pRight, 0), 0);
 }
-#line 5660 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5660 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DOT */
         /* No destructor defined for STAR */
         break;
       case 116:
-#line 331 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 331 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy210 = yymsp[0].minor.yy210; }
-#line 5667 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5667 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for AS */
         break;
       case 117:
-#line 332 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 332 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy210 = yymsp[0].minor.yy210; }
-#line 5673 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5673 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 118:
-#line 333 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 333 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy210.n = 0; }
-#line 5678 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5678 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 119:
-#line 345 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 345 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy335 = sqliteMalloc(sizeof(*yygotominor.yy335));}
-#line 5683 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5683 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 120:
-#line 346 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 346 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy335 = yymsp[0].minor.yy335;}
-#line 5688 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5688 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for FROM */
         break;
       case 121:
-#line 351 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 351 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
    yygotominor.yy335 = yymsp[-1].minor.yy335;
    if( yygotominor.yy335 && yygotominor.yy335->nSrc>0 ) yygotominor.yy335->a[yygotominor.yy335->nSrc-1].jointype = yymsp[0].minor.yy52;
 }
-#line 5697 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5697 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 122:
-#line 355 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 355 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy335 = 0;}
-#line 5702 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5702 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 123:
-#line 356 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 356 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy335 = sqliteSrcListAppend(yymsp[-5].minor.yy335,&yymsp[-4].minor.yy210,&yymsp[-3].minor.yy210);
   if( yymsp[-2].minor.yy210.n ) sqliteSrcListAddAlias(yygotominor.yy335,&yymsp[-2].minor.yy210);
@@ -5715,10 +5715,10 @@ static void yy_reduce(
     else { sqliteIdListDelete(yymsp[0].minor.yy92); }
   }
 }
-#line 5718 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5718 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 124:
-#line 368 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 368 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy335 = sqliteSrcListAppend(yymsp[-6].minor.yy335,0,0);
   yygotominor.yy335->a[yygotominor.yy335->nSrc-1].pSelect = yymsp[-4].minor.yy11;
@@ -5732,318 +5732,318 @@ static void yy_reduce(
     else { sqliteIdListDelete(yymsp[0].minor.yy92); }
   }
 }
-#line 5735 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5735 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LP */
         /* No destructor defined for RP */
         break;
       case 125:
-#line 383 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 383 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy210.z=0; yygotominor.yy210.n=0;}
-#line 5742 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5742 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 126:
-#line 384 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 384 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy210 = yymsp[0].minor.yy210;}
-#line 5747 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5747 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DOT */
         break;
       case 127:
-#line 388 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 388 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = JT_INNER; }
-#line 5753 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5753 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for COMMA */
         break;
       case 128:
-#line 389 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 389 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = JT_INNER; }
-#line 5759 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5759 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for JOIN */
         break;
       case 129:
-#line 390 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 390 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = sqliteJoinType(pParse,&yymsp[-1].minor.yy0,0,0); }
-#line 5765 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5765 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for JOIN */
         break;
       case 130:
-#line 391 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 391 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = sqliteJoinType(pParse,&yymsp[-2].minor.yy0,&yymsp[-1].minor.yy210,0); }
-#line 5771 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5771 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for JOIN */
         break;
       case 131:
-#line 393 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 393 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = sqliteJoinType(pParse,&yymsp[-3].minor.yy0,&yymsp[-2].minor.yy210,&yymsp[-1].minor.yy210); }
-#line 5777 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5777 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for JOIN */
         break;
       case 132:
-#line 397 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 397 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = yymsp[0].minor.yy334;}
-#line 5783 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5783 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for ON */
         break;
       case 133:
-#line 398 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 398 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = 0;}
-#line 5789 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5789 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 134:
-#line 402 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 402 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy92 = yymsp[-1].minor.yy92;}
-#line 5794 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5794 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for USING */
         /* No destructor defined for LP */
         /* No destructor defined for RP */
         break;
       case 135:
-#line 403 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 403 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy92 = 0;}
-#line 5802 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5802 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 136:
-#line 413 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 413 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy62 = 0;}
-#line 5807 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5807 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 137:
-#line 414 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 414 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy62 = yymsp[0].minor.yy62;}
-#line 5812 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5812 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for ORDER */
         /* No destructor defined for BY */
         break;
       case 138:
-#line 415 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 415 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy62 = sqliteExprListAppend(yymsp[-4].minor.yy62,yymsp[-2].minor.yy334,0);
   if( yygotominor.yy62 ) yygotominor.yy62->a[yygotominor.yy62->nExpr-1].sortOrder = yymsp[-1].minor.yy52+yymsp[0].minor.yy52;
 }
-#line 5822 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5822 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for COMMA */
         break;
       case 139:
-#line 419 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 419 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy62 = sqliteExprListAppend(0,yymsp[-2].minor.yy334,0);
   if( yygotominor.yy62 ) yygotominor.yy62->a[0].sortOrder = yymsp[-1].minor.yy52+yymsp[0].minor.yy52;
 }
-#line 5831 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5831 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 140:
-#line 423 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 423 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = yymsp[0].minor.yy334;}
-#line 5836 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5836 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 141:
-#line 428 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 428 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = SQLITE_SO_ASC;}
-#line 5841 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5841 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for ASC */
         break;
       case 142:
-#line 429 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 429 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = SQLITE_SO_DESC;}
-#line 5847 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5847 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DESC */
         break;
       case 143:
-#line 430 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 430 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = SQLITE_SO_ASC;}
-#line 5853 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5853 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 144:
-#line 431 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 431 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = SQLITE_SO_UNK;}
-#line 5858 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5858 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 145:
-#line 432 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 432 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = sqliteCollateType(yymsp[0].minor.yy210.z, yymsp[0].minor.yy210.n);}
-#line 5863 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5863 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for COLLATE */
         break;
       case 146:
-#line 436 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 436 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy62 = 0;}
-#line 5869 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5869 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 147:
-#line 437 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 437 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy62 = yymsp[0].minor.yy62;}
-#line 5874 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5874 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for GROUP */
         /* No destructor defined for BY */
         break;
       case 148:
-#line 441 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 441 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = 0;}
-#line 5881 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5881 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 149:
-#line 442 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 442 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = yymsp[0].minor.yy334;}
-#line 5886 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5886 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for HAVING */
         break;
       case 150:
-#line 445 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 445 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy280.limit = -1; yygotominor.yy280.offset = 0;}
-#line 5892 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5892 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 151:
-#line 446 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 446 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy280.limit = atoi(yymsp[0].minor.yy0.z); yygotominor.yy280.offset = 0;}
-#line 5897 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5897 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LIMIT */
         break;
       case 152:
-#line 448 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 448 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy280.limit = atoi(yymsp[-2].minor.yy0.z); yygotominor.yy280.offset = atoi(yymsp[0].minor.yy0.z);}
-#line 5903 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5903 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LIMIT */
         /* No destructor defined for OFFSET */
         break;
       case 153:
-#line 450 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 450 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy280.limit = atoi(yymsp[0].minor.yy0.z); yygotominor.yy280.offset = atoi(yymsp[-2].minor.yy0.z);}
-#line 5910 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5910 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LIMIT */
         /* No destructor defined for COMMA */
         break;
       case 154:
-#line 454 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 454 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
    sqliteDeleteFrom(pParse, sqliteSrcListAppend(0,&yymsp[-2].minor.yy210,&yymsp[-1].minor.yy210), yymsp[0].minor.yy334);
 }
-#line 5919 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5919 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DELETE */
         /* No destructor defined for FROM */
         break;
       case 155:
-#line 461 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 461 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = 0;}
-#line 5926 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5926 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 156:
-#line 462 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 462 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = yymsp[0].minor.yy334;}
-#line 5931 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5931 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for WHERE */
         break;
       case 157:
-#line 470 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 470 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteUpdate(pParse,sqliteSrcListAppend(0,&yymsp[-4].minor.yy210,&yymsp[-3].minor.yy210),yymsp[-1].minor.yy62,yymsp[0].minor.yy334,yymsp[-5].minor.yy52);}
-#line 5937 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5937 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for UPDATE */
         /* No destructor defined for SET */
         break;
       case 158:
-#line 473 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 473 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy62 = sqliteExprListAppend(yymsp[-4].minor.yy62,yymsp[0].minor.yy334,&yymsp[-2].minor.yy210);}
-#line 5944 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5944 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for COMMA */
         /* No destructor defined for EQ */
         break;
       case 159:
-#line 474 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 474 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy62 = sqliteExprListAppend(0,yymsp[0].minor.yy334,&yymsp[-2].minor.yy210);}
-#line 5951 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5951 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for EQ */
         break;
       case 160:
-#line 480 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 480 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteInsert(pParse, sqliteSrcListAppend(0,&yymsp[-6].minor.yy210,&yymsp[-5].minor.yy210), yymsp[-1].minor.yy62, 0, yymsp[-4].minor.yy92, yymsp[-8].minor.yy52);}
-#line 5957 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5957 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for INTO */
         /* No destructor defined for VALUES */
         /* No destructor defined for LP */
         /* No destructor defined for RP */
         break;
       case 161:
-#line 482 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 482 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteInsert(pParse, sqliteSrcListAppend(0,&yymsp[-3].minor.yy210,&yymsp[-2].minor.yy210), 0, yymsp[0].minor.yy11, yymsp[-1].minor.yy92, yymsp[-5].minor.yy52);}
-#line 5966 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5966 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for INTO */
         break;
       case 162:
-#line 485 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 485 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = yymsp[0].minor.yy52;}
-#line 5972 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5972 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for INSERT */
         break;
       case 163:
-#line 486 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 486 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = OE_Replace;}
-#line 5978 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5978 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for REPLACE */
         break;
       case 164:
-#line 492 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 492 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy62 = sqliteExprListAppend(yymsp[-2].minor.yy62,yymsp[0].minor.yy334,0);}
-#line 5984 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5984 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for COMMA */
         break;
       case 165:
-#line 493 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 493 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy62 = sqliteExprListAppend(0,yymsp[0].minor.yy334,0);}
-#line 5990 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5990 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 166:
-#line 500 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 500 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy92 = 0;}
-#line 5995 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 5995 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 167:
-#line 501 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 501 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy92 = yymsp[-1].minor.yy92;}
-#line 6000 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6000 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LP */
         /* No destructor defined for RP */
         break;
       case 168:
-#line 502 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 502 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy92 = sqliteIdListAppend(yymsp[-2].minor.yy92,&yymsp[0].minor.yy210);}
-#line 6007 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6007 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for COMMA */
         break;
       case 169:
-#line 503 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 503 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy92 = sqliteIdListAppend(0,&yymsp[0].minor.yy210);}
-#line 6013 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6013 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 170:
-#line 522 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 522 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = yymsp[-1].minor.yy334; sqliteExprSpan(yygotominor.yy334,&yymsp[-2].minor.yy0,&yymsp[0].minor.yy0); }
-#line 6018 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6018 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 171:
-#line 523 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 523 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_NULL, 0, 0, &yymsp[0].minor.yy0);}
-#line 6023 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6023 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 172:
-#line 524 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 524 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_ID, 0, 0, &yymsp[0].minor.yy0);}
-#line 6028 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6028 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 173:
-#line 525 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 525 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_ID, 0, 0, &yymsp[0].minor.yy0);}
-#line 6033 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6033 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 174:
-#line 526 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 526 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   Expr *temp1 = sqliteExpr(TK_ID, 0, 0, &yymsp[-2].minor.yy210);
   Expr *temp2 = sqliteExpr(TK_ID, 0, 0, &yymsp[0].minor.yy210);
   yygotominor.yy334 = sqliteExpr(TK_DOT, temp1, temp2, 0);
 }
-#line 6042 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6042 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DOT */
         break;
       case 175:
-#line 531 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 531 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   Expr *temp1 = sqliteExpr(TK_ID, 0, 0, &yymsp[-4].minor.yy210);
   Expr *temp2 = sqliteExpr(TK_ID, 0, 0, &yymsp[-2].minor.yy210);
@@ -6051,124 +6051,124 @@ static void yy_reduce(
   Expr *temp4 = sqliteExpr(TK_DOT, temp2, temp3, 0);
   yygotominor.yy334 = sqliteExpr(TK_DOT, temp1, temp4, 0);
 }
-#line 6054 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6054 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DOT */
         /* No destructor defined for DOT */
         break;
       case 176:
-#line 539 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 539 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = yymsp[-1].minor.yy334; ExprSetProperty(yygotominor.yy334,EP_Oracle8Join);}
-#line 6061 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6061 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for ORACLE_OUTER_JOIN */
         break;
       case 177:
-#line 540 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 540 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_INTEGER, 0, 0, &yymsp[0].minor.yy0);}
-#line 6067 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6067 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 178:
-#line 541 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 541 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_FLOAT, 0, 0, &yymsp[0].minor.yy0);}
-#line 6072 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6072 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 179:
-#line 542 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 542 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_STRING, 0, 0, &yymsp[0].minor.yy0);}
-#line 6077 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6077 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 180:
-#line 543 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 543 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExprFunction(yymsp[-1].minor.yy62, &yymsp[-3].minor.yy0);
   sqliteExprSpan(yygotominor.yy334,&yymsp[-3].minor.yy0,&yymsp[0].minor.yy0);
 }
-#line 6085 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6085 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LP */
         break;
       case 181:
-#line 547 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 547 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExprFunction(0, &yymsp[-3].minor.yy0);
   sqliteExprSpan(yygotominor.yy334,&yymsp[-3].minor.yy0,&yymsp[0].minor.yy0);
 }
-#line 6094 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6094 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LP */
         /* No destructor defined for STAR */
         break;
       case 182:
-#line 551 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 551 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_AND, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6101 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6101 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for AND */
         break;
       case 183:
-#line 552 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 552 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_OR, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6107 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6107 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for OR */
         break;
       case 184:
-#line 553 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 553 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_LT, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6113 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6113 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LT */
         break;
       case 185:
-#line 554 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 554 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_GT, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6119 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6119 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for GT */
         break;
       case 186:
-#line 555 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 555 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_LE, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6125 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6125 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LE */
         break;
       case 187:
-#line 556 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 556 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_GE, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6131 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6131 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for GE */
         break;
       case 188:
-#line 557 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 557 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_NE, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6137 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6137 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for NE */
         break;
       case 189:
-#line 558 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 558 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_EQ, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6143 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6143 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for EQ */
         break;
       case 190:
-#line 559 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 559 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_BITAND, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6149 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6149 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for BITAND */
         break;
       case 191:
-#line 560 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 560 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_BITOR, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6155 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6155 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for BITOR */
         break;
       case 192:
-#line 561 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 561 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_LSHIFT, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6161 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6161 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LSHIFT */
         break;
       case 193:
-#line 562 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 562 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_RSHIFT, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6167 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6167 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for RSHIFT */
         break;
       case 194:
-#line 563 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 563 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   ExprList *pList = sqliteExprListAppend(0, yymsp[0].minor.yy334, 0);
   pList = sqliteExprListAppend(pList, yymsp[-2].minor.yy334, 0);
@@ -6176,10 +6176,10 @@ static void yy_reduce(
   if( yygotominor.yy334 ) yygotominor.yy334->op = yymsp[-1].minor.yy52;
   sqliteExprSpan(yygotominor.yy334, &yymsp[-2].minor.yy334->span, &yymsp[0].minor.yy334->span);
 }
-#line 6179 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6179 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 195:
-#line 570 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 570 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   ExprList *pList = sqliteExprListAppend(0, yymsp[0].minor.yy334, 0);
   pList = sqliteExprListAppend(pList, yymsp[-3].minor.yy334, 0);
@@ -6188,144 +6188,144 @@ static void yy_reduce(
   yygotominor.yy334 = sqliteExpr(TK_NOT, yygotominor.yy334, 0, 0);
   sqliteExprSpan(yygotominor.yy334,&yymsp[-3].minor.yy334->span,&yymsp[0].minor.yy334->span);
 }
-#line 6191 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6191 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for NOT */
         break;
       case 196:
-#line 579 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 579 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = TK_LIKE;}
-#line 6197 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6197 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LIKE */
         break;
       case 197:
-#line 580 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 580 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy52 = TK_GLOB;}
-#line 6203 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6203 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for GLOB */
         break;
       case 198:
-#line 581 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 581 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_PLUS, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6209 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6209 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for PLUS */
         break;
       case 199:
-#line 582 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 582 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_MINUS, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6215 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6215 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for MINUS */
         break;
       case 200:
-#line 583 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 583 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_STAR, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6221 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6221 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for STAR */
         break;
       case 201:
-#line 584 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 584 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_SLASH, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6227 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6227 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for SLASH */
         break;
       case 202:
-#line 585 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 585 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_REM, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6233 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6233 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for REM */
         break;
       case 203:
-#line 586 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 586 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = sqliteExpr(TK_CONCAT, yymsp[-2].minor.yy334, yymsp[0].minor.yy334, 0);}
-#line 6239 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6239 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for CONCAT */
         break;
       case 204:
-#line 587 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 587 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_ISNULL, yymsp[-1].minor.yy334, 0, 0);
   sqliteExprSpan(yygotominor.yy334,&yymsp[-1].minor.yy334->span,&yymsp[0].minor.yy0);
 }
-#line 6248 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6248 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 205:
-#line 591 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 591 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_ISNULL, yymsp[-2].minor.yy334, 0, 0);
   sqliteExprSpan(yygotominor.yy334,&yymsp[-2].minor.yy334->span,&yymsp[0].minor.yy0);
 }
-#line 6256 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6256 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for IS */
         break;
       case 206:
-#line 595 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 595 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_NOTNULL, yymsp[-1].minor.yy334, 0, 0);
   sqliteExprSpan(yygotominor.yy334,&yymsp[-1].minor.yy334->span,&yymsp[0].minor.yy0);
 }
-#line 6265 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6265 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 207:
-#line 599 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 599 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_NOTNULL, yymsp[-2].minor.yy334, 0, 0);
   sqliteExprSpan(yygotominor.yy334,&yymsp[-2].minor.yy334->span,&yymsp[0].minor.yy0);
 }
-#line 6273 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6273 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for NOT */
         break;
       case 208:
-#line 603 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 603 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_NOTNULL, yymsp[-3].minor.yy334, 0, 0);
   sqliteExprSpan(yygotominor.yy334,&yymsp[-3].minor.yy334->span,&yymsp[0].minor.yy0);
 }
-#line 6282 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6282 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for IS */
         /* No destructor defined for NOT */
         break;
       case 209:
-#line 607 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 607 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_NOT, yymsp[0].minor.yy334, 0, 0);
   sqliteExprSpan(yygotominor.yy334,&yymsp[-1].minor.yy0,&yymsp[0].minor.yy334->span);
 }
-#line 6292 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6292 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 210:
-#line 611 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 611 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_BITNOT, yymsp[0].minor.yy334, 0, 0);
   sqliteExprSpan(yygotominor.yy334,&yymsp[-1].minor.yy0,&yymsp[0].minor.yy334->span);
 }
-#line 6300 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6300 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 211:
-#line 615 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 615 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_UMINUS, yymsp[0].minor.yy334, 0, 0);
   sqliteExprSpan(yygotominor.yy334,&yymsp[-1].minor.yy0,&yymsp[0].minor.yy334->span);
 }
-#line 6308 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6308 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 212:
-#line 619 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 619 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_UPLUS, yymsp[0].minor.yy334, 0, 0);
   sqliteExprSpan(yygotominor.yy334,&yymsp[-1].minor.yy0,&yymsp[0].minor.yy334->span);
 }
-#line 6316 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6316 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 213:
-#line 623 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 623 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_SELECT, 0, 0, 0);
   if( yygotominor.yy334 ) yygotominor.yy334->pSelect = yymsp[-1].minor.yy11;
   sqliteExprSpan(yygotominor.yy334,&yymsp[-2].minor.yy0,&yymsp[0].minor.yy0);
 }
-#line 6325 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6325 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 214:
-#line 628 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 628 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   ExprList *pList = sqliteExprListAppend(0, yymsp[-2].minor.yy334, 0);
   pList = sqliteExprListAppend(pList, yymsp[0].minor.yy334, 0);
@@ -6333,12 +6333,12 @@ static void yy_reduce(
   if( yygotominor.yy334 ) yygotominor.yy334->pList = pList;
   sqliteExprSpan(yygotominor.yy334,&yymsp[-4].minor.yy334->span,&yymsp[0].minor.yy334->span);
 }
-#line 6336 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6336 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for BETWEEN */
         /* No destructor defined for AND */
         break;
       case 215:
-#line 635 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 635 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   ExprList *pList = sqliteExprListAppend(0, yymsp[-2].minor.yy334, 0);
   pList = sqliteExprListAppend(pList, yymsp[0].minor.yy334, 0);
@@ -6347,283 +6347,283 @@ static void yy_reduce(
   yygotominor.yy334 = sqliteExpr(TK_NOT, yygotominor.yy334, 0, 0);
   sqliteExprSpan(yygotominor.yy334,&yymsp[-5].minor.yy334->span,&yymsp[0].minor.yy334->span);
 }
-#line 6350 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6350 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for NOT */
         /* No destructor defined for BETWEEN */
         /* No destructor defined for AND */
         break;
       case 216:
-#line 643 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 643 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_IN, yymsp[-4].minor.yy334, 0, 0);
   if( yygotominor.yy334 ) yygotominor.yy334->pList = yymsp[-1].minor.yy62;
   sqliteExprSpan(yygotominor.yy334,&yymsp[-4].minor.yy334->span,&yymsp[0].minor.yy0);
 }
-#line 6362 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6362 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for IN */
         /* No destructor defined for LP */
         break;
       case 217:
-#line 648 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 648 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_IN, yymsp[-4].minor.yy334, 0, 0);
   if( yygotominor.yy334 ) yygotominor.yy334->pSelect = yymsp[-1].minor.yy11;
   sqliteExprSpan(yygotominor.yy334,&yymsp[-4].minor.yy334->span,&yymsp[0].minor.yy0);
 }
-#line 6373 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6373 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for IN */
         /* No destructor defined for LP */
         break;
       case 218:
-#line 653 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 653 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_IN, yymsp[-5].minor.yy334, 0, 0);
   if( yygotominor.yy334 ) yygotominor.yy334->pList = yymsp[-1].minor.yy62;
   yygotominor.yy334 = sqliteExpr(TK_NOT, yygotominor.yy334, 0, 0);
   sqliteExprSpan(yygotominor.yy334,&yymsp[-5].minor.yy334->span,&yymsp[0].minor.yy0);
 }
-#line 6385 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6385 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for NOT */
         /* No destructor defined for IN */
         /* No destructor defined for LP */
         break;
       case 219:
-#line 659 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 659 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_IN, yymsp[-5].minor.yy334, 0, 0);
   if( yygotominor.yy334 ) yygotominor.yy334->pSelect = yymsp[-1].minor.yy11;
   yygotominor.yy334 = sqliteExpr(TK_NOT, yygotominor.yy334, 0, 0);
   sqliteExprSpan(yygotominor.yy334,&yymsp[-5].minor.yy334->span,&yymsp[0].minor.yy0);
 }
-#line 6398 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6398 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for NOT */
         /* No destructor defined for IN */
         /* No destructor defined for LP */
         break;
       case 220:
-#line 667 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 667 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_CASE, yymsp[-3].minor.yy334, yymsp[-1].minor.yy334, 0);
   if( yygotominor.yy334 ) yygotominor.yy334->pList = yymsp[-2].minor.yy62;
   sqliteExprSpan(yygotominor.yy334, &yymsp[-4].minor.yy0, &yymsp[0].minor.yy0);
 }
-#line 6410 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6410 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 221:
-#line 674 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 674 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy62 = sqliteExprListAppend(yymsp[-4].minor.yy62, yymsp[-2].minor.yy334, 0);
   yygotominor.yy62 = sqliteExprListAppend(yygotominor.yy62, yymsp[0].minor.yy334, 0);
 }
-#line 6418 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6418 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for WHEN */
         /* No destructor defined for THEN */
         break;
       case 222:
-#line 678 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 678 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy62 = sqliteExprListAppend(0, yymsp[-2].minor.yy334, 0);
   yygotominor.yy62 = sqliteExprListAppend(yygotominor.yy62, yymsp[0].minor.yy334, 0);
 }
-#line 6428 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6428 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for WHEN */
         /* No destructor defined for THEN */
         break;
       case 223:
-#line 683 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 683 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = yymsp[0].minor.yy334;}
-#line 6435 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6435 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for ELSE */
         break;
       case 224:
-#line 684 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 684 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = 0;}
-#line 6441 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6441 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 225:
-#line 686 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 686 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = yymsp[0].minor.yy334;}
-#line 6446 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6446 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 226:
-#line 687 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 687 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = 0;}
-#line 6451 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6451 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 227:
-#line 695 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 695 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy62 = sqliteExprListAppend(yymsp[-2].minor.yy62,yymsp[0].minor.yy334,0);}
-#line 6456 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6456 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for COMMA */
         break;
       case 228:
-#line 696 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 696 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy62 = sqliteExprListAppend(0,yymsp[0].minor.yy334,0);}
-#line 6462 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6462 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 229:
-#line 697 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 697 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = yymsp[0].minor.yy334;}
-#line 6467 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6467 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 230:
-#line 698 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 698 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy334 = 0;}
-#line 6472 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6472 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 231:
-#line 703 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 703 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   SrcList *pSrc = sqliteSrcListAppend(0, &yymsp[-5].minor.yy210, &yymsp[-4].minor.yy210);
   if( yymsp[-9].minor.yy52!=OE_None ) yymsp[-9].minor.yy52 = yymsp[0].minor.yy52;
   if( yymsp[-9].minor.yy52==OE_Default) yymsp[-9].minor.yy52 = OE_Abort;
   sqliteCreateIndex(pParse, &yymsp[-7].minor.yy210, pSrc, yymsp[-2].minor.yy92, yymsp[-9].minor.yy52, yymsp[-10].minor.yy52, &yymsp[-11].minor.yy0, &yymsp[-1].minor.yy0);
 }
-#line 6482 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6482 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for INDEX */
         /* No destructor defined for ON */
         /* No destructor defined for LP */
         break;
       case 232:
-#line 711 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 711 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = OE_Abort; }
-#line 6490 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6490 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for UNIQUE */
         break;
       case 233:
-#line 712 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 712 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = OE_None; }
-#line 6496 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6496 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 234:
-#line 720 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 720 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy92 = 0;}
-#line 6501 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6501 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 235:
-#line 721 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 721 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy92 = yymsp[-1].minor.yy92;}
-#line 6506 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6506 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LP */
         /* No destructor defined for RP */
         break;
       case 236:
-#line 722 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 722 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy92 = sqliteIdListAppend(yymsp[-2].minor.yy92,&yymsp[0].minor.yy210);}
-#line 6513 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6513 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for COMMA */
         break;
       case 237:
-#line 723 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 723 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy92 = sqliteIdListAppend(0,&yymsp[0].minor.yy210);}
-#line 6519 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6519 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 238:
-#line 724 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 724 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy210 = yymsp[-1].minor.yy210;}
-#line 6524 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6524 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for sortorder */
         break;
       case 239:
-#line 729 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 729 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   sqliteDropIndex(pParse, sqliteSrcListAppend(0,&yymsp[-1].minor.yy210,&yymsp[0].minor.yy210));
 }
-#line 6532 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6532 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DROP */
         /* No destructor defined for INDEX */
         break;
       case 240:
-#line 737 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 737 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteCopy(pParse,sqliteSrcListAppend(0,&yymsp[-6].minor.yy210,&yymsp[-5].minor.yy210),&yymsp[-3].minor.yy210,&yymsp[0].minor.yy0,yymsp[-7].minor.yy52);}
-#line 6539 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6539 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for COPY */
         /* No destructor defined for FROM */
         /* No destructor defined for USING */
         /* No destructor defined for DELIMITERS */
         break;
       case 241:
-#line 739 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 739 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteCopy(pParse,sqliteSrcListAppend(0,&yymsp[-3].minor.yy210,&yymsp[-2].minor.yy210),&yymsp[0].minor.yy210,0,yymsp[-4].minor.yy52);}
-#line 6548 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6548 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for COPY */
         /* No destructor defined for FROM */
         break;
       case 242:
-#line 743 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 743 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteVacuum(pParse,0);}
-#line 6555 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6555 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for VACUUM */
         break;
       case 243:
-#line 744 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 744 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqliteVacuum(pParse,&yymsp[0].minor.yy210);}
-#line 6561 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6561 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for VACUUM */
         break;
       case 244:
-#line 748 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 748 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqlitePragma(pParse,&yymsp[-2].minor.yy210,&yymsp[0].minor.yy210,0);}
-#line 6567 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6567 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for PRAGMA */
         /* No destructor defined for EQ */
         break;
       case 245:
-#line 749 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 749 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqlitePragma(pParse,&yymsp[-2].minor.yy210,&yymsp[0].minor.yy0,0);}
-#line 6574 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6574 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for PRAGMA */
         /* No destructor defined for EQ */
         break;
       case 246:
-#line 750 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 750 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqlitePragma(pParse,&yymsp[-2].minor.yy210,&yymsp[0].minor.yy210,0);}
-#line 6581 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6581 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for PRAGMA */
         /* No destructor defined for EQ */
         break;
       case 247:
-#line 751 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 751 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqlitePragma(pParse,&yymsp[-2].minor.yy210,&yymsp[0].minor.yy210,1);}
-#line 6588 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6588 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for PRAGMA */
         /* No destructor defined for EQ */
         break;
       case 248:
-#line 752 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 752 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqlitePragma(pParse,&yymsp[-3].minor.yy210,&yymsp[-1].minor.yy210,0);}
-#line 6595 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6595 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for PRAGMA */
         /* No destructor defined for LP */
         /* No destructor defined for RP */
         break;
       case 249:
-#line 753 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 753 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {sqlitePragma(pParse,&yymsp[0].minor.yy210,&yymsp[0].minor.yy210,0);}
-#line 6603 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6603 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for PRAGMA */
         break;
       case 250:
-#line 754 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 754 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy210 = yymsp[0].minor.yy210;}
-#line 6609 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6609 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for plus_opt */
         break;
       case 251:
-#line 755 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 755 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy210 = yymsp[0].minor.yy210;}
-#line 6615 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6615 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for MINUS */
         break;
       case 252:
-#line 756 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 756 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy210 = yymsp[0].minor.yy0;}
-#line 6621 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6621 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 253:
-#line 757 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 757 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy210 = yymsp[0].minor.yy0;}
-#line 6626 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6626 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 254:
         /* No destructor defined for PLUS */
@@ -6631,133 +6631,133 @@ static void yy_reduce(
       case 255:
         break;
       case 256:
-#line 763 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 763 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   Token all;
   all.z = yymsp[-4].minor.yy0.z;
   all.n = (yymsp[0].minor.yy0.z - yymsp[-4].minor.yy0.z) + yymsp[0].minor.yy0.n;
   sqliteFinishTrigger(pParse, yymsp[-1].minor.yy347, &all);
 }
-#line 6641 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6641 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for trigger_decl */
         /* No destructor defined for BEGIN */
         break;
       case 257:
-#line 771 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 771 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   SrcList *pTab = sqliteSrcListAppend(0, &yymsp[-3].minor.yy210, &yymsp[-2].minor.yy210);
   sqliteBeginTrigger(pParse, &yymsp[-7].minor.yy210, yymsp[-6].minor.yy52, yymsp[-5].minor.yy234.a, yymsp[-5].minor.yy234.b, pTab, yymsp[-1].minor.yy52, yymsp[0].minor.yy270, yymsp[-9].minor.yy52);
 }
-#line 6651 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6651 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for TRIGGER */
         /* No destructor defined for ON */
         break;
       case 258:
-#line 777 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 777 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = TK_BEFORE; }
-#line 6658 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6658 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for BEFORE */
         break;
       case 259:
-#line 778 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 778 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = TK_AFTER;  }
-#line 6664 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6664 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for AFTER */
         break;
       case 260:
-#line 779 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 779 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = TK_INSTEAD;}
-#line 6670 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6670 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for INSTEAD */
         /* No destructor defined for OF */
         break;
       case 261:
-#line 780 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 780 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = TK_BEFORE; }
-#line 6677 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6677 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 262:
-#line 784 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 784 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy234.a = TK_DELETE; yygotominor.yy234.b = 0; }
-#line 6682 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6682 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DELETE */
         break;
       case 263:
-#line 785 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 785 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy234.a = TK_INSERT; yygotominor.yy234.b = 0; }
-#line 6688 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6688 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for INSERT */
         break;
       case 264:
-#line 786 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 786 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy234.a = TK_UPDATE; yygotominor.yy234.b = 0;}
-#line 6694 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6694 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for UPDATE */
         break;
       case 265:
-#line 787 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 787 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy234.a = TK_UPDATE; yygotominor.yy234.b = yymsp[0].minor.yy92; }
-#line 6700 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6700 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for UPDATE */
         /* No destructor defined for OF */
         break;
       case 266:
-#line 790 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 790 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = TK_ROW; }
-#line 6707 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6707 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 267:
-#line 791 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 791 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = TK_ROW; }
-#line 6712 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6712 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for FOR */
         /* No destructor defined for EACH */
         /* No destructor defined for ROW */
         break;
       case 268:
-#line 792 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 792 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy52 = TK_STATEMENT; }
-#line 6720 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6720 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for FOR */
         /* No destructor defined for EACH */
         /* No destructor defined for STATEMENT */
         break;
       case 269:
-#line 795 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 795 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy270 = 0; }
-#line 6728 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6728 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 270:
-#line 796 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 796 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy270 = yymsp[0].minor.yy334; }
-#line 6733 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6733 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for WHEN */
         break;
       case 271:
-#line 800 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 800 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yymsp[-2].minor.yy347->pNext = yymsp[0].minor.yy347;
   yygotominor.yy347 = yymsp[-2].minor.yy347;
 }
-#line 6742 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6742 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for SEMI */
         break;
       case 272:
-#line 804 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 804 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy347 = 0; }
-#line 6748 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6748 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 273:
-#line 810 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 810 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 { yygotominor.yy347 = sqliteTriggerUpdateStep(&yymsp[-3].minor.yy210, yymsp[-1].minor.yy62, yymsp[0].minor.yy334, yymsp[-4].minor.yy52); }
-#line 6753 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6753 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for UPDATE */
         /* No destructor defined for SET */
         break;
       case 274:
-#line 815 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 815 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy347 = sqliteTriggerInsertStep(&yymsp[-5].minor.yy210, yymsp[-4].minor.yy92, yymsp[-1].minor.yy62, 0, yymsp[-7].minor.yy52);}
-#line 6760 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6760 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for INSERT */
         /* No destructor defined for INTO */
         /* No destructor defined for VALUES */
@@ -6765,86 +6765,86 @@ static void yy_reduce(
         /* No destructor defined for RP */
         break;
       case 275:
-#line 818 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 818 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy347 = sqliteTriggerInsertStep(&yymsp[-2].minor.yy210, yymsp[-1].minor.yy92, 0, yymsp[0].minor.yy11, yymsp[-4].minor.yy52);}
-#line 6770 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6770 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for INSERT */
         /* No destructor defined for INTO */
         break;
       case 276:
-#line 822 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 822 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy347 = sqliteTriggerDeleteStep(&yymsp[-1].minor.yy210, yymsp[0].minor.yy334);}
-#line 6777 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6777 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DELETE */
         /* No destructor defined for FROM */
         break;
       case 277:
-#line 825 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 825 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {yygotominor.yy347 = sqliteTriggerSelectStep(yymsp[0].minor.yy11); }
-#line 6784 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6784 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         break;
       case 278:
-#line 828 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 828 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_RAISE, 0, 0, 0); 
   yygotominor.yy334->iColumn = OE_Ignore;
   sqliteExprSpan(yygotominor.yy334, &yymsp[-3].minor.yy0, &yymsp[0].minor.yy0);
 }
-#line 6793 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6793 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LP */
         /* No destructor defined for IGNORE */
         break;
       case 279:
-#line 833 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 833 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_RAISE, 0, 0, &yymsp[-1].minor.yy210); 
   yygotominor.yy334->iColumn = OE_Rollback;
   sqliteExprSpan(yygotominor.yy334, &yymsp[-5].minor.yy0, &yymsp[0].minor.yy0);
 }
-#line 6804 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6804 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LP */
         /* No destructor defined for ROLLBACK */
         /* No destructor defined for COMMA */
         break;
       case 280:
-#line 838 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 838 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_RAISE, 0, 0, &yymsp[-1].minor.yy210); 
   yygotominor.yy334->iColumn = OE_Abort;
   sqliteExprSpan(yygotominor.yy334, &yymsp[-5].minor.yy0, &yymsp[0].minor.yy0);
 }
-#line 6816 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6816 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LP */
         /* No destructor defined for ABORT */
         /* No destructor defined for COMMA */
         break;
       case 281:
-#line 843 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 843 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   yygotominor.yy334 = sqliteExpr(TK_RAISE, 0, 0, &yymsp[-1].minor.yy210); 
   yygotominor.yy334->iColumn = OE_Fail;
   sqliteExprSpan(yygotominor.yy334, &yymsp[-5].minor.yy0, &yymsp[0].minor.yy0);
 }
-#line 6828 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6828 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for LP */
         /* No destructor defined for FAIL */
         /* No destructor defined for COMMA */
         break;
       case 282:
-#line 850 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 850 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
-  sqliteDropTrigger(pParse,sqliteSrcListAppend(0,&yymsp[-1].minor.yy210,&yymsp[0].minor.yy210),0);
+  sqliteDropTrigger(pParse,sqliteSrcListAppend(0,&yymsp[-1].minor.yy210,&yymsp[0].minor.yy210));
 }
-#line 6838 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6838 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DROP */
         /* No destructor defined for TRIGGER */
         break;
       case 283:
-#line 855 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 855 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   sqliteAttach(pParse, &yymsp[-2].minor.yy210, &yymsp[0].minor.yy210);
 }
-#line 6847 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6847 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for ATTACH */
         /* No destructor defined for database_kw_opt */
         /* No destructor defined for AS */
@@ -6855,11 +6855,11 @@ static void yy_reduce(
       case 285:
         break;
       case 286:
-#line 863 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 863 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 {
   sqliteDetach(pParse, &yymsp[0].minor.yy210);
 }
-#line 6862 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6862 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
         /* No destructor defined for DETACH */
         /* No destructor defined for database_kw_opt */
         break;
@@ -6904,7 +6904,7 @@ static void yy_syntax_error(
 ){
   sqliteParserARG_FETCH;
 #define TOKEN (yyminor.yy0)
-#line 23 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.y"
+#line 23 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.y"
 
   if( pParse->zErrMsg==0 ){
     if( TOKEN.z[0] ){
@@ -6916,7 +6916,7 @@ static void yy_syntax_error(
   }
   pParse->nErr++;
 
-#line 6919 "/home/wez/src/php/pear/PECL/sqlite/libsqlite/src/parse.c"
+#line 6919 "/home/wez/src/php/php4.3-cvs/ext/sqlite/libsqlite/src/parse.c"
   sqliteParserARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 

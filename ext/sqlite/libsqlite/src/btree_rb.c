@@ -580,8 +580,9 @@ int sqliteRbtreeOpen(
   const char *zFilename,
   int mode,
   int nPg,
-  Rbtree **ppRbtree
+  Btree **ppBtree
 ){
+  Rbtree **ppRbtree = (Rbtree**)ppBtree;
   *ppRbtree = (Rbtree *)sqliteMalloc(sizeof(Rbtree));
   sqliteHashInit(&(*ppRbtree)->tblHash, SQLITE_HASH_INT, 0);
 

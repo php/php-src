@@ -2287,7 +2287,7 @@ case OP_MustBeInt: {
     /* Do nothing */
   }else if( aStack[tos].flags & STK_Real ){
     int i = aStack[tos].r;
-    double r = i;
+    double r = (double)i;
     if( r!=aStack[tos].r ){
       goto mismatch;
     }
@@ -3168,8 +3168,9 @@ case OP_IncrKey: {
 */
 case OP_Checkpoint: {
   int i = pOp->p1;
-  if( i>=0 && i<db->nDb && db->aDb[i].pBt ){
+  if( i>=0 && i<db->nDb && db->aDb[i].pBt && db->aDb[i].inTrans==1 ){
     rc = sqliteBtreeBeginCkpt(db->aDb[i].pBt);
+    if( rc==SQLITE_OK ) db->aDb[i].inTrans = 2;
   }
   break;
 }
@@ -3381,6 +3382,11 @@ case OP_VerifyCookie: {
 **
 ** Open a read/write cursor named P1 on the table or index whose root
 ** page is P2.  If P2==0 then take the root page number from the stack.
+**
+** The P3 value is the name of the table or index being opened.
+** The P3 value is not actually used by this opcode and may be
+** omitted.  But the code generator usually inserts the index or
+** table name into P3 to make the code easier to read.
 **
 ** This instruction works just like OpenRead except that it opens the cursor
 ** in read/write mode.  For a given table, there can be one or more read-only
@@ -3890,7 +3896,7 @@ case OP_NewRecno: {
 
 /* Opcode: PutIntKey P1 P2 *
 **
-** Write an entry into the database file P1.  A new entry is
+** Write an entry into the table of cursor P1.  A new entry is
 ** created if it doesn't already exist or the data for an existing
 ** entry is overwritten.  The data is the value on the top of the
 ** stack.  The key is the next value down on the stack.  The key must
@@ -3902,7 +3908,7 @@ case OP_NewRecno: {
 */
 /* Opcode: PutStrKey P1 * *
 **
-** Write an entry into the database file P1.  A new entry is
+** Write an entry into the table of cursor P1.  A new entry is
 ** created if it doesn't already exist or the data for an existing
 ** entry is overwritten.  The data is the value on the top of the
 ** stack.  The key is the next value down on the stack.  The key must
@@ -4384,13 +4390,13 @@ case OP_Next: {
 
 /* Opcode: IdxPut P1 P2 P3
 **
-** The top of the stack hold an SQL index key made using the
+** The top of the stack holds a SQL index key made using the
 ** MakeIdxKey instruction.  This opcode writes that key into the
 ** index P1.  Data for the entry is nil.
 **
 ** If P2==1, then the key must be unique.  If the key is not unique,
 ** the program aborts with a SQLITE_CONSTRAINT error and the database
-** is rolled back.  If P3 is not null, then it because part of the
+** is rolled back.  If P3 is not null, then it becomes part of the
 ** error message returned with the SQLITE_CONSTRAINT.
 */
 case OP_IdxPut: {
@@ -4690,7 +4696,8 @@ case OP_ListWrite: {
 
 /* Opcode: ListRewind * * *
 **
-** Rewind the temporary buffer back to the beginning.
+** Rewind the temporary buffer back to the beginning.  This is 
+** now a no-op.
 */
 case OP_ListRewind: {
   /* This is now a no-op */
@@ -5820,8 +5827,9 @@ int sqliteVdbeFinalize(Vdbe *p, char **pzErrMsg){
     sqliteRollbackInternalChanges(db);
   }
   for(i=0; i<db->nDb; i++){
-    if( db->aDb[i].pBt ){
+    if( db->aDb[i].pBt && db->aDb[i].inTrans==2 ){
       sqliteBtreeCommitCkpt(db->aDb[i].pBt);
+      db->aDb[i].inTrans = 1;
     }
   }
   assert( p->tos<p->pc || sqlite_malloc_failed==1 );

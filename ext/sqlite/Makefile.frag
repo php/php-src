@@ -5,7 +5,7 @@
 # We avoid building these last three by bundling the generated versions
 # in our release packages
 
-$(srcdir)/libsqlite/src/opcodes.c: $(srcdir)/libsqlite/src/vdbe.c
+$(srcdir)/libsqlite/src/opcodes.c: $(srcdir)/libsqlite/src/opcodes.h $(srcdir)/libsqlite/src/sqlite.h
 	echo '/* Automatically generated file.  Do not edit */' >$@
 	echo 'char *sqliteOpcodeNames[] = { "???", ' >>$@
 	grep '^case OP_' $(srcdir)/libsqlite/src/vdbe.c | \
@@ -17,6 +17,9 @@ $(srcdir)/libsqlite/src/opcodes.h: $(srcdir)/libsqlite/src/vdbe.c
 	grep '^case OP_' $(srcdir)/libsqlite/src/vdbe.c | \
 	  sed -e 's/://' | \
 	  awk '{printf "#define %-30s %3d\n", $$2, ++cnt}' >>$@
+
+$(srcdir)/libsqlite/src/sqlite.h: $(srcdir)/libsqlite/src/sqlite.h.in
+	sed -e s/--VERS--/$(SQLITE_VERSION)/ -e s/--ENCODING--/$(SQLITE_ENCODING)/ $(srcdir)/libsqlite/src/sqlite.h.in >$(srcdir)/libsqlite/src/sqlite.h
 
 $(srcdir)/libsqlite/src/sqlite.c: $(srcdir)/libsqlite/src/sqlite.h
 
