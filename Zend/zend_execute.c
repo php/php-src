@@ -1330,7 +1330,7 @@ static int zend_check_symbol(zval **pz TSRMLS_DC)
 	}
 
 #define RETURN_FROM_EXECUTE_LOOP(execute_data)								\
-	efree(EX(Ts));													\
+	if (EX(Ts)) efree(EX(Ts));													\
 	EG(in_execution) = EX(original_in_execution);							\
 	EG(current_execute_data) = EX(prev_execute_data);						\
 	return 1; /* CHECK_ME */
@@ -1349,7 +1349,7 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 	/* Initialize execute_data */
 	EX(fbc) = NULL;
 	EX(object) = NULL;
-	EX(Ts) = (temp_variable *) safe_emalloc(sizeof(temp_variable), op_array->T, 0);
+	EX(Ts) = (temp_variable *) (op_array->T ? safe_emalloc(sizeof(temp_variable), op_array->T, 0) : NULL);
 	EX(op_array) = op_array;
 	EX(original_in_execution) = EG(in_execution);
 	EX(prev_execute_data) = EG(current_execute_data);
