@@ -770,6 +770,13 @@ _php_math_zvaltobase(zval *arg, int base)
 		char *ptr, *end;
 		char buf[(sizeof(double) << 3) + 1];
 
+		/* Don't try to convert +/- infinity */
+		if (fvalue == HUGE_VAL || fvalue == -HUGE_VAL) {
+			php_error(E_WARNING, "Number too large in %s() call",
+					  get_active_function_name(TSRMLS_C));
+			return empty_string;
+		}
+
 		end = ptr = buf + sizeof(buf) - 1;
 		*ptr = '\0';
 
