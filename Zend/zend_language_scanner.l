@@ -40,9 +40,9 @@
 #include <errno.h>
 #include "zend.h"
 #include "zend_alloc.h"
-#include "zend-parser.h"
+#include "zend_language_parser.h"
 #include "zend_compile.h"
-#include "zend-scanner.h"
+#include "zend_language_scanner.h"
 #include "zend_highlight.h"
 #include "zend_constants.h"
 #include "zend_variables.h"

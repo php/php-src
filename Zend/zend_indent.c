@@ -22,7 +22,7 @@
 
 
 #include "zend.h"
-#include "zend-parser.h"
+#include "zend_language_parser.h"
 #include "zend_compile.h"
 #include "zend_indent.h"
 
