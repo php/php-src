@@ -1032,6 +1032,37 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, HashTa
 	return 1;
 }
 
+static sdlTypePtr model_array_element(sdlContentModelPtr model)
+{
+	switch (model->kind) {
+		case XSD_CONTENT_ELEMENT: {
+			if (model->max_occurs == -1 || model->max_occurs > 1) {
+			  return model->u.element;
+			} else {
+			  return NULL;
+			}
+		}
+		case XSD_CONTENT_SEQUENCE:
+		case XSD_CONTENT_ALL:
+		case XSD_CONTENT_CHOICE: {
+			sdlContentModelPtr *tmp;
+
+			if (zend_hash_num_elements(model->u.content) != 1) {
+			  return NULL;
+			}
+			zend_hash_internal_pointer_reset(model->u.content);
+			zend_hash_get_current_data(model->u.content, (void**)&tmp);
+			return model_array_element(*tmp);
+		}
+		case XSD_CONTENT_GROUP: {
+			return model_array_element(model->u.group->model);
+		}
+		default:
+		  break;
+	}
+	return NULL;
+}
+
 static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
 	xmlNodePtr xmlParam;
@@ -1098,7 +1129,22 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 		FIND_ZVAL_NULL(data, xmlParam, style);
 
 		if (prop != NULL) {
-			if (sdlType->model) {
+		  sdlTypePtr array_el;
+
+		  if (Z_TYPE_P(data) == IS_ARRAY && 
+		      !is_map(data) && 
+		      sdlType->attributes == NULL &&
+		      sdlType->model != NULL &&
+		      (array_el = model_array_element(sdlType->model)) != NULL) {
+				zval **val;
+
+				zend_hash_internal_pointer_reset(prop);
+				while (zend_hash_get_current_data(prop,(void**)&val) == SUCCESS) {
+					xmlNodePtr property = master_to_xml(array_el->encode, *val, style, xmlParam);
+					xmlNodeSetName(property, array_el->name);
+					zend_hash_move_forward(prop);
+				}
+			} else if (sdlType->model) {
 				model_to_xml_object(xmlParam, sdlType->model, prop, style, 1);
 			}
 			if (sdlType->attributes) {
