@@ -690,44 +690,40 @@ xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 	return xmlParam;
 }
 
-static xmlNodePtr add_zval_array_elements(zval* ret, 
-                                          sdlPtr sdl,
-                                          encodePtr enc,
-                                          int dimension, 
-                                          int* dims, 
-                                          xmlNodePtr data)
+static int calc_dimension(const char* str) 
 {
-	int i;
-	if (dimension == 1) {
-		for (i = 0; i < dims[0]; i++) {
-			zval *tmpVal;
-			encodePtr typeEnc = NULL;
-			xmlAttrPtr type = get_attribute(data->properties,"type");
-			if (type != NULL && type->children && type->children->content) {
-				typeEnc = get_encoder_from_prefix(sdl, data, type->children->content);
-			}
-			if (typeEnc) {
-				tmpVal = master_to_zval(typeEnc, data);
-			} else {
-				tmpVal = master_to_zval(enc, data);
-			}
-			zend_hash_next_index_insert(Z_ARRVAL_P(ret), &tmpVal, sizeof(zval*), NULL);	  
-			if (data != NULL) {
-			  do {
-					data = data->next;
-				} while (data != NULL && data->type != XML_ELEMENT_NODE);
-			}
-		}
-	} else {
-		for (i = 0; i < dims[0]; i++) {
-			zval *tmpVal;
-			MAKE_STD_ZVAL(tmpVal);
-			array_init(tmpVal);
-			data = add_zval_array_elements(tmpVal,sdl,enc,dimension-1,dims+1,data);
-			zend_hash_next_index_insert(Z_ARRVAL_P(ret), &tmpVal, sizeof(zval*), NULL);	  
-		}
+	int i = 1;
+  while (*str != ']' && *str != '\0') {
+		if (*str == ',') {
+      i++;
+    }
+    str++;
+  }
+  return i;
+}
+
+static void get_position_ex(int dimension, const char* str, int** pos) 
+{
+  int i = 0;
+	
+	memset(*pos,0,sizeof(int)*dimension);
+  while (*str != ']' && *str != '\0' && i < dimension) {
+  	if (*str >= '0' && *str <= '9') {
+  		(*pos)[i] = ((*pos)[i]*10)+(*str-'0');
+    } else if (*str == ',') {
+      i++;
+    }
+    str++;
 	}
-	return data;
+}
+
+static int* get_position(int dimension, const char* str) 
+{
+	int *pos;
+	
+	pos = emalloc(sizeof(int)*dimension);
+	get_position_ex(dimension, str, &pos);
+	return pos;
 }
 
 zval *to_zval_array(encodeType type, xmlNodePtr data)
@@ -737,7 +733,9 @@ zval *to_zval_array(encodeType type, xmlNodePtr data)
 	encodePtr enc = NULL;
 	int dimension = 1;
 	int* dims = NULL;
+	int* pos = NULL;
 	xmlAttrPtr arrayTypeAttr;
+	xmlAttrPtr offsetAttr;
 	sdlPtr sdl;
 
 	TSRMLS_FETCH();
@@ -758,27 +756,9 @@ zval *to_zval_array(encodeType type, xmlNodePtr data)
 
 		end = strrchr(type,'[');
 		if (end) {
-			int i;
-		  char *tmp = end+1;
 		  *end = '\0';
-		  end++;
-		  while (*tmp != ']' && *tmp != '\0') {
-		    if (*tmp == ',') {
-		      dimension++;
-		    }
-		    tmp++;
-		  }
-			dims = emalloc(sizeof(int)*dimension);
-			memset(dims,0,sizeof(int)*dimension);
-			tmp = end; i = 0;
-		  while (*tmp != ']' && *tmp != '\0') {
-		  	if (*tmp >= '0' && *tmp <= '9') {
-		  		dims[i] = (dims[i]*10)+(*tmp-'0');
-		    } else if (*tmp == ',') {
-		      i++;
-		    }
-		    tmp++;
-		  }
+		  dimension = calc_dimension(end+1);
+		  dims = get_position(dimension, end+1);
 		}
 		if(nsptr != NULL) {
 			enc = get_encoder(SOAP_GLOBAL(sdl), nsptr->href, type);
@@ -786,61 +766,89 @@ zval *to_zval_array(encodeType type, xmlNodePtr data)
 		efree(type);
 		if (ns) efree(ns);
 	}
+	if (dims == NULL) {
+		dims = emalloc(sizeof(int));
+		*dims = 0;
+	}
+	pos = emalloc(sizeof(int)*dimension);
+	memset(pos,0,sizeof(int)*dimension);
+	if (data &&
+	    (offsetAttr = get_attribute(data->properties,"offset")) && 
+	     offsetAttr->children && 
+	     offsetAttr->children->content) {
+		char* tmp = strrchr(offsetAttr->children->content,'[');
+		if (tmp == NULL) {
+			tmp = offsetAttr->children->content;
+		}
+		get_position_ex(dimension, tmp, &pos);
+	}
 	if (enc == NULL) {
  		enc = get_conversion(UNKNOWN_TYPE);
  	}
 
 	array_init(ret);
-	if (dims == NULL) {
-		trav = data->children;
-		while(trav) {
-			if(trav->type == XML_ELEMENT_NODE) {
-				zval *tmpVal;
-				encodePtr typeEnc = NULL;
-				xmlAttrPtr type = get_attribute(trav->properties,"type");
-				if (type != NULL && type->children && type->children->content) {
-					typeEnc = get_encoder_from_prefix(sdl, trav, type->children->content);
+	trav = data->children;
+	while(trav) {
+		if(trav->type == XML_ELEMENT_NODE) {
+			int i;
+			zval *tmpVal, *ar;
+			encodePtr typeEnc = NULL;
+			xmlAttrPtr type = get_attribute(trav->properties,"type");
+			xmlAttrPtr position = get_attribute(trav->properties,"position");
+			if (type != NULL && type->children && type->children->content) {
+				typeEnc = get_encoder_from_prefix(sdl, trav, type->children->content);
+			}
+			if (typeEnc) {
+				tmpVal = master_to_zval(typeEnc, trav);
+			} else {
+				tmpVal = master_to_zval(enc, trav);
+			}
+			if (position != NULL && position->children && position->children->content) {
+				char* tmp = strrchr(position->children->content,'[');
+				if (tmp == NULL) {
+					tmp = offsetAttr->children->content;
 				}
-				if (typeEnc) {
-					tmpVal = master_to_zval(typeEnc, trav);
+				get_position_ex(dimension, tmp, &pos);
+			}
+
+			/* Get/Create intermediate arrays for multidimensional arrays */
+			i = 0;
+			ar = ret;
+			while (i < dimension-1) {
+				zval** ar2;
+				if (zend_hash_index_find(Z_ARRVAL_P(ar), pos[i], (void**)&ar2) == SUCCESS) {
+				  ar = *ar2;
 				} else {
-					tmpVal = master_to_zval(enc, trav);
+					zval *tmpAr;
+					MAKE_STD_ZVAL(tmpAr);
+					array_init(tmpAr);
+					zend_hash_index_update(Z_ARRVAL_P(ar), pos[i], &tmpAr, sizeof(zval*), (void**)&ar2);
+					ar = *ar2;
+				}	
+				i++;
+			}
+			zend_hash_index_update(Z_ARRVAL_P(ar), pos[i], &tmpVal, sizeof(zval *), NULL);
+
+			/* Increment position */
+			i = dimension;
+			while (i > 0) {
+			  i--;
+			  pos[i]++;
+				if (pos[i] >= dims[i]) {
+					if (i > 0) {
+					  pos[i] = 0;
+					} else {
+						/* TODO: Array index overflow */
+					}
+				} else {
+				  break;
 				}
-				zend_hash_next_index_insert(Z_ARRVAL_P(ret), &tmpVal, sizeof(zval *), NULL);
 			}
-			trav = trav->next;
 		}
-	} else {
-		trav = data->children;
-		while (trav != NULL && trav->type != XML_ELEMENT_NODE) { 
-		  trav = trav->next;
-		}
-		add_zval_array_elements(ret, sdl, enc, dimension, dims, trav);
+		trav = trav->next;
 	}
-/*
-	if (data) {
-		if (dims == NULL && dimension <= 1) {
-			trav = data->children;
-			while(trav) {
-				if(trav->type == XML_ELEMENT_NODE) {
-					zval *tmpVal;
-					tmpVal = master_to_zval(enc, trav);
-					zend_hash_next_index_insert(Z_ARRVAL_P(ret), &tmpVal, sizeof(zval *), NULL);
-				}
-				trav = trav->next;
-			}
-		} else {
-			trav = data->children;
-			while (trav != NULL && trav->type != XML_ELEMENT_NODE) { 
-			  trav = trav->next;
-			}
-			add_zval_array_elements(ret, enc, dimension, dims, trav);
-		}
-	}
-*/
-	if (dims) {
-	  efree(dims);
-	}
+  efree(dims);
+  efree(pos);
 	return ret;
 }
 
@@ -1266,6 +1274,7 @@ encodePtr get_conversion_from_type_ex(HashTable *encoding, xmlNodePtr node, cons
 int is_map(zval *array)
 {
 	int i, count = zend_hash_num_elements(Z_ARRVAL_P(array));
+	zend_hash_internal_pointer_reset(Z_ARRVAL_P(array));
 	for(i = 0;i < count;i++)
 	{
 		if(zend_hash_get_current_key_type(Z_ARRVAL_P(array)) == HASH_KEY_IS_STRING)
