@@ -40,7 +40,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDebug" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDebug" /D "_LIB" /D "Zend_EXPORTS" /D ZEND_DEBUG=0 /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "WIN32" /D "_MBCS" /FR /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDebug" /D "_LIB" /D "Zend_EXPORTS" /D ZEND_DEBUG=0 /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "WIN32" /D "_MBCS" /D "ZEND_WIN32" /FR /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x40d /d "NDebug"
 # ADD RSC /l 0x40d /d "NDebug"
@@ -62,7 +62,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_Debug" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /D "_Debug" /D "_LIB" /D ZEND_DEBUG=1 /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "WIN32" /D "_MBCS" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /D "_Debug" /D "_LIB" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D ZEND_DEBUG=1 /D "ZEND_WIN32" /D "WIN32" /D "_MBCS" /FR /YX /FD /GZ /c
 # ADD BASE RSC /l 0x40d /d "_Debug"
 # ADD RSC /l 0x40d /d "_Debug"
 BSC32=bscmake.exe
@@ -84,7 +84,7 @@ LIB32=link.exe -lib
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDebug" /D "_LIB" /D "Zend_EXPORTS" /D ZEND_DEBUG=0 /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "WIN32" /D "_MBCS" /FR /FD /c
 # SUBTRACT BASE CPP /YX
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDebug" /D "_LIB" /D "Zend_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D ZEND_DEBUG=0 /D "WIN32" /D "_MBCS" /D "ZEND_WIN32_FORCE_INLINE" /FR /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDebug" /D "_LIB" /D "Zend_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D ZEND_DEBUG=0 /D "ZEND_WIN32_FORCE_INLINE" /D "WIN32" /D "_MBCS" /D "ZEND_WIN32" /FR /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x40d /d "NDebug"
 # ADD RSC /l 0x40d /d "NDebug"

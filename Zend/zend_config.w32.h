@@ -51,7 +51,7 @@ typedef unsigned int uint;
 /* This will cause the compilation process to be MUCH longer, but will generate
  * a much quicker PHP binary
  */
-#ifdef defined(ZEND_WIN32)_FORCE_INLINE
+#ifdef ZEND_WIN32_FORCE_INLINE
 # define inline __forceinline
 #else
 # define inline
