@@ -1,8 +1,10 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-21 February 2000 Version 4.0 Beta 4 patch level 1 
+???, Version 4.0 Beta 5
 - Fixed OCI8 crash when returning cursors from stored-procedures. (Thies)
+
+21 February 2000 Version 4.0 Beta 4 patch level 1 
 - Fixed crash when magic_quotes were switched off. (Thies)
 - Support for pdflib 2.30 (Uwe)
 
