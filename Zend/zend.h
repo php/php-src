@@ -258,7 +258,7 @@ void zenderror(char *error);
 
 extern ZEND_API zend_class_entry zend_standard_class_def;
 extern zend_utility_values zend_uv;
-extern zval zval_used_for_init;
+extern ZEND_API zval zval_used_for_init;
 
 END_EXTERN_C()
 

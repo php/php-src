@@ -60,7 +60,7 @@ HashTable *global_constants_table;
 
 zend_utility_values zend_uv;
 
-zval zval_used_for_init; /* True global variable */
+ZEND_API zval zval_used_for_init; /* True global variable */
 
 /* version information */
 static char *zend_version_info;
