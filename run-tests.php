@@ -270,6 +270,7 @@ HELP;
 			}
 		}
 	}
+	$test_files = array_unique($test_files);
 	for($i = 0; $i < count($test_files); $i++) {
 		$test_files[$i] = trim($test_files[$i]);
 	}
@@ -367,6 +368,7 @@ function test_sort($a, $b) {
 	}
 }
 
+$test_files = array_unique($test_files);
 usort($test_files, "test_sort");
 
 $start_time = time();
