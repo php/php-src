@@ -38,6 +38,7 @@ HEADER_DIRS = \
 	ext/libxml/ \
 	ext/standard/ \
 	ext/session/ \
+	ext/dom/xml_common.h \
 	ext/xml/ \
 	ext/xml/expat/ \
 	ext/mbstring/ \
