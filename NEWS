@@ -2,6 +2,11 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Improved ISAPI module - it should no longer be necessary to set PHP as
+  an ISAPI filter, only as an ISAPI extension, unless you wish to perform
+  authentication using PHP.  This didn't yet get enough testing, but it
+  should work (Zeev)
+- Fixed RFC1867 file upload under Windows (Zeev)
 - Initital support for pdflib 2.20 (Uwe)
 - Added PostgreSQL support for DB (Rui Hirokawa <louis@cityfujisawa.ne.jp>)
 - Re-introduced "none" for disabling auto_prepend/append_file (Stig)
