@@ -21,10 +21,9 @@ try {
 } catch(sqlite_exception $err) {
 	echo "Message: ".$err->getMessage()."\n";
 	echo "File: ".$err->getFile()."\n";
-	echo "File: ".$err->getCode()."\n";
-	echo "Line: ".$err->getLine()."\n";
-	print_r($err->getTrace());
-	echo "BackTrace: ".$err->getTraceAsString()."\n";
+	//echo "Line: ".$err->getLine()."\n";
+	//print_r($err->getTrace());
+	//echo "BackTrace: ".$err->getTraceAsString()."\n";
 }
 
 $db = sqlite_factory($dbname);
