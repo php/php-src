@@ -16,6 +16,7 @@ README FOR THTTPD MODULE (by Sascha Schumann)
 	- Highlighting PHP Scripts (**.phps by default)
 	- Fast Accept Loop
 	- Periodic Connection Expiring
+	- Fixes the Host: header vulnerability
 
 	You can configure the filename extensions by creating a config file for
 	thttpd and setting these entries:
