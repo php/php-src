@@ -849,11 +849,12 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 		case XSD_CONTENT_ALL:
 		case XSD_CONTENT_CHOICE: {
 			sdlContentModelPtr *tmp;
+			HashPosition pos;
 
-			zend_hash_internal_pointer_reset(model->u.content);
-			while (zend_hash_get_current_data(model->u.content, (void**)&tmp) == SUCCESS) {
+			zend_hash_internal_pointer_reset_ex(model->u.content, &pos);
+			while (zend_hash_get_current_data_ex(model->u.content, (void**)&tmp, &pos) == SUCCESS) {
 				model_to_zval_object(ret, *tmp, data, sdl TSRMLS_CC);
-				zend_hash_move_forward(model->u.content);
+				zend_hash_move_forward_ex(model->u.content, &pos);
 			}
 			break;
 		}
@@ -934,9 +935,10 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 		}
 		if (sdlType->attributes) {
 			sdlAttributePtr *attr;
+			HashPosition pos;
 
-			zend_hash_internal_pointer_reset(sdlType->attributes);
-			while (zend_hash_get_current_data(sdlType->attributes, (void**)&attr) == SUCCESS) {
+			zend_hash_internal_pointer_reset_ex(sdlType->attributes, &pos);
+			while (zend_hash_get_current_data_ex(sdlType->attributes, (void**)&attr, &pos) == SUCCESS) {
 				if ((*attr)->name) {
 					xmlAttrPtr val = get_attribute(data->properties, (*attr)->name);
 					xmlChar *str_val = NULL;
@@ -965,7 +967,7 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 						add_property_zval(ret, (*attr)->name, data);
 					}
 				}
-				zend_hash_move_forward(sdlType->attributes);
+				zend_hash_move_forward_ex(sdlType->attributes, &pos);
 			}
 		}
 	} else {
@@ -1068,29 +1070,31 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, HashTa
 		case XSD_CONTENT_SEQUENCE:
 		case XSD_CONTENT_ALL: {
 			sdlContentModelPtr *tmp;
+			HashPosition pos;
 
-			zend_hash_internal_pointer_reset(model->u.content);
-			while (zend_hash_get_current_data(model->u.content, (void**)&tmp) == SUCCESS) {
+			zend_hash_internal_pointer_reset_ex(model->u.content, &pos);
+			while (zend_hash_get_current_data_ex(model->u.content, (void**)&tmp, &pos) == SUCCESS) {
 				if (!model_to_xml_object(node, *tmp, prop, style, model->min_occurs > 0)) {
 					return 0;
 				}
-				zend_hash_move_forward(model->u.content);
+				zend_hash_move_forward_ex(model->u.content, &pos);
 			}
 			return 1;
 		}
 		case XSD_CONTENT_CHOICE: {
 			sdlContentModelPtr *tmp;
+			HashPosition pos;
 			int ret = 0;
 
-			zend_hash_internal_pointer_reset(model->u.content);
-			while (zend_hash_get_current_data(model->u.content, (void**)&tmp) == SUCCESS) {
+			zend_hash_internal_pointer_reset_ex(model->u.content, &pos);
+			while (zend_hash_get_current_data_ex(model->u.content, (void**)&tmp, &pos) == SUCCESS) {
 				int tmp_ret = model_to_xml_object(node, *tmp, prop, style, 0);
 				if (tmp_ret == 1) {
 					return 1;
 				} else if (tmp_ret != 0) {
 					ret = 1;
 				}
-				zend_hash_move_forward(model->u.content);
+				zend_hash_move_forward_ex(model->u.content, &pos);
 			}
 			return ret;
 		}
@@ -1117,12 +1121,13 @@ static sdlTypePtr model_array_element(sdlContentModelPtr model)
 		case XSD_CONTENT_ALL:
 		case XSD_CONTENT_CHOICE: {
 			sdlContentModelPtr *tmp;
+			HashPosition pos;
 
 			if (zend_hash_num_elements(model->u.content) != 1) {
 			  return NULL;
 			}
-			zend_hash_internal_pointer_reset(model->u.content);
-			zend_hash_get_current_data(model->u.content, (void**)&tmp);
+			zend_hash_internal_pointer_reset_ex(model->u.content, &pos);
+			zend_hash_get_current_data_ex(model->u.content, (void**)&tmp, &pos);
 			return model_array_element(*tmp);
 		}
 		case XSD_CONTENT_GROUP: {
@@ -1246,9 +1251,10 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 			if (sdlType->attributes) {
 				sdlAttributePtr *attr;
 				zval **data;
+				HashPosition pos;
 
-				zend_hash_internal_pointer_reset(sdlType->attributes);
-				while (zend_hash_get_current_data(sdlType->attributes, (void**)&attr) == SUCCESS) {
+				zend_hash_internal_pointer_reset_ex(sdlType->attributes, &pos);
+				while (zend_hash_get_current_data_ex(sdlType->attributes, (void**)&attr, &pos) == SUCCESS) {
 					if ((*attr)->name) {
 						if (zend_hash_find(prop, (*attr)->name, strlen((*attr)->name)+1, (void**)&data) == SUCCESS) {
 							xmlNodePtr dummy;
@@ -1264,7 +1270,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 							xmlFreeNode(dummy);
 						}
 					}
-					zend_hash_move_forward(sdlType->attributes);
+					zend_hash_move_forward_ex(sdlType->attributes, &pos);
 				}
 			}
 		}
