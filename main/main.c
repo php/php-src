@@ -289,6 +289,9 @@ void php3_apache_putc(char c)
 void php3_log_err(char *log_message)
 {
 	FILE *log_file;
+	char error_time_str[128];
+	struct tm tmbuf;
+	time_t error_time;
 	PLS_FETCH();
 #if APACHE
 	SLS_FETCH();
@@ -304,6 +307,9 @@ void php3_log_err(char *log_message)
 #endif
 			log_file = fopen(PG(error_log), "a");
 			if (log_file != NULL) {
+				time(&error_time);
+				strftime(error_time_str, 128, "%d-%b-%Y %H:%M:%S", localtime_r(&error_time, &tmbuf)); 
+				fprintf(log_file, "[%s] ", error_time_str);
 				fprintf(log_file, log_message);
 				fprintf(log_file, "\n");
 				fclose(log_file);
