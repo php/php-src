@@ -195,7 +195,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 					 * start_arr is set to point to 1st [
 					 * end_arr points to last ]
 					 */
-					is_arr_upload = (start_arr = strrchr(namebuf,'[')) && 
+					is_arr_upload = (start_arr = strchr(namebuf,'[')) && 
 									(end_arr = strrchr(namebuf,']')) && 
 									(end_arr = namebuf+strlen(namebuf)-1);
 					if(is_arr_upload) {
