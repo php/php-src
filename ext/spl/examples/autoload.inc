@@ -1,5 +1,8 @@
 <?php
 
+/** \internal
+ * Tries to load class $classname from directory $dir.
+ */
 function __load_class($classname, $dir)
 {
 	$file = $dir . '/' . $classname . '.inc';
@@ -11,6 +14,14 @@ function __load_class($classname, $dir)
 	return false;
 }
 
+/** 
+ * @brief   Class loader for SPL example classes
+ * @author  Marcus Boerger
+ * @version 1.0
+ *
+ * Loads classes automatically from include_path as given by ini or from
+ * current directory of script or include file.
+ */
 function __autoload($classname) {
 	$classname = strtolower($classname);
 	foreach(split(':', ini_get('include_path')) as $dir)

@@ -1,11 +1,12 @@
 <?php
 
-require_once("KeyFilter.inc");
+if (!class_exists("KeyFilter")) require_once("keyfilter.inc");
+if (!class_exists("DbaReader")) require_once("dbareader.inc");
 
-/**
+/** \ingroup Examples
  * @brief   Class to iterate all groups within an ini file.
  * @author  Marcus Boerger
- * @version 1.0
+ * @version 1.1
  *
  * Using this class you can iterator over all groups of a ini file.
  * 
@@ -23,7 +24,7 @@ class IniGroups extends KeyFilter
 	 * @param file Ini file to open.
 	 */
 	function __construct($file) {
-		parent::__construct(new dba_reader($file, 'inifile'), '^\[.*\]$');
+		parent::__construct(new DbaReader($file, 'inifile'), '^\[.*\]$');
 	}
 
 	/**

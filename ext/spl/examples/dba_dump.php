@@ -9,7 +9,7 @@
  *
  * Note: configure with --enable-dba 
  *
- * (c) Marcus Boerger, 2003
+ * (c) Marcus Boerger, 2003 - 2004
  */
 
 if ($argc < 3) {
@@ -24,13 +24,13 @@ EOF;
 	exit(1);
 }
 
-require_once("dba_reader.inc");
-require_once("KeyFilter.inc");
+if (!class_exists("DbaReader")) require_once("dbareader.inc");
+if (!class_exists("KeyFilter")) require_once("keyfilter.inc");
 
 $db = new DbaReader($argv[1], $argv[2]);
 
 if ($argc>3) {
-	$db = new keyFilter($db, $argv[3]);
+	$db = new KeyFilter($db, $argv[3]);
 }
 
 foreach($db as $key => $val) {

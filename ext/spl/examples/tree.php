@@ -6,7 +6,7 @@
  *
  * Simply specify the path to tree with parameter <path>.
  *
- * (c) Marcus Boerger, 2003
+ * (c) Marcus Boerger, 2003 - 2004
  */
 
 // The following line only operates on classes which are converted to c already.
@@ -26,8 +26,11 @@ EOF;
 	exit(1);
 }
 
+if (!class_exists("DirectoryTreeIterator")) require_once("directorytreeiterator.inc");
+
 echo $argv[1]."\n";
-foreach(new DirectoryGraphIterator($argv[1]) as $file) {
+foreach(new DirectoryTreeIterator($argv[1]) as $file)
+{
 	echo $file . "\n";
 }
 

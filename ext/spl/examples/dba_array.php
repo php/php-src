@@ -9,7 +9,7 @@
  *
  * Note: configure with --enable-dba 
  *
- * (c) Marcus Boerger, 2003
+ * (c) Marcus Boerger, 2003 - 2004
  */
 
 if ($argc < 4) {
@@ -24,55 +24,7 @@ EOF;
 	exit(1);
 }
 
-class DbaArray implements ArrayAccess {
-	private $db;
-
-	function __construct($file, $handler)
-	{
-		$this->db = dba_popen($file, "c", $handler);
-		if (!$this->db) {
-			throw new exception("Databse could not be opened");
-		}
-	}
-
-	function __destruct()
-	{
-		dba_close($this->db);
-	}
-
-	function get($name)
-	{
-		$data = dba_fetch($name, $this->db); 
-		if($data) {
-			if (ini_get('magic_quotes_runtime')) {
-				$data = stripslashes($data);
-			}
-			//return unserialize($data);
-			return $data;
-		}
-		else 
-		{
-			return NULL;
-		}
-	}
-
-	function set($name, $value)
-	{
-		//dba_replace($name, serialize($value), $this->db);
-		dba_replace($name, $value, $this->db);
-		return $value;
-	}
-
-	function exists($name)
-	{
-		return dba_exists($name, $this->db);
-	}
-
-	function del($name)
-	{
-		return dba_delete($name, $this->db);
-	}
-}
+if (!class_exists("DbaReader", false)) require_once("dbareader.inc");
 
 try {
 	if ($argc > 2) {
