@@ -1,3 +1,98 @@
+2000-06-13  Andrei Zmievski  <andrei@ispi.net>
+
+    * main/main.c:
+    Plus a leak when both register_globals and track_vars are off.
+
+2000-06-13  Stig Venaas  <venaas@uninett.no>
+
+    * NEWS: News of ldap_add() and ldap_modify() fix.
+
+    * ext/ldap/ldap.c:
+    Also need to 0-terminate when adding/modifying an array of values.
+
+    * ext/ldap/ldap.c:
+    Think have to 0-terminate mod_values strings, got trailing garbage,
+    this fixes bug #5001 I think.
+
+2000-06-13  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/link.c
+      ext/standard/php_link.h:
+    We should define symlink functions only when HAVE_SYMLINK is defined.
+    Otherwise, they should be aliased as not available.
+
+2000-06-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/config.m4:
+    Due to creating the Makefiles later, generating libphp4.module failed,
+    because sapi/apache had not been created. This applies to VPATH builds
+    only.
+
+2000-06-13  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: array_uniq() has been implemented by someone else.
+
+2000-06-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/php_math.h:
+    Include <math.h> in php_math.h. This is necessary, because we might
+    otherwise redefine system macros.
+
+    * ext/standard/phpdir.h:
+    Delete phpdir.h. Someone moved this to php_dir.h in the past and
+    forgot to delete it.
+
+    * ext/standard/basic_functions.c
+      ext/standard/math.c
+      ext/standard/php_math.h
+      ext/standard/php_standard.h
+      ext/standard/phpmath.h
+      ext/standard/rand.c: Rename phpmath.h to php_math.h.
+
+2000-06-13  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/file.c:
+    copy() now creates the destination file with mode 0777 again. this is
+    the way it used to be in PHP 3
+
+2000-06-13  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Damn.
+
+    * NEWS: Forgot to add this yesterday.
+
+2000-06-13  Jim Jagielski  <jim@jaguNET.com>
+
+    * NEWS
+      ext/db/db.c: O_APPEND breaks 'c' for DBM files - this is handled
+    correctly by PHP3, so it's almost a forward'' port :)
+
+2000-06-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/var.c
+      sapi/cgi/cgi_main.c: Proper casts
+
+    * ext/standard/scanf.c:
+    Remove extra cast. `ch' is already of type `char *'.
+
+    This unbreaks the build with xlc on AIX.
+
+    * ext/standard/basic_functions.c: Remove single ;
+
+    * configure.in: Fix spelling
+
+2000-06-13  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/math.c:
+    (php_math_number_format) Simplifying the logic also fixed bugs #4954
+    and #4998.
+
+2000-06-13  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/mcal/config.m4:
+    Check more locations. Submitted by Anil Madhavapeddy <anil@recoil.org>
+
 2000-06-12  David Hedbor  <david@hedbor.org>
 
     * sapi/roxen/config.m4: Removed obsolete, commented line
