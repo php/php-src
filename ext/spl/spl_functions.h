@@ -71,6 +71,8 @@ int spl_add_classes(zend_class_entry ** ppce, zval *list TSRMLS_DC);
 #define SPL_METHOD(class_name, function_name) \
 	PHP_METHOD(spl_ ## class_name, function_name)
 
+#define SPL_MA(class_name, function_name, alias_class, alias_function, arg_info, flags) \
+	ZEND_MALIAS(function_name, spl_ ## alias_class, alias_function, arg_info, flags)
 #endif /* PHP_FUNCTIONS_H */
 
 /*
