@@ -544,7 +544,7 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 			if (toread > size)
 				toread = size;
 
-			if (toread) {
+			if (toread > 0) {
 				memcpy(buf, stream->readbuf + stream->readpos, toread);
 				stream->readpos += toread;
 			}
@@ -572,14 +572,6 @@ PHPAPI int _php_stream_eof(php_stream *stream TSRMLS_DC)
 		return 0;
 
 	return stream->eof;
-	
-	/* we define our stream reading function so that it
-	   must return EOF when an EOF condition occurs, when
-	   working in unbuffered mode and called with these args */
-	if (stream->filterhead)
-		return stream->filterhead->fops->eof(stream, stream->filterhead TSRMLS_CC);
-	
-	return stream->ops->read(stream, NULL, 0 TSRMLS_CC) == EOF ? 1 : 0;
 }
 
 PHPAPI int _php_stream_putc(php_stream *stream, int c TSRMLS_DC)
