@@ -1,4 +1,4 @@
-<!ELEMENT extension (name|summary|description|license|maintainers|logo|release|changelog|functions|constants|globals|deps|resources|code|streams)*>
+<!ELEMENT extension (name|summary|description|license|maintainers|logo|release|changelog|functions|constants|globals|deps|resources|code|streams|tests)*>
 
 <!ELEMENT name (#PCDATA)>
 
@@ -106,11 +106,21 @@
 
 <!ELEMENT streams (stream)*>
 <!ELEMENT stream (description?, ops?, data?)>
-<!ATLIST stream
+<!ATTLIST stream
   name CDATA #REQUIRED
 >
 <!ELEMENT ops (op)*>
 <!ELEMENT op (#PCDATA)>
-<!ATLIST op
+<!ATTLIST op
   name CDATA #REQUIRED
 >
+
+
+<!ELEMENT tests (test)*>
+<!ELEMENT test (title, skipif?, post?, get?, code, output)>
+<!ELEMENT title (#PCDATA)>
+<!ELEMENT skipif (#PCDATA)>
+<!ELEMENT post (#PCDATA)>
+<!ELEMENT get (#PCDATA)>
+<!ELEMENT code (#PCDATA)>
+<!ELEMENT output (#PCDATA)>
