@@ -79,94 +79,139 @@ class Cache {
     *
     * @param    string  Name of storage container class
     * @param    array   Array with storage class dependend config options
-    * @see      setOptions()
     */
     function Cache($storage_driver, $storage_options = "")
     {
         $storage_driver = strtolower($storage_driver);
         $storage_class = 'Cache_Container_' . $storage_driver;
         $storage_classfile = 'Cache/Container/' . $storage_driver . '.php';
-	
-        if (@include_once $storage_classfile) {
-            $this->container = new $storage_class($storage_options);
-            $this->garbageCollection();
-        } else {
-            return null;
-        }
+
+        include_once $storage_classfile
+        $this->container = new $storage_class($storage_options);
+        $this->garbageCollection();
+        
     }
     
     /**
     * Returns the requested dataset it if exists and is not expired
     *  
     * @param    string  dataset ID
+    * @param    string  cache group
     * @return   mixed   cached data or NULL on failure
     * @access   public
     */
-    function get($id) {
+    function get($id, $group = "default") {
         if ($this->no_cache)
             return "";
             
-        if ($this->isCached($id) && !$this->isExpired($id))
-            return $this->load($id);
+        if ($this->isCached($id, $group) && !$this->isExpired($id, $group))
+            return $this->load($id, $group);
         
         return NULL;            
     } // end func get
 
+    
     /**
     * Stores the given data in the cache.
     * 
     * @param    string  dataset ID used as cache identifier
     * @param    mixed   data to cache
     * @param    integer lifetime of the cached data in seconds - 0 for endless
+    * @param    string  cache group
     * @return   boolean
     * @access   public
     */
-    function save($id, $data, $expires = 0) {
+    function save($id, $data, $expires = 0, $group = "default") {
         if ($this->no_cache)
             return true;
             
-        return $this->container->save($id, $data, $expires);
+        return $this->container->save($id, $data, $expires, $group, "");
     } // end func save
+    
+    
+    /**
+    * Stores a dataset without additional userdefined data.
+    * 
+    * @param    string  dataset ID
+    * @param    mixed   data to store
+    * @param    string  additional userdefined data
+    * @param    mixed   userdefined expire date
+    * @param    string  cache group
+    * @return   boolean
+    * @throws   CacheError
+    * @access   public
+    * @see      getUserdata()
+    */
+    function extSave($id, $cachedata, $userdata, $expires = 0, $group = "default") {
+        if ($this->no_cache)
+            return true;
+
+        return $this->container->save($id, $cachedata, $expires, $group, $userdata);
+    } // end func extSave
+
     
     /**
     * Loads the given ID from the cache.
     * 
     * @param    string  dataset ID
+    * @param    string  cache group
     * @return   mixed   cached data or NULL on failure 
     * @access   public
     */
-    function load($id) {
+    function load($id, $group = "default") {
         if ($this->no_cache)
             return "";
             
-        return $this->container->load($id);
+        return $this->container->load($id, $group);
     } // end func load
+    
+    
+    /**
+    * Returns the userdata field of a cached data set.
+    *
+    * @param    string  dataset ID
+    * @param    string  cache group
+    * @return   string  userdata
+    * @access   public
+    * @see      extSave()
+    */
+    function getUserdata($id, $group = "default") {
+        if ($this->no_cache)
+            return "";
+            
+        return $this->container->getUserdata($id, $group);
+    } // end func getUserdata
+    
     
     /**
     * Removes the specified dataset from the cache.
     * 
     * @param    string  dataset ID
+    * @param    string  cache group
     * @return   boolean
     * @access   public
     */
-    function delete($id) {
+    function delete($id, $group = "default") {
         if ($this->no_cache)
             return true;
             
-        return $this->container->delete($id);
+        return $this->container->delete($id, $group);
     } // end func delete
+    
     
     /**
     * Flushes the cache - removes all data from it
     * 
+    * @param    string  cache group, if empty all groups will be flashed
     * @return   integer number of removed datasets
     */
-    function flush() {
+    function flush($group = "") {
         if ($this->no_cache)
             return true;
             
-        return $this->container->flush();
+        return $this->container->flush($group);
     } // end func flush
+    
     
     /**
     * Checks if a dataset exists.
@@ -174,20 +219,23 @@ class Cache {
     * Note: this does not say that the cached data is not expired!
     * 
     * @param    string  dataset ID
+    * @param    string  cache group
     * @return   boolean
     * @access   public
     */
-    function isCached($id) {
+    function isCached($id, $group = "default") {
         if ($this->no_cache)
             return false;
             
-        return $this->container->isCached($id);
+        return $this->container->isCached($id, $group);
     } // end func isCached
+    
     
     /**
     * Checks if a dataset is expired
     * 
     * @param    string  dataset ID
+    * @param    string  cache group
     * @param    integer maximum age for the cached data in seconds - 0 for endless
     *                   If the cached data is older but the given lifetime it will
     *                   be removed from the cache. You don't have to provide this 
@@ -197,11 +245,11 @@ class Cache {
     * @return   boolean
     * @access   public
     */
-    function isExpired($id, $max_age = 0) {
+    function isExpired($id, $group = "default", $max_age = 0) {
         if ($this->no_cache)
             return true;
             
-        return $this->container->isExpired($id, $max_age);
+        return $this->container->isExpired($id, $group, $max_age);
     } // end func isExpired
     
     /**
@@ -223,7 +271,7 @@ class Cache {
     * Calls the garbage collector of the storage object with a certain probability
     * 
     * @param    boolean Force a garbage collection run?
-    * @see  $gc_probability, $gc_time, setOptions()
+    * @see  $gc_probability, $gc_time
     */
     function garbageCollection($force = false) {
         static $last_run = 0;
