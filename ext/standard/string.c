@@ -43,6 +43,50 @@
 #include "zend_execute.h"
 #include "php_globals.h"
 
+static char hexconvtab[] = "0123456789abcdef";
+
+static char *php_bin2hex(const char *old, const size_t oldlen, size_t *newlen)
+{
+	char *new = NULL;
+	int i, j;
+
+	new = (char *) emalloc(oldlen * 2 * sizeof(char));
+	if(!new) {
+		return new;
+	}
+	
+	for(i = j = 0; i < oldlen; i++) {
+		new[j++] = hexconvtab[old[i] >> 4];
+		new[j++] = hexconvtab[old[i] & 15];
+	}
+
+	if(newlen) *newlen = oldlen * 2 * sizeof(char);
+
+	return new;
+}
+
+/* proto bin2hex(string data)
+   converts the binary representation of data to hex */
+PHP_FUNCTION(bin2hex)
+{
+	pval *data;
+	char *new;
+	size_t newlen;
+
+	if(ARG_COUNT(ht) != 1 || getParameters(ht, 1, &data) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string(data);
+
+	new = php_bin2hex(data->value.str.val, data->value.str.len, &newlen);
+	
+	if(!new) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRINGL(new, newlen, 0);
+}
 
 /* {{{ proto int strlen(string str)
    Get string length */
