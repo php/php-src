@@ -1509,6 +1509,10 @@ PHP_MSHUTDOWN_FUNCTION(yaz)
 #ifdef ZTS
 	tsrm_mutex_free (yaz_mutex);
 #endif
+
+	if (yaz_log_file()) {
+		fclose(yaz_log_file());
+	}
 	return SUCCESS;
 }
 
