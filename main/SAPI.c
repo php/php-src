@@ -93,10 +93,6 @@ static void sapi_free_header(sapi_header_struct *sapi_header)
 }
 
 
-#undef SAPI_POST_BLOCK_SIZE
-#define SAPI_POST_BLOCK_SIZE 2
-
-
 static void sapi_read_post_data(SLS_D)
 {
 	sapi_post_content_type_reader *post_content_type_reader;
