@@ -140,11 +140,6 @@ typedef unsigned int socklen_t;
 #include "zend_alloc.h"
 #include "zend_stack.h"
 
-typedef zval pval;
-
-#define pval_copy_constructor	zval_copy_ctor
-#define pval_destructor			zval_dtor
-
 #if STDC_HEADERS
 # include <string.h>
 #else
