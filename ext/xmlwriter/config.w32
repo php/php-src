@@ -1,0 +1,14 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_WITH("xmlwriter", "XMLWriter support", "yes");
+
+if (PHP_XMLWRITER == "yes" && PHP_LIBXML == "yes") {
+	EXTENSION("xmlwriter", "php_xmlwriter.c");
+	AC_DEFINE("HAVE_XMLWRITER", 1, "XMLWriter support");
+	if (!PHP_XMLWRITER_SHARED) {
+		ADD_FLAG("CFLAGS_XMLWRITER", "/D LIBXML_STATIC");
+	}
+	ADD_EXTENSION_DEP('xmlwriter', 'libxml');
+}
+
