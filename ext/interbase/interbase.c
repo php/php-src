@@ -940,7 +940,10 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			ib_link = (ibase_db_link *) malloc(sizeof(ibase_db_link));
 			ib_link->handle = db_handle;
-			ib_link->dialect = (ib_dialect ? (unsigned short) strtoul(ib_dialect, NULL, 10) : SQL_DIALECT_CURRENT);
+			if (ib_dialect) {
+				unsigned short d = (unsigned short)strtoul(ib_dialect, NULL, 10);
+				ib_link->dialect = (d ? d : SQL_DIALECT_CURRENT);
+			}
 			ib_link->tr_list = NULL;
 
 			/* hash it up */
@@ -1002,7 +1005,10 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
 		ib_link->handle = db_handle;
-		ib_link->dialect = (ib_dialect ? (unsigned short) strtoul(ib_dialect, NULL, 10) : SQL_DIALECT_CURRENT);
+		if (ib_dialect) {
+			unsigned short d = (unsigned short)strtoul(ib_dialect, NULL, 10);
+			ib_link->dialect = (d ? d : SQL_DIALECT_CURRENT);
+		}
 		ib_link->tr_list = NULL;
 		
 		ZEND_REGISTER_RESOURCE(return_value, ib_link, le_link);
