@@ -994,8 +994,6 @@ static PHP_METHOD(PDOStatement, setFetchMode)
 static PHP_METHOD(PDOStatement, nextRowset)
 {
 	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	long colno;
-	struct pdo_column_data *col;
 
 	if (!stmt->methods->next_rowset) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "driver does not support multiple rowsets" TSRMLS_CC);
@@ -1485,9 +1483,6 @@ static union _zend_function *row_method_get(
 {
 	zend_function *fbc;
 	char *lc_method_name;
-#if PHP_API_VERSION >= 20041225
-	zval *object = *object_pp;
-#endif
 
 	lc_method_name = emalloc(method_len + 1);
 	zend_str_tolower_copy(lc_method_name, method_name, method_len);
