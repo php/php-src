@@ -149,6 +149,6 @@ PHPAPI char *php_strerror(int errnum);
 #endif
 
 void register_string_constants(INIT_FUNC_ARGS);
-int php_charmask(unsigned char *input, int len, char *mask);
+int php_charmask(unsigned char *input, int len, char *mask TSRMLS_DC);
 
 #endif /* PHP_STRING_H */
