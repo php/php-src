@@ -410,7 +410,7 @@ int php_hostconnect(const char *host, unsigned short port, int socktype, struct 
 	struct sockaddr **sal, **psal;
 	struct timeval individual_timeout;
 	int set_timeout = 0;
-	int err;
+	int err = 0;
 	
 	n = php_network_getaddresses(host, &sal TSRMLS_CC);
 
