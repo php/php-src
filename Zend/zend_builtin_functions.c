@@ -723,9 +723,10 @@ ZEND_FUNCTION(get_object_vars)
 	zval **value;
 	HashTable *properties;
 	HashPosition pos;
-	char *key;
+	char *key, *prop_name, *class_name;
 	uint key_len;
 	ulong num_index;
+	int instanceof;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &obj) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -738,16 +739,27 @@ ZEND_FUNCTION(get_object_vars)
 		RETURN_FALSE;
 	}
 
+	instanceof = EG(This) && instanceof_function(Z_OBJCE_P(EG(This)), Z_OBJCE_PP(obj) TSRMLS_CC);
+
 	array_init(return_value);
 
 	properties = Z_OBJ_HT_PP(obj)->get_properties(*obj TSRMLS_CC);
 	zend_hash_internal_pointer_reset_ex(properties, &pos);
 
 	while (zend_hash_get_current_data_ex(properties, (void **) &value, &pos) == SUCCESS) {
-		if (zend_hash_get_current_key_ex(properties, &key, &key_len, &num_index, 0, &pos) == HASH_KEY_IS_STRING && key[0]) {
-			/* Not separating references */
-			(*value)->refcount++;
-			add_assoc_zval_ex(return_value, key, key_len, *value);
+		if (zend_hash_get_current_key_ex(properties, &key, &key_len, &num_index, 0, &pos) == HASH_KEY_IS_STRING) {
+			if (key[0]) {
+				/* Not separating references */
+				(*value)->refcount++;
+				add_assoc_zval_ex(return_value, key, key_len, *value);
+			} else if (instanceof) {
+				zend_unmangle_property_name(key, &class_name, &prop_name);
+				if (!memcmp(class_name, "*", 2) || (Z_OBJCE_P(EG(This)) == Z_OBJCE_PP(obj) && !strcmp(Z_OBJCE_P(EG(This))->name, class_name))) {
+					/* Not separating references */
+					(*value)->refcount++;
+					add_assoc_zval_ex(return_value, prop_name, strlen(prop_name)+1, *value);
+				}
+			}
 		}
 		zend_hash_move_forward_ex(properties, &pos);
 	}
