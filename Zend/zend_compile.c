@@ -1601,6 +1601,7 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
     if (!ce->__call) {
         ce->__call = ce->parent->__call;
     }
+	ce->create_object = ce->parent->create_object;
 }
 
 
