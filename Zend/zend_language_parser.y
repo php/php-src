@@ -238,10 +238,14 @@ unticked_declaration_statement:
 			'(' parameter_list ')' '{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING  { zend_do_begin_function_declaration(&$1, &$4, 0, $3.op_type TSRMLS_CC); }
 			parameter_list '(' inner_statement_list ')' ';' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
-	|	T_CLASS T_STRING { zend_do_begin_class_declaration(&$1, &$2, NULL TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
+	|	T_CLASS decleration_class_name { zend_do_begin_class_declaration(&$1, &$2, NULL TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
 	|	T_CLASS T_STRING T_EXTENDS T_STRING { zend_do_begin_class_declaration(&$1, &$2, &$4 TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
 ;
 
+decleration_class_name:
+	|	parse_class_name_entry T_STRING { do_fetch_class_name(&$$, &$1, &$2 TSRMLS_CC); }
+	|	T_STRING { $$ = $1; }
+;
 
 foreach_optional_arg:
 		/* empty */				{ $$.op_type = IS_UNUSED; }

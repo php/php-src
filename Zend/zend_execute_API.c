@@ -321,13 +321,15 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 			if (zend_hash_find(EG(class_table), last, strlen(last)+1, &ce) == FAILURE) {
 				zend_error(E_ERROR, "Invalid class! Improve this error message");
 			}
+			
+			last = tsrm_strtok_r(NULL, ":", &temp);
 
 			for(;;) {
 				cur = tsrm_strtok_r(NULL, ":", &temp);
 				if (!cur) {
 					break;
 				}
-				if (zend_hash_find(EG(class_table), last, strlen(last)+1, &ce) == FAILURE) {
+				if (zend_hash_find(&ce->class_table, last, strlen(last)+1, &ce) == FAILURE) {
 					zend_error(E_ERROR, "Invalid class! Improve this error message");
 				}
 				last = cur;
