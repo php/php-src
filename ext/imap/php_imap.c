@@ -3985,7 +3985,7 @@ static int build_thread_tree(THREADNODE *top, zval **tree)
 
 /* {{{ proto array imap_thread(resource stream_id [, int options])
    Return threaded by REFERENCES tree */
-PHP_FUNCTION (imap_thread)
+PHP_FUNCTION(imap_thread)
 {
 	zval **streamind, **search_flags;
 	pils *imap_le_struct;
@@ -4025,7 +4025,7 @@ PHP_FUNCTION (imap_thread)
 
 /* {{{ proto mixed imap_timeout(int timeout_type [, int timeout])
    Set or fetch imap timeout */
-PHP_FUNCTION (imap_timeout)
+PHP_FUNCTION(imap_timeout)
 {
 	long ttype, timeout=-1;
 	int timeout_type;
