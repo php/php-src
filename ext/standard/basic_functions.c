@@ -1068,6 +1068,9 @@ PHP_RINIT_FUNCTION(basic)
 	PHP_RINIT(dir) (INIT_FUNC_ARGS_PASSTHRU);
 	PHP_RINIT(url_scanner_ex) (INIT_FUNC_ARGS_PASSTHRU);
 
+	/* Reset magic_quotes_runtime */
+	PG(magic_quotes_runtime) = INI_BOOL("magic_quotes_runtime");
+
 	return SUCCESS;
 }
 
