@@ -121,7 +121,8 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_array_query, NULL)
 	PHP_FE(sqlite_single_query, NULL)
 	PHP_FE(sqlite_fetch_array, NULL)
-	PHP_FE(sqlite_fetch_string, NULL)
+	PHP_FE(sqlite_fetch_single, NULL)
+	PHP_FALIAS(sqlite_fetch_string, sqlite_fetch_single, NULL)
 	PHP_FE(sqlite_fetch_all, NULL)
 	PHP_FE(sqlite_current, NULL)
 	PHP_FE(sqlite_column, NULL)
@@ -1306,8 +1307,8 @@ PHP_FUNCTION(sqlite_array_query)
 }
 /* }}} */
 
-/* {{{ php_sqlite_fetch_string */
-static void php_sqlite_fetch_string(struct php_sqlite_result *res, zend_bool decode_binary, zval *return_value TSRMLS_DC)
+/* {{{ php_sqlite_fetch_single */
+static void php_sqlite_fetch_single(struct php_sqlite_result *res, zend_bool decode_binary, zval *return_value TSRMLS_DC)
 {
 	int j, buffered = res->buffered;
 	const char **rowdata, **colnames;
@@ -1402,7 +1403,7 @@ PHP_FUNCTION(sqlite_single_query)
 
 	while (rres->curr_row < rres->nrows) {
 		MAKE_STD_ZVAL(ent);
-		php_sqlite_fetch_string(rres, decode_binary, ent TSRMLS_CC);
+		php_sqlite_fetch_single(rres, decode_binary, ent TSRMLS_CC);
 
 		/* if set and we only have 1 row in the result set, return the result as a string. */
 		if (srow) {
@@ -1427,7 +1428,7 @@ PHP_FUNCTION(sqlite_single_query)
 
 /* {{{ proto string sqlite_fetch_array(resource result [, bool decode_binary])
    Fetches first column of a result set as a string */
-PHP_FUNCTION(sqlite_fetch_string)
+PHP_FUNCTION(sqlite_fetch_single)
 {
 	zval *zres;
 	zend_bool decode_binary = 1;
@@ -1441,7 +1442,7 @@ PHP_FUNCTION(sqlite_fetch_string)
 	}
 	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
 
-	php_sqlite_fetch_string(res, decode_binary, return_value TSRMLS_CC);
+	php_sqlite_fetch_single(res, decode_binary, return_value TSRMLS_CC);
 }
 /* }}} */
 
