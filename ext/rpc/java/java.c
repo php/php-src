@@ -401,7 +401,7 @@ static int checkError(pval *value) {
   if (value->type == IS_EXCEPTION) {
     php_error(E_WARNING, "%s", value->value.str.val);
     efree(value->value.str.val);
-    var_reset(value);
+    ZVAL_RESET(value);
     return 1;
   };
   return 0;

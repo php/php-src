@@ -295,7 +295,7 @@ PHP_FUNCTION(urlencode)
 	convert_to_string_ex(arg);
 
 	if (!(*arg)->value.str.len) {
-		var_reset(return_value);
+		ZVAL_RESET(return_value);
 		return;
 	}
 	str = php_url_encode((*arg)->value.str.val, (*arg)->value.str.len, &str_len);
@@ -316,7 +316,7 @@ PHP_FUNCTION(urldecode)
 	convert_to_string_ex(arg);
 
 	if (!(*arg)->value.str.len) {
-		var_reset(return_value);
+		ZVAL_RESET(return_value);
 		return;
 	}
 

@@ -271,7 +271,7 @@ static zval *_xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encod
 	MAKE_STD_ZVAL(ret);
 	
 	if (s == NULL) {
-		var_reset(ret);
+		ZVAL_RESET(ret);
 		return ret;
 	}
 	if (len == 0) {
