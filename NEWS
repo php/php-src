@@ -16,6 +16,7 @@ PHP 4                                                                      NEWS
 - Added a "DEBUG" note to 'php -v' output when --enable-debug is used. (Derick)
 - Fixed ext/yaz to not log unless yaz.log_file is set. (Adam Dickmeiss)
 - Fixed ext/exif to honor "magic_quotes_runtime" php.ini option. (Marcus)
+- Fixed bug #23913 (make rename() work across partitions on *nix) (Ilia)
 - Fixed bug #23898 (Proper handling of NULLs in odbc_result, odbc_fetch_into
   and odbc_result_all). (Ilia)
 - Fixed bug #23897 (Fixed a check for mbfilter_ru.h). (aleks@m2media.ru, Ilia)
