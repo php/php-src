@@ -166,23 +166,29 @@ AC_DEFUN(PHP_REMOVE_USR_LIB,[
 ])
 
 AC_DEFUN(PHP_SETUP_OPENSSL,[
-  if test "$PHP_OPENSSL" = "no"; then
+  if test "$PHP_OPENSSL" = "yes"; then
     PHP_OPENSSL="/usr/local/ssl /usr/local /usr /usr/local/openssl"
   fi
 
   for i in $PHP_OPENSSL; do
     if test -r $i/include/openssl/evp.h; then
-      OPENSSL_DIR=$i
-      OPENSSL_INC=$i/include
+      OPENSSL_INCDIR=$i/include
+    fi
+    if test -r $i/lib/libssl.a -o -r $i/lib/libssl.$SHLIB_SUFFIX_NAME; then
+      OPENSSL_LIBDIR=$i/lib
     fi
   done
 
-  if test -z "$OPENSSL_DIR"; then
+  if test -z "$OPENSSL_INCDIR"; then
     AC_MSG_ERROR([Cannot find OpenSSL's <evp.h>])
   fi
 
+  if test -z "$OPENSSL_LIBDIR"; then
+    AC_MSG_ERROR([Cannot find OpenSSL's libraries])
+  fi
+
   old_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS=-I$OPENSSL_INC
+  CPPFLAGS=-I$OPENSSL_INCDIR
   AC_MSG_CHECKING([for OpenSSL version])
   AC_EGREP_CPP(yes,[
   #include <openssl/opensslv.h>
@@ -196,20 +202,24 @@ AC_DEFUN(PHP_SETUP_OPENSSL,[
   ])
   CPPFLAGS=$old_CPPFLAGS
 
-  PHP_ADD_LIBPATH($OPENSSL_DIR/lib)
+  PHP_ADD_INCLUDE($OPENSSL_INCDIR)
+  PHP_ADD_LIBPATH($OPENSSL_LIBDIR)
 
-  AC_CHECK_LIB(crypto, CRYPTO_free, [
+  PHP_CHECK_LIBRARY(crypto, CRYPTO_free, [
     PHP_ADD_LIBRARY(crypto)
   ],[
     AC_MSG_ERROR([libcrypto not found!])
+  ],[
+    -L$OPENSSL_LIBDIR
   ])
 
-  AC_CHECK_LIB(ssl, SSL_CTX_set_ssl_version, [
+  PHP_CHECK_LIBRARY(ssl, SSL_CTX_set_ssl_version, [
     PHP_ADD_LIBRARY(ssl)
   ],[
     AC_MSG_ERROR([libssl not found!])
+  ],[
+    -L$OPENSSL_LIBDIR
   ])
-  PHP_ADD_INCLUDE($OPENSSL_INC)
 ])
 
 dnl PHP_EVAL_LIBLINE(LINE, SHARED-LIBADD)
@@ -1331,13 +1341,12 @@ AC_DEFUN(PHP_CHECK_LIBRARY, [
   LDFLAGS="$5 $LDFLAGS"
   AC_CHECK_LIB([$1],[$2],[
     LDFLAGS=$save_old_LDFLAGS
-    $3
+    m4_default([$3], :)
   ],[
     LDFLAGS=$save_old_LDFLAGS
-    $4
+    m4_default([$4], :)
   ])dnl
 ])
-
 
 dnl 
 dnl PHP_SETUP_ICONV(shared-add [, action-found [, action-not-found]])

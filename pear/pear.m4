@@ -43,12 +43,25 @@ PHP_CONFIG_NICE(config.nice)
 AC_PROG_CC
 AC_PROG_CC_C_O
 
+PHP_SHLIB_SUFFIX_NAME
 PHP_WITH_PHP_CONFIG
 
 PHP_BUILD_SHARED
 
 AC_PREFIX_DEFAULT()
 
+AC_ARG_WITH(openssl,
+[  --with-openssl[=DIR]    Include OpenSSL support (requires OpenSSL >= 0.9.5) ],
+[
+  if test "$withval" != "no"; then
+    PHP_WITH_SHARED
+    PHP_OPENSSL=$withval
+    ext_openssl_shared=yes
+    ext_shared=yes
+    PHP_SETUP_OPENSSL
+  fi
+])
+    
 sinclude(config.m4)
 
 enable_static=no
@@ -88,6 +101,7 @@ PHP_SUBST(INCLUDES)
 PHP_SUBST(LEX)
 PHP_SUBST(LEX_OUTPUT_ROOT)
 PHP_SUBST(LFLAGS)
+PHP_SUBST(LDFLAGS)
 PHP_SUBST(SHARED_LIBTOOL)
 PHP_SUBST(LIBTOOL)
 PHP_SUBST(SHELL)
