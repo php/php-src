@@ -58,17 +58,6 @@ struct magic {
     unsigned char reln;		/* relation (0=eq, '>'=gt, etc) */
     char type;			/* int, short, long or string. */
     char vallen;		/* length of string value, if any */
-#define BYTE    1
-#define SHORT    2
-#define LONG    4
-#define STRING    5
-#define DATE    6
-#define BESHORT    7
-#define BELONG    8
-#define BEDATE    9
-#define LESHORT    10
-#define LELONG    11
-#define LEDATE    12
     union VALUETYPE {
 		unsigned char b;
 		unsigned short h;
