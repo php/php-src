@@ -126,6 +126,11 @@ int php3_minit_pgsql(INIT_FUNC_ARGS)
 	php3_pgsql_module.le_result = register_list_destructors(_free_result,NULL);
 	php3_pgsql_module.le_lofp = register_list_destructors(_free_ptr,NULL);
 	php3_pgsql_module.le_string = register_list_destructors(_free_ptr,NULL);
+
+	REGISTER_LONG_CONSTANT("PGSQL_ASSOC", PGSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_NUM", PGSQL_NUM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_BOTH", PGSQL_BOTH, CONST_CS | CONST_PERSISTENT);
+
 	return SUCCESS;
 }
 
