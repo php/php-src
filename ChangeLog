@@ -1,3 +1,78 @@
+2001-12-01  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/index.php
+      ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h:
+    - Added stored API to mnoGoSearch module. Now you can check
+      if URL is places at the stored database ot not. Example updated.
+
+2001-12-01  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h: Last commit:
+    - Fix segfault in xmldoc().
+    - Proper free zval in php_xpathptr_eval().
+
+    This one:
+    - Fix segfault in php_xpathptr_eval().
+    - Fix win32 build (TSRMLS_FETCH issues).
+    - More sanity checking in php_xpath_get_object(), php_xpath_get_context()
+      and php_dom_get_object().
+    - Moved macros into header file.
+    - Register le_domxmldtd, le_domxmlcdatap (removes anoying warning message on shutdown).
+    - Fig segfault in node_children() with unsupported node types.
+    - Fix leak in php_domobject_new() with unsupported note types.
+    - Fix leak when freeing xpath context/objects.
+    - Reverted behaviour change to append_child() [old crashes].
+    - set_content() also sets the node->content property.
+
+
+2001-12-01  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Packager.php:
+    check for version for not building broken packages (thanks Markus)
+
+2001-12-01  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/string.c:
+    - Fix a crash when passing e.g. NULL to basename(). (Patch by Markus
+      Fischer <mfischer@guru.josefine.at>)
+
+2001-12-01  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/var.c:
+    fix problem when  __sleep() returned non-existant variables
+
+    * ext/standard/tests/serialize/002.phpt
+      ext/standard/var.c: improve last patch:
+    non existant object variables are now serialized as NULL, this saves us from
+    buffering the serialized data.
+
+    * ext/standard/tests/serialize/002.phpt
+      ext/standard/var.c:
+    serialized data would be incoorect if __sleep() returned a variable-name
+    which is non-existant in the object.
+    submitted by: Bernd Roemer <berndr@bonn.edu>
+
+2001-12-01  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c: Fixing ldap_first/next_attribute()
+
+2001-12-01  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/index.php:
+    - mnoGoSearch module usage example (searchlite) updated to support
+      StoreDoc stuff.
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h:
+    - StoreDOC support has been added to mnogoSearch module.
+
+2001-12-01  Jani Taskinen  <sniper@iki.fi>
+
+    * acinclude.m4
+      configure.in: This makes the configure --help output more readable.
+
 2001-11-30  Stig Venaas  <venaas@uninett.no>
 
     * ext/ldap/ldap.c:
