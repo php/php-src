@@ -49,6 +49,7 @@ ZEND_API zend_class_entry *sxe_get_element_class_entry()
 
 #define SXE_METHOD(func) PHP_METHOD(simplexml_element, func)
 
+static php_sxe_object* php_sxe_object_new(zend_class_entry *ce TSRMLS_DC);
 static zend_object_value php_sxe_register_object(php_sxe_object * TSRMLS_DC);
 
 /* {{{ _node_as_zval()
