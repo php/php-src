@@ -6,6 +6,7 @@ use_trans_sid should not affect SID
 session.use_trans_sid=1
 session.use_cookies=0
 session.cache_limiter=
+arg_separator.output=&
 --FILE--
 <?php
 error_reporting(E_ALL);
