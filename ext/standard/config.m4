@@ -225,6 +225,31 @@ AC_ARG_WITH(regex,
 
 AC_FUNC_FNMATCH	
 
+dnl Take a look and see if there is a support means of creating a new process
+dnl and defining which handles it receives
+AC_DEFUN([PHP_CHECK_IF_SUPPORT_PROC_OPEN],[
+  
+  AC_CACHE_VAL(php_can_support_proc_open,[
+    AC_CHECK_FUNCS(fork CreateProcess, [
+      php_can_support_proc_open=yes
+      break
+    ],[
+      php_can_support_proc_open=no
+    ])
+  ])
+  
+  AC_MSG_CHECKING([if your OS can spawn processes with inherited handles])
+  if test "$php_can_support_proc_open" = "yes"; then
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(PHP_CAN_SUPPORT_PROC_OPEN,1, [Define if your system has fork/vfork/CreateProcess])
+  else
+    AC_MSG_RESULT(no)
+  fi
+
+])
+
+PHP_CHECK_IF_SUPPORT_PROC_OPEN
+
 dnl getopt long options disabled for now
 dnl as we can't be sure that we get the right getopt.h here
 dnl using the standard AC_CHECK macros
@@ -256,6 +281,6 @@ PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.
                             incomplete_class.c url_scanner_ex.c ftp_fopen_wrapper.c \
                             http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
                             var_unserializer.c ftok.c aggregation.c sha1.c user_filters.c \
-							filters.c )
+                            filters.c proc_open.c )
 
 PHP_ADD_MAKEFILE_FRAGMENT
