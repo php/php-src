@@ -802,7 +802,7 @@ PHP_FUNCTION(ip2long)
 
 	convert_to_string_ex(str);
 
-	RETURN_LONG(inet_addr((*str)->value.str.val));
+	RETURN_LONG(ntohl(inet_addr((*str)->value.str.val)));
 }
 /* }}} */
 
@@ -818,7 +818,7 @@ PHP_FUNCTION(long2ip)
 	}
 	
 	convert_to_long_ex(num);
-	myaddr.s_addr = (unsigned long)(*num)->value.lval;
+	myaddr.s_addr = htonl((unsigned long)(*num)->value.lval);
 
 	RETURN_STRING (inet_ntoa(myaddr), 1);
 }
