@@ -762,7 +762,9 @@ PHP_FUNCTION(preg_split)
 	int				 argc;				/* Argument count */
 	int				 limit_val;			/* Integer value of limit */
 	int				 count = 0;			/* Count of matched subpatterns */
-	int				 last_offset;		/* Holds the offset of the last match */
+	char			*match,				/* The current match */
+					*piece,				/* The current piece of subject */
+					*subject_end;		/* Points to the end of subject string */
 
 	/* Get function parameters and do error checking */	
 	argc = ARG_COUNT(ht);
@@ -794,14 +796,16 @@ PHP_FUNCTION(preg_split)
 	offsets = (int *)emalloc(size_offsets * sizeof(int));
 	
 	/* Start at the beginning of the string */
-	last_offset = 0;
+	piece = subject->value.str.val;
+	subject_end = piece + subject->value.str.len;
+	match = NULL;
 	
 	/* Get next piece if no limit or limit not yet reached and something matched*/
 	while ((limit_val == -1 || limit_val > 0) && count >= 0) {
-		count = pcre_exec(re, extra, &subject->value.str.val[last_offset],
-						  subject->value.str.len-last_offset, subject->value.str.val,
-						  (last_offset ? exoptions|PCRE_NOTBOL : exoptions),
-						  offsets, size_offsets, 0);
+		count = pcre_exec(re, extra, piece,
+						  subject_end-piece, subject->value.str.val,
+						  (piece==subject->value.str.val ? exoptions : exoptions|PCRE_NOTBOL),
+						  offsets, size_offsets, (piece==match));
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
@@ -811,13 +815,15 @@ PHP_FUNCTION(preg_split)
 
 		/* If something matched */
 		if (count > 0) {
+			match = piece + offsets[0];
+			
 			/* Add the piece to the return value */
 			add_next_index_stringl(return_value,
-								  &subject->value.str.val[last_offset],
+								  piece,
 								  offsets[0], 1);
 			
 			/* Advance to next position */
-			last_offset += offsets[1];
+			piece += offsets[1];
 			
 			/* One less left to do */
 			if (limit_val != -1)
@@ -826,10 +832,10 @@ PHP_FUNCTION(preg_split)
 		else { /* if no match */
 			/* Add the last piece to the return value, if there
 			   were matches before */
-			if (last_offset > 0)
+			if (piece > subject->value.str.val)
 				add_next_index_stringl(return_value,
-									  &subject->value.str.val[last_offset],
-									  subject->value.str.len - last_offset, 1);
+									   piece,
+									   subject_end-piece, 1);
 		}
 	}
 	
