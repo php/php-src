@@ -2788,7 +2788,7 @@ CLEANUP:
 
 /************************* EXTENSION FUNCTIONS *************************/
 
-/* {{{ proto bool ocidefinebyname(int stmt, string name, mixed &var [, int type])
+/* {{{ proto bool ocidefinebyname(resource stmt, string name, mixed &var [, int type])
    Define a PHP variable to an Oracle column by name */
 /* if you want to define a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE defining!!!
  */
@@ -2847,7 +2847,7 @@ PHP_FUNCTION(ocidefinebyname)
 
 /* }}} */
 
-/* {{{ proto bool ocibindbyname(int stmt, string name, mixed &var, [, int maxlength] [, int type])
+/* {{{ proto bool ocibindbyname(resource stmt, string name, mixed &var, [, int maxlength [, int type]])
    Bind a PHP variable to an Oracle placeholder by name */
 /* if you want to bind a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE binding!!!
  */
@@ -3025,7 +3025,7 @@ break;
 
 /* }}} */
 
-/* {{{ proto bool ocifreedesc(object lob)
+/* {{{ proto bool ocifreedesc()
    Deletes large object description */
 
 PHP_FUNCTION(ocifreedesc)
@@ -3049,7 +3049,7 @@ PHP_FUNCTION(ocifreedesc)
 }
 /* }}} */
 
-/* {{{ proto bool ocisavelob(object lob)
+/* {{{ proto bool ocisavelob()
    Saves a large object */
 
 PHP_FUNCTION(ocisavelob)
@@ -3140,7 +3140,7 @@ PHP_FUNCTION(ocisavelob)
 
 /* }}} */
 
-/* {{{ proto bool ocisavelobfile(object lob)
+/* {{{ proto bool ocisavelobfile()
    Saves a large object file */
 
 PHP_FUNCTION(ocisavelobfile)
@@ -3221,7 +3221,7 @@ PHP_FUNCTION(ocisavelobfile)
 
 /* }}} */
 
-/* {{{ proto string ociloadlob(object lob)
+/* {{{ proto string ociloadlob()
    Loads a large object */
 
 PHP_FUNCTION(ociloadlob)
@@ -3246,7 +3246,7 @@ PHP_FUNCTION(ociloadlob)
 }
 /* }}} */
 
-/* {{{ proto bool ociwritelobtofile(object lob [, string filename] [, int start] [, int length])
+/* {{{ proto bool ociwritelobtofile([string filename [, int start [, int length]]])
    Writes a large object into a file */
 
 PHP_FUNCTION(ociwritelobtofile)
@@ -3432,8 +3432,8 @@ bail:
 /* }}} */
 
 #ifdef HAVE_OCI8_TEMP_LOB
-/* {{{ proto bool ociwritetemporarylob(int stmt, int loc, string var)
-   Return the row count of an OCI statement */
+/* {{{ proto bool ociwritetemporarylob(string var)
+   Writes temporary blob */
 
 PHP_FUNCTION(ociwritetemporarylob)
 {
@@ -3465,7 +3465,7 @@ PHP_FUNCTION(ociwritetemporarylob)
 	if (zend_get_parameters_ex(1, &var) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
+	/* is this convert needed - done again below */
 	convert_to_string_ex(var);
 
 	CALL_OCI_RETURN(connection->error, OCILobCreateTemporary(
@@ -3529,7 +3529,7 @@ PHP_FUNCTION(ociwritetemporarylob)
 
 /* }}} */
 
-/* {{{ proto bool ocicloselob(object lob)
+/* {{{ proto bool ocicloselob()
    Closes lob descriptor */
 
 PHP_FUNCTION(ocicloselob)
@@ -3597,7 +3597,7 @@ PHP_FUNCTION(ocicloselob)
 /* }}} */
 #endif 
 
-/* {{{ proto string ocinewdescriptor(int connection [, int type])
+/* {{{ proto object ocinewdescriptor(resource connection [, int type])
    Initialize a new empty descriptor LOB/FILE (LOB is default) */
 
 PHP_FUNCTION(ocinewdescriptor)
@@ -3630,7 +3630,7 @@ PHP_FUNCTION(ocinewdescriptor)
 
 /* }}} */
 
-/* {{{ proto bool ocirollback(int conn)
+/* {{{ proto bool ocirollback(resource conn)
    Rollback the current context */
 
 PHP_FUNCTION(ocirollback)
@@ -3666,7 +3666,7 @@ PHP_FUNCTION(ocirollback)
 
 /* }}} */
 
-/* {{{ proto bool ocicommit(int conn)
+/* {{{ proto bool ocicommit(resource conn)
    Commit the current context */
 
 PHP_FUNCTION(ocicommit)
@@ -3702,7 +3702,7 @@ PHP_FUNCTION(ocicommit)
 
 /* }}} */
 
-/* {{{ proto string ocicolumnname(int stmt, int col)
+/* {{{ proto string ocicolumnname(resource stmt, int col)
    Tell the name of a column */
 
 PHP_FUNCTION(ocicolumnname)
@@ -3727,7 +3727,7 @@ PHP_FUNCTION(ocicolumnname)
 
 /* }}} */
 
-/* {{{ proto int ocicolumnsize(int stmt, int col)
+/* {{{ proto int ocicolumnsize(resource stmt, int col)
    Tell the maximum data size of a column */
 
 PHP_FUNCTION(ocicolumnsize)
@@ -3760,7 +3760,7 @@ PHP_FUNCTION(ocicolumnsize)
 
 /* }}} */
 
-/* {{{ proto int ocicolumnscale(int stmt, int col)
+/* {{{ proto int ocicolumnscale(resource stmt, int col)
    Tell the scale of a column */
 
 PHP_FUNCTION(ocicolumnscale)
@@ -3784,7 +3784,7 @@ PHP_FUNCTION(ocicolumnscale)
 
 /* }}} */
 
-/* {{{ proto int ocicolumnprecision(int stmt, int col)
+/* {{{ proto int ocicolumnprecision(resource stmt, int col)
    Tell the precision of a column */
 
 PHP_FUNCTION(ocicolumnprecision)
@@ -3808,7 +3808,7 @@ PHP_FUNCTION(ocicolumnprecision)
 
 /* }}} */
 
-/* {{{ proto mixed ocicolumntype(int stmt, int col)
+/* {{{ proto mixed ocicolumntype(resource stmt, int col)
    Tell the data type of a column */
 
 PHP_FUNCTION(ocicolumntype)
@@ -3881,7 +3881,7 @@ PHP_FUNCTION(ocicolumntype)
 
 /* }}} */
 
-/* {{{ proto mixed ocicolumntyperaw(int stmt, int col)
+/* {{{ proto mixed ocicolumntyperaw(resource stmt, int col)
    Tell the raw oracle data type of a column */
 
 PHP_FUNCTION(ocicolumntyperaw)
@@ -3905,7 +3905,7 @@ PHP_FUNCTION(ocicolumntyperaw)
 
 /* }}} */
 
-/* {{{ proto bool ocicolumnisnull(int stmt, int col)
+/* {{{ proto bool ocicolumnisnull(resource stmt, int col)
    Tell whether a column is NULL */
 
 PHP_FUNCTION(ocicolumnisnull)
@@ -3952,7 +3952,7 @@ PHP_FUNCTION(ociinternaldebug)
 
 /* }}} */
 
-/* {{{ proto bool ociexecute(int stmt [, int mode])
+/* {{{ proto bool ociexecute(resource stmt [, int mode])
    Execute a parsed statement */
 
 PHP_FUNCTION(ociexecute)
@@ -3981,7 +3981,7 @@ PHP_FUNCTION(ociexecute)
 
 /* }}} */
 
-/* {{{ proto bool ocicancel(int stmt)
+/* {{{ proto bool ocicancel(resource stmt)
    Prepare a new row of data for reading */
 
 PHP_FUNCTION(ocicancel)
@@ -4004,7 +4004,7 @@ PHP_FUNCTION(ocicancel)
 
 /* }}} */
 
-/* {{{ proto bool ocifetch(int stmt)
+/* {{{ proto bool ocifetch(resource stmt)
    Prepare a new row of data for reading */
 
 PHP_FUNCTION(ocifetch)
@@ -4028,7 +4028,7 @@ PHP_FUNCTION(ocifetch)
 
 /* }}} */
 
-/* {{{ proto int ocifetchinto(int stmt, array &output [, int mode])
+/* {{{ proto int ocifetchinto(resource stmt, array &output [, int mode])
    Fetch a row of result data into an array */
 
 PHP_FUNCTION(ocifetchinto)
@@ -4093,7 +4093,7 @@ PHP_FUNCTION(ocifetchinto)
 
 /* }}} */
 
-/* {{{ proto int ocifetchstatement(int stmt, array &output[, int skip][, int maxrows][, int flags])
+/* {{{ proto int ocifetchstatement(resource stmt, array &output[, int skip][, int maxrows][, int flags])
    Fetch all rows of result data into an array */
 
 PHP_FUNCTION(ocifetchstatement)
@@ -4226,7 +4226,7 @@ PHP_FUNCTION(ocifetchstatement)
 
 /* }}} */
 
-/* {{{ proto bool ocifreestatement(int stmt)
+/* {{{ proto bool ocifreestatement(resource stmt)
    Free all resources associated with a statement */
 
 PHP_FUNCTION(ocifreestatement)
@@ -4247,7 +4247,7 @@ PHP_FUNCTION(ocifreestatement)
 
 /* }}} */
 
-/* {{{ proto bool ocilogoff(int conn)
+/* {{{ proto bool ocilogoff(resource conn)
    Disconnect from database */
 
 PHP_FUNCTION(ocilogoff)
@@ -4283,10 +4283,10 @@ PHP_FUNCTION(ocilogoff)
 
 /* }}} */
 
-/* {{{ proto int ocinlogon(string user, string pass [, string db])
+/* {{{ proto resource ocinlogon(string user, string pass [, string db])
    Connect to an Oracle database and log on. returns a new session */
 
-/* Connects to an Oracle 8 database and logs on.  If the
+/* Connects to an Oracle 8/9 database and logs on.  If the
  * optional third parameter is not specified, PHP uses the environment
  * variable ORACLE_SID to determine which database to connect to.
  */
@@ -4297,11 +4297,11 @@ PHP_FUNCTION(ocinlogon)
 
 /* }}} */
 
-/* {{{ proto int ocilogon(string user, string pass [, string db])
+/* {{{ proto resource ocilogon(string user, string pass [, string db])
    Connect to an Oracle database and log on. Returns a new session.
  */
 
-/* Connects to an Oracle 8 database and logs on.  If the
+/* Connects to an Oracle 8/9 database and logs on.  If the
  * optional third parameter is not specified, PHP uses the environment
  * variable ORACLE_SID to determine which database to connect to.
  */
@@ -4312,10 +4312,10 @@ PHP_FUNCTION(ocilogon)
 
 /* }}} */
 
-/* {{{ proto int ociplogon(string user, string pass [, string db])
+/* {{{ proto resource ociplogon(string user, string pass [, string db])
    Connect to an Oracle database using a persistent connection and log on. Returns a new session. */
 
-/* Connects to an Oracle 8 database and logs on.  If the
+/* Connects to an Oracle 8/9 database and logs on.  If the
  * optional third parameter is not specified, PHP uses the environment
  * variable ORACLE_SID to determine which database to connect to.
  */
@@ -4326,7 +4326,7 @@ PHP_FUNCTION(ociplogon)
 
 /* }}} */
 
-/* {{{ proto array ocierror([int stmt|conn|global])
+/* {{{ proto array ocierror([resource stmt|conn|global])
    Return the last error of stmt|conn|global. If no error happened returns false. */
 
 PHP_FUNCTION(ocierror)
@@ -4412,7 +4412,7 @@ PHP_FUNCTION(ocierror)
 
 /* }}} */
 
-/* {{{ proto int ocinumcols(int stmt)
+/* {{{ proto int ocinumcols(resource stmt)
    Return the number of result columns in a statement */
 
 PHP_FUNCTION(ocinumcols)
@@ -4431,7 +4431,7 @@ PHP_FUNCTION(ocinumcols)
 
 /* }}} */
 
-/* {{{ proto int ociparse(int conn, string query)
+/* {{{ proto resource ociparse(resource conn, string query)
    Parse a query and return a statement */
 
 PHP_FUNCTION(ociparse)
@@ -4459,7 +4459,7 @@ PHP_FUNCTION(ociparse)
 
 /* }}} */
 
-/* {{{ proto int ocisetprefetch(int stmt, int prefetch_rows)
+/* {{{ proto bool ocisetprefetch(resource stmt, int prefetch_rows)
   sets the number of rows to be prefetched on execute to prefetch_rows for stmt */
 
 PHP_FUNCTION(ocisetprefetch)
@@ -4482,8 +4482,8 @@ PHP_FUNCTION(ocisetprefetch)
 
 /* }}} */
 
-/* {{{ proto bool ocipasswordchange(int conn, string username, string old_password, string new_password)
-  changes the password of an account*/
+/* {{{ proto bool ocipasswordchange(resource conn, string username, string old_password, string new_password)
+  Changes the password of an account*/
 
 PHP_FUNCTION(ocipasswordchange)
 {
@@ -4534,7 +4534,7 @@ PHP_FUNCTION(ocipasswordchange)
 
 /* }}} */
 
-/* {{{ proto int ocinewcursor(int conn)
+/* {{{ proto int ocinewcursor(resource conn)
    Return a new cursor (Statement-Handle) - use this to bind ref-cursors! */
 
 PHP_FUNCTION(ocinewcursor)
@@ -4556,7 +4556,7 @@ PHP_FUNCTION(ocinewcursor)
 
 /* }}} */
 
-/* {{{ proto string ociresult(int stmt, mixed column)
+/* {{{ proto string ociresult(resource stmt, mixed column)
    Return a single column of result data */
 
 PHP_FUNCTION(ociresult)
@@ -4582,7 +4582,7 @@ PHP_FUNCTION(ociresult)
 
 /* }}} */
 
-/* {{{ proto string ociserverversion(int conn)
+/* {{{ proto string ociserverversion(resource conn)
    Return a string containing server version information */
 
 PHP_FUNCTION(ociserverversion)
@@ -4615,7 +4615,7 @@ PHP_FUNCTION(ociserverversion)
 
 /* }}} */
 
-/* {{{ proto string ocistatementtype(int stmt)
+/* {{{ proto string ocistatementtype(resource stmt)
    Return the query type of an OCI statement */
  
 /* XXX it would be better with a general interface to OCIAttrGet() */
@@ -4680,7 +4680,7 @@ PHP_FUNCTION(ocistatementtype)
 }
 /* }}} */
 
-/* {{{ proto int ocirowcount(int stmt)
+/* {{{ proto int ocirowcount(resource stmt)
    Return the row count of an OCI statement */
 
 PHP_FUNCTION(ocirowcount)
@@ -4732,7 +4732,7 @@ static oci_collection *oci_get_coll(int ind TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto bool ocifreecollection(object lob)
+/* {{{ proto bool ocifreecollection()
    Deletes collection object*/
 
 PHP_FUNCTION(ocifreecollection)
@@ -4772,7 +4772,7 @@ PHP_FUNCTION(ocifreecollection)
 }
 /* }}} */
 
-/* {{{ proto bool ocicollappend(object collection,value)
+/* {{{ proto bool ocicollappend(string value)
    Append an object to the collection */
 
 PHP_FUNCTION(ocicollappend)
@@ -4918,7 +4918,7 @@ PHP_FUNCTION(ocicollappend)
 }
 /* }}} */
 
-/* {{{ proto string ocicollgetelem(object collection,ndx)
+/* {{{ proto string ocicollgetelem(int ndx)
    Retrieve the value at collection index ndx */
 
 PHP_FUNCTION(ocicollgetelem)
@@ -5024,7 +5024,7 @@ PHP_FUNCTION(ocicollgetelem)
 }
 /* }}} */
 
-/* {{{ proto bool ocicollassign(object collection,object)
+/* {{{ proto bool ocicollassign(object from)
    Assign a collection from another existing collection */
 
 PHP_FUNCTION(ocicollassign)
@@ -5066,7 +5066,7 @@ PHP_FUNCTION(ocicollassign)
 }
 /* }}} */
 
-/* {{{ proto bool ocicollassignelem(object collection,ndx,val)
+/* {{{ proto bool ocicollassignelem(int index, string val)
    Assign element val to collection at index ndx */
 
 PHP_FUNCTION(ocicollassignelem)
@@ -5103,7 +5103,7 @@ PHP_FUNCTION(ocicollassignelem)
 		}
 
 		/* 
-		 * Handle NULLS.  For consistency with the rest of the OCI8 library, when
+		 * Handle NULLs.  For consistency with the rest of the OCI8 library, when
 		 * a value passed in is a 0 length string, consider it a null
 		 */
 		convert_to_string_ex(val);
@@ -5229,7 +5229,7 @@ PHP_FUNCTION(ocicollassignelem)
 }
 /* }}} */
 
-/* {{{ proto int ocicollsize(object collection)
+/* {{{ proto int ocicollsize()
    Return the size of a collection */
 
 PHP_FUNCTION(ocicollsize)
@@ -5263,7 +5263,7 @@ PHP_FUNCTION(ocicollsize)
 }
 /* }}} */
 
-/* {{{ proto int ocicollmax(object collection)
+/* {{{ proto int ocicollmax()
    Return the max value of a collection.  For a varray this is the maximum length of the array */
 
 PHP_FUNCTION(ocicollmax)
@@ -5285,7 +5285,7 @@ PHP_FUNCTION(ocicollmax)
 }
 /* }}} */
 
-/* {{{ proto bool ocicolltrim(object collection,num)
+/* {{{ proto bool ocicolltrim(int num)
    Trim num elements from the end of a collection */
 
 PHP_FUNCTION(ocicolltrim)
@@ -5319,7 +5319,7 @@ PHP_FUNCTION(ocicolltrim)
 }
 /* }}} */
 
-/* {{{ proto bool ocinewcollection(int connection, string tdo,[string schema])
+/* {{{ proto object ocinewcollection(resource connection, string tdo [, string schema])
    Initialize a new collection */
 
 PHP_FUNCTION(ocinewcollection)

@@ -383,7 +383,7 @@ static void _php_pdf_set_info(INTERNAL_FUNCTION_PARAMETERS, char *field)
 }
 /* }}} */
 
-/* {{{ proto bool pdf_set_info(int pdfdoc, string fieldname, string value)
+/* {{{ proto bool pdf_set_info(resource pdfdoc, string fieldname, string value)
    Fills an info field of the document */
 PHP_FUNCTION(pdf_set_info)
 {
@@ -404,7 +404,7 @@ PHP_FUNCTION(pdf_set_info)
 }
 /* }}} */
 
-/* {{{ proto bool pdf_set_info_creator(int pdfdoc, string creator)
+/* {{{ proto bool pdf_set_info_creator(resource pdfdoc, string creator)
    Fills the creator field of the document */
 PHP_FUNCTION(pdf_set_info_creator)
 {
@@ -412,7 +412,7 @@ PHP_FUNCTION(pdf_set_info_creator)
 }
 /* }}} */
 
-/* {{{ proto bool pdf_set_info_title(int pdfdoc, string title)
+/* {{{ proto bool pdf_set_info_title(resource pdfdoc, string title)
    Fills the title field of the document */
 PHP_FUNCTION(pdf_set_info_title) 
 {
@@ -420,7 +420,7 @@ PHP_FUNCTION(pdf_set_info_title)
 }
 /* }}} */
 
-/* {{{ proto bool pdf_set_info_subject(int pdfdoc, string subject)
+/* {{{ proto bool pdf_set_info_subject(resource pdfdoc, string subject)
    Fills the subject field of the document */
 PHP_FUNCTION(pdf_set_info_subject) 
 {
@@ -428,7 +428,7 @@ PHP_FUNCTION(pdf_set_info_subject)
 }
 /* }}} */
 
-/* {{{ proto bool pdf_set_info_author(int pdfdoc, string author)
+/* {{{ proto bool pdf_set_info_author(resource pdfdoc, string author)
    Fills the author field of the document */
 PHP_FUNCTION(pdf_set_info_author) 
 {
@@ -436,7 +436,7 @@ PHP_FUNCTION(pdf_set_info_author)
 }
 /* }}} */
 
-/* {{{ proto bool pdf_set_info_keywords(int pdfdoc, string keywords)
+/* {{{ proto bool pdf_set_info_keywords(resource pdfdoc, string keywords)
    Fills the keywords field of the document */
 PHP_FUNCTION(pdf_set_info_keywords)
 {
@@ -444,7 +444,7 @@ PHP_FUNCTION(pdf_set_info_keywords)
 }
 /* }}} */
 
-/* {{{ proto resource pdf_open([int filedesc])
+/* {{{ proto resource pdf_open([resource filedesc])
    Opens a new pdf document. If filedesc is NULL, document is created in memory. This is the old interface, only for compatibility use pdf_new + pdf_open_file instead */
 PHP_FUNCTION(pdf_open)
 {
@@ -486,7 +486,7 @@ PHP_FUNCTION(pdf_open)
 
 /* }}} */
 
-/* {{{ proto void pdf_close(int pdfdoc)
+/* {{{ proto bool pdf_close(resource pdfdoc)
    Closes the pdf document */
 PHP_FUNCTION(pdf_close)
 {
@@ -506,7 +506,7 @@ PHP_FUNCTION(pdf_close)
 
 /* }}} */
 
-/* {{{ proto void pdf_begin_page(int pdfdoc, float width, float height)
+/* {{{ proto bool pdf_begin_page(resource pdfdoc, float width, float height)
    Starts page */
 PHP_FUNCTION(pdf_begin_page)
 {
@@ -526,7 +526,7 @@ PHP_FUNCTION(pdf_begin_page)
 }
 /* }}} */
 
-/* {{{ proto void pdf_end_page(int pdfdoc)
+/* {{{ proto bool pdf_end_page(resource pdfdoc)
    Ends page */
 PHP_FUNCTION(pdf_end_page)
 {
@@ -544,7 +544,7 @@ PHP_FUNCTION(pdf_end_page)
 }
 /* }}} */
 
-/* {{{ proto void pdf_show(int pdfdoc, string text)
+/* {{{ proto bool pdf_show(resource pdfdoc, string text)
    Output text at current position */
 PHP_FUNCTION(pdf_show)
 {
@@ -563,7 +563,7 @@ PHP_FUNCTION(pdf_show)
 }
 /* }}} */
 
-/* {{{ proto void pdf_show_xy(int pdfdoc, string text, float x_koor, float y_koor)
+/* {{{ proto bool pdf_show_xy(resource pdfdoc, string text, float x_koor, float y_koor)
    Output text at position */
 PHP_FUNCTION(pdf_show_xy)
 {
@@ -584,7 +584,7 @@ PHP_FUNCTION(pdf_show_xy)
 }
 /* }}} */
 
-/* {{{ proto int pdf_show_boxed(int pdfdoc, string text, float x_koor, float y_koor, float width, float height, string mode [, string feature])
+/* {{{ proto int pdf_show_boxed(resource pdfdoc, string text, float x_koor, float y_koor, float width, float height, string mode [, string feature])
    Output text formated in a boxed */
 PHP_FUNCTION(pdf_show_boxed)
 {
@@ -626,7 +626,7 @@ PHP_FUNCTION(pdf_show_boxed)
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_font(int pdfdoc, string font, float size, string encoding [, int embed])
+/* {{{ proto bool pdf_set_font(resource pdfdoc, string font, float size, string encoding [, int embed])
    Select the current font face, size and encoding */
 PHP_FUNCTION(pdf_set_font)
 {
@@ -689,7 +689,7 @@ static void _php_pdf_set_value(INTERNAL_FUNCTION_PARAMETERS, char *field)
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_value(int pdfdoc, string key, float value)
+/* {{{ proto bool pdf_set_value(resource pdfdoc, string key, float value)
    Sets arbitrary value */
 PHP_FUNCTION(pdf_set_value)
 {
@@ -710,7 +710,7 @@ PHP_FUNCTION(pdf_set_value)
 }
 /* }}} */
 
-/* {{{ proto float pdf_get_value(int pdfdoc, string key, float modifier)
+/* {{{ proto float pdf_get_value(resource pdfdoc, string key, float modifier)
    Gets arbitrary value */
 PHP_FUNCTION(pdf_get_value)
 {
@@ -764,7 +764,7 @@ PHP_FUNCTION(pdf_get_value)
 }
 /* }}} */
 
-/* {{{ proto int pdf_get_font(int pdfdoc)
+/* {{{ proto int pdf_get_font(resource pdfdoc)
    Gets the current font */
 PHP_FUNCTION(pdf_get_font) 
 {
@@ -783,7 +783,7 @@ PHP_FUNCTION(pdf_get_font)
 }
 /* }}} */
 
-/* {{{ proto string pdf_get_fontname(int pdfdoc)
+/* {{{ proto string pdf_get_fontname(resource pdfdoc)
    Gets the current font name */
 PHP_FUNCTION(pdf_get_fontname) 
 {
@@ -802,7 +802,7 @@ PHP_FUNCTION(pdf_get_fontname)
 }
 /* }}} */
 
-/* {{{ proto float pdf_get_fontsize(int pdfdoc)
+/* {{{ proto float pdf_get_fontsize(resource pdfdoc)
    Gets the current font size */
 PHP_FUNCTION(pdf_get_fontsize) 
 {
@@ -821,7 +821,7 @@ PHP_FUNCTION(pdf_get_fontsize)
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_leading(int pdfdoc, float distance)
+/* {{{ proto bool pdf_set_leading(resource pdfdoc, float distance)
    Sets distance between text lines */
 PHP_FUNCTION(pdf_set_leading) 
 {
@@ -829,7 +829,7 @@ PHP_FUNCTION(pdf_set_leading)
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_text_rendering(int pdfdoc, int mode)
+/* {{{ proto bool pdf_set_text_rendering(resource pdfdoc, int mode)
    Determines how text is rendered */
 PHP_FUNCTION(pdf_set_text_rendering) 
 {
@@ -837,7 +837,7 @@ PHP_FUNCTION(pdf_set_text_rendering)
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_horiz_scaling(int pdfdoc, float scale)
+/* {{{ proto bool pdf_set_horiz_scaling(resource pdfdoc, float scale)
    Sets horizontal scaling of text */
 PHP_FUNCTION(pdf_set_horiz_scaling) 
 {
@@ -845,7 +845,7 @@ PHP_FUNCTION(pdf_set_horiz_scaling)
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_text_rise(int pdfdoc, float value)
+/* {{{ proto bool pdf_set_text_rise(resource pdfdoc, float value)
    Sets the text rise */
 PHP_FUNCTION(pdf_set_text_rise) 
 {
@@ -853,7 +853,7 @@ PHP_FUNCTION(pdf_set_text_rise)
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_char_spacing(int pdfdoc, float space)
+/* {{{ proto bool pdf_set_char_spacing(resource pdfdoc, float space)
    Sets character spacing */
 PHP_FUNCTION(pdf_set_char_spacing)
 {
@@ -861,7 +861,7 @@ PHP_FUNCTION(pdf_set_char_spacing)
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_word_spacing(int pdfdoc, float space)
+/* {{{ proto bool pdf_set_word_spacing(resource pdfdoc, float space)
    Sets spacing between words */
 PHP_FUNCTION(pdf_set_word_spacing)
 {
@@ -869,7 +869,7 @@ PHP_FUNCTION(pdf_set_word_spacing)
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_text_pos(int pdfdoc, float x, float y)
+/* {{{ proto bool pdf_set_text_pos(resource pdfdoc, float x, float y)
    Sets the position of text for the next pdf_show call */
 PHP_FUNCTION(pdf_set_text_pos) 
 {
@@ -889,7 +889,7 @@ PHP_FUNCTION(pdf_set_text_pos)
 }
 /* }}} */
 
-/* {{{ proto void pdf_continue_text(int pdfdoc, string text)
+/* {{{ proto bool pdf_continue_text(resource pdfdoc, string text)
    Output text in next line */
 PHP_FUNCTION(pdf_continue_text)
 {
@@ -908,7 +908,7 @@ PHP_FUNCTION(pdf_continue_text)
 }
 /* }}} */
 
-/* {{{ proto float pdf_stringwidth(int pdfdoc, string text [, int font, float size])
+/* {{{ proto float pdf_stringwidth(resource pdfdoc, string text [, int font, float size])
    Returns width of text in current font */
 PHP_FUNCTION(pdf_stringwidth)
 {
@@ -925,6 +925,7 @@ PHP_FUNCTION(pdf_stringwidth)
 	case 4:
 		if (zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
 			WRONG_PARAM_COUNT;
+		/* double convert_to_long_ex(arg3) - look below . is this needed ? */	
 		convert_to_long_ex(arg3);
 		break;
 	default:
@@ -953,7 +954,7 @@ PHP_FUNCTION(pdf_stringwidth)
 }
 /* }}} */
 
-/* {{{ proto void pdf_save(int pdfdoc)
+/* {{{ proto bool pdf_save(resource pdfdoc)
    Saves current enviroment */
 PHP_FUNCTION(pdf_save)
 {
@@ -971,7 +972,7 @@ PHP_FUNCTION(pdf_save)
 }
 /* }}} */
 
-/* {{{ proto void pdf_restore(int pdfdoc)
+/* {{{ proto bool pdf_restore(resource pdfdoc)
    Restores formerly saved enviroment */
 PHP_FUNCTION(pdf_restore)
 {
@@ -989,7 +990,7 @@ PHP_FUNCTION(pdf_restore)
 }
 /* }}} */
 
-/* {{{ proto void pdf_translate(int pdfdoc, float x, float y)
+/* {{{ proto bool pdf_translate(resource pdfdoc, float x, float y)
    Sets origin of coordinate system */
 PHP_FUNCTION(pdf_translate) 
 {
@@ -1009,7 +1010,7 @@ PHP_FUNCTION(pdf_translate)
 }
 /* }}} */
 
-/* {{{ proto void pdf_scale(int pdfdoc, float x_scale, float y_scale)
+/* {{{ proto bool pdf_scale(resource pdfdoc, float x_scale, float y_scale)
    Sets scaling */
 PHP_FUNCTION(pdf_scale)
 {
@@ -1029,7 +1030,7 @@ PHP_FUNCTION(pdf_scale)
 }
 /* }}} */
 
-/* {{{ proto void pdf_rotate(int pdfdoc, float angle)
+/* {{{ proto bool pdf_rotate(resource pdfdoc, float angle)
    Sets rotation */
 PHP_FUNCTION(pdf_rotate)
 {
@@ -1048,7 +1049,7 @@ PHP_FUNCTION(pdf_rotate)
 }
 /* }}} */
 
-/* {{{ proto void pdf_skew(int pdfdoc, float xangle, float yangle)
+/* {{{ proto bool pdf_skew(resource pdfdoc, float xangle, float yangle)
    Skew the coordinate system */
 PHP_FUNCTION(pdf_skew)
 {
@@ -1068,7 +1069,7 @@ PHP_FUNCTION(pdf_skew)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setflat(int pdfdoc, float value)
+/* {{{ proto bool pdf_setflat(resource pdfdoc, float value)
    Sets flatness */
 PHP_FUNCTION(pdf_setflat) 
 {
@@ -1094,7 +1095,7 @@ PHP_FUNCTION(pdf_setflat)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setlinejoin(int pdfdoc, int value)
+/* {{{ proto bool pdf_setlinejoin(resource pdfdoc, int value)
    Sets linejoin parameter */
 PHP_FUNCTION(pdf_setlinejoin) 
 {
@@ -1120,7 +1121,7 @@ PHP_FUNCTION(pdf_setlinejoin)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setlinecap(int pdfdoc, int value)
+/* {{{ proto bool pdf_setlinecap(resource pdfdoc, int value)
    Sets linecap parameter */
 PHP_FUNCTION(pdf_setlinecap) 
 {
@@ -1146,7 +1147,7 @@ PHP_FUNCTION(pdf_setlinecap)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setmiterlimit(int pdfdoc, float value)
+/* {{{ proto bool pdf_setmiterlimit(resource pdfdoc, float value)
    Sets miter limit */
 PHP_FUNCTION(pdf_setmiterlimit)
 {
@@ -1172,7 +1173,7 @@ PHP_FUNCTION(pdf_setmiterlimit)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setlinewidth(int pdfdoc, float width)
+/* {{{ proto bool pdf_setlinewidth(resource pdfdoc, float width)
    Sets line width */
 PHP_FUNCTION(pdf_setlinewidth)
 {
@@ -1191,7 +1192,7 @@ PHP_FUNCTION(pdf_setlinewidth)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setdash(int pdfdoc, float black, float white)
+/* {{{ proto bool pdf_setdash(resource pdfdoc, float black, float white)
    Sets dash pattern */
 PHP_FUNCTION(pdf_setdash)
 {
@@ -1211,7 +1212,7 @@ PHP_FUNCTION(pdf_setdash)
 }
 /* }}} */
 
-/* {{{ proto void pdf_moveto(int pdfdoc, float x, float y)
+/* {{{ proto bool pdf_moveto(resource pdfdoc, float x, float y)
    Sets current point */
 PHP_FUNCTION(pdf_moveto)
 {
@@ -1231,7 +1232,7 @@ PHP_FUNCTION(pdf_moveto)
 }
 /* }}} */
 
-/* {{{ proto void pdf_curveto(int pdfdoc, float x1, float y1, float x2, float y2, float x3, float y3)
+/* {{{ proto bool pdf_curveto(resource pdfdoc, float x1, float y1, float x2, float y2, float x3, float y3)
    Draws a curve */
 PHP_FUNCTION(pdf_curveto)
 {
@@ -1262,7 +1263,7 @@ PHP_FUNCTION(pdf_curveto)
 }
 /* }}} */
 
-/* {{{ proto void pdf_lineto(int pdfdoc, float x, float y)
+/* {{{ proto bool pdf_lineto(resource pdfdoc, float x, float y)
    Draws a line */
 PHP_FUNCTION(pdf_lineto)
 {
@@ -1282,7 +1283,7 @@ PHP_FUNCTION(pdf_lineto)
 }
 /* }}} */
 
-/* {{{ proto void pdf_circle(int pdfdoc, float x, float y, float radius)
+/* {{{ proto bool pdf_circle(resource pdfdoc, float x, float y, float radius)
    Draws a circle */
 PHP_FUNCTION(pdf_circle)
 {
@@ -1303,7 +1304,7 @@ PHP_FUNCTION(pdf_circle)
 }
 /* }}} */
 
-/* {{{ proto void pdf_arc(int pdfdoc, float x, float y, float radius, float start, float end)
+/* {{{ proto bool pdf_arc(resource pdfdoc, float x, float y, float radius, float start, float end)
    Draws an arc */
 PHP_FUNCTION(pdf_arc)
 {
@@ -1332,7 +1333,7 @@ PHP_FUNCTION(pdf_arc)
 }
 /* }}} */
 
-/* {{{ proto void pdf_rect(int pdfdoc, float x, float y, float width, float height)
+/* {{{ proto bool pdf_rect(resource pdfdoc, float x, float y, float width, float height)
    Draws a rectangle */
 PHP_FUNCTION(pdf_rect)
 {
@@ -1359,7 +1360,7 @@ PHP_FUNCTION(pdf_rect)
 }
 /* }}} */
 
-/* {{{ proto void pdf_closepath(int pdfdoc)
+/* {{{ proto bool pdf_closepath(resource pdfdoc)
    Close path */
 PHP_FUNCTION(pdf_closepath)
 {
@@ -1377,7 +1378,7 @@ PHP_FUNCTION(pdf_closepath)
 }
 /* }}} */
 
-/* {{{ proto void pdf_closepath_stroke(int pdfdoc)
+/* {{{ proto bool pdf_closepath_stroke(resource pdfdoc)
    Close path and draw line along path */
 PHP_FUNCTION(pdf_closepath_stroke)
 {
@@ -1395,7 +1396,7 @@ PHP_FUNCTION(pdf_closepath_stroke)
 }
 /* }}} */
 
-/* {{{ proto void pdf_stroke(int pdfdoc)
+/* {{{ proto bool pdf_stroke(resource pdfdoc)
    Draw line along path path */
 PHP_FUNCTION(pdf_stroke)
 {
@@ -1413,7 +1414,7 @@ PHP_FUNCTION(pdf_stroke)
 }
 /* }}} */
 
-/* {{{ proto void pdf_fill(int pdfdoc)
+/* {{{ proto bool pdf_fill(resource pdfdoc)
    Fill current path */
 PHP_FUNCTION(pdf_fill) 
 {
@@ -1431,7 +1432,7 @@ PHP_FUNCTION(pdf_fill)
 }
 /* }}} */
 
-/* {{{ proto void pdf_fill_stroke(int pdfdoc)
+/* {{{ proto bool pdf_fill_stroke(resource pdfdoc)
    Fill and stroke current path */
 PHP_FUNCTION(pdf_fill_stroke)
 {
@@ -1449,7 +1450,7 @@ PHP_FUNCTION(pdf_fill_stroke)
 }
 /* }}} */
 
-/* {{{ proto void pdf_closepath_fill_stroke(int pdfdoc)
+/* {{{ proto bool pdf_closepath_fill_stroke(resource pdfdoc)
    Close, fill and stroke current path */
 PHP_FUNCTION(pdf_closepath_fill_stroke)
 {
@@ -1467,7 +1468,7 @@ PHP_FUNCTION(pdf_closepath_fill_stroke)
 }
 /* }}} */
 
-/* {{{ proto void pdf_endpath(int pdfdoc)
+/* {{{ proto bool pdf_endpath(resource pdfdoc)
    Ends current path */
 PHP_FUNCTION(pdf_endpath) 
 {
@@ -1485,7 +1486,7 @@ PHP_FUNCTION(pdf_endpath)
 }
 /* }}} */
 
-/* {{{ proto void pdf_clip(int pdfdoc)
+/* {{{ proto bool pdf_clip(resource pdfdoc)
    Clips to current path */
 PHP_FUNCTION(pdf_clip)
 {
@@ -1503,7 +1504,7 @@ PHP_FUNCTION(pdf_clip)
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_parameter(int pdfdoc, string key, string value)
+/* {{{ proto bool pdf_set_parameter(resource pdfdoc, string key, string value)
    Sets arbitrary parameters */
 PHP_FUNCTION(pdf_set_parameter)
 {
@@ -1524,7 +1525,7 @@ PHP_FUNCTION(pdf_set_parameter)
 }
 /* }}} */
 
-/* {{{ proto string pdf_get_parameter(int pdfdoc, string key, mixed modifier)
+/* {{{ proto string pdf_get_parameter(resource pdfdoc, string key, mixed modifier)
    Gets arbitrary parameters */
 PHP_FUNCTION(pdf_get_parameter)
 {
@@ -1551,7 +1552,7 @@ PHP_FUNCTION(pdf_get_parameter)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setgray_fill(int pdfdoc, float value)
+/* {{{ proto bool pdf_setgray_fill(resource pdfdoc, float value)
    Sets filling color to gray value */
 PHP_FUNCTION(pdf_setgray_fill)
 {
@@ -1574,7 +1575,7 @@ PHP_FUNCTION(pdf_setgray_fill)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setgray_stroke(int pdfdoc, float value)
+/* {{{ proto bool pdf_setgray_stroke(resource pdfdoc, float value)
    Sets drawing color to gray value */
 PHP_FUNCTION(pdf_setgray_stroke) 
 {
@@ -1597,7 +1598,7 @@ PHP_FUNCTION(pdf_setgray_stroke)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setgray(int pdfdoc, float value)
+/* {{{ proto bool pdf_setgray(resource pdfdoc, float value)
    Sets drawing and filling color to gray value */
 PHP_FUNCTION(pdf_setgray)
 {
@@ -1620,7 +1621,7 @@ PHP_FUNCTION(pdf_setgray)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setrgbcolor_fill(int pdfdoc, float red, float green, float blue)
+/* {{{ proto bool pdf_setrgbcolor_fill(resource pdfdoc, float red, float green, float blue)
    Sets filling color to RGB color value */
 PHP_FUNCTION(pdf_setrgbcolor_fill)
 {
@@ -1645,7 +1646,7 @@ PHP_FUNCTION(pdf_setrgbcolor_fill)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setrgbcolor_stroke(int pdfdoc, float red, float green, float blue)
+/* {{{ proto bool pdf_setrgbcolor_stroke(resource pdfdoc, float red, float green, float blue)
    Sets drawing color to RGB color value */
 PHP_FUNCTION(pdf_setrgbcolor_stroke)
 {
@@ -1670,7 +1671,7 @@ PHP_FUNCTION(pdf_setrgbcolor_stroke)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setrgbcolor(int pdfdoc, float red, float green, float blue)
+/* {{{ proto bool pdf_setrgbcolor(resource pdfdoc, float red, float green, float blue)
    Sets drawing and filling color to RGB color value */
 PHP_FUNCTION(pdf_setrgbcolor)
 {
@@ -1695,7 +1696,7 @@ PHP_FUNCTION(pdf_setrgbcolor)
 }
 /* }}} */
 
-/* {{{ proto int pdf_add_bookmark(int pdfdoc, string text [, int parent, int open])
+/* {{{ proto int pdf_add_bookmark(resource pdfdoc, string text [, int parent [, int open]])
    Adds bookmark for current page */
 PHP_FUNCTION(pdf_add_bookmark)
 {
@@ -1749,7 +1750,7 @@ PHP_FUNCTION(pdf_add_bookmark)
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_transition(int pdfdoc, int transition)
+/* {{{ proto bool pdf_set_transition(resource pdfdoc, int transition)
    Sets transition between pages */
 PHP_FUNCTION(pdf_set_transition)
 {
@@ -1797,7 +1798,7 @@ PHP_FUNCTION(pdf_set_transition)
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_duration(int pdfdoc, float duration)
+/* {{{ proto bool pdf_set_duration(resource pdfdoc, float duration)
    Sets duration between pages */
 PHP_FUNCTION(pdf_set_duration)
 {
@@ -1849,7 +1850,7 @@ static void _php_pdf_open_image(INTERNAL_FUNCTION_PARAMETERS, char *type)
 }
 /* }}} */
 
-/* {{{ proto int pdf_open_gif(int pdf, string giffile)
+/* {{{ proto int pdf_open_gif(resource pdf, string giffile)
    Opens a GIF file and returns an image for placement in a pdf object */
 PHP_FUNCTION(pdf_open_gif)
 {
@@ -1857,7 +1858,7 @@ PHP_FUNCTION(pdf_open_gif)
 }
 /* }}} */
 
-/* {{{ proto int pdf_open_jpeg(int pdf, string jpegfile)
+/* {{{ proto int pdf_open_jpeg(resource pdf, string jpegfile)
    Opens a JPEG file and returns an image for placement in a PDF document */
 PHP_FUNCTION(pdf_open_jpeg)
 {
@@ -1865,7 +1866,7 @@ PHP_FUNCTION(pdf_open_jpeg)
 }
 /* }}} */
 
-/* {{{ proto int pdf_open_png(int pdf, string pngfile)
+/* {{{ proto int pdf_open_png(resource pdf, string pngfile)
    Opens a PNG file and returns an image for placement in a PDF document */
 PHP_FUNCTION(pdf_open_png)
 {
@@ -1873,7 +1874,7 @@ PHP_FUNCTION(pdf_open_png)
 }
 /* }}} */
 
-/* {{{ proto int pdf_open_tiff(int pdf, string tifffile)
+/* {{{ proto int pdf_open_tiff(resource pdf, string tifffile)
    Opens a TIFF file and returns an image for placement in a PDF document */
 PHP_FUNCTION(pdf_open_tiff)
 {
@@ -1881,7 +1882,7 @@ PHP_FUNCTION(pdf_open_tiff)
 }
 /* }}} */
 
-/* {{{ proto int pdf_open_image_file(int pdf, string type, string file, string stringparam, int intparam)
+/* {{{ proto int pdf_open_image_file(resource pdf, string type, string file [, string stringparam, int intparam])
    Opens an image file of the given type and returns an image for placement in a PDF document */
 PHP_FUNCTION(pdf_open_image_file)
 {
@@ -1948,7 +1949,7 @@ PHP_FUNCTION(pdf_open_image_file)
 /* }}} */
 
 #if HAVE_LIBGD13
-/* {{{ proto int pdf_open_memory_image(int pdf, int image)
+/* {{{ proto int pdf_open_memory_image(resource pdf, resource image)
    Takes an GD image and returns an image for placement in a PDF document */
 PHP_FUNCTION(pdf_open_memory_image)
 {
@@ -2015,7 +2016,7 @@ PHP_FUNCTION(pdf_open_memory_image)
 /* }}} */
 #endif /* HAVE_LIBGD13 */
 
-/* {{{ proto void pdf_close_image(int pdf, int pdfimage)
+/* {{{ proto void pdf_close_image(resource pdf, int pdfimage)
    Closes the PDF image */
 PHP_FUNCTION(pdf_close_image)
 {
@@ -2033,7 +2034,7 @@ PHP_FUNCTION(pdf_close_image)
 }
 /* }}} */
 
-/* {{{ proto void pdf_place_image(int pdf, int pdfimage, float x, float y, float scale)
+/* {{{ proto bool pdf_place_image(resource pdf, int pdfimage, float x, float y, float scale)
    Places image in the PDF document */
 PHP_FUNCTION(pdf_place_image)
 {
@@ -2056,7 +2057,7 @@ PHP_FUNCTION(pdf_place_image)
 }
 /* }}} */
 
-/* {{{ proto int pdf_get_image_width(int pdf, int pdfimage)
+/* {{{ proto int pdf_get_image_width(resource pdf, int pdfimage)
    Returns the width of an image */
 PHP_FUNCTION(pdf_get_image_width)
 {
@@ -2076,7 +2077,7 @@ PHP_FUNCTION(pdf_get_image_width)
 }
 /* }}} */
 
-/* {{{ proto int pdf_get_image_height(int pdf, int pdfimage)
+/* {{{ proto int pdf_get_image_height(resource pdf, int pdfimage)
    Returns the height of an image */
 PHP_FUNCTION(pdf_get_image_height)
 {
@@ -2096,7 +2097,7 @@ PHP_FUNCTION(pdf_get_image_height)
 }
 /* }}} */
 
-/* {{{ proto void pdf_add_weblink(int pdfdoc, float llx, float lly, float urx, float ury, string url)
+/* {{{ proto bool pdf_add_weblink(resource pdfdoc, float llx, float lly, float urx, float ury, string url)
    Adds link to web resource */
 PHP_FUNCTION(pdf_add_weblink)
 {
@@ -2123,7 +2124,7 @@ PHP_FUNCTION(pdf_add_weblink)
 }
 /* }}} */
 
-/* {{{ proto void pdf_add_pdflink(int pdfdoc, float llx, float lly, float urx, float ury, string filename, int page, string dest)
+/* {{{ proto bool pdf_add_pdflink(resource pdfdoc, float llx, float lly, float urx, float ury, string filename, int page, string dest)
    Adds link to PDF document */
 PHP_FUNCTION(pdf_add_pdflink)
 {
@@ -2155,7 +2156,7 @@ PHP_FUNCTION(pdf_add_pdflink)
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_border_style(int pdfdoc, string style, float width)
+/* {{{ proto bool pdf_set_border_style(resource pdfdoc, string style, float width)
    Sets style of box surounding all kinds of annotations and link */
 PHP_FUNCTION(pdf_set_border_style)
 {
@@ -2175,7 +2176,7 @@ PHP_FUNCTION(pdf_set_border_style)
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_border_color(int pdfdoc, float red, float green, float blue)
+/* {{{ proto bool pdf_set_border_color(resource pdfdoc, float red, float green, float blue)
    Sets color of box surounded all kinds of annotations and links */
 PHP_FUNCTION(pdf_set_border_color)
 {
@@ -2196,7 +2197,7 @@ PHP_FUNCTION(pdf_set_border_color)
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_border_dash(int pdfdoc, float black, float white)
+/* {{{ proto bool pdf_set_border_dash(resource pdfdoc, float black, float white)
    Sets the border dash style of all kinds of annotations and links */
 PHP_FUNCTION(pdf_set_border_dash)
 {
@@ -2216,7 +2217,7 @@ PHP_FUNCTION(pdf_set_border_dash)
 }
 /* }}} */
 
-/* {{{ proto void pdf_add_annotation(int pdfdoc, float xll, float yll, float xur, float xur, string title, string text)
+/* {{{ proto bool pdf_add_annotation(resource pdfdoc, float xll, float yll, float xur, float xur, string title, string text)
    Sets annotation (depreciated use pdf_add_note instead) */
 PHP_FUNCTION(pdf_add_annotation)
 {
@@ -2290,7 +2291,7 @@ PHP_FUNCTION(pdf_get_minorversion)
 }
 /* }}} */
 
-/* {{{ proto bool pdf_delete(int pdfdoc)
+/* {{{ proto bool pdf_delete(resource pdfdoc)
    Deletes the PDF object */
 PHP_FUNCTION(pdf_delete)
 {
@@ -2308,7 +2309,7 @@ PHP_FUNCTION(pdf_delete)
 }
 /* }}} */
 
-/* {{{ proto int pdf_open_file(int pdfdoc [, char filename])
+/* {{{ proto bool pdf_open_file(resource pdfdoc [, string filename])
    Opens a new PDF document. If filename is NULL, document is created in memory. This is not yet fully supported */
 
 PHP_FUNCTION(pdf_open_file)
@@ -2353,7 +2354,7 @@ PHP_FUNCTION(pdf_open_file)
 }
 /* }}} */
 
-/* {{{ proto string pdf_get_buffer(int pdfdoc)
+/* {{{ proto string pdf_get_buffer(resource pdfdoc)
    Fetches the full buffer containig the generated PDF data */
 PHP_FUNCTION(pdf_get_buffer)
 {
@@ -2374,7 +2375,7 @@ PHP_FUNCTION(pdf_get_buffer)
 }
 /* }}} */
 
-/* {{{ proto int pdf_findfont(int pdfdoc, string fontname, string encoding [, int embed])
+/* {{{ proto int pdf_findfont(resource pdfdoc, string fontname, string encoding [, int embed])
    Prepares the font fontname for later use with pdf_setfont() */
 PHP_FUNCTION(pdf_findfont)
 {
@@ -2421,7 +2422,7 @@ PHP_FUNCTION(pdf_findfont)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setfont(int pdfdoc, int font, float fontsize)
+/* {{{ proto bool pdf_setfont(resource pdfdoc, int font, float fontsize)
    Sets the current font in the fiven fontsize */
 PHP_FUNCTION(pdf_setfont)
 {
@@ -2449,7 +2450,7 @@ PHP_FUNCTION(pdf_setfont)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setpolydash(int pdfdoc, float darray)
+/* {{{ proto bool pdf_setpolydash(resource pdfdoc, float darray)
    Sets more complicated dash pattern */ 
 
 PHP_FUNCTION(pdf_setpolydash)
@@ -2494,7 +2495,7 @@ PHP_FUNCTION(pdf_setpolydash)
 }
 /* }}} */
 
-/* {{{ proto void pdf_concat(int pdf, float a, float b, float c, float d, float e, float f)
+/* {{{ proto bool pdf_concat(resource pdf, float a, float b, float c, float d, float e, float f)
    Concatenates a matrix to the current transformation matrix for text and graphics */
 PHP_FUNCTION(pdf_concat)
 {
@@ -2526,7 +2527,7 @@ PHP_FUNCTION(pdf_concat)
 }
 /* }}} */
 
-/* {{{ proto int pdf_open_ccitt(int pdf, string filename, int width, int height, int bitreverse, int k, int blackls1)
+/* {{{ proto int pdf_open_ccitt(resource pdf, string filename, int width, int height, int bitreverse, int k, int blackls1)
    Opens an image file with raw CCITT G3 or G4 compresed bitmap data */
 PHP_FUNCTION(pdf_open_ccitt)
 {
@@ -2570,7 +2571,7 @@ PHP_FUNCTION(pdf_open_ccitt)
 }
 /* }}} */
 
-/* {{{ proto int pdf_open_image(int pdf, string type, string source, string data, long length, int width, int height, int components, int bpc, string params)
+/* {{{ proto int pdf_open_image(resource pdf, string type, string source, string data, long length, int width, int height, int components, int bpc, string params)
    Opens an image of the given type and returns an image for placement in a PDF document */
 PHP_FUNCTION(pdf_open_image)
 {
@@ -2620,7 +2621,7 @@ PHP_FUNCTION(pdf_open_image)
 }
 /* }}} */
 
-/* {{{ proto void pdf_attach_file(int pdf, float lly, float lly, float urx, float ury, string filename, string description, string author, string mimetype, string icon)
+/* {{{ proto bool pdf_attach_file(resource pdf, float lly, float lly, float urx, float ury, string filename, string description, string author, string mimetype, string icon)
    Adds a file attachment annotation at the rectangle specified by his lower left and upper right corners */
 PHP_FUNCTION(pdf_attach_file)
 {
@@ -2662,7 +2663,7 @@ PHP_FUNCTION(pdf_attach_file)
 }
 /* }}} */
 
-/* {{{ proto void pdf_add_note(int pdfdoc, float llx, float lly, float urx, float ury, string contents, string title, string icon, int open)
+/* {{{ proto bool pdf_add_note(resource pdfdoc, float llx, float lly, float urx, float ury, string contents, string title, string icon, int open)
    Sets annotation */
 PHP_FUNCTION(pdf_add_note)
 {
@@ -2698,7 +2699,7 @@ PHP_FUNCTION(pdf_add_note)
 }
 /* }}} */
 
-/* {{{ proto void pdf_add_locallink(int pdfdoc, float llx, float lly, float urx, float ury, int page, string dest)
+/* {{{ proto bool pdf_add_locallink(resource pdfdoc, float llx, float lly, float urx, float ury, int page, string dest)
    Adds link to web resource */
 PHP_FUNCTION(pdf_add_locallink)
 {
@@ -2730,7 +2731,7 @@ PHP_FUNCTION(pdf_add_locallink)
 }
 /* }}} */
 
-/* {{{ proto void pdf_add_launchlink(int pdfdoc, float llx, float lly, float urx, float ury, string filename)
+/* {{{ proto bool pdf_add_launchlink(resource pdfdoc, float llx, float lly, float urx, float ury, string filename)
    Adds link to web resource */
 PHP_FUNCTION(pdf_add_launchlink)
 {
@@ -2762,7 +2763,7 @@ PHP_FUNCTION(pdf_add_launchlink)
 
 #if (PDFLIB_MAJORVERSION >= 4)
 
-/* {{{ proto int pdf_open_pdi(int pdf, string filename, string stringparam, int intparam);
+/* {{{ proto int pdf_open_pdi(resource pdf, string filename, string stringparam, int intparam);
  * Open an existing PDF document and prepare it for later use. */
 PHP_FUNCTION(pdf_open_pdi)
 {
@@ -2800,7 +2801,7 @@ PHP_FUNCTION(pdf_open_pdi)
 }
 /* }}} */
 
-/* {{{ proto void pdf_close_pdi(int pdf, int doc);
+/* {{{ proto bool pdf_close_pdi(resource pdf, int doc);
  * Close all open page handles, and close the input PDF document. */
 PHP_FUNCTION(pdf_close_pdi)
 {
@@ -2815,14 +2816,13 @@ PHP_FUNCTION(pdf_close_pdi)
 
 	convert_to_long_ex(arg2);
 
-	PDF_close_pdi(pdf,
-		Z_LVAL_PP(arg2)-PDFLIB_PDI_OFFSET);
+	PDF_close_pdi(pdf, Z_LVAL_PP(arg2)-PDFLIB_PDI_OFFSET);
 
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto int pdf_open_pdi_page(int pdf, int doc, int page, string label);
+/* {{{ proto int pdf_open_pdi_page(resource pdf, int doc, int page, string label);
  * Prepare a page for later use with PDF_place_image(). */
 PHP_FUNCTION(pdf_open_pdi_page)
 {
@@ -2849,7 +2849,7 @@ PHP_FUNCTION(pdf_open_pdi_page)
 }
 /* }}} */
 
-/* {{{ proto void pdf_place_pdi_page(int pdf, int page, float x, float y, float sx, float sy)
+/* {{{ proto bool pdf_place_pdi_page(resource pdf, int page, float x, float y, float sx, float sy)
  * Place a PDF page with the lower left corner at (x, y), and scale it. */
 PHP_FUNCTION(pdf_place_pdi_page)
 {
@@ -2879,7 +2879,7 @@ PHP_FUNCTION(pdf_place_pdi_page)
 }
 /* }}} */
 
-/* {{{ proto void pdf_close_pdi_page(int pdf, int page);
+/* {{{ proto bool pdf_close_pdi_page(resource pdf, int page);
  * Close the page handle, and free all page-related resources. */
 PHP_FUNCTION(pdf_close_pdi_page)
 {
@@ -2894,14 +2894,13 @@ PHP_FUNCTION(pdf_close_pdi_page)
 
 	convert_to_long_ex(arg2);
 
-	PDF_close_pdi_page(pdf,
-		Z_LVAL_PP(arg2)-PDFLIB_IMAGE_OFFSET);
+	PDF_close_pdi_page(pdf, Z_LVAL_PP(arg2)-PDFLIB_IMAGE_OFFSET);
 
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto string pdf_get_pdi_parameter(int pdf, string key, int doc, int page, int index);
+/* {{{ proto string pdf_get_pdi_parameter(resource pdf, string key, int doc, int page, int index);
  * Get the contents of some PDI document parameter with string type. */
 PHP_FUNCTION(pdf_get_pdi_parameter)
 {
@@ -2932,7 +2931,7 @@ PHP_FUNCTION(pdf_get_pdi_parameter)
 }
 /* }}} */
 
-/* {{{ proto float pdf_get_pdi_value(int pdf, string key, int doc, int page, int index);
+/* {{{ proto float pdf_get_pdi_value(resource pdf, string key, int doc, int page, int index);
  * Get the contents of some PDI document parameter with numerical type. */
 PHP_FUNCTION(pdf_get_pdi_value)
 {
@@ -2961,7 +2960,7 @@ PHP_FUNCTION(pdf_get_pdi_value)
 }
 /* }}} */
 
-/* {{{ proto int pdf_begin_pattern(int pdf, float width, float height, float xstep, float ystep, int painttype);
+/* {{{ proto int pdf_begin_pattern(resource pdf, float width, float height, float xstep, float ystep, int painttype);
  * Start a new pattern definition. */
 PHP_FUNCTION(pdf_begin_pattern)
 {
@@ -2992,7 +2991,7 @@ PHP_FUNCTION(pdf_begin_pattern)
 }
 /* }}} */
 
-/* {{{ proto void pdf_end_pattern(int pdf);
+/* {{{ proto bool pdf_end_pattern(resource pdf);
  * Finish the pattern definition. */
 PHP_FUNCTION(pdf_end_pattern)
 {
@@ -3011,7 +3010,7 @@ PHP_FUNCTION(pdf_end_pattern)
 }
 /* }}} */
 
-/* {{{ proto int pdf_begin_template(int pdf, float width, float height);
+/* {{{ proto int pdf_begin_template(resource pdf, float width, float height);
  * Start a new template definition. */
 PHP_FUNCTION(pdf_begin_template)
 {
@@ -3036,7 +3035,7 @@ PHP_FUNCTION(pdf_begin_template)
 }
 /* }}} */
 
-/* {{{ proto void pdf_end_template(int pdf);
+/* {{{ proto bool pdf_end_template(resource pdf);
  * Finish the template definition. */
 PHP_FUNCTION(pdf_end_template)
 {
@@ -3056,7 +3055,7 @@ PHP_FUNCTION(pdf_end_template)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setcolor(int pdf, string type, string colorspace, float c1 [, float c2 [, float c3 [, float c4]]]);
+/* {{{ proto bool pdf_setcolor(resource pdf, string type, string colorspace, float c1 [, float c2 [, float c3 [, float c4]]]);
  * Set the current color space and color. */
 PHP_FUNCTION(pdf_setcolor)
 {
@@ -3120,7 +3119,7 @@ PHP_FUNCTION(pdf_setcolor)
 }
 /* }}} */
 
-/* {{{ proto int pdf_makespotcolor(int pdf, string spotname);
+/* {{{ proto int pdf_makespotcolor(resource pdf, string spotname);
  * Make a named spot color from the current color. */
 PHP_FUNCTION(pdf_makespotcolor)
 {
@@ -3144,7 +3143,7 @@ PHP_FUNCTION(pdf_makespotcolor)
 }
 /* }}} */
 
-/* {{{ proto void pdf_arcn(int pdf, float x, float y, float r, float alpha, float beta);
+/* {{{ proto bool pdf_arcn(resource pdf, float x, float y, float r, float alpha, float beta);
  * Draw a clockwise circular arc from alpha to beta degrees. */
 PHP_FUNCTION(pdf_arcn)
 {
@@ -3174,7 +3173,7 @@ PHP_FUNCTION(pdf_arcn)
 }
 /* }}} */
 
-/* {{{ proto void pdf_initgraphics(int pdf);
+/* {{{ proto bool pdf_initgraphics(resource pdf);
  * Reset all implicit color and graphics state parameters to their defaults. */
 PHP_FUNCTION(pdf_initgraphics)
 {
@@ -3193,7 +3192,7 @@ PHP_FUNCTION(pdf_initgraphics)
 }
 /* }}} */
 
-/* {{{ proto void pdf_add_thumbnail(int pdf, int image);
+/* {{{ proto bool pdf_add_thumbnail(resource pdf, int image);
  * Add an existing image as thumbnail for the current page. */
 PHP_FUNCTION(pdf_add_thumbnail)
 {
@@ -3215,7 +3214,7 @@ PHP_FUNCTION(pdf_add_thumbnail)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setmatrix(int pdf, float a, float b, float c, float d, float e, float f)
+/* {{{ proto bool pdf_setmatrix(resource pdf, float a, float b, float c, float d, float e, float f)
    Explicitly set the current transformation matrix. */
 PHP_FUNCTION(pdf_setmatrix)
 { 

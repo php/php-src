@@ -397,7 +397,7 @@ static int _ora_ping(oraConnection *conn)
    ** PHP functions
 */
 
-/* {{{ proto int ora_logon(string user, string password)
+/* {{{ proto resource ora_logon(string user, string password)
    Open an Oracle connection */
 PHP_FUNCTION(ora_logon)
 {
@@ -405,7 +405,7 @@ PHP_FUNCTION(ora_logon)
 }
 /* }}} */
 
-/* {{{ proto int ora_plogon(string user, string password)
+/* {{{ proto resource ora_plogon(string user, string password)
    Open a persistent Oracle connection */
 PHP_FUNCTION(ora_plogon)
 {
@@ -588,7 +588,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 }
 /* }}} */
 
-/* {{{ proto int ora_logoff(int connection)
+/* {{{ proto bool ora_logoff(resource connection)
    Close an Oracle connection */
 PHP_FUNCTION(ora_logoff)
 {								/* conn_index */
@@ -606,7 +606,7 @@ PHP_FUNCTION(ora_logoff)
 }
 /* }}} */
 
-/* {{{ proto int ora_open(int connection)
+/* {{{ proto resource ora_open(resource connection)
    Open an Oracle cursor */
 PHP_FUNCTION(ora_open)
 {								/* conn_index */
@@ -635,7 +635,7 @@ PHP_FUNCTION(ora_open)
 
 /* }}} */
 
-/* {{{ proto int ora_close(int cursor)
+/* {{{ proto bool ora_close(resource cursor)
    Close an Oracle cursor */
 PHP_FUNCTION(ora_close)
 {								/* conn_index */
@@ -653,7 +653,7 @@ PHP_FUNCTION(ora_close)
 }
 /* }}} */
 
-/* {{{ proto int ora_commitoff(int connection)
+/* {{{ proto bool ora_commitoff(resource connection)
    Disable automatic commit */
 PHP_FUNCTION(ora_commitoff)
 {								/* conn_index */
@@ -674,7 +674,7 @@ PHP_FUNCTION(ora_commitoff)
 }
 /* }}} */
 
-/* {{{ proto int ora_commiton(int connection)
+/* {{{ proto bool ora_commiton(resource connection)
    Enable automatic commit */
 PHP_FUNCTION(ora_commiton)
 {								/* conn_index */
@@ -695,7 +695,7 @@ PHP_FUNCTION(ora_commiton)
 }
 /* }}} */
 
-/* {{{ proto int ora_commit(int connection)
+/* {{{ proto bool ora_commit(resource connection)
    Commit an Oracle transaction */
 PHP_FUNCTION(ora_commit)
 {								/* conn_index */
@@ -716,7 +716,7 @@ PHP_FUNCTION(ora_commit)
 }
 /* }}} */
 
-/* {{{ proto int ora_rollback(int connection)
+/* {{{ proto bool ora_rollback(resource connection)
    Roll back an Oracle transaction */
 PHP_FUNCTION(ora_rollback)
 {								/* conn_index */
@@ -737,7 +737,7 @@ PHP_FUNCTION(ora_rollback)
 }
 /* }}} */
 
-/* {{{ proto int ora_parse(int cursor, string sql_statement [, int defer])
+/* {{{ proto bool ora_parse(resource cursor, string sql_statement [, int defer])
    Parse an Oracle SQL statement */
 PHP_FUNCTION(ora_parse)
 {	
@@ -796,7 +796,7 @@ PHP_FUNCTION(ora_parse)
 }
 /* }}} */
 
-/* {{{ proto int ora_bind(int cursor, string php_variable_name, string sql_parameter_name, int length [, int type])
+/* {{{ proto bool ora_bind(resource cursor, string php_variable_name, string sql_parameter_name, int length [, int type])
    Bind a PHP variable to an Oracle parameter */
 PHP_FUNCTION(ora_bind)
 { 
@@ -893,7 +893,7 @@ PHP_FUNCTION(ora_bind)
 /*
   XXX Make return values compatible with old module ? 
  */
-/* {{{ proto int ora_exec(int cursor)
+/* {{{ proto bool ora_exec(resource cursor)
    Execute a parsed statement */
 PHP_FUNCTION(ora_exec)
 {								/* cursor_index */
@@ -935,7 +935,7 @@ PHP_FUNCTION(ora_exec)
 }
 /* }}} */
 
-/* {{{ proto int ora_numcols(int cursor)
+/* {{{ proto int ora_numcols(resource cursor)
    Returns the numbers of columns in a result */
 PHP_FUNCTION(ora_numcols)
 {								/* cursor_index */
@@ -953,7 +953,7 @@ PHP_FUNCTION(ora_numcols)
 }
 /* }}} */
 
-/* {{{ proto int ora_numrows(int cursor)
+/* {{{ proto int ora_numrows(resource cursor)
    Returns the number of rows in a result */
 PHP_FUNCTION(ora_numrows)
 {								/* cursor_index */
@@ -972,7 +972,7 @@ PHP_FUNCTION(ora_numrows)
 /* }}} */
 
 /* prepares/executes/fetches 1st row if avail*/
-/* {{{ proto int ora_do(int connection, int cursor)
+/* {{{ proto resource ora_do(resource connection, resource cursor)
    Parse and execute a statement and fetch first result row */ 
 PHP_FUNCTION(ora_do)
 {
@@ -1047,7 +1047,7 @@ PHP_FUNCTION(ora_do)
 }
 /* }}} */
 
-/* {{{ proto int ora_fetch(int cursor)
+/* {{{ proto bool ora_fetch(resource cursor)
    Fetch a row of result data from a cursor */
 PHP_FUNCTION(ora_fetch)
 {								/* cursor_index */
@@ -1080,7 +1080,7 @@ PHP_FUNCTION(ora_fetch)
 }
 /* }}} */
 
-/* {{{ proto int ora_fetch_into(int cursor, array result [, int flags])
+/* {{{ proto int ora_fetch_into(resource cursor, array result [, int flags])
    Fetch a row into the specified result array */
 PHP_FUNCTION(ora_fetch_into)
 {
@@ -1214,7 +1214,7 @@ PHP_FUNCTION(ora_fetch_into)
 }
 /* }}} */
 
-/* {{{ proto string ora_columnname(int cursor, int column)
+/* {{{ proto string ora_columnname(resource cursor, int column)
    Get the name of an Oracle result column */
 PHP_FUNCTION(ora_columnname)
 {								/* cursor_index, column_index */
@@ -1251,7 +1251,7 @@ PHP_FUNCTION(ora_columnname)
 }
 /* }}} */
 
-/* {{{ proto string ora_columntype(int cursor, int column) 
+/* {{{ proto string ora_columntype(resource cursor, int column)
    Get the type of an Oracle result column */
 PHP_FUNCTION(ora_columntype)
 {								/* cursor_index, column_index */
@@ -1356,7 +1356,7 @@ PHP_FUNCTION(ora_columnsize)
 }
 /* }}} */
 
-/* {{{ proto mixed ora_getcolumn(int cursor, int column)
+/* {{{ proto mixed ora_getcolumn(resource cursor, int column)
    Get data from a fetched row */
 PHP_FUNCTION(ora_getcolumn)
 {								/* cursor_index, column_index */
@@ -1483,7 +1483,7 @@ PHP_FUNCTION(ora_getcolumn)
 }
 /* }}} */
 
-/* {{{ proto string ora_error(int cursor_or_connection)
+/* {{{ proto string ora_error(resource cursor_or_connection)
    Get an Oracle error message */
 PHP_FUNCTION(ora_error)
 {
@@ -1515,7 +1515,7 @@ PHP_FUNCTION(ora_error)
 }
 /* }}} */
 
-/* {{{ proto int ora_errorcode(int cursor_or_connection)
+/* {{{ proto int ora_errorcode(resource cursor_or_connection)
    Get an Oracle error code */
 PHP_FUNCTION(ora_errorcode)
 {
