@@ -18,7 +18,7 @@ if test "$PHP_SOCKETS" != "no"; then
     AC_DEFINE(HAVE_CMSGHDR,1,[Whether you have struct cmsghdr])
   fi 
 
-  AC_CHECK_FUNCS([hstrerror])
+  AC_CHECK_FUNCS([hstrerror set_h_errno])
   AC_CHECK_HEADERS([netdb.h netinet/tcp.h sys/un.h errno.h])
   AC_TRY_COMPILE([
 #include <sys/types.h>

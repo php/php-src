@@ -57,7 +57,11 @@
 # include <sys/uio.h>
 # define IS_INVALID_SOCKET(a)	(a->bsd_socket < 0)
 # define set_errno(a) (errno = a)
-# define set_h_errno(a) (h_errno = a)
+# ifdef HAVE_SET_H_ERRNO
+#  define SET_H_ERRNO(newval) set_h_errno(newval)
+# else
+#  define SET_H_ERRNO(newval) h_errno = (newval)
+# endif
 #else /* windows */
 # include "php_sockets.h"
 # include "php_sockets_win.h"
@@ -1762,7 +1766,7 @@ PHP_FUNCTION(socket_sendmsg)
 				struct msghdr hdr;
 				struct sockaddr_in *sin = (struct sockaddr_in *) &sa;
 				
-				set_h_errno(0);
+				SET_H_ERRNO(0);
 				set_errno(0);
 				
 				memset(&hdr, 0, sizeof(hdr));

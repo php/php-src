@@ -41,7 +41,7 @@
 #define errno WSAGetLastError()
 #define h_errno WSAGetLastError()
 #define set_errno(a) WSASetLastError(a)
-#define set_h_errno(a) WSASetLastError(a)
+#define SET_H_ERRNO(a) WSASetLastError(a)
 #define close(a) closesocket(a)
 #define CMSG_DATA(cmsg) ((cmsg)->cmsg_data)
 

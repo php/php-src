@@ -7,6 +7,7 @@ PHP 4                                                                      NEWS
 - Fixed several leaks in ext/filepro. (Tony)
 - Fixed build system to always use bundled libtool files. (Jani)  
 - Fixed MacOSX shared extensions crashing on Apache startup. (Rasmus)
+- Fixed bug #31936 (set_h_errno() is redefined incompatibly). (Jani)
 - Fixed bug #31858 (--disable-cli does not force --without-pear). (Jani)
 - Fixed bug #31842 (*date('r') does not return RFC2822 conforming date string).
   (Jani)
