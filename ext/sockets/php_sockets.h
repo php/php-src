@@ -97,7 +97,8 @@ typedef struct {
 } php_fd_set;
 
 typedef struct {
-	unsigned char	info[256];
+	long family;
+	char info[256];
 } php_sockaddr_storage;
 
 typedef struct {
