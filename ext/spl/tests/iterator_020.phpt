@@ -3,8 +3,6 @@ SPL: AppendIterator
 --FILE--
 <?php
 
-require_once('examples.inc');
-
 echo "===Empty===\n";
 
 $it = new AppendIterator;
