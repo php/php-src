@@ -1,3 +1,56 @@
+2004-03-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/type_hinting_002.phpt:
+      Add new test
+
+    * ZendEngine2/zend.c:
+      Even though it is uncommented it should be right
+
+2004-03-27  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.dsp:
+      added missing files of oniguruma to mbstring.dsp.
+
+2004-03-27  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * acinclude.m4:
+      Put AC_DEFINE in correct place so caching will work properly
+
+2004-03-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      main/SAPI.c:
+      Fixed bug #27687 (Bug Adding Default Charset to 'text/*' Content-Type
+      Header
+
+    * ext/standard/config.m4:
+      Move defines to proper location
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c:
+      Touch after .c
+
+    * ext/standard/tests/math/bug27646.phpt:
+      
+      Portable solution for bug #27646 that works correct on Windows, too
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/config.m4
+      ext/standard/var_unserializer.re:
+      Portable solution for bug #27646 that works correct on Windows, too
+
+    * ext/ming/php_ming.h:
+      Commit the header, too.
+
+    * ext/ming/ming.c:
+      Follow ming_xy naming convention
+
 2004-03-26  Frank M. Kromann  <frank@kromann.info>
 
     * ext/ming/ming.c:
