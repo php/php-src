@@ -1116,10 +1116,15 @@ static int hash_zval_identical_function(const zval **z1, const zval **z2)
 {
 	zval result;
 
+	/* is_identical_function() returns 1 in case of identity and 0 in case
+	 * of a difference;
+	 * whereas this comparison function is expected to return 0 on identity,
+	 * and non zero otherwise.
+	 */
 	if (is_identical_function(&result, (zval *) *z1, (zval *) *z2)==FAILURE) {
-		return 0;
+		return 1;
 	}
-	return result.value.lval;
+	return !result.value.lval;
 }
 
 
@@ -1133,17 +1138,14 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 	switch (op1->type) {
 		case IS_NULL:
 			result->value.lval = (op2->type==IS_NULL);
-			return SUCCESS;
 			break;
 		case IS_BOOL:
 		case IS_LONG:
 		case IS_RESOURCE:
 			result->value.lval = (op1->value.lval == op2->value.lval);
-			return SUCCESS;
 			break;
 		case IS_DOUBLE:
 			result->value.lval = (op1->value.dval == op2->value.dval);
-			return SUCCESS;
 			break;
 		case IS_STRING:
 			if ((op1->value.str.len == op2->value.str.len)
@@ -1152,10 +1154,9 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 			} else {
 				result->value.lval = 0;
 			}
-			return SUCCESS;
 			break;
 		case IS_ARRAY:
-			if (zend_hash_compare(op1->value.ht, op2->value.ht, hash_zval_identical_function)==0) {
+			if (zend_hash_compare(op1->value.ht, op2->value.ht, hash_zval_identical_function, 1)==0) {
 				result->value.lval = 1;
 			} else {
 				result->value.lval = 0;
@@ -1165,16 +1166,18 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 			if (op1->value.obj.ce != op2->value.obj.ce) {
 				result->value.lval = 0;
 			} else {
-				if (zend_hash_compare(op1->value.obj.properties, op2->value.obj.properties, hash_zval_identical_function)==0) {
+				if (zend_hash_compare(op1->value.obj.properties, op2->value.obj.properties, hash_zval_identical_function, 1)==0) {
 					result->value.lval = 1;
 				} else {
 					result->value.lval = 0;
 				}
 			}
 			break;
+		default:
+			var_reset(result);
+			return FAILURE;
 	}
-	var_reset(result);
-	return FAILURE;
+	return SUCCESS;
 }
 
 
@@ -1536,7 +1539,7 @@ static int hash_zval_compare_function(const zval **z1, const zval **z2)
 	zval result;
 
 	if (compare_function(&result, (zval *) *z1, (zval *) *z2)==FAILURE) {
-		return 0;
+		return 1;
 	}
 	return result.value.lval;
 }
@@ -1546,7 +1549,7 @@ static int hash_zval_compare_function(const zval **z1, const zval **z2)
 ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2)
 {
 	result->type = IS_LONG;
-	result->value.lval = zend_hash_compare(ht1, ht2, hash_zval_compare_function);
+	result->value.lval = zend_hash_compare(ht1, ht2, hash_zval_compare_function, 0);
 }
 
 
