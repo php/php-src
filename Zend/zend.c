@@ -260,6 +260,8 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals)
 	zend_function tmp_func;
 	zend_class_entry tmp_class;
 
+	compiler_globals->compiled_filename = NULL;
+
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(compiler_globals->function_table, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
 	zend_hash_copy(compiler_globals->function_table, global_function_table, NULL, &tmp_func, sizeof(zend_function));
