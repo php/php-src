@@ -130,6 +130,14 @@ typedef struct _oo_class_data {
 	(ce).handle_property_set  = NULL; \
 	(ce).handle_function_call = NULL;
 
+/*
+ * In all three handlers, we save the original CE of the object, and replace it
+ * with a temporary one that has all handlers turned off. This is to avoid
+ * recursive calls to our handlers. We can't simply set a handler to NULL on the
+ * original CE, as that would disable overloading on other objects of the same
+ * class. After invoking the callback we restore the object's CE.
+ */
+
 /* {{{ int call_get_handler() */
 static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSRMLS_DC)
 {
@@ -141,13 +149,6 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 	zval *retval = NULL;
 	oo_class_data oo_data;
 
-	/*
-	 * Save original CE of the object, and make it use a temporary one
-	 * that has all handlers turned off. This is to avoid recursive
-	 * calls to overload_property_get. We can't just change
-	 * handle_property_get to NULL on the original CE, as that would
-	 * disable overloading on other objects of the same class.
-	 */
 	temp_ce = *Z_OBJCE_P(object);
 	DISABLE_HANDLERS(temp_ce);
 	orig_ce = Z_OBJCE_P(object);
@@ -167,7 +168,6 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 										&retval,
 										2, args,
 										0, NULL TSRMLS_CC);
-	/* Restore object's original CE. */
 	Z_OBJCE_P(object) = orig_ce;
 
 	if (call_result == FAILURE || !retval) {
@@ -210,13 +210,6 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 	zval *retval = NULL;
 	oo_class_data oo_data;
 
-	/*
-	 * Save original CE of the object, and make it use a temporary one
-	 * that has all handlers turned off. This is to avoid recursive
-	 * calls to overload_property_set. We can't just change
-	 * handle_property_set to NULL on the original CE, as that would
-	 * disable overloading on other objects of the same class.
-	 */
 	temp_ce = *Z_OBJCE_P(object);
 	DISABLE_HANDLERS(temp_ce);
 	orig_ce = Z_OBJCE_P(object);
@@ -238,7 +231,6 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 										&retval,
 										2, args,
 										0, NULL TSRMLS_CC);
-	/* Restore object's original CE. */
 	Z_OBJCE_P(object) = orig_ce;
 
 	if (call_result == FAILURE || !retval) {
@@ -297,7 +289,8 @@ static zval overload_get_property(zend_property_reference *property_reference)
 			/* Trying to access a property on a non-object. */
 			if (Z_TYPE(object) != IS_OBJECT) {
 				CLEANUP_OO_CHAIN();
-				zval_dtor(&object);
+				if (got_prop)
+					zval_dtor(&object);
 				return result;
 			}
 
@@ -316,14 +309,16 @@ static zval overload_get_property(zend_property_reference *property_reference)
 			} else {
 				php_error(E_NOTICE, "Undefined property: %s", Z_STRVAL(overloaded_property->element));	
 				CLEANUP_OO_CHAIN();
-				zval_dtor(&object);
+				if (got_prop)
+					zval_dtor(&object);
 				return result;
 			}
 		} else if (Z_TYPE_P(overloaded_property) == OE_IS_ARRAY) {
 			/* Trying to access index on a non-array. */
 			if (Z_TYPE(object) != IS_ARRAY) {
 				CLEANUP_OO_CHAIN();
-				zval_dtor(&object);
+				if (got_prop)
+					zval_dtor(&object);
 				return result;
 			}
 
@@ -333,7 +328,8 @@ static zval overload_get_property(zend_property_reference *property_reference)
 								   Z_STRLEN(overloaded_property->element)+1,
 								   (void **)&real_prop) == FAILURE) {
 					CLEANUP_OO_CHAIN();
-					zval_dtor(&object);
+					if (got_prop)
+						zval_dtor(&object);
 					return result;
 				}
 			} else if (Z_TYPE(overloaded_property->element) == IS_LONG) {
@@ -341,7 +337,8 @@ static zval overload_get_property(zend_property_reference *property_reference)
 										  Z_LVAL(overloaded_property->element),
 										  (void **)&real_prop) == FAILURE) {
 					CLEANUP_OO_CHAIN();
-					zval_dtor(&object);
+					if (got_prop)
+						zval_dtor(&object);
 					return result;
 				}
 			}
@@ -433,9 +430,8 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 {
 	zval ***args;
 	zval *retval = NULL;
-	int call_result, arg_offset = 1;
+	int call_result;
 	zend_bool use_call_handler = 1;
-	zend_class_entry temp_ce, *orig_ce;
 	zval *object = property_reference->object;
 	zval call_handler, method_name, *method_name_ptr = &method_name;
 	zend_overloaded_element *method = (zend_overloaded_element *)property_reference->elements_list->tail->data;
@@ -444,18 +440,22 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 						 Z_STRVAL(method->element),
 						 Z_STRLEN(method->element) + 1)) {
 		use_call_handler = 0;
-		arg_offset = 0;
 	}
 
-	args = (zval ***)emalloc((ZEND_NUM_ARGS() + arg_offset) * sizeof(zval **));
+	args = (zval ***)emalloc(ZEND_NUM_ARGS() * sizeof(zval **));
 
-	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), &args[arg_offset]) == FAILURE) {
+	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
 		efree(args);
 		php_error(E_WARNING, "unable to obtain arguments");
 		return;
 	}
 
 	if (use_call_handler) {
+		zval **handler_args[2];
+		zval *arg_array;
+		zend_class_entry temp_ce, *orig_ce;
+		int i;
+
 		temp_ce = *Z_OBJCE_P(object);
 		DISABLE_HANDLERS(temp_ce);
 		orig_ce = Z_OBJCE_P(object);
@@ -463,32 +463,46 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 
 		ZVAL_STRINGL(&call_handler, CALL_HANDLER, sizeof(CALL_HANDLER)-1, 0);
 		ZVAL_STRINGL(&method_name, Z_STRVAL(method->element), Z_STRLEN(method->element), 0);
+		INIT_PZVAL(&call_handler);
 		INIT_PZVAL(method_name_ptr);
-		args[0] = &method_name_ptr;
+
+		MAKE_STD_ZVAL(arg_array);
+		array_init(arg_array);
+		for (i = 0; i < ZEND_NUM_ARGS(); i++) {
+			zval_add_ref(args[i]);
+			add_next_index_zval(arg_array, *args[i]);
+		}
+		
+		handler_args[0] = &method_name_ptr;
+		handler_args[1] = &arg_array;
+		call_result = call_user_function_ex(NULL,
+											&object,
+											&call_handler,
+											&retval,
+											2, handler_args,
+											0, NULL TSRMLS_CC);
+		Z_OBJCE_P(object) = orig_ce;
+		zval_ptr_dtor(&arg_array);
+
+		if (call_result == FAILURE || !retval) {
+			efree(args);
+			php_error(E_WARNING, "unable to call %s::__call() handler", Z_OBJCE_P(object)->name);
+			return;
+		}
 	} else {
 		ZVAL_STRINGL(&call_handler, Z_STRVAL(method->element), Z_STRLEN(method->element), 0);
-	}
-	INIT_PZVAL(&call_handler);
-	
-	call_result = call_user_function_ex(NULL,
-										&object,
-										&call_handler,
-										&retval,
-										ZEND_NUM_ARGS() + arg_offset, args,
-										0, NULL TSRMLS_CC);
+		call_result = call_user_function_ex(NULL,
+											&object,
+											&call_handler,
+											&retval,
+											ZEND_NUM_ARGS(), args,
+											0, NULL TSRMLS_CC);
 
-	if (use_call_handler) {
-		/* Restore object's original CE. */
-		Z_OBJCE_P(object) = orig_ce;
-	}
-
-	if (call_result == FAILURE || !retval) {
-		efree(args);
-		if (use_call_handler)
-			php_error(E_WARNING, "unable to call %s::__call() handler", orig_ce->name);
-		else
-			php_error(E_WARNING, "unable to call %s::%s() method", orig_ce->name, Z_STRVAL(method->element));
-		return;
+		if (call_result == FAILURE || !retval) {
+			efree(args);
+			php_error(E_WARNING, "unable to call %s::%s() method", Z_OBJCE_P(object)->name, Z_STRVAL(method->element));
+			return;
+		}
 	}
 
 	*return_value = *retval;
