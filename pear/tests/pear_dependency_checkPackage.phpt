@@ -11,6 +11,7 @@ if (!getenv('PHP_PEAR_RUNTESTS')) {
 require_once "PEAR/Registry.php";
 require_once "PEAR/Dependency.php";
 
+mkdir(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'checkPackagetmp');
 // snarfed from pear_registry.phpt
 $reg = new PEAR_Registry;
 $reg->statedir = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'checkPackagetmp';
@@ -200,6 +201,8 @@ function cleanall()
             unlink(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'checkPackagetmp' . DIRECTORY_SEPARATOR . $ent);
         }
     }
+    closedir($dp);
+    rmdir(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'checkPackagetmp');
 }
 
 ?>

@@ -1,5 +1,5 @@
 --TEST--
-PEAR_Dependency::checkPackageUninstall() test
+PEAR_Dependency::checkExtension() test
 --SKIPIF--
 <?php
 if (!getenv('PHP_PEAR_RUNTESTS')) {
@@ -55,6 +55,7 @@ if (!$notloaded || !$loaded) {
 --FILE--
 <?php
 
+@mkdir(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'checkPackagetmp');
 require_once "PEAR/Registry.php";
 require_once "PEAR/Dependency.php";
 
@@ -221,6 +222,8 @@ function cleanall()
             unlink(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'checkPackagetmp' . DIRECTORY_SEPARATOR . $ent);
         }
     }
+    closedir($dp);
+    rmdir(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'checkPackagetmp');
 }
 
 ?>
