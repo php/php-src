@@ -1,3 +1,37 @@
+2000-02-08  Zeev Suraski  <zeev@php.net>
+
+    * ext/gd/gd.c
+      ext/gd/gdttf.c
+      ext/gd/gdttf.h
+      ext/imap/imap.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/standard/base64.c
+      ext/standard/php_string.h
+      ext/standard/string.c
+      ext/standard/url.c
+      dl/snmp/winsnmp.c:
+    Change string->str where possible;  string is basic a C++ class, so gdb can't look
+    inside variables named 'string'.
+
+    * ext/standard/file.c
+      ext/standard/php_string.h
+      ext/standard/string.c
+      ext/zlib/zlib.c:
+2000-02-08  Andrei Zmievski  <andrei@ispi.net>
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/mod_php4.h
+      NEWS: New function notice.
+
+2000-02-08  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hw.c: - made hyperwave extension compile again
+
+2000-02-08  Evan Klinger  <evan715@sirius.com>
+
+    * dl/calendar/calendar.c
+      dl/calendar/sdncal.h:    calendar.so now works with php4.
+
 2000-02-07  Thies C. Arntzen  <thies@digicol.de>
 
     * ext/standard/var.c:
