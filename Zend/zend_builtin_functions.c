@@ -314,6 +314,7 @@ ZEND_FUNCTION(each)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
+
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		zend_error(E_WARNING,"Variable passed to each() is not an array or object");
@@ -457,14 +458,17 @@ ZEND_FUNCTION(defined)
 ZEND_FUNCTION(get_class)
 {
 	zval **arg;
+	zend_class_entry *ce;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &arg)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
-	if ((*arg)->type != IS_OBJECT) {
+	if (Z_TYPE_PP(arg) != IS_OBJECT) {
 		RETURN_FALSE;
 	}
-	RETURN_STRINGL((*arg)->value.obj.ce->name,	(*arg)->value.obj.ce->name_length, 1);
+
+	ce = Z_OBJCE_PP(arg);
+	RETURN_STRINGL(ce->name, ce->name_length, 1);
 }
 /* }}} */
 
@@ -515,7 +519,7 @@ ZEND_FUNCTION(is_subclass_of)
 	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
 	zend_str_tolower(lcname, (*class_name)->value.str.len);
 
-	for (parent_ce = (*obj)->value.obj.ce->parent; parent_ce != NULL; parent_ce = parent_ce->parent) {
+	for (parent_ce = Z_OBJCE_PP(obj)->parent; parent_ce != NULL; parent_ce = parent_ce->parent) {
 		if (!strcmp(parent_ce->name, lcname)) {
 			efree(lcname);
 			RETURN_TRUE;
@@ -574,7 +578,7 @@ ZEND_FUNCTION(get_object_vars)
 	}
 
 	array_init(return_value);
-	zend_hash_copy(return_value->value.ht, (*obj)->value.obj.properties,
+	zend_hash_copy(return_value->value.ht, Z_OBJPROP_PP(obj),
 				   (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 }
 /* }}} */
@@ -635,7 +639,7 @@ ZEND_FUNCTION(method_exists)
 	convert_to_string_ex(method_name);
 	lcname = estrndup((*method_name)->value.str.val, (*method_name)->value.str.len);
 	zend_str_tolower(lcname, (*method_name)->value.str.len);
-	if (zend_hash_exists(&(*klass)->value.obj.ce->function_table, lcname, (*method_name)->value.str.len+1)) {
+	if (zend_hash_exists(&Z_OBJCE_PP(klass)->function_table, lcname, (*method_name)->value.str.len+1)) {
 		efree(lcname);
 		RETURN_TRUE;
 	} else {
