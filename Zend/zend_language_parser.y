@@ -207,14 +207,20 @@ unticked_statement:
 	|	T_DECLARE { zend_do_declare_begin(TSRMLS_C); } '(' declare_list ')' declare_statement { zend_do_declare_end(TSRMLS_C); }
 	|	';'		/* empty statement */
 	|	T_TRY { zend_do_try(&$1 TSRMLS_CC); } '{' inner_statement_list '}'
-			catches
+		T_CATCH '(' catch_class_entry T_VARIABLE ')' { zend_do_begin_catch(&$1, &$8, &$9, 1 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
+		additional_catches
 	|	T_THROW expr ';' { zend_do_throw(&$2 TSRMLS_CC); }
 	|	T_DELETE  cvar 	';' { zend_do_end_variable_parse(BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&$1, ZEND_UNSET_OBJ TSRMLS_CC); }
 ;
 
-catches:
-		catches T_CATCH '(' catch_class_entry T_VARIABLE ')' { zend_do_begin_catch(&$2, &$4, &$5, 0 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$2 TSRMLS_CC); }
-	|	T_CATCH '(' catch_class_entry T_VARIABLE ')' { zend_do_begin_catch(&$1, &$3, &$4, 1 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
+additional_catches:
+		non_empty_additional_catches
+	|	/* empty */
+;
+
+non_empty_additional_catches:
+		non_empty_additional_catches T_CATCH '(' catch_class_entry T_VARIABLE ')' { zend_do_begin_catch(&$2, &$4, &$5, 0 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$2 TSRMLS_CC); }
+	|	T_CATCH '(' catch_class_entry T_VARIABLE ')' { zend_do_begin_catch(&$1, &$3, &$4, 0 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
 ;
 
 

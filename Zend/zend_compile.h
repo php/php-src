@@ -78,10 +78,11 @@ typedef struct _zend_brk_cont_element {
 
 
 struct _zend_op_array {
-	zend_uchar type;	/* MUST be the first element of this struct! */
+	zend_uchar type;			/* MUST be the first element of this struct! */
 
 	zend_uchar *arg_types;		/* MUST be the second element of this struct! */
-	char *function_name;			/* MUST be the third element of this struct! */
+	char *function_name;		/* MUST be the third element of this struct! */
+	zend_class_entry *scope;	/* MUST be the fourth element of this struct! */
 
 	zend_uint *refcount;
 
@@ -110,20 +111,22 @@ struct _zend_op_array {
 
 
 typedef struct _zend_internal_function {
-	zend_uchar type;	/* MUST be the first element of this struct! */
+	zend_uchar type;			/* MUST be the first element of this struct! */
 
-	zend_uchar *arg_types;		/* MUST be the second element of this struct */
-	char *function_name;			/* MUST be the third element of this struct */
+	zend_uchar *arg_types;		/* MUST be the second element of this struct! */
+	char *function_name;		/* MUST be the third element of this struct! */
+	zend_class_entry *scope;	/* MUST be the fourth element of this struct! */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
 } zend_internal_function;
 
 
 typedef struct _zend_overloaded_function {
-	zend_uchar type;	/* MUST be the first element of this struct! */
+	zend_uchar type;			/* MUST be the first element of this struct! */
 
-	zend_uchar *arg_types;		/* MUST be the second element of this struct */
-	char *function_name;		/* MUST be the third element of this struct */
+	zend_uchar *arg_types;		/* MUST be the second element of this struct! */
+	char *function_name;		/* MUST be the third element of this struct! */
+	zend_class_entry *scope;	/* MUST be the fourth element of this struct! */
 
 	zend_uint var;
 } zend_overloaded_function;
@@ -131,10 +134,12 @@ typedef struct _zend_overloaded_function {
 
 typedef union _zend_function {
 	zend_uchar type;	/* MUST be the first element of this struct! */
+
 	struct {
 		zend_uchar type;  /* never used */
 		zend_uchar *arg_types;
 		char *function_name;
+		zend_class_entry *scope;
 	} common;
 	
 	zend_op_array op_array;
