@@ -2,8 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Fixed mysql_close(), pg_close(), msql_close() and sybase_close() - they
+  weren't properly closing the SQL connections (Zeev)
 - Fixed crypt() to supply random seed if none is given (Andi)
-- Fixed mysql_close() - it wasn't properly closing MySQL connections (Zeev)
 - Made print_r support recursive data structures, e.g., $GLOBALS. (Zeev)
 - Fixed a bug that caused PHP not to properly flush its output buffer, if more
   than one output buffer was used. (Zeev)

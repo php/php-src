@@ -404,12 +404,16 @@ DLEXPORT PHP_FUNCTION(msql_close)
 	
 	ZEND_FETCH_RESOURCE2(msql, int, &msql_link, id, "mSQL-Link", msql_globals.le_link, msql_globals.le_plink);
 	
-	zend_list_delete(Z_RESVAL_P(msql_link));
-	if (Z_RESVAL_P(mysql_link)==msql_globals.default_link) {
-		zend_list_delete(msql_globals.default_link);
+	if (id==-1) { /* explicit resource number */
+		zend_list_delete(Z_RESVAL_P(msql_link));
 	}
 
-	zend_list_delete(id);
+	if (id!=-1 
+		|| (msql_link && Z_RESVAL_P(msql_link)==msql_globals.default_link)) {
+		zend_list_delete(msql_globals.default_link);
+		msql_globals.default_link = -1;
+	}
+
 	RETURN_TRUE;
 }
 /* }}} */
