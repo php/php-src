@@ -5449,7 +5449,7 @@ PHP_FUNCTION(oci_field_type)
 }
 /* }}} */
 
-/* {{{ proto mixed oci_field_type_raw(resource stmt, int col)
+/* {{{ proto int oci_field_type_raw(resource stmt, int col)
    Tell the raw oracle data type of a column */
 PHP_FUNCTION(oci_field_type_raw)
 {
@@ -6505,7 +6505,7 @@ PHP_FUNCTION(oci_collection_element_get)
 
 		/* Return null if the value is null */
 		if (*elemind == OCI_IND_NULL) {
-			RETURN_FALSE;
+			RETURN_NULL;
 		} 
 
 		switch (coll->element_typecode) {
