@@ -223,7 +223,9 @@ class PEAR_DependencyDB extends PEAR
                 // Other packages depends on this package, can't be removed
                 if (isset($depdb['deps'][$package])) {
                     foreach ($depdb['deps'][$package] as $dep) {
-                        $fails .= "Package '" . $dep['depend'] . "' depends on '$package'\n";
+                        if (!$dep['optional']) {
+                            $fails .= "Package '" . $dep['depend'] . "' depends on '$package'\n";
+                        }
                     }
                     return $fails;
                 }
@@ -239,7 +241,8 @@ class PEAR_DependencyDB extends PEAR
                         if ($relation == 'not') {
                             $fails .= "Package '" . $dep['depend'] . "' conflicts with '$package'\n";
                         } elseif ($relation != 'has' && $new_version !== null) {
-                            if (!version_compare("$new_version", "{$dep['version']}", $relation)) {
+                            if (!version_compare("$new_version", "{$dep['version']}", $relation) &&
+                                !$dep['optional']) {
                                 $fails .= "Package '" . $dep['depend'] . "' requires ".
                                           "$package " . $this->pear_dep->signOperator($relation) .
                                           " " . $dep['version'];
@@ -280,7 +283,9 @@ class PEAR_DependencyDB extends PEAR
                     // Which version 'Package' needs of 'Package Name'
                     'version' => '1.0',
                     // The requirement (version_compare() operator)
-                    'rel' => 'ge'
+                    'rel' => 'ge',
+                    // whether the dependency is optional
+                    'optional' => true/false
                 ),
             ),
         )
@@ -315,6 +320,11 @@ class PEAR_DependencyDB extends PEAR
                 if ($dep['rel'] != 'has') {
                     $write['version'] = $dep['version'];
                 }
+                if (isset($dep['optional']) && $dep['optional'] == 'yes') {
+                    $write['optional'] = true;
+                } else {
+                    $write['optional'] = false;
+                }
                 settype($data['deps'][$dep_name], 'array');
 
                 // The dependency already exists, update it
@@ -324,8 +334,8 @@ class PEAR_DependencyDB extends PEAR
 
                 // New dependency, insert it
                 } else {
-                    $data['deps'][$dep_name][] = $write;
-                    $key = key($data['deps'][$dep_name]);
+                    $key = count($data['deps'][$dep_name]);
+                    $data['deps'][$dep_name][$key] = $write;
                     settype($data['pkgs'][$package], 'array');
                     $data['pkgs'][$package][$dep_name] = $key;
                 }
