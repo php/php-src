@@ -104,6 +104,7 @@ PEAR_FILES = \
 	PEAR/Config.php \
 	PEAR/Installer.php \
 	PEAR/Packager.php \
+	PEAR/Registry.php \
 	PEAR/Remote.php \
 	PEAR/Uploader.php \
 	Payment/Verisign.php \
