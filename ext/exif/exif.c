@@ -70,11 +70,6 @@
 
 typedef unsigned char uchar;
 
-//#undef safe_emalloc
-#ifndef safe_emalloc
-# define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
-#endif
-
 #ifndef TRUE
 #	define TRUE 1
 #	define FALSE 0
