@@ -964,6 +964,9 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 <ST_IN_SCRIPTING>"__FILE__" {
 	char *filename = zend_get_compiled_filename();
 	
+	if (!filename) {
+		filename = "";
+	}
 	zendlval->value.str.len = strlen(filename);
 	zendlval->value.str.val = estrndup(filename,zendlval->value.str.len);
 	zendlval->type = IS_STRING;
