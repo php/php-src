@@ -1107,12 +1107,11 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 		zend_hash_move_forward_ex(target_hash, &pos);
 	}
    
-	if (behavior == 0) { 
-		RETURN_FALSE;	   
+	if (behavior == 0) {
+		RETURN_FALSE;
 	} else { 
 		return;
 	}
-       
 }
 
 
@@ -1124,9 +1123,9 @@ PHP_FUNCTION(in_array)
 }
 /* }}} */
 
-/* {{{ proto mixed search_array(mixed needle, array haystack [, bool strict])
+/* {{{ proto mixed array_search(mixed needle, array haystack [, bool strict])
    Searches the array for a given value and returns the corresponding key if successful */
-PHP_FUNCTION(search_array)
+PHP_FUNCTION(array_search)
 {
 	php_search_array(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
