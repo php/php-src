@@ -1974,6 +1974,7 @@ PHP_FUNCTION(fgetcsv) {
 
 /* }}} */
 
+#if !PHP_WIN32 || defined(ZTS)
 /* {{{ proto string realpath(string path)
    Return the resolved path */
 PHP_FUNCTION(realpath)
@@ -1994,7 +1995,7 @@ PHP_FUNCTION(realpath)
 	}
 }
 /* }}} */
-
+#endif
 
 
 #if 0
