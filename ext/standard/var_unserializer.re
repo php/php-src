@@ -400,7 +400,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	*p = YYCURSOR;
 	INIT_PZVAL(*rval);
 #if defined(HAVE_ATOF_ACCEPTS_NAN) && defined(HAVE_ATOF_ACCEPTS_INF)
-	ZVAL_DOUBLE(*rval, atof(start + 2));
+	ZVAL_DOUBLE(*rval, zend_strtod(start + 2, NULL));
 #else
 	if (!strncmp(start + 2, "NAN", 3)) {
 		ZVAL_DOUBLE(*rval, php_get_nan());
@@ -416,7 +416,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 "d:" (iv | nv | nvexp) ";"	{
 	*p = YYCURSOR;
 	INIT_PZVAL(*rval);
-	ZVAL_DOUBLE(*rval, atof(start + 2));
+	ZVAL_DOUBLE(*rval, zend_strtod(start + 2, NULL));
 	return 1;
 }
 
