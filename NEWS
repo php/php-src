@@ -12,6 +12,9 @@ PHP 4                                                                      NEWS
 - Added --clean option into phpize. (Jani)
 - Added --ldflags option into php-config. (Jani)
 - Added OCIPasswordChange() which allows renewing expired Oracle users. (Maxim)
+- Added memory_get_usage(). Defined only when PHP is compiled with
+  --enable-memory-limit. Returns the number of bytes allocated by the Zend's
+  memory routines. (Andrey)
 - Fixed bug #22042 (pg_result_seek() would never seek to the 1st row in the
   result due to always seeking to row next to the one requested). (Ilia)
 - Fixed bug #22031 (Made curl_write() & curl_write_header() binary safe). (Ilia)
