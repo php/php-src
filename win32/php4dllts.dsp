@@ -255,6 +255,10 @@ SOURCE=..\main\strlcat.c
 
 SOURCE=..\main\strlcpy.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\uuencode.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
