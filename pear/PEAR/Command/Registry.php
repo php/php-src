@@ -53,7 +53,7 @@ Tests if a package is installed in the system. Will exit(1) if it is not.
         'info' => array(
             'summary'  => 'Display information about a package',
             'function' => 'doInfo',
-            'shortcut' => 'i',
+            'shortcut' => 'in',
             'options'  => array(),
             'doc'      => '<pacakge>
 Displays information about a package. The package argument may be a
