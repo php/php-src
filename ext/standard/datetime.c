@@ -64,7 +64,7 @@ static int phpday_tab[2][12] = {
 	{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 };
 
-#define isleap(year) (((year % 4) == 0 && (year % 100) != 0) || (year % 400)==0)
+#define isleap(year) ((((year) % 4) == 0 && ((year) % 100) != 0) || ((year) % 400)==0)
 #define YEAR_BASE 1900
 
 /* {{{ proto int time(void)

@@ -30,6 +30,7 @@ PHP 4                                                                      NEWS
   (Moriyoshi)
 - Fixed bug #28175 (Allow bundled GD to compile against freetype 2.1.2).
   (Elf, Ilia)
+- Fixed leap year checking with idate(). (Christian Schneider, Derick)
 - Fixed strip_tags() to correctly handle '\0' characters. (Stefan)
 
 03 Jun 2004, Version 4.3.7
