@@ -2846,20 +2846,12 @@ PHP_FUNCTION(html_doc_file)
 PHP_FUNCTION(domxml_substitute_entities_default)
 {
 	zend_bool enable;
-	int old_val, new_val;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &enable) == FAILURE) {
 		return;
 	}
 
-	new_val = (enable) ? 1 : 0;
-	old_val = xmlSubstituteEntitiesDefault(new_val);
-
-	if (old_val) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(xmlSubstituteEntitiesDefault(enable));
 }
 /* }}} */
 
