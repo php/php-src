@@ -1,9 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
-- Add the file_set_contents() function, as a complement to the
-  file_get_contents()
-  function. (Sterling)
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
 - Fixed bug #21600 (Assign by reference function call changes variable contents).
@@ -20,6 +17,7 @@ PHP 4                                                                      NEWS
 - Changed array_search() to accept also objects as a needle. (Moriyoshi)
 - Changed ext/mcrypt to require libmcrypt version 2.5.6 or greater. (Derick)
 - Changed uniqid() parameters to be optional and allow any prefix length. (Marcus)
+- Added file_set_contents() function. (Sterling)
 - Added "mail_force_extra_paramaters" php.ini option which forces the addition 
   of the specified parameters to be passed as extra parameters to the sendmail 
   binary. These parameters will always replace the value of the 5th parameter
