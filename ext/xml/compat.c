@@ -76,6 +76,14 @@ _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix
 	int z = 0;
 	int y = 0;
 	
+	if (nb_namespaces > 0 && parser->h_start_ns != NULL) {
+		for (i = 0; i < nb_namespaces; i += 1) {
+			parser->h_start_ns(parser->user, (const XML_Char *) namespaces[y], (const XML_Char *) namespaces[y+1]);
+			y += 2;
+		}
+		y = 0;
+	}
+	
 	if (parser->h_start_element == NULL) {
 		return;
 	}
@@ -247,23 +255,6 @@ _build_entity(const xmlChar *name, int len, xmlChar **entity, int *entity_len)
 	(*entity)[*entity_len] = '\0';
 }
 
-static xmlEntityPtr
-_get_entity(void *user, const xmlChar *name)
-{
-	XML_Parser parser = (XML_Parser) user;
-
-	if (parser->h_default) {
-		xmlChar *entity;
-		int      len;
-		
-		_build_entity(name, xmlStrlen(name), &entity, &len);
-		parser->h_default(parser->user, (const xmlChar *) entity, len);
-		xmlFree(entity);
-	}
-
-	return NULL;
-}
-
 static void
 _external_entity_ref_handler(void *user, const xmlChar *names, int type, const xmlChar *sys_id, const xmlChar *pub_id, xmlChar *content)
 {
@@ -276,6 +267,39 @@ _external_entity_ref_handler(void *user, const xmlChar *names, int type, const x
 	parser->h_external_entity_ref(parser, names, "", sys_id, pub_id);
 }
 
+static xmlEntityPtr
+_get_entity(void *user, const xmlChar *name)
+{
+	XML_Parser parser = (XML_Parser) user;
+	xmlEntityPtr ret = NULL;
+
+	if (parser->parser->inSubset == 0) {
+		ret = xmlGetPredefinedEntity(name);
+		if (ret == NULL)
+			ret = xmlGetDocEntity(parser->parser->myDoc, name);
+
+	
+		if (ret == NULL || (parser->parser->instate != XML_PARSER_ENTITY_VALUE && parser->parser->instate != XML_PARSER_ATTRIBUTE_VALUE)) {
+			if (ret == NULL || ret->etype == XML_INTERNAL_GENERAL_ENTITY || ret->etype == XML_INTERNAL_PARAMETER_ENTITY || ret->etype == XML_INTERNAL_PREDEFINED_ENTITY) {
+				if (parser->h_default) {
+					xmlChar *entity;
+					int      len;
+					
+					_build_entity(name, xmlStrlen(name), &entity, &len);
+					parser->h_default(parser->user, (const xmlChar *) entity, len);
+					xmlFree(entity);
+				}
+			} else {
+				if (ret->etype == XML_EXTERNAL_GENERAL_PARSED_ENTITY) {
+					_external_entity_ref_handler(user, ret->name, ret->etype, ret->SystemID, ret->ExternalID, NULL);
+				}
+			}
+		}
+	}
+
+	return ret;
+}
+
 static xmlSAXHandler 
 php_xml_compat_handlers = {
 	NULL, /* internalSubset */
@@ -284,7 +308,7 @@ php_xml_compat_handlers = {
 	NULL, /* hasExternalSubset */
 	NULL, /* resolveEntity */
 	_get_entity, /* getEntity */
-	_external_entity_ref_handler, /* entityDecl */
+	NULL, /* entityDecl */
 	_notation_decl_handler,
 	NULL, /* attributeDecl */
 	NULL, /* elementDecl */
@@ -353,6 +377,7 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 		parser->parser->charset = XML_CHAR_ENCODING_NONE;
 	}
 	parser->parser->replaceEntities = 1;
+	parser->parser->wellFormed = 0;
 	if (sep != NULL) {
 		parser->use_namespace = 1;
 #if LIBXML_VERSION >= 20600
