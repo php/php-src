@@ -1861,7 +1861,10 @@ void do_list_end(znode *result, znode *expr CLS_DC)
 						opline->opcode = ZEND_FETCH_DIM_R;
 						break;
 					case IS_TMP_VAR:
+						opline->opcode = ZEND_FETCH_DIM_TMP_VAR;
+						break;
 					case IS_CONST: /* fetch_dim_tmp_var will handle this bogus fetch */
+						zval_copy_ctor(&expr->u.constant);
 						opline->opcode = ZEND_FETCH_DIM_TMP_VAR;
 						break;
 				}
