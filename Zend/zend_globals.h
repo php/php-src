@@ -26,7 +26,7 @@
 
 
 /* Define ZTS if you want a thread-safe Zend */
-#undef ZTS
+/*#undef ZTS*/
 
 #ifdef ZTS
 #include "../TSRM/TSRM.h"
