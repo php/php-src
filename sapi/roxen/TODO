@@ -1,0 +1,14 @@
+BUGS:
+
+- fix backtraces
+- exit in PHP exits Roxen
+- POST newline added?
+- Rewriting header handling so that more than one header with the same
+  name can be set (most importantly, cookies).
+
+ADDITIONS:
+
+- use th_farm
+- change cwd in single threaded mode
+- per-virtual-server configuration
+
