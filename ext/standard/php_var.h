@@ -32,9 +32,9 @@ PHP_FUNCTION(unserialize);
 PHP_FUNCTION(memory_get_usage);
 #endif
 
-void php_var_dump(zval **struc, int level TSRMLS_DC);
-void php_var_export(zval **struc, int level TSRMLS_DC);
-void php_debug_zval_dump(zval **struc, int level TSRMLS_DC);
+PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC);
+PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC);
+PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC);
 
 /* typdef HashTable php_serialize_data_t; */
 #define php_serialize_data_t HashTable
