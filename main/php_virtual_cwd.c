@@ -345,6 +345,9 @@ CWD_API int virtual_chdir_file(char *path)
 		return virtual_chdir(path);
 	}
 
+	if (length == COPY_WHEN_ABSOLUTE) { /* Also use trailing slash if this is root */
+		length++;
+	}
 	temp = (char *) malloc(length+1);
 	memcpy(temp, path, length);
 	temp[length] = 0;
