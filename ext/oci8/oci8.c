@@ -2229,6 +2229,7 @@ PHP_FUNCTION(ocidefinebyname)
 		efree(define);
 		define = tmp_define;
 	} else {
+		efree(define);
 		RETURN_FALSE;
 	}
 
