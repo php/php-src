@@ -1477,16 +1477,17 @@ PHP_MINIT_FUNCTION(yaz)
 #ifdef ZTS
 	yaz_mutex = tsrm_mutex_alloc();
 #endif
-    yaz_log_init_file ("/dev/null");
 	ZEND_INIT_MODULE_GLOBALS(yaz, php_yaz_init_globals, NULL);
 
-    REGISTER_INI_ENTRIES();
+	REGISTER_INI_ENTRIES();
 
-    if (YAZSG(log_file))
-    {
-        yaz_log_init_file(YAZSG(log_file));
-        yaz_log_init_level (LOG_ALL);
-    }
+	if (YAZSG(log_file))
+	{
+		yaz_log_init_file(YAZSG(log_file));
+		yaz_log_init_level(LOG_ALL);
+	}
+	else
+		yaz_log_init_level(0);
 	le_link = zend_register_list_destructors_ex (yaz_close_link, 0,
 												"YAZ link", module_number);
 	order_associations = 1;
@@ -1511,6 +1512,7 @@ PHP_MSHUTDOWN_FUNCTION(yaz)
 #ifdef ZTS
 	tsrm_mutex_free (yaz_mutex);
 #endif
+	yaz_log_init_file(0);
 	return SUCCESS;
 }
 
