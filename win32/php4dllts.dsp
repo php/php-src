@@ -230,6 +230,10 @@ SOURCE=..\main\SAPI.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\streams.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\strlcat.c
 # End Source File
 # Begin Source File
@@ -318,6 +322,10 @@ SOURCE=..\main\php_regex.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\php_streams.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\php_variables.h
 # End Source File
 # Begin Source File
@@ -341,14 +349,6 @@ SOURCE=..\main\SAPI.h
 SOURCE=..\main\win95nt.h
 # End Source File
 # End Group
-# Begin Source File
-
-SOURCE=..\main\php_streams.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\main\streams.c
-# End Source File
 # End Group
 # Begin Group "Function Modules"
 
