@@ -1,8 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
-- Fixed bug #17448 (Print the message when OCI_SUCCESS_WITH_INFO is returned). 
-  (Maxim)
 - Fixed bug #20155 (xmlrpc compile problem with ZE2). (Derick, Jan Schneider)
 - Fixed bug #20442 (upgraded bundled expat to 1.95.5). (Ilia)
 - Changed ext/mcrypt to require libmcrypt version 2.5.3 or greater. (Derick)
@@ -10,7 +8,6 @@ PHP 4                                                                      NEWS
   (Marcus)
 - Improved JPEG 2000 support for getimagesize(). (Marcus, Adam Wright)
 - Improved array_search() to accept objects as a needle under ZE2. (Moriyoshi)
-- Added OCIPasswordChange() which allows renewing expired Oracle users. (Maxim)
 - Added string.base64 stream filter. (Moriyoshi)
 - Added domxml_node_get_path() (Lukas Schröder)
 - Added iconv related functions (Moriyoshi)
