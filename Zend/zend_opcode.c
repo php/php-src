@@ -190,6 +190,20 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 }
 
 
+void init_op(zend_op *op CLS_DC)
+{
+	op->lineno = CG(zend_lineno);
+	op->filename = zend_get_compiled_filename();
+	op->result.op_type = IS_UNUSED;
+	op->extended_value = 0;
+	op->op1.u.EA.var = 0;
+	op->op1.u.EA.type = 0;
+	op->op2.u.EA.var = 0;
+	op->op2.u.EA.type = 0;
+	op->result.u.EA.var = 0;
+	op->result.u.EA.type = 0;
+}
+
 zend_op *get_next_op(zend_op_array *op_array CLS_DC)
 {
 	int next_op_num = op_array->last++;
@@ -211,16 +225,8 @@ zend_op *get_next_op(zend_op_array *op_array CLS_DC)
 	}
 	
 	next_op = &(op_array->opcodes[next_op_num]);
-	next_op->lineno = CG(zend_lineno);
-	next_op->filename = zend_get_compiled_filename();
-	next_op->result.op_type = IS_UNUSED;
-	next_op->extended_value = 0;
-	next_op->op1.u.EA.var = 0;
-	next_op->op1.u.EA.type = 0;
-	next_op->op2.u.EA.var = 0;
-	next_op->op2.u.EA.type = 0;
-	next_op->result.u.EA.var = 0;
-	next_op->result.u.EA.type = 0;
+	
+	init_op(next_op CLS_CC);
 
 	return next_op;
 }
