@@ -176,7 +176,7 @@ static int le_xml_parser;
 #ifdef ZTS
 static void php_xml_init_globals(php_xml_globals *xml_globals_p TSRMLS_DC)
 {
-	XML(default_encoding) = "ISO-8859-1";
+	XML(default_encoding) = "UTF-8";
 }
 #endif
 
@@ -204,7 +204,7 @@ PHP_MINIT_FUNCTION(xml)
 #ifdef ZTS
 	ts_allocate_id(&xml_globals_id, sizeof(php_xml_globals), (ts_allocate_ctor) php_xml_init_globals, NULL);
 #else
-	XML(default_encoding) = "ISO-8859-1";
+	XML(default_encoding) = "UTF-8";
 #endif
 
 	REGISTER_LONG_CONSTANT("XML_ERROR_NONE", XML_ERROR_NONE, CONST_CS|CONST_PERSISTENT);
