@@ -107,7 +107,7 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 scan:
 /*!re2c
   ":"		{ smart_str_append(dest, url); return; }
-  "?"		{ sep = separator; goto done; }
+  "?"		{ sep = separator; goto scan; }
   "#"		{ bash = p - 1; goto done; }
   (any\[:?#])+		{ goto scan; }
 */
