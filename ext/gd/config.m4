@@ -230,6 +230,9 @@ AC_ARG_WITH(t1lib,
   if test -f /usr/pkg/include/gd/gd.h -a -z "$GD_INCLUDE" ; then
     GD_INCLUDE="/usr/pkg/include/gd"
   fi
+  if test -f /usr/include/gd/gd.h -a -z "$GD_INCLUDE" ; then
+    GD_INCLUDE="/usr/include/gd"
+  fi
 
   AC_MSG_CHECKING(whether to enable 4bit antialias hack with FreeType2)
   AC_ARG_ENABLE(freetype-4bit-antialias-hack,
