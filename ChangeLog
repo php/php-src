@@ -1,3 +1,27 @@
+1999-11-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner.c
+      ext/standard/url_scanner.re: Add <FORM ACTION=...> tag
+
+    * configure.in:
+    Additional check for concurrent use of --with-{apache,apxs}
+
+1999-11-02  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/standard/basic_functions.c: Remove extraneous comment.
+
+1999-11-02  Evan Klinger  <evan715@sirius.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+    (PHP getprotoby{name,number}) New Functions
+
+1999-11-02  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
+    * NEWS: NEWS update
+
 1999-11-01  Andrei Zmievski  <zmievski@ispi.net>
 
     * NEWS: *** empty log message ***
