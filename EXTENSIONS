@@ -183,9 +183,9 @@ PRIMARY MAINTAINER:  Uwe Steinmann <Uwe.Steinmann@fernuni-hagen.de>
 MAINTENANCE:         Unknown
 STATUS:              Unknown
 -------------------------------------------------------------------------------
-EXTENSION:           curl
+EXTENSION:           CURL
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
-MAINTENANCE:         Unknown
+MAINTENANCE:         Maintained
 STATUS:              Experimental
 SINCE:               4.0.2
 -------------------------------------------------------------------------------
@@ -309,7 +309,7 @@ SINCE:               4.0.2
 EXTENSION:           swf
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
 MAINTENANCE:         Maintained
-STATUS:              Unknown
+STATUS:              Unix (won't change)
 -------------------------------------------------------------------------------
 EXTENSION:           sysvsem
 MAINTENANCE:         Unknown

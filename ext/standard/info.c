@@ -389,6 +389,7 @@ void php_print_credits(int flag)
 		CREDIT_LINE("Apache", "Rasmus Lerdorf, Stig Bakken, David Sklar");
 		CREDIT_LINE("Assert", "Thies C. Arntzen");
 		CREDIT_LINE("BC Math", "Andi Gutmans");
+		CREDIT_LINE("CURL", "Sterling Hughes");
 		CREDIT_LINE("CyberCash", "Evan Klinger");
 		CREDIT_LINE("Win32 COM", "Zeev Suraski");
 		CREDIT_LINE("DAV", "Stig Bakken");
