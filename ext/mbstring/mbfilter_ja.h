@@ -82,17 +82,17 @@
 #ifndef MBFL_MBFILTER_JA_H
 #define MBFL_MBFILTER_JA_H
 
-int mbfl_filt_conv_eucjp_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_eucjp(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_eucjpwin_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_eucjpwin(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_sjis_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_sjis(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_sjiswin_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_sjiswin(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_jis_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_2022jp(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter);
+int mbfl_filt_conv_eucjp_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_wchar_eucjp(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_eucjpwin_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_wchar_eucjpwin(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_sjis_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_wchar_sjis(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_sjiswin_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_wchar_sjiswin(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_jis_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_wchar_2022jp(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter TSRMLS_DC);
 
 #endif /* MBFL_MBFILTER_JA_H */
