@@ -227,11 +227,12 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 		case IS_OBJECT:
 			if (expr->value.obj.handlers->cast_object) {
 				TSRMLS_FETCH();
-				expr->value.obj.handlers->cast_object(expr, expr_copy, IS_STRING, 0 TSRMLS_CC);
-			} else {
-				expr_copy->value.str.val = (char *) emalloc(sizeof("Object id #")-1 + MAX_LENGTH_OF_LONG);
-				expr_copy->value.str.len = sprintf(expr_copy->value.str.val, "Object id #%ld", (long)expr->value.obj.handle);
+				if (expr->value.obj.handlers->cast_object(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
+					break;
+				}
 			}
+			expr_copy->value.str.val = (char *) emalloc(sizeof("Object id #")-1 + MAX_LENGTH_OF_LONG);
+			expr_copy->value.str.len = sprintf(expr_copy->value.str.val, "Object id #%ld", (long)expr->value.obj.handle);
 #if 0
 			/* FIXME: This might break BC for some people */
 			expr_copy->value.str.len = sizeof("Object")-1;

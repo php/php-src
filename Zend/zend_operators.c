@@ -297,11 +297,12 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 		case IS_OBJECT:
 			if (op->value.obj.handlers->cast_object) {
 				TSRMLS_FETCH();
-				op->value.obj.handlers->cast_object(op, op, IS_LONG, 1 TSRMLS_CC);
-			} else {
-				zval_dtor(op);
-				op->value.lval = 1;
+				if (op->value.obj.handlers->cast_object(op, op, IS_LONG, 1 TSRMLS_CC) == SUCCESS) {
+					break;
+				}
 			}
+			zval_dtor(op);
+			op->value.lval = 1;
 			break;
 		default:
 			zend_error(E_WARNING, "Cannot convert to ordinal value");
@@ -349,11 +350,12 @@ ZEND_API void convert_to_double(zval *op)
 		case IS_OBJECT:
 			if (op->value.obj.handlers->cast_object) {
 				TSRMLS_FETCH();
-				op->value.obj.handlers->cast_object(op, op, IS_DOUBLE, 1 TSRMLS_CC);
-			} else {
-				zval_dtor(op);
-				op->value.dval = 1; /* TBI!! */
+				if (op->value.obj.handlers->cast_object(op, op, IS_DOUBLE, 1 TSRMLS_CC) == SUCCESS) {
+					break;
+				}
 			}
+			zval_dtor(op);
+			op->value.dval = 1; /* TBI!! */
 			break;			
 		default:
 			zend_error(E_WARNING, "Cannot convert to real value (type=%d)", op->type);
@@ -370,8 +372,9 @@ ZEND_API void convert_to_null(zval *op)
 	if (op->type == IS_OBJECT) {
 		if (op->value.obj.handlers->cast_object) {
 			TSRMLS_FETCH();
-			op->value.obj.handlers->cast_object(op, op, IS_NULL, 1 TSRMLS_CC);
-			return;
+			if (op->value.obj.handlers->cast_object(op, op, IS_NULL, 1 TSRMLS_CC) == SUCCESS) {
+				return;
+			}
 		}
 	}
 
@@ -422,11 +425,12 @@ ZEND_API void convert_to_boolean(zval *op)
 		case IS_OBJECT:
 			if (op->value.obj.handlers->cast_object) {
 				TSRMLS_FETCH();
-				op->value.obj.handlers->cast_object(op, op, IS_BOOL, 1 TSRMLS_CC);
-			} else {
-				zval_dtor(op);
-				op->value.lval = 1; /* TBI!! */
+				if (op->value.obj.handlers->cast_object(op, op, IS_BOOL, 1 TSRMLS_CC) == SUCCESS) {
+					break;
+				}
 			}
+			zval_dtor(op);
+			op->value.lval = 1; /* TBI!! */
 			break;
 		default:
 			zval_dtor(op);
