@@ -75,7 +75,6 @@
 #ifdef HAVE_NET_SNMP
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
-#define VersionInfo NetSnmpVersionInfo
 #else
 #ifdef HAVE_DEFAULT_STORE_H
 #include "default_store.h"
@@ -154,8 +153,13 @@ PHP_MINIT_FUNCTION(snmp)
 PHP_MINFO_FUNCTION(snmp)
 {
 	php_info_print_table_start();
+#ifdef HAVE_NET_SNMP
+	php_info_print_table_row(2, "NET-SNMP Support", "enabled");
+	php_info_print_table_row(2, "NET-SNMP Version", netsnmp_get_version());
+#else
 	php_info_print_table_row(2, "UCD-SNMP Support", "enabled");
 	php_info_print_table_row(2, "UCD-SNMP Version", VersionInfo);
+#endif
 	php_info_print_table_end();
 }
 /* }}} */
