@@ -36,11 +36,11 @@
 
 #ifdef HAVE_ICONV
 
-#ifndef PHP_ICONV_H_PATH
-#define PHP_ICONV_H_PATH <iconv.h>
-#endif
-
+#ifdef PHP_ICONV_H_PATH
 #include PHP_ICONV_H_PATH
+#else
+#include <iconv.h>
+#endif
 
 #ifdef HAVE_GLIBC_ICONV
 #include <gnu/libc-version.h>
