@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
+- Moved extensions to PECL:
+  . ext/dio (Jani, Derick)
 - Changed stream_filter_(ap|pre)pend() to return resource. (Sara)
 - Changed mysqli_exception and sqlite_exception to use RuntimeException as base 
   if SPL extension is present. (Georg, Marcus)
