@@ -57,7 +57,6 @@ PHP                                                                        NEWS
 - Fixed support for <![CDATA[]]> fields within XML documents in ext/xml. 
   (Sterling)
 - Fixed visibility of __construct and __clone. (Marcus)
-- Fixed bug #26003 (fgetcsv() not binary-safe on null bytes). (Moriyoshi)
 - Fixed bug #25756 (SimpleXML's validate_schema_file() broken). (Moriyoshi)
 - Fixed bug #25581 (getimagesize() returns incorrect values on bitmap (os2)
   files). (Marcus)
