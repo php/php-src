@@ -231,7 +231,11 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("output_handler",			NULL,		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateString,	output_handler,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_ALL,		OnUpdateBool,			register_argc_argv,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("register_globals",		"1",		PHP_INI_ALL,		OnUpdateBool,			register_globals,		php_core_globals,	core_globals)
+#if PHP_SAFE_MODE
+	STD_PHP_INI_BOOLEAN("safe_mode",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			safe_mode,				php_core_globals,	core_globals)
+#else
 	STD_PHP_INI_BOOLEAN("safe_mode",			"0",		PHP_INI_SYSTEM,		OnUpdateBool,			safe_mode,				php_core_globals,	core_globals)
+#endif
 	STD_PHP_INI_ENTRY("safe_mode_include_dir",	NULL,		PHP_INI_SYSTEM,		OnUpdateString,			safe_mode_include_dir,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("safe_mode_gid",			"0",		PHP_INI_SYSTEM,		OnUpdateBool,			safe_mode_gid,				php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("short_open_tag",DEFAULT_SHORT_OPEN_TAG,	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			short_tags,				zend_compiler_globals,	compiler_globals)
