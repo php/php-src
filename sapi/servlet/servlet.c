@@ -320,7 +320,7 @@ JNIEXPORT jlong JNICALL Java_net_php_servlet_define
 JNIEXPORT void JNICALL Java_net_php_servlet_send
 	(JNIEnv *jenv, jobject self, 
 	 jstring requestMethod, jstring queryString,
-	 jstring pathInfo, jstring pathTranslated,
+	 jstring requestURI, jstring pathTranslated,
 	 jstring contentType, jint contentLength, 
 	 jstring authUser, jboolean display_source_mode)
 {
@@ -354,7 +354,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	SETSTRING( SG(request_info).auth_user, authUser );
 	SETSTRING( SG(request_info).request_method, requestMethod );
 	SETSTRING( SG(request_info).query_string, queryString );
-	SETSTRING( SG(request_info).request_uri, pathInfo );
+	SETSTRING( SG(request_info).request_uri, requestURI );
 	SETSTRING( SG(request_info).content_type, contentType );
 	SG(request_info).content_length = contentLength;
 	SG(request_info).auth_password = NULL;
