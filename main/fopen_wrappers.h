@@ -22,9 +22,9 @@
 
 #include "php_globals.h"
 
-#define IGNORE_PATH	0
-#define USE_PATH	1
-#define IGNORE_URL	2
+#define IGNORE_PATH		0
+#define USE_PATH		1
+#define IGNORE_URL		2
 /* There's no USE_URL. */
 #ifdef PHP_WIN32
 # define IGNORE_URL_WIN 2
@@ -76,7 +76,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 PHPAPI int php_is_url(char *path);
 PHPAPI char *php_strip_url_passwd(char *path);
 
-PHPAPI char *expand_filepath(char *filepath,char *real_path);
+PHPAPI char *expand_filepath(const char *filepath,char *real_path);
 
 int php_init_fopen_wrappers(void); 
 int php_shutdown_fopen_wrappers(void); 

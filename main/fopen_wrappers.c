@@ -247,6 +247,17 @@ PHPAPI int php_check_open_basedir(char *path)
 	return 0;
 }
 
+FILE *php_fopen_and_set_opened_path(const char *path, char *mode, char **opened_path)
+{
+		FILE *fp;
+
+		fp = V_FOPEN(path, mode);
+		if (fp && opened_path) {
+			*opened_path = expand_filepath(path,NULL);
+		}
+		return fp;
+}
+
 PHPAPI FILE *php_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
 {
 	PLS_FETCH();
@@ -266,19 +277,13 @@ PHPAPI FILE *php_fopen_wrapper(char *path, char *mode, int options, int *issock,
 	if (options & USE_PATH && PG(include_path) != NULL) {
 		return php_fopen_with_path(path, mode, PG(include_path), opened_path);
 	} else {
-		FILE *fp;
-
 		if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!php_checkuid(path, mode, 0))) {
 			return NULL;
 		}
 		if (php_check_open_basedir(path)) {
 			return NULL;
 		}
-		fp = V_FOPEN(path, mode);
-		if (fp && opened_path) {
-			*opened_path = expand_filepath(path,NULL);
-		}
-		return fp;
+		return php_fopen_and_set_opened_path(path, mode, opened_path);
 	}
 }
 
@@ -391,7 +396,6 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	char *pathbuf, *ptr, *end;
 	char trypath[MAXPATHLEN + 1];
 	struct stat sb;
-	FILE *fp;
 	PLS_FETCH();
 
 	if (opened_path) {
@@ -404,11 +408,8 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 			return NULL;
 		}
 		if (php_check_open_basedir(filename)) return NULL;
-		fp = V_FOPEN(filename, mode);
-		if (fp && opened_path) {
-			*opened_path = expand_filepath(filename,NULL);
-		}
-		return fp;
+		
+		return php_fopen_and_set_opened_path(filename, mode, opened_path);
 	}
 	/* Absolute path open - prepend document_root in safe mode */
 #ifdef PHP_WIN32
@@ -426,20 +427,12 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 				return NULL;
 			}
 			if (php_check_open_basedir(trypath)) return NULL;
-			fp = V_FOPEN(trypath, mode);
-			if (fp && opened_path) {
-				*opened_path = expand_filepath(trypath,NULL);
-			}
-			return fp;
+			return php_fopen_and_set_opened_path(filename, mode, opened_path);
 		} else {
 			if (php_check_open_basedir(filename)) {
 				return NULL;
 			}
-			fp = V_FOPEN(filename, mode);
-			if (fp && opened_path) {
-				*opened_path = expand_filepath(filename,NULL);
-			}
-			return fp;
+			return php_fopen_and_set_opened_path(filename, mode, opened_path);
 		}
 	}
 	if (!path || (path && !*path)) {
@@ -449,11 +442,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 		if (php_check_open_basedir(filename)) {
 			return NULL;
 		}
-		fp = V_FOPEN(filename, mode);
-		if (fp && opened_path) {
-			*opened_path = strdup(filename);
-		}
-		return fp;
+		return php_fopen_and_set_opened_path(filename, mode, opened_path);
 	}
 	pathbuf = estrdup(path);
 
@@ -476,17 +465,9 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 				return NULL;
 			}
 		}
-		if ((fp = V_FOPEN(trypath, mode)) != NULL) {
-			if (php_check_open_basedir(trypath)) {
-				fclose(fp);
-				efree(pathbuf);
-				return NULL;
-			}
-			if (opened_path) {
-				*opened_path = expand_filepath(trypath,NULL);
-			}
+		if (!php_check_open_basedir(trypath)) {
 			efree(pathbuf);
-			return fp;
+			return php_fopen_and_set_opened_path(trypath, mode, opened_path);
 		}
 		ptr = end;
 	}
@@ -1036,12 +1017,10 @@ static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, in
 				if (php_check_open_basedir((char *) path)) {
 					fp = NULL;
 				} else {
-					fp = V_FOPEN(path, mode);
+					fp = php_fopen_and_set_opened_path(path, mode, opened_path);
 				}
 			}
 		}
-
-
 		return (fp);
 	}
 			
@@ -1100,7 +1079,7 @@ PHPAPI char *php_strip_url_passwd(char *url)
 
 #if 1
 
-PHPAPI char *expand_filepath(char *filepath, char *real_path)
+PHPAPI char *expand_filepath(const char *filepath, char *real_path)
 {
 	cwd_state new_state;
 	char cwd[MAXPATHLEN+1];
