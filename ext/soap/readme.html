@@ -169,7 +169,7 @@ It is just a data holder and it has not any special method except constructor.
 -->
 <h4>Table of Contents</h4>
 <table border="0">
-<tr><td><a href="#ref.soap.is_soap_fault">is_sopa_fault</a> -- checks if SOAP call was failed</td></tr>
+<tr><td><a href="#ref.soap.is_soap_fault">is_soap_fault</a> -- checks if SOAP call was failed</td></tr>
 <tr><td><a href="#ref.soap.soapclient.soapclient">SoapClient::SoapClient</a> -- SoapClient constructor</td></tr>
 <tr><td><a href="#ref.soap.soapclient.__call">SoapClient::__call</a> -- calls a SOAP function</td></tr>
 <tr><td><a href="#ref.soap.soapclient.__getlastrequest">SoapClient::__getLastRequest</a> -- returns last SOAP request</td></tr>
@@ -189,7 +189,7 @@ It is just a data holder and it has not any special method except constructor.
 </table>
 
 <a name="ref.soap.is_soap_fault"></a>
-<h2>is_sopa_fault</h2>
+<h2>is_soap_fault</h2>
 <p>(PHP 5)</p>
 <p>checks if SOAP call was failed</p>
 <h3>Description</h3>
@@ -266,7 +266,10 @@ This is a low level API function to make a SOAP call. Usually in WSDL mode
 you can simple call SOAP functions as SoapClient methods. It is useful for
 nonWSDL mode when 'soapaction' is unknown, 'uri' is differ form default or
 when ypu like to send and/or receive SOAP Headers. To check if function call
-is failed check the result with is_soap_fault() function.
+is failed check the result with is_soap_fault() function.<br>
+SOAP function may return one or several values. In the first case __call will
+return just the value of output parameter, in the second it will return
+array with named output parameters.
 </p>
 <h4>Examples</h4>
 <TABLE BORDER="0" BGCOLOR="#E0E0E0"><TR><TD><PRE CLASS="php">
@@ -388,12 +391,22 @@ allow setting a default SOAP version (<b>soap_version</b>) and actor URI
 Exports one or more functions for remote clients. To export one function pass
 function name into <b>functions</b> parameter as string. To export several
 functions pass an array of function names and to export all functions pass
-a special constant <b>SOAP_FUNCTIONS_ALL</b>.
+a special constant <b>SOAP_FUNCTIONS_ALL</b>.<br>
+Functions must receive all input arguments in the same order as defined
+in WSDL file (They should not receive any output parameters as arguments) and
+return one or more values. To return several values they must return array with
+named output parameters.
 <h4>Examples</h4>
 <TABLE BORDER="0" BGCOLOR="#E0E0E0"><TR><TD><PRE CLASS="php">
-    $server->addFunction("func");
+    function func($inputString) {
+        return $inputString;
+    }
+    $server->addFunction("echoString");
 
-    $server->addFunction(array("func1","func2"));
+    function echoTwoStrings($inputString1, $inputString2) {
+        return array("outputString1"=>$inputString1,"outputString2"=>$inputString2);
+    }
+    $server->addFunction(array("echoString","echoTwoStrings"));
 
     $server->addFunction(SOAP_FUNCTIONS_ALL);
 </PRE></TD></TR></TABLE>
@@ -443,9 +456,10 @@ with server that exports functions form class (see
 <p>(PHP 5)</p>
 <p>handles a SOAP request</p>
 <h3>Description</h3>
-<p>void <b>handle</b>()</p>
+<p>void <b>handle</b>([string soap_envelope])</p>
 It processes a SOAP request, call necessary functions, and send response back.
-It assumes request in global <b>$HTTP_RAW_POST_DATA</b> PHP variable.
+It assumes request in input parameter or in global <b>$HTTP_RAW_POST_DATA</b> PHP variable
+if the argument is omitted.
 <h4>Example</h4>
 <TABLE BORDER="0" BGCOLOR="#E0E0E0"><TR><TD><PRE CLASS="php">
 &lt;?php

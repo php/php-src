@@ -1051,12 +1051,17 @@ PHP_METHOD(soapserver, handle)
 	xmlChar *buf;
 	HashTable *function_table;
 	soapHeader *soap_headers;
+	sdlFunctionPtr function;
+	char *arg = NULL;
+	int arg_len;
 
 	SOAP_SERVER_BEGIN_CODE();
 
 	FETCH_THIS_SERVICE(service);
 	SOAP_GLOBAL(soap_version) = service->version;
-	ZERO_PARAM();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &arg, &arg_len) == FAILURE) {
+		php_error(E_ERROR, "Invalid parameters passed to soapserver:handle");
+	}
 	INIT_ZVAL(retval);
 
 	if (zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **)&server_vars) == SUCCESS) {
@@ -1111,234 +1116,229 @@ PHP_METHOD(soapserver, handle)
 		}
 	}
 
-/* Turn on output buffering... we don't want people print in their methods
- #if PHP_API_VERSION <= 20010901
-	if (php_start_ob_buffer(NULL, 0 TSRMLS_CC) != SUCCESS)
- #else
-*/
 	if (php_start_ob_buffer(NULL, 0, 0 TSRMLS_CC) != SUCCESS) {
-/* #endif */
 		php_error(E_ERROR,"ob_start failed");
 	}
 
-	if (zend_hash_find(&EG(symbol_table), HTTP_RAW_POST_DATA, sizeof(HTTP_RAW_POST_DATA), (void **) &raw_post)!=FAILURE
-		&& ((*raw_post)->type==IS_STRING)) {
-		sdlFunctionPtr function;
-
-		doc_request = soap_xmlParseMemory(Z_STRVAL_PP(raw_post),Z_STRLEN_PP(raw_post));
-
-		if (doc_request == NULL) {
-			php_error(E_ERROR, "Bad Request");
-		}
-		if (xmlGetIntSubset(doc_request) != NULL) {
-			xmlNodePtr env = get_node(doc_request->children,"Envelope");
-			if (env && env->ns) {
-				if (strcmp(env->ns->href,SOAP_1_1_ENV_NAMESPACE) == 0) {
-					SOAP_GLOBAL(soap_version) = SOAP_1_1;
-				} else if (strcmp(env->ns->href,SOAP_1_2_ENV_NAMESPACE) == 0) {
-					SOAP_GLOBAL(soap_version) = SOAP_1_2;
-				}
-			}
-			xmlFreeDoc(doc_request);
-			php_error(E_ERROR,"DTD are not supported by SOAP");
-		}
-
-		old_sdl = SOAP_GLOBAL(sdl);
-		SOAP_GLOBAL(sdl) = service->sdl;
-		old_soap_version = SOAP_GLOBAL(soap_version);
-		function = deseralize_function_call(service->sdl, doc_request, service->actor, &function_name, &num_params, &params, &soap_version, &soap_headers TSRMLS_CC);
-		xmlFreeDoc(doc_request);
-
-		if (service->type == SOAP_CLASS) {
-			soap_obj = NULL;
-#if HAVE_PHP_SESSION
-			/* If persistent then set soap_obj from from the previous created session (if available) */
-			if (service->soap_class.persistance == SOAP_PERSISTENCE_SESSION) {
-				zval **tmp_soap;
-
-				if (PS(session_status) != php_session_active &&
-				    PS(session_status) != php_session_disabled) {
-					php_session_start(TSRMLS_C);
-				}
-
-				/* Find the soap object and assign */
-				if (zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), "_bogus_session_name", sizeof("_bogus_session_name"), (void **) &tmp_soap) == SUCCESS) {
-					soap_obj = *tmp_soap;
-				}
-			}
-#endif
-			/* If new session or something wierd happned */
-			if (soap_obj == NULL) {
-				zval *tmp_soap;
-				char *class_name;
-				int class_name_len;
-
-				MAKE_STD_ZVAL(tmp_soap);
-				object_init_ex(tmp_soap, service->soap_class.ce);
-
-				/* Call constructor */
-				class_name_len = strlen(service->soap_class.ce->name);
-				class_name = emalloc(class_name_len+1);
-				memcpy(class_name, service->soap_class.ce->name,class_name_len+1);
-				if (zend_hash_exists(&Z_OBJCE_P(tmp_soap)->function_table, php_strtolower(class_name, class_name_len), class_name_len+1)) {
-					zval c_ret, constructor;
-
-					INIT_ZVAL(c_ret);
-					INIT_ZVAL(constructor);
-
-					ZVAL_STRING(&constructor, service->soap_class.ce->name, 1);
-					if (call_user_function(NULL, &tmp_soap, &constructor, &c_ret, service->soap_class.argc, service->soap_class.argv TSRMLS_CC) == FAILURE) {
-						php_error(E_ERROR, "Error calling constructor");
-					}
-					zval_dtor(&constructor);
-					zval_dtor(&c_ret);
-				}
-				efree(class_name);
-#if HAVE_PHP_SESSION
-				/* If session then update session hash with new object */
-				if (service->soap_class.persistance == SOAP_PERSISTENCE_SESSION) {
-					zval **tmp_soap_pp;
-					if (zend_hash_update(Z_ARRVAL_P(PS(http_session_vars)), "_bogus_session_name", sizeof("_bogus_session_name"), &tmp_soap, sizeof(zval *), (void **)&tmp_soap_pp) == SUCCESS) {
-						soap_obj = *tmp_soap_pp;
-					}
-				} else {
-					soap_obj = tmp_soap;
-				}
-#else
-				soap_obj = tmp_soap;
-#endif
-
-			}
-/* 			function_table = &(soap_obj->value.obj.ce->function_table);*/
- 			function_table = &((Z_OBJCE_P(soap_obj))->function_table);
+	if (ZEND_NUM_ARGS() == 0) {
+		if (zend_hash_find(&EG(symbol_table), HTTP_RAW_POST_DATA, sizeof(HTTP_RAW_POST_DATA), (void **) &raw_post)!=FAILURE
+			&& ((*raw_post)->type==IS_STRING)) {
+			doc_request = soap_xmlParseMemory(Z_STRVAL_PP(raw_post),Z_STRLEN_PP(raw_post));
 		} else {
-			if (service->soap_functions.functions_all == TRUE) {
-				function_table = EG(function_table);
-			} else {
-				function_table = service->soap_functions.ft;
+			if (!zend_ini_long("always_populate_raw_post_data", sizeof("always_populate_raw_post_data"), 0)) {
+				php_error(E_ERROR, "PHP-SOAP requires 'always_populate_raw_post_data' to be on please check your php.ini file");
 			}
+			php_error(E_ERROR, "Can't find HTTP_RAW_POST_DATA");
 		}
-
-		doc_return = NULL;
-
-		/* Process soap headers */
-		if (soap_headers != NULL) {
-			soapHeader *header = soap_headers;
-			while (header != NULL) {
-				soapHeader *h = header;
-
-				header = header->next;
-				if (h->mustUnderstand && service->sdl && !h->function && !h->hdr) {
-					soap_server_fault("MustUnderstand","Header not understood", NULL, NULL TSRMLS_CC);
-				}
-
-				fn_name = estrndup(Z_STRVAL(h->function_name),Z_STRLEN(h->function_name));
-				if (zend_hash_exists(function_table, php_strtolower(fn_name, Z_STRLEN(h->function_name)), Z_STRLEN(h->function_name) + 1)) {
- 					if (service->type == SOAP_CLASS) {
-						call_status = call_user_function(NULL, &soap_obj, &h->function_name, &h->retval, h->num_params, h->parameters TSRMLS_CC);
-					} else {
-						call_status = call_user_function(EG(function_table), NULL, &h->function_name, &h->retval, h->num_params, h->parameters TSRMLS_CC);
-					}
-					if (call_status != SUCCESS) {
-						php_error(E_ERROR, "Function '%s' call failed", Z_STRVAL(function_name));
-					}
-				} else if (h->mustUnderstand) {
-					soap_server_fault("MustUnderstand","Header not understood", NULL, NULL TSRMLS_CC);
-				}
-				efree(fn_name);
-			}
-		}
-
-		fn_name = estrndup(Z_STRVAL(function_name),Z_STRLEN(function_name));
-		if (zend_hash_exists(function_table, php_strtolower(fn_name, Z_STRLEN(function_name)), Z_STRLEN(function_name) + 1)) {
- 			if (service->type == SOAP_CLASS) {
-				call_status = call_user_function(NULL, &soap_obj, &function_name, &retval, num_params, params TSRMLS_CC);
-				if (service->soap_class.persistance != SOAP_PERSISTENCE_SESSION) {
-					zval_ptr_dtor(&soap_obj);
-				}
-			} else {
-				call_status = call_user_function(EG(function_table), NULL, &function_name, &retval, num_params, params TSRMLS_CC);
-			}
-		} else {
-			php_error(E_ERROR, "Function '%s' doesn't exist", Z_STRVAL(function_name));
-		}
-		efree(fn_name);
-
-		if (call_status == SUCCESS) {
-			char *response_name;
-
-			if (function && function->responseName) {
-				response_name = estrdup(function->responseName);
-			} else {
-				response_name = emalloc(Z_STRLEN(function_name) + sizeof("Response"));
-				memcpy(response_name,Z_STRVAL(function_name),Z_STRLEN(function_name));
-				memcpy(response_name+Z_STRLEN(function_name),"Response",sizeof("Response"));
-			}
-			SOAP_GLOBAL(overrides) = service->mapping;
-			doc_return = seralize_response_call(function, response_name, service->uri, &retval, soap_headers, soap_version TSRMLS_CC);
-			SOAP_GLOBAL(overrides) = NULL;
-			efree(response_name);
-		} else {
-			php_error(E_ERROR, "Function '%s' call failed", Z_STRVAL(function_name));
-		}
-
-		/* Free soap headers */
-		while (soap_headers != NULL) {
-			soapHeader *h = soap_headers;
-			int i;
-
-			soap_headers = soap_headers->next;
-			i = h->num_params;
-			while (i > 0) {
-				zval_ptr_dtor(&h->parameters[--i]);
-			}
-			efree(h->parameters);
-			zval_dtor(&h->function_name);
-			zval_dtor(&h->retval);
-			efree(h);
-		}
-
-		SOAP_GLOBAL(soap_version) = old_soap_version;
-		SOAP_GLOBAL(sdl) = old_sdl;
-
-		/* Flush buffer */
-		php_end_ob_buffer(0, 0 TSRMLS_CC);
-
-		/* xmlDocDumpMemoryEnc(doc_return, &buf, &size, XML_CHAR_ENCODING_UTF8); */
-		xmlDocDumpMemory(doc_return, &buf, &size);
-
-		if (size == 0) {
-			php_error(E_ERROR, "Dump memory failed");
-		}
-
-		sprintf(cont_len, "Content-Length: %d", size);
-		sapi_add_header(cont_len, strlen(cont_len) + 1, 1);
-		if (soap_version == SOAP_1_2) {
-			sapi_add_header("Content-Type: application/soap+xml; charset=\"utf-8\"", sizeof("Content-Type: application/soap+xml; charset=\"utf-8\""), 1);
-		} else {
-			sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\""), 1);
-		}
-
-		/* Free Memory */
-		if (num_params > 0) {
-			for (i = 0; i < num_params;i++) {
-				zval_ptr_dtor(&params[i]);
-			}
-			efree(params);
-		}
-
-		zval_dtor(&function_name);
-		xmlFreeDoc(doc_return);
-
-		php_write(buf, size TSRMLS_CC);
-		xmlFree(buf);
 	} else {
-		if (!zend_ini_long("always_populate_raw_post_data", sizeof("always_populate_raw_post_data"), 0)) {
-			php_error(E_ERROR, "PHP-SOAP requires 'always_populate_raw_post_data' to be on please check your php.ini file");
-		}
-
-		php_error(E_ERROR, "Can't find HTTP_RAW_POST_DATA");
+		doc_request = soap_xmlParseMemory(arg,arg_len);
 	}
+
+	if (doc_request == NULL) {
+		php_error(E_ERROR, "Bad Request");
+	}
+	if (xmlGetIntSubset(doc_request) != NULL) {
+		xmlNodePtr env = get_node(doc_request->children,"Envelope");
+		if (env && env->ns) {
+			if (strcmp(env->ns->href,SOAP_1_1_ENV_NAMESPACE) == 0) {
+				SOAP_GLOBAL(soap_version) = SOAP_1_1;
+			} else if (strcmp(env->ns->href,SOAP_1_2_ENV_NAMESPACE) == 0) {
+				SOAP_GLOBAL(soap_version) = SOAP_1_2;
+			}
+		}
+		xmlFreeDoc(doc_request);
+		php_error(E_ERROR,"DTD are not supported by SOAP");
+	}
+
+	old_sdl = SOAP_GLOBAL(sdl);
+	SOAP_GLOBAL(sdl) = service->sdl;
+	old_soap_version = SOAP_GLOBAL(soap_version);
+	function = deseralize_function_call(service->sdl, doc_request, service->actor, &function_name, &num_params, &params, &soap_version, &soap_headers TSRMLS_CC);
+	xmlFreeDoc(doc_request);
+
+	if (service->type == SOAP_CLASS) {
+		soap_obj = NULL;
+#if HAVE_PHP_SESSION
+		/* If persistent then set soap_obj from from the previous created session (if available) */
+		if (service->soap_class.persistance == SOAP_PERSISTENCE_SESSION) {
+			zval **tmp_soap;
+
+			if (PS(session_status) != php_session_active &&
+			    PS(session_status) != php_session_disabled) {
+				php_session_start(TSRMLS_C);
+			}
+
+			/* Find the soap object and assign */
+			if (zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), "_bogus_session_name", sizeof("_bogus_session_name"), (void **) &tmp_soap) == SUCCESS) {
+				soap_obj = *tmp_soap;
+			}
+		}
+#endif
+		/* If new session or something wierd happned */
+		if (soap_obj == NULL) {
+			zval *tmp_soap;
+			char *class_name;
+			int class_name_len;
+
+			MAKE_STD_ZVAL(tmp_soap);
+			object_init_ex(tmp_soap, service->soap_class.ce);
+
+			/* Call constructor */
+			class_name_len = strlen(service->soap_class.ce->name);
+			class_name = emalloc(class_name_len+1);
+			memcpy(class_name, service->soap_class.ce->name,class_name_len+1);
+			if (zend_hash_exists(&Z_OBJCE_P(tmp_soap)->function_table, php_strtolower(class_name, class_name_len), class_name_len+1)) {
+				zval c_ret, constructor;
+
+				INIT_ZVAL(c_ret);
+				INIT_ZVAL(constructor);
+
+				ZVAL_STRING(&constructor, service->soap_class.ce->name, 1);
+				if (call_user_function(NULL, &tmp_soap, &constructor, &c_ret, service->soap_class.argc, service->soap_class.argv TSRMLS_CC) == FAILURE) {
+					php_error(E_ERROR, "Error calling constructor");
+				}
+				zval_dtor(&constructor);
+				zval_dtor(&c_ret);
+			}
+			efree(class_name);
+#if HAVE_PHP_SESSION
+			/* If session then update session hash with new object */
+			if (service->soap_class.persistance == SOAP_PERSISTENCE_SESSION) {
+				zval **tmp_soap_pp;
+				if (zend_hash_update(Z_ARRVAL_P(PS(http_session_vars)), "_bogus_session_name", sizeof("_bogus_session_name"), &tmp_soap, sizeof(zval *), (void **)&tmp_soap_pp) == SUCCESS) {
+					soap_obj = *tmp_soap_pp;
+				}
+			} else {
+				soap_obj = tmp_soap;
+			}
+#else
+			soap_obj = tmp_soap;
+#endif
+
+		}
+/* 			function_table = &(soap_obj->value.obj.ce->function_table);*/
+		function_table = &((Z_OBJCE_P(soap_obj))->function_table);
+	} else {
+		if (service->soap_functions.functions_all == TRUE) {
+			function_table = EG(function_table);
+		} else {
+			function_table = service->soap_functions.ft;
+		}
+	}
+
+	doc_return = NULL;
+
+	/* Process soap headers */
+	if (soap_headers != NULL) {
+		soapHeader *header = soap_headers;
+		while (header != NULL) {
+			soapHeader *h = header;
+
+			header = header->next;
+			if (h->mustUnderstand && service->sdl && !h->function && !h->hdr) {
+				soap_server_fault("MustUnderstand","Header not understood", NULL, NULL TSRMLS_CC);
+			}
+
+			fn_name = estrndup(Z_STRVAL(h->function_name),Z_STRLEN(h->function_name));
+			if (zend_hash_exists(function_table, php_strtolower(fn_name, Z_STRLEN(h->function_name)), Z_STRLEN(h->function_name) + 1)) {
+				if (service->type == SOAP_CLASS) {
+					call_status = call_user_function(NULL, &soap_obj, &h->function_name, &h->retval, h->num_params, h->parameters TSRMLS_CC);
+				} else {
+					call_status = call_user_function(EG(function_table), NULL, &h->function_name, &h->retval, h->num_params, h->parameters TSRMLS_CC);
+				}
+				if (call_status != SUCCESS) {
+					php_error(E_ERROR, "Function '%s' call failed", Z_STRVAL(function_name));
+				}
+			} else if (h->mustUnderstand) {
+				soap_server_fault("MustUnderstand","Header not understood", NULL, NULL TSRMLS_CC);
+			}
+			efree(fn_name);
+		}
+	}
+
+	fn_name = estrndup(Z_STRVAL(function_name),Z_STRLEN(function_name));
+	if (zend_hash_exists(function_table, php_strtolower(fn_name, Z_STRLEN(function_name)), Z_STRLEN(function_name) + 1)) {
+		if (service->type == SOAP_CLASS) {
+			call_status = call_user_function(NULL, &soap_obj, &function_name, &retval, num_params, params TSRMLS_CC);
+			if (service->soap_class.persistance != SOAP_PERSISTENCE_SESSION) {
+				zval_ptr_dtor(&soap_obj);
+			}
+		} else {
+			call_status = call_user_function(EG(function_table), NULL, &function_name, &retval, num_params, params TSRMLS_CC);
+		}
+	} else {
+		php_error(E_ERROR, "Function '%s' doesn't exist", Z_STRVAL(function_name));
+	}
+	efree(fn_name);
+
+	if (call_status == SUCCESS) {
+		char *response_name;
+
+		if (function && function->responseName) {
+			response_name = estrdup(function->responseName);
+		} else {
+			response_name = emalloc(Z_STRLEN(function_name) + sizeof("Response"));
+			memcpy(response_name,Z_STRVAL(function_name),Z_STRLEN(function_name));
+			memcpy(response_name+Z_STRLEN(function_name),"Response",sizeof("Response"));
+		}
+		SOAP_GLOBAL(overrides) = service->mapping;
+		doc_return = seralize_response_call(function, response_name, service->uri, &retval, soap_headers, soap_version TSRMLS_CC);
+		SOAP_GLOBAL(overrides) = NULL;
+		efree(response_name);
+	} else {
+		php_error(E_ERROR, "Function '%s' call failed", Z_STRVAL(function_name));
+	}
+
+	/* Free soap headers */
+	while (soap_headers != NULL) {
+		soapHeader *h = soap_headers;
+		int i;
+
+		soap_headers = soap_headers->next;
+		i = h->num_params;
+		while (i > 0) {
+			zval_ptr_dtor(&h->parameters[--i]);
+		}
+		efree(h->parameters);
+		zval_dtor(&h->function_name);
+		zval_dtor(&h->retval);
+		efree(h);
+	}
+
+	SOAP_GLOBAL(soap_version) = old_soap_version;
+	SOAP_GLOBAL(sdl) = old_sdl;
+
+	/* Flush buffer */
+	php_end_ob_buffer(0, 0 TSRMLS_CC);
+
+	/* xmlDocDumpMemoryEnc(doc_return, &buf, &size, XML_CHAR_ENCODING_UTF8); */
+	xmlDocDumpMemory(doc_return, &buf, &size);
+
+	if (size == 0) {
+		php_error(E_ERROR, "Dump memory failed");
+	}
+
+	sprintf(cont_len, "Content-Length: %d", size);
+	sapi_add_header(cont_len, strlen(cont_len) + 1, 1);
+	if (soap_version == SOAP_1_2) {
+		sapi_add_header("Content-Type: application/soap+xml; charset=\"utf-8\"", sizeof("Content-Type: application/soap+xml; charset=\"utf-8\""), 1);
+	} else {
+		sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\""), 1);
+	}
+
+	/* Free Memory */
+	if (num_params > 0) {
+		for (i = 0; i < num_params;i++) {
+			zval_ptr_dtor(&params[i]);
+		}
+		efree(params);
+	}
+
+	zval_dtor(&function_name);
+	xmlFreeDoc(doc_return);
+
+	php_write(buf, size TSRMLS_CC);
+	xmlFree(buf);
 
 	zval_dtor(&retval);
 
