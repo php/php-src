@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Added array_reduce(), which allows iterative reduction of an array
+  to a single value via a callback function. (Andrei)
 - The imageloadfont function of the gd extension should be not platform
   dependent after this fix. (alex@zend.com)
 - Fixed a compatibility problem in some file functions (fgets, fputs, fread,
