@@ -89,9 +89,15 @@ y2k_compliance = Off
 output_buffering = Off
 
 ; You can redirect all of the output of your scripts to a function.  For
-; example, if you set output_handler to "ob_gzhandler", output will be
-; transparently compressed for browsers that support gzip or deflate encoding.
-; Setting an output handler automatically turns on output buffering.
+; example, if you set output_handler to "mb_output_handler", character
+; encoding will be transparently converted to the specified encoding.
+; Setting any output handler automatically turns on output buffering.
+; NOTE: People who wrote portable scripts should not depend on this ini
+; directive. Instead, explicitly set the output handler using ob_start().
+; Using this ini directive may cause problems unless you know what script 
+: is doing.
+; NOTE: You cannot use both "mb_output_handler" with "ob_inconv_handler"
+; and you cannot use both "ob_gzhandler" and "zlib.output_compression". 
 output_handler =
 
 ; The unserialize callback function will called (with the undefind class'
