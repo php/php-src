@@ -60,7 +60,7 @@ static char php_hex2int(int c)
 PHP_FUNCTION(quoted_printable_decode)
 {
 	pval **arg1;
-	char *str;
+	char *str_in, *str_out;
 	int i = 0, j = 0;
 	
     if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1,&arg1)==FAILURE) 
@@ -69,30 +69,36 @@ PHP_FUNCTION(quoted_printable_decode)
     }
     convert_to_string_ex(arg1);
     
-    str = (*arg1)->value.str.val;
-    while ( str[i] )
+	if((*arg1)->value.str.len == 0) {
+		/* shortcut */
+		RETURN_EMPTY_STRING();
+	}
+
+    str_in = (*arg1)->value.str.val;
+	str_out = emalloc((*arg1)->value.str.len+1);
+    while ( str_in[i] )
     {
-    	if ( (str[i] == '=') && str[i+1] && str[i+2] &&
-    	     ( isdigit((int)str[i+1]) || (str[i+1]<='F' && str[i+1]>='A'))
+    	if ( (str_in[i] == '=') && str_in[i+1] && str_in[i+2] &&
+    	     ( isdigit((int)str_in[i+1]) || (str_in[i+1]<='F' && str_in[i+1]>='A'))
     	     &&
-    	     ( isdigit((int)str[i+2]) || (str[i+2]<='F' && str[i+2]>='A'))
+    	     ( isdigit((int)str_in[i+2]) || (str_in[i+2]<='F' && str_in[i+2]>='A'))
     	   )
     	{
-    		str[j++] = (php_hex2int((int)str[i+1]) << 4 ) 
-    		           + php_hex2int((int)str[i+2]);
+    		str_out[j++] = (php_hex2int((int)str_in[i+1]) << 4 ) 
+    		           + php_hex2int((int)str_in[i+2]);
     		i += 3;
     	}
-    	else if ( str[i] == 13 )
+    	else if ( str_in[i] == 13 )
     	{
     		i++;
     	}
     	else
     	{	
-    		str[j++] = str[i++];
+    		str_out[j++] = str_in[i++];
     	}
     }
-    str[j] = '\0';
+    str_out[j] = '\0';
     
-    RETVAL_STRINGL(str, j, 1)
+    RETVAL_STRINGL(str_out, j, 0);
 }
 /* }}} */
