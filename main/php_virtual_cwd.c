@@ -19,6 +19,8 @@ cwd_state main_cwd_state; /* True global */
 
 #ifndef ZEND_WIN32
 #include <unistd.h>
+#else
+#include <direct.h>
 #endif
 
 #ifndef S_ISDIR
@@ -128,7 +130,7 @@ static void cwd_globals_dtor(zend_cwd_globals *cwd_globals)
 	CWD_STATE_FREE(&cwd_globals->cwd);
 }
 
-void virtual_cwd_startup()
+CWD_API void virtual_cwd_startup()
 {
 	char cwd[1024]; /* Should probably use system define here */
 	char *result;
@@ -143,7 +145,7 @@ void virtual_cwd_startup()
 	ZEND_INIT_MODULE_GLOBALS(cwd, cwd_globals_ctor, cwd_globals_dtor);
 }
 
-void virtual_cwd_shutdown()
+CWD_API void virtual_cwd_shutdown()
 {
 #ifndef ZTS
 	cwd_globals_dtor(&cwd_globals);
@@ -151,7 +153,7 @@ void virtual_cwd_shutdown()
 	free(main_cwd_state.cwd); /* Don't use CWD_STATE_FREE because the non global states will probably use emalloc()/efree() */
 }
 
-char *virtual_getcwd_ex(int *length)
+CWD_API char *virtual_getcwd_ex(int *length)
 {
 	cwd_state *state;
 	CWDLS_FETCH();
@@ -187,9 +189,9 @@ char *virtual_getcwd_ex(int *length)
 
 
 /* Same semantics as UNIX getcwd() */
-char *virtual_getcwd(char *buf, size_t size)
+CWD_API char *virtual_getcwd(char *buf, size_t size)
 {
-	int length;
+	size_t length;
 	char *cwd;
 
 	cwd = virtual_getcwd_ex(&length);
@@ -209,7 +211,7 @@ char *virtual_getcwd(char *buf, size_t size)
 
 
 /* returns 0 for ok, 1 for error */
-int virtual_file_ex(cwd_state *state, char *path, verify_path_func verify_path)
+CWD_API int virtual_file_ex(cwd_state *state, char *path, verify_path_func verify_path)
 {
 	int path_length = strlen(path);
 	char *ptr = path;
@@ -221,6 +223,8 @@ int virtual_file_ex(cwd_state *state, char *path, verify_path_func verify_path)
 
 	if (path_length == 0) 
 		return (0);
+
+	path = estrndup(path, path_length);
 
 	old_state = (cwd_state *) malloc(sizeof(cwd_state));
 	CWD_STATE_COPY(old_state, state);
@@ -289,17 +293,19 @@ int virtual_file_ex(cwd_state *state, char *path, verify_path_func verify_path)
 	
 	free(old_state);
 	
+	efree(path);
+
 	return (ret);
 }
 
-int virtual_chdir(char *path)
+CWD_API int virtual_chdir(char *path)
 {
 	CWDLS_FETCH();
 
 	return virtual_file_ex(&CWDG(cwd), path, php_is_dir_ok);
 }
 
-int virtual_chdir_file(char *path)
+CWD_API int virtual_chdir_file(char *path)
 {
 	int length = strlen(path);
 
@@ -317,7 +323,7 @@ int virtual_chdir_file(char *path)
 }
 
 
-int virtual_filepath(char *path, char **filepath)
+CWD_API int virtual_filepath(char *path, char **filepath)
 {
 	cwd_state new_state;
 	int retval;
@@ -330,7 +336,7 @@ int virtual_filepath(char *path, char **filepath)
 	return retval;
 }
 
-FILE *virtual_fopen(char *path, const char *mode)
+CWD_API FILE *virtual_fopen(char *path, const char *mode)
 {
 	cwd_state new_state;
 	FILE *f;
