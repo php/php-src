@@ -113,7 +113,11 @@ typedef enum _sdlTypeKind {
 	XSD_TYPEKIND_SIMPLE,
 	XSD_TYPEKIND_LIST,
 	XSD_TYPEKIND_UNION,
-	XSD_TYPEKIND_COMPLEX
+	XSD_TYPEKIND_COMPLEX,
+	XSD_TYPEKIND_SIMPLE_RESTRICTION,
+	XSD_TYPEKIND_SIMPLE_EXTENSION,
+	XSD_TYPEKIND_COMPLEX_RESTRICTION,
+	XSD_TYPEKIND_COMPLEX_EXTENSION
 } sdlTypeKind;
 
 struct _sdlType {
@@ -168,8 +172,8 @@ encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const 
 sdlBindingPtr get_binding_from_type(sdlPtr sdl, int type);
 sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns);
 
-xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval* data, int style);
-zval *sdl_guess_convert_zval(encodeType enc, xmlNodePtr data);
+xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval* data, int style);
+zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data);
 
 void delete_sdl(void *handle);
 void delete_type(void *type);

@@ -518,9 +518,11 @@ static int schema_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpCompT
 	}
 	if (trav != NULL) {
 		if (node_is_equal(trav, "restriction")) {
+			cur_type->kind = XSD_TYPEKIND_SIMPLE_RESTRICTION;
 			schema_restriction_simpleContent(sdl, tsn, trav, cur_type, 0);
 			trav = trav->next;
 		} else if (node_is_equal(trav, "extension")) {
+			cur_type->kind = XSD_TYPEKIND_SIMPLE_EXTENSION;
 			schema_extension_simpleContent(sdl, tsn, trav, cur_type);
 			trav = trav->next;
 		} else {
@@ -795,7 +797,16 @@ static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr
 
 	base = get_attribute(extType->properties, "base");
 	if (base != NULL) {
-		/*FIXME*/
+		char *type, *ns;
+		xmlNsPtr nsptr;
+
+		parse_namespace(base->children->content, &type, &ns);
+		nsptr = xmlSearchNs(extType->doc, extType, ns);
+		if (nsptr != NULL) {
+			cur_type->encode = get_create_encoder(sdl, cur_type, (char *)nsptr->href, type);
+		}
+		if (type) {efree(type);}
+		if (ns) {efree(ns);}
 	} else {
 		php_error(E_ERROR, "Error parsing schema (extension has no 'base' attribute)");
 	}
@@ -841,7 +852,16 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePt
 
 	base = get_attribute(extType->properties, "base");
 	if (base != NULL) {
-		/*FIXME*/
+		char *type, *ns;
+		xmlNsPtr nsptr;
+
+		parse_namespace(base->children->content, &type, &ns);
+		nsptr = xmlSearchNs(extType->doc, extType, ns);
+		if (nsptr != NULL) {
+			cur_type->encode = get_create_encoder(sdl, cur_type, (char *)nsptr->href, type);
+		}
+		if (type) {efree(type);}
+		if (ns) {efree(ns);}
 	} else {
 		php_error(E_ERROR, "Error parsing schema (extension has no 'base' attribute)");
 	}
@@ -906,7 +926,7 @@ static int schema_all(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr all, sdlTypePtr cur
 	newModel->u.content = malloc(sizeof(HashTable));
 	zend_hash_init(newModel->u.content, 0, NULL, delete_model, 1);
 	if (model == NULL) {
-		cur_type->model = newModel;		
+		cur_type->model = newModel;
 	} else {
 		zend_hash_next_index_insert(model->u.content,&newModel,sizeof(sdlContentModelPtr), NULL);
 	}
@@ -991,7 +1011,7 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTyp
 			newModel = malloc(sizeof(sdlContentModel));
 			newModel->kind = XSD_CONTENT_GROUP_REF;
 			newModel->u.group_ref = estrdup(key.c);
-			
+
 			if (type) {efree(type);}
 			if (ns) {efree(ns);}
 		} else {
@@ -1008,10 +1028,10 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTyp
 
 		if (cur_type == NULL) {
 			sdlTypePtr newType;
-			
+
 			newType = malloc(sizeof(sdlType));
 			memset(newType, 0, sizeof(sdlType));
-			
+
 			if (sdl->groups == NULL) {
 				sdl->groups = malloc(sizeof(HashTable));
 				zend_hash_init(sdl->groups, 0, NULL, delete_type, 1);
@@ -1106,7 +1126,7 @@ static int schema_choice(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlT
 	newModel->u.content = malloc(sizeof(HashTable));
 	zend_hash_init(newModel->u.content, 0, NULL, delete_model, 1);
 	if (model == NULL) {
-		cur_type->model = newModel;		
+		cur_type->model = newModel;
 	} else {
 		zend_hash_next_index_insert(model->u.content,&newModel,sizeof(sdlContentModelPtr), NULL);
 	}
@@ -1172,7 +1192,7 @@ static int schema_sequence(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTy
 	newModel->u.content = malloc(sizeof(HashTable));
 	zend_hash_init(newModel->u.content, 0, NULL, delete_model, 1);
 	if (model == NULL) {
-		cur_type->model = newModel;		
+		cur_type->model = newModel;
 	} else {
 		zend_hash_next_index_insert(model->u.content,&newModel,sizeof(sdlContentModelPtr), NULL);
 	}
@@ -1243,9 +1263,11 @@ static int schema_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compCont
 	}
 	if (trav != NULL) {
 		if (node_is_equal(trav, "restriction")) {
+			cur_type->kind = XSD_TYPEKIND_COMPLEX_RESTRICTION;
 			schema_restriction_complexContent(sdl, tsn, trav, cur_type);
 			trav = trav->next;
 		} else if (node_is_equal(trav, "extension")) {
+			cur_type->kind = XSD_TYPEKIND_COMPLEX_EXTENSION;
 			schema_extension_complexContent(sdl, tsn, trav, cur_type);
 			trav = trav->next;
 		} else {
