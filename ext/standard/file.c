@@ -639,13 +639,15 @@ PHP_FUNCTION(stream_get_wrappers)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash()) {
+	if ((url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash())) {
 		array_init(return_value);
 		for(zend_hash_internal_pointer_reset(url_stream_wrappers_hash);
 			(key_flags = zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, NULL, 0, NULL)) != HASH_KEY_NON_EXISTANT;
-			zend_hash_move_forward(url_stream_wrappers_hash)) 
-				if (key_flags == HASH_KEY_IS_STRING)
+			zend_hash_move_forward(url_stream_wrappers_hash)) {
+				if (key_flags == HASH_KEY_IS_STRING) {
 					add_next_index_stringl(return_value, stream_protocol, stream_protocol_len, 1);
+				}
+		}
 	} else {
 		RETURN_FALSE;
 	}
@@ -660,17 +662,17 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, int *max_fd T
 	php_stream *stream;
 	int this_fd;
 
-	if (Z_TYPE_P(stream_array) != IS_ARRAY)
+	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
-
+	}
 	for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(stream_array));
 		 zend_hash_get_current_data(Z_ARRVAL_P(stream_array), (void **) &elem) == SUCCESS;
 		 zend_hash_move_forward(Z_ARRVAL_P(stream_array))) {
 
 		php_stream_from_zval_no_verify(stream, elem);
-		if (stream == NULL)
+		if (stream == NULL) {
 			continue;
-
+		}
 		/* get the fd.
 		 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag
 		 * when casting.  It is only used here so that the buffered data warning
@@ -693,9 +695,9 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 	HashTable *new_hash;
 	int this_fd, ret = 0;
 
-	if (Z_TYPE_P(stream_array) != IS_ARRAY)
+	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
-
+	}
 	ALLOC_HASHTABLE(new_hash);
 	zend_hash_init(new_hash, 0, NULL, ZVAL_PTR_DTOR, 0);
 	
@@ -704,9 +706,9 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 		 zend_hash_move_forward(Z_ARRVAL_P(stream_array))) {
 
 		php_stream_from_zval_no_verify(stream, elem);
-		if (stream == NULL)
+		if (stream == NULL) {
 			continue;
-
+		}
 		/* get the fd 
 		 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag
 		 * when casting.  It is only used here so that the buffered data warning
@@ -715,8 +717,9 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1)) {
 			if (FD_ISSET(this_fd, fds)) {
 				zend_hash_next_index_insert(new_hash, (void *)elem, sizeof(zval *), (void **)&dest_elem);
-				if (dest_elem)
+				if (dest_elem) {
 					zval_add_ref(dest_elem);
+				}
 				ret++;
 				continue;
 			}
@@ -740,9 +743,9 @@ static int stream_array_emulate_read_fd_set(zval *stream_array TSRMLS_DC)
 	HashTable *new_hash;
 	int ret = 0;
 
-	if (Z_TYPE_P(stream_array) != IS_ARRAY)
+	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
-
+	}
 	ALLOC_HASHTABLE(new_hash);
 	zend_hash_init(new_hash, 0, NULL, ZVAL_PTR_DTOR, 0);
 	
@@ -751,9 +754,9 @@ static int stream_array_emulate_read_fd_set(zval *stream_array TSRMLS_DC)
 		 zend_hash_move_forward(Z_ARRVAL_P(stream_array))) {
 
 		php_stream_from_zval_no_verify(stream, elem);
-		if (stream == NULL)
+		if (stream == NULL) {
 			continue;
-
+		}
 		if ((stream->writepos - stream->readpos) > 0) {
 			/* allow readable non-descriptor based streams to participate in stream_select.
 			 * Non-descriptor streams will only "work" if they have previously buffered the
@@ -762,8 +765,9 @@ static int stream_array_emulate_read_fd_set(zval *stream_array TSRMLS_DC)
 			 * operate correctly in stream_select.
 			 * */
 			zend_hash_next_index_insert(new_hash, (void *)elem, sizeof(zval *), (void **)&dest_elem);
-			if (dest_elem)
+			if (dest_elem) {
 				zval_add_ref(dest_elem);
+			}
 			ret++;
 			continue;
 		}
@@ -878,8 +882,9 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 	if (FAILURE == call_user_function_ex(EG(function_table), NULL, callback, &retval, 6, ptps, 0, NULL TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to call user notifier");
 	}
-	if (retval)
+	if (retval) {
 		zval_ptr_dtor(&retval);
+	}
 }
 
 static int parse_context_options(php_stream_context *context, zval *options)
@@ -953,8 +958,9 @@ static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC)
 
 		if (stream) {
 			context = stream->context;
-			if (context == NULL)
+			if (context == NULL) {
 				context = stream->context = php_stream_context_alloc();
+			}
 		}
 	}
 
@@ -1047,8 +1053,9 @@ PHP_FUNCTION(stream_context_create)
 	
 	context = php_stream_context_alloc();
 	
-	if (params)
+	if (params) {
 		parse_context_options(context, params);
+	}
 	
 	ZEND_REGISTER_RESOURCE(return_value, context, le_stream_context);
 }
@@ -1071,13 +1078,15 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 	php_stream_from_zval(stream, &zstream);
 	
 	filter = php_stream_filter_create(filtername, filterparams, filterparamslen, php_stream_is_persistent(stream) TSRMLS_CC);
-	if (filter == NULL)
+	if (filter == NULL) {
 		RETURN_FALSE;
+	}
 
-	if (append)
+	if (append) { 
 		php_stream_filter_append(stream, filter);
-	else
+	} else {
 		php_stream_filter_prepend(stream, filter);
+	}
 
 	RETURN_TRUE;
 }
@@ -1122,7 +1131,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 				(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
 				NULL, context);
 
-	if (stream == NULL)	{
+	if (stream == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -2073,21 +2082,23 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 				ENFORCE_SAFE_MODE | REPORT_ERRORS,
 				NULL);
 	
-	if (!srcstream) 
+	if (!srcstream) {
 		return ret;
+	}
 
 	deststream = php_stream_open_wrapper(dest, "wb", 
 				ENFORCE_SAFE_MODE | REPORT_ERRORS,
 				NULL);
 
-	if (srcstream && deststream)
+	if (srcstream && deststream) {
 		ret = php_stream_copy_to_stream(srcstream, deststream, PHP_STREAM_COPY_ALL) == 0 ? FAILURE : SUCCESS;
-
-	if (srcstream)
+	}
+	if (srcstream) {
 		php_stream_close(srcstream);
-	if (deststream)
+	}
+	if (deststream) {
 		php_stream_close(deststream);
-
+	}
 	return ret;
 }
 /* }}} */
@@ -2108,10 +2119,10 @@ PHPAPI PHP_FUNCTION(fread)
 
 	convert_to_long_ex(arg2);
 	len = Z_LVAL_PP(arg2);
-    if (len < 0) {
+	if (len < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
 		RETURN_FALSE;
-    }
+	}
 
 	Z_STRVAL_P(return_value) = emalloc(len + 1);
 	Z_STRLEN_P(return_value) = php_stream_read(stream, Z_STRVAL_P(return_value), len);
