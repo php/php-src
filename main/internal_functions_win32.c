@@ -99,6 +99,38 @@ int module_startup_modules(void)
 	return SUCCESS;
 }
 
+int module_global_startup_modules(void)
+{
+	zend_module_entry **ptr = php3_builtin_modules, **end = ptr+(sizeof(php3_builtin_modules)/sizeof(zend_module_entry *));
+
+	while (ptr < end) {
+		if (*ptr) {
+			if ((*ptr)->global_startup_func && 
+					(*ptr)->global_startup_func()==FAILURE) {
+				return FAILURE;
+			}
+		}
+		ptr++;
+	}
+	return SUCCESS;
+}
+
+int module_global_shutdown_modules(void)
+{
+	zend_module_entry **ptr = php3_builtin_modules, **end = ptr+(sizeof(php3_builtin_modules)/sizeof(zend_module_entry *));
+
+	while (ptr < end) {
+		if (*ptr) {
+			if ((*ptr)->global_shutdown_func && 
+					(*ptr)->global_shutdown_func()==FAILURE) {
+				return FAILURE;
+			}
+		}
+		ptr++;
+	}
+	return SUCCESS;
+}
+
 
 /*
  * Local variables:
