@@ -198,7 +198,7 @@ class PEAR_Installer extends PEAR_Common
     {
         $type = strtolower($atts['ROLE']);
         switch ($type) {
-            case "test":
+            case 'test':
                 // don't install test files for now
                 $this->log(2, "+ Test file $file won't be installed yet");
                 return true;

@@ -74,7 +74,6 @@ class PEAR_Common extends PEAR
 
     function _PEAR_Common()
     {
-        $this->_PEAR();
         while (is_array($this->_tempfiles) &&
                $file = array_shift($this->_tempfiles))
         {
@@ -129,7 +128,7 @@ class PEAR_Common extends PEAR
     function mkTempDir()
     {
         $dir = (OS_WINDOWS) ? 'c:\\windows\\temp' : '/tmp';
-        $tmpdir = tempnam($tmpdir, 'pear');
+        $tmpdir = tempnam($dir, 'pear');
         unlink($tmpdir);
         if (!mkdir($tmpdir, 0700)) {
             return $this->raiseError("Unable to create temporary directory $tmpdir");
