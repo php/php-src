@@ -1310,6 +1310,7 @@ class PEAR_Common extends PEAR
         $used_functions = array();
         $extends = array();
         $nodeps = array();
+        $inquote = false;
         for ($i = 0; $i < sizeof($tokens); $i++) {
             if (is_array($tokens[$i])) {
                 list($token, $data) = $tokens[$i];
@@ -1317,7 +1318,17 @@ class PEAR_Common extends PEAR
                 $token = $tokens[$i];
                 $data = '';
             }
+            if ($inquote) {
+                if ($token != '"') {
+                    continue;
+                } else {
+                    $inquote = false;
+                }
+            }
             switch ($token) {
+                case '"':
+                    $inquote = true;
+                    break;
                 case T_CURLY_OPEN:
                 case T_DOLLAR_OPEN_CURLY_BRACES:
                 case '{': $brace_level++; continue 2;
