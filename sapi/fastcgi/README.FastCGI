@@ -1,0 +1,17 @@
+FastCGI module
+--------------
+
+This module requires the FastCGI development kit, available from
+http://www.fastcgi.com/
+
+Before building PHP, please enter the dev kit, and run:
+
+./configure
+make
+make export
+
+This will compile the library code required for the FastCGI module. All
+that is then required is to configure PHP with the '--with-fastcgi' option.
+After making the code, you will end up with a binary file called 'php'.
+Installation of this file will depend on the web server being used, please
+see their documentation for details.
