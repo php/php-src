@@ -956,7 +956,7 @@ int main(int argc, char *argv[])
 	zend_llist global_vars;
 	int interactive=0;
 #if FORCE_CGI_REDIRECT
-	int force_redirect = 1;
+	long force_redirect = 1;
 	char *redirect_status_env = NULL;
 #endif
 
