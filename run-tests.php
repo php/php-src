@@ -388,7 +388,6 @@ function compare_results($file1, $file2)
             $data2 .= trim($line2);
         }
     }
-   echo strlen($data1).'|'.strlen($data2);
     fclose($fp1);
     fclose($fp2);
     if ((trim($data1) != trim($data2))
