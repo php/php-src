@@ -664,6 +664,29 @@ when installing packages without a version or state specified',
     }
 
     // }}}
+    // {{{ removeLayer(layer)
+
+    /**
+     * Temporarily remove an entire config layer.  USE WITH CARE!
+     *
+     * @param string config key
+     *
+     * @param string (optional) config layer
+     *
+     * @return bool TRUE on success, FALSE on failure
+     *
+     * @access public
+     */
+    function removeLayer($layer)
+    {
+        if (isset($this->configuration[$layer])) {
+            unset($this->configuration[$layer]);
+            return true;
+        }
+        return false;
+    }
+
+    // }}}
     // {{{ store([layer])
 
     /**
