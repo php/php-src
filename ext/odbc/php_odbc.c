@@ -2157,15 +2157,15 @@ PHP_FUNCTION(odbc_close)
 	int i;
 	int type;
 	int is_pconn = 0;
+	int found_resource_type = le_conn;
 	ODBCLS_FETCH();
 
     if (zend_get_parameters_ex(1, &pv_conn) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *) zend_fetch_resource(pv_conn, -1, "ODBC-Link", NULL, 1, le_conn);
-	if(!conn){
-		ZEND_FETCH_RESOURCE(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_pconn);
+	conn = (odbc_connection *) zend_fetch_resource(pv_conn, -1, "ODBC-Link", found_resource_type, 2, le_conn, le_pconn);
+	if (found_resource_type==le_pconn) {
 		is_pconn = 1;
 	}
 
