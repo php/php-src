@@ -147,7 +147,7 @@ void swf_pushmatrix(void);
 void swf_popmatrix(void);
 void swf_scale(double x, double y, double z);
 void swf_translate(double x, double y, double z);
-void swf_rotate(double angle, char *axis);
+void swf_rotate(double angle, char axis);
 void swf_polarview(double dist, double azimuth, double incidence, double twist);
 void swf_lookat(double vx, double vy, double vz, double px, double py, double pz, double twist);
 void swf_perspective(double fovy, double aspect, double near, double far);
