@@ -91,10 +91,6 @@ struct _php_core_globals {
 
 	unsigned char header_is_being_sent;
 
-	/* for fsock */
-	HashTable ht_fsock_keys;
-	HashTable ht_fsock_socks;
-
 	zend_llist ll_post_request_startup;
 };
 
