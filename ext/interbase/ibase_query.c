@@ -618,182 +618,165 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval ***b_vars, BIND_BUF *buf, /* {{{ 
 
 		var->sqlind = &buf[i].sqlind;
 
-		if (Z_TYPE_P(b_var) != IS_NULL) {
-			buf[i].sqlind = 0;
+		/* check if a NULL should be inserted */
+		switch (Z_TYPE_P(b_var)) {
+			int force_null;
 
-			if (var->sqlscale < 0) {
-				/*
-				  DECIMAL or NUMERIC field are stored internally as scaled integers.
-				  Coerce it to string and let InterBase's internal routines handle it.
-				*/
-				goto php_ibase_bind_default;
-			}
+			case IS_STRING:
 
-			var->sqldata = (void*)&buf[i];
+				force_null = 0;
 
-			switch (var->sqltype & ~1) {
-				struct tm t;
+				/* for these types, an empty string can be handled like a NULL value */
+				switch (var->sqltype & ~1) {
+					case SQL_SHORT:
+					case SQL_LONG:
+					case SQL_INT64:
+					case SQL_FLOAT:
+					case SQL_DOUBLE:
+					case SQL_TIMESTAMP:
+					case SQL_TYPE_DATE:
+					case SQL_TYPE_TIME:
+						force_null = (Z_STRLEN_P(b_var) == 0);
+				}
 
-				case SQL_SHORT:
-					convert_to_long(b_var);
-					if (Z_LVAL_P(b_var) > SHRT_MAX || Z_LVAL_P(b_var) < SHRT_MIN) {
-						_php_ibase_module_error("Parameter %d exceeds field width" TSRMLS_CC, i+1);
-						rv = FAILURE;
-						break;
-					}
-					buf[i].val.sval = (short) Z_LVAL_P(b_var);
-					break;
-				case SQL_LONG:
-					convert_to_long(b_var);
-#if (SIZEOF_LONG > 4)
-					/* ISC_LONG is always 32-bit */
-					if (Z_LVAL_P(b_var) > ISC_LONG_MAX || Z_LVAL_P(b_var) < ISC_LONG_MIN) {
-						_php_ibase_module_error("Parameter %d exceeds field width" TSRMLS_CC, i+1);
-						rv = FAILURE;
-						break;
-					}
-#endif
-					buf[i].val.lval = (ISC_LONG) Z_LVAL_P(b_var);
-					break;
-#if (SIZEOF_LONG == 8)
-				case SQL_INT64:
-					convert_to_long(b_var);
-					var->sqldata = (void *) &Z_LVAL_P(b_var);
-					break;
-#endif
-				case SQL_FLOAT:
-					 convert_to_double(b_var);
-					buf[i].val.fval = (float) Z_DVAL_P(b_var);
-					break;
-				case SQL_DOUBLE:
-					convert_to_double(b_var);
-					var->sqldata = (void *) &Z_DVAL_P(b_var);
-					break;
+				if (! force_null) break;
 
-				case SQL_TIMESTAMP:
-				case SQL_TYPE_DATE:
-				case SQL_TYPE_TIME:
-					if (Z_TYPE_P(b_var) == IS_LONG) {
-						/* insert timestamp directly */
-						t = *gmtime(&Z_LVAL_P(b_var));
-					} else {
-#ifndef HAVE_STRPTIME
-						goto php_ibase_bind_default; /* let IB string handling take over */
-#else
-						convert_to_string(b_var);
+			case IS_NULL:
 
-						switch (var->sqltype & ~1) {
-							default: /* == case SQL_TIMESTAMP/SQL_DATE: */
-								strptime(Z_STRVAL_P(b_var), IBG(timestampformat), &t);
-								break;
-							case SQL_TYPE_DATE:
-								strptime(Z_STRVAL_P(b_var), IBG(dateformat), &t);
-								break;
-							case SQL_TYPE_TIME:
-								strptime(Z_STRVAL_P(b_var), IBG(timeformat), &t);
-								break;
-						}
-#endif
-					}
+				/* complain if this field doesn't allow NULL values */
+				if (! (var->sqltype & 1)) {
+					_php_ibase_module_error("Parameter %d: non-empty value required" TSRMLS_CC, i+1);
+					rv = FAILURE;
+				} else {
+					buf[i].sqlind = -1;
+				}
+
+				if (var->sqltype & SQL_ARRAY) ++array_cnt;
+
+				continue;
+		}
+
+		/* if we make it to this point, we must provide a value for the parameter */
+
+		buf[i].sqlind = 0;
+
+		var->sqldata = (void*)&buf[i].val;
+
+		switch (var->sqltype & ~1) {
+			struct tm t;
+
+			case SQL_TIMESTAMP:
+			case SQL_TYPE_DATE:
+			case SQL_TYPE_TIME:
+				if (Z_TYPE_P(b_var) == IS_LONG) {
+					/* insert timestamp directly */
+					t = *gmtime(&Z_LVAL_P(b_var));
+				} else {
+#ifdef HAVE_STRPTIME
+					char *format = IBG(timestampformat);
+
+					convert_to_string(b_var);
 
 					switch (var->sqltype & ~1) {
-						default: /* == case SQL_TIMESTAMP */
-							isc_encode_timestamp(&t, &buf[i].val.tsval);
-							break;
 						case SQL_TYPE_DATE:
-							isc_encode_sql_date(&t, &buf[i].val.dtval);
+							format = IBG(dateformat);
 							break;
 						case SQL_TYPE_TIME:
-							isc_encode_sql_time(&t, &buf[i].val.tmval);
-							break;
+							format = IBG(timeformat);
 					}
-					break;
-				case SQL_BLOB:
+					if (! strptime(Z_STRVAL_P(b_var), format, &t)) {
+						/* strptime() cannot handle it, so let IB have a try */
+						break;
+					}
+#else /* ifndef HAVE_STRPTIME */
+					break; /* let IB parse it as a string */
+#endif
+				}
 
+				switch (var->sqltype & ~1) {
+					default: /* == case SQL_TIMESTAMP */
+						isc_encode_timestamp(&t, &buf[i].val.tsval);
+						break;
+					case SQL_TYPE_DATE:
+						isc_encode_sql_date(&t, &buf[i].val.dtval);
+						break;
+					case SQL_TYPE_TIME:
+						isc_encode_sql_time(&t, &buf[i].val.tmval);
+						break;
+				}
+				continue;
+
+			case SQL_BLOB:
+
+				convert_to_string(b_var);
+
+				if (Z_STRLEN_P(b_var) != BLOB_ID_LEN ||
+					!_php_ibase_string_to_quad(Z_STRVAL_P(b_var), &buf[i].val.qval)) {
+
+					ibase_blob ib_blob = { NULL, BLOB_INPUT };
+
+					if (isc_create_blob(IB_STATUS, &ib_query->link->handle,
+							&ib_query->trans->handle, &ib_blob.bl_handle, &ib_blob.bl_qd)) {
+						_php_ibase_error(TSRMLS_C);
+						return FAILURE;
+					}
+
+					if (_php_ibase_blob_add(&b_var, &ib_blob TSRMLS_CC) != SUCCESS) {
+						return FAILURE;
+					}
+
+					if (isc_close_blob(IB_STATUS, &ib_blob.bl_handle)) {
+						_php_ibase_error(TSRMLS_C);
+						return FAILURE;
+					}
+					buf[i].val.qval = ib_blob.bl_qd;
+				}
+				continue;
+
+			case SQL_ARRAY:
+
+				if (Z_TYPE_P(b_var) != IS_ARRAY) {
 					convert_to_string(b_var);
 
 					if (Z_STRLEN_P(b_var) != BLOB_ID_LEN ||
 						!_php_ibase_string_to_quad(Z_STRVAL_P(b_var), &buf[i].val.qval)) {
 
-						ibase_blob ib_blob = { NULL, BLOB_INPUT };
-
-						if (isc_create_blob(IB_STATUS, &ib_query->link->handle,
-								&ib_query->trans->handle, &ib_blob.bl_handle, &ib_blob.bl_qd)) {
-							_php_ibase_error(TSRMLS_C);
-							return FAILURE;
-						}
-
-						if (_php_ibase_blob_add(&b_var, &ib_blob TSRMLS_CC) != SUCCESS) {
-							return FAILURE;
-						}
-
-						if (isc_close_blob(IB_STATUS, &ib_blob.bl_handle)) {
-							_php_ibase_error(TSRMLS_C);
-							return FAILURE;
-						}
-						buf[i].val.qval = ib_blob.bl_qd;
+						_php_ibase_module_error("Parameter %d: invalid array ID" TSRMLS_CC,i+1);
+						rv = FAILURE;
 					}
-					break;
-				case SQL_ARRAY:
-					if (Z_TYPE_P(b_var) != IS_ARRAY) {
-						convert_to_string(b_var);
+				} else {
+					/* convert the array data into something IB can understand */
+					ibase_array *ar = &ib_query->in_array[array_cnt];
+					void *array_data = emalloc(ar->ar_size);
+					ISC_QUAD array_id = { 0, 0 };
 
-						if (Z_STRLEN_P(b_var) != BLOB_ID_LEN ||
-							!_php_ibase_string_to_quad(Z_STRVAL_P(b_var), &buf[i].val.qval)) {
-
-							_php_ibase_module_error("Parameter %d: invalid array ID" TSRMLS_CC,i+1);
-							rv = FAILURE;
-						}
-					} else {
-						/* convert the array data into something IB can understand */
-						ibase_array *ar = &ib_query->in_array[array_cnt];
-						void *array_data = emalloc(ar->ar_size);
-						ISC_QUAD array_id = { 0, 0 };
-
-						if (FAILURE == _php_ibase_bind_array(b_var, array_data, ar->ar_size, 
-								ar, 0 TSRMLS_CC)) {
-							_php_ibase_module_error("Parameter %d: failed to bind array argument"
-								TSRMLS_CC,i+1);
-							efree(array_data);
-							rv = FAILURE;
-							break;
-						}
-
-						if (isc_array_put_slice(IB_STATUS, &ib_query->link->handle, &ib_query->trans->handle, 
-								&array_id, &ar->ar_desc, array_data, &ar->ar_size)) {
-							_php_ibase_error(TSRMLS_C);
-							efree(array_data);
-							return FAILURE;
-						}
-						buf[i].val.qval = array_id;
+					if (FAILURE == _php_ibase_bind_array(b_var, array_data, ar->ar_size, 
+							ar, 0 TSRMLS_CC)) {
+						_php_ibase_module_error("Parameter %d: failed to bind array argument"
+							TSRMLS_CC,i+1);
 						efree(array_data);
-					}				
-					++array_cnt;
-					break;
-php_ibase_bind_default:
-					/* empty strings should be coerced to NULL for non-text types */
-					if (Z_TYPE_P(b_var) == IS_STRING && Z_STRLEN_P(b_var) == 0) {
-						ZVAL_NULL(b_var);
-						break;
+						rv = FAILURE;
+						continue;
 					}
 
-				default:
-					convert_to_string(b_var);
-					var->sqldata = Z_STRVAL_P(b_var);
-					var->sqllen	 = Z_STRLEN_P(b_var);
-					var->sqltype = SQL_TEXT;
+					if (isc_array_put_slice(IB_STATUS, &ib_query->link->handle, &ib_query->trans->handle, 
+							&array_id, &ar->ar_desc, array_data, &ar->ar_size)) {
+						_php_ibase_error(TSRMLS_C);
+						efree(array_data);
+						return FAILURE;
+					}
+					buf[i].val.qval = array_id;
+					efree(array_data);
+				}				
+				++array_cnt;
+				continue;
 			} /* switch */
-		} /* if */
 
-		if (Z_TYPE_P(b_var) == IS_NULL) {
-			if (! (var->sqltype & 1)) {
-				_php_ibase_module_error("Parameter %d must have a value" TSRMLS_CC, i+1);
-				rv = FAILURE;
-			}
-			buf[i].sqlind = -1;
-
-			if (var->sqltype & SQL_ARRAY) ++array_cnt;
-		}
+			/* we end up here if none of the switch cases handled the field */
+			convert_to_string(b_var);
+			var->sqldata = Z_STRVAL_P(b_var);
+			var->sqllen	 = Z_STRLEN_P(b_var);
+			var->sqltype = SQL_TEXT;
 	} /* for */
 	return rv;
 }
