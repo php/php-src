@@ -531,7 +531,7 @@ PHP_ALWAYS_SHARED([$1])
 ])
 
 AC_DEFUN([PHP_ARG_ANALYZE],[
-ifelse([$3],yes,[PHP_ARG_ANALYZE_EX([$1])])
+ifelse([$3],yes,[PHP_ARG_ANALYZE_EX([$1])],[ext_output=ifelse([$]$1,,no,[$]$1)])
 ifelse([$2],,,[AC_MSG_RESULT([$ext_output])])
 ])
 
