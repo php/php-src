@@ -380,7 +380,11 @@ function run_test($file) {
     putenv("b=");
     putenv("c=");
     putenv("d=");
-    $cmd = "$php -f $tmpfile[FILE] < $tmpfile[POST]";
+    if (isset($fps["POST"])) {
+	$cmd = "$php -f $tmpfile[FILE] < $tmpfile[POST]";
+    } else {
+	$cmd = "$php -f $tmpfile[FILE]";
+    }
     $ofp = @fopen($tmpfile["OUTPUT"], "w");
     if (!$ofp) {
 	writeln("Error: could not write to output file");
