@@ -1095,7 +1095,12 @@ PHP_FUNCTION(socket_iovec_alloc)
 	zval			***args = (zval ***)NULL;
 	php_iovec_t		*vector;
 	struct iovec	*vector_array;
-	int				i, j, num_vectors, argc = ZEND_NUM_ARGS();
+	long 			num_vectors;
+	int				i, j, argc = ZEND_NUM_ARGS();
+
+	if(argc>65536) {
+		WRONG_PARAM_COUNT;
+	}
 	
 	args = emalloc(argc*sizeof(zval**));
 
