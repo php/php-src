@@ -888,8 +888,6 @@ _oci_stmt_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		efree(statement->defines);
 	}
 
-	zend_list_delete(statement->conn->id);
-
 	oci_debug("END   _oci_stmt_list_dtor: id=%d",statement->id);
 
 	efree(statement);
@@ -967,7 +965,6 @@ _oci_coll_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	oci_collection *coll = (oci_collection *)rsrc->ptr;
 	oci_debug("START _oci_coll_list_dtor: %d",coll->id);
 
-	zend_list_delete(coll->conn->id);
 	/* Note sure if we need to free the object.  Have an
 	   oracle TAR out on this one.
 	   OCIDescriptorFree(descr->ocidescr, Z_TYPE_P(descr)); */
