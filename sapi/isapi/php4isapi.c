@@ -744,16 +744,22 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 					 * variable won't be present, so fall back to old behaviour.
 					 */
 					efree( file_handle.filename );
-					file_handle.filename = SG(request_info.path_translated);
+					file_handle.filename = SG(request_info).path_translated;
 					file_handle.free_filename = 0;
 				}
 			}
 #else
-			file_handle.filename = SG(request_info.path_translated);
+			file_handle.filename = SG(request_info).path_translated;
 			file_handle.free_filename = 0;
 #endif
 			file_handle.type = ZEND_HANDLE_FILENAME;
 			file_handle.opened_path = NULL;
+			/* some server configurations allow '..' to slip through in the
+			   translated path.   We'll just refuse to handle such a path. */
+			if (strstr(SG(request_info).path_translated,"..")) {
+				SG(sapi_headers).http_response_code = 404;
+				SG(request_info).path_translated = NULL;
+			}
 
 			php_request_startup(TSRMLS_C);
 			php_execute_script(&file_handle TSRMLS_CC);
