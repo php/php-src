@@ -741,6 +741,7 @@ TABS_AND_SPACES [ \t]*
 TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
 ENCAPSED_TOKENS [\[\]{}$]
 ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
+ANY_CHAR (.|[\n])
 
 %option noyylineno
 %option noyywrap
@@ -879,7 +880,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	return T_STRING;
 }
 
-<ST_LOOKING_FOR_PROPERTY>. {
+<ST_LOOKING_FOR_PROPERTY>{ANY_CHAR} {
 	/*unput(yytext[0]);*/
 	yyless(0);
 	yy_pop_state();
@@ -1122,7 +1123,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<ST_LOOKING_FOR_VARNAME>. {
+<ST_LOOKING_FOR_VARNAME>{ANY_CHAR} {
 	/*unput(yytext[0]);*/
 	yyless(0);
 	yy_pop_state();
@@ -1618,7 +1619,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	return T_CHARACTER;
 }
 
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\". {
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\"{ANY_CHAR} {
 	switch (yytext[1]) {
 		case 'n':
 			zendlval->value.lval = (long) '\n';
@@ -1686,6 +1687,6 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	
 
 
-<ST_IN_SCRIPTING,INITIAL,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_SINGLE_QUOTE,ST_HEREDOC>. {
+<ST_IN_SCRIPTING,INITIAL,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_SINGLE_QUOTE,ST_HEREDOC>{ANY_CHAR} {
 	zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d",yytext[0],yytext[0],YYSTATE);
 }
