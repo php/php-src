@@ -20,13 +20,7 @@
 #include "php_dbx.h"
 #include "dbx_pgsql.h"
 #include <string.h>
-/*
-#ifdef ZTS
-extern int dbx_globals_id;
-#else
-extern ZEND_DBX_API zend_dbx_globals dbx_globals;
-#endif
-*/
+
 #define PGSQL_ASSOC		1<<0
 #define PGSQL_NUM		1<<1
 
@@ -156,17 +150,7 @@ int dbx_pgsql_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sql
 		return 0;
 	}
     MOVE_RETURNED_TO_RV(rv, returned_zval);
-/*
-	if(strstr(Z_STRVAL_PP(sql_statement), "SELECT") ||
-	   strstr(Z_STRVAL_PP(sql_statement), "select")){
-		DBXG(row_count) = 0;
 
-		args[0]=rv;
-		nargs = 1;
-		dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_numrows", &num_rows_zval, nargs, args);
-		DBXG(num_rows) = Z_LVAL_P(num_rows_zval);
-	} 
-*/
     return 1;
 }
 
@@ -245,13 +229,8 @@ int dbx_pgsql_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNA
     ZVAL_LONG(zval_row, row_number);
     arguments[0]=result_handle;
     arguments[1]=&zval_row;
-/*
-	DBXG(row_count)++;
-	if (DBXG(row_count)>DBXG(num_rows)){
-		return 0;
-	}
-*/
-	if (EG(error_reporting) & E_WARNING){
+
+    if (EG(error_reporting) & E_WARNING){
 		save_error_reporting = EG(error_reporting);
 		EG(error_reporting) &= ~E_WARNING;
 	}
