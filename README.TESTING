@@ -23,10 +23,9 @@ like
 
 [Which "php" executable "make test" look for]
 ---------------------------------------------
- "make test" executes "run-tests.php" script with "./sapi/cli/php".
-Although, "run-tests.php" is executed by CLI SAPI binary, test
-scripts must be executed by CGI SAPI. Therefore, you must build
-PHP with CGI SAPI to perform tests.
+ "make test" executes "run-tests.php" script with "./php".
+Test scripts must be executed by CGI SAPI. Therefore, you 
+must build PHP with CGI SAPI to perform tests.
 
  "run-tests.php" look for "php" executable in build top directory,
 then look for search path. Therefore, if you have "php" executable
