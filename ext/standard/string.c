@@ -1849,7 +1849,7 @@ PHP_FUNCTION(substr_replace)
 	zval **repl;
 	char *result;
 	int result_len;
-	int l;
+	int l = 0;
 	int f;
 	int argc = ZEND_NUM_ARGS();
 
