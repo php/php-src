@@ -148,8 +148,8 @@ ZEND_API int zend_hash_index_exists(HashTable *ht, ulong h);
 ZEND_API ulong zend_hash_next_free_element(HashTable *ht);
 
 /* traversing */
-ZEND_API void zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
-ZEND_API void zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
+ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
+ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_get_current_key_ex(HashTable *ht, char **str_index, ulong *num_index, HashPosition *pos);
 ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosition *pos);
