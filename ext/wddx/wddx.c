@@ -1284,8 +1284,7 @@ PHP_FUNCTION(wddx_deserialize)
 			payload_len = php_stream_copy_to_mem(stream, &payload, PHP_STREAM_COPY_ALL, 0 TSRMLS_CC);
 		}
 	} else {
-		php_error(E_WARNING, "%s() expects parameter 1 to be a string or a stream",
-				  get_active_function_name());
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expecting parameter 1 to be a string or a stream");
 		return;
 	}
 
