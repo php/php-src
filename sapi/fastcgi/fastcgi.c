@@ -213,8 +213,8 @@ static void fastcgi_module_main(TLS_D SLS_DC)
 
 	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == SUCCESS) {
 		php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+		php_request_shutdown(NULL);
 	}
-	php_request_shutdown(NULL);
 }
 
 
