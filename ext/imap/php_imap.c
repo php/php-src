@@ -1027,7 +1027,6 @@ PHP_FUNCTION(imap_close)
 		}	
 		imap_le_struct->flags = flags;
 	}
-  mail_close_it(imap_le_struct);
 
 	zend_list_delete(ind);
 	RETURN_TRUE;
