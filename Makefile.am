@@ -11,7 +11,7 @@ libphp4_la_SOURCES = \
        configuration-parser.y configuration-scanner.l request_info.c \
        safe_mode.c fopen-wrappers.c php3_realpath.c alloca.c \
        php_ini.c SAPI.c rfc1867.c dlist.c php_content_types.c strlcpy.c \
-	   strlcat.c mergesort.c
+       strlcat.c mergesort.c strtok_r.c reentrancy.c
 
 libphp4_la_DEPENDENCIES = \
 		libzend/libzend.la \

@@ -292,15 +292,19 @@ AC_CHECK_TYPE( ulong, unsigned long )
 dnl Checks for library functions.
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(
+asctime_r \
 crypt \
+ctime_r \
 cuserid \
 flock \
 gcvt \
 getlogin \
 gethostbyaddr \
 gettimeofday \
+gmtime_r \
 inet_aton \
 link \
+localtime_r \
 lockf \
 lrand48 \
 memcpy \
