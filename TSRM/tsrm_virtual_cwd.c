@@ -315,7 +315,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		is_absolute = 1;
 #ifdef TSRM_WIN32
 	} else if (IS_UNC_PATH(path_copy, path_length)) {
-		copy_amount = 1;
+		copy_amount = 2;
 		is_absolute = 1;
 	} else if (IS_SLASH(path_copy[0])) {
 		copy_amount = 2;
@@ -366,7 +366,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			state->cwd = (char *) realloc(state->cwd, state->cwd_length+ptr_length+1+1);
 #ifdef TSRM_WIN32
 			/* Windows 9x will consider C:\\Foo as a network path. Avoid it. */
-			if (state->cwd[state->cwd_length-1]!=DEFAULT_SLASH) {
+			if (state->cwd[state->cwd_length-1]!='\\' && state->cwd[state->cwd_length-1]!='/') {
 				state->cwd[state->cwd_length++] = DEFAULT_SLASH;
 			}
 #else
