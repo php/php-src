@@ -261,6 +261,7 @@ static gzFile php_gzopen_wrapper(char *path, char *mode, int options TSRMLS_DC)
 			if (ret)	{
 				/* arrange to clean up the actual stream */
 				ZEND_REGISTER_RESOURCE(NULL, stream, php_file_le_stream());
+/*				php_stream_auto_cleanup(stream); */
 				return ret;
 			}
 		}
@@ -300,7 +301,7 @@ PHP_FUNCTION(gzfile)
 	convert_to_string_ex(filename);
 
 	/* using a stream here is a bit more efficient (resource wise) than php_gzopen_wrapper */
-	stream = php_stream_gzopen(Z_STRVAL_PP(filename), "rb", use_include_path|ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL STREAMS_CC TSRMLS_CC);
+	stream = php_stream_gzopen(Z_STRVAL_PP(filename), "rb", use_include_path|ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
 	if (stream == NULL) {
 		php_error(E_WARNING,"gzFile(\"%s\") - %s",Z_STRVAL_PP(filename),strerror(errno));
 		RETURN_FALSE;
