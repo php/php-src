@@ -69,6 +69,9 @@ PHP_FUNCTION(array_reverse);
 PHP_FUNCTION(array_pad);
 PHP_FUNCTION(array_flip);
 PHP_FUNCTION(array_rand);
+PHP_FUNCTION(array_unique);
+PHP_FUNCTION(array_intersect);
+PHP_FUNCTION(array_subtract);
 
 HashTable* php_splice(HashTable *, int, int, zval ***, int, HashTable **);
 int multisort_compare(const void *a, const void *b);

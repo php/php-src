@@ -2142,6 +2142,254 @@ PHP_FUNCTION(array_flip)
 }
 /* }}} */
 
+/* {{{ proto array array_unique(array input)
+   Removes duplicate values from array */
+PHP_FUNCTION(array_unique)
+{
+	zval **array;
+	HashTable *target_hash;
+	Bucket **arTmp, **cmpdata, **lastkept;
+	Bucket *p;
+	int i;
+
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	target_hash = HASH_OF(*array);
+	if (!target_hash) {
+		php_error(E_WARNING, "Wrong datatype in array_unique() call");
+		RETURN_FALSE;
+	}
+
+	/* copy the argument array */
+	*return_value = **array;
+	zval_copy_ctor(return_value);
+
+	if (target_hash->nNumOfElements <= 1) /* nothing to do */
+	        return;
+
+	/* create and sort array with pointers to the target_hash buckets */
+	arTmp = (Bucket **) pemalloc((target_hash->nNumOfElements + 1) * sizeof(Bucket *), target_hash->persistent);
+	if (!arTmp)
+		RETURN_FALSE;
+	for (i = 0, p = target_hash->pListHead; p; i++, p = p->pListNext)
+		arTmp[i] = p;
+	arTmp[i] = NULL;
+	qsort((void *) arTmp, i, sizeof(Bucket *), array_data_compare);
+
+	/* go through the sorted array and delete duplicates from the copy */
+	lastkept = arTmp;
+	for (cmpdata = arTmp + 1; *cmpdata; cmpdata++) {
+		if (array_data_compare(lastkept, cmpdata)) {
+		        lastkept = cmpdata;
+		} else {
+			p = *cmpdata;
+			if (p->nKeyLength)
+			        zend_hash_del(return_value->value.ht, p->arKey, p->nKeyLength);  
+			else
+			        zend_hash_index_del(return_value->value.ht, p->h);  
+		}
+	}
+	pefree(arTmp, target_hash->persistent);
+}
+/* }}} */
+
+/* {{{ proto array array_intersect(array arr1, array arr2 [, ...])
+   Returns the entries of arr1 that have values which are present in
+   all the others arguments */
+PHP_FUNCTION(array_intersect)
+{
+        zval ***args = NULL;
+	HashTable *hash;
+	int argc, i, c = 0;
+	Bucket ***lists, **list, ***ptrs, *p;
+	zval *entry;
+
+	/* Get the argument count and check it */	
+	argc = ARG_COUNT(ht);
+	if (argc < 2) {
+		WRONG_PARAM_COUNT;
+	}
+	/* Allocate arguments array and get the arguments, checking for errors. */
+	args = (zval ***)emalloc(argc * sizeof(zval **));
+	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}
+	array_init(return_value);
+	/* for each argument, create and sort list with pointers to the hash buckets */
+	lists = (Bucket ***)emalloc(argc * sizeof(Bucket **));
+	ptrs = (Bucket ***)emalloc(argc * sizeof(Bucket **));
+	for (i=0; i<argc; i++) {
+		if ((*args[i])->type != IS_ARRAY) {
+			php_error(E_WARNING, "Argument #%d to array_intersect() is not an array", i+1);
+			argc = i; /* only free up to i-1 */
+			goto out;
+		}
+		hash = HASH_OF(*args[i]);
+		list = (Bucket **) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket *), hash->persistent);
+		if (!list)
+		        RETURN_FALSE;
+		lists[i] = list;
+		ptrs[i] = list;
+		for (p = hash->pListHead; p; p = p->pListNext)
+		        *list++ = p;
+		*list = NULL;
+		qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare);
+	}
+	/* go through the lists and look for common values */
+	while (*ptrs[0]) {
+		for (i=1; i<argc; i++) {
+		        while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i]))))
+			        ptrs[i]++;
+			if (!*ptrs[i])
+			        goto out;
+			if (c)
+			        break;
+			ptrs[i]++;
+		}
+		if (c) {
+		  /* ptrs[0] not in all arguments, next candidate is ptrs[i] */
+		        for (;;) {
+		                if (!*++ptrs[0])
+			                goto out;
+				if (0 <= array_data_compare(ptrs[0], ptrs[i]))
+			                break;
+			}
+		} else {
+		        /* ptrs[0] is present in all the arguments */
+		        /* Go through all entries with same value as ptrs[0] */
+		        for (;;) {
+			        p = *ptrs[0];
+				entry = *((zval **)p->pData);
+				entry->refcount++;
+				if (p->nKeyLength)
+				        zend_hash_update(return_value->value.ht,
+						 p->arKey, p->nKeyLength,
+						 &entry, sizeof(zval *),
+						 NULL);  
+				else
+				        zend_hash_index_update(return_value->value.ht,
+						       p->h, &entry,
+						       sizeof(zval *),
+						       NULL);
+				if (!*++ptrs[0])
+				        goto out;
+				if (array_data_compare(ptrs[0]-1, ptrs[0]))
+				        break;
+			}
+		}
+	}
+out:
+	for (i=0; i<argc; i++) {
+	        hash = HASH_OF(*args[i]);
+		pefree(lists[i], hash->persistent);
+	}
+	efree(ptrs);
+	efree(lists);
+	efree(args);
+}
+/* }}} */
+
+/* {{{ proto array array_subtract(array arr1, array arr2 [, ...])
+   Returns the entries of arr1 that have values which are not present in
+   any of the others arguments */
+PHP_FUNCTION(array_subtract)
+{
+        zval ***args = NULL;
+	HashTable *hash;
+	int argc, i, c;
+	Bucket ***lists, **list, ***ptrs, *p;
+	zval *entry;
+
+	/* Get the argument count and check it */	
+	argc = ARG_COUNT(ht);
+	if (argc < 2) {
+		WRONG_PARAM_COUNT;
+	}
+	/* Allocate arguments array and get the arguments, checking for errors. */
+	args = (zval ***)emalloc(argc * sizeof(zval **));
+	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}
+	array_init(return_value);
+	/* for each argument, create and sort list with pointers to the hash buckets */
+	lists = (Bucket ***)emalloc(argc * sizeof(Bucket **));
+	ptrs = (Bucket ***)emalloc(argc * sizeof(Bucket **));
+	for (i=0; i<argc; i++) {
+		if ((*args[i])->type != IS_ARRAY) {
+			php_error(E_WARNING, "Argument #%d to array_intersect() is not an array", i+1);
+			argc = i; /* only free up to i-1 */
+			goto out;
+		}
+		hash = HASH_OF(*args[i]);
+		list = (Bucket **) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket *), hash->persistent);
+		if (!list)
+		        RETURN_FALSE;
+		lists[i] = list;
+		ptrs[i] = list;
+		for (p = hash->pListHead; p; p = p->pListNext)
+		        *list++ = p;
+		*list = NULL;
+		qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare);
+	}
+	/* go through the lists and look for values of ptr[0]
+           that are not in the others */
+	while (*ptrs[0]) {
+	        c = 1;
+		for (i=1; i<argc; i++) {
+		        while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i]))))
+			        ptrs[i]++;
+			if (!c) {
+			        if (*ptrs[i])
+				        ptrs[i]++;
+			        break;
+			}
+		}
+		if (!c) {
+		  /* ptrs[0] in one of the other arguments */
+		  /* skip all entries with value as ptrs[0] */
+		        for (;;) {
+		                if (!*++ptrs[0])
+			                goto out;
+				if (array_data_compare(ptrs[0]-1, ptrs[0]))
+			                break;
+			}
+		} else {
+		        /* ptrs[0] is in none of the other arguments */
+		        for (;;) {
+			        p = *ptrs[0];
+				entry = *((zval **)p->pData);
+				entry->refcount++;
+				if (p->nKeyLength)
+				        zend_hash_update(return_value->value.ht,
+						 p->arKey, p->nKeyLength,
+						 &entry, sizeof(zval *),
+						 NULL);  
+				else
+				        zend_hash_index_update(return_value->value.ht,
+						       p->h, &entry,
+						       sizeof(zval *),
+						       NULL);
+				if (!*++ptrs[0])
+				        goto out;
+				if (array_data_compare(ptrs[0]-1, ptrs[0]))
+				        break;
+			}
+		}
+	}
+out:
+	for (i=0; i<argc; i++) {
+	        hash = HASH_OF(*args[i]);
+		pefree(lists[i], hash->persistent);
+	}
+	efree(ptrs);
+	efree(lists);
+	efree(args);
+}
+/* }}} */
+
 int multisort_compare(const void *a, const void *b)
 {
 	Bucket**	  ab = *(Bucket ***)a;
