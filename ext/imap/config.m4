@@ -21,10 +21,10 @@ AC_DEFUN(IMAP_LIB_CHK,[
   done
 ])
 
-dnl PHP_IMAP_TEST_BUILD(action-if-ok, action-if-not-ok [, extra-libs])
+dnl PHP_IMAP_TEST_BUILD(function, action-if-ok, action-if-not-ok [, extra-libs])
 AC_DEFUN(PHP_IMAP_TEST_BUILD, [
   old_LIBS=$LIBS
-  LIBS="$3 $LIBS"
+  LIBS="$4 $LIBS"
   AC_TRY_RUN([
     void mm_log(void){}
     void mm_dlog(void){}
@@ -41,17 +41,17 @@ AC_DEFUN(PHP_IMAP_TEST_BUILD, [
     void mm_exists(void){}
     void mm_searched(void){}
     void mm_expunged(void){}
-    char mail_open();
+    char $1();
     int main() {
-      mail_open(0,"",0);
+      $1();
       return 0;
     }
   ], [
     LIBS=$old_LIBS
-    $1
+    $2
   ],[
     LIBS=$old_LIBS
-    $2
+    $3
   ])
 ])
 
@@ -127,7 +127,7 @@ AC_DEFUN(PHP_IMAP_SSL_CHK, [
       TST_LIBS="$TST_LIBS -L$PHP_KERBEROS/lib -lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err"
     fi
 
-    PHP_IMAP_TEST_BUILD([
+    PHP_IMAP_TEST_BUILD(ssl_onceonlyinit, [
       AC_MSG_RESULT(no)
     ], [
       AC_MSG_RESULT(yes)
@@ -204,8 +204,14 @@ if test "$PHP_IMAP" != "no"; then
 
     dnl Test the build in the end
     TST_LIBS="$DLIBS $IMAP_SHARED_LIBADD"
+
+    dnl Check if auth_gss exists
+    PHP_IMAP_TEST_BUILD(auth_gssapi_valid, [
+      AC_DEFINE(HAVE_IMAP_AUTH_GSS, 1, [ ])
+    ], [], $TST_LIBS)
+
     AC_MSG_CHECKING(whether IMAP works)
-    PHP_IMAP_TEST_BUILD([
+    PHP_IMAP_TEST_BUILD(mail_open, [
       AC_MSG_RESULT(yes)
     ], [
       AC_MSG_RESULT(no)
