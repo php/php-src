@@ -91,7 +91,7 @@ static inline int is_numeric_string(char *str, int length, long *lval, double *d
 		if (length>16) {
 			register char *ptr=str, *end=str+length;
 			
-			while(ptr<end) {
+			while (ptr<end) {
 				switch(*ptr++) {
 					case 'e':
 					case 'E':

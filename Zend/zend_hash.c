@@ -52,7 +52,7 @@
 				return func;															\
 			}																			\
 		}																				\
-	} while(0);																			\
+	} while (0);																			\
 }
 
 

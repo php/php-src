@@ -1331,7 +1331,7 @@ static void increment_string(zval *str)
 		return;
 	}
 
-	while(pos >= 0) {
+	while (pos >= 0) {
         ch = s[pos];
         if (ch >= 'a' && ch <= 'z') {
             if (ch == 'z') {

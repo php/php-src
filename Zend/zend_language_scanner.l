@@ -95,12 +95,12 @@
 do { \
 	char *p = (s),*boundary = p+(l); \
 \
-	while(p<boundary) { \
+	while (p<boundary) { \
 		if (*p++=='\n') { \
 			CG(zend_lineno)++; \
 		} \
 	} \
-} while(0)
+} while (0)
 
 #define HANDLE_NEWLINE(c) \
 { \
