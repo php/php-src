@@ -389,6 +389,8 @@ static sapi_module_struct aolserver_sapi_module = {
 	php_ns_sapi_register_variables,
 	NULL,									/* Log message */
 
+	NULL,									/* php.ini path override */
+
 	NULL,									/* Block interruptions */
 	NULL,									/* Unblock interruptions */
 
