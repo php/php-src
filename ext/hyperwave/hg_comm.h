@@ -30,7 +30,13 @@
 
 #if HYPERWAVE
 
+#define newlist
+
 #include "hw_error.h"
+#ifdef newlist
+#else
+#include "dlist.h"
+#endif
 #define HG_SERVER_PORT   418
 
 #define F_DISTRIBUTED 0x80000000
@@ -146,6 +152,21 @@ typedef struct {
 typedef int hw_objectID;
 typedef char hw_objrec;
 
+#ifdef newlist
+void fnDeleteAnchor(void *ptr1);
+void fnListAnchor(zend_llist *pAnchorList);
+zend_llist *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorrec, char **reldestrec, int ancount, int anchormode);
+char *fnInsAnchorsIntoText(char *text, zend_llist *pAnchorList, char **bodytag, char *urlprefix);
+int fnCmpAnchors(const void *e1, const void *e2);
+ANCHOR *fnAddAnchor(zend_llist *pAnchorList, int objectID, int start, int end);
+#else
+void fnDeleteAnchor(ANCHOR *ptr);
+void fnListAnchor(DLIST *pAnchorList);
+DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorrec, char **reldestrec, int ancount, int anchormode);
+char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char *urlprefix);
+int fnCmpAnchors(ANCHOR *a1, ANCHOR *a2);
+ANCHOR *fnAddAnchor(DLIST *pAnchorList, int objectID, int start, int end);
+#endif
 extern void set_swap(int do_swap);
 extern int  open_hg_connection(char *server_name, int port);
 extern void close_hg_connection(int sockfd);
@@ -160,6 +181,7 @@ extern hg_msg *recv_command(int sockfd);
 
 extern char *fnInsStr(char *str, int pos, char *insstr);
 extern int fnAttributeCompare(char *object, char *attrname, char *value);
+extern char *fnAttributeValue(char *object, char *attrname);
 extern int getrellink(int sockfd, int rootID, int thisID, int destID, char **reldesstr);
 
 extern int send_deleteobject(int sockfd, hw_objectID objectID);
