@@ -19,9 +19,9 @@ mysqli_prepare_result
 	$result = mysqli_prepare_result($stmt);
 
 	$fields = mysqli_fetch_fields($result);
-	var_dump($fields);
-
 	mysqli_free_result($result);
+
+	var_dump($fields);
 
 	mysqli_stmt_close($stmt);	
 	mysqli_close($link);
@@ -29,7 +29,7 @@ mysqli_prepare_result
 --EXPECT--
 array(2) {
   [0]=>
-  object()(9) {
+  object(stdClass)(9) {
     ["name"]=>
     string(3) "foo"
     ["orgname"]=>
@@ -50,7 +50,7 @@ array(2) {
     int(0)
   }
   [1]=>
-  object()(9) {
+  object(stdClass)(9) {
     ["name"]=>
     string(3) "bar"
     ["orgname"]=>
