@@ -166,8 +166,11 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 			flock(data->fd, LOCK_EX);
 
 #ifdef F_SETFD
+#ifndef FD_CLOEXEC
+#define FD_CLOEXEC 1
+#endif
 			if (fcntl(data->fd, F_SETFD, FD_CLOEXEC)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "fcntl(%d, F_SETFD, 1) failed: %s (%d)", data->fd, strerror(errno), errno);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "fcntl(%d, F_SETFD, FD_CLOEXEC) failed: %s (%d)", data->fd, strerror(errno), errno);
 			}
 #endif
 		} else {
