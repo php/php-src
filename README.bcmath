@@ -1,6 +1,0 @@
-NOTE: If you are going to build with --enable-bcmath, you must download
-http://www.php.net/version4/do_download.php?download_file=number.tar.gz
-and unpack it in the top php4 directory.
-
-PHP no longer ships the bcmath files with the distribution because of
-licensing restrictions.
