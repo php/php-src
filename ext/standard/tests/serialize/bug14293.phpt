@@ -1,7 +1,5 @@
 --TEST--
-serialize() (Bug #14293)
---POST--
---GET--
+Bug #14293 (serialize() and __sleep())
 --FILE--
 <?php 
 class t
