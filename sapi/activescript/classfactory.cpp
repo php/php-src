@@ -243,7 +243,7 @@ static int perform_registration(BOOL do_reg)
 {
 	char module_name[MAX_PATH];
 	char classid[40];
-	int ret = 0;
+	int ret = 1;
 	int i, j;
 	struct reg_subst subst = {0};
 	LPOLESTR classidw;
