@@ -11,7 +11,7 @@ dbase               Working
 aspell              Working
 imap                Working
 ldap                Working
-oci8                Working (but no blob-support yet)
+oci8                Working
 oracle              Working
 iptc                Working
 informix            Working

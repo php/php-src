@@ -8,6 +8,8 @@ Zend
 
 global
 ------
+    * the following modules still use PHP3_TLS_*() macros (and thereby don't 
+      work in ZTS mode): ext/dav/dav.c, ext/db/db.c, ext/gd/gd.c, ext/ldap/ldap.c
     * let every module (source-file) have it's own module & function_entry 
       block. Right now the math functions are in math.c but the corresponding
       function-entries are in basic_functions.
