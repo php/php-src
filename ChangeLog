@@ -1,3 +1,66 @@
+1999-11-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/informix/Makefile.am
+      ext/informix/config.m4:
+    Improved build (now sets also runtime library search paths, works
+    out-of-the-box with Apache)
+
+1999-11-27  Andrei Zmievski  <zmievski@ispi.net>
+
+    * NEWS: *** empty log message ***
+
+    * ext/domxml/.cvsignore: Don't cry, CVS.
+
+    * ext/session/session.c:
+    (PHP session_register) Modified to accept variable number of arguments,
+    any of which can be either string holding the variable name or an array
+    consisting of such variable names or other arrays.
+
+1999-11-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/parsedate.y: one tmbuf is enough
+
+1999-11-27  Zeev Suraski  <zeev@php.net>
+
+    * php4.dsp
+      php4dll.dsp: - Win32 thread unsafe build updates
+
+1999-11-27  Andrew Skalski  <askalski@chek.com>
+
+    * ext/ftp/ftp.c: typecast void pointer to char* for pointer arithmetic
+
+1999-11-27  Jouni Ahto  <jah@mork.net>
+
+    * ext/standard/parsedate.y
+      ext/dbase/dbf_misc.c:
+    Use thread-safe versions of localtime and gmtime
+
+1999-11-27  Zeev Suraski  <zeev@php.net>
+
+    * php4dllts.dsp
+      php_reentrancy.h: Update Win32 build
+
+1999-11-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner.c
+      ext/standard/url_scanner.re:
+    Only compile the scanner, if trans_sid is enabled
+
+    * configure.in: Test for PHP_THREAD_SAFETY
+
+    * configure.in: PERL_PATH is used nowhere
+
+    * acinclude.m4
+      configure.in: Add --enable-experimental-zts
+
+1999-11-27  Zeev Suraski  <zeev@php.net>
+
+    * php.h
+      php4dllts.dsp
+      strlcat.c
+      strlcpy.c
+      strtok_r.c: Get Win32 to compile again
+
 1999-11-26  Zeev Suraski  <zeev@php.net>
 
     * NEWS: *** empty log message ***
