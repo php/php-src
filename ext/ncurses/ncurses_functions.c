@@ -25,7 +25,7 @@
 #include "php_ini.h"
 #include "php_ncurses.h"
 
-#define FETCH_WINRES(r, z)   ZEND_FETCH_RESOURCE(r, WINDOW *, z, -1, "ncurses_handle", le_ncurses); \
+#define FETCH_WINRES(r, z)   ZEND_FETCH_RESOURCE((void**)r, WINDOW *, z, -1, "ncurses_handle", le_ncurses); \
                                     if(!r) RETURN_FALSE;
 
 
@@ -1547,9 +1547,8 @@ PHP_FUNCTION(ncurses_ungetmouse)
 PHP_FUNCTION(ncurses_mouse_trafo)
 {
 	zval **x, **y, **toscreen;
-	ulong nx, ny, retval;
+	int nx, ny, retval;
 
-	WINDOW **win;
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &y, &x, &toscreen) == FAILURE){
 		WRONG_PARAM_COUNT;
   }
@@ -1575,7 +1574,7 @@ PHP_FUNCTION(ncurses_mouse_trafo)
 PHP_FUNCTION(ncurses_wmouse_trafo)
 {
 	zval **handle, **x, **y, **toscreen;
-	ulong nx, ny, retval;
+	int nx, ny, retval;
 	WINDOW **win;
 
 	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &y, &x, &toscreen) == FAILURE){
@@ -1643,7 +1642,7 @@ PHP_FUNCTION(ncurses_keypad)
    Sets windows color pairings */
 PHP_FUNCTION(ncurses_wcolor_set)
 {
-	zval **handle, **color_pair, **opts;
+	zval **handle, **color_pair;
 	WINDOW **win;
 
 #ifdef HAVE_NCURSES_COLOR_SET
