@@ -469,7 +469,7 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 		php_stream_close(stream);
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
-		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length or chunked data", NULL, NULL TSRMLS_CC);
+		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length, connection closed or chunked data", NULL, NULL TSRMLS_CC);
 		return FALSE;
 	}
 
@@ -635,17 +635,29 @@ static char *get_http_header_value(char *headers, char *type)
 
 static int get_http_body(php_stream *stream, char *headers,  char **response, int *out_size TSRMLS_DC)
 {
-	char *trans_enc, *content_length, *http_buf = NULL;
-	int http_buf_size = 0;
+	char *header, *http_buf = NULL;
+	int header_close = 0, header_chunked = 0, header_length = 0, http_buf_size = 0;
 
-	trans_enc = get_http_header_value(headers, "Transfer-Encoding: ");
-	content_length = get_http_header_value(headers, "Content-Length: ");
+	header = get_http_header_value(headers, "Connection: ");
+	if (header) {
+		if(!strcmp(header, "close")) header_close = 1;
+		efree(header);
+	}
+	header = get_http_header_value(headers, "Transfer-Encoding: ");
+	if (header) {
+		if(!strcmp(header, "chunked")) header_chunked = 1;
+		efree(header);
+	}
+	header = get_http_header_value(headers, "Content-Length: ");
+	if (header) {
+		header_length = atoi(header);
+		efree(header);
+	}
 
-	if (trans_enc && !strcmp(trans_enc, "chunked")) {
+	if (header_chunked) {
 		char done, chunk_size[10];
 
 		done = FALSE;
-		http_buf = NULL;
 
 		while (!done) {
 			int buf_size = 0;
@@ -674,7 +686,6 @@ static int get_http_body(php_stream *stream, char *headers,  char **response, in
 				php_stream_getc(stream);
 			} else {				
 				/* Somthing wrong in chunked encoding */
-				efree(trans_enc);
 				efree(http_buf);
 				return FALSE;
 			}
@@ -682,29 +693,26 @@ static int get_http_body(php_stream *stream, char *headers,  char **response, in
 				done = TRUE;
 			}
 		}
-		efree(trans_enc);
 
 		if (http_buf == NULL) {
-			http_buf = estrndup("", 1);
-			http_buf_size = 1;
-		} else {
-			http_buf[http_buf_size] = '\0';
+			http_buf = emalloc(1);
 		}
 
-	} else if (content_length) {
-		int size;
-		size = atoi(content_length);
-		http_buf = emalloc(size + 1);
-
-		while (http_buf_size < size) {
-			http_buf_size += php_stream_read(stream, http_buf + http_buf_size, size - http_buf_size);
+	} else if (header_length) {
+		http_buf = emalloc(header_length + 1);
+		while (http_buf_size < header_length) {
+			http_buf_size += php_stream_read(stream, http_buf + http_buf_size, header_length - http_buf_size);
 		}
-		http_buf[size] = '\0';
-		efree(content_length);
+	} else if (header_close) {
+		do {
+			http_buf = erealloc(http_buf, http_buf_size + 4096 + 1);
+			http_buf_size += php_stream_read(stream, http_buf + http_buf_size, 4096);
+		} while(!php_stream_eof(stream));
 	} else {
 		return FALSE;
 	}
 
+	http_buf[http_buf_size] = '\0';
 	(*response) = http_buf;
 	(*out_size) = http_buf_size;
 	return TRUE;
