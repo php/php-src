@@ -30,7 +30,7 @@ PHP_FUNCTION(confirm_extname_compiled);	/* For testing, remove later. */
 	and END macros here:     
 
 ZEND_BEGIN_MODULE_GLOBALS(extname)
-	int   global_value;
+	long  global_value;
 	char *global_string;
 ZEND_END_MODULE_GLOBALS(extname)
 */
