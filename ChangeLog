@@ -1,3 +1,31 @@
+2000-11-05  John Donagher  <john@webmeta.com>
+
+    * ext/standard/info.c: Bring phpcredits() up to date
+
+2000-11-05  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Math/Fraction.php
+      pear/Math/Util.php:
+    Initial checkin of Math_Fraction and Math_Util. This is not really tested :-)
+
+2000-11-05  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/curl/curl.c: Fix the other part...
+
+    * ext/curl/curl.c: This should fix the garbage.
+
+2000-11-05  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/curl/curl.c: Fix crash from #7577 (torben@php.net)
+
+2000-11-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/dl.c: PHP_EXTENSION_DIR is defined in build-defs.h
+
+2000-11-05  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/dl.c: Fix the problem Sascha reported, about extension_dir
+
 2000-11-04  Mathieu Kooiman  <mathieu@gginter.net>
 
     * ext/gd/gd.c:
