@@ -1777,7 +1777,6 @@ $debug ||
 }
   _max=0
   _count=0
-  # along with /bin/sed that truncates output.
   for _sed in $_sed_list; do
     test ! -f ${_sed} && break
     cat /dev/null > "$tmp/sed.in"
