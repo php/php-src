@@ -234,11 +234,6 @@ static void thttpd_request_ctor(TLS_D SLS_DC)
 	snprintf(buf, 1023, "/%s", TG(hc)->origfilename);
 	SG(request_info).request_uri = strdup(buf);
 	SG(request_info).request_method = httpd_method_str(TG(hc)->method);
-	if (!strcmp(SG(request_info).request_method, "HEAD")) {
-		SG(request_info).headers_only = 1;
-	} else {
-		SG(request_info).headers_only = 0;
-	}
 	SG(sapi_headers).http_response_code = 200;
 	SG(request_info).content_type = TG(hc)->contenttype;
 	SG(request_info).content_length = TG(hc)->contentlength;
