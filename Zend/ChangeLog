@@ -1,3 +1,11 @@
+2004-05-04  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_iterators.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_objects_API.c:
+      Add count_elements handler for overloaded objects.
+
 2004-05-02  Andi Gutmans  <andi@zend.com>
 
     * zend_operators.c:
