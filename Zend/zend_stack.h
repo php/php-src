@@ -38,8 +38,8 @@ ZEND_API int zend_stack_is_empty(zend_stack *stack);
 ZEND_API int zend_stack_destroy(zend_stack *stack);
 ZEND_API void **zend_stack_base(zend_stack *stack);
 ZEND_API int zend_stack_count(zend_stack *stack);
-ZEND_API void zend_stack_apply(zend_stack *stack, void (*apply_function)(void *element), int type);
-ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, void (*apply_function)(void *element, void *arg), int type, void *arg);
+ZEND_API void zend_stack_apply(zend_stack *stack, int (*apply_function)(void *element), int type);
+ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, int (*apply_function)(void *element, void *arg), int type, void *arg);
 
 #define ZEND_STACK_APPLY_TOPDOWN	1
 #define ZEND_STACK_APPLY_BOTTOMUP	2

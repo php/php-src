@@ -58,6 +58,7 @@ END_EXTERN_C()
 struct _zend_compiler_globals {
 	zend_stack bp_stack;
 	zend_stack switch_cond_stack;
+	zend_stack foreach_copy_stack;
 	zend_stack object_stack;
 
 	zend_class_entry class_entry, *active_class_entry;

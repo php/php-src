@@ -82,6 +82,7 @@ void init_compiler(CLS_D ELS_DC)
 	zend_stack_init(&CG(bp_stack));
 	zend_stack_init(&CG(function_call_stack));
 	zend_stack_init(&CG(switch_cond_stack));
+	zend_stack_init(&CG(foreach_copy_stack));
 	zend_stack_init(&CG(object_stack));
 	CG(active_class_entry) = NULL;
 	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
@@ -102,6 +103,7 @@ void shutdown_compiler(CLS_D)
 	zend_stack_destroy(&CG(bp_stack));
 	zend_stack_destroy(&CG(function_call_stack));
 	zend_stack_destroy(&CG(switch_cond_stack));
+	zend_stack_destroy(&CG(foreach_copy_stack));
 	zend_stack_destroy(&CG(object_stack));
 	zend_llist_destroy(&CG(filenames_list));
 	zend_hash_apply(CG(function_table), (int (*)(void *)) is_not_internal_function);
@@ -667,6 +669,19 @@ void do_begin_function_declaration(znode *function_token, znode *function_name, 
 		SET_UNUSED(opline->op1);
 		SET_UNUSED(opline->op2);
 	}
+	
+	{
+		/* Push a seperator to the switch and foreach stacks */
+		zend_switch_entry switch_entry;
+	
+		switch_entry.cond.op_type = IS_UNUSED;
+		switch_entry.default_case = 0;
+		switch_entry.control_var = 0;
+
+		zend_stack_push(&CG(switch_cond_stack), (void *) &switch_entry, sizeof(switch_entry));
+
+		zend_stack_push(&CG(foreach_copy_stack), (void *) &switch_entry.cond, sizeof(znode));
+	}
 }
 
 
@@ -674,6 +689,10 @@ void do_end_function_declaration(znode *function_token CLS_DC)
 {
 	pass_two(CG(active_op_array));
 	CG(active_op_array) = function_token->u.op_array;
+
+	/* Pop the switch and foreach seperators */
+	zend_stack_del_top(&CG(switch_cond_stack));
+	zend_stack_del_top(&CG(foreach_copy_stack));
 }
 
 
@@ -856,24 +875,48 @@ void do_pass_param(znode *param, int op, int offset CLS_DC)
 }
 
 
-static void generate_free_switch_expr(zend_switch_entry *switch_entry CLS_DC)
+static int generate_free_switch_expr(zend_switch_entry *switch_entry CLS_DC)
 {
-	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
+	zend_op *opline;
+	
+	if (switch_entry->cond.op_type == IS_UNUSED) {
+		return 1;
+	}
+	
+	opline = get_next_op(CG(active_op_array) CLS_CC);
 
 	opline->opcode = ZEND_SWITCH_FREE;
 	opline->op1 = switch_entry->cond;
 	SET_UNUSED(opline->op2);
+	return 0;
 }
 
+static int generate_free_foreach_copy(znode *foreach_copy CLS_DC)
+{
+	zend_op *opline;
+	
+	if (foreach_copy->op_type == IS_UNUSED) {
+		return 1;
+	}
+
+	opline = get_next_op(CG(active_op_array) CLS_CC);
+
+	opline->opcode = ZEND_FREE;
+	opline->op1 = *foreach_copy;
+	SET_UNUSED(opline->op2);
+	return 0;
+}
 
 void do_return(znode *expr CLS_DC)
 {
 	zend_op *opline;
 	
 #ifdef ZTS
-	zend_stack_apply_with_argument(&CG(switch_cond_stack), (void (*)(void *element, void *)) generate_free_switch_expr, ZEND_STACK_APPLY_TOPDOWN CLS_CC);
+	zend_stack_apply_with_argument(&CG(switch_cond_stack), (int (*)(void *element, void *)) generate_free_switch_expr, ZEND_STACK_APPLY_TOPDOWN CLS_CC);
+	zend_stack_apply_with_argument(&CG(foreach_copy_stack), (int (*)(void *element, void *)) generate_free_foreach_copy, ZEND_STACK_APPLY_TOPDOWN CLS_CC);
 #else
-	zend_stack_apply(&CG(switch_cond_stack), (void (*)(void *element)) generate_free_switch_expr, ZEND_STACK_APPLY_TOPDOWN);
+	zend_stack_apply(&CG(switch_cond_stack), (int (*)(void *element)) generate_free_switch_expr, ZEND_STACK_APPLY_TOPDOWN);
+	zend_stack_apply(&CG(foreach_copy_stack), (int (*)(void *element)) generate_free_foreach_copy, ZEND_STACK_APPLY_TOPDOWN);
 #endif
 
 	opline = get_next_op(CG(active_op_array) CLS_CC);
@@ -1808,6 +1851,8 @@ void do_foreach_begin(znode *foreach_token, znode *array, znode *open_brackets_t
 	SET_UNUSED(opline->op2);
 	*open_brackets_token = opline->result;
 
+	zend_stack_push(&CG(foreach_copy_stack), (void *) &opline->result, sizeof(znode));
+
 	/* save the location of the beginning of the loop (array fetching) */
 	foreach_token->u.opline_num = get_next_op_number(CG(active_op_array));
 
@@ -1886,6 +1931,8 @@ void do_foreach_end(znode *foreach_token, znode *open_brackets_token CLS_DC)
 	do_end_loop(foreach_token->u.opline_num CLS_CC);
 
 	do_free(open_brackets_token CLS_CC);
+
+	zend_stack_del_top(&CG(foreach_copy_stack));
 
 	DEC_BPC(CG(active_op_array));
 }

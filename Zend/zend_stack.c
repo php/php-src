@@ -118,38 +118,46 @@ ZEND_API int zend_stack_count(zend_stack *stack)
 }
 
 
-ZEND_API void zend_stack_apply(zend_stack *stack, void (*apply_function)(void *element), int type)
+ZEND_API void zend_stack_apply(zend_stack *stack, int (*apply_function)(void *element), int type)
 {
 	int i;
 
 	switch (type) {
 		case ZEND_STACK_APPLY_TOPDOWN:
 			for (i=stack->top-1; i>=0; i--) {
-				apply_function(stack->elements[i]);
+				if (apply_function(stack->elements[i])) {
+					break;
+				}
 			}
 			break;
 		case ZEND_STACK_APPLY_BOTTOMUP:
 			for (i=0; i<stack->top; i++) {
-				apply_function(stack->elements[i]);
+				if (apply_function(stack->elements[i])) {
+					break;
+				}
 			}
 			break;
 	}
 }
 
 
-ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, void (*apply_function)(void *element, void *arg), int type, void *arg)
+ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, int (*apply_function)(void *element, void *arg), int type, void *arg)
 {
 	int i;
 
 	switch (type) {
 		case ZEND_STACK_APPLY_TOPDOWN:
 			for (i=stack->top-1; i>=0; i--) {
-				apply_function(stack->elements[i], arg);
+				if (apply_function(stack->elements[i], arg)) {
+					break;
+				}
 			}
 			break;
 		case ZEND_STACK_APPLY_BOTTOMUP:
 			for (i=0; i<stack->top; i++) {
-				apply_function(stack->elements[i], arg);
+				if (apply_function(stack->elements[i], arg)) {
+					break;
+				}
 			}
 			break;
 	}
