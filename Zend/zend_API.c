@@ -1147,6 +1147,7 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL;
 	char *lowercase_name;
 	int fname_len;
+	zend_namespace *scope_namespace;
 
 	if (type==MODULE_PERSISTENT) {
 		error_type = E_CORE_WARNING;
@@ -1158,6 +1159,12 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 		target_function_table = CG(function_table);
 	}
 	internal_function->type = ZEND_INTERNAL_FUNCTION;
+
+	if(scope) {
+		scope_namespace = scope->ns;
+	} else {
+		scope_namespace = EG(active_namespace);
+	}
 	
 	while (ptr->fname) {
 		internal_function->handler = ptr->handler;
@@ -1165,11 +1172,7 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 		internal_function->function_name = ptr->fname;
 		internal_function->scope = scope;
 		internal_function->fn_flags = ZEND_ACC_PUBLIC;
-		if (!scope) {
-			internal_function->ns = EG(active_namespace);
-		} else {
-			internal_function->ns = NULL;
-		}
+		internal_function->ns = scope_namespace;
 		internal_function->prototype = NULL;
 		if (!internal_function->handler) {
 			zend_error(error_type, "Null function defined as active function");
@@ -1412,6 +1415,7 @@ ZEND_API zend_class_entry *zend_register_internal_class_in_ns(zend_class_entry *
 		orig_class_table = CG(class_table);
 		CG(class_table) = &ns->class_table;
 	}
+	class_entry->ns = ns;
 	register_class = zend_register_internal_class_ex(class_entry, parent_ce, NULL TSRMLS_CC);
 	if (restore_orig) {
 		EG(active_namespace) = orig_namespace;

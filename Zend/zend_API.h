@@ -99,6 +99,7 @@ BEGIN_EXTERN_C()
 		class_container.__call = handle_fcall;	\
 		class_container.__get = handle_propget;	\
 		class_container.__set = handle_propset;	\
+		class_container.num_interfaces = 0; \
 	}
 
 #define INIT_NAMESPACE(ns_container, ns_name) INIT_CLASS_ENTRY(ns_container, ns_name, NULL)
