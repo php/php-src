@@ -31,7 +31,7 @@ void php_free_ps_enc(char **enc)
 }
 
 /* {{{ proto int imagepsloadfont(string pathname)
-Load a new font from specified file */
+   Load a new font from specified file */
 PHP_FUNCTION(imagepsloadfont)
 {
 	pval *file;
@@ -131,7 +131,7 @@ PHP_FUNCTION(imagepscopyfont)
 /* }}} */
 
 /* {{{ proto bool imagepsfreefont(int font_index)
-Free memory used by a font */
+   Free memory used by a font */
 PHP_FUNCTION(imagepsfreefont)
 {
 	pval *fnt;
@@ -156,7 +156,7 @@ PHP_FUNCTION(imagepsfreefont)
 /* }}} */
 
 /* {{{ proto bool imagepsencodefont(int font_index, string filename)
-To change a fonts character encoding vector */
+   To change a fonts character encoding vector */
 PHP_FUNCTION(imagepsencodefont)
 {
 	pval *fnt, *enc;
@@ -195,7 +195,7 @@ PHP_FUNCTION(imagepsencodefont)
 /* }}} */
 
 /* {{{ proto bool imagepsextendfont(int font_index, double extend)
-Extend or or condense (if extend < 1) a font */
+   Extend or or condense (if extend < 1) a font */
 PHP_FUNCTION(imagepsextendfont)
 {
 	pval *fnt, *ext;
@@ -223,7 +223,7 @@ PHP_FUNCTION(imagepsextendfont)
 /* }}} */
 
 /* {{{ proto bool imagepsslantfont(int font_index, double slant)
-Slant a font */
+   Slant a font */
 PHP_FUNCTION(imagepsslantfont)
 {
 	pval *fnt, *slt;
@@ -250,7 +250,7 @@ PHP_FUNCTION(imagepsslantfont)
 /* }}} */
 
 /* {{{ proto array imagepstext(int image, string text, int font, int size, int xcoord, int ycoord [, int space, int tightness, double angle, int antialias])
-Rasterize a string over an image */
+   Rasterize a string over an image */
 PHP_FUNCTION(imagepstext)
 {
 	pval *img, *str, *fnt, *sz, *fg, *bg, *sp, *px, *py, *aas, *wd, *ang;
@@ -418,8 +418,8 @@ PHP_FUNCTION(imagepstext)
 }
 /* }}} */
 
-/* {{{ proto array imagepsbbox(string text, int font, int size[, int space, int tightness, int angle])
-Return the bounding box needed by a string if rasterized */
+/* {{{ proto array imagepsbbox(string text, int font, int size [, int space, int tightness, int angle])
+   Return the bounding box needed by a string if rasterized */
 PHP_FUNCTION(imagepsbbox)
 {
 	pval *str, *fnt, *sz, *sp, *wd, *ang;

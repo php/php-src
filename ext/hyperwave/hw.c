@@ -1252,7 +1252,7 @@ php_printf("%s\n", ptr);
 /* }}} */
 
 /* {{{ proto string hw_dummy(int link, int id, int msgid)
-   ??? */
+   Hyperwave dummy function */
 PHP_FUNCTION(hw_dummy) {
 	pval **arg1, **arg2, **arg3;
 	int link, id, type, msgid;
