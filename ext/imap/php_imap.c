@@ -51,8 +51,9 @@
 #include <signal.h>
 
 #ifdef PHP_WIN32
-#include "winsock.h"
-#include "win32/imap_sendmail.h"
+#include <winsock.h>
+#include <stdlib.h>
+#include "win32/sendmail.h"
 MAILSTREAM DEFAULTPROTO;
 #endif
 
@@ -3251,10 +3252,54 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 #endif
 
 #ifdef PHP_WIN32
-	if (imap_TSendMail(INI_STR("SMTP"), &tsm_err, headers, subject, to, message, cc, bcc, rpath) != SUCCESS) {
+	char *tempMailTo;
+	ADDRESS *addr;
+	char *bufferCc = NULL, *bufferBcc = NULL;
+	int offset;
+
+	if (cc && *cc) {
+		tempMailTo = estrdup(cc);
+		bufferCc = (char *)emalloc(strlen(cc));
+		offset = 0;
+		addr = NULL;
+		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
+		while (addr) {
+			if (strcmp(addr->host, ERRHOST) == 0)
+				return (BAD_MSG_DESTINATION);
+			else {
+				offset += sprintf(bufferCc + offset, "%s@%s,", addr->mailbox, addr->host);
+			}
+			addr = addr->next;
+		}
+		efree(tempMailTo);
+		bufferCc[offset] = 0;
+	}
+
+	if (bcc && *bcc) {
+		tempMailTo = estrdup(bcc);
+		bufferBcc = (char *)emalloc(strlen(bcc));
+		offset = 0;
+		addr = NULL;
+		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
+		while (addr) {
+			if (strcmp(addr->host, ERRHOST) == 0)
+				return (BAD_MSG_DESTINATION);
+			else {
+				offset += sprintf(bufferBcc + offset, "%s@%s,", addr->mailbox, addr->host);
+			}
+			addr = addr->next;
+		}
+		efree(tempMailTo);
+		bufferBcc[offset] = 0;
+	}
+
+
+	if (TSendMail(INI_STR("SMTP"), &tsm_err, NULL, headers, subject, to, message, bufferCc, bufferBcc, rpath) != SUCCESS) {
 		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), GetSMErrorText(tsm_err));
 		return 0;
 	}
+	if (bufferCc) efree(bufferCc);
+	if (bufferBcc) efree(bufferBcc);
 #else
 	if (!INI_STR("sendmail_path")) {
 		return 0;
