@@ -38,7 +38,7 @@ echo "====DONE!====\n";
 --EXPECTF--
 ====SEEK:-1====
 
-Warning: seek(): row -1 out of range in %ssqlite_oo_022.php on line %d
+Warning: sqlite_query::seek(): row -1 out of range in %ssqlite_oo_022.php on line %d
 array(1) {
   [0]=>
   string(3) "one"
@@ -60,7 +60,7 @@ array(1) {
 }
 ====SEEK:3====
 
-Warning: seek(): row 3 out of range in %ssqlite_oo_022.php on line %d
+Warning: sqlite_query::seek(): row 3 out of range in %ssqlite_oo_022.php on line %d
 array(1) {
   [0]=>
   string(5) "three"
@@ -68,7 +68,7 @@ array(1) {
 ====AGAIN====
 ====SEEK:-1====
 
-Warning: seek(): row -1 out of range in %ssqlite_oo_022.php on line %d
+Warning: sqlite_query::seek(): row -1 out of range in %ssqlite_oo_022.php on line %d
 array(1) {
   [0]=>
   string(5) "three"
@@ -90,7 +90,7 @@ array(1) {
 }
 ====SEEK:3====
 
-Warning: seek(): row 3 out of range in %ssqlite_oo_022.php on line %d
+Warning: sqlite_query::seek(): row 3 out of range in %ssqlite_oo_022.php on line %d
 array(1) {
   [0]=>
   string(5) "three"
