@@ -336,72 +336,34 @@ PHP_MINFO_FUNCTION(ldap)
 PHP_FUNCTION(ldap_connect)
 {
 	char *host = NULL;
+	int hostlen;
 	int port = 389; /* Default port */
 #ifdef HAVE_ORALDAP
 	char *wallet, *walletpasswd;
+	int walletlen, walletpasswdlen;
 	int authmode;
 	int ssl=0;
 #endif
 	ldap_linkdata *ld;
 	LDAP *ldap;
 
-	switch(ZEND_NUM_ARGS()) {
-		case 0: 
-			break;
-
-		case 1: {
-				pval **yyhost;
-
-				if (zend_get_parameters_ex(1, &yyhost) == FAILURE) {
-					RETURN_FALSE;
-				}
-
-				convert_to_string_ex(yyhost);
-				host = Z_STRVAL_PP(yyhost);
-			}
-			break;
-
-		case 2: {
-				pval **yyhost, **yyport;
-
-				if (zend_get_parameters_ex(2, &yyhost, &yyport) == FAILURE) {
-					RETURN_FALSE;
-				}
-
-				convert_to_string_ex(yyhost);
-				host = Z_STRVAL_PP(yyhost);
-				convert_to_long_ex(yyport);
-				port = Z_LVAL_PP(yyport);
-			}
-			break;
 #ifdef HAVE_ORALDAP
-
-		case 5: {
-				pval **yyhost, **yyport, **yywallet, **yywalletpasswd, **yyauthmode;
-
-				if (zend_get_parameters_ex(5, &yyhost, &yyport, &yywallet, &yywalletpasswd, &yyauthmode) == FAILURE) {
-					RETURN_FALSE;
-				}
-
-				convert_to_string_ex(yyhost);
-				convert_to_long_ex(yyport);
-				convert_to_string_ex(yywallet);
-				convert_to_string_ex(yywalletpasswd);
-				convert_to_long_ex(yyauthmode);
-				host = Z_STRVAL_PP(yyhost);
-				port = Z_LVAL_PP(yyport);
-				wallet = Z_STRVAL_PP(yywallet);
-				walletpasswd = Z_STRVAL_PP(yywalletpasswd);
-				authmode = Z_LVAL_PP(yyauthmode);
-				ssl = 1;
-			}
-			break;
-#endif
-
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (ZEND_NUM_ARGS() == 3 || ZEND_NUM_ARGS() == 4) {
+		WRONG_PARAM_COUNT;
 	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|slssl", &host, &hostlen, &port, &wallet, &walletlen, &walletpasswd, &walletpasswdlen, &authmode) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (ZEND_NUM_ARGS() == 5 ) {
+		ssl = 1;
+	}
+#else
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sl", &host, &hostlen, &port) == FAILURE) {
+		RETURN_FALSE;
+	}
+#endif
 
 	if (LDAPG(max_links) != -1 && LDAPG(num_links) >= LDAPG(max_links)) {
 		php_error(E_WARNING, "%s(): Too many open links (%d)", get_active_function_name(TSRMLS_C), LDAPG(num_links));
@@ -472,43 +434,19 @@ static int _get_lderrno(LDAP *ldap)
    Bind to LDAP directory */
 PHP_FUNCTION(ldap_bind)
 {
-	pval **link, **bind_rdn, **bind_pw;
-	char *ldap_bind_rdn, *ldap_bind_pw;
+	zval *link;
+	char *ldap_bind_dn = NULL, *ldap_bind_pw = NULL;
+	int ldap_bind_dnlen, ldap_bind_pwlen;
 	ldap_linkdata *ld;
 	int rc;
 
-	switch(ZEND_NUM_ARGS()) {
-		case 1: /* Anonymous Bind */
-			if (zend_get_parameters_ex(1, &link) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ss", &link, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen) == FAILURE) {
+		RETURN_FALSE;
+	}
 
-			ldap_bind_rdn = NULL;
-			ldap_bind_pw = NULL;
+	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, &link, -1, "ldap link", le_link);
 
-			break;
-
-		case 3 :
-			if (zend_get_parameters_ex(3, &link, &bind_rdn, &bind_pw) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-
-			convert_to_string_ex(bind_rdn);
-			convert_to_string_ex(bind_pw);
-
-			ldap_bind_rdn = Z_STRVAL_PP(bind_rdn);
-			ldap_bind_pw = Z_STRVAL_PP(bind_pw);
-
-			break;
-
-		default:
-			WRONG_PARAM_COUNT;
-			break;
-	}	
-
-	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, link, -1, "ldap link", le_link);
-
-	if ((rc = ldap_bind_s(ld->link, ldap_bind_rdn, ldap_bind_pw, LDAP_AUTH_SIMPLE)) != LDAP_SUCCESS) {
+	if ((rc = ldap_bind_s(ld->link, ldap_bind_dn, ldap_bind_pw, LDAP_AUTH_SIMPLE)) != LDAP_SUCCESS) {
 		php_error(E_WARNING, "%s():  Unable to bind to server: %s", get_active_function_name(TSRMLS_C), ldap_err2string(rc));
 		RETURN_FALSE;
 	} else {
@@ -521,16 +459,16 @@ PHP_FUNCTION(ldap_bind)
    Unbind from LDAP directory */
 PHP_FUNCTION(ldap_unbind)
 {
-	pval **link;
+	zval *link;
 	ldap_linkdata *ld;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &link) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &link) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, link, -1, "ldap link", le_link);
+	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, &link, -1, "ldap link", le_link);
 
-	zend_list_delete(Z_LVAL_PP(link));
+	zend_list_delete(Z_LVAL_P(link));
 	RETURN_TRUE;
 }
 /* }}} */
