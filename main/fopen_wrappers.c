@@ -457,7 +457,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	
 	/* Absolute path open */
 	if (IS_ABSOLUTE_PATH(filename, filename_length)) {
-		if ((php_check_safe_mode_include_dir(filename)) == 0)
+		if ((php_check_safe_mode_include_dir(filename TSRMLS_CC)) == 0)
 			/* filename is in safe_mode_include_dir (or subdir) */
 			return php_fopen_and_set_opened_path(filename, mode, opened_path TSRMLS_CC);
 			
@@ -511,7 +511,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 		if (PG(safe_mode)) {
 			if (VCWD_STAT(trypath, &sb) == 0) {
 				/* file exists ... check permission */
-				if ((php_check_safe_mode_include_dir(trypath) == 0) ||
+				if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC) == 0) ||
 						php_checkuid(trypath, mode, CHECKUID_CHECK_MODE_PARAM))
 					/* UID ok, or trypath is in safe_mode_include_dir */
 					fp = php_fopen_and_set_opened_path(trypath, mode, opened_path TSRMLS_CC);
