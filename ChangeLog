@@ -1,3 +1,67 @@
+2003-06-07  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Package.php:
+      Martin's run-test error msg improvements :-)
+
+2003-06-07  Sterling Hughes  <sterling@bumblebury.com>
+
+    * bundle-release:
+      woops, make that "bundle," not ".bundle"
+
+    * bundle-release:
+      simple script that will look at bundle (when which is populated when we
+      move the extensions to pecl) and bundle the contents of that file
+
+2003-06-07  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Package.php:
+      Added better error message to run-tests
+
+2003-06-07  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysql/libmysql/libmysql.c:
+      fixed mysql bug #564 (http://bugs.mysql.com/bug.php?id=564)
+
+    * (PHP_4_3)
+      NEWS:
+      fixed a bug in libmysql
+
+    * (PHP_4_3)
+      ext/mysql/libmysql/libmysql.c:
+      fixed mysql bug #564
+      (see http://bugs.mysql.com/bug.php?id=564)
+
+2003-06-07  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/dom/php_dom.c:
+      i ain't know domdom
+
+    * ext/dom/php_dom.c:
+      leftover.
+      its wholeText not whole_text
+
+    * ext/dom/text.c:
+      add the wholeText property
+
+2003-06-07  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/php_dom.c
+      ext/dom/xml_common.h:
+      fix more memory overruns
+      initial definition for document ref counting
+      fixed property access to support all objects
+      clear property handler from invalid objects until ref count implemented
+
+2003-06-07  Sterling Hughes  <sterling@bumblebury.com>
+
+    * pear/PEAR/Command/Install.php:
+      Add the pear bundle command from Thomas Cox.
+
+2003-06-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/inheritance_002.phpt:
+      Goodbye namespaces
+
 2003-06-06  Sterling Hughes  <sterling@bumblebury.com>
 
     * ext/dom/text.c:
