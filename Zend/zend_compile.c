@@ -204,8 +204,8 @@ static void zend_replace_object_fetch(zend_op *last_op, znode *value TSRMLS_DC)
 void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
 {
 	int last_op_number = get_next_op_number(CG(active_op_array))-1;
-	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 
 	if (last_op->opcode == ZEND_FETCH_OBJ_RW) {
 		
@@ -392,8 +392,8 @@ void zend_do_abstract_method(TSRMLS_D)
 void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 {
 	int last_op_number = get_next_op_number(CG(active_op_array))-1;
-	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 
 	if (last_op->opcode == ZEND_FETCH_OBJ_W) {
 		opline->opcode = ZEND_ASSIGN_OBJ;
