@@ -135,7 +135,7 @@ ZEND_API void zend_hash_internal_pointer_end(HashTable *ht);
 
 /* Copying, merging and sorting */
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, void (*pCopyConstructor) (void *pData), void *tmp, uint size);
-ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, void (*pCopyConstructor) (void *pData), void *tmp, uint size);
+ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, void (*pCopyConstructor) (void *pData), void *tmp, uint size, int overwrite);
 ZEND_API int zend_hash_sort(HashTable *ht, int (*compar) (const void *, const void *), int renumber);
 ZEND_API int zend_hash_minmax(HashTable *ht, int (*compar) (const void *, const void *), int flag, void **pData);
 

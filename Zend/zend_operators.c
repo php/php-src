@@ -431,7 +431,7 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2)
 	if (op1->type == IS_ARRAY && op2->type == IS_ARRAY) {
 		zval tmp;
 		
-		zend_hash_merge(op1->value.ht,op2->value.ht,(void (*)(void *pData)) zval_copy_ctor, (void *) &tmp, sizeof(zval));
+		zend_hash_merge(op1->value.ht,op2->value.ht,(void (*)(void *pData)) zval_copy_ctor, (void *) &tmp, sizeof(zval), 0);
 		*result = *op1;
 		zval_dtor(op2);
 		return SUCCESS;
