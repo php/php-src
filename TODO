@@ -49,8 +49,9 @@ ext/standard
 ------------
     * strpad() (Andrei)
     * stri_replace() (Andrei)
-    * socket_get_status (Andrei)
+    * socket_get_status() (Andrei)
     * comparing arrays semantically (like Python) (Andrei)
+    * move socket related functions to fsock.c
     * NOT binary safe:
         strtok()
         basename()
