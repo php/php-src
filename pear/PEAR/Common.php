@@ -488,6 +488,19 @@ class PEAR_Common extends PEAR
                 }
                 break;
             case 'notes':
+                // try to "de-indent" release notes in case someone
+                // has been over-indenting their xml ;-)
+                $data = preg_replace('/^[\r\n]+/', '', $this->cdata);
+                $indent_len = strspn($data, " \t");
+                $indent = substr($data, 0, $indent_len);
+                $newdata = '';
+                foreach (explode("\n", $data) as $line) {
+                    print "indent_len=$indent_len\n";
+                    if (substr($line, 0, $indent_len) == $indent) {
+                        $newdata .= substr($line, $indent_len) . "\n";
+                    }
+                }
+                $data = $newdata;
                 if ($this->in_changelog) {
                     $this->current_release['release_notes'] = $data;
                 } else {
