@@ -7,6 +7,7 @@ session.use_cookies=0
 session.cache_limiter=
 session.use_trans_sid=1
 arg_separator.output=&amp;
+session.name=PHPSESSID
 --FILE--
 <?php
 

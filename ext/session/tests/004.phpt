@@ -6,6 +6,7 @@ session_set_save_handler test
 session.use_cookies=0
 session.cache_limiter=
 register_globals=1
+session.name=PHPSESSID
 --FILE--
 <?php
 error_reporting(E_ALL);
