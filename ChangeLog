@@ -1,3 +1,80 @@
+2001-07-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_mm.c:
+    Fix GC bug which did not increment the proper variable.
+    Fix warning regarding the initial hash value.
+    Use php_uint32 everywhere.
+    Speedup linked-list traversal by using the hash value.
+    Degrade linked-list to singledly linked-list.
+    Allocate a new shared memory buffer, if the data does not fit into the
+    current one.  Prior to this change, we always allocated a new buffer.
+    Fix debug prints to be compatible with non-GCC compilers.
+    NUL-terminate string return values.
+
+2001-07-18  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php:
+    - Only decompress package once
+    - Allow relative directory package calls (for ex:
+      pear install packs/Pear_DB-1.1.tgz)
+
+2001-07-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+    Instead of using the poor system rand() algorithm and the
+    system-time seed, rely on the long-living LCG to determine
+    whether to start the GC process.
+
+    * ext/standard/lcg.c
+      ext/standard/php_lcg.h:
+    The lcg needs to operate on signed 32-bit integers, so use
+    the proper php_int32 types here.
+
+    * ext/standard/basic_functions.h: Provide typedefs for php_int32
+
+    * ext/session/mod_mm.c:
+    Retire old hash algorithm and use the FNV-1 algorithm.
+
+2001-07-18  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/conversion.c: fixed a bug in 'case VT_DATE'
+
+    * ext/com/COM.c
+      ext/com/conversion.c: MFH and VT_DATE patch
+
+2001-07-18  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php:
+    - remove the xml parser code (use PEAR_Common::infoFromDescFile)
+    - added the new package.xml Dir tag support
+    - killed many bugs and warnings
+
+    (as it is quite usable yet, work is still in progress)
+
+    * pear/PEAR/Packager.php:
+    - always write a the package definition file as 'package.xml' inside the package
+    - other clean-up's
+
+    * pear/PEAR/Common.php: killed some warnings
+
+2001-07-18  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/formatted_print.c: Make variables receiving long be long
+    Fix binary (x,o,b) formats - they should not be signed
+
+    * ext/curl/curl.c:
+    Prevent cURl from always outputting the header. Fix bug #12018
+
+2001-07-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Support IRCG 2.x
+
+    Partly submitted by: Oliver Lehmann <lehmann@ans-netz.de>
+
+2001-07-18  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/CODING_STANDARDS: Private members don't have to be functions.
+
 2001-07-17  Jon Parise  <jon@csh.rit.edu>
 
     * pear/CODING_STANDARDS: Woops, missed a closing paren.
