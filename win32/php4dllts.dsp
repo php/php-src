@@ -1,26 +1,26 @@
 # Microsoft Developer Studio Project File - Name="php4dllts" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
-# ** DO NOT EDIT **
+# ** NICHT BEARBEITEN **
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
 CFG=php4dllts - Win32 Debug_TS
-!MESSAGE This is not a valid makefile. To build this project using NMAKE,
-!MESSAGE use the Export Makefile command and run
+!MESSAGE Dies ist kein gültiges Makefile. Zum Erstellen dieses Projekts mit NMAKE
+!MESSAGE verwenden Sie den Befehl "Makefile exportieren" und führen Sie den Befehl
 !MESSAGE 
 !MESSAGE NMAKE /f "php4dllts.mak".
 !MESSAGE 
-!MESSAGE You can specify a configuration when running NMAKE
-!MESSAGE by defining the macro CFG on the command line. For example:
+!MESSAGE Sie können beim Ausführen von NMAKE eine Konfiguration angeben
+!MESSAGE durch Definieren des Makros CFG in der Befehlszeile. Zum Beispiel:
 !MESSAGE 
 !MESSAGE NMAKE /f "php4dllts.mak" CFG="php4dllts - Win32 Debug_TS"
 !MESSAGE 
-!MESSAGE Possible choices for configuration are:
+!MESSAGE Für die Konfiguration stehen zur Auswahl:
 !MESSAGE 
-!MESSAGE "php4dllts - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "php4dllts - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "php4dllts - Win32 Release_TS_inline" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "php4dllts - Win32 Release_TSDbg" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4dllts - Win32 Debug_TS" (basierend auf  "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4dllts - Win32 Release_TS" (basierend auf  "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4dllts - Win32 Release_TS_inline" (basierend auf  "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4dllts - Win32 Release_TSDbg" (basierend auf  "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -234,6 +234,14 @@ SOURCE=..\main\SAPI.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\snprintf.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\spprintf.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\streams.c
 # End Source File
 # Begin Source File
@@ -243,14 +251,6 @@ SOURCE=..\main\strlcat.c
 # Begin Source File
 
 SOURCE=..\main\strlcpy.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\main\snprintf.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\main\spprintf.c
 # End Source File
 # Begin Source File
 
@@ -266,7 +266,50 @@ SOURCE=..\ext\standard\aggregation.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\config.w32.h
+SOURCE=..\main\config.w32.h.in
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# Begin Custom Build
+InputPath=..\main\config.w32.h.in
+
+"..\main\config.w32.h.in" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# Begin Custom Build
+InputPath=..\main\config.w32.h.in
+
+"..\main\config.w32.h.in" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# Begin Custom Build
+InputPath=..\main\config.w32.h.in
+
+"..\main\config.w32.h.in" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TSDbg"
+
+# Begin Custom Build
+InputPath=..\main\config.w32.h.in
+
+"..\main\config.w32.h.in" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -342,14 +385,6 @@ SOURCE=..\main\php_streams.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\snprintf.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\main\spprintf.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\main\php_variables.h
 # End Source File
 # Begin Source File
@@ -367,6 +402,14 @@ SOURCE=..\main\safe_mode.h
 # Begin Source File
 
 SOURCE=..\main\SAPI.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\snprintf.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\spprintf.h
 # End Source File
 # Begin Source File
 
@@ -482,11 +525,11 @@ SOURCE=..\ext\mbstring\mbstring.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\mbstring\php_mbregex.c
+SOURCE=..\ext\overload\overload.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\overload\overload.c
+SOURCE=..\ext\mbstring\php_mbregex.c
 # End Source File
 # Begin Source File
 
