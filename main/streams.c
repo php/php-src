@@ -2317,7 +2317,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 				return stream;
 			case PHP_STREAM_RELEASED:
 #if ZEND_DEBUG
-				newstream->__orig_path = copy_of_path;
+				newstream->__orig_path = estrdup(copy_of_path);
 #endif
 				return newstream;
 			default:
