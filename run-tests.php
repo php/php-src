@@ -540,6 +540,7 @@ TEST $file
 		"output_handler=",
 		"zlib.output_compression=Off",
 		"open_basedir=",
+		"safe_mode=0",
 		"disable_functions=",
 		"error_reporting=2047",
 		"display_errors=1",
