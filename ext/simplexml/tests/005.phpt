@@ -5,7 +5,26 @@ SimpleXML and text data
 --FILE--
 <?php 
 
-$sxe = simplexml_load_file(dirname(__FILE__).'/005.xml');
+$sxe = simplexml_load_string(<<<EOF
+<?xml version='1.0'?>
+<!DOCTYPE sxe SYSTEM "notfound.dtd">
+<sxe id="elem1">
+ Plain text.
+ <elem1 attr1='first'>
+  <!-- comment -->
+  <elem2>
+   Here we have some text data.
+   <elem3>
+    And here some more.
+    <elem4>
+     Wow once again.
+    </elem4>
+   </elem3>
+  </elem2>
+ </elem1>
+</sxe>
+EOF
+);
 
 var_dump(trim($sxe->elem1->elem2));
 var_dump(trim($sxe->elem1->elem2->elem3));
