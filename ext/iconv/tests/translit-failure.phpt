@@ -3,7 +3,7 @@ Translit failure
 --SKIPIF--
 <?php
 include('skipif.inc');
-( ICONV_IMPL != "libiconv" ) and die("skip"); 
+( ICONV_IMPL != "libiconv" ) and die("skip ICONV_IMPL != \"libiconv\""); 
 ?>
 --FILE--
 <?php
@@ -15,7 +15,7 @@ include('skipif.inc');
 
 set_time_limit(5);
 /*
- * The bug (fixed in libiconv 1.8) was confirmed that iconv goes into a
+ * The bug (fixed in libiconv 1.8) was confirmed that iconv goes into an
  * infinite loop when ASCII//TRANSLIT is performed. We should stop it in
  * some time.
  */
