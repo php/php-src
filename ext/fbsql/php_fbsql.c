@@ -849,7 +849,7 @@ PHP_FUNCTION(fbsql_set_transaction)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid locking type.");
 		RETURN_FALSE;
 	}
-	if (Z_LVAL_PP(strIsolation) < 0 || Z_LVAL_PP(Isolation) > 4) {
+	if (Z_LVAL_PP(Isolation) < 0 || Z_LVAL_PP(Isolation) > 4) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid isolation type.");
 		RETURN_FALSE;
 	}
