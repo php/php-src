@@ -1,3 +1,45 @@
+2004-10-21  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * configure.in
+      configure.in:
+      MFB: Linux LFS support, fixes 27792
+
+    * (PHP_4_3)
+      configure.in:
+      Enable LFS (large file support) for Linux. Support for other operating
+      systems can be added later. FreeBSD does not seem to require any
+      special compile flags to enable LFS.
+      Fixes #27792.
+
+2004-10-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/microtime.c:
+      Allow gettimeofday() return a float if optional argument is specified.
+
+2004-10-21  Joe Orton  <jorton@redhat.com>
+
+    * (PHP_4_3)
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: Fix case where php_handle_aborted_connection was called
+      outside a try/end_try block (#25570).
+
+    * (PHP_4_3)
+      sapi/apache2filter/config.m4
+      sapi/apache2handler/config.m4:
+      MFH: Fixed apache2* SAPI build against httpd 2.1.
+
+2004-10-21  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c:
+      - Fix bug #30395 (Apache Child Segmentation fault in specific PHP-Code)
+
 2004-10-20  Andi Gutmans  <andi@zend.com>
 
     * tests/classes/interface_method_private.phpt:

@@ -1,3 +1,9 @@
+2004-10-21  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      zend_execute.c:
+      - Fix bug #30395 (Apache Child Segmentation fault in specific PHP-Code)
+
 2004-10-20  Andi Gutmans  <andi@zend.com>
 
     * zend_operators.c:
