@@ -865,7 +865,8 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 							return 0;
 						}
 						PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-#else
+#endif
+#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 1
 						if (!ce->unserialize) {
 							zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Class %s cannot be unserialized", ce->name);
 							return 0;
@@ -970,6 +971,13 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, int mode, int fetch_all TSRMLS
 		flags = stmt->default_fetch_type & PDO_FETCH_FLAGS;
 		mode = stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
 	}
+
+#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 1
+	if ((flags & PDO_FETCH_SERIALIZE) == PDO_FETCH_SERIALIZE) {
+		zend_throw_exception(pdo_exception_ce, "Fetch flag PDO_FETCH_SERIALIZE only allowed in PHP version 5.1 and higher", 0 TSRMLS_CC);
+		return 0;
+	}
+#endif
 
 	switch(mode) {
 	case PDO_FETCH_FUNC:
