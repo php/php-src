@@ -15,7 +15,7 @@ Check for mktime with out-of-range parameters
 	echo date("Y-m-d", mktime( 12, 0, 0, 2, 29, 2001)) ."\n";
 	echo date("Y-m-d", mktime( 12, 0, 0, 0,  0, 2000)) ."\n";
 
-  putenv("TZ=CET");
+  putenv("TZ=GST-1GDT");
   echo date("Y-m-d H:i:s", mktime(12,0,0,3,+90,2000,-1))."\n";
   echo date("Y-m-d H:i:s", mktime(12,0,0,3,+90,2000,0))."\n";
   echo date("Y-m-d H:i:s", mktime(12,0,0,3,+90,2000,1))."\n";
