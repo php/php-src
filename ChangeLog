@@ -1,3 +1,54 @@
+2000-08-09  Zeev Suraski  <zeev@php.net>
+
+    * NEWS:
+    Update NEWS, including some stuff that somehow got forgotten on my home machine
+
+    * main/main.c: Update to be consistent with the new Zend API
+
+2000-08-09  Brendan W. McAdams  <brendan@plexmedia.com>
+
+    * ext/ccvs/ccvs.c:
+    Updated Supported CCVS Versions based on Conversation with Doug. All versions of CCVS 3.0 and greater should work without problems.
+
+2000-08-09  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/msql/php_msql.c: - Fix mSQL_close(). (nick@loman.net)
+
+2000-08-09  Brendan W. McAdams  <brendan@plexmedia.com>
+
+    * ext/ccvs/ccvs.c: Added Dougs name to the PHPINFO "Support By" call.
+    Added a "Release Supports CCVS Versions..." line in PHPINFO
+
+2000-08-09  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/basic_functions.c: fix #6061
+
+2000-08-09  Brendan W. McAdams  <brendan@plexmedia.com>
+
+    * ext/ccvs/ccvs.c
+      ext/ccvs/ccvs.h: Looks like I found my problem.
+    I was predeclaring my functions in ccvs.h (stupid of me), so PHP was seeing the predec from internal_functions.h, the predec again, and then the actual functions and barfing.  Compiles into apache now.  Will test further.
+
+    * ext/ccvs/config.m4:
+    Tracked the stray -libccvs call to a bad config directive in the config.m4 file.
+
+2000-08-09  Zeev Suraski  <zeev@php.net>
+
+    * sapi/isapi/php4isapi.c: Fix a couple of bugs in the ISAPI module:
+    - I think NTLM should work now
+    - Fix the DOCUMENT_ROOT code
+
+2000-08-09  Brendan W. McAdams  <brendan@plexmedia.com>
+
+    * ext/ccvs/config.m4:
+    Trying to resolve the build issue. This module is currently broken. PHP compiles it fine but I'm having linking issues when it gets to the apache level.
+    Any help would be greatly appreciated.
+
+    * ext/ccvs/ccvs.c
+      ext/ccvs/ccvs.h:
+    Looks like my editor barfed sometime today and saved the source files as
+    PC Format. Fixed that.  Seeing some compiletime issues that I'm working on resolving.
+
 2000-08-08  Brendan W. McAdams  <brendan@plexmedia.com>
 
     * ext/ccvs/Makefile.in
