@@ -30,6 +30,7 @@ PHP_MINIT_FUNCTION(sysvsem);
 PHP_FUNCTION(sem_get);
 PHP_FUNCTION(sem_acquire);
 PHP_FUNCTION(sem_release);
+PHP_FUNCTION(sem_remove);
 
 typedef struct {
 	int le_sem;
