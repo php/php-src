@@ -26,10 +26,14 @@
 extern zend_module_entry zip_module_entry;
 #define phpext_zip_ptr &zip_module_entry
 
+#define PHP_ZZIPLIB_API
 #ifdef PHP_WIN32
+#undef PHP_ZZIPLIB_API
+#ifdef ZIP_EXPORTS
 #define PHP_ZZIPLIB_API __declspec(dllexport)
 #else
-#define PHP_ZZIPLIB_API
+#define PHP_ZZIPLIB_API __declspec(dllimport)
+#endif
 #endif
 
 PHP_MINIT_FUNCTION(zip);
