@@ -1614,16 +1614,20 @@ ZEND_FUNCTION(get_extension_funcs)
 	}
 
 	convert_to_string_ex(extension_name);
-	if (zend_hash_find(&module_registry, Z_STRVAL_PP(extension_name),
-		Z_STRLEN_PP(extension_name)+1, (void**)&module) == FAILURE) {
-		return;
+	if (strncasecmp(Z_STRVAL_PP(extension_name), "zend", sizeof("zend"))) {
+		if (zend_hash_find(&module_registry, Z_STRVAL_PP(extension_name), 
+			Z_STRLEN_PP(extension_name)+1, (void**)&module) == FAILURE) {
+			RETURN_FALSE;
+		}
+		
+		if (!(func = module->functions)) {
+			RETURN_FALSE;
+		}
+	} else {
+		func = builtin_functions;
 	}
 
 	array_init(return_value);
-	func = module->functions;
-	if (!func) {
-		return;
-	}
 
 	while (func->fname) {
 		add_next_index_string(return_value, func->fname, 1);
