@@ -1,5 +1,7 @@
 --TEST--
 mysqli fetch mixed values
+--INI--
+precision=12
 --FILE--
 <?php
 	include "connect.inc";
@@ -43,7 +45,7 @@ array(8) {
   [3]=>
   int(4999999)
   [4]=>
-  float(2345.6000976563)
+  float(2345.60009766)
   [5]=>
   float(5678.89563)
   [6]=>

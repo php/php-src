@@ -1,5 +1,7 @@
 --TEST--
 mysqli fetch float values
+--INI--
+precision=12
 --FILE--
 <?php
 	include "connect.inc";
@@ -38,17 +40,17 @@ mysqli fetch float values
 --EXPECT--
 array(7) {
   [0]=>
-  float(3.1415927410126)
+  float(3.14159274101)
   [1]=>
-  float(-9.9999999747524E-7)
+  float(-9.99999997475E-7)
   [2]=>
   float(0)
   [3]=>
   float(999999995904)
   [4]=>
-  float(0.56464248895645)
+  float(0.564642488956)
   [5]=>
   float(1)
   [6]=>
-  float(888888914608130)
+  float(888888914608000)
 }
