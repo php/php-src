@@ -145,7 +145,7 @@ static void php_cgi_usage(char *argv0)
 				"  -s       Display colour syntax highlighted source.\n"
 				"  -f<file> Parse <file>.  Implies `-q'\n"
 				"  -v       Version number\n"
-				"  -c<path> Look for php3.ini file in this directory\n"
+				"  -c<path> Look for php4.ini file in this directory\n"
 #if SUPPORT_INTERACTIVE
 				"  -a		Run interactively\n"
 #endif
@@ -235,7 +235,7 @@ set.  This variable is set, for example, by Apache's Action directive redirect.\
 --disable-force-cgi-redirect switch.  If you do this and you have your PHP CGI\n\
 binary accessible somewhere in your web tree, people will be able to circumvent\n\
 .htaccess security by loading files through the PHP parser.  A good way around\n\
-this is to define doc_root in your php3.ini file to something other than your\n\
+this is to define doc_root in your php4.ini file to something other than your\n\
 top-level DOCUMENT_ROOT.  This way you can separate the part of your web space\n\n\
 which uses PHP from the normal part using .htaccess security.  If you do not have\n\
 any .htaccess restrictions anywhere on your site you can leave doc_root undefined.\n\
