@@ -191,31 +191,31 @@ static sapi_module_struct apache2_sapi_module = {
 	"apache2filter",
 	"Apache 2.0 Filter",
 
-	php_module_startup,								/* startup */
+	php_module_startup,							/* startup */
 	php_module_shutdown_wrapper,			/* shutdown */
 
-	NULL,															/* activate */
-	NULL,															/* deactivate */
+	NULL,									/* activate */
+	NULL,									/* deactivate */
 
 	php_apache_sapi_ub_write,					/* unbuffered write */
-	php_apache_sapi_flush,						/* flush */
-	NULL,															/* get uid */
-	NULL,															/* getenv */
+	php_apache_sapi_flush,					/* flush */
+	NULL,									/* get uid */
+	NULL,									/* getenv */
 
-	php_error,												/* error handler */
+	php_error,								/* error handler */
 
-	php_apache_sapi_header_handler,		/* header handler */
-	php_apache_sapi_send_headers,			/* send headers handler */
-	NULL,															/* send header handler */
+	php_apache_sapi_header_handler,				/* header handler */
+	php_apache_sapi_send_headers,				/* send headers handler */
+	NULL,									/* send header handler */
 
-	php_apache_sapi_read_post,				/* read POST data */
-	php_apache_sapi_read_cookies,			/* read Cookies */
+	php_apache_sapi_read_post,					/* read POST data */
+	php_apache_sapi_read_cookies,				/* read Cookies */
 
 	php_apache_sapi_register_variables,
 	php_apache_sapi_log_message,			/* Log message */
 
-	NULL,															/* Block interruptions */
-	NULL,															/* Unblock interruptions */
+	NULL,									/* Block interruptions */
+	NULL,									/* Unblock interruptions */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
@@ -414,9 +414,9 @@ static void php_register_hook(apr_pool_t *p)
 AP_MODULE_DECLARE_DATA module php4_module = {
     STANDARD20_MODULE_STUFF,
     create_php_config,		/* create per-directory config structure */
-    merge_php_config,     /* merge per-directory config structures */
-    NULL,									/* create per-server config structure */
-    NULL,									/* merge per-server config structures */
-    php_dir_cmds,					/* command apr_table_t */
-    php_register_hook			/* register hooks */
+    merge_php_config,      		/* merge per-directory config structures */
+    NULL,			/* create per-server config structure */
+    NULL,			/* merge per-server config structures */
+    php_dir_cmds,			/* command apr_table_t */
+    php_register_hook		/* register hooks */
 };
