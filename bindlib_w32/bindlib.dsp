@@ -4,7 +4,7 @@
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
 
-CFG=bindlib - Win32 Debug
+CFG=bindlib - Win32 Debug_TS
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
@@ -13,12 +13,15 @@ CFG=bindlib - Win32 Debug
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "bindlib.mak" CFG="bindlib - Win32 Debug"
+!MESSAGE NMAKE /f "bindlib.mak" CFG="bindlib - Win32 Debug_TS"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
 !MESSAGE "bindlib - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "bindlib - Win32 Debug" (based on "Win32 (x86) Static Library")
+!MESSAGE "bindlib - Win32 Debug_TS" (based on "Win32 (x86) Static Library")
+!MESSAGE "bindlib - Win32 Release_TS" (based on "Win32 (x86) Static Library")
+!MESSAGE "bindlib - Win32 Release_TS_inline" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -74,12 +77,84 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo /out:"Debug\resolv.lib"
 
+!ELSEIF  "$(CFG)" == "bindlib - Win32 Debug_TS"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 1
+# PROP BASE Output_Dir "bindlib___Win32_Debug_TS"
+# PROP BASE Intermediate_Dir "bindlib___Win32_Debug_TS"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 1
+# PROP Output_Dir "Debug_TS"
+# PROP Intermediate_Dir "Debug_TS"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "WINNT" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "WINNT" /FR /YX /FD /GZ /c
+# ADD BASE RSC /l 0x40d /d "_DEBUG"
+# ADD RSC /l 0x40d /d "_DEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo /out:"Debug\resolv.lib"
+# ADD LIB32 /nologo /out:"Debug_TS\resolv.lib"
+
+!ELSEIF  "$(CFG)" == "bindlib - Win32 Release_TS"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "bindlib___Win32_Release_TS"
+# PROP BASE Intermediate_Dir "bindlib___Win32_Release_TS"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "Release_TS"
+# PROP Intermediate_Dir "Release_TS"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "WINNT" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "WINNT" /YX /FD /c
+# ADD BASE RSC /l 0x40d /d "NDEBUG"
+# ADD RSC /l 0x40d /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo /out:"Release\resolv.lib"
+# ADD LIB32 /nologo /out:"Release_TS\resolv.lib"
+
+!ELSEIF  "$(CFG)" == "bindlib - Win32 Release_TS_inline"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "bindlib___Win32_Release_TS_inline"
+# PROP BASE Intermediate_Dir "bindlib___Win32_Release_TS_inline"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "Release_TS_inline"
+# PROP Intermediate_Dir "Release_TS_inline"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "WINNT" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "WINNT" /YX /FD /c
+# ADD BASE RSC /l 0x40d /d "NDEBUG"
+# ADD RSC /l 0x40d /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo /out:"Release\resolv.lib"
+# ADD LIB32 /nologo /out:"Release_Ts_inline\resolv.lib"
+
 !ENDIF 
 
 # Begin Target
 
 # Name "bindlib - Win32 Release"
 # Name "bindlib - Win32 Debug"
+# Name "bindlib - Win32 Debug_TS"
+# Name "bindlib - Win32 Release_TS"
+# Name "bindlib - Win32 Release_TS_inline"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
