@@ -1,0 +1,76 @@
+# $Id$ -*- sh -*-
+
+# Solid
+define_option with-solid 'Solid support?' yesnodir \
+    'no /usr/local/solid Solid install' \
+'     Whether to build PHP with Solid support.\n
+     More information about Solid can be found at http://www.solidtech.com/.'
+
+# Empress
+if test "$option_value_with_solid" = "no"; then
+define_option with-empress 'Empress support?' yesnodir \
+    "no $EMPRESSPATH Empress home" \
+'    Whether to build PHP with Empress support.  Has been confirmed to
+    work with Empress Version 8.10.  If you have not set up your
+    Empress environment, enter what $EMPRESSPATH is usually set to here.
+    More info about Empress can be found at http://www.empress.com/.'
+fi
+
+# iODBC
+if test "$option_value_with_solid" = "no" -a \
+        "$option_value_with_empress" = "no"; then
+define_option with-iodbc 'iODBC support?' yesnodir \
+    'no /usr/local iODBC install' \
+'    Whether to build PHP with iODBC support.  This feature was first\n
+    developed for iODBC Driver Manager, a freely redistributable ODBC\n
+    driver manager which runs under many flavors of UNIX.\n
+    More info about iODBC can be found on the FreeODBC Pages at \n
+    http://users.ids.net/~bjepson/freeODBC/.'
+fi
+
+# OpenLink
+if test "$option_value_with_solid" = "no" -a \
+        "$option_value_with_empress" = "no" -a \
+        "$option_value_with_iodbc" = "no"; then
+define_option with-openlink 'OpenLink ODBC support?' yesnodir \
+    'no /usr/local/openlink OpenLink install' \
+'    Whether to build PHP with OpenLink ODBC support.  See
+     http://www.openlinksw.com/ for more information.'
+fi
+
+# Adabas D
+if test "$option_value_with_solid" = "no" -a \
+        "$option_value_with_empress" = "no" -a \
+        "$option_value_with_iodbc" = "no" -a \
+        "$option_value_with_openlink" = "no"; then
+define_option with-adabas 'Adabas D support?' yesnodir \
+    'no /usr/local Adabas D install root' \
+'    Whether to build with Adabas D support.\n
+    More info about Adabas D can be found at http://www.adabas.com/.'
+fi
+
+# Velocis
+if test "$option_value_with_solid" = "no" -a \
+        "$option_value_with_empress" = "no" -a \
+        "$option_value_with_iodbc" = "no" -a \
+        "$option_value_with_openlink" = "no" -a \
+        "$option_value_with_adabas" = "no"; then
+define_option with-velocis 'Velocis support?' yesnodir \
+    'no /usr/local/velocis Velocis install' \
+'     Whether to build PHP with Velocis support.\n
+     More information about Velocis can be found at http://www.raima.com/.'
+fi
+
+# Custom ODBC
+if test "$option_value_with_solid" = "no" -a \
+        "$option_value_with_empress" = "no" -a \
+        "$option_value_with_iodbc" = "no" -a \
+        "$option_value_with_openlink" = "no" -a \
+        "$option_value_with_adabas" = "no" -a \
+        "$option_value_with_velocis" = "no"; then
+define_option with-custom-odbc 'custom ODBC support?' yesnodir \
+    'no /usr/local CODBC install' \
+'    Whether to build PHP with CODBC support.  This feature was first
+    developed for Sybase SQL Anywhere 5.5 on QNX, but may be used for
+    any unknown ODBC driver on all flavors of UNIX.'
+fi
