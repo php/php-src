@@ -64,9 +64,6 @@
 #define REGEX 0
 #define HSREGEX 0
 
-/* Define if you want Hyperwave support */
-#define HYPERWAVE 0
-
 /* Define if you have the crypt() function */
 #define HAVE_CRYPT 1
 
