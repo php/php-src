@@ -582,6 +582,7 @@ function_entry basic_functions[] = {
 	PHP_FE(array_diff,							    NULL)
 	PHP_FE(array_sum,							    NULL)
 	PHP_FE(array_filter,						    NULL)
+	PHP_FE(array_map,							    NULL)
 
 	/* aliases from array.c */
 	PHP_FALIAS(pos,				current,			first_arg_force_ref)
