@@ -536,7 +536,7 @@ PHP_FUNCTION(aggregate_properties_by_regexp)
 
 /* {{{ proto array aggregation_info(object obj)
  */
-PHP_FUNCTION(aggregation_info)
+PHP_FUNCTION(aggregate_info)
 {
 	zval *obj;
 	aggregation_info *aggr_info;

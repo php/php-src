@@ -871,7 +871,8 @@ function_entry basic_functions[] = {
 	PHP_FE(aggregate_properties_by_regexp,	first_arg_force_ref)
 #endif
 	PHP_FE(deaggregate,						first_arg_force_ref)
-	PHP_FE(aggregation_info,				first_arg_force_ref)
+	PHP_FE(aggregate_info,				first_arg_force_ref)
+	PHP_FALIAS(aggregation_info,			aggregate_info,				first_arg_force_ref)
 
 	PHP_FE(output_add_rewrite_var,											NULL)
 	PHP_FE(output_reset_rewrite_vars,										NULL)
