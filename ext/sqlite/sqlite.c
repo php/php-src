@@ -98,6 +98,82 @@ static ZEND_RSRC_DTOR_FUNC(php_sqlite_result_dtor)
 	efree(res);
 }
 
+/* PHP Function interface */
+
+static void php_sqlite_function_callback(sqlite_func *func, int argc, const char **argv)
+{
+	zval *retval = NULL;
+	zval ***zargs;
+	zval funcname;
+	int i, res;
+
+	/* sanity check the args */
+	if (argc == 0) {
+		sqlite_set_result_error(func, "not enough parameters", -1);
+		return;
+	}
+	
+	ZVAL_STRING(&funcname, (char*)argv[0], 0);
+
+	if (!zend_is_callable(&funcname, 0, NULL)) {
+		sqlite_set_result_error(func, "function is not callable", -1);
+		return;
+	}
+	
+	if (argc > 1) {
+		zargs = (zval ***)emalloc((argc - 1) * sizeof(zval **));
+		
+		for (i = 0; i < argc-1; i++) {
+			zargs[i] = emalloc(sizeof(zval *));
+			MAKE_STD_ZVAL(*zargs[i]);
+
+			ZVAL_STRING(*zargs[i], (char*)argv[i+1], 0);
+		}
+	}
+
+	res = call_user_function_ex(EG(function_table),
+			NULL,
+			&funcname,
+			&retval,
+			argc-1,
+			zargs,
+			0, NULL TSRMLS_CC);
+
+	if (res == SUCCESS) {
+		if (retval == NULL) {
+			sqlite_set_result_string(func, NULL, 0);
+		} else {
+			switch (Z_TYPE_P(retval)) {
+				case IS_STRING:
+					sqlite_set_result_string(func, Z_STRVAL_P(retval), Z_STRLEN_P(retval));
+					break;
+				case IS_LONG:
+				case IS_BOOL:
+					sqlite_set_result_int(func, Z_LVAL_P(retval));
+					break;
+				case IS_DOUBLE:
+					sqlite_set_result_double(func, Z_DVAL_P(retval));
+					break;
+				case IS_NULL:
+				default:
+					sqlite_set_result_string(func, NULL, 0);
+			}
+		}
+	} else {
+		sqlite_set_result_error(func, "call_user_function_ex failed", -1);
+	}
+
+	if (retval) {
+		zval_ptr_dtor(&retval);
+	}
+
+	if (zargs) {
+		for (i = 0; i < argc-1; i++) {
+			efree(zargs[i]);
+		}
+		efree(zargs);
+	}
+}
 PHP_MINIT_FUNCTION(sqlite)
 {
 	le_sqlite_db = zend_register_list_destructors_ex(php_sqlite_db_dtor, NULL, "sqlite database", module_number);
@@ -158,6 +234,9 @@ PHP_FUNCTION(sqlite_open)
 		RETURN_FALSE;
 	}
 
+	/* register the PHP functions */
+	sqlite_create_function(db, "php", -1, php_sqlite_function_callback, 0);
+	
 	ZEND_REGISTER_RESOURCE(return_value, db, le_sqlite_db);
 	
 }
