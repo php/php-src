@@ -411,7 +411,7 @@ static char *php_apache_get_default_mimetype(request_rec *r SLS_DC)
 		mimetype = pstrdup(r->pool, tmpmimetype);
 		efree(tmpmimetype);
 	} else {
-		mimetype = SAPI_DEFAULT_CONTENT_TYPE;
+		mimetype = SAPI_DEFAULT_MIMETYPE "; charset=" SAPI_DEFAULT_CHARSET;
 	}
 	return mimetype;
 }

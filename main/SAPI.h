@@ -47,8 +47,6 @@ typedef struct {
 typedef struct {
 	zend_llist headers;
 	int http_response_code;
-	char *default_content_type;
-	size_t default_content_type_size;
 	unsigned char send_default_content_type;
 	char *http_status_line;
 } sapi_headers_struct;
@@ -145,6 +143,7 @@ SAPI_API struct stat *sapi_get_stat();
 SAPI_API char *sapi_getenv(char *name, int name_len);
 
 SAPI_API char *sapi_get_default_content_type(SLS_D);
+SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header SLS_DC);
 SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len SLS_DC);
 
 struct _sapi_module_struct {
@@ -199,8 +198,6 @@ struct _sapi_post_entry {
 
 #define SAPI_DEFAULT_MIMETYPE		"text/html"
 #define SAPI_DEFAULT_CHARSET		"iso-8859-1"
-#define SAPI_DEFAULT_CONTENT_TYPE	SAPI_DEFAULT_MIMETYPE ";charset=" SAPI_DEFAULT_CHARSET
-#define SAPI_DEFAULT_CONTENT_TYPE_HEADER "Content-type: " SAPI_DEFAULT_CONTENT_TYPE
 #define SAPI_PHP_VERSION_HEADER		"X-Powered-By: PHP/" PHP_VERSION
 
 #define SAPI_POST_READER_FUNC(post_reader) void post_reader(SLS_D)

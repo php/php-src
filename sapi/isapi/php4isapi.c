@@ -183,11 +183,12 @@ static int sapi_isapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 	LPEXTENSION_CONTROL_BLOCK lpECB = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
 	HSE_SEND_HEADER_EX_INFO header_info;
 	char status_buf[MAX_STATUS_LENGTH];
-	sapi_header_struct default_content_type = { SAPI_DEFAULT_CONTENT_TYPE, sizeof(SAPI_DEFAULT_CONTENT_TYPE)-1 };
+	sapi_header_struct default_content_type;
 	PLS_FETCH();
 
 	/* Obtain headers length */
 	if (SG(sapi_headers).send_default_content_type) {
+		sapi_get_default_content_type_header(&default_content_type SLS_CC);
 		accumulate_header_length(&default_content_type, (void *) &total_length);
 	}
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (void (*)(void *, void *)) accumulate_header_length, (void *) &total_length);
@@ -197,6 +198,7 @@ static int sapi_isapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 	combined_headers_ptr = combined_headers;
 	if (SG(sapi_headers).send_default_content_type) {
 		concat_header(&default_content_type, (void *) &combined_headers_ptr);
+		sapi_free_header(&default_content_type); /* we no longer need it */
 	}
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (void (*)(void *, void *)) concat_header, (void *) &combined_headers_ptr);
 	*combined_headers_ptr++ = '\r';
