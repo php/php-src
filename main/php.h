@@ -188,7 +188,7 @@ extern char *strerror(int);
 #define LONG_MIN (- LONG_MAX - 1)
 #endif
 
-#if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF)
+#if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF) || defined(BROKEN_SPRINTF)
 #include "snprintf.h"
 #endif
 
