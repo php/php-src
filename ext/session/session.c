@@ -553,21 +553,21 @@ static void _php_session_destroy(PSLS_D)
    return the current session name. if newname is given, the session name is replaced with newname */
 PHP_FUNCTION(session_name)
 {
-	pval *p_name;
+	pval **p_name;
 	int ac = ARG_COUNT(ht);
 	char *old;
 	PSLS_FETCH();
 
 	old = estrdup(PS(session_name));
 
-	if(ac < 0 || ac > 1 || getParameters(ht, ac, &p_name) == FAILURE) {
+	if(ac < 0 || ac > 1 || getParametersEx(ac, &p_name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	if(ac == 1) {
-		convert_to_string(p_name);
+		convert_to_string_ex(p_name);
 		efree(PS(session_name));
-		PS(session_name) = estrndup(p_name->value.str.val, p_name->value.str.len);
+		PS(session_name) = estrndup((*p_name)->value.str.val, (*p_name)->value.str.len);
 	}
 	
 	RETVAL_STRING(old, 0);
@@ -578,22 +578,22 @@ PHP_FUNCTION(session_name)
    return the current module name used for accessing session data. if newname is given, the module name is replaced with newname */
 PHP_FUNCTION(session_module_name)
 {
-	pval *p_name;
+	pval **p_name;
 	int ac = ARG_COUNT(ht);
 	char *old;
 	PSLS_FETCH();
 
 	old = estrdup(PS(mod)->name);
 
-	if(ac < 0 || ac > 1 || getParameters(ht, ac, &p_name) == FAILURE) {
+	if(ac < 0 || ac > 1 || getParametersEx(ac, &p_name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	if(ac == 1) {
 		ps_module *tempmod;
 
-		convert_to_string(p_name);
-		tempmod = _php_find_ps_module(p_name->value.str.val PSLS_CC);
+		convert_to_string_ex(p_name);
+		tempmod = _php_find_ps_module((*p_name)->value.str.val PSLS_CC);
 		if(tempmod) {
 			if(PS(mod_data))
 				PS(mod)->close(&PS(mod_data));
@@ -601,7 +601,7 @@ PHP_FUNCTION(session_module_name)
 		} else {
 			efree(old);
 			php_error(E_ERROR, "Cannot find named PHP session module (%s)",
-					p_name->value.str.val);
+					(*p_name)->value.str.val);
 			RETURN_FALSE;
 		}
 	}
@@ -646,21 +646,21 @@ PHP_FUNCTION(session_set_save_handler)
    return the current save path passed to module_name. if newname is given, the save path is replaced with newname */
 PHP_FUNCTION(session_save_path)
 {
-	pval *p_name;
+	pval **p_name;
 	int ac = ARG_COUNT(ht);
 	char *old;
 	PSLS_FETCH();
 
 	old = estrdup(PS(save_path));
 
-	if(ac < 0 || ac > 1 || getParameters(ht, ac, &p_name) == FAILURE) {
+	if(ac < 0 || ac > 1 || getParametersEx(ac, &p_name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	if(ac == 1) {
-		convert_to_string(p_name);
+		convert_to_string_ex(p_name);
 		efree(PS(save_path));
-		PS(save_path) = estrndup(p_name->value.str.val, p_name->value.str.len);
+		PS(save_path) = estrndup((*p_name)->value.str.val, (*p_name)->value.str.len);
 	}
 	
 	RETVAL_STRING(old, 0);
@@ -671,7 +671,7 @@ PHP_FUNCTION(session_save_path)
    return the current session id. if newid is given, the session id is replaced with newid */
 PHP_FUNCTION(session_id)
 {
-	pval *p_name;
+	pval **p_name;
 	int ac = ARG_COUNT(ht);
 	char *old = empty_string;
 	PSLS_FETCH();
@@ -679,14 +679,14 @@ PHP_FUNCTION(session_id)
 	if(PS(id))
 		old = estrdup(PS(id));
 
-	if(ac < 0 || ac > 1 || getParameters(ht, ac, &p_name) == FAILURE) {
+	if(ac < 0 || ac > 1 || getParametersEx(ac, &p_name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	if(ac == 1) {
-		convert_to_string(p_name);
+		convert_to_string_ex(p_name);
 		if(PS(id)) efree(PS(id));
-		PS(id) = estrndup(p_name->value.str.val, p_name->value.str.len);
+		PS(id) = estrndup((*p_name)->value.str.val, (*p_name)->value.str.len);
 	}
 	
 	RETVAL_STRING(old, 0);
@@ -697,18 +697,18 @@ PHP_FUNCTION(session_id)
    adds varname to the list of variables which are freezed at the session end */
 PHP_FUNCTION(session_register)
 {
-	pval *p_name;
+	pval **p_name;
 	int ac = ARG_COUNT(ht);
 	PSLS_FETCH();
 
-	if(ac != 1 || getParameters(ht, ac, &p_name) == FAILURE) {
+	if(ac != 1 || getParametersEx(ac, &p_name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(p_name);
+	convert_to_string_ex(p_name);
 	
 	if(!PS(nr_open_sessions)) _php_session_start(PSLS_C);
-	PS_ADD_VAR(p_name->value.str.val);
+	PS_ADD_VAR((*p_name)->value.str.val);
 }
 /* }}} */
 
@@ -716,17 +716,17 @@ PHP_FUNCTION(session_register)
    removes varname from the list of variables which are freezed at the session end */
 PHP_FUNCTION(session_unregister)
 {
-	pval *p_name;
+	pval **p_name;
 	int ac = ARG_COUNT(ht);
 	PSLS_FETCH();
 
-	if(ac != 1 || getParameters(ht, ac, &p_name) == FAILURE) {
+	if(ac != 1 || getParametersEx(ac, &p_name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_string(p_name);
+	convert_to_string_ex(p_name);
 	
-	PS_DEL_VAR(p_name->value.str.val);
+	PS_DEL_VAR((*p_name)->value.str.val);
 }
 /* }}} */
 
@@ -735,18 +735,18 @@ PHP_FUNCTION(session_unregister)
    checks if a variable is registered in session */
 PHP_FUNCTION(session_is_registered)
 {
-	pval *p_name;
+	pval **p_name;
 	pval *p_var;
 	int ac = ARG_COUNT(ht);
 	PSLS_FETCH();
 
-	if(ac != 1 || getParameters(ht, ac, &p_name) == FAILURE) {
+	if(ac != 1 || getParametersEx(ac, &p_name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_string(p_name);
+	convert_to_string_ex(p_name);
 	
-	if (zend_hash_find(&PS(vars), p_name->value.str.val, p_name->value.str.len+1,
+	if (zend_hash_find(&PS(vars), (*p_name)->value.str.val, (*p_name)->value.str.len+1,
 					   (void **)&p_var) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
@@ -773,14 +773,16 @@ PHP_FUNCTION(session_encode)
    deserializes data and reinitializes the variables */
 PHP_FUNCTION(session_decode)
 {
-	pval *str;
+	pval **str;
 	PSLS_FETCH();
 
-	if(ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
+	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	_php_session_decode(str->value.str.val, str->value.str.len PSLS_CC);
+	convert_to_string_ex(str);
+
+	_php_session_decode((*str)->value.str.val, (*str)->value.str.len PSLS_CC);
 }
 /* }}} */
 
