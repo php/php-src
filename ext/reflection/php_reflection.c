@@ -332,13 +332,13 @@ ZEND_FUNCTION(reflection_function_invoke)
 	efree(params);
 }
 
-void reflection_class_factory(zend_class_entry *ce, zval *object)
+void reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
 	zval *name;
 	ALLOC_ZVAL(name);
 	ZVAL_STRINGL(name, ce->name, ce->name_length, 1);
-	reflection_instanciate(reflection_class_ptr, object);
+	reflection_instanciate(reflection_class_ptr, object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	intern->ptr = ce;
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
@@ -595,7 +595,7 @@ ZEND_FUNCTION(reflection_class_getinterfaces)
 	   	for(i=0; i < ce->num_interfaces; i++) {
 			zval *interface;
 			ALLOC_ZVAL(interface);
-			reflection_class_factory(ce->interfaces[i], interface);
+			reflection_class_factory(ce->interfaces[i], interface TSRMLS_CC);
 			add_next_index_zval(return_value, interface);
 		}
 	}
@@ -613,7 +613,7 @@ ZEND_FUNCTION(reflection_class_getparentclass)
 	object = getThis();
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	if (intern && (ce = intern->ptr)  && ce->parent) {
-		reflection_class_factory(ce->parent, return_value);
+		reflection_class_factory(ce->parent, return_value TSRMLS_CC);
 	} 
 	else {
 		RETURN_FALSE;
