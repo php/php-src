@@ -1131,6 +1131,7 @@ void zend_unset_timeout(TSRMLS_D)
 zend_class_entry *zend_fetch_class(char *class_name, uint class_name_len, int fetch_type TSRMLS_DC)
 {
 	zend_class_entry **pce;
+	zend_bool in_autoload;
 
 check_fetch_type:
 	switch (fetch_type) {
@@ -1156,9 +1157,13 @@ check_fetch_type:
 			break;
 	}
 
+	in_autoload = EG(in_autoload);
+	EG(in_autoload) = 0;
 	if (zend_lookup_class(class_name, class_name_len, &pce TSRMLS_CC)==FAILURE) {
+		EG(in_autoload) = in_autoload;
 		zend_error(E_ERROR, "Class '%s' not found", class_name);
 	}
+	EG(in_autoload) = in_autoload;
 	return *pce;
 }
 
