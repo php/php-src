@@ -119,7 +119,7 @@ ZEND_END_MODULE_GLOBALS(sablot)
 
 
 #ifdef ZTS
-#define SABLOTG(v) TSRMG(sablot_globals_id, php_sablot_globals *, v)
+#define SABLOTG(v) TSRMG(sablot_globals_id, zend_sablot_globals *, v)
 #else
 #define SABLOTG(v) (sablot_globals.v)
 #endif

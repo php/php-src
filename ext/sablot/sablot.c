@@ -168,14 +168,14 @@ static SchemeHandler sh = {
 
 ZEND_DECLARE_MODULE_GLOBALS(sablot)
 
-static unsigned char sixth_arg_force_ref[] = { 6, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
-static unsigned char third_arg_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_NONE };
+static unsigned char a6_arg_force_ref[] = { 6, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
+static unsigned char a3_arg_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_NONE };
 
 function_entry sablot_functions[] = {
     PHP_FE(xslt_output_begintransform,    NULL)
     PHP_FE(xslt_output_endtransform,      NULL)
-    PHP_FE(xslt_transform,                sixth_arg_force_ref)
-    PHP_FE(xslt_process,                  third_arg_force_ref)
+    PHP_FE(xslt_transform,                a6_arg_force_ref)
+    PHP_FE(xslt_process,                  a3_arg_force_ref)
     PHP_FE(xslt_create,                   NULL)
     PHP_FE(xslt_run,                      NULL)
     PHP_FE(xslt_fetch_result,             NULL)
@@ -701,7 +701,6 @@ PHP_FUNCTION(xslt_openlog)
     int ret      = 0, 
         loglevel = 0, 
         argc     = ZEND_NUM_ARGS();
-    TSRMLS_FETCH();
     
     if (argc < 2 || argc > 3 ||
         zend_get_parameters_ex(argc, &xh, &logfile, &opt_loglevel) == FAILURE) {
@@ -1659,6 +1658,8 @@ static zval *_php_sablot_string_zval(const char *str)
 static zval *_php_sablot_resource_zval(long value)
 {
     zval *ret;
+    TSRMLS_FETCH();
+
     MAKE_STD_ZVAL(ret);
     
     Z_TYPE_P(ret) = IS_RESOURCE;
