@@ -1,0 +1,2 @@
+/* Define if you want the ICAP extension */
+#define HAVE_ICAP 0
