@@ -174,9 +174,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array ELS_DC SLS_DC 
 	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array ELS_CC PLS_CC);
 	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array ELS_CC PLS_CC);
 
-	buf[BUF_SIZE] = '\0';
-	
-	strncpy(buf, inet_ntoa(TG(hc)->client_addr.sa_in.sin_addr), BUF_SIZE);
+	strlcpy(buf, inet_ntoa(TG(hc)->client_addr.sa_in.sin_addr), sizeof(buf));
 	ADD_STRING("REMOTE_ADDR");
 	ADD_STRING("REMOTE_HOST");
 
