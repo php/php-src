@@ -106,10 +106,6 @@ PHP_MINFO_FUNCTION(regex)
 }
 
 
-/* This is the maximum number of (..) constructs we'll generate from a
-   call to ereg() or eregi() with the optional third argument. */
-#define  NS  10
-
 /* {{{ php_reg_eprint
  * php_reg_eprint - convert error number to name
  */
@@ -159,7 +155,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		**findin,		/* String to apply expression to */
 		**array = NULL;		/* Optional register array */
 	regex_t re;
-	regmatch_t subs[NS];
+	regmatch_t *subs;
 	int err, i, match_len, string_len;
 	int copts = 0;
 	off_t start, end;
@@ -199,11 +195,19 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	convert_to_string_ex(findin);
 	string = estrndup(Z_STRVAL_PP(findin), Z_STRLEN_PP(findin));
 
+	/* allocate storage for (sub-)expression-matches */
+	subs = (regmatch_t *)ecalloc(sizeof(regmatch_t),re.re_nsub+1);
+	if (!subs) {
+		php_error(E_WARNING, "Unable to allocate memory in php_ereg");
+		RETURN_FALSE;
+	}
+	
 	/* actually execute the regular expression */
-	err = regexec(&re, string, (size_t) NS, subs, 0);
+	err = regexec(&re, string, re.re_nsub+1, subs, 0);
 	if (err && err != REG_NOMATCH) {
 		php_reg_eprint(err, &re);
 		regfree(&re);
+		efree(subs);
 		RETURN_FALSE;
 	}
 	match_len = 1;
@@ -215,13 +219,14 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		buf = emalloc(string_len);
 		if (!buf) {
 			php_error(E_WARNING, "Unable to allocate memory in php_ereg");
+			efree(subs);
 			RETURN_FALSE;
 		}
 
 		zval_dtor(*array);	/* start with clean array */
 		array_init(*array);
 
-		for (i = 0; i < NS; i++) {
+		for (i = 0; i <= re.re_nsub; i++) {
 			start = subs[i].rm_so;
 			end = subs[i].rm_eo;
 			if (start != -1 && end > 0 && start < string_len && end < string_len && start < end) {
@@ -230,6 +235,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 				add_index_bool(*array, i, 0);
 			}
 		}
+		efree(subs);
 		efree(buf);
 	}
 
@@ -266,7 +272,7 @@ PHP_FUNCTION(eregi)
 PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended)
 {
 	regex_t re;
-	regmatch_t subs[NS];
+	regmatch_t *subs;
 
 	char *buf,	/* buf is where we build the replaced string */
 	     *nbuf,	/* nbuf is used when we grow the buffer */
@@ -289,12 +295,21 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 		return ((char *) -1);
 	}
 
+
+	/* allocate storage for (sub-)expression-matches */
+	subs = (regmatch_t *)ecalloc(sizeof(regmatch_t),re.re_nsub+1);
+	if (!subs) {
+		php_error(E_WARNING, "Unable to allocate memory in php_ereg_replace");
+		return ((char *) -1);
+	}
+
 	/* start with a buffer that is twice the size of the stringo
 	   we're doing replacements in */
 	buf_len = 2 * string_len + 1;
 	buf = emalloc(buf_len * sizeof(char));
 	if (!buf) {
-		php_error(E_WARNING, "Unable to allocate memory in php_reg_replace");
+		php_error(E_WARNING, "Unable to allocate memory in php_ereg_replace");
+		efree(subs);
 		regfree(&re);
 		return ((char *) -1);
 	}
@@ -302,10 +317,12 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 	err = pos = 0;
 	buf[0] = '\0';
 	while (!err) {
-		err = regexec(&re, &string[pos], (size_t) NS, subs, (pos ? REG_NOTBOL : 0));
+		err = regexec(&re, &string[pos], re.re_nsub+1, subs, (pos ? REG_NOTBOL : 0));
 
 		if (err && err != REG_NOMATCH) {
 			php_reg_eprint(err, &re);
+			efree(subs);
+			efree(buf);
 			regfree(&re);
 			return ((char *) -1);
 		}
@@ -396,6 +413,7 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 	}
 
 	/* don't want to leak memory .. */
+	efree(subs);
 	regfree(&re);
 
 	/* whew. */
