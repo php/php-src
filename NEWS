@@ -49,6 +49,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #25109 (Possible crash when fetching field names in pgsql). (Ilia)
 - Fixed bug #25106 (Added more stringent checks on bzopen() mode). (Ilia)
 - Fixed bug #25218 ("deflate" compressed pages had a gzip header). (Stefan)
+- Fixed bug #25070 (Don't forget to unlock session files on win32 before
+  closing them). (Ilia)
 - Fixed bug #24402 (Compile failure with gettext 0.12.x). (Jani)
 - Fixed bug #23326 (ext/domxml: Attributes via append_child not supported).
   (Melvyn)
