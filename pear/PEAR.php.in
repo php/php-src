@@ -236,8 +236,7 @@ class PEAR
         if ($mode === null) {
             if (isset($this->_default_error_mode)) {
                 $mode = $this->_default_error_mode;
-            }
-            if ($mode === null) {
+            } else {
                 $mode = $GLOBALS['_PEAR_default_error_mode'];
             }
         }
@@ -245,8 +244,7 @@ class PEAR
         if ($mode == PEAR_ERROR_TRIGGER && $options === null) {
             if (isset($this->_default_error_options)) {
                 $options = $this->_default_error_options;
-            }
-            if ($options === null) {
+            } else {
                 $options = $GLOBALS['_PEAR_default_error_options'];
             }
         }
@@ -257,8 +255,7 @@ class PEAR
                   is_object($options[0]) && is_string($options[1]))) {
                 if (isset($this->_default_error_callback)) {
                     $options = $this->_default_error_callback;
-                }
-                if ($options === null) {
+                } else {
                     $options = $GLOBALS['_PEAR_default_error_callback'];
                 }
             }
