@@ -124,6 +124,7 @@ PHP_FUNCTION(mssql_min_message_severity);
 PHP_FUNCTION(mssql_init);
 PHP_FUNCTION(mssql_bind);
 PHP_FUNCTION(mssql_execute);
+PHP_FUNCTION(mssql_free_statement);
 PHP_FUNCTION(mssql_guid_string);
 
 typedef struct mssql_link {
