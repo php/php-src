@@ -79,12 +79,6 @@ typedef enum {
 typedef struct php_imap_le_struct {
 	MAILSTREAM *imap_stream;
 	long flags;
-#ifdef OP_RELOGIN
-	/* AJS: busy flag for persistent connections, pointers for chaining */
-	struct php_imap_le_struct *next;
-	struct php_imap_le_struct **prev;
-	char busy;
-#endif
 } pils;
 
 typedef struct php_imap_mailbox_struct {

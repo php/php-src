@@ -30,8 +30,6 @@
 
 #define IMAP41
 
-#undef OP_RELOGIN
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -80,7 +78,6 @@ void *fs_get(size_t size);
  */
 function_entry imap_functions[] = {
 	PHP_FE(imap_open,								NULL)
-	PHP_FE(imap_popen,								NULL)
 	PHP_FE(imap_reopen,								NULL)
 	PHP_FE(imap_close,								NULL)
 	PHP_FE(imap_num_msg,							NULL)
@@ -180,10 +177,6 @@ ZEND_GET_MODULE(imap)
 
 /* True globals, no need for thread safety */
 static int le_imap;
-#ifdef OP_RELOGIN
-static int le_pimap;
-static int le_pimapchain;
-#endif
 
 /* {{{ mail_close_it
  */
@@ -205,41 +198,6 @@ static void mail_close_it(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	efree(imap_le_struct);
 }
 /* }}} */
-
-#ifdef OP_RELOGIN
-/* {{{ mail_userlogout_it
- */
-/* AJS: stream close functions for persistent connections */
-static void mail_userlogout_it(zend_rsrc_list_entry *rsrc TSRMLS_DC)
-{
-	pils *imap_le_struct = (pils *)rsrc->ptr;
-
-	/* Close this user's session, putting the stream back
-	 * into AUTHENTICATE state.  (Note that IMAP does not
-	 * support this behavior... yet)
-	 */
-	imap_le_struct->busy = 0;
-	mail_close_full(imap_le_struct->imap_stream, imap_le_struct->flags | CL_HALF);
-}
-/* }}} */
-
-/* {{{ mail_nuke_chain
- */
-static void mail_nuke_chain(zend_rsrc_list_entry *rsrc TSRMLS_DC)
-{
-	pils **headp = (pils **)rsrc->ptr;
-	pils		*node, *next;
-
-	for (node = *headp; node; node = next) {
-		next = node->next;
-		mail_close(node->imap_stream);
-		free(node);
-	}
-
-	free(headp);
-}
-/* }}} */
-#endif
 
 /* {{{ add_assoc_object
  */
@@ -626,13 +584,6 @@ PHP_MINIT_FUNCTION(imap)
 
     le_imap = zend_register_list_destructors_ex(mail_close_it, NULL, "imap", module_number);
 
-#ifdef OP_RELOGIN
-	/* AJS: destructors for persistent connections */
-	le_pimap = zend_register_list_destructors_ex(mail_userlogout_it, NULL, "imap persistent", module_number);
-	le_pimapchain = zend_register_list_destructors_ex(NULL, mail_nuke_chain, "imap chain persistent", module_number);
-#endif
-
-	return SUCCESS;
 }
 /* }}} */
 
@@ -715,11 +666,6 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	pils *imap_le_struct;
 	long flags=NIL;
 	long cl_flags=NIL;
-#ifdef OP_RELOGIN
-	NETMBX netmbx;
-	char *hashed_details = NULL;
-	int hashed_details_length = 0;
-#endif
 	int myargc = ZEND_NUM_ARGS();
 	
 	if (myargc < 3 || myargc > 4 || zend_get_parameters_ex(myargc, &mailbox, &user, &passwd, &options) == FAILURE) {
@@ -749,160 +695,20 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	IMAPG(imap_user)     = estrndup(Z_STRVAL_PP(user), Z_STRLEN_PP(user));
 	IMAPG(imap_password) = estrndup(Z_STRVAL_PP(passwd), Z_STRLEN_PP(passwd));
 	
-#ifdef OP_RELOGIN
-	/* AJS: persistent connection handling */
-	/* Cannot use a persistent connection if we cannot parse
-	 * out the server's hostname.
-	 */
-	if (persistent && !mail_valid_net_parse(Z_STRVAL_PP(mailbox), &netmbx)) {
-		persistent = 0;
+	imap_stream = mail_open(NIL, Z_STRVAL_PP(mailbox), flags);
+
+	if (imap_stream == NIL) {
+		php_error(E_WARNING, "%s(): Couldn't open stream %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(mailbox));
+		efree(IMAPG(imap_user)); IMAPG(imap_user) = 0;
+		efree(IMAPG(imap_password)); IMAPG(imap_password) = 0;
+		RETURN_FALSE;
 	}
 
-	imap_stream = NIL;
-	if (persistent) {
-		list_entry	*le = NULL;
-		list_entry	new_le;
-		pils		**headp, *node;
-		int		need_update = 0;
+	imap_le_struct = emalloc(sizeof(pils));
+	imap_le_struct->imap_stream = imap_stream;
+	imap_le_struct->flags = cl_flags;	
 
-		hashed_details_length = sizeof("imap_") + strlen(netmbx.host);
-		hashed_details = (char*) emalloc(hashed_details_length);
-		sprintf(hashed_details, "imap_%s", netmbx.host);
-
-		/* Check for an existing connection. */
-		if ((zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length, (void*) &le) == FAILURE) 
-			|| (Z_TYPE_P(le) != le_pimapchain)
-		) {
-			le = NULL;
-		}
-
-		/* Re-use existing connection if available. */
-		node = NULL;
-		headp = NULL;
-		if (le) {
-			headp = (pils**) le->ptr;
-
-			/* find a non-busy connection */
-			for (node=*headp; node; node=node->next)
-				if (!node->busy)
-					break;
-		}
-
-		/* If we found a node, do a relogin.  */
-		if (node) {
-			imap_stream = mail_open(node->imap_stream, Z_STRVAL_PP(mailbox), flags | OP_RELOGIN);
-			if (imap_stream) {
-				/* Ping the stream to see if it is
-				 * still good. 
-				 */
-				if (!mail_ping(imap_stream)) {
-					mail_close(imap_stream);
-					imap_stream = NIL;
-				}
-			}
-		}
-
-		/* Get a fresh stream if we don't have one yet. */
-		if (imap_stream == NIL) {
-			/* Open a new connection. */
-			imap_stream = mail_open(NIL, Z_STRVAL_PP(mailbox), flags | OP_RELOGIN);
-		}
-
-		/* Do we have a stream yet?  If not, bail. */
-		if (imap_stream == NIL) {
-			if (node) {
-				/* unlink the node */
-				if ((*node->prev = node->next))
-					node->next->prev = node->prev;
-				free(node);
-				/* delete the hash entry if empty */
-				if (*headp == NULL) {
-					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length);
-				}
- 			}
-			efree(hashed_details);
-			efree(IMAPG(imap_user)); IMAPG(imap_user) = 0;
-			efree(IMAPG(imap_password)); IMAPG(imap_password) = 0;
-			RETURN_FALSE;
-		}
-
-		/* Allocate a new node if none. */
-		if (node == NULL) {
-			/* Alloc new hash entry. */
-			node = malloc(sizeof(pils));
-			if (node == NULL) {
-				efree(hashed_details);
-				efree(IMAPG(imap_user)); IMAPG(imap_user) = 0;
-				efree(IMAPG(imap_password)); IMAPG(imap_password) = 0;
-				RETURN_FALSE;
-			}
-
-			/* Allocate headp if it does not exist. */
-			if (headp == NULL) {
-				headp = calloc(1, sizeof(*headp));
-				need_update = 1;
-			}
-
-			node->prev = headp;
-			node->next = *headp;
-			*headp = node;
-		}
-
-
-		/* Initialize the node. */
-		node->busy = 1;
-		node->imap_stream = imap_stream;
-		node->flags = cl_flags;
-
-		/* Update the hash. */
-		Z_TYPE(new_le) = le_pimapchain;
-		new_le.ptr = headp;
-		if (need_update	&& 
-				zend_hash_update(&EG(persistent_list), hashed_details,
-				hashed_details_length, &new_le,
-				sizeof(new_le), NULL) == FAILURE) {
-			/* unlink and free the new node */
-			if ((*node->prev = node->next)) {
-				node->next->prev = node->prev;
-			}
-			mail_close(node->imap_stream);
-			free(node);
-
-			free(headp);
-			efree(hashed_details);
-			efree(IMAPG(imap_user)); IMAPG(imap_user) = 0;
-			efree(IMAPG(imap_password)); IMAPG(imap_password) = 0;
- 			RETURN_FALSE;
-		}
-
-		efree(hashed_details);
-		imap_le_struct = node;
-
-	} else {
-#endif
-		imap_stream = mail_open(NIL, Z_STRVAL_PP(mailbox), flags);
-
-		if (imap_stream == NIL) {
-			php_error(E_WARNING, "%s(): Couldn't open stream %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(mailbox));
-			efree(IMAPG(imap_user)); IMAPG(imap_user) = 0;
-			efree(IMAPG(imap_password)); IMAPG(imap_password) = 0;
-			RETURN_FALSE;
-		}
-
-		imap_le_struct = emalloc(sizeof(pils));
-		imap_le_struct->imap_stream = imap_stream;
-		imap_le_struct->flags = cl_flags;	
-#ifdef OP_RELOGIN
-	}
-
-	if (persistent) {
-		ZEND_REGISTER_RESOURCE(return_value, imap_le_struct, le_pimap);
-	} 
-	else
-#endif
-	{
-		ZEND_REGISTER_RESOURCE(return_value, imap_le_struct, le_imap);
-	}
+	ZEND_REGISTER_RESOURCE(return_value, imap_le_struct, le_imap);
 }
 /* }}} */
 
@@ -914,20 +720,6 @@ PHP_FUNCTION(imap_open)
 }
 /* }}} */
 
-/* {{{ proto int imap_popen(string mailbox, string user, string password [, int options])
-   Open a persistant IMAP stream to a mailbox */
-PHP_FUNCTION(imap_popen)
-{
-#ifdef OP_RELOGIN
-	php_imap_do_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-	RETURN_TRUE;
-#else
-	php_error(E_WARNING, "%s(): Persistent IMAP connections are not yet supported.", get_active_function_name(TSRMLS_C));
-	RETURN_FALSE;
-#endif
-}
-/* }}} */
- 
 /* {{{ proto int imap_reopen(int stream_id, string mailbox [, int options])
    Reopen an IMAP stream to a new mailbox */
 PHP_FUNCTION(imap_reopen)
