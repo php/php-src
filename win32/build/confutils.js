@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.52 2005-02-06 22:48:35 wez Exp $
+// $Id: confutils.js,v 1.53 2005-02-06 23:23:05 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -870,7 +870,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 	var SAPI = sapiname.toUpperCase();
 	var ldflags;
 	var resname;
-	var ld = "$(LD)";
+	var ld = "@$(LD)";
 
 	STDOUT.WriteLine("Enabling SAPI " + configure_module_dirname);
 
@@ -1010,7 +1010,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		var libname = dllname.substring(0, dllname.length-4) + ".lib";
 
 		var resname = generate_version_info_resource(dllname, configure_module_dirname);
-		var ld = "$(LD)";
+		var ld = "@$(LD)";
 
 		MFO.WriteLine("$(BUILD_DIR)\\" + dllname + " $(BUILD_DIR)\\" + libname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
 		MFO.WriteLine("\t" + ld + " /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname);
