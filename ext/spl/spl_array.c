@@ -360,7 +360,7 @@ SPL_METHOD(Array, getIterator)
 /* }}} */
 
 /* {{{ spl_hash_pos_exists */
-ZEND_API int spl_hash_pos_exists(spl_array_object * intern TSRMLS_DC)
+SPL_API int spl_hash_pos_exists(spl_array_object * intern TSRMLS_DC)
 {
 	HashTable *ht = HASH_OF(intern->array);
 	Bucket *p;
