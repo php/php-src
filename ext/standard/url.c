@@ -83,6 +83,7 @@ url *url_parse(char *str)
 	if (err) {
 		/*php_error(E_WARNING,"Error with regex\n");*/
 		efree(ret);
+		regfree(&re);
 		return NULL;
 	}
 	/* no processing necessary on the scheme */
@@ -122,6 +123,7 @@ url *url_parse(char *str)
 			efree(ret);
 			efree(result);
 			/*php_error(E_WARNING,"Unable to compile regex: %d\n", err);*/
+			regfree(&re);
 			return NULL;
 		}
 		/* now deal with all of the results */
@@ -145,6 +147,7 @@ url *url_parse(char *str)
 		STR_FREE(ret->query);
 		STR_FREE(ret->fragment);
 		efree(ret);
+		regfree(&re);
 		return NULL;
 	}
 	regfree(&re);
