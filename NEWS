@@ -3,14 +3,14 @@ PHP                                                                        NEWS
 ?? ??? 2004, PHP 5.0.1
 
 11 Aug 2004, PHP 5.0.1RC2
-- Fixed bug #29606 (php_strip_whitespace() prints to stdout rather then
-  returning the value). (Ilia)
 - Changed destructor mechanism so that destructors are called prior to request
   shutdown. (Marcus)
 - Rewritten UNIX and Windows install help files. (Documentation Team)
 - Updated several libraries bundled with the windows release which now 
   includes libxml2-2.6.11, libxslt-1.1.7 and iconv-1.9.1. (Rob, Edin)
 - Improved and moved ActiveScript SAPI to PECL.  (Wez)
+- Fixed bug #29606 (php_strip_whitespace() prints to stdout rather then
+  returning the value). (Ilia)
 - Fixed bug #29577 (MYSQLI_CLIENT_FOUND_ROWS undefined) (Georg)
 - Fixed bug #29573 (Segmentation fault, when exception thrown within
   PHP function called from XSLT). (Christian)
@@ -57,7 +57,7 @@ PHP                                                                        NEWS
   raise an ReflectionException instead of returning NULL on failure.
   (Sebastian)
 - Fixed convert.* filters to consume remaining buckets_in on flush. (Sara)
-- Fixed bug in mysqli->client_version (Georg)
+- Fixed bug in mysqli->client_version. (Georg)
 
 13 Jul 2004, PHP 5.0.0
 - Updated PCRE to provide better error handling in certain cases. (Andrei)
