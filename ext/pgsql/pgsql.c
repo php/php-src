@@ -1457,7 +1457,7 @@ PHP_FUNCTION(pg_free_result)
 }
 /* }}} */
 
-/* {{{ proto int pg_last_oid(resource result)
+/* {{{ proto string pg_last_oid(resource result)
    Returns the last object identifier */
 PHP_FUNCTION(pg_last_oid)
 {
@@ -1575,7 +1575,7 @@ PHP_FUNCTION(pg_untrace)
 }
 /* }}} */
 
-/* {{{ proto int pg_lo_create(resource connection)
+/* {{{ proto int pg_lo_create([resource connection])
    Create a large object */
 PHP_FUNCTION(pg_lo_create)
 {
@@ -1618,7 +1618,7 @@ PHP_FUNCTION(pg_lo_create)
 }
 /* }}} */
 
-/* {{{ proto bool pg_lo_unlink([resource connection,] int large_object_oid)
+/* {{{ proto bool pg_lo_unlink([resource connection,] string large_object_oid)
    Delete a large object */
 PHP_FUNCTION(pg_lo_unlink)
 {
