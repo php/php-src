@@ -17,12 +17,20 @@ if test "$PHP_PCRE_REGEX" != "no"; then
     PHP_ADD_BUILD_DIR($ext_builddir/pcrelib)
     AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
   else
-    test -f $PHP_PCRE_REGEX/pcre.h && PCRE_INCDIR=$PHP_PCRE_REGEX
-    test -f $PHP_PCRE_REGEX/include/pcre.h && PCRE_INCDIR=$PHP_PCRE_REGEX/include
-    test -f $PHP_PCRE_REGEX/include/pcre/pcre.h && PCRE_INCDIR=$PHP_PCRE_REGEX/include/pcre
+    for i in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/include $PHP_PCRE_REGEX/include/pcre; do
+      test -f $i/pcre.h && PCRE_INCDIR=$i
+    done
 
     if test -z "$PCRE_INCDIR"; then
-      AC_MSG_RESULT(Could not find pcre.h in $PHP_PCRE_REGEX)
+      AC_MSG_ERROR([Could not find pcre.h in $PHP_PCRE_REGEX])
+    fi
+
+    for j in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/lib; do
+      test -f $j/libpcre.a -o -f $j/libpcre.$SHLIB_SUFFIX_NAME && PCRE_LIBDIR=$j
+    done
+    
+    if test -z "$PCRE_LIBDIR" ; then
+      AC_MSG_ERROR([Could not find libpcre.(a|$SHLIB_SUFFIX_NAME) in $PHP_PCRE_REGEX])
     fi
 
     changequote({,})
@@ -35,14 +43,7 @@ if test "$PHP_PCRE_REGEX" != "no"; then
     fi
     pcre_version=$pcre_major$pcre_minor
     if test "$pcre_version" -lt 208; then
-      AC_MSG_ERROR(The PCRE extension requires PCRE library version >= 2.08)
-    fi
-
-    test -f $PHP_PCRE_REGEX/libpcre.a && PCRE_LIBDIR=$PHP_PCRE_REGEX
-    test -f $PHP_PCRE_REGEX/lib/libpcre.a && PCRE_LIBDIR=$PHP_PCRE_REGEX/lib
-
-    if test -z "$PCRE_LIBDIR" ; then
-      AC_MSG_ERROR(Could not find libpcre.a in $PHP_PCRE_REGEX)
+      AC_MSG_ERROR([The PCRE extension requires PCRE library version >= 2.08])
     fi
 
     PHP_ADD_LIBRARY_WITH_PATH(pcre, $PCRE_LIBDIR, PCRE_SHARED_LIBADD)
@@ -51,7 +52,5 @@ if test "$PHP_PCRE_REGEX" != "no"; then
     PHP_ADD_INCLUDE($PCRE_INCDIR)
     PHP_NEW_EXTENSION(pcre, php_pcre.c, $ext_shared,,-DSUPPORT_UTF8 -DLINK_SIZE=2)
   fi
+  PHP_SUBST(PCRE_SHARED_LIBADD)
 fi
-PHP_SUBST(PCRE_SHARED_LIBADD)
-
-AC_CHECK_FUNC(memmove, [], [AC_DEFINE(USE_BCOPY, 1, [ ])])
