@@ -1650,13 +1650,8 @@ do_fcall_common:
 						
 						retval_ptr_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_W);
 
-						if (*retval_ptr_ptr==EG(uninitialized_zval_ptr)
-							|| *retval_ptr_ptr==EG(error_zval_ptr)) {
-							ALLOC_INIT_ZVAL(*retval_ptr_ptr);
-						} else {
-							SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
-							(*retval_ptr_ptr)->refcount++;
-						}
+						SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
+						(*retval_ptr_ptr)->refcount++;
 						
 						(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
 					} else {
