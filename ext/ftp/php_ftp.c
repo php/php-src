@@ -71,11 +71,11 @@ function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_close,			NULL)
 	PHP_FE(ftp_set_option,		NULL)
 	PHP_FE(ftp_get_option,		NULL)
-	PHP_FE(ftp_async_fget,		NULL)
-	PHP_FE(ftp_async_get,		NULL)
-	PHP_FE(ftp_async_continue,	NULL)
-	PHP_FE(ftp_async_put,		NULL)
-	PHP_FE(ftp_async_fput,		NULL)
+	PHP_FE(ftp_nb_fget,			NULL)
+	PHP_FE(ftp_nb_get,			NULL)
+	PHP_FE(ftp_nb_continue,		NULL)
+	PHP_FE(ftp_nb_put,			NULL)
+	PHP_FE(ftp_nb_fput,			NULL)
 	PHP_FALIAS(ftp_quit, ftp_close, NULL)
 	{NULL, NULL, NULL}
 };
@@ -460,9 +460,9 @@ PHP_FUNCTION(ftp_fget)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_async_fget(resource stream, resource fp, string remote_file, int mode[, int resumepos])
+/* {{{ proto bool ftp_nb_fget(resource stream, resource fp, string remote_file, int mode[, int resumepos])
    Retrieves a file from the FTP server asynchronly and writes it to an open file */
-PHP_FUNCTION(ftp_async_fget)
+PHP_FUNCTION(ftp_nb_fget)
 {
 	zval		*z_ftp, *z_file;
 	ftpbuf_t	*ftp;
@@ -498,7 +498,7 @@ PHP_FUNCTION(ftp_async_fget)
 	ftp->direction = 0;   /* recv */
 	ftp->closestream = 0; /* do not close */
 
-	if ((ret = ftp_async_get(ftp, stream, file, xtype, resumepos)) == PHP_FTP_FAILED) {
+	if ((ret = ftp_nb_get(ftp, stream, file, xtype, resumepos)) == PHP_FTP_FAILED) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_LONG(ret);
 	}
@@ -585,9 +585,9 @@ PHP_FUNCTION(ftp_get)
 }
 /* }}} */
 
-/* {{{ proto int ftp_async_get(resource stream, string local_file, string remote_file, int mode[, int resume_pos])
-   Retrieves a file from the FTP server asynchronly and writes it to a local file */
-PHP_FUNCTION(ftp_async_get)
+/* {{{ proto int ftp_nb_get(resource stream, string local_file, string remote_file, int mode[, int resume_pos])
+   Retrieves a file from the FTP server nbhronly and writes it to a local file */
+PHP_FUNCTION(ftp_nb_get)
 {
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
@@ -635,7 +635,7 @@ PHP_FUNCTION(ftp_async_get)
 	ftp->direction = 0;   /* recv */
 	ftp->closestream = 1; /* do close */
 
-	if ((ret = ftp_async_get(ftp, outstream, remote, xtype, resumepos)) == PHP_FTP_FAILED) {
+	if ((ret = ftp_nb_get(ftp, outstream, remote, xtype, resumepos)) == PHP_FTP_FAILED) {
 		php_stream_close(outstream);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_LONG(PHP_FTP_FAILED);
@@ -649,9 +649,9 @@ PHP_FUNCTION(ftp_async_get)
 }
 /* }}} */
 
-/* {{{ proto int ftp_async_continue(resource stream)
-   Continues retrieving/sending a file asyncronously */
-PHP_FUNCTION(ftp_async_continue)
+/* {{{ proto int ftp_nb_continue(resource stream)
+   Continues retrieving/sending a file nbronously */
+PHP_FUNCTION(ftp_nb_continue)
 {
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
@@ -663,15 +663,15 @@ PHP_FUNCTION(ftp_async_continue)
 
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
-	if (!ftp->async) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no asyncronous transfer to continue.");
+	if (!ftp->nb) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no nbronous transfer to continue.");
 		RETURN_LONG(PHP_FTP_FAILED);
 	}
 
 	if (ftp->direction) {
-		ret=ftp_async_continue_write(ftp);
+		ret=ftp_nb_continue_write(ftp);
 	} else {
-		ret=ftp_async_continue_read(ftp);
+		ret=ftp_nb_continue_read(ftp);
 	}
 
 	if (ret != PHP_FTP_MOREDATA && ftp->closestream) {
@@ -732,9 +732,9 @@ PHP_FUNCTION(ftp_fput)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_async_fput(resource stream, string remote_file, resource fp, int mode[, int startpos])
-   Stores a file from an open file to the FTP server asyncronly */
-PHP_FUNCTION(ftp_async_fput)
+/* {{{ proto bool ftp_nb_fput(resource stream, string remote_file, resource fp, int mode[, int startpos])
+   Stores a file from an open file to the FTP server nbronly */
+PHP_FUNCTION(ftp_nb_fput)
 {
 	zval		*z_ftp, *z_file;
 	ftpbuf_t	*ftp;
@@ -773,7 +773,7 @@ PHP_FUNCTION(ftp_async_fput)
 	ftp->direction = 1;   /* send */
 	ftp->closestream = 0; /* do not close */
 
-	if (((ret = ftp_async_put(ftp, remote, stream, xtype, startpos)) == PHP_FTP_FAILED)) {
+	if (((ret = ftp_nb_put(ftp, remote, stream, xtype, startpos)) == PHP_FTP_FAILED)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_LONG(ret);
 	}
@@ -837,9 +837,9 @@ PHP_FUNCTION(ftp_put)
 /* }}} */
 
 
-/* {{{ proto bool ftp_async_put(resource stream, string remote_file, string local_file, int mode[, int startpos])
+/* {{{ proto bool ftp_nb_put(resource stream, string remote_file, string local_file, int mode[, int startpos])
    Stores a file on the FTP server */
-PHP_FUNCTION(ftp_async_put)
+PHP_FUNCTION(ftp_nb_put)
 {
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
@@ -883,7 +883,7 @@ PHP_FUNCTION(ftp_async_put)
 	ftp->direction = 1;   /* send */
 	ftp->closestream = 1; /* do close */
 
-	ret = ftp_async_put(ftp, remote, instream, xtype, startpos);
+	ret = ftp_nb_put(ftp, remote, instream, xtype, startpos);
 
 	if (ret != PHP_FTP_MOREDATA) {
 		php_stream_close(instream);

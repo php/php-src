@@ -138,7 +138,7 @@ ftp_open(const char *host, short port, long timeout_sec TSRMLS_DC)
 
 	/* Default Settings */
 	ftp->timeout_sec = timeout_sec;
-	ftp->async = 0;
+	ftp->nb = 0;
 
 	size = sizeof(ftp->localaddr);
 	memset(&ftp->localaddr, 0, size);
@@ -250,7 +250,7 @@ ftp_reinit(ftpbuf_t *ftp)
 
 	ftp_gc(ftp);
 
-	ftp->async = 0;
+	ftp->nb = 0;
 
 	if (!ftp_putcmd(ftp, "REIN", NULL))
 		return 0;
@@ -1381,10 +1381,10 @@ bail:
 }
 /* }}} */
 
-/* {{{ ftp_async_get
+/* {{{ ftp_nb_get
  */
 int
-ftp_async_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, int resumepos)
+ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, int resumepos)
 {
 	databuf_t		*data = NULL;
 	char			arg[11];
@@ -1425,9 +1425,9 @@ ftp_async_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t 
 	ftp->data = data;
 	ftp->stream = outstream;
 	ftp->lastch = 0;
-	ftp->async = 1;
+	ftp->nb = 1;
 
-	return (ftp_async_continue_read(ftp));
+	return (ftp_nb_continue_read(ftp));
 
 bail:
 	data_close(data);
@@ -1435,10 +1435,10 @@ bail:
 }
 /* }}} */
 
-/* {{{ ftp_aget
+/* {{{ ftp_nb_continue_read
  */
 int
-ftp_async_continue_read(ftpbuf_t *ftp)
+ftp_nb_continue_read(ftpbuf_t *ftp)
 {
 	databuf_t	*data = NULL;
 	char		*ptr;
@@ -1489,19 +1489,19 @@ ftp_async_continue_read(ftpbuf_t *ftp)
 		goto bail;
 	}
 
-	ftp->async = 0;
+	ftp->nb = 0;
 	return PHP_FTP_FINISHED;
 bail:
-	ftp->async = 0;
+	ftp->nb = 0;
 	data_close(data);
 	return PHP_FTP_FAILED;
 }
 /* }}} */
 
-/* {{{ ftp_async_put
+/* {{{ ftp_nb_put
  */
 int
-ftp_async_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, int startpos)
+ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, int startpos)
 {
 	databuf_t		*data = NULL;
 	char			arg[11];
@@ -1537,9 +1537,9 @@ ftp_async_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t t
 	ftp->data = data;
 	ftp->stream = instream;
 	ftp->lastch = 0;
-	ftp->async = 1;
+	ftp->nb = 1;
 
-	return (ftp_async_continue_write(ftp));
+	return (ftp_nb_continue_write(ftp));
 
 bail:
 	data_close(data);
@@ -1549,10 +1549,10 @@ bail:
 /* }}} */
 
 
-/* {{{ ftp_async_continue_write
+/* {{{ ftp_nb_continue_write
  */
 int
-ftp_async_continue_write(ftpbuf_t *ftp)
+ftp_nb_continue_write(ftpbuf_t *ftp)
 {
 	int			size;
 	char			*ptr;
@@ -1594,11 +1594,11 @@ ftp_async_continue_write(ftpbuf_t *ftp)
 	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250))
 		goto bail;
 
-	ftp->async = 0;
+	ftp->nb = 0;
 	return PHP_FTP_FINISHED;
 bail:
 	data_close(ftp->data);
-	ftp->async = 0;
+	ftp->nb = 0;
 	return PHP_FTP_FAILED;
 }
 /* }}} */
