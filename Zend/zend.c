@@ -813,7 +813,9 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			orig_user_error_handler = EG(user_error_handler);
 			EG(user_error_handler) = NULL;
 			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL TSRMLS_CC)==SUCCESS) {
-				zval_ptr_dtor(&retval);
+				if (retval) {
+					zval_ptr_dtor(&retval);
+				}
 			} else {
 				/* The user error handler failed, use built-in error handler */
 				zend_error_cb(type, error_filename, error_lineno, format, args);
