@@ -47,7 +47,7 @@
 #  endif
 # endif /* osf alpha */
 
-#if WIN32||WINNT
+#ifdef PHP_WIN32
 #define PHP_OCI_API __declspec(dllexport)
 #else
 #define PHP_OCI_API
