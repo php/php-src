@@ -60,7 +60,6 @@ ext/oci8
 
 ext/pcre
 --------
-    * have a non-greedy option for preg_replace().
     * have an option for preg_grep() to return keys as well.
     * update the online docs from version 3.1 man page
 
