@@ -81,7 +81,7 @@ ZEND_API void zend_llist_del_element(zend_llist *l, void *element, int (*compare
 			}
 			if (l->dtor) {
 				l->dtor(current->data);
-				efree(current);
+				pefree(current, l->persistent);
 			}
 			break;
 		}
@@ -121,7 +121,7 @@ ZEND_API void zend_llist_remove_tail(zend_llist *l)
 			l->tail->prev->next = NULL;
 		}
 		l->tail = l->tail->prev;
-		efree(old_tail);
+		pefree(old_tail, l->persistent);
 	}
 }
 
