@@ -357,7 +357,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysql.default_password",		NULL,	PHP_INI_ALL,		OnUpdateString,		default_password,	zend_mysql_globals,		mysql_globals)
 	PHP_INI_ENTRY("mysql.default_port",				NULL,	PHP_INI_ALL,		OnMySQLPort)
 	STD_PHP_INI_ENTRY("mysql.default_socket",		NULL,	PHP_INI_ALL,		OnUpdateStringUnempty,	default_socket,	zend_mysql_globals,		mysql_globals)
-	STD_PHP_INI_ENTRY_EX("mysql.connect_timeout",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		connect_timeout, 	zend_mysql_globals,		mysql_globals, display_link_numbers)
+	STD_PHP_INI_ENTRY("mysql.connect_timeout",		"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		connect_timeout, 	zend_mysql_globals,		mysql_globals)
+	STD_PHP_INI_BOOLEAN("mysql.trace_mode",			"0",	PHP_INI_ALL,		OnUpdateInt,		trace_mode, 		zend_mysql_globals,		mysql_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -373,6 +374,8 @@ static void php_mysql_init_globals(zend_mysql_globals *mysql_globals)
 	mysql_globals->connect_errno = 0;
 	mysql_globals->connect_error = NULL;
 	mysql_globals->connect_timeout = 0;
+	mysql_globals->trace_mode = 0;
+	mysql_globals->result_allocated = 0;
 }
 /* }}} */
 
@@ -442,6 +445,14 @@ PHP_RINIT_FUNCTION(mysql)
 PHP_RSHUTDOWN_FUNCTION(mysql)
 {
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) _restore_connection_defaults TSRMLS_CC);
+
+	if (MySG(trace_mode)) {
+		if (MySG(result_allocated)){
+			char tmp[128];
+			sprintf((char *)&tmp, "%d result set(s) not freed. Use mysql_free_result to free result sets which were requested using mysql_query()", MySG(result_allocated));
+			php_error_docref("function.mysql-free-result" TSRMLS_CC, E_WARNING, tmp);
+		}
+	}
 
 	if (MySG(connect_error)!=NULL) {
 		efree(MySG(connect_error));
@@ -1192,6 +1203,7 @@ static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link
 {
 	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
+	char tmp[128];
 	
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, link_id, "MySQL-Link", le_link, le_plink);
 	
@@ -1220,13 +1232,56 @@ static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link
 	} while(0);
 
 	convert_to_string_ex(query);
+
+	/* check explain */
+	if (MySG(trace_mode)) {
+		if (!strncasecmp("select", Z_STRVAL_PP(query), 6)){
+			MYSQL_ROW 	row;
+			
+			char *newquery = (char *)emalloc(Z_STRLEN_PP(query) + 10);	
+			sprintf ((char *)newquery, "EXPLAIN %s", Z_STRVAL_PP(query));
+			mysql_real_query(&mysql->conn, newquery, strlen(newquery));
+			efree (newquery);
+			if (mysql_errno(&mysql->conn)) {
+				php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, mysql_error(&mysql->conn));
+				RETURN_FALSE;
+			}
+			else {
+    			mysql_result = mysql_use_result(&mysql->conn);
+				while (row = mysql_fetch_row(mysql_result)) {
+					if (!strcmp("ALL", row[1])) {
+						sprintf((char *)&tmp, "Your query requires a full tablescan (table %s, %s rows affected). Use EXPLAIN to optimize your query.", row[0], row[6]);
+						php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, tmp);
+					}
+					else if (!strcmp("INDEX", row[1])) {
+						sprintf((char *)&tmp, "Your query requires a full indexscan (table %s, %s rows affected). Use EXPLAIN to optimize your query.", row[0], row[6]);
+						php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, tmp);
+					}
+				}
+				mysql_free_result(mysql_result);
+			}
+		}	
+	} /* end explain */
+
 	/* mysql_query is binary unsafe, use mysql_real_query */
 #if MYSQL_VERSION_ID > 32199
 	if (mysql_real_query(&mysql->conn, Z_STRVAL_PP(query), Z_STRLEN_PP(query))!=0) {
+		/* check possible error */
+		if (MySG(trace_mode)){
+			if (mysql_errno(&mysql->conn)){
+				php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, mysql_error(&mysql->conn)); 
+			}
+		}
 		RETURN_FALSE;
 	}
 #else
 	if (mysql_query(&mysql->conn, Z_STRVAL_PP(query))!=0) {
+		/* check possible error */
+		if (MySG(trace_mode)){
+			if (mysql_errno(&mysql->conn)){
+				php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, mysql_error(&mysql->conn)); 
+			}
+		}
 		RETURN_FALSE;
 	}
 #endif
@@ -1243,6 +1298,7 @@ static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link
 			RETURN_TRUE;
 		}
 	}
+	MySG(result_allocated)++;
 	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
 	if (use_store == MYSQL_USE_RESULT) {
 		mysql->active_result_id = Z_LVAL_P(return_value);
@@ -1323,8 +1379,8 @@ PHP_FUNCTION(mysql_db_query)
 			break;
 	}
 	
-	if (!strcasecmp(get_active_function_name(TSRMLS_C), "mysql")) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated; use mysql_query()");
+	if (MySG(trace_mode) || !strcasecmp(get_active_function_name(TSRMLS_C), "mysql")) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated; use mysql_query() instead.");
 	}
 	
 	php_mysql_do_query_general(query, mysql_link, id, db, MYSQL_STORE_RESULT, return_value TSRMLS_CC);
@@ -1612,6 +1668,10 @@ PHP_FUNCTION(mysql_escape_string)
 	Z_STRVAL_P(return_value) = (char *) emalloc(Z_STRLEN_PP(str)*2+1);
 	Z_STRLEN_P(return_value) = mysql_escape_string(Z_STRVAL_P(return_value), Z_STRVAL_PP(str), Z_STRLEN_PP(str));
 	Z_TYPE_P(return_value) = IS_STRING;
+
+	if (MySG(trace_mode)){
+		php_error_docref("function.mysql-real-escape-string" TSRMLS_CC, E_WARNING, "This function is deprecated; use mysql_real_escape_string() instead.");
+	}
 
 }
 /* }}} */
