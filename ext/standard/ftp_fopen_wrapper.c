@@ -83,10 +83,11 @@ static inline int get_ftp_result(php_stream *stream, char *buffer, size_t buffer
 	while (php_stream_gets(stream, buffer, buffer_size-1) &&
 		   !(isdigit((int) buffer[0]) && isdigit((int) buffer[1]) &&
 			 isdigit((int) buffer[2]) && buffer[3] == ' '));
-
 	return strtol(buffer, NULL, 10);
 }
 #define GET_FTP_RESULT(stream)	get_ftp_result((stream), tmp_line, sizeof(tmp_line) TSRMLS_CC)
+
+#define FTPS_ENCRYPT_DATA 1
 
 static int php_stream_ftp_stream_stat(php_stream_wrapper *wrapper,
 		php_stream *stream,
@@ -118,13 +119,13 @@ php_stream_wrapper php_stream_ftp_wrapper =	{
  */
 php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
-	php_stream *stream=NULL;
+	php_stream *stream=NULL, *datastream=NULL;
 	php_url *resource=NULL;
 	char tmp_line[512];
 	unsigned short portno;
 	char *scratch;
 	int result;
-	int i;
+	int i, use_ssl, use_ssl_on_data=0;
 	char *tpath, *ttpath;
 	size_t file_size = 0;
 
@@ -136,6 +137,8 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	resource = php_url_parse((char *) path);
 	if (resource == NULL || resource->path == NULL)
 		return NULL;
+
+	use_ssl = resource->scheme && (strlen(resource->scheme) > 3) && resource->scheme[3] == 's';
 
 	/* use port 21 if one wasn't specified */
 	if (resource->port == 0)
@@ -154,6 +157,62 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		php_stream_notify_error(context, PHP_STREAM_NOTIFY_FAILURE, tmp_line, result);
 		goto errexit;
 	}
+
+#if HAVE_OPENSSL_EXT
+	if (use_ssl)	{
+	
+		/* send the AUTH TLS request name */
+		php_stream_write_string(stream, "AUTH TLS\r\n");
+
+		/* get the response */
+		result = GET_FTP_RESULT(stream);
+		if (result != 234) {
+			/* AUTH TLS not supported try AUTH SSL */
+			php_stream_write_string(stream, "AUTH SSL\r\n");
+			
+			/* get the response */
+			result = GET_FTP_RESULT(stream);
+			if (result != 334) {
+				use_ssl = 0;
+			}
+		} else {
+			/* encrypt data etc */
+
+
+		}
+
+	}
+	
+	if (use_ssl) {
+		if (use_ssl && php_stream_sock_ssl_activate_with_method(stream, 1, SSLv23_method()) == FAILURE)	{
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to activate SSL mode");
+			php_stream_close(stream);
+			stream = NULL;
+			goto errexit;
+		}
+	
+		/* set PBSZ to 0 */
+		php_stream_write_string(stream, "PBSZ 0\r\n");
+
+		/* ignore the response */
+		result = GET_FTP_RESULT(stream);
+		
+		/* set data connection protection level */
+#if FTPS_ENCRYPT_DATA
+		php_stream_write_string(stream, "PROT P\r\n");
+
+		/* get the response */
+		result = GET_FTP_RESULT(stream);
+		use_ssl_on_data = result >= 200 && result<=299;
+#else
+		php_stream_write_string(stream, "PROT C\r\n");
+
+		/* get the response */
+		result = GET_FTP_RESULT(stream);
+#endif
+	}
+
+#endif
 
 	/* send the user name */
 	php_stream_write_string(stream, "USER ");
@@ -237,7 +296,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 
 	/* set up the passive connection */
 
-    /* We try EPSV first, needed for IPv6 and works on some IPv4 servers */
+	/* We try EPSV first, needed for IPv6 and works on some IPv4 servers */
 	php_stream_write_string(stream, "EPSV\r\n");
 	result = GET_FTP_RESULT(stream);
 
@@ -308,21 +367,32 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	} else {
 		php_stream_write_string(stream, "/");
 	}
-	
-	/* close control connection */
-	php_stream_write_string(stream, "\r\nQUIT\r\n");
-	php_stream_close(stream);
+	php_stream_write_string(stream, "\r\n");
+
+	/* close control connection if not in ssl mode */
+	if (!use_ssl) {
+		php_stream_write_string(stream, "QUIT\r\n");
+		php_stream_close(stream);
+	}
 
 	/* open the data channel */
-	stream = php_stream_sock_open_host(resource->host, portno, SOCK_STREAM, 0, 0);
-	if (stream == NULL)
+	datastream = php_stream_sock_open_host(resource->host, portno, SOCK_STREAM, 0, 0);
+	if (datastream == NULL)
 		goto errexit;
 
-	php_stream_context_set(stream, context);
+	php_stream_context_set(datastream, context);
 	php_stream_notify_progress_init(context, 0, file_size);
 
+	if (use_ssl_on_data && php_stream_sock_ssl_activate_with_method(datastream, 1, SSLv23_method()) == FAILURE)	{
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to activate SSL mode");
+		php_stream_close(datastream);
+		datastream = NULL;
+		goto errexit;
+	}
+
+
 	php_url_free(resource);
-	return stream;
+	return datastream;
 
  errexit:
 	php_url_free(resource);
