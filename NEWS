@@ -1,6 +1,12 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- mnoGoSearch module example updates for 3.2.x compatibility
+- Some mnogosearch-3.2.x compilation bugs fixes.
+  Make crosswords and weight sections work with mnogosearch-3.2.x
+  UDM_PARAM_HLBEG, UDM_PARAM_HLEND mnoGoSearch Agent parameters
+  has been added (gluke)
+- Fix bug 13885 (gmdate timezone handling on windows) (jmoore)
 - Fix behaviour of strtok. Bug 13866 (jmoore)
 - Made fbsql_num_rows() return the correct value on all select statements.
   (Frank)
