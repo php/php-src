@@ -156,7 +156,7 @@ AC_DEFUN(PHP_GD_T1LIB,[
         -L$T1_DIR/lib
       ])
     else
-      AC_MSG_ERROR(Your t1lib distribution is not installed correctly. Please reinstall it.) 
+      AC_MSG_ERROR(Your T1lib distribution is not installed correctly. Please reinstall it.) 
     fi
   fi
 ])
