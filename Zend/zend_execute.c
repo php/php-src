@@ -330,6 +330,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 					if (!return_value_used && type == IS_TMP_VAR) {
 						zval_dtor(value);
 					}
+					return;
 					break;
 				}
 			case IS_STRING_OFFSET: {
