@@ -317,6 +317,11 @@ PHP_FUNCTION(stream_socket_recvfrom)
 		ZVAL_NULL(zremote);
 		Z_STRLEN_P(zremote) = 0;
 	}
+
+	if (to_read <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0.");
+		RETURN_FALSE;
+	}
 	
 	read_buf = emalloc(to_read + 1);
 	
