@@ -71,6 +71,7 @@
 #include "mbregex.h"
 #endif
 
+#if defined(HAVE_MBSTR_JA)
 static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 	mbfl_no_encoding_ascii,
 	mbfl_no_encoding_jis,
@@ -78,6 +79,35 @@ static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 	mbfl_no_encoding_euc_jp,
 	mbfl_no_encoding_sjis
 };
+#endif
+
+
+#if defined(HAVE_MBSTR_CN) & !defined(HAVE_MBSTR_JA)
+static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
+	mbfl_no_encoding_ascii,
+	mbfl_no_encoding_utf8,
+	mbfl_no_encoding_euc_cn,
+	mbfl_no_encoding_cp936
+};
+#endif
+
+#if defined(HAVE_MBSTR_TW) & !defined(HAVE_MBSTR_JA)
+static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
+	mbfl_no_encoding_ascii,
+	mbfl_no_encoding_utf8,
+	mbfl_no_encoding_euc_tw,
+	mbfl_no_encoding_big5
+};
+#endif
+
+#if defined(HAVE_MBSTR_KR) & !defined(HAVE_MBSTR_JA)
+static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
+	mbfl_no_encoding_ascii,
+	mbfl_no_encoding_utf8,
+	mbfl_no_encoding_euc_kr,
+	mbfl_no_encoding_uhc
+};
+#endif
 
 static const int php_mbstr_default_identify_list_size = sizeof(php_mbstr_default_identify_list)/sizeof(enum mbfl_no_encoding);
 
@@ -525,10 +555,30 @@ PHP_INI_END()
 static void
 php_mbstring_init_globals(zend_mbstring_globals *pglobals TSRMLS_DC)
 {
+#if defined(HAVE_MBSTR_CN) & !defined(HAVE_MBSTR_JA)
+	MBSTRG(language) = mbfl_no_language_chinese;
+	MBSTRG(current_language) = mbfl_no_language_chinese;
+	MBSTRG(internal_encoding) = mbfl_no_encoding_euc_cn;
+	MBSTRG(current_internal_encoding) = mbfl_no_encoding_euc_cn;
+#endif
+#if defined(HAVE_MBSTR_TW) & !defined(HAVE_MBSTR_JA)
+	MBSTRG(language) = mbfl_no_language_chinese;
+	MBSTRG(current_language) = mbfl_no_language_chinese;
+	MBSTRG(internal_encoding) = mbfl_no_encoding_euc_tw;
+	MBSTRG(current_internal_encoding) = mbfl_no_encoding_euc_tw;
+#endif
+#if defined(HAVE_MBSTR_KR) & !defined(HAVE_MBSTR_JA)
+	MBSTRG(language) = mbfl_no_language_chinese;
+	MBSTRG(current_language) = mbfl_no_language_korean;
+	MBSTRG(internal_encoding) = mbfl_no_encoding_euc_kr;
+	MBSTRG(current_internal_encoding) = mbfl_no_encoding_euc_kr;
+#endif
+#if defined(HAVE_MBSTR_JA)
 	MBSTRG(language) = mbfl_no_language_japanese;
 	MBSTRG(current_language) = mbfl_no_language_japanese;
 	MBSTRG(internal_encoding) = mbfl_no_encoding_euc_jp;
 	MBSTRG(current_internal_encoding) = mbfl_no_encoding_euc_jp;
+#endif
 	MBSTRG(http_output_encoding) = mbfl_no_encoding_pass;
 	MBSTRG(current_http_output_encoding) = mbfl_no_encoding_pass;
 	MBSTRG(http_input_identify) = mbfl_no_encoding_invalid;
@@ -724,12 +774,24 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 PHP_MINFO_FUNCTION(mbstring)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Multibyte (Japanese) Support", "enabled");
+	php_info_print_table_header(2, "Multibyte Support", "enabled");
+#if defined(HAVE_MBSTR_JA)
+	php_info_print_table_row(2, "japanese support", "enabled");	
+#endif
+#if defined(HAVE_MBSTR_CN)
+	php_info_print_table_row(2, "simplified chinese support", "enabled");	
+#endif
+#if defined(HAVE_MBSTR_TW)
+	php_info_print_table_row(2, "traditional chinese support", "enabled");	
+#endif
+#if defined(HAVE_MBSTR_KR)
+	php_info_print_table_row(2, "korean support", "enabled");	
+#endif
 #if defined(MBSTR_ENC_TRANS)
 	php_info_print_table_row(2, "http input encoding translation", "enabled");	
 #endif
 #if defined(HAVE_MBREGEX)
-	php_info_print_table_row(2, "multibyte regex support", "enabled");	
+	php_info_print_table_row(2, "multibyte (japanese) regex support", "enabled");	
 #endif
 	php_info_print_table_end();
 
