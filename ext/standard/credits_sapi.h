@@ -15,6 +15,8 @@ CREDIT_LINE("Apache 1.3", "Rasmus Lerdorf, Zeev Suraski, Stig Bakken, David Skla
 CREDIT_LINE("Apache 2.0", "Sascha Schumann");
 CREDIT_LINE("Caudium / Roxen", "David Hedbor");
 CREDIT_LINE("CGI", "Rasmus Lerdorf, Stig Bakken");
+CREDIT_LINE("CLI", "Rasmus Lerdorf, Stig Bakken, Edin Kadribasic");
+CREDIT_LINE("fastcgi", "Ben Mansell");
 CREDIT_LINE("fhttpd", "Alex Belits");
 CREDIT_LINE("ISAPI", "Andi Gutmans, Zeev Suraski");
 CREDIT_LINE("Java Servlet", "Sam Ruby");
@@ -22,3 +24,5 @@ CREDIT_LINE("NSAPI", "Jayakumar Muthukumarasamy");
 CREDIT_LINE("phttpd", "Thies C. Arntzen");
 CREDIT_LINE("pi3web", "Holger Zimmermann");
 CREDIT_LINE("thttpd", "Sascha Schumann");
+CREDIT_LINE("tux", "Sascha Schumann");
+CREDIT_LINE("WebJames", "Alex Waugh");
