@@ -20,6 +20,7 @@
 /* $Id$ */
 
 /* Synced with php3 revision 1.121 1999-06-18 [ssb] */
+/* Synced with php3 revision 1.133 1999-07-21 [sas] */
 
 #include "php.h"
 #include "php_globals.h"
@@ -69,6 +70,9 @@ extern int le_fp;
 #endif
 
 #define FREE_SOCK if(socketd >= 0) close(socketd); efree(sock); if (key) efree(key)
+
+#define SEARCHCR \
+	p = memchr(READPTR(sock), '\n', MIN(TOREAD(sock), maxlen - 1));
 
 #if WIN32|WINNT
 #define EWOULDBLOCK WSAEWOULDBLOCK
@@ -233,6 +237,7 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	int socketd = -1;
 	struct timeval timeout = { 60, 0 };
 	unsigned short portno;
+	unsigned long conv;
 	char *key = NULL;
 	PLS_FETCH();
 	
@@ -242,8 +247,10 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	}
 	switch(arg_count) {
 		case 5:
-			convert_to_long(args[4]);
-			timeout.tv_sec = args[4]->value.lval;
+			convert_to_double(args[4]);
+			conv = args[4]->value.dval * 1000000.0;
+			timeout.tv_sec = conv / 1000000;
+			timeout.tv_usec = conv % 1000000;
 			/* fall-through */
 		case 4:
 			if(!ParameterPassedByReference(ht,4)) {
@@ -271,7 +278,7 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 
 	if (persistent && _php3_hash_find(&PG(ht_fsock_keys), key, strlen(key) + 1,
 				(void *) &sockp) == SUCCESS) {
-		efree(key);
+		FREE_SOCK;
 		*sock = *sockp;
 		RETURN_LONG(php3_list_insert(sock, wsa_fp));
 	}
@@ -355,14 +362,14 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 }
 /* }}} */
 
-/* {{{ proto int fsockopen(string hostname, int port [, int errno [, string errstr]])
+/* {{{ proto int fsockopen(string hostname, int port [, int errno [, string errstr [, double timeout]]])
    Open Internet or Unix domain socket connection */
 PHP_FUNCTION(fsockopen) 
 {
 	_php3_fsockopen(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
-/* {{{ proto int pfsockopen(string hostname, int port [, int errno [, string errstr]])
+/* {{{ proto int pfsockopen(string hostname, int port [, int errno [, string errstr [, double timeout]]])
    Open persistent Internet or Unix domain socket connection */
 PHP_FUNCTION(pfsockopen) 
 {
@@ -370,40 +377,7 @@ PHP_FUNCTION(pfsockopen)
 }
 /* }}} */
 
-/* Known issues with the socket buffering code:
- * - does not work reliably with persistent sockets yet
- *   (buffered data is not persistent)
- * - php3_fopen_url_wrapper() is still doing single-byte lookahead/read
- */
-
-static php3i_sockbuf *_php3_sock_findsock(int socket)
-{
-	/* FIXME: O(n) could be improved */
-
-	php3i_sockbuf *buf = NULL, *tmp;
-	
-	for(tmp = phpsockbuf; tmp; tmp = tmp->next)
-		if(tmp->socket == socket) {
-			buf = tmp;
-			break;
-		}
-
-	return buf;
-}
-
-int _php3_sock_eof(int socket)
-{
-	php3i_sockbuf *sockbuf;
-	int ret = 0;
-
-	sockbuf = _php3_sock_findsock(socket);
-	if(sockbuf) {
-		ret = (sockbuf->writepos - sockbuf->readpos) == 0 ? 1 : 0;
-	}
-	return ret;
-}
-
-#define CHUNK_SIZE 2048
+#define CHUNK_SIZE 8192
 #define SOCK_DESTROY(sock) \
 		if(sock->readbuf) pefree(sock->readbuf, sock->persistent); \
 		if(sock->prev) sock->prev->next = sock->next; \
@@ -438,12 +412,12 @@ static php3i_sockbuf *_php3_sock_find(int socket)
 {
 	php3i_sockbuf *buf = NULL, *tmp;
 
-	for (tmp = phpsockbuf; tmp; tmp = tmp->next) {
-		if (tmp->socket == socket) {
+	for(tmp = phpsockbuf; tmp; tmp = tmp->next) 
+		if(tmp->socket == socket) {
 			buf = tmp;
 			break;
 		}
-	}
+
 	return buf;
 }
 
@@ -454,9 +428,8 @@ static php3i_sockbuf *_php3_sock_create(int socket)
 
 	sock = pecalloc(sizeof(*sock), 1, persistent);
 	sock->socket = socket;
-	if ((sock->next = phpsockbuf)) {
+	if((sock->next = phpsockbuf)) 
 		phpsockbuf->prev = sock;
-	}
 	sock->persistent = persistent;
 	sock->is_blocked = 1;
 	sock->chunk_size = def_chunk_size;
@@ -471,9 +444,8 @@ size_t _php3_sock_set_def_chunk_size(size_t size)
 
 	old = def_chunk_size;
 
-	if (size <= CHUNK_SIZE || size > 0) {
+	if(size <= CHUNK_SIZE || size > 0) 
 		def_chunk_size = size;
-	}
 
 	return old;
 }
@@ -484,7 +456,7 @@ int _php3_sock_destroy(int socket)
 	php3i_sockbuf *sock;
 
 	sock = _php3_sock_find(socket);
-	if (sock) {
+	if(sock) {
 		ret = 1;
 		SOCK_DESTROY(sock);
 	}
@@ -492,24 +464,31 @@ int _php3_sock_destroy(int socket)
 	return ret;
 }
 
+#if !defined(WIN32) && !defined(WINNT)
+#undef closesocket
+#define closesocket close
+#endif
+
+#ifndef HAVE_SHUTDOWN
+#undef shutdown
+#define shutdown
+#endif
+
+#define SOCK_CLOSE(s) shutdown(s, 0); closesocket(s)
+
 int _php3_sock_close(int socket)
 {
 	int ret = 0;
 	php3i_sockbuf *sock;
 
 	sock = _php3_sock_find(socket);
-	if (sock) {
-		if (!sock->persistent) {
-#if HAVE_SHUTDOWN
-			shutdown(sock->socket, 0);
-#endif
-#if WIN32||WINNT
-			closesocket(sock->socket);
-#else
-			close(sock->socket);
-#endif
+	if(sock) {
+		if(!sock->persistent) {
+			SOCK_CLOSE(sock->socket);
 			SOCK_DESTROY(sock);
 		}
+	} else {
+		SOCK_CLOSE(socket);
 	}
 
 	return ret;
@@ -524,42 +503,54 @@ static void _php3_sock_wait_for_data(php3i_sockbuf *sock)
 	FD_ZERO(&fdr);
 	FD_SET(sock->socket, &fdr);
 
-	while (1) {
+	while(1) {
 		tfdr = fdr;
-		if(select(sock->socket + 1, &tfdr, NULL, NULL, NULL) == 1) {
+		if(select(sock->socket + 1, &tfdr, NULL, NULL, NULL) == 1) 
 			break;
-		}
 	}
 }
 
-static size_t _php3_sock_read_limited(php3i_sockbuf *sock, int maxread)
+static size_t _php3_sock_read_internal(php3i_sockbuf *sock)
 {
 	char buf[CHUNK_SIZE];
 	int nr_bytes;
 	size_t nr_read = 0;
+	
+	/* For blocking sockets, we wait until there is some
+	   data to read (real data or EOF)
+	   
+	   Otherwise, recv() may time out and return 0 and
+	   therefore sock->eof would be set errornously.
+	 */
 
-	if (sock->eof || TOREAD(sock) >= maxread) {
-		return 0;
-	}
-	if (sock->is_blocked) {
+	
+	if(sock->is_blocked) {
 		_php3_sock_wait_for_data(sock);
 	}
 
+	/* read at a maximum sock->chunk_size */
 	nr_bytes = recv(sock->socket, buf, sock->chunk_size, 0);
-	if (nr_bytes > 0) {
-		if (sock->writepos + nr_bytes > sock->readbuflen) {
+	if(nr_bytes > 0) {
+		if(sock->writepos + nr_bytes > sock->readbuflen) {
 			sock->readbuflen += sock->chunk_size;
 			sock->readbuf = perealloc(sock->readbuf, sock->readbuflen,
-                                      sock->persistent);
+					sock->persistent);
 		}
 		memcpy(WRITEPTR(sock), buf, nr_bytes);
 		sock->writepos += nr_bytes;
 		nr_read = nr_bytes;
-	} else if (nr_bytes == 0 || (nr_bytes < 0 && errno != EWOULDBLOCK)) {
+	} else if(nr_bytes == 0 || (nr_bytes < 0 && errno != EWOULDBLOCK)) {
 		sock->eof = 1;
 	}
 
 	return nr_read;
+}
+
+static void _php3_sock_read_total(php3i_sockbuf *sock, size_t maxread)
+{
+	while(!sock->eof && TOREAD(sock) < maxread) {
+		_php3_sock_read_internal(sock);
+	}
 }
 
 static size_t _php3_sock_read(php3i_sockbuf *sock)
@@ -567,9 +558,9 @@ static size_t _php3_sock_read(php3i_sockbuf *sock)
 	size_t nr_bytes;
 	size_t nr_read = 0;
 	int i;
-
-	for (i = 0; !sock->eof && i < MAX_CHUNKS_PER_READ; i++) {
-		nr_bytes = _php3_sock_read_limited(sock, CHUNK_SIZE);
+	
+	for(i = 0; !sock->eof && i < MAX_CHUNKS_PER_READ; i++) {
+		nr_bytes = _php3_sock_read_internal(sock);
 		if(nr_bytes == 0) break;
 		nr_read += nr_bytes;
 	}
@@ -583,64 +574,60 @@ int _php3_sock_set_blocking(int socket, int mode)
 	SOCK_FIND(sock, socket);
 
 	old = sock->is_blocked;
-
+	
 	sock->is_blocked = mode;
-
+	
 	return old;
 }
 
 #define SOCK_FIND_AND_READ_MAX(max) \
-      SOCK_FIND(sock, socket); \
-      if(sock->is_blocked) _php3_sock_read_limited(sock, max); else _php3_sock_read(sock)
+	SOCK_FIND(sock, socket); \
+	if(sock->is_blocked) _php3_sock_read_total(sock, max); else _php3_sock_read(sock)
 
 /* {{{ _php3_sock_fgets() */
 /*
- * FIXME: fgets depends on '\n' as line delimiters
+ * FIXME: fgets depends on '\n' as line delimiter
  */
 char *_php3_sock_fgets(char *buf, size_t maxlen, int socket)
 {
 	char *p = NULL;
 	char *ret = NULL;
 	size_t amount = 0;
-	size_t nr_read;
-	size_t nr_toread;
 	SOCK_FIND(sock, socket);
 
-	if (maxlen < 0) {
-		return ret;
-	}
+	SEARCHCR;
 
-	if (sock->is_blocked) {
-		nr_toread = 0;
-		for (nr_read = 1; !sock->eof && nr_read < maxlen; ) {
-			nr_read += _php3_sock_read_limited(sock, nr_toread);
-			if ((p = memchr(READPTR(sock), '\n', TOREAD(sock))) != NULL) {
-				break;
+	if(!p) {
+		if(sock->is_blocked) {
+			while(!p && !sock->eof && TOREAD(sock) < maxlen - 1) {
+				_php3_sock_read_internal(sock);
+				SEARCHCR;
 			}
-			nr_toread = 512;
+		} else {
+			_php3_sock_read(sock);
+			SEARCHCR;
 		}
-	} else {
-		_php3_sock_read(sock);
-		p = memchr(READPTR(sock), '\n', MIN(TOREAD(sock), maxlen - 1));
 	}
 
-	if (p) {
+	
+	if(p) {
 		amount = (ptrdiff_t) p - (ptrdiff_t) READPTR(sock) + 1;
 	} else {
-		amount = MIN(TOREAD(sock), maxlen - 1);
+		amount = TOREAD(sock);
 	}
+	
+	amount = MIN(amount, maxlen - 1);
 
-	if (amount > 0) {
+	if(amount > 0) {
 		memcpy(buf, READPTR(sock), amount);
 		sock->readpos += amount;
 	}
 	buf[amount] = '\0';
-
-	/* signal error only, if we don't return data from this call and
+	
+	/* signal error only, if we don't return data from this call and 
 	   if there is no data to read and if the eof flag is set */
-	if (amount || TOREAD(sock) || !sock->eof) {
+	if(amount || TOREAD(sock) || !sock->eof)
 		ret = buf;
-	}
 
 	return ret;
 }
@@ -659,7 +646,7 @@ int _php3_sock_fgetc(int socket)
 	int ret = EOF;
 	SOCK_FIND_AND_READ_MAX(1);
 
-	if (TOREAD(sock) > 0) {
+	if(TOREAD(sock) > 0) {
 		ret = *READPTR(sock);
 		sock->readpos++;
 	}
@@ -672,9 +659,11 @@ int _php3_sock_feof(int socket)
 	int ret = 0;
 	SOCK_FIND(sock, socket);
 
-	if (!TOREAD(sock) && sock->eof) {
+	if(!sock->is_blocked)
+		_php3_sock_read(sock);
+	
+	if(!TOREAD(sock) && sock->eof) 
 		ret = 1;
-	}
 
 	return ret;
 }
@@ -686,12 +675,11 @@ size_t _php3_sock_fread(char *ptr, size_t size, int socket)
 	size_t ret = 0;
 	SOCK_FIND_AND_READ_MAX(size);
 
-	if (size < 0) {
+	if(size < 0) 
 		return ret;
-	}
 
 	ret = MIN(TOREAD(sock), size);
-	if (ret) {
+	if(ret) {
 		memcpy(ptr, READPTR(sock), ret);
 		sock->readpos += ret;
 	}
