@@ -255,7 +255,13 @@ ZEND_DECLARE_MODULE_GLOBALS(fbsql)
 ZEND_GET_MODULE(fbsql)
 #endif
 
-#define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING, "FrontBase:  A link to the server could not be established"); RETURN_FALSE; } }
+#define CHECK_LINK(link) { \
+	if (link==-1) { \
+		if (FB_SQL_G(generateWarnings)) \
+			php_error(E_WARNING, "FrontBase:  A link to the server could not be established"); \
+		RETURN_FALSE; \
+	} \
+}
 
 static void phpfbReleaseResult (zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void phpfbReleaseLink (zend_rsrc_list_entry *rsrc TSRMLS_DC);
@@ -515,13 +521,15 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 
 			if ((FB_SQL_G(maxLinks) != -1 && FB_SQL_G(linkCount) == FB_SQL_G(maxLinks)))
 			{
-				php_error(E_WARNING, "FrontBase link limit %d exceeded ", FB_SQL_G(maxLinks));
+				if (FB_SQL_G(generateWarnings))
+					php_error(E_WARNING, "FrontBase link limit %d exceeded ", FB_SQL_G(maxLinks));
 				RETURN_FALSE;
 			}
 
 			if ((FB_SQL_G(maxPersistant) != -1 && FB_SQL_G(persistantCount) == FB_SQL_G(maxPersistant)))
 			{
-				php_error(E_WARNING, "FrontBase persistant link limit %d exceeded ", FB_SQL_G(maxPersistant));
+				if (FB_SQL_G(generateWarnings))
+					php_error(E_WARNING, "FrontBase persistant link limit %d exceeded ", FB_SQL_G(maxPersistant));
 				RETURN_FALSE;
 			}
 
@@ -562,7 +570,8 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 
 		if ((FB_SQL_G(maxLinks) != -1 && FB_SQL_G(linkCount) == FB_SQL_G(maxLinks)))
 		{
-			php_error(E_WARNING, "FrontBase link limit %d exceeded ", FB_SQL_G(maxLinks));
+			if (FB_SQL_G(generateWarnings))
+				php_error(E_WARNING, "FrontBase link limit %d exceeded ", FB_SQL_G(maxLinks));
 			RETURN_FALSE;
 		}
 
@@ -709,7 +718,8 @@ static int php_fbsql_select_db(char *databaseName, PHPFBLink *link TSRMLS_DC)
 			c = fbcdcConnectToDatabase(databaseName, link->hostName, link->databasePassword);
 		if (c == NULL)
 		{
-			php_error(E_WARNING, fbcdcClassErrorMessage());
+			if (FB_SQL_G(generateWarnings))
+				php_error(E_WARNING, fbcdcClassErrorMessage());
 			return 0;
 		}
 		md = fbcdcCreateSession(c, "PHP", link->userName, link->userPassword, link->userName);
@@ -717,10 +727,15 @@ static int php_fbsql_select_db(char *databaseName, PHPFBLink *link TSRMLS_DC)
 		{
 			FBCErrorMetaData* emd = fbcdcErrorMetaData(c, md);
 			char*             emg = fbcemdAllErrorMessages(emd);
-			if (emg)
-				php_error(E_WARNING, emg);
-			else
-				php_error(E_WARNING, "No message");
+			if (FB_SQL_G(generateWarnings))
+			{
+				if (emg)
+					php_error(E_WARNING, emg);
+				else
+					php_error(E_WARNING, "No message");
+			}
+			link->errorText = strdup(emg);
+			link->errorNo  = fbcemdErrorCodeAtIndex(emd, 0);;
 			free(emg);
 			fbcemdRelease(emd);
 			fbcmdRelease(md);
@@ -1276,8 +1291,10 @@ PHP_FUNCTION(fbsql_select_db)
 	{
 		int port = atoi(name);
 		if (port == 0 || port > 64535) {
-			php_error(E_WARNING, "Cannot connect to FBExec for database '%s'", name);
-			php_error(E_WARNING, fbcehClassErrorMessage());
+			if (FB_SQL_G(generateWarnings)) {
+				php_error(E_WARNING, "Cannot connect to FBExec for database '%s'", name);
+				php_error(E_WARNING, fbcehClassErrorMessage());
+			}
 			RETURN_FALSE;
 		}
 	}
@@ -1390,13 +1407,15 @@ PHP_FUNCTION(fbsql_create_db)
 		else if (status == FBRunning ) txt = "running";
 		else if (status == FBStopping) txt = "stopping";
 		else if (status == FBNoExec  ) txt = "no exec";
-		php_error(E_WARNING, "Could not create %s@%s, database is %s", databaseName, phpLink->hostName, txt);
+		if (FB_SQL_G(generateWarnings))
+			php_error(E_WARNING, "Could not create %s@%s, database is %s", databaseName, phpLink->hostName, txt);
 		RETURN_FALSE;
 	}
 	if (!fbcehCreateDatabaseNamedWithOptions(phpLink->execHandler, databaseName, ""))
 	{
 		char* error = fbechErrorMessage(phpLink->execHandler);
-		php_error(E_WARNING, "Could not create %s@%s. %s.", databaseName, phpLink->hostName, error);
+		if (FB_SQL_G(generateWarnings))
+			php_error(E_WARNING, "Could not create %s@%s. %s.", databaseName, phpLink->hostName, error);
 		RETURN_FALSE;
 	}
 	for (i=0; i < 20; i++)
@@ -1411,7 +1430,8 @@ PHP_FUNCTION(fbsql_create_db)
 	}
 	if (status != FBRunning)
 	{
-		php_error(E_WARNING, "Database %s@%s created -- status unknown", databaseName, phpLink->hostName);
+		if (FB_SQL_G(generateWarnings))
+			php_error(E_WARNING, "Database %s@%s created -- status unknown", databaseName, phpLink->hostName);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1461,14 +1481,16 @@ PHP_FUNCTION(fbsql_drop_db)
 		else if (status == FBRunning      ) txt = "running";
 		else if (status == FBStopping     ) txt = "stopping";
 		else if (status == FBNoExec       ) txt = "no exec";
-		php_error(E_WARNING, "Could not drop %s@%s, database is %s.", databaseName, phpLink->hostName, txt);
+		if (FB_SQL_G(generateWarnings))
+			php_error(E_WARNING, "Could not drop %s@%s, database is %s.", databaseName, phpLink->hostName, txt);
 		RETURN_FALSE;
 	}
 
 	if (! fbcehDeleteDatabaseNamed (phpLink->execHandler, databaseName))
 	{
 		char* error = fbechErrorMessage(phpLink->execHandler);
-		php_error(E_WARNING, "Could not drop %s@%s. %s.", databaseName, phpLink->hostName, error);
+		if (FB_SQL_G(generateWarnings))
+			php_error(E_WARNING, "Could not drop %s@%s. %s.", databaseName, phpLink->hostName, error);
 		RETURN_FALSE;
 	}
 	for (i=0; i < 20; i++)
@@ -1483,7 +1505,8 @@ PHP_FUNCTION(fbsql_drop_db)
 	}
 	if (status != FBUnknownStatus)
 	{
-		php_error(E_WARNING, "Database %s@%s dropped -- status unknown", databaseName, phpLink->hostName);
+		if (FB_SQL_G(generateWarnings))
+			php_error(E_WARNING, "Database %s@%s dropped -- status unknown", databaseName, phpLink->hostName);
 		RETURN_FALSE;
 	}
 }
@@ -1531,7 +1554,8 @@ PHP_FUNCTION(fbsql_start_db)
 		else if (status == FBRunning ) txt = "running";
 		else if (status == FBStopping) txt = "stopping";
 		else if (status == FBNoExec  ) txt = "no exec";
-		php_error(E_WARNING, "Could not start %s@%s, as database is %s.", databaseName, phpLink->hostName, txt);
+		if (FB_SQL_G(generateWarnings))
+			php_error(E_WARNING, "Could not start %s@%s, as database is %s.", databaseName, phpLink->hostName, txt);
 		RETURN_FALSE;
 	}
 
@@ -1540,7 +1564,8 @@ PHP_FUNCTION(fbsql_start_db)
 		if (!fbcehStartDatabaseNamed (phpLink->execHandler, databaseName))
 		{
 			char* error = fbechErrorMessage(phpLink->execHandler);
-			php_error(E_WARNING, "Could not start %s@%s. %s.", databaseName, phpLink->hostName, error);
+			if (FB_SQL_G(generateWarnings))
+				php_error(E_WARNING, "Could not start %s@%s. %s.", databaseName, phpLink->hostName, error);
 			RETURN_FALSE;
 		}
 	}
@@ -1557,7 +1582,8 @@ PHP_FUNCTION(fbsql_start_db)
 	}
 	if (status != FBRunning)
 	{
-		php_error(E_WARNING, "Database %s@%s started -- status unknown", databaseName, phpLink->hostName);
+		if (FB_SQL_G(generateWarnings))
+			php_error(E_WARNING, "Database %s@%s started -- status unknown", databaseName, phpLink->hostName);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1604,7 +1630,8 @@ PHP_FUNCTION(fbsql_stop_db)
 /*	printf("Stop db %x\n", phpDatabase->connection); */
 	if (!fbcdcStopDatabase(phpLink->connection))
 	{
-		php_error(E_WARNING, "Cannot stop database %s@%s", databaseName, phpLink->hostName);
+		if (FB_SQL_G(generateWarnings))
+			php_error(E_WARNING, "Cannot stop database %s@%s", databaseName, phpLink->hostName);
 		RETURN_FALSE;
 	}
 
@@ -1696,7 +1723,7 @@ int mdOk(PHPFBLink* link, FBCMetaData* md, char* sql)
 				php_error(E_WARNING, "No message");
 		}
 		link->errorText = strdup(emg);
-		link->errorNo  = 1;
+		link->errorNo  = fbcemdErrorCodeAtIndex(emd, 0);;
 		free(emg);
 		fbcemdRelease(emd);
 		result = 0;
@@ -2325,7 +2352,7 @@ void phpfbColumnAsString (PHPFBResult* result, int column, void* data , int* len
 		break;
 
 		default:
-			php_error(E_WARNING, "Unimplemented type");
+			php_error(E_ERROR, "Unimplemented type");
 		break;
 	}
 }
@@ -2369,12 +2396,14 @@ void phpfbSqlResult(INTERNAL_FUNCTION_PARAMETERS, PHPFBResult* result, int rowIn
 	}
 	else if (!phpfbFetchRow(result, rowIndex))
 	{
-		php_error(E_WARNING, "No such row %d in result set %d", rowIndex, rowIndex);
+		if (FB_SQL_G(generateWarnings))
+			php_error(E_WARNING, "No such row %d in result set %d", rowIndex, rowIndex);
 		RETURN_FALSE;
 	}
 	else if (columnIndex >= result->columnCount)
 	{
-		php_error(E_WARNING, "No such column %d in result set %d", columnIndex, rowIndex);
+		if (FB_SQL_G(generateWarnings))
+			php_error(E_WARNING, "No such column %d in result set %d", columnIndex, rowIndex);
 		RETURN_FALSE;
 	}
 	else
@@ -2454,7 +2483,8 @@ PHP_FUNCTION(fbsql_result)
 			columnIndex = Z_LVAL_PP(field);
 			if (columnIndex < 0)
 			{
-				php_error(E_WARNING, "Illegal column index - %d", columnIndex);
+				if (FB_SQL_G(generateWarnings))
+					php_error(E_WARNING, "Illegal column index - %d", columnIndex);
 				RETURN_FALSE;
 			}
 		}
@@ -2611,6 +2641,50 @@ PHP_FUNCTION(fbsql_fetch_array)
 }
 /* }}} */
 
+static void _parse_list(zval** return_value, FBCPList* list) 
+{
+	int count = fbcplCount(list);
+	int i,j;
+
+	for (i=0; i<count; i++)
+	{
+		char* key = (char*)fbcplKeyAtIndex(list, i);
+		FBCPList* value = (FBCPList*)fbcplValueForKey(list, key);
+		if (fbcplIsDictionary(value))
+		{
+			zval *value_array; 
+
+			MAKE_STD_ZVAL(value_array);
+			array_init(value_array);
+
+			_parse_list(&value_array, value);
+			add_assoc_zval(*return_value, key, value_array);
+		}
+		else if (fbcplIsArray(value))
+		{
+			zval *value_array; 
+			int valcount = fbcplCount(value);
+
+			MAKE_STD_ZVAL(value_array);
+			array_init(value_array);
+
+			for (j=0; j<valcount; j++)
+			{
+				FBCPList* arrayValue = (FBCPList*)fbcplValueAtIndex(value, j);
+				if (fbcplIsString(arrayValue))
+					add_index_string(value_array, j, (char*)fbcplString(arrayValue), 1);
+				else {
+					_parse_list(&value_array, arrayValue);
+				}
+			}
+			add_assoc_zval(*return_value, key, value_array);
+		}
+		else if (fbcplIsString(value)) {
+			add_assoc_string(*return_value, key, (char*)fbcplString(value), 1);
+		}
+	}
+}
+
 static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
 
@@ -2642,7 +2716,8 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	rowIndex = result->rowIndex;
 	if (((result_type & FBSQL_NUM) != FBSQL_NUM) && ((result_type & FBSQL_ASSOC) != FBSQL_ASSOC))
 	{
-		php_error(E_WARNING, "Illegal result type use FBSQL_NUM, FBSQL_ASSOC, or FBSQL_BOTH.");
+		if (FB_SQL_G(generateWarnings))
+			php_error(E_WARNING, "Illegal result type use FBSQL_NUM, FBSQL_ASSOC, or FBSQL_BOTH.");
 		RETURN_FALSE;
 	}
 	if (array_init(return_value)==FAILURE)
@@ -2651,7 +2726,7 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	}
 	if (result->fetchHandle == NULL)
 	{
-		if (result->array == NULL)
+		if (result->array == NULL && result->list == NULL)
 		{
 			RETURN_FALSE;
 		}
@@ -2659,13 +2734,81 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		{
 			RETURN_FALSE;
 		}
-		if (result_type & FBSQL_NUM)
-		{
-			add_index_string(return_value, 0, estrdup(fbaObjectAtIndex(result->array, result->rowIndex)), 0);
+		if (result->list) {
+			char* key;
+			FBCPList* value;
+
+			if (result->rowCount == 0 || result->rowIndex >= result->rowCount) {
+				RETURN_FALSE;
+			}
+
+			value = (FBCPList*)fbcplValueAtIndex(result->list, result->rowIndex);
+			key = (char*)fbcplKeyAtIndex(result->list, result->rowIndex);
+			if (key && key[0] == 2)
+				key = NULL;
+
+			if (fbcplIsDictionary(value)) {
+				zval *value_array; 
+
+				MAKE_STD_ZVAL(value_array);
+				array_init(value_array);
+
+				_parse_list(&value_array, value);
+				if (result_type & FBSQL_NUM || key == NULL)
+				{
+					add_index_zval(return_value, 0, value_array);
+				}
+				if (result_type & FBSQL_ASSOC && key != NULL)
+				{
+					add_assoc_zval(return_value, key, value_array);
+				}
+			}
+			else if (fbcplIsArray(value)) {
+				zval *value_array; 
+				int valcount = fbcplCount(value);
+				int j;
+
+				MAKE_STD_ZVAL(value_array);
+				array_init(value_array);
+
+				for (j=0; j<valcount; j++)
+				{
+					FBCPList* arrayValue = (FBCPList*)fbcplValueAtIndex(value, j);
+					if (fbcplIsString(arrayValue))
+						add_index_string(value_array, j, (char*)fbcplString(arrayValue), 1);
+					else {
+						_parse_list(&value_array, arrayValue);
+					}
+				}
+				if (result_type & FBSQL_NUM || key == NULL)
+				{
+					add_index_zval(return_value, 0, value_array);
+				}
+				if (result_type & FBSQL_ASSOC && key != NULL)
+				{
+					add_assoc_zval(return_value, key, value_array);
+				}
+			}
+			else if (fbcplIsString(value)) {
+				if (result_type & FBSQL_NUM)
+				{
+					add_index_string(return_value, 0, (char*)fbcplString(value), 1);
+				}
+				if (result_type & FBSQL_ASSOC)
+				{
+					add_assoc_string(return_value, key, (char*)fbcplString(value), 1);
+				}
+			}
 		}
-		if (result_type & FBSQL_ASSOC)
-		{
-			add_assoc_string(return_value, "Database", estrdup(fbaObjectAtIndex(result->array, result->rowIndex)), 0);
+		else {
+			if (result_type & FBSQL_NUM)
+			{
+				add_index_string(return_value, 0, estrdup(fbaObjectAtIndex(result->array, result->rowIndex)), 0);
+			}
+			if (result_type & FBSQL_ASSOC)
+			{
+				add_assoc_string(return_value, "Database", estrdup(fbaObjectAtIndex(result->array, result->rowIndex)), 0);
+			}
 		}
 	}
 	else {
@@ -2745,7 +2888,8 @@ PHP_FUNCTION(fbsql_data_seek)
 
 	if (rowIndex < 0)
 	{
-		php_error(E_WARNING, "Illegal row_index (%i)", rowIndex);
+		if (FB_SQL_G(generateWarnings))
+			php_error(E_WARNING, "Illegal row_index (%i)", rowIndex);
 		RETURN_FALSE;
 	}
 
@@ -2820,7 +2964,8 @@ PHP_FUNCTION(fbsql_fetch_field)
 		column = Z_LVAL_PP(field_index);
 		if (column < 0 || column >= result->columnCount)
 		{
-			php_error(E_WARNING, "%d no such column in result", column);
+			if (FB_SQL_G(generateWarnings))
+				php_error(E_WARNING, "%d no such column in result", column);
 			RETURN_FALSE;
 		}
 	}
@@ -2876,7 +3021,8 @@ PHP_FUNCTION(fbsql_field_seek)
 		column = Z_LVAL_PP(field_index);
 		if (column < 0 || column >= result->columnCount)
 		{
-			php_error(E_WARNING, "%d no such column in result", column);
+			if (FB_SQL_G(generateWarnings))
+				php_error(E_WARNING, "%d no such column in result", column);
 			RETURN_FALSE;
 		}
 	}
@@ -2918,7 +3064,8 @@ PHP_FUNCTION(fbsql_field_name)
 		column = Z_LVAL_PP(field_index);
 		if (column < 0 || column >= result->columnCount)
 		{
-			php_error(E_WARNING, "%d no such column in result", column);
+			if (FB_SQL_G(generateWarnings))
+				php_error(E_WARNING, "%d no such column in result", column);
 			RETURN_FALSE;
 		}
 	}
@@ -2966,7 +3113,8 @@ PHP_FUNCTION(fbsql_field_table)
 		column = Z_LVAL_PP(field_index);
 		if (column < 0 || column >= result->columnCount)
 		{
-			php_error(E_WARNING, "%d no such column in result", column);
+			if (FB_SQL_G(generateWarnings))
+				php_error(E_WARNING, "%d no such column in result", column);
 			RETURN_FALSE;
 		}
 	}
@@ -3006,7 +3154,8 @@ PHP_FUNCTION(fbsql_field_len)
 		column = Z_LVAL_PP(field_index);
 		if (column < 0 || column >= result->columnCount)
 		{
-			php_error(E_WARNING, "%d no such column in result", column);
+			if (FB_SQL_G(generateWarnings))
+				php_error(E_WARNING, "%d no such column in result", column);
 			RETURN_FALSE;
 		}
 	}
@@ -3057,7 +3206,8 @@ PHP_FUNCTION(fbsql_field_type)
 		column = Z_LVAL_PP(field_index);
 		if (column < 0 || column >= result->columnCount)
 		{
-			php_error(E_WARNING, "%d no such column in result", column);
+			if (FB_SQL_G(generateWarnings))
+				php_error(E_WARNING, "%d no such column in result", column);
 			RETURN_FALSE;
 		}
 	}
@@ -3110,7 +3260,8 @@ PHP_FUNCTION(fbsql_field_flags)
 		column = Z_LVAL_PP(field_index);
 		if (column < 0 || column >= result->columnCount)
 		{
-			php_error(E_WARNING, "%d no such column in result", column);
+			if (FB_SQL_G(generateWarnings))
+				php_error(E_WARNING, "%d no such column in result", column);
 			RETURN_FALSE;
 		}
 	}
