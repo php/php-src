@@ -846,30 +846,24 @@ static int php_get_configuration_directive_for_zend(char *name, uint name_length
  */
 static void php_message_handler_for_zend(long message, void *data)
 {
+	TSRMLS_FETCH();
+
 	switch (message) {
 		case ZMSG_FAILED_INCLUDE_FOPEN: {
-				TSRMLS_FETCH();
-
 				php_error_docref("function.include" TSRMLS_CC, E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
 			}
 			break;
 		case ZMSG_FAILED_REQUIRE_FOPEN: {
-				TSRMLS_FETCH();
-
 				php_error_docref("function.require" TSRMLS_CC, E_COMPILE_ERROR, "Failed opening required '%s' (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
 			}
 			break;
 		case ZMSG_FAILED_HIGHLIGHT_FOPEN: {
-				TSRMLS_FETCH();
-
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed opening '%s' for highlighting", php_strip_url_passwd((char *) data));
 			}
 			break;
 		case ZMSG_MEMORY_LEAK_DETECTED:
 		case ZMSG_MEMORY_LEAK_REPEATED: {
 #if ZEND_DEBUG
-				TSRMLS_FETCH();
-
 				if ((EG(error_reporting)&E_WARNING) && PG(report_memleaks)) {
 					char memory_leak_buf[512];
 
@@ -895,13 +889,11 @@ static void php_message_handler_for_zend(long message, void *data)
 					fprintf(stderr, "%s", memory_leak_buf);
 #	endif
 				}
-			}
 #endif
+			}
 			break;
 		case ZMSG_MEMORY_LEAKS_GRAND_TOTAL: {
 #if ZEND_DEBUG
-				TSRMLS_FETCH();
-
 				if ((EG(error_reporting)&E_WARNING) && PG(report_memleaks)) {
 					char memory_leak_buf[512];
 
@@ -912,14 +904,13 @@ static void php_message_handler_for_zend(long message, void *data)
 					fprintf(stderr, "%s", memory_leak_buf);
 #	endif
 				}
-			}
 #endif
+			}
 			break;
 		case ZMSG_LOG_SCRIPT_NAME: {
 				struct tm *ta, tmbuf;
 				time_t curtime;
 				char *datetime_str, asctimebuf[52];
-				TSRMLS_FETCH();
 
 				time(&curtime);
 				ta = php_localtime_r(&curtime, &tmbuf);
