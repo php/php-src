@@ -162,7 +162,7 @@ PHP_FUNCTION(dio_open)
 }
 /* }}} */
 
-/* {{{ string dio_read(resource fd[, int n])
+/* {{{ proto string dio_read(resource fd[, int n])
    Read n bytes from fd and return them, if n is not specified, read 1k */
 PHP_FUNCTION(dio_read)
 {
@@ -188,7 +188,7 @@ PHP_FUNCTION(dio_read)
 }
 /* }}} */
 
-/* {{{ int dio_write(resource fd, string data[, int len])
+/* {{{ proto int dio_write(resource fd, string data[, int len])
    Write data to fd with optional truncation at length */
 PHP_FUNCTION(dio_write)
 {
