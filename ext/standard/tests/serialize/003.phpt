@@ -1,7 +1,8 @@
 --TEST--
 unserialize() floats with E notation (#18654)
---POST--
---GET--
+--INI--
+precision=12
+serialize_precision=100
 --FILE--
 <?php 
 foreach(array(1e2, 5.2e25, 85.29e-23, 9e-9) AS $value) {
