@@ -71,7 +71,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 		ALLOC_ZVAL(http_post_files);
 		array_init(http_post_files);
 		INIT_PZVAL(http_post_files);
-		zend_hash_add_ptr(&EG(symbol_table), "HTTP_POST_FILES", sizeof("HTTP_POST_FILES"), http_post_files, sizeof(zval *),NULL);
+		PG(http_globals).post_files = http_post_files;
 	}
 
 
