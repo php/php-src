@@ -1826,6 +1826,7 @@ DLEXPORT PHP_FUNCTION(udm_store_doc_cgi)
 	
 	UdmPrepare(Agent,Res);
 	UdmVarListReplaceStr(&Doc->Sections, "URL", UdmVarListFindStr(&Agent->Conf->Vars, "URL", "0"));
+	UdmVarListReplaceStr(&Doc->Sections, "dbnum", UdmVarListFindStr(&Agent->Conf->Vars, "dbnum", "0"));
 	UdmURLAction(Agent, Doc, UDM_URL_ACTION_GET_CACHED_COPY);
 	UdmVarListReplaceLst(&Agent->Conf->Vars, &Doc->Sections, NULL, "*");
 
