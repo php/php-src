@@ -24,7 +24,9 @@
 #define _WIN32_DCOM
 #define COBJMACROS
 #include <ocidl.h>
-#include "oleauto.h"
+#include <oleauto.h>
+#include <unknwn.h>
+#include <dispex.h>
 #include "win32/winutil.h"
 
 /* brain-death in winutil.h defines the macro to hide the useful function... */

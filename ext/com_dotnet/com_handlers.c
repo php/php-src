@@ -316,7 +316,9 @@ static union _zend_function *com_method_get(zval *object, char *name, int len TS
 						ITypeComp_Release(bindptr.lptcomp);
 						break;
 				}
-				ITypeInfo_Release(TI);
+				if (TI) {
+					ITypeInfo_Release(TI);
+				}
 			}
 			ITypeComp_Release(comp);
 			efree(olename);
