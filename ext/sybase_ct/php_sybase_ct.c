@@ -262,36 +262,36 @@ PHP_MINIT_FUNCTION(sybase)
 	 * signals to implement timeouts, they are actually implemented
 	 * by using poll() or select() on Solaris and Linux.
 	 */
-	if (cfg_get_long("sybase.login_timeout",&timeout)==SUCCESS) {
+	if (cfg_get_long("sybct.login_timeout",&timeout)==SUCCESS) {
 		CS_INT cs_login_timeout = timeout;
 		if (ct_config(context, CS_SET, CS_LOGIN_TIMEOUT, &cs_login_timeout, CS_UNUSED, NULL)!=CS_SUCCEED) {
 			php_error(E_WARNING,"Sybase:  Unable to set login timeoutt");
 		}
 	}
-	if (cfg_get_long("sybase.timeout",&timeout)==SUCCESS) {
+	if (cfg_get_long("sybct.timeout",&timeout)==SUCCESS) {
 		CS_INT cs_timeout = timeout;
 		if (ct_config(context, CS_SET, CS_TIMEOUT, &cs_timeout, CS_UNUSED, NULL)!=CS_SUCCEED) {
 			php_error(E_WARNING,"Sybase:  Unable to set timeout");
 		}
 	}
 
-	if (cfg_get_long("sybase.allow_persistent",&sybase_globals.allow_persistent)==FAILURE) {
+	if (cfg_get_long("sybct.allow_persistent",&sybase_globals.allow_persistent)==FAILURE) {
 		sybase_globals.allow_persistent=1;
 	}
-	if (cfg_get_long("sybase.max_persistent",&sybase_globals.max_persistent)==FAILURE) {
+	if (cfg_get_long("sybct.max_persistent",&sybase_globals.max_persistent)==FAILURE) {
 		sybase_globals.max_persistent=-1;
 	}
-	if (cfg_get_long("sybase.max_links",&sybase_globals.max_links)==FAILURE) {
+	if (cfg_get_long("sybct.max_links",&sybase_globals.max_links)==FAILURE) {
 		sybase_globals.max_links=-1;
 	}
-	if (cfg_get_long("sybase.min_server_severity",&sybase_globals.cfg_min_server_severity)==FAILURE) {
+	if (cfg_get_long("sybct.min_server_severity",&sybase_globals.cfg_min_server_severity)==FAILURE) {
 		sybase_globals.cfg_min_server_severity=10;
 	}
-	if (cfg_get_long("sybase.min_client_severity",&sybase_globals.cfg_min_client_severity)==FAILURE) {
+	if (cfg_get_long("sybct.min_client_severity",&sybase_globals.cfg_min_client_severity)==FAILURE) {
 		sybase_globals.cfg_min_client_severity=10;
 	}
 	
-	if (cfg_get_string("sybase.hostname",&sybase_globals.hostname)==FAILURE
+	if (cfg_get_string("sybct.hostname",&sybase_globals.hostname)==FAILURE
 		|| sybase_globals.hostname[0]==0) {
 		sybase_globals.hostname=NULL;
 	}
