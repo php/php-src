@@ -837,6 +837,35 @@ PHP_FUNCTION(xslt_set_sax_handler)
 }
 /* }}} */
 
+
+#ifdef HAVE_SABLOT_SET_ENCODING
+
+/* {{{ proto void xslt_set_encoding(resource xh, string encoding)
+   Sets output encoding to be used for Sablotron regardless of the encoding specified by the stylesheet. To unset, call with encoding_ NULL. */
+PHP_FUNCTION(xslt_set_encoding)
+{
+    zval **xh, **encoding;
+    php_sablot *handle;
+    int ret      = 0, 
+        loglevel = 0, 
+        argc     = ZEND_NUM_ARGS();
+    SABLOTLS_FETCH();
+    
+    if (argc != 2  ||
+        zend_get_parameters_ex(argc, &xh, &encoding) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+    ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron", le_sablot);
+    convert_to_string_ex(encoding);
+    
+    SablotSetEncoding(handle->p, (char *) Z_STRVAL_PP(encoding));
+
+}
+/* }}} */
+
+#endif
+
+
 /* }}} */
 
 /* {{{ Begin Error Handling functions */
@@ -978,33 +1007,6 @@ static void _php_sablot_handler_pair(php_sablot *handle, zval **first_func, zval
     }
 }
 /* }}} */
-
-#ifdef HAVE_SABLOT_SET_ENCODING
-/* {{{ proto void xslt_set_encoding(resource xh, string encoding)
-   Sets output encoding to be used for Sablotron regardless of the 
-   encoding specified by the stylesheet. To unset, call with 
-   encoding_ NULL. */
-PHP_FUNCTION(xslt_set_encoding)
-{
-    zval **xh, **encoding;
-    php_sablot *handle;
-    int ret      = 0, 
-        loglevel = 0, 
-        argc     = ZEND_NUM_ARGS();
-    SABLOTLS_FETCH();
-    
-    if (argc != 2  ||
-        zend_get_parameters_ex(argc, &xh, &encoding) == FAILURE) {
-        WRONG_PARAM_COUNT;
-    }
-    ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron", le_sablot);
-    convert_to_string_ex(encoding);
-    
-    SablotSetEncoding(handle->p, (char *)Z_STRVAL_PP(encoding));
-
-}
-/* }}} */
-#endif
 
 /* {{{ _php_sablot_call_handler_function()
    Call a sablot call handler function, wrapper for call_user_function() */
