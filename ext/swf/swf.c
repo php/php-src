@@ -141,6 +141,7 @@ PHP_MINIT_FUNCTION(swf)
 	return SUCCESS;
 }
 
+
          
 /* {{{ proto void swf_openfile(string name, double xsize, double ysize, double framerate, double r, double g, double b)
    Create a Shockwave Flash file given by name, with width xsize and height ysize at a frame rate of framerate and a background color specified by a red value of r, green value of g and a blue value of b */
@@ -300,7 +301,7 @@ PHP_FUNCTION(swf_removeobject)
    Returns a free objid */
 PHP_FUNCTION(swf_nextid)
 {
-	swf_nextid();
+	RETURN_LONG(swf_nextid());
 }
 /* }}} */
 
