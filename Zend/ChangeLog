@@ -1,3 +1,12 @@
+2002-04-30  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_API.h
+      zend_builtin_functions.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_operators.h
+      zend_API.c: Make OBJCE return zend_class_entry*, also some cleanups
+
 2002-04-28  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * zend_alloc.c
