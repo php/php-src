@@ -109,7 +109,7 @@ function_entry exif_functions[] = {
 
 #define EXIF_VERSION "1.3 $Id$"
 
-PHP_MINFO_FUNCTION(exif);
+ZEND_DECLARE_MODULE_GLOBALS(exif)
 
 /* {{{ PHP_MINFO_FUNCTION
  */
@@ -124,13 +124,75 @@ PHP_MINFO_FUNCTION(exif)
 }
 /* }}} */
 
-static char * exif_encoding_unicode = "ISO-8859-15"; 
-static char * exif_encoding_jis     = NULL; /* default to internal encoding */
+ZEND_BEGIN_MODULE_GLOBALS(exif)
+	char * encode_unicode;
+	char * decode_unicode_be;
+	char * decode_unicode_le;
+	char * encode_jis;
+	char * decode_jis_be;
+	char * decode_jis_le;
+ZEND_END_MODULE_GLOBALS(exif) 
+
+#ifdef ZTS
+#define EXIF_G(v) TSRMG(exif_globals_id, zend_exif_globals *, v)
+#else
+#define EXIF_G(v) (exif_globals.v)
+#endif
+ 
+/* {{{ PHP_INI
+ */
+
+ZEND_API ZEND_INI_MH(OnUpdateEncode)
+{
+#ifdef HAVE_MBSTRING
+	if (new_value && strlen(new_value) && !php_mb_check_encoding_list(new_value TSRMLS_CC)) {
+		php_error(E_WARNING,"Illegal encoding ignored: '%s'", new_value);
+		return FAILURE;
+	}
+#endif
+	return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+}
+
+ZEND_API ZEND_INI_MH(OnUpdateDecode)
+{
+#ifdef HAVE_MBSTRING
+	if (!php_mb_check_encoding_list(new_value TSRMLS_CC)) {
+		php_error(E_WARNING,"Illegal encoding ignored: '%s'", new_value);
+		return FAILURE;
+	}
+#endif
+	return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+}
+
+PHP_INI_BEGIN()
+    STD_PHP_INI_ENTRY("exif.encode_unicode",          "ISO-8859-15", PHP_INI_ALL, OnUpdateEncode, encode_unicode,    zend_exif_globals, exif_globals)
+    STD_PHP_INI_ENTRY("exif.decode_unicode_motorola", "UCS-2BE",     PHP_INI_ALL, OnUpdateDecode, decode_unicode_be, zend_exif_globals, exif_globals)
+    STD_PHP_INI_ENTRY("exif.decode_unicode_intel",    "UCS-2LE",     PHP_INI_ALL, OnUpdateDecode, decode_unicode_le, zend_exif_globals, exif_globals)
+    STD_PHP_INI_ENTRY("exif.encode_jis",              "",            PHP_INI_ALL, OnUpdateEncode, encode_jis,        zend_exif_globals, exif_globals)
+    STD_PHP_INI_ENTRY("exif.decode_jis_motorola",     "JIS",         PHP_INI_ALL, OnUpdateDecode, decode_jis_be,     zend_exif_globals, exif_globals)
+    STD_PHP_INI_ENTRY("exif.decode_jis_intel",        "JIS",         PHP_INI_ALL, OnUpdateDecode, decode_jis_le,     zend_exif_globals, exif_globals)
+PHP_INI_END()
+/* }}} */
+ 
+/* {{{ php_extname_init_globals
+ */
+static void php_exif_init_globals(zend_exif_globals *exif_globals)
+{
+	exif_globals->encode_unicode    = NULL;
+	exif_globals->decode_unicode_be = NULL;
+	exif_globals->decode_unicode_le = NULL;
+	exif_globals->encode_jis        = NULL;
+	exif_globals->decode_jis_be     = NULL;
+	exif_globals->decode_jis_le     = NULL;
+}
+/* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION(exif)
    Get the size of an image as 4-element array */
 PHP_MINIT_FUNCTION(exif)
 {
+	ZEND_INIT_MODULE_GLOBALS(exif, php_exif_init_globals, NULL);
+	REGISTER_INI_ENTRIES();
 	REGISTER_LONG_CONSTANT("IMAGETYPE_GIF",     IMAGE_FILETYPE_GIF,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JPEG",    IMAGE_FILETYPE_JPEG,    CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_PNG",     IMAGE_FILETYPE_PNG,     CONST_CS | CONST_PERSISTENT);
@@ -147,6 +209,15 @@ PHP_MINIT_FUNCTION(exif)
 }
 /* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
+PHP_MSHUTDOWN_FUNCTION(exif)
+{
+	UNREGISTER_INI_ENTRIES();
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ exif_module_entry
  */
 zend_module_entry exif_module_entry = {
@@ -155,10 +226,13 @@ zend_module_entry exif_module_entry = {
 #endif
 	"exif",
 	exif_functions,
-	ZEND_MODULE_STARTUP_N(exif), NULL,
+	PHP_MINIT(exif), 
+	PHP_MSHUTDOWN(exif),
 	NULL, NULL,
 	PHP_MINFO(exif),
+#if ZEND_MODULE_API_NO >= 20010901
 	EXIF_VERSION,
+#endif
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -924,6 +998,12 @@ typedef struct {
 	char            *UserComment;
 	int             UserCommentLength;
 	char            *UserCommentEncoding;
+	char            *encode_unicode;
+	char            *decode_unicode_be;
+	char            *decode_unicode_le;
+	char            *encode_jis;
+	char            *decode_jis_be;
+	char            *decode_jis_le;
 	char            *Copyright;
 	char            *CopyrightPhotographer;
 	char            *CopyrightEditor;
@@ -2029,7 +2109,7 @@ static int exif_process_string(char **result, char *value, size_t byte_count) {
 
 /* {{{ exif_process_user_comment
  * Process UserComment in IFD. */
-static int exif_process_user_comment(char **pszInfoPtr, char **pszEncoding, char *szValuePtr, int ByteCount, int motorola_intel TSRMLS_DC)
+static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoPtr, char **pszEncoding, char *szValuePtr, int ByteCount TSRMLS_DC)
 {
 	int   a;
 
@@ -2045,12 +2125,11 @@ static int exif_process_user_comment(char **pszInfoPtr, char **pszEncoding, char
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
 #ifdef HAVE_MBSTRING
-			if (motorola_intel) {
-				*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, exif_encoding_unicode, "UCS-2BE", &len TSRMLS_CC);
+			if (ImageInfo->motorola_intel) {
+				*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_unicode, ImageInfo->decode_unicode_be, &len TSRMLS_CC);
 			} else {
-				*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, exif_encoding_unicode, "UCS-2LE", &len TSRMLS_CC);
+				*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_unicode, ImageInfo->decode_unicode_le, &len TSRMLS_CC);
 			}
-			/*php_error(E_NOTICE, "converted(%d,%s): %s", len, *pszEncoding, *pszInfoPtr);*/
 			return len;
 #else
 			return exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
@@ -2067,7 +2146,11 @@ static int exif_process_user_comment(char **pszInfoPtr, char **pszEncoding, char
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
 #ifdef HAVE_MBSTRING
-			*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, exif_encoding_jis, "JIS", &len TSRMLS_CC);
+			if (ImageInfo->motorola_intel) {
+				*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_jis, ImageInfo->decode_jis_be, &len TSRMLS_CC);
+			} else {
+				*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_jis, ImageInfo->decode_jis_le, &len TSRMLS_CC);
+			}
 			return len;
 #else
 			return exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
@@ -2239,7 +2322,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				break;
 
 			case TAG_USERCOMMENT:
-				ImageInfo->UserCommentLength = exif_process_user_comment(&(ImageInfo->UserComment), &(ImageInfo->UserCommentEncoding), value_ptr, byte_count, ImageInfo->motorola_intel TSRMLS_CC);
+				ImageInfo->UserCommentLength = exif_process_user_comment(ImageInfo, &(ImageInfo->UserComment), &(ImageInfo->UserCommentEncoding), value_ptr, byte_count TSRMLS_CC);
 				break;
 
 			case TAG_FNUMBER:
@@ -3010,6 +3093,12 @@ static int exif_discard_imageinfo(image_info_type *ImageInfo)
 	EFREE_IF(ImageInfo->CopyrightPhotographer);
 	EFREE_IF(ImageInfo->CopyrightEditor);
 	EFREE_IF(ImageInfo->Thumbnail.data);
+	EFREE_IF(ImageInfo->encode_unicode);
+	EFREE_IF(ImageInfo->decode_unicode_be);
+	EFREE_IF(ImageInfo->decode_unicode_le);
+	EFREE_IF(ImageInfo->encode_jis);
+	EFREE_IF(ImageInfo->decode_jis_be);
+	EFREE_IF(ImageInfo->decode_jis_le);
 	for (i=0; i<SECTION_COUNT; i++) {
 		exif_iif_free(ImageInfo, i);
 	}
@@ -3029,7 +3118,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 	/* Start with an empty image information structure. */
 	memset(ImageInfo, 0, sizeof(*ImageInfo));
 
-	ImageInfo->motorola_intel = 0;
+	ImageInfo->motorola_intel = -1; /* flag as unknown */
 
 	ImageInfo->infile = php_stream_open_wrapper(FileName, "rb", STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
 	if (!ImageInfo->infile) {
@@ -3041,6 +3130,13 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 	ImageInfo->read_thumbnail = read_thumbnail;
 	ImageInfo->read_all = read_all;
 	ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_UNKNOWN;
+
+	ImageInfo->encode_unicode    = estrdup(EXIF_G(encode_unicode));
+	ImageInfo->decode_unicode_be = estrdup(EXIF_G(decode_unicode_be));
+	ImageInfo->decode_unicode_le = estrdup(EXIF_G(decode_unicode_le));
+	ImageInfo->encode_jis        = estrdup(EXIF_G(encode_jis));
+	ImageInfo->decode_jis_be     = estrdup(EXIF_G(decode_jis_be));
+	ImageInfo->decode_jis_le     = estrdup(EXIF_G(decode_jis_le));
 
 	if (php_stream_is(ImageInfo->infile, PHP_STREAM_IS_STDIO)) {
 		if (VCWD_STAT(FileName, &st) >= 0) {
@@ -3168,6 +3264,9 @@ PHP_FUNCTION(exif_read_data)
 		exif_iif_add_int(&ImageInfo, SECTION_COMPUTED, "Width",  ImageInfo.Width);
 	}
 	exif_iif_add_int(&ImageInfo, SECTION_COMPUTED, "IsColor", ImageInfo.IsColor);
+	if (ImageInfo.motorola_intel != -1) {
+		exif_iif_add_int(&ImageInfo, SECTION_COMPUTED, "ByteOrderMotorola", ImageInfo.motorola_intel);
+	}
 	if (ImageInfo.FocalLength) {
 		exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "FocalLength", "%4.1fmm", ImageInfo.FocalLength);
 		if(ImageInfo.CCDWidth) {
