@@ -195,7 +195,7 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 	pval **arg;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		php_error (E_WARNING, "%s(): Only one argument expected", get_active_function_name (TSRMLS_CC));
+		php_error(E_WARNING, "%s(): Only one argument expected", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
