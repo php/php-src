@@ -447,7 +447,7 @@ PHP_FUNCTION(clearstatcache)
 /* }}} */
 
 
-static void php_stat(const char *filename, int type, pval *return_value)
+static void php_stat(const char *filename, int filename_length, int type, pval *return_value)
 {
 	struct stat *stat_sb;
 	int rmask=S_IROTH,wmask=S_IWOTH,xmask=S_IXOTH; /* access rights defaults to other */
@@ -455,25 +455,28 @@ static void php_stat(const char *filename, int type, pval *return_value)
 
 	stat_sb = &BG(sb);
 
-	if (!BG(CurrentStatFile) || strcmp(filename,BG(CurrentStatFile))) {
-		if (!BG(CurrentStatFile)
-			|| strlen(filename) > BG(CurrentStatLength)) {
-			if (BG(CurrentStatFile)) efree(BG(CurrentStatFile));
-			BG(CurrentStatLength) = strlen(filename);
-			BG(CurrentStatFile) = estrndup(filename,BG(CurrentStatLength));
+	if (!BG(CurrentStatFile) || strcmp(filename, BG(CurrentStatFile))) {
+		if (!BG(CurrentStatFile) || filename_length > BG(CurrentStatLength)) {
+			if (BG(CurrentStatFile)) {
+				efree(BG(CurrentStatFile));
+			}
+			BG(CurrentStatLength) = filename_length;
+			BG(CurrentStatFile) = estrndup(filename, filename_length);
 		} else {
-			strcpy(BG(CurrentStatFile),filename);
+			memcpy(BG(CurrentStatFile), filename, filename_length+1);
 		}
 #if HAVE_SYMLINK
 		BG(lsb).st_mode = 0; /* mark lstat buf invalid */
 #endif
-		if (V_STAT(BG(CurrentStatFile),&BG(sb))==-1) {
-			if (type != 15 || errno != ENOENT) { /* fileexists() test must print no error */
-				php_error(E_NOTICE,"stat failed for %s (errno=%d - %s)",BG(CurrentStatFile),errno,strerror(errno));
+		if (V_STAT(BG(CurrentStatFile), &BG(sb)) == -1) {
+			if ((type != 14) && (type != 15 || errno != ENOENT)) { /* fileexists() test must print no error */
+				php_error(E_NOTICE,"stat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
 			}
 			efree(BG(CurrentStatFile));
-			BG(CurrentStatFile)=NULL;
-			RETURN_FALSE;
+			BG(CurrentStatFile) = NULL;
+			if (type != 14) { /* Don't require success for is link */
+				RETURN_FALSE;
+			}
 		}
 	}
 
@@ -485,8 +488,8 @@ static void php_stat(const char *filename, int type, pval *return_value)
 		/* do lstat if the buffer is empty */
 
 		if (!BG(lsb).st_mode) {
-			if (V_LSTAT(BG(CurrentStatFile),&BG(lsb)) == -1) {
-				php_error(E_NOTICE,"lstat failed for %s (errno=%d - %s)",BG(CurrentStatFile),errno,strerror(errno));
+			if (V_LSTAT(BG(CurrentStatFile), &BG(lsb)) == -1) {
+				php_error(E_NOTICE, "lstat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
 				RETURN_FALSE;
 			}
 		}
@@ -494,35 +497,37 @@ static void php_stat(const char *filename, int type, pval *return_value)
 #endif
 
 
-	if(BG(sb).st_uid==getuid()) {
-		rmask=S_IRUSR;
-		wmask=S_IWUSR;
-		xmask=S_IXUSR;
-	} else if(BG(sb).st_gid==getgid()) {
-		rmask=S_IRGRP;
-		wmask=S_IWGRP;
-		xmask=S_IXGRP;
-	} else {
-		int   groups,n,i;
-		gid_t *gids;
+	if (type >= 9 && type <= 11) {
+		if(BG(sb).st_uid==getuid()) {
+			rmask=S_IRUSR;
+			wmask=S_IWUSR;
+			xmask=S_IXUSR;
+		} else if(BG(sb).st_gid==getgid()) {
+			rmask=S_IRGRP;
+			wmask=S_IWGRP;
+			xmask=S_IXGRP;
+		} else {
+			int   groups,n,i;
+			gid_t *gids;
 
-		groups = getgroups(0,NULL);
-		if(groups) {
-			gids=(gid_t *)emalloc(groups*sizeof(gid_t));
-			n=getgroups(groups,gids);
-			for(i=0;i<n;i++){
-				if(BG(sb).st_gid==gids[i]) {
-					rmask=S_IRGRP;
-					wmask=S_IWGRP;
-					xmask=S_IXGRP;
-					break;
+			groups = getgroups(0,NULL);
+			if(groups) {
+				gids=(gid_t *)emalloc(groups*sizeof(gid_t));
+				n=getgroups(groups,gids);
+				for(i=0;i<n;i++){
+					if(BG(sb).st_gid==gids[i]) {
+						rmask=S_IRGRP;
+						wmask=S_IWGRP;
+						xmask=S_IXGRP;
+						break;
+					}
 				}
+				efree(gids);
 			}
-			efree(gids);
 		}
 	}
 
-	switch(type) {
+	switch (type) {
 	case 0: /* fileperms */
 		RETURN_LONG((long)BG(sb).st_mode);
 	case 1: /* fileinode */
@@ -556,15 +561,21 @@ static void php_stat(const char *filename, int type, pval *return_value)
 #endif
 		}
 		php_error(E_WARNING,"Unknown file type (%d)",BG(sb).st_mode&S_IFMT);
-		RETURN_STRING("unknown",1);
+		RETURN_STRING("unknown", 1);
 	case 9: /*is writable*/
-		if(getuid()==0) RETURN_LONG(1); /* root */
-		RETURN_LONG((BG(sb).st_mode&wmask)!=0);
+		if (getuid()==0) {
+			RETURN_LONG(1); /* root */
+		}
+		RETURN_LONG((BG(sb).st_mode & wmask) != 0);
 	case 10: /*is readable*/
-		if(getuid()==0) RETURN_LONG(1); /* root */
+		if (getuid()==0) {
+			RETURN_LONG(1); /* root */
+		}
 		RETURN_LONG((BG(sb).st_mode&rmask)!=0);
 	case 11: /*is executable*/
-		if(getuid()==0) xmask = S_IXROOT; /* root */
+		if (getuid()==0) {
+			xmask = S_IXROOT; /* root */
+		}
 		RETURN_LONG((BG(sb).st_mode&xmask)!=0 && !S_ISDIR(BG(sb).st_mode));
 	case 12: /*is file*/
 		RETURN_LONG(S_ISREG(BG(sb).st_mode));
@@ -622,12 +633,11 @@ static void php_stat(const char *filename, int type, pval *return_value)
 #define FileFunction(name, funcnum) \
 void name(INTERNAL_FUNCTION_PARAMETERS) { \
 	pval **filename; \
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1,&filename) == FAILURE) { \
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) { \
 		WRONG_PARAM_COUNT; \
 	} \
 	convert_to_string_ex(filename); \
-	if ((*filename)->value.str.len) \
-		php_stat((*filename)->value.str.val, funcnum, return_value); \
+	php_stat(Z_STRVAL_PP(filename), Z_STRLEN_PP(filename), funcnum, return_value); \
 }
 
 /* {{{ proto int fileperms(string filename)
@@ -712,7 +722,7 @@ FileFunction(PHP_FN(file_exists),15)
 
 /* {{{ proto array lstat(string filename)
    Give information about a file or symbolic link */
-FileFunction(php_if_lstat,16)
+FileFunction(php_if_lstat, 16)
 /* }}} */
 
 /* {{{ proto array stat(string filename)
