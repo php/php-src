@@ -1,3 +1,181 @@
+2004-01-14  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR.php:
+      fix get_class() case-sensitive incompatibility in PHP5
+
+2004-01-14  Edin Kadribasic  <edink@emini.dk>
+
+    * (PECL_4_3)
+      ext/sqlite/libsqlite/src/sqlite.w32.h:
+      Update version number
+
+    * (PECL_4_3)
+      ext/sqlite/sqlite.dsp:
+      Add new files to windows build
+
+2004-01-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PECL_4_3)
+      ext/sqlite/libsqlite/src/date.c
+      ext/sqlite/libsqlite/src/vdbeInt.h
+      ext/sqlite/libsqlite/src/vdbeaux.c:
+      Added new files.
+
+2004-01-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/010.phpt:
+      This is no longer usefull in any way.
+
+2004-01-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/tests/bug26911.phpt:
+      
+      MFH: Fixed bug #26911 (crash in sqlite extension when fetching data from
+      empty queries).
+
+    * NEWS
+      ext/sqlite/sqlite.c
+      ext/sqlite/sqlite.c
+      ext/sqlite/tests/bug26911.phpt:
+      MFH: Fixed bug #26911 (crash in sqlite extension when fetching data from
+      empty queries).
+
+2004-01-14  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/simplexml.c:
+      test user define namespace aliases
+
+2004-01-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PECL_4_3)
+      ext/sqlite/libsqlite/src/parse.c:
+      Touch parser.
+
+    * (PECL_4_3)
+      ext/sqlite/config.m4
+      ext/sqlite/libsqlite/VERSION
+      ext/sqlite/libsqlite/src/attach.c
+      ext/sqlite/libsqlite/src/auth.c
+      ext/sqlite/libsqlite/src/btree.c
+      ext/sqlite/libsqlite/src/btree.h
+      ext/sqlite/libsqlite/src/btree_rb.c
+      ext/sqlite/libsqlite/src/build.c
+      ext/sqlite/libsqlite/src/copy.c
+      ext/sqlite/libsqlite/src/delete.c
+      ext/sqlite/libsqlite/src/encode.c
+      ext/sqlite/libsqlite/src/expr.c
+      ext/sqlite/libsqlite/src/func.c
+      ext/sqlite/libsqlite/src/hash.c
+      ext/sqlite/libsqlite/src/hash.h
+      ext/sqlite/libsqlite/src/insert.c
+      ext/sqlite/libsqlite/src/main.c
+      ext/sqlite/libsqlite/src/opcodes.c
+      ext/sqlite/libsqlite/src/opcodes.h
+      ext/sqlite/libsqlite/src/os.c
+      ext/sqlite/libsqlite/src/os.h
+      ext/sqlite/libsqlite/src/pager.c
+      ext/sqlite/libsqlite/src/pager.h
+      ext/sqlite/libsqlite/src/parse.c
+      ext/sqlite/libsqlite/src/parse.h
+      ext/sqlite/libsqlite/src/parse.y
+      ext/sqlite/libsqlite/src/pragma.c
+      ext/sqlite/libsqlite/src/printf.c
+      ext/sqlite/libsqlite/src/random.c
+      ext/sqlite/libsqlite/src/select.c
+      ext/sqlite/libsqlite/src/sqlite.h.in
+      ext/sqlite/libsqlite/src/sqlite.w32.h
+      ext/sqlite/libsqlite/src/sqliteInt.h
+      ext/sqlite/libsqlite/src/table.c
+      ext/sqlite/libsqlite/src/tokenize.c
+      ext/sqlite/libsqlite/src/trigger.c
+      ext/sqlite/libsqlite/src/update.c
+      ext/sqlite/libsqlite/src/util.c
+      ext/sqlite/libsqlite/src/vacuum.c
+      ext/sqlite/libsqlite/src/vdbe.c
+      ext/sqlite/libsqlite/src/vdbe.h
+      ext/sqlite/libsqlite/src/where.c:
+      Upgrade bundled libsqlite to 2.8.11
+
+    * ext/sqlite/libsqlite/src/parse.c:
+      touch generated parser.
+
+    * ext/sqlite/libsqlite/src/date.c
+      ext/sqlite/libsqlite/src/hash.c
+      ext/sqlite/libsqlite/src/hash.h
+      ext/sqlite/libsqlite/src/opcodes.c
+      ext/sqlite/libsqlite/src/opcodes.h
+      ext/sqlite/libsqlite/src/os.c
+      ext/sqlite/libsqlite/src/os.h
+      ext/sqlite/libsqlite/src/pager.c
+      ext/sqlite/libsqlite/src/printf.c
+      ext/sqlite/libsqlite/src/select.c
+      ext/sqlite/libsqlite/src/sqliteInt.h
+      ext/sqlite/libsqlite/src/tokenize.c
+      ext/sqlite/libsqlite/src/util.c
+      ext/sqlite/libsqlite/src/vdbe.c
+      ext/sqlite/libsqlite/src/vdbeInt.h
+      ext/sqlite/libsqlite/src/vdbeaux.c
+      ext/sqlite/libsqlite/src/where.c:
+      
+      Upgraded bundled libsqlite to 2.8.11 (fixed critical bug of *NIX systems).
+
+    * NEWS
+      ext/sqlite/libsqlite/VERSION
+      ext/sqlite/libsqlite/src/btree_rb.c:
+      Upgraded bundled libsqlite to 2.8.11 (fixed critical bug of *NIX systems).
+
+2004-01-14  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      main/network.c:
+      Probable fix for:
+      Bug #25575 stream_set_blocking with STDIN doesnt block
+
+    * ext/standard/file.c:
+      Remove stale code from flock();
+      spotted by Hartmut.
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/file.c:
+      Fixed bug #26772 (fgets returns NULL instead of FALSE). (Wez)
+
+    * ext/standard/file.c:
+      Fix #26772: fgets returns NULL instead of FALSE.
+
+2004-01-14  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      Don't allow interfaces to implement anything
+
+2004-01-14  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/sqlite/libsqlite/src/parse.c:
+      touch
+
+2004-01-14  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_operators.h:
+      - Remove bogus macros
+
+    * ext/imap/php_imap.c:
+      - Remove use of bogus macro
+
+2004-01-14  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * sapi/cli/cli_win32.c
+      sapi/cli/config.w32
+      sapi/cli/php_cli.c:
+      Add optional php-win.exe variation of the CLI sapi.
+      php-win.exe runs in the windows GUI subsystem, and thus
+      has no console; stdio handles are effectively set to /dev/null
+      and no "dos box" will appear on screen when running scripts
+      using this sapi (php-gtk people will be familiar with this concept).
+      
+      Aside from those differences, php-win.exe is 100% identical to
+      regular CLI
+
 2004-01-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
