@@ -1,3 +1,119 @@
+2000-11-13  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/ingres_ii/ingres.dsp: fix link object
+
+    * ext/ingres_ii/ingres.dsp: forgot to add...
+
+    * ext/ingres_ii/ii.c
+      ext/ingres_ii/ii.h
+      ext/ingres_ii/php_ii.h
+      win32/php_modules.dsw: make ingres compile under win32
+
+    * ext/openssl/openssl.dsp
+      win32/php_modules.dsw: added dsp for openssl win32
+
+2000-11-13  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c:
+    - Modified preg_replace() to ignore backreferences that refer to
+      non-existing subpatterns. 
+
+2000-11-13  Stig Venaas  <venaas@uninett.no>
+
+    * ext/openssl/Makefile.in
+      ext/openssl/config.m4
+      ext/openssl/openssl.c
+      ext/openssl/php_openssl.h:
+    OpenSSL extension. So far it implements assymetric encryption functions.
+
+    * configure.in:
+    OpenSSL checking didn't work well, should be better now. Removed check
+    for include/evp.h, are there versions around that put it there? Recent
+    versions have it in include/openssl.
+
+2000-11-13  Zeev Suraski  <zeev@zend.com>
+
+    * ext/zlib/zlib.c: Handle unable-to-add-new-headers error nicely
+
+    * ext/zlib/php_zlib.h
+      ext/zlib/zlib.c
+      main/SAPI.c
+      main/SAPI.h
+      main/main.c
+      main/php_globals.h
+      sapi/apache/sapi_apache.c
+      sapi/cgi/cgi_main.c
+      NEWS
+      php.ini-dist
+      php.ini-optimized:
+    - Import Jade Nicoletti's transparent gzip encoding support as an output
+      handler.  Works quite nicely!
+    - Fix buglets in output buffering
+    - Add output_handler INI directive
+
+2000-11-13  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c:    fix #7784
+
+2000-11-13  Onn Ben-Zvi  <onn@zend.com>
+
+    * ext/fribidi/php_fribidi.h
+      ext/fribidi/fribidi.php
+      ext/fribidi/fribidi.c
+      ext/fribidi/config.m4
+      ext/fribidi/README
+      ext/fribidi/Makefile.in: initial - ONn
+
+2000-11-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/README.txt: Build instructions
+
+    * ext/ircg/.cvsignore
+      ext/ircg/Makefile.in
+      ext/ircg/config.m4
+      ext/ircg/ircg.c
+      ext/ircg/ircg.php
+      ext/ircg/php_ircg.h:
+    V0.1 of a duplex HTTP/IRC Gateway. You can join arbitrary channels,
+    send messages to arbitrary targets, and quit by hitting the stop button.
+
+    The cool part of this extension is that it does not tie up a complete
+    thread/process for one user. Instead, it keeps a connection open after
+    finishing the PHP script. Since connections are only an entry in some
+    table in thttpd, it allows us to handle arbitrary numbers of connections.
+
+    TODO:
+
+    	- Allow sending of arbitrary IRC commands.
+    	- Allow customization of message output.
+
+    A complete web-chat employing PHP 4 Sessions and IRCG is about 70 lines
+    long. =)
+
+    * sapi/thttpd/thttpd_patch:
+    Update patch and add persistent connection handling
+
+2000-11-13  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.c: - fixed serveral prototypes
+    - replaced C++ style comments
+
+2000-11-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/php_thttpd.h
+      sapi/thttpd/thttpd.c:
+    Add thttpd-dependent interface for maintaining persistent connections on
+    an iterative web-server. This will be used by the IRCG extension.
+
+    * sapi/apache/config.m4:
+    More verbose error message for non-working apxs case
+
+    * sapi/thttpd/README: Add note about serialized requests and their impact
+
+2000-11-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/ldap.c: Fixed bug: #7768. Some cleaning up too.
+
 2000-11-12  Kristian Köhntopp  <kk@netuse.de>
 
     * ext/standard/output.c: Prototype corrected.
