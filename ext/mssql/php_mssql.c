@@ -775,8 +775,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 		case SQLINT2:
 		case SQLINT4:
 		case SQLINTN: {	
-			Z_LVAL_P(result) = (long) anyintcol(offset);
-			Z_TYPE_P(result) = IS_LONG;
+			ZVAL_LONG(result, (long) anyintcol(offset));
 			break;
 		} 
 		case SQLCHAR:
@@ -791,18 +790,14 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 				length--;
 			}
 #endif
-			Z_STRVAL_P(result) = estrndup(data,length);
-			Z_STRLEN_P(result) = length;
-			Z_TYPE_P(result) = IS_STRING;
+			ZVAL_STRINGL(result, data, length, 1); 
 			break;
 		}
 		case SQLFLT4:
-			Z_DVAL_P(result) = (double) floatcol4(offset);
-			Z_TYPE_P(result) = IS_DOUBLE;
+			ZVAL_DOUBLE(result, (double) floatcol4(offset));
 			break;
 		case SQLFLT8:
-			Z_DVAL_P(result) = (double) floatcol8(offset);
-			Z_TYPE_P(result) = IS_DOUBLE;
+			ZVAL_DOUBLE(result, (double) floatcol8(offset));
 			break;
 #ifdef SQLUNIQUE
 		case SQLUNIQUE: {
@@ -824,9 +819,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			bin = ((DBBINARY *)dbdata(mssql_ptr->link, offset));
 			memcpy(res_buf,bin,res_length);
 			res_buf[res_length] = '\0';
-			Z_STRLEN_P(result) = res_length;
-			Z_STRVAL_P(result) = res_buf;
-			Z_TYPE_P(result) = IS_STRING;
+			ZVAL_STRINGL(result, res_buf, res_length, 0);
 			}
 			break;
 		case SQLNUMERIC:
@@ -858,9 +851,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 					sprintf(res_buf, "%d-%02d-%02d %02d:%02d:%02d" , dateinfo.year, dateinfo.month, dateinfo.day, dateinfo.hour, dateinfo.minute, dateinfo.second);
 				}
 		
-				Z_STRVAL_P(result) = res_buf;
-				Z_STRLEN_P(result) = res_length;
-				Z_TYPE_P(result) = IS_STRING;
+				ZVAL_STRINGL(result, res_buf, res_length, 0);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "column %d has unknown data type (%d)", offset, coltype(offset));
 				ZVAL_FALSE(result);
@@ -887,9 +878,7 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 		bin = ((DBBINARY *)dbdata(mssql_ptr->link, offset));
 		memcpy(res_buf, bin, res_length);
 		res_buf[res_length] = '\0';
-		Z_STRLEN_P(result) = res_length;
-		Z_STRVAL_P(result) = res_buf;
-		Z_TYPE_P(result) = IS_STRING;
+		ZVAL_STRINGL(result, res_buf, res_length, 0);
 	}
 	else if  (dbwillconvert(coltype(offset),SQLCHAR)) {
 		unsigned char *res_buf;
@@ -919,9 +908,7 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 			sprintf(res_buf, "%d-%02d-%02d %02d:%02d:%02d" , dateinfo.year, dateinfo.month, dateinfo.day, dateinfo.hour, dateinfo.minute, dateinfo.second);
 		}
 
-		Z_STRVAL_P(result) = res_buf;
-		Z_STRLEN_P(result) = res_length;
-		Z_TYPE_P(result) = IS_STRING;
+		ZVAL_STRINGL(result, res_buf, res_length, 0);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "column %d has unknown data type (%d)", offset, coltype(offset));
 		ZVAL_FALSE(result);
@@ -1063,6 +1050,9 @@ static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int r
 		result->lastresult = retvalue;
 	}
 	efree(column_types);
+	if (result->statement) {
+		_mssql_get_sp_result(mssql_ptr, result->statement TSRMLS_CC);
+	}
 	return i;
 }
 
@@ -1632,9 +1622,7 @@ PHP_FUNCTION(mssql_field_name)
 		RETURN_FALSE;
 	}
 
-	Z_STRVAL_P(return_value) = estrdup(result->fields[field_offset].name);
-	Z_STRLEN_P(return_value) = strlen(result->fields[field_offset].name);
-	Z_TYPE_P(return_value) = IS_STRING;
+	RETURN_STRINGL(result->fields[field_offset].name, strlen(result->fields[field_offset].name), 1);
 }
 
 /* }}} */
@@ -1680,9 +1668,7 @@ PHP_FUNCTION(mssql_field_type)
 		RETURN_FALSE;
 	}
 
-	Z_STRVAL_P(return_value) = estrdup(php_mssql_get_field_name(Z_TYPE(result->fields[field_offset])));
-	Z_STRLEN_P(return_value) = strlen(php_mssql_get_field_name(Z_TYPE(result->fields[field_offset])));
-	Z_TYPE_P(return_value) = IS_STRING;
+	RETURN_STRINGL(php_mssql_get_field_name(Z_TYPE(result->fields[field_offset])), strlen(php_mssql_get_field_name(Z_TYPE(result->fields[field_offset]))), 1);
 }
 
 /* }}} */
@@ -1787,9 +1773,6 @@ PHP_FUNCTION(mssql_next_result)
 		RETURN_FALSE;
 	}
 	else if (retvalue == NO_MORE_RESULTS || retvalue == NO_MORE_RPC_RESULTS) {
-		if (result->statement) {
-			_mssql_get_sp_result(result->mssql_ptr, result->statement TSRMLS_CC);
-		}
 		RETURN_FALSE;
 	}
 	else {
@@ -2112,11 +2095,8 @@ PHP_FUNCTION(mssql_execute)
 				result->num_fields = num_fields;
 
 				result->fields = (mssql_field *) safe_emalloc(sizeof(mssql_field), num_fields, 0);
-				result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
 				result->statement = statement;
-			}
-			else {
-				_mssql_get_sp_result(mssql_ptr, statement TSRMLS_CC);
+				result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
 			}
 		}
 	}
