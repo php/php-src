@@ -1,3 +1,33 @@
+2002-05-22  Jani Taskinen  <sniper@iki.fi>
+
+    * run-tests.php: Skip POST data if it is empty.
+
+2002-05-22  Andi Gutmans  <andi@zend.com>
+
+    * makedist.ZendEngine2:
+    - makedist script for creating Engine 2 distribution.
+    - Hopefully we can get a preview out in the next few days.
+
+2002-05-22  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Package.php:
+    Trigger an error if the run-test.php file is not found
+    Make the run-tests pear cmd run with the CGI SAPI
+
+    * pear/PEAR/Dependency.php:
+    Test first if the package exists before comparing the version
+    (fix the version_compare() segfault)
+
+    * pear/PEAR/Remote.php: Make pear -vv XXX set the XML_RPC debug flag
+
+2002-05-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * sapi/activescript/CREDITS
+      sapi/activescript/README: Add README and CREDITS...
+
+    * sapi/activescript/scriptengine.cpp:
+    Fix bug when length was queried before the string was converted.
+
 2002-05-21  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/com/COM.c:
