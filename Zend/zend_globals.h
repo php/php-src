@@ -181,6 +181,11 @@ struct _zend_alloc_globals {
 	unsigned char cache_count[MAX_CACHED_MEMORY];
 	void *zval_list_head;
 
+#if ZEND_DEBUG
+	/* for performance tuning */
+	int cache_stats[MAX_CACHED_MEMORY][2];
+	int zval_cache_stats[2];
+#endif
 #if MEMORY_LIMIT
 	unsigned int memory_limit;
 	unsigned int allocated_memory;
