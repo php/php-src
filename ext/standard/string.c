@@ -203,10 +203,10 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 {
 	char *s11, *s22;
 	int len1, len2;
-	long start, len;
-	
-	start = 0;
-	len = 0;
+	long start = 0, len = 0;
+	unsigned char match[256] = {0};
+	char *rs, *s, *e;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ll", &s11, &len1,
 				&s22, &len2, &start, &len) == FAILURE) {
 		return;
@@ -238,18 +238,17 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 		len = len1 - start;
 	}
 
-	if (behavior == STR_STRSPN) {
-		RETURN_LONG(php_strspn(s11 + start /*str1_start*/,
-						s22 /*str2_start*/,
-						s11 + start + len /*str1_end*/,
-						s22 + len2 /*str2_end*/));
-	} else if (behavior == STR_STRCSPN) {
-		RETURN_LONG(php_strcspn(s11 + start /*str1_start*/,
-						s22 /*str2_start*/,
-						s11 + start + len /*str1_end*/,
-						s22 + len2 /*str2_end*/));
+	s = s22;
+	e = s22 + len2;
+	while (s < e) {
+		match[(int)(unsigned char)*s++] = 1;
 	}
-	
+
+	rs = s = s11 + start;
+	e = s11 + start + len;
+	while (s <= e && match[(int)(unsigned char)*s++] != behavior);
+
+	RETURN_LONG((s - rs) < 1 ? 0 : s - rs - 1);
 }
 
 /* {{{ proto int strspn(string str, string mask [, start [, len]])
@@ -1289,42 +1288,6 @@ PHPAPI char *php_stristr(unsigned char *s, unsigned char *t, size_t s_len, size_
 	php_strtolower(s, s_len);
 	php_strtolower(t, t_len);
 	return php_memnstr(s, t, t_len, s + s_len);
-}
-/* }}} */
-
-/* {{{ php_strspn
- */
-PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end)
-{
-	register const char *p = s1, *spanp;
-	register char c = *p;
-
-cont:
-	for (spanp = s2; p != s1_end && spanp != s2_end;)
-		if (*spanp++ == c) {
-			c = *(++p);
-			goto cont;
-		}
-	return (p - s1);
-}
-/* }}} */
-
-/* {{{ php_strcspn
- */
-PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end)
-{
-	register const char *p, *spanp;
-	register char c = *s1;
-
-	for (p = s1;;) {
-		spanp = s2;
-		do {
-			if (*spanp == c || p == s1_end)
-				return p - s1;
-		} while (spanp++ < s2_end);
-		c = *++p;
-	}
-	/* NOTREACHED */
 }
 /* }}} */
 
