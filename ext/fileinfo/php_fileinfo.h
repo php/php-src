@@ -18,8 +18,8 @@
 
 /* $Id$ */
 
-#ifndef PHP_FILENINFO_H
-#define PHP_FILENINFO_H
+#ifndef PHP_FILEINFO_H
+#define PHP_FILEINFO_H
 
 extern zend_module_entry fileinfo_module_entry;
 #define phpext_fileinfo_ptr &fileinfo_module_entry
