@@ -750,7 +750,7 @@ static void nsapi_php_ini_entries(NSLS_D TSRMLS_DC)
 				if (zend_alter_ini_entry(entry->param->name, strlen(entry->param->name)+1,
 				 entry->param->value, strlen(entry->param->value),
 				 PHP_INI_USER, PHP_INI_STAGE_RUNTIME)==FAILURE) {
-					log_error(LOG_WARN, "php4_execute", NSG(sn), NSG(rq), "Cannot change php.ini key \"%s\" to \"%s\"", entry->param->name, entry->param->value);
+					log_error(LOG_WARN, "php5_execute", NSG(sn), NSG(rq), "Cannot change php.ini key \"%s\" to \"%s\"", entry->param->name, entry->param->value);
 				}
 			}
 			entry=entry->next;
@@ -758,7 +758,7 @@ static void nsapi_php_ini_entries(NSLS_D TSRMLS_DC)
   	}
 }
 
-void NSAPI_PUBLIC php4_close(void *vparam)
+void NSAPI_PUBLIC php5_close(void *vparam)
 {
 	if (nsapi_sapi_module.shutdown) {
 		nsapi_sapi_module.shutdown(&nsapi_sapi_module);
@@ -770,10 +770,10 @@ void NSAPI_PUBLIC php4_close(void *vparam)
 
 	tsrm_shutdown();
 
-	log_error(LOG_INFORM, "php4_close", NULL, NULL, "Shutdown PHP Module");
+	log_error(LOG_INFORM, "php5_close", NULL, NULL, "Shutdown PHP Module");
 }
 
-int NSAPI_PUBLIC php4_init(pblock *pb, Session *sn, Request *rq)
+int NSAPI_PUBLIC php5_init(pblock *pb, Session *sn, Request *rq)
 {
 	php_core_globals *core_globals;
 	char *ini_path;
@@ -790,7 +790,7 @@ int NSAPI_PUBLIC php4_init(pblock *pb, Session *sn, Request *rq)
 
 	core_globals = ts_resource(core_globals_id);
 
-	/* look if php_ini parameter is given to php4_init */
+	/* look if php_ini parameter is given to php5_init */
 	if (ini_path = pblock_findval("php_ini", pb)) {
 		nsapi_sapi_module.php_ini_path_override = strdup(ini_path);
 	}
@@ -799,13 +799,13 @@ int NSAPI_PUBLIC php4_init(pblock *pb, Session *sn, Request *rq)
 	sapi_startup(&nsapi_sapi_module);
 	nsapi_sapi_module.startup(&nsapi_sapi_module);
 
-	daemon_atrestart(&php4_close, NULL);
+	daemon_atrestart(&php5_close, NULL);
 
-	log_error(LOG_INFORM, "php4_init", sn, rq, "Initialized PHP Module (%d threads exspected)", threads);
+	log_error(LOG_INFORM, "php5_init", sn, rq, "Initialized PHP Module (%d threads exspected)", threads);
 	return REQ_PROCEED;
 }
 
-int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
+int NSAPI_PUBLIC php5_execute(pblock *pb, Session *sn, Request *rq)
 {
 	int retval;
 	nsapi_request_context *request_context;
@@ -826,7 +826,7 @@ int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 	   by looking for a request context in the current thread */
 	if (SG(server_context)) {
 		/* send 500 internal server error */
-		log_error(LOG_WARN, "php4_execute", sn, rq, "Cannot make nesting PHP requests with virtual()");
+		log_error(LOG_WARN, "php5_execute", sn, rq, "Cannot make nesting PHP requests with virtual()");
 		protocol_status(sn, rq, 500, NULL);
 		return REQ_ABORTED;
 	}
@@ -860,13 +860,13 @@ int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 			retval=REQ_PROCEED;
 		} else {
 			/* send 500 internal server error */
-			log_error(LOG_WARN, "php4_execute", sn, rq, "Cannot prepare PHP engine!");
+			log_error(LOG_WARN, "php5_execute", sn, rq, "Cannot prepare PHP engine!");
 			protocol_status(sn, rq, 500, NULL);
 			retval=REQ_ABORTED;
 		}
 	} else {
 		/* send 404 because file not found */
-		log_error(LOG_WARN, "php4_execute", sn, rq, "Cannot execute PHP script: %s", SG(request_info).path_translated);
+		log_error(LOG_WARN, "php5_execute", sn, rq, "Cannot execute PHP script: %s", SG(request_info).path_translated);
 		protocol_status(sn, rq, 404, NULL);
 		retval=REQ_ABORTED;
 	}
@@ -890,15 +890,15 @@ int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 / will pass authentication through to php, and allow us to
 / check authentication with our scripts.
 /
-/ php4_auth_trans
+/ php5_auth_trans
 /   main function called from netscape server to authenticate
 /   a line in obj.conf:
-/		funcs=php4_auth_trans shlib="path/to/this/phpnsapi.dll"
+/		funcs=php5_auth_trans shlib="path/to/this/phpnsapi.dll"
 /	and:
 /		<Object ppath="path/to/be/authenticated/by/php/*">
-/		AuthTrans fn="php4_auth_trans"
+/		AuthTrans fn="php5_auth_trans"
 /*********************************************************/
-int NSAPI_PUBLIC php4_auth_trans(pblock * pb, Session * sn, Request * rq)
+int NSAPI_PUBLIC php5_auth_trans(pblock * pb, Session * sn, Request * rq)
 {
 	/* This is a DO NOTHING function that allows authentication
 	 * information
