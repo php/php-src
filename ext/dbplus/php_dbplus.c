@@ -1136,6 +1136,8 @@ PHP_FUNCTION(dbplus_ropen)
     RETURN_FALSE;
   }
 
+	r->r_sid = 9999;
+  
   ZEND_REGISTER_RESOURCE(return_value, r, le_dbplus_relation);
 }
 /* }}} */
