@@ -1,0 +1,15 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_WITH("pdo_sqlite", "for pdo_sqlite support", "no");
+
+if (PHP_PDO_SQLITE != "no") {
+	if (CHECK_LIB("libsqlite3.lib", "pdo_sqlite", PHP_PDO_SQLITE) &&
+			CHECK_HEADER_ADD_INCLUDE("sqlite3.h", "CFLAGS_PDO_SQLITE", PHP_PDO_SQLITE)) {
+		EXTENSION("pdo_sqlite", "pdo_sqlite.c sqlite_driver.c sqlite_statement.c", "/I ..\\pecl");
+	} else {
+		WARNING("pdo_sqlite not enabled; libraries and headers not found");
+	}
+	ADD_EXTENSION_DEP('pdo_sqlite', 'pdo');
+}
+
