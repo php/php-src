@@ -378,8 +378,11 @@ ftp_mkdir(ftpbuf_t *ftp, const char *dir)
 		return NULL;
 
 	/* copy out the dir from response */
-	if ((mkd = strchr(ftp->inbuf, '"')) == NULL)
-		return NULL;
+	if ((mkd = strchr(ftp->inbuf, '"')) == NULL) {
+		mkd = strdup(dir);
+		return mkd;
+	}
+
 	end = strrchr(++mkd, '"');
 	*end = 0;
 	mkd = strdup(mkd);
