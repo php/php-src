@@ -291,7 +291,6 @@ static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
 */
 			break;
 		}
-nextiter:
 	}
 
 #define PRESERVE(s) \
