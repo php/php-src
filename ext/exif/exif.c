@@ -86,6 +86,7 @@ typedef struct {
 	char Software[32];
 	char *Thumbnail;
 	int ThumbnailSize;
+	int ThumbnailOffset;
 	/* Olympus vars */
 	int SpecialMode;
 	int JpegQual;
@@ -471,12 +472,34 @@ static double ConvertAnyFormat(void *ValuePtr, int Format, int MotorolaOrder)
     return Value;
 }
 
+/* Grab the thumbnail - by Matt Bonneau */
+static void ExtractThumbnail(ImageInfoType *ImageInfo, char *OffsetBase, unsigned ExifLength) {
+	/* according to exif2.1, the thumbnail is not supposed to be greater than 64K */
+	if (ImageInfo->ThumbnailSize > 65536) {
+		php_error(E_ERROR,"Illegal thumbnail size");
+	}
+
+	ImageInfo->Thumbnail = emalloc(ImageInfo->ThumbnailSize);
+	if (!ImageInfo->Thumbnail) {
+		php_error(E_ERROR,"Could not allocate memory for thumbnail");
+	} else {
+		/* Check to make sure we are not going to go past the ExifLength */
+		if (ImageInfo->ThumbnailOffset + ImageInfo->ThumbnailSize > ExifLength) {
+			php_error(E_ERROR,"Thumbnail goes beyond exif header boundary");
+		} else {
+			memcpy(ImageInfo->Thumbnail, OffsetBase + ImageInfo->ThumbnailOffset, ImageInfo->ThumbnailSize);
+		}
+	}
+}
+
 /* Process one of the nested EXIF directories. */
 static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *OffsetBase, unsigned ExifLength, char *LastExifRefd)
 {
     int de;
     int a;
     int NumDirEntries;
+    int NextDirOffset;
+    
 
     NumDirEntries = Get16u(DirStart, ImageInfo->MotorolaOrder);
 
@@ -681,12 +704,24 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
                 ImageInfo->SpecialMode = (int)ConvertAnyFormat(ValuePtr, Format,ImageInfo->SpecialMode);
 				break;
 
-			case TAG_JPEGQUAL:
-                ImageInfo->JpegQual = (int)ConvertAnyFormat(ValuePtr, Format,ImageInfo->JpegQual);
+			case TAG_JPEGQUAL: /* I think that this is a pointer to the thumbnail - let's see */
+				ImageInfo->ThumbnailOffset = (int)ConvertAnyFormat(ValuePtr, Format, ImageInfo->ThumbnailOffset);
+				
+				/* see if we know the size */
+				if (ImageInfo->ThumbnailSize) {
+					ExtractThumbnail(ImageInfo, OffsetBase, ExifLength);
+				}
+                /*ImageInfo->JpegQual = (int)ConvertAnyFormat(ValuePtr, Format,ImageInfo->JpegQual);*/
 				break;
 
-			case TAG_MACRO:
-                ImageInfo->Macro = (int)ConvertAnyFormat(ValuePtr, Format,ImageInfo->Macro);
+			case TAG_MACRO: /* I think this is the size of the Thumbnail */
+				ImageInfo->ThumbnailSize = (int)ConvertAnyFormat(ValuePtr, Format, ImageInfo->ThumbnailSize);
+
+				/* see if we have the offset */
+				if (ImageInfo->ThumbnailOffset) {
+					ExtractThumbnail(ImageInfo, OffsetBase, ExifLength);
+				}
+                /*ImageInfo->Macro = (int)ConvertAnyFormat(ValuePtr, Format,ImageInfo->Macro);*/
 				break;
 
 			case TAG_DIGIZOOM:
@@ -716,6 +751,17 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
             continue;
         }
     }
+    /*
+     * Hack to make it process IDF1 I hope
+     * There are 2 IDFs, the second one holds the keys (0x0201 and 0x0202) to the thumbnail
+     */
+    NextDirOffset = Get32u(DirStart+2+12*de, ImageInfo->MotorolaOrder);
+    if (NextDirOffset) {
+            if (OffsetBase + NextDirOffset < OffsetBase || OffsetBase + NextDirOffset > OffsetBase+ExifLength) {
+                php_error(E_ERROR,"Illegal directory offset");
+            }
+	    ProcessExifDir(ImageInfo, OffsetBase + NextDirOffset, OffsetBase, ExifLength, LastExifRefd);
+    }
 }
 
 /* 
@@ -730,6 +776,10 @@ static void process_EXIF (ImageInfoType *ImageInfo, char *CharBuf, unsigned int 
     ImageInfo->FocalplaneXRes = 0;
     ImageInfo->FocalplaneUnits = 0;
     ImageInfo->ExifImageWidth = 0;
+
+    /* set the thumbnail stuff to nothing so we can test to see if they get set up */
+    ImageInfo->Thumbnail = NULL;
+    ImageInfo->ThumbnailSize = 0;
 
     {   /* Check the EXIF header component */
         static const uchar ExifHeader[] = {0x45, 0x78, 0x69, 0x66, 0x00, 0x00};
@@ -758,6 +808,9 @@ static void process_EXIF (ImageInfoType *ImageInfo, char *CharBuf, unsigned int 
 
     /* First directory starts 16 bytes in.  Offsets start at 8 bytes in. */
     ProcessExifDir(ImageInfo, CharBuf+16, CharBuf+8, length-6, LastExifRefd);
+
+    /* MB: This is where I will make my attempt to get the tumbnail */
+
 
     /* Compute the CCD width, in milimeters. */
     if (ImageInfo->FocalplaneXRes != 0) {
@@ -1010,8 +1063,9 @@ PHP_FUNCTION(read_exif_data) {
 	ImageInfoType ImageInfo;
 	char tmp[64];
 
-	ImageInfo.Thumbnail = NULL;
+	/*ImageInfo.Thumbnail = NULL;
 	ImageInfo.ThumbnailSize = 0;
+	*/
 
     if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
