@@ -2621,9 +2621,7 @@ out:
 }
 /* }}} */
 
-/* {{{ proto array array_diff(array arr1, array arr2 [, array ...])
-   Returns the entries of arr1 that have values which are not present in any of the others arguments */
-PHP_FUNCTION(array_diff)
+static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior TSRMLS_DC)
 {
 	zval ***args = NULL;
 	HashTable *hash;
@@ -2660,7 +2658,11 @@ PHP_FUNCTION(array_diff)
 		for (p = hash->pListHead; p; p = p->pListNext)
 				*list++ = p;
 		*list = NULL;
-		zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare TSRMLS_CC);
+		if (behavior == 0) {
+			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare TSRMLS_CC);
+		} else if (behavior == 1) {
+			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_key_compare TSRMLS_CC);
+		}
 	}
 
 	/* copy the argument array */
@@ -2672,12 +2674,27 @@ PHP_FUNCTION(array_diff)
 	while (*ptrs[0]) {
 		c = 1;
 		for (i=1; i<argc; i++) {
-			while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC))))
-				ptrs[i]++;
-			if (!c) {
-				if (*ptrs[i])
+			if (behavior == 0) {
+				while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC))))
 					ptrs[i]++;
-				break;
+			} else if (behavior == 1) {
+				while (*ptrs[i] && (0 < (c = array_key_compare(ptrs[0], ptrs[i] TSRMLS_CC))))
+					ptrs[i]++;
+			}
+			if (!c) {
+				if (behavior == 0) {
+					if (*ptrs[i])
+						ptrs[i]++;
+					break;
+				} else if (behavior == 1) {
+					if (*ptrs[i]) {
+						if (array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC) != 0) {
+							c = -1;
+						} else {
+							break;
+						}
+					}
+				}
 			}
 		}
 		if (!c) {
@@ -2691,8 +2708,13 @@ PHP_FUNCTION(array_diff)
 					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
 				if (!*++ptrs[0])
 					goto out;
-				if (array_data_compare(ptrs[0]-1, ptrs[0] TSRMLS_CC))
+				if (behavior == 0) {
+					if (array_data_compare(ptrs[0]-1, ptrs[0] TSRMLS_CC))
+						break;
+				} else if (behavior == 1) {
+					/* in this case no array_key_compare is needed */
 					break;
+				}
 			}
 		} else {
 			/* ptrs[0] in none of the other arguments */
@@ -2700,8 +2722,13 @@ PHP_FUNCTION(array_diff)
 			for (;;) {
 				if (!*++ptrs[0])
 					goto out;
-				if (array_data_compare(ptrs[0]-1, ptrs[0] TSRMLS_CC))
+				if (behavior == 0) {
+					if (array_data_compare(ptrs[0]-1, ptrs[0] TSRMLS_CC))
+						break;
+				} else if (behavior == 1) {
+					/* in this case no array_key_compare is needed */
 					break;
+				}
 			}
 		}
 	}
@@ -2714,7 +2741,24 @@ out:
 	efree(lists);
 	efree(args);
 }
+
+/* {{{ proto array array_diff(array arr1, array arr2 [, array ...])
+   Returns the entries of arr1 that have values which are not present in any of the others arguments */
+PHP_FUNCTION(array_diff)
+{
+	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0 TSRMLS_CC);
+}
 /* }}} */
+
+/* {{{ proto array array_diff_assoc(array arr1, array arr2 [, array ...])
+   Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal */
+PHP_FUNCTION(array_diff_assoc)
+{
+	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1 TSRMLS_CC);
+}
+/* }}} */
+
+
 
 #define MULTISORT_ORDER	0
 #define MULTISORT_TYPE	1
