@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Added support for converting images from JPG/PNG on the fly with the GD
+  extension, which is usefull for creating dynamic WAP-sites (Derick)
 - Updated ext/mysql/libmysql to version 3.23.32; bug fixes (tim@mysql.com)
 - Fixed possible crash in all (non-pcre) regex functions. (Thies)
 - Improved str_replace() to accept an array for any parameter - similar
