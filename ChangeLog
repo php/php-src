@@ -1,3 +1,71 @@
+2001-12-13  Alexander Merz  <alexander.merz@t-online.de>
+
+    * pear/DB/common.php
+      pear/DB.php: fix phpdoc
+
+2001-12-13  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: - Remove debug stuff
+
+    * ext/mcrypt/mcrypt.c: - Remove debug crap
+
+    * ext/mcrypt/mcrypt.c:
+    - MFH for bugs 10324, 12777, 14488, 13399 and probably 13239
+
+    * ext/mcrypt/mcrypt.c: - Fixes for bugs 10324, 12777, 14488 and 13399
+    - Fixed several crash bugs in the mcrypt extension 
+
+2001-12-13  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c:
+    fixed some minor bugs and reordered some code to fix array uploads.
+
+2001-12-13  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * NEWS: This'll come with 4.1.1
+
+    * ext/mcrypt/mcrypt.c: MFB
+
+    * ext/mcrypt/mcrypt.c:
+    Fix mcrypt compile on systems that don't have mcrypt
+
+2001-12-13  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/ncurses/ncurses_functions.c: more proto descriptions and fixes
+
+2001-12-13  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * EXTENSIONS: added mbstring to EXTENSIONS.
+
+    * pear/DB/pgsql.php
+      ext/iconv/iconv.c
+      ext/iconv/php_iconv.h: added mbstring to maintainers list.
+
+2001-12-13  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/filestat.c: MFH
+
+2001-12-13  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c: typo
+
+2001-12-13  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/parsedate.y: MFH timezone fix
+
+2001-12-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c: Provide access to ini settings.
+
+    Properly block the thread, if IO is not ready on a fd.
+
+2001-12-13  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/ncurses/ncurses_functions.c: - new parameter parsing api used
+    - added proto descriptions (not complete)
+    - swapped x/y arguments
+    - indentation style fix (no seperate WS fix as most of the file changed anyway)
+
 2001-12-12  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/skeleton/create_stubs: editor preferences for XML files updated
