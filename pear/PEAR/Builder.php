@@ -68,7 +68,7 @@ class PEAR_Builder extends PEAR_Common
      *
      * @return array an array of associative arrays with built files,
      * format:
-     * array( array( 'name' => '/path/to/ext.so',
+     * array( array( 'file' => '/path/to/ext.so',
      *               'php_api' => YYYYMMDD,
      *               'zend_mod_api' => YYYYMMDD,
      *               'zend_ext_api' => YYYYMMDD ),
@@ -124,13 +124,13 @@ class PEAR_Builder extends PEAR_Common
         $build_basedir = "/var/tmp/pear-build-$_ENV[USER]";
         $build_dir = "$build_basedir/$info[package]-$info[version]";
         $this->log(1, "building in $build_dir");
-        if (PEAR::isError($err = System::rm("-rf $build_dir"))) {
-            return $err;
+        if (is_dir($build_dir)) {
+            System::rm("-rf $build_dir");
         }
         if (!System::mkDir("-p $build_dir")) {
             return $this->raiseError("could not create build dir: $build_dir");
         }
-
+        $this->addTempFile($build_dir);
         if (isset($_ENV['MAKE'])) {
             $make_command = $_ENV['MAKE'];
         } else {
@@ -199,6 +199,7 @@ class PEAR_Builder extends PEAR_Common
         if ($what != 'cmdoutput') {
             return;
         }
+        $this->log(3, rtrim($data));
         if (preg_match('/You should update your .aclocal.m4/', $data)) {
             return;
         }
@@ -236,7 +237,7 @@ class PEAR_Builder extends PEAR_Common
     function _runCommand($command, $callback = null)
     {
         $this->log(1, "running: $command");
-        $pp = @popen($command, "r");
+        $pp = @popen("$command 2>&1", "r");
         if (!$pp) {
             return $this->raiseError("failed to run `$command'");
         }

@@ -42,6 +42,7 @@
 * new command: "build"
 * fix: config-set did not work with "set" parameters
 * disable magic_quotes_runtime
+* "install" now builds and installs C extensions
 </notes>
     <filelist>
       <file role="data" name="package.dtd"/>
