@@ -128,6 +128,7 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable *services;
 	HashTable *overrides;
 	int cur_uniq_ns;
+	int soap_version;
 	sdlPtr sdl;
 	zend_bool use_soap_error_handler;
 ZEND_END_MODULE_GLOBALS(soap)

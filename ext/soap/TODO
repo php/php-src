@@ -3,12 +3,16 @@ General
 - rename soapobject to soapclient
 - make sure soapvar and soapparam are really need
 - make sure soapserver.map(), soap_encode_to_xml() and soap_encode_to_zval() are really need
+- reimplement SoapObject::__getfunctions() and SoapObject::__gettypes()
+  to return structures instead of strings
 
 SOAP
 ----
 + SOAP versioning model
 + SOAP message must not contain a Document Type Declaration
 - SOAP message MUST NOT contain Processing Instructions <?xml-stylesheet ... ?> (XML_PI_NODE)
+- SOAP 1.1 fault codes ("client","server"), SOAP 1.1 fault codes ("Sender","Receiver")
++ SOAP 1.1 Content-Type - "text/xml", SOAP 1.2 - "application/soap+xml"
 - support for SOAP headers
   - actor attribute
   - mustUnderstend attribute
@@ -18,21 +22,22 @@ Encoding
 --------
 - full support for standard simple types (
   + anyType
-  ? duration, 
-  ? anyURI, 
-  ? QName, 
-  ? NOTATION,
+  + anyURI, 
+  + QName, 
+  + NOTATION,
   + normalizedString, 
-  ? token, 
-  ? language, 
-  ? NMTOKEN, 
-  ? Name, 
-  ? NCName, 
-  ? ID, 
-  ? IDREF,
-  ? IDREFS, 
-  ? ENTITY, 
-  ? ENTITIES, 
+  + token, 
+  ? language, (pattern: "[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*")
+  ? NMTOKEN, (pattern: "\c+") (\c: [a-zA-Z0-9.\-_:])
+  ? NMTOKENS, (list: NMTOKEN, minLength: 1)
+  ? Name, (pattern: "\i\c*") (\i: [a-zA-Z_:]
+  ? NCName, (pattern: "[\i-[:]][\c-[:]]*")
+  ? ID, (base: NCName)
+  ? IDREF, (base: NCName)
+  ? IDREFS, (list: IDREF; minLength: 1) 
+  ? ENTITY, (base: NCName)
+  ? ENTITIES,  (list: ENTITY; minLength: 1) 
+  ? duration, 
   + unsignedLong)
 - full support for standard date/time types (
   ? dateTime,
@@ -51,7 +56,10 @@ Encoding
   + position attribute
   + multidimensional arrays
   + arrays of arrays
-  - encoding of arrays with holes
+	- SOAP 1.2 array encoding/decoding (itemType, arraySize)
+  - SOAP 1.1 - arrayType="xsd:ur-type[]", SOAP 1.2 - itemType="xsd:anyType"
+  - SOAP 1.1 encoding of arrays with holes (partially transmitted and sparse arrays)
+	  SOAP 1.2 doesn't support partially transmitted and sparse arrays
 - full support for structures???  
 + references (id,href)
 - references to external resources

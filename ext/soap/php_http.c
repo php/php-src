@@ -8,7 +8,7 @@ static int get_http_headers(php_stream *socketd,char **response, int *out_size T
 #define smart_str_append_const(str, const) \
 	smart_str_appendl(str,const,sizeof(const)-1)
 
-int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *soapaction TSRMLS_DC)
+int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *soapaction, int soap_version TSRMLS_DC)
 {
 	xmlChar *buf;
 	smart_str soap_headers = {0};
@@ -130,9 +130,13 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 			"Connection: close\r\n"
 			"Accept: text/html; text/xml; text/plain\r\n"
 */
-			"User-Agent: PHP SOAP 0.1\r\n"
-			"Content-Type: text/xml; charset=\"utf-8\"\r\n"
-			"Content-Length: ");
+			"User-Agent: PHP SOAP 0.1\r\n");
+		if (soap_version == SOAP_1_2) {
+			smart_str_append_const(&soap_headers,"Content-Type: application/soap+xml; charset=\"utf-8\"\r\n");
+		} else {
+			smart_str_append_const(&soap_headers,"Content-Type: text/xml; charset=\"utf-8\"\r\n");
+		}
+		smart_str_append_const(&soap_headers,"Content-Length: ");
 		smart_str_append_long(&soap_headers, buf_size);
 		smart_str_append_const(&soap_headers, "\r\n"
 			"SOAPAction: \"");
