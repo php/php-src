@@ -312,6 +312,7 @@ sys/select.h \
 sys/socket.h \
 sys/statfs.h \
 sys/statvfs.h \
+sys/vfs.h \
 sys/sysexits.h \
 sys/time.h \
 sys/types.h \

@@ -34,6 +34,10 @@
 # include <unistd.h>
 #endif
 
+#if HAVE_SYS_VFS_H
+# include <sys/vfs.h>
+#endif
+
 #ifdef OS2
 #  define INCL_DOS
 #  include <os2.h>
