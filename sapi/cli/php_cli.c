@@ -870,7 +870,7 @@ int main(int argc, char *argv[])
 		if (param_error) {
 			PUTS(param_error);
 			exit_status=1;
-			goto out_err;
+			goto err;
 		}
 
 		CG(interactive) = interactive;
