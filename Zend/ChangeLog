@@ -1,3 +1,17 @@
+2002-03-10  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c: - Fix build in ZTS mode.
+
+2002-03-10  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_object_handlers.c
+      zend_object_handlers.h: New stuff for objects API:
+    - Better assignment handling
+    - More flexible operations with zval-containing objects
+
 2002-03-09  Andi Gutmans  <andi@zend.com>
 
     * tests/zend2.php:
