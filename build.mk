@@ -36,7 +36,7 @@ targets = $(makefile_in_files) configure $(config_h_in)
 all: $(targets)
 	@for i in $(SUBDIRS); do \
 		test -d $$i || (test -d ../$$i && ln -s ../$$i $$i); \
-		(cd $$i && $(MAKE) -f build.mk AMFLAGS=$(AMFLAGS)); \
+		(cd $$i>/dev/null && $(MAKE) -f build.mk AMFLAGS=$(AMFLAGS)); \
 	done
 
 all: $(STAMP)
