@@ -250,9 +250,9 @@ ZEND_API ZEND_FUNCTION(display_disabled_function);
 
 #if ZEND_DEBUG
 #define CHECK_ZVAL_STRING(z) \
-	if ((z)->value.str.val[ (z)->value.str.len ] != '\0') zend_error(E_WARNING, "String is not zero-terminated (%s)", (z)->value.str.val);
+	if ((z)->value.str.val[ (z)->value.str.len ] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s)", (z)->value.str.val); }
 #define CHECK_ZVAL_STRING_REL(z) \
-	if ((z)->value.str.val[ (z)->value.str.len ] != '\0') zend_error(E_WARNING, "String is not zero-terminated (%s) (source: %s:%d)", (z)->value.str.val ZEND_FILE_LINE_RELAY_CC);
+	if ((z)->value.str.val[ (z)->value.str.len ] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s) (source: %s:%d)", (z)->value.str.val ZEND_FILE_LINE_RELAY_CC); }
 #else
 #define CHECK_ZVAL_STRING(z)
 #define CHECK_ZVAL_STRING_REL(z)
