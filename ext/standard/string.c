@@ -41,22 +41,22 @@ static char hexconvtab[] = "0123456789abcdef";
 
 static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *newlen)
 {
-	unsigned char *new = NULL;
+	unsigned char *result = NULL;
 	size_t i, j;
 
-	new = (char *) emalloc(oldlen * 2 * sizeof(char));
-	if(!new) {
-		return new;
+	result = (char *) emalloc(oldlen * 2 * sizeof(char));
+	if(!result) {
+		return result;
 	}
 	
 	for(i = j = 0; i < oldlen; i++) {
-		new[j++] = hexconvtab[old[i] >> 4];
-		new[j++] = hexconvtab[old[i] & 15];
+		result[j++] = hexconvtab[old[i] >> 4];
+		result[j++] = hexconvtab[old[i] & 15];
 	}
 
 	if(newlen) *newlen = oldlen * 2 * sizeof(char);
 
-	return new;
+	return result;
 }
 
 /* {{{ proto string bin2hex(string data)
@@ -64,7 +64,7 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 PHP_FUNCTION(bin2hex)
 {
 	zval **data;
-	char *new;
+	char *result;
 	size_t newlen;
 
 	if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
@@ -73,13 +73,13 @@ PHP_FUNCTION(bin2hex)
 
 	convert_to_string_ex(data);
 
-	new = php_bin2hex((*data)->value.str.val, (*data)->value.str.len, &newlen);
+	result = php_bin2hex((*data)->value.str.val, (*data)->value.str.len, &newlen);
 	
-	if(!new) {
+	if(!result) {
 		RETURN_FALSE;
 	}
 
-	RETURN_STRINGL(new, newlen, 0);
+	RETURN_STRINGL(result, newlen, 0);
 }
 /* }}} */
 
@@ -1746,21 +1746,21 @@ PHPAPI char *php_str_to_str(char *haystack, int length,
 	char *p, *q;
 	char *r, *s;
 	char *end = haystack + length;
-	char *new;
+	char *result;
 	char *off;
 	
-	new = emalloc(length);
+	result = emalloc(length);
 	/* we jump through haystack searching for the needle. hurray! */
-	for(p = haystack, q = new;
+	for(p = haystack, q = result;
 			(r = php_memnstr(p, needle, needle_len, end));) {
 	/* this ain't optimal. you could call it `efficient memory usage' */
-		off = erealloc(new, (q - new) + (r - p) + (str_len) + 1);
-		if(off != new) {
+		off = erealloc(result, (q - result) + (r - p) + (str_len) + 1);
+		if(off != result) {
 			if(!off) {
 				goto finish;
 			}
-			q += off - new;
-			new = off;
+			q += off - result;
+			result = off;
 		}
 		memcpy(q, p, r - p);
 		q += r - p;
@@ -1772,13 +1772,13 @@ PHPAPI char *php_str_to_str(char *haystack, int length,
 	/* if there is a rest, copy it */
 	if((end - p) > 0) {
 		s = (q) + (end - p);
-		off = erealloc(new, s - new + 1);
-		if(off != new) {
+		off = erealloc(result, s - result + 1);
+		if(off != result) {
 			if(!off) {
 				goto finish;
 			}
-			q += off - new;
-			new = off;
+			q += off - result;
+			result = off;
 			s = q + (end - p);
 		}
 		memcpy(q, p, end - p);
@@ -1786,8 +1786,8 @@ PHPAPI char *php_str_to_str(char *haystack, int length,
 	}
 finish:
 	*q = '\0';
-	if(_new_length) *_new_length = q - new;
-	return new;
+	if(_new_length) *_new_length = q - result;
+	return result;
 }
 
 
@@ -1796,7 +1796,7 @@ finish:
 PHP_FUNCTION(str_replace)
 {
 	zval **haystack, **needle, **str;
-	char *new;
+	char *result;
 	int len = 0;
 
 	if(ARG_COUNT(ht) != 3 ||
@@ -1827,10 +1827,10 @@ PHP_FUNCTION(str_replace)
 		RETURN_FALSE;
 	}
 
-	new = php_str_to_str((*haystack)->value.str.val, (*haystack)->value.str.len,
+	result = php_str_to_str((*haystack)->value.str.val, (*haystack)->value.str.len,
 						 (*needle)->value.str.val, (*needle)->value.str.len,
 						 (*str)->value.str.val, (*str)->value.str.len, &len);
-	RETURN_STRINGL(new, len, 0);
+	RETURN_STRINGL(result, len, 0);
 }
 /* }}} */
 
