@@ -337,7 +337,7 @@ int send_parsed_php(request_rec * r)
 
 int send_parsed_php_source(request_rec * r)
 {
-	return send_php(r, 0, NULL);
+	return send_php(r, 1, NULL);
 }
 
 
