@@ -50,12 +50,10 @@ void spl_register_interface(zend_class_entry ** ppce, zend_namespace * namespace
 	zend_class_entry ce;
 	
 	INIT_CLASS_ENTRY(ce, class_name, NULL);
-	ce.num_interfaces = 0;
 	*ppce = zend_register_internal_ns_class(&ce, NULL, namespace_entry, NULL TSRMLS_CC);
 
 	/* entries changed by initialize */
 	(*ppce)->ce_flags = ZEND_ACC_ABSTRACT | ZEND_ACC_INTERFACE;
-	(*ppce)->ns = namespace_entry;
 }
 /* }}} */
 
@@ -66,15 +64,11 @@ void spl_register_std_class(zend_class_entry ** ppce, zend_namespace * namespace
 	memset(&ce, 0, sizeof(zend_class_entry));
 	
 	INIT_CLASS_ENTRY(ce, class_name, NULL);
-
-	ce.num_interfaces = 0;
-
 	*ppce = zend_register_internal_ns_class(&ce, NULL, namespace_entry, NULL TSRMLS_CC);
 
 	/* entries changed by initialize */
 	(*ppce)->ce_flags = ZEND_ACC_ABSTRACT | ZEND_ACC_INTERFACE;
 	(*ppce)->create_object = obj_ctor;
-	(*ppce)->ns = namespace_entry;
 }
 /* }}} */
 
