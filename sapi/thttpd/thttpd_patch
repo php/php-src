@@ -108,8 +108,6 @@ diff -ur thttpd-2.21/libhttpd.c thttpd-2.21-p/libhttpd.c
  
      /* It's not CGI.  If it's executable or there's pathinfo, someone's
      ** trying to either serve or run a non-CGI file as CGI.   Either case
-Only in thttpd-2.21-p: libhttpd.c.rej
-Only in thttpd-2.21-p: libhttpd.c~
 diff -ur thttpd-2.21/libhttpd.h thttpd-2.21-p/libhttpd.h
 --- thttpd-2.21/libhttpd.h	Fri Apr 13 07:37:17 2001
 +++ thttpd-2.21-p/libhttpd.h	Sun Apr 22 15:59:42 2001
@@ -137,4 +135,3 @@ diff -ur thttpd-2.21/thttpd.c thttpd-2.21-p/thttpd.c
      if ( c->bytes_sent >= c->bytes_to_send )
  	{
  	/* There's nothing to send. */
-Only in thttpd-2.21-p: thttpd.c~
