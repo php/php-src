@@ -21,7 +21,7 @@ foreach ($data as $str) {
 	$db->query("INSERT INTO strings VALUES('$str')");
 }
 
-$res = $db->arrayQuery("SELECT a from strings", SQLITE_NUM);
+$res = $db->array_query("SELECT a from strings", SQLITE_NUM);
 var_dump($res);
 
 echo "DONE!\n";
