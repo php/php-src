@@ -37,6 +37,8 @@ static zval *com_property_read(zval *object, zval *member, zend_bool silent TSRM
 
 	MAKE_STD_ZVAL(return_value);
 	ZVAL_NULL(return_value);
+	return_value->refcount = 0;
+	return_value->is_ref = 0;
 
 	obj = CDNO_FETCH(object);
 
@@ -110,6 +112,8 @@ static zval *com_read_dimension(zval *object, zval *offset TSRMLS_DC)
 
 	MAKE_STD_ZVAL(return_value);
 	ZVAL_NULL(return_value);
+	return_value->refcount = 0;
+	return_value->is_ref = 0;
 
 	obj = CDNO_FETCH(object);
 
