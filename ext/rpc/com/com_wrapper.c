@@ -1183,6 +1183,14 @@ static int process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int prin
 
 					if (isprop) {
 
+						typeinfo->lpVtbl->GetDocumentation(typeinfo, func->memid, NULL, &olename, NULL, NULL);
+						if (olename) {
+							funcdesc = php_OLECHAR_to_char(olename, &funcdesclen, codepage TSRMLS_CC);
+							SysFreeString(olename);
+							php_printf("\t/* %s */\n", funcdesc);
+							efree(funcdesc);
+						}
+
 						php_printf("\tvar $%s;\n\n", ansiname);
 
 					} else {
