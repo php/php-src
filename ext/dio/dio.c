@@ -421,7 +421,7 @@ PHP_FUNCTION(dio_tcsetattr)
 	php_fd_t *f;
 	int       cmd;
         struct termios newtio;
-        int Baud_Rate, Data_Bits=8, Stop_Bits=0, Parity=1;
+        int Baud_Rate, Data_Bits=8, Stop_Bits=1, Parity=0;
 	long BAUD,DATABITS,STOPBITS,PARITYON,PARITY;
         HashTable      *fh;
         zval          **element;
@@ -456,7 +456,7 @@ PHP_FUNCTION(dio_tcsetattr)
         }
         
         if (zend_hash_find(fh, "stop", sizeof("stop"), (void **) &element) == FAILURE) {
-                Stop_Bits    = 0;
+                Stop_Bits    = 1;
         }
         else {
                 Stop_Bits  = Z_LVAL_PP(element);
