@@ -1,3 +1,8 @@
+2004-03-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/lang/bug23384.phpt:
+      Fix test
+
 2004-03-19  Sara Golemon  <php@alphaweb.net>
 
     * ext/standard/dns.c:
