@@ -12,7 +12,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Hartmut Holzgraefe                                           |
+  | Author: Hartmut Holzgraefe  <hartmut@six.de>                         |
   +----------------------------------------------------------------------+
 
   $Id$ 
@@ -1043,7 +1043,7 @@ static void tryit(unsigned char *buf, int nb, int checkzmagic)
     /*
      * Try compression stuff
      */
-#if 0 /* TODO */
+#if HAVE_ZLIB
 	if (checkzmagic == 1) {  
 		if (zmagic(buf, nb) == 1)
 			return;
@@ -1689,47 +1689,12 @@ static int mcheck(union VALUETYPE *p, struct magic *m)
     return matched;
 }
 
-#if 0 /* TODO */
+#if HAVE_ZLIB
 /*
  * compress routines: zmagic() - returns 0 if not recognized, uncompresses
  * and prints information if recognized uncompress(s, method, old, n, newch)
  * - uncompress old into new, using method, return sizeof new
  */
-
-static struct {
-    char *magic;
-    int maglen;
-    char *argv[3];
-    int silent;
-    char *encoding;	/* MUST be lowercase */
-} compr[] = {
-
-    /* we use gzip here rather than uncompress because we have to pass
-     * it a full filename -- and uncompress only considers filenames
-     * ending with .Z
-     */
-    {
-		"\037\235", 2, {
-			"gzip", "-dcq", NULL
-		}, 0, "x-compress"
-    },
-    {
-		"\037\213", 2, {
-			"gzip", "-dcq", NULL
-		}, 1, "x-gzip"
-    },
-    /*
-     * XXX pcat does not work, cause I don't know how to make it read stdin,
-     * so we use gzip
-     */
-    {
-		"\037\036", 2, {
-			"gzip", "-dcq", NULL
-		}, 0, "x-gzip"
-    },
-};
-
-static int ncompr = sizeof(compr) / sizeof(compr[0]);
 
 static int zmagic(unsigned char *buf, int nbytes)
 {
@@ -1737,126 +1702,28 @@ static int zmagic(unsigned char *buf, int nbytes)
     int newsize;
     int i;
 
-    for (i = 0; i < ncompr; i++) {
-		if (nbytes < compr[i].maglen)
-			continue;
-		if (memcmp(buf, compr[i].magic, compr[i].maglen) == 0)
-			break;
-    }
+	if (buf[0] != 0x1f) return 0;
 
-    if (i == ncompr)
-		return 0;
+	switch(buf[1]) {
+	case 0x9d: /* .Z "x-compress" */
+		break; /* not yet supportet */
 
-    if ((newsize = uncompress(i, &newbuf, nbytes)) > 0) {
-		tryit(newbuf, newsize, 0);
-
-		/* set encoding type in the request record */
-		/* TODO r->content_encoding = compr[i].encoding; */
-    }
-    return 1;
-}
-
-
-struct uncompress_parms {
-    request_rec *r;
-    int method;
-};
-
-static int uncompress_child(void *data, child_info *pinfo)
-{
-    struct uncompress_parms *parm = data;
-#ifndef WIN32
-    char *new_argv[4];
-
-    new_argv[0] = compr[parm->method].argv[0];
-    new_argv[1] = compr[parm->method].argv[1];
-    new_argv[2] = parm->r->filename;
-    new_argv[3] = NULL;
-
-    if (compr[parm->method].silent) {
-		close(STDERR_FILENO);
-    }
-
-    execvp(compr[parm->method].argv[0], new_argv);
-    ap_log_rerror(APLOG_MARK, APLOG_ERR, parm->r,
-				  MODNAME ": could not execute `%s'.",
-				  compr[parm->method].argv[0]);
-    return -1;
-#else
-    char *pCommand;
-    STARTUPINFO si;
-    PROCESS_INFORMATION pi;
-    pid_t pid;
-
-    memset(&si, 0, sizeof(si));
-    memset(&pi, 0, sizeof(pi));
-
-    pid = -1;
-
-    /*
-     * Look at the arguments...
-     */
-    pCommand = ap_pstrcat(parm->r->pool, compr[parm->method].argv[0], " ",
-						  compr[parm->method].argv[1], " \"",
-						  parm->r->filename, "\"", NULL);
-
-    /*
-     * Make child process use hPipeOutputWrite as standard out,
-     * and make sure it does not show on screen.
-     */
-    si.cb = sizeof(si);
-    si.dwFlags     = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
-    si.wShowWindow = SW_HIDE;
-    si.hStdInput   = pinfo->hPipeInputRead;
-    si.hStdOutput  = pinfo->hPipeOutputWrite;
-    si.hStdError   = pinfo->hPipeErrorWrite;
-
-    if (CreateProcess(NULL, pCommand, NULL, NULL, TRUE, 0, NULL,
-                      ap_make_dirstr_parent(parm->r->pool, parm->r->filename),
-                      &si, &pi)) {
-        pid = pi.dwProcessId;
-        /*
-         * We must close the handles to the new process and its main thread
-         * to prevent handle and memory leaks.
-         */ 
-        CloseHandle(pi.hProcess);
-        CloseHandle(pi.hThread);
-    }
-    return (pid);
+	case 0x8b: /* .gz "x-gzip" */
+#if 0
+		if ((newsize = magic_uncompress(i, &newbuf, nbytes)) > 0) {
+			tryit(newbuf, newsize, 0);
+			
+			/* set encoding type in the request record */
+			/* TODO r->content_encoding = compr[i].encoding; */
+		}
 #endif
-}
-
-static int uncompress(int method, unsigned char **newch, int n)
-{
-    struct uncompress_parms parm;
-    BUFF *bout;
-    pool *sub_pool;
-
-    parm.r = r;
-    parm.method = method;
-
-    /* We make a sub_pool so that we can collect our child early, otherwise
-     * there are cases (i.e. generating directory indicies with mod_autoindex)
-     * where we would end up with LOTS of zombies.
-     */
-    sub_pool = ap_make_sub_pool(r->pool);
-
-    if (!ap_bspawn_child(sub_pool, uncompress_child, &parm, kill_always,
-						 NULL, &bout, NULL)) {
-		ap_log_rerror(APLOG_MARK, APLOG_ERR, r,
-					  MODNAME ": couldn't spawn uncompress process: %s", r->uri);
-		return -1;
+		break; /* not yet supported */
+		
+	case 0x1e: /* simply packed ? */
+		break; /* not yet supported */
     }
 
-    *newch = (unsigned char *) emalloc(n);
-    if ((n = ap_bread(bout, *newch, n)) <= 0) {
-		ap_destroy_pool(sub_pool);
-		ap_log_rerror(APLOG_MARK, APLOG_ERR, r,
-					  MODNAME ": read failed %s", r->filename);
-		return -1;
-    }
-    ap_destroy_pool(sub_pool);
-    return n;
+	return 0;
 }
 #endif 
 
