@@ -609,7 +609,7 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 		if (EG(error_reporting) & E_NOTICE) {
 			ecur = IMAPG(imap_errorstack);
 			while (ecur != NIL) {
-				php_error(E_NOTICE, "%s(): %s (errflg=%d)", get_active_function_name(TSRMLS_C), ecur->LTEXT, ecur->errflg);
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s (errflg=%d)", ecur->LTEXT, ecur->errflg);
 				ecur = ecur->next;
 			}
 		}
@@ -621,7 +621,7 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 		if (EG(error_reporting) & E_NOTICE) {
 			acur = IMAPG(imap_alertstack);
 			while (acur != NIL) {
-				php_error(E_NOTICE, "%s(): %s", get_active_function_name(TSRMLS_C), acur->LTEXT);
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s", acur->LTEXT);
 				acur = acur->next;
 			}
 		}
@@ -698,7 +698,7 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	imap_stream = mail_open(NIL, Z_STRVAL_PP(mailbox), flags);
 
 	if (imap_stream == NIL) {
-		php_error(E_WARNING, "%s(): Couldn't open stream %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(mailbox));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't open stream %s", Z_STRVAL_PP(mailbox));
 		efree(IMAPG(imap_user)); IMAPG(imap_user) = 0;
 		efree(IMAPG(imap_password)); IMAPG(imap_password) = 0;
 		RETURN_FALSE;
@@ -750,7 +750,7 @@ PHP_FUNCTION(imap_reopen)
 	}
 	imap_stream = mail_open(imap_le_struct->imap_stream, Z_STRVAL_PP(mailbox), flags);
 	if (imap_stream == NIL) {
-		php_error(E_WARNING, "%s(): Couldn't re-open stream", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't re-open stream");
 		RETURN_FALSE;
 	}
 	imap_le_struct->imap_stream = imap_stream;
@@ -857,19 +857,16 @@ PHP_FUNCTION(imap_get_quota)
 
 	convert_to_string_ex(qroot);
 
-	MAKE_STD_ZVAL(IMAPG(quota_return));
-	array_init(IMAPG(quota_return));
+	array_init(return_value);
+	*IMAPG(quota_return) = *return_value;
 
 	/* set the callback for the GET_QUOTA function */
 	mail_parameters(NIL, SET_QUOTA, (void *) mail_getquota);
 	if(!imap_getquota(imap_le_struct->imap_stream, Z_STRVAL_PP(qroot))) {
-		php_error(E_WARNING, "%s(): c-client imap_getquota failed", get_active_function_name(TSRMLS_C));
-		FREE_ZVAL(IMAPG(quota_return));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "c-client imap_getquota failed");
+		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
-
-	*return_value = *IMAPG(quota_return);
-	FREE_ZVAL(IMAPG(quota_return));
 }
 /* }}} */
 
@@ -888,19 +885,16 @@ PHP_FUNCTION(imap_get_quotaroot)
 
 	convert_to_string_ex(mbox);
 
-	MAKE_STD_ZVAL(IMAPG(quota_return));
-	array_init(IMAPG(quota_return));
+	array_init(return_value);
+	*IMAPG(quota_return) = *return_value;
 
 	/* set the callback for the GET_QUOTAROOT function */
 	mail_parameters(NIL, SET_QUOTA, (void *) mail_getquota);
 	if(!imap_getquotaroot(imap_le_struct->imap_stream, Z_STRVAL_PP(mbox))) {
-		php_error(E_WARNING, "%s(): c-client imap_getquotaroot failed", get_active_function_name(TSRMLS_C));
-		FREE_ZVAL(IMAPG(quota_return));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "c-client imap_getquotaroot failed");
+		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
-
-	*return_value = *IMAPG(quota_return);
-	FREE_ZVAL(IMAPG(quota_return));
 }
 /* }}} */
 
@@ -1081,7 +1075,7 @@ PHP_FUNCTION(imap_body)
 		msgindex = Z_LVAL_PP(msgno);
 	}
 	if ((msgindex < 1) || ((unsigned) msgindex > imap_le_struct->imap_stream->nmsgs)) {
-		php_error(E_WARNING, "%s(): Bad message number", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad message number");
 		RETURN_FALSE;
 	}
 
@@ -1454,7 +1448,7 @@ PHP_FUNCTION(imap_headerinfo)
 	}
 	
 	if (!Z_LVAL_PP(msgno) || Z_LVAL_PP(msgno) < 1 || (unsigned) Z_LVAL_PP(msgno) > imap_le_struct->imap_stream->nmsgs) {
-		php_error(E_WARNING, "%s(): Bad message number", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad message number");
 		RETURN_FALSE;
 	}
 	
@@ -1705,14 +1699,14 @@ PHP_FUNCTION(imap_fetchstructure)
 		msgindex = Z_LVAL_PP(msgno);
 	}
 	if ((msgindex < 1) || ((unsigned) msgindex > imap_le_struct->imap_stream->nmsgs)) {
-		php_error(E_WARNING, "%s(): Bad message number", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad message number");
 		RETURN_FALSE;
 	}
 
 	mail_fetchstructure_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), &body , myargc == 3 ? Z_LVAL_PP(flags) : NIL);
 	
 	if (!body) {
-		php_error(E_WARNING, "%s(): No body information available", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No body information available");
 		RETURN_FALSE;
 	}
 	
@@ -1745,7 +1739,7 @@ PHP_FUNCTION(imap_fetchbody)
 	body = mail_fetchbody_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), Z_STRVAL_PP(sec), &len, myargc==4 ? Z_LVAL_PP(flags) : NIL);
 
 	if (!body) {
-		php_error(E_WARNING, "%s(): No body information available", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No body information available");
 		RETURN_FALSE;
 	}
 	RETVAL_STRINGL(body, len, 1);
@@ -2065,12 +2059,12 @@ PHP_FUNCTION(imap_utf7_decode)
 		if (state == ST_NORMAL) {
 			/* process printable character */
 			if (SPECIAL(*inp)) {
-				php_error(E_WARNING, "%s(): Invalid modified UTF-7 character: `%c'", get_active_function_name(TSRMLS_C), *inp);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid modified UTF-7 character: `%c'", *inp);
 				RETURN_FALSE;
 			} else if (*inp != '&') {
 				outlen++;
 			} else if (inp + 1 == endp) {
-				php_error(E_WARNING, "%s(): Unexpected end of string", get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unexpected end of string");
 				RETURN_FALSE;
 			} else if (inp[1] != '-') {
 				state = ST_DECODE0;
@@ -2081,12 +2075,12 @@ PHP_FUNCTION(imap_utf7_decode)
 		} else if (*inp == '-') {
 			/* return to NORMAL mode */
 			if (state == ST_DECODE1) {
-				php_error(E_WARNING, "%s(): Stray modified base64 character: `%c'", get_active_function_name(TSRMLS_C), *--inp);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Stray modified base64 character: `%c'", *--inp);
 				RETURN_FALSE;
 			}
 			state = ST_NORMAL;
 		} else if (!B64CHAR(*inp)) {
-			php_error(E_WARNING, "%s(): Invalid modified base64 character: `%c'", get_active_function_name(TSRMLS_C), *inp);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid modified base64 character: `%c'", *inp);
 			RETURN_FALSE;
 		} else {
 			switch (state) {
@@ -2107,15 +2101,12 @@ PHP_FUNCTION(imap_utf7_decode)
 
 	/* enforce end state */
 	if (state != ST_NORMAL) {
-		php_error(E_WARNING, "%s(): Unexpected end of string", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unexpected end of string");
 		RETURN_FALSE;
 	}
 
 	/* allocate output buffer */
-	if ((out = emalloc(outlen + 1)) == NULL) {
-		php_error(E_WARNING, "%s(): Unable to allocate result string", get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
-	}
+	out = emalloc(outlen + 1);
 
 	/* decode input string */
 	outp = out;
@@ -2167,7 +2158,7 @@ PHP_FUNCTION(imap_utf7_decode)
 #if PHP_DEBUG
 	/* warn if we computed outlen incorrectly */
 	if (outp - out != outlen) {
-		php_error(E_WARNING, "%s(): outp - out [%d] != outlen [%d]", get_active_function_name(TSRMLS_C), outp - out, outlen);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "outp - out [%d] != outlen [%d]", outp - out, outlen);
 	}
 #endif
 
@@ -2233,10 +2224,7 @@ PHP_FUNCTION(imap_utf7_encode)
 	}
 
 	/* allocate output buffer */
-	if ((out = emalloc(outlen + 1)) == NULL) {
-		php_error(E_WARNING, "%s(): Unable to allocate result string", get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
-	}
+	out = emalloc(outlen + 1);
 
 	/* encode input string */
 	outp = out;
@@ -2289,7 +2277,7 @@ PHP_FUNCTION(imap_utf7_encode)
 #if PHP_DEBUG
 	/* warn if we computed outlen incorrectly */
 	if (outp - out != outlen) {
-		php_error(E_WARNING, "%s(): outp - out [%d] != outlen [%d]", get_active_function_name(TSRMLS_C), outp - out, outlen);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "outp - out [%d] != outlen [%d]", outp - out, outlen);
 	}
 #endif
 
@@ -2373,7 +2361,7 @@ PHP_FUNCTION(imap_sort)
 	convert_to_long_ex(rev);
 	convert_to_long_ex(pgm);
 	if (Z_LVAL_PP(pgm) > SORTSIZE) {
-		php_error(E_WARNING, "%s(): Unrecognized sort criteria", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unrecognized sort criteria");
 		RETURN_FALSE;
 	}
 	if (myargc >= 4) {
@@ -2437,7 +2425,7 @@ PHP_FUNCTION(imap_fetchheader)
 	}
 
 	if ((msgindex < 1) || ((unsigned) msgindex > imap_le_struct->imap_stream->nmsgs)) {
-		php_error(E_WARNING, "%s(): Bad message number", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad message number");
 		RETURN_FALSE;
 	}
 
@@ -2463,7 +2451,7 @@ PHP_FUNCTION(imap_uid)
  
 	msgindex = Z_LVAL_PP(msgno);
 	if ((msgindex < 1) || ((unsigned) msgindex > imap_le_struct->imap_stream->nmsgs)) {
-		php_error(E_WARNING, "%s(): Bad message number", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad message number");
 		RETURN_FALSE;
 	}
 
@@ -2553,7 +2541,7 @@ PHP_FUNCTION(imap_bodystruct)
 	convert_to_string_ex(section);
 
 	if (!Z_LVAL_PP(msg) || Z_LVAL_PP(msg) < 1 || (unsigned) Z_LVAL_PP(msg) > imap_le_struct->imap_stream->nmsgs) {
-		php_error(E_WARNING, "%s(): Bad message number", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad message number");
 		RETURN_FALSE;
 	}
 
@@ -2751,12 +2739,12 @@ PHP_FUNCTION(imap_mail_compose)
 	}
 
 	if (Z_TYPE_PP(envelope) != IS_ARRAY) {
-		php_error(E_WARNING, "%s(): Expected Array as envelope parameter", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected Array as envelope parameter");
 		RETURN_FALSE;
  	}
 
 	if (Z_TYPE_PP(body) != IS_ARRAY) {
-		php_error(E_WARNING, "%s(): Expected Array as body parameter", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected Array as body parameter");
 		RETURN_FALSE;
  	}
 
@@ -3220,10 +3208,10 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 
 	if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, bufferHeader, subject, bufferTo, message, bufferCc, bufferBcc, rpath) != SUCCESS) {
 		if (tsm_errmsg) {
-			php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), tsm_errmsg);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", tsm_errmsg);
 			efree(tsm_errmsg);
 		} else {
-			php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), GetSMErrorText(tsm_err));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", GetSMErrorText(tsm_err));
 		}
 		return 0;
 	}
@@ -3261,7 +3249,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 			return 1;
 		}
 	} else {
-		php_error(E_WARNING, "%s(): Could not execute mail delivery program", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute mail delivery program");
 		return 0;
 	}
 #endif
@@ -3286,7 +3274,7 @@ PHP_FUNCTION(imap_mail)
 	if (Z_STRVAL_PP(argv[0])) {
 		to = Z_STRVAL_PP(argv[0]);
 	} else {
-		php_error(E_WARNING, "%s(): No to field in mail command", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No to field in mail command");
 		RETURN_FALSE;
 	}
 
@@ -3295,7 +3283,7 @@ PHP_FUNCTION(imap_mail)
 	if (Z_STRVAL_PP(argv[1])) {
 		subject = Z_STRVAL_PP(argv[1]);
 	} else {
-		php_error(E_WARNING, "%s(): No subject field in mail command", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No subject field in mail command");
 		RETURN_FALSE;
 	}
 
@@ -3305,7 +3293,7 @@ PHP_FUNCTION(imap_mail)
 		message = Z_STRVAL_PP(argv[2]);
 	} else {
 		/* this is not really an error, so it is allowed. */
-		php_error(E_WARNING, "%s(): No message string in mail command", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No message string in mail command");
 		message = NULL;
 	}
 
@@ -3487,80 +3475,77 @@ PHP_FUNCTION(imap_mime_header_decode)
 	string = Z_STRVAL_PP(str);
 	end = Z_STRLEN_PP(str);
 			
-	if ((charset = ((char *)emalloc((end + 1) * 2)))) {
-		text = &charset[end + 1];
-		while (offset < end) {	/* Reached end of the string? */
-			if ((charset_token = (long)php_memnstr(&string[offset], "=?", 2, string + end))) {	/* Is there anything encoded in the string? */
-				charset_token -= (long)string;
-				if (offset != charset_token) {	/* Is there anything before the encoded data? */
-					/* Retrieve unencoded data that is found before encoded data */
-					memcpy(text, &string[offset], charset_token-offset);
-					text[charset_token - offset] = 0x00;
+	charset = (char *) emalloc((end + 1) * 2);
+	text = &charset[end + 1];
+	while (offset < end) {	/* Reached end of the string? */
+		if ((charset_token = (long)php_memnstr(&string[offset], "=?", 2, string + end))) {	/* Is there anything encoded in the string? */
+			charset_token -= (long)string;
+			if (offset != charset_token) {	/* Is there anything before the encoded data? */
+				/* Retrieve unencoded data that is found before encoded data */
+				memcpy(text, &string[offset], charset_token-offset);
+				text[charset_token - offset] = 0x00;
+				MAKE_STD_ZVAL(myobject);
+				object_init(myobject);
+				add_property_string(myobject, "charset", "default", 1);
+				add_property_string(myobject, "text", text, 1);
+				zend_hash_next_index_insert(Z_ARRVAL_P(return_value), (void *)&myobject, sizeof(zval *), NULL);
+			}
+			if ((encoding_token = (long)php_memnstr(&string[charset_token+2], "?", 1, string+end))) {		/* Find token for encoding */
+				encoding_token -= (long)string;
+				if ((end_token = (long)php_memnstr(&string[encoding_token+3], "?=", 2, string+end))) {	/* Find token for end of encoded data */
+					end_token -= (long)string;
+					memcpy(charset, &string[charset_token + 2], encoding_token - (charset_token + 2));	/* Extract charset encoding */
+					charset[encoding_token-(charset_token + 2)] = 0x00;
+					encoding=string[encoding_token + 1];	/* Extract encoding from string */
+					memcpy(text, &string[encoding_token + 3], end_token - (encoding_token + 3));	/* Extract text */
+					text[end_token - (encoding_token + 3)] = 0x00;
+					decode = text;
+					if (encoding == 'q' || encoding == 'Q') {	/* Decode 'q' encoded data */
+						for(i=0; text[i] != 0x00; i++) if (text[i] == '_') text[i] = ' ';	/* Replace all *_' with space. */
+						decode = (char *)rfc822_qprint((unsigned char *) text, strlen(text), &newlength);
+					} else if (encoding == 'b' || encoding == 'B') {
+						decode = (char *)rfc822_base64((unsigned char *) text, strlen(text), &newlength); /* Decode 'B' encoded data */
+					}
+					if (decode == NULL) {
+						efree(charset);
+						zval_dtor(return_value);
+						RETURN_FALSE;
+					}
 					MAKE_STD_ZVAL(myobject);
 					object_init(myobject);
-					add_property_string(myobject, "charset", "default", 1);
-					add_property_string(myobject, "text", text, 1);
+					add_property_string(myobject, "charset", charset, 1);
+					add_property_string(myobject, "text", decode, 1);
 					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), (void *)&myobject, sizeof(zval *), NULL);
-				}
-				if ((encoding_token = (long)php_memnstr(&string[charset_token+2], "?", 1, string+end))) {		/* Find token for encoding */
-					encoding_token -= (long)string;
-					if ((end_token = (long)php_memnstr(&string[encoding_token+3], "?=", 2, string+end))) {	/* Find token for end of encoded data */
-						end_token -= (long)string;
-						memcpy(charset, &string[charset_token + 2], encoding_token - (charset_token + 2));	/* Extract charset encoding */
-						charset[encoding_token-(charset_token + 2)] = 0x00;
-						encoding=string[encoding_token + 1];	/* Extract encoding from string */
-						memcpy(text, &string[encoding_token + 3], end_token - (encoding_token + 3));	/* Extract text */
-						text[end_token - (encoding_token + 3)] = 0x00;
-						decode = text;
-						if (encoding == 'q' || encoding == 'Q') {	/* Decode 'q' encoded data */
-							for(i=0; text[i] != 0x00; i++) if (text[i] == '_') text[i] = ' ';	/* Replace all *_' with space. */
-							decode = (char *)rfc822_qprint((unsigned char *) text, strlen(text), &newlength);
-						} else if (encoding == 'b' || encoding == 'B') {
-							decode = (char *)rfc822_base64((unsigned char *) text, strlen(text), &newlength); /* Decode 'B' encoded data */
-						}
-						if (decode == NULL) {
-							efree(charset);
-							zval_dtor(return_value);
-							RETURN_FALSE;
-						}
-						MAKE_STD_ZVAL(myobject);
-						object_init(myobject);
-						add_property_string(myobject, "charset", charset, 1);
-						add_property_string(myobject, "text", decode, 1);
-						zend_hash_next_index_insert(Z_ARRVAL_P(return_value), (void *)&myobject, sizeof(zval *), NULL);
-						fs_give((void**)&decode);
+					fs_give((void**)&decode);
 						
-						offset = end_token+2;
-						for (i = 0; (string[offset + i] == ' ') || (string[offset + i] == 0x0a) || (string[offset + i] == 0x0d); i++);
-						if ((string[offset + i] == '=') && (string[offset + i + 1] == '?') && (offset + i < end)) {
-							offset += i;
-						}
-						continue;	/*/ Iterate the loop again please. */
+					offset = end_token+2;
+					for (i = 0; (string[offset + i] == ' ') || (string[offset + i] == 0x0a) || (string[offset + i] == 0x0d); i++);
+					if ((string[offset + i] == '=') && (string[offset + i + 1] == '?') && (offset + i < end)) {
+						offset += i;
 					}
+					continue;	/*/ Iterate the loop again please. */
 				}
-			} else {
-				/* Just some tweaking to optimize the code, and get the end statements work in a general manner.
-				   If we end up here we didn't find a position for "charset_token",
-				   so we need to set it to the start of the yet unextracted data. */
-				charset_token = offset;
 			}
-			/* Return the rest of the data as unencoded, as it was either unencoded or was missing separators
-			   which rendered the the remainder of the string impossible for us to decode. */
-			memcpy(text, &string[charset_token], end - charset_token);	/* Extract unencoded text from string */
-			text[end - charset_token] = 0x00;
-			MAKE_STD_ZVAL(myobject);
-			object_init(myobject);
-			add_property_string(myobject, "charset", "default", 1);
-			add_property_string(myobject, "text", text, 1);
-			zend_hash_next_index_insert(Z_ARRVAL_P(return_value), (void *)&myobject, sizeof(zval *), NULL);
-			
-			offset = end;	/* We have reached the end of the string. */
+		} else {
+			/* Just some tweaking to optimize the code, and get the end statements work in a general manner.
+			 * If we end up here we didn't find a position for "charset_token",
+			 * so we need to set it to the start of the yet unextracted data.
+			 */
+			charset_token = offset;
 		}
-		efree(charset);
-	} else {
-		php_error(E_WARNING, "%s(): Unable to allocate temporary memory buffer", get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
+		/* Return the rest of the data as unencoded, as it was either unencoded or was missing separators
+		   which rendered the the remainder of the string impossible for us to decode. */
+		memcpy(text, &string[charset_token], end - charset_token);	/* Extract unencoded text from string */
+		text[end - charset_token] = 0x00;
+		MAKE_STD_ZVAL(myobject);
+		object_init(myobject);
+		add_property_string(myobject, "charset", "default", 1);
+		add_property_string(myobject, "text", text, 1);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), (void *)&myobject, sizeof(zval *), NULL);
+			
+		offset = end;	/* We have reached the end of the string. */
 	}
+	efree(charset);
 }
 /* }}} */
 
@@ -3923,7 +3908,7 @@ PHP_FUNCTION (imap_thread)
 	top = mail_thread(imap_le_struct->imap_stream, "REFERENCES", NIL, mail_criteria(criteria), flags);
 
 	if(top == NIL) {
-		php_error(E_WARNING, "%s(): Function returned an empty tree", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Function returned an empty tree");
 		RETURN_FALSE;
 	}
 
