@@ -721,6 +721,10 @@ PHP_FUNCTION(fdf_set_file)
 		return;
 	}
 
+	if (php_check_open_basedir(filename TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(filename, "wb+", CHECKUID_CHECK_MODE_PARAM))) {
+		RETURN_FALSE;
+	}
+
 	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
 
 	err = FDFSetFile(fdf, filename);
@@ -1480,6 +1484,10 @@ PHP_FUNCTION(fdf_get_attachment) {
 	}
 	
 	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
+
+	if (php_check_open_basedir(savepath TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(savepath, "wb+", CHECKUID_CHECK_MODE_PARAM))) {
+		RETURN_FALSE;
+	}
 
 	strncpy(pathbuf	, savepath, MAXPATHLEN-1);
 	pathbuf[MAXPATHLEN-1] = '\0';
