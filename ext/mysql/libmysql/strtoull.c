@@ -7,6 +7,6 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include <m_string.h>
 #if !defined(HAVE_STRTOULL) && defined(HAVE_LONG_LONG)
 #define UNSIGNED
-#define LONGLONG
+#define MYSQL_LONGLONG
 #include "strto.c"
 #endif

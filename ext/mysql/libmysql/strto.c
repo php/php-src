@@ -28,7 +28,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include "my_sys.h"			/* defines errno */
 #include <errno.h>
 
-#ifdef LONGLONG
+#ifdef MYSQL_LONGLONG
 #define UTYPE_MAX (~(ulonglong) 0)
 #define TYPE_MIN LONGLONG_MIN
 #define TYPE_MAX LONGLONG_MAX
