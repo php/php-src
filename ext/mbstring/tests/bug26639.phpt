@@ -33,7 +33,7 @@ unset($c);
 $a = "‚ ‚¢‚¤‚¦‚¨";
 $b = array(&$a);
 $c = $b;
-mb_convert_variables("euc-jp", "shift_jis", $c);
+mb_convert_variables("EUC-JP", "Shift_JIS", $c);
 debug_zval_dump($b);
 debug_zval_dump($c);
 unset($a);
@@ -43,7 +43,7 @@ unset($c);
 $a = "‚ ‚¢‚¤‚¦‚¨";
 $b = array($a);
 $c = &$b;
-mb_convert_variables("euc-jp", "shift_jis", $c);
+mb_convert_variables("EUC-JP", "Shift_JIS", $c);
 debug_zval_dump($b);
 debug_zval_dump($c);
 unset($a);
@@ -53,7 +53,17 @@ unset($c);
 $a = "‚ ‚¢‚¤‚¦‚¨";
 $b = array(&$a);
 $c = &$b;
-mb_convert_variables("euc-jp", "shift_jis", $c);
+mb_convert_variables("EUC-JP", "Shift_JIS", $c);
+debug_zval_dump($b);
+debug_zval_dump($c);
+unset($a);
+unset($b);
+unset($c);
+
+$a = array(array("‚ ‚¢‚¤‚¦‚¨"));
+$b = $a;
+$c = $b;
+mb_convert_variables("EUC-JP", "Shift_JIS", $c);
 debug_zval_dump($b);
 debug_zval_dump($c);
 unset($a);
@@ -97,4 +107,17 @@ array(1) refcount(1){
   [0]=>
   string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(2)
 }
-
+array(1) refcount(3){
+  [0]=>
+  array(1) refcount(1){
+    [0]=>
+    string(10) "‚ ‚¢‚¤‚¦‚¨" refcount(1)
+  }
+}
+array(1) refcount(2){
+  [0]=>
+  array(1) refcount(1){
+    [0]=>
+    string(10) "¤¢¤¤¤¦¤¨¤ª" refcount(1)
+  }
+}
