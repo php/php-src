@@ -106,16 +106,15 @@ BUILD_FILES = \
 	dynlib.m4 \
 	acinclude.m4
 
-bin_PROGRAMS = phpize php-config pear
+bin_SCRIPTS = phpize php-config pear phpextdist
 
 install-build:
 	$(mkinstalldirs) $(phpbuilddir) $(bindir) && \
 	(cd $(top_srcdir) && cp $(BUILD_FILES) $(phpbuilddir))
 
 install-programs:
-	$(INSTALL) -m 755 $(srcdir)/phpextdist $(bindir)/phpextdist
-	for prog in $(bin_PROGRAMS); do \
-		$(INSTALL) -m 755 $$prog $(bindir)/$$prog; \
+	for prog in $(bin_SCRIPTS); do \
+		$(INSTALL) -m 755 scripts/$$prog $(bindir)/$$prog; \
 	done
 
 HEADER_DIRS = \
@@ -143,14 +142,14 @@ install-headers:
 Makefile: Makefile.in $(top_builddir)/config.status
 	(cd ..;CONFIG_FILES=pear/Makefile CONFIG_HEADERS= $(top_builddir)/config.status)
 
-pear: pear.in $(top_builddir)/config.status
-	(cd ..;CONFIG_FILES=pear/pear CONFIG_HEADERS= $(top_builddir)/config.status)
+scripts/pear: scripts/pear.in $(top_builddir)/config.status
+	(cd ..;CONFIG_FILES=pear/scripts/pear CONFIG_HEADERS= $(top_builddir)/config.status)
 
-phpize: phpize.in $(top_builddir)/config.status
-	(cd ..;CONFIG_FILES=pear/phpize CONFIG_HEADERS= $(top_builddir)/config.status)
+scripts/phpize: scripts/phpize.in $(top_builddir)/config.status
+	(cd ..;CONFIG_FILES=pear/scripts/phpize CONFIG_HEADERS= $(top_builddir)/config.status)
 
-php-config: php-config.in $(top_builddir)/config.status
-	(cd ..;CONFIG_FILES=pear/php-config CONFIG_HEADERS= $(top_builddir)/config.status)
+scripts/php-config: scripts/php-config.in $(top_builddir)/config.status
+	(cd ..;CONFIG_FILES=pear/scripts/php-config CONFIG_HEADERS= $(top_builddir)/config.status)
 
 PEAR.php: PEAR.php.in $(top_builddir)/config.status
 	(cd ..;CONFIG_FILES=pear/PEAR.php CONFIG_HEADERS= $(top_builddir)/config.status)
