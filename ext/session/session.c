@@ -437,7 +437,18 @@ static void _php_session_save_current_state(PSLS_D)
 	char *val;
 	int vallen;
 	int ret;
+	char *variable;
+	ulong num_key;
+	PLS_FETCH();
 	
+	if (!PG(register_globals)) {
+		for (zend_hash_internal_pointer_reset(PS(http_state_vars)->value.ht);
+			 zend_hash_get_current_key(PS(http_state_vars)->value.ht, &variable, &num_key) == HASH_KEY_IS_STRING;
+			 zend_hash_move_forward(PS(http_state_vars)->value.ht)) {
+			PS_ADD_VAR(variable);
+		}
+	}
+
 	val = _php_session_encode(&vallen PSLS_CC);
 	if (val) {
 		ret = PS(mod)->write(&PS(mod_data), PS(id), val, vallen);
