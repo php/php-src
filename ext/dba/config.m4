@@ -11,8 +11,11 @@ AC_DEFUN(PHP_DBA_STD_BEGIN,[
 AC_DEFUN(PHP_TEMP_LDFLAGS,[
   old_LDFLAGS=$LDFLAGS
   LDFLAGS="$1 $LDFLAGS"
-  $2
+  old_LIBS=$LIBS
+  LIBS="$2 $LIBS"
+  $3
   LDFLAGS=$old_LDFLAGS
+  LIBS=$old_LIBS
 ])
 
 dnl Assign INCLUDE/LFLAGS from PREFIX
@@ -134,7 +137,7 @@ dnl parameters(version, library list, function)
 AC_DEFUN(PHP_DBA_DB_CHECK,[
   for LIB in $2; do
     if test -f $THIS_PREFIX/lib/lib$LIB.a -o -f $THIS_PREFIX/lib/lib$LIB.$SHLIB_SUFFIX_NAME; then
-      PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib -l$LIB,[
+      PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib, -l$LIB,[
         AC_TRY_LINK([
 #include "$THIS_INCLUDE"
         ],[
@@ -171,7 +174,7 @@ AC_DEFUN(PHP_DBA_DB_CHECK,[
     ])
   fi
   if test "$ext_shared" = "yes"; then
-    AC_MSG_CHECKING(if db can be used as shared extension)
+    AC_MSG_CHECKING(if dba can be used as shared extension)
     AC_EGREP_CPP(yes,[
 #include "$THIS_INCLUDE"
 #if DB_VERSION_MAJOR > 3 || (DB_VERSION_MAJOR == 3 && DB_VERSION_MINOR > 2)
