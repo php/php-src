@@ -14,6 +14,7 @@ AC_PROG_RANLIB
 
 AC_CHECK_LIB(c_r, pthread_create)
 AC_CHECK_LIB(pthread, pthread_create)
+AC_CHECK_LIB(pthreads, pthread_create)
 
 AC_CHECK_FUNCS(pthread_create)
 
