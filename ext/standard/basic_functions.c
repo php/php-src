@@ -885,6 +885,7 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 	BLS_FETCH();
 
 	STR_FREE(BG(strtok_string));
+	BG(strtok_string) = NULL;
 #ifdef HAVE_PUTENV
 	zend_hash_destroy(&BG(putenv_ht));
 #endif
