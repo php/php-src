@@ -21,6 +21,8 @@
 #ifndef PHP_FTOK_H
 #define PHP_FTOK_H
 
+#if HAVE_FTOK
 PHP_FUNCTION(ftok);
+#endif
 
 #endif /* PHP_FTOK_H */
