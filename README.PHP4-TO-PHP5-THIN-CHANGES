@@ -1,5 +1,5 @@
-1. strrpos() and strripos() now use the entire string as a needle.
-   Be aware that the existing scripts may no longer work as you expect.
+1. strrpos() and strripos() now use the entire string as a needle.  Be aware
+   that the existing scripts may no longer work as you expect.
 
    EX :
    <?php
@@ -53,18 +53,55 @@
    variables_order setting.  As in, the CLI version will now always populate
    the global $argc and $argv variables.
 
-8. Classes must be declared before used:
+8. In some cases classes must be declared before used. It only happens only
+   if some of the new features of PHP 5 are used. Otherwise the behaviour is
+   the old.
+   Example 1 (works with no errors):
    <?php
-   $test = new fubar();
-   $test->barfu();
-
-   class fubar {
-       function barfu() {
-           echo 'fubar';
-       }
+   $a = new a();
+   class a {
    }
    ?>
-   This script is perfectly valid and works in PHP 4 but with PHP 5 there
-   will be a fatal error like :
-   Fatal error: Class 'fubar' not found in ....
-   If there is defined function __autoload() it will be called.
+ 
+   Example 2 (throws an error):
+   <?php 
+   $a = new a();
+   interface b{
+   }
+   class a implements b {
+   } 
+   ?>
+
+   Output (example 2) :
+   Fatal error: Class 'a' not found in /tmp/cl.php on line 2
+
+9. get_class() starting PHP 5 returns the name of the class as it was
+   declared which may lead to problems in older scripts that rely on
+   the previous behaviour - the class name is lowercased.
+   Example :
+   <?php
+   class FooBar {
+   }
+   $a = new FooBar();
+   var_dump(get_class($a));
+   ?>
+
+   Output (PHP 4):
+   string(6) "foobar"
+
+   Output (PHP 5):
+   string(6) "FooBar"
+   ----------------------------------------------------------------------
+   Example code that will break :
+   //....
+   function someMethod($p) {
+     if (get_class($p) != 'helpingclass') {
+       return FALSE;
+     }
+     //...
+   }
+   //...
+   Possible solution is to search for get_class() in all your scripts and
+   use strtolower().
+
+   
