@@ -57,8 +57,8 @@ PHP_FUNCTION(user_filter_nop)
 
 static zend_function_entry user_filter_class_funcs[] = {
 	PHP_NAMED_FE(filter,	PHP_FN(user_filter_nop),		NULL)
-	PHP_NAMED_FE(oncreate,	PHP_FN(user_filter_nop),		NULL)
-	PHP_NAMED_FE(onclose,	PHP_FN(user_filter_nop),		NULL)
+	PHP_NAMED_FE(onCreate,	PHP_FN(user_filter_nop),		NULL)
+	PHP_NAMED_FE(onClose,	PHP_FN(user_filter_nop),		NULL)
 	{ NULL, NULL, NULL }
 };
 
