@@ -149,7 +149,7 @@ PHP_MINIT_FUNCTION(browscap)
 {
 	char *browscap = INI_STR("browscap");
 
-	if (browscap) {
+	if (browscap && browscap[0]) {
 		zend_file_handle fh = {0};
 
 		if (zend_hash_init(&browser_hash, 0, NULL, (dtor_func_t) browscap_entry_dtor, 1)==FAILURE) {
@@ -176,7 +176,9 @@ PHP_MINIT_FUNCTION(browscap)
  */
 PHP_MSHUTDOWN_FUNCTION(browscap)
 {
-	if (INI_STR("browscap")) {
+	char *browscap = INI_STR("browscap");
+
+	if (browscap && browscap[0]) {
 		zend_hash_destroy(&browser_hash);
 	}
 	return SUCCESS;
@@ -216,8 +218,9 @@ PHP_FUNCTION(get_browser)
 	zval **agent_name, **agent;
 	zval *found_browser_entry, *tmp_copy;
 	char *lookup_browser_name;
+	char *browscap = INI_STR("browscap");
 
-	if (!INI_STR("browscap")) {
+	if (!browscap || !browscap[0]) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "browscap ini directive not set.");
 		RETURN_FALSE;
 	}
