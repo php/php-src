@@ -209,7 +209,7 @@ static SWFInput getInput(zval **zfile TSRMLS_DC)
 
   what =  zend_fetch_resource(zfile TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
 
-  if (!php_stream_cast((php_stream*)what, PHP_STREAM_AS_STDIO, (void*)&file, REPORT_ERRORS))	{
+  if (php_stream_cast((php_stream*)what, PHP_STREAM_AS_STDIO, (void*)&file, REPORT_ERRORS) != SUCCESS) {
 	return NULL;
   }
   
