@@ -36,7 +36,7 @@ Java Servlet SAPI Module for PHP 4
     compilation tasks.
 
 
-  Installing PHP as a Servlet into Apache's Jakarta Tomcat
+  Installing PHP as a Servlet into Apache's Jakarta Tomcat [*]
 
     1.) Build the PHP 4 Java Servlet SAPI Module
 
@@ -47,57 +47,43 @@ Java Servlet SAPI Module for PHP 4
 
           o ./configure --with-servlet --with-java
 
-          o Add directory containing libphp4.so to LD_LIBRARY_PATH
+          o Add directory containing libphp4.so to LD_LIBRARY_PATH.
 
         Windows
 
           o Build ext/java/java.dsp, copy php_java.dll to your
             extension_dir directory and enable the extension in the
-            php.ini
+            php.ini.
 
-          o Build sapi/servlet/servlet.dsp
+          o Build sapi/servlet/servlet.dsp.
 
-          o Add directory containing php4ts.dll and phpsrvlt.dll to
-            PATH
+          o Add the directory containing php4ts.dll and phpsrvlt.dll to
+            the PATH environment variable.
 
-    2.) Tomcat 3
+    2.) Copy phpsrvlt.jar into your $TOMCAT_HOME/shared/lib directory.
 
-          * Add phpsrvlt.jar to CLASSPATH
+    3.) Merge the configuration directives from web.xml file that
+        comes with the Java Servlet SAPI Module into your
+        $TOMCAT_HOME/conf/web.xml configuration file.
 
-        Tomcat 4
+        Make sure that the element ordering of the web.xml is legal
+        with Tomcat and put all the <servlet> declarations first,
+        followed by all the <servlet-mapping> declarations.
 
-          * Copy phpsrvlt.jar into your $CATALINA_HOME/lib directory
+        Add
 
-    3.) Tomcat 3
+          <welcome-file>index.php</welcome-file>
 
-          * Merge or overwrite build/tomcat/examples/WEB-INF/web.xml
-            with the configuration directives from the web.xml file
-            that comes with the Java Servlet SAPI Module.
+        to the
 
-        Tomcat 4
-    
-          * Merge the configuration directives from web.xml file that
-            comes with the Java Servlet SAPI Module into your
-            Tomcat/conf/web.xml configuration file.
+          <welcome-file-list>
+            ...
+          </welcome-file-list>
 
-            Make sure that the element ordering of the web.xml is legal
-            with Tomcat and put all the <servlet> declarations first,
-            followed by all the <servlet-mapping> declarations.
-
-          * Add
-
-              <welcome-file>index.php</welcome-file>
-
-            to the
-
-              <welcome-file-list>
-                ...
-              </welcome-file-list>
-
-            block of your Tomcat/conf/web.xml configuration file.
+        block of your $TOMCAT_HOME/conf/web.xml configuration file.
 
     4.) Test your installation by creating a test.php file in your
-        Tomcat/webapps/ROOT directory with
+        $TOMCAT_HOME/webapps/ROOT directory with
 
           <?php phpinfo(); ?>
 
@@ -120,6 +106,8 @@ Java Servlet SAPI Module for PHP 4
         and build Cocoon.
 
 -- 
+ [*] The instructions herein have been tested with Tomcat 4.1.12.
+
  [1] http://jakarta.apache.org/tomcat/
  [2] http://xml.apache.org/cocoon2/
  [3] http://www.php.net/support.php
