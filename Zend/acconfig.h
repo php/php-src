@@ -23,19 +23,12 @@
 #define ZEND_DLEXPORT
 #define ZEND_DLIMPORT
 
-#ifndef NETWARE
-@TOP@
-#endif
-
 #undef uint
 #undef ulong
 
 /* Define if you want to enable memory limit support */
 #define MEMORY_LIMIT 0
 
-#ifndef NETWARE
-@BOTTOM@
-#endif
 
 #ifndef ZEND_ACCONFIG_H_NO_C_PROTOS
 
