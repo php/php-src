@@ -458,6 +458,14 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	
 	buffer_len = vspprintf(&buffer, 0, format, args);
 	if (buffer) {
+		if (PG(html_errors)) {
+			int len;
+			char *replace = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
+			efree(buffer);
+			buffer = replace;
+			buffer_len = len;
+		}
+
 		if (docref && docref[0] == '#') {
 			docref_target = strchr(docref, '#');
 			docref = NULL;
@@ -590,6 +598,14 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	TSRMLS_FETCH();
 
 	buffer_len = vspprintf(&buffer, PG(log_errors_max_len), format, args);
+	if (PG(html_errors)) {
+		int len;
+		char *replace = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
+		efree(buffer);
+		buffer = replace;
+		buffer_len = len;
+	}
+
 	if (PG(ignore_repeated_errors)) {
 		if (strncmp(last_error.buf, buffer, sizeof(last_error.buf))
 			|| (!PG(ignore_repeated_source)
