@@ -1999,9 +1999,9 @@ send_by_ref:
 										zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle.filename);
 									}
 								}
-								if (opened_path) {
+								/* if (opened_path) {
 									free (opened_path);
-								}
+									} */
 								break;
 							}
 							break;
