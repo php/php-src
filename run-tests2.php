@@ -29,132 +29,6 @@ error_reporting(E_ALL);
 define('PHP_QA_EMAIL', 'php-qa@lists.php.net');
 define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
 
-class webHarness extends testHarness {
-	
-	var $textdata;
-	
-	function checkSafeMode() {
-		if (ini_get('safe_mode')) {
-		
-?>
-<CENTER>
-<TABLE CELLPADDING=5 CELLSPACING=0 BORDER=1>
-<TR>
-<TD BGCOLOR="#FE8C97" ALIGN=CENTER><B>WARNING</B>
-<HR NOSHADE COLOR=#000000>
-You are running this test-suite with "safe_mode" <B>ENABLED</B>!<BR><BR>
-Chances are high that none of the tests will work at all, depending on
-how you configured "safe_mode".
-</TD>
-</TR>
-</TABLE>
-</CENTER>
-<?php
-		return true;
-	}
-	return false;
-	}
-	
-	function runHeader() {
-?>
-<TABLE CELLPADDING=3 CELLSPACING=0 BORDER=0 STYLE="border: thin solid black;">
-<TR>
-	<TD>TESTED FUNCTIONALITY</TD>
-	<TD>RESULT</TD>
-</TR>
-<?php
-
-	}
-
-	function runFooter() {
-
-
-?>
-<TR>
-<TD COLSPAN=2 ALIGN=CENTER><FONT SIZE=3>Additional Notes</FONT><HR><?php $this->displaymsg(); ?></TD>
-</TR>
-</TABLE><BR><BR>
-<?php 
-	}
-	
-	function error($message)
-	{
-		$this->writemsg("ERROR: {$message}\n");
-		exit(1);
-	}
-	
-	// Use this function to do any displaying of text, so that
-	// things can be over-written as necessary.
-	
-	function writemsg($msg) {
-		
-		$this->textdata = $this->textdata . $msg;
-		
-	}
-	
-	function displaymsg() {
-	
-?>
-<TEXTAREA ROWS=10 COLS=80><?=$this->textdata?></TEXTAREA>
-<?php
-	}
-	
-	// Another wrapper function, this one should be used any time
-	// a particular test passes or fails
-	
-	function showstatus($item, $status, $reason = '') 
-	{
-		static $color = "#FAE998";
-		
-		$color = ($color == "#FAE998") ? "#FFFFFF" : "#FAE998";
-		
-		switch($status) {
-		
-			case 'PASSED':
-			
-?>
-<TR>
-<TD BGCOLOR=<?=$color?>><?=$item?></TD>
-<TD VALIGN=CENTER ALIGN=CENTER BGCOLOR=<?=$color?> ROWSPAN=2><FONT COLOR=#00FF00>PASSED</FONT></TD>
-</TR>
-<TR>
-<TD BGCOLOR=<?=$color?>>Notes: <?=htmlentities($reason)?></TD>
-</TR>
-<?php
-				
-				break;
-				
-			case 'FAILED':
-				
-?>
-<TR>
-<TD BGCOLOR=<?=$color?>><?=$item?></TD>
-<TD VALIGN=CENTER ALIGN=CENTER BGCOLOR=<?=$color?> ROWSPAN=2><FONT COLOR=#FF0000>FAILED</FONT></TD>
-</TR>
-<TR>
-<TD BGCOLOR=<?=$color?>>Notes: <?=htmlentities($reason)?></TD>
-</TR>
-<?php
-				
-				break;
-				
-			case 'SKIPPED':
-			
-?>
-<TR>
-<TD BGCOLOR=<?=$color?>><?=$item?></TD>
-<TD VALIGN=CENTER ALIGN=CENTER BGCOLOR=<?=$color?> ROWSPAN=2><FONT COLOR=#000000>SKIPPED</FONT></TD>
-</TR>
-<TR>
-<TD BGCOLOR=<?=$color?>>Notes: <?=htmlentities($reason)?></TD>
-</TR>
-<?php
-				break;
-			
-		}
-	
-	}
-}
 
 class testHarness {
 	var $cwd;
@@ -183,23 +57,28 @@ class testHarness {
 	var $sdash = "---------------------------------------------------------------------";
 
 	// Default ini settings
-	var $ini_settings = array (
+	var $ini_overwrites = array(
+			'output_handler'=>'',
+			'zlib.output_compression'=>'Off',
 			'open_basedir'=>'',
+			'safe_mode'=>'0',
 			'disable_functions'=>'',
+			'output_buffering'=>'Off',
 			'error_reporting'=>'2047',
-			'display_errors'=>'0',
+			'display_errors'=>'1',
 			'log_errors'=>'0',
 			'html_errors'=>'0',
 			'track_errors'=>'1',
 			'report_memleaks'=>'1',
+			'report_zend_debug'=>'0',
 			'docref_root'=>'/phpmanual/',
 			'docref_ext'=>'.html',
 			'error_prepend_string'=>'',
 			'error_append_string'=>'',
-			'auto_append_file'=>'',
 			'auto_prepend_file'=>'',
-		);
-	
+			'auto_append_file'=>'',
+			'magic_quotes_runtime'=>'0',
+		);	
 	var $env = array(
 		'REDIRECT_STATUS'=>'',
 		'QUERY_STRING'=>'',
@@ -209,25 +88,23 @@ class testHarness {
 		'CONTENT_TYPE'=>'',
 		'CONTENT_LENGTH'=>'',
 		);
-	
+	var $info_params = array();
+
 	function testHarness() {
+		$this->checkPCRE();
+		$this->checkSafeMode();
+		$this->removeSensitiveEnvVars();
+		$this->initializeConfiguration();
 		$this->parseArgs();
-		
 		# change to working directory
 		if ($this->TEST_PHP_SRCDIR) {
 			@chdir($this->TEST_PHP_SRCDIR);
 		}
 		$this->cwd = getcwd();
-		
 		$this->isExecutable();
-		
-		$this->checkSafeMode();
-		
 		$this->getInstalledExtensions();
-		
 		$this->contextHeader();
 		$this->loadFileList();
-		
 		$this->run();
 		$this->summarizeResults();
 	}
@@ -287,8 +164,11 @@ class testHarness {
 	function parseArgs() {
 		global $argc;
 		global $argv;
-		$this->initializeConfiguration();
 		
+		if (!isset($argv)) {
+			$argv = $_SERVER['argv'];
+			$argc = $_SERVER['argc'];
+		}
 		if (!isset($argc) || $argc < 2) return;
 	
 		for ($i=1; $i<$argc;) {
@@ -337,8 +217,17 @@ class testHarness {
 		}
 	}
 	
+	function removeSensitiveEnvVars()
+	{
+		# delete sensitive env vars
+		putenv('SSH_CLIENT=deleted');
+		putenv('SSH_AUTH_SOCK=deleted');
+		putenv('SSH_TTY=deleted');
+	}
+	
 	function initializeConfiguration()
 	{
+		# get config from environment
 		$this->TEST_PHP_SRCDIR = getenv('TEST_PHP_SRCDIR');
 		$this->TEST_PHP_EXECUTABLE = getenv('TEST_PHP_EXECUTABLE');
 		$this->TEST_PHP_LOG_FORMAT = getenv('TEST_PHP_LOG_FORMAT');
@@ -357,7 +246,19 @@ class testHarness {
 		$this->exts_tested = count($this->exts_to_test);
 		sort($this->exts_to_test);
 	}
+
+	function test_sort($a, $b) {
+		global $cwd;
 	
+		$ta = strpos($a, "{$cwd}/tests")===0 ? 1 + (strpos($a, "{$cwd}/tests/run-test")===0 ? 1 : 0) : 0;
+		$tb = strpos($b, "{$cwd}/tests")===0 ? 1 + (strpos($b, "{$cwd}/tests/run-test")===0 ? 1 : 0) : 0;
+		if ($ta == $tb) {
+			return strcmp($a, $b);
+		} else {
+			return $tb - $ta;
+		}
+	}
+
 	function isExecutable() {
 		if (!$this->TEST_PHP_EXECUTABLE ||
 			(function_exists('is_executable') &&
@@ -367,6 +268,23 @@ class testHarness {
 			return false;
 		}
 		return true;
+	}
+	
+	function checkPCRE() {
+		if (!extension_loaded("pcre")) {
+			echo <<<NO_PCRE_ERROR
+
++-----------------------------------------------------------+
+|                       ! ERROR !                           |
+| The test-suite requires that you have pcre extension      |
+| enabled. To enable this extension either compile your PHP |
+| with --with-pcre-regex or if you have compiled pcre as a  |
+| shared module load it via php.ini.                        |
++-----------------------------------------------------------+
+
+NO_PCRE_ERROR;
+		exit;
+		}
 	}
 	
 	function checkSafeMode() {
@@ -389,6 +307,25 @@ SAFE_MODE_WARNING;
 		return false;
 	}
 	
+	function getExecutableInfo()
+	{
+		$info_file = realpath(dirname(__FILE__)) . '/run-test-info.php';
+		@unlink($info_file);
+		$php_info = '<?php echo "
+PHP_SAPI    : " . PHP_SAPI . "
+PHP_VERSION : " . phpversion() . "
+ZEND_VERSION: " . zend_version() . "
+PHP_OS      : " . PHP_OS . "
+INI actual  : " . realpath(get_cfg_var("cfg_file_path")) . "
+More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
+		$this->save_text($info_file, $php_info);
+		$this->settings2array($this->ini_overwrites,$this->info_params);
+		$this->settings2params($this->info_params);
+		$php_info = `{$this->TEST_PHP_EXECUTABLE} {$this->info_params} -f $info_file`;
+		@unlink($info_file);
+		return $php_info;
+	}
+	
 	//
 	// Write test context information.
 	//
@@ -398,18 +335,15 @@ SAFE_MODE_WARNING;
 		if (function_exists('php_ini_scanned_files')) {
 			$ini=php_ini_scanned_files();
 		}
+
+		$info = $this->getExecutableInfo();
 		
 		$this->writemsg("\n$this->ddash\n".
 			"CWD         : {$this->cwd}\n".
-			"PHP         : {$this->TEST_PHP_EXECUTABLE}\n".
-			"PHP_SAPI    : " . PHP_SAPI . "\n".
-			"PHP_VERSION : " . PHP_VERSION . "\n".
-			"PHP_OS      : " . PHP_OS . "\n".
-			"INI actual  : " . realpath(get_cfg_var('cfg_file_path')) . "\n".
-			"More .INIs  : " . str_replace("\n","", $ini) . "\n".
+			"PHP         : {$this->TEST_PHP_EXECUTABLE} $info\n".
 			"Test Dirs   : ");
 		foreach ($this->test_dirs as $test_dir) {
-			$this->writemsg("{$test_dir}\n              ");
+			$this->writemsg("$test_dir\n              ");
 		}
 		$this->writemsg("\n$this->ddash\n");
 	}
@@ -417,22 +351,26 @@ SAFE_MODE_WARNING;
 	function loadFileList()
 	{
 		foreach ($this->test_dirs as $dir) {
-			#$this->findFilesInDir("{$this->cwd}/{$dir}", ($dir == 'ext'));
-			$this->findFilesInDir($dir, ($dir == 'ext'));
+			print "searching {$this->cwd}/{$dir}\n";
+			$this->findFilesInDir("{$this->cwd}/$dir", ($dir == 'ext'));
+			#$this->findFilesInDir($dir, ($dir == 'ext'));
 		}
-		sort($this->test_files);
+		usort($this->test_files,array($this,"test_sort"));
+		$this->writemsg("found ".count($this->test_files)." files\n");
 	}
 	
 	function findFilesInDir($dir,$is_ext_dir=FALSE,$ignore=FALSE)
 	{
+		$skip = array('.', '..', 'CVS');
 		$o = opendir($dir) or $this->error("cannot open directory: $dir");
 		while (($name = readdir($o)) !== FALSE) {
-			if (is_dir("{$dir}/{$name}") && !in_array($name, array('.', '..', 'CVS'))) {
+			if (in_array($name, $skip)) continue;
+			if (is_dir("$dir/$name")) {
 				$skip_ext = ($is_ext_dir && !in_array($name, $this->exts_to_test));
 				if ($skip_ext) {
 					$this->exts_skipped++;
 				}
-				$this->findFilesInDir("{$dir}/{$name}", FALSE, $ignore || $skip_ext);
+				$this->findFilesInDir("$dir/$name", FALSE, $ignore || $skip_ext);
 			}
 	
 			// Cleanup any left-over tmp files from last run.
@@ -446,7 +384,7 @@ SAFE_MODE_WARNING;
 				if ($ignore) {
 					$this->ignored_by_ext++;
 				} else {
-					$testfile = realpath("{$dir}/{$name}");
+					$testfile = realpath("$dir/$name");
 					$this->test_files[] = $testfile;
 				}
 			}
@@ -457,7 +395,11 @@ SAFE_MODE_WARNING;
 	function runHeader()
 	{
 		$this->writemsg("TIME START " . date('Y-m-d H:i:s', $this->start_time) . "\n".$this->ddash."\n");
-		$this->writemsg("Running selected tests.\n");
+		if (count($this->test_to_run)) {
+			$this->writemsg("Running selected tests.\n");
+		} else {
+			$this->writemsg("Running all test files.\n");
+		}
 	}
 	
 	// Probably unnecessary for CLI, but used when overloading a
@@ -544,59 +486,97 @@ SAFE_MODE_WARNING;
 		/* We got failed Tests, offer the user to send and e-mail to QA team, unless NO_INTERACTION is set */
 		if ($sum_results['FAILED'] && !$this->NO_INTERACTION) {
 			$fp = fopen("php://stdin", "r+");
-			$this->writemsg("Some tests have failed, would you like to send the\nreport to PHP's QA team? [Yn]: ");
+			$this->writemsg("\nPlease allow this report to be send to the PHP QA\nteam. This will give us a better understanding in how\n");
+			$this->writemsg("PHP's test cases are doing.\n");
+			$this->writemsg("(choose \"s\" to just save the results to a file)? [Yns]: ");
+			flush();
 			$user_input = fgets($fp, 10);
+			$just_save_results = (strtolower($user_input[0]) == 's');
 			
-			if (strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
+			if ($just_save_results || strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
 				/*  
 				 * Collect information about the host system for our report
 				 * Fetch phpinfo() output so that we can see the PHP enviroment
 				 * Make an archive of all the failed tests
 				 * Send an email
 				 */
-				
+
+				/* Ask the user to provide an email address, so that QA team can contact the user */
+				if (!strncasecmp($user_input, 'y', 1) || strlen(trim($user_input)) == 0) {
+					echo "\nPlease enter your email address.\n(Your address will be mangled so that it will not go out on any\nmailinglist in plain text): ";
+					flush();
+					$fp = fopen("php://stdin", "r+");
+					$user_email = trim(fgets($fp, 1024));
+					$user_email = str_replace("@", " at ", str_replace(".", " dot ", $user_email));
+				}
+		
 				$failed_tests_data = '';
 				$sep = "\n" . str_repeat('=', 80) . "\n";
 				
-				$failed_tests_data .= "OS:\n". PHP_OS. "\n";
+				$failed_tests_data .= $failed_test_summary . "\n";
+				$failed_tests_data .= $summary . "\n";
+				
+				if (sum($this->failed_tests)) {
+					foreach ($this->failed_tests as $test_info) {
+						$failed_tests_data .= $sep . $test_info['name'];
+						$failed_tests_data .= $sep . $this->getFileContents($test_info['output']);
+						$failed_tests_data .= $sep . $this->getFileContents($test_info['diff']);
+						$failed_tests_data .= $sep . "\n\n";
+					}
+					$status = "failed";
+				} else {
+					$status = "success";
+				}
+				
+				$failed_tests_data .= "\n" . $sep . 'BUILD ENVIRONMENT' . $sep;
+				$failed_tests_data .= "OS:\n". PHP_OS. "\n\n";
 				$automake = $autoconf = $libtool = $compiler = 'N/A';
+
 				if (substr(PHP_OS, 0, 3) != "WIN") {
 					$automake = shell_exec('automake --version');
 					$autoconf = shell_exec('autoconf --version');
-					$libtool = shell_exec('libtool --version');
-					$compiler = shell_exec(getenv('CC').' -v 2>&1');
+					/* Always use the generated libtool - Mac OSX uses 'glibtool' */
+					$libtool = shell_exec('./libtool --version');
+					/* Try the most common flags for 'version' */
+					$flags = array('-v', '-V', '--version');
+					$cc_status=0;
+					foreach($flags AS $flag) {
+						system(getenv('CC')." $flag >/dev/null 2>&1", $cc_status);
+						if($cc_status == 0) {
+							$compiler = shell_exec(getenv('CC')." $flag 2>&1");
+							break;
+						}
+					}
 				}
+				
 				$failed_tests_data .= "Automake:\n$automake\n";
 				$failed_tests_data .= "Autoconf:\n$autoconf\n";
 				$failed_tests_data .= "Libtool:\n$libtool\n";
 				$failed_tests_data .= "Compiler:\n$compiler\n";
 				$failed_tests_data .= "Bison:\n". @shell_exec('bison --version'). "\n";
 				$failed_tests_data .= "\n\n";
-				
-				$failed_tests_data .= $failed_test_summary . "\n";
-				
-				foreach ($this->failed_tests as $test_info) {
-					$failed_tests_data .= $sep . $test_info['name'];
-					$failed_tests_data .= $sep . $this->getFileContents($test_info['output']);
-					$failed_tests_data .= $sep . $this->getFileContents($test_info['diff']);
-					$failed_tests_data .= $sep . "\n\n";
+
+				if (isset($user_email)) {
+					$failed_tests_data .= "User's E-mail: ".$user_email."\n\n";
 				}
-				
+
 				$failed_tests_data .= $sep . "PHPINFO" . $sep;
 				$failed_tests_data .= shell_exec($this->TEST_PHP_EXECUTABLE.' -dhtml_errors=0 -i');
 				
 				$compression = 0;
-				
-				fwrite($fp, "\nThank you for helping to make PHP better.\n");
-				fclose($fp);
 
-				if (0 && !$this->mail_qa_team($failed_tests_data, $compression)) {
-					$output_file = 'php_test_results_' . date('Ymd') . ( $compression ? '.txt.gz' : '.txt' );
+				if ($just_save_results || !$this->mail_qa_team($failed_tests_data, $compression, $status)) {
+					$output_file = 'php_test_results_' . date('Ymd_Hi') . ( $compression ? '.txt.gz' : '.txt' );
 					$fp = fopen($output_file, "w");
 					fwrite($fp, $failed_tests_data);
 					fclose($fp);
 				
-					$this->writemsg("\nThe test script was unable to automatically send the report to PHP's QA Team\nPlease send ".$output_file." to ".PHP_QA_EMAIL." manually, thank you.\n");
+					if (!$just_save_results)
+						echo "\nThe test script was unable to automatically send the report to PHP's QA Team\n";
+					echo "Please send ".$output_file." to ".PHP_QA_EMAIL." manually, thank you.\n";
+				} else {
+					fwrite($fp, "\nThank you for helping to make PHP better.\n");
+					fclose($fp);
 				}
 			}
 		}
@@ -622,26 +602,41 @@ SAFE_MODE_WARNING;
 		return NULL;
 	}
 
+	function settings2array($settings, &$ini_settings)
+	{
+		foreach($settings as $setting) {
+			if (strpos($setting, '=')!==false) {
+				$setting = explode("=", $setting, 2);
+				$name = trim(strtolower($setting[0]));
+				$value = trim($setting[1]);
+				$ini_settings[$name] = $value;
+			}
+		}
+	}
+
+	function settings2params(&$ini_settings)
+	{
+		if (count($ini_settings)) {
+			$settings = '';
+			foreach($ini_settings as $name => $value) {
+				$value = addslashes($value);
+				$settings .= " -d \"$name=$value\"";
+			}
+			$ini_settings = $settings;
+		} else {
+			$ini_settings = '';
+		}
+	}
+
 	function getINISettings(&$section_text)
 	{
-		$ini_settings = $this->ini_settings;
+		$ini_settings = $this->ini_overwrites;
 		// Any special ini settings 
 		// these may overwrite the test defaults...
 		if (array_key_exists('INI', $section_text)) {
-			foreach(preg_split( "/[\n\r]+/", $section_text['INI']) as $setting) {
-				if (strpos($setting, '=')!==false) {
-					$setting = explode("=", $setting,2);
-					$name = trim(strtolower($setting[0]));
-					$value = trim($setting[1]);
-					$ini_settings[$name] = addslashes($value);
-				}
-			}
+			$this->settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
 		}
-		$settings = '';
-		foreach($ini_settings as $name => $value) {
-			$settings .= " -d \"$name=$value\"";
-		}
-		return $settings;
+		return $this->settings2params($ini_settings);
 	}
 	
 	//
@@ -697,20 +692,65 @@ SAFE_MODE_WARNING;
 			@unlink($tmp_skipif);
 			if (trim($section_text['SKIPIF'])) {
 				$this->save_text($tmp_skipif, $section_text['SKIPIF']);
-				$output = `{$this->TEST_PHP_EXECUTABLE} $tmp_skipif`;
+				$output = `{$this->TEST_PHP_EXECUTABLE} {$this->info_params} $tmp_skipif`;
 				@unlink($tmp_skipif);
-				if (ereg("^skip", trim($output))){
+				if (eregi("^skip", trim($output))){
 				
 					$reason = (ereg("^skip[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^skip[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
 					$this->showstatus($section_text['TEST'], 'SKIPPED', $reason);
 	
 					return 'SKIPPED';
 				}
+				if (eregi("^info", trim($output))) {
+					$reason = (ereg("^info[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^info[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
+					if ($reason) {
+						$tested .= " (info: $reason)";
+					}
+				}
 			}
 		}
 		return NULL;
 	}
+
+	function execute($commandline)
+	{
+		$data = "";
+		
+		$proc = proc_open($commandline, array(
+                  0 => array('pipe', 'r'),
+                  1 => array('pipe', 'w'),
+                  2 => array('pipe', 'w')
+                  ), $pipes);
+		
+		if (!$proc)
+                return false;
+          fclose($pipes[0]);
 	
+		while (true) {
+			/* hide errors from interrupted syscalls */
+			$r = $pipes;
+			$w = null;
+			$e = null;
+			$n = @stream_select($r, $w, $e, 60);
+	
+			if ($n == 0) {
+				/* timed out */
+				$data .= "\n ** ERROR: process timed out **\n";
+				proc_terminate($proc);
+				return $data;
+			} else if ($n) {
+				$line = fread($pipes[1], 8192);
+				if (strlen($line) == 0) {
+					/* EOF */
+					break;
+				}
+				$data .= $line;
+			}
+		}
+		$code = proc_close($proc);
+		return $data;
+	}
+
 	//
 	//  Run an individual test case.
 	//
@@ -743,7 +783,7 @@ SAFE_MODE_WARNING;
 		$skipreason = $this->getSkipReason($section_text);
 		if ($skipreason == 'SKIPPED') return $skipreason;
 		
-		$ini_settings = $this->getINISettings($section_text);
+		$ini_overwrites = $this->getINISettings($section_text);
 	
 		// We've satisfied the preconditions - run the test!
 		$this->save_text($tmp_file,$section_text['FILE']);
@@ -763,14 +803,14 @@ SAFE_MODE_WARNING;
 		if (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
 	
 			$post = trim($section_text['POST']);
-			save_text($tmp_post,$post);
+			$this->save_text($tmp_post,$post);
 			$content_length = strlen($post);
 	
 			$env['REQUEST_METHOD']='POST';
 			$env['CONTENT_TYPE']='application/x-www-form-urlencoded';
 			$env['CONTENT_LENGTH']=$content_length;
 	
-			$cmd = "{$this->TEST_PHP_EXECUTABLE}$ini_settings -f $tmp_file 2>&1 < $tmp_post";
+			$cmd = "{$this->TEST_PHP_EXECUTABLE} $ini_overwrites -f $tmp_file 2>&1 < $tmp_post";
 	
 		} else {
 	
@@ -778,7 +818,7 @@ SAFE_MODE_WARNING;
 			$env['CONTENT_TYPE']='';
 			$env['CONTENT_LENGTH']='';
 	
-			$cmd = "{$this->TEST_PHP_EXECUTABLE}$ini_settings -f $tmp_file$args 2>&1";
+			$cmd = "{$this->TEST_PHP_EXECUTABLE} $ini_overwrites -f $tmp_file$args 2>&1";
 		}
 	
 		if ($this->TEST_PHP_DETAILED)
@@ -793,7 +833,7 @@ SAFE_MODE_WARNING;
 	
 		$this->setEnvironment($env);
 		
-		$out = `$cmd`;
+		$out = $this->execute($cmd);
 	
 		@unlink($tmp_post);
 	
@@ -950,8 +990,8 @@ SAFE_MODE_WARNING;
 	{
 		$w = explode("\n", $wanted);
 		$o = explode("\n", $output);
-		$w1 = array_diff($w,$o);
-		$o1 = array_diff($o,$w);
+		$w1 = array_diff_assoc($w,$o);
+		$o1 = array_diff_assoc($o,$w);
 		$w2 = array();
 		$o2 = array();
 		foreach($w1 as $idx => $val) $w2[sprintf("%03d<",$idx)] = sprintf("%03d- ", $idx+1).$val;
@@ -968,7 +1008,134 @@ SAFE_MODE_WARNING;
 	}
 }
 
-$test = new webHarness();
+class webHarness extends testHarness {
+	
+	var $textdata;
+	
+	function checkSafeMode() {
+		if (ini_get('safe_mode')) {
+		
+?>
+<CENTER>
+<TABLE CELLPADDING=5 CELLSPACING=0 BORDER=1>
+<TR>
+<TD BGCOLOR="#FE8C97" ALIGN=CENTER><B>WARNING</B>
+<HR NOSHADE COLOR=#000000>
+You are running this test-suite with "safe_mode" <B>ENABLED</B>!<BR><BR>
+Chances are high that none of the tests will work at all, depending on
+how you configured "safe_mode".
+</TD>
+</TR>
+</TABLE>
+</CENTER>
+<?php
+		return true;
+	}
+	return false;
+	}
+	
+	function runHeader() {
+?>
+<TABLE CELLPADDING=3 CELLSPACING=0 BORDER=0 STYLE="border: thin solid black;">
+<TR>
+	<TD>TESTED FUNCTIONALITY</TD>
+	<TD>RESULT</TD>
+</TR>
+<?php
+
+	}
+
+	function runFooter() {
+
+
+?>
+<TR>
+<TD COLSPAN=2 ALIGN=CENTER><FONT SIZE=3>Additional Notes</FONT><HR><?php $this->displaymsg(); ?></TD>
+</TR>
+</TABLE><BR><BR>
+<?php 
+	}
+	
+	function error($message)
+	{
+		$this->writemsg("ERROR: {$message}\n");
+		exit(1);
+	}
+	
+	// Use this function to do any displaying of text, so that
+	// things can be over-written as necessary.
+	
+	function writemsg($msg) {
+		
+		$this->textdata = $this->textdata . $msg;
+		
+	}
+	
+	function displaymsg() {
+	
+?>
+<TEXTAREA ROWS=10 COLS=80><?=$this->textdata?></TEXTAREA>
+<?php
+	}
+	
+	// Another wrapper function, this one should be used any time
+	// a particular test passes or fails
+	
+	function showstatus($item, $status, $reason = '') 
+	{
+		static $color = "#FAE998";
+		
+		$color = ($color == "#FAE998") ? "#FFFFFF" : "#FAE998";
+		
+		switch($status) {
+		
+			case 'PASSED':
+			
+?>
+<TR>
+<TD BGCOLOR=<?=$color?>><?=$item?></TD>
+<TD VALIGN=CENTER ALIGN=CENTER BGCOLOR=<?=$color?> ROWSPAN=2><FONT COLOR=#00FF00>PASSED</FONT></TD>
+</TR>
+<TR>
+<TD BGCOLOR=<?=$color?>>Notes: <?=htmlentities($reason)?></TD>
+</TR>
+<?php
+				
+				break;
+				
+			case 'FAILED':
+				
+?>
+<TR>
+<TD BGCOLOR=<?=$color?>><?=$item?></TD>
+<TD VALIGN=CENTER ALIGN=CENTER BGCOLOR=<?=$color?> ROWSPAN=2><FONT COLOR=#FF0000>FAILED</FONT></TD>
+</TR>
+<TR>
+<TD BGCOLOR=<?=$color?>>Notes: <?=htmlentities($reason)?></TD>
+</TR>
+<?php
+				
+				break;
+				
+			case 'SKIPPED':
+			
+?>
+<TR>
+<TD BGCOLOR=<?=$color?>><?=$item?></TD>
+<TD VALIGN=CENTER ALIGN=CENTER BGCOLOR=<?=$color?> ROWSPAN=2><FONT COLOR=#000000>SKIPPED</FONT></TD>
+</TR>
+<TR>
+<TD BGCOLOR=<?=$color?>>Notes: <?=htmlentities($reason)?></TD>
+</TR>
+<?php
+				break;
+			
+		}
+	
+	}
+}
+
+$test = new testHarness();
 /*
  * Local variables:
  * tab-width: 4
