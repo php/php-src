@@ -41,7 +41,7 @@ typedef long pid_t;
 #define M_PI_4           0.78539816339744830962
 #endif
 
-#if !PHP_DEBUG
+#if !defined(PHP_DEBUG)
 #ifdef inline
 #undef inline
 #endif
