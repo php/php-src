@@ -2694,15 +2694,15 @@ PHP_FUNCTION(mb_strtolower)
 }
 /* }}} */
 
-/* {{{ proto string mb_detect_encoding(string str [, mixed encoding_list])
+/* {{{ proto string mb_detect_encoding(string str [, mixed encoding_list [, bool strict]])
    Encodings of the given string is returned (as a string) */
 PHP_FUNCTION(mb_detect_encoding)
 {
-	pval **arg_str, **arg_list;
+	pval **arg_str, **arg_list, **arg_strict;
 	mbfl_string string;
 	const char *ret;
 	enum mbfl_no_encoding *elist;
-	int size, *list;
+	int size, *list, strict = 0;
 
 	if (ZEND_NUM_ARGS() == 1) {
 		if (zend_get_parameters_ex(1, &arg_str) == FAILURE) {
@@ -2712,6 +2712,10 @@ PHP_FUNCTION(mb_detect_encoding)
 		if (zend_get_parameters_ex(2, &arg_str, &arg_list) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
+	} else if (ZEND_NUM_ARGS() == 3) {
+		if (zend_get_parameters_ex(3, &arg_str, &arg_list, &arg_strict) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -2719,7 +2723,7 @@ PHP_FUNCTION(mb_detect_encoding)
 	/* make encoding list */
 	list = NULL;
 	size = 0;
-	if (ZEND_NUM_ARGS() >= 2) {
+	if (ZEND_NUM_ARGS() >= 2 &&  Z_STRVAL_PP(arg_list)) {
 		switch (Z_TYPE_PP(arg_list)) {
 		case IS_ARRAY:
 			if (!php_mb_parse_encoding_array(*arg_list, &list, &size, 0)) {
@@ -2744,6 +2748,11 @@ PHP_FUNCTION(mb_detect_encoding)
 		}
 	}
 
+	if (ZEND_NUM_ARGS() == 3) {
+		convert_to_long_ex(arg_strict);
+		strict = Z_LVAL_PP(arg_strict);
+	}
+
 	if (size > 0 && list != NULL) {
 		elist = list;
 	} else {
@@ -2756,7 +2765,7 @@ PHP_FUNCTION(mb_detect_encoding)
 	string.no_language = MBSTRG(current_language);
 	string.val = (unsigned char *)Z_STRVAL_PP(arg_str);
 	string.len = Z_STRLEN_PP(arg_str);
-	ret = mbfl_identify_encoding_name(&string, elist, size TSRMLS_CC);
+	ret = mbfl_identify_encoding_name(&string, elist, size, strict TSRMLS_CC);
 	if (list != NULL) {
 		efree((void *)list);
 	}
