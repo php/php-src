@@ -76,11 +76,14 @@ function_entry vpopmail_functions[] = {
 	PHP_FE(vpopmail_set_user_quota, NULL)
 	PHP_FE(vpopmail_auth_user, NULL)
 	/* alias management */
-#if VALIAS
+#if HAVE_VPOPMAIL_VALIAS
 	PHP_FE(vpopmail_alias_add, NULL)
 	PHP_FE(vpopmail_alias_del, NULL)
+#ifdef VALIAS
 	PHP_FE(vpopmail_alias_del_domain, NULL)
+#endif
 	PHP_FE(vpopmail_alias_get, NULL)
+	PHP_FE(vpopmail_alias_get_all, NULL)
 #endif
 	/* error handling */
 	PHP_FE(vpopmail_error, NULL)
@@ -159,7 +162,7 @@ PHP_MINFO_FUNCTION(vpopmail)
 	php_info_print_table_row(2, "vpopmail vadddomain", VPOPMAIL_BIN_DIR VPOPMAIL_ADDD);
 	php_info_print_table_row(2, "vpopmail vdeldomain", VPOPMAIL_BIN_DIR VPOPMAIL_DELD);
 	php_info_print_table_row(2, "vpopmail vaddaliasdomain", VPOPMAIL_BIN_DIR VPOPMAIL_ADAD);
-#if VALIAS
+#if HAVE_VPOPMAIL_VALIAS
 	php_info_print_table_row(2, "vpopmail valias support", "Enabled");
 #else
 	php_info_print_table_row(2, "vpopmail valias support", "Not supported by vpopmail");
@@ -742,7 +745,7 @@ PHP_FUNCTION(vpopmail_auth_user)
 /* }}} */
 
 
-#if VALIAS
+#if HAVE_VPOPMAIL_VALIAS
 
 /*
  * Alias management functions
@@ -815,6 +818,7 @@ PHP_FUNCTION(vpopmail_alias_del)
 }
 /* }}} */
 
+#ifdef VALIAS
 /* {{{ proto bool vpopmail_alias_del_domain(string domain)
    deletes all virtual aliases of a domain */
 PHP_FUNCTION(vpopmail_alias_del_domain)
@@ -843,6 +847,7 @@ PHP_FUNCTION(vpopmail_alias_del_domain)
 	}
 }
 /* }}} */
+#endif
 
 /* {{{ proto array vpopmail_alias_get(string alias, string domain)
    get all lines of an alias for a domain */
@@ -873,6 +878,40 @@ PHP_FUNCTION(vpopmail_alias_get)
 	while (talias) {
 		add_index_string(return_value,index++,talias,1);
 		talias=valias_select_next();
+	}
+}
+/* }}} */
+
+/* {{{ proto array vpopmail_alias_get_all(string domain)
+   get all lines of an alias for a domain */
+PHP_FUNCTION(vpopmail_alias_get_all)
+{
+	zval **domain;
+	int retval;
+	char *talias;
+	char tpath[1024];
+	uint index=0;
+
+	if (ZEND_NUM_ARGS() != 1
+			|| zend_get_parameters_ex(ZEND_NUM_ARGS(), &domain) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_string_ex(domain);
+
+	VPOPMAILLS_FETCH();
+	VPOPMAILG(vpopmail_open) = 1;
+
+	if (array_init(return_value)!=SUCCESS) {
+		zend_error(E_ERROR,"unable to create array");
+		RETURN_FALSE;
+	}
+
+	talias=valias_select_all(tpath, Z_STRVAL_PP(domain));
+	while (talias) {
+		strcat(tpath,":");
+		strcat(tpath,talias);
+		add_index_string(return_value,index++,tpath,1);
+		talias=valias_select_all_next(tpath);
 	}
 }
 /* }}} */
