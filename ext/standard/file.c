@@ -2331,6 +2331,11 @@ PHP_FUNCTION(fgetcsv)
 	}	\
 }
 
+	if (!(e - s)) {
+		CSV_ADD_ENTRY(s, e, s);
+		goto done;
+	}
+
 csv_start:
 	if (!enclosure || !(p = _php_fgetcsv_find_enclosure(s, (e - s), enclosure, 0))) {
 no_enclosure:

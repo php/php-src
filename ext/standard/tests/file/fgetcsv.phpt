@@ -23,7 +23,8 @@ various fgetcsv() functionality tests
 		'aaa"aaa","bbb"bbb',
 		'aaa"aaa""",bbb',
 		'aaa"\\"a","bbb"',
-		'""'
+		'""',
+		''
 	);
 
 	$file = dirname(__FILE__) . 'fgetcsv.csv';
@@ -156,6 +157,10 @@ array(2) {
   string(8) "aaa"\"a""
   [1]=>
   string(3) "bbb"
+}
+array(1) {
+  [0]=>
+  string(0) ""
 }
 array(1) {
   [0]=>
