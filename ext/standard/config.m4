@@ -239,6 +239,6 @@ PHP_NEW_EXTENSION(standard,	array.c base64.c basic_functions.c browscap.c crc32.
 	syslog.c type.c uniqid.c url.c url_scanner.c var.c versioning.c assert.c \
 	strnatcmp.c levenshtein.c incomplete_class.c url_scanner_ex.c \
 	ftp_fopen_wrapper.c http_fopen_wrapper.c php_fopen_wrapper.c credits.c \
-	var_unserializer.c ftok.c aggregation.c)
+	var_unserializer.c ftok.c aggregation.c sha1.c )
 
 PHP_ADD_MAKEFILE_FRAGMENT
