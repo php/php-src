@@ -6,6 +6,7 @@
 
 #include "php.h"
 #include "php_ini.h"
+#include "ext/standard/info.h"
 #include "php_extname.h"
 
 /* If you declare any globals in php_extname.h uncomment this:
