@@ -333,7 +333,7 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		}
 
 		/* add it to the list */
-		ZEND_REGISTER_RESOURCE(return_value, (void *) msql, msql_globals.le_plink);
+		ZEND_REGISTER_RESOURCE(return_value, (void *) msql, msql_globals.le_link);
 		
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) return_value->value.lval;
