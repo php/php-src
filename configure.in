@@ -479,8 +479,12 @@ PHP_ARG_WITH(config-file-path,[path to configuration file],
 
 if test "x$PHP_CONFIG_FILE_PATH" = "xDEFAULT"; then
   case $PHP_LAYOUT in
-    GNU) PHP_CONFIG_FILE_PATH="$sysconfdir";;
-    *)   PHP_CONFIG_FILE_PATH="$libdir";;
+    GNU)
+      PHP_CONFIG_FILE_PATH="$sysconfdir"
+      oldstyleextdir=no;;
+    *)
+      PHP_CONFIG_FILE_PATH="$libdir"
+      oldstyleextdir=yes;;
   esac
 fi
 
@@ -710,13 +714,10 @@ LIBS=""
 
 test "$prefix" = "NONE" && prefix="/usr/local"
 test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'
+
 case $libdir in
   '${exec_prefix}/lib')
     libdir="$libdir/php"
-	oldstyleextdir=yes
-    ;;
-  *)
-    oldstyleextdir=no
     ;;
 esac
 case $datadir in
