@@ -349,17 +349,10 @@ PHP_FUNCTION(yp_err_string) {
 }
 /* }}} */
 
-static void php_yp_init_globals(YPLS_D)
-{
-	YP(error) = 0;
-}
-
 PHP_MINIT_FUNCTION(yp)
 {
 #ifdef ZTS
-	yp_globals_id = ts_allocate_id(sizeof(php_yp_globals), (ts_allocate_ctor) php_yp_init_globals, NULL);
-#else
-	php_yp_init_globals(YPLS_C);
+	yp_globals_id = ts_allocate_id(sizeof(php_yp_globals), NULL, NULL);
 #endif
 
 	REGISTER_LONG_CONSTANT("YPERR_BADARGS", YPERR_BADARGS, CONST_CS | CONST_PERSISTENT);
