@@ -418,7 +418,7 @@ ZEND_FUNCTION(define)
 	c.flags = case_sensitive; /* non persistent */
 	c.name = zend_strndup((*var)->value.str.val, (*var)->value.str.len);
 	c.name_len = (*var)->value.str.len+1;
-	if(zend_register_constant(&c ELS_CC) == SUCCESS) {
+	if (zend_register_constant(&c ELS_CC) == SUCCESS) {
 	  RETURN_TRUE;
 	} else {
 	  RETURN_FALSE;
@@ -627,7 +627,7 @@ ZEND_FUNCTION(method_exists)
 	convert_to_string_ex(method_name);
 	lcname = estrndup((*method_name)->value.str.val, (*method_name)->value.str.len);
 	zend_str_tolower(lcname, (*method_name)->value.str.len);
-	if(zend_hash_exists(&(*klass)->value.obj.ce->function_table, lcname, (*method_name)->value.str.len+1)) {
+	if (zend_hash_exists(&(*klass)->value.obj.ce->function_table, lcname, (*method_name)->value.str.len+1)) {
 		efree(lcname);
 		RETURN_TRUE;
 	} else {

@@ -644,7 +644,7 @@ static unsigned __stdcall timeout_thread_proc(void *pArgs)
 	wc.hbrBackground=(HBRUSH)(COLOR_BACKGROUND + 5);
 	wc.lpszMenuName=NULL;
 	wc.lpszClassName = "Zend Timeout Window";
-	if(!RegisterClass(&wc)) {
+	if (!RegisterClass(&wc)) {
 		return -1;
 	}
 	timeout_window = CreateWindow(wc.lpszClassName, wc.lpszClassName, 0, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, NULL, NULL);

@@ -433,7 +433,7 @@ ZEND_API int zend_get_configuration_directive(char *name, uint name_length, zval
 	refcount = (*ppzv_dest)->refcount;			\
 	zval_dtor(*ppzv_dest);						\
 	**ppzv_dest = *pzv_src;						\
-	if(copy) {                                  \
+	if (copy) {                                  \
 		zval_copy_ctor(*ppzv_dest);				\
     }		                                    \
 	(*ppzv_dest)->is_ref = is_ref;				\

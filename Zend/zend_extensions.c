@@ -49,7 +49,7 @@ int zend_load_extension(char *path)
 
 
 	/* allow extension to proclaim compatibility with any Zend version */
-	if(extension_version_info->zend_extension_api_no != ZEND_EXTENSION_API_NO &&(!new_extension->api_no_check || new_extension->api_no_check(ZEND_EXTENSION_API_NO) != SUCCESS)) {
+	if (extension_version_info->zend_extension_api_no != ZEND_EXTENSION_API_NO &&(!new_extension->api_no_check || new_extension->api_no_check(ZEND_EXTENSION_API_NO) != SUCCESS)) {
 		if (extension_version_info->zend_extension_api_no > ZEND_EXTENSION_API_NO) {
 			fprintf(stderr, "%s requires Zend Engine API version %d\n"
 					"The installed Zend Engine API version is %d\n\n",

@@ -304,7 +304,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 	CG(ZFL)->switch_streams(file_handle->handle.is, &cout);
 #endif
 
-	if(file_handle->opened_path) {
+	if (file_handle->opened_path) {
 		file_path = file_handle->opened_path; 
 	} else {
 		file_path = file_handle->filename;
@@ -1011,7 +1011,7 @@ ANY_CHAR (.|[\n])
 		zendlval->value.lval = LONG_MAX; /* maximal long */
 		zend_error(E_NOTICE,"Hex number is too big: %s",yytext);
 	} else {
-		if(zendlval->value.lval < 0) {
+		if (zendlval->value.lval < 0) {
 			/* maintain consistency with the old way */
 			zendlval->value.dval = (unsigned long) zendlval->value.lval;
 			zendlval->type = IS_DOUBLE;
@@ -1188,7 +1188,7 @@ ANY_CHAR (.|[\n])
 }
 
 <ST_ONE_LINE_COMMENT>"?>"|"%>" {
-    if(CG(asp_tags) || yytext[yyleng-2] != '%') { /* asp comment? */
+    if (CG(asp_tags) || yytext[yyleng-2] != '%') { /* asp comment? */
 		zendlval->value.str.val = yytext; /* no copying - intentional */
 		zendlval->value.str.len = yyleng;
 		zendlval->type = IS_STRING;
