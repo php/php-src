@@ -90,6 +90,11 @@
 #include "version.h"
 #endif
 
+/* For really old ucd-snmp versions.. */
+#ifndef HAVE_SNMP_PARSE_OID
+#define snmp_parse_oid read_objid
+#endif
+
 /* ucd-snmp 3.3.1 changed the name of a few #defines... They've been changed back to the original ones in 3.5.3! */
 #ifndef SNMP_MSG_GET
 #define SNMP_MSG_GET GET_REQ_MSG

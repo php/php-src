@@ -91,6 +91,8 @@ if test "$PHP_SNMP" != "no"; then
     PHP_ADD_LIBRARY_WITH_PATH(snmp, $SNMP_LIBDIR, SNMP_SHARED_LIBADD)
   fi
 
+  AC_CHECK_FUNCS(snmp_parse_oid)
+
   PHP_NEW_EXTENSION(snmp, snmp.c, $ext_shared)
   PHP_SUBST(SNMP_SHARED_LIBADD)
   AC_DEFINE(HAVE_SNMP,1,[ ])
