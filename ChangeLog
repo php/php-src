@@ -1,3 +1,34 @@
+2000-10-28  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/ldap.c
+      ext/ldap/php_ldap.h:
+    Fix for bug #7416. ldap_set|get_option() are also in NSLDAP SDKs.
+
+2000-10-28  Stig Venaas  <venaas@uninett.no>
+
+    * ext/snmp/config.m4
+      configure.in:
+    Moving --with-openssl to global configure, want OpenSSL for not just snmp
+
+2000-10-28  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/session/php_session.h
+      ext/session/session.c: Allow to send secure cookies
+
+2000-10-28  Andi Gutmans  <andi@zend.com>
+
+    * acinclude.m4: - Fix from Sascha. It fixes errorneous inclusion of bz2
+
+2000-10-28  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/fsock.c
+      ext/standard/http_fopen_wrapper.c
+      main/fopen-wrappers.c:
+    - URL-opened files now store the HTTP response header in $http_response_header
+    - Some layout updates
+
 2000-10-27  Sascha Schumann  <sascha@schumann.cx>
 
     * sapi/apache2filter/php_apache.h
