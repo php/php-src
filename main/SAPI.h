@@ -102,6 +102,7 @@ typedef struct {
 	char *default_charset;
 	HashTable *rfc1867_uploaded_files;
 	long post_max_size;
+	void *server_filter;
 } sapi_globals_struct;
 
 
