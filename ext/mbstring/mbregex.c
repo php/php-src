@@ -522,7 +522,7 @@ enum regexpcode
 
    The argument SYNTAX is a bit-mask comprised of the various bits
    defined in regex.h.  */
-
+#if 0
 long
 re_set_syntax(syntax)
   long syntax;
@@ -530,7 +530,7 @@ re_set_syntax(syntax)
     /* obsolete */
     return 0;
 }
-
+#endif
 
 /* Macros for re_compile_pattern, which is found below these definitions.  */
 
