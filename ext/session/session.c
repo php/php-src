@@ -889,7 +889,7 @@ PHP_FUNCTION(session_get_cookie_params)
 		RETURN_FALSE;
 	}
 
-	add_assoc_string(return_value, "lifetime", PS(cookie_lifetime), 1);
+	add_assoc_long(return_value, "lifetime", PS(cookie_lifetime));
 	add_assoc_string(return_value, "path", PS(cookie_path), 1);
 	add_assoc_string(return_value, "domain", PS(cookie_domain), 1);
 }
