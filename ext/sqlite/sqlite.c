@@ -354,7 +354,7 @@ PHP_FUNCTION(sqlite_fetch_array)
 	/* now populate the result */
 	for (j = 0; j < res->ncolumns; j++) {
 		if (mode & PHPSQLITE_NUM) {
-			if (res->table[i +j] == NULL) {
+			if (res->table[i + j] == NULL) {
 				add_index_null(return_value, j);
 			} else {
 				add_index_string(return_value, j, res->table[i + j], 1);
