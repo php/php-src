@@ -738,79 +738,23 @@ SOURCE=.\ext\xml\php_xml.h
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;for;f90"
 # Begin Source File
 
-SOURCE=.\hashtable.c
-
-!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
-
+SOURCE=.\ext\xml\expat\xmlparse\hashtable.c
 # ADD CPP /I "ext\xml\expat\xmltok"
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
-
-# ADD CPP /I "ext\xml\expat\xmltok"
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
-
-# ADD CPP /I "ext\xml\expat\xmltok"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
-SOURCE=.\xmlparse.c
-
-!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
-
+SOURCE=.\ext\xml\expat\xmlparse\xmlparse.c
 # ADD CPP /I "ext\xml\expat\xmltok"
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
-
-# ADD CPP /I "ext\xml\expat\xmltok"
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
-
-# ADD CPP /I "ext\xml\expat\xmltok"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\ext\xml\expat\xmltok\xmlrole.c
-
-!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
-
 # ADD CPP /I "ext\xml\expat\xmltok"
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
-
-# ADD CPP /I "ext\xml\expat\xmltok"
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
-
-# ADD CPP /I "ext\xml\expat\xmltok"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\ext\xml\expat\xmltok\xmltok.c
-
-!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
-
 # ADD CPP /I "ext\xml\expat\xmltok"
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
-
-# ADD CPP /I "ext\xml\expat\xmltok"
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
-
-# ADD CPP /I "ext\xml\expat\xmltok"
-
-!ENDIF 
-
 # End Source File
 # End Group
 # Begin Group "Header Files No. 5"
