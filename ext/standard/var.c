@@ -431,17 +431,16 @@ int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 /* {{{ proto string serialize(mixed variable)
    Returns a string representation of variable (which can later be unserialized) */
 PHP_FUNCTION(serialize)
-
 {
-	pval *struc;
+	pval **struc;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &struc) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &struc) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	return_value->type = IS_STRING;
 	return_value->value.str.val = NULL;
 	return_value->value.str.len = 0;
-	php3api_var_serialize(return_value, &struc);
+	php3api_var_serialize(return_value, struc);
 }
 
 /* }}} */
@@ -451,14 +450,15 @@ PHP_FUNCTION(serialize)
 
 PHP_FUNCTION(unserialize)
 {
-	pval *buf;
+	pval **buf;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &buf) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &buf) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	if (buf->type == IS_STRING) {
-		const char *p = buf->value.str.val;
-		if (!php3api_var_unserialize(&return_value, &p, p + buf->value.str.len)) {
+	if ((*buf)->type == IS_STRING) {
+		const char *p = (*buf)->value.str.val;
+
+		if (!php3api_var_unserialize(&return_value, &p, p + (*buf)->value.str.len)) {
 			RETURN_FALSE;
 		}
 	} else {
