@@ -262,9 +262,7 @@ PHP_FUNCTION(getallheaders)
 {
 	int i;
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	
 	for (i = 0; i < Ns_SetSize(NSG(conn->headers)); i++) {
 		char *key = Ns_SetKey(NSG(conn->headers), i);

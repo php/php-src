@@ -345,9 +345,7 @@ PHP_FUNCTION(apache_request_headers)
     table_entry *tenv;
     int i;
 	
-    if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-    }
+    array_init(return_value);
     env_arr = table_elts(((request_rec *) SG(server_context))->headers_in);
     tenv = (table_entry *)env_arr->elts;
     for (i = 0; i < env_arr->nelts; ++i) {
@@ -371,9 +369,7 @@ PHP_FUNCTION(apache_response_headers)
     table_entry *tenv;
     int i;
 
-    if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-    }
+    array_init(return_value);
     env_arr = table_elts(((request_rec *) SG(server_context))->headers_out);
     tenv = (table_entry *)env_arr->elts;
     for (i = 0; i < env_arr->nelts; ++i) {
