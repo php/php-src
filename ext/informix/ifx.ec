@@ -193,7 +193,7 @@ PHP_IFX_API php_ifx_globals ifx_globals;
 
 #define CHECK_LINK(link) {     \
     if (link==0) {             \
-        php3_error(E_WARNING,  \
+        php_error(E_WARNING,  \
                 "Informix:  A link to the server could not be established"); \
         RETURN_FALSE;          \
         }                      \
@@ -315,14 +315,40 @@ char *a_result_id;
   return;
 }
 
+static PHP_INI_DISP(display_link_numbers)
+{
+  char *value;
+
+  if (type==PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
+     value = ini_entry->orig_value;
+  } else {
+    if (ini_entry->value) {
+      value = ini_entry->value;
+    } else {
+      value = NULL;
+    }
+  }	 
+  if (value) {
+    if (atoi(value)==-1) {
+      PUTS("Unlimited");
+    } else {
+      php_printf("%s", value);
+    }
+  }
+}
+						
+						
+
 
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("ifx.allow_persistent", "1", PHP_INI_SYSTEM, 
+    STD_PHP_INI_BOOLEAN("ifx.allow_persistent", "1", PHP_INI_SYSTEM, 
                        OnUpdateInt, allow_persistent, php_ifx_globals, ifx_globals)
-    STD_PHP_INI_ENTRY("ifx.max_persistent", "0", PHP_INI_SYSTEM, 
-                       OnUpdateInt, max_persistent, php_ifx_globals, ifx_globals)
-    STD_PHP_INI_ENTRY("ifx.max_links", "0", PHP_INI_SYSTEM, 
-                       OnUpdateInt, max_links, php_ifx_globals, ifx_globals)
+    STD_PHP_INI_ENTRY_EX("ifx.max_persistent", "-1", PHP_INI_SYSTEM, 
+                       OnUpdateInt, max_persistent, php_ifx_globals, ifx_globals,
+                       display_link_numbers)
+    STD_PHP_INI_ENTRY_EX("ifx.max_links", "-1", PHP_INI_SYSTEM, 
+                       OnUpdateInt, max_links, php_ifx_globals, ifx_globals,
+		       display_link_numbers)
     STD_PHP_INI_ENTRY("ifx.default_host", NULL, PHP_INI_SYSTEM, 
                        OnUpdateString, default_host, php_ifx_globals, ifx_globals)
     STD_PHP_INI_ENTRY("ifx.default_user", NULL, PHP_INI_SYSTEM, 
@@ -343,6 +369,8 @@ PHP_INI_END()
 
 PHP_MINIT_FUNCTION(ifx)
 {
+   ELS_FETCH();
+   
 #ifdef ZTS
     ifx_globals_id = ts_allocate_id(sizeof(php_ifx_globals), php_ifx_init_globals, NULL);
 #else
@@ -401,14 +429,15 @@ PHP_RINIT_FUNCTION(ifx)
     IFXLS_FETCH();
 
     IFXG(default_link)=-1;
-    IFXG(num_links) = 
-                 IFXG(num_persistent);
+    IFXG(num_links) = IFXG(num_persistent);
     return SUCCESS;
 }
 
 PHP_MINFO_FUNCTION(ifx)
 {
+    char buf[32];
     char maxp[16],maxl[16];
+   
     IFXLS_FETCH();
 
     
@@ -424,17 +453,18 @@ PHP_MINFO_FUNCTION(ifx)
         snprintf(maxl,15,"%ld",IFXG(max_links));
         maxl[15]=0;
     }
-    php_printf("<table cellpadding=5>"
-                "<tr><td>Allow persistent links:</td><td>%s</td></tr>\n"
-                "<tr><td>Persistent links:</td><td>%d/%s</td></tr>\n"
-                "<tr><td>Total links:</td><td>%d/%s</td></tr>\n"
-                "<tr><td>Client API version:</td><td>%02.2f</td></tr>\n"
-                "</table>\n",
-                (IFXG(allow_persistent)?"Yes":"No"),
-                IFXG(num_persistent),maxp,
-                IFXG(num_links),maxl,
-                (double)(CLIENT_SQLI_VER/100.0)
-                );
+   
+    DISPLAY_INI_ENTRIES();
+   
+    php_printf("<table border=\"5\" width=\"600\">\n");
+    php_info_print_table_header(2, "Key", "Value");
+    sprintf(buf, "%ld", IFXG(num_persistent));
+    php_info_print_table_row(2, "Persistent links : ", buf);
+    sprintf(buf, "%ld", IFXG(num_links)); 
+    php_info_print_table_row(2, "Total links : ", buf);
+    sprintf(buf, "%02.2f", (double)(CLIENT_SQLI_VER/100.0)); 
+    php_info_print_table_row(2, "Client API Version: ", buf);
+    php_printf("</table>\n");
 }
 
 /* ----------------------------------------------------------------------
