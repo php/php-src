@@ -1209,18 +1209,10 @@ static void exif_iif_add_int(image_info_type *image_info, int section_index, cha
 /* {{{ exif_iif_add_str
  Add a string value to image_info MUST BE NUL TERMINATED
 */
-static void exif_iif_add_str(image_info_type *image_info, int section_index, char *name, char *value, ...)
+static void exif_iif_add_str(image_info_type *image_info, int section_index, char *name, char *value)
 {
 	image_info_data  *info_data;
 	image_info_data  *list;
-	char             tmp[1024];
-	va_list 		 arglist;
-
-	va_start(arglist, value);
-	if (value) {
-		vsnprintf(tmp, sizeof(tmp), value, arglist);
-	}
-	va_end(arglist);
 
 	if (value) {
 		list = erealloc(image_info->info_list[section_index].list, (image_info->info_list[section_index].count+1)*sizeof(image_info_data));
@@ -1238,7 +1230,7 @@ static void exif_iif_add_str(image_info_type *image_info, int section_index, cha
 			EXIF_ERRLOG_EALLOC
 			return;
 		}
-		info_data->value.s = estrdup(tmp);
+		info_data->value.s = estrdup(value);
 		if (!info_data->value.s) {
 			EXIF_ERRLOG_EALLOC
 			return;
@@ -1246,6 +1238,24 @@ static void exif_iif_add_str(image_info_type *image_info, int section_index, cha
 		image_info->sections_found |= 1<<section_index;
 		image_info->info_list[section_index].count++;
 	}
+}
+/* }}} */
+
+/* {{{ exif_iif_add_fmt
+ Add a format string value to image_info MUST BE NUL TERMINATED
+*/
+static void exif_iif_add_fmt(image_info_type *image_info, int section_index, char *name, char *value, ...)
+{
+	char             *tmp;
+	va_list 		 arglist;
+
+	va_start(arglist, value);
+	if (value) {
+		vspprintf(&tmp, 0, value, arglist);
+		exif_iif_add_str(image_info, section_index, name, tmp);
+		efree(tmp);
+	}
+	va_end(arglist);
 }
 /* }}} */
 
@@ -1670,7 +1680,7 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *DirStart, 
 
 /* {{{ exif_get_markername
 	Get name of marker */
-//#ifdef EXIF_DEBUG
+#ifdef EXIF_DEBUG
 static char * exif_get_markername(int marker)
 {
 	switch(marker) {
@@ -1719,7 +1729,7 @@ static char * exif_get_markername(int marker)
 	}
 	return "Unknown";
 }
-//#endif
+#endif
 /* }}} */
 
 /* {{{ proto string|false exif_tagname(index)
@@ -3153,35 +3163,35 @@ PHP_FUNCTION(exif_read_data)
 #endif
 
 	if (ImageInfo.Width>0 &&  ImageInfo.Height>0) {
-		exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "html",   "width=\"%d\" height=\"%d\"", ImageInfo.Width, ImageInfo.Height);
+		exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "html",   "width=\"%d\" height=\"%d\"", ImageInfo.Width, ImageInfo.Height);
 		exif_iif_add_int(&ImageInfo, SECTION_COMPUTED, "Height", ImageInfo.Height);
 		exif_iif_add_int(&ImageInfo, SECTION_COMPUTED, "Width",  ImageInfo.Width);
 	}
 	exif_iif_add_int(&ImageInfo, SECTION_COMPUTED, "IsColor", ImageInfo.IsColor);
 	if (ImageInfo.FocalLength) {
-		exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "FocalLength", "%4.1fmm", ImageInfo.FocalLength);
+		exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "FocalLength", "%4.1fmm", ImageInfo.FocalLength);
 		if(ImageInfo.CCDWidth) {
-			exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "35mmFocalLength", "%dmm", (int)(ImageInfo.FocalLength/ImageInfo.CCDWidth*35+0.5));
+			exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "35mmFocalLength", "%dmm", (int)(ImageInfo.FocalLength/ImageInfo.CCDWidth*35+0.5));
 		}
 	}
 	if(ImageInfo.CCDWidth) {
-		exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "CCDWidth", "%dmm", (int)ImageInfo.CCDWidth);
+		exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "CCDWidth", "%dmm", (int)ImageInfo.CCDWidth);
 	}
 	if(ImageInfo.ExposureTime>0) {
 		if(ImageInfo.ExposureTime <= 0.5) {
-			exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "ExposureTime", "%0.3f s (1/%d)", ImageInfo.ExposureTime, (int)(0.5 + 1/ImageInfo.ExposureTime));
+			exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "ExposureTime", "%0.3f s (1/%d)", ImageInfo.ExposureTime, (int)(0.5 + 1/ImageInfo.ExposureTime));
 		} else {
-			exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "ExposureTime", "%0.3f s", ImageInfo.ExposureTime);
+			exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "ExposureTime", "%0.3f s", ImageInfo.ExposureTime);
 		}
 	}
 	if(ImageInfo.ApertureFNumber) {
-		exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "ApertureFNumber", "f/%.1f", ImageInfo.ApertureFNumber);
+		exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "ApertureFNumber", "f/%.1f", ImageInfo.ApertureFNumber);
 	}
 	if(ImageInfo.Distance) {
 		if(ImageInfo.Distance<0) {
 			exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "FocusDistance", "Infinite");
 		} else {
-			exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "FocusDistance", "%0.2fm", ImageInfo.Distance);
+			exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "FocusDistance", "%0.2fm", ImageInfo.Distance);
 		}
 	}
 	if (ImageInfo.UserComment) {
@@ -3216,7 +3226,7 @@ PHP_FUNCTION(exif_read_data)
 #endif
 
 	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_FILE);
-	add_assoc_image_info(return_value, 1, 			&ImageInfo, SECTION_COMPUTED);
+	add_assoc_image_info(return_value, 1,          &ImageInfo, SECTION_COMPUTED);
 	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_ANY_TAG);
 	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_IFD0);
 	add_assoc_image_info(return_value, 1,          &ImageInfo, SECTION_THUMBNAIL);
