@@ -1219,10 +1219,10 @@ PHP_FUNCTION(imap_headers)
 PHP_FUNCTION(imap_body)
 {
 	zval **streamind, **msgno, **flags;
-	int ind, ind_type;
+	int ind, ind_type, msgindex;
 	pils *imap_le_struct; 
 	int myargc=ZEND_NUM_ARGS();
-	if (myargc <2 || myargc > 3 || zend_get_parameters_ex(myargc, &streamind, &msgno, &flags) == FAILURE) {
+	if (myargc < 2 || myargc > 3 || zend_get_parameters_ex(myargc, &streamind, &msgno, &flags) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
@@ -1238,6 +1238,20 @@ PHP_FUNCTION(imap_body)
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
+
+	if ((myargc == 3) && (Z_LVAL_PP(flags) & FT_UID)) {
+		/* This should be cached; if it causes an extra RTT to the
+		   IMAP server, then that's the price we pay for making
+		   sure we don't crash. */
+		msgindex = mail_msgno(imap_le_struct->imap_stream, Z_LVAL_PP(msgno));
+	} else {
+		msgindex = Z_LVAL_PP(msgno);
+	}
+	if ((msgindex < 1) || ((unsigned) msgindex > imap_le_struct->imap_stream->nmsgs)) {
+		php_error(E_WARNING, "Bad message number");
+		RETURN_FALSE;
+	}
+    
 	RETVAL_STRING(mail_fetchtext_full (imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, myargc==3 ? Z_LVAL_PP(flags) : NIL), 1);
 }
 /* }}} */
@@ -2028,11 +2042,11 @@ PHP_FUNCTION(imap_fetchstructure)
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-    
+
 	if ((myargc == 3) && (Z_LVAL_PP(flags) & FT_UID)) {
-		/*  This should be cached; if it causes an extra RTT to the
-			IMAP server, then that's the price we pay for making sure
-			we don't crash. */
+		/* This should be cached; if it causes an extra RTT to the
+		   IMAP server, then that's the price we pay for making
+		   sure we don't crash. */
 		msgindex = mail_msgno(imap_le_struct->imap_stream, Z_LVAL_PP(msgno));
 	} else {
 		msgindex = Z_LVAL_PP(msgno);
