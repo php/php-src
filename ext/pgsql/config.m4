@@ -12,6 +12,7 @@ AC_ARG_WITH(pgsql,
     else
       PGSQL_INCDIR=$withval/include
       test -d $withval/include/pgsql && PGSQL_INCDIR=$withval/include/pgsql
+      test -d $withval/include/postgresql && PGSQL_INCDIR=$withval/include/postgresql
       PGSQL_LIBDIR=$withval/lib
       test -d $withval/lib/pgsql && PGSQL_LIBDIR=$withval/lib/pgsql
     fi
