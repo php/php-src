@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
+?? ??? 2000, Version 4.0.1-dev
+
 22 May 2000, Version 4.0.0 Release
 - Allow the writing of flash files to stdout.
 - Fixed a crash bug in .phps syntax-highlighted files (Andi)
