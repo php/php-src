@@ -1,3 +1,8 @@
+2004-06-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      Fix Bug #28694 ReflectionExtension::getFunctions() crashes PHP
+
 2004-06-07  Andi Gutmans  <andi@zend.com>
 
     * zend.h:
