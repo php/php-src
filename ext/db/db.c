@@ -237,13 +237,17 @@ PHP_MINFO_FUNCTION(db)
 	php_info_print_box_end();
 }
 
+/* {{{ proto string dblist(void)
+   Describes the dbm-compatible library being used */ 
 PHP_FUNCTION(dblist)
 {
 	char *str = php_get_info_db();
 	RETURN_STRING(str,1);
 }
+/* }}} */
 
-
+/* {{{ proto int dbmopen(string filename, string mode)
+   Opens a dbm database */
 PHP_FUNCTION(dbmopen) {
 	pval *filename, *mode;
 	dbm_info *info=NULL;
@@ -264,6 +268,8 @@ PHP_FUNCTION(dbmopen) {
 		RETURN_FALSE;
 	}
 }
+/* }}} */
+
 
 dbm_info *php_dbm_open(char *filename, char *mode) {
 	dbm_info *info;
@@ -402,6 +408,8 @@ dbm_info *php_dbm_open(char *filename, char *mode) {
 	return NULL;
 }
 
+/* {{{ proto bool dbmclose(int dbm_identifier)
+   Closes a dbm database */
 PHP_FUNCTION(dbmclose) {
 	pval *id;
 
@@ -416,6 +424,7 @@ PHP_FUNCTION(dbmclose) {
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
 int php_dbm_close(dbm_info *info) {
 	int ret = 0;
@@ -450,6 +459,8 @@ int php_dbm_close(dbm_info *info) {
  * ret = 0  success
  * ret = 1  key already exists - nothing done
  */
+/* {{{ proto int dbminsert(int dbm_identifier, string key, string value)
+   Inserts a value for a key in a dbm database */
 PHP_FUNCTION(dbminsert)
 {
 	pval *id, *key, *value;
@@ -471,6 +482,9 @@ PHP_FUNCTION(dbminsert)
 	ret = php_dbm_insert(info, key->value.str.val, value->value.str.val);
 	RETURN_LONG(ret);
 }
+/* }}} */
+
+
 
 int php_dbm_insert(dbm_info *info, char *key, char *value) {
 	datum key_datum, value_datum;
@@ -503,6 +517,8 @@ int php_dbm_insert(dbm_info *info, char *key, char *value) {
 	return(ret);	
 }	
 
+/* {{{ proto int dbmreplace(int dbm_identifier, string key, string value)
+   Replaces the value for a key in a dbm database */
 PHP_FUNCTION(dbmreplace)
 {
 	pval *id, *key, *value;
@@ -524,6 +540,7 @@ PHP_FUNCTION(dbmreplace)
 	ret = php_dbm_replace(info, key->value.str.val, value->value.str.val);
 	RETURN_LONG(ret);
 }
+/* }}} */
 
 int php_dbm_replace(dbm_info *info, char *key, char *value) {
 	DBM_TYPE dbf;
@@ -559,6 +576,8 @@ int php_dbm_replace(dbm_info *info, char *key, char *value) {
 	return(ret);	
 }	
 
+/* {{{ proto string dbmfetch(int dbm_identifier, string key)
+   Fetches a value for a key from a dbm database */
 PHP_FUNCTION(dbmfetch)
 {
 	pval *id, *key;
@@ -583,6 +602,7 @@ PHP_FUNCTION(dbmfetch)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
 char *php_dbm_fetch(dbm_info *info, char *key) {
 	datum key_datum, value_datum;
@@ -629,7 +649,8 @@ char *php_dbm_fetch(dbm_info *info, char *key) {
 	return(ret);
 }
 
-
+/* {{{ proto int dbmexists(int dbm_identifier, string key)
+   Tells if a value exists for a key in a dbm database */
 PHP_FUNCTION(dbmexists)
 {
 	pval *id, *key;
@@ -650,6 +671,7 @@ PHP_FUNCTION(dbmexists)
 	ret = php_dbm_exists(info, key->value.str.val);
 	RETURN_LONG(ret);
 }
+/* }}} */
 
 int php_dbm_exists(dbm_info *info, char *key) {
 	datum key_datum;
@@ -672,7 +694,9 @@ int php_dbm_exists(dbm_info *info, char *key) {
 
 	return(ret);
 }
-		
+
+/* {{{ proto int dbmdelete(int dbm_identifier, string key)
+   Deletes the value for a key from a dbm database */ 		
 PHP_FUNCTION(dbmdelete)
 {
 	pval *id, *key;
@@ -693,6 +717,7 @@ PHP_FUNCTION(dbmdelete)
 	ret = php_dbm_delete(info, key->value.str.val);
 	RETURN_LONG(ret);
 }
+/* }}} */
 
 int php_dbm_delete(dbm_info *info, char *key) {
 	datum key_datum;
@@ -715,6 +740,8 @@ int php_dbm_delete(dbm_info *info, char *key) {
 	return(ret);
 }
 
+/* {{{ string dbmfirstkey(int dbm_identifier)
+   Retrieves the first key from a dbm database */
 PHP_FUNCTION(dbmfirstkey)
 {
 	pval *id;
@@ -740,6 +767,7 @@ PHP_FUNCTION(dbmfirstkey)
 		return_value->type = IS_STRING;
 	}
 }
+/* }}} */
 
 char *php_dbm_first_key(dbm_info *info) {
 	datum ret_datum;
@@ -772,6 +800,8 @@ char *php_dbm_first_key(dbm_info *info) {
 	return (ret);
 }
 
+/* {{{ proto string dbmnextkey(int dbm_identifier, string key)
+   Retrieves the next key from a dbm database */
 PHP_FUNCTION(dbmnextkey)
 {
 	pval *id, *key;
@@ -798,6 +828,8 @@ PHP_FUNCTION(dbmnextkey)
 		return_value->type = IS_STRING;
 	}
 }
+/* }}} */
+
 
 char *php_dbm_nextkey(dbm_info *info, char *key) {
 	datum key_datum, ret_datum;
