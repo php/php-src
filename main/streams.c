@@ -760,8 +760,9 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 	}
 	
 	if (total_copied == 0) {
-		if (grow_mode)
-			assert(bufstart != NULL);
+		if (grow_mode) {
+			assert(bufstart == NULL);
+		}
 		return NULL;
 	}
 	
