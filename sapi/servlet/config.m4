@@ -25,11 +25,10 @@ AC_ARG_WITH(servlet,
     fi
 
     AC_DEFINE(SAPI_SERVLET)
-    enable_thread_safety=yes
-    passthru="$passthru --enable-thread-safety"
     PHP_EXTENSION(servlet, "shared")
     PHP_SAPI=servlet
     PHP_BUILD_SHARED
+    PHP_BUILD_THREAD_SAFE
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
