@@ -38,6 +38,13 @@
 
 #define smart_str_0(x) ((x)->c[(x)->len] = '\0')
 
+#define smart_str_alloc(d,n) {\
+	if (n >= d->a) {\
+		d->c = erealloc(d->c, n + 129); \
+		d->a = n + 128; \
+	}\
+}
+
 static inline void smart_str_append(smart_str *dest, smart_str *src)
 {
 	size_t newlen;
@@ -46,24 +53,16 @@ static inline void smart_str_append(smart_str *dest, smart_str *src)
 		dest->len = dest->a = 0;
 	
 	newlen = dest->len + src->len;
-	if (newlen >= dest->a) {
-		dest->c = erealloc(dest->c, newlen + 129);
-		dest->a = newlen + 128;
-	}
+	smart_str_alloc(dest, newlen);
 	memcpy(dest->c + dest->len, src->c, src->len);
 	dest->len = newlen;
 }
 
 static inline void smart_str_appendc(smart_str *dest, char c)
 {
-	size_t newlen;
-
-	newlen = dest->len + 1;
-	if (newlen >= dest->a) {
-		dest->c = erealloc(dest->c, newlen + 129);
-		dest->a = newlen + 128;
-	}
-	dest->c[dest->len++] = c;
+	++dest->len;
+	smart_str_alloc(dest, dest->len);
+	dest->c[dest->len - 1] = c;
 }
 
 static inline void smart_str_free(smart_str *s)
@@ -77,9 +76,9 @@ static inline void smart_str_free(smart_str *s)
 
 static inline void smart_str_copyl(smart_str *dest, const char *src, size_t len)
 {
-	dest->c = erealloc(dest->c, len + 1);
+	smart_str_alloc(dest, len);
 	memcpy(dest->c, src, len);
-	dest->a = dest->len = len;
+	dest->len = len;
 }
 
 static inline void smart_str_appendl(smart_str *dest, const char *src, size_t len)
@@ -128,7 +127,7 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 		}
 	}
 
-	if (bash) 
+	if (bash)
 		smart_str_appendl(dest, url->c, bash - url->c);
 	else
 		smart_str_append(dest, url);
