@@ -1904,7 +1904,7 @@ int zend_echo_handler(ZEND_OPCODE_HANDLER_ARGS)
 		zend_print_variable(z);
 	}
 
-	FREE_OP(EX(Ts), &opline->op1, EG(free_op1));
+	FREE_OP(EX(Ts), &opline->op1, free_op1);
 	NEXT_OPCODE();
 }
 
