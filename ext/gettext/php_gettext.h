@@ -23,7 +23,7 @@
 
 #if HAVE_LIBINTL
 #ifndef INIT_FUNC_ARGS
-#include "modules.h"
+#include "zend_modules.h"
 #endif
 
 extern zend_module_entry php_gettext_module_entry;
