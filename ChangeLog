@@ -1,3 +1,322 @@
+2000-05-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/snmp/Makefile.in
+      ext/snmp/config.m4:
+    Convert config.m4 to make use of the new build system features
+
+    * ext/imap/Makefile.in
+      ext/imap/config.m4: Make imap extension buildable as shared module.
+
+    * ext/recode/Makefile.in
+      ext/recode/config.m4
+      ext/recode/recode.c: Make recode extension buildable as shared module.
+
+    * ext/msql/Makefile.in
+      ext/msql/config.m4: Make msql extension buildable as shared module.
+
+    * ext/informix/Makefile.in: Add INFORMIX_SHARED_LIBADD to LT_SHARED_LIBADD
+
+    * ext/informix/Makefile.in
+      ext/informix/config.m4
+      ext/informix/ifx.ec:
+    Make informix extension buildable as shared module on Unix.
+
+    * acinclude.m4: A couple of cleanups and shared-libadd additions
+
+2000-05-23  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/metaphone.c
+      ext/standard/output.c
+      configuration-parser.y
+      ext/db/db.c
+      ext/domxml/domxml.c
+      ext/session/session.c: another bunch of proto fixes
+
+    * ext/oci8/oci8.c: proto function name fixed
+
+    * ext/gd/gd.c: added a missing proto
+
+2000-05-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/gettext/Makefile.in
+      ext/gettext/config.m4
+      ext/gettext/gettext.c:
+    Make gettext extension compilable as shared module.
+
+2000-05-23  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/com/COM.c: even more protos were missing
+
+    * ext/com/COM.c: some protos where missing, took them from php3
+
+    * ext/pgsql/pgsql.c: proto typo fix
+
+    * ext/mssql/php_mssql.c: some protos where missing proto keyword
+
+    * ext/mhash/mhash.c
+      ext/mcrypt/mcrypt.c: protos where lacking return types
+
+    * ext/filepro/filepro.c: integratet protos from php3 version
+
+    * ext/icap/php_icap.c: some protos fixed
+    commented out yet not implemented function icap_popen() from functiontabe
+
+    * ext/mcal/php_mcal.c: some protos got to the wrong function - fixed
+
+2000-05-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * makedist:
+    Add check for Bison. A recent version is required when in ZTS mode.
+
+2000-05-23  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/php_string.h
+      ext/standard/string.c:
+    Need a PHPAPI version of basename for some stuff I am working on.
+    Also fixed a bug along the way in the basename function.  If it
+    was fed something like "filename.ext/////" it would return the string
+    with all the slashes whereas if you fed it "/path/filename.ext////" it
+    would get it right.
+
+2000-05-23  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/levenshtein.c:
+    one little unimportant detail (cut&paste is evil :)
+
+    * ext/standard/levenshtein.c:
+    a little less optimized, but no dirty tricks anymore
+
+2000-05-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/levenshtein.c:
+    Make calc_levdist static and fix pointer swapping.
+
+2000-05-23  Zeev Suraski  <zeev@php.net>
+
+    * NEWS
+      php4dllts.dsp:
+    - Update Windows project to include levensthein.c and update NEWS file
+
+2000-05-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * INSTALL:
+    Add interesting email which explains why disabling -fPIC works on Linux
+    by Martin v. Loewis <martin@loewis.home.cs.tu-berlin.de>
+
+2000-05-23  Andi Gutmans  <andi@php.net>
+
+    * dl/log/log_db.c
+      ext/standard/file.c
+      php.h
+      php_virtual_cwd.c
+      php_virtual_cwd.h: - Virtual current working directory is now enabled
+    - Added support for mkdir()/rmdir() and more
+
+2000-05-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: Cosmetic changes
+
+    * php_reentrancy.h:
+    Some systems don't have dirent.h. Wrap include appropiately.
+
+    * ext/standard/dir.c
+      acinclude.m4
+      configure.in
+      ext/session/mod_files.c
+      php_reentrancy.h
+      reentrancy.c:
+    Use reentrant version of readdir. If the target platform does not support
+    the POSIX-like readdir_r, we fall back to readdir. In ZTS mode, this will
+    cause php_readdir_r calls to be serialized.
+
+    * config.w32.h
+      win32/readdir.c
+      win32/readdir.h: Add POSIX-like readdir_r for Win32
+
+2000-05-23  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/levenshtein.c: - English fix.
+
+2000-05-23  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/levenshtein.c
+      ext/standard/php_string.h: name changed from levdist() to levenshtein()
+    (although i bet we'll get a    levenstein() alias some day)
+
+2000-05-23  Andi Gutmans  <andi@php.net>
+
+    * ext/db/db.c
+      ext/session/mod_files.c
+      ext/standard/file.c
+      ext/standard/link.c
+      dl/log/log_sql.c
+      php.h
+      php_virtual_cwd.c
+      php_virtual_cwd.h: - Support virtual unlink()
+
+2000-05-23  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/Makefile.in
+      ext/standard/basic_functions.c
+      ext/standard/levenshtein.c
+      ext/standard/php_string.h:
+    added function "int levdist(string str1, string str2)"
+    that will calculate the Levenshtein distance between two
+    strings (faster and possibly more accurate than similar_text())
+
+2000-05-23  Andrew Skalski  <askalski@chek.com>
+
+    * ext/ftp/ftp.c:
+    Changed the #ifdefs around "errno = ETIMEDOUT;" to include the rest
+    of the statement ["if (n == 0)"]
+
+2000-05-23  Andi Gutmans  <andi@php.net>
+
+    * ext/ftp/ftp.c
+      ext/ftp/php_ftp.c: - PHP_WIN32 macro should be used with #ifdef/#ifndef
+    - Always use PHP_WIN32 instead of WIN32/WINNT values
+
+2000-05-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/calendar/calendar.c: Revert recent COMPILE_DL change.
+
+2000-05-23  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/string.c: Clean up the patch by Hartmut.
+
+2000-05-23  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/swf/swf.h: 'char *' to 'char'
+
+2000-05-23  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/ftp/ftp.c: fixing type
+
+    * ext/ftp/ftp.c: chang #if to #ifdef
+
+2000-05-23  Thies C. Arntzen  <thies@digicol.de>
+
+    * main.c: fixed newly introduced crash
+
+2000-05-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * README.SELF-CONTAINED-EXTENSIONS: Use new syntax
+
+    * ext/gd/config.m4: --with-foo causes $withval to be set to "yes," not ""
+
+2000-05-23  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/ftp/ftp.h: even better check for netinet/in.h
+
+    * ext/ftp/ftp.h: make ftp compile on unix again
+
+2000-05-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * calendar.mak
+      dbase.mak
+      dbm.mak
+      filepro.mak
+      gd.mak
+      hyperwave.mak
+      imap4.mak
+      ldap.mak
+      msql.mak
+      msql1.mak
+      mysql.mak
+      snmp.mak
+      zlib.mak: s/COMPILE_DL/COMPILE_DL_EXTNAME/
+
+    * ext/zlib/zlib.c
+      ext/sysvshm/sysvshm.c
+      ext/xml/xml.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sysvsem/sysvsem.c
+      ext/sybase/sybase.c
+      ext/standard/mail.c
+      ext/swf/swf.c
+      ext/session/session.c
+      ext/snmp/snmp.c
+      ext/pgsql/pgsql.c
+      ext/posix/posix.c
+      ext/pcre/php_pcre.c
+      ext/pdf/pdf.c
+      ext/odbc/velocis.c
+      ext/oracle/oracle.c
+      ext/oci8/oci8.c
+      ext/odbc/php_odbc.c
+      ext/mysql/php_mysql.c
+      ext/mcal/php_mcal.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/ldap/ldap.c
+      ext/imap/php_imap.c
+      ext/interbase/interbase.c
+      ext/hyperwave/hw.c
+      ext/icap/php_icap.c
+      ext/filepro/filepro.c
+      ext/gd/gd.c
+      ext/db/db.c
+      ext/dbase/dbase.c
+      ext/fdf/fdf.c
+      ext/aspell/aspell.c
+      ext/bcmath/bcmath.c
+      ext/cpdf/cpdf.c
+      ext/dav/dav.c: Use #ifdef COMPILE_DL_EXTNAME solely.
+
+    * ext/zlib/zlib.dsp
+      ext/pgsql/pgsql.dsp
+      ext/swf/swf.dsp
+      ext/oci8/oci8.dsp
+      ext/oracle/oracle.dsp
+      ext/mssql/mssql.dsp
+      ext/mysql/mysql.dsp
+      ext/java/java.dsp
+      ext/ldap/ldap.dsp
+      ext/mcrypt/mcrypt.dsp
+      ext/calendar/calendar.dsp
+      ext/ftp/ftp.dsp
+      ext/imap/imap.dsp
+      ext/informix/ifx.dsp:
+    s/COMPILE_DL/COMPILE_DL_EXTNAME/ for Windows build files.
+
+    * ext/standard/config.m4:
+    Only print the attention thing, if the MD5 and DES checks failed.
+
+2000-05-23  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c: making ftp module compile and work on win32
+
+2000-05-23  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS
+      configure.in
+      php_version.h: bump version to 4.0.1-dev
+
+2000-05-23  Jouni Ahto  <jah@mork.net>
+
+    * ext/pgsql/config.m4
+      ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+    According to current PostgreSQL docs, using PQoidStatus() is deprecated.
+
+2000-05-23  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/php_string.h
+      ext/standard/string.c: again (due to feature request in bug id #3251)
+    added optional 3rd parameter 'limit' to explode() as in split()
+
+2000-05-23  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/swf/php_swf.h
+      ext/swf/swf.c: -Add the swf_ortho function. 
+
 2000-05-22  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
 
     * main.c: fix for bug #2852 : argc inconsistency
