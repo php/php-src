@@ -122,12 +122,22 @@ class PEAR_Config extends PEAR
             'default' => 1,
             'doc' => 'verbosity level',
             ),
+        'preferred_state' => array(
+            'type' => 'set',
+            'default' => 'stable',
+            'doc' => 'the installer will prefer releases with this state
+when installing packages without a version or state specified',
+            'valid_set' => array(
+                'stable', 'beta', 'alpha', 'devel', 'snapshot'),
+            ),
+/*
         'testset1' => array(
             'type' => 'set',
             'default' => 'foo',
             'doc' => 'test set',
             'valid_set' => array('foo', 'bar'),
             ),
+*/
         );
 
     // }}}
