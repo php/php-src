@@ -61,7 +61,7 @@ static int le_ps_font, le_ps_enc;
 #include <gdfontl.h>  /* 4 Large font */
 #include <gdfontg.h>  /* 5 Giant font */
 #ifdef HAVE_GD_WBMP
-#include <wbmp.h>
+#include "libgd/wbmp.h"
 #endif
 #ifdef ENABLE_GD_TTF
 # include "gdttf.h"
