@@ -357,7 +357,21 @@ PHP_FUNCTION(ldap_connect)
 		RETURN_FALSE;
 	}
 
-	ldap = ldap_open(host,port);
+#ifdef LDAP_API_FEATURE_X_OPENLDAP
+	if (strchr(host, '/')) {
+		int rc;
+		
+		rc = ldap_initialize(&ldap, host);
+		if (rc != LDAP_SUCCESS) {
+			php_error(E_WARNING, "Could not create LDAP session handle (%d): %s\n", rc, ldap_err2string(rc));
+			RETURN_FALSE;
+		}
+	} else
+#endif
+	{
+		ldap = ldap_open(host,port);
+	}
+	
 	if ( ldap == NULL ) {
 		RETURN_FALSE;
 	} else {
