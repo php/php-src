@@ -1914,9 +1914,30 @@ PHP_FUNCTION(rename)
 	if (ret == -1) {
 #ifdef EXDEV
 		if (errno == EXDEV) {
-			if (php_copy_file(old_name, new_name TSRMLS_CC)	== SUCCESS) {
-				VCWD_UNLINK(old_name);
-				RETURN_TRUE;
+			struct stat sb;
+			if (php_copy_file(old_name, new_name TSRMLS_CC) == SUCCESS) {
+				if (VCWD_STAT(old_name, &sb) == 0) {
+					if (VCWD_CHMOD(new_name, sb.st_mode)) {
+						if (errno == EPERM) {
+							php_error_docref2(NULL TSRMLS_CC, old_name, new_name, E_WARNING, "%s", strerror(errno));
+							VCWD_UNLINK(old_name);
+							RETURN_TRUE;
+						}
+						php_error_docref2(NULL TSRMLS_CC, old_name, new_name, E_WARNING, "%s", strerror(errno));
+						RETURN_FALSE;
+					}
+					if (VCWD_CHOWN(new_name, sb.st_uid, sb.st_gid)) {
+						if (errno == EPERM) {
+							php_error_docref2(NULL TSRMLS_CC, old_name, new_name, E_WARNING, "%s", strerror(errno));
+							VCWD_UNLINK(old_name);
+							RETURN_TRUE;
+						}
+						php_error_docref2(NULL TSRMLS_CC, old_name, new_name, E_WARNING, "%s", strerror(errno));
+						RETURN_FALSE;
+					}
+					VCWD_UNLINK(old_name);
+					RETURN_TRUE;
+				}
 			}
 		}
 #endif
