@@ -103,33 +103,28 @@ static zend_object_handlers tidy_object_handlers_attr;
 static zend_object_handlers tidy_object_handlers_exception;
 
 function_entry tidy_funcs_node[] = {
-	PHP_ME_MAPPING(is_xml, 			tidy_is_xml, NULL)
-	PHP_ME_MAPPING(is_xhtml, 		tidy_is_xhtml, NULL)
-	PHP_ME_MAPPING(diagnose, 		tidy_diagnose, NULL)
-	PHP_ME_MAPPING(errors, 			tidy_get_error_buffer, NULL)
-	PHP_ME_MAPPING(errorcount, 		tidy_error_count, NULL)
-	PHP_ME_MAPPING(warningcount, 	tidy_warning_count, NULL)
 	
-	PHP_NODE_ME(type, NULL)
-	PHP_NODE_ME(name, NULL)
-	PHP_NODE_ME(value, NULL)
-	PHP_NODE_ME(id, NULL)
+	PHP_NODE_ME(__construct, NULL)
 	PHP_NODE_ME(attributes, NULL)
 	PHP_NODE_ME(children, NULL)
+	
+	PHP_NODE_ME(has_children, NULL)
+	PHP_NODE_ME(has_siblings, NULL)
+	PHP_NODE_ME(is_comment, NULL)
+	PHP_NODE_ME(is_html, NULL)
+	PHP_NODE_ME(is_text, NULL)
+	PHP_NODE_ME(is_jste, NULL)
+	PHP_NODE_ME(is_asp, NULL)
+	PHP_NODE_ME(is_php, NULL)
+	
+	PHP_NODE_ME(next, NULL)
+	PHP_NODE_ME(prev, NULL)
+	PHP_NODE_ME(get_attr, NULL)
+	/*PHP_NODE_ME(get_nodes, NULL) TODO */
 	{NULL, NULL, NULL}
 };
 
 function_entry tidy_funcs_attr[] = {
-	PHP_ME_MAPPING(is_xml, 			tidy_is_xml, NULL)
-	PHP_ME_MAPPING(is_xhtml, 		tidy_is_xhtml, NULL)
-	PHP_ME_MAPPING(diagnose, 		tidy_diagnose, NULL)
-	PHP_ME_MAPPING(errors, 			tidy_get_error_buffer, NULL)
-	PHP_ME_MAPPING(errorcount, 		tidy_error_count, NULL)
-	PHP_ME_MAPPING(warningcount, 	tidy_warning_count, NULL)
-	
-	PHP_ATTR_ME(name, NULL)
-	PHP_ATTR_ME(value, NULL)
-	PHP_ATTR_ME(id, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -151,7 +146,7 @@ zend_module_entry tidy_module_entry = {
 	NULL,
 	PHP_MINFO(tidy),
 #if ZEND_MODULE_API_NO >= 20010901
-	"0.6b",
+	"0.7b",
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
@@ -298,8 +293,8 @@ PHP_MINIT_FUNCTION(tidy)
 	REGISTER_INI_ENTRIES();
 
 #ifdef ZEND_ENGINE_2
-	REGISTER_TIDY_CLASS(node,NULL);
-	REGISTER_TIDY_CLASS(attr,NULL);
+	REGISTER_TIDY_CLASS(node, NULL);
+	REGISTER_TIDY_CLASS(attr, NULL);
 	REGISTER_TIDY_CLASS(exception, zend_exception_get_default());
 #endif
 	tidy_object_handlers_node.get_class_entry = tidy_get_ce_node;
@@ -891,7 +886,7 @@ static void tidy_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 
 	zend_hash_destroy(intern->std.properties);
 	FREE_HASHTABLE(intern->std.properties);
-
+	
 	efree(object);
 }
 
@@ -957,11 +952,71 @@ static zval * tidy_instanciate(zend_class_entry *pce, zval *object TSRMLS_DC)
 	return object;
 }
 
+#define ADD_PROPERITY_STRING(_table, _key, _string) \
+	{ \
+		zval *tmp; \
+		MAKE_STD_ZVAL(tmp); \
+		if(_string) { \
+			ZVAL_STRING(tmp, (char *)_string, 1); \
+		} else { \
+			ZVAL_EMPTY_STRING(tmp); \
+		} \
+		zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
+	}
+
+#define ADD_PROPERITY_LONG(_table, _key, _long) \
+	{ \
+		zval *tmp; \
+		MAKE_STD_ZVAL(tmp); \
+		ZVAL_LONG(tmp, _long); \
+		zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
+	}
+
+static void tidy_add_default_properities(PHPTidyObj *obj, tidy_obj_type type TSRMLS_DC) {
+	
+	TidyBuffer buf;
+	
+	switch(type) {
+		
+		case is_node:
+			memset(&buf, 0, sizeof(buf));
+			tidyNodeGetText(TG(tdoc)->doc, obj->node, &buf);
+			ADD_PROPERITY_STRING(obj->std.properties, value, buf.bp);
+			tidyBufFree(&buf);
+			
+			ADD_PROPERITY_STRING(obj->std.properties, name, tidyNodeGetName(obj->node));
+			ADD_PROPERITY_LONG(obj->std.properties, type, tidyNodeGetType(obj->node));
+			ADD_PROPERITY_LONG(obj->std.properties, id, tidyNodeGetId(obj->node));
+			
+            break;
+		case is_attr:
+			ADD_PROPERITY_STRING(obj->std.properties, name, tidyAttrName(obj->attr));
+			ADD_PROPERITY_STRING(obj->std.properties, value, tidyAttrValue(obj->attr));
+			ADD_PROPERITY_LONG(obj->std.properties, id, tidyAttrGetId(obj->attr));
+			break;
+	}
+	
+}
 /* {{{ proto TidyNode tidy_get_root()
     Returns a TidyNode Object representing the root of the tidy parse tree */
 PHP_FUNCTION(tidy_get_root)
 {
+	PHPTidyObj	*obj;
+	
+	if(ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
 
+	TIDY_PARSED_CHECK();
+	
+	tidy_instanciate(tidy_ce_node, return_value TSRMLS_CC);
+	obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
+	obj->node = tidyGetRoot(TG(tdoc)->doc);
+	obj->attr = NULL;
+	obj->type = is_node;
+	
+	tidy_add_default_properities(obj, is_node TSRMLS_CC);
+		
 }
 /* }}} */
 
@@ -969,6 +1024,21 @@ PHP_FUNCTION(tidy_get_root)
     Returns a TidyNode Object starting from the <HTML> tag of the tidy parse tree */
 PHP_FUNCTION(tidy_get_html)
 {
+	PHPTidyObj	*obj;
+	
+	if(ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
+
+	TIDY_PARSED_CHECK();
+	
+	tidy_instanciate(tidy_ce_node, return_value TSRMLS_CC);
+	obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
+	obj->node = tidyGetHtml(TG(tdoc)->doc);
+	obj->attr = NULL;
+	obj->type = is_node;
+	
+	tidy_add_default_properities(obj, is_node TSRMLS_CC);
 }
 /* }}} */
 
@@ -976,7 +1046,21 @@ PHP_FUNCTION(tidy_get_html)
     Returns a TidyNode Object starting from the <HEAD> tag of the tidy parse tree */
 PHP_FUNCTION(tidy_get_head)
 {
+	PHPTidyObj	*obj;
 	
+	if(ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
+
+	TIDY_PARSED_CHECK();
+	
+	tidy_instanciate(tidy_ce_node, return_value TSRMLS_CC);
+	obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
+	obj->node = tidyGetHead(TG(tdoc)->doc);
+	obj->attr = NULL;
+	obj->type = is_node;
+	
+	tidy_add_default_properities(obj, is_node TSRMLS_CC);
 }
 /* }}} */
 
@@ -984,35 +1068,28 @@ PHP_FUNCTION(tidy_get_head)
     Returns a TidyNode Object starting from the <BODY> tag of the tidy parse tree */
 PHP_FUNCTION(tidy_get_body)
 {
+	PHPTidyObj	*obj;
+	
+	if(ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
+
+	TIDY_PARSED_CHECK();
+	
+	tidy_instanciate(tidy_ce_node, return_value TSRMLS_CC);
+	obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
+	obj->node = tidyGetBody(TG(tdoc)->doc);
+	obj->attr = NULL;
+	obj->type = is_node;
+	
+	tidy_add_default_properities(obj, is_node TSRMLS_CC);
 }
 /* }}} */
 #endif
 
-/* {{{ proto int tidy_node::type()
-   Returns the type of node */
-PHP_NODE_METHOD(type)
-{
-}
-/* }}} */
-   
-/* {{{ proto string tidy_node::name()
-   Returns the name of the node */
-PHP_NODE_METHOD(name)
-{
-}
-/* }}} */
-   
-   
-/* {{{ proto string tidy_node::value()
-   Returns the value of the node */
-PHP_NODE_METHOD(value)
-{
-}
-/* }}} */
-
-/* {{{ proto int tidy_node::id()
-   Returns the id of the node */
-PHP_NODE_METHOD(id)
+/* {{{ proto void tidy_node::tidy_node()
+   Constructor. */
+PHP_NODE_METHOD(__construct)
 {
 }
 /* }}} */
@@ -1021,6 +1098,43 @@ PHP_NODE_METHOD(id)
    Returns an array of attribute objects for node */
 PHP_NODE_METHOD(attributes)
 {
+	TidyAttr	tempattr;
+	zval *object;
+	PHPTidyObj	*objtemp;
+	GET_THIS_CONTAINER();
+	
+	tempattr = tidyAttrFirst(obj->node);
+	array_init(return_value);
+		
+	if(tempattr) {
+		
+		MAKE_STD_ZVAL(object);	
+		tidy_instanciate(tidy_ce_node, object TSRMLS_CC);
+
+		objtemp = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
+		objtemp->node = NULL;
+		objtemp->attr = tempattr;
+		objtemp->type = is_attr;
+	
+		tidy_add_default_properities(objtemp, is_attr TSRMLS_CC);
+		
+		add_next_index_zval(return_value, object);
+		object=NULL;
+		
+		while((tempattr = tidyAttrNext(tempattr))) {
+			MAKE_STD_ZVAL(object);	
+			tidy_instanciate(tidy_ce_node, object TSRMLS_CC);
+			objtemp = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
+			objtemp->node = NULL;
+			objtemp->attr = tempattr;
+			objtemp->type = is_attr;
+		
+			tidy_add_default_properities(objtemp, is_attr TSRMLS_CC);
+				
+			add_next_index_zval(return_value, object);
+			object=NULL;
+		}
+	}
 }
 /* }}} */
 
@@ -1028,27 +1142,275 @@ PHP_NODE_METHOD(attributes)
    Returns an array of child nodes */
 PHP_NODE_METHOD(children)
 {
+	TidyNode tempnode;
+	zval *object;
+	PHPTidyObj	*objtemp;
+	GET_THIS_CONTAINER();
+	
+	tempnode = tidyGetChild(obj->node);
+	array_init(return_value);
+		
+	if(tempnode) {
+		
+		MAKE_STD_ZVAL(object);	
+		tidy_instanciate(tidy_ce_node, object TSRMLS_CC);
+
+		objtemp = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
+		objtemp->node = tempnode;
+		objtemp->attr = NULL;
+		objtemp->type = is_node;
+	
+		tidy_add_default_properities(objtemp, is_node TSRMLS_CC);
+		
+		add_next_index_zval(return_value, object);
+		object=NULL;
+		
+		while((tempnode = tidyGetNext(tempnode))) {
+			MAKE_STD_ZVAL(object);	
+			tidy_instanciate(tidy_ce_node, object TSRMLS_CC);
+			objtemp = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
+			objtemp->node = tempnode;
+			objtemp->attr = NULL;
+			objtemp->type = is_node;
+		
+			tidy_add_default_properities(objtemp, is_node TSRMLS_CC);
+				
+			add_next_index_zval(return_value, object);
+			object=NULL;
+		}
+	}
 }
 /* }}} */
 
-/* {{{ proto string tidy_attr::name()
-   Returns the name of the attribute */
-PHP_ATTR_METHOD(name)
+/* {{{ proto boolean tidy_node::has_children()
+   Returns true if this node has children */
+PHP_NODE_METHOD(has_children)
 {
+	GET_THIS_CONTAINER();
+	
+	if(tidyGetChild(obj->node)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+	
+}
+/* }}} */
+
+/* {{{ proto boolean tidy_node::has_siblings()
+   Returns true if this node has siblings */
+PHP_NODE_METHOD(has_siblings)
+{
+	GET_THIS_CONTAINER();
+	
+	if(tidyGetNext(obj->node)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+	
 }
 /* }}} */
    
-/* {{{ proto string tidy_attr::value()
-   Returns the value of the attribute */
-PHP_ATTR_METHOD(value)
+/* {{{ proto boolean tidy_node::is_comment()
+   Returns true if this node represents a comment */
+PHP_NODE_METHOD(is_comment)
 {
+	GET_THIS_CONTAINER();
+	if(tidyNodeGetType(obj->node) == TidyNode_Comment) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+
 }
 /* }}} */
    
-/* {{{ proto int tidy_attr::id()
-   Returns the ID of the attribute */
-PHP_ATTR_METHOD(id)
+/* {{{ proto boolean tidy_node::is_html()
+   Returns true if this node is part of a HTML document */
+PHP_NODE_METHOD(is_html)
 {
+	GET_THIS_CONTAINER();
+	switch(tidyNodeGetType(obj->node)) {
+		case TidyNode_Start:
+		case TidyNode_End:
+		case TidyNode_StartEnd:
+			RETURN_TRUE;
+			break;
+		default:
+			RETURN_FALSE;
+			break;
+	}
+}
+/* }}} */
+   
+/* {{{ proto boolean tidy_node::is_xhtml()
+   Returns true if this node is part of a XHTML document */ 
+PHP_NODE_METHOD(is_xhtml)
+{
+	GET_THIS_CONTAINER();
+	if(tidyDetectedXhtml(TG(tdoc)->doc)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+   
+/* {{{ proto boolean tidy_node::is_xml()
+   Returns true if this node is part of a XML document */
+PHP_NODE_METHOD(is_xml)
+{
+	GET_THIS_CONTAINER();
+	if(tidyDetectedGenericXml(TG(tdoc)->doc)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+   
+/* {{{ proto boolean tidy_node::is_text()
+   Returns true if this node represents text (no markup) */
+PHP_NODE_METHOD(is_text)
+{
+	GET_THIS_CONTAINER();
+	if(tidyNodeGetType(obj->node) == TidyNode_Text) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+	
+}
+/* }}} */
+   
+/* {{{ proto boolean tidy_node::is_jste()
+   Returns true if this node is JSTE */
+PHP_NODE_METHOD(is_jste)
+{
+	GET_THIS_CONTAINER();
+	if(tidyNodeGetType(obj->node) == TidyNode_Jste) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+   
+/* {{{ proto boolean tidy_node::is_asp()
+   Returns true if this node is ASP */
+PHP_NODE_METHOD(is_asp)
+{
+	GET_THIS_CONTAINER();
+	if(tidyNodeGetType(obj->node) == TidyNode_Asp) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+   
+/* {{{ proto boolean tidy_node::is_jsp()
+   Returns true if this node is JSP */
+PHP_NODE_METHOD(is_php)
+{
+	GET_THIS_CONTAINER();
+	if(tidyNodeGetType(obj->node) == TidyNode_Php) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto tidy_node tidy_node::next()
+   Returns the next sibling to this node */
+PHP_NODE_METHOD(next)
+{
+	PHPTidyObj	*obj;
+	
+	if(ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
+
+	TIDY_PARSED_CHECK();
+	
+	tidy_instanciate(tidy_ce_node, return_value TSRMLS_CC);
+	obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
+	obj->node = tidyGetNext(obj->node);
+	obj->attr = NULL;
+	obj->type = is_node;
+	
+	tidy_add_default_properities(obj, is_node TSRMLS_CC);
+}
+/* }}} */
+   
+/* {{{ proto tidy_node tidy_node::prev()
+   Returns the previous sibiling to this node */
+PHP_NODE_METHOD(prev)
+{
+	PHPTidyObj	*obj;
+	
+	if(ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
+
+	TIDY_PARSED_CHECK();
+	
+	tidy_instanciate(tidy_ce_node, return_value TSRMLS_CC);
+	obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
+	obj->node = tidyGetPrev(obj->node);
+	obj->attr = NULL;
+	obj->type = is_node;
+	
+	tidy_add_default_properities(obj, is_node TSRMLS_CC);
+}
+/* }}} */
+   
+/* {{{ proto tidy_attr tidy_node::get_attr(int attrib_id)
+   Return the attribute with the provided attribute id */
+PHP_NODE_METHOD(get_attr)
+{
+	TidyAttr tempattr;
+	int	param;
+	GET_THIS_CONTAINER();
+	
+	if(ZEND_NUM_ARGS() != 1) {
+		WRONG_PARAM_COUNT;
+	}
+
+	TIDY_PARSED_CHECK();
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &param) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	for(tempattr = tidyAttrFirst(obj->node);
+		tempattr;
+		tempattr = tidyAttrNext(tempattr)) {
+		
+		fprintf(stderr, "Comparing %d with %d\n", tidyAttrGetId(tempattr), param);
+		if(tidyAttrGetId(tempattr) == param) {
+	
+			tidy_instanciate(tidy_ce_node, return_value TSRMLS_CC);
+	
+			obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
+			obj->node = NULL;
+			obj->attr = tempattr;
+			obj->type = is_attr;
+	
+			tidy_add_default_properities(obj, is_attr TSRMLS_CC);
+		}
+	}
+		
+}
+/* }}} */
+
+/* {{{ proto tidy_node tidy_node::get_nodes(int node_id)
+   Return an array of nodes under this node with the specified id */
+PHP_NODE_METHOD(get_nodes)
+{
+	/* TODO */
 }
 /* }}} */
    

@@ -83,9 +83,17 @@ extern zend_module_entry tidy_module_entry;
 		INIT_CLASS_ENTRY(ce, "tidy_" # name, tidy_funcs_ ## name); \
 		ce.create_object = tidy_object_new_ ## name; \
 		tidy_ce_ ## name = zend_register_internal_class_ex(&ce, parent, NULL TSRMLS_CC); \
-		memcpy(&tidy_object_handlers_ ## name, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); \
+		tidy_ce_ ## name->ce_flags |= ZEND_ACC_FINAL_CLASS; \
+        memcpy(&tidy_object_handlers_ ## name, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); \
 		tidy_object_handlers_ ## name.clone_obj = NULL; \
-	}
+    }
+
+#define GET_THIS_CONTAINER() \
+    PHPTidyObj *obj; \
+    { \
+        zval *object = getThis(); \
+        obj = (PHPTidyObj *)zend_object_store_get_object(object TSRMLS_CC); \
+    }
 
 typedef enum {
     is_node,
@@ -147,16 +155,25 @@ PHP_FUNCTION(tidy_get_html);
 PHP_FUNCTION(tidy_get_head);
 PHP_FUNCTION(tidy_get_body);
 
-PHP_NODE_METHOD(type);
-PHP_NODE_METHOD(name);
-PHP_NODE_METHOD(value);
-PHP_NODE_METHOD(id);
+PHP_NODE_METHOD(__construct);
 PHP_NODE_METHOD(attributes);
 PHP_NODE_METHOD(children);
 
-PHP_ATTR_METHOD(name);
-PHP_ATTR_METHOD(value);
-PHP_ATTR_METHOD(id);
+PHP_NODE_METHOD(has_children);
+PHP_NODE_METHOD(has_siblings);
+PHP_NODE_METHOD(is_comment);
+PHP_NODE_METHOD(is_html);
+PHP_NODE_METHOD(is_xhtml);
+PHP_NODE_METHOD(is_xml);
+PHP_NODE_METHOD(is_text);
+PHP_NODE_METHOD(is_jste);
+PHP_NODE_METHOD(is_asp);
+PHP_NODE_METHOD(is_php);
+
+PHP_NODE_METHOD(next);
+PHP_NODE_METHOD(prev);
+PHP_NODE_METHOD(get_attr);
+PHP_NODE_METHOD(get_nodes);
 
 /* resource dtor */
 void dtor_TidyDoc(zend_rsrc_list_entry * TSRMLS_DC);
