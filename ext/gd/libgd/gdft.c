@@ -19,7 +19,7 @@
 #endif
 
 #ifdef WIN32
-extern int access(const char *pathname, int mode);
+#define access _access
 #ifndef R_OK
 #define R_OK 2
 #endif
