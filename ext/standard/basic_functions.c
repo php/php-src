@@ -99,6 +99,9 @@ static unsigned char second_and_third_args_force_ref[] = { 3, BYREF_NONE, BYREF_
 static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 static unsigned char third_and_rest_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST };
+static unsigned char first_through_third_args_force_ref[] =
+{3, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE};
+
 
 typedef struct _php_shutdown_function_entry {
 	zval **arguments;
@@ -617,6 +620,7 @@ function_entry basic_functions[] = {
 	PHP_STATIC_FE("tmpfile",		php_if_tmpfile,							NULL)
 	PHP_FE(file,															NULL)
 	PHP_FE(file_get_contents,												NULL)
+	PHP_FE(stream_select,					  first_through_third_args_force_ref)
 	PHP_FE(stream_context_create,											NULL)
 	PHP_FE(stream_context_set_params,										NULL)
 	PHP_FE(stream_context_set_option,										NULL)
@@ -628,11 +632,9 @@ function_entry basic_functions[] = {
 	PHP_FE(get_meta_tags,													NULL)
 	PHP_FE(set_file_buffer,													NULL)
 
-	/* set_socket_blocking() is deprecated,
-	   use socket_set_blocking() instead 
-	*/
 	PHP_FE(set_socket_blocking,												NULL)
-	PHP_FE(socket_set_blocking,												NULL)
+	PHP_FE(stream_set_blocking,												NULL)
+	PHP_FALIAS(socket_set_blocking, stream_set_blocking,					NULL)
 
 	PHP_FE(file_get_meta_data,												NULL)
 	PHP_FE(file_register_wrapper,											NULL)
