@@ -283,7 +283,7 @@ int php_doit(PHLS_D SLS_DC)
 
 int pm_init(const char **argv)
 {
-	tsrm_startup(1, 1, 0);
+	tsrm_startup(1, 1, 0, NULL);
 	sapi_startup(&sapi_module);
     sapi_module.startup(&sapi_module);
 

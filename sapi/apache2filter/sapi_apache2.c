@@ -429,7 +429,7 @@ php_apache_server_shutdown(void *tmp)
 static void
 php_apache_server_startup(apr_pool_t *pchild, server_rec *s)
 {
-	tsrm_startup(1, 1, 0);
+	tsrm_startup(1, 1, 0, NULL);
 	sapi_startup(&sapi_module);
 	sapi_module.startup(&sapi_module);
 	apr_register_cleanup(pchild, NULL, php_apache_server_shutdown, NULL);

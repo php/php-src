@@ -409,7 +409,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef ZTS
-	tsrm_startup(1,1,0);
+	tsrm_startup(1,1,0, NULL);
 #endif
 
 	sapi_startup(&sapi_module);

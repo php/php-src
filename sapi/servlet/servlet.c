@@ -255,7 +255,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_startup
 {
 
 #ifdef ZTS
-	tsrm_startup(1,1,0);
+	tsrm_startup(1, 1, 0, NULL);
 #else
 	if (setjmp(EG(bailout))!=0) {
 		ThrowServletException(jenv,"bailout");

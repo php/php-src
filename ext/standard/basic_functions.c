@@ -652,6 +652,7 @@ static void basic_globals_ctor(BLS_D)
 
 #ifdef TRANS_SID
 	memset(&BG(url_adapt_state), 0, sizeof(BG(url_adapt_state)));
+	memset(&BG(url_adapt_state_ex), 0, sizeof(BG(url_adapt_state_ex)));
 #endif
 
 #ifdef PHP_WIN32

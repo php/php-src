@@ -605,7 +605,7 @@ int Ns_ModuleInit(char *server, char *module)
 {
 	php_ns_context *ctx;
 	
-	tsrm_startup(1, 1, 0);
+	tsrm_startup(1, 1, 0, NULL);
 	sapi_startup(&sapi_module);
 	sapi_module.startup(&sapi_module);
 	

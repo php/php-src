@@ -427,7 +427,7 @@ DWORD fnWrapperProc(LPCONTROL_BLOCK lpCB)
 }
 
 BOOL PHP4_startup() {
-	tsrm_startup(1, 1, 0);
+	tsrm_startup(1, 1, 0, NULL);
 	sapi_startup(&sapi_module);
 	if (sapi_module.startup) {
 		sapi_module.startup(&sapi_module);
