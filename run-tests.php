@@ -273,6 +273,7 @@ TEST $file
         'TEST'      => '(unnamed test)',
         'SKIPIF'    => '',
         'GET'       => '',
+        'ARGS'      => '',
     );
 
     $fp = @fopen($file, "r")
@@ -348,6 +349,8 @@ TEST $file
     putenv("PATH_TRANSLATED=$tmp_file");
     putenv("SCRIPT_FILENAME=$tmp_file");
 
+    $args = $section_text['ARGS'] ? ' -- '.$section_text['ARGS'] : '';
+
     if (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
     
         $post = trim($section_text['POST']);
@@ -366,7 +369,7 @@ TEST $file
         putenv("CONTENT_TYPE=");
         putenv("CONTENT_LENGTH=");
 
-        $cmd = "$php$ini_settings -f $tmp_file 2>&1";
+        $cmd = "$php$ini_settings -f $tmp_file$args 2>&1";
         
     }
 
