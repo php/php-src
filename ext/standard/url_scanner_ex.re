@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "php_ini.h"
 #include "php_globals.h"
 #define STATE_TAG SOME_OTHER_STATE_TAG
 #include "basic_functions.h"
@@ -37,6 +38,54 @@
 #define url_scanner url_scanner_ex
 
 #include "php_smart_str.h"
+
+static PHP_INI_MH(OnUpdateTags)
+{
+	url_adapt_state_ex_t *ctx;
+	char *key;
+	char *lasts;
+	char *tmp;
+	BLS_FETCH();
+	
+	ctx = &BG(url_adapt_state_ex);
+	
+	tmp = estrndup(new_value, new_value_length);
+	
+	if (ctx->tags)
+		zend_hash_destroy(ctx->tags);
+	else
+		ctx->tags = malloc(sizeof(HashTable));
+	
+	zend_hash_init(ctx->tags, 0, NULL, NULL, 1);
+	
+	for (key = php_strtok_r(tmp, ",", &lasts);
+			key;
+			key = php_strtok_r(NULL, ",", &lasts)) {
+		char *val;
+
+		val = strchr(key, '=');
+		if (val) {
+			char *q;
+			int keylen;
+			
+			*val++ = '\0';
+			for (q = key; *q; q++)
+				*q = tolower(*q);
+			keylen = q - key;
+			/* key is stored withOUT NUL
+			   val is stored WITH    NUL */
+			zend_hash_add(ctx->tags, key, keylen, val, strlen(val)+1, NULL);
+		}
+	}
+
+	efree(tmp);
+
+	return SUCCESS;
+}
+
+PHP_INI_BEGIN()
+	STD_PHP_INI_ENTRY("url_rewriter.tags", "a=href,area=href,frame=src,form=fakeentry", PHP_INI_ALL, OnUpdateTags, url_adapt_state_ex, php_basic_globals, basic_globals)
+PHP_INI_END()
 
 static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *name, smart_str *val, const char *separator)
 {
@@ -60,6 +109,12 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 		}
 	}
 
+	/* Don't modify URLs of the format "#mark" */
+	if (bash - url->c == 0) {
+		smart_str_append(dest, url);
+		return;
+	}
+
 	if (bash)
 		smart_str_appendl(dest, url->c, bash - url->c);
 	else
@@ -74,47 +129,20 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 		smart_str_appendl(dest, bash, q - bash);
 }
 
-struct php_tag_arg {
-	char *tag;
-	int taglen;
-	char *arg;
-	int arglen;
-};
-
-#define TAG_ARG_ENTRY(a,b) {#a,sizeof(#a)-1,#b,sizeof(#b)-1},
-
-static struct php_tag_arg check_tag_arg[] = {
-	TAG_ARG_ENTRY(a, href)
-	TAG_ARG_ENTRY(area, href)
-	TAG_ARG_ENTRY(frame, src)
-	TAG_ARG_ENTRY(img, src)
-	TAG_ARG_ENTRY(input, src)
-	TAG_ARG_ENTRY(form, fake_entry_for_passing_on_form_tag)
-	{0}
-};
-
 static inline void tag_arg(url_adapt_state_ex_t *ctx PLS_DC)
 {
 	char f = 0;
-	int i;
 
-	for (i = 0; check_tag_arg[i].tag; i++) {
-		if (check_tag_arg[i].arglen == ctx->arg.len
-				&& check_tag_arg[i].taglen == ctx->tag.len
-				&& strncasecmp(ctx->tag.c, check_tag_arg[i].tag, ctx->tag.len) == 0
-				&& strncasecmp(ctx->arg.c, check_tag_arg[i].arg, ctx->arg.len) == 0) {
-			f = 1;
-			break;
-		}
-	}
+	if (strncasecmp(ctx->arg.c, ctx->lookup_data, ctx->arg.len) == 0)
+		f = 1;
 
-	smart_str_appends(&ctx->result, "\"");
+	smart_str_appendc(&ctx->result, '"');
 	if (f) {
 		append_modified_url(&ctx->val, &ctx->result, &ctx->q_name, &ctx->q_value, PG(arg_separator));
 	} else {
 		smart_str_append(&ctx->result, &ctx->val);
 	}
-	smart_str_appends(&ctx->result, "\"");
+	smart_str_appendc(&ctx->result, '"');
 }
 
 enum {
@@ -158,13 +186,10 @@ enum {
 	int ok = 0; \
 	int i; \
 	smart_str_copyl(&ctx->tag, start, YYCURSOR - start); \
-	for (i = 0; check_tag_arg[i].tag; i++) { \
-		if (ctx->tag.len == check_tag_arg[i].taglen \
-				&& strncasecmp(ctx->tag.c, check_tag_arg[i].tag, ctx->tag.len) == 0) { \
-			ok = 1; \
-			break; \
-		} \
-	} \
+	for (i = 0; i < ctx->tag.len; i++) \
+		ctx->tag.c[i] = tolower(ctx->tag.c[i]); \
+	if (zend_hash_find(ctx->tags, ctx->tag.c, ctx->tag.len, &ctx->lookup_data) == SUCCESS) \
+		ok = 1; \
 	STATE = ok ? STATE_NEXT_ARG : STATE_PLAIN; \
 }
 
@@ -293,7 +318,7 @@ PHP_RINIT_FUNCTION(url_scanner)
 	
 	ctx = &BG(url_adapt_state_ex);
 
-	memset(ctx, 0, sizeof(*ctx));
+	memset(ctx, 0, ((size_t) &((url_adapt_state_ex_t *)0)->tags));
 
 	return SUCCESS;
 }
@@ -310,6 +335,20 @@ PHP_RSHUTDOWN_FUNCTION(url_scanner)
 	smart_str_free(&ctx->tag);
 	smart_str_free(&ctx->arg);
 
+	return SUCCESS;
+}
+
+PHP_MINIT_FUNCTION(url_scanner)
+{
+	REGISTER_INI_ENTRIES();
+	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(url_scanner)
+{
+	UNREGISTER_INI_ENTRIES();
+	zend_hash_destroy(BG(url_adapt_state_ex).tags);
+	free(BG(url_adapt_state_ex).tags);
 	return SUCCESS;
 }
 
