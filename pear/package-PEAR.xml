@@ -48,24 +48,12 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.3.1</version>
+    <version>1.3.2</version>
     <date>2004-04-06</date>
     <state>stable</state>
     <notes>
-PEAR Installer:
-
- * Bug #534  pear search doesn't list unstable releases
- * Bug #933  CMD Usability Patch 
- * Bug #937  throwError() treats every call as static 
- * Bug #964 PEAR_ERROR_EXCEPTION causes fatal error 
- * Bug #1008 safe mode raises warning
-
-PEAR_ErrorStack:
-
- * Added experimental error handling, designed to eventually replace
-   PEAR_Error.  It should be considered experimental until explicitly marked
-   stable.  require_once 'PEAR/ErrorStack.php' to use.
-
+Installer:
+ * fix Bug #1186 raise a notice error on PEAR::Common $_packageName
     </notes>
     <provides type="class" name="OS_Guess" />
     <provides type="class" name="System" />
@@ -136,6 +124,27 @@ PEAR_ErrorStack:
     </deps>
   </release>
   <changelog>
+  <release>
+    <version>1.3.1</version>
+    <date>2004-04-06</date>
+    <state>stable</state>
+    <notes>
+PEAR Installer:
+
+ * Bug #534  pear search doesn't list unstable releases
+ * Bug #933  CMD Usability Patch 
+ * Bug #937  throwError() treats every call as static 
+ * Bug #964 PEAR_ERROR_EXCEPTION causes fatal error 
+ * Bug #1008 safe mode raises warning
+
+PEAR_ErrorStack:
+
+ * Added experimental error handling, designed to eventually replace
+   PEAR_Error.  It should be considered experimental until explicitly marked
+   stable.  require_once 'PEAR/ErrorStack.php' to use.
+
+    </notes>
+  </release>
   <release>
     <version>1.3</version>
     <date>2004-02-20</date>
