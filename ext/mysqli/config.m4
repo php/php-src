@@ -50,7 +50,7 @@ if test "$PHP_MYSQLI" != "no"; then
   ],[
     AC_MSG_ERROR([wrong mysql library version or lib not found])
   ],[
-    -L$MYSQLI_DIR -lm -ldl
+    `$PHP_MYSQLI/bin/mysql_config --libs | sed -e "s/'//g"`
   ])
   PHP_SUBST(MYSQLI_SHARED_LIBADD)
 
