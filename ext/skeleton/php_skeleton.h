@@ -21,11 +21,6 @@
 #ifndef _PHP_EXTNAME_H
 #define _PHP_EXTNAME_H
 
-#ifdef COMPILE_DL_EXTNAME
-#undef HAVE_EXTNAME
-#define HAVE_EXTNAME 1
-#endif
-
 /* You should tweak config.m4 so this symbol (or some else suitable)
    gets defined.
 */
