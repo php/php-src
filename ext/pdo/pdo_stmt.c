@@ -32,7 +32,6 @@
 #include "php_pdo.h"
 #include "php_pdo_driver.h"
 #include "php_pdo_int.h"
-#include "php_pdo_sql_parser.h"
 #include "zend_exceptions.h"
 
 #if COMPILE_DL_PDO
@@ -311,17 +310,22 @@ static PHP_METHOD(PDOStatement, execute)
 		}
 	}
 
-	/* TODO: handle the non-native types too... doh. */
 	if (PDO_PLACEHOLDER_NONE == stmt->supports_placeholders) {
-		int error_pos;
 		/* handle the emulated parameter binding,
          * stmt->active_query_string holds the query with binds expanded and 
 		 * quoted.
          */
-		if((error_pos = pdo_parse_params(stmt, stmt->query_string, stmt->query_stringlen, 
-				&stmt->active_query_string, &stmt->active_query_stringlen)) != 0) {
-			// parse error in handling the query
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error emulating placeholder binding in query at %.*s....", error_pos, stmt->query_string);
+
+		ret = pdo_parse_params(stmt, stmt->query_string, stmt->query_stringlen,
+			&stmt->active_query_string, &stmt->active_query_stringlen TSRMLS_CC);
+
+		if (ret == 0) {
+			/* no changes were made */
+			stmt->active_query_string = stmt->query_string;
+			stmt->active_query_stringlen = stmt->active_query_stringlen;
+		} else if (ret == -1) {
+			/* something broke */
+			PDO_HANDLE_STMT_ERR();
 			RETURN_FALSE;
 		}
 	} else if (!dispatch_param_event(stmt, PDO_PARAM_EVT_EXEC_PRE TSRMLS_CC)) {
@@ -329,10 +333,10 @@ static PHP_METHOD(PDOStatement, execute)
 		RETURN_FALSE;
 	}
 	if (stmt->methods->executer(stmt TSRMLS_CC)) {
-		if (stmt->active_query_string) {
+		if (stmt->active_query_string && stmt->active_query_string != stmt->query_string) {
 			efree(stmt->active_query_string);
-			stmt->active_query_string = NULL;
 		}
+		stmt->active_query_string = NULL;
 		if (!stmt->executed) {
 			/* this is the first execute */
 
@@ -351,10 +355,10 @@ static PHP_METHOD(PDOStatement, execute)
 			
 		RETURN_BOOL(ret);
 	}
-	if (stmt->active_query_string) {
+	if (stmt->active_query_string && stmt->active_query_string != stmt->query_string) {
 		efree(stmt->active_query_string);
-		stmt->active_query_string = NULL;
 	}
+	stmt->active_query_string = NULL;
 	PDO_HANDLE_STMT_ERR();
 	RETURN_FALSE;
 }
