@@ -515,9 +515,6 @@ AC_DEFUN(PHP_SETUP_OPENSSL,[
   for i in $PHP_OPENSSL; do
     if test -r $i/include/openssl/evp.h; then
       OPENSSL_DIR=$i
-      OPENSSL_INC=$i/include/openssl
-    elif test -r $i/include/evp.h; then
-      OPENSSL_DIR=$i
       OPENSSL_INC=$i/include
     fi
   done
