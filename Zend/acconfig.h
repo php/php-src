@@ -65,6 +65,13 @@ int zend_sprintf(char *buffer, const char *format, ...);
 
 #include <math.h>
 
+/* To enable the is_nan, is_infinite and is_finite PHP functions */
+#ifdef NETWARE
+	#define HAVE_ISNAN 1
+	#define HAVE_ISINF 1
+	#define HAVE_ISFINITE 1
+#endif
+
 #ifndef zend_isnan
 #ifdef HAVE_ISNAN
 #define zend_isnan(a) isnan(a)
