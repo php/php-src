@@ -32,12 +32,10 @@ require_once 'Console/Getopt.php';
 
 PEAR_Command::setFrontendType('CLI');
 $all_commands = PEAR_Command::getCommands();
-$cmd_options  = PEAR_Command::getOptions();
-$progname = basename(__FILE__);
 
 $argv = Console_Getopt::readPHPArgv();
-array_shift($argv);
-$options = Console_Getopt::getopt($argv, "c:C:d:D:Gh?sSqu:v" . $cmd_options);
+$progname = basename(array_shift($argv));
+$options = Console_Getopt::getopt($argv, "c:C:d:D:Gh?sSqu:v");
 if (PEAR::isError($options)) {
     usage($options);
 }
@@ -45,9 +43,13 @@ if (PEAR::isError($options)) {
 $opts = $options[0];
 
 $fetype = 'CLI';
-foreach ($opts as $opt) {
-    if ($opt[0] == 'G') {
-        $fetype = 'Gtk';
+if ($progname == 'gpear' || $progname == 'pear-gtk') {
+    $fetype = 'Gtk';
+} else {
+    foreach ($opts as $opt) {
+        if ($opt[0] == 'G') {
+            $fetype = 'Gtk';
+        }
     }
 }
 PEAR_Command::setFrontendType($fetype);
@@ -116,7 +118,7 @@ if ($store_user_config) {
     $config->store('user');
 }
 
-$command = (isset($options[1][0])) ? $options[1][0] : null;
+$command = (isset($options[1][0])) ? array_shift($options[1]) : null;
 
 if (empty($command) && ($store_user_config || $store_system_config)) {
     exit;
@@ -133,9 +135,35 @@ if ($fetype == 'Gtk') {
     if (PEAR::isError($cmd)) {
         die($cmd->getMessage());
     }
+    
+    $short_args = $long_args = array();
+    PEAR_Command::getGetoptArgs($command, $short_args, $long_args);
+    if (PEAR::isError($tmp = Console_Getopt::getopt($params, $short_args, $long_args))) {
+        return $this->raiseError($tmp);
+    }
+    list($tmpopt, $params) = $tmp;
+    $options = array();
+    foreach ($tmpopt as $foo => $tmp2) {
+        list($opt, $value) = $tmp2;
+        if ($value === null) {
+            $value = true;
+        }
+        if (strlen($opt) == 1) {
+            foreach ($this->commands[$command]['options'] as $o => $d) {
+                if (@$d['shortopt'] == $opt) {
+                    $options[$o] = $value;
+                }
+            }
+        } else {
+            if (substr($opt, 0, 2) == '--') {
+                    $options[substr($opt, 2)] = $value;
+                }
+            }
+        }
 
-    $cmdargs = array_slice($options[1], 1);
-    $ok = $cmd->run($command, $cmdopts, $cmdargs);
+
+
+    $ok = $cmd->run($command, $options[1]);
     if ($ok === false) {
         PEAR::raiseError("unknown command `$command'");
     }
@@ -190,6 +218,10 @@ function cmdHelp($command)
         "     -u foo     unset `foo' in the user configuration\n".
         "     -h, -?     display help/usage (this message)\n";
     } elseif ($help = PEAR_Command::getHelp($command)) {
+        if (is_string($help)) {
+            $help = preg_replace('/{config\s+([^\}]+)}/e', "\$config->get('\1')", $help);
+            return "Usage : $help";
+        }
         return "Usage : $progname $command {$help[0]}\n{$help[1]}";
     }
     return "No such command";
