@@ -330,6 +330,7 @@ PHP_FUNCTION(msg_receive)
 		/* got it! */
 		ZVAL_LONG(out_msgtype, messagebuffer->mtype);
 
+		RETVAL_TRUE;
 		if (do_unserialize)	{
 			php_unserialize_data_t var_hash;
 			zval *tmp = NULL;
@@ -347,7 +348,6 @@ PHP_FUNCTION(msg_receive)
 		} else {
 			ZVAL_STRINGL(out_message, messagebuffer->mtext, result, 1);
 		}
-		RETVAL_TRUE;
 	} else if (zerrcode) {
 		ZVAL_LONG(zerrcode, errno);
 	}
