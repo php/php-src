@@ -33,6 +33,15 @@
 #include "win95nt.h"
 #endif
 
+#if HAVE_UTIME
+# ifdef PHP_WIN32
+#  include <sys/utime.h>
+# else
+#  include <utime.h>
+# endif
+#endif
+
+
 #include "php_virtual_cwd.h"
 #include "php_reentrancy.h" /* for php_strtok_r */
 
@@ -390,6 +399,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		ret = 1;
 	} else {
 		CWD_STATE_FREE(old_state);
+		ret = (verify_path)? 0:1;
 	}
 	
 	free(old_state);
@@ -438,6 +448,24 @@ CWD_API int virtual_chdir_file(char *path)
 	return retval;
 }
 
+CWD_API char *virtual_realpath(char *path, char *real_path)
+{
+	cwd_state new_state;
+	int retval;
+    CWDLS_FETCH();
+
+	CWD_STATE_COPY(&new_state, &CWDG(cwd));
+	retval = virtual_file_ex(&new_state, path, NULL);
+	
+	if(retval) {
+		int len = min(MAXPATHLEN-1,new_state.cwd_length);
+		memcpy(real_path, new_state.cwd, len);
+		real_path[len] = '\0';
+		return real_path;
+	}
+
+	return NULL;
+}
 
 CWD_API int virtual_filepath(char *path, char **filepath)
 {
@@ -471,6 +499,55 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode)
 	CWD_STATE_FREE(&new_state);
 	return f;
 }
+
+#if HAVE_UTIME
+CWD_API int virtual_utime(const char *filename, struct utimbuf *buf)
+{
+	cwd_state new_state;
+	int ret;
+	CWDLS_FETCH();
+
+	CWD_STATE_COPY(&new_state, &CWDG(cwd));
+	virtual_file_ex(&new_state, filename, NULL);
+
+	ret = utime(new_state.cwd, buf);
+
+	CWD_STATE_FREE(&new_state);
+	return ret;
+}
+#endif
+
+CWD_API int virtual_chmod(const char *filename, mode_t mode)
+{
+	cwd_state new_state;
+	int ret;
+	CWDLS_FETCH();
+
+	CWD_STATE_COPY(&new_state, &CWDG(cwd));
+	virtual_file_ex(&new_state, filename, NULL);
+
+	ret = chmod(new_state.cwd, mode);
+
+	CWD_STATE_FREE(&new_state);
+	return ret;
+}
+
+#ifndef PHP_WIN32
+CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group)
+{
+	cwd_state new_state;
+	int ret;
+	CWDLS_FETCH();
+
+	CWD_STATE_COPY(&new_state, &CWDG(cwd));
+	virtual_file_ex(&new_state, filename, NULL);
+
+	ret = chown(new_state.cwd, owner, group);
+
+	CWD_STATE_FREE(&new_state);
+	return ret;
+}
+#endif
 
 CWD_API int virtual_open(const char *path, int flags, ...)
 {

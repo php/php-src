@@ -303,6 +303,7 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define V_CHDIR(path) virtual_chdir(path)
 #define V_CHDIR_FILE(path) virtual_chdir_file(path)
 #define V_GETWD(buf)
+#define V_REALPATH(path,realpath) virtual_realpath(path,realpath)
 #define V_STAT(path, buff) virtual_stat(path, buff)
 #ifdef PHP_WIN32
 #define V_LSTAT(path, buff) virtual_stat(path, buff)
@@ -314,7 +315,13 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define V_RMDIR(pathname) virtual_rmdir(pathname)
 #define V_OPENDIR(pathname) virtual_opendir(pathname)
 #define V_POPEN(command, type) virtual_popen(command, type)
-
+#if HAVE_UTIME
+#define V_UTIME(path,time) virtual_utime(path,time)
+#endif
+#define V_CHMOD(path,mode) virtual_chmod(path,mode)
+#ifndef PHP_WIN32
+#define V_CHOWN(path,owner,group) virtual_chown(path,owner,group)
+#endif
 #else
 
 #define V_GETCWD(buff, size) getcwd(buff,size)
@@ -331,7 +338,14 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define V_RMDIR(pathname) rmdir(pathname)
 #define V_OPENDIR(pathname) opendir(pathname)
 #define V_POPEN(command, type) popen(command, type)
-
+#define V_REALPATH(path,realpath) realpath(path,realpath)
+#if HAVE_UTIME
+#define V_UTIME(path,time) utime(path,time)
+#endif
+#define V_CHMOD(path,mode) chmod(path,mode)
+#ifndef PHP_WIN32
+#define V_CHOWN(path,owner,group) chown(path,owner,group)
+#endif
 #endif
 
 #include "zend_constants.h"
