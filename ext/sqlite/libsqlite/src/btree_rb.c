@@ -281,7 +281,7 @@ static char *append_node(char * orig, BtRbNode *pNode, int indent)
 static void print_node(BtRbNode *pNode)
 {
     char * str = append_node(0, pNode, 0);
-    printf(str);
+    printf("%s", str);
 }
 
 /* 
