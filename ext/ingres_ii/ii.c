@@ -40,24 +40,24 @@ static int le_ii_link,le_ii_plink;
 /* Every user visible function must have an entry in ii_functions[].
 */
 function_entry ii_functions[] = {
-  PHP_FE(ii_connect,	      NULL)
-  PHP_FE(ii_pconnect,	      NULL)
-  PHP_FE(ii_close,            NULL)
-  PHP_FE(ii_query,	      NULL)
-  PHP_FE(ii_num_rows,         NULL)
-  PHP_FE(ii_num_fields,       NULL)
-  PHP_FE(ii_field_name,       NULL)
-  PHP_FE(ii_field_type,       NULL)
-  PHP_FE(ii_field_nullable,   NULL)
-  PHP_FE(ii_field_length,     NULL)
-  PHP_FE(ii_field_precision,  NULL)
-  PHP_FE(ii_field_scale,      NULL)
-  PHP_FE(ii_fetch_array,      NULL)
-  PHP_FE(ii_fetch_row,        NULL)
-  PHP_FE(ii_fetch_object,     NULL)
-  PHP_FE(ii_rollback,         NULL)
-  PHP_FE(ii_commit,           NULL)
-  PHP_FE(ii_autocommit,       NULL)
+  PHP_FE(ingres_connect,	      NULL)
+  PHP_FE(ingres_pconnect,	      NULL)
+  PHP_FE(ingres_close,            NULL)
+  PHP_FE(ingres_query,	      NULL)
+  PHP_FE(ingres_num_rows,         NULL)
+  PHP_FE(ingres_num_fields,       NULL)
+  PHP_FE(ingres_field_name,       NULL)
+  PHP_FE(ingres_field_type,       NULL)
+  PHP_FE(ingres_field_nullable,   NULL)
+  PHP_FE(ingres_field_length,     NULL)
+  PHP_FE(ingres_field_precision,  NULL)
+  PHP_FE(ingres_field_scale,      NULL)
+  PHP_FE(ingres_fetch_array,      NULL)
+  PHP_FE(ingres_fetch_row,        NULL)
+  PHP_FE(ingres_fetch_object,     NULL)
+  PHP_FE(ingres_rollback,         NULL)
+  PHP_FE(ingres_commit,           NULL)
+  PHP_FE(ingres_autocommit,       NULL)
   {NULL, NULL, NULL}	/* Must be the last line in ii_functions[] */
 };
 
@@ -79,12 +79,12 @@ ZEND_GET_MODULE(ingres_ii)
 /* php.ini entries
 */
 PHP_INI_BEGIN()
-     STD_PHP_INI_BOOLEAN("ii.allow_persistent", "1", PHP_INI_SYSTEM, OnUpdateInt, allow_persistent, zend_ii_globals, ii_globals)
-     STD_PHP_INI_ENTRY_EX("ii.max_persistent", "-1", PHP_INI_SYSTEM, OnUpdateInt, max_persistent, zend_ii_globals, ii_globals, display_link_numbers)
-     STD_PHP_INI_ENTRY_EX("ii.max_links", "-1", PHP_INI_SYSTEM, OnUpdateInt, max_links, zend_ii_globals, ii_globals, display_link_numbers)
-     STD_PHP_INI_ENTRY("ii.default_database", NULL, PHP_INI_ALL, OnUpdateString, default_database, zend_ii_globals, ii_globals)
-     STD_PHP_INI_ENTRY("ii.default_user", NULL, PHP_INI_ALL, OnUpdateString, default_user, zend_ii_globals, ii_globals)
-     STD_PHP_INI_ENTRY("ii.default_password", NULL, PHP_INI_ALL, OnUpdateString, default_password, zend_ii_globals, ii_globals)
+     STD_PHP_INI_BOOLEAN("ingres.allow_persistent", "1", PHP_INI_SYSTEM, OnUpdateInt, allow_persistent, zend_ii_globals, ii_globals)
+     STD_PHP_INI_ENTRY_EX("ingres.max_persistent", "-1", PHP_INI_SYSTEM, OnUpdateInt, max_persistent, zend_ii_globals, ii_globals, display_link_numbers)
+     STD_PHP_INI_ENTRY_EX("ingres.max_links", "-1", PHP_INI_SYSTEM, OnUpdateInt, max_links, zend_ii_globals, ii_globals, display_link_numbers)
+     STD_PHP_INI_ENTRY("ingres.default_database", NULL, PHP_INI_ALL, OnUpdateString, default_database, zend_ii_globals, ii_globals)
+     STD_PHP_INI_ENTRY("ingres.default_user", NULL, PHP_INI_ALL, OnUpdateString, default_user, zend_ii_globals, ii_globals)
+     STD_PHP_INI_ENTRY("ingres.default_password", NULL, PHP_INI_ALL, OnUpdateString, default_password, zend_ii_globals, ii_globals)
 PHP_INI_END()
 
 /* closes statement in given link
@@ -360,9 +360,9 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
     
     db = pass = NULL;
     user=php_get_current_user();
-    hashed_details_length = strlen(user) + sizeof("ii___")-1;
+    hashed_details_length = strlen(user) + sizeof("ingres___")-1;
     hashed_details = (char *) emalloc(hashed_details_length+1);
-    sprintf(hashed_details,"ii__%s_",user);
+    sprintf(hashed_details,"ingres__%s_",user);
   } else {
     db = IIG(default_database);
     user = IIG(default_user);
@@ -389,9 +389,9 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
       break;
     }
     
-    hashed_details_length = sizeof("ii___")-1 + strlen(SAFE_STRING(db))+strlen(SAFE_STRING(user))+strlen(SAFE_STRING(pass));
+    hashed_details_length = sizeof("ingres___")-1 + strlen(SAFE_STRING(db))+strlen(SAFE_STRING(user))+strlen(SAFE_STRING(pass));
     hashed_details = (char *) emalloc(hashed_details_length+1);
-    sprintf(hashed_details,"ii_%s_%s_%s",SAFE_STRING(db), SAFE_STRING(user), SAFE_STRING(pass));
+    sprintf(hashed_details,"ingres_%s_%s_%s",SAFE_STRING(db), SAFE_STRING(user), SAFE_STRING(pass));
   }
   
   /* if asked for unauthorized persistency, issue a warning
@@ -546,25 +546,25 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
   php_ii_set_default_link(return_value->value.lval);
 }
 
-/* {{{ proto resource ii_connect([string database [, string username [, string password]]])
+/* {{{ proto resource ingres_connect([string database [, string username [, string password]]])
    Open a connection to an Ingres II database the syntax of database is [node_id::]dbname[/svr_class] */
-PHP_FUNCTION(ii_connect)
+PHP_FUNCTION(ingres_connect)
 {
   php_ii_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto resource ii_pconnect([string database [, string username [, string password]]])
+/* {{{ proto resource ingres_pconnect([string database [, string username [, string password]]])
    Open a persistent connection to an Ingres II database the syntax of database is [node_id::]dbname[/svr_class] */
-PHP_FUNCTION(ii_pconnect)
+PHP_FUNCTION(ingres_pconnect)
 {
   php_ii_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto bool ii_close([resource link])
+/* {{{ proto bool ingres_close([resource link])
    Close an Ingres II database connection */
-PHP_FUNCTION(ii_close)
+PHP_FUNCTION(ingres_close)
 {
   zval **link;
   int argc;
@@ -587,7 +587,7 @@ PHP_FUNCTION(ii_close)
 }
 /* }}} */
 
-/* {{{ proto bool ii_query(string query [, resource link])
+/* {{{ proto bool ingres_query(string query [, resource link])
    Send a SQL query to Ingres II */
 /* This should go into the documentation */
 /* Unsupported query types:
@@ -602,7 +602,7 @@ PHP_FUNCTION(ii_close)
    - set autocommit
    - <all cursor related queries>
    (look for dedicated functions instead) */
-PHP_FUNCTION(ii_query)
+PHP_FUNCTION(ingres_query)
 {
   zval **query, **link;
   int argc;
@@ -671,12 +671,12 @@ PHP_FUNCTION(ii_query)
 }
 /* }}} */
 
-/* {{{ proto int ii_num_rows([resource link])
+/* {{{ proto int ingres_num_rows([resource link])
    Return the number of rows affected/returned by the last query */
 
-/* Warning : don't call ii_num_rows() before ii_fetch_xx(),
-   or ii_fetch_xx() wouldn't find any data */
-PHP_FUNCTION(ii_num_rows)
+/* Warning : don't call ingres_num_rows() before ingres_fetch_xx(),
+   or ingres_fetch_xx() wouldn't find any data */
+PHP_FUNCTION(ingres_num_rows)
 {
   zval **link;
   int argc;
@@ -717,9 +717,9 @@ PHP_FUNCTION(ii_num_rows)
 }
 /* }}} */
 
-/* {{{ proto int ii_num_fields([resource link])
+/* {{{ proto int ingres_num_fields([resource link])
    Return the number of fields returned by the last query */
-PHP_FUNCTION(ii_num_fields)
+PHP_FUNCTION(ingres_num_fields)
 {
   zval **link;
   int argc;
@@ -866,49 +866,49 @@ static char *php_ii_field_name(II_LINK *ii_link, int index)
   return (ii_link->descriptor[index - 1]).ds_columnName;
 }
 
-/* {{{ proto string ii_field_name(int index [, resource link])
-   Return the name of a field in a query result index must be >0 and <= ii_num_fields() */
-PHP_FUNCTION(ii_field_name)
+/* {{{ proto string ingres_field_name(int index [, resource link])
+   Return the name of a field in a query result index must be >0 and <= ingres_num_fields() */
+PHP_FUNCTION(ingres_field_name)
 {
   php_ii_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, II_FIELD_INFO_NAME);
 }
 /* }}} */
 
-/* {{{ proto string ii_field_type(int index [, resource link])
-   Return the type of a field in a query result index must be >0 and <= ii_num_fields() */
-PHP_FUNCTION(ii_field_type)
+/* {{{ proto string ingres_field_type(int index [, resource link])
+   Return the type of a field in a query result index must be >0 and <= ingres_num_fields() */
+PHP_FUNCTION(ingres_field_type)
 {
   php_ii_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, II_FIELD_INFO_TYPE);
 }
 /* }}} */
 
-/* {{{ proto string ii_field_nullable(int index [, resource link])
-   Return true if the field is nullable and false otherwise index must be >0 and <= ii_num_fields() */
-PHP_FUNCTION(ii_field_nullable)
+/* {{{ proto string ingres_field_nullable(int index [, resource link])
+   Return true if the field is nullable and false otherwise index must be >0 and <= ingres_num_fields() */
+PHP_FUNCTION(ingres_field_nullable)
 {
   php_ii_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, II_FIELD_INFO_NULLABLE);
 }
 /* }}} */
 
-/* {{{ proto string ii_field_length(int index [, resource link])
-   Return the length of a field in a query result index must be >0 and <= ii_num_fields() */
-PHP_FUNCTION(ii_field_length)
+/* {{{ proto string ingres_field_length(int index [, resource link])
+   Return the length of a field in a query result index must be >0 and <= ingres_num_fields() */
+PHP_FUNCTION(ingres_field_length)
 {
   php_ii_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, II_FIELD_INFO_LENGTH);
 }
 /* }}} */
 
-/* {{{ proto string ii_field_precision(int index [, resource link])
-   Return the precision of a field in a query result index must be >0 and <= ii_num_fields() */
-PHP_FUNCTION(ii_field_precision)
+/* {{{ proto string ingres_field_precision(int index [, resource link])
+   Return the precision of a field in a query result index must be >0 and <= ingres_num_fields() */
+PHP_FUNCTION(ingres_field_precision)
 {
   php_ii_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, II_FIELD_INFO_PRECISION);
 }
 /* }}} */
 
-/* {{{ proto string ii_field_scale(int index [, resource link])
-   Return the scale of a field in a query result index must be >0 and <= ii_num_fields() */
-PHP_FUNCTION(ii_field_scale)
+/* {{{ proto string ingres_field_scale(int index [, resource link])
+   Return the scale of a field in a query result index must be >0 and <= ingres_num_fields() */
+PHP_FUNCTION(ingres_field_scale)
 {
   php_ii_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, II_FIELD_INFO_SCALE);
 }
@@ -1134,9 +1134,9 @@ static void php_ii_fetch(INTERNAL_FUNCTION_PARAMETERS, II_LINK *ii_link, int res
 
 }
 
-/* {{{ proto array ii_fetch_array([int result_type [, resource link]])
+/* {{{ proto array ingres_fetch_array([int result_type [, resource link]])
    Fetch a row of result into an array result_type can be II_NUM for enumerated array, II_ASSOC for associative array, or II_BOTH (default) */
-PHP_FUNCTION(ii_fetch_array)
+PHP_FUNCTION(ingres_fetch_array)
 {
   zval **result_type, **link;
   int argc;
@@ -1164,9 +1164,9 @@ PHP_FUNCTION(ii_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto array ii_fetch_row([resource link])
+/* {{{ proto array ingres_fetch_row([resource link])
    Fetch a row of result into an enumerated array */
-PHP_FUNCTION(ii_fetch_row)
+PHP_FUNCTION(ingres_fetch_row)
 {
   zval **link;
   int argc;
@@ -1189,9 +1189,9 @@ PHP_FUNCTION(ii_fetch_row)
 }
 /* }}} */
 
-/* {{{ proto array ii_fetch_object([int result_type [, resource link]])
+/* {{{ proto array ingres_fetch_object([int result_type [, resource link]])
    Fetch a row of result into an object result_type can be II_NUM for enumerated object, II_ASSOC for associative object, or II_BOTH (default) */
-PHP_FUNCTION(ii_fetch_object)
+PHP_FUNCTION(ingres_fetch_object)
 {
   zval **result_type, **link;
   int argc;
@@ -1222,9 +1222,9 @@ PHP_FUNCTION(ii_fetch_object)
 }
 /* }}} */
 
-/* {{{ proto bool ii_rollback([resource link])
+/* {{{ proto bool ingres_rollback([resource link])
    Roll back a transaction */
-PHP_FUNCTION(ii_rollback)
+PHP_FUNCTION(ingres_rollback)
 {
   zval **link;
   int argc;
@@ -1249,9 +1249,9 @@ PHP_FUNCTION(ii_rollback)
 }
 /* }}} */
 
-/* {{{ proto bool ii_commit([resource link])
+/* {{{ proto bool ingres_commit([resource link])
    Commit a transaction */
-PHP_FUNCTION(ii_commit)
+PHP_FUNCTION(ingres_commit)
 {
   zval **link;
   int argc;
@@ -1291,9 +1291,9 @@ PHP_FUNCTION(ii_commit)
 }
 /* }}} */
 
-/* {{{ proto bool ii_autocommit([resource link])
+/* {{{ proto bool ingres_autocommit([resource link])
    Switch autocommit on or off */
-PHP_FUNCTION(ii_autocommit)
+PHP_FUNCTION(ingres_autocommit)
 {
   zval **link;
   int argc;
