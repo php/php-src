@@ -12,6 +12,7 @@ peardir=$(PEAR_INSTALLDIR)
 PEAR_SUBDIRS = \
 	DB \
 	File \
+	Net \
 	PEAR
 
 PEAR_FILES = \
@@ -25,9 +26,9 @@ PEAR_FILES = \
 	DB/oci8.php \
 	HTTP.php \
 	File/Find.php \
+	Net/Socket.php \
 	PEAR.php \
-	PEAR/Installer.php \
-	Socket.php
+	PEAR/Installer.php
 
 install-data-local:
 	@if $(mkinstalldirs) $(peardir); then \
