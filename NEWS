@@ -30,6 +30,7 @@ PHP                                                                        NEWS
   is passed. (Tony)
 - Fixed posix_getsid() & posix_getpgid() to return sid & pgid instead 
   of true. (Tony)   
+- Fixed bug #32394 (offsetUnset() segfaults in a foreach). (Marcus)
 - Fixed bug #32373 (segfault in bzopen() if supplied path to non-existent 
   file). (Tony)
 - Fixed bug #32326 (Check values of Connection/Transfer-Encoding 
