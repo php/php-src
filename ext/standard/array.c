@@ -3328,6 +3328,8 @@ PHP_FUNCTION(array_map)
 		WRONG_PARAM_COUNT;
 	}
 
+	RETVAL_NULL();
+
 	callback = *args[0];
 	if (Z_TYPE_P(callback) != IS_NULL) {
 		if (!zend_is_callable(callback, 0, &callback_name)) {
@@ -3348,6 +3350,7 @@ PHP_FUNCTION(array_map)
 		if (Z_TYPE_PP(args[i+1]) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d should be an array", i + 2);
 			efree(array_len);
+			efree(array_pos);
 			efree(args);
 			return;
 		}
