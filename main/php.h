@@ -63,7 +63,16 @@
 
 #include "php_regex.h"
 
-
+#if HAVE_ASSERT_H
+#if PHP_DEBUG
+#undef NDEBUG
+#else
+#define NDEBUG
+#endif
+#include <assert.h>
+#else /* HAVE_ASSERT_H */
+#define assert(expr) ((void) (0))
+#endif /* HAVE_ASSERT_H */
 
 #define APACHE 0
 
