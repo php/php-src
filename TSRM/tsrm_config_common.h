@@ -11,6 +11,10 @@
 # include "tsrm_config.w32.h"
 #endif
 
+#ifdef TSRM_WIN32
+#include <malloc.h>
+#endif
+
 #if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2))
 # define tsrm_do_alloca(p) alloca(p)
 # define tsrm_free_alloca(p)
