@@ -118,6 +118,12 @@ void sqliteExec(Parse *pParse){
 ** of that table and (optionally) the name of the database
 ** containing the table.  Return NULL if not found.
 **
+** If zDatabase is 0, all databases are searched for the
+** table and the first matching table is returned.  (No checking
+** for duplicate table names is done.)  The search order is
+** TEMP first, then MAIN, then any auxiliary databases added
+** using the ATTACH command.
+**
 ** See also sqliteLocateTable().
 */
 Table *sqliteFindTable(sqlite *db, const char *zName, const char *zDatabase){
@@ -137,38 +143,22 @@ Table *sqliteFindTable(sqlite *db, const char *zName, const char *zDatabase){
 ** a particular database table given the name
 ** of that table and (optionally) the name of the database
 ** containing the table.  Return NULL if not found.
+** Also leave an error message in pParse->zErrMsg.
 **
-** If pParse->useDb is not negative, then the table must be
-** located in that database.  If a different database is specified,
-** an error message is generated into pParse->zErrMsg.
+** The difference between this routine and sqliteFindTable()
+** is that this routine leaves an error message in pParse->zErrMsg
+** where sqliteFindTable() does not.
 */
 Table *sqliteLocateTable(Parse *pParse, const char *zName, const char *zDbase){
-  sqlite *db;
-  const char *zUse;
   Table *p;
-  db = pParse->db;
-  if( pParse->useDb<0 ){
-    p = sqliteFindTable(db, zName, zDbase);
-  }else {
-    assert( pParse->useDb<db->nDb );
-    assert( db->aDb[pParse->useDb].pBt!=0 );
-    zUse = db->aDb[pParse->useDb].zName;
-    if( zDbase && pParse->useDb!=1 && sqliteStrICmp(zDbase, zUse)!=0 ){
-      sqliteErrorMsg(pParse,"cannot use database %s in this context", zDbase);
-      return 0;
-    }
-    p = sqliteFindTable(db, zName, zUse);
-    if( p==0 && pParse->useDb==1 && zDbase==0 ){
-      p = sqliteFindTable(db, zName, 0);
-    }
-  }
+
+  p = sqliteFindTable(pParse->db, zName, zDbase);
   if( p==0 ){
     if( zDbase ){
       sqliteErrorMsg(pParse, "no such table: %s.%s", zDbase, zName);
-    }else if( (pParse->useDb==0 || pParse->useDb>=2) 
-               && sqliteFindTable(db, zName, 0)!=0 ){
+    }else if( sqliteFindTable(pParse->db, zName, 0)!=0 ){
       sqliteErrorMsg(pParse, "table \"%s\" is not in database \"%s\"",
-         zName, zUse);
+         zName, zDbase);
     }else{
       sqliteErrorMsg(pParse, "no such table: %s", zName);
     }
@@ -181,6 +171,12 @@ Table *sqliteLocateTable(Parse *pParse, const char *zName, const char *zDbase){
 ** a particular index given the name of that index
 ** and the name of the database that contains the index.
 ** Return NULL if not found.
+**
+** If zDatabase is 0, all databases are searched for the
+** table and the first matching index is returned.  (No checking
+** for duplicate index names is done.)  The search order is
+** TEMP first, then MAIN, then any auxiliary databases added
+** using the ATTACH command.
 */
 Index *sqliteFindIndex(sqlite *db, const char *zName, const char *zDb){
   Index *p = 0;
@@ -1046,10 +1042,17 @@ void sqliteCreateView(
   int n;
   const char *z;
   Token sEnd;
+  DbFixer sFix;
 
   sqliteStartTable(pParse, pBegin, pName, isTemp, 1);
   p = pParse->pNewTable;
   if( p==0 || pParse->nErr ){
+    sqliteSelectDelete(pSelect);
+    return;
+  }
+  if( sqliteFixInit(&sFix, pParse, p->iDb, "view", pName)
+    && sqliteFixSelect(&sFix, pSelect)
+  ){
     sqliteSelectDelete(pSelect);
     return;
   }
@@ -1297,12 +1300,8 @@ void sqliteDropTable(Parse *pParse, Token *pName, int isView){
     /* Drop all triggers associated with the table being dropped */
     pTrigger = pTable->pTrigger;
     while( pTrigger ){
-      SrcList *pNm;
       assert( pTrigger->iDb==pTable->iDb || pTrigger->iDb==1 );
-      pNm = sqliteSrcListAppend(0, 0, 0);
-      pNm->a[0].zName = sqliteStrDup(pTrigger->name);
-      pNm->a[0].zDatabase = sqliteStrDup(db->aDb[pTable->iDb].zName);
-      sqliteDropTrigger(pParse, pNm, 1);
+      sqliteDropTriggerPtr(pParse, pTrigger, 1);
       if( pParse->explain ){
         pTrigger = pTrigger->pNext;
       }else{
@@ -1538,10 +1537,17 @@ void sqliteCreateIndex(
   Index *pIndex;   /* The index to be created */
   char *zName = 0;
   int i, j;
-  Token nullId;             /* Fake token for an empty ID list */
+  Token nullId;    /* Fake token for an empty ID list */
+  DbFixer sFix;    /* For assigning database names to pTable */
   sqlite *db = pParse->db;
 
   if( pParse->nErr || sqlite_malloc_failed ) goto exit_create_index;
+  if( !isTemp && pParse->initFlag 
+     && sqliteFixInit(&sFix, pParse, pParse->iDb, "index", pName)
+     && sqliteFixSrcList(&sFix, pTable)
+  ){
+    goto exit_create_index;
+  }
 
   /*
   ** Find the table that is to be indexed.  Return early if not found.

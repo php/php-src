@@ -1657,6 +1657,7 @@ static int flattenSubquery(
     if( pSrc->a[iFrom].pTab && pSrc->a[iFrom].pTab->isTransient ){
       sqliteDeleteTable(0, pSrc->a[iFrom].pTab);
     }
+    sqliteFree(pSrc->a[iFrom].zDatabase);
     sqliteFree(pSrc->a[iFrom].zName);
     sqliteFree(pSrc->a[iFrom].zAlias);
     if( nSubSrc>1 ){

@@ -317,7 +317,8 @@ char *sqliteStrNDup(const char *z, int n){
 ** Create a string from the 2nd and subsequent arguments (up to the
 ** first NULL argument), store the string in memory obtained from
 ** sqliteMalloc() and make the pointer indicated by the 1st argument
-** point to that string.
+** point to that string.  The 1st argument must either be NULL or 
+** point to memory obtained from sqliteMalloc().
 */
 void sqliteSetString(char **pz, const char *zFirst, ...){
   va_list ap;
@@ -355,7 +356,9 @@ void sqliteSetString(char **pz, const char *zFirst, ...){
 /*
 ** Works like sqliteSetString, but each string is now followed by
 ** a length integer which specifies how much of the source string 
-** to copy (in bytes).  -1 means use the whole string.
+** to copy (in bytes).  -1 means use the whole string.  The 1st 
+** argument must either be NULL or point to memory obtained from 
+** sqliteMalloc().
 */
 void sqliteSetNString(char **pz, ...){
   va_list ap;
@@ -609,188 +612,6 @@ int sqliteStrNICmp(const char *zLeft, const char *zRight, int N){
   while( N-- > 0 && *a!=0 && UpperToLower[*a]==UpperToLower[*b]){ a++; b++; }
   return N<0 ? 0 : *a - *b;
 }
-
-#if 0  /* NOT USED */
-/* 
-** The sortStrCmp() function below is used to order elements according
-** to the ORDER BY clause of a SELECT.  The sort order is a little different
-** from what one might expect.  This note attempts to describe what is
-** going on.
-**
-** We want the main string comparision function used for sorting to
-** sort both numbers and alphanumeric words into the correct sequence.
-** The same routine should do both without prior knowledge of which
-** type of text the input represents.  It should even work for strings
-** which are a mixture of text and numbers.  (It does not work for
-** numeric substrings in exponential notation, however.)
-**
-** To accomplish this, we keep track of a state number while scanning
-** the two strings.  The states are as follows:
-**
-**    1      Beginning of word
-**    2      Arbitrary text
-**    3      Integer
-**    4      Negative integer
-**    5      Real number
-**    6      Negative real
-**
-** The scan begins in state 1, beginning of word.  Transitions to other
-** states are determined by characters seen, as shown in the following
-** chart:
-**
-**      Current State         Character Seen  New State
-**      --------------------  --------------  -------------------
-**      0 Beginning of word   "-"             3 Negative integer
-**                            digit           2 Integer
-**                            space           0 Beginning of word
-**                            otherwise       1 Arbitrary text
-**
-**      1 Arbitrary text      space           0 Beginning of word
-**                            digit           2 Integer
-**                            otherwise       1 Arbitrary text
-**
-**      2 Integer             space           0 Beginning of word
-**                            "."             4 Real number
-**                            digit           2 Integer
-**                            otherwise       1 Arbitrary text
-**
-**      3 Negative integer    space           0 Beginning of word
-**                            "."             5 Negative Real num
-**                            digit           3 Negative integer
-**                            otherwise       1 Arbitrary text
-**
-**      4 Real number         space           0 Beginning of word
-**                            digit           4 Real number
-**                            otherwise       1 Arbitrary text
-**
-**      5 Negative real num   space           0 Beginning of word
-**                            digit           5 Negative real num
-**                            otherwise       1 Arbitrary text
-**
-** To implement this state machine, we first classify each character
-** into on of the following categories:
-**
-**      0  Text
-**      1  Space
-**      2  Digit
-**      3  "-"
-**      4  "."
-**
-** Given an arbitrary character, the array charClass[] maps that character
-** into one of the atove categories.
-*/
-static const unsigned char charClass[] = {
-        /* x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 xA xB xC xD xE xF */
-/* 0x */   0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0,
-/* 1x */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-/* 2x */   1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 0,
-/* 3x */   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0,
-/* 4x */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-/* 5x */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-/* 6x */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-/* 7x */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-/* 8x */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-/* 9x */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-/* Ax */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-/* Bx */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-/* Cx */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-/* Dx */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-/* Ex */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-/* Fx */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-};
-#define N_CHAR_CLASS 5
-
-/*
-** Given the current state number (0 thru 5), this array figures
-** the new state number given the character class.
-*/
-static const unsigned char stateMachine[] = {
- /* Text,  Space, Digit, "-", "." */
-      1,      0,    2,    3,   1,      /* State 0: Beginning of word */
-      1,      0,    2,    1,   1,      /* State 1: Arbitrary text */
-      1,      0,    2,    1,   4,      /* State 2: Integer */
-      1,      0,    3,    1,   5,      /* State 3: Negative integer */
-      1,      0,    4,    1,   1,      /* State 4: Real number */
-      1,      0,    5,    1,   1,      /* State 5: Negative real num */
-};
-
-/* This routine does a comparison of two strings.  Case is used only
-** if useCase!=0.  Numeric substrings compare in numerical order for the
-** most part but this routine does not understand exponential notation.
-*/
-static int sortStrCmp(const char *atext, const char *btext, int useCase){
-  register unsigned char *a, *b, *map, ca, cb;
-  int result;
-  register int cclass = 0;
-
-  a = (unsigned char *)atext;
-  b = (unsigned char *)btext;
-  if( useCase ){
-    do{
-      if( (ca= *a++)!=(cb= *b++) ) break;
-      cclass = stateMachine[cclass*N_CHAR_CLASS + charClass[ca]];
-    }while( ca!=0 );
-  }else{
-    map = UpperToLower;
-    do{
-      if( (ca=map[*a++])!=(cb=map[*b++]) ) break;
-      cclass = stateMachine[cclass*N_CHAR_CLASS + charClass[ca]];
-    }while( ca!=0 );
-    if( ca>='[' && ca<='`' ) cb = b[-1];
-    if( cb>='[' && cb<='`' ) ca = a[-1];
-  }
-  switch( cclass ){
-    case 0:
-    case 1: {
-      if( isdigit(ca) && isdigit(cb) ){
-        cclass = 2;
-      }
-      break;
-    }
-    default: {
-      break;
-    }
-  }
-  switch( cclass ){
-    case 2:
-    case 3: {
-      if( isdigit(ca) ){
-        if( isdigit(cb) ){
-          int acnt, bcnt;
-          acnt = bcnt = 0;
-          while( isdigit(*a++) ) acnt++;
-          while( isdigit(*b++) ) bcnt++;
-          result = acnt - bcnt;
-          if( result==0 ) result = ca-cb;
-        }else{
-          result = 1;
-        }
-      }else if( isdigit(cb) ){
-        result = -1;
-      }else if( ca=='.' ){
-        result = 1;
-      }else if( cb=='.' ){
-        result = -1;
-      }else{
-        result = ca - cb;
-        cclass = 2;
-      }
-      if( cclass==3 ) result = -result;
-      break;
-    }
-    case 0:
-    case 1:
-    case 4: {
-      result = ca - cb;
-      break;
-    }
-    case 5: {
-      result = cb - ca;
-    };
-  }
-  return result;
-}
-#endif /* NOT USED */
 
 /*
 ** Return TRUE if z is a pure numeric string.  Return FALSE if the

@@ -391,6 +391,7 @@ int sqlite_get_table_vprintf(
   va_list ap             /* Arguments to the format string */
 );
 char *sqlite_mprintf(const char*,...);
+char *sqlite_vmprintf(const char*, va_list);
 
 /*
 ** Windows systems should call this routine to free memory that
@@ -554,6 +555,9 @@ int sqlite_set_authorizer(
 #define SQLITE_SELECT               21   /* NULL            NULL            */
 #define SQLITE_TRANSACTION          22   /* NULL            NULL            */
 #define SQLITE_UPDATE               23   /* Table Name      Column Name     */
+#define SQLITE_ATTACH               24   /* Filename        NULL            */
+#define SQLITE_DETACH               25   /* Database Name   NULL            */
+
 
 /*
 ** The return value of the authorization function should be one of the

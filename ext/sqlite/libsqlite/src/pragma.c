@@ -421,6 +421,7 @@ void sqlitePragma(Parse *pParse, Token *pLeft, Token *pRight, int minusFlag){
     static VdbeOp indexListPreface[] = {
       { OP_ColumnName,  0, 0,       "seq"},
       { OP_ColumnName,  1, 0,       "name"},
+      { OP_ColumnName,  2, 0,       "file"},
     };
 
     sqliteVdbeAddOpList(v, ArraySize(indexListPreface), indexListPreface);
@@ -430,7 +431,10 @@ void sqlitePragma(Parse *pParse, Token *pLeft, Token *pRight, int minusFlag){
       sqliteVdbeAddOp(v, OP_Integer, i, 0);
       sqliteVdbeAddOp(v, OP_String, 0, 0);
       sqliteVdbeChangeP3(v, -1, db->aDb[i].zName, P3_STATIC);
-      sqliteVdbeAddOp(v, OP_Callback, 2, 0);
+      sqliteVdbeAddOp(v, OP_String, 0, 0);
+      sqliteVdbeChangeP3(v, -1, sqliteBtreeGetFilename(db->aDb[i].pBt),
+           P3_STATIC);
+      sqliteVdbeAddOp(v, OP_Callback, 3, 0);
     }
   }else
   /*

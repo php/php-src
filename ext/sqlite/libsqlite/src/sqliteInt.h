@@ -132,8 +132,13 @@ typedef unsigned INTPTR_TYPE uptr; /* Big enough to hold a pointer */
 ** multi-megabyte records are OK.  If your needs are different, you can
 ** change this define and recompile to increase or decrease the record
 ** size.
+**
+** The 16777198 is computed as follows:  238 bytes of payload on the
+** original pages plus 16448 overflow pages each holding 1020 bytes of
+** data.
 */
 #define MAX_BYTES_PER_ROW  1048576
+/* #define MAX_BYTES_PER_ROW 16777198 */
 
 /*
 ** If memory allocation problems are found, recompile with
@@ -236,7 +241,7 @@ struct Db {
   Hash idxHash;        /* All (named) indices indexed by name */
   Hash trigHash;       /* All triggers indexed by name */
   Hash aFKey;          /* Foreign keys indexed by to-table */
-  u8 inTrans;          /* True if a transaction is underway for this backend */
+  u8 inTrans;          /* 0: not writable.  1: Transaction.  2: Checkpoint */
   u16 flags;           /* Flags associated with this database */
 };
 
@@ -852,7 +857,6 @@ struct Parse {
                        ** while generating expressions.  Normally false */
   u8 iDb;              /* Index of database whose schema is being parsed */
   u8 useCallback;      /* True if callbacks should be used to report results */
-  int useDb;           /* Restrict references to tables in this database */
   int newTnum;         /* Table number to use when reparsing CREATE TABLEs */
   int nErr;            /* Number of errors seen */
   int nTab;            /* Number of previously allocated VDBE cursors */
@@ -893,12 +897,14 @@ struct Trigger {
   char *name;             /* The name of the trigger                        */
   char *table;            /* The table or view to which the trigger applies */
   u8 iDb;                 /* Database containing this trigger               */
+  u8 iTabDb;              /* Database containing Trigger.table              */
   u8 op;                  /* One of TK_DELETE, TK_UPDATE, TK_INSERT         */
   u8 tr_tm;               /* One of TK_BEFORE, TK_AFTER */
   Expr *pWhen;            /* The WHEN clause of the expresion (may be NULL) */
   IdList *pColumns;       /* If this is an UPDATE OF <column-list> trigger,
                              the <column-list> is stored here */
   int foreach;            /* One of TK_ROW or TK_STATEMENT */
+  Token nameToken;        /* Token containing zName. Use during parsing only */
 
   TriggerStep *step_list; /* Link list of trigger program steps             */
   Trigger *pNext;         /* Next trigger associated with the table */
@@ -993,6 +999,19 @@ struct TriggerStack {
   int ignoreJump;      /* where to jump to for a RAISE(IGNORE) */
   Trigger *pTrigger;   /* The trigger currently being coded */
   TriggerStack *pNext; /* Next trigger down on the trigger stack */
+};
+
+/*
+** The following structure contains information used by the sqliteFix...
+** routines as they walk the parse tree to make database references
+** explicit.  
+*/
+typedef struct DbFixer DbFixer;
+struct DbFixer {
+  Parse *pParse;      /* The parsing context.  Error messages written here */
+  const char *zDb;    /* Make sure all objects are contained in this database */
+  const char *zType;  /* Type of the container - used for error messages */
+  const Token *pName; /* Name of the container - used for error messages */
 };
 
 /*
@@ -1135,7 +1154,8 @@ int sqliteSafetyCheck(sqlite*);
 void sqliteChangeCookie(sqlite*, Vdbe*);
 void sqliteBeginTrigger(Parse*, Token*,int,int,IdList*,SrcList*,int,Expr*,int);
 void sqliteFinishTrigger(Parse*, TriggerStep*, Token*);
-void sqliteDropTrigger(Parse*, SrcList*, int);
+void sqliteDropTrigger(Parse*, SrcList*);
+void sqliteDropTriggerPtr(Parse*, Trigger*, int);
 int sqliteTriggersExist(Parse* , Trigger* , int , int , int, ExprList*);
 int sqliteCodeRowTrigger(Parse*, int, ExprList*, int, Table *, int, int, 
                          int, int);
@@ -1164,3 +1184,9 @@ void sqliteAttach(Parse*, Token*, Token*);
 void sqliteDetach(Parse*, Token*);
 int sqliteBtreeFactory(const sqlite *db, const char *zFilename,
                        int mode, int nPg, Btree **ppBtree);
+int sqliteFixInit(DbFixer*, Parse*, int, const char*, const Token*);
+int sqliteFixSrcList(DbFixer*, SrcList*);
+int sqliteFixSelect(DbFixer*, Select*);
+int sqliteFixExpr(DbFixer*, Expr*);
+int sqliteFixExprList(DbFixer*, ExprList*);
+int sqliteFixTriggerStep(DbFixer*, TriggerStep*);
