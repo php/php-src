@@ -78,21 +78,30 @@ PHP_FUNCTION(socket_setopt);
 PHP_FUNCTION(socket_shutdown);
 
 typedef struct php_iovec {
-	struct iovec *iov_array;
-	unsigned int count;
+	struct iovec	*iov_array;
+	unsigned int	count;
 } php_iovec_t;
 
-typedef struct {
-#ifdef PHP_WIN32
-	SOCKET socket;
-#else
-	int socket;
+#ifndef PHP_WIN32
+typedef int SOCKET;
 #endif
-	int type;
+
+typedef struct {
+	SOCKET	socket;
+	int		type;
 } php_socket;
 
 typedef struct {
-	zend_bool use_system_read;
+	fd_set	set;
+	SOCKET	max_fd;
+} php_fd_set;
+
+typedef struct {
+	unsigned char	info[256];
+} php_sockaddr_storage;
+
+typedef struct {
+	zend_bool	use_system_read;
 } php_sockets_globals;
 
 

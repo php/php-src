@@ -41,7 +41,6 @@
 #define set_h_errno(a) WSASetLastError(a)
 #define close(a) closesocket(a)
 #define CMSG_DATA(cmsg) ((cmsg)->cmsg_data)
-#define IS_INVALID_SOCKET(a)  (a->socket == INVALID_SOCKET)
 
 typedef long ssize_t;
 
