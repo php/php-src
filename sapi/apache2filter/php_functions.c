@@ -18,6 +18,9 @@
 
 /* $Id$ */
 
+
+#define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
+
 #include "php.h"
 #include "ext/standard/php_smart_str.h"
 #include "ext/standard/info.h"
