@@ -752,7 +752,7 @@ PHPAPI int _php3_set_sock_blocking(int socketd, int block)
 #elif defined(O_NDELAY)
       myflag = O_NDELAY;   /* old non-POSIX version */
 #endif
-      if (block) {
+      if (!block) {
               flags |= myflag;
       } else {
               flags &= ~myflag;
