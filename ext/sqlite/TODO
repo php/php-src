@@ -1,4 +1,4 @@
-- Implement a generic php function handler for use in SQL statements and
+- Implement an aggregating php function handler for use in SQL statements and
   triggers etc.
 
 - Make a release
