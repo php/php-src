@@ -4,6 +4,7 @@ PHP 4.0                                                                    NEWS
 ?? ??? 2000, Version 4.0 Release
 
 27 March 2000, Version 4.0 Release Candidate 1
+- added !== operator support. (Torben, Zend library)
 - Fixed a data corruption bug in mysql_result(), if used in table.fieldname
   mode (Zeev)
 - Fixed a crash problem in func_num_args(), func_get_arg() and func_get_args()
