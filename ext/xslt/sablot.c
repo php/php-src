@@ -194,7 +194,7 @@ PHP_FUNCTION(xslt_create)
 	XSLT_CONTEXT(handle) = ctx;
 
 	/* Allocate the actual processor itself, via sablotron */
-	error = SablotCreateProcessor(&processor);
+	error = SablotCreateProcessorForSituation(XSLT_CONTEXT(handle), &processor);
 	if (error) {
 		XSLT_ERRNO(handle) = error;
 		RETURN_FALSE;
@@ -480,7 +480,7 @@ PHP_FUNCTION(xslt_set_log)
 /* {{{ S_DOM *_php_sablot_dom_proc(php_xslt *, char *, size_t, zval **)
  */
 static SDOM_Document 
-_php_sablot_dom_proc(php_xslt *h, char *datap, size_t data_len, zval **args)
+_php_sablot_dom_proc(php_xslt *handle, char *datap, size_t data_len, zval **args)
 {
 	SDOM_Document domtree;
 
@@ -499,10 +499,10 @@ _php_sablot_dom_proc(php_xslt *h, char *datap, size_t data_len, zval **args)
 			return NULL;
 		}
 
-		SablotParseBuffer(XSLT_CONTEXT(h), Z_STRVAL_PP(data), &domtree);
+		SablotParseBuffer(XSLT_CONTEXT(handle), Z_STRVAL_PP(data), &domtree);
 	}
 	else {
-		SablotParse(XSLT_CONTEXT(h), datap, &domtree);
+		SablotParse(XSLT_CONTEXT(handle), datap, &domtree);
 	}
 
 	return domtree;
@@ -558,7 +558,7 @@ PHP_FUNCTION(xslt_process)
 		RETURN_FALSE;
 	}
 
-	SablotAddArgTree(handle->processor.ctx,
+	SablotAddArgTree(XSLT_CONTEXT(handle),
 					 XSLT_PROCESSOR(handle),
 					 "xml",
 					 xml_dom);
