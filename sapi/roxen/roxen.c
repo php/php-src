@@ -26,6 +26,7 @@
 #include "php_globals.h"
 #include "SAPI.h"
 #include "main.h"
+#include "ext/standard/info.h"
 
 #include "php_version.h"
 
@@ -445,9 +446,7 @@ php_roxen_sapi_read_cookies(SLS_D)
 static void php_info_roxen(ZEND_MODULE_INFO_FUNC_ARGS)
 {
   /*  char buf[512]; */
-  extern void php_info_print_table_row( int, ... );
-	
-  PUTS("<table border=5 width=600>\n");
+  php_info_print_table_start();
   php_info_print_table_row(2, "SAPI module version", "$Id$");
   /*  php_info_print_table_row(2, "Build date", Ns_InfoBuildDate());
       php_info_print_table_row(2, "Config file path", Ns_InfoConfigFile());
@@ -465,7 +464,7 @@ static void php_info_roxen(ZEND_MODULE_INFO_FUNC_ARGS)
       uptime % 60);
       php_info_print_table_row(2, "Server uptime", buf);
   */
-  PUTS("</table>");
+  php_info_print_table_end();
 }
 
 static zend_module_entry php_roxen_module = {
