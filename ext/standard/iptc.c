@@ -227,11 +227,6 @@ PHP_FUNCTION(iptcembed)
 		fstat(fileno(fp), &sb);
 
 		poi = spoolbuf = emalloc(len + sizeof(psheader) + sb.st_size + 1024);
-
-		if (! spoolbuf) {
-			fclose(fp);
-			RETURN_FALSE;
-		}
 	} 
 
 	if (php_iptc_get1(fp, spool, poi?&poi:0 TSRMLS_CC) != 0xFF) {
