@@ -73,6 +73,9 @@ PHP_FUNCTION(pg_tty);
 PHP_FUNCTION(pg_options);
 PHP_FUNCTION(pg_version);
 PHP_FUNCTION(pg_ping);
+#if HAVE_PQPARAMETERSTATUS
+PHP_FUNCTION(pg_parameter_status);
+#endif
 /* query functions */
 PHP_FUNCTION(pg_query);
 PHP_FUNCTION(pg_send_query);

@@ -90,6 +90,9 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_options,		NULL)
 	PHP_FE(pg_version,		NULL)
 	PHP_FE(pg_ping,			NULL)
+#if HAVE_PQPARAMETERSTATUS
+	PHP_FE(pg_parameter_status, NULL)
+#endif
 	/* query functions */
 	PHP_FE(pg_query,		NULL)
 	PHP_FE(pg_send_query,	NULL)
@@ -927,6 +930,41 @@ PHP_FUNCTION(pg_version)
 	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_VERSION);
 }
 /* }}} */
+
+#if HAVE_PQPARAMETERSTATUS
+/* {{{ proto string|false pg_parameter_status([resource connection,] string param_name)
+   Returns the value of a server parameter */
+PHP_FUNCTION(pg_parameter_status)
+{
+	zval *pgsql_link;
+	int id;
+	PGconn *pgsql;
+	char *param;
+	int len;
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pgsql_link, &param, &len) == SUCCESS) {
+		id = -1;
+	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &param, &len) == SUCCESS) {
+		pgsql_link = NULL;
+		id = PGG(default_link);
+	} else {
+		RETURN_FALSE;
+	}
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	param = (char*)PQparameterStatus(pgsql, param);
+	if (param) {
+		RETURN_STRING(param, 1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+#endif
 
 /* {{{ proto bool pg_ping([resource connection])
    Ping database. If connection is bad, try to reconnect. */
