@@ -1775,6 +1775,9 @@ static inline int zend_binary_assign_op_helper(int (*binary_op)(zval *result, zv
 		EX_T(opline->result.u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*EX_T(opline->result.u.var).var.ptr_ptr, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+	    if (increment_opline) {
+    	    INC_OPCODE();
+    	}
 		NEXT_OPCODE();
 	}
 	
