@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- ATTENTION!! "make install" will install CLI SAPI version of "php" binary in 
+  {PREFIX}/bin/php *always* while CGI binary is renamed and installed as 
+  {PREFIX}/bin/php-cgi when CGI SAPI is chosen.
 - Fixed bug #17281 (Sanity checks for encoding sessions). (Ilia)
 - Fixed bug #16995 and #19392 (Prevent crash if $HTTP_SESSION_VARS != ARRAY).
   (Ilia)
@@ -405,8 +408,7 @@ PHP 4                                                                      NEWS
   shell scripts. Some of the differences to CGI sapi are: no HTTP headers, 
   plain text error messages, does not change working directory, have a new -r
   option which executes a piece of PHP code directly from the commmand line, etc.
-  "make install" will install CLI SAPI version of php in {PREFIX}/bin/php while
-  CGI is renamed and installed as {PREFIX}/bin/php-cgi. (Edin)
+  (Edin)
 - Fixed HTTP file upload support to handle big files better. (Jani)
 - Major modifications to the Sockets Extension and its API (Jason):
   . Fixed numerous bugs.
