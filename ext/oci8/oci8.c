@@ -159,7 +159,10 @@ PHP_FUNCTION(ocidefinebyname);
 PHP_FUNCTION(ocicolumnisnull);
 PHP_FUNCTION(ocicolumnname);
 PHP_FUNCTION(ocicolumnsize);
+PHP_FUNCTION(ocicolumnscale);
+PHP_FUNCTION(ocicolumnprecision);
 PHP_FUNCTION(ocicolumntype);
+PHP_FUNCTION(ocicolumntyperaw);
 PHP_FUNCTION(ociexecute);
 PHP_FUNCTION(ocifetch);
 PHP_FUNCTION(ocicancel);
@@ -226,7 +229,10 @@ static zend_function_entry php_oci_functions[] = {
 	PHP_FE(ocicolumnisnull,  NULL)
 	PHP_FE(ocicolumnname,    NULL)
 	PHP_FE(ocicolumnsize,    NULL)
+	PHP_FE(ocicolumnscale,    NULL)
+	PHP_FE(ocicolumnprecision,    NULL)	
 	PHP_FE(ocicolumntype,    NULL)
+	PHP_FE(ocicolumntyperaw,    NULL)	
 	PHP_FE(ociexecute,       NULL)
 	PHP_FE(ocicancel,        NULL)
 	PHP_FE(ocifetch,         NULL)
@@ -1273,6 +1279,32 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 			outcol->storage_size4 = outcol->data_size;
 			outcol->retlen = outcol->data_size;
 
+			statement->error =
+				oci_error(statement->pError,
+						   "OCIAttrGet OCI_DTYPE_PARAM/OCI_ATTR_SCALE",
+						   OCIAttrGet((dvoid *)param,
+									  OCI_DTYPE_PARAM,
+									  (dvoid *)&outcol->scale,
+									  (dvoid *)0,
+									  OCI_ATTR_SCALE,
+									  statement->pError));
+			if (statement->error) {
+				return 0; /* XXX we lose memory!!! */
+			}
+
+			statement->error =
+				oci_error(statement->pError,
+						   "OCIAttrGet OCI_DTYPE_PARAM/OCI_ATTR_PRECISION",
+						   OCIAttrGet((dvoid *)param,
+									  OCI_DTYPE_PARAM,
+									  (dvoid *)&outcol->precision,
+									  (dvoid *)0,
+									  OCI_ATTR_PRECISION,
+									  statement->pError));
+			if (statement->error) {
+				return 0; /* XXX we lose memory!!! */
+			}
+						
 			statement->error = 
 				oci_error(statement->pError,
 						   "OCIAttrGet OCI_DTYPE_PARAM/OCI_ATTR_NAME",
@@ -3034,7 +3066,62 @@ PHP_FUNCTION(ocicolumnsize)
 	if (outcol == NULL) {
 		RETURN_FALSE;
 	}
-	RETURN_LONG(outcol->data_size);
+
+	oci_debug("ocicolumnsize: %16s, retlen = %4d, retlen4 = %d, data_size = %4d, storage_size4 = %4d, indicator %4d, retcode = %4d",
+				  outcol->name,outcol->retlen,outcol->retlen4,outcol->data_size,outcol->storage_size4,outcol->indicator,outcol->retcode);
+		
+	/* Handle data type of LONG */
+	if(outcol->data_type == SQLT_LNG){
+		RETURN_LONG(outcol->storage_size4);
+	}else{
+		RETURN_LONG(outcol->data_size);
+	}
+}
+
+/* }}} */
+/* {{{ proto int OCIColumnScale(int stmt, int col)
+   Tell the scale of a column */
+
+PHP_FUNCTION(ocicolumnscale)
+{
+	zval **stmt, **col;
+	oci_statement *statement;
+	oci_out_column *outcol;
+
+	if (zend_get_parameters_ex(2, &stmt, &col) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	OCI_GET_STMT(statement,stmt);
+
+	outcol = oci_get_col(statement, -1, col);
+	if (outcol == NULL) {
+		RETURN_FALSE;
+	}
+	RETURN_LONG(outcol->scale);
+}
+
+/* }}} */
+/* {{{ proto int OCIColumnPrecision(int stmt, int col)
+   Tell the precision of a column */
+
+PHP_FUNCTION(ocicolumnprecision)
+{
+	zval **stmt, **col;
+	oci_statement *statement;
+	oci_out_column *outcol;
+
+	if (zend_get_parameters_ex(2, &stmt, &col) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	OCI_GET_STMT(statement,stmt);
+
+	outcol = oci_get_col(statement, -1, col);
+	if (outcol == NULL) {
+		RETURN_FALSE;
+	}
+	RETURN_LONG(outcol->precision);
 }
 
 /* }}} */
@@ -3046,7 +3133,7 @@ PHP_FUNCTION(ocicolumntype)
 	zval **stmt, **col;
 	oci_statement *statement;
 	oci_out_column *outcol;
-
+	
 	if (zend_get_parameters_ex(2, &stmt, &col) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -3097,6 +3184,29 @@ PHP_FUNCTION(ocicolumntype)
 		default:
 			RETVAL_LONG(outcol->data_type);
 	}
+}
+
+/* }}} */
+/* {{{ proto mixed  OCIColumnTypeRaw(int stmt, int col)
+   Tell the raw oracle data type of a column */
+
+PHP_FUNCTION(ocicolumntyperaw)
+{
+	zval **stmt, **col;
+	oci_statement *statement;
+	oci_out_column *outcol;
+	
+	if (zend_get_parameters_ex(2, &stmt, &col) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	OCI_GET_STMT(statement,stmt);
+
+	outcol = oci_get_col(statement, -1, col);
+	if (outcol == NULL) {
+		RETURN_FALSE;
+	}
+	RETVAL_LONG(outcol->data_type);
 }
 
 /* }}} */

@@ -143,6 +143,8 @@ typedef struct {
 	oci_define *define;
 	int piecewise;
 	ub4 cb_retlen;
+   ub2 scale;
+   ub2 precision;    	
 } oci_out_column;
 
 typedef struct {
