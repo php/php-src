@@ -221,7 +221,7 @@ zoorb.php exists? yes
 goompness/Mopreeb.php exists? yes
 goompness/oggbrzitzkee.php exists? yes
 Test conflicting files:
-Caught error: pkg6conflict: conflicting files found:
+Caught error: pear::pkg6conflict: conflicting files found:
 groob\goompness\oggbrzitzkee.php (pkg6)
      groob\goompness\Mopreeb.php (pkg6)
 

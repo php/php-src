@@ -38,12 +38,17 @@ if (!is_dir($temp_path . DIRECTORY_SEPARATOR . 'bin')) {
 }
 // make the fake configuration - we'll use one of these and it should work
 $config = serialize(array('master_server' => 'pear.php.net',
+    'default_channel' => 'pear',
     'php_dir' => $temp_path . DIRECTORY_SEPARATOR . 'php',
     'ext_dir' => $temp_path . DIRECTORY_SEPARATOR . 'ext',
     'data_dir' => $temp_path . DIRECTORY_SEPARATOR . 'data',
     'doc_dir' => $temp_path . DIRECTORY_SEPARATOR . 'doc',
     'test_dir' => $temp_path . DIRECTORY_SEPARATOR . 'test',
-    'bin_dir' => $temp_path . DIRECTORY_SEPARATOR . 'bin',));
+    'bin_dir' => $temp_path . DIRECTORY_SEPARATOR . 'bin',
+    '__channels' => array(
+        'frob' => array(
+            'php_dir' => $temp_path . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'frob',
+    ))));
 touch($temp_path . DIRECTORY_SEPARATOR . 'pear.conf');
 $fp = fopen($temp_path . DIRECTORY_SEPARATOR . 'pear.conf', 'w');
 fwrite($fp, $config);
@@ -59,6 +64,16 @@ if (!empty($home)) {
     // for PEAR_Config initialization
     putenv('HOME="'.$temp_path);
 }
+require_once 'PEAR/ChannelFile.php';
+require_once 'PEAR/Registry.php';
+$reg = &new PEAR_Registry($temp_path . DIRECTORY_SEPARATOR . 'php');
+$chan = new PEAR_ChannelFile;
+$chan->setName('frob');
+$chan->setSummary('test');
+$chan->setServer('test');
+$reg->addChannel($chan);
+$chan->setName('groob');
+$reg->addChannel($chan);
 require_once "PEAR/Installer.php";
 
 // no UI is needed for these tests
@@ -84,106 +99,49 @@ function catchit($err)
 }
 
 echo "Test package.xml direct install:\n";
-$installer->install(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'test-pkg6' . DIRECTORY_SEPARATOR . 'package.xml');
+$installer->install(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'test-pkg6' . DIRECTORY_SEPARATOR . 'package2.xml');
 $reg = &new PEAR_Registry($temp_path . DIRECTORY_SEPARATOR . 'php');
-var_dump($reg->listPackages());
+var_dump($reg->listAllPackages());
 echo "zoorb.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
+echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'frob'
     . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'zoorb.php')) ? "yes\n" : "no\n";
 echo "goompness/Mopreeb.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
+echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'frob'
     . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'goompness'
     . DIRECTORY_SEPARATOR . 'Mopreeb.php')) ? "yes\n" : "no\n";
 echo "goompness/oggbrzitzkee.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
+echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'frob'
     . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'goompness'
     . DIRECTORY_SEPARATOR . 'oggbrzitzkee.php')) ? "yes\n" : "no\n";
+echo "goompness/test.dat exists? ";
+echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'pkg6'
+    . DIRECTORY_SEPARATOR . 'goompness'
+    . DIRECTORY_SEPARATOR . 'test.dat')) ? "yes\n" : "no\n";
+
+echo "Test conflicting files:\n";
+$installer->install(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'test-pkg6' . DIRECTORY_SEPARATOR . 'conflictpackage2.xml');
+
+echo "Test unknown channel:\n";
+$installer->install(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'test-pkg6' . DIRECTORY_SEPARATOR . 'package2_invalid.xml');
+
 echo "After uninstall:\n";
-$installer->uninstall('pkg6');
-var_dump($reg->listPackages());
+$installer->uninstall('frob::pkg6');
+var_dump($reg->listAllPackages());
 echo "zoorb.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
+echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'frob'
     . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'zoorb.php')) ? "yes\n" : "no\n";
 echo "goompness/Mopreeb.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
+echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'frob'
     . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'goompness'
     . DIRECTORY_SEPARATOR . 'Mopreeb.php')) ? "yes\n" : "no\n";
 echo "goompness/oggbrzitzkee.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
+echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'frob'
     . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'goompness'
     . DIRECTORY_SEPARATOR . 'oggbrzitzkee.php')) ? "yes\n" : "no\n";
-echo "goompness exists? ";
-echo (is_dir($temp_path . DIRECTORY_SEPARATOR . 'php'
-    . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'goompness'))
-    ? "yes\n" : "no\n";
-
-echo "Test .tgz install:\n";
-$installer->install(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'test-pkg6' . DIRECTORY_SEPARATOR . 'pkg6-1.1.tgz');
-$reg = &new PEAR_Registry($temp_path . DIRECTORY_SEPARATOR . 'php');
-var_dump($reg->listPackages());
-echo "zoorb.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
-    . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'zoorb.php')) ? "yes\n" : "no\n";
-echo "goompness/Mopreeb.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
-    . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'goompness'
-    . DIRECTORY_SEPARATOR . 'Mopreeb.php')) ? "yes\n" : "no\n";
-echo "goompness/oggbrzitzkee.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
-    . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'goompness'
-    . DIRECTORY_SEPARATOR . 'oggbrzitzkee.php')) ? "yes\n" : "no\n";
-echo "After uninstall:\n";
-$installer->uninstall('pkg6');
-var_dump($reg->listPackages());
-echo "zoorb.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
-    . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'zoorb.php')) ? "yes\n" : "no\n";
-echo "goompness/Mopreeb.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
-    . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'goompness'
-    . DIRECTORY_SEPARATOR . 'Mopreeb.php')) ? "yes\n" : "no\n";
-echo "goompness/oggbrzitzkee.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
-    . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'goompness'
-    . DIRECTORY_SEPARATOR . 'oggbrzitzkee.php')) ? "yes\n" : "no\n";
-echo "goompness exists? ";
-echo (is_dir($temp_path . DIRECTORY_SEPARATOR . 'php'
-    . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'goompness'))
-    ? "yes\n" : "no\n";
-
-echo "Test invalid .tgz install:\n";
-$error_to_catch = 'unable to unpack ' . dirname(__FILE__) . DIRECTORY_SEPARATOR .
-    'test-pkg6' . DIRECTORY_SEPARATOR . 'invalidtgz.tgz';
-$installer->install(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'test-pkg6' . DIRECTORY_SEPARATOR . 'invalidtgz.tgz');
-$reg = &new PEAR_Registry($temp_path . DIRECTORY_SEPARATOR . 'php');
-var_dump($reg->listPackages());
-echo "zoorb.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
-    . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'zoorb.php')) ? "yes\n" : "no\n";
-echo "goompness/Mopreeb.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
-    . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'goompness'
-    . DIRECTORY_SEPARATOR . 'Mopreeb.php')) ? "yes\n" : "no\n";
-echo "goompness/oggbrzitzkee.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
-    . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'goompness'
-    . DIRECTORY_SEPARATOR . 'oggbrzitzkee.php')) ? "yes\n" : "no\n";
-
-echo "Test missing package.xml in .tgz install:\n";
-$installer->install(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'test-pkg6' . DIRECTORY_SEPARATOR . 'nopackagexml.tgz');
-$reg = &new PEAR_Registry($temp_path . DIRECTORY_SEPARATOR . 'php');
-var_dump($reg->listPackages());
-echo "zoorb.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
-    . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'zoorb.php')) ? "yes\n" : "no\n";
-echo "goompness/Mopreeb.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
-    . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'goompness'
-    . DIRECTORY_SEPARATOR . 'Mopreeb.php')) ? "yes\n" : "no\n";
-echo "goompness/oggbrzitzkee.php exists? ";
-echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'php'
-    . DIRECTORY_SEPARATOR . 'groob' . DIRECTORY_SEPARATOR . 'goompness'
-    . DIRECTORY_SEPARATOR . 'oggbrzitzkee.php')) ? "yes\n" : "no\n";
+echo "goompness/test.dat exists? ";
+echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'pkg6'
+    . DIRECTORY_SEPARATOR . 'goompness'
+    . DIRECTORY_SEPARATOR . 'test.dat')) ? "yes\n" : "no\n";
 
 chdir($curdir);
 cleanall($temp_path);
@@ -211,49 +169,45 @@ function cleanall($dir)
 --POST--
 --EXPECT--
 Test package.xml direct install:
-array(1) {
-  [0]=>
-  string(4) "pkg6"
+array(3) {
+  ["frob"]=>
+  array(1) {
+    [0]=>
+    string(4) "pkg6"
+  }
+  ["groob"]=>
+  array(0) {
+  }
+  ["pear"]=>
+  array(0) {
+  }
 }
 zoorb.php exists? yes
 goompness/Mopreeb.php exists? yes
 goompness/oggbrzitzkee.php exists? yes
+goompness/test.dat exists? yes
+Test conflicting files:
+Caught error: groob::pkg6conflict: conflicting files found:
+groob\goompness\oggbrzitzkee.php (frob::pkg6)
+     groob\goompness\Mopreeb.php (frob::pkg6)
+        groob\goompness\test.dat (frob::pkg6)
+
+Test unknown channel:
+Error: Unknown channel, "gorp"
+Caught error: Installation failed: invalid package file, use option force to install anyway
 After uninstall:
-array(0) {
+array(3) {
+  ["frob"]=>
+  array(0) {
+  }
+  ["groob"]=>
+  array(0) {
+  }
+  ["pear"]=>
+  array(0) {
+  }
 }
 zoorb.php exists? no
 goompness/Mopreeb.php exists? no
 goompness/oggbrzitzkee.php exists? no
-goompness exists? no
-Test .tgz install:
-array(1) {
-  [0]=>
-  string(4) "pkg6"
-}
-zoorb.php exists? yes
-goompness/Mopreeb.php exists? yes
-goompness/oggbrzitzkee.php exists? yes
-After uninstall:
-array(0) {
-}
-zoorb.php exists? no
-goompness/Mopreeb.php exists? no
-goompness/oggbrzitzkee.php exists? no
-goompness exists? no
-Test invalid .tgz install:
-Caught error: Invalid checksum for file "<?xml version="1.0" encoding="ISO-8859-1" ?>
-    <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/" : 37649 calculated, 0 expected
-Caught expected error
-array(0) {
-}
-zoorb.php exists? no
-goompness/Mopreeb.php exists? no
-goompness/oggbrzitzkee.php exists? no
-Test missing package.xml in .tgz install:
-warning : you are using an archive with an old format
-Caught error: no package.xml file after extracting the archive
-array(0) {
-}
-zoorb.php exists? no
-goompness/Mopreeb.php exists? no
-goompness/oggbrzitzkee.php exists? no
+goompness/test.dat exists? no

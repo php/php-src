@@ -78,10 +78,6 @@ dumpall($reg);
 var_dump($reg->deletePackage("pkg2"));
 dumpall($reg);
 
-echo "add package with conflicting files:\n";
-var_dump($reg->addPackage('pkg2', array('name' => 'pkg2', 'version' => '1.0', 'filelist' => $files1)));
-dumpall($reg);
-
 $reg->updatePackage("pkg3", array("version" => "3.1b1", "status" => "beta"));
 dumpall($reg);
 
@@ -124,16 +120,6 @@ channel pear:
 pkg1: version="1.0" filelist=array(pkg1-1.php[role=php],pkg1-2.php[role=php,baseinstalldir=pkg1])
 pkg3: version="3.0" filelist=array(pkg3-1.php[role=php],pkg3-2.php[role=php,baseinstalldir=pkg3])
 dump done
-bool(false)
-dumping registry...
-channel pear:
-pkg1: version="1.0" filelist=array(pkg1-1.php[role=php],pkg1-2.php[role=php,baseinstalldir=pkg1])
-pkg3: version="3.0" filelist=array(pkg3-1.php[role=php],pkg3-2.php[role=php,baseinstalldir=pkg3])
-dump done
-add package with conflicting files:
-caught ErrorStack error:
-message: package pear::pkg2 has files that conflict with installed packages pear::pkg1
-code: -5
 bool(false)
 dumping registry...
 channel pear:
