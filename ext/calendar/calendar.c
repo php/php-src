@@ -137,7 +137,7 @@ PHP_MINFO_FUNCTION(calendar)
 }
 
 /* {{{ proto array cal_info(int calendar)
- * Return information about a particular calendar */
+   Returns information about a particular calendar */
 PHP_FUNCTION(cal_info)
 {
 	zval ** cal;
@@ -176,7 +176,7 @@ PHP_FUNCTION(cal_info)
 /* }}} */
 
 /* {{{ proto int cal_days_in_month(int calendar, int month, int year)
- * Returns the number of days in a month for a given year and calendar */
+   Returns the number of days in a month for a given year and calendar */
 PHP_FUNCTION(cal_days_in_month)
 {
 	zval ** cal, **month, **year;
@@ -212,7 +212,7 @@ PHP_FUNCTION(cal_days_in_month)
 /* }}} */
 
 /* {{{ proto int cal_to_jd(int calendar, int month, int day, int year)
- * Convert from a supported calendar to Julian Day Count */
+   Converts from a supported calendar to Julian Day Count */
 PHP_FUNCTION(cal_to_jd)
 {
 	zval ** cal, **month, **day, **year;
@@ -239,7 +239,7 @@ PHP_FUNCTION(cal_to_jd)
 /* }}} */
 
 /* {{{ proto array cal_from_jd(int jd, int calendar)
- * Convert from Julian Day Count to a supported calendar and return extended information */
+   Converts from Julian Day Count to a supported calendar and return extended information */
 PHP_FUNCTION(cal_from_jd)
 {
 	zval ** jd, ** cal;
@@ -284,7 +284,7 @@ PHP_FUNCTION(cal_from_jd)
 /* }}} */
 
 /* {{{ proto string jdtogregorian(int juliandaycount)
-   Convert a julian day count to a gregorian calendar date */
+   Converts a julian day count to a gregorian calendar date */
 PHP_FUNCTION(jdtogregorian)
 {
 	pval **julday;
@@ -304,7 +304,7 @@ PHP_FUNCTION(jdtogregorian)
 /* }}} */
 
 /* {{{ proto int gregoriantojd(int month, int day, int year)
-   Convert a gregorian calendar date to julian day count */
+   Converts a gregorian calendar date to julian day count */
  PHP_FUNCTION(gregoriantojd)
 {
 	pval **year, **month, **day;
@@ -345,7 +345,7 @@ PHP_FUNCTION(jdtogregorian)
 /* }}} */
 
 /* {{{ proto int juliantojd(int month, int day, int year)
-   Convert a julian calendar date to julian day count */
+   Converts a julian calendar date to julian day count */
  PHP_FUNCTION(juliantojd)
 {
 	pval **year, **month, **day;
@@ -366,7 +366,7 @@ PHP_FUNCTION(jdtogregorian)
 /* }}} */
 
 /* {{{ proto string jdtojewish(int juliandaycount)
-   Convert a julian day count to a jewish calendar date */
+   Converts a julian day count to a jewish calendar date */
  PHP_FUNCTION(jdtojewish) 
 {
 	pval **julday;
@@ -387,7 +387,7 @@ PHP_FUNCTION(jdtogregorian)
 /* }}} */
 
 /* {{{ proto int jewishtojd(int month, int day, int year)
-   Convert a jewish calendar date to a julian day count */
+   Converts a jewish calendar date to a julian day count */
  PHP_FUNCTION(jewishtojd)
 {
 	pval **year, **month, **day;
@@ -408,7 +408,7 @@ PHP_FUNCTION(jdtogregorian)
 /* }}} */
 
 /* {{{ proto string jdtofrench(int juliandaycount)
-   Convert a julian day count to a french republic calendar date */
+   Converts a julian day count to a french republic calendar date */
  PHP_FUNCTION(jdtofrench)
 {
 	pval **julday;
@@ -429,7 +429,7 @@ PHP_FUNCTION(jdtogregorian)
 /* }}} */
 
 /* {{{ proto int frenchtojd(int month, int day, int year)
-   Convert a french republic calendar date to julian day count */
+   Converts a french republic calendar date to julian day count */
  PHP_FUNCTION(frenchtojd)
 {
 	pval **year, **month, **day;
