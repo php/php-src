@@ -2129,7 +2129,7 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 	t = str;
  
 	if (PG(magic_quotes_sybase)) {
-		while (l >= 0) {
+		while (l > 0) {
 			if(*t=='\'') {
 				if((l>0) && (t[1]=='\'')) {
 					t++;
