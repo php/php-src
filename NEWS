@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 200?, Version 5.0.0
 
 ?? ??? 2003, PHP 5 Beta 2
+- Added snmp_read_mib() which reads a MIB file into the active MIB tree. (Jani)
 - Fixed support for <![CDATA[]]> fields within XML documents in ext/xml. 
   (Sterling)
 
