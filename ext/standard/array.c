@@ -36,13 +36,13 @@
 #include "zend_globals.h"
 #include "php_globals.h"
 #include "php_array.h"
+#include "basic_functions.h"
 
 #define EXTR_OVERWRITE		0
 #define EXTR_SKIP			1
 #define EXTR_PREFIX_SAME	2
 #define	EXTR_PREFIX_ALL		3
 
-static zval **user_compare_func_name;
 static unsigned char all_args_force_ref[] = { 1, BYREF_FORCE_REST };
 
 function_entry array_functions[] = {
@@ -97,7 +97,7 @@ zend_module_entry array_module_entry = {
 	array_functions,			/* function list */
 	PHP_MINIT(array),			/* process startup */
 	NULL,						/* process shutdown */
-	PHP_RINIT(array),			/* request startup */
+	NULL,						/* request startup */
 	NULL,						/* request shutdown */
 	NULL,						/* extension info */
 	STANDARD_MODULE_PROPERTIES
@@ -115,12 +115,6 @@ PHP_MINIT_FUNCTION(array)
 	return SUCCESS;
 }
 
-PHP_RINIT_FUNCTION(array)
-{
-	user_compare_func_name=NULL;
-	return SUCCESS;
-}
-	
 static int array_key_compare(const void *a, const void *b)
 {
 	Bucket *f;
@@ -372,6 +366,7 @@ static int array_user_compare(const void *a, const void *b)
 	pval **args[2];
 	pval retval;
 	CLS_FETCH();
+	BLS_FETCH();
 
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
@@ -379,7 +374,7 @@ static int array_user_compare(const void *a, const void *b)
 	args[0] = (pval **) f->pData;
 	args[1] = (pval **) s->pData;
 
-	if (call_user_function_ex(CG(function_table), NULL, *user_compare_func_name, &retval, 2, args, 0)==SUCCESS) {
+	if (call_user_function_ex(CG(function_table), NULL, *BG(user_compare_func_name), &retval, 2, args, 0)==SUCCESS) {
 		convert_to_long(&retval);
 		return retval.value.lval;
 	} else {
@@ -393,24 +388,25 @@ PHP_FUNCTION(usort)
 	pval **array;
 	pval **old_compare_func;
 	HashTable *target_hash;
+	BLS_FETCH();
 
-	old_compare_func = user_compare_func_name;
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &array, &user_compare_func_name) == FAILURE) {
-		user_compare_func_name = old_compare_func;
+	old_compare_func = BG(user_compare_func_name);
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &array, &BG(user_compare_func_name)) == FAILURE) {
+		BG(user_compare_func_name) = old_compare_func;
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in usort() call");
-		user_compare_func_name = old_compare_func;
+		BG(user_compare_func_name) = old_compare_func;
 		return;
 	}
-	convert_to_string_ex(user_compare_func_name);
+	convert_to_string_ex(BG(user_compare_func_name));
 	if (zend_hash_sort(target_hash, qsort, array_user_compare, 1) == FAILURE) {
-		user_compare_func_name = old_compare_func;
+		BG(user_compare_func_name) = old_compare_func;
 		return;
 	}
-	user_compare_func_name = old_compare_func;
+	BG(user_compare_func_name) = old_compare_func;
 	RETURN_TRUE;
 }
 
@@ -419,24 +415,25 @@ PHP_FUNCTION(uasort)
 	pval **array;
 	pval **old_compare_func;
 	HashTable *target_hash;
+	BLS_FETCH();
 
-	old_compare_func = user_compare_func_name;
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &array, &user_compare_func_name) == FAILURE) {
-		user_compare_func_name = old_compare_func;
+	old_compare_func = BG(user_compare_func_name);
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &array, &BG(user_compare_func_name)) == FAILURE) {
+		BG(user_compare_func_name) = old_compare_func;
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in uasort() call");
-		user_compare_func_name = old_compare_func;
+		BG(user_compare_func_name) = old_compare_func;
 		return;
 	}
-	convert_to_string_ex(user_compare_func_name);
+	convert_to_string_ex(BG(user_compare_func_name));
 	if (zend_hash_sort(target_hash, qsort, array_user_compare, 0) == FAILURE) {
-		user_compare_func_name = old_compare_func;
+		BG(user_compare_func_name) = old_compare_func;
 		return;
 	}
-	user_compare_func_name = old_compare_func;
+	BG(user_compare_func_name) = old_compare_func;
 	RETURN_TRUE;
 }
 
@@ -450,6 +447,7 @@ static int array_user_key_compare(const void *a, const void *b)
 	pval retval;
 	int status;
 	CLS_FETCH();
+	BLS_FETCH();
 
 	args[0] = &key1;
 	args[1] = &key2;
@@ -476,7 +474,7 @@ static int array_user_key_compare(const void *a, const void *b)
 		key2.type = IS_LONG;
 	}
 
-	status = call_user_function(CG(function_table), NULL, *user_compare_func_name, &retval, 2, args);
+	status = call_user_function(CG(function_table), NULL, *BG(user_compare_func_name), &retval, 2, args);
 	
 	zval_dtor(&key1);
 	zval_dtor(&key2);
@@ -495,24 +493,25 @@ PHP_FUNCTION(uksort)
 	pval **array;
 	pval **old_compare_func;
 	HashTable *target_hash;
+	BLS_FETCH();
 
-	old_compare_func = user_compare_func_name;
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &array, &user_compare_func_name) == FAILURE) {
-		user_compare_func_name = old_compare_func;
+	old_compare_func = BG(user_compare_func_name);
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &array, &BG(user_compare_func_name)) == FAILURE) {
+		BG(user_compare_func_name) = old_compare_func;
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in uksort() call");
-		user_compare_func_name = old_compare_func;
+		BG(user_compare_func_name) = old_compare_func;
 		return;
 	}
-	convert_to_string_ex(user_compare_func_name);
+	convert_to_string_ex(BG(user_compare_func_name));
 	if (zend_hash_sort(target_hash, qsort, array_user_key_compare, 0) == FAILURE) {
-		user_compare_func_name = old_compare_func;
+		BG(user_compare_func_name) = old_compare_func;
 		return;
 	}
-	user_compare_func_name = old_compare_func;
+	BG(user_compare_func_name) = old_compare_func;
 	RETURN_TRUE;
 }
 
@@ -770,8 +769,6 @@ PHP_FUNCTION(max)
 	}
 }
 
-static zval **php_array_walk_func_name;
-
 static int php_array_walk(HashTable *target_hash, zval **userdata)
 {
 	zval **args[3],			/* Arguments to userland function */
@@ -780,6 +777,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 	char  *string_key;
 	ulong  num_key;
 	CLS_FETCH();
+	BLS_FETCH();
 
 	/* Allocate space for key */
 	MAKE_STD_ZVAL(key);
@@ -801,7 +799,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 		}
 		
 		/* Call the userland function */
-		call_user_function_ex(CG(function_table), NULL, *php_array_walk_func_name,
+		call_user_function_ex(CG(function_table), NULL, *BG(array_walk_func_name),
 						   &retval, userdata ? 3 : 2, args, 0);
 		
 		/* Clean up the key */
@@ -823,23 +821,24 @@ PHP_FUNCTION(array_walk) {
 		 **userdata = NULL,
 		 **old_walk_func_name;
 	HashTable *target_hash;
+	BLS_FETCH();
 
 	argc = ARG_COUNT(ht);
-	old_walk_func_name = php_array_walk_func_name;
+	old_walk_func_name = BG(array_walk_func_name);
 	if (argc < 2 || argc > 3 ||
-		getParametersEx(argc, &array, &php_array_walk_func_name, &userdata) == FAILURE) {
-		php_array_walk_func_name = old_walk_func_name;
+		getParametersEx(argc, &array, &BG(array_walk_func_name), &userdata) == FAILURE) {
+		BG(array_walk_func_name) = old_walk_func_name;
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in array_walk() call");
-		php_array_walk_func_name = old_walk_func_name;
+		BG(array_walk_func_name) = old_walk_func_name;
 		return;
 	}
-	convert_to_string_ex(php_array_walk_func_name);
+	convert_to_string_ex(BG(array_walk_func_name));
 	php_array_walk(target_hash, userdata);
-	php_array_walk_func_name = old_walk_func_name;
+	BG(array_walk_func_name) = old_walk_func_name;
 	RETURN_TRUE;
 }
 

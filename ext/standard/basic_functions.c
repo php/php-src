@@ -394,6 +394,8 @@ PHP_RINIT_FUNCTION(basic)
 
 	BG(strtok_string) = NULL;
 	BG(locale_string) = NULL;
+	BG(user_compare_func_name) = NULL;
+	BG(array_walk_func_name) = NULL;
 #ifdef HAVE_PUTENV
 	if (zend_hash_init(&BG(putenv_ht), 1, NULL, (int (*)(void *)) _php3_putenv_destructor, 0) == FAILURE) {
 		return FAILURE;
