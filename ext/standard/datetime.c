@@ -88,18 +88,53 @@ void _php3_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	for (i = 0; i < arg_count; i++) {
 		convert_to_long(arguments[i]);
 	}
-	t=time(NULL);
+	t = time(NULL);
 #ifdef HAVE_TZSET
 	tzset();
 #endif
+	/*
+	** Set default time parameters with local time values,
+	** EVEN when some GMT time parameters are specified!
+	** This may give strange result, with PHP gmmktime(0,0,0),
+	** which is assumed to return GMT midnight time
+	** for today (in localtime), so that the result time may be
+	** AFTER or BEFORE the current time.
+	** May be we should initialize tn using gmtime(), so that
+	** default parameters for PHP gmmktime would be the current
+	** GMT time values...
+	*/
 	tn = localtime(&t);
-	memcpy(&ta,tn,sizeof(struct tm));
-	ta.tm_isdst = arg_count > 6 ? arguments[6]->value.lval : gm ? 0 : -1;
+ 	memcpy(&ta, tn, sizeof(struct tm));
+	if (gm) {
+	  ta.tm_isdst = 0 /* force winter time if UTC flag is true */
+	  /* unless the UTC flag is specified after GMT date parameters. */
+	}
+	else {
+	  ta.tm_isdst = -1; /* let DST unknown */
+	  /* this will recompute the DST status for the */
+	  /* given date, based on localtime rules. */
+	  /* Most often, this will return the same value */
+	}
 
+	/*
+	** Now change date values with supplied parameters.
+	*/
 	switch(arg_count) {
 	case 7:
+		ta.tm_isdst = arguments[6]->value.lval;
+		/* fall-through */
 	case 6:
-		ta.tm_year = arguments[5]->value.lval - ((arguments[5]->value.lval > 1000) ? 1900 : 0);
+		/*
+		** Accept parameter in range 0..1000 interpreted as 1900..2900
+		** (if 100 is given, it means year 2000)
+		** or in range 1001..9999 interpreted as is (this will store
+		** negative tm_year for years in range 1001..1899)
+		** This function is then Y2K ready, and accepts a wide range of
+		** dates including the whole gregorian calendar.
+		** But it cannot represent ancestral dates prior to year 1001.
+		*/
+		ta.tm_year = arguments[5]->value.lval
+		  - ((arguments[5]->value.lval > 1000) ? 1900 : 0);
 		/* fall-through */
 	case 5:
 		ta.tm_mday = arguments[4]->value.lval;
@@ -115,20 +150,51 @@ void _php3_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 		/* fall-through */
 	case 1:
 		ta.tm_hour = arguments[0]->value.lval;
+		/* fall-through */
 	case 0:
 		break;
 	}
-	t=mktime(&ta); /* Need to do this because of Daylight savings */
-	tn = localtime(&t);
 
 	if (gm) {
 #if HAVE_TM_GMTOFF
-		gmadjust=tn->tm_gmtoff;
+	    /*
+	    ** If GMT parameters were given, mktime() will
+	    ** use the forced winter time local convention
+	    ** and the structure will be adjusted to compute
+	    ** the effective localtime GMT offset in seconds.
+	    ** This value depends on date parameters in ta.
+	    ** So this compute the Winter GMT offset.
+	    */
+	    t = mktime(&ta); /* Need to do this because of Daylight savings */
+	    tn = localtime(&t);
+	    /*
+	    ** Note: despite locatime() returns a global structure,
+	    ** structure, this structure is supposed to be thread-unique,
+	    ** (this is true with MS Visual compiler for Windows)
+	    ** so the localtime() function will be MT-safe.
+	    ** On other systems, localtime() may not return thread-unique
+	    ** structure, and won't be MT-safe. For now MT is supported
+	    ** only on Windows for the DLL versions of PHP.
+	    */
+	    gmadjust = tn->tm_gmtoff;
 #else
-		gmadjust=timezone;
+	    /*
+	    ** Without tm_gmtoff, the non-ANSI C run-time global 'timezone'
+	    ** variable simply returns the current Winter GMT offset
+	    ** in the current locale (defined in DOS/Windows compilers).
+	    */
+	    gmadjust = timezone;
 #endif
-		ta.tm_hour += gmadjust / 3600;
-		ta.tm_min += gmadjust % 3600;
+	    /*
+	    ** Adjust parameters, to void the GMT offset in seconds
+	    ** in the supplied parameters, because mktime() below
+	    ** computes a local time instead of GMT time.
+	    */
+	    ta.tm_hour += gmadjust / 3600;
+	    /* bug here: gmadjust % 3600 gives seconds, not minutes!!! */
+	    ta.tm_min += (gmadjust % 3600) / 60;
+	    /* is there any timezone with seconds ? */
+	    ta.tm_sec += gmadjust % 60;
 	}
 
 	RETURN_LONG(mktime(&ta));
