@@ -23,7 +23,15 @@
 
 #define ZEND_ENABLE_FAST_CACHE	1
 
+typedef struct _zend_fast_cache_list_entry {
+	struct _zend_fast_cache_list_entry *next;
+} zend_fast_cache_list_entry;
+
 #define MAX_FAST_CACHE_TYPES	4
+
+
+
+
 
 #if ZEND_ENABLE_FAST_CACHE
 
@@ -34,9 +42,6 @@
 #include "zend_globals_macros.h"
 #include "zend_alloc.h"
 
-typedef struct _zend_fast_cache_list_entry {
-	struct _zend_fast_cache_list_entry *next;
-} zend_fast_cache_list_entry;
 
 #if ZEND_DEBUG
 # define RECORD_ZVAL_CACHE_HIT(fc_type)		AG(fast_cache_stats)[fc_type][1]++;
