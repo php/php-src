@@ -1664,7 +1664,9 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
     ],[
       -L$OPENSSL_LIBDIR
     ])
-  
+
+    old_LIBS=$LIBS
+    LIBS="$LIBS -lcrypto"
     PHP_CHECK_LIBRARY(ssl, SSL_CTX_set_ssl_version, [
       PHP_ADD_LIBRARY(ssl,,$1)
       found_openssl=yes
@@ -1673,6 +1675,7 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
     ],[
       -L$OPENSSL_LIBDIR
     ])
+    LIBS=$old_LIBS
   fi
 
   dnl For apache 1.3.x static build
