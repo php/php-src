@@ -1,3 +1,75 @@
+2002-05-15  Preston L. Bannister  <preston.bannister@cox.net>
+
+    * tests/tests.dsp
+      tests/tests.mak: Win32 project and makefile used to invoke run-tests.php
+
+2002-05-15  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mssql/php_mssql.c:
+    Fixing the mssql_query to handle multiple results correct if the first result does not return any data.
+
+2002-05-15  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/conversion.c: MFH
+
+
+    * ext/com/conversion.c: this should finally fix bug #14353
+
+2002-05-15  Frank M. Kromann  <frank@frontbase.com>
+
+    * win32/sendmail.c
+      win32/sendmail.h: Fixing line breaks
+
+    * win32/imap_sendmail.c:
+    Fixing build of IMAP extension, after changes in sendmail
+
+2002-05-15  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * win32/imap_sendmail.c: - Accommodate API changes to Ack().
+
+2002-05-15  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/config.m4:
+    libxml2 >= 2.4.14 is needed (since quite some time ...)
+
+2002-05-15  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Cleanup
+
+2002-05-15  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * NEWS: Added Chinese, Korean support in mbstring.
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter_cn.c
+      ext/mbstring/mbfilter_kr.c
+      ext/mbstring/mbfilter_kr.h
+      ext/mbstring/mbstring.c: added ISO-2022-KR support in mbstring.
+
+2002-05-15  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php: make downloadHttp() detect HTTP errors
+
+2002-05-15  Jani Taskinen  <sniper@iki.fi>
+
+    * INSTALL: MFB
+
+    * INSTALL: Nuke 4.1 for good this time.
+
+    * INSTALL: MFH
+
+    * INSTALL: Nuke .1
+
+    * EXTENSIONS: Added ctype to this list too.
+
+2002-05-15  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * win32/sendmail.c: - Add support for Bcc in w32/sendmail code.
+
+2002-05-15  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/ctype/ctype.c: - It's bundled, thus not experimental anymore
+
 2002-05-14  Frank M. Kromann  <frank@frontbase.com>
 
     * ext/mssql/php_mssql.h
