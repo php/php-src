@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Make the printf family of functions binary clean
+- Fixed WDDX serialization to HTML-escape key/variable names so as not to
+  break the XML packet. (Andrei)
 - Made WDDX extension enabled by default. (Andrei)
 - Added -C command-line option to avoid chdir to the script's directory (Stig)
 - Fixed a bug with /e modifier in preg_replace(), that would not correctly
