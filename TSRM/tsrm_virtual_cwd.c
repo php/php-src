@@ -48,7 +48,6 @@
 #endif
 
 #ifdef TSRM_WIN32
-#include <sys/utime.h>
 #include <io.h>
 #endif
 
