@@ -1620,7 +1620,6 @@ PHP_FUNCTION(domxml_elem_get_attribute_node)
 {
 	zval *id, *arg1;
 	xmlNode *nodep;
-	char *value;
 	
 	if ((ZEND_NUM_ARGS() == 1) && getParameters(ht, 1, &arg1) == SUCCESS) {
 		id = getThis();
