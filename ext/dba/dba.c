@@ -36,6 +36,7 @@
  
 #include "php_dba.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_string.h"
 
 #include "php_gdbm.h"
 #include "php_ndbm.h"
@@ -613,6 +614,9 @@ PHP_FUNCTION(dba_fetch)
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Handler %s does not support optional skip parameter", info->hnd->name);
 	}
 	if((val = info->hnd->fetch(info, VALLEN(key), skip, &len TSRMLS_CC)) != NULL) {
+		if (val && PG(magic_quotes_runtime)) {
+			val = php_addslashes(val, len, &len, 1 TSRMLS_CC);
+		}
 		RETURN_STRINGL(val, len, 0);
 	} 
 	RETURN_FALSE;
