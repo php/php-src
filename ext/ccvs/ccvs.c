@@ -193,6 +193,11 @@ PHP_FUNCTION(ccvs_new) /* cv_new() */
   }
 
   convert_to_string_ex(psess);
+  if (!Z_STRVAL_PP(psess)) {
+    php_error(E_WARNING, "Invalid session to ccvs_new()");
+    RETURN_FALSE;
+  }
+
   sess = hks_ptr_stringtoptr((*psess)->value.str.val);
 
   convert_to_string_ex(pinvoice);
