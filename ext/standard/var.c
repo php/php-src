@@ -335,10 +335,12 @@ int php3api_var_unserialize(pval **rval, char **p, char *max)
 			(*rval)->type = IS_OBJECT;
 
 		  got_array:
+			(*rval)->refcount = 1;
+			(*rval)->is_ref = 0;
 			(*p) += 2;
 			i = atoi(*p);
 			(*rval)->value.ht = (HashTable *) emalloc(sizeof(HashTable));
-			_php3_hash_init((*rval)->value.ht, i + 1, NULL, PVAL_DESTRUCTOR, 0);
+			_php3_hash_init((*rval)->value.ht, i + 1, NULL, PVAL_PTR_DTOR, 0);
 			while (**p && **p != ':') {
 				(*p)++;
 			}
