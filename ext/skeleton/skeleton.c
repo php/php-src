@@ -62,8 +62,8 @@ PHP_INI_END()
 /* Uncomment this function if you have INI entries
 static void php_extname_init_globals(zend_extname_globals *extname_globals)
 {
-	extname_globals->value = 0;
-	extname_globals->string = NULL;
+	extname_globals->global_value = 0;
+	extname_globals->global_string = NULL;
 }
 */
 /* }}} */
