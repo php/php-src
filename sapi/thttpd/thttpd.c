@@ -42,7 +42,6 @@
 
 typedef struct {
 	httpd_conn *hc;
-	int read_post_data;	
 	void (*on_close)(int);
 
 	smart_str sbuf;
@@ -229,41 +228,6 @@ static int sapi_thttpd_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 		memcpy(buffer, TG(hc)->read_buf + TG(hc)->checked_idx, read_bytes);
 		CONSUME_BYTES(read_bytes);
 		count_bytes -= read_bytes;
-	}
-	
-	count_bytes = MIN(count_bytes, 
-			SG(request_info).content_length - SG(read_post_bytes));
-
-	while (read_bytes < count_bytes) {
-		tmp = recv(TG(hc)->conn_fd, buffer + read_bytes, 
-				count_bytes - read_bytes, 0);
-		if (tmp == 0 || (tmp == -1 && errno != EAGAIN))
-			break;
-		/* A simple "tmp > 0" produced broken code on Solaris/GCC */
-		if (tmp != 0 && tmp != -1)
-			read_bytes += tmp;
-
-		if (tmp == -1 && errno == EAGAIN) {
-			fd_set fdr;
-
-			FD_ZERO(&fdr);
-			FD_SET(TG(hc)->conn_fd, &fdr);
-			n = select(TG(hc)->conn_fd + 1, &fdr, NULL, NULL, NULL);
-			if (n <= 0)
-				php_handle_aborted_connection();
-
-			continue;
-		}
-	}
-
-	TG(read_post_data) += read_bytes;
-
-	/* Hack for user-agents which send a LR or CRLF after POST data */
-	if (TG(read_post_data) >= TG(hc)->contentlength) {
-		char tmpbuf[2];
-	
-		/* we are in non-blocking mode */
-		recv(TG(hc)->conn_fd, tmpbuf, 2, 0);
 	}
 	
 	return read_bytes;
@@ -471,7 +435,8 @@ static void thttpd_request_ctor(TSRMLS_D)
 	SG(request_info).request_uri = s.c;
 	SG(request_info).request_method = httpd_method_str(TG(hc)->method);
 	SG(sapi_headers).http_response_code = 200;
-	SG(request_info).content_type = TG(hc)->contenttype;
+	if (TG(hc)->contenttype)
+		SG(request_info).content_type = strdup(TG(hc)->contenttype);
 	SG(request_info).content_length = TG(hc)->contentlength == -1 ? 0
 		: TG(hc)->contentlength;
 	
@@ -485,6 +450,8 @@ static void thttpd_request_dtor(TSRMLS_D)
 		free(SG(request_info).query_string);
 	free(SG(request_info).request_uri);
 	free(SG(request_info).path_translated);
+	if (SG(request_info).content_type)
+		free(SG(request_info).content_type);
 }
 
 #ifdef ZTS
@@ -664,14 +631,11 @@ static void remove_dead_conn(int fd)
 
 #endif
 
-#define CT_LEN_MAX_RAM 8192
-
 static off_t thttpd_real_php_request(httpd_conn *hc, int show_source TSRMLS_DC)
 {
 	TG(hc) = hc;
 	hc->bytes_sent = 0;
 
-	TG(read_post_data) = 0;
 	if (hc->method == METHOD_POST)
 		hc->should_linger = 1;
 	
@@ -679,12 +643,8 @@ static off_t thttpd_real_php_request(httpd_conn *hc, int show_source TSRMLS_DC)
 			&& SIZEOF_UNCONSUMED_BYTES() < hc->contentlength) {
 		int missing = hc->contentlength - SIZEOF_UNCONSUMED_BYTES();
 		
-		if (hc->contentlength < CT_LEN_MAX_RAM) {
-			hc->read_body_into_mem = 1;
-			return 0;
-		} else {
-			return -1;
-		}
+		hc->read_body_into_mem = 1;
+		return 0;
 	}
 	
 	thttpd_request_ctor(TSRMLS_C);
