@@ -49,6 +49,10 @@
 
 #include <gd.h>
 
+#if HAVE_LIBT1
+#include "gdt1.h"
+#endif
+
 extern zend_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry
 

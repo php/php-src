@@ -162,6 +162,37 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
     AC_MSG_RESULT(no)
   fi
   
+AC_MSG_CHECKING(for T1lib support)
+AC_ARG_WITH(t1lib,
+[  --with-t1lib[=DIR]      Include T1lib support.],
+[
+  if test "$withval" != "no"; then
+    if test "$withval" = "yes"; then
+      for i in /usr/local /usr; do
+        if test -f "$i/include/t1lib.h"; then
+          AC_ADD_LIBRARY_WITH_PATH(t1, "$i/lib")
+          AC_ADD_INCLUDE("$i/include")
+        fi
+      done
+    else
+      if test -f "$withval/include/t1lib.h"; then
+        AC_ADD_LIBRARY_WITH_PATH(t1, "$withval/lib")
+        AC_ADD_INCLUDE("$withval/include")
+      fi
+    fi
+    AC_CHECK_LIB(t1, T1_GetExtend, [AC_DEFINE(HAVE_LIBT1,1,[ ])])
+    if test "$ac_cv_lib_t1_T1_GetExtend" = "yes"; then
+      AC_MSG_RESULT(yes)
+    else
+      AC_MSG_RESULT(no)
+    fi
+  else
+    AC_MSG_RESULT(no)
+  fi
+],[
+  AC_MSG_RESULT(no)
+])
+
   if test -f /usr/pkg/include/gd/gd.h -a -z "$GD_INCLUDE" ; then
     GD_INCLUDE="/usr/pkg/include/gd"
   fi
