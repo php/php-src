@@ -1062,7 +1062,7 @@ PHP_FUNCTION(session_module_name)
 	int ac = ZEND_NUM_ARGS();
 	char *old;
 
-	old = estrdup(PS(mod)->name);
+	old = safe_estrdup(PS(mod)->name);
 
 	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
