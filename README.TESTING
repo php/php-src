@@ -17,7 +17,7 @@ make test
 under source root. Therefore you can execute the script
 as follows
 
-./sapi/cli/php -c php.ini-dist run-tests.php [ext/some_extension_name]
+./sapi/cli/php -c /path/to/php.ini/ run-tests.php [ext/some_extension_name]
 
 
 
@@ -42,7 +42,7 @@ you would like to test with other configuration file, user
 "run-tests.php" script.
 
 Example:
-./sapi/cli/php -c ./your_php.ini ext/standard
+./sapi/cli/php -c /path/to/php.ini/ ext/standard
 
 If you use php.ini other than php.ini-dist, you may see more failed
 tests.
@@ -58,7 +58,7 @@ executes it.
  Tester can easily executes tests selectively with as follows.
 
 Example:
-./sapi/cli/php -c php.ini-dist run-tests.php ext/mbstring
+./sapi/cli/php -c /path/to/php.ini/ run-tests.php ext/mbstring
 
 
 [Test results]
@@ -146,7 +146,7 @@ However, it is recommended to use other files for ease of writing
 test script. For instance, you can execute test script under 
 ext/iconv as follows:
 
-./sapi/cli/php -c /etc/php.ini-dist ext/iconv
+./sapi/cli/php -c /path/to/php.ini/ ext/iconv
 
 
 [How to help us]
