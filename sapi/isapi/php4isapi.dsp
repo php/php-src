@@ -19,6 +19,7 @@ CFG=php4isapi - Win32 Debug_TS
 !MESSAGE 
 !MESSAGE "php4isapi - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "php4isapi - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4isapi - Win32 Release_TS_inline" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -80,12 +81,40 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib /nologo /dll /machine:I386 /libpath:"..\..\Release_TS"
 
+!ELSEIF  "$(CFG)" == "php4isapi - Win32 Release_TS_inline"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "php4isapi___Win32_Release_TS_inline"
+# PROP BASE Intermediate_Dir "php4isapi___Win32_Release_TS_inline"
+# PROP BASE Ignore_Export_Lib 0
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "php4isapi___Win32_Release_TS_inline"
+# PROP Intermediate_Dir "php4isapi___Win32_Release_TS_inline"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "...\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4ISAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=0 /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "...\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4ISAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=0 /FR /YX /FD /c
+# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD BASE RSC /l 0x40d /d "NDEBUG"
+# ADD RSC /l 0x40d /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib /nologo /dll /machine:I386 /libpath:"..\..\Release_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib /nologo /dll /machine:I386 /libpath:"..\..\Release_TS"
+
 !ENDIF 
 
 # Begin Target
 
 # Name "php4isapi - Win32 Debug_TS"
 # Name "php4isapi - Win32 Release_TS"
+# Name "php4isapi - Win32 Release_TS_inline"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
