@@ -2,7 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
-- Make the printf family of functions binary clean
+- Make the printf family of functions binary clean (Rasmus)
 - Fixed WDDX serialization to HTML-escape key/variable names so as not to
   break the XML packet. (Andrei)
 - Made WDDX extension enabled by default. (Andrei)
