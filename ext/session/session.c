@@ -623,6 +623,9 @@ static void _php_session_start(PSLS_D)
 	char *p;
 	int send_cookie = 1;
 	int define_sid = 1;
+	int found_sid = 0;
+	zend_bool gpc_globals;
+	zend_bool track_vars;
 	int module_number = PS(module_number);
 	int nrand;
 	int lensess;
@@ -632,28 +635,56 @@ static void _php_session_start(PSLS_D)
 
 	lensess = strlen(PS(session_name));
 	
-	/* check whether a symbol with the name of the session exists
-	   in the global symbol table */
+	gpc_globals = INI_BOOL("gpc_globals");
+	track_vars = INI_BOOL("track_vars");
+
+	if (!gpc_globals && !track_vars) {
+		php_error(E_ERROR, "The sessions module will not work, if you have disabled track_vars and gpc_globals. Enable at least one of them.");
+		return;
+	}
 	
-	if(!PS(id) &&
+	/* check whether a symbol with the name of the session exists
+	   in the global symbol table. This requires gpc_globals to be enabled */
+	
+	if (gpc_globals &&
+			!PS(id) &&
 			zend_hash_find(&EG(symbol_table), PS(session_name),
 				lensess + 1, (void **) &ppid) == SUCCESS) {
 		convert_to_string((*ppid));
 		PS(id) = estrndup((*ppid)->value.str.val, (*ppid)->value.str.len);
 		send_cookie = 0;
+		found_sid = 1;
 	}
 
-	/* if the previous section was successful, we check whether
-	   a symbol with the name of the session exists in the global
-	   HTTP_COOKIE_VARS array */
+	/* if we did not find the session id yet, we check track_vars */
 
-	if(!send_cookie &&
-			zend_hash_find(&EG(symbol_table), "HTTP_COOKIE_VARS",
-				sizeof("HTTP_COOKIE_VARS"), (void **) &data) == SUCCESS &&
-			(*data)->type == IS_ARRAY &&
-			zend_hash_find((*data)->value.ht, PS(session_name),
-				lensess + 1, (void **) &ppid) == SUCCESS) {
-		define_sid = 0;
+	if (!found_sid && track_vars) {
+		if (zend_hash_find(&EG(symbol_table), "HTTP_COOKIE_VARS",
+					sizeof("HTTP_COOKIE_VARS"), (void **) &data) == SUCCESS &&
+				(*data)->type == IS_ARRAY &&
+				zend_hash_find((*data)->value.ht, PS(session_name),
+					lensess + 1, (void **) &ppid) == SUCCESS) {
+			define_sid = 0;
+			found_sid = 1;
+		}
+
+		if (!found_sid &&
+				zend_hash_find(&EG(symbol_table), "HTTP_GET_VARS",
+					sizeof("HTTP_GET_VARS"), (void **) &data) == SUCCESS &&
+				(*data)->type == IS_ARRAY &&
+				zend_hash_find((*data)->value.ht, PS(session_name),
+					lensess + 1, (void **) &ppid) == SUCCESS) {
+			found_sid = 1;
+		}
+
+		if (!found_sid &&
+				zend_hash_find(&EG(symbol_table), "HTTP_POST_VARS",
+					sizeof("HTTP_POST_VARS"), (void **) &data) == SUCCESS &&
+				(*data)->type == IS_ARRAY &&
+				zend_hash_find((*data)->value.ht, PS(session_name),
+					lensess + 1, (void **) &ppid) == SUCCESS) {
+			found_sid = 1;
+		}
 	}
 
 	/* check the REQUEST_URI symbol for a string of the form
