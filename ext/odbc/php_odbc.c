@@ -468,8 +468,11 @@ void ODBC_SQL_ERROR(HENV henv, HDBC conn, HSTMT stmt, char *func)
 	RETCODE rc;
 	ODBCLS_FETCH();
 
-	while(henv != SQL_NULL_HENV){
+	/* This leads to an endless loop in many drivers! 
+	 *
+	   while(henv != SQL_NULL_HENV){
 		do {
+	 */
 			rc = SQLError(henv, conn, stmt, state,
 			    &error, errormsg, sizeof(errormsg)-1, &errormsgsize);
 	    	if (func) {
@@ -479,9 +482,10 @@ void ODBC_SQL_ERROR(HENV henv, HDBC conn, HSTMT stmt, char *func)
 		    	php_error(E_WARNING, "SQL error: %s, SQL state %s",
 						    errormsg, state);
 			}
-			
+	/*		
 		} while (SQL_SUCCEEDED(rc));
 	}
+	*/
 }
 
 void php_odgbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
