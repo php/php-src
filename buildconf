@@ -66,4 +66,8 @@ fi
  
 rm -f generated_lists
 
-${MAKE:-make} -s -f build/build.mk AMFLAGS="$automake_flags" ZENDDIR="$ZENDDIR" SHOW_WARNINGS="$debug"
+if test "$debug" = "yes"; then
+  ${MAKE:-make} -s -f build/build.mk AMFLAGS="$automake_flags" ZENDDIR="$ZENDDIR" SUPPRESS_WARNINGS=""
+else
+  ${MAKE:-make} -s -f build/build.mk AMFLAGS="$automake_flags" ZENDDIR="$ZENDDIR"
+fi
