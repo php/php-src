@@ -1127,22 +1127,8 @@ static int zend_check_symbol(zval **pz TSRMLS_DC)
 #define RETURN_FROM_EXECUTE_LOOP(execute_data)								\
 	free_alloca(EX(Ts));													\
 	EG(in_execution) = EX(original_in_execution);							\
+	EG(current_execute_data) = EX(prev_execute_data);						\
 	return;
-
-typedef struct _object_info {
-	zval *ptr;
-} object_info;
-
-typedef struct _zend_execute_data {
-	zend_op *opline;
-	zend_function_state function_state;
-	zend_function *fbc; /* Function Being Called */
-	zend_function *fbc_constructor;
-	object_info object;
-	temp_variable *Ts;
-	zend_bool original_in_execution;
-	zend_class_entry *calling_scope;
-} zend_execute_data;
 
 #define EX(element) execute_data.element
 
@@ -1152,9 +1138,11 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 
 	/* Initialize execute_data */
 	EX(fbc) = NULL;
-	EX(object).ptr = NULL;
+	EX(object) = NULL;
 	EX(Ts) = (temp_variable *) do_alloca(sizeof(temp_variable)*op_array->T);
-	EX(original_in_execution)=EG(in_execution);
+	EX(original_in_execution) = EG(in_execution);
+	EX(prev_execute_data) = EG(current_execute_data);
+	EG(current_execute_data) = &execute_data;
 
 	EG(in_execution) = 1;
 	if (op_array->start_op) {
@@ -1873,29 +1861,29 @@ binary_assign_op_addr_obj:
 				}
 			case ZEND_INIT_CTOR_CALL:
 				{
-					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object).ptr);
+					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object));
 
 					if (EX(opline)->op1.op_type == IS_VAR) {
 						SELECTIVE_PZVAL_LOCK(*EX(Ts)[EX(opline)->op1.u.var].var.ptr_ptr, &EX(opline)->op1);
 					}
 
 					/* We are not handling overloaded classes right now */
-					EX(object).ptr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-					if (!PZVAL_IS_REF(EX(object).ptr)) {
-						EX(object).ptr->refcount++; /* For $this pointer */
+					EX(object) = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+					if (!PZVAL_IS_REF(EX(object))) {
+						EX(object)->refcount++; /* For $this pointer */
 					} else {
 						zval *this_ptr;
 
 						ALLOC_ZVAL(this_ptr);
-						*this_ptr = *EX(object).ptr;
+						*this_ptr = *EX(object);
 						INIT_PZVAL(this_ptr);
 						zval_copy_ctor(this_ptr);
-						EX(object).ptr = this_ptr;
+						EX(object) = this_ptr;
 					}
 
 					EX(fbc) = EX(fbc_constructor);
 					if(EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
-						EX(calling_scope) = Z_OBJCE_P(EX(object).ptr);
+						EX(calling_scope) = Z_OBJCE_P(EX(object));
 					} else {
 						EX(calling_scope) = NULL;
 					}
@@ -1910,7 +1898,7 @@ binary_assign_op_addr_obj:
 					char *function_name_strval;
 					int function_name_strlen;
 					
-					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object).ptr);
+					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object));
 
 					is_const = (EX(opline)->op2.op_type == IS_CONST);
 
@@ -1936,13 +1924,13 @@ binary_assign_op_addr_obj:
 						if (!EG(This)) {
 							zend_error(E_ERROR, "Can't fetch $this as not in object context");
 						}
-						EX(object).ptr = EG(This);
+						EX(object) = EG(This);
 					} else {
-						EX(object).ptr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+						EX(object) = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 					}
 							
-					if (EX(object).ptr && EX(object).ptr->type == IS_OBJECT) {
-						EX(fbc) = Z_OBJ_HT_P(EX(object).ptr)->get_method(EX(object).ptr, function_name_strval, function_name_strlen TSRMLS_CC);
+					if (EX(object) && EX(object)->type == IS_OBJECT) {
+						EX(fbc) = Z_OBJ_HT_P(EX(object))->get_method(EX(object), function_name_strval, function_name_strlen TSRMLS_CC);
 					} else {
 						zend_error(E_ERROR, "Call to a member function on a non-object");
 					}
@@ -1950,19 +1938,19 @@ binary_assign_op_addr_obj:
 						zend_error(E_ERROR, "Call to undefined function:  %s()", function_name_strval);
 					}
 
-					if (!PZVAL_IS_REF(EX(object).ptr)) {
-						EX(object).ptr->refcount++; /* For $this pointer */
+					if (!PZVAL_IS_REF(EX(object))) {
+						EX(object)->refcount++; /* For $this pointer */
 					} else {
 						zval *this_ptr;
 						ALLOC_ZVAL(this_ptr);
-						*this_ptr = *EX(object).ptr;
+						*this_ptr = *EX(object);
 						INIT_PZVAL(this_ptr);
 						zval_copy_ctor(this_ptr);
-						EX(object).ptr = this_ptr;
+						EX(object) = this_ptr;
 					}
 
 					if(EX(fbc)->type == ZEND_USER_FUNCTION) {
-						EX(calling_scope) = Z_OBJCE_P(EX(object).ptr);
+						EX(calling_scope) = Z_OBJCE_P(EX(object));
 					} else {
 						EX(calling_scope) = NULL;
 					}
@@ -1984,7 +1972,7 @@ binary_assign_op_addr_obj:
 					char *function_name_strval;
 					int function_name_strlen;
 
-					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object).ptr);
+					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object));
 
 					is_const = (EX(opline)->op2.op_type == IS_CONST);
 
@@ -2003,8 +1991,8 @@ binary_assign_op_addr_obj:
 						function_name_strlen = tmp.value.str.len;
 					}
 					
-					if ((EX(object).ptr = EG(This))) {
-						EX(object).ptr->refcount++;
+					if ((EX(object) = EG(This))) {
+						EX(object)->refcount++;
 					}
 
 					ce = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
@@ -2033,7 +2021,7 @@ binary_assign_op_addr_obj:
 					char *function_name_strval;
 					int function_name_strlen;
 
-					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object).ptr);
+					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object));
 
 					is_const = (EX(opline)->op2.op_type == IS_CONST);
 
@@ -2056,8 +2044,8 @@ binary_assign_op_addr_obj:
 					do {
 						if (EG(scope)) {
 							if (zend_hash_find(&EG(scope)->function_table, function_name_strval, function_name_strlen+1, (void **) &function) == SUCCESS) {
-								if ((EX(object).ptr = EG(This))) {
-									EX(object).ptr->refcount++;
+								if ((EX(object) = EG(This))) {
+									EX(object)->refcount++;
 								}
 								EX(calling_scope) = EG(scope);
 								break;
@@ -2067,7 +2055,7 @@ binary_assign_op_addr_obj:
 							zend_error(E_ERROR, "Call to undefined function:  %s()", function_name_strval);
 						}
 						EX(calling_scope) = function->common.scope;
-						EX(object).ptr = NULL;
+						EX(object) = NULL;
 					} while (0);
 					
 					if (!is_const) {
@@ -2084,13 +2072,13 @@ binary_assign_op_addr_obj:
 			case ZEND_DO_FCALL: {
 					zval *fname = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 					
-					zend_ptr_stack_push(&EG(arg_types_stack), EX(object).ptr);
+					zend_ptr_stack_push(&EG(arg_types_stack), EX(object));
 
 					do {
 						if (EG(scope)) {
 							if (zend_hash_find(&EG(scope)->function_table, fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function) == SUCCESS) {
-								if ((EX(object).ptr = EG(This))) {
-									EX(object).ptr->refcount++;
+								if ((EX(object) = EG(This))) {
+									EX(object)->refcount++;
 								}
 								EX(calling_scope) = EG(scope);
 								break;
@@ -2099,7 +2087,7 @@ binary_assign_op_addr_obj:
 						if (zend_hash_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
 							zend_error(E_ERROR, "Unknown function:  %s()\n", fname->value.str.val);
 						}
-						EX(object).ptr = NULL;
+						EX(object) = NULL;
 						EX(calling_scope) = EX(function_state).function->common.scope;
 					} while (0);
 
@@ -2119,14 +2107,14 @@ do_fcall_common:
 					EG(scope) = EX(calling_scope);
 
 					current_this = EG(This);
-					EG(This) = EX(object).ptr;
+					EG(This) = EX(object);
 
 					EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr = &EX(Ts)[EX(opline)->result.u.var].var.ptr;
 
 					if (EX(function_state).function->type==ZEND_INTERNAL_FUNCTION) {	
 						ALLOC_ZVAL(EX(Ts)[EX(opline)->result.u.var].var.ptr);
 						INIT_ZVAL(*(EX(Ts)[EX(opline)->result.u.var].var.ptr));
-						((zend_internal_function *) EX(function_state).function)->handler(EX(opline)->extended_value, EX(Ts)[EX(opline)->result.u.var].var.ptr, EX(object).ptr, return_value_used TSRMLS_CC);
+						((zend_internal_function *) EX(function_state).function)->handler(EX(opline)->extended_value, EX(Ts)[EX(opline)->result.u.var].var.ptr, EX(object), return_value_used TSRMLS_CC);
 						EX(Ts)[EX(opline)->result.u.var].var.ptr->is_ref = 0;
 						EX(Ts)[EX(opline)->result.u.var].var.ptr->refcount = 1;
 						if (!return_value_used) {
@@ -2176,8 +2164,8 @@ do_fcall_common:
 						ALLOC_ZVAL(EX(Ts)[EX(opline)->result.u.var].var.ptr);
 						INIT_ZVAL(*(EX(Ts)[EX(opline)->result.u.var].var.ptr));
 
-						if(EX(object).ptr) {
-							Z_OBJ_HT_P(EX(object).ptr)->call_method(EX(fbc)->common.function_name, EX(opline)->extended_value, EX(Ts)[EX(opline)->result.u.var].var.ptr, EX(object).ptr, return_value_used TSRMLS_CC);
+						if(EX(object)) {
+							Z_OBJ_HT_P(EX(object))->call_method(EX(fbc)->common.function_name, EX(opline)->extended_value, EX(Ts)[EX(opline)->result.u.var].var.ptr, EX(object), return_value_used TSRMLS_CC);
 						} else {
 							zend_error(E_ERROR, "Cannot call overloaded function for non-object");
 						}
@@ -2188,9 +2176,9 @@ do_fcall_common:
 						}
 					}
 					if (EX(opline)->opcode == ZEND_DO_FCALL_BY_NAME) {
-						zend_ptr_stack_n_pop(&EG(arg_types_stack), 2, &EX(object).ptr, &EX(fbc));
+						zend_ptr_stack_n_pop(&EG(arg_types_stack), 2, &EX(object), &EX(fbc));
 					} else {
-						EX(object).ptr = zend_ptr_stack_pop(&EG(arg_types_stack));
+						EX(object) = zend_ptr_stack_pop(&EG(arg_types_stack));
 					}
 					EX(function_state).function = (zend_function *) op_array;
 					EG(function_state_ptr) = &EX(function_state);

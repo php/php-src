@@ -65,6 +65,7 @@ static ZEND_FUNCTION(get_loaded_extensions);
 static ZEND_FUNCTION(extension_loaded);
 static ZEND_FUNCTION(get_extension_funcs);
 static ZEND_FUNCTION(get_defined_constants);
+static ZEND_FUNCTION(debug_backtrace);
 #if ZEND_DEBUG
 static ZEND_FUNCTION(zend_test_func);
 #endif
@@ -116,6 +117,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(extension_loaded,			NULL)
 	ZEND_FE(get_extension_funcs,		NULL)
 	ZEND_FE(get_defined_constants,		NULL)
+	ZEND_FE(debug_backtrace, NULL)
 #if ZEND_DEBUG
 	ZEND_FE(zend_test_func,		NULL)
 #endif
@@ -1177,6 +1179,33 @@ ZEND_FUNCTION(get_defined_constants)
 
 	array_init(return_value);
 	zend_hash_apply_with_argument(EG(zend_constants), (apply_func_arg_t) add_constant_info, return_value TSRMLS_CC);
+}
+
+
+/* {{{ proto void debug_backtrace(void)
+   Prints out a backtrace */
+ZEND_FUNCTION(debug_backtrace)
+{
+	zend_execute_data *ptr;
+	int lineno;
+
+
+	ptr = EG(current_execute_data);
+	lineno = ptr->opline->lineno;
+
+	ptr = ptr->prev_execute_data;
+
+	while (ptr) {
+		if (ptr->object) {
+			printf("%s::", Z_OBJCE(*ptr->object)->name);
+		}
+		printf("%s() [%s:%d]\n", ptr->function_state.function->common.function_name, ptr->function_state.function->op_array.filename, lineno);
+		lineno = ptr->opline->lineno;
+		ptr = ptr->prev_execute_data;
+	}
+
+	printf("main() [...:%d]\n", lineno);
+	RETURN_TRUE;
 }
 
 

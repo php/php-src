@@ -203,6 +203,8 @@ struct _zend_executor_globals {
 	zend_objects objects;
 	zval *exception;
 
+	struct _zend_execute_data *current_execute_data;
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 

@@ -174,6 +174,8 @@ void init_executor(TSRMLS_D)
 	EG(main_class_ptr) = &CG(main_class);
 	CG(main_class).static_members = &EG(symbol_table);
 
+	EG(current_execute_data) = NULL;
+
 	EG(This) = NULL;
 }
 

@@ -181,6 +181,19 @@ typedef struct _zend_file_handle {
 	zend_bool free_filename;
 } zend_file_handle;
 
+union _temp_variable;
+
+typedef struct _zend_execute_data {
+	struct _zend_op *opline;
+	zend_function_state function_state;
+	zend_function *fbc; /* Function Being Called */
+	zend_function *fbc_constructor;
+	zval *object;
+	union _temp_variable *Ts;
+	zend_bool original_in_execution;
+	zend_class_entry *calling_scope;
+	struct _zend_execute_data *prev_execute_data;
+} zend_execute_data;
 
 
 #define IS_CONST	(1<<0)
