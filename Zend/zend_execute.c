@@ -2929,21 +2929,16 @@ int zend_catch_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 	ce = Z_OBJCE_P(EG(exception));
 	if (ce != EX_T(opline->op1.u.var).class_entry) {
-		while (ce->parent) {
-			if (ce->parent == EX_T(opline->op1.u.var).class_entry) {
-				goto exception_should_be_taken;
+		if (!instanceof_function(ce, EX_T(opline->op1.u.var).class_entry TSRMLS_CC)) {
+			if (opline->op1.u.EA.type) {
+				zend_throw_exception_internal(NULL TSRMLS_CC);
+				NEXT_OPCODE();
 			}
-			ce = ce->parent;
+			SET_OPCODE(&op_array->opcodes[opline->extended_value]);
+			return 0; /* CHECK_ME */
 		}
-		if (opline->op1.u.EA.type) {
-			zend_throw_exception_internal(NULL TSRMLS_CC);
-			NEXT_OPCODE();
-		}
-		SET_OPCODE(&op_array->opcodes[opline->extended_value]);
-		return 0; /* CHECK_ME */
 	}
 
-exception_should_be_taken:
 	zend_hash_update(EG(active_symbol_table), opline->op2.u.constant.value.str.val,
 		opline->op2.u.constant.value.str.len+1, &EG(exception), sizeof(zval *), (void **) NULL);
 	EG(exception) = NULL;
