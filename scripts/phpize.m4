@@ -63,6 +63,8 @@ AC_ARG_WITH(openssl,
     PHP_SETUP_OPENSSL
   fi
 ])
+
+AC_PROG_AWK
     
 sinclude(config.m4)
 
@@ -70,7 +72,6 @@ enable_static=no
 enable_shared=yes
 
 AC_PROG_LIBTOOL
-AC_PROG_AWK
 
 all_targets='$(PHP_MODULES)'
 install_targets=install-modules
