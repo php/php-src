@@ -218,6 +218,8 @@ function_entry fbsql_functions[] = {
 	PHP_FE(fbsql_set_lob_mode,	NULL)
 	PHP_FE(fbsql_read_blob,		NULL)
 	PHP_FE(fbsql_read_clob,		NULL)
+	PHP_FE(fbsql_blob_size,		NULL)
+	PHP_FE(fbsql_clob_size,		NULL)
 
 	PHP_FE(fbsql_hostname,		NULL)
 	PHP_FE(fbsql_database,		NULL)
@@ -649,7 +651,7 @@ int phpfbFetchRow(PHPFBResult* result, int row)
 
 
 /* {{{ proto resource fbsql_connect([string hostname [, string username [, string password]]])
-   ??? */
+   Create a connection to a database server */
 PHP_FUNCTION(fbsql_connect)
 {
 	php_fbsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
@@ -657,7 +659,7 @@ PHP_FUNCTION(fbsql_connect)
 /* }}} */
 
 /* {{{ proto resource fbsql_pconnect([string hostname [, string username [, string password]]])
-   ??? */
+   Create a persistant connection to a database server */
 PHP_FUNCTION(fbsql_pconnect)
 {
 	php_fbsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -665,7 +667,7 @@ PHP_FUNCTION(fbsql_pconnect)
 /* }}} */
 
 /* {{{ proto int fbsql_close([resource link_identifier])
-   ??? */
+   Close a connection to a database server */
 PHP_FUNCTION(fbsql_close)
 {
 	PHPFBLink* phpLink = NULL;
@@ -855,7 +857,7 @@ PHP_FUNCTION(fbsql_autocommit)
 /* }}} */
 
 /* {{{ proto bool fbsql_commit([resource link_identifier])
-   ??? */
+   Commit the transaction */
 PHP_FUNCTION(fbsql_commit)
 {
 	PHPFBLink* phpLink = NULL;
@@ -892,7 +894,7 @@ PHP_FUNCTION(fbsql_commit)
 /* }}} */
 
 /* {{{ proto int fbsql_rollback([resource link_identifier])
-   ??? */
+   Rollback all statments since last commit */
 PHP_FUNCTION(fbsql_rollback)
 {
 	PHPFBLink* phpLink = NULL;
@@ -974,7 +976,7 @@ static void php_fbsql_create_lob(INTERNAL_FUNCTION_PARAMETERS, int lob_type)
 }
 
 /* {{{ proto string fbsql_create_blob(string blob_data [, resource link_identifier])
-   ??? */
+   Create a BLOB in the database for use with an insert or update statement */
 PHP_FUNCTION(fbsql_create_blob)
 {
 	php_fbsql_create_lob(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
@@ -982,7 +984,7 @@ PHP_FUNCTION(fbsql_create_blob)
 /* }}} */
 
 /* {{{ proto string fbsql_create_clob(string clob_data [, resource link_identifier])
-   ??? */
+   Create a CLOB in the database for use with an insert or update statement */
 PHP_FUNCTION(fbsql_create_clob)
 {
 	php_fbsql_create_lob(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -990,7 +992,7 @@ PHP_FUNCTION(fbsql_create_clob)
 /* }}} */
 
 /* {{{ proto bool fbsql_set_lob_mode(resource result, int lob_mode)
-   ??? */
+   Sets the mode for how LOB data re retreived (actual data or a handle) */
 PHP_FUNCTION(fbsql_set_lob_mode)
 {
 
@@ -1021,7 +1023,7 @@ static void php_fbsql_read_lob(INTERNAL_FUNCTION_PARAMETERS, int lob_type)
 	PHPFBLink* phpLink = NULL;
 	zval	**lob_handle, **fbsql_link_index = NULL;
 	int id;
-	int length = 0;
+	long length = 0;
 	char* value = NULL;
 
 	switch (ZEND_NUM_ARGS()) {
@@ -1063,8 +1065,9 @@ static void php_fbsql_read_lob(INTERNAL_FUNCTION_PARAMETERS, int lob_type)
 		RETURN_FALSE;
 	}
 }
+
 /* {{{ proto string fbsql_read_blob(string blob_handle [, resource link_identifier])
-   ??? */
+   Read the BLOB data identified by blob_handle */
 PHP_FUNCTION(fbsql_read_blob)
 {
 	php_fbsql_read_lob(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
@@ -1072,15 +1075,68 @@ PHP_FUNCTION(fbsql_read_blob)
 /* }}} */
 
 /* {{{ proto string fbsql_read_clob(string clob_handle [, resource link_identifier])
-   ??? */
+   Read the CLOB data identified by clob_handle */
 PHP_FUNCTION(fbsql_read_clob)
 {
 	php_fbsql_read_lob(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
+static void php_fbsql_lob_size(INTERNAL_FUNCTION_PARAMETERS, int lob_type)
+{
+	PHPFBLink* phpLink = NULL;
+	zval	**lob_handle, **fbsql_link_index = NULL;
+	int id;
+	char* value = NULL;
+
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &lob_handle)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+			CHECK_LINK(id);
+			break;
+		case 2:
+			if (zend_get_parameters_ex(2, &lob_handle, &fbsql_link_index)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = -1;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
+
+	convert_to_string_ex(lob_handle);
+
+	if (Z_STRLEN_PP(lob_handle) != 27 || Z_STRVAL_PP(lob_handle)[0] != '@') {
+		if (FB_SQL_G(generateWarnings)) php_error(E_WARNING, "The handle is invalid");
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(fbcbhBlobSize((FBCBlobHandle *)Z_STRVAL_PP(lob_handle)));
+}
+
+/* {{{ proto string fbsql_read_blob(string blob_handle [, resource link_identifier])
+   Get the size of a BLOB identified by blob_handle */
+PHP_FUNCTION(fbsql_blob_size)
+{
+	php_fbsql_lob_size(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto string fbsql_read_clob(string clob_handle [, resource link_identifier])
+   Get the size of a CLOB identified by clob_handle */
+PHP_FUNCTION(fbsql_clob_size)
+{
+	php_fbsql_lob_size(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
 /* {{{ proto string fbsql_hostname(resource link_identifier [, string host_name])
-   ??? */
+   Get or set the host name used with a connection */
 PHP_FUNCTION(fbsql_hostname)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1114,7 +1170,7 @@ PHP_FUNCTION(fbsql_hostname)
 /* }}} */
 
 /* {{{ proto string fbsql_database(resource link_identifier [, string database]) 
-   ??? */
+   Get or set the database name used with a connection */
 PHP_FUNCTION(fbsql_database)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1148,7 +1204,7 @@ PHP_FUNCTION(fbsql_database)
 /* }}} */
 
 /* {{{ proto string fbsql_database_password(resource link_identifier [, string database_password])
-   ??? */
+   Get or set the databsae password used with a connection */
 PHP_FUNCTION(fbsql_database_password)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1182,7 +1238,7 @@ PHP_FUNCTION(fbsql_database_password)
 /* }}} */
 
 /* {{{ proto string fbsql_username(resource link_identifier [, string username])
-   ??? */
+   Get or set the host user used with a connection */
 PHP_FUNCTION(fbsql_username)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1216,7 +1272,7 @@ PHP_FUNCTION(fbsql_username)
 /* }}} */
 
 /* {{{ proto string fbsql_password(resource link_identifier [, string password])
-   ??? */
+   Get or set the user password used with a connection */
 PHP_FUNCTION(fbsql_password)
 {   
 	PHPFBLink* phpLink = NULL;
@@ -1250,7 +1306,7 @@ PHP_FUNCTION(fbsql_password)
 /* }}} */
 
 /* {{{ proto bool fbsql_select_db([string database_name [, resource link_identifier]])
-   ??? */
+   Select the database to open */
 PHP_FUNCTION(fbsql_select_db)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1307,7 +1363,7 @@ PHP_FUNCTION(fbsql_select_db)
 /* }}} */
 
 /* {{{ proto int fbsql_change_user(string user, string password [, string database [, resource link_identifier]])
-   ??? */
+   Change the user for a session */
 PHP_FUNCTION(fbsql_change_user)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1366,7 +1422,7 @@ PHP_FUNCTION(fbsql_change_user)
 /* }}} */
 
 /* {{{ proto bool fbsql_create_db(string database_name [, resource link_identifier])
-   ??? */
+   Create a new database on the server */
 PHP_FUNCTION(fbsql_create_db)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1439,7 +1495,7 @@ PHP_FUNCTION(fbsql_create_db)
 /* }}} */
 
 /* {{{ proto int fbsql_drop_db(string database_name [, resource link_identifier])
-   ??? */
+   Drop a database on the server */
 PHP_FUNCTION(fbsql_drop_db)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1513,7 +1569,7 @@ PHP_FUNCTION(fbsql_drop_db)
 /* }}} */
 
 /* {{{ proto bool fbsql_start_db(string database_name [, resource link_identifier])
-   ??? */
+   Start a database on the server */
 PHP_FUNCTION(fbsql_start_db)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1591,7 +1647,7 @@ PHP_FUNCTION(fbsql_start_db)
 /* }}} */
 
 /* {{{ proto bool fbsql_stop_db(string database_name [, resource link_identifier])
-   ??? */
+   Stop a database on the server */
 PHP_FUNCTION(fbsql_stop_db)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1815,7 +1871,7 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 }
 
 /* {{{ proto resource fbsql_query(string query [, resource link_identifier])
-   ??? */
+   Send one or more SQL statements to the server and execute them */
 PHP_FUNCTION(fbsql_query)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1849,7 +1905,7 @@ PHP_FUNCTION(fbsql_query)
 /* }}} */
 
 /* {{{ proto resource fbsql_db_query(string database_name, string query [, resource link_identifier])
-   ??? */
+   Send one or more SQL statements to a specified database on the server */
 PHP_FUNCTION(fbsql_db_query)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1888,7 +1944,7 @@ PHP_FUNCTION(fbsql_db_query)
 /* }}} */
 
 /* {{{ proto resource fbsql_list_dbs([resource link_identifier])
-   ??? */
+   Retreive a list of all databases on the server */
 PHP_FUNCTION(fbsql_list_dbs)
 {
 	PHPFBResult*    phpResult;
@@ -1933,7 +1989,7 @@ PHP_FUNCTION(fbsql_list_dbs)
 /* }}} */
 
 /* {{{ proto resource fbsql_list_tables(string database [, int link_identifier])
-   ??? */
+   Retreive a list of all tables from the specifoied database */
 PHP_FUNCTION(fbsql_list_tables)
 {
 	char* sql = "select t0.\"table_name\"from information_schema.tables t0, information_schema.SCHEMATA t1 where t0.schema_pk = t1.schema_pk and t1.\"schema_name\" = current_schema;";
@@ -1976,7 +2032,7 @@ PHP_FUNCTION(fbsql_list_tables)
 /* }}} */
 
 /* {{{ proto resource fbsql_list_fields(string database_name, string table_name [, resource link_identifier])
-   ??? */
+   Retrieve a list of all fields for the specified database.table */
 PHP_FUNCTION(fbsql_list_fields)
 {
 	PHPFBLink* phpLink = NULL;
@@ -2021,7 +2077,7 @@ PHP_FUNCTION(fbsql_list_fields)
 /* }}} */
 
 /* {{{ proto string fbsql_error([resource link_identifier])
-   ??? */
+   Returns the last error string */
 PHP_FUNCTION(fbsql_error)
 {
 	PHPFBLink* phpLink = NULL;
@@ -2055,7 +2111,7 @@ PHP_FUNCTION(fbsql_error)
 /* }}} */
 
 /* {{{ proto int fbsql_errno([resource link_identifier])
-   ??? */
+   Returns the last error code */
 PHP_FUNCTION(fbsql_errno)
 {
 	PHPFBLink* phpLink = NULL;
@@ -2084,7 +2140,7 @@ PHP_FUNCTION(fbsql_errno)
 /* }}} */
 
 /* {{{ proto bool fbsql_warnings([int flag])
-   ??? */
+   Enable or disable FrontBase warnings */
 PHP_FUNCTION(fbsql_warnings)
 {
 	int   argc     = ARG_COUNT(ht);
@@ -2102,7 +2158,7 @@ PHP_FUNCTION(fbsql_warnings)
 /* }}} */
 
 /* {{{ proto int fbsql_affected_rows([resource link_identifier])
-   ??? */
+   Get the number of rows affected by the last statement */
 PHP_FUNCTION(fbsql_affected_rows)
 {
 	PHPFBLink* phpLink = NULL;
@@ -2131,7 +2187,7 @@ PHP_FUNCTION(fbsql_affected_rows)
 /* }}} */
 
 /* {{{ proto int fbsql_insert_id([resource link_identifier])
-   ??? */
+   Get the internal index for the last insert statement */
 PHP_FUNCTION(fbsql_insert_id)
 {
 	PHPFBLink* phpLink = NULL;
@@ -2502,7 +2558,7 @@ PHP_FUNCTION(fbsql_result)
 /* }}} */
 
 /* {{{ proto int fbsql_next_result(int result)
-   ??? */
+   Switch to the next result if multiple results are available */
 PHP_FUNCTION(fbsql_next_result)
 {
 	PHPFBResult* result = NULL;
@@ -2550,7 +2606,7 @@ PHP_FUNCTION(fbsql_next_result)
 /* }}} */
 
 /* {{{ proto int fbsql_num_rows(int result)
-   ??? */
+   Get number of rows */
 PHP_FUNCTION(fbsql_num_rows)
 {
 	PHPFBResult* result = NULL;
@@ -2584,7 +2640,7 @@ PHP_FUNCTION(fbsql_num_rows)
 /* }}} */
 
 /* {{{ proto int fbsql_num_fields(int result)
-   ??? */
+   Get number of fields in the result set */
 PHP_FUNCTION(fbsql_num_fields)
 {
 	PHPFBResult* result = NULL;
@@ -2607,7 +2663,7 @@ PHP_FUNCTION(fbsql_num_fields)
 /* }}} */
 
 /* {{{ proto array fbsql_fetch_row(resource result)
-   ??? */
+   Fetch a row of data. Returns an indexed array */
 PHP_FUNCTION(fbsql_fetch_row)
 {
 	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_NUM);
@@ -2615,7 +2671,7 @@ PHP_FUNCTION(fbsql_fetch_row)
 /* }}} */
 
 /* {{{ proto object fbsql_fetch_assoc(resource result)
-   ??? */
+   Detch a row of data. Returns an assoc array */
 PHP_FUNCTION(fbsql_fetch_assoc)
 {
 	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_ASSOC);
@@ -2623,7 +2679,7 @@ PHP_FUNCTION(fbsql_fetch_assoc)
 /* }}} */
 
 /* {{{ proto object fbsql_fetch_object(resource result [, int result_type])
-   ??? */
+   Fetch a row of data. Returns an object */
 PHP_FUNCTION(fbsql_fetch_object)
 {
 	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_ASSOC);
@@ -2861,7 +2917,7 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 }
 
 /* {{{ proto int fbsql_data_seek(int result, int row_number)
-   ??? */
+   Move the internal row counter to the specified row_number */
 PHP_FUNCTION(fbsql_data_seek)
 {
 	PHPFBResult* result = NULL;
@@ -2893,13 +2949,14 @@ PHP_FUNCTION(fbsql_data_seek)
 	if (result->rowCount == 0x7fffffff) phpfbFetchRow(result, rowIndex);
 	if (rowIndex > result->rowCount) RETURN_FALSE;
 	result->rowIndex = rowIndex;
+	result->columnIndex = 0;
 
 	RETURN_TRUE;
 }
 /* }}} */
 
 /* {{{ proto array fbsql_fetch_lengths(int result)
-   ??? */
+   Returns an array of the lengths of each column in the result set */
 PHP_FUNCTION(fbsql_fetch_lengths)
 {
 	PHPFBResult* result = NULL;
@@ -2930,7 +2987,7 @@ PHP_FUNCTION(fbsql_fetch_lengths)
 /* }}} */
 
 /* {{{ proto object fbsql_fetch_field(int result [, int field_index])
-   ??? */
+   Get the field properties for a specified field_index */
 PHP_FUNCTION(fbsql_fetch_field)
 {
 	PHPFBResult* result = NULL;
@@ -3030,7 +3087,7 @@ PHP_FUNCTION(fbsql_field_seek)
 /* }}} */
 
 /* {{{ proto string fbsql_field_name(int result [, int field_index])
-   ??? */
+   Get the column name for a specified field_index */
 PHP_FUNCTION(fbsql_field_name)
 {
 	PHPFBResult* result = NULL;
@@ -3079,7 +3136,7 @@ PHP_FUNCTION(fbsql_field_name)
 /* }}} */
 
 /* {{{ proto string fbsql_field_table(int result [, int field_index])
-   ??? */
+   Get the table name for a specified field_index */
 PHP_FUNCTION(fbsql_field_table)
 {
 	PHPFBResult* result = NULL;
@@ -3120,7 +3177,7 @@ PHP_FUNCTION(fbsql_field_table)
 /* }}} */
 
 /* {{{ proto string fbsql_field_len(int result [, int field_index])
-   ??? */
+   Get the column length for a specified field_index */
 PHP_FUNCTION(fbsql_field_len)
 {
 	PHPFBResult* result = NULL;
@@ -3172,7 +3229,7 @@ PHP_FUNCTION(fbsql_field_len)
 /* }}} */
 
 /* {{{ proto string fbsql_field_type(int result [, int field_index])
-   ??? */
+   Get the field type for a specified field_index */
 PHP_FUNCTION(fbsql_field_type)
 {
 	PHPFBResult* result = NULL;
@@ -3309,7 +3366,7 @@ PHP_FUNCTION(fbsql_field_flags)
 /* }}} */
 
 /* {{{ proto bool fbsql_free_result(int result)
-   ??? */
+   free the memory used to store a result */
 PHP_FUNCTION(fbsql_free_result)
 {
 	PHPFBResult* result = NULL;
