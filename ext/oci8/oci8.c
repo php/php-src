@@ -1555,7 +1555,7 @@ static int
 oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer,ub4 *loblen)
 {
 	ub4 siz = 0;
-	ub4 readlen;
+	ub4 readlen = 0;
 	char *buf;
 
 	*loblen = 0;
@@ -1572,7 +1572,6 @@ oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer,u
 		}
 	}
 
-
 	connection->error =
 		OCILobGetLength(connection->pServiceContext,
 						connection->pError,
@@ -1586,7 +1585,7 @@ oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer,u
 
 	buf = emalloc(readlen + 1);
 
-	do {
+	while (readlen > 0) { /* thies loop should not be entered on readlen == 0 */
 		connection->error = 
 			OCILobRead(connection->pServiceContext, 
 					   connection->pError,
@@ -1609,7 +1608,7 @@ oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer,u
 		} else {
 			break;
 		}
-	} while (1);
+	}
 
 	if (connection->error) {
 		oci_error(connection->pError, "OCILobRead", connection->error);
