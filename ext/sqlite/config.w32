@@ -27,6 +27,5 @@ if (PHP_SQLITE != "no") {
 	if (!PHP_SQLITE_SHARED) {
 		ADD_DEF_FILE(configure_module_dirname + "\\php_sqlite.def");
 	}
+	ADD_EXTENSION_DEP('sqlite', 'spl')
 }
-
-
