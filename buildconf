@@ -136,7 +136,9 @@ fi
 
 autoheader
 
-automake --add-missing --include-deps $automake_flags
+find . -name Makefile.am -print|sed -e 's/\.am//' | \
+    xargs automake --add-missing --include-deps $automake_flags
+
 
 mv configure configure.old 2>/dev/null
 autoconf

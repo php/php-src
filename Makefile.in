@@ -72,10 +72,11 @@ APXS_EXP = @APXS_EXP@
 WARNING_LEVEL = @WARNING_LEVEL@
 LEX_CFLAGS = -w$(WARNING_LEVEL) @LEX_CFLAGS@
 EXT_SHARED = @EXT_SHARED@
-LIBOBJS=@LIBOBJS@
-REGEX_LIB=@REGEX_LIB@
-FHTTPD_LIB=@FHTTPD_LIB@
-TSRM_LIB=@TSRM_LIB@
+LIBOBJS = @LIBOBJS@
+REGEX_LIB = @REGEX_LIB@
+FHTTPD_LIB = @FHTTPD_LIB@
+TSRM_LIB = @TSRM_LIB@
+APACHE_INSTALL = @APACHE_INSTALL@
 
 SOURCE = main.c internal_functions.c snprintf.c php3_sprintf.c \
        configuration-parser.c configuration-scanner.c request_info.c \

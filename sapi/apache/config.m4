@@ -1,14 +1,5 @@
 dnl ## -*- sh -*-
 
-divert(1)
-
-if test "`uname -sv`" = "AIX 4" -a "$GCC" != "yes"; then
-	APXS_EXP="-bE:sapi/apache/mod_php4.exp"
-fi
-AC_SUBST(APXS_EXP)
-	
-divert(2)
-
 AC_MSG_CHECKING(for Apache module support via DSO through APXS)
 AC_ARG_WITH(apxs,
 [  --with-apxs[=FILE]	   Build shared Apache module.	FILE is the optional
@@ -42,7 +33,8 @@ AC_ARG_WITH(apxs,
 	AC_MSG_RESULT(no)
 ])
 
-APACHE_INSTALL_FILES="$srcdir/mod_php4.* libphp4.module"
+APACHE_INSTALL_FILES="sapi/apache/mod_php4.* sapi/apache/libphp4.module"
+PHP_OUTPUT(sapi/apache/libphp4.module)
 
 if test "$SAPI_TARGET" != "libmodphp4-so.a"; then
 if test "$SAPI_TARGET" != "libphp4.so"; then
@@ -168,6 +160,11 @@ dnl## AC_SUBST(APACHE_INCLUDE)
 fi
 fi
 
+if test "x$APXS" != "x" -a "`uname -sv`" = "AIX 4" -a "$GCC" != "yes"; then
+	APXS_EXP="-bE:sapi/apache/mod_php4.exp"
+fi
+
+AC_SUBST(APXS_EXP)
 AC_SUBST(APACHE_INCLUDE)
 AC_SUBST(APACHE_TARGET)
 AC_SUBST(APXS)
