@@ -34,9 +34,6 @@
 #endif
 
 #if HAVE_MYSQL
-#ifndef DLEXPORT
-#define DLEXPORT
-#endif
 
 #ifdef __ZTS
 #include "TSRM.h"
