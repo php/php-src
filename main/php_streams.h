@@ -101,12 +101,13 @@ typedef struct _php_stream_ops  {
 } php_stream_ops;
 
 /* options uses the IGNORE_URL family of defines from fopen_wrappers.h */
-typedef php_stream *(*php_stream_factory_func_t)(char *filename, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC);
+typedef php_stream *(*php_stream_factory_func_t)(char *filename, char *mode, int options, char **opened_path, void * wrappercontext STREAMS_DC TSRMLS_DC);
 typedef void (*php_stream_wrapper_dtor_func_t)(php_stream *stream TSRMLS_DC);
 
 typedef struct _php_stream_wrapper	{
 	php_stream_factory_func_t		create;
 	php_stream_wrapper_dtor_func_t	destroy;
+	void * wrappercontext;
 } php_stream_wrapper;
 
 struct _php_stream  {
@@ -253,6 +254,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 # define IGNORE_URL_WIN 0
 #endif
 
+int php_init_user_streams(TSRMLS_D);
 int php_init_stream_wrappers(TSRMLS_D);
 int php_shutdown_stream_wrappers(TSRMLS_D);
 PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
@@ -267,6 +269,11 @@ PHPAPI php_stream *_php_stream_open_wrapper(char *path, char *mode, int options,
 /* DO NOT call this on streams that are referenced by resources! */
 PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream STREAMS_DC TSRMLS_DC);
 #define php_stream_make_seekable(origstream, newstream)	_php_stream_make_seekable(origstream, newstream STREAMS_CC TSRMLS_CC)
+
+
+/* for user-space streams */
+extern php_stream_ops php_stream_userspace_ops;
+#define PHP_STREAM_IS_USERSPACE	&php_stream_userspace_ops
 
 #endif
 

@@ -237,9 +237,7 @@ PHP_MINFO_FUNCTION(zlib)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "ZLib Support", "enabled");
-#if HAVE_FOPENCOOKIE
 	php_info_print_table_row(2, "'zlib:' fopen wrapper", "enabled");
-#endif
 	php_info_print_table_row(2, "Compiled Version", ZLIB_VERSION );
 	php_info_print_table_row(2, "Linked Version", (char *)zlibVersion() );
 	php_info_print_table_end();
