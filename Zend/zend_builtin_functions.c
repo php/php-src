@@ -557,15 +557,7 @@ ZEND_FUNCTION(get_parent_class)
 	}
 
 	if (Z_TYPE_PP(arg) == IS_OBJECT) {
-
-		if (Z_OBJ_HT_PP(arg)->get_class_name
-			&& Z_OBJ_HT_PP(arg)->get_class_name(*arg, &name, &name_length, 1 TSRMLS_CC) == SUCCESS) {
-			RETURN_STRINGL(name, name_length, 0);
-		} else if (Z_OBJ_HT_PP(arg)->get_class_entry && (ce = zend_get_class_entry(*arg TSRMLS_CC))) {
-			RETURN_STRINGL(ce->name, ce->name_length, 1);
-		} else {
-			RETURN_FALSE;
-		}
+		ce = zend_get_class_entry(*arg TSRMLS_CC);
 	} else if (Z_TYPE_PP(arg) == IS_STRING) {
 		zend_class_entry **pce;
 		
