@@ -1,5 +1,5 @@
 --TEST--
-PDO-SQLite: PDO_FETCH_GROUP
+PDO-MySQL: PDO_FETCH_GROUP
 --SKIPIF--
 <?php # vim:ft=php
 require_once('skipif.inc'); ?>
