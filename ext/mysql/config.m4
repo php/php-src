@@ -80,7 +80,7 @@ elif test "$PHP_MYSQL" != "no"; then
 
   if test "$PHP_ZLIB_DIR" != "no"; then
     PHP_ADD_LIBRARY(z,, MYSQL_SHARED_LIBADD)
-    MYSQL_LIBS="-L$PHP_ZLIB_DIR -z"
+    MYSQL_LIBS="-L$PHP_ZLIB_DIR/lib -z"
   fi
 
   PHP_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIB_DIR, MYSQL_SHARED_LIBADD)
