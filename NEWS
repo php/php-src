@@ -3,7 +3,6 @@ PHP                                                                        NEWS
 ?? ??? 200?, Version 5.0.0
 
 ?? ??? 2003, PHP 5 Beta 2
-- Added new setrawcookie function (bfrance)
 - Added new COM extension with integrated .Net support. (Wez)
 - Improved the Interbase extension: (Ard Biesheuvel)
   . Added support for multiple databases into ibase_trans()
@@ -18,6 +17,7 @@ PHP                                                                        NEWS
   . Added ibase_wait_event()
   . Added ibase_set_event_handler() and ibase_free_event_handler()
 - Added misc. new functions:
+  . setrawcookie(). (Brian)
   . pg_version(). (Marcus)
   . dbase_get_header_info(). (Zak)
   . snmp_read_mib(). (Jani)
