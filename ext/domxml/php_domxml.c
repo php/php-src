@@ -2559,6 +2559,12 @@ static void php_xpathptr_new_context(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	int ret;
 
 	id = getThis();
+
+	if (!id) {
+		php_error(E_ERROR, "Invalid object");
+		RETURN_FALSE;
+	}
+
 	docp = php_dom_get_object(id, le_domxmldocp, 0 TSRMLS_CC);
 
 #if defined(LIBXML_XPTR_ENABLED)
