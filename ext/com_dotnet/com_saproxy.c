@@ -168,7 +168,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type TSRMLS_
 		VariantInit(&v);
 		
 		/* we can return a real value */
-		indices = do_alloca(dims * sizeof(LONG));
+		indices = emalloc(dims * sizeof(LONG));
 
 		/* copy indices from proxy */
 		for (i = 0; i < dims; i++) {
@@ -191,7 +191,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type TSRMLS_
 			res = SafeArrayGetElement(sa, indices, &v.lVal);
 		}
 
-		free_alloca(indices);
+		efree(indices);
 
 		if (SUCCEEDED(res)) {
 			php_com_wrap_variant(return_value, &v, proxy->obj->code_page TSRMLS_CC);
@@ -244,7 +244,7 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRM
 		VARTYPE vt;
 
 		dims = SafeArrayGetDim(V_ARRAY(&proxy->obj->v));
-		indices = do_alloca(dims * sizeof(LONG));
+		indices = emalloc(dims * sizeof(LONG));
 		/* copy indices from proxy */
 		for (i = 0; i < dims; i++) {
 			convert_to_long(proxy->indices[i]);
@@ -272,7 +272,7 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRM
 			res = SafeArrayPutElement(V_ARRAY(&proxy->obj->v), indices, &v.lVal);
 		}
 	
-		free_alloca(indices);
+		efree(indices);
 		VariantClear(&v);
 
 		if (FAILED(res)) {
