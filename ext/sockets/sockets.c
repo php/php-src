@@ -24,6 +24,12 @@
 
 #if HAVE_SOCKETS
 
+/* This hopefully will fix some compile errors on other platforms --
+ * the usage of msg_control/msg_controllen are X/Open Extended attributes,
+ * or so it seems, by reading HP/UX 10.20 manual pages. */
+
+#define _XOPEN_SOURCE_EXTENDED
+
 #include "ext/standard/info.h"
 #include "php_sockets.h"
 
@@ -46,6 +52,19 @@ int sockets_globals_id;
 #else
 php_sockets_globals sockets_globals;
 #endif
+
+/* It seems some platforms don't have this... */
+
+#ifndef MSG_WAITALL
+#ifdef LINUX
+/* Well, it's defined on linux to this, and on a few
+ * distributions, it doesn't get included... */
+#define MSG_WAITALL 0x00000100
+#else
+#define MSG_WAITALL 0x00000000
+#endif
+#endif
+
 
 /* Perform convert_to_long_ex on a list of items */
 static void v_convert_to_long_ex(int items,...)
@@ -151,14 +170,14 @@ ZEND_GET_MODULE(sockets)
 
 static void destroy_fd_sets(zend_rsrc_list_entry *rsrc)
 {
-	fd_set *set = (fd_set *)rsrc->ptr;
+	fd_set *set = (fd_set *) rsrc->ptr;
 	efree(set);
 }
 
 static void destroy_iovec(zend_rsrc_list_entry *rsrc)
 {
-	php_iovec_t *iov = (php_iovec_t *)rsrc->ptr;
 	int i;
+	php_iovec_t *iov = (php_iovec_t *) rsrc->ptr;
 
 	if (iov->count && iov->iov_array) {
 		for (i = 0; i < iov->count; i++) {
@@ -576,20 +595,36 @@ PHP_FUNCTION(write)
 }
 /* }}} */
 
-/* {{{ proto int read(int fd, string &buf, int length)
+/* {{{ proto int read(int fd, string &buf, int length [, int binary])
    Reads length bytes from fd into buf */
 
 /* php_read -- wrapper around read() so that it only reads to a \r, \n, or \0. */
 
-int php_read(int fd, void *buf, int maxlen)
+int php_read(int fd, void *buf, int maxlen, int binary)
 {
      char *t;
      int m = 0, n = 0;
      int no_read = 0;
-
+     int nonblock = 0;
+     int keep_going = 1;
      errno = 0;
+
+     m = fcntl(fd, F_GETFL);
+     if (m == -1)
+          return -1;
+
+     if (m & O_NONBLOCK)
+          nonblock = 1;
+
+     {
+	char buf[255];
+	snprintf(buf, 255, "nonblock = %i\n", nonblock);
+	PUTS(buf);
+     }
+
      t = (char *) buf;
-     while (*t != '\n' && *t != '\r' && *t != '\0' && n < maxlen) {
+     while (keep_going) { /* (*t != '\n' && *t != '\r' && *t != '\0' && n < maxlen) { */
+          m = read(fd, (void *) t, 1);
           if (m > 0) {
                t++;
                n++;
@@ -600,26 +635,35 @@ int php_read(int fd, void *buf, int maxlen)
                     return -1;
                }
           }
-          m = read(fd, (void *) t, 1);
           if (errno != 0 && errno != ESPIPE && errno != EAGAIN) {
                return -1;
           }
           errno = 0;
+          if (!binary) {
+		if (*t == '\n' || *t == '\r' || *t == '\0') {
+			keep_going = 0;
+		}
+	  }
+	  if (n == maxlen)
+		keep_going = 0;
+	  if (m == 0 && nonblock)
+		keep_going = 0;
      }
      return n;
 }
 
 PHP_FUNCTION(read)
 {
-	zval **fd, **buf, **length;
+	zval **fd, **buf, **length, **binary;
 	char *tmpbuf;
 	int ret;
 
-	if (ZEND_NUM_ARGS() != 3 || 
-	    zend_get_parameters_ex(3, &fd, &buf, &length) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 3 || ZEND_NUM_ARGS() > 4 ||
+	    zend_get_parameters_ex(ZEND_NUM_ARGS(), &fd, &buf, &length, &binary) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	v_convert_to_long_ex(2, fd, length);
+
+	v_convert_to_long_ex(ZEND_NUM_ARGS() - 1, fd, length, binary);
 	convert_to_string_ex(buf);
 
 	tmpbuf = emalloc(Z_LVAL_PP(length)*sizeof(char));
@@ -628,7 +672,7 @@ PHP_FUNCTION(read)
 		RETURN_FALSE;
 	}
 	
-	ret = php_read(Z_LVAL_PP(fd), tmpbuf, Z_LVAL_PP(length));
+	ret = php_read(Z_LVAL_PP(fd), tmpbuf, Z_LVAL_PP(length), ZEND_NUM_ARGS() == 4 ? Z_LVAL_PP(binary) : 0);
 	
 	if (ret >= 0) {
 		Z_STRVAL_PP(buf) = estrndup(tmpbuf,ret);
@@ -1289,7 +1333,7 @@ PHP_FUNCTION(recv)
 		efree(recv_buf);
 		RETURN_LONG(-errno);
 	} else {
-		if (Z_STRVAL_PP(buf) != NULL) {
+		if (Z_STRLEN_PP(buf) > 0) {
 			efree(Z_STRVAL_PP(buf));
 		}
 		Z_STRVAL_PP(buf) = estrndup(recv_buf, strlen(recv_buf));
@@ -1356,6 +1400,11 @@ PHP_FUNCTION(recvfrom)
 	
 	if (ret < 0) {
 		RETURN_LONG(-errno);
+	}
+
+	if (Z_LVAL_PP(flags) & 0xf0000000) {
+		Z_LVAL_PP(flags) &= ~0xf0000000;
+		php_error(E_WARNING, "This platform does not support the MSG_WAITALL flag..");
 	}
 	
 	switch (sa.sa_family)
@@ -1580,6 +1629,12 @@ PHP_FUNCTION(recvmsg)
 	if (ZEND_NUM_ARGS() == 7) {
 		convert_to_long_ex(port);
 	}
+
+	if (Z_LVAL_PP(flags) & 0xf0000000) {
+		Z_LVAL_PP(flags) &= ~0xf0000000;
+		php_error(E_WARNING, "This platform does not support the MSG_WAITALL flag..");
+	}
+
 
 	ZEND_FETCH_RESOURCE(iov, php_iovec_t *, iovec, -1, "IO vector table", SOCKETSG(le_iov));
 
