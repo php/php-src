@@ -2339,7 +2339,11 @@ PHP_FUNCTION(pdf_open_gif) {
 		RETURN_FALSE;
 	}
 
+#ifdef VIRTUAL_DIR
 	virtual_filepath((*arg2)->value.str.val, &image);
+#else
+	image = (*arg2)->value.str.val;
+#endif
 
 	pdf_image = PDF_open_image_file(pdf, "gif", image, "", 0);
 
@@ -2376,7 +2380,11 @@ PHP_FUNCTION(pdf_open_jpeg) {
 		RETURN_FALSE;
 	}
 
+#ifdef VIRTUAL_DIR
 	virtual_filepath((*arg2)->value.str.val, &image);
+#else
+	image = (*arg2)->value.str.val;
+#endif
 
 	pdf_image = PDF_open_image_file(pdf, "jpeg", image, "", 0);
 
@@ -2413,7 +2421,11 @@ PHP_FUNCTION(pdf_open_png) {
 		RETURN_FALSE;
 	}
 
+#ifdef VIRTUAL_DIR
 	virtual_filepath((*arg2)->value.str.val, &image);
+#else
+	image = (*arg2)->value.str.val;
+#endif
 
 	pdf_image = PDF_open_image_file(pdf, "png", image, "", 0);
 
@@ -2450,7 +2462,11 @@ PHP_FUNCTION(pdf_open_tiff) {
 		RETURN_FALSE;
 	}
 
+#ifdef VIRTUAL_DIR
 	virtual_filepath((*arg2)->value.str.val, &image);
+#else
+	image = (*arg2)->value.str.val;
+#endif
 
 	pdf_image = PDF_open_image_file(pdf, "tiff", image, "", 0);
 
@@ -2488,7 +2504,11 @@ PHP_FUNCTION(pdf_open_image_file) {
 		RETURN_FALSE;
 	}
 
+#ifdef VIRTUAL_DIR
 	virtual_filepath((*arg3)->value.str.val, &image);
+#else
+	image = (*arg3)->value.str.val;
+#endif
 
 	pdf_image = PDF_open_image_file(pdf, (*arg2)->value.str.val, image, "", 0);
 

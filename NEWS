@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? Jan 2001, Version 4.0.4pl1
+- Fixed the various pdf_open_*() functions (Daniel)
 - Fixed a bug that could cause invalid INI entries to be used under certain
   circumstances (Zeev)
 - Fixed a bug in the Apache module that could cause invalid INI values to
