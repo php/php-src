@@ -34,15 +34,6 @@ if test "$PHP_ORACLE" != "no"; then
   fi
   AC_MSG_RESULT($ORACLE_DIR)
 
-  if test "$PHP_SIGCHILD" != "yes"; then
-    echo "+--------------------------------------------------------------------+"
-    echo "| Notice:                                                            |"
-    echo "| If you encounter <defunc> processes when using a local Oracle-DB   |"
-    echo "| please recompile PHP and specify --enable-sigchild when configuring|"
-    echo "| (This problem has been reported un Linux using Oracle >= 8.1.5)    |"
-    echo "+--------------------------------------------------------------------+"
-  fi                                                                                          
-
   if test -d "$ORACLE_DIR/rdbms/public"; then
   	PHP_ADD_INCLUDE($ORACLE_DIR/rdbms/public)
   fi
