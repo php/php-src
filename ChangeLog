@@ -1,3 +1,41 @@
+2000-03-14  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/oci8/oci8.c: One space character is enough.
+
+    * ext/oci8/oci8.c:
+    Thies, please check the function names and descriptions.
+
+2000-03-14  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/domxml.c
+      tests/testdom: - fixed invalid class names
+    - added standalone, encoding attribute to DocDocument class
+
+2000-03-14  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/imap/imap.c:
+    I SHALL NOT TOUCH MY EMACS BETWEEN COMPILE AND CHECKIN !!!
+    I SHALL NOT TOUCH MY EMACS BETWEEN COMPILE AND CHECKIN !!!
+    I SHALL NOT TOUCH MY EMACS BETWEEN COMPILE AND CHECKIN !!!
+
+    * ext/standard/filestat.c
+      ext/imap/imap.c:
+    imap_utf7_encode didn't expand international characters to 16bit
+       before coding
+    imap_fetch_overview could crash when some fields where missing
+    imap_fetch_overview will now take msg indices for default and
+       UIDs by optional flag, as the other functions in the family
+
+2000-03-14  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/var.c:
+    - fixed possible crash in unserialize if the serailized data was
+      damaged. 
+
+2000-03-14  Andi Gutmans  <andi@php.net>
+
+    * ext/odbc/php_odbc.c: - ELS are passed to internal functions
+
 2000-03-13  Egon Schmid  <eschmid@s.netic.de>
 
     * ext/gd/gd.c: Fixed some protos.
