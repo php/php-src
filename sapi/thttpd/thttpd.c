@@ -98,7 +98,8 @@ static void sapi_thttpd_send_header(sapi_header_struct *sapi_header, void *serve
 	vec[n++].iov_len = 2;
 	TG(hc)->bytes += 2;
 	
-	writev(TG(hc)->conn_fd, vec, n);
+	if (writev(TG(hc)->conn_fd, vec, n) == -1 && errno == EPIPE)
+		php_handle_aborted_connection();
 }
 
 static int sapi_thttpd_read_post(char *buffer, uint count_bytes SLS_DC)
