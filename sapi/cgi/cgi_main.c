@@ -756,7 +756,11 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 		switch (behavior) {
 			case PHP_MODE_STANDARD:
-				exit_status = php_execute_script(&file_handle TSRMLS_CC);
+				if (php_execute_script(&file_handle TSRMLS_CC)) {
+					exit_status = EG(exit_status);
+				} else {
+					exit_status = -1;
+				}
 				break;
 			case PHP_MODE_LINT:
 				PG(during_request_startup) = 0;

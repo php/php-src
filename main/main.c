@@ -1287,6 +1287,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 	zend_file_handle *prepend_file_p, *append_file_p;
 	zend_file_handle prepend_file, append_file;
 	char *old_cwd;
+	int retval = 0;
 
 	EG(exit_status) = 0;
 	if (php_handle_special_queries(TSRMLS_C)) {
@@ -1327,14 +1328,14 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 		} else {
 			append_file_p = NULL;
 		}
-		zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 3, prepend_file_p, primary_file, append_file_p);
+		retval = (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
 	} zend_end_try();
 
 	if (old_cwd[0] != '\0') {
 		VCWD_CHDIR(old_cwd);
 	}
 	free_alloca(old_cwd);
-	return EG(exit_status);
+	return retval;
 }
 /* }}} */
 
