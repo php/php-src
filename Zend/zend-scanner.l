@@ -435,59 +435,59 @@ TLS_VARS;
 }
 
 <IN_SCRIPTING>"old_function" {
-	return OLD_FUNCTION;
+	return T_OLD_FUNCTION;
 }
 
 <IN_SCRIPTING>"function"|"cfunction" {
-	return FUNCTION;
+	return T_FUNCTION;
 }
 
 <IN_SCRIPTING>"const" {
-	return ZEND_CONST;
+	return T_CONST;
 }
 
 <IN_SCRIPTING>"return" {
-	return RETURN;
+	return T_RETURN;
 }
 
 <IN_SCRIPTING>"if" {
-	return IF;
+	return T_IF;
 }
 
 <IN_SCRIPTING>"elseif" {
-	return ELSEIF;
+	return T_ELSEIF;
 }
 
 <IN_SCRIPTING>"endif" {
-	return ENDIF;
+	return T_ENDIF;
 }
 
 <IN_SCRIPTING>"else" {
-	return ELSE;
+	return T_ELSE;
 }
 
 <IN_SCRIPTING>"while" {
-	return WHILE;
+	return T_WHILE;
 }
 
 <IN_SCRIPTING>"endwhile" {
-	return ENDWHILE;
+	return T_ENDWHILE;
 }
 
 <IN_SCRIPTING>"do" {
-	return DO;
+	return T_DO;
 }
 
 <IN_SCRIPTING>"for" {
-	return FOR;
+	return T_FOR;
 }
 
 <IN_SCRIPTING>"endfor" {
-	return ENDFOR;
+	return T_ENDFOR;
 }
 
 <IN_SCRIPTING>"foreach" {
-	return ZEND_FOREACH;
+	return T_FOREACH;
 }
 
 <IN_SCRIPTING>"endforeach" {
@@ -495,52 +495,52 @@ TLS_VARS;
 }
 
 <IN_SCRIPTING>"as" {
-	return ZEND_AS;
+	return T_AS;
 }
 
 <IN_SCRIPTING>"switch" {
-	return SWITCH;
+	return T_SWITCH;
 }
 
 <IN_SCRIPTING>"endswitch" {
-	return ENDSWITCH;
+	return T_ENDSWITCH;
 }
 
 <IN_SCRIPTING>"case" {
-	return CASE;
+	return T_CASE;
 }
 
 <IN_SCRIPTING>"default" {
-	return DEFAULT;
+	return T_DEFAULT;
 }
 
 <IN_SCRIPTING>"break" {
-	return BREAK;
+	return T_BREAK;
 }
 
 <IN_SCRIPTING>"continue" {
-	return CONTINUE;
+	return T_CONTINUE;
 }
 
 <IN_SCRIPTING>"echo" {
-	return ZEND_ECHO;
+	return T_ECHO;
 }
 
 <IN_SCRIPTING>"print" {
-	return ZEND_PRINT;
+	return T_PRINT;
 }
 
 <IN_SCRIPTING>"class" {
-	return CLASS;
+	return T_CLASS;
 }
 
 <IN_SCRIPTING>"extends" {
-	return EXTENDS;
+	return T_EXTENDS;
 }
 
 <IN_SCRIPTING,DOUBLE_QUOTES,BACKQUOTE,HEREDOC>"->" {
 	yy_push_state(LOOKING_FOR_PROPERTY);
-	return ZEND_OBJECT_OPERATOR;
+	return T_OBJECT_OPERATOR;
 }
 
 <LOOKING_FOR_PROPERTY>{LABEL} {
@@ -548,7 +548,7 @@ TLS_VARS;
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
-	return STRING;
+	return T_STRING;
 }
 
 <LOOKING_FOR_PROPERTY>. {
@@ -561,47 +561,47 @@ TLS_VARS;
 }
 
 <IN_SCRIPTING>"new" {
-	return NEW;
+	return T_NEW;
 }
 
 <IN_SCRIPTING>"var" {
-	return VAR;
+	return T_VAR;
 }
 
 <IN_SCRIPTING>"("{TABS_AND_SPACES}("int"|"integer"){TABS_AND_SPACES}")" {
-	return INT_CAST;
+	return T_INT_CAST;
 }
 
 <IN_SCRIPTING>"("{TABS_AND_SPACES}("real"|"double"|"float"){TABS_AND_SPACES}")" {
-	return DOUBLE_CAST;
+	return T_DOUBLE_CAST;
 }
 
 <IN_SCRIPTING>"("{TABS_AND_SPACES}"string"{TABS_AND_SPACES}")" {
-	return STRING_CAST;
+	return T_STRING_CAST;
 }
 
 <IN_SCRIPTING>"("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
-	return ARRAY_CAST;
+	return T_ARRAY_CAST;
 }
 
 <IN_SCRIPTING>"("{TABS_AND_SPACES}"object"{TABS_AND_SPACES}")" {
-	return OBJECT_CAST;
+	return T_OBJECT_CAST;
 }
 
 <IN_SCRIPTING>"eval" {
-	return EVAL;
+	return T_EVAL;
 }
 
 <IN_SCRIPTING>"include" {
-	return INCLUDE;
+	return T_INCLUDE;
 }
 
 <IN_SCRIPTING>"require" {
-	return REQUIRE;
+	return T_REQUIRE;
 }
 
 <IN_SCRIPTING>"global" {
-	return ZEND_GLOBAL;
+	return T_GLOBAL;
 }
 
 <IN_SCRIPTING>"isset" {
@@ -613,120 +613,120 @@ TLS_VARS;
 }
 
 <IN_SCRIPTING>"static" {
-	return ZEND_STATIC;
+	return T_STATIC;
 }
 
 <IN_SCRIPTING>"unset" {
-	return ZEND_UNSET;
+	return T_UNSET;
 }
 
 <IN_SCRIPTING>"=>" {
-	return ZEND_DOUBLE_ARROW;
+	return T_DOUBLE_ARROW;
 }
 
 <IN_SCRIPTING>"list" {
-	return ZEND_LIST;
+	return T_LIST;
 }
 
 <IN_SCRIPTING>"array" {
-	return ZEND_ARRAY;
+	return T_ARRAY;
 }
 
 <IN_SCRIPTING>"++" {
-	return INCREMENT;
+	return T_INC;
 }
 
 <IN_SCRIPTING>"--" {
-	return DECREMENT;
+	return T_DEC;
 }
 
 <IN_SCRIPTING>"==" {
-	return IS_EQUAL;
+	return T_IS_EQUAL;
 }
 
 <IN_SCRIPTING>"!="|"<>" {
-	return IS_NOT_EQUAL;
+	return T_IS_NOT_EQUAL;
 }
 
 <IN_SCRIPTING>"<=" {
-	return IS_SMALLER_OR_EQUAL;
+	return T_IS_SMALLER_OR_EQUAL;
 }
 
 <IN_SCRIPTING>">=" {
-	return IS_GREATER_OR_EQUAL;
+	return T_IS_GREATER_OR_EQUAL;
 }
 
 <IN_SCRIPTING>"+=" {
-	return PLUS_EQUAL;
+	return T_PLUS_EQUAL;
 }
 
 <IN_SCRIPTING>"-=" {
-	return MINUS_EQUAL;
+	return T_MINUS_EQUAL;
 }
 
 <IN_SCRIPTING>"*=" {
-	return MUL_EQUAL;
+	return T_MUL_EQUAL;
 }
 
 <IN_SCRIPTING>"/=" {
-	return DIV_EQUAL;
+	return T_DIV_EQUAL;
 }
 
 <IN_SCRIPTING>".=" {
-	return CONCAT_EQUAL;
+	return T_CONCAT_EQUAL;
 }
 
 
 <IN_SCRIPTING>"%=" {
-	return MOD_EQUAL;
+	return T_MOD_EQUAL;
 }
 
 <IN_SCRIPTING>"<<=" {
-	return SHIFT_LEFT_EQUAL;
+	return T_SL_EQUAL;
 }
 
 <IN_SCRIPTING>">>=" {
-	return SHIFT_RIGHT_EQUAL;
+	return T_SR_EQUAL;
 }
 
 <IN_SCRIPTING>"&=" {
-	return AND_EQUAL;
+	return T_AND_EQUAL;
 }
 
 <IN_SCRIPTING>"|=" {
-	return OR_EQUAL;
+	return T_OR_EQUAL;
 }
 
 <IN_SCRIPTING>"^=" {
-	return XOR_EQUAL;
+	return XT_OR_EQUAL;
 }
 
 <IN_SCRIPTING>"||" {
-	return BOOLEAN_OR;
+	return T_BOOLEAN_OR;
 }
 
 <IN_SCRIPTING>"&&" {
-	return BOOLEAN_AND;
+	return T_BOOLEAN_AND;
 }
 
 <IN_SCRIPTING>"OR" {
-	return LOGICAL_OR;
+	return T_LOGICAL_OR;
 }
 
 <IN_SCRIPTING>"AND" {
-	return LOGICAL_AND;
+	return T_LOGICAL_AND;
 }
 
 <IN_SCRIPTING>"XOR" {
-	return LOGICAL_XOR;
+	return T_LOGICAL_XOR;
 }
 
 <IN_SCRIPTING>"<<" {
-	return SHIFT_LEFT;
+	return T_SL;
 }
 
 <IN_SCRIPTING>">>" {
-	return SHIFT_RIGHT;
+	return T_SR;
 }
 
 <IN_SCRIPTING>{TOKENS} {
@@ -742,7 +742,7 @@ TLS_VARS;
 
 <DOUBLE_QUOTES,BACKQUOTE,HEREDOC>"${" {
 	yy_push_state(IN_SCRIPTING);
-	return DOLLAR_OPEN_CURLY_BRACES;
+	return T_DOLLAR_OPEN_CURLY_BRACES;
 }
 
 
@@ -759,10 +759,10 @@ TLS_VARS;
 	if (errno == ERANGE) { /* overflow */
 		zendlval->value.dval = strtod(yytext,NULL);
 		zendlval->type = IS_DOUBLE;
-		return DNUMBER;
+		return T_DNUMBER;
 	} else {
 		zendlval->type = IS_LONG;
-		return LNUMBER;
+		return T_LNUMBER;
 	}
 }
 
@@ -770,19 +770,19 @@ TLS_VARS;
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
-	return NUM_STRING;
+	return T_NUM_STRING;
 }
 
 <IN_SCRIPTING>{DNUM}|{EXPONENT_DNUM} {
 	zendlval->value.dval = strtod(yytext,NULL);
 	zendlval->type = IS_DOUBLE;
-	return DNUMBER;
+	return T_DNUMBER;
 }
 
 <IN_SCRIPTING>"__LINE__" {
 	zendlval->value.lval = CG(zend_lineno);
 	zendlval->type = IS_LONG;
-	return ZEND_LINE;
+	return T_LINE;
 }
 
 <IN_SCRIPTING>"__FILE__" {
@@ -791,7 +791,7 @@ TLS_VARS;
 	zendlval->value.str.len = strlen(filename);
 	zendlval->value.str.val = estrndup(filename,zendlval->value.str.len);
 	zendlval->type = IS_STRING;
-	return ZEND_FILE;
+	return T_FILE;
 }
 
 
@@ -800,7 +800,7 @@ TLS_VARS;
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext,yyleng);
-	return INLINE_HTML;
+	return T_INLINE_HTML;
 }
 
 <INITIAL>"<?"|"<script"{WHITESPACE}+"language"{WHITESPACE}*"="{WHITESPACE}*("php"|"\"php\""|"\'php\'"){WHITESPACE}*">" {
@@ -810,12 +810,12 @@ TLS_VARS;
 		zendlval->value.str.len = yyleng;
 		zendlval->type = IS_STRING;
 		BEGIN(IN_SCRIPTING);
-		return PHP_OPEN_TAG;
+		return T_OPEN_TAG;
 	} else {
 		zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 		zendlval->value.str.len = yyleng;
 		zendlval->type = IS_STRING;
-		return INLINE_HTML;
+		return T_INLINE_HTML;
 	}
 }
 
@@ -827,12 +827,12 @@ TLS_VARS;
 		zendlval->value.str.len = yyleng;
 		zendlval->type = IS_STRING;
 		BEGIN(IN_SCRIPTING);
-		return PHP_OPEN_TAG_WITH_ECHO;
+		return T_OPEN_TAG_WITH_ECHO;
 	} else {
 		zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 		zendlval->value.str.len = yyleng;
 		zendlval->type = IS_STRING;
-		return INLINE_HTML;
+		return T_INLINE_HTML;
 	}
 }
 
@@ -848,7 +848,7 @@ TLS_VARS;
 		zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 		zendlval->value.str.len = yyleng;
 		zendlval->type = IS_STRING;
-		return INLINE_HTML;
+		return T_INLINE_HTML;
 	}
 }
 
@@ -859,7 +859,7 @@ TLS_VARS;
 	zendlval->type = IS_STRING;
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(IN_SCRIPTING);
-	return PHP_OPEN_TAG;
+	return T_OPEN_TAG;
 }
 
 
@@ -873,7 +873,7 @@ TLS_VARS;
 	zendlval->value.str.val = (char *)estrndup(yytext+1, yyleng-1);
 	zendlval->value.str.len = yyleng-1;
 	zendlval->type = IS_STRING;
-	return VARIABLE;
+	return T_VARIABLE;
 }
 
 
@@ -881,7 +881,7 @@ TLS_VARS;
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
-	return STRING;
+	return T_STRING;
 }
 
 
@@ -889,7 +889,7 @@ TLS_VARS;
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
-	return STRING;
+	return T_STRING;
 }
 
 
@@ -904,12 +904,12 @@ TLS_VARS;
 
 <IN_SCRIPTING>([#]|"//")([^\n\r?]|"?"[^>\n\r])*("?\n"|"?\r\n")? { /* eat one line comments */
 	HANDLE_NEWLINE(yytext[yyleng-1]);
-	return ZEND_COMMENT;
+	return T_COMMENT;
 }
 
 <IN_SCRIPTING>"/*"([^*]|"*"[^/])*(("*/")?) {
 	HANDLE_NEWLINES(yytext, yyleng);
-	return ZEND_COMMENT;
+	return T_COMMENT;
 }
 
 
@@ -919,7 +919,7 @@ TLS_VARS;
 	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 	BEGIN(INITIAL);
-	return PHP_CLOSE_TAG;  /* implicit ';' at php-end tag */
+	return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 }
 
 
@@ -930,9 +930,9 @@ TLS_VARS;
 	HANDLE_NEWLINES(yytext,yyleng);
 	if (CG(asp_tags)) {
 		BEGIN(INITIAL);
-		return PHP_CLOSE_TAG;  /* implicit ';' at php-end tag */
+		return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 	} else {
-		return INLINE_HTML;
+		return T_INLINE_HTML;
 	}
 }
 
@@ -989,7 +989,7 @@ TLS_VARS;
 	}
 	*t = 0;
 	
-	return CONSTANT_ENCAPSED_STRING;
+	return T_CONSTANT_ENCAPSED_STRING;
 }
 
 
@@ -1009,7 +1009,7 @@ TLS_VARS;
 	}
 	CG(heredoc) = estrndup(s, CG(heredoc_len));
 	BEGIN(HEREDOC);
-	return ZEND_HEREDOC;
+	return T_HEREDOC;
 }
 	
 
@@ -1050,12 +1050,12 @@ TLS_VARS;
 		CG(heredoc)=NULL;
 		CG(heredoc_len)=0;
 		BEGIN(IN_SCRIPTING);
-		return ZEND_HEREDOC;
+		return T_HEREDOC;
 	} else {
 		zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 		zendlval->value.str.len = yyleng;
 		zendlval->type = IS_STRING;
-		return STRING;
+		return T_STRING;
 	}
 }
 
@@ -1065,7 +1065,7 @@ TLS_VARS;
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
-	return ENCAPSED_AND_WHITESPACE;
+	return T_ENCAPSED_AND_WHITESPACE;
 }
 
 <SINGLE_QUOTE>([^'\\]|\\[^'\\])+ {
@@ -1073,7 +1073,7 @@ TLS_VARS;
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
-	return ENCAPSED_AND_WHITESPACE;
+	return T_ENCAPSED_AND_WHITESPACE;
 }
 
 
@@ -1081,7 +1081,7 @@ TLS_VARS;
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
-	return ENCAPSED_AND_WHITESPACE;
+	return T_ENCAPSED_AND_WHITESPACE;
 }
 
 
@@ -1089,7 +1089,7 @@ TLS_VARS;
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
-	return ENCAPSED_AND_WHITESPACE;
+	return T_ENCAPSED_AND_WHITESPACE;
 }
 
 
@@ -1100,7 +1100,7 @@ TLS_VARS;
 		yytext[1] = 0;
 		yyleng--;
 	}
-	return CHARACTER;	
+	return T_CHARACTER;	
 }
 
 
@@ -1118,32 +1118,32 @@ TLS_VARS;
 
 <SINGLE_QUOTE>"\\'" {
 	zendlval->value.chval='\'';
-	return CHARACTER;
+	return T_CHARACTER;
 }
 
 <SINGLE_QUOTE>"\\\\" {
 	zendlval->value.chval='\\';
-	return CHARACTER;
+	return T_CHARACTER;
 }
 
 <DOUBLE_QUOTES>"\\\"" {
 	zendlval->value.chval='"';
-	return CHARACTER;
+	return T_CHARACTER;
 }
 
 <BACKQUOTE>"\\`" {
 	zendlval->value.chval='`';
-	return CHARACTER;
+	return T_CHARACTER;
 }
 
 <DOUBLE_QUOTES,BACKQUOTE,HEREDOC>"\\"[0-7]{1,3} {
 	zendlval->value.chval = (char) strtol (yytext+1, NULL, 8);
-	return CHARACTER;
+	return T_CHARACTER;
 }
 
 <DOUBLE_QUOTES,BACKQUOTE,HEREDOC>"\\x"[0-9A-Fa-f]{1,2} {
 	zendlval->value.chval = (char) strtol (yytext+2, NULL, 16);
-	return CHARACTER;
+	return T_CHARACTER;
 }
 
 <DOUBLE_QUOTES,BACKQUOTE>"\\". {
@@ -1170,16 +1170,16 @@ TLS_VARS;
 			zendlval->value.str.val = estrndup(yytext,yyleng);
 			zendlval->value.str.len = yyleng;
 			zendlval->type = IS_STRING;
-			return BAD_CHARACTER;
+			return T_BAD_CHARACTER;
 			break;
 	}
-	return CHARACTER;
+	return T_CHARACTER;
 }
 
 
 <HEREDOC>"\\$"|"\\{" {
 	zendlval->value.chval = yytext[1];
-	return CHARACTER;
+	return T_CHARACTER;
 }
 
 
@@ -1187,7 +1187,7 @@ TLS_VARS;
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
-	return ENCAPSED_AND_WHITESPACE;
+	return T_ENCAPSED_AND_WHITESPACE;
 }
 
 

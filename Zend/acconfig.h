@@ -26,7 +26,7 @@
 
 /* Undefine if you want stricter XML/SGML compliance by default */
 /* (this disables "<?expression?>" by default) */
-#define DEFAULT_SHORT_OPEN_TAG 1
+#define T_DEFAULT_SHORT_OPEN_TAG 1
 
 /* Define both of these if you want the bundled REGEX library */
 #define REGEX 0

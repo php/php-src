@@ -78,19 +78,19 @@ void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini)
 	token.type = 0;
 	while ((token_type=lex_scan(&token CLS_CC))) {
 		switch (token_type) {
-			case INLINE_HTML:
+			case T_INLINE_HTML:
 				next_color = syntax_highlighter_ini->highlight_html;
 				break;
-			case ZEND_COMMENT:
+			case T_COMMENT:
 				next_color = syntax_highlighter_ini->highlight_comment;
 				break;
-			case PHP_OPEN_TAG:
+			case T_OPEN_TAG:
 				next_color = syntax_highlighter_ini->highlight_default;
 				break;
-			case PHP_CLOSE_TAG:
+			case T_CLOSE_TAG:
 				next_color = syntax_highlighter_ini->highlight_default;
 				break;
-			case CONSTANT_ENCAPSED_STRING:
+			case T_CONSTANT_ENCAPSED_STRING:
 				next_color = syntax_highlighter_ini->highlight_string;
 				break;
 			case '"':
@@ -125,7 +125,7 @@ void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini)
 			}
 		}
 		switch (token_type) {
-			case DOLLAR_OPEN_CURLY_BRACES:
+			case T_DOLLAR_OPEN_CURLY_BRACES:
 				html_puts("{", 1);
 				break;
 			default:
@@ -135,8 +135,8 @@ void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini)
 
 		if (token.type == IS_STRING) {
 			switch (token_type) {
-			case PHP_OPEN_TAG:
-			case PHP_CLOSE_TAG:
+			case T_OPEN_TAG:
+			case T_CLOSE_TAG:
 			case T_WHITESPACE:
 				break;
 			default:
