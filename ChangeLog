@@ -1,3 +1,126 @@
+2003-10-26  Christian Stocker  <chregu@phant.ch>
+
+    * ext/simplexml/tests/bug25756.phpt:
+      fix test (validation returns a warning, if xml is not valid)
+
+    * ext/simplexml/examples/interop.php
+      ext/simplexml/examples/xpath.php:
+      - added interop between DOM and SimpleXML example
+      - added xpath example
+
+    * ext/simplexml/examples/security.php:
+      fix example for saving to file
+
+2003-10-26  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      tests/lang/035.phpt:
+      No need to have ze2 specific tests in this branch.
+
+    * tests/lang/overload_leak.phpt
+      tests/lang/overload_leak.phpt:
+      
+      file overload_leak.phpt was initially added on branch PHP_4_3.
+
+    * (PHP_4_3)
+      ext/overload/overload.c:
+      Prevent leaks in the overload extension that occur in some special cases.
+
+2003-10-26  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c:
+      add interop with dom - simplexml_import_dom
+      change write behavior on elements to change actual contents
+      change clone method to clone node and not document
+      fix a few libxml mem leaks
+
+    * ext/xsl/xsltprocessor.c:
+      use common structures from php_libxml.h
+
+    * ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/domimplementation.c
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/node.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/dom/processinginstruction.c
+      ext/dom/text.c
+      ext/dom/xml_common.h
+      ext/dom/xpath.c:
+      add interop with simplexml - dom_import_simplexml
+      fix cloneNode with elements
+
+2003-10-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/tests/007.phpt:
+      Add attribute test
+
+    * ext/simplexml/simplexml.c:
+      Fix memory corruption
+
+    * ext/simplexml/tests/006.phpt
+      ext/simplexml/tests/006.xml
+      ext/simplexml/tests/sxe.dtd:
+      Add foreach test
+
+    * ext/simplexml/simplexml.c:
+      Add iterator to make foreach work
+
+2003-10-26  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      main/rfc1867.c:
+      revert my previous patch.
+
+2003-10-26  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/config.m4:
+      Remove just unnecessary leftovers
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/tests/mb_convert_encoding.phpt
+      ext/mbstring/tests/mb_convert_variables.phpt
+      ext/mbstring/tests/mb_detect_encoding.phpt
+      ext/mbstring/tests/mb_detect_order.phpt:
+      Backport some patch already in HEAD to assure backwards compatibility
+
+2003-10-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug25756.phpt:
+      And get the last thing working
+
+    * ext/simplexml/tests/005.phpt
+      ext/simplexml/tests/005.xml:
+      Add test
+
+    * ext/simplexml/tests/bug25756.phpt:
+      Fix tests
+
+2003-10-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/gd/libgd/gd_jpeg.c:
+      Patch by Steph to sanitize ssize_t typedef on Windows.
+
+2003-10-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c:
+      Fix casting (the question is when & what should be freed here).
+
+    * ext/simplexml/tests/004.phpt:
+      Fix test
+
 2003-10-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/sqlite/sqlite.c:
