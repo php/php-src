@@ -216,8 +216,10 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len)
 	sapi_header.header_len = header_line_len;
 
 	/* Check the header for a few cases that we have special support for in SAPI */
-	if (!memcmp(header_line, "HTTP/", 5)) {
+	if (header_line_len>=5 
+		&& !memcmp(header_line, "HTTP/", 5)) {
 		SG(sapi_headers).http_status_line = header_line;
+		return SUCCESS;
 	} else {
 		colon_offset = strchr(header_line, ':');
 		if (colon_offset) {
@@ -238,7 +240,6 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len)
 	} else {
 		retval = SAPI_HEADER_ADD;
 	}
-
 	if (retval & SAPI_HEADER_DELETE_ALL) {
 		zend_llist_clean(&SG(sapi_headers).headers);
 	}
