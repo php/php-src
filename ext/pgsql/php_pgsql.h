@@ -43,7 +43,8 @@ extern zend_module_entry pgsql_module_entry;
 #define pgsql_module_ptr &pgsql_module_entry
 
 #ifdef PHP_PGSQL_PRIVATE
-
+#undef SOCKET_SIZE_TYPE
+#include <postgres.h>
 #include <libpq-fe.h>
 
 #if (WIN32||WINNT)
