@@ -149,17 +149,18 @@ ZEND_BEGIN_MODULE_GLOBALS(mssql)
 	long default_link;
 	long num_links,num_persistent;
 	long max_links,max_persistent;
-	long allow_persistent;
+	zend_bool allow_persistent;
 	char *appname;
 	char *server_message;
 	long min_error_severity, min_message_severity;
 	long cfg_min_error_severity, cfg_min_message_severity;
-	long compatability_mode, connect_timeout, timeout;
+	long connect_timeout, timeout;
+	zend_bool compatability_mode;
 	void (*get_column_content)(mssql_link *mssql_ptr,int offset,pval *result,int column_type  TSRMLS_DC);
 	long textsize, textlimit, batchsize;
-	long datetimeconvert;
+	zend_bool datetimeconvert;
 	HashTable *resource_list, *resource_plist;
-	long secure_connection;
+	zend_bool secure_connection;
 	long max_procs;
 ZEND_END_MODULE_GLOBALS(mssql)
 

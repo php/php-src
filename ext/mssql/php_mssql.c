@@ -446,7 +446,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	DBMSGHANDLE(mssql.login, (MHANDLEFUNC) php_mssql_message_handler);
 
 #ifndef HAVE_FREETDS
-	if (MS_SQL_G(secure_connection) == 1){
+	if (MS_SQL_G(secure_connection)){
 		DBSETLSECURE(mssql.login);
 	}
 	else {
