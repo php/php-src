@@ -805,6 +805,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					value = estrdup("");
 				}
 
+				sapi_module.input_filter(PARSE_POST, param, value, strlen(value) TSRMLS_CC);
 				safe_php_register_variable(param, value, array_ptr, 0 TSRMLS_CC);
 				if (!strcmp(param, "MAX_FILE_SIZE")) {
 					max_file_size = atol(value);

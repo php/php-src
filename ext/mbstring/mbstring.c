@@ -1281,7 +1281,7 @@ PHP_FUNCTION(mb_parse_str)
 
 	encstr = estrndup(encstr, encstr_len);
 
-	RETVAL_BOOL(_php_mb_encoding_handler_ex(track_vars_array, encstr, separator, (track_vars_array == NULL), 1 TSRMLS_CC));
+	RETVAL_BOOL(_php_mb_encoding_handler_ex(PARSE_STRING, track_vars_array, encstr, separator, (track_vars_array == NULL), 1 TSRMLS_CC));
 
 	if (encstr != NULL) efree(encstr);
 	if (separator != NULL) efree(separator);

@@ -169,7 +169,7 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 		break;
 	}
 
-	_php_mb_encoding_handler_ex(array_ptr, res, separator, 0, 0 TSRMLS_CC);
+	_php_mb_encoding_handler_ex(arg, array_ptr, res, separator, 0, 0 TSRMLS_CC);
 
 	if (MBSTRG(http_input_identify) != mbfl_no_encoding_invalid) {
 		switch(arg){
@@ -199,7 +199,7 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 /* }}} */
 
 /* {{{ int _php_mb_encoding_handler_ex() */
-int _php_mb_encoding_handler_ex(zval *arg, char *res, char *separator, int force_register_globals, int report_errors TSRMLS_DC)
+int _php_mb_encoding_handler_ex(int data_type, zval *arg, char *res, char *separator, int force_register_globals, int report_errors TSRMLS_DC)
 {
 	char *var, *val, *s1, *s2;
 	char *strtok_buf = NULL, **val_list = NULL;
@@ -342,6 +342,7 @@ int _php_mb_encoding_handler_ex(zval *arg, char *res, char *separator, int force
 			val_len = len_list[n];
 		}
 		n++;
+		val_len = sapi_module.input_filter(data_type, var, val, val_len TSRMLS_CC);
 		/* add variable to symbol table */
 		php_register_variable_safe(var, val, val_len, array_ptr TSRMLS_CC);
 		if (convd != NULL){
