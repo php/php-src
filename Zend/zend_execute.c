@@ -1822,6 +1822,7 @@ send_by_ref:
 							new_op_array = compile_string(get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R) CLS_CC);
 							break;
 					}
+					FREE_OP(&opline->op1, EG(free_op1));
 					if (new_op_array) {
 						Ts[opline->result.u.var].tmp_var.value.lval = 1;
 						Ts[opline->result.u.var].tmp_var.type = IS_LONG;
@@ -1838,7 +1839,6 @@ send_by_ref:
 						var_uninit(&Ts[opline->result.u.var].tmp_var);
 					}
 					EG(return_value) = original_return_value;
-					FREE_OP(&opline->op1, EG(free_op1));
 				}
 				break;
 			case ZEND_UNSET_VAR: {
