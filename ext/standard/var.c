@@ -132,7 +132,8 @@ void php_var_dump(pval **struc, int level)
 /* }}} */
 
 
-/* {{{ php_var_dump */
+/* {{{ proto void var_dump(mixed var)
+   Dumps a string representation of variable to output */
 PHP_FUNCTION(var_dump)
 {
 	zval ***args;
