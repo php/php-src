@@ -431,7 +431,7 @@ PS_SERIALIZER_ENCODE_FUNC(wddx)
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 	
 	ENCODE_LOOP(
-		php_wddx_serialize_var(packet, *struc, key);
+		php_wddx_serialize_var(packet, *struc, key, strlen(key));
 	);
 	
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
