@@ -294,16 +294,34 @@ class PEAR_Downloader extends PEAR_Common
     /**
      * Download any files and their dependencies, if necessary
      *
+     * BC-compatible method name
      * @param array a mixed list of package names, local files, or package.xml
      */
     function download($packages)
+    {
+        return $this->doDownload($packages);
+    }
+    
+    // }}}
+    // {{{ doDownload()
+
+    /**
+     * Download any files and their dependencies, if necessary
+     *
+     * @param array a mixed list of package names, local files, or package.xml
+     */
+    function doDownload($packages)
     {
         $mywillinstall = array();
         $state = $this->_preferredState;
 
         // {{{ download files in this list if necessary
         foreach($packages as $pkgfile) {
+            $need_download = false;
             if (!is_file($pkgfile)) {
+                if (preg_match('#^(http|ftp)://#', $pkgfile)) {
+                    $need_download = true;
+                }
                 $pkgfile = $this->_downloadNonFile($pkgfile);
                 if (PEAR::isError($pkgfile)) {
                     return $pkgfile;
@@ -312,7 +330,11 @@ class PEAR_Downloader extends PEAR_Common
                     continue;
                 }
             } // end is_file()
+
             $tempinfo = $this->infoFromAny($pkgfile);
+            if ($need_download) {
+                $this->_toDownload[] = $tempinfo['package'];
+            }
             if (isset($this->_options['alldeps']) || isset($this->_options['onlyreqdeps'])) {
                 // ignore dependencies if there are any errors
                 if (!PEAR::isError($tempinfo)) {
@@ -349,17 +371,7 @@ class PEAR_Downloader extends PEAR_Common
             }
 
             if (count($deppackages)) {
-                // check dependencies' dependencies
-                // combine the list of packages to install
-                $temppack = array();
-                foreach($this->_downloadedPackages as $p) {
-                    $temppack[] = strtolower($p['info']['package']);
-                }
-                foreach($deppackages as $pack) {
-                    $temppack[] = strtolower($pack);
-                }
-                $this->_toDownload = array_merge($this->_toDownload, $temppack);
-                $this->download($deppackages);
+                $this->doDownload($deppackages);
             }
         } // }}} if --alldeps or --onlyreqdeps
     }
@@ -379,20 +391,7 @@ class PEAR_Downloader extends PEAR_Common
         $state = null;
         $pkgfile = $this->extractDownloadFileName($pkgfile, $version);
         if (preg_match('#^(http|ftp)://#', $pkgfile)) {
-            $pkgfile = $this->_downloadFile($pkgfile, $version, $origpkgfile);
-            if (PEAR::isError($pkgfile)) {
-                return $pkgfile;
-            }
-            $tempinfo = $this->infoFromAny($pkgfile);
-            if (isset($this->_options['alldeps']) || isset($this->_options['onlyreqdeps'])) {
-                // ignore dependencies if there are any errors
-                if (!PEAR::isError($tempinfo)) {
-                    $mywillinstall[strtolower($tempinfo['package'])] = @$tempinfo['release_deps'];
-                }
-            }
-            $this->_downloadedPackages[] = array('pkg' => $tempinfo['package'],
-                                       'file' => $pkgfile, 'info' => $tempinfo);
-            return false;
+            return $this->_downloadFile($pkgfile, $version, $origpkgfile);
         }
         if (!$this->validPackageName($pkgfile)) {
             return $this->raiseError("Package name '$pkgfile' not valid");
@@ -402,6 +401,9 @@ class PEAR_Downloader extends PEAR_Common
         if ($this->_registry->packageExists($pkgfile)
               && empty($this->_options['upgrade']) && empty($this->_options['force'])) {
             $this->log(0, "Package '{$curinfo['package']}' already installed, skipping");
+            return false;
+        }
+        if (in_array($pkgfile, $this->_toDownload)) {
             return false;
         }
         $releases = $this->_remote->call('package.info', $pkgfile, 'releases');
@@ -460,6 +462,7 @@ class PEAR_Downloader extends PEAR_Common
                 return false;
             }
         }
+        $this->_toDownload[] = $pkgfile;
         return $this->_downloadFile($pkgfile, $version, $origpkgfile, $state);
     }
     
