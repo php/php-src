@@ -1,3 +1,25 @@
+2004-08-27  Christian Stocker  <chregu@phant.ch>
+
+    * (PHP_5_0)
+      EXTENSIONS:
+      Marking DOM and XSL as "Working". This should have happened with the
+      release of PHP 5.0.0 already.
+
+2004-08-27  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_4_3)
+      Zend/zend_alloc.c:
+      - MF PHP 5
+
+    * ZendEngine2/zend_alloc.c:
+      - Fix leak report for 0 byte allocations (Dmitry)
+
+2004-08-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #29842 (soapclient return null value)
+
 2004-08-26  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
