@@ -1,3 +1,18 @@
+2005-02-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      - Cleanup foreach statement
+
+2005-02-05  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/config.m4:
+      fix for bug #29329
+
 2005-02-04  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * ext/standard/tests/time/bug13142.phpt

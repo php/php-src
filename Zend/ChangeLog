@@ -1,3 +1,13 @@
+2005-02-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      - Cleanup foreach statement
+
 2005-02-04  Hartmut Holzgraefe  <hartmut@php-groupies.de>
 
     * zend_API.c
