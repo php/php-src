@@ -52,7 +52,6 @@ error_reporting(E_ALL & ~E_NOTICE);
 PEAR::setErrorHandling(PEAR_ERROR_PRINT, "pear: %s\n");
 
 // {{{ config file and option parsing
-
 $options = Console_Getopt::getopt($argv, "c:C:d:D:h?sSqu:v");
 if (PEAR::isError($options)) {
     usage($options);
@@ -172,6 +171,7 @@ if (isset($command_options[$command])) {
 // }}}
 
 switch ($command) {
+
     // {{{ install
 
     case 'install': case 'upgrade': {
@@ -384,15 +384,24 @@ function present_array(&$arr, $keys = null)
     if ($keys === null) {
         $keys = array_keys($arr);
     }
-    $longest_key = max(array_map("strlen", array_keys($arr)));
+    $longest_key = max(array_map("strlen", array_keys($arr))) + 2;
     $format_string = "%{$longest_key}s : %s\n";
     foreach ($keys as $k) {
         if (is_array($arr[$k])) {
-            $v = implode(", ", $arr[$k]);
+            foreach ($arr[$k] as $i => $value) {
+                $x = "$k #$i";
+                foreach(array_keys($value) as $val) {
+                    $cont[] = "$val=" . $value[$val];
+                }
+                $v = implode(", ", $cont);
+                $cont = array();
+                printf($format_string, $x, $v);
+            }
+            continue;
         } else {
             $v = $arr[$k];
+            printf($format_string, $k, $v);
         }
-        printf($format_string, $k, $v);
     }
 }
 
