@@ -126,7 +126,7 @@ if (empty($command) && ($store_user_config || $store_system_config)) {
 
 if ($fetype == 'Gtk') {
     Gtk::main();
-} else {
+} else do {
     if (empty($all_commands[$command]) || $command == 'help') {
         usage(null, @$options[1][2]);
     }
@@ -136,38 +136,36 @@ if ($fetype == 'Gtk') {
         die($cmd->getMessage());
     }
     
-    $short_args = $long_args = array();
+    $short_args = $long_args = null;
     PEAR_Command::getGetoptArgs($command, $short_args, $long_args);
-    if (PEAR::isError($tmp = Console_Getopt::getopt($params, $short_args, $long_args))) {
-        return $this->raiseError($tmp);
+    if (PEAR::isError($tmp = Console_Getopt::getopt($options[1], $short_args, $long_args))) {
+        break;
     }
     list($tmpopt, $params) = $tmp;
-    $options = array();
+    $opts = array();
     foreach ($tmpopt as $foo => $tmp2) {
         list($opt, $value) = $tmp2;
         if ($value === null) {
-            $value = true;
+            $value = true; // options without args
         }
         if (strlen($opt) == 1) {
-            foreach ($this->commands[$command]['options'] as $o => $d) {
+            $cmdoptions = $cmd->getOptions($command);
+            foreach ($cmdoptions as $o => $d) {
                 if (@$d['shortopt'] == $opt) {
-                    $options[$o] = $value;
+                    $opts[$o] = $value;
                 }
             }
         } else {
             if (substr($opt, 0, 2) == '--') {
-                    $options[substr($opt, 2)] = $value;
-                }
+                $opts[substr($opt, 2)] = $value;
             }
         }
-
-
-
-    $ok = $cmd->run($command, $options[1]);
+    }
+    $ok = $cmd->run($command, $opts, $params);
     if ($ok === false) {
         PEAR::raiseError("unknown command `$command'");
     }
-}
+} while (false);
 
 // {{{ usage()
 
