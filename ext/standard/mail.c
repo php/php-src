@@ -74,7 +74,7 @@ PHP_FUNCTION(mail)
 
 	if (PG(safe_mode) && (ZEND_NUM_ARGS() == 5)) {
 		php_error(E_WARNING, "%s(): SAFE MODE Restriction in effect.  The fifth parameter is disabled in SAFE MODE.", get_active_function_name(TSRMLS_C));
-		return;
+		RETURN_FALSE;
 	}	
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss",
