@@ -143,7 +143,7 @@ php_apache_sapi_read_cookies(TSRMLS_D)
 }
 
 static void
-php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC TSRMLS_DC TSRMLS_DC)
+php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 {
 	php_struct *ctx = SG(server_context);
 	apr_array_header_t *arr = apr_table_elts(ctx->f->r->subprocess_env);
@@ -265,7 +265,6 @@ static void php_apache_request_ctor(ap_filter_t *f, php_struct *ctx TSRMLS_DC)
 {
 	char *content_type;
 	const char *auth;
-	TSRMLS_FETCH();
 	TSRMLS_FETCH();
 	
 	PG(during_request_startup) = 0;
