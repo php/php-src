@@ -684,8 +684,8 @@ Problems?
    If it still fails then it could be one of the following:
 
    file permissions on your php script, php.exe, php4ts.dll, php.ini or any php
-   extensions you are trying to load are such that the anonymous internet user
-   ISUR_<machinename> cannot access them.
+   extensions you are trying to load are such that the web server cannot access 
+   them. For IIS, IUSR_<machinename> needs at least read access.
 
    The script file does not exist (or possibly isn't where you think it is
    relative to your web root directory). Note that for IIS you can trap this error by ticking
