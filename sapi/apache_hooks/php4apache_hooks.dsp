@@ -1,25 +1,25 @@
-# Microsoft Developer Studio Project File - Name="php4apache" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="php4apache_hooks" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
-CFG=php4apache - Win32 Release_TS
+CFG=php4apache_hooks - Win32 Release_TS
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "php4apache.mak".
+!MESSAGE NMAKE /f "php4apache_hooks.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "php4apache.mak" CFG="php4apache - Win32 Release_TS"
+!MESSAGE NMAKE /f "php4apache_hooks.mak" CFG="php4apache_hooks - Win32 Release_TS"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "php4apache - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "php4apache - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "php4apache - Win32 Release_TS_inline" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4apache_hooks - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4apache_hooks - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4apache_hooks - Win32 Release_TS_inline" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -30,7 +30,7 @@ CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "php4apache - Win32 Release_TS"
+!IF  "$(CFG)" == "php4apache_hooks - Win32 Release_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -44,7 +44,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "APACHEPHP4_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "...\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\..\php_build\apache\src\include" /I "..\..\main" /I "..\..\TSRM" /D ZEND_DEBUG=0 /D "NDEBUG" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "_WINDOWS" /D "_USRDLL" /D "APACHEPHP4_EXPORTS" /D "WIN32" /D "_MBCS" /D "APACHE_READDIR_H" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "...\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\..\regex" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\..\php_build\apache\src\include" /I "..\..\main" /I "..\..\TSRM" /D ZEND_DEBUG=0 /D "NDEBUG" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "_WINDOWS" /D "_USRDLL" /D "APACHEPHP4_EXPORTS" /D "WIN32" /D "_MBCS" /D "APACHE_READDIR_H" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -56,7 +56,7 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
 # ADD LINK32 php4ts.lib ApacheCore.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /base:"0x60000000" /version:4.0 /dll /machine:I386 /libpath:"..\..\..\php_build\apache\src\corer" /libpath:"..\..\Release_TS" /libpath:"..\..\TSRM\Release_TS" /libpath:"..\..\Zend\Release_TS"
 
-!ELSEIF  "$(CFG)" == "php4apache - Win32 Debug_TS"
+!ELSEIF  "$(CFG)" == "php4apache_hooks - Win32 Debug_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -70,7 +70,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "APACHEPHP4_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "...\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\..\php_build\apache\src\include" /I "..\..\main" /I "..\..\TSRM" /D "_DEBUG" /D ZEND_DEBUG=1 /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "_WINDOWS" /D "_USRDLL" /D "APACHEPHP4_EXPORTS" /D "WIN32" /D "_MBCS" /D "APACHE_READDIR_H" /FR /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "...\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\..\regex" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\..\php_build\apache\src\include" /I "..\..\main" /I "..\..\TSRM" /D "_DEBUG" /D ZEND_DEBUG=1 /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "_WINDOWS" /D "_USRDLL" /D "APACHEPHP4_EXPORTS" /D "WIN32" /D "_MBCS" /D "APACHE_READDIR_H" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -80,9 +80,9 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 php4ts_debug.lib ApacheCore.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /base:"0x60000000" /version:4.0 /dll /incremental:yes /debug /machine:I386 /out:"..\..\Debug_TS/php4apache.dll" /pdbtype:sept /libpath:"..\..\..\php_build\apache\src\cored" /libpath:"..\..\Debug_TS" /libpath:"..\..\TSRM\Debug_TS" /libpath:"..\..\Zend\Debug_TS"
+# ADD LINK32 php4ts_debug.lib ApacheCore.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /base:"0x60000000" /version:4.0 /dll /incremental:yes /debug /machine:I386 /out:"..\..\Debug_TS/php4apache_hooks.dll" /pdbtype:sept /libpath:"..\..\..\php_build\apache\src\cored" /libpath:"..\..\Debug_TS" /libpath:"..\..\TSRM\Debug_TS" /libpath:"..\..\Zend\Debug_TS"
 
-!ELSEIF  "$(CFG)" == "php4apache - Win32 Release_TS_inline"
+!ELSEIF  "$(CFG)" == "php4apache_hooks - Win32 Release_TS_inline"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -96,7 +96,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "APACHEPHP4_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "...\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\..\php_build\apache\src\include" /I "..\..\main" /I "..\..\TSRM" /D ZEND_DEBUG=0 /D "ZEND_WIN32_FORCE_INLINE" /D "NDEBUG" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "_WINDOWS" /D "_USRDLL" /D "APACHEPHP4_EXPORTS" /D "WIN32" /D "_MBCS" /D "APACHE_READDIR_H" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "...\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\..\regex" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\..\php_build\apache\src\include" /I "..\..\main" /I "..\..\TSRM" /D ZEND_DEBUG=0 /D "ZEND_WIN32_FORCE_INLINE" /D "NDEBUG" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "_WINDOWS" /D "_USRDLL" /D "APACHEPHP4_EXPORTS" /D "WIN32" /D "_MBCS" /D "APACHE_READDIR_H" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -112,9 +112,9 @@ LINK32=link.exe
 
 # Begin Target
 
-# Name "php4apache - Win32 Release_TS"
-# Name "php4apache - Win32 Debug_TS"
-# Name "php4apache - Win32 Release_TS_inline"
+# Name "php4apache_hooks - Win32 Release_TS"
+# Name "php4apache_hooks - Win32 Debug_TS"
+# Name "php4apache_hooks - Win32 Release_TS_inline"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
