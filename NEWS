@@ -246,11 +246,38 @@ PHP 4                                                                      NEWS
   dependencies. Automake is only needed for its aclocal tool. The build 
   process is now more portable and less resource-consuming. (Sascha)
 
-?? ??? 2002, Version 4.2.3
-- Lot of other bug fixes. (Various Artists)
-- Transparent sid support is now disabled by default. (Yasuo)
+06 Sep 2002, Version 4.2.3
+- Enable UTF8 modifier support for PCRE on win32. (Wez, Edin)
+- Enabled strcoll() on win32. (Markus)
+- Fixed possible ASCII control char injection in mail(). (Stefan Esser)
+- Fixed a potential crash bug in import_request_variables() (Zeev)
+- Fixed several problems with directory functions on Windows. (Steph)
+- Fixed xbithack bug in Apache module. (Rasmus)
+- Fixed a bug that prevented touch() from working on various platforms. (Steph)
+- Fixed ob_gzhandler()'s handling of requests that do have the Accept-Encoding
+  header, but do not allow compression. (Zeev)
+- Fixed several bugs in the multithreaded version that could cause random parse
+  errors, especially on machines with multiple CPUs. (Zeev, Zend Engine)
+- Fixed a build problem in bcmath. (Alan)
+- Fixed several bzip2 issues. (Andrei, kalowsky)
+- Fixed several COM issues. (Harald)
+- Various exif fixes. (Marcus)
+- Fixed domxml_xslt_process() and domxml_get_element_by_id() and several
+  other issues in DOMXML. (Christian)
+- Fixed DOMXML crash on removing previously created attributes. (Christian)
+- Fixed crash when converting $GLOBALS to an object. (Zeev, Zend Engine)
+- Fixed ImageCreateFromGD2Part() (Jani)
+- Fixed a build issue in the IMAP extension under IRIX. (kalowsky)
+- Fixed a bug in imap_last_error() (Jani)
+- Various mbstring fixes. (Yasuo, Rui)
+- Fixed a build problem in the mcal extension. (Jani)
+- Made MySQL rollback open transactions when the request ends. (Georg)
+- Fixed a crash in the shutdown order of the ODBC module. (kalowsky)
+- Fixed PCRE build problems. (troels@arvin.dk)
+- Fixed a crash in pg_lo_write() (Yasuo)
+- Fixed posix_isatty() and posix_ttyname(). (Markus)
 - Fixed accidental pg_lo_import() API change. (Yasuo)
-- Fixed ereg_replace() crash when the backreference number was greater than the
+- Fixed ereg_replace() crash when the backreference number was greater than the 
   number of captured subpatterns. (oliver@billix.franken.de)
 - Fixed array_rand() on thread-safe platforms such as Windows. (Edin)
 - Report the right exit code after a call to exit(). (Edin)
