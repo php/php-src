@@ -578,7 +578,6 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 				smart_str_appendl(buf,"N;", 2);
 				continue;
 			}
-
 			if (zend_hash_find(Z_OBJPROP_PP(struc), Z_STRVAL_PP(name), 
 						Z_STRLEN_PP(name) + 1, (void *) &d) == SUCCESS) {
 				php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
@@ -599,6 +598,7 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 							php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);
 							break;
 						}
+						efree(priv_name);
 						zend_mangle_property_name(&prot_name, &prop_name_length,  "*", 1, 
 									Z_STRVAL_PP(name), Z_STRLEN_PP(name) + 1, ce->type & ZEND_INTERNAL_CLASS);
 						if (zend_hash_find(Z_OBJPROP_PP(struc), prot_name, prop_name_length, (void *) &d) == SUCCESS) {
@@ -607,12 +607,10 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 							php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);
 							break;
 						}
+						efree(prot_name);
 						php_error_docref(NULL TSRMLS_CC, E_NOTICE, "\"%s\" returned as member variable from __sleep() but does not exist", Z_STRVAL_PP(name));
 						php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
 						php_var_serialize_intern(buf, &nvalp, var_hash TSRMLS_CC);
-						
-						efree(prot_name);
-						efree(priv_name);
 					} while (0);
 				} else {
 					php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
@@ -825,7 +823,7 @@ PHP_FUNCTION(unserialize)
 	}
 
 	if (Z_TYPE_PP(buf) == IS_STRING) {
-		const char *p = Z_STRVAL_PP(buf);
+		const unsigned char *p = (unsigned char*)Z_STRVAL_PP(buf);
 
 		if (Z_STRLEN_PP(buf) == 0) {
 			RETURN_FALSE;
@@ -835,7 +833,7 @@ PHP_FUNCTION(unserialize)
 		if (!php_var_unserialize(&return_value, &p, p + Z_STRLEN_PP(buf),  &var_hash TSRMLS_CC)) {
 			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 			zval_dtor(return_value);
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %ld of %d bytes", (long)(p - Z_STRVAL_PP(buf)), Z_STRLEN_PP(buf));
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %ld of %d bytes", (long)((char*)p - Z_STRVAL_PP(buf)), Z_STRLEN_PP(buf));
 			RETURN_FALSE;
 		}
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
