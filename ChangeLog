@@ -1,3 +1,106 @@
+2004-01-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/formatted_print.c
+      ext/standard/tests/strings/bug26878.phpt:
+      MFH: Fixed bug #26878 (problem with multiple references to the same
+      variable
+      with different types).
+
+    * ext/standard/tests/strings/bug26878.phpt:
+      
+      Fixed bug #26878 (problem with multiple references to the same variable
+      with different types).
+
+    * ext/standard/formatted_print.c:
+      Fixed bug #26878 (problem with multiple references to the same variable
+      with different types).
+
+2004-01-13  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/017.phpt:
+      add support for $foo["a:bar"]
+      fix xsearch to only return values for text,element and attribute nodes
+      fix getChildren and return array
+      remove most methods
+      update test
+
+2004-01-13  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/ftp/ftp.c:
+      MFH: - Fixed bug #26896 (ext/ftp does not work as shared extension)
+
+    * ext/ftp/ftp.c:
+      - Fixed bug #26896 (ext/ftp does not work as shared extension)
+
+    * NEWS
+      NEWS:
+      BFN
+
+2004-01-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ZendEngine2/zend_ini_parser.y:
+      Don't treat strings containing : as potential constant names in
+      the .ini parser.
+      This fixes Bug #26893
+
+    * ext/com_dotnet/com_handlers.c:
+      reinstate this ifdef for people without .Net SDK
+
+    * ext/com_dotnet/com_handlers.c:
+      Fix refcount on these return values to avoid a leak and allow object dtor's
+      to be called.
+      This in turn prevents a massive slow-down in CoUninitialize which would
+      have to
+      forcibly destroy the COM objects in request shutdown.
+
+2004-01-13  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/php_dom.c:
+      fix getElementsByTagName and getElementsByTagNameNS - allow *
+
+2004-01-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      Fix leaking constructors.
+      Implement a cache for method signatures and DISPID's to
+      greatly improve performance when repeatedly accessing
+      members with the same names.
+
+2004-01-13  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      Zend/zend.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      - Fixed year in version notices
+
+2004-01-13  Sara Golemon  <php@alphaweb.net>
+
+    * ext/curl/config.w32:
+      Don't even define this.
+
+2004-01-13  John Coggeshall  <john@coggeshall.org>
+
+    * ext/sqlite/sess_sqlite.c:
+      Whoops... Ilia forgot a ')'
+
+2004-01-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * win32/time.c:
+      make usleep actually work properly
+
+    * ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      Support automatic handling of byref parameters
+
 2004-01-12  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/sqlite/sess_sqlite.c:
