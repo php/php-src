@@ -51,6 +51,10 @@
 
 #include <oci.h>
 
+#define OCI_SEEK_SET 0
+#define OCI_SEEK_CUR 1
+#define OCI_SEEK_END 2
+
 typedef struct {
 	int num;
 	int persistent;
@@ -89,6 +93,9 @@ typedef struct {
 	oci_connection *conn;
 	dvoid *ocidescr;
 	ub4 type;
+	int lob_current_position; 
+	int lob_size;  // -1 = Lob wasn't initialized yet
+	int buffering; // 0 - off, 1 - on, 2 - on and buffer was used
 } oci_descriptor;
 
 typedef struct {
