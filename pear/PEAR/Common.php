@@ -1,9 +1,9 @@
 <?php
 //
 // +----------------------------------------------------------------------+
-// | PHP Version 5                                                        |
+// | PHP Version 4                                                        |
 // +----------------------------------------------------------------------+
-// | Copyright (c) 1997-2004 The PHP Group                                |
+// | Copyright (c) 1997-2003 The PHP Group                                |
 // +----------------------------------------------------------------------+
 // | This source file is subject to version 3.0 of the PHP license,       |
 // | that is bundled with this package in the file LICENSE, and is        |
@@ -148,6 +148,12 @@ class PEAR_Common extends PEAR
      * @access private
      */
     var $_packageSortTree;
+    /**
+     * Temporary variable used to store the current package name
+     * @var string
+     * @access private
+     */
+    var $_validPackageName;
 
     // }}}
 
@@ -1052,6 +1058,7 @@ class PEAR_Common extends PEAR
         if (!is_array($info)) {
             return false;
         }
+
         $errors = array();
         $warnings = array();
         if (!isset($info['package'])) {
@@ -1059,6 +1066,8 @@ class PEAR_Common extends PEAR
         } elseif (!$this->validPackageName($info['package'])) {
             $errors[] = 'invalid package name';
         }
+        $this->_packageName = $pn = $info['package'];
+
         if (empty($info['summary'])) {
             $errors[] = 'missing summary';
         } elseif (strpos(trim($info['summary']), "\n") !== false) {
@@ -1175,12 +1184,13 @@ class PEAR_Common extends PEAR
                         $this->buildProvidesArray($srcinfo);
                     }
                 }
+
                 // (ssb) Any checks we can do for baseinstalldir?
                 // (cox) Perhaps checks that either the target dir and
                 //       baseInstall doesn't cointain "../../"
             }
         }
-        $pn = $info['package'];
+        $this->_packageName = $pn = $info['package'];
         $pnl = strlen($pn);
         foreach ((array)$this->pkginfo['provides'] as $key => $what) {
             if (isset($what['explicit'])) {
@@ -1200,8 +1210,9 @@ class PEAR_Common extends PEAR
                 }
                 $warnings[] = "in $file: function \"$name\" not prefixed with package name \"$pn\"";
             }
-            //print "$file: provides $what[type] $what[name]\n";
         }
+
+
         return true;
     }
 
@@ -1229,13 +1240,16 @@ class PEAR_Common extends PEAR
      */
     function buildProvidesArray($srcinfo)
     {
+        $file = basename($srcinfo['source_file']);
+        $pn  = $this->_packageName;
+        $pnl = strlen($pn);
         foreach ($srcinfo['declared_classes'] as $class) {
             $key = "class;$class";
             if (isset($this->pkginfo['provides'][$key])) {
                 continue;
             }
             $this->pkginfo['provides'][$key] =
-                array('type' => 'class', 'name' => $class);
+                array('file'=> $file, 'type' => 'class', 'name' => $class);
             if (isset($srcinfo['inheritance'][$class])) {
                 $this->pkginfo['provides'][$key]['extends'] =
                     $srcinfo['inheritance'][$class];
@@ -1250,16 +1264,20 @@ class PEAR_Common extends PEAR
                     continue;
                 }
                 $this->pkginfo['provides'][$key] =
-                    array('type' => 'function', 'name' => $function);
+                    array('file'=> $file, 'type' => 'function', 'name' => $function);
             }
         }
+
         foreach ($srcinfo['declared_functions'] as $function) {
             $key = "function;$function";
             if ($function{0} == '_' || isset($this->pkginfo['provides'][$key])) {
                 continue;
             }
+            if (!strstr($function, '::') && strncasecmp($function, $pn, $pnl)) {
+                $warnings[] = "in1 " . $file . ": function \"$function\" not prefixed with package name \"$pn\"";
+            }
             $this->pkginfo['provides'][$key] =
-                array('type' => 'function', 'name' => $function);
+                array('file'=> $file, 'type' => 'function', 'name' => $function);
         }
     }
 
@@ -1405,6 +1423,7 @@ class PEAR_Common extends PEAR
             }
         }
         return array(
+            "source_file" => $file,
             "declared_classes" => $declared_classes,
             "declared_methods" => $declared_methods,
             "declared_functions" => $declared_functions,
