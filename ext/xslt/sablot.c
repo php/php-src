@@ -1306,7 +1306,7 @@ struct _error_fields {
 	char *line;
 };
 
-static int
+static void
 _error_parse (char **fields, struct _error_fields *xse)
 {
 	char *val;
