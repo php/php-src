@@ -94,7 +94,7 @@ void apply_config(void *dummy)
 			zend_hash_move_forward(&d->config)) {
 		zend_hash_get_current_data(&d->config, &data);
 		fprintf(stderr, "APPLYING (%s)(%s)\n", str, data->value);
-		if (php_alter_ini_entry(str, str_len, data->value, data->value_len + 1, 
+		if (zend_alter_ini_entry(str, str_len, data->value, data->value_len + 1, 
 				data->status, PHP_INI_STAGE_RUNTIME) == FAILURE)
 			fprintf(stderr, "..FAILED\n");
 	}

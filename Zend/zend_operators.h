@@ -158,6 +158,7 @@ ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable
 ZEND_API void zend_compare_arrays(zval *result, zval *a1, zval *a2);
 ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2);
 
+ZEND_API int zend_atoi(const char *str, int str_len);
 
 #define convert_to_ex_master(ppzv, lower_type, upper_type)	\
 	if ((*ppzv)->type!=IS_##upper_type) {					\

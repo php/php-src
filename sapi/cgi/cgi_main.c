@@ -346,7 +346,7 @@ static void define_command_line_ini_entry(char *arg)
 	} else {
 		value = "1";
 	}
-	php_alter_ini_entry(name, strlen(name), value, strlen(value), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+	zend_alter_ini_entry(name, strlen(name), value, strlen(value), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 }
 
 
