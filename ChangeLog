@@ -1,3 +1,25 @@
+2000-12-23  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/xml/xml.c: fix #8363.
+    fix call_user_function when parser->object is not set.
+
+2000-12-23  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * pear/Net/Curl.php: 4.0.5-dev is not a release tag for @since...
+
+    changed to 4.0.5
+
+2000-12-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in:
+    Pass some more variables to AC_SUBST as those are needed for Apache 1.3's
+    libphp4.module.in.
+
+2000-12-23  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * pear/Net/Curl.php:
+    Add the Net_Curl class which provides a nice friendly OO interface to PHP's curl extension.
+
 2000-12-22  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/session/session.c:
