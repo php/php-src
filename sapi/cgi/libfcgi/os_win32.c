@@ -271,24 +271,14 @@ void OS_ShutdownPending(void)
 static DWORD WINAPI ShutdownRequestThread(LPVOID arg)
 {
     HANDLE shutdownEvent = (HANDLE) arg;
-    
-    if (WaitForSingleObject(shutdownEvent, INFINITE) == WAIT_FAILED)
-    {
-        // Assuming it will happen again, all we can do is exit the thread
-        return 1;
-    }
-    else
-    {
-        // "Simple reads and writes to properly-aligned 32-bit variables are atomic"
-        shutdownPending = TRUE;
-        
-        // Before an accept() is entered the shutdownPending flag is checked.
-        // If set, OS_Accept() will return -1.  If not, it waits
-        // on a connection request for one second, checks the flag, & repeats.
-        // Only one process/thread is allowed to do this at time by
-        // wrapping the accept() with mutex.
-        return 0;
-    }
+    WaitForSingleObject(shutdownEvent, INFINITE);
+    shutdownPending = TRUE;
+    // Before an accept() is entered the shutdownPending flag is checked.
+    // If set, OS_Accept() will return -1.  If not, it waits
+    // on a connection request for one second, checks the flag, & repeats.
+    // Only one process/thread is allowed to do this at time by
+    // wrapping the accept() with mutex.
+    return 0;
 }
 
 int OS_SetImpersonate(void)
@@ -1923,8 +1913,12 @@ int OS_Accept(int listen_sock, int fail_on_intr, const char *webServerAddrs)
     
     if (acceptMutex != INVALID_HANDLE_VALUE) 
     {
-        if (WaitForSingleObject(acceptMutex, INFINITE) == WAIT_FAILED) 
+		DWORD ret;
+        while ((ret = WaitForSingleObject(acceptMutex, ACCEPT_TIMEOUT)) == WAIT_TIMEOUT) 
         {
+			if (shutdownPending) break;
+		}
+		if (ret == WAIT_FAILED) {
             printLastError("WaitForSingleObject() failed");
             return -1;
         }
