@@ -80,8 +80,14 @@ Note that the MySQL client library is not bundled anymore.])
 
   PHP_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIB_DIR, PDO_MYSQL_SHARED_LIBADD)
   PHP_ADD_INCLUDE($MYSQL_INC_DIR)
+ 
+  if test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
+  	pdo_inc_path=$prefix/include/php/ext
+  else
+  	pdo_inc_path=$abs_srcdir/ext
+  fi
 
-  PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared)
+  PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_inc_path)
   PDO_MYSQL_MODULE_TYPE=external
   PDO_MYSQL_LIBS="-L$MYSQL_LIB_DIR -lmysqlclient $MYSQL_LIBS"
   PDO_MYSQL_INCLUDE=-I$MYSQL_INC_DIR
