@@ -51,7 +51,9 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 	if (hash_key->nKeyLength==0) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
-		php_printf("%*c[\"%s\"]=>\n", level + 1, ' ', hash_key->arKey);
+		php_printf("%*c[\"", level + 1, ' ');
+		PHPWRITE(hash_key->arKey, hash_key->nKeyLength - 1);
+		php_printf("\"]=>\n");
 	}
 	php_var_dump(zv, level + 2 TSRMLS_CC);
 	return 0;
@@ -159,7 +161,9 @@ static int zval_array_element_dump(zval **zv, int num_args, va_list args, zend_h
 	if (hash_key->nKeyLength==0) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
-		php_printf("%*c[\"%s\"]=>\n", level + 1, ' ', hash_key->arKey);
+		php_printf("%*c[\"", level + 1, ' ');
+		PHPWRITE(hash_key->arKey, hash_key->nKeyLength - 1);
+		php_printf("\"]=>\n");
 	}
 	php_debug_zval_dump(zv, level + 2 TSRMLS_CC);
 	return 0;
@@ -259,7 +263,9 @@ static int php_array_element_export(zval **zv, int num_args, va_list args, zend_
 		char *key;
 		int key_len;
 		key = php_addcslashes(hash_key->arKey, hash_key->nKeyLength - 1, &key_len, 0, "'\\", 2 TSRMLS_CC);
-		php_printf("%*c'%s' => ", level + 1, ' ', key);
+		php_printf("%*c'", level + 1, ' ');
+		PHPWRITE(key, key_len);
+		php_printf("' => ");
 		efree(key);
 	}
 	php_var_export(zv, level + 2 TSRMLS_CC);
