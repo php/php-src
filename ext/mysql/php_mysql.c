@@ -1509,7 +1509,8 @@ PHP_FUNCTION(mysql_escape_string)
 /* }}} */
 
 /* {{{ proto string mysql_real_escape_string(string to_be_escaped, [int link_identifier])
-	Escape string for mysql_query */
+	Escape special characters in a string for ise in a SQL statement, taking into account the 
+	current charset of the connection */
 PHP_FUNCTION(mysql_real_escape_string)
 {
 	zval *mysql_link = NULL;
