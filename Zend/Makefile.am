@@ -3,13 +3,11 @@
 #CLEANFILES = zend-parser.c zend-parser.h zend-scanner.c zend-parser.output 
 
 AUTOMAKE_OPTIONS=foreign
-EXTRA_LTLIBRARIES=libZend_cc.la libZend_c.la libZend_gcc.la
-noinst_LTLIBRARIES=$(ZEND_SCANNER) $(ZEND_GCC) libZend.la
+EXTRA_LTLIBRARIES=libZend_cc.la libZend_c.la
+noinst_LTLIBRARIES=$(ZEND_SCANNER) libZend.la
 
 libZend_cc_la_SOURCES=zend-scanner-cc.cc
 libZend_c_la_SOURCES=zend-scanner.c
-
-libZend_gcc_la_SOURCES=zend_gcc_inline.c
 
 libZend_la_SOURCES=\
 	zend-parser.y \
@@ -19,7 +17,7 @@ libZend_la_SOURCES=\
 	zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
 	zend_list.c zend_indent.c zend_builtin_functions.c zend_sprintf.c
 
-libZend_la_LIBADD = $(ZEND_SCANNER) $(ZEND_GCC)
+libZend_la_LIBADD = $(ZEND_SCANNER)
 libZend_la_LDFLAGS = @EXTRA_LIBS@
 libZend_la_DEPENDENCIES = $(ZEND_SCANNER)
 
