@@ -41,11 +41,11 @@ TD.WSDLPARSER { background-color: Yellow; }
 TD.HTTP { background-color: Yellow; }
 TD.SMTP { background-color: Yellow; }
 </style>
-	<title>PEAR-PHP SOAP Interop Tests</title>
+  <title>PHP SOAP Client Interop Test Results</title>
 </head>
 
 <body bgcolor="White" text="Black">
-<h2 align="center">SOAP Client Interop Test Results: Round2</h2>
+<h2 align="center">PHP SOAP Client Interop Test Results: Round2</h2>
 
 <a href="index.php">Back to Interop Index</a><br>
 <p>&nbsp;</p>
