@@ -1,3 +1,32 @@
+2003-11-23  Sara Golemon  <php@alphaweb.net>
+
+    * main/streams/streams.c:
+      Fix for file:// wrapper parsing.
+      (Cristiano Duarte <cunha17@uol.com.br>)
+
+2003-11-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/tests/010.phpt:
+      Add  new test
+
+    * ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/006.phpt
+      ext/simplexml/tests/006.xml:
+      Several  improvements to the simplexml_element object:
+      - Allow to use it as an instance of Iterator
+      - Prepareto use it as a normal object, including spcialization
+
+2003-11-23  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Allocation optimizations by Timm Friebe
+
+2003-11-23  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_nonapi.c:
+      fixed mem leak in constructor
+
 2003-11-22  Georg Richter  <phpinfo@t-online.de>
 
     * ext/mysqli/config.m4

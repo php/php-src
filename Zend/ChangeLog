@@ -1,3 +1,8 @@
+2003-11-23  Andi Gutmans  <andi@zend.com>
+
+    * zend_reflection_api.c:
+      - Allocation optimizations by Timm Friebe
+
 2003-11-21  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_execute.c:
