@@ -96,8 +96,8 @@ int basic_globals_id;
 php_basic_globals basic_globals;
 #endif
 
-
 #include "php_fopen_wrappers.h"
+#include "streamsfuncs.h"
 
 static unsigned char first_and_second__args_force_ref[] = { 2, BYREF_FORCE, BYREF_FORCE };
 static unsigned char second_and_third_args_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
@@ -679,6 +679,10 @@ function_entry basic_functions[] = {
 	PHP_FE(stream_context_get_options,										NULL)
 	PHP_FE(stream_filter_prepend,											NULL)
 	PHP_FE(stream_filter_append,											NULL)
+	PHP_FE(stream_socket_client,				 second_and_third_args_force_ref)
+	PHP_FE(stream_socket_server,				 second_and_third_args_force_ref)
+	PHP_FE(stream_socket_accept,				 		   third_arg_force_ref)
+	PHP_FE(stream_socket_get_name,											NULL)
 	PHP_FE(fgetcsv,															NULL)
 	PHP_FE(flock,															NULL)
 	PHP_FE(get_meta_tags,													NULL)

@@ -83,7 +83,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		efree(hostname);
 	}
 	if (stream == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:%d", host, port);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:%d (%s)", host, port, errstr == NULL ? "Unknown error" : errstr);
 	}
 
 	if (hashkey) {
@@ -101,6 +101,10 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			ZVAL_STRING(zerrstr, errstr, 0);
 		}
 		RETURN_FALSE;
+	}
+
+	if (errstr) {
+		efree(errstr);
 	}
 		
 	php_stream_to_zval(stream, return_value);

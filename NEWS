@@ -21,8 +21,16 @@ PHP 4                                                                      NEWS
   of the specified parameters to be passed as extra parameters to the sendmail 
   binary. These parameters will always replace the value of the 5th parameter
   to mail(), even in safe mode. (Derick)
+- Added new "transport" layer for sockets and associated functions. (Wez)
+  . stream_socket_client() - similar to fsockopen(), but more powerful.
+  . stream_socket_server() - Creates a server socket.
+  . stream_socket_accept() - Accept a client connection.
+  . stream_socket_get_name() - Get local or remote name of socket.
+  . generic crypto interface for streams (supports dynamic loading of OpenSSL)
+- Added memory mapping support under win32 to improve performance of
+  readfile(), fpassthru() and some internal streams operations. (Wez)
 - Added DBA handler 'inifile' to support ini files. (Marcus)
-- Added filter support. See README.input_filter. (Rasmus)
+- Added input filter support. See README.input_filter. (Rasmus)
 - Added "session.hash_function" and "session.hash_bits_per_character". (Sascha)
 - Added lightweight streaming input abstraction to the Zend Engine scanners
   that provides uniform support for include()'ing data from PHP streams across
