@@ -216,7 +216,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	PUTS("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n");
 	PUTS("<head>");
 	php_info_print_style();
-	PUTS("<title>phpinfo()</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\">/head><body>");
+	PUTS("<title>phpinfo()</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\"></head><body>");
 
 	if (flag & PHP_INFO_GENERAL) {
 		char *zend_version = get_zend_version();
