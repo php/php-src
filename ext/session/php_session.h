@@ -19,6 +19,8 @@
 #ifndef PHP_SESSION_H
 #define PHP_SESSION_H
 
+#include "ext/standard/php_var.h"
+
 #define PS_OPEN_ARGS void **mod_data, const char *save_path, const char *session_name
 #define PS_CLOSE_ARGS void **mod_data
 #define PS_READ_ARGS void **mod_data, const char *key, char **val, int *vallen
@@ -148,7 +150,7 @@ typedef struct ps_serializer_struct {
 
 PHPAPI void session_adapt_url(const char *, size_t, char **, size_t * TSRMLS_DC);
 
-void php_set_session_var(char *name, size_t namelen, zval *state_val,HashTable *var_hash TSRMLS_DC);
+void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC);
 int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC);
 
 int php_session_register_module(ps_module *);
