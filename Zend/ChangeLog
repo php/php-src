@@ -1,3 +1,15 @@
+2003-09-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c
+      zend_execute.c:
+      Show name of missing function as typed
+
+    * zend_default_classes.c:
+      Use studlyCaps in exception class
+
+    * zend_compile.c:
+      Go with studlyCaps in error messages/backtrace/reflection output
+
 2003-09-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
