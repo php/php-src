@@ -194,9 +194,11 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	} 
 	
 	t = mktime(ta); 
+	if (t == -1) {
+		RETURN_LONG(-1);
+	}
+
 	seconds = t - chgsecs;
-
-
 
 	if (is_dst == -1) {
 		struct tm t1, t2;
