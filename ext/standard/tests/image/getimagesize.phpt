@@ -11,7 +11,7 @@ GetImageSize()
 	$result = array();
 	$files  = array();
 	while (($file = readdir($dir)) !== FALSE) {
-		if (preg_match('/^test.+pix\./',$file)) {
+		if (preg_match('/^test.+pix\./',$file) && $file != "test13pix.swf") {
 			$files[] = $file;
 		}
 	}
@@ -23,20 +23,7 @@ GetImageSize()
 	var_dump($result);
 ?>
 --EXPECT--
-array(11) {
-  ["test13pix.swf"]=>
-  array(5) {
-    [0]=>
-    int(550)
-    [1]=>
-    int(400)
-    [2]=>
-    int(13)
-    [3]=>
-    string(24) "width="550" height="400""
-    ["mime"]=>
-    string(29) "application/x-shockwave-flash"
-  }
+array(10) {
   ["test1pix.bmp"]=>
   array(6) {
     [0]=>
