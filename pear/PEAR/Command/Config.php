@@ -67,6 +67,16 @@ argument may be used to specify which layer to set the configuration parameter
 in.  The default layer is "user".
 ',
             ),
+        'config-help' => array(
+            'summary' => 'Show Information About Setting',
+            'function' => 'doConfigHelp',
+            'shortcut' => 'ch',
+            'options' => array(),
+            'doc' => '[parameter]
+Displays help for a configuration parameter.  Without arguments it
+displays help for all configuration parameters.
+',
+           ),
         );
 
     /**
@@ -137,6 +147,9 @@ in.  The default layer is "user".
             $failmsg .= $error;
             return PEAR::raiseError($failmsg);
         }
+        if ($params[0] == 'umask') {
+            list($params[1]) = sscanf($params[1], '%o');
+        }
         if (!call_user_func_array(array(&$this->config, 'set'), $params))
         {
             $failmsg = "config-set (" . implode(", ", $params) . ") failed";
@@ -147,6 +160,26 @@ in.  The default layer is "user".
             return $this->raiseError($failmsg);
         }
         return true;
+    }
+
+    function doConfigHelp($command, $options, $params)
+    {
+        if (empty($params)) {
+            $params = $this->config->getKeys();
+        }
+        $data['caption']  = "Config help" . ((count($params) == 1) ? " for $params[0]" : '');
+        $data['headline'] = array('Name', 'Type', 'Description');
+        $data['border']   = true;
+        foreach ($params as $name) {
+            $type = $this->config->getType($name);
+            $docs = $this->config->getDocs($name);
+            if ($type == 'set') {
+                $docs = rtrim($docs) . "\nValid set: " .
+                    implode(' ', $this->config->getSetValues($name));
+            }
+            $data['data'][] = array($name, $type, $docs);
+        }
+        $this->ui->outputData($data, $command);
     }
 
     /**
