@@ -326,6 +326,15 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 #define PHP_STREAM_OPTION_READ_TIMEOUT	4
 #define PHP_STREAM_OPTION_SET_CHUNK_SIZE	5
 
+/* set or release lock on a stream */
+#define PHP_STREAM_OPTION_LOCKING		6
+
+/* whether or not locking is supported */
+#define PHP_STREAM_LOCK_SUPPORTED		1	
+
+#define php_stream_supports_lock(stream)	php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, 0, (void *) PHP_STREAM_LOCK_SUPPORTED TSRMLS_CC) == 0 ? 1 : 0
+#define php_stream_lock(stream, mode)		php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, (mode), (void *) NULL TSRMLS_CC)
+
 #define PHP_STREAM_OPTION_RETURN_OK			 0 /* option set OK */
 #define PHP_STREAM_OPTION_RETURN_ERR 		-1 /* problem setting option */
 #define PHP_STREAM_OPTION_RETURN_NOTIMPL	-2 /* underlying stream does not implement; streams can handle it instead */

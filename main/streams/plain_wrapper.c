@@ -23,6 +23,7 @@
 #include "php_network.h"
 #include "php_open_temporary_file.h"
 #include "ext/standard/file.h"
+#include "ext/standard/flock_compat.h"
 #include <stddef.h>
 #include <fcntl.h>
 #if HAVE_SYS_WAIT_H
@@ -131,6 +132,7 @@ typedef struct {
 	int fd;					/* underlying file descriptor */
 	int is_process_pipe;	/* use pclose instead of fclose */
 	int is_pipe;			/* don't try and seek */
+	int lock_flag;		/* stores the lock state */
 	char *temp_file_name;	/* if non-null, this is the path to a temporary file that
 							 * is to be deleted when the stream is closed */
 #if HAVE_FLUSHIO
@@ -167,6 +169,8 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 			php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
 
 			self->temp_file_name = opened_path;
+			self->lock_flag = LOCK_UN;
+			
 			return stream;
 		}
 		fclose(fp);
@@ -186,6 +190,7 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode STREAMS_DC
 	self = emalloc_rel_orig(sizeof(*self));
 	self->file = NULL;
 	self->is_pipe = 0;
+	self->lock_flag = LOCK_UN;
 	self->is_process_pipe = 0;
 	self->temp_file_name = NULL;
 	self->fd = fd;
@@ -228,6 +233,7 @@ PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STRE
 	self = emalloc_rel_orig(sizeof(*self));
 	self->file = file;
 	self->is_pipe = 0;
+	self->lock_flag = LOCK_UN;
 	self->is_process_pipe = 0;
 	self->temp_file_name = NULL;
 	self->fd = fileno(file);
@@ -270,6 +276,7 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 	self = emalloc_rel_orig(sizeof(*self));
 	self->file = file;
 	self->is_pipe = 1;
+	self->lock_flag = LOCK_UN;
 	self->is_process_pipe = 1;
 	self->fd = fileno(file);
 	self->temp_file_name = NULL;
@@ -340,6 +347,9 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 	assert(data != NULL);
 	
 	if (close_handle) {
+		if (data->lock_flag != LOCK_UN) {
+			php_stream_lock(stream, LOCK_UN);
+		}
 		if (data->file) {
 			if (data->is_process_pipe) {
 				errno = 0;
@@ -541,6 +551,24 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 					return -1;
 			}
 			break;
+		
+		case PHP_STREAM_OPTION_LOCKING:
+			if (fd == -1) {
+				return -1;
+			}
+
+			if ((int) ptrparam == PHP_STREAM_LOCK_SUPPORTED) {
+				return 0;
+			}
+
+			if (!php_flock(fd, value) || (errno == EWOULDBLOCK && value & LOCK_NB)) {
+				data->lock_flag = value;
+				return 0;
+			} else {
+				return -1;
+			}
+			break;
+
 		default:
 			return -1;
 	}

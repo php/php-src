@@ -218,8 +218,8 @@ static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 
 PHP_FUNCTION(flock)
 {
-	zval *arg1, *arg3;
-	int fd, act, ret;
+	zval *arg1, *arg3 = NULL;
+	int fd, act;
 	php_stream *stream;
 	long operation = 0;
 
@@ -241,15 +241,14 @@ PHP_FUNCTION(flock)
 
 	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
 	act = flock_values[act - 1] | (operation & 4 ? LOCK_NB : 0);
-	if ((ret = flock(fd, act)) == -1) {
-		if (errno == EWOULDBLOCK && operation) {
-			convert_to_long(arg3);
-			Z_LVAL_P(arg3) = 1;
-			RETURN_TRUE;
+	if (!php_stream_lock(stream, act)) {
+		if (operation && errno == EWOULDBLOCK && arg3 && PZVAL_IS_REF(arg3)) {
+			convert_to_long_ex(&arg3);
+			ZVAL_LONG(arg3, 1);
 		}
-		RETURN_FALSE;
+		RETURN_TRUE;
 	}
-	RETURN_TRUE;
+	RETURN_FALSE;
 }
 
 /* }}} */
