@@ -60,7 +60,6 @@ PHP                                                                        NEWS
 - Added proc_nice() function. Changes priority of the current process. (Ilia)
 - Added pcntl_getpriority() and pcntl_setpriority() functions. (Ilia)
 - Added idate(), date_sunrise() and date_sunset() functions. (Moshe Doron)
-- Added long options into CLI & CGI (e.g. --version). (Marcus)
 - Added strpbrk() function. Searches a string for a list of characters. (Ilia)
 - Added stream_get_line() function. Reads either the specified number of bytes
   or until the ending string is found. (Ilia)
@@ -72,8 +71,6 @@ PHP                                                                        NEWS
 - Added str_split() function. Breaks down a string into an array of elements 
   based on length. (Ilia)
 - Added array_walk_recursive() function. (Ilia)
-- Added new command line parameters -B, -F, -R and -E which allow to process stdin
-  line by line (See 'php -h' or 'man php' for more). (Marcus)
 - Added string.base64 stream filter. (Moriyoshi)
 - Added domxml_node_get_path(). (Lukas Schröder)
 - Added iconv related functions. (Moriyoshi)
