@@ -1,3 +1,211 @@
+2001-08-14  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/cgi/cgi_main.c: Revert an old bogus patch
+
+    * main/SAPI.h: improve typedef definition
+
+    * configure.in
+      main/php_version.h: Go with RC1
+
+2001-08-14  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/DB.php:
+    Implement setFetchMode() and DB_FETCHMODE_OBJECT mechanism.
+
+2001-08-14  Stig Bakken  <ssb@fast.no>
+
+    * pear/tests/pear_error.phpt
+      pear/PEAR.php:
+    * expected error codes are stored on a stack now, PEAR::expectError()
+      pushes into it, PEAR::popExpect() pops off it
+    * made pear_error test work on other boxes than my own :-)
+
+2001-08-14  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/DB.php: Implement fetchInto(). Further work on fetchRow().
+
+2001-08-14  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/wddx/wddx.c:
+    Uh-oh, didn't mean to eliminate all folds.
+
+    * ext/wddx/wddx.c:
+    Be more safe about freeing zvals.
+
+2001-08-14  John Donagher  <john@webmeta.com>
+
+    * ext/pfpro/pfpro.c: Add compile-time versioning for default hostname
+
+    * php.ini-recommended
+      php.ini-dist: Update hostname
+
+2001-08-14  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/DB.php:
+    Calculate num_columns/num_rows only once. Add PHPDoc comments.
+
+    * pear/Cache/DB.php:
+    Don't even connect to the database if there's a cached result set for the current query. Just use setConnection() instead of connect() to register a database connection and let Cache_DB connect to the database on demand.
+
+2001-08-14  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Experimental/XML/sql2xml.php
+      pear/Experimental/XML/sql2xml_ext.php:
+    that's in /pear (since quite some time...)
+
+2001-08-14  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/DB.php: Call array_keys() only once per result set.
+
+2001-08-14  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/db/php_db.h
+      ext/db/db.c: depreciated, but should build anyway...
+
+2001-08-14  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/var.c: - This code looks OK so remove FIXME comment
+
+2001-08-14  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/bz2/bz2.c: nuke warnings + fix v-dir behaviour
+
+    * sapi/pi3web/pi3web_sapi.c
+      sapi/nsapi/nsapi.c
+      sapi/apache/php_apache.c
+      sapi/aolserver/aolserver.c: TSRMLS fixes
+
+2001-08-14  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/DB.php: Initial version of the PEAR DB Cache.
+
+2001-08-14  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c: fixed com_invoke retval
+
+2001-08-14  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/zip/zip.c: I'm sure you meant 'l' here, Sterling.
+
+2001-08-14  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/common.php: * updated DB_common::raiseError doc
+
+    * pear/tests/pear_error.phpt:
+    * updated test (currently passes only on my laptop, sorry...)
+
+    * pear/PEAR.php: * added expectError() method
+
+2001-08-14  Zeev Suraski  <zeev@zend.com>
+
+    * ext/com/COM.c
+      ext/com/VARIANT.c
+      ext/com/conversion.c
+      ext/com/conversion.h: - Avoid using malloc()
+    - Improve and fix leaks in the typelib constants registration mechanism
+
+2001-08-14  Stig Bakken  <ssb@fast.no>
+
+    * pear/HTML/Form.php: * typo
+
+2001-08-14  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c: fixed bug in com_load_typelib
+
+2001-08-14  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/dbase/dbase.c:
+    - Fixed a bug in dbase_get_record() and dbase_get_record_with_names().
+      boolean fields are now returned correctly.
+      Patch by Lawrence E. Widman <widman@cardiothink.com> 
+
+2001-08-14  Zeev Suraski  <zeev@zend.com>
+
+    * ext/com/conversion.c: Whitespace
+
+    * ext/com/VARIANT.c: more whitespace
+
+    * ext/com/VARIANT.c: Whitespace & API updates
+
+    * ext/com/COM.c:
+    Whitespace and API updates (please keep code in the repository in K&R style
+    like the CODING_STANDARDS ask, guys...)
+
+    * ext/com/COM.c: Add missing break
+
+2001-08-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/config.m4:
+    use an absolute path for symlinking the php library archive
+
+    * ext/ircg/ircg.c: defer initialization of hash
+
+2001-08-14  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/pgsql/config.m4: If the header file is not found, bail out.
+
+    * configure.in:
+    Fixed bug: #12726. If --with-xxx is used in configure line without any
+    value, it gets value 'yes'.
+
+2001-08-14  Thies C. Arntzen  <thies@thieso.net>
+
+    * sapi/apache/mod_php4.c: ypo;-)
+
+2001-08-14  Joey Smith  <joey@joeysmith.com>
+
+    * ext/domxml/TODO: Obviously not complete, but somewhere to start.
+
+    * ext/domxml/php_domxml.c: Kill some duplicate PHP_FALIAS()'s.
+    Many of these were commented out, but I killed them anyways just to be
+    consistent.
+
+    * ext/domxml/php_domxml.c:
+    Group PHP_FE and PHP_FALIAS with their own kind.
+
+    * ext/domxml/php_domxml.c: Fix my own ws errors.
+
+    * ext/domxml/php_domxml.c: Register le_domxmltextp.
+
+    * ext/domxml/php_domxml.c:
+    Don't hammer the resource type right off the bat.
+
+    * ext/domxml/php_domxml.c: Trim ws only lines.
+
+2001-08-14  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/php_domxml.c:
+    ws fix. Also added some missing protos and fold tags.
+
+    * ext/java/java.c: Fix ZTS build.
+
+    * ext/dba/dba.c
+      ext/dba/dba_db2.c
+      ext/dba/php_dba.h: Another TSRMLS_FETCH() nuke.
+
+2001-08-14  Alan Brown  <abrown@pobox.com>
+
+    * ext/com/COM.c:
+    Whenever typelibrary constants were loaded, there was a GP Fault at process exit as shutdown_memory_manager seemed to delete constants that were supposed to have been deleted earlier. It seems as though CONST_PERSISTENT is a bad thing to use. Resetting that bit on the constant creation still seems to work and the GP Fault at exit is gone.
+
+2001-08-14  Joey Smith  <joey@joeysmith.com>
+
+    * ext/sybase_ct/php_sybase_ct.c: More Z_* macro changes.
+
+2001-08-14  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c: hresult is returned if no return type is specified
+
+    * ext/com/TODO: update todo
+
+    * ext/com/COM.c:
+    make next() return a single value instead of an array with one element
+
+2001-08-14  Joey Smith  <joey@joeysmith.com>
+
+    * ext/domxml/php_domxml.c:
+    Remove unused variable and fix small mental error.
+
 2001-08-13  Harald Radi  <h.radi@nme.at>
 
     * ext/com/COM.c
