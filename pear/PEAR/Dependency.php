@@ -48,12 +48,7 @@ class PEAR_Dependency
     function callCheckMethod($opts)
     {
         $rel = isset($opts['rel']) ? $opts['rel'] : 'has';
-        if (isset($opts['version'])) {
-            $req = $opts['version'];
-            $rel = 'v.' . $rel;
-        } else {
-            $req = null;
-        }
+        $req = isset($opts['version']) ? $opts['version'] : null;
         $name = isset($opts['name']) ? $opts['name'] : null;
         switch ($opts['type']) {
             case 'pkg':
@@ -74,6 +69,9 @@ class PEAR_Dependency
             case 'sapi':
                 return $this->checkSAPI($name);
                 break;
+            case 'zend':
+                return $this->checkZend($name);
+                break;
             default:
                 return "'{$opts['type']}' dependency type not supported";
         }
@@ -90,7 +88,7 @@ class PEAR_Dependency
      */
     function checkPackage($name, $req = null, $relation = 'has')
     {
-        if (substr($relation, 0, 2) == "v.") {
+        if (substr($relation, 0, 2) == 'v.') {
             $relation = substr($relation, 2);
         }
         switch ($relation) {
@@ -179,7 +177,7 @@ class PEAR_Dependency
      *
      * @return mixed bool false if no error or the error string
      */
-    function checkPHP($req, $relation = 'v.ge')
+    function checkPHP($req, $relation = 'ge')
     {
         if (substr($relation, 0, 2) == 'v.') {
             $php_ver = phpversion();
@@ -239,10 +237,32 @@ class PEAR_Dependency
         return "'$sapi_backend' SAPI backend not supported";
     }
 
+
     /**
-    * Converts text comparing operators to them sign equivalents
-    * ex: 'ge' to '>='
-    */
+     * Zend version check method
+     *
+     * @param string $req   which version to compare
+     * @param string $relation  how to compare the version
+     *
+     * @return mixed bool false if no error or the error string
+     */
+    function checkZend($req, $relation = 'ge')
+    {
+        if (substr($relation, 0, 2) == 'v.') {
+            $zend_ver = zend_version();
+            $operator = substr($relation, 2);
+            if (!version_compare("$zend_ver", "$req", $operator)) {
+                return "Zend version " . $this->signOperator($operator) .
+                       " $req is required";
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Converts text comparing operators to them sign equivalents
+     * ex: 'ge' to '>='
+     */
     function signOperator($operator)
     {
         switch($operator) {
