@@ -1431,8 +1431,32 @@ ZEND_API int increment_function(zval *op1)
 			op1->value.lval = 1;
 			op1->type = IS_LONG;
 			break;
-		case IS_STRING: /* Perl style string increment */
-			increment_string(op1);
+		case IS_STRING: {
+				long lval;
+				double dval;
+				char *strval = op1->value.str.val;
+
+				switch (is_numeric_string(strval, op1->value.str.len, &lval, &dval)) {
+					case IS_LONG:
+						op1->value.lval = lval+1;
+						op1->type = IS_LONG;
+						efree(strval);
+						break;
+					case IS_DOUBLE:
+						op1->value.dval = dval+1;
+						op1->type = IS_DOUBLE;
+						efree(strval);
+						break;
+#if 0
+					case FLAG_IS_BC:
+						/* Not implemented */
+#endif
+					default:
+						/* Perl style string increment */
+						increment_string(op1);
+						break;
+				}
+			}
 			break;
 		default:
 			return FAILURE;
