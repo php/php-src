@@ -1080,8 +1080,10 @@ PHP_FUNCTION(strtotime)
 	}
 
 	convert_to_string_ex(z_time);
-	if (Z_STRLEN_PP(z_time) == 0)
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Called with empty time parameter");
+	if (!Z_STRLEN_PP(z_time)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Called with an empty time parameter.");
+		RETURN_LONG(-1);
+	}
 	if (argc == 2) {
 		convert_to_long_ex(z_now);
 		now = Z_LVAL_PP(z_now);
