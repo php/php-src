@@ -1512,6 +1512,15 @@ gdImageFill (gdImagePtr im, int x, int y, int color)
   int old;
   int leftLimit, rightLimit;
   int i;
+  
+  if (x >= im->sx) {
+  	x = im->sx - 1;
+  }
+  
+  if (y >= im->sy) {
+  	y = im->sy - 1;
+  }
+  
   old = gdImageGetPixel (im, x, y);
   if (color == gdTiled)
     {
