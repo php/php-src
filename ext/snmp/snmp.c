@@ -201,7 +201,7 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 	
 	memset(&session, 0, sizeof(struct snmp_session));
 
-	session.peername = a1->value.str.val;
+	session.peername = (*a1)->value.str.val;
 	session.version = SNMP_VERSION_1;
 	/*
 	* FIXME: potential memory leak
@@ -210,11 +210,11 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 	* memory it did not allocate
 	*/
 #ifdef UCD_SNMP_HACK
-	session.community = (u_char *) strdup(a2->value.str.val);
+	session.community = (u_char *) strdup((*a2)->value.str.val);
 #else
-	session.community = (u_char *) a2->value.str.val;
+	session.community = (u_char *) (*a2)->value.str.val;
 #endif
-	session.community_len = a2->value.str.len;
+	session.community_len = (*a2)->value.str.len;
 	session.retries = retries;
 	session.timeout = timeout;
 	
@@ -317,7 +317,7 @@ retry:
 			php_error(E_WARNING,"No Response from %s\n", (*a1)->value.str.val);
 			RETURN_FALSE;
 		} else {    /* status == STAT_ERROR */
-			php_error(E_WARNING,"An error occurred, Quitting\n");
+			php_error(E_WARNING,"An error occurred, Quitting...\n");
 			RETURN_FALSE;
 		}
 		if (response) {
@@ -328,7 +328,7 @@ retry:
 }
 
 /* {{{ proto string snmpget(string host, string community, string object_id [, int timeout [, int retries]]) 
-   Fetch an SNMP object */
+   Fetch a SNMP object */
 PHP_FUNCTION(snmpget) {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
