@@ -304,7 +304,9 @@ AC_CHECK_FUNCS(memcpy memmove strdup strerror strcasecmp strstr flock lockf pute
 AC_FUNC_UTIME_NULL
 AC_FUNC_ALLOCA
 dnl## OLDLIBS=$LIBS; LIBS=""
-AC_BROKEN_SPRINTF
+dnl This is also defined/used in libzend. To avoid a redefinition
+dnl we use that version
+dnl AC_BROKEN_SPRINTF
 dnl## LIBS=$OLDLIBS
 AC_REPLACE_FUNCS(getopt)
 
