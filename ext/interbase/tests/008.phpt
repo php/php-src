@@ -1,7 +1,10 @@
 --TEST--
 InterBase: event handling
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php 
+if (PHP_OS == "WINNT") echo "skip";
+include("skipif.inc"); 
+?>
 --POST--
 --GET--
 --FILE--
