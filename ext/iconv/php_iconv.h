@@ -17,6 +17,8 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Revision$ */
+
 #ifndef PHP_ICONV_H
 #define PHP_ICONV_H
 
@@ -29,6 +31,10 @@
 #ifdef PHP_ATOM_INC
 #include "php_have_iconv.h"
 #include "php_have_libiconv.h"
+#include "php_have_glibc_iconv.h"
+#include "php_have_bsd_iconv.h"
+#include "php_iconv_supports_errno.h"
+#include "php_php_iconv_impl.h"
 #endif
 
 
