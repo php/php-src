@@ -1111,6 +1111,11 @@ function get_summary($show_ext_summary)
 {
 	global $exts_skipped, $exts_tested, $n_total, $sum_results, $percent_results, $end_time, $start_time, $failed_test_summary, $PHP_FAILED_TESTS;
 
+	$x_total = $n_total - $sum_results['SKIPPED'] - $sum_results['BORKED'];
+	$x_warned = (100.0 * $sum_results['FAILED']) / $x_total;
+	$x_failed = (100.0 * $sum_results['FAILED']) / $x_total;
+	$x_passed = (100.0 * $sum_results['PASSED']) / $x_total;
+
 	$summary = "";
 	if ($show_ext_summary) {
 		$summary .= "
@@ -1123,16 +1128,16 @@ Exts tested     : " . sprintf("%4d",$exts_tested) . "
 ";
 	}
 	$summary .= "
-Number of tests : " . sprintf("%4d",$n_total);
+Number of tests : " . sprintf("%4d",$n_total). "          " . sprintf("%8d",$x_total);
 	if ($sum_results['BORKED']) {
 	$summary .= "
-Tests borked    : " . sprintf("%4d (%2.1f%%)",$sum_results['BORKED'],$percent_results['BORKED']);
+Tests borked    : " . sprintf("%4d (%3.1f%%)",$sum_results['BORKED'],$percent_results['BORKED']) . " --------";
 	}
 	$summary .= "
-Tests skipped   : " . sprintf("%4d (%2.1f%%)",$sum_results['SKIPPED'],$percent_results['SKIPPED']) . "
-Tests warned    : " . sprintf("%4d (%2.1f%%)",$sum_results['WARNED'],$percent_results['WARNED']) . "
-Tests failed    : " . sprintf("%4d (%2.1f%%)",$sum_results['FAILED'],$percent_results['FAILED']) . "
-Tests passed    : " . sprintf("%4d (%2.1f%%)",$sum_results['PASSED'],$percent_results['PASSED']) . "
+Tests skipped   : " . sprintf("%4d (%3.1f%%)",$sum_results['SKIPPED'],$percent_results['SKIPPED']) . " --------
+Tests warned    : " . sprintf("%4d (%3.1f%%)",$sum_results['WARNED'],$percent_results['WARNED']) . " " . sprintf("(%3.1f%%)",$x_warned) . "
+Tests failed    : " . sprintf("%4d (%3.1f%%)",$sum_results['FAILED'],$percent_results['FAILED']) . " " . sprintf("(%3.1f%%)",$x_failed) . "
+Tests passed    : " . sprintf("%4d (%3.1f%%)",$sum_results['PASSED'],$percent_results['PASSED']) . " " . sprintf("(%3.1f%%)",$x_passed) . "
 ---------------------------------------------------------------------
 Time taken      : " . sprintf("%4d seconds", $end_time - $start_time) . "
 =====================================================================
