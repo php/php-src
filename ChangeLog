@@ -1,3 +1,39 @@
+2000-08-02  Rasmus Lerdorf  <rasmus@php.net>
+
+    * main/SAPI.c: Leave this initialization in
+
+    * sapi/servlet/servlet.c
+      sapi/thttpd/thttpd.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/cgi/cgi_main.c
+      sapi/isapi/php4isapi.c
+      sapi/nsapi/nsapi.c
+      sapi/phttpd/phttpd.c
+      sapi/apache/mod_php4.c
+      main/SAPI.c
+      sapi/aolserver/aolserver.c:
+    Heads up!  I have moved the headers_only and response_code checks out of
+    SAPI and down into the individual SAPI modules.  I have made the
+    appropriate changes in all the SAPI modules, but please verify these.
+    The reason for this change is that Apache sometimes will feed PHP
+    a request_method of GET but have r->header_only set to true.  This happens
+    in an ErrorDocument redirect.  In this same scenario we want to preserve
+    the status code as well instead of just overwriting it with a 200 and
+    losing this information.  For now the other sapi modules act exactly as
+    before since they probably do not make this distinction, and they may
+    not even have a valid response code this early in the request.
+
+    * ext/ldap/config.m4: Fix library ordering here so static builds will work
+
+2000-08-02  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/ldap.c
+      ext/ldap/php_ldap.h:
+    - Added two new functions: ldap_t61_to_8859() and ldap_8859_to_t61().
+      These functions are available only when using openldap which is compiled
+      with STR_TRANSLATION and LDAP_CHARSET_8859 defined in ldap_cdefs.h (Jani)
+
 2000-08-01  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/exif/exif.c: Add Olympus-specific tags to read_exif_data()
