@@ -1,3 +1,105 @@
+2001-12-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/pdf/config.m4:
+    - Let's not default to any set of extra libraries. This way any kind of
+      builds of pdflib work. And this configure stays simple.
+
+2001-12-03  Shane Caraveo  <shane@caraveo.com>
+
+    * ext/xmlrpc/libxmlrpc/queue.c
+      ext/xmlrpc/libxmlrpc/xml_element.c
+      ext/xmlrpc/libxmlrpc/xml_to_dandarpc.c
+      ext/xmlrpc/libxmlrpc/xml_to_soap.c
+      ext/xmlrpc/libxmlrpc/xml_to_xmlrpc.c
+      ext/xmlrpc/libxmlrpc/xmlrpc.c
+      ext/xmlrpc/libxmlrpc/xmlrpc_introspection.c
+      ext/xmlrpc/libxmlrpc/xmlrpc_private.h
+      ext/xmlrpc/libxmlrpc/xmlrpc_win32.h
+      ext/xmlrpc/php_xmlrpc.h
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/xmlrpc.dsp:
+    Make xmlrpc module compilable on windows.  compiles, but untested.
+
+2001-12-03  Andi Gutmans  <andi@zend.com>
+
+    * ext/ftp/php_ftp.c: - Missed one
+
+    * ext/imap/php_imap.c
+      ext/ldap/ldap.c
+      ext/mcal/php_mcal.c
+      ext/pspell/pspell.c:
+    - Nuke REGISTER_MAIN_*. Extension maintainers please make sure I didn't
+    - change something I wasn't supposed to. It should be fine IMO.
+
+2001-12-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter_ja.c:
+    Fix declarations of static variables.  Builds on AIX now.
+
+2001-12-03  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c:
+    Add a content length field to perhaps eliminate null truncation
+
+2001-12-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Extend the meaning of "bailout on trivial" to also cover kicks.  This
+    is a simple method to free a nick for custom chat systems.
+
+    External programs can now also savely truncate the file IRCG writes to,
+    because we open those files with O_APPEND, so that the write pointer
+    is always at the end of the data.
+
+2001-12-03  Zeev Suraski  <zeev@zend.com>
+
+    * configure.in
+      main/php_version.h: Here we go again
+
+2001-12-03  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c: MFH
+
+    * ext/curl/curl.c: Re-add support for HTTP file uploads
+
+    * ext/xslt/xslt.c: MFB
+
+    * ext/xslt/xslt.c:
+    No need to create this, automatically done (automagically even) by
+    call_user_function_ex()
+
+2001-12-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/basic_functions.c
+      main/php_output.h
+      main/output.c:
+    - Added ob_get_level, which returns the nesting level of the output buffering
+      mechanism. (patch by Yasuo Ohgaki <yasuo_ohgaki@yahoo.com>)
+    - Added ob_get_level, which returns the nesting level of the output buffering
+      mechanism. (Yasuo, Derick)
+
+2001-12-03  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/standard/reg.c
+      ext/standard/reg.h:
+    Make php_reg_replace available from shared extensions
+
+    * ext/standard/md5.c
+      ext/standard/md5.h:
+    Make php_MD5* functions available from shared extensions
+
+    * ext/standard/math.c
+      ext/standard/php_math.h:
+    Make _php_math_number_format available from shared extensions
+
+    * ext/standard/pageinfo.c
+      ext/standard/pageinfo.h:
+    Make php_startpage and php_getlastmod available from shared extensions
+
+    * ext/standard/head.c
+      ext/standard/head.h: Make php_setcookie available from shared extensions
+
 2001-12-02  Harald Radi  <h.radi@nme.at>
 
     * ext/mssql/php_mssql.c: MFH
