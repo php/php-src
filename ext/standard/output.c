@@ -59,7 +59,7 @@ static void php_output_init_globals(OLS_D)
 }
 
 
-PHP_GINIT_FUNCTION(output)
+PHP_MINIT_FUNCTION(output)
 {
 #ifdef ZTS
 	output_globals_id = ts_allocate_id(sizeof(php_output_globals), (ts_allocate_ctor) php_output_init_globals, NULL);
