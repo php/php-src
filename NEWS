@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Fixed a bug that prevented PHP from paying attention to the extension_dir
+  directive with extensions that were loaded from the php.ini file (Zeev)
 - Changed set_error_handler() to return the name of the previously defined
   error handler, if any (Zeev, Zend Engine)
 - Declared <?php_track_vars?> officially dead.  It didn't work in PHP 4.0.0
