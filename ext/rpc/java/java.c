@@ -500,7 +500,7 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromObject
     zend_hash_init(presult->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
   };
 
-  handle = (pval *) emalloc(sizeof(pval));
+  handle = ALLOC_ZVAL();
   handle->type = IS_LONG;
   handle->value.lval =
     zend_list_insert((*jenv)->NewGlobalRef(jenv,value), le_jobject);

@@ -446,7 +446,7 @@ PHPAPI void php_error(int type, const char *format,...)
 		va_end(args);
 		buffer[sizeof(buffer) - 1] = 0;
 
-		tmp = (pval *)emalloc(sizeof(pval));
+		tmp = ALLOC_ZVAL();
 		INIT_PZVAL(tmp);
 		tmp->value.str.val = (char *) estrndup(buffer, size);
 		tmp->value.str.len = size;
@@ -1079,7 +1079,7 @@ static int zend_hash_environment(PLS_D ELS_DC SLS_DC)
 			continue;
 		}
 		t = estrndup(*env, p - *env);
-		tmp = (pval *) emalloc(sizeof(pval));
+		tmp = ALLOC_ZVAL();
 		tmp->value.str.len = strlen(p + 1);
 		tmp->value.str.val = estrndup(p + 1, tmp->value.str.len);
 		tmp->type = IS_STRING;
@@ -1100,7 +1100,7 @@ static int zend_hash_environment(PLS_D ELS_DC SLS_DC)
 		for (i = 0; i < arr->nelts; i++) {
 			len = strlen(elts[i].key);
 			t = elts[i].key;
-			tmp = (pval *) emalloc(sizeof(pval));
+			tmp = ALLOC_ZVAL();
 			if (elts[i].val) {
 				tmp->value.str.len = strlen(elts[i].val);
 				tmp->value.str.val = estrndup(elts[i].val, tmp->value.str.len);
@@ -1117,7 +1117,7 @@ static int zend_hash_environment(PLS_D ELS_DC SLS_DC)
 			(*tmp_ptr)->refcount++;
 			zend_hash_update(&EG(symbol_table), "PATH_TRANSLATED", sizeof("PATH_TRANSLATED"), tmp_ptr, sizeof(pval *), NULL);
 		}
-		tmp = (pval *) emalloc(sizeof(pval));
+		tmp = ALLOC_ZVAL();
 		tmp->value.str.len = strlen(((request_rec *) SG(server_context))->uri);
 		tmp->value.str.val = estrndup(((request_rec *) SG(server_context))->uri, tmp->value.str.len);
 		INIT_PZVAL(tmp);
@@ -1130,7 +1130,7 @@ static int zend_hash_environment(PLS_D ELS_DC SLS_DC)
 		char *pi;
 #if FORCE_CGI_REDIRECT
 		pi = SG(request_info).request_uri;
-		tmp = (pval *) emalloc(sizeof(pval));
+		tmp = ALLOC_ZVAL();
 		tmp->value.str.val = emalloc(((pi)?strlen(pi):0) + 1);
 		tmp->value.str.len = php_sprintf(tmp->value.str.val, "%s", (pi ? pi : ""));	/* SAFE */
 		tmp->type = IS_STRING;
@@ -1148,7 +1148,7 @@ static int zend_hash_environment(PLS_D ELS_DC SLS_DC)
 			l -= strlen(pi);
 			pi = NULL;
 		}
-		tmp = (pval *) emalloc(sizeof(pval));
+		tmp = ALLOC_ZVAL();
 		tmp->value.str.val = emalloc(l + 1);
 		tmp->value.str.len = php_sprintf(tmp->value.str.val, "%s%s", (sn ? sn : ""), (pi ? pi : ""));	/* SAFE */
 		tmp->type = IS_STRING;
@@ -1171,7 +1171,7 @@ void _php_build_argv(char *s ELS_DC)
 	int count = 0;
 	char *ss, *space;
 
-	arr = (pval *) emalloc(sizeof(pval));
+	arr = ALLOC_ZVAL();
 	arr->value.ht = (HashTable *) emalloc(sizeof(HashTable));
 	if (zend_hash_init(arr->value.ht, 0, NULL, ZVAL_PTR_DTOR, 0) == FAILURE) {
 		php_error(E_WARNING, "Unable to create argv array");
@@ -1188,7 +1188,7 @@ void _php_build_argv(char *s ELS_DC)
 			*space = '\0';
 		}
 		/* auto-type */
-		tmp = (pval *) emalloc(sizeof(pval));
+		tmp = ALLOC_ZVAL();
 		tmp->type = IS_STRING;
 		tmp->value.str.len = strlen(ss);
 		tmp->value.str.val = estrndup(ss, tmp->value.str.len);
@@ -1206,7 +1206,7 @@ void _php_build_argv(char *s ELS_DC)
 			ss = space;
 		}
 	}
-	tmp = (pval *) emalloc(sizeof(pval));
+	tmp = ALLOC_ZVAL();
 	tmp->value.lval = count;
 	tmp->type = IS_LONG;
 	INIT_PZVAL(tmp);

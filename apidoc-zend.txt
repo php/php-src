@@ -64,7 +64,7 @@ php3_write()
 
 php4_write()
 {
-	pval *newval = (pval *) emalloc(sizeof(pval));
+	pval *newval = ALLOC_ZVAL();
 
 	newval->refcount=1;
 	newval->is_ref=0;

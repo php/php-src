@@ -96,7 +96,7 @@ void php_var_dump(pval **struc, int level)
 				}
 				switch (i) {
 					case HASH_KEY_IS_LONG:{
-							pval *d = emalloc(sizeof(pval));
+							pval *d = ALLOC_ZVAL();
 
 							d->type = IS_LONG;
 							d->value.lval = index;
@@ -106,7 +106,7 @@ void php_var_dump(pval **struc, int level)
 						break;
 
 					case HASH_KEY_IS_STRING:{
-							pval *d = emalloc(sizeof(pval));
+							pval *d = ALLOC_ZVAL();
 
 							d->type = IS_STRING;
 							d->value.str.val = key;
@@ -253,14 +253,14 @@ void php_var_serialize(pval *buf, pval **struc)
 
 					switch (i) {
 						case HASH_KEY_IS_LONG:
-							d = emalloc(sizeof(pval));	
+							d = ALLOC_ZVAL();	
 							d->type = IS_LONG;
 							d->value.lval = index;
 							php_var_serialize(buf, &d);
 							efree(d);
 							break;
 						case HASH_KEY_IS_STRING:
-							d = emalloc(sizeof(pval));	
+							d = ALLOC_ZVAL();	
 							d->type = IS_STRING;
 							d->value.str.val = key;
 							d->value.str.len = strlen(key);
@@ -431,8 +431,8 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 				return 0;
 			}
 			for ((*p) += 2; **p && **p != '}' && i > 0; i--) {
-				pval *key = emalloc(sizeof(pval));
-				pval *data = emalloc(sizeof(pval));
+				pval *key = ALLOC_ZVAL();
+				pval *data = ALLOC_ZVAL();
 				
 				if (!php_var_unserialize(&key, p, max)) {
 				  zval_dtor(key);
