@@ -3614,6 +3614,7 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 	PZVAL_LOCK(array);
 
 	switch (zend_iterator_unwrap(array, &iter TSRMLS_CC)) {
+		default:
 		case ZEND_ITER_INVALID:
 			zend_error(E_WARNING, "Invalid argument supplied for foreach()");
 			EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
