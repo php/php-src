@@ -17,13 +17,35 @@ PHP_ARG_WITH(mnogosearch,for mnoGoSearch support,
       MNOGOSEARCH_LIBDIR=$PHP_MNOGOSEARCH/lib
     fi
     
-    AC_ADD_INCLUDE($MNOGOSEARCH_INCDIR)
+    AC_MSG_CHECKING(for mnoGoSearch version)    
     
     if test -x "$MNOGOSEARCH_BINDIR/udm-config"; then
+    	MNOGOSEARCH_VERSION=`$MNOGOSEARCH_BINDIR/udm-config --version`
+    	MNOGOSEARCH_VERSION_ID=`$MNOGOSEARCH_BINDIR/udm-config -version-id`
+
+	if test $? -ne 0; then
+		AC_MSG_RESULT(<= 3.1.9)    
+		AC_MSG_ERROR(mnoGoSearch 3.1.10 at least required)
+	fi
+	
+	if test -l "$MNOGOSEARCH_VERSION_ID" -gt 6; then
+		AC_MSG_RESULT(<= 3.1.9)    
+		AC_MSG_ERROR(mnoGoSearch 3.1.10 at least required)
+	fi
+	
+	if test "$MNOGOSEARCH_VERSION_ID" -lt 30110; then
+		AC_MSG_RESULT(<= 3.1.9)
+		AC_MSG_ERROR(mnoGoSearch 3.1.10 at least required)
+	fi
+	
+	AC_MSG_RESULT($MNOGOSEARCH_VERSION)
+	
   	PHP_EVAL_LIBLINE(`$MNOGOSEARCH_BINDIR/udm-config --libs`, MNOGOSEARCH_SHARED_LIBADD)
     else
-    	AC_ADD_LIBRARY_WITH_PATH(udmsearch, $MNOGOSEARCH_LIBDIR, MNOGOSEARCH_SHARED_LIBADD)
+	AC_MSG_ERROR(udm-config script not found in $MNOGOSEARCH_BINDIR)
     fi
+    
+    AC_ADD_INCLUDE($MNOGOSEARCH_INCDIR)
     
     AC_DEFINE(HAVE_MNOGOSEARCH,1,[ ])
     
