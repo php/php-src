@@ -1,3 +1,8 @@
+2004-09-30  Andi Gutmans  <andi@zend.com>
+
+    * zend_operators.c:
+      - Small improvement to DVAL_TO_ZVAL macro
+
 2004-09-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c:

@@ -1,3 +1,67 @@
+2004-09-30  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_4_3)
+      Zend/zend_operators.c:
+      - MF PHP 5
+
+    * ZendEngine2/zend_operators.c:
+      - Small improvement to DVAL_TO_ZVAL macro
+
+2004-09-30  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * main/config.nw.h:
+      enabling few functionalities as the LibC starts supporting them
+
+2004-09-30  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      BFN
+
+2004-09-30  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * main/php_scandir.h:
+      Including config.nw.h file for NetWare
+
+    * ext/session/session.c:
+      NetWare specific stat structure access incorporated
+
+    * ext/session/mod_files.c:
+      handled NetWare F_SETFD and stat differences
+
+2004-09-30  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/session/session.c
+      ext/session/session.c:
+      fix error message
+
+    * (PHP_4_3)
+      ext/session/session.c
+      ext/session/session.c:
+      MFH: fix segfaults and bug #30282 and suppress compile warnings
+
+    * ext/session/session.c:
+      fix segfault when using unknown/unsupported save_handler and/or
+      serialize_handler (bug #30282)
+
+2004-09-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/php.h:
+      -  Add missing macro
+
+2004-09-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/ctype/ctype.c
+      ext/ctype/ctype.c:
+      MFH: Fixed bug #30276 (Possible crash in ctype_digit on large numbers).
+
+    * ext/ctype/ctype.c:
+      Fixed bug #30276 (Possible crash in ctype_digit on large numbers).
+
 2004-09-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_API.c:
