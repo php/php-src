@@ -43,6 +43,7 @@ extern zend_module_entry libxml_module_entry;
 typedef struct {
 	zval *stream_context;
 	smart_str error_buffer;
+	zend_llist *error_list;
 } php_libxml_globals;
 
 typedef struct _php_libxml_ref_obj {
@@ -67,11 +68,15 @@ typedef struct _php_libxml_node_object {
 typedef void * (*php_libxml_export_node) (zval *object TSRMLS_DC);
 
 PHP_FUNCTION(libxml_set_streams_context);
+PHP_FUNCTION(libxml_use_internal_errors);
+PHP_FUNCTION(libxml_get_last_error);
+PHP_FUNCTION(libxml_clear_errors);
+PHP_FUNCTION(libxml_get_errors);
 
 int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data TSRMLS_DC);
 int php_libxml_decrement_node_ptr(php_libxml_node_object *object TSRMLS_DC);
-int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp TSRMLS_DC);
-int php_libxml_decrement_doc_ref(php_libxml_node_object *object TSRMLS_DC);
+PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp TSRMLS_DC);
+PHP_LIBXML_API int php_libxml_decrement_doc_ref(php_libxml_node_object *object TSRMLS_DC);
 PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object TSRMLS_DC);
 PHP_LIBXML_API int php_libxml_register_export(zend_class_entry *ce, php_libxml_export_node export_function);
 /* When an explicit freeing of node and children is required */
