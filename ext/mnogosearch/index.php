@@ -5,9 +5,9 @@
     $Id$ 
 */
 
-/*   mnoGoSearch-php-lite v.1.2
+/*   mnoGoSearch-php-lite v.1.3
  *   for mnoGoSearch ( formely known as UdmSearch ) free web search engine
- *   (C) 2001 by Sergey Kartashoff <gluke@mail.ru>,
+ *   (C) 2001-2002 by Sergey Kartashoff <gluke@mail.ru>,
  *               mnoGoSearch Developers Team <devel@mnogosearch.org>
  */
 
@@ -28,8 +28,12 @@ $MAX_PS=100;
 
 /* variables section */
 
-$dbaddr='mysql://udm:udm@/udm/';
-$dbmode='single';
+if (Udm_Api_Version() >= 30204) {
+	$dbaddr='mysql://mnogo:mnogo@/mnogo/?dbmode=single';
+} else {
+	$dbaddr='mysql://mnogo:mnogo@/mnogo/';
+	$dbmode='single';
+}
 
 $localcharset='koi8-r';
 $browsercharset='utf-8';
@@ -37,13 +41,21 @@ $phrase=$cache=$crosswords='no';
 $ispelluseprefixes=$trackquery='no';
 $spell_host=$vardir=$datadir='';
 $ispellmode='text';
-$affix_file['en']='/opt/udm/ispell/en.aff';
+
+$affix_file=array();
+$spell_file=array();
+$stopwordtable_arr=array();
+$stopwordfile_arr=array();
+$synonym_arr=array();
+$searchd_arr=array();
+
+// $affix_file['en']='/opt/udm/ispell/en.aff';
 // $affix_file['ru']='/opt/udm/ispell/ru.aff';
-$spell_file['en']='/opt/udm/ispell/en.dict';
+// $spell_file['en']='/opt/udm/ispell/en.dict';
 // $spell_file['ru']='/opt/udm/ispell/ru.dict';
-$stopwordtable_arr[]='stopword';
+ $stopwordtable_arr[]='stopword';
 // $stopwordfile_arr[]='stopwords.txt';
-$synonym_arr[]='/opt/udm/synonym/english.syn';
+// $synonym_arr[]='/opt/udm/synonym/english.syn';
 $searchd_arr[]='localhost';
 
 $minwordlength=1;
@@ -52,6 +64,27 @@ $maxwordlength=32;
 $storedocurl="/cgi-bin/storedoc.cgi";
 
 /* initialisation section */
+
+if(isset($HTTP_GET_VARS)){
+  while(list($var, $val)=each($HTTP_GET_VARS)){
+    $$var=$val;
+  }
+}
+if(isset($HTTP_POST_VARS)){
+  while(list($var, $val)=each($HTTP_POST_VARS)){
+    $$var=$val;
+  }
+}
+if(isset($HTTP_COOKIE_VARS)){
+  while(list($var, $val)=each($HTTP_COOKIE_VARS)){
+    $$var=$val;
+  }
+}
+if(isset($HTTP_SERVER_VARS)){
+  while(list($var, $val)=each($HTTP_SERVER_VARS)){
+    $$var=$val;
+  }
+}
 
 $self=$PHP_SELF;
 
@@ -479,7 +512,11 @@ function make_nav($query_orig){
      
    $have_spell_flag=0;
 
-   $udm_agent=Udm_Alloc_Agent($dbaddr,$dbmode);	
+   if (Udm_Api_Version() >= 30204) {
+	$udm_agent=Udm_Alloc_Agent($dbaddr);	
+   } else {
+	$udm_agent=Udm_Alloc_Agent($dbaddr,$dbmode);	
+   }       
 
    Udm_Set_Agent_Param($udm_agent,UDM_PARAM_PAGE_SIZE,$ps);
    Udm_Set_Agent_Param($udm_agent,UDM_PARAM_PAGE_NUM,$np);
@@ -611,6 +648,10 @@ function make_nav($query_orig){
 
 	Udm_Set_Agent_Param($udm_agent,UDM_PARAM_QSTRING,$QUERY_STRING);
         Udm_Set_Agent_Param($udm_agent,UDM_PARAM_REMOTE_ADDR,$REMOTE_ADDR);
+   }
+
+   if (Udm_Api_Version() >= 30204) {   	
+	if ($have_query_flag)Udm_Set_Agent_Param($udm_agent,UDM_PARAM_QUERY,$query_orig);
    }
 
    if  ($m=='any') {
@@ -924,7 +965,7 @@ if(($errno=Udm_Errno($udm_agent))>0){
 	print("Displaying documents $first_doc-$last_doc of total <B>$found</B> found.\n");
 
         $stored_link=-1;
-	if ((Udm_Api_Version() >= 30203) && ($storedaddr != '')) {
+	if ((Udm_Api_Version() == 30203) && ($storedaddr != '')) {
 	    $stored_link=Udm_Open_Stored($udm_agent,$storedaddr);
 	}
                         
@@ -964,7 +1005,7 @@ if(($errno=Udm_Errno($udm_agent))>0){
                 print ("<A HREF=\"$url\" TARGET=\"_blank\">$url</A>\n");
                 print ("($contype) $lastmod, $docsize bytes</UL></DL>\n");
 		
-		if (Udm_Api_Version() >= 30203) {
+		if (Udm_Api_Version() == 30203) {
 		    if ((($stored_link>0) && (Udm_Check_Stored($udm_agent,$stored_link,Udm_CRC32($udm_agent,$url)))) ||
 		        ($stored_link==-1)) {		    
 		        $storedstr="$storedocurl?rec_id=".Udm_CRC32($udm_agent,$url).
@@ -979,7 +1020,7 @@ if(($errno=Udm_Errno($udm_agent))>0){
 		} 		
 	}	
 
-        if ((Udm_Api_Version() >= 30203) &&
+        if ((Udm_Api_Version() == 30203) &&
 	    ($stored_link>0)) {
 	    Udm_Close_Stored($udm_agent, $stored_link);
 	}
