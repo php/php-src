@@ -264,8 +264,11 @@ static int _build_trace_string(zval **frame, int num_args, va_list args, zend_ha
 	TRACE_APPEND_KEY("function");
 	TRACE_APPEND_CHR('(');
 	if (zend_hash_find(ht, "args", sizeof("args"), (void**)&tmp) == SUCCESS) {
+		int last_len = *len;
 		zend_hash_apply_with_arguments(Z_ARRVAL_PP(tmp), (apply_func_args_t)_build_trace_args, 2, str, len);
-		*len -= 2; /* remove last ', ' */
+		if (last_len != *len) {
+			*len -= 2; /* remove last ', ' */
+		}
 	}
 	TRACE_APPEND_STR(")\n");
 	return ZEND_HASH_APPLY_KEEP;
