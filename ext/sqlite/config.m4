@@ -12,6 +12,23 @@ PHP_ARG_WITH(sqlite, for sqlite support,
                           if not using bundled library.], yes)
 
 if test "$PHP_SQLITE" != "no"; then
+  AC_MSG_CHECKING([for PDO includes])
+  if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
+    pdo_inc_path=$abs_srcdir/ext
+  elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
+    pdo_inc_path=$abs_srcdir/ext
+  elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
+    pdo_inc_path=$prefix/include/php/ext
+  else
+    AC_MSG_WARN([Cannot find php_pdo_driver.h.])
+    pdo_inc_path=""
+  fi
+  if test -n "$pdo_inc_path"; then
+    AC_DEFINE([PHP_SQLITE2_HAVE_PDO], [1], [Have PDO])
+    pdo_inc_path="-I$pdo_inc_path"
+  fi
+  
+  AC_MSG_RESULT($pdo_inc_path)
 
   if test "$PHP_SQLITE" != "yes"; then
     SEARCH_PATH="/usr/local /usr"
@@ -49,11 +66,11 @@ if test "$PHP_SQLITE" != "no"; then
     ])
  
     PHP_SUBST(SQLITE_SHARED_LIBADD)
-    PHP_NEW_EXTENSION(sqlite, sqlite.c sess_sqlite.c libsqlite/src/encode.c, $ext_shared)
+    PHP_NEW_EXTENSION(sqlite, sqlite.c sess_sqlite.c pdo_sqlite2.c libsqlite/src/encode.c, $ext_shared,,$pdo_inc_path)
   else
     # use bundled library
 
-    PHP_SQLITE_CFLAGS="-I@ext_srcdir@/libsqlite/src"
+    PHP_SQLITE_CFLAGS="-I@ext_srcdir@/libsqlite/src $pdo_inc_path"
 
     sources="libsqlite/src/opcodes.c
         libsqlite/src/parse.c libsqlite/src/encode.c \
@@ -69,8 +86,9 @@ if test "$PHP_SQLITE" != "no"; then
         libsqlite/src/vdbeaux.c libsqlite/src/date.c \
         libsqlite/src/where.c libsqlite/src/trigger.c"
     
-    PHP_NEW_EXTENSION(sqlite, sqlite.c sess_sqlite.c $sources, $ext_shared,,$PHP_SQLITE_CFLAGS)
+    PHP_NEW_EXTENSION(sqlite, sqlite.c sess_sqlite.c pdo_sqlite2.c $sources, $ext_shared,,$PHP_SQLITE_CFLAGS)
     PHP_ADD_EXTENSION_DEP(sqlite, spl)
+    PHP_ADD_EXTENSION_DEP(sqlite, pdo)
     PHP_ADD_BUILD_DIR($ext_builddir/libsqlite)
     PHP_ADD_BUILD_DIR($ext_builddir/libsqlite/src)
     AC_CHECK_SIZEOF(char *,4)
