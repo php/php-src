@@ -175,8 +175,8 @@ struct _zend_executor_globals {
 
 
 struct _zend_alloc_globals {
-	mem_header *head;		/* standard list */
-	mem_header *phead;		/* persistent list */
+	zend_mem_header *head;		/* standard list */
+	zend_mem_header *phead;		/* persistent list */
 	void *cache[MAX_CACHED_MEMORY][MAX_CACHED_ENTRIES];
 	unsigned char cache_count[MAX_CACHED_MEMORY];
 

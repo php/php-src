@@ -30,7 +30,7 @@
 #define MEM_BLOCK_FREED_MAGIC	0x99954317L
 #define MEM_BLOCK_CACHED_MAGIC	0xFB8277DCL
 
-typedef struct _mem_header {
+typedef struct _zend_mem_header {
 #if ZEND_DEBUG
 	long magic;
 	char *filename;
@@ -39,12 +39,12 @@ typedef struct _mem_header {
 	char *orig_filename;
 	uint orig_lineno;
 #endif
-    struct _mem_header *pNext;
-    struct _mem_header *pLast;
+    struct _zend_mem_header *pNext;
+    struct _zend_mem_header *pLast;
 	unsigned int size:30;
 	unsigned int persistent:1;
 	unsigned int cached:1;
-} mem_header;
+} zend_mem_header;
 
 typedef union _align_test {
 	void *ptr;
@@ -56,7 +56,7 @@ typedef union _align_test {
 #define MAX_CACHED_ENTRIES	16
 
 #define PLATFORM_ALIGNMENT (sizeof(align_test))
-#define PLATFORM_PADDING (((PLATFORM_ALIGNMENT-sizeof(mem_header))%PLATFORM_ALIGNMENT+PLATFORM_ALIGNMENT)%PLATFORM_ALIGNMENT)
+#define PLATFORM_PADDING (((PLATFORM_ALIGNMENT-sizeof(zend_mem_header))%PLATFORM_ALIGNMENT+PLATFORM_ALIGNMENT)%PLATFORM_ALIGNMENT)
 
 ZEND_API char *zend_strndup(const char *s, unsigned int length);
 

@@ -96,13 +96,13 @@ static zend_alloc_globals alloc_globals;
 		}							\
 		AG(head) = p;				\
 	}								\
-	p->pLast = (mem_header *) NULL;
+	p->pLast = (zend_mem_header *) NULL;
 
 
 
 ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	mem_header *p;
+	zend_mem_header *p;
 	ALS_FETCH();
 
 
@@ -118,9 +118,9 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 #endif
 		p->persistent = 0;
 		p->cached = 0;
-		return (void *)((char *)p + sizeof(mem_header) + PLATFORM_PADDING);
+		return (void *)((char *)p + sizeof(zend_mem_header) + PLATFORM_PADDING);
 	} else {
-		p  = (mem_header *) malloc(sizeof(mem_header) + size + PLATFORM_PADDING + END_ALIGNMENT(size) + END_MAGIC_SIZE);
+		p  = (zend_mem_header *) malloc(sizeof(zend_mem_header) + size + PLATFORM_PADDING + END_ALIGNMENT(size) + END_MAGIC_SIZE);
 	}
 
 	HANDLE_BLOCK_INTERRUPTIONS();
@@ -145,19 +145,19 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	p->orig_lineno = __zend_orig_lineno;
 	p->magic = MEM_BLOCK_START_MAGIC;
 	p->reported = 0;
-	*((long *)(((char *) p) + sizeof(mem_header)+size+PLATFORM_PADDING+END_ALIGNMENT(size))) = MEM_BLOCK_END_MAGIC;
+	*((long *)(((char *) p) + sizeof(zend_mem_header)+size+PLATFORM_PADDING+END_ALIGNMENT(size))) = MEM_BLOCK_END_MAGIC;
 #endif
 #if MEMORY_LIMIT
 	CHECK_MEMORY_LIMIT(size);
 #endif
 	HANDLE_UNBLOCK_INTERRUPTIONS();
-	return (void *)((char *)p + sizeof(mem_header) + PLATFORM_PADDING);
+	return (void *)((char *)p + sizeof(zend_mem_header) + PLATFORM_PADDING);
 }
 
 
 ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	mem_header *p = (mem_header *) ((char *)ptr - sizeof(mem_header) - PLATFORM_PADDING);
+	zend_mem_header *p = (zend_mem_header *) ((char *)ptr - sizeof(zend_mem_header) - PLATFORM_PADDING);
 	ALS_FETCH();
 
 #if ZEND_DEBUG
@@ -207,8 +207,8 @@ ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 
 ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	mem_header *p = (mem_header *) ((char *)ptr-sizeof(mem_header)-PLATFORM_PADDING);
-	mem_header *orig = p;
+	zend_mem_header *p = (zend_mem_header *) ((char *)ptr-sizeof(zend_mem_header)-PLATFORM_PADDING);
+	zend_mem_header *orig = p;
 	ALS_FETCH();
 
 	if (!ptr) {
@@ -216,7 +216,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 	}
 	HANDLE_BLOCK_INTERRUPTIONS();
 	REMOVE_POINTER_FROM_LIST(p);
-	p = (mem_header *) realloc(p,sizeof(mem_header)+size+PLATFORM_PADDING+END_ALIGNMENT(size)+END_MAGIC_SIZE);
+	p = (zend_mem_header *) realloc(p,sizeof(zend_mem_header)+size+PLATFORM_PADDING+END_ALIGNMENT(size)+END_MAGIC_SIZE);
 	if (!p) {
 		if (!allow_failure) {
 			fprintf(stderr,"FATAL:  erealloc():  Unable to allocate %ld bytes\n", (long) size);
@@ -235,7 +235,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 	p->filename = __zend_filename;
 	p->lineno = __zend_lineno;
 	p->magic = MEM_BLOCK_START_MAGIC;
-	*((long *)(((char *) p) + sizeof(mem_header)+size+PLATFORM_PADDING+END_ALIGNMENT(size))) = MEM_BLOCK_END_MAGIC;
+	*((long *)(((char *) p) + sizeof(zend_mem_header)+size+PLATFORM_PADDING+END_ALIGNMENT(size))) = MEM_BLOCK_END_MAGIC;
 #endif	
 #if MEMORY_LIMIT
 	CHECK_MEMORY_LIMIT(size - p->size);
@@ -243,7 +243,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 	p->size = size;
 
 	HANDLE_UNBLOCK_INTERRUPTIONS();
-	return (void *)((char *)p+sizeof(mem_header)+PLATFORM_PADDING);
+	return (void *)((char *)p+sizeof(zend_mem_header)+PLATFORM_PADDING);
 }
 
 
@@ -327,7 +327,7 @@ ZEND_API void start_memory_manager(ALS_D)
 
 ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 {
-	mem_header *p, *t;
+	zend_mem_header *p, *t;
 #if ZEND_DEBUG
 	int had_leaks=0;
 #endif
@@ -339,7 +339,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 		if (!t->cached || clean_cache) {
 #if ZEND_DEBUG
 			if (!t->cached && !t->reported) {
-				mem_header *iterator;
+				zend_mem_header *iterator;
 				int total_leak=0, total_leak_count=0;
 
 				had_leaks=1;
@@ -392,7 +392,7 @@ void zend_debug_alloc_output(char *format, ...)
 
 ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	mem_header *p = (mem_header *) ((char *)ptr - sizeof(mem_header) - PLATFORM_PADDING);
+	zend_mem_header *p = (zend_mem_header *) ((char *)ptr - sizeof(zend_mem_header) - PLATFORM_PADDING);
 	int no_cache_notice=0;
 	int valid_beginning=1;
 	int had_problems=0;
@@ -454,7 +454,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_
 
 
 	if (valid_beginning
-		&& *((long *)(((char *) p)+sizeof(mem_header)+p->size+PLATFORM_PADDING+END_ALIGNMENT(p->size))) != MEM_BLOCK_END_MAGIC) {
+		&& *((long *)(((char *) p)+sizeof(zend_mem_header)+p->size+PLATFORM_PADDING+END_ALIGNMENT(p->size))) != MEM_BLOCK_END_MAGIC) {
 		long magic_num = MEM_BLOCK_END_MAGIC;
 		char *overflow_ptr, *magic_ptr=(char *) &magic_num;
 		int overflows=0;
@@ -464,7 +464,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_
 			return _mem_block_check(ptr, 0 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 		}
 		had_problems=1;
-		overflow_ptr = ((char *) p)+sizeof(mem_header)+p->size+PLATFORM_PADDING;
+		overflow_ptr = ((char *) p)+sizeof(zend_mem_header)+p->size+PLATFORM_PADDING;
 
 		for (i=0; i<sizeof(long); i++) {
 			if (overflow_ptr[i]!=magic_ptr[i]) {
@@ -474,7 +474,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_
 
 		zend_debug_alloc_output("%10s\t", "End:");
 		zend_debug_alloc_output("Overflown (magic=0x%0.8lX instead of 0x%0.8lX)\n", 
-				*((long *)(((char *) p) + sizeof(mem_header)+p->size+PLATFORM_PADDING+END_ALIGNMENT(p->size))), MEM_BLOCK_END_MAGIC);
+				*((long *)(((char *) p) + sizeof(zend_mem_header)+p->size+PLATFORM_PADDING+END_ALIGNMENT(p->size))), MEM_BLOCK_END_MAGIC);
 		zend_debug_alloc_output("%10s\t","");
 		if (overflows>=sizeof(long)) {
 			zend_debug_alloc_output("At least %d bytes overflown\n", sizeof(long));
@@ -505,7 +505,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_
 
 ZEND_API void _full_mem_check(int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	mem_header *p;
+	zend_mem_header *p;
 	int errors=0;
 	ALS_FETCH();
 
@@ -516,7 +516,7 @@ ZEND_API void _full_mem_check(int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_D
 	zend_debug_alloc_output("Full Memory Check at %s:%d\n" ZEND_FILE_LINE_RELAY_CC);
 
 	while (p) {
-		if (!_mem_block_check((void *)((char *)p + sizeof(mem_header) + PLATFORM_PADDING), (silent?2:3) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC)) {
+		if (!_mem_block_check((void *)((char *)p + sizeof(zend_mem_header) + PLATFORM_PADDING), (silent?2:3) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC)) {
 			errors++;
 		}
 		p = p->pNext;
@@ -529,7 +529,7 @@ ZEND_API void _full_mem_check(int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_D
 
 ZEND_API void _persist_alloc(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	mem_header *p = (mem_header *) ((char *)ptr-sizeof(mem_header)-PLATFORM_PADDING);
+	zend_mem_header *p = (zend_mem_header *) ((char *)ptr-sizeof(zend_mem_header)-PLATFORM_PADDING);
 	ALS_FETCH();
 
 #if ZEND_DEBUG
