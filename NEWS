@@ -1,9 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 30 Jul 2003, Version 4.3.3RC2
-- More improvements of NSAPI module (Uwe Schindler)
-  . Possibility to use PHP to generate HTTP error pages (404 Not Found,...)
-  . Possibility to use PHP to generate directory listings for directories
+- Improved the NSAPI SAPI module (Uwe Schindler)
+  . Added possibility to use PHP to generate HTTP error pages (404 Not Found..)
+  . Added possibility to use PHP to generate directory listings for directories
     without index.html
 - Upgraded the bundled Expat library to version 1.95.6. (Jani)
 - Upgraded the bundled PCRE library to version 4.3. (Andrei)
