@@ -2504,7 +2504,7 @@ mbfl_filt_conv_wchar_byte4le(int c, mbfl_convert_filter *filter)
 
 /* uuencode => any */
 #define UUDEC(c)	(char)(((c)-' ')&077)
-static const char * uuenc_begin_text = "begin 0";
+static const char * uuenc_begin_text = "begin ";
 enum { uudec_state_ground=0, uudec_state_inbegin,
 	uudec_state_until_newline,
 	uudec_state_size, uudec_state_a, uudec_state_b, uudec_state_c, uudec_state_d,
