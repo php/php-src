@@ -36,6 +36,7 @@
 
 #if HAVE_JAVAVM_JAVAVM_H
 #include <JavaVM/JavaVM.h>
+#include <JavaVM/jni.h>
 #define JNI_12
 #else
 #include <jni.h>
