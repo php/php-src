@@ -1,3 +1,199 @@
+2003-12-03  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_downloader_old.phpt:
+      another test case, small fix for XML_RPC caching borking working tests
+
+    * pear/tests/pear_downloader_old.phpt:
+      add part of a test case
+
+2003-12-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * tests/lang/bug24773.phpt:
+      
+      file bug24773.phpt was initially added on branch PHP_4_3.
+
+    * ZendEngine2/tests/bug24773.phpt:
+      Test case for bug #24773.
+
+2003-12-03  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Downloader.php:
+      remove unnecessary notice generator in certain cases
+
+2003-12-03  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/iconv/config.w32:
+      This should solve a few problems with static vs. shared builds for
+      extensions (such as mssql) that require certain CFLAGS to be defined, but
+      not pull in other flags that would affect DLL linkage.
+      Also fix the iconv file; MSVC doesn't seem to like the #include SYMBOL
+      syntax.
+
+2003-12-03  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_downloader_old.phpt:
+      new unit test for downloader - incomplete.
+      
+      WARNING: this test requires a fully functional pearweb server at address
+      pear.Chiara, with several packages available for download.  This one will
+      fail until Martin has time to set up test.pear.php.net as the server.
+
+2003-12-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/url.c:
+      Remove unnecessary casts.
+
+2003-12-03  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Installer-minus-download.php:
+      duhhh...
+
+2003-12-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      MFZE2(r-1.558): This kind of error should be caught.
+
+2003-12-03  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - Add news about include_once fix for Windows
+
+2003-12-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ZendEngine2/zend_execute.c:
+      This kind of error should be caught. (suggested by Andi, thanks)
+
+2003-12-03  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/documenttype.c:
+      fix notations - forgot to create iterator
+
+2003-12-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/standard/url.c:
+      MFH(r-1.71): Possible fix for bug #26391 (parse_url() destroys strings
+      that contain a character in range of 0x80-0xff)
+
+    * ext/standard/url.c:
+      Possible fix for bug #26391 (parse_url() destroys strings that contain
+      a character in range of \x80-\xff))
+
+    * ext/iconv/config.w32:
+      Add a win32 build script. Not tested, but should work :)
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      MFZE2(r-1.557): Fix bug #24773 (unset()ing string offsets crashes PHP)
+
+    * ZendEngine2/zend_execute.c:
+      Fix bug #24773 (unset()ing string offsets crashes PHP)
+
+2003-12-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/openssl/xp_ssl.c:
+      Fixed compiler warning due to unused variables.
+
+2003-12-03  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_execute.c:
+      - Remove newline from error message
+
+2003-12-03  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/mssql/config.w32
+      ext/sqlite/config.w32
+      sapi/apache/config.w32:
+      Build adjustments.
+
+    * TSRM/TSRM.h:
+      Explicitly include this header for SHFILEINFO.
+
+2003-12-03  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      require libxml 2.5.11 for threaded error handling
+      certain cases crash unlocking libxml mutex with earlier versions
+
+2003-12-03  Derick Rethans  <php@derickrethans.nl>
+
+    * CODING_STANDARDS:
+      - I am sure I reverted this before
+
+2003-12-03  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/config.w32:
+      Adding missing defines and lib/include paths
+
+    * ext/fbsql/config.w32:
+      look for FrontBase files in the default location
+
+2003-12-03  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      ext/standard/http_fopen_wrapper.c:
+      Add http proxy support via context option.
+
+2003-12-03  Jon Parise  <jon@csh.rit.edu>
+
+    * configure.in:
+      Removing the DB extension warning message.  The DB extension is no longer
+      included in the PHP distribution.
+
+2003-12-03  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/zlib/config.w32
+      sapi/apache/config.w32:
+      some tweaks for Frank
+
+2003-12-03  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/string.c:
+      Optimize strrpos/strripos for single char strings and fix offset to report
+      correctly
+
+    * ext/standard/string.c:
+      Restore ability to use strrpos/strripos with an ordinal needle
+
+2003-12-03  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * README.WIN32-BUILD-SYSTEM:
+      add win32 build readme
+
+2003-12-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/shmop/config.w32:
+      Adding shmop config file for the new build system
+
+2003-12-03  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/fbsql/config.w32:
+      Adding FrontBase config file for the new build system
+
+2003-12-03  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * sapi/apache/config.w32:
+      Fix build if you don't have apache headers and want to disable apache...
+
+2003-12-03  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/config.w32:
+      oops. this should be with and not enable
+
+    * ext/mssql/config.w32:
+      Adding mssql config file for the new build system
+
+2003-12-03  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/config.w32:
+      Clarify a little.
+
 2003-12-02  Wez Furlong  <wez.php@thebrainroom.net>
 
     * .cvsignore

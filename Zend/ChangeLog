@@ -1,3 +1,21 @@
+2003-12-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * tests/bug24773.phpt:
+      Test case for bug #24773.
+
+2003-12-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * zend_execute.c:
+      This kind of error should be caught. (suggested by Andi, thanks)
+
+    * zend_execute.c:
+      Fix bug #24773 (unset()ing string offsets crashes PHP)
+
+2003-12-03  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_execute.c:
+      - Remove newline from error message
+
 2003-12-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_object_handlers.c:
