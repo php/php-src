@@ -1,3 +1,13 @@
+2001-09-28  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/msession.c
+      ext/msession/php_msession.h
+      ext/msession/reqclient.h: Added msession_set_array and msession_plugin
+
+2001-09-28  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php: implemented infoFromTgzFile()
+
 2001-09-27  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/scripts/phptar.in: tab vs ws
