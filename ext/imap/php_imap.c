@@ -1027,6 +1027,7 @@ PHP_FUNCTION(imap_getacl)
 	mail_parameters(NIL, SET_ACL, (void *) mail_getacl);
 	if(!imap_getacl(imap_le_struct->imap_stream, Z_STRVAL_PP(mailbox))) {
 		php_error(E_WARNING, "c-client imap_getacl failed");
+		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
 
