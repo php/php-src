@@ -37,32 +37,18 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.1</version>
+    <version>1.2</version>
     <state>stable</state>
     <date>2003-01-10</date>
     <notes>
-PEAR BASE CLASS:
-
-* PEAR_Error now supports exceptions when using Zend Engine 2.  Set the
-  error mode to PEAR_ERROR_EXCEPTION to make PEAR_Error throw itself
-  as an exception (invoke PEAR errors with raiseError() or throwError()
-  just like before).
-
-PEAR INSTALLER:
-
-* Packaging and validation now parses PHP source code (unless
-  ext/tokenizer is disabled) and does some coding standard conformance
-  checks.  Specifically, the names of classes and functions are
-  checked to ensure that they are prefixed with the package name.  If
-  your package has symbols that should be without this prefix, you can
-  override this warning by explicitly adding a "provides" entry in
-  your package.xml file.  See the package.xml file for this release
-  for an example (OS_Guess, System and md5_file).
-
-  All classes and non-private (not underscore-prefixed) methods and
-  functions are now registered during "pear package".
-
-</notes>
+* Changed license from PHP 2.02 to 3.0
+* Added support for optional dependencies
+* pear makerpm, now works and generates a better system independant spec file
+* pear install|build &lt;pecl-package&gt;, now exposes the compilation progress
+* Added new pear bundle command, which downloads and uncompress a &lt;pecl-package&gt;.
+The main purpouse of this command is for easily adding extensions to the PHP sources
+before compiling it.
+    </notes>
     <provides type="class" name="OS_Guess" />
     <provides type="class" name="System" />
     <provides type="function" name="md5_file" />
@@ -107,9 +93,9 @@ PEAR INSTALLER:
           <replace from="@include_path@" to="php_dir" type="pear-config"/>
         </file>
         <file role="script" platform="windows" install-as="pear.bat" name="pear.bat">
-	  <replace from="@bin_dir@" to="bin_dir" type="pear-config"/>
-	  <replace from="@php_bin@" to="php_bin" type="pear-config"/>
-	  <replace from="@include_path@" to="php_dir" type="pear-config"/>
+        <replace from="@bin_dir@" to="bin_dir" type="pear-config"/>
+        <replace from="@php_bin@" to="php_bin" type="pear-config"/>
+        <replace from="@include_path@" to="php_dir" type="pear-config"/>
         </file>
         <file role="php" install-as="pearcmd.php" name="pearcmd.php">
           <replace from="@php_bin@" to="php_bin" type="pear-config"/>
@@ -126,6 +112,33 @@ PEAR INSTALLER:
     </deps>
   </release>
   <changelog>
+    <release>
+        <version>1.1</version>
+        <state>stable</state>
+        <date>2003-01-10</date>
+        <notes>
+PEAR BASE CLASS:
+
+* PEAR_Error now supports exceptions when using Zend Engine 2.  Set the
+  error mode to PEAR_ERROR_EXCEPTION to make PEAR_Error throw itself
+  as an exception (invoke PEAR errors with raiseError() or throwError()
+  just like before).
+
+PEAR INSTALLER:
+
+* Packaging and validation now parses PHP source code (unless
+  ext/tokenizer is disabled) and does some coding standard conformance
+  checks.  Specifically, the names of classes and functions are
+  checked to ensure that they are prefixed with the package name.  If
+  your package has symbols that should be without this prefix, you can
+  override this warning by explicitly adding a "provides" entry in
+  your package.xml file.  See the package.xml file for this release
+  for an example (OS_Guess, System and md5_file).
+
+  All classes and non-private (not underscore-prefixed) methods and
+  functions are now registered during "pear package".
+        </notes>
+    </release>
    <release>
      <version>1.0.1</version>
      <state>stable</state>
@@ -134,15 +147,15 @@ PEAR INSTALLER:
  * PEAR_Error class has call backtrace available by
    calling getBacktrace().  Available if used with
    PHP 4.3 or newer.
- 
+
  * PEAR_Config class uses getenv() rather than $_ENV
    to read environment variables.
- 
+
  * System::which() Windows fix, now looks for
    exe/bat/cmd/com suffixes rather than just exe
- 
+
  * Added "pear cvsdiff" command
- 
+
  * Windows output buffering bugfix for "pear" command
 
  * Multiple drives installation now works on windows
