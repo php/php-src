@@ -188,7 +188,7 @@ PHP_FUNCTION(mailparse_uudecode_all)
 
 	outfp = php_open_temporary_file(NULL, "mailparse", &outpath TSRMLS_CC);
 	if (outfp == NULL)	{
-		zend_error(E_WARNING, "%s(): unable to open temp file", get_active_function_name(TSRMLS_CC));
+		zend_error(E_WARNING, "%s(): unable to open temp file", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
