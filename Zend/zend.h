@@ -265,7 +265,7 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define MAX(a,b)  (((a)>(b))?(a):(b))
 #define MIN(a,b)  (((a)<(b))?(a):(b))
 #define ZEND_STRL(str)		(str), (sizeof(str)-1)
-#define ZEND_STRS(str)		(str), (sizeof(str)
+#define ZEND_STRS(str)		(str), (sizeof(str))
 #define ZEND_NORMALIZE_BOOL(n)			\
 	((n) ? (((n)>0) ? 1 : -1) : 0)
 
