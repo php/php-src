@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ???, Version 4.0 Beta 5
+- Fixed comparison of (string) "inf" with (string) "inf", which was erroneously
+  returning false (Zeev)
 - Implemented default_charset and default_mimetype config directives (Stig)
 - Ported T1lib support from PHP3. (Jouni)
 - Fixed -DEAPI inheritance from APXS. (Sascha)
