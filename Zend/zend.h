@@ -324,19 +324,27 @@ END_EXTERN_C()
 	ALLOC_ZVAL(zv); \
 	INIT_PZVAL(zv);
 
+#define PZVAL_IS_REF(z)		((z)->is_ref)
+
 #define SEPARATE_ZVAL(ppzv)									\
 	{														\
 		zval *orig_ptr = *(ppzv);							\
 															\
 		if (orig_ptr->refcount>1) {							\
 			orig_ptr->refcount--;							\
-			ALLOC_ZVAL(*(ppzv));		\
+			ALLOC_ZVAL(*(ppzv));							\
 			**(ppzv) = *orig_ptr;							\
 			zval_copy_ctor(*(ppzv));						\
 			(*(ppzv))->refcount=1;							\
 			(*(ppzv))->is_ref = 0;							\
 		}													\
 	}
+
+#define SEPARATE_ZVAL_IF_NOT_REF(ppzv)		\
+	if (!PZVAL_IS_REF(*ppzv)) {				\
+		SEPARATE_ZVAL(ppzv);				\
+	}
+
 
 #define COPY_PZVAL_TO_ZVAL(zv, pzv)			\
 	(zv) = *(pzv);							\

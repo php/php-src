@@ -584,8 +584,6 @@ int zendlex(znode *zendlval CLS_DC);
 		(ai).ptr = NULL; \
 	}
 
-#define PZVAL_IS_REF(z)		((z)->is_ref)
-
 /* Lost In Stupid Parentheses */
 #define ARG_SHOULD_BE_SENT_BY_REF(offset, conduct_check, arg_types)	\
 	(																\

@@ -74,8 +74,8 @@ static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_
 
 
 #define SEPARATE_ON_READ_OBJECT(obj, _type)	\
-if ((obj) && ((_type) == BP_VAR_R) && ((*(obj))->type == IS_OBJECT) && (!(*(obj))->is_ref)) { \
-		SEPARATE_ZVAL((obj));			\
+if ((obj) && ((_type) == BP_VAR_R) && ((*(obj))->type == IS_OBJECT)) { \
+		SEPARATE_ZVAL_IF_NOT_REF((obj));			\
 		(*(obj))->is_ref = 1;			\
 	}
 
@@ -734,8 +734,8 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 					convert_to_long(&tmp);
 					offset = &tmp;
 				}
-				if (!container->is_ref && type!=BP_VAR_R && type!=BP_VAR_IS) {
-					SEPARATE_ZVAL(container_ptr);
+				if (type!=BP_VAR_R && type!=BP_VAR_IS) {
+					SEPARATE_ZVAL_IF_NOT_REF(container_ptr);
 				}
 				container = *container_ptr;
 				Ts[result->u.var].EA.str = container;
@@ -1249,7 +1249,7 @@ binary_assign_op_addr: {
 			case ZEND_FETCH_UNSET:
 				zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
 				if (Ts[opline->result.u.var].var.ptr_ptr != &EG(uninitialized_zval_ptr)) {
-					SEPARATE_ZVAL(Ts[opline->result.u.var].var.ptr_ptr);
+					SEPARATE_ZVAL_IF_NOT_REF(Ts[opline->result.u.var].var.ptr_ptr);
 				}
 				NEXT_OPCODE();
 			case ZEND_FETCH_IS:
@@ -1291,7 +1291,7 @@ binary_assign_op_addr: {
 				*/
 				zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
 				if (Ts[opline->result.u.var].var.ptr_ptr != &EG(uninitialized_zval_ptr)) {
-					SEPARATE_ZVAL(Ts[opline->result.u.var].var.ptr_ptr);
+					SEPARATE_ZVAL_IF_NOT_REF(Ts[opline->result.u.var].var.ptr_ptr);
 				}
 				NEXT_OPCODE();
 			case ZEND_FETCH_OBJ_R:
@@ -1320,7 +1320,7 @@ binary_assign_op_addr: {
 			case ZEND_FETCH_OBJ_UNSET:
 				zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
 				if (Ts[opline->result.u.var].var.ptr_ptr != &EG(uninitialized_zval_ptr)) {
-					SEPARATE_ZVAL(Ts[opline->result.u.var].var.ptr_ptr);
+					SEPARATE_ZVAL_IF_NOT_REF(Ts[opline->result.u.var].var.ptr_ptr);
 				}
 				NEXT_OPCODE();
 			case ZEND_FETCH_DIM_TMP_VAR:
