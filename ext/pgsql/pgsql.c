@@ -535,15 +535,29 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			PGG(num_links)++;
 			PGG(num_persistent)++;
 		} else {  /* we do */
+			php_log_err("CONNECTION IS ALREADY OPENED :)" TSRMLS_CC);
 			if (Z_TYPE_P(le) != le_plink) {
 				RETURN_FALSE;
 			}
 			/* ensure that the link did not die */
+			{
+				/* need to send & get something from backend to
+				   make sure we catch CONNECTION_BAD everytime */
+				PGresult *pg_result;
+				pg_result = PQexec(le->ptr, "select 1");
+				PQclear(pg_result);
+			}
+			PQconsumeInput(le->ptr); 
 			if (PQstatus(le->ptr)==CONNECTION_BAD) { /* the link died */
-				if (connstring) {
-					le->ptr=PQconnectdb(connstring);
-				} else {
-					le->ptr=PQsetdb(host,port,options,tty,dbname);
+				if (le->ptr == NULL) {
+					if (connstring) {
+						le->ptr=PQconnectdb(connstring);
+					} else {
+						le->ptr=PQsetdb(host,port,options,tty,dbname);
+					}
+				}
+				else {
+					PQreset(le->ptr);
 				}
 				if (le->ptr==NULL || PQstatus(le->ptr)==CONNECTION_BAD) {
 					php_error(E_WARNING,"PostgreSQL link lost, unable to reconnect");
@@ -721,9 +735,6 @@ void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-	if (PQstatus(pgsql) != CONNECTION_OK) {
-		PQreset(pgsql);
-	}
 	switch(entry_type) {
 		case PHP_PG_DBNAME:
 			Z_STRVAL_P(return_value) = PQdb(pgsql);
@@ -832,9 +843,6 @@ PHP_FUNCTION(pg_query)
 	
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-	if (PQstatus(pgsql) != CONNECTION_OK) {
-		PQreset(pgsql);
-	}
 	convert_to_string_ex(query);
 	PQsetnonblocking(pgsql, 0);
 	while ((pgsql_result = PQgetResult(pgsql))) {
@@ -2516,9 +2524,6 @@ PHP_FUNCTION(pg_send_query)
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-	if (PQstatus(pgsql) != CONNECTION_OK) {
-		PQreset(pgsql);
-	}
 	if (PQsetnonblocking(pgsql, 1)) {
 		php_error(E_NOTICE,"%s() cannot set connection to nonblocking mode",
 				  get_active_function_name(TSRMLS_C));
