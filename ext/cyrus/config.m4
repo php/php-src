@@ -21,6 +21,11 @@ if test "$PHP_CYRUS" != "no"; then
 			PHP_SUBST(SASL_SHARED_LIBADD)
 			PHP_ADD_LIBRARY_WITH_PATH(sasl, $i/lib, SASL_SHARED_LIBADD)
 			found_sasl=yes
+		elif test -r $i/include/sasl/sasl.h && test "$found_sasl" = "no"; then
+			PHP_ADD_INCLUDE($i/include/sasl)
+			PHP_SUBST(SASL_SHARED_LIBADD)
+			PHP_ADD_LIBRARY_WITH_PATH(sasl, $i/lib, SASL_SHARED_LIBADD)
+			found_sasl=yes
 		fi
 		if test -r $i/include/openssl/ssl.h && test "$found_openssl" = "no" && test "$PHP_OPENSSL" = "no"; then
 			PHP_SUBST(OPENSSL_SHARED_LIBADD)
