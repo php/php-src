@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Added command line parameters -B, -F, -R and -E which allow to process
+  stdin line by line (See php -h for more). (marcus)
 - Added XBM support for bundled gd library. (marcus)
 - Added XBM support for GetImageSize(). (helly)
 - Fixed bug #20155 (xmlrpc compile problem with ZE2). (Derick, Jan Schneider)
