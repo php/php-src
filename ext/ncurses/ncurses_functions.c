@@ -2239,7 +2239,7 @@ PHP_FUNCTION(ncurses_del_panel)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &handle) == FAILURE) {
 		return;
 	}
-	zend_list_delete(Z_RESVAL_PP(handle));
+	zend_list_delete(Z_RESVAL_P(handle));
 
 	RETURN_TRUE;
 }
