@@ -38,7 +38,7 @@
 #define ISAPI_SERVER_VAR_BUF_SIZE 1024
 #define ISAPI_POST_DATA_BUF 1024
 
-static int isapi_globals_id=-1;
+static zend_bool bFilterLoaded=0;
 
 static char *isapi_server_variables[] = {
 	"ALL_HTTP",
@@ -395,15 +395,9 @@ static sapi_module_struct sapi_module = {
 };
 
 
-typedef struct _php_isapi_globals {
-	char *auth_user;
-	char *auth_password;
-} php_isapi_globals;
-
-
 BOOL WINAPI GetFilterVersion(PHTTP_FILTER_VERSION pFilterVersion)
 {
-	isapi_globals_id = ts_allocate_id(sizeof(php_isapi_globals), NULL, NULL);
+	bFilterLoaded = 1;
 	pFilterVersion->dwFilterVersion = HTTP_FILTER_REVISION;
 	strcpy(pFilterVersion->lpszFilterDesc, sapi_module.name);
 	pFilterVersion->dwFlags= (SF_NOTIFY_AUTHENTICATION | SF_NOTIFY_PREPROC_HEADERS);
@@ -413,22 +407,22 @@ BOOL WINAPI GetFilterVersion(PHTTP_FILTER_VERSION pFilterVersion)
 
 DWORD WINAPI HttpFilterProc(PHTTP_FILTER_CONTEXT pfc, DWORD notificationType, LPVOID pvNotification)
 {
-	php_isapi_globals *isapi_globals = ts_resource(isapi_globals_id);
+	SLS_FETCH();
 
 	switch (notificationType) {
 		case SF_NOTIFY_PREPROC_HEADERS:
-			isapi_globals->auth_user = NULL;
-			isapi_globals->auth_password = NULL;
+			SG(request_info).auth_user = NULL;
+			SG(request_info).auth_password = NULL;
 			break;
 		case SF_NOTIFY_AUTHENTICATION: {
 				char *auth_user = ((HTTP_FILTER_AUTHENT *) pvNotification)->pszUser;
 				char *auth_password = ((HTTP_FILTER_AUTHENT *) pvNotification)->pszPassword;
 
 				if (auth_user && auth_user[0]) {
-					isapi_globals->auth_user = estrdup(auth_user);
+					SG(request_info).auth_user = estrdup(auth_user);
 				}   
 				if (auth_password && auth_password[0]) {
-					isapi_globals->auth_password = estrdup(auth_password);
+					SG(request_info).auth_password = estrdup(auth_password);
 				}
 				auth_user[0] = 0;
 				auth_password[0] = 0;
@@ -457,11 +451,8 @@ static void init_request_info(sapi_globals_struct *sapi_globals, LPEXTENSION_CON
 			*path_end = '\\';
 		}
 	}
-	if (isapi_globals_id!=-1) { /* we have valid ISAPI Filter information */
-		php_isapi_globals *isapi_globals = ts_resource(isapi_globals_id);
-
-		SG(request_info).auth_user = isapi_globals->auth_user;
-		SG(request_info).auth_password = isapi_globals->auth_password;
+	if (!bFilterLoaded) { /* we don't have valid ISAPI Filter information */
+		SG(request_info).auth_user = SG(request_info).auth_password = NULL;
 	}
 }
 

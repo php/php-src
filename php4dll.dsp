@@ -140,10 +140,6 @@ SOURCE=".\fopen-wrappers.c"
 # End Source File
 # Begin Source File
 
-SOURCE=.\getopt.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\internal_functions_win32.c
 
 !IF  "$(CFG)" == "php4dll - Win32 Debug"
@@ -760,19 +756,29 @@ SOURCE=.\ext\pcre\pcrelib\pcre.h
 # PROP Default_Filter ".c"
 # Begin Source File
 
+SOURCE=.\dlist.c
+# ADD CPP /I "ext\xml\expat\xmltok" /I "ext\xml\expat\xmlparse"
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\wddx\wddx.c
+# ADD CPP /I "ext\xml\expat\xmltok" /I "ext\xml\expat\xmlparse"
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\xml\xml.c
 
 !IF  "$(CFG)" == "php4dll - Win32 Debug"
 
-# ADD CPP /I "ext\xml\expat\xmltok" /I "ext\xml\expat\xmlparse"
+# ADD CPP /I "ext\xml\expat\xmlparse" /I "ext\xml\expat\xmltok"
 
 !ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
 
-# ADD CPP /I "ext\xml\expat\xmltok"
+# ADD CPP /I "ext\xml\expat\xmltok" /I "ext\xml\expat\xmlparse"
 
 !ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
 
-# ADD CPP /I "ext\xml\expat\xmltok"
+# ADD CPP /I "ext\xml\expat\xmltok" /I "ext\xml\expat\xmlparse"
 
 !ENDIF 
 

@@ -178,7 +178,6 @@ SAPI_API void sapi_activate(SLS_D)
 	SG(request_info).post_data = NULL;
 	SG(request_info).current_user = NULL;
 	SG(request_info).current_user_length = 0;
-	SG(request_info).auth_user = SG(request_info).auth_password = NULL;
 
 	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
 		SG(request_info).headers_only = 1;
