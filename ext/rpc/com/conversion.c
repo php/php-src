@@ -1,4 +1,7 @@
+#ifdef PHP_WIN32
+
 #include "php.h"
+#include "php_COM.h"
 
 #ifdef CP_THREAD_ACP
 #define PHP_UNICODE_CODEPAGE CP_THREAD_ACP
@@ -6,16 +9,17 @@
 #define PHP_UNICODE_CODEPAGE CP_ACP
 #endif
 
+// prototypes
 
-__declspec(dllexport) void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg);
-__declspec(dllexport) void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type);
-__declspec(dllexport) void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent); 
-__declspec(dllexport) OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen);
-__declspec(dllexport) char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent);
+PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg);
+PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type);
+PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent); 
+PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen);
+PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent);
 
+// implementations
 
-__declspec(dllexport)
-void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg)
+PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg)
 {
 	OLECHAR *unicode_str;
 
@@ -68,7 +72,7 @@ void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg)
 	}
 }
 
-__declspec(dllexport) void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type)
+PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type)
 {
 	if(pval_type->type != IS_STRING)
 	{
@@ -292,8 +296,7 @@ __declspec(dllexport) void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_a
 	}
 }
 
-__declspec(dllexport)
-void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent)
+PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent)
 {
 	
 	switch (var_arg->vt & ~VT_BYREF) {
@@ -409,7 +412,7 @@ void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent)
 				pval *handle;
 
 				pval_arg->type=IS_OBJECT;
-//				pval_arg->value.obj.ce=&VARIANT_class_entry;
+				pval_arg->value.obj.ce = &com_class_entry;
 				pval_arg->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
 				pval_arg->is_ref=1;
 				pval_arg->refcount=1;
@@ -417,7 +420,7 @@ void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent)
 
 				ALLOC_ZVAL(handle);
 				handle->type = IS_LONG;
-// 				handle->value.lval = zend_list_insert(var_arg->pdispVal, le_variant);
+ 				handle->value.lval = zend_list_insert(var_arg->pdispVal, php_COM_get_le_idispatch());
 				pval_copy_constructor(handle);
 				INIT_PZVAL(handle);
 				zend_hash_index_update(pval_arg->value.obj.properties, 0, &handle, sizeof(pval *), NULL);
@@ -433,8 +436,7 @@ void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent)
 	}
 }
 
-__declspec(dllexport)
-OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen)
+PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen)
 {
 	OLECHAR *unicode_str;
 
@@ -466,8 +468,7 @@ OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen)
 	return unicode_str;
 }
 
-__declspec(dllexport)
-char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent)
+PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent)
 {
 	char *C_str;
 	uint length = 0;
@@ -495,3 +496,5 @@ char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent
 
 	return C_str;
 }
+
+#endif /* PHP_WIN32 */

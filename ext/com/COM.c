@@ -59,7 +59,7 @@
 #include <iostream.h>
 #include <math.h>
 
-extern "C" {
+extern "C" {	/* this should be included in the includes itself !! */
 
 #include "php.h"
 #include "php_ini.h"
@@ -67,12 +67,20 @@ extern "C" {
 }
 
 #include "conversion.h"
-#include "php_COM.h"
 #include "unknwn.h"
 
-static int le_idispatch;
+BEGIN_EXTERN_C()
 
-static zend_class_entry com_class_entry;
+zend_class_entry com_class_entry;
+
+END_EXTERN_C()
+
+PHP_FUNCTION(COM_load);
+PHP_FUNCTION(COM_invoke);
+PHP_FUNCTION(com_propget);
+PHP_FUNCTION(com_propput);
+
+static int le_idispatch;
 
 function_entry COM_functions[] = {
 	PHP_FE(COM_load,								NULL)
@@ -88,10 +96,6 @@ function_entry COM_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-__declspec(dllexport)
-int php_COM_get_le_idispatch() {
-	return le_idispatch;
-}
 
 static PHP_MINFO_FUNCTION(COM)
 {
@@ -100,8 +104,7 @@ static PHP_MINFO_FUNCTION(COM)
 
 static int php_COM_load_typelib(char *typelib_name, int mode);
 
-__declspec(dllexport)
-char *php_COM_error_message(HRESULT hr)
+PHPAPI char *php_COM_error_message(HRESULT hr)
 {
 	char *pMsgBuf;
 
@@ -133,7 +136,6 @@ static void php_idispatch_destructor(zend_rsrc_list_entry *rsrc)
 	IDispatch *i_dispatch = (IDispatch *)rsrc->ptr;
 	i_dispatch->Release();
 }
-
 
 static PHP_INI_MH(OnTypelibFileChange)
 {
@@ -631,9 +633,7 @@ VARIANTARG _php_COM_get_property_handler(zend_property_reference *property_refer
 	return var_result;
 }
 
-
-__declspec(dllexport)
-pval php_COM_get_property_handler(zend_property_reference *property_reference)
+PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_reference)
 {
 	pval result;
 	VARIANTARG var_result = _php_COM_get_property_handler(property_reference);
@@ -643,8 +643,7 @@ pval php_COM_get_property_handler(zend_property_reference *property_reference)
 }
 
 
-__declspec(dllexport)
-int php_COM_set_property_handler(zend_property_reference *property_reference, pval *value)
+PHPAPI int php_COM_set_property_handler(zend_property_reference *property_reference, pval *value)
 {
 	pval result;
 	zend_overloaded_element *overloaded_property;
@@ -707,8 +706,7 @@ int php_COM_set_property_handler(zend_property_reference *property_reference, pv
 
 
 
-__declspec(dllexport)
-void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
+PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
 	zend_overloaded_element *overloaded_property;
 	pval *object = property_reference->object;
@@ -868,8 +866,17 @@ PHP_MSHUTDOWN_FUNCTION(COM)
 	return SUCCESS;
 }
 
+BEGIN_EXTERN_C()
+// exports for external object creation
+
 zend_module_entry COM_module_entry = {
 	"com", COM_functions, PHP_MINIT(COM), PHP_MSHUTDOWN(COM), NULL, NULL, PHP_MINFO(COM), STANDARD_MODULE_PROPERTIES
 };
+
+PHPAPI int php_COM_get_le_idispatch() {
+	return le_idispatch;
+}
+
+END_EXTERN_C()
 
 #endif

@@ -34,20 +34,15 @@
 #include <math.h>
 #include <comdef.h>
 
-extern "C" {
+extern "C" {  /* this should be included in the includes itself !! */
+
 #include "php.h"
 #include "php_ini.h"
 
-OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen);
 }
 
-pval php_COM_get_property_handler(zend_property_reference *property_reference);
-int php_COM_set_property_handler(zend_property_reference *property_reference, pval *value);
-char *php_COM_error_message(HRESULT hr);
-void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
-int php_COM_get_le_idispatch();
-
 #include "../com/conversion.h"
+#include "../com/php_COM.h"
 #include "Mscoree.h"
 #include "mscorlib.h"
 
@@ -220,8 +215,8 @@ zend_module_entry dotnet_module_entry = {
 	"dotnet", DOTNET_functions, PHP_MINIT(DOTNET), PHP_MSHUTDOWN(DOTNET), NULL, NULL, PHP_MINFO(DOTNET), STANDARD_MODULE_PROPERTIES
 };
 
-extern "C" {
-	ZEND_GET_MODULE(dotnet)
-}
+BEGIN_EXTERN_C()
+ZEND_GET_MODULE(dotnet)
+END_EXTERN_C()
 
 #endif

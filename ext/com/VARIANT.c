@@ -410,4 +410,4 @@ void php_register_VARIANT_class()
 	zend_register_internal_class(&VARIANT_class_entry);
 }
 
-#endif
+#endif /* PHP_WIN32 */
