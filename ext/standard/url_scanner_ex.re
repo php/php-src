@@ -199,16 +199,16 @@ static void handle_form(STD_PARA)
 
 	if (ctx->form_app.len > 0) {
 		switch (ctx->tag.len) {
-		
-			case sizeof("form")-1:
-				if (strcasecmp(ctx->tag.c, "form") == 0)
-					doit = 1;
-				break;
 
-			case sizeof("fieldset")-1:
-				if (strcasecmp(ctx->tag.c, "fieldset") == 0)
-					doit = 1;
-				break;
+#define RECOGNIZE(x) do { 	\
+	case sizeof(x)-1: \
+		if (strncasecmp(ctx->tag.c, x, sizeof(x)-1) == 0) \
+			doit = 1; \
+		break; \
+} while (0)
+		
+			RECOGNIZE("form");
+			RECOGNIZE("fieldset");
 		}
 
 		if (doit)
