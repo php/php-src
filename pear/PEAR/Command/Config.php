@@ -63,6 +63,8 @@ class PEAR_Command_Config extends PEAR_Command_Common
     {
         $cf =& $this->config;
         $failmsg = '';
+        $params[0] = (isset($params[0])) ? $params[0] : null;
+        $params[1] = (isset($params[1])) ? $params[1] : null;
         switch ($command) {
             case 'config-show': {
                 $keys = $cf->getKeys();
