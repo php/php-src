@@ -53,7 +53,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 	char esbuf[512];
 	char *ebuf = NULL, *wptr = NULL;
 	size_t ebuf_size = 0;
-	unsigned long code;
+	unsigned long code, ecode;
 	int retry = 1;
 
 	switch(err) {
@@ -84,37 +84,49 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 				}
 				break;
 			}
+
+			
 			/* fall through */
 		default:
 			/* some other error */
-			while ((code = ERR_get_error()) != 0) {
-				/* allow room for a NUL and an optional \n */
-				if (ebuf) {
-					esbuf[0] = '\n';
-					esbuf[1] = '\0';
-					ERR_error_string_n(code, esbuf + 1, sizeof(esbuf) - 2);
-				} else {
-					esbuf[0] = '\0';
-					ERR_error_string_n(code, esbuf, sizeof(esbuf) - 1);
-				}
-				code = strlen(esbuf);
-				esbuf[code] = '\0';
+			ecode = ERR_get_error();
 
-				ebuf = erealloc(ebuf, ebuf_size + code + 1);
-				if (wptr == NULL) {
-					wptr = ebuf;
-				}	
+			switch (ERR_GET_REASON(ecode)) {
+				case SSL_R_NO_SHARED_CIPHER:
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSL_R_NO_SHARED_CIPHER: no suitable shared cipher could be used.  This could be because the server is missing an SSL certificate (local_cert context option)");
+					retry = 0;
+					break;
 
-				/* also copies the NUL */
-				memcpy(wptr, esbuf, code + 1);
-				wptr += code;
+				default:
+					do {
+						/* allow room for a NUL and an optional \n */
+						if (ebuf) {
+							esbuf[0] = '\n';
+							esbuf[1] = '\0';
+							ERR_error_string_n(ecode, esbuf + 1, sizeof(esbuf) - 2);
+						} else {
+							esbuf[0] = '\0';
+							ERR_error_string_n(ecode, esbuf, sizeof(esbuf) - 1);
+						}
+						code = strlen(esbuf);
+						esbuf[code] = '\0';
+
+						ebuf = erealloc(ebuf, ebuf_size + code + 1);
+						if (wptr == NULL) {
+							wptr = ebuf;
+						}	
+
+						/* also copies the NUL */
+						memcpy(wptr, esbuf, code + 1);
+						wptr += code;
+					} while ((ecode = ERR_get_error()) != 0);
+
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,
+							"SSL operation failed with code %d. %s%s",
+							err,
+							ebuf ? "OpenSSL Error messages:\n" : "",
+							ebuf ? ebuf : "");
 			}
-
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,
-					"SSL operation failed with code %d.%s%s",
-					err,
-					ebuf ? "OpenSSL Error messages:\n" : "",
-					ebuf ? ebuf : "");
 				
 			retry = 0;
 	}
@@ -424,6 +436,36 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 				xparam->outputs.client->context = stream->context;
 			}
 		}
+
+		if (xparam->outputs.client && sock->enable_on_connect) {
+			/* apply crypto */
+			switch (sock->method) {
+				case STREAM_CRYPTO_METHOD_SSLv23_CLIENT:
+					sock->method = STREAM_CRYPTO_METHOD_SSLv23_SERVER;
+					break;
+				case STREAM_CRYPTO_METHOD_SSLv2_CLIENT:
+					sock->method = STREAM_CRYPTO_METHOD_SSLv2_SERVER;
+					break;
+				case STREAM_CRYPTO_METHOD_SSLv3_CLIENT:
+					sock->method = STREAM_CRYPTO_METHOD_SSLv3_SERVER;
+					break;
+				case STREAM_CRYPTO_METHOD_TLS_CLIENT:
+					sock->method = STREAM_CRYPTO_METHOD_TLS_SERVER;
+					break;
+			}
+
+			clisockdata->method = sock->method;
+
+			if (php_stream_xport_crypto_setup(xparam->outputs.client, clisockdata->method,
+					NULL TSRMLS_CC) < 0 || php_stream_xport_crypto_enable(
+					xparam->outputs.client, 1 TSRMLS_CC) < 0) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to enable crypto");
+
+				php_stream_close(xparam->outputs.client);
+				xparam->outputs.client = NULL;
+				xparam->outputs.returncode = -1;
+			}
+		}
 	}
 	
 	return xparam->outputs.client == NULL ? -1 : 0;
@@ -524,14 +566,14 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 						}
 					}
 					return PHP_STREAM_OPTION_RETURN_OK;
-					break;
 
 				case STREAM_XPORT_OP_ACCEPT:
 					/* we need to copy the additional fields that the underlying tcp transport
 					 * doesn't know about */
 					xparam->outputs.returncode = php_openssl_tcp_sockop_accept(stream, sslsock, xparam STREAMS_CC TSRMLS_CC);
+
+					
 					return PHP_STREAM_OPTION_RETURN_OK;
-					break;
 
 				default:
 					/* fall through */
