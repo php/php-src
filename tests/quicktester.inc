@@ -1,5 +1,21 @@
 <?php
- error_reporting(0);  
+ /*
+  Helper for simple tests to check return-value. Usage:
+
+  $tests = <<<TESTS
+   expected_return_value === expression
+   2                     === 1+1
+   4                     === 2*2
+   FALSE                 === @ fopen('non_existent_file')
+TESTS;
+  include( '../../../(../)tests/quicktester.inc' );
+
+  Expect: OK
+
+  Remember to NOT put a trailing ; after a line!
+
+ */
+ error_reporting(E_ALL);  
  $tests = explode("\n",$tests);
  $success = TRUE;
  foreach ($tests as $test)
