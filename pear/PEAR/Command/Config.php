@@ -62,14 +62,21 @@ class PEAR_Command_Config extends PEAR_Command_Common
     {
         switch ($command) {
             case 'config-show':
-                return array(null, 'Displays the configuration');
+                $ret = array('[<layer>]', 'Displays the configuration');
+                break;
             case 'config-get':
-                return array('<parameter>',
+                $ret = array('<parameter> [<layer>]',
                              'Displays the value of the given parameter');
+                break;
             case 'config-set':
-                return array('<parameter>=<value>',
+                $ret = array('<parameter> <value> [<layer>]',
                              'Sets the value of a parameter in the config');
+                break;
         }
+        $ret[1] .= "\n".
+                   "  <layer>    Where to store/get the configuration. The installer\n".
+                   "             supports 'user' (per user conf) and 'system' (global conf)";
+        return $ret;
     }
     // {{{ run()
 
@@ -77,8 +84,6 @@ class PEAR_Command_Config extends PEAR_Command_Common
     {
         $cf =& $this->config;
         $failmsg = '';
-        $params[0] = (isset($params[0])) ? $params[0] : null;
-        $params[1] = (isset($params[1])) ? $params[1] : null;
         switch ($command) {
             case 'config-show': {
                 $keys = $cf->getKeys();
@@ -96,7 +101,7 @@ class PEAR_Command_Config extends PEAR_Command_Common
                 } else {
                     foreach ($keys as $key) {
                         $type = $cf->getType($key);
-                        $value = $cf->get($key, $params[0]);
+                        $value = $cf->get($key, @$params[0]);
                         if ($type == 'password' && $value) {
                             $value = '********';
                         }
@@ -108,7 +113,7 @@ class PEAR_Command_Config extends PEAR_Command_Common
             }
             case 'config-get': {
                 if (sizeof($params) < 1 || sizeof($params) > 2) {
-                    $failmsg .= "config-get expects 1 or 2 parameters";
+                    $failmsg .= "config-get expects 1 or 2 parameters. Try \"help config-get\" for help";
                 } elseif (sizeof($params) == 1) {
                     $this->ui->displayLine("$params[0] = " . $cf->get($params[0]));
                 } else {
@@ -119,13 +124,15 @@ class PEAR_Command_Config extends PEAR_Command_Common
             }
             case 'config-set': {
                 if (sizeof($params) < 2 || sizeof($params) > 3) {
-                    $failmsg .= "config-set expects 2 or 3 parameters";
+                    $failmsg .= "config-set expects 2 or 3 parameters. Try \"help config-set\" for help";
                     break;
                 } else {
-                    if (!call_user_func_array(array($cf, 'set'), $params))
+                    if (!call_user_func_array(array(&$cf, 'set'), $params))
                     {
                         $failmsg = "config-set (" .
                              implode(", ", $params) . ") failed";
+                    } else {
+                        $cf->store();
                     }
                 }
                 break;
