@@ -379,6 +379,9 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			smart_str_appendl(&ch->handlers->write->buf, data, size * nmemb);
 		else
 			PUTS(data);
+
+		length = size * nmemb;
+
 		break;
 	case PHP_CURL_FILE:
 		length = fwrite(data, size, nmemb, t->fp);
