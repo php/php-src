@@ -1,3 +1,214 @@
+2001-08-13  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c
+      ext/com/VARIANT.c
+      ext/com/com.h
+      ext/com/conversion.c
+      ext/com/conversion.h
+      ext/com/php_COM.h
+      ext/com/php_VARIANT.h
+      ext/com/variant.h: merged from EXPERIMENTAL
+    lots of cleanup work
+
+    * ext/com/TODO: remove from EXP
+
+    * ext/com/TODO: initial
+
+    * ext/com/com.h: MFH - andis object model change
+
+2001-08-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg_scanner.c: timestamp fix?
+
+    * sapi/thttpd/config.m4:
+    Use a symlink instead of copying the +6MB library archive during install
+
+2001-08-13  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/aspell/aspell.c: Reverted - Didn't yet read Torben's mail - Sorry!
+
+    * ext/aspell/aspell.c: Fixed proto's
+
+2001-08-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: make it build
+
+    * sapi/thttpd/config.m4: Don't display egrep result
+
+    * sapi/thttpd/thttpd_patch:
+    whoops, forgot to apply cgi/poll patch before diff'ing
+
+2001-08-13  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/zip/zip.c: remove "i"
+
+2001-08-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: .
+
+    * sapi/thttpd/config.m4:
+    Add check for thttpd-2.21b.  We support nothing else for now, because
+    this version is rock-stable using the combined set of patches.
+
+    * sapi/thttpd/thttpd_patch:
+    improved thttpd-2.21b patch.. I got tired of applying my patches for
+    these bugs.
+
+    fixes poll(2) issue
+    fixes hanging cgi issue
+    fixes off-by-one in scanning input buffers in case of EAGAIN/EWOULDBLOCK
+    fixes potential bug in managing write buffers
+    add "index.php" to default files to look for
+
+    * ext/ircg/README.txt: update
+
+    * ext/ircg/ircg.c:
+    print some more stats on format msg vs tokenizer invocations
+
+    * NEWS: assorted stuff
+
+    * ext/ircg/ircg.c
+      ext/ircg/ircg_scanner.c
+      ext/ircg/ircg_scanner.re: do some fancy stuff to optionally:
+
+     - disable automatic link conversion (placing a link on a web-site makes
+       you a potential target for a lawsuit in Germany, so some users
+       want to disable that selectively)
+
+     - convert a special character to <br>, so that we can "flatten" the
+       input for transportation through the IRC layer and convert it back
+       to multi-line representation later.
+
+2001-08-13  Adam Daniel  <adaniel2@cinci.rr.com>
+
+    * pear/HTML/Common.php: fixed typo in removeAttribute
+
+2001-08-13  Joey Smith  <joey@joeysmith.com>
+
+    * ext/sybase_ct/php_sybase_ct.c: More WS.
+
+    * ext/sybase_ct/php_sybase_ct.c: WS only
+
+2001-08-13  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/skeleton/create_stubs: Add TSRMLS_CC
+
+2001-08-13  Zeev Suraski  <zeev@zend.com>
+
+    * ext/zip/zip.c
+      ext/standard/info.c
+      ext/snmp/snmp.c: Fix crashes in parse_parameters calls
+    HEADS UP:  Make sure you supply TSRMLS_CC for this function!
+    I'll try to think of a way that'd allow us to find this issue using
+    the compiler.
+
+2001-08-13  Andi Gutmans  <andi@zend.com>
+
+    * ext/qtdom/qtdom.c
+      ext/domxml/php_domxml.c
+      ext/icap/php_icap.c: - More Engine 2 work.
+
+    * ext/sybase_ct/php_sybase_ct.c
+      ext/qtdom/qtdom.c
+      ext/ming/ming.c
+      ext/dotnet/dotnet.cpp
+      ext/fbsql/php_fbsql.c
+      ext/dbx/dbx.c: - ZE2 fixes
+
+    * ext/pgsql/pgsql.c
+      ext/odbc/php_odbc.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/imap/php_imap.c
+      ext/mcal/php_mcal.c: - More ZE2 fixes
+
+    * ext/java/java.c: - Attempt at fixing the Java extension for ZE2
+
+2001-08-13  Mika Tuupola  <tuupola@appelsiini.net>
+
+    * pear/Image/Remote.php:
+    * Fix PHPDoc
+
+2001-08-13  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/skeleton/create_stubs:
+    Faster wrong_param check for functions that take no parameters
+
+2001-08-13  Joey Smith  <joey@joeysmith.com>
+
+    * ext/domxml/php_domxml.c: Change to Z_* macros.
+
+2001-08-13  Stig Bakken  <ssb@fast.no>
+
+    * pear/scripts/php-config.in: Added --version option to php-config 
+
+2001-08-13  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/head.c
+      ext/standard/info.c
+      ext/standard/rand.c
+      ext/snmp/snmp.c
+      ext/sockets/sockets.c
+      ext/standard/basic_functions.c
+      ext/session/session.c
+      ext/sablot/sablot.c
+      ext/mhash/mhash.c
+      ext/odbc/php_odbc.c
+      ext/hyperwave/hw.c
+      ext/interbase/interbase.c
+      ext/curl/curl.c
+      ext/db/db.c
+      ext/domxml/php_domxml.c
+      ext/fdf/fdf.c
+      ext/gd/gd.c:
+    Track down a few more functions that don't check for 0 args and use
+    faster mechanism
+
+    * ext/standard/info.c: Oops, a little too much simplification there.. ;)
+
+    * ext/standard/basic_functions.c
+      ext/standard/info.c
+      ext/snmp/snmp.c
+      ext/sockets/sockets.c
+      ext/sablot/sablot.c
+      ext/session/session.c
+      ext/mhash/mhash.c
+      ext/odbc/php_odbc.c
+      ext/gd/gd.c
+      ext/hyperwave/hw.c
+      ext/interbase/interbase.c
+      ext/curl/curl.c
+      ext/db/db.c
+      ext/domxml/php_domxml.c
+      ext/fdf/fdf.c:
+    We don't consistently check for args passed to functions that don't
+    take any args.  In some cases we probably want to skip the check for
+    performance reasons, but in other cases where performance is unlikely
+    to be a factor, not throwing a warning on the wrong number of args passed
+    to a function is at best inconsistent, and at worst it could hide a bug.
+    So, add a few such checks.  There are still lots of cases out there.
+
+2001-08-13  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/zip/php_zip.h
+      ext/zip/zip.c: ws
+
+    * ext/zip/php_zip.h
+      ext/zip/zip.c: Whitespace fixes and moving to zend_parse_parameters()
+
+2001-08-13  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/isapi/php4isapi.c:
+    Reverse patches that slipped in by mistake in a whitespace patch.  They
+    require some more work...
+
+    * win32/php4dllts.dsp: Update .dsp
+
+    * ext/standard/datetime.c
+      NEWS
+      ext/standard/basic_functions.c: - Fix API
+    - Update NEWS
+
 2001-08-12  Zeev Suraski  <zeev@zend.com>
 
     * php.ini-recommended: Enable output buffering in the php.ini-recommended
