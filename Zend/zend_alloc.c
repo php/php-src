@@ -189,7 +189,7 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 		return (void *)p;
 	}
 	p->cached = 0;
-#if ZEND_DEBUG || !defined(ZEND_MM)
+#if ZEND_DEBUG
 	ADD_POINTER_TO_LIST(p);
 #endif
 	p->size = size; /* Save real size for correct cache output */
@@ -272,7 +272,7 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	}
 #endif
 	HANDLE_BLOCK_INTERRUPTIONS();
-#if ZEND_DEBUG || !defined(ZEND_MM)
+#if ZEND_DEBUG
 	REMOVE_POINTER_FROM_LIST(p);
 #endif
 
@@ -337,7 +337,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 		AG(allocated_memory_peak) = AG(allocated_memory);
 	}
 #endif
-#if ZEND_DEBUG || !defined(ZEND_MM)
+#if ZEND_DEBUG
 	REMOVE_POINTER_FROM_LIST(p);
 #endif
 	p = (zend_mem_header *) ZEND_DO_REALLOC(p, sizeof(zend_mem_header)+MEM_HEADER_PADDING+SIZE+END_MAGIC_SIZE);
@@ -350,13 +350,13 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 			exit(1);
 #endif
 		}
-#if ZEND_DEBUG || !defined(ZEND_MM)
+#if ZEND_DEBUG
 		ADD_POINTER_TO_LIST(orig);
 #endif
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return (void *)NULL;
 	}
-#if ZEND_DEBUG || !defined(ZEND_MM)
+#if ZEND_DEBUG
 	ADD_POINTER_TO_LIST(p);
 #endif
 #if ZEND_DEBUG
@@ -470,7 +470,7 @@ ZEND_API void start_memory_manager(TSRMLS_D)
 
 ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 {
-#if ZEND_DEBUG || !defined(ZEND_MM)
+#if ZEND_DEBUG
 	zend_mem_header *p, *t;
 #endif
 #if ZEND_DEBUG
@@ -489,7 +489,9 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 #  if MEMORY_LIMIT
 				AG(allocated_memory) -= REAL_SIZE(ptr->size);
 #  endif
+#  if ZEND_DEBUG
 				REMOVE_POINTER_FROM_LIST(ptr);
+#  endif
 				ZEND_DO_FREE(ptr);
 			}
 			AG(cache_count)[i] = 0;
@@ -526,7 +528,7 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 	}
 #endif /* ZEND_ENABLE_FAST_CACHE */
 
-#if ZEND_DEBUG || !defined(ZEND_MM)
+#if ZEND_DEBUG
 	p = AG(head);
 	t = AG(head);
 	while (t) {
