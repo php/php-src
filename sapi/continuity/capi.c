@@ -148,7 +148,7 @@ static int sapi_capi_header_handler(sapi_header_struct * sapi_header, sapi_heade
    char *header_name, *header_content, *p;
    capi_request_context *rc = (capi_request_context *) SG(server_context);
 
-   lstFset_delete_key(rc->t->res_hdrs, "content-type");
+   lstFset_delete_key(rc->t->res_hdrs, "Content-Type");
 
    header_name = sapi_header->header;
    header_content = p = strchr(header_name, ':');
@@ -185,8 +185,8 @@ static int sapi_capi_send_headers(sapi_headers_struct * sapi_headers TSRMLS_DC)
     */
 
    if (SG(sapi_headers).send_default_content_type) {
-      /* lstFset_delete_key(rc->t->res_hdrs, "content-type"); */
-      lstFset_update(rc->t->res_hdrs, "content-type", "text/html");
+      /* lstFset_delete_key(rc->t->res_hdrs, "Content-Type"); */
+      lstFset_update(rc->t->res_hdrs, "Content-Type", "text/html");
    }
    httpFset_status(rc->t, SG(sapi_headers).http_response_code, NULL);
    httpFstart_response(rc->t);
@@ -244,7 +244,7 @@ static void sapi_capi_register_server_variables(zval * track_vars_array TSRMLS_D
       php_register_variable("REQUEST_URI", value, track_vars_array TSRMLS_CC);
    }
  
-/* COUNTRY CODE */
+   /* COUNTRY CODE */
    value = lstFset_get(rc->t->vars, "ccode");
    if(value!=NULL)
      php_register_variable("COUNTRY_CODE", value, track_vars_array TSRMLS_CC);
@@ -265,7 +265,7 @@ static void sapi_capi_register_server_variables(zval * track_vars_array TSRMLS_D
       php_register_variable("SERVER_NAME", value, track_vars_array TSRMLS_CC);
    }
    /* SERVER_SOFTWARE */
-   value = lstFset_get(rc->t->res_hdrs, "server");
+   value = lstFset_get(rc->t->res_hdrs, "Server");
    if (value != NULL)
       php_register_variable("SERVER_SOFTWARE", value, track_vars_array TSRMLS_CC);
 
