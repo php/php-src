@@ -393,13 +393,22 @@ DLEXPORT PHP_MINFO_FUNCTION(mnogosearch)
 	php_info_print_table_end();
 }
 
-ssize_t UdmRecvAll(int s, void *buf, size_t len, int flags) {
-  size_t received = 0, r;
-  char *b = buf;
-  while ( (received < len) && ((r = recv(s, &b[received], len - received, flags)) >= 0 ) ) {
-    received += r;
-  }
-  return received;
+static char* MyRemoveHiLightDup(const char *s){
+	size_t	len=strlen(s)+1;
+	char	*res=malloc(len);
+	char	*d;
+	
+	for(d=res;s[0];s++){
+		switch(s[0]){
+			case '\2':
+			case '\3':
+				break;
+			default:
+				*d++=*s;
+		}
+	}
+	*d='\0';
+	return res;
 }
 
 /* {{{ proto int udm_alloc_agent(string dbaddr [, string dbmode])
@@ -1363,6 +1372,17 @@ DLEXPORT PHP_FUNCTION(udm_crc32)
 #endif
 
 #if UDM_VERSION_ID == 30203
+
+static ssize_t UdmRecvAll(int s, void *buf, size_t len, int flags) {
+  size_t received = 0, r;
+  char *b = buf;
+  while ( (received < len) && ((r = recv(s, &b[received], len - received, flags)) >= 0 ) ) {
+    received += r;
+  }
+  return received;
+}
+
+
 /* {{{ proto int udm_open_stored(int agent, string storedaddr)
    Open connection to stored  */
 DLEXPORT PHP_FUNCTION(udm_open_stored)
@@ -1537,11 +1557,13 @@ DLEXPORT PHP_FUNCTION(udm_make_excerpt)
 	ZEND_FETCH_RESOURCE(Res, UDM_RESULT *, yyres, -1, "mnoGoSearch-Result", le_res);
 	
 	if(row<Res->num_rows){
-		const char	*al;
+		char		*al;
 		char		*Excerpt;
 		
-		al = UdmVarListFindStr(&(Res->Doc[row].Sections), "URL", "");
+		al = (char *)MyRemoveHiLightDup((const char *)(UdmVarListFindStr(&(Res->Doc[row].Sections), "URL", "")));
 		UdmVarListReplaceInt(&(Res->Doc[row].Sections), "STORED_ID", UdmCRC32(al, strlen(al)));
+		free(al);
+		
 		Excerpt = UdmExcerptDoc(Agent, Res, &(Res->Doc[row]), 256);
 		
 		if (Excerpt != NULL) {
@@ -1554,7 +1576,6 @@ DLEXPORT PHP_FUNCTION(udm_make_excerpt)
 		        UdmVarListReplaceInt(&(Res->Doc[row].Sections),"ST",0);
 			RETURN_FALSE;
 		}
-
 	}else{
 		php_error(E_WARNING,"%s(): row number too large", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
@@ -1629,7 +1650,14 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 		switch(field){
 			case UDM_FIELD_URL: 		
 #if UDM_VERSION_ID >= 30204
+			    {
+				char	*al;
+				al = (char *)MyRemoveHiLightDup((const char *)(UdmVarListFindStr(&(Res->Doc[row].Sections), "URL", "")));
+				UdmVarListReplaceStr(&Res->Doc[row].Sections,"URL",al);
+				free(al);
+				
 				RETURN_STRING((char *)UdmVarListFindStr(&Res->Doc[row].Sections,"URL",""),1);
+			    }
 #else
 				RETURN_STRING((Res->Doc[row].url)?(Res->Doc[row].url):"",1);
 #endif
@@ -1995,7 +2023,11 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 	pval ** yycat, ** yyagent;
 	UDM_AGENT * Agent;
 	char *cat;
+#if UDM_VERSION_ID >= 30204	
+	UDM_CATEGORY C;
+#else	
 	UDM_CATEGORY *c=NULL;
+#endif
 	char *buf=NULL;
 	int id=-1;
 
@@ -2015,10 +2047,9 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 	cat = Z_STRVAL_PP(yycat);
 
 #if UDM_VERSION_ID >= 30204
-	if (NULL==(c=(UDM_CATEGORY *)malloc(sizeof(UDM_CATEGORY)))) RETURN_FALSE;
-	if (NULL==(c->Category=malloc(sizeof(UDM_CATITEM)))) RETURN_FALSE;
-	strncpy(c->addr,cat,sizeof(c->addr)-1);
-	if(UdmCatAction(Agent,c,UDM_CAT_ACTION_LIST,Agent->Conf->db)){
+	bzero(&C,sizeof(C));
+	strncpy(C.addr,cat,sizeof(C.addr)-1);
+	if(!UdmCatAction(Agent,&C,UDM_CAT_ACTION_LIST,Agent->Conf->db)){
 #else
 	if((c=UdmCatList(Agent,cat))){
 #endif
@@ -2033,11 +2064,10 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 #if UDM_VERSION_ID >= 30204
 		{
 		    int i;
-		    for(i==0;i<c->ncategories;i++){			
-			snprintf(buf, UDMSTRSIZ, "%s%s",c->Category[i].link[0]?"@ ":"", c->Category[i].name);				 
-			add_next_index_string(return_value, c->Category[i].link[0]?c->Category[i].link:c->Category[i].path, 1);
+		    for(i=0;i<C.ncategories;i++){			
+			snprintf(buf, UDMSTRSIZ, "%s%s",C.Category[i].link[0]?"@ ":"", C.Category[i].name);
+			add_next_index_string(return_value, C.Category[i].link[0]?C.Category[i].link:C.Category[i].path, 1);
 			add_next_index_string(return_value, buf, 1);
-			c++;
 		    }
 		}
 #else
@@ -2049,11 +2079,7 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 		}
 #endif		
 		free(buf);
-#if UDM_VERSION_ID >= 30204	
-		free(c->Category);
-		free(c);
-#endif
-} else {
+	} else {
 		RETURN_FALSE;
 	}
 }
@@ -2066,7 +2092,11 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 	pval ** yycat, ** yyagent;
 	UDM_AGENT * Agent;
 	char *cat;
+#if UDM_VERSION_ID >= 30204	
+	UDM_CATEGORY C;
+#else	
 	UDM_CATEGORY *c=NULL;
+#endif
 	char *buf=NULL;
 	int id=-1;
 
@@ -2086,10 +2116,9 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 	cat = Z_STRVAL_PP(yycat);
 
 #if UDM_VERSION_ID >= 30204
-	if (NULL==(c=(UDM_CATEGORY *)malloc(sizeof(UDM_CATEGORY)))) RETURN_FALSE;
-	if (NULL==(c->Category=malloc(sizeof(UDM_CATITEM)))) RETURN_FALSE;
-	strncpy(c->addr,cat,sizeof(c->addr)-1);
-	if(UdmCatAction(Agent,c,UDM_CAT_ACTION_PATH,Agent->Conf->db)){
+	bzero(&C,sizeof(C));
+	strncpy(C.addr,cat,sizeof(C.addr)-1);
+	if(!UdmCatAction(Agent,&C,UDM_CAT_ACTION_PATH,Agent->Conf->db)){
 #else
 	if((c=UdmCatPath(Agent,cat))){
 #endif
@@ -2104,11 +2133,10 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 #if UDM_VERSION_ID >= 30204
 		{
 		    int i;
-		    for(i==0;i<c->ncategories;i++){			
-			snprintf(buf, UDMSTRSIZ, "%s%s",c->Category[i].link[0]?"@ ":"", c->Category[i].name);
-			add_next_index_string(return_value, c->Category[i].link[0]?c->Category[i].link:c->Category[i].path, 1);
+		    for(i=0;i<C.ncategories;i++){			
+			snprintf(buf, UDMSTRSIZ, "%s%s",C.Category[i].link[0]?"@ ":"", C.Category[i].name);
+			add_next_index_string(return_value, C.Category[i].link[0]?C.Category[i].link:C.Category[i].path, 1);
 			add_next_index_string(return_value, buf, 1);
-			c++;
 		    }
 		}
 #else
@@ -2120,10 +2148,6 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 		}
 #endif		
 		free(buf);
-#if UDM_VERSION_ID >= 30204	
-		free(c->Category);
-		free(c);
-#endif
 	} else {
 		RETURN_FALSE;
 	}
@@ -2151,7 +2175,10 @@ DLEXPORT PHP_FUNCTION(udm_get_doc_count)
 			break;
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
-#if UDM_VERSION_ID >= 30204
+#if UDM_VERSION_ID >= 30207
+	if (!Agent->doccount) UdmURLAction(Agent,NULL,UDM_URL_ACTION_DOCCOUNT,Agent->Conf->db);
+	RETURN_LONG(Agent->doccount);
+#elif UDM_VERSION_ID >= 30204
 	RETURN_LONG(UdmURLAction(Agent,NULL,UDM_URL_ACTION_DOCCOUNT,Agent->Conf->db));
 #else
 	RETURN_LONG(UdmGetDocCount(Agent));
