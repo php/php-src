@@ -3008,7 +3008,16 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length,
 					o += needle_len;
 					count++;
 				}
-				new_str = safe_emalloc(count, str_len - needle_len, length + 1);
+				if (count == 0) {
+					/* Needle doesn't occur, shortcircuit the actual replacement. */
+					new_str = estrndup(haystack, length);
+					if (_new_length) {
+						*_new_length = length;
+					}
+					return new_str;
+				} else {
+					new_str = safe_emalloc(count, str_len - needle_len, length + 1);
+				}
 			}
 
 			e = s = new_str;
