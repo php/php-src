@@ -4,6 +4,10 @@
 #include "zend.h"
 #include "zend_API.h"
 
+#ifdef PHP_EXPORTS
+#define CWD_EXPORTS
+#endif
+
 #ifdef ZEND_WIN32
 #       ifdef CWD_EXPORTS
 #       define CWD_API __declspec(dllexport)
@@ -21,14 +25,14 @@ typedef struct _cwd_state {
 
 typedef int (*verify_path_func)(const cwd_state *);
 
-void virtual_cwd_startup();
-void virtual_cwd_shutdown();
-char *virtual_getcwd_ex(int *length);
-char *virtual_getcwd(char *buf, size_t size);
-int virtual_chdir(char *path);
-int virtual_chdir_file(char *path);
-int virtual_filepath(char *path, char **filepath);
-FILE *virtual_fopen(char *path, const char *mode);
+CWD_API void virtual_cwd_startup();
+CWD_API void virtual_cwd_shutdown();
+CWD_API char *virtual_getcwd_ex(int *length);
+CWD_API char *virtual_getcwd(char *buf, size_t size);
+CWD_API int virtual_chdir(char *path);
+CWD_API int virtual_chdir_file(char *path);
+CWD_API int virtual_filepath(char *path, char **filepath);
+CWD_API FILE *virtual_fopen(char *path, const char *mode);
 
 ZEND_BEGIN_MODULE_GLOBALS(cwd)
 	cwd_state cwd;
