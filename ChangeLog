@@ -1,5 +1,6 @@
 PHP 3.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
 December 24 1998, Version 3.0.6
 - Fix GetImageSize() to work with non-standard jpg images
 - Add Mersenne Twister functions (mt_rand, mt_srand, etc)
