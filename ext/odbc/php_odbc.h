@@ -45,11 +45,24 @@
 
 /* checking in the same order as in configure.in */
 
-#ifdef HAVE_SOLID /* Solid Server */
+#if defined(HAVE_SOLID) || defined(HAVE_SOLID_35) /* Solid Server */
 
 #define ODBC_TYPE "Solid"
-#include <cli0core.h>
-#include <cli0ext1.h>
+#if defined(HAVE_SOLID)
+ #include <cli0core.h>
+ #include <cli0ext1.h>
+ /*the following help for SOLID 3.0 */
+ #include <cli0cli.h>
+ #include <cli0env.h>
+#elif defined(HAVE_SOLID_35)
+ #if !defined(PHP_WIN32)
+  #include <sqlunix.h>
+ #endif
+ #include <sql.h>
+ #include <sqltypes.h>
+ #include <sqlucode.h>
+ #include <sqlext.h>
+#endif
 #undef HAVE_SQL_EXTENDED_FETCH
 PHP_FUNCTION(solid_fetch_prev);
 #define SQLSMALLINT SWORD
@@ -194,11 +207,11 @@ PHP_FUNCTION(odbc_binmode);
 PHP_FUNCTION(odbc_longreadlen);
 PHP_FUNCTION(odbc_tables);
 PHP_FUNCTION(odbc_columns);
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID)    /* not supported now */
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_35)    /* not supported now */
 PHP_FUNCTION(odbc_columnprivileges);
 PHP_FUNCTION(odbc_tableprivileges);
 #endif
-#if !defined(HAVE_SOLID)    /* not supported */
+#if !defined(HAVE_SOLID) || !defined(HAVE_SOLID_35)    /* not supported */
 PHP_FUNCTION(odbc_foreignkeys);
 PHP_FUNCTION(odbc_procedures);
 PHP_FUNCTION(odbc_procedurecolumns);

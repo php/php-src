@@ -96,11 +96,11 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_columns, NULL)
 	PHP_FE(odbc_gettypeinfo, NULL)
 	PHP_FE(odbc_primarykeys, NULL)
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID)    /* not supported now */
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_35)    /* not supported now */
 	PHP_FE(odbc_columnprivileges, NULL)
 	PHP_FE(odbc_tableprivileges, NULL)
 #endif
-#if !defined(HAVE_SOLID)    /* not supported */
+#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_35)    /* not supported */
 	PHP_FE(odbc_foreignkeys, NULL)
 	PHP_FE(odbc_procedures, NULL)
 	PHP_FE(odbc_procedurecolumns, NULL)
@@ -147,7 +147,7 @@ static void _free_odbc_result(odbc_result *res)
 			res->values = NULL;
 		}
 		if (res->stmt) {
-#ifdef HAVE_SOLID
+#if defined(HAVE_SOLID) || defined(HAVE_SOLID_35)
 			SQLTransact(res->conn_ptr->henv, res->conn_ptr->hdbc,
 						(UWORD)SQL_COMMIT);
 #endif
@@ -1227,7 +1227,7 @@ PHP_FUNCTION(odbc_fetch_into)
 }
 /* }}} */
 
-#ifdef HAVE_SOLID
+#ifdef HAVE_SOLID || defined(HAVE_SOLID_35)
 PHP_FUNCTION(solid_fetch_prev)
 {
 	odbc_result *result;
@@ -2403,7 +2403,7 @@ PHP_FUNCTION(odbc_columns)
 }
 /* }}} */
 
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID)
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_35)
 /* {{{ proto int odbc_columnprivileges(int connection_id, string catalog, string schema, string table, string column)
    Returns a result identifier that can be used to fetch a list of columns and associated privileges for the specified table */
 PHP_FUNCTION(odbc_columnprivileges)
@@ -2483,7 +2483,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 /* }}} */
 #endif /* HAVE_DBMAKER || HAVE_SOLID*/
 
-#if !defined(HAVE_SOLID)
+#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_35)
 /* {{{ proto int odbc_foreignkeys(int connection_id, string pk_qualifier, string pk_owner, string pk_table, string fk_qualifier, string fk_owner, string fk_table)
    Returns a result identifier to either a list of foreign keys in the specified table or a list of foreign keys in other tables that refer to the primary key in the specified table */
 PHP_FUNCTION(odbc_foreignkeys)
@@ -2730,7 +2730,7 @@ PHP_FUNCTION(odbc_primarykeys)
 }
 /* }}} */
 
-#if !defined(HAVE_SOLID)
+#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_35)
 /* {{{ proto int odbc_procedurecolumns(int connection_id [, string qualifier, string owner, string proc, string column])
    Returns a result identifier containing the list of input and output parameters, as well as the columns that make up the result set for the specified procedures */
 PHP_FUNCTION(odbc_procedurecolumns)
@@ -2814,7 +2814,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 /* }}} */
 #endif /* HAVE_SOLID */
 
-#if !defined(HAVE_SOLID)
+#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_35)
 /* {{{ proto int odbc_procedures(int connection_id [, string qualifier, string owner, string name])
    Returns a result identifier containg the list of procedure names in a datasource */
 PHP_FUNCTION(odbc_procedures)
@@ -3067,7 +3067,7 @@ PHP_FUNCTION(odbc_statistics)
 }
 /* }}} */
 
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID)
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_35)
 /* {{{ proto int odbc_tableprivileges(int connection_id, string qualifier, string owner, string name)
    Returns a result identifier containing a list of tables and the privileges associated with each table */
 PHP_FUNCTION(odbc_tableprivileges)
