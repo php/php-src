@@ -96,7 +96,7 @@ PHPAPI void php_print_credits(int flag)
 	if (flag & PHP_CREDITS_QA) {
 		php_info_print_table_start();
 		php_info_print_table_header(1, "PHP 5.0 Quality Assurance Team");
-		php_info_print_table_row(1, "Ilia Alshanetsky, Joerg Behrens, Stefan Esser, Moriyoshi Koizumi, Sebastian Nohn, Derick Rethans, Melvyn Sopacua, Jani Taskinen");
+		php_info_print_table_row(1, "Ilia Alshanetsky, Joerg Behrens, Stefan Esser, Moriyoshi Koizumi, Magnus Maatta, Sebastian Nohn, Derick Rethans, Melvyn Sopacua, Jani Taskinen");
 		php_info_print_table_end();
 	}
 
