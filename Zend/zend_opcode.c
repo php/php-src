@@ -132,7 +132,6 @@ ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
 		/* Note that only run-time accessed data need to be cleaned up, pre-defined data can
 		   not contain objects and thus are not probelmatic */
 		zend_hash_clean((*pce)->static_members);
-		zend_hash_apply(&(*pce)->class_table, (apply_func_t) zend_cleanup_class_data TSRMLS_CC);
 		zend_hash_apply(&(*pce)->function_table, (apply_func_t) zend_cleanup_function_data TSRMLS_CC);
 	}
 	return 0;
@@ -154,7 +153,6 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			zend_hash_destroy(&ce->function_table);
 			FREE_HASHTABLE(ce->static_members);
 			zend_hash_destroy(&ce->constants_table);
-			zend_hash_destroy(&ce->class_table);
 			if (ce->num_interfaces > 0 && ce->interfaces) {
 				efree(ce->interfaces);
 			}
@@ -171,7 +169,6 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			zend_hash_destroy(&ce->function_table);
 			free(ce->static_members);
 			zend_hash_destroy(&ce->constants_table);
-			zend_hash_destroy(&ce->class_table);
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
 			}

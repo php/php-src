@@ -2214,131 +2214,6 @@ int zend_add_var_handler(ZEND_OPCODE_HANDLER_ARGS)
 	NEXT_OPCODE();
 }
 
-static int zend_import_check_function(HashTable *target_ht, zend_function *function, zend_hash_key *hash_key, void *param)
-{
-	if (zend_hash_quick_exists(target_ht, hash_key->arKey, hash_key->nKeyLength, hash_key->h)) {
-		zend_error(E_ERROR, "Import: function %s() already exists in current scope", function->common.function_name?function->common.function_name:"main");
-	}
-	return 1; /* OK */
-}
-
-int zend_import_function_handler(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_class_entry *ce;
-	zend_function *function;
-	
-	ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
-
-	if (EX(opline)->op2.op_type != IS_UNUSED) {
-		char *function_name_strval;
-		int function_name_strlen;
-
-		function_name_strval = EX(opline)->op2.u.constant.value.str.val;
-		function_name_strlen = EX(opline)->op2.u.constant.value.str.len;
-
-		if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen + 1, (void **) &function)==FAILURE) {
-			zend_error(E_ERROR, "Import: function %s() not found", function_name_strval);
-		}
-		if (zend_hash_add(EG(function_table), function_name_strval, function_name_strlen + 1, function, sizeof(zend_function), NULL) == FAILURE) {
-			zend_error(E_ERROR, "Import: function %s() already exists in current scope", function_name_strval);
-		}
-		function_add_ref(function);
-	} else {
-		zend_hash_merge_ex(EG(function_table), &ce->function_table, (copy_ctor_func_t) function_add_ref, sizeof(zend_function), (merge_checker_func_t)zend_import_check_function, NULL);
-	}
-	NEXT_OPCODE();
-}
-
-static int zend_import_check_class(HashTable *target_ht, zend_class_entry **ce, zend_hash_key *hash_key, void *param)
-{
-	if (zend_hash_quick_exists(target_ht, hash_key->arKey, hash_key->nKeyLength, hash_key->h)) {
-		zend_error(E_ERROR, "Import: class '%s' already exists in current scope", (*ce)->name);
-	}
-	return 1; /* OK */
-}
-
-int zend_import_class_handler(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_class_entry *ce;
-	zend_class_entry **import_ce;
-	
-	ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
-
-	if (EX(opline)->op2.op_type != IS_UNUSED) {
-		char *class_name_strval;
-		int class_name_strlen;
-		
-		class_name_strval = EX(opline)->op2.u.constant.value.str.val;
-		class_name_strlen = EX(opline)->op2.u.constant.value.str.len;
-		
-		if (zend_hash_find(&ce->class_table, class_name_strval, class_name_strlen + 1, (void **) &import_ce)==FAILURE) {
-			zend_error(E_ERROR, "Import: class %s not found", class_name_strval);
-		}
-		if (zend_hash_add(EG(class_table), class_name_strval, class_name_strlen + 1, import_ce, sizeof(zend_class_entry *), NULL) == FAILURE) {
-			zend_error(E_ERROR, "Import: class %s already exists in current scope", class_name_strval);
-		}
-		zend_class_add_ref(import_ce);
-	} else {
-		zend_hash_merge_ex(EG(class_table), &ce->class_table, (copy_ctor_func_t) zend_class_add_ref, sizeof(zend_class_entry *), (merge_checker_func_t)zend_import_check_class, NULL);
-	}
-
-	NEXT_OPCODE();
-}
-
-
-int zend_import_const_handler(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_class_entry *ce;
-	zval **import_constant;
-	zend_constant c;
-	
-	ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
-	if (EX(opline)->op2.op_type != IS_UNUSED) {
-		char *const_name_strval;
-		int const_name_strlen;
-		
-		const_name_strval = EX(opline)->op2.u.constant.value.str.val;
-		const_name_strlen = EX(opline)->op2.u.constant.value.str.len;
-		
-		if (zend_hash_find(&ce->constants_table, const_name_strval, const_name_strlen + 1, (void **) &import_constant)==FAILURE) {
-			zend_error(E_ERROR, "Import: constant %s not found", const_name_strval);
-		}
-		c.value = **import_constant;
-		zval_copy_ctor(&c.value);
-		c.flags = CONST_CS;
-		c.name = zend_strndup(const_name_strval, const_name_strlen);
-		c.name_len = const_name_strlen + 1;
-
-		if (zend_register_constant(&c TSRMLS_CC) == FAILURE) {
-			zend_error(E_ERROR, "Import: unable to register constant %s", const_name_strval);
-		}
-	} else {
-		HashPosition pos;
-		char *key;
-		uint key_length;
-		int key_type;
-		ulong dummy;
-
-		zend_hash_internal_pointer_reset_ex(&ce->constants_table, &pos);
-		while (zend_hash_get_current_data_ex(&ce->constants_table, (void **)&import_constant, &pos) == SUCCESS) {
-			key_type = zend_hash_get_current_key_ex(&ce->constants_table, &key, &key_length, &dummy, 0, &pos);
-
-			c.value = **import_constant;
-			zval_copy_ctor(&c.value);
-			c.flags = CONST_CS;
-			c.name = zend_strndup(key, key_length - 1);
-			c.name_len = key_length;
-
-			if (zend_register_constant(&c TSRMLS_CC) == FAILURE) {
-				zend_error(E_ERROR, "Import: unable to register constant %s", key);
-			}
-			zend_hash_move_forward_ex(&ce->constants_table, &pos);
-		}
-	}
-	NEXT_OPCODE();
-}
-
-
 int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_class_entry **pce;
@@ -2381,6 +2256,7 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 				ce = Z_OBJCE_P(class_name);
 				break;
 			case IS_STRING:
+				convert_to_string_ex(&class_name);
 				class_name_strval = zend_str_tolower_dup(class_name->value.str.val, class_name->value.str.len);
 				class_name_strlen = class_name->value.str.len;
 				free_class_name = 1;
@@ -4204,10 +4080,6 @@ void zend_init_opcodes_handlers()
 
 	zend_opcode_handlers[ZEND_ISSET_ISEMPTY_VAR] = zend_isset_isempty_var_handler;
 	zend_opcode_handlers[ZEND_ISSET_ISEMPTY_DIM_OBJ] = zend_isset_isempty_dim_obj_handler;
-
-	zend_opcode_handlers[ZEND_IMPORT_FUNCTION] = zend_import_function_handler;
-	zend_opcode_handlers[ZEND_IMPORT_CLASS] = zend_import_class_handler;
-	zend_opcode_handlers[ZEND_IMPORT_CONST] = zend_import_const_handler;
 
 	zend_opcode_handlers[ZEND_PRE_INC_OBJ] = zend_pre_inc_obj_handler;
 	zend_opcode_handlers[ZEND_PRE_DEC_OBJ] = zend_pre_dec_obj_handler;
