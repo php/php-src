@@ -56,8 +56,15 @@ static zend_bool satellite_any_to_zval_long(
 		const CORBA_any * pSource, zval * pDestination)
 {
 	CORBA_long * p_value = (CORBA_long *)pSource->_value;
-	ZVAL_LONG(pDestination, *p_value);
-	return TRUE;
+	if (p_value)
+	{
+		ZVAL_LONG(pDestination, *p_value);
+		return TRUE;
+	}
+	else
+	{
+		return FALSE;
+	}
 }
 
 static zend_bool satellite_any_to_zval_short(
