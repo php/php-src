@@ -106,22 +106,22 @@ php_ns_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct 
 	header_name = sapi_header->header;
 	header_content = p = strchr(header_name, ':');
 
-	if(!p) return 0;
+	if (p) {
+		*p = '\0';
+		do {
+			header_content++;
+		} while (*header_content == ' ');
 
-	*p = '\0';
-	do {
-		header_content++;
-	} while(*header_content == ' ');
+		if (!strcasecmp(header_name, "Content-type")) {
+			Ns_ConnSetTypeHeader(NSG(conn), header_content);
+		} else {
+			Ns_ConnSetHeaders(NSG(conn), header_name, header_content);
+		}
 
-	if(!strcasecmp(header_name, "Content-type")) {
-		Ns_ConnSetTypeHeader(NSG(conn), header_content);
-	} else {
-		Ns_ConnSetHeaders(NSG(conn), header_name, header_content);
+		*p = ':';
 	}
-	
-	*p = ':';
-	
-	efree(sapi_header->header);
+
+	sapi_free_header(sapi_header);
 	
 	return 0;
 }
