@@ -345,7 +345,6 @@ AC_ARG_WITH(dbm,
 AC_DBA_STD_RESULT(dbm)
 
 AC_DEFUN(PHP_DBA_BUILTIN_CDB,[
-  PHP_ADD_BUILD_DIR($ext_builddir/libcdb)
   AC_DEFINE(DBA_CDB_BUILTIN, 1, [ ])
   AC_DEFINE(DBA_CDB_MAKE, 1, [ ])
   AC_DEFINE(DBA_CDB, 1, [ ])
@@ -392,7 +391,6 @@ AC_ARG_WITH(cdb,
 AC_DBA_STD_RESULT(cdb)
 
 AC_DEFUN(PHP_DBA_BUILTIN_FLATFILE,[
-  PHP_ADD_BUILD_DIR($ext_builddir/libflatfile)
   AC_DEFINE(DBA_FLATFILE, 1, [ ])
   flat_sources="libflatfile/flatfile.c"
   THIS_RESULT="builtin"
