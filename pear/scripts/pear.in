@@ -62,10 +62,10 @@ if (PEAR::isError($options)) {
 
 if (OS_WINDOWS) {
     $pear_default_config = PHP_SYSCONFDIR.DIRECTORY_SEPARATOR.'pearsys.ini';
-    $pear_user_config = PHP_SYSCONFDIR.DIRECTORY_SEPARATOR.'pear.ini';
+    $pear_user_config    = PHP_SYSCONFDIR.DIRECTORY_SEPARATOR.'pear.ini';
 } else {
     $pear_default_config = PHP_SYSCONFDIR.DIRECTORY_SEPARATOR.'pear.conf';
-    $pear_user_config = $HTTP_ENV_VARS['HOME'].DIRECTORY_SEPARATOR.'.pearrc';
+    $pear_user_config    = getenv('HOME').DIRECTORY_SEPARATOR.'.pearrc';
 }
 
 $opts = $options[0];
