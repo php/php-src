@@ -73,15 +73,8 @@ function dowriteln($str)
 }
 
 function create_compiled_in_modules_list()  {
-    global $php,$compiled_in_modules;
-    $ret=`$php -m`;
-   
-    $compiled_in_modules=explode("\n",$ret);
-    foreach ($compiled_in_modules AS $key => $value) {
-        if (!$value
-            || strchr($value,' ') )    unset($compiled_in_modules[$key]);
-    }
-    
+    global $compiled_in_modules;
+    $compiled_in_modules = @get_loaded_extensions();
 }
 
 function extract_module_name_from_path($path)   {
@@ -127,16 +120,13 @@ function initialize()
         $term_bold = $term_norm = "";
     }
 
-    $windows_p = (substr(PHP_OS, 0, 3) == "WIN");
-    if ($windows_p) {
-        if (file_exists('Release_TS_inline\\php.exe')) {
-            $php = 'Release_TS_inline\\php.exe';
-        } elseif (file_exists('Release_TS\\php.exe')) {
-            $php = 'Release_TS\\php.exe';
-        } else {
-            $php=trim($windows_p ? `cd`:`pwd`).'\\php';
-        }
-    } else {
+   if((substr(PHP_OS, 0, 3) == "WIN")) {
+       $windows_p = true;
+       $term = getenv("COMSPEC");
+       $null = getenv("TOP_BUILDDIR");
+       $php =  ($null ? $null : getcwd()) . "/php.exe";
+       unset($null);
+   } else {
         if (isset($GLOBALS["TOP_BUILDDIR"])) {
             $php = $GLOBALS["TOP_BUILDDIR"]."/php";
         } else {
@@ -145,8 +135,8 @@ function initialize()
     }
 
     create_compiled_in_modules_list();
-   
-    if (!is_executable($php)) {
+
+    if (!is_executable($php) && !$windows_p) {
         dowriteln("PHP CGI binary ($php) is not executable.");
         dowriteln("Please compile PHP as a CGI executable and try again.");
         exit;
@@ -211,14 +201,14 @@ function do_testing($argc, &$argv)
         }
     } else {
         // $dir = $GLOBALS["TOP_SRCDIR"]; // XXX ??? where should this variable be set?
-        $dir=str_replace('\\','/',trim(($windows_p ? `cd`:`pwd`)));
+        $dir=str_replace('\\','/',trim(($windows_p ? getenv("TEST_DIR"):`pwd`)));
     }
     if (isset($dir) && $dir) {
         find_testdirs($dir);
-        
+
         create_found_tests_4_modules_list();
         create_modules_2_test_list();
-        
+
         for ($i = 0; $i < sizeof($testdirs); $i++) {
             run_tests_in_dir($testdirs[$i]);
         }
@@ -265,22 +255,22 @@ function find_testdirs($dir = '.', $first_pass = true)
     }
     while ($ent = readdir($dp)) {
         $path = "$dir/$ent";
-        
+
         if ((isset($skip[$ent]) && $skip[$ent])
             || substr($ent, 0, 1) == "."
             || !is_dir($path)
-            
+
             ) {
             continue;
             }
-      
+
         if (strstr("/$path/", "/tests/")) {
             $testdirs[] = $path;
         }
         find_testdirs($path, false);
     }
     closedir($dp);
-    
+
 }
 
 function run_tests_in_dir($dir = '.')
@@ -307,13 +297,13 @@ function run_tests_in_dir($dir = '.')
     if (sizeof($testfiles) == 0) {
         return;
     }
-    
+
     if ($mod_name=extract_module_name_from_path($dir))   {
         if ($ext_found=in_array($mod_name,$modules_available))
              dowriteln("Testing extension: $mod_name");
         else $skipped_extensions[$mod_name]=TRUE;
     }
-   
+
     if ($ext_found!==FALSE) {
         dowriteln("%bRunning tests in $dir%B");
         dowriteln("=================".str_repeat("=", strlen($dir)));
@@ -373,7 +363,7 @@ function delete_tmpfiles()
  * @return bool whether the files were "equal"
  */
 function compare_results($file1, $file2)
-{ 
+{
         $data1 = $data2 = "";
     if (!($fp1 = @fopen($file1, "r")) || !($fp2 = @fopen($file2, "r"))) {
         return false;
@@ -382,12 +372,12 @@ function compare_results($file1, $file2)
     while (!(feof($fp1) || feof($fp2))) {
         if (!feof($fp1) && trim($line1 = fgets($fp1, 10240)) != "") {
             //print "adding line1 $line1\n";
-           
+
             $data1 .= trim($line1);
         }
         if (!feof($fp2) && trim($line2 = fgets($fp2, 10240)) != "") {
             //print "adding line2 $line2\n";
-            
+
             $data2 .= trim($line2);
         }
     }
@@ -404,7 +394,7 @@ function compare_results($file1, $file2)
 
 function run_test($file)
 {
-    global $php, $tmpfile, $term_bold, $term_norm;
+    global $php, $tmpfile, $term_bold, $term_norm, $term, $windows_p;
 
     $variables = array("TEST", "POST", "GET", "FILE", "EXPECT", "SKIPIF",
                        "OUTPUT");
@@ -417,11 +407,11 @@ function run_test($file)
     $tmpfile["FILE"] = tempnam($tmpdir, $tmpfix);
     $tmpfile["SKIPIF"] = tempnam($tmpdir, $tmpfix);
     $tmpfile["POST"] = tempnam($tmpdir, $tmpfix);
-   
+
     $tmpfile["EXPECT"] = tempnam($tmpdir, $tmpfix);
     $tmpfile["OUTPUT"] = tempnam($tmpdir, $tmpfix);
-    
-    
+
+
     while ($line = fgets($fp, 4096)) {
         if (preg_match('/^--([A-Z]+)--/', $line, $matches)) {
             $var = $matches[1];
@@ -487,11 +477,19 @@ function run_test($file)
         putenv("CONTENT_LENGTH=");
     }
     if (isset($fps["POST"])) {
-       
-        // XXX Fix me, I do not work on win32 (?)
-        $cmd = "$php -q $tmpfile[FILE] < $tmpfile[POST]";
+        if(!$windows_p) {
+            $cmd = "$php -q $tmpfile[FILE] < $tmpfile[POST]";
+        }
+        else {
+            $cmd = "$term /c " . realpath($php) ." -q $tmpfile[FILE] < $tmpfile[POST]";
+        }
     } else {
-        $cmd = "$php -q $tmpfile[FILE]";
+        if(!$windows_p) {
+            $cmd = "$php -q $tmpfile[FILE]";
+        }
+        else {
+            $cmd = "$term /c " . realpath($php) ." -q $tmpfile[FILE]";;
+        }
     }
     $ofp = @fopen($tmpfile["OUTPUT"], "w");
     if (!$ofp) {
