@@ -661,7 +661,6 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 PHP_MINFO_FUNCTION(imap)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "IMAP Support", "enabled" );
 #if HAVE_IMAP2001
 	php_info_print_table_row(2, "IMAP c-Client Version", "2001");               
 #elif HAVE_IMAP2000
