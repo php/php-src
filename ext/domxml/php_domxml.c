@@ -2384,6 +2384,7 @@ PHP_FUNCTION(domxml_node_replace_node)
 {
 	zval *id, *rv = NULL, *node;
 	xmlNodePtr repnode, nodep, old_repnode;
+	xmlDocPtr tmpdoc;
 	int ret;
 
 	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlnodep);
@@ -2394,7 +2395,17 @@ PHP_FUNCTION(domxml_node_replace_node)
 
 	DOMXML_GET_OBJ(repnode, node, le_domxmlnodep);
 
+	tmpdoc = repnode->doc;
+
 	old_repnode = xmlReplaceNode(nodep, repnode);
+
+	/* ReplaceNode will change the doc for only the first node 
+	so check if doc was changed */
+	if (tmpdoc != repnode->doc) {
+		/* Set doc back to old doc otherwise libxml wont change all sub nodes */
+		repnode->doc = tmpdoc;
+		xmlSetTreeDoc(repnode, old_repnode->doc);
+	}
 
 	DOMXML_RET_OBJ(rv, old_repnode, &ret);
 }
