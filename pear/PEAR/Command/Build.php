@@ -66,7 +66,7 @@ Builds one or more extensions contained in a package.'
             $params[0] = 'package.xml';
         }
         $builder = &new PEAR_Builder($this->ui);
-        $this->verbose = $this->config->get('verbose');
+        $this->debug = $this->config->get('verbose');
         $err = $builder->build($params[0], array(&$this, 'buildCallback'));
         if (PEAR::isError($err)) {
             return $err;
@@ -79,8 +79,8 @@ Builds one or more extensions contained in a package.'
 
     function buildCallback($what, $data)
     {
-        if (($what == 'cmdoutput' && $this->verbose > 1) ||
-            ($what == 'output' && $this->verbose > 0)) {
+        if (($what == 'cmdoutput' && $this->debug > 1) ||
+            ($what == 'output' && $this->debug > 0)) {
             $this->ui->outputData(rtrim($data), 'build');
         }
     }
