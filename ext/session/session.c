@@ -287,24 +287,31 @@ void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unseri
 	if (PG(register_globals)) {
 		zval **old_symbol;
 		if (zend_hash_find(&EG(symbol_table),name,namelen+1,(void *)&old_symbol) == SUCCESS) { 
+			
 			/* 
-			   There was an old one, we need to replace it accurately.
-			   hash_update in zend_set_hash_symbol is not good, because
-			   it will leave referenced variables (such as local instances
-			   of a global variable) dangling.
-
-			   BTW: if you use register_globals references between
-			   session-vars won't work because of this very reason!
+			 * A global symbol with the same name exists already. That
+			 * symbol might have been created by other means (e.g. $_GET).
+			 *
+			 * hash_update in zend_set_hash_symbol is not good, because
+			 * it will leave referenced variables (such as local instances
+			 * of a global variable) dangling.
+			 *
+			 * BTW: if you use register_globals references between
+			 * session-vars won't work because of this very reason!
 			 */
 
 			
 			REPLACE_ZVAL_VALUE(old_symbol,state_val,1);
 
-			/* the following line will muck with the reference-table used for
-			 * unserialisation 
+			/*
+			 * The following line will update the reference table used for
+			 * unserialization.  It is optional, because some storage 
+			 * formats may not be able to represent references.
 			 */
 
-			PHP_VAR_UNSERIALIZE_ZVAL_CHANGED(var_hash,state_val,*old_symbol);
+			if (var_hash) {
+				PHP_VAR_UNSERIALIZE_ZVAL_CHANGED(var_hash,state_val,*old_symbol);
+			}
 
 			zend_set_hash_symbol(*old_symbol, name, namelen, 1, 1, Z_ARRVAL_P(PS(http_session_vars)));
 		} else {
