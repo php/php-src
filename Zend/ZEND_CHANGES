@@ -333,6 +333,8 @@ Changes in the Zend Engine 2.0
       instance, the namespaces "Package", "Package:Subpackage" and 
       "Package:Subpackage:Subsubpackage" as related.
 
+      Namespaces can be neither nested nor instantiated.
+
       To avoid ambiguities in the '::' resolution there may be no
       global class and namespace with the same name.
 
