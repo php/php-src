@@ -1,9 +1,35 @@
 <?php
 
-/** Standard PHP Library
+/** \mainpage SPL - Standard PHP Library
+ *
+ * SPL - Standard PHP Library
  *
  * (c) Marcus Boerger, 2003 - 2004
  */
+
+/** Interface to override array access of objects.
+ */
+interface ArrayAccess
+{
+	/** \param $offset to modify
+	 * \param $value new value
+	 */
+	function offsetSet($offset, $value);
+
+	/** \param $offset to retrieve
+	 * \return value at given offset
+	 */
+	function offsetGet($offset);
+
+	/** \param $offset to delete
+	 */
+	function offsetUnset($offset);
+
+	/** \param $offset to check
+	 *\return whether the offset exists.
+	 */
+	function offsetExists($offset);
+}
 
 /** Abstract base interface that cannot be implemented alone. Instead it
  * must be implemented by either IteratorAggregate or Iterator. 
@@ -343,7 +369,7 @@ class CachingIterator implements Iterator
 
 /** The recursive version of the CachingIterator.
  */
-class CachingRecursiveIterator extends CachingIterator implemnets RecursiveIterator
+class CachingRecursiveIterator extends CachingIterator implements RecursiveIterator
 {
 	/** Construct an instance form a RecursiveIterator.
 	 *

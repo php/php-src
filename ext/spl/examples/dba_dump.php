@@ -25,7 +25,7 @@ EOF;
 }
 
 require_once("dba_reader.inc");
-require_once("key_filter.inc");
+require_once("KeyFilter.inc");
 
 $db = new DbaReader($argv[1], $argv[2]);
 

@@ -23,7 +23,7 @@ class KeyFilter implements Iterator
 	 * method is called.
 	 *
 	 * @param it     Object that implements at least spl_forward
-	 * @patam regex  Regular expression used as a filter.
+	 * @param regex  Regular expression used as a filter.
 	 */
 	function __construct(Iterator $it, $regex) {
 		$this->it = $it;
