@@ -2269,10 +2269,8 @@ PHP_FUNCTION(addslashes)
 		RETURN_EMPTY_STRING();
 	}
 
-	RETURN_STRING(php_addslashes(Z_STRVAL_PP(str),
-	                             Z_STRLEN_PP(str), 
-	                             &Z_STRLEN_P(return_value), 0 
-	                             TSRMLS_CC), 0);
+	Z_TYPE_P(return_value) = IS_STRING;
+	Z_STRVAL_P(return_value) = php_addslashes(Z_STRVAL_PP(str), Z_STRLEN_PP(str), &Z_STRLEN_P(return_value), 0 TSRMLS_CC);
 }
 /* }}} */
 
@@ -2441,72 +2439,80 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 }
 /* }}} */
 
+/* true static */
+const unsigned char php_esc_list[256] = {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
 /* {{{ php_addslashes
  */
 PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_free TSRMLS_DC)
 {
-	/* maximum string length, worst case situation */
-	char *new_str;
-	char *source, *target;
-	char *end;
-	int local_new_length;
- 	        
+	char *e = str + (length ? length : (length = strlen(str)));
+	char *p = str;
+	char *new_str, *ps;
+	int local_new_length = length;
+	int type = PG(magic_quotes_sybase) ? 1 : 0;
+
 	if (!new_length) {
 		new_length = &local_new_length;
 	}
+
 	if (!str) {
 		*new_length = 0;
 		return str;
 	}
-	new_str = (char *) emalloc((length?length:(length=strlen(str)))*2+1);
-	source = str;
-	end = source + length;
-	target = new_str;
-	
-	if (PG(magic_quotes_sybase)) {
-		while (source < end) {
-			switch (*source) {
-				case '\0':
-					*target++ = '\\';
-					*target++ = '0';
-					break;
-				case '\'':
-					*target++ = '\'';
-					*target++ = '\'';
-					break;
-				default:
-					*target++ = *source;
-					break;
-			}
-			source++;
-		}
-	} else {
-		while (source < end) {
-			switch (*source) {
-				case '\0':
-					*target++ = '\\';
-					*target++ = '0';
-					break;
-				case '\'':
-				case '\"':
-				case '\\':
-					*target++ = '\\';
-					/* break is missing *intentionally* */
-				default:
-					*target++ = *source;
-					break;	
-			}
-		
-			source++;
+
+	/* determine the number of the characters that need to be escaped */
+	while (p < e) {
+		if (php_esc_list[(int)(unsigned char)*p++] > type) {
+			local_new_length++;
 		}
 	}
-	
-	*target = 0;
-	*new_length = target - new_str;
+
+	/* string does not have any escapable characters */
+	if (local_new_length == length) {
+		new_str = estrndup(str, length);
+		goto done;
+	}
+
+	/* create escaped string */
+	ps = new_str = emalloc(local_new_length + 1);
+	p = str;
+	if (!type) {
+		while (p < e) {
+			if (php_esc_list[(int)(unsigned char)*p]) {
+				*ps++ = '\\';
+			}
+			*ps++ = *p++;
+		}
+	} else {
+		while (p < e) {
+			switch (php_esc_list[(int)(unsigned char)*p]) {
+				case 2:
+					*ps++ = '\\';
+					*ps++ = '0';
+					p++;
+					break;
+			
+				case 3:
+					*ps++ = '\'';
+					*ps++ = '\'';
+					p++;
+					break;
+
+				default:
+					*ps++ = *p++;
+					break;
+			}
+		}
+	}
+	*ps = '\0';
+
+done:
 	if (should_free) {
 		STR_FREE(str);
 	}
-	new_str = (char *) erealloc(new_str, *new_length+1);
+	*new_length = local_new_length;
+
 	return new_str;
 }
 /* }}} */
