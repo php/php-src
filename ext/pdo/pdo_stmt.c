@@ -485,9 +485,9 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 				Z_TYPE_P(return_value) = IS_OBJECT;
 				Z_OBJ_HANDLE_P(return_value) = Z_OBJ_HANDLE_P(stmt->fetch.into);
 				Z_OBJ_HT_P(return_value) = Z_OBJ_HT_P(stmt->fetch.into);
-				zend_objects_store_add_ref(stmt->fetch.into);
+				zend_objects_store_add_ref(stmt->fetch.into TSRMLS_CC);
 
-				if (zend_get_class_entry(return_value) == ZEND_STANDARD_CLASS_DEF_PTR) {
+				if (zend_get_class_entry(return_value TSRMLS_CC) == ZEND_STANDARD_CLASS_DEF_PTR) {
 					how = PDO_FETCH_OBJ;
 				}
 				break;
@@ -867,7 +867,7 @@ fail_out:
 			convert_to_string_ex(args[skip+1]);
 
 			if (FAILURE == zend_lookup_class(Z_STRVAL_PP(args[skip+1]),
-					Z_STRLEN_PP(args[skip+1]), &cep)) {
+					Z_STRLEN_PP(args[skip+1]), &cep TSRMLS_CC)) {
 				goto fail_out;
 			}
 				
@@ -905,7 +905,7 @@ fail_out:
 			Z_TYPE_P(stmt->fetch.into) = IS_OBJECT;
 			Z_OBJ_HANDLE_P(stmt->fetch.into) = Z_OBJ_HANDLE_PP(args[skip+1]);
 			Z_OBJ_HT_P(stmt->fetch.into) = Z_OBJ_HT_PP(args[skip+1]);
-			zend_objects_store_add_ref(stmt->fetch.into);
+			zend_objects_store_add_ref(stmt->fetch.into TSRMLS_CC);
 			break;
 		
 		default:
@@ -1176,7 +1176,6 @@ static void pdo_stmt_iter_get_data(zend_object_iterator *iter, zval ***data TSRM
 {
 	struct php_pdo_iterator *I = (struct php_pdo_iterator*)iter->data;
 	zval **ptr_ptr;
-	zval *ptr;
 
 	/* sanity */
 	if (!I->fetch_ahead) {
