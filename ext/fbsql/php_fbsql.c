@@ -408,10 +408,6 @@ static void php_fbsql_init_globals(zend_fbsql_globals *fbsql_globals)
 		name[sizeof(name)-1] = 0;
 		fbsql_globals->hostName = strdup(name);
 	}
-/*	fbsql_globals->userName			= strdup(fbsql_globals->userName); */
-/*	fbsql_globals->userPassword		= strdup(fbsql_globals->userPassword); */
-/*	fbsql_globals->databaseName		= strdup(fbsql_globals->databaseName); */
-/*	fbsql_globals->databasePassword	= strdup(fbsql_globals->databasePassword); */
 
 	fbsql_globals->persistantCount	= 0;
 	fbsql_globals->linkCount		= 0;
@@ -713,13 +709,9 @@ PHP_FUNCTION(fbsql_close)
 }
 /* }}} */
 
-
-/* {{{ proto int fbsql_select_db(string database_name [, int link_identifier]
-	*/
 PHPFBDatabase* phpfbSelectDB 
 (	INTERNAL_FUNCTION_PARAMETERS,
 	char*        databaseName,
-	char*        databasePassword,
 	PHPFBLink*   link
 )
 {
@@ -750,7 +742,7 @@ PHPFBDatabase* phpfbSelectDB
 	else
 	{
 		list_entry             le;
-		FBCDatabaseConnection* c = fbcdcConnectToDatabase(databaseName,link->hostName,databasePassword);
+		FBCDatabaseConnection* c = fbcdcConnectToDatabase(databaseName,link->hostName,FB_SQL_G(databasePassword));
 		FBCMetaData*           md;
 		if (c == NULL)
 		{
@@ -800,7 +792,7 @@ PHPFBDatabase* phpfbSelectDB
 		result->index            = zend_list_insert((PHPFBDatabase*)(le.ptr), le_dba);
 		result->link             = phpfbRetainLink(link);
 		result->databaseName     = strdup(databaseName);
-		result->databasePassword = strdup(databasePassword);
+		result->databasePassword = strdup(FB_SQL_G(databasePassword));
 		result->connection       = c;
 		result->errorNo          = 0;
 		result->errorText        = NULL;
@@ -1010,7 +1002,7 @@ PHP_FUNCTION(fbsql_database_password)
 	if (argc >= 1)
 	{
 		convert_to_string_ex(argv[0]);
-		free(FB_SQL_G(hostName));
+		free(FB_SQL_G(databasePassword));
 		FB_SQL_G(databasePassword) = strdup((*argv[0])->value.str.val); 
 	}
 }
@@ -1098,7 +1090,7 @@ PHP_FUNCTION(fbsql_select_db)
 	if (phpLink == NULL) RETURN_FALSE;
 /*	printf("Select db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
 
-	database = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU,name,"",phpLink);
+	database = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU,name,phpLink);
 	if (database == NULL) RETURN_FALSE;
 
 	phpLink->currentDatabase  = database;
@@ -1147,7 +1139,7 @@ PHP_FUNCTION(fbsql_change_user)
 		link = (*argv[3])->value.lval;
 	}
 	if ((phpLink = phpfbGetLink(link))==NULL) RETURN_FALSE;
-	if ((phpDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU,databaseName,"",phpLink)) == NULL) RETURN_FALSE;
+	if ((phpDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU,databaseName,phpLink)) == NULL) RETURN_FALSE;
 	{
 		char buffer[1024];
 		sprintf(buffer,"SET AUTHORIZATION %s;",userName);
@@ -1348,7 +1340,7 @@ PHP_FUNCTION(fbsql_stop_db)
 		if (phpLink == NULL) RETURN_FALSE;
 	}
 
-	phpDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, databaseName,"",phpLink);
+	phpDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, databaseName,phpLink);
 	if (phpDatabase == NULL) RETURN_FALSE;
 
 /*	printf("Stop db %x\n",phpDatabase->connection); */
@@ -1698,7 +1690,7 @@ PHP_FUNCTION(fbsql_db_query)
 	}
 	if (phpLink == NULL) RETURN_FALSE;
 /*	printf("Query db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
-	phpDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, databaseName,"",phpLink);
+	phpDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, databaseName,phpLink);
 	if (phpDatabase == NULL) RETURN_FALSE;
  
 	phpResult = phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU,sql,phpDatabase);
@@ -1818,11 +1810,11 @@ PHP_FUNCTION(fbsql_list_tables)
   
 	if (databaseName == NULL)
 	{
-		phpLink->currentDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, FB_SQL_G(databaseName),"",phpLink);
+		phpLink->currentDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, FB_SQL_G(databaseName),phpLink);
 	}
 	else 
 	{
-		phpLink->currentDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, databaseName,"",phpLink);
+		phpLink->currentDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, databaseName,phpLink);
 	}
 	phpDatabase = phpLink->currentDatabase;
 	if (phpDatabase == NULL) RETURN_FALSE;
@@ -1882,7 +1874,7 @@ PHP_FUNCTION(fbsql_list_fields)
 	}
 	if (phpLink == NULL) RETURN_FALSE;
 
-	phpDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, databaseName,"",phpLink);
+	phpDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, databaseName,phpLink);
 	phpLink->currentDatabase = phpDatabase;
 	if (phpDatabase == NULL) RETURN_FALSE;
 
@@ -2038,7 +2030,7 @@ PHP_FUNCTION(fbsql_insert_id)
 
 	if (phpLink->currentDatabase == NULL)
 	{
-		phpLink->currentDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, FB_SQL_G(databaseName),"",phpLink);
+		phpLink->currentDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, FB_SQL_G(databaseName),phpLink);
 	}
 	phpDatabase = phpLink->currentDatabase;
 	if (phpDatabase == NULL) RETURN_FALSE;
