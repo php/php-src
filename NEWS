@@ -14,6 +14,9 @@ PHP 4                                                                      NEWS
 - Changed array_search() to accept also objects as a needle. (Moriyoshi)
 - Changed ext/mcrypt to require libmcrypt version 2.5.6 or greater. (Derick)
 - Changed uniqid() parameters to be optional and allow any prefix length. (Marcus)
+- Added lightweight streaming input abstraction to the Zend Engine scanners
+  the provides uniform support for include()'ing data from PHP streams across
+  all platforms (Wez, Zend Engine).
 - Added optional parameter to sha1() and md5() which makes them return 
   the digest as binary data. (Michael Bretterklieber <mbretter@jawa.at>, Derick)
 - Added proc_nice() function. Changes priority of the current process. (Ilia)
