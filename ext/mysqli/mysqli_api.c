@@ -282,6 +282,8 @@ PHP_FUNCTION(mysqli_bind_result)
 
 			case MYSQL_TYPE_LONGLONG:
 				stmt->bind[ofs].type = IS_STRING; 
+
+				/* TODO: change and check buflen when bug #74 is fixed */
 				stmt->bind[ofs].buflen = sizeof(my_ulonglong); 
 				stmt->bind[ofs].buffer = (char *)emalloc(stmt->bind[ofs].buflen);
 				bind[ofs].buffer_type = MYSQL_TYPE_LONGLONG;
@@ -298,7 +300,7 @@ PHP_FUNCTION(mysqli_bind_result)
 			case MYSQL_TYPE_BLOB:
 			case MYSQL_TYPE_TIMESTAMP:
 				stmt->bind[ofs].type = IS_STRING; 
-				stmt->bind[ofs].buflen = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].length + 1: 250;
+				stmt->bind[ofs].buflen = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].length + 1: 256;
 				stmt->bind[ofs].buffer = (char *)emalloc(stmt->bind[ofs].buflen);
 				bind[ofs].buffer_type = MYSQL_TYPE_STRING;
 				bind[ofs].buffer = stmt->bind[ofs].buffer;
@@ -307,7 +309,6 @@ PHP_FUNCTION(mysqli_bind_result)
 				bind[ofs].length = &stmt->bind[ofs].buflen;
 				break;
 		}
-//		bind[ofs].length = &stmt->bind[ofs].buflen;
 	}
 
 	if (mysql_bind_result(stmt->stmt, bind)) {
@@ -598,7 +599,7 @@ PHP_FUNCTION(mysqli_execute)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_fetch(resource stmt)
+/* {{{ proto int mysqli_fetch(resource stmt)
 */
 PHP_FUNCTION(mysqli_fetch)
 {
@@ -622,39 +623,38 @@ PHP_FUNCTION(mysqli_fetch)
 	}
 	
 	if (!(ret = mysql_fetch(stmt->stmt))) {
-		RETURN_FALSE;
-	}
 
-	for (i = 0; i < stmt->var_cnt; i++) {
-		if (!stmt->is_null[i]) {
-			switch (stmt->bind[i].type) {
-				case IS_LONG:
-					stmt->vars[i]->type = IS_LONG;
-					break;
-				case IS_DOUBLE:
-					stmt->vars[i]->type = IS_DOUBLE;
-					break;
-				case IS_STRING:
-					if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_LONGLONG) {
-						char tmp[50];
-						my_ulonglong lval;
-						memcpy (&lval, stmt->bind[i].buffer, sizeof(my_ulonglong));
-						if (lval != (long)lval) {
-							sprintf((char *)&tmp, "%lld", lval);
-							ZVAL_STRING(stmt->vars[i], tmp, 1);
+		for (i = 0; i < stmt->var_cnt; i++) {
+			if (!stmt->is_null[i]) {
+				switch (stmt->bind[i].type) {
+					case IS_LONG:
+						stmt->vars[i]->type = IS_LONG;
+						break;
+					case IS_DOUBLE:
+						stmt->vars[i]->type = IS_DOUBLE;
+						break;
+					case IS_STRING:
+						if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_LONGLONG) {
+							char tmp[50];
+							my_ulonglong lval;
+							memcpy (&lval, stmt->bind[i].buffer, sizeof(my_ulonglong));
+							if (lval != (long)lval) {
+								sprintf((char *)&tmp, "%lld", lval);
+								ZVAL_STRING(stmt->vars[i], tmp, 1);
+							} else {
+								ZVAL_LONG(stmt->vars[i], lval);
+							}
 						} else {
-							ZVAL_LONG(stmt->vars[i], lval);
+							stmt->bind[i].type = IS_STRING;
+							ZVAL_STRING(stmt->vars[i], stmt->bind[i].buffer, 1);
 						}
-					} else {
-						stmt->bind[i].type = IS_STRING;
-						ZVAL_STRING(stmt->vars[i], stmt->bind[i].buffer, 1);
-					}
-					break;
-				default:
-					break;	
+						break;
+					default:
+						break;	
+				}
+			} else {
+				stmt->vars[i]->type = IS_NULL;
 			}
-		} else {
-			stmt->vars[i]->type = IS_NULL;
 		}
 	}
 
@@ -1266,7 +1266,7 @@ PHP_FUNCTION(mysqli_real_connect)
 
 	if (mysql_real_connect(mysql,hostname,username,passwd,dbname,port,socket,flags) == NULL) {
 		/* Save error messages */
-		php_mysqli_set_error(mysql_errno(mysql), mysql_error(mysql) TSRMLS_CC);
+		php_mysqli_set_error(mysql_errno(mysql), (char *)mysql_error(mysql) TSRMLS_CC);
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysql_error(mysql));
 		RETURN_FALSE;
