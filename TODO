@@ -5,10 +5,12 @@ Zend
 ----
     * allow foreach ($array as $k => &$val) syntax. right now we can not 
       traverse an array without copying each element.
-    * look al replacing c-lib call tolower().
+    * look at replacing c-lib call tolower().
 
 global
 ------
+    * always build the standalone executable as well as teh chosen SAPI 
+	  target.
     * make sure all source files have the "right" copyright.
     * the following modules still use PHP3_TLS_*() macros (and thereby don't 
       work in ZTS mode): ext/dav/dav.c, ext/db/db.c, ext/gd/gd.c, ext/ldap/ldap.c
