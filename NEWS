@@ -34,6 +34,7 @@ PHP 4                                                                      NEWS
   (Elf, Ilia)
 - Fixed leap year checking with idate(). (Christian Schneider, Derick)
 - Fixed strip_tags() to correctly handle '\0' characters. (Stefan)
+- Fixed funny forking effect in FastCGI when PHP_FCGI_CHILDREN was not set.
 
 03 Jun 2004, Version 4.3.7
 - Upgraded bundled GD library to 2.0.23. (Ilia)
