@@ -7,7 +7,8 @@ PHP 4                                                                      NEWS
   makes more sense); do not include functions in symbol table which aren't
   supported on host system. (Markus)
 - TIFF support for GetImageSize (Marcus)
-- The Velocis extension is no
+- Changed the Velocis extension namespace to Birdstep to reflect new product 
+  name. Added aliases for BC. (James)
 - Added test.php/txt to have a possibility to check ext/exif
   (Marcus)
 - Added TIFF support
