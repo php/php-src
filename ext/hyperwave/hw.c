@@ -4311,7 +4311,6 @@ PHP_FUNCTION(hw_insertanchors)
 	pval **arg1, **arg2, **arg3, **arg4;
 	hw_document *hwdoc;
 	int type, docid, error, argc, count;
-	char *anchorstr;
 	char **anchorrecs;
 	char **dest;
 	char **urlprefix;
