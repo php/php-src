@@ -516,6 +516,40 @@ function error_report($testname,$logname,$tested)
 	}
 }
 
+function system_with_timeout($commandline)
+{
+	$data = "";
+	
+	$proc = proc_open($commandline, array(1 => array('pipe', 'w')), $pipes);
+
+	if (!$proc)
+		return false;
+
+	while (true) {
+		/* hide errors from interrupted syscalls */
+		$r = $pipes;
+		$w = null;
+		$e = null;
+		$n = stream_select($r, $w, $e, 60);
+
+		if ($n == 0) {
+			/* timed out */
+			$data .= "\n ** ERROR: process timed out **\n";
+			proc_terminate($proc);
+			return $data;
+		} else if ($n) {
+			$line = fgets($pipes[1]);
+			if ($line === false) {
+				/* EOF */
+				break;
+			}
+			$data .= $line;
+		}
+	}
+	$code = proc_close($proc);
+	return $data;
+}
+
 //
 //  Run an individual test case.
 //
@@ -667,7 +701,8 @@ SCRIPT_FILENAME = " . getenv("SCRIPT_FILENAME") . "
 COMMAND $cmd
 ";
 
-	$out = `$cmd`;
+//	$out = `$cmd`;
+	$out = system_with_timeout($cmd);
 
 	@unlink($tmp_post);
 
