@@ -4,7 +4,7 @@
 #include <novsock2.h>
 #else
 #include <sys/socket.h>	/* For struct sockaddr, 'PF_INET' and 'AF_INET' */
-#include <netinet\in.h>	/* For struct sockaddr_in */
+#include <netinet/in.h>	/* For struct sockaddr_in */
 #include <netdb.h>		/* For struct hostent */
 /*#include <ws2name.h>*/
 #endif	/* USE_WINSOCK */
