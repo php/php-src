@@ -4,6 +4,8 @@
 #undef PACKAGE
 #undef VERSION
 
+#undef HAVE_LIBDL
+
 #undef HAVE_STRUCT_FLOCK
 #undef HAVE_TM_GMTOFF
 
