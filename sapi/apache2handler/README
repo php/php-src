@@ -1,9 +1,0 @@
-
-    After short discussion, the #php.bugs mob decided that we don't want
-    this in PHP_4_3 branch. At least as long as it doesn't work as well
-    (or preferrably better :) than the apache2filter SAPI does.
-    
-    So please remove it from the branch for now..
-    
-    --Jani
-    
