@@ -30,6 +30,8 @@ class Interop_Client
     // database DNS
     var $DSN = "";
 
+    var $baseURL = "";
+
     // our central interop server, where we can get the list of endpoints
     var $interopServer = "http://www.whitemesa.net/wsdl/interopInfo.wsdl";
 
@@ -57,10 +59,13 @@ class Interop_Client
     var $tests = array('base','GroupB', 'GroupC');
     var $paramTypes = array('php', 'soapval');
     var $endpoints = array();
+    var $html = 1;
 
     function Interop_Client() {
         global $interopConfig;
     		$this->DSN = $interopConfig['DSN'];
+    		$this->baseURL = $interopConfig['baseURL'];
+    		//$this->baseURL = 'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']);
         // set up the database connection
         $this->dbc = DB::connect($this->DSN, true);
         // if it errors out, just ignore it and rely on regular methods
@@ -71,19 +76,18 @@ class Interop_Client
         // set up local endpoint
         $this->localEndpoint['base'] = (object)array(
                                 'endpointName'=>'PHP ext/soap',
-                                'endpointURL'=>'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/server_round2_base.php',
-                                'wsdlURL'=>'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/interop.wsdl.php'
+                                'endpointURL'=>$this->baseURL.'/server_round2_base.php',
+                                'wsdlURL'=>$this->baseURL.'/interop.wsdl.php'
                               );
         $this->localEndpoint['GroupB'] = (object)array(
                                 'endpointName'=>'PHP ext/soap',
-                                'endpointURL'=>'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/server_round2_groupB.php',
-                                'wsdlURL'=>'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/interopB.wsdl.php'
+                                'endpointURL'=>$this->baseURL.'/server_round2_groupB.php',
+                                'wsdlURL'=>$this->baseURL.'/interopB.wsdl.php'
                               );
         $this->localEndpoint['GroupC'] = (object)array(
                                 'endpointName'=>'PHP ext/soap',
-                                'endpointURL'=>'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/server_round2_groupC.php',
-                                'wsdlURL'=>'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/echoheadersvc.wsdl.php'
-                              );
+                                'endpointURL'=>$this->baseURL.'/server_round2_groupC.php',
+                                'wsdlURL'=>$this->baseURL.'/echoheadersvc.wsdl.php');
     }
 
     function _fetchEndpoints(&$soapclient, $test) {
@@ -92,9 +96,11 @@ class Interop_Client
         // retreive endpoints from the endpoint server
         $endpointArray = $soapclient->__call("GetEndpointInfo",array("groupName"=>$test),array('soapaction'=>"http://soapinterop.org/",'uri'=>"http://soapinterop.org/"));
         if (is_soap_fault($endpointArray) || PEAR::isError($endpointArray)) {
-            print "<pre>".$soapclient->wire."\n";
+        		if ($this->html) print "<pre>";
+            print $soapclient->wire."\n";
             print_r($endpointArray);
-            print "</pre>";
+        		if ($this->html) print "</pre>";
+            print "\n";
             return;
         }
 
@@ -145,7 +151,11 @@ class Interop_Client
                 $test = 'base';
             }
         } catch (SoapFault $fault) {
-        		echo "<pre>$fault</pre>";
+            if ($this->html) {
+        		    echo "<pre>$fault</pre>\n";
+        		} else {
+        		    echo "$fault\n";
+        		}
             return NULL;
         }
         // retreive all endpoints now
@@ -552,7 +562,10 @@ try {
             $this->totals['servers']++;
             #$endpoint_info['tests'] = array();
 
-            if ($this->show) print "Processing $endpoint at {$endpoint_info['endpointURL']}<br>\n";
+            if ($this->show) {
+              print "Processing $endpoint at {$endpoint_info['endpointURL']}";
+              if ($this->html) print "<br>\n"; else print "\n";
+           	}
 
             foreach($soap_tests[$this->currentTest] as $soap_test) {
             //foreach(array_keys($method_params[$this->currentTest][$this->paramType]) as $method)
@@ -573,7 +586,7 @@ try {
                                   $skipfault
                                   );
                     #$endpoint_info['tests'][] = &$soap_test;
-                    #$soap_test->showTestResult($this->debug);
+                    #$soap_test->showTestResult($this->debug, $this->html);
                     #$this->_saveResults($endpoint_info['id'], $soap_test->method_name);
                     $soap_test->result = NULL;
                     continue;
@@ -602,7 +615,7 @@ try {
                     }
                     #$endpoint_info['tests'][] = &$soap_test;
                 }
-                $soap_test->showTestResult($this->debug);
+                $soap_test->showTestResult($this->debug, $this->html);
                 $this->_saveResults($endpoint_info['id'], $soap_test);
                 $soap_test->result = NULL;
                 $this->totals['calls']++;
@@ -775,7 +788,10 @@ try {
         $results = $this->dbc->getAll("select * from results where id=$id",NULL, DB_FETCHMODE_ASSOC );
         #$wire = preg_replace("/>/",">\n",$results[0]['wire']);
         $wire = $results[0]['wire'];
-        echo "<pre>\n".HTMLSpecialChars($wire)."</pre>\n";
+        if ($this->html) print "<pre>";
+        echo "\n".HTMLSpecialChars($wire);
+        if ($this->html) print "</pre>";
+        print "\n";
     }
 
 }

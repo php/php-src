@@ -81,11 +81,11 @@ class SOAP_Test {
     * @param string method
     * @access public
     */
-    function showTestResult($debug = 0) {
+    function showTestResult($debug = 0, $html = 0) {
         // debug output
         if ($debug) $this->show = 1;
         if ($debug) {
-            echo str_repeat("-",50)."<br>\n";
+            echo str_repeat("-",50).$html?"<br>\n":"\n";
         }
 
         echo "testing $this->test_name : ";
@@ -98,7 +98,11 @@ class SOAP_Test {
 
         $ok = $this->result['success'];
         if ($ok) {
-            print "<font color=\"#00cc00\">SUCCESS</font>\n";
+            if ($html) {
+                print "<font color=\"#00cc00\">SUCCESS</font>\n";
+            } else {
+                print "SUCCESS\n";
+            }
         } else {
             $fault = $this->result['fault'];
             if ($fault) {
@@ -107,13 +111,25 @@ class SOAP_Test {
                 if ($pos !== false) {
                 	$res = substr($res,$pos+1);                	
                 }
-                print "<font color=\"#ff0000\">FAILED: [$res] {$fault->faultstring}</font>\n";
+                if ($html) {
+                    print "<font color=\"#ff0000\">FAILED: [$res] {$fault->faultstring}</font>\n";
+                } else {
+                    print "FAILED: [$res] {$fault->faultstring}\n";
+                }
             } else {
-                print "<font color=\"#ff0000\">FAILED: ".$this->result['result']."</font>\n";
+                if ($html) {
+                    print "<font color=\"#ff0000\">FAILED: ".$this->result['result']."</font>\n";
+                } else {
+                    print "FAILED: ".$this->result['result']."\n";
+                }
             }
         }
         if ($debug) {
-            echo "<pre>\n".htmlentities($this->result['wire'])."</pre>\n";
+            if ($html) {
+                echo "<pre>\n".htmlentities($this->result['wire'])."</pre>\n";
+            } else {
+                echo "\n".htmlentities($this->result['wire'])."\n";
+            }
         }
     }
 }
