@@ -301,7 +301,6 @@ PHP 4                                                                      NEWS
   condition. Also fixed host resolution error messages on win32. (Jason)
 - Added optional 3rd parameter 'recursive' to ftp_rawlist() which will
   do 'LIST -R' instead of 'LIST'. (Jani)
-- Disabled the fifth parameter in mail() when safe-mode is turned on. (Derick)
 - Changed getimagesize() to always set unknown fields to 0 and added support
   for iff imagetype. (Marcus)
 - Added runtime Apache2 thread check to ensure we don't run a non-threaded
@@ -429,6 +428,7 @@ PHP 4                                                                      NEWS
   process is now more portable and less resource-consuming. (Sascha)
 
 06 Sep 2002, Version 4.2.3
+- Disabled the fifth parameter in mail() when safe-mode is turned on. (Derick)
 - Enable UTF8 modifier support for PCRE on win32. (Wez, Edin)
 - Enabled strcoll() on win32. (Markus)
 - Fixed possible ASCII control char injection in mail(). (Stefan Esser)
