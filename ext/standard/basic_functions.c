@@ -996,6 +996,35 @@ static void basic_globals_dtor(php_basic_globals *basic_globals_p TSRMLS_DC)
 }
 
 
+#define PHP_DOUBLE_INFINITY_HIGH       0x7ff00000
+#define PHP_DOUBLE_QUIET_NAN_HIGH      0xfff80000
+
+PHPAPI double php_get_nan()
+{
+#if defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
+	double val;
+	((php_uint32*)&val)[1] = PHP_DOUBLE_QUIET_NAN_HIGH;
+	((php_uint32*)&val)[0] = 0;
+	return val;
+#else
+	/* hope the target platform is ISO-C compliant */
+	return atof("NAN");
+#endif
+}
+
+PHPAPI double php_get_inf()
+{
+#if defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
+	double val;
+	((php_uint32*)&val)[1] = PHP_DOUBLE_INFINITY_HIGH;
+	((php_uint32*)&val)[0] = 0;
+	return val;
+#else
+	/* hope the target platform is ISO-C compliant */
+	return atof("INF");
+#endif
+}
+
 PHP_MINIT_FUNCTION(basic)
 {
 #ifdef ZTS
@@ -1027,6 +1056,8 @@ PHP_MINIT_FUNCTION(basic)
 	REGISTER_MATH_CONSTANT(M_2_SQRTPI);
 	REGISTER_MATH_CONSTANT(M_SQRT2);
 	REGISTER_MATH_CONSTANT(M_SQRT1_2);
+	REGISTER_DOUBLE_CONSTANT("INF", php_get_inf(), CONST_CS | CONST_PERSISTENT);
+	REGISTER_DOUBLE_CONSTANT("NAN", php_get_nan(), CONST_CS | CONST_PERSISTENT);
 
 #if ENABLE_TEST_CLASS
 	test_class_startup();

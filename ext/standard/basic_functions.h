@@ -211,4 +211,7 @@ typedef struct {
 #define SAFE_MODE_PROTECTED_ENV_VARS	"LD_LIBRARY_PATH"
 #define SAFE_MODE_ALLOWED_ENV_VARS		"PHP_"
 
+PHPAPI double php_get_nan();
+PHPAPI double php_get_inf();
+
 #endif /* BASIC_FUNCTIONS_H */
