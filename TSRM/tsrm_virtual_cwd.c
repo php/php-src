@@ -289,9 +289,9 @@ CWD_API char *virtual_link(char *buf, size_t size TSRMLS_DC)
 	char resolved_path[MAXPATHLEN];
 	
 	if (IS_ABSOLUTE_PATH(buf, size)) {
-		memcpy(resolved_path, buf, size);
-		p[size] = '\0';
 		p = resolved_path;
+		memcpy(p, buf, size);
+		p[size] = '\0';
 	} else {
 		virtual_getcwd(tmp_path, MAXPATHLEN TSRMLS_CC);
 		p = tmp_path + strlen(tmp_path);
