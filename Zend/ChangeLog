@@ -1,3 +1,19 @@
+2003-11-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      Add method reflection_class::implementsInterface()
+      Allow string & reflection_class in isSubclassOf()
+
+    * zend_reflection_api.c:
+      Fix reflection_class::isSubclassOf()
+
+    * zend.c
+      zend_object_handlers.c
+      zend_operators.c
+      tests/bug26166.phpt:
+      Handle exceptions in casting more gracefully.
+      This fixes bug #26166
+
 2003-11-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute_API.c:
