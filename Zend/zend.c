@@ -65,7 +65,7 @@ zend_class_entry global_main_class;
 HashTable *global_auto_globals_table;
 #endif
 
-zend_utility_values zend_uv;
+ZEND_API zend_utility_values zend_uv;
 
 ZEND_API zval zval_used_for_init; /* True global variable */
 
