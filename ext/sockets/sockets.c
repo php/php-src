@@ -357,12 +357,12 @@ static char *php_strerror(int error TSRMLS_DC)
 	return (buf ? (char *) buf : "");
 }
 
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 /* Sets addr by hostname, or by ip in string form (AF_INET6) */
 static int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock TSRMLS_DC)
 {
 	struct in6_addr tmp;
-#ifdef HAVE_GETADDRINFO
+#if HAVE_GETADDRINFO
 	struct addrinfo hints;
 	struct addrinfo *addrinfo = NULL;
 #endif
@@ -370,7 +370,7 @@ static int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socke
 	if (inet_pton(AF_INET6, string, &tmp)) {
 		memcpy(&(sin6->sin6_addr.s6_addr), &(tmp.s6_addr), sizeof(struct in6_addr));
 	} else {
-#ifdef HAVE_GETADDRINFO
+#if HAVE_GETADDRINFO
 
 		memset(&hints, 0, sizeof(struct addrinfo));
 		hints.ai_family = PF_INET6;
@@ -450,7 +450,7 @@ PHP_MINIT_FUNCTION(sockets)
 
 	REGISTER_LONG_CONSTANT("AF_UNIX",		AF_UNIX,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AF_INET",		AF_INET,		CONST_CS | CONST_PERSISTENT);
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 	REGISTER_LONG_CONSTANT("AF_INET6",		AF_INET6,		CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("SOCK_STREAM",	SOCK_STREAM,	CONST_CS | CONST_PERSISTENT);
@@ -871,7 +871,7 @@ PHP_FUNCTION(socket_getsockname)
 	php_socket				*php_sock;
 	struct sockaddr			*sa;
 	struct sockaddr_in		*sin;
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 	struct sockaddr_in6		*sin6;
 	char					addr6[INET6_ADDRSTRLEN+1];
 #endif
@@ -892,7 +892,7 @@ PHP_FUNCTION(socket_getsockname)
 	}
 	
 	switch (sa->sa_family) {
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 		case AF_INET6:
 			sin6 = (struct sockaddr_in6 *) sa;
 			inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);			
@@ -947,7 +947,7 @@ PHP_FUNCTION(socket_getpeername)
 	php_socket				*php_sock;
 	struct sockaddr			*sa;
 	struct sockaddr_in		*sin;
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 	struct sockaddr_in6		*sin6;
 	char					addr6[INET6_ADDRSTRLEN+1];
 #endif
@@ -968,7 +968,7 @@ PHP_FUNCTION(socket_getpeername)
 	}
 
 	switch (sa->sa_family) {
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 		case AF_INET6:
 			sin6 = (struct sockaddr_in6 *) sa;
 			inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);			
@@ -1029,7 +1029,7 @@ PHP_FUNCTION(socket_create)
     }
 
 	if (arg1 != AF_UNIX 
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 		&& arg1 != AF_INET6
 #endif
 		&& arg1 != AF_INET) {
@@ -1063,7 +1063,7 @@ PHP_FUNCTION(socket_connect)
 	zval				*arg1;
 	php_socket			*php_sock;
 	struct sockaddr_in	sin;
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 	struct sockaddr_in6	sin6;
 #endif
 	struct sockaddr_un	s_un;
@@ -1078,7 +1078,7 @@ PHP_FUNCTION(socket_connect)
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 
 	switch(php_sock->type) {
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 		case AF_INET6:
 			if (argc != 3) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Socket of type AF_INET6 requires 3 arguments");
@@ -1189,7 +1189,7 @@ PHP_FUNCTION(socket_bind)
 				retval = bind(php_sock->bsd_socket, (struct sockaddr *)sa, sizeof(struct sockaddr_in));
 				break;
 			}
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 		case AF_INET6:
 			{
 				struct sockaddr_in6 *sa = (struct sockaddr_in6 *) sock_type;
@@ -1298,7 +1298,7 @@ PHP_FUNCTION(socket_recvfrom)
 	php_socket			*php_sock;
 	struct sockaddr_un	s_un;
 	struct sockaddr_in	sin;
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 	struct sockaddr_in6	sin6;
 	char				addr6[INET6_ADDRSTRLEN];
 #endif
@@ -1361,7 +1361,7 @@ PHP_FUNCTION(socket_recvfrom)
 			ZVAL_STRING(arg5, address ? address : "0.0.0.0", 1);
 			ZVAL_LONG(arg6, ntohs(sin.sin_port));
 			break;
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 		case AF_INET6:
 			slen = sizeof(sin6);
 			memset(&sin6, 0, slen);
@@ -1407,7 +1407,7 @@ PHP_FUNCTION(socket_sendto)
 	php_socket			*php_sock;
 	struct sockaddr_un	s_un;
 	struct sockaddr_in	sin;
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 	struct sockaddr_in6	sin6;
 #endif
 	int					retval, buf_len, addr_len;
@@ -1445,7 +1445,7 @@ PHP_FUNCTION(socket_sendto)
 			
 			retval = sendto(php_sock->bsd_socket, buf, (len > buf_len) ? buf_len : len, flags, (struct sockaddr *) &sin, sizeof(sin));
 			break;
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 		case AF_INET6:
 			if (argc != 6) {
 				WRONG_PARAM_COUNT;
@@ -1647,7 +1647,7 @@ PHP_FUNCTION(socket_create_pair)
 	php_sock[1] = (php_socket*)emalloc(sizeof(php_socket));
 
 	if (domain != AF_INET 
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 		&& domain != AF_INET6
 #endif
 		&& domain != AF_UNIX) {

@@ -181,3 +181,17 @@ ADD_SOURCES("regex", "regcomp.c regerror.c regexec.c regfree.c");
 
 STDOUT.WriteBlankLines(1);
 
+/* Can we build with IPv6 support? */
+ARG_ENABLE("ipv6", "Disable IPv6 support (default is turn it on if available)", "yes");
+
+var main_network_has_ipv6 = 0;
+if (PHP_IPV6 == "yes") {
+	main_network_has_ipv6 = CHECK_HEADER_ADD_INCLUDE("ws2tcpip.h", "CFLAGS") ? 1 : 0;
+}
+if (main_network_has_ipv6) {
+	STDOUT.WriteLine("Enabling IPv6 support");
+}
+AC_DEFINE('HAVE_GETADDRINFO', main_network_has_ipv6);
+AC_DEFINE('HAVE_GAI_STRERROR', main_network_has_ipv6);
+AC_DEFINE('HAVE_IPV6', main_network_has_ipv6);
+
