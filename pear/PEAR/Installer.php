@@ -23,6 +23,10 @@ require_once 'PEAR/Common.php';
 require_once 'PEAR/Registry.php';
 require_once 'PEAR/Dependency.php';
 
+// TODO:
+// * files that are not installed should be removed from the
+//   registered file list.
+
 /**
  * Administration class used to install PEAR packages and maintain the
  * installed package database.
