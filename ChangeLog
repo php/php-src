@@ -1,3 +1,27 @@
+2004-06-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/syslog.c:
+      Standardize error reporting.
+
+2004-06-13  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * pear/PEAR/Packager.php:
+      - Typo (#1627) (cox)
+
+2004-06-13  Rob Richards  <rrichards@ctindustries.net>
+
+    * NEWS:
+      BFN
+
+    * ext/dom/node.c:
+      Fix bug #28721 (appendChild() and insertBefore() unset DOMText)
+
+2004-06-13  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_3)
+      ext/gettext/gettext.dsp:
+      Part of fix for #28745: link agains extension against iconv
+
 2004-06-12  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
 
     * ext/interbase/ibase_query.c
