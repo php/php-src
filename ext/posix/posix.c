@@ -449,11 +449,11 @@ PHP_FUNCTION(posix_uname)
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
-	add_assoc_string(return_value, "sysname",  u.sysname,  strlen(u.sysname));
-	add_assoc_string(return_value, "nodename", u.nodename, strlen(u.nodename));
-    add_assoc_string(return_value, "release",  u.release,  strlen(u.release));
-    add_assoc_string(return_value, "version",  u.version,  strlen(u.version));
-    add_assoc_string(return_value, "machine",  u.machine,  strlen(u.machine));
+	add_assoc_string(return_value, "sysname",  u.sysname,  1);
+	add_assoc_string(return_value, "nodename", u.nodename, 1);
+    add_assoc_string(return_value, "release",  u.release, 1);
+    add_assoc_string(return_value, "version",  u.version, 1);
+    add_assoc_string(return_value, "machine",  u.machine, 1);
 }
 /* }}} */
 
@@ -659,11 +659,11 @@ PHP_FUNCTION(posix_getgrnam)
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
-	add_assoc_string(return_value, "name",		g->gr_name,  strlen(g->gr_name));
+	add_assoc_string(return_value, "name",		g->gr_name,  1);
 	add_assoc_long  (return_value, "gid",		g->gr_gid);
 	for (count=0, p=g->gr_mem; p[count] != NULL; count++) {
 		snprintf(buffer, 10, "%d", count);
-		add_assoc_string(return_value, buffer, p[count], strlen(p[count]));
+		add_assoc_string(return_value, buffer, p[count], 1);
 	}
 	add_assoc_long(return_value, "members", count);
 }
@@ -695,11 +695,11 @@ PHP_FUNCTION(posix_getgrgid)
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
-	add_assoc_string(return_value, "name",		g->gr_name,  strlen(g->gr_name));
+	add_assoc_string(return_value, "name",		g->gr_name, 1);
 	add_assoc_long  (return_value, "gid",		g->gr_gid);
 	for (count=0, p=g->gr_mem; p[count] != NULL; count++) {
 		snprintf(buffer, 10, "%d", count);
-		add_assoc_string(return_value, buffer, p[count], strlen(p[count]));
+		add_assoc_string(return_value, buffer, p[count], 1);
 	}
 	add_assoc_long(return_value, "members", count);
 }
@@ -727,13 +727,13 @@ PHP_FUNCTION(posix_getpwnam)
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
-	add_assoc_string(return_value, "name",      pw->pw_name, strlen(pw->pw_name));
-	add_assoc_string(return_value, "passwd",    pw->pw_passwd, strlen(pw->pw_passwd));
+	add_assoc_string(return_value, "name",      pw->pw_name, 1);
+	add_assoc_string(return_value, "passwd",    pw->pw_passwd, 1);
 	add_assoc_long  (return_value, "uid",       pw->pw_uid);
 	add_assoc_long  (return_value, "gid",		pw->pw_gid);
-	add_assoc_string(return_value, "gecos",     pw->pw_gecos, strlen(pw->pw_gecos));
-	add_assoc_string(return_value, "dir",       pw->pw_dir, strlen(pw->pw_dir));
-	add_assoc_string(return_value, "shell",     pw->pw_shell, strlen(pw->pw_shell));
+	add_assoc_string(return_value, "gecos",     pw->pw_gecos, 1);
+	add_assoc_string(return_value, "dir",       pw->pw_dir, 1);
+	add_assoc_string(return_value, "shell",     pw->pw_shell, 1);
 }
 /* }}} */
 
@@ -759,13 +759,13 @@ PHP_FUNCTION(posix_getpwuid)
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
-	add_assoc_string(return_value, "name",      pw->pw_name, strlen(pw->pw_name));
-	add_assoc_string(return_value, "passwd",    pw->pw_passwd, strlen(pw->pw_passwd));
+	add_assoc_string(return_value, "name",      pw->pw_name, 1);
+	add_assoc_string(return_value, "passwd",    pw->pw_passwd, 1);
 	add_assoc_long  (return_value, "uid",       pw->pw_uid);
 	add_assoc_long  (return_value, "gid",		pw->pw_gid);
-	add_assoc_string(return_value, "gecos",     pw->pw_gecos, strlen(pw->pw_gecos));
-	add_assoc_string(return_value, "dir",       pw->pw_dir, strlen(pw->pw_dir));
-	add_assoc_string(return_value, "shell",     pw->pw_shell, strlen(pw->pw_shell));
+	add_assoc_string(return_value, "gecos",     pw->pw_gecos, 1);
+	add_assoc_string(return_value, "dir",       pw->pw_dir, 1);
+	add_assoc_string(return_value, "shell",     pw->pw_shell, 1);
 }
 /* }}} */
 
@@ -787,12 +787,12 @@ static int posix_addlimit(int limit, char *name, pval *return_value) {
 	}
 
 	if (rl.rlim_cur == RLIM_INFINITY)
-		add_assoc_string(return_value,soft,"unlimited", 9);
+		add_assoc_stringl(return_value,soft,"unlimited", 9, 0);
 	else
 		add_assoc_long(return_value,soft,rl.rlim_cur);
 
 	if (rl.rlim_max == RLIM_INFINITY)
-		add_assoc_string(return_value,hard,"unlimited", 9);
+		add_assoc_stringl(return_value,hard,"unlimited", 9, 0);
 	else
 		add_assoc_long(return_value,hard,rl.rlim_max);
 
