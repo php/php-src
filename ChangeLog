@@ -1,3 +1,58 @@
+2001-04-23  Zeev Suraski  <zeev@zend.com>
+
+    * build/build2.mk: Remove unnecessary tab (was killing Tru64 make)
+
+2001-04-23  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/imap/php_imap.c:
+    Fix for bug 9908: check that the result of mail_sort is not 0 before trying
+    to dereference the pointer. :)
+
+    Also, free sort programs - this might have been a memory leak.
+
+2001-04-23  Colin Viebrock  <colin@easydns.com>
+
+    * pear/Crypt/CBC.php: use $this->raiseError instead ... thanks Stig
+
+2001-04-23  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Experimental/Image/color_helper.php
+      pear/Experimental/Image/gbutton.php
+      pear/Experimental/Image/gtext.php: whitespaces + some require_once
+
+2001-04-23  Colin Viebrock  <colin@easydns.com>
+
+    * pear/Crypt/CBC.php: use PEAR::raiseError now
+
+2001-04-23  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Experimental/Cache/OutputCompression.php:
+    headers can be send even if there's already a setcookie() etc.
+
+2001-04-23  Frank M. Kromann  <frank@frontbase.com>
+
+    * main/config.w32.h
+      main/php_ini.c: Fix build on WIn32
+    Should the new directorys be static?
+
+2001-04-23  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c: fixed ZTS buidl - still some WS pollution left
+
+2001-04-23  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in: Fixed bugs: #10194, #9177.
+
+    * configure.in: MFH
+
+2001-04-23  Rasmus Lerdorf  <rasmus@php.net>
+
+    * configure.in: Uh, weird typo.  Wonder when that crept in.
+
+2001-04-23  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/Makefile.in: Updater.php -> Uploader.php
+
 2001-04-22  Sterling Hughes  <sterling@designmultimedia.com>
 
     * ext/ccvs/ccvs.c: Fix bug #10447.
