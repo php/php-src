@@ -1,3 +1,71 @@
+2004-09-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sysvmsg/sysvmsg.c:
+      - Fix warnign
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_objects.c:
+      Simplify/Optmize magic method calls (__get/__set/__call/__clone/__destruct)
+
+2004-09-28  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/config.m4:
+      MFB: - Fixed bug #30205 (Missing <unistd.h> in crypt() configure test).
+
+    * (PHP_4_3)
+      ext/standard/config.m4:
+      - Fixed bug #30205 (Missing <unistd.h> in crypt() configure test).
+
+2004-09-28  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_execute_API.c:
+      - Return the warning until we check if we can change the type of str.len
+
+2004-09-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c
+      ZendEngine2/zend_reflection_api.h:
+      - publish reflection_class_factory() as zend_reflection_class_factory()
+
+2004-09-28  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c:
+      Fix compilation
+
+2004-09-28  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c:
+      fix bug #29652 (number of FD to ocius.msb is growing)
+      many thanks to Sergei V. Rozinov <S dot Rozinov at sibron dot ru> for
+      testing
+
+2004-09-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      MFH: Fixed bug #30224 (Sybase date strings are sometimes not null
+      terminated).
+
+    * ext/mssql/php_mssql.c:
+      Fixed bug #30224 (Sybase date strings are sometimes not null terminated).
+
+2004-09-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_0)
+      configure.in
+      ext/ftp/ftp.c
+      ext/openssl/xp_ssl.c
+      ext/standard/streamsfuncs.c
+      main/network.c
+      main/php_network.h
+      main/streams/xp_socket.c:
+      MFH: Fix for Bug #24189: possibly unsafe select(2) usage.
+
 2004-09-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_0)
