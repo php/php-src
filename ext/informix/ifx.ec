@@ -52,7 +52,6 @@
  *
  * ? Safe mode implementation
  *
- * ? cursory stored procedures
  * Jouni Ahto promised help and already did the configuration stuff
  * (Jouni Ahto <jah@mork.net>).
  *
@@ -2526,7 +2525,7 @@ EXEC SQL END DECLARE SECTION;
     
     /* start spitting out rows untill none left */    
     while (moredata) { 
-        printf("<tr>");
+        php3_printf("<tr>");
         locind = 0;
         for (i = 1; i <= num_fields; i++) {
             EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :fieldtype = TYPE,
