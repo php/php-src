@@ -55,9 +55,7 @@ static zval *ps_call_handler(char *name, int argc, zval **argv)
 	zval *retval = NULL;
 	ELS_FETCH();
 	
-	printf("calling %s (argc=%d)\n", name, argc);
-	
-	if(name) {
+	if(name && name[0] != '\0') {
 		zval *func;
 
 		ZVAL_STRING(name, func);
