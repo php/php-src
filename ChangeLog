@@ -1,3 +1,42 @@
+2005-02-06  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_ini_scanner.l:
+      Correct fix for #28803
+
+    * ZendEngine2/zend_ini_scanner.l:
+      Correct fix for #28804
+
+    * (PHP_4_3)
+      Zend/zend_ini_scanner.l:
+      Correct fix for #28804 (minimize change from previous regexp)
+
+2005-02-06  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/php_streams.h:
+      Avoid bug where stream_copy_to_stream() call for precisely 2000000 bytes
+      would
+      result in entire resource being copied.
+      The mmap brake is already present inside mmap_range() and is set to 1MB.
+
+    * ext/standard/file.c:
+      support sucking data from streams in file_put_contents()
+
+2005-02-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/exec.c:
+      Fixed possible un-initialized var on error.
+
+2005-02-06  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/php_memory_streams.h
+      main/streams/memory.c:
+      add an open mode for the memory streams that allows the stream to take
+      ownership of the passed-in buffer
+
+    * ext/sqlite/TODO:
+      update todo
+
 2005-02-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_compile.c
