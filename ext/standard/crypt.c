@@ -103,7 +103,16 @@ PHP_MINIT_FUNCTION(crypt)
     REGISTER_LONG_CONSTANT("CRYPT_STD_DES", PHP_STD_DES_CRYPT, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("CRYPT_EXT_DES", PHP_EXT_DES_CRYPT, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("CRYPT_MD5", PHP_MD5_CRYPT, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("CRYPT_BLOWFISH", PHP_BLOWFISH_CRYPT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CRYPT_BLOWFISH", PHP_BLOWFISH_CRYPT, CONST_CS | CONST_PERSISTENT);
+
+#if HAVE_SRAND48
+	srand48((unsigned int) time(0) * getpid() * (php_combined_lcg() * 10000.0));
+#elif HAVE_SRANDOM
+	srandom((unsigned int) time(0) * getpid() * (php_combined_lcg() * 10000.0));
+#else
+	srand((unsigned int) time(0) * getpid() * (php_combined_lcg() * 10000.0));
+#endif
+
     return SUCCESS;
 }
 
@@ -139,7 +148,7 @@ PHP_FUNCTION(crypt)
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(arg2);
-			memcpy(salt, (*arg2)->value.str.val, MIN(PHP_MAX_SALT_LEN,(*arg2)->value.str.len));
+			memcpy(salt, Z_STRVAL_PP(arg2), MIN(PHP_MAX_SALT_LEN, Z_STRLEN_PP(arg2)));
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -149,14 +158,6 @@ PHP_FUNCTION(crypt)
 
 	/* The automatic salt generation only covers standard DES and md5-crypt */
 	if(!*salt) {
-#if HAVE_SRAND48
-		srand48((unsigned int) time(0) * getpid() * (php_combined_lcg() * 10000.0));
-#elif HAVE_SRANDOM
-		srandom((unsigned int) time(0) * getpid() * (php_combined_lcg() * 10000.0));
-#else
-		srand((unsigned int) time(0) * getpid() * (php_combined_lcg() * 10000.0));
-#endif
-
 #if PHP_STD_DES_CRYPT
 		php_to64(&salt[0], PHP_CRYPT_RAND, 2);
 		salt[2] = '\0';
@@ -168,7 +169,7 @@ PHP_FUNCTION(crypt)
 #endif
 	}
 
-	return_value->value.str.val = (char *) crypt((*arg1)->value.str.val, salt);
+	return_value->value.str.val = (char *) crypt(Z_STRVAL_PP(arg1), salt);
 	return_value->value.str.len = strlen(return_value->value.str.val);
 	return_value->type = IS_STRING;
 	pval_copy_constructor(return_value);
