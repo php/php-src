@@ -49,11 +49,10 @@ static php_tux_globals tux_globals;
 
 #define TG(v) (tux_globals.v)
 
-static int sapi_tux_ub_write(const char *str, uint str_length)
+static int sapi_tux_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	int n;
 	uint sent = 0;	
-	TSRMLS_FETCH();
 	
 	/* combine headers and body */
 	if (TG(number_vec)) {

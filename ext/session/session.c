@@ -658,8 +658,8 @@ static int php_session_cache_limiter(TSRMLS_D)
 	php_session_cache_limiter_t *lim;
 
 	if (SG(headers_sent)) {
-		char *output_start_filename = php_get_output_start_filename();
-		int output_start_lineno = php_get_output_start_lineno();
+		char *output_start_filename = php_get_output_start_filename(TSRMLS_C);
+		int output_start_lineno = php_get_output_start_lineno(TSRMLS_C);
 
 		if (output_start_filename) {
 			php_error(E_WARNING, "Cannot send session cache limiter - headers already sent (output started at %s:%d)",
@@ -692,8 +692,8 @@ static void php_session_send_cookie(TSRMLS_D)
 	char *date_fmt = NULL;
 
 	if (SG(headers_sent)) {
-		char *output_start_filename = php_get_output_start_filename();
-		int output_start_lineno = php_get_output_start_lineno();
+		char *output_start_filename = php_get_output_start_filename(TSRMLS_C);
+		int output_start_lineno = php_get_output_start_lineno(TSRMLS_C);
 
 		if (output_start_filename) {
 			php_error(E_WARNING, "Cannot send session cookie - headers already sent by (output started at %s:%d)",
@@ -1280,13 +1280,13 @@ void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newle
 		*new = url_adapt_single_url(url, urllen, PS(session_name), PS(id), newlen);
 }
 
-void session_adapt_flush(int (*write)(const char *, uint))
+void session_adapt_flush(int (*write)(const char *, uint TSRMLS_DC) TSRMLS_DC)
 {
 	char *str;
 	size_t len;
 	
 	str = url_adapt_flush(&len);
-	if (str) write(str, len);
+	if (str) write(str, len TSRMLS_CC);
 }
 
 #endif

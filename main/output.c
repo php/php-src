@@ -26,12 +26,12 @@
 #include "SAPI.h"
 
 /* output functions */
-static int php_ub_body_write(const char *str, uint str_length);
-static int php_ub_body_write_no_header(const char *str, uint str_length);
-static int php_b_body_write(const char *str, uint str_length);
+static int php_ub_body_write(const char *str, uint str_length TSRMLS_DC);
+static int php_ub_body_write_no_header(const char *str, uint str_length TSRMLS_DC);
+static int php_b_body_write(const char *str, uint str_length TSRMLS_DC);
 
-static void php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size);
-static void php_ob_append(const char *text, uint text_length);
+static void php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size TSRMLS_DC);
+static void php_ob_append(const char *text, uint text_length TSRMLS_DC);
 #if 0
 static void php_ob_prepend(const char *text, uint text_length);
 #endif
@@ -43,7 +43,7 @@ int output_globals_id;
 php_output_globals output_globals;
 #endif
 
-static int php_default_output_func(const char *str, uint str_len)
+static int php_default_output_func(const char *str, uint str_len TSRMLS_DC)
 {
 	fwrite(str, 1, str_len, stderr);
 	return str_len;
@@ -71,10 +71,8 @@ PHPAPI void php_output_startup(void)
 }
 
 
-PHPAPI void php_output_activate(void)
+PHPAPI void php_output_activate(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	OG(php_body_write) = php_ub_body_write;
 	OG(php_header_write) = sapi_module.ub_write;
 	OG(ob_nesting_level) = 0;
@@ -83,18 +81,14 @@ PHPAPI void php_output_activate(void)
 }
 
 
-PHPAPI void php_output_set_status(zend_bool status)
+PHPAPI void php_output_set_status(zend_bool status TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	OG(disable_output) = !status;
 }
 
 
-void php_output_register_constants()
+void php_output_register_constants(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	REGISTER_MAIN_LONG_CONSTANT("PHP_OUTPUT_HANDLER_START", PHP_OUTPUT_HANDLER_START, CONST_CS | CONST_PERSISTENT);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_OUTPUT_HANDLER_CONT", PHP_OUTPUT_HANDLER_CONT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_OUTPUT_HANDLER_END", PHP_OUTPUT_HANDLER_END, CONST_CS | CONST_PERSISTENT);
@@ -104,7 +98,7 @@ void php_output_register_constants()
 PHPAPI int php_body_write(const char *str, uint str_length)
 {
 	TSRMLS_FETCH();
-	return OG(php_body_write)(str, str_length);	
+	return OG(php_body_write)(str, str_length TSRMLS_CC);	
 }
 
 PHPAPI int php_header_write(const char *str, uint str_length)
@@ -113,23 +107,21 @@ PHPAPI int php_header_write(const char *str, uint str_length)
 	if (OG(disable_output)) {
 		return 0;
 	} else {
-		return OG(php_header_write)(str, str_length);
+		return OG(php_header_write)(str, str_length TSRMLS_CC);
 	}
 }
 
 /* {{{ php_start_ob_buffer
  * Start output buffering */
-PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size)
+PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (OG(ob_lock)) {
 		return FAILURE;
 	}
 	if (chunk_size) {
-		php_ob_init((chunk_size*3/2), chunk_size/2, output_handler, chunk_size);
+		php_ob_init((chunk_size*3/2), chunk_size/2, output_handler, chunk_size TSRMLS_CC);
 	} else {
-		php_ob_init(40*1024, 10*1024, output_handler, chunk_size);
+		php_ob_init(40*1024, 10*1024, output_handler, chunk_size TSRMLS_CC);
 	}
 	OG(php_body_write) = php_b_body_write;
 	return SUCCESS;
@@ -138,7 +130,7 @@ PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size)
 
 /* {{{ php_end_ob_buffer
  * End output buffering (one level) */
-PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
+PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS_DC)
 {
 	char *final_buffer=NULL;
 	int final_buffer_length=0;
@@ -146,7 +138,6 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 	char *to_be_destroyed_buffer;
 	char *to_be_destroyed_handled_output[2] = { 0, 0 };
 	int status;
-	TSRMLS_FETCH();
 
 	if (OG(ob_nesting_level)==0) {
 		return;
@@ -165,12 +156,11 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 	if (OG(active_ob_buffer).internal_output_handler) {
 		final_buffer = OG(active_ob_buffer).internal_output_handler_buffer;
 		final_buffer_length = OG(active_ob_buffer).internal_output_handler_buffer_size;
-		OG(active_ob_buffer).internal_output_handler(OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length, &final_buffer, &final_buffer_length, status);
+		OG(active_ob_buffer).internal_output_handler(OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length, &final_buffer, &final_buffer_length, status TSRMLS_CC);
 	} else if (OG(active_ob_buffer).output_handler) {
 		zval **params[2];
 		zval *orig_buffer;
 		zval *z_status;
-		TSRMLS_FETCH();
 
 		ALLOC_INIT_ZVAL(orig_buffer);
 		ZVAL_STRINGL(orig_buffer, OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length, 0);
@@ -235,7 +225,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 	}
 
 	if (send_buffer) {
-		OG(php_body_write)(final_buffer, final_buffer_length);
+		OG(php_body_write)(final_buffer, final_buffer_length TSRMLS_CC);
 	}
 
 	if (alternate_buffer) {
@@ -260,47 +250,39 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 
 /* {{{ php_end_ob_buffers
  * End output buffering (all buffers) */
-PHPAPI void php_end_ob_buffers(zend_bool send_buffer)
+PHPAPI void php_end_ob_buffers(zend_bool send_buffer TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	while (OG(ob_nesting_level)!=0) {
-		php_end_ob_buffer(send_buffer, 0);
+		php_end_ob_buffer(send_buffer, 0 TSRMLS_CC);
 	}
 
 	if (!OG(disable_output) && send_buffer && BG(use_trans_sid)) {
-		session_adapt_flush(OG(php_header_write));
+		session_adapt_flush(OG(php_header_write) TSRMLS_CC);
 	}
 }
 /* }}} */
 
 /* {{{ php_start_implicit_flush
  */
-PHPAPI void php_start_implicit_flush()
+PHPAPI void php_start_implicit_flush(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
-	php_end_ob_buffer(1, 0);		/* Switch out of output buffering if we're in it */
+	php_end_ob_buffer(1, 0 TSRMLS_CC);		/* Switch out of output buffering if we're in it */
 	OG(implicit_flush)=1;
 }
 /* }}} */
 
 /* {{{ php_end_implicit_flush
  */
-PHPAPI void php_end_implicit_flush()
+PHPAPI void php_end_implicit_flush(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	OG(implicit_flush)=0;
 }
 /* }}} */
 
 /* {{{ php_ob_set_internal_handler
  */
-PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size)
+PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (OG(ob_nesting_level)==0) {
 		return;
 	}
@@ -317,10 +299,8 @@ PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_outpu
 
 /* {{{ php_ob_allocate
  */
-static inline void php_ob_allocate(void)
+static inline void php_ob_allocate(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	if (OG(active_ob_buffer).size<OG(active_ob_buffer).text_length) {
 		while (OG(active_ob_buffer).size <= OG(active_ob_buffer).text_length) {
 			OG(active_ob_buffer).size+=OG(active_ob_buffer).block_size;
@@ -333,10 +313,8 @@ static inline void php_ob_allocate(void)
 
 /* {{{ php_ob_init
  */
-static void php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size)
+static void php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (OG(ob_nesting_level)>0) {
 		if (OG(ob_nesting_level)==1) { /* initialize stack */
 			zend_stack_init(&OG(ob_buffers));
@@ -357,16 +335,15 @@ static void php_ob_init(uint initial_size, uint block_size, zval *output_handler
 
 /* {{{ php_ob_append
  */
-static void php_ob_append(const char *text, uint text_length)
+static void php_ob_append(const char *text, uint text_length TSRMLS_DC)
 {
 	char *target;
 	int original_ob_text_length;
-	TSRMLS_FETCH();
 
 	original_ob_text_length=OG(active_ob_buffer).text_length;
 	OG(active_ob_buffer).text_length = OG(active_ob_buffer).text_length + text_length;
 
-	php_ob_allocate();
+	php_ob_allocate(TSRMLS_C);
 	target = OG(active_ob_buffer).buffer+original_ob_text_length;
 	memcpy(target, text, text_length);
 	target[text_length]=0;
@@ -378,7 +355,7 @@ static void php_ob_append(const char *text, uint text_length)
 		if (output_handler) {
 			output_handler->refcount++;
 		}
-		php_end_ob_buffer(1, 1);
+		php_end_ob_buffer(1, 1 TSRMLS_CC);
 		return;
 	}
 }
@@ -391,7 +368,7 @@ static void php_ob_prepend(const char *text, uint text_length)
 	TSRMLS_FETCH();
 
 	OG(active_ob_buffer).text_length += text_length;
-	php_ob_allocate();
+	php_ob_allocate(TSRMLS_C);
 
 	/* php_ob_allocate() may change OG(ob_buffer), so we can't initialize p&start earlier */
 	p = OG(ob_buffer)+OG(ob_text_length);
@@ -408,10 +385,8 @@ static void php_ob_prepend(const char *text, uint text_length)
 
 /* {{{ php_ob_get_buffer
  * Return the current output buffer */
-int php_ob_get_buffer(pval *p)
+int php_ob_get_buffer(pval *p TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (OG(ob_nesting_level)==0) {
 		return FAILURE;
 	}
@@ -422,10 +397,8 @@ int php_ob_get_buffer(pval *p)
 
 /* {{{ php_ob_get_length
  * Return the size of the current output buffer */
-int php_ob_get_length(pval *p)
+int php_ob_get_length(pval *p TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (OG(ob_nesting_level) == 0) {
 		return FAILURE;
 	}
@@ -440,20 +413,19 @@ int php_ob_get_length(pval *p)
 
 
 /* buffered output function */
-static int php_b_body_write(const char *str, uint str_length)
+static int php_b_body_write(const char *str, uint str_length TSRMLS_DC)
 {
-	php_ob_append(str, str_length);
+	php_ob_append(str, str_length TSRMLS_CC);
 	return str_length;
 }
 
 /* {{{ php_ub_body_write_no_header
  */
-static int php_ub_body_write_no_header(const char *str, uint str_length)
+static int php_ub_body_write_no_header(const char *str, uint str_length TSRMLS_DC)
 {
 	char *newstr = NULL;
 	size_t new_length=0;
 	int result;
-	TSRMLS_FETCH();
 
 	if (OG(disable_output)) {
 		return 0;
@@ -467,7 +439,7 @@ static int php_ub_body_write_no_header(const char *str, uint str_length)
 		str_length = new_length;
 	}
 
-	result = OG(php_header_write)(str, str_length);
+	result = OG(php_header_write)(str, str_length TSRMLS_CC);
 
 	if (OG(implicit_flush)) {
 		sapi_flush(TSRMLS_C);
@@ -479,10 +451,9 @@ static int php_ub_body_write_no_header(const char *str, uint str_length)
 
 /* {{{ php_ub_body_write
  */
-static int php_ub_body_write(const char *str, uint str_length)
+static int php_ub_body_write(const char *str, uint str_length TSRMLS_DC)
 {
 	int result = 0;
-	TSRMLS_FETCH();
 
 	if (SG(request_info).headers_only) {
 		php_header();
@@ -498,7 +469,7 @@ static int php_ub_body_write(const char *str, uint str_length)
 		}
 
 		OG(php_body_write) = php_ub_body_write_no_header;
-		result = php_ub_body_write_no_header(str, str_length);
+		result = php_ub_body_write_no_header(str, str_length TSRMLS_CC);
 	}
 
 	return result;
@@ -548,9 +519,7 @@ PHP_FUNCTION(ob_start)
 			ZEND_WRONG_PARAM_COUNT();
 			break;
 	}
-	if (php_start_ob_buffer(output_handler, chunk_size)==FAILURE) {
-		TSRMLS_FETCH();
-
+	if (php_start_ob_buffer(output_handler, chunk_size TSRMLS_CC)==FAILURE) {
 		if (SG(headers_sent) && !SG(request_info).headers_only) {
 			OG(php_body_write) = php_ub_body_write_no_header;
 		} else {
@@ -568,7 +537,7 @@ PHP_FUNCTION(ob_start)
    Flush (send) the output buffer, and turn off output buffering */
 PHP_FUNCTION(ob_end_flush)
 {
-	php_end_ob_buffer(1, 0);
+	php_end_ob_buffer(1, 0 TSRMLS_CC);
 }
 /* }}} */
 
@@ -576,7 +545,7 @@ PHP_FUNCTION(ob_end_flush)
    Clean (erase) the output buffer, and turn off output buffering */
 PHP_FUNCTION(ob_end_clean)
 {
-	php_end_ob_buffer(0, 0);
+	php_end_ob_buffer(0, 0 TSRMLS_CC);
 }
 /* }}} */
 
@@ -584,7 +553,7 @@ PHP_FUNCTION(ob_end_clean)
    Return the contents of the output buffer */
 PHP_FUNCTION(ob_get_contents)
 {
-	if (php_ob_get_buffer(return_value)==FAILURE) {
+	if (php_ob_get_buffer(return_value TSRMLS_CC)==FAILURE) {
 		RETURN_FALSE;
 	}
 }
@@ -594,7 +563,7 @@ PHP_FUNCTION(ob_get_contents)
    Return the length of the output buffer */
 PHP_FUNCTION(ob_get_length)
 {
-	if (php_ob_get_length(return_value)==FAILURE) {
+	if (php_ob_get_length(return_value TSRMLS_CC)==FAILURE) {
 		RETURN_FALSE;
 	}
 }
@@ -623,25 +592,21 @@ PHP_FUNCTION(ob_implicit_flush)
 			break;
 	}
 	if (flag) {
-		php_start_implicit_flush();
+		php_start_implicit_flush(TSRMLS_C);
 	} else {
-		php_end_implicit_flush();
+		php_end_implicit_flush(TSRMLS_C);
 	}
 }
 /* }}} */
 
-PHPAPI char *php_get_output_start_filename()
+PHPAPI char *php_get_output_start_filename(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	return OG(output_start_filename);
 }
 
 
-PHPAPI int php_get_output_start_lineno()
+PHPAPI int php_get_output_start_lineno(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	return OG(output_start_lineno);
 }
 

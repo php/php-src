@@ -65,7 +65,7 @@ PHP_FUNCTION(gzencode);
 PHP_FUNCTION(ob_gzhandler);
 
 FILE *zlib_fopen_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC);
-int php_enable_output_compression(int buffer_size);
+int php_enable_output_compression(int buffer_size TSRMLS_DC);
 
 
 #ifdef ZTS

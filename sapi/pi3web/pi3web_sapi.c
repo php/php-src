@@ -133,11 +133,10 @@ static zend_module_entry php_pi3web_module = {
 };
 
 
-static int zend_pi3web_ub_write(const char *str, uint str_length)
+static int zend_pi3web_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	DWORD num_bytes = str_length;
 	LPCONTROL_BLOCK cb;
-	TSRMLS_FETCH();
 	
 	cb = (LPCONTROL_BLOCK) SG(server_context);
 

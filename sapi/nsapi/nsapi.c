@@ -135,12 +135,11 @@ static nsapi_equiv nsapi_client[] = {
 static size_t nsapi_client_size = sizeof(nsapi_client)/sizeof(nsapi_client[0]);
 
 static int
-sapi_nsapi_ub_write(const char *str, unsigned int str_length)
+sapi_nsapi_ub_write(const char *str, unsigned int str_length TSRMLS_DC)
 {
 	int retval;
 	nsapi_request_context *rc;
 
-	TSRMLS_FETCH();
 	rc = (nsapi_request_context *)SG(server_context);
 	retval = net_write(rc->sn->csd, (char *)str, str_length);
 	if (retval == IO_ERROR /*-1*/ || retval == IO_EOF /*0*/)

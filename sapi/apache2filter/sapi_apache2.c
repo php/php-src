@@ -44,13 +44,12 @@
 #include "php_apache.h"
 
 static int
-php_apache_sapi_ub_write(const char *str, uint str_length)
+php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	apr_bucket *b;
 	apr_bucket_brigade *bb;
 	php_struct *ctx;
 	uint now;
-	TSRMLS_FETCH();
 
 	ctx = SG(server_context);
 

@@ -211,13 +211,12 @@ INLINE static int lookup_integer_header(char *headername, int default_value)
  */
 
 static int
-php_roxen_low_ub_write(const char *str, uint str_length) {
+php_roxen_low_ub_write(const char *str, uint str_length TSRMLS_DC) {
   int sent_bytes = 0;
   struct pike_string *to_write = NULL;
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif
-  TSRMLS_FETCH();
 
   if(!MY_FD_OBJ->prog) {
     PG(connection_status) = PHP_CONNECTION_ABORTED;
@@ -243,12 +242,11 @@ php_roxen_low_ub_write(const char *str, uint str_length) {
  */
 
 static int
-php_roxen_sapi_ub_write(const char *str, uint str_length)
+php_roxen_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif
-  TSRMLS_FETCH();
 
   int sent_bytes = 0, fd = MY_FD;
   if(fd)
@@ -276,7 +274,7 @@ php_roxen_sapi_ub_write(const char *str, uint str_length)
       }
     }
   } else {
-    THREAD_SAFE_RUN(sent_bytes = php_roxen_low_ub_write(str, str_length),
+    THREAD_SAFE_RUN(sent_bytes = php_roxen_low_ub_write(str, str_length TSRMLS_CC),
 		    "write");
   }
   return sent_bytes;

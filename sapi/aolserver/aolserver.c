@@ -86,11 +86,10 @@ static void php_ns_config(php_ns_context *ctx, char global);
  */
 
 static int
-php_ns_sapi_ub_write(const char *str, uint str_length)
+php_ns_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	int n;
 	uint sent = 0;
-	TSRMLS_FETCH();
 
 	while (str_length > 0) {
 		n = Ns_ConnWrite(NSG(conn), (void *) str, str_length);

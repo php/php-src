@@ -23,24 +23,24 @@
 
 #include "php.h"
 
-typedef void (*php_output_handler_func_t)(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode);
+typedef void (*php_output_handler_func_t)(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC);
 
 PHPAPI void php_output_startup(void);
-PHPAPI void php_output_activate(void);
-PHPAPI void php_output_set_status(zend_bool status);
-void php_output_register_constants(void);
+PHPAPI void php_output_activate(TSRMLS_D);
+PHPAPI void php_output_set_status(zend_bool status TSRMLS_DC);
+void php_output_register_constants(TSRMLS_D);
 PHPAPI int  php_body_write(const char *str, uint str_length);
 PHPAPI int  php_header_write(const char *str, uint str_length);
-PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size);
-PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush);
-PHPAPI void php_end_ob_buffers(zend_bool send_buffer);
-PHPAPI int php_ob_get_buffer(pval *p);
-PHPAPI int php_ob_get_length(pval *p);
-PHPAPI void php_start_implicit_flush(void);
-PHPAPI void php_end_implicit_flush(void);
-PHPAPI char *php_get_output_start_filename(void);
-PHPAPI int php_get_output_start_lineno(void);
-PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size);
+PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size TSRMLS_DC);
+PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS_DC);
+PHPAPI void php_end_ob_buffers(zend_bool send_buffer TSRMLS_DC);
+PHPAPI int php_ob_get_buffer(zval *p TSRMLS_DC);
+PHPAPI int php_ob_get_length(zval *p TSRMLS_DC);
+PHPAPI void php_start_implicit_flush(TSRMLS_D);
+PHPAPI void php_end_implicit_flush(TSRMLS_D);
+PHPAPI char *php_get_output_start_filename(TSRMLS_D);
+PHPAPI int php_get_output_start_lineno(TSRMLS_D);
+PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size TSRMLS_DC);
 
 PHP_FUNCTION(ob_start);
 PHP_FUNCTION(ob_end_flush);
@@ -63,8 +63,8 @@ typedef struct _php_ob_buffer {
 } php_ob_buffer;
 
 typedef struct _php_output_globals {
-	int (*php_body_write)(const char *str, uint str_length);		/* string output */
-	int (*php_header_write)(const char *str, uint str_length);	/* unbuffer string output */
+	int (*php_body_write)(const char *str, uint str_length TSRMLS_DC);		/* string output */
+	int (*php_header_write)(const char *str, uint str_length TSRMLS_DC);	/* unbuffer string output */
 	php_ob_buffer active_ob_buffer;
 	unsigned char implicit_flush;
 	char *output_start_filename;

@@ -282,7 +282,7 @@ PHP_FUNCTION(xslt_output_begintransform)
      * Start output buffering, NULL signifies that no "user-space" output function
      * will be used.  The 0 disables chunking
      */
-    php_start_ob_buffer(NULL, 0);
+    php_start_ob_buffer(NULL, 0 TSRMLS_CC);
 }
 /* }}} */
 
@@ -345,7 +345,7 @@ PHP_FUNCTION(xslt_output_endtransform)
      * current output buffer (so we don't send data twice) 
      */
     if (tRes)
-        php_end_ob_buffer(0, 0);
+        php_end_ob_buffer(0, 0 TSRMLS_CC);
     
     PUTS(tRes);
     
@@ -360,7 +360,7 @@ PHP_FUNCTION(xslt_output_endtransform)
     if (tRes)
         SablotFree(tRes);
     else
-        php_end_ob_buffer(1, 0);
+        php_end_ob_buffer(1, 0 TSRMLS_CC);
 }
 /* }}} */
 

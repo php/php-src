@@ -160,7 +160,7 @@ struct _sapi_module_struct {
 	int (*activate)(TSRMLS_D);
 	int (*deactivate)(TSRMLS_D);
 
-	int (*ub_write)(const char *str, unsigned int str_length);
+	int (*ub_write)(const char *str, unsigned int str_length TSRMLS_DC);
 	void (*flush)(void *server_context);
 	struct stat *(*get_stat)(TSRMLS_D);
 	char *(*getenv)(char *name, size_t name_len TSRMLS_DC);
