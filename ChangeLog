@@ -1,3 +1,97 @@
+2000-06-24  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/basic_functions.c:
+    Correct protos call_user_func() and call_user_method().
+
+2000-06-24  Andi Gutmans  <andi@php.net>
+
+    * win32/php4dllts.dsp: - winsnmp.c has moved to ext/snmp
+
+2000-06-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/snmp/winsnmp.c: Revice winsnmp.c from repo-copy
+
+2000-06-24  Zeev Suraski  <zeev@php.net>
+
+    * NEWS: credit where credit's due
+
+    * sapi/nsapi/nsapi.c: Apply the NSAPI patch
+
+2000-06-24  Jouni Ahto  <jah@mork.net>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+    - Close cursor immediately before reuse so that calling ibase_free_result is
+      not necessary anymore. Seems to also prevent a a situation where at request
+      shutdown cursor was first dropped and tried to close it afterwards when
+      all the resources were not manually freed, and could occasionally segfault.
+
+2000-06-24  Andi Gutmans  <andi@php.net>
+
+    * main/php_virtual_cwd.c: - Forgot to remove comment
+
+    * main/php.h
+      main/php_virtual_cwd.c
+      main/php_virtual_cwd.h:
+    - Only use VIRTUAL_DIR in ZTS mode until it is thoroughly tested.
+    - Mutex popen() in Windows as the UNIX trick doesn't work there.
+
+2000-06-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * pear/Makefile.in: Also install XML-related header files.
+
+    * ext/snmp/winsnmp.c: Get rid of files in the dl directory hierarchy.
+
+    PHP compiles without them under Unix, please test this also under Win32.
+
+    * ext/informix/ifx.ec
+      ext/xml/xml.c
+      ext/zlib/zlib.c
+      sapi/servlet/servlet.c
+      ext/snmp/snmp.c
+      ext/oracle/oracle.c
+      ext/pdf/pdf.c
+      ext/mcal/php_mcal.c
+      ext/mssql/php_mssql.c
+      ext/odbc/php_odbc.c
+      ext/hyperwave/hw.c
+      ext/icap/php_icap.c
+      ext/interbase/interbase.c
+      ext/java/java.c
+      ext/fdf/fdf.c
+      ext/filepro/filepro.c
+      ext/gd/gd.c
+      ext/cpdf/cpdf.c
+      ext/dav/dav.c
+      ext/db/db.c
+      ext/dbase/dbase.c: Stop including dl/phpdl.h.
+
+2000-06-24  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/incomplete_class.c
+      ext/standard/output.c
+      ext/standard/php_output.h
+      win32/php4dllts.dsp:
+    - Make the output globals accessible from the outside world
+    - Fix Win32 compilation
+
+2000-06-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/apMakefile.tmpl:
+    alloc.h has been removed from the Apache 1.3 CVS tree
+
+2000-06-24  Joey Smith  <joey@samaritan.com>
+
+    * ext/sybase_ct/config.m4: Fix for bug #3983
+
+2000-06-24  Andi Gutmans  <andi@php.net>
+
+    * NEWS: - Entries start with capital letters
+
+2000-06-24  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/skeleton/create_stubs: <funcprototype> added to xml generation
+
 2000-06-23  Zeev Suraski  <zeev@php.net>
 
     * ext/wddx/wddx.c: Fix Win32 compilation
