@@ -267,6 +267,9 @@ typedef struct _zend_overloaded_element {
 /* excpt.h on Digital Unix 4.0 defines function_table */
 #undef function_table
 
+/* A lot of stuff needs shifiting around in order to include zend_compile.h here */
+union _zend_function;
+
 struct _zend_class_entry {
 	char type;
 	char *name;
@@ -279,6 +282,8 @@ struct _zend_class_entry {
 	HashTable default_properties;
 	HashTable class_table;
 	zend_function_entry *builtin_functions;
+
+	union _zend_function *constructor;
 
 	/* handlers */
 	void (*handle_function_call)(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);

@@ -729,6 +729,9 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 
 	if (is_method) {
 		zend_hash_update(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
+		if ((CG(active_class_entry)->name_length == (uint) name_len) && (!memcmp(CG(active_class_entry)->name, name, name_len))) {
+			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
+		}
 	} else {
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -1701,6 +1704,8 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 			/* copy default properties */
 			zend_hash_copy(&new_class_entry.default_properties, &parent_class->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
+			new_class_entry.constructor = parent_class->constructor;
+
 			/* copy overloaded handlers */
 			new_class_entry.handle_function_call = parent_class->handle_function_call;
 			new_class_entry.handle_property_get  = parent_class->handle_property_get;
@@ -1834,14 +1839,12 @@ void zend_do_begin_new_object(znode *new_token, znode *class_name TSRMLS_DC)
 	opline->op1 = (opline-1)->result;
 	SET_UNUSED(opline->op2);
 
-	if (class_name->op_type == IS_CONST) {
-		zval_copy_ctor(&class_name->u.constant);
-	}
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 	opline->op1 = (opline-2)->result;
-	opline->op2 = *class_name;
+	SET_UNUSED(opline->op2);
 	opline->extended_value = ZEND_MEMBER_FUNC_CALL | ZEND_CTOR_CALL;
+
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(unsigned char *));
 }
 
