@@ -47,8 +47,8 @@
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.2.1</version>
-  <date>2005-02-10</date>
+  <version>0.2.2</version>
+  <date>2005-02-11</date>
 
   <notes>
 Note that PDO on its own is useless.
@@ -67,6 +67,7 @@ You can find additional PDO drivers at:
 http://snaps.php.net/win32/PECL_5_0/
 
 - Added PDO::quote($string).  Closes PECL Bug #3393
+- Fixed PDO::query() for drivers using bound parameter emulation.
 
   </notes>
 
