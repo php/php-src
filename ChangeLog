@@ -1,3 +1,37 @@
+2000-08-14  Brendan W. McAdams  <brendan@plexmedia.com>
+
+    * ext/ccvs/TODO:
+2000-08-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mcrypt/mcrypt.c:
+    Move MCLS_FETCH() inside #if HAVE_LIBMCRYPT24. Fixes build against
+    libmcrypt 2.2.
+
+    * ext/mcrypt/mcrypt.c:
+    Remove unnecessary precompiler macros. The failure condition is catched
+    at configure time.
+
+    * ext/mcrypt/mcrypt.c:
+    Restrict INI entries when compiling against libmcrypt 2.4.
+
+    * ext/mcrypt/config.m4:
+    Fix check for libmcrypt in non-system library paths.
+    Fix case where neither libmcrypt 2.4.x and 2.2.x were found.
+    Fix library order (scope limited to static libraries)
+
+2000-08-14  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/formatted_print.c: Fix print length - again
+
+    * ext/standard/formatted_print.c:
+    Fix another crash with long formats (#6145)
+
+    * ext/standard/formatted_print.c: Fix non-numbers printing (#6142)
+
+2000-08-14  David Croft  <david@infotrek.co.uk>
+
+    * ext/standard/basic_functions.c: presumably this was wrong
+
 2000-08-13  Sterling Hughes  <stirling@bestweb.net>
 
     * ext/curl/curl.c
