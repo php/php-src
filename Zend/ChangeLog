@@ -1,3 +1,59 @@
+2004-02-10  Zeev Suraski  <zeev@zend.com>
+
+    * tests/bug26698.phpt:
+      Ignore the memleak in this test
+
+    * zend_execute.c:
+      Fix bug #26698 (exceptions handled properly during argument passing to
+      functions)
+
+    * zend_default_classes.c:
+      Fix bug #27186
+
+    * zend_execute_API.c:
+      Fix bug #26869
+
+    * zend_execute.c:
+      Fix refcounting of ++/+= overloading (fix leak in __get()/__set()
+      based classes)
+
+2004-02-10  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - Nuke more unused code
+
+2004-02-10  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c:
+      Fix handling in assignment using multidimensional array syntax to string
+      offset ($s = "FUBAR"; $s[0][0] = 1;)
+
+2004-02-10  Andi Gutmans  <andi@zend.com>
+
+    * ZEND_CHANGES:
+      - We will go with PHP 4 behavior. With the new object model assigning by
+        reference has lost a lot of its importance.
+
+    * zend_compile.c:
+      - Remove junk
+
+2004-02-10  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c:
+      Fix exception handling in opcodes spanned across multiple oplines (fixes
+      the crash in __set())
+
+    * zend_execute.c:
+      - Fix pre/post increment for overloaded objects
+      - Fix binary-assign-op for overloaded objects
+      
+      NOTE:  This requires the implementation of the 'get' callback!
+
+2004-02-10  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/bug22836.phpt:
+      - Correcting test.
+
 2004-02-08  Zeev Suraski  <zeev@zend.com>
 
     * zend_execute.c
