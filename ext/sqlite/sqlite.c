@@ -757,7 +757,7 @@ typedef struct _sqlite_object {
 
 static int sqlite_free_persistent(list_entry *le, void *ptr TSRMLS_DC)
 {
-	return le->ptr == ptr;
+	return le->ptr == ptr ? ZEND_HASH_APPLY_REMOVE : ZEND_HASH_APPLY_KEEP;
 }
 
 static void sqlite_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
@@ -1172,14 +1172,16 @@ PHP_FUNCTION(sqlite_factory)
 		zval_dtor(errmsg);
 	}
 
-	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		php_std_error_handling();
-		RETURN_NULL();
-	}
-
-	if (php_check_open_basedir(filename TSRMLS_CC)) {
-		php_std_error_handling();
-		RETURN_NULL();
+	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
+		if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+			php_std_error_handling();
+			RETURN_NULL();
+		}
+	
+		if (php_check_open_basedir(filename TSRMLS_CC)) {
+			php_std_error_handling();
+			RETURN_NULL();
+		}
 	}
 
 	php_sqlite_open(filename, mode, NULL, return_value, errmsg, return_value TSRMLS_CC);
