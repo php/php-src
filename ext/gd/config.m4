@@ -12,7 +12,7 @@ AC_ARG_WITH(gd,
     no)
       AC_MSG_RESULT(no) ;;
     yes)
-      AC_DEFINE(HAVE_LIBGD)
+      AC_DEFINE(HAVE_LIBGD,,[ ])
       if test "$shared" = "yes"; then
         AC_MSG_RESULT(yes (shared))
         GD_LIBS="-lgd"
@@ -22,12 +22,12 @@ AC_ARG_WITH(gd,
       fi
         old_LDFLAGS=$LDFLAGS
 		old_LIBS=$LIBS
-        AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13) ])
+        AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13,,[ ]) ])
 		LIBS="$LIBS -lpng -lz"
-        AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1)])
+        AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1,[ ])])
 dnl Some versions of GD support both PNG and GIF. Check for both.
-        AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1)])
-        AC_CHECK_LIB(gd, gdImageCreateFromGif, [AC_DEFINE(HAVE_GD_GIF, 1)])
+        AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1, [ ])])
+        AC_CHECK_LIB(gd, gdImageCreateFromGif, [AC_DEFINE(HAVE_GD_GIF, 1, [ ])])
         
         LIBS=$old_LIBS
         LDFLAGS=$old_LDFLAGS
@@ -60,7 +60,7 @@ dnl A whole whack of possible places where this might be
       test -f $withval/gd/libgd.a && GD_LIB="$withval/gd"
       test -f $withval/gd1.3/libgd.a && GD_LIB="$withval/gd1.3"
       if test -n "$GD_INCLUDE" && test -n "$GD_LIB" ; then
-        AC_DEFINE(HAVE_LIBGD)
+        AC_DEFINE(HAVE_LIBGD,,[ ])
         if test "$shared" = "yes"; then
           AC_MSG_RESULT(yes (shared))
           GD_LIBS="-lgd"
@@ -72,11 +72,11 @@ dnl A whole whack of possible places where this might be
         old_LDFLAGS=$LDFLAGS
         LDFLAGS="$LDFLAGS -L$GD_LIB"
 		old_LIBS=$LIBS
-        AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13) ])
+        AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13,, [ ]) ])
 		LIBS="$LIBS -lpng -lz"
-        AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1)])
-        AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1)])
-        AC_CHECK_LIB(gd, gdImageCreateFromGif, [AC_DEFINE(HAVE_GD_GIF, 1)])
+        AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1,[ ])])
+        AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1, [ ])])
+        AC_CHECK_LIB(gd, gdImageCreateFromGif, [AC_DEFINE(HAVE_GD_GIF, 1, [ ])])
         
         LIBS=$old_LIBS
         LDFLAGS=$old_LDFLAGS
@@ -91,14 +91,14 @@ dnl A whole whack of possible places where this might be
   esac
 ],[
   AC_CHECK_LIB(gd, gdImageLine)
-  AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13) ])
+  AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13,, [ ]) ])
   if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
 		old_LIBS=$LIBS
-        AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13) ])
+        AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13,, [ ]) ])
 		LIBS="$LIBS -lpng -lz"
-        AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1)])
-        AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1)])
-        AC_CHECK_LIB(gd, gdImageCreateFromGif, [AC_DEFINE(HAVE_GD_GIF, 1)])
+        AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1, [ ])])
+        AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1, [ ])])
+        AC_CHECK_LIB(gd, gdImageCreateFromGif, [AC_DEFINE(HAVE_GD_GIF, 1, [ ])])
         
         LIBS=$old_LIBS
         LDFLAGS=$old_LDFLAGS
@@ -131,7 +131,7 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
       fi
     done
     if test -n "$FREETYPE_DIR" ; then
-      AC_DEFINE(HAVE_LIBFREETYPE)
+      AC_DEFINE(HAVE_LIBFREETYPE,,[ ])
       if test "$shared" = "yes"; then
         GD_LIBS="$GD_LIBS -lfreetype"
         GD_LFLAGS="$GD_LFLAGS -L$FREETYPE_DIR/lib"
@@ -142,7 +142,7 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
       AC_MSG_RESULT(yes)
     else
       if test -n "$TTF_DIR" ; then
-        AC_DEFINE(HAVE_LIBTTF)
+        AC_DEFINE(HAVE_LIBTTF,,[ ])
         if test "$shared" = "yes"; then
           GD_LIBS="$GD_LIBS -lttf"
           GD_LFLAGS="$GD_LFLAGS -L$TTF_DIR/lib"
@@ -168,7 +168,7 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
   [  --enable-freetype-4bit-antialias-hack  
                           Include support for FreeType2 (experimental).],[
   if test "$enableval" = "yes" ; then
-    AC_DEFINE(FREETYPE_4BIT_ANTIALIAS_HACK, 1)
+    AC_DEFINE(FREETYPE_4BIT_ANTIALIAS_HACK, 1, [ ])
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)

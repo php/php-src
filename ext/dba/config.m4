@@ -65,7 +65,7 @@ AC_ARG_WITH(gdbm,
 
     unset ac_cv_lib_gdbm_gdbm_open
     AC_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-    AC_CHECK_LIB(gdbm, gdbm_open, [AC_DEFINE(DBA_GDBM, 1) THIS_LIBS="gdbm"])
+    AC_CHECK_LIB(gdbm, gdbm_open, [AC_DEFINE(DBA_GDBM, 1, [ ]) THIS_LIBS="gdbm"])
     ])
     
     AC_DBA_STD_ASSIGN
@@ -90,12 +90,12 @@ AC_ARG_WITH(ndbm,
 	done
     
     if test "$NDBM_EXTRA" != ""; then
-      eval "AC_DEFINE($NDBM_EXTRA, 1)"
+      eval "AC_DEFINE($NDBM_EXTRA, 1, [ ])"
     fi
 
     for LIB in db1 ndbm c; do
       AC_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-      AC_CHECK_LIB($LIB, dbm_open, [AC_DEFINE(DBA_NDBM,1) THIS_LIBS="$LIB"])
+      AC_CHECK_LIB($LIB, dbm_open, [AC_DEFINE(DBA_NDBM,1, [ ]) THIS_LIBS="$LIB"])
       ])
     done
     
@@ -135,12 +135,12 @@ AC_ARG_WITH(db2,
     fi
     
     if test -n "$DB2_EXTRA"; then
-      eval "AC_DEFINE($DB2_EXTRA, 1)"
+      eval "AC_DEFINE($DB2_EXTRA, 1, [ ])"
     fi
 
     for LIB in db db2 c; do
       AC_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-      AC_CHECK_LIB($LIB, db_appinit, [AC_DEFINE(DBA_DB2,1) THIS_LIBS="$LIB"])
+      AC_CHECK_LIB($LIB, db_appinit, [AC_DEFINE(DBA_DB2,1,[ ]) THIS_LIBS="$LIB"])
       ])
     done
     
@@ -163,12 +163,12 @@ AC_ARG_WITH(db3,
 	done
 
     if test -n "$DB3_EXTRA"; then
-      eval "AC_DEFINE($DB3_EXTRA, 1)"
+      eval "AC_DEFINE($DB3_EXTRA, 1, [ ])"
     fi
 
     for LIB in db; do
       AC_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-      AC_CHECK_LIB($LIB, db_create, [AC_DEFINE(DBA_DB3,1) THIS_LIBS="$LIB"])
+      AC_CHECK_LIB($LIB, db_create, [AC_DEFINE(DBA_DB3,1,[ ]) THIS_LIBS="$LIB"])
       ])
     done
     
@@ -191,7 +191,7 @@ AC_ARG_WITH(dbm,
 
     for LIB in db1 dbm c; do
       AC_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-      AC_CHECK_LIB($LIB, dbminit, [AC_DEFINE(DBA_DBM,1) THIS_LIBS="$LIB"])
+      AC_CHECK_LIB($LIB, dbminit, [AC_DEFINE(DBA_DBM,1,[ ]) THIS_LIBS="$LIB"])
       ])
     done
     
@@ -214,7 +214,7 @@ AC_ARG_WITH(cdb,
 
     for LIB in cdb c; do
       AC_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-      AC_CHECK_LIB($LIB, cdb_bread, [AC_DEFINE(DBA_CDB,1) THIS_LIBS="$LIB"])
+      AC_CHECK_LIB($LIB, cdb_bread, [AC_DEFINE(DBA_CDB,1,[ ]) THIS_LIBS="$LIB"])
       ])
     done
     
@@ -229,10 +229,10 @@ AC_DBA_STD_RESULT
 AC_MSG_CHECKING(whether to enable DBA interface)
 if test "$HAVE_DBA" = "1"; then
   AC_MSG_RESULT(yes)
-  AC_DEFINE(HAVE_DBA, 1)
+  AC_DEFINE(HAVE_DBA, 1, [ ])
   PHP_EXTENSION(dba)
 else
   AC_MSG_RESULT(no)
-  AC_DEFINE(HAVE_DBA, 0)
+  AC_DEFINE(HAVE_DBA, 0, [ ])
 fi
 

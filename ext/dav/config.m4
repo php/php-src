@@ -13,17 +13,17 @@ AC_ARG_WITH(mod-dav,
   else
     if test "$withval" != "no"; then
       AC_MSG_RESULT(yes)
-      AC_DEFINE(HAVE_MOD_DAV, 1)
+      AC_DEFINE(HAVE_MOD_DAV, 1, [Whether you have mod_dav])
       CFLAGS="$CFLAGS -DHAVE_MOD_DAV -I$withval"
       INCLUDES="$INCLUDES -I$withval"
       PHP_EXTENSION(dav)
     else
       AC_MSG_RESULT(no)
-      AC_DEFINE(HAVE_MOD_DAV, 0)
+      AC_DEFINE(HAVE_MOD_DAV, 0, [Whether you have mod_dav])
     fi
   fi
 ],[
   AC_MSG_RESULT(no)
-  AC_DEFINE(HAVE_MOD_DAV, 0)
+  AC_DEFINE(HAVE_MOD_DAV, 0, [Whether you have mod_dav])
 ])
 

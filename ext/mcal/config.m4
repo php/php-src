@@ -13,7 +13,7 @@ AC_ARG_WITH(mcal,
     
     AC_ADD_INCLUDE($MCAL_DIR)
     AC_ADD_LIBRARY_WITH_PATH(mcal, $MCAL_DIR)
-    AC_DEFINE(HAVE_MCAL)
+    AC_DEFINE(HAVE_MCAL,,[ ])
     PHP_EXTENSION(mcal)
     AC_MSG_RESULT(yes)
   else

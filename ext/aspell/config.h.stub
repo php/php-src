@@ -1,4 +1,0 @@
-/* Define if you want the ASPELL interface */
-#ifndef HAVE_ASPELL
-#define HAVE_ASPELL 0
-#endif

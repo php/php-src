@@ -1,3 +1,0 @@
-#ifndef HAVE_IBASE
-#define HAVE_IBASE 0
-#endif

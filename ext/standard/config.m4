@@ -24,9 +24,9 @@ main() {
   ])
   ])
   if test "$ac_cv_crypt_des" = "yes"; then
-    AC_DEFINE(PHP3_STD_DES_CRYPT, 1)
+    AC_DEFINE(PHP3_STD_DES_CRYPT, 1, [ ])
   else
-    AC_DEFINE(PHP3_STD_DES_CRYPT, 0)
+    AC_DEFINE(PHP3_STD_DES_CRYPT, 0, [ ])
   fi
 
   AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
@@ -46,9 +46,9 @@ main() {
   ])
   ])
   if test "$ac_cv_crypt_ext_des" = "yes"; then
-    AC_DEFINE(PHP3_EXT_DES_CRYPT,1)
+    AC_DEFINE(PHP3_EXT_DES_CRYPT,1, [ ])
   else
-    AC_DEFINE(PHP3_EXT_DES_CRYPT,0)
+    AC_DEFINE(PHP3_EXT_DES_CRYPT,0, [ ])
   fi
 
   AC_CACHE_CHECK(for MD5 crypt, ac_cv_crypt_md5,[
@@ -77,9 +77,9 @@ main() {
   ])
   ])
   if test "$ac_cv_crypt_md5" = "yes"; then
-    AC_DEFINE(PHP3_MD5_CRYPT,1)
+    AC_DEFINE(PHP3_MD5_CRYPT,1,[ ])
   else
-    AC_DEFINE(PHP3_MD5_CRYPT,0)
+    AC_DEFINE(PHP3_MD5_CRYPT,0,[ ])
   fi
 
   AC_CACHE_CHECK(for Blowfish crypt, ac_cv_crypt_blowfish,[
@@ -105,26 +105,26 @@ main() {
   ])
   ])
   if test "$ac_cv_crypt_blowfish" = "yes"; then
-    AC_DEFINE(PHP3_BLOWFISH_CRYPT,1)
+    AC_DEFINE(PHP3_BLOWFISH_CRYPT,1,[ ])
   else
-    AC_DEFINE(PHP3_BLOWFISH_CRYPT,0)
+    AC_DEFINE(PHP3_BLOWFISH_CRYPT,0,[ ])
   fi
 ])
 
 AC_CHECK_LIB(c, dlopen, [
  # fake it
- AC_DEFINE(HAVE_LIBDL) ], [
+ AC_DEFINE(HAVE_LIBDL,,[ ]) ], [
  AC_CHECK_LIB(dl, dlopen, [
   LIBS="-ldl $LIBS"
-  AC_DEFINE(HAVE_LIBDL) ], []) ])
+  AC_DEFINE(HAVE_LIBDL,,[ ]) ], []) ])
 
 AC_CHECK_LIB(pam, pam_start, [
   EXTRA_LIBS="$EXTRA_LIBS -lpam"
-  AC_DEFINE(HAVE_LIBPAM) ], []) 
+  AC_DEFINE(HAVE_LIBPAM,,[ ]) ], []) 
 
 AC_CHECK_LIB(crypt, crypt, [
  AC_ADD_LIBRARY(crypt)
- AC_DEFINE(HAVE_LIBCRYPT) ], [])
+ AC_DEFINE(HAVE_LIBCRYPT,,[ ]) ], [])
 
 AC_CHECK_FUNCS(getcwd)
 AC_CHECK_FUNCS(getwd)

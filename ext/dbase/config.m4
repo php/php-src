@@ -6,13 +6,13 @@ AC_ARG_WITH(dbase,
 [
   if test "$withval" = "yes"; then
 	AC_MSG_RESULT(yes)
-	AC_DEFINE(DBASE,1)
+	AC_DEFINE(DBASE,1,[ ])
 	PHP_EXTENSION(dbase)
   else
 	AC_MSG_RESULT(no)
-	AC_DEFINE(DBASE,0)
+	AC_DEFINE(DBASE,0,[ ])
   fi
 ],[
   AC_MSG_RESULT(no)
-  AC_DEFINE(DBASE,0)
+  AC_DEFINE(DBASE,0,[ ])
 ])

@@ -9,10 +9,10 @@ AC_CHECK_HEADERS(db1/ndbm.h)
 # Checks for libraries.
 # Prefer gdbm, Berkeley DB and ndbm/dbm, in that order
 AC_DEFUN(AC_PREFERRED_DB_LIB,[
-  AC_CHECK_LIB(gdbm, gdbm_open,[AC_DEFINE(GDBM) DBM_TYPE=gdbm; DBM_LIB=-lgdbm],
-  [AC_CHECK_LIB(db, dbm_open,[AC_DEFINE(NDBM) DBM_TYPE=ndbm; DBM_LIB=-ldb],
-   [AC_CHECK_LIB(c, dbm_open,[AC_DEFINE(NDBM) DBM_TYPE=ndbm; DBM_LIB=],
-    [AC_CHECK_LIB(dbm, dbm_open,[AC_DEFINE(NDBM) DBM_TYPE=ndbm; DBM_LIB=-ldbm],
+  AC_CHECK_LIB(gdbm, gdbm_open,[AC_DEFINE(GDBM,, [Whether you have GDBM]) DBM_TYPE=gdbm; DBM_LIB=-lgdbm],
+  [AC_CHECK_LIB(db, dbm_open,[AC_DEFINE(NDBM,, [Whether you have NDBM]) DBM_TYPE=ndbm; DBM_LIB=-ldb],
+   [AC_CHECK_LIB(c, dbm_open,[AC_DEFINE(NDBM,,[ ]) DBM_TYPE=ndbm; DBM_LIB=],
+    [AC_CHECK_LIB(dbm, dbm_open,[AC_DEFINE(NDBM,,[ ]) DBM_TYPE=ndbm; DBM_LIB=-ldbm],
      [DBM_TYPE=""])])])])
   AC_MSG_CHECKING([preferred dbm library])
   if test "a$DBM_TYPE" = a; then

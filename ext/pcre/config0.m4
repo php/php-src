@@ -18,7 +18,7 @@ AC_ARG_WITH(pcre-regex,
 		yes)
 			EXTRA_LIBS="-L$abs_builddir/ext/pcre/pcrelib -lpcre $EXTRA_LIBS"
 			PCRE_SUBDIR="pcrelib"
-			AC_DEFINE(HAVE_BUNDLED_PCRE, 1)
+			AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
 			AC_MSG_RESULT(yes)
 			PHP_EXTENSION(pcre)
 			PHP_FAST_OUTPUT(ext/pcre/pcrelib/Makefile)
@@ -45,7 +45,7 @@ AC_ARG_WITH(pcre-regex,
 				AC_MSG_ERROR(Could not find libpcre.a in $withval)
 			fi
 
-			AC_DEFINE(HAVE_PCRE, 1)
+			AC_DEFINE(HAVE_PCRE, 1, [ ])
 			AC_MSG_RESULT(yes)
 			PHP_EXTENSION(pcre)
 			;;
@@ -53,7 +53,7 @@ AC_ARG_WITH(pcre-regex,
 ],[
   PCRE_LIBADD=pcrelib/libpcre.la
   PCRE_SUBDIRS=pcrelib
-  AC_DEFINE(HAVE_BUNDLED_PCRE, 1)
+  AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
   AC_MSG_RESULT(yes)
   PHP_EXTENSION(pcre)
   PHP_FAST_OUTPUT(ext/pcre/pcrelib/Makefile)
@@ -61,4 +61,4 @@ AC_ARG_WITH(pcre-regex,
 PHP_SUBST(PCRE_LIBADD)
 PHP_SUBST(PCRE_SUBDIRS)
 
-AC_CHECK_FUNC(memmove, [], [AC_DEFINE(USE_BCOPY, 1)])
+AC_CHECK_FUNC(memmove, [], [AC_DEFINE(USE_BCOPY, 1, [ ])])
