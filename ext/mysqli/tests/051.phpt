@@ -7,7 +7,7 @@ free statement after close
 	/************************
 	 * free statement after close 
 	 ************************/
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 
 	$stmt1 = mysqli_prepare($link, "SELECT CURRENT_USER()");
 	mysqli_execute($stmt1);

@@ -2,12 +2,10 @@
 mysqli bind_param/bind_result with send_long_data 
 --FILE--
 <?php
-	$user = "root";
-	$passwd = "";
-
+	include "connect.inc";
 	
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 
 	mysqli_select_db($link, "test");
 

@@ -7,7 +7,7 @@ call statement after close
 	/************************
 	 * statement call  after close 
 	 ************************/
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 
 	$stmt2 = mysqli_prepare($link, "SELECT CURRENT_USER()");
 

@@ -5,7 +5,7 @@ mysqli bind_result 1
 	include "connect.inc";
 	
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 
 	mysqli_select_db($link, "test");		
 	$rc = mysqli_query($link,"DROP TABLE IF EXISTS test_fetch_null");

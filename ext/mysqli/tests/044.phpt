@@ -5,7 +5,7 @@ mysqli_get_server_version
 	include "connect.inc";
 	
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 
 	$i = mysqli_get_server_version($link);
 

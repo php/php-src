@@ -7,7 +7,7 @@ not freed resultset
 	/************************
 	 * non freed resultset 
 	 ************************/
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 
 	$result = mysqli_query($link, "SELECT CURRENT_USER()");
 	mysqli_close($link);
