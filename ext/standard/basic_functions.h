@@ -170,6 +170,9 @@ typedef struct {
 	/* syslog.c */
 	int syslog_started;
 	char *syslog_device;
+
+	/* var.c */
+	zend_class_entry *incomplete_class;
 } php_basic_globals;
 
 #ifdef ZTS

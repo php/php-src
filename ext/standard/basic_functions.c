@@ -708,6 +708,7 @@ PHP_RINIT_FUNCTION(basic)
 	BG(locale_string) = NULL;
 	BG(user_compare_func_name) = NULL;
 	BG(array_walk_func_name) = NULL;
+	BG(incomplete_class) = NULL;
 	BG(page_uid) = -1;
 	BG(page_inode) = -1;
 	BG(page_mtime) = -1;
