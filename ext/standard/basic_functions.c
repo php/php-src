@@ -2919,8 +2919,6 @@ PHP_FUNCTION(parse_ini_file)
 			convert_to_boolean_ex(process_sections);
 		
 			if (Z_BVAL_PP(process_sections)) {
-				TSRMLS_FETCH();
-
 				BG(active_ini_file_section) = NULL;
 				ini_parser_cb = (zend_ini_parser_cb_t) php_ini_parser_cb_with_sections;
 			} else {

@@ -959,7 +959,7 @@ static void php_session_send_cookie(TSRMLS_D)
 		struct timeval tv;
 		
 		gettimeofday(&tv, NULL);
-		date_fmt = php_std_date(tv.tv_sec + PS(cookie_lifetime));
+		date_fmt = php_std_date(tv.tv_sec + PS(cookie_lifetime) TSRMLS_CC);
 		
 		smart_str_appends(&ncookie, COOKIE_EXPIRES);
 		smart_str_appends(&ncookie, date_fmt);

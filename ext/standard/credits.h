@@ -37,6 +37,6 @@
 
 #endif /* HAVE_CREDITS_DEFS */
 
-PHPAPI void php_print_credits(int flag);
+PHPAPI void php_print_credits(int flag TSRMLS_DC);
 
 #endif
