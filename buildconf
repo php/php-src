@@ -137,7 +137,10 @@ fi
 autoheader
 
 # suppress stupid automake warning
-automake --add-missing --include-deps $automake_flags 2>&1 | grep -v \$PHP_OUTPUT_FILES >&2
+files=`find . -name Makefile.am | sed 's#\.am##' | tr '\n' ' '`
+
+
+automake --add-missing --include-deps $automake_flags $files  2>&1 | grep -v \$PHP_OUTPUT_FILES >&2
 
 
 mv configure configure.old 2>/dev/null
