@@ -2700,7 +2700,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 
 #if !HAVE_GD_STRINGFTEX
 	if (extended)	{
-		zend_error(E_WARNING, "%s(): gdImageStringFTEx not supported in this PHP build", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "gdImageStringFTEx not supported in this PHP build");
 		RETURN_FALSE;
 	}
 #endif
@@ -3440,7 +3440,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 		case PHP_GDIMG_TYPE_GIF:
 			im_org = gdImageCreateFromGif (org);
 			if (im_org == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s(): Unable to open '%s' Not a valid GIF file", fn_dest);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open '%s' Not a valid GIF file", fn_dest);
 				RETURN_FALSE;
 			}
 			break;
