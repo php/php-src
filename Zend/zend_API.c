@@ -1179,16 +1179,22 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 		}
 		if (ptr->flags) {
 			if (!(ptr->flags & ZEND_ACC_PPP_MASK)) {
-				zend_error(error_type, "Invalid access level for %s() - access must be exactly one of public, protected or private", ptr->fname);
+				zend_error(error_type, "Invalid access level for %s%s%s() - access must be exactly one of public, protected or private", scope ? scope->name : "", scope ? "::" : "", ptr->fname);
 			}
 			internal_function->fn_flags = ptr->flags;
 		} else {
 			internal_function->fn_flags = ZEND_ACC_PUBLIC;
 		}
-		if (!internal_function->handler && !(ptr->flags&ZEND_ACC_ABSTRACT)) {
-			zend_error(error_type, "Null function defined as active function");
-			zend_unregister_functions(functions, count, target_function_table TSRMLS_CC);
-			return FAILURE;
+		if (ptr->flags&ZEND_ACC_ABSTRACT) {
+			if (scope) {
+				scope->ce_flags |= ZEND_ACC_ABSTRACT;
+			}
+		} else {
+			if (!internal_function->handler) {
+				zend_error(error_type, "Method %s%s%s() cannot be a NULL function", scope ? scope->name : "", scope ? "::" : "", ptr->fname);
+				zend_unregister_functions(functions, count, target_function_table TSRMLS_CC);
+				return FAILURE;
+			}
 		}
 		fname_len = strlen(ptr->fname);
 		lowercase_name = do_alloca(fname_len+1);
