@@ -3,15 +3,15 @@ PHP 4                                                                      NEWS
 ?? ??? ????, Version 4.3.11
 - Fixed bug #31111 (Compile failure of zend_strtod.c). (Derick)
 - Fixed bug #31110 (PHP 4.3.10 does not compile on Tru64 UNIX 5.1B). (Derick)
-- Fixed bug #31107 (Complile failure on Solaris 9 (Intel) and gcc 3.4.3). (Derick)
+- Fixed bug #31107 (Compile failure on Solaris 9 (Intel) and gcc 3.4.3). (Derick)
 - Fixed bug #31056 (php_std_date() returns invalid formatted date if 
   y2k_compliance is On). (Ilia)
 
 15 Dec 2004, Version 4.3.10
 - Added the %F modifier to *printf to render a non-locale-aware representation
   of a float with the . as decimal separator. (Derick)
-- Fixed a bug in addslashes() handling of the '\0' character. (Ilia)
 - Backported Marcus' foreach() speedup patch from PHP 5.x. (Derick)
+- Fixed a bug in addslashes() handling of the '\0' character. (Ilia)
 - Fixed potential problems with unserializing invalid serialize data. (Marcus)
 - Fixed bug #31034 (Problem with non-existing iconv header file). (Derick)
 - Fixed bug #31024 (Crash in fgetcsv() with negative length). (Ilia)
