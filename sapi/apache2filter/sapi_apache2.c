@@ -238,7 +238,7 @@ AP_MODULE_DECLARE_DATA module php4_module;
 	}
 
 static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb, 
-		ap_input_mode_t mode, apr_off_t *readbytes)
+		ap_input_mode_t mode, apr_read_type_e block, apr_off_t *readbytes)
 {
 	php_struct *ctx;
 	long old_index;
@@ -249,14 +249,14 @@ static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb,
 	TSRMLS_FETCH();
 
 	if (f->r->proxyreq) {
-		return ap_get_brigade(f->next, bb, mode, readbytes);
+		return ap_get_brigade(f->next, bb, mode, block, readbytes);
 	}
 
 	ctx = SG(server_context);
 
 	INIT_CTX;
 
-	if ((rv = ap_get_brigade(f->next, bb, mode, readbytes)) != APR_SUCCESS) {
+	if ((rv = ap_get_brigade(f->next, bb, mode, block, readbytes)) != APR_SUCCESS) {
 		return rv;
 	}
 
