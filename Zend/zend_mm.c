@@ -282,6 +282,8 @@ void *zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size)
 
 	zend_mm_remove_from_free_list(heap, (zend_mm_free_block *) next_block);
 	mm_block->size += next_block->size;
+	/* update the next block's prev_size */
+	ZEND_MM_BLOCK_AT(mm_block, mm_block->size)->prev_size = mm_block->size;
 	
 	zend_mm_create_new_free_block(heap, mm_block, true_size);
 	/* We don't yet merge this free block with the following one */
