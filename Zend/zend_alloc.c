@@ -548,6 +548,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 				if (!silent && total_leak_count>0) {
 					zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *) (long) (total_leak_count));
 				}
+				grand_total_leaks += total_leak_count;
 			}
 #endif
 #if MEMORY_LIMIT
