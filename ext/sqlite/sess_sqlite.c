@@ -71,9 +71,9 @@ static int ps_sqlite_valid_key(const char *key)
 
 PS_OPEN_FUNC(sqlite) 
 {
-    char *filepath;
+	char *filepath;
 	char *errmsg = NULL;
-    int spath_len, sname_len, fp_len;
+	int spath_len, sname_len, fp_len;
 	sqlite *db;
 
 	/* TODO: do we need a safe_mode check here? */
@@ -86,14 +86,14 @@ PS_OPEN_FUNC(sqlite)
 
 	/* allow up to 1 minute when busy */
 	sqlite_busy_timeout(db, 60000);
-    
-    /* This will fail if the table already exists, but that's not a big problem. I'm
-    unclear as to how to check for a table's existence in SQLite -- that would be better here. */
-    sqlite_exec(db, CREATE_TBL_QUERY, NULL, NULL, NULL);
-    
-    PS_SET_MOD_DATA(db);
 
-    return SUCCESS;
+	/* This will fail if the table already exists, but that's not a big problem. I'm
+	   unclear as to how to check for a table's existence in SQLite -- that would be better here. */
+	sqlite_exec(db, CREATE_TBL_QUERY, NULL, NULL, NULL);
+
+	PS_SET_MOD_DATA(db);
+
+	return SUCCESS;
 }
 
 PS_CLOSE_FUNC(sqlite) 
