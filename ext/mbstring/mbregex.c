@@ -186,7 +186,9 @@ static void store_jump _((char*, int, char*));
 static void insert_jump _((int, char*, char*, char*));
 static void store_jump_n _((char*, int, char*, unsigned));
 static void insert_jump_n _((int, char*, char*, char*, unsigned));
+#if 0
 static void insert_op _((int, char*, char*));
+#endif
 static void insert_op_2 _((int, char*, char*, int, int));
 static int memcmp_translate _((unsigned char*, unsigned char*, int, const unsigned char*));
 static const unsigned char* re_mbctab_get _((int));
@@ -1289,7 +1291,7 @@ re_compile_pattern(pattern, size, bufp)
   register const char *p = pattern;
   const char *nextp;
   const char *pend = pattern + size;
-  register unsigned int c, c1;
+  register unsigned int c, c1=0;
   const char *p0;
   int numlen;
 #define ERROR_MSG_MAX_SIZE 200
