@@ -90,6 +90,21 @@ dnl A whole whack of possible places where this might be
 ],[
   AC_CHECK_LIB(gd, gdImageLine)
   AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13) ])
+  if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
+		old_LIBS=$LIBS
+        AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13) ])
+		LIBS="$LIBS -lpng -lz"
+        AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1)])
+        AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1)])
+        
+        LIBS=$old_LIBS
+        LDFLAGS=$old_LDFLAGS
+        if test "$ac_cv_lib_gd_gdImageCreateFromPng" = "yes"; then
+          AC_ADD_LIBRARY(png)
+          AC_ADD_LIBRARY(z)
+        fi
+        ac_cv_lib_gd_gdImageLine=yes
+  fi
 ])
 if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
   CHECK_TTF="yes"
