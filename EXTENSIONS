@@ -165,7 +165,7 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           odbc
-PRIMARY MAINTAINER:  Andreas Karajannis <Karajannis@gmd.de>
+PRIMARY MAINTAINER:  Daniel R. Kalowsky <kalowsky@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 COMMENT:             Working except for persistent connections
