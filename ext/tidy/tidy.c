@@ -71,19 +71,19 @@ function_entry tidy_functions[] = {
 };
 
 function_entry tidy_funcs_doc[] = {
-	TIDY_METHOD_MAP(getopt, tidy_getopt, NULL)
-	TIDY_METHOD_MAP(clean_repair, tidy_clean_repair, NULL)
-	TIDY_DOC_ME(parse_file, NULL)
-	TIDY_DOC_ME(parse_string, NULL)
-	TIDY_METHOD_MAP(repair_string, tidy_repair_string, NULL)
-	TIDY_METHOD_MAP(repair_file, tidy_repair_file, NULL)
+	TIDY_METHOD_MAP(getOpt, tidy_getopt, NULL)
+	TIDY_METHOD_MAP(cleanRepair, tidy_clean_repair, NULL)
+	TIDY_DOC_ME(parseFile, NULL)
+	TIDY_DOC_ME(parseString, NULL)
+	TIDY_METHOD_MAP(repairString, tidy_repair_string, NULL)
+	TIDY_METHOD_MAP(repairFile, tidy_repair_file, NULL)
 	TIDY_METHOD_MAP(diagnose, tidy_diagnose, NULL)
-	TIDY_METHOD_MAP(get_release, tidy_get_release, NULL)
-	TIDY_METHOD_MAP(get_config, tidy_get_config, NULL)
-	TIDY_METHOD_MAP(get_status, tidy_get_status, NULL)
-	TIDY_METHOD_MAP(get_html_ver, tidy_get_html_ver, NULL)
-	TIDY_METHOD_MAP(is_xhtml, tidy_is_xhtml, NULL)
-	TIDY_METHOD_MAP(is_xml, tidy_is_xml, NULL)
+	TIDY_METHOD_MAP(getRelease, tidy_get_release, NULL)
+	TIDY_METHOD_MAP(getConfig, tidy_get_config, NULL)
+	TIDY_METHOD_MAP(getStatus, tidy_get_status, NULL)
+	TIDY_METHOD_MAP(getHtmlVer, tidy_get_html_ver, NULL)
+	TIDY_METHOD_MAP(isXhtml, tidy_is_xhtml, NULL)
+	TIDY_METHOD_MAP(isXml, tidy_is_xml, NULL)
 	TIDY_METHOD_MAP(root, tidy_get_root, NULL)
 	TIDY_METHOD_MAP(head, tidy_get_head, NULL)
 	TIDY_METHOD_MAP(html, tidy_get_html, NULL)
@@ -95,14 +95,14 @@ function_entry tidy_funcs_doc[] = {
 function_entry tidy_funcs_node[] = {
 
 	TIDY_NODE_ME(__construct, NULL)
-	TIDY_NODE_ME(has_children, NULL)
-	TIDY_NODE_ME(has_siblings, NULL)
-	TIDY_NODE_ME(is_comment, NULL)
-	TIDY_NODE_ME(is_html, NULL)
-	TIDY_NODE_ME(is_text, NULL)
-	TIDY_NODE_ME(is_jste, NULL)
-	TIDY_NODE_ME(is_asp, NULL)
-	TIDY_NODE_ME(is_php, NULL)
+	TIDY_NODE_ME(hasChildren, NULL)
+	TIDY_NODE_ME(hasSiblings, NULL)
+	TIDY_NODE_ME(isComment, NULL)
+	TIDY_NODE_ME(isHtml, NULL)
+	TIDY_NODE_ME(isText, NULL)
+	TIDY_NODE_ME(isJste, NULL)
+	TIDY_NODE_ME(isAsp, NULL)
+	TIDY_NODE_ME(isPhp, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -1176,7 +1176,7 @@ TIDY_DOC_METHOD(__construct)
 
 }
 
-TIDY_DOC_METHOD(parse_file)
+TIDY_DOC_METHOD(parseFile)
 {
 	char *inputfile, *enc = NULL;
 	int input_len, enc_len = 0;
@@ -1209,7 +1209,7 @@ TIDY_DOC_METHOD(parse_file)
 	efree(contents);
 }
 
-TIDY_DOC_METHOD(parse_string)
+TIDY_DOC_METHOD(parseString)
 {
 	char *input, *enc = NULL;
 	int input_len, enc_len = 0;
@@ -1275,7 +1275,7 @@ TIDY_NODE_METHOD(__construct)
 
 /* {{{ proto boolean tidy_node::has_children()
    Returns true if this node has children */
-TIDY_NODE_METHOD(has_children)
+TIDY_NODE_METHOD(hasChildren)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1289,7 +1289,7 @@ TIDY_NODE_METHOD(has_children)
 
 /* {{{ proto boolean tidy_node::has_siblings()
    Returns true if this node has siblings */
-TIDY_NODE_METHOD(has_siblings)
+TIDY_NODE_METHOD(hasSiblings)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1303,7 +1303,7 @@ TIDY_NODE_METHOD(has_siblings)
 
 /* {{{ proto boolean tidy_node::is_comment()
    Returns true if this node represents a comment */
-TIDY_NODE_METHOD(is_comment)
+TIDY_NODE_METHOD(isComment)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1317,7 +1317,7 @@ TIDY_NODE_METHOD(is_comment)
 
 /* {{{ proto boolean tidy_node::is_html()
    Returns true if this node is part of a HTML document */
-TIDY_NODE_METHOD(is_html)
+TIDY_NODE_METHOD(isHtml)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1331,7 +1331,7 @@ TIDY_NODE_METHOD(is_html)
 
 /* {{{ proto boolean tidy_node::is_xhtml()
    Returns true if this node is part of a XHTML document */
-TIDY_NODE_METHOD(is_xhtml)
+TIDY_NODE_METHOD(isXhtml)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1345,7 +1345,7 @@ TIDY_NODE_METHOD(is_xhtml)
 
 /* {{{ proto boolean tidy_node::is_xml()
    Returns true if this node is part of a XML document */
-TIDY_NODE_METHOD(is_xml)
+TIDY_NODE_METHOD(isXml)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1359,7 +1359,7 @@ TIDY_NODE_METHOD(is_xml)
 
 /* {{{ proto boolean tidy_node::is_text()
    Returns true if this node represents text (no markup) */
-TIDY_NODE_METHOD(is_text)
+TIDY_NODE_METHOD(isText)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1373,7 +1373,7 @@ TIDY_NODE_METHOD(is_text)
 
 /* {{{ proto boolean tidy_node::is_jste()
    Returns true if this node is JSTE */
-TIDY_NODE_METHOD(is_jste)
+TIDY_NODE_METHOD(isJste)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1387,7 +1387,7 @@ TIDY_NODE_METHOD(is_jste)
 
 /* {{{ proto boolean tidy_node::is_asp()
    Returns true if this node is ASP */
-TIDY_NODE_METHOD(is_asp)
+TIDY_NODE_METHOD(isAsp)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1401,7 +1401,7 @@ TIDY_NODE_METHOD(is_asp)
 
 /* {{{ proto boolean tidy_node::is_php()
    Returns true if this node is PHP */
-TIDY_NODE_METHOD(is_php)
+TIDY_NODE_METHOD(isPhp)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
