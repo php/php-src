@@ -1451,10 +1451,9 @@ ZEND_API int increment_function(zval *op1)
 {
 	switch (op1->type) {
 		case IS_BOOL:
-			if (op1->value.lval) {
-				op1->type = IS_LONG;
+			if (!op->value.lval) {
+				op1->value.lval = 1;
 			}
-			op1->value.lval++;
 			break;
 		case IS_LONG:
 			if(op1->value.lval == LONG_MAX) {
@@ -1519,10 +1518,11 @@ ZEND_API int decrement_function(zval *op1)
 	
 	switch (op1->type) {
 		case IS_BOOL:
-			if (!op1->value.lval) {
-				op1->type = IS_LONG;
+			if (op->value.lval) {
+				op1->value.lval = 0;
+			} else {
+				op1->value.lval = 1;
 			}
-			op1->value.lval--;
 			break;
 		case IS_LONG:
 			if(op1->value.lval == LONG_MIN) {
