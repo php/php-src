@@ -1,3 +1,24 @@
+2004-03-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_handlers.c:
+      update for read handler api change
+
+2004-03-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c:
+      Fixes to allow curl extension to compile against libcurl 7.11.1
+
+    * ext/gd/libgd/gd.c:
+      Revert patch to imagefillborder.
+
+2004-03-22  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      - Fix bug
+
+    * ZendEngine2/zend_execute.c:
+      - Remove whitespace
+
 2004-03-21  Greg Beaver  <greg@chiaraquartet.net>
 
     * pear/package-PEARtests.xml
