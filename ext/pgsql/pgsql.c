@@ -1776,6 +1776,10 @@ PHP_FUNCTION(pg_lo_unlink)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Requires 1 or 2 arguments.");
 		RETURN_FALSE;
 	}
+
+	if (pgsql_link == NULL) {
+		RETURN_FALSE;
+	}
 	
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
@@ -1843,6 +1847,10 @@ PHP_FUNCTION(pg_lo_open)
 	}
 	else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Requires 1 or 2 arguments.");
+		RETURN_FALSE;
+	}
+
+	if (pgsql_link == NULL) {
 		RETURN_FALSE;
 	}
 	
@@ -2073,6 +2081,10 @@ PHP_FUNCTION(pg_lo_import)
 	else {
 		WRONG_PARAM_COUNT;
 	}
+
+	if (pgsql_link == NULL) {
+		RETURN_FALSE;
+	}
 	
 	if (PG(safe_mode) &&(!php_checkuid(file_in, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
@@ -2135,7 +2147,7 @@ PHP_FUNCTION(pg_lo_export)
 		CHECK_DEFAULT_LINK(id);
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
-								 "ss", &pgsql_link, &oid_string, &oid_strlen, &file_out, &name_len) == SUCCESS) {
+								 "ss", &oid_string, &oid_strlen, &file_out, &name_len) == SUCCESS) {
 		oid = (Oid)strtoul(oid_string, &end_ptr, 10);
 		if ((oid_string+oid_strlen) != end_ptr) {
 			/* wrong integer format */
@@ -2165,6 +2177,10 @@ PHP_FUNCTION(pg_lo_export)
 	}
 	else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Requires 2 or 3 arguments.");
+		RETURN_FALSE;
+	}
+
+	if (pgsql_link == NULL) {
 		RETURN_FALSE;
 	}
 	
