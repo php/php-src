@@ -1388,8 +1388,8 @@ PHP_FUNCTION(min)
 		min = args[0];
 
 		for (i=1; i<ARG_COUNT(ht); i++) {
-			compare_function(&result, min, args[i]);
-			if (result.value.lval > 0) {
+			is_smaller_function(&result, args[i], min);
+			if (result.value.lval == 1) {
 				min = args[i];
 			}
 		}
@@ -1439,8 +1439,8 @@ PHP_FUNCTION(max)
 		max = args[0];
 
 		for (i=1; i<ARG_COUNT(ht); i++) {
-			compare_function(&result, max, args[i]);
-			if (result.value.lval < 0) {
+			is_smaller_or_equal_function(&result, args[i], max);
+			if (result.value.lval == 0) {
 				max = args[i];
 			}
 		}
