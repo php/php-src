@@ -1,3 +1,15 @@
+2004-05-10  Zeev Suraski  <zeev@zend.com>
+
+    * zend_operators.c:
+      - Fix comparison of objects
+      - Clarify convert_object_to_type()
+
+2004-05-10  Stefan Esser  <sesser@suspekt.org>
+
+    * zend_alloc.c:
+      Checking MEMORY_LIMIT before doing emalloc/erealloc solves several ugly
+      problems.
+
 2004-05-04  Wez Furlong  <wez.php@thebrainroom.net>
 
     * zend_iterators.c
