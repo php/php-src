@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added new mysql functions: mysql_ping(), mysql_real_escape_string(), 
+  mysql_character_set_name(), mysql_thread_id(), mysql_stat(), 
+  mysql_list_processes (Zak, Georg)
 - Added pg_fetch_all() that fetch all rows in result. (Yasuo)
 - Changed "session.use_trans_sid" to be disabled by default in php.ini. (Yasuo)
 - Added safe_mode & open_basedir checks for pg_lo_export(). (Yasuo)
@@ -101,8 +104,6 @@ PHP 4                                                                      NEWS
   and remove variables from the URL-Rewriter. (Thies)
 - The Windows build can now be configured more comfortably, for example 
   when dealing with built-in extensions. (Sebastian)
-- Added optional 3rd parameter to mysql_select_db() which makes it return
-  the previously selected database name. (Jani)
 - Added large OID value (2^31 to 2^32) support for pg_lo_import(),
   pg_lo_unlink(), pg_lo_open() and pg_lo_export(). (Yasuo)
 - Changed the mbstring extension to be enabled by default. (Yasuo)
