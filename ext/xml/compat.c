@@ -86,6 +86,10 @@ _start_element_handler(void *user, const xmlChar *name, const xmlChar **attribut
 	XML_Parser  parser = (XML_Parser) user;
 	xmlChar    *qualified_name = NULL;
 
+	if (parser->h_start_element == NULL) {
+		return;
+	}
+	
 	if (parser->namespace) {
 		_find_namespace_decl(parser, name, attributes);
 		_qualify_namespace(parser, name, &qualified_name);
@@ -104,6 +108,10 @@ _end_element_handler(void *user, const xmlChar *name)
 	xmlChar    *qualified_name;
 	XML_Parser  parser = (XML_Parser) user;
 
+	if (parser->h_end_element == NULL) {
+		return;
+	}
+	
 	if (parser->namespace) {
 		xmlChar *nsname;
 
@@ -127,6 +135,10 @@ _cdata_handler(void *user, const xmlChar *cdata, int cdata_len)
 {
 	XML_Parser parser = (XML_Parser) user;
 
+	if (parser->h_cdata == NULL) {
+		return;
+	}
+
 	parser->h_cdata(parser->user, (const XML_Char *) cdata, cdata_len);
 }
 
@@ -134,6 +146,10 @@ static void
 _pi_handler(void *user, const xmlChar *target, const xmlChar *data)
 {
 	XML_Parser parser = (XML_Parser) user;
+
+	if (parser->h_pi == NULL) {
+		return;
+	}
 
 	parser->h_pi(parser->user, (const XML_Char *) target, (const XML_Char *) data);
 }
@@ -147,6 +163,10 @@ _unparsed_entity_decl_handler(void *user,
 {
 	XML_Parser parser = (XML_Parser) user;
 
+	if (parser->h_unparsed_entity_decl == NULL) {
+		return;
+	}
+
 	parser->h_unparsed_entity_decl(parser->user, name, NULL, sys_id, pub_id, notation);
 }
 
@@ -154,6 +174,10 @@ static void
 _notation_decl_handler(void *user, const xmlChar *notation, const xmlChar *sys_id, const xmlChar *pub_id)
 {
 	XML_Parser parser = (XML_Parser) user;
+
+	if (parser->h_notation_decl == NULL) {
+		return;
+	}
 
 	parser->h_notation_decl(parser->user, notation, NULL, sys_id, pub_id);
 }
@@ -163,7 +187,11 @@ _external_entity_ref_handler(void *user, const xmlChar *names, int type, const x
 {
 	XML_Parser parser = (XML_Parser) user;
 
-	parser->h_external_entity_ref(parser->user, names, NULL, sys_id, pub_id);
+	if (parser->h_external_entity_ref == NULL) {
+		return;
+	}
+
+	parser->h_external_entity_ref(parser, names, NULL, sys_id, pub_id);
 }
 
 static xmlSAXHandler 
@@ -240,6 +268,7 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	xmlMemSetup(memsuite->free_fcn, memsuite->malloc_fcn, memsuite->realloc_fcn, _expat_cpt_intn_strdup); /* WHOCANFIXME: not reentrant ! */
 
 	parser = (XML_Parser) memsuite->malloc_fcn(sizeof(struct _XML_Parser));
+	memset(parser, 0, sizeof(struct _XML_Parser));
 	parser->namespace = 0;
 	parser->mem_hdlrs = *memsuite;
 	parser->parser = xmlCreatePushParserCtxt((xmlSAXHandlerPtr) &php_xml_compat_handlers, (void *) parser, NULL, 0, NULL);
