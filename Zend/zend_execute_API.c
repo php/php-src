@@ -337,7 +337,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 			last = tsrm_strtok_r(p->value.str.val, ":", &temp);
 
 			if (zend_lookup_class(last, strlen(last), &ce TSRMLS_CC) == FAILURE) {
-				zend_error(E_ERROR, "Invalid class '%s'", last);
+				zend_error(E_ERROR, "Undefined class '%s'", last);
 			}
 			
 			last = tsrm_strtok_r(NULL, ":", &temp);
@@ -348,12 +348,12 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 					break;
 				}
 				if (zend_hash_find(&(*ce)->class_table, last, strlen(last)+1, (void **)&ce) == FAILURE) {
-					zend_error(E_ERROR, "Invalid sub-class '%s'", last);
+					zend_error(E_ERROR, "Undefined sub-class '%s'", last);
 				}
 				last = cur;
 			}
 			if (zend_hash_find(&(*ce)->constants_table, last, strlen(last)+1, (void **) &value) == FAILURE) {
-				zend_error(E_ERROR, "Invalid class constant '%s'", last);
+				zend_error(E_ERROR, "Undefined class constant '%s'", last);
 			}
 			const_value = **value;
 			zval_copy_ctor(&const_value);
