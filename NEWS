@@ -69,6 +69,7 @@ PHP 4.0                                                                    NEWS
 - snmp_walkoid is now an alias for snmp_realwalk. (Sterling)
 - Fixed a bug that could cause a crash when using 'global' inside large include
   files (Stas, Zend Engine)
+- Added --enable-libgcc switch to force linking against libgcc (Sascha)
 - Fixed dynamic loading where extension_dir had no trailing slash (Sascha)
 - Fixed dynamic loading on OpenBSD (Sascha)
 - Improved POSIX threads check. ZTS works now on at least Linux, Solaris, 
