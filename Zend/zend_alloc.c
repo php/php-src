@@ -46,7 +46,7 @@ static zend_alloc_globals alloc_globals;
 
 # if MEMORY_LIMIT
 #  if ZEND_DEBUG
-#define CHECK_MEMORY_LIMIT(s) _CHECK_MEMORY_LIMIT(s ZEND_FILE_LINE_RELAY_CC)
+#define CHECK_MEMORY_LIMIT(s) _CHECK_MEMORY_LIMIT(s, __zend_filename, __zend_lineno)
 #  else
 #define CHECK_MEMORY_LIMIT(s)	_CHECK_MEMORY_LIMIT(s,NULL,0)
 #  endif
