@@ -138,7 +138,7 @@ static inline void tag_arg(url_adapt_state_ex_t *ctx, char quote PLS_DC)
 
 	smart_str_appendc(&ctx->result, quote);
 	if (f) {
-		append_modified_url(&ctx->val, &ctx->result, &ctx->q_name, &ctx->q_value, PG(arg_separator));
+		append_modified_url(&ctx->val, &ctx->result, &ctx->q_name, &ctx->q_value, PG(arg_separator).output);
 	} else {
 		smart_str_append(&ctx->result, &ctx->val);
 	}
@@ -313,7 +313,7 @@ char *url_adapt_single_url(const char *url, size_t urllen, const char *name, con
 	smart_str_sets(&sname, name);
 	smart_str_sets(&sval, value);
 
-	append_modified_url(&surl, &buf, &sname, &sval, PG(arg_separator));
+	append_modified_url(&surl, &buf, &sname, &sval, PG(arg_separator).output);
 
 	smart_str_0(&buf);
 	if (newlen) *newlen = buf.len;
