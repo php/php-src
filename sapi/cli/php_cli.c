@@ -76,17 +76,18 @@
 
 #include "php_getopt.h"
 
-#define PHP_MODE_STANDARD    1
-#define PHP_MODE_HIGHLIGHT   2
-#define PHP_MODE_INDENT      3
-#define PHP_MODE_LINT        4
-#define PHP_MODE_STRIP       5
-#define PHP_MODE_CLI_DIRECT  6
+#define PHP_MODE_STANDARD      1
+#define PHP_MODE_HIGHLIGHT     2
+#define PHP_MODE_INDENT        3
+#define PHP_MODE_LINT          4
+#define PHP_MODE_STRIP         5
+#define PHP_MODE_CLI_DIRECT    6
+#define PHP_MODE_PROCESS_STDIN 7
 
 extern char *ap_php_optarg;
 extern int ap_php_optind;
 
-#define OPTSTRING "aCc:d:ef:g:hilmnqr:sw?vz:"
+#define OPTSTRING "aB:Cc:d:E:eF:f:g:hilmnqR:r:sw?vz:"
 
 static int print_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 {
@@ -295,9 +296,12 @@ static void php_cli_usage(char *argv0)
 		prog = "php";
 	}
 	
-	php_printf( "Usage: %s [options] [-f] <file> [args...]\n"
-	            "       %s [options] -r <code> [args...]\n"
-	            "       %s [options] [-- args...]\n"
+	php_printf( "Usage: %s [options] [-f] <file> [--] [args...]\n"
+	            "       %s [options] -r <code> [--] [args...]\n"
+	            "       %s [options] [-B <begin_code>] -R <code> [-E <end_code>] [--] [args...]\n"
+	            "       %s [options] [-B <begin_code>] -F <file> [-E <end_code>] [--] [args...]\n"
+	            "       %s [options] [--] [args...]\n"
+	            "\n"
 				"  -a               Run interactively\n"
 				"  -c <path>|<file> Look for php.ini file in this directory\n"
 				"  -n               No php.ini file will be used\n"
@@ -309,14 +313,38 @@ static void php_cli_usage(char *argv0)
 				"  -l               Syntax check only (lint)\n"
 				"  -m               Show compiled in modules\n"
 				"  -r <code>        Run PHP <code> without using script tags <?..?>\n"
+				"  -B <begin_code>  Run PHP <begin_code> before processing input lines\n"
+				"  -R <code>        Run PHP <code> for every input line\n"
+				"  -F <file>        Parse and execute <file> for every input line\n"
+				"  -E <end_code>    Run PHP <end_code> after processing all input lines\n"
 				"  -s               Display colour syntax highlighted source.\n"
 				"  -v               Version number\n"
 				"  -w               Display source with stripped comments and whitespace.\n"
 				"  -z <file>        Load Zend extension <file>.\n"
 				"\n"
-				"  args...          Arguments passed to script. Use -- args when first argument \n"
+				"  args...          Arguments passed to script. Use -- args when first argument\n"
 				"                   starts with - or script is read from stdin\n"
-				, prog, prog, prog);
+				"\n"
+"The PHP Command Line Interface 'CLI' supports the following operation modes:\n"
+"\n"
+"  You can parse and execute files by using parameter -f followed by the\n"
+"  name of the file to be executed.\n"
+"\n"
+"  Using parameter -r you can directly execute PHP code simply as you would\n"
+"  do inside a php file when using the eval() function.\n"
+"\n"
+"  It is also possible to process the standard input line by line using either\n"
+"  the parameter -R or -F. In this mode each separate input line causes the\n"
+"  code specified by -R (see -r) or the file specified by -F to be executed.\n"
+"  You can access the input line by $argn. While processing the input lines\n"
+"  $argi contains the number of the actual line being processed. Further more\n"
+"  the paramters -B and -E can be used to execute code (see -r) before and\n"
+"  after input line processing respectively.\n"
+"\n"
+"  If none of -r -f -B -R -F and -E is present but a single parameter is given\n"
+"  then this parameter is taken as the filename to process (same as with -f)\n"
+"  If no parameter is present then the standard input is read and executed.\n"
+				, prog, prog, prog, prog, prog);
 }
 /* }}} */
 
@@ -397,6 +425,44 @@ static void cli_register_file_handles(TSRMLS_D)
 	FREE_ZVAL(zerr);
 }
 
+static const char *param_mode_conflict = "Either execute direct code, process stdin or use a file.\n";
+
+/* {{{ cli_seek_file_begin
+ */
+static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file, int *lineno)
+{
+	int c;
+
+	*lineno = 1;
+
+	if (!(file_handle->handle.fp = VCWD_FOPEN(script_file, "rb"))) {
+		SG(headers_sent) = 1;
+		SG(request_info).no_headers = 1;
+		php_printf("Could not open input file: %s.\n", script_file);
+		return FAILURE;
+	}
+	file_handle->filename = script_file;
+	/* #!php support */
+	c = fgetc(file_handle->handle.fp);
+	if (c == '#') {
+		while (c != 10 && c != 13) {
+			c = fgetc(file_handle->handle.fp);	/* skip to end of line */
+		}
+		/* handle situations where line is terminated by \r\n */
+		if (c == 13) {
+			if (fgetc(file_handle->handle.fp) != 10) {
+				long pos = ftell(file_handle->handle.fp);
+				fseek(file_handle->handle.fp, pos - 1, SEEK_SET);
+			}
+		}
+		*lineno = 2;
+	} else {
+		rewind(file_handle->handle.fp);
+	}
+	return SUCCESS;
+}
+/* }} */
+
 /* {{{ main
  */
 int main(int argc, char *argv[])
@@ -415,8 +481,9 @@ int main(int argc, char *argv[])
 	int interactive=0;
 	int module_started = 0;
 	int lineno = 0;
-	char *exec_direct=NULL;
-	char *param_error=NULL;
+	char *exec_direct=NULL, *exec_run=NULL, *exec_begin=NULL, *exec_end=NULL;
+	const char *param_error=NULL;
+	int scan_input = 0;
 /* end of temporary locals */
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
@@ -542,9 +609,27 @@ int main(int argc, char *argv[])
 				CG(extended_info) = 1;
 				break;
 
+			case 'F':
+				if (behavior == PHP_MODE_PROCESS_STDIN) {
+					if (exec_run || script_file) {
+						param_error = "You can use -R or -F only once.\n";
+						break;
+					}
+				} else if (behavior != PHP_MODE_STANDARD) {
+					param_error = param_mode_conflict;
+					break;
+				}
+				behavior=PHP_MODE_PROCESS_STDIN;
+				script_file = ap_php_optarg;
+				no_headers = 1;
+				break;
+
 			case 'f': /* parse file */
-				if (behavior == PHP_MODE_CLI_DIRECT) {
-					param_error = "Either execute direct code or use a file.\n";
+				if (behavior == PHP_MODE_CLI_DIRECT || behavior == PHP_MODE_PROCESS_STDIN) {
+					param_error = param_mode_conflict;
+					break;
+				} else if (script_file) {
+					param_error = "You can use -f only once.\n";
 					break;
 				}
 				script_file = ap_php_optarg;
@@ -606,7 +691,7 @@ int main(int argc, char *argv[])
 
 #if 0 /* not yet operational, see also below ... */
 			case '': /* generate indented source mode*/
-				if (behavior == PHP_MODE_CLI_DIRECT) {
+				if (behavior == PHP_MODE_CLI_DIRECT || behavior == PHP_MODE_PROCESS_STDIN) {
 					param_error = "Source indenting only works for files.\n";
 					break;
 				}
@@ -619,16 +704,64 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'r': /* run code from command line */
-				if (behavior != PHP_MODE_STANDARD) {
-					param_error = "Either execute direct code or use a file.\n";
+				if (behavior == PHP_MODE_CLI_DIRECT) {
+					if (exec_direct || script_file) {
+						param_error = "You can use -r only once.\n";
+						break;
+					}
+				} else if (behavior != PHP_MODE_STANDARD) {
+					param_error = param_mode_conflict;
 					break;
 				}
 				behavior=PHP_MODE_CLI_DIRECT;
 				exec_direct=ap_php_optarg;
 				break;
+			
+			case 'R':
+				if (behavior == PHP_MODE_PROCESS_STDIN) {
+					if (exec_run || script_file) {
+						param_error = "You can use -R or -F only once.\n";
+						break;
+					}
+				} else if (behavior != PHP_MODE_STANDARD) {
+					param_error = param_mode_conflict;
+					break;
+				}
+				behavior=PHP_MODE_PROCESS_STDIN;
+				exec_run=ap_php_optarg;
+				break;
+
+			case 'B':
+				if (behavior == PHP_MODE_PROCESS_STDIN) {
+					if (exec_begin) {
+						param_error = "You can use -B only once.\n";
+						break;
+					}
+				} else if (behavior != PHP_MODE_STANDARD) {
+					param_error = param_mode_conflict;
+					break;
+				}
+				behavior=PHP_MODE_PROCESS_STDIN;
+				exec_begin=ap_php_optarg;
+				break;
+
+			case 'E':
+				if (behavior == PHP_MODE_PROCESS_STDIN) {
+					if (exec_end) {
+						param_error = "You can use -E only once.\n";
+						break;
+					}
+				} else if (behavior != PHP_MODE_STANDARD) {
+					param_error = param_mode_conflict;
+					break;
+				}
+				scan_input = 1;
+				behavior=PHP_MODE_PROCESS_STDIN;
+				exec_end=ap_php_optarg;
+				break;
 
 			case 's': /* generate highlighted HTML from source */
-				if (behavior == PHP_MODE_CLI_DIRECT) {
+				if (behavior == PHP_MODE_CLI_DIRECT || behavior == PHP_MODE_PROCESS_STDIN) {
 					param_error = "Source highlighting only works for files.\n";
 					break;
 				}
@@ -650,7 +783,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'w':
-				if (behavior == PHP_MODE_CLI_DIRECT) {
+				if (behavior == PHP_MODE_CLI_DIRECT || behavior == PHP_MODE_PROCESS_STDIN) {
 					param_error = "Source stripping only works for files.\n";
 					break;
 				}
@@ -676,38 +809,26 @@ int main(int argc, char *argv[])
 		CG(interactive) = interactive;
 
 		/* only set script_file if not set already and not in direct mode and not at end of parameter list */
-		if (argc > ap_php_optind && !script_file && behavior!=PHP_MODE_CLI_DIRECT && strcmp(argv[ap_php_optind-1],"--")) {
+		if (argc > ap_php_optind 
+		  && !script_file 
+		  && behavior!=PHP_MODE_CLI_DIRECT 
+		  && behavior!=PHP_MODE_PROCESS_STDIN 
+		  && strcmp(argv[ap_php_optind-1],"--")) 
+		{
 			no_headers = 1;
 			script_file=argv[ap_php_optind];
 			ap_php_optind++;
 		}
 		if (script_file) {
-			if (!(file_handle.handle.fp = VCWD_FOPEN(script_file, "rb"))) {
-				SG(headers_sent) = 1;
-				SG(request_info).no_headers = 1;
-				php_printf("Could not open input file: %s.\n", script_file);
+			if (cli_seek_file_begin(&file_handle, script_file, &lineno) != SUCCESS) {
 				goto err;
 			}
-			file_handle.filename = script_file;
 			script_filename = script_file;
-			/* #!php support */
-			c = fgetc(file_handle.handle.fp);
-			if (c == '#') {
-				while (c != 10 && c != 13) {
-					c = fgetc(file_handle.handle.fp);	/* skip to end of line */
-				}
-				/* handle situations where line is terminated by \r\n */
-				if (c == 13) {
-					if (fgetc(file_handle.handle.fp) != 10) {
-						long pos = ftell(file_handle.handle.fp);
-						fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
-					}
-				}
-				lineno = 2;
-			} else {
-				rewind(file_handle.handle.fp);
-			}
 		} else {
+			/* We could handle PHP_MODE_PROCESS_STDIN in a different manner  */
+			/* here but this would make things only more complicated. And it */
+			/* is consitent with the way -R works where the stdin file handle*/
+			/* is also accessible. */
 			file_handle.filename = "-";
 			file_handle.handle.fp = stdin;
 		}
@@ -716,7 +837,7 @@ int main(int argc, char *argv[])
 		file_handle.free_filename = 0;
 		php_self = file_handle.filename;
 
-		/* before registering argv to modulule exchange the *new* argv[0] */
+		/* before registering argv to module exchange the *new* argv[0] */
 		/* we can achieve this without allocating more memory */
 		SG(request_info).argc=argc-ap_php_optind+1;
 		arg_excp = argv+ap_php_optind-1;
@@ -796,6 +917,59 @@ int main(int argc, char *argv[])
 				exit_status=254;
 			}
 			break;
+			
+		case PHP_MODE_PROCESS_STDIN:
+			{
+				char input[4096];
+				size_t len, index = 0;
+				php_stream_context *sc_in = php_stream_context_alloc();
+				php_stream *s_in = php_stream_open_wrapper_ex("php://stdin", "rb", 0, NULL, sc_in);
+				pval *argn, *argi;
+	
+				if (exec_begin && zend_eval_string(exec_begin, NULL, "Command line begin code" TSRMLS_CC) == FAILURE) {
+					exit_status=254;
+				}
+				ALLOC_ZVAL(argi);
+				Z_TYPE_P(argi) = IS_LONG;
+				Z_LVAL_P(argi) = index;
+				INIT_PZVAL(argi);
+				zend_hash_update(&EG(symbol_table), "argi", sizeof("argi"), &argi, sizeof(pval *), NULL);
+				while (exit_status == SUCCESS && php_stream_gets(s_in, input, sizeof(input))) {
+					len = strlen(input);
+					while (len-- && (input[len]=='\n' || input[len]=='\r')) {
+						input[len] = '\0';
+					}
+					ALLOC_ZVAL(argn);
+					Z_TYPE_P(argn) = IS_STRING;
+					Z_STRLEN_P(argn) = ++len;
+					Z_STRVAL_P(argn) = estrndup(input, len);
+					INIT_PZVAL(argn);
+					zend_hash_update(&EG(symbol_table), "argn", sizeof("argn"), &argn, sizeof(pval *), NULL);
+					Z_LVAL_P(argi) = ++index;
+					if (exec_run) {
+						if (zend_eval_string(exec_run, NULL, "Command line run code" TSRMLS_CC) == FAILURE) {
+							exit_status=254;
+						}
+					} else {
+						if (script_file) {
+							if (cli_seek_file_begin(&file_handle, script_file, &lineno) != SUCCESS) {
+								exit_status = 1;
+							} else {
+								CG(start_lineno) = lineno;
+								php_execute_script(&file_handle TSRMLS_CC);
+								exit_status = EG(exit_status);
+							}
+						}
+					}
+				}
+				if (exec_end && zend_eval_string(exec_end, NULL, "Command line end code" TSRMLS_CC) == FAILURE) {
+					exit_status=254;
+				}
+	
+				php_stream_close(s_in);
+				php_stream_context_free(sc_in);
+				break;
+			}
 		}
 
 		if (cli_sapi_module.php_ini_path_override) {
