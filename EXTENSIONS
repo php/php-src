@@ -197,8 +197,8 @@ MAINTENANCE:         Unknown
 STATUS:              Unknown
 -------------------------------------------------------------------------------
 EXTENSION:           bz2
-PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
-MAINTENANCE:         Orphaned
+PRIMARY MAINTAINER:  Hartmut Holzgraefe <hartmut@six.de>
+MAINTENANCE:         Odd Fixes
 STATUS:              Working
 SINCE:               4.0.3
 -------------------------------------------------------------------------------
@@ -463,9 +463,9 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xslt
-PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
-MAINTENANC:          Orphaned
-STATUS:              Working
+PRIMARY MAINTAINER:  Hartmut Holzgraefe <hartmut@six.de>
+MAINTENANC:          Odd Fixes
+STATUS:              Working (mostly)
 -------------------------------------------------------------------------------
 EXTENSION:           yaz
 PRIMARY MAINTAINER:  Adam Dickmeiss <adam@indexdata.dk>
@@ -483,8 +483,8 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           zziplib
-PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
-MAINTENANCE:         Orphaned
+PRIMARY MAINTAINER:  Hartmut Holzgraefe <hartmut@six.de>
+MAINTENANCE:         Odd Fixes
 STATUS:              Working
 SINCE:               4.0.5
 -------------------------------------------------------------------------------
