@@ -90,7 +90,7 @@ int zend_startup_constants(TSRMLS_D)
 	DWORD dwWindowsMinorVersion =  (DWORD)(HIBYTE(LOWORD(dwVersion)));
 #endif
 
-	EG(zend_constants) = (HashTable *) malloc(sizeof(HashTable));
+	EG(zend_constants) = &CG(main_class).constants_table;
 
 	if (zend_hash_init(EG(zend_constants), 20, NULL, ZEND_CONSTANT_DTOR, 1)==FAILURE) {
 		return FAILURE;
@@ -153,7 +153,6 @@ void zend_register_standard_constants(TSRMLS_D)
 int zend_shutdown_constants(TSRMLS_D)
 {
 	zend_hash_destroy(EG(zend_constants));
-	free(EG(zend_constants));
 	return SUCCESS;
 }
 

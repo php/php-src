@@ -28,9 +28,9 @@
 #include "zend_ini.h"
 
 #ifdef ZTS
-#	define GLOBAL_FUNCTION_TABLE	global_function_table
-#	define GLOBAL_CLASS_TABLE		global_class_table
-#	define GLOBAL_CONSTANTS_TABLE	global_constants_table
+#	define GLOBAL_FUNCTION_TABLE	&global_main_class.function_table
+#	define GLOBAL_CLASS_TABLE		&global_main_class.class_table
+#	define GLOBAL_CONSTANTS_TABLE	&global_main_class.constants_table
 #	define GLOBAL_AUTO_GLOBALS_TABLE	global_auto_globals_table
 #else
 #	define GLOBAL_FUNCTION_TABLE	CG(function_table)
@@ -61,9 +61,7 @@ static int (*zend_get_configuration_directive_p)(char *name, uint name_length, z
 ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
 ZEND_API int alloc_globals_id;
-HashTable *global_function_table;
-HashTable *global_class_table;
-HashTable *global_constants_table;
+zend_class_entry global_main_class;
 HashTable *global_auto_globals_table;
 #endif
 
@@ -280,13 +278,13 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 
 	compiler_globals->compiled_filename = NULL;
 
-	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
+	compiler_globals->function_table = &compiler_globals->main_class.function_table;
 	zend_hash_init_ex(compiler_globals->function_table, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
-	zend_hash_copy(compiler_globals->function_table, global_function_table, NULL, &tmp_func, sizeof(zend_function));
+	zend_hash_copy(compiler_globals->function_table, GLOBAL_FUNCTION_TABLE, NULL, &tmp_func, sizeof(zend_function));
 
-	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
+	compiler_globals->class_table = &compiler_globals->main_class.class_table;
 	zend_hash_init_ex(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
-	zend_hash_copy(compiler_globals->class_table, global_class_table, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry));
+	zend_hash_copy(compiler_globals->class_table, GLOBAL_CLASS_TABLE, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry));
 
 	zend_set_default_compile_time_values(TSRMLS_C);
 
@@ -300,13 +298,11 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 
 static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS_DC)
 {
-	if (compiler_globals->function_table != global_function_table) {
+	if (compiler_globals->function_table != GLOBAL_FUNCTION_TABLE) {
 		zend_hash_destroy(compiler_globals->function_table);
-		free(compiler_globals->function_table);
 	}
-	if (compiler_globals->class_table != global_class_table) {
+	if (compiler_globals->class_table != GLOBAL_CLASS_TABLE) {
 		zend_hash_destroy(compiler_globals->class_table);
-		free(compiler_globals->class_table);
 	}
 	if (compiler_globals->auto_globals != global_auto_globals_table) {
 		zend_hash_destroy(compiler_globals->auto_globals);
@@ -317,9 +313,9 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS
 
 static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS_DC)
 {
-	if (global_constants_table) {
+	if (GLOBAL_CONSTANTS_TABLE) {
 		zend_startup_constants(TSRMLS_C);
-		zend_copy_constants(EG(zend_constants), global_constants_table);
+		zend_copy_constants(EG(zend_constants), GLOBAL_CONSTANTS_TABLE);
 	}
 	zend_init_rsrc_plist(TSRMLS_C);
 	EG(lambda_count)=0;
@@ -424,8 +420,10 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_version_info = strdup(ZEND_CORE_VERSION_INFO);
 	zend_version_info_length = sizeof(ZEND_CORE_VERSION_INFO)-1;
 
-	GLOBAL_FUNCTION_TABLE = (HashTable *) malloc(sizeof(HashTable));
-	GLOBAL_CLASS_TABLE = (HashTable *) malloc(sizeof(HashTable));
+#ifndef ZTS
+	GLOBAL_FUNCTION_TABLE = &compiler_globals.main_class.function_table;
+	GLOBAL_CLASS_TABLE = &compiler_globals.main_class.class_table;
+#endif
 	GLOBAL_AUTO_GLOBALS_TABLE = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(GLOBAL_FUNCTION_TABLE, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
 	zend_hash_init_ex(GLOBAL_CLASS_TABLE, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
@@ -441,7 +439,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zval_used_for_init.type = IS_NULL;
 
 #ifdef ZTS
-	global_constants_table = NULL;
 	ts_allocate_id(&compiler_globals_id, sizeof(zend_compiler_globals), (ts_allocate_ctor) compiler_globals_ctor, (ts_allocate_dtor) compiler_globals_dtor);
 	ts_allocate_id(&executor_globals_id, sizeof(zend_executor_globals), (ts_allocate_ctor) executor_globals_ctor, (ts_allocate_dtor) executor_globals_dtor);
 	ts_allocate_id(&language_scanner_globals_id, sizeof(zend_scanner_globals), (ts_allocate_ctor) scanner_globals_ctor, NULL);
@@ -454,7 +451,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	compiler_globals->class_table = GLOBAL_CLASS_TABLE;
 	compiler_globals->auto_globals = GLOBAL_AUTO_GLOBALS_TABLE;
 	zend_startup_constants(tsrm_ls);
-	GLOBAL_CONSTANTS_TABLE = EG(zend_constants);
 #else
 	zend_hash_init_ex(CG(auto_globals), 8, NULL, NULL, 1, 0);
 	scanner_globals_ctor(&ini_scanner_globals TSRMLS_CC);
@@ -494,9 +490,7 @@ void zend_shutdown(TSRMLS_D)
 	zend_destroy_rsrc_list_dtors();
 	zend_hash_destroy(&module_registry);
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
-	free(GLOBAL_FUNCTION_TABLE);
 	zend_hash_destroy(GLOBAL_CLASS_TABLE);
-	free(GLOBAL_CLASS_TABLE);
 	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
 	zend_shutdown_extensions(TSRMLS_C);

@@ -183,6 +183,10 @@ SOURCE=.\zend_llist.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_objects.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_opcode.c
 # End Source File
 # Begin Source File

@@ -85,6 +85,7 @@ struct _zend_compiler_globals {
 
 	zend_op_array *active_op_array;
 
+	zend_class_entry main_class;
 	HashTable *function_table;	/* function symbol table */
 	HashTable *class_table;		/* class table */
 
