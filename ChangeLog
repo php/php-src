@@ -1,3 +1,26 @@
+2004-12-24  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/pcre/php_pcre.c:
+      return empty string when got empty parameter
+
+2004-12-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      New sarbage collector's bug was fixed (the behavior should be the same as
+      in PHP_5_0)
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/tests/unset_cv01.phpt
+      ZendEngine2/tests/unset_cv02.phpt
+      ZendEngine2/tests/unset_cv03.phpt
+      ZendEngine2/tests/unset_cv04.phpt
+      ZendEngine2/tests/unset_cv06.phpt
+      ZendEngine2/tests/unset_cv08.phpt
+      ZendEngine2/tests/unset_cv09.phpt
+      ZendEngine2/tests/unset_cv10.phpt:
+      "Undefined variable:  %s" noticies were fixed to be compatible with PHP_5_0
+
 2004-12-23  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/standard/streamsfuncs.c:
