@@ -655,10 +655,6 @@ void php3_key_sort(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-/* the current implementation of count() is a definite example of what
- * user functions should NOT look like.  It's a hack, until we get
- * unset() to work right in 3.1
- */
 void php3_count(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *array;
