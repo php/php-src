@@ -3,6 +3,8 @@
 
 #if PHP_WIN32
 
+BEGIN_EXTERN_C()
+
 #include "com.h"
 
 extern PHP_MINIT_FUNCTION(COM);
@@ -17,6 +19,8 @@ extern pval php_COM_get_property_handler(zend_property_reference *property_refer
 extern int php_COM_set_property_handler(zend_property_reference *property_reference, pval *value);
 extern char *php_COM_error_message(HRESULT hr);
 extern void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
+
+END_EXTERN_C()
 
 #define COM_module_ptr &COM_module_entry
 

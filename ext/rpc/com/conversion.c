@@ -1,3 +1,21 @@
+/*
+   +----------------------------------------------------------------------+
+   | PHP version 4.0                                                      |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2001 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.02 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Author: Harald Radi <h.radi@nme.at>                                  |
+   +----------------------------------------------------------------------+
+ */
+
 #ifdef PHP_WIN32
 
 #include "php.h"
@@ -43,22 +61,22 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
          else if(!strcmp(pval_arg->value.obj.ce->name, "COM"))
          {
             pval **idispatch_handle;
-            IDispatch *i_dispatch;
+            i_dispatch *obj;
             int type;
 
             /* fetch the IDispatch interface */
             zend_hash_index_find(pval_arg->value.obj.properties, 0, (void **) &idispatch_handle);
-            i_dispatch = (IDispatch *)zend_list_find((*idispatch_handle)->value.lval, &type);
-            if (!i_dispatch || (type != php_COM_get_le_idispatch()))
+            obj = (i_dispatch *)zend_list_find((*idispatch_handle)->value.lval, &type);
+            if (!obj || (type != php_COM_get_le_idispatch()))
                var_arg->vt = VT_EMPTY;
             else
             {
-               var_arg->vt = VT_DISPATCH;
-               var_arg->pdispVal = i_dispatch;
+				var_arg->vt = VT_DISPATCH;
+				var_arg->pdispVal = obj->i.dispatch;
             }
          }
          else
-            var_arg->vt = VT_DISPATCH;
+            var_arg->vt = VT_EMPTY;
          break;
 
       case IS_RESOURCE:
@@ -488,6 +506,7 @@ PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent
          break;
       case VT_DISPATCH: {
             pval *handle;
+			i_dispatch *obj;
 
             pval_arg->type=IS_OBJECT;
             pval_arg->value.obj.ce = &com_class_entry;
@@ -497,15 +516,19 @@ PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent
             zend_hash_init(pval_arg->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
             ALLOC_ZVAL(handle);
+			obj = emalloc(sizeof(i_dispatch));
+			php_COM_set(obj, var_arg->pdispVal, TRUE);
+
             handle->type = IS_LONG;
-             handle->value.lval = zend_list_insert(var_arg->pdispVal, php_COM_get_le_idispatch());
+			handle->value.lval = zend_list_insert(obj, php_COM_get_le_idispatch());
             pval_copy_constructor(handle);
             INIT_PZVAL(handle);
             zend_hash_index_update(pval_arg->value.obj.properties, 0, &handle, sizeof(pval *), NULL);
          }
          break;
       case VT_UNKNOWN:
-         var_arg->pdispVal->lpVtbl->Release(var_arg->pdispVal);
+//wtf ??
+		  var_arg->pdispVal->lpVtbl->Release(var_arg->pdispVal);
          /* break missing intentionally */
 
       case VT_I1:
