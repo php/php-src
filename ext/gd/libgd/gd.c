@@ -1879,13 +1879,18 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 	int l, x1, x2, dy;
 	int oc;   /* old pixel value */
 	int wx2,wy2;
+	int alphablending_bak;
 	/* stack of filled segments */
 	/* struct seg stack[FILL_MAX],*sp = stack;; */
 	struct seg *stack;
 	struct seg *sp;
 
+	alphablending_bak = im->alphaBlendingFlag;	
+	im->alphaBlendingFlag = 0;
+
 	if (nc==gdTiled){
 		_gdImageFillTiled(im,x,y,nc);
+		im->alphaBlendingFlag = alphablending_bak;	
 		return;
 	}
 
@@ -1931,6 +1936,7 @@ skip:			for (x++; x<=x2 && (gdImageGetPixel(im, x, y)!=oc); x++);
 		} while (x<=x2);
 	}
 	efree(stack);
+	im->alphaBlendingFlag = alphablending_bak;	
 }
 
 void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
