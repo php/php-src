@@ -498,7 +498,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 				zfd.opened_path = NULL;
 
 				php_execute_script(&zfd TSRMLS_CC);
-#ifdef MEMORY_LIMIT
+#if MEMORY_LIMIT
 				{
 					char *mem_usage;
  
