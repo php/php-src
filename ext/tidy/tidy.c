@@ -92,6 +92,8 @@ function_entry tidy_functions[] = {
 	PHP_FE(tidy_get_output,         NULL)
 	PHP_FE(tidy_get_error_buffer,   NULL)
 	PHP_FE(tidy_clean_repair,       NULL)
+	PHP_FE(tidy_repair_string,	NULL)
+	PHP_FE(tidy_repair_file,	NULL)
 	PHP_FE(tidy_diagnose,           NULL)
 	PHP_FE(tidy_get_release,	NULL)
 	PHP_FE(tidy_get_config,		NULL)
@@ -176,7 +178,7 @@ static void tidy_globals_dtor(zend_tidy_globals *g TSRMLS_DC)
 	g->used = 0;
 }
 
-static void *_php_tidy_get_opt_val(TidyOption opt, TidyOptionType *type)
+static void *php_tidy_get_opt_val(TidyOption opt, TidyOptionType *type)
 {
 	*type = tidyOptGetType(opt);
 
@@ -202,6 +204,75 @@ static void *_php_tidy_get_opt_val(TidyOption opt, TidyOptionType *type)
 
 	/* should not happen */
 	return NULL;
+}
+
+static char *php_tidy_file_to_mem(char *filename, zend_bool use_include_path)
+{
+	php_stream *stream;
+	int len;
+	char *data = NULL;
+
+	if (!(stream = php_stream_open_wrapper(filename, "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL))) {
+		return NULL;
+	}
+	if ((len = php_stream_copy_to_mem(stream, &data, PHP_STREAM_COPY_ALL, 0)) > 0) {
+		/* noop */
+	} else if (len == 0) {
+		data = estrdup("");
+	}
+	php_stream_close(stream);
+
+	return data;
+}
+
+static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_file)
+{
+	char *data=NULL, *cfg_file=NULL, *arg1;
+	int cfg_file_len, arg1_len;
+	zend_bool use_include_path = 0;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sb", &arg1, &arg1_len, &cfg_file, &cfg_file_len, &use_include_path) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (is_file) {
+		if (!(data = php_tidy_file_to_mem(arg1, use_include_path))) {
+			RETURN_FALSE;
+		}
+	} else {
+		data = arg1;
+	}
+
+	if (cfg_file && cfg_file[0]) {
+		TIDY_SAFE_MODE_CHECK(cfg_file);
+		if(tidyLoadConfig(TG(tdoc)->doc, cfg_file) < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", cfg_file);
+			RETVAL_FALSE;
+		}
+		TG(used) = 1;
+	}
+
+	if (data) {
+		if(tidyParseString(TG(tdoc)->doc, data) < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "[Tidy error] %s", TG(tdoc)->errbuf->bp);
+			RETVAL_FALSE;
+		} else {
+			TG(tdoc)->parsed = TRUE;
+			if (tidyCleanAndRepair(TG(tdoc)->doc) >= 0) {
+				TidyBuffer output = {0};
+
+				tidySaveBuffer (TG(tdoc)->doc, &output);
+				RETVAL_STRING(output.bp, 1);
+				tidyBufFree(&output);
+			} else {
+				RETVAL_FALSE;
+			}
+		}
+	}
+
+	if (is_file) {
+		efree(data);
+	}
 }
 
 #ifdef ZEND_ENGINE_2
@@ -412,7 +483,7 @@ PHP_MINFO_FUNCTION(tidy)
 	while (itOpt) {
 		TidyOption opt = tidyGetNextOption(TG(tdoc)->doc, &itOpt);
 
-		opt_value = _php_tidy_get_opt_val(opt, &optt);
+		opt_value = php_tidy_get_opt_val(opt, &optt);
 		switch (optt) {
 			case TidyString:
 				php_info_print_table_row(2, (char *)tidyOptGetName(opt), (char*)opt_value);
@@ -494,36 +565,32 @@ PHP_FUNCTION(tidy_get_output)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_parse_file(string file)
+/* {{{ proto boolean tidy_parse_file(string file [, bool use_include_path])
    Parse markup in file or URI */
 PHP_FUNCTION(tidy_parse_file)
 {
 	char *inputfile;
 	int input_len;
-	php_stream *stream;
+	zend_bool use_include_path = 0;
 	char *contents;
 
 	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &inputfile, &input_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (!(stream = php_stream_open_wrapper(inputfile, "rb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL))) {
+	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path))) {
 		RETURN_FALSE;
 	}
-
-	if (php_stream_copy_to_mem(stream, &contents, PHP_STREAM_COPY_ALL, 0) > 0) {
-		if(tidyParseString(TG(tdoc)->doc, contents) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "[Tidy error] %s", TG(tdoc)->errbuf->bp);
-			efree(contents);
-			php_stream_close(stream);
-			RETURN_FALSE;
-		}
+	
+	if(tidyParseString(TG(tdoc)->doc, contents) < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "[Tidy error] %s", TG(tdoc)->errbuf->bp);
+		RETVAL_FALSE;
+	} else {
 		TG(tdoc)->parsed = TRUE;
-		efree(contents);
+		RETVAL_TRUE;
 	}
-	php_stream_close(stream);
 
-	RETURN_TRUE;
+	efree(contents);
 }
 /* }}} */
 
@@ -545,6 +612,22 @@ PHP_FUNCTION(tidy_clean_repair)
 }
 /* }}} */
 
+/* {{{ proto boolean tidy_repair_string(string data [, string config_file])
+   Repair a string using an optionally provided configuration file */
+PHP_FUNCTION(tidy_repair_string)
+{
+	php_tidy_quick_repair(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto boolean tidy_repair_file(string filename [, string config_file [, bool use_include_path]])
+   Repair a file using an optionally provided configuration file */
+PHP_FUNCTION(tidy_repair_file)
+{
+	php_tidy_quick_repair(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
 /* {{{ proto boolean tidy_diagnose()
     Run configured diagnostics on parsed and repaired markup. */
 PHP_FUNCTION(tidy_diagnose)
@@ -561,7 +644,6 @@ PHP_FUNCTION(tidy_diagnose)
 
 	RETURN_FALSE;    
 }
-
 /* }}} */
 
 /* {{{ proto string tidy_get_release()
@@ -607,7 +689,7 @@ PHP_FUNCTION(tidy_get_config)
 		TidyOption opt = tidyGetNextOption(TG(tdoc)->doc, &itOpt);
 
 		opt_name = (char *)tidyOptGetName(opt);
-		opt_value = _php_tidy_get_opt_val(opt, &optt);
+		opt_value = php_tidy_get_opt_val(opt, &optt);
 		switch (optt) {
 			case TidyString:
 				add_assoc_string(return_value, opt_name, (char*)opt_value, 0);
@@ -756,6 +838,7 @@ PHP_FUNCTION(tidy_load_config)
 		RETURN_FALSE;
 	}
 
+	TG(used) = 1;
 	RETURN_TRUE;
 }
 /* }}} */
@@ -778,6 +861,7 @@ PHP_FUNCTION(tidy_load_config_enc)
 		RETURN_FALSE;
 	}
 
+	TG(used) = 1;
 	RETURN_TRUE;
 }
 /* }}} */
@@ -800,6 +884,7 @@ PHP_FUNCTION(tidy_set_encoding)
 		RETURN_FALSE;
 	}
 
+	TG(used) = 1;
 	RETURN_TRUE;
 }
 /* }}} */
@@ -898,7 +983,7 @@ PHP_FUNCTION(tidy_getopt)
 		RETURN_FALSE;
 	}
 	    
-	optval = _php_tidy_get_opt_val(opt, &optt);
+	optval = php_tidy_get_opt_val(opt, &optt);
 	switch (optt) {
 		case TidyString:
 			RETVAL_STRING((char *)optval, 0);
