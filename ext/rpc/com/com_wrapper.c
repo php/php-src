@@ -554,7 +554,7 @@ PHP_FUNCTION(com_load)
 			pResults.pIID = &IID_IDispatch;
 			pResults.pItf = NULL;
 			pResults.hr = S_OK;
-			hr=CoCreateInstanceEx(&clsid, NULL, CLSCTX_SERVER, &server_info, 1, &pResults);
+			hr = CoCreateInstanceEx(&clsid, NULL, CLSCTX_REMOTE_SERVER, &server_info, 1, &pResults);
 			if (SUCCEEDED(hr)) {
 				hr = pResults.hr;
 				C_DISPATCH(obj) = (IDispatch *) pResults.pItf;
@@ -612,21 +612,21 @@ PHP_FUNCTION(com_load)
 int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **arguments, int arg_count TSRMLS_DC)
 {
 	DISPID dispid;
+	DISPPARAMS dispparams;
 	HRESULT hr;
 	OLECHAR *funcname;
-	char *error_message;
-	VARIANT *variant_args;
-	int current_arg, current_variant;
-	DISPPARAMS dispparams;
 	SAFEARRAY *pSA;
+	SAFEARRAYBOUND rgsabound[1];
+	VARIANT *variant_args;
+	char *error_message;
+	int current_arg, current_variant;
+	unsigned long count;
 
 	if (C_HASENUM(obj) && strstr(Z_STRVAL_P(function_name), "next")) {
 		/* Grab one argument off the stack, allocate enough
 		 * VARIANTs
 		 * Get the IEnumVariant interface and call ->Next();
 		 */
-		SAFEARRAYBOUND rgsabound[1];
-		unsigned long count;
 
 		switch (arg_count) {
 			case 0:
@@ -649,7 +649,6 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 
 		if ((pSA = SafeArrayCreate(VT_VARIANT, 1, rgsabound)) == NULL) {
 			VariantInit(var_result);
-
 			return FAILURE;
 		} else {
 			V_ARRAY(var_result) = pSA;
@@ -684,6 +683,25 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 		}
 
 		return SUCCESS;
+	} else if (C_HASENUM(obj) && strstr(Z_STRVAL_P(function_name), "all")) {
+#define FETCH_BLOCKSIZE 10 /* fetch blocks of 10 elements */
+
+		count = FETCH_BLOCKSIZE;
+
+		rgsabound[0].lLbound = 0;
+		rgsabound[0].cElements = count;
+
+		if ((pSA = SafeArrayCreate(VT_VARIANT, 1, rgsabound)) == NULL) {
+			VariantInit(var_result);
+			return FAILURE;
+		} else {
+			V_ARRAY(var_result) = pSA;
+			V_VT(var_result) = VT_VARIANT|VT_ARRAY;
+		}
+
+		/* blah*/
+
+
 	} else if (C_HASENUM(obj) && strstr(Z_STRVAL_P(function_name), "reset")) {
 		if (FAILED(hr = C_ENUMVARIANT_VT(obj)->Reset(C_ENUMVARIANT(obj)))) {
 			char *error_message = php_COM_error_message(hr TSRMLS_CC);
@@ -1668,6 +1686,9 @@ PHP_MINIT_FUNCTION(COM)
 {
 	le_comval = zend_register_list_destructors_ex(php_comval_destructor, NULL, "COM", module_number);
 	php_register_COM_class(TSRMLS_C);
+
+	php_VARIANT_init(module_number, TSRMLS_C);
+
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }

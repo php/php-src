@@ -1,5 +1,6 @@
 1) Multi-dimenstional array support
 -- done 2) IErrorInfo
+-- done 13) export VARIANT through the COM module
 3) WithEvents
 4) Documentation (internal and user) and howtos
 5) IEnumVariant::All() which would be like IEnumVariant::Next(IDispatch::Count)
@@ -9,11 +10,12 @@
 9) reduce the need for VARIANT()
 10) lets try if we are able to call non IDispatch - only Typelib components
 -- done 11) IEnumVariant::Next() without parameter should only return an object, not an array with one element
-12) VARIANT->value as lvalue
+-- done 12) VARIANT->value as lvalue
 
 
 ad 6.) check vbsample.php (new VARIANT(*, *|VT_BYREF)) GPs
 ad 4.) faq (i've collected a few questions from various lists)
+       variant attributes !!
 
 to be discussed:
 
