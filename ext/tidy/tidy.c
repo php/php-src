@@ -29,12 +29,11 @@
 
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "safe_mode.h"
 #include "Zend/zend_API.h"
 #include "Zend/zend_hash.h"
-#include "safe_mode.h"
 #include "Zend/zend_default_classes.h"
 #include "Zend/zend_object_handlers.h"
-#include "Zend/zend_hash.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(tidy)
 
