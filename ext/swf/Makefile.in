@@ -1,5 +1,7 @@
 
 LTLIBRARY_NAME    = libswf.la
 LTLIBRARY_SOURCES = swf.c
+LTLIBRARY_SHARED_NAME   = swf.la
+LTLIBRARY_SHARED_LIBADD = $(SWF_SHARED_LIBADD)
 
-include $(top_srcdir)/build/ltlib.mk
+include $(top_srcdir)/build/dynlib.mk

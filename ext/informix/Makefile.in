@@ -4,7 +4,7 @@ LTLIBRARY_SOURCES = ifx.c
 LTLIBRARY_LIBADD  = $(IFX_LIBS)
 CLEANFILES        = ifx.c
 
-include $(top_srcdir)/build/ltlib.mk
+include $(top_srcdir)/build/dynlib.mk
 
 ifx.c: $(srcdir)/ifx.ec
 	(if test -d $(INFORMIXDIR); then \

@@ -11,7 +11,7 @@ EXTRA_INCLUDES = $(JAVA_INCLUDE)
 
 make_shared = yes
 
-include $(top_srcdir)/build/ltlib.mk
+include $(top_srcdir)/build/dynlib.mk
 
 php_java.jar : reflect.java
 	@test -d net || mkdir net

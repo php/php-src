@@ -106,6 +106,10 @@ zend_module_entry swf_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
+#ifdef COMPILE_DL_SWF
+ZEND_DLEXPORT zend_module_entry *get_module(void) { return &swf_module_entry; }
+#endif
+
 PHP_MINFO_FUNCTION(swf)
 {
 	php_info_print_table_start();

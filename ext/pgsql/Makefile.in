@@ -6,4 +6,4 @@ LTLIBRARY_SHARED_LIBADD = $(PGSQL_LFLAGS) $(PGSQL_LIBS)
 
 EXTRA_INCLUDES = $(PGSQL_INCLUDE)
 	
-include $(top_srcdir)/build/ltlib.mk
+include $(top_srcdir)/build/dynlib.mk

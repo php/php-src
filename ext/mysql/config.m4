@@ -26,18 +26,19 @@ PHP_ARG_WITH(mysql, for MySQL support,
 
 if test "$PHP_MYSQL" != "no"; then
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
-  PHP_EXTENSION(mysql)
+  PHP_EXTENSION(mysql,$ext_shared)
 fi
 
 if test "$PHP_MYSQL" = "yes"; then
   PHP_MYSQL_SOCK
   MYSQL_CHECKS
   MYSQL_LIBADD=libmysql/libmysql_client.la
+  MYSQL_SHARED_LIBADD=libmysql/libmysql_client.la
   MYSQL_SUBDIRS=libmysql
   PHP_SUBST(MYSQL_LIBADD)
   PHP_SUBST(MYSQL_SUBDIRS)
-
-  AC_ADD_INCLUDE(${ext_src_base}libmysql)
+  LIB_BUILD($ext_builddir/libmysql,$ext_shared,yes)
+  AC_ADD_INCLUDE($ext_srcdir/libmysql)
 elif test "$PHP_MYSQL" != "no"; then
   for i in $PHP_MYSQL; do
     if test -r $i/include/mysql/mysql.h; then
@@ -53,7 +54,14 @@ elif test "$PHP_MYSQL" != "no"; then
     AC_MSG_ERROR(Cannot find header files under $PHP_MYSQL)
   fi
 
-  AC_ADD_LIBPATH($MYSQL_DIR/lib/mysql) 
-  AC_ADD_LIBRARY(mysqlclient)
+
+  if test "$ext_shared" = "yes"; then
+    MYSQL_SHARED_LIBADD="-R$MYSQL_DIR/lib/mysql -L$MYSQL_DIR/lib/mysql -lmysqlclient"
+  else
+    AC_ADD_LIBPATH($MYSQL_DIR/lib/mysql) 
+    AC_ADD_LIBRARY(mysqlclient)
+  fi
+
   AC_ADD_INCLUDE($MYSQL_INC_DIR)
 fi
+PHP_SUBST(MYSQL_SHARED_LIBADD)

@@ -2,7 +2,9 @@
 LTLIBRARY_NAME    = libpcre.la
 LTLIBRARY_SOURCES = php_pcre.c
 LTLIBRARY_LIBADD  = $(PCRE_LIBADD)
+LTLIBRARY_SHARED_NAME = pcre.la
+LTLIBRARY_SHARED_LIBADD = $(PCRE_SHARED_LIBADD)
 
 SUBDIRS = $(PCRE_SUBDIRS)
 
-include $(top_srcdir)/build/ltlib.mk
+include $(top_srcdir)/build/dynlib.mk

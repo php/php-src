@@ -4,5 +4,5 @@ LTLIBRARY_SOURCES = gd.c gdcache.c gdttf.c gdt1.c
 LTLIBRARY_SHARED_NAME   = gd.la
 LTLIBRARY_SHARED_LIBADD = $(GD_LFLAGS) $(GD_LIBS)
 
-include $(top_srcdir)/build/ltlib.mk
+include $(top_srcdir)/build/dynlib.mk
 

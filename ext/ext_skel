@@ -56,7 +56,7 @@ dnl Make sure that the comment is aligned:
 
 if test "\$PHP_$EXTNAME" != "no"; then
   dnl Action..
-  PHP_EXTENSION($extname)
+  PHP_EXTENSION($extname, \$ext_shared)
 fi
 eof
 
@@ -64,10 +64,11 @@ $ECHO_N " Makefile.in$ECHO_C"
 cat >Makefile.in <<eof
 # \$Id\$
 
-LTLIBRARY_NAME    = lib$extname.la
-LTLIBRARY_SOURCES = $extname.c
+LTLIBRARY_NAME        = lib$extname.la
+LTLIBRARY_SOURCES     = $extname.c
+LTLIBRARY_SHARED_NAME = $extname.la
 
-include \$(top_srcdir)/build/ltlib.mk
+include \$(top_srcdir)/build/dynlib.mk
 eof
 
 
@@ -79,6 +80,7 @@ Makefile
 *.lo
 *.la
 .libs
+libs.mk
 eof
 
 chmod 644 *

@@ -2,4 +2,4 @@
 LTLIBRARY_NAME    = libposix.la
 LTLIBRARY_SOURCES = posix.c
 
-include $(top_srcdir)/build/ltlib.mk
+include $(top_srcdir)/build/dynlib.mk

@@ -1210,6 +1210,10 @@ zend_module_entry pcre_module_entry = {
 		   STANDARD_MODULE_PROPERTIES
 };
 
+#ifdef COMPILE_DL_PCRE
+ZEND_DLEXPORT zend_module_entry *get_module(void) { return &pcre_module_entry; }
+#endif
+
 /* }}} */
 
 
