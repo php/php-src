@@ -112,7 +112,7 @@ PHP_FUNCTION(openssl_read_privatekey)
 	}
 	convert_to_string_ex(key);
 	
-	b = BIO_new_mem_buf((*key)->value.str.val, -1);
+	b = BIO_new_mem_buf(Z_STRVAL_PP(key), -1);
         if (b == NULL) {
 		RETURN_FALSE;
 	}
@@ -145,7 +145,7 @@ PHP_FUNCTION(openssl_get_publickey)
 	}
 	convert_to_string_ex(cert);
 
-	b = BIO_new_mem_buf((*cert)->value.str.val, -1);
+	b = BIO_new_mem_buf(Z_STRVAL_PP(cert), -1);
         if (b == NULL) {
 		RETURN_FALSE;
 	}
@@ -183,7 +183,7 @@ PHP_FUNCTION(openssl_free_key)
 	}
 	
 	ZEND_FETCH_RESOURCE(pkey, EVP_PKEY *, key, -1, "OpenSSL key", le_key);
-	zend_list_delete((*key)->value.lval);
+	zend_list_delete(Z_LVAL_PP(key));
 }
 /* }}} */
 
@@ -225,7 +225,7 @@ PHP_FUNCTION(openssl_read_x509)
 	}
 	convert_to_string_ex(cert);
 
-	b = BIO_new_mem_buf((*cert)->value.str.val, -1);
+	b = BIO_new_mem_buf(Z_STRVAL_PP(cert), -1);
         if (b == NULL) {
 		RETURN_FALSE;
 	}
@@ -255,8 +255,7 @@ PHP_FUNCTION(openssl_free_x509)
 		WRONG_PARAM_COUNT;
 	}
 	ZEND_FETCH_RESOURCE(cert, X509 *, x509, -1, "OpenSSL X.509", le_x509);
-
-	zend_list_delete((*x509)->value.lval);
+	zend_list_delete(Z_LVAL_PP(x509));
 }
 /* }}} */
 #endif
@@ -285,8 +284,7 @@ PHP_FUNCTION(openssl_sign)
 	}
 
 	EVP_SignInit(&md_ctx, EVP_sha1());
-	EVP_SignUpdate(&md_ctx, (*data)->value.str.val,
-		       (*data)->value.str.len);
+	EVP_SignUpdate(&md_ctx, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
 	if (EVP_SignFinal (&md_ctx, sigbuf, &siglen, pkey)) {
 		zval_dtor(*signature);
 		sigbuf[siglen] = '\0';
@@ -318,10 +316,9 @@ PHP_FUNCTION(openssl_verify)
 	ZEND_FETCH_RESOURCE(pkey, EVP_PKEY *, key, -1, "OpenSSL key", le_key);
 
 	EVP_VerifyInit   (&md_ctx, EVP_sha1());
-	EVP_VerifyUpdate (&md_ctx, (*data)->value.str.val,
-			  (*data)->value.str.len);
-	err = EVP_VerifyFinal (&md_ctx, (*signature)->value.str.val,
-			       (*signature)->value.str.len, pkey);
+	EVP_VerifyUpdate (&md_ctx, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
+	err = EVP_VerifyFinal (&md_ctx, Z_STRVAL_PP(signature),
+			       Z_STRLEN_PP(signature), pkey);
 	RETURN_LONG(err);
 }
 /* }}} */
@@ -422,7 +419,7 @@ PHP_FUNCTION(openssl_seal)
 	}
 #endif
 	/* allocate one byte extra to make room for \0 */
-	buf = emalloc((*data)->value.str.len + EVP_CIPHER_CTX_block_size(&ctx));
+	buf = emalloc(Z_STRLEN_PP(data) + EVP_CIPHER_CTX_block_size(&ctx));
 	if (buf == NULL) {
 		for (i=0; i<nkeys; i++) {
 			efree(eks[i]);
@@ -434,8 +431,8 @@ PHP_FUNCTION(openssl_seal)
 	}
 
 	if (!EVP_SealInit(&ctx, EVP_rc4(), eks, eksl, NULL, pkeys, nkeys) ||
-	    !EVP_SealUpdate(&ctx, buf, &len1, (*data)->value.str.val,
-			    (*data)->value.str.len)) {
+	    !EVP_SealUpdate(&ctx, buf, &len1, Z_STRVAL_PP(data),
+			    Z_STRLEN_PP(data))) {
 		efree(buf);
 		for (i=0; i<nkeys; i++) {
 			efree(eks[i]);
@@ -521,21 +518,21 @@ PHP_FUNCTION(openssl_open)
 	ZEND_FETCH_RESOURCE(pkey, EVP_PKEY *, privkey, -1, "OpenSSL key",
 			    le_key);
 
-	buf = emalloc((*data)->value.str.len + 1);
+	buf = emalloc(Z_STRLEN_PP(data) + 1);
 	if (buf == NULL) {
 		RETURN_FALSE;
 	}
 
-	if (!EVP_OpenInit(&ctx, EVP_rc4(), (*ekey)->value.str.val,
-			  (*ekey)->value.str.len, NULL, pkey) ||
-	    !EVP_OpenUpdate(&ctx, buf, &len1, (*data)->value.str.val,
-			    (*data)->value.str.len) ||
+	if (!EVP_OpenInit(&ctx, EVP_rc4(), Z_STRVAL_PP(ekey),
+			  Z_STRLEN_PP(ekey), NULL, pkey) ||
+	    !EVP_OpenUpdate(&ctx, buf, &len1, Z_STRVAL_PP(data),
+			    Z_STRLEN_PP(data)) ||
 	    !EVP_OpenFinal(&ctx, buf + len1, &len2) ||
 	    (len1 + len2 == 0)) {
 		efree(buf);
 		RETURN_FALSE;
 	}
-
+	
 	zval_dtor(*opendata);
 	buf[len1 + len2] = '\0';
 	ZVAL_STRINGL(*opendata, erealloc(buf, len1 + len2 + 1), len1 + len2, 0);
