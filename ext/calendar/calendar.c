@@ -24,6 +24,10 @@
 #include "config.h"
 #endif
 
+#ifdef PHP_WIN32
+#define _WINNLS_
+#endif
+
 #include "php.h"
 #include "ext/standard/info.h"
 #include "php_calendar.h"
