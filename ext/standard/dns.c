@@ -561,13 +561,13 @@ PHP_FUNCTION(dns_get_record)
 			n = res_nmkquery(&res, QUERY, Z_STRVAL_P(host), C_IN, type_to_fetch, NULL, 0, NULL, buf.qb2, sizeof buf);
 			if (n<0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "res_nmkquery() failed");
-				zval_ptr_dtor(&return_value);
+				zval_dtor(return_value);
 				RETURN_FALSE;
 			}
 			n = res_nsend(&res, buf.qb2, n, answer.qb2, sizeof answer);
 			if (n<0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "res_nsend() failed");
-				zval_ptr_dtor(&return_value);
+				zval_dtor(return_value);
 				RETURN_FALSE;
 			}
 		
@@ -585,7 +585,7 @@ PHP_FUNCTION(dns_get_record)
 				n = dn_skipname(cp, end);
 				if (n < 0) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to parse DNS data received");
-					zval_ptr_dtor(&return_value);
+					zval_dtor(return_value);
 					RETURN_FALSE;
 				}
 				cp += n + QFIXEDSZ;
