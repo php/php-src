@@ -12,7 +12,7 @@ if test "$PHP_SOCKETS" != "no"; then
   AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/socket.h>
-  ], [static struct msghdr tp; int n = (int) tp.msg_flags; return n],
+  ], [static struct msghdr tp; int n = (int) tp.msg_flags; return n],[],
     [AC_DEFINE(MISSING_MSGHDR_MSGFLAGS, 1, [ ])]
   )
   AC_DEFINE([HAVE_SOCKETS], 1, [ ])
