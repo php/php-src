@@ -2,3 +2,4 @@ GetFilterVersion
 HttpFilterProc
 GetExtensionVersion
 HttpExtensionProc
+ZSLMain
