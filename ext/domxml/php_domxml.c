@@ -1888,7 +1888,7 @@ PHP_FUNCTION(domxml_elem_get_attribute)
 }
 /* }}} */
 
-/* {{{ proto bool domxml_elem_set_attribute(string attrname, string value)&name, &name_len, &value, &value_len
+/* {{{ proto bool domxml_elem_set_attribute(string attrname, string value)
    Sets value of given attribute */
 PHP_FUNCTION(domxml_elem_set_attribute)
 {
