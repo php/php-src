@@ -51,7 +51,7 @@ ZEND_EXTERN_MODULE_GLOBALS(iconv)
 #endif
 
 #define SECTION(name)	if (PG(html_errors)) { \
-							PUTS("<h2 class=\"section\">" name "</h2>\n"); \
+							PUTS("<h2>" name "</h2>\n"); \
 						} else { \
 							php_info_print_table_start(); \
 							php_info_print_table_header(1, name); \
@@ -68,7 +68,7 @@ static int _display_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 
 	if (show_info_func && module->info_func) {
 		if (PG(html_errors)) {
-			php_printf("<h2 class=\"section\"><a name=\"module_%s\">%s</a></h2>\n", module->name, module->name);
+			php_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", module->name, module->name);
 		} else {
 			php_info_print_table_start();
 			php_info_print_table_header(1, module->name);
@@ -105,7 +105,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 		while (zend_hash_get_current_data(Z_ARRVAL_PP(data), (void **) &tmp) == SUCCESS) {
 			if (PG(html_errors)) {
 				PUTS("<tr>");
-				PUTS("<td class=\"entry\">");
+				PUTS("<td class=\"e\">");
 
 			}
 
@@ -126,7 +126,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 			}
 			PUTS("\"]");
 			if (PG(html_errors)) {
-				PUTS("</td><td class=\"value\">");
+				PUTS("</td><td class=\"v\">");
 			} else {
 				PUTS(" => ");
 			}
@@ -143,14 +143,22 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 				zval_copy_ctor(&tmp2);
 				convert_to_string(&tmp2);
 				if (PG(html_errors)) {
-					zend_html_puts(Z_STRVAL(tmp2), Z_STRLEN(tmp2));
+					if (Z_STRLEN(tmp2) == 0) {
+						PUTS("<i>no value</i>");
+					} else {
+						zend_html_puts(Z_STRVAL(tmp2), Z_STRLEN(tmp2));
+					} 
 				} else {
 					PUTS(Z_STRVAL(tmp2));
 				}	
 				zval_dtor(&tmp2);
 			} else {
 				if (PG(html_errors)) {
-					zend_html_puts(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+					if (Z_STRLEN_PP(tmp) == 0) {
+						PUTS("<i>no value</i>");
+					} else {
+						zend_html_puts(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+					}
 				} else {
 					PUTS(Z_STRVAL_PP(tmp));
 				}	
@@ -294,8 +302,8 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	}
 
 	if (PG(html_errors)) {
-		php_printf("<title>phpinfo()</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\" /></head>", charset);
-		PUTS("<body>");
+		php_printf("<title>phpinfo()</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\" /></head>\n", charset);
+		PUTS("<body><center>\n");
 	} else {
 		PUTS("       _           _        __        ____  \n");
 		PUTS(" _ __ | |__  _ __ (_)_ __  / _| ___  / /\\ \\ \n");
@@ -316,7 +324,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		}
 
 		if (expose_php && PG(html_errors)) {
-			PUTS("<a href=\"http://www.php.net/\"><img src=\"");
+			PUTS("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
 			if (SG(request_info).request_uri) {
 				PUTS(SG(request_info).request_uri);
 			}
@@ -328,7 +336,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		}
 
 		if (PG(html_errors)) {
-			php_printf("<h1 class=\"phpver\">PHP Version %s</h1>\n", PHP_VERSION);
+			php_printf("<h1 class=\"p\">PHP Version %s</h1>\n", PHP_VERSION);
 		} else {
 			php_info_print_table_row(2, "PHP Version", PHP_VERSION);
 		}	
@@ -406,7 +414,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		/* Zend Engine */
 		php_info_print_box_start(0);
 		if (expose_php && PG(html_errors)) {
-			PUTS("<a href=\"http://www.zend.com/\"><img src=\"");
+			PUTS("<a href=\"http://www.zend.com/\"><img border=\"0\" src=\"");
 			if (SG(request_info).request_uri) {
 				PUTS(SG(request_info).request_uri);
 			}
@@ -426,7 +434,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			PUTS(SG(request_info).request_uri);
 		}
 		PUTS("?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000\">");
-		PUTS("PHP 4 Credits");
+		PUTS("PHP Credits");
 		PUTS("</a></h1>\n");
 	}
 
@@ -451,6 +459,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 		SECTION("Additional Modules");
 		php_info_print_table_start();
+		php_info_print_table_header(1, "Module Name");
 		show_info_func = 0;
 		zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) _display_module_info, &show_info_func TSRMLS_CC);
 		php_info_print_table_end();
@@ -537,7 +546,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		}
 	}
 	if (PG(html_errors)) {
-		PUTS("</body></html>");
+		PUTS("</center></body></html>");
 	}	
 }
 /* }}} */
@@ -548,7 +557,7 @@ PHPAPI void php_info_print_table_start()
 	TSRMLS_FETCH();
 
 	if (PG(html_errors)) {
-		php_printf("<div class=\"centered\"><table><tbody>\n");
+		php_printf("<table border=\"0\" cellpadding=\"3\" width=\"600\">\n");
 	} else {
 		php_printf("\n");
 	}	
@@ -559,7 +568,7 @@ PHPAPI void php_info_print_table_end()
 	TSRMLS_FETCH();
 
 	if (PG(html_errors)) {
-		php_printf("</tbody></table></div><br />\n");
+		php_printf("</table><br />\n");
 	}
 
 }
@@ -571,11 +580,11 @@ PHPAPI void php_info_print_box_start(int flag)
 	php_info_print_table_start();
 	if (flag) {
 		if (PG(html_errors)) {
-			php_printf("<tr class=\"header\"><td>\n");
+			php_printf("<tr class=\"h\"><td>\n");
 		}
 	} else {
 		if (PG(html_errors)) {
-			php_printf("<tr class=\"infobox\"><td>\n");
+			php_printf("<tr class=\"v\"><td>\n");
 		} else {
 			php_printf("\n");
 		}	
@@ -610,7 +619,7 @@ PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header)
 	TSRMLS_FETCH();
 	
 	if (PG(html_errors)) {
-		php_printf("<tr class=\"header\"><th colspan=\"%d\">%s</th></tr>\n", num_cols, header );
+		php_printf("<tr class=\"h\"><th colspan=\"%d\">%s</th></tr>\n", num_cols, header );
 	} else {
 		spaces = (74 - strlen(header));
 		php_printf("%*s%s%*s\n", (int)(spaces/2), " ", header, (int)(spaces/2), " ");
@@ -629,7 +638,7 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 
 	va_start(row_elements, num_cols);
 	if (PG(html_errors)) {
-		php_printf("<tr class=\"header\">");
+		php_printf("<tr class=\"h\">");
 	}	
 	for (i=0; i<num_cols; i++) {
 		row_element = va_arg(row_elements, char *);
@@ -672,12 +681,16 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 	for (i=0; i<num_cols; i++) {
 		if (PG(html_errors)) {
 			php_printf("<td class=\"%s\">",
-			   (i==0 ? "entry" : "value" )
+			   (i==0 ? "e" : "v" )
 			);
 		}	
 		row_element = va_arg(row_elements, char *);
 		if (!row_element || !*row_element) {
-			PUTS( " " );
+			if (PG(html_errors)) {
+				PUTS( "<i>no value</i>" );
+			} else {
+				PUTS( " " );
+			}
 		} else {
 			if (PG(html_errors)) {
 				zend_html_puts(row_element,  strlen(row_element));
@@ -691,7 +704,7 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 			}
 		}
 		if (PG(html_errors)) {
-			php_printf("</td>");
+			php_printf(" </td>");
 		}	
 	}
 	if (PG(html_errors)) {
