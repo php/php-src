@@ -2,6 +2,8 @@ dnl $Id$
 
 divert(3)
 
+PHPIFXLIB=ext/informix/libphp_ifx.a
+	
 AC_MSG_CHECKING(for Informix support)
 AC_ARG_WITH(informix,
 [  --with-informix[=DIR]   Include Informix support.  DIR is the Informix base
@@ -73,11 +75,16 @@ WARNING: You specified Informix base install directory that is different
       for i in $IFX_LIBS; do
         case "$i" in
         *.o)
-            IFX_OBJS="$IFX_OBJS $i"
-            AC_ADD_LIBRARY_WITH_PATH(php_ifx, $abs_builddir/ext/informix);;
+            AC_ADD_LIBPATH($abs_builddir/ext/informix)
+            AC_ADD_LIBRARY(php_ifx, 1)
+            test -d ext/informix || mkdir ext ext/informix
+            cd ext/informix
+            ar r libphp_ifx.a $i
+            ranlib libphp_ifx.a
+            cd ../..;;
         -l*)
             lib=`echo $i|sed 's/^-l//'`
-            AC_ADD_LIBRARY($lib);;
+            AC_ADD_LIBRARY($lib, 1);;
         *)
             IFX_LIBADD="$IFX_LIBADD $i";;
         esac
@@ -94,7 +101,6 @@ WARNING: You specified Informix base install directory that is different
 ])
 AC_SUBST(INFORMIXDIR)
 AC_SUBST(IFX_LIBS)
-AC_SUBST(IFX_OBJS)
 	
 divert(5)
 
