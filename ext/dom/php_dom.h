@@ -36,6 +36,7 @@ extern zend_module_entry dom_module_entry;
 #include <libxml/uri.h>
 #include <libxml/xmlerror.h>
 #include <libxml/xinclude.h>
+#include <libxml/hash.h>
 #if defined(LIBXML_HTML_ENABLED)
 #include <libxml/HTMLparser.h>
 #include <libxml/HTMLtree.h>

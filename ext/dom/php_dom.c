@@ -160,8 +160,8 @@ xmlNodePtr dom_object_get_node(dom_object *obj)
 }
 /* }}} end dom_object_get_node */
 
-/* {{{ dom_object *dom_object_get_data(xmlNodePtr obj) */
-dom_object *dom_object_get_data(xmlNodePtr obj)
+/* {{{ dom_object *php_dom_object_get_data(xmlNodePtr obj) */
+dom_object *php_dom_object_get_data(xmlNodePtr obj)
 {
 	if (obj->_private != NULL) {
 		return (dom_object *) ((php_libxml_node_ptr *) obj->_private)->_private;
@@ -169,7 +169,7 @@ dom_object *dom_object_get_data(xmlNodePtr obj)
 		return NULL;
 	}
 }
-/* }}} end dom_object_get_data */
+/* }}} end php_dom_object_get_data */
 
 /* {{{ dom_read_na */
 static int dom_read_na(dom_object *obj, zval **retval TSRMLS_DC)
@@ -697,7 +697,7 @@ void node_list_unlink(xmlNodePtr node TSRMLS_DC)
 
 	while (node != NULL) {
 
-		wrapper = dom_object_get_data(node);
+		wrapper = php_dom_object_get_data(node);
 
 		if (wrapper != NULL ) {
 			xmlUnlinkNode(node);
@@ -852,7 +852,7 @@ zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *
 		return wrapper;
 	}
 
-	if ((intern = (dom_object *) dom_object_get_data((void *) obj))) {
+	if ((intern = (dom_object *) php_dom_object_get_data((void *) obj))) {
 		return_value->type = IS_OBJECT;
 		return_value->is_ref = 1;
 		return_value->value.obj.handle = intern->handle;

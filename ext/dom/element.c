@@ -247,7 +247,7 @@ PHP_FUNCTION(dom_element_remove_attribute)
 	}
 
 	/*	TODO: DTD defined attributes are handled special */
-	if (dom_object_get_data((xmlNodePtr) attrp) == NULL) {
+	if (php_dom_object_get_data((xmlNodePtr) attrp) == NULL) {
 		node_list_unlink(attrp->children TSRMLS_CC);
 		xmlUnlinkNode((xmlNodePtr) attrp);
 		xmlFreeProp(attrp);
@@ -321,7 +321,7 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 
 	existattrp = xmlHasProp(nodep, attrp->name);
 	if (existattrp != NULL) {
-		if ((oldobj = dom_object_get_data((xmlNodePtr) existattrp)) != NULL && 
+		if ((oldobj = php_dom_object_get_data((xmlNodePtr) existattrp)) != NULL && 
 			((php_libxml_node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp)
 		{
 			RETURN_NULL();
@@ -588,7 +588,7 @@ PHP_FUNCTION(dom_element_remove_attribute_ns)
 	}
 
 	if (attrp) {
-		if (dom_object_get_data((xmlNodePtr) attrp) == NULL) {
+		if (php_dom_object_get_data((xmlNodePtr) attrp) == NULL) {
 			node_list_unlink(attrp->children TSRMLS_CC);
 			xmlUnlinkNode((xmlNodePtr) attrp);
 			xmlFreeProp(attrp);
@@ -672,7 +672,7 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
     }
 
 	if (existattrp != NULL) {
-		if ((oldobj = dom_object_get_data((xmlNodePtr) existattrp)) != NULL && 
+		if ((oldobj = php_dom_object_get_data((xmlNodePtr) existattrp)) != NULL && 
 			((php_libxml_node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp)
 		{
 			RETURN_NULL();
