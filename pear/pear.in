@@ -4,16 +4,53 @@
 require_once "PEAR.php";
 require_once "PEAR/Installer.php";
 
-error_reporting(1);
+error_reporting(7);
 
-$pkgfile = $argv[0];
+$stderr = fopen("php://stderr", "w");
+
+$debug = 1;
+$optind = 1;
+
+while ($optind < $argc && $argv[$optind][0] == "-") {
+    switch (substr($argv[$optind], 1)) {
+        case "v":
+            $debug = (int)$argv[++$optind];
+            break;
+        case "-":
+            $optind++;
+            break 2;
+        default:
+            fputs($stderr, "Unknown option: $argv[$optind]\n");
+            /* fall through */
+        case "?":
+        case "h":
+            usage();
+            break;
+    }
+    
+    $optind++;
+}
+
+$pkgfile = $argv[$optind];
 
 if (!$pkgfile) {
-    die("Usage: pear <packagefile>\n");
+    usage();
 }
 
 $p = new PEAR_Installer();
-$p->debug = true;
+$p->debug = $debug;
 $p->install($pkgfile);
+
+function usage()
+{
+    global $stderr;
+    fputs($stderr,
+          "Usage: pear [-v n] [-h] <package>\n".
+          "Options:\n".
+          "     -v   set verbosity level to <n> (0-2, default 1)\n".
+          "     -h   display help/usage (this message)\n");
+    fclose($stderr);
+    exit;
+}
 
 ?>
