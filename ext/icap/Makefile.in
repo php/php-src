@@ -205,7 +205,7 @@ maintainer-clean-libtool:
 libphpext_php3_icap.a: $(libphpext_php3_icap_a_OBJECTS) $(libphpext_php3_icap_a_DEPENDENCIES)
 	-rm -f libphpext_php3_icap.a
 	$(AR) cru libphpext_php3_icap.a $(libphpext_php3_icap_a_OBJECTS) $(libphpext_php3_icap_a_LIBADD)
-	$(RANLIB) libphpex_icap.a
+	$(RANLIB) libphpext_php3_icap.a
 
 tags: TAGS
 

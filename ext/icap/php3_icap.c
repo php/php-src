@@ -34,11 +34,7 @@
 #undef ERROR
 #endif
 
-#if !(WIN32|WINNT)
-#include "config.h"
-#endif
 #include "php.h"
-#include "internal_functions.h"
 
 #if COMPILE_DL
 #include "dl/phpdl.h"
@@ -53,7 +49,6 @@
 #include <stdarg.h>
 #include "icap.h"
 #include "icapclient.h"
-#include "php3_list.h"
 #include "php3_icap.h"
 #include "modules.h"
 #if (WIN32|WINNT)
