@@ -47,6 +47,8 @@ PHP                                                                        NEWS
   has no properties (NULL hashtable)). (Wez)
 - Fixed bug #25664 (COM crashes when calling a Delphi implementations of 
   ITypeInfo). (Wez)
+- Fixed bug #24693 (Allow session.use_trans_sid to be enabled/disabled from
+  inside the script). (Ilia)
 - Fixed bug #24394 (Serializing cross-referenced objects causes segfault).
   (Moriyoshi)
 

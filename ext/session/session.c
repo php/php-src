@@ -86,12 +86,16 @@ ZEND_DECLARE_MODULE_GLOBALS(ps);
 static ps_module *_php_find_ps_module(char *name TSRMLS_DC);
 static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 
+#define SESSION_CHECK_ACTIVE_STATE	\
+	if (PS(session_status) == php_session_active) {	\
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A session is active. You cannot change the session module's ini settings at this time.");	\
+		return FAILURE;	\
+	}	\
+
 static PHP_INI_MH(OnUpdateSaveHandler)
 {
-	if (PS(session_status) == php_session_active) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A session is active. You cannot change the session module's ini settings at this time.");
-		return FAILURE;
-	}
+	SESSION_CHECK_ACTIVE_STATE;
+
 	PS(mod) = _php_find_ps_module(new_value TSRMLS_CC);
 
 	if (PG(modules_activated) && !PS(mod)) {
@@ -101,12 +105,23 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 	return SUCCESS;
 }
 
+static PHP_INI_MH(OnUpdateTransSid)
+{
+	SESSION_CHECK_ACTIVE_STATE;
+
+	if (!strncasecmp(new_value, "on", sizeof("on"))) {
+		PS(use_trans_sid) = (zend_bool) 1;
+	} else {
+		PS(use_trans_sid) = (zend_bool) atoi(new_value);
+	}
+
+	return SUCCESS;
+}
+
 static PHP_INI_MH(OnUpdateSerializer)
 {
-	if (PS(session_status) == php_session_active) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A session is active. You cannot change the session module's ini settings at this time.");
-		return FAILURE;
-	}
+	SESSION_CHECK_ACTIVE_STATE;
+
 	PS(serializer) = _php_find_ps_serializer(new_value TSRMLS_CC);
 
 	if (PG(modules_activated) && !PS(serializer)) {
@@ -141,7 +156,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.entropy_length",     "0",         PHP_INI_ALL, OnUpdateLong,    entropy_length,     php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_limiter",      "nocache",   PHP_INI_ALL, OnUpdateString, cache_limiter,      php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_expire",       "180",       PHP_INI_ALL, OnUpdateLong,    cache_expire,       php_ps_globals,    ps_globals)
-	STD_PHP_INI_BOOLEAN("session.use_trans_sid",    "0",         PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   use_trans_sid,      php_ps_globals,    ps_globals)
+	PHP_INI_ENTRY("session.use_trans_sid",    	"0",         PHP_INI_ALL, OnUpdateTransSid)
 	STD_PHP_INI_ENTRY("session.hash_function",      "0",         PHP_INI_ALL, OnUpdateLong,    hash_func,          php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.hash_bits_per_character",      "4",         PHP_INI_ALL, OnUpdateLong,    hash_bits_per_character,          php_ps_globals,    ps_globals)
 
