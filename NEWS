@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Added ability to extract() variables as references via OR'able EXTR_REFS
+  flag. (Andrei)
 - Fixed a build failure with the OCI8 extension on Tru64.
   (Patch by Michael Mauch, micahel.mauch@gmx.de)
 - Added support for fopen("ftps://...", ...) which allows to connect to FTP 
