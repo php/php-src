@@ -53,6 +53,7 @@ STATUS:              Working
 EXTENSION:           cli
 MAINTENANCE:         Marcus Boerger <helly@php.net>, Edin Kadribasic <edink@php.net>
 STATUS:              Working
+SINCE:               4.3.0
 -------------------------------------------------------------------------------
 EXTENSION:           fhttpd
 MAINTENANCE:         Unknown
@@ -166,6 +167,7 @@ EXTENSION:           mysqli
 PRIMARY MAINTAINER:  Georg Richter <georg@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Experimental
+SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           pgsql
 PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>, Yasuo Ohgaki <yohgaki@php.net>
@@ -177,6 +179,8 @@ EXTENSION:           sqlite
 PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>, Wez Furlong <wez@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
+SINCE:               5.0 (Since 4.3.2 in PECL)
+COMMENT:             Integrates SQLite embeddable SQL database engine.
 -------------------------------------------------------------------------------
 EXTENSION:           sybase
 MAINTENANCE:         Unknown
@@ -212,11 +216,13 @@ EXTENSION:           dom
 PRIMARY MAINTAINER:  Christian Stocker <chregu@php.net>, Rob Richards <rrichards@php.net>, Marcus Boerger <helly@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Experimental
+SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           simplexml
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Experimental
+SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           wddx
 PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net>
@@ -237,6 +243,7 @@ EXTENSION:           xsl
 PRIMARY MAINTAINER:  Christian Stocker <chregu@php.net>, Rob Richards <rrichards@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Experimental
+SINCE:               5.0
 -------------------------------------------------------------------------------
 
 
@@ -279,6 +286,7 @@ EXTENSION:           com_dotnet
 PRIMARY MAINTAINER:  Wez Furlong <wez@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Windows
+SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           cpdf
 PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
