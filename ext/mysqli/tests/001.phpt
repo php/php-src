@@ -2,13 +2,14 @@
 mysqli connect
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+<?php require_once('skipifemb.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";
 
 	$dbname = "test";
 	$test = "";
-	
+
 	/*** test mysqli_connect localhost:port ***/
 	$link = mysqli_connect($host, $user, $passwd, "", 3306);
 	$test .= ($link) ? "1" : "0";

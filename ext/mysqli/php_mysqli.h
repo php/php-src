@@ -31,6 +31,8 @@
 #ifndef PHP_MYSQLI_H
 #define PHP_MYSQLI_H
 
+#define MYSQLI_VERSION_ID		101008
+
 typedef struct {
 	ulong		buflen;
 	char		*val;
@@ -68,6 +70,12 @@ typedef struct {
 	void		*info;		/* additional buffer				 */
 } MYSQLI_RESOURCE;
 
+typedef struct {
+	MYSQL_RES		*result;		/* stored result set from SHOW WARNINGS */
+	MYSQL_ROW		row;
+	int				warning_count;	/* number of warnings */
+} MYSQLI_WARNING;
+
 typedef struct _mysqli_object {
 	zend_object 	zo;
 	void 			*ptr;
@@ -78,7 +86,7 @@ typedef struct _mysqli_object {
 typedef struct _mysqli_property_entry {
 	char *pname;
 	int (*r_func)(mysqli_object *obj, zval **retval TSRMLS_DC);
-	int (*w_func)(mysqli_object *obj, zval **retval TSRMLS_DC);
+	int (*w_func)(mysqli_object *obj, zval *value TSRMLS_DC);
 } mysqli_property_entry;
 
 typedef struct {
@@ -105,13 +113,20 @@ extern function_entry mysqli_functions[];
 extern function_entry mysqli_link_methods[];
 extern function_entry mysqli_stmt_methods[];
 extern function_entry mysqli_result_methods[];
+extern function_entry mysqli_driver_methods[];
+extern function_entry mysqli_warning_methods[];
+extern function_entry mysqli_exception_methods[];
+
 extern mysqli_property_entry mysqli_link_property_entries[];
 extern mysqli_property_entry mysqli_result_property_entries[];
 extern mysqli_property_entry mysqli_stmt_property_entries[];
+extern mysqli_property_entry mysqli_driver_property_entries[];
+extern mysqli_property_entry mysqli_warning_property_entries[];
 
 extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flag, int into_object);
 extern void php_clear_stmt_bind(MY_STMT *stmt);
-void php_clear_mysql(MY_MYSQL *);
+extern void php_clear_mysql(MY_MYSQL *);
+extern void php_clear_warnings(MYSQLI_WARNING *w);
 extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
 extern void php_mysqli_report_error(char *sqlstate, int errorno, char *error TSRMLS_DC);
 extern void php_mysqli_report_index(char *query, unsigned int status TSRMLS_DC);
@@ -120,14 +135,17 @@ extern int php_local_infile_read(void *, char *, uint);
 extern void php_local_infile_end(void *);
 extern int php_local_infile_error(void *, char *, uint);
 extern void php_set_local_infile_handler_default(MY_MYSQL *);
-
+extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char *format, ...);
 zend_class_entry *mysqli_link_class_entry;
 zend_class_entry *mysqli_stmt_class_entry;
 zend_class_entry *mysqli_result_class_entry;
+zend_class_entry *mysqli_driver_class_entry;
+zend_class_entry *mysqli_warning_class_entry;
+zend_class_entry *mysqli_exception_class_entry;
 
-zend_class_entry _mysqli_link_class_entry;
-zend_class_entry _mysqli_stmt_class_entry;
-zend_class_entry _mysqli_result_class_entry;
+#ifdef HAVE_SPL
+extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
+#endif
 
 PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRMLS_DC);
 
@@ -142,9 +160,10 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 } 
 
 #define REGISTER_MYSQLI_CLASS_ENTRY(name, mysqli_entry, class_functions) { \
-	INIT_CLASS_ENTRY(_##mysqli_entry,name,class_functions); \
-	_##mysqli_entry.create_object = mysqli_objects_new; \
-	mysqli_entry = zend_register_internal_class(&_##mysqli_entry TSRMLS_CC); \
+	zend_class_entry ce; \
+	INIT_CLASS_ENTRY(ce, name,class_functions); \
+	ce.create_object = mysqli_objects_new; \
+	mysqli_entry = zend_register_internal_class(&ce TSRMLS_CC); \
 } \
 
 #define MYSQLI_REGISTER_RESOURCE_EX(__ptr, __zval, __ce)  \
@@ -210,7 +229,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 { \
 	int i = 0; \
 	while (b[i].pname != NULL) { \
-		mysqli_add_property(a, b[i].pname, (mysqli_read_t)b[i].r_func, NULL TSRMLS_CC); \
+		mysqli_add_property(a, b[i].pname, (mysqli_read_t)b[i].r_func, (mysqli_write_t)b[i].w_func TSRMLS_CC); \
 		i++; \
 	}\
 }
@@ -241,9 +260,10 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 
 /*** REPORT MODES ***/
 #define MYSQLI_REPORT_OFF           0
-#define MYSQLI_REPORT_INDEX			1
-#define MYSQLI_REPORT_ERROR			2
-#define MYSQLI_REPORT_CLOSE			4
+#define MYSQLI_REPORT_ERROR			1
+#define MYSQLI_REPORT_STRICT		2
+#define MYSQLI_REPORT_INDEX			4
+#define MYSQLI_REPORT_CLOSE			8	
 #define MYSQLI_REPORT_ALL		  255
 
 #define MYSQLI_REPORT_MYSQL_ERROR(mysql) \
@@ -282,9 +302,6 @@ PHP_FUNCTION(mysqli_debug);
 PHP_FUNCTION(mysqli_disable_reads_from_master);
 PHP_FUNCTION(mysqli_disable_rpl_parse);
 PHP_FUNCTION(mysqli_dump_debug_info);
-#ifdef HAVE_EMBEDDED_MYSQLI
-PHP_FUNCTION(mysqli_embedded_connect);
-#endif
 PHP_FUNCTION(mysqli_enable_reads_from_master);
 PHP_FUNCTION(mysqli_enable_rpl_parse);
 PHP_FUNCTION(mysqli_errno);
@@ -347,10 +364,8 @@ PHP_FUNCTION(mysqli_stmt_fetch);
 PHP_FUNCTION(mysqli_stmt_param_count);
 PHP_FUNCTION(mysqli_stmt_send_long_data);
 PHP_FUNCTION(mysqli_send_query);
-#ifdef HAVE_EMBEDDED_MYSQLI
-PHP_FUNCTION(mysqli_server_init);
-PHP_FUNCTION(mysqli_server_end);
-#endif
+PHP_FUNCTION(mysqli_embedded_server_end);
+PHP_FUNCTION(mysqli_embedded_server_start);
 PHP_FUNCTION(mysqli_slave_query);
 PHP_FUNCTION(mysqli_sqlstate);
 PHP_FUNCTION(mysqli_ssl_set);
@@ -374,6 +389,8 @@ PHP_FUNCTION(mysqli_warning_count);
 
 ZEND_FUNCTION(mysqli_stmt_construct);
 ZEND_FUNCTION(mysqli_result_construct);
+ZEND_FUNCTION(mysqli_driver_construct);
+ZEND_FUNCTION(mysqli_warning_construct);
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	long			default_link;
@@ -385,14 +402,13 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	char			*default_socket;
 	char            *default_pw;
 	int				reconnect;
+	int				strict;
 	long			error_no;
 	char			*error_msg;
 	int				report_mode;
 	HashTable		*report_ht;
 	unsigned int	multi_query;
-#ifdef HAVE_EMBEDDED_MYSQLI
 	unsigned int	embedded;
-#endif
 ZEND_END_MODULE_GLOBALS(mysqli)
 
 

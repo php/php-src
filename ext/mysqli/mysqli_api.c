@@ -149,7 +149,7 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 				break;
 
 			case 'b': /* Blob (send data) */
-				bind[ofs].buffer_type = MYSQL_TYPE_VAR_STRING;
+				bind[ofs].buffer_type = MYSQL_TYPE_LONG_BLOB;
 				bind[ofs].is_null = 0;
 				bind[ofs].length = 0;
 				break;
@@ -182,7 +182,7 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 	stmt->param.var_cnt = num_vars;
 	stmt->param.vars = (zval **)safe_emalloc(num_vars, sizeof(zval), 0);
 	for (i = 0; i < num_vars; i++) {
-		if (bind[i].buffer_type  != MYSQLI_BIND_SEND_DATA) {
+		if (bind[i].buffer_type  != MYSQL_TYPE_LONG_BLOB) {
 			ZVAL_ADDREF(*args[i+start]);
 			stmt->param.vars[i] = *args[i+start];
 		} else {
@@ -564,6 +564,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 		RETURN_FALSE;
 	}
+
 	if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
 		php_mysqli_report_index(stmt->query, stmt->stmt->mysql->server_status TSRMLS_CC);
 	}
@@ -837,7 +838,7 @@ PHP_FUNCTION(mysqli_field_seek)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result"); 
 
 	if (fieldnr < 0 || fieldnr >= mysql_num_fields(result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field offset is invalid for resultset");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Function cannot be used with MYSQL_USE_RESULT");
 		RETURN_FALSE; 
 	}
 	
@@ -1305,12 +1306,10 @@ PHP_FUNCTION(mysqli_real_connect)
 
 	if (mysql_real_connect(mysql->mysql,hostname,username,passwd,dbname,port,socket,flags) == NULL) {
 		
-		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql) TSRMLS_CC);
+		php_mysqli_throw_sql_exception( mysql->mysql->net.sqlstate, mysql->mysql->net.last_errno TSRMLS_CC,
+										mysql->mysql->net.last_error);
 
-		if (!(MyG(report_mode) & MYSQLI_REPORT_ERROR)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysql_error(mysql->mysql));
-		}
 		RETURN_FALSE;
 	}
 	php_mysqli_set_error(mysql_errno(mysql->mysql), (char *)mysql_error(mysql->mysql) TSRMLS_CC);
@@ -1422,39 +1421,6 @@ PHP_FUNCTION(mysqli_stmt_send_long_data)
 }
 /* }}} */
 
-#ifdef HAVE_EMBEDDED_MYSQLI
-/* {{{ proto bool mysqli_server_init(void)
- initialize embedded server */
-PHP_FUNCTION(mysqli_server_init)
-{
-	zval	*server;
-	zval	*groups;
-
-	if (MyG(embedded)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Embedded server already initialized.");
-		RETURN_FALSE;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|aa", &server, &groups) == FAILURE) {
-		return;
-	}
-
-	if (mysql_server_init(0, NULL, NULL)) {
-			RETURN_FALSE;
-	}
-	MyG(embedded) = 1;
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto void mysqli_server_end(void)
-*/
-PHP_FUNCTION(mysqli_server_end)
-{
-	mysql_server_end();
-}
-/* }}} */
-#endif
 
 /* {{{ proto mixed mysqli_stmt_affected_rows(object stmt)
    Return the number of rows affected in the last query for the given link */

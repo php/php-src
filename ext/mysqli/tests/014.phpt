@@ -1,7 +1,7 @@
 --TEST--
 mysqli autocommit/commit/rollback 
 --SKIPIF--
-<?php	
+<?php
 	include "connect.inc";
 	$link = mysqli_connect($host, $user, $passwd);
 	$result = mysqli_query($link, "SHOW VARIABLES LIKE 'have_innodb'");
