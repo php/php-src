@@ -327,11 +327,12 @@ xml_destroy_parser(xml_parser *parser)
 static void
 xml_set_handler(char **nameBufp, zval **data)
 {
+	convert_to_string_ex(data);
+
 	if ((*data)->value.str.len > 0) {
 		if (*nameBufp != NULL) {
 			efree(*nameBufp);
 		}
-		convert_to_string_ex(data);
 		*nameBufp = estrndup((*data)->value.str.val, (*data)->value.str.len);
 	} else {
 		if (*nameBufp != NULL) {
