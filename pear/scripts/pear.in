@@ -175,9 +175,9 @@ function usage($error = null, $helpsubject = null)
     $stderr = fopen('php://stderr', 'w');
     fputs($stderr, "\n");
     if (PEAR::isError($error)) {
-        fputs($stderr, $error->getMessage());
+        fputs($stderr, $error->getMessage() . "\n");
     } elseif ($error !== null) {
-        fputs($stderr, $error);
+        fputs($stderr, "$error\n");
     }
     if ($helpsubject != null) {
         $put = cmdHelp($helpsubject);
