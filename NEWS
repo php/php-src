@@ -1,15 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Apr 2004, Version 4.3.6
-- Fixed bug #27769 (domxml_xmltree crashes). (Rob)
-
-05 Apr 2004, Version 4.3.6RC2
+08 Apr 2004, Version 4.3.6
 - Fixed a bug that prevented building of the GD extension against external GD
   lib 1.X. (Ilia, Edin, Nick Talbott).
-- Fixed bug #27849 (configure craps out on trivial syntax error). (Derick)
-
-01 Apr 2004, Version 4.3.6RC1
 - Synchronized bundled GD library with GD 2.0.22. (Ilia)
+- Fixed bug #27849 (configure craps out on trivial syntax error). (Derick)
 - Fixed bug #27822 (is_resource() returns TRUE for closed resources). (Derick)
 - Fixed bug #27819 (problems returning reference to a reference parameter).
   (Ilia)
@@ -17,6 +12,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #27802 (default number of children to 8 when PHP_FCGI_CHILDREN is
   not defined). (Ilia)
 - Fixed bug #27780 (strtotime(+1 xxx) returns a wrong date/time). (Derick)
+- Fixed bug #27769 (domxml_xmltree crashes). (Rob)
 - Fixed bug #27764 (Get return value from a stored procedure not returning any
   result sets). (Frank)
 - Fixed bug #27762 (SCO Openserver doesn't have S_ISSOCK). (Wez)
