@@ -13,13 +13,8 @@ meaningful error messages.
 Prototypes
 ----------
 /* Implemented. */
-zend_parse_parameters(int num_args, char *type_spec, ...);
-zend_parse_parameters_ex(int flags, int num_args, char *type_spec, ...);
-
-/* Not implemented yet. */
-zend_parse_parameters_hash(HashTable *ht, char *type_spec, ...);
-zend_parse_parameters_hash_ex(int flags, HashTable *ht, char *type_spec, ...);
-
+int zend_parse_parameters(int num_args TSRMLS_DC, char *type_spec, ...);
+int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, char *type_spec, ...);
 
 The zend_parse_parameters() function takes the number of parameters
 passed to the extension function, the type specifier string, and the
@@ -27,6 +22,8 @@ list of pointers to variables to store the results in. The _ex() version
 also takes 'flags' argument -- current only ZEND_PARSE_PARAMS_QUIET can
 be used as 'flags' to specify that the function should operate quietly
 and not output any error messages.
+
+Both functions return SUCCESS or FAILURE depending on the result.
 
 The auto-conversions are performed as necessary. Arrays, objects, and
 resources cannot be autoconverted.
@@ -61,41 +58,60 @@ long l;
 char *s;
 int s_len;
 zval *param;
-zend_parse_parameters(ZEND_NUM_ARGS(), "lsz", &l, &s, &s_len, &param);
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsz",
+						  &l, &s, &s_len, &param) == FAILURE) {
+	return;
+}
 
 
 /* Gets an object of class specified by my_ce, and an optional double. */
 zval *obj;
 double d = 0.5;
-zend_parse_parameters(ZEND_NUM_ARGS(), "O|d", &obj, my_ce, &d);
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|d",
+						  &obj, my_ce, &d) == FAILURE) {
+	return;
+}
 
 
 /* Gets an object or null, and an array.
    If null is passed for object, obj will be set to NULL. */
 zval *obj;
 zval *arr;
-zend_parse_parameters(ZEND_NUM_ARGS(), "O!a", &obj, &arr);
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O!a",
+						  &obj, &arr) == FAILURE) {
+	return;
+}
 
 
 /* Gets a separated array. */
 zval *arr;
-zend_parse_parameters(ZEND_NUM_ARGS(), "a/", &arr));
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/",
+						  &arr) == FAILURE) {
+	return;
+}
 
 
 /* Get only the first three parameters (useful for varargs functions). */
 zval *z;
 zend_bool b;
 zval *r;
-zend_parse_parameters(3, "zbr!", &z, &b, &r);
+if (zend_parse_parameters(3 TSRMLS_CC, "zbr!",
+						  &z, &b, &r) == FAILURE) {
+	return;
+}
 
 
 /* Get either a set of 3 longs or a string. */
 long l1, l2, l3;
 char *s;
-if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "lll", &l1, &l2, &l3)) {
+if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
+							 "lll", &l1, &l2, &l3) == SUCCESS) {
 	/* manipulate longs */
-} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "s", &s)) {
+} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
+									"s", &s) == SUCCESS) {
 	/* manipulate string */
 } else {
 	/* output error */
+
+	return;
 }
