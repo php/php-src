@@ -68,7 +68,7 @@ all_targets='$(PHP_MODULES)'
 install_targets=install-modules
 phplibdir="`pwd`/modules"
 CPPFLAGS="$CPPFLAGS -DHAVE_CONFIG_H"
-CFLAGS_CLEAN=$CFLAGS
+CFLAGS_CLEAN='$(CFLAGS)'
 
 test "$prefix" = "NONE" && prefix="/usr/local"
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
