@@ -928,7 +928,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 
 	if (is_method) {
 		char *short_class_name = CG(active_class_entry)->name;
-		zend_uint short_class_name_length = CG(active_class_entry)->name_length;
+		int short_class_name_length = CG(active_class_entry)->name_length;
 		zend_uint i;
 
 		for (i=0; i < CG(active_class_entry)->name_length; i++) {
