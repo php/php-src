@@ -1,3 +1,90 @@
+2004-08-03  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_0)
+      NEWS:
+      Typofix
+
+2004-08-03  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_4_3)
+      ext/iconv/iconv.dsp:
+      Oops. remember to save the project file before commiting.
+
+    * (PHP_4_3)
+      ext/iconv/iconv.dsp:
+      Updating library name to iconv.lib
+
+2004-08-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/ZEND_CHANGES:
+      Update
+
+    * (PHP_5_0)
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/bug29505.phpt:
+      - MFH Bug #29505 get_class_vars() severely broken when used with arrays
+
+    * ZendEngine2/tests/bug29505.phpt:
+      
+      Add new test
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Fixed Bug #29505 get_class_vars() severely broken when used with arrays
+
+    * NEWS
+      NEWS:
+      BFN
+
+2004-08-03  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_dotnet.c:
+      Even more verbosity...
+
+    * ext/com_dotnet/com_dotnet.c:
+      Even more verbosity in case of error
+
+2004-08-03  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/standard/mail.c:
+      fix typo in mail.c: mail_force_extra_parameters ->
+      mail.force_extra_parameters
+
+    * (PHP_5_0)
+      php.ini-dist
+      php.ini-recommended:
+      MFH: fix typo in php.ini-dist & php.ini-recommended
+
+    * php.ini-dist
+      php.ini-recommended:
+      fix typo in php.ini: paramAters -> paramEters
+
+2004-08-03  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_0)
+      pear/go-pear.bat:
+      commit for win32 - binary so line endings are always preserved - ..and in
+      PHP_5_0, where it also belongs
+
+    * pear/go-pear.bat:
+      
+      commit for win32 - binary so line endings are always preserved - this time
+      on HEAD, where it belongs
+
+    * pear/go-pear.bat
+      pear/go-pear.bat:
+      
+      file go-pear.bat was initially added on branch PHP_4_3.
+
+2004-08-03  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mime_magic/mime_magic.c:
+      sys/stat.h is includes in php_streams.h no need to do that again.
+
+2004-08-03  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/ming/config.w32:
+      Avoid possible exception
+
 2004-08-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_reflection_api.c:
