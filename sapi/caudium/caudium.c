@@ -474,6 +474,51 @@ static zend_module_entry php_caudium_module = {
 };
 
 
+static void sapi_caudium_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
+{
+  php_register_variable("PHP_SELF", SG(request_info).request_uri,
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("GATEWAY_INTERFACE", "CGI/1.1",
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("REQUEST_METHOD", (char *) SG(request_info).request_method,
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("REQUEST_URI", SG(request_info).request_uri,
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated,
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("SERVER_NAME", lookup_string_header("SERVER_NAME", NULL),
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("SERVER_PORT", lookup_string_header("SERVER_PORT", NULL),
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("SERVER_PROTOCOL", lookup_string_header("SERVER_PROTOCOL", NULL),
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("SCRIPT_NAME", lookup_string_header("SCRIPT_NAME", NULL),
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("SCRIPT_FILENAME", lookup_string_header("SCRIPT_FILENAME", NULL),
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("REMOTE_ADDR", lookup_string_header("REMOTE_ADDR", NULL),
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("REMOTE_PORT", lookup_string_header("REMOTE_PORT", NULL),
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("DOCUMENT_ROOT", lookup_string_header("DOCUMENT_ROOT", NULL),
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("HTTP_CONNECTION", lookup_string_header("HTTP_CONNECTION", NULL),
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("HTTP_USER_AGENT", lookup_string_header("HTTP_USER_AGENT", NULL),
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("DOCUMENT_ROOT", lookup_string_header("DOCUMENT_ROOT", NULL),
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("QUERY_STRING", lookup_string_header("QUERY_STRING", ""),
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("REMOTE_USER", lookup_string_header("REMOTE_USER", NULL),
+			track_vars_array ELS_CC PLS_CC);
+  php_register_variable("REMOTE_PASSWORD", lookup_string_header("REMOTE_PASSWORD", NULL),
+			track_vars_array ELS_CC PLS_CC);
+
+}
+
+
+
 /* this structure is static (as in "it does not change") */
 static sapi_module_struct caudium_sapi_module = {
   "caudium",
@@ -492,7 +537,7 @@ static sapi_module_struct caudium_sapi_module = {
   NULL,					/* send header handler */
   php_caudium_sapi_read_post,		/* read POST data */
   php_caudium_sapi_read_cookies,	/* read cookies */
-  NULL,					/* register server variables */
+  sapi_caudium_register_variables,	/* register server variables */
   NULL,					/* Log message */
   NULL,					/* Block interruptions */
   NULL,					/* Unblock interruptions */
