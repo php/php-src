@@ -32,7 +32,7 @@ var_dump ($data);
 array(8) {
   [16777216]=>
   float(-0.33333333333333)
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -55,7 +55,7 @@ array(8) {
 
  -- Testing uksort() -- 
 array(8) {
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
