@@ -23,7 +23,7 @@
 
 BEGIN_EXTERN_C()
 
-ZEND_API zend_class_entry *zend_exception_get_default(void)
+ZEND_API zend_class_entry *zend_exception_get_default(void);
 ZEND_API void zend_register_default_classes(TSRMLS_D);
 	
 END_EXTERN_C()
