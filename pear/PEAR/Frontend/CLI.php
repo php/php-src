@@ -68,10 +68,23 @@ class PEAR_Frontend_CLI extends PEAR
 
     function displayLine($text)
     {
+        trigger_error("Frontend::displayLine deprecated", E_USER_ERROR);
+    }
+
+    function _displayLine($text)
+    {
         print "$this->lp$text\n";
     }
 
+    // }}}
+    // {{{ display(text)
+
     function display($text)
+    {
+        trigger_error("Frontend::display deprecated", E_USER_ERROR);
+    }
+
+    function _display($text)
     {
         print $text;
     }
@@ -81,7 +94,7 @@ class PEAR_Frontend_CLI extends PEAR
 
     function displayError($eobj)
     {
-        return $this->displayLine($eobj->getMessage());
+        return $this->_displayLine($eobj->getMessage());
     }
 
     // }}}
@@ -89,7 +102,7 @@ class PEAR_Frontend_CLI extends PEAR
 
     function displayFatalError($eobj)
     {
-        $this->displayError($eobj);
+        $this->_displayError($eobj);
         exit(1);
     }
 
@@ -98,6 +111,11 @@ class PEAR_Frontend_CLI extends PEAR
 
     function displayHeading($title)
     {
+        trigger_error("Frontend::displayHeading deprecated", E_USER_ERROR);
+    }
+
+    function _displayHeading($title)
+    {
         print $this->lp.$this->bold($title)."\n";
         print $this->lp.str_repeat("=", strlen($title))."\n";
     }
@@ -105,27 +123,36 @@ class PEAR_Frontend_CLI extends PEAR
     // }}}
     // {{{ userDialog(prompt, [type], [default])
 
-    function userDialog($prompt, $type = 'text', $default = '')
+    function userDialog($command, $prompts, $types = array(), $defaults = array())
     {
-        if ($type == 'password') {
-            system('stty -echo');
+        $result = array();
+        if (is_array($prompts)) {
+            $fp = fopen("php://stdin", "r");
+            foreach ($prompts as $key => $prompt) {
+                $type = $types[$key];
+                $default = $defaults[$key];
+                if ($type == 'password') {
+                    system('stty -echo');
+                }
+                print "$this->lp$prompt ";
+                if ($default) {
+                    print "[$default] ";
+                }
+                print ": ";
+                $line = fgets($fp, 2048);
+                if ($type == 'password') {
+                    system('stty echo');
+                    print "\n";
+                }
+                if ($default && trim($line) == "") {
+                    $result[$key] = $default;
+                } else {
+                    $result[$key] = $line;
+                }
+            }
+            fclose($fp);
         }
-        print "$this->lp$prompt ";
-        if ($default) {
-            print "[$default] ";
-        }
-        print ": ";
-        $fp = fopen("php://stdin", "r");
-        $line = fgets($fp, 2048);
-        fclose($fp);
-        if ($type == 'password') {
-            system('stty echo');
-            print "\n";
-        }
-        if ($default && trim($line) == "") {
-            return $default;
-        }
-        return $line;
+        return $result;
     }
 
     // }}}
@@ -133,6 +160,7 @@ class PEAR_Frontend_CLI extends PEAR
 
     function userConfirm($prompt, $default = 'yes')
     {
+        trigger_error("Frontend::userConfirm not yet converted", E_USER_ERROR);
         static $positives = array('y', 'yes', 'on', '1');
         static $negatives = array('n', 'no', 'off', '0');
         print "$this->lp$prompt [$default] : ";
@@ -160,6 +188,11 @@ class PEAR_Frontend_CLI extends PEAR
 
     function startTable($params = array())
     {
+        trigger_error("Frontend::startTable deprecated", E_USER_ERROR);
+    }
+
+    function _startTable($params = array())
+    {
         $this->omode = 'table';
         $params['table_data'] = array();
         $params['widest'] = array();  // indexed by column
@@ -172,6 +205,11 @@ class PEAR_Frontend_CLI extends PEAR
     // {{{ tableRow(columns, [rowparams], [colparams])
 
     function tableRow($columns, $rowparams = array(), $colparams = array())
+    {
+        trigger_error("Frontend::tableRow deprecated", E_USER_ERROR);
+    }
+
+    function _tableRow($columns, $rowparams = array(), $colparams = array())
     {
         $highest = 1;
         for ($i = 0; $i < sizeof($columns); $i++) {
@@ -218,10 +256,15 @@ class PEAR_Frontend_CLI extends PEAR
 
     function endTable()
     {
+        trigger_error("Frontend::tableRow deprecated", E_USER_ERROR);
+    }
+
+    function _endTable()
+    {
         $this->omode = '';
         extract($this->params);
         if (!empty($caption)) {
-            $this->displayHeading($caption);
+            $this->_displayHeading($caption);
         }
         if (count($table_data) == 0) {
             return;
@@ -253,7 +296,7 @@ class PEAR_Frontend_CLI extends PEAR
             }
         }
         if ($borderline) {
-            $this->displayLine($borderline);
+            $this->_displayLine($borderline);
         }
         for ($i = 0; $i < sizeof($table_data); $i++) {
             extract($table_data[$i]);
@@ -297,13 +340,73 @@ class PEAR_Frontend_CLI extends PEAR
                     $rowtext .= $cellstart . $cell . $cellend;
                 }
                 $rowtext .= $rowend;
-                $this->displayLine($rowtext);
+                $this->_displayLine($rowtext);
             }
         }
         if ($borderline) {
-            $this->displayLine($borderline);
+            $this->_displayLine($borderline);
         }
     }
+    
+    // }}}
+    // {{{ outputData()
+
+    function outputData($data, $command)
+    {
+        switch ($command)
+        {
+            case 'list-all':
+                $this->_startTable($data);
+                if (isset($data['headline']) && is_array($data['headline']))
+                    $this->_tableRow($data['headline'], array('bold' => true), array(1 => array('wrap' => 55)));
+                
+                foreach($data['data'] as $category) {
+                    foreach($category as $pkg) {
+                        unset($pkg[3]);
+                        $this->_tableRow($pkg, null, array(1 => array('wrap' => 55)));
+                    }
+                };
+                $this->_endTable();
+                break;
+            case 'config-show':
+                $this->_startTable($data);
+                if (isset($data['headline']) && is_array($data['headline']))
+                    $this->_tableRow($data['headline'], array('bold' => true), array(1 => array('wrap' => 55)));
+                
+                foreach($data['data'] as $group) {
+                    foreach($group as $value) {
+                        if ($value === null || $value === '') {
+                            $value = "<not set>";
+                        };
+                        $this->_tableRow($value, null, array(1 => array('wrap' => 55)));
+                    }
+                };
+                $this->_endTable();
+                break;
+            default:
+                if (is_array($data))
+                {
+                    $this->_startTable($data);
+                    if (isset($data['headline']) && is_array($data['headline']))
+                        $this->_tableRow($data['headline'], array('bold' => true), array(1 => array('wrap' => 55)));
+                    foreach($data['data'] as $row)
+                        $this->_tableRow($row);
+                    $this->_endTable();
+                } else {
+                    $this->_displayLine($data);
+                }
+        }
+    }
+
+    // }}}
+    // {{{ log(text)
+
+    
+    function log($text)
+    {
+        return $this->_displayLine($text);
+    }
+    
 
     // }}}
     // {{{ bold($text)
