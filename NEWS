@@ -89,6 +89,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #21815 (fpassthru() ignored buffered data but complained anyway). 
   (Wez)
 - Fixed bug #21809 (select would not always timeout during socket shutdown). (Wez)
+- Fixed bug #21751 (default output buffer could not be deleted). (Marcus)
 - Fixed bug #21725 (return behaviour differs between include and require). (Zeev)
 - Fixed bug #21713 (include remote files leaks descriptors on Solaris). (Wez)
 - Fixed bug #21708 (ucwords() trouble again). (Moriyoshi)
