@@ -80,7 +80,7 @@ php_sockets_globals sockets_globals;
 #endif
 
 #ifndef SUN_LEN
-#define SUN_LEN(su) (sizeof(*(su)) - sizeof((su)->sun_path) + strlen((su)->sun_path))
+#define SUN_LEN(su) (sizeof(su) - sizeof(su.sun_path) + strlen(su.sun_path))
 #endif
 
 #define PHP_NORMAL_READ 0x0001
@@ -873,12 +873,9 @@ PHP_FUNCTION(socket_connect)
 {
 	zval **arg1, **arg2, **arg3;
 	php_socket *php_sock;
-	php_sockaddr_storage sa_storage;
-	struct sockaddr *sa = (struct sockaddr *) &sa_storage;
-	struct sockaddr_in *sin;
-	struct sockaddr_un *s_un;
+	struct sockaddr_in sin;
+	struct sockaddr_un s_un;
 	int retval;
-	socklen_t salen;
 	struct in_addr addr_buf;
 	struct hostent *host_struct;
 	int argc = ZEND_NUM_ARGS();
@@ -894,28 +891,21 @@ PHP_FUNCTION(socket_connect)
 		convert_to_long_ex(arg3);
 	}
 
-	memset(sa, 0, sizeof(sa_storage));
-	salen = sizeof(sa_storage);
 
-	if (getsockname(php_sock->socket, sa, &salen) != 0) {
-		php_error(E_WARNING, "failed connecting to [%s], %i", Z_STRVAL_PP(arg2), errno);
-		RETURN_FALSE;
-	}
-
-	switch(sa->sa_family) {
+	switch( php_sock->type ) {
 		case AF_INET:
-			sin = (struct sockaddr_in *)sa;
-			salen = sizeof(struct sockaddr_in);
 
 			if (argc != 3) {
 				WRONG_PARAM_COUNT;
 			}
 
-			sin->sin_port = htons((unsigned short int)Z_LVAL_PP(arg3));
+			sin.sin_family = AF_INET;
+			sin.sin_port = htons((unsigned short int)Z_LVAL_PP(arg3));
+
 			if (inet_aton(Z_STRVAL_PP(arg2), &addr_buf)) {
-				sin->sin_addr.s_addr = addr_buf.s_addr;
+				sin.sin_addr.s_addr = addr_buf.s_addr;
 			} else {
-				char *q = (char *) &(sin->sin_addr.s_addr);
+				char *q = (char *) &(sin.sin_addr.s_addr);
 				host_struct = gethostbyname(Z_STRVAL_PP(arg2));
 				if (host_struct->h_addrtype != AF_INET) {
 					RETURN_FALSE;
@@ -926,13 +916,13 @@ PHP_FUNCTION(socket_connect)
 				q[3] = host_struct->h_addr_list[0][3];
 			}
 	
-			retval = connect(php_sock->socket, (struct sockaddr *) sin, salen);
+			retval = connect(php_sock->socket, (struct sockaddr *)&sin, sizeof(struct sockaddr_in));
 			break;
 
 		case AF_UNIX:
-			s_un = (struct sockaddr_un *)sa;
-			snprintf(s_un->sun_path, 108, "%s", Z_STRVAL_PP(arg2));
-			retval = connect(php_sock->socket, (struct sockaddr *) s_un, SUN_LEN(s_un));
+			s_un.sun_family = AF_UNIX;
+			snprintf(s_un.sun_path, 108, "%s", Z_STRVAL_PP(arg2));
+			retval = connect(php_sock->socket, (struct sockaddr *)&s_un, SUN_LEN(s_un));
 			break;
 
 		default:
@@ -1021,7 +1011,7 @@ PHP_FUNCTION(socket_bind)
 		memset(sa, 0, sizeof(sa_storage));
 		sa->sun_family = AF_UNIX;
 		snprintf(sa->sun_path, 108, "%s", Z_STRVAL_PP(arg2));
-		retval = bind(php_sock->socket, (struct sockaddr *) sa, SUN_LEN(sa));
+		retval = bind(php_sock->socket, (struct sockaddr *) sa, SUN_LEN((*sa)));
 
 	} else if (php_sock->type == AF_INET) {
 		
@@ -1339,11 +1329,12 @@ PHP_FUNCTION(socket_send)
 PHP_FUNCTION(socket_recvfrom)
 {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6;
-	php_sockaddr_storage sa_storage;
 	php_socket *php_sock;
-	struct sockaddr *sa = (struct sockaddr *) &sa_storage;
-	socklen_t salen;
+	struct sockaddr_un s_un;
+	struct sockaddr_in sin;
+	socklen_t slen;
 	int retval, argc = ZEND_NUM_ARGS();
+	char *recv_buf, *address;
 
 
 	if(argc < 5 || argc > 6 || zend_get_parameters_ex(argc, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
@@ -1362,91 +1353,76 @@ PHP_FUNCTION(socket_recvfrom)
 			break;
 	}
 
-	salen = sizeof(sa_storage);
+	recv_buf = (char*)emalloc(Z_LVAL_PP(arg3) + 2);
+	memset(recv_buf, 0, Z_LVAL_PP(arg3) + 2);
 	
-	if (getsockname(php_sock->socket, sa, &salen) != 0) {
-		php_error(E_WARNING, "unable to recvfrom, %i", errno);
-		RETURN_LONG(0);
-	}
-
-	switch (sa->sa_family) {
+	switch ( php_sock->type ) {
 		case AF_UNIX:
-			{
-				struct sockaddr_un s_un;
-				socklen_t sun_length = sizeof(s_un);
-				char *recv_buf = (char*)emalloc(Z_LVAL_PP(arg3) + 2);
-
-				memset(recv_buf, 0, Z_LVAL_PP(arg3) + 2);
-				retval = recvfrom(php_sock->socket, recv_buf, Z_LVAL_PP(arg3), Z_LVAL_PP(arg4),
-					(struct sockaddr *)&s_un, (socklen_t *) & sun_length);
-
-				if (retval < 0) {
-					efree(recv_buf);
-					php_error(E_WARNING, "unable to recvfrom, %i", errno);
-					RETURN_FALSE;
-				}
-
-				if (Z_STRVAL_PP(arg2) != NULL) {
-					efree(Z_STRVAL_PP(arg2));
-				}
-				
-				Z_STRVAL_PP(arg2) = estrndup(recv_buf, strlen(recv_buf));
-				Z_STRLEN_PP(arg2) = strlen(recv_buf);
-				
-				if (Z_STRLEN_PP(arg5) > 0) {
-					efree(Z_STRVAL_PP(arg5));
-				}
-				
-				Z_STRVAL_PP(arg5) = estrdup(s_un.sun_path);
-				Z_STRLEN_PP(arg5) = strlen(s_un.sun_path);
+			slen = sizeof(s_un);
+			s_un.sun_family = AF_UNIX;
+			retval = recvfrom(php_sock->socket, recv_buf, Z_LVAL_PP(arg3), Z_LVAL_PP(arg4),
+				(struct sockaddr *)&s_un, (socklen_t *)&slen);
+			
+			if (retval < 0) {
 				efree(recv_buf);
+				php_error(E_WARNING, "unable to recvfrom, %i", errno);
+				RETURN_FALSE;
 			}
-	
+
+			if (Z_STRVAL_PP(arg2) != NULL) {
+				efree(Z_STRVAL_PP(arg2));
+			}
+				
+			Z_STRVAL_PP(arg2) = estrndup(recv_buf, strlen(recv_buf));
+			Z_STRLEN_PP(arg2) = strlen(recv_buf);
+				
+			if (Z_STRLEN_PP(arg5) > 0) {
+				efree(Z_STRVAL_PP(arg5));
+			}
+				
+			Z_STRVAL_PP(arg5) = estrdup(s_un.sun_path);
+			Z_STRLEN_PP(arg5) = strlen(s_un.sun_path);
+			efree(recv_buf);
 						
 		case AF_INET:
-			{
-				struct sockaddr_in sin;
-				char *recv_buf = (char*)emalloc(Z_LVAL_PP(arg3) + 2);
-				socklen_t sin_length = sizeof(sin);
-				char *address;
-
-				if (argc != 6) {
-					WRONG_PARAM_COUNT;
-				}
-				
-				memset(recv_buf, 0, Z_LVAL_PP(arg3) + 2);
-				retval = recvfrom(php_sock->socket, recv_buf, Z_LVAL_PP(arg3), Z_LVAL_PP(arg4),
-					(struct sockaddr *)&sin, (socklen_t *) & sin_length);
-				
-				if (retval < 0) {
-					efree(recv_buf);
-					php_error(E_WARNING, "unable to recvfrom, %i", errno);
-					RETURN_FALSE;
-				}
-				
-				if (Z_STRLEN_PP(arg2) > 0) {
-					efree(Z_STRVAL_PP(arg2));
-				}
-
-				Z_STRVAL_PP(arg2) = estrdup(recv_buf);
-				Z_STRLEN_PP(arg2) = strlen(recv_buf);
-				
-				if (Z_STRLEN_PP(arg5) > 0) {
-					efree(Z_STRVAL_PP(arg5));
-				}
-				
-				address = inet_ntoa(sin.sin_addr);
-				if (address == NULL) {
-					Z_STRVAL_PP(arg5) = estrdup("0.0.0.0");
-					Z_STRLEN_PP(arg5) = strlen(Z_STRVAL_PP(arg5));
-				} else {
-					Z_STRVAL_PP(arg5) = estrdup(address);
-					Z_STRLEN_PP(arg5) = strlen(address);
-				}
-				
-				Z_LVAL_PP(arg6) = ntohs(sin.sin_port);
-				efree(recv_buf);
+			slen = sizeof(sin);
+			sin.sin_family = AF_INET;
+			
+			if (argc != 6) {
+				WRONG_PARAM_COUNT;
 			}
+				
+			retval = recvfrom(php_sock->socket, recv_buf, Z_LVAL_PP(arg3), Z_LVAL_PP(arg4),
+				(struct sockaddr *)&sin, (socklen_t *)&slen);
+			
+			if (retval < 0) {
+				efree(recv_buf);
+				php_error(E_WARNING, "unable to recvfrom, %i", errno);
+				RETURN_FALSE;
+			}
+				
+			if (Z_STRLEN_PP(arg2) > 0) {
+				efree(Z_STRVAL_PP(arg2));
+			}
+
+			Z_STRVAL_PP(arg2) = estrdup(recv_buf);
+			Z_STRLEN_PP(arg2) = strlen(recv_buf);
+				
+			if (Z_STRLEN_PP(arg5) > 0) {
+				efree(Z_STRVAL_PP(arg5));
+			}
+				
+			address = inet_ntoa(sin.sin_addr);
+			if (address == NULL) {
+				Z_STRVAL_PP(arg5) = estrdup("0.0.0.0");
+				Z_STRLEN_PP(arg5) = strlen(Z_STRVAL_PP(arg5));
+			} else {
+				Z_STRVAL_PP(arg5) = estrdup(address);
+				Z_STRLEN_PP(arg5) = strlen(address);
+			}
+				
+			Z_LVAL_PP(arg6) = ntohs(sin.sin_port);
+			efree(recv_buf);
 
 		default:
 			RETURN_FALSE;
@@ -1461,11 +1437,11 @@ PHP_FUNCTION(socket_recvfrom)
 PHP_FUNCTION(socket_sendto)
 {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6;
-	php_sockaddr_storage sa_storage;
 	php_socket *php_sock;
-	struct sockaddr *sa = (struct sockaddr *) &sa_storage;
-	socklen_t salen = sizeof(sa_storage);
-	int retval, argc = ZEND_NUM_ARGS();
+	struct sockaddr_un s_un;
+	struct sockaddr_in sin;
+	struct in_addr addr_buf;
+	int retval, argc = ZEND_NUM_ARGS(), which;
 
 	if(argc < 5 || argc > 6 || zend_get_parameters_ex(argc, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1484,59 +1460,42 @@ PHP_FUNCTION(socket_sendto)
 	}
 
 
-	if (getsockname(php_sock->socket, sa, &salen) != 0) {
-		php_error(E_WARNING, "unable to sendto, %i", errno);
-		RETURN_LONG(0);
-	}
-
-	switch (sa->sa_family) {
+	switch ( php_sock->socket ) {
 		case AF_UNIX:
-			{
-				struct sockaddr_un s_un;
-				int which;
+			memset(&s_un, 0, sizeof(s_un));
+			s_un.sun_family = AF_UNIX;
+			snprintf(s_un.sun_path, 108, "%s", Z_STRVAL_PP(arg5));
 
-				memset(&s_un, 0, sizeof(s_un));
-				s_un.sun_family = AF_UNIX;
-				snprintf(s_un.sun_path, 108, "%s", Z_STRVAL_PP(arg5));
-				
-				which = (Z_STRLEN_PP(arg2) > Z_LVAL_PP(arg3)) ? 1 : 0;
-				retval = sendto(php_sock->socket, Z_STRVAL_PP(arg2), (which ? Z_LVAL_PP(arg3) : Z_STRLEN_PP(arg2)),
-					Z_LVAL_PP(arg4), (struct sockaddr *) &s_un, SUN_LEN(&s_un));
-			}
+			which = (Z_STRLEN_PP(arg2) > Z_LVAL_PP(arg3)) ? 1 : 0;
+			retval = sendto(php_sock->socket, Z_STRVAL_PP(arg2), (which ? Z_LVAL_PP(arg3) : Z_STRLEN_PP(arg2)),
+			Z_LVAL_PP(arg4), (struct sockaddr *) &s_un, SUN_LEN(s_un));
 
 		case AF_INET:
-			{
-				struct sockaddr_in sin;
-				struct in_addr addr_buf;
-				int which;
-
-				if (argc != 6) {
-					WRONG_PARAM_COUNT;
-				}
-
-				memset(&sin, 0, sizeof(sin));
-				sin.sin_family = AF_INET;
-	
-				if (inet_aton(Z_STRVAL_PP(arg5), &addr_buf) == 0) {
-					sin.sin_addr.s_addr = addr_buf.s_addr;
-				} else {
-					struct hostent *he;
-
-					he = gethostbyname(Z_STRVAL_PP(arg4));
-
-					if (he == NULL) {
-						php_error(E_WARNING, "unable to sendto, %i", h_errno);
-						RETURN_FALSE;
-					}
-
-					sin.sin_addr.s_addr = *(int *) (he->h_addr_list[0]);
-				}
-
-				sin.sin_port = htons((unsigned short)Z_LVAL_PP(arg6));
-				which = (Z_STRLEN_PP(arg2) > Z_LVAL_PP(arg3)) ? 1 : 0;
-				retval = sendto(php_sock->socket, Z_STRVAL_PP(arg2), (which ? Z_LVAL_PP(arg3) : Z_STRLEN_PP(arg2)),
-					Z_LVAL_PP(arg4), (struct sockaddr *) &sin, sizeof(sin));
+			if (argc != 6) {
+				WRONG_PARAM_COUNT;
 			}
+
+			memset(&sin, 0, sizeof(sin));
+			sin.sin_family = AF_INET;
+	
+			if (inet_aton(Z_STRVAL_PP(arg5), &addr_buf) == 0) {
+				sin.sin_addr.s_addr = addr_buf.s_addr;
+			} else {
+				struct hostent *he;
+				he = gethostbyname(Z_STRVAL_PP(arg4));
+
+				if (he == NULL) {
+					php_error(E_WARNING, "unable to sendto, %i", h_errno);
+					RETURN_FALSE;
+				}
+
+				sin.sin_addr.s_addr = *(int *) (he->h_addr_list[0]);
+			}
+
+			sin.sin_port = htons((unsigned short)Z_LVAL_PP(arg6));
+			which = (Z_STRLEN_PP(arg2) > Z_LVAL_PP(arg3)) ? 1 : 0;
+			retval = sendto(php_sock->socket, Z_STRVAL_PP(arg2), (which ? Z_LVAL_PP(arg3) : Z_STRLEN_PP(arg2)),
+				Z_LVAL_PP(arg4), (struct sockaddr *) &sin, sizeof(sin));
 
 		default:
 			RETURN_LONG(0);
@@ -1775,7 +1734,7 @@ PHP_FUNCTION(socket_sendmsg)
 
 				snprintf(s_un->sun_path, 108, "%s", Z_STRVAL_PP(arg4));
 
-				hdr.msg_namelen = SUN_LEN(s_un);
+				hdr.msg_namelen = SUN_LEN((*s_un));
 
 				if(sendmsg(php_sock->socket, &hdr, Z_LVAL_PP(arg3)) != 0) {
 					php_error(E_WARNING, "unable to sendmsg, %i", errno);
