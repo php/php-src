@@ -351,7 +351,7 @@ PHP_FUNCTION(iptcparse)
 			inx += 2;
 		}
 
-		sprintf(key, "%d#%03d", (unsigned int) dataset, (unsigned int) recnum);
+		snprintf(key, sizeof(key), "%d#%03d", (unsigned int) dataset, (unsigned int) recnum);
 
 		if ((len > length) || (inx + len) > length)
 			break;
