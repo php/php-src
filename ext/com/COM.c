@@ -1566,7 +1566,12 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 		FREE_VARIANT(var_result);
 		FREE_VARIANT(new_value);
 
-		RETURN_NULL();
+
+		if (return_value) {
+			RETVAL_NULL();
+		}
+
+		return;
 	}
 
 	php_pval_to_variant(value, new_value, codepage TSRMLS_CC);
@@ -1592,7 +1597,11 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 		efree(new_value);
 		efree(propname);
 
-		RETURN_NULL();
+		if (return_value) {
+			RETVAL_NULL();
+		}
+
+		return;
 	}
 
 	if (return_value) {
