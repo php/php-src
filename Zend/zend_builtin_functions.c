@@ -707,6 +707,8 @@ ZEND_FUNCTION(get_object_vars)
 
 	while (zend_hash_get_current_data_ex(properties, (void **) &value, &pos) == SUCCESS) {
 		if (zend_hash_get_current_key_ex(properties, &key, &key_len, &num_index, 0, &pos) == HASH_KEY_IS_STRING && key[0]) {
+			/* Not separating references */
+			(*value)->refcount++;
 			add_assoc_zval_ex(return_value, key, key_len, *value);
 		}
 		zend_hash_move_forward_ex(properties, &pos);
