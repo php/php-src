@@ -26,8 +26,9 @@
 #define PHP_ICONV_API
 #endif
 
+#if HAVE_ICONV
 extern zend_module_entry iconv_module_entry;
-#define phpext_iconv_ptr &iconv_module_entry
+#define iconv_module_ptr &iconv_module_entry
 
 PHP_MINIT_FUNCTION(miconv);
 PHP_MSHUTDOWN_FUNCTION(miconv);
@@ -53,6 +54,14 @@ ZEND_END_MODULE_GLOBALS(iconv)
 #define ICONV_INPUT_ENCODING "ISO-8859-1" 
 #define ICONV_OUTPUT_ENCODING "ISO-8859-1"
 #define ICONV_INTERNAL_ENCODING "ISO-8859-1" 
+
+#else
+
+#define iconv_module_ptr NULL
+
+#endif /* HAVE_ICONV */
+
+#define phpext_iconv_ptr iconv_module_ptr
 
 #endif	/* PHP_ICONV_H */
 
